@@ -573,6 +573,30 @@
   gap: var(--petri-space-3);
   flex-wrap: wrap;
 }
+
+/* BLOCK-246 B2 — 计划调整意见（写在按钮下方，与既有卡片内边距同族） */
+.sc-plan-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  margin-top: var(--petri-space-2);
+}
+
+.sc-plan-feedback-input {
+  width: 100%;
+  min-height: 0;
+  resize: vertical;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg);
+  color: var(--petri-text);
+  font: inherit;
+}
+
+.sc-plan-feedback-hint {
+  color: var(--petri-text-muted);
+}
 .sc-plan-approval-btn {
   padding: 5px var(--petri-space-4);
   border-radius: var(--petri-radius-lg);;
@@ -3856,6 +3880,8 @@
 }
 
 .sc-preview-image-area {
+  /* BLOCK-246 C11：翻页钮是绝对定位，锚点必须落在图片区而不是整张卡片 */
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow: auto;
@@ -3876,6 +3902,41 @@
 
 .sc-preview-image:active {
   cursor: grabbing;
+}
+
+/* BLOCK-246 C11 — 多图计数与左右翻页（浮在图片区两侧，不占布局宽度） */
+.sc-preview-counter {
+  color: var(--petri-text-muted);
+}
+
+.sc-preview-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sc-preview-nav-btn:hover {
+  background: var(--petri-hover);
+}
+
+.sc-preview-nav-prev {
+  left: var(--petri-space-3);
+}
+
+.sc-preview-nav-next {
+  right: var(--petri-space-3);
 }
 
 .sc-preview-footer {

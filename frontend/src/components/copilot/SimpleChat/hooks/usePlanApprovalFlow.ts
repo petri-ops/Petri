@@ -33,7 +33,7 @@ export function usePlanApprovalFlow(options: UsePlanApprovalFlowOptions): {
   setPendingPlan: Dispatch<SetStateAction<PlanApprovalCardPlan | null>>;
   pendingRevision: { planId: string; title: string; revNo: number } | null;
   planCardBusy: boolean;
-  handlePlanApprove: (action: PlanApprovalAction) => Promise<void>;
+  handlePlanApprove: (action: PlanApprovalAction, options?: { feedback?: string }) => Promise<void>;
   handleRevisionApprove: () => Promise<void>;
 } {
   const { conversationId, streaming, send, setAccessMode, prePlanAccessModeRef } = options;
@@ -73,14 +73,24 @@ export function usePlanApprovalFlow(options: UsePlanApprovalFlowOptions): {
   }, [conversationId, streaming]);
 
   // BLOCK-55 P1 — 批准三选一：批准执行 / 批准并清上下文执行 / 继续讨论
-  const handlePlanApprove = useCallback(async (action: PlanApprovalAction) => {
+  // BLOCK-246 B2 — 「继续讨论」不再吞掉用户的调整意见：带 feedback 时把它作为一条
+  // 用户消息发回同一计划（只要求重排步骤表、不批准执行），空 feedback 保持原行为。
+  const handlePlanApprove = useCallback(async (action: PlanApprovalAction, options?: { feedback?: string }) => {
     if (!pendingPlan || planCardBusy) return;
     setPlanCardBusy(true);
     try {
       await approvePlan(pendingPlan.id, action);
       const plan = pendingPlan;
       setPendingPlan(null);
-      if (action === 'keep-planning') return;
+      if (action === 'keep-planning') {
+        const feedback = options?.feedback?.trim();
+        if (feedback) {
+          await send(
+            `计划「${plan.title}」需要调整：${feedback}\n\n（planId: ${plan.id}；请据此修订步骤表并继续留在计划档，暂不执行）`
+          );
+        }
+        return;
+      }
       // UI-303 — 批准执行即退出计划档：恢复进入计划模式前的档位（缺省完全访问）
       setAccessMode(prePlanAccessModeRef.current ?? 'full');
       prePlanAccessModeRef.current = null;

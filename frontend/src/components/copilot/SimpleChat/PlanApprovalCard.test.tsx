@@ -35,7 +35,18 @@ describe('PlanApprovalCard', () => {
     fireEvent.click(screen.getByText('批准并清上下文执行'));
     expect(onApprove).toHaveBeenCalledWith('execute-fresh');
     fireEvent.click(screen.getByText(/继续讨论/));
-    expect(onApprove).toHaveBeenCalledWith('keep-planning');
+    // BLOCK-246 B2：keep-planning 现在带 feedback 选项（空串 = 维持原行为）
+    expect(onApprove).toHaveBeenCalledWith('keep-planning', { feedback: '' });
+  });
+
+  it('BLOCK-246 B2：计划调整意见随「继续讨论」一起派发', () => {
+    const onApprove = vi.fn();
+    render(<PlanApprovalCard plan={plan} onApprove={onApprove} onDismiss={() => {}} />);
+    fireEvent.change(screen.getByTestId('plan-feedback-input'), {
+      target: { value: '第二步拆成两步再跑' },
+    });
+    fireEvent.click(screen.getByText(/继续讨论/));
+    expect(onApprove).toHaveBeenCalledWith('keep-planning', { feedback: '第二步拆成两步再跑' });
   });
 
   it('busy 时按钮禁用，dismiss 回调可用', () => {

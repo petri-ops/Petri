@@ -2098,12 +2098,9 @@ export function SimpleChat({
           隐藏系统原生 thumb，常驻纤细 thumb + 轨道线 */}
       {!composerOnly && <ChatScrollbar containerRef={scrollRef} />}
 
-      {/* Image Preview Modal */}
+      {/* Image Preview Modal（C11：同批图片一起传入，多图导航在模态内部推进） */}
       {previewImage && (
-        <ImagePreviewModal
-          attachment={previewImage}
-          onClose={closePreview}
-        />
+        <ImagePreviewModal attachment={previewImage} items={attachments.filter((att) => att.previewUrl)} onClose={closePreview} />
       )}
     </div>
   );
