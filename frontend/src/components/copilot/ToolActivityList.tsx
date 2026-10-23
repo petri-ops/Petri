@@ -18,6 +18,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
+import { ToolRowBoundary } from './TimelineBoundaries';
 
 // ANSI CSI 序列（ESC=0x1b 开头）——预编译供输出尾逐行剥离
 const ANSI_CSI_RE = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*[A-Za-z]', 'g');
@@ -435,6 +436,11 @@ function ActivityBody({ activity, subSnap }: {
             <div className="sc-tool-changediff-empty">差异较大，仅显示行数统计。</div>
           )}
         </div>
+      ) : QODER_WRITE_TOOLS.has(activity.name) ? (
+        // BLOCK-248（Q3）— 诚实态：写工具没有逐行改动记录时明说，不留空白
+        <span className="sc-tool-changediff-absent" data-testid="tool-diff-absent">
+          未记录逐行改动（本次没有上报 diff）{sideEffects ? ` · 影响：${sideEffects}` : ''}
+        </span>
       ) : (
         sideEffects && <span>影响：{sideEffects}</span>
       )}
@@ -835,7 +841,9 @@ export function ToolActivityList({
                 />
               ) : null}
               {(byIteration.get(iterationKey) || []).map((activity) => (
-                <QoderRow key={activity.key} activity={activity} />
+                <ToolRowBoundary key={activity.key} resetKey={activity.key}>
+                  <QoderRow activity={activity} />
+                </ToolRowBoundary>
               ))}
             </div>
           ))}
@@ -877,7 +885,9 @@ export function ToolActivityList({
           <div className="sc-tool-activity-inline" data-testid="qoder-cluster-body">
             {reasoningRows}
             {runningTail && last ? (
-              <QoderRow key={last.key} activity={last} />
+              <ToolRowBoundary key={last.key} resetKey={last.key}>
+                <QoderRow activity={last} />
+              </ToolRowBoundary>
             ) : groupOrder.map((iterationKey) => (
               <div key={`qoder-iter-${iterationKey}`}>
                 {reasoningMap[iterationKey] ? (
@@ -888,7 +898,9 @@ export function ToolActivityList({
                   />
                 ) : null}
                 {(byIteration.get(iterationKey) || []).map((activity) => (
-                  <QoderRow key={activity.key} activity={activity} />
+                  <ToolRowBoundary key={activity.key} resetKey={activity.key}>
+                    <QoderRow activity={activity} />
+                  </ToolRowBoundary>
                 ))}
               </div>
             ))}
@@ -962,7 +974,9 @@ export function ToolActivityList({
                     {EXEC_TOOL_NAMES.has(activity.name) ? (
                       <TerminalRow activity={activity} />
                     ) : (
-                      <ActivityRow activity={activity} />
+                      <ToolRowBoundary resetKey={activity.key}>
+                        <ActivityRow activity={activity} />
+                      </ToolRowBoundary>
                     )}
                   </div>
                 ))}

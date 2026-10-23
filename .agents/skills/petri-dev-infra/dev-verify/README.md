@@ -24,6 +24,15 @@ module.exports = {
 
 2. 运行：`npm run verify -- my-flow`；清单：`npm run verify -- --list`。
 
+## 硬规则：测试窗口不得出现在屏幕上（用户裁决 2026-10-17；2026-10-23 复发）
+
+- **Agent 的 flow / live 脚本一律不得设置 `PETRI_TEST_ONSCREEN`**（含直接 `spawn` Electron 时写进 env）。
+  测试实例默认 `show:false` 离屏渲染，`backgroundThrottling:false` 保证 rAF 与 CDP 求值照常。
+- 人要看测试过程只能手动跑 `bash scripts/start-test-instance.sh --onscreen`（启动器是唯一合法入口）。
+- 隐藏窗下 `Page.captureScreenshot` 可能等不到合成帧（BLOCK-243 实测）——截图必须**有界超时**，
+  失败就如实记 `screenshot_unavailable`，**不得靠开窗换证据**；DOM/`elementFromPoint` 断言优先。
+- 机械门禁：`test/live-window-policy.test.mjs`（扫 `scripts/` 与 `dev-verify/flows/`，命中 `PETRI_TEST_ONSCREEN=1` 即红）。
+
 纪律：本底座只连接既有 dev 栈，不启动/重启 Electron（后端代码变更后必须重启
 dev Electron —— 这一步留在人/Agent 手里）；CDP 客户端按仓库根懒解析宿主
 `scripts/g0-rs-p7-cdp.cjs`（单源复用，不建第二套连接层）；跨仓库复用见 `../PORTING.md`。

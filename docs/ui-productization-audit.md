@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-23（**UI-558 执行轨迹（事件级）verified**（隔离 9223 亮 20/20 + 暗 20/20；离屏无窗，截图如实 unavailable）；BLOCK-248 / Q3）：右栏新增「轨迹」surface——run 统计 / 9 类筛选 / 跟随最新 / 失败定位 / recordedOnly / 加载更早 / 模型 I/O 互链；证据面聚合执行事件计数与入口；写工具无 diff 诚实态；轮次/工具行错误边界；同时移除 6 个 live 脚本的 `PETRI_TEST_ONSCREEN=1` 并加窗口策略门禁（用户二次要求屏幕不留测试窗）。旧记录：
+
 最后更新：2026-10-23（**UI-557 联网授权设置面 + 工具活动来源标签 verified**（隔离 9223 实机亮 23/23 + 暗 23/23 全绿：默认关 / 关闭态被拒 / 授权后真检索带来源与成本 / **展开执行簇后来源标签屏幕可见** / SSRF 云元数据地址被拒）；BLOCK-247 / Q2b）：设置→计算与数据 新增「联网检索与抓取」分区（默认关、即时生效、审计/SSRF/白名单文案照抄边界）；工具活动行渲染**来源标签**（先取 `results[].source` 再取顶层 `source`；时间线 Qoder 单行也渲染，历史恢复按活动快照/`resultData` 重建）；检索走自建 SearXNG（未配置＝明确拒绝，不是"没搜到"）、抓取只收文本类 content-type、私网/云元数据地址硬拒、重定向逐跳复检、出网审计只记主机与字节不记正文。**旧「渲染进程被拖住」归因已更正**：真因是标签只加在 legacy 行 + 完成簇默认折叠 + 探针短轮询姿态。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-23（**UI-556 Q2 余项实机面 verified（dev Electron 边界内；隔离 9223 亮 19/19 + 暗 19/19；BLOCK-246）**：速记板引用（迁移 016 旁路表）/ 应用快照源 / 文件夹整体引用 / 回复行加入上下文与赞踩；**UI-555 划词动作 / 图片预览 / 计划反馈 in_progress**（代码+单测绿、无实机腿））。G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -5351,6 +5353,15 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 - **变化面**：`WorkspaceFilePreview` 划词动作条（复制/加入对话/加入速记/侧聊提问/批注不可用）；图片预览保存+多图导航+缩放预设；计划批准卡「继续讨论」带调整意见。
 - **实机待验**：三角色面都需要"文件预览拖选 / 附件图片 / 计划 draft 流程"，本包实机腿未覆盖；**代码与单测已绿**（selectionActions 9、ImagePreviewModal 6、PlanApprovalCard 5 + usePlanApprovalFlow 3），按台账纪律只能记 `in_progress`。
+
+## UI-558: 执行轨迹（事件级）+ 证据面事件聚合 + 轮次/工具行边界（2026-10-23 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；离屏无窗；BLOCK-248 / Q3）**）
+
+- **变化面**：右栏新增「轨迹」surface——run 统计（事件/工具/失败/tokens/用时）、9 类筛选（全部 + 工具/文本/思考/错误/压缩/用户/助手/系统）、跟随最新 + 回到最新、失败定位、`recordedOnly` 口径、加载更早、模型 I/O 互链；证据面新增「执行事件」统计与轨迹入口；写工具无 diff 时显示「未记录逐行改动」；消息行（轮次）与工具行各包一层 `SegmentBoundary`。
+- **为什么这样设计（自有形态）**：轨迹只读本地 `task_events`，分类/摘要/统计由后端单源产出——与模型 I/O（请求级）互链但不合并；失败定位用行几何 + `elementFromPoint` 命中证明「屏幕上看得见」，不靠截图；未上报的耗时显示「—」，不补 0。
+- **验证（代码）**：Node `block248-trajectory` 6/6 + `live-window-policy` 1/1；前端定向 54/54（TraceSurface 6 / EvidenceSurface 4 / ToolActivityList 30 / TimelineBoundaries 2 / registry 6 / SimpleChat 6）；`quality:types` 0。
+- **实机证据**：`acceptance/ui-558/`（亮/暗断言 JSON + 运行日志 + 截图 provenance；同份落 `acceptance/block-248/`）。断言链：工作区路由 → 轨迹可见 → 真实失败工具链（`workspace_read` ENOENT）→ 新装载读轨迹 → 13 条事件 → 工具失败行 → recordedOnly → 错误镜头 → 定位失败（inList + hit）→ 模型 I/O → 证据面统计 `事件 13 · 工具 1 · 失败 1` → 入口回轨迹（20 条 ×2 轮）。
+- **实机抓真**：① 1280 测试窗落窄布局，且 `?project=` 会停在欢迎页 → 必须直达 `/project/:id` 并确认路由；② 回合后的重渲染抖动会拖死后续 CDP 求值 → 轨迹断言改「新装载」；③ 离屏窗口 `captureScreenshot` 等不到合成帧且会拖住渲染器 → 截图挪到最后并如实标 `screenshot_unavailable`；④ **6 个 live 脚本照搬 `PETRI_TEST_ONSCREEN=1` 把测试窗显示到屏幕上**（用户二次追问）→ 全部移除 + `test/live-window-policy.test.mjs` 机械门禁 + dev-infra SKILL/README/模板写死。
+- **边界**：截图 unavailable（离屏规则，不开窗换证据）；逐消息结果统计（C4 消息动作）与 Electron `webContents.capturePage` 测试 IPC 为 reopen。
 
 ## UI-557: 联网授权设置面 + 工具活动来源标签（2026-10-23 **verified（dev Electron 边界内；隔离 9223 亮 23/23 + 暗 23/23；BLOCK-247 / Q2b）**）
 

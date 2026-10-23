@@ -1376,6 +1376,11 @@
   font-weight: 650;
 }
 
+/* BLOCK-248（Q3）— 写工具无 diff 记录时的诚实态（不伪造行数、不留空白） */
+.sc-tool-changediff-absent {
+  color: var(--petri-text-tertiary);
+}
+
 .sc-tool-activity-meta {
   margin-top: 3px;
   color: var(--petri-text-tertiary);

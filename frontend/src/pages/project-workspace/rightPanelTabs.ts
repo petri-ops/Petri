@@ -12,6 +12,7 @@ type CoreRightPanelMode =
   | 'review'
   | 'io'
   | 'jobs'
+  | 'trace'
   | 'agent'
   | 'plan'
   | 'evidence';

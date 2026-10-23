@@ -5101,6 +5101,48 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block248-q3-execution-trace",
+      "note": "BLOCK-248 Q3 — 执行轨迹：事件分类/摘要单源 + 只读 trajectory API + 轨迹 surface + 证据面事件聚合 + 轮次/工具行错误边界 + 写工具 diff 诚实态。",
+      "patterns": [
+        "core/petri-server/helpers/trajectory-events.js",
+        "core/petri-server/routes/ai-agent/trajectory.js",
+        "core/petri-server/routes/ai-agent/index.js",
+        "core/petri-server/agent-task-store.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "frontend/src/lib/trajectoryClient.ts",
+        "frontend/src/components/work-surface/TraceSurface.tsx",
+        "frontend/src/components/work-surface/TraceSurface.module.css",
+        "frontend/src/components/work-surface/EvidenceSurface.tsx",
+        "frontend/src/components/copilot/TimelineBoundaries.tsx",
+        "frontend/src/components/copilot/SimpleChat/CompactionNotice.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/ToolActivityList.tsx",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/lib/workSurface/registry.ts",
+        "frontend/src/pages/project-workspace/rightPanelTabs.ts",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "test/block248-*.test.mjs",
+        "test/live-window-policy.test.mjs",
+        "scripts/block248-*.mjs",
+        "docs/block-248-q3-execution-trace-plan.md",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui558-*.cjs",
+        "acceptance/block-248/**",
+        "acceptance/ui-558/**"
+      ],
+      "tests": [
+        "test/block248-trajectory.test.mjs",
+        "test/live-window-policy.test.mjs",
+        "frontend/src/components/work-surface/TraceSurface.test.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
+        "frontend/src/components/copilot/ToolActivityList.test.tsx",
+        "frontend/src/components/copilot/TimelineBoundaries.test.tsx",
+        "frontend/src/lib/workSurface/registry.test.ts"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

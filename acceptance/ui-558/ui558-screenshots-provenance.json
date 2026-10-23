@@ -1,0 +1,6 @@
+{
+  "note": "ui558-trace-light.png / ui558-trace-error-light.png / ui558-evidence-light.png 是 2026-10-23 20:46 一次 onscreen 运行（PETRI_TEST_ONSCREEN=1）的产物，仅作视觉参考，不代表本轮收口证据。",
+  "policy": "Agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（用户 2026-10-17 裁决；2026-10-23 复发后加固）；测试窗默认 show:false 离屏渲染。",
+  "currentRuns": "离屏窗口下 Page.captureScreenshot 等不到合成帧 → 两轮均如实记 unavailable（见 ui558-screenshots-light.json / ui558-screenshots-dark.json）。",
+  "guard": "test/live-window-policy.test.mjs"
+}

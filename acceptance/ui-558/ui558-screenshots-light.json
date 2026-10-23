@@ -1,0 +1,5 @@
+{
+  "trace": "unavailable:screenshot_timeout(offscreen)",
+  "traceError": "skipped:offscreen_screenshot_unavailable",
+  "evidence": "skipped:offscreen_screenshot_unavailable"
+}

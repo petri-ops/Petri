@@ -139,6 +139,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui553-context-mention-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui554-q2-rem-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui557-web-access-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui558-trace-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",

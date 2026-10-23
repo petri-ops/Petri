@@ -30,6 +30,8 @@ import { AgentRunPanel } from '@/components/workspace-panels/AgentRunPanel';
 import { GeneratedFilesSurface } from '@/components/work-surface/GeneratedFilesSurface';
 import { PlanSurface } from '@/components/work-surface/PlanSurface';
 import { EvidenceSurface } from '@/components/work-surface/EvidenceSurface';
+// BLOCK-248（Q3）— 事件级执行轨迹（与模型 I/O 互相链接，不互相替代）
+import { TraceSurface } from '@/components/work-surface/TraceSurface';
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
 import type { PackUiActionDescriptor, WorkSurfaceDescriptor } from '@/lib/workSurface/types';
 import styles from '@/pages/project-workspace.module.css';
@@ -277,6 +279,13 @@ export function RightPanel({
                 )}
                 {/* BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（绑当前会话，只读；无会话诚实空态） */}
                 {tab === 'io' && <LlmTranscriptViewer conversationId={ctx.activeConvId} />}
+                {/* BLOCK-248（Q3）— 事件级执行轨迹：只读已记录事件；与模型 I/O 互链 */}
+                {tab === 'trace' && (
+                  <TraceSurface
+                    conversationId={ctx.activeConvId}
+                    onOpenIo={() => ctx.openRightPanel('io')}
+                  />
+                )}
                 {/* UI-385 — 子智能体实时详情（原独立专属窗迁入：中断/留言/续派完整保留；
                     未选中 agent 时诚实空态，入口=工具行内联卡「详情」/活动条/俯瞰行点击） */}
                 {tab === 'agent' && (
@@ -306,9 +315,11 @@ export function RightPanel({
                     activeJob={ctx.activeJob}
                     activeWorkflow={ctx.activeWorkflow}
                     activeArtifact={ctx.activeArtifact}
+                    conversationId={ctx.activeConvId}
                     onOpenResults={() => ctx.openRightPanel('results')}
                     onOpenReview={() => ctx.openRightPanel('review')}
                     onOpenPlan={() => ctx.openRightPanel('plan')}
+                    onOpenTrace={() => ctx.openRightPanel('trace')}
                   />
                 )}
                 {surfaceDescriptor?.kind === 'pack-view' && (

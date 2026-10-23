@@ -407,6 +407,17 @@ const stmts = {
     `SELECT seq, event_type, payload, created_at FROM task_events
      WHERE task_id = ? AND seq > ? ORDER BY seq ASC LIMIT ?`
   ),
+  listEventsBefore: db.prepare(
+    `SELECT seq, event_type, payload, created_at FROM task_events
+     WHERE task_id = ? AND seq < ? ORDER BY seq DESC LIMIT ?`
+  ),
+  listRecentEvents: db.prepare(
+    `SELECT seq, event_type, payload, created_at FROM task_events
+     WHERE task_id = ? ORDER BY seq DESC LIMIT ?`
+  ),
+  hasEventBefore: db.prepare(
+    `SELECT 1 AS x FROM task_events WHERE task_id = ? AND seq < ? LIMIT 1`
+  ),
   listRunning: db.prepare(
     `SELECT id, params, status, created_at, finished_at, error, user_id, agent_status,
             retry_count, retry_error_type, next_retry_at, max_retries
@@ -461,6 +472,21 @@ const stmts = {
     `UPDATE tasks
      SET retry_count = 0, retry_error_type = NULL, next_retry_at = NULL, max_retries = 0
      WHERE id = ? AND type = 'agent_loop'`
+  ),
+  // BLOCK-248（Q3）— 执行轨迹：最近主任务 + 统计聚合（只读，不做逐消息分摊）。
+  latestPrimaryByConversation: db.prepare(
+    `SELECT id FROM tasks
+     WHERE user_id = ? AND type = 'agent_loop'
+       AND json_valid(params) = 1
+       AND json_extract(params, '$.conversationId') = ?
+       AND COALESCE(json_extract(params, '$.kind'), 'primary') <> 'subagent'
+     ORDER BY created_at DESC LIMIT 1`
+  ),
+  eventTypeCounts: db.prepare(
+    `SELECT event_type, COUNT(*) AS n FROM task_events WHERE task_id = ? GROUP BY event_type`
+  ),
+  eventPayloads: db.prepare(
+    `SELECT payload FROM task_events WHERE task_id = ? AND event_type = ? ORDER BY seq ASC`
   ),
 };
 
@@ -548,13 +574,112 @@ function appendAgentTaskEvent(taskId, seq, eventType, payload) {
   taskEventBus.emit('event', { taskId, seq, eventType, payload });
 }
 
-function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
-  return stmts.listEvents.all(taskId, afterSeq, limit).map((row) => ({
+function mapEventRow(row) {
+  return {
     seq: row.seq,
     eventType: row.event_type,
     payload: tryParse(row.payload),
     createdAt: row.created_at,
-  }));
+  };
+}
+
+function getAgentTaskEventsSince(taskId, afterSeq, limit = 500) {
+  return stmts.listEvents.all(taskId, afterSeq, limit).map(mapEventRow);
+}
+
+// BLOCK-248（Q3）— 轨迹分页：默认取**最新**一页（长任务要跟随尾部，不能只看开头）；
+// `beforeSeq` 取更早一页（前端"加载更早"）。返回升序，query 侧用 DESC 反查后 reverse。
+function getRecentAgentTaskEvents(taskId, limit = 500) {
+  return stmts.listRecentEvents.all(taskId, limit).map(mapEventRow).reverse();
+}
+
+function getAgentTaskEventsBefore(taskId, beforeSeq, limit = 500) {
+  return stmts.listEventsBefore.all(taskId, beforeSeq, limit).map(mapEventRow).reverse();
+}
+
+function hasAgentTaskEventBefore(taskId, seq) {
+  if (!Number.isFinite(Number(seq))) return false;
+  try {
+    return Boolean(stmts.hasEventBefore.get(taskId, Number(seq)));
+  } catch {
+    return false;
+  }
+}
+
+// BLOCK-248（Q3）— 轨迹默认锚点：该会话最近的一条主任务（子代理任务不在列）。
+// 畸形 params 行无法归属会话，按"不可证明即不选"跳过（不猜）。
+function getLatestPrimaryTaskForConversation(userId, conversationId) {
+  if (!userId || !conversationId) return null;
+  let row = null;
+  try {
+    row = stmts.latestPrimaryByConversation.get(userId, String(conversationId));
+  } catch {
+    return null;
+  }
+  return row ? getAgentTask(row.id) : null;
+}
+
+// BLOCK-248（Q3）— run 级统计（只读聚合）。token 只来自 `usage` 事件（每次模型调用一条），
+// 工具失败 = tool_result 的 status 非 success（denied/timeout/cancelled 一并计入）；
+// 耗时不由任务墙钟推算（未上报就是 null，前端显示"—"）。
+function getAgentTaskTrajectoryStats(taskId) {
+  if (!taskId) return null;
+  const counts = {};
+  let events = 0;
+  try {
+    for (const row of stmts.eventTypeCounts.all(taskId)) {
+      const n = Number(row.n) || 0;
+      counts[row.event_type] = n;
+      events += n;
+    }
+  } catch {
+    return null;
+  }
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let cacheReadTokens = 0;
+  let cacheCreationTokens = 0;
+  const models = [];
+  try {
+    for (const row of stmts.eventPayloads.all(taskId, 'usage')) {
+      const payload = tryParse(row.payload) || {};
+      const prompt = Number(payload.promptTokens);
+      const completion = Number(payload.completionTokens);
+      const cacheRead = Number(payload.cacheReadTokens);
+      const cacheCreation = Number(payload.cacheCreationTokens);
+      if (Number.isFinite(prompt) && prompt >= 0) promptTokens += prompt;
+      if (Number.isFinite(completion) && completion >= 0) completionTokens += completion;
+      if (Number.isFinite(cacheRead) && cacheRead >= 0) cacheReadTokens += cacheRead;
+      if (Number.isFinite(cacheCreation) && cacheCreation >= 0) cacheCreationTokens += cacheCreation;
+      if (payload.model && !models.includes(String(payload.model))) models.push(String(payload.model));
+    }
+  } catch {
+    /* 统计失败不阻塞轨迹读取：返回已聚合部分 */
+  }
+  let toolFailures = 0;
+  try {
+    for (const row of stmts.eventPayloads.all(taskId, 'tool_result')) {
+      const payload = tryParse(row.payload) || {};
+      const status = payload.toolResult && payload.toolResult.status;
+      if (typeof status === 'string' && status && status !== 'success' && status !== 'awaiting_confirmation') {
+        toolFailures += 1;
+      }
+    }
+  } catch {
+    /* 同上 */
+  }
+  return {
+    events,
+    toolCalls: counts.tool_call || 0,
+    toolFailures,
+    errors: counts.error || 0,
+    compactions: counts.context_compacted || 0,
+    promptTokens,
+    completionTokens,
+    cacheReadTokens,
+    cacheCreationTokens,
+    models,
+  };
 }
 
 // BLOCK-109-CORE-ARCH P1.2（附录 A E2/E5）— 在途主任务清单（恢复的单一后端源）。
@@ -994,6 +1119,11 @@ module.exports = {
   appendAgentTaskEvent,
   taskEventBus, // BLOCK-162 P1 — 进程内事件总线（网关 WS 即时推送源）
   getAgentTaskEventsSince,
+  getRecentAgentTaskEvents,
+  getAgentTaskEventsBefore,
+  hasAgentTaskEventBefore,
+  getLatestPrimaryTaskForConversation,
+  getAgentTaskTrajectoryStats,
   coalesceTaskDeltas,
   listInFlightPrimaryTasks,
   getRunningChildAgentTasks,

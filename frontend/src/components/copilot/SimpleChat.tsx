@@ -67,6 +67,8 @@ import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 // BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
+import { CompactionNotice } from './SimpleChat/CompactionNotice';
+import { TurnBoundary } from './TimelineBoundaries';
 import { GuardAckCard } from './SimpleChat/GuardAckCard';
 import { ApprovalSurfaces } from './SimpleChat/ApprovalSurfaces';
 import { useApprovalSurfaces } from './SimpleChat/hooks/useApprovalSurfaces';
@@ -1490,15 +1492,9 @@ export function SimpleChat({
         <div className="sc-body">
           <div className="sc-messages" ref={scrollRef} onScroll={handleMessagesScroll}>
           {older.loadingMore && <div className="sc-loading-older">加载更早消息…</div>}
-          {/* BLOCK-95 B2/A5 — 压缩诚实可见：LLM 视图中更早上下文已折叠为摘要（本界面仍显示原文） */}
+          {/* BLOCK-95 B2/A5 — 压缩诚实可见（抽件：CompactionNotice） */}
           {compaction && !composerOnly && displayMessages.length > 0 && (
-            <div className="sc-compaction-notice" role="status" title={compaction.summary}>
-              <Icon name="layers" size={13} />
-              <span>
-                上下文压缩视图：更早的 {compaction.coversCount} 条消息已折叠为摘要参与对话
-                <span className="sc-compaction-notice-sub">（此处仍显示原文 · {compaction.sourceTokens} tokens 已压缩）</span>
-              </span>
-            </div>
+            <CompactionNotice coversCount={compaction.coversCount} sourceTokens={compaction.sourceTokens} summary={compaction.summary} />
           )}
           {loading && <div className="sc-loading">加载会话…</div>}
           {!loading && displayMessages.length === 0 && (
@@ -1519,40 +1515,41 @@ export function SimpleChat({
           {displayMessages.map((m, i) => {
             const key = m.ts ? `${m.role}-${m.ts}-${i}` : `${m.role}-${i}`;
             return (
-              <SimpleChatMessageRow
-                key={key}
-                {...messageActions.rowProps(key)}
-                m={m}
-                messageKey={key}
-                isTopicShiftStart={i === topicShiftIndex}
-                topicShiftReason={topicShiftReason}
-                segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? EMPTY_ROW_SEGMENTS}
-                streaming={streaming}
-                onCancelTools={handleCancelTools}
-                settledContext={settledContext}
-                resolveNonce={resolveNonce}
-                extraRenderersFlag={extraRenderersFlag}
-                conversationId={conversationId}
-                projectId={projectId}
-                copiedMessageKey={copiedMessageKey}
-                forkingAtIndex={forkingAtIndex}
-                forkAbsoluteIndex={older.windowOffset + i}
-                summaryRetryState={summaryRetryState}
-                summaryRetryErrors={summaryRetryErrors}
-                summaryRetryAttempts={summaryRetryAttempts}
-                summaryRetryCooldownUntil={summaryRetryCooldownUntil}
-                cooldownNow={cooldownNow}
-                maxSummaryRetries={MAX_SUMMARY_RETRIES}
-                formatError={formatError}
-                getTechnicalDetails={getTechnicalDetails}
-                onFileReferenceClick={handleFileReferenceClick}
-                onCopyMessage={copyMessage}
-                onRegenerate={regenerate}
-                onEditUserMessage={m.role === 'user' && !m.pending && i < messages.length && !streaming ? approvalSurfaces.handleEditUserMessage : undefined}
-                onForkAt={handleForkAt}
-                onRetrySummary={retrySummary}
-                onGenUiFollowUp={handleGenUiFollowUp}
-              />
+              <TurnBoundary key={key} resetKey={key}>
+                <SimpleChatMessageRow
+                  {...messageActions.rowProps(key)}
+                  m={m}
+                  messageKey={key}
+                  isTopicShiftStart={i === topicShiftIndex}
+                  topicShiftReason={topicShiftReason}
+                  segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? EMPTY_ROW_SEGMENTS}
+                  streaming={streaming}
+                  onCancelTools={handleCancelTools}
+                  settledContext={settledContext}
+                  resolveNonce={resolveNonce}
+                  extraRenderersFlag={extraRenderersFlag}
+                  conversationId={conversationId}
+                  projectId={projectId}
+                  copiedMessageKey={copiedMessageKey}
+                  forkingAtIndex={forkingAtIndex}
+                  forkAbsoluteIndex={older.windowOffset + i}
+                  summaryRetryState={summaryRetryState}
+                  summaryRetryErrors={summaryRetryErrors}
+                  summaryRetryAttempts={summaryRetryAttempts}
+                  summaryRetryCooldownUntil={summaryRetryCooldownUntil}
+                  cooldownNow={cooldownNow}
+                  maxSummaryRetries={MAX_SUMMARY_RETRIES}
+                  formatError={formatError}
+                  getTechnicalDetails={getTechnicalDetails}
+                  onFileReferenceClick={handleFileReferenceClick}
+                  onCopyMessage={copyMessage}
+                  onRegenerate={regenerate}
+                  onEditUserMessage={m.role === 'user' && !m.pending && i < messages.length && !streaming ? approvalSurfaces.handleEditUserMessage : undefined}
+                  onForkAt={handleForkAt}
+                  onRetrySummary={retrySummary}
+                  onGenUiFollowUp={handleGenUiFollowUp}
+                  />
+              </TurnBoundary>
             );
           })}
           {standaloneDurableLoop && (

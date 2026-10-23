@@ -335,7 +335,6 @@ async function main() {
     const electronEnv = {
       ...process.env,
       PETRI_TEST_INSTANCE: '1',
-      PETRI_TEST_ONSCREEN: '1',
       PETRI_ELECTRON_USER_DATA_DIR: userDataDir,
       PETRI_DB_PATH: dbPath,
       PETRI_LOCAL_DATA_DIR: dataDir,

@@ -50,6 +50,11 @@ description: Use Petri development infrastructure when starting or resuming a se
     + `npm --prefix core/petri-server start`（:3001）+ `cd frontend && npm run dev`（:3000），两者都不开窗。
   - UI 腿只在**9223 测试实例**上跑（`bash scripts/start-test-instance.sh`，默认离屏 + macOS dock 隐藏；**禁 `--onscreen`**）；
     **探针跑完立即 `kill` 9223 进程**，不把测试窗口留在屏幕上。
+  - **2026-10-23 复发（用户再次追问「为啥每次启动软件操作还有屏幕出现」）**：live 脚本直接 spawn Electron 时照搬了
+    `PETRI_TEST_ONSCREEN: '1'`，把测试窗摆到屏幕上。**硬规则=Agent 脚本一律不得设置 `PETRI_TEST_ONSCREEN`**
+    （含直接 spawn）；默认 `show:false` 离屏渲染。截图若因隐藏窗合成帧超时失败，**如实标 `screenshot_unavailable`**，
+    不得靠开窗换证据。机械门禁=`test/live-window-policy.test.mjs`（扫 `scripts/` 与 `dev-verify/flows/`，命中即红）；
+    人要看测试过程只能手动跑启动器 `--onscreen`。
   - 无法离屏的验证（原生对话框/OS 权限）按无人化阶梯降级并如实登记，不为取证开可见窗口。
 - 前置：后端代码变更后必须重启 backend（`lsof -ti :3001 | xargs kill` 后重起）；Vite 保持运行即可被 9223 页面复用。
 - 从 `dev-verify/flows/_template.cjs` 拷贝新建 flow，用 `dev-verify/lib.cjs` 原语组装断言（pollTargets / filterPageTargets+selectPageTarget / evalJs / screenshotPng / createRun），跑 `npm run verify -- <flow>`；清单 `npm run verify -- --list`。

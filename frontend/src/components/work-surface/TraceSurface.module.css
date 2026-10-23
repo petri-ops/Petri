@@ -1,0 +1,183 @@
+/* BLOCK-248（Q3）— 执行轨迹 surface。颜色/间距一律 --petri-* token；字号走 inherit
+   （小字号棘轮只许收缩，本文件不新增 xs/sm 引用）。 */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  padding: var(--petri-space-3);
+  color: var(--petri-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  min-width: 0;
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  color: var(--petri-text);
+}
+
+.taskState {
+  padding: 0 var(--petri-space-1);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.headerAction {
+  margin-left: auto;
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+}
+
+.errorBox p {
+  margin: 0;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--petri-space-4) var(--petri-space-3);
+  color: var(--petri-text-muted);
+  line-height: 1.6;
+  text-align: center;
+}
+
+.emptyInline {
+  margin: 0;
+  padding: var(--petri-space-3);
+  color: var(--petri-text-muted);
+  text-align: center;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+  color: var(--petri-text-secondary);
+}
+
+.note {
+  margin: 0;
+  color: var(--petri-text-tertiary);
+  line-height: 1.5;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--petri-space-1);
+}
+
+.chip {
+  border: 1px solid var(--petri-border-card);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  padding: 1px var(--petri-space-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  color: var(--petri-text);
+}
+
+.chipActive {
+  border-color: var(--petri-text-secondary);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: auto;
+  padding-top: var(--petri-space-1);
+  border-top: 1px solid var(--petri-border-card);
+}
+
+.event {
+  display: flex;
+  align-items: baseline;
+  gap: var(--petri-space-2);
+  padding: 2px var(--petri-space-1);
+  border-left: 2px solid transparent;
+  border-radius: var(--petri-radius-sm);
+}
+
+.event:hover {
+  background: var(--petri-bg-subtle);
+}
+
+.eventFailure {
+  border-left-color: var(--petri-danger);
+}
+
+.clock {
+  flex: 0 0 auto;
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-mono);
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.badge[data-group='error'] {
+  color: var(--petri-danger);
+}
+
+.badge[data-group='compaction'] {
+  color: var(--petri-warning);
+}
+
+.summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--petri-text);
+  font-family: var(--petri-font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.duration {
+  flex: 0 0 auto;
+  color: var(--petri-text-tertiary);
+  font-family: var(--petri-font-mono);
+}

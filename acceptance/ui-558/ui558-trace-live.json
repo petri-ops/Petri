@@ -1,0 +1,110 @@
+{
+  "name": "ui558-trace-live",
+  "darkMode": false,
+  "startedAt": "2026-10-23T16:25:40.508Z",
+  "finishedAt": "2026-10-23T16:26:02.594Z",
+  "providerCalls": 3,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvl6long_0ydh status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui558-live-moiqU9\\data\\projects\\ui-558-mvl6long"
+    },
+    {
+      "name": "E2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui558-live-moiqU9"
+    },
+    {
+      "name": "W0_project_selected",
+      "pass": true,
+      "detail": "selected"
+    },
+    {
+      "name": "W1_trace_surface_visible",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "name": "R1_conversation_resolved",
+      "pass": true,
+      "detail": "status=200 id=conv_868f209d-a9e"
+    },
+    {
+      "name": "R2_trajectory_ready_with_failure",
+      "pass": true,
+      "detail": "availability=available task=completed stats={\"events\":13,\"toolCalls\":1,\"toolFailures\":1,\"errors\":0,\"compactions\":0,\"promptTokens\":0,\"completionTokens\":0,\"cacheReadTokens\":0,\"cacheCreationTokens\":0,\"models\":[]}"
+    },
+    {
+      "name": "W2_existing_message_rail_present",
+      "pass": true,
+      "detail": "railTicks=1"
+    },
+    {
+      "name": "W3_reloaded_for_trace",
+      "pass": true,
+      "detail": "selected"
+    },
+    {
+      "name": "R3_trace_visible_after_reload",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "name": "R4_trace_events_rendered",
+      "pass": true,
+      "detail": "rows=13"
+    },
+    {
+      "name": "R5_tool_failure_visible_in_trace",
+      "pass": true,
+      "detail": "{\"group\":\"tool\",\"status\":\"error\",\"seq\":\"7\",\"text\":\"00:25:45工具错误: ENOENT9 ms\"}"
+    },
+    {
+      "name": "R6_recorded_only_notice",
+      "pass": true,
+      "detail": "只显示已记录事件（单页 200 条 · 上限 500）· 未上报的耗时显示 — · 文本为终态合并快照"
+    },
+    {
+      "name": "R7_error_filter_shows_failures_only",
+      "pass": true,
+      "detail": "rows=[{\"group\":\"tool\",\"status\":\"error\",\"seq\":\"7\",\"text\":\"00:25:45工具错误: ENOENT9 ms\"}]"
+    },
+    {
+      "name": "R8_locate_failure_visible",
+      "pass": true,
+      "detail": "{\"found\":true,\"inList\":true,\"hit\":true}"
+    },
+    {
+      "name": "R9_io_link_opens_transcript",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "name": "W4_reloaded_for_evidence",
+      "pass": true,
+      "detail": "selected"
+    },
+    {
+      "name": "R10_evidence_event_stats",
+      "pass": true,
+      "detail": "事件 13 · 工具 1 · 失败 1"
+    },
+    {
+      "name": "R11_evidence_entry_opens_trace",
+      "pass": true,
+      "detail": "visible"
+    },
+    {
+      "name": "E3_mock_provider_used",
+      "pass": true,
+      "detail": "3"
+    }
+  ],
+  "allPass": true
+}

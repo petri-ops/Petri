@@ -622,3 +622,38 @@ describe('BLOCK-107 P2c 运行中秒表（showRunningStopwatch）', () => {
     expect(text).not.toMatch(/已运行/);
   });
 });
+
+describe('BLOCK-248 Q3 诚实态', () => {
+  it('写工具没有 diff 记录时明说「未记录逐行改动」而不是空白', () => {
+    render(
+      <ToolActivityList
+        activities={[activity('success', {
+          key: 'write-1',
+          name: 'workspace_write',
+          actionLabel: '已写入',
+          actionDetail: 'notes/a.txt',
+        })]}
+      />
+    );
+    fireEvent.click(screen.getByText(/已完成 1 项/));
+    fireEvent.click(screen.getByRole('button', { name: '展开执行详情 已写入' }));
+    const absent = screen.getByTestId('tool-diff-absent');
+    expect(absent.textContent).toContain('未记录逐行改动');
+  });
+
+  it('非写工具无 diff 时不显示该诚实态（零噪声）', () => {
+    render(
+      <ToolActivityList
+        activities={[activity('success', {
+          key: 'read-1',
+          name: 'workspace_read',
+          actionLabel: '已读取',
+          actionDetail: 'notes/a.txt',
+        })]}
+      />
+    );
+    fireEvent.click(screen.getByText(/已完成 1 项/));
+    fireEvent.click(screen.getByRole('button', { name: '展开执行详情 已读取' }));
+    expect(screen.queryByTestId('tool-diff-absent')).toBeNull();
+  });
+});

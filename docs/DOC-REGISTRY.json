@@ -7876,8 +7876,31 @@
         "G0"
       ],
       "notes": "2026-10-23 立项（用户「Q2 余项 整完」后的下一包 = §6.5 第 3 行 Q2b）：给 agent 两个默认关、逐跳受控、来源与成本可核的联网能力。结构：唯一出网口 helpers/web-fetch-policy.js（协议/凭据/主机形态 + 私网·环回·链路本地·CGNAT·ULA·云元数据拒绝 + DNS 解析后二次校验防 rebinding + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type + HTML→文本）；检索后端抽象 helpers/web-search-provider.js（只接自建 SearXNG，未配置=明确拒绝而非空结果）；授权与预算 helpers/web-search-config.js（新配置族 web-search，默认 enabled=false，独立于 network 族以免混淆需重启语义）+ GET/PUT /api/web-access；工具 agent-tools/web-tools.js（授权闸门→策略层→有界返回→出网审计 JSONL：主机/状态/字节/来源/成本）；事件来源标签 tool-events.js:sourceLabelFromResult（先 results[].source 再顶层 source）；前端 WebAccessPanel.tsx（设置页「计算与数据」分区）+ toolActivity.ts:deriveSourceLabel + ToolActivityList.tsx 渲染。红线=零新依赖 / 不建第二套出网通道 / 默认关+显式授权（未授权返回结构化拒绝）。2026-10-23 状态：P0–P7 落地（Node 单测 13+12 绿、前端定向 48 绿、types 0）；**实机腿亮 23/23 · 暗 23/23 全绿**（默认关、关闭态真调用被拒 web_access_disabled、真实 API 授权后真检索成功 resultSources+cost、**展开完成簇后来源标签屏幕可见**（rendered/hit/inViewport + 截图）、SSRF 云元数据地址被拒 web_url_private_host；证据 acceptance/ui-557/ 与 acceptance/block-247/）；配置族 web-search 已按 BLOCK-199 规则接入导出/导入/按区重置 + 落点总账（注册表 18 族 / 103 键）；UI-557 verified。收口补齐来源标签屏幕可见性的两处真缺陷（标签只加在 legacy 行、聊天实际走 Qoder 时间线行 → 已补渲染；完成簇默认折叠使折叠态探针误判渲染冻结 → 取证改 settle→长超时→展开）与两条持久化链路（活动快照写 sourceLabel、旧记录按 resultData 派生）。"
+    },
+    {
+      "id": "BLOCK-248-Q3-EXECUTION-TRACE",
+      "capability": "q3-execution-trace",
+      "path": "docs/block-248-q3-execution-trace-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P4-CLOSED",
+      "canonical": true,
+      "truthDomain": "q3-execution-trace",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-23",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "q3",
+        "trace",
+        "observability",
+        "evidence",
+        "boundary",
+        "G0"
+      ],
+      "notes": "2026-10-23 立项（用户「按母纲 §6.5 队列进 Q3（执行轨迹），直接推完」）：把「这一轮到底发生了什么」做成事件级执行轨迹。交付=后端单源 helpers/trajectory-events.js（8 组分类 + 有界摘要 + 查询编排，前端不二次解释 payload）+ agent-task-store 尾部/更早分页与 run 级统计（usage tokens / tool_result 失败）+ GET /api/ai/agent/trajectory（会话归属+任务 user_id 双校验、limit≤500、availability/recordedOnly/truncated/hasMoreOlder）+ 右栏「轨迹」surface（9 chips / 跟随最新 / 失败定位 / 统计头 / 加载更早 / 模型 I/O 互链）+ 证据面「执行事件」统计与入口 + 写工具无 diff 诚实态 + TurnBoundary/ToolRowBoundary（SegmentBoundary 注入）。P0 对账纠正 C1：MessageRail（UI-262）已提供用户消息导航，不重复造。证据=Node block248 6/6 + live-window-policy 1/1 + 前端定向 54/54 + types 0 + 隔离 9223 亮/暗各 20/20（离屏，无可见测试窗；截图不可得如实标 screenshot_unavailable）（acceptance/ui-558/、acceptance/block-248/）+ closeout。同期移除 6 个 live 脚本的 PETRI_TEST_ONSCREEN=1 并固化窗口策略门禁（用户二次要求屏幕不留测试窗）。reopen=逐消息结果统计（无逐消息 token 真相）/跨会话联邦轨迹/Electron capturePage 测试 IPC。"
     }
   ],
   "lastUpdated": "2026-10-23",
-  "documentCount": 390
+  "documentCount": 391
 }

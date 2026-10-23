@@ -7,6 +7,8 @@
  *
  * 纪律：
  *   - 只连接既有 dev 栈（npm run dev + remote-debugging-port），不启动/不重启 Electron；
+ *   - **不得设置 PETRI_TEST_ONSCREEN**（用户裁决：测试窗口不许出现在屏幕上）；
+ *     隐藏窗截图可能超时 → 有界捕获并如实标 screenshot_unavailable，不开窗换证据；
  *   - 断言用 lib 原语组装；证据 JSON 由 createRun 自动落盘，勿手工伪造；
  *   - 每条断言 fail 时带可定位的 detail（选择器/表达式/期望 vs 实际）。
  */
