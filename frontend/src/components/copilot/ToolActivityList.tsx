@@ -513,6 +513,13 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
         {activity.actionDetail && (
           <code className="sc-tool-activity-command">{activity.actionDetail}</code>
         )}
+        {/* BLOCK-247（Q2b）— 来源标签：联网结论从哪个网来的，头行一眼可见 */}
+        {activity.sourceLabel && (
+          <span className="sc-tool-activity-source" title={`来源：${activity.sourceLabel}`}>
+            <Icon name="globe" size={11} />
+            {activity.sourceLabel}
+          </span>
+        )}
         {subSnap && (
           <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
             <Icon name="bot" size={10} />

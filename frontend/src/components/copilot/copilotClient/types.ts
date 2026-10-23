@@ -106,6 +106,8 @@ export interface StructuredToolResult {
   approval?: ToolApproval;
   /** BLOCK-244 — 结构化提问载荷（独立于 data 截断）。 */
   question?: UserQuestion;
+  /** BLOCK-247（Q2b）— 联网结果的来源标签（独立于 data 截断；结果多时也不丢）。 */
+  sourceLabel?: string;
 }
 
 export interface ToolResultEvent {

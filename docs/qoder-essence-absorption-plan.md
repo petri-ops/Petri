@@ -85,8 +85,8 @@ status: planned
 
 | 能力 | Petri 现状 | 结论 |
 | --- | --- | --- |
-| 公网搜索 | 无 `web_search`；`query/read_page/search` 是项目资源/内容插件教程/项目记忆；`knowledge_search` 是本地知识库 | **缺一等工具**；`tool-router.js` 的 browser 域描述「网页浏览/搜索」与实际工具面不符（claim drift，待修） |
-| 网页抓取 | 无 `web_fetch`；`defuddle` 技能 + CLI 可把单个 URL 提取成 markdown（本机已装），但不是搜索、无来源/引用/权限统一面 | **有 skill 级近似，缺一等工具** |
+| 公网搜索 | 无 `web_search`；`query/read_page/search` 是项目资源/内容插件教程/项目记忆；`knowledge_search` 是本地知识库 | **缺一等工具**；`tool-router.js` 的 browser 域描述「网页浏览/搜索」与实际工具面不符（claim drift，待修）→ **BLOCK-247 已补 `web_search`（独立 `web` 域），claim drift 仍在（见 L1 行）** |
+| 网页抓取 | 无 `web_fetch`；`defuddle` 技能 + CLI 可把单个 URL 提取成 markdown（本机已装），但不是搜索、无来源/引用/权限统一面 | **有 skill 级近似，缺一等工具** → **BLOCK-247 已补 `web_fetch`（唯一出网口 + 来源/成本可核）** |
 | 电脑控制 | 8 个 `computer_*` 工具 + macOS/Windows sidecar 源码 + block48/63 测试；但 `sidecars/*/bin/` 未构建，当前调用报 `sidecar_not_built` | **实现面在库，本机未就绪**；Q9 启用 |
 | 浏览器 | `BrowserPanel` 是 UI；Agent 无网页操作工具 | **UI-only**；浏览器连接器属 Q9/后续 |
 
@@ -304,8 +304,8 @@ status: planned
 
 | # | 体验面 | Qoder 0.4.8 行为（证据） | Petri 现状（证据） | 判定 | 汲取的精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| L1 | 联网搜索 | 核心工具 `WebSearch`，云端 `/api/v1/webSearch/unifiedSearch`、`/oneSearch` | 无公网搜索；只有本地 `knowledge_search`/项目检索 | 🔴 | 只借行为合同（summary/来源/权威度）；**不接 Qoder 端点** | Q2b |
-| L2 | 网页抓取 | 核心工具 `WebFetch`，云端抓取 + 独立 model purpose | 无 `web_fetch`；`defuddle` 技能仅单 URL 提取 | 🔴 | 只借行为合同（URL→Markdown/来源）；**不接 Qoder 端点** | Q2b |
+| L1 | 联网搜索 | 核心工具 `WebSearch`，云端 `/api/v1/webSearch/unifiedSearch`、`/oneSearch` | **已交付 `web_search`**（BLOCK-247 / Q2b，默认关 + 显式授权；检索后端 = 自建 SearXNG，每条结果带来源主机名 + 成本入账；未配置＝明确拒绝 `web_search_not_configured`，不是"没搜到"） | 🟡 | 只借行为合同（summary/来源/权威度）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） |
+| L2 | 网页抓取 | 核心工具 `WebFetch`，云端抓取 + 独立 model purpose | **已交付 `web_fetch`**（BLOCK-247 / Q2b：唯一出网口 `web-fetch-policy.js`——协议/凭据/主机形态校验 → 私网·环回·链路本地·CGNAT·ULA·云元数据硬拒 → DNS 解析后二次校验防 rebinding → 重定向逐跳复检 → 流式字节截断 → 文本类 content-type 白名单；HTML→纯文本；来源/字节入审计，**不记正文**） | 🟡 | 只借行为合同（URL→Markdown/来源）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） |
 | L3 | 浏览器连接器 | Chrome/Edge 扩展 + native messaging + `/sdk/browser-use/v1` | `BrowserPanel` UI；无 Agent 网页操作 | 🟡 | 只借行为合同（浏览器可操作）；**不复刻 Qoder SDK/端点** | Q9 |
 | L4 | 电脑控制 | 随包 `qoder-computer-use` 插件 + `qoder.computer-control` 技能 + 原生 addon | 8 个 `computer_*` + macOS/Windows sidecar（未构建）+ block48/63 | 🟡 | 只借行为合同（语义树+确认门）；**不搬 Qoder 插件代码** | Q9 |
 | L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | Q5 surface/pack host API 已交付（BLOCK-216）；通用 utility-process host/sandbox 未做 | 🟡 | manifest + host API + sandbox | Q0.5/Q5 |
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-23 BLOCK-246 回写，机械计数）**：✅ 43 · 🟡 39 · 🔴 13 · ⛔ 7 = **102 点**（本轮 B2 计划反馈、C11 图片预览、C16 附件形态 → ✅；C4 消息动作（缺结果统计）、C12 划词（缺文本批注）、C13 速记板（缺图片批注）、C17 跨会话（缺拖放）保持 🟡）。基线取 BLOCK-245 收口口径 ✅40/🟡41/🔴14/⛔7。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/43/39/13/7。
+**矩阵统计（2026-10-23 BLOCK-247 回写，机械计数）**：✅ 43 · 🟡 41 · 🔴 11 · ⛔ 7 = **102 点**（本轮 L1 联网搜索、L2 网页抓取 🔴→🟡——`web_search`/`web_fetch` 已交付且实机亮/暗各 21/21，唯一缺口＝来源标签 DOM 可见性，UI-557 记 `in_progress`）。基线取 BLOCK-246 收口口径 ✅43/🟡39/🔴13/⛔7（BLOCK-245 收口口径 ✅40/🟡41/🔴14/⛔7）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。**口径已同步**：DOC-REGISTRY 注记与 §12 更新记录统一为 102/43/41/11/7。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -432,6 +432,12 @@ status: planned
 - 度量：每次调用的 provider/延迟/成本估算入 `ai_usage` 或专用台账；`test:changed` + `quality:types` + `closeout`。
 
 **风险**：网页内容不可信（提示词注入/虚假来源）；SSRF 与抓取合规；DeepSeek 价格/限流/字段可能变更；真实调用成本与隐私边界。**默认关 + 显式授权 + 审计**是底线。
+
+> **2026-10-23：Q2b 已立项 [BLOCK-247](./block-247-q2b-web-access-plan.md)（active：P0–P5 落地并绿，实机腿部分绿）**——落点与本节口径的三处**显式差异**（按用户红线「不绑厂商 / 零新依赖 / 默认关 + 显式授权」裁决，以实现为准，不回改母纲已冻结口径）：
+> ① **provider = 自建 SearXNG**（不绑厂商、无需密钥、可内网、来源可审计）；**DeepSeek Search/Fetch 本包未接**——厂商 provider 需凭据面与计费口径，留后续 adapter（本包不引凭据面、不引新依赖）。
+> ② **配置族名 `web-search`**（非本节写的 `web-retrieval`）：刻意**独立于 `network` 族**——network 是"往 env 写代理"的源头（固定四键快照 + "需重启"语义），联网授权是**即时生效**的能力开关与预算，混族会造出"设置页说要重启、其实早生效"的第二套真相。族已按 BLOCK-199 规则注册（8 键、默认关、写侧未知键拒绝、有真实设置面 `计算与数据` 分区 + `/api/web-access`）。
+> ③ **工具签名收窄**为 `web_search(query, count?)` / `web_fetch(url)`（本节列的 `site/lang/after/before/oriQuestion` 等 provider 方言**未暴露**）；返回信封带来源主机名 + 成本（请求数/字节）。
+> **未做**：真实 API 调用、prompt-injection 隔离块、每次出网审批、`ai_usage` 成本入账（当前成本只进出网审计台账）、多 provider 切换。
 
 ### Q-DOMAIN — 垂直领域去核化（生信 pack 完整性；跨波次轨道）
 
@@ -782,3 +788,4 @@ Q-DOMAIN（垂直去核化，跨波次）
 | 2026-10-22 | Q1-REM | BLOCK-244 收口：逐工具审批策略 allow/ask/deny（A1/A8）、同参循环防护 `loop_guard`（A5，交互运行由 `repeated_tool_call` 硬停交棒审批层）、确定性意图 + sideTask 变体（A2 部分/A7）、AskUserQuestion（C19）、完全访问确认层（D3）、编辑重发 + checkpoint 回退（C5）；A1/A5/A7/A8/C5/C19/D3→✅，A2 仍 🟡（模型解释 reopen）；矩阵 **✅39 / 🟡42 / 🔴14 / ⛔7 = 102** | `docs/block-244-q1-rem-approval-tail-plan.md` §5 + `acceptance/block-244/`、`acceptance/ui-552/`（亮/暗 28/28） |
 | 2026-10-23 | Q2 余项 | BLOCK-246 收口：C13 速记板（迁移 016 旁路表 + store/route/面板）、C12 划词动作生产者（`selectionQuote` 首产）、C4 动作注册表（+加入上下文/评价，017 表）、C11 图片预览（保存/多图/预设）、B2 计划反馈（keep-planning 带意见）、C16 形态补全（文件夹/代码/快照）、C17 会话摘要；**B2/C11/C16 → ✅**，C4/C12/C13/C17 保持 🟡（余：结果统计 / 文本批注 / 图片批注 / 拖放）；矩阵 **✅43 / 🟡39 / 🔴13 / ⛔7 = 102** | `docs/block-246-q2-rem-plan.md` §5/§6 + `acceptance/ui-554/`、`acceptance/block-246/`（亮/暗各 19/19） |
 | 2026-10-22 | Q2 首切片 | BLOCK-245 收口：三通道并一（拆前基线逐字不变）+ `@` 七源同源聚合 + 超限可见提示；**C15 🟡→✅**（一个入口装配上下文），**C16 保持 🟡**（上限诚实化已落地，文件夹整体/选中代码/应用快照仍缺）；矩阵 **✅40 / 🟡41 / 🔴14 / ⛔7 = 102**（同时纠正 §5 统计句仍停在 BLOCK-243 的 32/47/16 的漏回写） | `docs/block-245-q2-context-assembly-plan.md` §5 + `acceptance/ui-553/`、`acceptance/block-245/`（亮/暗各 22/22） |
+| 2026-10-23 | Q2b | BLOCK-247 收口中：**L1 联网搜索 🔴→🟡**（`web_search` 已交付：自建 SearXNG、默认关 + 显式授权、每条结果带来源主机名 + 成本入账、未配置＝明确拒绝 `web_search_not_configured`）、**L2 网页抓取 🔴→🟡**（`web_fetch` 已交付：唯一出网口 + SSRF 硬边界 + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type）；与 §6-Q2b 口径三处差异（provider=SearXNG 不绑厂商 / 配置族名 `web-search` / 工具签名收窄）已就地标注；矩阵 **✅43 / 🟡41 / 🔴11 / ⛔7 = 102**（唯一缺口＝来源标签 DOM 可见性，UI-557 记 `in_progress`） | `docs/block-247-q2b-web-access-plan.md` §5 + `acceptance/ui-557/`、`acceptance/block-247/`（亮/暗各 21/21） |

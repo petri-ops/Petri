@@ -13,6 +13,8 @@ import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
 import { DesktopBehaviorPanel } from './DesktopSettingsPanel/sections/DesktopBehaviorPanel';
 import { ModelSelectorControls } from './DesktopSettingsPanel/sections/ModelSelectorControls';
 import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
+// BLOCK-247（Q2b）— 联网检索与抓取的授权面（默认关；即时生效）
+import { WebAccessPanel } from './DesktopSettingsPanel/sections/WebAccessPanel';
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
 import { UsageSection } from './DesktopSettingsPanel/UsageSection';
@@ -578,6 +580,10 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         {/* BLOCK-202 W3 — 网络代理与自签 CA（保存后需重启后端生效） */}
         <NetworkProxyPanel />
+        <hr className="petri-section-divider" />
+
+        {/* BLOCK-247（Q2b）— 联网检索与抓取授权（默认关；即时生效） */}
+        <WebAccessPanel />
         <hr className="petri-section-divider" />
 
         <TrashManagement />

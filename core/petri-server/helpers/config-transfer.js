@@ -36,6 +36,7 @@ const memoryPolicy = require('./memory-policy');
 const subagentProfile = require('./subagent-profile');
 const trustPolicy = require('./trust-policy');
 const retention = require('./data-retention');
+const webSearch = require('./web-search-config');
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -67,6 +68,9 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'subagent-profile',
   'trust-policy',
   'data-retention',
+  // BLOCK-247（Q2b）联网检索授权与预算：导出的是用户覆盖层（开关/后端/预算/黑白名单）。
+  // 导出**不含**任何凭据（本族本就无凭据：SearXNG 自建实例无需 key）。
+  'web-search',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -142,6 +146,7 @@ function readFamilyOverrides() {
     'subagent-profile': subagentProfile.readStore(),
     'trust-policy': trustPolicy.readStore(),
     'data-retention': retention.readStore(),
+    'web-search': { ...webSearch.readStore() },
   };
 }
 
@@ -232,7 +237,7 @@ function validateFamily(family, body) {
   if (family === 'reasoning') {
     return reasoningConfig.validateReasoningPatch(body);
   }
-  if (family === 'network' || family === 'runtime') {
+  if (family === 'network' || family === 'runtime' || family === 'web-search') {
     return schema.commitGuard(family, body, lookup).diagnostics;
   }
   if (family === 'data-retention') {
@@ -465,6 +470,10 @@ const WRITERS = {
       throw error;
     }
   },
+  'web-search'(body) {
+    // 合并覆盖（导入不删文件里未出现的键）；拒绝走共享注册表守卫（saveWebSearchConfig 抛带 diagnostics 的错）
+    webSearch.saveWebSearchConfig(body);
+  },
 };
 
 /**
@@ -512,6 +521,8 @@ const RESETTERS = {
   'subagent-profile'() { subagentProfile.resetProfiles(); },
   'trust-policy'() { trustPolicy.writeStore({ defaultLevel: trustPolicy.DEFAULT_LEVEL, projects: [] }, { actor: 'reset' }); },
   'data-retention'() { retention.resetRetention(); },
+  // 重置 = 清空覆盖层 → 回落代码默认（默认关、不用检索后端、无黑白名单）
+  'web-search'() { webSearch.writeStore({}); },
 };
 
 /**

@@ -5,7 +5,9 @@
  *  - guard 关（PETRI_JEV_TOOL_ROUTE=1 显式开）＝零出站零行为变化；
  *  - 任何决策失败形态（缺 key/超时/校验失败）＝route=false 回退全量，永不 throw；
  *  - 采纳（argmax≠all 且 conf ≥ θ=0.80）→ 收窄=路由域 ∪ session 基础件；
- *  - 71 工具集合恒等：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（BLOCK-109 P2 红线）。
+ *  - 83 工具集合恒等：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（BLOCK-109 P2 红线）。
+ *    （BLOCK-247 Q2b 新增 web 域：web_search/web_fetch；skill/web 两域同 precedent——
+ *    入 DOMAIN_TOOL_DEFS 但不入 TOOL_FAMILIES 决策分类学，θ=0.80 校准契约不动，宁全勿缺。）
  */
 import assert from 'node:assert/strict';
 import path from 'node:path';
@@ -66,13 +68,13 @@ function errorFetch(name) {
   return { impl, count: () => calls };
 }
 
-test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（71 工具零变化）', () => {
+test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（83 工具零变化）', () => {
   const union = Object.values(DOMAIN_TOOL_DEFS).flat();
   assert.equal(union.length, TOOL_DEFS.length);
   const b = new Set(union);
   assert.ok(TOOL_DEFS.every((t) => b.has(t)), '每个 TOOL_DEFS 成员都来自某域模块（同引用）');
   assert.deepEqual(Object.keys(DOMAIN_TOOL_DEFS).sort(),
-    ['agent-orchestration', 'browser', 'computer', 'knowledge', 'remote', 'resident', 'result-studio', 'session', 'skill', 'workspace']);
+    ['agent-orchestration', 'browser', 'computer', 'knowledge', 'remote', 'resident', 'result-studio', 'session', 'skill', 'web', 'workspace']);
 });
 
 test('D-1/D-3 定版契约：九域+all 类目集、session 底座、θ=0.80', () => {

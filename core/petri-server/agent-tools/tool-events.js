@@ -114,11 +114,34 @@ function summarizeResultObject(obj) {
   return parts.join(' · ');
 }
 
+/**
+ * BLOCK-247（Q2b）— 联网结果的来源标签。
+ * `web_fetch` → 最终来源主机名；`web_search` → 结果里的来源主机名（去重，最多 3 个）。
+ * 只放**主机名**不放正文：来源要可见、可核，但不该把网页内容抄进活动流。
+ */
+function sourceLabelFromResult(result) {
+  if (!result || typeof result !== 'object') return undefined;
+  // 先看结果里的来源主机名（检索结果来自多个站，来源标签要如实列出来），
+  // 没有结果数组时再看顶层 source（抓取场景 = 被抓页面自己的主机名）。
+  if (Array.isArray(result.results)) {
+    const hosts = [];
+    for (const row of result.results) {
+      const host = row && typeof row === 'object' && typeof row.source === 'string' ? row.source.trim() : '';
+      if (host && !hosts.includes(host)) hosts.push(host);
+      if (hosts.length >= 3) break;
+    }
+    if (hosts.length > 0) return hosts.join('、').slice(0, 160);
+  }
+  const source = typeof result.source === 'string' ? result.source.trim() : '';
+  return source ? source.slice(0, 120) : undefined;
+}
+
 function buildToolResultEvent(envelope, args = {}, options = {}) {
   const result = envelope.data;
   const published = publicData(result);
   const approval = approvalPayload(result);
   const question = questionPayload(result);
+  const sourceLabel = sourceLabelFromResult(result);
   const summary = result && typeof result === 'object'
     ? Array.isArray(result)
       ? `返回 ${result.length} 条`
@@ -159,6 +182,9 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
       ...(result && typeof result.shell === 'string'
         ? { shellLabel: shellLabelFromPath(result.shell) }
         : {}),
+      // BLOCK-247（Q2b）— 联网结果的来源标签（独立于 data：结果一多就会被
+      // publicData 换成 preview，来源信息必须活在顶层才不丢）
+      ...(sourceLabel ? { sourceLabel } : {}),
     },
   };
 
@@ -459,6 +485,8 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "todo_write": "已记录",
   "verify_state": "已校验",
   "wait_agent": "已等待",
+  "web_fetch": "已抓取",
+  "web_search": "已检索",
   "workspace_exec": "已运行",
   "workspace_exec_background": "后台运行",
   "workspace_find": "已查找",
@@ -525,6 +553,11 @@ function summarizeToolCallSwitch(name, args = {}) {
       return { actionLabel: TOOL_ACTIVITY_VERBS.delegate_to_petri_node, actionDetail: compactActivityDetail(args.task) || '协作节点' };
     case 'federation_list_peers':
       return { actionLabel: TOOL_ACTIVITY_VERBS.federation_list_peers, actionDetail: '联邦节点' };
+    // BLOCK-247（Q2b）— 联网两件：宾语带来源/关键词，便于活动流一眼看出"从哪拿的"
+    case 'web_search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.web_search, actionDetail: compactActivityDetail(args.query) || '网络' };
+    case 'web_fetch':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.web_fetch, actionDetail: compactActivityDetail(args.url) || '网页' };
     default: {
       // UI-437 v5.18 — 已登记工具：动词取注册表、detail 用参数摘要（无工具名
       // 前缀，与登记工具同构）；未登记（MCP/插件动态工具）保持

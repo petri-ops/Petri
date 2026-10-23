@@ -36,7 +36,7 @@ test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：17 族 / 95 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice）', () => {
+test('配置注册表冻结：18 族 / 103 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -52,7 +52,7 @@ test('配置注册表冻结：17 族 / 95 键（BLOCK-210 data-retention；BLOCK
   //   BLOCK-205（W6）：13 族/65 键 → 14 族/75 键（memory-policy：9 可写标量 + 嵌入模型只读）。
   //   BLOCK-206（W7a）：14 族/75 键 → 15 族/81 键（subagent-profile：default + 5 条目字段）。
   //   BLOCK-207（W7b）：15 族/81 键 → 16 族/84 键（trust-policy：defaultLevel + project/level）。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 17);
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 18);
   //   BLOCK-208（W7c）：84 → 86 键（user-prefs + motion 接线 / density 仅登记）。
   //   BLOCK-210（W7e）：86 → 89 键（data-retention：historyDays/archiveDir/maxBytesPerDir）。
   //   BLOCK-223（Q9 续项）：89 → 91 键（user-prefs + notifyOnTurnEnd / closeToTray，
@@ -61,7 +61,10 @@ test('配置注册表冻结：17 族 / 95 键（BLOCK-210 data-retention；BLOCK
   //   BLOCK-226（Q9 通知中心）：92 → 93 键（user-prefs + quietHours，空=关；只抑制系统 toast）。
   //   BLOCK-227（Q9 首启揭示）：93 → 94 键（user-prefs + roleRevealSeen，默认 false）。
   //   BLOCK-228（Q9 崩溃提示）：94 → 95 键（user-prefs + crashNotice，默认 true）。
-  assert.equal(schema.CONFIG_KEYS.length, 95);
+  //   BLOCK-247（Q2b）：17 族/95 键 → 18 族/103 键（web-search：enabled/provider/searxngBaseUrl/
+  //     maxResults/timeoutMs/fetchMaxBytes/allowedHosts/blockedHosts；默认关 + 即时生效，
+  //     独立成族不塞 network——network 是"往 env 写代理"的源头（有"需重启"语义），两者混族会造出第二套真相）。
+  assert.equal(schema.CONFIG_KEYS.length, 103);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {

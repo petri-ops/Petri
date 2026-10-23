@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  deriveSourceLabel,
   formatToolDuration,
   formatToolSideEffects,
   mergeToolCallActivity,
@@ -416,5 +417,31 @@ describe('UI-382/UI-384 — 持久化快照回程保留 agentRunId 与输出尾�
       name: 'workspace_read',
       output: { tail: expect.stringContaining('block89 move me'), truncated: false },
     })]);
+  });
+});
+
+// BLOCK-247（Q2b）— 联网来源标签派生：只取主机名，不取正文（来源要可核，内容看「返回」详情）
+describe('BLOCK-247 联网来源标签派生', () => {
+  it('web_fetch 取顶层 source 主机名', () => {
+    expect(deriveSourceLabel('web_fetch', { source: 'wiki.example.org' })).toBe('wiki.example.org');
+  });
+
+  it('web_search 取 results[].source，去重且最多 3 个', () => {
+    expect(deriveSourceLabel('web_search', {
+      results: [
+        { source: 'wiki.example.org' },
+        { source: 'notes.example.net' },
+        { source: 'wiki.example.org' },
+        { source: 'third.example.com' },
+        { source: 'fourth.example.com' },
+      ],
+    })).toBe('wiki.example.org、notes.example.net、third.example.com');
+  });
+
+  it('非联网工具或无来源时返回 undefined（不硬造来源）', () => {
+    expect(deriveSourceLabel('workspace_read', { source: 'x' })).toBeUndefined();
+    expect(deriveSourceLabel('web_search', { results: [] })).toBeUndefined();
+    expect(deriveSourceLabel('web_fetch', {})).toBeUndefined();
+    expect(deriveSourceLabel('web_fetch', null)).toBeUndefined();
   });
 });

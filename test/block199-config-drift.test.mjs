@@ -43,6 +43,9 @@ const UI_CARRIERS = {
   // BLOCK-203 W4a P5：MCP 服务货架（扩展中心 → MCP 服务）。数据面在 hook 里（面板只做呈现），
   // 故钉 hook 而不是钉面板——钉面板会变成"文件里出现 mcp 字样"就算过，那种门守不住任何东西。
   'mcp-servers': { file: 'frontend/src/hooks/useMcpServers.ts', must: ['/mcp/servers'] },
+  // BLOCK-247（Q2b）联网检索授权面：承载面在「计算与数据」分区（独立路由 /settings?section=compute），
+  // 走 REST 端点 /api/web-access（GET 读快照 / PUT 写授权），**不与 network 族混**（生效语义不同）。
+  'web-search': { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.tsx', must: ['/web-access'] },
 };
 
 /**
@@ -79,6 +82,8 @@ const WRITE_ROUTES = {
   'subagent-profile': 'core/petri-server/routes/subagent-profiles.js',
   'trust-policy': 'core/petri-server/routes/trust-policy.js',
   'data-retention': 'core/petri-server/routes/data-retention.js',
+  // BLOCK-247（Q2b）：联网授权写面与 runtime-policy 同文件（同一路由装配单元），拒绝码同构（400 + diagnostics）。
+  'web-search': 'core/petri-server/routes/runtime-config.js',
 };
 
 /**

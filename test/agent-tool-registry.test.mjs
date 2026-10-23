@@ -182,8 +182,9 @@ test('schema-first loading does not capture partial act helper exports', () => {
       // BLOCK-99 G4：空间管理会话台工具族 71 件；BLOCK-116 W2（BK-04）决策观测 +2 = 73；
       // BLOCK-121 P2（B1）result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76；
       // BLOCK-157 W1（KNW-1）skill_discover/skill_get +2 = 78；BLOCK-164 W1 federation_list_peers +1 = 79；
-      // BLOCK-176 W7（CP-21）skill_preflight +1 = 80；BLOCK-244 Q1-REM ask_user_question +1 = 81
-      if (getToolDefs().length !== 81) throw new Error('unexpected tool count');
+      // BLOCK-176 W7（CP-21）skill_preflight +1 = 80；BLOCK-244 Q1-REM ask_user_question +1 = 81；
+      // BLOCK-247（Q2b）web_search + web_fetch +2 = 83
+      if (getToolDefs().length !== 83) throw new Error('unexpected tool count');
       if (typeof actTools.actUiAction !== 'function') throw new Error('ui action dispatcher unavailable');
       if (typeof actTools.actOpenTool !== 'function') throw new Error('open_tool dispatcher unavailable');
       process.exit(0);
@@ -296,7 +297,7 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
     // BLOCK-99 G4 71 件 + BLOCK-116 W2（BK-04）决策观测 2 件 = 73；BLOCK-121 result_summary +1 = 74；
     // BLOCK-124（C-13）codegraph +2 = 76；BLOCK-176 W7（CP-21）skill_preflight +1 = 80；
     // BLOCK-244 Q1-REM ask_user_question +1 = 81
-    assert.equal(receivedBody.tools.length, 81);
+    assert.equal(receivedBody.tools.length, 83);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

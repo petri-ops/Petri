@@ -1351,6 +1351,16 @@
   white-space: nowrap;
 }
 
+/* BLOCK-247（Q2b）— 联网结果的来源标签：域名/来源主机名，让"这段结论从哪来"一眼可见 */
+.sc-tool-activity-source {
+  max-width: min(360px, 40vw);
+  overflow: hidden;
+  color: var(--petri-text-secondary);
+  font-size: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sc-tool-activity-status {
   font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   font-weight: 650;

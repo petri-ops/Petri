@@ -84,6 +84,15 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-247（Q2b）—— web-search：联网检索与抓取的**授权面**。
+  // 刻意独立成族而不是塞进 network：network 族是"往 env 写代理"的源头（applyNetworkEnv
+  // 有固定的四键快照与"需重启"语义），联网检索是**即时生效**的能力开关与预算，
+  // 混族会把两种生效语义搅在一起。无 env 层——联网出网属于用户授权，不由部署环境污染。
+  'web-search': {
+    store: 'file:web-search.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
   // runtime：全局审批默认档位 + 派生并发/深度 + 工具曝光黑名单。
   // 并发/深度保留 env 覆盖（PETRI_SPAWN_* 是既有部署面，env 优先），审批默认为纯文件。
   'runtime': {
@@ -314,6 +323,53 @@ const CONFIG_KEYS = Object.freeze([
   {
     // 自签 CA 文件路径（PEM）。只存路径不存证书内容；文件不存在时 apply 阶段给诊断且不设 env。
     key: 'network.caFile', family: 'network', path: 'caFile',
+    type: 'string', domain: { pattern: '^[^\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  // —— BLOCK-247 web-search：联网检索授权与预算（默认关；开启即用户授权出网）——
+  {
+    // 总开关。**默认 false**：未开启时 web_search/web_fetch 返回结构化拒绝（不静默失败、不偷偷出网）。
+    key: 'webSearch.enabled', family: 'web-search', path: 'enabled',
+    type: 'boolean', envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 检索后端。目前只有 searxng（自建实例）；'none' 表示未选（检索工具会诚实报未配置）。
+    key: 'webSearch.provider', family: 'web-search', path: 'provider',
+    type: 'string', domain: { pattern: '^(?:searxng|none)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // SearXNG 实例基址（自建/内网均可）。只接受 http(s) 绝对地址；末尾斜杠由实现归一。
+    key: 'webSearch.searxngBaseUrl', family: 'web-search', path: 'searxngBaseUrl',
+    type: 'string', domain: { pattern: '^(?:https?://[^\\s]+)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'webSearch.maxResults', family: 'web-search', path: 'maxResults',
+    type: 'number', domain: { min: 1, max: 20, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 单次外部请求超时（检索与抓取共用）；抓取另受字节上限约束。
+    key: 'webSearch.timeoutMs', family: 'web-search', path: 'timeoutMs',
+    type: 'number', domain: { min: 1000, max: 30000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    key: 'webSearch.fetchMaxBytes', family: 'web-search', path: 'fetchMaxBytes',
+    type: 'number', domain: { min: 65536, max: 4194304, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 可选白名单（逗号分隔域名，含子域）。非空时只允许这些域的抓取/检索结果落地。
+    key: 'webSearch.allowedHosts', family: 'web-search', path: 'allowedHosts',
+    type: 'string', domain: { pattern: '^[^\\s]*$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 黑名单优先于白名单（用户明确不想访问的域）。
+    key: 'webSearch.blockedHosts', family: 'web-search', path: 'blockedHosts',
     type: 'string', domain: { pattern: '^[^\\s]*$' }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },

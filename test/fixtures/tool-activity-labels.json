@@ -15,6 +15,14 @@
     "label": "已提问",
     "icon": "message-circle"
   },
+  "codegraph_classify_edges": {
+    "label": "已盘点依赖",
+    "icon": "git-branch"
+  },
+  "codegraph_who_imports": {
+    "label": "已查引用",
+    "icon": "git-branch"
+  },
   "computer_authorize": {
     "label": "已授权",
     "icon": "eye"
@@ -47,8 +55,20 @@
     "label": "已等待",
     "icon": "eye"
   },
+  "decision_recent": {
+    "label": "已回放",
+    "icon": "clock"
+  },
+  "decision_summary": {
+    "label": "已统计",
+    "icon": "settings"
+  },
   "delegate_to_petri_node": {
     "label": "已委派",
+    "icon": "globe"
+  },
+  "federation_list_peers": {
+    "label": "已查询协作节点",
     "icon": "globe"
   },
   "followup_task": {
@@ -239,6 +259,16 @@
     "label": "已发送",
     "icon": "bot"
   },
+  "skill_discover": {
+    "label": "已列技能"
+  },
+  "skill_get": {
+    "label": "已读技能"
+  },
+  "skill_preflight": {
+    "label": "已检技能依赖",
+    "verb": "inspect"
+  },
   "spawn_agent": {
     "label": "已派发",
     "icon": "bot"
@@ -258,6 +288,14 @@
   "wait_agent": {
     "label": "已等待",
     "icon": "bot"
+  },
+  "web_fetch": {
+    "label": "已抓取",
+    "icon": "globe"
+  },
+  "web_search": {
+    "label": "已检索",
+    "icon": "globe"
   },
   "workspace_exec": {
     "label": "已运行",
@@ -290,35 +328,5 @@
   "workspace_write": {
     "label": "已写入",
     "icon": "pencil"
-  },
-  "decision_summary": {
-    "label": "已统计",
-    "icon": "settings"
-  },
-  "decision_recent": {
-    "label": "已回放",
-    "icon": "clock"
-  },
-  "codegraph_who_imports": {
-    "label": "已查引用",
-    "icon": "git-branch"
-  },
-  "codegraph_classify_edges": {
-    "label": "已盘点依赖",
-    "icon": "git-branch"
-  },
-  "skill_discover": {
-    "label": "已列技能"
-  },
-  "skill_get": {
-    "label": "已读技能"
-  },
-  "federation_list_peers": {
-    "label": "已查询协作节点",
-    "icon": "globe"
-  },
-  "skill_preflight": {
-    "label": "已检技能依赖",
-    "verb": "inspect"
   }
 }

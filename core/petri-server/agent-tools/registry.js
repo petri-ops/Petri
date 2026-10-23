@@ -64,6 +64,8 @@ const {
   tool_resident_task_read,
 } = require('./workspace-tools');
 const { tool_system_info } = require('./system-info-tools');
+// BLOCK-247（Q2b）— 联网检索与抓取：唯一出网入口（策略层见 helpers/web-fetch-policy）
+const { tool_web_search, tool_web_fetch } = require('./web-tools');
 // BLOCK-244 Q1-REM — 结构化提问（C19）：暂停等用户回答，回答回传同一 tool 结果
 const { tool_ask_user_question } = require('./ask-user-tools');
 const { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read } = require('./knowledge-tools');
@@ -136,6 +138,8 @@ const HANDLERS = {
   resident_task_list: tool_resident_task_list,
   resident_task_read: tool_resident_task_read,
   system_info: tool_system_info,
+  web_search: tool_web_search,
+  web_fetch: tool_web_fetch,
   ask_user_question: tool_ask_user_question,
   computer_snapshot: tool_computer_snapshot,
   computer_click: tool_computer_click,
@@ -250,6 +254,10 @@ const CONTRACTS = {
   resident_task_read: contract('workspace', 'none', 'R0', ['project.files'], 1000),
   // BLOCK-33 P1 — 环境自省：只读零副作用，不依赖项目工作区（category 非 workspace → 不走 preflight）
   system_info: contract('verification', 'none', 'R0', ['local.process'], 1000),
+  // BLOCK-247（Q2b）— 联网只读：external-request/R1，资源面 `network.egress`（新词，
+  // 用于审计与后续出网预算挂钩）；估时按搜索 8s / 抓取 12s（含一次重定向）。
+  web_search: contract('retrieval', 'external-request', 'R1', ['network.egress'], 8000),
+  web_fetch: contract('retrieval', 'external-request', 'R1', ['network.egress'], 12000),
   // BLOCK-244 Q1-REM — 结构化提问：无副作用但会暂停等待用户（UI 会话资源）
   ask_user_question: contract('action', 'none', 'R0', ['ui.session'], 300000),
   // BLOCK-48 P3 — Computer Use（macOS）：快照/授权/等待为只读面；控制类

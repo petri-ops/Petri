@@ -5073,6 +5073,34 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block247-q2b-web-access",
+      "note": "BLOCK-247 Q2b — 联网检索与抓取：出网策略层（SSRF/重定向/大小/content-type/超时）+ 检索后端抽象（SearXNG）+ web_search/web_fetch 工具 + 授权设置面（默认关）。",
+      "patterns": [
+        "core/petri-server/helpers/web-search-config.js",
+        "core/petri-server/helpers/web-fetch-policy.js",
+        "core/petri-server/helpers/web-search-provider.js",
+        "core/petri-server/agent-tools/web-tools.js",
+        "core/petri-server/agent-tools/tool-defs/web.js",
+        "core/petri-server/routes/runtime-config.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.tsx",
+        "test/block247-*.test.mjs",
+        "scripts/block247-*.mjs",
+        "docs/block-247-q2b-web-access-plan.md",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui557-*.cjs",
+        "acceptance/block-247/**",
+        "acceptance/ui-557/**"
+      ],
+      "tests": [
+        "test/block247-web-policy.test.mjs",
+        "test/block247-web-tools.test.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.test.tsx",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

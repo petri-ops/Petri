@@ -7852,8 +7852,32 @@
         "G0"
       ],
       "notes": "2026-10-23 立项（用户「Q2 余项 整完」）：BLOCK-245 首切片收口后，把 §6.5 第 2 行剩余七项一次做完——C13 速记板（迁移 016 + store/route/面板）、C12 划词动作生产者（WorkspaceFilePreview 选区 → 复制/加入对话/侧聊/加入速记/批注不可用如实）、C4 消息动作注册表（+加入上下文/评价）、C11 图片预览（保存/多图/缩放预设）、B2 计划反馈输入（keep-planning 不再吞意见）、C16 形态补全（文件夹整体引用/选中代码块/应用快照）、C17 跨会话引用（有界摘要 + 拖放）。红线=零新依赖 / 不建第四注入通道（全挂单一 ComposerContextItem）/ 用户数据表只走迁移 / SimpleChat.tsx 只许变短。非范围=C13 图片批注（并入 Q6）/C12 选择总线重构/C4 结果统计/C11 编辑面/B2 修订案自动生成/C17 跨设备/G1+。"
+    },
+    {
+      "id": "BLOCK-247-Q2B-WEB-ACCESS",
+      "capability": "q2b-web-access",
+      "path": "docs/block-247-q2b-web-access-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P7-CLOSEOUT",
+      "canonical": true,
+      "truthDomain": "q2b-web-access",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-23",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "qoder",
+        "q2b",
+        "web-search",
+        "web-fetch",
+        "searxng",
+        "ssrf",
+        "tooling",
+        "G0"
+      ],
+      "notes": "2026-10-23 立项（用户「Q2 余项 整完」后的下一包 = §6.5 第 3 行 Q2b）：给 agent 两个默认关、逐跳受控、来源与成本可核的联网能力。结构：唯一出网口 helpers/web-fetch-policy.js（协议/凭据/主机形态 + 私网·环回·链路本地·CGNAT·ULA·云元数据拒绝 + DNS 解析后二次校验防 rebinding + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type + HTML→文本）；检索后端抽象 helpers/web-search-provider.js（只接自建 SearXNG，未配置=明确拒绝而非空结果）；授权与预算 helpers/web-search-config.js（新配置族 web-search，默认 enabled=false，独立于 network 族以免混淆需重启语义）+ GET/PUT /api/web-access；工具 agent-tools/web-tools.js（授权闸门→策略层→有界返回→出网审计 JSONL：主机/状态/字节/来源/成本）；事件来源标签 tool-events.js:sourceLabelFromResult（先 results[].source 再顶层 source）；前端 WebAccessPanel.tsx（设置页「计算与数据」分区）+ toolActivity.ts:deriveSourceLabel + ToolActivityList.tsx 渲染。红线=零新依赖 / 不建第二套出网通道 / 默认关+显式授权（未授权返回结构化拒绝）。2026-10-23 状态：P0–P5 落地（Node 单测 13+11 绿、前端 47 绿、types 0）；**实机腿亮 21/21 · 暗 21/21 全绿**（默认关、关闭态真调用被拒 web_access_disabled、真实 API 授权后真检索成功 resultSources+cost、SSRF 云元数据地址被拒 web_url_private_host；证据 acceptance/ui-557/ 与 acceptance/block-247/）；配置族 web-search 已按 BLOCK-199 规则接入导出/导入/按区重置 + 落点总账（注册表 18 族 / 103 键）；唯一缺口=来源标签 DOM 可见性（渲染进程被 ProjectWorkspace 既存重渲染环拖住，已用回退前端改动复跑证明与本包无关）→ UI-557 记 in_progress，详见 plan §5。"
     }
   ],
   "lastUpdated": "2026-10-23",
-  "documentCount": 389
+  "documentCount": 390
 }

@@ -100,6 +100,9 @@ export interface ToolActivityItem {
   approval?: ToolApproval;
   /** BLOCK-244 — 结构化提问载荷（toolResult 顶层）。 */
   question?: UserQuestion;
+  /** BLOCK-247（Q2b）— 联网结果的来源标签（域名/来源主机名）。
+   *  治理透明：结论从哪个网来的必须一眼可见，不能只留一句「已检索」。 */
+  sourceLabel?: string;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -178,6 +181,8 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       };
     })(),
     shellLabel: typeof raw.shellLabel === 'string' ? raw.shellLabel.slice(0, 24) : undefined,
+    // BLOCK-247（Q2b）— 联网结果的来源标签（历史恢复时随 meta 一起回来）
+    sourceLabel: typeof raw.sourceLabel === 'string' ? raw.sourceLabel.slice(0, 160) : undefined,
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
     resultData: 'resultData' in raw ? raw.resultData : undefined,
@@ -319,6 +324,8 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "todo_write": "已记录",
   "verify_state": "已校验",
   "wait_agent": "已等待",
+  "web_fetch": "已抓取",
+  "web_search": "已检索",
   "workspace_exec": "已运行",
   "workspace_exec_background": "后台运行",
   "workspace_find": "已查找",
@@ -402,6 +409,8 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "todo_write": "list-details",
   "verify_state": "shield",
   "wait_agent": "bot",
+  "web_fetch": "globe",
+  "web_search": "globe",
   "workspace_exec": "terminal",
   "workspace_exec_background": "terminal",
   "workspace_find": "search",
@@ -420,6 +429,32 @@ export function summarizeToolCall(
   // UI-437 v5.18 — 标签唯一真源 = TOOL_ACTIVITY_VERBS（与后端注册表同构）
   const verb = TOOL_ACTIVITY_VERBS[name];
   return verb ? { ...result, actionLabel: verb } : result;
+}
+
+/**
+ * BLOCK-247（Q2b）— 从工具结果派生来源标签（前端兜底；后端顶层 sourceLabel 优先）。
+ * 只取主机名，不取正文：来源要可核，内容要看「返回」详情。
+ */
+export function deriveSourceLabel(name: string, data: unknown): string | undefined {
+  if (!data || typeof data !== 'object') return undefined;
+  const record = data as Record<string, unknown>;
+  if (name === 'web_fetch') {
+    const source = typeof record.source === 'string' ? record.source.trim() : '';
+    return source ? source.slice(0, 120) : undefined;
+  }
+  if (name === 'web_search') {
+    if (!Array.isArray(record.results)) return undefined;
+    const hosts: string[] = [];
+    for (const row of record.results) {
+      const host = row && typeof row === 'object' && typeof (row as Record<string, unknown>).source === 'string'
+        ? String((row as Record<string, unknown>).source).trim()
+        : '';
+      if (host && !hosts.includes(host)) hosts.push(host);
+      if (hosts.length >= 3) break;
+    }
+    return hosts.length > 0 ? hosts.join('、').slice(0, 160) : undefined;
+  }
+  return undefined;
 }
 
 function summarizeToolCallSwitch(
@@ -451,6 +486,11 @@ function summarizeToolCallSwitch(
       return { actionLabel: TOOL_ACTIVITY_VERBS.search, actionDetail: compactDetail(args.q) || '网络' };
     case 'read_page':
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_page, actionDetail: compactDetail(args.url) || '网页' };
+    // BLOCK-247（Q2b）— 联网两件：宾语带来源线索（检索词 / 目标 URL）
+    case 'web_search':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.web_search, actionDetail: compactDetail(args.query) || '网络' };
+    case 'web_fetch':
+      return { actionLabel: TOOL_ACTIVITY_VERBS.web_fetch, actionDetail: compactDetail(args.url) || '网页' };
     case 'read_image':
       return { actionLabel: TOOL_ACTIVITY_VERBS.read_image, actionDetail: compactDetail(args.filePath || args.toolJobId) || '图像' };
     case 'delegate_to_petri_node':
@@ -653,6 +693,10 @@ export function mergeToolResultActivity(
     // UI-315 优化 — exec 终端块：完整命令 + shell 标签（result 事件 data.shell 派生）
     command: index >= 0 ? current[index].command : undefined,
     shellLabel: (result && result.shellLabel) || resultShellLabel || (index >= 0 ? current[index].shellLabel : undefined),
+    // BLOCK-247（Q2b）— 联网来源标签：后端顶层下发（结果多时被 publicData 换 preview 也不丢）
+    sourceLabel: (result && typeof result.sourceLabel === 'string' ? result.sourceLabel : undefined)
+      || deriveSourceLabel(name, result?.data)
+      || (index >= 0 ? current[index].sourceLabel : undefined),
     actionLabel: index >= 0 ? current[index].actionLabel : fallbackAction.actionLabel,
     actionDetail: index >= 0 ? current[index].actionDetail : fallbackAction.actionDetail,
     agentRunId: resultAgentRunId || (index >= 0 ? current[index].agentRunId : undefined),

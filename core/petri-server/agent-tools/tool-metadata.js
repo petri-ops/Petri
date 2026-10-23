@@ -86,6 +86,13 @@ const TOOL_METADATA = {
   // 非只读（写提问资源 + task 事件）、不可并发（阻塞本轮）、风险低（无副作用面）。
   ask_user_question: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: 300000 },
 
+  // ---- 联网域（BLOCK-247 / Q2b）----
+  // 只读外部请求：读并发、无写面，但**受配置授权闸门管**（默认关；
+  // 未开启时 handler 返回 web_access_disabled）。needsApproval=false 的理由：
+  // 授权已在设置面完成（一次性显式开启），逐次弹审批会把「查一次资料」变成打断流。
+  web_search: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  web_fetch: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+
   // ---- 会话/工具栏域 ----
   system_info: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   todo_write: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
