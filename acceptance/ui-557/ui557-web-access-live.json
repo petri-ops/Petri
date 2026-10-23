@@ -2,19 +2,19 @@
   "name": "ui557-web-access-live",
   "darkMode": false,
   "syntheticArtifactJob": "tj_ui554_synthetic",
-  "startedAt": "2026-10-23T08:38:22.067Z",
-  "finishedAt": "2026-10-23T08:40:31.867Z",
+  "startedAt": "2026-10-23T11:47:40.100Z",
+  "finishedAt": "2026-10-23T11:47:55.120Z",
   "providerCalls": 5,
   "assertions": [
     {
       "name": "E1_project_created",
       "pass": true,
-      "detail": "projectId=p_mvkpwq1e_945e status=200"
+      "detail": "projectId=p_mvkwo5yd_8sg7 status=200"
     },
     {
       "name": "E1b_workspace_resolved",
       "pass": true,
-      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui557-live-pUEGEc\\data\\projects\\ui-557-mvkpwq1e"
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui557-live-JE6viY\\data\\projects\\ui-557-mvkwo5yd"
     },
     {
       "name": "E2_synthetic_done_job",
@@ -24,7 +24,7 @@
     {
       "name": "E3_isolated_stack",
       "pass": true,
-      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui557-live-pUEGEc"
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui557-live-JE6viY"
     },
     {
       "name": "W0_first_run_overlay_dismissed",
@@ -69,7 +69,7 @@
     {
       "name": "W2a_disabled_refused_with_reason",
       "pass": true,
-      "detail": "{\"at\":\"2026-10-23T08:38:32.559Z\",\"tool\":\"web_search\",\"query\":\"联网检索一次（关闭态应被拒）\",\"provider\":\"none\",\"ok\":false,\"code\":\"web_access_disabled\",\"status\":null}"
+      "detail": "{\"at\":\"2026-10-23T11:47:49.463Z\",\"tool\":\"web_search\",\"query\":\"联网检索一次（关闭态应被拒）\",\"provider\":\"none\",\"ok\":false,\"code\":\"web_access_disabled\",\"status\":null}"
     },
     {
       "name": "W2b_provider_actually_ran_tool",
@@ -89,22 +89,32 @@
     {
       "name": "W4a_search_succeeded",
       "pass": true,
-      "detail": "{\"at\":\"2026-10-23T08:38:33.203Z\",\"tool\":\"web_search\",\"query\":\"格物 联网检索（授权后）\",\"provider\":\"searxng\",\"ok\":true,\"code\":null,\"status\":null,\"resultSources\":[\"wiki.example.org\",\"notes.example.net\"],\"cost\":{\"requests\":1,\"bytes\":350,\"results\":2}}"
+      "detail": "{\"at\":\"2026-10-23T11:47:50.324Z\",\"tool\":\"web_search\",\"query\":\"格物 联网检索（授权后）\",\"provider\":\"searxng\",\"ok\":true,\"code\":null,\"status\":null,\"resultSources\":[\"wiki.example.org\",\"notes.example.net\"],\"cost\":{\"requests\":1,\"bytes\":350,\"results\":2}}"
     },
     {
-      "name": "W4b_source_visible",
+      "name": "W4b_source_in_audit",
       "pass": true,
-      "detail": "dom=false body=false audit=true sources=[\"wiki.example.org\",\"notes.example.net\"] bodyLen=0 targets=[\"cdp_error:The operation was aborted due to timeout\"] conv=convCount=0 keys=status,conversations meta="
+      "detail": "sources=[\"wiki.example.org\",\"notes.example.net\"] cost={\"requests\":1,\"bytes\":350,\"results\":2}"
     },
     {
-      "name": "W4c_dom_label_or_known_renderer_stall",
+      "name": "W4c_cluster_expanded",
       "pass": true,
-      "detail": "dom_unavailable_renderer_busy(known: ProjectWorkspace 重渲染环, AUDIT-LOG 登记)"
+      "detail": "clicked"
+    },
+    {
+      "name": "W4d_dom_source_label_visible",
+      "pass": true,
+      "detail": "label={\"text\":\"wiki.example.org、notes.example.net\",\"w\":160,\"h\":16,\"rendered\":true,\"hit\":true,\"inViewport\":true} labels=2 bodyLen=642 ready=complete snippet=工作台\n新建任务\n扩展\n知识空间\n项目\nUI-557 联网探针项目\n联邦\n设置\nUI-557 联网探针项目\n\n联网检索一次（关闭态应被拒）\n\n编辑\n刚刚\n✓\n执行工具 3 次 · 1 轮\n2 项需注意\n33 ms\n✕\n已检索\n联网检索一次（"
+    },
+    {
+      "name": "W4e_source_screenshot",
+      "pass": true,
+      "detail": "ui557-web-source-light.png"
     },
     {
       "name": "W5a_ssrf_refused",
       "pass": true,
-      "detail": "{\"at\":\"2026-10-23T08:38:33.216Z\",\"tool\":\"web_fetch\",\"url\":\"http://169.254.169.254/latest/meta-data/\",\"ok\":false,\"code\":\"web_url_private_host\",\"status\":null,\"source\":\"169.254.169.254\"}"
+      "detail": "{\"at\":\"2026-10-23T11:47:50.334Z\",\"tool\":\"web_fetch\",\"url\":\"http://169.254.169.254/latest/meta-data/\",\"ok\":false,\"code\":\"web_url_private_host\",\"status\":null,\"source\":\"169.254.169.254\"}"
     },
     {
       "name": "E4_mock_provider_used",

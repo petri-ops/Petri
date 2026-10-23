@@ -661,6 +661,14 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
         {previewSource && (
           <span className="sc-tool-qoder-preview" title={previewSource}>{previewSource}</span>
         )}
+        {/* BLOCK-247（Q2b）— 联网来源标签：时间线单行也带出来源主机名，
+            「这段结论从哪来」不用先展开详情 */}
+        {activity.sourceLabel && (
+          <span className="sc-tool-activity-source sc-tool-qoder-source" title={`来源：${activity.sourceLabel}`}>
+            <Icon name="globe" size={11} />
+            {activity.sourceLabel}
+          </span>
+        )}
         {diffStat && (
           <span className="sc-tool-qoder-diffstat" aria-label={`变更 +${diffStat.added} -${diffStat.removed}`}>
             {diffStat.added > 0 && <span className="sc-tool-qoder-diffstat-add">+{diffStat.added}</span>}

@@ -682,6 +682,9 @@ function createToolActivityRecorder() {
       && resultAgentData && typeof resultAgentData.agentId === 'string'
         ? resultAgentData.agentId
         : undefined;
+    // BLOCK-247（Q2b）— 联网来源标签随活动快照落库：历史会话重载后来源标签
+    // 仍能重建（resultData 可能被 publicData 换成 preview，顶层字段不丢）
+    const resultSourceLabel = result.sourceLabel || sourceLabelFromResult(result);
     const next = {
       key: existing ? existing.key : (result.callId || `${result.traceId || 'legacy'}:${name}:${items.length + 1}`),
       toolJobId: event.toolJobId || (existing && existing.toolJobId),
@@ -713,6 +716,8 @@ function createToolActivityRecorder() {
       // UI-315 优化 — exec 实际使用的 shell 标签（头行展示）
       shellLabel: result.shellLabel || (existing ? existing.shellLabel : undefined),
       agentRunId: resultAgentRunId || (existing ? existing.agentRunId : undefined),
+      // BLOCK-247（Q2b）— 联网来源标签（与 tool_result 事件的顶层字段同源）
+      ...(resultSourceLabel ? { sourceLabel: resultSourceLabel } : {}),
       // UI-437 v5.6 — 结果数据本体（publicData bounded）随活动快照落库，历史展开可回看
       resultData: result.data,
       summary: event.summary,

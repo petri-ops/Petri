@@ -181,8 +181,10 @@ export function restoreToolActivities(value: unknown): ToolActivityItem[] {
       };
     })(),
     shellLabel: typeof raw.shellLabel === 'string' ? raw.shellLabel.slice(0, 24) : undefined,
-    // BLOCK-247（Q2b）— 联网结果的来源标签（历史恢复时随 meta 一起回来）
-    sourceLabel: typeof raw.sourceLabel === 'string' ? raw.sourceLabel.slice(0, 160) : undefined,
+    // BLOCK-247（Q2b）— 联网结果的来源标签（历史恢复时随 meta 一起回来；
+    // 旧记录没有该字段时按 resultData 重新派生，避免重载后来源标签消失）
+    sourceLabel: (typeof raw.sourceLabel === 'string' ? raw.sourceLabel.slice(0, 160) : undefined)
+      || deriveSourceLabel(name, 'resultData' in raw ? raw.resultData : undefined),
     agentRunId: typeof raw.agentRunId === 'string' ? raw.agentRunId : undefined,
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的有界形状）随 meta 恢复
     resultData: 'resultData' in raw ? raw.resultData : undefined,

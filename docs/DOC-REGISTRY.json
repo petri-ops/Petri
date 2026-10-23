@@ -7858,8 +7858,8 @@
       "capability": "q2b-web-access",
       "path": "docs/block-247-q2b-web-access-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P7-CLOSEOUT",
+      "status": "completed",
+      "phase": "P7-CLOSED",
       "canonical": true,
       "truthDomain": "q2b-web-access",
       "entrypoint": "docs/README.md",
@@ -7875,7 +7875,7 @@
         "tooling",
         "G0"
       ],
-      "notes": "2026-10-23 立项（用户「Q2 余项 整完」后的下一包 = §6.5 第 3 行 Q2b）：给 agent 两个默认关、逐跳受控、来源与成本可核的联网能力。结构：唯一出网口 helpers/web-fetch-policy.js（协议/凭据/主机形态 + 私网·环回·链路本地·CGNAT·ULA·云元数据拒绝 + DNS 解析后二次校验防 rebinding + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type + HTML→文本）；检索后端抽象 helpers/web-search-provider.js（只接自建 SearXNG，未配置=明确拒绝而非空结果）；授权与预算 helpers/web-search-config.js（新配置族 web-search，默认 enabled=false，独立于 network 族以免混淆需重启语义）+ GET/PUT /api/web-access；工具 agent-tools/web-tools.js（授权闸门→策略层→有界返回→出网审计 JSONL：主机/状态/字节/来源/成本）；事件来源标签 tool-events.js:sourceLabelFromResult（先 results[].source 再顶层 source）；前端 WebAccessPanel.tsx（设置页「计算与数据」分区）+ toolActivity.ts:deriveSourceLabel + ToolActivityList.tsx 渲染。红线=零新依赖 / 不建第二套出网通道 / 默认关+显式授权（未授权返回结构化拒绝）。2026-10-23 状态：P0–P5 落地（Node 单测 13+11 绿、前端 47 绿、types 0）；**实机腿亮 21/21 · 暗 21/21 全绿**（默认关、关闭态真调用被拒 web_access_disabled、真实 API 授权后真检索成功 resultSources+cost、SSRF 云元数据地址被拒 web_url_private_host；证据 acceptance/ui-557/ 与 acceptance/block-247/）；配置族 web-search 已按 BLOCK-199 规则接入导出/导入/按区重置 + 落点总账（注册表 18 族 / 103 键）；唯一缺口=来源标签 DOM 可见性（渲染进程被 ProjectWorkspace 既存重渲染环拖住，已用回退前端改动复跑证明与本包无关）→ UI-557 记 in_progress，详见 plan §5。"
+      "notes": "2026-10-23 立项（用户「Q2 余项 整完」后的下一包 = §6.5 第 3 行 Q2b）：给 agent 两个默认关、逐跳受控、来源与成本可核的联网能力。结构：唯一出网口 helpers/web-fetch-policy.js（协议/凭据/主机形态 + 私网·环回·链路本地·CGNAT·ULA·云元数据拒绝 + DNS 解析后二次校验防 rebinding + 重定向逐跳复检 + 流式字节截断 + 文本类 content-type + HTML→文本）；检索后端抽象 helpers/web-search-provider.js（只接自建 SearXNG，未配置=明确拒绝而非空结果）；授权与预算 helpers/web-search-config.js（新配置族 web-search，默认 enabled=false，独立于 network 族以免混淆需重启语义）+ GET/PUT /api/web-access；工具 agent-tools/web-tools.js（授权闸门→策略层→有界返回→出网审计 JSONL：主机/状态/字节/来源/成本）；事件来源标签 tool-events.js:sourceLabelFromResult（先 results[].source 再顶层 source）；前端 WebAccessPanel.tsx（设置页「计算与数据」分区）+ toolActivity.ts:deriveSourceLabel + ToolActivityList.tsx 渲染。红线=零新依赖 / 不建第二套出网通道 / 默认关+显式授权（未授权返回结构化拒绝）。2026-10-23 状态：P0–P7 落地（Node 单测 13+12 绿、前端定向 48 绿、types 0）；**实机腿亮 23/23 · 暗 23/23 全绿**（默认关、关闭态真调用被拒 web_access_disabled、真实 API 授权后真检索成功 resultSources+cost、**展开完成簇后来源标签屏幕可见**（rendered/hit/inViewport + 截图）、SSRF 云元数据地址被拒 web_url_private_host；证据 acceptance/ui-557/ 与 acceptance/block-247/）；配置族 web-search 已按 BLOCK-199 规则接入导出/导入/按区重置 + 落点总账（注册表 18 族 / 103 键）；UI-557 verified。收口补齐来源标签屏幕可见性的两处真缺陷（标签只加在 legacy 行、聊天实际走 Qoder 时间线行 → 已补渲染；完成簇默认折叠使折叠态探针误判渲染冻结 → 取证改 settle→长超时→展开）与两条持久化链路（活动快照写 sourceLabel、旧记录按 resultData 派生）。"
     }
   ],
   "lastUpdated": "2026-10-23",

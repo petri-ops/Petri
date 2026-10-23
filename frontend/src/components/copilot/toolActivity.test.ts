@@ -444,4 +444,25 @@ describe('BLOCK-247 联网来源标签派生', () => {
     expect(deriveSourceLabel('web_fetch', {})).toBeUndefined();
     expect(deriveSourceLabel('web_fetch', null)).toBeUndefined();
   });
+
+  it('历史恢复：旧记录无 sourceLabel 时按 resultData 重新派生；落库字段优先', () => {
+    const restored = restoreToolActivities([{
+      key: 'call_web_old',
+      name: 'web_search',
+      status: 'success',
+      actionLabel: '已检索',
+      resultData: { results: [{ source: 'wiki.example.org' }, { source: 'notes.example.net' }] },
+    }]);
+    expect(restored[0].sourceLabel).toBe('wiki.example.org、notes.example.net');
+
+    const withLabel = restoreToolActivities([{
+      key: 'call_web_new',
+      name: 'web_search',
+      status: 'success',
+      actionLabel: '已检索',
+      sourceLabel: 'audit.example.org',
+      resultData: { results: [{ source: 'wiki.example.org' }] },
+    }]);
+    expect(withLabel[0].sourceLabel).toBe('audit.example.org');
+  });
 });

@@ -1361,6 +1361,16 @@
   white-space: nowrap;
 }
 
+/* 时间线单行（Qoder 行）里与预览/耗时并排：比 legacy 行更窄，避免挤掉单行预览；
+   字号走 inherit（小字号棘轮只许收缩，新增 xs/sm 会超预算） */
+.sc-tool-qoder-source {
+  flex: 0 1 auto;
+  max-width: min(240px, 30vw);
+  font-family: var(--petri-font-mono);
+  font-size: inherit;
+  color: var(--petri-text-tertiary);
+}
+
 .sc-tool-activity-status {
   font-size: inherit; /* BLOCK-178 存量棘轮清偿：正文/标题性小字归位 14px */
   font-weight: 650;

@@ -11,7 +11,7 @@ acceptance:
   - 来源与成本可核：检索结果每条带来源主机名；工具结果与出网审计带来源与成本（请求数/字节数）；前端在工具活动行渲染**来源标签**；审计只记"访问了什么、花了多少"，**不记正文**。
   - 设置面：设备级、**即时生效**（与「网络代理」需重启的语义分开：授权族独立成 `web-search`，不塞进 `network`）；文案照抄边界（默认关/审计/SSRF/白名单）。
   - 收口：Node 单测覆盖地址分类/URL 解析/黑白名单/DNS 私网/重定向逐跳/内容类型/字节上限/未配置语义；实机腿（隔离栈 + mock provider + 假 SearXNG）反证三件套——**关闭态真调用被拒**、**真实 API 授权后真检索成功且带来源**、**SSRF 目标被拒**。
-status: active
+status: completed
 ---
 
 # BLOCK-247 · Q2b：联网检索与抓取
@@ -21,8 +21,8 @@ status: active
 
 ## 0. 交接摘要（换 agent 先读这一节）
 
-- **当前状态**：`active`。P0–P5 全部落地并有单测；**P6 实机腿亮 21/21 + 暗 21/21 全绿**（见 §5）。
-- **本包实现 + 证据已本地提交**（**不推送**）；接手者只剩 **P7 收口**：跑 `npm run closeout` 十三门 + canonical 回写核对 + 台账 UI-557 的 `in_progress`→`verified` 判定（唯一缺口＝来源标签 DOM 可见性，见 §5）。
+- **当前状态**：`completed`。P0–P7 全部落地；**P6 实机腿亮 23/23 + 暗 23/23 全绿**（见 §5），来源标签的**屏幕可见性**已取证；UI-557 `verified`。
+- **本包实现 + 证据已本地提交**（**不推送**）；**`npm run closeout` 十三门 PASS**（影响范围 Node 全绿 + 前端 244/244 + types 0 + lint 0 error + knip 278 键冻结 + `skills:check` 报告级 OK）。
 - **不要**在本包里顺手做：G1+ 事项（Provider / 公证 / GA / 打包发布）、Q3 执行轨迹、Q6 批注域。
 - **红线**（三条，最易破）：零新依赖；不建第二套出网通道（`web-fetch-policy.js` 是**唯一**出网口）；
   默认关 + 显式授权（未授权时工具返回**结构化拒绝**，不是空结果、不是静默失败）。
@@ -64,8 +64,8 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
 | P3 检索后端 | ✅ | `web-search-provider.js`（SearXNG adapter + 归一化 + 黑白名单过滤 + 成本） |
 | P4 工具接入 | ✅ | `web-tools.js`（两个工具）+ Schema + 元数据（`external-request`/R1/`network.egress`）+ 事件来源标签（`tool-events.js` 的 `sourceLabelFromResult`） |
 | P5 设置面 + 前端投影 | ✅ | `WebAccessPanel.tsx`（默认关文案/能力状态/诊断）+ 前端来源标签（`toolActivity.ts` `deriveSourceLabel` + `ToolActivityList.tsx` 渲染） |
-| P6 实机腿 | ✅ | 亮 21/21 + 暗 21/21（隔离 9223；`acceptance/ui-557/`）——见 §5「实机腿当前态」 |
-| P7 收口 | 🔵 进行中 | 台账 UI-557（`in_progress`，DOM 面缺证据）+ Q-MATRIX L1/L2 回写 + closeout 十三门 + 本地提交 |
+| P6 实机腿 | ✅ | 亮 23/23 + 暗 23/23（隔离 9223；`acceptance/ui-557/`）——见 §5「实机腿当前态」 |
+| P7 收口 | ✅ | 台账 UI-557 `verified` + Q-MATRIX L1/L2 回写 + closeout 十三门 + 本地提交 |
 
 ## 4. 实码锚点（接手者可直接查）
 
@@ -87,9 +87,10 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
 
 ### 实机腿当前态（`scripts/block247-web-access-live.mjs` + flow `ui557-web-access-live.cjs`）
 
-**最终态：亮色 21/21 + 暗色 21/21 全绿**（证据：`acceptance/ui-557/`——两份断言报告
+**最终态：亮色 23/23 + 暗色 23/23 全绿**（证据：`acceptance/ui-557/`——两份断言报告
 `ui557-web-access-live.json` / `ui557-web-access-live-dark.json` + 两张设置面截图
-`ui557-web-settings-{light,dark}.png` + 两份运行日志 `ui557-live-{light,dark}.log`；同份落 `acceptance/block-247/`）。
+`ui557-web-settings-{light,dark}.png` + 两张来源标签截图 `ui557-web-source-{light,dark}.png`
++ 两份运行日志 `ui557-live-{light,dark}.log`；同份落 `acceptance/block-247/`）。
 
 断言链（每条都有报告行）：
 
@@ -102,17 +103,30 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
 - `W2b` provider 确实被调用（0 → 2）；
 - `W3a/W3b` 经**真实 API** 打开授权后 `capabilities.search/fetch=true`；
 - `W4a` **开启后真检索成功**（审计行 `ok=true` + `resultSources=[wiki.example.org, notes.example.net]` + `cost{requests:1,bytes:350,results:2}`）；
-- `W4b` 来源可见（**审计面**取证 `audit=true`）；`W4c` DOM 面不可取证 → 如实标注 `dom_unavailable_renderer_busy`；
+- `W4b` 来源在**运行时账**可见（审计行带 `resultSources`/`cost`）；
+- `W4c` 按用户路径**展开完成簇**（`aria-label="展开执行过程"` → `qoder-cluster-body`）；
+- `W4d` **来源标签屏幕可见**：`{"text":"wiki.example.org、notes.example.net","w":160,"h":16,"rendered":true,"hit":true,"inViewport":true}`（宽高 + 渲染态 + `elementFromPoint` 命中 + 视口内）；
+- `W4e` 来源截图落盘（`ui557-web-source-{light,dark}.png`）；
 - `W5a` **SSRF 拦截**：抓 `169.254.169.254/latest/meta-data/` 被拒（`code=web_url_private_host`，被拒主机名入账）。
 
-**仍缺一格（只剩"屏幕上看见来源标签"）**：
+**来源标签 DOM 面（原唯一缺口）——已补齐；根因不是渲染进程，而是两处产品缺陷 + 一处探针姿态**：
 
-- `W4b` 的 **DOM 面**（活动行里来源标签肉眼可见）本轮取不到证据：渲染进程被 **ProjectWorkspace 既存重渲染环**拖住
-  （CDP `Runtime.evaluate` 与 `/json/list` 双双超时、`body.innerText` 变空）。已用「**回退本包前端改动复跑**」
-  （`git stash push -- frontend/src`）证明**与本包前端无关**。来源语义由**运行时账**（`resultSources`）+ 事件契约
-  Node 单测（`tool-events.sourceLabelFromResult`）兜底；台账只记 `in_progress`，**不拿别的证据冒充"屏幕上看见了"**。
-- 若要拿这一格，二选一：**(a)** 调换 mock 回合序（把 SSRF 探针放进前两次调用）；**(b)** 拆两个 Electron 会话
-  （设置面取证 / 聊天回合各一）。
+1. **时间线形态从未渲染来源标签**：标签只加在 legacy `ActivityRow` 行头，而聊天实际走 BLOCK-108 P3 的
+   `QoderRow` 单行形态 → 屏幕上根本不存在这个元素。已补到 Qoder 行（折叠单行也带来源，`title` 保留完整主机名）。
+2. **完成簇默认折叠**（BLOCK-108 v4）：回合结束后整簇收成一行摘要（`执行工具 N 次 · X 轮`），
+   明细与标签要点开才出现。原探针在折叠态直接查 `.sc-tool-activity-source`，把"选择器缺失"误读成"渲染进程被拖住"。
+3. **探针姿态**：原来用 8s 短轮询追 DOM，每个超时的 `Runtime.evaluate` 在 CDP 侧仍挂着，越轮询越慢
+   （`/json/list` 都被拖到超时）。改成「等回合收尾 → **一次长超时** eval」后，同一台机器上立即返回
+   （`readyState=complete`、`bodyLen=642`）。
+
+**取证姿势（已固化进 flow）**：等回合收尾（mock 第 4 次调用）→ 一次长超时 `Runtime.evaluate` →
+点 `aria-label="展开执行过程"` → 等 `qoder-cluster-body` → 查标签宽高 / `getComputedStyle` /
+`elementFromPoint` 命中（沿用 BLOCK-245「DOM 在场 ≠ 屏幕可见」纪律）→ 截图。截图里可见三条活动：
+关闭态拒绝 / 授权后检索带来源 `wiki.example.org、notes.exa…` / SSRF 拒绝带主机名。
+
+**同批补上两条持久化链路**（否则重载后来源标签会消失）：
+`tool-events.js` 的 `recordResult` 把 `sourceLabel` 写进活动快照；`toolActivity.ts` 的
+`restoreToolActivities` 在旧记录缺该字段时按 `resultData` 重新派生（落库字段优先）。
 
 **本轮修掉的两个实机坑（都在 flow 侧，不在产品面）**：
 
@@ -122,7 +136,7 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
    → 暗色轮照样发亮色截图并覆盖亮色证据，而报告写着 `darkMode=true`。已改为**调用时读**（`isDark()`/`suffix()`），
    暗色轮重跑后截图确为暗色。
 
-### 实机腿的四个坑（都已固化，别再踩）
+### 实机腿的五个坑（都已固化，别再踩）
 
 1. **首启角色揭示浮层在导航之后才异步出现** → 截图/点击前必须 `ensureNoOverlay`（BLOCK-245/246/247 三包同款）。
 2. **`?project=` 在项目列表装载前会被忽略** → 先等侧栏出现项目名，再带参二次导航（否则停在"先选择一个项目"）。
@@ -132,6 +146,11 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
    第 1 次工具结果后**等 marker 文件**再发第二次检索；这样只发一条用户消息，避开"第二轮发送撞上重渲染环"。
    本轮 3 次工具调用（W2a 拒 / W4a 成功 / W5a SSRF 拒）**都在同一轮内跑完**（此前第 3 次不发生——真因是上面那个无界截图把 flow 挂住，
    不是"两次调用上限"）。
+5. **「渲染进程被拖住」是测量假象（本轮更正）**：8s 短轮询追 DOM 时，每个超时的 `Runtime.evaluate` 在 CDP 侧仍挂着，
+   越轮询越慢；改成「等回合收尾 → 一次长超时 eval」后同一台机器立即返回（`readyState=complete`）。
+   另外**完成簇默认折叠**、标签又只在 legacy 行渲染——折叠态查选择器必然为空。ProjectWorkspace 的
+   setState-in-effect 告警（BLOCK-244 登记）仍是存量抖动，但**不是本格缺口的成因**；DOM 取证统一用
+   「settle → 长超时 → 按用户路径展开 → 可见性/命中断言」。
 
 ### 本包改动清单（提交内容，**已本地提交·不推送**）
 
@@ -143,27 +162,31 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
       core/petri-server/routes/runtime-config.js（GET/PUT /api/web-access）
 前端：frontend/src/components/desktop/DesktopSettingsPanel.tsx + sections/WebAccessPanel.tsx（新增）
       frontend/src/components/copilot/{toolActivity.ts,ToolActivityList.tsx,simple-chat.css,copilotClient/types.ts}
-测试：test/block247-web-policy.test.mjs | block247-web-tools.test.mjs（新增）
+      （收口补齐：Qoder 时间线行渲染来源标签 + 历史恢复按 resultData 派生）
+测试：test/block247-web-policy.test.mjs | block247-web-tools.test.mjs（新增；工具层 12 条，含来源随活动快照落库）
+      前端 toolActivity.test.ts（+恢复派生）/ ToolActivityList.test.tsx（+时间线行来源标签）
       test/{agent-tool-registry,block113-tool-prerouting,block116-decision-platform,block157-skill-visibility,
             tool-activity-labels,block199-config-drift,block201-settings-baseline,block203-landing-registry}.test.mjs
       test/fixtures/tool-activity-labels.json（工具数 81→83）
       test/impact-map.json（block247 规则 + 脚本分类唯一归属）
 治理：core/petri-server/helpers/config-transfer.js（web-search 族接入导出/导入/按区重置）
+      core/petri-server/agent-tools/tool-events.js（活动快照写 sourceLabel）
 实机：scripts/block247-web-access-live.mjs（新增）+ .agents/skills/petri-dev-infra/dev-verify/flows/ui557-web-access-live.cjs（新增）
-证据：acceptance/ui-557/、acceptance/block-247/（亮暗两轮报告 + 截图 + 日志）
+证据：acceptance/ui-557/、acceptance/block-247/（亮暗两轮报告 + 设置面/来源标签截图 + 日志）
 ```
 
 ## 6. 下一步（按顺序）
 
-1. ~~**提交现有改动**（本地，不推送）~~ → **已在本轮提交**（收口后一次落库）。
-2. ~~**跑完实机腿最后一格**~~ → **已跑绿**：亮 21/21 + 暗 21/21（§5）。
-3. ~~**补台账**~~ → **已补** UI-557（`in_progress`：设置面/检索/SSRF 实机全绿，来源标签 DOM 面缺证据）。
+1. ~~**提交现有改动**（本地，不推送）~~ → **已提交**（主体 `e2cd1524`；收口补齐另起一笔）。
+2. ~~**跑完实机腿最后一格**~~ → **已跑绿**：亮 23/23 + 暗 23/23（§5），含来源标签屏幕可见。
+3. ~~**补台账**~~ → **已补** UI-557 `verified`（设置面/检索/SSRF/来源标签屏幕可见全绿）。
 4. ~~**Q-MATRIX**~~ → **已回写** `docs/qoder-essence-absorption-plan.md` L1/L2 行 + §6 Q2b 口径差异 + §2.5 现状表。
-5. **收口**：`npm run test:changed` → `npm run closeout`（PATH 需含 Git `usr\bin` 与 `bin`；**别接管道**）→
-   `npm run output:judge`（本次交付物是代码+文档，非对话输出，工具按用法需要 request/output 输入 → 未跑）→
-   canonical 回写（plan §5 / roadmap / handoff / AUDIT-LOG / UI 台账）→ 本地提交（**不推送**）。
-6. **下一位接手者可做（不阻塞收口）**：拿"来源标签 DOM 可见性"那一格（§5 二选一修法）→ 台账 UI-557 才能从
-   `in_progress` 升 `verified`。
+5. ~~**收口**~~ → **已跑**：`npm run test:changed`（Node 影响范围全绿 + 前端 244/244）→ `npm run closeout`
+   **十三门 PASS**（hygiene/docs/ui-audit/test:changed/code-size/arch-cycles/css-modules/secret/arch/lint/types/knip + 报告级 skills:check OK）；
+   `npm run output:judge` 未跑（本次交付物是代码+文档，非对话输出，工具需要 `--request/--output` 输入）→
+   canonical 回写完成 → 本地提交（**不推送**）。
+6. ~~**来源标签 DOM 可见性**~~ → **已补齐**：真因＝Qoder 时间线行从未渲染标签（只加了 legacy 行）
+   + 完成簇默认折叠 + 探针姿态（短轮询叠 pending eval）；同批补了活动快照与历史恢复两条持久化链路。UI-557 升 `verified`。
 
 ## 7. 诚实边界（写给下一位，别夸大）
 
@@ -176,4 +199,6 @@ frontend/.../DesktopSettingsPanel/sections/WebAccessPanel.tsx ← 设置面（�
 - **每次出网审批未做**：授权是族级开关（默认关），不是逐次审批；`requireApproval` 类键位留给后续批次。
 - **成本只进出网审计台账**，未并入 `ai_usage` 计量面。
 - **`tool-router.js` 的 browser 域描述 claim drift 仍在**：描述里写着"网页浏览/搜索"，而本包把联网放进**新 `web` 域**（入 `DOMAIN_TOOL_DEFS`，按 `skill` 域先例**不**进 `TOOL_FAMILIES` 决策分类学，θ=0.80 校准契约不动）。改描述会动到已校准的决策类目文本，本包不动它（母纲已登记待修）。
+- **来源标签的可见前提**：完成簇默认折叠（BLOCK-108 v4），标签在**展开执行过程**后的活动行上；折叠摘要行不显示来源（保持单行紧凑）。重载后标签由活动快照（新记录）或 `resultData` 派生（旧记录）重建。
+- **「渲染进程被拖住」的旧归因已更正**（§5 坑 5）：本格缺口是产品侧两处真缺陷（Qoder 行未渲染 + 完成簇折叠）+ 探针姿态，不是渲染冻结；ProjectWorkspace 重渲染告警仍作为存量抖动留在 AUDIT-LOG。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -12,6 +12,7 @@ process.env.PETRI_LOCAL_DATA_DIR = TMP_ROOT;
 
 const config = require('../core/petri-server/helpers/web-search-config.js');
 const { tool_web_search, tool_web_fetch, readAuditTail } = require('../core/petri-server/agent-tools/web-tools.js');
+const { buildToolResultEvent, createToolActivityRecorder } = require('../core/petri-server/agent-tools/tool-events.js');
 
 function resetConfig(patch = {}) {
   fs.mkdirSync(TMP_ROOT, { recursive: true });
@@ -90,8 +91,52 @@ test('检索成功：结果带来源主机名与成本，审计落一行', async
   assert.equal(audit[audit.length - 1].ok, true);
 });
 
-test('抓取成功：正文转纯文本、返回来源与重定向链', async () => {
-  resetConfig({ enabled: true, provider: 'none' });
+test('来源标签随工具活动快照落库（历史重载后来源不丢）', async () => {
+  resetConfig({ enabled: true, provider: 'searxng', searxngBaseUrl: 'http://searx.internal:8080' });
+  const result = await tool_web_search({ query: '格物' }, {}, {
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      async text() {
+        return JSON.stringify({
+          results: [
+            { title: '结果一', url: 'https://a.example.org/1', content: '摘要一' },
+            { title: '结果二', url: 'https://b.example.net/2', content: '摘要二' },
+          ],
+        });
+      },
+    }),
+  });
+  const event = buildToolResultEvent({
+    contractVersion: '1.0.0',
+    traceId: 'trace_web',
+    callId: 'call_web',
+    tool: 'web_search',
+    status: 'success',
+    terminationReason: 'success',
+    durationMs: 5,
+    truncated: false,
+    data: result,
+  }, { query: '格物' }, { iteration: 1 });
+  assert.equal(event.toolResult.sourceLabel, 'a.example.org、b.example.net');
+
+  const recorder = createToolActivityRecorder();
+  recorder.recordCall({ name: 'web_search', args: { query: '格物' }, traceId: 'trace_web', callId: 'call_web', iteration: 1 });
+  recorder.recordResult({ ...event, iteration: 1 });
+  const item = recorder.snapshot().find((row) => row.callId === 'call_web');
+  assert.equal(item.sourceLabel, 'a.example.org、b.example.net');
+  // 非联网工具不硬造来源字段（快照形状零漂移）
+  const readEvent = buildToolResultEvent({
+    contractVersion: '1.0.0', traceId: 'trace_read', callId: 'call_read', tool: 'workspace_read',
+    status: 'success', terminationReason: 'success', durationMs: 5, truncated: false, data: { ok: true, path: 'a.txt' },
+  }, {}, { iteration: 1 });
+  const recorder2 = createToolActivityRecorder();
+  recorder2.recordCall({ name: 'workspace_read', args: { path: 'a.txt' }, traceId: 'trace_read', callId: 'call_read', iteration: 1 });
+  recorder2.recordResult({ ...readEvent, iteration: 1 });
+  assert.equal('sourceLabel' in recorder2.snapshot()[0], false);
+});
+
+test('抓取成功：正文转纯文本、返回来源与重定向链', async () => {  resetConfig({ enabled: true, provider: 'none' });
   const result = await tool_web_fetch({ url: 'https://example.org/doc' }, {}, {
     lookup: PUBLIC_LOOKUP,
     fetchImpl: async () => htmlResponse('<html><head><title>文档</title></head><body><p>正文内容</p></body></html>'),

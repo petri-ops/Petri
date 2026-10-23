@@ -550,6 +550,28 @@ describe('BLOCK-108 P3 Qoder 行形态（时间线模式 collapseWhenSettled）'
     expect(screen.queryByText(/→ ok/)).toBeNull();
   });
 
+  it('BLOCK-247：联网来源标签在时间线单行可见（簇折叠时随明细收起，点开即见）', () => {
+    render(
+      <ToolActivityList
+        activities={[{
+          key: 'web-1',
+          name: 'web_search',
+          status: 'success',
+          actionLabel: '已检索',
+          actionDetail: '格物 联网检索（授权后）',
+          sourceLabel: 'wiki.example.org、notes.example.net',
+        }]}
+        collapseWhenSettled
+      />
+    );
+    // 完成簇默认折叠：来源标签不悬在摘要行上（保持单行紧凑）
+    expect(document.querySelector('.sc-tool-activity-source')).toBeNull();
+    fireEvent.click(screen.getByText(/执行工具 1 次/));
+    const chip = document.querySelector('.sc-tool-activity-source');
+    expect(chip?.textContent).toContain('wiki.example.org');
+    expect(chip?.getAttribute('title')).toBe('来源：wiki.example.org、notes.example.net');
+  });
+
   it('UI-437 v5.3 输出预览兜底：actionDetail 为空的调用行显示输出尾首个非空行（ANSI 剥离）', () => {
     render(
       <ToolActivityList

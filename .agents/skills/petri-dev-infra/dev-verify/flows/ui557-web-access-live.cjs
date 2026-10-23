@@ -57,6 +57,26 @@ async function evalJsWithTimeout(client, expression, timeoutMs = 15_000) {
   }
 }
 
+/**
+ * 长超时 eval：lib.evalJs 内部自带 30s 上限，渲染线程被既有重渲染环拖慢时
+ * 需要**一次**更长等待，而不是 8s 轮询叠一堆 pending evaluate（会互相拖累）。
+ */
+async function evalJsLong(client, expression, timeoutMs = 120_000) {
+  let timer = null;
+  try {
+    const result = await Promise.race([
+      client.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`cdp_eval_timeout_${timeoutMs}ms`)), timeoutMs); }),
+    ]);
+    if (result && result.exceptionDetails) {
+      throw new Error('eval_exception: ' + String(result.exceptionDetails.exception?.description || result.exceptionDetails.text || '').slice(0, 200));
+    }
+    return result && result.result ? result.result.value : undefined;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function poll(fn, { timeoutMs, intervalMs = 300, label }) {
   const deadline = Date.now() + timeoutMs;
   let last = null;
@@ -193,24 +213,42 @@ function readAudit() {
   }
 }
 
-async function activityText(client) {
-  return evalJsWithTimeout(client, `(function(){
-    var rows = document.querySelectorAll('.sc-tool-activity-item, .sc-tool-activity-row, [data-testid^="tool-activity"]');
-    var out = [];
-    for (var i = 0; i < rows.length; i += 1) out.push((rows[i].textContent || '').trim());
-    return JSON.stringify(out);
-  })()`, 8000).catch(() => '[]');
-}
-
-async function sourceLabels(client) {
-  return evalJsWithTimeout(client, `(function(){
-    var out = [];
-    document.querySelectorAll('.sc-tool-activity-source').forEach(function(el){
-      out.push((el.textContent || '').trim());
+/**
+ * 来源标签的**屏幕可见性**取证（一次长超时，回合收尾后跑）。
+ * 不只查选择器：宽高/可见性/elementFromPoint 命中断言——沿用 BLOCK-245 的
+ * 「DOM 在场 ≠ 屏幕上看得见」纪律（浮层盖住时 DOM 断言全绿而截图全是欢迎页）。
+ */
+const DOM_PROBE_EXPR = `(function(){
+  var els = document.querySelectorAll('.sc-tool-activity-source');
+  if (els.length && els[0].scrollIntoView) {
+    try { els[0].scrollIntoView({ block: 'center' }); } catch (e) { /* 旧内核忽略参数 */ }
+  }
+  var out = [];
+  for (var i = 0; i < els.length; i += 1) {
+    var el = els[i];
+    var rect = el.getBoundingClientRect();
+    var style = window.getComputedStyle(el);
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    var hit = (cx > 0 && cy > 0 && cx < window.innerWidth && cy < window.innerHeight)
+      ? document.elementFromPoint(cx, cy) : null;
+    out.push({
+      text: (el.textContent || '').trim(),
+      w: Math.round(rect.width),
+      h: Math.round(rect.height),
+      rendered: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity || '1') > 0,
+      hit: Boolean(hit && (hit === el || el.contains(hit))),
+      inViewport: rect.top >= 0 && rect.bottom <= window.innerHeight,
     });
-    return JSON.stringify(out);
-  })()`, 8000).catch(() => '[]');
-}
+  }
+  var body = document.body ? document.body.innerText : '';
+  return JSON.stringify({
+    readyState: document.readyState,
+    bodyLen: body.length,
+    labels: out,
+    snippet: body.slice(0, 400),
+  });
+})()`;
 
 async function run({ assert }) {
   const projectId = process.env.PETRI_B247_PROJECT_ID;
@@ -388,66 +426,58 @@ async function run({ assert }) {
   }, { timeoutMs: 90_000, intervalMs: 700, label: 'web_search_ok_audit' }).catch(() => []);
   assert('W4a_search_succeeded', okAudit.length > 0, JSON.stringify(okAudit[okAudit.length - 1] || readAudit().slice(-2)));
 
-  const labels = await poll(async () => {
-    const list = JSON.parse(await sourceLabels(client));
-    return list.length > 0 ? list : null;
-  }, { timeoutMs: 30_000, intervalMs: 700, label: 'source_label_rendered' }).catch(() => []);
-  console.log('  [flow] W4b labels poll done');
-  const bodyText = await evalJsWithTimeout(client, `(document.body && document.body.innerText ? document.body.innerText : '')`).catch(() => '');
-  console.log('  [flow] W4b bodyText len =', String(bodyText).length);
-  const activityRows = await activityText(client);
-  const classCensus = await evalJsWithTimeout(client, `(function(){
-    var set = {};
-    document.querySelectorAll('*').forEach(function(el){
-      var c = (el.className && typeof el.className === 'string') ? el.className : '';
-      c.split(/\\s+/).forEach(function(k){ if (k.indexOf('tool') >= 0 || k.indexOf('activity') >= 0) set[k] = (set[k] || 0) + 1; });
-    });
-    return JSON.stringify(set);
-  })()`).catch(() => '{}');
-  const cdpTargets = await fetch('http://127.0.0.1:9223/json/list', { signal: AbortSignal.timeout(5000) })
-    .then((r) => r.json()).then((list) => list.map((t) => `${t.type}:${String(t.url).slice(0, 60)}`)).catch((error) => [`cdp_error:${error.message}`]);
+  // ---- 回合收尾后再取证：渲染线程被既有重渲染环拖慢，回合进行中做短轮询会
+  //      叠一堆 pending Runtime.evaluate（每个 8s 超时只是放弃等待，CDP 侧仍挂着），
+  //      越轮询越慢。改为「等收尾 → 一次长超时」。
+  const settled = await poll(async () => {
+    const stats = await mockStats();
+    return stats.calls >= 4 ? stats : null;
+  }, { timeoutMs: 60_000, intervalMs: 700, label: 'turn_final_text' }).catch(() => null);
+  console.log('  [flow] W4b turn settle calls =', settled ? settled.calls : 'timeout');
+  await sleep(1500);
 
-  // DOM 取证可能撞上 ProjectWorkspace 既存重渲染环（渲染进程被拖住 → eval 超时 →
-  // 拿不到 DOM）。此时改用**落库面**取证：工具活动随消息 meta 落库，来源标签在其中。
-  let persisted = '';
-  let persistedMeta = '';
-  let convInfo = '';
-  try {
-    const list = await restGet('/ai/conversations');
-    const data = list.data || {};
-    const conversations = data.conversations || data.items || data.list || [];
-    convInfo = `convCount=${conversations.length} keys=${Object.keys(data).join(',')}`;
-    if (conversations.length > 0) {
-      const first = conversations[0];
-      const id = first && (first.id || first.conversation_id || first.conversationId);
-      convInfo += ` id=${id}`;
-      if (id) {
-        const messages = await restGet(`/ai/conversations/${encodeURIComponent(id)}/messages?limit=50`);
-        persisted = JSON.stringify(messages.data || {});
-        const match = persisted.match(/"sourceLabel":"[^"]*"/g);
-        persistedMeta = (match || []).slice(0, 3).join(' | ');
-      }
-    }
-  } catch (error) { convInfo = `err:${error.message}`; }
-
-  // 来源可见性：DOM 取证在本轮**不可用**（渲染进程被 ProjectWorkspace 既存重渲染环
-  // 拖住 → CDP eval 超时；已用「回退前端改动复跑」证明与本包前端无关，见 AUDIT-LOG）。
-  // 因此来源以**运行时账**取证：审计行带 resultSources（各结果站点主机名），与前端
-  // 来源标签同源（tool-events.sourceLabelFromResult 用同一份 results[].source）。
+  // 来源的**运行时账**（审计行带 resultSources/cost，与前端标签同源）
   const auditRows = readAudit();
   const okRow = auditRows.find((row) => row.tool === 'web_search' && row.ok === true);
-  const domLabel = Array.isArray(labels) && labels.some((row) => String(row).includes('wiki.example.org'));
-  const domBody = String(bodyText).includes('wiki.example.org');
   const auditHasSource = Boolean(okRow && Array.isArray(okRow.resultSources) && okRow.resultSources.some((host) => String(host).includes('wiki.example.org')));
-  assert('W4b_source_visible',
-    domLabel || domBody || auditHasSource,
-    `dom=${domLabel} body=${domBody} audit=${auditHasSource} sources=${JSON.stringify((okRow && okRow.resultSources) || [])} `
-    + `bodyLen=${String(bodyText).length} targets=${JSON.stringify(cdpTargets).slice(0, 120)} conv=${convInfo} meta=${persistedMeta}`);
-  // DOM 面单独记账：不可取证就如实说不可取证（不拿别的证据冒充"屏幕上看见了"）
-  assert('W4c_dom_label_or_known_renderer_stall',
-    domLabel || domBody || String(bodyText).length === 0,
-    domLabel || domBody ? 'dom_ok' : 'dom_unavailable_renderer_busy(known: ProjectWorkspace 重渲染环, AUDIT-LOG 登记)');
-  await capturePng(client, `ui557-web-source-${suffix()}.png`).catch(() => 'screenshot_unavailable(renderer busy)');
+  assert('W4b_source_in_audit', auditHasSource,
+    `sources=${JSON.stringify((okRow && okRow.resultSources) || [])} cost=${JSON.stringify((okRow && okRow.cost) || null)}`);
+
+  // 完成簇在回合收尾后**默认折叠**（BLOCK-108 v4）：来源标签在明细行上。
+  // 按用户路径点开簇头，再取"屏幕可见"证据——不拿折叠态的选择器缺失冒充不可见。
+  const expandResult = await evalJsLong(client, `(function(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll('button'));
+    var target = btns.filter(function(b){
+      var a = b.getAttribute('aria-label');
+      return a === '展开执行过程' || a === '展开执行记录';
+    })[0];
+    if (target) { target.click(); return 'clicked'; }
+    return 'not_found:' + btns.map(function(b){ return b.getAttribute('aria-label'); }).filter(Boolean).slice(0, 20).join('|');
+  })()`, 60_000).catch((error) => `expand_error:${String(error && error.message ? error.message : error)}`);
+  assert('W4c_cluster_expanded', expandResult === 'clicked', String(expandResult));
+  await poll(async () => {
+    const ready = await evalJsWithTimeout(client, `!!document.querySelector('[data-testid="qoder-cluster-body"]')`).catch(() => false);
+    return ready === true ? true : null;
+  }, { timeoutMs: 30_000, intervalMs: 500, label: 'cluster_body' }).catch(() => null);
+  await sleep(500);
+
+  // 来源的**屏幕可见性**（这一格要的是"屏幕上看得见"，不是"账上有"）
+  let domReport = null;
+  let domError = '';
+  try {
+    domReport = JSON.parse(String(await evalJsLong(client, DOM_PROBE_EXPR, 120_000)));
+  } catch (error) {
+    domError = String(error && error.message ? error.message : error);
+  }
+  const domRows = domReport && Array.isArray(domReport.labels) ? domReport.labels : [];
+  const domRow = domRows.find((row) => String(row.text).includes('wiki.example.org'));
+  assert('W4d_dom_source_label_visible',
+    Boolean(domRow && domRow.rendered && domRow.w > 0 && domRow.h > 0 && domRow.hit),
+    domReport
+      ? `label=${JSON.stringify(domRow || null)} labels=${domRows.length} bodyLen=${domReport.bodyLen} ready=${domReport.readyState} snippet=${String(domReport.snippet || '').slice(0, 120)}`
+      : `dom_unavailable(${domError})`);
+  const shot = await capturePng(client, `ui557-web-source-${suffix()}.png`, 90_000).catch((error) => `screenshot_unavailable(${String(error && error.message ? error.message : error)})`);
+  assert('W4e_source_screenshot', shot === `ui557-web-source-${suffix()}.png`, String(shot));
 
   // ---- W5 抓取云元数据地址 → 逐跳策略拒绝（同一轮的第三次工具调用）----
   const blocked = await poll(async () => {
