@@ -88,6 +88,8 @@ export interface SelectionSourceInfo {
   /** 编辑器内选中时的行号（Markdown 渲染视图没有行号，如实留空）。 */
   startLine?: number;
   endLine?: number;
+  /** BLOCK-246 C16 — 代码面选区的语言（有值 → 引用块用围栏代码块）。 */
+  language?: string;
 }
 
 /** 选区 → `selectionQuote` 事件载荷（唯一契约，不新增字段）。 */
@@ -102,6 +104,7 @@ export function selectionQuoteDetail(text: string, source: SelectionSourceInfo):
     startLine: source.startLine,
     endLine: source.endLine,
     text: clamped.text,
+    ...(source.language ? { language: source.language } : {}),
   };
 }
 

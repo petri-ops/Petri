@@ -34,6 +34,8 @@ export interface PreviewSelectionOptions {
   projectId?: string;
   filePath?: string;
   fileName?: string;
+  /** BLOCK-246 C16 — 代码面的语言（有值 → 引用块按围栏代码块渲染）。 */
+  language?: string;
   /** 编辑器面选区读出（CodeMirror 面才有行号）。 */
   getEditorSelection?: () => { text: string; startLine: number; endLine: number } | null;
   /** 动作结果提示（宿主已有的 notice 条）。 */
@@ -55,7 +57,7 @@ function rectOf(range: Range): { x: number; y: number } {
 }
 
 export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSelectionApi {
-  const { containerRef, projectId, filePath, fileName, getEditorSelection, onNotice } = options;
+  const { containerRef, projectId, filePath, fileName, language, getEditorSelection, onNotice } = options;
   const [selection, setSelection] = useState<PreviewSelectionState | null>(null);
 
   const capture = useCallback(() => {
@@ -148,7 +150,7 @@ export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSe
     } catch (error) {
       onNotice?.(error instanceof Error ? `动作失败：${error.message}` : '动作失败');
     }
-  }, [filePath, fileName, onNotice, projectId, selection]);
+  }, [filePath, fileName, language, onNotice, projectId, selection]);
 
   return { selection, actions, capture, dismiss, pick };
 }

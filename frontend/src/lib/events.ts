@@ -374,6 +374,8 @@ export interface SelectionQuoteDetail {
   endLine?: number;
   /** 选中文字原文（已在生产侧截断到上限）。 */
   text: string;
+  /** BLOCK-246 C16 — 代码文件的语法高亮语言（有值时引用块用围栏代码块渲染）。 */
+  language?: string;
 }
 
 /** BLOCK-28.7: 打开审阅并选中指定文件的载荷。 */

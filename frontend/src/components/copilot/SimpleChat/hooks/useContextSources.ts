@@ -19,17 +19,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getApiPrefix } from '@/lib/authClient';
 import { listProjectJobs } from '@/lib/project-store';
 import { fetchKnowledgeSpaces } from '@/lib/knowledgeClient';
-import { listConversationsStrict } from '../../copilotConversationsClient';
+import { getConversationMessages, listConversationsStrict } from '../../copilotConversationsClient';
 import { fetchSlashEntries } from '../slashSources';
 import {
   CONTEXT_SOURCE_ORDER,
   buildAgentCandidates,
   buildConnectorCandidates,
   buildConversationCandidates,
+  buildConversationDigest,
   buildFileCandidates,
   buildKnowledgeCandidates,
   buildResultCandidates,
   buildSkillCandidates,
+  buildSnapshotCandidates,
   unavailableContextSource,
   type AgentProfileRow,
   type ConnectorRow,
@@ -97,9 +99,32 @@ async function loadKnowledge(): Promise<ContextSourceResult> {
   return buildKnowledgeCandidates(spaces);
 }
 
+/** 最多给多少个会话补摘要（每个一次消息请求；上限防菜单打开变成批量拉取）。 */
+const CONVERSATION_DIGEST_LIMIT = 6;
+
+/**
+ * BLOCK-246 C17 — 会话候选带**有界摘要**：列表照旧，只给最靠前的若干条补摘要
+ * （逐条独立降级：某个会话的消息拉不到就退回"只有元数据"，不拖垮整个源）。
+ */
 async function loadConversations(projectId: string, conversationId?: string | null): Promise<ContextSourceResult> {
   const rows = await listConversationsStrict('active', projectId || undefined);
-  return buildConversationCandidates(rows, conversationId);
+  const top = rows.filter((row) => row.id !== conversationId).slice(0, CONVERSATION_DIGEST_LIMIT);
+  const digests = await Promise.allSettled(top.map((row) => getConversationMessages(row.id, 12)));
+  const digestById = new Map<string, string[]>();
+  digests.forEach((result, index) => {
+    if (result.status !== 'fulfilled') return;
+    const digest = buildConversationDigest(result.value);
+    if (digest.lines.length > 0) digestById.set(top[index].id, digest.lines);
+  });
+  return buildConversationCandidates(
+    rows.map((row) => ({ ...row, digest: digestById.get(row.id) })),
+    conversationId,
+  );
+}
+
+/** BLOCK-246 C16 — 应用快照：不需要端点，全部来自宿主已知状态。 */
+function loadSnapshot(projectId: string, conversationId?: string | null): ContextSourceResult {
+  return buildSnapshotCandidates({ projectId, conversationId });
 }
 
 export interface ContextSourcesApi {
@@ -146,6 +171,8 @@ export function useContextSources(options: UseContextSourcesOptions): ContextSou
       { id: 'artifact', run: () => loadResults(projectId) },
       { id: 'knowledge', run: loadKnowledge },
       { id: 'conversation', run: () => loadConversations(projectId, conversationId) },
+      // C16 应用快照：无端点，永远可用（未选项目时以 note 说明原因）
+      { id: 'snapshot', run: async () => loadSnapshot(projectId, conversationId) },
     ];
     const settled = await Promise.allSettled(tasks.map((task) => task.run()));
     if (!alive.current || sequence.current !== requestId) return;

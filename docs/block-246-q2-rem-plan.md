@@ -68,7 +68,11 @@ status: active
 | P1 C13 速记板 | ✅ | `016_scratchpad.sql`（由 `scratchpad-schema.js` 生成，Node 测逐字节一致）+ `scratchpad-store.js`（正文 8000 字 / 图片约 1.5MB / 单页 ≤100，超限返可读原因）+ `routes/scratchpad.js`（GET/POST/DELETE，注册于 routes/index.js）+ `lib/scratchpadClient.ts` + `ScratchpadPanel`/`ScratchpadDock`（composer 底栏 Ⓟ 钮）+ `scratchpadContextItem`（引用入单一通道）；Node 12/12 + 前端 6+6+27（基线 12 条仍绿）；`SimpleChat.tsx` 2119→**2118**（基线随批下调） |
 | P2 C12 划词动作 | ✅ | `SimpleChat/selectionActions.ts`（纯：动作清单/截断/事件载荷/速记载荷，批注**可见但禁用**并给理由）+ `SelectionActionBar.tsx`（视口定位、贴边翻转、mousedown 保选区）+ `pages/project-workspace/usePreviewSelection.ts`（CodeMirror 走 `EditorApi.getSelection()` 有行号，Markdown 视图走 `window.getSelection()` 无行号如实留空）+ 挂载在 `WorkspaceFilePreview`；**这是 `selectionQuote` 的第一个生产者**。测试 9/9 + 预览面回归 8/8。边界：侧聊提问=复制选区并打开侧聊（`sideChatOpen` 无载荷、不为此给 SimpleChat 加预填 prop），提示语如实说明"粘贴即可提问" |
 | P3 C4 消息动作 | ✅ | `SimpleChat/messageActions.ts` 注册表（顺序=复制→重新生成→分支→加入上下文→赞/踩；禁用带理由；`nextRating` 切换语义）+ `SimpleChatMessageRow` 两处硬编码块收成一张表（`{...rowProps(key)}` 一行注入，既有 memo 边界测仍绿）+ `hooks/useMessageActions.ts`（加入上下文产 `message` 组条目；评价乐观更新 + 失败回滚 + 可见提示）+ `017_message_ratings.sql`/`message-rating-{schema,store}.js`/`routes/message-ratings.js`/`lib/messageRatingClient.ts`（**与 feedback 意见箱分表**：那边最短 5 字 + 频率限制 + 推送通知，逐条赞踩塞进去会互相污染）。测试 Node 5/5 + 前端 12 + 3；`SimpleChat.tsx` 2118→**2115**（顺手把 BLOCK-9.2 的历史清单压成 4 行） |
-| P4 → P8 | 未做 | 见 §3 |
+| P4 C11 图片预览 | ✅ | 保存（download 保留扩展名，无扩展名按 MIME 补）/ 多图 N/M + ←→ 与首尾回卷 / 缩放预设 50·100·200（aria-pressed 标当前档）；单图调用方零改动。测试 6/6 |
+| P5 B2 计划反馈 | ✅ | `PlanApprovalCard` 意见输入（不抢「继续讨论」文案，避免测试与读屏歧义）+ `usePlanApprovalFlow` keep-planning 带意见→发回同一计划（不批准、不改档位、不带 approvedPlanId）；空意见=原行为。测试 5+3 |
+| P6 C16 形态补全 | ✅ | 文件夹整体引用（按路径前缀从**同一份递归树**展开子文件，上限 20 并报总数；空目录如实说明"可能超出 500 条覆盖"）/ 选中代码块（`SelectionQuoteDetail.language` 加性字段 → 围栏代码块，非代码选区形状不变）/ 应用快照（第八源，无端点，未知字段写「未接入」）。测试 12（含两条既有断言按新行为更新） |
+| P7 C17 跨会话引用 | ✅ | `buildConversationDigest`（末尾 N 条 × 每条 300 字 × 总 2000 字三重有界 + 截断注明）+ 装载层只给前 6 个会话补摘要（逐条独立降级）+ 候选 `detail` 标「含摘要」；引用块追加摘要段。测试含在 P6 的 12 条里 |
+| P8 实机腿 + 收口 | 🔵 进行中 | 见 §4 |
 
 **实码锚点（已核实）**
 

@@ -75,17 +75,27 @@ export const CONTEXT_GROUP_CAPS: Record<ContextGroup, number | null> = {
   attachment: null,
 };
 
-/** 选中文段 → reference 组条目（渲染头用全角【】，见基线测的纪律断言）。 */
+/**
+ * 选中文段 → reference 组条目（渲染头用全角【】，见基线测的纪律断言）。
+ *
+ * BLOCK-246 C16：代码文件（带 `language`）改用**围栏代码块**——模型读代码时围栏比
+ * 逐行 `>` 更省 token 也更清楚边界；非代码选区保持原样（基线测逐字不变）。
+ */
 export function selectionContextItem(ref: SelectionReference): ComposerContextItem {
   const location = selectionReferenceLocation(ref);
+  const isCode = Boolean(ref.language);
+  const fence = ref.language ? `\`\`\`${ref.language}` : '```';
+  const body = isCode
+    ? [fence, ...ref.text.split('\n'), '```']
+    : ref.text.split('\n').map((line) => `> ${line}`);
   return {
     id: ref.id,
     kind: 'selection',
     group: 'reference',
     label: location,
     source: ref.path,
-    lines: [`【引用 ${location}】`, ...ref.text.split('\n').map((line) => `> ${line}`)],
-    dedupeKey: `${ref.path}|${ref.startLine ?? ''}|${ref.endLine ?? ''}|${ref.text}`,
+    lines: [isCode ? `【引用代码 ${location}】` : `【引用 ${location}】`, ...body],
+    dedupeKey: `${ref.path}|${ref.startLine ?? ''}|${ref.endLine ?? ''}|${ref.language ?? ''}|${ref.text}`,
     payload: ref,
   };
 }

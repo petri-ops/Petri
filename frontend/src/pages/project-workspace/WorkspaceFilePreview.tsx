@@ -315,6 +315,8 @@ export function WorkspaceFilePreview({
     projectId,
     filePath: file?.path,
     fileName: file?.name,
+    // 只有代码/JSON 面才按围栏渲染；Markdown 预览的选区保持原来的引用块形状。
+    language: fallbackKind === 'text' ? (codeLanguage || undefined) : fallbackKind === 'json' ? 'json' : undefined,
     getEditorSelection: readEditorSelection,
     onNotice: setSelectionNotice,
   });

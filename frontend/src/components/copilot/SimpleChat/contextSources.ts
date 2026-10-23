@@ -15,7 +15,8 @@
 
 import type { ComposerContextItem } from './contextItems';
 
-/** 八类候选源里可由 `@` 菜单提供的那七类（selection/image/attachment 走既有事件面）。 */
+/** 八类候选源里可由 `@` 菜单提供的那七类（selection/image/attachment 走既有事件面）。
+ *  BLOCK-246 C16 加第八类 `snapshot`（应用快照）。 */
 export type ContextSourceId =
   | 'file'
   | 'skill'
@@ -23,7 +24,8 @@ export type ContextSourceId =
   | 'agent'
   | 'artifact'
   | 'knowledge'
-  | 'conversation';
+  | 'conversation'
+  | 'snapshot';
 
 /** 展示与键盘导航的固定次序（分组顺序=本数组顺序，不随装载完成先后漂移）。 */
 export const CONTEXT_SOURCE_ORDER: ContextSourceId[] = [
@@ -34,6 +36,7 @@ export const CONTEXT_SOURCE_ORDER: ContextSourceId[] = [
   'artifact',
   'knowledge',
   'conversation',
+  'snapshot',
 ];
 
 /** 来源标签（菜单分组头 + 候选行右侧的源标记，一条真相）。 */
@@ -45,6 +48,7 @@ export const CONTEXT_SOURCE_LABELS: Record<ContextSourceId, string> = {
   artifact: '结果',
   knowledge: '知识空间',
   conversation: '会话',
+  snapshot: '应用快照',
 };
 
 /** 逐项上限（「逐源有界」的可见形态：超出即截断并报条数，不静默丢）。 */
@@ -56,6 +60,7 @@ export const CONTEXT_SOURCE_CAPS: Record<ContextSourceId, number> = {
   artifact: 6,
   knowledge: 4,
   conversation: 6,
+  snapshot: 1,
 };
 
 /** 单源绝对硬上限（装载面防御：即便端点返回上万行也不进内存无限膨胀）。 */
@@ -138,36 +143,71 @@ export interface WorkspaceTreeRow {
   path?: string;
 }
 
+/** 文件夹整体引用时逐条列出的子文件上限（C16；超出只报总数，不装作全量）。 */
+export const FOLDER_EXPAND_LIMIT = 20;
+
 export function buildFileCandidates(
   rows: WorkspaceTreeRow[],
   options: { prefix?: string; includeHidden?: boolean; treeTruncated?: boolean } = {},
 ): ContextSourceResult {
   const prefix = options.prefix ?? '';
   const candidates: ContextCandidate[] = [];
+  // 目录候选要"整体引用"：从同一份递归树里按前缀取子文件（不额外打端点，
+  // 因此覆盖范围就是树本身的范围——被 500 条上限砍掉的部分同样不在展开里）。
+  const filePaths = rows
+    .filter((row) => row && row.type === 'file' && typeof row.path === 'string' && row.path)
+    .map((row) => row.path as string);
   for (const row of rows) {
     if (!row || typeof row.name !== 'string' || !row.name) continue;
     // 隐藏项（含 `.chat-attachments`）默认不进候选：它们是内部落点，不是用户的上下文。
     if (!options.includeHidden && row.name.startsWith('.')) continue;
     const path = row.path ?? `${prefix}${row.name}`;
     const isDir = row.type === 'dir';
-    const title = isDir ? '目录' : '文件';
     const sizeLabel = !isDir && typeof row.size === 'number' && row.size >= 0
       ? `${(row.size / 1024).toFixed(1)}KB`
       : '';
+    if (isDir) {
+      const dirPrefix = `${path.replace(/\/+$/, '')}/`;
+      const descendants = filePaths.filter((child) => child.startsWith(dirPrefix));
+      const shown = descendants.slice(0, FOLDER_EXPAND_LIMIT);
+      candidates.push({
+        id: `file:${path}`,
+        sourceId: 'file',
+        label: path,
+        detail: `文件夹 · ${descendants.length} 个文件`,
+        item: {
+          id: `ctx-folder-${path}`,
+          kind: 'folder',
+          group: 'reference',
+          label: path,
+          source: CONTEXT_SOURCE_LABELS.file,
+          lines: [
+            `【引用文件夹 ${dirPrefix}】`,
+            descendants.length === 0
+              ? '> 说明：这个目录下没有可列出的文件（可能是空目录，或文件超出工作区树的 500 条覆盖范围）'
+              : `> 共 ${descendants.length} 个文件${descendants.length > shown.length ? `（已列前 ${shown.length}，完整清单请按目录再选具体文件）` : ''}`,
+            ...shown.map((child) => `> ${child}`),
+          ],
+          dedupeKey: `folder|${path}`,
+          payload: { path, type: 'dir', childCount: descendants.length },
+        },
+      });
+      continue;
+    }
     candidates.push({
       id: `file:${path}`,
       sourceId: 'file',
       label: path,
-      detail: isDir ? '目录' : (sizeLabel || '文件'),
+      detail: sizeLabel || '文件',
       item: {
         id: `ctx-file-${path}`,
         kind: 'file',
         group: 'reference',
         label: path,
         source: CONTEXT_SOURCE_LABELS.file,
-        lines: referenceLines(title, [['path', path]]),
+        lines: referenceLines('文件', [['path', path]]),
         dedupeKey: `file|${path}`,
-        payload: { path, type: isDir ? 'dir' : 'file', size: row.size ?? 0 },
+        payload: { path, type: 'file', size: row.size ?? 0 },
       },
     });
   }
@@ -390,6 +430,65 @@ export interface ConversationRow {
   message_count?: number;
   updated_at?: string;
   status?: string;
+  /** BLOCK-246 C17 — 已组装的有界摘要行（装载层按需补；缺省 = 只有元数据）。 */
+  digest?: string[];
+}
+
+/** C17 摘要上限：条数/每条字符/总字符三重有界（都要如实标注）。 */
+export interface ConversationDigestOptions {
+  maxMessages?: number;
+  maxCharsPerMessage?: number;
+  maxTotalChars?: number;
+}
+
+export interface ConversationDigest {
+  lines: string[];
+  used: number;
+  total: number;
+  truncated: boolean;
+}
+
+export interface DigestMessage {
+  role: string;
+  content: string;
+}
+
+/**
+ * 会话消息 → 有界摘要行（C17）。
+ *
+ * 取**最后** N 条（跨会话引用通常是"就上一轮讨论继续"），每条裁到上限，总量再裁一次；
+ * 任何一次裁剪都写进 `lines` 末尾的注明里——摘要不能假装是全文。
+ */
+export function buildConversationDigest(
+  messages: DigestMessage[],
+  options: ConversationDigestOptions = {},
+): ConversationDigest {
+  const maxMessages = options.maxMessages ?? 8;
+  const maxCharsPerMessage = options.maxCharsPerMessage ?? 300;
+  const maxTotalChars = options.maxTotalChars ?? 2000;
+  const rows = messages.filter((message) => message && typeof message.content === 'string' && message.content.trim());
+  const tail = rows.slice(-maxMessages);
+  const lines: string[] = [];
+  let used = 0;
+  let clippedAny = false;
+  let stoppedByTotal = false;
+  for (const message of tail) {
+    const role = message.role === 'user' ? '用户' : message.role === 'assistant' ? '助手' : message.role;
+    const chars = Array.from(message.content.replace(/\s+/g, ' ').trim());
+    const clipped = chars.length > maxCharsPerMessage;
+    if (clipped) clippedAny = true;
+    const body = clipped ? `${chars.slice(0, maxCharsPerMessage).join('')}…` : chars.join('');
+    const line = `> ${role}：${body}`;
+    if (used + line.length > maxTotalChars) {
+      lines.push('> …（摘要已达字符上限，后续消息未纳入）');
+      stoppedByTotal = true;
+      break;
+    }
+    used += line.length;
+    lines.push(line);
+  }
+  const truncated = rows.length > tail.length || clippedAny || stoppedByTotal;
+  return { lines, used, total: rows.length, truncated };
 }
 
 /** 当前会话自身不进候选（"引用自己"没有语义）。 */
@@ -402,28 +501,76 @@ export function buildConversationCandidates(
     if (!row || !row.id || row.id === currentConversationId) continue;
     const title = row.title || '未命名对话';
     const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : '';
+    const digest = Array.isArray(row.digest) ? row.digest.filter(Boolean) : [];
     candidates.push({
       id: `conversation:${row.id}`,
       sourceId: 'conversation',
       label: title,
-      detail: `${row.message_count ?? 0} 条消息${updated ? ` · ${updated}` : ''}`,
+      detail: `${row.message_count ?? 0} 条消息${digest.length > 0 ? ' · 含摘要' : ''}${updated ? ` · ${updated}` : ''}`,
       item: {
         id: `ctx-conversation-${row.id}`,
         kind: 'conversation',
         group: 'reference',
         label: title,
         source: CONTEXT_SOURCE_LABELS.conversation,
-        lines: referenceLines('会话', [
-          ['标题', title],
-          ['conversationId', row.id],
-          ['消息', `${row.message_count ?? 0}`],
-        ]),
+        lines: [
+          ...referenceLines('会话', [
+            ['标题', title],
+            ['conversationId', row.id],
+            ['消息', `${row.message_count ?? 0}`],
+          ]),
+          ...(digest.length > 0 ? ['> 摘要（末尾若干条，已裁剪）：', ...digest] : []),
+        ],
         dedupeKey: `conversation|${row.id}`,
-        payload: { id: row.id },
+        payload: { id: row.id, hasDigest: digest.length > 0 },
       },
     });
   }
   return sourceResult('conversation', candidates);
+}
+
+// ── 应用快照（C16） ──────────────────────────────────────────
+export interface AppSnapshotInput {
+  projectId?: string | null;
+  projectName?: string | null;
+  conversationId?: string | null;
+  /** 活动页面/面板的可读名（宿主给；未接入时留空，不编造）。 */
+  surfaceLabel?: string | null;
+  /** 在跑任务数（未接入运行态时为 null，如实标注）。 */
+  runningTasks?: number | null;
+}
+
+/**
+ * 「应用快照」候选：把"用户此刻在哪儿、在干什么"压成一块可引用的上下文。
+ * 只写宿主真的知道的字段——未知字段如实写「未接入」，不编造。
+ */
+export function buildSnapshotCandidates(input: AppSnapshotInput): ContextSourceResult {
+  const project = input.projectName || input.projectId || '';
+  if (!project) return sourceResult('snapshot', [], null, '未选择项目：应用快照需要至少一个项目上下文');
+  const lines = referenceLines('应用快照', [
+    ['项目', project],
+    ['会话', input.conversationId || '（未开始会话）'],
+    ['当前面', input.surfaceLabel || '未接入'],
+    ['在跑任务', input.runningTasks === null || input.runningTasks === undefined ? '未接入' : `${input.runningTasks}`],
+    ['生成时间', new Date().toISOString()],
+  ]);
+  return sourceResult('snapshot', [{
+    id: `snapshot:${input.projectId ?? project}`,
+    sourceId: 'snapshot',
+    label: `当前状态 · ${project}`,
+    detail: input.surfaceLabel ? `当前面：${input.surfaceLabel}` : '项目 + 会话状态',
+    item: {
+      id: `ctx-snapshot-${input.projectId ?? project}`,
+      kind: 'snapshot',
+      group: 'reference',
+      label: `当前状态 · ${project}`,
+      source: CONTEXT_SOURCE_LABELS.snapshot,
+      lines,
+      // 快照是"此刻"的，同一次会话里重复引用应替换而不是堆叠 → 用固定 dedupeKey
+      dedupeKey: `snapshot|${input.projectId ?? project}`,
+      payload: { ...input },
+    },
+  }]);
 }
 
 // ── 过滤 / 上限 / 扁平化 ─────────────────────────────────────

@@ -35,8 +35,9 @@ import {
 
 describe('BLOCK-245 P3 `@` 候选源：形状与上限单源', () => {
   it('七类来源固定次序与标签（键盘导航与分组顺序不随装载完成先后漂移）', () => {
+    // BLOCK-246 C16：新增第八类「应用快照」，固定排在最后
     expect(CONTEXT_SOURCE_ORDER).toEqual([
-      'file', 'skill', 'connector', 'agent', 'artifact', 'knowledge', 'conversation',
+      'file', 'skill', 'connector', 'agent', 'artifact', 'knowledge', 'conversation', 'snapshot',
     ]);
     expect(CONTEXT_SOURCE_LABELS.file).toBe('文件');
     expect(CONTEXT_SOURCE_LABELS.conversation).toBe('会话');
@@ -89,10 +90,13 @@ describe('BLOCK-245 P3 文件 / 文件夹源', () => {
 
   it('目录与文件给不同的引用头；文件带大小', () => {
     const [dir, file] = buildFileCandidates([
-      { name: 'src', type: 'dir' },
-      { name: 'a.R', type: 'file', size: 2048 },
+      { name: 'src', type: 'dir', path: 'src' },
+      { name: 'a.R', type: 'file', size: 2048, path: 'a.R' },
     ]).candidates;
-    expect(dir.item.lines).toEqual(['【引用目录】', '> path：src']);
+    // BLOCK-246 C16：目录从「条目引用」升级为「文件夹整体引用」（递归列出子文件）
+    expect(dir.item.kind).toBe('folder');
+    expect(dir.item.lines[0]).toBe('【引用文件夹 src/】');
+    expect(dir.item.lines.join('\n')).toContain('这个目录下没有可列出的文件');
     expect(file.item.lines).toEqual(['【引用文件】', '> path：a.R']);
     expect(file.item.lines.join('\n')).not.toContain('2.0KB');
     expect(file.detail).toBe('2.0KB');

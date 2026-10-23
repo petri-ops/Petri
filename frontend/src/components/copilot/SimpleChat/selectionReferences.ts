@@ -26,6 +26,8 @@ export interface SelectionReference {
   endLine?: number;
   /** 选中文字原文（已在创建时截断到 MAX_SELECTION_REFERENCE_CHARS）。 */
   text: string;
+  /** BLOCK-246 C16 — 代码文件的语法高亮语言（有值时按围栏代码块渲染）。 */
+  language?: string;
 }
 
 /** 选中文字截断上限（字符）——引用是上下文提示，不是文件传输通道。 */
@@ -54,6 +56,7 @@ export function makeSelectionReference(detail: SelectionQuoteDetail): SelectionR
     text: text.length > MAX_SELECTION_REFERENCE_CHARS
       ? `${text.slice(0, MAX_SELECTION_REFERENCE_CHARS)}\n…（选中内容过长，已截断）`
       : text,
+    language: detail.language,
   };
 }
 
