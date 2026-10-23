@@ -1,0 +1,106 @@
+{
+  "name": "ui554-q2-rem-live",
+  "darkMode": true,
+  "syntheticArtifactJob": "tj_ui554_synthetic",
+  "startedAt": "2026-10-23T01:27:30.654Z",
+  "finishedAt": "2026-10-23T01:27:39.815Z",
+  "providerCalls": 2,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvkaimyt_6ktl status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui554-live-yS6kFv\\data\\projects\\ui-554-q2-mvkaimyt"
+    },
+    {
+      "name": "E2_synthetic_done_job",
+      "pass": true,
+      "detail": "jobs=1 status=200"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui554-live-yS6kFv"
+    },
+    {
+      "name": "L0_first_run_overlay_dismissed",
+      "pass": true,
+      "detail": "click=none"
+    },
+    {
+      "name": "L1a_scratchpad_seeded",
+      "pass": true,
+      "detail": "scr_03fa7bd0-c9c1-41ad-bdbd-5079c1ccc722"
+    },
+    {
+      "name": "L1b_scratchpad_panel_shows_seed",
+      "pass": true,
+      "detail": "速记板1 条UI-554 速记样本片段 · 会话 · ui554-seed引用引用后的速记会作为一条上下文出现在输入框上方，可随时移除 | panels=1 rows=1 htmlLen=1599"
+    },
+    {
+      "name": "L1c_scratchpad_quoted_to_composer",
+      "pass": true,
+      "detail": "[{\"kind\":\"scratchpad\",\"label\":\"UI-554 速记样本速记板 · 会话\"}]"
+    },
+    {
+      "name": "L2a_snapshot_source_present",
+      "pass": true,
+      "detail": "[\"文件\",\"技能\",\"结果\",\"知识空间\",\"应用快照\"]"
+    },
+    {
+      "name": "L2b_snapshot_quoted",
+      "pass": true,
+      "detail": "[{\"kind\":\"scratchpad\",\"label\":\"UI-554 速记样本速记板 · 会话\"},{\"kind\":\"snapshot\",\"label\":\"当前状态 · p_mvkaimyt_6ktl应用快照\"}]"
+    },
+    {
+      "name": "L3_folder_quoted",
+      "pass": true,
+      "detail": "[{\"kind\":\"scratchpad\",\"label\":\"UI-554 速记样本速记板 · 会话\"},{\"kind\":\"snapshot\",\"label\":\"当前状态 · p_mvkaimyt_6ktl应用快照\"},{\"kind\":\"folder\",\"label\":\"analysis文件\"}]"
+    },
+    {
+      "name": "L4a_request_has_scratchpad_block",
+      "pass": true,
+      "detail": "【引用速记 UI-554 速记样本】\n> 来源：会话 · ui554-seed\n> 先做质控再降维（实机腿种子）\n\n【引用应用快照】\n> 项目：p_mvkaimyt_6ktl\n> 会话：（未开始会话）\n> 当前面：未接入\n> 在跑任务：未接入\n> 生成时间：2026-10-23T01:27:36.132Z\n\n【引用文件夹 analysis/】\n> 共 2 个文件\n> analysis/norm.p"
+    },
+    {
+      "name": "L4b_request_has_snapshot_block",
+      "pass": true,
+      "detail": "【引用速记 UI-554 速记样本】\n> 来源：会话 · ui554-seed\n> 先做质控再降维（实机腿种子）\n\n【引用应用快照】\n> 项目：p_mvkaimyt_6ktl\n> 会话：（未开始会话）\n> 当前面：未接入\n> 在跑任务：未接入\n> 生成时间：2026-10-23T01:27:36.132Z\n\n【引用文件夹 analysis/】\n> 共 2 个文件\n> analysis/norm.p"
+    },
+    {
+      "name": "L4c_request_has_folder_block",
+      "pass": true,
+      "detail": "【引用速记 UI-554 速记样本】\n> 来源：会话 · ui554-seed\n> 先做质控再降维（实机腿种子）\n\n【引用应用快照】\n> 项目：p_mvkaimyt_6ktl\n> 会话：（未开始会话）\n> 当前面：未接入\n> 在跑任务：未接入\n> 生成时间：2026-10-23T01:27:36.132Z\n\n【引用文件夹 analysis/】\n> 共 2 个文件\n> analysis/norm.p"
+    },
+    {
+      "name": "L4d_reference_block_count",
+      "pass": true,
+      "detail": "3"
+    },
+    {
+      "name": "L5a_message_actions_rendered",
+      "pass": true,
+      "detail": "quote-context button present"
+    },
+    {
+      "name": "L5b_message_quoted_to_context",
+      "pass": true,
+      "detail": "[{\"kind\":\"message\",\"label\":\"UI-554 探针：已收到引用上下文。会话回复\"}]"
+    },
+    {
+      "name": "L5c_message_rating_applied",
+      "pass": true,
+      "detail": "已赞"
+    },
+    {
+      "name": "E4_mock_provider_used",
+      "pass": true,
+      "detail": "2"
+    }
+  ],
+  "allPass": true
+}
