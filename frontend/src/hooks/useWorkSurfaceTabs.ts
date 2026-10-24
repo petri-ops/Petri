@@ -160,9 +160,18 @@ export function useWorkSurfaceTabs(projectId: string | null | undefined): UseWor
     ? state.activeId
     : home.id;
 
+  // 派生数组必须 memo：每次渲染 filter 出新数组会把「surfaces」变成每轮新依赖，
+  // 传导到标题栏 effect（其 setState 与闭合 callback 叠加 → Maximum update depth，
+  // BLOCK-250 实机抓真）。
+  const tabSurfaces = React.useMemo(() => registry.surfaces.filter(isTabSurface), [registry]);
+  const resultSurfaces = React.useMemo(
+    () => registry.surfaces.filter((surface) => surface.kind === 'pack-result'),
+    [registry]
+  );
+
   return {
-    surfaces: registry.surfaces.filter(isTabSurface),
-    resultSurfaces: registry.surfaces.filter((surface) => surface.kind === 'pack-result'),
+    surfaces: tabSurfaces,
+    resultSurfaces,
     uiActions: registry.uiActions,
     registryLoading,
     registryError,

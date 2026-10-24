@@ -127,6 +127,34 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     };
   }), [conversationJobs]);
 
+  // 标题栏是壳层共享状态：复位只放在**卸载**（effect cleanup 每次重跑都会 setState；
+  // 与依赖抖动叠加会形成 "Maximum update depth" 环——BLOCK-250 实机抓真）。
+  useEffect(() => () => {
+    updateTitleBar({
+      title: 'Petri',
+      tabs: [],
+      activeTabId: null,
+      reviewCount: 0,
+      reviewStat: null,
+      onSelectTab: null,
+      onCloseTab: null,
+      onCloseOtherTabs: null,
+      onCloseTabsToRight: null,
+      onCloseAllTabs: null,
+      onMoreAction: null,
+      toolMenuOpen: false,
+      toolMenuItems: [],
+      onSelectToolItem: null,
+      resultItems: [],
+      activeResultId: null,
+      onSelectResult: null,
+      canGoBack: false,
+      canGoForward: false,
+      onGoBack: null,
+      onGoForward: null,
+    });
+  }, [updateTitleBar]);
+
   useEffect(() => {
     updateTitleBar({
       title: titleBarTitle,
@@ -179,31 +207,6 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
           ? () => dispatchPetriEvent(petriEvents.browserForward)
           : null,
     });
-    return () => {
-    updateTitleBar({
-      title: 'Petri',
-      tabs: [],
-      activeTabId: null,
-      reviewCount: 0,
-      reviewStat: null,
-        onSelectTab: null,
-        onCloseTab: null,
-        onCloseOtherTabs: null,
-        onCloseTabsToRight: null,
-        onCloseAllTabs: null,
-        onMoreAction: null,
-        toolMenuOpen: false,
-        toolMenuItems: [],
-        onSelectToolItem: null,
-        resultItems: [],
-        activeResultId: null,
-        onSelectResult: null,
-        canGoBack: false,
-        canGoForward: false,
-        onGoBack: null,
-        onGoForward: null,
-      });
-    };
   }, [
     activeJobId,
     closeRightPanelTab,

@@ -1,0 +1,27 @@
+{
+  "name": "block250-loop-probe",
+  "description": "BLOCK-250 修复前后同一探针：console.error 包装 + sendBeacon 栈 + 读回 + 连续 3 次 CDP 求值。",
+  "before": {
+    "beacons": 8,
+    "readback": "probe_error:eval_timeout_30000ms",
+    "raw": "addScript injection\r\nEXIT=0\ncdp connected\nprobe injected for next documents\nnavigated\nbeacon collected: 8\n--- STACK ---\nError\n    at console.error (<anonymous>:8:50)\n    at printWarning (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:442:29)\n    at error (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:429:5)\n    at checkForNestedUpdates (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15924:5)\n    at scheduleUpdateOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15043:4)\n    at dispatchSetState (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:10288:6)\n    at http://localhost:3000/src/components/copilot/ChatScrollbar.tsx:32:3\n    at MutationObserver.<anonymous> (http://localhost:3000/src/components/copilot/ChatScrollbar.tsx:49:4)\n--- STACK ---\nError\n    at console.error (<anonymous>:8:50)\n    at printWarning (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:442:29)\n    at error (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:429:5)\n    at checkForNestedUpdates (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15924:5)\n    at scheduleUpdateOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15043:4)\n    at dispatchSetState (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:10288:6)\n    at http://localhost:3000/src/hooks/useWorkspacePanels.ts:56:3\n    at http://localhost:3000/src/pages/project-workspace/useWorkspaceTitleBar.ts:95:4\n    at safelyCallDestroy (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:13701:5)\n    at commitHookEffectListUnmount (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:13797:8)\n--- STACK ---\nError\n    at console.error (<anonymous>:8:50)\n    at printWarning (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:442:29)\n    at error (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:429:5)\n    at checkForNestedUpdates (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15924:5)\n    at scheduleUpdateOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:15043:4)\n    at dispatchSetState (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:10288:6)\n    at http://localhost:3000/src/hooks/useWorkspacePanels.ts:56:3\n    at http://localhost:3000/src/pages/project-workspace/useWorkspaceTitleBar.ts:95:4\n    at safelyCallDestroy (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:13701:5)\n    at commitHookEffectListUnmount (http://localhost:3000/node_modules/.vite/deps/react-dom-DbGfNMsb.js?v=8c9f7e86:13797:8)\nprojectId=p_mvln46pz_4ebj conversationId=conv_11d0d3ea-afd\nprobe_error:eval_timeout_30000ms"
+  },
+  "after": {
+    "warnings": 0,
+    "evals": [
+      {
+        "ms": 0,
+        "value": "{\"ready\":\"complete\",\"at\":1792802427922}"
+      },
+      {
+        "ms": 1,
+        "value": "{\"ready\":\"complete\",\"at\":1792802427922}"
+      },
+      {
+        "ms": 0,
+        "value": "{\"ready\":\"complete\",\"at\":1792802427922}"
+      }
+    ],
+    "raw": "cdp connected\nprobe injected for next documents\nnavigated\nbeacon collected: 0\nprojectId=p_mvlo9ohs_kjmu conversationId=conv_628cdd89-81d\n{\"count\":0,\"samples\":[]}\nprobe evals: [{\"ms\":0,\"value\":\"{\\\"ready\\\":\\\"complete\\\",\\\"at\\\":1792802427922}\"},{\"ms\":1,\"value\":\"{\\\"ready\\\":\\\"complete\\\",\\\"at\\\":1792802427922}\"},{\"ms\":0,\"value\":\"{\\\"ready\\\":\\\"complete\\\",\\\"at\\\":1792802427922}\"}]\n"
+  }
+}

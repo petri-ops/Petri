@@ -1,17 +1,21 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-23（**BLOCK-249 Q4a 多智能体团队 completed；UI-559 in_progress**）
+最后更新：2026-10-24（**BLOCK-250 UI-FIX completed；UI-559 verified**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。刚收口=BLOCK-249（Q4a 多智能体团队）：团队 roster / 整体停止（逐成员回执）/ 迭代边界暂停恢复 / profile 工具约束 / 结构化输出 / journal / investigator；实机两会话（重启 Electron 同数据根）**亮/暗各 19/20**（停止回执 UI 的 DOM 取证被既有重渲染环拖超时 → UI-559 `in_progress`）。plan=`docs/block-249-q4a-agent-team-plan.md`（completed）；**下一包**=Q7 或按母纲 §6.5 继续（需发令）。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。刚收口=BLOCK-250（UI-FIX ProjectWorkspace 重渲染环）：用探针（`scripts/block250-loop-probe.mjs`，`addScriptToEvaluateOnNewDocument` + `sendBeacon` 送出警告栈）定位四处不稳定依赖——`useWorkSurfaceTabs` 派生数组每渲染新建（根因）/ `useWorkspaceTitleBar` effect cleanup 重跑即复位标题栏 / `ChatScrollbar` 测量回调每轮写新对象 / `updateWorkspaceMode` 依赖 `useSearchParams()` 对象；修复后同一探针 **0 警告、读回即时**（修复前 8 警告 + `eval_timeout_30000ms`），回归 10/10。**回填 UI-559 verified**：停止团队逐成员回执 DOM 实机可见（`停止回执：已请求 0 · 本就已结束 3 · 未取消 0`），**亮/暗各 20/20**。plan=`docs/block-250-projectworkspace-render-loop-plan.md`（completed）；**下一包**=UI-555 实机腿补证（Jev 判定，置信 0.59，单一建议）。
+
+**BLOCK-250 已落地**：`useWorkSurfaceTabs.ts`（`tabSurfaces`/`resultSurfaces` memo）、`useWorkspaceTitleBar.ts`（复位移到卸载专用 effect）、`ChatScrollbar.tsx`（`metricsEqual` 值相等保留旧 state）、`project-workspace.tsx`（`updateWorkspaceMode` 读 `window.location.search`，依赖收敛）；新增 `scripts/block250-loop-probe.mjs` 与三条回归测试（10/10）。证据=`acceptance/block-250-loop-probe.json`（before 8 警告 / after 0 警告 + 3 次求值 `[0,1,0]ms`）、`acceptance/ui-559/`、`acceptance/block-249/`；closeout 十三门 **PASS**。
+
+**历史恢复要点（BLOCK-249 收口时）**：刚收口=BLOCK-249（Q4a 多智能体团队）：团队 roster / 整体停止（逐成员回执）/ 迭代边界暂停恢复 / profile 工具约束 / 结构化输出 / journal / investigator；实机两会话（重启 Electron 同数据根）**亮/暗各 19/20**（停止回执 UI 的 DOM 取证被既有重渲染环拖超时 → **已由 BLOCK-250 修复并回填至 20/20**）。plan=`docs/block-249-q4a-agent-team-plan.md`（completed）。
 
 **BLOCK-249 已落地**：`helpers/{agent-team,agent-journal,agent-pause,json-schema-subset,tool-filter}.js` + `routes/ai-agent/team.js`（GET team / stop / pause / resume）+ spawn schema/tools/journal/结构化重试 + loop 暂停门 + 工具集过滤 + `read_agent_journal` 工具 + investigator 角色 + 前端 `AgentTeamRoster`（成员切换/暂停恢复/两步停止回执）。
 
 **已绿证据**：Node block249 **7/7** + 前端定向 **18/18** + types 0 + lint 0 error + **隔离 9223 两会话亮/暗各 19/20**（`acceptance/ui-559/`、`acceptance/block-249/`）——3 子代理（search/investigator/search+schema）/ 结构化有效 / 暂停恢复（`iteration_boundary`）/ 停止团队 API 部分回执（1 请求 2 已结束）/ journal 3 行 / 第二会话 roster+徽标可见。
 
-**本轮实机抓真**：① 长回合后同一渲染器会被既有重渲染环拖死 → **拆两个 Electron 会话**（活态断言走 REST，UI 断言在重启后的平静页面）；② 「停止团队」点击会触发同一重渲染环 → 回执 DOM 取证超时（组件测试覆盖渲染、API 覆盖部分回执）；③ 离屏截图不可得 → 如实 unavailable；④ 新增工具后工具计数回归 **84**（fixture/注册表/预路由/决策/标签五处同批）；⑤ `project-workspace.tsx` 只净增 0 行（压缩注释换行维持 code-size 基线）。
+**本轮实机抓真**：① 长回合后同一渲染器会被既有重渲染环拖死 → **拆两个 Electron 会话**（活态断言走 REST，UI 断言在重启后的平静页面）；② 「停止团队」点击会触发同一重渲染环 → 回执 DOM 取证超时（组件测试覆盖渲染、API 覆盖部分回执；**已由 BLOCK-250 修复并回填 DOM 证据**）；③ 离屏截图不可得 → 如实 unavailable；④ 新增工具后工具计数回归 **84**（fixture/注册表/预路由/决策/标签五处同批）；⑤ `project-workspace.tsx` 只净增 0 行（压缩注释换行维持 code-size 基线）。
 
-**上一包=BLOCK-248 completed**（Q3 执行轨迹；UI-558 verified；`5c5e14cb`）。**再上一包=BLOCK-247 completed**（UI-557 verified）。Q-MATRIX（BLOCK-249 回写）：C7/C10/F1/F3/F4/F5/F9 → ✅；**✅54 / 🟡36 / 🔴5 / ⛔7 = 102**。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；**closeout 别接管道**；closeout 十三门 **PASS**；本地提交（不推送）。本地领先 origin 若干笔**未推送**（推送需单独发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**上一包=BLOCK-250 completed**（UI-FIX 重渲染环；UI-559 verified）。**再上一包=BLOCK-249 completed**（Q4a 多智能体团队）；BLOCK-248（Q3 执行轨迹；UI-558 verified；`5c5e14cb`）与 BLOCK-247（UI-557 verified）为更早包。Q-MATRIX（BLOCK-249 回写）：C7/C10/F1/F3/F4/F5/F9 → ✅；**✅54 / 🟡36 / 🔴5 / ⛔7 = 102**。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；**closeout 别接管道**；closeout 十三门 **PASS**；本地提交（不推送）。本地领先 origin 若干笔**未推送**（推送需单独发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-243（Q1 审批契约 v2 + MCP trust 生效）**：scope once/task/always + updatedInput 批准前重跑 schema/preflight/policy（只放行本次 guardKey，新风险拒绝）+ 编辑参数执行替换（原始指纹→生效参数，一次性）+ `permission.resolved` 审计（原始/生效哈希/脱敏输入/耗时）+ 重复 pending 幂等/计数；MCP `trust='ask'` 对 destructiveHint 工具生效、`allow` 自动放行（调用时重读），货架 allow 可改回 ask；审批卡三变体/确定性解释/长命令折叠/参数编辑/范围/两步武装。证据=Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + 隔离 API 实机 14/14（`acceptance/block-243/`）+ 隔离 9223 亮 21/21/暗 21/21（`acceptance/ui-551/` 双截图）+ closeout 十三门；UI-551 verified。实机抓真=测试实例 `show:false` 与 `--onscreen` 冲突致截图超时，已修 `_window-create.js`。reopen 已收敛到 Qoder 总纲 §6.5：Q1-REM（A1/A2/A5/A8/C5/C19/D3）、Q2/Q2b/Q3/Q4a/Q7/Q4b/Q5-REM/Q6-REM/Q8-REM/Q9-REM/P4-REM + V-REM（UI-544/545/546 实机腿）；Q-MATRIX 回写 **✅32/🟡47/🔴16/⛔7**。**Q8 trust 降档欠账已解**。**下一包需用户发令**：Q1-REM 或 Q2（按 §6.5 序）。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

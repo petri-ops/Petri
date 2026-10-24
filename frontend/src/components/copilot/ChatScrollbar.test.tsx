@@ -1,7 +1,7 @@
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ChatScrollbar } from './ChatScrollbar';
+import { ChatScrollbar, scrollbarMetricsEqual } from './ChatScrollbar';
 
 // UI-269 — ChatScrollbar：溢出渲染 / 无溢出不渲染 / scroll 事件更新 thumb 位置
 
@@ -92,5 +92,13 @@ describe('ChatScrollbar', () => {
       roCb([], {} as ResizeObserver);
     });
     expect(container.querySelector('[class*=track]')).toBeNull();
+  });
+});
+
+describe('ChatScrollbar metric equality (BLOCK-250 loop regression)', () => {
+  it('值相同视为相等（观察器回调不再写新对象）', () => {
+    expect(scrollbarMetricsEqual({ clientH: 10, scrollH: 100, scrollTop: 5 }, { clientH: 10, scrollH: 100, scrollTop: 5 })).toBe(true);
+    expect(scrollbarMetricsEqual({ clientH: 10, scrollH: 100, scrollTop: 5 }, { clientH: 10, scrollH: 101, scrollTop: 5 })).toBe(false);
+    expect(scrollbarMetricsEqual({ clientH: 10, scrollH: 100, scrollTop: 5 }, { clientH: 10, scrollH: 100, scrollTop: 6 })).toBe(false);
   });
 });

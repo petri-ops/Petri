@@ -7921,9 +7921,30 @@
         "structured-output",
         "G0"
       ],
-      "notes": "2026-10-23 立项（用户「整完Q4a」）：把子智能体从「一个面板」升级为「一个团队」。交付=team API（leader+members/counts/journal，跨用户 403）+ 停止团队逐成员回执（cancel_requested/already_finished/not_cancelled）+ 迭代边界暂停/恢复（agent_paused/agent_resumed 事件）+ profile tools.allow/deny（只收紧、deny 优先）+ 结构化输出（schema 最小子集、终态校验、followup 纠正 ≤2、machine-readable）+ 运行级 journal（<dataDir>/agent-journal/<leader>/journal.jsonl + read_agent_journal 只读工具）+ investigator（CodebaseInvestigator）角色 + 前端团队 roster（成员切换/暂停恢复/两步停止回执）。诚实差异：omitAgentsMd N/A（Petri 无 AGENTS.md 注入）；无隐藏 structured_output 工具（用 spawn 参数+终态校验）；暂停只在迭代边界。证据=Node block249 7/7 + 前端 18/18 + types 0 + lint 0 error + 隔离 9223 两会话亮/暗各 19/20（roster/结构化/暂停恢复/API 部分回执/journal 实机；停止回执 UI 的 DOM 取证被既有重渲染环拖超时 → UI-559 in_progress）。reopen=回执 UI 实机取证/跨机团队/Q4b 工作流脚本。"
+      "notes": "2026-10-23 立项（用户「整完Q4a」）：把子智能体从「一个面板」升级为「一个团队」。交付=team API（leader+members/counts/journal，跨用户 403）+ 停止团队逐成员回执（cancel_requested/already_finished/not_cancelled）+ 迭代边界暂停/恢复（agent_paused/agent_resumed 事件）+ profile tools.allow/deny（只收紧、deny 优先）+ 结构化输出（schema 最小子集、终态校验、followup 纠正 ≤2、machine-readable）+ 运行级 journal（<dataDir>/agent-journal/<leader>/journal.jsonl + read_agent_journal 只读工具）+ investigator（CodebaseInvestigator）角色 + 前端团队 roster（成员切换/暂停恢复/两步停止回执）。诚实差异：omitAgentsMd N/A（Petri 无 AGENTS.md 注入）；无隐藏 structured_output 工具（用 spawn 参数+终态校验）；暂停只在迭代边界。证据=Node block249 7/7 + 前端 18/18 + types 0 + lint 0 error + 隔离 9223 两会话亮/暗各 19/20（roster/结构化/暂停恢复/API 部分回执/journal 实机；停止回执 UI 的 DOM 取证被既有重渲染环拖超时 → UI-559 in_progress；BLOCK-250 修复该环后回填为 20/20 verified）。reopen=跨机团队/Q4b 工作流脚本（回执 UI 实机取证已由 BLOCK-250 回填）。"
+    },
+    {
+      "id": "BLOCK-250-PROJECTWORKSPACE-RENDER-LOOP",
+      "capability": "projectworkspace-render-loop",
+      "path": "docs/block-250-projectworkspace-render-loop-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "UI-FIX",
+      "canonical": true,
+      "truthDomain": "projectworkspace-render-loop",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-24",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-fix",
+        "render-loop",
+        "set-state-in-effect",
+        "probe",
+        "G0"
+      ],
+      "notes": "2026-10-24 立项（用户「开工 UI-FIX」）：修掉 AUDIT-LOG 2026-10-22 登记的 ProjectWorkspace setState-in-effect 重渲染环（它把渲染线程拖慢到 CDP 求值 6–30s 超时，UI-557/558/559 都被挡过），并回填 UI-559 的停止团队回执 DOM。诊断=scripts/block250-loop-probe.mjs 以 Page.addScriptToEvaluateOnNewDocument 注入 console 包装 + navigator.sendBeacon 把警告发生瞬间的 JS 栈送出渲染器（渲染器随后会被拖死，读回不可靠）。根因（栈证据）：① useWorkSurfaceTabs 每次渲染 registry.surfaces.filter(...) 返回新数组 → surfaces 成为每轮新依赖 → 标题栏 effect 每轮重跑；② useWorkspaceTitleBar 的 effect cleanup 每次重跑都把标题栏重置为默认值（'Petri'/空 tabs）；③ ChatScrollbar 的 MutationObserver/ResizeObserver 回调每次 setMetrics 新对象（值不变也写）；④ updateWorkspaceMode 依赖 useSearchParams() 对象（每次渲染新实例）。修复=surfaces/resultSurfaces memo 化（根因）+ 标题栏复位移到卸载专用 effect + ChatScrollbar 值相等保留旧 state（导出 metricsEqual）+ updateWorkspaceMode 读 window.location.search、依赖收敛 [navigate, projectId, workspaceMode]。证据=修复前 8 条 beacon + eval_timeout_30000ms → 修复后 {\"count\":0,\"samples\":[]} 且连续 3 次 CDP 求值 [0,1,0]ms（acceptance/block-250-loop-probe.json，含 before/after 原始 stdout；同名 .log 为本机留档）+ 回归 10/10（useWorkSurfaceTabs 4 / useWorkspaceTitleBar 1 / ChatScrollbar 5）+ UI-559 实机亮/暗各 20/20（R10_stop_receipt_ui：停止回执：已请求 0 · 本就已结束 3 · 未取消 0；acceptance/ui-559/、acceptance/block-249/）+ closeout 十三门 PASS。reopen=其他 UI 缺陷独立立项（本包只拆环）。"
     }
   ],
-  "lastUpdated": "2026-10-23",
-  "documentCount": 392
+  "lastUpdated": "2026-10-24",
+  "documentCount": 393
 }

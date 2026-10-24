@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWorkSurfaceTabs } from './useWorkSurfaceTabs';
 
@@ -52,6 +52,16 @@ describe('useWorkSurfaceTabs (host integration)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'close-pack' }));
     expect(screen.getByTestId('tabs').textContent).toBe('home,files');
     expect(screen.getByTestId('active').textContent).toBe('files');
+  });
+
+  it('derived surfaces array is referentially stable across re-renders (BLOCK-250 loop regression)', async () => {
+    const { result, rerender } = renderHook(() => useWorkSurfaceTabs('project-1'));
+    await waitFor(() => expect(result.current.surfaces.some((surface) => surface.id === 'pack:bio:lab')).toBe(true));
+    const firstSurfaces = result.current.surfaces;
+    const firstResultSurfaces = result.current.resultSurfaces;
+    rerender();
+    expect(result.current.surfaces).toBe(firstSurfaces);
+    expect(result.current.resultSurfaces).toBe(firstResultSurfaces);
   });
 
   it('keeps non-closable home and applies close-others', async () => {

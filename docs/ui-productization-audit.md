@@ -1,6 +1,8 @@
 # Petri Desktop UI 产品化审计台账
 
-最后更新：2026-10-23（**UI-559 多智能体团队 roster/暂停/整体停止 in_progress**（隔离 9223 亮/暗各 19/20；roster/成员/调查员/结构化/journal 实机可见；**停止回执 UI 的 DOM 取证被既有重渲染环拖超时**）；BLOCK-249 / Q4a）：团队 roster（leader/member/角色/最近事件/结构化与 journal 徽标）+ 成员切换 + 暂停（迭代边界）/恢复 + 整体停止两步武装与逐成员回执；后端 team API + journal + 结构化输出 + 工具约束 + 调查员角色。旧记录：
+最后更新：2026-10-24（**UI-559 多智能体团队 roster/暂停/整体停止 verified**（隔离 9223 亮 20/20 + 暗 20/20；**停止回执 DOM 实机可见**）；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）：团队 roster（leader/member/角色/最近事件/结构化与 journal 徽标）+ 成员切换 + 暂停（迭代边界）/恢复 + 整体停止两步武装与逐成员回执；后端 team API + journal + 结构化输出 + 工具约束 + 调查员角色。**BLOCK-250 拆掉挡取证的重渲染环**（派生数组 memo / 标题栏复位只在卸载 / 滚动测量幂等 / 模式切换依赖收敛），探针修复前 8 警告 + 读回超时 → 修复后 0 警告 + 即时返回。旧记录：
+
+最后更新：2026-10-23（**UI-559 多智能体团队 roster/暂停/整体停止 in_progress**（隔离 9223 亮/暗各 19/20；roster/成员/调查员/结构化/journal 实机可见；**停止回执 UI 的 DOM 取证被既有重渲染环拖超时**）；BLOCK-249 / Q4a）。旧记录：
 
 最后更新：2026-10-23（**UI-558 执行轨迹（事件级）verified**（隔离 9223 亮 20/20 + 暗 20/20；离屏无窗，截图如实 unavailable）；BLOCK-248 / Q3）：右栏新增「轨迹」surface——run 统计 / 9 类筛选 / 跟随最新 / 失败定位 / recordedOnly / 加载更早 / 模型 I/O 互链；证据面聚合执行事件计数与入口；写工具无 diff 诚实态；轮次/工具行错误边界；同时移除 6 个 live 脚本的 `PETRI_TEST_ONSCREEN=1` 并加窗口策略门禁（用户二次要求屏幕不留测试窗）。旧记录：
 
@@ -5356,14 +5358,14 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **变化面**：`WorkspaceFilePreview` 划词动作条（复制/加入对话/加入速记/侧聊提问/批注不可用）；图片预览保存+多图导航+缩放预设；计划批准卡「继续讨论」带调整意见。
 - **实机待验**：三角色面都需要"文件预览拖选 / 附件图片 / 计划 draft 流程"，本包实机腿未覆盖；**代码与单测已绿**（selectionActions 9、ImagePreviewModal 6、PlanApprovalCard 5 + usePlanApprovalFlow 3），按台账纪律只能记 `in_progress`。
 
-## UI-559: 多智能体团队 roster + 暂停/恢复 + 整体停止（2026-10-23 **in_progress（隔离 9223 亮 19/20 + 暗 19/20；roster/成员/结构化/journal 已实机，回执 UI 缺证据）；BLOCK-249 / Q4a**）
+## UI-559: 多智能体团队 roster + 暂停/恢复 + 整体停止（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）**）
 
 - **变化面**：右栏「智能体」面板顶部新增**团队 roster**——leader + 成员（角色/状态/最近事件/结构化徽标/journal 徽标）、点击成员打开详情、暂停（当前步骤后生效）/恢复、整体停止两步武装 + **逐成员回执**（已请求 / 本就已结束 / 未取消）。
 - **为什么这样设计（自有形态）**：团队数据只从 `tasks` 投影（`GET /api/ai/agent/team`），不建第二套任务真源；停止回执逐成员判定、部分成功如实；暂停只在迭代边界生效（不假装冻结进行中的工具）；结构化输出由服务端终态校验（失败纠正 ≤2 次），不伪造。
 - **验证（代码）**：Node `block249-team` 7/7（团队投影/停止回执/暂停登记/journal/schema 子集/工具过滤/结构化）；前端 AgentTeamRoster 5/5 + AgentRunPanel 5/5 + categories 8/8；types 0；lint 0 error。
-- **实机证据**：`acceptance/ui-559/`（亮/暗断言 JSON + 日志 + 截图 provenance；同份落 `acceptance/block-249/`）。会话 1：父派 3 子代理（search/investigator/search+schema）→ 结构化有效 → 暂停/恢复（`effective=iteration_boundary`）→ 停止团队（API 部分回执 1 请求 / 2 已结束）→ journal 3 行；会话 2（重启 Electron 同数据根）：roster 可见、3 成员、调查员标签、结构化徽标、journal 徽标。
-- **实机抓真**：① 长回合（父等待长跑子代理）后同一渲染器会被既有重渲染环拖死 → **拆两个 Electron 会话**（后端/协议断言走 REST，UI 断言在重启后的平静页面）；② 「停止团队」点击会触发同一重渲染环 → 回执 DOM 取证超时（组件测试覆盖回执渲染、API 覆盖部分回执）；③ 离屏窗口截图不可得 → 如实 unavailable。
-- **未取证（精确缺口）**：UI 停止回执的**实机 DOM**。归属既有 ProjectWorkspace 重渲染环（AUDIT-LOG 登记项）；修好后回填。
+- **实机证据**：`acceptance/ui-559/`（亮/暗断言 JSON + 日志 + 截图 provenance；同份落 `acceptance/block-249/`）。会话 1：父派 3 子代理（search/investigator/search+schema）→ 结构化有效 → 暂停/恢复（`effective=iteration_boundary`）→ 停止团队（API 部分回执 1 请求 / 2 已结束）→ journal 3 行；会话 2（重启 Electron 同数据根）：roster 可见、3 成员、调查员标签、结构化徽标、journal 徽标 → **点「停止团队」→ 逐成员回执 DOM 可见**（`R10_stop_receipt_ui`：`停止回执：已请求 0 · 本就已结束 3 · 未取消 0` + 三行 `本就已结束`）。**亮 20/20 · 暗 20/20**。
+- **实机抓真**：① 长回合（父等待长跑子代理）后同一渲染器会被重渲染环拖死 → 拆两个 Electron 会话（后端/协议断言走 REST，UI 断言在重启后的平静页面）；② 「停止团队」点击触发同一环 → 回执 DOM 取证超时；**根因由 BLOCK-250 定位并修复**（探针栈：`ChatScrollbar` MutationObserver setState + `useWorkspaceTitleBar` effect cleanup 复位），修复后同一渲染器可直接取证；③ 离屏窗口截图不可得 → 如实 unavailable。
+- **前置修复（BLOCK-250 UI-FIX）**：`useWorkSurfaceTabs` 派生数组 memo、`useWorkspaceTitleBar` 复位移到卸载专用 effect、`ChatScrollbar` 测量值相等不写 state、`updateWorkspaceMode` 依赖收敛；回归 10/10；探针修复前 8 警告 + `eval_timeout_30000ms` → 修复后 0 警告、连续 3 次 CDP 求值 `[0,1,0]ms`（证据 `acceptance/block-250-loop-probe.json`，含 before/after 原始 stdout）。
 - **边界**：`omitAgentsMd` N/A（Petri 无 AGENTS.md 注入）；暂停不冻结进行中的工具；结构化重试只纠正不伪造。
 
 ## UI-558: 执行轨迹（事件级）+ 证据面事件聚合 + 轮次/工具行边界（2026-10-23 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；离屏无窗；BLOCK-248 / Q3）**）

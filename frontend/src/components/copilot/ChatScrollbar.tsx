@@ -2,6 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './ChatScrollbar.module.css';
 
 const TRACK_INSET = 14; // 轨道上下留白（与左 rail 的 8px 内衬感对齐）
+
+interface ScrollbarMetrics { clientH: number; scrollH: number; scrollTop: number }
+
+/** 度量值相等即不写 state：观察器回调不是重渲染源（BLOCK-250 环根因之一）。 */
+export function scrollbarMetricsEqual(a: ScrollbarMetrics, b: ScrollbarMetrics): boolean {
+  return a.clientH === b.clientH && a.scrollH === b.scrollH && a.scrollTop === b.scrollTop;
+}
 const THUMB_LENGTH = 75; // UI-269：thumb 固定长度（初版 125px，UI-270 增补用户裁决「改成75px」）
 
 interface ChatScrollbarProps {
@@ -28,10 +35,11 @@ export function ChatScrollbar({ containerRef }: ChatScrollbarProps) {
   const measure = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
-    setMetrics({
-      clientH: el.clientHeight,
-      scrollH: el.scrollHeight,
-      scrollTop: el.scrollTop,
+    // 值不变就不 setState：MutationObserver/ResizeObserver 会在每次 DOM 变更时回调，
+    // 每次写新对象会把"测量"变成"重渲染源"（BLOCK-250 实机抓真：Maximum update depth）。
+    setMetrics((prev) => {
+      const next = { clientH: el.clientHeight, scrollH: el.scrollHeight, scrollTop: el.scrollTop };
+      return scrollbarMetricsEqual(prev, next) ? prev : next;
     });
   }, [containerRef]);
 

@@ -21,7 +21,7 @@ status: completed
 ## 0. 交接摘要（换 agent 先读这一节）
 
 - **母纲**：`docs/qoder-essence-absorption-plan.md` §Q4a（C7/C10/F1/F3/F4/F5 + F9）与 §6.5 第 5 行。
-- **当前状态**：`completed`。**`npm run closeout` 十三门 PASS**（test:changed 463s + ui:audit 126s + lint 34.9s + types 6.5s + knip 281 键冻结）；Node `block249-team` 7/7；实机亮/暗各 19/20（UI-559 `in_progress`：停止回执 UI 的 DOM 被既有重渲染环拖超时）。
+- **当前状态**：`completed`。**`npm run closeout` 十三门 PASS**（test:changed 463s + ui:audit 126s + lint 34.9s + types 6.5s + knip 281 键冻结）；Node `block249-team` 7/7；实机亮/暗各 19/20；**UI-559 后由 BLOCK-250 修复重渲染环并回填为亮/暗各 20/20（verified）**。
 - **红线**：零新依赖；不建第二套任务/事件真源（团队数据全部从 `tasks`/`task_events` 投影）；工具约束**只收紧**；暂停只在迭代边界生效（不假装能冻结正在跑的工具）；结构化输出校验失败**如实回传**，不伪造；不碰 hook 系统 / Q4b 工作流脚本 / G1+。
 - **与母纲的诚实差异**（实现口径，不夸大）：① Petri 没有 `structured_output` 隐藏工具 → 用 spawn 参数 + 终态校验 + followup 重试；② Petri 不做 AGENTS.md 注入 → `omitAgentsMd` 为 N/A（不加空键）；③ 暂停粒度=迭代边界（母纲"若后端支持"）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -65,7 +65,7 @@ frontend/src/lib/agentTeamClient.ts            ← team API 客户端（类型�
 | P3 工具约束 | ✅ | profile tools.allow/deny（schema 键）+ 子代理工具集过滤（只收紧）+ 契约测试 |
 | P4 结构化输出 | ✅ | schema 子集校验 + 终态校验 + followup ≤2 + `structured` 机器可读（实机有效） |
 | P5 journal + 调查员 | ✅ | journal 落盘/读取 + `read_agent_journal` + investigator 角色（实机 3 行） |
-| P6 实机 + 收口 | ✅ | 两会话实机亮/暗各 19/20；closeout；UI-559 in_progress（回执 UI 缺口） |
+| P6 实机 + 收口 | ✅ | 两会话实机亮/暗各 19/20；closeout；回执 UI 缺口由 BLOCK-250 回填（20/20，verified） |
 
 ## 4. 实码锚点（接手者可直接查）
 
@@ -94,8 +94,8 @@ frontend/src/lib/agentTeamClient.ts            ← team API 客户端（类型�
 
 - Node：`test/block249-team.test.mjs` **7/7**（schema 子集/工具过滤/暂停登记/journal/团队投影与停止回执/存储暂停与合成事件/结构化评估）+ 工具计数回归（84 工具）全绿。
 - 前端定向 **18/18**：AgentTeamRoster 5（roster/两步停止/回执/暂停恢复/空态）、AgentRunPanel 5、agentCategories 8。
-- 实机（隔离 9223，mock provider，**离屏**，**两会话**）：**亮 19/20 · 暗 19/20**（`acceptance/ui-559/`、`acceptance/block-249/`）。会话 1 验证：3 子代理（roles search/investigator/search）→ 结构化有效 → 暂停/恢复（API `paused`/`running`，`effective=iteration_boundary`）→ 停止团队部分回执（`requested=1 / alreadyFinished=2`）→ journal 3 行；会话 2（重启 Electron，同数据根）验证：roster 可见/3 成员/调查员标签/结构化徽标/journal 徽标。
-- **唯一未取证格**：UI「停止团队」两步点击后的**回执 DOM**——该点击会触发既有 ProjectWorkspace 重渲染环，CDP 求值 20s 超时（同一会话内 pause/resume 点击可过，停止点击必挂）。回执渲染由 `AgentTeamRoster` 组件测试覆盖（逐成员 outcome 行）；停止动作与部分回执已由真实 API 取证。UI-559 记 `in_progress`，不拿组件测试冒充实机 DOM。
+- 实机（隔离 9223，mock provider，**离屏**，**两会话**）：首轮 **亮 19/20 · 暗 19/20**（`acceptance/ui-559/`、`acceptance/block-249/`）。会话 1 验证：3 子代理（roles search/investigator/search）→ 结构化有效 → 暂停/恢复（API `paused`/`running`，`effective=iteration_boundary`）→ 停止团队部分回执（`requested=1 / alreadyFinished=2`）→ journal 3 行；会话 2（重启 Electron，同数据根）验证：roster 可见/3 成员/调查员标签/结构化徽标/journal 徽标。**BLOCK-250 修复重渲染环后复跑：亮/暗各 20/20，含停止回执 DOM。**
+- **原唯一未取证格（已补齐）**：UI「停止团队」两步点击后的**回执 DOM** 曾被既有 ProjectWorkspace 重渲染环拖到 CDP 20s 超时。BLOCK-250 定位并修复该环（探针 0 警告）后复跑，回执 DOM 实机可见（`停止回执：已请求 0 · 本就已结束 3 · 未取消 0` + 三行成员 outcome），UI-559 `verified`。
 - 截图：离屏窗口 `Page.captureScreenshot` 等不到合成帧 → 如实记 `unavailable`（`ui559-screenshots-{light,dark}.json`），不开窗换证据。
 - 门禁：`npm run closeout` 十三门 **PASS**（test:changed 463s + ui:audit 126s + lint 0 error + types 0 + knip 281 键冻结 + `skills:check` 报告级 OK）+ canonical 回写 + 本地提交（不推送）。
 

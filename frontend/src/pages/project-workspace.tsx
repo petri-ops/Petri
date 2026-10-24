@@ -324,9 +324,8 @@ export function ProjectWorkspace(): React.ReactElement {
     },
     [startBottomTerminalResize]
   );
-  // T85: navigation now pushes the mode into the URL sub-path
-  // (`/project/:id/<mode>?job=...`) instead of the `?mode=` query param. The
-  // `?job=`/`?artifact=`/`?file=` query params are preserved for deep links.
+  // T85: mode 进 URL 子路径（`/project/:id/<mode>`）；`?job=`/`?artifact=`/`?file=` 深链保留。
+  // 旧 `?mode=` 仍由下面的归一化 effect 迁到子路径。
   const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
     const currentIsResult = isResultWorkspaceMode(workspaceMode);
     const nextIsResult = isResultWorkspaceMode(nextMode);
@@ -337,7 +336,8 @@ export function ProjectWorkspace(): React.ReactElement {
     }
     const seg = modeToSegment(nextMode);
     const base = seg ? `/project/${projectId}/${seg}` : `/project/${projectId}`;
-    const nextParams = new URLSearchParams(searchParams);
+    // 读当前 URL（不是 useSearchParams 对象）：后者每轮新实例会让回调逐轮换引用（BLOCK-250 环）。
+    const nextParams = new URLSearchParams(window.location.search);
     const nextCarriesJob = (nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && Boolean(jobId);
     if (!nextCarriesJob || nextParams.get('job') !== jobId) {
       openResultRequestSequenceRef.current += 1;
@@ -353,7 +353,7 @@ export function ProjectWorkspace(): React.ReactElement {
     nextParams.delete('mode');
     const query = nextParams.toString();
     void navigate(query ? `${base}?${query}` : base, { replace });
-  }, [leftOpen, rightOpen, searchParams, navigate, projectId, workspaceMode]);
+  }, [navigate, projectId, workspaceMode]);
   // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
   // 顺手收起左栏：侧栏只由用户主动点击改变。
   const openRightPanel = useCallback((tab: string) => {

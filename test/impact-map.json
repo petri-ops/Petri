@@ -5193,6 +5193,29 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block250-projectworkspace-render-loop",
+      "note": "BLOCK-250 UI-FIX：ProjectWorkspace 重渲染环（派生数组 memo / 标题栏卸载复位 / 测量幂等 / 模式切换依赖收敛）+ 探针 + UI-559 回执回填。",
+      "patterns": [
+        "frontend/src/hooks/useWorkSurfaceTabs.ts",
+        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.ts",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.test.tsx",
+        "frontend/src/components/copilot/ChatScrollbar.tsx",
+        "frontend/src/components/copilot/ChatScrollbar.test.tsx",
+        "frontend/src/pages/project-workspace.tsx",
+        "scripts/block250-*.mjs",
+        "docs/block-250-projectworkspace-render-loop-plan.md",
+        "acceptance/block-250*"
+      ],
+      "tests": [
+        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.test.tsx",
+        "frontend/src/components/copilot/ChatScrollbar.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

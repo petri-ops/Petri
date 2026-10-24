@@ -1,24 +1,24 @@
 {
   "name": "ui559-team-live",
   "darkMode": false,
-  "startedAt": "2026-10-23T18:01:35.986Z",
-  "finishedAt": "2026-10-23T18:04:39.264Z",
+  "startedAt": "2026-10-24T00:14:31.795Z",
+  "finishedAt": "2026-10-24T00:16:33.268Z",
   "providerCalls": 9,
   "assertions": [
     {
       "name": "E1_project_created",
       "pass": true,
-      "detail": "projectId=p_mvla11lj_91i9 status=200"
+      "detail": "projectId=p_mvlncmwd_5afx status=200"
     },
     {
       "name": "E1b_workspace_resolved",
       "pass": true,
-      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-CXVbq5\\data\\projects\\ui-559-mvla11lj"
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-a351C0\\data\\projects\\ui-559-mvlncmwd"
     },
     {
       "name": "E2_isolated_stack",
       "pass": true,
-      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-CXVbq5"
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui559-live-a351C0"
     },
     {
       "name": "W0_project_selected",
@@ -33,7 +33,7 @@
     {
       "name": "R1_leader_task_resolved",
       "pass": true,
-      "detail": "conversation=conv_7608ef26-db3 leader=1d7318be-43a6-473e-a7d5-c2e1288054c9"
+      "detail": "conversation=conv_de8544a6-2ad leader=2344e17c-17d6-406e-9d7c-e56f242861c9"
     },
     {
       "name": "R2_three_members_with_roles",
@@ -63,12 +63,12 @@
     {
       "name": "R7_stop_partial_receipt_api",
       "pass": true,
-      "detail": "{\"status\":200,\"summary\":{\"requested\":1,\"alreadyFinished\":2,\"notCancelled\":0},\"members\":[[\"e13005\",\"already_finished\"],[\"dd4e7f\",\"cancel_requested\"],[\"54be69\",\"already_finished\"]]}"
+      "detail": "{\"status\":200,\"summary\":{\"requested\":1,\"alreadyFinished\":2,\"notCancelled\":0},\"members\":[[\"2b7808\",\"already_finished\"],[\"ec9b26\",\"cancel_requested\"],[\"ab1752\",\"already_finished\"]]}"
     },
     {
       "name": "E4_leader_resolved_for_ui",
       "pass": true,
-      "detail": "1d7318be-43a6-473e-a7d5-c2e1288054c9"
+      "detail": "2344e17c-17d6-406e-9d7c-e56f242861c9"
     },
     {
       "name": "E5_ui_session_restarted",
@@ -78,7 +78,7 @@
     {
       "name": "W2_leader_env",
       "pass": true,
-      "detail": "1d7318be-43a6-473e-a7d5-c2e1288054c9"
+      "detail": "2344e17c-17d6-406e-9d7c-e56f242861c9"
     },
     {
       "name": "W3_ui_session_ready",
@@ -97,8 +97,8 @@
     },
     {
       "name": "R10_stop_receipt_ui",
-      "pass": false,
-      "detail": "stopClicked=eval_failed:cdp_eval_timeout/eval_failed:cdp_eval_timeout"
+      "pass": true,
+      "detail": "停止回执：已请求 0 · 本就已结束 3 · 未取消 02b780859 → 本就已结束ec9b2682 → 本就已结束ab175247 → 本就已结束"
     },
     {
       "name": "E3_mock_provider_used",
@@ -106,5 +106,5 @@
       "detail": "9"
     }
   ],
-  "allPass": false
+  "allPass": true
 }
