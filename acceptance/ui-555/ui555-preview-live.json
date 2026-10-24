@@ -1,0 +1,146 @@
+{
+  "name": "ui555-preview-live",
+  "darkMode": false,
+  "syntheticDraftPlan": "plan_ui555_live",
+  "startedAt": "2026-10-24T01:02:08.426Z",
+  "finishedAt": "2026-10-24T01:02:38.902Z",
+  "providerCalls": 3,
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvlp1v2e_269y status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui555-live-4klKWm\\data\\projects\\ui-555-mvlp1v2e"
+    },
+    {
+      "name": "E2_conversation_created",
+      "pass": true,
+      "detail": "conversationId=conv_775a8154-944 status=200"
+    },
+    {
+      "name": "E3_synthetic_draft_plan",
+      "pass": true,
+      "detail": "plans=1 steps=2 status=200"
+    },
+    {
+      "name": "E4_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui555-live-4klKWm"
+    },
+    {
+      "name": "S0_first_run_overlay_dismissed",
+      "pass": true,
+      "detail": "dismissed=true"
+    },
+    {
+      "name": "S1_file_preview_ready",
+      "pass": true,
+      "detail": "UI-555 预览样本\n划词动作实机样本第一句。\n第二段用于验证加入速记与侧聊。\n\n列表项一\n列表项二\n"
+    },
+    {
+      "name": "S2_selection_bar_visible",
+      "pass": true,
+      "detail": "[\"copy\",\"quote\",\"scratchpad\",\"side-chat\",\"annotate(disabled)\"]"
+    },
+    {
+      "name": "S3_annotation_disabled_reason",
+      "pass": true,
+      "detail": "{\"id\":\"annotate\",\"label\":\"批注\",\"disabled\":true,\"hint\":\"文本批注暂不支持：批注只支持 PDF 与图像文件；可先「加入对话」让 Agent 解读这段\"}"
+    },
+    {
+      "name": "S4_quote_chip_created",
+      "pass": true,
+      "detail": "[\"preview-note.md\"]"
+    },
+    {
+      "name": "S5_copy_payload",
+      "pass": true,
+      "detail": "patched:real clipboardReal=false text=\"划词动作实机样本第一句。\""
+    },
+    {
+      "name": "S6_scratchpad_persisted",
+      "pass": true,
+      "detail": "notice=已存入速记板 status=200 entries=1 hit=scr_0d103b9c-d17c-4a6e-a71c-b8eb74c6f5e5 chipsBefore=1"
+    },
+    {
+      "name": "S7_side_chat_opened",
+      "pass": true,
+      "detail": "side-chat-dock visible"
+    },
+    {
+      "name": "S8_selection_quote_in_request",
+      "pass": true,
+      "detail": "n=1 head=【引用 preview-note.md】\n> 划词动作实机样本第一句。\n\n请解读我选中的这段，并说明下一步。"
+    },
+    {
+      "name": "P1_plan_card_visible",
+      "pass": true,
+      "detail": "计划待批准UI-555 计划反馈样本验证计划调整意见不会停在输入框读取工作区并质控子智能体降维与聚类计划正文（spec）目标把计划意见带回模型，而不是只收起卡片。在计划面查看批准并执行批准并清上下文执行继续讨论（含 1 个子智能体步骤）写在这里再点上面的讨论按钮，Agent 会按意见重排步骤表；留空则只是收起这张卡。"
+    },
+    {
+      "name": "P2_plan_feedback_sent_to_model",
+      "pass": true,
+      "detail": "n=2 head=计划「UI-555 计划反馈样本」需要调整：第二步拆成两步：先做质控，再跑降维\n\n（planId: plan_ui555_live；请据此修订步骤表并继续留在计划档，暂不执行）"
+    },
+    {
+      "name": "P3_plan_still_draft",
+      "pass": true,
+      "detail": "status=200 planStatus=draft"
+    },
+    {
+      "name": "P4_plan_card_reappears",
+      "pass": true,
+      "detail": "draft 计划在回合结束后被重新拉取：true"
+    },
+    {
+      "name": "I1_two_attachments",
+      "pass": true,
+      "detail": "2 thumbs"
+    },
+    {
+      "name": "I2_preview_counter_1_of_2",
+      "pass": true,
+      "detail": "{\"counter\":\"1/2\",\"name\":\"ui555-red.png 1/2\"}"
+    },
+    {
+      "name": "I3a_nav_next_2_of_2",
+      "pass": true,
+      "detail": "{\"counter\":\"2/2\",\"name\":\"ui555-blue.png 2/2\"}"
+    },
+    {
+      "name": "I3b_nav_keyboard_1_of_2",
+      "pass": true,
+      "detail": "{\"counter\":\"1/2\",\"name\":\"ui555-red.png 1/2\"}"
+    },
+    {
+      "name": "I4a_zoom_200",
+      "pass": true,
+      "detail": "{\"label\":\"200%\",\"transform\":\"scale(2)\"}"
+    },
+    {
+      "name": "I4b_zoom_50",
+      "pass": true,
+      "detail": "{\"label\":\"50%\",\"transform\":\"scale(0.5)\"}"
+    },
+    {
+      "name": "I5_save_contract",
+      "pass": true,
+      "detail": "{\"download\":\"ui555-red.png\",\"href\":\"data:image/png;base64,iVBORw0KGg\",\"text\":\"\"}"
+    },
+    {
+      "name": "I6_attachments_removed",
+      "pass": true,
+      "detail": "removed:2"
+    },
+    {
+      "name": "E5_mock_provider_used",
+      "pass": true,
+      "detail": "3"
+    }
+  ],
+  "allPass": true
+}

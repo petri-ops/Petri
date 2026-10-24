@@ -5216,6 +5216,28 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block251-ui555-live-evidence",
+      "note": "BLOCK-251 UI-555 实机腿：划词动作条 / 图片预览 / 计划反馈意见上行（隔离栈 + mock provider）。",
+      "patterns": [
+        "scripts/block251-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui555-*.cjs",
+        "docs/block-251-ui555-live-evidence-plan.md",
+        "test/plan-feedback-wiring.test.mjs",
+        "acceptance/ui-555/**",
+        "acceptance/block-251/**"
+      ],
+      "tests": [
+        "test/plan-feedback-wiring.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/selectionActions.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ImagePreviewModal.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/usePlanApprovalFlow.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

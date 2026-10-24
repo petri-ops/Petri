@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-24（**UI-555 划词动作 / 图片预览 / 计划反馈 verified**（隔离 9223 亮/暗各 **27/27**；BLOCK-251）：文件预览真实 DOM Range 划词 → 动作条 5 项（批注禁用带理由）→ 引用 chip 且**请求体含 `【引用 preview-note.md】`+原文** → 速记 REST 落库 / 侧聊 dock / 复制载荷；图片拖入两张 PNG → 预览 1/2→2/2→←键→200%/50% 缩放 → 保存锚点；计划卡「继续讨论」意见真实进 mock 请求体且计划仍 draft。**实机抓到真缺陷**：宿主 `SimpleChat` 的 `onApprove` 丢掉 feedback 参数（两层单测都绿、端到端失效）→ 已修 + `test/plan-feedback-wiring.test.mjs` 守卫）。旧记录：
+
 最后更新：2026-10-24（**UI-559 多智能体团队 roster/暂停/整体停止 verified**（隔离 9223 亮 20/20 + 暗 20/20；**停止回执 DOM 实机可见**）；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）：团队 roster（leader/member/角色/最近事件/结构化与 journal 徽标）+ 成员切换 + 暂停（迭代边界）/恢复 + 整体停止两步武装与逐成员回执；后端 team API + journal + 结构化输出 + 工具约束 + 调查员角色。**BLOCK-250 拆掉挡取证的重渲染环**（派生数组 memo / 标题栏复位只在卸载 / 滚动测量幂等 / 模式切换依赖收敛），探针修复前 8 警告 + 读回超时 → 修复后 0 警告 + 即时返回。旧记录：
 
 最后更新：2026-10-23（**UI-559 多智能体团队 roster/暂停/整体停止 in_progress**（隔离 9223 亮/暗各 19/20；roster/成员/调查员/结构化/journal 实机可见；**停止回执 UI 的 DOM 取证被既有重渲染环拖超时**）；BLOCK-249 / Q4a）。旧记录：
@@ -5353,10 +5355,13 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机抓真**：① 首启角色揭示浮层在**导航之后**才异步出现，截图会拍成欢迎页（截图前统一再兜一次浮层）；② 速记板开态住在 React 里，宿主重渲染时面板会被关掉——已登记 AUDIT-LOG「当前待处理项」，本包先在流程侧做幂等"确保打开"，不掩盖行为。
 - **未覆盖**：划词动作条（需文件预览里真拖选）、图片预览多图/保存、计划反馈输入——三项只有单测，见 UI-555。
 
-## UI-555: Q2 余项单测面（划词动作 / 图片预览 / 计划反馈）（2026-10-23 **in_progress（代码+单测绿，无实机腿；BLOCK-246）**）
+## UI-555: Q2 余项实机面（划词动作 / 图片预览 / 计划反馈）（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮 27/27 + 暗 27/27；BLOCK-251）**）
 
-- **变化面**：`WorkspaceFilePreview` 划词动作条（复制/加入对话/加入速记/侧聊提问/批注不可用）；图片预览保存+多图导航+缩放预设；计划批准卡「继续讨论」带调整意见。
-- **实机待验**：三角色面都需要"文件预览拖选 / 附件图片 / 计划 draft 流程"，本包实机腿未覆盖；**代码与单测已绿**（selectionActions 9、ImagePreviewModal 6、PlanApprovalCard 5 + usePlanApprovalFlow 3），按台账纪律只能记 `in_progress`。
+- **变化面**：`WorkspaceFilePreview` 划词动作条（复制/加入对话/加入速记/侧聊提问/批注不可用）；图片预览保存契约+多图导航+缩放预设；计划批准卡「继续讨论」带调整意见。
+- **为什么这样设计**：划词只产既有 `selectionQuote` 事件（不建第四注入通道）；批注在文本面禁用但**不隐藏**，给出「只支持 PDF 与图像」的理由；图片保存用 download 锚点保留原文件名；计划意见走既有 keep-planning 回合，不新建审批面。
+- **实机证据**：`acceptance/ui-555/`（亮/暗断言 JSON + 四张截图；同份 `acceptance/block-251/`）。断言链：文件预览打开 → 真实 DOM Range 划词 → 动作条 5 项（批注 disabled + 理由）→ 引用 chip → **mock 请求体含 `【引用 preview-note.md】` 与原文** → 速记 REST 条目（`sourceKind=selection`/`sourceRef=preview-note.md`）→ 侧聊 dock 开合 → 复制载荷与选区一致（离屏真实写剪贴板失败，如实标 `clipboardReal=false`）→ 两张 16×16 PNG 拖入 → 预览 `1/2`→`2/2`→`←` 回 `1/2` → 200%/50% 缩放标签与 transform 同步 → 保存锚点 `download=ui555-red.png` + `data:image/png` → 移除附件；合成 draft 计划 → 意见进 mock 请求体（含 planId）→ 计划仍 draft → 回合后卡片重拉。
+- **实机抓真（真缺陷，已修）**：`SimpleChat` 的 `PlanApprovalCard onApprove={(action) => handlePlanApprove(action)}` **丢掉了卡片传出的 `{feedback}` 第二参数**——`PlanApprovalCard` 单测与 `usePlanApprovalFlow` 单测都绿，但用户在真实宿主里写意见只会收起卡片，意见从未上行。已改为 `(action, options)` 转发，并新增 `test/plan-feedback-wiring.test.mjs` 机械守卫。
+- **边界**：图片保存只验锚点契约（不点写盘，避免污染用户 Downloads）；计划为合成 draft 夹具（报告标 synthetic）；离屏窗口可截图（本轮四张均成功）。
 
 ## UI-559: 多智能体团队 roster + 暂停/恢复 + 整体停止（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）**）
 
