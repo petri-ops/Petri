@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-24T03:20:19.686Z -->
 | ✅ BLOCK-241（Q8 大目录懒加载，2026-10-22；用户「启动 BLOCK-241：大目录懒加载」） | 2026-10-22 | **completed**：超阈值 MCP server 只投影 catalog（R1，list/describe）+ call（R2，按名代理）；call 时复核 server allow/block + 逐工具 enabled/timeout；小目录零变化；货架显示目录模式。证据=block241 5/5 + mcp-projection 15/15 + 前端 18/18 + 9223 live 7/7 + closeout 十三门；UI-549 verified。reopen=按 hint 动态降档/分页>200/设置页阈值/真实>200/Q1 | BLOCK-241 / P5-CLOSED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-24T05:27:10.194Z -->
+| ✅ BLOCK-242（Q8 深链安装安全面，2026-10-22；用户「按照建议开 242深链安装安全面 一次整完」） | 2026-10-22 | **completed**：`petri-install://` pack/mcp 双 kind——只读预览名称/来源/下载地址/大小/SHA-256/风险/替换警告；确认重取对账 + sha/size 双验；env 禁止；pack 走 pack-lifecycle、MCP 走 mcp-settings（冲突需显式替换）；OS 协议注册（测试实例跳过）+ 扩展页「从链接安装」。证据=core 8/8 + 弹层 2/2 + 通道漂移 5/5 + 隔离 9223 live 10/10 + closeout 十三门；UI-550 verified。reopen=packaged 真机唤起/签名/allowlist/Q1 | BLOCK-242 / P5-CLOSED |

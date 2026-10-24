@@ -126,6 +126,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-dialog-snapshot.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-save-dialog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/pack-lifecycle.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/q5rem-plan-tools-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui342-endpoint-grid.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs",

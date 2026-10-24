@@ -76,6 +76,7 @@ export function RightFileTree({
   // UI-451 — 关闭涉及脏 tab 时的确认弹层（复用 fileTreeDialog 样式族）。
   const [closeConfirm, setCloseConfirm] = useState<{ paths: string[]; dirtyNames: string[] } | null>(null);
   const [openError, setOpenError] = useState('');
+  const [showInFolderNotice, setShowInFolderNotice] = useState('');
   const [opening, setOpening] = useState(false);
   const activeFileSignatureRef = useRef<string | null>(null);
   // UI-399 — 最新活动文件引用：refreshFiles 读 ref 而非闭包捕获，身份保持稳定。
@@ -829,8 +830,13 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
                 return;
               }
               setOpenError('');
+              setShowInFolderNotice('');
               void filesBridge.showInFolder(project.workspacePath, activeFile.path).then((result) => {
-                if (!result.ok) setOpenError(result.error || '无法在文件管理器中显示该文件');
+                if (result.ok) {
+                  setShowInFolderNotice(result.testInstance ? '已在文件管理器中显示（测试实例干跑）' : '已在文件管理器中显示');
+                  return;
+                }
+                setOpenError(result.error || '无法在文件管理器中显示该文件');
               }).catch((error: Error) => {
                 setOpenError(error.message || '无法在文件管理器中显示该文件');
               });
@@ -854,6 +860,11 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
           </button>
         )}
       </div>
+      {showInFolderNotice ? (
+        <div className={styles.workspaceTreeNotice} role="status" data-testid="file-show-in-folder-status">
+          {showInFolderNotice}
+        </div>
+      ) : null}
       <div className={styles.workspaceFilesMain}>
         <div className={styles.workspaceFilePreviewPane}>
           {/* UI-451 — 多 tab 常驻：tab 条 + keep-alive 预览栈。每个打开文件一个常驻

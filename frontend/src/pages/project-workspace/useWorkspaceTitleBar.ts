@@ -47,6 +47,13 @@ interface UseWorkspaceTitleBarOptions {
   setRightOpen: (open: boolean) => void;
   setRightTab: (tab: RightPanelMode) => void;
   setRightToolMenuOpen: Dispatch<SetStateAction<boolean>>;
+  // BLOCK-253 E1 — 宿主入口统一：中心模式/终端/侧聊与右轨面同菜单列出。
+  workspaceMode: string;
+  onSwitchWorkspaceMode: (mode: 'result' | 'code' | 'compare' | 'history') => void;
+  bottomTerminalOpen: boolean;
+  onToggleBottomTerminal: () => void;
+  sideChatOpen: boolean;
+  onToggleSideChat: () => void;
 }
 
 export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void {
@@ -76,6 +83,12 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     setRightOpen,
     setRightTab,
     setRightToolMenuOpen,
+    workspaceMode,
+    onSwitchWorkspaceMode,
+    bottomTerminalOpen,
+    onToggleBottomTerminal,
+    sideChatOpen,
+    onToggleSideChat,
   } = options;
 
   // UI-446 v4 — 审阅 tab 计数徽章：当前会话未审工作区改动文件数（激活审阅 tab 即归零）
@@ -107,6 +120,15 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     () => surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
     [surfaces]
   );
+  // BLOCK-253 E1 — 宿主入口统一：工作区模式/底部终端/侧聊与右轨面同一菜单。
+  const hostToolItems = useMemo(() => [
+    { id: 'host:mode:result', label: '结果', icon: 'bar-chart' as const, isOpen: workspaceMode === 'result' },
+    { id: 'host:mode:code', label: '代码', icon: 'layers' as const, isOpen: workspaceMode === 'code' },
+    { id: 'host:mode:compare', label: '审查', icon: 'git-branch' as const, isOpen: workspaceMode === 'compare' },
+    { id: 'host:mode:history', label: '历史', icon: 'message-circle' as const, isOpen: workspaceMode === 'history' },
+    { id: 'host:terminal', label: '终端', icon: 'terminal' as const, isOpen: bottomTerminalOpen },
+    { id: 'host:side-chat', label: '侧聊', icon: 'message-circle' as const, isOpen: sideChatOpen },
+  ], [workspaceMode, bottomTerminalOpen, sideChatOpen]);
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
       ? '完成'
@@ -178,19 +200,37 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
       onCloseAllTabs: closeAllTabs ? () => closeAllTabs() : null,
       onMoreAction: () => setRightToolMenuOpen((value) => !value),
       toolMenuOpen: rightToolMenuOpen,
-      toolMenuItems: toolSurfaceItems.map((surface) => ({
-        id: surface.id,
-        label: surface.title,
-        icon: surface.icon,
-        isOpen: tabs.some((tab) => tab.surfaceId === surface.id),
-      })),
-      onSelectToolItem: (surfaceId) => {
-        if (surfaceId === 'results') {
+      toolMenuItems: [
+        ...hostToolItems,
+        ...toolSurfaceItems.map((surface) => ({
+          id: surface.id,
+          label: surface.title,
+          icon: surface.icon,
+          isOpen: tabs.some((tab) => tab.surfaceId === surface.id),
+        })),
+      ],
+      onSelectToolItem: (itemId) => {
+        if (itemId === 'host:terminal') {
+          onToggleBottomTerminal();
+          setRightToolMenuOpen(false);
+          return;
+        }
+        if (itemId === 'host:side-chat') {
+          onToggleSideChat();
+          setRightToolMenuOpen(false);
+          return;
+        }
+        if (itemId.startsWith('host:mode:')) {
+          onSwitchWorkspaceMode(itemId.slice('host:mode:'.length) as 'result' | 'code' | 'compare' | 'history');
+          setRightToolMenuOpen(false);
+          return;
+        }
+        if (itemId === 'results') {
           handleOpenRightResults();
           setRightToolMenuOpen(false);
           return;
         }
-        openRightPanel(surfaceId as RightPanelMode);
+        openRightPanel(itemId as RightPanelMode);
         setRightToolMenuOpen(false);
       },
       resultItems: titleBarResultItems,
@@ -219,6 +259,10 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     tabs,
     surfaces,
     toolSurfaceItems,
+    hostToolItems,
+    onSwitchWorkspaceMode,
+    onToggleBottomTerminal,
+    onToggleSideChat,
     projectName,
     titleBarTitle,
     rightTab,

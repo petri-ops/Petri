@@ -480,7 +480,7 @@ declare global {
         showInFolder: (
           workspacePath: string,
           relativePath: string
-        ) => Promise<{ ok: boolean; error?: string }>;
+        ) => Promise<{ ok: boolean; testInstance?: boolean; path?: string; error?: string }>;
         /** UI-400-2 — 导出/下载：主进程保存对话框 + 受限本机来源流式写盘。 */
         downloadFromUrl: (
           url: string,

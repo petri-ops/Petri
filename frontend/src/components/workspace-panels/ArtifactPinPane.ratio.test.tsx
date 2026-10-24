@@ -100,3 +100,25 @@ describe('ArtifactPinPane 分屏比例可调（D18 锚）', () => {
     expect(columns()).not.toContain('NaN');
   });
 });
+
+describe('ArtifactPinPane 窗格最大化（BLOCK-253 F7）', () => {
+  beforeEach(() => { localStorage.clear(); });
+  afterEach(() => { cleanup(); });
+
+  it('主区/副栏最大化与恢复，恢复后比例不变', () => {
+    localStorage.setItem(RATIO_KEY, '70');
+    renderSplit();
+    fireEvent.click(screen.getByTestId('artifact-pin-maximize-main'));
+    expect(screen.queryByTestId('artifact-pin-divider')).toBeNull();
+    expect(screen.queryByTestId('artifact-pin-pane')).toBeNull();
+    expect(screen.getByTestId('artifact-pin-main')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('artifact-pin-restore'));
+    expect(ratioNow()).toBe(70);
+
+    fireEvent.click(screen.getByTestId('artifact-pin-maximize-pin'));
+    expect(screen.queryByTestId('artifact-pin-main')).toBeNull();
+    expect(screen.getByTestId('artifact-pin-pane')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('artifact-pin-restore'));
+    expect(ratioNow()).toBe(70);
+  });
+});

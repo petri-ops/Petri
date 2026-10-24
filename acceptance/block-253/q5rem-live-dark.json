@@ -1,0 +1,83 @@
+{
+  "name": "q5rem-plan-tools-live",
+  "darkMode": true,
+  "synthetic": {
+    "planId": "plan_q5rem_live",
+    "revisionNo": 1
+  },
+  "startedAt": "2026-10-24T05:06:54.277Z",
+  "finishedAt": "2026-10-24T05:10:12.439Z",
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvlxsmr8_8i1a status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-q5rem-live-ou4SC9\\data\\projects\\q5-rem-mvlxsmr8"
+    },
+    {
+      "name": "E1c_conversation_created",
+      "pass": true,
+      "detail": "conversationId=conv_c9d43883-509"
+    },
+    {
+      "name": "E2_synthetic_plan_revision",
+      "pass": true,
+      "detail": "plan=plan_q5rem_live pending=1 revisions=1"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-q5rem-live-ou4SC9"
+    },
+    {
+      "name": "H1_host_entries_in_tools_menu",
+      "pass": true,
+      "detail": "[\"结果\",\"代码\",\"审查\",\"历史\",\"终端\",\"侧聊\",\"结果\",\"文件\",\"生成文件\",\"浏览器\",\"分析\",\"审阅\",\"指挥中心\",\"轨迹\",\"模型 I/O\",\"智能体\",\"计划\",\"证据\"]"
+    },
+    {
+      "name": "P1_revision_tab_visible",
+      "pass": true,
+      "detail": "v1 · 待批准"
+    },
+    {
+      "name": "P1b_revision_detail",
+      "pass": true,
+      "detail": "计划\n1 个\nQ5-REM 计划修订样本\n执行中\n1/2\nQ5-REM 计划修订样本\n执行中\n当前\nv1 · 待批准\n修订 v1\n待批准\n\n原因：第二步拆成两步：先质控再降维\n\n读取数据\n先做质控 — 修订新增\n降维与聚类\n批准修订\n复制\n下载 .md\n在对话中讨论"
+    },
+    {
+      "name": "P2_revision_applied_rest",
+      "pass": true,
+      "detail": "revisions=1 steps=[\"读取数据\",\"先做质控\",\"降维与聚类\"]"
+    },
+    {
+      "name": "P2b_revision_applied_ui",
+      "pass": true,
+      "detail": "v1 · 已应用"
+    },
+    {
+      "name": "F1_bridge_test_instance_dry_run",
+      "pass": true,
+      "detail": "{\"ok\":true,\"testInstance\":true,\"path\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\petri-q5rem-live-ou4SC9\\\\data\\\\projects\\\\q5-rem-mvlxsmr8\\\\note.txt\"}"
+    },
+    {
+      "name": "F2_show_in_folder_status",
+      "pass": true,
+      "detail": "已在文件管理器中显示（测试实例干跑）"
+    },
+    {
+      "name": "H2a_side_chat_toggled",
+      "pass": true,
+      "detail": "side-chat-dock visible"
+    },
+    {
+      "name": "H2b_terminal_toggled",
+      "pass": true,
+      "detail": "terminal tablist visible"
+    }
+  ],
+  "allPass": true
+}

@@ -53,6 +53,8 @@ export function ArtifactPinPane({
   });
   const splitRef = React.useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
+  // BLOCK-253 F7 — 窗格最大化/恢复；比例槽不动，恢复后回到用户上次拖拽值。
+  const [expanded, setExpanded] = useState<'main' | 'pin' | null>(null);
 
   const applyRatio = useCallback((next: number) => {
     const clamped = clampRatio(next);
@@ -151,50 +153,98 @@ export function ArtifactPinPane({
     );
   };
 
+  const columns = expanded === 'main'
+    ? 'minmax(0, 1fr) minmax(0, 0fr)'
+    : expanded === 'pin'
+      ? 'minmax(0, 0fr) minmax(0, 1fr)'
+      : `minmax(0, ${mainRatio}fr) minmax(0, ${100 - mainRatio}fr)`;
+  const restoreButton = (
+    <button
+      type="button"
+      className="petri-btn petri-btn--ghost petri-btn--sm"
+      data-testid="artifact-pin-restore"
+      onClick={() => setExpanded(null)}
+    >
+      恢复分屏
+    </button>
+  );
+
   return (
     <div
       className={styles.artifactPinSplit}
       ref={splitRef}
-      style={{ gridTemplateColumns: `minmax(0, ${mainRatio}fr) minmax(0, ${100 - mainRatio}fr)` }}
+      data-expanded={expanded || undefined}
+      style={{ gridTemplateColumns: columns }}
     >
-      <div className={styles.artifactPinMain} data-testid="artifact-pin-main">
-        {children}
-      </div>
-      <div
-        className={styles.artifactPinDivider}
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="拖拽调整分屏比例"
-        aria-valuenow={mainRatio}
-        aria-valuemin={20}
-        aria-valuemax={80}
-        tabIndex={0}
-        data-dragging={dragging || undefined}
-        onPointerDown={onDividerPointerDown}
-        onKeyDown={onDividerKeyDown}
-        data-testid="artifact-pin-divider"
-      />
-      <aside
-        className={styles.artifactPinSide}
-        data-testid="artifact-pin-pane"
-        aria-label={`钉住的产物：${snapshot.artifactName}`}
-        title={snapshot.jobId}
-      >
-        <div className={styles.artifactPinHeader}>
-          {snapshot.label ? (
-            <span className={styles.artifactPinLabel}>{snapshot.label}</span>
-          ) : null}
-          <span className={styles.artifactPinName}>{snapshot.artifactName}</span>
-          <button
-            type="button"
-            className="petri-btn petri-btn--ghost petri-btn--sm"
-            onClick={() => onUnpin?.()}
-          >
-            解除钉住
-          </button>
+      {expanded !== 'pin' && (
+        <div className={styles.artifactPinMain} data-testid="artifact-pin-main">
+          {expanded === 'main' && (
+            <div className={styles.artifactPinControls} data-testid="artifact-pin-main-controls">
+              {restoreButton}
+            </div>
+          )}
+          {children}
         </div>
-        <div className={styles.artifactPinBody}>{renderSnapshotBody()}</div>
-      </aside>
+      )}
+      {!expanded && (
+        <div
+          className={styles.artifactPinDivider}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="拖拽调整分屏比例"
+          aria-valuenow={mainRatio}
+          aria-valuemin={20}
+          aria-valuemax={80}
+          tabIndex={0}
+          data-dragging={dragging || undefined}
+          onPointerDown={onDividerPointerDown}
+          onKeyDown={onDividerKeyDown}
+          data-testid="artifact-pin-divider"
+        />
+      )}
+      {expanded !== 'main' && (
+        <aside
+          className={styles.artifactPinSide}
+          data-testid="artifact-pin-pane"
+          aria-label={`钉住的产物：${snapshot.artifactName}`}
+          title={snapshot.jobId}
+        >
+          <div className={styles.artifactPinHeader}>
+            {snapshot.label ? (
+              <span className={styles.artifactPinLabel}>{snapshot.label}</span>
+            ) : null}
+            <span className={styles.artifactPinName}>{snapshot.artifactName}</span>
+            <button
+              type="button"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              data-testid="artifact-pin-maximize-main"
+              aria-pressed={false}
+              onClick={() => setExpanded('main')}
+            >
+              主区最大化
+            </button>
+            {expanded === 'pin' ? restoreButton : (
+              <button
+                type="button"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
+                data-testid="artifact-pin-maximize-pin"
+                aria-pressed={false}
+                onClick={() => setExpanded('pin')}
+              >
+                副栏最大化
+              </button>
+            )}
+            <button
+              type="button"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              onClick={() => onUnpin?.()}
+            >
+              解除钉住
+            </button>
+          </div>
+          <div className={styles.artifactPinBody}>{renderSnapshotBody()}</div>
+        </aside>
+      )}
     </div>
   );
 }

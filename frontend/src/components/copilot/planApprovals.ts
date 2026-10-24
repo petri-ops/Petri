@@ -84,6 +84,41 @@ export async function approvePlan(
   return { ok: true };
 }
 
+export interface PlanRevisionEntry {
+  id: string;
+  revNo: number;
+  reason: string | null;
+  status: string;
+  steps: NonNullable<PlanApprovalCardPlan['steps']>;
+  createdAt: string | null;
+  appliedAt: string | null;
+}
+
+/** BLOCK-253 B3/H4 — 计划修订版本列表（proposed_json → 步骤表，坏 JSON 如实留空）。 */
+export async function fetchPlanRevisions(planId: string): Promise<PlanRevisionEntry[]> {
+  const body = await requestJson<{ revisions: Array<Record<string, unknown>> }>(
+    `${getApiPrefix()}/ai/plans/${encodeURIComponent(planId)}/revisions`
+  );
+  const rows = Array.isArray(body.revisions) ? body.revisions : [];
+  return rows.map((row) => {
+    let steps: PlanRevisionEntry['steps'] = [];
+    const proposedJson = typeof row.proposed_json === 'string' ? row.proposed_json : '[]';
+    try {
+      const parsed: unknown = JSON.parse(proposedJson);
+      if (Array.isArray(parsed)) steps = parsed as PlanRevisionEntry['steps'];
+    } catch { /* 坏 JSON 不伪造步骤 */ }
+    return {
+      id: typeof row.id === 'string' ? row.id : '',
+      revNo: typeof row.rev_no === 'number' ? row.rev_no : Number(row.rev_no) || 0,
+      reason: typeof row.reason === 'string' ? row.reason : null,
+      status: typeof row.status === 'string' ? row.status : 'proposed',
+      steps,
+      createdAt: typeof row.created_at === 'string' ? row.created_at : null,
+      appliedAt: typeof row.applied_at === 'string' ? row.applied_at : null,
+    };
+  }).filter((entry) => entry.revNo > 0);
+}
+
 /** 批准修订案（P3：applied → 步骤表替换）。 */
 export async function approvePlanRevision(planId: string, revNo: number): Promise<{ ok: boolean }> {
   await requestJson<{ status: string }>(

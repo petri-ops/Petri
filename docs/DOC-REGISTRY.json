@@ -7988,8 +7988,30 @@
         "G0"
       ],
       "notes": "2026-10-24 立项（用户「继续 V-REM UI-544/545/546 实机腿」；Jev next:suggest 单一判定 V-REM，置信 0.87）：BLOCK-236（UI-544 源码/血缘 tab、UI-545 compare）与 BLOCK-238（UI-546 ellipse/arrow 批注）均因无夹具只记 in_progress。P0 实码勘察抓到四处真断点：① pack-contributions 不透出 tabs（前端永远看不到声明）；② packTabData 读 source/text 而后端返回 content；③ lineage 桥读 nodes/edges 而后端返回 lineage.chain；④ compare 的 changeSetId 只来自瞬时 activeResultProgress，当前查看版本的 changeSetId 未作持久来源。方案=修四处 + 隔离栈夹具（真实 git 绑定项目 + 合成完成 job/产物/revision/变更集/血缘图 + 夹具 pack 只声明 table 结果面），实机验 UI-544 code pack 源码 / history 诚实回落、UI-545 compare pack 四列差异表、UI-546 图像批注 ellipse+arrow 创建与落库。结果=亮/暗各 23/23（八张亮暗截图）；UI-544 code 命中 pack revisions-source（截图真实源码 len=46）；UI-545 compare 命中 pack 四列差异（REST 2 changedPaths）；history tab_not_claimed 诚实回落；UI-546 ellipse/arrow 创建/保存/列表/REST kinds 全绿。实机又抓真并修复：pack-result 无 URL、pack 接管后无模式栏、source 缺 projectId、tab 端点双 /api 404、compare/lineage 响应形状不匹配、changeSetId 持久来源与空投影覆盖。边界=iframe 独立 origin 以截图为准；per-file patch 缺失显示「—」；合成夹具。"
+    },
+    {
+      "id": "BLOCK-253-Q5-REM-LONG-TAIL",
+      "capability": "q5-rem-long-tail",
+      "path": "docs/block-253-q5-rem-live-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P4-CLOSED",
+      "canonical": true,
+      "truthDomain": "q5-rem-long-tail",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-24",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "q5-rem",
+        "plan-revisions",
+        "pane-maximize",
+        "show-in-folder",
+        "host-menu",
+        "G0"
+      ],
+      "notes": "2026-10-24 用户「行！搞定 Q5-REM 长尾」；Jev 单一判定 Q5-REM 置信 0.46。交付=B3/H4 计划修订 tabs（当前/修订、原因/提议步骤/状态、批准后步骤替换刷新、按选中版本复制下载）；E4 文件管理器显示真实 bridge→IPC（测试实例干跑 testInstance:true + UI 可见状态，不弹系统窗）；F7 ArtifactPinPane 主区/副栏最大化与恢复（比例保留，6/6 测试）；E1 入口统一第一步（标题栏更多工具菜单聚合结果/代码/审查/历史/终端/侧聊 + 右轨面，实机开合）。证据=亮/暗各 14/14（acceptance/ui-544-547-q5rem/、acceptance/block-253/；离屏截图超时如实 unavailable）+ closeout 十三门 PASS。reopen=E1 跨宿主渲染合并 / 通用 pane 模型与钉住实机 / E9 终端分屏 deferred / 宿主菜单在底部终端打开后无法再次弹出（实机观察）。"
     }
   ],
   "lastUpdated": "2026-10-24",
-  "documentCount": 395
+  "documentCount": 396
 }

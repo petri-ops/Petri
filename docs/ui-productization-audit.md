@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-24（**UI-560 Q5-REM 长尾 UI verified / UI-561 分屏最大化 in_progress**（隔离 9223 亮/暗各 14/14；BLOCK-253）：计划面新增「当前 + 修订」tabs（原因/提议步骤/状态/批准后替换刷新/按版本复制下载）；标题栏「更多工具」聚合结果/代码/审查/历史/终端/侧聊与右轨面；文件管理器定位在测试实例干跑并显示可见状态。**UI-561** ArtifactPinPane 主区/副栏最大化与恢复为组件测试绿（6/6），无钉住实机腿 → `in_progress`。旧记录：
+
 最后更新：2026-10-24（**UI-544 / UI-545 / UI-546 verified**（V-REM；隔离 9223 亮/暗各 **23/23**；BLOCK-252）：结果面 result body 由领域包渲染；code 模式命中 pack `revisions-source`（截图见真实源码）；compare 命中 pack 四列差异表（REST 2 个 changedPaths 对账）；历史未声明时核心回落 `tab_not_claimed`；图像批注 ellipse/arrow 创建、保存、列表与 REST `kinds=["ellipse","arrow"]` 全绿。**实机抓真八处接线断点**：pack tabs 投影丢失 / pack-result 无 URL / pack 接管后无模式栏 / source 读错字段且缺 projectId / 双 `/api` 前缀 404 / lineage 与 compare 响应形状不匹配 / changeSetId 只有瞬时来源并被空投影覆盖。旧记录：
 
 最后更新：2026-10-24（**UI-555 划词动作 / 图片预览 / 计划反馈 verified**（隔离 9223 亮/暗各 **27/27**；BLOCK-251）：文件预览真实 DOM Range 划词 → 动作条 5 项（批注禁用带理由）→ 引用 chip 且**请求体含 `【引用 preview-note.md】`+原文** → 速记 REST 落库 / 侧聊 dock / 复制载荷；图片拖入两张 PNG → 预览 1/2→2/2→←键→200%/50% 缩放 → 保存锚点；计划卡「继续讨论」意见真实进 mock 请求体且计划仍 draft。**实机抓到真缺陷**：宿主 `SimpleChat` 的 `onApprove` 丢掉 feedback 参数（两层单测都绿、端到端失效）→ 已修 + `test/plan-feedback-wiring.test.mjs` 守卫）。旧记录：
@@ -5367,6 +5369,19 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机证据**：`acceptance/ui-555/`（亮/暗断言 JSON + 四张截图；同份 `acceptance/block-251/`）。断言链：文件预览打开 → 真实 DOM Range 划词 → 动作条 5 项（批注 disabled + 理由）→ 引用 chip → **mock 请求体含 `【引用 preview-note.md】` 与原文** → 速记 REST 条目（`sourceKind=selection`/`sourceRef=preview-note.md`）→ 侧聊 dock 开合 → 复制载荷与选区一致（离屏真实写剪贴板失败，如实标 `clipboardReal=false`）→ 两张 16×16 PNG 拖入 → 预览 `1/2`→`2/2`→`←` 回 `1/2` → 200%/50% 缩放标签与 transform 同步 → 保存锚点 `download=ui555-red.png` + `data:image/png` → 移除附件；合成 draft 计划 → 意见进 mock 请求体（含 planId）→ 计划仍 draft → 回合后卡片重拉。
 - **实机抓真（真缺陷，已修）**：`SimpleChat` 的 `PlanApprovalCard onApprove={(action) => handlePlanApprove(action)}` **丢掉了卡片传出的 `{feedback}` 第二参数**——`PlanApprovalCard` 单测与 `usePlanApprovalFlow` 单测都绿，但用户在真实宿主里写意见只会收起卡片，意见从未上行。已改为 `(action, options)` 转发，并新增 `test/plan-feedback-wiring.test.mjs` 机械守卫。
 - **边界**：图片保存只验锚点契约（不点写盘，避免污染用户 Downloads）；计划为合成 draft 夹具（报告标 synthetic）；离屏窗口可截图（本轮四张均成功）。
+
+## UI-560: Q5-REM 长尾 UI（计划修订 tabs / 宿主入口菜单 / 文件管理器状态）（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮/暗各 14/14；BLOCK-253）**）
+
+- **变化面**：右轨计划面新增修订版本 tabs（当前/修订、原因/提议步骤/状态、批准后替换刷新、按选中版本复制/下载）；标题栏「更多工具」菜单聚合中心模式（结果/代码/审查/历史）、终端、侧聊与右轨 surface（点击开合）；文件树「在文件管理器中显示」在测试实例干跑并在界面显示可见状态。
+- **为什么这样设计**：计划修订只消费既有 `GET /ai/plans/:id/revisions` 与 `POST …/revisions/:revNo/approve`，不建第二套版本表；宿主入口统一先做「一处可寻」，不冒险重写各宿主渲染；文件管理器动作在测试实例不弹用户桌面（与测试实例跳过 OS 协议注册同向），但走真实 bridge→IPC。
+- **实机证据**：`acceptance/ui-544-547-q5rem/`（同份 `acceptance/block-253/`）。`P1/P1b` 修订 tab + 原因/提议步骤；`P2/P2b` 批准后 REST 步骤替换 + UI「已应用」；`F1` bridge 返回 `{ok:true,testInstance:true,path}`；`F2` 界面「已在文件管理器中显示（测试实例干跑）」；`H1/H2a/H2b` 宿主菜单列出并开合侧聊/终端。亮/暗各 14/14。
+- **边界**：离屏截图在计划/终端切换后连续超时 → 如实 unavailable（DOM+REST 为证据主体）；E1 跨宿主渲染合并、E9 终端分屏、宿主菜单在底部终端打开后无法再弹出（实机观察）保留 reopen。
+
+## UI-561: 分屏窗格最大化/恢复（2026-10-24 **in_progress（组件测试 6/6；无钉住实机腿；BLOCK-253）**）
+
+- **变化面**：ArtifactPinPane 在既有 60/40 拖拽/键盘比例之上新增「主区最大化 / 副栏最大化 / 恢复分屏」；恢复后回到用户上次比例。
+- **验证**：ArtifactPinPane.ratio 6/6（比例/钳制/持久化 + 最大化/恢复）。
+- **未取证**：钉住实机腿（需真实结果 job + lineage pin 夹具），按台账纪律记 `in_progress`。
 
 ## UI-559: 多智能体团队 roster + 暂停/恢复 + 整体停止（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）**）
 

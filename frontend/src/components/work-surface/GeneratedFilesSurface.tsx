@@ -92,7 +92,7 @@ export function GeneratedFilesSurface({
     }
     try {
       const result = await filesBridge.showInFolder(project.workspacePath, path);
-      setActionNotice(result.ok ? '' : (result.error || '无法在文件管理器中显示该文件'));
+      setActionNotice(result.ok ? '已在文件管理器中显示' : (result.error || '无法在文件管理器中显示该文件'));
     } catch (cause) {
       setActionNotice(cause instanceof Error ? cause.message : '无法在文件管理器中显示该文件');
     }

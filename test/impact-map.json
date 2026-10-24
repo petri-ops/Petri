@@ -5270,6 +5270,36 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block253-q5-rem-long-tail",
+      "note": "BLOCK-253 Q5-REM：计划修订 tabs / 分屏最大化 / 文件管理器定位（测试实例干跑）/ 宿主入口菜单。",
+      "patterns": [
+        "scripts/block253-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q5rem-*.cjs",
+        "docs/block-253-q5-rem-live-plan.md",
+        "frontend/src/components/work-surface/PlanSurface.tsx",
+        "frontend/src/components/copilot/planApprovals.ts",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.tsx",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.module.css",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.ts",
+        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/components/work-surface/GeneratedFilesSurface.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.tsx",
+        "frontend/src/lib/electron.d.ts",
+        "src/ipc/file-dialog.js",
+        "acceptance/ui-544-547-q5rem/**",
+        "acceptance/block-253/**"
+      ],
+      "tests": [
+        "frontend/src/components/work-surface/PlanSurface.test.tsx",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.test.tsx",
+        "frontend/src/pages/project-workspace/useWorkspaceTitleBar.test.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.refresh.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

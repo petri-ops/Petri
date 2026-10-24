@@ -517,9 +517,9 @@ export function ProjectWorkspace(): React.ReactElement {
     openRightPanel,
     closeRightPanelTab,
     closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
-    setRightOpen,
-    setRightTab,
-    setRightToolMenuOpen,
+    setRightOpen, setRightTab, setRightToolMenuOpen,
+    workspaceMode, onSwitchWorkspaceMode: (nextMode) => updateWorkspaceMode(nextMode, true, activeJobId || null),
+    bottomTerminalOpen, onToggleBottomTerminal: () => setBottomTerminalOpen((value) => !value), sideChatOpen, onToggleSideChat: () => setSideChatOpen((value) => !value),
   });
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
   // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）

@@ -406,6 +406,11 @@ function setupFileDialogIpc({ mainWindow } = {}) {
     try {
       const resolved = resolveWorkspaceFile(workspacePath, relativePath);
       if (!resolved.ok) return resolved;
+      // BLOCK-253 E4 — 测试实例干跑：自动化不弹用户桌面的文件管理器（与测试实例
+      // 跳过 OS 协议注册同向），返回可核对的真实目标路径供实机断言。
+      if (process.env.PETRI_TEST_INSTANCE === '1') {
+        return { ok: true, testInstance: true, path: resolved.realTarget };
+      }
       shell.showItemInFolder(resolved.realTarget);
       return { ok: true };
     } catch (e) {

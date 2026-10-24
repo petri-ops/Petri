@@ -1,9 +1,11 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-24（**BLOCK-252 V-REM completed；UI-544/545/546 verified**）
+最后更新：2026-10-24（**BLOCK-253 Q5-REM 长尾 partial completed**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。刚收口=BLOCK-252（V-REM UI-544/545/546 实机腿）：真实 git 绑定项目 + 合成结果链 + 夹具 pack，**亮/暗各 23/23**（`acceptance/ui-544|545|546/`、`acceptance/block-252/`，八张亮暗截图）——UI-544 code pack 源码、UI-545 compare pack 四列差异、UI-546 ellipse/arrow 批注全部实机通过；history 诚实回落 `tab_not_claimed`。**实机抓真八处接线断点并修复**（tabs 投影 / pack-result URL / 模式栏 / source 字段与 projectId / 双 `/api` / lineage 与 compare 形状 / changeSetId 持久来源与空投影覆盖）。plan=`docs/block-252-v-rem-live-evidence-plan.md`（completed）；**下一包**=Q5-REM 长尾（Jev 判定，置信 0.46，单一建议）。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。刚收口=BLOCK-253（Q5-REM 长尾）：B3/H4 计划修订 tabs、E4 文件管理器 bridge→IPC 实机（测试实例干跑 + 可见状态）、F7 ArtifactPinPane 主区/副栏最大化、E1 入口统一第一步（标题栏菜单聚合中心模式/终端/侧聊/右轨面）；亮/暗各 **14/14**（`acceptance/ui-544-547-q5rem/`、`acceptance/block-253/`；离屏截图如实 unavailable）。仍 reopen=E1 跨宿主渲染合并 / 通用 pane 模型与钉住实机 / E9 终端分屏 deferred / 宿主菜单在底部终端打开后无法再次弹出（实机观察，未修壳层）。Q-MATRIX **✅57 / 🟡33 / 🔴5 / ⛔7 = 102**。plan=`docs/block-253-q5-rem-live-plan.md`（completed）；**下一包**=Q6-REM 长尾（Jev 判定，置信 0.48，单一建议）。
+
+**BLOCK-253 已落地**：`PlanSurface.tsx` + `planApprovals.ts`（修订 tabs/批准/按版本复制下载）、`ArtifactPinPane.tsx`（最大化/恢复）、`useWorkspaceTitleBar.ts` + `project-workspace.tsx`（宿主入口菜单）、`file-dialog.js`（测试实例干跑）+ `RightFileTree.tsx`/`GeneratedFilesSurface.tsx`（可见状态）。证据=`acceptance/ui-544-547-q5rem/`（亮暗 JSON + 截图 provenance）、`acceptance/block-253/`；closeout 十三门 **PASS**。
 
 **BLOCK-252 已落地**：`pack-contributions.js`（tabs 透出）、`PackSurfaceFrame.tsx`（pack-result URL）、`CenterPanel.tsx`（pack result 模式栏、身份一次性水化缓存、changeSetId 持久回退）、`ResultArtifactShell.tsx`（身份保留投影）、`useResultStudioEditContext.ts`（同 job 不清空）、`packTabData.ts` + `usePackTabData.ts`（content/lineage.chain/changeSet.changedPaths/单 `/api`/projectId）及对应单测。证据=`acceptance/ui-544|545|546/`（JSON + 8 PNG）、`acceptance/block-252/`；closeout 十三门 **PASS**。
 
@@ -21,7 +23,7 @@
 
 **本轮实机抓真**：① 长回合后同一渲染器会被既有重渲染环拖死 → **拆两个 Electron 会话**（活态断言走 REST，UI 断言在重启后的平静页面）；② 「停止团队」点击会触发同一重渲染环 → 回执 DOM 取证超时（组件测试覆盖渲染、API 覆盖部分回执；**已由 BLOCK-250 修复并回填 DOM 证据**）；③ 离屏截图不可得 → 如实 unavailable；④ 新增工具后工具计数回归 **84**（fixture/注册表/预路由/决策/标签五处同批）；⑤ `project-workspace.tsx` 只净增 0 行（压缩注释换行维持 code-size 基线）。
 
-**上一包=BLOCK-252 completed**（V-REM UI-544/545/546 实机腿；三条 verified）。**再上一包=BLOCK-251 completed**（UI-555 实机腿补证）；BLOCK-250（UI-FIX 重渲染环；UI-559 verified）；BLOCK-249（Q4a）、BLOCK-248（Q3 执行轨迹；UI-558 verified；`5c5e14cb`）与 BLOCK-247（UI-557 verified）为更早包。Q-MATRIX（BLOCK-249 回写）：C7/C10/F1/F3/F4/F5/F9 → ✅；**✅54 / 🟡36 / 🔴5 / ⛔7 = 102**。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；**closeout 别接管道**；closeout 十三门 **PASS**；本地提交（不推送）。本地领先 origin 若干笔**未推送**（推送需单独发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**上一包=BLOCK-253 completed**（Q5-REM 长尾 partial：B3/H4+E4+F7+E1 入口）。**再上一包=BLOCK-252 completed**（V-REM UI-544/545/546 实机腿；三条 verified）；BLOCK-251（UI-555 实机腿补证）、BLOCK-250（UI-FIX 重渲染环；UI-559 verified）、BLOCK-249（Q4a）、BLOCK-248（Q3 执行轨迹；UI-558 verified；`5c5e14cb`）与 BLOCK-247（UI-557 verified）为更早包。Q-MATRIX（BLOCK-253 回写）：B3/H4/E4 → ✅；**✅57 / 🟡33 / 🔴5 / ⛔7 = 102**。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；**closeout 别接管道**；closeout 十三门 **PASS**；本地提交（不推送）。本地领先 origin 若干笔**未推送**（推送需单独发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。**刚收口=BLOCK-243（Q1 审批契约 v2 + MCP trust 生效）**：scope once/task/always + updatedInput 批准前重跑 schema/preflight/policy（只放行本次 guardKey，新风险拒绝）+ 编辑参数执行替换（原始指纹→生效参数，一次性）+ `permission.resolved` 审计（原始/生效哈希/脱敏输入/耗时）+ 重复 pending 幂等/计数；MCP `trust='ask'` 对 destructiveHint 工具生效、`allow` 自动放行（调用时重读），货架 allow 可改回 ask；审批卡三变体/确定性解释/长命令折叠/参数编辑/范围/两步武装。证据=Node 契约 15/15 + 邻域 69 通过 0 失败 + 前端 59/59 + types 0 + 隔离 API 实机 14/14（`acceptance/block-243/`）+ 隔离 9223 亮 21/21/暗 21/21（`acceptance/ui-551/` 双截图）+ closeout 十三门；UI-551 verified。实机抓真=测试实例 `show:false` 与 `--onscreen` 冲突致截图超时，已修 `_window-create.js`。reopen 已收敛到 Qoder 总纲 §6.5：Q1-REM（A1/A2/A5/A8/C5/C19/D3）、Q2/Q2b/Q3/Q4a/Q7/Q4b/Q5-REM/Q6-REM/Q8-REM/Q9-REM/P4-REM + V-REM（UI-544/545/546 实机腿）；Q-MATRIX 回写 **✅32/🟡47/🔴16/⛔7**。**Q8 trust 降档欠账已解**。**下一包需用户发令**：Q1-REM 或 Q2（按 §6.5 序）。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

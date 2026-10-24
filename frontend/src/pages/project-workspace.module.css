@@ -7522,3 +7522,10 @@ body:global(.petri-resizing-columns) * {
   visibility: visible;
   z-index: 1;
 }
+
+/* BLOCK-253 E4 — 文件管理器定位的可见状态（成功/测试实例干跑） */
+.workspaceTreeNotice {
+  padding: 0 var(--petri-space-3) var(--petri-space-1);
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-xs, 12px);
+}
