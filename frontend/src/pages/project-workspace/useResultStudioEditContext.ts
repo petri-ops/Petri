@@ -224,10 +224,15 @@ export function useResultStudioEditContext(options: UseResultStudioEditContextOp
   }, [activeArtifact?.artifactId, selectionBusState.selection]);
 
   useEffect(() => {
-    setActiveArtifact(null);
+    // BLOCK-252 — 切模式时路由可能先把 activeJobId 置空再恢复同一 job；
+    // 无条件清空会把刚水化的 revision/family/changeSet 打掉（pack tab 因此回落）。
+    // 只在「换到另一个 job」时清空。
+    setActiveArtifact((previous) => (
+      previous && activeJobId && previous.jobId === activeJobId ? previous : null
+    ));
     setResultContextState(null);
     setResultEditControls(null);
-  }, [activeJobId]);
+  }, [activeJobId, setActiveArtifact]);
 
   // G0-RS-P3: 每当打开的结果或其版本变化，就从后端重新投影一次上下文。
   // 这里只提供 job/文件名/revision 线索，坐标齐备与否由后端裁决；

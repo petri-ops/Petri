@@ -130,6 +130,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui342-endpoint-grid.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui526-527-badges.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui544-546-pack-annotation-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui547-mcp-policy-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui548-mcp-oauth-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui549-mcp-catalog-live.cjs",

@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-24（**UI-544 / UI-545 / UI-546 verified**（V-REM；隔离 9223 亮/暗各 **23/23**；BLOCK-252）：结果面 result body 由领域包渲染；code 模式命中 pack `revisions-source`（截图见真实源码）；compare 命中 pack 四列差异表（REST 2 个 changedPaths 对账）；历史未声明时核心回落 `tab_not_claimed`；图像批注 ellipse/arrow 创建、保存、列表与 REST `kinds=["ellipse","arrow"]` 全绿。**实机抓真八处接线断点**：pack tabs 投影丢失 / pack-result 无 URL / pack 接管后无模式栏 / source 读错字段且缺 projectId / 双 `/api` 前缀 404 / lineage 与 compare 响应形状不匹配 / changeSetId 只有瞬时来源并被空投影覆盖。旧记录：
+
 最后更新：2026-10-24（**UI-555 划词动作 / 图片预览 / 计划反馈 verified**（隔离 9223 亮/暗各 **27/27**；BLOCK-251）：文件预览真实 DOM Range 划词 → 动作条 5 项（批注禁用带理由）→ 引用 chip 且**请求体含 `【引用 preview-note.md】`+原文** → 速记 REST 落库 / 侧聊 dock / 复制载荷；图片拖入两张 PNG → 预览 1/2→2/2→←键→200%/50% 缩放 → 保存锚点；计划卡「继续讨论」意见真实进 mock 请求体且计划仍 draft。**实机抓到真缺陷**：宿主 `SimpleChat` 的 `onApprove` 丢掉 feedback 参数（两层单测都绿、端到端失效）→ 已修 + `test/plan-feedback-wiring.test.mjs` 守卫）。旧记录：
 
 最后更新：2026-10-24（**UI-559 多智能体团队 roster/暂停/整体停止 verified**（隔离 9223 亮 20/20 + 暗 20/20；**停止回执 DOM 实机可见**）；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）：团队 roster（leader/member/角色/最近事件/结构化与 journal 徽标）+ 成员切换 + 暂停（迭代边界）/恢复 + 整体停止两步武装与逐成员回执；后端 team API + journal + 结构化输出 + 工具约束 + 调查员角色。**BLOCK-250 拆掉挡取证的重渲染环**（派生数组 memo / 标题栏复位只在卸载 / 滚动测量幂等 / 模式切换依赖收敛），探针修复前 8 警告 + 读回超时 → 修复后 0 警告 + 即时返回。旧记录：
@@ -5283,27 +5285,30 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 
 **口径**：`verified` 只认**仓内可核产物**；本轮不重跑实机，故不把「代码完成 + 单测绿」升级为 verified（台账纪律：verified 需实机）。
 
-## UI-544: 结果面 tab 级接管（源码/血缘由领域包渲染）（2026-10-21 **in_progress（代码+单测绿，无实机腿）**，BLOCK-236 / Q-DOMAIN P2b）
+## UI-544: 结果面 tab 级接管（源码/血缘由领域包渲染）（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮/暗各 23/23；BLOCK-252）**，BLOCK-236 / Q-DOMAIN P2b）
 
 - **变化面**：结果面 `code` 模式由 pack 渲染只读源码视图、`history` 模式进入 tab 判定；命中失败/未声明时回落核心并标注 `data-fallback-reason`。pack 侧 `ui/result.html` 新增 `renderTab()`（源码 `<pre>`、血缘三列表格、未知 tab 诚实空态）。
 - **为什么这样设计（自有形态）**：迁移按「只读先、交互后」推进——先把数据可复现、无副作用的源码/血缘交给领域包，写面（选择/重放/回滚）留在核心治理面，避免把可信边界挪进包；回落原因写进 DOM，实机一眼能看出是「没声明」还是「取数失败」。
 - **验证（代码）**：路由/降级单测 11 条 + 定向回归 41 文件 318 项 + `quality:types` 0 + knip PASS（255 键）+ theme 17/17；pack 仓 `0.2.1`。
-- **未做实机腿**：dev 栈里没有带 revision 的 artifact 可打开，`renderTab()` 与 `lineage` 字段（按 `nodes/edges`）均未实机核对 → 保持 `in_progress`，不宣称 verified。
+- **实机证据（BLOCK-252）**：`acceptance/ui-544/`（同份 `acceptance/block-252/`）。真实 git 绑定项目 + 合成完成 job/产物/revision/变更集 + 夹具 pack（`ui252fixture`）：结果 body 由 pack 渲染（`data-result-surface-source=pack`，iframe `petri-pack://ui252fixture/ui/result.html`）；code 模式命中 `data-pack-tab=revisions-source`，截图显示 `UI544_SOURCE_READY len=46` 与真实源码（marker + `plot(0)`）；history 未声明时核心回落 `data-fallback-reason=tab_not_claimed`（不渲染空白 iframe）。亮/暗各 23/23。
+- **实机抓真（已修）**：① 后端贡献投影不透出 `tabs`；② `packSurfaceUrl` 只认 `pack-view` 导致 `pack-result` 永远“没有可挂载视图”；③ pack 接管 result body 后宿主把模式栏置空，用户没有入口切 code/compare/history；④ source 桥读 `source/text` 而非 `content` 且不带 `projectId`；⑤ tab 端点双 `/api` 前缀 404；⑥ lineage 桥形状不匹配；⑦ changeSetId 只有瞬时来源。边界=iframe 独立 origin，页面侧读不到内部 DOM → 截图为准；lineage tab 当前无 mode 映射（仅 pack 页能力）。
 
-## UI-545: 结果面 compare 由领域包渲染（2026-10-21 **in_progress（代码+单测绿，无实机腿）**，BLOCK-236 第二批）
+## UI-545: 结果面 compare 由领域包渲染（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮/暗各 23/23；BLOCK-252）**，BLOCK-236 第二批）
 
 - **变化面**：结果面 `compare` 模式在领域包声明 `tabs: compare` 时由 pack 渲染四列差异表（文件/状态/新增/删除），带截断提示与「没有可比较差异」空态；未声明或取数失败回落核心并标 `data-fallback-reason`。
 - **为什么这样设计（自有形态）**：只读视图（差异表）可以外包给领域包，但**写面（selection 选择/查询/解析）留在核心**——那是治理边界，不随渲染一起搬。
 - **验证（代码）**：桥 compare 分支（裁剪/缺参/HTTP 失败）+ 路由 compare 命中，共 3 条新用例；`lib/workSurface`+host 41 项绿；`quality:types` 0。
-- **未做实机腿**：dev 栈未打开 compare 视图，`changesets/:id/compare` 字段未实机核对 → 保持 `in_progress`。
+- **实机证据（BLOCK-252）**：`acceptance/ui-545/`（同份 `acceptance/block-252/`）。选中历史版本后 compare 模式命中 pack（`data-pack-tab=compare`），截图显示四列差异表（`analysis/scripts/rev_candidate/artifact.R` / `parameters.json`，状态 modified；无逐行 patch 时新增/删除显示「—」，不补 0）；REST `changesets/:id/compare` 返回 2 个 changedPaths 对账。`changeSetId` 来自当前查看版本的持久字段（新增 `ActiveArtifact.changeSetId` 投影），不再只依赖瞬时 `resultEditProgress`；切模式时核心空投影不再覆盖已水化身份。亮/暗各 23/23。
+- **实机抓真（已修）**：compare 桥按不存在的 `files` 形状读，真实响应是 `changeSet.changedPaths + textDiff`；双 `/api` 前缀 404；pack 接管后无模式栏。
 
-## UI-546: 图形批注创建入口（ellipse / arrow）（2026-10-21 **in_progress（代码+组件测试绿，无实机腿）**，BLOCK-238 / Q6）
+## UI-546: 图形批注创建入口（ellipse / arrow）（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮/暗各 23/23；BLOCK-252）**，BLOCK-238 / Q6）
 
 - **变化面**：批注工具条绘制态新增形状三档（矩形/椭圆/箭头，`annotation-kind-<kind>`）；`kind` 从工具条经 `useAnnotationSession` → `useArtifactAnnotations` → REST 载荷落库；绘制中的 draft 实时按所选形状预览（`data-kind`），批注列表标出形状；已保存批注沿用既有 `data-kind` + CSS 渲染（椭圆/箭头形态由先行提交 `20be172d` 提供）。
 - **为什么这样设计（自有形态）**：形状是「批注意图」的一部分，不是新数据模型——沿用 BLOCK-219 的旁路元数据与归一化矩形，零迁移；箭头以拖拽矩形对角线近似，方向/角度限制如实留在 reopen，不用半成品几何冒充完整箭头工具。旧调用省略 `kind` 时回落 `region`，存量行为零变化。
 - **验证（代码）**：红绿证据=5 条失败（client 载荷写死 region / 工具条无形状选择 / 列表无形状 / draft 无 data-kind / 宿主端到端找不到形状档）→ 实现后定向 **25/25**；邻域 `annotations` + `resultAnnotation` + `WorkspacePdfPreview` + `WorkspaceFilePreview` + theme **42/42**；Node `block219-result-annotations` **13/13**；`quality:types` 0。
 - **先行提交对账**：渲染层提交 `20be172d` 先于立项且未带 UI-###——按不可变提交先例登记门禁豁免，本条即其台账对账（不重写共享历史）。
-- **未做实机腿**：dev 栈未打开带 PDF/图像产物的批注面，形状选择 → 保存 → 渲染未实机核对 → 保持 `in_progress`，不宣称 verified。
+- **实机证据（BLOCK-252）**：`acceptance/ui-546/`（同份 `acceptance/block-252/`）。图像结果（合成 plot）走核心结果面；历史「查看」后批注条可用；选椭圆时提示「拖拽框选椭圆范围」、选箭头时提示「拖拽框选箭头范围」；拖拽 → 保存后列表出现「椭圆」「箭头」两条，REST 返回 `kinds=["ellipse","arrow"]`；截图中红图上可见椭圆与箭头（亮/暗各一份）。亮/暗各 23/23。
+- **边界**：合成图像产物（320×200 真 PNG）；通过历史版本「查看」获得批注 scope；未覆盖 PDF 批注与任意角度箭头（沿用 reopen）。
 
 ## UI-547: MCP 货架工具治理操作面（2026-10-22 **verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）
 

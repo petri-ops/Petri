@@ -31,7 +31,7 @@ import {
   isRelatedArtifactKind,
 } from '@/lib/result-artifact-display';
 import { ResultStudioChangeSetPanel } from '@/components/result-studio/ResultStudioChangeSetPanel';
-import { isSameActiveArtifactProjection } from '@/components/result-studio/activeArtifactProjection';
+import { isSameActiveArtifactProjection, withHydratedArtifactIdentity } from '@/components/result-studio/activeArtifactProjection';
 import { RevisionCodeView } from '@/components/result-studio/RevisionCodeView';
 import { revisionArtifactUrl, type ArtifactRevision } from '@/components/result-studio/resultStudioClient';
 import { shouldShowWorkflowBar } from '@/components/result-studio/resultFirstScreen';
@@ -635,10 +635,11 @@ export function ResultArtifactShell({
   // useArtifactInteractionSelection 外迁（含乐观投影/失败回滚语义，逐行平移）。
 
   useEffect(() => {
-    if (!job || effectiveJobStatus !== 'done' || (!selectedArtifact && !viewedRevision)) {
+    if (!job || effectiveJobStatus !== 'done') {
       onActiveArtifactChange(null);
       return;
     }
+    if (!selectedArtifact && !viewedRevision) return; // BLOCK-252 keep hydrated identity
     const artifact: ActiveArtifact = {
       jobId: viewedRevision?.toolJobId || job.id,
       toolId: job.tool_id,
@@ -666,11 +667,9 @@ export function ResultArtifactShell({
       availabilityStatus: selectedArtifact ? effectivePreviewAvailability.status : 'available',
       availabilityReason: selectedArtifact ? effectivePreviewAvailability.reason : null,
     };
-    // The interaction manifest arrives after the file body. Compare the full
-    // projection so late revision/family/semantic hydration reaches the header.
-    if (!isSameActiveArtifactProjection(activeArtifact, artifact)) {
-      onActiveArtifactChange(artifact);
-    }
+    // Interaction manifest arrives after the file body; compare full projection for late hydration.
+    const projected = withHydratedArtifactIdentity(activeArtifact, artifact, selectedArtifactName, viewedRevision);
+    if (!isSameActiveArtifactProjection(activeArtifact, projected)) onActiveArtifactChange(projected);
   }, [
     activeArtifact,
     boundArtifactSelection,

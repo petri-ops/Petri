@@ -7965,8 +7965,31 @@
         "G0"
       ],
       "notes": "2026-10-24 立项（用户「好 按照建议推进」；建议来自 Jev next:suggest 单一判定 UI-555 实机腿补证，置信 0.59）：BLOCK-246 交付的 C12 划词动作 / C11 图片预览 / B2 计划反馈只有单测，划词接线（usePreviewSelection + WorkspaceFilePreview onMouseUp）无组件测试。本包用隔离栈（:3001 + :3000 + :9223 离屏测试实例 + mock provider + 临时数据根）补三段真实路径：DOM Range 划词 → 动作条 5 项（批注禁用理由）→ 引用 chip + 请求体含【引用 preview-note.md】原文 / 速记 REST 落库 / 侧聊 dock / 复制载荷；粘贴两张 PNG → 预览 1/2→2/2 → 200%/50% 缩放 → 保存锚点；合成 draft 计划 → 反馈意见 → mock 请求体含意见与 planId 且计划仍 draft。结果=亮/暗各 27/27（四张亮暗截图：划词动作条 + 图片预览）；划词引用/速记/侧聊/复制载荷全绿，图片导航与缩放全绿，计划意见进 mock 请求体且仍 draft。实机抓真=SimpleChat 的 PlanApprovalCard onApprove 丢掉 {feedback} 第二参数（卡片/hook 单测都绿但端到端失效）→ 已修为 (action, options) + test/plan-feedback-wiring.test.mjs 守卫。边界=离屏真实写系统剪贴板失败（clipboardReal=false，如实标注，捕获产品载荷）；保存只验锚点契约不点写盘；计划为合成 draft 夹具。证据落 acceptance/ui-555/ 与 acceptance/block-251/。"
+    },
+    {
+      "id": "BLOCK-252-V-REM-LIVE-EVIDENCE",
+      "capability": "v-rem-live-evidence",
+      "path": "docs/block-252-v-rem-live-evidence-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P4-CLOSED",
+      "canonical": true,
+      "truthDomain": "v-rem-live-evidence",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-24",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "v-rem",
+        "ui-544",
+        "ui-545",
+        "ui-546",
+        "pack-tabs",
+        "annotations",
+        "G0"
+      ],
+      "notes": "2026-10-24 立项（用户「继续 V-REM UI-544/545/546 实机腿」；Jev next:suggest 单一判定 V-REM，置信 0.87）：BLOCK-236（UI-544 源码/血缘 tab、UI-545 compare）与 BLOCK-238（UI-546 ellipse/arrow 批注）均因无夹具只记 in_progress。P0 实码勘察抓到四处真断点：① pack-contributions 不透出 tabs（前端永远看不到声明）；② packTabData 读 source/text 而后端返回 content；③ lineage 桥读 nodes/edges 而后端返回 lineage.chain；④ compare 的 changeSetId 只来自瞬时 activeResultProgress，当前查看版本的 changeSetId 未作持久来源。方案=修四处 + 隔离栈夹具（真实 git 绑定项目 + 合成完成 job/产物/revision/变更集/血缘图 + 夹具 pack 只声明 table 结果面），实机验 UI-544 code pack 源码 / history 诚实回落、UI-545 compare pack 四列差异表、UI-546 图像批注 ellipse+arrow 创建与落库。结果=亮/暗各 23/23（八张亮暗截图）；UI-544 code 命中 pack revisions-source（截图真实源码 len=46）；UI-545 compare 命中 pack 四列差异（REST 2 changedPaths）；history tab_not_claimed 诚实回落；UI-546 ellipse/arrow 创建/保存/列表/REST kinds 全绿。实机又抓真并修复：pack-result 无 URL、pack 接管后无模式栏、source 缺 projectId、tab 端点双 /api 404、compare/lineage 响应形状不匹配、changeSetId 持久来源与空投影覆盖。边界=iframe 独立 origin 以截图为准；per-file patch 缺失显示「—」；合成夹具。"
     }
   ],
   "lastUpdated": "2026-10-24",
-  "documentCount": 394
+  "documentCount": 395
 }

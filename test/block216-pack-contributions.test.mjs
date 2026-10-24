@@ -85,6 +85,38 @@ test('BLOCK-216 contributions: installed pack projects views/result surfaces/act
   }
 });
 
+test('BLOCK-252 contributions: result surface tabs are passed through with whitelist', () => {
+  const root = tempRoot();
+  try {
+    const packRoot = makePack(root, {
+      provides: {
+        resultSurfaces: [{
+          id: 'result',
+          title: '结果面',
+          entry: 'ui/result.html',
+          artifactTypes: ['table'],
+          modes: ['result', 'code', 'compare'],
+          tabs: [
+            { id: 'revisions-source', label: '源码' },
+            { id: 'compare', label: '比较' },
+            { id: 'compare', label: '重复' },
+            { id: 'unknown-tab', label: '非法' },
+          ],
+        }],
+      },
+    });
+    install(root, packRoot);
+    const result = loadPackContributions({ dataDir: root });
+    assert.deepEqual(result.packs[0].resultSurfaces[0].tabs, [
+      { id: 'revisions-source', label: '源码' },
+      { id: 'compare', label: '比较' },
+    ]);
+    assert.ok(result.diagnostics.some((item) => item.code === 'tab_unknown_id'));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('BLOCK-216 contributions: disabled pack disappears', () => {
   const root = tempRoot();
   try {

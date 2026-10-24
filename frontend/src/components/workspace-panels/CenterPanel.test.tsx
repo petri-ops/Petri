@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from './CenterPanel';
 
@@ -16,6 +16,12 @@ vi.mock('@/components/copilot/conversationRunStore', () => ({
 }));
 vi.mock('@/hooks/useDurableConversationLoop', () => ({
   useDurableConversationLoop: () => ({ loop: null, summary: null }),
+}));
+vi.mock('@/lib/result-studio-interaction-client', () => ({
+  fetchArtifactInteraction: vi.fn(() => Promise.resolve({
+    manifest: { artifactId: 'art_1', revisionId: 'rev_1', artifactFamilyId: 'fam_1' },
+    revision: { revisionId: 'rev_1', revisionOrdinal: 2, artifactFamilyId: 'fam_1', changeSetId: 'cs_1' },
+  })),
 }));
 vi.mock('@/components/desktop/PluginStorePanel', () => ({ PluginStorePanel: () => <div>plugins</div> }));
 vi.mock('@/components/desktop/DesktopSettingsPanel', () => ({ DesktopSettingsPanel: () => <div>settings</div> }));
@@ -200,6 +206,98 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     render(<CenterPanel ctx={ctx} refs={refs} />);
     expect(screen.getByTestId('central-result-view')).toBeTruthy();
     expect(screen.queryByTestId('pack-surface-unsupported')).toBeNull();
+  });
+
+  it('keeps the result mode switcher when a pack takes over result body (BLOCK-252)', () => {
+    const ctx = context('result');
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result', 'code'],
+      tabs: [{ id: 'revisions-source', label: '源码' }],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    const nav = screen.getByRole('navigation', { name: '结果视图' });
+    fireEvent.click(Array.from(nav.querySelectorAll('button')).find((btn) => btn.textContent === '代码')!);
+    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('code', true, 'job-1');
+  });
+
+  it('hydrates revision/family/changeSet when a pack takes over result body (BLOCK-252)', async () => {
+    const ctx = context('result');
+    ctx.activeArtifact = { ...ctx.activeArtifact!, revisionId: null, artifactFamilyId: null, changeSetId: null };
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result', 'code'],
+      tabs: [{ id: 'revisions-source', label: '源码' }],
+      entry: 'ui/result.html',
+    }];
+    render(<CenterPanel ctx={ctx} refs={refs} />);
+    await waitFor(() => {
+      expect(ctx.setActiveArtifact).toHaveBeenCalledWith(expect.objectContaining({
+        revisionId: 'rev_1',
+        artifactFamilyId: 'fam_1',
+        changeSetId: 'cs_1',
+        artifactId: 'art_1',
+      }));
+    });
+  });
+
+  it('uses the viewed revision changeSetId for pack compare after reload (BLOCK-252)', async () => {
+    const ctx = context('compare');
+    ctx.activeArtifact = { ...ctx.activeArtifact!, changeSetId: 'cs_viewed' };
+    ctx.packResultSurfaces = [{
+      id: 'pack:bio:result:bio-result',
+      kind: 'pack-result',
+      title: '生信结果',
+      icon: 'bar-chart',
+      source: 'pack',
+      packId: 'bio',
+      singleton: true,
+      closeable: true,
+      persist: false,
+      order: 0,
+      artifactTypes: ['table'],
+      modes: ['result', 'compare'],
+      tabs: [{ id: 'compare', label: '比较' }],
+      entry: 'ui/result.html',
+    }];
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve(JSON.stringify({ files: [{ path: 'a.R', status: 'modified', added: 1, removed: 0 }] })),
+    } as unknown as Response);
+    try {
+      render(<CenterPanel ctx={ctx} refs={refs} />);
+      await waitFor(() => {
+        const urls = fetchSpy.mock.calls.map(([input]) => (
+          typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+        ));
+        expect(urls.some((url) => url.includes('changesets/cs_viewed/compare'))).toBe(true);
+      });
+      expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   // UI-448 加映 v23 — 会话浮面纯悬浮（用户双图对比裁决：摘要点击就悬浮，

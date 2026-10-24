@@ -5238,6 +5238,38 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block252-v-rem-live-evidence",
+      "note": "BLOCK-252 V-REM：pack result tabs（源码/比较）/ 结果面身份水化 / 图像批注 ellipse+arrow 实机腿。",
+      "patterns": [
+        "scripts/block252-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui544-*.cjs",
+        "docs/block-252-v-rem-live-evidence-plan.md",
+        "core/petri-server/helpers/pack-contributions.js",
+        "frontend/src/lib/workSurface/packTabData.ts",
+        "frontend/src/lib/workSurface/usePackTabData.ts",
+        "frontend/src/components/work-surface/PackSurfaceFrame.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/workspace-panels/ResultView/types.ts",
+        "frontend/src/pages/project-workspace/useResultStudioEditContext.ts",
+        "acceptance/ui-544/**",
+        "acceptance/ui-545/**",
+        "acceptance/ui-546/**",
+        "acceptance/block-252/**"
+      ],
+      "tests": [
+        "test/block216-pack-contributions.test.mjs",
+        "frontend/src/lib/workSurface/packTabData.test.ts",
+        "frontend/src/lib/workSurface/usePackTabData.test.ts",
+        "frontend/src/components/result-studio/resultSurfaceHost.tabs.test.ts",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/components/annotations/AnnotatableImagePane.test.tsx",
+        "frontend/src/components/annotations/AnnotationBar.test.tsx"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true
     }
   ]
 }

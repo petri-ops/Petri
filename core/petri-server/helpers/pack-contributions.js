@@ -41,6 +41,9 @@ const LIMITS = Object.freeze({
 });
 
 const RESULT_SURFACE_MODES = new Set(['result', 'code', 'compare', 'history']);
+// BLOCK-236 — tab 级接管白名单必须与前端 registry 同源；后端不做这一层透出，
+// 前端永远看不到声明（BLOCK-252 实机抓真：code/compare 必回落核心）。
+const RESULT_SURFACE_TABS = new Set(['lineage', 'history', 'revisions-source', 'compare']);
 
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/;
 
@@ -150,6 +153,25 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
         .filter((mode) => typeof mode === 'string' && RESULT_SURFACE_MODES.has(mode))
       : [];
     const modes = rawModes.length > 0 ? [...new Set(rawModes)] : ['result'];
+    const tabs = [];
+    if (item.tabs !== undefined) {
+      if (!Array.isArray(item.tabs)) {
+        diagnostics.push(diagnostic(packId, `resultSurfaces/${id}`, 'tabs_not_array'));
+      } else {
+        for (const rawTab of item.tabs.slice(0, 12)) {
+          const tabId = asSmallString(rawTab && rawTab.id, LIMITS.idLength);
+          if (!RESULT_SURFACE_TABS.has(tabId)) {
+            diagnostics.push(diagnostic(packId, `resultSurfaces/${id}`, 'tab_unknown_id', tabId || ''));
+            continue;
+          }
+          if (tabs.some((tab) => tab.id === tabId)) continue;
+          tabs.push({
+            id: tabId,
+            label: asSmallString(rawTab && rawTab.label, 24) || tabId,
+          });
+        }
+      }
+    }
     seen.add(id);
     surfaces.push({
       id,
@@ -158,6 +180,7 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
       ...(typeof item.entry === 'string' ? { entry: item.entry.replace(/\\/g, '/') } : {}),
       artifactTypes,
       modes,
+      ...(tabs.length > 0 ? { tabs } : {}),
       priority: Number.isFinite(item.priority) ? item.priority : 0,
       ...(typeof item.emptyState === 'string'
         ? { emptyState: item.emptyState.slice(0, LIMITS.emptyStateLength) }

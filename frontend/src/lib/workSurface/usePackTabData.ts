@@ -42,13 +42,14 @@ export function shouldDowngradeToCore(tab: string | undefined, state: PackTabSta
 
 export function usePackTabData(
   tab: string | undefined,
-  params: { jobId?: string | null; revisionId?: string | null; changeSetId?: string | null },
+  params: { projectId?: string | null; jobId?: string | null; revisionId?: string | null; changeSetId?: string | null },
   apiBase: string,
 ): PackTabState {
+  const projectId = params.projectId ?? null;
   const jobId = params.jobId ?? null;
   const revisionId = params.revisionId ?? null;
   const changeSetId = params.changeSetId ?? null;
-  const key = tab ? `${tab}|${jobId ?? ''}|${revisionId ?? ''}|${changeSetId ?? ''}|${apiBase}` : '';
+  const key = tab ? `${tab}|${projectId ?? ''}|${jobId ?? ''}|${revisionId ?? ''}|${changeSetId ?? ''}|${apiBase}` : '';
   const [entry, setEntry] = useState<{ key: string; state: PackTabState }>({
     key: '',
     state: EMPTY_PACK_TAB_STATE,
@@ -57,7 +58,7 @@ export function usePackTabData(
   useEffect(() => {
     if (!tab) return undefined;
     let cancelled = false;
-    void fetchPackTabData(tab as PackTabId, { jobId, revisionId, changeSetId }, { apiBase })
+    void fetchPackTabData(tab as PackTabId, { projectId, jobId, revisionId, changeSetId }, { apiBase })
       .then((res: PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload>) => {
         if (cancelled) return;
         setEntry({
@@ -71,7 +72,7 @@ export function usePackTabData(
     return () => {
       cancelled = true;
     };
-  }, [key, tab, jobId, revisionId, changeSetId, apiBase]);
+  }, [key, tab, projectId, jobId, revisionId, changeSetId, apiBase]);
 
   if (!tab) return EMPTY_PACK_TAB_STATE;
   return entry.key === key ? entry.state : LOADING_PACK_TAB_STATE;

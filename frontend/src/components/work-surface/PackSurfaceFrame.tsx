@@ -16,7 +16,9 @@ function packOrigin(packId: string): string {
 }
 
 export function packSurfaceUrl(descriptor: WorkSurfaceDescriptor): string | null {
-  if (descriptor.kind !== 'pack-view' || !descriptor.packId || !descriptor.entry) return null;
+  // BLOCK-252 实机抓真：pack-result surface 与 pack-view 共用同一 entry/协议，
+  // 旧实现只认 pack-view，导致结果包永远显示“没有可挂载的视图入口”。
+  if ((descriptor.kind !== 'pack-view' && descriptor.kind !== 'pack-result') || !descriptor.packId || !descriptor.entry) return null;
   const encodedPath = descriptor.entry.split('/').map(encodeURIComponent).join('/');
   return `${packOrigin(descriptor.packId)}/${encodedPath}`;
 }

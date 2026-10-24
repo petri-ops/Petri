@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { ArtifactSelection } from '@/lib/artifact-selection';
 import {
   isSameActiveArtifactProjection,
+  withHydratedArtifactIdentity,
   type ActiveArtifactProjection,
 } from './activeArtifactProjection';
 
@@ -110,5 +111,23 @@ describe('active artifact projection equality', () => {
     });
 
     expect(isSameActiveArtifactProjection(left, right)).toBe(true);
+  });
+});
+
+describe('withHydratedArtifactIdentity (BLOCK-252)', () => {
+  it('preserves revision/family/changeSet for the same job+artifact', () => {
+    const previous = projection({ revisionId: 'rev_1', revisionOrdinal: 1, artifactFamilyId: 'fam_1', changeSetId: 'cs_base' });
+    const next = projection({ revisionId: null, revisionOrdinal: null, artifactFamilyId: null, changeSetId: null });
+    const result = withHydratedArtifactIdentity(previous, next, 'deg_table.csv', { changeSetId: 'cs_viewed' });
+    expect(result).toMatchObject({
+      revisionId: 'rev_1', revisionOrdinal: 1, artifactFamilyId: 'fam_1', changeSetId: 'cs_viewed',
+    });
+  });
+
+  it('does not carry identity across a different artifact', () => {
+    const previous = projection({ revisionId: 'rev_1', artifactFamilyId: 'fam_1', changeSetId: 'cs_base' });
+    const next = projection({ name: 'other.csv', revisionId: null, artifactFamilyId: null, changeSetId: null });
+    const result = withHydratedArtifactIdentity(previous, next, 'other.csv', null);
+    expect(result).toMatchObject({ revisionId: null, artifactFamilyId: null, changeSetId: null });
   });
 });

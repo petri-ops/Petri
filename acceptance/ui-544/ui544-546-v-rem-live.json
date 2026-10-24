@@ -1,0 +1,130 @@
+{
+  "name": "ui544-546-pack-annotation-live",
+  "darkMode": false,
+  "synthetic": {
+    "jobId": "tj_ui252",
+    "changeSetId": "cs_ui252_candidate",
+    "revisionId": "rev_ui252_table_v2",
+    "packId": "ui252fixture"
+  },
+  "startedAt": "2026-10-24T03:17:00.142Z",
+  "finishedAt": "2026-10-24T03:17:57.514Z",
+  "assertions": [
+    {
+      "name": "E1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvltvany_jk1p status=200"
+    },
+    {
+      "name": "E1b_workspace_resolved",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui252-live-sMMckw\\data\\projects\\ui-252-v-rem-mvltvany"
+    },
+    {
+      "name": "E1c_conversation_created",
+      "pass": true,
+      "detail": "conversationId=conv_3ac513f5-57c status=200"
+    },
+    {
+      "name": "E2_result_chain_seeded",
+      "pass": true,
+      "detail": "job=tj_ui252 changeSet=cs_ui252_candidate revision=rev_ui252_table_v2 status=200 files=2"
+    },
+    {
+      "name": "E2b_interaction_revision_projection",
+      "pass": true,
+      "detail": "status=200 revision=rev_ui252_table_v2 family=fam_ui252_table body={\"manifest\":{\"interactionVersion\":1,\"artifactId\":\"art_ui252_table\",\"revisionId\":\"rev_ui252_table_v2\",\"artifactKind\":\"table\",\"entityType\":\"gene\",\"idField\":\"gene\",\"idStrategy\":\"inferred_column\",\"selectionDurable\":false,\"columns\":[{\"field\":\"gene\",\"sortable\":true,\"filterable\":true},{\"field\":\"logfc\",\"sortable\":true,\"filterable\":true}],\"totalRowCount\":3,\"sampledRowCount\":3,\"capabilities\":[],\"diagnostics\":[{\"code\":\"plugin_i"
+    },
+    {
+      "name": "E2c_source_projection",
+      "pass": true,
+      "detail": "status=200 body={\"revisionId\":\"rev_ui252_table_v2\",\"artifactId\":\"art_ui252_table\",\"revisionOrdinal\":2,\"relativePath\":\"analysis/scripts/rev_candidate/artifact.R\",\"entryPoint\":\"artifact.R\",\"language\":\"r\",\"origin\":\"project_materialized\",\"rendererId\":\"plugin:table\",\"scope\":\"artifact_specific_materialization\",\"content\":\"ui252_marker <- \\\"UI544_SOURCE_MARKER\\\"\\nplot(1)\\n\",\"sha256"
+    },
+    {
+      "name": "E3_fixture_pack_tabs_visible",
+      "pass": true,
+      "detail": "packs=1 tabs=[{\"id\":\"revisions-source\",\"label\":\"源码\"},{\"id\":\"compare\",\"label\":\"比较\"}]"
+    },
+    {
+      "name": "E4_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-ui252-live-sMMckw"
+    },
+    {
+      "name": "U1_result_pack_body",
+      "pass": true,
+      "detail": "{\"source\":\"pack\",\"tab\":null,\"fallback\":null,\"frameState\":\"ready\",\"src\":\"petri-pack://ui252fixture/ui/result.html\"}"
+    },
+    {
+      "name": "U1b_revision_identity_hydrated",
+      "pass": true,
+      "detail": "revision label v2 visible=true"
+    },
+    {
+      "name": "U4_history_fallback_honest",
+      "pass": true,
+      "detail": "{\"source\":\"core-transitional\",\"tab\":null,\"fallback\":\"tab_not_claimed\",\"frameState\":null,\"src\":null}"
+    },
+    {
+      "name": "U4b_history_revision_viewed",
+      "pass": true,
+      "detail": "点击「查看」选中历史版本"
+    },
+    {
+      "name": "C1_compare_pack_host",
+      "pass": true,
+      "detail": "{\"source\":\"pack\",\"tab\":\"compare\",\"fallback\":null,\"frameState\":\"ready\",\"src\":\"petri-pack://ui252fixture/ui/result.html\"} iframeAccessible=false"
+    },
+    {
+      "name": "C2_compare_iframe_table",
+      "pass": true,
+      "detail": "iframe 跨域不可读 → 以截图 provenance 为准（DOM 路由已断言）"
+    },
+    {
+      "name": "C3_compare_rest_truth",
+      "pass": true,
+      "detail": "status=200 files=analysis/scripts/rev_candidate/artifact.R|analysis/scripts/rev_candidate/parameters.json"
+    },
+    {
+      "name": "U2_code_pack_source",
+      "pass": true,
+      "detail": "{\"source\":\"pack\",\"tab\":\"revisions-source\",\"fallback\":null,\"frameState\":\"ready\",\"src\":\"petri-pack://ui252fixture/ui/result.html\"} iframeAccessible=false"
+    },
+    {
+      "name": "U3_source_marker_in_iframe",
+      "pass": true,
+      "detail": "iframe 跨域不可读 → 以截图 provenance 为准（DOM 路由已断言）"
+    },
+    {
+      "name": "A1_history_view_clicked",
+      "pass": true,
+      "detail": "点击「查看」选中历史版本"
+    },
+    {
+      "name": "A2a_ellipse_draft_hint",
+      "pass": true,
+      "detail": "hint=拖拽框选椭圆范围，松开后填写评论"
+    },
+    {
+      "name": "A2b_ellipse_listed",
+      "pass": true,
+      "detail": "[\"椭圆图像区域椭圆批注：离群点需要复核×\"]"
+    },
+    {
+      "name": "A3a_arrow_draft_hint",
+      "pass": true,
+      "detail": "hint=拖拽框选箭头范围（沿矩形对角线绘制），松开后填写评论"
+    },
+    {
+      "name": "A3b_arrow_listed",
+      "pass": true,
+      "detail": "[\"椭圆图像区域椭圆批注：离群点需要复核×\",\"箭头图像区域箭头批注：指向异常簇×\"]"
+    },
+    {
+      "name": "A4_annotations_rest_kinds",
+      "pass": true,
+      "detail": "status=200 kinds=[\"ellipse\",\"arrow\"]"
+    }
+  ],
+  "allPass": true
+}

@@ -43,6 +43,7 @@ import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
 import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
 import { usePackResultData } from '@/lib/workSurface/packResultData';
 import { shouldDowngradeToCore, usePackTabData } from '@/lib/workSurface/usePackTabData';
+import { fetchArtifactInteraction } from '@/lib/result-studio-interaction-client';
 import { getApiPrefix } from '@/lib/env';
 // UI-448 加映 v25 — 浮卡左缘拖宽把手 + 偏好持久化（摘要浮卡与会话浮面共用）
 import {
@@ -53,6 +54,17 @@ import {
 import { Icon } from '@/components/icons/Icon';
 // UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
+
+// BLOCK-252 — pack 面接管后身份水化的一次性缓存：跨 CenterPanel 重挂/多实例去重，
+// 避免「设置 → 被空投影清空 → 再设置」的请求反馈环。
+const hydratedArtifactIdentities = new Map<string, {
+  revisionId: string;
+  revisionOrdinal: number | null;
+  artifactFamilyId: string | null;
+  changeSetId: string | null;
+  artifactId: string | null;
+}>();
+const inflightArtifactIdentities = new Map<string, Promise<void>>();
 import styles from '@/pages/project-workspace.module.css';
 
 export type { ActiveArtifact };
@@ -175,14 +187,80 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
   const packTabState = usePackTabData(
     resultSurfaceHost.tab,
     {
+      projectId: ctx.projectId,
       jobId: ctx.activeJob?.id,
       revisionId: ctx.activeArtifact?.revisionId,
-      changeSetId: activeResultProgress[activeResultProgress.length - 1]?.changeSetId ?? null,
+      // 优先用运行中的最新进度；没有运行时用「当前查看版本」的变更集（BLOCK-252：
+      // 只有瞬时进度会让重载/普通查看版本后的 compare 永远 missing_changeset_id）。
+      changeSetId: activeResultProgress[activeResultProgress.length - 1]?.changeSetId
+        ?? ctx.activeArtifact?.changeSetId
+        ?? null,
     },
     getApiPrefix(),
   );
   const downgradeToCore = shouldDowngradeToCore(resultSurfaceHost.tab, packTabState);
   const packResultData = usePackResultData(resultSurfaceHost.source === 'pack' ? ctx.activeArtifact : null);
+  // BLOCK-252 — pack 接管 result body（或切到 code/compare/history）后核心
+  // ResultArtifactShell 可能不再挂载/丢选中态，交互清单的 revision/family 水化会丢失；
+  // 这里在缺版本时补一次只读投影，否则 pack tab 与历史面板都拿不到 revisionId。
+  const packIdentityJobId = ctx.activeJob && ctx.activeArtifact
+    && !ctx.activeArtifact.revisionId ? ctx.activeJob.id : null;
+  const packIdentityArtifactName = packIdentityJobId ? ctx.activeArtifact?.name ?? null : null;
+  const packIdentityKey = packIdentityJobId && packIdentityArtifactName
+    ? `${packIdentityJobId}\0${packIdentityArtifactName}` : null;
+  React.useEffect(() => {
+    if (!packIdentityKey || !packIdentityJobId || !packIdentityArtifactName || !ctx.activeArtifact) return undefined;
+    const apply = (identity: {
+      revisionId: string;
+      revisionOrdinal: number | null;
+      artifactFamilyId: string | null;
+      changeSetId: string | null;
+      artifactId: string | null;
+    }) => {
+      // 异步返回时 artifact 可能已切换；身份只能落到当初请求的那个产物上。
+      if (!ctx.activeArtifact
+        || ctx.activeArtifact.jobId !== packIdentityJobId
+        || ctx.activeArtifact.name !== packIdentityArtifactName) return;
+      ctx.setActiveArtifact({
+        ...ctx.activeArtifact,
+        revisionId: identity.revisionId,
+        revisionOrdinal: identity.revisionOrdinal,
+        artifactFamilyId: identity.artifactFamilyId,
+        changeSetId: identity.changeSetId,
+        artifactId: identity.artifactId,
+      });
+    };
+    const cached = hydratedArtifactIdentities.get(packIdentityKey);
+    if (cached) {
+      apply(cached);
+      return undefined;
+    }
+    let cancelled = false;
+    const pending = inflightArtifactIdentities.get(packIdentityKey) || (async () => {
+      const response = await fetchArtifactInteraction({
+        language: 'r', jobId: packIdentityJobId, artifact: packIdentityArtifactName,
+      });
+      const revision = response.revision || {};
+      const manifest = response.manifest;
+      const revisionId = typeof revision.revisionId === 'string' ? revision.revisionId : manifest.revisionId;
+      if (!revisionId) throw new Error('revision_identity_missing');
+      hydratedArtifactIdentities.set(packIdentityKey, {
+        revisionId,
+        revisionOrdinal: typeof revision.revisionOrdinal === 'number' ? revision.revisionOrdinal : null,
+        artifactFamilyId: typeof revision.artifactFamilyId === 'string'
+          ? revision.artifactFamilyId : manifest.artifactFamilyId ?? null,
+        changeSetId: typeof revision.changeSetId === 'string' ? revision.changeSetId : null,
+        artifactId: manifest.artifactId ?? null,
+      });
+    })().finally(() => { inflightArtifactIdentities.delete(packIdentityKey); });
+    inflightArtifactIdentities.set(packIdentityKey, pending);
+    void pending.then(() => {
+      if (cancelled) return;
+      const identity = hydratedArtifactIdentities.get(packIdentityKey);
+      if (identity) apply(identity);
+    }).catch(() => null);
+    return () => { cancelled = true; };
+  }, [packIdentityKey, packIdentityJobId, packIdentityArtifactName, ctx.activeArtifact, ctx.setActiveArtifact]);
   const truthStatus = typeof ctx.activeArtifact?.truthStatus === 'string'
     ? ctx.activeArtifact.truthStatus
     : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
@@ -295,7 +373,7 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
                 progress={activeResultProgress}
               />
             ) : null}
-            contextBar={workspaceMode === 'result' ? null : (
+            contextBar={(workspaceMode === 'result' && !(ctx.activeJob && resultSurfaceHost.descriptor && !downgradeToCore)) ? null : (
               <ResultStudioContextBar
                 title={contextTitle}
                 trust={describeTruthStatus(truthStatus, ctx.activeJob?.status)}

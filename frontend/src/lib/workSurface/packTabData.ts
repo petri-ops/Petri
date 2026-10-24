@@ -11,6 +11,7 @@
 export type PackTabId = 'lineage' | 'history' | 'revisions-source' | 'compare';
 
 export interface PackTabParams {
+  projectId?: string | null;
   jobId?: string | null;
   revisionId?: string | null;
   changeSetId?: string | null;
@@ -29,7 +30,8 @@ export interface PackLineagePayload {
 }
 
 export interface PackComparePayload {
-  files: { path: string; status: string; added: number; removed: number }[];
+  /** added/removed 为 null = 该文件没有逐行差异（如结构化 JSON 或仅表格数据变化），UI 显示「—」。 */
+  files: { path: string; status: string; added: number | null; removed: number | null }[];
   truncated: boolean;
 }
 
@@ -95,15 +97,37 @@ export async function fetchPackTabData(
   if (tab === 'lineage') {
     const jobId = typeof params.jobId === 'string' ? params.jobId.trim() : '';
     if (!jobId) return { ok: false, reason: 'missing_job_id' };
-    const res = await readJson(`${base}/api/result-studio/lineage?jobId=${encodeURIComponent(jobId)}`, deps);
+    const res = await readJson(`${base}/result-studio/lineage?jobId=${encodeURIComponent(jobId)}`, deps);
     if (!res.ok) return res as PackTabResult<PackLineagePayload>;
-    const raw = (res.data ?? {}) as { nodes?: unknown; edges?: unknown };
-    const nodes = asArray<PackLineagePayload['nodes'][number]>(raw.nodes)
-      .filter((n) => n && typeof n.id === 'string')
-      .map((n) => ({ id: n.id, label: typeof n.label === 'string' ? n.label.slice(0, 120) : undefined, kind: typeof n.kind === 'string' ? n.kind : undefined }));
-    const edges = asArray<PackLineagePayload['edges'][number]>(raw.edges)
-      .filter((e) => e && typeof e.from === 'string' && typeof e.to === 'string')
-      .map((e) => ({ from: e.from, to: e.to, label: typeof e.label === 'string' ? e.label.slice(0, 120) : undefined }));
+    // 后端返回 { lineage: { chain, downstreamCount } }（祖先链），不是 nodes/edges；
+    // 见 BLOCK-252 实机抓真。兼容旧顶层 nodes/edges 形状。
+    const raw = (res.data ?? {}) as {
+      nodes?: unknown;
+      edges?: unknown;
+      lineage?: { chain?: Array<{ toolJobId?: unknown; toolId?: unknown; isCurrent?: unknown }> } | null;
+    };
+    const chain = Array.isArray(raw.lineage?.chain) ? raw.lineage.chain : [];
+    const lineageNodes = chain
+      .filter((item) => item && typeof item.toolJobId === 'string' && item.toolJobId)
+      .map((item) => ({
+        id: String(item.toolJobId),
+        label: typeof item.toolId === 'string' ? item.toolId.slice(0, 120) : undefined,
+        kind: item.isCurrent === true ? 'current' : 'ancestor',
+      }));
+    const lineageEdges = lineageNodes.slice(1).map((node, index) => ({
+      from: lineageNodes[index].id,
+      to: node.id,
+    }));
+    const nodes = lineageNodes.length > 0
+      ? lineageNodes
+      : asArray<PackLineagePayload['nodes'][number]>(raw.nodes)
+        .filter((n) => n && typeof n.id === 'string')
+        .map((n) => ({ id: n.id, label: typeof n.label === 'string' ? n.label.slice(0, 120) : undefined, kind: typeof n.kind === 'string' ? n.kind : undefined }));
+    const edges = lineageNodes.length > 0
+      ? lineageEdges
+      : asArray<PackLineagePayload['edges'][number]>(raw.edges)
+        .filter((e) => e && typeof e.from === 'string' && typeof e.to === 'string')
+        .map((e) => ({ from: e.from, to: e.to, label: typeof e.label === 'string' ? e.label.slice(0, 120) : undefined }));
     const truncated = nodes.length > PACK_TAB_LIMITS.lineageNodes || edges.length > PACK_TAB_LIMITS.lineageEdges;
     return {
       ok: true,
@@ -120,35 +144,84 @@ export async function fetchPackTabData(
     const changeSetId = typeof params.changeSetId === 'string' ? params.changeSetId.trim() : '';
     if (!changeSetId) return { ok: false, reason: 'missing_changeset_id' };
     const res = await readJson(
-      `${base}/api/result-studio/changesets/${encodeURIComponent(changeSetId)}/compare`,
+      `${base}/result-studio/changesets/${encodeURIComponent(changeSetId)}/compare`,
       deps,
     );
     if (!res.ok) return res as PackTabResult<PackComparePayload>;
-    const raw = (res.data ?? {}) as { files?: unknown[] };
-    const files = asArray<{ path?: unknown; status?: unknown; added?: unknown; removed?: unknown }>(raw.files)
-      .filter((f) => f && typeof f.path === 'string')
-      .map((f) => ({
-        path: String(f.path).slice(0, 300),
-        status: typeof f.status === 'string' ? f.status : 'modified',
-        added: typeof f.added === 'number' ? f.added : 0,
-        removed: typeof f.removed === 'number' ? f.removed : 0,
-      }));
+    // 真实响应是 compareResultChangeSet 的投影：changeSet.changedPaths + textDiff.patch，
+    // 不存在的 `files` 只是旧假设（BLOCK-252 实机抓真）。逐文件 +/- 数从 patch 头分桶。
+    const raw = (res.data ?? {}) as {
+      files?: unknown[];
+      changeSet?: { changedPaths?: Array<{ relativePath?: unknown; changeType?: unknown }> };
+      textDiff?: { patch?: unknown; truncated?: unknown };
+    };
+    const patchLines = typeof raw.textDiff?.patch === 'string' ? String(raw.textDiff.patch).split('\n') : [];
+    const countsByPath = new Map<string, { added: number; removed: number }>();
+    let currentPath: string | null = null;
+    for (const line of patchLines) {
+      const diffMatch = /^diff --git a\/.+ b\/(.+)$/.exec(line);
+      if (diffMatch) {
+        currentPath = diffMatch[1];
+        if (!countsByPath.has(currentPath)) countsByPath.set(currentPath, { added: 0, removed: 0 });
+        continue;
+      }
+      if (!currentPath) continue;
+      const counts = countsByPath.get(currentPath);
+      if (!counts) continue;
+      if (line.startsWith('+') && !line.startsWith('+++')) counts.added += 1;
+      if (line.startsWith('-') && !line.startsWith('---')) counts.removed += 1;
+    }
+    const changedPaths = asArray<{ relativePath?: unknown; changeType?: unknown }>(raw.changeSet?.changedPaths)
+      .filter((entry) => entry && typeof entry.relativePath === 'string');
+    const files = changedPaths.length > 0
+      ? changedPaths.map((entry) => {
+        const path = String(entry.relativePath).slice(0, 300);
+        const counts = countsByPath.get(String(entry.relativePath)) || null;
+        return {
+          path,
+          status: typeof entry.changeType === 'string' ? entry.changeType : 'modified',
+          added: counts ? counts.added : null,
+          removed: counts ? counts.removed : null,
+        };
+      })
+      : asArray<{ path?: unknown; status?: unknown; added?: unknown; removed?: unknown }>(raw.files)
+        .filter((f) => f && typeof f.path === 'string')
+        .map((f) => ({
+          path: String(f.path).slice(0, 300),
+          status: typeof f.status === 'string' ? f.status : 'modified',
+          added: typeof f.added === 'number' ? f.added : null,
+          removed: typeof f.removed === 'number' ? f.removed : null,
+        }));
     return {
       ok: true,
-      data: { files: files.slice(0, PACK_TAB_LIMITS.compareFiles), truncated: files.length > PACK_TAB_LIMITS.compareFiles },
+      data: {
+        files: files.slice(0, PACK_TAB_LIMITS.compareFiles),
+        truncated: raw.textDiff?.truncated === true || files.length > PACK_TAB_LIMITS.compareFiles,
+      },
     };
   }
 
   // revisions-source
   const revisionId = typeof params.revisionId === 'string' ? params.revisionId.trim() : '';
   if (!revisionId) return { ok: false, reason: 'missing_revision_id' };
+  // 后端 source 端点强制 projectId（BLOCK-252 实机抓真：旧桥不带 → 永远 400）。
+  const projectId = typeof params.projectId === 'string' ? params.projectId.trim() : '';
+  if (!projectId) return { ok: false, reason: 'missing_project_id' };
+  const query = new URLSearchParams({ projectId });
   const res = await readJson(
-    `${base}/api/result-studio/revisions/${encodeURIComponent(revisionId)}/source`,
+    `${base}/result-studio/revisions/${encodeURIComponent(revisionId)}/source?${query.toString()}`,
     deps,
   );
   if (!res.ok) return res as PackTabResult<PackSourcePayload>;
-  const payload = (res.data ?? {}) as { source?: unknown; text?: unknown };
-  const source = typeof payload.source === 'string' ? payload.source : typeof payload.text === 'string' ? payload.text : '';
+  const payload = (res.data ?? {}) as { source?: unknown; text?: unknown; content?: unknown };
+  // 后端 source 投影字段名是 `content`（BLOCK-252 实机抓真：旧桥只读 source/text，永远 empty_source）。
+  const source = typeof payload.content === 'string'
+    ? payload.content
+    : typeof payload.source === 'string'
+      ? payload.source
+      : typeof payload.text === 'string'
+        ? payload.text
+        : '';
   if (!source) return { ok: false, reason: 'empty_source' };
   const clipped = clip(source, PACK_TAB_LIMITS.sourceChars);
   return { ok: true, data: { text: clipped.text, truncated: clipped.truncated } };

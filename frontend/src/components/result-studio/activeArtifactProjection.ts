@@ -15,6 +15,8 @@ export interface ActiveArtifactProjection {
   revisionId?: string | null;
   revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
+  /** BLOCK-252 — 当前版本所属变更集；compare tab 的持久数据源。 */
+  changeSetId?: string | null;
   /** BLOCK-141 R-5：viewer interaction manifest 的 artifactId（归属校验可比来源）。 */
   artifactId?: string | null;
   semanticKind?: ResultArtifactKind;
@@ -80,6 +82,7 @@ export function isSameActiveArtifactProjection(
     && (left.revisionId ?? null) === (right.revisionId ?? null)
     && (left.revisionOrdinal ?? null) === (right.revisionOrdinal ?? null)
     && (left.artifactFamilyId ?? null) === (right.artifactFamilyId ?? null)
+    && (left.changeSetId ?? null) === (right.changeSetId ?? null)
     && (left.artifactId ?? null) === (right.artifactId ?? null)
     && (left.semanticKind ?? null) === (right.semanticKind ?? null)
     && (left.entityType ?? null) === (right.entityType ?? null)
@@ -92,4 +95,24 @@ export function isSameActiveArtifactProjection(
     && (left.availabilityStatus ?? 'checking') === (right.availabilityStatus ?? 'checking')
     && (left.availabilityReason ?? null) === (right.availabilityReason ?? null)
     && sameSelectionProjection(left.selection, right.selection);
+}
+
+/**
+ * BLOCK-252 — 同一 job/artifact 上保留外部已水化的 revision/family/changeSet，
+ * 不被核心 shell 的空投影覆盖（pack 面接管/切模式时身份由 CenterPanel 补齐）。
+ */
+export function withHydratedArtifactIdentity<T extends ActiveArtifactProjection>(
+  previous: ActiveArtifactProjection | null,
+  next: T,
+  artifactName: string,
+  viewedRevision: { changeSetId?: string | null } | null,
+): T {
+  const same = Boolean(previous && previous.jobId === next.jobId && previous.name === artifactName);
+  return {
+    ...next,
+    revisionId: next.revisionId ?? (same ? previous?.revisionId ?? null : null),
+    revisionOrdinal: next.revisionOrdinal ?? (same ? previous?.revisionOrdinal ?? null : null),
+    artifactFamilyId: next.artifactFamilyId ?? (same ? previous?.artifactFamilyId ?? null : null),
+    changeSetId: viewedRevision?.changeSetId ?? (same ? previous?.changeSetId ?? null : null),
+  };
 }

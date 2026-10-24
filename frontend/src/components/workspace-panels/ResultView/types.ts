@@ -35,6 +35,8 @@ export interface ActiveArtifact {
    */
   revisionOrdinal?: number | null;
   artifactFamilyId?: string | null;
+  /** BLOCK-252 — 当前查看版本所属变更集；compare tab 的持久数据源（重载后仍可用）。 */
+  changeSetId?: string | null;
   /**
    * BLOCK-141 R-5 — viewer interaction manifest 的 artifactId（后端库记录 id，
    * 前端不可由 jobId+name 合成）。D2 注入归属校验的可比来源：选择总线的
