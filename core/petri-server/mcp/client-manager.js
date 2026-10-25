@@ -45,12 +45,17 @@ async function _loadSdk() {
       try {
         ({ StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js'));
       } catch { /* 旧 SDK 无此传输：http 配置在 connect 时诚实报错 */ }
+      // BLOCK-258 Q8-REM — 旧版 SSE 传输（SDK 1.29 自带，eventsource 已随 SDK 依赖，零新增依赖）
+      let SSEClientTransport = null;
+      try {
+        ({ SSEClientTransport } = await import('@modelcontextprotocol/sdk/client/sse.js'));
+      } catch { /* 旧 SDK 无此传输：sse 配置在 connect 时诚实报错 */ }
       // BLOCK-239 — 授权需求判定用 SDK 的 UnauthorizedError（缺失时回退消息匹配）
       let UnauthorizedError = null;
       try {
         ({ UnauthorizedError } = await import('@modelcontextprotocol/sdk/client/auth.js'));
       } catch { /* 旧 SDK 无 auth 模块 */ }
-      return { Client, StdioClientTransport, StreamableHTTPClientTransport, UnauthorizedError };
+      return { Client, StdioClientTransport, StreamableHTTPClientTransport, SSEClientTransport, UnauthorizedError };
     })().catch((e) => {
       _sdkPromise = null; // 失败不缓存——下次重试
       throw e;
@@ -93,26 +98,21 @@ async function connectServer(id) {
   try {
     const sdk = await _loadSdk();
     UnauthorizedError = sdk.UnauthorizedError;
-    const { Client, StdioClientTransport, StreamableHTTPClientTransport } = sdk;
+    const { Client, StdioClientTransport } = sdk;
     const client = new Client({ name: 'petri-desktop', version: '0.1.0' }, {
       capabilities: {},
     });
-    // BLOCK-163 W3 P3（CAP-3）— 双传输：transport==='http' 走 StreamableHTTP
-    //（配置 url）；缺省 stdio 子进程（语义零变化）。
+    // BLOCK-163/258 — 三传输：stdio 子进程；http=StreamableHTTP；sse=旧版 SSE（均支持自定义 headers）。
     let transport;
-    if (cfg.transport === 'http') {
-      if (!StreamableHTTPClientTransport) {
-        throw new Error('http_transport_unavailable_in_sdk');
-      }
-      if (!cfg.url || !/^https?:\/\//.test(cfg.url)) {
-        throw new Error('http_url_required');
-      }
+    if (isRemoteConfig(cfg)) {
       // BLOCK-239 — 有 token 才挂 provider（刷新/复用）；无 token 不自动生成
       // 授权 URL，避免启动 autoConnect 时为所有未授权 server 造 pending 状态。
       const useAuth = oauthStore.hasTokens(id);
-      transport = new StreamableHTTPClientTransport(
-        new URL(cfg.url),
-        useAuth ? { authProvider: oauthProvider.createOAuthProvider(id) } : undefined,
+      transport = createRemoteTransport(
+        sdk,
+        cfg,
+        id,
+        useAuth ? oauthProvider.createOAuthProvider(id) : null,
       );
     } else {
       transport = new StdioClientTransport({
@@ -123,7 +123,7 @@ async function connectServer(id) {
     }
     await _withTimeout(client.connect(transport), CONNECT_TIMEOUT_MS, 'connect');
     sess.client = client;
-    sess.transport = cfg.transport === 'http' ? 'http' : 'stdio';
+    sess.transport = cfg.transport === 'http' ? 'http' : cfg.transport === 'sse' ? 'sse' : 'stdio';
     sess.status = 'connected';
     sess.connectedAt = Date.now();
     // 连接即拉一次工具清单（货架预览 + P3 投影数据源）
@@ -151,7 +151,30 @@ function isAuthRequired(error, UnauthorizedErrorClass) {
   if (UnauthorizedErrorClass && error instanceof UnauthorizedErrorClass) return true;
   if (error && error.name === 'UnauthorizedError') return true;
   const message = String((error && error.message) || error || '');
-  return /unauthorized|missing authorization|invalid_token|\b401\b/i.test(message);
+  // 仅认明确的授权语义；不把裸 401 当“需授权”（SSE/自定义 Header 的 401 不是 OAuth）。
+  return /unauthorized|missing authorization|invalid_token|www-authenticate/i.test(message);
+}
+
+function isRemoteConfig(cfg) {
+  return cfg && (cfg.transport === 'http' || cfg.transport === 'sse');
+}
+
+/** BLOCK-258 — 远程传输工厂（HTTP/SSE 共用自定义 headers；有 token 才挂 authProvider）。 */
+function createRemoteTransport(sdk, cfg, id, authProvider) {
+  if (!cfg.url || !/^https?:\/\//.test(cfg.url)) {
+    throw new Error(cfg.transport === 'sse' ? 'sse_url_required' : 'http_url_required');
+  }
+  const headers = cfg.headers && Object.keys(cfg.headers).length > 0 ? cfg.headers : null;
+  const options = {
+    ...(authProvider ? { authProvider } : {}),
+    ...(headers ? { requestInit: { headers } } : {}),
+  };
+  if (cfg.transport === 'sse') {
+    if (!sdk.SSEClientTransport) throw new Error('sse_transport_unavailable_in_sdk');
+    return new sdk.SSEClientTransport(new URL(cfg.url), options);
+  }
+  if (!sdk.StreamableHTTPClientTransport) throw new Error('http_transport_unavailable_in_sdk');
+  return new sdk.StreamableHTTPClientTransport(new URL(cfg.url), options);
 }
 
 function safeStateEqual(left, right) {
@@ -167,7 +190,7 @@ function safeStateEqual(left, right) {
 async function beginAuthorization(id, options = {}) {
   const cfg = settings.getMcpServer(id);
   if (!cfg) return { ok: false, error: 'server_not_found' };
-  if (cfg.transport !== 'http') return { ok: false, error: 'oauth_requires_http' };
+  if (!isRemoteConfig(cfg)) return { ok: false, error: 'oauth_requires_remote' };
   const sess = _session(id);
   if (sess.status === 'connected') return { ok: true, status: 'connected', toolCount: sess.tools.length };
 
@@ -181,14 +204,13 @@ async function beginAuthorization(id, options = {}) {
   try {
     const sdk = await _loadSdk();
     UnauthorizedError = sdk.UnauthorizedError;
-    const { Client, StreamableHTTPClientTransport } = sdk;
-    if (!StreamableHTTPClientTransport) throw new Error('http_transport_unavailable_in_sdk');
+    const { Client } = sdk;
     const provider = oauthProvider.createOAuthProvider(id, { redirectBase: options.redirectBase });
     client = new Client({ name: 'petri-desktop', version: '0.1.0' }, { capabilities: {} });
-    const transport = new StreamableHTTPClientTransport(new URL(cfg.url), { authProvider: provider });
+    const transport = createRemoteTransport(sdk, cfg, id, provider);
     await _withTimeout(client.connect(transport), CONNECT_TIMEOUT_MS, 'connect');
     sess.client = client;
-    sess.transport = 'http';
+    sess.transport = cfg.transport === 'sse' ? 'sse' : 'http';
     sess.status = 'connected';
     sess.connectedAt = Date.now();
     sess.authStartedAt = null;
@@ -228,6 +250,7 @@ async function beginAuthorization(id, options = {}) {
 async function completeAuthorization(id, code, state) {
   const cfg = settings.getMcpServer(id);
   if (!cfg) return { ok: false, error: 'server_not_found' };
+  if (!isRemoteConfig(cfg)) return { ok: false, error: 'oauth_requires_remote' };
   const pending = oauthProvider.pendingFor(id);
   const sess = _session(id);
   if (!pending) {
@@ -243,10 +266,9 @@ async function completeAuthorization(id, code, state) {
 
   let transport = null;
   try {
-    const { StreamableHTTPClientTransport } = await _loadSdk();
-    if (!StreamableHTTPClientTransport) throw new Error('http_transport_unavailable_in_sdk');
+    const sdk = await _loadSdk();
     const provider = oauthProvider.createOAuthProvider(id, { redirectBase: pending.redirectBase });
-    transport = new StreamableHTTPClientTransport(new URL(cfg.url), { authProvider: provider });
+    transport = createRemoteTransport(sdk, cfg, id, provider);
     await _withTimeout(transport.finishAuth(String(code)), CONNECT_TIMEOUT_MS, 'finish_auth');
   } catch {
     if (transport) {
@@ -289,6 +311,28 @@ async function disconnectServer(id) {
   return { ok: true };
 }
 
+/**
+ * BLOCK-258 — 本地撤销授权（账号切换 = 撤销后重新授权）。
+ * 断开连接并清 tokens/pending/verifier；默认保留动态注册的 clientInformation。
+ * 只做本地撤销：服务端 access/refresh token 在过期前仍可能有效（如实声明）。
+ */
+async function revokeAuthorization(id, options = {}) {
+  const cfg = settings.getMcpServer(id);
+  if (!cfg) return { ok: false, error: 'server_not_found' };
+  if (!isRemoteConfig(cfg)) return { ok: false, error: 'oauth_requires_remote' };
+  await _closeQuietly(id);
+  const sess = _session(id);
+  sess.status = 'disconnected';
+  sess.tools = [];
+  sess.error = null;
+  sess.connectedAt = null;
+  sess.authStartedAt = null;
+  const forgetClient = options.forgetClient === true;
+  const result = forgetClient ? oauthStore.removeServer(id) : oauthStore.clearCredentials(id);
+  if (!result.ok) return { ok: false, error: result.error || 'revoke_failed' };
+  return { ok: true, revoked: true, removed: result.removed !== false, clientForgotten: forgetClient };
+}
+
 /** 调用某 server 的工具（P3 投影 handler 的执行通道）。 */
 async function callServerTool(id, toolName, args = {}, options = {}) {
   const sess = _sessions.get(id);
@@ -323,10 +367,11 @@ function getStatuses() {
   const configured = settings.listMcpServers();
   const rows = configured.map((cfg) => {
     const sess = _sessions.get(cfg.id);
-    // BLOCK-221（Q8）— 凭据脱敏：env 值是第三方 server 的 token（落盘密文、读侧已还原明文），
-    // 绝不随状态面出 HTTP。只透键名与数量，够前端解释「这台配了 2 个环境变量」。
-    const { env, ...rest } = cfg;
-    const auth = cfg.transport === 'http'
+    // BLOCK-221（Q8）— 凭据脱敏：env/headers 值是第三方 server 的 token（落盘密文、
+    // 读侧已还原明文），绝不随状态面出 HTTP。只透键名与数量。
+    const { env, headers, ...rest } = cfg;
+    const remote = cfg.transport === 'http' || cfg.transport === 'sse';
+    const auth = remote
       ? (oauthStore.hasTokens(cfg.id) ? 'authorized'
         : (sess && (sess.status === 'auth_required' || sess.status === 'authorizing')) ? 'required'
           : 'unknown')
@@ -335,14 +380,18 @@ function getStatuses() {
       ...rest,
       envKeys: env ? Object.keys(env).sort() : [],
       envCount: env ? Object.keys(env).length : 0,
+      headerKeys: headers ? Object.keys(headers).sort() : [],
+      headerCount: headers ? Object.keys(headers).length : 0,
       status: sess ? sess.status : 'disconnected',
       error: sess ? sess.error : null,
       toolCount: sess ? sess.tools.length : 0,
       connectedAt: sess ? sess.connectedAt : null,
       // CAP-3 健康面：传输类型 + 最近错误时间戳透出。
       // BLOCK-239 — 未连接/授权失败时也要如实显示**配置的**传输；sess.transport
-      // 在成功连接前仍是默认 stdio，不能拿它覆盖 http 配置。
-      transport: cfg.transport === 'http' ? 'http' : (sess ? (sess.transport || 'stdio') : 'stdio'),
+      // 在成功连接前仍是默认 stdio，不能拿它覆盖远程配置。
+      transport: cfg.transport === 'http' ? 'http'
+        : cfg.transport === 'sse' ? 'sse'
+          : (sess ? (sess.transport || 'stdio') : 'stdio'),
       lastErrorAt: sess ? sess.lastErrorAt : null,
       // BLOCK-239 — 只透授权状态，不出现 token/client_secret
       ...(auth ? { auth } : {}),
@@ -377,6 +426,7 @@ module.exports = {
   connectServer,
   beginAuthorization,
   completeAuthorization,
+  revokeAuthorization,
   disconnectServer,
   callServerTool,
   listServerTools,

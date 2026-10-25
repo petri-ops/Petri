@@ -282,9 +282,12 @@ function validateFamily(family, body) {
     const diagnostics = [];
     const seen = new Set();
     body.servers.forEach((entry, index) => {
-      // 导入**不接受 env**：导出已剥离（D-2），带 env 的导入会把凭据以明文塞进配置迁移链
+      // 导入**不接受 env/headers**：导出已剥离（D-2），带凭据的导入会把明文塞进配置迁移链
       if (entry && typeof entry === 'object' && entry.env !== undefined) {
         diagnostics.push(diagnostic(family, `servers[${index}].env`, 'not-allowed', 'MCP env 是凭据，不随配置导入/导出（按 id 自动保留原值）'));
+      }
+      if (entry && typeof entry === 'object' && entry.headers !== undefined) {
+        diagnostics.push(diagnostic(family, `servers[${index}].headers`, 'not-allowed', 'MCP headers 是凭据，不随配置导入/导出（按 id 自动保留原值）'));
       }
       const { server, error } = mcpSettings.normalizeServerEntry(entry);
       if (error) {
@@ -451,9 +454,18 @@ const WRITERS = {
     }
   },
   'mcp-servers'(body) {
-    // 按 id 保留原 env（导出已剥离它）——否则"导出→导入"会静默清空所有 MCP 凭据
-    const existing = new Map(mcpSettings.listMcpServers().map((s) => [s.id, s.env]));
-    const next = body.servers.map((server) => ({ ...server, env: existing.get(server.id) || {} }));
+    // 按 id 保留原 env/headers（导出已剥离它们）——否则"导出→导入"会静默清空所有 MCP 凭据
+    const existing = new Map(mcpSettings.listMcpServers().map((s) => [s.id, { env: s.env, headers: s.headers }]));
+    const next = body.servers.map((server) => {
+      const prior = existing.get(server.id);
+      // headers 只对远程传输有意义：导入时把远程 server 改成 stdio 不得把旧 headers 带回去
+      const remote = server.transport === 'http' || server.transport === 'sse';
+      return {
+        ...server,
+        env: prior ? prior.env : {},
+        ...(remote && prior && prior.headers ? { headers: prior.headers } : {}),
+      };
+    });
     const saved = mcpSettings.saveMcpServers(next);
     if (saved.error) {
       const error = new Error('mcp-servers 写入被拒');

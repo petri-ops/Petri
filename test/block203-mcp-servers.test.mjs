@@ -102,10 +102,10 @@ test('BLOCK-203 P5 — 读侧 fail-open：损坏文件=空清单（不抛）', (
   fs.writeFileSync(settings.SETTINGS_FILE, JSON.stringify({ version: 1, servers: [] }), 'utf8');
 });
 
-test('BLOCK-203 P5 — 注册面：9 键、无 env 层、条目字段不含逐 env 键', () => {
+test('BLOCK-203 P5 — 注册面：10 键、无 env/headers 子键、条目字段不含逐键项', () => {
   const keys = schema.CONFIG_KEYS.filter((e) => e.family === 'mcp-servers');
   assert.deepEqual(keys.map((e) => e.path).sort(), [
-    '<item>.args', '<item>.autoConnect', '<item>.command', '<item>.env', '<item>.id',
+    '<item>.args', '<item>.autoConnect', '<item>.command', '<item>.env', '<item>.headers', '<item>.id',
     '<item>.transport', '<item>.url', 'savedAt', 'version',
   ]);
   assert.deepEqual(schema.CONFIG_FAMILIES['mcp-servers'].precedence, ['file', 'default']);

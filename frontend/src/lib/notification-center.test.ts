@@ -2,9 +2,13 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   __resetNotificationCenterForTests,
   clearNotices,
+  getNoticePrefs,
   listNotices,
   markAllNoticesRead,
+  markNoticeRead,
+  noticeTarget,
   pushNotice,
+  setNoticePrefs,
   subscribeNotices,
   unreadNoticeCount,
 } from './notification-center';
@@ -57,5 +61,38 @@ describe('notification-center', () => {
     pushNotice({ kind: 'turn_completed', title: '持久化', body: 'x' });
     const raw = window.localStorage.getItem('petri:notification-center:v1');
     expect(raw).toContain('持久化');
+  });
+
+  it('BLOCK-259 K4 — 类型开关：关闭的类型不入历史；重新开启恢复', () => {
+    setNoticePrefs({ kinds: { turn_completed: false } });
+    expect(pushNotice({ kind: 'turn_completed', title: '完成', body: 'A' })).toBeNull();
+    expect(listNotices()).toHaveLength(0);
+
+    expect(pushNotice({ kind: 'turn_failed', title: '失败', body: 'B' })).not.toBeNull();
+    expect(listNotices()).toHaveLength(1);
+
+    setNoticePrefs({ kinds: { turn_completed: true } });
+    expect(pushNotice({ kind: 'turn_completed', title: '完成', body: 'C' })).not.toBeNull();
+    expect(listNotices()).toHaveLength(2);
+    expect(getNoticePrefs().kinds.turn_completed).toBe(true);
+    expect(window.localStorage.getItem('petri:notification-center:prefs:v1')).toContain('turn_completed');
+  });
+
+  it('BLOCK-259 K4 — 单条已读与点击去向', () => {
+    const notice = pushNotice({
+      kind: 'approval_required',
+      title: '确认',
+      body: 'B',
+      projectId: 'p1',
+      conversationId: 'c1',
+    });
+    expect(notice).not.toBeNull();
+    markNoticeRead(notice!.id);
+    expect(listNotices()[0].read).toBe(true);
+    expect(noticeTarget(notice!)).toEqual({ projectId: 'p1', mode: 'chat', conversationId: 'c1' });
+
+    const reminder = pushNotice({ kind: 'schedule_reminder', title: '提醒', body: 'R', projectId: 'p2' });
+    expect(noticeTarget(reminder!)).toEqual({ projectId: 'p2', mode: 'scheduled' });
+    expect(noticeTarget({ ...reminder!, projectId: undefined })).toBeNull();
   });
 });

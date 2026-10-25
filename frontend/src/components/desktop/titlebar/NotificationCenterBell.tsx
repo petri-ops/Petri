@@ -7,14 +7,22 @@
  */
 
 import React, { useState, useSyncExternalStore } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
+import { useAppRailOptional } from '@/components/desktop/AppRailContext';
 import styles from '../TitleBar.module.css';
 import {
   clearNotices,
+  getNoticePrefs,
   listNotices,
   markAllNoticesRead,
+  markNoticeRead,
+  noticeTarget,
+  setNoticePrefs,
+  subscribeNoticePrefs,
   subscribeNotices,
   unreadNoticeCount,
+  type AppNotice,
   type AppNoticeKind,
 } from '@/lib/notification-center';
 
@@ -25,10 +33,29 @@ const KIND_LABELS: Record<AppNoticeKind, string> = {
   schedule_reminder: '提醒',
 };
 
+const PREF_ITEMS: Array<{ kind: AppNoticeKind; label: string }> = [
+  { kind: 'turn_completed', label: '完成' },
+  { kind: 'turn_failed', label: '失败' },
+  { kind: 'approval_required', label: '待确认' },
+  { kind: 'schedule_reminder', label: '提醒' },
+];
+
 export function NotificationCenterBell(): React.ReactElement {
   const notices = useSyncExternalStore(subscribeNotices, listNotices, listNotices);
+  const prefs = useSyncExternalStore(subscribeNoticePrefs, getNoticePrefs, getNoticePrefs);
   const unread = unreadNoticeCount();
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const appRail = useAppRailOptional();
+
+  const openNotice = (notice: AppNotice) => {
+    const target = noticeTarget(notice);
+    markNoticeRead(notice.id);
+    setOpen(false);
+    if (!target) return;
+    if (target.conversationId) appRail?.setActiveConvId(target.conversationId);
+    void navigate(`/project/${target.projectId}/${target.mode}`);
+  };
 
   return (
     <div className={styles.toolMenuAnchor}>
@@ -85,40 +112,78 @@ export function NotificationCenterBell(): React.ReactElement {
                 清空
               </button>
             </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '6px 10px', borderBottom: '1px solid var(--petri-divider)' }} data-testid="notification-center-prefs">
+              <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>接收</span>
+              {PREF_ITEMS.map((item) => (
+                <label key={item.kind} style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--petri-text-secondary)', fontSize: 12 }}>
+                  <input
+                    type="checkbox"
+                    checked={prefs.kinds[item.kind]}
+                    onChange={(event) => setNoticePrefs({ kinds: { [item.kind]: event.target.checked } })}
+                    data-testid={`notice-pref-${item.kind}`}
+                  />
+                  {item.label}
+                </label>
+              ))}
+              <label style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--petri-text-secondary)', fontSize: 12 }}>
+                <input
+                  type="checkbox"
+                  checked={prefs.sound}
+                  onChange={(event) => setNoticePrefs({ sound: event.target.checked })}
+                  data-testid="notice-pref-sound"
+                />
+                声音
+              </label>
+            </div>
             {notices.length === 0 ? (
               <div style={{ padding: 14, color: 'var(--petri-text-tertiary)', fontSize: 13 }}>
                 暂无通知。回合完成、失败或等待确认时会出现在这里。
               </div>
             ) : (
-              notices.map((notice) => (
-                <div
-                  key={notice.id}
-                  data-testid="notification-center-item"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 2,
-                    padding: '8px 10px',
-                    borderBottom: '1px solid var(--petri-divider)',
-                    opacity: notice.read ? 0.65 : 1,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>{KIND_LABELS[notice.kind]}</span>
-                    <span style={{ color: 'var(--petri-text)', fontSize: 13, flex: 1 }}>{notice.title}</span>
-                    {!notice.read && (
-                      <span
-                        data-testid="notification-center-dot"
-                        style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--petri-accent)' }}
-                      />
-                    )}
-                  </div>
-                  <span style={{ color: 'var(--petri-text-secondary)', fontSize: 12 }}>{notice.body}</span>
-                  <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>
-                    {new Date(notice.createdAt).toLocaleString()}
-                  </span>
-                </div>
-              ))
+              notices.map((notice) => {
+                const target = noticeTarget(notice);
+                return (
+                  <button
+                    key={notice.id}
+                    type="button"
+                    onClick={() => openNotice(notice)}
+                    disabled={!target}
+                    data-testid="notification-center-item"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                      padding: '8px 10px',
+                      borderBottom: '1px solid var(--petri-divider)',
+                      borderTop: 'none',
+                      borderLeft: 'none',
+                      borderRight: 'none',
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'transparent',
+                      color: 'inherit',
+                      cursor: target ? 'pointer' : 'default',
+                      opacity: notice.read ? 0.65 : 1,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>{KIND_LABELS[notice.kind]}</span>
+                      <span style={{ color: 'var(--petri-text)', fontSize: 13, flex: 1 }}>{notice.title}</span>
+                      {!notice.read && (
+                        <span
+                          data-testid="notification-center-dot"
+                          style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--petri-accent)' }}
+                        />
+                      )}
+                    </div>
+                    <span style={{ color: 'var(--petri-text-secondary)', fontSize: 12 }}>{notice.body}</span>
+                    <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>
+                      {new Date(notice.createdAt).toLocaleString()}
+                      {target ? ' · 点击打开' : ''}
+                    </span>
+                  </button>
+                );
+              })
             )}
           </div>
         </>

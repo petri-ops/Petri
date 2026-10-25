@@ -194,7 +194,7 @@ status: planned
 | C11 | 图片预览 | 缩放/复制/保存/多图/缩放预设 | 缩放（步进 + 50/100/200 预设）/ 保存（download 保留扩展名）/ 多图 N·M + ←→ 与首尾回卷 / 保留 1:1 与 Esc（BLOCK-246 P4 + 单测 6） | ✅ | 补保存/多图导航即可 | — |
 | C12 | 划词操作 | 复制/加入任务/侧聊提问/加入速记/批注 | **✅** 文件预览选区 → 动作条：复制 / 加入对话（`selectionQuote` **第一个生产者**）/ 加入速记 / 侧聊提问 / 批注（**BLOCK-254**：`text-selection` + 行号锚点，有路径+行号即解禁，无行号视图禁用并给具体理由） | ✅ | 选中即行动 | BLOCK-254 |
 | C13 | 速记板 | 片段/图片/搜索/来源会话/图片批注 | **✅** 旁路表（迁移 016，schema 生成 .sql 逐字节一致）+ `/api/scratchpad`（列表/搜索/新建/删除，上限与清洗单源）+ composer 面板（搜索·引用·删除）+ 来源会话/文件/选区；引用走唯一 ContextItem 通道（图片不把 base64 塞上行）；**图片批注已交付**（**BLOCK-254**：surface `scratchpad-entry` + `entryId`，迁移 019，缩略图→大图复用批注宿主；删除条目不级联清理其批注留 reopen） | ✅ | 学习型产品的捕获面 | BLOCK-254 |
-| C14 | 后续建议/提示词润色 | `followupSuggestions`、`polishPrompt` | Gen UI follow-up 已有；composer 无 | 🟡 | 降低下一句成本 | Q9 |
+| C14 | 后续建议/提示词润色 | `followupSuggestions`、`polishPrompt` | Gen UI follow-up 已有；**BLOCK-259**：消息动作「润色/建议追问」+ 3 条固定追问 chips（4000 字有界、只填输入框）；**BLOCK-260**：chips 按结果/代码/失败关键词切换；模型生成建议/自动改写未做 | 🟡 | 降低下一句成本 | Q9 |
 | C15 | 统一 `@` 上下文菜单 | 任务/指令/Skill/插件/连接器/Agent/文件/会话 | composer 光标处 `@` 打开统一菜单，七源同源聚合（文件·文件夹 / 技能 / MCP 连接器 / 智能体 profile / 结果产物 / 知识空间 / 历史会话），带来源标签、逐源上限、不可用原因；选中只产 `ComposerContextItem` 进单列表（BLOCK-245 P3/P4 + UI-553 实机 22/22） | ✅ | 一个入口装配上下文（不要重建第二条注入通道） | — |
 | C16 | 附件形态 | 文件夹/选中文本/选中代码/应用快照/20 上限 | 五种形态齐备：上限诚实化（BLOCK-245 P5，文案单源 `contextLimits.ts`）+ **文件夹整体引用**（同树按前缀展开、上限 20 并报总数）+ **选中代码块**（`language` 加性字段 → 围栏块）+ **应用快照**（第八源，未知字段写「未接入」）+ 选中文本（既有）；附件条目上限沿用既有 `MAX_ATTACHMENTS` 可见提示 | ✅ | 上下文形态完整 | — |
 | C17 | 跨会话引用 | `chatSessionDrop`、引用上限 | **✅** `@` 会话源带**有界摘要**（末尾 8 条 × 每条 300 字 × 总 2000 字，裁剪必注明；只给前 6 个会话补摘要、逐条独立降级）；**BLOCK-255**：左栏会话行可拖入 composer，落下只产一条 `ComposerContextItem`（kind=conversation，reference 组），复用同一 builder/上限；当前会话拒自引用并提示；摘要拉取失败退化为元数据并如实标注 | ✅ | 会话作为上下文资源 | BLOCK-255 |
@@ -205,7 +205,7 @@ status: planned
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| D1 | 模型选择器状态 | 分类/失效/无权限/Workspace 限制/加载失败/低峰折扣 | 目录状态/缺密钥/隐藏逐行可见（BLOCK-224）；低峰折扣/权限/价格/缓存未做 | 🟡 | 失败可解释 | Q9 |
+| D1 | 模型选择器状态 | 分类/失效/无权限/Workspace 限制/加载失败/低峰折扣 | 目录状态/缺密钥/隐藏逐行可见（BLOCK-224）；**BLOCK-259**：模型菜单价格显示（`/api/ai/pricing` 单一源；发现失败时原因+价格并存）；低峰折扣（provider 外部/G1+）/权限/缓存余项未做 | 🟡 | 失败可解释 | Q9 |
 | D2 | 每模型思考/上下文/可见性 | 模型设置表：effort/contextWindow/visible | 逐模型可见性/上下文/默认思考档（BLOCK-224） | ✅ | 模型能力透明 | Q9 |
 | D3 | 访问权限选择器 | 三档描述 + 完全访问确认（能力清单/风险提示） | 四档选择器 + 完全访问确认弹层（能力清单/风险/可切回，本会话确认一次，取消不改档）（BLOCK-244） | ✅ | 高危档位显式确认 | Q1 |
 | D4 | 自动选模型 | Auto 档 | Auto 按任务/附件选模（BLOCK-225）；复杂度/成本权重/审计/覆盖确认未做 | 🟡 | 任务适配 | Q9 |
@@ -279,7 +279,7 @@ status: planned
 | J1 | 扩展中心/技能货架 | 有 | UI-480/506/507/527 更深 | ✅ | 不重建 | — |
 | J2 | 技能自进化建议 | 建议列表/一键建任务/忽略 | 无 | 🟡 | 技能可演进 | Q8 |
 | J3 | 插件视图 tab | plugin view host | Q5 surface host + pack views（BLOCK-216） | ✅ | 插件即工作面 | Q8 |
-| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | HTTP OAuth（BLOCK-239）+ 懒加载（BLOCK-241）+ trust ask/destructive 门（BLOCK-243）+ 四 hint（BLOCK-240）；agent authenticate/stdio/SSE/非 destructive 默认策略未做 | 🟡 | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 |
+| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | HTTP OAuth（BLOCK-239）+ 懒加载（BLOCK-241）+ trust ask/destructive 门（BLOCK-243）+ 四 hint（BLOCK-240）+ **SSE 传输与 OAuth 本地撤销/账号切换（BLOCK-258；自定义 headers 同步交付）**；仍余 agent 侧 authenticate 工具与项目级默认策略（以 J4 逐项对账为准） | 🟡 | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 |
 | J5 | 深链安装安全警告 | 名称/来源/下载地址/大小/SHA-256/风险 | 深链安装安全面（BLOCK-242） | ✅ | 安装前看清来源 | Q8 |
 | J6 | Agent builder | 自定义 Agent/角色 | agent roles 只有内置 | 🟡 | 用户自定义专长 | Q8/Q9 |
 
@@ -288,9 +288,9 @@ status: planned
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
 | K1 | 分段错误边界 | 应用/页面/预览/轮次/工具五级 | 页面/预览段（BLOCK-222）+ **轮次/工具行（BLOCK-248 TurnBoundary/ToolRowBoundary，注入测试）**；**应用级仍缺** | 🟡 | 局部崩溃不白屏 | Q9 余项 |
-| K2 | 崩溃同意/本地解析 | consent + minidump 本地解析 | 本地崩溃记录/横幅（BLOCK-228）；minidump 解析/上传未做 | 🟡 | 隐私边界 + 证据 | Q9 |
-| K3 | 退出/更新运行摘要 | 运行/后台/排队/等待交互计数 | 退出摘要三选一（BLOCK-223）；逐项操作未做 | 🟡 | 退出不误杀工作 | Q9 |
-| K4 | 托盘/系统通知 | 托盘最小化、轮次完成/失败/权限/提问通知 | 系统通知/托盘/通知中心/免打扰（BLOCK-223/226）；点击跳转/系统历史/审批穿透/声音/类型开关未做 | 🟡 | 长跑可离开窗口 | Q9 |
+| K2 | 崩溃同意/本地解析 | consent + minidump 本地解析 | 本地崩溃记录/横幅（BLOCK-228）；**BLOCK-260**：本地 MINIDUMP 摘要（模块/异常/系统/进程，零依赖零上传、畸形 fail-closed）+ 横幅详情；上传=G1+ 未做 | 🟡 | 隐私边界 + 证据 | Q9 |
+| K3 | 退出/更新运行摘要 | 运行/后台/排队/等待交互计数 | 退出摘要三选一（BLOCK-223）；**BLOCK-260**：逐项查看（toolJob/task/approval，有界、无参数正文，取消退出后跳转）；逐项取消/停止未做 | 🟡 | 退出不误杀工作 | Q9 |
+| K4 | 托盘/系统通知 | 托盘最小化、轮次完成/失败/权限/提问通知 | 系统通知/托盘/通知中心/免打扰（BLOCK-223/226）；**BLOCK-259**：点击跳转+单条已读+四类开关+声音偏好（关闭类型不入历史）；OS 级通知历史/审批卡深度定位未做 | 🟡 | 长跑可离开窗口 | Q9 |
 | K5 | 命令面板 | 有 | UI-528 已对齐 | ✅ | 不重建 | — |
 | K6 | 设置搜索/导出/重置 | 有 | UI-516/517/518 更深 | ✅ | 不重建 | — |
 | K7 | 键位/推理档位 | 有 | UI-514/515 更深 | ✅ | 不重建 | — |
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-25 BLOCK-257 回写，机械计数）**：✅ 69 · 🟡 25 · 🔴 1 · ⛔ 7 = **102 点**（本轮 E9 → ✅；F7 保持 🟡＝钉住实机腿已补，通用 pane 模型仍 reopen）。基线取 BLOCK-256 收口口径。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
+**矩阵统计（2026-10-25 BLOCK-260 回写，机械计数）**：✅ 69 · 🟡 25 · 🔴 1 · ⛔ 7 = **102 点**（BLOCK-260 交付 K3 逐项查看、K2 本地 minidump 摘要、C14 上下文追问；K2 上传=G1+、K3 逐项停止未做，均保持 🟡）。基线取 BLOCK-259 收口口径。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -684,15 +684,15 @@ status: planned
 | 4 | Q3 **completed（BLOCK-248 · 2026-10-23）** | C1 对账（MessageRail 已在）；C2 活动卡对账 + 无 diff 诚实态；C3 事件级轨迹+筛选+recordedOnly；H3 证据面事件聚合；K1 轮次/工具级边界（应用级仍缺） | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 已完成 |
 | 5 | Q4a **completed（BLOCK-249 · 2026-10-23）** | C7 暂停/恢复；C10 团队活动；F1 roster/stop-all/部分回执；F3 结构化输出；F4 工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 已完成（UI-559 已 verified · BLOCK-250 拆重渲染环；亮/暗各 20/20） |
 | 6 | Q7 **（completed · BLOCK-256 · 2026-10-25）** | goal 持久状态机 + `create_goal`/`get_goal`/`update_goal` 三工具；goal 用量取真实 `ai_usage`，80% usageLimited / 100% budgetLimited，关联 schedule 提交前跳过（不硬熔断运行中 loop）；schedule 持久计划 + 10s runner 复用既有 `POST /api/ai/agent` + 任务看板 + `/schedule` composer 入口 + reminder 进通知中心；隔离 9223 亮/暗各 **21/21**（`acceptance/block-256/q7-live{,-dark}.json`）。reopen=cron/时区/跨设备/overlap/失败重试/agent 唤醒 | Q4a 已完成 | 已完成 |
-| 7 | Q4b | F8 工作流脚本（meta/agent/parallel/pipeline/phase/log/budget/resume）；确定性沙箱；并发/代理/预算帽；journal/血缘；opt-in | Q4a 后单列立项 | 2–3 周 |
+| 7 | Q4b | F8 工作流脚本（meta/agent/parallel/pipeline/phase/log/budget/resume）；确定性沙箱；并发/代理/预算帽；journal/血缘；opt-in。**实码对账（2026-10-25）**：现有 `agent-workflow` 仅为计划步骤模板（BLOCK-234 pack `workflowTemplates` + session plan step），**不是** F8 脚本执行面；无 `vm`/`worker_threads`/`.petri/workflows`/`resumeFromRunId` 实现 | Q4a 后单列立项；P0 须明确与既有计划模板/`spawn_agent` 的复用与隔离，不建第二执行器 | 2–3 周 |
 | 8 | Q5-REM **（completed · BLOCK-253 + BLOCK-257 · 2026-10-25 尾包收口）** | 已交付：B3/H4 计划修订 tabs（实机 14/14）、E4 文件管理器 bridge/IPC 实机、E1 入口统一第一步（标题栏菜单聚合）、F7 ArtifactPinPane 主区/副栏最大化（6/6 测试）；**BLOCK-257 尾包**：宿主「更多工具」菜单 portal 修复（终端打开后可再次弹出）、**E9 终端双 pane 分屏**（active+secondary 独立 tab/xterm/pty）、**F7 钉住/最大化实机腿**（亮/暗各 17/17）；H3 已随 Q3。仍 reopen：E1 跨宿主渲染合并（**另立设计包**）、通用 pane 模型与三 pane/拖拽比例/会话恢复 | BLOCK-216 主体已完成；BLOCK-253/257 已闭环 Q5 可安全项 | 尾包已完成 |
 | 9 | Q6-REM **（completed · BLOCK-254 · 2026-10-25 P8 收口：A 档 + B-1～B-5 全闭环 + 实机亮/暗 + closeout 十三门 PASS）** | 已销项（母纲滞后项）：C13 速记板本体（BLOCK-246 已交付）、UI-546 实机腿（BLOCK-252 verified）。**A 已闭环**：E5 文字（`text` 契约/渲染/工具条/列表 + placeholder 语义分支）、Agent 批注读取工具（`result_annotations_list`，projectId 必填 fail-closed、有界、只读 R1；工具 84→85）。B 档五项已全闭环并过实机（B-1=**E5 马赛克**：`MOSAIC_DISCLOSURE` 单一措辞源 + hint/overlay title/prompt/placeholder 四处一致 + `backdrop-filter` 缺失时不透明色块降级 + 反向措辞守卫；实机视觉留 P8）、**撤销重做**（B-2 已闭环=仅本次会话/仅当前 scope/最近 10 次的前端补偿栈，删除补偿按原内容重建为新 id 并如实标注；**redo 非范围**，理由=不对称补偿会产生 id 漂移链）、**文本选中批注**（B-3 已闭环=`text-selection` + `anchor(text-range)`，与 rect 契约级互斥；迁移 018 只加 `anchor_json`；选区「批注」按「有路径+有行号+有出口」解禁，无行号视图禁用并说明；**v1 不做行内高亮**）、**速记板图片批注**（B-4 已闭环=surface `scratchpad-entry` + `entryId`，与 filePath/artifactId/revisionId 互斥；迁移 019 只加 `entry_id`；速记面板缩略图→大图叠加层复用批注宿主；**删除条目不清批注**留 reopen）、**PPTX/DOCX/XLSX**（B-5 已闭环=锚点加 `unit(line/paragraph/row)`，docx/pptx/odt/odp 按段落批注、xlsx/ods 按行批注；零新依赖不做版式渲染；无回调时退回 `<pre>` 零回归；**段落/行序会随文档改动漂移**，无失效检测留 reopen）。C 阻塞（另立契约包）：E5 画笔（rect-only 几何需契约 v2）、pack iframe 批注窄桥（契约冻结 + 写权限边界） | BLOCK-219/238 主体已完成；P2b/Q5 已就绪；逐项判定见 [BLOCK-254 §2–§3](./block-254-q6-rem-plan.md)，执行记录见 §9 | B 档 1 周+实机；C 档另包 |
-| 10 | Q8-REM | J2 技能自进化建议（可选）；J6 Agent builder（可选）；J4 reopen：agent authenticate/stdio/SSE/非 destructive 默认策略；OAuth revoke/账号切换；真实 provider 矩阵=G1+；packaged 深链/签名/allowlist=G1+ | Q8 主体已完成；G1+ 不计 | 0.5 周（可选） |
-| 11 | Q9-REM | K1 轮次/工具/应用级边界；K2 minidump 解析/上传；K3 摘要逐项操作；K4 通知点击/系统历史/审批穿透/声音/类型开关；K9 分步引导/数据导入；D1 低峰/权限/价格/缓存；D4 成本/复杂度/审计/覆盖确认；E7 macOS/PiP/真实 click-type；C14 后续建议/润色；L3 浏览器连接器；L4 电脑控制余项 | Q8 后；可与 Q5/Q6 余项互换 | 1–2 周 |
+| 10 | Q8-REM **（completed · BLOCK-258 · 2026-10-25）** | 已交付：**SSE 传输**（SDK 自带 SSEClientTransport，零新依赖）+ **HTTP/SSE 自定义凭据 headers**（AES 密文落盘、状态仅键名、导出剥离、导入按 id 保留、CRLF/保留头拒绝）+ **OAuth 本地撤销/重新授权**（清 tokens/pending/verifier，默认保留 client；服务端令牌过期前可能仍有效如实声明）；隔离 9223 亮/暗各 **18/18**（`acceptance/block-258/q8rem-live{,-dark}.json`）。仍 reopen：J2 技能自进化建议 / J6 Agent builder（可选、另包）、RFC 7009 服务端令牌撤销、多账号并存、SSE server 端、J4 agent 侧 authenticate 工具与项目级默认策略；真实 provider 矩阵/packaged 签名=G1+ | Q8 主体已完成；G1+ 不计 | 已完成（2–4 天实际） |
+| 11 | Q9-REM **（partial · BLOCK-259 + BLOCK-260 · 2026-10-25）** | 已交付：**K4** 通知点击/单条已读/四类开关/声音；**C14** 消息「润色/建议追问」+ 按结果/代码/失败切换；**D1** 模型价格显示；**K3** 退出摘要逐项查看；**K2** 本地 minidump 摘要（零上传）；隔离 9223 亮/暗各 11/11（BLOCK-259）与 14/14（BLOCK-260）。仍 reopen：K1 应用级边界（产品定义）、K2 上传（G1+）、K3 逐项取消/停止、K9 分步引导/数据导入（产品决策）、D1 低峰计价（provider 外部/G1+）/权限/缓存余项、D4 成本/复杂度/审计/覆盖确认、E7 macOS/PiP/真实 click-type（平台）、C14 模型生成建议/自动润色、L3 浏览器连接器、L4 电脑控制余项 | Q8 后；可与 Q5/Q6 余项互换；平台/G1+ 项不计 | 余项按需单列 |
 | 12 | P4-REM | E13 Result Studio 高级 tab 全量迁 pack（lineage/compare/history/selection/revisions/annotations/methods/export）；域中性 11 处/6 键 compat 是否清零（需裁决）；真实结果页保真实机 | 母纲硬约束：最后 | 1–2 周 |
 | V | V-REM **（completed · BLOCK-252 · 2026-10-24）** | 已交付：UI-544/545/546 实机腿（pack tabs、结果面 compare、图形批注亮暗各 23/23） | 代码+单测已绿；纯验证债已清 | 已完成 |
 
-> 推荐执行序（Q1-REM/Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q7 已收口）：**Q4b → Q8-REM → Q9-REM → P4-REM**；Q4b 单列，Q4b 之后按 §6.5 队列。Q5/Q6 余项与 Q9 可在主序中互换；Q2-REM/V-REM 已收口。P4-REM 最后。
+> 推荐执行序（Q1-REM/Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q7/Q8-REM 已收口）：**Q4b → Q9-REM → P4-REM**；Q4b 单列，Q4b 之后按 §6.5 队列。Q5/Q6 余项与 Q9 可在主序中互换；Q2-REM/V-REM 已收口。P4-REM 最后。
 
 ## 7. 波次依赖与排序
 
@@ -766,6 +766,9 @@ Q-DOMAIN（垂直去核化，跨波次）
 
 | 日期 | 波次 | 变更 | 证据 |
 | --- | --- | --- | --- |
+| 2026-10-25 | Q9-REM | BLOCK-260 余项切片：**K3** 退出摘要逐项查看（有界、无参数正文、跳转结果面/会话）、**K2** 本地 minidump 摘要（模块/异常/系统/进程，零上传）、**C14** 追问按结果/代码/失败切换；隔离 9223 亮/暗各 **14/14**；K2/K3/C14 保持 🟡（上传/逐项停止/模型生成建议未做）；矩阵 **✅69 / 🟡25 / 🔴1 / ⛔7 = 102**（计数不变） | `docs/block-260-q9-rem-tail-plan.md` §2 + `acceptance/block-260/q9rem-tail-live{,-dark}.json` |
+| 2026-10-25 | Q9-REM | BLOCK-259 最小切片：**K4** 通知点击跳转/单条已读/四类开关/声音偏好、**C14** 消息「润色/建议追问」（有界模板只填输入框）、**D1** 模型价格显示（`/api/ai/pricing` 单一源）；隔离 9223 亮/暗各 **11/11**；三项保持 🟡（余项列明）；矩阵 **✅69 / 🟡25 / 🔴1 / ⛔7 = 102**（计数不变） | `docs/block-259-q9-rem-slice-plan.md` §2 + `acceptance/block-259/q9rem-live{,-dark}.json` |
+| 2026-10-25 | Q8-REM | BLOCK-258 收口：**SSE 传输**（SDK 自带 SSEClientTransport，零新依赖；SSE GET/POST 全链）+ **HTTP/SSE 自定义 headers**（AES 密文、状态仅键名、导出剥离、导入按 id 保留、CRLF/保留头拒绝）+ **OAuth 本地撤销/账号切换**（清 tokens/pending/verifier，默认保留 client；UI 断开/重新授权）；隔离 9223 亮/暗各 **18/18**；**J4 保持 🟡**（agent 侧 authenticate 工具与项目级默认策略未做）；矩阵 **✅69 / 🟡25 / 🔴1 / ⛔7 = 102**（计数不变） | `docs/block-258-q8-rem-mcp-tail-plan.md` §4 + `acceptance/block-258/q8rem-live{,-dark}.json` |
 | 2026-10-25 | Q5-REM | BLOCK-257 尾包收口：**E9 🟡→✅**（底部终端双 pane：active+secondary 独立 tab/xterm/pty；无第二 tab 自动补开；点分屏 tab 交换；关闭/切换收敛）、宿主「更多工具」菜单 portal 修复（终端打开后可再次弹出）、**F7 钉住/最大化实机腿**（合成 job → 钉住 → 主/副最大化 → 恢复，亮/暗各 17/17）；F7 保持 🟡（通用 pane 模型 reopen）；矩阵 **✅69 / 🟡25 / 🔴1 / ⛔7 = 102** | `docs/block-257-q5-rem-tail-plan.md` §4 + `acceptance/block-257/q5rem-live{,-dark}.json` |
 | 2026-10-25 | Q7 | BLOCK-256 收口：**B4/B5/B6 → ✅**（goal 持久状态机 + 三工具 + 真实 ai_usage 用量/预算 + 调度提交前预算跳过）、**I1/I2/I3/I5 → ✅**（schedule 持久计划 + 10s runner 复用既有 agent task 链 + 看板 + `/schedule` + 提醒通知）；矩阵 **✅68 / 🟡26 / 🔴1 / ⛔7 = 102** | `docs/block-256-q7-automation-goals-plan.md` §7 + `acceptance/block-256/q7-live{,-dark}.json` |
 | 2026-10-25 | Q2-REM | BLOCK-255 收口：**C4 🟡→✅**（消息统计动作/面板 + loop usage 合计落 `meta_json.usage` + 实时 `runUsage` 累加）、**C17 🟡→✅**（会话行拖入 composer，唯一 `ComposerContextItem` 通道 + 有界摘要；当前会话拒自引用）；矩阵 **✅61 / 🟡30 / 🔴4 / ⛔7 = 102** | `docs/block-255-q2-rem-plan.md` §7 + `acceptance/block-255/q2rem-live{,-dark}.json` |

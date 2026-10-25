@@ -27,18 +27,35 @@ function parseArgs(raw: string): string[] {
   return raw.trim().length ? raw.trim().split(/\s+/) : [];
 }
 
+/** BLOCK-258 — 每行 `Name: value`；空行忽略；非法行直接拒绝（不静默丢弃）。 */
+function parseHeaders(raw: string): Record<string, string> | undefined {
+  const lines = raw.split('\n').map((line) => line.trim()).filter(Boolean);
+  if (lines.length === 0) return undefined;
+  const headers: Record<string, string> = {};
+  for (const line of lines) {
+    const idx = line.indexOf(':');
+    if (idx <= 0) throw new Error(`Header 行缺少冒号：${line}`);
+    const name = line.slice(0, idx).trim();
+    const value = line.slice(idx + 1).trim();
+    if (!name) throw new Error('Header 名为空');
+    headers[name] = value;
+  }
+  return headers;
+}
+
 export function McpShelfPane(): React.ReactElement {
   const {
     servers, loading, error, notice, busyId,
-    refresh, addServer, removeServer, connect, disconnect, updatePolicy, authenticate,
+    refresh, addServer, removeServer, connect, disconnect, updatePolicy, authenticate, revokeAuthorization,
   } = useMcpServers();
 
   const [formOpen, setFormOpen] = useState(false);
   const [draftId, setDraftId] = useState('');
-  const [draftTransport, setDraftTransport] = useState<'stdio' | 'http'>('stdio');
+  const [draftTransport, setDraftTransport] = useState<'stdio' | 'http' | 'sse'>('stdio');
   const [draftCommand, setDraftCommand] = useState('');
   const [draftArgs, setDraftArgs] = useState('');
   const [draftUrl, setDraftUrl] = useState('');
+  const [draftHeaders, setDraftHeaders] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [authUrl, setAuthUrl] = useState<string | null>(null);
 
@@ -56,38 +73,47 @@ export function McpShelfPane(): React.ReactElement {
 
   const handleAdd = async () => {
     const id = draftId.trim();
-    const isHttp = draftTransport === 'http';
+    const isRemote = draftTransport !== 'stdio';
     const command = draftCommand.trim();
     const url = draftUrl.trim();
     if (!id || /[\s/\\]/.test(id)) {
       setFormError('ID 不能为空，且不含空格/斜杠');
       return;
     }
-    if (isHttp && !/^https?:\/\//.test(url)) {
+    if (isRemote && !/^https?:\/\//.test(url)) {
       setFormError('URL 必须以 http:// 或 https:// 开头');
       return;
     }
-    if (!isHttp && !command) {
+    if (!isRemote && !command) {
       setFormError('命令不能为空（如 node / npx / uvx）');
+      return;
+    }
+    let headers: Record<string, string> | undefined;
+    try {
+      headers = isRemote ? parseHeaders(draftHeaders) : undefined;
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Header 格式错误');
       return;
     }
     setFormError(null);
     const ok = await addServer({
       id,
-      command: isHttp ? 'http' : command,
-      args: isHttp ? [] : parseArgs(draftArgs),
+      command: isRemote ? draftTransport : command,
+      args: isRemote ? [] : parseArgs(draftArgs),
       transport: draftTransport,
-      ...(isHttp ? { url } : {}),
+      ...(isRemote ? { url } : {}),
+      ...(headers ? { headers } : {}),
     });
     if (ok) {
       setDraftId('');
       setDraftCommand('');
       setDraftArgs('');
       setDraftUrl('');
+      setDraftHeaders('');
       setDraftTransport('stdio');
       setFormOpen(false);
     } else {
-      setFormError('添加失败（检查 ID 是否重复或 URL 是否合法）');
+      setFormError('添加失败（检查 ID 是否重复、URL 或 headers 是否合法）');
     }
   };
 
@@ -96,7 +122,7 @@ export function McpShelfPane(): React.ReactElement {
       <div className={styles.mcpHeaderRow}>
         <div className={styles.mcpIntro}>
           <Icon name="zap" size={16} />
-          <span>连接第三方 MCP server（本地 stdio 或 HTTP/OAuth）；已连接 server 的工具自动进入 agent 可用集</span>
+          <span>连接第三方 MCP server（本地 stdio / HTTP / SSE；远程可带自定义 Headers 或 OAuth）；已连接 server 的工具自动进入 agent 可用集</span>
         </div>
         <button
           type="button"
@@ -116,12 +142,13 @@ export function McpShelfPane(): React.ReactElement {
               <span>传输</span>
               <select
                 value={draftTransport}
-                onChange={(e) => setDraftTransport(e.target.value === 'http' ? 'http' : 'stdio')}
+                onChange={(e) => setDraftTransport(e.target.value === 'http' ? 'http' : e.target.value === 'sse' ? 'sse' : 'stdio')}
                 aria-label="传输类型"
                 data-testid="mcp-form-transport"
               >
                 <option value="stdio">本地 stdio</option>
                 <option value="http">HTTP（OAuth）</option>
+                <option value="sse">SSE（旧版远程）</option>
               </select>
             </label>
             <label className={styles.mcpField}>
@@ -134,7 +161,7 @@ export function McpShelfPane(): React.ReactElement {
                 data-testid="mcp-form-id"
               />
             </label>
-            {draftTransport === 'http' ? (
+            {draftTransport !== 'stdio' ? (
               <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
                 <span>URL</span>
                 <input
@@ -158,8 +185,23 @@ export function McpShelfPane(): React.ReactElement {
               </label>
             )}
           </div>
+          {draftTransport !== 'stdio' && (
+            <div className={styles.mcpFormRow}>
+              <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
+                <span>自定义 Headers（每行 Name: value，可留空；值不会回显）</span>
+                <textarea
+                  value={draftHeaders}
+                  onChange={(e) => setDraftHeaders(e.target.value)}
+                  placeholder="x-api-key: sk-…"
+                  rows={2}
+                  aria-label="自定义请求头"
+                  data-testid="mcp-form-headers"
+                />
+              </label>
+            </div>
+          )}
           <div className={styles.mcpFormRow}>
-            {draftTransport === 'http' ? (
+            {draftTransport !== 'stdio' ? (
               <span className={`${styles.mcpAuthHint} ${styles.mcpFieldGrow}`}>
                 保存后点卡片上的「授权」完成 OAuth；授权前工具不会投影。
               </span>
@@ -228,13 +270,19 @@ export function McpShelfPane(): React.ReactElement {
               </div>
               <div
                 className={styles.mcpCardCmd}
-                title={row.transport === 'http' ? row.url : [row.command, ...row.args].join(' ')}
+                title={row.transport === 'http' || row.transport === 'sse' ? row.url : [row.command, ...row.args].join(' ')}
               >
-                {row.transport === 'http' ? row.url : `${row.command} ${row.args.join(' ')}`}
+                {row.transport === 'http' || row.transport === 'sse' ? row.url : `${row.command} ${row.args.join(' ')}`}
               </div>
               <div className={styles.mcpCardMeta}>
+                {row.transport === 'sse' && <span>SSE</span>}
                 {row.status === 'connected' && (
                   <span>{row.toolCount} 个工具</span>
+                )}
+                {row.headerCount > 0 && (
+                  <span data-testid={`mcp-header-count-${row.id}`} title={row.headerKeys.join(', ')}>
+                    {row.headerCount} 个自定义 Header
+                  </span>
                 )}
                 {row.auth === 'authorized' && (
                   <span data-testid={`mcp-auth-badge-${row.id}`}>已授权</span>
@@ -252,6 +300,26 @@ export function McpShelfPane(): React.ReactElement {
                 onSave={(patch) => updatePolicy(row.id, patch)}
               />
               <div className={styles.mcpCardActions}>
+                {row.auth === 'authorized' && (
+                  <>
+                    <button
+                      type="button"
+                      disabled={busyId === row.id}
+                      onClick={() => void revokeAuthorization(row.id)}
+                      data-testid={`mcp-revoke-${row.id}`}
+                    >
+                      断开授权
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busyId === row.id}
+                      onClick={() => void handleAuthenticate(row)}
+                      data-testid={`mcp-reauth-${row.id}`}
+                    >
+                      重新授权
+                    </button>
+                  </>
+                )}
                 {row.status === 'auth_required' ? (
                   <button
                     type="button"

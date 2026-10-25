@@ -11,6 +11,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { summarizeDumpFile } = require('./minidump-summary');
 
 function evaluateSessionHealth(previous, dumps) {
   const list = Array.isArray(dumps) ? dumps : [];
@@ -110,6 +111,17 @@ function createCrashGuard({ app, crashReporter, isTestInstance = false }) {
     }
   }
 
+  /** BLOCK-260 K2 — 本地只读摘要（不解析栈、不上传）；名称限定为目录内 .dmp 文件。 */
+  function summarizeDump(name) {
+    const requested = String(name || (status.dumps && status.dumps[0] && status.dumps[0].name) || '');
+    const safeName = path.basename(requested);
+    if (!safeName || safeName !== requested || !/\.dmp$/i.test(safeName)) {
+      return { ok: false, error: 'invalid_dump_name' };
+    }
+    const dir = status.crashDumpsDir || app.getPath('crashDumps');
+    return { ...summarizeDumpFile(path.join(dir, safeName)), name: safeName };
+  }
+
   function simulateForTest(payload) {
     if (!isTestInstance) return { ok: false, reason: 'test_instance_only' };
     const source = payload && typeof payload === 'object' ? payload : {};
@@ -123,7 +135,7 @@ function createCrashGuard({ app, crashReporter, isTestInstance = false }) {
     return { ok: true, status: getStatus() };
   }
 
-  return { start, markCleanExit, getStatus, openDumps, simulateForTest };
+  return { start, markCleanExit, getStatus, openDumps, summarizeDump, simulateForTest };
 }
 
 module.exports = { createCrashGuard, evaluateSessionHealth };

@@ -46,6 +46,37 @@ const FAMILY = 'mcp-servers';
 const MAX_SERVERS = schema.CONFIG_FAMILIES[FAMILY].maxItems;
 const ARGS_ENTRY = schema.findItemFieldEntry(FAMILY, 'args');
 const MAX_ARGS = ARGS_ENTRY.domain.maxItems;
+// BLOCK-258 — 远程传输自定义 headers 的边界（凭据与 env 同级）。
+const MAX_HEADERS = 32;
+const MAX_HEADER_NAME = 128;
+const MAX_HEADER_VALUE = 4096;
+const HEADER_NAME_RE = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+// 由传输层/运行时计算的头不允许用户覆盖（避免破坏 SSE/HTTP 语义或请求走私）。
+const RESERVED_HEADERS = new Set([
+  'host', 'content-length', 'connection', 'transfer-encoding', 'upgrade', 'accept', 'content-type',
+]);
+
+/** 规范化远程请求头：小写键、拒 CRLF/非法名/保留头/超限。 */
+function normalizeHeaders(raw) {
+  if (raw === undefined) return { headers: {} };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { error: 'invalid_headers' };
+  const entries = Object.entries(raw);
+  if (entries.length > MAX_HEADERS) return { error: 'too_many_headers' };
+  const headers = {};
+  for (const [rawKey, rawValue] of entries) {
+    if (typeof rawValue !== 'string') return { error: 'invalid_header_value' };
+    const name = String(rawKey).trim().toLowerCase();
+    if (!name || name.length > MAX_HEADER_NAME || !HEADER_NAME_RE.test(name)) {
+      return { error: 'invalid_header_name' };
+    }
+    if (RESERVED_HEADERS.has(name)) return { error: `reserved_header:${name}` };
+    if (rawValue.length > MAX_HEADER_VALUE || /[\r\n\0]/.test(rawValue)) {
+      return { error: 'invalid_header_value' };
+    }
+    headers[name] = rawValue;
+  }
+  return { headers };
+}
 
 /** 诊断 → BLOCK-156/160 既有错误码（路由与前端都认这些码，不换契约）。 */
 function legacyErrorFor(diagnostics) {
@@ -87,27 +118,47 @@ function normalizeServerEntry(entry) {
             : entry.env,
         }
       : {}),
+    ...(entry.headers !== undefined
+      ? {
+          headers: entry.headers && typeof entry.headers === 'object' && !Array.isArray(entry.headers)
+            ? Object.fromEntries(
+                Object.entries(entry.headers)
+                  .filter(([, v]) => typeof v === 'string')
+                  .map(([k, v]) => [String(k), String(v)]),
+              )
+            : entry.headers,
+        }
+      : {}),
   };
+  // `{...entry}` 会把显式的 undefined 键带进注册表校验（headers 在旧调用方常为 undefined）。
+  if (source.headers === undefined) delete source.headers;
+  if (source.env === undefined) delete source.env;
   const { item, diagnostics } = schema.sanitizeItem(FAMILY, source);
   if (!item) return { error: 'server_entry_not_object' };
-  if (diagnostics.length > 0) return { error: legacyErrorFor(diagnostics), diagnostics };
-  // 必填关系（形状校验只校验"出现了的字段"，"必须出现"是关系，登记表表达不了）
+  if (diagnostics.length > 0) return { error: legacyErrorFor(diagnostics), diagnostics };  // BLOCK-258 — 远程传输判定与关系校验（command 仅 stdio 必需；url 仅远程必需）。
+  const transport = item.transport === 'http' ? 'http' : item.transport === 'sse' ? 'sse' : 'stdio';
+  const remote = transport !== 'stdio';
   const missing = [];
   if (!item.id) missing.push({ code: schema.DIAGNOSTIC_CODES.TYPE_MISMATCH, path: 'id', family: FAMILY, message: '缺少必填字段 id' });
-  if (!item.command) missing.push({ code: schema.DIAGNOSTIC_CODES.TYPE_MISMATCH, path: 'command', family: FAMILY, message: '缺少必填字段 command' });
+  if (!remote && !item.command) missing.push({ code: schema.DIAGNOSTIC_CODES.TYPE_MISMATCH, path: 'command', family: FAMILY, message: '缺少必填字段 command' });
   if (missing.length > 0) return { error: legacyErrorFor(missing), diagnostics: missing };
-  // BLOCK-163 W3 P3（CAP-3）— 双传输：transport 缺省 stdio（零变化）；http 必带 url
-  const transport = item.transport === 'http' ? 'http' : 'stdio';
-  if (transport === 'http' && !item.url) return { error: 'http_url_required' };
+  if (remote && !item.url) {
+    return { error: transport === 'sse' ? 'sse_url_required' : 'http_url_required' };
+  }
+  const headerCheck = normalizeHeaders(item.headers);
+  if (headerCheck.error) return { error: headerCheck.error };
+  const headers = headerCheck.headers;
+  if (!remote && Object.keys(headers).length > 0) return { error: 'headers_require_remote' };
   return {
     server: {
       id: item.id,
-      command: item.command,
+      command: remote ? (item.command || transport) : item.command,
       args: item.args || [],
       env: item.env || {},
       autoConnect: item.autoConnect !== false,
       transport,
-      ...(transport === 'http' ? { url: item.url } : {}),
+      ...(remote ? { url: item.url } : {}),
+      ...(remote && Object.keys(headers).length > 0 ? { headers } : {}),
     },
   };
 }
@@ -129,6 +180,13 @@ function listMcpServers() {
         env: Object.fromEntries(
           Object.entries(server.env).map(([k, v]) => [k, envCrypto.decryptSecret(v)]),
         ),
+        ...(server.headers
+          ? {
+              headers: Object.fromEntries(
+                Object.entries(server.headers).map(([k, v]) => [k, envCrypto.decryptSecret(v)]),
+              ),
+            }
+          : {}),
       });
     }
     return out;
@@ -144,7 +202,7 @@ function listMcpServers() {
  * 导入侧按 id 保留原 env（见 config-transfer 的 writer），所以剥离不影响往返可用性。
  */
 function listMcpServersForExport() {
-  return listMcpServers().map(({ env: _env, ...rest }) => rest);
+  return listMcpServers().map(({ env: _env, headers: _headers, ...rest }) => rest);
 }
 
 /** 整表保存（UI 侧编辑后整体回写）；任一条目非法=拒绝写入。 */
@@ -161,12 +219,19 @@ function saveMcpServers(servers) {
     normalized.push(server);
   }
   _ensureDir();
-  // CAP-2 — env 落盘加密（normalized 的内存副本保持明文返回给调用方）
+  // CAP-2 — env/headers 落盘加密（normalized 的内存副本保持明文返回给调用方）
   const persisted = normalized.map((server) => ({
     ...server,
     env: Object.fromEntries(
       Object.entries(server.env).map(([k, v]) => [k, envCrypto.encryptSecret(v)]),
     ),
+    ...(server.headers
+      ? {
+          headers: Object.fromEntries(
+            Object.entries(server.headers).map(([k, v]) => [k, envCrypto.encryptSecret(v)]),
+          ),
+        }
+      : {}),
   }));
   const payload = { version: 1, savedAt: new Date().toISOString(), servers: persisted };
   fs.writeFileSync(settingsFile(), JSON.stringify(payload, null, 2) + '\n', 'utf8');
@@ -206,6 +271,8 @@ module.exports = {
   settingsFile,
   MAX_SERVERS,
   MAX_ARGS,
+  MAX_HEADERS,
+  normalizeHeaders,
   listMcpServers,
   listMcpServersForExport,
   saveMcpServers,

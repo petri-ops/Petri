@@ -56,6 +56,28 @@ describe('QuitSummaryDialog', () => {
     fireEvent.keyDown(screen.getByTestId('quit-summary-dialog'), { key: 'Escape' });
     expect(onDecision).toHaveBeenCalledWith('cancel');
   });
+
+  it('BLOCK-260 K3 — 逐项查看：可定位项显示查看按钮并回调，无项目不显示死按钮', () => {
+    const onOpenItem = vi.fn();
+    render(
+      <QuitSummaryDialog
+        request={{
+          ...request,
+          items: [
+            { kind: 'toolJob', id: 'job_1', label: '运行中的差异分析', projectId: 'p1', conversationId: 'c1' },
+            { kind: 'approval', id: 'ap_1', label: '审批：run_tool', projectId: null },
+          ],
+        }}
+        onDecision={() => {}}
+        onOpenItem={onOpenItem}
+      />
+    );
+    expect(screen.getByTestId('quit-summary-items')).not.toBeNull();
+    expect(screen.getByText('运行中的差异分析')).not.toBeNull();
+    fireEvent.click(screen.getByTestId('quit-summary-open-job_1'));
+    expect(onOpenItem).toHaveBeenCalledWith(expect.objectContaining({ kind: 'toolJob', id: 'job_1', projectId: 'p1' }));
+    expect(screen.queryByTestId('quit-summary-open-ap_1')).toBeNull();
+  });
 });
 
 describe('normalizeShellPrefs', () => {

@@ -326,7 +326,7 @@ export function SimpleChat({
   // 拥有者（中央会话）消费，避免右栏 chat tab 与中央会话重复入列。
   const composerContext = useComposerContext({ projectId, ownsEventBus: ownsCopilotAsk });
   // BLOCK-246 C4 — 行级新增动作（加入上下文/评价）；失败复用附件提示条，不静默。
-  const messageActions = useMessageActions({ conversationId, projectId, addItem: composerContext.addItem, onNotice: setAttachmentNotice });
+  const messageActions = useMessageActions({ conversationId, projectId, addItem: composerContext.addItem, onNotice: setAttachmentNotice, insertComposerText: setInput });
   // BLOCK-256 Q7 — `/schedule` 草稿与确认框
   const scheduleComposer = useScheduleComposer();
   const [isDraggingOver, setIsDraggingOver] = useState(false);

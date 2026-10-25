@@ -16,8 +16,9 @@ interface DraftBody {
   command?: string;
   args?: string[];
   autoConnect?: boolean;
-  transport?: 'stdio' | 'http';
+  transport?: 'stdio' | 'http' | 'sse';
   url?: string;
+  headers?: Record<string, string>;
   allow?: string[];
   block?: string[];
   trust?: 'ask' | 'allow';
@@ -49,6 +50,9 @@ function withServers(
           authorizationUrl: 'https://auth.example/authorize?state=abc',
         }), { status: 200 });
       }
+      if (/\/mcp\/servers\/[^/]+\/oauth\/revoke$/.test(url) && method === 'POST') {
+        return new Response(JSON.stringify({ status: 'ok', revoked: true, clientForgotten: false }), { status: 200 });
+      }
       if (/\/mcp\/servers\/[^/]+\/policy$/.test(url) && method === 'PUT') {
         if (putPolicy) return putPolicy(body);
         return new Response(JSON.stringify({
@@ -79,6 +83,8 @@ const row = (over: Partial<Record<string, unknown>> = {}) => ({
   args: ['server.js'],
   envKeys: [],
   envCount: 0,
+  headerKeys: [],
+  headerCount: 0,
   autoConnect: true,
   status: 'disconnected',
   error: null,
@@ -344,5 +350,56 @@ describe('BLOCK-156 McpShelfPane', () => {
     expect(body.id).toBe('fs');
     expect(body.args).toEqual(['-y', '@mcp/fs', '/tmp']);
     expect(body.autoConnect).toBe(false);
+  });
+});
+
+describe('BLOCK-258 MCP 尾项（SSE / headers / 撤销授权）', () => {
+  it('SSE 表单：逐行解析 headers 并提交 transport=sse', async () => {
+    const mock = withServers([]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-empty')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('mcp-add-toggle'));
+    fireEvent.change(screen.getByLabelText('传输类型'), { target: { value: 'sse' } });
+    fireEvent.change(screen.getByLabelText('server ID'), { target: { value: 'sse-srv' } });
+    fireEvent.change(screen.getByLabelText('MCP URL'), { target: { value: 'http://127.0.0.1:9/sse' } });
+    fireEvent.change(screen.getByLabelText('自定义请求头'), {
+      target: { value: 'x-api-key: sk-1\nx-trace: t1' },
+    });
+    fireEvent.click(screen.getByTestId('mcp-form-submit'));
+    await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已添加 sse-srv'));
+    const posts = (mock.mock.calls as Array<[string, RequestInit | undefined]>)
+      .filter(([u, i]) => String(u).endsWith('/mcp/servers') && i?.method === 'POST');
+    const rawBody = posts[0][1]?.body;
+    const body: DraftBody = typeof rawBody === 'string' ? (JSON.parse(rawBody) as DraftBody) : {};
+    expect(body.transport).toBe('sse');
+    expect(body.url).toBe('http://127.0.0.1:9/sse');
+    expect(body.command).toBe('sse');
+    expect(body.headers).toEqual({ 'x-api-key': 'sk-1', 'x-trace': 't1' });
+  });
+
+  it('卡片：Header 数量可见；已授权提供断开/重新授权，断开走撤销端点', async () => {
+    const mock = withServers([
+      row({
+        id: 'sse-srv',
+        transport: 'sse',
+        url: 'http://127.0.0.1:9/sse',
+        headerKeys: ['x-api-key'],
+        headerCount: 1,
+        status: 'connected',
+        toolCount: 2,
+        auth: 'authorized',
+      }),
+    ]);
+    render(<McpShelfPane />);
+    await waitFor(() => expect(screen.getByTestId('mcp-card-sse-srv')).toBeTruthy());
+    expect(screen.getByTestId('mcp-header-count-sse-srv').textContent).toContain('1');
+    expect(screen.getByTestId('mcp-revoke-sse-srv')).toBeTruthy();
+    expect(screen.getByTestId('mcp-reauth-sse-srv')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('mcp-revoke-sse-srv'));
+    await waitFor(() => expect(screen.getByTestId('mcp-notice').textContent).toContain('已撤销'));
+    expect((mock.mock.calls as Array<[string, RequestInit | undefined]>).some(
+      ([u, i]) => String(u).endsWith('/oauth/revoke') && i?.method === 'POST',
+    )).toBe(true);
   });
 });

@@ -32,9 +32,15 @@ function computeVisionConfigured(settings, getCredentialFn) {
 }
 
 function registerAiSettingsRoutes(app) {
+  // BLOCK-259 D1 — 模型计价表（单一源=ai-usage 的 AI_PRICING；选择器只读展示）。
+  // 延迟 require：避免路由注册期触发 ai_usage 建表/连接。
+  app.get('/api/ai/pricing', (_req, res) => {
+    const { AI_PRICING } = require('../helpers/ai-usage');
+    res.json({ status: 'ok', pricing: AI_PRICING });
+  });
+
   // 获取当前 AI 设置。密钥已与普通设置分离，因此这里不会出现明文 key。
-  app.get('/api/ai/settings', (req, res) => {
-    const settings = getAiSettings();
+  app.get('/api/ai/settings', (req, res) => {    const settings = getAiSettings();
     res.json({
       status: 'ok',
       settings: {

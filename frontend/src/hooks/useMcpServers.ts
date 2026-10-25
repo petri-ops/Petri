@@ -29,8 +29,10 @@ export interface McpServerRow {
   args: string[];
   envKeys: string[];
   envCount: number;
+  headerKeys: string[];
+  headerCount: number;
   autoConnect: boolean;
-  transport?: 'stdio' | 'http';
+  transport?: 'stdio' | 'http' | 'sse';
   url?: string;
   auth?: 'authorized' | 'required' | 'unknown';
   status: McpServerStatus;
@@ -53,7 +55,8 @@ export interface McpServerDraft {
   command: string;
   args: string[];
   env?: Record<string, string>;
-  transport?: 'stdio' | 'http';
+  headers?: Record<string, string>;
+  transport?: 'stdio' | 'http' | 'sse';
   url?: string;
 }
 
@@ -81,6 +84,11 @@ export interface McpAuthenticateResult {
   ok: boolean;
   authorizationUrl?: string;
   toolCount?: number;
+  error?: string;
+}
+
+export interface McpRevokeResult {
+  ok: boolean;
   error?: string;
 }
 
@@ -157,6 +165,7 @@ export function useMcpServers(): {
   disconnect: (id: string) => Promise<void>;
   updatePolicy: (id: string, patch: McpPolicyPatch) => Promise<McpUpdatePolicyResult>;
   authenticate: (id: string) => Promise<McpAuthenticateResult>;
+  revokeAuthorization: (id: string) => Promise<McpRevokeResult>;
 } {
   const [servers, setServers] = useState<McpServerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -322,6 +331,30 @@ export function useMcpServers(): {
     [refresh],
   );
 
+  const revokeAuthorization = useCallback(
+    async (id: string): Promise<McpRevokeResult> => {
+      setBusyId(id);
+      setNotice(null);
+      try {
+        await apiJson(`/mcp/servers/${encodeURIComponent(id)}/oauth/revoke`, {
+          method: 'POST',
+          body: JSON.stringify({}),
+        });
+        setNotice(`已撤销 ${id} 的本地授权（服务端令牌在过期前可能仍有效）`);
+        await refresh();
+        return { ok: true };
+      } catch (e) {
+        const message = errText(e instanceof Error ? e.message : e, '撤销失败');
+        setNotice(`撤销失败：${message}`);
+        await refresh();
+        return { ok: false, error: message };
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [refresh],
+  );
+
   return {
     servers,
     loading,
@@ -335,5 +368,6 @@ export function useMcpServers(): {
     disconnect,
     updatePolicy,
     authenticate,
+    revokeAuthorization,
   };
 }

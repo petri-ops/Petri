@@ -141,8 +141,23 @@
   min-width: 0;
 }
 
+/* BLOCK-258 — headers 多行输入（等宽，值与键同宽；不占额外高度默认） */
+.mcpField > textarea {
+  min-height: 52px;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);;
+  background: var(--petri-input-bg, var(--petri-bg-surface));
+  color: var(--petri-text);
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-xs, 12px);
+  resize: vertical;
+  min-width: 0;
+}
+
 .mcpField > input:focus,
-.mcpField > select:focus {
+.mcpField > select:focus,
+.mcpField > textarea:focus {
   outline: 1px solid var(--petri-accent);
 }
 

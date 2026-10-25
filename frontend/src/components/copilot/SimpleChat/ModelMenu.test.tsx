@@ -1,11 +1,20 @@
 import React from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ModelMenu } from './ModelMenu';
 import { buildModelGroups, EMPTY_MODEL_CATALOG } from '@/lib/model-catalog';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
-afterEach(cleanup);
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(
+    new Response(JSON.stringify({ status: 'ok', pricing: {} }), { status: 200 }),
+  )));
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 const presets: ChatModelPreset[] = [
   { id: 'a1', label: 'DeepSeek', provider: 'anthropic', model: 'model-a', endpointProfileId: 'a', contextWindow: 128000 },
@@ -93,6 +102,55 @@ describe('ModelMenu', () => {
     expect(screen.getByTestId('model-menu-auto').textContent).toContain('开启 · model-a');
     fireEvent.click(screen.getByTestId('model-menu-auto'));
     expect(onToggleAuto).toHaveBeenCalledTimes(1);
+  });
+
+  it('BLOCK-259 D1 — 价格来自 /api/ai/pricing，逐模型展示', async () => {
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      expect(url).toContain('/ai/pricing');
+      return Promise.resolve(new Response(JSON.stringify({
+        status: 'ok',
+        pricing: { 'model-a': { input: 0.5, output: 8 } },
+      }), { status: 200 }));
+    }));
+    render(
+      <ModelMenu
+        mode="model"
+        groups={groups}
+        selectedGroup={groups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    await waitFor(() => expect(screen.getByText(/¥0\.5\/¥8 每 1M/)).not.toBeNull());
+    expect(screen.getByText('当前使用 · 128K 上下文 · ¥0.5/¥8 每 1M')).not.toBeNull();
+  });
+
+  it('BLOCK-259 D1 — 发现失败时「原因 + 价格」同时显示', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      status: 'ok',
+      pricing: { 'model-a': { input: 0.5, output: 8 } },
+    }), { status: 200 }))));
+    const failedGroups = buildModelGroups(presets, {
+      ...EMPTY_MODEL_CATALOG,
+      discoveryErrors: { a: 'boom' },
+    });
+    render(
+      <ModelMenu
+        mode="model"
+        groups={failedGroups}
+        selectedGroup={failedGroups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />
+    );
+    await waitFor(() => expect(screen.getByText(/加载失败.*¥0\.5\/¥8 每 1M/)).not.toBeNull());
   });
 
   it('加载中与零可用模型显示状态行', () => {

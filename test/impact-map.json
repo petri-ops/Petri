@@ -5473,6 +5473,105 @@
         "frontend/src/hooks/useTerminalTabs.test.ts",
         "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
       ]
+    },
+    {
+      "id": "block258-q8-rem-mcp-tail",
+      "note": "BLOCK-258 Q8-REM MCP 尾项：SSE 传输 + HTTP/SSE 自定义凭据 headers（密文/脱敏/导出剥离/导入保留）+ OAuth 本地撤销与重新授权（账号切换）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block258-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q8rem-mcp-tail-*.cjs",
+        "docs/block-258-q8-rem-mcp-tail-plan.md",
+        "acceptance/block-258/**",
+        "core/packages/shared-config/config-schema.js",
+        "core/petri-server/helpers/mcp-settings.js",
+        "core/petri-server/helpers/mcp-oauth-store.js",
+        "core/petri-server/helpers/config-transfer.js",
+        "core/petri-server/mcp/client-manager.js",
+        "core/petri-server/mcp/oauth-provider.js",
+        "core/petri-server/routes/mcp-client.js",
+        "frontend/src/hooks/useMcpServers.ts",
+        "frontend/src/pages/extensions/McpShelfPane.tsx",
+        "test/block258-*.test.mjs",
+        "test/fixtures/mcp-sse-server.mjs"
+      ],
+      "tests": [
+        "test/block258-mcp-tail.test.mjs",
+        "test/block163-mcp-http-transport.test.mjs",
+        "test/block239-mcp-oauth.test.mjs",
+        "test/mcp-client-settings.test.mjs",
+        "test/mcp-client-manager.test.mjs",
+        "test/block203-mcp-servers.test.mjs",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx"
+      ]
+    },
+    {
+      "id": "block259-q9-rem-slice",
+      "note": "BLOCK-259 Q9-REM 最小切片：K4 通知中心点击/开关/声音 + C14 建议追问/润色 + D1 模型价格显示（/api/ai/pricing 单一源）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block259-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q9rem-slice-*.cjs",
+        "docs/block-259-q9-rem-slice-plan.md",
+        "acceptance/block-259/**",
+        "core/petri-server/routes/ai-settings-api.js",
+        "frontend/src/lib/notification-center.ts",
+        "frontend/src/components/desktop/titlebar/NotificationCenterBell.tsx",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
+        "frontend/src/components/copilot/SimpleChat/messageActions.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useMessageActions.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "acceptance/block-92/size-baseline.json",
+        "test/block259-*.test.mjs"
+      ],
+      "tests": [
+        "test/block259-q9-rem-slice.test.mjs",
+        "frontend/src/lib/notification-center.test.ts",
+        "frontend/src/components/desktop/titlebar/NotificationCenterBell.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/messageActions.test.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useMessageActions.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.followups.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.stats.test.tsx"
+      ]
+    },
+    {
+      "id": "block260-q9-rem-tail",
+      "note": "BLOCK-260 Q9-REM 余项：K3 退出摘要逐项查看（activity items + dialog）+ K2 本地 minidump 摘要（解析器/IPC/横幅）+ C14 追问按上下文切换。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block260-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q9rem-tail-*.cjs",
+        "docs/block-260-q9-rem-tail-plan.md",
+        "acceptance/block-260/**",
+        "src/main/minidump-summary.js",
+        "src/main/crash-guard.js",
+        "src/main/desktop-shell-model.js",
+        "src/ipc/diagnostic.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "core/petri-server/routes/app-activity.js",
+        "core/petri-server/helpers/approval-request-store.js",
+        "frontend/src/components/desktop/CrashNoticeBanner.tsx",
+        "frontend/src/components/shell/QuitSummaryDialog.tsx",
+        "frontend/src/components/shell/DesktopShellProvider.tsx",
+        "frontend/src/lib/electron.d.ts",
+        "frontend/src/components/copilot/SimpleChat/messageActions.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "test/block260-*.test.mjs",
+        "test/fixtures/synthetic-minidump.mjs"
+      ],
+      "tests": [
+        "test/block260-minidump.test.mjs",
+        "test/block260-q9-rem.test.mjs",
+        "test/block223-desktop-shell-model.test.mjs",
+        "frontend/src/components/desktop/CrashNoticeBanner.test.tsx",
+        "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/messageActions.test.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.followups.test.tsx"
+      ]
     }
   ]
 }

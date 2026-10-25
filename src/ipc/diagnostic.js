@@ -160,6 +160,11 @@ function setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs, crashGuard } = {
     const deny = assertSender(event); if (deny) return deny;
     return crashGuard?.openDumps?.() || { ok: false, error: "crash_guard_unavailable" };
   });
+  // BLOCK-260 K2 — 本地 minidump 只读摘要（不解析栈、不上传）。
+  ipcMain.handle(CHANNELS.diagnostic.crashDumpSummary, (event, name) => {
+    const deny = assertSender(event); if (deny) return deny;
+    return crashGuard?.summarizeDump?.(name) || { ok: false, error: "crash_guard_unavailable" };
+  });
   ipcMain.handle(CHANNELS.diagnostic.crashSimulate, (event, payload) => {
     const deny = assertSender(event); if (deny) return deny;
     return crashGuard?.simulateForTest?.(payload) || { ok: false, error: "crash_guard_unavailable" };

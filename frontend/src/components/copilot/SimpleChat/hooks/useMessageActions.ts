@@ -20,12 +20,15 @@ export interface UseMessageActionsOptions {
   addItem: (item: ComposerContextItem) => void;
   /** 复用宿主既有的可见提示条（失败不静默）。 */
   onNotice?: (message: string | null) => void;
+  /** BLOCK-259 C14 — 润色/追问模板只填入输入框（不自动发送）。 */
+  insertComposerText?: (text: string) => void;
 }
 
 interface MessageRowActionProps {
   onQuoteToContext: (messageKey: string, content: string) => void;
   onRateMessage: (messageKey: string, rating: MessageRatingValue) => void;
   messageRating: MessageRatingValue | null;
+  onInsertComposerText?: (text: string) => void;
 }
 
 export interface ComposerMessageActions {
@@ -34,7 +37,7 @@ export interface ComposerMessageActions {
 }
 
 export function useMessageActions(options: UseMessageActionsOptions): ComposerMessageActions {
-  const { conversationId, projectId, addItem, onNotice } = options;
+  const { conversationId, projectId, addItem, onNotice, insertComposerText } = options;
   const [ratings, setRatings] = useState<Record<string, MessageRatingValue | null>>({});
 
   const onQuoteToContext = useCallback((messageKey: string, content: string) => {
@@ -62,7 +65,8 @@ export function useMessageActions(options: UseMessageActionsOptions): ComposerMe
     onQuoteToContext,
     onRateMessage,
     messageRating: ratings[messageKey] ?? null,
-  }), [onQuoteToContext, onRateMessage, ratings]);
+    onInsertComposerText: insertComposerText,
+  }), [onQuoteToContext, onRateMessage, ratings, insertComposerText]);
 
   return useMemo(() => ({ rowProps }), [rowProps]);
 }

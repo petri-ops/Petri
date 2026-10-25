@@ -110,8 +110,8 @@ function registerMcpClientRoutes(app) {
       res.status(404).json({ status: 'error', error: 'server_not_found' });
       return;
     }
-    if (cfg.transport !== 'http') {
-      res.status(400).json({ status: 'error', error: 'oauth_requires_http' });
+    if (cfg.transport !== 'http' && cfg.transport !== 'sse') {
+      res.status(400).json({ status: 'error', error: 'oauth_requires_remote' });
       return;
     }
     const redirectBase = `${req.protocol}://${req.get('host')}`;
@@ -150,18 +150,42 @@ function registerMcpClientRoutes(app) {
     res.status(200).type('html').send(oauthPage('授权完成', '已完成授权并重新连接，可以关闭此页面回到 Petri。'));
   });
 
+  // BLOCK-258 — 本地撤销授权（账号切换=撤销后重新授权）；不动 server 配置本身。
+  app.post('/api/mcp/servers/:id/oauth/revoke', express.json(), async (req, res) => {
+    const id = String(req.params.id || '');
+    const body = req.body || {};
+    const result = await manager.revokeAuthorization(id, { forgetClient: body.forgetClient === true });
+    if (!result.ok) {
+      const status = result.error === 'server_not_found' ? 404
+        : result.error === 'oauth_requires_remote' ? 400
+          : 502;
+      res.status(status).json({ status: 'error', error: result.error });
+      return;
+    }
+    res.json({
+      status: 'ok',
+      revoked: true,
+      clientForgotten: result.clientForgotten,
+      // 诚实边界：本地撤销不清服务端令牌。
+      note: '本地授权已撤销；服务端令牌在过期前可能仍有效',
+    });
+  });
+
   app.post('/api/mcp/servers', express.json(), (req, res) => {
     const body = req.body || {};
-    const transport = body.transport === 'http' ? 'http' : 'stdio';
+    // BLOCK-258 — 三传输：stdio / http(StreamableHTTP) / sse；远程可带自定义 headers
+    const transport = body.transport === 'http' ? 'http' : body.transport === 'sse' ? 'sse' : 'stdio';
+    const remote = transport !== 'stdio';
     const { server, error } = settings.upsertMcpServer({
       id: body.id,
       command: body.command,
       args: Array.isArray(body.args) ? body.args : [],
       env: body.env && typeof body.env === 'object' ? body.env : {},
+      headers: body.headers && typeof body.headers === 'object' ? body.headers : undefined,
       autoConnect: body.autoConnect !== false,
-      // BLOCK-239 — 路由必须保真 transport/url，否则 HTTP server 会被静默降级为 stdio
+      // BLOCK-239 — 路由必须保真 transport/url，否则远程 server 会被静默降级为 stdio
       transport,
-      ...(transport === 'http' ? { url: body.url } : {}),
+      ...(remote ? { url: body.url } : {}),
     });
     if (error) {
       res.status(400).json({ status: 'error', error });

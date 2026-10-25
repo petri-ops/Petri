@@ -1,0 +1,73 @@
+{
+  "name": "q9rem-slice-live",
+  "block": "BLOCK-259",
+  "darkMode": true,
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "synthetic": {
+    "conversationId": "conv_q9_live",
+    "note": "合成会话 + 助手消息；只验 UI 动作"
+  },
+  "startedAt": "2026-10-25T07:39:20.393Z",
+  "finishedAt": "2026-10-25T07:39:29.597Z",
+  "assertions": [
+    {
+      "name": "B0_seeded_project_conversation",
+      "pass": true,
+      "detail": "project=p_mvnioilj_n6yq conv=conv_q9_live"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=true"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A1_seeded_conversation_ready",
+      "pass": true,
+      "detail": "合成会话与助手消息可见"
+    },
+    {
+      "name": "A2_polish_fills_composer",
+      "pass": true,
+      "detail": "clicked :: 请润色上一条助手回复，保持事实、数字与结论不变，只改进结构与表达：\n\n这是上一条回复，用于验收润色与追问。"
+    },
+    {
+      "name": "A3_followups_fill_composer",
+      "pass": true,
+      "detail": "clicked :: 请解释上一条回复的关键结论，以及每个结论对应的依据。"
+    },
+    {
+      "name": "A4_model_price_visible",
+      "pass": true,
+      "detail": "1 个渠道的模型列表加载失败（已回退到默认模型）\n自动（按任务选择）\n关闭\ndeepseek-chat\n模型列表加载失败，已回退到默认模型 · ¥0.5/¥8 每 1M"
+    },
+    {
+      "name": "A5_notification_click_navigates",
+      "pass": true,
+      "detail": "/project/p_mvnioilj_n6yq/chat"
+    },
+    {
+      "name": "A6_notification_prefs_toggle",
+      "pass": true,
+      "detail": "{\"kinds\":{\"turn_completed\":false,\"turn_failed\":true,\"approval_required\":true,\"schedule_reminder\":true},\"sound\":false}"
+    },
+    {
+      "name": "A7_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1"
+    }
+  ],
+  "allPass": true,
+  "passed": 11,
+  "total": 11
+}

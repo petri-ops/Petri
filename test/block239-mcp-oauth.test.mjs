@@ -165,7 +165,7 @@ test('BLOCK-239 — stdio 调授权=400；未知 server=404', async () => {
   const stdio = await fetch(`${apiBase}/api/mcp/servers/std-oauth/authenticate`, { method: 'POST' });
   assert.equal(stdio.status, 400);
   const stdioData = await stdio.json();
-  assert.equal(stdioData.error, 'oauth_requires_http');
+  assert.equal(stdioData.error, 'oauth_requires_remote');
 
   const missing = await fetch(`${apiBase}/api/mcp/servers/missing-oauth/authenticate`, { method: 'POST' });
   assert.equal(missing.status, 404);

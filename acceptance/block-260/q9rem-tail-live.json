@@ -1,0 +1,90 @@
+{
+  "name": "q9rem-tail-live",
+  "block": "BLOCK-260",
+  "darkMode": false,
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "synthetic": {
+    "conversationId": "conv_q9_tail",
+    "jobId": "job_q9_tail",
+    "dump": "synthetic-q9.dmp",
+    "note": "只验 UI 链路"
+  },
+  "startedAt": "2026-10-25T09:04:36.715Z",
+  "finishedAt": "2026-10-25T09:04:45.278Z",
+  "assertions": [
+    {
+      "name": "B0_seeded_project_conversation_jobs",
+      "pass": true,
+      "detail": "project=p_mvnlq6e1_bk2i conv=conv_q9_tail job=job_q9_tail"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A1_seeded_conversation_ready",
+      "pass": true,
+      "detail": "合成会话与结果类助手消息可见"
+    },
+    {
+      "name": "A2_context_followups",
+      "pass": true,
+      "detail": "解释这个结果\n检查结果可信度\n给出下一步验证"
+    },
+    {
+      "name": "A3a_quit_preview_opened",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A3b_quit_items_visible",
+      "pass": true,
+      "detail": "运行中的差异分析\n查看\n运行中的长任务\n查看"
+    },
+    {
+      "name": "A3c_quit_item_navigates",
+      "pass": true,
+      "detail": "/project/p_mvnlq6e1_bk2i/result?job=job_q9_tail"
+    },
+    {
+      "name": "A4a_crash_dump_dir",
+      "pass": true,
+      "detail": "C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b260-live-A8Szul\\electron-user-data\\Crashpad"
+    },
+    {
+      "name": "A4b_crash_simulated",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A4c_crash_summary_visible",
+      "pass": true,
+      "detail": "上次运行未正常结束（2026/10/25 17:03:41）。本地记录，未上传。 转储：synthetic-q9.dmp（1 个模块 · x64 10.0.26100 · 异常 0xc0000005）详情打开崩溃目录知道了"
+    },
+    {
+      "name": "A4d_crash_details_module",
+      "pass": true,
+      "detail": "进程 4242 · 线程 7 异常 0xc0000005 @ 0x140001234 · 模块：petri.exe"
+    },
+    {
+      "name": "A5_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1"
+    }
+  ],
+  "allPass": true,
+  "passed": 14,
+  "total": 14
+}

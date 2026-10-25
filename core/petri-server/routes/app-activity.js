@@ -36,6 +36,80 @@ function readToolJobCounts(userId) {
   return counts;
 }
 
+function text(value, max = 80) {
+  const out = String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
+  return out.length > max ? `${out.slice(0, max - 1)}…` : out;
+}
+
+function parseParams(raw) {
+  try {
+    const parsed = JSON.parse(raw || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+/** BLOCK-260 K3 — 退出摘要逐项查看（有界；只给定位信息，不给参数正文）。 */
+function readActivityItems(userId, { limit = 20 } = {}) {
+  const db = require('../db').getDatabase();
+  const items = [];
+  const push = (item) => { if (items.length < limit) items.push(item); };
+
+  try {
+    const jobRows = db.prepare(`
+      SELECT id, name, tool_id, status, project_id, conversation_id
+      FROM tool_jobs
+      WHERE user_id = ? AND is_test_run = 0 AND status IN ('pending', 'running')
+      ORDER BY created_at DESC LIMIT 8
+    `).all(userId);
+    for (const row of jobRows) {
+      push({
+        kind: 'toolJob',
+        id: String(row.id),
+        label: text(row.name || row.tool_id || '工具作业'),
+        status: String(row.status || ''),
+        projectId: row.project_id || null,
+        conversationId: row.conversation_id || null,
+      });
+    }
+
+    const taskRows = db.prepare(`
+      SELECT id, params, status FROM tasks
+      WHERE status = 'running' AND (user_id = ? OR user_id IS NULL)
+      ORDER BY created_at DESC LIMIT 8
+    `).all(userId);
+    for (const row of taskRows) {
+      const params = parseParams(row.params);
+      const message = params.messages && params.messages[0] && params.messages[0].content;
+      push({
+        kind: params.kind === 'subagent' ? 'subagentTask' : 'task',
+        id: String(row.id),
+        label: text(params.title || message || '运行中的任务'),
+        status: 'running',
+        projectId: params.projectId || null,
+        conversationId: params.conversationId || null,
+      });
+    }
+
+    const approvals = approvalRequests.listPendingApprovals({ limit: Math.max(1, limit - items.length) });
+    for (const approval of approvals) {
+      push({
+        kind: 'approval',
+        id: approval.requestId,
+        label: text(`审批：${approval.toolName}`),
+        status: 'pending',
+        projectId: approval.projectId || null,
+        conversationId: null,
+        taskId: approval.taskId || null,
+      });
+    }
+  } catch {
+    // 单项读取失败不拖累退出摘要主面。
+  }
+  return items.slice(0, limit);
+}
+
 module.exports = function registerAppActivity(app) {
   app.get('/api/app/activity-summary', (req, res) => {
     const userId = req.user && req.user.id;
@@ -58,6 +132,7 @@ module.exports = function registerAppActivity(app) {
         ok: true,
         counts,
         total,
+        items: readActivityItems(userId, { limit: 20 }),
         fetchedAt: new Date().toISOString(),
       });
     } catch (error) {

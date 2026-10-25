@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-25（**UI-573/574/575 verified（BLOCK-260 Q9-REM 余项；隔离 9223 亮/暗各 14/14）**：退出摘要逐项查看；本地 minidump 摘要与详情；追问 chips 按内容切换。）
+
+最后更新：2026-10-25（**UI-570/571/572 verified（BLOCK-259 Q9-REM 最小切片；隔离 9223 亮/暗各 11/11）**：通知中心点击跳转/单条已读/类型与声音开关；消息「润色/建议追问」只填输入框；模型菜单价格显示。）
+
+最后更新：2026-10-25（**UI-569 MCP 尾项 verified（隔离 9223 亮/暗各 18/18；BLOCK-258）**：SSE 传输 + 远程自定义 headers（密文落盘、值不回显、导出剥离）+ OAuth「断开授权 / 重新授权」；契约 6/6、前端 15/15、theme 17/17。）
+
+最后更新：2026-10-25（**进度对账：UI-561 → verified（BLOCK-257 补钉住实机腿，亮/暗各 17/17）**；UI 台账精确状态计数待单独规范化——历史标题存在「in_progress → verified」叠加，机械计数会误判。）
+
 最后更新：2026-10-25（**UI-568 宿主菜单修复 + 终端双 pane 分屏 verified（隔离 9223 亮/暗各 17/17；BLOCK-257 P1–P4）**：宿主「更多工具」菜单 portal 到 body（终端打开后可再次弹出）；底部终端双 pane 分屏（active+secondary 独立 tab/xterm/pty）；F7 钉住主区/副栏最大化与恢复补实机腿。证据=`acceptance/block-257/q5rem-live{,-dark}.json`；截图 unavailable。）
 
 最后更新：2026-10-25（**UI-567 自动化与目标看板 verified（隔离 9223 亮/暗各 21/21；BLOCK-256 P1–P6）**：看板显示 schedule/最近运行/goal 用量预算/提醒；goal 暂停恢复、schedule 启停、看板新建、立即运行记录、提醒进通知中心、composer `/schedule` 创建计划全链实机通过。证据=`acceptance/block-256/q7-live.json` / `q7-live-dark.json`；截图 unavailable。）
@@ -5432,11 +5440,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机证据**：`acceptance/ui-544-547-q5rem/`（同份 `acceptance/block-253/`）。`P1/P1b` 修订 tab + 原因/提议步骤；`P2/P2b` 批准后 REST 步骤替换 + UI「已应用」；`F1` bridge 返回 `{ok:true,testInstance:true,path}`；`F2` 界面「已在文件管理器中显示（测试实例干跑）」；`H1/H2a/H2b` 宿主菜单列出并开合侧聊/终端。亮/暗各 14/14。
 - **边界**：离屏截图在计划/终端切换后连续超时 → 如实 unavailable（DOM+REST 为证据主体）；E1 跨宿主渲染合并、E9 终端分屏、宿主菜单在底部终端打开后无法再弹出（实机观察）保留 reopen。
 
-## UI-561: 分屏窗格最大化/恢复（2026-10-24 **in_progress（组件测试 6/6；无钉住实机腿；BLOCK-253）**）
+## UI-561: 分屏窗格最大化/恢复（2026-10-25 **verified（BLOCK-257 补钉住实机腿；隔离 9223 亮/暗各 17/17）**）
 
 - **变化面**：ArtifactPinPane 在既有 60/40 拖拽/键盘比例之上新增「主区最大化 / 副栏最大化 / 恢复分屏」；恢复后回到用户上次比例。
-- **验证**：ArtifactPinPane.ratio 6/6（比例/钳制/持久化 + 最大化/恢复）。
-- **未取证**：钉住实机腿（需真实结果 job + lineage pin 夹具），按台账纪律记 `in_progress`。
+- **验证**：ArtifactPinPane.ratio 6/6（比例/钳制/持久化 + 最大化/恢复）；**BLOCK-257** 实机：合成完成 job（`tj_q5rem_tail` + `deg.csv`）经 `/project/:id/result?job=…&artifact=deg.csv` 打开结果面 → 钉住 → 主区最大化 → 恢复 → 副栏最大化 → 恢复（分屏 + 比例槽在场），亮/暗各 **17/17**。
+- **证据**：`acceptance/block-257/q5rem-live.json` / `q5rem-live-dark.json`（截图 `unavailable`）。
 
 ## UI-559: 多智能体团队 roster + 暂停/恢复 + 整体停止（2026-10-24 **verified（dev Electron 边界内；隔离 9223 亮 20/20 + 暗 20/20；BLOCK-249 / Q4a + BLOCK-250 UI-FIX）**）
 
@@ -5497,6 +5505,61 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：Node `block256-automation` **5/5** + registry/prerouting/skill/decision **52/52**；前端 Q7 **33/33**（panel/dialog/bridge/slash/notification/theme）；`quality:types` 0、`quality:lint` 0 error、theme **17/17**、`test:changed` EXIT=0（Node 1389/1372 pass/0 fail/17 skipped；前端 107 文件 768）。
 - **实机证据**：`acceptance/block-256/q7-live.json` / `q7-live-dark.json`（各 **21/21**；截图 `unavailable`）。断言链：看板 schedule/goal/run → goal 820/1000 预算与「接近预算」→ goal 暂停/恢复 → schedule 暂停/启用 → 看板新建 → 立即运行记录 → 提醒进通知中心（`schedule_reminder`）→ composer `/schedule` 对话框创建计划 → 收尾回 `?test=1`。
 - **边界（reopen）**：cron/时区、跨设备、运行中 loop 硬熔断、schedule 重叠并发策略、失败重试退避、goal 跨会话聚合口径、agent 唤醒。
+
+## UI-573: 退出摘要逐项查看（2026-10-25 **verified（BLOCK-260 K3；隔离 9223 亮/暗各 14/14）**）
+
+- **变化面**：退出摘要在计数之外列出运行中工具作业/任务/子代理/待审批的有界条目（≤20），可「查看」；点击先取消退出再跳结果面（toolJob）或项目会话。
+- **为什么这样设计**：退出前让用户看见「具体是什么在跑」；只给定位字段，不带参数正文/路径。无项目定位的条目不渲染死按钮。
+- **验证（代码）**：activity-summary 逐项契约 2/2 + 外壳归一（未知 kind 丢弃/字段有界/≤20）+ 弹窗 5/5；实机 A3。
+- **实机证据**：`acceptance/block-260/q9rem-tail-live{,-dark}.json`（各 14/14；截图 unavailable）。
+- **边界（reopen）**：逐项取消/停止（需要任务级取消协议，不在本轮）。
+
+## UI-574: 本地 minidump 摘要与详情（2026-10-25 **verified（BLOCK-260 K2；隔离 9223 亮/暗各 14/14）**）
+
+- **变化面**：崩溃横幅显示本地解析摘要（模块数/架构/OS/异常码）；「详情」展开进程/线程/异常地址与前 5 个模块；解析失败如实「摘要不可用」。
+- **为什么这样设计**：本地只读、零依赖、零上传；只解析头/模块/异常/系统/进程，不解析栈、不还原内存；畸形/截断 fail-closed。
+- **验证（代码）**：解析器 3/3（合法/畸形/文件入口）+ 横幅 3/3；实机 A4。
+- **实机证据**：`acceptance/block-260/q9rem-tail-live{,-dark}.json`（各 14/14；截图 unavailable）。
+- **边界（reopen）**：minidump 上传（G1+）；完整栈符号化未做。
+
+## UI-575: 追问 chips 按上下文切换（2026-10-25 **verified（BLOCK-260 C14；隔离 9223 亮/暗各 14/14）**）
+
+- **变化面**：「建议追问」按消息内容关键词切换三组模板（结果/代码/失败），未命中回落默认；仍只填输入框、不调用模型。
+- **为什么这样设计**：本地启发式可预期、零成本；上下文感知但不引入自动模型调用。
+- **验证（代码）**：`messageActions` 12/12（含三组切换）+ 行组件 3/3；实机 A2。
+- **边界（reopen）**：模型生成的后续建议/自动润色。
+
+## UI-570: 通知中心点击跳转 / 单条已读 / 类型与声音开关（2026-10-25 **verified（BLOCK-259 K4；隔离 9223 亮/暗各 11/11）**）
+
+- **变化面**：通知条目可点击（标已读并跳项目会话/计划看板）；新增四类通知开关与声音开关（本地持久化）；关闭类型不再写入本地历史。
+- **为什么这样设计**：通知中心是本地留痕，不依赖系统通知权限；点击去向由 `noticeTarget` 单点决定，避免在组件里散落路由规则。
+- **验证（代码）**：`notification-center` 8/8（开关门控/单条已读/去向）+ `NotificationCenterBell` 5/5（点击跳转/开关/已读）；实机 A5/A6。
+- **实机证据**：`acceptance/block-259/q9rem-live{,-dark}.json`（各 11/11；截图 unavailable）。
+- **边界（reopen）**：OS 级通知历史不可读；审批卡深度定位（滚动到具体卡）未做。
+
+## UI-571: 消息「润色 / 建议追问」（2026-10-25 **verified（BLOCK-259 C14；隔离 9223 亮/暗各 11/11）**）
+
+- **变化面**：助手消息动作新增「润色」与「建议追问」；润色生成 4000 字有界要求，追问展开 3 条固定模板；两者只填入输入框，不自动发送。
+- **为什么这样设计**：不让动作隐式触发模型调用/成本；用户保留编辑与发送决定权。无宿主回调时不渲染死按钮。
+- **验证（代码）**：`messageActions` 11/11 + 行组件 3/3 + `useMessageActions` 3/3；实机 A2/A3（输入框值逐字断言）。
+- **实机证据**：`acceptance/block-259/q9rem-live{,-dark}.json`（各 11/11；截图 unavailable）。
+- **边界（reopen）**：上下文感知建议、自动润色/改写、历史建议去重未做。
+
+## UI-572: 模型菜单价格显示（2026-10-25 **verified（BLOCK-259 D1；隔离 9223 亮/暗各 11/11）**）
+
+- **变化面**：模型菜单每行显示 `¥input/¥output 每 1M`；模型发现失败时「原因 + 价格」同时显示；取不到价格不猜价。
+- **为什么这样设计**：价格单一源=`ai-usage.AI_PRICING`（经 `GET /api/ai/pricing` 只读透出），前端不建第二份价格表。
+- **验证（代码）**：后端价格契约 1/1（与 `AI_PRICING` 逐字一致）+ `ModelMenu` 6/6；实机 A4。
+- **实机证据**：`acceptance/block-259/q9rem-live{,-dark}.json`（各 11/11；截图 unavailable）。
+- **边界（reopen）**：低峰折扣（provider 外部/G1+）、权限限制态、缓存命中率展示未做。
+
+## UI-569: MCP 尾项——SSE 传输 / 自定义 headers / OAuth 断开授权（2026-10-25 **verified（BLOCK-258 Q8-REM P1–P4；隔离 9223 亮/暗各 18/18）**）
+
+- **变化面**：MCP 添加表单支持 SSE 传输；HTTP/SSE 支持自定义 headers（已保存值不回显，只显示键名）；已授权卡片提供「断开授权 / 重新授权」。
+- **为什么这样设计**：补 Q8-REM 真实剩余面；headers 属于凭据，按 D-2 密文落盘、状态面只透键名、配置导出剥离；账号切换用「本地撤销 → 重新授权」，不做多账号并存。
+- **验证（代码）**：`block258` 契约 **6/6**；MCP 邻域合计 **34/34**；前端 shelf **15/15**；theme **17/17**；`test:changed` EXIT=0（Node 626＝621 pass/0 fail/5 skipped；前端 related 2 文件 21 + 定向 33 文件 241）；types 0 / lint 0 error。
+- **实机证据**：`acceptance/block-258/q8rem-live.json` / `q8rem-live-dark.json`（各 **18/18**；截图 `unavailable`）。断言链：SSE+Header 表单保存 → 真连接（1 工具 / Header 计数）→ Header 值不出现在 DOM → 断开授权（notice/徽标消失/配置保留）；宿主侧 tokens 清空、client 保留、状态非 authorized、headers 密文落盘、状态面不含 Header 值。
+- **边界（reopen）**：J2/J6、RFC 7009 服务端令牌撤销、多账号并存、SSE server 端实现。
 
 ## UI-568: 宿主菜单修复 + 终端双 pane 分屏（2026-10-25 **verified（BLOCK-257 Q5-REM 尾包 P1–P4）**）
 

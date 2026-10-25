@@ -517,6 +517,18 @@ declare global {
           error?: string;
         }>;
         crashOpenDumps: () => Promise<{ ok: boolean; error?: string }>;
+        crashDumpSummary: (name?: string) => Promise<{
+          ok: boolean;
+          name?: string;
+          version?: number;
+          streamCount?: number;
+          streamTypes?: number[];
+          modules?: Array<{ name: string; size: number; timeDateStamp: number | null }>;
+          exception?: { threadId: number; code: string; address: string | null } | null;
+          system?: { arch: string; processors: number; osVersion: string } | null;
+          processId?: number | null;
+          error?: string;
+        }>;
         crashSimulate: (payload: {
           uncleanExit?: boolean;
           previousStartedAt?: string;

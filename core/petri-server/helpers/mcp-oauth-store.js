@@ -176,11 +176,31 @@ function removeServer(serverId) {
   }
 }
 
+/**
+ * BLOCK-258 — 本地撤销授权：清 tokens/pending/codeVerifier，默认保留 clientInformation
+ * （重新授权可复用动态注册，不必重新 DCR）。服务端令牌是否失效由 provider 决定。
+ */
+function clearCredentials(serverId) {
+  const id = String(serverId || '');
+  if (!id) return { ok: false, error: 'server_id_required' };
+  const current = readEntry(id);
+  if (!current.tokens && !current.pending && !current.codeVerifier) return { ok: true, removed: false };
+  const result = updateEntry(id, (entry) => {
+    const next = { ...entry };
+    delete next.tokens;
+    delete next.pending;
+    delete next.codeVerifier;
+    return next;
+  });
+  return result.ok ? { ok: true, removed: true } : result;
+}
+
 module.exports = {
   readEntry,
   updateEntry,
   pendingFor,
   hasTokens,
   clearPending,
+  clearCredentials,
   removeServer,
 };

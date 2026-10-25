@@ -17,10 +17,21 @@ interface QuitSummaryRow {
   value: number;
 }
 
+export interface QuitSummaryItem {
+  kind: 'toolJob' | 'task' | 'subagentTask' | 'approval';
+  id: string;
+  label: string;
+  status?: string;
+  projectId?: string | null;
+  conversationId?: string | null;
+  taskId?: string | null;
+}
+
 export interface QuitSummaryRequest {
   counts: Record<string, number>;
   total: number;
   rows: QuitSummaryRow[];
+  items?: QuitSummaryItem[];
   reason?: string;
   preview?: boolean;
 }
@@ -31,11 +42,13 @@ interface QuitSummaryDialogProps {
   request: QuitSummaryRequest | null;
   error?: string | null;
   onDecision: (action: QuitDecision) => void;
+  onOpenItem?: (item: QuitSummaryItem) => void;
 }
 
-export function QuitSummaryDialog({ request, error, onDecision }: QuitSummaryDialogProps): React.ReactElement | null {
+export function QuitSummaryDialog({ request, error, onDecision, onOpenItem }: QuitSummaryDialogProps): React.ReactElement | null {
   if (!request) return null;
   const rows = Array.isArray(request.rows) ? request.rows.filter((row) => Number(row.value) > 0) : [];
+  const items = Array.isArray(request.items) ? request.items.slice(0, 10) : [];
   return (
     <div
       className={styles.overlay}
@@ -63,6 +76,27 @@ export function QuitSummaryDialog({ request, error, onDecision }: QuitSummaryDia
           </ul>
         ) : (
           <p className={styles.lead}>未读到具体活动明细，但仍建议确认后再退出。</p>
+        )}
+        {items.length > 0 && (
+          <ul className={styles.rows} data-testid="quit-summary-items">
+            {items.map((item) => (
+              <li key={`${item.kind}:${item.id}`} className={styles.row}>
+                <span className={styles.rowLabel}>{item.label}</span>
+                {onOpenItem && item.projectId ? (
+                  <button
+                    type="button"
+                    className={button.ghost}
+                    data-testid={`quit-summary-open-${item.id}`}
+                    onClick={() => onOpenItem(item)}
+                  >
+                    查看
+                  </button>
+                ) : (
+                  <span className={styles.rowValue}>{item.status || ''}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
         {request.preview && (
           <p className={styles.note} data-testid="quit-summary-preview">

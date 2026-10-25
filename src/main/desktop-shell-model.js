@@ -92,9 +92,36 @@ function normalizeActivity(raw) {
   return {
     counts,
     total,
+    items: normalizeActivityItems(raw && raw.items),
     fetchedAt: typeof raw?.fetchedAt === 'string' ? raw.fetchedAt : null,
     degraded: raw?.degraded === true,
   };
+}
+
+const ACTIVITY_ITEM_KINDS = new Set(['toolJob', 'task', 'subagentTask', 'approval']);
+const MAX_ACTIVITY_ITEMS = 20;
+
+/** BLOCK-260 K3 — 只保留可定位字段；正文/参数/路径一律不进退出摘要。 */
+function normalizeActivityItems(raw) {
+  if (!Array.isArray(raw)) return [];
+  const items = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== 'object') continue;
+    if (!ACTIVITY_ITEM_KINDS.has(String(entry.kind || ''))) continue;
+    const id = sanitizeText(entry.id, 120);
+    if (!id) continue;
+    items.push({
+      kind: String(entry.kind),
+      id,
+      label: sanitizeText(entry.label, 80) || String(entry.kind),
+      status: sanitizeText(entry.status, 20),
+      projectId: sanitizeText(entry.projectId, 120) || null,
+      conversationId: sanitizeText(entry.conversationId, 120) || null,
+      taskId: sanitizeText(entry.taskId, 120) || null,
+    });
+    if (items.length >= MAX_ACTIVITY_ITEMS) break;
+  }
+  return items;
 }
 
 function shouldShowQuitSummary(summary) {

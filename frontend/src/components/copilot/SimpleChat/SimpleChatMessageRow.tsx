@@ -39,7 +39,7 @@ import { parseInlineAttachments, workspaceFileUrl, type InlineAttachmentImage } 
 import { ImagePreviewModal } from './ImagePreviewModal';
 import { MessageStatsPanel } from './MessageStatsPanel';
 // BLOCK-246 C4 — 动作注册表（复制/重新生成/分支/加入上下文/评价）
-import { buildMessageActions, type MessageActionId, type MessageRatingValue } from './messageActions';
+import { buildMessageActions, polishPrompt, selectFollowupPrompts, type MessageActionId, type MessageRatingValue } from './messageActions';
 
 export interface SimpleChatMessageRowProps {
   m: SimpleMessage;
@@ -88,6 +88,8 @@ export interface SimpleChatMessageRowProps {
   onQuoteToContext?: (messageKey: string, content: string) => void;
   /** BLOCK-246 C4 — 赞/踩（不传 = 不显示评价动作）。 */
   onRateMessage?: (messageKey: string, rating: MessageRatingValue) => void;
+  /** BLOCK-259 C14 — 润色/追问模板填入输入框（不传 = 不显示这两个动作）。 */
+  onInsertComposerText?: (text: string) => void;
   /** 当前评价（受控；null = 未评价）。 */
   messageRating?: MessageRatingValue | null;
 }
@@ -125,6 +127,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   onRetrySummary,
   onQuoteToContext,
   onRateMessage,
+  onInsertComposerText,
   messageRating = null,
 }: SimpleChatMessageRowProps): React.ReactElement {
   // BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：图片附件行抽成 <img>
@@ -134,6 +137,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   const [zoomedImage, setZoomedImage] = useState<InlineAttachmentImage | null>(null);
   // BLOCK-255 C4 — 本条统计面板开合（行内状态；不污染父级 memo props）。
   const [statsOpen, setStatsOpen] = useState(false);
+  // BLOCK-259 C14 — 常用追问 chips 开合（本地固定模板，不触发模型调用）。
+  const [followupsOpen, setFollowupsOpen] = useState(false);
+  const followupPrompts = selectFollowupPrompts(m.content);
   const statsPanelId = React.useId();
   // BLOCK-246 C4 — 动作来自注册表；宿主没给回调的动作不渲染（不留死按钮）。
   const actions = buildMessageActions({
@@ -149,6 +155,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
     if (action.id === 'edit') return Boolean(onEditUserMessage);
     if (action.id === 'quote-context') return Boolean(onQuoteToContext);
     if (action.id === 'rate-up' || action.id === 'rate-down') return Boolean(onRateMessage);
+    if (action.id === 'polish' || action.id === 'suggest-followups') return Boolean(onInsertComposerText);
     return true;
   });
   const runAction = (id: MessageActionId) => {
@@ -158,6 +165,8 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
     else if (id === 'fork') void onForkAt(forkAbsoluteIndex);
     else if (id === 'quote-context') onQuoteToContext?.(messageKey, m.content);
     else if (id === 'stats') setStatsOpen((open) => !open);
+    else if (id === 'polish') onInsertComposerText?.(polishPrompt(m.content));
+    else if (id === 'suggest-followups') setFollowupsOpen((open) => !open);
     else if (id === 'rate-up') onRateMessage?.(messageKey, 'up');
     else if (id === 'rate-down') onRateMessage?.(messageKey, 'down');
   };
@@ -173,7 +182,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             title={action.title}
             aria-label={action.title}
             aria-pressed={action.pressed}
-            aria-expanded={action.id === 'stats' ? statsOpen : undefined}
+            aria-expanded={action.id === 'stats' ? statsOpen : action.id === 'suggest-followups' ? followupsOpen : undefined}
             aria-controls={action.id === 'stats' && statsOpen ? statsPanelId : undefined}
             data-testid={action.id === 'edit' ? 'msg-edit-user' : `msg-action-${action.id}`}
           >
@@ -373,6 +382,27 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             );
           })()}
           {m.role === 'assistant' && actionBar}
+          {m.role === 'assistant' && followupsOpen && onInsertComposerText && (
+            <div
+              data-testid="msg-followups"
+              style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '4px 0 8px' }}
+            >
+              {followupPrompts.map((item, index) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  className="sc-msg-action"
+                  data-testid={`msg-followup-${index}`}
+                  onClick={() => {
+                    onInsertComposerText(item.prompt);
+                    setFollowupsOpen(false);
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
           {m.role === 'assistant' && statsOpen && !m.pending && (
             <MessageStatsPanel
               message={m}

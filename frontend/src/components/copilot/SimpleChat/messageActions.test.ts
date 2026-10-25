@@ -5,7 +5,10 @@ import {
   buildAssistantMessageActions,
   buildMessageActions,
   buildUserMessageActions,
+  FOLLOWUP_PROMPTS,
   nextRating,
+  polishPrompt,
+  selectFollowupPrompts,
   type MessageActionInput,
 } from './messageActions';
 
@@ -25,7 +28,7 @@ function input(overrides: Partial<MessageActionInput> = {}): MessageActionInput 
 describe('buildAssistantMessageActions', () => {
   it('keeps the existing action order and appends 加入上下文 + 统计 + 评价', () => {
     const ids = buildAssistantMessageActions(input()).map((action) => action.id);
-    expect(ids).toEqual(['copy', 'regenerate', 'fork', 'quote-context', 'stats', 'rate-up', 'rate-down']);
+    expect(ids).toEqual(['copy', 'regenerate', 'fork', 'quote-context', 'stats', 'polish', 'suggest-followups', 'rate-up', 'rate-down']);
   });
 
   it('carries state into labels and disabled reasons', () => {
@@ -86,7 +89,25 @@ describe('buildUserMessageActions', () => {
 describe('buildMessageActions / nextRating', () => {
   it('routes by role', () => {
     expect(buildMessageActions(input({ role: 'user' })).map((spec) => spec.id)).toEqual(['edit']);
-    expect(buildMessageActions(input()).length).toBe(7);
+    expect(buildMessageActions(input()).length).toBe(9);
+  });
+
+  it('BLOCK-259 C14 — 润色/追问模板有界且只生成输入框文本', () => {
+    const long = 'x'.repeat(5000);
+    const prompt = polishPrompt(long);
+    expect(prompt).toContain('保持事实、数字与结论不变');
+    expect(prompt).toContain('已截取前 4000 字');
+    expect(prompt.length).toBeLessThan(4200);
+    expect(FOLLOWUP_PROMPTS).toHaveLength(3);
+    expect(FOLLOWUP_PROMPTS.every((item) => item.prompt.length > 10)).toBe(true);
+  });
+
+  it('BLOCK-260 C14 — 追问按内容切换（结果/代码/失败），未命中回落默认', () => {
+    expect(selectFollowupPrompts('差异分析结果 p-value 0.01')[0].label).toBe('解释这个结果');
+    expect(selectFollowupPrompts('这部分代码 diff 需要审查')[0].label).toBe('审查这处改动');
+    expect(selectFollowupPrompts('执行失败：error traceback')[0].label).toBe('定位失败根因');
+    expect(selectFollowupPrompts('普通回答')[0].label).toBe(FOLLOWUP_PROMPTS[0].label);
+    expect(selectFollowupPrompts('').length).toBe(3);
   });
 
   it('toggles: same side clears, other side switches', () => {

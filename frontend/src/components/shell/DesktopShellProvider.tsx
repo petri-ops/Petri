@@ -11,10 +11,11 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { normalizeQuietHours } from '@/lib/quiet-hours';
-import { QuitSummaryDialog, type QuitDecision, type QuitSummaryRequest } from './QuitSummaryDialog';
+import { QuitSummaryDialog, type QuitDecision, type QuitSummaryItem, type QuitSummaryRequest } from './QuitSummaryDialog';
 
 export interface ShellPrefs {
   closeToTray: boolean;
@@ -73,6 +74,7 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
   const [syncError, setSyncError] = useState<string | null>(null);
   const [quitRequest, setQuitRequest] = useState<QuitSummaryRequest | null>(null);
   const [quitError, setQuitError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -132,8 +134,7 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
     }
   }, []);
 
-  const respondQuit = useCallback(async (action: QuitDecision) => {
-    if (action === 'cancel') {
+  const respondQuit = useCallback(async (action: QuitDecision) => {    if (action === 'cancel') {
       setQuitRequest(null);
       setQuitError(null);
       try { await bridge?.respondQuitDecision('cancel'); } catch {}
@@ -167,6 +168,16 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
     respondQuit,
   }), [prefs, updatePref, syncError, bridgeAvailable, quitRequest, respondQuit]);
 
+  const openSummaryItem = useCallback((item: QuitSummaryItem) => {
+    void (async () => {
+      await respondQuit('cancel');
+      if (!item.projectId) return;
+      await navigate(item.kind === 'toolJob'
+        ? `/project/${item.projectId}/result?job=${encodeURIComponent(item.id)}`
+        : `/project/${item.projectId}/chat`);
+    })();
+  }, [navigate, respondQuit]);
+
   return (
     <DesktopShellContext.Provider value={value}>
       {children}
@@ -174,6 +185,7 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
         request={quitRequest}
         error={quitError}
         onDecision={(action) => { void respondQuit(action); }}
+        onOpenItem={openSummaryItem}
       />
     </DesktopShellContext.Provider>
   );

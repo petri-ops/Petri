@@ -6,8 +6,9 @@
  * 加载中/零可用模型给出可读空态，而不是一张空菜单。
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
+import { getApiPrefix } from '@/lib/env';
 import {
   formatContextWindow,
   groupSelectableRows,
@@ -33,12 +34,43 @@ interface ModelMenuProps {
 
 const THINKING_LABELS: Record<string, string> = { off: '关闭思考', standard: '标准思考', high: '高思考' };
 
-function presetMeta(preset: ChatModelPreset, active: boolean): string {
+interface ModelPrice { input: number; output: number }
+type PricingTable = Record<string, ModelPrice>;
+
+/** BLOCK-259 D1 — 价格来自后端单一源 /api/ai/pricing；取不到就不显示，不猜价。 */
+function useModelPricing(): PricingTable {
+  const [pricing, setPricing] = useState<PricingTable>({});
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const response = await fetch(`${getApiPrefix()}/ai/pricing`);
+        const data = await response.json() as { pricing?: PricingTable };
+        if (alive && data && data.pricing && typeof data.pricing === 'object') setPricing(data.pricing);
+      } catch {
+        // 价格不可用不影响选择器
+      }
+    };
+    void load();
+    return () => { alive = false; };
+  }, []);
+  return pricing;
+}
+
+function formatPrice(price: ModelPrice | undefined): string | null {
+  if (!price || typeof price.input !== 'number') return null;
+  const output = typeof price.output === 'number' ? price.output : 0;
+  return `¥${price.input}/¥${output} 每 1M`;
+}
+
+function presetMeta(preset: ChatModelPreset, active: boolean, pricing: PricingTable): string {
   const parts: string[] = [];
   if (active) parts.push('当前使用');
   const context = formatContextWindow(preset.contextWindow);
   if (context) parts.push(context);
   if (preset.defaultThinkingLevel) parts.push(THINKING_LABELS[preset.defaultThinkingLevel] || preset.defaultThinkingLevel);
+  const price = formatPrice(pricing[preset.model]);
+  if (price) parts.push(price);
   return parts.length > 0 ? parts.join(' · ') : active ? '当前使用' : '点击切换';
 }
 
@@ -56,6 +88,7 @@ export function ModelMenu({
   onPickSupplier,
   onPickModel,
 }: ModelMenuProps): React.ReactElement {
+  const pricing = useModelPricing();
   return (
     <>
       <div className="sc-model-overlay" onClick={onClose} />
@@ -112,6 +145,10 @@ export function ModelMenu({
           (selectedGroup?.rows || []).map((row) => {
             const active = row.preset.id === activeModelId;
             const disabled = !isSelectableRow(row);
+            const price = formatPrice(pricing[row.preset.model]);
+            const meta = row.reason
+              ? `${row.reason}${price ? ` · ${price}` : ''}`
+              : presetMeta(row.preset, active, pricing);
             return (
               <button
                 type="button"
@@ -123,7 +160,7 @@ export function ModelMenu({
               >
                 <span className="sc-model-option-title">{row.preset.model}</span>
                 <span className={`sc-model-option-meta ${row.reason ? 'sc-model-option-warning' : ''}`}>
-                  {row.reason || presetMeta(row.preset, active)}
+                  {meta}
                 </span>
               </button>
             );

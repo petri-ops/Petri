@@ -351,6 +351,7 @@ const desktopBridgeSurface = {
   diagnostic: {
     export: (targetPath) => ipcRenderer.invoke('diagnostic:export', targetPath),
     crashStatus: () => ipcRenderer.invoke('diagnostic:crash-status'),
+    crashDumpSummary: (name) => ipcRenderer.invoke('diagnostic:crash-dump-summary', name),
     crashOpenDumps: () => ipcRenderer.invoke('diagnostic:crash-open-dumps'),
     crashSimulate: (payload) => ipcRenderer.invoke('diagnostic:crash-simulate', payload),
   },

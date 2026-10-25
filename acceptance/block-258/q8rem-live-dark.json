@@ -1,0 +1,108 @@
+{
+  "name": "q8rem-mcp-tail-live",
+  "block": "BLOCK-258",
+  "darkMode": true,
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "fixture": {
+    "kind": "local-sse-mcp",
+    "note": "127.0.0.1 夹具；GET/POST 均校验自定义 Header"
+  },
+  "startedAt": "2026-10-25T05:52:09.504Z",
+  "finishedAt": "2026-10-25T05:52:18.537Z",
+  "assertions": [
+    {
+      "name": "B0_oauth_seeded",
+      "pass": true,
+      "detail": "\"authorized\""
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=true"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A1_mcp_shelf_ready",
+      "pass": true,
+      "detail": "MCP 货架可见"
+    },
+    {
+      "name": "A2_sse_added_via_form",
+      "pass": true,
+      "detail": "transport=set id=set url=set headers=set submit=clicked"
+    },
+    {
+      "name": "A3_sse_connected",
+      "pass": true,
+      "detail": "{\"text\":\"sse-live\\n已连接\\nhttp://127.0.0.1:54326/sse\\nSSE1 个工具1 个自定义 Header\\n工具治理\\n信任位 ask（destructive 工具需确认）\\n\\n白名单非空时只投影名单内工具；阻断优先于白名单。信任位只影响声明 destructiveHint 的变更类工具； 审批卡「始终信任此服务」可把该位改为 allow。\\n\\n生效 1 · 已连接 1 · 白名单 0 · 阻断 0\\n白名单（逗号/空格分隔；空=全部允许）\\n阻断（逗号/空格分隔；优先于白名单）\\n保存治理\\n只写本机策略文件，不改 server 配置\\n断开\\n移除\",\"headerCount\":\"1 个自定义 Header\"}"
+    },
+    {
+      "name": "A4_header_value_not_rendered",
+      "pass": true,
+      "detail": "leaked=false"
+    },
+    {
+      "name": "A5a_oauth_revoke_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5b_revoke_notice",
+      "pass": true,
+      "detail": "已撤销 oauth-live 的本地授权（服务端令牌在过期前可能仍有效）"
+    },
+    {
+      "name": "A5c_oauth_badge_gone",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A5d_server_kept",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A6_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1"
+    },
+    {
+      "name": "B1_oauth_tokens_cleared",
+      "pass": true,
+      "detail": "{\"tokens\":null,\"client\":\"live-client\"}"
+    },
+    {
+      "name": "B2_oauth_client_kept",
+      "pass": true,
+      "detail": "{\"client_id\":\"live-client\"}"
+    },
+    {
+      "name": "B3_status_not_authorized",
+      "pass": true,
+      "detail": "\"unknown\""
+    },
+    {
+      "name": "B4_header_encrypted_on_disk",
+      "pass": true,
+      "detail": "enc:v1:bfd3267f60127ea47"
+    },
+    {
+      "name": "B5_header_not_in_status_json",
+      "pass": true,
+      "detail": "status 面不得出现 header 值"
+    }
+  ],
+  "allPass": true,
+  "passed": 18,
+  "total": 18
+}

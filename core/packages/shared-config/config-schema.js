@@ -560,12 +560,18 @@ const CONFIG_KEYS = Object.freeze([
     type: 'object', envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
   {
+    // BLOCK-258 — HTTP/SSE 远程传输的自定义请求头；值是凭据（与 env 同级），
+    // 落盘密文、状态面只透键名、导出剥离。形状在 mcp-settings 语义层校验。
+    key: 'mcpServers.<item>.headers', family: 'mcp-servers', path: '<item>.headers',
+    type: 'object', envKeys: [], aliases: [], mutable: true, ui: 'settings',
+  },
+  {
     key: 'mcpServers.<item>.autoConnect', family: 'mcp-servers', path: '<item>.autoConnect',
     type: 'boolean', envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
   {
     key: 'mcpServers.<item>.transport', family: 'mcp-servers', path: '<item>.transport',
-    type: 'string', domain: { oneOf: ['stdio', 'http'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+    type: 'string', domain: { oneOf: ['stdio', 'http', 'sse'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
   // —— MCP 逐工具策略（BLOCK-204 / W5）——
   // `ui: 'none'`：v1 不提供逐工具设置页（plan §2 已声明）；漂移门按 `NO_UI_FAMILIES` 显式登记，

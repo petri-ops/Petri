@@ -417,6 +417,28 @@ function countPendingApprovals(now = Date.now()) {
   return pending;
 }
 
+/** BLOCK-260 K3 — 退出摘要可展示的 pending 审批（有界、只读、无参数正文）。 */
+function listPendingApprovals({ limit = 10, now = Date.now() } = {}) {
+  const items = [];
+  const max = Math.max(1, Math.min(Number(limit) || 10, 20));
+  for (const store of stores.values()) {
+    sweepStore(store, now);
+    for (const request of store.requests.values()) {
+      if (request.status !== 'pending') continue;
+      items.push({
+        requestId: String(request.requestId || ''),
+        taskId: String(request.taskId || ''),
+        toolName: String(request.toolName || 'tool'),
+        dimension: String(request.dimension || ''),
+        projectId: request.ctxSnapshot && request.ctxSnapshot.projectId ? String(request.ctxSnapshot.projectId) : null,
+        createdAt: Number(request.createdAt) || null,
+      });
+      if (items.length >= max) return items;
+    }
+  }
+  return items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, max);
+}
+
 module.exports = {
   DEFAULT_TTL_MS,
   MAX_PREVIEW_CHARS,
@@ -438,5 +460,6 @@ module.exports = {
   consumeFingerprint,
   releaseApprovalRequests,
   countPendingApprovals,
+  listPendingApprovals,
   pendingCount,
 };
