@@ -4,7 +4,11 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { ScratchpadPanel, type ScratchpadApi } from './ScratchpadPanel';
 import type { ScratchpadEntry } from '@/lib/scratchpadClient';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 function entry(overrides: Partial<ScratchpadEntry> = {}): ScratchpadEntry {
   return {
@@ -88,6 +92,43 @@ describe('ScratchpadPanel', () => {
     const error = await screen.findByTestId('sc-scratch-error');
     expect(error.textContent).toContain('HTTP 500');
     expect(screen.getByText('重试')).toBeTruthy();
+  });
+
+  it('BLOCK-254 P6 — 点缩略图打开大图批注，返回列表后收起', async () => {
+    const api = makeApi([entry({ entryId: 'scr_img', kind: 'image', title: '结果图', body: 'data:image/png;base64,AA' })]);
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(
+      JSON.stringify({ annotations: [], count: 0, limit: 200 }),
+      { status: 200 },
+    ))));
+
+    render(<ScratchpadPanel onClose={vi.fn()} onQuote={vi.fn()} api={api} projectId="proj_1" />);
+    await screen.findByText('结果图');
+    fireEvent.click(screen.getByTestId('sc-scratch-open-image'));
+
+    const viewer = screen.getByTestId('sc-scratch-viewer');
+    expect(viewer).toBeTruthy();
+    // 大图里挂的是既有批注宿主（同一条落库通道），不是新的存储。
+    expect(await screen.findByTestId('annotation-bar')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('sc-scratch-viewer-close'));
+    expect(screen.queryByTestId('sc-scratch-viewer')).toBeNull();
+  });
+
+  it('BLOCK-254 P6 — 条目与宿主都没有项目时不渲染批注宿主，只给可执行说明', async () => {
+    const api = makeApi([entry({
+      entryId: 'scr_no_proj',
+      kind: 'image',
+      title: '无项目图',
+      body: 'data:image/png;base64,AA',
+      projectId: null,
+    })]);
+
+    render(<ScratchpadPanel onClose={vi.fn()} onQuote={vi.fn()} api={api} />);
+    await screen.findByText('无项目图');
+    fireEvent.click(screen.getByTestId('sc-scratch-open-image'));
+
+    expect(screen.getByTestId('sc-scratch-viewer-no-project').textContent).toContain('没有项目归属');
+    expect(screen.queryByTestId('annotation-bar')).toBeNull();
   });
 
   it('closes on Escape', async () => {

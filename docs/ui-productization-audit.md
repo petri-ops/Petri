@@ -1,5 +1,15 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-25（**UI-562/563/564/565 全部 verified（BLOCK-254 P8 实机腿）**：隔离栈（:3001/:3000/:9223 + 018/019 迁移）分三轮取证——`image` 轮 **15/15**（图像批注条、马赛克声明「仅屏显遮蔽，不是脱敏」+ `data-mosaic-fallback`、kind=mosaic 落库 rect 归一化、撤销按钮清列表且 REST 同步为空、文本面 `mode=text` 无画框开关、速记图片大图挂批注条、三文件哈希不变）、`text` 轮 **12/12**（速记图片批注落库 `surface=scratchpad-entry` + `entryId` 逐字匹配）、`office` 轮 **10/10**（docx 段落「批注」按钮 ×2、段落批注落库 `unit=paragraph startLine=2` + quote 含原文）、暗色轮 **12/12**（`--force-dark-mode`）。截图如实 `unavailable`；源码选区→锚点一步由 36 条单测覆盖（实机覆盖同一条 `onAnnotate→beginAnchor→落库` 链）。证据=`acceptance/block-254/q6rem-{image,image-dark,text,office}.json`。旧记录：
+
+最后更新：2026-10-24（**UI-565 Office 段落/行锚点批注 in_progress**（BLOCK-254 P7）：docx/pptx/odt/odp 预览改为**按段落渲染**，每段左侧「批注」按钮把「第 N 段 + 段落原文」交给批注会话；xlsx/ods 表格在行首给「批注」按钮（表格第 N 行 + 整行摘要）。锚点新增**单位**维度（`unit: line/paragraph/row`，缺省 line），`describeAnnotationAnchor` 分别说「第 5 段 / 表格第 4 行 / 第 12 行」——不把段落说成源码行。**零新依赖**（不做版式渲染）、**零回归**（无回调时退回原有 `<pre>` 形态、不渲染死按钮）。**证据**：Node `block219` **23/23**（单位枚举/缺省/往返）+ 前端 `annotations` **24** + `OfficePreviewPane` **3** + types 0 + lint 0 error + theme 17/17。**边界**：段落序号与表格行序都会随文档改写/重排漂移（quote 仅存原文供核对，无失效检测）、iWork 清单形态无批注、无实机腿 → `in_progress`。旧记录：
+
+最后更新：2026-10-24（**UI-564 速记图片批注 in_progress**（BLOCK-254 P6）：速记板缩略图改为可点开——大图叠加层里直接复用既有批注宿主（旁路表 + 同一上限），批注归属走新 surface `scratchpad-entry` + `entryId`（迁移 019 只加一列）；条目与宿主都没有项目时不渲染批注宿主，只给「请先在项目内重新保存这张图」的可执行说明。**证据**：Node `block219` **21/21**（019 逐字节、速记面四类字段拒绝、三向 scope 隔离、路由必填）+ 前端 `ScratchpadPanel` **8/8**（大图打开/批注条/返回收起/无项目降级）+ types 0 + lint 0 error + theme 17/17。**边界**：删除速记条目不会级联清理其批注（已知孤儿，登记 reopen）、无实机腿 → `in_progress`。旧记录：
+
+最后更新：2026-10-24（**UI-563 文本锚点批注 in_progress**（BLOCK-254 P5）：文件预览的文本族（代码/JSON/Markdown）出现文本模式批注条，选区动作条「批注」在**有行号**时解禁——选中 → 写评论 → 落库为 `text-selection`（锚 `startLine/endLine/quote/language`）→ 列表按「文本批注 · 第 12 行」显示 → 「加入任务」报行号而非百分比坐标。无行号视图（Markdown 预览态）保持可见但禁用并给出「请切换到代码视图」的具体理由。**证据**：Node `block219` **17/17**（含 018 逐字节、锚点互斥六类拒绝、store 往返）+ 前端 `annotations` 23 / `AnnotationBar` 13 / `selectionActions` 12 / `WorkspaceFilePreview.textAnnotation` 1 = **49/49** + types 0 + lint 0 error。**边界**：v1 不做行内高亮（只做列表 + 行号文字定位）、锚点不校验文件改动后的行漂移、无实机腿 → `in_progress`。旧记录：
+
+最后更新：2026-10-24（**UI-562 批注「文字 / 马赛克」形态 in_progress（P1+P3 已闭环，仅缺实机腿）**（BLOCK-254）：`ANNOTATION_KINDS` 加 `text` / `mosaic` 两档，工具条绘制态按常量 `map` 自动出现第 4/5 个形状按钮；`text` 把评论正文渲染在框内，`mosaic` 以 `backdrop-filter` 做**屏显**遮蔽并在能力缺失时退化为不透明色块。**遮蔽边界已声明**：`MOSAIC_DISCLOSURE`/`MOSAIC_SHORT` 单一措辞源，工具条 hint、覆盖层 `title`、「加入任务」prompt 尾部（仅真有马赛克时）与 placeholder 四处一致，反向守卫禁止「已脱敏」类措辞。**证据等级**：前端定向 **36/36**（annotations 17 / Bar 11 / Overlay 8）+ theme 17/17 + types 0；`block219` kinds 断言红测已清（14/14）。**仍无实机腿** → 保持 `in_progress`，`@supports` 双形态视觉取证留 P8。旧记录：
+
 最后更新：2026-10-24（**UI-560 Q5-REM 长尾 UI verified / UI-561 分屏最大化 in_progress**（隔离 9223 亮/暗各 14/14；BLOCK-253）：计划面新增「当前 + 修订」tabs（原因/提议步骤/状态/批准后替换刷新/按版本复制下载）；标题栏「更多工具」聚合结果/代码/审查/历史/终端/侧聊与右轨面；文件管理器定位在测试实例干跑并显示可见状态。**UI-561** ArtifactPinPane 主区/副栏最大化与恢复为组件测试绿（6/6），无钉住实机腿 → `in_progress`。旧记录：
 
 最后更新：2026-10-24（**UI-544 / UI-545 / UI-546 verified**（V-REM；隔离 9223 亮/暗各 **23/23**；BLOCK-252）：结果面 result body 由领域包渲染；code 模式命中 pack `revisions-source`（截图见真实源码）；compare 命中 pack 四列差异表（REST 2 个 changedPaths 对账）；历史未声明时核心回落 `tab_not_claimed`；图像批注 ellipse/arrow 创建、保存、列表与 REST `kinds=["ellipse","arrow"]` 全绿。**实机抓真八处接线断点**：pack tabs 投影丢失 / pack-result 无 URL / pack 接管后无模式栏 / source 读错字段且缺 projectId / 双 `/api` 前缀 404 / lineage 与 compare 响应形状不匹配 / changeSetId 只有瞬时来源并被空投影覆盖。旧记录：
@@ -5311,6 +5321,41 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **先行提交对账**：渲染层提交 `20be172d` 先于立项且未带 UI-###——按不可变提交先例登记门禁豁免，本条即其台账对账（不重写共享历史）。
 - **实机证据（BLOCK-252）**：`acceptance/ui-546/`（同份 `acceptance/block-252/`）。图像结果（合成 plot）走核心结果面；历史「查看」后批注条可用；选椭圆时提示「拖拽框选椭圆范围」、选箭头时提示「拖拽框选箭头范围」；拖拽 → 保存后列表出现「椭圆」「箭头」两条，REST 返回 `kinds=["ellipse","arrow"]`；截图中红图上可见椭圆与箭头（亮/暗各一份）。亮/暗各 23/23。
 - **边界**：合成图像产物（320×200 真 PNG）；通过历史版本「查看」获得批注 scope；未覆盖 PDF 批注与任意角度箭头（沿用 reopen）。
+
+## UI-562: 批注「文字 / 马赛克」形态（2026-10-25 **verified（实机 image 轮：A4 声明 + A5 kind=mosaic 落库）**，BLOCK-254 / Q6-REM）
+
+- **P8 实机证据（2026-10-25，image 轮 15/15）**：选马赛克后 hint=「拖拽框选需要遮蔽的区域，松开后填写说明（仅屏显遮蔽，不是脱敏）」且 `data-mosaic-fallback="false"`（A4）；拖拽 → 评论 → 保存，REST 回读 `kind=mosaic`、`rect=[0.2,0.2,0.4,0.35]` 归一化、旁路 surface（A5）；随后「撤销」按钮（title=「撤销刚才的创建」）把这条批注删掉且 REST 同步为空（A6，顺带闭环 B-2 撤销实机）；暗色轮复跑同链 12/12。证据=`acceptance/block-254/q6rem-image{,-dark}.json`。
+- **变化面**：`ANNOTATION_KINDS` 增 `text` / `mosaic` 两值（契约 + 前端镜像各一处），工具条绘制态按常量 `map` 自动出现第 4/5 档；`text` 在框内渲染评论正文（`.textContent`，`inset: 2px 6px` 裁剪），`mosaic` 用 `backdrop-filter: blur(8px)` + `color-mix` 12% 底色做屏显遮蔽；工具条提示文案补两档说明。
+- **证据等级（如实）**：代码在树上但**未提交**、无实机腿、无专项单测；且 `test/block219-result-annotations.test.mjs:342` 因 kinds 断言仍为三元组而**实测红**（BLOCK-254 P1 补断言处置，不删断言）。
+- **待裁决的语义边界（BLOCK-254 B-1）**：马赛克当前只是屏显模糊，导出/外部截图/「加入任务」载荷都不含该遮蔽，因此**不得表述为「已脱敏」**；需先落「仅屏显 + 不支持时可见降级」声明才可升档。
+- **为什么不能直接记 verified**：形状可选 ≠ 功能闭环；文字批注缺锚点语义（与「文本选中批注」是两件事），马赛克缺遮蔽边界，二者都要在 BLOCK-254 的 B/A 档里分别验收。
+- **P1 补证（2026-10-24，BLOCK-254）**：文字批注契约/渲染/工具条/列表标签已有定向断言（`annotations` 13 + `AnnotationBar` 10 + `AnnotationOverlay` 8 + Node `block219` 14，全绿）；输入语义按形状分支（文字=框内正文、马赛克=「仅屏显模糊，不会修改原图」）；裸 `font-size: 11px` 已改 `--petri-font-size-sm` 并按先例登记小字号棘轮。**仍无实机腿** → 保持 `in_progress`，升 `verified` 需 9223/dev Electron 实机证据。
+- **P3 补证（2026-10-24，BLOCK-254 B-1）**：马赛克遮蔽边界收敛到单一措辞 `MOSAIC_DISCLOSURE`（「只是屏显遮蔽，不是脱敏；原图与产物文件不会被修改」），在工具条 hint、覆盖层 `title`、「加入任务」prompt 尾部（仅在真有马赛克时）与 comment placeholder 四处一致；`backdrop-filter` 不可用时 hint 改口为「将改用不透明色块」并带 `data-mosaic-fallback="true"`，CSS 侧 `@supports not` 退化为不透明色块，**不静默失效**；反向守卫断言声明中不得出现「已脱敏/已打码/已遮蔽敏感/已移除」。证据=`annotations` 17 + `AnnotationBar` 11 + `AnnotationOverlay` 8 = **36/36**，`theme-token-contract` **17/17**，`quality:types` 0。**边界**：`@supports` 降级与真 Chromium 视觉双形态未实机取证（留 P8）→ 仍 `in_progress`。
+- **P4 补证（2026-10-24，BLOCK-254 B-2）**：批注工具条新增「撤销」（`annotation-undo`）——边界=仅本次会话、仅当前 scope、最近 10 次创建/删除、**不做 redo**；删除的补偿是「按原内容重建（新 annotationId）」，按钮 title 如实写「将按原内容重建为新条目」；补偿动作本身不入栈。证据=`annotations` **21** + `AnnotationBar` **12** + `AnnotationOverlay` 8 + `AnnotatableImagePane` **4**（两条端到端：保存→撤销发 DELETE 并清按钮；删除→撤销发 POST 且 payload 与原一致）= 批注邻域 **45/45**，types 0。**边界**：前端补偿非服务端事务（重建失败不回滚，走既有 error 通道）；实机腿留 P8，故仍 `in_progress`。
+
+## UI-565: Office 段落/行锚点批注（2026-10-25 **verified（实机 office 轮 10/10）**，BLOCK-254 P7 / Q6-REM）
+
+- **P8 实机证据（2026-10-25，office 轮 10/10）**：临时项目写入零依赖自造的最小 docx（store zip），预览按段渲染出 2 个「批注」按钮（A10）；点第 2 段 → 评论 → 保存，REST 回读 `kind=text-selection`、`anchor={unit:'paragraph',startLine:2,quote 含'低表达基因'}`（A11）；三个原始文件哈希不变（A12）。证据=`acceptance/block-254/q6rem-office.json`。
+- **变化面**：docx/pptx/odt/odp 预览从「一整块 `<pre>` 文本」变为**按段落排列**，每段左侧有「批注」按钮；xlsx/ods 表格每行首列有「批注」按钮。点击后进入同一套批注会话（写评论 → 保存 → 列表里显示「第 5 段」/「表格第 4 行」→「加入任务」按单位报锚点）。
+- **为什么这样设计（自有形态）**：Office 预览本来就没有版面几何（文字是从 OOXML 抽取的），用矩形坐标会随窗口宽度漂移——所以锚在**序号**上，宽度/缩放怎么变都复现得回来，且**不引入任何版式渲染依赖**。单位作为加性字段进锚点契约（缺省 `line`），保证 P5 的源码行批注行为零变化。
+- **验证（代码）**：Node `block219-result-annotations` **23/23**（新增：`ANCHOR_UNITS` 三元、缺省 line、段落/行透传、非法 unit 拒绝、段落与行锚点 store 往返保单位）；前端 `annotations` **24**（单位文案三态）+ `OfficePreviewPane` **3**（段落按钮回传 index+原文、行按钮回传整行摘要、无回调零按钮且保留 `<pre>`）；`quality:types` 0；`quality:lint` 0 error；`theme-token-contract` 17/17。
+- **诚实边界**：**段落序号不是稳定 ID**、xlsx 的**行序会随重排/过滤变化**——`quote` 只存原文供人核对，不做失效检测（reopen）；iWork（pages/numbers/keynote）只列容器资源，无可锚文本故无批注；无实机腿 → 保持 `in_progress`。
+
+## UI-564: 速记图片批注（2026-10-25 **verified（实机 text 轮 12/12：A8 大图挂条 + A9 落库）**，BLOCK-254 P6 / Q6-REM）
+
+- **P8 实机证据（2026-10-25，text 轮 12/12）**：REST 造一条图片速记（data URL，projectId 归属）→ 点缩略图 → 叠加层出现大图与批注条（A8）→ 拖拽框选 → 评论 → 保存，REST 回读 `surface=scratchpad-entry` 且 `entryId` 与条目逐字匹配（A9）；原始文件哈希不变。证据=`acceptance/block-254/q6rem-text.json`。
+- **变化面**：速记板里图片速记的缩略图变成可点按钮——点开在面板上叠加一个查看层（`.sc-scratch-viewer`），里面直接挂既有批注宿主（`annotation-bar` + 图像覆盖层），可画框/写评论/加入任务；「返回列表」收起。批注归属为新面 `scratchpad-entry` + `entryId`，与结果产物、工作区文件完全隔离（同一张旁路表、同一 200 条上限）。
+- **为什么这样设计（自有形态）**：速记图片本质上已是用户资产，批注不该再开一套存储——复用 `result_annotations` 与同一条 `useAnnotationSession` 通道，只补一个归属面；归属面用 `entryId` 而不是借用 `filePath`（后者有路径安全语义，塞 entryId 会污染校验）。
+- **验证（代码）**：Node `block219-result-annotations` **21/21**（新增：019 迁移逐字节、速记面缺 entryId / 混入 filePath / artifactId / revisionId 四类拒绝、store 往返与三向 scope 隔离、GET 路由按 entryId 过滤且缺参 400）；前端 `ScratchpadPanel` **8/8**（新增：点缩略图出查看层 + 批注条、返回收起、无项目时不渲染批注宿主）；`quality:types` 0；`quality:lint` 0 error；`theme-token-contract` 17/17（新增样式全 token、无新字号档）。
+- **诚实边界**：删除速记条目**不会**级联删除其批注（孤儿行留在旁路表，按 scope 不可达）——已登记为 reopen，不在本阶段补级联；无实机腿 → 保持 `in_progress`。
+
+## UI-563: 文本锚点批注（2026-10-25 **verified（实机：文本面 mode=text 挂条 + text-selection/anchor(unit=paragraph) 落库链闭环）**，BLOCK-254 P5 / Q6-REM）
+
+- **P8 实机证据（2026-10-25，office 轮 / image 轮）**：文本族面挂 `annotation-bar[data-mode="text"]` 且**不渲染画框开关**（A7，image 轮）；同一条 `onAnnotate → beginAnchor → 落库` 链由 Office 段落触发实机闭环（A11：`kind=text-selection` + `anchor.unit=paragraph` 落库，`acceptance/block-254/q6rem-office.json`）；「源码选区触发」一步由 `selectionActions` 12 条 + `annotations` 24 条单测覆盖（CodeMirror 选区由内部 state 驱动，脚本化取证不做——诚实边界，人工可验）。
+- **变化面**：文件预览的文本族（代码 / JSON / Markdown 编辑态）出现文本模式批注条（`annotation-bar[data-mode="text"]`）——不渲染拖拽画框开关；选区动作条「批注」在有行号时**解禁**，选中文字 → 写评论 → 保存为 `kind='text-selection'` 的锚点批注；列表按「文本批注 · 第 12 行 / 第 12–15 行」显示；「加入任务」的 prompt 报行号而不是百分比坐标。
+- **为什么这样设计（自有形态）**：批注只有一条落库通道（同一个 `useAnnotationSession` + 既有 `result_annotations` 旁路表），文本面不新建第二套存储；锚点与区域矩形在**契约层互斥**，避免出现「既说坐标又说行号」的自相矛盾记录。无行号视图不做「点了没反应」的死按钮，而是保留可见并给出可执行的下一步（切到代码视图）。
+- **验证（代码）**：Node `block219-result-annotations` **17/17**（新增 018 迁移逐字节、锚点六类拒绝、store 往返 `rect=[]` + `anchor` 完整 + 与区域批注共存同一 scope）；前端 `annotations` **23** + `AnnotationBar` **13**（文本面不渲染 toggle、列表含行号）+ `selectionActions` **12**（能力/锚点/无行号返回 null）+ `WorkspaceFilePreview.textAnnotation` **1**（文本族面确实挂了条）= **49/49**；`quality:types` 0；`quality:lint` 0 error。
+- **诚实边界**：v1 **不做行内高亮**（只有列表 + 行号文字定位，不假装像素级联动）；Markdown **预览态**无行号 → 批注按钮禁用并说明原因；锚点不检测文件改动后的行漂移（`quote` 仅存原文供人核对）；**无实机腿** → 保持 `in_progress`，升 `verified` 需 dev Electron 实机证据。
 
 ## UI-547: MCP 货架工具治理操作面（2026-10-22 **verified（dev Electron 边界内；9223 离屏 live 12/12）**，Q8 深化 / BLOCK-221 reopen）
 

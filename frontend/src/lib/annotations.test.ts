@@ -1,11 +1,24 @@
 import { describe, expect, it } from 'vitest';
+import * as annotationsModule from './annotations';
 import {
+  ANNOTATION_KINDS,
+  ANNOTATION_KIND_LABELS,
+  MAX_ANNOTATION_UNDO,
   MAX_ANNOTATIONS_IN_PROMPT,
+  MOSAIC_DISCLOSURE,
+  MOSAIC_SHORT,
+  appendUndoAction,
   buildAnnotationTaskPrompt,
   describeAnnotationAnchor,
+  describeAnnotationKind,
+  mosaicTaskNote,
   normalizePointerRect,
   pointToNormalized,
   rectToStyle,
+  supportsBackdropFilter,
+  undoActionLabel,
+  type AnnotationUndoAction,
+  type ArtifactAnnotation,
 } from './annotations';
 
 describe('normalizePointerRect（BLOCK-219 Q6 批注坐标）', () => {
@@ -44,11 +57,177 @@ describe('pointToNormalized / rectToStyle（跨缩放可复现）', () => {
   });
 });
 
+describe('ANNOTATION_KINDS（BLOCK-254 契约镜像）', () => {
+  it('六档形态齐全，且每档都有中文标签', () => {
+    expect([...ANNOTATION_KINDS]).toEqual(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
+    for (const kind of ANNOTATION_KINDS) {
+      expect(ANNOTATION_KIND_LABELS[kind]).toBeTruthy();
+      expect(describeAnnotationKind(kind)).toBe(ANNOTATION_KIND_LABELS[kind]);
+    }
+  });
+
+  it('缺省/空值回落 region（旧数据不出现空标签）', () => {
+    expect(describeAnnotationKind(undefined)).toBe('矩形');
+    expect(describeAnnotationKind(null)).toBe('矩形');
+    expect(describeAnnotationKind('region')).toBe('矩形');
+  });
+});
+
+describe('撤销边界（BLOCK-254 B-2）', () => {
+  const created = (id: string): AnnotationUndoAction => ({ type: 'created', annotationId: id });
+  const deleted: AnnotationUndoAction = {
+    type: 'deleted',
+    annotation: {
+      annotationId: 'ann-x',
+      contractVersion: 1,
+      projectId: 'p1',
+      conversationId: null,
+      surface: 'result-artifact',
+      artifactId: 'a1',
+      revisionId: 'r1',
+      filePath: null,
+      entryId: null,
+      artifactName: 'volcano.png',
+      kind: 'ellipse',
+      page: null,
+      rect: [0.2, 0.3, 0.1, 0.1],
+      anchor: null,
+      comment: '纵轴尺度看着不对',
+      color: 'sky',
+      author: 'user',
+      createdAt: '2026-10-24T00:00:00.000Z',
+      updatedAt: '2026-10-24T00:00:00.000Z',
+    } satisfies ArtifactAnnotation,
+  };
+
+  it('有界：只保留最近 N 次补偿，最旧的被丢弃', () => {
+    let actions: AnnotationUndoAction[] = [];
+    for (let index = 0; index < MAX_ANNOTATION_UNDO + 3; index += 1) {
+      actions = appendUndoAction(actions, created(`ann-${index}`));
+    }
+    expect(actions).toHaveLength(MAX_ANNOTATION_UNDO);
+    expect(actions[actions.length - 1]).toMatchObject({ annotationId: `ann-${MAX_ANNOTATION_UNDO + 2}` });
+    expect(actions.some((action) => action.type === 'created' && action.annotationId === 'ann-0')).toBe(false);
+  });
+
+  it('非法上限回落默认值（不出现空栈/无界栈）', () => {
+    expect(appendUndoAction([], created('a'), 0)).toHaveLength(1);
+    expect(appendUndoAction([], created('a'), -3)).toHaveLength(1);
+    expect(appendUndoAction([], created('a'), Number.NaN)).toHaveLength(1);
+    expect(appendUndoAction([created('a')], created('b'), 1)).toHaveLength(1);
+  });
+
+  it('文案：创建/删除区分，删除必须说明「重建为新条目」，空栈为空串', () => {
+    expect(undoActionLabel(null)).toBe('');
+    expect(undoActionLabel(undefined)).toBe('');
+    expect(undoActionLabel(created('a'))).toContain('撤销刚才的创建');
+    const label = undoActionLabel(deleted);
+    expect(label).toContain('撤销刚才的删除');
+    expect(label).toContain('重建为新条目');
+  });
+
+  it('边界写死：只做撤销，不导出任何 redo 面', () => {
+    // 反向守卫：redo 会在这套不对称补偿（删除→重建新 id）上产生 id 漂移链，
+    // 一旦有人加了 redo 导出，说明边界被悄悄扩张。
+    expect(Object.keys(annotationsModule).some((key) => /redo/i.test(key))).toBe(false);
+  });
+});
+
+describe('马赛克遮蔽边界（BLOCK-254 B-1）', () => {
+  it('声明措辞只能是「屏显遮蔽」，不得暗示脱敏', () => {
+    expect(MOSAIC_DISCLOSURE).toContain('屏显遮蔽');
+    expect(MOSAIC_DISCLOSURE).toContain('不是脱敏');
+    expect(MOSAIC_DISCLOSURE).toContain('不会被修改');
+    // 短位与长位必须是同一句话的两种粒度，不允许各自漂移。
+    expect(MOSAIC_SHORT).toContain('屏显遮蔽');
+    expect(MOSAIC_SHORT).toContain('不是脱敏');
+    // 反向守卫：任何"已脱敏/已打码/已移除"式承诺都不允许出现在声明里。
+    expect(MOSAIC_DISCLOSURE).not.toMatch(/已脱敏|已打码|已遮蔽敏感|已移除/);
+    expect(MOSAIC_SHORT).not.toMatch(/已脱敏|已打码|已遮蔽敏感|已移除/);
+  });
+
+  it('mosaicTaskNote 带条数且复用同一措辞', () => {
+    const note = mosaicTaskNote(3);
+    expect(note).toContain('其中 3 条');
+    expect(note).toContain(MOSAIC_DISCLOSURE);
+    expect(note).toContain('请勿把遮蔽区域当作已移除的敏感信息');
+  });
+
+  it('加入任务：有马赛克才追加边界声明，无马赛克零噪声', () => {
+    const base = { rect: [0.1, 0.1, 0.2, 0.2] as [number, number, number, number], page: null, surface: 'result-artifact' as const };
+
+    const withMosaic = buildAnnotationTaskPrompt(
+      [{ ...base, comment: '遮住姓名', kind: 'mosaic' }, { ...base, comment: '离群点', kind: 'region' }],
+      { surface: 'result-artifact', artifactName: 'volcano.png' },
+    );
+    expect(withMosaic).toContain('其中 1 条为「马赛克」标记');
+    expect(withMosaic).toContain('不是脱敏');
+
+    const withoutMosaic = buildAnnotationTaskPrompt(
+      [{ ...base, comment: '离群点', kind: 'region' }],
+      { surface: 'result-artifact', artifactName: 'volcano.png' },
+    );
+    expect(withoutMosaic).not.toContain('马赛克');
+  });
+
+  it('能力探测：支持/不支持/探测缺失都收敛到确定布尔', () => {
+    expect(supportsBackdropFilter(() => true)).toBe(true);
+    expect(supportsBackdropFilter(() => false)).toBe(false);
+    // 只支持带前缀的实现也算支持（Safari 形态）
+    expect(supportsBackdropFilter((property) => property === '-webkit-backdrop-filter')).toBe(true);
+    expect(supportsBackdropFilter(null)).toBe(false);
+    expect(supportsBackdropFilter(() => { throw new Error('boom'); })).toBe(false);
+  });
+});
+
 describe('describeAnnotationAnchor', () => {
   it('有页号说页，无页号说区域', () => {
     expect(describeAnnotationAnchor({ page: 3, surface: 'result-artifact' })).toBe('第 3 页');
     expect(describeAnnotationAnchor({ page: null, surface: 'result-artifact' })).toBe('图像区域');
     expect(describeAnnotationAnchor({ page: null, surface: 'workspace-file' })).toBe('文件区域');
+  });
+
+  it('BLOCK-254 P5 — 文本锚点优先说行号（单行/区间两态）', () => {
+    const base = {
+      page: null,
+      surface: 'workspace-file' as const,
+      anchor: {
+        kind: 'text-range' as const,
+        startLine: 12,
+        endLine: 12,
+        startColumn: null,
+        endColumn: null,
+        quote: 'x',
+        language: null,
+      },
+    };
+    expect(describeAnnotationAnchor(base)).toBe('第 12 行');
+    expect(describeAnnotationAnchor({ ...base, anchor: { ...base.anchor, endLine: 15 } })).toBe('第 12–15 行');
+    // 没有锚点时不误报行号
+    expect(describeAnnotationAnchor({ ...base, anchor: null })).toBe('文件区域');
+  });
+
+  it('BLOCK-254 P7 — 段落锚点说「段」、表格行说「表格第 N 行」', () => {
+    const base = {
+      page: null,
+      surface: 'workspace-file' as const,
+      anchor: {
+        kind: 'text-range' as const,
+        startLine: 5,
+        endLine: 5,
+        startColumn: null,
+        endColumn: null,
+        quote: 'Methods 段落原文',
+        language: null,
+      },
+    };
+    expect(describeAnnotationAnchor(base)).toBe('第 5 行');
+    expect(describeAnnotationAnchor({ ...base, anchor: { ...base.anchor, unit: 'paragraph' } })).toBe('第 5 段');
+    expect(describeAnnotationAnchor({
+      ...base,
+      anchor: { ...base.anchor, unit: 'paragraph', endLine: 7 },
+    })).toBe('第 5–7 段');
+    expect(describeAnnotationAnchor({ ...base, anchor: { ...base.anchor, unit: 'row' } })).toBe('表格第 5 行');
   });
 });
 
@@ -72,6 +251,30 @@ describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => 
     expect(prompt).toContain('第 2 页 (10%, 20%, 30%×10%)：这个离群点需要复核');
     expect(prompt).toContain('图像区域 (50%, 50%, 20%×20%)：纵轴尺度看着不对');
     expect(prompt).toContain('原始产物文件未被修改');
+  });
+
+  it('BLOCK-254 P5 — 文本锚点批注在 prompt 里报行号，不编造百分比坐标', () => {
+    const prompt = buildAnnotationTaskPrompt([
+      {
+        rect: [],
+        comment: '这段结论要复核',
+        page: null,
+        surface: 'workspace-file',
+        kind: 'text-selection',
+        anchor: {
+          kind: 'text-range',
+          startLine: 12,
+          endLine: 12,
+          startColumn: null,
+          endColumn: null,
+          quote: '结论：差异基因数目偏低',
+          language: 'md',
+        },
+      },
+    ], { surface: 'workspace-file', filePath: 'notes/plan.md' });
+
+    expect(prompt).toContain('第 12 行：这段结论要复核');
+    expect(prompt).not.toContain('(0%');
   });
 
   it('工作区文件走文件措辞，不冒充结果产物', () => {

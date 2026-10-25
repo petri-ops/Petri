@@ -1,0 +1,116 @@
+{
+  "name": "q6rem-annotations-live",
+  "block": "BLOCK-254",
+  "phase": "image",
+  "darkMode": false,
+  "mode": "system-default",
+  "migrationsApplied": 19,
+  "resultAnnotationColumns": [
+    "annotation_id",
+    "contract_version",
+    "project_id",
+    "conversation_id",
+    "surface",
+    "artifact_id",
+    "revision_id",
+    "file_path",
+    "artifact_name",
+    "kind",
+    "page",
+    "rect_json",
+    "comment",
+    "color",
+    "author",
+    "created_at",
+    "updated_at",
+    "anchor_json",
+    "entry_id"
+  ],
+  "screenshots": "unavailable",
+  "synthetic": {
+    "note": "临时项目 + 合成 SVG/文本/最小 docx；速记图片为 data URL 自造",
+    "paragraphAnchor": "docx split into 2 paragraphs; annotation anchors unit=paragraph startLine=2"
+  },
+  "startedAt": "2026-10-24T16:30:48.647Z",
+  "finishedAt": "2026-10-24T16:31:03.119Z",
+  "assertions": [
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b254-live-eQBfjO / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A0c_temp_project_created",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvmm87r3_j306\",\"workspacePath\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\petri-b254-live-eQBfjO\\\\data\\\\projects\\\\block254---1792859453221-mvmm87r3\"}"
+    },
+    {
+      "name": "A1_fixtures_written",
+      "pass": true,
+      "detail": "svg=342B txt=85B docx=889B"
+    },
+    {
+      "name": "A2_files_panel_ready",
+      "pass": true,
+      "detail": "文件 tab + annot254/ + volcano.svg 行在场"
+    },
+    {
+      "name": "A3_image_bar_mounted",
+      "pass": true,
+      "detail": "data-annotatable=true"
+    },
+    {
+      "name": "A4_mosaic_disclosure",
+      "pass": true,
+      "detail": "hint=拖拽框选需要遮蔽的区域，松开后填写说明（仅屏显遮蔽，不是脱敏） fallback=false"
+    },
+    {
+      "name": "A5_mosaic_saved",
+      "pass": true,
+      "detail": "{\"draw\":\"drawn:{\\\"w\\\":120.00617218017578,\\\"h\\\":79.99383544921875}\",\"kind\":\"mosaic\",\"rect\":[0.2,0.2,0.4,0.35]}"
+    },
+    {
+      "name": "A6_undo_removes_annotation",
+      "pass": true,
+      "detail": "title=撤销刚才的创建 remaining=0"
+    },
+    {
+      "name": "A7_text_bar_mode",
+      "pass": true,
+      "detail": "{\"mode\":\"text\",\"toggle\":false}"
+    },
+    {
+      "name": "A8a_scratchpad_entry_created",
+      "pass": true,
+      "detail": "entryId=scr_2e123b10-22e9-46d7-980a-c7cc57b6d85c status=201"
+    },
+    {
+      "name": "A8_scratchpad_image_bar",
+      "pass": true,
+      "detail": "速记图片大图挂上批注条"
+    },
+    {
+      "name": "A12_artifacts_untouched",
+      "pass": true,
+      "detail": "svg=true txt=true docx=true"
+    },
+    {
+      "name": "A99_cleanup",
+      "pass": true,
+      "detail": "页面还原（临时项目保留在隔离库，随临时根一并丢弃）"
+    }
+  ],
+  "allPass": true,
+  "passed": 15,
+  "total": 15
+}

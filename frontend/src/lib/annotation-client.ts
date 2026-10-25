@@ -61,6 +61,8 @@ function scopeQuery(scope: AnnotationScope): URLSearchParams {
   if (scope.surface === 'result-artifact') {
     if (scope.artifactId) query.set('artifactId', scope.artifactId);
     if (scope.revisionId) query.set('revisionId', scope.revisionId);
+  } else if (scope.surface === 'scratchpad-entry') {
+    if (scope.entryId) query.set('entryId', scope.entryId);
   } else if (scope.filePath) {
     query.set('filePath', scope.filePath);
   }
@@ -88,11 +90,16 @@ export async function fetchAnnotations(
 export async function createAnnotation(
   input: CreateAnnotationInput & { conversationId?: string | null; artifactName?: string | null },
 ): Promise<{ annotation: ArtifactAnnotation; count: number }> {
+  const kind = input.kind || 'region';
+  // 两种定位方式互斥：契约层会直接拒绝同时出现，客户端也不发多余字段。
+  const locator = kind === 'text-selection'
+    ? { anchor: input.anchor }
+    : { rect: input.rect };
   const body: Record<string, unknown> = {
     projectId: input.projectId,
     surface: input.surface,
-    kind: input.kind || 'region',
-    rect: input.rect,
+    kind,
+    ...locator,
     comment: input.comment,
     color: input.color || 'amber',
     ...(input.page ? { page: input.page } : {}),
@@ -100,7 +107,9 @@ export async function createAnnotation(
     ...(input.artifactName ? { artifactName: input.artifactName } : {}),
     ...(input.surface === 'result-artifact'
       ? { artifactId: input.artifactId, revisionId: input.revisionId ?? null }
-      : { filePath: input.filePath }),
+      : input.surface === 'scratchpad-entry'
+        ? { entryId: input.entryId }
+        : { filePath: input.filePath }),
   };
   const response = await fetch(`${getApiPrefix()}/result-studio/annotations`, {
     method: 'POST',

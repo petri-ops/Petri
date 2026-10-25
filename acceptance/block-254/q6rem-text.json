@@ -1,0 +1,101 @@
+{
+  "name": "q6rem-annotations-live",
+  "block": "BLOCK-254",
+  "phase": "text",
+  "darkMode": false,
+  "mode": "system-default",
+  "migrationsApplied": 19,
+  "resultAnnotationColumns": [
+    "annotation_id",
+    "contract_version",
+    "project_id",
+    "conversation_id",
+    "surface",
+    "artifact_id",
+    "revision_id",
+    "file_path",
+    "artifact_name",
+    "kind",
+    "page",
+    "rect_json",
+    "comment",
+    "color",
+    "author",
+    "created_at",
+    "updated_at",
+    "anchor_json",
+    "entry_id"
+  ],
+  "screenshots": "unavailable",
+  "synthetic": {
+    "note": "临时项目 + 合成 SVG/文本/最小 docx；速记图片为 data URL 自造",
+    "paragraphAnchor": "docx split into 2 paragraphs; annotation anchors unit=paragraph startLine=2"
+  },
+  "startedAt": "2026-10-24T16:32:49.863Z",
+  "finishedAt": "2026-10-24T16:33:03.372Z",
+  "assertions": [
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b254-live-HfSZek / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A0c_temp_project_created",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvmmat9s_aimj\",\"workspacePath\":\"C:\\\\Users\\\\Admin\\\\AppData\\\\Local\\\\Temp\\\\petri-b254-live-HfSZek\\\\data\\\\projects\\\\block254---1792859574410-mvmmat9s\"}"
+    },
+    {
+      "name": "A1_fixtures_written",
+      "pass": true,
+      "detail": "svg=342B txt=85B docx=889B"
+    },
+    {
+      "name": "A2_files_panel_ready",
+      "pass": true,
+      "detail": "文件 tab + annot254/ + volcano.svg 行在场"
+    },
+    {
+      "name": "A7_text_bar_mode",
+      "pass": true,
+      "detail": "{\"mode\":\"text\",\"toggle\":false}"
+    },
+    {
+      "name": "A8a_scratchpad_entry_created",
+      "pass": true,
+      "detail": "entryId=scr_62395257-eadc-4d32-a57e-57b0cd57c2cd status=201"
+    },
+    {
+      "name": "A8_scratchpad_image_bar",
+      "pass": true,
+      "detail": "速记图片大图挂上批注条"
+    },
+    {
+      "name": "A9_scratchpad_annotation_saved",
+      "pass": true,
+      "detail": "{\"draw\":\"drawn:{\\\"w\\\":494.1276550292969,\\\"h\\\":319.97528076171875}\",\"surface\":\"scratchpad-entry\",\"entryId\":\"scr_62395257-eadc-4d32-a57e-57b0cd57c2cd\"}"
+    },
+    {
+      "name": "A12_artifacts_untouched",
+      "pass": true,
+      "detail": "svg=true txt=true docx=true"
+    },
+    {
+      "name": "A99_cleanup",
+      "pass": true,
+      "detail": "页面还原（临时项目保留在隔离库，随临时根一并丢弃）"
+    }
+  ],
+  "allPass": true,
+  "passed": 12,
+  "total": 12
+}

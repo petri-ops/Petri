@@ -19,9 +19,30 @@
 
 const ANNOTATION_CONTRACT_VERSION = 1;
 
-const ANNOTATION_SURFACES = Object.freeze(['result-artifact', 'workspace-file']);
-const ANNOTATION_KINDS = Object.freeze(['region', 'ellipse', 'arrow']);
+// BLOCK-254 P6 — 三种归属面：结果产物（artifact+revision）/ 工作区文件（filePath）/
+// 速记条目（entryId）。第三种只用于速记板里的图片批注，不与工作区路径混用。
+const ANNOTATION_SURFACES = Object.freeze(['result-artifact', 'workspace-file', 'scratchpad-entry']);
+const ANNOTATION_KINDS = Object.freeze(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
 const ANNOTATION_COLORS = Object.freeze(['amber', 'sky', 'rose']);
+
+/**
+ * BLOCK-254 P5 — 文本锚点（text-selection）是**另一种定位方式**，不是另一种形状。
+ *
+ * 它与 rect 互斥：文本批注锚在「文件 + 行范围（+可选列/原文片段）」上，图像/PDF 批注
+ * 锚在归一化矩形上。两者塞进同一条记录会导致「既说坐标又说行号」的自相矛盾，
+ * 因此契约层直接拒绝越界组合，而不是靠调用方自觉。
+ */
+const ANNOTATION_ANCHOR_KINDS = Object.freeze(['text-range']);
+/**
+ * BLOCK-254 P7 — 锚点单位。源码行、文档段落、表格行三者序号语义不同，
+ * 用加性字段区分（默认 line），避免把「第 3 段」说成「第 3 行」。
+ */
+const ANCHOR_UNITS = Object.freeze(['line', 'paragraph', 'row']);
+const ANCHOR_SURFACE = 'workspace-file';
+const MAX_ANCHOR_LINE = 1000000;
+const MAX_ANCHOR_COLUMN = 100000;
+const MAX_ANCHOR_QUOTE_CHARS = 500;
+const MAX_ANCHOR_LANGUAGE_CHARS = 40;
 
 const MAX_ANNOTATION_COMMENT_CHARS = 2000;
 const MAX_ANNOTATIONS_PER_SCOPE = 200;
@@ -102,6 +123,94 @@ function normalizePage(value) {
   return { ok: true, page };
 }
 
+function normalizeAnchorLine(value, field, errors) {
+  const raw = typeof value === 'string' ? Number(value) : value;
+  if (!Number.isInteger(raw) || raw < 1 || raw > MAX_ANCHOR_LINE) {
+    errors.push({ code: 'anchor_line_invalid', message: `${field} 必须是 1..${MAX_ANCHOR_LINE} 的整数。` });
+    return null;
+  }
+  return raw;
+}
+
+function normalizeAnchorColumn(value, field, errors) {
+  if (value === undefined || value === null || value === '') return null;
+  const raw = typeof value === 'string' ? Number(value) : value;
+  if (!Number.isInteger(raw) || raw < 0 || raw > MAX_ANCHOR_COLUMN) {
+    errors.push({ code: 'anchor_column_invalid', message: `${field} 必须是 0..${MAX_ANCHOR_COLUMN} 的整数。` });
+    return null;
+  }
+  return raw;
+}
+
+/**
+ * 校验并归一化文本锚点（`kind='text-selection'` 专用）。
+ *
+ * @returns {{ ok: true, anchor: object } | { ok: false, errors: Array<{code: string, message: string}> }}
+ */
+function normalizeAnnotationAnchor(input) {
+  const errors = [];
+  if (!isPlainObject(input)) {
+    return { ok: false, errors: [{ code: 'anchor_invalid', message: 'anchor 必须是对象。' }] };
+  }
+
+  const anchorKind = readString(input.kind) || 'text-range';
+  if (!ANNOTATION_ANCHOR_KINDS.includes(anchorKind)) {
+    errors.push({ code: 'anchor_kind_invalid', message: `anchor.kind 必须是 ${ANNOTATION_ANCHOR_KINDS.join(' | ')}。` });
+  }
+
+  const startLine = normalizeAnchorLine(input.startLine, 'anchor.startLine', errors);
+  const endLine = normalizeAnchorLine(input.endLine, 'anchor.endLine', errors);
+  if (startLine !== null && endLine !== null && endLine < startLine) {
+    errors.push({ code: 'anchor_range_inverted', message: 'anchor.endLine 不能小于 startLine。' });
+  }
+
+  const startColumn = normalizeAnchorColumn(input.startColumn, 'anchor.startColumn', errors);
+  const endColumn = normalizeAnchorColumn(input.endColumn, 'anchor.endColumn', errors);
+  if (
+    startColumn !== null && endColumn !== null
+    && startLine !== null && endLine === startLine
+    && endColumn < startColumn
+  ) {
+    errors.push({ code: 'anchor_columns_inverted', message: '同一行内 anchor.endColumn 不能小于 startColumn。' });
+  }
+
+  const quote = readString(input.quote);
+  if (!quote) {
+    errors.push({ code: 'anchor_quote_required', message: '文本批注必须带选中原文（quote）。' });
+  } else if (quote.length > MAX_ANCHOR_QUOTE_CHARS) {
+    errors.push({
+      code: 'anchor_quote_too_long',
+      message: `选中原文不能超过 ${MAX_ANCHOR_QUOTE_CHARS} 字（当前 ${quote.length}），请缩小选区。`,
+    });
+  }
+
+  const language = readString(input.language) || null;
+  if (language && language.length > MAX_ANCHOR_LANGUAGE_CHARS) {
+    errors.push({ code: 'anchor_language_too_long', message: `language 不能超过 ${MAX_ANCHOR_LANGUAGE_CHARS} 字。` });
+  }
+
+  const rawUnit = readString(input.unit);
+  const unit = rawUnit || 'line';
+  if (!ANCHOR_UNITS.includes(unit)) {
+    errors.push({ code: 'anchor_unit_invalid', message: `unit 必须是 ${ANCHOR_UNITS.join(' | ')}。` });
+  }
+
+  if (errors.length > 0) return { ok: false, errors };
+  return {
+    ok: true,
+    anchor: {
+      kind: 'text-range',
+      unit,
+      startLine,
+      endLine,
+      startColumn,
+      endColumn,
+      quote,
+      language,
+    },
+  };
+}
+
 /**
  * 校验并归一化一条批注输入。
  *
@@ -143,24 +252,74 @@ function normalizeAnnotationInput(input) {
     });
   }
 
-  const rect = normalizeAnnotationRect(input.rect);
-  if (!rect.ok) errors.push({ code: rect.code, message: rect.message });
+  // 区域批注与文本锚点互斥：一条记录只能有一种定位方式。
+  const isTextAnchor = kind === 'text-selection';
+  let anchor = null;
+  let normalizedRect = null;
+
+  if (isTextAnchor) {
+    if (surface && surface !== ANCHOR_SURFACE) {
+      errors.push({
+        code: 'anchor_surface_invalid',
+        message: '文本锚点批注只支持工作区文件（结果产物是图像/PDF，没有文本行）。',
+      });
+    }
+    if (input.rect !== undefined && input.rect !== null) {
+      errors.push({ code: 'rect_unexpected', message: '文本锚点批注不接受 rect（区域与行锚点互斥）。' });
+    }
+    const anchorResult = normalizeAnnotationAnchor(input.anchor);
+    if (!anchorResult.ok) errors.push(...anchorResult.errors);
+    else anchor = anchorResult.anchor;
+  } else {
+    if (input.anchor !== undefined && input.anchor !== null) {
+      errors.push({ code: 'anchor_unexpected', message: '只有 text-selection 批注才带 anchor。' });
+    }
+    const rect = normalizeAnnotationRect(input.rect);
+    if (!rect.ok) errors.push({ code: rect.code, message: rect.message });
+    else normalizedRect = rect.rect;
+  }
 
   const page = normalizePage(input.page);
   if (!page.ok) errors.push({ code: page.code, message: page.message });
+  else if (isTextAnchor && page.page !== null) {
+    errors.push({ code: 'page_unexpected', message: '文本锚点批注不接受 page（用行号定位）。' });
+  }
 
   const artifactId = readString(input.artifactId) || null;
   const revisionId = readString(input.revisionId) || null;
   const artifactName = readString(input.artifactName) || null;
   const filePathRaw = readString(input.filePath);
+  const entryIdRaw = readString(input.entryId);
   let filePath = null;
+  let entryId = null;
 
-  if (surface === 'result-artifact') {
+  if (surface === 'scratchpad-entry') {
+    if (!entryIdRaw) {
+      errors.push({ code: 'entry_id_required', message: '速记图片批注必须带 entryId。' });
+    } else if (entryIdRaw.length > MAX_ANNOTATION_IDENTIFIER_CHARS) {
+      errors.push({ code: 'entry_id_invalid', message: `entryId 不能超过 ${MAX_ANNOTATION_IDENTIFIER_CHARS} 字。` });
+    } else {
+      entryId = entryIdRaw;
+    }
+    // 速记条目既不是产物也不是工作区文件：混入其它身份一律拒绝，避免 scope 两种归属。
+    if (filePathRaw) {
+      errors.push({ code: 'file_path_unexpected', message: '速记批注不接受 filePath。' });
+    }
+    if (artifactId) {
+      errors.push({ code: 'artifact_id_unexpected', message: '速记批注不接受 artifactId。' });
+    }
+    if (revisionId) {
+      errors.push({ code: 'revision_id_unexpected', message: '速记批注不接受 revisionId。' });
+    }
+  } else if (surface === 'result-artifact') {
     if (!artifactId) {
       errors.push({ code: 'artifact_id_required', message: '结果产物批注必须带 artifactId。' });
     }
     if (filePathRaw) {
       errors.push({ code: 'file_path_unexpected', message: '结果产物批注不接受 filePath。' });
+    }
+    if (entryIdRaw) {
+      errors.push({ code: 'entry_id_unexpected', message: '结果产物批注不接受 entryId。' });
     }
   } else if (surface === 'workspace-file') {
     if (!filePathRaw) {
@@ -175,6 +334,9 @@ function normalizeAnnotationInput(input) {
     }
     if (revisionId) {
       errors.push({ code: 'revision_id_unexpected', message: '工作区文件批注不接受 revisionId。' });
+    }
+    if (entryIdRaw) {
+      errors.push({ code: 'entry_id_unexpected', message: '工作区文件批注不接受 entryId。' });
     }
   }
 
@@ -193,10 +355,13 @@ function normalizeAnnotationInput(input) {
       artifactId,
       revisionId,
       filePath,
+      // 仅 surface='scratchpad-entry' 有值；其余面恒为 null。
+      entryId,
       artifactName,
       kind,
       page: page.page,
-      rect: rect.rect,
+      rect: isTextAnchor ? [] : normalizedRect,
+      anchor: isTextAnchor ? anchor : null,
       comment,
       color,
       author,
@@ -220,6 +385,16 @@ function annotationScopeOf(annotation) {
       filePath: null,
     };
   }
+  if (surface === 'scratchpad-entry') {
+    return {
+      projectId,
+      surface,
+      artifactId: null,
+      revisionId: null,
+      filePath: null,
+      entryId: readString(annotation.entryId) || null,
+    };
+  }
   return {
     projectId,
     surface: 'workspace-file',
@@ -233,7 +408,11 @@ module.exports = {
   ANNOTATION_CONTRACT_VERSION,
   ANNOTATION_SURFACES,
   ANNOTATION_KINDS,
+  ANNOTATION_ANCHOR_KINDS,
+  ANCHOR_UNITS,
   ANNOTATION_COLORS,
+  MAX_ANCHOR_QUOTE_CHARS,
+  normalizeAnnotationAnchor,
   MAX_ANNOTATION_COMMENT_CHARS,
   MAX_ANNOTATIONS_PER_SCOPE,
   MAX_ANNOTATION_PAGE,

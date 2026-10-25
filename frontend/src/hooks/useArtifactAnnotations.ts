@@ -10,6 +10,7 @@ import type {
   AnnotationKind,
   AnnotationScope,
   ArtifactAnnotation,
+  TextAnchor,
 } from '@/lib/annotations';
 
 /**
@@ -32,7 +33,8 @@ export interface ArtifactAnnotationsState {
   error: string;
   limit: number;
   add: (input: {
-    rect: [number, number, number, number];
+    rect?: [number, number, number, number];
+    anchor?: TextAnchor;
     comment: string;
     color?: AnnotationColor;
     kind?: AnnotationKind;
@@ -63,6 +65,7 @@ function scopeKey(scope: AnnotationScope | null): string {
     scope.artifactId || '',
     scope.revisionId || '',
     scope.filePath || '',
+    scope.entryId || '',
   ].join('|');
 }
 
@@ -87,6 +90,7 @@ export function useArtifactAnnotations(input: {
   const artifactId = scope?.artifactId ?? null;
   const revisionId = scope?.revisionId ?? null;
   const filePath = scope?.filePath ?? null;
+  const entryId = scope?.entryId ?? null;
   const active = Boolean(projectId && surface && key);
 
   const [snapshot, setSnapshot] = useState<AnnotationSnapshot>(EMPTY_SNAPSHOT);
@@ -97,7 +101,7 @@ export function useArtifactAnnotations(input: {
     if (!active || !surface) return () => undefined;
     const epoch = epochRef.current + 1;
     epochRef.current = epoch;
-    const currentScope: AnnotationScope = { projectId, surface, artifactId, revisionId, filePath };
+    const currentScope: AnnotationScope = { projectId, surface, artifactId, revisionId, filePath, entryId };
     const controller = new AbortController();
     fetchAnnotations(currentScope, { signal: controller.signal })
       .then((result) => {
@@ -109,13 +113,14 @@ export function useArtifactAnnotations(input: {
         setSnapshot({ key, annotations: EMPTY_ANNOTATIONS, limit: 0, error: messageOf(failure) });
       });
     return () => controller.abort();
-  }, [active, artifactId, filePath, key, projectId, reloadToken, revisionId, surface]);
+  }, [active, artifactId, entryId, filePath, key, projectId, reloadToken, revisionId, surface]);
 
   const current = snapshot.key === key;
   const loading = active && !current;
 
   const add = useCallback(async (annotationInput: {
-    rect: [number, number, number, number];
+    rect?: [number, number, number, number];
+    anchor?: TextAnchor;
     comment: string;
     color?: AnnotationColor;
     kind?: AnnotationKind;
@@ -128,6 +133,7 @@ export function useArtifactAnnotations(input: {
         conversationId,
         artifactName,
         rect: annotationInput.rect,
+        anchor: annotationInput.anchor,
         comment: annotationInput.comment,
         color: annotationInput.color,
         kind: annotationInput.kind,

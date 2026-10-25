@@ -17,6 +17,16 @@
  */
 
 const RESULT_ANNOTATION_MIGRATION_VERSION = 15;
+/**
+ * BLOCK-254 P5 — 文本锚点列（018）。015 的建表语句**保持逐字节不变**（既有测试钉住），
+ * 新列只经 ALTER 追加：新库由 ensureAnnotationSchema 在建表后补列，旧库由 018 迁移补列。
+ */
+const RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION = 18;
+/**
+ * BLOCK-254 P6 — 速记条目归属列（019）。同样只 ALTER 追加：速记图片批注按 entryId
+ * 归属，其它面该列为 NULL。
+ */
+const RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION = 19;
 const RESULT_ANNOTATION_CONTRACT_VERSION = 1;
 
 const RESULT_ANNOTATION_TABLES = Object.freeze(['result_annotations']);
@@ -63,6 +73,69 @@ function buildAnnotationMigrationSql() {
   return `${RESULT_ANNOTATION_MIGRATION_HEADER}\n\n${body}\n`;
 }
 
+/** 018 — 文本锚点列（可空；区域批注该列为 NULL）。 */
+const RESULT_ANNOTATION_ANCHOR_STATEMENTS = Object.freeze([
+  'ALTER TABLE result_annotations ADD COLUMN anchor_json TEXT',
+]);
+
+const RESULT_ANNOTATION_ANCHOR_HEADER = `-- BLOCK-254 P5 — text anchor for annotations (migration 018)
+--
+-- This file is generated from core/shared-backend/result-annotation-schema.js.
+-- Text-selection annotations anchor on (file, line range) instead of a normalized
+-- rect; the two locators are mutually exclusive by contract, so area annotations
+-- keep anchor_json NULL and text annotations keep rect_json as '[]'.
+--
+-- Constraints:
+-- - No BEGIN/COMMIT: migration-runner already wraps the file in a transaction.
+-- - Additive only: one nullable column, no rewrite of existing rows.`;
+
+function buildAnnotationAnchorMigrationSql() {
+  const body = RESULT_ANNOTATION_ANCHOR_STATEMENTS.map((statement) => `${statement};`).join('\n\n');
+  return `${RESULT_ANNOTATION_ANCHOR_HEADER}\n\n${body}\n`;
+}
+
+/** 锚点列是否就位（旧库升级前为 false）。 */
+function hasAnnotationAnchorColumn(db) {
+  if (!db || typeof db.prepare !== 'function') return false;
+  try {
+    const rows = db.prepare('PRAGMA table_info(result_annotations)').all();
+    return rows.some((row) => row && row.name === 'anchor_json');
+  } catch {
+    return false;
+  }
+}
+
+/** 019 — 速记条目归属列（可空；其它面该列为 NULL）。 */
+const RESULT_ANNOTATION_ENTRY_STATEMENTS = Object.freeze([
+  'ALTER TABLE result_annotations ADD COLUMN entry_id TEXT',
+]);
+
+const RESULT_ANNOTATION_ENTRY_HEADER = `-- BLOCK-254 P6 — scratchpad entry ownership for annotations (migration 019)
+--
+-- This file is generated from core/shared-backend/result-annotation-schema.js.
+-- Scratchpad image annotations belong to a scratchpad entry (entryId), not to an
+-- artifact or a workspace path; every other surface keeps entry_id NULL.
+--
+-- Constraints:
+-- - No BEGIN/COMMIT: migration-runner already wraps the file in a transaction.
+-- - Additive only: one nullable column, no rewrite of existing rows.`;
+
+function buildAnnotationEntryMigrationSql() {
+  const body = RESULT_ANNOTATION_ENTRY_STATEMENTS.map((statement) => `${statement};`).join('\n\n');
+  return `${RESULT_ANNOTATION_ENTRY_HEADER}\n\n${body}\n`;
+}
+
+/** 条目归属列是否就位（旧库升级前为 false）。 */
+function hasAnnotationEntryColumn(db) {
+  if (!db || typeof db.prepare !== 'function') return false;
+  try {
+    const rows = db.prepare('PRAGMA table_info(result_annotations)').all();
+    return rows.some((row) => row && row.name === 'entry_id');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 幂等建表（测试 / 脚本 / 隔离后端用）。
  *
@@ -74,6 +147,14 @@ function ensureAnnotationSchema(db) {
     throw new Error('[result-annotation-schema] db instance with exec() is required');
   }
   for (const statement of RESULT_ANNOTATION_SCHEMA_STATEMENTS) db.exec(statement);
+  // 旧库（015 之后、018 之前）补列；已补则跳过，保证幂等。
+  if (!hasAnnotationAnchorColumn(db)) {
+    for (const statement of RESULT_ANNOTATION_ANCHOR_STATEMENTS) db.exec(statement);
+  }
+  // 019 同理：速记归属列。
+  if (!hasAnnotationEntryColumn(db)) {
+    for (const statement of RESULT_ANNOTATION_ENTRY_STATEMENTS) db.exec(statement);
+  }
   return { contractVersion: RESULT_ANNOTATION_CONTRACT_VERSION, tables: [...RESULT_ANNOTATION_TABLES] };
 }
 
@@ -93,10 +174,18 @@ function inspectAnnotationSchema(db) {
 
 module.exports = {
   RESULT_ANNOTATION_MIGRATION_VERSION,
+  RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION,
+  RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION,
   RESULT_ANNOTATION_CONTRACT_VERSION,
   RESULT_ANNOTATION_TABLES,
   RESULT_ANNOTATION_SCHEMA_STATEMENTS,
+  RESULT_ANNOTATION_ANCHOR_STATEMENTS,
+  RESULT_ANNOTATION_ENTRY_STATEMENTS,
   buildAnnotationMigrationSql,
+  buildAnnotationAnchorMigrationSql,
+  buildAnnotationEntryMigrationSql,
+  hasAnnotationAnchorColumn,
+  hasAnnotationEntryColumn,
   ensureAnnotationSchema,
   inspectAnnotationSchema,
 };

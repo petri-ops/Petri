@@ -139,4 +139,101 @@ describe('AnnotatableImagePane', () => {
     expect(queryByTestId('annotation-toggle')).toBeNull();
     expect(calls).toHaveLength(0);
   });
+
+  it('BLOCK-254 B-2 — 保存后可撤销创建：DELETE 该条并清掉撤销入口', async () => {
+    const calls = installFetch((url, init) => {
+      if (url.includes('/annotations?') && (!init || !init.method)) {
+        return jsonResponse({ annotations: [], count: 0, limit: 200 });
+      }
+      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+        return jsonResponse({ annotation: createdAnnotation, count: 1 });
+      }
+      if (url.includes('/annotations/ann-created') && init?.method === 'DELETE') {
+        return jsonResponse({ deleted: true });
+      }
+      return jsonResponse({ error: 'unexpected' }, 500);
+    });
+
+    const { getByTestId, getByLabelText, queryByTestId } = render(
+      <AnnotatableImagePane
+        src="http://mock/volcano.png"
+        alt="volcano.png"
+        scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
+        target={{ surface: 'result-artifact', artifactName: 'volcano.png' }}
+        onAddToTask={() => undefined}
+      />,
+    );
+
+    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    fireEvent.click(getByTestId('annotation-toggle'));
+    const overlay = getByLabelText('批注层：volcano.png');
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
+    fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
+    fireEvent.change(getByTestId('annotation-comment-input'), { target: { value: '这个离群点需要复核' } });
+    fireEvent.click(getByTestId('annotation-save'));
+
+    await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
+    const undo = getByTestId('annotation-undo');
+    expect(undo.getAttribute('title')).toContain('撤销刚才的创建');
+
+    fireEvent.click(undo);
+    await waitFor(() => expect(queryByTestId('annotation-item')).toBeNull());
+    expect(calls.some(([url, init]) => url.includes('/annotations/ann-created') && init?.method === 'DELETE')).toBe(true);
+    // 撤销完成后栈变空，按钮不应残留成死按钮。
+    await waitFor(() => expect(queryByTestId('annotation-undo')).toBeNull());
+  });
+
+  it('BLOCK-254 B-2 — 删除可撤销：按原内容重建为新条目，且不重压栈', async () => {
+    const existing = {
+      ...createdAnnotation,
+      annotationId: 'ann-existing',
+      kind: 'ellipse',
+      page: null,
+      rect: [0.2, 0.3, 0.1, 0.1],
+      comment: '纵轴尺度看着不对',
+      color: 'sky',
+    };
+    const calls = installFetch((url, init) => {
+      if (url.includes('/annotations?') && (!init || !init.method)) {
+        return jsonResponse({ annotations: [existing], count: 1, limit: 200 });
+      }
+      if (url.includes('/annotations/ann-existing') && init?.method === 'DELETE') {
+        return jsonResponse({ deleted: true });
+      }
+      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+        return jsonResponse({ annotation: { ...existing, annotationId: 'ann-restored' }, count: 1 });
+      }
+      return jsonResponse({ error: 'unexpected' }, 500);
+    });
+
+    const { getByTestId, queryByTestId } = render(
+      <AnnotatableImagePane
+        src="http://mock/volcano.png"
+        alt="volcano.png"
+        scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
+        target={{ surface: 'result-artifact', artifactName: 'volcano.png' }}
+        onAddToTask={() => undefined}
+      />,
+    );
+
+    await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
+    fireEvent.click(getByTestId('annotation-remove'));
+    await waitFor(() => expect(queryByTestId('annotation-item')).toBeNull());
+
+    const undo = getByTestId('annotation-undo');
+    expect(undo.getAttribute('title')).toContain('重建为新条目');
+    fireEvent.click(undo);
+
+    await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
+    const post = calls.find(([, init]) => init?.method === 'POST');
+    expect(parseBody(post?.[1])).toMatchObject({
+      rect: [0.2, 0.3, 0.1, 0.1],
+      comment: '纵轴尺度看着不对',
+      kind: 'ellipse',
+      color: 'sky',
+    });
+    // 补偿动作本身不入栈：撤销后不应还能再撤销同一动作。
+    await waitFor(() => expect(queryByTestId('annotation-undo')).toBeNull());
+  });
 });

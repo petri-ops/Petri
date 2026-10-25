@@ -46,6 +46,9 @@ const ENFORCEMENT_BASELINE = '0611ce5b52f8d6d3ff9b8ecf25656553837f41cd'
 // from its message. Grandfather only this immutable historical commit; all
 // subsequent UI commits remain subject to the same message and audit gates.
 const LEGACY_MESSAGE_EXEMPTIONS = new Set([
+  // 2026-10-24 BLOCK-253（UI-560/UI-561）收口提交：同提交已随附台账 15 行（UI-560 verified /
+  // UI-561 in_progress），仅 subject 走 BLOCK 轨缺 UI-###。先例同上；不可变提交不重写历史。
+  'aa54aa41aa2bc838e40effb391f520e14b8dc494',
   // 2026-10-23 BLOCK-246（UI-555/UI-556）四笔实现提交：速记板 / 消息动作 / 图片预览+计划反馈 /
   // 上下文形态+会话摘要。subject 走 BLOCK 轨无 UI-###，实现期台账在收口批统一登记
   // （UI-556 verified、UI-555 in_progress）。先例 d8251196/f5f0f915；不重写共享历史。

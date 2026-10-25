@@ -75,7 +75,7 @@ module.exports = {
           return res.status(409).json({
             error: 'annotation_limit_reached',
             limit: MAX_ANNOTATIONS_PER_SCOPE,
-            message: `同一产物/文件最多 ${MAX_ANNOTATIONS_PER_SCOPE} 条批注，请先删除不再需要的批注。`,
+            message: `同一产物/文件/速记最多 ${MAX_ANNOTATIONS_PER_SCOPE} 条批注，请先删除不再需要的批注。`,
           });
         }
         const saved = store().create(annotation);
@@ -99,6 +99,9 @@ module.exports = {
         scope.artifactId = String(query.artifactId || '').trim();
         if (!scope.artifactId) return res.status(400).json({ error: 'artifact_id_required' });
         scope.revisionId = String(query.revisionId || '').trim() || null;
+      } else if (surface === 'scratchpad-entry') {
+        scope.entryId = String(query.entryId || '').trim();
+        if (!scope.entryId) return res.status(400).json({ error: 'entry_id_required' });
       } else {
         scope.filePath = String(query.filePath || '').trim();
         if (!scope.filePath || !isSafeRelativePath(scope.filePath)) {

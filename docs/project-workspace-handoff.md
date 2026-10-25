@@ -1,9 +1,15 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
-最后更新：2026-10-24（**BLOCK-253 Q5-REM 长尾 partial completed**）
+最后更新：2026-10-25（**BLOCK-254 completed（P8 收口：实机亮/暗 + closeout 十三门 PASS）**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**。刚收口=BLOCK-253（Q5-REM 长尾）：B3/H4 计划修订 tabs、E4 文件管理器 bridge→IPC 实机（测试实例干跑 + 可见状态）、F7 ArtifactPinPane 主区/副栏最大化、E1 入口统一第一步（标题栏菜单聚合中心模式/终端/侧聊/右轨面）；亮/暗各 **14/14**（`acceptance/ui-544-547-q5rem/`、`acceptance/block-253/`；离屏截图如实 unavailable）。仍 reopen=E1 跨宿主渲染合并 / 通用 pane 模型与钉住实机 / E9 终端分屏 deferred / 宿主菜单在底部终端打开后无法再次弹出（实机观察，未修壳层）。Q-MATRIX **✅57 / 🟡33 / 🔴5 / ⛔7 = 102**。plan=`docs/block-253-q5-rem-live-plan.md`（completed）；**下一包**=Q6-REM 长尾（Jev 判定，置信 0.48，单一建议）。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——BLOCK-254（Q6-REM）已 **completed**（plan=`docs/block-254-q6-rem-plan.md`，P0 对账 + P1–P8 全交付，执行记录见 §9）。**交付总览**：P1=G-1 红测清零 + 文字批注；P2=`result_annotations_list` 只读工具（projectId 必填 fail-closed、有界、最近优先），工具 84→**85**；P3=马赛克遮蔽边界（单一措辞 + 能力降级 + 反向守卫）；P4=撤销边界（10 次有界栈、仅本次会话/scope、删除补偿重建新 id、不做 redo）；P5=文本锚点批注（`text-selection` + `anchor`，迁移 **018**）；P6=速记图片批注（surface `scratchpad-entry` + `entryId`，迁移 **019**）；P7=Office 锚点批注（`anchor.unit` line/paragraph/row，零新依赖）；**P8=实机亮/暗 + closeout 十三门 PASS + 回写**——实机分三轮（`acceptance/block-254/q6rem-{image,image-dark,text,office}.json`：image 15/15、text 12/12、office 10/10、暗色 12/12；实机抓真=保存过批注后切文件会让离屏 CDP 失活，故每轮只保存一次），十三门逐门取证 PASS（抓真三修：CRLF 归一、impact-map 补 block254 分类、knip +1 定性动态入口）；母纲 §6.5 第 9 行 `completed`，UI-562/563/564/565 → `verified`。**仍 reopen（另立契约包）**：画笔（契约 v2）、pack iframe 批注窄桥、速记条目删除不清批注（孤儿）、段落/行锚点随文档改动漂移（无失效检测）、iWork 容器批注。**树上批注改动（契约/018+019 迁移/store/镜像/工具条/覆盖层/CSS/撤销栈/选区锚点/速记面板/Office 段落 + 新增工具与实机脚本 + 测试）属本包 P1–P8，尚未提交**；是否提交由用户发令。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+**历史恢复要点（BLOCK-254 P7 时）**：active=BLOCK-254（P7-B5-CLOSED），P1–P7 已交付、待 P8。
+
+**历史恢复要点（BLOCK-254 P0 时）**：**active 工作包=BLOCK-254（P0-CONTRACT-AUDIT）**——七项对账分 A/B/C/D 四档；A=文字批注 / Agent 批注读取工具 / UI-546 销项；B=马赛克语义 / 撤销 / 文本锚点 / 速记图片批注 / Office 锚点；C=画笔、pack 桥（另包）；D=C13 速记板本体、UI-546 实机腿已完成待回写。
+
+**历史恢复要点（BLOCK-253 收口时）**：**无 active 工作包**。刚收口=BLOCK-253（Q5-REM 长尾）：B3/H4 计划修订 tabs、E4 文件管理器 bridge→IPC 实机（测试实例干跑 + 可见状态）、F7 ArtifactPinPane 主区/副栏最大化、E1 入口统一第一步（标题栏菜单聚合中心模式/终端/侧聊/右轨面）；亮/暗各 **14/14**（`acceptance/ui-544-547-q5rem/`、`acceptance/block-253/`；离屏截图如实 unavailable）。仍 reopen=E1 跨宿主渲染合并 / 通用 pane 模型与钉住实机 / E9 终端分屏 deferred / 宿主菜单在底部终端打开后无法再次弹出（实机观察，未修壳层）。Q-MATRIX **✅57 / 🟡33 / 🔴5 / ⛔7 = 102**。plan=`docs/block-253-q5-rem-live-plan.md`（completed）；**下一包**=Q6-REM 长尾（Jev 判定，置信 0.48，单一建议）。
 
 **BLOCK-253 已落地**：`PlanSurface.tsx` + `planApprovals.ts`（修订 tabs/批准/按版本复制下载）、`ArtifactPinPane.tsx`（最大化/恢复）、`useWorkspaceTitleBar.ts` + `project-workspace.tsx`（宿主入口菜单）、`file-dialog.js`（测试实例干跑）+ `RightFileTree.tsx`/`GeneratedFilesSurface.tsx`（可见状态）。证据=`acceptance/ui-544-547-q5rem/`（亮暗 JSON + 截图 provenance）、`acceptance/block-253/`；closeout 十三门 **PASS**。
 

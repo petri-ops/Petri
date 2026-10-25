@@ -243,6 +243,10 @@
     "label": "已查询",
     "icon": "table"
   },
+  "result_annotations_list": {
+    "label": "已读取批注",
+    "icon": "table"
+  },
   "result_summary": {
     "label": "已读取结果",
     "icon": "table"

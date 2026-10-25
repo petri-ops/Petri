@@ -347,6 +347,7 @@ describe('theme token contract', () => {
     // xs(11px)+sm(12px) 引用——W1 已重分类 519 处正文性小字→inherit(14)；
     // 剩余应为徽标/元信息语境（宪章 §1）。W2/W4 逐域审计后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
+      'components/annotations/AnnotationOverlay.module.css': 1, // BLOCK-254 文字批注正文（图内注释；框内需小于页面正文，非正文性小字）
       'components/ui/controls/status.module.css': 3, // W4 三件套元信息（ErrorNotice/LoadingLabel）合法 sm 域
       'pages/project-workspace.module.css': 52,
       'components/copilot/simple-chat.css': 24,

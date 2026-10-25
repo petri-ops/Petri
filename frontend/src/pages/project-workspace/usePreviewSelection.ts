@@ -15,10 +15,12 @@ import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { createScratchpad } from '@/lib/scratchpadClient';
 import {
   buildSelectionActions,
+  selectionAnchor,
   selectionQuoteDetail,
   selectionScratchpadInput,
   type SelectionActionId,
 } from '@/components/copilot/SimpleChat/selectionActions';
+import type { TextAnchor } from '@/lib/annotations';
 
 interface PreviewSelectionState {
   text: string;
@@ -40,6 +42,11 @@ export interface PreviewSelectionOptions {
   getEditorSelection?: () => { text: string; startLine: number; endLine: number } | null;
   /** 动作结果提示（宿主已有的 notice 条）。 */
   onNotice?: (message: string | null) => void;
+  /**
+   * BLOCK-254 P5 — 文本批注入口。宿主收到锚点后打开评论输入（同一 annotation session），
+   * 保证「批注」仍只有一条落库通道。
+   */
+  onAnnotate?: (anchor: TextAnchor) => void;
 }
 
 export interface PreviewSelectionApi {
@@ -57,7 +64,7 @@ function rectOf(range: Range): { x: number; y: number } {
 }
 
 export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSelectionApi {
-  const { containerRef, projectId, filePath, fileName, language, getEditorSelection, onNotice } = options;
+  const { containerRef, projectId, filePath, fileName, language, getEditorSelection, onNotice, onAnnotate } = options;
   const [selection, setSelection] = useState<PreviewSelectionState | null>(null);
 
   const capture = useCallback(() => {
@@ -97,7 +104,18 @@ export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSe
 
   const dismiss = useCallback(() => setSelection(null), []);
 
-  const actions = useMemo(() => buildSelectionActions({ charCount: selection ? selection.text.length : 0 }), [selection]);
+  const actions = useMemo(() => buildSelectionActions({
+    charCount: selection ? selection.text.length : 0,
+    // 只有「有路径 + 有行号 + 宿主提供了批注出口」才算可用，否则给出一条具体理由。
+    annotate: {
+      available: Boolean(filePath && onAnnotate && Number.isInteger(selection?.startLine)),
+      reason: !filePath
+        ? '缺少文件路径，无法把批注锚定到文件'
+        : !onAnnotate
+          ? '当前预览面不支持文本批注'
+          : undefined,
+    },
+  }), [filePath, onAnnotate, selection]);
 
   const pick = useCallback(async (id: SelectionActionId) => {
     if (!selection) return;
@@ -107,6 +125,7 @@ export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSe
       projectId,
       startLine: selection.startLine,
       endLine: selection.endLine,
+      language,
     };
     const text = selection.text;
     try {
@@ -145,12 +164,24 @@ export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSe
         setSelection(null);
         return;
       }
-      // annotate 在文本面是禁用的（按钮 disabled），走到这里说明调用方绕过了 UI。
-      onNotice?.('文本批注暂不支持：批注只支持 PDF 与图像文件');
+      if (id === 'annotate') {
+        const anchor = selectionAnchor(text, source);
+        if (!anchor) {
+          onNotice?.('这段选区没有行号，无法定位批注；请切换到代码视图再试');
+          return;
+        }
+        if (!onAnnotate) {
+          onNotice?.('当前预览面不支持文本批注');
+          return;
+        }
+        onAnnotate(anchor);
+        setSelection(null);
+        return;
+      }
     } catch (error) {
       onNotice?.(error instanceof Error ? `动作失败：${error.message}` : '动作失败');
     }
-  }, [filePath, fileName, language, onNotice, projectId, selection]);
+  }, [filePath, fileName, language, onAnnotate, onNotice, projectId, selection]);
 
   return { selection, actions, capture, dismiss, pick };
 }

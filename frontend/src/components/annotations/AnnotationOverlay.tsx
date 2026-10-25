@@ -1,5 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
+  MOSAIC_DISCLOSURE,
   describeAnnotationAnchor,
   normalizePointerRect,
   pointToNormalized,
@@ -121,10 +122,15 @@ export function AnnotationOverlay({
           data-kind={annotation.kind || 'region'}
           data-testid="annotation-box"
           style={rectToStyle(annotation.rect)}
-          title={`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}
+          title={annotation.kind === 'mosaic'
+            ? `${describeAnnotationAnchor(annotation)}：${annotation.comment}（${MOSAIC_DISCLOSURE}）`
+            : `${describeAnnotationAnchor(annotation)}：${annotation.comment}`}
           aria-label={`批注 ${index + 1}：${annotation.comment}`}
           onClick={() => onSelect?.(annotation.annotationId)}
         >
+          {annotation.kind === 'text' ? (
+            <span className={styles.textContent}>{annotation.comment}</span>
+          ) : null}
           <span className={styles.badge}>{index + 1}</span>
         </button>
       ))}

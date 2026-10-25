@@ -279,7 +279,7 @@ test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计�
   const names = TOOL_DEFS.map((t) => t.function.name);
   assert.ok(names.includes('decision_summary') && names.includes('decision_recent'), 'defs 在位');
   // BLOCK-121 result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76（73 系 BLOCK-121 漏改的存量红，本批清偿）
-  assert.equal(names.length, 84, '工具总数 81→84（BLOCK-247 Q2b +2；BLOCK-249 read_agent_journal +1）');
+  assert.equal(names.length, 85, '工具总数 84→85（BLOCK-254 A-2 result_annotations_list +1）');
   // 恒等：新工具经 session 域模块进入（⋃ 域 = 全集）
   const union = Object.values(DOMAIN_TOOL_DEFS).flat().map((t) => t.function.name);
   assert.ok(union.includes('decision_summary') && union.includes('decision_recent'));

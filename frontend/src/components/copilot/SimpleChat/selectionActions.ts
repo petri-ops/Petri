@@ -14,6 +14,7 @@
 //     生产侧先截一次只是为了不给剪贴板/网络塞 100KB。
 // ============================================================
 import type { SelectionQuoteDetail } from '@/lib/events';
+import { MAX_ANCHOR_QUOTE_CHARS, type TextAnchor } from '@/lib/annotations';
 import { MAX_SELECTION_REFERENCE_CHARS } from './selectionReferences';
 
 export type SelectionActionId = 'copy' | 'quote' | 'scratchpad' | 'side-chat' | 'annotate';
@@ -26,9 +27,47 @@ export interface SelectionActionSpec {
   disabled: boolean;
 }
 
-/** 文本面的批注不可用原因（与 WorkspaceFilePreview 里 Office 的同类说明同风格）。 */
+/** 缺少行号时的文本批注不可用原因（Markdown 渲染视图没有行号，如实说明而不是给死按钮）。 */
 export const TEXT_ANNOTATION_UNAVAILABLE_REASON =
-  '文本批注暂不支持：批注只支持 PDF 与图像文件；可先「加入对话」让 Agent 解读这段';
+  '该视图没有行号，无法定位批注；请切换到代码视图后重新选中这段文字';
+
+/** 有行号时的文本批注可用说明。 */
+export const TEXT_ANNOTATION_HINT = '为选中文字添加批注（锚定到行号，可在文件批注列表回看）';
+
+export interface SelectionAnnotateCapability {
+  /** 有文件路径 + 行号才能建文本锚点批注。 */
+  available: boolean;
+  /** 不可用原因（available=false 时展示；缺省用 TEXT_ANNOTATION_UNAVAILABLE_REASON）。 */
+  reason?: string;
+}
+
+/**
+ * 选区 → 文本锚点（BLOCK-254 P5）。
+ * 没有行号（Markdown 渲染视图）返回 null：不伪造 `startLine: 1` 去凑一条假锚点。
+ */
+export function selectionAnchor(text: string, source: SelectionSourceInfo): TextAnchor | null {
+  const trimmed = text.trim();
+  if (!trimmed || !source.path) return null;
+  if (!Number.isInteger(source.startLine) || (source.startLine ?? 0) < 1) return null;
+  const startLine = source.startLine as number;
+  const endLine = Number.isInteger(source.endLine) && (source.endLine as number) >= startLine
+    ? (source.endLine as number)
+    : startLine;
+  const chars = Array.from(trimmed);
+  const quote = chars.length > MAX_ANCHOR_QUOTE_CHARS
+    ? chars.slice(0, MAX_ANCHOR_QUOTE_CHARS).join('')
+    : trimmed;
+  return {
+    kind: 'text-range',
+    unit: 'line',
+    startLine,
+    endLine,
+    startColumn: null,
+    endColumn: null,
+    quote,
+    language: source.language ?? null,
+  };
+}
 
 /** 选中原文的截断（与 composer 引用块同上限，早截一次省剪贴板与网络）。 */
 export function clampSelectionText(text: string): { text: string; truncated: boolean } {
@@ -44,8 +83,13 @@ export function clampSelectionText(text: string): { text: string; truncated: boo
  * 选区动作清单。`charCount` 为 0（空选区）时全部禁用——调用方本就不该弹条，
  * 这里再兜一层，避免"空选区也能点出引用"的假动作。
  */
-export function buildSelectionActions(input: { charCount: number }): SelectionActionSpec[] {
+export function buildSelectionActions(input: {
+  charCount: number;
+  /** 省略 = 文本批注不可用（保持旧行为：可见但禁用并给理由）。 */
+  annotate?: SelectionAnnotateCapability;
+}): SelectionActionSpec[] {
   const empty = input.charCount <= 0;
+  const annotateAvailable = input.annotate?.available === true;
   return [
     {
       id: 'copy',
@@ -74,8 +118,10 @@ export function buildSelectionActions(input: { charCount: number }): SelectionAc
     {
       id: 'annotate',
       label: '批注',
-      hint: TEXT_ANNOTATION_UNAVAILABLE_REASON,
-      disabled: true,
+      hint: annotateAvailable
+        ? TEXT_ANNOTATION_HINT
+        : (input.annotate?.reason || TEXT_ANNOTATION_UNAVAILABLE_REASON),
+      disabled: empty || !annotateAvailable,
     },
   ];
 }

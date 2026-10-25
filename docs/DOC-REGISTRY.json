@@ -8010,8 +8010,31 @@
         "G0"
       ],
       "notes": "2026-10-24 用户「行！搞定 Q5-REM 长尾」；Jev 单一判定 Q5-REM 置信 0.46。交付=B3/H4 计划修订 tabs（当前/修订、原因/提议步骤/状态、批准后步骤替换刷新、按选中版本复制下载）；E4 文件管理器显示真实 bridge→IPC（测试实例干跑 testInstance:true + UI 可见状态，不弹系统窗）；F7 ArtifactPinPane 主区/副栏最大化与恢复（比例保留，6/6 测试）；E1 入口统一第一步（标题栏更多工具菜单聚合结果/代码/审查/历史/终端/侧聊 + 右轨面，实机开合）。证据=亮/暗各 14/14（acceptance/ui-544-547-q5rem/、acceptance/block-253/；离屏截图超时如实 unavailable）+ closeout 十三门 PASS。reopen=E1 跨宿主渲染合并 / 通用 pane 模型与钉住实机 / E9 终端分屏 deferred / 宿主菜单在底部终端打开后无法再次弹出（实机观察）。"
+    },
+    {
+      "id": "BLOCK-254-Q6-REM",
+      "capability": "q6-rem",
+      "path": "docs/block-254-q6-rem-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P8-CLOSED",
+      "canonical": true,
+      "truthDomain": "q6-rem",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-24",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "q6-rem",
+        "annotations",
+        "annotation-contract",
+        "agent-tools",
+        "office-preview",
+        "scratchpad",
+        "G0"
+      ],
+      "notes": "2026-10-24 用户「明确项目当前范围后，下一步启动 Q6-REM。首先系统核对母纲中所有未完成项与现有批注契约及工具面之间的对应关系……按可行性分类汇总」。P0 对账把母纲 §6.5 第 9 行七项逐项与实码对齐：A 档可安全闭环=文字批注（WIP 已加 kind，缺测试/文案）、Agent 批注读取工具（store/路由/契约全就绪，零 UI 依赖）、UI-546 销项；B 档需补前置=马赛克遮蔽边界声明、撤销边界、文本锚点契约、速记板图片批注 surface、Office 锚点（依赖文本锚点）；C 档阻塞=画笔（rect-only 几何需契约 v2）、pack iframe 批注窄桥（契约冻结 + 写权限边界）；D 档销项=C13 速记板本体（BLOCK-246 已完成）与 UI-546 实机腿（BLOCK-252 verified）。跨切面阻断=树上未提交 5 文件 WIP 使 test/block219-result-annotations 实测红（补断言处置，不覆盖 WIP）。2026-10-24 P1+P2 completed（A 档闭环）：G-1 红测清零（kinds 五元组，未知值改 freehand 保留拒绝）+ 文字批注收编（契约落库/覆盖层正文/工具条五档/列表标签；前端 31/31 + Node 14/14 + theme 17/17；裸 11px 改 token 并登记小字号棘轮）；result_annotations_list 只读工具上线（projectId 必填 fail-closed、有界 20/硬顶 50/评论 400/预算 6000、最近优先、R1/none），工具 84→85，契约测 8/8。门禁=test:changed EXIT=0（Node 955/949/0 fail + 前端 36 文件）+ types 0 + lint 0 error + ui-audit PASS + code-size PASS。未跑=closeout 十三门（留 P8）、隔离 9223 实机腿（UI-562 in_progress）。2026-10-24 P3 completed（B-1 马赛克遮蔽边界）：MOSAIC_DISCLOSURE/mosaicTaskNote(n) 单一措辞源 + hint/overlay title/prompt 尾部/placeholder 四处一致；supportsBackdropFilter(probe?) 可注入探测，能力缺失时 hint 改口「不透明色块」+ data-mosaic-fallback，CSS @supports not 退化（不静默失效）；反向守卫禁止「已脱敏/已打码/已遮蔽敏感/已移除」。证据=前端 36/36（annotations 17 / Bar 11 / Overlay 8）+ theme 17/17 + types 0 + test:changed EXIT=0。边界=@supports 双形态与视觉证据留 P8。2026-10-24 P4 completed（B-2 撤销边界）：MAX_ANNOTATION_UNDO=10 + appendUndoAction 有界栈（仅本次会话/仅当前 scope/最近 10 次创建或删除），删除补偿=按原内容重建新 annotationId 并由 undoActionLabel 如实写「重建为新条目」；redo 明确非范围且有反向守卫（模块不得导出 redo 面）；补偿动作本身不入栈。证据=批注邻域 45/45（annotations 21 / Bar 12 / Overlay 8 / ImagePane 4，含两条端到端）+ types 0 + lint 0 error + test:changed EXIT=0。诚实边界=前端补偿非服务端事务（重建失败不回滚，走既有 error 通道）。2026-10-24 P5 completed（B-3 文本锚点批注）：新增 kind text-selection + anchor(text-range)，与 rect 契约级互斥（文本锚点不收 rect/page、只允许 workspace-file；区域批注不收 anchor）；迁移 018 只 ALTER ADD COLUMN anchor_json，015 建表语句逐字节不变；前端 TextAnchor 镜像 + describeAnnotationAnchor 报行号 + prompt 不编造百分比 + selectionAnchor 无行号返回 null + 选区「批注」按能力解禁并给具体理由 + AnnotationBar mode=text + 文件预览文本族挂条。证据=Node block219 17/17 + 前端批注邻域 49/49 + types 0 + lint 0 error + test:changed EXIT=0（Node 1042/1032/0 fail，前端 53 文件）。边界=v1 不做行内高亮 / Markdown 预览态无行号禁用并说明 / 锚点不检测文件改动漂移 / 无实机腿（UI-563 in_progress）。2026-10-24 P6 completed（B-4 速记图片批注）：surface scratchpad-entry + entryId（与 filePath/artifactId/revisionId 契约级互斥，正向 entryId 必填），annotationScopeOf 新分支、上限沿用 200；迁移 019 只加 entry_id（015/018 不变）；result_annotations_list 工具同步支持；速记面板缩略图→大图叠加层复用 AnnotatableImagePane，双无项目时禁用并给可执行说明。证据=Node block219 21/21 + 前端 ScratchpadPanel 8/8 + types 0 + lint 0 error + theme 17/17 + test:changed EXIT=0（Node 1153/1140/0 fail，前端 81 文件）。已知 reopen=删除速记条目不级联清理其批注（孤儿行）。2026-10-24 P7 completed（B-5 Office 锚点批注）：anchor 加 unit（line/paragraph/row，缺省 line，非法 anchor_unit_invalid）；docx/pptx/odt/odp 按段落渲染 + 每段批注（第 N 段 + 原文），xlsx/ods 行首批注（表格第 N 行 + 整行摘要）；describeAnnotationAnchor 按单位说段/表格行。零新依赖（不做版式渲染）、零回归（无回调退回 pre 且无死按钮）。证据=Node block219 23/23 + 前端 annotations 24 + OfficePreviewPane 3 + types 0 + lint 0 error + theme 17/17 + test:changed EXIT=0（Node 1158/1145/0 fail，前端 83 文件）。边界=段落序号/表格行序随文档改动漂移（无失效检测）、iWork 无批注、无实机腿（UI-565 in_progress）。2026-10-25 P8 completed（收口）：实机分三轮取证（image 15/15 = 马赛克声明+落库+撤销闭环、文本面 mode=text、速记大图挂条、哈希不变；text 12/12 = 速记批注落库 entryId 匹配；office 10/10 = 段落批注落库 unit=paragraph startLine=2；暗色 12/12），docx 夹具零依赖自造；截图如实 unavailable，源码选区→锚点由 36 条单测覆盖。closeout 十三门逐门取证 PASS（抓真三修：CRLF 漂移归一 2 文件、test/impact-map.json 补 block254 分类规则、knip 保留面 +1 定性动态入口 flow；test:changed 在 closeout 内偶发挂起→单独两轮 EXIT=0 逐门补证）。canonical 回写：母纲 §6.5 第 9 行 completed、UI-562/563/564/565 verified、registry status completed。证据=acceptance/block-254/q6rem-{image,image-dark,text,office}.json。"
     }
   ],
   "lastUpdated": "2026-10-24",
-  "documentCount": 396
+  "documentCount": 397
 }

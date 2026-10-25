@@ -42,6 +42,9 @@ import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOf
 // BLOCK-219 Q6 — 工作区文件批注（PDF/图像）；进对话仍走唯一通道 copilotAsk
 import { AnnotatableImagePane } from '@/components/annotations/AnnotatableImagePane';
 import { AnnotatablePdfPane } from '@/components/annotations/AnnotatablePdfPane';
+// BLOCK-254 P5 — 文本锚点批注：选区产生锚点，落库走同一条 annotation session
+import { ConnectedAnnotationBar } from '@/components/annotations/ConnectedAnnotationBar';
+import { useAnnotationSession } from '@/components/annotations/useAnnotationSession';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import type { AnnotationScope, AnnotationTaskTarget } from '@/lib/annotations';
 // BLOCK-246 C12 — 划词动作（selectionQuote 的第一个生产者）+ 动作条
@@ -310,6 +313,20 @@ export function WorkspaceFilePreview({
     () => editorApiRef.current?.getSelection() ?? null,
     [],
   );
+  // BLOCK-254 P5 — 文本锚点批注只在文本族面初始化：图片/PDF 面走各自的
+  // AnnotatableImagePane / AnnotatablePdfPane，避免同一 scope 被拉两次。
+  // BLOCK-254 P7 — Office 文本面（docx/pptx/odt/odp/xlsx）也能批注：锚点是段落/行序号，
+  // 不是版面坐标，所以和文本族共用同一个 workspace-file scope。
+  const officeAnnotatable = officeStatus === 'ready' && Boolean(officePreview && !officePreview.fallback);
+  const textAnnotationScope: AnnotationScope | null =
+    fallbackKind === 'text' || fallbackKind === 'json' || fallbackKind === 'markdown' || officeAnnotatable
+      ? annotationScope
+      : null;
+  const textAnnotation = useAnnotationSession({
+    scope: textAnnotationScope,
+    target: annotationTarget,
+  });
+
   const previewSelection = usePreviewSelection({
     containerRef: previewBodyRef,
     projectId,
@@ -319,6 +336,8 @@ export function WorkspaceFilePreview({
     language: fallbackKind === 'text' ? (codeLanguage || undefined) : fallbackKind === 'json' ? 'json' : undefined,
     getEditorSelection: readEditorSelection,
     onNotice: setSelectionNotice,
+    // 选区动作条「批注」的唯一出口：打开评论输入，保存仍由 session 落库。
+    onAnnotate: textAnnotation.beginAnchor,
   });
 
   // UI-451 — 脏检测外露：宿主 tab 条的未保存圆点与关闭确认消费（脏 = 既有
@@ -389,10 +408,36 @@ export function WorkspaceFilePreview({
         )}
         {officeStatus === 'ready' && officePreview && !officePreview.fallback && (
           <>
-            <OfficePreviewPane preview={officePreview} onAssetOpen={setLightboxSrc} />
-            {/* BLOCK-219 Q6 — Office 文档无文本层可锚定：说明原因，不放死按钮 */}
+            <OfficePreviewPane
+              preview={officePreview}
+              onAssetOpen={setLightboxSrc}
+              /* BLOCK-254 P7 — Office 没有版面几何：批注锚在段落/表格行序号上，
+                 宽度变化不影响复现；回调把序号 + 段落原文交给同一个批注会话。 */
+              onAnnotateParagraph={(paragraphIndex, quote) => textAnnotation.beginAnchor({
+                kind: 'text-range',
+                unit: 'paragraph',
+                startLine: paragraphIndex + 1,
+                endLine: paragraphIndex + 1,
+                startColumn: null,
+                endColumn: null,
+                quote,
+                language: null,
+              })}
+              onAnnotateRow={(rowIndex, quote) => textAnnotation.beginAnchor({
+                kind: 'text-range',
+                unit: 'row',
+                startLine: rowIndex + 1,
+                endLine: rowIndex + 1,
+                startColumn: null,
+                endColumn: null,
+                quote,
+                language: null,
+              })}
+            />
             <p className={styles.resultAnnotationUnavailable} data-testid="annotation-unavailable-hint">
-              文档格式（docx/pptx）暂不支持批注：批注只支持 PDF 与图像文件。
+              {officePreview.sheet
+                ? '表格批注锚在行号上：点行首「批注」即可（不改原始文件）'
+                : '文档批注锚在段落序号上：点段落左侧「批注」即可（不改原始文件）'}
             </p>
           </>
         )}
@@ -508,6 +553,17 @@ export function WorkspaceFilePreview({
             className={styles.workspaceCodeEditor}
             onChange={setText}
             editorRef={editorApiRef}
+          />
+        )}
+        {((status === 'ready' && (fallbackKind === 'text' || fallbackKind === 'json' || isMarkdown)) || officeAnnotatable) && (
+          /* BLOCK-254 P5 — 文本族面的批注条：列表/撤销/加入任务常驻，
+             新增批注由选区动作条触发（预览视图无行号时按钮禁用并说明原因）。 */
+          <ConnectedAnnotationBar
+            mode="text"
+            session={textAnnotation}
+            canAnnotate={Boolean(annotationScope)}
+            unavailableReason="缺少文件路径，无法保存批注。"
+            onAddToTask={handleAnnotationAddToTask}
           />
         )}
         {status === 'ready' && fallbackKind === 'text' && (

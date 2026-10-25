@@ -2,12 +2,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
+  TEXT_ANNOTATION_HINT,
   TEXT_ANNOTATION_UNAVAILABLE_REASON,
   buildSelectionActions,
   clampSelectionText,
+  selectionAnchor,
   selectionQuoteDetail,
   selectionScratchpadInput,
 } from './selectionActions';
+import { MAX_ANCHOR_QUOTE_CHARS } from '@/lib/annotations';
 import { MAX_SELECTION_REFERENCE_CHARS } from './selectionReferences';
 import { SelectionActionBar } from './SelectionActionBar';
 
@@ -26,6 +29,52 @@ describe('buildSelectionActions', () => {
   it('disables every action for an empty selection', () => {
     const actions = buildSelectionActions({ charCount: 0 });
     expect(actions.every((action) => action.disabled)).toBe(true);
+  });
+});
+
+describe('BLOCK-254 P5 — 文本批注能力与锚点', () => {
+  it('有行号时批注可点并给出锚定说明', () => {
+    const actions = buildSelectionActions({ charCount: 8, annotate: { available: true } });
+    const annotate = actions.find((action) => action.id === 'annotate')!;
+    expect(annotate.disabled).toBe(false);
+    expect(annotate.hint).toBe(TEXT_ANNOTATION_HINT);
+  });
+
+  it('不可用时用自定义理由；空选区仍全部禁用', () => {
+    const actions = buildSelectionActions({
+      charCount: 8,
+      annotate: { available: false, reason: '缺少文件路径，无法把批注锚定到文件' },
+    });
+    const annotate = actions.find((action) => action.id === 'annotate')!;
+    expect(annotate.disabled).toBe(true);
+    expect(annotate.hint).toContain('缺少文件路径');
+
+    const empty = buildSelectionActions({ charCount: 0, annotate: { available: true } });
+    expect(empty.every((action) => action.disabled)).toBe(true);
+  });
+
+  it('selectionAnchor：有行号产锚点，无行号返回 null（不伪造 startLine）', () => {
+    const withLines = selectionAnchor('  选中文字  ', { path: 'notes/a.md', startLine: 9, endLine: 11, language: 'md' });
+    expect(withLines).toEqual({
+      kind: 'text-range',
+      unit: 'line',
+      startLine: 9,
+      endLine: 11,
+      startColumn: null,
+      endColumn: null,
+      quote: '选中文字',
+      language: 'md',
+    });
+
+    // 单行选区：endLine 与 startLine 相同
+    expect(selectionAnchor('x', { path: 'notes/a.md', startLine: 4 })?.endLine).toBe(4);
+    // 无行号 / 无路径 / 空文本 → null，不生成假锚点
+    expect(selectionAnchor('x', { path: 'notes/a.md' })).toBeNull();
+    expect(selectionAnchor('x', { path: '', startLine: 1 })).toBeNull();
+    expect(selectionAnchor('   ', { path: 'a.md', startLine: 1 })).toBeNull();
+
+    const longQuote = selectionAnchor('字'.repeat(MAX_ANCHOR_QUOTE_CHARS + 30), { path: 'a.md', startLine: 1 });
+    expect(Array.from(longQuote!.quote)).toHaveLength(MAX_ANCHOR_QUOTE_CHARS);
   });
 });
 

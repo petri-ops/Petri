@@ -5300,6 +5300,52 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": true
+    },
+    {
+      "id": "block254-q6-rem",
+      "note": "BLOCK-254 Q6-REM：批注文字/马赛克/撤销/文本锚点/速记图片/Office 段落批注（含只读 Agent 工具与实机分轮脚本）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block254-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q6rem-*.cjs",
+        "docs/block-254-q6-rem-plan.md",
+        "acceptance/block-254/**",
+        "core/shared-backend/result-annotation-contracts.js",
+        "core/shared-backend/result-annotation-store.js",
+        "core/shared-backend/result-annotation-schema.js",
+        "core/petri-server/routes/result-studio/annotations.js",
+        "core/petri-server/agent-tools/result-annotation-tools.js",
+        "src/migrations/018_annotation_text_anchor.sql",
+        "src/migrations/019_annotation_entry_owner.sql",
+        "test/block219-result-annotations.test.mjs",
+        "test/block254-result-annotations-tool.test.mjs",
+        "frontend/src/lib/annotations.ts",
+        "frontend/src/lib/annotation-client.ts",
+        "frontend/src/hooks/useArtifactAnnotations.ts",
+        "frontend/src/components/annotations/**",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadPanel.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.tsx",
+        "frontend/src/components/copilot/SimpleChat/selectionActions.ts",
+        "frontend/src/pages/project-workspace/usePreviewSelection.ts",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+        "frontend/src/pages/project-workspace/OfficePreviewPane.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "test/fixtures/tool-activity-labels.json"
+      ],
+      "tests": [
+        "test/block219-result-annotations.test.mjs",
+        "test/block254-result-annotations-tool.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "frontend/src/lib/annotations.test.ts",
+        "frontend/src/lib/annotation-client.test.ts",
+        "frontend/src/components/annotations/AnnotationBar.test.tsx",
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "frontend/src/components/annotations/AnnotatableImagePane.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadPanel.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/selectionActions.test.tsx",
+        "frontend/src/pages/project-workspace/OfficePreviewPane.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.textAnnotation.test.tsx"
+      ]
     }
   ]
 }

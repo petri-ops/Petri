@@ -39,10 +39,25 @@ function newAnnotationId() {
 function parseRect(raw) {
   try {
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length !== 4) return [0, 0, 0, 0];
+    if (!Array.isArray(parsed)) return [0, 0, 0, 0];
+    // 文本锚点批注没有区域坐标，存 '[]' 而不是伪造一个 0×0 的框。
+    if (parsed.length === 0) return [];
+    if (parsed.length !== 4) return [0, 0, 0, 0];
     return parsed.map((value) => (Number.isFinite(value) ? value : 0));
   } catch {
     return [0, 0, 0, 0];
+  }
+}
+
+/** anchor_json → 对象（坏数据按「无锚点」处理，不让一条脏行毁掉整页列表）。 */
+function parseAnchor(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
   }
 }
 
@@ -57,10 +72,12 @@ function rowToAnnotation(row) {
     artifactId: row.artifact_id || null,
     revisionId: row.revision_id || null,
     filePath: row.file_path || null,
+    entryId: row.entry_id || null,
     artifactName: row.artifact_name || null,
     kind: row.kind || 'region',
     page: row.page === null || row.page === undefined ? null : Number(row.page),
     rect: parseRect(row.rect_json),
+    anchor: parseAnchor(row.anchor_json),
     comment: row.comment,
     color: row.color,
     author: row.author,
@@ -78,6 +95,10 @@ function scopeWhere(scope) {
     // revision 必须逐字匹配：不同 revision 的图/页布局不同，坐标不可跨版本复用。
     clauses.push(scope.revisionId === null ? 'revision_id IS NULL' : 'revision_id = ?');
     if (scope.revisionId !== null) params.push(scope.revisionId);
+  } else if (scope.surface === 'scratchpad-entry') {
+    // 速记图片批注按条目归属：与工作区路径、产物身份都无关。
+    clauses.push(scope.entryId === null || scope.entryId === undefined ? 'entry_id IS NULL' : 'entry_id = ?');
+    if (scope.entryId !== null && scope.entryId !== undefined) params.push(scope.entryId);
   } else {
     clauses.push(scope.filePath === null ? 'file_path IS NULL' : 'file_path = ?');
     if (scope.filePath !== null) params.push(scope.filePath);
@@ -98,12 +119,12 @@ function createResultAnnotationStore(db, options = {}) {
   const insertStatement = db.prepare(`
     INSERT INTO result_annotations (
       annotation_id, contract_version, project_id, conversation_id, surface,
-      artifact_id, revision_id, file_path, artifact_name, kind, page,
-      rect_json, comment, color, author, created_at, updated_at
+      artifact_id, revision_id, file_path, entry_id, artifact_name, kind, page,
+      rect_json, anchor_json, comment, color, author, created_at, updated_at
     ) VALUES (
       @annotation_id, @contract_version, @project_id, @conversation_id, @surface,
-      @artifact_id, @revision_id, @file_path, @artifact_name, @kind, @page,
-      @rect_json, @comment, @color, @author, @created_at, @updated_at
+      @artifact_id, @revision_id, @file_path, @entry_id, @artifact_name, @kind, @page,
+      @rect_json, @anchor_json, @comment, @color, @author, @created_at, @updated_at
     )
   `);
   const getStatement = db.prepare('SELECT * FROM result_annotations WHERE annotation_id = ?');
@@ -121,10 +142,12 @@ function createResultAnnotationStore(db, options = {}) {
       artifact_id: scope.artifactId,
       revision_id: scope.revisionId,
       file_path: scope.filePath,
+      entry_id: scope.entryId || null,
       artifact_name: annotation.artifactName || null,
       kind: annotation.kind || 'region',
       page: annotation.page === undefined ? null : annotation.page,
-      rect_json: JSON.stringify(annotation.rect),
+      rect_json: JSON.stringify(Array.isArray(annotation.rect) ? annotation.rect : []),
+      anchor_json: annotation.anchor ? JSON.stringify(annotation.anchor) : null,
       comment: annotation.comment,
       color: annotation.color,
       author: annotation.author || 'user',

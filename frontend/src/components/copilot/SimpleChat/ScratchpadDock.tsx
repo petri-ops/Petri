@@ -14,11 +14,13 @@ import { scratchpadContextItem, type ComposerContextItem } from './contextItems'
 export interface ScratchpadDockProps {
   /** 引用一条速记：**已转成** ComposerContextItem（宿主只负责入单列表）。 */
   onQuote: (item: ComposerContextItem) => void;
+  /** BLOCK-254 P6 — 当前项目（速记条目自身无项目时用于图片批注的 scope 兜底）。 */
+  projectId?: string | null;
   /** 测试注入点（透传面板）。 */
   api?: ScratchpadApi;
 }
 
-export function ScratchpadDock({ onQuote, api }: ScratchpadDockProps) {
+export function ScratchpadDock({ onQuote, projectId, api }: ScratchpadDockProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   const handleQuote = useCallback((entry: ScratchpadEntry) => {
@@ -28,7 +30,14 @@ export function ScratchpadDock({ onQuote, api }: ScratchpadDockProps) {
 
   return (
     <>
-      {open && <ScratchpadPanel onClose={close} onQuote={handleQuote} api={api} />}
+      {open && (
+        <ScratchpadPanel
+          onClose={close}
+          onQuote={handleQuote}
+          projectId={projectId ?? null}
+          api={api}
+        />
+      )}
       <button
         type="button"
         className="sc-model-btn sc-thinking-btn"

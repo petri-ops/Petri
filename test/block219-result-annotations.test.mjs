@@ -30,7 +30,13 @@ await runMigrations(process.env.PETRI_DB_PATH, path.join(REPO_ROOT, 'src', 'migr
 
 const {
   RESULT_ANNOTATION_MIGRATION_VERSION,
+  RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION,
+  RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION,
   buildAnnotationMigrationSql,
+  buildAnnotationAnchorMigrationSql,
+  buildAnnotationEntryMigrationSql,
+  hasAnnotationAnchorColumn,
+  hasAnnotationEntryColumn,
   ensureAnnotationSchema,
   inspectAnnotationSchema,
 } = require('../core/shared-backend/result-annotation-schema');
@@ -339,11 +345,11 @@ test('DELETE /annotations/:id scopes the check to the owning project', () => {
   assert.equal(store.get(saved.annotationId), null);
 });
 
-test('BLOCK-238 — 图形批注 kind 白名单：ellipse / arrow 被接受，未知 kind 仍拒绝', async () => {
+test('BLOCK-238/254 — 批注 kind 白名单：ellipse / arrow / text / mosaic / text-selection 被接受，未知 kind 仍拒绝', async () => {
   const { ANNOTATION_KINDS, normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
-  assert.deepEqual([...ANNOTATION_KINDS], ['region', 'ellipse', 'arrow']);
+  assert.deepEqual([...ANNOTATION_KINDS], ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
 
-  for (const kind of ['ellipse', 'arrow']) {
+  for (const kind of ['ellipse', 'arrow', 'text', 'mosaic']) {
     const result = normalizeAnnotationInput({
       projectId: 'p1',
       surface: 'result-artifact',
@@ -357,14 +363,371 @@ test('BLOCK-238 — 图形批注 kind 白名单：ellipse / arrow 被接受，�
     assert.equal(result.annotation.kind, kind);
   }
 
+  // 画笔（freehand）仍是明确拒绝值：点序列要改几何契约，不能靠加枚举混进来。
   const bad = normalizeAnnotationInput({
     projectId: 'p1',
     surface: 'result-artifact',
     artifactId: 'a1',
     revisionId: 'r1',
-    kind: 'mosaic',
+    kind: 'freehand',
     rect: [0.1, 0.2, 0.3, 0.4],
+    comment: '未实现的形状',
   });
   assert.equal(bad.ok, false);
   assert.ok(bad.errors.some((e) => e.code === 'kind_invalid'));
+});
+
+test('BLOCK-254 A-1 — 文字/马赛克批注经 store 落库并按 kind 回读（零迁移）', async () => {
+  const { normalizeAnnotationInput, ANNOTATION_KINDS } = require('../core/shared-backend/result-annotation-contracts.js');
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store.js');
+  const store = createResultAnnotationStore(sqlite);
+  const scope = { projectId: 'p1', surface: 'workspace-file', filePath: 'notes/block254-shapes.md' };
+
+  for (const kind of ['text', 'mosaic']) {
+    assert.ok(ANNOTATION_KINDS.includes(kind), kind + ' 必须已在白名单内');
+    const normalized = normalizeAnnotationInput({
+      ...scope,
+      kind,
+      rect: [0.2, 0.3, 0.25, 0.15],
+      comment: kind === 'text' ? '这段结论需要复核' : '遮住患者姓名',
+    });
+    assert.equal(normalized.ok, true, kind + ' 归一化失败：' + JSON.stringify(normalized.errors || []));
+    const saved = store.create(normalized.annotation);
+    assert.equal(saved.kind, kind);
+    assert.deepEqual(saved.rect, [0.2, 0.3, 0.25, 0.15]);
+
+    const listed = store.listByScope(scope);
+    const roundTrip = listed.find((entry) => entry.annotationId === saved.annotationId);
+    assert.ok(roundTrip, kind + ' 回读缺失');
+    assert.equal(roundTrip.kind, kind);
+    assert.equal(roundTrip.comment, normalized.annotation.comment);
+  }
+
+  // 同一 scope 两种 kind 共享上限计数，不各算一套。
+  assert.equal(store.countByScope(scope), 2);
+});
+
+test('BLOCK-254 P5 — 018 迁移与 schema 生成器逐字节一致（只加一列）', () => {
+  const file = path.join(REPO_ROOT, 'src', 'migrations', '018_annotation_text_anchor.sql');
+  const sql = fs.readFileSync(file, 'utf8');
+  assert.equal(sql, buildAnnotationAnchorMigrationSql());
+  assert.equal(RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION, 18);
+  assert.match(sql, /ALTER TABLE result_annotations ADD COLUMN anchor_json TEXT;/);
+  // 015 的建表语句不得被改动（本列只走 ALTER）。
+  assert.ok(!buildAnnotationMigrationSql().includes('anchor_json'), '015 不应包含锚点列');
+  // 迁移目录里的真实库已由 runMigrations 应用，列必须就位。
+  assert.equal(hasAnnotationAnchorColumn(sqlite), true);
+});
+
+test('BLOCK-254 P5 — 文本锚点：合法形态、行号校验、与 rect 互斥', () => {
+  const { normalizeAnnotationInput, MAX_ANCHOR_QUOTE_CHARS } = require('../core/shared-backend/result-annotation-contracts.js');
+
+  const base = {
+    projectId: 'p1',
+    surface: 'workspace-file',
+    filePath: 'notes/plan.md',
+    kind: 'text-selection',
+    comment: '这段结论需要复核',
+    anchor: { startLine: 12, endLine: 14, startColumn: 3, endColumn: 20, quote: '结论：差异基因数目偏低', language: 'md' },
+  };
+  const ok = normalizeAnnotationInput(base);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors || []));
+  assert.deepEqual(ok.annotation.rect, []);
+  assert.equal(ok.annotation.anchor.kind, 'text-range');
+  assert.equal(ok.annotation.anchor.startLine, 12);
+  assert.equal(ok.annotation.anchor.endLine, 14);
+  assert.equal(ok.annotation.anchor.language, 'md');
+  assert.equal(ok.annotation.page, null);
+
+  // 只带 startLine（单行选区）也合法，列可省略。
+  const singleLine = normalizeAnnotationInput({
+    ...base,
+    anchor: { startLine: 7, endLine: 7, quote: '单行片段' },
+  });
+  assert.equal(singleLine.ok, true);
+  assert.equal(singleLine.annotation.anchor.startColumn, null);
+
+  // 缺原文 → 锚点无法校验。
+  const noQuote = normalizeAnnotationInput({ ...base, anchor: { startLine: 1, endLine: 1 } });
+  assert.equal(noQuote.ok, false);
+  assert.ok(noQuote.errors.some((error) => error.code === 'anchor_quote_required'));
+
+  // 行号倒置 / 非法行号。
+  const inverted = normalizeAnnotationInput({ ...base, anchor: { startLine: 9, endLine: 3, quote: 'x' } });
+  assert.equal(inverted.ok, false);
+  assert.ok(inverted.errors.some((error) => error.code === 'anchor_range_inverted'));
+
+  const badLine = normalizeAnnotationInput({ ...base, anchor: { startLine: 0, endLine: 2, quote: 'x' } });
+  assert.equal(badLine.ok, false);
+  assert.ok(badLine.errors.some((error) => error.code === 'anchor_line_invalid'));
+
+  // 原文有界。
+  const tooLong = normalizeAnnotationInput({ ...base, anchor: { startLine: 1, endLine: 1, quote: 'x'.repeat(MAX_ANCHOR_QUOTE_CHARS + 1) } });
+  assert.equal(tooLong.ok, false);
+  assert.ok(tooLong.errors.some((error) => error.code === 'anchor_quote_too_long'));
+
+  // 两种定位方式互斥：文本锚点不收 rect，区域批注不收 anchor。
+  const withRect = normalizeAnnotationInput({ ...base, rect: [0.1, 0.1, 0.2, 0.2] });
+  assert.equal(withRect.ok, false);
+  assert.ok(withRect.errors.some((error) => error.code === 'rect_unexpected'));
+
+  const areaWithAnchor = normalizeAnnotationInput({
+    projectId: 'p1',
+    surface: 'workspace-file',
+    filePath: 'notes/plan.md',
+    kind: 'region',
+    rect: [0.1, 0.1, 0.2, 0.2],
+    comment: '区域批注',
+    anchor: { startLine: 1, endLine: 1, quote: 'x' },
+  });
+  assert.equal(areaWithAnchor.ok, false);
+  assert.ok(areaWithAnchor.errors.some((error) => error.code === 'anchor_unexpected'));
+
+  // 结果产物没有文本行，锚点批注必须拒绝。
+  const onArtifact = normalizeAnnotationInput({
+    projectId: 'p1',
+    surface: 'result-artifact',
+    artifactId: 'a1',
+    kind: 'text-selection',
+    comment: '错面',
+    anchor: { startLine: 1, endLine: 1, quote: 'x' },
+  });
+  assert.equal(onArtifact.ok, false);
+  assert.ok(onArtifact.errors.some((error) => error.code === 'anchor_surface_invalid'));
+
+  // PDF 的页号对文本锚点无意义。
+  const withPage = normalizeAnnotationInput({ ...base, page: 3 });
+  assert.equal(withPage.ok, false);
+  assert.ok(withPage.errors.some((error) => error.code === 'page_unexpected'));
+});
+
+test('BLOCK-254 P5 — 文本锚点经 store 往返：rect 为空数组、anchor 完整、与区域批注共存同一 scope', () => {
+  const { normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store.js');
+  const store = createResultAnnotationStore(sqlite);
+  const scope = { projectId: 'p1', surface: 'workspace-file', filePath: 'notes/anchor-round-trip.md' };
+
+  const text = normalizeAnnotationInput({
+    ...scope,
+    kind: 'text-selection',
+    comment: '这段要复核',
+    anchor: { startLine: 5, endLine: 6, quote: '原句片段', language: 'md' },
+  });
+  assert.equal(text.ok, true);
+  const savedText = store.create(text.annotation);
+  assert.deepEqual(savedText.rect, []);
+  assert.equal(savedText.anchor.startLine, 5);
+  assert.equal(savedText.anchor.quote, '原句片段');
+
+  const area = normalizeAnnotationInput({ ...scope, kind: 'region', rect: [0.2, 0.2, 0.1, 0.1], comment: '区域' });
+  assert.equal(area.ok, true);
+  const savedArea = store.create(area.annotation);
+  assert.equal(savedArea.anchor, null, '区域批注不得带锚点');
+
+  const listed = store.listByScope(scope);
+  assert.equal(listed.length, 2);
+  const textRow = listed.find((entry) => entry.annotationId === savedText.annotationId);
+  const areaRow = listed.find((entry) => entry.annotationId === savedArea.annotationId);
+  assert.equal(textRow.kind, 'text-selection');
+  assert.deepEqual(textRow.rect, []);
+  assert.equal(textRow.anchor.kind, 'text-range');
+  assert.equal(areaRow.anchor, null);
+  assert.deepEqual(areaRow.rect, [0.2, 0.2, 0.1, 0.1]);
+});
+
+test('BLOCK-254 P6 — 019 迁移与 schema 生成器逐字节一致（只加 entry_id）', () => {
+  const file = path.join(REPO_ROOT, 'src', 'migrations', '019_annotation_entry_owner.sql');
+  const sql = fs.readFileSync(file, 'utf8');
+  assert.equal(sql, buildAnnotationEntryMigrationSql());
+  assert.equal(RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION, 19);
+  assert.match(sql, /ALTER TABLE result_annotations ADD COLUMN entry_id TEXT;/);
+  assert.ok(!buildAnnotationMigrationSql().includes('entry_id'), '015 不应包含条目归属列');
+  assert.equal(hasAnnotationEntryColumn(sqlite), true);
+});
+
+test('BLOCK-254 P6 — 速记面：entryId 必填，且不接受 filePath / artifactId / revisionId', () => {
+  const { normalizeAnnotationInput, annotationScopeOf } = require('../core/shared-backend/result-annotation-contracts.js');
+  const base = {
+    projectId: 'p1',
+    surface: 'scratchpad-entry',
+    kind: 'region',
+    rect: [0.1, 0.1, 0.2, 0.2],
+    comment: '圈出异常点',
+  };
+
+  const missing = normalizeAnnotationInput(base);
+  assert.equal(missing.ok, false);
+  assert.ok(missing.errors.some((error) => error.code === 'entry_id_required'));
+
+  const ok = normalizeAnnotationInput({ ...base, entryId: 'sp_1' });
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors || []));
+  assert.equal(ok.annotation.entryId, 'sp_1');
+  assert.equal(ok.annotation.filePath, null);
+  assert.deepEqual(annotationScopeOf(ok.annotation), {
+    projectId: 'p1',
+    surface: 'scratchpad-entry',
+    artifactId: null,
+    revisionId: null,
+    filePath: null,
+    entryId: 'sp_1',
+  });
+
+  const withPath = normalizeAnnotationInput({ ...base, entryId: 'sp_1', filePath: 'result.png' });
+  assert.equal(withPath.ok, false);
+  assert.ok(withPath.errors.some((error) => error.code === 'file_path_unexpected'));
+
+  const withArtifact = normalizeAnnotationInput({ ...base, entryId: 'sp_1', artifactId: 'a1' });
+  assert.equal(withArtifact.ok, false);
+  assert.ok(withArtifact.errors.some((error) => error.code === 'artifact_id_unexpected'));
+
+  const withRevision = normalizeAnnotationInput({ ...base, entryId: 'sp_1', revisionId: 'r1' });
+  assert.equal(withRevision.ok, false);
+  assert.ok(withRevision.errors.some((error) => error.code === 'revision_id_unexpected'));
+
+  // 反向：别的面混入 entryId 一律拒绝，避免一条批注两种归属。
+  const fileWithEntry = normalizeAnnotationInput({
+    projectId: 'p1',
+    surface: 'workspace-file',
+    filePath: 'notes/a.md',
+    kind: 'region',
+    rect: [0.1, 0.1, 0.2, 0.2],
+    comment: 'x',
+    entryId: 'sp_1',
+  });
+  assert.equal(fileWithEntry.ok, false);
+  assert.ok(fileWithEntry.errors.some((error) => error.code === 'entry_id_unexpected'));
+});
+
+test('BLOCK-254 P6 — 速记批注经 store 往返，且与工作区/产物 scope 完全隔离', () => {
+  const { normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store.js');
+  const store = createResultAnnotationStore(sqlite);
+  const scope = { projectId: 'p1', surface: 'scratchpad-entry', entryId: 'sp_roundtrip' };
+
+  const normalized = normalizeAnnotationInput({
+    ...scope,
+    kind: 'region',
+    rect: [0.3, 0.4, 0.2, 0.1],
+    comment: '这块需要复核',
+    color: 'rose',
+  });
+  assert.equal(normalized.ok, true);
+  const saved = store.create(normalized.annotation);
+  assert.equal(saved.entryId, 'sp_roundtrip');
+  assert.equal(saved.filePath, null);
+  assert.equal(saved.artifactId, null);
+
+  assert.equal(store.listByScope(scope).length, 1);
+  // 换条目 / 换面都不可见：scope 判定唯一，不靠前端过滤。
+  assert.equal(store.listByScope({ ...scope, entryId: 'sp_other' }).length, 0);
+  assert.equal(store.listByScope({ projectId: 'p1', surface: 'workspace-file', filePath: 'a.md' }).length, 0);
+  assert.equal(store.countByScope({ projectId: 'p2', surface: 'scratchpad-entry', entryId: 'sp_roundtrip' }), 0);
+});
+
+test('BLOCK-254 P6 — GET /annotations?surface=scratchpad-entry 按 entryId 过滤并校验必填', () => {
+  const { normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
+  const routes = loadRoutes();
+  const list = routes.find((entry) => entry.method === 'GET');
+  const store = makeStore();
+
+  const normalized = normalizeAnnotationInput({
+    projectId: 'proj-a',
+    surface: 'scratchpad-entry',
+    entryId: 'sp_route',
+    kind: 'region',
+    rect: [0.1, 0.1, 0.2, 0.2],
+    comment: '路由读写',
+  });
+  assert.equal(normalized.ok, true);
+  store.create(normalized.annotation);
+
+  const listed = invoke(list, {
+    query: { projectId: 'proj-a', surface: 'scratchpad-entry', entryId: 'sp_route' },
+  });
+  assert.equal(listed.statusCode, 200);
+  assert.equal(listed.payload.annotations.length, 1);
+  assert.equal(listed.payload.annotations[0].entryId, 'sp_route');
+
+  const missing = invoke(list, { query: { projectId: 'proj-a', surface: 'scratchpad-entry' } });
+  assert.equal(missing.statusCode, 400);
+  assert.equal(missing.payload.error, 'entry_id_required');
+
+  const otherEntry = invoke(list, {
+    query: { projectId: 'proj-a', surface: 'scratchpad-entry', entryId: 'sp_none' },
+  });
+  assert.equal(otherEntry.statusCode, 200);
+  assert.equal(otherEntry.payload.annotations.length, 0);
+});
+
+test('BLOCK-254 P7 — 锚点单位：缺省 line，段落/表格行透传，非法值拒绝', () => {
+  const { normalizeAnnotationInput, ANCHOR_UNITS } = require('../core/shared-backend/result-annotation-contracts.js');
+  assert.deepEqual([...ANCHOR_UNITS], ['line', 'paragraph', 'row']);
+
+  const base = {
+    projectId: 'p1',
+    surface: 'workspace-file',
+    filePath: 'docs/report.docx',
+    kind: 'text-selection',
+    comment: '这段需要复核',
+  };
+
+  const implicit = normalizeAnnotationInput({ ...base, anchor: { startLine: 3, endLine: 3, quote: 'x' } });
+  assert.equal(implicit.ok, true, JSON.stringify(implicit.errors || []));
+  assert.equal(implicit.annotation.anchor.unit, 'line', '缺省必须是 line，保持 P5 行为');
+
+  const paragraph = normalizeAnnotationInput({
+    ...base,
+    anchor: { unit: 'paragraph', startLine: 5, endLine: 5, quote: 'Methods 段落原文' },
+  });
+  assert.equal(paragraph.ok, true);
+  assert.equal(paragraph.annotation.anchor.unit, 'paragraph');
+
+  const row = normalizeAnnotationInput({
+    ...base,
+    anchor: { unit: 'row', startLine: 4, endLine: 4, quote: 'TP53 | 0.001' },
+  });
+  assert.equal(row.ok, true);
+  assert.equal(row.annotation.anchor.unit, 'row');
+
+  const bad = normalizeAnnotationInput({
+    ...base,
+    anchor: { unit: 'slide', startLine: 1, endLine: 1, quote: 'x' },
+  });
+  assert.equal(bad.ok, false);
+  assert.ok(bad.errors.some((error) => error.code === 'anchor_unit_invalid'));
+});
+
+test('BLOCK-254 P7 — 段落/表格行锚点经 store 往返保单位（同一 scope 可与源码行批注共存）', () => {
+  const { normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store.js');
+  const store = createResultAnnotationStore(sqlite);
+  const scope = { projectId: 'p1', surface: 'workspace-file', filePath: 'docs/block254-office.docx' };
+
+  const paragraph = normalizeAnnotationInput({
+    ...scope,
+    kind: 'text-selection',
+    comment: '这一段结论要复核',
+    anchor: { unit: 'paragraph', startLine: 5, endLine: 5, quote: 'Methods 段落原文' },
+  });
+  assert.equal(paragraph.ok, true);
+  const savedParagraph = store.create(paragraph.annotation);
+  assert.equal(savedParagraph.anchor.unit, 'paragraph');
+  assert.equal(savedParagraph.anchor.startLine, 5);
+
+  const row = normalizeAnnotationInput({
+    ...scope,
+    kind: 'text-selection',
+    comment: '这一行数值异常',
+    anchor: { unit: 'row', startLine: 4, endLine: 4, quote: 'TP53 | 0.001' },
+  });
+  assert.equal(row.ok, true);
+  const savedRow = store.create(row.annotation);
+
+  const listed = store.listByScope(scope);
+  assert.equal(listed.length, 2);
+  const paragraphRow = listed.find((entry) => entry.annotationId === savedParagraph.annotationId);
+  const tableRow = listed.find((entry) => entry.annotationId === savedRow.annotationId);
+  assert.equal(paragraphRow.anchor.unit, 'paragraph');
+  assert.equal(tableRow.anchor.unit, 'row');
+  assert.deepEqual([...paragraphRow.rect], [], '锚点批注不带区域坐标');
 });

@@ -7529,3 +7529,46 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text-tertiary);
   font-size: var(--petri-font-size-xs, 12px);
 }
+
+/* BLOCK-254 P7 — Office 段落/表格行批注入口（无版面几何，锚在序号上）。
+   全 token、无字号档、无 1px 结构边框。 */
+.workspaceOfficeParagraphs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+}
+
+.workspaceOfficeParagraph {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--petri-space-2);
+}
+
+.workspaceOfficeParagraphText {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.workspaceOfficeAnnotate {
+  flex-shrink: 0;
+  padding: 2px var(--petri-space-2);
+  border: none;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-hover);
+  color: var(--petri-text-muted);
+  cursor: pointer;
+}
+
+.workspaceOfficeAnnotate:hover {
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
+
+.workspaceOfficeAnnotateCell {
+  width: 1%;
+  white-space: nowrap;
+  padding: 0 var(--petri-space-1);
+}

@@ -2032,7 +2032,7 @@ export function SimpleChat({
                   )}
                 </div>
                 {/* BLOCK-246 C13 — 速记板入口（引用结果入同一条 ContextItem 通道） */}
-                <ScratchpadDock onQuote={composerContext.addItem} />
+                <ScratchpadDock onQuote={composerContext.addItem} projectId={projectId} />
                 {/* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消）。
                     BLOCK-178 P0 — Stop 与发送并存：运行中发送钮保持可点，
                     点击按投递模式路由（转向=立即注入下一轮边界；排队=收尾后自动发）。 */}

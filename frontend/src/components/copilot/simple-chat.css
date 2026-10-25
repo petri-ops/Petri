@@ -3133,6 +3133,46 @@
   color: var(--petri-danger);
 }
 
+/* BLOCK-254 P6 — 速记图片：缩略图可点开大图，大图区叠在列表之上做批注。
+   颜色/间距全部走既有 token，不新增字号档。 */
+.sc-scratch-thumb-btn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  flex-shrink: 0;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.sc-scratch-thumb-btn:hover {
+  opacity: 0.85;
+}
+
+.sc-scratch-viewer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3);
+  overflow: auto;
+  border-radius: inherit;
+  background: var(--petri-bg-elevated);
+}
+
+.sc-scratch-viewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.sc-scratch-viewer-note {
+  margin: 0;
+  line-height: 1.5;
+}
+
 .sc-scratch-retry {
   margin-left: var(--petri-space-2);
   border: none;

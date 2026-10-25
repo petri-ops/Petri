@@ -478,6 +478,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "result_selection_run": "已运行",
   "result_studio_context": "已查询",
   "result_summary": "已读取结果",
+  "result_annotations_list": "已读取批注",
   "run_tool": "已运行",
   "search": "已搜索",
   "send_message": "已发送",

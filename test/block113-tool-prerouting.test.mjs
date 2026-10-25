@@ -68,7 +68,7 @@ function errorFetch(name) {
   return { impl, count: () => calls };
 }
 
-test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（84 工具零变化）', () => {
+test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（工具集零遗漏）', () => {
   const union = Object.values(DOMAIN_TOOL_DEFS).flat();
   assert.equal(union.length, TOOL_DEFS.length);
   const b = new Set(union);

@@ -134,3 +134,36 @@
   border-left: 7px solid transparent;
   border-bottom: 7px solid var(--petri-warning);
 }
+
+/* BLOCK-254 Q6-REM — 文本/马赛克批注形态 */
+.box[data-kind='text'] {
+  background: var(--petri-bg-surface, var(--petri-bg-subtle));
+  border-style: dashed;
+}
+
+.box[data-kind='mosaic'] {
+  background: color-mix(in srgb, var(--petri-bg-canvas) 12%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+/* BLOCK-254 B-1 — 不支持 backdrop-filter 时退化为不透明色块：
+   至少保证「看起来被遮住」，而不是静默失效什么也没遮。
+   两种形态都只是屏显遮蔽（不裁像素、不写回产物），不是脱敏。 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .box[data-kind='mosaic'] {
+    background: var(--petri-bg-elevated);
+    border-style: dashed;
+  }
+}
+
+.textContent {
+  position: absolute;
+  inset: 2px 6px;
+  overflow: hidden;
+  color: var(--petri-text);
+  /* 正文注释用 sm（12px 次级元信息）；xs=11px 是徽标专用档，出徽标域即违规。 */
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.3;
+  text-align: left;
+  white-space: pre-wrap;
+}

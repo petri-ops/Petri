@@ -16,6 +16,8 @@ const { tool_plan } = require('./plan-ui-tools');
 const { tool_todo_write } = require('./todo-tools');
 const { tool_decision_summary, tool_decision_recent } = require('./decision-tools');
 const { tool_result_summary } = require('./result-summary-tools');
+// BLOCK-254 A-2（Q6-REM）— 批注旁路元数据只读读取（scope 定界 / 项目隔离 fail-closed）
+const { tool_result_annotations_list } = require('./result-annotation-tools');
 // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
 const { tool_skill_discover, tool_skill_get, tool_skill_preflight } = require('./skill-tools');
 // BLOCK-124（C-13）— 符号图只读查询（内核单源 helpers/code-graph）
@@ -165,6 +167,8 @@ const HANDLERS = {
   run_tool: tool_run_tool,
   // BLOCK-121 P2（B1）— 结果内容只读读取（跨轮引用断点的修复面）
   result_summary: tool_result_summary,
+  // BLOCK-254 A-2 — 批注只读读取（跨轮回读「我在图上标了什么」的唯一入口）
+  result_annotations_list: tool_result_annotations_list,
   // BLOCK-124（C-13）— 符号图只读查询（根解析走 withWorkspace 双闸，同 workspace_* 家族）
   codegraph_who_imports: tool_codegraph_who_imports,
   codegraph_classify_edges: tool_codegraph_classify_edges,
@@ -290,6 +294,8 @@ const CONTRACTS = {
   run_tool: contract('analysis', 'execution', 'R2', ['tool_jobs', 'artifacts', 'local.process'], 300000),
   // BLOCK-121 P2（B1）— 结果内容只读读取：tool_jobs/产物文件，无写面
   result_summary: contract('analysis', 'none', 'R1', ['tool_jobs', 'artifacts', 'project.files'], 500),
+  // BLOCK-254 A-2 — 批注只读：只查旁路表，无写面、无文件读取
+  result_annotations_list: contract('analysis', 'none', 'R1', ['project.database'], 500),
   // BLOCK-124（C-13）— 符号图只读查询：读项目源文件建 AST 图（estMs 按 1604 文件≈1.8s 实测 + 上限 5000 定界）
   codegraph_who_imports: contract('workspace', 'none', 'R0', ['project.files'], 5000),
   codegraph_classify_edges: contract('workspace', 'none', 'R0', ['project.files'], 5000),

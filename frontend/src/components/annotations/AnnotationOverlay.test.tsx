@@ -18,10 +18,12 @@ function annotation(overrides: Partial<ArtifactAnnotation>): ArtifactAnnotation 
     artifactId: 'a1',
     revisionId: 'r1',
     filePath: null,
+    entryId: null,
     artifactName: 'volcano.png',
     kind: 'region',
     page: null,
     rect: [0.1, 0.1, 0.2, 0.2],
+    anchor: null,
     comment: '离群点',
     color: 'amber',
     author: 'user',
@@ -57,6 +59,34 @@ describe('AnnotationOverlay', () => {
 
     const kinds = getAllByTestId('annotation-box').map((el) => el.dataset.kind);
     expect(kinds).toEqual(['region', 'ellipse', 'arrow']);
+  });
+
+  it('BLOCK-254 — 文字批注把正文渲染在框内，马赛克不渲染正文', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const { getAllByTestId } = render(
+      <AnnotationOverlay
+        annotations={[
+          annotation({ annotationId: 'k-text', kind: 'text', comment: '这段结论要复核' }),
+          annotation({ annotationId: 'k-mosaic', kind: 'mosaic', comment: '遮住姓名' }),
+        ]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+
+    const boxes = getAllByTestId('annotation-box');
+    expect(boxes.map((el) => el.dataset.kind)).toEqual(['text', 'mosaic']);
+    // 文字批注：正文可见（不是只有编号徽标）。
+    expect(boxes[0].textContent).toContain('这段结论要复核');
+    // 马赛克：说明文字不进画面，避免在遮挡区上再画字。
+    expect(boxes[1].textContent).not.toContain('遮住姓名');
+    expect(boxes[1].textContent).toContain('2');
+    // BLOCK-254 B-1：悬停必须能看到「仅屏显遮蔽，不是脱敏」的边界声明。
+    expect(boxes[1].getAttribute('title')).toContain('不是脱敏');
   });
 
   it('BLOCK-238 — 绘制中的 draft 按所选形状预览', () => {

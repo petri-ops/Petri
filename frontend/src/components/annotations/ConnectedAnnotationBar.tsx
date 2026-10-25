@@ -13,14 +13,18 @@ export function ConnectedAnnotationBar({
   canAnnotate,
   unavailableReason,
   onAddToTask,
+  mode = 'region',
 }: {
   session: AnnotationSession;
   canAnnotate: boolean;
   unavailableReason?: string;
   onAddToTask: (prompt: string) => void;
+  /** 'text' = 文本锚点面（不渲染绘制开关，创建由选区触发）。 */
+  mode?: 'region' | 'text';
 }): React.ReactElement {
   return (
     <AnnotationBar
+      mode={mode}
       annotations={session.annotations}
       loading={session.loading}
       error={session.error}
@@ -31,6 +35,11 @@ export function ConnectedAnnotationBar({
       canAnnotate={canAnnotate}
       cannotAnnotateReason={unavailableReason}
       pendingRect={session.pending}
+      canUndo={session.canUndo}
+      undoLabel={session.undoLabel}
+      onUndo={() => {
+        void session.undo();
+      }}
       onToggleDrawing={session.toggleDrawing}
       onColorChange={session.setColor}
       onKindChange={session.setKind}

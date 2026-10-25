@@ -488,5 +488,47 @@ module.exports = [
         "required": ["question"]
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "result_annotations_list",
+      "description": "BLOCK-254 — 有界读取用户在结果产物或工作区文件上留下的批注（旁路元数据）：形状（矩形/椭圆/箭头/文本/马赛克）+ 页或百分比坐标 + 评论。用户说「我之前标注的那几点」「图上圈出来的地方」而当前上下文没有批注正文时调用；只读，不创建也不删除批注。projectId 必填（系统提示里 projectId= 的值），批注按项目隔离，缺失即拒绝，不做跨项目猜测。返回最近 ≤20 条（硬顶 50），单条评论截 400 字；坐标是相对页/图的百分比，原始产物未被修改。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "description": "项目 id（系统提示里的 projectId= 值）"
+          },
+          "surface": {
+            "type": "string",
+            "enum": ["result-artifact", "workspace-file", "scratchpad-entry"],
+            "description": "批注所在的面；省略时按 artifactId / entryId / filePath 隐式判定"
+          },
+          "entryId": {
+            "type": "string",
+            "description": "surface=scratchpad-entry 时必填：速记条目 id"
+          },
+          "artifactId": {
+            "type": "string",
+            "description": "surface=result-artifact 时必填：结果产物 id"
+          },
+          "revisionId": {
+            "type": "string",
+            "description": "可选：只看某个版本上的批注（不同版本布局不同，坐标不可跨版本复用）"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "surface=workspace-file 时必填：项目内相对路径"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "返回条数上限（默认 20，最大 50）"
+          }
+        },
+        "required": ["projectId"]
+      }
+    }
   }
 ];

@@ -11,6 +11,10 @@
 // ============================================================
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+// BLOCK-254 P6 — 速记图片批注：复用既有批注宿主（旁路表 + 唯一落库通道）
+import { AnnotatableImagePane } from '@/components/annotations/AnnotatableImagePane';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import type { AnnotationScope, AnnotationTaskTarget } from '@/lib/annotations';
 import {
   listScratchpad,
   removeScratchpad,
@@ -26,6 +30,8 @@ export interface ScratchpadPanelProps {
   onClose: () => void;
   /** 引用一条速记进 composer（唯一通道：宿主把它变成 ComposerContextItem）。 */
   onQuote: (entry: ScratchpadEntry) => void;
+  /** 当前项目：条目自身没有 projectId 时，用作图片批注 scope 的兜底。 */
+  projectId?: string | null;
   /** 测试注入点；默认走 REST 客户端。 */
   api?: ScratchpadApi;
 }
@@ -51,8 +57,10 @@ function entryMeta(entry: ScratchpadEntry): string {
   return `${kindLabel} · ${source}${ref}`;
 }
 
-export function ScratchpadPanel({ onClose, onQuote, api }: ScratchpadPanelProps) {
+export function ScratchpadPanel({ onClose, onQuote, projectId = null, api }: ScratchpadPanelProps) {
   const client = useRef<ScratchpadApi>(api ?? { list: listScratchpad, remove: removeScratchpad });
+  /** 打开大图（并在其上批注）的条目；null = 显示列表。 */
+  const [viewing, setViewing] = useState<ScratchpadEntry | null>(null);
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<ScratchpadEntry[]>([]);
   const [total, setTotal] = useState(0);
@@ -104,6 +112,21 @@ export function ScratchpadPanel({ onClose, onQuote, api }: ScratchpadPanelProps)
     }
   }, []);
 
+  // 批注 scope：条目自带项目优先，其次宿主当前项目；都没有则不具备批注条件（诚实禁用）。
+  const annotationProjectId = viewing ? (viewing.projectId || projectId || '') : '';
+  const annotationScope: AnnotationScope | null = viewing && annotationProjectId
+    ? { projectId: annotationProjectId, surface: 'scratchpad-entry', entryId: viewing.entryId }
+    : null;
+  const annotationTarget: AnnotationTaskTarget = {
+    surface: 'scratchpad-entry',
+    artifactName: viewing?.title || '速记图片',
+  };
+  const handleAnnotationAddToTask = useCallback((prompt: string) => {
+    if (!prompt) return;
+    // 与其他批注面同一条进对话通道（copilotAsk），不新建第二条。
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt });
+  }, []);
+
   return (
     <div className="sc-scratch-panel" data-testid="sc-scratch-panel" role="dialog" aria-label="速记板">
       <div className="sc-slash-header">
@@ -121,6 +144,34 @@ export function ScratchpadPanel({ onClose, onQuote, api }: ScratchpadPanelProps)
           data-testid="sc-scratch-search"
         />
       </div>
+      {viewing && (
+        <div className="sc-scratch-viewer" data-testid="sc-scratch-viewer">
+          <div className="sc-scratch-viewer-head">
+            <span className="sc-slash-item-label">{viewing.title || '速记图片'}</span>
+            <button
+              type="button"
+              className="sc-scratch-action"
+              data-testid="sc-scratch-viewer-close"
+              onClick={() => setViewing(null)}
+            >
+              返回列表
+            </button>
+          </div>
+          {annotationScope ? (
+            <AnnotatableImagePane
+              src={viewing.body}
+              alt={viewing.title || '速记图片'}
+              scope={annotationScope}
+              target={annotationTarget}
+              onAddToTask={handleAnnotationAddToTask}
+            />
+          ) : (
+            <p className="sc-scratch-viewer-note" data-testid="sc-scratch-viewer-no-project">
+              这条速记没有项目归属，无法添加批注：批注按项目隔离，请先在项目内重新保存这张图。
+            </p>
+          )}
+        </div>
+      )}
       <div className="sc-slash-list">
         {loading && entries.length === 0 && <div className="sc-slash-empty">正在读取速记…</div>}
         {!loading && error && (
@@ -145,7 +196,16 @@ export function ScratchpadPanel({ onClose, onQuote, api }: ScratchpadPanelProps)
         {entries.map((entry) => (
           <div className="sc-scratch-item" key={entry.entryId} data-testid="sc-scratch-item">
             {entry.kind === 'image' && /^data:|^https?:/.test(entry.body) && (
-              <img className="sc-scratch-thumb" src={entry.body} alt={entry.title || '速记图片'} />
+              <button
+                type="button"
+                className="sc-scratch-thumb-btn"
+                title="打开大图并批注"
+                aria-label={`打开 ${entry.title || '速记图片'}`}
+                data-testid="sc-scratch-open-image"
+                onClick={() => setViewing(entry)}
+              >
+                <img className="sc-scratch-thumb" src={entry.body} alt={entry.title || '速记图片'} />
+              </button>
             )}
             <div className="sc-scratch-body">
               <span className="sc-slash-item-label" title={entry.title || entryPreview(entry)}>

@@ -13,18 +13,45 @@
  * - 批注是旁路元数据：prompt 里必须声明「原始产物未被修改」，不暗示已改动文件。
  */
 
-type AnnotationSurface = 'result-artifact' | 'workspace-file';
+type AnnotationSurface = 'result-artifact' | 'workspace-file' | 'scratchpad-entry';
 export type AnnotationColor = 'amber' | 'sky' | 'rose';
-export type AnnotationKind = 'region' | 'ellipse' | 'arrow';
+export type AnnotationKind = 'region' | 'ellipse' | 'arrow' | 'text' | 'mosaic' | 'text-selection';
 
 export const ANNOTATION_COLORS: readonly AnnotationColor[] = ['amber', 'sky', 'rose'];
-export const ANNOTATION_KINDS: readonly AnnotationKind[] = ['region', 'ellipse', 'arrow'];
+export const ANNOTATION_KINDS: readonly AnnotationKind[] = ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection'];
 
 export const ANNOTATION_KIND_LABELS: Record<AnnotationKind, string> = {
   region: '矩形',
   ellipse: '椭圆',
   arrow: '箭头',
+  text: '文本',
+  mosaic: '马赛克',
+  // 与图形「文本」区分：这是锚在源码行范围上的批注，不是画在图上的文字框。
+  'text-selection': '文本批注',
 };
+
+/**
+ * BLOCK-254 P5 — 文本锚点：与归一化矩形**互斥**的另一种定位方式。
+ * 只用于工作区文件（结果产物是图像/PDF，没有文本行）。
+ */
+export type AnchorUnit = 'line' | 'paragraph' | 'row';
+
+export const ANCHOR_UNITS: readonly AnchorUnit[] = ['line', 'paragraph', 'row'];
+
+export interface TextAnchor {
+  kind: 'text-range';
+  /** 序号语义：源码行 / 文档段落 / 表格行（缺省 line）。 */
+  unit?: AnchorUnit;
+  startLine: number;
+  endLine: number;
+  startColumn: number | null;
+  endColumn: number | null;
+  /** 选中原文（≤500 字）；没有它就无法校验锚点是否还指得住。 */
+  quote: string;
+  language: string | null;
+}
+
+export const MAX_ANCHOR_QUOTE_CHARS = 500;
 
 export function describeAnnotationKind(kind: AnnotationKind | null | undefined): string {
   return ANNOTATION_KIND_LABELS[kind || 'region'];
@@ -37,6 +64,77 @@ export const MAX_ANNOTATIONS_IN_PROMPT = 20;
 /** 指针拖拽产生的最小边长（归一化）；小于它视为误触，不创建批注。 */
 const MIN_ANNOTATION_SIDE = 0.004;
 
+/**
+ * BLOCK-254 B-1 — 马赛克遮蔽边界（唯一措辞源）。
+ *
+ * 马赛克只是**屏显遮蔽**：它在查看器里把该区域模糊掉，既不裁掉像素，
+ * 也不写回产物文件，更不做任何脱敏。任何「已遮蔽敏感信息 / 已打码」的说法
+ * 都是超出实现能力的承诺，必须用下面这句话纠正。
+ */
+export const MOSAIC_DISCLOSURE = '马赛克只是屏显遮蔽，不是脱敏；原图与产物文件不会被修改。';
+
+/** 短位（工具条 hint / 悬停标题）用的同一句话的压缩形态，避免长句撑破单行。 */
+export const MOSAIC_SHORT = '仅屏显遮蔽，不是脱敏';
+
+/** 「加入任务」里对马赛克条目的补充声明（只在真有马赛克批注时追加）。 */
+export function mosaicTaskNote(count: number): string {
+  return `其中 ${count} 条为「马赛克」标记：${MOSAIC_DISCLOSURE}请勿把遮蔽区域当作已移除的敏感信息。`;
+}
+
+/**
+ * BLOCK-254 B-2 — 撤销边界（唯一判定源）。
+ *
+ * 边界（写死，不接受隐式扩张）：
+ *  - **仅本次会话**：栈只活在 `useAnnotationSession` 的内存里，刷新/切 scope 即失效；
+ *  - **仅当前 scope**：scope 身份一变视为空栈（同 pending 的纪律，不靠 effect 清空）；
+ *  - **有界**：只保留最近 `MAX_ANNOTATION_UNDO` 次补偿，最旧的被丢弃；
+ *  - **只做撤销，不做重做**：删除的补偿是「按原内容重建」，会生成新 annotationId；
+ *    在这个不对称语义上再做 redo 只会形成 id 漂移链，故 redo 明确非范围。
+ */
+export const MAX_ANNOTATION_UNDO = 10;
+
+export type AnnotationUndoAction =
+  | { type: 'created'; annotationId: string }
+  | { type: 'deleted'; annotation: ArtifactAnnotation };
+
+/** 入栈（有界）；纯函数，便于把「上限语义」钉在测试里。 */
+export function appendUndoAction(
+  actions: readonly AnnotationUndoAction[],
+  action: AnnotationUndoAction,
+  max: number = MAX_ANNOTATION_UNDO,
+): AnnotationUndoAction[] {
+  const limit = Number.isInteger(max) && max > 0 ? max : MAX_ANNOTATION_UNDO;
+  return [...actions, action].slice(-limit);
+}
+
+/** 撤销按钮 title：删除的补偿必须如实说明「重建为新条目」（id 会变）。 */
+export function undoActionLabel(action: AnnotationUndoAction | null | undefined): string {
+  if (!action) return '';
+  return action.type === 'created'
+    ? '撤销刚才的创建'
+    : '撤销刚才的删除（将按原内容重建为新条目）';
+}
+
+export type CssSupportProbe = (property: string, value: string) => boolean;
+
+/**
+ * 当前环境是否支持 `backdrop-filter`（不支持的实现会静默什么都不遮，必须降级）。
+ * 探测函数可注入，便于在 jsdom 里断言两条分支。
+ */
+export function supportsBackdropFilter(probe?: CssSupportProbe | null): boolean {
+  const resolve = probe === undefined
+    ? (typeof CSS !== 'undefined' && typeof CSS.supports === 'function'
+      ? (property: string, value: string) => CSS.supports(property, value)
+      : null)
+    : probe;
+  if (!resolve) return false;
+  try {
+    return resolve('backdrop-filter', 'blur(1px)') || resolve('-webkit-backdrop-filter', 'blur(1px)');
+  } catch {
+    return false;
+  }
+}
+
 export interface ArtifactAnnotation {
   annotationId: string;
   contractVersion: number;
@@ -46,10 +144,15 @@ export interface ArtifactAnnotation {
   artifactId: string | null;
   revisionId: string | null;
   filePath: string | null;
+  /** 仅 `surface='scratchpad-entry'` 有值。 */
+  entryId: string | null;
   artifactName: string | null;
   kind: AnnotationKind;
   page: number | null;
-  rect: [number, number, number, number];
+  /** 区域批注为四元组；文本锚点批注为空数组（坐标由 anchor 取代）。 */
+  rect: number[];
+  /** 文本锚点批注为 `text-range` 对象；区域批注恒为 null。 */
+  anchor: TextAnchor | null;
   comment: string;
   color: AnnotationColor;
   author: string;
@@ -63,13 +166,18 @@ export interface AnnotationScope {
   artifactId?: string | null;
   revisionId?: string | null;
   filePath?: string | null;
+  /** 仅 `surface='scratchpad-entry'` 使用。 */
+  entryId?: string | null;
 }
 
 export interface CreateAnnotationInput extends AnnotationScope {
   conversationId?: string | null;
   artifactName?: string | null;
   page?: number | null;
-  rect: [number, number, number, number];
+  /** 区域批注必填；`kind='text-selection'` 时必须省略（契约拒绝两者同时出现）。 */
+  rect?: [number, number, number, number];
+  /** 仅 `kind='text-selection'` 使用。 */
+  anchor?: TextAnchor;
   comment: string;
   color?: AnnotationColor;
   kind?: AnnotationKind;
@@ -138,10 +246,22 @@ export function rectToStyle(rect: readonly number[]): {
   };
 }
 
-/** 批注锚点的人类可读描述（「第 2 页」/「图像区域」）。 */
-export function describeAnnotationAnchor(annotation: Pick<ArtifactAnnotation, 'page' | 'surface'>): string {
+/** 批注锚点的人类可读描述（「第 12 行」/「第 2 页」/「图像区域」）。 */
+export function describeAnnotationAnchor(
+  annotation: Pick<ArtifactAnnotation, 'page' | 'surface'> & { anchor?: TextAnchor | null },
+): string {
+  const anchor = annotation.anchor;
+  if (anchor && Number.isInteger(anchor.startLine) && anchor.startLine > 0) {
+    const unitLabel = anchor.unit === 'paragraph' ? '段' : '行';
+    const head = anchor.unit === 'row' ? '表格第 ' : '第 ';
+    return anchor.startLine === anchor.endLine
+      ? `${head}${anchor.startLine} ${unitLabel}`
+      : `${head}${anchor.startLine}–${anchor.endLine} ${unitLabel}`;
+  }
   if (typeof annotation.page === 'number' && annotation.page > 0) return `第 ${annotation.page} 页`;
-  return annotation.surface === 'workspace-file' ? '文件区域' : '图像区域';
+  if (annotation.surface === 'workspace-file') return '文件区域';
+  if (annotation.surface === 'scratchpad-entry') return '速记图片';
+  return '图像区域';
 }
 
 function formatPercentRect(rect: readonly number[]): string {
@@ -168,7 +288,8 @@ export interface AnnotationTaskTarget {
  * 重新读取被改写的文件。
  */
 export function buildAnnotationTaskPrompt(
-  annotations: readonly Pick<ArtifactAnnotation, 'rect' | 'comment' | 'page' | 'surface'>[],
+  annotations: readonly (Pick<ArtifactAnnotation, 'rect' | 'comment' | 'page' | 'surface'>
+    & { kind?: AnnotationKind | null; anchor?: TextAnchor | null })[],
   target: AnnotationTaskTarget,
 ): string {
   const usable = annotations.filter((annotation) => annotation.comment.trim().length > 0);
@@ -185,16 +306,22 @@ export function buildAnnotationTaskPrompt(
 
   const shown = usable.slice(0, MAX_ANNOTATIONS_IN_PROMPT);
   const lines = shown.map((annotation, index) => {
-    const anchor = describeAnnotationAnchor(annotation);
-    return `${index + 1}. ${anchor} ${formatPercentRect(annotation.rect)}：${annotation.comment.trim()}`;
+    // 文本锚点没有区域坐标：报行号比报一个假的 (0%,0%,0%×0%) 诚实。
+    const where = annotation.anchor
+      ? describeAnnotationAnchor(annotation)
+      : `${describeAnnotationAnchor(annotation)} ${formatPercentRect(annotation.rect)}`;
+    return `${index + 1}. ${where}：${annotation.comment.trim()}`;
   });
   const omitted = usable.length - shown.length;
   if (omitted > 0) lines.push(`… 另有 ${omitted} 条批注未逐条展开（可在结果面板查看）。`);
 
-  return [
-    head,
-    ...lines,
+  // 只在该批注集真有马赛克时追加边界声明，避免无马赛克的任务被噪声干扰。
+  const mosaicCount = usable.filter((annotation) => annotation.kind === 'mosaic').length;
+  const notes = [
     '坐标是相对页/图的百分比区域。批注只存在于旁路元数据中，原始产物文件未被修改；'
       + '如需重新定位请以坐标为准，不要假设文件已被编辑。',
-  ].join('\n');
+  ];
+  if (mosaicCount > 0) notes.push(mosaicTaskNote(mosaicCount));
+
+  return [head, ...lines, ...notes].join('\n');
 }

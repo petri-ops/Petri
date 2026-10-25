@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ANNOTATION_COLORS,
   ANNOTATION_KINDS,
   ANNOTATION_KIND_LABELS,
   MAX_ANNOTATION_COMMENT_CHARS,
+  MOSAIC_SHORT,
   describeAnnotationAnchor,
   describeAnnotationKind,
+  supportsBackdropFilter,
   type AnnotationColor,
   type AnnotationKind,
   type ArtifactAnnotation,
@@ -30,11 +32,21 @@ export interface AnnotationBarProps {
   drawing: boolean;
   color: AnnotationColor;
   kind: AnnotationKind;
+  /**
+   * 'region'（默认）= PDF/图像，可拖拽画框；
+   * 'text' = 工作区文本面，批注由选区产生（不渲染绘制开关/形状/颜色）。
+   */
+  mode?: 'region' | 'text';
   /** false = 当前面不支持批注（只显示 cannotAnnotateReason）。 */
   canAnnotate: boolean;
   cannotAnnotateReason?: string;
   /** 已画好矩形、等待填写评论。 */
   pendingRect: boolean;
+  /** 本次会话内是否有可撤销的批注操作（栈空时不渲染按钮，避免死按钮）。 */
+  canUndo: boolean;
+  /** 下一步撤销会做什么（按钮 title 如实说明，含「重建为新条目」）。 */
+  undoLabel?: string;
+  onUndo: () => void;
   onToggleDrawing: () => void;
   onColorChange: (color: AnnotationColor) => void;
   onKindChange: (kind: AnnotationKind) => void;
@@ -58,9 +70,13 @@ export function AnnotationBar({
   drawing,
   color,
   kind,
+  mode = 'region',
   canAnnotate,
   cannotAnnotateReason,
   pendingRect,
+  canUndo,
+  undoLabel,
+  onUndo,
   onToggleDrawing,
   onColorChange,
   onKindChange,
@@ -71,6 +87,9 @@ export function AnnotationBar({
 }: AnnotationBarProps): React.ReactElement {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // 能力探测一次即可：CSS.supports 不随交互变化。
+  const mosaicSupport = useMemo(() => supportsBackdropFilter(), []);
+  const regionMode = mode !== 'text';
 
   if (!canAnnotate) {
     return (
@@ -92,17 +111,31 @@ export function AnnotationBar({
   };
 
   return (
-    <div className={styles.bar} data-testid="annotation-bar" data-annotatable="true">
-      <button
-        type="button"
-        className={drawing ? `${styles.toggle} ${styles.toggleActive}` : styles.toggle}
-        data-testid="annotation-toggle"
-        aria-pressed={drawing}
-        onClick={onToggleDrawing}
-        title={drawing ? '退出批注模式' : '在图上拖拽框选区域添加批注'}
-      >
-        批注{annotations.length > 0 ? ` ${annotations.length}` : ''}
-      </button>
+    <div className={styles.bar} data-testid="annotation-bar" data-annotatable="true" data-mode={mode}>
+      {regionMode && (
+        <button
+          type="button"
+          className={drawing ? `${styles.toggle} ${styles.toggleActive}` : styles.toggle}
+          data-testid="annotation-toggle"
+          aria-pressed={drawing}
+          onClick={onToggleDrawing}
+          title={drawing ? '退出批注模式' : '在图上拖拽框选区域添加批注'}
+        >
+          批注{annotations.length > 0 ? ` ${annotations.length}` : ''}
+        </button>
+      )}
+
+      {canUndo && (
+        <button
+          type="button"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
+          data-testid="annotation-undo"
+          title={undoLabel || '撤销上一步批注操作'}
+          onClick={onUndo}
+        >
+          撤销
+        </button>
+      )}
 
       {drawing && (
         <div className={styles.kinds} role="group" aria-label="批注形状">
@@ -143,12 +176,22 @@ export function AnnotationBar({
       )}
 
       {drawing && !pendingRect && (
-        <span className={styles.hint} data-testid="annotation-hint">
+        <span
+          className={styles.hint}
+          data-testid="annotation-hint"
+          data-mosaic-fallback={kind === 'mosaic' ? String(!mosaicSupport) : undefined}
+        >
           {kind === 'arrow'
             ? '拖拽框选箭头范围（沿矩形对角线绘制），松开后填写评论'
             : kind === 'ellipse'
               ? '拖拽框选椭圆范围，松开后填写评论'
-              : '拖拽框选区域，松开后填写评论'}
+              : kind === 'text'
+                ? '拖拽框选文本标注位置，松开后填写文本'
+                : kind === 'mosaic'
+                  ? (mosaicSupport
+                    ? `拖拽框选需要遮蔽的区域，松开后填写说明（${MOSAIC_SHORT}）`
+                    : `拖拽框选需要遮蔽的区域；当前环境不支持模糊，将改用不透明色块（${MOSAIC_SHORT}）`)
+                  : '拖拽框选区域，松开后填写评论'}
         </span>
       )}
 
@@ -160,7 +203,13 @@ export function AnnotationBar({
             data-testid="annotation-comment-input"
             value={comment}
             maxLength={MAX_ANNOTATION_COMMENT_CHARS}
-            placeholder="写下这条批注的含义（会随「加入任务」发给 Agent）"
+            placeholder={!regionMode
+              ? '写下对这段文字的批注（会随「加入任务」发给 Agent）'
+              : kind === 'text'
+                ? '输入要显示在框内的文字（会随「加入任务」发给 Agent）'
+              : kind === 'mosaic'
+                ? `说明这块要遮什么（${MOSAIC_SHORT}；不会修改原图）`
+                : '写下这条批注的含义（会随「加入任务」发给 Agent）'}
             onChange={(event) => setComment(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') void submit();
