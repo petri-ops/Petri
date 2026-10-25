@@ -18,6 +18,8 @@ const { tool_decision_summary, tool_decision_recent } = require('./decision-tool
 const { tool_result_summary } = require('./result-summary-tools');
 // BLOCK-254 A-2（Q6-REM）— 批注旁路元数据只读读取（scope 定界 / 项目隔离 fail-closed）
 const { tool_result_annotations_list } = require('./result-annotation-tools');
+// BLOCK-256 Q7 — 目标状态机三工具（create/get/update；用量来自 ai_usage 真账本）
+const { tool_create_goal, tool_get_goal, tool_update_goal } = require('./goal-tools');
 // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
 const { tool_skill_discover, tool_skill_get, tool_skill_preflight } = require('./skill-tools');
 // BLOCK-124（C-13）— 符号图只读查询（内核单源 helpers/code-graph）
@@ -159,6 +161,10 @@ const HANDLERS = {
   search: tool_search,
   act: tool_act,
   plan: tool_plan,
+  // BLOCK-256 Q7 — 目标状态机（持久 goal；projectId 上下文注入/fail-closed）
+  create_goal: tool_create_goal,
+  get_goal: tool_get_goal,
+  update_goal: tool_update_goal,
   // BLOCK-97 — 任务清单维护（整单幂等替换；快照经 task_todo 事件广播）
   todo_write: tool_todo_write,
   // BLOCK-116 W2（BK-04）— 决策台账只读观测面（数据源 helpers/decision-log 单源直调）
@@ -285,6 +291,10 @@ const CONTRACTS = {
   search: contract('retrieval', 'external-request', 'R1', ['project.database', 'plugin.content', 'llm.provider'], 30000),
   act: contract('action', 'execution', 'R2', ['user.account', 'project.database', 'ui.session', 'local.process'], 30000),
   plan: contract('planning', 'state-write', 'R1', ['project.database'], 500),
+  // BLOCK-256 Q7 — 目标：查询只读 R0；创建/更新写 project.database（R1）
+  create_goal: contract('planning', 'state-write', 'R1', ['project.database'], 300),
+  get_goal: contract('planning', 'none', 'R0', ['project.database'], 200),
+  update_goal: contract('planning', 'state-write', 'R1', ['project.database'], 300),
   // BLOCK-97 — 任务清单：任务运行内的临时 UI 态（事件流承载，非用户数据表），
   // 与 plan 同族 state-write/R1；不设 userId 门（访客会话可用，见 todo-tools.js 头注）
   todo_write: contract('planning', 'state-write', 'R1', ['ui.session'], 200),

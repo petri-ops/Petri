@@ -8055,8 +8055,31 @@
         "G0"
       ],
       "notes": "2026-10-25 用户「搞定 Q2-REM」。P0 对账：C4 消息动作注册表已有 edit/copy/regenerate/fork/quote-context/rating，缺统计；逐消息耗时/工具/迭代/字符已有，token 只在会话级 ai_usage（无 message/run 列），runLoop 每次调用发 usage 事件但不聚合；C17 @ 会话源已有有界摘要与单一 ComposerContextItem 通道，缺拖拽入口；LeftPanel 会话行不可拖，composer onDrop 只处理 Files。方案=loop 内累加本轮 usage 并随助手消息 meta.usage 落库（零迁移）+ 统计动作/面板（无 usage 时诚实未记录）+ LeftPanel 会话行拖拽到 composer（复用 buildConversationCandidates/摘要上限，当前会话拒自引用）。非范围=逐消息成本/历史回填/项目树拖放/第二注入通道/G1+。验收=Node usage 累加测 + 前端统计/拖放测 + types/lint/theme + 隔离 9223 亮暗实机 + closeout 十三门。plan=docs/block-255-q2-rem-plan.md。P1–P6 completed（2026-10-25）：loop usage totals→`meta_json.usage`（Node 6/6）+ 统计动作/面板 + 实时 `useRunUsageTotals`；会话拖拽源/`useComposerDrop`/`conversationDrag`（前端 C4 46/46 + C17 49/49）；`test:changed` Node 1692（1683 pass/0 fail/9 skipped）/前端 79 文件 602；types 0/lint 0 error/theme 17/17；隔离 9223 亮/暗各 17/17（`acceptance/block-255/q2rem-live{,-dark}.json`；截图 unavailable）；closeout 十三门逐门取证 PASS（整链收尾被 test:affected 收尾挂起，逐门补证）；UI-566 verified、Q-MATRIX C4/C17 ✅（61/30/4/7）。reopen=逐消息成本/旧消息回填/统计导出/项目树拖放/跨设备。"
+    },
+    {
+      "id": "BLOCK-256-Q7-AUTOMATION",
+      "capability": "q7-automation-goals",
+      "path": "docs/block-256-q7-automation-goals-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P6-CLOSED",
+      "canonical": true,
+      "truthDomain": "q7-automation-goals",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-25",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "q7",
+        "goals",
+        "scheduled-tasks",
+        "automation",
+        "task-board",
+        "reminders",
+        "G0"
+      ],
+      "notes": "2026-10-25 用户「搞完 Q7（confidence=0.77）」。P0 对账：ScheduledWorkspacePanel 是占位；后端无 schedule 表/runner；goal 只有 spawn_agent params.goals，无独立表/状态机/预算；通知中心已有本地 AppNotice。方案=goal 持久表 + 状态机 + create_goal/get_goal/update_goal 三工具（B4/B6）；goal 用量取真实 ai_usage（goal 会话 + goal 关联运行会话），80% usageLimited / 100% budgetLimited，定时提交前跳过（B5）；schedule 持久表 + 10s runner 复用内部 POST /api/ai/agent（I1）；看板 + /schedule 斜杠入口（I2/I3）；reminder 到期写行 → 全局 bridge → 通知中心 schedule_reminder（I5）。非范围=cron/时区/跨设备/硬熔断运行中 loop/第二执行器/G1+。plan=docs/block-256-q7-automation-goals-plan.md。P1–P6 completed（2026-10-25）：automation-store（goal/schedule/runs/reminders + goal_id 列）+ goal 状态机/预算 + 三工具（registry 85→88）+ 10s runner（复用 POST /api/ai/agent）+ automation 路由 + 看板/`/schedule`/通知 bridge；测试=Node block256 5/5 + registry 邻域 52/52 + 前端 Q7 33/33 + test:changed EXIT=0（Node 1389/1372 pass/0 fail/17 skipped；前端 107 文件 768）+ types 0/lint 0 error/theme 17/17/code-size PASS/knip 278；实机=隔离 9223 亮/暗各 21/21（acceptance/block-256/q7-live{,-dark}.json；截图 unavailable）；UI-567 verified、Q-MATRIX B4/B5/B6/I1/I2/I3/I5 ✅（68/26/1/7）。reopen=cron/时区/跨设备/overlap/失败重试/agent 唤醒/硬熔断运行中 loop。"
     }
   ],
   "lastUpdated": "2026-10-25",
-  "documentCount": 398
+  "documentCount": 399
 }

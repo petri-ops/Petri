@@ -37,6 +37,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { id: 'export', label: '导出对话', description: '导出当前对话为 Markdown', shortcut: null },
   // BLOCK-172 CP-7 — 手动压缩（BLOCK-95 B2 后端端点的用户入口；低于阈值时诚实提示）
   { id: 'compact', label: '压缩上下文', description: '立即压缩较早对话为摘要（释放上下文预算）', shortcut: null },
+  // BLOCK-256 Q7 — 定时任务入口：把当前输入设为计划，不立即发送
+  { id: 'schedule', label: '定时任务', description: '把当前输入设为定时计划（不立即发送）', shortcut: null },
   { id: 'help', label: '帮助', description: '显示所有命令', shortcut: null },
 ];
 

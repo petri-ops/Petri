@@ -336,5 +336,17 @@
   "read_agent_journal": {
     "label": "已读 journal",
     "icon": "list-details"
+  },
+  "create_goal": {
+    "label": "已创建目标",
+    "icon": "flag"
+  },
+  "get_goal": {
+    "label": "已查询目标",
+    "icon": "bar-chart"
+  },
+  "update_goal": {
+    "label": "已更新目标",
+    "icon": "pencil"
   }
 }

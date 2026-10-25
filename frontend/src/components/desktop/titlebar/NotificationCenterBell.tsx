@@ -22,6 +22,7 @@ const KIND_LABELS: Record<AppNoticeKind, string> = {
   turn_completed: '完成',
   turn_failed: '失败',
   approval_required: '待确认',
+  schedule_reminder: '提醒',
 };
 
 export function NotificationCenterBell(): React.ReactElement {

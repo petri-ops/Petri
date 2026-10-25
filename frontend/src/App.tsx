@@ -17,6 +17,7 @@ import { AppRailProvider } from '@/components/desktop/AppRailContext';
 import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
 import { ProjectionLinkBanner } from '@/components/desktop/_ProjectionLinkBanner';
 import { CrashNoticeBanner } from '@/components/desktop/CrashNoticeBanner';
+import { ScheduleReminderBridge } from '@/components/copilot/ScheduleReminderBridge';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
@@ -270,6 +271,8 @@ export default function App(): React.ReactElement {
         {/* BLOCK-159 P1-9 / UI-482 — 投影断连横幅（仅投影环境渲染，桌面零行为） */}
         <ProjectionLinkBanner />
         <CrashNoticeBanner />
+        {/* BLOCK-256 Q7 — 计划提醒 → 通知中心（全局轮询；只投递，不依赖系统通知权限） */}
+        <ScheduleReminderBridge />
         {/* BLOCK-242 — petri-install:// 深链安装预览弹层（全局） */}
         <InstallDeepLinkDialog />
         <AppRailProvider>

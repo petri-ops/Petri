@@ -368,6 +368,13 @@ app.listen(PORT, '127.0.0.1', () => {
   console.log(`   GET  http://localhost:${PORT}/api/health`);
   // BLOCK-186：后端就绪即本机 app_started 落本地漏斗台账（best-effort，永不阻塞监听）。
   recordFunnelEvent('app_started');
+  // BLOCK-256 Q7 — 定时任务 runner（10s；复用 POST /api/ai/agent，不建第二执行器）
+  try {
+    const { startScheduleRunner } = require('./helpers/automation-runner');
+    startScheduleRunner({ baseUrl: `http://127.0.0.1:${PORT}` });
+  } catch (e) {
+    console.warn('[automation-runner] not started:', e && e.message ? e.message : e);
+  }
 });
 
 // ── BLOCK-70：手机远程同步 mobile-gateway（additive，默认关闭）────────────

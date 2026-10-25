@@ -5394,6 +5394,61 @@
         "frontend/src/components/copilot/SimpleChat/contextSources.test.ts",
         "frontend/src/styles/theme-token-contract.test.ts"
       ]
+    },
+    {
+      "id": "block256-q7-automation",
+      "note": "BLOCK-256 Q7：goal 状态机/预算/三工具 + schedule 持久计划/runner/看板//schedule/提醒（复用既有 agent task 链）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block256-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q7-*.cjs",
+        "docs/block-256-q7-automation-goals-plan.md",
+        "acceptance/block-256/**",
+        "core/petri-server/helpers/automation-store.js",
+        "core/petri-server/helpers/automation-runner.js",
+        "core/petri-server/routes/automation.js",
+        "core/petri-server/routes/index.js",
+        "core/petri-server/server.js",
+        "core/petri-server/agent-tools/goal-tools.js",
+        "core/petri-server/agent-tools/tool-defs/goals.js",
+        "core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "test/block256-*.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "frontend/src/lib/automationClient.ts",
+        "frontend/src/lib/notification-center.ts",
+        "frontend/src/components/desktop/titlebar/NotificationCenterBell.tsx",
+        "frontend/src/components/workspace-panels/ScheduledWorkspacePanel.tsx",
+        "frontend/src/components/workspace-panels/ScheduledWorkspacePanel.module.css",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/copilot/ScheduleReminderBridge.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScheduleDialog.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScheduleDialog.module.css",
+        "frontend/src/components/copilot/SimpleChat/hooks/useScheduleComposer.ts",
+        "frontend/src/components/copilot/SimpleChat/slashExecute.ts",
+        "frontend/src/components/copilot/SimpleChat/types.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/App.tsx"
+      ],
+      "tests": [
+        "test/block256-automation.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block113-tool-prerouting.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "frontend/src/components/workspace-panels/ScheduledWorkspacePanel.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScheduleDialog.test.tsx",
+        "frontend/src/components/copilot/ScheduleReminderBridge.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts",
+        "frontend/src/lib/notification-center.test.ts",
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx"
+      ]
     }
   ]
 }

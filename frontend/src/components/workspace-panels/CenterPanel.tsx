@@ -455,7 +455,12 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       {workspaceMode === 'scheduled' && (
         <SessionFrameView ctx={ctx} sessionFrameRef={sessionFrameRef}>
           <ScheduledWorkspacePanel
+            projectId={ctx.projectId}
             onBackToChat={() => ctx.updateWorkspaceMode('chat')}
+            onOpenConversation={(convId) => {
+              ctx.updateWorkspaceMode('chat');
+              ctx.handleSwitchConversation(convId);
+            }}
           />
         </SessionFrameView>
       )}

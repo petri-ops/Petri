@@ -1,0 +1,131 @@
+{
+  "name": "q7-automation-live",
+  "block": "BLOCK-256",
+  "darkMode": false,
+  "mode": "system-default",
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "seeded": {
+    "projectId": "p_mvn8lqvx_23x6",
+    "projectName": "BLOCK256-验收-1792897036117",
+    "goalId": "goal_bf256_live",
+    "scheduleId": "sch_d85b97ae-2228-4f9a-b80a-c02bf64f4b72",
+    "goalUsageTokens": 820,
+    "goalBudgetTokens": 1000,
+    "scheduleLinkedToGoal": true,
+    "completedRun": true,
+    "unacknowledgedReminder": "记得看质控"
+  },
+  "startedAt": "2026-10-25T02:57:14.990Z",
+  "finishedAt": "2026-10-25T02:57:26.403Z",
+  "assertions": [
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b256-live-m4cQwn / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A0c_seeded_snapshot",
+      "pass": true,
+      "detail": "{\"schedules\":1,\"goals\":1,\"runs\":1}"
+    },
+    {
+      "name": "A1_panel_content",
+      "pass": true,
+      "detail": "schedule/goal 卡片在场"
+    },
+    {
+      "name": "A1b_goal_budget_visible",
+      "pass": true,
+      "detail": "返回对话自动化与目标刷新定时任务新建BLOCK256 实机计划分析 · 启用每 60 分钟下次 2026/10/25 11:57:16目标：Q7 稳定交付完成2026/10/25 10:55:16暂停立即运行删除目标Q7 稳定交付进行中 · 接近预算实机 seed 目标用量 820 / 预算 1000 tokens已用 60 分钟暂停完成最近运行完成BLOCK256 实机计划2026/10/25 10:55:16task task_bf2打开会话提醒没有未确认提醒。"
+    },
+    {
+      "name": "A2_goal_pause_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A2b_goal_paused",
+      "pass": true,
+      "detail": "paused"
+    },
+    {
+      "name": "A2c_goal_resume_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A2d_goal_resumed",
+      "pass": true,
+      "detail": "active"
+    },
+    {
+      "name": "A3_schedule_toggle_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A3b_schedule_disabled",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "A3c_schedule_enable_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A4_new_form_open",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A4b_schedule_created",
+      "pass": true,
+      "detail": "REST 可见新计划"
+    },
+    {
+      "name": "A5_run_now_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5b_run_recorded",
+      "pass": true,
+      "detail": "运行记录已落库（模型成败不伪造）"
+    },
+    {
+      "name": "A6_reminder_notification",
+      "pass": true,
+      "detail": "通知中心全部已读清空提醒计划提醒记得看质控2026/10/25 10:57:18"
+    },
+    {
+      "name": "A7_slash_entry",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A7b_composer_schedule_created",
+      "pass": true,
+      "detail": "REST 可见 composer 创建的计划"
+    },
+    {
+      "name": "A8_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1"
+    }
+  ],
+  "allPass": true,
+  "passed": 21,
+  "total": 21
+}

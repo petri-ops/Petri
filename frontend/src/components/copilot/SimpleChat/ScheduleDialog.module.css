@@ -1,0 +1,92 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--petri-space-4);
+  background: color-mix(in srgb, var(--petri-bg-canvas) 72%, transparent);
+}
+
+.dialog {
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-4);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  box-shadow: var(--petri-shadow-float);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-muted);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--petri-text-secondary);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--petri-space-1) var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font: inherit;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.preview {
+  max-height: 120px;
+  overflow: auto;
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  color: var(--petri-danger);
+}
+
+.actions {
+  display: flex;
+  gap: var(--petri-space-2);
+  justify-content: flex-end;
+}
+

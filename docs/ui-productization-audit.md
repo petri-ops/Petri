@@ -1,5 +1,9 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-25（**UI-567 自动化与目标看板 verified（隔离 9223 亮/暗各 21/21；BLOCK-256 P1–P6）**：看板显示 schedule/最近运行/goal 用量预算/提醒；goal 暂停恢复、schedule 启停、看板新建、立即运行记录、提醒进通知中心、composer `/schedule` 创建计划全链实机通过。证据=`acceptance/block-256/q7-live.json` / `q7-live-dark.json`；截图 unavailable。）
+
+最后更新：2026-10-25（**UI-567 Q7 自动化与目标看板 in_progress（BLOCK-256 P0）**：ScheduledWorkspacePanel 将从占位改为任务看板——schedule 列表（启用/暂停/立即运行/删除）、最近运行、goal 状态/用量/预算、提醒确认；composer 新增 `/schedule` 入口；提醒进入通知中心 `schedule_reminder`。代码+测试后在 9223 实机取证再升级。）
+
 最后更新：2026-10-25（**UI-566 逐消息统计 + 会话拖入 composer verified（隔离 9223 亮/暗各 17/17；BLOCK-255 P1–P6）**：统计动作打开面板，展示本条耗时/工具步数/迭代/字符/模型与 usage token（2 次有 usage · 1 次未返回 · 输入 1K）；无 usage 的历史消息明确「未记录」；左栏当前会话自拖被拒（提示 + 0 chip），目标会话拖入产唯一 conversation chip（conversationId + 有界摘要）并可移除。证据=`acceptance/block-255/q2rem-live.json` / `q2rem-live-dark.json`；截图 unavailable。）
 
 最后更新：2026-10-25（**UI-566 逐消息统计 + 会话拖入 composer in_progress（BLOCK-255 Q2-REM P0）**：助手消息动作将新增「统计」面板（耗时/工具步数/迭代/字符 + 本轮 usage token；无数据诚实未记录）；左栏会话行可拖入 composer，复用唯一 `ComposerContextItem` 通道与既有有界摘要。代码+测试后在 9223 实机取证再升级，当前不冒充 verified。）
@@ -5483,3 +5487,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：Node `block255-message-stats` **6/6** + UI-523 usage **12/12**；前端 C4 **46/46**（messageActions/messageStats/MessageStatsPanel/行统计/行 memo/useRunUsageTotals/theme）+ C17 **49/49**（conversationDrag/useComposerDrop/attachments/contextSources）；`quality:types` 0、`quality:lint` 0 error、`test:changed` EXIT=0（Node 1692 / 1683 pass / 0 fail / 9 skipped；前端 79 文件 602）。
 - **实机证据**：`acceptance/block-255/q2rem-live.json` / `q2rem-live-dark.json`（各 **17/17**；截图 `unavailable`）。断言链：左栏两会话行 → 当前会话种子消息 → 统计面板（2 次有 usage / 1 次未返回 / 输入 1K / 2 步 / 2 轮）→ 无 usage「未记录」→ 当前会话自拖被拒（提示 + 0 chip）→ 目标会话拖入产唯一 conversation chip（conversationId + 有界摘要）→ chip 可移除 → 收尾回 `?test=1`。
 - **边界（reopen）**：逐消息人民币成本、BLOCK-255 前历史消息 token 回填、统计导出/复制、项目树/结果面/知识空间拖放、跨设备。
+
+## UI-567: 自动化与目标看板（2026-10-25 **verified（隔离 9223 亮/暗各 21/21；BLOCK-256 P1–P6）**）
+
+- **变化面**：`ScheduledWorkspacePanel` 从占位改为任务看板——schedule 列表（标题/间隔/下次运行/启用暂停/立即运行/删除）、最近运行（状态/task/会话）、goal 列表（状态/用量/预算/暂停恢复完成）、提醒确认；composer 新增 `/schedule` 斜杠入口（标题/间隔对话框）；提醒到期进入通知中心（`schedule_reminder`）。
+- **为什么这样设计（自有形态）**：定时执行复用既有 `POST /api/ai/agent` 单链，不建第二执行器；goal 用量取本地 `ai_usage` 真账本，预算受限在调度提交前跳过并如实记录；提醒只写本地通知中心，不依赖系统通知权限。
+- **验证（代码）**：Node `block256-automation` **5/5** + registry/prerouting/skill/decision **52/52**；前端 Q7 **33/33**（panel/dialog/bridge/slash/notification/theme）；`quality:types` 0、`quality:lint` 0 error、theme **17/17**、`test:changed` EXIT=0（Node 1389/1372 pass/0 fail/17 skipped；前端 107 文件 768）。
+- **实机证据**：`acceptance/block-256/q7-live.json` / `q7-live-dark.json`（各 **21/21**；截图 `unavailable`）。断言链：看板 schedule/goal/run → goal 820/1000 预算与「接近预算」→ goal 暂停/恢复 → schedule 暂停/启用 → 看板新建 → 立即运行记录 → 提醒进通知中心（`schedule_reminder`）→ composer `/schedule` 对话框创建计划 → 收尾回 `?test=1`。
+- **边界（reopen）**：cron/时区、跨设备、运行中 loop 硬熔断、schedule 重叠并发策略、失败重试退避、goal 跨会话聚合口径、agent 唤醒。

@@ -1,0 +1,232 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: var(--petri-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3) var(--petri-space-4);
+  border-bottom: 1px solid var(--petri-border-card);
+}
+
+.headerTitle {
+  flex: 1;
+  font-weight: 600;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--petri-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-5);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--petri-space-3);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.cardTitle {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  padding: 2px var(--petri-space-2);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.statusOk {
+  color: var(--petri-status-success-fg);
+}
+
+.statusError {
+  color: var(--petri-danger);
+}
+
+.statusWarn {
+  color: var(--petri-warning-text);
+}
+
+.statusRunning {
+  color: var(--petri-status-info);
+}
+
+.meta,
+.metaRow {
+  color: var(--petri-text-secondary);
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+  align-items: center;
+}
+
+.progressTrack {
+  height: 6px;
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  overflow: hidden;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--petri-status-info);
+}
+
+.cardActions,
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+  margin-top: var(--petri-space-1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--petri-space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--petri-text-secondary);
+}
+
+.input,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--petri-space-1) var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text);
+  font: inherit;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.empty {
+  padding: var(--petri-space-4);
+  border: 1px dashed var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  color: var(--petri-text-muted);
+}
+
+.errorBox,
+.noticeBox {
+  margin: 0 var(--petri-space-4);
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-status-warning-bg);
+  color: var(--petri-warning-text);
+}
+
+.errorBox {
+  color: var(--petri-danger);
+}
+
+.runs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+}
+
+.runRow,
+.reminderRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface);
+}
+
+.runStatus {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.runTitle {
+  flex: 1;
+  min-width: 120px;
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--petri-font-mono);
+  color: var(--petri-text-muted);
+}
+
+.errorText {
+  color: var(--petri-danger);
+  overflow-wrap: anywhere;
+}

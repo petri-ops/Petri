@@ -102,6 +102,10 @@ const TOOL_METADATA = {
   // （plan-ui-tools.js INSERT/UPDATE，契约 state-write/R1）——曾误标 readOnly=true
   // 会被调度器放进只读并行组；改非只读串行（concurrentSafe 随只读轴一并收串行）。
   plan: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // ---- 目标状态机（BLOCK-256 Q7）：get 只读；create/update 写 agent_goals ----
+  create_goal: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  get_goal: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  update_goal: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   // ---- 决策观测域（BLOCK-116 W2 / BK-04）：只读台账查询（纯读并发；变更面不对模型开放）----
   decision_summary: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   decision_recent: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

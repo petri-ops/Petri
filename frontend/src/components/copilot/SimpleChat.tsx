@@ -50,6 +50,9 @@ import {
 import { useComposerDrop } from './SimpleChat/hooks/useComposerDrop';
 import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
+import { ScheduleDialog } from './SimpleChat/ScheduleDialog';
+import { useScheduleComposer } from './SimpleChat/hooks/useScheduleComposer';
+import { runCompactSlash } from './SimpleChat/compactSlash';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
@@ -324,6 +327,8 @@ export function SimpleChat({
   const composerContext = useComposerContext({ projectId, ownsEventBus: ownsCopilotAsk });
   // BLOCK-246 C4 — 行级新增动作（加入上下文/评价）；失败复用附件提示条，不静默。
   const messageActions = useMessageActions({ conversationId, projectId, addItem: composerContext.addItem, onNotice: setAttachmentNotice });
+  // BLOCK-256 Q7 — `/schedule` 草稿与确认框
+  const scheduleComposer = useScheduleComposer();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [previewImage, setPreviewImage] = useState<AttachmentFile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -1394,38 +1399,17 @@ export function SimpleChat({
         URL.revokeObjectURL(url);
         break;
       }
-      case 'compact-context': {
-        // BLOCK-172 CP-7 — /compact 手动压缩（后端 BLOCK-95 B2 端点；同步等摘要）。
+      case 'compact-context':
         if (!conversationId) {
           setSteerNotice('压缩上下文：当前无会话');
           break;
         }
         setSteerNotice('正在压缩上下文（生成摘要中）…');
-        void (async () => {
-          try {
-            const response = await fetch(getPlatformApiPrefix() + '/ai/conversations/' + encodeURIComponent(conversationId) + '/compact', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
-              },
-            });
-            const data = (await response.json().catch(() => ({}))) as { status?: string; compacted?: boolean; reason?: string; compaction?: { coversCount?: number }; error?: string };
-            if (response.ok && data.status === 'ok' && data.compacted) {
-              setSteerNotice(`上下文已压缩（覆盖 ${data.compaction?.coversCount ?? 0} 条较早消息）`);
-            } else if (data.reason === 'below_threshold' || data.reason === 'too_few_messages') {
-              setSteerNotice('上下文尚未达到压缩阈值，无需压缩');
-            } else if (data.error === 'session compaction disabled') {
-              setSteerNotice('会话压缩开关未开启（设置→实验特性）');
-            } else {
-              setSteerNotice('压缩失败：' + (data.error || 'HTTP ' + response.status));
-            }
-          } catch (e) {
-            setSteerNotice('压缩失败：' + (e instanceof Error ? e.message : '网络错误'));
-          }
-        })();
+        void runCompactSlash(conversationId).then(setSteerNotice);
         break;
-      }
+      case 'schedule-task':
+        scheduleComposer.open(input);
+        break;
       case 'dismiss-slash':
         setSlashQuery('');
         break;
@@ -1456,7 +1440,7 @@ export function SimpleChat({
     historyNavRef.current = INITIAL_NAV_STATE;
     clearConversationDraft(projectId, conversationId);
     if (taRef.current) taRef.current.style.height = 'auto';
-  }, [newConversation, projectId, conversationId, displayMessages, resizeTextarea]);
+  }, [newConversation, projectId, conversationId, displayMessages, resizeTextarea, scheduleComposer.open]);
 
   // Close slash panel on outside click
   useEffect(() => {
@@ -2096,6 +2080,13 @@ export function SimpleChat({
       {previewImage && (
         <ImagePreviewModal attachment={previewImage} items={attachments.filter((att) => att.previewUrl)} onClose={closePreview} />
       )}
+      <ScheduleDialog
+        open={scheduleComposer.isOpen}
+        prompt={scheduleComposer.prompt}
+        projectId={projectId}
+        onClose={scheduleComposer.close}
+        onCreated={() => { scheduleComposer.close(); setAttachmentNotice('定时计划已创建'); }}
+      />
     </div>
   );
 }

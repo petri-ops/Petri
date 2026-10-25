@@ -173,9 +173,9 @@ status: planned
 | B1 | 计划批准三选一 | 开始实现/调整/暂不实施 | `PlanApprovalCard` 批准/清上下文执行/继续计划 | ✅ | Petri 已对齐且更细 | — |
 | B2 | 计划反馈回路 | `requestChanges` 输入「告诉 Qoder 计划需要如何调整」 | 批准卡带意见输入，「继续讨论」把意见发回**同一计划**（只要求重排步骤表、不批准执行、不改档位），空意见=只收起卡片（BLOCK-246 P5 + 单测 5+3） | ✅ | 计划不是只读弹窗 | — |
 | B3 | 计划版本/状态/复制/下载 | `specArtifact` 版本 tabs、pending/approved/accepted、copy/download | **✅ BLOCK-253**：计划面「当前 + 修订」tabs，修订原因/提议步骤/状态可见，proposed 可批准并刷新步骤表，复制/下载跟随选中版本（实机批准 + REST 步骤替换） | ✅ | 计划作为可追溯产物 | Q5 |
-| B4 | 目标模式 | active/completed/paused/blocked/usage/budget + elapsed | 无 | 🔴 | 长跑目标的状态机 | Q7 |
-| B5 | 目标用量/预算受限 | `usageLimited/budgetLimited` | 只有成本上限提示 | 🟡 | 目标级预算可见 | Q7 |
-| B6 | 目标工具契约 | GetGoal/CreateGoal/UpdateGoal 三件 | 只有 `spawn_agent` 的 goals 参数；无独立目标工具 | 🟡 | 目标可查询/可更新 | Q7 |
+| B4 | 目标模式 | active/completed/paused/blocked/usage/budget + elapsed | **✅** `agent_goals` 持久表 + 状态机（active/paused/completed/blocked，非法迁移拒绝）+ elapsed/completed_at + 看板 goal 卡片（BLOCK-256） | ✅ | 长跑目标的状态机 | BLOCK-256 |
+| B5 | 目标用量/预算受限 | `usageLimited/budgetLimited` | **✅** 用量取真实 `ai_usage`（goal 会话 + goal 关联运行会话）；80% usageLimited / 100% budgetLimited；关联 schedule 在预算/非 active 时提交前跳过并记录 `skipped_budget`/`skipped_goal`（不硬熔断运行中 loop）（BLOCK-256） | ✅ | 目标级预算可见 | BLOCK-256 |
+| B6 | 目标工具契约 | GetGoal/CreateGoal/UpdateGoal 三件 | **✅** `create_goal`/`get_goal`/`update_goal`（项目隔离；R1/R0；registry 85→88）（BLOCK-256） | ✅ | 目标可查询/可更新 | BLOCK-256 |
 
 ### C. 会话与消息
 
@@ -266,11 +266,11 @@ status: planned
 
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| I1 | 定时任务 | cron/启停/运行历史/立即运行 | `ScheduledWorkspacePanel` 占位「即将推出」 | 🔴 | 科学分析可定时重跑 | Q7 |
-| I2 | 自动化入口 | composer 插件「创建定时任务」 | 无 | 🔴 | 从一次分析到周期分析 | Q7 |
-| I3 | 任务看板 | 「构建团队分析看板」提示 | 定时面板占位 | 🟡 | 多任务编排视图 | Q7 |
+| I1 | 定时任务 | cron/启停/运行历史/立即运行 | **✅** `agent_schedules` + 10s runner（复用 `POST /api/ai/agent`，不建第二执行器）+ 运行历史 + 立即运行；interval 1–10080 分钟（BLOCK-256；cron/时区 reopen） | ✅ | 科学分析可定时重跑 | BLOCK-256 |
+| I2 | 自动化入口 | composer 插件「创建定时任务」 | **✅** composer `/schedule` 斜杠 + 确认对话框（prompt 可编辑/间隔；不发送聊天消息）（BLOCK-256） | ✅ | 从一次分析到周期分析 | BLOCK-256 |
+| I3 | 任务看板 | 「构建团队分析看板」提示 | **✅** `ScheduledWorkspacePanel` 真实看板：schedule 列表/启停/立即运行/删除 + 最近运行 + goal 用量预算 + 提醒确认（BLOCK-256） | ✅ | 多任务编排视图 | BLOCK-256 |
 | I4 | 常驻任务意图卡 | 有 | `resident_task_*` 已更深 | ✅ | 不重建 | — |
-| I5 | 计划提醒/唤醒 | ScheduleWakeup | 无 | 🟡 | 长跑提醒 | Q7 |
+| I5 | 计划提醒/唤醒 | ScheduleWakeup | **✅** reminder schedule 到期写 `agent_schedule_reminders` → 全局 bridge → 通知中心 `schedule_reminder`（应用内，不依赖系统通知权限；agent 唤醒未做，reopen）（BLOCK-256） | ✅ | 长跑提醒 | BLOCK-256 |
 
 ### J. 扩展与 MCP
 
@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-25 BLOCK-255 回写，机械计数）**：✅ 61 · 🟡 30 · 🔴 4 · ⛔ 7 = **102 点**（本轮 C4/C17 🟡→✅；其余不变）。基线取 BLOCK-254 收口口径。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
+**矩阵统计（2026-10-25 BLOCK-256 回写，机械计数）**：✅ 68 · 🟡 26 · 🔴 1 · ⛔ 7 = **102 点**（本轮 B4/B5/B6/I1/I2/I3/I5 🟡/🔴→✅；F8 仍 🔴）。基线取 BLOCK-255 收口口径。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
 
 ## 6. 多波次计划（Q0–Q9）
 
@@ -683,7 +683,7 @@ status: planned
 | 3 | Q2b **（completed · BLOCK-247 · 2026-10-23）** | 已交付：`web_search` + `web_fetch`（实际 provider=SearXNG，未配置=明确拒绝而非空结果）+ 唯一出网口（协议/凭据/私网·云元数据拒绝/DNS 二次校验/重定向逐跳/字节截断/content-type）+ 设置页 + 默认关授权族 + 来源/成本审计 + 实机亮暗各 23/23；UI-557 verified；L1/L2 保持 🟡（provider 方言/权威度未做） | Q2 来源标签最小投影已兑现 | 已完成 |
 | 4 | Q3 **completed（BLOCK-248 · 2026-10-23）** | C1 对账（MessageRail 已在）；C2 活动卡对账 + 无 diff 诚实态；C3 事件级轨迹+筛选+recordedOnly；H3 证据面事件聚合；K1 轮次/工具级边界（应用级仍缺） | Q1/Q2b 事件；与 Q5 evidence tab 合并 | 已完成 |
 | 5 | Q4a **completed（BLOCK-249 · 2026-10-23）** | C7 暂停/恢复；C10 团队活动；F1 roster/stop-all/部分回执；F3 结构化输出；F4 工具约束；F5 journal；F9 CodebaseInvestigator | Q3 团队活动可见 | 已完成（UI-559 已 verified · BLOCK-250 拆重渲染环；亮/暗各 20/20） |
-| 6 | Q7 | I1 定时任务；I2 composer 入口；I3 任务看板；I5 唤醒提醒；B4 目标状态机；B5 预算；B6 目标工具 | Q4a | 1–2 周 |
+| 6 | Q7 **（completed · BLOCK-256 · 2026-10-25）** | goal 持久状态机 + `create_goal`/`get_goal`/`update_goal` 三工具；goal 用量取真实 `ai_usage`，80% usageLimited / 100% budgetLimited，关联 schedule 提交前跳过（不硬熔断运行中 loop）；schedule 持久计划 + 10s runner 复用既有 `POST /api/ai/agent` + 任务看板 + `/schedule` composer 入口 + reminder 进通知中心；隔离 9223 亮/暗各 **21/21**（`acceptance/block-256/q7-live{,-dark}.json`）。reopen=cron/时区/跨设备/overlap/失败重试/agent 唤醒 | Q4a 已完成 | 已完成 |
 | 7 | Q4b | F8 工作流脚本（meta/agent/parallel/pipeline/phase/log/budget/resume）；确定性沙箱；并发/代理/预算帽；journal/血缘；opt-in | Q4a 后单列立项 | 2–3 周 |
 | 8 | Q5-REM **（partial · BLOCK-253 · 2026-10-24）** | 已交付：B3/H4 计划修订 tabs（实机 14/14）、E4 文件管理器 bridge/IPC 实机（测试实例干跑 + 可见状态）、F7 ArtifactPinPane 主区/副栏最大化（6/6 测试）、E1 入口统一第一步（标题栏菜单聚合中心模式/终端/侧聊/右轨面，实机开合）；H3 已随 Q3。仍 reopen：E1 跨宿主渲染合并、通用 pane 模型/钉住实机、E9 终端分屏（母纲 deferred）、宿主菜单在底部终端打开后无法再次弹出（实机观察） | BLOCK-216 主体已完成；BLOCK-253 已闭环可安全项 | 余项按需单列 |
 | 9 | Q6-REM **（completed · BLOCK-254 · 2026-10-25 P8 收口：A 档 + B-1～B-5 全闭环 + 实机亮/暗 + closeout 十三门 PASS）** | 已销项（母纲滞后项）：C13 速记板本体（BLOCK-246 已交付）、UI-546 实机腿（BLOCK-252 verified）。**A 已闭环**：E5 文字（`text` 契约/渲染/工具条/列表 + placeholder 语义分支）、Agent 批注读取工具（`result_annotations_list`，projectId 必填 fail-closed、有界、只读 R1；工具 84→85）。B 档五项已全闭环并过实机（B-1=**E5 马赛克**：`MOSAIC_DISCLOSURE` 单一措辞源 + hint/overlay title/prompt/placeholder 四处一致 + `backdrop-filter` 缺失时不透明色块降级 + 反向措辞守卫；实机视觉留 P8）、**撤销重做**（B-2 已闭环=仅本次会话/仅当前 scope/最近 10 次的前端补偿栈，删除补偿按原内容重建为新 id 并如实标注；**redo 非范围**，理由=不对称补偿会产生 id 漂移链）、**文本选中批注**（B-3 已闭环=`text-selection` + `anchor(text-range)`，与 rect 契约级互斥；迁移 018 只加 `anchor_json`；选区「批注」按「有路径+有行号+有出口」解禁，无行号视图禁用并说明；**v1 不做行内高亮**）、**速记板图片批注**（B-4 已闭环=surface `scratchpad-entry` + `entryId`，与 filePath/artifactId/revisionId 互斥；迁移 019 只加 `entry_id`；速记面板缩略图→大图叠加层复用批注宿主；**删除条目不清批注**留 reopen）、**PPTX/DOCX/XLSX**（B-5 已闭环=锚点加 `unit(line/paragraph/row)`，docx/pptx/odt/odp 按段落批注、xlsx/ods 按行批注；零新依赖不做版式渲染；无回调时退回 `<pre>` 零回归；**段落/行序会随文档改动漂移**，无失效检测留 reopen）。C 阻塞（另立契约包）：E5 画笔（rect-only 几何需契约 v2）、pack iframe 批注窄桥（契约冻结 + 写权限边界） | BLOCK-219/238 主体已完成；P2b/Q5 已就绪；逐项判定见 [BLOCK-254 §2–§3](./block-254-q6-rem-plan.md)，执行记录见 §9 | B 档 1 周+实机；C 档另包 |
@@ -692,7 +692,7 @@ status: planned
 | 12 | P4-REM | E13 Result Studio 高级 tab 全量迁 pack（lineage/compare/history/selection/revisions/annotations/methods/export）；域中性 11 处/6 键 compat 是否清零（需裁决）；真实结果页保真实机 | 母纲硬约束：最后 | 1–2 周 |
 | V | V-REM **（completed · BLOCK-252 · 2026-10-24）** | 已交付：UI-544/545/546 实机腿（pack tabs、结果面 compare、图形批注亮暗各 23/23） | 代码+单测已绿；纯验证债已清 | 已完成 |
 
-> 推荐执行序（Q1-REM 已于 BLOCK-244 收口）：**Q2 → Q2b → Q3 → Q4a → Q7 → Q5-REM/Q6-REM → Q8-REM → Q9-REM → P4-REM**；Q4b 在 Q4a 后单列。Q5/Q6 余项与 Q9 可在主序中互换。V-REM 随对应 UI 包或独立验证批收口。
+> 推荐执行序（Q1-REM/Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q7 已收口）：**Q4b → Q8-REM → Q9-REM → P4-REM**；Q4b 单列，Q4b 之后按 §6.5 队列。Q5/Q6 余项与 Q9 可在主序中互换；Q2-REM/V-REM 已收口。P4-REM 最后。
 
 ## 7. 波次依赖与排序
 
@@ -766,6 +766,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 
 | 日期 | 波次 | 变更 | 证据 |
 | --- | --- | --- | --- |
+| 2026-10-25 | Q7 | BLOCK-256 收口：**B4/B5/B6 → ✅**（goal 持久状态机 + 三工具 + 真实 ai_usage 用量/预算 + 调度提交前预算跳过）、**I1/I2/I3/I5 → ✅**（schedule 持久计划 + 10s runner 复用既有 agent task 链 + 看板 + `/schedule` + 提醒通知）；矩阵 **✅68 / 🟡26 / 🔴1 / ⛔7 = 102** | `docs/block-256-q7-automation-goals-plan.md` §7 + `acceptance/block-256/q7-live{,-dark}.json` |
 | 2026-10-25 | Q2-REM | BLOCK-255 收口：**C4 🟡→✅**（消息统计动作/面板 + loop usage 合计落 `meta_json.usage` + 实时 `runUsage` 累加）、**C17 🟡→✅**（会话行拖入 composer，唯一 `ComposerContextItem` 通道 + 有界摘要；当前会话拒自引用）；矩阵 **✅61 / 🟡30 / 🔴4 / ⛔7 = 102** | `docs/block-255-q2-rem-plan.md` §7 + `acceptance/block-255/q2rem-live{,-dark}.json` |
 | 2026-10-25 | Q6-REM | BLOCK-254 收口：**C12 🟡→✅**（文本选中批注 `text-selection` + 行号锚点）、**C13 🟡→✅**（速记图片批注 `scratchpad-entry`）；E5 保持 🟡（已补文字/马赛克/文本锚点/Office/撤销/Agent 读取，仍缺画笔契约 v2 与 pack iframe 桥）；另回写 Q2b（BLOCK-247）与 V-REM（BLOCK-252）completed；矩阵 **✅59 / 🟡32 / 🔴4 / ⛔7 = 102** | `docs/block-254-q6-rem-plan.md` §9 + `acceptance/block-254/` |
 | 2026-10-20 | Q0 | 初始 89 点矩阵落档；✅24 / 🟡40 / 🔴19 / ⛔6（机械计数） | 本文件 §5；Qoder 反编译树 + Petri UI 台账/组件核对 |

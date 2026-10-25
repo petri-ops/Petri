@@ -39,6 +39,12 @@ describe('notification-center', () => {
     expect(unreadNoticeCount()).toBe(0);
   });
 
+  it('接受 Q7 schedule_reminder 类型并持久化', () => {
+    pushNotice({ kind: 'schedule_reminder', title: '计划提醒', body: '记得看质控', projectId: 'proj_1' });
+    expect(listNotices()[0].kind).toBe('schedule_reminder');
+    expect(window.localStorage.getItem('petri:notification-center:v1')).toContain('schedule_reminder');
+  });
+
   it('最多保留 50 条（新在前）', () => {
     for (let i = 0; i < 55; i++) {
       pushNotice({ kind: 'turn_completed', title: `t${i}`, body: 'x' });

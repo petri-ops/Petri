@@ -14,6 +14,7 @@ describe('classifySlashCommand', () => {
     expect(classifySlashCommand('model')).toBe('toggle-model-menu');
     expect(classifySlashCommand('export')).toBe('export-markdown');
     expect(classifySlashCommand('compact')).toBe('compact-context');
+    expect(classifySlashCommand('schedule')).toBe('schedule-task');
   });
 
   it('skill:/template: 前缀走模板注入（结构化 chip 属 v2，不在本包）', () => {

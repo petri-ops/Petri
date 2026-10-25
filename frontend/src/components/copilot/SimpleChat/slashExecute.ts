@@ -17,6 +17,7 @@ export type SlashCommandKind =
   | 'toggle-model-menu'
   | 'export-markdown'
   | 'compact-context'
+  | 'schedule-task'
   | 'dismiss-slash'
   | 'insert-template';
 
@@ -26,6 +27,7 @@ const KNOWN: Record<string, SlashCommandKind> = {
   model: 'toggle-model-menu',
   export: 'export-markdown',
   compact: 'compact-context',
+  schedule: 'schedule-task',
   help: 'dismiss-slash',
 };
 
