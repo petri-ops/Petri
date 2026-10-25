@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-25（**BLOCK-262 Q4b 工作流脚本立项 active（P0-LAUNCH）**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-262（Q4b 工作流脚本；P0-LAUNCH）**，plan=`docs/block-262-q4b-workflow-scripts-plan.md`（对账 §1 / 设计 §2 / 阶段 §4）。**P1**=`workflow-script.js`（meta 校验）+ `workflow-sandbox.js`（扫描/转译/vm 骨架）红绿 → **P2**=`workflow-runner.js`（原语/帽/journal/resume）+ `workflow-journal.js` + `launchSubAgent` 导出（mock 注入测试）→ **P3**=`routes/ai-agent/workflow.js`（opt-in/dryRun/cancel/伞 task）→ **P4**=9223 实机腿（2-agent fan-out + 预算耗尽）+ closeout。红线=不建第二执行器（agent() 只经 launchSubAgent）/沙箱 fail-closed/零新依赖/零迁移/默认关/审批链全继承。**BLOCK-261 已提交 `c83b6a36`；main ahead origin 未推送（推送需发令）**。**收口 PATH** 需同时含 Git `usr\bin`（GNU tar）与 `bin`（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-25（**BLOCK-260 completed（Q9-REM 余项：K3 退出逐项 + K2 minidump 摘要 + C14 上下文追问；closeout 十三门 PASS）**）
 
 最后更新：2026-10-25（**BLOCK-261 completed（Q9-REM 余项逐条裁决与出籍：K3 逐项停止 + K1 应用级边界；closeout 十三门 PASS）**）
