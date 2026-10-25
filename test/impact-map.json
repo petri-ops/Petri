@@ -5603,6 +5603,28 @@
         "frontend/src/components/shell/QuitSummaryDialog.stop.test.tsx",
         "frontend/src/components/RouteErrorBoundary.test.tsx"
       ]
+    },
+    {
+      "id": "block262-q4b-workflow-scripts",
+      "note": "BLOCK-262 Q4b — 工作流脚本面：node:vm 沙箱（workflow-script/workflow-sandbox）+ runner/journal/resume（workflow-runner/workflow-journal）+ REST opt-in/dryRun/cancel（routes/ai-agent/workflow.js）；launchSubAgent 从 spawn-agent-tools 导出复用（agent() 唯一执行路径）。",
+      "patterns": [
+        "core/petri-server/helpers/workflow-script.js",
+        "core/petri-server/helpers/workflow-sandbox.js",
+        "core/petri-server/helpers/workflow-runner.js",
+        "core/petri-server/helpers/workflow-journal.js",
+        "core/petri-server/routes/ai-agent/workflow.js",
+        "core/petri-server/routes/ai-agent/index.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js"
+      ],
+      "tests": [
+        "test/block262-workflow-sandbox.test.mjs",
+        "test/block262-workflow-runner.test.mjs",
+        "test/block262-workflow-routes.test.mjs",
+        "test/block249-team.test.mjs",
+        "test/block49-spawn-agent-tools.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block198-spawn-depth.test.mjs"
+      ]
     }
   ]
 }

@@ -56,7 +56,7 @@ function newRunId() {
  *   resumeFromRunId：可选，前缀复用来源。
  * @returns {{ runId, promise: Promise<{status, returned?, error?, runId}>, cancel: () => Promise<void> }}
  */
-function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = null }) {
+function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = null, extraRunMeta = null }) {
   const scriptHash = hashWorkflowSource(source);
   const argsHash = hashWorkflowArgs(args);
   const runId = newRunId();
@@ -300,6 +300,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
   journal.writeRunMeta(root, runId, {
     runId,
     userId,
+    ...(extraRunMeta || {}),
     status: 'running',
     meta,
     scriptHash,
@@ -332,6 +333,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
       journal.writeRunMeta(root, runId, {
         runId,
         userId,
+        ...(extraRunMeta || {}),
         status: 'failed',
         meta,
         scriptHash,
@@ -350,6 +352,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     journal.writeRunMeta(root, runId, {
       runId,
       userId,
+      ...(extraRunMeta || {}),
       status: finalStatus,
       meta,
       scriptHash,

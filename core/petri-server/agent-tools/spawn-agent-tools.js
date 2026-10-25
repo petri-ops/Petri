@@ -1044,6 +1044,9 @@ async function buildTerminalSummary(task) {
 }
 
 module.exports = {
+  // BLOCK-262（Q4b）— launchSubAgent 是子代理唯一启动器：工作流 runner 经注入复用
+  // （红线=不建第二执行器）；签名与内部调用点零变化。
+  launchSubAgent,
   // BLOCK-173 CP-8 — 配置解析器导出（契约测试直测；非工具面）
   resolveSpawnConcurrencyLimit,
   resolveSpawnMaxDepth,
