@@ -222,6 +222,17 @@ declare global {
             counts: Record<string, number>;
             total: number;
             rows: Array<{ key: string; label: string; value: number }>;
+            /** BLOCK-260/261 K3 — 主进程归一后的有界逐项定位（无参数正文）。 */
+            items?: Array<{
+              kind: 'toolJob' | 'task' | 'subagentTask' | 'approval';
+              id: string;
+              label: string;
+              status?: string;
+              projectId?: string | null;
+              conversationId?: string | null;
+              taskId?: string | null;
+            }>;
+            fetchedAt?: string | null;
             reason?: string;
             preview?: boolean;
             trayAvailable?: boolean;

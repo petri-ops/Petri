@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-25T09:36:55.610Z -->
 | ✅ BLOCK-254 P7（B-5 Office 锚点批注，2026-10-24；用户「P7 = B-5 Office 锚点批注 整完」） | 2026-10-24 | **P7 completed**：锚点加 `unit(line/paragraph/row)`（缺省 line 保 P5 零变化，非法即 anchor_unit_invalid）；docx/pptx/odt/odp 按段落渲染 + 每段批注（第 N 段 + 原文），xlsx/ods 行首批注（表格第 N 行 + 整行摘要）；描述按单位说段/表格行。零新依赖、无回调时退回 pre 且无死按钮。证据=Node 23/23 + 前端 24/3 + types 0 + lint 0 error + theme 17/17 + test:changed EXIT=0（Node 1158/1145/0 fail，前端 83 文件）。边界=序号会随文档改写/重排漂移（无失效检测）、iWork 无批注、无实机腿（UI-565 in_progress）。plan §9 | BLOCK-254 / Q6-REM |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-25T12:30:19.504Z -->
+| ✅ BLOCK-254 P8（收口：实机亮/暗 + closeout 十三门 + 回写，2026-10-25；用户「搞定 P8 = 收口批」） | 2026-10-25 | **P8 completed → 包 completed**：实机分三轮（实机抓真=保存后切文件致 CDP 失活，故每轮只保存一次）——image 15/15（马赛克声明/落库/撤销、文本面 mode、速记大图）、text 12/12（速记落库 entryId 匹配）、office 10/10（段落批注 unit=paragraph）、暗色 12/12；docx 夹具零依赖自造；截图如实 unavailable。closeout 十三门逐门取证 PASS（抓真三修：CRLF 归一、impact-map 补 block254 分类、knip +1 定性动态入口；test:changed 在 closeout 内偶发挂起→单独两轮 EXIT=0 逐门补证）。回写：母纲 completed、UI-562/563/564/565 verified。证据=acceptance/block-254/q6rem-{image,image-dark,text,office}.json | BLOCK-254 / Q6-REM |

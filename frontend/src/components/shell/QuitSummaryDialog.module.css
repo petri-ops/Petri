@@ -64,6 +64,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* BLOCK-261 K3 — 逐项动作：按钮 + 结果文案并排，结果短且不换行挤走标签。 */
+.itemActions {
+  display: flex;
+  align-items: baseline;
+  gap: var(--petri-space-2);
+}
+
+.itemError {
+  color: var(--petri-danger);
+  font-size: 0.85em;
+}
+
 .note {
   margin: 0;
   color: var(--petri-text-tertiary);

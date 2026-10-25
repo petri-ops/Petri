@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { normalizeQuietHours } from '@/lib/quiet-hours';
+import { requestActivityStop } from '@/lib/activity-control';
 import { QuitSummaryDialog, type QuitDecision, type QuitSummaryItem, type QuitSummaryRequest } from './QuitSummaryDialog';
 
 export interface ShellPrefs {
@@ -73,6 +74,7 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
   const [loaded, setLoaded] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [quitRequest, setQuitRequest] = useState<QuitSummaryRequest | null>(null);
+  const [quitSummaryVersion, setQuitSummaryVersion] = useState(0);
   const [quitError, setQuitError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -107,6 +109,8 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
     return bridge.onQuitRequested((payload) => {
       setQuitError(null);
       setQuitRequest(payload);
+      // BLOCK-261 K3 — 每轮摘要一个版本号：上一轮的逐项停止结果不该跟着新一轮跑。
+      setQuitSummaryVersion((version) => version + 1);
     });
   }, [bridge, bridgeAvailable]);
 
@@ -178,14 +182,19 @@ export function DesktopShellProvider({ children }: { children: React.ReactNode }
     })();
   }, [navigate, respondQuit]);
 
+  // BLOCK-261 K3 — 逐项停止只调用后端既有端点；结果文案回给弹窗，不在此假设已停成。
+  const stopSummaryItem = useCallback((item: QuitSummaryItem) => requestActivityStop(item), []);
+
   return (
     <DesktopShellContext.Provider value={value}>
       {children}
       <QuitSummaryDialog
         request={quitRequest}
         error={quitError}
+        summaryVersion={quitSummaryVersion}
         onDecision={(action) => { void respondQuit(action); }}
         onOpenItem={openSummaryItem}
+        onStopItem={stopSummaryItem}
       />
     </DesktopShellContext.Provider>
   );

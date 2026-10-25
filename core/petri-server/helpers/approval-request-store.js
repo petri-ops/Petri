@@ -421,13 +421,14 @@ function countPendingApprovals(now = Date.now()) {
 function listPendingApprovals({ limit = 10, now = Date.now() } = {}) {
   const items = [];
   const max = Math.max(1, Math.min(Number(limit) || 10, 20));
-  for (const store of stores.values()) {
+  // stores 的键就是审批所属任务；请求对象本身不带 taskId，缺它会让逐项停止无处下手。
+  for (const [storeTaskId, store] of stores.entries()) {
     sweepStore(store, now);
     for (const request of store.requests.values()) {
       if (request.status !== 'pending') continue;
       items.push({
         requestId: String(request.requestId || ''),
-        taskId: String(request.taskId || ''),
+        taskId: String(request.taskId || storeTaskId || ''),
         toolName: String(request.toolName || 'tool'),
         dimension: String(request.dimension || ''),
         projectId: request.ctxSnapshot && request.ctxSnapshot.projectId ? String(request.ctxSnapshot.projectId) : null,

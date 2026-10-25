@@ -252,6 +252,7 @@ export default function App(): React.ReactElement {
   // （窗口永不持有 canonical state，plan §10 治理红线）。
   if (isWindowSurface) {
     return (
+      <RouteErrorBoundary surface="app">
       <RouteErrorBoundary>
       <Suspense fallback={<RouteFallback />}>
       <Routes>
@@ -262,10 +263,13 @@ export default function App(): React.ReactElement {
       </Routes>
       </Suspense>
       </RouteErrorBoundary>
+      </RouteErrorBoundary>
     );
   }
 
+  // BLOCK-261 K1 — 应用级边界：壳层与 Provider 链自身抛异常时不再整窗白屏。
   return (
+    <RouteErrorBoundary surface="app">
     <DesktopShellProvider>
       <BackendStatusProvider>
         {/* BLOCK-159 P1-9 / UI-482 — 投影断连横幅（仅投影环境渲染，桌面零行为） */}
@@ -285,5 +289,6 @@ export default function App(): React.ReactElement {
         </AppRailProvider>
       </BackendStatusProvider>
     </DesktopShellProvider>
+    </RouteErrorBoundary>
   );
 }

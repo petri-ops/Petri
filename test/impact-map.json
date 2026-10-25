@@ -5572,6 +5572,37 @@
         "frontend/src/components/copilot/SimpleChat/messageActions.test.ts",
         "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.followups.test.tsx"
       ]
+    },
+    {
+      "id": "block261-q9-rem-adjudication",
+      "note": "BLOCK-261 Q9-REM 余项裁决与出籍：K3 逐项停止最小协议（复用既有取消端点 + 审批项补 taskId）+ K1 应用级错误边界。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block261-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q9rem-adjudication-*.cjs",
+        "docs/block-261-q9-rem-adjudication-plan.md",
+        "acceptance/block-261/**",
+        "frontend/src/lib/activity-control.ts",
+        "frontend/src/components/shell/QuitSummaryDialog.tsx",
+        "frontend/src/components/shell/QuitSummaryDialog.module.css",
+        "frontend/src/components/shell/DesktopShellProvider.tsx",
+        "frontend/src/components/RouteErrorBoundary.tsx",
+        "frontend/src/App.tsx",
+        "frontend/src/lib/electron.d.ts",
+        "core/petri-server/helpers/approval-request-store.js",
+        "core/petri-server/routes/app-activity.js",
+        "test/block261-*.test.mjs"
+      ],
+      "tests": [
+        "test/block261-q9-rem-adjudication.test.mjs",
+        "test/block260-q9-rem.test.mjs",
+        "test/approval-request-store.test.mjs",
+        "test/block223-desktop-shell-model.test.mjs",
+        "frontend/src/lib/activity-control.test.ts",
+        "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
+        "frontend/src/components/shell/QuitSummaryDialog.stop.test.tsx",
+        "frontend/src/components/RouteErrorBoundary.test.tsx"
+      ]
     }
   ]
 }

@@ -127,7 +127,7 @@
 
 | 序 | ID | 事项 | 来源（证据指针） | 状态 |
 | --- | --- | --- | --- | --- |
-| 0 | QODER-REM / Q1-Q9 | **Qoder 吸收剩余队列（planned，2026-10-25 对账：Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q2-REM/Q7/Q8-REM 已完成；Q9-REM partial）**：~~Q1-REM~~（**completed · BLOCK-244**：A1 逐工具审批门/A5 循环检测/A8 逐工具 allow-ask-deny/C5 checkpoint 编辑回退/C19 AskUserQuestion/D3 完全访问确认/A7 sideTask；A2 仅剩模型意图解释=reopen）、~~Q2/Q2b/Q3/Q4a~~（completed）、~~Q6-REM~~（completed · BLOCK-254）、~~Q2-REM~~（completed · BLOCK-255）、~~V-REM~~（completed · BLOCK-252）、~~Q7~~（completed · BLOCK-256）、~~Q5-REM~~（completed · BLOCK-257）、~~Q8-REM~~（completed · BLOCK-258）、Q4b、Q9-REM（**partial · BLOCK-259 + BLOCK-260**：K4 通知/C14 建议润色/D1 价格/K3 退出逐项/K2 minidump 摘要已交付；余 K1/K2 上传/K3 逐项停止/K9/D1 余项/D4/E7/L3/L4）、P4-REM；另 Q6 reopen 五项。串行序与量级见 `docs/qoder-essence-absorption-plan.md` §6.5；Q-MATRIX 已回写 ✅69/🟡25/🔴1/⛔7 | plan §6.5 + 各 BLOCK 收口 | **planned（Q7/Q5-REM/Q8-REM completed；Q9-REM partial；下一项待用户发令，见 §6.5）** |
+| 0 | QODER-REM / Q1-Q9 | **Qoder 吸收剩余队列（planned，2026-10-25 对账：Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q2-REM/Q7/Q8-REM 已完成；Q9-REM 已裁决式收口）**：~~Q1-REM~~（**completed · BLOCK-244**：A1 逐工具审批门/A5 循环检测/A8 逐工具 allow-ask-deny/C5 checkpoint 编辑回退/C19 AskUserQuestion/D3 完全访问确认/A7 sideTask；A2 仅剩模型意图解释=reopen）、~~Q2/Q2b/Q3/Q4a~~（completed）、~~Q6-REM~~（completed · BLOCK-254）、~~Q2-REM~~（completed · BLOCK-255）、~~V-REM~~（completed · BLOCK-252）、~~Q7~~（completed · BLOCK-256）、~~Q5-REM~~（completed · BLOCK-257）、~~Q8-REM~~（completed · BLOCK-258）、Q4b、Q9-REM（**adjudicated · BLOCK-259 + BLOCK-260 + BLOCK-261**：K4 通知/C14 建议润色/D1 价格/K3 退出逐项查看+**逐项取消停止**/K2 minidump 摘要/K1 应用级边界已交付；十一项已逐条判档，余项分三档另立项=平台与外部条件（E7 macOS 与真实 click-type、L4 macOS sidecar、K4 OS 通知历史、D1 低峰计价）/G1+ 出籍（K2 上传）/产品包候选（K9 引导与导入应用面、C14 模型生成建议、D4 成本复杂度审计覆盖确认、D1 权限与缓存、E7 PiP、K4 审批卡定位、L3 浏览器连接器））、P4-REM；另 Q6 reopen 五项。串行序与量级见 `docs/qoder-essence-absorption-plan.md` §6.5；Q-MATRIX 已回写 ✅72/🟡22/🔴1/⛔7。**候选产品包已入册本表**：🗃 **C-35～C-44**（Q9 六项=C-35～C-40；母纲各行 reopen 四项=C-41～C-44）与 ⛔ **D-05**（Q9 平台与外部条件四项），2026-10-25 BLOCK-261 裁决批——这些**不进串行序**，单项启动均需用户裁决+立项 | plan §6.5 + 各 BLOCK 收口 | **planned（Q7/Q5-REM/Q8-REM/Q9-REM completed（后者为裁决式收口）；下一项待用户发令，见 §6.5）** |
 | 0 | BLOCK-222 / Q9 | **段落级错误边界（completed，垂直切片）**：`SegmentBoundary`（`data-segment` 标注 / `resetKey` 自动恢复 / 重试 / 复制诊断含失败态 / 上报器抛错不反噬）+ 结果面预览段 + 工作区文件预览段独立兜底；崩溃不扩散到页面骨架。非范围=轮次/工具卡/应用级边界、错误落盘、通知/托盘/退出摘要/模型选择器/电脑控制 | `docs/block-222-q9-segment-boundary-plan.md` §5 + `docs/qoder-essence-absorption-plan.md` §6-Q9 | **completed（5/5；邻域 170 项）** |
 | 0 | BLOCK-221 / Q8 | **MCP 服务级治理（completed，垂直切片）**：凭据脱敏（状态面只出 `envKeys`/`envCount`，修掉解密 env 明文下发）+ `mcp-server-policy.json`（逐 server `trust/allow/block`，读侧 fail-closed、写侧 404/400）+ 投影 block 优先/allow 白名单 + `GET/PUT /api/mcp/servers/:id/policy` + 清单 `policy` 摘要。非范围=trust 降档接审批（随 Q1）/OAuth/懒加载/深链安装/四 hint/货架 UI 操作面 | `docs/block-221-q8-mcp-governance-plan.md` §5 + `docs/qoder-essence-absorption-plan.md` §6-Q8 | **completed（block221 9/9；MCP 邻域 40/40）** |
 | 0 | BLOCK-220 / Q-DOMAIN P3 | **methods 契约下沉 + 遗留注册表清除（completed，垂直切片）**：删化石 `core/shared-backend/tool-registry.js`（10 个内联生信工具/零消费；单一注册源=pack `registry/tool-registry.json` 驱动的 `petri-server/tool-registry.js`）+ pack 新契约 `provides.methods`（`methods/citations.json`/`methods/tool-labels.json`）+ `pack-methods.js` 只读有界装载器 + `methods-export.js` 接线与无 pack 无引文的诚实降级。非范围=`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools` | `docs/block-220-qdomain-p3-methods-plan.md` §8 + `docs/qoder-essence-absorption-plan.md` §Q-DOMAIN | **completed（block220 13/13；域中性 261→208；pack 0.2.0）** |
@@ -226,8 +226,20 @@
 
 ## 🗃 候选池（未排期；启动均需用户裁决 + 立项）
 
+> 2026-10-25 **BLOCK-261 Q9-REM 裁决批**新增 C-35～C-44（编号接在既有 C-34 之后；本表下方「已核实销号」段也使用 C-xx 编号，取号须先全表核对避免撞号）：Q9 十一项判档后，「产品包候选」与母纲各行的 reopen 项统一在此入册（单项启动均需裁决+立项；平台/外部条件项见下方 ⛔ 段 D-05）。
+
 | ID | 事项 | 重开条件 / 来源 |
 | --- | --- | --- |
+| C-35 | **Q9-P1 首启引导 + 外部配置导入「应用面」**（母纲 K9 余项）：分步引导（首启建立心智的形态）+ 在既有 `POST /api/import/external-agent/preview` 之上做应用面＝逐键确认/回滚/凭据不落明文/审计留痕。preview 面已在（永不写盘），应用面属独立契约，不塞长尾包。体量 3–5 天 | 启动条件=用户裁决首启引导步数与导入确认粒度并立项；来源=BLOCK-261 §0 K9 判档 |
+| C-36 | **Q9-P2 模型侧追问建议 + Auto 定形**（C14 与 D4 余项）：模型生成 follow-up/润色（先定「建议=草稿还是可执行动作」，不自动发送红线不破）+ Auto 的复杂度分级/成本权重（取真实 `ai_usage` 口径）/决策审计落盘/覆盖确认 UI。体量 1 周+ | 启动条件=产品定义与审计粒度；来源=BLOCK-261 §0（`auto-model.ts` 机械核对 0 命中） |
+| C-37 | **Q9-P3 模型选择器权限来源 + 定价缓存**（D1 余项）：Workspace 级模型限制的规则来源（谁定义、不可用原因如何逐行可解释）+ 定价发现的缓存与失效策略。体量 2–3 天 | 启动条件=权限规则来源的产品口径（低峰计价已判为外部条件，见 D-05）；来源=BLOCK-261 §0 |
+| C-38 | **Q9-P4 电脑使用画中画（PiP）**（E7 余项）：置顶小窗呈现自动化过程 + 会话级隐藏；复用既有 sidecar/status/probe 采集面，不新起第二采集。体量 3–5 天 | 启动条件=与 E7 形态一起裁决（谁可唤起/停驻/遮挡）；来源=BLOCK-261 §0（全仓无 PiP 实现） |
+| C-39 | **Q9-P5 审批通知深度定位**（K4 余项）：通知点击由「到会话」深到「到具体待决审批卡」；跳转仍走 `noticeTarget` 单点，不在组件里散落路由规则。体量 1–2 天 | 启动条件=通知中心与审批卡的跳转语义裁决；来源=BLOCK-261 §0 |
+| C-40 | **Q9-P6 浏览器连接器**（L3）：Chrome/Edge 扩展 + native messaging + Agent 网页操作工具面；整包体量 2–3 周。红线=只借行为合同（浏览器可操作），**不复刻 Qoder SDK/端点** | 启动条件=出网与注入边界的安全+产品裁决并立项；来源=BLOCK-261 §0（`agent-tools` 无 `browser_*`） |
+| C-41 | **E1 跨宿主渲染合并**（Q5-REM reopen）：中心模式/底部终端/侧聊仍各宿主，BLOCK-253/257 只做到入口统一；先出设计包再谈实现 | 启动条件=母纲标注「另立设计包」→ 设计立项；来源=BLOCK-253/BLOCK-257 |
+| C-42 | **通用 pane 模型 + 终端分屏余项**（F7/E9 reopen）：跨 terminal/sidechat/right rail 的统一 pane 模型，及三 pane/拖拽比例/会话恢复 | 启动条件=pane 模型设计立项（BLOCK-257 明确排除在尾包外）；来源=BLOCK-257 |
+| C-43 | **批注画笔（契约 v2）**（Q6 E5 C 档）：rect-only 几何承载不了自由路径，需批注契约 v2（含路径锚点语义）先行 | 启动条件=另立契约包冻结 `result_annotations` v2；来源=BLOCK-254 §C 档 |
+| C-44 | **pack iframe 批注窄桥**（Q6 C 档）：批注写权限边界 + 跨 iframe 数据桥契约冻结后再实现 | 启动条件=契约冻结 + 安全评审（写权限不得由 pack 侧自宣）；来源=BLOCK-254 §C 档 |
 | C-01 | 长列表虚拟化——**已编入 CK-02 → 勘察收缩转观察（2026-09-25：cv 与 prepend 锚定结构性冲突，CSS 回退零残留；重开=用户实测卡顿报告，届时带实验数据选型 react-virtuoso 或重写锚定后 cv 重试）** | BLOCK-106/107 遗留候选 |
 | C-12 | **scrna_standard 结果闭环路径——已转 G0-BIO BIO-7 领域深化池（2026-09-28）**：原 BLOCK-121 出局项（seurat-standard/scanpy-advanced 在 `../petri-pack-bio/plugins.dormant/` 休眠且包内无 scrna 演示数据）；届时 BLOCK-121 的 flow/工具面（result_summary）直接复用；启动仍需逐项裁决 | BLOCK-121 P0 勘察登记；2026-09-28 编入 G0-BIO |
 | C-13 | **符号图 MCP 产品化——已随 BLOCK-124 completed（2026-09-26 当日立项当日整包收口）**：codegraph_who_imports / codegraph_classify_edges 落地 agent 内建工具轨（七面注册+实机走查 allPass，agent 自主调用完成死导出清理）；plan=docs/block-124-harness-productization-plan.md | 已完成销号（证据 acceptance/block-124/）；来源=HK 建表批 2026-09-26 |
@@ -261,6 +273,7 @@
 | D-02 | macOS G0 视觉证据唯一性缺口 | 🟡待评估（重开条件＝任何对外发布/资格声明前；修补检查脚本会使 G0 门变红需先获批） |
 | D-03 | Windows 代码签名 | 🟡延期（阻塞于代码签名证书） |
 | D-04 | i18n 资源抽离 | 🟡延期（阻塞于国际化产品决策） |
+| D-05 | **Q9 平台与外部条件项（BLOCK-261 判档）**：E7 macOS 构建与真实 click/type 端到端、L4 macOS sidecar 构建、K4 OS 级通知历史、D1 低峰计价 | 阻塞点=**外部条件，非本地可闭环**：macOS 两条需 Mac 硬件（本机 Windows 无法构建/取证）；非交互桌面下 UIA 实测 `target_not_found`；OS 通知历史归操作系统（应用内留痕已交付，BLOCK-226/259）；低峰折扣需 provider 侧电价真值（本地无源，不自造第二套价格）。重开条件=具备 Mac 硬件 / provider 侧数据源 / 对外发布资格工作启动（属 G1+ 另裁）；来源=BLOCK-261 §0 |
 
 ## ✅ 已核实销号（防重复入册）
 

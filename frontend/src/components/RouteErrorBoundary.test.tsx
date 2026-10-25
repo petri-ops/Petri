@@ -63,4 +63,34 @@ describe('RouteErrorBoundary', () => {
     expect(screen.getByText('页面出错了')).toBeTruthy();
     expect(screen.queryByText('换回正常内容')).toBeNull();
   });
+
+  it('BLOCK-261 K1 — surface=app 用应用级文案与独立 testid', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(
+      <RouteErrorBoundary surface="app">
+        <Bomb message="爆点：外壳 Provider 抛错" />
+      </RouteErrorBoundary>,
+    );
+    expect(screen.getByTestId('error-boundary-app').getAttribute('data-testid')).toBe('error-boundary-app');
+    expect(screen.getByText('应用出错了')).toBeTruthy();
+    expect(screen.getByText(/外壳渲染时发生异常/)).toBeTruthy();
+    expect(screen.getByText('爆点：外壳 Provider 抛错')).toBeTruthy();
+    expect(screen.queryByTestId('error-boundary-route')).toBeNull();
+  });
+
+  it('BLOCK-261 K1 — 嵌套时内层（路由级）先兜，外层不抢恢复 UI', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(
+      <RouteErrorBoundary surface="app">
+        <div>外壳仍在场</div>
+        <RouteErrorBoundary>
+          <Bomb message="爆点：路由页" />
+        </RouteErrorBoundary>
+      </RouteErrorBoundary>,
+    );
+    expect(screen.getByTestId('error-boundary-route')).toBeTruthy();
+    expect(screen.queryByTestId('error-boundary-app')).toBeNull();
+    // 应用级边界没被触发，同层的其它壳层内容继续渲染
+    expect(screen.getByText('外壳仍在场')).toBeTruthy();
+  });
 });

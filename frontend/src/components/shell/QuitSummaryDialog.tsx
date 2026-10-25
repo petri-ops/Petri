@@ -7,9 +7,11 @@
  * 渲染侧不重复维护标签表。
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import styles from './QuitSummaryDialog.module.css';
 import button from '@/components/ui/controls/button.module.css';
+import { describeActivityAction } from '@/lib/activity-control';
+import type { ActivityActionOutcome } from '@/lib/activity-control';
 
 interface QuitSummaryRow {
   key: string;
@@ -32,20 +34,63 @@ export interface QuitSummaryRequest {
   total: number;
   rows: QuitSummaryRow[];
   items?: QuitSummaryItem[];
+  fetchedAt?: string | null;
   reason?: string;
   preview?: boolean;
 }
 
 export type QuitDecision = 'cancel' | 'tray' | 'quit';
 
+interface ItemActionState {
+  busy: boolean;
+  outcome: ActivityActionOutcome | null;
+}
+
 interface QuitSummaryDialogProps {
   request: QuitSummaryRequest | null;
   error?: string | null;
+  /** 每次主进程重新出摘要就 +1；动作结果只属于出它的那一轮，避免旧结果误导。 */
+  summaryVersion?: number;
   onDecision: (action: QuitDecision) => void;
   onOpenItem?: (item: QuitSummaryItem) => void;
+  onStopItem?: (item: QuitSummaryItem) => Promise<ActivityActionOutcome>;
 }
 
-export function QuitSummaryDialog({ request, error, onDecision, onOpenItem }: QuitSummaryDialogProps): React.ReactElement | null {
+const EMPTY_ACTIONS = new Map<string, ItemActionState>();
+
+export function QuitSummaryDialog({
+  request,
+  error,
+  summaryVersion = 0,
+  onDecision,
+  onOpenItem,
+  onStopItem,
+}: QuitSummaryDialogProps): React.ReactElement | null {
+  const [stored, setStored] = useState<{ version: number; actions: Map<string, ItemActionState> }>({
+    version: 0,
+    actions: EMPTY_ACTIONS,
+  });
+  const actions = stored.version === summaryVersion ? stored.actions : EMPTY_ACTIONS;
+
+  const mark = useCallback((key: string, state: ItemActionState): void => {
+    setStored((prev) => {
+      const base = prev.version === summaryVersion ? prev.actions : EMPTY_ACTIONS;
+      const next = new Map(base);
+      next.set(key, state);
+      return { version: summaryVersion, actions: next };
+    });
+  }, [summaryVersion]);
+
+  const runStop = useCallback((item: QuitSummaryItem): void => {
+    if (!onStopItem) return;
+    const key = `${item.kind}:${item.id}`;
+    mark(key, { busy: true, outcome: null });
+    void onStopItem(item).then(
+      (outcome) => mark(key, { busy: false, outcome }),
+      () => mark(key, { busy: false, outcome: { ok: false, reason: 'renderer_error', message: '停止请求未能发出。' } }),
+    );
+  }, [mark, onStopItem]);
+
   if (!request) return null;
   const rows = Array.isArray(request.rows) ? request.rows.filter((row) => Number(row.value) > 0) : [];
   const items = Array.isArray(request.items) ? request.items.slice(0, 10) : [];
@@ -79,23 +124,46 @@ export function QuitSummaryDialog({ request, error, onDecision, onOpenItem }: Qu
         )}
         {items.length > 0 && (
           <ul className={styles.rows} data-testid="quit-summary-items">
-            {items.map((item) => (
-              <li key={`${item.kind}:${item.id}`} className={styles.row}>
-                <span className={styles.rowLabel}>{item.label}</span>
-                {onOpenItem && item.projectId ? (
-                  <button
-                    type="button"
-                    className={button.ghost}
-                    data-testid={`quit-summary-open-${item.id}`}
-                    onClick={() => onOpenItem(item)}
-                  >
-                    查看
-                  </button>
-                ) : (
-                  <span className={styles.rowValue}>{item.status || ''}</span>
-                )}
-              </li>
-            ))}
+            {items.map((item) => {
+              const key = `${item.kind}:${item.id}`;
+              const action = describeActivityAction(item);
+              const state = actions.get(key);
+              return (
+                <li key={key} className={styles.row} data-item-kind={item.kind}>
+                  <span className={styles.rowLabel}>{item.label}</span>
+                  <span className={styles.itemActions}>
+                    {onOpenItem && item.projectId ? (
+                      <button
+                        type="button"
+                        className={button.ghost}
+                        data-testid={`quit-summary-open-${item.id}`}
+                        onClick={() => onOpenItem(item)}
+                      >
+                        查看
+                      </button>
+                    ) : null}
+                    {onStopItem ? (
+                      <button
+                        type="button"
+                        className={button.ghost}
+                        data-testid={`quit-summary-stop-${item.id}`}
+                        disabled={state?.busy === true || !action.label}
+                        title={action.label || action.unavailable}
+                        onClick={() => runStop(item)}
+                      >
+                        {state?.busy ? '处理中…' : action.label || '无法停止'}
+                      </button>
+                    ) : null}
+                    <span
+                      className={state?.outcome && !state.outcome.ok ? styles.itemError : styles.rowValue}
+                      data-testid={`quit-summary-stop-result-${item.id}`}
+                    >
+                      {state?.outcome ? state.outcome.message : (!action.label && action.unavailable) || item.status || ''}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         )}
         {request.preview && (
@@ -109,13 +177,13 @@ export function QuitSummaryDialog({ request, error, onDecision, onOpenItem }: Qu
           </p>
         )}
         <div className={styles.actions}>
-          <button type="button" className={button.ghost} onClick={() => onDecision('cancel')} autoFocus>
+          <button type="button" className={button.ghost} data-testid="quit-summary-decision-cancel" onClick={() => onDecision('cancel')} autoFocus>
             取消
           </button>
-          <button type="button" className={button.ghostCard} onClick={() => onDecision('tray')}>
+          <button type="button" className={button.ghostCard} data-testid="quit-summary-decision-tray" onClick={() => onDecision('tray')}>
             最小化到托盘
           </button>
-          <button type="button" className={button.danger} onClick={() => onDecision('quit')}>
+          <button type="button" className={button.danger} data-testid="quit-summary-decision-quit" onClick={() => onDecision('quit')}>
             停止并退出
           </button>
         </div>

@@ -8138,8 +8138,23 @@
       "archivePolicy": "retain_stable_path",
       "tags": ["q9-rem", "minidump", "quit-summary", "followups", "G0"],
       "notes": "2026-10-25 用户「搞定 Q9-REM 余项」。交付：K3 退出摘要逐项查看（有界、无参数正文、跳转结果面/会话）+ K2 本地 minidump 摘要（模块/异常/系统/进程，零依赖零上传、fail-closed，横幅详情）+ C14 追问按结果/代码/失败切换。证据=后端 5/5 + 前端 23/23 + 隔离 9223 亮/暗各 14/14（acceptance/block-260/q9rem-tail-live{,-dark}.json）+ closeout 十三门；UI-573/574/575 verified。仍 reopen=K1 应用级边界/K2 上传（G1+）/K3 逐项停止/K9 引导与导入/D1 低峰与缓存余项/D4 成本复杂度审计/E7 平台项/C14 模型生成建议/L3/L4。"
+    },
+    {
+      "id": "BLOCK-261-Q9-REM-ADJUDICATION",
+      "capability": "q9-rem-adjudication",
+      "path": "docs/block-261-q9-rem-adjudication-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P4-CLOSED",
+      "canonical": true,
+      "truthDomain": "q9-rem-adjudication",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-25",
+      "archivePolicy": "retain_stable_path",
+      "tags": ["q9-rem", "governance", "quit-summary", "error-boundary", "G0"],
+      "notes": "2026-10-25 用户「先提交 完成 Jev 单一建议：Q9-REM 余项逐项裁决与出籍」（Jev confidence=0.95）。十一项（K1/K2/K3/K4/K9/C14/D1/D4/E7/L3/L4）逐条判档（本包交付/G1+ 出籍/平台与外部条件/产品包候选），同批纠正两处漂移=§6.5 Q9-REM 漏记 K4 余项、K9 未记 external-import preview 面。交付：K3 退出摘要逐项取消/停止（activity-control 单源映射到既有 /api/tools/cancel 与 /api/ai/agent/task/:id/cancel，零新端点零新 IPC；409 如实回显；summaryVersion 令旧结果不跟跑；拒绝/放行仍只归审批卡）+ K1 应用级错误边界（RouteErrorBoundary surface=app，主窗与 /window/* 两棵树，嵌套内层先兜）+ 修真 listPendingApprovals 恒空 taskId。证据=Node 契约 6/6 + 前端 25/25 + test:changed EXIT=0（Node 717＝712/0/5 skipped；前端 related 28 + 定向 359）+ 隔离 9223 亮/暗各 18/18（acceptance/block-261/q9rem-adjudication-live{,-dark}.json）+ closeout 十三门；UI-576/577 verified；Q-MATRIX K1/K2/K3 🟡→✅ → 72/22/1/7；§6.5 Q9-REM 判为已裁决完毕（余项按三档另立项）。"
     }
   ],
   "lastUpdated": "2026-10-25",
-  "documentCount": 403
+  "documentCount": 404
 }

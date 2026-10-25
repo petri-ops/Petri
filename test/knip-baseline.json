@@ -132,6 +132,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q6rem-annotations-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q7-automation-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q8rem-mcp-tail-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/q9rem-adjudication-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q9rem-slice-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q9rem-tail-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",

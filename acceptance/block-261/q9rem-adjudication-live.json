@@ -1,0 +1,115 @@
+{
+  "name": "q9rem-adjudication-live",
+  "block": "BLOCK-261",
+  "darkMode": false,
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "synthetic": {
+    "conversationId": "conv_b261",
+    "pendingJob": "job_b261_pending",
+    "orphanJob": "job_b261_orphan",
+    "task": "task_b261",
+    "note": "作业/任务为 seed 行；无真实子进程，归属未证明路径是后端真实判定"
+  },
+  "notCoveredByLive": {
+    "approvalItem": "审批只存在于后端内存 store，逐项停止由 test/block261 契约测试覆盖",
+    "k1AppBoundary": "触发需要真实渲染异常，由 RouteErrorBoundary 组件测试覆盖（含嵌套优先级）"
+  },
+  "startedAt": "2026-10-25T11:36:12.406Z",
+  "finishedAt": "2026-10-25T11:36:22.275Z",
+  "assertions": [
+    {
+      "name": "B0_seeded_project_jobs_task",
+      "pass": true,
+      "detail": "project=p_mvnr54nq_4hvb pending=job_b261_pending orphan=job_b261_orphan task=task_b261"
+    },
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A1a_quit_preview_opened",
+      "pass": true,
+      "detail": "测试实例预览退出摘要"
+    },
+    {
+      "name": "A1b_quit_dialog_rendered",
+      "pass": true,
+      "detail": "dialog=true"
+    },
+    {
+      "name": "A1c_quit_items_visible",
+      "pass": true,
+      "detail": "排队中的差异分析\n查看\n取消\npending\n无主的运行中作业\n查看\n取消\nrunning\n运行中的长任务\n查看\n停止\nrunning"
+    },
+    {
+      "name": "A2a_stop_pending_job",
+      "pass": true,
+      "detail": "clicked / 已取消。"
+    },
+    {
+      "name": "A2b_stop_orphan_job_refuses_false_success",
+      "pass": true,
+      "detail": "clicked / 后端未能证明该作业的进程归属，已拒绝强制终止。"
+    },
+    {
+      "name": "A2c_stop_running_task",
+      "pass": true,
+      "detail": "clicked / 已请求停止。"
+    },
+    {
+      "name": "A3a_dialog_closed_by_cancel",
+      "pass": true,
+      "detail": "cancel=clicked"
+    },
+    {
+      "name": "A3b_reopen_preview",
+      "pass": true,
+      "detail": "取消后再次预览退出摘要"
+    },
+    {
+      "name": "A3c_new_summary_drops_old_results",
+      "pass": true,
+      "detail": "items=无主的运行中作业 查看 取消 running 运行中的长任务 查看 停止 running orphanResult=running"
+    },
+    {
+      "name": "A4_dialog_closed_clean",
+      "pass": true,
+      "detail": "取消退出后弹窗收起"
+    },
+    {
+      "name": "A5_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1，应用级边界未被触发"
+    },
+    {
+      "name": "C1_db_pending_job_cancelled",
+      "pass": true,
+      "detail": "status=cancelled"
+    },
+    {
+      "name": "C2_db_orphan_job_untouched",
+      "pass": true,
+      "detail": "status=running"
+    },
+    {
+      "name": "C3_db_task_cancel_requested",
+      "pass": true,
+      "detail": "agent_status=cancel_requested"
+    }
+  ],
+  "allPass": true,
+  "passed": 18,
+  "total": 18
+}
