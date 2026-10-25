@@ -9,14 +9,14 @@ acceptance:
   - 实机腿（P4）：隔离 9223 + mock provider 跑一个小型 2-agent fan-out review 工作流全链（脚本→预估→确认→两 agent→journal→终态汇总）；预算耗尽场景明确失败如实回显。截图不可得按 `unavailable` 如实标注。
   - 收口：closeout 十三门 PASS；母纲 §6.5/roadmap/handoff/（如涉及）UI 台账回写。
 reopen: Qoder 全量语法（循环依赖图/条件边/子工作流 import）；workflow DAG 可视化编辑面；schedule 定时触发接线（Q7 已有 runner，后续接）；工具面 run_workflow agent 工具（R2+审批，若 P3 不做）；跨设备同步；worker_threads 进程级隔离升级；G1+。
-status: active
+status: completed
 ---
 
 # BLOCK-262 · Q4b 工作流脚本（确定性多代理编排执行面）
 
 用户发令：「行 按照建议 推完这一波」（2026-10-25）——按 Jev 单一建议（confidence=0.85 主会话 / 0.08 本轮复核，方向一致）立项 Q4b，推完本波。
 
-本包当前阶段 = **P0 对账完成（本文件 §1–§3）**；P1 起按 §4 串行推进。母纲依据：`docs/qoder-essence-absorption-plan.md` §6-Q4b（单列大包）+ §6.5 第 7 行。
+本包当前阶段 = **completed**（P0 对账 + P1 沙箱 + P2 runner + P3 REST + P4 实机腿全部交付，证据见 §9）；C 档（画笔、pack iframe 桥）不属本包。母纲依据：`docs/qoder-essence-absorption-plan.md` §6-Q4b（单列大包）+ §6.5 第 7 行。
 
 ## 0. 启动前置（2026-10-25 实测）
 
@@ -112,3 +112,17 @@ status: active
 1. 母纲 §6.5 第 7 行：`Q4b（active · BLOCK-262）`；收口时回写交付明细与 F8 状态。
 2. roadmap/handoff：只写「active=BLOCK-262（P0 完成）」级别状态，明细以本文件为唯一源。
 3. UI 台账：本包默认无 UI 面（REST/脚本面）；若 P3 补设置开关则登记新 UI 编号。
+
+## 9. 执行记录（2026-10-25）
+
+| 阶段 | 交付 | 证据 |
+| --- | --- | --- |
+| P0 对账 | 复用=launchSubAgent（导出复用，签名零变化）/agentTaskStore/agent-journal 形态；隔离=agent-workflow.js 数据面/harness-workflow-state；新建=vm 沙箱 | 提交 42a24823 |
+| P1 沙箱 | workflow-script.js（meta 校验 fail-closed + 稳定哈希）+ workflow-sandbox.js（13 类禁词扫描 + ESM 子集转译 + realm 摘除真 Date/Math.random + now/random 确定性注入） | test/block262-workflow-sandbox.test.mjs 25/25；提交 bd07b6a7 |
+| P2 runner | workflow-runner.js（六原语/并发信号量/双帽/硬停不杀/cancel 语义）+ workflow-journal.js（每步骤一行/轮转/resume 前缀表/journal 写失败 fail-closed）+ ALS slot 确定性 stepKey | test/block262-workflow-runner.test.mjs 12/12（mock deps 全注入零网络）；提交 e33b86b4 |
+| P3 REST | routes/ai-agent/workflow.js（opt-in env 默认关 503/dryRun 预估零执行/202 真跑/runs 列表详情/cancel in_process+伞 task 级联兜底+409）+ launchSubAgent 导出 + index 挂载 + extraRunMeta 透传 | test/block262-workflow-routes.test.mjs 7/7；邻域回归 85/85（block249 team/block49 spawn/工具计数/spawn 深度）；impact-map 登记；提交 8ec54064 |
+| P4 实机 | 隔离后端 + mock provider + PETRI_WORKFLOW_ENABLED=1 全链：W1 2-agent fan-out（伞 task kind=workflow + params.parentTaskId 血缘 + 真实 runAgentLoop 打 mock ×2 + journal agent 行 completed×2）/ W2 预算硬停（maxAgents=1 第二个 rejected、第一个不强杀）/ W3 cancel（in_process + 级联 + 终态 cancelled + 不再启动第二个）/ R1 dryRun 零执行 / R2 禁词 400 | acceptance/block-262/workflow-live.json 11/11；scripts/block262-workflow-live.mjs |
+
+**实机抓真三处并修复**：① launchSubAgent 未传 model 参数 → accessModeHint 解构崩（修=model:{} 缺省回落）；② 终态枚举写 done 但实测 DB status 列是 completed（done 进 agent_status 列）→ 轮询永不命中（修=TERMINAL 四值全收）；③ 子任务血缘在 params JSON 而非 parent_task_id 列（live 断言改 json_extract）。
+
+**已知边界（如实）**：截图 unavailable（REST 面无 UI）；mock provider 秒回曾使 cancel 窗口不存在（mock 加长任务语义后复验通过）；resume 实机腿未单独跑（Node 12/12 契约覆盖三态）；run_workflow agent 工具未做（reopen）；run_workflow 的 schedule 定时触发接线 reopen。

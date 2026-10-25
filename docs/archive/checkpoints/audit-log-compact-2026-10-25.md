@@ -27,3 +27,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-25T12:30:19.504Z -->
 | ✅ BLOCK-254 P8（收口：实机亮/暗 + closeout 十三门 + 回写，2026-10-25；用户「搞定 P8 = 收口批」） | 2026-10-25 | **P8 completed → 包 completed**：实机分三轮（实机抓真=保存后切文件致 CDP 失活，故每轮只保存一次）——image 15/15（马赛克声明/落库/撤销、文本面 mode、速记大图）、text 12/12（速记落库 entryId 匹配）、office 10/10（段落批注 unit=paragraph）、暗色 12/12；docx 夹具零依赖自造；截图如实 unavailable。closeout 十三门逐门取证 PASS（抓真三修：CRLF 归一、impact-map 补 block254 分类、knip +1 定性动态入口；test:changed 在 closeout 内偶发挂起→单独两轮 EXIT=0 逐门补证）。回写：母纲 completed、UI-562/563/564/565 verified。证据=acceptance/block-254/q6rem-{image,image-dark,text,office}.json | BLOCK-254 / Q6-REM |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-25T15:36:10.922Z -->
+| ✅ BLOCK-255 Q2-REM（逐消息统计 + 会话拖入 composer，2026-10-25；用户「搞定 Q2-REM」） | 2026-10-25 | **P1–P6 completed → 包 completed**：C4 loop usage 合计→`meta_json.usage`（零迁移）+ 统计动作/面板 + 实时 `useRunUsageTotals`；C17 左栏会话行拖入 composer（唯一 `ComposerContextItem` 通道 + 有界摘要，当前会话拒自引用）。证据=Node 6/6 + 前端 C4 46/46 / C17 49/49 + types 0 + lint 0 error + test:changed Node 1692（1683 pass/0 fail/9 skipped）/前端 79 文件 602 + 隔离 9223 亮/暗各 **17/17**（`acceptance/block-255/q2rem-live{,-dark}.json`；截图 unavailable）+ closeout 十三门**逐门取证 PASS**（整链收尾被 test:affected 收尾挂起，逐门补证）。UI-566 verified；Q-MATRIX C4/C17 ✅（61/30/4/7）。reopen=逐消息成本/旧消息回填/统计导出/项目树拖放/跨设备。G0 开发期常态 · 不外推 packaged/Provider/GA。 | BLOCK-255 / P6-CLOSED |

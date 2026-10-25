@@ -1,0 +1,70 @@
+{
+  "name": "workflow-live",
+  "block": "BLOCK-262",
+  "provider": "mock",
+  "screenshots": "unavailable",
+  "migrationsApplied": 19,
+  "providerCalls": 4,
+  "startedAt": "2026-10-25T15:31:33.564Z",
+  "finishedAt": "2026-10-25T15:31:46.548Z",
+  "assertions": [
+    {
+      "name": "S1_isolated_backend",
+      "pass": true,
+      "detail": "backend :3171 + mock :3172 + PETRI_WORKFLOW_ENABLED=1"
+    },
+    {
+      "name": "R1_dryRun_estimate_zero_exec",
+      "pass": true,
+      "detail": "dryRun=200 estimate={\"estimate\":true,\"agentCallsInSource\":2,\"budget\":{\"maxAgents\":2,\"maxSteps\":6,\"timeoutMs\":600000},\"concurrency\":2,\"note\": providerCalls=0"
+    },
+    {
+      "name": "R2_forbidden_syntax_400",
+      "pass": true,
+      "detail": "status=400 error=script_forbidden_syntax"
+    },
+    {
+      "name": "W1_start_202",
+      "pass": true,
+      "detail": "runId=wf-mvnzjsnd-b5mwik taskId=b6a2c8f8-81a2-44a2-904f-34eedd014acd"
+    },
+    {
+      "name": "W1_fanout_completed",
+      "pass": true,
+      "detail": "agents=2 statuses=completed,completed"
+    },
+    {
+      "name": "W1_umbrella_and_lineage",
+      "pass": true,
+      "detail": "umbrellaKind=workflow children=2 statuses=completed,completed"
+    },
+    {
+      "name": "W1_mock_provider_real_loop",
+      "pass": true,
+      "detail": "providerCalls=2（子代理经真实 runAgentLoop 打到 mock）"
+    },
+    {
+      "name": "W2_budget_hardstop",
+      "pass": true,
+      "detail": "rejected=1 runStatus=completed（第二个 agent 被 maxAgents=1 拒绝，第一个不强杀）"
+    },
+    {
+      "name": "W3_cancel_accepted",
+      "pass": true,
+      "detail": "status=200 mode=in_process"
+    },
+    {
+      "name": "W3_cancelled_no_second_agent",
+      "pass": true,
+      "detail": "launched=1（取消后不再启动第二个 agent）"
+    },
+    {
+      "name": "L1_runs_listed",
+      "pass": true,
+      "detail": "runs=3"
+    }
+  ],
+  "allPass": true,
+  "passed": 11,
+  "total": 11
+}

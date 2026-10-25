@@ -5614,7 +5614,9 @@
         "core/petri-server/helpers/workflow-journal.js",
         "core/petri-server/routes/ai-agent/workflow.js",
         "core/petri-server/routes/ai-agent/index.js",
-        "core/petri-server/agent-tools/spawn-agent-tools.js"
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "scripts/block262-*.mjs",
+        "acceptance/block-262/**"
       ],
       "tests": [
         "test/block262-workflow-sandbox.test.mjs",
@@ -5624,7 +5626,8 @@
         "test/block49-spawn-agent-tools.test.mjs",
         "test/agent-tool-registry.test.mjs",
         "test/block198-spawn-depth.test.mjs"
-      ]
+      ],
+      "classifiesScripts": true
     }
   ]
 }

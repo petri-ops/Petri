@@ -75,7 +75,6 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
   const semaphore = makeSemaphore(1); // 占位，装载 meta 后按 concurrency 重建
   let concurrencySemaphore = semaphore;
 
-  const cancelledAgentIds = [];
   let timeoutHandle = null;
 
   const nextSeq = () => {
@@ -194,7 +193,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     }
   }
 
-  async function parallelImpl(fns, options = {}) {
+  async function parallelImpl(fns) {
     const list = Array.isArray(fns) ? fns : [];
     const slotKind = 'agent';
     return Promise.all(

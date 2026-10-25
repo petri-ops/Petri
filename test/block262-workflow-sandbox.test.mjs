@@ -158,7 +158,7 @@ function recordingHost() {
   return {
     calls,
     agent: async (opts) => { calls.push(['agent', opts]); return { ok: true, status: 'completed', summary: 's' }; },
-    parallel: async (fns, o) => { calls.push(['parallel', fns.length]); return []; },
+    parallel: async (fns) => { calls.push(['parallel', fns.length]); return []; },
     pipeline: async (fns) => { calls.push(['pipeline', fns.length]); return null; },
     phase: async (name, fn) => { calls.push(['phase', name]); return fn(); },
     log: (...a) => { calls.push(['log', ...a]); },

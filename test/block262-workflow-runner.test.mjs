@@ -327,7 +327,7 @@ export default async function run() {
 });
 
 test('BLOCK-262 runner — budget 只读视图随执行推进', async () => {
-  const { deps, spawned, finishAgent } = makeDeps();
+  const { deps, finishAgent } = makeDeps();
   const root = tempRoot();
   const script = `
 export const meta = { name: 'budgetview', version: 1, budget: { maxAgents: 3 }, concurrency: 1 };

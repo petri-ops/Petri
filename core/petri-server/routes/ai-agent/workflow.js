@@ -16,7 +16,6 @@
  * 测试注入：register(app, { deps }) 覆盖真实 deps（此时跳过伞 task）。
  */
 
-const path = require('node:path');
 const dataPaths = require('../../../shared-backend/data-paths');
 const runnerMod = require('../../helpers/workflow-runner');
 const workflowJournal = require('../../helpers/workflow-journal');
@@ -42,7 +41,9 @@ function buildRealDeps({ parentTaskId, userId }) {
   const spawnTools = require('../../agent-tools/spawn-agent-tools');
   const agentTaskStore = require('../../agent-task-store');
   const dbMod = require('../../db');
-  const TERMINAL = new Set(['done', 'failed', 'cancelled']);
+  // 终态双写形态：markAgentTaskDone 落 status='completed'/agent_status='done'
+  // （实测 DB 列序），failed/cancelled 同列同名——四个都收，避免漏识别。
+  const TERMINAL = new Set(['done', 'completed', 'failed', 'cancelled']);
   return {
     launchSubAgent: ({ userContent, role, goals }) =>
       spawnTools.launchSubAgent({
@@ -50,6 +51,9 @@ function buildRealDeps({ parentTaskId, userId }) {
         userId,
         parentParams: {},
         parentContext: {},
+        // model 缺省={}：accessModeHint 不注入、preset 走默认 provider 回落
+        // （与 spawn_agent 未显式选模时的 resolveSpawnModelSettings 语义一致）
+        model: {},
         userContent,
         role: role || null,
         goals: goals || [],
