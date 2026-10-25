@@ -14,6 +14,7 @@
 
 import type * as React from 'react';
 import { attachmentCountNotice, attachmentTooLargeNotice } from './contextLimits';
+import { CONVERSATION_DRAG_MIME } from './dragTypes';
 
 export interface AttachmentFile {
   id: string;
@@ -46,7 +47,7 @@ export function onDragOver(
 ): void {
   e.preventDefault();
   e.stopPropagation();
-  if (e.dataTransfer.types.includes('Files')) {
+  if (e.dataTransfer.types.includes('Files') || e.dataTransfer.types.includes(CONVERSATION_DRAG_MIME)) {
     setIsDraggingOver(true);
   }
 }

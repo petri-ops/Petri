@@ -1,5 +1,9 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-25（**UI-566 逐消息统计 + 会话拖入 composer verified（隔离 9223 亮/暗各 17/17；BLOCK-255 P1–P6）**：统计动作打开面板，展示本条耗时/工具步数/迭代/字符/模型与 usage token（2 次有 usage · 1 次未返回 · 输入 1K）；无 usage 的历史消息明确「未记录」；左栏当前会话自拖被拒（提示 + 0 chip），目标会话拖入产唯一 conversation chip（conversationId + 有界摘要）并可移除。证据=`acceptance/block-255/q2rem-live.json` / `q2rem-live-dark.json`；截图 unavailable。）
+
+最后更新：2026-10-25（**UI-566 逐消息统计 + 会话拖入 composer in_progress（BLOCK-255 Q2-REM P0）**：助手消息动作将新增「统计」面板（耗时/工具步数/迭代/字符 + 本轮 usage token；无数据诚实未记录）；左栏会话行可拖入 composer，复用唯一 `ComposerContextItem` 通道与既有有界摘要。代码+测试后在 9223 实机取证再升级，当前不冒充 verified。）
+
 最后更新：2026-10-25（**UI-562/563/564/565 全部 verified（BLOCK-254 P8 实机腿）**：隔离栈（:3001/:3000/:9223 + 018/019 迁移）分三轮取证——`image` 轮 **15/15**（图像批注条、马赛克声明「仅屏显遮蔽，不是脱敏」+ `data-mosaic-fallback`、kind=mosaic 落库 rect 归一化、撤销按钮清列表且 REST 同步为空、文本面 `mode=text` 无画框开关、速记图片大图挂批注条、三文件哈希不变）、`text` 轮 **12/12**（速记图片批注落库 `surface=scratchpad-entry` + `entryId` 逐字匹配）、`office` 轮 **10/10**（docx 段落「批注」按钮 ×2、段落批注落库 `unit=paragraph startLine=2` + quote 含原文）、暗色轮 **12/12**（`--force-dark-mode`）。截图如实 `unavailable`；源码选区→锚点一步由 36 条单测覆盖（实机覆盖同一条 `onAnnotate→beginAnchor→落库` 链）。证据=`acceptance/block-254/q6rem-{image,image-dark,text,office}.json`。旧记录：
 
 最后更新：2026-10-24（**UI-565 Office 段落/行锚点批注 in_progress**（BLOCK-254 P7）：docx/pptx/odt/odp 预览改为**按段落渲染**，每段左侧「批注」按钮把「第 N 段 + 段落原文」交给批注会话；xlsx/ods 表格在行首给「批注」按钮（表格第 N 行 + 整行摘要）。锚点新增**单位**维度（`unit: line/paragraph/row`，缺省 line），`describeAnnotationAnchor` 分别说「第 5 段 / 表格第 4 行 / 第 12 行」——不把段落说成源码行。**零新依赖**（不做版式渲染）、**零回归**（无回调时退回原有 `<pre>` 形态、不渲染死按钮）。**证据**：Node `block219` **23/23**（单位枚举/缺省/往返）+ 前端 `annotations` **24** + `OfficePreviewPane` **3** + types 0 + lint 0 error + theme 17/17。**边界**：段落序号与表格行序都会随文档改写/重排漂移（quote 仅存原文供核对，无失效检测）、iWork 清单形态无批注、无实机腿 → `in_progress`。旧记录：
@@ -5471,3 +5475,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机证据**：`acceptance/ui-552/`（完全访问弹层/提问卡/策略卡/循环卡/checkpoint 对话框 × 亮暗）+ `ui552-audit-light|dark.json`（后端事件真相：`permission.resolved`×2 + `user_question_answered`）+ 同份报告落 `acceptance/block-244/`。断言链：`D1–D4`（取消不改档→确认切档）、`K0–K4`（checkpoint 记录→编辑→回退把文件从 v3 恢复 v2→输入回填）、`Q1–Q2`（提问卡→回答）、`A1–A5`（策略 ask 卡 + 意图块→批准→复位→同参 3 次循环卡→批准）、`C1–C3`（终态 + 审计）。
 - **实机抓真**：① `APPROVAL_FIELDS` 缺 `intent`/`source` ⇒ 意图块在真链路恒空（已补白名单并把断言下移到事件层）；② `repeated_tool_call` 硬停抢在 `loop_guard` 之前 ⇒ 交互运行改为有审批通道时交棒审批层（无审批通道仍硬停）；③ `ProjectWorkspace` 既存重渲染环拖慢长链路尾部探针（已登记 AUDIT-LOG，不归本包修复）。
 - **回归面**：Node block244 7/7 + 5/5；前端 56/56；types 0；lint 0 新增违规；`SimpleChat.tsx` 2211→2210（审批面外迁 `hooks/useApprovalSurfaces.ts` + `ApprovalSurfaces.tsx`）。
+
+## UI-566: 逐消息统计 + 会话拖入 composer（2026-10-25 **verified（隔离 9223 亮/暗各 17/17；BLOCK-255 P1–P6）**）
+
+- **变化面**：助手消息动作新增「统计」——面板展示本条处理耗时、工具步数、模型迭代数、字符数、模型与 token（输入/输出/缓存读/缓存写、有 usage 的调用数）；无 usage 时明确「未记录」，其余字段照常。左栏会话行可拖入 composer——落下后产一条 `kind=conversation` 的 `ComposerContextItem`（标题/conversationId/消息数 + 有界摘要），当前会话拒自引用。
+- **为什么这样设计（自有形态）**：统计只读本地账本（`ai_usage` 同源的 loop usage 累加，随消息 `meta_json.usage` 落库），不建第二套计量；拖放复用唯一 `ComposerContextItem` 通道与既有摘要上限，不新增注入通道；无数据如实说未记录，不伪造 0。
+- **验证（代码）**：Node `block255-message-stats` **6/6** + UI-523 usage **12/12**；前端 C4 **46/46**（messageActions/messageStats/MessageStatsPanel/行统计/行 memo/useRunUsageTotals/theme）+ C17 **49/49**（conversationDrag/useComposerDrop/attachments/contextSources）；`quality:types` 0、`quality:lint` 0 error、`test:changed` EXIT=0（Node 1692 / 1683 pass / 0 fail / 9 skipped；前端 79 文件 602）。
+- **实机证据**：`acceptance/block-255/q2rem-live.json` / `q2rem-live-dark.json`（各 **17/17**；截图 `unavailable`）。断言链：左栏两会话行 → 当前会话种子消息 → 统计面板（2 次有 usage / 1 次未返回 / 输入 1K / 2 步 / 2 轮）→ 无 usage「未记录」→ 当前会话自拖被拒（提示 + 0 chip）→ 目标会话拖入产唯一 conversation chip（conversationId + 有界摘要）→ chip 可移除 → 收尾回 `?test=1`。
+- **边界（reopen）**：逐消息人民币成本、BLOCK-255 前历史消息 token 回填、统计导出/复制、项目树/结果面/知识空间拖放、跨设备。

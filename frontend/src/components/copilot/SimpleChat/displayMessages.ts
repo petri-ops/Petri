@@ -67,6 +67,8 @@ export function buildBaseDisplayMessages(options: {
       toolActivities: activeRun.toolActivities,
       reasoningByIteration: activeRun.reasoningByIteration,
       processingDurationMs: activeRun.processingDurationMs,
+      // BLOCK-255 C4 — 实时 usage 合计先挂到运行投影；落库后以消息 meta.usage 为准。
+      usage: activeRun.usage,
       statusMessage: summaryPresentation.statusMessage,
       summaryUnavailable: summaryPresentation.summaryUnavailable,
       retryToolJobId: summaryPresentation.retryToolJobId,
@@ -86,6 +88,10 @@ export function buildBaseDisplayMessages(options: {
       // BLOCK-56 P1 — 模型降级提示（任务条持久显示「已降级到 X 模型」）
       modelFallbackNotice: activeRun.modelFallbackNotice,
     });
+  }
+  // BLOCK-255 C4 — 持久化尾行还没有 meta.usage 时，补上实时累计（不覆盖已落库值）。
+  if (assistantAlreadyPersisted && activeRun.usage && lastAssistant && !lastAssistant.usage) {
+    next[next.length - 1] = { ...lastAssistant, usage: activeRun.usage };
   }
   return next;
 }

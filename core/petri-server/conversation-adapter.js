@@ -56,6 +56,7 @@ require('./agent-task-store');
  * @param {object|null} opts.finalizationRouting - Model routing info
  * @param {object|null} opts.toolCallController - Tool call controller (for anomaly)
  * @param {object} opts.assistantProgress - Progress recorder (live object)
+ * @param {object|null} opts.assistantUsage - BLOCK-255 C4 本轮 usage 合计（calls/tokens/cache/duration/models/unmeasuredCalls）
  * @param {object} opts.emitFn - Event emit function
  * @param {string} opts.taskId - Task ID for persistence
  * @returns {{persisted: boolean, shifted: boolean}}
@@ -69,6 +70,8 @@ function appendAssistantMessage({
   assistantProgress,
   resultEditProgress,
   assistantToolActivities,
+  // BLOCK-255 C4 — 本轮 usage 合计（来自 loop-orchestrator，随助手消息落库）
+  assistantUsage,
   // UI-272 — 按迭代聚合的模型思考段（reasoning_content），随消息落库
   reasoningByIteration,
   assistantResultCards,
@@ -99,6 +102,24 @@ function appendAssistantMessage({
       projectId: context && context.projectId,
       processingDurationMs: Math.max(0, Date.now() - turnStartedAt),
     };
+
+    // BLOCK-255 C4 — 本轮 usage 合计（零迁移，落既有 meta_json）：
+    // calls 只数拿到 usage 的调用；unmeasuredCalls 单列，前端不把不可算写成 0。
+    if (assistantUsage && (assistantUsage.calls > 0 || assistantUsage.unmeasuredCalls > 0)) {
+      const nonNegative = (value) => Math.max(0, Number(value) || 0);
+      assistantMeta.usage = {
+        calls: nonNegative(assistantUsage.calls),
+        unmeasuredCalls: nonNegative(assistantUsage.unmeasuredCalls),
+        promptTokens: nonNegative(assistantUsage.promptTokens),
+        completionTokens: nonNegative(assistantUsage.completionTokens),
+        cacheReadTokens: nonNegative(assistantUsage.cacheReadTokens),
+        cacheCreationTokens: nonNegative(assistantUsage.cacheCreationTokens),
+        durationMs: nonNegative(assistantUsage.durationMs),
+        models: Array.isArray(assistantUsage.models)
+          ? assistantUsage.models.filter((model) => typeof model === 'string' && model).slice(0, 5)
+          : [],
+      };
+    }
 
     // Add cancellation info if present
     if (cancellationObserved) {

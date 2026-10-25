@@ -1,0 +1,8 @@
+# AUDIT-LOG 自动精简归档 · 2026-10-25（audit-log-compact.mjs）
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（用户裁决「AUDIT-LOG 的规范和精简
+> 应该是自动化的过程，仅保留必要的内容」）。内容=「最近处理记录」表窗口外淘汰行原文（搬移不改写）。
+> canonical 状态以 roadmap/plan/DOC-REGISTRY 为准，本档仅作广播历史追溯。
+
+| ✅ BLOCK-252（V-REM UI-544/545/546 实机腿，2026-10-24；用户「继续 V-REM UI-544/545/546 实机腿」） | 2026-10-24 | **completed**：真实 git 绑定项目 + 合成结果链 + 夹具 pack，亮/暗各 **23/23**（`acceptance/ui-544|545|546/`、`acceptance/block-252/`，八张亮暗截图）。UI-544 code 命中 pack revisions-source（截图真实源码）；UI-545 compare 命中 pack 四列差异表 + REST 2 changedPaths；UI-546 ellipse/arrow 创建/保存/列表/REST 全绿。**八处真断点修复**：tabs 投影丢失 / pack-result 无 URL / pack 接管后无模式栏 / source 字段与 projectId / 双 `/api` 404 / lineage 形状 / compare 响应形状 / changeSetId 持久来源与空投影覆盖。新增单测：pack contributions tabs、packTabData lineage/content/compare 真实形状、CenterPanel 模式栏与身份水化。边界=iframe 独立 origin 以截图为准；per-file patch 缺失时显示「—」；合成夹具。closeout 十三门 **PASS**；本地提交（不推送）。plan=docs/block-252-v-rem-live-evidence-plan.md | BLOCK-252 / V-REM |
+| ✅ BLOCK-251（UI-555 实机腿补证，2026-10-24；用户「好 按照建议推进」） | 2026-10-24 | **completed**：划词动作/图片预览/计划反馈三面实机补证，**亮/暗各 27/27**（`acceptance/ui-555/`、`acceptance/block-251/`，四张亮暗截图）。划词走真实 DOM Range：动作条 5 项、批注禁用带理由、引用 chip、请求体含 `【引用 preview-note.md】`+原文、速记 `sourceKind=selection`、侧聊 dock、复制载荷一致（离屏真实写剪贴板失败如实标 `clipboardReal=false`）；图片拖入两张 16×16 PNG：1/2→2/2→←键→200%/50% 缩放、保存锚点 `download`+`data:image/png`；计划反馈：意见进 mock 请求体（含 planId）、计划仍 draft、回合后卡片重拉。**抓真并修复宿主缺陷**：`SimpleChat` 的 `onApprove` 丢弃 `{feedback}`（已改为 `(action, options)` + `test/plan-feedback-wiring.test.mjs` 守卫）。closeout 十三门 **PASS**；本地提交（不推送）。plan=docs/block-251-ui555-live-evidence-plan.md | BLOCK-251 / UI-EVIDENCE |

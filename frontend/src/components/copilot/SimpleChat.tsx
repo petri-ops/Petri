@@ -42,14 +42,12 @@ import {
 } from './SimpleChat/helpers';
 import {
   type AttachmentFile,
-  onDragOver,
-  onDragLeave,
-  onDrop,
   onPaste,
   removeAttachmentById,
   openImagePreview,
   closeImagePreview,
 } from './SimpleChat/attachments';
+import { useComposerDrop } from './SimpleChat/hooks/useComposerDrop';
 import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
@@ -190,6 +188,7 @@ import { ContextBudgetButton } from './ContextBudgetBar';
 // UI-523 — composer 运行计量条（卡片下方读数；环组件搬进条内，单一实例）
 import { RunStatsBar } from './RunStatsBar';
 import { useRunUsage } from './SimpleChat/hooks/useRunUsage';
+import { useRunUsageTotals } from './SimpleChat/hooks/useRunUsageTotals';
 import { useConversationUsage } from './SimpleChat/hooks/useConversationUsage';
 
 // SimpleMessage + restoreSimpleMessage + AgentProgressUpdate + restoreProgressUpdates + MessageMeta moved to
@@ -389,6 +388,8 @@ export function SimpleChat({
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
+  // BLOCK-255 C4 — 本轮实时 usage 合计（run 开始即归零；落库后以消息 meta 为准）。
+  const liveUsage = useRunUsageTotals(conversationId, activeRun?.startedAt ?? null);
   // AGENT-CONCURRENCY A-5: 会话挂载/切换时恢复崩溃或刷新前仍在跑的后台任务
   // （sub-agent 走后端 loop_runs，主 agent 走 localStorage resumable task）。
   // 幂等：已追踪的 sub-agent 会被跳过，已有活跃主 run 时不重复恢复。
@@ -639,9 +640,10 @@ export function SimpleChat({
   // BLOCK-95 A2 — 派生链 useMemo 化：此前每次 render（含 composer 输入 keystroke、
   // 菜单开合等无关 state 变化）都全量重拼 250+ 条历史；useMemo 后仅
   // messages/activeRun/durableLoop 变化（真数据变化）才重算。
+  const displayRun = activeRun && liveUsage ? { ...activeRun, usage: liveUsage } : activeRun;
   const baseDisplayMessages = useMemo(
-    () => buildBaseDisplayMessages({ activeRun, conversationId, messages, durableLoop }),
-    [activeRun, conversationId, messages, durableLoop]
+    () => buildBaseDisplayMessages({ activeRun: displayRun, conversationId, messages, durableLoop }),
+    [displayRun, conversationId, messages, durableLoop]
   );
   const displayMessages = useMemo(
     () => applyConversationNotices({ base: baseDisplayMessages, activeRun, conversationId }),
@@ -780,22 +782,17 @@ export function SimpleChat({
     }
   };
 
-  // Drag/drop handlers for file attachments (logic lives in ./SimpleChat/attachments.ts;
-  // these wrappers just bind the host component's setters per React's stable-identity rules).
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    onDragOver(e, setIsDraggingOver);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    onDragLeave(e, setIsDraggingOver);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    // BLOCK-150 加映 / BLOCK-155 放宽 — 图片前置门（放行判据单源 imageInputAllowed：
-    // vision_configured || 聊天渠道视觉能力，两者皆无才阻断；返回提示文案则落 attachmentNotice）
-    const notice = onDrop(e, setAttachments, setIsDraggingOver, { visionEnabled: visionConfigured, chatVisionCapable }, attachments.length);
-    if (notice) setAttachmentNotice(notice);
-  }, [visionConfigured, chatVisionCapable, attachments.length]);
+  // Drag/drop handlers（附件 + BLOCK-255 会话引用；逻辑在 hooks/useComposerDrop）
+  const { handleDragOver, handleDragLeave, handleDrop } = useComposerDrop({
+    conversationId,
+    addItem: composerContext.addItem,
+    setAttachments,
+    setIsDraggingOver,
+    existingCount: attachments.length,
+    visionEnabled: visionConfigured,
+    chatVisionCapable,
+    onNotice: setAttachmentNotice,
+  });
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     const notice = onPaste(e, setAttachments, { visionEnabled: visionConfigured, chatVisionCapable });

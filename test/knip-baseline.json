@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-24",
+  "updatedAt": "2026-10-25",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -126,6 +126,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-dialog-snapshot.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-save-dialog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/pack-lifecycle.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/q2rem-stats-drag-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q5rem-plan-tools-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q6rem-annotations-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",

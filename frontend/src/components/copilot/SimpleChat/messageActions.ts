@@ -19,6 +19,7 @@ export type MessageActionId =
   | 'regenerate'
   | 'fork'
   | 'quote-context'
+  | 'stats'
   | 'rate-up'
   | 'rate-down';
 
@@ -32,6 +33,8 @@ export interface MessageActionInput {
   forking: boolean;
   copied: boolean;
   rating: MessageRatingValue | null;
+  /** BLOCK-255 C4 — 统计面板是否展开（按钮文案/按下态）。 */
+  statsOpen?: boolean;
 }
 
 export interface MessageActionSpec {
@@ -63,7 +66,7 @@ export function buildUserMessageActions(input: MessageActionInput): MessageActio
   ];
 }
 
-/** 助手回复的动作：复制 / 重新生成 / 创建分支 / 加入上下文 / 评价。 */
+/** 助手回复的动作：复制 / 重新生成 / 创建分支 / 加入上下文 / 统计 / 评价。 */
 export function buildAssistantMessageActions(input: MessageActionInput): MessageActionSpec[] {
   if (!input.hasContent || input.pending) return EMPTY;
   const rating = input.rating;
@@ -99,6 +102,15 @@ export function buildAssistantMessageActions(input: MessageActionInput): Message
       icon: 'layers',
       disabled: false,
       dividerAfter: true,
+    },
+    {
+      id: 'stats',
+      label: input.statsOpen ? '收起统计' : '统计',
+      title: '查看这条回复的耗时、工具步数、迭代数与 token 统计',
+      icon: 'bar-chart',
+      disabled: false,
+      dividerAfter: true,
+      pressed: Boolean(input.statsOpen),
     },
     {
       id: 'rate-up',

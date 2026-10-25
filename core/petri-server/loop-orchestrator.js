@@ -50,7 +50,7 @@ const { resolveCostCapCny, isCostCapExceeded } = require('./helpers/cost-cap');
 const { getAiSettings } = require('./helpers/ai-settings');
 const { summarizeAiUsage } = require('./helpers/ai-usage');
 // UI-523 — 每次模型调用的实测用量事件（composer 计量条数据源；纯函数构造）
-const { buildRunUsageEvent } = require('./helpers/run-usage');
+const { buildRunUsageEvent, createRunUsageTotals, accumulateRunUsage } = require('./helpers/run-usage');
 // BLOCK-179 — 正文工具块修复提升（扫描+fail-closed 决策；keep 零行为变化）
 const { scanPlainTextToolCalls } = require('./helpers/tool-call-repair');
 const {
@@ -249,6 +249,8 @@ async function runLoop({
   // UI-523 — 单次调用用量外发（additive：旧客户端不认识 `usage` 事件，天然 no-op）。
   // 数据源=provider 返回值里的 usage（与 ai_usage 落库同源），不是第二套计量。
   // usage 缺失/全 0 时 buildRunUsageEvent 返回 null ⇒ 不发事件（前端显示 `—`）。
+  // BLOCK-255 C4 — 同时把本轮调用累加为 totals，随助手消息 meta 落库；不新增第二套账本。
+  const runUsageTotals = createRunUsageTotals();
   const _emitCallUsage = (upJson, meta) => {
     try {
       const payload = buildRunUsageEvent(upJson && upJson.usage, {
@@ -258,7 +260,12 @@ async function runLoop({
         model: modelName,
         durationMs: meta && meta.durationMs,
       });
-      if (payload) _emit(payload);
+      if (payload) {
+        accumulateRunUsage(runUsageTotals, payload);
+        _emit(payload);
+      } else {
+        runUsageTotals.unmeasuredCalls += 1;
+      }
     } catch {
       /* 观测面故障不阻塞主流程 */
     }
@@ -1581,6 +1588,9 @@ ${compactSummaryText}`,
     // 落库传 null，meta.progressUpdates 从未持久化，历史刷新后过渡叙述
     // 全部消失（与 BLOCK-34 P1 工具记录消失同构的漏传，实机腿抓真）。
     assistantProgress,
+    // BLOCK-255 C4 — 本轮 usage 合计（calls/tokens/cache/duration/models），
+    // 随助手消息 meta 落库；unmeasuredCalls 单列，不把不可算写成 0。
+    usageTotals: runUsageTotals,
     loopRunId,
     loopState,
     toolResultEventsByCallId,

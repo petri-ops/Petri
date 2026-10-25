@@ -1,6 +1,7 @@
 import type { LoopIterationEvent } from '@/lib/loop-client';
 import type { ResultEditProgressEvent } from '../copilotClient';
 import type { ToolActivityItem } from '../toolActivity';
+import type { MessageUsage } from '../messageUsage';
 
 export interface ConversationPendingApproval {
   ackToken: string;
@@ -72,6 +73,8 @@ export interface ConversationRunSnapshot {
    */
   iteration?: number;
   processingDurationMs?: number;
+  /** BLOCK-255 C4 — 本轮实时 usage 合计（runUsage 事件累加；落库后以消息 meta 为准）。 */
+  usage?: MessageUsage;
   startedAt: number;
   completedAt?: number;
   taskId?: string;

@@ -473,6 +473,12 @@
   flex-wrap: wrap;
 }
 
+/* BLOCK-255 C4 — 统计面板展开时动作行保持可见（否则鼠标移开统计钮消失） */
+.sc-msg-actions-open,
+.sc-msg-actions-open:focus-within {
+  opacity: 1;
+}
+
 .sc-msg-action-error {
   color: var(--petri-danger);
 }

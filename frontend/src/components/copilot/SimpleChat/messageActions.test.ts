@@ -23,9 +23,9 @@ function input(overrides: Partial<MessageActionInput> = {}): MessageActionInput 
 }
 
 describe('buildAssistantMessageActions', () => {
-  it('keeps the existing action order and appends 加入上下文 + 评价', () => {
+  it('keeps the existing action order and appends 加入上下文 + 统计 + 评价', () => {
     const ids = buildAssistantMessageActions(input()).map((action) => action.id);
-    expect(ids).toEqual(['copy', 'regenerate', 'fork', 'quote-context', 'rate-up', 'rate-down']);
+    expect(ids).toEqual(['copy', 'regenerate', 'fork', 'quote-context', 'stats', 'rate-up', 'rate-down']);
   });
 
   it('carries state into labels and disabled reasons', () => {
@@ -56,6 +56,17 @@ describe('buildAssistantMessageActions', () => {
     const names: IconName[] = buildAssistantMessageActions(input()).map((spec) => spec.icon);
     expect(names).toContain('layers');
     expect(names).toContain('git-branch');
+    expect(names).toContain('bar-chart');
+  });
+
+  it('统计按钮随面板开合切换文案与按下态', () => {
+    const closed = buildAssistantMessageActions(input()).find((spec) => spec.id === 'stats')!;
+    expect(closed.label).toBe('统计');
+    expect(closed.pressed).toBe(false);
+    const open = buildAssistantMessageActions(input({ statsOpen: true })).find((spec) => spec.id === 'stats')!;
+    expect(open.label).toBe('收起统计');
+    expect(open.pressed).toBe(true);
+    expect(open.title).toContain('耗时');
   });
 });
 
@@ -75,7 +86,7 @@ describe('buildUserMessageActions', () => {
 describe('buildMessageActions / nextRating', () => {
   it('routes by role', () => {
     expect(buildMessageActions(input({ role: 'user' })).map((spec) => spec.id)).toEqual(['edit']);
-    expect(buildMessageActions(input()).length).toBe(6);
+    expect(buildMessageActions(input()).length).toBe(7);
   });
 
   it('toggles: same side clears, other side switches', () => {

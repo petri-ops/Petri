@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   hasImagePayload,
   imageInputAllowed,
+  onDragOver,
   onDrop,
   onPaste,
   VISION_NOT_CONFIGURED_NOTICE,
 } from './attachments';
+import { CONVERSATION_DRAG_MIME } from './dragTypes';
 
 function fakePasteEvent(types: string[]) {
   const preventDefault = vi.fn();
@@ -126,5 +128,25 @@ describe('BLOCK-155 真·单通道 vision — 放行判据单源（vision_config
       { visionEnabled: true, chatVisionCapable: false },
     );
     expect(notice).toBeUndefined();
+  });
+});
+
+describe('BLOCK-255 C17 — 会话拖拽态与文件拖拽共存', () => {
+  it('onDragOver 接受会话 MIME（composer 高亮），并保持 Files 行为', () => {
+    const setIsDraggingOver = vi.fn();
+    onDragOver({
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      dataTransfer: { types: [CONVERSATION_DRAG_MIME] },
+    } as unknown as React.DragEvent, setIsDraggingOver);
+    expect(setIsDraggingOver).toHaveBeenCalledWith(true);
+
+    const fileGuard = vi.fn();
+    onDragOver({
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      dataTransfer: { types: ['text/plain'] },
+    } as unknown as React.DragEvent, fileGuard);
+    expect(fileGuard).not.toHaveBeenCalled();
   });
 });

@@ -5346,6 +5346,54 @@
         "frontend/src/pages/project-workspace/OfficePreviewPane.test.tsx",
         "frontend/src/pages/project-workspace/WorkspaceFilePreview.textAnnotation.test.tsx"
       ]
+    },
+    {
+      "id": "block255-q2-rem",
+      "note": "BLOCK-255 Q2-REM：C4 逐消息统计（loop usage 合计→meta.usage + 统计面板）+ C17 会话拖入 composer（唯一 ContextItem 通道 + 有界摘要）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block255-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q2rem-*.cjs",
+        "docs/block-255-q2-rem-plan.md",
+        "acceptance/block-255/**",
+        "core/petri-server/helpers/run-usage.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/conversation-adapter.js",
+        "test/block255-*.test.mjs",
+        "frontend/src/components/copilot/messageUsage.ts",
+        "frontend/src/components/copilot/SimpleChat/types.ts",
+        "frontend/src/components/copilot/SimpleChat/displayMessages.ts",
+        "frontend/src/components/copilot/SimpleChat/messageActions.ts",
+        "frontend/src/components/copilot/SimpleChat/messageStats.ts",
+        "frontend/src/components/copilot/SimpleChat/MessageStatsPanel.tsx",
+        "frontend/src/components/copilot/SimpleChat/MessageStatsPanel.module.css",
+        "frontend/src/components/copilot/SimpleChat/conversationDrag.ts",
+        "frontend/src/components/copilot/SimpleChat/dragTypes.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useRunUsageTotals.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useComposerDrop.ts",
+        "frontend/src/components/copilot/SimpleChat/attachments.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/components/copilot/conversationRunStore/types.ts",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx"
+      ],
+      "tests": [
+        "test/block255-message-stats.test.mjs",
+        "test/ui523-usage-event.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/messageActions.test.ts",
+        "frontend/src/components/copilot/SimpleChat/messageStats.test.ts",
+        "frontend/src/components/copilot/SimpleChat/MessageStatsPanel.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.stats.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useRunUsageTotals.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/conversationDrag.test.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useComposerDrop.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/attachments.test.ts",
+        "frontend/src/components/copilot/SimpleChat/contextSources.test.ts",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ]
     }
   ]
 }

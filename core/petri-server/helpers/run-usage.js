@@ -59,4 +59,42 @@ function buildRunUsageEvent(rawUsage, meta = {}) {
   };
 }
 
-module.exports = { buildRunUsageEvent };
+/**
+ * 一轮助手回复内的 usage 合计（BLOCK-255 C4）。
+ *
+ * `calls` 只数**拿到 usage 的调用**；`unmeasuredCalls` 单列没返回 usage 的调用，
+ * 两者不混写——面板据此说「N 次调用有 usage，另有 M 次未返回」，不把不可算写成 0。
+ * `durationMs` 同样只合计有 usage 的调用耗时（与 events 的 durationMs 同口径）。
+ */
+function createRunUsageTotals() {
+  return {
+    calls: 0,
+    unmeasuredCalls: 0,
+    promptTokens: 0,
+    completionTokens: 0,
+    cacheReadTokens: 0,
+    cacheCreationTokens: 0,
+    durationMs: 0,
+    models: [],
+  };
+}
+
+/**
+ * 把一条 `buildRunUsageEvent` 载荷累加进本轮合计（就地修改并返回 totals）。
+ * 纯累加，不做 IO；模型名去重且有界（最多 5 个，防异常 provider 刷屏）。
+ */
+function accumulateRunUsage(totals, payload) {
+  if (!totals || !payload) return totals;
+  totals.calls += 1;
+  totals.promptTokens += positiveInt(payload.promptTokens);
+  totals.completionTokens += positiveInt(payload.completionTokens);
+  totals.cacheReadTokens += positiveInt(payload.cacheReadTokens);
+  totals.cacheCreationTokens += positiveInt(payload.cacheCreationTokens);
+  totals.durationMs += Math.max(0, Math.round(Number(payload.durationMs) || 0));
+  if (payload.model && !totals.models.includes(payload.model) && totals.models.length < 5) {
+    totals.models.push(payload.model);
+  }
+  return totals;
+}
+
+module.exports = { buildRunUsageEvent, createRunUsageTotals, accumulateRunUsage };

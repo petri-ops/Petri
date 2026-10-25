@@ -7,6 +7,7 @@ import { FederationPanel } from '@/components/desktop/DesktopSettingsPanel/secti
 import type { Project } from '@/lib/project-types';
 import { SshCreateInlinePanel } from './LeftSshCreatePanel';
 import { listConversations, type ConversationSummary } from '@/components/copilot/copilotConversationsClient';
+import { setConversationDragData } from '@/components/copilot/SimpleChat/conversationDrag';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useConversationRun } from '@/components/copilot/conversationRunStore';
 import { formatDate, formatRelativeShort } from '@/lib/format';
@@ -709,6 +710,13 @@ function ConversationItem({
   return (
     <li
       className={`${styles.convItem} ${isCurrent && conversation.id === ctx.activeConvId ? styles.convItemActive : ''} ${hasBranch ? styles.convItemBranch : ''}`}
+      draggable
+      data-conversation-id={conversation.id}
+      title="拖到输入框引用此会话（也可用 @ 选择会话）"
+      onDragStart={(event) => {
+        event.stopPropagation();
+        setConversationDragData(event.dataTransfer, conversation);
+      }}
       onClick={() => {
         if (!isCurrent) ctx.switchToProject(projectId);
         ctx.handleSwitchConversation(conversation.id);

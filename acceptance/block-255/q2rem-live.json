@@ -1,0 +1,109 @@
+{
+  "name": "q2rem-stats-drag-live",
+  "block": "BLOCK-255",
+  "darkMode": false,
+  "mode": "system-default",
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "seeded": {
+    "projectId": "p_mvn6fu9k_vg01",
+    "projectName": "BLOCK255-验收-1792893401328",
+    "currentConversationId": "conv_c0c4f3df-517",
+    "targetConversationId": "conv_14aca1b1-ef0",
+    "currentMessages": 4,
+    "targetMessages": 3,
+    "usageSource": "persisted copilot_messages.meta_json.usage（BLOCK-255 C4 落库形状）"
+  },
+  "startedAt": "2026-10-25T01:56:40.200Z",
+  "finishedAt": "2026-10-25T01:56:48.234Z",
+  "assertions": [
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / data=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b255-live-doys8z / dark=false"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A0c_seeded_conversations",
+      "pass": true,
+      "detail": "{\"count\":2,\"current\":true,\"targetMessages\":3}"
+    },
+    {
+      "name": "A1_left_panel_conversations",
+      "pass": true,
+      "detail": "左栏两个会话行在场"
+    },
+    {
+      "name": "A2_current_conversation_loaded",
+      "pass": true,
+      "detail": "当前会话种子消息渲染"
+    },
+    {
+      "name": "A3_stats_action_present",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A4_stats_panel_usage",
+      "pass": true,
+      "detail": "本条统计处理耗时2.5s工具步数2 步模型迭代2 轮字符数18 字模型deepseek-chatToken输入 1K · 输出 80缓存读 600 · 写 0调用2 次（有 usage） · 1 次未返回 usagetoken 为本条回复内模型调用合计；另有 1 次调用未返回 usage，未计入 token。"
+    },
+    {
+      "name": "A4b_stats_panel_closed",
+      "pass": true,
+      "detail": "关闭后面板移除"
+    },
+    {
+      "name": "A5_stats_honest_without_usage",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5b_no_usage_honest",
+      "pass": true,
+      "detail": "本条统计处理耗时900ms工具步数1 步模型迭代1 轮字符数17 字模型未记录Token未记录调用未记录本条未记录 token（旧消息或渠道未返回 usage）；耗时/工具/迭代仍为本地实测。"
+    },
+    {
+      "name": "A6_drag_dispatched_current",
+      "pass": true,
+      "detail": "{\"ok\":true,\"mime\":\"application/x-petri-conversation\"}"
+    },
+    {
+      "name": "A6b_self_drag_rejected",
+      "pass": true,
+      "detail": "notice=当前会话无需引用自己 chips=0"
+    },
+    {
+      "name": "A7_drag_dispatched_target",
+      "pass": true,
+      "detail": "{\"ok\":true,\"mime\":\"application/x-petri-conversation\"}"
+    },
+    {
+      "name": "A7b_target_drag_adds_chip",
+      "pass": true,
+      "detail": "{\"text\":\"待拖入会话会话\",\"title\":\"【引用会话】\\n> 标题：待拖入会话\\n> conversationId：conv_14aca1b1-ef0\\n> 消息：3\\n> 摘要（末尾若干条，已裁剪）：\\n> 用户：上一个会话的问题\\n> 助手：上一个会话的结论\\n> 用户：继续追问\"}"
+    },
+    {
+      "name": "A8_chip_removable",
+      "pass": true,
+      "detail": "removed"
+    },
+    {
+      "name": "A9_spa_clean",
+      "pass": true,
+      "detail": "收尾回到 ?test=1，页面可用"
+    }
+  ],
+  "allPass": true,
+  "passed": 17,
+  "total": 17
+}

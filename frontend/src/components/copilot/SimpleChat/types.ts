@@ -17,6 +17,8 @@ import type { ConversationMessage } from '../copilotConversationsClient';
 import type { ResultNode } from '../types';
 import type { ConversationLoopState } from '../conversationRunStore';
 import type { ConversationPendingApproval } from '../conversationRunStore';
+import type { MessageUsage } from '../messageUsage';
+export type { MessageUsage } from '../messageUsage';
 
 /**
  * Slash command definitions
@@ -60,6 +62,7 @@ export function shouldOpenWithSystemApp(name: string): boolean {
   return SYSTEM_OPEN_FILE_EXTENSIONS.has(extension);
 }
 
+/** SimpleChat 渲染用的消息形状（持久化消息 + 运行投影共用）。 */
 export interface SimpleMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -68,6 +71,8 @@ export interface SimpleMessage {
   ts?: string;
   /** BLOCK-95 A1 — 持久化消息的 DB id（msg_*）；run 投影的临时消息无此字段。 */
   id?: string;
+  /** BLOCK-255 C4 — 本条助手回复的模型调用 usage 合计（meta_json.usage 还原）。 */
+  usage?: MessageUsage;
   toolActivities?: ToolActivityItem[];
   processingDurationMs?: number;
   statusMessage?: string;
@@ -138,6 +143,31 @@ function restoreReasoningByIteration(
   return count > 0 ? out : undefined;
 }
 
+function restoreMessageUsage(raw: unknown): MessageUsage | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const row = raw as Record<string, unknown>;
+  const count = (value: unknown): number => {
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0 ? Math.round(number) : 0;
+  };
+  const calls = count(row.calls);
+  const unmeasuredCalls = count(row.unmeasuredCalls);
+  if (calls === 0 && unmeasuredCalls === 0) return undefined;
+  const models = Array.isArray(row.models)
+    ? row.models.filter((model): model is string => typeof model === 'string' && model.length > 0).slice(0, 5)
+    : [];
+  return {
+    calls,
+    ...(unmeasuredCalls > 0 ? { unmeasuredCalls } : {}),
+    promptTokens: count(row.promptTokens),
+    completionTokens: count(row.completionTokens),
+    cacheReadTokens: count(row.cacheReadTokens),
+    cacheCreationTokens: count(row.cacheCreationTokens),
+    durationMs: count(row.durationMs),
+    models,
+  };
+}
+
 export function restoreSimpleMessage(message: ConversationMessage): SimpleMessage {
   const meta = message.meta || {};
   const toolActivities = restoreToolActivities(meta.toolActivities);
@@ -161,6 +191,7 @@ export function restoreSimpleMessage(message: ConversationMessage): SimpleMessag
     retryToolJobId: presentation.retryToolJobId,
     ts: message.ts,
     id: message.id,
+    usage: restoreMessageUsage(meta.usage),
     toolActivities,
     progressUpdates: restoreProgressUpdates(meta.progressUpdates),
     resultEditProgress: restoreResultEditProgressEvents(meta.resultEditProgress),

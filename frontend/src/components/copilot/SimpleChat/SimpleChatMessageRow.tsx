@@ -37,6 +37,7 @@ import type { ExtractContext, FileReferenceClickDetail } from '@/lib/chat-file-r
 import type { FormattedError } from '../useErrorFormatter';
 import { parseInlineAttachments, workspaceFileUrl, type InlineAttachmentImage } from './attachmentInline';
 import { ImagePreviewModal } from './ImagePreviewModal';
+import { MessageStatsPanel } from './MessageStatsPanel';
 // BLOCK-246 C4 — 动作注册表（复制/重新生成/分支/加入上下文/评价）
 import { buildMessageActions, type MessageActionId, type MessageRatingValue } from './messageActions';
 
@@ -131,6 +132,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   const inlineImages = m.role === 'user' ? parseInlineAttachments(m.content || '') : { text: '', images: [] };
   // UI-477 加映 — 点击放大（复用 ImagePreviewModal）；悬挂式小图不占正文主区。
   const [zoomedImage, setZoomedImage] = useState<InlineAttachmentImage | null>(null);
+  // BLOCK-255 C4 — 本条统计面板开合（行内状态；不污染父级 memo props）。
+  const [statsOpen, setStatsOpen] = useState(false);
+  const statsPanelId = React.useId();
   // BLOCK-246 C4 — 动作来自注册表；宿主没给回调的动作不渲染（不留死按钮）。
   const actions = buildMessageActions({
     role: m.role === 'user' ? 'user' : 'assistant',
@@ -140,6 +144,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
     forking: forkingAtIndex === forkAbsoluteIndex,
     copied: copiedMessageKey === messageKey,
     rating: messageRating,
+    statsOpen,
   }).filter((action) => {
     if (action.id === 'edit') return Boolean(onEditUserMessage);
     if (action.id === 'quote-context') return Boolean(onQuoteToContext);
@@ -152,11 +157,12 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
     else if (id === 'regenerate') void onRegenerate();
     else if (id === 'fork') void onForkAt(forkAbsoluteIndex);
     else if (id === 'quote-context') onQuoteToContext?.(messageKey, m.content);
+    else if (id === 'stats') setStatsOpen((open) => !open);
     else if (id === 'rate-up') onRateMessage?.(messageKey, 'up');
     else if (id === 'rate-down') onRateMessage?.(messageKey, 'down');
   };
   const actionBar = actions.length === 0 ? null : (
-    <div className="sc-msg-actions">
+    <div className={`sc-msg-actions${statsOpen ? ' sc-msg-actions-open' : ''}`}>
       {actions.map((action) => (
         <React.Fragment key={action.id}>
           <button
@@ -167,6 +173,8 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             title={action.title}
             aria-label={action.title}
             aria-pressed={action.pressed}
+            aria-expanded={action.id === 'stats' ? statsOpen : undefined}
+            aria-controls={action.id === 'stats' && statsOpen ? statsPanelId : undefined}
             data-testid={action.id === 'edit' ? 'msg-edit-user' : `msg-action-${action.id}`}
           >
             <Icon name={action.icon} size={14} />
@@ -365,6 +373,13 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             );
           })()}
           {m.role === 'assistant' && actionBar}
+          {m.role === 'assistant' && statsOpen && !m.pending && (
+            <MessageStatsPanel
+              message={m}
+              onClose={() => setStatsOpen(false)}
+              id={statsPanelId}
+            />
+          )}
         </div>
       </div>
     </>
