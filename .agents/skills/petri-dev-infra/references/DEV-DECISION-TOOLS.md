@@ -24,6 +24,8 @@
 | 台账回写前 | `npm run doc:suggest -- --supply=cloud --context "<改动说明>"` | 提示可能漏回写的 canonical 文档 |
 | 测试失败需要归因时 | `node scripts/block114-failure-triage.mjs <failures.json> -o report.json` | 三层管线：L1 指纹/L2 环境词表（零模型）→ L3 Jev choice 语义残差（仅 L3 出站）；低置信=needs_human |
 | 收口/交接给下一个工作包建议前 | `npm run next:suggest -- --supply=cloud --context "<收口摘要 + 队列>" --candidates "Q7|Q4b|..."` | 用 Jev 在母纲 §6.5/backlog 候选中选**一个**：唯一建议，禁止"或"式多选；Jev 不可用按候选首个兜底并标注（用户裁决 2026-10-24） |
+
+> **每次任务完成后**（不只是收口）都要把 `next:suggest` 的结果写成固定下一步提示：单条建议（含 confidence、具体范围、体量/类型）+ 母纲波次顺序 + 蓝图/全局计划进展（母纲 Q-MATRIX / §6.5、竞争力纲/成熟度蓝图、Result Studio、UI 台账、active 包）。模板与字段规则见 [`$petri-project-governance/references/NEXT-STEP-BRIEF.md`](../../petri-project-governance/references/NEXT-STEP-BRIEF.md)；禁止多选、禁止编造计数、纯问答至少给一行「队列未变」。
 | 多轮会话产出关键结论/收口声明前 | `npm run output:judge -- --transcript <conv.jsonl> [--probe 3]`<br>或 `--request "…" --output "…" [--reference …] [--goals "a;b"]` | 评判门三态（PASS 推进/RETRY 重写/ESCALATE 升级），fit score 0-4 + 忠实性（需 reference）+ 目标完备性 |
 | 限定提示词脚本输出结构化结果后 | 同上 `--probe k` | 稳定性探针：k 次重放一致率（<2/3=unstable，阈值附近判定须谨慎解读） |
 

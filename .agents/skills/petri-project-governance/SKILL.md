@@ -11,6 +11,7 @@ Reference files in this folder (operational detail; this file stays the entry po
 
 - `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` — run at launch; any unchecked box means not ready (or an explicit, recorded user waiver).
 - `references/STAGE-CLOSEOUT-CHECKLIST.md` — run at every stage/Goal close, in order.
+- `references/NEXT-STEP-BRIEF.md` — mandatory delivery format after every task: one Jev recommendation with confidence and concrete scope, master-plan wave order, and blueprint/global-plan progress (母纲 Q-MATRIX / 竞争力纲 / Result Studio / UI 台账 / active package).
 - `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
 - `references/POSTMORTEM-TEMPLATE.md` — run after any incident; every postmortem must land its lesson somewhere.
 - `references/DEPENDENCY-CHANGE-CHECKLIST.md` — run before proposing any new dependency; default answer is "no".
@@ -142,4 +143,5 @@ npm run next:suggest -- --context "<本包收口摘要 + 当前队列/未收口�
 - 取脚本返回的**单个** `suggestion` 作为唯一建议，并附 Jev confidence；Jev 不可用（`reason=jev_unavailable:*`）时按候选**首个**兜底，如实标注"Jev 不可用，按队列序默认"——仍然只给一个。
 - 候选集应来自母纲 §6.5 / backlog 的**真实可开工项**（含当前未收口缺口）；单列大包（如 Q4b）可以进候选，但建议落地前需用户显式发令。
 - 本规则只约束"建议形态"，不改变"新包开工需用户发令"的治理纪律；advice-only，不设门禁、不写决策阈值。
+- **固定输出形态（用户裁决 2026-10-25，每次任务完成都适用）**：按 [`references/NEXT-STEP-BRIEF.md`](./references/NEXT-STEP-BRIEF.md) 交付——①单条 Jev 建议（含 confidence、具体范围、体量/类型）；②母纲波次顺序（P4-REM 最后、Q4b 单列）；③蓝图/全局计划进展（母纲 Q-MATRIX 计数与 §6.5 剩余、竞争力纲/成熟度蓝图、Result Studio、UI 台账、active 工作包）。不存在的计划写「不适用」；纯问答至少给一行「队列未变」。不得只写代号、不得多选、不得列 G1+。
 

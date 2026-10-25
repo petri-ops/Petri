@@ -36,3 +36,4 @@
 
 - [ ] `completed` / `qualified` / `verified` 每一个字都有对应契约证据支撑
 - [ ] "当前无 active 工作包"或下一顺位建议，与 DOC-REGISTRY 一致
+- [ ] 已按 `references/NEXT-STEP-BRIEF.md` 输出下一步提示：单条 Jev 建议（含 confidence 与具体范围）+ 母纲波次顺序 + 蓝图/全局计划进展（母纲 Q-MATRIX / §6.5、竞争力纲/成熟度蓝图、Result Studio、UI 台账、active 包）
