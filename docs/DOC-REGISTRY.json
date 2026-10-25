@@ -8205,6 +8205,27 @@
         "G0"
       ],
       "notes": "2026-10-25 用户「行 按照建议 推完这一波」立项（Jev Q4b：主会话 confidence=0.85 / 复核 0.08，方向一致且队列序同向；§6.5 串行队列仅剩 Q4b 与 P4-REM）。F8 确定性多代理编排脚本面：node:vm 沙箱执行 export const meta 脚本（静态扫描 fail-closed、ESM 子集）；agent/parallel/pipeline/phase/log/budget 原语唯一经导出的 launchSubAgent（不建第二执行器）；并发帽/总代理数帽/预算硬停（不强杀运行中子代理）；journal.jsonl 血缘 + resumeFromRunId 前缀复用；opt-in 默认关 + dryRun 成本预估；零新依赖零迁移（run 状态落 <dataDir>/workflows/<runId>/）。P0 对账=复用（launchSubAgent/agentTaskStore/agent-journal 形态）·隔离（shared-backend/agent-workflow.js 数据面/harness-workflow-state）·新建（vm 沙箱）。P1 沙箱 25/25 → P2 runner 12/12 → P3 REST 7/7 + 邻域 85/85 → P4 隔离后端 mock 实机 11/11（fan-out 全链/预算硬停/cancel/dryRun；实机抓真三处=launchSubAgent model 缺省崩/status 列 completed 非 done/血缘在 params JSON）；closeout 十三门 PASS；F8 🔴→✅ → Q-MATRIX 73/21/0/7（🔴 清零）。plan=docs/block-262-q4b-workflow-scripts-plan.md §9。"
+    },
+    {
+      "id": "BLOCK-263-P4-REM-FINAL",
+      "capability": "p4-rem-final",
+      "path": "docs/block-263-p4-rem-final-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "p4-rem-final",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-25",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "p4-rem",
+        "e13",
+        "result-studio",
+        "domain-neutrality",
+        "G0"
+      ],
+      "notes": "2026-10-25 用户「搞定 P4-REM 数据模型收官」（母纲 §6.5 第 12 行·串行队列最后一项）。P0 对账：E13 现状矩阵（result body/code/compare/lineage 已交付；history 数据桥诚实 no_endpoint 待补全链；selection/revisions 写/annotations/export 判出籍 C-44 写桥依赖；methods 数据面已 pack 化判达成）；域中性 11 处/6 键裁决=保留（schema 回填/legacy 别名/安全边界/制品契约，清零=破坏存量）。P1=history 有界端点+桥+pack 声明渲染器。plan=docs/block-263-p4-rem-final-plan.md。"
     }
   ],
   "lastUpdated": "2026-10-25",
