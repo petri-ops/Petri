@@ -20,13 +20,15 @@ export interface UseTerminalTabsOptions {
   ssh?: { alias: string; remotePath: string };
   /** 解析后的应用主题；xterm 实例跟随变化（不重建会话）。 */
   theme: TerminalThemeName;
+  /** Q5-REM E9 — 分屏第二 pane 的 tab id（null=单 pane）。 */
+  secondaryId?: string | null;
 }
 
 export interface UseTerminalTabsResult {
   tabs: TerminalTab[];
   activeId: string | null;
   setActive: (id: string) => void;
-  openTab: () => void;
+  openTab: () => string | null;
   closeTab: (id: string) => void;
   /** tab 内容容器 callback ref（xterm 首次激活时 open 进该容器）。 */
   registerHost: (id: string) => (el: HTMLDivElement | null) => void;
@@ -56,7 +58,7 @@ interface TabEntry {
  *   dispose 实例；卸载（离开页面）时全量 stop（对齐旧单会话行为）。
  */
 export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTabsResult {
-  const { open, theme, workspacePath, ssh } = options;
+  const { open, theme, workspacePath, ssh, secondaryId = null } = options;
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [limitNotice, setLimitNotice] = useState<string | null>(null);
@@ -66,12 +68,16 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
   const hostsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const activeIdRef = useRef<string | null>(null);
   const sshRef = useRef(ssh);
-  sshRef.current = ssh;
   const themeRef = useRef(theme);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const visibleIdsRef = useRef<string[]>([]);
 
-  activeIdRef.current = activeId;
-  themeRef.current = theme;
+  useEffect(() => {
+    activeIdRef.current = activeId;
+    sshRef.current = ssh;
+    themeRef.current = theme;
+    visibleIdsRef.current = [activeId, secondaryId].filter((id): id is string => Boolean(id));
+  }, [activeId, secondaryId, ssh, theme]);
 
   const getBridgeTerminal = useCallback(() => getBridge('terminal'), []);
 
@@ -118,10 +124,9 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
   const ensureResizeObserver = useCallback((): ResizeObserver => {
     if (!resizeObserverRef.current) {
       resizeObserverRef.current = new ResizeObserver((observed) => {
-        const active = activeIdRef.current;
         for (const item of observed) {
           const id = [...hostsRef.current.entries()].find(([, el]) => el === item.target)?.[0];
-          if (!id || id !== active) continue;
+          if (!id || !visibleIdsRef.current.includes(id)) continue;
           const entry = entriesRef.current.get(id);
           if (!entry) continue;
           try {
@@ -198,13 +203,15 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
     [ensureResizeObserver, getBridgeTerminal]
   );
 
-  // Lazy start: panel open + tab active → ensure xterm + pty for the active tab.
+  // Lazy start: panel open + visible tabs (active + optional split) → ensure xterm + pty.
   useEffect(() => {
-    if (!open || !activeId) return;
-    const tab = tabs.find((t) => t.id === activeId);
-    if (tab) ensureSession(tab);
-     
-  }, [open, activeId, tabs, ensureSession]);
+    if (!open) return;
+    for (const id of [activeId, secondaryId]) {
+      if (!id) continue;
+      const tab = tabs.find((t) => t.id === id);
+      if (tab) ensureSession(tab);
+    }
+  }, [open, activeId, secondaryId, tabs, ensureSession]);
 
   // Switch tab → refit + focus after paint (layout settled).
   useEffect(() => {
@@ -224,15 +231,16 @@ export function useTerminalTabs(options: UseTerminalTabsOptions): UseTerminalTab
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
 
-  const openTab = useCallback(() => {
+  const openTab = useCallback((): string | null => {
     setLimitNotice(null);
     const res = createTerminalTab(tabs, workspacePath);
     if ('limitReached' in res) {
       setLimitNotice(`最多同时打开 ${MAX_TERMINAL_TABS} 个终端标签，请先关闭不用的标签`);
-      return;
+      return null;
     }
     setTabs(res.tabs);
     setActiveId(res.tab.id);
+    return res.tab.id;
   }, [tabs, workspacePath]);
 
   const closeTab = useCallback(

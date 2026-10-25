@@ -117,7 +117,7 @@ function uninstallBridge() {
 // Harness
 // ---------------------------------------------------------------------------
 
-function mountHook(open = false, workspacePath?: string, theme: TerminalThemeName = 'dark') {
+function mountHook(open = false, workspacePath?: string, theme: TerminalThemeName = 'dark', initialSecondaryId: string | null = null) {
   const hosts = new Map<string, HTMLDivElement>();
   /** 挂载宿主元素（模拟 React commit：ref 先于 effects 就绪，带 data-tab-body 供断言定位）。 */
   function attachHost(id: string) {
@@ -129,9 +129,9 @@ function mountHook(open = false, workspacePath?: string, theme: TerminalThemeNam
     result.current.registerHost(id)(el);
   }
   const { result, rerender, unmount } = renderHook(
-    ({ isOpen, ws, activeTheme }: { isOpen: boolean; ws?: string; activeTheme: TerminalThemeName }) =>
-      useTerminalTabs({ open: isOpen, workspacePath: ws, theme: activeTheme }),
-    { initialProps: { isOpen: open, ws: workspacePath, activeTheme: theme } }
+    ({ isOpen, ws, activeTheme, secondaryId }: { isOpen: boolean; ws?: string; activeTheme: TerminalThemeName; secondaryId: string | null }) =>
+      useTerminalTabs({ open: isOpen, workspacePath: ws, theme: activeTheme, secondaryId }),
+    { initialProps: { isOpen: open, ws: workspacePath, activeTheme: theme, secondaryId: initialSecondaryId } }
   );
   /** 连开 n 个 tab；每次 openTab 独立 act（对齐真实用户点击节奏：每 tab 激活期间各自 ensure）。
    *  新 tab 宿主必须在同一 act 内挂载：真实组件所有 tab body 随创建即渲染（ref 先于
@@ -146,9 +146,12 @@ function mountHook(open = false, workspacePath?: string, theme: TerminalThemeNam
     }
   }
   function setOpen(nextOpen: boolean) {
-    rerender({ isOpen: nextOpen, ws: workspacePath, activeTheme: theme });
+    rerender({ isOpen: nextOpen, ws: workspacePath, activeTheme: theme, secondaryId: initialSecondaryId });
   }
-  return { result, rerender, unmount, attachHost, openTabAndAttach, setOpen };
+  function setSecondary(nextSecondaryId: string | null) {
+    rerender({ isOpen: open, ws: workspacePath, activeTheme: theme, secondaryId: nextSecondaryId });
+  }
+  return { result, rerender, unmount, attachHost, openTabAndAttach, setOpen, setSecondary };
 }
 
 async function flush() {
@@ -209,11 +212,24 @@ describe('useTerminalTabs', () => {
   it(`上限 4：第 5 个 openTab 诚实拒绝并给出提示`, () => {
     installBridge();
     const { result } = mountHook(false, '/tmp/proj');
-    for (let i = 0; i < 4; i += 1) act(() => result.current.openTab());
+    for (let i = 0; i < 4; i += 1) act(() => { result.current.openTab(); });
     expect(result.current.tabs).toHaveLength(4);
-    act(() => result.current.openTab());
+    act(() => { result.current.openTab(); });
     expect(result.current.tabs).toHaveLength(4);
     expect(result.current.limitNotice).toContain('最多同时打开 4 个');
+  });
+
+  it('E9 分屏 secondaryId：打开面板时 active + secondary 两个 tab 各起独立 session', async () => {
+    const { bridge } = installBridge();
+    const { result, openTabAndAttach, setOpen } = mountHook(false, '/tmp/proj', 'dark', 'tab-1');
+    openTabAndAttach(2);
+    expect(bridge.startSession).not.toHaveBeenCalled();
+    expect(result.current.activeId).toBe('tab-2');
+    act(() => setOpen(true));
+    await flush();
+    expect(bridge.startSession).toHaveBeenCalledTimes(2);
+    const startedIds = bridge.startSession.mock.calls.map((call) => call[1]).sort();
+    expect(startedIds).toEqual(['tab-1', 'tab-2']);
   });
 
   it('terminal:data 按 sessionId 路由到对应 xterm', async () => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Icon } from '@/components/icons/Icon';
 import { formatShortstatBadge } from '@/components/copilot/conversationChangesStore';
@@ -46,6 +47,8 @@ export function TitleBarRightZone(): React.ReactElement {
   } = panels.titleBar;
   // BLOCK-216 Q5 — tab 生命周期菜单（close / others / right / all）
   const [tabMenu, setTabMenu] = React.useState<{ x: number; y: number; id: string; label: string } | null>(null);
+  const moreButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const [menuAnchor, setMenuAnchor] = React.useState<{ top: number; right: number } | null>(null);
   const tabsRailRef = React.useRef<HTMLDivElement | null>(null);
 
   // 多 surface 横向滚动后，激活项必须自动回到视野（新开 pack 视图不在首屏时尤其重要）。
@@ -112,9 +115,14 @@ export function TitleBarRightZone(): React.ReactElement {
           })}
           <div className={styles.toolMenuAnchor}>
             <button
+              ref={moreButtonRef}
               type="button"
               className={styles.iconBtn}
-              onClick={() => onMoreAction?.()}
+              onClick={() => {
+                const rect = moreButtonRef.current?.getBoundingClientRect();
+                if (rect) setMenuAnchor({ top: rect.bottom + 4, right: Math.max(8, window.innerWidth - rect.right) });
+                onMoreAction?.();
+              }}
               title="展开更多工具"
               aria-label="展开更多工具"
               aria-haspopup="menu"
@@ -128,7 +136,7 @@ export function TitleBarRightZone(): React.ReactElement {
                 <span className={styles.tabCountBadge} data-testid="review-menu-count">{formatShortstatBadge(panels.titleBar.reviewCount ?? 0, panels.titleBar.reviewStat)}</span>
               )}
             </button>
-            {toolMenuOpen && (
+            {toolMenuOpen && createPortal(
               <>
                 <button
                   type="button"
@@ -136,7 +144,12 @@ export function TitleBarRightZone(): React.ReactElement {
                   onClick={() => onMoreAction?.()}
                   aria-label="关闭工具菜单"
                 />
-                <div id="titlebar-tool-menu" className={styles.toolMenu} role="menu">
+                <div
+                  id="titlebar-tool-menu"
+                  className={styles.toolMenu}
+                  role="menu"
+                  style={{ position: 'fixed', top: menuAnchor?.top ?? 42, right: menuAnchor?.right ?? 12 }}
+                >
                   {toolMenuItems.map((item) => (
                     <button
                       key={item.id}
@@ -155,7 +168,8 @@ export function TitleBarRightZone(): React.ReactElement {
                     </button>
                   ))}
                 </div>
-              </>
+              </>,
+              document.body,
             )}
           </div>
         </div>

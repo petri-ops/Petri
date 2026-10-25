@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+最后更新：2026-10-25（**UI-568 宿主菜单修复 + 终端双 pane 分屏 verified（隔离 9223 亮/暗各 17/17；BLOCK-257 P1–P4）**：宿主「更多工具」菜单 portal 到 body（终端打开后可再次弹出）；底部终端双 pane 分屏（active+secondary 独立 tab/xterm/pty）；F7 钉住主区/副栏最大化与恢复补实机腿。证据=`acceptance/block-257/q5rem-live{,-dark}.json`；截图 unavailable。）
+
 最后更新：2026-10-25（**UI-567 自动化与目标看板 verified（隔离 9223 亮/暗各 21/21；BLOCK-256 P1–P6）**：看板显示 schedule/最近运行/goal 用量预算/提醒；goal 暂停恢复、schedule 启停、看板新建、立即运行记录、提醒进通知中心、composer `/schedule` 创建计划全链实机通过。证据=`acceptance/block-256/q7-live.json` / `q7-live-dark.json`；截图 unavailable。）
 
 最后更新：2026-10-25（**UI-567 Q7 自动化与目标看板 in_progress（BLOCK-256 P0）**：ScheduledWorkspacePanel 将从占位改为任务看板——schedule 列表（启用/暂停/立即运行/删除）、最近运行、goal 状态/用量/预算、提醒确认；composer 新增 `/schedule` 入口；提醒进入通知中心 `schedule_reminder`。代码+测试后在 9223 实机取证再升级。）
@@ -5495,3 +5497,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：Node `block256-automation` **5/5** + registry/prerouting/skill/decision **52/52**；前端 Q7 **33/33**（panel/dialog/bridge/slash/notification/theme）；`quality:types` 0、`quality:lint` 0 error、theme **17/17**、`test:changed` EXIT=0（Node 1389/1372 pass/0 fail/17 skipped；前端 107 文件 768）。
 - **实机证据**：`acceptance/block-256/q7-live.json` / `q7-live-dark.json`（各 **21/21**；截图 `unavailable`）。断言链：看板 schedule/goal/run → goal 820/1000 预算与「接近预算」→ goal 暂停/恢复 → schedule 暂停/启用 → 看板新建 → 立即运行记录 → 提醒进通知中心（`schedule_reminder`）→ composer `/schedule` 对话框创建计划 → 收尾回 `?test=1`。
 - **边界（reopen）**：cron/时区、跨设备、运行中 loop 硬熔断、schedule 重叠并发策略、失败重试退避、goal 跨会话聚合口径、agent 唤醒。
+
+## UI-568: 宿主菜单修复 + 终端双 pane 分屏（2026-10-25 **verified（BLOCK-257 Q5-REM 尾包 P1–P4）**）
+
+- **变化面**：修复底部终端打开后标题栏「更多工具」菜单无法再次弹出；BottomTerminal 增加双 pane 分屏（两个 tab 同时可见、各自 xterm/pty 独立）；F7 钉住/最大化补实机证据。
+- **为什么这样设计**：终端分屏复用既有 xterm/pty 与 tab 上限，不建第二终端栈；宿主菜单修复只动壳层堆叠/状态，不重构 E1 跨宿主渲染。菜单根因=留在 titlebar 容器内被列级 header 的 `overflow`/层叠裁切，修法=portal 到 `document.body` + fixed 定位。
+- **验证（代码）**：`TitleBarRightZone.toolMenu.test.tsx` 2/2（菜单父节点=body、容器内无菜单、fixed、终端项在场）；`useTerminalTabs.test.ts` 10/10（secondary session 懒启动）；`BottomTerminal.split.test.tsx` 2/2（分屏 toggle 双 host 可见/取消收敛）；`quality:types` 0、`quality:lint` 0 error；`test:changed` EXIT=0（Node 97＝95 pass/0 fail/2 skipped；前端 related 26 文件 202 + 定向 37 文件 297）；closeout **13/13 PASS** + `skills:check` OK；Knip 基线 278→279（新增 flow 动态入口，逐条留痕）。
+- **实机证据**：`acceptance/block-257/q5rem-live.json` / `q5rem-live-dark.json`（各 **17/17**；截图 `unavailable`）。断言链：更多工具菜单开 → 菜单点终端 → 终端打开后菜单复开 → 新 tab + 分屏两 pane 可见 → 合成 job 结果面钉住 → 主区最大化 → 恢复 → 副栏最大化 → 恢复（分屏+比例槽） → 收尾回 `?test=1`。
+- **边界（reopen）**：E1 跨宿主 DOM 合并（另立设计包）、通用 pane 模型、终端三 pane/拖拽比例/会话恢复；结果链为合成 job，只验钉住/最大化 UI。

@@ -1,0 +1,104 @@
+{
+  "name": "q5rem-tail-live",
+  "block": "BLOCK-257",
+  "darkMode": true,
+  "migrationsApplied": 19,
+  "screenshots": "unavailable",
+  "synthetic": {
+    "jobId": "tj_q5rem_tail",
+    "artifact": "deg.csv",
+    "note": "合成完成 job + 本地 CSV；只验钉住/最大化 UI"
+  },
+  "startedAt": "2026-10-25T04:15:04.523Z",
+  "finishedAt": "2026-10-25T04:15:13.165Z",
+  "assertions": [
+    {
+      "name": "E3_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=true"
+    },
+    {
+      "name": "A0a_backend_rest_healthy",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "A0b_app_page_ready",
+      "pass": true,
+      "detail": "root 就绪"
+    },
+    {
+      "name": "A1_host_menu_open",
+      "pass": true,
+      "detail": "更多工具菜单可见"
+    },
+    {
+      "name": "A2_terminal_open_via_menu",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A2b_terminal_open",
+      "pass": true,
+      "detail": "终端面板打开"
+    },
+    {
+      "name": "A3_host_menu_reopen",
+      "pass": true,
+      "detail": "终端打开后菜单仍可弹出"
+    },
+    {
+      "name": "A4_terminal_split_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A4b_two_panes_visible",
+      "pass": true,
+      "detail": "{\"split\":true,\"visible\":2,\"labels\":[\"tab-1\",\"tab-2\"]}"
+    },
+    {
+      "name": "A5_pin_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5b_pin_pane_visible",
+      "pass": true,
+      "detail": "副栏快照在场"
+    },
+    {
+      "name": "A5c_maximize_main_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5d_restore_after_main",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5e_maximize_pin_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5f_restore_after_pin",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A5g_split_restored",
+      "pass": true,
+      "detail": "恢复分屏且比例槽在场"
+    },
+    {
+      "name": "A6_spa_clean",
+      "pass": true,
+      "detail": "收尾回 ?test=1"
+    }
+  ],
+  "allPass": true,
+  "passed": 17,
+  "total": 17
+}

@@ -546,11 +546,6 @@
       "count": 5
     }
   },
-  "frontend/src/hooks/useTerminalTabs.ts": {
-    "react-hooks/refs": {
-      "count": 3
-    }
-  },
   "frontend/src/hooks/useWorkspaceLayout.test.tsx": {
     "@typescript-eslint/unbound-method": {
       "count": 1

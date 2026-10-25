@@ -43,6 +43,7 @@ export function BottomTerminal({
   const { resolvedTheme } = useTheme();
   // BLOCK-59 P2 — 终端 Tab 升格为独立窗（同一会话第二活视图，主窗 tab 保活）
   const windowManagerBridge = getBridge('windowManager');
+  const [splitId, setSplitId] = React.useState<string | null>(null);
   const {
     tabs,
     activeId,
@@ -54,12 +55,35 @@ export function BottomTerminal({
     dismissLimitNotice,
     clear,
     runningBy,
-  } = useTerminalTabs({ open, workspacePath, ssh, theme: resolvedTheme });
+  } = useTerminalTabs({ open, workspacePath, ssh, theme: resolvedTheme, secondaryId: splitId });
+  // 双 pane 不允许同一 tab 同时占两栏；关闭/切换后自动收敛。
+  if (splitId && (!tabs.some((tab) => tab.id === splitId) || splitId === activeId)) setSplitId(null);
 
   // 打开面板且尚无任何 tab → 自动开第一个（懒启动，此刻才拉起 pty）。
   useEffect(() => {
     if (open && tabs.length === 0) openTab();
   }, [open, tabs.length, openTab]);
+
+  const activateTab = (id: string) => {
+    // 点已分屏 tab = 两栏交换，保持两个 pane 不同 tab。
+    if (splitId === id) setSplitId(activeId);
+    setActive(id);
+  };
+  const closeOne = (id: string) => {
+    closeTab(id);
+    if (splitId === id) setSplitId(null);
+  };
+  const toggleSplit = () => {
+    if (splitId) { setSplitId(null); return; }
+    const other = tabs.find((tab) => tab.id !== activeId);
+    if (other) { setSplitId(other.id); return; }
+    const previous = activeId;
+    const newId = openTab();
+    if (newId) {
+      setSplitId(newId);
+      if (previous) setActive(previous);
+    }
+  };
 
   // 上限提示 4s 自动消隐。
   useEffect(() => {
@@ -83,7 +107,7 @@ export function BottomTerminal({
           return (
             <div
               key={tab.id}
-              className={`${styles.embeddedTerminalTab} ${isActive ? styles.embeddedTerminalTabActive : ''}`}
+              className={`${styles.embeddedTerminalTab} ${isActive ? styles.embeddedTerminalTabActive : ''} ${tab.id === splitId ? styles.embeddedTerminalTabSplit : ''}`}
               data-exited={tab.exited ? 'true' : 'false'}
             >
               <button
@@ -92,7 +116,7 @@ export function BottomTerminal({
                 aria-selected={isActive}
                 title={tab.cwd || label}
                 className={styles.embeddedTerminalTabLabel}
-                onClick={() => setActive(tab.id)}
+                onClick={() => activateTab(tab.id)}
               >
                 <span
                   aria-hidden
@@ -119,7 +143,7 @@ export function BottomTerminal({
                 type="button"
                 className={styles.embeddedTerminalTabClose}
                 aria-label={`关闭 ${label}`}
-                onClick={() => closeTab(tab.id)}
+                onClick={() => closeOne(tab.id)}
               >
                 <Icon name="x" size={10} />
               </button>
@@ -141,22 +165,29 @@ export function BottomTerminal({
               {limitNotice}
             </span>
           ) : null}
+          <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={toggleSplit} data-testid="terminal-split-toggle" aria-pressed={Boolean(splitId)} title={splitId ? '退出分屏' : '分屏（第二个终端 pane）'}>
+            <Icon name="panel-right" size={12} />
+            {splitId ? '取消分屏' : '分屏'}
+          </button>
           <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={clear}>清空</button>
           <button className="petri-btn petri-btn--icon" type="button" onClick={onClose} aria-label="关闭终端面板" title="关闭终端面板">
             <Icon name="x" size={13} />
           </button>
         </div>
       </div>
-      <div className={styles.embeddedTerminalBody}>
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            ref={registerHost(tab.id)}
-            className={`${styles.embeddedTerminalHost} ${tab.id === activeId ? '' : styles.embeddedTerminalHostHidden}`}
-            data-tab-body={tab.id}
-            aria-hidden={tab.id !== activeId}
-          />
-        ))}
+      <div className={`${styles.embeddedTerminalBody} ${splitId ? styles.embeddedTerminalBodySplit : ''}`} data-split={splitId ? 'true' : 'false'}>
+        {tabs.map((tab) => {
+          const visible = tab.id === activeId || tab.id === splitId;
+          return (
+            <div
+              key={tab.id}
+              ref={registerHost(tab.id)}
+              className={`${styles.embeddedTerminalHost} ${visible ? '' : styles.embeddedTerminalHostHidden}`}
+              data-tab-body={tab.id}
+              aria-hidden={!visible}
+            />
+          );
+        })}
       </div>
     </section>
   );

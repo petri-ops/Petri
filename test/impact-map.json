@@ -5449,6 +5449,30 @@
         "frontend/src/styles/theme-token-contract.test.ts",
         "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.test.tsx"
       ]
+    },
+    {
+      "id": "block257-q5-rem-tail",
+      "note": "BLOCK-257 Q5-REM 尾包：宿主更多工具菜单 portal 修复 + E9 终端双 pane 分屏 + F7 钉住/最大化实机腿（E1 跨宿主 DOM 合并另立设计包）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/block257-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/q5rem-tail-*.cjs",
+        "docs/block-257-q5-rem-tail-plan.md",
+        "acceptance/block-257/**",
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.tsx",
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.toolMenu.test.tsx",
+        "frontend/src/components/workspace-panels/BottomTerminal.tsx",
+        "frontend/src/components/workspace-panels/BottomTerminal.split.test.tsx",
+        "frontend/src/hooks/useTerminalTabs.ts",
+        "frontend/src/hooks/useTerminalTabs.test.ts",
+        "frontend/src/pages/project-workspace.module.css"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.toolMenu.test.tsx",
+        "frontend/src/components/workspace-panels/BottomTerminal.split.test.tsx",
+        "frontend/src/hooks/useTerminalTabs.test.ts",
+        "frontend/src/components/workspace-panels/ArtifactPinPane.ratio.test.tsx"
+      ]
     }
   ]
 }
