@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-26（**BLOCK-267 flaky 根治+backlog 小项清偿批 completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——刚收口=BLOCK-267（flaky 根治+backlog 清偿）：①ReviewMode.block147 并发 flaky 根治（act 冲刷+timeout 5s，隔离 6/6 恒绿，🟡 销号）②ScratchpadDock 开态提升模块级外置 store（重挂不再吃开态；UI-585 in_progress 实机未跑）③/api/auth/me standalone 恒 500 清偿（auth.js 直 require 助手模块，红绿对账 500→200，🟡 销号）④dev-verify flow env 陷阱固化静态门 + 首批清偿 8 flow。closeout 十三门 PASS。**前序补记**：BLOCK-264（C-35~C-44 十候选包）/BLOCK-265（UI-578~582 实机腿+PiP+浏览器连接器 transport 接线）/BLOCK-266（composer 视觉收缩）已各自收口提交，canonical 记录以各自 plan+AUDIT-LOG 为准。余下工作面=UI-585/578~582 实机腿补验（下次实机批）+ backlog（R 运行时装后 UI-526 补腿需授权、浏览器连接器前端桥、批注画笔前端渲染器）+ G1+（不外推）。**收口 PATH** 需同时含 Git usr/bin（GNU tar）与 bin（bash）；测试零弹窗纪律（离屏实例+组件级测试）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-25（**BLOCK-263 P4-REM 收官 completed；§6.5 串行队列清零；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——刚收口=BLOCK-263（P4-REM）：history tab 全链（GET /api/result-studio/history + packTabData 桥 + pack 0.2.3）+ 裁决（写面四 tab 出籍 C-44/域中性 6 键保留/methods 达成）+ 实机 6/6（acceptance/block-263/p4rem-live.json）；E13 ✅ → **Q-MATRIX 74/21/0/7**；**母纲 §6.5 串行队列全部收口**。余下工作面=📻 C-35～C-44 候选产品包（backlog，单项启动需用户裁决立项）+ R 运行时装后 UI-526 补腿（需授权）+ G1+（不外推）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。

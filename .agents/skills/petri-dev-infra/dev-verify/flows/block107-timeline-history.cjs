@@ -24,7 +24,7 @@
 const path = require('node:path');
 const lib = require('../lib.cjs');
 
-const PROJECT_ID = process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
+const projectId = () => process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
 const APP_ORIGIN = 'http://localhost:3000';
 const MAX_ROWS = Number(process.env.BLOCK107_ROWS || 4);
 // runner 的 ctx 只给 { assert, timeoutMs }（finish() 不收额外字段），故证据目录在本流
@@ -102,7 +102,7 @@ module.exports = {
     let originalUrl = '';
     try {
       originalUrl = String(await lib.evalJs(client, 'location.href', 8_000));
-      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${PROJECT_ID}?test=1'; 'go'`, 10_000);
+      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${projectId()}?test=1'; 'go'`, 10_000);
       const loaded = await waitForRows(client);
       assert('A1_conversation_rows_present', loaded.rows.length > 0,
         `rows=${loaded.rows.length} :: ${loaded.rows.map((r) => r.label).join(' / ').slice(0, 160)}`);
@@ -162,11 +162,11 @@ module.exports = {
       assert('A5_no_blank_message_body', totalBodies > 0 && emptyBodies === 0,
         `msgBodies=${totalBodies} 空体=${emptyBodies}`);
 
-      lib.log(`project=${PROJECT_ID} 点选行=${perRow.length} 截图=${shots.filter(Boolean).length}`
+      lib.log(`project=${projectId()} 点选行=${perRow.length} 截图=${shots.filter(Boolean).length}`
         + ` :: ${perRow.map((r) => `${r.label}→${r.classified.length}条线`).join(' / ')}`);
       return true;
     } finally {
-      if (originalUrl && !originalUrl.includes(`/project/${PROJECT_ID}`)) {
+      if (originalUrl && !originalUrl.includes(`/project/${projectId()}`)) {
         await lib.evalJs(client, `location.href = ${JSON.stringify(originalUrl)}; 'restoring'`, 8_000)
           .catch(() => null);
       }

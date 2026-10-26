@@ -5722,6 +5722,34 @@
         "test/block113-tool-prerouting.test.mjs",
         "frontend/src/components/copilot/RunStatsBar.test.tsx"
       ]
+    },
+    {
+      "id": "block267-small-clearing",
+      "classifiesScripts": true,
+      "note": "BLOCK-267 flaky 根治+backlog 小项清偿批：①ReviewMode.block147 flaky（act 冲刷+timeout 5s）②ScratchpadDock 开态外置 store ③/api/auth/me standalone 500（auth.js 直 require 助手模块）④dev-verify env 陷阱静态门（flow 顶层 const=process.env 即红）。",
+      "patterns": [
+        "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.block147.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx",
+        "core/petri-server/auth.js",
+        "test/block267-auth-me-standalone.test.mjs",
+        "test/block267-flow-env-trap.test.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-history.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-hosts.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-long.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block214-pack-skills.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/pack-lifecycle.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui554-q2-rem-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui557-web-access-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b264-evidence-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b266-composer-shrink.cjs"
+      ],
+      "tests": [
+        "test/block267-auth-me-standalone.test.mjs",
+        "test/block267-flow-env-trap.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx",
+        "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.block147.test.tsx"
+      ]
     }
   ]
 }

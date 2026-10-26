@@ -26,7 +26,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const lib = require('../lib.cjs');
 
-const PROJECT_ID = process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
+const projectId = () => process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
 const APP_ORIGIN = 'http://localhost:3000';
 const MAX_ROWS = Number(process.env.BLOCK107_HOSTS_ROWS || 3);
 const EVIDENCE_DIR = path.join(process.cwd(), 'acceptance', 'block-107');
@@ -90,7 +90,7 @@ module.exports = {
     let originalUrl = '';
     try {
       originalUrl = String(await lib.evalJs(client, 'location.href', 8_000));
-      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${PROJECT_ID}?test=1'; 'go'`, 10_000);
+      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${projectId()}?test=1'; 'go'`, 10_000);
 
       // 等左栏会话行出现
       let loaded = null;
@@ -188,7 +188,7 @@ module.exports = {
       fs.writeFileSync(
         path.join(EVIDENCE_DIR, 'block107-timeline-hosts-scopes.json'),
         JSON.stringify({
-          project: PROJECT_ID,
+          project: projectId(),
           chosenRow: chosen.row,
           centerActive: chosen.snap.centerActive,
           centerSequences: centerSeqs,
@@ -196,7 +196,7 @@ module.exports = {
           perRow,
         }, null, 2)
       );
-      lib.log(`project=${PROJECT_ID} 选中行=${chosen.row.label} 中央面线=${centerSeqs.length} 悬挂面线=${dockSeqs ? dockSeqs.length : 0} 逐段相等=${equal}`);
+      lib.log(`project=${projectId()} 选中行=${chosen.row.label} 中央面线=${centerSeqs.length} 悬挂面线=${dockSeqs ? dockSeqs.length : 0} 逐段相等=${equal}`);
       return true;
     } finally {
       if (originalUrl) {

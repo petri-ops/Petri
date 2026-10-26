@@ -4,8 +4,13 @@
 // 为什么合成一个组件：面板是绝对定位浮层（锚在 .sc-composer 上），钮在底栏；
 // 若把两者分别写进 SimpleChat.tsx，宿主会为同一件事多背一个 state 与两段 JSX，
 // 而该文件受 code-size 棘轮约束（只许变短）。宿主只需一行 + 一个回调。
+//
+// BLOCK-267（AUDIT-LOG 🟡 清偿）— 开态提升为模块级外置 store：composer 子树在
+// 会话消息/流式推进时会重挂（BLOCK-246 实机观察），组件内 useState 的 open 会被
+// 重挂吃掉（~300ms 自行关闭）。外置 store 让重挂后的新实例重读同一份开态——
+// 开关状态不再随组件生命周期漂移。
 // ============================================================
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ScratchpadEntry } from '@/lib/scratchpadClient';
 import { ScratchpadPanel, type ScratchpadApi } from './ScratchpadPanel';
@@ -20,8 +25,40 @@ export interface ScratchpadDockProps {
   api?: ScratchpadApi;
 }
 
+// ---- 模块级外置开态 store（零依赖；会话内不持久化，刷新即归零为有意语义） ----
+let dockOpen = false;
+const dockListeners = new Set<() => void>();
+
+function setDockOpen(next: boolean | ((current: boolean) => boolean)) {
+  dockOpen = typeof next === 'function' ? next(dockOpen) : next;
+  dockListeners.forEach((listener) => listener());
+}
+
+/** 订阅外置开态（useSyncExternalStore 语义的简化实现：挂载重读 + 变更同步）。 */
+function useDockOpen(): [boolean, (next: boolean | ((current: boolean) => boolean)) => void] {
+  const [open, setOpen] = useState(dockOpen);
+  useEffect(() => {
+    const listener = () => setOpen(dockOpen);
+    dockListeners.add(listener);
+    listener(); // 挂载即重读——重挂不再丢开态
+    return () => {
+      dockListeners.delete(listener);
+    };
+  }, []);
+  const set = useCallback((next: boolean | ((current: boolean) => boolean)) => {
+    setDockOpen(next);
+  }, []);
+  return [open, set];
+}
+
+/** 测试复位（模块级态跨用例残留；下划线前缀=非产品面）。 */
+export function _resetDockOpenForTest() {
+  dockOpen = false;
+  dockListeners.forEach((listener) => listener());
+}
+
 export function ScratchpadDock({ onQuote, projectId, api }: ScratchpadDockProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useDockOpen();
   const close = useCallback(() => setOpen(false), []);
   const handleQuote = useCallback((entry: ScratchpadEntry) => {
     onQuote(scratchpadContextItem(entry));

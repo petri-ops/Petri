@@ -41,7 +41,7 @@ const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const APP_ORIGIN = 'http://localhost:3000';
 const PACK_ROOT = path.resolve(ROOT, '..', 'petri-pack-bio');
-const DATA_ROOT = process.env.PETRI_LOCAL_DATA_DIR || path.join(ROOT, '.petri-dev-user-data', 'data');
+const DATA_ROOT = () => process.env.PETRI_LOCAL_DATA_DIR || path.join(ROOT, '.petri-dev-user-data', 'data');
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
@@ -108,8 +108,8 @@ module.exports = {
     const evidenceDir = path.join(ROOT, 'acceptance', 'block-86');
     fs.mkdirSync(evidenceDir, { recursive: true });
 
-    const recordFile = path.join(DATA_ROOT, 'packs', 'installed.json');
-    const rRuntimeDir = path.join(DATA_ROOT, 'runtimes', 'R');
+    const recordFile = path.join(DATA_ROOT(), 'packs', 'installed.json');
+    const rRuntimeDir = path.join(DATA_ROOT(), 'runtimes', 'R');
     const recordBefore = fs.existsSync(recordFile)
       ? JSON.parse(fs.readFileSync(recordFile, 'utf-8'))
       : [];

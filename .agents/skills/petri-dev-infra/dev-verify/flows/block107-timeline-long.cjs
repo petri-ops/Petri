@@ -35,7 +35,7 @@ const lib = require('../lib.cjs');
 const API = 'http://127.0.0.1:3001/api';
 const AUTH = { Authorization: 'Bearer desktop-local' };
 const APP_ORIGIN = 'http://localhost:3000';
-const PROJECT_ID = process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
+const PROJECT_ID = () => process.env.BLOCK107_PROJECT || 'p_mu174w3u_ncze';
 const TITLE = 'BLK107长会话合成';
 const MSG_COUNT = 250;
 const WINDOW = 200;
@@ -67,7 +67,7 @@ async function rest(method, p, body) {
 
 /** 自愈：清掉同名残留会话（上次中断的运行不会污染本次断言）。 */
 async function deleteByTitle() {
-  const listed = await rest('GET', `/ai/conversations?project_id=${PROJECT_ID}&status=all`);
+  const listed = await rest('GET', `/ai/conversations?project_id=${PROJECT_ID()}&status=all`);
   const rows = (listed.data && listed.data.conversations) || [];
   let n = 0;
   for (const c of rows) {
@@ -234,7 +234,7 @@ module.exports = {
     const healed = await deleteByTitle().catch(() => 0);
     if (healed > 0) lib.log(`自愈清理同名残留会话 ${healed} 条`);
 
-    const created = await rest('POST', '/ai/conversations', { title: TITLE, project_id: PROJECT_ID });
+    const created = await rest('POST', '/ai/conversations', { title: TITLE, project_id: PROJECT_ID() });
     const convId = created.data && created.data.conversation && created.data.conversation.id;
     assert('L0a_rest_create_conversation', created.ok && Boolean(convId),
       JSON.stringify(created.data || null).slice(0, 200));
@@ -264,7 +264,7 @@ module.exports = {
 
       client = await lib.connectTestTarget({ timeoutMs: 20_000 });
       originalUrl = String(await lib.evalJs(client, 'location.href', 8_000));
-      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${PROJECT_ID}?test=1'; 'go'`, 10_000);
+      await lib.evalJs(client, `location.href = '${APP_ORIGIN}/project/${PROJECT_ID()}?test=1'; 'go'`, 10_000);
 
       const snap1 = await openSyntheticConversation(client);
       const marks20Absent = snap1.markers.indexOf(markerOf(20)) === -1;
@@ -310,7 +310,7 @@ module.exports = {
       fs.writeFileSync(
         path.join(EVIDENCE_DIR, 'block107-timeline-long-scopes.json'),
         JSON.stringify({
-          project: PROJECT_ID, convTitle: TITLE, convId,
+          project: PROJECT_ID(), convTitle: TITLE, convId,
           messageCount: MSG_COUNT, windowSize: WINDOW,
           restWindow,
           ui: { initial: slim(snap1), afterLoadOlder: slim(snap2), afterReload: slim(snap3) },

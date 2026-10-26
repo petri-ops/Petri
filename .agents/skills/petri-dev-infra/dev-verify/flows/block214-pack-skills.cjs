@@ -12,7 +12,7 @@ const fs = require('node:fs');
 const lib = require('../lib.cjs');
 
 const OUT = path.join(process.cwd(), 'acceptance', 'block-214');
-const EXPECT = process.env.BLOCK214_EXPECT === 'absent' ? 'absent' : 'pack';
+const EXPECT = () => process.env.BLOCK214_EXPECT === 'absent' ? 'absent' : 'pack';
 
 const BIO_SKILLS = ['标准差异表达分析', 'GO 富集分析', '标准单细胞分析'];
 
@@ -34,14 +34,14 @@ module.exports = {
     fs.mkdirSync(OUT, { recursive: true });
     const client = await lib.connectTestTarget({ timeoutMs: 30000 });
 
-    const url = `http://localhost:3000/extensions?tab=domain-skills&test=${EXPECT === 'pack' ? '1' : '2'}`;
+    const url = `http://localhost:3000/extensions?tab=domain-skills&test=${EXPECT() === 'pack' ? '1' : '2'}`;
     await lib.evalJs(client, `(() => { location.href = ${JSON.stringify(url)}; return true; })()`);
     const text = await waitForText(client, (t) => t.includes('搜索领域技能') || t.includes('扩展中心'));
 
-    const screenshot = EXPECT === 'pack' ? 'ui-pack-skills-installed.png' : 'ui-pack-skills-absent.png';
+    const screenshot = EXPECT() === 'pack' ? 'ui-pack-skills-installed.png' : 'ui-pack-skills-absent.png';
     await lib.screenshotPng(client, OUT, screenshot);
 
-    if (EXPECT === 'pack') {
+    if (EXPECT() === 'pack') {
       assert('pack 在位：货架出现「领域包」来源标签', text.includes('领域包'));
       for (const name of BIO_SKILLS) {
         assert(`pack 在位：货架出现「${name}」`, text.includes(name));

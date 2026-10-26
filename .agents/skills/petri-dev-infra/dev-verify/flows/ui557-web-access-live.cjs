@@ -12,7 +12,7 @@
  *   W1 默认关：/api/web-access 快照显示未开启、检索/抓取都不可用；
  *   W2 关闭态跑真调用：agent 调 web_search → 工具**被拒**（web_access_disabled），
  *      审计 JSONL 留一行 ok:false —— 不是静默空结果；
- *   W3 经真实 API 打开授权（PUT /api/web-access）→ capabilities.search=true；
+ *   W3 经真实 API() 打开授权（PUT /api/web-access）→ capabilities.search=true；
  *   W4 开启后再跑：web_search 真的检索到 → 结果带来源主机名 → 活动行出现来源标签；
  *   W5 抓取内网地址：逐跳策略拒绝（web_url_private_host），审计留痕；
  *   W6 设置面：联网面板可见、开关为开、说明文字在位（截图）。
@@ -24,12 +24,12 @@ const path = require('node:path');
 const lib = require('../lib.cjs');
 const ROOT = lib.findRepoRoot(__dirname);
 
-const APP = process.env.PETRI_B247_APP || 'http://localhost:3000';
-const API = process.env.PETRI_B247_API || 'http://127.0.0.1:3001';
+const APP = () => process.env.PETRI_B247_APP || 'http://localhost:3000';
+const API = () => process.env.PETRI_B247_API || 'http://127.0.0.1:3001';
 // env 必须**调用时**读：flow 是被 require 进来的，脚本在 require 之后才设 env
 // （模块级常量会在 require 时固化空值——实机抓真：审计文件路径与 SearXNG 地址都成了空串）。
-const appUrl = () => process.env.PETRI_B247_APP || APP;
-const apiUrl = () => process.env.PETRI_B247_API || API;
+const appUrl = () => process.env.PETRI_B247_APP || APP();
+const apiUrl = () => process.env.PETRI_B247_API || API();
 const auditFile = () => process.env.PETRI_B247_AUDIT_FILE || '';
 const searxngUrl = () => process.env.PETRI_B247_SEARXNG_URL || '';
 // DARK/SUFFIX 也必须**调用时**读：脚本在 require 本模块**之后**才设 PETRI_B247_DARK
@@ -39,9 +39,9 @@ const isDark = () => process.env.PETRI_B247_DARK === '1';
 const suffix = () => (isDark() ? 'dark' : 'light');
 const EVIDENCE = path.join(ROOT, 'acceptance', 'ui-557');
 const COMPOSER = 'textarea.sc-input';
-const AUDIT_FILE = process.env.PETRI_B247_AUDIT_FILE || '';
-const SEARXNG_URL = process.env.PETRI_B247_SEARXNG_URL || '';
-void AUDIT_FILE; void SEARXNG_URL;
+const AUDIT_FILE = () => process.env.PETRI_B247_AUDIT_FILE || '';
+const SEARXNG_URL = () => process.env.PETRI_B247_SEARXNG_URL || '';
+void AUDIT_FILE(); void SEARXNG_URL();
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
@@ -202,10 +202,10 @@ async function restPut(endpoint, body) {
 }
 
 function readAudit() {
-  const AUDIT_FILE = auditFile();
-  if (!AUDIT_FILE) return [];
+  const auditFilePath = auditFile();
+  if (!auditFilePath) return [];
   try {
-    return fs.readFileSync(AUDIT_FILE, 'utf8').split('\n').filter(Boolean).map((line) => {
+    return fs.readFileSync(auditFilePath, 'utf8').split('\n').filter(Boolean).map((line) => {
       try { return JSON.parse(line); } catch { return { corrupt: true }; }
     });
   } catch {
@@ -401,7 +401,7 @@ async function run({ assert }) {
   const statsAfterReject = (await mockStats()).calls;
   assert('W2b_provider_actually_ran_tool', statsAfterReject > statsBefore, `calls ${statsBefore} → ${statsAfterReject}`);
 
-  // ---- W3 授权面：经**真实 API**打开（同一轮内完成——第二轮发送会撞上
+  // ---- W3 授权面：经**真实 API()**打开（同一轮内完成——第二轮发送会撞上
   //      ProjectWorkspace 既存重渲染环，AUDIT-LOG 已登记的抖动，本包不修它）----
   const put = await restPut('/web-access', {
     enabled: true,

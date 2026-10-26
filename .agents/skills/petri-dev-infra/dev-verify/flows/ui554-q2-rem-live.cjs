@@ -23,8 +23,8 @@ const ROOT = lib.findRepoRoot(__dirname);
 
 const APP = 'http://localhost:3000';
 const API = 'http://127.0.0.1:3001';
-const DARK = process.env.PETRI_B245_DARK === '1';
-const SUFFIX = DARK ? 'dark' : 'light';
+const DARK = () => process.env.PETRI_B245_DARK === '1';
+const SUFFIX = DARK() ? 'dark' : 'light';
 const EVIDENCE = path.join(ROOT, 'acceptance', 'ui-554');
 const COMPOSER = 'textarea.sc-input';
 const MESSAGE = '请结合速记、快照与文件夹说明下一步。';
@@ -227,7 +227,7 @@ async function run({ assert }) {
     return ready ? true : null;
   }, { timeoutMs: 40_000, label: 'composer_ready' });
 
-  if (DARK) {
+  if (DARK()) {
     await client.send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-color-scheme', value: 'dark' }],
     }).catch(() => {});

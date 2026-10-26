@@ -16,10 +16,14 @@ function authMiddleware(req, _res, next) {
   next();
 }
 
-function setupAuthRoutes(app, db) {
-  const lookupById = db.getUserByIdAsync
-    ? (id) => db.getUserByIdAsync(id)
-    : (id) => Promise.resolve(db.getUserById(id));
+function setupAuthRoutes(app, _db) {
+  // BLOCK-267 — standalone server 传入的 `db` 是 raw better-sqlite3 handle（无助手
+  // 方法），此前 `db.getUserByIdAsync` 恒 undefined → /api/auth/me 恒 500（AUDIT-LOG
+  // 🟡 存量）。改为直接 require 助手模块（与 bootstrap 其它消费同源），入参保留兼容。
+  const dbHelpers = require('./db');
+  const lookupById = dbHelpers.getUserByIdAsync
+    ? (id) => dbHelpers.getUserByIdAsync(id)
+    : (id) => Promise.resolve(dbHelpers.getUserById(id));
 
   app.get('/api/auth/me', authMiddleware, async (req, res) => {
     try {

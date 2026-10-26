@@ -9,7 +9,7 @@
 // #3 焦点 hunk 视觉反馈（ReviewMode 集成层；组件层见 CodeMirrorDiffView.test.tsx）。
 // ============================================================
 
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -176,16 +176,17 @@ describe('BLOCK-147 #1 — hunk 决策键内容寻址（refresh 后决策不错�
     // A 的回退已生效 → refresh（task-done / 手动刷新 / stagePaths 同路径重解析 diff）
     rejectApplied = true;
     fireEvent.click(screen.getByLabelText('刷新'));
+    await act(async () => {}); // 冲刷 refresh 微任务链（并发下 1s 默认超时可不够）
 
     // 断言决策落在正确 hunk：幸存的 B（现为 index 0）未被审过，
     // 不得继承 A 的「已拒绝」——索引键（file#0）在此场景即错位。
     await waitFor(() => {
       expect(document.querySelectorAll('.wt-diff-marker.is-rejected').length).toBe(0);
-    });
+    }, { timeout: 5000 });
     // 文件级已审进度同样不得误报
     await waitFor(() => {
       expect(screen.getByTestId('rvw-review-progress').textContent).toContain('0/1 已审');
-    });
+    }, { timeout: 5000 });
   });
 
   it('幸存 hunk 的悬浮控件不显示「已拒绝」态，accept 后决策挂在自身内容上', async () => {
@@ -223,6 +224,7 @@ describe('BLOCK-147 #1 — hunk 决策键内容寻址（refresh 后决策不错�
 
     rejectApplied = true;
     fireEvent.click(screen.getByLabelText('刷新'));
+    await act(async () => {}); // 冲刷 refresh 微任务链（并发下 1s 默认超时可不够）
 
     // B 幸存：其 hunk 控件应仍是可决策的「接受/拒绝」按钮，而非「已拒绝」标签
     await waitFor(() => {
