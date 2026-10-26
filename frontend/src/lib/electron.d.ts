@@ -183,6 +183,9 @@ declare global {
       /** 应用级控制 —— 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化）。 */
       app: {
         relaunch: () => Promise<{ ok: boolean; error?: string }>;
+        /** BLOCK-264（C-38）— 电脑使用画中画：开/关置顶小窗（会话级隐藏）。 */
+        openComputerUsePip: () => Promise<{ ok: boolean }>;
+        closeComputerUsePip: () => Promise<{ ok: boolean }>;
         /** BLOCK-223 — 退出摘要只读计数（主进程把终端会话数合并进来）。 */
         getActivitySummary: () => Promise<{
           ok: boolean;

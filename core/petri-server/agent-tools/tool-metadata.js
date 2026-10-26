@@ -94,6 +94,12 @@ const TOOL_METADATA = {
   // 授权已在设置面完成（一次性显式开启），逐次弹审批会把「查一次资料」变成打断流。
   web_search: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   web_fetch: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-264（C-40）— 浏览器连接器：connect/status/disconnect 只读会话面；
+  // act 逐动作分层（click/fill 写操作 → needsApproval；navigate/read/screenshot 只读）
+  browser_connect: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 5000 },
+  browser_status: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 2000 },
+  browser_disconnect: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 2000 },
+  browser_act: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 20000 },
 
   // ---- 会话/工具栏域 ----
   system_info: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

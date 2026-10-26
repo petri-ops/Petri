@@ -36,6 +36,17 @@ function newAnnotationId() {
   return `ann_${random}`;
 }
 
+/** BLOCK-264（C-43）— path_json 解析：坏数据按 null 降级（不让脏行毁列表）。 */
+function parsePath(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length >= 2 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function parseRect(raw) {
   try {
     const parsed = JSON.parse(raw);
@@ -77,6 +88,7 @@ function rowToAnnotation(row) {
     kind: row.kind || 'region',
     page: row.page === null || row.page === undefined ? null : Number(row.page),
     rect: parseRect(row.rect_json),
+    path: parsePath(row.path_json),
     anchor: parseAnchor(row.anchor_json),
     comment: row.comment,
     color: row.color,
@@ -120,11 +132,11 @@ function createResultAnnotationStore(db, options = {}) {
     INSERT INTO result_annotations (
       annotation_id, contract_version, project_id, conversation_id, surface,
       artifact_id, revision_id, file_path, entry_id, artifact_name, kind, page,
-      rect_json, anchor_json, comment, color, author, created_at, updated_at
+      rect_json, anchor_json, path_json, comment, color, author, created_at, updated_at
     ) VALUES (
       @annotation_id, @contract_version, @project_id, @conversation_id, @surface,
       @artifact_id, @revision_id, @file_path, @entry_id, @artifact_name, @kind, @page,
-      @rect_json, @anchor_json, @comment, @color, @author, @created_at, @updated_at
+      @rect_json, @anchor_json, @path_json, @comment, @color, @author, @created_at, @updated_at
     )
   `);
   const getStatement = db.prepare('SELECT * FROM result_annotations WHERE annotation_id = ?');
@@ -147,6 +159,8 @@ function createResultAnnotationStore(db, options = {}) {
       kind: annotation.kind || 'region',
       page: annotation.page === undefined ? null : annotation.page,
       rect_json: JSON.stringify(Array.isArray(annotation.rect) ? annotation.rect : []),
+      // BLOCK-264（C-43）— freehand 点序列；非 freehand 恒 NULL
+      path_json: Array.isArray(annotation.path) ? JSON.stringify(annotation.path) : null,
       anchor_json: annotation.anchor ? JSON.stringify(annotation.anchor) : null,
       comment: annotation.comment,
       color: annotation.color,

@@ -207,6 +207,9 @@ const desktopBridgeSurface = {
   // 只重启 petri-server 不够，必须重新解析 runtime 路径）
   app: {
     relaunch: () => ipcRenderer.invoke('app:relaunch'),
+    // BLOCK-264（C-38）— 电脑使用画中画（转投主进程 computer-use-pip 通道）
+    openComputerUsePip: () => ipcRenderer.invoke('computer-use:pip-open'),
+    closeComputerUsePip: () => ipcRenderer.invoke('computer-use:pip-close'),
     // BLOCK-223 — 桌面外壳（通知 / 托盘 / 退出摘要）
     getActivitySummary: () => ipcRenderer.invoke('app:get-activity-summary'),
     getShellStatus: () => ipcRenderer.invoke('app:get-shell-status'),

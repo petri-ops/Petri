@@ -34,9 +34,38 @@ function computeVisionConfigured(settings, getCredentialFn) {
 function registerAiSettingsRoutes(app) {
   // BLOCK-259 D1 — 模型计价表（单一源=ai-usage 的 AI_PRICING；选择器只读展示）。
   // 延迟 require：避免路由注册期触发 ai_usage 建表/连接。
+  // BLOCK-264（C-37）— 进程内缓存（表为静态常量，无失效源；重启即新读）。
+  let pricingCache = null;
   app.get('/api/ai/pricing', (_req, res) => {
-    const { AI_PRICING } = require('../helpers/ai-usage');
-    res.json({ status: 'ok', pricing: AI_PRICING });
+    if (!pricingCache) {
+      const { AI_PRICING } = require('../helpers/ai-usage');
+      pricingCache = { ...AI_PRICING };
+    }
+    res.json({ status: 'ok', pricing: pricingCache, cached: true });
+  });
+
+  // BLOCK-264（C-37）— 模型选择器权限来源（model-access 族；读投影 + 校验写）。
+  app.get('/api/ai/model-access', (_req, res) => {
+    const modelAccess = require('../helpers/model-access');
+    const store = modelAccess.readStore();
+    res.json({
+      status: 'ok',
+      mode: store.allowedModels.length > 0 ? 'allowlist' : 'open',
+      allowedModels: store.allowedModels,
+      reasonNotes: store.reasonNotes,
+    });
+  });
+  app.put('/api/ai/model-access', express.json(), (req, res) => {
+    const modelAccess = require('../helpers/model-access');
+    const saved = modelAccess.saveModelAccess(req.body || {});
+    if (!saved.ok) return res.status(400).json({ status: 'error', error: saved.error, diagnostics: saved.diagnostics });
+    const store = modelAccess.readStore();
+    return res.json({
+      status: 'ok',
+      mode: store.allowedModels.length > 0 ? 'allowlist' : 'open',
+      allowedModels: store.allowedModels,
+      reasonNotes: store.reasonNotes,
+    });
   });
 
   // 获取当前 AI 设置。密钥已与普通设置分离，因此这里不会出现明文 key。

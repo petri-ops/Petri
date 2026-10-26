@@ -5586,3 +5586,43 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：`TitleBarRightZone.toolMenu.test.tsx` 2/2（菜单父节点=body、容器内无菜单、fixed、终端项在场）；`useTerminalTabs.test.ts` 10/10（secondary session 懒启动）；`BottomTerminal.split.test.tsx` 2/2（分屏 toggle 双 host 可见/取消收敛）；`quality:types` 0、`quality:lint` 0 error；`test:changed` EXIT=0（Node 97＝95 pass/0 fail/2 skipped；前端 related 26 文件 202 + 定向 37 文件 297）；closeout **13/13 PASS** + `skills:check` OK；Knip 基线 278→279（新增 flow 动态入口，逐条留痕）。
 - **实机证据**：`acceptance/block-257/q5rem-live.json` / `q5rem-live-dark.json`（各 **17/17**；截图 `unavailable`）。断言链：更多工具菜单开 → 菜单点终端 → 终端打开后菜单复开 → 新 tab + 分屏两 pane 可见 → 合成 job 结果面钉住 → 主区最大化 → 恢复 → 副栏最大化 → 恢复（分屏+比例槽） → 收尾回 `?test=1`。
 - **边界（reopen）**：E1 跨宿主 DOM 合并（另立设计包）、通用 pane 模型、终端三 pane/拖拽比例/会话恢复；结果链为合成 job，只验钉住/最大化 UI。
+
+## UI-578: 首启分步引导清单（2026-10-26 **in_progress（BLOCK-264 C-35；代码+组件级完成，实机腿未跑）**）
+
+- **变化面**：空首页（创建第一个项目页）顶部新增「开始使用（n/3）」清单：配置模型/创建项目/开始对话三步，全部由 `GET /api/app/onboarding-status` 真实状态派生；全部完成整块隐藏。
+- **为什么这样设计**：不存进度偏好、不虚构「已读」——步数即真实状态；老用户零打扰。
+- **验证（代码）**：`OnboardingChecklist` 4/4（步数一致性/全完成隐藏/接口失败不渲染/状态只读）。
+- **实机证据**：未跑（组件级完成；待下一次实机批）。
+- **边界（reopen）**：分步引导（向导式逐页）、数据导入应用面的设置页入口深化。
+
+## UI-579: 外部配置导入应用面（2026-10-26 **in_progress（BLOCK-264 C-35；面板+端点完成，实机腿未跑）**）
+
+- **变化面**：设置「常规」节新增「从外部 Agent 导入配置」：粘贴 → 只读预览（勾选键/凭据检测提示）→ 两步确认应用 → 可回滚。后端 apply 服务端重推导+前值快照+审计 jsonl。
+- **为什么这样设计**：预览永不写盘（BLOCK-209 语义保留）；apply 不信任客户端 patch；凭据键结构性排除。
+- **验证（代码）**：Node apply/rollback 7/7 + `ExternalImportPanel` 4/4（预览→勾选→确认请求体/部分导入/错误如实/回滚带 applyId）。
+- **实机证据**：未跑。
+- **边界（reopen）**：更多源格式（Claude/Cursor）、导入冲突逐键对比视图。
+
+## UI-580: 审批通知深定位（2026-10-26 **in_progress（BLOCK-264 C-39；事件链完成，实机腿未跑）**）
+
+- **变化面**：通知中心点击「待确认」通知 → 跳转会话后滚动到待决审批卡（`guard-ack-card`）并居中；非审批通知不派发。
+- **为什么这样设计**：K4 余项「点击由到会话深到到具体待决审批卡」；跳转仍走 `noticeTarget` 单点。
+- **验证（代码）**：`NotificationCenterBell` 7/7（含 ackToken 派发/非审批不派发两断言）。
+- **实机证据**：未跑。
+- **边界（reopen）**：多待决审批卡时的目标选择策略。
+
+## UI-581: 模型菜单白名单禁行（2026-10-26 **in_progress（BLOCK-264 C-37；前后端完成，实机腿未跑）**）
+
+- **变化面**：模型菜单在白名单模式下未列入的模型禁用并显示「未列入本机允许清单（理由）」；价格旁注保持。
+- **为什么这样设计**：权限单一源=`model-access` 族（`GET/PUT /api/ai/model-access`）；取不到=open 全放行（不阻塞选择器）；定价端点进程内缓存。
+- **验证（代码）**：Node 5/5 + `ModelMenu` 6/6（含新禁行回归）。
+- **实机证据**：未跑。
+- **边界（reopen）**：设置页白名单编辑 UI、逐模型理由录入面。
+
+## UI-582: 电脑使用画中画入口（2026-10-26 **in_progress（BLOCK-264 C-38；IPC+面板按钮完成，实机窗口腿未跑）**）
+
+- **变化面**：设置「电脑控制」面板新增「画中画」按钮 → 主进程开置顶小窗实时显示自动化截帧（1.5s 间隔；隐藏只关窗可再开；关窗即停采集）。
+- **为什么这样设计**：E7 余项 PiP；截帧只在窗开时拉（不开窗零截屏零开销）；复用 computer-use-host 单例不建第二采集。
+- **验证（代码）**：Node PiP 3/3（帧形状/IPC 四通道/关窗拒拉）+ `ComputerUsePanel` 2/2。
+- **实机证据**：未跑（窗口面需真 Electron）。
+- **边界（reopen）**：帧率调节、点击穿透控制、会话级隐藏偏好持久化。

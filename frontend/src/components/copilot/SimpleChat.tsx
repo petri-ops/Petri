@@ -719,6 +719,16 @@ export function SimpleChat({
     });
   }, [conversationId, refreshConversations]);
 
+  // BLOCK-264（C-39）— 待审批通知深定位：通知中心点击后滚动到待决审批卡
+  // （只在对应会话内生效；卡片锚 = GuardAckCard 的 data-testid=guard-ack-card）。
+  useEffect(() => {
+    return subscribePetriEvent(petriEvents.approvalCardFocus, (detail) => {
+      if (detail.conversationId && detail.conversationId !== conversationId) return;
+      const card = document.querySelector('[data-testid="guard-ack-card"]');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [conversationId]);
+
   // UI-262 — 左缘用户消息导航条（构建逻辑外迁至 ./SimpleChat/displayMessages.ts）。
   const railItems = useMemo(() => buildRailItems(displayMessages), [displayMessages]);
 

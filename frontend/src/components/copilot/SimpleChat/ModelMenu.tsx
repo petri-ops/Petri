@@ -74,6 +74,35 @@ function presetMeta(preset: ChatModelPreset, active: boolean, pricing: PricingTa
   return parts.length > 0 ? parts.join(' · ') : active ? '当前使用' : '点击切换';
 }
 
+
+/** BLOCK-264（C-37）— 模型白名单单一源 /api/ai/model-access；取不到=open 全放行。 */
+interface ModelAccessState { mode: 'open' | 'allowlist'; allowedModels: string[]; reasonNotes: Record<string, string> }
+const OPEN_ACCESS: ModelAccessState = { mode: 'open', allowedModels: [], reasonNotes: {} };
+function useModelAccess(): ModelAccessState {
+  const [access, setAccess] = useState<ModelAccessState>(OPEN_ACCESS);
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const response = await fetch(`${getApiPrefix()}/ai/model-access`);
+        const data = await response.json() as { mode?: 'open' | 'allowlist'; allowedModels?: string[]; reasonNotes?: Record<string, string> };
+        if (alive && data) {
+          setAccess({
+            mode: data.mode === 'allowlist' ? 'allowlist' : 'open',
+            allowedModels: Array.isArray(data.allowedModels) ? data.allowedModels : [],
+            reasonNotes: data.reasonNotes || {},
+          });
+        }
+      } catch {
+        // 权限面不可用不拦截选择（open 语义）
+      }
+    };
+    void load();
+    return () => { alive = false; };
+  }, []);
+  return access;
+}
+
 export function ModelMenu({
   mode,
   groups,
@@ -89,6 +118,13 @@ export function ModelMenu({
   onPickModel,
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
+  const access = useModelAccess();
+  const accessDenied = (model: string): string | null => {
+    if (access.mode !== 'allowlist') return null;
+    if (access.allowedModels.includes(model)) return null;
+    const note = access.reasonNotes[model];
+    return note ? `未列入本机允许清单（${note}）` : '未列入本机允许清单';
+  };
   return (
     <>
       <div className="sc-model-overlay" onClick={onClose} />
@@ -144,10 +180,12 @@ export function ModelMenu({
         ) : (
           (selectedGroup?.rows || []).map((row) => {
             const active = row.preset.id === activeModelId;
-            const disabled = !isSelectableRow(row);
+            const accessReason = accessDenied(row.preset.model);
+            const effectiveReason = row.reason || accessReason;
+            const disabled = !isSelectableRow(row) || accessReason !== null;
             const price = formatPrice(pricing[row.preset.model]);
-            const meta = row.reason
-              ? `${row.reason}${price ? ` · ${price}` : ''}`
+            const meta = effectiveReason
+              ? `${effectiveReason}${price ? ` · ${price}` : ''}`
               : presetMeta(row.preset, active, pricing);
             return (
               <button
@@ -155,11 +193,11 @@ export function ModelMenu({
                 key={row.preset.id}
                 className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
                 disabled={disabled}
-                title={row.reason || row.preset.model}
+                title={effectiveReason || row.preset.model}
                 onClick={() => onPickModel(row.preset)}
               >
                 <span className="sc-model-option-title">{row.preset.model}</span>
-                <span className={`sc-model-option-meta ${row.reason ? 'sc-model-option-warning' : ''}`}>
+                <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
                   {meta}
                 </span>
               </button>

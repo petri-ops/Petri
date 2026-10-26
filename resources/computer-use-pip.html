@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>电脑使用 · 画中画</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #10151c; color: #dbe4ee; font: 13px/1.5 system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: #182029; }
+  header span { font-weight: 600; }
+  header button { all: unset; cursor: pointer; padding: 2px 10px; border-radius: 6px; background: #2a3644; }
+  #stage { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+  #stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  #stage .empty { color: #8fa1b5; text-align: center; padding: 12px; }
+  footer { padding: 4px 10px; font-size: 11px; color: #8fa1b5; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <header>
+    <span>电脑使用 · 实时画面</span>
+    <button id="hide" type="button">隐藏</button>
+  </header>
+  <div id="stage"><div class="empty" id="placeholder">正在获取画面…</div></div>
+  <footer><span id="meta">—</span><span>置顶小窗；隐藏只关窗，会话内可从设置再打开</span></footer>
+<script>
+  (function () {
+    var stage = document.getElementById('stage');
+    var placeholder = document.getElementById('placeholder');
+    var meta = document.getElementById('meta');
+    var img = null;
+    document.getElementById('hide').addEventListener('click', function () { window.pipApi.close(); });
+    function apply(frame) {
+      if (frame && frame.pngBase64) {
+        if (!img) {
+          img = document.createElement('img');
+          img.alt = '自动化屏幕画面';
+          placeholder.replaceWith(img);
+        }
+        img.src = 'data:image/png;base64,' + frame.pngBase64;
+        meta.textContent = frame.at ? new Date(frame.at).toLocaleTimeString() : '—';
+      } else {
+        meta.textContent = (frame && frame.error) || '暂无画面';
+      }
+    }
+    var timer = null;
+    function tick() {
+      window.pipApi.pullFrame().then(function (res) {
+        if (res && res.ok) apply(res.frame);
+        if (res && !res.ok && res.error === 'pip_not_open') { clearInterval(timer); timer = null; }
+      }).catch(function () { /* 单帧失败下轮再试 */ });
+    }
+    tick();
+    timer = setInterval(tick, 1500);
+  })();
+</script>
+</body>
+</html>

@@ -27,7 +27,11 @@ const RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION = 18;
  * 归属，其它面该列为 NULL。
  */
 const RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION = 19;
-const RESULT_ANNOTATION_CONTRACT_VERSION = 1;
+/**
+ * BLOCK-264（C-43）— 画笔路径列（020）。同样只 ALTER 追加。
+ */
+const RESULT_ANNOTATION_PATH_MIGRATION_VERSION = 20;
+const RESULT_ANNOTATION_CONTRACT_VERSION = 2;
 
 const RESULT_ANNOTATION_TABLES = Object.freeze(['result_annotations']);
 
@@ -124,6 +128,37 @@ function buildAnnotationEntryMigrationSql() {
   const body = RESULT_ANNOTATION_ENTRY_STATEMENTS.map((statement) => `${statement};`).join('\n\n');
   return `${RESULT_ANNOTATION_ENTRY_HEADER}\n\n${body}\n`;
 }
+/** 020 列是否就位。 */
+function hasAnnotationPathColumn(db) {
+  if (!db || typeof db.prepare !== 'function') return false;
+  try {
+    const rows = db.prepare('PRAGMA table_info(result_annotations)').all();
+    return rows.some((row) => row && row.name === 'path_json');
+  } catch {
+    return false;
+  }
+}
+
+/** 020 — 画笔路径列（可空；非 freehand kind 该列为 NULL）。 */
+const RESULT_ANNOTATION_PATH_STATEMENTS = Object.freeze([
+  'ALTER TABLE result_annotations ADD COLUMN path_json TEXT',
+]);
+
+const RESULT_ANNOTATION_PATH_HEADER = `-- BLOCK-264 C-43 — freehand path column for annotations (migration 020)
+--
+-- This file is generated from core/shared-backend/result-annotation-schema.js.
+-- Freehand pen annotations store a normalized point series in path_json
+-- (same 0..1 domain as rect_json); every non-freehand kind keeps it NULL.
+--
+-- Constraints:
+-- - No BEGIN/COMMIT: migration-runner already wraps the file in a transaction.
+-- - Additive only: one nullable column, no rewrite of existing rows.`;
+
+function buildAnnotationPathMigrationSql() {
+  const body = RESULT_ANNOTATION_PATH_STATEMENTS.map((statement) => `${statement};`).join('\n\n');
+  return `${RESULT_ANNOTATION_PATH_HEADER}\n\n${body}\n`;
+}
+
 
 /** 条目归属列是否就位（旧库升级前为 false）。 */
 function hasAnnotationEntryColumn(db) {
@@ -155,6 +190,10 @@ function ensureAnnotationSchema(db) {
   if (!hasAnnotationEntryColumn(db)) {
     for (const statement of RESULT_ANNOTATION_ENTRY_STATEMENTS) db.exec(statement);
   }
+  // BLOCK-264（C-43）— 020 画笔路径列（幂等补列）。
+  if (!hasAnnotationPathColumn(db)) {
+    for (const statement of RESULT_ANNOTATION_PATH_STATEMENTS) db.exec(statement);
+  }
   return { contractVersion: RESULT_ANNOTATION_CONTRACT_VERSION, tables: [...RESULT_ANNOTATION_TABLES] };
 }
 
@@ -176,16 +215,20 @@ module.exports = {
   RESULT_ANNOTATION_MIGRATION_VERSION,
   RESULT_ANNOTATION_ANCHOR_MIGRATION_VERSION,
   RESULT_ANNOTATION_ENTRY_MIGRATION_VERSION,
+  RESULT_ANNOTATION_PATH_MIGRATION_VERSION,
   RESULT_ANNOTATION_CONTRACT_VERSION,
   RESULT_ANNOTATION_TABLES,
   RESULT_ANNOTATION_SCHEMA_STATEMENTS,
   RESULT_ANNOTATION_ANCHOR_STATEMENTS,
   RESULT_ANNOTATION_ENTRY_STATEMENTS,
+  RESULT_ANNOTATION_PATH_STATEMENTS,
   buildAnnotationMigrationSql,
   buildAnnotationAnchorMigrationSql,
   buildAnnotationEntryMigrationSql,
+  buildAnnotationPathMigrationSql,
   hasAnnotationAnchorColumn,
   hasAnnotationEntryColumn,
+  hasAnnotationPathColumn,
   ensureAnnotationSchema,
   inspectAnnotationSchema,
 };

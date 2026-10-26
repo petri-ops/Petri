@@ -153,5 +153,6 @@ test('BLOCK-261 K3 — 映射面只认后端既有两个端点，且不复制审
 
 test('BLOCK-261 K3 — 活动摘要面不扩成第二控制面（只读，无新增写路由）', () => {
   const source = fs.readFileSync(path.join(ROOT, 'core/petri-server/routes/app-activity.js'), 'utf8');
-  assert.deepEqual(source.match(/app\.(get|post|put|delete)\('[^']+'/g), [`app.get('/api/app/activity-summary'`]);
+  // BLOCK-264（C-35）追加 onboarding-status 只读端点（仍无写路由）
+  assert.deepEqual(source.match(/app\.(get|post|put|delete)\('[^']+'/g), [`app.get('/api/app/activity-summary'`, `app.get('/api/app/onboarding-status'`]);
 });

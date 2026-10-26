@@ -14,6 +14,8 @@ export interface AppNotice {
   body: string;
   conversationId?: string;
   projectId?: string;
+  /** BLOCK-264（C-39）— 待审批通知携带审批 token（点击深定位到审批卡） */
+  ackToken?: string;
   createdAt: string;
   read: boolean;
 }

@@ -491,6 +491,11 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "verify_state": "已校验",
   "wait_agent": "已等待",
   "web_fetch": "已抓取",
+  // BLOCK-264（C-40）浏览器连接器
+  "browser_connect": "已连接浏览器",
+  "browser_act": "浏览器操作",
+  "browser_status": "浏览器状态",
+  "browser_disconnect": "已断开浏览器",
   "web_search": "已检索",
   "workspace_exec": "已运行",
   "workspace_exec_background": "后台运行",

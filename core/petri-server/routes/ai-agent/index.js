@@ -25,6 +25,7 @@ const resume = require('./resume');
 const taskActions = require('./task-actions');
 const decisions = require('./decisions'); // BLOCK-116 W2 决策观测面（只读聚合）
 const workflow = require('./workflow'); // BLOCK-262（Q4b）工作流脚本（opt-in 默认关）
+const suggestions = require('./suggestions'); // BLOCK-264（C-36）模型侧追问/润色
 const costCap = require('./cost-cap'); // BLOCK-176 CP-18 任务级成本硬熔断
 
 // AGENT_TASK_MODE_v1：默认 task 模式（loop 后台跑 + 订阅重连），legacy 回退到直连 SSE
@@ -49,6 +50,7 @@ module.exports = {
     taskActions.register(app);
     decisions.register(app);
     workflow.register(app); // BLOCK-262（Q4b）
+    suggestions.register(app); // BLOCK-264（C-36）
   },
 
   // 子模块 surface（方便测试与子域调试）

@@ -10,6 +10,7 @@ import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider
 import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
 import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
+import { ExternalImportPanel } from '@/components/settings/ExternalImportPanel'; // BLOCK-264（C-35）
 import { DesktopBehaviorPanel } from './DesktopSettingsPanel/sections/DesktopBehaviorPanel';
 import { ModelSelectorControls } from './DesktopSettingsPanel/sections/ModelSelectorControls';
 import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
@@ -241,6 +242,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         </div>
         <MotionControl />
         <DesktopBehaviorPanel />
+        {/* BLOCK-264（C-35）— 外部配置导入应用面 */}
+        <ExternalImportPanel />
           </section>
         )}
 

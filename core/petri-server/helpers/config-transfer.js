@@ -37,6 +37,7 @@ const subagentProfile = require('./subagent-profile');
 const trustPolicy = require('./trust-policy');
 const retention = require('./data-retention');
 const webSearch = require('./web-search-config');
+const modelAccess = require('./model-access'); // BLOCK-264（C-37）
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -71,6 +72,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   // BLOCK-247（Q2b）联网检索授权与预算：导出的是用户覆盖层（开关/后端/预算/黑白名单）。
   // 导出**不含**任何凭据（本族本就无凭据：SearXNG 自建实例无需 key）。
   'web-search',
+  // BLOCK-264（C-37）— 模型选择器权限来源（白名单/理由账本）
+  'model-access',
 ]);
 
 /** 显式排除清单：随信封回传，防止「以为备份了全部设置」。 */
@@ -147,6 +150,8 @@ function readFamilyOverrides() {
     'trust-policy': trustPolicy.readStore(),
     'data-retention': retention.readStore(),
     'web-search': { ...webSearch.readStore() },
+    // BLOCK-264（C-37）— 模型白名单覆盖层（含理由账本；无凭据面）
+    'model-access': { ...modelAccess.readStore() },
   };
 }
 
@@ -311,6 +316,11 @@ function validateFamily(family, body) {
       for (const d of result.diagnostics) diagnostics.push({ ...d, path: `rules[${index}].${d.path}` });
     });
     return diagnostics;
+  }
+  if (family === 'model-access') {
+    // BLOCK-264（C-37）— 元素级校验在落点模块（saveModelAccess 的字符串项整批拒）
+    const saved = modelAccess.saveModelAccess(body);
+    return saved.ok ? [] : (saved.diagnostics || []).map((d) => ({ family: 'model-access', path: d.path || '', code: d.code, message: d.message }));
   }
   if (family === 'skills-prefs') {
     // 该族有代码自写字段（version/at/sourceDir），不能走 commitGuard（会按只读键全拒）；
@@ -486,6 +496,15 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）；拒绝走共享注册表守卫（saveWebSearchConfig 抛带 diagnostics 的错）
     webSearch.saveWebSearchConfig(body);
   },
+  // BLOCK-264（C-37）— 模型白名单导入（saveModelAccess 自带元素级校验，非法整批拒）
+  'model-access'(body) {
+    const saved = modelAccess.saveModelAccess(body);
+    if (!saved.ok) {
+      const error = new Error('model-access import failed');
+      error.diagnostics = saved.diagnostics || [];
+      throw error;
+    }
+  },
 };
 
 /**
@@ -535,6 +554,7 @@ const RESETTERS = {
   'data-retention'() { retention.resetRetention(); },
   // 重置 = 清空覆盖层 → 回落代码默认（默认关、不用检索后端、无黑白名单）
   'web-search'() { webSearch.writeStore({}); },
+  'model-access'() { modelAccess.writeStore({ allowedModels: [], reasonNotes: {} }); },
 };
 
 /**

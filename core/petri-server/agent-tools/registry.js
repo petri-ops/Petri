@@ -18,6 +18,8 @@ const { tool_decision_summary, tool_decision_recent } = require('./decision-tool
 const { tool_result_summary } = require('./result-summary-tools');
 // BLOCK-254 A-2（Q6-REM）— 批注旁路元数据只读读取（scope 定界 / 项目隔离 fail-closed）
 const { tool_result_annotations_list } = require('./result-annotation-tools');
+// BLOCK-264（C-40）— 浏览器连接器垂直切片（会话/白名单/审批门在 helpers/browser-connector）
+const browserTools = require('./browser-tools');
 // BLOCK-256 Q7 — 目标状态机三工具（create/get/update；用量来自 ai_usage 真账本）
 const { tool_create_goal, tool_get_goal, tool_update_goal } = require('./goal-tools');
 // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
@@ -157,6 +159,11 @@ const HANDLERS = {
   send_message,
   followup_task,
   query: tool_query,
+  // BLOCK-264（C-40）浏览器连接器垂直切片（会话/白名单/审批门在 helpers/browser-connector）
+  browser_connect: browserTools.browser_connect,
+  browser_act: browserTools.browser_act,
+  browser_status: browserTools.browser_status,
+  browser_disconnect: browserTools.browser_disconnect,
   read_page: tool_read_page,
   search: tool_search,
   act: tool_act,
@@ -269,6 +276,11 @@ const CONTRACTS = {
   // 用于审计与后续出网预算挂钩）；估时按搜索 8s / 抓取 12s（含一次重定向）。
   web_search: contract('retrieval', 'external-request', 'R1', ['network.egress'], 8000),
   web_fetch: contract('retrieval', 'external-request', 'R1', ['network.egress'], 12000),
+  // BLOCK-264（C-40）浏览器连接器：会话面 R0；act=external-request R2（mutating 无 ackToken 在 connector 层硬拒）
+  browser_connect: contract('action', 'none', 'R0', ['ui.session'], 3000),
+  browser_status: contract('retrieval', 'none', 'R0', [], 1000),
+  browser_disconnect: contract('action', 'none', 'R0', [], 1000),
+  browser_act: contract('action', 'external-request', 'R2', ['network.egress'], 15000),
   // BLOCK-244 Q1-REM — 结构化提问：无副作用但会暂停等待用户（UI 会话资源）
   ask_user_question: contract('action', 'none', 'R0', ['ui.session'], 300000),
   // BLOCK-48 P3 — Computer Use（macOS）：快照/授权/等待为只读面；控制类

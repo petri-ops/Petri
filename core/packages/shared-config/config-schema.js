@@ -170,6 +170,14 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-264（C-37）：模型选择器权限来源——
+  // 谁定义「本机允许用哪些模型」的单一真相：默认全放行；allowlist 非空=白名单模式。
+  // 无 env 层（本地单用户产品，加 env 会造第二真相）；HTTP 写面在 ai-settings-api。
+  'model-access': {
+    store: 'file:model-access.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
 });
 
 /**
@@ -720,6 +728,18 @@ const CONFIG_KEYS = Object.freeze([
     key: 'retention.maxBytesPerDir', family: 'data-retention', path: 'maxBytesPerDir',
     type: 'number', domain: { min: 0, max: 1e12, integer: 'floor' }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
+  },
+  // —— 模型选择器权限来源（BLOCK-264 / C-37）——
+  {
+    // 空数组 = 全放行（默认）；非空 = 白名单模式（不在清单的模型不可选且逐行给理由）
+    key: 'model-access.allowedModels', family: 'model-access', path: 'allowedModels',
+    type: 'array', domain: { itemKind: 'string', maxItems: 64 }, envKeys: [], aliases: [],
+    mutable: true, ui: 'settings',
+  },
+  {
+    // 逐模型豁免理由账本（只读登记面：谁批准的、为什么）——不参与放行判定，只做可解释
+    key: 'model-access.reasonNotes', family: 'model-access', path: 'reasonNotes',
+    type: 'object', envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
   {
     // 只登记不可写：模型 id 与向量维度（EMBEDDING_DIM=1024）绑定，单方面换模型会让已存向量全部失效。

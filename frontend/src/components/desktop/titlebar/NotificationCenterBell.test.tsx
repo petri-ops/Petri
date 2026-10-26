@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NotificationCenterBell } from './NotificationCenterBell';
 import {
@@ -97,5 +97,52 @@ describe('NotificationCenterBell', () => {
     expect(pushNotice({ kind: 'turn_completed', title: '完成', body: 'A' })).toBeNull();
     expect(listNotices()).toHaveLength(0);
     expect(unreadNoticeCount()).toBe(0);
+  });
+});
+
+// ---------- BLOCK-264（C-39）审批通知深定位 ----------
+
+describe('NotificationCenterBell · 审批深定位（BLOCK-264 C-39）', () => {
+  it('点击待审批通知派发 approvalCardFocus 事件（带 ackToken）', async () => {
+    const dispatched: { name: string; detail: unknown }[] = [];
+    const origDispatch = window.dispatchEvent;
+    window.dispatchEvent = ((e: Event) => {
+      if (e instanceof CustomEvent) dispatched.push({ name: e.type, detail: e.detail });
+      return origDispatch.call(window, e);
+    }) as typeof window.dispatchEvent;
+    pushNotice({
+      kind: 'approval_required',
+      title: '需要确认',
+      body: '工具 x 正在等待授权',
+      conversationId: 'conv-1',
+      projectId: 'p1',
+      ackToken: 'token-abc',
+    });
+    renderBell();
+    fireEvent.click(screen.getByTestId('notification-center-bell')); // 展开列表
+    const item = await screen.findByText(/工具 x 正在等待授权/);
+    fireEvent.click(item);
+    await waitFor(() => {
+      const evt = dispatched.find((d) => d.name === 'petri:approval-card-focus');
+      expect(evt).toBeTruthy();
+      expect((evt!.detail as { ackToken?: string }).ackToken).toBe('token-abc');
+    });
+    window.dispatchEvent = origDispatch;
+  });
+
+  it('非审批通知不派发深定位事件', async () => {
+    const dispatched: { name: string }[] = [];
+    const origDispatch = window.dispatchEvent;
+    window.dispatchEvent = ((e: Event) => {
+      if (e instanceof CustomEvent) dispatched.push({ name: e.type });
+      return origDispatch.call(window, e);
+    }) as typeof window.dispatchEvent;
+    pushNotice({ kind: 'turn_completed', title: '本轮完成', body: '对话已完成', conversationId: 'conv-2', projectId: 'p1' });
+    renderBell();
+    fireEvent.click(screen.getByTestId('notification-center-bell')); // 展开列表
+    const item = await screen.findByText('本轮完成');
+    fireEvent.click(item);
+    await waitFor(() => expect(dispatched.some((d) => d.name === 'petri:approval-card-focus')).toBe(false));
+    window.dispatchEvent = origDispatch;
   });
 });

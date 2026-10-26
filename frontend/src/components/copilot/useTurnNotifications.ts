@@ -56,6 +56,7 @@ export function useTurnNotifications(
       body: toolId ? `工具 ${toolId} 正在等待授权` : '有工具调用正在等待授权',
       conversationId: conversationId || undefined,
       projectId: projectId || undefined,
+      ackToken: token || undefined, // BLOCK-264（C-39）— 点击深定位审批卡
     });
     const bridge = getBridge('app');
     if (!bridge?.notify) return;

@@ -17,12 +17,16 @@
  * 不得各自复制字面量。
  */
 
-const ANNOTATION_CONTRACT_VERSION = 1;
+const ANNOTATION_CONTRACT_VERSION = 2;
 
 // BLOCK-254 P6 — 三种归属面：结果产物（artifact+revision）/ 工作区文件（filePath）/
 // 速记条目（entryId）。第三种只用于速记板里的图片批注，不与工作区路径混用。
 const ANNOTATION_SURFACES = Object.freeze(['result-artifact', 'workspace-file', 'scratchpad-entry']);
-const ANNOTATION_KINDS = Object.freeze(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
+const ANNOTATION_KINDS = Object.freeze(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection', 'freehand']);
+// BLOCK-264（C-43）— freehand 画笔：点序列几何（归一化 0..1，与 rect 同域）；
+// 有界采样（≤MAX_FREEHAND_POINTS，超限等距抽稀不拒绝）；与 rect/anchor 均互斥。
+const MAX_FREEHAND_POINTS = 512;
+const PATH_KINDS = Object.freeze(['freehand']);
 const ANNOTATION_COLORS = Object.freeze(['amber', 'sky', 'rose']);
 
 /**
@@ -112,6 +116,36 @@ function normalizeAnnotationRect(input) {
   }
   const round = (value) => Math.round(value * 10000) / 10000;
   return { ok: true, rect: [round(x1), round(y1), round(width), round(height)] };
+}
+
+
+/**
+ * BLOCK-264（C-43）— 画笔路径归一化：点序列 [[x,y],...]，每点 0..1 clamp。
+ * 有界：≤ MAX_FREEHAND_POINTS（超限等距抽稀——保留首尾与形状，不拒绝）；
+ * 少于 2 点拒绝（画一笔至少两个采样）。
+ */
+function normalizeAnnotationPath(input) {
+  if (!Array.isArray(input) || input.length < 2) {
+    return { ok: false, code: 'path_invalid', message: 'path 必须是至少 2 个 [x,y] 点的数组。' };
+  }
+  const seenFinite = input.every((pt) => Array.isArray(pt) && pt.length === 2
+    && pt.every((v) => typeof v === 'number' && Number.isFinite(v)));
+  if (!seenFinite) {
+    return { ok: false, code: 'path_not_finite', message: 'path 每个点必须是 [x, y] 有限数字对。' };
+  }
+  let points = input.map(([x, y]) => [clamp01(x), clamp01(y)]);
+  if (points.length > MAX_FREEHAND_POINTS) {
+    // 等距抽稀（保留首尾）
+    const kept = [points[0]];
+    const step = (points.length - 1) / (MAX_FREEHAND_POINTS - 1);
+    for (let i = 1; i < MAX_FREEHAND_POINTS - 1; i += 1) {
+      kept.push(points[Math.round(i * step)]);
+    }
+    kept.push(points[points.length - 1]);
+    points = kept;
+  }
+  const round = (value) => Math.round(value * 10000) / 10000;
+  return { ok: true, path: points.map(([x, y]) => [round(x), round(y)]), thinned: input.length > MAX_FREEHAND_POINTS };
 }
 
 function normalizePage(value) {
@@ -252,10 +286,12 @@ function normalizeAnnotationInput(input) {
     });
   }
 
-  // 区域批注与文本锚点互斥：一条记录只能有一种定位方式。
+  // 区域批注/文本锚点/画笔路径互斥：一条记录只能有一种定位方式。
   const isTextAnchor = kind === 'text-selection';
+  const isPath = kind === 'freehand'; // BLOCK-264（C-43）
   let anchor = null;
   let normalizedRect = null;
+  let normalizedPath = null;
 
   if (isTextAnchor) {
     if (surface && surface !== ANCHOR_SURFACE) {
@@ -267,12 +303,28 @@ function normalizeAnnotationInput(input) {
     if (input.rect !== undefined && input.rect !== null) {
       errors.push({ code: 'rect_unexpected', message: '文本锚点批注不接受 rect（区域与行锚点互斥）。' });
     }
+    if (input.path !== undefined && input.path !== null) {
+      errors.push({ code: 'path_unexpected', message: '文本锚点批注不接受 path。' });
+    }
     const anchorResult = normalizeAnnotationAnchor(input.anchor);
     if (!anchorResult.ok) errors.push(...anchorResult.errors);
     else anchor = anchorResult.anchor;
+  } else if (isPath) {
+    if (input.anchor !== undefined && input.anchor !== null) {
+      errors.push({ code: 'anchor_unexpected', message: 'freehand 批注不接受 anchor。' });
+    }
+    if (input.rect !== undefined && input.rect !== null) {
+      errors.push({ code: 'rect_unexpected', message: 'freehand 批注不接受 rect（用 path 点序列）。' });
+    }
+    const pathResult = normalizeAnnotationPath(input.path);
+    if (!pathResult.ok) errors.push({ code: pathResult.code, message: pathResult.message });
+    else normalizedPath = pathResult.path;
   } else {
     if (input.anchor !== undefined && input.anchor !== null) {
       errors.push({ code: 'anchor_unexpected', message: '只有 text-selection 批注才带 anchor。' });
+    }
+    if (input.path !== undefined && input.path !== null) {
+      errors.push({ code: 'path_unexpected', message: '只有 freehand 批注才带 path。' });
     }
     const rect = normalizeAnnotationRect(input.rect);
     if (!rect.ok) errors.push({ code: rect.code, message: rect.message });
@@ -360,7 +412,9 @@ function normalizeAnnotationInput(input) {
       artifactName,
       kind,
       page: page.page,
-      rect: isTextAnchor ? [] : normalizedRect,
+      rect: isTextAnchor || isPath ? [] : normalizedRect,
+      // BLOCK-264（C-43）— freehand 点序列（存 path_json 列；rect 恒 []）
+      path: isPath ? normalizedPath : null,
       anchor: isTextAnchor ? anchor : null,
       comment,
       color,
@@ -409,6 +463,9 @@ module.exports = {
   ANNOTATION_SURFACES,
   ANNOTATION_KINDS,
   ANNOTATION_ANCHOR_KINDS,
+  MAX_FREEHAND_POINTS,
+  PATH_KINDS,
+  normalizeAnnotationPath,
   ANCHOR_UNITS,
   ANNOTATION_COLORS,
   MAX_ANCHOR_QUOTE_CHARS,

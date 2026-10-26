@@ -79,6 +79,24 @@ export function ComputerUsePanel(): React.ReactElement {
     }
   }, []);
 
+  // BLOCK-264（C-38）— 画中画：置顶小窗实时看自动化过程（会话级隐藏可再开）
+  const openPip = useCallback(async () => {
+    setBusy(true);
+    try {
+      const { getBridge } = await import('@/lib/desktopBridge');
+      const bridge = getBridge('app');
+      if (bridge && typeof bridge.openComputerUsePip === 'function') {
+        await bridge.openComputerUsePip();
+      } else {
+        setError('画中画仅在桌面端可用');
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '画中画打开失败');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
   return (
     <div className="petri-field" data-testid="computer-use-panel">
       <label className="petri-field__label">电脑控制（sidecar）</label>
@@ -95,6 +113,9 @@ export function ComputerUsePanel(): React.ReactElement {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" disabled={busy} onClick={() => void test()}>
           {busy ? '测试中…' : '测试连接'}
+        </button>
+        <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" disabled={busy} onClick={() => void openPip()} data-testid="computer-use-pip-open">
+          画中画
         </button>
         {probe && (
           <span className="petri-field__hint" data-testid="computer-use-probe">

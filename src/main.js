@@ -12,6 +12,8 @@
  * 6. 外部链接走系统浏览器
  */
 const CHANNELS = require('./ipc/channels');
+// BLOCK-264（C-38）— 电脑使用画中画 IPC（窗口/截帧；主窗 preload 不暴露）
+const computerUsePip = require('./main/computer-use-pip');
 // BLOCK-101 P0 — 启动 timeline：进程起点锚点必须在主进程模块加载期冻结（main()
 // 内懒 require 会把 mainReady 锚点推迟数秒得到 mainReady≈0 的假数字）。
 const { PROCESS_START } = require('./ipc/startup-timeline');
@@ -271,6 +273,7 @@ function setupSkillsIpc() {
   };
 
   // 规整化 bridge 返回值，保证前端 contract 严格 `{ ok, ... }`
+  computerUsePip.registerComputerUsePipIpc(ipcMain); // BLOCK-264（C-38）
   ipcMain.handle(CHANNELS.skills.discover, async (event) => {
     if (!_resolveSkillsIpcWindow(() => mainWindow, event)) return { ok: false, error: "unauthorized" };
     try {

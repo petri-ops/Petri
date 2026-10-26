@@ -20,6 +20,32 @@ const {
 } = require('../agent-tools/workspace-tools/internals');
 const agentTasks = require('../agent-task-store');
 
+/**
+ * BLOCK-264（C-35）— 首启分步引导状态：三步全部由真实状态派生（零新偏好键），
+ * 完成即全部为真；不虚构进度。
+ */
+function readOnboardingStatus() {
+  const aiSettingsMod = require('../helpers/ai-settings');
+  const db = require('../db').getDatabase();
+  const settings = aiSettingsMod.getAiSettings() || {};
+  const preset = settings.active_chat_model_id
+    ? (Array.isArray(settings.chat_model_presets) ? settings.chat_model_presets : []).find((p) => p && p.id === settings.active_chat_model_id)
+    : null;
+  let modelConfigured = false;
+  if (preset) {
+    try { modelConfigured = Boolean(aiSettingsMod.getChatModelCredential(preset)); } catch { modelConfigured = false; }
+  }
+  const projects = Number(db.prepare('SELECT COUNT(*) AS n FROM projects').get().n) || 0;
+  const conversations = Number(db.prepare('SELECT COUNT(*) AS n FROM copilot_conversations').get().n) || 0;
+  const steps = { modelConfigured, hasProject: projects > 0, hasConversation: conversations > 0 };
+  return {
+    ok: true,
+    steps,
+    allDone: steps.modelConfigured && steps.hasProject && steps.hasConversation,
+    counts: { projects, conversations },
+  };
+}
+
 function readToolJobCounts(userId) {
   const db = require('../db').getDatabase();
   const rows = db.prepare(`
@@ -137,6 +163,15 @@ module.exports = function registerAppActivity(app) {
       });
     } catch (error) {
       return res.status(500).json({ ok: false, error: (error && error.message) || '读取活动状态失败' });
+    }
+  });
+
+  // BLOCK-264（C-35）— 首启分步引导状态（只读，真实状态派生）
+  app.get('/api/app/onboarding-status', (_req, res) => {
+    try {
+      return res.json(readOnboardingStatus());
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: (error && error.message) || '读取引导状态失败' });
     }
   });
 };

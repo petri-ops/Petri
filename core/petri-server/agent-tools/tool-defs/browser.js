@@ -180,5 +180,61 @@ module.exports = [
         }
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "browser_connect",
+      "description": "连接浏览器操作会话（BLOCK-264 C-40 垂直切片；opt-in；TTL 30 分钟）。连接后才能执行 browser_act。可选限定 allowedOrigins。私网/环回/云元数据地址一律拒绝。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "allowedOrigins": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "可选：允许导航的 origin 白名单（最多 20 条）；缺省=不限定（仍拒私网）"
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "browser_act",
+      "description": "在已连接的浏览器上执行一个白名单动作：navigate / read_text（≤20k 字）/ click / fill / screenshot。click 与 fill 属写操作：必须先经审批（guard-ack）携带 ackToken。未连接返回 browser_not_connected。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["navigate", "read_text", "click", "fill", "screenshot"],
+            "description": "动作类型（白名单外拒绝）"
+          },
+          "url": { "type": "string", "description": "navigate 目标 URL（https/http；私网拒绝）" },
+          "selector": { "type": "string", "description": "click/fill 的目标元素选择器" },
+          "text": { "type": "string", "description": "fill 的填充文本" },
+          "ackToken": { "type": "string", "description": "click/fill 必填：审批回执 token" }
+        },
+        "required": ["action"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "browser_status",
+      "description": "查询浏览器连接会话状态（是否连接/会话 id/origin 白名单/已执行动作数/最近 URL）。只读。",
+      "parameters": { "type": "object", "properties": {}, "required": [] }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "browser_disconnect",
+      "description": "断开浏览器连接会话（断开后 browser_act 一律拒绝）。会话 TTL 30 分钟到期待自动失效。",
+      "parameters": { "type": "object", "properties": {}, "required": [] }
+    }
   }
 ];

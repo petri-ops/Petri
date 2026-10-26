@@ -348,5 +348,21 @@
   "update_goal": {
     "label": "已更新目标",
     "icon": "pencil"
+  },
+  "browser_connect": {
+    "label": "已连接浏览器",
+    "icon": "globe"
+  },
+  "browser_act": {
+    "label": "浏览器操作",
+    "icon": "mouse-pointer"
+  },
+  "browser_status": {
+    "label": "浏览器状态",
+    "icon": "globe"
+  },
+  "browser_disconnect": {
+    "label": "已断开浏览器",
+    "icon": "globe"
   }
 }

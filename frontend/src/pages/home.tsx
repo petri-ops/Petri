@@ -31,12 +31,12 @@ import {
   useManualPathFlow,
 } from './home/useHomeCreateFlows';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
+import { OnboardingChecklist } from '@/components/desktop/OnboardingChecklist';
 
 export default function Home(): React.ReactElement {
   const backendStatus = useBackendStatus();
   const navigate = useNavigate();
-  // BLOCK-80 — 本页退役为 /projects「项目管理」（项目卡 + 创建流常驻）；
-  // UI-258 的冷启动自动跳最近项目随欢迎页（/）接位而拆除。
+  // BLOCK-80 — 本页退役为 /projects「项目管理」；UI-258 冷启动自动跳最近项目随欢迎页接位。
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [projects, setProjects] = useState<Project[]>([]);
   const [targetProjectId, setTargetProjectId] = useState<string | null>(null);
@@ -744,6 +744,7 @@ export default function Home(): React.ReactElement {
     <section className={styles.emptyHome} aria-label="创建第一个项目">
       {runtimeBanner}
       {storeOverlay}
+      <OnboardingChecklist />
       <div className={styles.emptyHomeIcon}><Icon name="folder" size={22} /></div>
       <h1>创建第一个项目</h1>
       <p>选择工作目录后，将以目录名称创建项目。</p>

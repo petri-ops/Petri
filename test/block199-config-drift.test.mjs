@@ -46,6 +46,8 @@ const UI_CARRIERS = {
   // BLOCK-247（Q2b）联网检索授权面：承载面在「计算与数据」分区（独立路由 /settings?section=compute），
   // 走 REST 端点 /api/web-access（GET 读快照 / PUT 写授权），**不与 network 族混**（生效语义不同）。
   'web-search': { file: 'frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.tsx', must: ['/web-access'] },
+  // BLOCK-264（C-37）模型白名单：承载面=模型菜单（选择器逐行禁用与理由展示），读 /ai/model-access
+  'model-access': { file: 'frontend/src/components/copilot/SimpleChat/ModelMenu.tsx', must: ['/ai/model-access'] },
 };
 
 /**
@@ -82,6 +84,8 @@ const WRITE_ROUTES = {
   'subagent-profile': 'core/petri-server/routes/subagent-profiles.js',
   'trust-policy': 'core/petri-server/routes/trust-policy.js',
   'data-retention': 'core/petri-server/routes/data-retention.js',
+  // BLOCK-264（C-37）— PUT /api/ai/model-access（元素级字符串校验 400）
+  'model-access': 'core/petri-server/routes/ai-settings-api.js',
   // BLOCK-247（Q2b）：联网授权写面与 runtime-policy 同文件（同一路由装配单元），拒绝码同构（400 + diagnostics）。
   'web-search': 'core/petri-server/routes/runtime-config.js',
 };

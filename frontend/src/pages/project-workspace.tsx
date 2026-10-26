@@ -495,6 +495,20 @@ export function ProjectWorkspace(): React.ReactElement {
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
   );
+  // BLOCK-253 回归修复：这三个回调是 useWorkspaceTitleBar 主注册 effect 的依赖，
+  // 行内箭头每轮新引用会与 updateTitleBar setState 组成重渲染环（BLOCK-250 同款）。
+  const handleSwitchWorkspaceMode = useCallback(
+    (nextMode: 'result' | 'code' | 'compare' | 'history') => updateWorkspaceMode(nextMode, true, activeJobId || null),
+    [updateWorkspaceMode, activeJobId],
+  );
+  const handleToggleBottomTerminal = useCallback(
+    () => setBottomTerminalOpen((value) => !value),
+    [setBottomTerminalOpen],
+  );
+  const handleToggleSideChat = useCallback(
+    () => setSideChatOpen((value) => !value),
+    [setSideChatOpen],
+  );
   // TitleBar 注册 effect 簇已外迁 ./project-workspace/useWorkspaceTitleBar.ts
   // （BLOCK-92 Wave B-1，含 titleBarTabs/titleBarResultItems 派生；纯搬运零行为变化）。
   useWorkspaceTitleBar({
@@ -518,8 +532,8 @@ export function ProjectWorkspace(): React.ReactElement {
     closeRightPanelTab,
     closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
     setRightOpen, setRightTab, setRightToolMenuOpen,
-    workspaceMode, onSwitchWorkspaceMode: (nextMode) => updateWorkspaceMode(nextMode, true, activeJobId || null),
-    bottomTerminalOpen, onToggleBottomTerminal: () => setBottomTerminalOpen((value) => !value), sideChatOpen, onToggleSideChat: () => setSideChatOpen((value) => !value),
+    workspaceMode, onSwitchWorkspaceMode: handleSwitchWorkspaceMode,
+    bottomTerminalOpen, onToggleBottomTerminal: handleToggleBottomTerminal, sideChatOpen, onToggleSideChat: handleToggleSideChat,
   });
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
   // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）

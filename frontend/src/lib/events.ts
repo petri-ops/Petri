@@ -51,6 +51,9 @@ export const petriEvents = {
   /** BLOCK-217 — agent act(ui_action) → 前端 pack surface host 分发。 */
   uiActionRequest: 'petri:ui-action-request',
 
+  /** BLOCK-264（C-39）— 通知中心点击「待审批」深定位：滚动到会话内待决审批卡。 */
+  approvalCardFocus: 'petri:approval-card-focus',
+
   /**
    * UI-417 — 侧边聊天悬挂化：请求展开悬挂聊天面（原右栏 chat tab 入口收编——
    * home 空态卡「打开聊天」/分析完成跳转等）。SideChatDock 订阅后滑出 overlay；
@@ -331,6 +334,8 @@ export type PetriEventMap = {
   [petriEvents.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
   [petriEvents.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
   [petriEvents.copilotAsk]: CopilotAskDetail;
+  /** BLOCK-264（C-39）— 待审批通知点击载荷（conversationId 定位会话；ackToken 冗余留痕） */
+  [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;
   [petriEvents.uiActionRequest]: UiActionRequestDetail;
   [petriEvents.sideChatOpen]: undefined;

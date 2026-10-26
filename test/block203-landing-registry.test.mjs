@@ -57,12 +57,14 @@ const LANDING_POINTS = Object.freeze([
   { id: 'trust-policy', core14: false, kind: 'file', families: ['trust-policy'], note: '项目级信任策略（BLOCK-207 邻域新增，无设置面）' },
   // BLOCK-247（Q2b）联网检索授权与预算：有真实设置面（计算与数据分区 → /api/web-access）
   { id: 'web-search', core14: false, kind: 'file', families: ['web-search'], note: '联网检索授权/后端/预算/域名黑白名单（BLOCK-247 新增，有设置面）' },
+  // BLOCK-264（C-37）模型选择器权限来源：file:model-access.json（GET/PUT /api/ai/model-access）
+  { id: 'model-access', core14: false, kind: 'file', families: ['model-access'], note: '模型白名单 + 逐模型理由账本（BLOCK-264 新增，有 REST 写面）' },
 ]);
 
 test('BLOCK-203 W4b P0 — 落点总账：BLOCK-199 的 14 处 + 后续新增 4 族，每处有归属与理由', () => {
   const core14 = LANDING_POINTS.filter((point) => point.core14);
   assert.equal(core14.length, 14, `BLOCK-199 的落点必须是 14 处（实得 ${core14.length}）——新增族不得拿来抵数`);
-  assert.equal(LANDING_POINTS.length, 24, `当前全集应为 14 + 10（W1–W3 三族 + W5 一族 + Q8 一族 + W6/W7 四族 + Q2b 一族；实得 ${LANDING_POINTS.length}）`);
+  assert.equal(LANDING_POINTS.length, 25, `当前全集应为 14 + 11（W1–W3 三族 + W5 一族 + Q8 一族 + W6/W7 四族 + Q2b 一族 + C-37 model-access；实得 ${LANDING_POINTS.length}）`);
   const ids = LANDING_POINTS.map((p) => p.id);
   assert.equal(new Set(ids).size, ids.length, `落点 id 重复：${ids.join(',')}`);
   for (const point of LANDING_POINTS) {

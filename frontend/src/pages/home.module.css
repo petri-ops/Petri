@@ -568,3 +568,32 @@
   height: auto;
   background: var(--petri-bg-base);
 }
+
+/* BLOCK-264（C-35）— 首启分步引导清单 */
+.onboardingSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.onboardingStepList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+}
+
+.onboardingStepList li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: var(--petr-font-size-body);
+}
+
+.onboardingStepHint {
+  color: var(--petr-color-text-secondary, inherit);
+  font-size: var(--petr-font-size-small);
+}

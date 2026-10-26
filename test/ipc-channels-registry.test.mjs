@@ -48,6 +48,10 @@ const CH_RE = /^(?:[a-z][a-z0-9-]*)(?::[a-zA-Z0-9-]+)+$/;
  * （UI-457：result:* 全域已退役，MAIN_ONLY 相应收缩。）
  */
 const MAIN_ONLY = new Set([
+  // BLOCK-264（C-38）— PiP 四通道：主进程窗口/截帧面；PiP 页用独立 preload
+  // （computer-use-pip-preload.js），主窗 preload 刻意不暴露（渲染侧无消费）
+  'computer-use:pip-frame',
+  'computer-use:pip-status',
   'branch:children',
   'branch:get',
   'branch:project:create',

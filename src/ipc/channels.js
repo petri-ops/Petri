@@ -12,6 +12,14 @@ const CHANNELS = {
   agent: {
     taskDone: 'agent:task-done',
   },
+  // BLOCK-264（C-38）— 电脑使用画中画（主进程侧窗口/截帧；preload 不暴露——
+  // PiP 页自带独立 preload，主窗渲染侧不消费）
+  computerUsePip: {
+    open: 'computer-use:pip-open',
+    close: 'computer-use:pip-close',
+    frame: 'computer-use:pip-frame',
+    status: 'computer-use:pip-status',
+  },
   aiSettings: {
     get: 'ai-settings:get',
     getCredential: 'ai-settings:get-credential',

@@ -25,6 +25,7 @@ import {
   type AppNotice,
   type AppNoticeKind,
 } from '@/lib/notification-center';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events'; // BLOCK-264（C-39）
 
 const KIND_LABELS: Record<AppNoticeKind, string> = {
   turn_completed: '完成',
@@ -55,6 +56,10 @@ export function NotificationCenterBell(): React.ReactElement {
     if (!target) return;
     if (target.conversationId) appRail?.setActiveConvId(target.conversationId);
     void navigate(`/project/${target.projectId}/${target.mode}`);
+    // BLOCK-264（C-39）— 待审批通知深定位：到位后滚动到待决审批卡
+    if (notice.kind === 'approval_required' && notice.ackToken) {
+      dispatchPetriEvent(petriEvents.approvalCardFocus, { conversationId: notice.conversationId, ackToken: notice.ackToken });
+    }
   };
 
   return (

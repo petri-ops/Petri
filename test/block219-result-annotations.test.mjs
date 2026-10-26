@@ -347,7 +347,7 @@ test('DELETE /annotations/:id scopes the check to the owning project', () => {
 
 test('BLOCK-238/254 — 批注 kind 白名单：ellipse / arrow / text / mosaic / text-selection 被接受，未知 kind 仍拒绝', async () => {
   const { ANNOTATION_KINDS, normalizeAnnotationInput } = require('../core/shared-backend/result-annotation-contracts.js');
-  assert.deepEqual([...ANNOTATION_KINDS], ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
+  assert.deepEqual([...ANNOTATION_KINDS], ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection', 'freehand']);
 
   for (const kind of ['ellipse', 'arrow', 'text', 'mosaic']) {
     const result = normalizeAnnotationInput({
@@ -363,18 +363,19 @@ test('BLOCK-238/254 — 批注 kind 白名单：ellipse / arrow / text / mosaic 
     assert.equal(result.annotation.kind, kind);
   }
 
-  // 画笔（freehand）仍是明确拒绝值：点序列要改几何契约，不能靠加枚举混进来。
-  const bad = normalizeAnnotationInput({
+  // BLOCK-264（C-43）— 契约 v2：freehand 已是合法 kind（path 点序列几何）。
+  // 但混用 rect 仍拒绝（三态互斥），未知 kind 照旧拒绝。
+  const mixed = normalizeAnnotationInput({
     projectId: 'p1',
     surface: 'result-artifact',
     artifactId: 'a1',
     revisionId: 'r1',
     kind: 'freehand',
     rect: [0.1, 0.2, 0.3, 0.4],
-    comment: '未实现的形状',
+    comment: '混用 rect',
   });
-  assert.equal(bad.ok, false);
-  assert.ok(bad.errors.some((e) => e.code === 'kind_invalid'));
+  assert.equal(mixed.ok, false);
+  assert.ok(mixed.errors.some((e) => e.code === 'rect_unexpected'));
 });
 
 test('BLOCK-254 A-1 — 文字/马赛克批注经 store 落库并按 kind 回读（零迁移）', async () => {
@@ -730,4 +731,46 @@ test('BLOCK-254 P7 — 段落/表格行锚点经 store 往返保单位（同一 
   assert.equal(paragraphRow.anchor.unit, 'paragraph');
   assert.equal(tableRow.anchor.unit, 'row');
   assert.deepEqual([...paragraphRow.rect], [], '锚点批注不带区域坐标');
+});
+
+// ---------- BLOCK-264（C-43）契约 v2：freehand 画笔 ----------
+
+test('BLOCK-264 C-43 — freehand：path 归一化/抽稀/三态互斥/store 往返', async () => {
+  const { normalizeAnnotationInput, MAX_FREEHAND_POINTS } = require('../core/shared-backend/result-annotation-contracts.js');
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store.js');
+
+  // 合法路径
+  const ok = normalizeAnnotationInput({
+    projectId: 'p1', surface: 'workspace-file', filePath: 'plot.png',
+    kind: 'freehand', path: [[0.1, 0.1], [0.5, 0.2], [0.8, 0.5]], comment: '圈出趋势',
+  });
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors || []));
+  assert.equal(ok.annotation.contractVersion, 2);
+  assert.deepEqual(ok.annotation.rect, []);
+  assert.equal(ok.annotation.path.length, 3);
+
+  // 单点拒绝；点数超限等距抽稀保留首尾
+  const single = normalizeAnnotationInput({ projectId: 'p1', surface: 'workspace-file', filePath: 'p.png', kind: 'freehand', path: [[0, 0]], comment: 'x' });
+  assert.equal(single.ok, false);
+  assert.equal(single.errors[0].code, 'path_invalid');
+  const long = normalizeAnnotationInput({ projectId: 'p1', surface: 'workspace-file', filePath: 'p.png', kind: 'freehand', path: Array.from({ length: MAX_FREEHAND_POINTS + 100 }, (_, i) => [i / 700, 0.4]), comment: '长笔迹' });
+  assert.equal(long.ok, true);
+  assert.equal(long.annotation.path.length, MAX_FREEHAND_POINTS);
+  assert.deepEqual(long.annotation.path[0], long.annotation.path.length > 0 ? [0, 0.4] : []);
+
+  // 非 finite 点拒绝
+  const nan = normalizeAnnotationInput({ projectId: 'p1', surface: 'workspace-file', filePath: 'p.png', kind: 'freehand', path: [[0, 0], ['x', 0.5]], comment: 'x' });
+  assert.equal(nan.ok, false);
+
+  // store 往返（真实 SQLite）
+  const { getDatabase } = require('better-sqlite3');
+  const store = createResultAnnotationStore(sqlite);
+  const scope = { projectId: 'p1', surface: 'workspace-file', filePath: 'plot.png' };
+  const created = (() => { try { return { ok: true, annotation: store.create({ ...ok.annotation, author: 'tester' }) } } catch (e) { return { ok: false, errors: [{ message: e.message }] } } })();
+  assert.equal(created.ok, true, JSON.stringify(created.errors || []));
+  const list = store.listByScope(scope);
+  const free = list.find((row) => row.kind === 'freehand');
+  assert.ok(free, 'freehand 应入库');
+  assert.equal(free.path.length, 3);
+  assert.deepEqual(free.path[0], [0.1, 0.1]);
 });
