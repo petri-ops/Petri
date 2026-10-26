@@ -639,12 +639,13 @@
 }
 
 .sc-msg-action {
+  /* BLOCK-266 图标态：纯图标钮（文字说明收 title/aria-label） */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 26px;
   height: 24px;
-  padding: 0 var(--petri-space-2);
+  padding: 0 4px;
   border: 0;
   border-radius: var(--petri-radius-md);;
   background: transparent;
@@ -5292,4 +5293,14 @@
 .sc-full-access-dialog__btn-primary {
   background: var(--petri-danger);
   color: var(--petri-on-solid);
+}
+
+/* BLOCK-266 并钮组合菜单——供应商分组标题行（非输入语义，弱化样式） */
+.sc-model-group-header {
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.sc-model-group-header:hover {
+  background: var(--petri-hover);
 }

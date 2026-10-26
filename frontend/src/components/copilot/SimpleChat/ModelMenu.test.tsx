@@ -182,3 +182,54 @@ describe('ModelMenu', () => {
     expect(screen.getByTestId('model-menu-status').textContent).toContain('没有可用模型');
   });
 });
+
+describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all）', () => {
+  it('all 模式：供应商分组标题 + 全部可选模型平铺（跨供应商一屏选完）', () => {
+    const onPickSupplier = vi.fn();
+    const onPickModel = vi.fn();
+    render(
+      <ModelMenu
+        mode="all"
+        groups={groups}
+        selectedGroup={groups[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={onPickSupplier}
+        onPickModel={onPickModel}
+      />,
+    );
+    // 分组标题（supplier label）与两个模型都在场
+    expect(screen.getByText('DeepSeek')).toBeTruthy();
+    expect(screen.getByText('model-a')).toBeTruthy();
+    expect(screen.getByText('model-b')).toBeTruthy();
+    // 点标题 = 选该组首选模型（onPickSupplier 回调）
+    fireEvent.click(screen.getByText('DeepSeek'));
+    expect(onPickSupplier).toHaveBeenCalledWith(groups[0]);
+    // 点模型 = onPickModel 回调
+    fireEvent.click(screen.getByText('model-b'));
+    expect(onPickModel).toHaveBeenCalledWith(groups[0].rows[1].preset);
+  });
+
+  it('all 模式：缺密钥行禁行 + 白名单拒绝理由与 model 模式同源', () => {
+    const locked = buildModelGroups(presets, {
+      ...EMPTY_MODEL_CATALOG,
+      credentialStatus: { anthropic: false },
+    });
+    render(
+      <ModelMenu
+        mode="all"
+        groups={locked}
+        selectedGroup={locked[0]}
+        activeModelId="a1"
+        summary={{ level: 'ok', text: '' }}
+        onClose={() => {}}
+        onPickSupplier={() => {}}
+        onPickModel={() => {}}
+      />,
+    );
+    const row = screen.getByText('model-a').closest('button') as HTMLButtonElement;
+    expect(row.disabled).toBe(true);
+    expect(screen.getAllByText('未配置密钥').length).toBeGreaterThanOrEqual(2);
+  });
+});

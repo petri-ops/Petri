@@ -18,7 +18,7 @@ import {
 } from '@/lib/model-catalog';
 
 interface ModelMenuProps {
-  mode: 'supplier' | 'model';
+  mode: 'supplier' | 'model' | 'all';
   groups: ModelCatalogGroup[];
   selectedGroup: ModelCatalogGroup | undefined;
   activeModelId: string;
@@ -36,6 +36,64 @@ const THINKING_LABELS: Record<string, string> = { off: '关闭思考', standard:
 
 interface ModelPrice { input: number; output: number }
 type PricingTable = Record<string, ModelPrice>;
+
+/**
+ * BLOCK-266 并钮——组合菜单行渲染（供应商分组标题 + 全部可选模型平铺）。
+ * 纯投影：分组标题行点击=切到该渠道默认模型；模型行点击=选该模型；
+ * 白名单禁行与价格元信息与 model/model 分支同源。
+ */
+function renderAllGroupRows(opts: {
+  groups: ModelCatalogGroup[];
+  activeModelId: string;
+  accessDenied: (model: string) => string | null;
+  pricing: Record<string, { input: number; output: number }>;
+  onPickSupplier: (group: ModelCatalogGroup) => void;
+  onPickModel: (preset: ChatModelPreset) => void;
+}): React.ReactElement[] {
+  const { groups, activeModelId, accessDenied, pricing, onPickSupplier, onPickModel } = opts;
+  return groups.flatMap((group) => {
+    const selectable = groupSelectableRows(group);
+    const header = (
+      <button
+        type="button"
+        key={"hdr-" + group.key}
+        className="sc-model-option sc-model-group-header"
+        onClick={() => onPickSupplier(group)}
+        title="点击切换到该渠道的默认模型"
+      >
+        <span className="sc-model-option-title">{group.supplier}</span>
+        <span className="sc-model-option-meta">{selectable.length} 个模型</span>
+      </button>
+    );
+    // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
+    const rows = group.rows.map((row) => {
+      const active = row.preset.id === activeModelId;
+      const accessReason = accessDenied(row.preset.model);
+      const effectiveReason = row.reason || accessReason;
+      const disabled = !isSelectableRow(row) || accessReason !== null;
+      const price = formatPrice(pricing[row.preset.model]);
+      const meta = effectiveReason
+        ? effectiveReason + (price ? ` · ${price}` : '')
+        : presetMeta(row.preset, active, pricing);
+      return (
+        <button
+          type="button"
+          key={row.preset.id}
+          className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
+          disabled={disabled}
+          title={effectiveReason || row.preset.model}
+          onClick={() => onPickModel(row.preset)}
+        >
+          <span className="sc-model-option-title">{row.preset.model}</span>
+          <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
+            {meta}
+          </span>
+        </button>
+      );
+    });
+    return [header, ...rows];
+  });
+}
 
 /** BLOCK-259 D1 — 价格来自后端单一源 /api/ai/pricing；取不到就不显示，不猜价。 */
 function useModelPricing(): PricingTable {
@@ -157,7 +215,17 @@ export function ModelMenu({
             {autoError}
           </div>
         )}
-        {summary.level === 'empty' && groups.length === 0 ? null : mode === 'supplier' ? (
+        {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
+          renderAllGroupRows({
+            groups,
+            activeModelId,
+            accessDenied,
+            pricing,
+            onPickSupplier,
+            onPickModel,
+          })
+        ) : mode === 'supplier' ? (
+
           groups.map((group) => {
             const selectable = groupSelectableRows(group);
             const disabled = selectable.length === 0;

@@ -186,8 +186,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             aria-controls={action.id === 'stats' && statsOpen ? statsPanelId : undefined}
             data-testid={action.id === 'edit' ? 'msg-edit-user' : `msg-action-${action.id}`}
           >
+            {/* BLOCK-266 用户裁决——动作条纯图标：文字说明收 title/aria-label（悬浮可见），
+                复制成功态由图标变化（copy→check）+ title 表达 */}
             <Icon name={action.icon} size={14} />
-            {action.label}
           </button>
           {action.dividerAfter && <span className="sc-msg-action-divider" aria-hidden="true" />}
         </React.Fragment>

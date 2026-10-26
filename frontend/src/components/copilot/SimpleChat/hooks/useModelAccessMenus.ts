@@ -26,8 +26,8 @@ import {
 export type AccessMode = 'full' | 'workspace-write' | 'plan' | 'read';
 
 export interface ModelAccessMenusController {
-  modelMenuOpen: 'supplier' | 'model' | null;
-  setModelMenuOpen: React.Dispatch<React.SetStateAction<'supplier' | 'model' | null>>;
+  modelMenuOpen: 'supplier' | 'model' | 'all' | null;
+  setModelMenuOpen: React.Dispatch<React.SetStateAction<'supplier' | 'model' | 'all' | null>>;
   modelSupplierKey: string | null;
   setModelSupplierKey: React.Dispatch<React.SetStateAction<string | null>>;
   accessMenuOpen: boolean;
@@ -67,7 +67,7 @@ export function useModelAccessMenus({
    */
   lockedAccessMode?: AccessMode;
 }): ModelAccessMenusController {
-  const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | null>(null);
+  const [modelMenuOpen, setModelMenuOpen] = useState<'supplier' | 'model' | 'all' | null>(null);
   const [modelSupplierKey, setModelSupplierKey] = useState<string | null>(null);
   const [accessMenuOpen, setAccessMenuOpen] = useState(false);
   const [accessMode, setAccessModeState] = useState<AccessMode>(lockedAccessMode ?? 'full');

@@ -7,7 +7,7 @@ interface UseComposerFocusOptions {
   taRef: RefObject<HTMLTextAreaElement | null>;
   ownsCopilotAsk: boolean;
   accessMenuOpen: boolean;
-  modelMenuOpen: 'supplier' | 'model' | null;
+  modelMenuOpen: 'supplier' | 'model' | 'all' | null;
 }
 
 export function useComposerFocus(options: UseComposerFocusOptions): void {

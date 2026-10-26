@@ -1912,19 +1912,15 @@ export function SimpleChat({
                 {/* UI-523 — 上下文预算环搬进卡片下方计量条右端（同一组件实例；
                     UI-448 加映 v3 — slimComposer 悬挂面整条不渲染）。 */}
                 <div className="sc-model-picker-pair">
+                {/* BLOCK-266 并钮——供应商+模型合一：单钮开组合菜单（分组标题+全部模型平铺） */}
                 <ModelChip
                   supplier={activeSupplierGroup?.supplier || activeModel?.label || ''}
                   modelName={activeModel?.model || ''}
                   autoModel={autoModel}
                   autoPreview={autoPreview}
-                  narrow={composerNarrow}
-                  onOpenSupplier={() => {
-                    setModelSupplierKey(activeSupplierGroup?.key || null);
-                    setModelMenuOpen((current) => current === 'supplier' ? null : 'supplier');
-                  }}
                   onOpenModel={() => {
                     setModelSupplierKey(selectedSupplierGroup?.key || null);
-                    setModelMenuOpen((current) => current === 'model' ? null : 'model');
+                    setModelMenuOpen((current) => current === 'all' ? null : 'all');
                   }}
                 />
                   {/* BLOCK-178 P0 — 投递模式显式切换（运行中提交的路由语义） */}
@@ -2003,7 +1999,7 @@ export function SimpleChat({
                   )}
                   {modelMenuOpen && (
                     <ModelMenu
-                      mode={modelMenuOpen}
+                      mode={modelMenuOpen === 'supplier' ? 'supplier' : modelMenuOpen === 'model' ? 'model' : 'all'}
                       groups={modelGroups}
                       selectedGroup={selectedSupplierGroup}
                       activeModelId={activeModelId}
