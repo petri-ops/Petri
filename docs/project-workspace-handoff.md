@@ -3,7 +3,7 @@
 
 最后更新：2026-10-25（**BLOCK-263 P4-REM 收官 completed；§6.5 串行队列清零；无 active 工作包**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——刚收口=BLOCK-263（P4-REM）：history tab 全链（GET /api/result-studio/history + packTabData 桥 + pack 0.2.3）+ 裁决（写面四 tab 出籍 C-44/域中性 6 键保留/methods 达成）+ 实机 6/6（acceptance/block-263/p4rem-live.json）；E13 ✅ → **Q-MATRIX 74/20/0/7**；**母纲 §6.5 串行队列全部收口**。余下工作面=📻 C-35～C-44 候选产品包（backlog，单项启动需用户裁决立项）+ R 运行时装后 UI-526 补腿（需授权）+ G1+（不外推）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——刚收口=BLOCK-263（P4-REM）：history tab 全链（GET /api/result-studio/history + packTabData 桥 + pack 0.2.3）+ 裁决（写面四 tab 出籍 C-44/域中性 6 键保留/methods 达成）+ 实机 6/6（acceptance/block-263/p4rem-live.json）；E13 ✅ → **Q-MATRIX 74/21/0/7**；**母纲 §6.5 串行队列全部收口**。余下工作面=📻 C-35～C-44 候选产品包（backlog，单项启动需用户裁决立项）+ R 运行时装后 UI-526 补腿（需授权）+ G1+（不外推）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-25（**BLOCK-263 P4-REM 数据模型收官立项 active（P0-LAUNCH）**）
 
