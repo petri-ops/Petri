@@ -5698,7 +5698,14 @@
         "acceptance/block-264/**",
         "scripts/block265-*.mjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/b264-evidence-live.cjs",
-        "acceptance/block-265/**"
+        "acceptance/block-265/**",
+        "frontend/src/components/copilot/RunStatsBar.tsx",
+        "frontend/src/components/copilot/RunStatsBar.module.css",
+        "frontend/src/components/copilot/RunStatsBar.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ModelChip.tsx",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b266-composer-shrink.cjs",
+        "scripts/block266-*.mjs",
+        "acceptance/block-266/**"
       ],
       "tests": [
         "test/block264-external-import-apply.test.mjs",
@@ -5712,7 +5719,8 @@
         "test/tool-activity-labels.test.mjs",
         "test/ipc-channels-registry.test.mjs",
         "test/block203-landing-registry.test.mjs",
-        "test/block113-tool-prerouting.test.mjs"
+        "test/block113-tool-prerouting.test.mjs",
+        "frontend/src/components/copilot/RunStatsBar.test.tsx"
       ]
     }
   ]

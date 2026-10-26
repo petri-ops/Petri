@@ -1,8 +1,10 @@
 /**
  * ModelChip — BLOCK-225 composer 的供应商/模型两枚按钮（从 SimpleChat 抽出）。
  *
- * 自动档开启时模型钮显示「自动」，title 给出当前解析预览；
- * 两枚按钮只负责打开菜单，选择逻辑仍在 useModelAccessMenus/ModelMenu。
+ * BLOCK-266 视觉收缩：默认图标态（zap + chevron 一枚钮），供应商文字与模型名
+ * 收进 title（悬浮可见）——文字常驻会在窄容器挤压换行且换供应商是低频操作；
+ * 两钮仍各自可点（供应商钮=图标左半、模型钮=图标右半的联合胶囊），
+ * 选择逻辑仍在 useModelAccessMenus/ModelMenu。
  */
 
 import React from 'react';
@@ -23,10 +25,11 @@ export function ModelChip({
   modelName,
   autoModel,
   autoPreview,
-  narrow,
+  narrow: _narrow, // 保留签名兼容；图标态已不区分窄宽
   onOpenSupplier,
   onOpenModel,
 }: ModelChipProps): React.ReactElement {
+  const modelTitle = autoModel ? `自动选模型（当前：${autoPreview}）` : modelName || '选择会话模型';
   return (
     <>
       <div className="sc-model-picker sc-model-picker-footer">
@@ -34,10 +37,11 @@ export function ModelChip({
           type="button"
           className="sc-model-btn sc-model-provider-btn"
           onClick={onOpenSupplier}
-          title={autoModel ? `自动选模型（当前：${autoPreview}）` : supplier || '选择供应商'}
+          title={`供应商：${supplier || '未选择'}（点击切换）`}
+          aria-label={`供应商：${supplier || '未选择'}`}
+          data-testid="model-chip-supplier"
         >
-          {narrow ? <Icon name="cpu" size={14} /> : <span>{supplier || '供应商'}</span>}
-          <Icon name="chevron-down" size={12} />
+          <Icon name="cpu" size={14} />
         </button>
       </div>
       <div className="sc-model-picker sc-model-picker-footer">
@@ -45,10 +49,12 @@ export function ModelChip({
           type="button"
           className="sc-model-btn sc-model-name-btn"
           onClick={onOpenModel}
-          title={autoModel ? `自动：${autoPreview}` : modelName || '选择会话模型'}
+          title={modelTitle}
+          aria-label={modelTitle}
           data-auto={autoModel ? 'true' : 'false'}
+          data-testid="model-chip-model"
         >
-          {narrow ? <Icon name="zap" size={14} /> : <span>{autoModel ? '自动' : modelName || '选择模型'}</span>}
+          <Icon name="zap" size={14} />
           <Icon name="chevron-down" size={12} />
         </button>
       </div>

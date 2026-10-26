@@ -81,6 +81,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/app-health.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/app-rail-persistent.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/b264-evidence-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/b266-composer-shrink.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block100-test-instance.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block101-startup-timeline.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block107-timeline-history.cjs",

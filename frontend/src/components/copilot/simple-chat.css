@@ -76,12 +76,11 @@
 }
 
 .sc-model-provider-btn {
-  max-width: 150px;
+  /* BLOCK-266 图标态：单图标钮，宽度不再随供应商名变化 */
   border-radius: 999px 0 0 999px;
 }
 
 .sc-model-name-btn {
-  max-width: 220px;
   border-radius: 0 999px 999px 0;
 }
 
@@ -91,7 +90,8 @@
   gap: var(--petri-space-2);
   max-width: 300px;
   height: 34px;
-  padding: 0 var(--petri-space-4);
+  padding: 0 var(--petri-space-2);
+  flex: 0 0 auto;
   border: 1px solid transparent;
   border-radius: var(--petri-radius-pill);;
   background: transparent;
