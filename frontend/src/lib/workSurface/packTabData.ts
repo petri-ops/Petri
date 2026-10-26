@@ -4,8 +4,8 @@
  * 只做三件事：按 tab 调**已存在的只读端点**、把结果裁到有界形状、失败如实返回原因。
  * 不新增数据 API、不建第二套 artifact/truth；写面（selection/changeset/replay）一律不进本桥。
  *
- * 诚实边界：`history` 目前**没有**现成列表端点（只有 `/revisions/:id/*` 单条），
- * 故一律返回 `no_endpoint`，由 host 回落核心历史面——不拿 lineage 数据冒充历史。
+ * BLOCK-263（P4-REM P1）：`history` 改接真实有界端点 `/result-studio/history`（此前
+ * 诚实 no_endpoint 回落核心）；载荷 ≤100 行字段白名单。
  */
 
 export type PackTabId = 'lineage' | 'history' | 'revisions-source' | 'compare';
@@ -37,6 +37,18 @@ export interface PackComparePayload {
 
 export interface PackSourcePayload {
   text: string;
+  truncated: boolean;
+}
+
+/** BLOCK-263（P4-REM P1）— history tab 载荷：job 的修订历史有界只读列表。 */
+export interface PackHistoryPayload {
+  revisions: {
+    revisionId: string;
+    ordinal: number;
+    createdAt?: string;
+    isCurrent?: boolean;
+    validationStatus?: string;
+  }[];
   truncated: boolean;
 }
 
@@ -89,10 +101,32 @@ export async function fetchPackTabData(
   tab: PackTabId,
   params: PackTabParams,
   deps: PackTabDeps,
-): Promise<PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload>> {
+): Promise<PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload | PackHistoryPayload>> {
   const base = deps.apiBase.replace(/\/$/, '');
 
-  if (tab === 'history') return { ok: false, reason: 'no_endpoint' };
+  if (tab === 'history') {
+    // BLOCK-263（P4-REM P1）— 接真实有界端点（此前诚实 no_endpoint 回落核心）。
+    const jobId = typeof params.jobId === 'string' ? params.jobId.trim() : '';
+    if (!jobId) return { ok: false, reason: 'missing_job_id' };
+    const res = await readJson(`${base}/result-studio/history?jobId=${encodeURIComponent(jobId)}`, deps);
+    if (!res.ok) return res as PackTabResult<PackHistoryPayload>;
+    const raw = (res.data ?? {}) as {
+      revisions?: Array<{ revisionId?: unknown; ordinal?: unknown; createdAt?: unknown; isCurrent?: unknown; validationStatus?: unknown }>;
+    };
+    const list = asArray<NonNullable<PackHistoryPayload['revisions'][number]>>(raw.revisions)
+      .filter((r) => r && typeof r.revisionId === 'string' && r.revisionId)
+      .map((r) => ({
+        revisionId: r.revisionId,
+        ordinal: typeof r.ordinal === 'number' ? r.ordinal : 0,
+        createdAt: typeof r.createdAt === 'string' ? r.createdAt.slice(0, 40) : undefined,
+        isCurrent: r.isCurrent === true,
+        validationStatus: typeof r.validationStatus === 'string' ? r.validationStatus.slice(0, 40) : undefined,
+      }));
+    return {
+      ok: true,
+      data: { revisions: list.slice(0, 100), truncated: list.length > 100 },
+    };
+  }
 
   if (tab === 'lineage') {
     const jobId = typeof params.jobId === 'string' ? params.jobId.trim() : '';

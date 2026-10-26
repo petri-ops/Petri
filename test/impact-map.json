@@ -5628,6 +5628,25 @@
         "test/block198-spawn-depth.test.mjs"
       ],
       "classifiesScripts": true
+    },
+    {
+      "id": "block263-p4-rem-final",
+      "classifiesScripts": true,
+      "note": "BLOCK-263 P4-REM 收官 — history tab 全链（/api/result-studio/history 有界端点 + packTabData 桥 + pack 0.2.3 声明/渲染器）+ 三块裁决（写面出籍 C-44/域中性 6 键保留/methods 达成）+ 实机腿。",
+      "patterns": [
+        "core/petri-server/routes/result-studio/revisions.js",
+        "frontend/src/lib/workSurface/packTabData.ts",
+        "frontend/src/lib/workSurface/usePackTabData.ts",
+        "frontend/src/lib/workSurface/packTabData.test.ts",
+        "frontend/src/lib/workSurface/usePackTabData.test.ts",
+        "test/block263-history-endpoint.test.mjs",
+        "scripts/block263-*.mjs",
+        "acceptance/block-263/**"
+      ],
+      "tests": [
+        "test/block263-history-endpoint.test.mjs",
+        "test/block216-pack-contributions.test.mjs"
+      ]
     }
   ]
 }

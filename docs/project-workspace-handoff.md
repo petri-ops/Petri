@@ -1,9 +1,13 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-25（**BLOCK-263 P4-REM 收官 completed；§6.5 串行队列清零；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**无 active 工作包**——刚收口=BLOCK-263（P4-REM）：history tab 全链（GET /api/result-studio/history + packTabData 桥 + pack 0.2.3）+ 裁决（写面四 tab 出籍 C-44/域中性 6 键保留/methods 达成）+ 实机 6/6（acceptance/block-263/p4rem-live.json）；E13 ✅ → **Q-MATRIX 74/20/0/7**；**母纲 §6.5 串行队列全部收口**。余下工作面=📻 C-35～C-44 候选产品包（backlog，单项启动需用户裁决立项）+ R 运行时装后 UI-526 补腿（需授权）+ G1+（不外推）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-25（**BLOCK-263 P4-REM 数据模型收官立项 active（P0-LAUNCH）**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-263（P4-REM 收官；P0-LAUNCH）**，plan=docs/block-263-p4-rem-final-plan.md（E13 矩阵 §1 / history 设计 §2 / 裁决 §3 / 阶段 §4）。P1=history 有界端点（routes/result-studio/revisions.js）+ packTabData 桥 + pack 仓补 tabs 声明与 renderTab（兄弟仓独立提交）；P2=裁决回写；P3=隔离栈实机（/api/runtime/status probe → R 在装跑真实 demo / 未装如实登记）；P4=closeout+回写（E13 🟡→✅、§6.5 串行清零）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：**active 工作包=BLOCK-263（P4-REM 收官；P0-LAUNCH）**，plan=docs/block-263-p4-rem-final-plan.md（E13 矩阵 §1 / history 设计 §2 / 裁决 §3 / 阶段 §4）。P1=history 有界端点（routes/result-studio/revisions.js）+ packTabData 桥 + pack 仓补 tabs 声明与 renderTab（兄弟仓独立提交）；P2=裁决回写；P3=隔离栈实机（/api/runtime/status probe → R 在装跑真实 demo / 未装如实登记）；P4=closeout+回写（E13 🟡→✅、§6.5 串行清零）。**收口 PATH** 需同时含 Git usrin（GNU tar）与 bin（bash）；closeout 别接管道。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-25（**BLOCK-262 Q4b 工作流脚本 completed；无 active 工作包**）
 

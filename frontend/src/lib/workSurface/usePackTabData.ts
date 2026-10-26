@@ -14,6 +14,7 @@ import {
   type PackLineagePayload,
   type PackSourcePayload,
   type PackComparePayload,
+  type PackHistoryPayload,
   type PackTabId,
   type PackTabResult,
 } from './packTabData';
@@ -23,7 +24,7 @@ type PackTabStatus = 'idle' | 'loading' | 'ready' | 'error';
 export interface PackTabState {
   status: PackTabStatus;
   reason?: string;
-  data?: PackLineagePayload | PackSourcePayload | PackComparePayload;
+  data?: PackLineagePayload | PackSourcePayload | PackComparePayload | PackHistoryPayload;
 }
 
 const EMPTY_PACK_TAB_STATE: PackTabState = { status: 'idle' };
@@ -59,7 +60,7 @@ export function usePackTabData(
     if (!tab) return undefined;
     let cancelled = false;
     void fetchPackTabData(tab as PackTabId, { projectId, jobId, revisionId, changeSetId }, { apiBase })
-      .then((res: PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload>) => {
+      .then((res: PackTabResult<PackLineagePayload | PackSourcePayload | PackComparePayload | PackHistoryPayload>) => {
         if (cancelled) return;
         setEntry({
           key,

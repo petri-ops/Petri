@@ -73,10 +73,10 @@ describe('packTabData（BLOCK-236）', () => {
     expect(calls).toHaveLength(0);
   });
 
-  it('history：没有列表端点 → 明确 no_endpoint（不拿别的数据冒充）', async () => {
+  it('BLOCK-263 history：端点未命中（404）如实透传原因（原 no_endpoint 契约已升级为真实端点）', async () => {
     const { impl } = fetcher(new Map());
     const res = await fetchPackTabData('history', { jobId: 'job-1' }, { apiBase: BASE, fetchImpl: impl });
-    expect(res).toEqual({ ok: false, reason: 'no_endpoint' });
+    expect(res).toEqual({ ok: false, reason: 'http_404' });
   });
 
   it('revisions-source：超长源码截断并留提示', async () => {
@@ -173,5 +173,55 @@ describe('packTabData.compare（BLOCK-236 第二批）', () => {
     const res = await fetchPackTabData('compare', {}, { apiBase: BASE, fetchImpl: impl });
     expect(res).toEqual({ ok: false, reason: 'missing_changeset_id' });
     expect(calls).toHaveLength(0);
+  });
+});
+
+describe('packTabData history（BLOCK-263 · P4-REM P1）', () => {
+  it('history：接真实端点、字段白名单映射、≤100 行', async () => {
+    const revisions = Array.from({ length: 102 }, (_, i) => ({
+      revisionId: `rev-${i}`,
+      ordinal: 102 - i,
+      createdAt: `2026-10-25T00:00:${String(i % 60).padStart(2, '0')}Z`,
+      isCurrent: i === 0,
+      validationStatus: 'verified',
+      extraField: 'should-be-dropped',
+    }));
+    const routes = new Map<string, Route>([
+      [`${BASE}result-studio/history?jobId=job-h`, { body: JSON.stringify({ ok: true, revisions }) }],
+    ]);
+    const res = await fetchPackTabData('history', { jobId: 'job-h' }, { apiBase: BASE, fetchImpl: fetcher(routes).impl });
+    expect(res.ok).toBe(true);
+    const data = res.data;
+    if (!data || !('revisions' in data)) throw new Error('expected history payload');
+    expect(data.revisions).toHaveLength(100);
+    expect(data.truncated).toBe(true);
+    expect(data.revisions[0].revisionId).toBe('rev-0');
+    expect(data.revisions[0].isCurrent).toBe(true);
+    expect(Object.keys(data.revisions[0]).includes('extraField')).toBe(false);
+  });
+
+  it('history：缺 jobId 如实 missing_job_id；端点失败如实传 reason', async () => {
+    const missing = await fetchPackTabData('history', {}, { apiBase: BASE, fetchImpl: fetcher(new Map()).impl });
+    expect(missing.ok).toBe(false);
+    expect(missing.reason).toBe('missing_job_id');
+
+    const routes = new Map<string, Route>([
+      [`${BASE}result-studio/history?jobId=job-x`, { status: 500, body: '' }],
+    ]);
+    const failed = await fetchPackTabData('history', { jobId: 'job-x' }, { apiBase: BASE, fetchImpl: fetcher(routes).impl });
+    expect(failed.ok).toBe(false);
+    expect(failed.reason).toBe('http_500');
+  });
+
+  it('history：无修订的 job 返回空列表（ok，不虚构）', async () => {
+    const routes = new Map<string, Route>([
+      [`${BASE}result-studio/history?jobId=job-empty`, { body: JSON.stringify({ ok: true, revisions: [], hasMore: false }) }],
+    ]);
+    const res = await fetchPackTabData('history', { jobId: 'job-empty' }, { apiBase: BASE, fetchImpl: fetcher(routes).impl });
+    expect(res.ok).toBe(true);
+    const data = res.data;
+    if (!data || !('revisions' in data)) throw new Error('expected history payload');
+    expect(data.revisions).toHaveLength(0);
+    expect(data.truncated).toBe(false);
   });
 });

@@ -18,8 +18,10 @@ describe('shouldDowngradeToCore（BLOCK-236）', () => {
     expect(shouldDowngradeToCore('lineage', { status: 'ready' })).toBe(false);
   });
 
-  it('tab 取数失败 → 降级核心（含 history 的 no_endpoint）', () => {
+  it('tab 取数失败 → 降级核心（含 history 端点不可达）', () => {
     expect(shouldDowngradeToCore('revisions-source', { status: 'error', reason: 'http_500' })).toBe(true);
+    // BLOCK-263：history 已接真实端点，no_endpoint 不再出现；任何取数失败仍降级核心
+    expect(shouldDowngradeToCore('history', { status: 'error', reason: 'http_404' })).toBe(true);
     expect(shouldDowngradeToCore('history', { status: 'error', reason: 'no_endpoint' })).toBe(true);
   });
 });

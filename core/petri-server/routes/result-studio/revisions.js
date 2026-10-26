@@ -65,6 +65,24 @@ const { guardContextOperation } = require('../../agent-tools/result-context-tool
 
 const TABLE_EXTENSIONS = /\.(csv|tsv)$/i;
 
+/**
+ * BLOCK-263（P4-REM P1）— job 修订历史查询（纯函数，供路由与测试共用）。
+ * 走 artifact_revisions 的 tool_job_id 索引；多取一行实现 hasMore；字段白名单。
+ */
+function projectJobHistoryRows({ jobId, projectId, limit, offset }) {
+  const handle = typeof db.getDatabase === 'function' ? db.getDatabase() : null;
+  if (!handle || typeof handle.prepare !== 'function') return [];
+  return handle
+    .prepare(
+      `SELECT revision_id, artifact_family_id, revision_ordinal, created_at, is_current, validation_status
+       FROM artifact_revisions
+       WHERE tool_job_id = ? AND project_id = ?
+       ORDER BY revision_ordinal DESC
+       LIMIT ? OFFSET ?`
+    )
+    .all(String(jobId), String(projectId), limit + 1, offset);
+}
+
 module.exports = {
   register(app, options) {
     if (typeof app.get !== 'function') {
@@ -75,6 +93,45 @@ module.exports = {
       || !options.replayService) {
       throw new Error('result-studio/revisions register requires options.repo / projectContext / replayService');
     }
+
+    /**
+     * BLOCK-263（P4-REM P1）— job 的修订历史有界只读列表（pack history tab 数据源）。
+     * 真相=artifact_revisions（idx_rs_revisions_job 索引在）；只投影白名单列，
+     * ≤100 行/页；job→project 解析后过 projectContext 归属鉴权（已知 Revision/Job
+     * id 不能跨项目越权）。无修订诚实返回空列表，不虚构。
+     */
+    app.get('/api/result-studio/history', (req, res) => {
+      const jobId = String(req.query.jobId || '').trim();
+      if (!jobId) return res.status(400).json({ ok: false, error: 'jobId_required' });
+      const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit || '100'), 10) || 100));
+      const offset = Math.max(0, Number.parseInt(String(req.query.offset || '0'), 10) || 0);
+      try {
+        const job = db.getToolJob(jobId);
+        const projectId = job && job.project_id ? String(job.project_id) : (job && job.projectId ? String(job.projectId) : null);
+        if (!projectId) {
+          return res.json({ ok: true, jobId, revisions: [], hasMore: false, note: '该结果没有项目归属，无历史可投影。' });
+        }
+        const context = options.projectContext(req, projectId, { write: false, git: false });
+        if (context.error) return res.status(context.error.status).json({ ok: false, error: context.error.code });
+        const rows = projectJobHistoryRows({ jobId, projectId, limit, offset });
+        return res.json({
+          ok: true,
+          jobId,
+          projectId,
+          revisions: rows.slice(0, limit).map((row) => ({
+            revisionId: row.revision_id,
+            artifactFamilyId: row.artifact_family_id,
+            ordinal: row.revision_ordinal,
+            createdAt: row.created_at,
+            isCurrent: row.is_current === 1,
+            validationStatus: row.validation_status,
+          })),
+          hasMore: rows.length > limit,
+        });
+      } catch (error) {
+        return res.status(500).json({ ok: false, error: 'history_projection_failed', message: String(error && error.message || error) });
+      }
+    });
 
     /**
      * Project the exact source for one persisted Revision. This is deliberately
@@ -343,4 +400,6 @@ module.exports = {
       }
     });
   },
+  // BLOCK-263 — 测试面（纯函数直测；不进路由注册）
+  _internals: { projectJobHistoryRows },
 };

@@ -1,0 +1,43 @@
+{
+  "name": "p4rem-live",
+  "block": "BLOCK-263",
+  "screenshots": "unavailable（后端级实机腿；iframe 渲染通道由 BLOCK-252 先例覆盖）",
+  "migrationsApplied": 19,
+  "startedAt": "2026-10-25T23:53:56.054Z",
+  "finishedAt": "2026-10-25T23:53:58.155Z",
+  "assertions": [
+    {
+      "name": "S1_seeded_project",
+      "pass": true,
+      "detail": "project=p1（db 模块 schema 就位）"
+    },
+    {
+      "name": "S2_isolated_backend",
+      "pass": true,
+      "detail": "backend :3173 + 真实 pack 0.2.3@D:\\1.WorkDir\\petri-pack-bio"
+    },
+    {
+      "name": "H1_pack_contributions_history_tab",
+      "pass": true,
+      "detail": "packs=1 tabs=[\"revisions-source\",\"lineage\",\"compare\",\"history\"]"
+    },
+    {
+      "name": "H2_history_endpoint_bounded",
+      "pass": true,
+      "detail": "revisions=3 首末=rev-3/rev-1"
+    },
+    {
+      "name": "H3_job_isolation",
+      "pass": true,
+      "detail": "job-b revisions=1（不串 job-a）"
+    },
+    {
+      "name": "R1_runtime_r_not_installed_honest",
+      "pass": true,
+      "detail": "R 未装如实登记（r.installed=false）——「真实结果页保真」实机腿按 UI-526 重开条件顺延（安装 petri-r-runtime 需用户授权 657MB 下载）；本腿以真实 DB 修订链 + truth 字段（validationStatus）补证"
+    }
+  ],
+  "allPass": true,
+  "passed": 6,
+  "total": 6
+}

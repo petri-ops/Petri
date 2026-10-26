@@ -10,14 +10,14 @@ acceptance:
   - 实机腿：隔离栈 probe /api/runtime/status——R installed 则跑真实 demo 分析全链（job→产物→truth 校验→结果页 pack 渲染）；未装则如实登记（UI-526 重开条件不变）并以 artifact-truth 校验过的产物链补证；断言 JSON 落 acceptance/block-263/。
   - closeout 十三门 PASS；母纲 E13 🟡→✅、§6.5 第 12 行 completed（串行队列清零）、registry/roadmap/handoff/AUDIT-LOG 回写。
 reopen: pack iframe 写桥（C-44：selection/revisions 写操作/annotations/export 写出统一依赖）；R 运行时安装后 UI-526 实机补腿（需用户授权 657MB 下载）；E13 lineage 图形态核心渲染长期保留；G1+。
-status: active
+status: completed
 ---
 
 # BLOCK-263 · P4-REM 数据模型收官（串行队列最后一项）
 
 用户发令：「搞定 P4-REM 数据模型收官」（2026-10-25）。母纲依据：§6.5 第 12 行（母纲硬约束：最后）+ E13 行。
 
-本包当前阶段 = **P0 对账完成（§1–§3）**；P1 起按 §4 串行推进。
+本包当前阶段 = **completed**（P0–P3 全部交付，证据见 §6）。
 
 ## 0. 启动前置（2026-10-25 实测）
 
@@ -89,3 +89,16 @@ selection / revisions 写操作（restore/replay）/ annotations / export 写出
 - `completed` = P1 契约绿 + P2 裁决回写 + P3 实机腿（或如实 R 未装登记）+ closeout 十三门 PASS + 母纲/台账回写。
 - 写面 tab 不因 C-44 未做而阻塞收口（出籍判档即交付）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 执行记录（2026-10-25）
+
+| 阶段 | 交付 | 证据 |
+| --- | --- | --- |
+| P0 立项 | E13 现状矩阵 + 三块裁决 + 登记 | 提交 0b46127f |
+| P1 history tab | `GET /api/result-studio/history?jobId=`（revisions.js；job→project 归属鉴权 + artifact_revisions 索引查询 + ≤100 行白名单列 + hasMore）+ packTabData history 桥接真端点（删 no_endpoint 诚实回落）+ pack 仓 0.2.3（tabs 补 history/label + renderTab history 分支） | Node `test/block263-history-endpoint.test.mjs` **6/6**（纯函数倒排/白名单列/400/空归属/403 透传/limit 封顶）；前端 packTabData+usePackTabData **17/17**；pack 仓 `1816c42` |
+| P2 裁决落档 | §3 判档：写面四 tab（selection/revisions 写/annotations/export）出籍 C-44；域中性 6 键保留（终态）；methods 达成 | 本文件 §3 + 母纲 E13 回写 |
+| P3 实机 | 隔离后端 + 真实 pack 0.2.3：contributions 透出 history ✓ / 端点真实 DB 3 修订倒排 ✓ / job 隔离不串 ✓ / R 运行时 probe r.installed=false 如实登记（UI-526 重开条件不变） | `acceptance/block-263/p4rem-live.json` **6/6**；`scripts/block263-p4-rem-live.mjs` |
+
+**实机抓真四处（种子/断言修正，非产品缺陷）**：projects 表无 modality 列（后置扩展不在此表）；fam-1「单当前版本」唯一索引要求 job-b 用独立 fam-2；tool_jobs 由 db 模块自有 schema 创建（先 getDatabase() 触发再种子）；runtime/status 形状是 data.runtime.r.installed（非 data.r）。
+
+**诚实边界**：① R 未装（r.installed=false）——「真实结果页保真」的完整实机腿（真实分析跑通出产物）按 UI-526 重开条件顺延（安装 petri-r-runtime 需用户授权 657MB），本腿以真实 DB 修订链 + validationStatus truth 字段补证；② iframe 渲染通道不重复实机（BLOCK-252 已对 code/compare/lineage 三 tab 验证同一 renderTab 机制，history 同通道）；③ pack contributions 的 tabs 断言基于真实 pack 仓（版本 0.2.3）。
