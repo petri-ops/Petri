@@ -39,7 +39,20 @@ module.exports = function registerComputerUse(app) {
     }
   });
 
-  app.post('/api/computer-use/probe', async (req, res) => {
+  // BLOCK-265（C-38 补）— PiP 截帧：主进程窗口经 HTTP 拉（主进程禁引 core 实现 R5；host 单例归后端）
+  app.get('/api/computer-use/pip-frame', async (req, res) => {
+    if (!requireUser(req, res)) return;
+    try {
+      const host = getComputerUseHost();
+      const shot = await host.requestWithRecovery('screenshot', {}, 8000);
+      const b64 = (shot && (shot.pngBase64 || shot.imageBase64 || shot.base64)) || null;
+      return res.json({ ok: true, pngBase64: b64, error: b64 ? null : 'frame_shape_unexpected', at: Date.now() });
+    } catch (error) {
+      return res.status(503).json({ ok: false, pngBase64: null, error: (error && error.code) || 'screenshot_failed' });
+    }
+  });
+
+    app.post('/api/computer-use/probe', async (req, res) => {
     if (!requireUser(req, res)) return;
     try {
       const host = getComputerUseHost();

@@ -355,7 +355,7 @@
   },
   "browser_act": {
     "label": "浏览器操作",
-    "icon": "mouse-pointer"
+    "icon": "bot"
   },
   "browser_status": {
     "label": "浏览器状态",

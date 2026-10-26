@@ -763,7 +763,6 @@ test('BLOCK-264 C-43 — freehand：path 归一化/抽稀/三态互斥/store 往
   assert.equal(nan.ok, false);
 
   // store 往返（真实 SQLite）
-  const { getDatabase } = require('better-sqlite3');
   const store = createResultAnnotationStore(sqlite);
   const scope = { projectId: 'p1', surface: 'workspace-file', filePath: 'plot.png' };
   const created = (() => { try { return { ok: true, annotation: store.create({ ...ok.annotation, author: 'tester' }) } } catch (e) { return { ok: false, errors: [{ message: e.message }] } } })();

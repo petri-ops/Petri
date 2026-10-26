@@ -37,7 +37,7 @@ describe('assessComplexity（BLOCK-264 C-36）', () => {
 
 describe('describeAutoDecisionWithComplexity（BLOCK-264 C-36）', () => {
   const decision: AutoModelDecision = {
-    preset: { id: 'p1', label: 'P', provider: 'openai-compatible', model: 'm-1' } as AutoModelDecision['preset'],
+    preset: { id: 'p1', label: 'P', provider: 'openai-compatible', model: 'm-1' },
     reason: 'Agent 角色绑定',
     role: 'agent',
   };

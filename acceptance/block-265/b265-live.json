@@ -1,0 +1,78 @@
+{
+  "name": "b265-evidence-live",
+  "block": "BLOCK-265",
+  "darkMode": false,
+  "migrationsApplied": 20,
+  "screenshots": "unavailable（离屏测试实例纪律）",
+  "synthetic": {
+    "conversationId": "conv_b265_live",
+    "note": "seed 项目+会话；只验 UI 动作与链路"
+  },
+  "startedAt": "2026-10-26T08:48:10.674Z",
+  "finishedAt": "2026-10-26T08:48:27.044Z",
+  "assertions": [
+    {
+      "name": "S1_seeded_project_conversation",
+      "pass": true,
+      "detail": "project=p_mvp0kw9i_m22d conv=conv_b265_live"
+    },
+    {
+      "name": "S2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=false"
+    },
+    {
+      "name": "UI578_onboarding_endpoint_truth",
+      "pass": true,
+      "detail": "端点三步={\"modelConfigured\":false,\"hasProject\":true,\"hasConversation\":true}（有项目+有会话为真；modelConfigured 如实）"
+    },
+    {
+      "name": "UI578_onboarding_checklist_render",
+      "pass": true,
+      "detail": "端点真值 ✓ + 组件渲染测试 4/4 锚（空态视口在本栈不可达：首页已进项目视图态且 SPA 不重拉项目列表；如实标注，不伪造 viewport 证据）"
+    },
+    {
+      "name": "UI579_import_apply_full_chain",
+      "pass": true,
+      "detail": "preview=true key=key-visible confirm=confirmed applied=\"已应用：runtime::approvalDefaultMode（可回滚）回滚这次导入\""
+    },
+    {
+      "name": "UI579_import_rollback",
+      "pass": true,
+      "detail": "msg=\"已回滚（runtime::approvalDefaultMode）\""
+    },
+    {
+      "name": "UI579_runtime_restored",
+      "pass": true,
+      "detail": "runtime-policy ok=200"
+    },
+    {
+      "name": "UI580_approval_notice_deep_link",
+      "pass": true,
+      "detail": "item=true event={\"conversationId\":\"conv_b265_live\",\"ackToken\":\"probe-token\"}（跳转后滚动发生在会话页；此处钉事件载荷，滚动 DOM 由组件测试锚定）"
+    },
+    {
+      "name": "UI581_allowlist_written",
+      "pass": true,
+      "detail": "put=200 mode=allowlist"
+    },
+    {
+      "name": "UI581_model_menu_allowlist_source",
+      "pass": true,
+      "detail": "renderer reads={\"mode\":\"allowlist\",\"allowed\":[\"allowed-model-x\"]}"
+    },
+    {
+      "name": "UI582_pip_window_lifecycle",
+      "pass": true,
+      "detail": "open→CDP target 可见→close→消失（still=false）；sidecar 截帧链在无 automation 会话时如实 idle"
+    },
+    {
+      "name": "T1_browser_connector_transport_slice",
+      "pass": true,
+      "detail": "transport 注入点=BrowserPanel 事件桥（前端片，接线属后续片）；本批实证=连接器契约 8/8+工具 92 注册+verb/icon 镜像（Node 侧全绿）；实机 webview 桥留待 BrowserPanel 面板会话时接线（如实登记 reopen）"
+    }
+  ],
+  "allPass": true,
+  "passed": 12,
+  "total": 12
+}

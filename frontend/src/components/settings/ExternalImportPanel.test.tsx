@@ -8,16 +8,17 @@ interface Call { path: string; body: Record<string, unknown>; }
 
 function mockFetchByRoute(routes: Record<string, { status?: number; body: unknown }>) {
   const calls: Call[] = [];
-  const impl = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+  const impl = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
     const path = String(url).replace('http://mock/api', '');
-    calls.push({ path, body: JSON.parse(String(init?.body || '{}')) });
-    const hit = routes[path];
+    const rawBody = typeof init?.body === 'string' ? init.body : '{}';
+    calls.push({ path, body: JSON.parse(rawBody) as Record<string, unknown> });
+    const hit: { status?: number; body: unknown } | undefined = Object.prototype.hasOwnProperty.call(routes, path) ? routes[path] : undefined;
     const status = hit?.status ?? 200;
-    return {
+    return Promise.resolve({
       ok: status >= 200 && status < 300,
       status,
       json: () => Promise.resolve(hit ? hit.body : {}),
-    };
+    });
   });
   return { impl, calls };
 }
@@ -50,7 +51,7 @@ describe('ExternalImportPanel（BLOCK-264 · C-35）', () => {
   });
 
   it('取消勾选后 apply 不带该键（可部分导入）', async () => {
-    const { impl, calls } = mockFetchByRoute({
+    const { impl, calls: _calls } = mockFetchByRoute({
       '/import/external-agent/preview': { body: { ok: true, patch: { 'runtime::approvalDefaultMode': 'read' }, credentialsDetected: [], unsupported: [] } },
       '/import/external-agent/apply': { body: { status: 'ok', appliedKeys: [], applyId: null } },
     });

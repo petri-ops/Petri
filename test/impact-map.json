@@ -5695,7 +5695,10 @@
         "frontend/src/lib/desktopBridge.ts",
         "frontend/src/lib/electron.d.ts",
         "scripts/block264-*.mjs",
-        "acceptance/block-264/**"
+        "acceptance/block-264/**",
+        "scripts/block265-*.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b264-evidence-live.cjs",
+        "acceptance/block-265/**"
       ],
       "tests": [
         "test/block264-external-import-apply.test.mjs",

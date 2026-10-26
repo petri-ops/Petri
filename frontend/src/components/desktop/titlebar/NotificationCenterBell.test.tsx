@@ -105,11 +105,11 @@ describe('NotificationCenterBell', () => {
 describe('NotificationCenterBell · 审批深定位（BLOCK-264 C-39）', () => {
   it('点击待审批通知派发 approvalCardFocus 事件（带 ackToken）', async () => {
     const dispatched: { name: string; detail: unknown }[] = [];
-    const origDispatch = window.dispatchEvent;
+    const origDispatch = window.dispatchEvent.bind(window);
     window.dispatchEvent = ((e: Event) => {
       if (e instanceof CustomEvent) dispatched.push({ name: e.type, detail: e.detail });
-      return origDispatch.call(window, e);
-    }) as typeof window.dispatchEvent;
+      return Reflect.apply(origDispatch, window, [e]);
+    });
     pushNotice({
       kind: 'approval_required',
       title: '需要确认',
@@ -125,18 +125,19 @@ describe('NotificationCenterBell · 审批深定位（BLOCK-264 C-39）', () => 
     await waitFor(() => {
       const evt = dispatched.find((d) => d.name === 'petri:approval-card-focus');
       expect(evt).toBeTruthy();
-      expect((evt!.detail as { ackToken?: string }).ackToken).toBe('token-abc');
+      const detail = (evt && evt.detail) as { ackToken?: string } | undefined;
+      expect(detail && detail.ackToken).toBe('token-abc');
     });
     window.dispatchEvent = origDispatch;
   });
 
   it('非审批通知不派发深定位事件', async () => {
     const dispatched: { name: string }[] = [];
-    const origDispatch = window.dispatchEvent;
+    const origDispatch = window.dispatchEvent.bind(window);
     window.dispatchEvent = ((e: Event) => {
       if (e instanceof CustomEvent) dispatched.push({ name: e.type });
-      return origDispatch.call(window, e);
-    }) as typeof window.dispatchEvent;
+      return Reflect.apply(origDispatch, window, [e]);
+    });
     pushNotice({ kind: 'turn_completed', title: '本轮完成', body: '对话已完成', conversationId: 'conv-2', projectId: 'p1' });
     renderBell();
     fireEvent.click(screen.getByTestId('notification-center-bell')); // 展开列表

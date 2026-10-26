@@ -428,7 +428,7 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "wait_agent": "bot",
   "web_fetch": "globe",
   "browser_connect": "globe",
-  "browser_act": "mouse-pointer",
+  "browser_act": "bot",
   "browser_status": "globe",
   "browser_disconnect": "globe",
   "web_search": "globe",
