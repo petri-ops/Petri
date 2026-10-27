@@ -1,6 +1,14 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**整波收官：批次 1~5 全 completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户「按顺序批次完成」整波（2026-10-27）已收官——①BLOCK-268 UI-585 实机腿（c46df0dc，verified，亮/暗 7/7）→②BLOCK-269 浏览器连接器前端桥（53dc1f35，UI-586 verified，亮/暗 12/12）→③BLOCK-270 批注画笔渲染器（9fc608b5，59/59，UI-587 in_progress）→④BLOCK-271 1b 兜底实机腿（26053b86，UI-454 verified，4/4）→⑤backlog 滞后注记对账批（治理）。**对账结论**：成熟度蓝图（W1-W3）与竞争力纲（W1-W7）**全部收口无剩余波次**；真实剩余=候选池零散项+1d/1z（用户裁决或过目）+UI-587 实机腿+环境类+D 档（不外推）。**待用户发令**：推送（本地领先 6 笔）/R 运行时 657MB/UI-501/503/504/457 过目。**批间纪律沉淀**：每包收口 canonical 回写应含 backlog 行（防注记滞后再误导）；closeout 运行期不得动工作区；隔离后端 spawn 显式 PETRI_LOCAL_RESULTS_DIR。**实机教训**：CDP Page.navigate 是整页刷新；event-bus payload 在顶层；SSE abort 波及 keep-alive。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+最后更新：2026-10-27（**BLOCK-270/271 completed；批次进行中 5/5（对账治理批）**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户整波授权「按顺序批次完成」——①UI-585 实机腿（✅ c46df0dc，verified）→②浏览器连接器前端桥（✅ 53dc1f35，UI-586 verified）→③批注画笔渲染器（✅ 本笔，组件级 59/59，UI-587 in_progress）→④1b 日志端点兜底实机生效腿（✅ 本笔，UI-454 verified）→⑤backlog 滞后注记对账批（治理）。**对账抓真（重要）**：成熟度蓝图 W1/W2/W3 全部收口（BLOCK-157/160/163，当日达成）；竞争力纲 W1-W7 全部收口（BLOCK-171~176，W6 仅 CP-19 移动栈 deferred）——两大纲**无剩余波次**；backlog 队列表多行注记滞后（1b/2b/W3/W6 等），真实剩余=候选池零散项+环境类+D 档（不外推）。**批间纪律**：每批 plan+定向/实机+closeout+canonical 回写+提交；不推送（需发令）；R 运行时 657MB 需单独授权。**实机教训**：CDP Page.navigate 是整页刷新；event-bus payload 在顶层；SSE abort 波及 keep-alive；closeout 运行期不得动工作区；隔离后端 spawn 须显式 PETRI_LOCAL_RESULTS_DIR（否则全局链写用户真实目录）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**BLOCK-269 浏览器连接器前端桥 completed；批次进行中 3/5 待启动**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户整波授权「按顺序批次完成」——批次序列=①UI-585 实机腿（✅ c46df0dc）→②浏览器连接器前端桥（✅ 本笔，UI-586 verified，亮/暗 12/12）→③批注画笔前端渲染器（C-43 尾项；前端 KINDS 尚无 freehand，Overlay 只渲染 rect；改动面=annotations.ts 契约镜像+client locator 三态+Overlay SVG polyline 渲染与画笔采点+两 pane 接线）→④成熟度蓝图 W3 首切片（ORC-3→ORC-4→CAP-3）→⑤W6 落地形态对账。**批间纪律**：每批 plan+定向/实机+closeout 十三门+canonical 回写+提交；不推送（需用户发令）；R 运行时 657MB 需单独授权。**实机教训**（累积）：CDP Page.navigate 是整页刷新非 SPA 重挂；event-bus payload 在事件顶层；SSE abort 重置 keep-alive 波及复用连接。G0 开发期常态 · 不外推 packaged/Provider/GA。

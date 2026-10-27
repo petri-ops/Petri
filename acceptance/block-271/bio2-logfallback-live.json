@@ -1,0 +1,32 @@
+{
+  "name": "b271-bio2-logfallback-live",
+  "block": "BLOCK-271",
+  "migrationsApplied": 20,
+  "startedAt": "2026-10-27T03:04:11.510Z",
+  "finishedAt": "2026-10-27T03:04:13.333Z",
+  "assertions": [
+    {
+      "name": "S1_seeded_project",
+      "pass": true,
+      "detail": "project=p_mvq3qdlo_mbt2"
+    },
+    {
+      "name": "S2_layout_outputDir",
+      "pass": true,
+      "detail": "outputDir=C:\\Users\\Admin\\AppData\\Local\\Temp\\petri-b271-live-bpJc2C\\data\\projects\\b271---1793070252624-mvq3qdlo\\results\\jobs\\job_b271_mvq3qdlr\\output"
+    },
+    {
+      "name": "A4_runlog_via_project_layout",
+      "pass": true,
+      "detail": "source=run.log bytes=30 note=布局解析失败已按项目目录约定兜底（[project-run-layout] db instance with getProject method is requ"
+    },
+    {
+      "name": "A5_global_chain_unregressed",
+      "pass": true,
+      "detail": "source=run.log（全局目录链行为不回退）"
+    }
+  ],
+  "allPass": true,
+  "passed": 4,
+  "total": 4
+}

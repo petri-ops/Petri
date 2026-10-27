@@ -8314,6 +8314,26 @@
         "G0"
       ],
       "notes": "2026-10-27 用户「按顺序批次完成」批次 2/5（C-40 尾项）。transport 桥=event-bus SSE 下发+action-result 回传+25s 超时；REST 四面与 agent 工具同源执行面；BrowserPanel 执行器（JSON.stringify 注入零拼接）。实机亮/暗各 12/12（含真面板 webview read_text/外网导航）。"
+    },
+    {
+      "id": "BLOCK-270-FREEHAND-RENDERER",
+      "capability": "block-270-freehand-renderer",
+      "path": "docs/block-270-freehand-renderer-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P4-CLOSED",
+      "canonical": true,
+      "truthDomain": "block-270-freehand-renderer",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-27",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "c-43",
+        "freehand",
+        "annotation",
+        "G0"
+      ],
+      "notes": "2026-10-27 用户「按顺序批次完成」批次 3/5（C-43 尾项）。freehand 前端镜像（KINDS/path/抽稀/locator 三态/session beginPath/Overlay SVG 渲染+采点/两 pane 接线/prompt 画笔分支）；组件级 59/59；UI-587 in_progress（实机需 job+artifact seed）。"
     }
   ],
   "lastUpdated": "2026-10-26",
