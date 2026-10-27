@@ -1,0 +1,32 @@
+{
+  "rect": {
+    "x": 275.00592041015625,
+    "y": 0,
+    "w": 8.993865013122559,
+    "h": 835.731201171875
+  },
+  "checks": [
+    {
+      "label": "glow-y150",
+      "pointerY": 150,
+      "hovered": true,
+      "inlineGlowY": "",
+      "usedGlowY": "50%",
+      "beforeOpacity": "0.113749",
+      "shot": "saved"
+    },
+    {
+      "label": "glow-y600",
+      "pointerY": 600,
+      "hovered": true,
+      "inlineGlowY": "",
+      "usedGlowY": "50%",
+      "beforeOpacity": "1",
+      "shot": "saved"
+    }
+  ],
+  "cssApplied": {
+    "bgImage": "radial-gradient(12px 170px, color(srgb 0.0509804 0.580392 0.533333 / 0.42), rgba(0, 0, 0, 0) 72%)",
+    "defaultOpacity": "0"
+  }
+}

@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-591: 拖拽边界指针跟随渐晕（2026-10-27 **in_progress（UI-591 轻量包 v2；主窗口真实指针取证 done，用户人测确认后翻 verified）**）
+
+- **变化面**：BLOCK-273 reopen（指针跟随渐晕，Qoder 完整形态）兑现——三处可调宽边界悬停唯一 accent 信号 = 「以指针 Y 为中心、上下渐隐的椭圆 glow」（radial-gradient rx=4px/ry=170px、30% accent、横跨接缝；v3 用户微调 rx7px/42%→rx4px/30%）：`resizeHandleV`（AppRail 左栏 / RightPanel 右栏）、`workspaceFileTreeResize`（右文件树）、FloatCardResizer（项目摘要/侧边聊天）。**线保持中性不转色**（v2 用户裁决「有光晕后同色竖带冗余」：v1 的 hover accent 2px 线与文件树 :has 分隔线转色退场）。新增 `lib/resize-glow.ts`（onPointerMove 刷新 `--petri-resize-glow-y`，未跟踪回落 50% 居中），四组件接线；custom.css 定义几何 token（明暗同值，成对棘轮豁免同 `--petri-ring-width` 先例）；theme accent 棘轮 project-workspace 95→94 / FloatCardResizer 3→2（渐晕 +1、同色竖带 -1 对冲）。
+- **为什么这样设计**：用户人测抓真（附图 1=Qoder 目标形态、图 2=本仓实况「只有一条均匀 teal 线」）——根因有二：①用户 hover 的主列边界 `resizeHandleV` 是 BLOCK-273 刻意保留的「参照形态」，从未升级为渐变规范；②Qoder 的核心观感=以指针为中心的局部渐变（渐晕），BLOCK-273 落地的是 6~10px 宽 / 16% 侧向微弱渐变+全高均匀线，几乎不可感知。跟手渐晕是 BLOCK-273 plan 显式 reopen（「本轮不做，用户要再做」）；v1 交付后用户两点评审（光晕偏宽、同色竖带冗余）即得 v2 终态：光晕=唯一彩色信号，线只承担结构分隔。
+- **验证（代码）**：resize-glow 单测 2/2 + theme-token-contract 17/17（新 token 定义+成对豁免+棘轮 94/2）+ CenterPanel 21/21 + SideChatDock 14/14 + tsc 0 + eslint 0 error + css-modules 棘轮 PASS；impact-map 登记 ui591-resize-glow-follow（routing 无未映射）。
+- **实机证据**：acceptance/ui-591/——9222 主实例**真实指针**（CDP Input.dispatchMouseEvent）v2 取证 win-glow-follow-result.json：v2 CSS 生效（bgImage=radial 7px）+ 两档 Y 跟手（150→150px、600→600px，inlineGlowY/usedGlowY 全对齐）+ ::after 恒中性 1px（同色竖带退场实测）；v1 跟手双档截图 test-resize-handle-v-glow-y{150,600}.png（9223 onscreen）证明跟随行为；v2 视觉 clip 因真实光标竞争 hover 不稳定，以 JSON 计算样式证据+用户主窗口直视为人测门。根因取证=acceptance/tmp-block273-hover-probe/（修复前 resizeHandleV hover=无渐变、::after teal 58% 全高均匀线）。**环境教训入册**：Windows Vite watcher 可能漏 .tsx 事件（CSS 热更正常、组件 props 陈旧）——验方=读元素 `__reactProps$` keys、touch 强制 transform 失效；离屏实例 -32000 拒真实输入，屏内弹窗=用户裁决禁用（「测试 不需要出现屏幕」），真实指针取证唯一通道=主实例 9222。
+- **边界（reopen）**：拖拽进行中的渐晕跟随（pointermove 挂在把手，拖拽移出把手后光斑停驻——与既有 :active 线行为同界）；暗主题走查随用户主窗口人测一并确认。
+
 ## UI-590: 左栏页脚图标化右对齐（2026-10-27 **verified（BLOCK-275；9223 实机断言 6/6）**）
 
 - **变化面**：左栏页脚「联邦/设置」两钮去文字只留图标（语义由 title/aria-label 承载）；联邦图标 cpu→smartphone（手机连接语义对位，用户图3）；`.leftFooterRow` 右对齐 + 图标钮紧凑化（30px 方钮，flex:0 0 auto）。
@@ -22,7 +30,7 @@
 - **为什么这样设计**：BLOCK-62 只精修了主列一处，其余边界保持原始实心带写法——规范从未统一；可发现性约束（v25「隐形热区不可发现」抓真在案）只降视觉重量不删暗示，热区宽度不收窄。
 - **验证（代码）**：theme-token-contract 17/17（含新棘轮 + AnnotationOverlay 清偿）；FloatCardResizer 消费组件测试 35/35（SideChatDock/CenterPanel）；routing unknown=[]（block273 规则登记）。
 - **实机证据**：acceptance/block-273/live-light.json / live-dark.json——亮/暗双主题默认态实机断言（无实心条带 bg=透明+glow=0+分隔线=divider）+ 源码接线断言（S1-S4）全绿；环境边界如实记录：隐藏页 used 值缓存 + 离屏截图合成不可用（-32000），悬停激活态的干净渲染观测见诊断记录（亮主题 glow=1、分隔线=accent rgb(13,148,136)，非门禁证据）。**补录（并发会话产出 34f91bc0）**：用户主实例 9222 **可见窗口真实指针** hover 实证——resizeHandleV（主列边界）悬停 accent 渐变真实渲染（hovered=true、afterBg=accent teal 0.58、默认/悬停 clip 截图双落盘 acceptance/tmp-block273-hover-probe/）；workspaceFileTreeResize/floatCard 该页态未展开如实记录。
-- **边界（reopen）**：指针跟随渐晕（Qoder 完整形态）；暗主题悬停态+真实指针走查=30 秒人测路线随交付（确认后翻 verified）。
+- **边界（reopen）**：指针跟随渐晕（Qoder 完整形态）**已随 UI-591 兑现**（见本台账 UI-591 行）；暗主题悬停态+真实指针走查=30 秒人测路线随交付（确认后翻 verified）。
 
 ## UI-587: 批注画笔前端渲染器（2026-10-27 **in_progress（BLOCK-270；组件级 59 项，实机腿未跑）**）
 

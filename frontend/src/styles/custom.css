@@ -198,6 +198,9 @@
   --petri-divider: color-mix(in srgb, var(--petri-border) 55%, transparent);
   /* BLOCK-178 — 焦点环宽度 token（ArtifactPinPane 键盘可达分隔条 focus ring 定性） */
   --petri-ring-width: 2px;
+  /* UI-591 — 拖拽边界指针跟随渐晕中心（px，把手内 Y）；lib/resize-glow.ts
+     onPointerMove 实时刷新，未跟踪时回落居中。几何量非颜色，明暗同值。 */
+  --petri-resize-glow-y: 50%;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */

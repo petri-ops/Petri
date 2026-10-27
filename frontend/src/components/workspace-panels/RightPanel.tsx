@@ -9,6 +9,7 @@ import {
   type ResultEditSubmission,
 } from '@/components/result-studio/ResultEditPanel';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
+import { trackResizeGlow } from '@/lib/resize-glow';
 import {
   type ActiveArtifact,
   type ActiveWorkspaceFile,
@@ -163,7 +164,13 @@ export function RightPanel({
   // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
   return (
     <>
-      {visible && onResize && <div className={styles.resizeHandleV} onMouseDown={onResize} />}
+      {visible && onResize && (
+        <div
+          className={styles.resizeHandleV}
+          onMouseDown={onResize}
+          onPointerMove={trackResizeGlow}
+        />
+      )}
       <aside
         className={`${styles.rightCol}${visible ? '' : ` ${styles.rightColCollapsed}`}`}
         style={{ width: visible ? `var(--petri-live-right-width, ${ctx.width}px)` : 0 }}

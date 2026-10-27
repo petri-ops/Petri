@@ -172,6 +172,8 @@ describe('theme token contract', () => {
       '--petri-shadow-sm',
       // BLOCK-178 — 功能性尺寸 token（焦点环宽度，非颜色；主题无关）
       '--petri-ring-width',
+      // UI-591 — 功能性几何 token（拖拽边界渐晕中心 Y，px；主题无关，同 ring-width 理由）
+      '--petri-resize-glow-y',
       // 派生层（color-mix(var(--petri-*)) 自动适配主题）非缺失
       '--petri-accent-weak',
       // BLOCK-167 W0 — 宪章派生 token：border 三语义引用主题变量按元素解析；
@@ -403,7 +405,9 @@ describe('theme token contract', () => {
       'components/workspace-panels/OrchestrationGraph.module.css': 1, // 节点选中态
       // BLOCK-273 拖拽边界统一规范：+2 = 文件树把手悬停渐隐 glow（accent 16% 渐变）+
       // 分隔线 hover 转 accent（:has）——宪章五类「交互态拖拽把手」合法语义（同 ArtifactPinPane 先例）
-      'pages/project-workspace.module.css': 95,
+      // UI-591 指针跟随渐晕：+1 = resizeHandleV::before 跟手 radial glow；
+      // 用户裁决「有光晕后同色竖带冗余」：hover accent 线与 :has 分隔线转色退场（-2）
+      'pages/project-workspace.module.css': 94,
       'components/copilot/simple-chat.css': 31,
       'components/desktop/desktop.css': 24,
       'pages/extensions/styles.module.css': 20,
@@ -433,7 +437,7 @@ describe('theme token contract', () => {
       'components/knowledge/KnowledgeConsoleDock.module.css': 2,
       'components/result-studio/LineageViewSwitch.module.css': 2,
       'components/RouteErrorBoundary.module.css': 2,
-      'components/workspace-panels/FloatCardResizer.module.css': 2,
+      'components/workspace-panels/FloatCardResizer.module.css': 2, // 拖拽把手态：UI-591 跟手渐晕（同色 hover 线按用户裁决退场，常驻线本就中性）
       'components/workspace-panels/MarkdownResultViewer.module.css': 2,
       'components/workspace-panels/SpreadsheetResultViewer.module.css': 2,
       'components/copilot/LlmTranscriptViewer.css': 1,

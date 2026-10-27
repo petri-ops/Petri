@@ -9,6 +9,7 @@ import type { Project } from '@/lib/project-types';
 import { getApiPrefix } from '@/lib/authClient';
 import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
 import { getBridge } from '@/lib/desktopBridge';
+import { trackResizeGlow } from '@/lib/resize-glow';
 import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile, FileEntry } from './types';
 import { FileTreeList } from './FileTreeList';
@@ -937,6 +938,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
             <div
               className={styles.workspaceFileTreeResize}
               onMouseDown={startTreeResize}
+              onPointerMove={trackResizeGlow}
               title="拖拽调整文件树宽度"
             />
             <div

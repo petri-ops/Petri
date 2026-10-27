@@ -3924,9 +3924,11 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   cursor: pointer;
 }
 
-/* Resize handles — BLOCK-273 拖拽边界统一渐变规范的参照形态：
-   默认 1px 中性细线，悬停转 2px accent（本列边界，行为不动）；渐隐 glow 范式见
-   .workspaceFileTreeResize::before / FloatCardResizer.module.css */
+/* Resize handles — BLOCK-273 统一渐变规范 + UI-591 指针跟随渐晕（Qoder 完整形态）：
+   线保持中性细线不转色；悬停唯一 accent 信号 = 以指针 Y 为中心上下渐隐的椭圆 glow
+   （用户裁决：有光晕后同色竖带冗余——旧 hover accent 线/:has 分隔线转色退场）。
+   光晕中心变量 --petri-resize-glow-y 由 lib/resize-glow.ts 的 onPointerMove 刷新，
+   未跟踪时回落 50%（居中光晕）；同一范式见 workspaceFileTreeResize / FloatCardResizer。 */
 .resizeHandleV {
   width: 9px;
   margin-left: -4px;
@@ -3954,16 +3956,32 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   opacity: 0.72;
 }
 
+/* 指针跟随渐晕：横跨接缝的椭圆光斑，亮部集中在指针附近、向上下渐隐 */
+.resizeHandleV::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -6px;
+  right: -6px;
+  background: radial-gradient(
+    4px 170px at 50% var(--petri-resize-glow-y, 50%),
+    color-mix(in srgb, var(--petri-accent) 30%, transparent),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity var(--petri-duration-fast) ease;
+  pointer-events: none;
+}
+
 .resizeHandleV:hover,
 .resizeHandleV:active {
   background: transparent;
 }
 
-.resizeHandleV:hover::after,
-.resizeHandleV:active::after {
-  background: color-mix(in srgb, var(--petri-accent) 58%, transparent 42%);
-  opacity: 0.88;
-  width: 2px;
+.resizeHandleV:hover::before,
+.resizeHandleV:active::before {
+  opacity: 1;
 }
 
 body:global(.petri-resizing-columns) .rightCol iframe,
@@ -6089,17 +6107,20 @@ body:global(.petri-resizing-columns) * {
   position: relative;
 }
 
-/* BLOCK-273 统一规范 — 悬停 = 渐隐 glow + 既有分隔线（wrap 的 border-left）转 accent：
-   线转色而非叠加新线（:has 穿透父级 border，避免双线）；默认态无任何实心条带
-   （原 4px 全高 accent-bg 实心带按 BLOCK-273 退场）。 */
+/* BLOCK-273 统一规范 + UI-591 指针跟随渐晕 — 悬停唯一 accent 信号 = 渐隐 glow
+   （以把手左缘=分隔线位置为中心、随 --petri-resize-glow-y 跟手）；线保持中性
+   不转色（用户裁决：有光晕后同色竖带冗余）。默认态无任何实心条带。 */
 .workspaceFileTreeResize::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--petri-accent) 16%, transparent),
-    transparent
+  top: 0;
+  bottom: 0;
+  left: -7px;
+  right: -7px;
+  background: radial-gradient(
+    4px 170px at 0 var(--petri-resize-glow-y, 50%),
+    color-mix(in srgb, var(--petri-accent) 30%, transparent),
+    transparent 72%
   );
   opacity: 0;
   transition: opacity var(--petri-duration-fast) ease;
@@ -6109,11 +6130,6 @@ body:global(.petri-resizing-columns) * {
 .workspaceFileTreeResize:hover::before,
 .workspaceFileTreeResize:active::before {
   opacity: 1;
-}
-
-.workspaceFileTreePaneWrap:has(.workspaceFileTreeResize:hover),
-.workspaceFileTreePaneWrap:has(.workspaceFileTreeResize:active) {
-  border-left-color: var(--petri-accent);
 }
 
 .workspaceFilePreviewPane {

@@ -3,6 +3,20 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "ui591-resize-glow-follow",
+      "classifiesScripts": true,
+      "note": "UI-591 拖拽边界指针跟随渐晕（BLOCK-273 reopen 兑现；v2 用户裁决=光晕收窄 rx7px+悬停同色竖带退场，线保持中性）：lib/resize-glow.ts 跟手 helper + 三处 CSS radial-gradient 光晕 + 四组件 onPointerMove 接线；常驻探针 scripts/ui591-glow-follow-live.cjs（9222 主实例真实指针取证；测试不弹屏=用户裁决，禁用 --onscreen 弹窗路线）；取证目录 acceptance/ui-591/**；CSS 棘轮由 block273 规则的 theme 契约门覆盖。",
+      "patterns": [
+        "scripts/ui591-glow-follow-live.cjs",
+        "frontend/src/lib/resize-glow.ts",
+        "frontend/src/lib/resize-glow.test.ts",
+        "acceptance/ui-591/**"
+      ],
+      "tests": [
+        "frontend/src/lib/resize-glow.test.ts"
+      ]
+    },
+    {
       "id": "block231-dev-task-runner",
       "note": "BLOCK-231 进程层后台任务看门狗：task:run/wait/status + exit.json + state 对账（不依赖 agent 通知）。",
       "patterns": [
@@ -5862,7 +5876,8 @@
         "frontend/src/components/desktop/desktop.css",
         "frontend/src/components/annotations/AnnotationOverlay.module.css",
         "frontend/src/styles/theme-token-contract.test.ts",
-        "acceptance/block-273/**"
+        "acceptance/block-273/**",
+        "acceptance/tmp-block273-hover-probe/**"
       ],
       "tests": [
         "frontend/src/styles/theme-token-contract.test.ts"

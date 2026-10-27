@@ -13,6 +13,7 @@ import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { useAppRail } from '@/components/desktop/AppRailContext';
 import { segmentToMode } from '@/hooks/useWorkspaceRouting';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
+import { trackResizeGlow } from '@/lib/resize-glow';
 import styles from '@/pages/project-workspace.module.css';
 
 /** 从路由段推导当前工作区模式（壳层与工作区同一套 URL 语义）。 */
@@ -124,7 +125,11 @@ export function AppRail(): React.ReactElement {
     <>
       <LeftPanel ctx={ctx} open={leftOpen} />
       {leftOpen && (
-        <div className={styles.resizeHandleV} onMouseDown={startColumnResize('left')} />
+        <div
+          className={styles.resizeHandleV}
+          onMouseDown={startColumnResize('left')}
+          onPointerMove={trackResizeGlow}
+        />
       )}
     </>
   );

@@ -6,6 +6,7 @@
  * 宽度钳制 [240, 720] 且不越过视口右缘；主会话/钉住列渲染零改动。
  */
 import React, { useCallback, useEffect, useRef } from 'react';
+import { trackResizeGlow } from '@/lib/resize-glow';
 import styles from './FloatCardResizer.module.css';
 
 // UI-448 清偿（AUDIT-LOG 🔴 销号）：仅模块内使用，按 knip 棘轮去导出（行为不变）
@@ -88,6 +89,7 @@ export function FloatCardResizeHandle({
     <div
       className={styles.handle}
       onPointerDown={onPointerDown}
+      onPointerMove={trackResizeGlow}
       role="separator"
       aria-orientation="vertical"
       aria-label="拖动调整卡片宽度"

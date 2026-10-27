@@ -1,0 +1,38 @@
+{
+  "url": "http://localhost:3000/project/p_mv9rojeu_o3t0",
+  "rect": {
+    "x": 374.0009765625,
+    "y": 0,
+    "w": 8.993865013122559,
+    "h": 835.731201171875
+  },
+  "cssApplied": {
+    "bgImage": "radial-gradient(4px 170px at 50% 505px, color(srgb 0.0509804 0.580392 0.533333 / 0.3), rgba(0, 0, 0, 0) 72%)",
+    "defaultOpacity": "0",
+    "hoverAfterRule": "505px"
+  },
+  "checks": [
+    {
+      "label": "glow-y150",
+      "hovered": true,
+      "inlineGlowY": "150px",
+      "usedGlowY": "150px",
+      "beforeOpacity": "1",
+      "afterBg": "color(srgb 0.894118 0.894118 0.905882 / 0.62)",
+      "afterWidth": "0.990055px",
+      "pointerY": 150,
+      "shot": "saved(fromSurface=true)"
+    },
+    {
+      "label": "glow-y600",
+      "hovered": true,
+      "inlineGlowY": "600px",
+      "usedGlowY": "600px",
+      "beforeOpacity": "1",
+      "afterBg": "color(srgb 0.894118 0.894118 0.905882 / 0.62)",
+      "afterWidth": "0.990055px",
+      "pointerY": 600,
+      "shot": "saved(fromSurface=true)"
+    }
+  ]
+}
