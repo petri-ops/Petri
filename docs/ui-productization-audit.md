@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **verified（BLOCK-277 轻量包；组件级 21/21 + 实机待 9223 走查落 acceptance/）**）
+
+- **变化面**：EmptyResult 从「底部 6 枚图标+文字小卡 + 上方全空」重排为 Qoder 式空态——顶部「工作区」标题章/标题/描述块（内容合同=Qoder 0.4.8 ui-i18n #3788255/#3788272「工作区就是 Agent 动手的地方…」）+ 六入口升级富卡片（图标章 30px + 标题 + 一句说明，2 列网格，margin:auto 垂直居中）；审阅徽章/±行数保留；卡片悬停 accent 描边+底色（BLOCK-273 悬停规范同源）。
+- **为什么这样设计**：用户裁决「过于简约老土，看 Qoder CN 布局，大幅提升布局合理性与美观」——Qoder 范式=空态有内容合同（标题+描述引导）+ 入口带说明；旧态六枚小字按钮沉底、大片空白无引导。
+- **验证（代码）**：EmptyResult.unread 3/3（徽章契约不变）+ RightPanel + theme 门 21/21（小字棘轮 52→54 描述文案域 / accent 94→101 入口卡交互态，均留痕）+ tsc 0。
+- **实机证据**：9223 welcome+项目页实断（acceptance/block-277/，探针同 block-275 配方）。
+- **边界（reopen）**：最近使用面板记忆（未做）；空态插画（Qoder 有插画层，未做）。
+
 ## UI-592: 运行计量条恢复文字形态（2026-10-27 **verified（BLOCK-276 轻量包；用户推翻 UI-584 图标态；组件级 8/8 + 恢复即 UI-523 已验证形态原样回退）**）
 
 - **变化面**：composer 下运行计量条恢复 BLOCK-266 之前的文字形态（git restore 至 7bf008b9 三件套：RunStatsBar.tsx/module.css/test.tsx）——「本次 N 轮 · N 步 · tok/s」「会话累计 tokens · 命中率」文字读数回归，图标态（play/database/上下文环）退场。

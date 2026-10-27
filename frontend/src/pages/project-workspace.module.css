@@ -5558,8 +5558,6 @@ body:global(.petri-resizing-columns) * {
 .emptyResult {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -5567,53 +5565,124 @@ body:global(.petri-resizing-columns) * {
   padding: var(--petri-space-6);
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+/* UI-593 — margin:auto 无条件垂直居中（不依赖父容器拉伸高度） */
+.emptyResultInner {
+  margin: auto;
+  width: min(100%, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-5);
+}
+
+.emptyResultHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   text-align: center;
-  gap: var(--petri-space-3);
 }
 
+.emptyResultBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  color: var(--petri-accent);
+}
+
+.emptyResultTitle {
+  margin: 0;
+  font-size: var(--petri-font-size-lg);
+  font-weight: 700;
+  color: var(--petri-text);
+}
+
+.emptyResultDesc {
+  margin: 0;
+  max-width: 400px;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.55;
+  color: var(--petri-text-tertiary);
+}
+
+/* UI-593（用户裁决 2026-10-27「过于简约老土，对标 Qoder CN 布局大幅优化」）——
+   空态重排：顶部「工作区」标题/描述块（Qoder ui-i18n #3788255/#3788272 内容合同）
+   + 富入口卡片（图标章+标题+一句说明）2 列网格；入口卡悬停 accent 描边（BLOCK-273
+   悬停规范同源）。全部 token 化，禁字面量。 */
 .emptyResultLaunchpad {
-  width: min(100%, 560px);
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  /* UI-333 — 用户裁决回退 UI-329 两轮收窄/对齐实验：恢复满宽卡片
-     （默认 stretch 铺满格宽），整体感优先于单卡贴内容 */
-  gap: 7px;
-  margin-top: var(--petri-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
-/* UI-301 加映 — 卡片文字垂直居中 + 去外框线（保留底色作分区）
-   UI-333 — UI-329 的 fit-content 收窄实验整体回退，恢复 width:100% 满宽 */
 .emptyResultLaunchCard {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   width: 100%;
-  min-height: 54px;
-  padding: 10px var(--petri-space-4);
-  border: none;
-  border-radius: var(--petri-radius-lg);;
+  padding: 12px 14px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
-  /* UI-215 补充：卡片容器收敛 UA 默认字号（子级文本自带 token） */
+  transition: border-color var(--petri-duration-fast) ease-in-out,
+    background-color var(--petri-duration-fast) ease-in-out;
 }
 
 .emptyResultLaunchCard:hover {
-  background: var(--petri-bg-subtle);
+  border-color: color-mix(in srgb, var(--petri-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--petri-accent) 6%, var(--petri-bg-surface));
 }
 
-.emptyResultLaunchCard span {
-  font-size: var(--petri-font-size-body);
-  font-weight: 600;
+.emptyResultLaunchCard:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.emptyResultLaunchIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--petri-radius-md);
+  background: color-mix(in srgb, var(--petri-accent) 10%, transparent);
+  color: var(--petri-text-secondary);
+  transition: background-color var(--petri-duration-fast) ease-in-out,
+    color var(--petri-duration-fast) ease-in-out;
+}
+
+.emptyResultLaunchCard:hover .emptyResultLaunchIcon {
+  background: color-mix(in srgb, var(--petri-accent) 18%, transparent);
+  color: var(--petri-accent);
 }
 
 .emptyResultLaunchText {
   display: grid;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
+}
+
+.emptyResultLaunchTitle {
+  font-size: var(--petri-font-size-body);
+  font-weight: 600;
+  color: var(--petri-text);
+}
+
+.emptyResultLaunchDesc {
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
+  line-height: 1.4;
 }
 
 /* Tab bar (resource panel) */

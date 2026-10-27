@@ -1,7 +1,11 @@
 // ============================================================
-// EmptyResult — UI-305 P1 从 project-workspace.tsx 尾部整簇平移（原 3389-3463 行）。
-// BLOCK-68 / UI-317 — 空态极简：删头部四件套（闪电图标/标题/描述/项目行）与
-// 六卡片 <small> 副标题，仅留「图标 + 名称」卡片网格。
+// EmptyResult — 右栏「首页」空态。
+// UI-305 P1 曾收敛为极简「图标+名称」卡片网格；UI-593（用户裁决 2026-10-27
+// 「过于简约老土，需要大幅度布局合理性和提升美观程度；看 Qoder CN 怎么布局」）
+// 对标 Qoder 0.4.8 工作区面板内容合同（ui-i18n-zh #3788255/#3788272：标题
+// 「工作区」+ 描述「工作区就是 Agent 动手的地方：它会在这里看文件、改文件、
+// 跑命令，也会读取这里的 Git 状态」）重排：顶部标题/描述块 + 富入口卡片
+// （图标章 + 标题 + 一句说明）2 列网格，垂直居中。
 // ============================================================
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
@@ -35,32 +39,62 @@ export function EmptyResult({
 }): React.ReactElement {
   return (
     <div className={styles.emptyResult}>
-      <div className={styles.emptyResultLaunchpad}>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenResults} disabled={!onOpenResults}>
-          <Icon name="bar-chart" size={16} />
-          <span className={styles.emptyResultLaunchText}>结果</span>
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
-          <Icon name="globe" size={16} />
-          <span className={styles.emptyResultLaunchText}>浏览器</span>
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenFiles} disabled={!onOpenFiles}>
-          <Icon name="folder" size={16} />
-          <span className={styles.emptyResultLaunchText}>文件</span>
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenChat} disabled={!onOpenChat}>
-          <Icon name="sidebar" size={16} />
-          <span className={styles.emptyResultLaunchText}>侧边聊天</span>
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
-          <Icon name="git-branch" size={16} />
-          <span className={styles.emptyResultLaunchText}>审阅</span>
-          {reviewCount ? <span className={styles.emptyResultLaunchCount} data-testid="review-tile-count">{formatShortstatBadge(reviewCount, reviewStat)}</span> : null}
-        </button>
-        <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenJobs} disabled={!onOpenJobs}>
-          <Icon name="command" size={16} />
-          <span className={styles.emptyResultLaunchText}>指挥中心</span>
-        </button>
+      <div className={styles.emptyResultInner}>
+        <div className={styles.emptyResultHeader}>
+          <span className={styles.emptyResultBadge} aria-hidden="true">
+            <Icon name="layout-grid" size={20} />
+          </span>
+          <h3 className={styles.emptyResultTitle}>工作区</h3>
+          <p className={styles.emptyResultDesc}>
+            Agent 会在这里看文件、改文件、跑命令，也会读取 Git
+            状态——选择一个面板开始。
+          </p>
+        </div>
+        <div className={styles.emptyResultLaunchpad}>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenResults} disabled={!onOpenResults}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="bar-chart" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>结果</span>
+              <span className={styles.emptyResultLaunchDesc}>查看 Agent 作业的产物与运行结果</span>
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="globe" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>浏览器</span>
+              <span className={styles.emptyResultLaunchDesc}>内嵌浏览器，直接查看与操作网页</span>
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenFiles} disabled={!onOpenFiles}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="folder" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>文件</span>
+              <span className={styles.emptyResultLaunchDesc}>浏览工作区文件与目录</span>
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenChat} disabled={!onOpenChat}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="sidebar" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>侧边聊天</span>
+              <span className={styles.emptyResultLaunchDesc}>不离开工作区，继续与 Agent 对话</span>
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="git-branch" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>审阅</span>
+              <span className={styles.emptyResultLaunchDesc}>审查 Agent 的工作区改动</span>
+            </span>
+            {reviewCount ? <span className={styles.emptyResultLaunchCount} data-testid="review-tile-count">{formatShortstatBadge(reviewCount, reviewStat)}</span> : null}
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenJobs} disabled={!onOpenJobs}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="command" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>指挥中心</span>
+              <span className={styles.emptyResultLaunchDesc}>项目作业与编排俯瞰</span>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   );

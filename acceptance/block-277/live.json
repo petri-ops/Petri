@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-10-27T14:30:33.615Z",
+  "head": "51848d755f5055fe03170bccfeff550440481614",
+  "projectId": "p_mvqs8wsc_ib74",
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_temp_project_created",
+      "ok": true,
+      "detail": "id=p_mvqs8wsc_ib74"
+    },
+    {
+      "id": "A1_header_block",
+      "ok": true,
+      "detail": "{\"title\":\"工作区\",\"desc\":\"Agent 会在这里看文件、改文件、跑命令，也会读取 Git 状态——选择一个面\",\"badgeSvg\":true}"
+    },
+    {
+      "id": "A2_six_rich_cards_two_col",
+      "ok": true,
+      "detail": "{\"cards\":6,\"withDesc\":6,\"rowCount\":3,\"twoCol\":true}"
+    },
+    {
+      "id": "A3_vertically_centered",
+      "ok": true,
+      "detail": "{\"cTop\":38,\"cH\":962,\"iTop\":318,\"iH\":401,\"expectTop\":319}"
+    },
+    {
+      "id": "A4_no_review_badge_on_fresh",
+      "ok": true,
+      "detail": "fresh project has no unread changes"
+    }
+  ]
+}
