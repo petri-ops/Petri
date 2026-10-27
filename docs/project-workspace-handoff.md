@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**BLOCK-276 运行计量条恢复文字形态 completed（UI-592 verified；轻量包·plan=AUDIT-LOG 本行）+ UI-591 代为落盘；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：①BLOCK-276（用户裁决「恢复之前的形式，图标大不好看」）已收口——composer 运行计量条恢复文字形态（git restore 至 7bf008b9 三件套，图标态退场；UI-584 标注用户推翻；RunStatsBar 8/8+SimpleChat 6/6+tsc 0，恢复即 UI-523 已验证形态）。②UI-591（拖拽边界指针跟随渐晕，并发会话产出）经用户确认「刚才的收口搞定了」由本会话代为落盘（5174f71d；resize-glow 测试+主题门 19/19 复验；UI-591 in_progress 待用户人测翻 verified）。当日全链：BLOCK-272 closeout 定向化 → 273 拖拽边界渐变 → 274 closeout 内部优化（~3min）→ 275 UI 反馈批（UI-589/590 verified）→ 276 计量条恢复。待用户动作：UI-588/591 人测确认/UI-501、503、504、457 过目/R 运行时授权/本地领先 2 笔的下次推送。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**BLOCK-275 UI 反馈批 completed（UI-589/590 verified；轻量包·plan=AUDIT-LOG 本行）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-275（用户截图裁决两条）已收口——①模型菜单两级导航：并钮 mode=all 从供应商/模型平铺混排改为两级导航（一级供应商列表→钻取该渠道模型+返回行；点模型=selectModel 连带切渠道默认，supplier/model 模式不变）；②左栏页脚图标化右对齐：联邦/设置去文字只留图标（联邦 cpu→smartphone）、行右对齐紧凑化。证据=ModelMenu 8/8+9223 welcome 实断 **6/6**（acceptance/block-275/live.json）。前序当日：BLOCK-274 closeout 内部优化（validateMap memoization，closeout ~14min→~3min）/BLOCK-273 拖拽边界渐变（UI-588 in_progress 待人测）/BLOCK-272 closeout 定向化。待用户动作：UI-588 人测确认/UI-501、503、504、457 过目/R 运行时授权/本地领先 1 笔（audit:compact 治理尾差）的下次推送。G0 开发期常态 · 不外推 packaged/Provider/GA。

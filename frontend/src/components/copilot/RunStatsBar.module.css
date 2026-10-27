@@ -50,16 +50,3 @@
     gap: 6px;
   }
 }
-
-/* BLOCK-266 图标态：屏幕读数收进视觉隐藏（可访问性保留，条内不再常驻文字） */
-.visuallyHidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}

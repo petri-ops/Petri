@@ -1,20 +1,21 @@
 /**
  * UI-523 — composer 运行计量条（Run Stats Strip）。
  *
- * BLOCK-266 视觉收缩：默认图标态——三段各一个图标（播放=本次/数据库=会话/环=上下文），
- * 数字读数全部收进各段 title（悬浮可见），条内不再渲染常驻文字（窄容器不再换行）。
- * 上下文环本体保留（它本身就是图形读数，零文字）。
+ * 三条读数，各有唯一真源、各有范围限定词：
+ *   本次  N 轮 · N 步 · 252 tok/s   ← 本次运行（迭代数 / 工具步数 / 最近一次调用实测）
+ *   会话  6.4M tok · 缓存命中 98%   ← 本会话累计（ai_usage 聚合）
+ *   ◐ 14%                          ← 上下文水位（token_budget，环本体是可点组件）
  *
- * 诚实边界（不变）：
- * - 不可算一律省略该段渲染（无运行/零调用），title 中用「—」表达不可算；
- * - tok/s 是**最近一次调用**的端到端平均输出速率（含网络与 prefill）；
+ * 诚实边界：
+ * - 不可算一律 `—`：无运行 / 渠道未返回 usage / 会话零调用 / 耗时 0；
+ * - tok/s 是**最近一次调用**的端到端平均输出速率（含网络与 prefill），
+ *   title 明写口径，不称「解码速度」；
  * - 纯展示组件：零数据依赖、零副作用，环由调用方注入（同一实例，单一真相）。
  */
 import React from 'react';
 import type { RunUsageDetail } from '@/lib/events';
 import type { ConversationUsageSnapshot } from './SimpleChat/hooks/useConversationUsage';
 import { formatPercent, formatRate, formatTokens } from './formatCount';
-import { Icon } from '@/components/icons/Icon';
 import styles from './RunStatsBar.module.css';
 
 export interface RunStatsBarProps {
@@ -30,9 +31,9 @@ export interface RunStatsBarProps {
   contextPct: number | null;
   /** 上下文预算环（由 SimpleChat 注入同一 ContextBudgetButton 实例） */
   contextSlot?: React.ReactNode;
-  /** 窄容器（BLOCK-266 起图标态已为默认，此参保留兼容不再改变布局） */
+  /** 窄容器：收起范围标签与缓存段，只留数字 */
   narrow?: boolean;
-  /** 运行中：图标用强调色（纯视觉） */
+  /** 运行中：速率用强调色（纯视觉，不改读数） */
   running?: boolean;
   /** 会话标识：切换会话即归零「最近一次运行」记忆 */
   conversationId?: string | null;
@@ -50,12 +51,13 @@ export function RunStatsBar({
   conversationUsage,
   contextPct,
   contextSlot,
-  narrow: _narrow = false,
+  narrow = false,
   running = false,
   conversationId = null,
 }: RunStatsBarProps): React.ReactElement {
   // 运行结束后 run 快照会被持久消息对账清除（useConversationResume），若直接读
-  // 会导致「本次」段的记忆读数丢失。记住最近一次观测到的轮/步（切会话归零）。
+  // 会导致「本次」段在读数为 1 轮/0 步之后突然变成只剩速率。这里记住最近一次
+  // 观测到的轮/步（切会话即归零），让条内读数与「最近一次运行」语义一致。
   const [lastRun, setLastRun] = React.useState<{ key: string | null; rounds: number | null; steps: number | null }>({
     key: conversationId, rounds: null, steps: null,
   });
@@ -79,10 +81,6 @@ export function RunStatsBar({
     ? formatPercent((conversationUsage as ConversationUsageSnapshot).cacheHitRate)
     : '—';
 
-  const runTitle = `本次运行：${shownRounds != null ? `${shownRounds} 轮` : '—'} · ${shownSteps != null ? `${shownSteps} 步` : '—'} · ${rate}（tok/s=最近一次调用的端到端平均输出速率，含网络与 prefill，非解码速度）`;
-  const convTitle = `本会话累计：${totalTokens == null ? '— tok' : `${formatTokens(totalTokens)} tok`} · 缓存命中 ${cacheHit}`;
-  const ctxTitle = `上下文用量 ${contextPct ?? 0}%（点击圆环查看明细）`;
-
   return (
     <div
       className={styles.strip}
@@ -90,18 +88,38 @@ export function RunStatsBar({
       data-state={running ? 'running' : 'idle'}
     >
       {hasRun && (
-        <span className={styles.group} title={runTitle} data-testid="run-stats-run">
-          <Icon name="play" size={13} />
+        <span
+          className={styles.group}
+          title="本次运行：轮=模型迭代轮次；步=工具调用步数；tok/s=最近一次调用的端到端平均输出速率（含网络与 prefill，非解码速度）"
+          data-testid="run-stats-run"
+        >
+          {!narrow && <span className={styles.scope}>本次</span>}
+          {shownRounds != null && <span>{shownRounds} 轮</span>}
+          {shownRounds != null && shownSteps != null && <span className={styles.dot}>·</span>}
+          {shownSteps != null && <span>{shownSteps} 步</span>}
+          <span className={styles.dot}>·</span>
+          <span className={styles.rate} data-testid="run-stats-rate">{rate}</span>
         </span>
       )}
       {hasRun && <span className={styles.divider} aria-hidden="true" />}
-      <span className={styles.group} title={convTitle} data-testid="run-stats-conversation">
-        <Icon name="database" size={13} />
+      <span
+        className={styles.group}
+        title="本会话累计：输入+输出 tokens（含缓存命中部分）；缓存命中率 = 缓存读取 ÷ 输入 tokens"
+        data-testid="run-stats-conversation"
+      >
+        {!narrow && <span className={styles.scope}>会话</span>}
+        <span data-testid="run-stats-total">{totalTokens == null ? '—' : formatTokens(totalTokens)} tok</span>
+        {!narrow && (
+          <>
+            <span className={styles.dot}>·</span>
+            <span data-testid="run-stats-cache">缓存命中 {cacheHit}</span>
+          </>
+        )}
       </span>
       <span className={styles.divider} aria-hidden="true" />
-      <span className={styles.group} title={ctxTitle} data-testid="run-stats-context">
+      <span className={styles.group} title="上下文用量（点击圆环查看明细）" data-testid="run-stats-context">
         {contextSlot}
-        <span className={styles.visuallyHidden}>{contextPct ?? 0}%</span>
+        <span>{contextPct ?? 0}%</span>
       </span>
     </div>
   );

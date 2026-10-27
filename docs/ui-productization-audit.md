@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-592: 运行计量条恢复文字形态（2026-10-27 **verified（BLOCK-276 轻量包；用户推翻 UI-584 图标态；组件级 8/8 + 恢复即 UI-523 已验证形态原样回退）**）
+
+- **变化面**：composer 下运行计量条恢复 BLOCK-266 之前的文字形态（git restore 至 7bf008b9 三件套：RunStatsBar.tsx/module.css/test.tsx）——「本次 N 轮 · N 步 · tok/s」「会话累计 tokens · 命中率」文字读数回归，图标态（play/database/上下文环）退场。
+- **为什么这样设计**：用户裁决「恢复之前的形式，目前这个图标大，也不好看。之前的文字和内容都比较好」——实测渲染图标偏大（上下文环被裁切），文字形态信息密度与观感更优。
+- **验证（代码）**：RunStatsBar 8/8（恢复即原测试集回归）+ SimpleChat 6/6 + tsc 0 红；恢复=UI-523 已验证形态原样回退（7bf008b9），无行为变化。
+- **实机证据**：恢复即已验证形态（UI-523 当轮实机 verified 的同一代码），无需重跑实机；如需过目，composer 下沿直接可见。
+- **边界（reopen）**：无（图标态如需回归须用户再裁决）。
+
 ## UI-591: 拖拽边界指针跟随渐晕（2026-10-27 **in_progress（UI-591 轻量包 v2；主窗口真实指针取证 done，用户人测确认后翻 verified）**）
 
 - **变化面**：BLOCK-273 reopen（指针跟随渐晕，Qoder 完整形态）兑现——三处可调宽边界悬停唯一 accent 信号 = 「以指针 Y 为中心、上下渐隐的椭圆 glow」（radial-gradient rx=4px/ry=170px、30% accent、横跨接缝；v3 用户微调 rx7px/42%→rx4px/30%）：`resizeHandleV`（AppRail 左栏 / RightPanel 右栏）、`workspaceFileTreeResize`（右文件树）、FloatCardResizer（项目摘要/侧边聊天）。**线保持中性不转色**（v2 用户裁决「有光晕后同色竖带冗余」：v1 的 hover accent 2px 线与文件树 :has 分隔线转色退场）。新增 `lib/resize-glow.ts`（onPointerMove 刷新 `--petri-resize-glow-y`，未跟踪回落 50% 居中），四组件接线；custom.css 定义几何 token（明暗同值，成对棘轮豁免同 `--petri-ring-width` 先例）；theme accent 棘轮 project-workspace 95→94 / FloatCardResizer 3→2（渐晕 +1、同色竖带 -1 对冲）。
@@ -5693,10 +5701,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **BLOCK-266 同日追加（用户裁决「并到一起节省空间」）**：供应商+模型两钮并为一枚图标钮（zap+chevron），开组合菜单（供应商分组标题 + 全部可选模型平铺跨供应商一屏选完；缺密钥/白名单禁行与 model 模式同源）；ModelMenu 增 mode='all'（renderAllGroupRows 纯投影）；测试 8/8。
 - **边界（reopen）**：hover 展开全名胶囊（进阶形态）不做。
 
-## UI-584: 运行计量条图标态（2026-10-26 **verified（BLOCK-266；实机亮/暗各 4/4）**）
+## UI-584: 运行计量条图标态（2026-10-26 **verified（BLOCK-266；实机亮/暗各 4/4）→ 2026-10-27 **用户推翻**：图标态被 UI-592 恢复文字形态取代（「目前这个图标大，也不好看。之前的文字和内容都比较好」）**）
 
 - **变化面**：composer 下运行计量条默认图标态（play=本次/database=会话/上下文环），三段数字读数收进各段 title；上下文百分比保留视觉隐藏可访问性读数；条高 26px 且窄容器不再换行。
 - **为什么这样设计**：三段文字读数常驻是视觉主噪音源；图标+悬浮 title 保留全部信息量；可访问性读数 clip 隐藏不占版面。
 - **验证（代码）**：RunStatsBar 7/7（title 承载/「—」语义/记忆保留/可访问性 span）+ 实机 V2（text 只剩隐藏 0%，h=26px）。
-- **实机证据**：`acceptance/block-266/`（亮/暗各 4/4）。
+- **实机证据**：`acceptance/block-266/`（亮/暗各 4/4）。**2026-10-27 用户推翻**：实际渲染图标偏大不美观（上下文环被裁切），恢复 UI-523 文字形态（见 UI-592）。
 - **边界（reopen）**：hover 弹出数字明细浮层（进阶形态）不做。

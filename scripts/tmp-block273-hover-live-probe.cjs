@@ -40,7 +40,7 @@ async function clipShot(client, file, rect, pad = 64) {
       const shot = await client.send('Page.captureScreenshot', { format: 'png', clip, fromSurface }, { timeoutMs: 20000 });
       fs.writeFileSync(path.join(OUT, file), Buffer.from(shot.data, 'base64'));
       return `saved(fromSurface=${fromSurface})`;
-    } catch (e) { /* try next */ }
+    } catch { /* try next */ }
   }
   return 'screenshot_unavailable';
 }
