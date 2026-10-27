@@ -175,4 +175,28 @@ describe('deleteAnnotation', () => {
     expect(calls[0][0]).toContain('/result-studio/annotations/ann_missing');
     expect(calls[0][1]?.method).toBe('DELETE');
   });
+
+  it('BLOCK-270 — 画笔批注发 path 不发 rect（三态互斥镜像）', async () => {
+    const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+    globalThis.fetch = ((url: string, init?: RequestInit) => {
+      const raw: Record<string, unknown> = typeof init?.body === 'string' ? (JSON.parse(init.body) as Record<string, unknown>) : {};
+      calls.push({ url: String(url), body: raw });
+      return Promise.resolve(new Response(JSON.stringify({ annotation: { annotationId: 'ann-free' }, count: 1 }), { status: 200 }));
+    }) as unknown as typeof fetch;
+    await createAnnotation({
+      projectId: 'p1',
+      surface: 'result-artifact',
+      artifactId: 'a1',
+      revisionId: 'r1',
+      artifactName: 'volcano.png',
+      kind: 'freehand',
+      path: [[0.1, 0.2], [0.5, 0.6]],
+      comment: '曲线走向',
+      color: 'sky',
+    });
+    expect(calls[0].body.path).toEqual([[0.1, 0.2], [0.5, 0.6]]);
+    expect(calls[0].body.rect).toBeUndefined();
+    expect(calls[0].body.anchor).toBeUndefined();
+    expect(calls[0].body.kind).toBe('freehand');
+  });
 });

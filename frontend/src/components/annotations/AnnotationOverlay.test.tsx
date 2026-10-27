@@ -23,6 +23,7 @@ function annotation(overrides: Partial<ArtifactAnnotation>): ArtifactAnnotation 
     kind: 'region',
     page: null,
     rect: [0.1, 0.1, 0.2, 0.2],
+    path: [],
     anchor: null,
     comment: '离群点',
     color: 'amber',
@@ -226,5 +227,75 @@ describe('AnnotationOverlay', () => {
     );
     fireEvent.click(getAllByTestId('annotation-box')[0]);
     expect(onSelect).toHaveBeenCalledWith('ann-x');
+  });
+
+  it('BLOCK-270 — 画笔批注渲染为 SVG polyline（归一化点 → 0..100 viewBox）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[
+          annotation({ annotationId: 'k-free', kind: 'freehand', rect: [], path: [[0.1, 0.2], [0.5, 0.6], [0.9, 0.3]] }),
+        ]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    const stroke = getByTestId('annotation-freehand-stroke');
+    expect(stroke.getAttribute('points')).toBe('10,20 50,60 90,30');
+    expect(stroke.getAttribute('data-annotation-id')).toBe('k-free');
+  });
+
+  it('BLOCK-270 — 画笔模式采点提交：pointer 序列 → onCommitPath 收抽稀后归一化路径', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommit = vi.fn();
+    const onCommitPath = vi.fn();
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="sky"
+        kind="freehand"
+        onCommit={onCommit}
+        onCommitPath={onCommitPath}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 60, clientY: 50 });
+    fireEvent.pointerMove(overlay, { clientX: 100, clientY: 90 });
+    fireEvent.pointerUp(overlay, { clientX: 100, clientY: 90 });
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(onCommitPath).toHaveBeenCalledWith([
+      [0.1, 0.1],
+      [0.3, 0.5],
+      [0.5, 0.9],
+    ]);
+  });
+
+  it('BLOCK-270 — 画笔模式单点（<2 点）不提交', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommitPath = vi.fn();
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="freehand"
+        onCommit={() => undefined}
+        onCommitPath={onCommitPath}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerUp(overlay, { clientX: 20, clientY: 10 });
+    expect(onCommitPath).not.toHaveBeenCalled();
   });
 });

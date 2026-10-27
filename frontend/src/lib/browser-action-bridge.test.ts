@@ -22,11 +22,12 @@ describe('performBrowserAction', () => {
   });
 
   it('navigate 无 url → url_required；有 url → 调 bridge.navigate', async () => {
-    const bridge = makeBridge();
+    const navigateMock = vi.fn(() => Promise.resolve());
+    const bridge = makeBridge({ navigate: navigateMock });
     expect((await performBrowserAction({ action: 'navigate' }, bridge)).error).toBe('url_required');
     const ok = await performBrowserAction({ action: 'navigate', url: 'https://example.com/' }, bridge);
     expect(ok.ok).toBe(true);
-    expect(bridge.navigate).toHaveBeenCalledWith('https://example.com/');
+    expect(navigateMock).toHaveBeenCalledWith('https://example.com/');
   });
 
   it('read_text 有界：超 20k 截断标 truncated', async () => {
@@ -42,21 +43,23 @@ describe('performBrowserAction', () => {
   it('click selector 不存在 → selector_not_found；存在 → clicked', async () => {
     const missing = makeBridge({ executeJavaScript: vi.fn(() => Promise.resolve({ found: false })) });
     expect((await performBrowserAction({ action: 'click', selector: '#a' }, missing)).error).toBe('selector_not_found');
-    const hit = makeBridge({ executeJavaScript: vi.fn(() => Promise.resolve({ found: true, clicked: true })) });
+    const clickJs = vi.fn((_code: string) => Promise.resolve({ found: true, clicked: true }));
+    const hit = makeBridge({ executeJavaScript: clickJs });
     const outcome = await performBrowserAction({ action: 'click', selector: '#a' }, hit);
     expect(outcome.ok).toBe(true);
     // 注入安全：selector 必须走 JSON.stringify（零裸拼接）
-    const code = vi.mocked(hit.executeJavaScript).mock.calls[0]?.[0] ?? '';
+    const code = clickJs.mock.calls[0]?.[0] ?? '';
     expect(code).toContain('"#a"');
   });
 
   it('fill 拒绝态（非输入元素）→ fill_rejected；成功 → filled', async () => {
     const rejected = makeBridge({ executeJavaScript: vi.fn(() => Promise.resolve({ found: true, filled: false, reason: 'not_input' })) });
     expect((await performBrowserAction({ action: 'fill', selector: '#a', text: 'x' }, rejected)).error).toBe('fill_rejected');
-    const okBridge = makeBridge({ executeJavaScript: vi.fn(() => Promise.resolve({ found: true, filled: true })) });
+    const fillJs = vi.fn((_code: string) => Promise.resolve({ found: true, filled: true }));
+    const okBridge = makeBridge({ executeJavaScript: fillJs });
     const outcome = await performBrowserAction({ action: 'fill', selector: '#a', text: 'hello' }, okBridge);
     expect(outcome.ok).toBe(true);
-    const code = vi.mocked(okBridge.executeJavaScript).mock.calls[0]?.[0] ?? '';
+    const code = fillJs.mock.calls[0]?.[0] ?? '';
     expect(code).toContain('"hello"');
   });
 

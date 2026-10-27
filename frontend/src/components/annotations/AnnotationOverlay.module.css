@@ -167,3 +167,37 @@
   text-align: left;
   white-space: pre-wrap;
 }
+
+/* BLOCK-270（C-43 尾项）— freehand 画笔图层：SVG 铺满覆盖层，polyline 描边即批注本体。 */
+.freehandLayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.freehandLayer [data-testid='annotation-freehand-stroke'] {
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.freehandStroke {
+  stroke: var(--petri-warning, #d97706);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.freehandStroke[data-color='amber'] {
+  stroke: var(--petri-warning, #d97706);
+}
+
+.freehandStroke[data-color='sky'] {
+  stroke: var(--petri-info, #2563eb);
+}
+
+.freehandStroke[data-color='rose'] {
+  stroke: var(--petri-danger, #dc2626);
+}

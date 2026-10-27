@@ -181,7 +181,9 @@ export function AnnotationBar({
           data-testid="annotation-hint"
           data-mosaic-fallback={kind === 'mosaic' ? String(!mosaicSupport) : undefined}
         >
-          {kind === 'arrow'
+          {kind === 'freehand'
+            ? '在图上拖动绘制画笔路径，松开后填写评论'
+            : kind === 'arrow'
             ? '拖拽框选箭头范围（沿矩形对角线绘制），松开后填写评论'
             : kind === 'ellipse'
               ? '拖拽框选椭圆范围，松开后填写评论'

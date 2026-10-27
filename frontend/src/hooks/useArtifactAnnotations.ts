@@ -35,6 +35,7 @@ export interface ArtifactAnnotationsState {
   add: (input: {
     rect?: [number, number, number, number];
     anchor?: TextAnchor;
+    path?: [number, number][];
     comment: string;
     color?: AnnotationColor;
     kind?: AnnotationKind;
@@ -121,6 +122,7 @@ export function useArtifactAnnotations(input: {
   const add = useCallback(async (annotationInput: {
     rect?: [number, number, number, number];
     anchor?: TextAnchor;
+    path?: [number, number][];
     comment: string;
     color?: AnnotationColor;
     kind?: AnnotationKind;
@@ -134,6 +136,7 @@ export function useArtifactAnnotations(input: {
         artifactName,
         rect: annotationInput.rect,
         anchor: annotationInput.anchor,
+        path: annotationInput.path,
         comment: annotationInput.comment,
         color: annotationInput.color,
         kind: annotationInput.kind,

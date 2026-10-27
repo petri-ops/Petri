@@ -9,6 +9,7 @@ import {
   MOSAIC_SHORT,
   appendUndoAction,
   buildAnnotationTaskPrompt,
+  decimatePath,
   describeAnnotationAnchor,
   describeAnnotationKind,
   mosaicTaskNote,
@@ -58,8 +59,8 @@ describe('pointToNormalized / rectToStyle（跨缩放可复现）', () => {
 });
 
 describe('ANNOTATION_KINDS（BLOCK-254 契约镜像）', () => {
-  it('六档形态齐全，且每档都有中文标签', () => {
-    expect([...ANNOTATION_KINDS]).toEqual(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection']);
+  it('七档形态齐全（BLOCK-270 同步 C-43 契约 v2 的 freehand），且每档都有中文标签', () => {
+    expect([...ANNOTATION_KINDS]).toEqual(['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection', 'freehand']);
     for (const kind of ANNOTATION_KINDS) {
       expect(ANNOTATION_KIND_LABELS[kind]).toBeTruthy();
       expect(describeAnnotationKind(kind)).toBe(ANNOTATION_KIND_LABELS[kind]);
@@ -82,6 +83,7 @@ describe('撤销边界（BLOCK-254 B-2）', () => {
       contractVersion: 1,
       projectId: 'p1',
       conversationId: null,
+      path: [],
       surface: 'result-artifact',
       artifactId: 'a1',
       revisionId: 'r1',
@@ -154,7 +156,7 @@ describe('马赛克遮蔽边界（BLOCK-254 B-1）', () => {
   });
 
   it('加入任务：有马赛克才追加边界声明，无马赛克零噪声', () => {
-    const base = { rect: [0.1, 0.1, 0.2, 0.2] as [number, number, number, number], page: null, surface: 'result-artifact' as const };
+    const base = { rect: [0.1, 0.1, 0.2, 0.2] as [number, number, number, number], path: [] as number[][], page: null, surface: 'result-artifact' as const };
 
     const withMosaic = buildAnnotationTaskPrompt(
       [{ ...base, comment: '遮住姓名', kind: 'mosaic' }, { ...base, comment: '离群点', kind: 'region' }],
@@ -233,8 +235,8 @@ describe('describeAnnotationAnchor', () => {
 
 describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => {
   const annotations = [
-    { rect: [0.1, 0.2, 0.3, 0.1] as [number, number, number, number], comment: '这个离群点需要复核', page: 2, surface: 'result-artifact' as const },
-    { rect: [0.5, 0.5, 0.2, 0.2] as [number, number, number, number], comment: '纵轴尺度看着不对', page: null, surface: 'result-artifact' as const },
+    { rect: [0.1, 0.2, 0.3, 0.1] as [number, number, number, number], path: [], comment: '这个离群点需要复核', page: 2, surface: 'result-artifact' as const },
+    { rect: [0.5, 0.5, 0.2, 0.2] as [number, number, number, number], path: [], comment: '纵轴尺度看着不对', page: null, surface: 'result-artifact' as const },
   ];
 
   it('携带产物身份、页/坐标、评论，并声明原始产物未被修改', () => {
@@ -257,6 +259,7 @@ describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => 
     const prompt = buildAnnotationTaskPrompt([
       {
         rect: [],
+    path: [],
         comment: '这段结论要复核',
         page: null,
         surface: 'workspace-file',
@@ -303,5 +306,33 @@ describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => 
     expect(buildAnnotationTaskPrompt([
       { rect: [0.1, 0.1, 0.1, 0.1], comment: '   ', page: null, surface: 'result-artifact' },
     ], { surface: 'result-artifact' })).toBe('');
+  });
+
+  it('BLOCK-270 — 契约镜像：KINDS 含 freehand，decimatePath 等距抽稀保留首尾', () => {
+    expect(ANNOTATION_KINDS).toContain('freehand');
+    expect(ANNOTATION_KIND_LABELS.freehand).toBe('画笔');
+    const points: [number, number][] = Array.from({ length: 600 }, (_, index) => [index / 600, index / 600]);
+    const thinned = decimatePath(points);
+    expect(thinned.length).toBe(512);
+    expect(thinned[0]).toEqual([0, 0]);
+    expect(thinned[511]).toEqual([599 / 600, 599 / 600]);
+    // 未超限原样返回
+    const small: [number, number][] = [[0, 0], [0.5, 0.5], [1, 1]];
+    expect(decimatePath(small)).toEqual(small);
+  });
+
+  it('BLOCK-270 — 画笔批注在任务 prompt 里报路径点数，不报假矩形', () => {
+    const prompt = buildAnnotationTaskPrompt([
+      {
+        rect: [],
+        path: [[0.1, 0.1], [0.5, 0.5], [0.9, 0.9]],
+        kind: 'freehand',
+        comment: '这条曲线的走向需要复核',
+        page: null,
+        surface: 'result-artifact',
+      },
+    ], { surface: 'result-artifact', artifactName: 'volcano.png' });
+    expect(prompt).toContain('画笔路径（3 个点）');
+    expect(prompt).not.toContain('0%');
   });
 });

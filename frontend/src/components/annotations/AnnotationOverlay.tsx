@@ -1,13 +1,16 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   MOSAIC_DISCLOSURE,
+  decimatePath,
   describeAnnotationAnchor,
+  normalizeFreehandPoints,
   normalizePointerRect,
   pointToNormalized,
   rectToStyle,
   type AnnotationColor,
   type AnnotationKind,
   type ArtifactAnnotation,
+  type NormalizedPoint,
 } from '@/lib/annotations';
 import styles from './AnnotationOverlay.module.css';
 
@@ -32,13 +35,13 @@ export interface AnnotationOverlayProps {
   /** 当前绘制的形状（draft 预览；保存由会话层随批注一起提交）。 */
   kind: AnnotationKind;
   onCommit: (rect: [number, number, number, number]) => void;
+  /** BLOCK-270（C-43 尾项）— 画笔提交（kind='freehand' 时替代 onCommit）；缺省=画笔不可绘制。 */
+  onCommitPath?: (path: [number, number][]) => void;
   onSelect?: (annotationId: string) => void;
   /** 无障碍标签（如「批注层：第 2 页」）。 */
   label: string;
   testId?: string;
 }
-
-type NormalizedPoint = { x: number; y: number };
 
 function samePage(annotation: ArtifactAnnotation, page: number | null): boolean {
   const annotationPage = typeof annotation.page === 'number' ? annotation.page : null;
@@ -52,14 +55,19 @@ export function AnnotationOverlay({
   color,
   kind,
   onCommit,
+  onCommitPath,
   onSelect,
   label,
   testId = 'annotation-overlay',
 }: AnnotationOverlayProps): React.ReactElement {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const startRef = useRef<NormalizedPoint | null>(null);
+  const strokeRef = useRef<NormalizedPoint[] | null>(null);
   const [draft, setDraft] = useState<[number, number, number, number] | null>(null);
+  const [draftPath, setDraftPath] = useState<NormalizedPoint[] | null>(null);
   const visible = annotations.filter((annotation) => samePage(annotation, page));
+  const freehandVisible = visible.filter((annotation) => annotation.kind === 'freehand');
+  const freehandDrawing = drawing && kind === 'freehand' && typeof onCommitPath === 'function';
 
   const readPoint = useCallback((event: React.PointerEvent<HTMLDivElement>): NormalizedPoint | null => {
     const node = surfaceRef.current;
@@ -72,19 +80,48 @@ export function AnnotationOverlay({
     const point = readPoint(event);
     if (!point) return;
     event.preventDefault();
+    if (freehandDrawing) {
+      strokeRef.current = [point];
+      setDraftPath([point]);
+      return;
+    }
     startRef.current = point;
     setDraft(null);
-  }, [drawing, readPoint]);
+  }, [drawing, freehandDrawing, readPoint]);
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (!drawing || !startRef.current) return;
+    if (!drawing) return;
     const point = readPoint(event);
     if (!point) return;
+    if (freehandDrawing && strokeRef.current) {
+      const stroke = [...strokeRef.current, point];
+      strokeRef.current = stroke;
+      setDraftPath(stroke);
+      return;
+    }
+    if (!startRef.current) return;
     setDraft(normalizePointerRect(startRef.current, point));
-  }, [drawing, readPoint]);
+  }, [drawing, freehandDrawing, readPoint]);
 
   const finish = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (!drawing || !startRef.current) return;
+    if (!drawing) return;
+    if (freehandDrawing) {
+      const stroke = strokeRef.current;
+      strokeRef.current = null;
+      setDraftPath(null);
+      const point = readPoint(event);
+      const strokeAll = point && stroke ? [...stroke, point] : stroke;
+      // 相邻重复点去重（up 终点常与最后一次 move 重合；同点单“笔触”不成路径）
+      const deduped = (strokeAll ?? []).filter((point, index) => {
+        const previous = index > 0 ? (strokeAll as NormalizedPoint[])[index - 1] : null;
+        return !previous || previous.x !== point.x || previous.y !== point.y;
+      });
+      if (deduped.length < 2) return;
+      const path = decimatePath(normalizeFreehandPoints(deduped));
+      onCommitPath?.(path);
+      return;
+    }
+    if (!startRef.current) return;
     const point = readPoint(event);
     const start = startRef.current;
     startRef.current = null;
@@ -93,7 +130,7 @@ export function AnnotationOverlay({
     const rect = normalizePointerRect(start, point);
     if (!rect) return;
     onCommit(rect);
-  }, [drawing, onCommit, readPoint]);
+  }, [drawing, freehandDrawing, onCommit, onCommitPath, readPoint]);
 
   return (
     <div
@@ -134,7 +171,31 @@ export function AnnotationOverlay({
           <span className={styles.badge}>{index + 1}</span>
         </button>
       ))}
-      {draft && (
+      {freehandVisible.length > 0 && (
+        <svg
+          className={styles.freehandLayer}
+          data-testid="annotation-freehand-layer"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="false"
+        >
+          {freehandVisible.map((annotation) => (
+            <polyline
+              key={annotation.annotationId}
+              data-annotation-id={annotation.annotationId}
+              data-testid="annotation-freehand-stroke"
+              data-color={annotation.color}
+              points={(annotation.path || []).map(([x, y]) => `${x * 100},${y * 100}`).join(' ')}
+              fill="none"
+              className={styles.freehandStroke}
+              onClick={() => onSelect?.(annotation.annotationId)}
+            >
+              <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
+            </polyline>
+          ))}
+        </svg>
+      )}
+      {draft && !freehandDrawing && (
         <div
           className={styles.draft}
           data-testid="annotation-draft"
@@ -142,6 +203,16 @@ export function AnnotationOverlay({
           data-kind={kind}
           style={rectToStyle(draft)}
         />
+      )}
+      {freehandDrawing && draftPath && draftPath.length >= 2 && (
+        <svg className={styles.freehandLayer} data-testid="annotation-freehand-draft" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <polyline
+            points={draftPath.map((point) => `${point.x * 100},${point.y * 100}`).join(' ')}
+            fill="none"
+            className={styles.freehandStroke}
+            data-color={color}
+          />
+        </svg>
       )}
     </div>
   );

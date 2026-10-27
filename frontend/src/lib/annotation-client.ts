@@ -91,10 +91,12 @@ export async function createAnnotation(
   input: CreateAnnotationInput & { conversationId?: string | null; artifactName?: string | null },
 ): Promise<{ annotation: ArtifactAnnotation; count: number }> {
   const kind = input.kind || 'region';
-  // 两种定位方式互斥：契约层会直接拒绝同时出现，客户端也不发多余字段。
+  // 三种定位方式互斥（BLOCK-270 加 freehand）：契约层会直接拒绝同时出现，客户端也不发多余字段。
   const locator = kind === 'text-selection'
     ? { anchor: input.anchor }
-    : { rect: input.rect };
+    : kind === 'freehand'
+      ? { path: input.path }
+      : { rect: input.rect };
   const body: Record<string, unknown> = {
     projectId: input.projectId,
     surface: input.surface,

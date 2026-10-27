@@ -15,10 +15,13 @@
 
 type AnnotationSurface = 'result-artifact' | 'workspace-file' | 'scratchpad-entry';
 export type AnnotationColor = 'amber' | 'sky' | 'rose';
-export type AnnotationKind = 'region' | 'ellipse' | 'arrow' | 'text' | 'mosaic' | 'text-selection';
+export type AnnotationKind = 'region' | 'ellipse' | 'arrow' | 'text' | 'mosaic' | 'text-selection' | 'freehand';
 
 export const ANNOTATION_COLORS: readonly AnnotationColor[] = ['amber', 'sky', 'rose'];
-export const ANNOTATION_KINDS: readonly AnnotationKind[] = ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection'];
+
+/** 归一化点（0..1）；freehand 采点与路径共用。 */
+export interface NormalizedPoint { x: number; y: number }
+export const ANNOTATION_KINDS: readonly AnnotationKind[] = ['region', 'ellipse', 'arrow', 'text', 'mosaic', 'text-selection', 'freehand'];
 
 export const ANNOTATION_KIND_LABELS: Record<AnnotationKind, string> = {
   region: '矩形',
@@ -28,6 +31,8 @@ export const ANNOTATION_KIND_LABELS: Record<AnnotationKind, string> = {
   mosaic: '马赛克',
   // 与图形「文本」区分：这是锚在源码行范围上的批注，不是画在图上的文字框。
   'text-selection': '文本批注',
+  // BLOCK-270（C-43 尾项）— 画笔：点序列几何（归一化 0..1），与后端契约同镜像。
+  freehand: '画笔',
 };
 
 /**
@@ -151,6 +156,8 @@ export interface ArtifactAnnotation {
   page: number | null;
   /** 区域批注为四元组；文本锚点批注为空数组（坐标由 anchor 取代）。 */
   rect: number[];
+  /** BLOCK-270 — 仅 `kind='freehand'` 有值：归一化点序列 [[x,y],…]；其余批注恒空数组。 */
+  path: number[][];
   /** 文本锚点批注为 `text-range` 对象；区域批注恒为 null。 */
   anchor: TextAnchor | null;
   comment: string;
@@ -178,9 +185,30 @@ export interface CreateAnnotationInput extends AnnotationScope {
   rect?: [number, number, number, number];
   /** 仅 `kind='text-selection'` 使用。 */
   anchor?: TextAnchor;
+  /** BLOCK-270 — 仅 `kind='freehand'` 使用：归一化点序列（与 rect/anchor 三态互斥）。 */
+  path?: [number, number][];
   comment: string;
   color?: AnnotationColor;
   kind?: AnnotationKind;
+}
+
+/** BLOCK-270 — freehand 点数上界（与后端 MAX_FREEHAND_POINTS 同值）。 */
+export const MAX_FREEHAND_POINTS = 512;
+
+/** 点序列等距抽稀（保留首尾与形状；超限不拒绝，镜像后端契约语义）。 */
+export function decimatePath(points: readonly [number, number][], max = MAX_FREEHAND_POINTS): [number, number][] {
+  if (points.length <= max) return [...points];
+  const step = (points.length - 1) / (max - 1);
+  const output: [number, number][] = [];
+  for (let index = 0; index < max; index += 1) {
+    output.push(points[Math.round(index * step)]);
+  }
+  return output;
+}
+
+/** 指针采点 → 归一化点序列（clamp 0..1 + 保留 4 位，镜像后端 round 精度）。 */
+export function normalizeFreehandPoints(points: readonly NormalizedPoint[]): [number, number][] {
+  return points.map((point) => [round4(clamp01(point.x)), round4(clamp01(point.y))]);
 }
 
 function clamp01(value: number): number {
@@ -289,7 +317,7 @@ export interface AnnotationTaskTarget {
  */
 export function buildAnnotationTaskPrompt(
   annotations: readonly (Pick<ArtifactAnnotation, 'rect' | 'comment' | 'page' | 'surface'>
-    & { kind?: AnnotationKind | null; anchor?: TextAnchor | null })[],
+    & { kind?: AnnotationKind | null; anchor?: TextAnchor | null; path?: number[][] })[],
   target: AnnotationTaskTarget,
 ): string {
   const usable = annotations.filter((annotation) => annotation.comment.trim().length > 0);
@@ -307,9 +335,12 @@ export function buildAnnotationTaskPrompt(
   const shown = usable.slice(0, MAX_ANNOTATIONS_IN_PROMPT);
   const lines = shown.map((annotation, index) => {
     // 文本锚点没有区域坐标：报行号比报一个假的 (0%,0%,0%×0%) 诚实。
+    // BLOCK-270 — 画笔没有矩形：报路径点数比报假的空矩形诚实。
     const where = annotation.anchor
       ? describeAnnotationAnchor(annotation)
-      : `${describeAnnotationAnchor(annotation)} ${formatPercentRect(annotation.rect)}`;
+      : annotation.kind === 'freehand'
+        ? `${describeAnnotationAnchor(annotation)} 画笔路径（${annotation.path?.length ?? 0} 个点）`
+        : `${describeAnnotationAnchor(annotation)} ${formatPercentRect(annotation.rect)}`;
     return `${index + 1}. ${where}：${annotation.comment.trim()}`;
   });
   const omitted = usable.length - shown.length;

@@ -50,6 +50,8 @@ export interface AnnotationSession {
   setKind: (kind: AnnotationKind) => void;
   /** PDF 传页号，图像传 null；页号随批注一起落库。 */
   beginRect: (rect: [number, number, number, number], page?: number | null) => void;
+  /** BLOCK-270（C-43 尾项）— 画笔：路径采点完成，待填评论（与 beginRect 互斥）。 */
+  beginPath: (path: [number, number][], page?: number | null) => void;
   /** BLOCK-254 P5 — 文本锚点：选区落在源码行范围上（与 beginRect 互斥）。 */
   beginAnchor: (anchor: TextAnchor) => void;
   cancelPending: () => void;
@@ -65,6 +67,7 @@ export interface AnnotationSession {
  */
 type PendingTarget =
   | { kind: 'rect'; rect: [number, number, number, number]; page: number | null }
+  | { kind: 'path'; path: [number, number][]; page: number | null }
   | { kind: 'anchor'; anchor: TextAnchor };
 
 interface UndoSnapshot {
@@ -114,6 +117,11 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     setDrawing(false);
   }, [identity]);
 
+  const beginPath = useCallback((path: [number, number][], page: number | null = null) => {
+    setPending({ target: { kind: 'path', path, page }, identity });
+    setDrawing(false);
+  }, [identity]);
+
   const beginAnchor = useCallback((anchor: TextAnchor) => {
     setPending({ target: { kind: 'anchor', anchor }, identity });
     setDrawing(false);
@@ -129,10 +137,12 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
       setPending(null);
       return false;
     }
-    // 锚点批注的 kind 由定位方式决定，工具条上的形状选择对它无意义。
+    // 定位方式决定 kind：锚点→text-selection、路径→freehand（工具条形状选择对二者无意义）。
     const saved = pending.target.kind === 'rect'
       ? await store.add({ rect: pending.target.rect, comment, color, kind, page: pending.target.page })
-      : await store.add({ anchor: pending.target.anchor, comment, color, kind: 'text-selection' });
+      : pending.target.kind === 'path'
+        ? await store.add({ path: pending.target.path, comment, color, kind: 'freehand', page: pending.target.page })
+        : await store.add({ anchor: pending.target.anchor, comment, color, kind: 'text-selection' });
     if (!saved) return false;
     pushUndo({ type: 'created', annotationId: saved.annotationId });
     setPending(null);
@@ -156,10 +166,12 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
       return store.remove(last.annotationId);
     }
     const restored = await store.add({
-      // 重建也要保持定位方式互斥：文本锚点走 anchor，区域批注走 rect。
+      // 重建也要保持定位方式互斥：文本锚点走 anchor、画笔走 path，区域批注走 rect。
       ...(last.annotation.anchor
         ? { anchor: last.annotation.anchor }
-        : { rect: last.annotation.rect as [number, number, number, number] }),
+        : last.annotation.kind === 'freehand' && Array.isArray(last.annotation.path) && last.annotation.path.length > 0
+          ? { path: last.annotation.path as [number, number][] }
+          : { rect: last.annotation.rect as [number, number, number, number] }),
       comment: last.annotation.comment,
       color: last.annotation.color,
       kind: last.annotation.kind,
@@ -191,6 +203,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     setColor,
     setKind,
     beginRect,
+    beginPath,
     beginAnchor,
     cancelPending,
     submitComment,
@@ -199,6 +212,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     buildPrompt,
   }), [
     beginAnchor,
+    beginPath,
     beginRect,
     buildPrompt,
     cancelPending,

@@ -5788,6 +5788,47 @@
         "test/block269-browser-bridge.test.mjs",
         "frontend/src/lib/browser-action-bridge.test.ts"
       ]
+    },
+    {
+      "id": "block270-freehand-renderer",
+      "classifiesScripts": true,
+      "note": "BLOCK-270 批注画笔前端渲染器（C-43 尾项）：annotations.ts 契约镜像（freehand/path/decimatePath）+ client locator 三态 + session beginPath + Overlay SVG 渲染采点 + 两 pane 接线。",
+      "patterns": [
+        "frontend/src/lib/annotations.ts",
+        "frontend/src/lib/annotations.test.ts",
+        "frontend/src/lib/annotation-client.ts",
+        "frontend/src/lib/annotation-client.test.ts",
+        "frontend/src/hooks/useArtifactAnnotations.ts",
+        "frontend/src/components/annotations/useAnnotationSession.ts",
+        "frontend/src/components/annotations/AnnotationOverlay.tsx",
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "frontend/src/components/annotations/AnnotationOverlay.module.css",
+        "frontend/src/components/annotations/AnnotationBar.tsx",
+        "frontend/src/components/annotations/AnnotationBar.test.tsx",
+        "frontend/src/components/annotations/AnnotatableImagePane.tsx",
+        "frontend/src/components/annotations/AnnotatablePdfPane.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell/resultAnnotation.tsx"
+      ],
+      "tests": [
+        "frontend/src/lib/annotations.test.ts",
+        "frontend/src/lib/annotation-client.test.ts",
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "frontend/src/components/annotations/AnnotationBar.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx"
+      ]
+    },
+    {
+      "id": "block271-bio2-logfallback",
+      "classifiesScripts": true,
+      "note": "BLOCK-271 1b（BIO-2/UI-454）日志端点项目布局兜底实机生效腿：隔离后端+真实 DB 行+项目布局 run.log 直证 source='run.log'；对照无 workspace_path 回全局链不回退。",
+      "patterns": [
+        "scripts/block271-bio2-logfallback-live.mjs",
+        "core/petri-server/routes/tools-metadata.js",
+        "acceptance/block-271/**"
+      ],
+      "tests": [
+        "test/block269-browser-bridge.test.mjs"
+      ]
     }
   ]
 }

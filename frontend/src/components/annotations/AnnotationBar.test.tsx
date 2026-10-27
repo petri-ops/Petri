@@ -21,6 +21,7 @@ function annotation(overrides: Partial<ArtifactAnnotation> = {}): ArtifactAnnota
     kind: 'region',
     page: 2,
     rect: [0.1, 0.1, 0.2, 0.2],
+    path: [],
     anchor: null,
     comment: '离群点需要复核',
     color: 'amber',
