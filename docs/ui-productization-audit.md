@@ -21,7 +21,7 @@
 - **变化面**：五处可调宽边界统一「细线+渐变高光」悬停规范（Qoder 式，用户实测反馈）——文件树边界 `workspaceFileTreeResize` 4px 全高实心 accent 带 → 6px 热区 + 悬停渐隐 glow（`::before` linear-gradient）+ 分隔线经 `:has` 转 accent（线转色不叠新线）；FloatCardResizer 常驻指示线 3px→2px 变淡（35%→22%）+ hover 整块 tint 换渐隐 glow（项目摘要/侧边聊天共用）；desktop.css 死把手样式 `.petri-desktop-workarea__resize-handle`（6px 全高实心带，全站无渲染点）整块删除；`resizeHandleV`（BLOCK-62 参照）与两处 pill 分隔标注规范归属。顺手清偿：AnnotationOverlay 4 处死字面量 fallback（token 均有定义）；theme 契约门 accent 棘轮 93→95（拖拽把手态，宪章五类合法，对标 ArtifactPinPane 先例）。
 - **为什么这样设计**：BLOCK-62 只精修了主列一处，其余边界保持原始实心带写法——规范从未统一；可发现性约束（v25「隐形热区不可发现」抓真在案）只降视觉重量不删暗示，热区宽度不收窄。
 - **验证（代码）**：theme-token-contract 17/17（含新棘轮 + AnnotationOverlay 清偿）；FloatCardResizer 消费组件测试 35/35（SideChatDock/CenterPanel）；routing unknown=[]（block273 规则登记）。
-- **实机证据**：acceptance/block-273/live-light.json / live-dark.json——亮/暗双主题默认态实机断言（无实心条带 bg=透明+glow=0+分隔线=divider）+ 源码接线断言（S1-S4）全绿；环境边界如实记录：隐藏页 used 值缓存 + 离屏截图合成不可用（-32000），悬停激活态的干净渲染观测见诊断记录（亮主题 glow=1、分隔线=accent rgb(13,148,136)，非门禁证据）。
+- **实机证据**：acceptance/block-273/live-light.json / live-dark.json——亮/暗双主题默认态实机断言（无实心条带 bg=透明+glow=0+分隔线=divider）+ 源码接线断言（S1-S4）全绿；环境边界如实记录：隐藏页 used 值缓存 + 离屏截图合成不可用（-32000），悬停激活态的干净渲染观测见诊断记录（亮主题 glow=1、分隔线=accent rgb(13,148,136)，非门禁证据）。**补录（并发会话产出 34f91bc0）**：用户主实例 9222 **可见窗口真实指针** hover 实证——resizeHandleV（主列边界）悬停 accent 渐变真实渲染（hovered=true、afterBg=accent teal 0.58、默认/悬停 clip 截图双落盘 acceptance/tmp-block273-hover-probe/）；workspaceFileTreeResize/floatCard 该页态未展开如实记录。
 - **边界（reopen）**：指针跟随渐晕（Qoder 完整形态）；暗主题悬停态+真实指针走查=30 秒人测路线随交付（确认后翻 verified）。
 
 ## UI-587: 批注画笔前端渲染器（2026-10-27 **in_progress（BLOCK-270；组件级 59 项，实机腿未跑）**）

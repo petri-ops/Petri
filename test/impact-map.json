@@ -5855,6 +5855,7 @@
       "note": "BLOCK-273 拖拽边界统一渐变暗示规范：live 探针（CSS 注入激活 + 元素级强制布局读数；隐藏页 used 值缓存/离屏截图边界见脚本头注）+ 取证目录 + 前端主题契约门（CSS 改动面棘轮）。",
       "patterns": [
         "scripts/block273-resize-affordance-live.cjs",
+        "scripts/tmp-block273-hover-live-probe.cjs",
         "frontend/src/pages/project-workspace.module.css",
         "frontend/src/components/workspace-panels/FloatCardResizer.module.css",
         "frontend/src/components/workspace-panels/ArtifactPinPane.module.css",
