@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T10:47:35.584Z -->
 最后更新：2026-10-27（**BLOCK-271 1b 实机生效腿 completed（BIO-2/UI-454·批次 4/5）**：①日志端点项目布局兜底隔离栈直证 **4/4**（acceptance/block-271/）——隔离后端+真实 DB 行+项目布局 run.log 直打 /api/tools/log/:id 得 source=run.log（workspace_path 兜底链实机生效）+对照无 workspace_path 回全局链不回退；②**backlog 滞后注记对账抓真**：W3 已由 BLOCK-163 整波收口（12 单元全 ✅）、竞争力纲 W6 已由 BLOCK-176-WAVE6 收口（CP-16/17/18 交付，仅 CP-19 移动栈 deferred）——批次规划时的「W3 首切片/W6 对账」是 backlog 旧注记误导，真实剩余见 backlog 修正行。UI-454 verified（②③热图/分页实机走查随 UI-452 六面用户过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T14:58:20.392Z -->
+最后更新：2026-10-27（**BLOCK-270 批注画笔前端渲染器 completed（C-43 尾项·批次 3/5）**）：freehand 前端镜像全链——KINDS/LABELS/ArtifactAnnotation.path/decimatePath 抽稀镜像（≤512 等距保留首尾）、client locator 三态互斥（freehand 发 path 不发 rect）、session beginPath（undo 重建保持互斥）、Overlay SVG polyline 渲染+画笔采点（down 采点/move 预览/up 相邻去重提交 ≥2 点）、两 pane 接线、任务 prompt 画笔报点数不报假矩形。组件级 **59/59**（Overlay 11/契约/client/Bar）；tsc 0。实机抓真=采点 up 终点与末次 move 重合产生重复点（去重修复）。UI-587 in_progress（实机需结果面真实 job+artifact seed，随结果面实机批）。G0 开发期常态 · 不外推 packaged/Provider/GA。

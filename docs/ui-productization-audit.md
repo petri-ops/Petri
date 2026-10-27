@@ -48,13 +48,13 @@
 - **实机证据**：acceptance/block-273/live-light.json / live-dark.json——亮/暗双主题默认态实机断言（无实心条带 bg=透明+glow=0+分隔线=divider）+ 源码接线断言（S1-S4）全绿；环境边界如实记录：隐藏页 used 值缓存 + 离屏截图合成不可用（-32000），悬停激活态的干净渲染观测见诊断记录（亮主题 glow=1、分隔线=accent rgb(13,148,136)，非门禁证据）。**补录（并发会话产出 34f91bc0）**：用户主实例 9222 **可见窗口真实指针** hover 实证——resizeHandleV（主列边界）悬停 accent 渐变真实渲染（hovered=true、afterBg=accent teal 0.58、默认/悬停 clip 截图双落盘 acceptance/tmp-block273-hover-probe/）；workspaceFileTreeResize/floatCard 该页态未展开如实记录。
 - **边界（reopen）**：指针跟随渐晕（Qoder 完整形态）**已随 UI-591 兑现**（见本台账 UI-591 行）；暗主题悬停态+真实指针走查=30 秒人测路线随交付（确认后翻 verified）。
 
-## UI-587: 批注画笔前端渲染器（2026-10-27 **in_progress（BLOCK-270；组件级 59 项，实机腿未跑）**）
+## UI-587: 批注画笔前端渲染器（2026-10-27 **verified（BLOCK-270 组件级 59 项 + BLOCK-278 暗主题实机腿 10/10；工作区文件预览图像面，真实鼠标绘制 8 点采点全链）**）
 
 - **变化面**：C-43 契约 v2 的 freehand 在前端落地——KINDS/LABELS 加画笔、ArtifactAnnotation.path 点序列、decimatePath 抽稀镜像（≤512 等距保留首尾）；AnnotationOverlay 增 SVG polyline 图层（归一化点→0..100 viewBox）与画笔采点绘制（down 采点/move 预览/up 去重提交，≥2 点才成路径）；client locator 三态互斥（freehand 发 path 不发 rect）；session beginPath 链（含 undo 重建保持互斥）；两 pane 接线 onCommitPath；任务 prompt 对画笔报路径点数不报假矩形。
 - **为什么这样设计**：渲染走 SVG polyline 而非 canvas（批注是可选中/可撤销的元数据对象，DOM 节点天然承载选中语义）；抽稀与互斥语义镜像后端单一真相，前端不自造第二份。
 - **验证（代码）**：批注域 59 项全绿（Overlay 11：渲染点换算/采点提交/去重/单点不提交；契约镜像：抽稀/标签/prompt 画笔分支；client：三态互斥；既有夹具随 path 必填同步）。
-- **实机证据**：未跑（组件级；实机腿需结果面真实 job+artifact seed，随下次结果面板实机批补）。
-- **边界（reopen）**：压感/贝塞尔平滑、触屏防误触。
+- **实机证据**：BLOCK-278 暗主题实机腿 10/10（acceptance/block-278/live-dark.json）——工作区文件预览图像面（volcano.svg，BLOCK-219 同款夹具）：暗主题原生 boot（accent=#2dd4bf 断言）→ 批注 toggle drawing 态 → 画笔工具选中 → **CDP 真实鼠标绘制 8 点采点** → 保存 → REST 契约 kind=freehand/path≥2 点/**无相邻重复（去重契约）** → 暗主题持久 stroke 真实渲染（rgb(251,146,60) 画笔橙 visible）。截图合成 -32000 离屏边界如实记录。
+- **边界（reopen）**：压感/贝塞尔平滑、触屏防误触；**结果面 artifact mount 变体待 R 运行时授权**（本腿=工作区文件预览图像面，同一 AnnotationOverlay/useAnnotationSession 渲染链，result shell 仅 scope 解析差异）。
 
 ## UI-586: 浏览器面板连接器动作事件桥（2026-10-27 **verified（BLOCK-269；实机亮/暗各 12/12）**）
 

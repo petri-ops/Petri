@@ -5884,6 +5884,18 @@
       ]
     },
     {
+      "id": "block278-freehand-dark-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",
+      "patterns": [
+        "scripts/block278-freehand-dark-live.cjs",
+        "acceptance/block-278/**"
+      ],
+      "tests": [
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx"
+      ]
+    },
+    {
       "id": "block277-empty-state",
       "classifiesScripts": true,
       "note": "BLOCK-277 右栏空态重排（Qoder 式工作区引导）实机取证：探针（结构/居中几何/双列网格断言）与取证目录；前端改动面经 frontend 通道自动路由 vitest。",

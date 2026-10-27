@@ -1,0 +1,62 @@
+{
+  "capturedAt": "2026-10-27T14:56:19.456Z",
+  "head": "7358abb798f62cedb1215de34c5163c5204c961f",
+  "projectId": "p_mvqt5sta_2iyd",
+  "theme": "dark（localStorage petri-theme=dark 原生 boot）",
+  "surface": "workspace-file 图像预览面（BLOCK-270 画笔第一类宿主；结果面 artifact mount 待 R 运行时授权，边界如实记录）",
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvqt5sta_2iyd"
+    },
+    {
+      "id": "P0b_svg_fixture",
+      "ok": true,
+      "detail": "352B"
+    },
+    {
+      "id": "D0_dark_theme_active",
+      "ok": true,
+      "detail": "accent=#2dd4bf"
+    },
+    {
+      "id": "D1_annotation_drawing_on",
+      "ok": true,
+      "detail": "data-drawing=true"
+    },
+    {
+      "id": "D2_freehand_kind_active",
+      "ok": true,
+      "detail": "data-active=true"
+    },
+    {
+      "id": "D3a_overlay_rect",
+      "ok": true,
+      "detail": "{\"x\":1262.185302734375,\"y\":368.3057861328125,\"w\":119.98704528808594,\"h\":89.9864273071289}"
+    },
+    {
+      "id": "D3_freehand_drawn",
+      "ok": true,
+      "detail": "{\"strokePts\":0,\"strokeVisible\":false,\"items\":0,\"input\":true}"
+    },
+    {
+      "id": "D4_saved_item_visible",
+      "ok": true,
+      "detail": "annotation-item 在场"
+    },
+    {
+      "id": "D5_rest_freehand_contract",
+      "ok": true,
+      "detail": "rows=1 freehand=true pathPts=8 dupAdjacent=false"
+    },
+    {
+      "id": "D6_dark_stroke_rendered",
+      "ok": true,
+      "detail": "{\"stroke\":\"rgb(251, 146, 60)\",\"width\":\"0.6px\",\"visible\":true}"
+    }
+  ]
+}
