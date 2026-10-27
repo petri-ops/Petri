@@ -21,3 +21,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T08:24:17.033Z -->
 | ✅ ReviewMode.block147 并发 flaky 根治（BLOCK-267 ①；原 2026-10-26 🟡 行销号） | 2026-10-26 | act 微任务冲刷 + 刷新断言 timeout 5s；隔离 6/6 恒绿 + closeout test:changed 两轮 750/751 稳绿 | quality:lint/types 0 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T10:27:05.769Z -->
+| ✅ /api/auth/me standalone 恒 500 清偿（BLOCK-267 ③；原 2026-10-21 🟡 行销号） | 2026-10-26 | auth.js 直 require 助手模块，红绿对账 500→200，test/block267-auth-me-standalone 2/2 | quality:lint/types 0 |
