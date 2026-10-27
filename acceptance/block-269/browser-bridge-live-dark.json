@@ -1,0 +1,78 @@
+{
+  "name": "b269-browser-bridge-live",
+  "block": "BLOCK-269",
+  "darkMode": true,
+  "migrationsApplied": 20,
+  "screenshots": "unavailable（离屏测试实例纪律）",
+  "synthetic": {
+    "conversationId": "conv_b269_live",
+    "note": "seed 项目+会话；只验 UI 动作与链路"
+  },
+  "startedAt": "2026-10-27T01:33:56.250Z",
+  "finishedAt": "2026-10-27T01:34:15.030Z",
+  "assertions": [
+    {
+      "name": "S1_seeded_project_conversation",
+      "pass": true,
+      "detail": "project=p_mvq0ib5q_vky3 conv=conv_b269_live"
+    },
+    {
+      "name": "S2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=true"
+    },
+    {
+      "name": "BRIDGE_connect_session",
+      "pass": true,
+      "detail": "connect=200 sessionId=bc-mvq0icon-1krknl"
+    },
+    {
+      "name": "BRIDGE_sse_dispatch",
+      "pass": true,
+      "detail": "SSE 下发=1 帧，browser-action={\"actionId\":\"ba-mvq0icop-six4i5\",\"action\":\"navigate\"}"
+    },
+    {
+      "name": "BRIDGE_result_feed",
+      "pass": true,
+      "detail": "回传=200"
+    },
+    {
+      "name": "BRIDGE_act_resolved",
+      "pass": true,
+      "detail": "act={\"ok\":true,\"action\":\"navigate\",\"result\":{\"url\":\"https://example.com/bridge-live\"}}"
+    },
+    {
+      "name": "BRIDGE_status_counted",
+      "pass": true,
+      "detail": "status={\"ok\":true,\"connected\":true,\"sessionId\":\"bc-mvq0icon-1krknl\",\"allowedOrigins\":[\"https://example.com\"],\"lastUrl\":\"https://example.com/bridge-live\",\"actionsPerfor"
+    },
+    {
+      "name": "BRIDGE_error_passthrough",
+      "pass": true,
+      "detail": "错误态穿透={\"ok\":false,\"error\":\"webview_not_ready\"}（SSE 二发=true）"
+    },
+    {
+      "name": "GUARD_private_reject",
+      "pass": true,
+      "detail": "私网=web_url_private_host"
+    },
+    {
+      "name": "GUARD_ack_gate",
+      "pass": true,
+      "detail": "无 ackToken=ack_token_required"
+    },
+    {
+      "name": "BRIDGE_panel_read_text",
+      "pass": true,
+      "detail": "openBrowserTab=clicked panel=host-present read_text={\"ok\":true,\"action\":\"read_text\",\"result\":{\"text\":\"Subscribe to Petri.com\\nSearch\\nMICROSOFT ENTRA ID\\nConnectWise: How One Stolen Credential Can Expose Hundreds of Entra Tenants\\nACTIVE DIRECTORY\\nAct navigate={\"ok\":true,\"action\":\"navigate\",\"result\":{\"url\":\"https://example.com/\"}}（tried=true；未开成面板时以链 A+执行器测试 6/6 为证据，如实登记）"
+    },
+    {
+      "name": "GUARD_disconnect_gate",
+      "pass": true,
+      "detail": "disconnect=200 connected=false"
+    }
+  ],
+  "allPass": true,
+  "passed": 12,
+  "total": 12
+}

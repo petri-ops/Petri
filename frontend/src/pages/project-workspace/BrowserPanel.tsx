@@ -6,12 +6,20 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { getBrowserViewportSize, isPetriLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { useInvalidationStream } from '@/hooks/useInvalidationStream';
+import {
+  performBrowserAction,
+  postActionResult,
+  type BrowserActionParams,
+  type WebviewActionBridge,
+} from '@/lib/browser-action-bridge';
 import styles from '../project-workspace.module.css';
 
 // ============================================================
 // BLOCK-105 §7 Batch-7 — Electron <webview> 最小形状（本组件实际使用的成员；
 // 官方 webview TS 类型未入仓，此前 useRef<any> 是 no-unsafe-* 病根）。
 // 事件对象按字段结构化定型；运行时防御（?. / typeof 守卫 / try-catch）保持原样。
+// BLOCK-269 — 增 executeJavaScript/capturePage（连接器动作执行面）。
 // ============================================================
 interface WebviewEventLike {
   preventDefault?: () => void;
@@ -32,6 +40,8 @@ interface WebviewLike extends HTMLElement {
   goBack(): void;
   goForward(): void;
   reload?(): void;
+  executeJavaScript?(code: string): Promise<unknown>;
+  capturePage?(): Promise<{ size?: { width?: number; height?: number } }>;
   addEventListener(type: string, listener: (event: WebviewEventLike) => void): void;
   removeEventListener(type: string, listener: (event: WebviewEventLike) => void): void;
 }
@@ -240,6 +250,78 @@ export function BrowserPanel({
       offForward();
     };
   }, [goBack, goForward]);
+
+  // ============================================================
+  // BLOCK-269 — 连接器动作事件桥：event-bus 下发 browser-action → webview 执行 →
+  // 结果 POST 回传（resolve 后端 pending）。面板未挂载/离线时收不到下发，
+  // 后端 25s 超时如实报 transport_timeout（不假装操作成功）。
+  // ============================================================
+  const performBridgeRef = useRef<WebviewActionBridge | null>(null);
+
+  useEffect(() => {
+    performBridgeRef.current = {
+      async navigate(url) {
+        const webview = webviewRef.current;
+        if (!webview) throw new Error('webview_not_ready');
+        await new Promise<void>((resolve, reject) => {
+          let settled = false;
+          const done = () => {
+            if (settled) return;
+            settled = true;
+            webview.removeEventListener('did-navigate', done);
+            webview.removeEventListener('did-navigate-in-page', done);
+            webview.removeEventListener('did-fail-load', onFail);
+            resolve();
+          };
+          const onFail = (event: WebviewEventLike) => {
+            if (Number(event?.errorCode) === -3) return; // 中断态不算失败
+            if (settled) return;
+            settled = true;
+            webview.removeEventListener('did-navigate', done);
+            webview.removeEventListener('did-navigate-in-page', done);
+            webview.removeEventListener('did-fail-load', onFail);
+            reject(new Error(String(event?.errorDescription || 'navigation_failed')));
+          };
+          webview.addEventListener('did-navigate', done);
+          webview.addEventListener('did-navigate-in-page', done);
+          webview.addEventListener('did-fail-load', onFail);
+          try {
+            webview.loadURL(url);
+          } catch {
+            webview.src = url;
+          }
+          setTimeout(done, 12_000); // 慢站点兜底（loadURL 已发起即视为已投递）
+        });
+      },
+      async executeJavaScript(code) {
+        const webview = webviewRef.current;
+        if (!webview || typeof webview.executeJavaScript !== 'function') {
+          throw new Error('webview_not_ready');
+        }
+        return webview.executeJavaScript(code);
+      },
+      async capturePage() {
+        const webview = webviewRef.current;
+        if (!webview || typeof webview.capturePage !== 'function') {
+          throw new Error('webview_not_ready');
+        }
+        return webview.capturePage();
+      },
+    };
+  }, []);
+
+  useInvalidationStream(true, (info) => {
+    if (info.domain !== 'browser-connector') return;
+    const payload = info.payload as { kind?: string; actionId?: string; params?: BrowserActionParams } | undefined;
+    if (!payload || payload.kind !== 'browser-action' || !payload.actionId || !payload.params) return;
+    const bridge = performBridgeRef.current;
+    if (!bridge) {
+      void postActionResult(payload.actionId, { ok: false, error: 'webview_not_ready' });
+      return;
+    }
+    void performBrowserAction(payload.params, bridge)
+      .then((outcome) => postActionResult(payload.actionId as string, outcome));
+  });
 
   const submitUrl = useCallback(
     (event: React.FormEvent) => {

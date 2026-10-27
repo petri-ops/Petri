@@ -27,6 +27,8 @@ module.exports = async function registerRoutes(app) {
     ['App activity', () => require('./app-activity')(app)],
     // BLOCK-229 — 电脑控制 sidecar 状态/探针（只读；不含控制动作）
     ['Computer use', () => require('./computer-use')(app)],
+    // BLOCK-269 — 浏览器连接器 REST 面（与 agent 工具同源执行面 + action-result 回传）
+    ['Browser connector', () => require('./browser-connector')(app)],
     ['AI conversations', () => require('./ai-conversations')(app)],
     ['AI memory', () => require('./ai-memory')(app)],
     ['AI admin', () => require('./ai-admin')(app)],

@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-586: 浏览器面板连接器动作事件桥（2026-10-27 **verified（BLOCK-269；实机亮/暗各 12/12）**）
+
+- **变化面**：BrowserPanel 订阅 event-bus 的 browser-action 下发（BLOCK-264 预留的 transport 注入点接线），把白名单动作落到 webview：navigate（did-navigate 一次性等待）/read_text（executeJavaScript body.innerText ≤20k）/click/fill（native setter+input 事件）/screenshot（只回尺寸）；结果 POST `/api/browser-connector/action-result` 回传 resolve 后端 pending（25s 超时兜底）。执行器抽 `lib/browser-action-bridge.ts` 纯逻辑（webview 调用注入可测；参数全 JSON.stringify 注入零拼接）。
+- **为什么这样设计**：后端与面板分进程，复用 CK-03 event-bus 失效广播（不自造第二通道）；面板离线=超时如实 transport_timeout，不假装操作成功。
+- **验证（代码）**：transport 桥契约 Node 5/5 + 执行器 6/6（注入安全/有界/失败态）。
+- **实机证据**：`acceptance/block-269/`（亮/暗各 12/12：链 A 后端桥全链（SSE 下发→回传 resolve→act ok+计数）+ 链 B 真面板 webview 真执行 read_text（读到真实页面文本）+ navigate 外网真实导航 + 私网拒/无 ackToken 拒/未连接拒/断开清态）。
+- **边界（reopen）**：native messaging/Chrome 扩展（传输层第三形态）；screenshot 像素回传（传输层约束维持只回尺寸）。
+
 ## UI-585: 速记板开态抗重挂（2026-10-27 **verified（BLOCK-268；实机亮/暗各 7/7）**）
 
 - **变化面**：ScratchpadDock 开态从组件 useState 提升为模块级外置 store（挂载重读+变更同步）；composer 子树因会话消息/流式推进重挂时面板不再自关。

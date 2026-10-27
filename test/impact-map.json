@@ -5767,6 +5767,27 @@
         "test/block268-scratchpad-flow-contract.test.mjs",
         "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx"
       ]
+    },
+    {
+      "id": "block269-browser-bridge",
+      "classifiesScripts": true,
+      "note": "BLOCK-269 浏览器连接器前端桥（C-40 尾项）：transport 桥（SSE 下发+action-result 回传+25s 超时）+ REST 四面 + BrowserPanel 执行器（browser-action-bridge）。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b269-browser-bridge-live.cjs",
+        "scripts/block269-browser-live.mjs",
+        "core/petri-server/agent-tools/browser-tools.js",
+        "core/petri-server/routes/browser-connector.js",
+        "core/petri-server/helpers/browser-connector.js",
+        "frontend/src/lib/browser-action-bridge.ts",
+        "frontend/src/lib/browser-action-bridge.test.ts",
+        "frontend/src/pages/project-workspace/BrowserPanel.tsx",
+        "test/block269-browser-bridge.test.mjs",
+        "acceptance/block-269/**"
+      ],
+      "tests": [
+        "test/block269-browser-bridge.test.mjs",
+        "frontend/src/lib/browser-action-bridge.test.ts"
+      ]
     }
   ]
 }

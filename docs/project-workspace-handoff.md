@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**BLOCK-269 浏览器连接器前端桥 completed；批次进行中 3/5 待启动**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户整波授权「按顺序批次完成」——批次序列=①UI-585 实机腿（✅ c46df0dc）→②浏览器连接器前端桥（✅ 本笔，UI-586 verified，亮/暗 12/12）→③批注画笔前端渲染器（C-43 尾项；前端 KINDS 尚无 freehand，Overlay 只渲染 rect；改动面=annotations.ts 契约镜像+client locator 三态+Overlay SVG polyline 渲染与画笔采点+两 pane 接线）→④成熟度蓝图 W3 首切片（ORC-3→ORC-4→CAP-3）→⑤W6 落地形态对账。**批间纪律**：每批 plan+定向/实机+closeout 十三门+canonical 回写+提交；不推送（需用户发令）；R 运行时 657MB 需单独授权。**实机教训**（累积）：CDP Page.navigate 是整页刷新非 SPA 重挂；event-bus payload 在事件顶层；SSE abort 重置 keep-alive 波及复用连接。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**BLOCK-268 UI-585 实机腿补验 completed；批次进行中 2/5 待启动**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户整波授权「按顺序批次完成」（2026-10-27）——批次序列=①UI-585 实机腿（✅ completed，亮/暗 7/7，UI-585 verified）→②浏览器连接器前端桥（C-40 尾项）→③批注画笔前端渲染器（C-43 尾项）→④成熟度蓝图 W3 首切片（ORC-3→ORC-4→CAP-3）→⑤W6 落地形态对账（CP-16/17/18 裁决材料）。**批间纪律**：每批立项 plan+实机/定向+closeout 十三门+canonical 回写+提交；**不推送**（推送需用户单独发令）；R 运行时 657MB 需用户单独授权（解锁 UI-526）。本批实机教训：CDP Page.navigate 是整页刷新（新 realm），SPA 重挂触发必须走页内导航（sidebar-settings+history.back）。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -8294,6 +8294,26 @@
         "G0"
       ],
       "notes": "2026-10-27 用户「行！ 你规划一下 按顺序批次完成」批次 1/5（Jev 实机腿补验批）。UI-585 实机亮/暗各 7/7（开→SPA 跨路由重挂保留→Esc 关闭→刷新归零；acceptance/block-268/）；实机抓真=CDP Page.navigate 是整页刷新非 SPA 重挂，修正为 sidebar-settings+history.back。台账 UI-585 verified。"
+    },
+    {
+      "id": "BLOCK-269-BROWSER-BRIDGE",
+      "capability": "block-269-browser-bridge",
+      "path": "docs/block-269-browser-bridge-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P3-CLOSED",
+      "canonical": true,
+      "truthDomain": "block-269-browser-bridge",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-27",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "c-40",
+        "browser-connector",
+        "transport",
+        "G0"
+      ],
+      "notes": "2026-10-27 用户「按顺序批次完成」批次 2/5（C-40 尾项）。transport 桥=event-bus SSE 下发+action-result 回传+25s 超时；REST 四面与 agent 工具同源执行面；BrowserPanel 执行器（JSON.stringify 注入零拼接）。实机亮/暗各 12/12（含真面板 webview read_text/外网导航）。"
     }
   ],
   "lastUpdated": "2026-10-26",
