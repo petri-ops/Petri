@@ -1,0 +1,44 @@
+{
+  "phase": "after",
+  "capturedAt": "2026-10-27T05:56:05.313Z",
+  "head": "0fab977b755db93320b3d16dfc5fc146353e5eed",
+  "note": "单项计时探针：命令形态与 closeout 链一致；eslint/tsc 为无缓存原始形态（before）或改后形态（after）。",
+  "gates": [
+    {
+      "id": "quality:lint",
+      "exitCode": 1,
+      "seconds": 81.8,
+      "stdoutTail": " | ✖ 1982 problems (1 error, 1981 warnings) |   0 errors and 7 warnings potentially fixable with the `--fix` option.",
+      "stderrTail": ""
+    },
+    {
+      "id": "quality:types",
+      "exitCode": 0,
+      "seconds": 12.3,
+      "stdoutTail": "",
+      "stderrTail": ""
+    },
+    {
+      "id": "gate:arch-cycles",
+      "exitCode": 0,
+      "seconds": 2.2,
+      "stdoutTail": "[arch-cycles] PASS（14 存量环在册，无新环）",
+      "stderrTail": ""
+    },
+    {
+      "id": "quality:arch(raw depcruise)",
+      "exitCode": 0,
+      "seconds": 1.8,
+      "stdoutTail": "✔ no dependency violations found (1860 modules, 5478 dependencies cruised)",
+      "stderrTail": ""
+    },
+    {
+      "id": "quality:knip:check",
+      "exitCode": 0,
+      "seconds": 3.2,
+      "stdoutTail": "[knip-ratchet] PASS（保留面 289 键冻结，无新增）",
+      "stderrTail": ""
+    }
+  ],
+  "totalSeconds": 101.3
+}

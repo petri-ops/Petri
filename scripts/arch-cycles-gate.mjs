@@ -15,13 +15,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+// BLOCK-272：cruise 走共享单轮（与 quality:arch 合并配置一次执行），消除同轮二次全量 cruise。
+// 独立运行（无 PETRI_CLOSEOUT_RUN_ID）时不读不写缓存，行为等同原实现。
+import { runSharedCruise } from './lib/arch-cruise.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE = path.join(ROOT, 'acceptance', 'block-109', 'arch-cycles-baseline.json');
-const CRUISE_TARGETS = ['src', 'core', 'frontend/src'];
 
 /** 环链 → 规范化签名：按字典序旋转到最小模块开头后 join。 */
 export function cycleSignature(cycleNames) {
@@ -57,41 +57,9 @@ export function computeGate({ current, baseline }) {
 }
 
 function cruiseCycles() {
-  const config = {
-    forbidden: [
-      {
-        name: 'P3-no-cycles',
-        comment: 'BLOCK-109-CORE-ARCH P3-2 — 循环依赖硬门禁（存量环入基线，新环即红）',
-        severity: 'error',
-        from: {},
-        to: { circular: true },
-      },
-    ],
-    options: { doNotFollow: { path: 'node_modules' }, tsPreCompilationDeps: true },
-  };
-  // os.tmpdir 而非仓库根：Windows 下 unlink 竞态（AV/索引器短暂持句柄）会把残留
-  // 留进工作区，污染 knip 保留面扫描（test:changed 棘轮误红）。绝对路径配置跨目录可用。
-  const configFile = path.join(os.tmpdir(), `petri-arch-cycles-config-${process.pid}.cjs`);
-  fs.writeFileSync(configFile, `module.exports = ${JSON.stringify(config)};`);
-  // 直连 dependency-cruiser bin（node 执行本仓依赖内的 .mjs 入口，跨平台免 shell、
-  // 免 npx 的 Windows spawn 陷阱）。bin 缺失=依赖损坏，fail-fast。
-  const cruiserBin = path.join(ROOT, 'node_modules', 'dependency-cruiser', 'bin', 'dependency-cruiser.mjs');
-  if (!fs.existsSync(cruiserBin)) {
-    throw new Error(`dependency-cruiser bin 缺失（依赖损坏）: ${cruiserBin}`);
-  }
-  const cmd = process.execPath;
-  const args = [cruiserBin, ...CRUISE_TARGETS, '--config', configFile, '--output-type', 'json'];
-  try {
-    const out = execFileSync(cmd, args, {
-      cwd: ROOT,
-      maxBuffer: 256 * 1024 * 1024,
-      encoding: 'utf8',
-    });
-    const parsed = JSON.parse(out);
-    return extractCycleSignatures(parsed.summary && parsed.summary.violations);
-  } finally {
-    try { fs.unlinkSync(configFile); } catch { /* 清理失败不阻塞 */ }
-  }
+  const { violations, cached } = runSharedCruise();
+  if (cached) console.error('[arch-cycles] cruise 缓存命中（同轮与 quality:arch 共享）');
+  return extractCycleSignatures(violations);
 }
 
 const args = process.argv.slice(2);

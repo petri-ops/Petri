@@ -22,6 +22,13 @@
  * 经 `npm run <name>` 执行。`--no-tests` 可跳过 test:changed（仅限纯文档改动等场景，
  * 跳过后摘要中如实标注 skipped，不算 PASS）。
  *
+ * **定向语义（BLOCK-272）**：带域元数据的门禁（arch 两门 + knip）在「验证锚点以来改动与
+ * 门禁域不相交且配置/基线 digest 未变」时 SKIP-with-reason（摘要如实标注，不算 PASS）。
+ * 判定 fail-open：状态缺失/损坏/锚点不可达一律全量；SKIP 不刷新锚点，只有实际全量跑过
+ * 且 PASS 才记录。判定实现在 host 仓库 `scripts/lib/gate-skip-state.mjs`（缺失时本特性
+ * 自动关闭、门禁照常全量，同 docs/ui-audit 按约定路径探测先例）。
+ * `--force-full` 旁路一切跳过与共享 cruise 缓存（发布/CI：`npm run closeout:full`）。
+ *
  * 注意：本命令通过 ≠ 收口完成。canonical 回写（work package / roadmap / handoff /
  * AUDIT-LOG / ui-audit 台账）与 docs:reconcile 仍按治理纪律单独执行。
  * 退出码：0 = 全部 PASS；1 = 有 FAIL；2 = 参数错误。
@@ -29,7 +36,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SELF_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = (() => {
@@ -48,9 +55,11 @@ function parseArgs(argv) {
   const reports = [];
   const skips = new Set();
   let noTests = false;
+  let forceFull = false;
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--no-tests') noTests = true;
+    if (arg === '--no_tests') noTests = true;
+    else if (arg === '--force-full') forceFull = true;
     else if (arg.startsWith('--skip=')) arg.slice(7).split(',').forEach((s) => skips.add(s.trim()));
     else if (arg === '--gate' || arg === '--report') {
       const name = argv[i + 1];
@@ -62,7 +71,7 @@ function parseArgs(argv) {
       process.exit(2);
     }
   }
-  return { gates, reports, skips, noTests };
+  return { gates, reports, skips, noTests, forceFull };
 }
 
 function repoGate(id, title, relScript, args) {
@@ -72,6 +81,32 @@ function repoGate(id, title, relScript, args) {
   }
   return { id, title, cmd: process.execPath, args: [abs, ...args] };
 }
+
+// BLOCK-272 — 门禁域元数据（host 仓库约定路径，同 repoGate 的 docs/ui-audit 探测先例；
+// 目标仓库无对应文件时 computeConfigDigest 按 <missing> 计入，域跳过自动退化为全量）。
+// matchFile：改动文件命中即"域内"（→ 全量）；configPaths：配置/基线漂移同样 → 全量。
+// **门禁自身实现脚本属于其域**——改门禁代码必须重跑该门禁，不得域跳过（BLOCK-272 自纠）。
+const GATE_DOMAINS = {
+  'gate:arch-cycles': {
+    label: '源码域(src/core/frontend/src)',
+    matchFile: (f) =>
+      f.startsWith('src/') || f.startsWith('core/') || f.startsWith('frontend/src/') ||
+      f === 'scripts/arch-cycles-gate.mjs' || f === 'scripts/lib/arch-cruise.mjs',
+    configPaths: ['.dependency-cruiser.cjs', 'acceptance/block-109/arch-cycles-baseline.json'],
+  },
+  'quality:arch': {
+    label: '源码域(src/core/frontend/src)',
+    matchFile: (f) =>
+      f.startsWith('src/') || f.startsWith('core/') || f.startsWith('frontend/src/') ||
+      f === 'scripts/quality-arch.mjs' || f === 'scripts/lib/arch-cruise.mjs',
+    configPaths: ['.dependency-cruiser.cjs'],
+  },
+  'quality:knip:check': {
+    label: 'JS/TS 源全域',
+    matchFile: (f) => /\.(?:mjs|cjs|js|ts|tsx|jsx)$/.test(f),
+    configPaths: ['test/knip-baseline.json', 'knip.json', 'package.json', 'frontend/package.json'],
+  },
+};
 
 function plan(skips, noTests, extraGates) {
   const fixed = [
@@ -84,15 +119,31 @@ function plan(skips, noTests, extraGates) {
   const tests = noTests
     ? [{ id: 'tests', title: '影响范围测试（test:changed）', skipped: true }]
     : [repoGate('tests', '影响范围测试（test:changed）', path.join('scripts', 'test-affected.mjs'), ['--run'])];
-  const extras = extraGates.map((name) => ({ id: name, title: `专项门禁 npm run ${name}`, cmd: NPM, args: ['run', name] }));
+  const extras = extraGates.map((name) => {
+    const g = { id: name, title: `专项门禁 npm run ${name}`, cmd: NPM, args: ['run', name] };
+    if (GATE_DOMAINS[name]) g.domain = GATE_DOMAINS[name];
+    return g;
+  });
   return [...fixed, ...tests, ...extras].filter((g) => !skips.has(g.id));
 }
 
-function main() {
-  const { gates: extraGates, reports, skips, noTests } = parseArgs(process.argv.slice(2));
-  const list = plan(skips, noTests, extraGates);
+// BLOCK-272 — host 仓库域跳过判定模块（缺失 → null，特性关闭，门禁照常全量）。
+let skipStateModule; // undefined=未加载；null=host 无该 lib；否则为模块命名空间
+async function loadSkipStateModule() {
+  if (skipStateModule !== undefined) return skipStateModule;
+  const abs = path.join(ROOT, 'scripts', 'lib', 'gate-skip-state.mjs');
+  skipStateModule = fs.existsSync(abs) ? await import(pathToFileURL(abs).href) : null;
+  return skipStateModule;
+}
 
-  console.log(`== 收口门禁聚合（${list.length} 项，fail-fast）==`);
+async function main() {
+  const { gates: extraGates, reports, skips, noTests, forceFull } = parseArgs(process.argv.slice(2));
+  const list = plan(skips, noTests, extraGates);
+  const skipMod = await loadSkipStateModule();
+  // BLOCK-272：本轮收口运行 ID——arch 共享 cruise 缓存的同轮新鲜度键（子进程经 env 继承）。
+  process.env.PETRI_CLOSEOUT_RUN_ID = `closeout-${process.pid}-${Date.now().toString(36)}`;
+
+  console.log(`== 收口门禁聚合（${list.length} 项，fail-fast${forceFull ? '，force-full 全量' : ''}）==`);
   const results = [];
   let failed = false;
   for (let i = 0; i < list.length; i++) {
@@ -101,6 +152,15 @@ function main() {
       results.push({ ...g, status: 'SKIPPED' });
       console.log(`\n[${i + 1}/${list.length}] ${g.title} — SKIPPED（${g.reason || '--no-tests'}，如实标注，不算 PASS）`);
       continue;
+    }
+    if (g.domain && !forceFull && skipMod) {
+      const d = skipMod.decideSkip({ gateId: g.id, domain: g.domain, forceFull });
+      if (d.skip) {
+        results.push({ ...g, status: 'SKIPPED', dur: '0.0', skipReason: d.reason });
+        console.log(`\n[${i + 1}/${list.length}] ${g.title} — SKIPPED（${d.reason}；如实标注，不算 PASS）`);
+        continue;
+      }
+      console.log(`（域跳过未命中：${d.reason}——全量执行）`);
     }
     console.log(`\n[${i + 1}/${list.length}] ${g.title}`);
     const t0 = Date.now();
@@ -111,6 +171,10 @@ function main() {
     const status = r.status === 0 ? 'PASS' : `FAIL(exit ${r.status ?? 'signal'})`;
     results.push({ ...g, status, dur });
     console.log(`→ ${status}（${dur}s）`);
+    // 域门禁只有实际全量跑过且 PASS 才记录锚点（SKIP/FAIL 均不记录，防漂移累积）。
+    if (r.status === 0 && g.domain && skipMod) {
+      skipMod.recordPass({ gateId: g.id, domain: g.domain });
+    }
     if (r.status !== 0) {
       failed = true;
       break;
@@ -148,4 +212,7 @@ function main() {
   console.log('与 docs:reconcile 仍需按治理纪律完成；收口笔录使用「G0 开发期常态 · 不外推 packaged/Provider/GA」一次。');
 }
 
-main();
+main().catch((e) => {
+  console.error('[closeout] 聚合器内部错误（fail-closed，按 FAIL 处理）：', e && e.message ? e.message : e);
+  process.exit(1);
+});

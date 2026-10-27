@@ -29,12 +29,17 @@
  * 由 `package.json` 的 `test:changed:list` / `test:changed` 引用。
  */
 
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GATE_REPORT_SCHEMA_VERSION, validateReport } from './lib/gate-report-schema.mjs';
+// BLOCK-272：git 变更收集提取到 lib 单一真相（gate-skip-state 域跳过共用同一口径）；
+// 原函数体逐字节等价搬移，行为不变。collectChangedFiles 继续对外导出保持兼容。
+import { collectChangedFiles, normalizePath, runGit } from './lib/changed-files.mjs';
+
+export { collectChangedFiles };
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MAP = JSON.parse(readFileSync(resolve(ROOT, 'test/impact-map.json'), 'utf8'));
@@ -57,13 +62,6 @@ export function globMatches(pattern, value) {
     else source += escapeRegExp(pattern[i]);
   }
   return new RegExp(`${source}$`).test(value);
-}
-
-function normalizePath(value) { return value.replaceAll('\\', '/').replace(/^\.\//, ''); }
-
-function runGit(args) {
-  return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' })
-    .split(/\r?\n/).map((line) => normalizePath(line.trim())).filter(Boolean);
 }
 
 function listScripts() {
@@ -92,16 +90,6 @@ function validateMap(map) {
   }
   const uncovered = listScripts().filter((file) => scriptRules.filter((rule) => rule.patterns.some((pattern) => globMatches(pattern, file))).length !== 1);
   if (uncovered.length) throw new Error(`script classification must match exactly one rule: ${uncovered.join(', ')}`);
-}
-
-export function collectChangedFiles({ base = null, explicit = [] } = {}) {
-  if (explicit.length) return [...new Set(explicit.map(normalizePath))].sort();
-  const files = new Set();
-  if (base) runGit(['diff', '--name-only', '--diff-filter=ACMR', `${base}...HEAD`]).forEach((file) => files.add(file));
-  runGit(['diff', '--name-only', '--diff-filter=ACMR']).forEach((file) => files.add(file));
-  runGit(['diff', '--cached', '--name-only', '--diff-filter=ACMR']).forEach((file) => files.add(file));
-  runGit(['ls-files', '--others', '--exclude-standard']).forEach((file) => files.add(file));
-  return [...files].sort();
 }
 
 function isNodeSource(file) { return /\.(?:js|mjs|cjs)$/.test(file) && !file.startsWith('test/') && !file.startsWith('frontend/'); }

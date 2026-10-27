@@ -5829,6 +5829,25 @@
       "tests": [
         "test/block269-browser-bridge.test.mjs"
       ]
+    },
+    {
+      "id": "block272-closeout-targeted",
+      "classifiesScripts": true,
+      "note": "BLOCK-272 closeout 收口定向化：changed-files 提取（test-affected 共用口径）、gate-skip-state 域跳过判定、arch-cruise 共享单轮 cruise、quality-arch 包装器（R1-R5）、计时探针。改动影响 closeout 定向语义与两道 arch 门。",
+      "patterns": [
+        "scripts/lib/changed-files.mjs",
+        "scripts/lib/gate-skip-state.mjs",
+        "scripts/lib/arch-cruise.mjs",
+        "scripts/quality-arch.mjs",
+        "scripts/block272-timing-probe.mjs",
+        "acceptance/block-272/**"
+      ],
+      "tests": [
+        "test/closeout-gate-skip.test.mjs",
+        "test/quality-arch-wrapper.test.mjs",
+        "test/test-affected.test.mjs",
+        "test/block109-p3-gates.test.mjs"
+      ]
     }
   ]
 }

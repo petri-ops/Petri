@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 completed；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-272（用户裁决「收口只需要校验有改动的部分。你看看怎么处理」）已收口——closeout 默认变定向：eslint --cache + tsc --incremental + arch 两门/knip 域跳过（decideSkip 锚定，fail-open；门禁实现脚本属自身域）+ cruise 同轮共享 + `npm run closeout:full`（--force-full）全量转义（发布/CI/锚点存疑时用）。证据=红绿 13/13+回归 31/31+双 closeout PASS exit 0；**静态门热态 98.4s→10.4s**（timing 三件落 acceptance/block-272/）。抓真：impact-map 未登记 18 红（复绿）/platform-freeze 抓探针平台分支（shell:true 收敛）/域设计自纠。**test:changed 语义未动**（代码类工作包的最大耗时项仍是它；「vitest 通道防复发」用例 864s 优化已入 plan reopen）。待用户发令：推送（本地领先 7 笔）/R 运行时/UI-501/503/504/457 过目。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**整波收官：批次 1~5 全 completed；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户「按顺序批次完成」整波（2026-10-27）已收官——①BLOCK-268 UI-585 实机腿（c46df0dc，verified，亮/暗 7/7）→②BLOCK-269 浏览器连接器前端桥（53dc1f35，UI-586 verified，亮/暗 12/12）→③BLOCK-270 批注画笔渲染器（9fc608b5，59/59，UI-587 in_progress）→④BLOCK-271 1b 兜底实机腿（26053b86，UI-454 verified，4/4）→⑤backlog 滞后注记对账批（治理）。**对账结论**：成熟度蓝图（W1-W3）与竞争力纲（W1-W7）**全部收口无剩余波次**；真实剩余=候选池零散项+1d/1z（用户裁决或过目）+UI-587 实机腿+环境类+D 档（不外推）。**待用户发令**：推送（本地领先 6 笔）/R 运行时 657MB/UI-501/503/504/457 过目。**批间纪律沉淀**：每包收口 canonical 回写应含 backlog 行（防注记滞后再误导）；closeout 运行期不得动工作区；隔离后端 spawn 显式 PETRI_LOCAL_RESULTS_DIR。**实机教训**：CDP Page.navigate 是整页刷新；event-bus payload 在顶层；SSE abort 波及 keep-alive。G0 开发期常态 · 不外推 packaged/Provider/GA。

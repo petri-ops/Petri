@@ -87,7 +87,8 @@ npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
 npm run audit:compact  # AUDIT-LOG 自稳（BLOCK-170）：「最后更新」链/处理记录表超窗行自动剪切归档（搬移不改写，幂等）；closeout 首步自动执行
 npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + 符号链接检出退化 + 文本源码控制字节（只报告不代删）
-npm run closeout     # 收口门禁聚合（fail-fast）：audit:compact(自稳先行) → hygiene → docs → ui-audit → test:changed → gate:code-size → gate:arch-cycles → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check（十一门）
+npm run closeout     # 收口门禁聚合（fail-fast，定向语义 BLOCK-272）：audit:compact(自稳先行) → hygiene → docs → ui-audit → test:changed → gate:code-size → gate:arch-cycles → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check（十一门）；arch/knip 三门带域跳过（改动域不相交才 SKIP，fail-open），lint/tsc 走增量缓存，cruise 同轮共享；--force-full 全量转义
+npm run closeout:full # 冷启动全量收口（closeout --force-full）：发布前/CI/锚点存疑时用
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 ```

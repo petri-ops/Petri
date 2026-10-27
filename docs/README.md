@@ -1,4 +1,5 @@
 # Petri Desktop（格物）文档入口
+297. [`block-272-closeout-targeted-plan.md`](./block-272-closeout-targeted-plan.md) — 2026-10-27 **completed（P4-CLOSED）**（closeout 收口定向化；用户裁决「收口只需要校验有改动的部分」）：eslint --cache + tsc --incremental + arch/knip 域跳过 + cruise 同轮去重 + closeout:full 转义；静态门热态 98.4s→10.4s；红绿 13/13+回归 31/31+双 closeout PASS。
 294. [](./../acceptance/block-265/) — 2026-10-26 **BLOCK-265 实机验证补腿批 completed**：UI-578~582 五条翻 verified（亮/暗各 12/12；PiP 真窗口 CDP 取证）；台账 154 verified。
 296. [`block-270-freehand-renderer-plan.md`](./block-270-freehand-renderer-plan.md) — 2026-10-27 **completed（P4-CLOSED）**（批注画笔前端渲染器，C-43 尾项；批次 3/5）：freehand 前端镜像全链（契约/抽稀/locator 三态/session/Overlay SVG 渲染与采点/两 pane/prompt 画笔分支）；组件级 59/59；UI-587 in_progress（实机需 job+artifact seed，随结果面实机批）。
 295. [`block-269-browser-bridge-plan.md`](./block-269-browser-bridge-plan.md) — 2026-10-27 **completed（P3-CLOSED）**（浏览器连接器前端桥，C-40 尾项；批次 2/5）：transport 桥=event-bus SSE 下发+action-result 回传+25s 超时；REST 四面同源执行面；BrowserPanel 执行器（零拼接注入）；实机亮/暗各 12/12（真面板 webview read_text+外网导航）。

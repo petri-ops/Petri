@@ -1,0 +1,93 @@
+【捕获语境（BLOCK-272 收口时修正注记 · 评审抓真：原第二轮标题「arch 两门 SKIP」与实测内容矛盾，如实改写）】
+捕获时点=BLOCK-272 WIP 未提交（改动面即门禁实现脚本自身）。按「门禁自身实现脚本属于其域」自纠规则，
+本轮 WIP 命中 arch/knip 三门域 → 域跳过在本语境按设计不可触发；下两轮实测证明的是 fail-open 判定链
+真实执行（域内命中→全量，理由带文件名清单）。SKIP-with-锚点-sha 的实测轮次在批次落定后的干净树上
+复证，追加于本文件末尾（第三轮）。
+
+== 第一轮（无状态，全量，记录锚点）==
+== 收口门禁聚合（4 项，fail-fast）==
+
+[1/4] 影响范围测试（test:changed） — SKIPPED（--no-tests，如实标注，不算 PASS）
+（域跳过未命中：域内命中（scripts/arch-cycles-gate.mjs, scripts/lib/arch-cruise.mjs）——全量执行）
+
+[2/4] 专项门禁 npm run gate:arch-cycles
+
+> petri-desktop@0.0.1-rc.7 gate:arch-cycles
+> node scripts/arch-cycles-gate.mjs --check
+
+[arch-cycles] PASS（14 存量环在册，无新环）
+→ PASS（2.3s）
+（域跳过未命中：域内命中（scripts/lib/arch-cruise.mjs, scripts/quality-arch.mjs）——全量执行）
+
+[3/4] 专项门禁 npm run quality:arch
+
+> petri-desktop@0.0.1-rc.7 quality:arch
+> node scripts/quality-arch.mjs
+
+[quality:arch] PASS（R1-R5 无违规；cruise 缓存命中）
+→ PASS（0.3s）
+（域跳过未命中：域内命中（.agents/skills/petri-dev-infra/scripts/closeout-gates.mjs, package.json, scripts/arch-cycles-gate.mjs 等 11 个）——全量执行）
+
+[4/4] 专项门禁 npm run quality:knip:check
+
+> petri-desktop@0.0.1-rc.7 quality:knip:check
+> node scripts/knip-ratchet.mjs
+
+[knip-ratchet] PASS（保留面 289 键冻结，无新增）
+→ PASS（3.3s）
+
+== 收口门禁摘要 ==
+  ⏭️  影响范围测试（test:changed）
+  ✅ 专项门禁 npm run gate:arch-cycles（2.3s）
+  ✅ 专项门禁 npm run quality:arch（0.3s）
+  ✅ 专项门禁 npm run quality:knip:check（3.3s）
+
+CLOSEOUT: PASS — 门禁全绿。
+提醒：门禁通过 ≠ 收口完成。canonical 回写（work package/roadmap/handoff/AUDIT-LOG/ui-audit 台账）
+与 docs:reconcile 仍需按治理纪律完成；收口笔录使用「G0 开发期常态 · 不外推 packaged/Provider/GA」一次。
+(node:35628) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+== 第二轮（锚点已记录；改动命中门禁自身域 → 全量执行，符合自纠规则设计）==
+== 收口门禁聚合（4 项，fail-fast）==
+
+[1/4] 影响范围测试（test:changed） — SKIPPED（--no-tests，如实标注，不算 PASS）
+（域跳过未命中：域内命中（scripts/arch-cycles-gate.mjs, scripts/lib/arch-cruise.mjs）——全量执行）
+
+[2/4] 专项门禁 npm run gate:arch-cycles
+
+> petri-desktop@0.0.1-rc.7 gate:arch-cycles
+> node scripts/arch-cycles-gate.mjs --check
+
+[arch-cycles] PASS（14 存量环在册，无新环）
+→ PASS（2.3s）
+（域跳过未命中：域内命中（scripts/lib/arch-cruise.mjs, scripts/quality-arch.mjs）——全量执行）
+
+[3/4] 专项门禁 npm run quality:arch
+
+> petri-desktop@0.0.1-rc.7 quality:arch
+> node scripts/quality-arch.mjs
+
+[quality:arch] PASS（R1-R5 无违规；cruise 缓存命中）
+→ PASS（0.4s）
+（域跳过未命中：域内命中（.agents/skills/petri-dev-infra/scripts/closeout-gates.mjs, package.json, scripts/arch-cycles-gate.mjs 等 11 个）——全量执行）
+
+[4/4] 专项门禁 npm run quality:knip:check
+
+> petri-desktop@0.0.1-rc.7 quality:knip:check
+> node scripts/knip-ratchet.mjs
+
+[knip-ratchet] PASS（保留面 289 键冻结，无新增）
+→ PASS（3.3s）
+
+== 收口门禁摘要 ==
+  ⏭️  影响范围测试（test:changed）
+  ✅ 专项门禁 npm run gate:arch-cycles（2.3s）
+  ✅ 专项门禁 npm run quality:arch（0.4s）
+  ✅ 专项门禁 npm run quality:knip:check（3.3s）
+
+CLOSEOUT: PASS — 门禁全绿。
+提醒：门禁通过 ≠ 收口完成。canonical 回写（work package/roadmap/handoff/AUDIT-LOG/ui-audit 台账）
+与 docs:reconcile 仍需按治理纪律完成；收口笔录使用「G0 开发期常态 · 不外推 packaged/Provider/GA」一次。
+(node:31932) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)

@@ -36,6 +36,7 @@ description: Use Petri development infrastructure when starting or resuming a se
 ## 宣称收口之前
 
 - 跑 `npm run closeout`（十三门 fail-fast：audit:compact → hygiene → docs:check → ui:audit:check → test:changed → gate:code-size → gate:arch-cycles → gate:css-modules → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check）；当前工作包另有专项门禁时用 `--gate <npm-script>` 追加。
+- **定向语义（BLOCK-272 · 2026-10-27 用户裁决「收口只需要校验有改动的部分」）**：默认 `closeout` 是定向收口——arch 两门与 knip 带域跳过（改动域与门禁域不相交且配置/基线未变才 SKIP，摘要如实标注不算 PASS；判定 fail-open：状态缺失/损坏/锚点不可达一律全量；SKIP 不刷新锚点），lint 走 eslint `--cache`、types 走 tsc `--incremental`，arch 两门同轮共享一次 cruise（`PETRI_CLOSEOUT_RUN_ID` 同轮新鲜度键）。**`npm run closeout:full`（=closeout --force-full）是冷启动全量转义**：发布前、CI、锚点存疑或域跳过语义被质疑时必须用它重跑。测试语义（test:changed）不受定向化影响。
 - **报告级门禁**（BLOCK-211 起）：`--report <npm-script>` 可重复，所有阻塞门禁跑完**之后**执行，只把结果打进口径摘要、**不改变退出码**。用途=`skills:check` 这类"已知红且不在阻塞链"的存量门禁至少每次收口都被看见（`npm run closeout` 已挂 `--report skills:check`）；它不替代阻塞门禁——红数要不要升阻塞是治理裁决。）
 - 门禁全绿是收口的必要条件不是充分条件：canonical 回写（work package / roadmap / handoff / AUDIT-LOG / ui-audit 台账）仍按治理纪律单独完成。
 - 属于其他线/并行包的红旗如实登记归属，不得表述为本包通过。

@@ -9,3 +9,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T03:29:08.698Z -->
 最后更新：2026-10-26（**BLOCK-265 实机验证补腿批 completed：UI-578~582 五条翻 verified（亮/暗各 12/12）**）：隔离 9223 双轮全绿——UI-578 引导清单（端点三步真值 hasProject/hasConversation=true、modelConfigured 如实 false；空态视口在本栈不可达以端点+组件 4/4 锚如实标注）；UI-579 导入面板 DOM 全链（预览→勾选→两步确认→apply 落盘→回滚消息→runtime 恢复 200）；UI-580 审批深定位（通知条目点击→petri:approval-card-focus 事件载荷 {conversationId, ackToken} 实证）；UI-581 白名单（PUT mode=allowlist→渲染侧读回 allowed[0]）；UI-582 PiP 真窗口（open→CDP target 出现→close→消失）。过程修真三处：flow 首页空态拦截方案 reload 后 stub 丢失改 SPA 内证+如实标注、通知条目选择器对齐 data-testid=notification-center-item、桥名 desktopBridge→petriDesktop；另清两批残留 dev 栈端口占用。T1 transport 首片如实登记 reopen（注入点已留 BrowserPanel 事件桥边界）。截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T06:18:07.329Z -->
+最后更新：2026-10-26（**BLOCK-266 composer 视觉收缩 completed：UI-583/584 verified（亮/暗各 4/4）**）：用户反馈两处视觉问题确认并修——①模型选择占用多：ModelChip 两钮默认图标态（cpu+zap+chevron，28/46px，供应商名与模型名收 title/菜单，低频的供应商切换不再常驻占宽）；②聊天框下计量条换行：RunStatsBar 默认图标态（play/database/上下文环，数字读数收各段 title，上下文百分比保留视觉隐藏可访问性读数，条高 26px 零换行）。证据=RunStatsBar 7/7（title 承载/—语义/记忆保留/a11y span）+ModelMenu 6/6 回归+实机亮/暗各 4/4（acceptance/block-266/）。types 0/lint 0/theme 17/17。reopen=hover 展开全名胶囊与数字明细浮层（进阶形态）。plan=AUDIT-LOG 本行。G0 开发期常态 · 不外推 packaged/Provider/GA。
