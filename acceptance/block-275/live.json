@@ -1,0 +1,39 @@
+{
+  "capturedAt": "2026-10-27T10:45:11.428Z",
+  "head": "42d15a1debe5b7b60a8c2c5aa4745cf18b6fb96b",
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "records": [
+    {
+      "id": "A0_model_chip_present",
+      "ok": true,
+      "detail": "welcome composer"
+    },
+    {
+      "id": "A1_level1_suppliers_only",
+      "ok": true,
+      "detail": "{\"suppliers\":4,\"plainModelRows\":0,\"back\":false}"
+    },
+    {
+      "id": "A2_level2_drilled",
+      "ok": true,
+      "detail": "{\"back\":true,\"modelRows\":3}"
+    },
+    {
+      "id": "A3_back_restores_level1",
+      "ok": true,
+      "detail": "{\"back\":false,\"suppliers\":4}"
+    },
+    {
+      "id": "B1_icon_only",
+      "ok": true,
+      "detail": "{\"fedText\":\"\",\"setText\":\"\",\"fedSvg\":true,\"setSvg\":true,\"fedLabel\":\"联邦\",\"setLabel\":\"设置\",\"padRight\":8,\"gap\":6,\"fedRight\":188,\"setRight\":224,\"setWidth\":30,\"expectSetRight\":224,\"expectFedRight\":188}"
+    },
+    {
+      "id": "B2_right_aligned",
+      "ok": true,
+      "detail": "actual fed=188 set=224; expected fed=188 set=224 (pad=8 gap=6)"
+    }
+  ]
+}

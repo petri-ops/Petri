@@ -7120,17 +7120,21 @@ body:global(.petri-resizing-columns) * {
   text-decoration: underline;
 }
 
-/* UI-354 修订 1 — 左栏底部账户行：[手机连接（左）][设置（最右）] + 手机连接弹层 */
+/* UI-354 修订 1 — 左栏底部账户行 → UI-590（用户裁决「去掉文字只用图标、两图标右对齐」）：
+   纯图标钮（smartphone/settings）右对齐紧凑排布 */
 .leftFooterRow {
   display: flex;
   gap: var(--petri-space-2);
   padding: 0 var(--petri-space-3) var(--petri-space-3);
+  justify-content: flex-end;
 }
 
 .leftFooterRow .leftQuickAction {
-  flex: 1;
+  flex: 0 0 auto;
+  width: 30px;
   justify-content: center;
-  height: 32px;
+  padding: 0;
+  height: 30px;
 }
 
 .sidebarMobileOverlay {

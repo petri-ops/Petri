@@ -183,8 +183,8 @@ describe('ModelMenu', () => {
   });
 });
 
-describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all）', () => {
-  it('all 模式：供应商分组标题 + 全部可选模型平铺（跨供应商一屏选完）', () => {
+describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级导航）', () => {
+  it('all 模式：第一级供应商列表（无平铺）→ 点供应商钻取其模型 → 点模型回调 → 返回', () => {
     const onPickSupplier = vi.fn();
     const onPickModel = vi.fn();
     render(
@@ -199,19 +199,28 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all）', () => {
         onPickModel={onPickModel}
       />,
     );
-    // 分组标题（supplier label）与两个模型都在场
+    // 第一级：只有供应商分组标题，模型不平铺
     expect(screen.getByText('DeepSeek')).toBeTruthy();
+    expect(screen.queryByText('model-a')).toBeNull();
+    expect(screen.queryByText('model-b')).toBeNull();
+    // 点供应商标题 = 钻取（不再直接 onPickSupplier 切默认）
+    fireEvent.click(screen.getByText('DeepSeek'));
+    expect(onPickSupplier).not.toHaveBeenCalled();
+    // 第二级：该渠道模型行 + 返回行
+    expect(screen.getByTestId('model-menu-back')).toBeTruthy();
     expect(screen.getByText('model-a')).toBeTruthy();
     expect(screen.getByText('model-b')).toBeTruthy();
-    // 点标题 = 选该组首选模型（onPickSupplier 回调）
-    fireEvent.click(screen.getByText('DeepSeek'));
-    expect(onPickSupplier).toHaveBeenCalledWith(groups[0]);
-    // 点模型 = onPickModel 回调
+    // 点模型 = onPickModel 回调（selectModel 连带切渠道默认，供应商级联隐式成立）
     fireEvent.click(screen.getByText('model-b'));
     expect(onPickModel).toHaveBeenCalledWith(groups[0].rows[1].preset);
+    expect(onPickSupplier).not.toHaveBeenCalled();
+    // 返回 = 回第一级供应商列表
+    fireEvent.click(screen.getByTestId('model-menu-back'));
+    expect(screen.queryByText('model-b')).toBeNull();
+    expect(screen.getByText('DeepSeek')).toBeTruthy();
   });
 
-  it('all 模式：缺密钥行禁行 + 白名单拒绝理由与 model 模式同源', () => {
+  it('all 模式：钻取后缺密钥行禁行 + 拒绝理由与 model 模式同源', () => {
     const locked = buildModelGroups(presets, {
       ...EMPTY_MODEL_CATALOG,
       credentialStatus: { anthropic: false },
@@ -228,6 +237,7 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all）', () => {
         onPickModel={() => {}}
       />,
     );
+    fireEvent.click(screen.getByText('DeepSeek'));
     const row = screen.getByText('model-a').closest('button') as HTMLButtonElement;
     expect(row.disabled).toBe(true);
     expect(screen.getAllByText('未配置密钥').length).toBeGreaterThanOrEqual(2);

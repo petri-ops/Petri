@@ -9,3 +9,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T10:27:05.768Z -->
 最后更新：2026-10-27（**BLOCK-269 浏览器连接器前端桥 completed（C-40 尾项·批次 2/5）**）：transport 桥接线=BLOCK-264 预留注入点落地：event-bus SSE 下发 browser-action → BrowserPanel webview 执行（navigate/read_text/click/fill/screenshot，executeJavaScript 零拼接注入）→ action-result 回传 resolve（25s 超时兜底）；REST 四面（connect/act/status/disconnect）与 agent 工具同源执行面（helpers 单一真相）。证据=Node 5/5+执行器 6/6+实机亮/暗各 **12/12**（acceptance/block-269/）——链 A 后端桥全链+链 B 真面板 webview 真执行（read_text 读到真实页面文本+navigate 外网真实导航）。**实机抓真两处**：①event-bus payload 展开在事件顶层（flow 首版嵌套取法错过帧）；②SSE abort 重置 keep-alive 连接波及复用连接 fetch（ECONNRESET unhandled rejection 崩进程）——rest 重试+兜底。lint 首跑 15 error 全为本批新文件形态按真缺陷修零豁免；knip +1 留痕。UI-586 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T10:47:35.584Z -->
+最后更新：2026-10-27（**BLOCK-271 1b 实机生效腿 completed（BIO-2/UI-454·批次 4/5）**：①日志端点项目布局兜底隔离栈直证 **4/4**（acceptance/block-271/）——隔离后端+真实 DB 行+项目布局 run.log 直打 /api/tools/log/:id 得 source=run.log（workspace_path 兜底链实机生效）+对照无 workspace_path 回全局链不回退；②**backlog 滞后注记对账抓真**：W3 已由 BLOCK-163 整波收口（12 单元全 ✅）、竞争力纲 W6 已由 BLOCK-176-WAVE6 收口（CP-16/17/18 交付，仅 CP-19 移动栈 deferred）——批次规划时的「W3 首切片/W6 对账」是 backlog 旧注记误导，真实剩余见 backlog 修正行。UI-454 verified（②③热图/分页实机走查随 UI-452 六面用户过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。

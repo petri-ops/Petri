@@ -1,5 +1,21 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-590: 左栏页脚图标化右对齐（2026-10-27 **verified（BLOCK-275；9223 实机断言 6/6）**）
+
+- **变化面**：左栏页脚「联邦/设置」两钮去文字只留图标（语义由 title/aria-label 承载）；联邦图标 cpu→smartphone（手机连接语义对位，用户图3）；`.leftFooterRow` 右对齐 + 图标钮紧凑化（30px 方钮，flex:0 0 auto）。
+- **为什么这样设计**：两钮高频且语义已被图形约定承载（手机=联邦/齿轮=设置），文字冗余占宽；右对齐贴近窗口操作动线。
+- **验证（代码）**：LeftPanel 组件测试绿（无文字断言依赖）。
+- **实机证据**：9223 welcome 首页实断 6/6（acceptance/block-275/live.json）——B1 图标化（textContent 空+svg 在场+aria-label 保留）/B2 右对齐几何精确匹配（扣行内边距 pad=8/gap=6 后 fed=188 set=224 双贴齐，容差 3px）。截图合成不可用（-32000 离屏边界，BLOCK-273 已入册）。
+- **边界（reopen）**：无。
+
+## UI-589: 模型菜单两级导航（2026-10-27 **verified（BLOCK-275；9223 实机断言 6/6 + 组件级 8/8）**）
+
+- **变化面**：并钮组合菜单 mode=all 从「供应商分组+全部模型平铺混排」改为两级导航——第一级供应商列表（每行显示模型数，不平铺模型），点击供应商钻取进入第二级（该渠道全部模型行 + 「‹ 全部供应商」返回行）；点模型=selectModel 连带切渠道默认（供应商级联隐式成立，原 onPickSupplier 切默认路径在 all 模式退役，supplier/model 独立模式不变）。
+- **为什么这样设计**：用户裁决「点击模型供应商，出现对应的模型选择」——多渠道多模型时平铺混排要滚动扫找，两级导航按渠道收敛视线。
+- **验证（代码）**：ModelMenu 8/8（原 6 条不涉 all 平铺的用例不动；all 两条重写为两级导航契约：一级无平铺/钻取不出 onPickSupplier/二级出 back+模型行/点模型回调/返回复位）。
+- **实机证据**：9223 welcome 首页实断 6/6（acceptance/block-275/live.json）——A1 一级仅供应商（4 渠道/0 平铺模型行/无返回行）/A2 钻取（返回行+3 模型行）/A3 返回复位；截图合成不可用（-32000 离屏边界，BLOCK-273 已入册）。
+- **边界（reopen）**：供应商搜索/收藏置顶（未做）。
+
 ## UI-588: 拖拽边界统一渐变暗示规范（2026-10-27 **in_progress（BLOCK-273；亮主题默认态+接线实机断言 done，暗主题+真实指针 hover 走查待 30 秒人测路线确认）**）
 
 - **变化面**：五处可调宽边界统一「细线+渐变高光」悬停规范（Qoder 式，用户实测反馈）——文件树边界 `workspaceFileTreeResize` 4px 全高实心 accent 带 → 6px 热区 + 悬停渐隐 glow（`::before` linear-gradient）+ 分隔线经 `:has` 转 accent（线转色不叠新线）；FloatCardResizer 常驻指示线 3px→2px 变淡（35%→22%）+ hover 整块 tint 换渐隐 glow（项目摘要/侧边聊天共用）；desktop.css 死把手样式 `.petri-desktop-workarea__resize-handle`（6px 全高实心带，全站无渲染点）整块删除；`resizeHandleV`（BLOCK-62 参照）与两处 pill 分隔标注规范归属。顺手清偿：AnnotationOverlay 4 处死字面量 fallback（token 均有定义）；theme 契约门 accent 棘轮 93→95（拖拽把手态，宪章五类合法，对标 ArtifactPinPane 先例）。

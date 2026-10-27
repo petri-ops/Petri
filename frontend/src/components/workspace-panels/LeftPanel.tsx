@@ -229,8 +229,10 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
 /**
  * UI-354 修订 1（用户裁决：位置在左侧栏最下方）→ BLOCK-85 UI 收敛（用户裁决
  * 「协作节点和手机连接是不是应该合并到一起呢 放到 联邦？」）——底部一行两个
- * 入口：[联邦]（左，手机接入 + 协作成员两区）+ [设置]（最右）。弹层 portal 挂
+ * 入口：[联邦]（手机接入 + 协作成员两区）+ [设置]。弹层 portal 挂
  * body 防遮挡；设置走既有 handleShowSettings。
+ * UI-590（用户裁决 2026-10-27「去掉文字，只用图标；联邦图标换成手机；两图标右对齐」）：
+ * 纯图标钮（smartphone/settings，语义由 title/aria-label 承载），行右对齐。
  */
 function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   const [federationOpen, setFederationOpen] = useState(false);
@@ -247,8 +249,7 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           aria-expanded={federationOpen}
           data-testid="sidebar-federation"
         >
-          <Icon name="cpu" size={15} />
-          <span>联邦</span>
+          <Icon name="smartphone" size={15} />
         </button>
         {/* UI-362 — 指挥中心入口已迁入右栏 tab 体系（项目绑定俯瞰，与结果/审阅
             同级；用户裁决「应该像右侧边栏中的结果文件审阅一样」）。UI-361 曾短暂
@@ -264,7 +265,6 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
           data-testid="sidebar-settings"
         >
           <Icon name="settings" size={15} />
-          <span>设置</span>
         </button>
       </div>
       {federationOpen && createPortal(

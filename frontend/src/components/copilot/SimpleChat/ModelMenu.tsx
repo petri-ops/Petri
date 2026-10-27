@@ -38,60 +38,67 @@ interface ModelPrice { input: number; output: number }
 type PricingTable = Record<string, ModelPrice>;
 
 /**
- * BLOCK-266 并钮——组合菜单行渲染（供应商分组标题 + 全部可选模型平铺）。
- * 纯投影：分组标题行点击=切到该渠道默认模型；模型行点击=选该模型；
- * 白名单禁行与价格元信息与 model/model 分支同源。
+ * BLOCK-266 并钮——组合菜单行渲染。UI-589（用户裁决「点击模型供应商，出现对应的
+ * 模型选择」）：mode=all 改两级导航——第一级供应商标题行（点击=钻取进入该渠道
+ * 模型列表），第二级=该渠道模型行 + 返回行；不再供应商/模型平铺混排。
+ * 纯投影：模型行点击=选该模型（selectModel 连带切渠道默认，供应商级联隐式成立）；
+ * 白名单禁行与价格元信息与 model 分支同源。
  */
-function renderAllGroupRows(opts: {
-  groups: ModelCatalogGroup[];
-  activeModelId: string;
-  accessDenied: (model: string) => string | null;
-  pricing: Record<string, { input: number; output: number }>;
-  onPickSupplier: (group: ModelCatalogGroup) => void;
-  onPickModel: (preset: ChatModelPreset) => void;
-}): React.ReactElement[] {
-  const { groups, activeModelId, accessDenied, pricing, onPickSupplier, onPickModel } = opts;
-  return groups.flatMap((group) => {
+function renderSupplierHeaderRows(
+  groups: ModelCatalogGroup[],
+  onDrill: (group: ModelCatalogGroup) => void,
+): React.ReactElement[] {
+  return groups.map((group) => {
     const selectable = groupSelectableRows(group);
-    const header = (
+    return (
       <button
         type="button"
         key={"hdr-" + group.key}
         className="sc-model-option sc-model-group-header"
-        onClick={() => onPickSupplier(group)}
-        title="点击切换到该渠道的默认模型"
+        onClick={() => onDrill(group)}
+        title={`查看 ${group.supplier} 的模型`}
+        data-testid={`model-menu-supplier-${group.key}`}
       >
         <span className="sc-model-option-title">{group.supplier}</span>
         <span className="sc-model-option-meta">{selectable.length} 个模型</span>
       </button>
     );
-    // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
-    const rows = group.rows.map((row) => {
-      const active = row.preset.id === activeModelId;
-      const accessReason = accessDenied(row.preset.model);
-      const effectiveReason = row.reason || accessReason;
-      const disabled = !isSelectableRow(row) || accessReason !== null;
-      const price = formatPrice(pricing[row.preset.model]);
-      const meta = effectiveReason
-        ? effectiveReason + (price ? ` · ${price}` : '')
-        : presetMeta(row.preset, active, pricing);
-      return (
-        <button
-          type="button"
-          key={row.preset.id}
-          className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
-          disabled={disabled}
-          title={effectiveReason || row.preset.model}
-          onClick={() => onPickModel(row.preset)}
-        >
-          <span className="sc-model-option-title">{row.preset.model}</span>
-          <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
-            {meta}
-          </span>
-        </button>
-      );
-    });
-    return [header, ...rows];
+  });
+}
+
+function renderGroupModelRows(opts: {
+  group: ModelCatalogGroup;
+  activeModelId: string;
+  accessDenied: (model: string) => string | null;
+  pricing: Record<string, { input: number; output: number }>;
+  onPickModel: (preset: ChatModelPreset) => void;
+}): React.ReactElement[] {
+  const { group, activeModelId, accessDenied, pricing, onPickModel } = opts;
+  // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
+  return group.rows.map((row) => {
+    const active = row.preset.id === activeModelId;
+    const accessReason = accessDenied(row.preset.model);
+    const effectiveReason = row.reason || accessReason;
+    const disabled = !isSelectableRow(row) || accessReason !== null;
+    const price = formatPrice(pricing[row.preset.model]);
+    const meta = effectiveReason
+      ? effectiveReason + (price ? ` · ${price}` : '')
+      : presetMeta(row.preset, active, pricing);
+    return (
+      <button
+        type="button"
+        key={row.preset.id}
+        className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
+        disabled={disabled}
+        title={effectiveReason || row.preset.model}
+        onClick={() => onPickModel(row.preset)}
+      >
+        <span className="sc-model-option-title">{row.preset.model}</span>
+        <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
+          {meta}
+        </span>
+      </button>
+    );
   });
 }
 
@@ -177,6 +184,11 @@ export function ModelMenu({
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
   const access = useModelAccess();
+  // UI-589 — mode=all 两级导航的钻取态（菜单关闭即卸载，状态自然复位）
+  const [drilledKey, setDrilledKey] = useState<string | null>(null);
+  const drilledGroup = mode === 'all' && drilledKey
+    ? groups.find((group) => group.key === drilledKey) ?? null
+    : null;
   const accessDenied = (model: string): string | null => {
     if (access.mode !== 'allowlist') return null;
     if (access.allowedModels.includes(model)) return null;
@@ -216,14 +228,28 @@ export function ModelMenu({
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
-          renderAllGroupRows({
-            groups,
-            activeModelId,
-            accessDenied,
-            pricing,
-            onPickSupplier,
-            onPickModel,
-          })
+          drilledGroup ? (
+            <>
+              <button
+                type="button"
+                className="sc-model-option sc-model-group-header"
+                onClick={() => setDrilledKey(null)}
+                data-testid="model-menu-back"
+                title="返回供应商列表"
+              >
+                <span className="sc-model-option-title">‹ 全部供应商</span>
+              </button>
+              {renderGroupModelRows({
+                group: drilledGroup,
+                activeModelId,
+                accessDenied,
+                pricing,
+                onPickModel,
+              })}
+            </>
+          ) : (
+            renderSupplierHeaderRows(groups, (group) => setDrilledKey(group.key))
+          )
         ) : mode === 'supplier' ? (
 
           groups.map((group) => {
