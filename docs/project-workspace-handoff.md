@@ -1,9 +1,9 @@
 # Petri Desktop Current Handoff
-**已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
+**已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
 最后更新：2026-10-27（**BLOCK-274 test-changed 内部优化 completed（轻量包·plan=AUDIT-LOG 本条目）；无 active 工作包**）
 
-**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-274（用户「行！ 按照建议来」；两会话 Jev 建议收敛同案+BLOCK-273 实撞 120s 超时留痕根修指向本包）已收口——scripts/test-affected.mjs validateMap 进程内 memoization（WeakMap 按影响图对象身份缓存成功校验，失败照常抛出）。证据=「vitest 通道防复发」用例 solo 505-864s→**5.7s**、31 用例套件 1058s→**12.8s**（同套绿=纯重构行为基线）、closeout tests 门 704s→**14.6s**、整体 closeout ~14min→**~3min**。**closeout 现两大常态成本=ui-audit 门 ~144s（普惠优化候选另案）+ tests 门（已从分钟级降到秒级）**。前序：BLOCK-272 closeout 定向化（静态门热态 10.4s + 域跳过 + closeout:full 转义）/BLOCK-273 拖拽边界渐变（UI-588 in_progress 待人测）。待用户发令：推送（本地领先 12 笔）/UI-588 人测/UI-501/503/504/457 过目/R 运行时授权。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-274（用户「行！ 按照建议来」；两会话 Jev 建议收敛同案+BLOCK-273 实撞 120s 超时留痕根修指向本包）已收口——scripts/test-affected.mjs validateMap 进程内 memoization（WeakMap 按影响图对象身份缓存成功校验，失败照常抛出）。证据=「vitest 通道防复发」用例 solo 505-864s→**5.7s**、31 用例套件 1058s→**12.8s**（同套绿=纯重构行为基线）、closeout tests 门 704s→**14.6s**、整体 closeout ~14min→**~3min**。**closeout 现两大常态成本=ui-audit 门 ~144s（普惠优化候选另案）+ tests 门（已从分钟级降到秒级）**。前序：BLOCK-272 closeout 定向化（静态门热态 10.4s + 域跳过 + closeout:full 转义）/BLOCK-273 拖拽边界渐变（UI-588 in_progress 待人测）。待用户发令：UI-588 人测/UI-501/503/504/457 过目/R 运行时授权（**推送已于 2026-10-27 兑现**：9 笔+91 锚点标签）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 completed（UI-588 in_progress）；无 active 工作包**）
 
