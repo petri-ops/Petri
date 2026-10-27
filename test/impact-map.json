@@ -5750,6 +5750,23 @@
         "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx",
         "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.block147.test.tsx"
       ]
+    },
+    {
+      "id": "block268-scratchpad-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-268 UI-585 速记板开态实机腿补验：隔离 9223 亮暗双腿（flow b268-scratchpad-live + 主脚本 block268-scratchpad-live.mjs）；开→SPA 跨路由重挂保留→Esc 关闭→刷新归零。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b268-scratchpad-live.cjs",
+        "scripts/block268-scratchpad-live.mjs",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadPanel.tsx",
+        "acceptance/block-268/**"
+      ],
+      "tests": [
+        "test/block268-scratchpad-flow-contract.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/ScratchpadDock.test.tsx"
+      ]
     }
   ]
 }

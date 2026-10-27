@@ -1,0 +1,53 @@
+{
+  "name": "b268-scratchpad-live",
+  "block": "BLOCK-268",
+  "darkMode": true,
+  "migrationsApplied": 20,
+  "screenshots": "unavailable（离屏测试实例纪律）",
+  "synthetic": {
+    "conversationId": "conv_b268_live",
+    "note": "seed 项目+会话；只验 UI 动作与链路"
+  },
+  "startedAt": "2026-10-27T00:05:36.473Z",
+  "finishedAt": "2026-10-27T00:05:44.740Z",
+  "assertions": [
+    {
+      "name": "S1_seeded_project_conversation",
+      "pass": true,
+      "detail": "project=p_mvpxcpu2_d6hf conv=conv_b268_live"
+    },
+    {
+      "name": "S2_isolated_stack",
+      "pass": true,
+      "detail": "backend :3001 / vite :3000 / cdp :9223 / dark=true"
+    },
+    {
+      "name": "S2_composer_ready",
+      "pass": true,
+      "detail": "scratchpad-toggle 在场（首页 composer）"
+    },
+    {
+      "name": "UI585_dock_open",
+      "pass": true,
+      "detail": "toggle 开 → aria-expanded=true + sc-scratch-panel 在场"
+    },
+    {
+      "name": "UI585_remount_keeps_open",
+      "pass": true,
+      "detail": "首页→(SPA)设置→history.back 回首页（SPA 卸载重挂）→ aria-expanded=true panel=true（模块级 store 重读）"
+    },
+    {
+      "name": "UI585_close_semantics",
+      "pass": true,
+      "detail": "Escape（面板 document keydown 既有监听）→ aria-expanded=false + panel 消失"
+    },
+    {
+      "name": "UI585_reload_resets",
+      "pass": true,
+      "detail": "reload → aria-expanded=false + 无 panel（刷新即归零=有意边界，非持久化缺陷）"
+    }
+  ],
+  "allPass": true,
+  "passed": 7,
+  "total": 7
+}

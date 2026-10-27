@@ -8274,6 +8274,26 @@
         "G0"
       ],
       "notes": "BLOCK-264 候选产品包批（C-35~C-44 十包连打）：C-35 导入应用面+首启引导；C-36 模型侧建议+Auto 定形；C-37 model-access 族+定价缓存；C-38 PiP；C-39 审批深定位；C-40 浏览器连接器垂直切片；C-41/42 设计合册；C-43 批注契约 v2+画笔+迁移020；C-44 pack 写桥契约。证据=定向 95/95+前端 51+closeout。"
+    },
+    {
+      "id": "BLOCK-268-SCRATCHPAD-LIVE",
+      "capability": "block-268-scratchpad-live",
+      "path": "docs/block-268-scratchpad-live-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P1-CLOSED",
+      "canonical": true,
+      "truthDomain": "block-268-scratchpad-live",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-27",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-585",
+        "scratchpad",
+        "live-leg",
+        "G0"
+      ],
+      "notes": "2026-10-27 用户「行！ 你规划一下 按顺序批次完成」批次 1/5（Jev 实机腿补验批）。UI-585 实机亮/暗各 7/7（开→SPA 跨路由重挂保留→Esc 关闭→刷新归零；acceptance/block-268/）；实机抓真=CDP Page.navigate 是整页刷新非 SPA 重挂，修正为 sidebar-settings+history.back。台账 UI-585 verified。"
     }
   ],
   "lastUpdated": "2026-10-26",
