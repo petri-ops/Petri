@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T06:18:07.329Z -->
 最后更新：2026-10-26（**BLOCK-266 composer 视觉收缩 completed：UI-583/584 verified（亮/暗各 4/4）**）：用户反馈两处视觉问题确认并修——①模型选择占用多：ModelChip 两钮默认图标态（cpu+zap+chevron，28/46px，供应商名与模型名收 title/菜单，低频的供应商切换不再常驻占宽）；②聊天框下计量条换行：RunStatsBar 默认图标态（play/database/上下文环，数字读数收各段 title，上下文百分比保留视觉隐藏可访问性读数，条高 26px 零换行）。证据=RunStatsBar 7/7（title 承载/—语义/记忆保留/a11y span）+ModelMenu 6/6 回归+实机亮/暗各 4/4（acceptance/block-266/）。types 0/lint 0/theme 17/17。reopen=hover 展开全名胶囊与数字明细浮层（进阶形态）。plan=AUDIT-LOG 本行。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T06:55:10.116Z -->
+最后更新：2026-10-26（**BLOCK-266 补：模型选择并钮 completed（用户裁决「并到一起节省空间」；UI-583 同日追加）**）：供应商+模型两钮并为一枚图标钮（zap+chevron），单钮开组合菜单 mode='all'——供应商分组标题行（点击=切该渠道默认模型）+ 全部可选模型平铺（跨供应商一屏选完；缺密钥/白名单禁行带理由与 model 模式同源，renderAllGroupRows 纯投影）。ModelMenu mode 联合加 'all'（hook/useComposerFocus 类型随批）；SimpleChat 调用点只传 onOpenModel。证据=ModelMenu 8/8（原 6+并钮 2：分组标题回调+禁行同源）+types 0+lint 0。dev 栈干扰已清（用户纪律：测试零弹窗不干扰其它程序——本批全程离屏/组件级验证，无窗口）。G0 开发期常态 · 不外推 packaged/Provider/GA。

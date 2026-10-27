@@ -28,7 +28,7 @@
 
 - **targeted closeout（十三门）**：exit=0 全绿（task slot 20261027-061806-block272-closeout-soqf6）。域自纠实证：arch 两门「域内命中（scripts/arch-cycles-gate.mjs, scripts/lib/arch-cruise.mjs）→全量执行」（本批改了门禁实现，必须重跑）；quality:arch 0.4s=同轮 cruise 缓存命中；tests 门 704s。
 - **closeout:full（--force-full 全量转义）**：exit=0 全绿、header 标注 force-full、零域跳过行（task slot 20261027-063309-block272-closeout-full-ph28t）。
-- **域跳过实证**：live-skip-evidence.txt——首轮全量记锚点→次轮 arch 两门 SKIP（带锚点短 sha 与理由）；knip 因 package.json 在域内而全量（正确）。
+- **域跳过实证**：live-skip-evidence.txt 三轮实录——一/二轮（WIP 语境）域内命中→全量（fail-open 判定链实证；本摘要原「次轮 arch 两门 SKIP」注记失实，评审抓真改写）；第三轮（提交 d6118ee7 后干净树两连跑）**三门 SKIP 带锚点短 sha=真 SKIP 实证**（SKIP 不刷新锚点）。
 
 ## 5. Jev 决策建议实录（supply=cloud）
 

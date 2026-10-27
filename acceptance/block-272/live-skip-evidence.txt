@@ -91,3 +91,16 @@ CLOSEOUT: PASS — 门禁全绿。
 与 docs:reconcile 仍需按治理纪律完成；收口笔录使用「G0 开发期常态 · 不外推 packaged/Provider/GA」一次。
 (node:31932) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
 (Use `node --trace-deprecation ...` to show where the warning was created)
+
+== 第三轮（批次落定 d6118ee7 后干净树两连跑 · 2026-10-27 收口补充 · 真 SKIP 实证）==
+【语境】提交 d6118ee7 落定后，`npm run closeout -- --no_tests` 连跑两轮（关键判定行摘录，全程 exit=0）。
+第一轮：锚点（0fab977b）以来含本批已提交文件 → 三门「域内命中——全量执行」→ PASS → 锚点推进 d6118ee7。
+第二轮：锚点（d6118ee7）以来仅 docs/acceptance 治理类改动 → 三门 SKIP，理由带锚点短 sha：
+
+[7/13] 专项门禁 npm run gate:arch-cycles — SKIPPED（域不相交：锚点 d6118ee7 以来 3 个改动均不在源码域(src/core/frontend/src)；如实标注，不算 PASS）
+[10/13] 专项门禁 npm run quality:arch — SKIPPED（域不相交：锚点 d6118ee7 以来 3 个改动均不在源码域(src/core/frontend/src)；如实标注，不算 PASS）
+[13/13] 专项门禁 npm run quality:knip:check — SKIPPED（域不相交：锚点 d6118ee7 以来 3 个改动均不在JS/TS 源全域；如实标注，不算 PASS）
+CLOSEOUT: PASS — 门禁全绿。
+
+【结论】验收项「域跳过实测输出带理由与锚点 sha」由此轮闭环：SKIP 不刷新锚点（第二轮后锚点仍为 d6118ee7），
+域内命中必全量且 PASS 才推进锚点，与 plan §2 判定链一致。

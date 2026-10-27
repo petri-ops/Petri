@@ -64,6 +64,6 @@ status: completed
 
 - **红绿**：13/13（decideSkip 八例 + 包装器五例；红=实现缺失两文件失败，绿=全过）。**回归 31/31**（test-affected 18 + block109 + dev-verify + platform-freeze + knip-ratchet；vitest 通道防复发用例 864s 慢而有限如实记录，优化入 reopen）。
 - **计时**（acceptance/block-272/timing-*.json）：静态门冷 98.4→101.3s（缓存首建 +3s），**热 98.4→10.4s**（lint 79→1.5s、tsc 12.1→1.6s、quality:arch 1.8→0.4s 同轮缓存命中）。
-- **closeout 实机**：十三门 PASS exit=0——域自纠实证（arch 两门因实现脚本改动「域内命中→全量」）、quality:arch 0.4s 同轮共享；**closeout:full** PASS exit=0 零域跳过行（force-full 转义实证）；域跳过实证=live-skip-evidence.txt（次轮 arch 两门 SKIP 带锚点；knip 因 package.json 在域内全量=正确）。
+- **closeout 实机**：十三门 PASS exit=0——域自纠实证（arch 两门因实现脚本改动「域内命中→全量」）、quality:arch 0.4s 同轮共享；**closeout:full** PASS exit=0 零域跳过行（force-full 转义实证）；域跳过实证=live-skip-evidence.txt 三轮实录：一/二轮（WIP 语境）域内命中→全量（fail-open 判定链实证；原「次轮 arch 两门 SKIP」注记系证据标题失实，评审抓真改写）；第三轮=批次落定 d6118ee7 后干净树两连跑，**三门 SKIP 带锚点短 sha（真 SKIP 实证，SKIP 不刷新锚点）**。
 - **抓真三处**：①test-affected 18 红=新脚本未登记 impact-map（登记 block272-closeout-targeted 复绿）；②platform-freeze 抓真=探针 process.platform（含注释字面量）违 BLOCK-104 冻结门→shell:true 收敛（Jev test:suggest 追加建议直接命中）；③域设计自纠=门禁实现脚本纳入自身域。Jev 实录=doc:suggest planDoc 0.89 采纳/uiAudit 0.06 零/auditLog 纪律下限回写。
 - 证据：acceptance/block-272/（SUMMARY.md + timing 三件 + live-skip-evidence.txt）。收口运行=task slot 20261027-061806（targeted）/20261027-063309（full），以退出码为准（0/0）。

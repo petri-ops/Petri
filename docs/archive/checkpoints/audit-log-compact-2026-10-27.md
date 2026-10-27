@@ -15,3 +15,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T03:29:08.698Z -->
 | ✅ BLOCK-261 Q9-REM 余项逐条裁决与出籍（K3 逐项停止 / K1 应用级边界 / 十一项判档，2026-10-25；用户「先提交 完成 Jev 单一建议」confidence=0.95） | 2026-10-25 | **P0–P4 completed → 包收口**：K1/K2/K3 🟡→✅（矩阵 **72/22/1/7** 机械重算）；余项分三档另立项（平台/外部条件、G1+ 出籍、产品包候选），纠正 §6.5 漏记 K4 余项与 K9 未记 external-import preview 面。证据=Node 6/6 + 前端 25/25 + `test:changed` EXIT=0（Node 717＝712/0/5 skipped；前端 related 28 + 定向 359）+ 亮/暗各 18/18 + closeout 十三门。顺带修真 `listPendingApprovals` 恒空 taskId。plan=`docs/block-261-q9-rem-adjudication-plan.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T06:55:10.117Z -->
+| ✅ 候选产品包入册下步计划（🗃 C-35～C-44 + ⛔ D-05，2026-10-25；用户「把剩余的候选产品包列入下步计划」） | 2026-10-25 | 治理批（无代码改动）：BLOCK-261 判出的产品包候选与母纲各行 reopen 项统一入册 `pending-work-backlog.md`，不进串行序（启动均需用户裁决+立项）；§6.5 第 8/9/11 行与 roadmap/handoff 改为指向同一批 ID，防第二份清单漂移。同批抓真并改正自己的撞号（首笔用了已被「已核实销号」段占用的 C-24～C-33 → 改 C-35～C-44，全表核无重号）。轻门禁 `docs:check`/`ui:audit:check` 复跑。G0 开发期常态 · 不外推 packaged/Provider/GA。 |
