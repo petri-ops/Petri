@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**BLOCK-274 test-changed 内部优化 completed（轻量包·plan=AUDIT-LOG 本条目）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-274（用户「行！ 按照建议来」；两会话 Jev 建议收敛同案+BLOCK-273 实撞 120s 超时留痕根修指向本包）已收口——scripts/test-affected.mjs validateMap 进程内 memoization（WeakMap 按影响图对象身份缓存成功校验，失败照常抛出）。证据=「vitest 通道防复发」用例 solo 505-864s→**5.7s**、31 用例套件 1058s→**12.8s**（同套绿=纯重构行为基线）、closeout tests 门 704s→**14.6s**、整体 closeout ~14min→**~3min**。**closeout 现两大常态成本=ui-audit 门 ~144s（普惠优化候选另案）+ tests 门（已从分钟级降到秒级）**。前序：BLOCK-272 closeout 定向化（静态门热态 10.4s + 域跳过 + closeout:full 转义）/BLOCK-273 拖拽边界渐变（UI-588 in_progress 待人测）。待用户发令：推送（本地领先 12 笔）/UI-588 人测/UI-501/503/504/457 过目/R 运行时授权。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 completed（UI-588 in_progress）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-273（用户实测 Qoder 反馈+截图裁决）已收口——五处可调宽边界统一「细线+渐变高光」悬停规范：文件树 4px 全高实心带重构（6px 热区+`::before` 渐隐 glow+`:has` 分隔线转 accent）/ FloatCardResizer 常驻线 3px→2px 变淡（可发现性不回退）/ desktop.css 死把手样式删除 / 主列参照+pill 标注归属；顺手清偿 AnnotationOverlay 4 处死字面量 fallback + theme accent 棘轮 93→95 留痕。证据=theme 17/17+组件 35/35+双主题默认态实机断言（acceptance/block-273/）。**UI-588 in_progress**：暗主题悬停态+真实指针 hover 走查=30 秒人测路线（隐藏页 used 值缓存+离屏截图 -32000 环境边界如实入册 plan §6；用户确认后翻 verified）。**实机环境教训入册**：隐藏页 getComputedStyle used 值读旧缓存（自定义属性读新值）、`CSS.forcePseudoState` 静默不生效、离屏截图 -32000——探针配方沉淀在 scripts/block273-resize-affordance-live.cjs 头注。上包 BLOCK-272 已收口（含 SKIP 实证补录 6ac5167f）。待用户发令：推送（本地领先 9 笔）/R 运行时/UI-501/503/504/457/588 过目。G0 开发期常态 · 不外推 packaged/Provider/GA。

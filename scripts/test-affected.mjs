@@ -78,7 +78,18 @@ function listScripts() {
     .filter((file) => /\.(?:js|mjs|cjs|sh)$/.test(file) && !file.startsWith('scripts/archive/'));
 }
 
+// BLOCK-274 — validateMap 按影响图对象身份做进程内 memoization（根修落地）。
+// resolveImpact 每次调用都全量校验（实测 ~2s/次：127 条 script 规则 × 2418 patterns
+// × 全部 scripts 文件的 glob 扫描），而影响图在进程内是不可变常量——测试套件里
+// 「vitest 通道防复发」用例 59 次循环即重复支付 59 次（该用例 solo 505-864s 的根因，
+// BLOCK-273 曾因此把 --test-timeout 兜底提到 600s 并留痕「根修=本 memoization」）。
+// 生产 CLI 每进程仅一次调用，本缓存对生产无感知；测试进程内 scripts 文件树静态，
+// 校验语义不变。仅缓存成功结果（校验失败照常抛出、不缓存，重试语义同前）。
+// 若未来出现进程内动态增删 scripts 文件且依赖校验实时性的场景，需在此显式失效。
+const validatedMaps = new WeakMap();
+
 function validateMap(map) {
+  if (validatedMaps.has(map)) return;
   if (map.schema !== 'petri/test-impact-map.v1' || !Array.isArray(map.rules)) throw new Error('invalid test impact map schema');
   const commandIds = new Set(Object.keys(COMMANDS));
   const scriptRules = [];
@@ -90,6 +101,7 @@ function validateMap(map) {
   }
   const uncovered = listScripts().filter((file) => scriptRules.filter((rule) => rule.patterns.some((pattern) => globMatches(pattern, file))).length !== 1);
   if (uncovered.length) throw new Error(`script classification must match exactly one rule: ${uncovered.join(', ')}`);
+  validatedMaps.set(map, true);
 }
 
 function isNodeSource(file) { return /\.(?:js|mjs|cjs)$/.test(file) && !file.startsWith('test/') && !file.startsWith('frontend/'); }
