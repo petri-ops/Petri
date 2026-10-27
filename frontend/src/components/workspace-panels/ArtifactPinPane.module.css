@@ -142,7 +142,8 @@
   color: var(--petri-text-tertiary);
 }
 
-/* BLOCK-175 CP-15 — 可拖拽分隔条（20-80% 钳制；键盘可达） */
+/* BLOCK-175 CP-15 — 可拖拽分隔条（20-80% 钳制；键盘可达）
+   BLOCK-273 归属：pill 抓握提示形态（非全高实心条带），符合统一规范保留 */
 .artifactPinDivider {
   width: var(--petri-space-2);
   align-self: stretch;

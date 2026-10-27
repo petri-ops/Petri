@@ -7,7 +7,7 @@ acceptance:
   - 计时对照：四项重量门禁单项计时 before/after 落 acceptance/block-272/（before=eslint 79s/types 12.1s/cruise 2.2+1.8s/knip 3.3s，总 98.4s）。
   - 转义实测：`npm run closeout:full`（--force-full）全量跑通一轮；域跳过实测输出带理由与锚点 sha。
   - impact-map 登记 block272 规则 + routing 验证；closeout 十三门 PASS；AGENTS/SKILL 门禁行同步。
-reopen: 依赖图增量 cruise（depcruise 无内建增量，域跳过已覆盖其主要收益）；test:changed 内部并发化（BLOCK-97 稳定性史，另立项）；test-affected「vitest 通道防复发」用例 864s 优化（59 探针×全量 validateMap 串行，慢而有限）。
+reopen: 依赖图增量 cruise（depcruise 无内建增量，域跳过已覆盖其主要收益）；test:changed 内部并发化（BLOCK-97 稳定性史，另立项）；test-affected「vitest 通道防复发」用例 864s 优化（59 探针×全量 validateMap 串行，慢而有限）。**BLOCK-273 具体化（2026-10-27）**：该用例已越过 `--test-timeout` 120s 上限使 closeout 结构性红（solo 505s 实测；O(规则数×全库扫描) 随规则累积线性变慢）——兜底上限已 120s→600s（scripts/test-affected.mjs 留痕），根修=用例内 memoize listScripts 全库扫描一次复用（O(n×全库)→O(n)），本优化包落地时一并做。
 status: completed
 ---
 

@@ -1,0 +1,117 @@
+{
+  "capturedAt": "2026-10-27T08:18:17.268Z",
+  "head": "6ac5167f6fb9cbf95fd47ec97ab36b686708eb13",
+  "projectId": "p_mvqexqx6_gat9",
+  "method": "内联注入激活（forcePseudoState 本实例静默不生效，实测沉淀进脚本头注）+ 源码接线断言",
+  "total": 21,
+  "passed": 16,
+  "failed": 5,
+  "records": [
+    {
+      "id": "S1_tree_hover_selectors",
+      "ok": true,
+      "detail": "project-workspace.module.css"
+    },
+    {
+      "id": "S2_tree_divider_has_rule",
+      "ok": true,
+      "detail": ":has 分隔线转 accent"
+    },
+    {
+      "id": "S3_card_hover_selectors",
+      "ok": true,
+      "detail": "FloatCardResizer.module.css"
+    },
+    {
+      "id": "S4_dead_handle_style_removed",
+      "ok": true,
+      "detail": "desktop.css"
+    },
+    {
+      "id": "P0a_backend_rest_healthy",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "id": "P0b_temp_project_created",
+      "ok": true,
+      "detail": "id=p_mvqexqx6_gat9"
+    },
+    {
+      "id": "P0c_seed_files",
+      "ok": true,
+      "detail": "ws=D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block273---1793089072263-mvqexqx6"
+    },
+    {
+      "id": "light.A1_tree_handle_present",
+      "ok": true,
+      "detail": "workspaceFileTreeResize"
+    },
+    {
+      "id": "light.T0_theme_token_active",
+      "ok": true,
+      "detail": "accent=#0d9488"
+    },
+    {
+      "id": "light.A2_default_no_solid_band",
+      "ok": true,
+      "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"glow\":\"0\",\"img\":\"linear-gradient(to right, color(srgb 0.0509804 0.580392 0.533333 / 0.1\",\"border\":\"color(srgb 0.894118 0.894118 0.905882 / 0.55)\",\"w\":\"5.99568px\"}"
+    },
+    {
+      "id": "light.A3_hover_glow_on",
+      "ok": false,
+      "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"glow\":\"0\",\"img\":\"linear-gradient(to right, color(srgb 0.0509804 0.580392 0.533333 / 0.1\",\"border\":\"oklab(0.919723 0.0011749 -0.00385052 / 0.55)\",\"w\":\"5.99568px\"}"
+    },
+    {
+      "id": "light.A4_divider_turns_accent",
+      "ok": false,
+      "detail": "expected=rgb(13, 148, 136) actual=oklab(0.919723 0.0011749 -0.00385052 / 0.55)"
+    },
+    {
+      "id": "light.A5_glow_restored_off",
+      "ok": true,
+      "detail": "glow=0"
+    },
+    {
+      "id": "light.B1_card_handle_skipped",
+      "ok": true,
+      "detail": "float-card handle not mounted in this state（如实标注，不算 PASS 断言）"
+    },
+    {
+      "id": "dark.A1_tree_handle_present",
+      "ok": true,
+      "detail": "workspaceFileTreeResize"
+    },
+    {
+      "id": "dark.T0_theme_token_active",
+      "ok": false,
+      "detail": "accent=#0d9488"
+    },
+    {
+      "id": "dark.A2_default_no_solid_band",
+      "ok": true,
+      "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"glow\":\"0\",\"img\":\"linear-gradient(to right, color(srgb 0.0509804 0.580392 0.533333 / 0.1\",\"border\":\"color(srgb 0.894118 0.894118 0.905882 / 0.55)\",\"w\":\"5.99568px\"}"
+    },
+    {
+      "id": "dark.A3_hover_glow_on",
+      "ok": false,
+      "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"glow\":\"0\",\"img\":\"linear-gradient(to right, color(srgb 0.0509804 0.580392 0.533333 / 0.1\",\"border\":\"oklab(0.919723 0.0011749 -0.00385052 / 0.55)\",\"w\":\"5.99568px\"}"
+    },
+    {
+      "id": "dark.A4_divider_turns_accent",
+      "ok": false,
+      "detail": "expected=rgb(13, 148, 136) actual=oklab(0.919723 0.0011749 -0.00385052 / 0.55)"
+    },
+    {
+      "id": "dark.A5_glow_restored_off",
+      "ok": true,
+      "detail": "glow=0"
+    },
+    {
+      "id": "dark.B1_card_handle_skipped",
+      "ok": true,
+      "detail": "float-card handle not mounted in this state（如实标注，不算 PASS 断言）"
+    }
+  ],
+  "mode": "dark"
+}

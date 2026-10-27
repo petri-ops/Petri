@@ -184,20 +184,20 @@
 }
 
 .freehandStroke {
-  stroke: var(--petri-warning, #d97706);
+  stroke: var(--petri-warning);
   stroke-width: 0.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .freehandStroke[data-color='amber'] {
-  stroke: var(--petri-warning, #d97706);
+  stroke: var(--petri-warning);
 }
 
 .freehandStroke[data-color='sky'] {
-  stroke: var(--petri-info, #2563eb);
+  stroke: var(--petri-info);
 }
 
 .freehandStroke[data-color='rose'] {
-  stroke: var(--petri-danger, #dc2626);
+  stroke: var(--petri-danger);
 }

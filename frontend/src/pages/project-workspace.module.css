@@ -3304,6 +3304,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   pointer-events: auto;
 }
 
+/* BLOCK-273 归属：pill 抓握提示形态（34px 短线加宽为抓握暗示，非全高实心条带），符合统一规范保留 */
 .embeddedTerminalResize {
   position: absolute;
   inset: 0 0 auto;
@@ -3923,7 +3924,9 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   cursor: pointer;
 }
 
-/* Resize handles */
+/* Resize handles — BLOCK-273 拖拽边界统一渐变规范的参照形态：
+   默认 1px 中性细线，悬停转 2px accent（本列边界，行为不动）；渐隐 glow 范式见
+   .workspaceFileTreeResize::before / FloatCardResizer.module.css */
 .resizeHandleV {
   width: 9px;
   margin-left: -4px;
@@ -6079,14 +6082,38 @@ body:global(.petri-resizing-columns) * {
 }
 
 .workspaceFileTreeResize {
-  width: 4px;
+  width: 6px;
   flex-shrink: 0;
   cursor: ew-resize;
   background: transparent;
+  position: relative;
 }
 
-.workspaceFileTreeResize:hover {
-  background: var(--petri-accent-bg);
+/* BLOCK-273 统一规范 — 悬停 = 渐隐 glow + 既有分隔线（wrap 的 border-left）转 accent：
+   线转色而非叠加新线（:has 穿透父级 border，避免双线）；默认态无任何实心条带
+   （原 4px 全高 accent-bg 实心带按 BLOCK-273 退场）。 */
+.workspaceFileTreeResize::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--petri-accent) 16%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--petri-duration-fast) ease;
+  pointer-events: none;
+}
+
+.workspaceFileTreeResize:hover::before,
+.workspaceFileTreeResize:active::before {
+  opacity: 1;
+}
+
+.workspaceFileTreePaneWrap:has(.workspaceFileTreeResize:hover),
+.workspaceFileTreePaneWrap:has(.workspaceFileTreeResize:active) {
+  border-left-color: var(--petri-accent);
 }
 
 .workspaceFilePreviewPane {

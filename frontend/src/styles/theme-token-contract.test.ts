@@ -401,7 +401,9 @@ describe('theme token contract', () => {
       // LineageViewSwitch 既有条目 2 已覆盖其选中态计数，不重复登记）
       'components/workspace-panels/ArtifactPinPane.module.css': 2, // 拖拽把手态+键盘可达 focus ring
       'components/workspace-panels/OrchestrationGraph.module.css': 1, // 节点选中态
-      'pages/project-workspace.module.css': 93,
+      // BLOCK-273 拖拽边界统一规范：+2 = 文件树把手悬停渐隐 glow（accent 16% 渐变）+
+      // 分隔线 hover 转 accent（:has）——宪章五类「交互态拖拽把手」合法语义（同 ArtifactPinPane 先例）
+      'pages/project-workspace.module.css': 95,
       'components/copilot/simple-chat.css': 31,
       'components/desktop/desktop.css': 24,
       'pages/extensions/styles.module.css': 20,

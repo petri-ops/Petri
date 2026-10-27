@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：**main 已推到 `origin/main`**——`1e73233f..033072e5`，共 **93 笔**，快进推送、未改写历史、未强推、未碰其它分支。此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录本轮已兑现的授权，不构成常驻授权）。
 
+最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 completed（UI-588 in_progress）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-273（用户实测 Qoder 反馈+截图裁决）已收口——五处可调宽边界统一「细线+渐变高光」悬停规范：文件树 4px 全高实心带重构（6px 热区+`::before` 渐隐 glow+`:has` 分隔线转 accent）/ FloatCardResizer 常驻线 3px→2px 变淡（可发现性不回退）/ desktop.css 死把手样式删除 / 主列参照+pill 标注归属；顺手清偿 AnnotationOverlay 4 处死字面量 fallback + theme accent 棘轮 93→95 留痕。证据=theme 17/17+组件 35/35+双主题默认态实机断言（acceptance/block-273/）。**UI-588 in_progress**：暗主题悬停态+真实指针 hover 走查=30 秒人测路线（隐藏页 used 值缓存+离屏截图 -32000 环境边界如实入册 plan §6；用户确认后翻 verified）。**实机环境教训入册**：隐藏页 getComputedStyle used 值读旧缓存（自定义属性读新值）、`CSS.forcePseudoState` 静默不生效、离屏截图 -32000——探针配方沉淀在 scripts/block273-resize-affordance-live.cjs 头注。上包 BLOCK-272 已收口（含 SKIP 实证补录 6ac5167f）。待用户发令：推送（本地领先 9 笔）/R 运行时/UI-501/503/504/457/588 过目。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 completed；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：BLOCK-272（用户裁决「收口只需要校验有改动的部分。你看看怎么处理」）已收口——closeout 默认变定向：eslint --cache + tsc --incremental + arch 两门/knip 域跳过（decideSkip 锚定，fail-open；门禁实现脚本属自身域）+ cruise 同轮共享 + `npm run closeout:full`（--force-full）全量转义（发布/CI/锚点存疑时用）。证据=红绿 13/13+回归 31/31+双 closeout PASS exit 0；**静态门热态 98.4s→10.4s**（timing 三件落 acceptance/block-272/）。抓真：impact-map 未登记 18 红（复绿）/platform-freeze 抓探针平台分支（shell:true 收敛）/域设计自纠。**test:changed 语义未动**（代码类工作包的最大耗时项仍是它；「vitest 通道防复发」用例 864s 优化已入 plan reopen）。待用户发令：推送（本地领先 7 笔）/R 运行时/UI-501/503/504/457 过目。G0 开发期常态 · 不外推 packaged/Provider/GA。

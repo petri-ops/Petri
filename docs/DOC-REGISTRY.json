@@ -8354,8 +8354,28 @@
         "G0"
       ],
       "notes": "2026-10-27 用户裁决「收口只需要校验有改动的部分。你看看怎么处理」。三层机制：eslint --cache + tsc --incremental（工具内建增量）、arch 两门+knip 域跳过（decideSkip 状态锚定）、cruise 同轮去重；fail-open 全护栏 + closeout:full 转义；test:changed 不动。收口=13/13 红绿+回归 31/31+closeout/closeout:full 双 PASS exit 0；静态门热态 98.4s→10.4s。"
+    },
+    {
+      "id": "BLOCK-273-RESIZE-AFFORDANCE-GRADIENT",
+      "capability": "block-273-resize-affordance-gradient",
+      "path": "docs/block-273-resize-affordance-gradient-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "phase": "P5-CLOSED",
+      "canonical": true,
+      "truthDomain": "block-273-resize-affordance-gradient",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-27",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-ux",
+        "qoder-essence",
+        "css-theme",
+        "G0"
+      ],
+      "notes": "2026-10-27 用户裁决「鼠标放到拖拽的地方有渐变的渲染效果……任何可以变化的窗口不应该被固定宽度的条带干扰影响美观」+「项目摘要和侧边聊天的窗口左侧也不要默认有这么宽 换成 一致的统一规范」（附截图）。拖拽边界悬停统一「细线+渐变高光」规范：workspaceFileTreeResize 4px 实心带重构 / FloatCardResizer 常驻线 3px 收窄（可发现性不回退，v25 教训在案）/ 清 desktop.css 死把手样式；QODER-ESSENCE-ABSORPTION 切片（用户实测反馈，非矩阵行）。"
     }
   ],
-  "lastUpdated": "2026-10-26",
-  "documentCount": 404
+  "lastUpdated": "2026-10-27",
+  "documentCount": 405
 }

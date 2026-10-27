@@ -184,9 +184,14 @@ export function runPlan(plan) {
   // keep-alive 句柄（例：block93-role-prompt 的 mock 上游 server 不 close），
   // runner 就在「用例全过后」无限等待进程退出——聚合批表现为整体挂起
   // （实测 28 分钟零 CPU）。--test-force-exit 让 runner 在用例完成后强制
-  // 退出，--test-timeout=120000 给单个用例兜底超时：任何套件都无法再把
+  // 退出，--test-timeout 给单个用例兜底超时：任何套件都无法再把
   // 聚合门禁拖死。挂起定诊法=对比进程 CPU 时间（零增量=挂起而非慢）。
-  if (plan.tests.length) { const status = runProcess(process.execPath, ['--test', '--test-force-exit', '--test-timeout=120000', ...plan.tests]); if (status !== 0) return status; }
+  // BLOCK-273 抓真（2026-10-27）：120000→600000——「防复发全量扫描」用例
+  // O(规则数×全库扫描) 随规则累积线性变慢（本批实测 solo 505s；BLOCK-272
+  // 收口实测 864s），已越过 120s 上限使 closeout 结构性红。根修=该用例
+  // memoize 全库扫描（O(n×全库)→O(n)），在 test:changed 内部优化包落地
+  // （BLOCK-272 reopen 具体化）；本行只是兜底上限，不是性能修复。
+  if (plan.tests.length) { const status = runProcess(process.execPath, ['--test', '--test-force-exit', '--test-timeout=600000', ...plan.tests]); if (status !== 0) return status; }
   if (plan.frontendRelated.length) {
     // 分流执行：impact-map 显式声明的 vitest 文件 → test:files（直接跑该文件）；
     // 被改动的前端源文件 → test:related（vitest 依赖图反查相关测试）。

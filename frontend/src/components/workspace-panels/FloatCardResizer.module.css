@@ -1,4 +1,7 @@
-/* FloatCardResizer — UI-448 加映 v25 — 浮卡左缘拖宽把手 */
+/* FloatCardResizer — UI-448 加映 v25 — 浮卡左缘拖宽把手
+   BLOCK-273 统一规范：默认 2px 低存在感常驻线（v25 可发现性约束保留——「只有悬浮时
+   才可以拖宽吗」用户抓真在案：只降视觉重量，不删暗示），悬停转 accent 细线 + 渐隐
+   glow（取代 v25 的整块 16% tint——固定宽度实心条带按 BLOCK-272/273 评审退场）。 */
 .handle {
   position: absolute;
   top: 0;
@@ -10,24 +13,39 @@
   touch-action: none;
 }
 
-.handle:hover {
-  background: color-mix(in srgb, var(--petri-accent) 16%, transparent);
+/* 悬停渐隐 glow：从左缘向右淡出，视觉重量集中在把手上 */
+.handle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--petri-accent) 16%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity var(--petri-duration-fast) ease;
+  pointer-events: none;
 }
 
-/* v25 补 — 把手可见性：常驻一条 3px 中性指示线（用户反馈「只有悬浮时才可以
-   拖宽吗」——隐形热区不可发现），悬停把手时转主题色明确可拖 */
 .handle::after {
   content: '';
   position: absolute;
-  left: 3px;
+  left: 4px;
   top: 14px;
   bottom: 14px;
-  width: 3px;
-  border-radius: var(--petri-radius-sm);;
-  background: color-mix(in srgb, var(--petri-text-tertiary) 35%, transparent);
+  width: 2px;
+  border-radius: var(--petri-radius-pill);
+  background: color-mix(in srgb, var(--petri-text-tertiary) 22%, transparent);
   transition: background var(--petri-duration-base) ease;
 }
 
-.handle:hover::after {
+.handle:hover::before,
+.handle:active::before {
+  opacity: 1;
+}
+
+.handle:hover::after,
+.handle:active::after {
   background: var(--petri-accent);
 }

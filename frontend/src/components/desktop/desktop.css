@@ -191,28 +191,9 @@
   width: 960px;
 }
 
-/* 右边缘拖拽手柄：鼠标拖动调整面板宽度 */
-.petri-desktop-workarea__resize-handle {
-  position: absolute;
-  top: 0;
-  right: -3px;
-  width: 6px;
-  height: 100%;
-  cursor: col-resize;
-  z-index: 10;
-  background: transparent;
-  transition: background var(--petri-duration-fast);
-}
-
-.petri-desktop-workarea__resize-handle:hover,
-.petri-desktop-workarea__resize-handle:active {
-  background: var(--petri-accent-border);
-}
-
-[data-theme='dark'] .petri-desktop-workarea__resize-handle:hover,
-[data-theme='dark'] .petri-desktop-workarea__resize-handle:active {
-  background: var(--petri-accent-border);
-}
+/* BLOCK-273 — 原右边缘拖拽手柄样式块已删：全站无渲染点（评审核实），
+   且其「6px 全高实心 accent 条带」形态违反拖拽边界统一渐变规范
+   （docs/block-273-resize-affordance-gradient-plan.md）。 */
 
 [data-theme='dark'] .petri-desktop-workarea {
   border-right-color: rgba(230, 237, 243, 0.08);

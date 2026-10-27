@@ -18,3 +18,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T06:55:10.117Z -->
 | ✅ 候选产品包入册下步计划（🗃 C-35～C-44 + ⛔ D-05，2026-10-25；用户「把剩余的候选产品包列入下步计划」） | 2026-10-25 | 治理批（无代码改动）：BLOCK-261 判出的产品包候选与母纲各行 reopen 项统一入册 `pending-work-backlog.md`，不进串行序（启动均需用户裁决+立项）；§6.5 第 8/9/11 行与 roadmap/handoff 改为指向同一批 ID，防第二份清单漂移。同批抓真并改正自己的撞号（首笔用了已被「已核实销号」段占用的 C-24～C-33 → 改 C-35～C-44，全表核无重号）。轻门禁 `docs:check`/`ui:audit:check` 复跑。G0 开发期常态 · 不外推 packaged/Provider/GA。 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-27T08:24:17.033Z -->
+| ✅ ReviewMode.block147 并发 flaky 根治（BLOCK-267 ①；原 2026-10-26 🟡 行销号） | 2026-10-26 | act 微任务冲刷 + 刷新断言 timeout 5s；隔离 6/6 恒绿 + closeout test:changed 两轮 750/751 稳绿 | quality:lint/types 0 |
