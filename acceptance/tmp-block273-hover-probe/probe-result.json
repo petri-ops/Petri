@@ -1,0 +1,73 @@
+{
+  "url": "http://localhost:3000/project/p_mvqexqx6_gat9",
+  "dpr": 1.4992859363555908,
+  "fullShot": "saved",
+  "inventory": {
+    "workspaceFileTreeResize": [],
+    "workspaceFileTreePaneWrap": [],
+    "resizeHandleV": [
+      {
+        "x": 335,
+        "y": 0,
+        "w": 9,
+        "h": 836,
+        "cls": "_resizeHandleV_1f3rm_2925"
+      },
+      {
+        "x": 963,
+        "y": 0,
+        "w": 9,
+        "h": 836,
+        "cls": "_resizeHandleV_1f3rm_2925"
+      }
+    ],
+    "floatCardHandle": [],
+    "artifactPinDivider": [],
+    "embeddedTerminalResize": [
+      {
+        "x": 349,
+        "y": 829,
+        "w": 610,
+        "h": 7,
+        "cls": "_embeddedTerminalResize_1f3rm_3308"
+      }
+    ]
+  },
+  "treeResize": {
+    "label": "tree-resize",
+    "status": "not_found_or_zero_rect"
+  },
+  "resizeHandleV": {
+    "label": "resize-handle-v",
+    "rect": {
+      "x": 335.00323486328125,
+      "y": 0,
+      "w": 8.993865013122559,
+      "h": 835.731201171875
+    },
+    "default": {
+      "handleHover": false,
+      "width": "8.99387px",
+      "bg": "rgba(0, 0, 0, 0)",
+      "beforeOpacity": "1",
+      "wrapClass": "",
+      "wrapBorderLeft": "rgb(63, 63, 70)",
+      "dpr": 1.4992859363555908
+    },
+    "defaultShot": "saved(fromSurface=true)",
+    "hover": {
+      "hovered": true,
+      "handleHoverActive": true,
+      "beforeOpacity": "1",
+      "beforeBg": "none",
+      "beforeWidth": "8.99387px",
+      "afterBg": "color(srgb 0.0509804 0.580392 0.533333 / 0.58)",
+      "wrapBorderLeft": "rgb(63, 63, 70)"
+    },
+    "hoverShot": "saved(fromSurface=true)"
+  },
+  "floatCard": {
+    "label": "float-card",
+    "status": "not_found_or_zero_rect"
+  }
+}
