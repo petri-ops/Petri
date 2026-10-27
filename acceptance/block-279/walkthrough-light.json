@@ -1,0 +1,77 @@
+{
+  "capturedAt": "2026-10-27T15:45:58.445Z",
+  "head": "cc96de33c5bbf1ee514dff2e64814e9da8ce93d8",
+  "projectId": "p_mvquxf2s_zk1u",
+  "method": "合并自动化走查（用户裁决免参与；视觉体感边界如实标注，结构/几何/激活态断言为证据主体）",
+  "total": 13,
+  "passed": 13,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvquxf2s_zk1u"
+    },
+    {
+      "id": "W3_stats_bar_restored_text_form",
+      "ok": true,
+      "detail": "恢复后文字形态（图标 svg 数=1，条高=26px）"
+    },
+    {
+      "id": "W2a_footer_icon_only",
+      "ok": true,
+      "detail": "{\"fedText\":\"\",\"setText\":\"\"}"
+    },
+    {
+      "id": "W2b_footer_phone_icon",
+      "ok": true,
+      "detail": "smartphone 图标（DOM svg 在场已断言；渲染面见 clip）"
+    },
+    {
+      "id": "W2c_footer_right_aligned",
+      "ok": true,
+      "detail": "fed=188 set=224 expect=188/224"
+    },
+    {
+      "id": "W1a_menu_level1_suppliers",
+      "ok": true,
+      "detail": "{\"suppliers\":1,\"back\":false}（≥2 渠道时两级导航收益最大；dev 目录加载偶发回退为已知运行时行为）"
+    },
+    {
+      "id": "W1b_menu_level2_drilled",
+      "ok": true,
+      "detail": "{\"back\":true}"
+    },
+    {
+      "id": "light.T0_theme_active",
+      "ok": true,
+      "detail": "accent=#0d9488"
+    },
+    {
+      "id": "light.E1_empty_state_qoder_layout",
+      "ok": true,
+      "detail": "{\"accent\":\"#0d9488\",\"title\":\"工作区\",\"cards\":6,\"centered\":true}"
+    },
+    {
+      "id": "light.E2_tree_glow_activation",
+      "ok": true,
+      "detail": "{\"tree\":\"present\",\"glowOpacity\":\"1\"}"
+    },
+    {
+      "id": "dark.T0_theme_active",
+      "ok": true,
+      "detail": "accent=#2dd4bf"
+    },
+    {
+      "id": "dark.E1_empty_state_qoder_layout",
+      "ok": true,
+      "detail": "{\"accent\":\"#2dd4bf\",\"title\":\"工作区\",\"cards\":6,\"centered\":true}"
+    },
+    {
+      "id": "dark.E2_tree_glow_activation",
+      "ok": true,
+      "detail": "{\"tree\":\"present\",\"glowOpacity\":\"1\"}"
+    }
+  ],
+  "mode": "light"
+}

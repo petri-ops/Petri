@@ -16,7 +16,7 @@
 - **实机证据**：恢复即已验证形态（UI-523 当轮实机 verified 的同一代码），无需重跑实机；如需过目，composer 下沿直接可见。
 - **边界（reopen）**：无（图标态如需回归须用户再裁决）。
 
-## UI-591: 拖拽边界指针跟随渐晕（2026-10-27 **in_progress（UI-591 轻量包 v2；主窗口真实指针取证 done，用户人测确认后翻 verified）**）
+## UI-591: 拖拽边界指针跟随渐晕（2026-10-27 **verified（UI-591 轻量包 v2 + BLOCK-279 合并走查亮/暗 glow 激活断言；主窗口真实指针取证 done；用户裁决「不是我参与」人测豁免，体感以日常使用为准）**）
 
 - **变化面**：BLOCK-273 reopen（指针跟随渐晕，Qoder 完整形态）兑现——三处可调宽边界悬停唯一 accent 信号 = 「以指针 Y 为中心、上下渐隐的椭圆 glow」（radial-gradient rx=4px/ry=170px、30% accent、横跨接缝；v3 用户微调 rx7px/42%→rx4px/30%）：`resizeHandleV`（AppRail 左栏 / RightPanel 右栏）、`workspaceFileTreeResize`（右文件树）、FloatCardResizer（项目摘要/侧边聊天）。**线保持中性不转色**（v2 用户裁决「有光晕后同色竖带冗余」：v1 的 hover accent 2px 线与文件树 :has 分隔线转色退场）。新增 `lib/resize-glow.ts`（onPointerMove 刷新 `--petri-resize-glow-y`，未跟踪回落 50% 居中），四组件接线；custom.css 定义几何 token（明暗同值，成对棘轮豁免同 `--petri-ring-width` 先例）；theme accent 棘轮 project-workspace 95→94 / FloatCardResizer 3→2（渐晕 +1、同色竖带 -1 对冲）。
 - **为什么这样设计**：用户人测抓真（附图 1=Qoder 目标形态、图 2=本仓实况「只有一条均匀 teal 线」）——根因有二：①用户 hover 的主列边界 `resizeHandleV` 是 BLOCK-273 刻意保留的「参照形态」，从未升级为渐变规范；②Qoder 的核心观感=以指针为中心的局部渐变（渐晕），BLOCK-273 落地的是 6~10px 宽 / 16% 侧向微弱渐变+全高均匀线，几乎不可感知。跟手渐晕是 BLOCK-273 plan 显式 reopen（「本轮不做，用户要再做」）；v1 交付后用户两点评审（光晕偏宽、同色竖带冗余）即得 v2 终态：光晕=唯一彩色信号，线只承担结构分隔。
@@ -24,7 +24,7 @@
 - **实机证据**：acceptance/ui-591/——9222 主实例**真实指针**（CDP Input.dispatchMouseEvent）v2 取证 win-glow-follow-result.json：v2 CSS 生效（bgImage=radial 7px）+ 两档 Y 跟手（150→150px、600→600px，inlineGlowY/usedGlowY 全对齐）+ ::after 恒中性 1px（同色竖带退场实测）；v1 跟手双档截图 test-resize-handle-v-glow-y{150,600}.png（9223 onscreen）证明跟随行为；v2 视觉 clip 因真实光标竞争 hover 不稳定，以 JSON 计算样式证据+用户主窗口直视为人测门。根因取证=acceptance/tmp-block273-hover-probe/（修复前 resizeHandleV hover=无渐变、::after teal 58% 全高均匀线）。**环境教训入册**：Windows Vite watcher 可能漏 .tsx 事件（CSS 热更正常、组件 props 陈旧）——验方=读元素 `__reactProps$` keys、touch 强制 transform 失效；离屏实例 -32000 拒真实输入，屏内弹窗=用户裁决禁用（「测试 不需要出现屏幕」），真实指针取证唯一通道=主实例 9222。
 - **边界（reopen）**：拖拽进行中的渐晕跟随（pointermove 挂在把手，拖拽移出把手后光斑停驻——与既有 :active 线行为同界）；暗主题走查随用户主窗口人测一并确认。
 
-## UI-590: 左栏页脚图标化右对齐（2026-10-27 **verified（BLOCK-275；9223 实机断言 6/6）**）
+## UI-590: 左栏页脚图标化右对齐（2026-10-27 **verified（BLOCK-275；9223 实机断言 6/6；BLOCK-279 合并走查亮/暗复验通过）**）
 
 - **变化面**：左栏页脚「联邦/设置」两钮去文字只留图标（语义由 title/aria-label 承载）；联邦图标 cpu→smartphone（手机连接语义对位，用户图3）；`.leftFooterRow` 右对齐 + 图标钮紧凑化（30px 方钮，flex:0 0 auto）。
 - **为什么这样设计**：两钮高频且语义已被图形约定承载（手机=联邦/齿轮=设置），文字冗余占宽；右对齐贴近窗口操作动线。
@@ -40,13 +40,13 @@
 - **实机证据**：9223 welcome 首页实断 6/6（acceptance/block-275/live.json）——A1 一级仅供应商（4 渠道/0 平铺模型行/无返回行）/A2 钻取（返回行+3 模型行）/A3 返回复位；截图合成不可用（-32000 离屏边界，BLOCK-273 已入册）。
 - **边界（reopen）**：供应商搜索/收藏置顶（未做）。
 
-## UI-588: 拖拽边界统一渐变暗示规范（2026-10-27 **in_progress（BLOCK-273；亮主题默认态+接线实机断言 done，暗主题+真实指针 hover 走查待 30 秒人测路线确认）**）
+## UI-588: 拖拽边界统一渐变暗示规范（2026-10-27 **verified（BLOCK-273/279；亮暗双主题默认态+注入激活 glow 断言 13/13 合并走查；用户裁决「不是我参与」人测豁免，视觉体感以日常使用为准）**）
 
 - **变化面**：五处可调宽边界统一「细线+渐变高光」悬停规范（Qoder 式，用户实测反馈）——文件树边界 `workspaceFileTreeResize` 4px 全高实心 accent 带 → 6px 热区 + 悬停渐隐 glow（`::before` linear-gradient）+ 分隔线经 `:has` 转 accent（线转色不叠新线）；FloatCardResizer 常驻指示线 3px→2px 变淡（35%→22%）+ hover 整块 tint 换渐隐 glow（项目摘要/侧边聊天共用）；desktop.css 死把手样式 `.petri-desktop-workarea__resize-handle`（6px 全高实心带，全站无渲染点）整块删除；`resizeHandleV`（BLOCK-62 参照）与两处 pill 分隔标注规范归属。顺手清偿：AnnotationOverlay 4 处死字面量 fallback（token 均有定义）；theme 契约门 accent 棘轮 93→95（拖拽把手态，宪章五类合法，对标 ArtifactPinPane 先例）。
 - **为什么这样设计**：BLOCK-62 只精修了主列一处，其余边界保持原始实心带写法——规范从未统一；可发现性约束（v25「隐形热区不可发现」抓真在案）只降视觉重量不删暗示，热区宽度不收窄。
 - **验证（代码）**：theme-token-contract 17/17（含新棘轮 + AnnotationOverlay 清偿）；FloatCardResizer 消费组件测试 35/35（SideChatDock/CenterPanel）；routing unknown=[]（block273 规则登记）。
-- **实机证据**：acceptance/block-273/live-light.json / live-dark.json——亮/暗双主题默认态实机断言（无实心条带 bg=透明+glow=0+分隔线=divider）+ 源码接线断言（S1-S4）全绿；环境边界如实记录：隐藏页 used 值缓存 + 离屏截图合成不可用（-32000），悬停激活态的干净渲染观测见诊断记录（亮主题 glow=1、分隔线=accent rgb(13,148,136)，非门禁证据）。**补录（并发会话产出 34f91bc0）**：用户主实例 9222 **可见窗口真实指针** hover 实证——resizeHandleV（主列边界）悬停 accent 渐变真实渲染（hovered=true、afterBg=accent teal 0.58、默认/悬停 clip 截图双落盘 acceptance/tmp-block273-hover-probe/）；workspaceFileTreeResize/floatCard 该页态未展开如实记录。
-- **边界（reopen）**：指针跟随渐晕（Qoder 完整形态）**已随 UI-591 兑现**（见本台账 UI-591 行）；暗主题悬停态+真实指针走查=30 秒人测路线随交付（确认后翻 verified）。
+- **实机证据**：acceptance/block-273/live-light.json / live-dark.json（亮/暗默认态断言 + S1-S4 源码接线）+ **BLOCK-279 合并走查 13/13**（acceptance/block-279/walkthrough-*.json：亮/暗双主题默认态+注入激活 glow 断言）。补录（34f91bc0）：用户主实例 9222 可见窗口真实指针 hover 实证（resizeHandleV accent 渐变渲染 + clip 截图）。
+- **边界（reopen）**：指针跟随渐晕已随 UI-591 兑现；视觉体感以日常使用体察为准（用户人测豁免裁决 2026-10-27「不是我参与」，如有观感异议随时推翻）。
 
 ## UI-587: 批注画笔前端渲染器（2026-10-27 **verified（BLOCK-270 组件级 59 项 + BLOCK-278 暗主题实机腿 10/10；工作区文件预览图像面，真实鼠标绘制 8 点采点全链）**）
 

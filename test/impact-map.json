@@ -5884,6 +5884,18 @@
       ]
     },
     {
+      "id": "block279-ui-walkthrough",
+      "classifiesScripts": true,
+      "note": "BLOCK-279 七批 UI 改动合并自动化走查（用户裁决免人测参与）：计量条文字形态/页脚图标化/两级菜单/空态重排/拖拽边界 glow 注入激活，亮暗双主题断言与取证。",
+      "patterns": [
+        "scripts/block279-ui-walkthrough-live.cjs",
+        "acceptance/block-279/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",
