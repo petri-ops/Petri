@@ -125,6 +125,26 @@ export async function createAnnotation(
   return { annotation: data.annotation as ArtifactAnnotation, count: Number(data.count) || 0 };
 }
 
+/** BLOCK-307 — 拖拽移动：只改几何（rect/path），返回更新后的完整批注。 */
+export async function updateAnnotationGeometry(
+  projectId: string,
+  annotationId: string,
+  geometry: { rect?: number[]; path?: number[][] },
+): Promise<ArtifactAnnotation> {
+  const response = await fetch(
+    `${getApiPrefix()}/result-studio/annotations/${encodeURIComponent(annotationId)}/geometry`,
+    {
+      method: 'PATCH',
+      headers: headers(true),
+      body: JSON.stringify({ projectId, ...geometry }),
+    },
+  );
+  if (!response.ok) throw await readError(response);
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!data.annotation) throw new AnnotationClientError('annotation_response_invalid', '批注移动响应缺少 annotation。');
+  return data.annotation as ArtifactAnnotation;
+}
+
 export async function deleteAnnotation(annotationId: string): Promise<void> {
   const response = await fetch(
     `${getApiPrefix()}/result-studio/annotations/${encodeURIComponent(annotationId)}`,

@@ -1,17 +1,22 @@
 /* BLOCK-219 Q6 — 批注宿主（图像/PDF 共用）。 */
 
+/* UI-607 — 工具条列在图片左侧、图片水平居中（用户反馈「图片查看是左对齐吗，能否
+   居中呢 顶部的工具选择框是否可以列在左侧」）。bar 退化为窄竖列，canvas 占主区。 */
 .pane {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-start;
   min-width: 0;
   min-height: 0;
-  gap: var(--petri-space-1);
+  gap: var(--petri-space-2);
 }
 
 .canvas {
   position: relative;
-  display: inline-block;
-  max-width: 100%;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
   line-height: 0;
 }
 

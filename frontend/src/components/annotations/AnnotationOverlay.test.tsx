@@ -434,7 +434,7 @@ describe('AnnotationOverlay', () => {
     expect(onSubmitPending).toHaveBeenCalledWith('', undefined);
   });
 
-  it('BLOCK-300 — text 工具点击图面即上报点击点（不采点不拖拽）', () => {
+  it('BLOCK-300/307 — text 工具点击图面即上报点击点（click 路径，真实鼠标可靠）', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
     const onCommitClick = vi.fn();
     const onCommit = vi.fn();
@@ -451,11 +451,55 @@ describe('AnnotationOverlay', () => {
       />,
     );
     const overlay = getByTestId('annotation-overlay');
-    fireEvent.pointerDown(overlay, { clientX: 60, clientY: 30 });
-    fireEvent.pointerUp(overlay, { clientX: 60, clientY: 30 });
+    fireEvent.click(overlay, { clientX: 60, clientY: 30 });
     expect(onCommitClick).toHaveBeenCalledWith([0.3, 0.3]);
     expect(onCommit).not.toHaveBeenCalled();
     expect(getByTestId('annotation-overlay').getAttribute('data-drawing')).toBe('true');
+    // 就地输入框自身点击不重开
+    const withInput = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="text"
+        pendingTextPoint={[0.3, 0.3]}
+        onSubmitPending={() => Promise.resolve(true)}
+        onCommitClick={onCommitClick}
+        onCommit={onCommit}
+        label="批注层：图像"
+      />,
+    );
+    fireEvent.click(withInput.getByTestId('annotation-inline-input'));
+    expect(onCommitClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('BLOCK-307 — 非 drawing 态拖拽 box 提交平移 rect；未移动的 click 仍选中', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onMoveAnnotation = vi.fn();
+    const onSelect = vi.fn();
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[annotation({ annotationId: 'm1', rect: [0.1, 0.1, 0.2, 0.2] })]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onMoveAnnotation={onMoveAnnotation}
+        onSelect={onSelect}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    const box = getByTestId('annotation-box');
+    // BOX 200×100：拖 40px→dx 0.2、20px→dy 0.2；尺寸不变整体平移
+    fireEvent.pointerDown(box, { clientX: 30, clientY: 30, pointerId: 5 });
+    fireEvent.pointerMove(getByTestId('annotation-overlay'), { clientX: 70, clientY: 50, pointerId: 5 });
+    fireEvent.pointerUp(getByTestId('annotation-overlay'), { clientX: 70, clientY: 50, pointerId: 5 });
+    expect(onMoveAnnotation).toHaveBeenCalledWith('m1', { rect: [0.3, 0.3, 0.2, 0.2] });
+    // 拖拽结束后 click 使批注进入选中态（拖完即选中，符合直觉）
+    fireEvent.click(box);
+    expect(onSelect).toHaveBeenCalledWith('m1');
   });
 
   it('BLOCK-303 — 箭头真形态：拖拽起点→终点提交两点，绘制中即最终形态（SVG 线+头）', () => {

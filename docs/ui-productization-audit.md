@@ -40,6 +40,29 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-609: 批注面布局——工具条列左+图片居中（2026-10-28 **verified（BLOCK-307；主题门 + 批注域 + 实机 8/8 内 D 断言）**）
+
+- **变化面**：批注宿主 `.pane` 从「bar 横排在顶 + canvas inline-block 贴左」改为**行排**——工具条为图片左侧 104px 窄竖列（形状/颜色纵向堆叠，文字 hint 列窄隐藏由按钮 title 承载；文本锚点面保持全宽横排），canvas 占主区且 `justify-content: center`（图片水平居中，用户反馈「图片查看是左对齐吗，能否居中呢 顶部的工具选择框是否可以列在左侧」）。
+- **验证（代码）**：批注域 36/36 + 主题棘轮 0 新增。
+- **实机证据**：block304 探针 D 断言（acceptance/block-305/live-touch.json）：bar 左列与 pane 同 x、宽 104；图片中心相对画布区偏移 0px。
+- **边界（reopen）**：窄右栏（<260px）下 bar 104px 会挤压画布区（bar 宽度为后续可调单点）。
+
+## UI-608: 批注拖拽移动（2026-10-28 **verified（BLOCK-307；契约 26/26 + 组件级 + 实机 C 断言）**）
+
+- **变化面**：已保存批注（矩形/椭圆/箭头/文本/马赛克/画笔）**任意模式下整体拖拽移动**——非绘制/绘制态点在既有批注上按下即拖（stopPropagation 防误采新点），拖拽实时跟随渲染（box style 偏移/SVG translate），松手提交 PATCH 只更新几何；>3px 阈值区分拖拽与选中点击，平移整体 clamp 进画布；anchor（源码行锚点）不适用如实拒绝。
+- **后端**：store.updateGeometry（只动 rect/path/updated_at）+ `PATCH /api/result-studio/annotations/:id/geometry`（rect 四元/path 点 0..1 校验、fail-closed）。
+- **验证（代码）**：契约 26/26（PATCH 端点清单+store.updateGeometry+anchor 原样返回）+ Overlay 拖拽契约（平移 rect 提交/尺寸不变/拖后选中）。
+- **实机证据**：block304 探针 C：CDP 拖 box 25%/20% → REST rect=[0.40,0.41,…]（原 0.10,0.10）。
+- **边界（reopen）**：移动无撤销入栈（undo 面向创建/删除；移动撤销待用户裁决）。
+
+## UI-607: 批注交互真实鼠标修复——✓/× 失效根因+text 开框统一管线（2026-10-28 **verified（BLOCK-307；组件级 + 实机 8/8 内 A/B 断言）**）
+
+- **变化面**：①**就地框 ✓/× 真实鼠标失效根因修复**——`handlePointerDown` 对任何 pointerdown 无条件 `setPointerCapture` 到覆盖层，点在 ✓/× 按钮上的后续 click 被劫持回覆盖层永不达按钮（实测原生 click 计数 0）；修法=capture **延迟到 pointermove 首次移动**（防笔画出界本意不变）+ finish 显式 `releasePointerCapture`。②**preventDefault 移除**——pointerdown 的 preventDefault 阻断浏览器 mousedown/click 兼容序列，同址二次失效源。③**text 开框统一管线**——text 拖拽开框与矩形同 trusted 可靠管线（拖出的框就地直接输入文字），单击开框保留为补充路径并与拖拽互斥（suppress 一次）。
+- **为什么这样设计**：用户反馈「对号和 x 都无法控制这些工具框（只能 Enter）」「文本点击后没办法输入文字」——两类失效同源（trusted pointer 管线 vs 合成事件差异），统一到浏览器原生派发最可靠路径。
+- **验证（代码）**：annotations 36/36（text click 路径+就地框不重开）。
+- **实机证据**：block304 探针 A/B（acceptance/block-305/live-touch.json）：A CDP 真实鼠标点 ✓ → 落库+pending 退场；B text 拖拽 → composer 出现。
+- **边界（reopen）**：trusted 单击开框在部分环境仍不触发（拖拽开框不受影响，已如实记录；日常拖拽/点击双路径覆盖）。
+
 ## UI-606: 标题栏「更多工具」菜单弹出位置修复+图标语义校正（2026-10-28 **verified（BLOCK-306；titlebar 16/16 + 实机断言落 acceptance/block-304/）**）
 
 - **变化面**：①**根因修复**——标题栏右区「+」按钮（实为「展开更多工具」）点击后菜单**弹出窗口右外不可见**（用户报「点击无效」）：`.toolMenu` 类残留 `left: calc(100% + 6px)`（旧挂锚布局的右侧弹出偏移），portal 到 body 后语义变为「视口宽+6px」→ 菜单整体飞出右缘（实测 x=1608 > vw=1602）。修复=portal inline style 显式 `left: 'auto'` 压掉 class 遗留（菜单回到按钮下方视口内 x=1195）。②**图标语义校正**——按钮图标从 plus（+，语义=新建）换 **more-horizontal（⋯，语义=更多）**：用户点 + 预期新建项，弹出 18 项工具清单即体感「无效」；more-horizontal 准确表达「更多」。③**小屏加固**——工具面全集可达 18+ 项（~588px 高），小窗口溢出屏幕底部；菜单钳 `max-height: calc(100vh - 120px)` + `overflow-y: auto`。

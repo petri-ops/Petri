@@ -1,0 +1,51 @@
+{
+  "capturedAt": "2026-10-28T08:56:40.305Z",
+  "head": "a7c6009ce9111e569c8a24cc15645a29a0b68060",
+  "projectId": "p_mvrvqqo5_mnss",
+  "surface": "workspace-file 图像预览面（BLOCK-307 四条：✓ 真实点击/text 点击/拖拽移动/布局左列+居中）",
+  "total": 8,
+  "passed": 8,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvrvqqo5_mnss"
+    },
+    {
+      "id": "A0_pending_present",
+      "ok": true,
+      "detail": "就地框出现"
+    },
+    {
+      "id": "A_confirm_via_real_click",
+      "ok": true,
+      "detail": "{\"boxes\":1,\"pendingGone\":true}"
+    },
+    {
+      "id": "B0_text_kind_active",
+      "ok": true,
+      "detail": "data-active=true"
+    },
+    {
+      "id": "B_text_drag_opens_inline",
+      "ok": true,
+      "detail": "{\"composer\":true,\"draft\":false,\"kind\":null}"
+    },
+    {
+      "id": "C_drag_moves_geometry",
+      "ok": true,
+      "detail": "rect=[0.4028,0.4081,0.2995,0.2664]（原 0.1,0.1 附近 → 右下平移）"
+    },
+    {
+      "id": "D_bar_left_column",
+      "ok": true,
+      "detail": "{\"barX\":1250,\"canvasX\":1360,\"canvasW\":10,\"barW\":104,\"imgCenterOffset\":0}"
+    },
+    {
+      "id": "D_image_centered",
+      "ok": true,
+      "detail": "centerOffset=0px（相对画布区）"
+    }
+  ]
+}

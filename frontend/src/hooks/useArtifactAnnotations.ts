@@ -3,6 +3,7 @@ import {
   AnnotationClientError,
   createAnnotation,
   deleteAnnotation,
+  updateAnnotationGeometry,
   fetchAnnotations,
 } from '@/lib/annotation-client';
 import type {
@@ -42,6 +43,8 @@ export interface ArtifactAnnotationsState {
     page?: number | null;
   }) => Promise<ArtifactAnnotation | null>;
   remove: (annotationId: string) => Promise<boolean>;
+  /** BLOCK-307 — 拖拽移动：只更新几何（rect/path），失败本地回滚。 */
+  moveGeometry: (annotationId: string, geometry: { rect?: number[]; path?: number[][] }) => Promise<boolean>;
   reload: () => void;
   clearError: () => void;
 }
@@ -171,6 +174,36 @@ export function useArtifactAnnotations(input: {
     }
   }, [key]);
 
+  // BLOCK-307 — 拖拽移动：只改几何，失败本地回滚并如实报错。
+  const moveGeometry = useCallback(async (
+    annotationId: string,
+    geometry: { rect?: number[]; path?: number[][] },
+  ): Promise<boolean> => {
+    const previousRow = snapshot.annotations.find((a) => a.annotationId === annotationId) || null;
+    try {
+      const saved = await updateAnnotationGeometry(projectId, annotationId, geometry);
+      setSnapshot((previous) => ({
+        key,
+        limit: previous.limit,
+        error: '',
+        annotations: previous.key === key
+          ? previous.annotations.map((a) => (a.annotationId === annotationId ? saved : a))
+          : previous.annotations,
+      }));
+      return true;
+    } catch (failure) {
+      setSnapshot((previous) => ({
+        ...previous,
+        key,
+        error: messageOf(failure),
+        annotations: previousRow && previous.key === key
+          ? previous.annotations.map((a) => (a.annotationId === annotationId ? previousRow : a))
+          : previous.annotations,
+      }));
+      return false;
+    }
+  }, [key, snapshot.annotations]);
+
   const reload = useCallback(() => setReloadToken((value) => value + 1), []);
   const clearError = useCallback(() => {
     setSnapshot((previous) => ({ ...previous, error: '' }));
@@ -183,7 +216,8 @@ export function useArtifactAnnotations(input: {
     limit: active && current ? snapshot.limit : 0,
     add,
     remove,
+    moveGeometry,
     reload,
     clearError,
-  }), [active, add, clearError, current, loading, reload, remove, snapshot]);
+  }), [active, add, clearError, current, loading, moveGeometry, reload, remove, snapshot]);
 }

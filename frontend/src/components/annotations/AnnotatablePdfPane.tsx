@@ -55,6 +55,7 @@ export function AnnotatablePdfPane({
             onCommitPath={(path) => session.beginPath(path, page)}
             onCommitArrow={(start, end) => session.beginArrow(start, end, page)}
             onCommitClick={(point) => session.beginTextAt(point, page)}
+            onMoveAnnotation={(id, geometry) => { void session.moveGeometry(id, geometry); }}
             onSubmitPending={session.submitComment}
             onCancelPending={session.cancelPending}
             label={`批注层：第 ${page} 页`}

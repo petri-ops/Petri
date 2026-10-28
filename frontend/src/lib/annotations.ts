@@ -275,7 +275,8 @@ export function arrowHeadPoints(
   };
 }
 
-function clamp01(value: number): number {
+/** BLOCK-307 — 导出供 overlay 拖拽提交面复用（0..1 钳制语义单源）。 */
+export function clamp01(value: number): number {
   if (!Number.isFinite(value)) return 0;
   if (value < 0) return 0;
   if (value > 1) return 1;

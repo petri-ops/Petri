@@ -141,6 +141,32 @@ function createResultAnnotationStore(db, options = {}) {
   `);
   const getStatement = db.prepare('SELECT * FROM result_annotations WHERE annotation_id = ?');
   const deleteStatement = db.prepare('DELETE FROM result_annotations WHERE annotation_id = ?');
+  // BLOCK-307 — 拖拽移动：只动几何（rect/path），评论/颜色/锚点原样保留。
+  const updateGeometryStatement = db.prepare(`
+    UPDATE result_annotations
+    SET rect_json = @rect_json, path_json = @path_json, updated_at = @updated_at
+    WHERE annotation_id = @annotation_id
+  `);
+
+  /**
+   * BLOCK-307 — 拖拽移动的几何更新（UI 平移后的新坐标落库）。
+   * 输入已由路由层 normalize 校验（rect 四元 0..1 / path 点有限 0..1）；
+   * 只改 rect_json / path_json / updated_at，comment、颜色、锚点、scope 身份零变化。
+   * anchor（文本锚点）批注不适用——锚在源码行上，拖拽没有几何意义，直接返回原行。
+   */
+  function updateGeometry(annotationId, geometry) {
+    const row = getStatement.get(annotationId);
+    if (!row) return null;
+    if (row.anchor_json) return rowToAnnotation(row);
+    const updated = {
+      annotation_id: annotationId,
+      rect_json: JSON.stringify(Array.isArray(geometry.rect) ? geometry.rect : parseRect(row.rect_json)),
+      path_json: Array.isArray(geometry.path) ? JSON.stringify(geometry.path) : row.path_json,
+      updated_at: nowIso(),
+    };
+    updateGeometryStatement.run(updated);
+    return rowToAnnotation(getStatement.get(annotationId));
+  }
 
   function create(annotation) {
     const scope = annotationScopeOf(annotation);
@@ -200,7 +226,7 @@ function createResultAnnotationStore(db, options = {}) {
     return Boolean(info && info.changes > 0);
   }
 
-  return { create, listByScope, countByScope, get, deleteById };
+  return { create, listByScope, countByScope, get, deleteById, updateGeometry };
 }
 
 module.exports = { createResultAnnotationStore, rowToAnnotation, newAnnotationId };

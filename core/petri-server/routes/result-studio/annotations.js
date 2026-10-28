@@ -117,6 +117,63 @@ module.exports = {
       }
     });
 
+    // BLOCK-307 — 拖拽移动：只改几何（rect/path），不动评论/颜色/scope 身份。
+    // 校验语义：rect 必须四元有限 0..1；path 每点必须 [x,y] 有限 0..1；与既有 kind 的
+    // 定位方式一致（rect 族只收 rect、path 族只收 path，文本锚点批注不适用直接 400）。
+    app.patch('/api/result-studio/annotations/:annotationId/geometry', (req, res) => {
+      const annotationId = String((req.params && req.params.annotationId) || '').trim();
+      if (!annotationId) {
+        res.status(400).json({ error: 'annotation_id_required' });
+        return undefined;
+      }
+      const project = readProject(req, res);
+      if (!project) return undefined;
+      const existing = store().get(annotationId);
+      if (!existing || existing.projectId !== project.id) {
+        res.status(404).json({ error: 'annotation_not_found' });
+        return undefined;
+      }
+      if (existing.anchor) {
+        res.status(400).json({ error: 'anchor_not_movable', message: '文本锚点批注锚在源码行上，不支持拖拽移动。' });
+        return undefined;
+      }
+
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const finite01 = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1;
+      let rect = existing.rect;
+      let path = existing.path;
+      if (body.rect !== undefined) {
+        if (!Array.isArray(body.rect) || body.rect.length !== 4 || !body.rect.every(finite01)) {
+          res.status(400).json({ error: 'rect_invalid', message: 'rect 必须是 0..1 的四元数组。' });
+          return undefined;
+        }
+        rect = body.rect.map((v) => Math.round(v * 10000) / 10000);
+      }
+      if (body.path !== undefined) {
+        if (!Array.isArray(body.path) || body.path.length < 2 || !body.path.every((p) => Array.isArray(p) && p.length === 2 && p.every(finite01))) {
+          res.status(400).json({ error: 'path_invalid', message: 'path 每点必须是 0..1 的 [x,y]。' });
+          return undefined;
+        }
+        path = body.path.map((p) => [Math.round(p[0] * 10000) / 10000, Math.round(p[1] * 10000) / 10000]);
+      }
+      if (body.rect === undefined && body.path === undefined) {
+        res.status(400).json({ error: 'geometry_required', message: 'rect / path 至少提供一个。' });
+        return undefined;
+      }
+
+      try {
+        const saved = store().updateGeometry(annotationId, { rect, path });
+        if (!saved) {
+          res.status(404).json({ error: 'annotation_not_found' });
+          return undefined;
+        }
+        res.json({ annotation: saved });
+      } catch (error) {
+        res.status(500).json({ error: 'annotation_geometry_update_failed', message: error && error.message });
+      }
+      return undefined;
+    });
+
     app.delete('/api/result-studio/annotations/:annotationId', (req, res) => {
       const annotationId = String((req.params && req.params.annotationId) || '').trim();
       if (!annotationId) return res.status(400).json({ error: 'annotation_id_required' });

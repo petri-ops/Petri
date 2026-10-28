@@ -6017,6 +6017,19 @@
       ]
     },
     {
+      "id": "block307-annotation-touch-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-307 UI-607/608/609 实机腿：批注交互四条走查（✓ 真实点击/text 拖拽开框/拖拽移动 PATCH/布局左列+居中，8/8 PASS）；取证探针与目录，前端与契约改动面经 frontend/Node 通道自动路由 vitest。",
+      "patterns": [
+        "scripts/block304-annotation-touch-live.cjs",
+        "acceptance/block-305/**"
+      ],
+      "tests": [
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "test/block219-result-annotations.test.mjs"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

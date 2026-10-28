@@ -1,13 +1,24 @@
 /* BLOCK-219 Q6 — 批注工具条。层级：条=页面级 surface，列表浮层=elevated。 */
 
+/* UI-607 — 工具条改为图片左侧窄竖列（宿主 .pane 行排）：形状/颜色纵向堆叠，
+   文字类 hint 列窄隐藏（title 已承载语义）。文本锚点面（mode=text）仍横排全宽。 */
 .bar {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--petri-space-2);
+  width: 104px;
+  flex: none;
+  padding: var(--petri-space-1);
+  color: var(--petri-text-tertiary);
+}
+
+/* 文本锚点面（无图面就地语义）保持全宽横排 */
+.bar[data-mode='text'] {
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--petri-space-2);
-  min-height: 30px;
-  padding: var(--petri-space-1) 0;
-  color: var(--petri-text-tertiary);
+  width: 100%;
 }
 
 .unavailable {
@@ -100,6 +111,11 @@
 
 .hint {
   color: var(--petri-text-tertiary);
+}
+
+/* UI-607 — 左列窄条放不下长文字提示（语义由各按钮 title 承载）；文本锚点面不隐藏。 */
+.bar:not([data-mode='text']) .hint {
+  display: none;
 }
 
 .error {

@@ -3,6 +3,7 @@ import {
   MAX_ANNOTATION_COMMENT_CHARS,
   MOSAIC_DISCLOSURE,
   arrowHeadPoints,
+  clamp01,
   decimatePath,
   describeAnnotationAnchor,
   normalizeFreehandPoints,
@@ -55,6 +56,11 @@ export interface AnnotationOverlayProps {
   pendingTextPoint?: [number, number] | null;
   /** BLOCK-300 — 文本标注点击上报（kind='text' 时点击图面即就地开框）。 */
   onCommitClick?: (point: [number, number]) => void;
+  /** BLOCK-307 — 拖拽移动提交（非绘制态拖动既有批注；提供即启用，缺省=不可拖）。 */
+  onMoveAnnotation?: (
+    annotationId: string,
+    geometry: { rect?: number[]; path?: number[][] },
+  ) => void;
   /**
    * BLOCK-300 — 就地确认：动作结束后输入框出现在结束位置，允许不填直接确认。
    * 提供即接管评论输入（bar 的 composer 在区域面退场）；返回 false=保存失败，框保留。
@@ -121,6 +127,7 @@ export function AnnotationOverlay({
   onCommitClick,
   onSubmitPending,
   onCancelPending,
+  onMoveAnnotation,
 }: AnnotationOverlayProps): React.ReactElement {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const startRef = useRef<NormalizedPoint | null>(null);
@@ -190,7 +197,7 @@ export function AnnotationOverlay({
     onCancelPending?.();
   };
 
-  const readPoint = useCallback((event: React.PointerEvent<HTMLDivElement>): NormalizedPoint | null => {
+  const readPoint = useCallback((event: { clientX: number; clientY: number }): NormalizedPoint | null => {
     const node = surfaceRef.current;
     if (!node) return null;
     return pointToNormalized(node.getBoundingClientRect(), event.clientX, event.clientY);
@@ -204,20 +211,13 @@ export function AnnotationOverlay({
     if (!drawing) return;
     const point = readPoint(event);
     if (!point) return;
-    // BLOCK-300 — 文本标注：点击即就地输入（不采点不拖拽）；输入框自身点击不重开。
-    if (kind === 'text' && onCommitClick) {
-      if ((event.target as HTMLElement | null)?.tagName === 'INPUT') return;
-      onCommitClick([point.x, point.y]);
-      return;
-    }
-    event.preventDefault();
+    // BLOCK-307 两处真实鼠标路径修复：
+    // ①不再对 pointerdown 无条件 setPointerCapture——capture 会把后续 click 的派发
+    //   目标劫持回覆盖层，点在就地框 ✓/× 按钮上的 click 永远到不了按钮（体感「点击
+    //   无效，只能 Enter」）。capture 延迟到 pointermove 首次移动（防出界的本意不变）。
+    // ②不再 preventDefault：阻断 mousedown/click 兼容序列，同址二次失效。
     if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
     activePointerRef.current = event.pointerId;
-    try {
-      event.currentTarget.setPointerCapture?.(event.pointerId);
-    } catch {
-      /* 测试环境无 capture 实现 */
-    }
     if (freehandDrawing) {
       strokeRef.current = [point];
       setDraftPath([point]);
@@ -231,13 +231,145 @@ export function AnnotationOverlay({
     }
     startRef.current = point;
     setDraft(null);
-  }, [arrowDrawing, drawing, freehandDrawing, kind, onCommitClick, readPoint]);
+  }, [arrowDrawing, drawing, freehandDrawing, readPoint]);
+
+  // BLOCK-307 — 文本标注采点改走 click（浏览器原生派发，trusted/合成同管线可靠；
+  // pointerdown 在真实鼠标路径下存在不触发的输入管线差异，BLOCK-300 实机复现实锤）。
+  const handleTextClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    // BLOCK-307 — 已有待填批注时 click 不再开新的点击框（一次只有一个就地框）；
+    // 拖拽与单击共用该互斥语义，无时序脆弱性。
+    if (pendingRect || pendingPath || pendingArrow) return;
+    if (!drawing || kind !== 'text' || !onCommitClick) return;
+    if ((event.target as HTMLElement | null)?.tagName === 'INPUT') return;
+    const point = readPoint(event);
+    if (!point) return;
+    onCommitClick([point.x, point.y]);
+  }, [drawing, kind, onCommitClick, pendingArrow, pendingPath, pendingRect, readPoint]);
+
+  // ── BLOCK-307 拖拽移动（非绘制态）：box / 箭头线 / 画笔线均可整体拖动 ──
+  const [moveDrag, setMoveDrag] = useState<{
+    id: string;
+    isPath: boolean;
+    origRect: number[] | null;
+    origPath: number[][] | null;
+    startClientX: number;
+    startClientY: number;
+    dx: number;
+    dy: number;
+    moved: boolean;
+  } | null>(null);
+  const surfaceSizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+
+  const startShapeMove = useCallback((annotation: ArtifactAnnotation, event: React.PointerEvent) => {
+    // 已存批注任何模式下都可拖（绘制态点在既有框上=拖框而非采新点；stopPropagation
+    // 阻止冒泡到覆盖层采新点——drawing gate 不设，避免绘制态拖拽被拦）。
+    if (!onMoveAnnotation) return;
+    const node = surfaceRef.current;
+    if (!node) return;
+    const bounds = node.getBoundingClientRect();
+    surfaceSizeRef.current = { w: bounds.width || 1, h: bounds.height || 1 };
+    event.stopPropagation();
+    try {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    } catch {
+      /* 测试环境无 capture 实现 */
+    }
+    setMoveDrag({
+      id: annotation.annotationId,
+      isPath: Array.isArray(annotation.path) && annotation.path.length >= 2,
+      origRect: Array.isArray(annotation.rect) && annotation.rect.length === 4 ? [...annotation.rect] : null,
+      origPath: Array.isArray(annotation.path) ? annotation.path.map((p) => [p[0], p[1]]) : null,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      dx: 0,
+      dy: 0,
+      moved: false,
+    });
+  }, [onMoveAnnotation]);
+
+  const handleMoveDragPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (!moveDrag) return;
+    const size = surfaceSizeRef.current;
+    const dx = (event.clientX - moveDrag.startClientX) / size.w;
+    const dy = (event.clientY - moveDrag.startClientY) / size.h;
+    const moved = Math.abs(event.clientX - moveDrag.startClientX) + Math.abs(event.clientY - moveDrag.startClientY) > 3;
+    setMoveDrag((current) => (current ? { ...current, dx, dy, moved } : current));
+  }, [moveDrag]);
+
+  const commitMoveDrag = useCallback(() => {
+    if (!moveDrag) return;
+    const state = moveDrag;
+    setMoveDrag(null);
+    if (!state.moved || !onMoveAnnotation) return;
+    if (state.isPath && state.origPath) {
+      // 平移整体 clamp 进画布（保持形状，逐点同 delta）
+      const minX = Math.min(...state.origPath.map((p) => p[0]));
+      const maxX = Math.max(...state.origPath.map((p) => p[0]));
+      const minY = Math.min(...state.origPath.map((p) => p[1]));
+      const maxY = Math.max(...state.origPath.map((p) => p[1]));
+      const clampedDx = Math.max(-minX, Math.min(state.dx, 1 - maxX));
+      const clampedDy = Math.max(-minY, Math.min(state.dy, 1 - maxY));
+      onMoveAnnotation(state.id, {
+        path: state.origPath.map((p) => [
+          Math.round(clamp01(p[0] + clampedDx) * 10000) / 10000,
+          Math.round(clamp01(p[1] + clampedDy) * 10000) / 10000,
+        ]),
+      });
+      return;
+    }
+    if (state.origRect) {
+      const [x, y, w, h] = state.origRect;
+      const clampedDx = Math.max(-x, Math.min(state.dx, 1 - x - w));
+      const clampedDy = Math.max(-y, Math.min(state.dy, 1 - y - h));
+      onMoveAnnotation(state.id, {
+        rect: [
+          Math.round(clamp01(x + clampedDx) * 10000) / 10000,
+          Math.round(clamp01(y + clampedDy) * 10000) / 10000,
+          w,
+          h,
+        ],
+      });
+    }
+  }, [moveDrag, onMoveAnnotation]);
+
+  // 拖拽中的渲染偏移（归一化）——box 用 style 覆盖、SVG 用 translate。
+  const moveOffsetFor = (annotationId: string): { dx: number; dy: number } => {
+    if (!moveDrag || moveDrag.id !== annotationId || !moveDrag.moved) return { dx: 0, dy: 0 };
+    return { dx: moveDrag.dx, dy: moveDrag.dy };
+  };
+  const surfaceMoveHandlers = {
+    onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
+      if (moveDrag) {
+        handleMoveDragPointerMove(event);
+        return;
+      }
+      handlePointerMove(event);
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLDivElement>) => {
+      if (moveDrag) {
+        commitMoveDrag();
+        return;
+      }
+      finish(event);
+      // BLOCK-307 — text 采点的 pointerup 兜底：与 click 幂等（同点重复 beginTextAt
+      // 只是覆盖同 pending），trusted click 派发异常时此路径仍可达。
+      handleTextClick(event);
+    },
+  };
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
     if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
     const point = readPoint(event);
     if (!point) return;
+    // BLOCK-307 — 延迟 capture：首次移动才抢（防笔画出界），点按钮的按下不受劫持。
+    try {
+      if (!event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+      }
+    } catch {
+      /* 测试环境无 capture 实现 */
+    }
     if (freehandDrawing && strokeRef.current) {
       const stroke = [...strokeRef.current, point];
       strokeRef.current = stroke;
@@ -257,6 +389,13 @@ export function AnnotationOverlay({
     if (!drawing) return;
     if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
     activePointerRef.current = null;
+    // BLOCK-307 — 显式释放采点 capture：泄漏时后续 trusted click 的 target 会被
+    // 劫持回覆盖层，就地框 ✓/× 等 click 按钮全部失灵（真实鼠标路径复现实锤）。
+    try {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    } catch {
+      /* 未 capture/测试环境无实现 */
+    }
     if (freehandDrawing) {
       const stroke = strokeRef.current;
       strokeRef.current = null;
@@ -306,14 +445,22 @@ export function AnnotationOverlay({
       role="group"
       aria-label={label}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={finish}
+      onPointerMove={surfaceMoveHandlers.onPointerMove}
+      onPointerUp={surfaceMoveHandlers.onPointerUp}
+      onClick={handleTextClick}
       onPointerLeave={(event) => {
         if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
         if (startRef.current || strokeRef.current) finish(event);
       }}
     >
-      {boxVisible.map((annotation, index) => (
+      {boxVisible.map((annotation, index) => {
+        const offset = moveOffsetFor(annotation.annotationId);
+        const boxStyle = rectToStyle(annotation.rect);
+        if (offset.dx || offset.dy) {
+          boxStyle.left = `${clamp01(annotation.rect[0] + offset.dx) * 100}%`;
+          boxStyle.top = `${clamp01(annotation.rect[1] + offset.dy) * 100}%`;
+        }
+        return (
         <button
           key={annotation.annotationId}
           type="button"
@@ -322,11 +469,12 @@ export function AnnotationOverlay({
           data-color={annotation.color}
           data-kind={annotation.kind || 'region'}
           data-testid="annotation-box"
-          style={rectToStyle(annotation.rect)}
+          style={boxStyle}
           title={annotation.kind === 'mosaic'
             ? `${describeAnnotationAnchor(annotation)}：${annotation.comment}（${MOSAIC_DISCLOSURE}）`
             : `${describeAnnotationAnchor(annotation)}：${annotation.comment}`}
           aria-label={`批注 ${index + 1}：${annotation.comment}`}
+          onPointerDown={(event) => startShapeMove(annotation, event)}
           onClick={() => onSelect?.(annotation.annotationId)}
         >
           {annotation.kind === 'text' ? (
@@ -334,7 +482,8 @@ export function AnnotationOverlay({
           ) : null}
           <span className={styles.badge}>{index + 1}</span>
         </button>
-      ))}
+        );
+      })}
       {freehandVisible.length > 0 && (
         <svg
           className={styles.freehandLayer}
@@ -343,20 +492,25 @@ export function AnnotationOverlay({
           preserveAspectRatio="none"
           aria-hidden="false"
         >
-          {freehandVisible.map((annotation) => (
-            <path
-              key={annotation.annotationId}
-              data-annotation-id={annotation.annotationId}
-              data-testid="annotation-freehand-stroke"
-              data-color={annotation.color}
-              d={smoothFreehandPathD(annotation.path || [])}
-              fill="none"
-              className={styles.freehandStroke}
-              onClick={() => onSelect?.(annotation.annotationId)}
-            >
-              <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
-            </path>
-          ))}
+          {freehandVisible.map((annotation) => {
+            const offset = moveOffsetFor(annotation.annotationId);
+            return (
+              <path
+                key={annotation.annotationId}
+                data-annotation-id={annotation.annotationId}
+                data-testid="annotation-freehand-stroke"
+                data-color={annotation.color}
+                d={smoothFreehandPathD(annotation.path || [])}
+                fill="none"
+                className={styles.freehandStroke}
+                transform={`translate(${offset.dx * 100} ${offset.dy * 100})`}
+                onPointerDown={(event) => startShapeMove(annotation, event)}
+                onClick={() => onSelect?.(annotation.annotationId)}
+              >
+                <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
+              </path>
+            );
+          })}
         </svg>
       )}
       {/* BLOCK-303 — 箭头真形态（两点 path）：线段+贴合方向的头部三角；旧 rect-only 数据仍走下方对角线。 */}
@@ -371,11 +525,14 @@ export function AnnotationOverlay({
           {arrowVisible.map((annotation) => {
             const start = annotation.path[0];
             const end = annotation.path[1];
+            const offset = moveOffsetFor(annotation.annotationId);
             return (
               <g
                 key={annotation.annotationId}
                 data-annotation-id={annotation.annotationId}
                 data-testid="annotation-arrow-stroke"
+                transform={`translate(${offset.dx * 100} ${offset.dy * 100})`}
+                onPointerDown={(event) => startShapeMove(annotation, event)}
                 onClick={() => onSelect?.(annotation.annotationId)}
               >
                 <ArrowGlyph start={start} end={end} color={annotation.color} />

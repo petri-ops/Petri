@@ -288,9 +288,9 @@ describe('AnnotatableImagePane', () => {
     await waitFor(() => expect(posts.length).toBe(2));
     expect(posts[1]).toMatchObject({ comment: '矩形标注', kind: 'region' });
 
-    // ⑤text 工具：点击图面即就地开框（不拖拽），确认落库 kind=text
+    // ⑤text 工具：点击图面即就地开框（BLOCK-307 起采点走 click 路径，真实鼠标可靠）
     fireEvent.click(getByTestId('annotation-kind-text'));
-    fireEvent.pointerDown(overlay, { clientX: 80, clientY: 40 });
+    fireEvent.click(overlay, { clientX: 80, clientY: 40 });
     expect(queryByTestId('annotation-pending-rect')).toBeNull();
     expect(getByTestId('annotation-inline-input')).toBeTruthy();
     fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '看这里的峰值' } });

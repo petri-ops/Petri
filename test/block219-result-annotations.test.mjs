@@ -248,6 +248,8 @@ function loadRoutes() {
   const app = {
     get: (routePath, handler) => entries.push({ method: 'GET', path: routePath, handler }),
     post: (routePath, handler) => entries.push({ method: 'POST', path: routePath, handler }),
+    // BLOCK-307 — 拖拽移动的几何更新端点
+    patch: (routePath, handler) => entries.push({ method: 'PATCH', path: routePath, handler }),
     delete: (routePath, handler) => entries.push({ method: 'DELETE', path: routePath, handler }),
   };
   routeModule.register(app, { ensureSchema: false });
@@ -277,6 +279,8 @@ test('route module registers the three annotation endpoints', () => {
   assert.deepEqual(keys, [
     'DELETE /api/result-studio/annotations/:annotationId',
     'GET /api/result-studio/annotations',
+    // BLOCK-307 — 拖拽移动的几何更新端点
+    'PATCH /api/result-studio/annotations/:annotationId/geometry',
     'POST /api/result-studio/annotations',
   ]);
 });
@@ -805,4 +809,40 @@ test('BLOCK-303 — arrow accepts a two-point path (true arrow form), rejects ot
   assert.equal(legacy.ok, true, JSON.stringify(legacy.errors || []));
   assert.deepEqual(legacy.annotation.rect, [0.2, 0.3, 0.3, 0.3]);
   assert.equal(legacy.annotation.path, null);
+});
+
+test('BLOCK-307 — updateGeometry 只动几何；anchor 批注原样返回', () => {
+  const { createResultAnnotationStore } = require('../core/shared-backend/result-annotation-store');
+  const sqlite = (() => {
+    // 与上方 freehand 往返用例同库复用：本文件顶部已建内存/临时库（若无则新建）
+    return globalThis.__b219sqlite || null;
+  })();
+  if (!sqlite) {
+    // 本用例独立建库（与文件顶其它 store 用例同法）
+    const Database = require('better-sqlite3');
+    const storeDb = new Database(':memory:');
+    const s = createResultAnnotationStore(storeDb);
+    const created = s.create(normalizeAnnotationInput({
+      projectId: 'p1', surface: 'workspace-file', filePath: 'p.png',
+      kind: 'arrow', path: [[0.2, 0.2], [0.5, 0.5]], comment: '原始位置',
+    }).annotation);
+    const moved = s.updateGeometry(created.annotationId, { path: [[0.4, 0.4], [0.7, 0.7]] });
+    assert.deepEqual(moved.path, [[0.4, 0.4], [0.7, 0.7]]);
+    assert.equal(moved.comment, '原始位置');
+    assert.equal(moved.rect.length, 0);
+
+    // anchor 批注不适用：原样返回（几何零变化）
+    const anchorRow = s.create(normalizeAnnotationInput({
+      projectId: 'p1', surface: 'workspace-file', filePath: 'code.ts',
+      kind: 'text-selection', anchor: { kind: 'text-range', startLine: 3, endLine: 3, startColumn: null, endColumn: null, quote: 'x', language: 'ts' },
+      comment: '行锚点',
+    }).annotation);
+    const untouched = s.updateGeometry(anchorRow.annotationId, { rect: [0.1, 0.1, 0.2, 0.2] });
+    assert.deepEqual(untouched.rect, []);
+    assert.equal(untouched.comment, '行锚点');
+
+    // 不存在的 id → null
+    assert.equal(s.updateGeometry('ann_missing', { rect: [0, 0, 1, 1] }), null);
+    return;
+  }
 });

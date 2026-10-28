@@ -73,6 +73,8 @@ export interface AnnotationSession {
    */
   submitComment: (comment: string, rectOverride?: [number, number, number, number]) => Promise<boolean>;
   remove: (annotationId: string) => void;
+  /** BLOCK-307 — 拖拽移动：只更新几何（rect/path），失败本地回滚。 */
+  moveGeometry: (annotationId: string, geometry: { rect?: number[]; path?: number[][] }) => Promise<boolean>;
   undo: () => Promise<boolean>;
   buildPrompt: () => string;
 }
@@ -273,6 +275,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     cancelPending,
     submitComment,
     remove,
+    moveGeometry: store.moveGeometry,
     undo,
     buildPrompt,
   }), [
@@ -293,6 +296,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     store.error,
     store.limit,
     store.loading,
+    store.moveGeometry,
     submitComment,
     undo,
     undoActions.length,
