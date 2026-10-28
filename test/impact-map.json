@@ -6056,6 +6056,19 @@
       ]
     },
     {
+      "id": "block310-image-vision-gate-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-310 UI-614 实机腿：图片入口识图门红→绿（临时切非视觉 chat/agent 绑定 + auto on 拖图：旧门禁复现提示 → 修复后无提示 + 附件入列；finally 恢复共享设置），8/8 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block310-image-vision-gate-live.cjs",
+        "acceptance/block-308/**"
+      ],
+      "tests": [
+        "frontend/src/lib/auto-model.test.ts",
+        "frontend/src/components/copilot/SimpleChat/attachments.test.ts"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

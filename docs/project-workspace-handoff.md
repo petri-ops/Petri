@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。**三推（2026-10-28，用户全权收尾指令「继续 搞完这个」）**：main `e9960ce6..72c1e061` 共 **11 笔**（BLOCK-275/276/277/278/279 五包 + UI-591 代落盘 + 对账/自稳治理批）+ 快照标签 snapshot-20261027-7 补推（远端=本地全集）；此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录已兑现授权，不构成常驻授权）。
 
+最后更新：2026-10-28（**BLOCK-310 completed（UI-614 verified）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户反馈拖图片被「识图模型未配置」拦住，BLOCK-310 已收口：图片入口按「有图时的自动决议」判断（自动模式有图会选 DeepSeek 视觉模型）/ 手动与 legacy preset 补能力位 / notice 指路；红→绿实机验证（临时把 chat/agent 切到非视觉 gemini、auto on：旧门禁复现原提示 → 修复后无提示+附件入列；finally 恢复共享设置，C0 相等）。非范围=后端 vision 角色绑定/模型目录不动；手动非视觉 + 关自动仍如实阻断。证据=[`acceptance/block-308/live-image-vision-gate.json`](../acceptance/block-308/live-image-vision-gate.json)（8/8）+ auto-model 9/9 + attachments 10/10 + closeout 十三门 PASS。**待用户动作**：UI-594/595/596 实机腿补跑 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-28（**BLOCK-309 completed（UI-613 verified；UI-597 两列布局由用户推翻）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户 2026-10-28 截图反馈模型菜单「供应商模型列表应该是新的页面，混在一起不专业、灰底不好看」，BLOCK-309 已收口：mode=all 改「供应商页 → 点供应商进入模型页（返回行 + 供应商标题/数量）」，删除 two-pane 灰底容器与右列提示，active 态改左侧 accent 细线（透明底），菜单 320px；整组不可用仍可进入看原因。非范围=mode=supplier/model 单模式与模型目录/白名单/定价链路零改动；供应商页不记忆上次进入项。证据=[`acceptance/block-307/live-model-menu-page.json`](../acceptance/block-307/live-model-menu-page.json)（14/14）+ ModelMenu 8/8 + theme 17/17 + closeout 十三门 PASS。**待用户动作**：UI-594/595/596 实机腿补跑 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。

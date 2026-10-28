@@ -24,6 +24,14 @@
 - **实机证据**：未跑（斜杠面板选中链路实机腿待批；决策层与构造器已组件级锚定）。
 - **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
 
+## UI-614: 图片入口识图门——自动模式按「有图决议」放行 + 手动/遗留 preset 补能力位（2026-10-28 **verified（BLOCK-310；auto-model 9/9 + attachments 10/10 + 实机红→绿 8/8）**）
+
+- **变化面**：①新增 `resolveImageVisionPreset/imageVisionCapable`——图片入口门禁在**自动模式**用 `hasImages=true` 的自动决议（有图会选 vision 能力的模型，当前配置=DeepSeek），不再按「无图时的 agent 绑定 / 手动 activeModel」判死；手动模式用当前模型；旧 bridge/legacy preset 缺 `capabilities` 时按同 id/endpoint 从完整 presets 补能力位。②notice 文案补「在模型菜单选择支持视觉的模型，或开启自动（按任务选择）」。
+- **为什么这样设计**：用户拖图提示「识图模型未配置」，但配置里 DeepSeek（deepseek-flash）已声明 vision 且自动模式有图会选它——根因是入口读错了模型。手动非视觉 + 关自动仍如实阻断（请求确实发给不支持视觉的模型），提示指路而不是静默失败。
+- **验证（代码）**：auto-model 9/9（自动有图/手动/legacy 补位）+ attachments 10/10 + 相关域 35/35 + tsc 0 + lint 0 error。
+- **实机证据**：`acceptance/block-308/live-image-vision-gate.json`（红→绿）：探测期临时把 chat/agent 绑定切到非视觉 gemini（auto on），旧门禁**复现用户原话提示**（B0/B1 红）；修复后同一场景拖入图片**无提示、附件入列**（8/8），finally 恢复原绑定（C0 bindings/active 相等）。
+- **边界（reopen）**：不改后端 vision 角色绑定/模型目录；手动非视觉 + 关自动仍阻断；测试实例里附件文件名延迟渲染（探针以附件元素入列为准）。
+
 ## UI-613: 模型菜单下钻页（供应商页 → 模型页）+ 去灰底（2026-10-28 **verified（BLOCK-309；ModelMenu 8/8 + 主题门 + 实机 14/14）**）
 
 - **变化面**：mode=all 从「左右两列常驻」改**两页下钻**——供应商页只列自动档 + 供应商行（chevron + 模型数/当前使用/无可用提示），点供应商整页切到该渠道**模型页**（返回行 + 供应商标题/模型数 + 模型列表）；删除 `.sc-model-two-pane` 灰底容器与右列「← 选择供应商查看模型」提示；选中态不再铺 `--petri-hover` 灰底，改左侧 `--petri-accent-border` 细线（透明底）；菜单宽 280→320px（两页一致）；整组不可用的供应商仍可点进入，如实查看禁行原因。

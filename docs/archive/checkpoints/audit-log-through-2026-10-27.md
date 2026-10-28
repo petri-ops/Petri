@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:16:56.840Z -->
 最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 completed（P4-CLOSED）**）：三层机制落地——eslint --cache + tsc --incremental + arch 两门/knip 域跳过（decideSkip 状态锚定，fail-open）+ cruise 同轮共享 + closeout:full --force-full 转义。证据=红绿 13/13 + 回归 31/31 + closeout 十三门 PASS exit 0（域自纠实证：arch 两门因实现脚本改动域内命中→全量）+ closeout:full PASS 零跳过行；**静态门热态 98.4s→10.4s**（lint 79→1.5s/tsc 12.1→1.6s，timing 三件落 acceptance/block-272/）。抓真三处：test-affected 18 红=新脚本未登记 impact-map（复绿）；platform-freeze 抓探针平台分支（含注释字面量，Jev 追加建议命中，shell:true 收敛）；域设计自纠=门禁实现脚本纳入自身域。Jev=doc:suggest planDoc 0.89 采纳/uiAudit 0.06 零建议（无 UI 增量）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:31:51.531Z -->
+最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 启动登记（active·P0-LAUNCH）**）：用户裁决「qoder……鼠标放到拖拽的地方有渐变的渲染效果……任何可以变化的窗口不应该被固定宽度的条带干扰影响美观」+「项目摘要和侧边聊天的窗口左侧也不要默认有这么宽 换成 一致的统一规范」（附截图）。范围=五处可调宽边界统一「细线+渐变高光」悬停规范（workspaceFileTreeResize 4px 实心带重构 / FloatCardResizer 常驻线 3px 收窄 / 清 desktop.css 死把手样式 / 主列 resizeHandleV 参照核对）；红线=可发现性不回退（v25 隐形热区抓真在案）、纯视觉层不动拖拽逻辑；非范围=指针跟随渐晕（reopen）。归属 QODER-ESSENCE-ABSORPTION 切片（用户实测反馈）。plan=docs/block-273-resize-affordance-gradient-plan.md。

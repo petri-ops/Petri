@@ -1,0 +1,56 @@
+{
+  "capturedAt": "2026-10-28T10:31:29.726Z",
+  "head": "d780d88e46da18d6a2ee735e656bce9e25ed2f3d",
+  "projectId": "p_mvrz5ctt_s9o4",
+  "surface": "composer 图片拖入（BLOCK-310/UI-614：自动模式有图决议=DeepSeek 视觉能力）",
+  "switch": {
+    "target": "model-1787541766966",
+    "model": "gemini-3.7-flash-tiered",
+    "restored": true
+  },
+  "total": 8,
+  "passed": 8,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_auto_model_on",
+      "ok": true,
+      "detail": "autoModel=true（用户偏好；探针不改写）"
+    },
+    {
+      "id": "P1_switch_target_available",
+      "ok": true,
+      "detail": "nonVision=model-1787541766966 vision=deepseek-chat"
+    },
+    {
+      "id": "P2_settings_switched",
+      "ok": true,
+      "detail": "chat/agent=model-1787541766966（探测期临时；finally 恢复）"
+    },
+    {
+      "id": "P3_project_created",
+      "ok": true,
+      "detail": "id=p_mvrz5ctt_s9o4"
+    },
+    {
+      "id": "A0_nonvision_auto_decision",
+      "ok": true,
+      "detail": "autoMeta=开启 · gemini-3.7-flash-tiered（Agent 角色绑定） 期望含=gemini-3.7-flash-tiered"
+    },
+    {
+      "id": "B0_no_vision_notice",
+      "ok": true,
+      "detail": "notice=(none)"
+    },
+    {
+      "id": "B1_attachment_accepted",
+      "ok": true,
+      "detail": "attachments=[\"\"] notice=(none)"
+    },
+    {
+      "id": "C0_settings_restored",
+      "ok": true,
+      "detail": "bindingsEqual=true activeEqual=true active=deepseek-chat"
+    }
+  ]
+}

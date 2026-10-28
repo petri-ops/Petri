@@ -146,7 +146,7 @@ import { getBridge } from '@/lib/desktopBridge';
 import { ModelMenu } from './SimpleChat/ModelMenu';
 import { ModelChip } from './SimpleChat/ModelChip';
 import { useAutoModelPreference } from '@/hooks/useAutoModelPreference';
-import { describeAutoDecision, resolveAutoPreset } from '@/lib/auto-model';
+import { describeAutoDecision, imageVisionCapable, resolveAutoPreset } from '@/lib/auto-model';
 import { useTurnNotifications } from './useTurnNotifications';
 import { matchesCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
@@ -512,8 +512,8 @@ export function SimpleChat({
   // 对齐上方 reasoning 能力位读取先例）：渠道声明 vision 时当前轮图片直接内联进聊天请求体，
   // 识图角色未配置（vision_configured=false）也不必前置阻断贴图/拖图。合并放行判据
   // （vision_configured || 渠道视觉能力）单源在 attachments.ts 的 imageInputAllowed。
-  const chatVisionCapable = Array.isArray(activeModel?.capabilities)
-    && activeModel.capabilities.includes('vision');
+  const chatVisionCapable = imageVisionCapable({ autoModel, activeModel, presets: modelPresets,
+    autoImagePreset: resolveAutoPreset({ presets: modelPresets, catalog: modelCatalog, roleBindings, hasImages: true, fallbackId: activeModelId })?.preset });
   // Ctrl+T 循环档位（对齐 ZCode 习惯）；未声明能力的渠道不响应。
   // BLOCK-200 P1：组合串读键位注册表（`thinking.cycle`），能力门与局部生效条件留在这里。
   const { bindings: keymapBindings } = useKeymapSafe();

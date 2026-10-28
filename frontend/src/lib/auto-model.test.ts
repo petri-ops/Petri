@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeAutoDecision, resolveAutoPreset } from './auto-model';
+import { describeAutoDecision, imageVisionCapable, resolveAutoPreset } from './auto-model';
 import { EMPTY_MODEL_CATALOG } from './model-catalog';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
@@ -91,5 +91,44 @@ describe('resolveAutoPreset', () => {
     expect(fallback?.preset.id).toBe('y');
     expect(fallback?.role).toBe('fallback');
     expect(describeAutoDecision(fallback)).toContain('回落当前模型');
+  });
+});
+
+describe('imageVisionCapable（UI-614 图片入口门禁）', () => {
+  it('自动模式：用有图决议，手动 active 非视觉也放行', () => {
+    expect(imageVisionCapable({
+      autoModel: true,
+      autoImagePreset: preset({ endpointProfileId: 'p2', capabilities: ['chat', 'vision'] }),
+      activeModel: preset({ endpointProfileId: 'p1', capabilities: ['chat', 'tools'] }),
+      presets,
+    })).toBe(true);
+  });
+
+  it('自动模式：有图决议也无视觉 → 阻断', () => {
+    expect(imageVisionCapable({
+      autoModel: true,
+      autoImagePreset: preset({ capabilities: ['chat', 'tools'] }),
+      activeModel: preset({ capabilities: ['chat', 'vision'] }),
+    })).toBe(false);
+  });
+
+  it('手动模式：当前模型声明 vision 放行，显式非视觉阻断', () => {
+    expect(imageVisionCapable({
+      autoModel: false,
+      activeModel: preset({ capabilities: ['chat', 'vision'] }),
+    })).toBe(true);
+    expect(imageVisionCapable({
+      autoModel: false,
+      activeModel: preset({ capabilities: ['chat', 'tools'] }),
+    })).toBe(false);
+  });
+
+  it('手动模式：legacy preset 缺 capabilities → 按同 profile 从完整 presets 补能力位', () => {
+    const legacy = { id: 'p2::m2', label: 'P2', provider: 'openai-compatible', model: 'm2' };
+    expect(imageVisionCapable({
+      autoModel: false,
+      activeModel: legacy,
+      presets: [preset({ id: 'p2::m2', endpointProfileId: 'p2', model: 'm2', capabilities: ['chat', 'vision'] })],
+    })).toBe(true);
   });
 });

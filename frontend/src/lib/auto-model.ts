@@ -70,6 +70,42 @@ export function describeAutoDecision(decision: AutoModelDecision | undefined): s
   return `${decision.preset.model}（${decision.reason}）`;
 }
 
+/**
+ * UI-614 — 图片输入能力门的「实际执行模型」解析：
+ * - 自动模式：用「有图时」的自动决议（不是当前无图时的 agent 绑定）——否则
+ *   自动模式下明明会切到视觉模型，入口却按手动模型判死；
+ * - 手动模式：用当前模型；旧 bridge/legacy preset 缺 capabilities 时，按同 id /
+ *   endpoint / model 从完整 presets 补能力位（配置声明 vision 就应放行）。
+ */
+function resolveImageVisionPreset(input: {
+  autoModel: boolean;
+  autoImagePreset?: ChatModelPreset;
+  activeModel?: ChatModelPreset;
+  presets?: ChatModelPreset[];
+}): ChatModelPreset | undefined {
+  if (input.autoModel) return input.autoImagePreset || input.activeModel;
+  const active = input.activeModel;
+  if (!active) return undefined;
+  if (Array.isArray(active.capabilities)) return active;
+  const presets = input.presets || [];
+  const match = presets.find((preset) => preset.id === active.id)
+    || presets.find((preset) => preset.endpointProfileId && preset.endpointProfileId === active.id)
+    || presets.find((preset) => preset.endpointProfileId
+      && preset.endpointProfileId === active.endpointProfileId
+      && preset.model === active.model);
+  return match ? { ...active, capabilities: match.capabilities } : active;
+}
+
+export function imageVisionCapable(input: {
+  autoModel: boolean;
+  autoImagePreset?: ChatModelPreset;
+  activeModel?: ChatModelPreset;
+  presets?: ChatModelPreset[];
+}): boolean {
+  const preset = resolveImageVisionPreset(input);
+  return Array.isArray(preset?.capabilities) && preset.capabilities.includes('vision');
+}
+
 // ---------- BLOCK-264（C-36）— Auto 定形：复杂度分级 + 决策依据审计 ----------
 
 export type TaskComplexity = 'light' | 'standard' | 'heavy';

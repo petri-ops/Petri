@@ -140,7 +140,7 @@ export function onDrop(
 /** Paste: read clipboard image items as data URLs and append them to the attachment list. */
 /** BLOCK-150 加映 — 识图未配置时的前置阻断提示（onPaste/onDrop 共用，SimpleChat 落 attachmentNotice）。 */
 export const VISION_NOT_CONFIGURED_NOTICE =
-  '识图模型未配置：图片输入已停用（设置 → AI 设置 配置视觉模型 / API Key 后可用）';
+  '识图模型未配置：图片输入已停用（在模型菜单选择支持视觉的模型，或开启「自动（按任务选择）」；也可在设置 → AI 设置配置视觉模型 / API Key）';
 
 /** onPaste/onDrop 共用的图片输入门参数。 */
 type ImageInputGateOptions = {
