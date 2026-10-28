@@ -271,12 +271,12 @@ describe('Welcome（BLOCK-80 欢迎页 + UI-341 内嵌聊天模块 + UI-373 不�
     expect(alert.textContent).toContain('目标别名不可达');
   });
 
-  it('快捷 chip 一键直发 starter prompt（copilotAsk 事件）', () => {
+  it('快捷 chip 一键直发 starter prompt（copilotAsk 事件；UI-597 通用 agent 文案）', () => {
     renderWelcome();
-    fireEvent.click(screen.getByText('差异分析'));
+    fireEvent.click(screen.getByText('整理笔记'));
     expect(mockDispatchPetriEvent).toHaveBeenCalledWith(
       petriEvents.copilotAsk,
-      expect.objectContaining({ prompt: expect.stringContaining('组间差异分析') })
+      expect.objectContaining({ prompt: expect.stringContaining('工作笔记') })
     );
   });
 });

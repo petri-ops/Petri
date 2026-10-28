@@ -228,28 +228,29 @@ export function ModelMenu({
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
-          drilledGroup ? (
-            <>
-              <button
-                type="button"
-                className="sc-model-option sc-model-group-header"
-                onClick={() => setDrilledKey(null)}
-                data-testid="model-menu-back"
-                title="返回供应商列表"
-              >
-                <span className="sc-model-option-title">‹ 全部供应商</span>
-              </button>
-              {renderGroupModelRows({
-                group: drilledGroup,
-                activeModelId,
-                accessDenied,
-                pricing,
-                onPickModel,
-              })}
-            </>
-          ) : (
-            renderSupplierHeaderRows(groups, (group) => setDrilledKey(group.key))
-          )
+          /* UI-597（用户裁决「模型列表在供应商右侧的新窗口列出，不在下面」）——
+             两级导航从垂直钻取改左右两列：左列供应商常驻（点选切换右列），
+             右列=选中供应商的模型列表；未选中时右列给引导态。 */
+          <div className="sc-model-two-pane" data-testid="model-menu-two-pane">
+            <div className="sc-model-two-pane-suppliers">
+              {renderSupplierHeaderRows(groups, (group) => setDrilledKey(group.key))}
+            </div>
+            <div className="sc-model-two-pane-models">
+              {drilledGroup ? (
+                renderGroupModelRows({
+                  group: drilledGroup,
+                  activeModelId,
+                  accessDenied,
+                  pricing,
+                  onPickModel,
+                })
+              ) : (
+                <div className="sc-model-two-pane-hint" data-testid="model-menu-hint">
+                  <span className="sc-model-option-meta">← 选择供应商查看模型</span>
+                </div>
+              )}
+            </div>
+          </div>
         ) : mode === 'supplier' ? (
 
           groups.map((group) => {

@@ -63,7 +63,7 @@ describe('RunStatsBar（UI-523 计量条）', () => {
     expect(getByTestId('run-stats-bar').getAttribute('data-state')).toBe('idle');
   });
 
-  it('不可算一律「—」：无 usage 实测 / 零调用会话 / 零耗时', () => {
+  it('不可算一律「—」：无 usage 实测 / 零调用会话 / 零耗时（UI-598：无消耗组整组隐藏）', () => {
     const { container } = render(
       <RunStatsBar
         rounds={1}
@@ -74,11 +74,11 @@ describe('RunStatsBar（UI-523 计量条）', () => {
       />,
     );
     const text = container.textContent ?? '';
-    expect(text).toContain('— tok');
-    expect(text).toContain('缓存命中 —');
     expect(text).toContain('—'); // 速率也是 —
     expect(text).toContain('0%'); // 上下文无 budget 与环一致显 0%
+    // UI-598 — 无会话消耗时会话组整组隐藏：不出「— tok」「缓存命中 —」零值占位
     expect(text).not.toContain('0 tok');
+    expect(text).not.toContain('缓存命中');
   });
 
   it('零耗时调用不除零：速率显「—」而不是 Infinity', () => {

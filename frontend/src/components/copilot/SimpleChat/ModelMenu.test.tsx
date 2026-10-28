@@ -183,8 +183,8 @@ describe('ModelMenu', () => {
   });
 });
 
-describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级导航）', () => {
-  it('all 模式：第一级供应商列表（无平铺）→ 点供应商钻取其模型 → 点模型回调 → 返回', () => {
+describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级导航 + UI-597 左右两列）', () => {
+  it('all 模式：左列供应商常驻 → 点供应商右列显示其模型 → 点模型回调', () => {
     const onPickSupplier = vi.fn();
     const onPickModel = vi.fn();
     render(
@@ -199,24 +199,22 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级�
         onPickModel={onPickModel}
       />,
     );
-    // 第一级：只有供应商分组标题，模型不平铺
+    // 左列供应商常驻；未点选前右列无模型
     expect(screen.getByText('DeepSeek')).toBeTruthy();
     expect(screen.queryByText('model-a')).toBeNull();
     expect(screen.queryByText('model-b')).toBeNull();
-    // 点供应商标题 = 钻取（不再直接 onPickSupplier 切默认）
+    expect(screen.queryByTestId('model-menu-back')).toBeNull();
+    // 点供应商标题 = 钻取（不直接 onPickSupplier 切默认）
     fireEvent.click(screen.getByText('DeepSeek'));
     expect(onPickSupplier).not.toHaveBeenCalled();
-    // 第二级：该渠道模型行 + 返回行
-    expect(screen.getByTestId('model-menu-back')).toBeTruthy();
+    // 右列出现该渠道模型行（供应商左列保持常驻——两列布局无返回行）
     expect(screen.getByText('model-a')).toBeTruthy();
     expect(screen.getByText('model-b')).toBeTruthy();
     // 点模型 = onPickModel 回调（selectModel 连带切渠道默认，供应商级联隐式成立）
     fireEvent.click(screen.getByText('model-b'));
     expect(onPickModel).toHaveBeenCalledWith(groups[0].rows[1].preset);
     expect(onPickSupplier).not.toHaveBeenCalled();
-    // 返回 = 回第一级供应商列表
-    fireEvent.click(screen.getByTestId('model-menu-back'));
-    expect(screen.queryByText('model-b')).toBeNull();
+    // 供应商左列在点模型后仍常驻
     expect(screen.getByText('DeepSeek')).toBeTruthy();
   });
 

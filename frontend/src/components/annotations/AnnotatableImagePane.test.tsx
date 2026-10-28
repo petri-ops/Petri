@@ -86,7 +86,6 @@ describe('AnnotatableImagePane', () => {
     );
 
     await waitFor(() => expect(calls.length).toBeGreaterThan(0));
-    fireEvent.click(getByTestId('annotation-toggle'));
     fireEvent.click(getByTestId('annotation-kind-ellipse'));
 
     const overlay = getByLabelText('批注层：volcano.png');
@@ -165,7 +164,6 @@ describe('AnnotatableImagePane', () => {
     );
 
     await waitFor(() => expect(calls.length).toBeGreaterThan(0));
-    fireEvent.click(getByTestId('annotation-toggle'));
     const overlay = getByLabelText('批注层：volcano.png');
     fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
     fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });

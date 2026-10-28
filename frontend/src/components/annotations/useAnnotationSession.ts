@@ -92,7 +92,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     conversationId,
     artifactName: input.target.artifactName ?? null,
   });
-  const [drawing, setDrawing] = useState(false);
+  const [drawing, setDrawing] = useState(true); // BLOCK-292 自动打开：挂载即批注模式（用户裁决「不需要点击批注才可以」）
   const [color, setColor] = useState<AnnotationColor>('amber');
   const [kind, setKind] = useState<AnnotationKind>('region');
   // 待填矩形随「画它时的 scope 身份」一起存：切换产物后即便组件未重挂，

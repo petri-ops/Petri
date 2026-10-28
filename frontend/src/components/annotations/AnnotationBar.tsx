@@ -197,13 +197,14 @@ export function AnnotationBar({
         </span>
       )}
 
-      {pendingRect && (
+      {(drawing || pendingRect) && (
         <div className={styles.composer} data-testid="annotation-composer">
           <input
             type="text"
             className={styles.input}
             data-testid="annotation-comment-input"
             value={comment}
+            disabled={!pendingRect}
             maxLength={MAX_ANNOTATION_COMMENT_CHARS}
             placeholder={!regionMode
               ? '写下对这段文字的批注（会随「加入任务」发给 Agent）'
@@ -211,6 +212,8 @@ export function AnnotationBar({
                 ? '输入要显示在框内的文字（会随「加入任务」发给 Agent）'
               : kind === 'mosaic'
                 ? `说明这块要遮什么（${MOSAIC_SHORT}；不会修改原图）`
+                : !pendingRect
+                ? '在图上画下一笔后，可在此填写批注内容'
                 : '写下这条批注的含义（会随「加入任务」发给 Agent）'}
             onChange={(event) => setComment(event.target.value)}
             onKeyDown={(event) => {
@@ -218,23 +221,27 @@ export function AnnotationBar({
               if (event.key === 'Escape') onCancelPending();
             }}
           />
-          <button
-            type="button"
-            className="petri-btn petri-btn--primary petri-btn--sm"
-            data-testid="annotation-save"
-            disabled={!comment.trim() || submitting}
-            onClick={() => void submit()}
-          >
-            保存
-          </button>
-          <button
-            type="button"
-            className="petri-btn petri-btn--ghost petri-btn--sm"
-            data-testid="annotation-cancel"
-            onClick={onCancelPending}
-          >
-            取消
-          </button>
+          {pendingRect && (
+            <>
+              <button
+                type="button"
+                className="petri-btn petri-btn--primary petri-btn--sm"
+                data-testid="annotation-save"
+                disabled={!comment.trim() || submitting}
+                onClick={() => void submit()}
+              >
+                保存
+              </button>
+              <button
+                type="button"
+                className="petri-btn petri-btn--ghost petri-btn--sm"
+                data-testid="annotation-cancel"
+                onClick={onCancelPending}
+              >
+                取消
+              </button>
+            </>
+          )}
         </div>
       )}
 

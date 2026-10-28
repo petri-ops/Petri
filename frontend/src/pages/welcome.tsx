@@ -37,11 +37,12 @@ import styles from './welcome.module.css';
  * 内闭环（UI-337）。
  */
 
+// UI-597（用户裁决 2026-10-28「生信垂直领域内容换了，现在是通用 agent，适配合适的文字」）
 const QUICK_CHIPS: Array<{ label: string; prompt: string }> = [
-  { label: '差异分析', prompt: '请对本项目的数据做组间差异分析，并给出可视化与结果表。' },
-  { label: '富集分析', prompt: '请对差异结果做功能富集分析，输出图表与结果表。' },
-  { label: '聚类分析', prompt: '请对表达数据做标准聚类流程（QC→降维→聚类），并给出 marker 基因表。' },
-  { label: '报告解读', prompt: '请解读项目内最新的分析结果，并生成一份简明报告。' },
+  { label: '整理笔记', prompt: '请帮我整理一段工作笔记：先列出要点结构，再补齐细节。' },
+  { label: '写一份总结', prompt: '请根据我提供的材料写一份简明总结，突出关键结论。' },
+  { label: '代码走查', prompt: '请帮我走查一段代码：指出潜在问题并给出改进建议。' },
+  { label: '规划任务', prompt: '请帮我把一个模糊目标拆解成可执行的任务清单。' },
 ];
 
 function greeting(): string {

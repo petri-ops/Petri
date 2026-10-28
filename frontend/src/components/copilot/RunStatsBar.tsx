@@ -81,11 +81,16 @@ export function RunStatsBar({
     ? formatPercent((conversationUsage as ConversationUsageSnapshot).cacheHitRate)
     : '—';
 
+  // UI-598（用户裁决 2026-10-28「首页计量信息不需要有，只有真的存在 token 消耗的
+  // 对话框再出现」）——无运行且无会话消耗时整条隐藏（含上下文环），不再渲染零值占位。
+  const hasConsumption = hasRun || hasConversation;
+
   return (
     <div
       className={styles.strip}
       data-testid="run-stats-bar"
       data-state={running ? 'running' : 'idle'}
+      hidden={!hasConsumption && !running}
     >
       {hasRun && (
         <span
@@ -102,6 +107,7 @@ export function RunStatsBar({
         </span>
       )}
       {hasRun && <span className={styles.divider} aria-hidden="true" />}
+      {hasConversation && (
       <span
         className={styles.group}
         title="本会话累计：输入+输出 tokens（含缓存命中部分）；缓存命中率 = 缓存读取 ÷ 输入 tokens"
@@ -116,7 +122,8 @@ export function RunStatsBar({
           </>
         )}
       </span>
-      <span className={styles.divider} aria-hidden="true" />
+      )}
+      {hasConversation && <span className={styles.divider} aria-hidden="true" />}
       <span className={styles.group} title="上下文用量（点击圆环查看明细）" data-testid="run-stats-context">
         {contextSlot}
         <span>{contextPct ?? 0}%</span>

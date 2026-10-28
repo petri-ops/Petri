@@ -134,6 +134,35 @@
   box-shadow: var(--petri-shadow-float);
 }
 
+/* UI-597（用户裁决「模型列表在供应商右侧的新窗口列出，不在下面」）——
+   mode=all 两列布局：左列供应商常驻、右列选中供应商的模型；加宽菜单容纳两列。 */
+.sc-model-menu:has(.sc-model-two-pane) {
+  width: min(460px, calc(100vw - 32px));
+}
+.sc-model-two-pane {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 1px;
+  background: var(--sc-divider, rgba(128,128,128,0.15));
+}
+.sc-model-two-pane > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.sc-model-two-pane-suppliers .sc-model-option {
+  border-radius: 0;
+}
+.sc-model-two-pane-suppliers [data-active='true'],
+.sc-model-two-pane-suppliers .sc-model-group-header:has(+ .sc-model-option-active) {
+  background: color-mix(in srgb, var(--sc-accent, var(--petri-accent, #14b8a6)) 12%, transparent);
+}
+.sc-model-two-pane-hint {
+  padding: 18px 12px;
+  text-align: center;
+  color: var(--sc-text-tertiary, var(--petri-text-tertiary, #888));
+}
+
 .sc-model-option {
   display: flex;
   flex-direction: column;
