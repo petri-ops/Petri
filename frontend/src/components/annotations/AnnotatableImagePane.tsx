@@ -67,9 +67,11 @@ export function AnnotatableImagePane({
           kind={session.kind}
           pendingRect={session.pendingRect}
           pendingPath={session.pendingPath}
+          pendingArrow={session.pendingArrow}
           pendingTextPoint={session.pendingTextPoint}
           onCommit={(rect) => session.beginRect(rect, null)}
           onCommitPath={(path) => session.beginPath(path, null)}
+          onCommitArrow={(start, end) => session.beginArrow(start, end, null)}
           onCommitClick={(point) => session.beginTextAt(point, null)}
           onSubmitPending={session.submitComment}
           onCancelPending={session.cancelPending}

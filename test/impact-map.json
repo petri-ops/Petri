@@ -5983,6 +5983,19 @@
       "tests": []
     },
     {
+      "id": "block302-arrow-form-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-303/304 UI-603/604 实机腿：箭头真形态+批注 prompt 路径溯源走查（draft 即最终形态/pending SVG/REST 两点 path/保存后 stroke SVG，7/7 PASS，D5 F1 部分跳过）；取证探针与目录，前端与契约改动面经 frontend/Node 通道自动路由 vitest。",
+      "patterns": [
+        "scripts/block302-arrow-form-live.cjs",
+        "acceptance/block-302/**"
+      ],
+      "tests": [
+        "frontend/src/components/annotations/AnnotatableImagePane.test.tsx",
+        "test/block219-result-annotations.test.mjs"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

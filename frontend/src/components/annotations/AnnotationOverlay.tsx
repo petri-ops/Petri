@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   MAX_ANNOTATION_COMMENT_CHARS,
   MOSAIC_DISCLOSURE,
+  arrowHeadPoints,
   decimatePath,
   describeAnnotationAnchor,
   normalizeFreehandPoints,
@@ -39,6 +40,8 @@ export interface AnnotationOverlayProps {
   onCommit: (rect: [number, number, number, number]) => void;
   /** BLOCK-270（C-43 尾项）— 画笔提交（kind='freehand' 时替代 onCommit）；缺省=画笔不可绘制。 */
   onCommitPath?: (path: [number, number][]) => void;
+  /** BLOCK-303 — 箭头真形态提交（kind='arrow' 时替代 onCommit）：起点→终点两点；缺省=旧矩形对角线。 */
+  onCommitArrow?: (start: [number, number], end: [number, number]) => void;
   onSelect?: (annotationId: string) => void;
   /** 无障碍标签（如「批注层：第 2 页」）。 */
   label: string;
@@ -46,6 +49,8 @@ export interface AnnotationOverlayProps {
   /** BLOCK-292 — pending 批注预览（画完→保存期间保持可见；会话层下放）。 */
   pendingRect?: [number, number, number, number] | null;
   pendingPath?: readonly (readonly [number, number])[] | null;
+  /** BLOCK-303 — 箭头待填两点 [起点,终点]（保存前保持可见）。 */
+  pendingArrow?: readonly (readonly [number, number])[] | null;
   /** BLOCK-300 — 文本标注点击点（就地输入框锚点；缺省=text 形状退回拖拽语义）。 */
   pendingTextPoint?: [number, number] | null;
   /** BLOCK-300 — 文本标注点击上报（kind='text' 时点击图面即就地开框）。 */
@@ -62,6 +67,36 @@ export interface AnnotationOverlayProps {
   onCancelPending?: () => void;
 }
 
+/** BLOCK-303 — 箭头图形（线段+贴合方向的头部三角）；draft/待填/已保存三态共用同一形态，
+ *  绘制中所见即保存后所得。坐标 0..1 → 0..100 viewBox。入参放宽 number[]：ArtifactAnnotation.path
+ *  与采点元组两种形态都吃。 */
+function ArrowGlyph({ start, end, color }: {
+  start: readonly number[];
+  end: readonly number[];
+  color: AnnotationColor;
+}): React.ReactElement {
+  const geo = arrowHeadPoints(start, end);
+  return (
+    <>
+      <line
+        x1={start[0] * 100}
+        y1={start[1] * 100}
+        x2={geo.lineEnd[0] * 100}
+        y2={geo.lineEnd[1] * 100}
+        className={styles.arrowLine}
+        data-color={color}
+      />
+      <polygon
+        points={[geo.head[0], geo.head[1], geo.head[2]]
+          .map((point) => `${point[0] * 100},${point[1] * 100}`)
+          .join(' ')}
+        className={styles.arrowHead}
+        data-color={color}
+      />
+    </>
+  );
+}
+
 function samePage(annotation: ArtifactAnnotation, page: number | null): boolean {
   const annotationPage = typeof annotation.page === 'number' ? annotation.page : null;
   return annotationPage === page;
@@ -75,11 +110,13 @@ export function AnnotationOverlay({
   kind,
   onCommit,
   onCommitPath,
+  onCommitArrow,
   onSelect,
   label,
   testId = 'annotation-overlay',
   pendingRect = null,
   pendingPath = null,
+  pendingArrow = null,
   pendingTextPoint = null,
   onCommitClick,
   onSubmitPending,
@@ -90,23 +127,34 @@ export function AnnotationOverlay({
   const strokeRef = useRef<NormalizedPoint[] | null>(null);
   const [draft, setDraft] = useState<[number, number, number, number] | null>(null);
   const [draftPath, setDraftPath] = useState<NormalizedPoint[] | null>(null);
+  /** BLOCK-303 — 箭头拖拽实时预览（[起点, 当前点]；绘制中即最终形态，丝滑无「外部框」中间态）。 */
+  const [draftArrow, setDraftArrow] = useState<[[number, number], [number, number]] | null>(null);
   const visible = annotations.filter((annotation) => samePage(annotation, page));
   const freehandVisible = visible.filter((annotation) => annotation.kind === 'freehand');
+  // BLOCK-303 — 箭头真形态（两点 path）走 SVG 层；freehand 与两点箭头不再产生矩形退化框。
+  const isArrowLine = (annotation: ArtifactAnnotation): boolean =>
+    annotation.kind === 'arrow' && Array.isArray(annotation.path) && annotation.path.length === 2;
+  const boxVisible = visible.filter((annotation) => annotation.kind !== 'freehand' && !isArrowLine(annotation));
+  const arrowVisible = visible.filter(isArrowLine);
   const freehandDrawing = drawing && kind === 'freehand' && typeof onCommitPath === 'function';
+  // BLOCK-303 — 箭头真形态：拖拽=起点→终点两点线段（缺省 onCommitArrow 时退回旧 rect 对角线）。
+  const arrowDrawing = drawing && kind === 'arrow' && typeof onCommitArrow === 'function';
 
   // BLOCK-300 — 就地批注输入：动作结束位置出现，允许不填直接确认（Esc/× 取消）。
   const [inlineComment, setInlineComment] = useState('');
   const inlineInputRef = useRef<HTMLInputElement | null>(null);
   const submittingRef = useRef(false);
 
-  // 就地框锚点：形状=拖拽终点（右下角），画笔=尾点，文本=点击点。
+  // 就地框锚点：形状=拖拽终点（右下角），画笔=尾点，箭头=终点，文本=点击点。
   const pendingAnchor: { x: number; y: number } | null = pendingRect
     ? { x: pendingRect[0] + pendingRect[2], y: pendingRect[1] + pendingRect[3] }
     : pendingPath && pendingPath.length > 0
       ? { x: pendingPath[pendingPath.length - 1][0], y: pendingPath[pendingPath.length - 1][1] }
-      : pendingTextPoint
-        ? { x: pendingTextPoint[0], y: pendingTextPoint[1] }
-        : null;
+      : pendingArrow && pendingArrow.length === 2
+        ? { x: pendingArrow[1][0], y: pendingArrow[1][1] }
+        : pendingTextPoint
+          ? { x: pendingTextPoint[0], y: pendingTextPoint[1] }
+          : null;
 
   // text-place 保存时把就地输入框的实际渲染尺寸落库（rectOverride），文本框位置才忠实于输入现场。
   const measureInlineRect = (): [number, number, number, number] | undefined => {
@@ -175,9 +223,15 @@ export function AnnotationOverlay({
       setDraftPath([point]);
       return;
     }
+    if (arrowDrawing) {
+      startRef.current = point;
+      setDraftArrow([[point.x, point.y], [point.x, point.y]]);
+      setDraft(null);
+      return;
+    }
     startRef.current = point;
     setDraft(null);
-  }, [drawing, freehandDrawing, kind, onCommitClick, readPoint]);
+  }, [arrowDrawing, drawing, freehandDrawing, kind, onCommitClick, readPoint]);
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
@@ -190,9 +244,14 @@ export function AnnotationOverlay({
       setDraftPath(stroke);
       return;
     }
+    if (arrowDrawing && startRef.current) {
+      const start = startRef.current;
+      setDraftArrow([[start.x, start.y], [point.x, point.y]]);
+      return;
+    }
     if (!startRef.current) return;
     setDraft(normalizePointerRect(startRef.current, point));
-  }, [drawing, freehandDrawing, readPoint]);
+  }, [arrowDrawing, drawing, freehandDrawing, readPoint]);
 
   const finish = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
@@ -214,6 +273,17 @@ export function AnnotationOverlay({
       onCommitPath?.(path);
       return;
     }
+    if (arrowDrawing) {
+      const start = startRef.current;
+      startRef.current = null;
+      setDraftArrow(null);
+      const point = readPoint(event);
+      if (!start || !point) return;
+      // 误触（微动）不成箭头：位移低于 1% 忽略
+      if (Math.hypot(point.x - start.x, point.y - start.y) < 0.01) return;
+      onCommitArrow?.([start.x, start.y], [point.x, point.y]);
+      return;
+    }
     if (!startRef.current) return;
     const point = readPoint(event);
     const start = startRef.current;
@@ -223,7 +293,7 @@ export function AnnotationOverlay({
     const rect = normalizePointerRect(start, point);
     if (!rect) return;
     onCommit(rect);
-  }, [drawing, freehandDrawing, onCommit, onCommitPath, readPoint]);
+  }, [arrowDrawing, drawing, freehandDrawing, onCommit, onCommitArrow, onCommitPath, readPoint]);
 
   return (
     <div
@@ -243,7 +313,7 @@ export function AnnotationOverlay({
         if (startRef.current || strokeRef.current) finish(event);
       }}
     >
-      {visible.map((annotation, index) => (
+      {boxVisible.map((annotation, index) => (
         <button
           key={annotation.annotationId}
           type="button"
@@ -289,6 +359,32 @@ export function AnnotationOverlay({
           ))}
         </svg>
       )}
+      {/* BLOCK-303 — 箭头真形态（两点 path）：线段+贴合方向的头部三角；旧 rect-only 数据仍走下方对角线。 */}
+      {arrowVisible.length > 0 && (
+        <svg
+          className={styles.freehandLayer}
+          data-testid="annotation-arrow-layer"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="false"
+        >
+          {arrowVisible.map((annotation) => {
+            const start = annotation.path[0];
+            const end = annotation.path[1];
+            return (
+              <g
+                key={annotation.annotationId}
+                data-annotation-id={annotation.annotationId}
+                data-testid="annotation-arrow-stroke"
+                onClick={() => onSelect?.(annotation.annotationId)}
+              >
+                <ArrowGlyph start={start} end={end} color={annotation.color} />
+                <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
+              </g>
+            );
+          })}
+        </svg>
+      )}
       {draft && !freehandDrawing && (
         <div
           className={styles.draft}
@@ -306,6 +402,18 @@ export function AnnotationOverlay({
             className={styles.freehandStroke}
             data-color={color}
           />
+        </svg>
+      )}
+      {/* BLOCK-303 — 箭头拖拽实时预览：与保存后同形态（线段+贴合方向的头部），无「外部框」中间态。 */}
+      {draftArrow && (
+        <svg className={styles.freehandLayer} data-testid="annotation-arrow-draft" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <ArrowGlyph start={draftArrow[0]} end={draftArrow[1]} color={color} />
+        </svg>
+      )}
+      {/* BLOCK-303 — 箭头待填预览：保存前保持可见且形态不变。 */}
+      {pendingArrow && pendingArrow.length === 2 && (
+        <svg className={styles.freehandLayer} data-testid="annotation-pending-arrow" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <ArrowGlyph start={pendingArrow[0]} end={pendingArrow[1]} color={color} />
         </svg>
       )}
       {/* BLOCK-292 — pending 批注预览：画完→保存期间保持可见（用户裁决「批注不要隐藏」）。

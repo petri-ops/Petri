@@ -323,12 +323,27 @@ function normalizeAnnotationInput(input) {
     if (input.anchor !== undefined && input.anchor !== null) {
       errors.push({ code: 'anchor_unexpected', message: '只有 text-selection 批注才带 anchor。' });
     }
-    if (input.path !== undefined && input.path !== null) {
+    const wantsPath = input.path !== undefined && input.path !== null;
+    if (wantsPath && kind !== 'arrow') {
       errors.push({ code: 'path_unexpected', message: '只有 freehand 批注才带 path。' });
     }
-    const rect = normalizeAnnotationRect(input.rect);
-    if (!rect.ok) errors.push({ code: rect.code, message: rect.message });
-    else normalizedRect = rect.rect;
+    if (wantsPath) {
+      // BLOCK-303 — 箭头真形态：path=[起点, 终点] 两点线段（渲染为带箭头头部的线段，
+      // 头部贴合线段方向）；旧数据的 arrow 仍以矩形对角线近似渲染，两种形态并存兼容。
+      const pathResult = normalizeAnnotationPath(input.path);
+      if (!pathResult.ok) {
+        errors.push({ code: pathResult.code, message: pathResult.message });
+      } else if (pathResult.path.length !== 2) {
+        errors.push({ code: 'arrow_path_points', message: '箭头 path 必须恰好 2 个点（起点、终点）。' });
+      } else {
+        normalizedPath = pathResult.path;
+      }
+    }
+    if (!wantsPath) {
+      const rect = normalizeAnnotationRect(input.rect);
+      if (!rect.ok) errors.push({ code: rect.code, message: rect.message });
+      else normalizedRect = rect.rect;
+    }
   }
 
   const page = normalizePage(input.page);
@@ -412,9 +427,10 @@ function normalizeAnnotationInput(input) {
       artifactName,
       kind,
       page: page.page,
-      rect: isTextAnchor || isPath ? [] : normalizedRect,
+      rect: isTextAnchor || isPath || normalizedPath ? [] : normalizedRect,
       // BLOCK-264（C-43）— freehand 点序列（存 path_json 列；rect 恒 []）
-      path: isPath ? normalizedPath : null,
+      // BLOCK-303 — 箭头真形态同列：path=[起点,终点] 两点（rect 恒 []）
+      path: normalizedPath,
       anchor: isTextAnchor ? anchor : null,
       comment,
       color,

@@ -243,6 +243,38 @@ export function smoothFreehandPathD(
   return d;
 }
 
+/** BLOCK-303 — 箭头线几何：线段缩到头部底边，头部三角沿方向贴合（替代旧「矩形对角线
+ *  + 固定角三角」近似形态）。归一化 0..1 坐标；头部尺寸随图等比（与批注框同缩放语义）。 */
+export function arrowHeadPoints(
+  start: readonly number[],
+  end: readonly number[],
+): { lineEnd: [number, number]; head: [[number, number], [number, number], [number, number]] } {
+  const dx = end[0] - start[0];
+  const dy = end[1] - start[1];
+  const len = Math.hypot(dx, dy);
+  if (len === 0) {
+    return {
+      lineEnd: [end[0], end[1]],
+      head: [[end[0], end[1]], [end[0], end[1]], [end[0], end[1]]],
+    };
+  }
+  const ux = dx / len;
+  const uy = dy / len;
+  const nx = -uy;
+  const ny = ux;
+  const HEAD_LEN = 0.035;
+  const HEAD_HALF = 0.018;
+  const base: [number, number] = [end[0] - ux * HEAD_LEN, end[1] - uy * HEAD_LEN];
+  return {
+    lineEnd: base,
+    head: [
+      [end[0], end[1]],
+      [base[0] + nx * HEAD_HALF, base[1] + ny * HEAD_HALF],
+      [base[0] - nx * HEAD_HALF, base[1] - ny * HEAD_HALF],
+    ],
+  };
+}
+
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) return 0;
   if (value < 0) return 0;
@@ -330,6 +362,13 @@ function formatPercentRect(rect: readonly number[]): string {
   return `(${pct(x)}, ${pct(y)}, ${pct(width)}×${pct(height)})`;
 }
 
+/** BLOCK-303 — 箭头两点的百分比坐标（prompt 溯源用，避免报假矩形）。 */
+function formatPercentPoint(point: readonly number[]): string {
+  const [x = 0, y = 0] = point;
+  const pct = (value: number) => `${Math.round(clamp01(value) * 100)}%`;
+  return `(${pct(x)}, ${pct(y)})`;
+}
+
 export interface AnnotationTaskTarget {
   surface: AnnotationSurface;
   artifactId?: string | null;
@@ -361,7 +400,7 @@ export function buildAnnotationTaskPrompt(
   if (target.revisionOrdinal) identityParts.push(`第 ${target.revisionOrdinal} 版`);
   const identity = identityParts.length > 0 ? `（${identityParts.join('，')}）` : '';
   const head = target.surface === 'workspace-file'
-    ? `请查看工作区文件「${name}」中的 ${usable.length} 条批注并给出结论或下一步：`
+    ? `请查看工作区文件「${name}」（项目工作区内的相对路径，可直接按此路径读取文件对照批注位置）中的 ${usable.length} 条批注并给出结论或下一步：`
     : `请基于结果产物「${name}」${identity}的 ${usable.length} 条批注继续分析：`;
 
   const shown = usable.slice(0, MAX_ANNOTATIONS_IN_PROMPT);
@@ -372,7 +411,9 @@ export function buildAnnotationTaskPrompt(
       ? describeAnnotationAnchor(annotation)
       : annotation.kind === 'freehand'
         ? `${describeAnnotationAnchor(annotation)} 画笔路径（${annotation.path?.length ?? 0} 个点）`
-        : `${describeAnnotationAnchor(annotation)} ${formatPercentRect(annotation.rect)}`;
+        : annotation.kind === 'arrow' && Array.isArray(annotation.path) && annotation.path.length === 2
+          ? `${describeAnnotationAnchor(annotation)} 箭头 ${formatPercentPoint(annotation.path[0])} → ${formatPercentPoint(annotation.path[1])}`
+          : `${describeAnnotationAnchor(annotation)} ${formatPercentRect(annotation.rect)}`;
     return `${index + 1}. ${where}：${annotation.comment.trim()}`;
   });
   const omitted = usable.length - shown.length;

@@ -45,6 +45,8 @@ export interface AnnotationSession {
   /** BLOCK-292 — 待填批注的几何（overlay 据此在保存前保持可见；anchor 待填时两者皆 null）。 */
   pendingRect: [number, number, number, number] | null;
   pendingPath: readonly [number, number][] | null;
+  /** BLOCK-303 — 箭头待填两点 [起点,终点]（就地输入框锚点兼形状预览）。 */
+  pendingArrow: readonly [number, number][] | null;
   /** BLOCK-300 — 文本标注点击点（就地输入框锚点；形状待填时为 null）。 */
   pendingTextPoint: [number, number] | null;
   /** 撤销栈是否可回退（仅本次会话、仅当前 scope）。 */
@@ -58,6 +60,8 @@ export interface AnnotationSession {
   beginRect: (rect: [number, number, number, number], page?: number | null) => void;
   /** BLOCK-270（C-43 尾项）— 画笔：路径采点完成，待填评论（与 beginRect 互斥）。 */
   beginPath: (path: [number, number][], page?: number | null) => void;
+  /** BLOCK-303 — 箭头真形态：起点→终点两点线段，待填评论（与 beginRect 互斥）。 */
+  beginArrow: (start: [number, number], end: [number, number], page?: number | null) => void;
   /** BLOCK-300 — 文本标注：点击图上位置，待就地输入文字（与 beginRect 互斥）。 */
   beginTextAt: (point: [number, number], page?: number | null) => void;
   /** BLOCK-254 P5 — 文本锚点：选区落在源码行范围上（与 beginRect 互斥）。 */
@@ -80,6 +84,7 @@ export interface AnnotationSession {
 type PendingTarget =
   | { kind: 'rect'; rect: [number, number, number, number]; page: number | null }
   | { kind: 'path'; path: [number, number][]; page: number | null }
+  | { kind: 'line'; points: [[number, number], [number, number]]; page: number | null }
   | { kind: 'text-place'; point: [number, number]; page: number | null }
   | { kind: 'anchor'; anchor: TextAnchor };
 
@@ -135,6 +140,14 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     setPending({ target: { kind: 'path', path, page }, identity });
   }, [identity]);
 
+  const beginArrow = useCallback((
+    start: [number, number],
+    end: [number, number],
+    page: number | null = null,
+  ) => {
+    setPending({ target: { kind: 'line', points: [start, end], page }, identity });
+  }, [identity]);
+
   const beginTextAt = useCallback((point: [number, number], page: number | null = null) => {
     setPending({ target: { kind: 'text-place', point, page }, identity });
   }, [identity]);
@@ -160,26 +173,31 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     const resolvedComment = comment.trim() || defaultAnnotationComment(
       pending.target.kind === 'path'
         ? 'freehand'
-        : pending.target.kind === 'anchor'
-          ? 'text-selection'
-          : pending.target.kind === 'text-place'
-            ? 'text'
-            : kind,
+        : pending.target.kind === 'line'
+          ? 'arrow'
+          : pending.target.kind === 'anchor'
+            ? 'text-selection'
+            : pending.target.kind === 'text-place'
+              ? 'text'
+              : kind,
     );
-    // 定位方式决定 kind：锚点→text-selection、路径→freehand、点击→text（工具条形状选择对前三者无意义）。
+    // 定位方式决定 kind：锚点→text-selection、路径→freehand、箭头线→arrow、点击→text
+    //（工具条形状选择对前三者无意义）。
     const saved = pending.target.kind === 'rect'
       ? await store.add({ rect: rectOverride ?? pending.target.rect, comment: resolvedComment, color, kind, page: pending.target.page })
       : pending.target.kind === 'path'
         ? await store.add({ path: pending.target.path, comment: resolvedComment, color, kind: 'freehand', page: pending.target.page })
-        : pending.target.kind === 'text-place'
-          ? await store.add({
-            rect: rectOverride ?? [pending.target.point[0], pending.target.point[1], 0.25, 0.06],
-            comment: resolvedComment,
-            color,
-            kind: 'text',
-            page: pending.target.page,
-          })
-          : await store.add({ anchor: pending.target.anchor, comment: resolvedComment, color, kind: 'text-selection' });
+        : pending.target.kind === 'line'
+          ? await store.add({ path: pending.target.points, comment: resolvedComment, color, kind: 'arrow', page: pending.target.page })
+          : pending.target.kind === 'text-place'
+            ? await store.add({
+              rect: rectOverride ?? [pending.target.point[0], pending.target.point[1], 0.25, 0.06],
+              comment: resolvedComment,
+              color,
+              kind: 'text',
+              page: pending.target.page,
+            })
+            : await store.add({ anchor: pending.target.anchor, comment: resolvedComment, color, kind: 'text-selection' });
     if (!saved) return false;
     pushUndo({ type: 'created', annotationId: saved.annotationId });
     setPending(null);
@@ -203,10 +221,12 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
       return store.remove(last.annotationId);
     }
     const restored = await store.add({
-      // 重建也要保持定位方式互斥：文本锚点走 anchor、画笔走 path，区域批注走 rect。
+      // 重建也要保持定位方式互斥：文本锚点走 anchor、画笔/箭头线走 path（BLOCK-303
+      // 箭头真形态存两点 path），区域批注走 rect。
       ...(last.annotation.anchor
         ? { anchor: last.annotation.anchor }
-        : last.annotation.kind === 'freehand' && Array.isArray(last.annotation.path) && last.annotation.path.length > 0
+        : (last.annotation.kind === 'freehand' || last.annotation.kind === 'arrow')
+          && Array.isArray(last.annotation.path) && last.annotation.path.length > 0
           ? { path: last.annotation.path as [number, number][] }
           : { rect: last.annotation.rect as [number, number, number, number] }),
       comment: last.annotation.comment,
@@ -236,7 +256,9 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     pending: pending !== null,
     pendingRect: pending?.target.kind === 'rect' ? pending.target.rect : null,
     pendingPath: pending?.target.kind === 'path' ? pending.target.path : null,
-    /** BLOCK-300 — 文本标注的就地输入锚点（text-place 专属；形状待填走终点定位）。 */
+    /** BLOCK-303 — 箭头待填两点 [起点,终点]（就地输入框锚点兼形状预览）。 */
+    pendingArrow: pending?.target.kind === 'line' ? pending.target.points : null,
+    /** BLOCK-300 — 文本标注点击点（就地输入框锚点；形状待填时为 null）。 */
     pendingTextPoint: pending?.target.kind === 'text-place' ? pending.target.point : null,
     canUndo: undoActions.length > 0,
     undoLabel: undoActionLabel(lastUndo),
@@ -245,6 +267,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     setKind,
     beginRect,
     beginPath,
+    beginArrow,
     beginTextAt,
     beginAnchor,
     cancelPending,
@@ -255,6 +278,7 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
   }), [
     beginAnchor,
     beginPath,
+    beginArrow,
     beginTextAt,
     beginRect,
     buildPrompt,

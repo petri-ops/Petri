@@ -773,3 +773,36 @@ test('BLOCK-264 C-43 — freehand：path 归一化/抽稀/三态互斥/store 往
   assert.equal(free.path.length, 3);
   assert.deepEqual(free.path[0], [0.1, 0.1]);
 });
+
+test('BLOCK-303 — arrow accepts a two-point path (true arrow form), rejects other point counts', () => {
+  const base = {
+    projectId: 'p1',
+    surface: 'workspace-file',
+    filePath: 'icons/logo.png',
+    kind: 'arrow',
+    path: [[0.2, 0.3], [0.5, 0.6]],
+    comment: '指向峰值',
+  };
+  const ok = normalizeAnnotationInput(base);
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors || []));
+  assert.deepEqual(ok.annotation.path, [[0.2, 0.3], [0.5, 0.6]]);
+  // 箭头线形态 rect 恒 []（与 freehand 同列语义）
+  assert.deepEqual(ok.annotation.rect, []);
+
+  // 单点/三点拒绝：箭头恰好两点（起点、终点）
+  assert.equal(normalizeAnnotationInput({ ...base, path: [[0.2, 0.3]] }).ok, false);
+  const three = normalizeAnnotationInput({ ...base, path: [[0.2, 0.3], [0.5, 0.6], [0.7, 0.8]] });
+  assert.equal(three.ok, false);
+  if (!three.ok) assert.ok(three.errors.some((e) => e.code === 'arrow_path_points'));
+
+  // 非 arrow 形状带 path 仍拒绝（path_unexpected 契约不变）
+  const regionWithPath = normalizeAnnotationInput({ ...base, kind: 'region' });
+  assert.equal(regionWithPath.ok, false);
+  if (!regionWithPath.ok) assert.ok(regionWithPath.errors.some((e) => e.code === 'path_unexpected'));
+
+  // 旧数据兼容：arrow 仍可用 rect（对角线近似形态）
+  const legacy = normalizeAnnotationInput({ ...base, path: undefined, rect: [0.2, 0.3, 0.3, 0.3] });
+  assert.equal(legacy.ok, true, JSON.stringify(legacy.errors || []));
+  assert.deepEqual(legacy.annotation.rect, [0.2, 0.3, 0.3, 0.3]);
+  assert.equal(legacy.annotation.path, null);
+});

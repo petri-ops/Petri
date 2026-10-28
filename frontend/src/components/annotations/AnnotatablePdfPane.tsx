@@ -49,9 +49,11 @@ export function AnnotatablePdfPane({
             kind={session.kind}
             pendingRect={session.pendingRect}
             pendingPath={session.pendingPath}
+            pendingArrow={session.pendingArrow}
             pendingTextPoint={session.pendingTextPoint}
             onCommit={(rect) => session.beginRect(rect, page)}
             onCommitPath={(path) => session.beginPath(path, page)}
+            onCommitArrow={(start, end) => session.beginArrow(start, end, page)}
             onCommitClick={(point) => session.beginTextAt(point, page)}
             onSubmitPending={session.submitComment}
             onCancelPending={session.cancelPending}

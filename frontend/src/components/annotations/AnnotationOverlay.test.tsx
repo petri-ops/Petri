@@ -457,4 +457,79 @@ describe('AnnotationOverlay', () => {
     expect(onCommit).not.toHaveBeenCalled();
     expect(getByTestId('annotation-overlay').getAttribute('data-drawing')).toBe('true');
   });
+
+  it('BLOCK-303 — 箭头真形态：拖拽起点→终点提交两点，绘制中即最终形态（SVG 线+头）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommitArrow = vi.fn();
+    const onCommit = vi.fn();
+    const { getByTestId, queryByTestId, getAllByTestId, rerender } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="arrow"
+        onCommit={onCommit}
+        onCommitArrow={onCommitArrow}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    // 拖拽中：draft SVG 在场（线+头），无外部虚线框
+    fireEvent.pointerDown(overlay, { clientX: 10, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 100, clientY: 30 });
+    expect(getByTestId('annotation-arrow-draft')).toBeTruthy();
+    expect(queryByTestId('annotation-draft')).toBeNull();
+    fireEvent.pointerUp(overlay, { clientX: 100, clientY: 30 });
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(onCommitArrow).toHaveBeenCalledWith([0.05, 0.1], [0.5, 0.3]);
+    expect(queryByTestId('annotation-arrow-draft')).toBeNull();
+
+    // 误触（微动 <1%）不成箭头
+    fireEvent.pointerDown(overlay, { clientX: 50, clientY: 50 });
+    fireEvent.pointerUp(overlay, { clientX: 51, clientY: 50.5 });
+    expect(onCommitArrow).toHaveBeenCalledTimes(1);
+
+    // 待填预览：两点 SVG 保持可见（BLOCK-292「批注不要隐藏」）
+    rerender(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing={false}
+        color="sky"
+        kind="arrow"
+        pendingArrow={[[0.2, 0.2], [0.8, 0.7]]}
+        onSubmitPending={() => Promise.resolve(true)}
+        onCommit={() => undefined}
+        onCommitArrow={onCommitArrow}
+        label="批注层：图像"
+      />,
+    );
+    expect(getByTestId('annotation-pending-arrow')).toBeTruthy();
+    // 就地框锚在箭头终点 (0.8, 0.7) → left clamp 到 55%
+    expect(getByTestId('annotation-inline-composer').style.left).toBe('55%');
+
+    // 保存后：两点 path → arrow-stroke（line+polygon）；rect-only 旧数据仍走 box 对角线
+    rerender(
+      <AnnotationOverlay
+        annotations={[
+          annotation({ annotationId: 'a-new', kind: 'arrow', rect: [], path: [[0.2, 0.2], [0.8, 0.7]] }),
+          annotation({ annotationId: 'a-legacy', kind: 'arrow', path: [] }),
+        ]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="arrow"
+        pendingArrow={null}
+        onCommit={() => undefined}
+        onCommitArrow={onCommitArrow}
+        label="批注层：图像"
+      />,
+    );
+    expect(queryByTestId('annotation-pending-arrow')).toBeNull();
+    const stroke = getByTestId('annotation-arrow-stroke');
+    expect(stroke.querySelector('line')).toBeTruthy();
+    expect(stroke.querySelector('polygon')).toBeTruthy();
+    expect(getAllByTestId('annotation-box').map((el) => el.dataset.kind)).toEqual(['arrow']);
+  });
 });

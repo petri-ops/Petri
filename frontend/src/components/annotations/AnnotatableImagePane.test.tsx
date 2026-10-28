@@ -302,4 +302,48 @@ describe('AnnotatableImagePane', () => {
     expect(textRect).toHaveLength(4);
     expect(textRect.every((v) => v >= 0 && v <= 1)).toBe(true);
   });
+
+  it('BLOCK-303 — 箭头端到端：拖拽起点→终点，两点 path 落库 kind=arrow', async () => {
+    const posts: Record<string, unknown>[] = [];
+    const calls = installFetch((url, init) => {
+      if (url.includes('/annotations?') && (!init || !init.method)) {
+        return jsonResponse({ annotations: [], count: 0, limit: 200 });
+      }
+      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+        const body = parseBody(init);
+        posts.push(body);
+        return jsonResponse({ annotation: { ...createdAnnotation, ...body, annotationId: `ann-${posts.length}` }, count: posts.length });
+      }
+      return jsonResponse({ error: 'unexpected' }, 500);
+    });
+
+    const { getByTestId, getByLabelText } = render(
+      <AnnotatableImagePane
+        src="http://mock/volcano.png"
+        alt="volcano.png"
+        onOpenImage={() => undefined}
+        scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
+        target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-9', revisionOrdinal: 3 }}
+        onAddToTask={() => undefined}
+      />,
+    );
+
+    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    fireEvent.click(getByTestId('annotation-kind-arrow'));
+    const overlay = getByLabelText('批注层：volcano.png');
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
+    expect(getByTestId('annotation-arrow-draft')).toBeTruthy();
+    fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
+    expect(getByTestId('annotation-pending-arrow')).toBeTruthy();
+
+    // 不填写直接确认 → 默认文案「箭头标注」+ 两点 path 落库
+    fireEvent.click(getByTestId('annotation-inline-confirm'));
+    await waitFor(() => expect(posts.length).toBe(1));
+    expect(posts[0]).toMatchObject({
+      kind: 'arrow',
+      comment: '箭头标注',
+      path: [[0.1, 0.1], [0.6, 0.6]],
+    });
+  });
 });

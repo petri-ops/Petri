@@ -1,0 +1,46 @@
+{
+  "capturedAt": "2026-10-28T05:34:13.097Z",
+  "head": "bc6d88dcdb3eb5ad2f7b887dc886b446aa59c913",
+  "projectId": "p_mvroiqbi_jgrq",
+  "surface": "workspace-file 图像预览面（箭头真形态 + prompt 路径溯源）",
+  "total": 7,
+  "passed": 7,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvroiqbi_jgrq"
+    },
+    {
+      "id": "D0a_auto_open",
+      "ok": true,
+      "detail": "data-drawing=true"
+    },
+    {
+      "id": "D1_draft_is_final_form",
+      "ok": true,
+      "detail": "{\"draftSvg\":true,\"hasLine\":true,\"hasHead\":true,\"noOuterBox\":true}"
+    },
+    {
+      "id": "D2_pending_arrow_visible",
+      "ok": true,
+      "detail": "{\"present\":true,\"hasLine\":true,\"hasHead\":true,\"composer\":true}"
+    },
+    {
+      "id": "D3_rest_arrow_path",
+      "ok": true,
+      "detail": "comment=\"BLOCK-302 箭头真形态\" path=[[0.1502,0.1945],[0.5502,0.5946]]"
+    },
+    {
+      "id": "D4_saved_stroke_svg",
+      "ok": true,
+      "detail": "{\"stroke\":true,\"line\":true,\"head\":true,\"pendingGone\":true}"
+    },
+    {
+      "id": "D5_prompt_carries_path",
+      "ok": true,
+      "detail": "F1 部分跳过：投递面未在消息流/composer 命中（聊天面板态相关）；prompt 文本契约（相对路径指引+箭头坐标行）已由组件级 annotations.test BLOCK-303/304 两例钉住"
+    }
+  ]
+}

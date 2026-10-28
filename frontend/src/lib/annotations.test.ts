@@ -8,6 +8,7 @@ import {
   MOSAIC_DISCLOSURE,
   MOSAIC_SHORT,
   appendUndoAction,
+  arrowHeadPoints,
   buildAnnotationTaskPrompt,
   decimatePath,
   describeAnnotationAnchor,
@@ -256,6 +257,27 @@ describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => 
     expect(prompt).toContain('原始产物文件未被修改');
   });
 
+  it('BLOCK-304 — 工作区文件 prompt 显式带相对路径与读取指引（Agent 可溯源打开文件）', () => {
+    const prompt = buildAnnotationTaskPrompt(annotations, {
+      surface: 'workspace-file',
+      filePath: 'icons/icon-512.png',
+    });
+    expect(prompt).toContain('工作区文件「icons/icon-512.png」');
+    expect(prompt).toContain('项目工作区内的相对路径');
+    expect(prompt).toContain('读取文件对照批注位置');
+  });
+
+  it('BLOCK-303 — 箭头两点 path 在 prompt 里报起点→终点坐标，不报假矩形', () => {
+    const prompt = buildAnnotationTaskPrompt(
+      [
+        { rect: [], path: [[0.2, 0.3], [0.5, 0.6]], comment: '指向峰值', page: null, surface: 'workspace-file' as const, kind: 'arrow' as const },
+      ],
+      { surface: 'workspace-file', filePath: 'icons/logo.png' },
+    );
+    expect(prompt).toContain('箭头 (20%, 30%) → (50%, 60%)：指向峰值');
+    expect(prompt).not.toContain('(0%, 0%, 0%×0%)');
+  });
+
   it('BLOCK-254 P5 — 文本锚点批注在 prompt 里报行号，不编造百分比坐标', () => {
     const prompt = buildAnnotationTaskPrompt([
       {
@@ -358,5 +380,30 @@ describe('smoothFreehandPathD（BLOCK-288 渲染层贝塞尔平滑；存储 path
     expect(smoothFreehandPathD([[0.12345, 0.99999]])).toBe('');
     const d = smoothFreehandPathD([[0.12345, 0.12345], [0.9, 0.9]]);
     expect(d).toBe('M 12.35,12.35 L 90,90');
+  });
+});
+
+describe('arrowHeadPoints（BLOCK-303 箭头几何）', () => {
+  it('头部 tip=终点、线段缩到头部底边、方向贴合拖拽方向', () => {
+    const geo = arrowHeadPoints([0.2, 0.2], [0.8, 0.7]);
+    expect(geo.head[0][0]).toBeCloseTo(0.8);
+    expect(geo.head[0][1]).toBeCloseTo(0.7);
+    // 线端沿方向往回缩（不到达终点，避免穿过三角）
+    expect(geo.lineEnd[0]).toBeLessThan(0.8);
+    expect(geo.lineEnd[1]).toBeLessThan(0.7);
+    // 底边两点分布在方向法线两侧
+    expect(geo.head[1][0]).not.toBe(geo.head[2][0]);
+  });
+
+  it('反向拖拽（终点在左上）同样成立', () => {
+    const geo = arrowHeadPoints([0.8, 0.7], [0.2, 0.2]);
+    expect(geo.head[0][0]).toBeCloseTo(0.2);
+    expect(geo.lineEnd[0]).toBeGreaterThan(0.2);
+  });
+
+  it('零长度（同点）退化不炸', () => {
+    const geo = arrowHeadPoints([0.5, 0.5], [0.5, 0.5]);
+    expect(geo.head[0]).toEqual([0.5, 0.5]);
+    expect(geo.lineEnd).toEqual([0.5, 0.5]);
   });
 });

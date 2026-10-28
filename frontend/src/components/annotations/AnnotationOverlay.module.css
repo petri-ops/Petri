@@ -62,11 +62,13 @@
   text-align: center;
 }
 
+/* BLOCK-303 — draft 形状特征化：绘制中即最终形态（实线+色底+形状），
+   不再是「外部虚线框」中间态；箭头 draft 走 SVG（ArrowGlyph），无对角线近似。 */
 .draft {
   position: absolute;
-  border: 1px dashed var(--petri-warning);
+  border: 2px solid var(--petri-warning);
   border-radius: var(--petri-radius-sm);
-  background: var(--petri-accent-bg);
+  background: var(--petri-warning-bg);
   pointer-events: none;
 }
 
@@ -77,6 +79,7 @@
 
 .draft[data-color='sky'] {
   border-color: var(--petri-info);
+  background: var(--petri-accent-bg);
 }
 
 .draft[data-color='rose'] {
@@ -88,17 +91,49 @@
   border-radius: 50%;
 }
 
-.draft[data-kind='arrow'] {
-  border-style: dashed;
-  background:
-    linear-gradient(
-      to top right,
-      transparent calc(50% - 1px),
-      var(--petri-warning) calc(50% - 1px),
-      var(--petri-warning) calc(50% + 1px),
-      transparent calc(50% + 1px)
-    ),
-    var(--petri-accent-bg);
+.draft[data-kind='mosaic'] {
+  background: color-mix(in srgb, var(--petri-bg-canvas) 12%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.draft[data-kind='text'] {
+  background: var(--petri-bg-surface, var(--petri-bg-subtle));
+}
+
+/* BLOCK-303 — 箭头真形态：线段+贴合方向的头部三角（SVG 三色族）。 */
+.arrowLine {
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  fill: none;
+  pointer-events: none;
+}
+
+.arrowLine[data-color='amber'] {
+  stroke: var(--petri-warning);
+}
+
+.arrowLine[data-color='sky'] {
+  stroke: var(--petri-info);
+}
+
+.arrowLine[data-color='rose'] {
+  stroke: var(--petri-danger);
+}
+
+.arrowHead {
+  stroke: none;
+}
+
+.arrowHead[data-color='amber'] {
+  fill: var(--petri-warning);
+}
+
+.arrowHead[data-color='sky'] {
+  fill: var(--petri-info);
+}
+
+.arrowHead[data-color='rose'] {
+  fill: var(--petri-danger);
 }
 
 /* BLOCK-238 — 图形批注：椭圆 / 箭头（纯 CSS，几何=拖拽矩形，箭头沿对角线近似） */
