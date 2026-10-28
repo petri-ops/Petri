@@ -18,3 +18,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T00:53:52.668Z -->
 最后更新：2026-10-27（**BLOCK-271 批次 5/5 backlog 滞后注记对账批 completed（治理无代码）**）：pending-work-backlog 队列表滞后注记修正——序 0（W3=BLOCK-163 整波/W6=BLOCK-176-WAVE6 已收口，**两大纲无剩余波次**）；2b 评测 v2 七包（BLOCK-188~194）闭合→completed；2a/2d/2e 补对应交付注记（BLOCK-200/202/206/207/209/210），剩余面标待核；2c/1z 未确凿不冒进只标待核。**教训入册**：queue 表注记不随包收口自动回写是本次误导源头——后续每包收口的 canonical 回写应含 backlog 行（已在 handoff 批间纪律提示）。治理门=docs:check（本批无代码，test:changed 沿用上一轮 PASS）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T09:52:48.079Z -->
+最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 启动登记（active·P0-LAUNCH）**）：用户裁决「每次优化升级只是部分代码，收口只需要校验有改动的部分即可」。范围=eslint --cache + tsc --incremental + arch 两门/knip 域跳过 + cruise 同轮去重 + closeout:full 转义；非范围=test:changed 内部语义、knip/arch 判定规则与基线、npm run check 发布链。基线实测=重量静态门 98.4s/轮（eslint 79s 占 80%）。fail-open 全护栏（状态缺失/损坏/锚点不可达即全量）。plan=docs/block-272-closeout-targeted-plan.md。无 UI 台账增量（纯治理门禁）。

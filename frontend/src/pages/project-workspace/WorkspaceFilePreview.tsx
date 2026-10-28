@@ -132,9 +132,10 @@ export function WorkspaceFilePreview({
     filePath: file?.path ?? null,
     artifactName: file?.name ?? null,
   };
-  const handleAnnotationAddToTask = useCallback((prompt: string) => {
+  const handleAnnotationAddToContext = useCallback((prompt: string) => {
     if (!prompt) return;
-    dispatchPetriEvent(petriEvents.copilotAsk, { prompt });
+    // UI-612 — 加入上下文 = 只入 composer 草稿，用户按发送才启动任务。
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt, compose: true });
   }, []);
 
   // BLOCK-52 P2 头部「引用到对话」按钮已随 BLOCK-74 用户裁决退役（图片引用行删除）。
@@ -449,7 +450,7 @@ export function WorkspaceFilePreview({
             onOpenImage={() => setLightboxSrc(previewUrl)}
             scope={annotationScope}
             target={annotationTarget}
-            onAddToTask={handleAnnotationAddToTask}
+            onAddToContext={handleAnnotationAddToContext}
           />
         )}
         {status === 'ready' && fallbackKind === 'pdf' && (
@@ -461,7 +462,7 @@ export function WorkspaceFilePreview({
             name={file.name}
             scope={annotationScope}
             target={annotationTarget}
-            onAddToTask={handleAnnotationAddToTask}
+            onAddToContext={handleAnnotationAddToContext}
           />
         )}
         {status === 'ready' && fallbackKind === 'html' && (
@@ -563,7 +564,7 @@ export function WorkspaceFilePreview({
             session={textAnnotation}
             canAnnotate={Boolean(annotationScope)}
             unavailableReason="缺少文件路径，无法保存批注。"
-            onAddToTask={handleAnnotationAddToTask}
+            onAddToContext={handleAnnotationAddToContext}
           />
         )}
         {status === 'ready' && fallbackKind === 'text' && (

@@ -6019,13 +6019,27 @@
     {
       "id": "block307-annotation-touch-live",
       "classifiesScripts": true,
-      "note": "BLOCK-307 UI-607/608/609 实机腿：批注交互四条走查（✓ 真实点击/text 拖拽开框/拖拽移动 PATCH/布局左列+居中，8/8 PASS）；取证探针与目录，前端与契约改动面经 frontend/Node 通道自动路由 vitest。",
+      "note": "BLOCK-307 UI-607/608/609 实机腿：批注交互四条走查（✓ 真实点击/text 拖拽开框/拖拽移动 PATCH/布局左列+居中，BLOCK-308 回归复跑 9/9 PASS，补画布宽度分母）；取证探针与目录，前端与契约改动面经 frontend/Node 通道自动路由 vitest。",
       "patterns": [
         "scripts/block304-annotation-touch-live.cjs",
         "acceptance/block-305/**"
       ],
       "tests": [
         "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "test/block219-result-annotations.test.mjs"
+      ]
+    },
+    {
+      "id": "block308-annotation-drag-polish-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-308 UI-610/611/612 实机腿：拖拽跟手（直写 DOM transform/props 不动/REST 落地/清理）+ 箭头命中热区与拖拽 PATCH + 三段式布局（左图标工具轨/中画布居中/右执行区；窄栏换行回退）+ 加入上下文 compose 草稿（不发送）+ 选择工具（选择态选中/移动、绘制态不吃指针），30/30 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block308-annotation-drag-polish-live.cjs",
+        "acceptance/block-306/**"
+      ],
+      "tests": [
+        "frontend/src/components/annotations/AnnotationOverlay.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
         "test/block219-result-annotations.test.mjs"
       ]
     },

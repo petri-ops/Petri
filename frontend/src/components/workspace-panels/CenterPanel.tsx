@@ -142,7 +142,7 @@ export interface CenterPanelContext {
   setSideChatOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
   handleShowPlugins: () => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<boolean>;
-  handleAskAgent: (prompt: string) => void;
+  handleAskAgent: (prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => void;
   handleOpenWorkspacePath: () => void | Promise<void>;
   onPendingArtifactConsumed: () => void;
   onWorkflowChanged: () => void;
@@ -277,13 +277,18 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
         : '正在读取结果与可信状态，不会把未知信息标记为成功。'
   );
 
-  const askAboutCurrentResult = React.useCallback(() => {
+  const askAboutCurrentResult = React.useCallback((prompt?: string, options?: { compose?: boolean }) => {
     // BIO-6（BIO-D4 裁决 b）— 解读统一走 Agent + result_summary 链，prompt 经
     // resultSurface 单一构造器出词：锚定任务与产物坐标，不接遗留模板。
-    ctx.handleAskAgent(buildResultInterpretationPrompt({
+    // UI-612 — 批注「加入上下文」传入自己的 prompt + compose：只入草稿不发送。
+    // onAskAgent 也被直接挂在按钮上（onClick 会把事件作为首参传入）——只认字符串 prompt。
+    const explicit = typeof prompt === 'string' ? prompt.trim() : '';
+    const text = explicit || buildResultInterpretationPrompt({
       jobId: ctx.activeJob?.id,
       artifactName: ctx.activeArtifact?.name || contextTitle,
-    }));
+    });
+    if (!text) return;
+    ctx.handleAskAgent(text, options);
     ctx.updateWorkspaceMode('chat');
   }, [contextTitle, ctx.activeJob, ctx.activeArtifact, ctx.handleAskAgent, ctx.updateWorkspaceMode]);
 

@@ -227,6 +227,13 @@ async function main() {
   await sleep(400);
 
   // ── C 拖拽移动已保存矩形 ──
+  // UI-612 起：移动/选中只在「选择」态生效，绘制态批注层不吃指针。
+  await evalRetry(client, `(function(){
+    var b = document.querySelector('[data-testid="annotation-select-mode"]');
+    if (b) b.click();
+    return 'select';
+  })()`);
+  await sleep(300);
   const box = await evalRetry(client, `(function(){
     var b = document.querySelector('[data-testid="annotation-box"]');
     var r = b.getBoundingClientRect();
@@ -263,7 +270,11 @@ async function main() {
              barW: Math.round(br.width),
              imgCenterOffset: Math.round(Math.abs((ir.x + ir.width / 2) - (cr.x + cr.width / 2))) };
   })()`);
-  assert('D_bar_left_column', layout && layout.barX <= layout.canvasX && layout.barW <= 140,
+  // BLOCK-308 — 布局契约更新：bar 放宽到 152（2 列形状组），并补画布宽度分母
+  //（旧断言允许 canvasW=10 时居中断言恒真，属假绿）。
+  assert('D_canvas_has_width', Boolean(layout) && layout.canvasW >= 100,
+    `canvasW=${layout && layout.canvasW}`);
+  assert('D_bar_left_column', layout && layout.barX <= layout.canvasX && layout.barW <= 170,
     JSON.stringify(layout));
   assert('D_image_centered', layout && layout.imgCenterOffset <= 40,
     `centerOffset=${layout && layout.imgCenterOffset}px（相对画布区）`);

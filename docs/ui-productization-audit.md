@@ -40,12 +40,36 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-612: 「加入上下文」（compose 草稿，不发送）+ 选择工具（选择态选中/移动，绘制态不抢指针）（2026-10-28 **verified（BLOCK-308；对话 compose 单测 + 批注 41/41 + 实机 30/30 F/G 断言）**）
+
+- **变化面**：①「加入任务」→「**加入上下文**」：`CopilotAskDetail` 增加 `compose` 语义，owner SimpleChat 只把 prompt 追加进 composer 草稿并把光标落到末尾，**不建会话、不启动任务**；发送仍由用户按发送键。工作区文件/结果产物/速记三处批注宿主统一 compose。②**结果面接线修复**：`askAboutCurrentResult` 此前忽略调用方传入的 prompt（零参回调被赋给 `(prompt)=>void`，批注 prompt 被静默丢弃、误发通用解读 prompt）——现在显式接收 prompt + compose：批注内容进草稿，普通「询问 Agent」仍走发送。③**新增「选择」工具**：右侧执行区「批注 / 选择」两个模式按钮；选择态（drawing=false）批注吃指针（点击选中，accent 外环/光晕；拖拽仍整体移动），点左侧任一形状回到批注态；批注态（drawing=true）批注层 `pointer-events:none` + `startShapeMove` 守卫——画在批注上不会被既有批注抢走；选中只存 UI 态、不落库。④运行中的 compose 不触发 `handleAskAgent` 的「仍在处理」拦截（只追加草稿）。
+- **为什么这样设计**：用户裁决「加入任务改成加入上下文，点击发送后再启动任务；目前直接启动任务不合适」+「需要一个选择按钮，使用选择按钮时选择任何批注都不会有冲突」；同时修复结果面 prompt 丢弃的存量缺陷（零参回调赋值导致批注 prompt 从未进入对话）。
+- **验证（代码）**：useChatStream compose 例（追加两段草稿、不启动 run）+ 批注 41/41 + 受影响前端域 78/78 + tsc 0 + lint 0。
+- **实机证据**：`acceptance/block-306/live-drag-polish.json`（30/30）：F0 按钮 `aria=加入上下文`、F1 composer 草稿含 volcano.svg + 批注明细、F2 用户消息 0→0（未发送）；G0 选择态 `data-select=true` 且 box `pointer-events=auto`、G1 点击选中 `data-selected=true`、G2 切回批注态 `pointer-events=none` 且选中清空、G3 绘制态点击不新增条目（2→2）。
+- **边界（reopen）**：选中不持久化、不联动列表高亮；compose 阶段不固化结果面 `resultContext` 快照（发送时按当前上下文组装，本轮批注 prompt 自带 artifact 身份/坐标）。
+
+## UI-610: 批注拖拽跟手（绕过 React 直写位移）+ 箭头可拖（2026-10-28 **verified（BLOCK-308；批注 41/41 + 主题门 + 实机 block308 30/30 内 C/D 断言）**）
+
+- **变化面**：①**拖拽跟手**——拖拽态从 React state 移入 `useRef`，每个 pointermove 只直写 DOM 位移（box `style.transform` 像素 / SVG `transform` 属性 viewBox 单位），不再 setState 重渲染整棵 overlay；pointerup 一次 clamp 后提交，几何落地（props 变化或请求 settle）时由 `useLayoutEffect` 清理内联位移，`will-change` 只在拖拽期间设置。②**箭头可拖**——`.freehandLayer` 的 `pointer-events:none` 下给箭头组放行：新增透明宽描边命中线（`annotation-arrow-hit`，2.4 viewBox 单位）+ 头部 `pointer-events:all` + `cursor:move`（`.arrowLine` 仍不吃指针，线本体由热区承担）。③`onMoveAnnotation` 允许返回 Promise，宿主回传 `session.moveGeometry`，落地后再清内联位移（避免「先清后落地」的闪回）。④UI-612 起移动/选中收敛到「选择」态（绘制态批注层不吃指针）。
+- **为什么这样设计**：用户反馈「拖已存批注时有可感知延迟（拖影/滞后）」与「任何确定的批注都应该可以拖拽移动」——延迟根因=旧实现每个 move 都 setState 全树重渲染；箭头根因=父层 none 未开口且线显式 none（头部继承 none）。
+- **验证（代码）**：Overlay 20/20（新增：拖拽中 inline transform 生效且 `style.left` 不变、松手提交后清理；箭头命中线拖拽直写 SVG transform 并按 path 平移落库；选择态选中/绘制态不选中）+ 批注 41/41 + theme 17/17 + tsc 0 + lint 0。
+- **实机证据**：`acceptance/block-306/live-drag-polish.json`（30/30）：C0 拖拽中 `transform=translate(12px, 12px)`、C1 React props（left/top）未动、C2 浏览器计算 transform=`matrix(…,12,12)`、C3 REST rect 落到平移后区间、C4 落地后内联 transform 清空；D0 选择态命中热区 `pointer-events=stroke`、D1 SVG 组直写 transform、D2 REST path 整体平移、D3 拖箭头不产生新 pending。
+- **边界（reopen）**：移动撤销仍未入栈（用户未裁决）；离屏实例的 used 值/布局需冲帧/轮询才刷新（探针已按帧轮询，真人体感仍需人眼确认）。
+
+## UI-611: 批注三段式图标轨（左=工具集 / 中=图片 / 右=执行区）+ 窄栏换行回退（2026-10-28 **verified（BLOCK-308；实机 block308 30/30 E/G 断言 + 主题门）**）
+
+- **变化面**：①**左工具轨**：48px 单列**图标**按钮（矩形/椭圆/箭头/文本/马赛克/文本批注/画笔各配 SVG 图标，文字标签进 aria-label/title），色板纵向堆叠；列数随工具数量自适应（`annotationKindColumns`：≤8 单列、≤12 两列、>12 三列，轨宽 48/84/120），后续加工具不重排设计。②**右执行区**：48px 单列——「批注/选择」模式、撤销、loading/error、批注列表（浮层向左展开）、「加入上下文」。③**宿主三段式**：`.pane` flex + wrap = 工具轨 | 画布（图片居中）| 执行区；窄预览放不下时自动换行（工具轨在前、画布整行、执行区在后），图片不再被固定栏挤成 0。④hint 长提示在轨内隐藏（loading 等短状态保留），撤销复用 `petri-btn--icon`（零新增按钮类定义）。
+- **为什么这样设计**：用户两次裁决——「左栏工具在数量不多时一列展示，增多再两列或多列，并用工具适配的图标减少空间占用」+「批注按钮、加入上下文、选择按钮放到图片右侧：左边工具集、右边执行按钮」；同时修 BLOCK-307 `canvasW=10` 的假绿分母。
+- **验证（代码）**：批注 41/41 + theme 17/17（accent 棘轮 +2 = 选中态外环/光晕，已留痕；按钮清单零新增）。
+- **实机证据**：`acceptance/block-306/live-drag-polish.json`（30/30）：E0 窄 pane 120 → canvas 120/img 120（分母成立）、E1 工具轨在画布上方、E2 7 个图标单列；拖宽后 E3 pane 479、E4 tools(48) 在左 / canvas(371) 居中 / actions(48) 在右、E5 双轨宽 48、E6 图片居中偏移 0、E7 工具轨 7 图标单列且执行区含 toggle/select/add。
+- **边界（reopen）**：极窄预览（<~264px）执行区换到画布下方（保持图片可见优先）；列数阈值 8/12 随工具集增长可调；选中态不联动列表高亮（见 UI-612）。
+
 ## UI-609: 批注面布局——工具条列左+图片居中（2026-10-28 **verified（BLOCK-307；主题门 + 批注域 + 实机 8/8 内 D 断言）**）
 
 - **变化面**：批注宿主 `.pane` 从「bar 横排在顶 + canvas inline-block 贴左」改为**行排**——工具条为图片左侧 104px 窄竖列（形状/颜色纵向堆叠，文字 hint 列窄隐藏由按钮 title 承载；文本锚点面保持全宽横排），canvas 占主区且 `justify-content: center`（图片水平居中，用户反馈「图片查看是左对齐吗，能否居中呢 顶部的工具选择框是否可以列在左侧」）。
 - **验证（代码）**：批注域 36/36 + 主题棘轮 0 新增。
-- **实机证据**：block304 探针 D 断言（acceptance/block-305/live-touch.json）：bar 左列与 pane 同 x、宽 104；图片中心相对画布区偏移 0px。
-- **边界（reopen）**：窄右栏（<260px）下 bar 104px 会挤压画布区（bar 宽度为后续可调单点）。
+- **实机证据**：block304 探针 D 断言（acceptance/block-305/live-touch.json）：bar 左列与 pane 同 x、宽 104；图片中心相对画布区偏移 0px。**2026-10-28 BLOCK-308 复核**：该次 D 断言缺画布宽度分母（实为 `canvasW=10`），居中偏移恒 0 属假绿——已在 block304 探针补 `canvasW >= 100` 分母断言，并由 UI-611 改为响应式布局（bar 152 + 窄栏换行回退）。
+- **边界（reopen）**：窄右栏下工具条会压缩画布——已由 UI-611 清偿（窄栏自动换行）。
 
 ## UI-608: 批注拖拽移动（2026-10-28 **verified（BLOCK-307；契约 26/26 + 组件级 + 实机 C 断言）**）
 
@@ -53,6 +77,7 @@
 - **后端**：store.updateGeometry（只动 rect/path/updated_at）+ `PATCH /api/result-studio/annotations/:id/geometry`（rect 四元/path 点 0..1 校验、fail-closed）。
 - **验证（代码）**：契约 26/26（PATCH 端点清单+store.updateGeometry+anchor 原样返回）+ Overlay 拖拽契约（平移 rect 提交/尺寸不变/拖后选中）。
 - **实机证据**：block304 探针 C：CDP 拖 box 25%/20% → REST rect=[0.40,0.41,…]（原 0.10,0.10）。
+- **2026-10-28 BLOCK-308/UI-612 收敛**：移动/选中收敛到「选择」态——绘制态批注层 `pointer-events:none`，画在图上不会被既有批注误拖；「任何已确认批注都能拖」仍成立，入口改为右侧「选择」按钮（block304 回归探针已同步先切选择态，9/9 PASS）。
 - **边界（reopen）**：移动无撤销入栈（undo 面向创建/删除；移动撤销待用户裁决）。
 
 ## UI-607: 批注交互真实鼠标修复——✓/× 失效根因+text 开框统一管线（2026-10-28 **verified（BLOCK-307；组件级 + 实机 8/8 内 A/B 断言）**）
@@ -82,7 +107,7 @@
 
 - **变化面**：「加入任务」prompt ①工作区文件头行显式标注「（项目工作区内的相对路径，可直接按此路径读取文件对照批注位置）」——Agent 拿到批注引用即可溯源打开文件；②箭头两点 path 批注行报「箭头 (起点%) → (终点%)」真坐标，不再报 (0%,0%,0%×0%) 假矩形（用户裁决「每一个批注无论是文字还是图形，发送到聊天框的时候都应该带批注图片或文字的路径，方便溯源和发送给上下文」）。
 - **验证（代码）**：annotations.test 新增 2 例（相对路径指引断言 + 箭头坐标行/无假矩形断言）。
-- **实机证据**：block302 探针 D5 **F1 部分跳过**（点击「加入任务」后消息流/composer 均未命中 prompt 文本——投递面与聊天面板态相关，属既有链路；prompt 文本契约由组件级钉住），其余 6 断言全过。
+- **实机证据**：block302 探针 D5 **F1 部分跳过**（点击「加入任务」后消息流/composer 均未命中 prompt 文本——投递面与聊天面板态相关，属既有链路；prompt 文本契约由组件级钉住），其余 6 断言全过。**2026-10-28 BLOCK-308 回归复跑**（最终代码）：同探针 7/7 全过，D5 F1 命中 `channel=composer`（加入上下文＝写 composer 草稿；acceptance/block-302/ 现行档已更新）。
 - **边界（reopen）**：结果产物面无文件系统路径（artifact mount 属 R 阶段），如实保持 artifactName+revision 标识。
 
 ## UI-603: 箭头真形态+批注图形 draft 特征化（2026-10-28 **verified（BLOCK-303；契约 25/25 + 组件级 + 实机 7/7）**）

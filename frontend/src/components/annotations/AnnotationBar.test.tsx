@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { AnnotationBar, type AnnotationBarProps } from './AnnotationBar';
+import { AnnotationBar, annotationKindColumns, type AnnotationBarProps } from './AnnotationBar';
 import type { ArtifactAnnotation } from '@/lib/annotations';
 
 /** BLOCK-219 Q6 — 批注工具条：能力门、评论提交、列表删除、加入任务。 */
@@ -51,7 +51,7 @@ function props(overrides: Partial<AnnotationBarProps> = {}): AnnotationBarProps 
     onSubmitComment: vi.fn(() => Promise.resolve(true)),
     onCancelPending: vi.fn(),
     onRemove: vi.fn(),
-    onAddToTask: vi.fn(),
+    onAddToContext: vi.fn(),
     ...overrides,
   };
 }
@@ -72,27 +72,32 @@ describe('AnnotationBar', () => {
     expect(queryByTestId('annotation-add-to-task')).toBeNull();
   });
 
-  it('切换批注模式并显示颜色档位', () => {
+  it('UI-611/612 — 工具区常驻（选择态也能换色）；批注/选择模式按钮互斥', () => {
     const onToggleDrawing = vi.fn();
     const onColorChange = vi.fn();
-    const { getByTestId, queryByTestId } = render(
-      <AnnotationBar {...props({ onToggleDrawing, onColorChange })} />,
-    );
-    expect(queryByTestId('annotation-swatch-amber')).toBeNull();
-    fireEvent.click(getByTestId('annotation-toggle'));
-    expect(onToggleDrawing).toHaveBeenCalledTimes(1);
+    const idle = render(<AnnotationBar {...props({ onToggleDrawing, onColorChange })} />);
+    // 选择态（drawing=false）：工具区仍可见，选择按钮激活。
+    expect(idle.getByTestId('annotation-swatch-amber')).toBeTruthy();
+    expect(idle.getByTestId('annotation-select-mode').getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(idle.getByTestId('annotation-swatch-rose'));
+    expect(onColorChange).toHaveBeenCalledWith('rose');
+    idle.unmount();
 
     const drawing = render(
-      <AnnotationBar {...props({ drawing: true, onColorChange })} />,
+      <AnnotationBar {...props({ drawing: true, onToggleDrawing, onColorChange })} />,
     );
-    fireEvent.click(drawing.getByTestId('annotation-swatch-rose'));
-    expect(onColorChange).toHaveBeenCalledWith('rose');
+    expect(drawing.getByTestId('annotation-toggle').getAttribute('aria-pressed')).toBe('true');
+    expect(drawing.getByTestId('annotation-select-mode').getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(drawing.getByTestId('annotation-select-mode'));
+    expect(onToggleDrawing).toHaveBeenCalledTimes(1);
   });
 
-  it('BLOCK-238 — 绘制态提供三种形状，选择回传 kind', () => {
+  it('UI-611 — 形状工具常驻（选择态选形状即回到绘制），选择回传 kind', () => {
     const onKindChange = vi.fn();
     const idle = render(<AnnotationBar {...props({ onKindChange })} />);
-    expect(idle.queryByTestId('annotation-kind-ellipse')).toBeNull();
+    expect(idle.getByTestId('annotation-kind-ellipse')).toBeTruthy();
+    fireEvent.click(idle.getByTestId('annotation-kind-arrow'));
+    expect(onKindChange).toHaveBeenCalledWith('arrow');
     idle.unmount();
 
     const drawing = render(
@@ -103,13 +108,31 @@ describe('AnnotationBar', () => {
     expect(onKindChange).toHaveBeenCalledWith('arrow');
   });
 
+  it('UI-611 — 三段式：tools 侧只渲染工具集，actions 侧只渲染执行区', () => {
+    const shared = { annotations: [annotation()], canUndo: true, undoLabel: '撤销刚才的创建' };
+    const tools = render(<AnnotationBar {...props({ ...shared, side: 'tools' })} />);
+    expect(tools.getByTestId('annotation-bar').dataset.side).toBe('tools');
+    expect(tools.getByTestId('annotation-kind-region')).toBeTruthy();
+    expect(tools.queryByTestId('annotation-toggle')).toBeNull();
+    expect(tools.queryByTestId('annotation-add-to-task')).toBeNull();
+    tools.unmount();
+
+    const actions = render(<AnnotationBar {...props({ ...shared, side: 'actions' })} />);
+    expect(actions.getByTestId('annotation-actions').dataset.side).toBe('actions');
+    expect(actions.getByTestId('annotation-toggle')).toBeTruthy();
+    expect(actions.getByTestId('annotation-select-mode')).toBeTruthy();
+    expect(actions.getByTestId('annotation-add-to-task').getAttribute('aria-label')).toBe('加入上下文');
+    expect(actions.queryByTestId('annotation-kind-region')).toBeNull();
+  });
+
   it('BLOCK-254 — 绘制态含文字/马赛克两档，选择回传 kind；BLOCK-300 起 region 面评论就地输入（composer 退场）', () => {
     const onKindChange = vi.fn();
     const drawing = render(
       <AnnotationBar {...props({ drawing: true, kind: 'region', onKindChange })} />,
     );
-    expect(drawing.getByTestId('annotation-kind-text').textContent).toContain('文本');
-    expect(drawing.getByTestId('annotation-kind-mosaic').textContent).toContain('马赛克');
+    // UI-611 — 图标轨：文字标签进 aria-label/title（按钮内是 SVG 图标）。
+    expect(drawing.getByTestId('annotation-kind-text').getAttribute('aria-label')).toContain('文本');
+    expect(drawing.getByTestId('annotation-kind-mosaic').getAttribute('aria-label')).toContain('马赛克');
     fireEvent.click(drawing.getByTestId('annotation-kind-text'));
     expect(onKindChange).toHaveBeenCalledWith('text');
     drawing.unmount();
@@ -168,7 +191,7 @@ describe('AnnotationBar', () => {
     expect(item).toContain('文本批注');
     expect(item).toContain('第 12 行');
     expect(getByTestId('annotation-undo')).toBeTruthy();
-    expect(getByTestId('annotation-add-to-task')).toBeTruthy();
+    expect(getByTestId('annotation-add-to-task').textContent).toBe('加入上下文');
   });
 
   it('BLOCK-254 B-2 — 撤销按钮：栈空不渲染，栈非空带下一步说明并回传', () => {
@@ -181,7 +204,9 @@ describe('AnnotationBar', () => {
       <AnnotationBar {...props({ canUndo: true, undoLabel: '撤销刚才的删除（将按原内容重建为新条目）', onUndo })} />,
     );
     const undo = filled.getByTestId('annotation-undo');
-    expect(undo.textContent).toContain('撤销');
+    // UI-611 — 区域面撤销也走图标轨：图标 + aria-label 承载语义。
+    expect(undo.querySelector('svg')).toBeTruthy();
+    expect(undo.getAttribute('aria-label')).toContain('撤销');
     expect(undo.getAttribute('title')).toContain('重建为新条目');
     fireEvent.click(undo);
     expect(onUndo).toHaveBeenCalledTimes(1);
@@ -251,22 +276,46 @@ describe('AnnotationBar', () => {
   });
 
   it('无批注时「加入任务」禁用；有批注时触发回调', () => {
-    const onAddToTask = vi.fn();
-    const empty = render(<AnnotationBar {...props({ onAddToTask })} />);
+    const onAddToContext = vi.fn();
+    const empty = render(<AnnotationBar {...props({ onAddToContext })} />);
     expect((empty.getByTestId('annotation-add-to-task') as HTMLButtonElement).disabled).toBe(true);
     empty.unmount();
 
     const filled = render(
-      <AnnotationBar {...props({ annotations: [annotation()], onAddToTask })} />,
+      <AnnotationBar {...props({ annotations: [annotation()], onAddToContext })} />,
     );
     fireEvent.click(filled.getByTestId('annotation-add-to-task'));
-    expect(onAddToTask).toHaveBeenCalledTimes(1);
+    expect(onAddToContext).toHaveBeenCalledTimes(1);
   });
 
-  it('错误如实展示（不吞服务端拒绝）', () => {
+  it('UI-611 — 区域面图标轨：工具少时单列，按钮用图标 + aria/title 承载标签', () => {
+    const { getByTestId, getAllByTestId } = render(<AnnotationBar {...props({ drawing: true })} />);
+    const bar = getByTestId('annotation-bar');
+    expect(bar.dataset.kindColumns).toBe('1');
+    const kinds = getAllByTestId(/^annotation-kind-/);
+    expect(kinds).toHaveLength(7);
+    for (const button of kinds) {
+      expect(button.querySelector('svg')).toBeTruthy();
+      expect(button.textContent).toBe('');
+      expect(button.getAttribute('aria-label')).toMatch(/^批注形状 /);
+      expect(button.getAttribute('title')).toBeTruthy();
+    }
+    expect(getByTestId('annotation-toggle').querySelector('svg')).toBeTruthy();
+    expect(getByTestId('annotation-add-to-task').querySelector('svg')).toBeTruthy();
+    // 列数随工具数量增长：少时单列，增多再两/多列。
+    expect(annotationKindColumns(7)).toBe(1);
+    expect(annotationKindColumns(8)).toBe(1);
+    expect(annotationKindColumns(9)).toBe(2);
+    expect(annotationKindColumns(12)).toBe(2);
+    expect(annotationKindColumns(13)).toBe(3);
+  });
+
+  it('错误如实展示（不吞服务端拒绝；图标轨以 title/aria 承载全文）', () => {
     const { getByTestId } = render(
       <AnnotationBar {...props({ error: '同一产物/文件最多 200 条批注' })} />,
     );
-    expect(getByTestId('annotation-error').textContent).toContain('最多 200 条');
+    const error = getByTestId('annotation-error');
+    expect(error.getAttribute('title')).toContain('最多 200 条');
+    expect(error.getAttribute('aria-label')).toContain('最多 200 条');
   });
 });

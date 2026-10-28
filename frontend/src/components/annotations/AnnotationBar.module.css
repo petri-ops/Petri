@@ -1,16 +1,41 @@
 /* BLOCK-219 Q6 — 批注工具条。层级：条=页面级 surface，列表浮层=elevated。 */
 
 /* UI-607 — 工具条改为图片左侧窄竖列（宿主 .pane 行排）：形状/颜色纵向堆叠，
-   文字类 hint 列窄隐藏（title 已承载语义）。文本锚点面（mode=text）仍横排全宽。 */
+   文字类 hint 列窄隐藏（title 已承载语义）。文本锚点面（mode=text）仍横排全宽。
+   UI-611 — 工具少时单列图标轨（48px，图标替代文字标签）；工具增多按数量自动加列
+   （2 列 84px / 3 列 120px），不写死固定列。 */
 .bar {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--petri-space-2);
-  width: 104px;
-  flex: none;
+  align-items: center;
+  gap: var(--petri-space-1);
+  width: 48px;
+  /* 换行回退时允许收缩到容器宽度（窄预览不再溢出/压垮画布）。 */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
   padding: var(--petri-space-1);
   color: var(--petri-text-tertiary);
+}
+
+.bar[data-kind-columns='2'] {
+  width: 84px;
+}
+
+.bar[data-kind-columns='3'] {
+  width: 120px;
+}
+
+/* 右侧执行区：固定单列（批注/选择模式、撤销、列表、加入上下文）。 */
+.bar[data-side='actions'] {
+  width: 48px;
+}
+
+.modes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  width: 100%;
 }
 
 /* 文本锚点面（无图面就地语义）保持全宽横排 */
@@ -18,6 +43,7 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
+  gap: var(--petri-space-2);
   width: 100%;
 }
 
@@ -28,9 +54,10 @@
 .toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--petri-space-1);
-  min-height: 26px;
-  padding: 0 var(--petri-space-3);
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);
   background: transparent;
@@ -50,14 +77,30 @@
   color: var(--petri-text);
 }
 
+/* UI-611 — 形状组列数随工具数量：少时单列，增多再 2/3 列（data-kind-columns 由组件算）。 */
 .kinds {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: var(--petri-space-1);
+  width: 100%;
+}
+
+.bar[data-kind-columns='2'] .kinds {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bar[data-kind-columns='3'] .kinds {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .kind {
-  min-height: 24px;
-  padding: 0 var(--petri-space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);
   background: transparent;
@@ -80,6 +123,14 @@
 .swatches {
   display: inline-flex;
   gap: var(--petri-space-1);
+  width: 100%;
+  justify-content: center;
+}
+
+/* 单列窄轨放不下一排三色：纵向堆叠。 */
+.bar[data-kind-columns='1'] .swatches {
+  flex-direction: column;
+  align-items: center;
 }
 
 .swatch {
@@ -113,8 +164,9 @@
   color: var(--petri-text-tertiary);
 }
 
-/* UI-607 — 左列窄条放不下长文字提示（语义由各按钮 title 承载）；文本锚点面不隐藏。 */
-.bar:not([data-mode='text']) .hint {
+/* UI-607 — 左列窄条放不下长文字提示（语义由各按钮 title 承载）；文本锚点面不隐藏。
+   UI-611 — 只隐藏形状长提示，loading 等短状态仍要在列模式可见。 */
+.bar:not([data-mode='text']) [data-testid='annotation-hint'] {
   display: none;
 }
 
@@ -170,6 +222,12 @@
 .list[open] > summary {
   background: var(--petri-hover);
   color: var(--petri-text);
+}
+
+/* 右栏贴右缘：批注列表向左展开，避免 420px 浮层飞出窗口。 */
+.bar[data-side='actions'] .items {
+  left: auto;
+  right: 0;
 }
 
 .items {
@@ -266,6 +324,53 @@
   padding-top: var(--petri-space-1);
   border-top: 1px solid var(--petri-border-card);
   color: var(--petri-text-tertiary);
+}
+
+.bar:not([data-mode='text']) .addToTask {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+}
+
+.statusIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 24px;
+  color: var(--petri-text-tertiary);
+}
+
+.statusError {
+  color: var(--petri-danger);
+}
+
+.count {
+  min-width: 14px;
+  padding: 0 3px;
+  border-radius: var(--petri-radius-pill, 999px);
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+  /* 同 AnnotationOverlay 徽标先例：相对缩号，不新增小字 token 引用。 */
+  font-size: 0.75em;
+  line-height: 14px;
+  text-align: center;
+}
+
+.bar:not([data-mode='text']) .list {
+  width: 100%;
+}
+
+.bar:not([data-mode='text']) .list > summary {
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
 }
 
 .addToTask {

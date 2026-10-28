@@ -8379,7 +8379,7 @@
       "id": "BLOCK-307-ANNOTATION-HANDOFF",
       "path": "docs/block-307-annotation-handoff.md",
       "kind": "handoff",
-      "status": "active",
+      "status": "reference",
       "canonical": false,
       "archivePolicy": "archive_when_superseded",
       "tags": [

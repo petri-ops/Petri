@@ -1,7 +1,7 @@
 {
-  "capturedAt": "2026-10-28T06:47:15.514Z",
-  "head": "ffa47fe92f26d1ea013ec4690552585ecefdbbcd",
-  "projectId": "p_mvrr4u6p_6376",
+  "capturedAt": "2026-10-28T09:51:01.016Z",
+  "head": "8c5dba6606a5545b990bc5c53b71c694a1fa578a",
+  "projectId": "p_mvrxp2le_0hkm",
   "surface": "workspace-file 图像预览面（UI-605 形状批注透明淡染：区域内内容可透视）",
   "total": 3,
   "passed": 3,
@@ -10,7 +10,7 @@
     {
       "id": "P0a_project_created",
       "ok": true,
-      "detail": "id=p_mvrr4u6p_6376"
+      "detail": "id=p_mvrxp2le_0hkm"
     },
     {
       "id": "D1_draft_translucent",

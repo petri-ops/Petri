@@ -23,9 +23,21 @@
   /* UI-605 — 形状批注内部只做 12% 淡染不做实底：批注标位置，不遮挡区域内内容。 */
   background: color-mix(in srgb, var(--petri-warning) 12%, transparent);
   box-shadow: var(--petri-shadow-float);
-  pointer-events: auto;
+  /* UI-612 — 只有选择态吃指针：绘制态的批注层不抢拖拽（可画在批注上）。 */
+  pointer-events: none;
   cursor: pointer;
   font: inherit;
+}
+
+.overlay[data-select='true'] .box {
+  pointer-events: auto;
+  cursor: move;
+}
+
+/* 选中态：accent 外环（仅选择态可见）。 */
+.overlay[data-select='true'] .box[data-selected='true'] {
+  outline: 2px solid var(--petri-accent);
+  outline-offset: 2px;
 }
 
 .box:hover {
@@ -214,9 +226,37 @@
   pointer-events: none;
 }
 
-.freehandLayer [data-testid='annotation-freehand-stroke'] {
+.overlay[data-select='true'] .freehandLayer [data-testid='annotation-freehand-stroke'] {
   pointer-events: stroke;
-  cursor: pointer;
+  cursor: move;
+}
+
+/* BLOCK-308 — 箭头可拖：`.arrowLine` 显式 none 且头部继承父层 none，箭头永远收不到指针。
+   透明宽描边承担命中热区（细线/三角点不中），线+头也一并放开。 */
+.arrowHit {
+  stroke: transparent;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.overlay[data-select='true'] .arrowHit {
+  pointer-events: stroke;
+  cursor: move;
+}
+
+.overlay[data-select='true'] .freehandLayer [data-testid='annotation-arrow-stroke'] {
+  cursor: move;
+}
+
+.overlay[data-select='true'] .freehandLayer [data-testid='annotation-arrow-stroke'] .arrowHead {
+  pointer-events: all;
+  cursor: move;
+}
+
+/* 选中态：SVG 笔画/箭头加 accent 光晕（仅选择态可见）。 */
+.overlay[data-select='true'] [data-selected='true'] {
+  filter: drop-shadow(0 0 3px var(--petri-accent));
 }
 
 .freehandStroke {

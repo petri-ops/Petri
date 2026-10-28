@@ -47,12 +47,12 @@ describe('buildResultAnnotationProps', () => {
 });
 
 describe('ResultImagePreview', () => {
-  it('保留引用到对话（imageQuote），批注加入任务走 onAddToTask', () => {
+  it('保留引用到对话（imageQuote），批注加入任务走 onAddToContext', () => {
     const quotes: Array<{ kind?: string; name?: string }> = [];
     const unsubscribe = subscribePetriEvent(petriEvents.imageQuote, (detail) => {
       quotes.push({ kind: detail.kind, name: detail.name });
     });
-    const onAddToTask = vi.fn();
+    const onAddToContext = vi.fn();
     const { getByText, getByTestId, getByLabelText } = render(
       <ResultImagePreview
         url="http://mock/volcano.png"
@@ -63,7 +63,7 @@ describe('ResultImagePreview', () => {
         conversationId={null}
         scope={null}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-1' }}
-        onAddToTask={onAddToTask}
+        onAddToContext={onAddToContext}
         onLightbox={() => undefined}
         onImageLoad={() => undefined}
         onImageError={() => undefined}
@@ -76,7 +76,7 @@ describe('ResultImagePreview', () => {
     // scope=null：条上只给原因，不渲染可写入口
     expect(getByTestId('annotation-unavailable')).toBeTruthy();
     expect(getByLabelText('查看 火山图')).toBeTruthy();
-    expect(onAddToTask).not.toHaveBeenCalled();
+    expect(onAddToContext).not.toHaveBeenCalled();
     unsubscribe();
   });
 });

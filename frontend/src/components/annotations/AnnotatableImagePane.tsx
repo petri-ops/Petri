@@ -20,7 +20,7 @@ export function AnnotatableImagePane({
   scope,
   conversationId = null,
   target,
-  onAddToTask,
+  onAddToContext,
 }: {
   src: string;
   alt: string;
@@ -31,17 +31,18 @@ export function AnnotatableImagePane({
   scope: AnnotationScope | null;
   conversationId?: string | null;
   target: AnnotationTaskTarget;
-  onAddToTask: (prompt: string) => void;
+  onAddToContext: (prompt: string) => void;
 }): React.ReactElement {
   const session = useAnnotationSession({ scope, conversationId, target });
 
   return (
     <div className={styles.pane} data-testid="annotatable-image-pane">
       <ConnectedAnnotationBar
+        side="tools"
         session={session}
         canAnnotate={Boolean(scope)}
         unavailableReason="缺少产物身份，无法保存批注。"
-        onAddToTask={onAddToTask}
+        onAddToContext={onAddToContext}
       />
       <div className={styles.canvas}>
         <button
@@ -73,12 +74,19 @@ export function AnnotatableImagePane({
           onCommitPath={(path) => session.beginPath(path, null)}
           onCommitArrow={(start, end) => session.beginArrow(start, end, null)}
           onCommitClick={(point) => session.beginTextAt(point, null)}
-          onMoveAnnotation={(id, geometry) => { void session.moveGeometry(id, geometry); }}
+          onMoveAnnotation={(id, geometry) => session.moveGeometry(id, geometry)}
           onSubmitPending={session.submitComment}
           onCancelPending={session.cancelPending}
           label={`批注层：${alt}`}
         />
       </div>
+      <ConnectedAnnotationBar
+        side="actions"
+        session={session}
+        canAnnotate={Boolean(scope)}
+        unavailableReason="缺少产物身份，无法保存批注。"
+        onAddToContext={onAddToContext}
+      />
     </div>
   );
 }

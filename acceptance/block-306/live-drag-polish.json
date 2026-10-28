@@ -1,0 +1,164 @@
+{
+  "capturedAt": "2026-10-28T09:50:04.711Z",
+  "head": "8c5dba6606a5545b990bc5c53b71c694a1fa578a",
+  "projectId": "p_mvrxn3fk_tl1q",
+  "surface": "workspace-file 图像预览面（BLOCK-308：拖拽跟手/箭头可拖/左栏 2 列布局）",
+  "total": 30,
+  "passed": 30,
+  "failed": 0,
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_failed:-32000"
+  },
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvrxn3fk_tl1q"
+    },
+    {
+      "id": "E0_narrow_fallback_image_visible",
+      "ok": true,
+      "detail": "paneW=120 canvasW=120 imgW=120"
+    },
+    {
+      "id": "E1_narrow_fallback_bar_stacked",
+      "ok": true,
+      "detail": "barBottom=440 canvasTop=446"
+    },
+    {
+      "id": "E2_narrow_kinds_icon_rail_single_column",
+      "ok": true,
+      "detail": "kinds=7 columns=1 样本=[{\"label\":\"矩形\",\"title\":\"矩形\",\"hasIcon\":true,\"text\":\"\",\"w\":40},{\"label\":\"椭圆\",\"title\":\"椭圆\",\"hasIcon\":true,\"text\":\"\",\"w\":40}]"
+    },
+    {
+      "id": "E3_wide_pane_reached",
+      "ok": true,
+      "detail": "paneW=479（拖宽后）"
+    },
+    {
+      "id": "E4_tools_left_actions_right",
+      "ok": true,
+      "detail": "tools=[903,48] canvas=[957,371] actions={\"x\":1334,\"y\":111,\"w\":48,\"h\":112}"
+    },
+    {
+      "id": "E5_rails_width",
+      "ok": true,
+      "detail": "toolsW=48 actionsW=48"
+    },
+    {
+      "id": "E6_wide_canvas_and_centered_image",
+      "ok": true,
+      "detail": "canvasW=371 imgW=371 offset=0"
+    },
+    {
+      "id": "E7_wide_rails_content",
+      "ok": true,
+      "detail": "kinds=7 columns=1 rows=7 actions=[\"annotation-toggle\",\"annotation-select-mode\",\"annotation-add-to-task\"]"
+    },
+    {
+      "id": "A0_pending_present",
+      "ok": true,
+      "detail": "就地框出现"
+    },
+    {
+      "id": "A_confirm_via_real_click",
+      "ok": true,
+      "detail": "{\"boxes\":1,\"pendingGone\":true}"
+    },
+    {
+      "id": "B0_arrow_kind_active",
+      "ok": true,
+      "detail": "data-active=true"
+    },
+    {
+      "id": "B_arrow_created",
+      "ok": true,
+      "detail": "{\"arrows\":1,\"pendingGone\":true}"
+    },
+    {
+      "id": "C_pre_select_mode",
+      "ok": true,
+      "detail": "{\"dataSelect\":\"true\",\"pointerEvents\":\"auto\"}"
+    },
+    {
+      "id": "C0_drag_direct_transform",
+      "ok": true,
+      "detail": "transform=translate(11.9999px, 12px)"
+    },
+    {
+      "id": "C1_react_props_untouched_during_drag",
+      "ok": true,
+      "detail": "left=9.98%/9.98% top=15.05%/15.05%"
+    },
+    {
+      "id": "C2_drag_follows_pointer",
+      "ok": true,
+      "detail": "computed translate=(12,12) rectΔ=12px（期望 translate≈12,12）"
+    },
+    {
+      "id": "C3_drag_settles_geometry",
+      "ok": true,
+      "detail": "rect=[0.3505,0.3517,0.2507,0.2983]"
+    },
+    {
+      "id": "C4_transform_cleared_after_settle",
+      "ok": true,
+      "detail": "transform=(empty) left=35.05%"
+    },
+    {
+      "id": "D0_arrow_hit_pointer_events",
+      "ok": true,
+      "detail": "pointer-events=stroke"
+    },
+    {
+      "id": "D1_arrow_drag_direct_transform",
+      "ok": true,
+      "detail": "transform=translate(4.042904181844982 4.312396032932556)"
+    },
+    {
+      "id": "D2_arrow_drag_geometry",
+      "ok": true,
+      "detail": "path=[[0.6523,0.3014],[0.9515,0.65]]"
+    },
+    {
+      "id": "D3_arrow_drag_no_new_pending",
+      "ok": true,
+      "detail": "transform=(null) pending=false"
+    },
+    {
+      "id": "F0_add_to_context_present",
+      "ok": true,
+      "detail": "{\"x\":1358,\"y\":279,\"disabled\":false,\"aria\":\"加入上下文\"}"
+    },
+    {
+      "id": "F1_compose_writes_draft",
+      "ok": true,
+      "detail": "value=请查看工作区文件「volcano.svg」（项目工作区内的相对路径，可直接按此路径读取文件对照批注位置）中的 2 条批注并给出结论或下一步：\n1. 文件区域 (35%, 35%, 25%×30%)：矩形标注\n2. 文件区域 箭头 (65%, 30%) → (95%, 65%)：箭头标注\n坐标是相对页/图的百分比区域。批"
+    },
+    {
+      "id": "F2_compose_does_not_send",
+      "ok": true,
+      "detail": "userRows=0 → 0"
+    },
+    {
+      "id": "G0_select_mode_active",
+      "ok": true,
+      "detail": "{\"dataSelect\":\"true\",\"pointerEvents\":\"auto\",\"aria\":\"true\"}"
+    },
+    {
+      "id": "G1_click_selects_annotation",
+      "ok": true,
+      "detail": "data-selected=true"
+    },
+    {
+      "id": "G2_drawing_mode_ignores_annotation",
+      "ok": true,
+      "detail": "{\"dataSelect\":\"false\",\"pointerEvents\":\"none\",\"selected\":\"false\"}"
+    },
+    {
+      "id": "G3_drawing_click_creates_no_duplicate",
+      "ok": true,
+      "detail": "2 → 2"
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 > 目的：把「批注」这条线完整交给下一个 Agent 继续。本文件是**唯一入口**——先读这里，再按 §7 恢复状态。
 > 阶段纪律：G0 开发期（不外推 packaged / Provider / GA / 远程发布）。单工作包串行。
+>
+> **2026-10-28 BLOCK-308 更新**：§3 三条待办已全部清偿并随用户追加反馈定型——拖拽跟手（绕过 React 直写 DOM 位移）+ 箭头命中热区 + **三段式图标轨**（左=工具集 48px 单列图标、工具增多按数量自动加列；中=图片居中；右=执行区：批注/选择/撤销/列表/加入上下文；窄栏换行回退）+ **加入上下文**（`copilotAsk.compose` 只写 composer 草稿，发送才启动任务）+ **选择工具**（选择态选中/拖拽移动，绘制态批注层不抢指针）。台账 UI-610/611/612 verified，证据 `acceptance/block-306/live-drag-polish.json`（30/30）。§4 探针配方与环境坑仍有效；§4.1 里 block298/299 的契约已过期（见该节注记）。
 
 ---
 
@@ -53,7 +55,7 @@
 
 ---
 
-## 3. 待办三条（用户 2026-10-28 最新反馈，尚未开工）
+## 3. 待办三条（用户 2026-10-28 最新反馈；**已由 BLOCK-308 全部清偿，以下保留根因/修法记录**）
 
 ### 3.1 拖拽有延迟 ⚠️ 主要体感问题
 
@@ -143,6 +145,9 @@ BLOCK-307 把 `.bar` 改成 `flex-direction: column; width: 104px`，但 `.kinds
 | `scripts/block302-arrow-form-live.cjs` | 箭头真形态 + prompt 路径 | 同上 |
 | `scripts/block303-transparent-fill-live.cjs` | 形状透明淡染（alpha 断言） | 同上 |
 | `scripts/block304-annotation-touch-live.cjs` | **本轮四条**（✓ 真实点击/text 拖拽开框/拖拽移动 PATCH/布局）——**改拖拽与布局后必须重跑** | 同上 |
+| `scripts/block308-annotation-drag-polish-live.cjs` | **BLOCK-308 两态布局**（窄栏回退 + 拖宽右栏验左列）+ 拖拽跟手（直写 transform/props 不动/落地清理）+ 箭头命中热区与拖拽 PATCH | 同上 |
+
+> **探针契约时效注记（2026-10-28 BLOCK-308 实测）**：`block298`/`block299` 仍断言 BLOCK-300 之前的 bar composer 与「箭头 pending-rect」，分别被 BLOCK-300（就地框接管区域面）与 BLOCK-303（箭头两点 path → pending-arrow）取代，**已不能代表现契约**；当前有效回归批=block302/303/304 + block308。不要为了跑绿去改旧探针的语义（它们是其所属包的历史证据）。
 
 证据目录：`acceptance/block-298/ ~ block-305/`（每包一个 json，部分带 clip PNG）。
 
@@ -180,6 +185,8 @@ powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorActio
 5. `Page.captureScreenshot` 偶发 20-30s 超时；先 `Page.enable` 再截，失败就跳过（探针已做降级）。
 6. `.bar` 的 computed `backgroundColor` 在 `color-mix` 下是 `color(srgb … / 0.12)` 形态，正则解析要兼容（探针里 `alphaOf()` 已处理）。
 7. 导航后要摘「上次未正常结束」横幅（找文本 `知道了` 点掉），否则挡住探针点击。
+8. **离屏实例（show:false）的样式/布局要到下一帧才刷新**：pointermove 里直写的 `transform` 在随后的 `getComputedStyle`/`getBoundingClientRect` 里可能仍是旧值（CDP 同轮读取表现为「transform 已写、rect 未动」）。探针读 rect/computed 前须显式冲两帧（`requestAnimationFrame` 嵌套，dev-verify 的 `evalJs` 支持 awaitPromise），block308 探针的 `flushFrames()` 即此。
+9. **右栏宽度会被持久化**（`localStorage['petri-pw-cols'].rightWidth`，默认 340）：探针若依赖「窄栏/宽栏」两态，先复位到 340 再按需拖宽；拖宽右栏用最右侧 `resizeHandleV`，**松手点必须落在面板内侧**（落在柄左侧的 backdrop 上会被判成点关闭侧栏）。
 
 ---
 

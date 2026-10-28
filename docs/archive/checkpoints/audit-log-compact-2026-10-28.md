@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T08:46:05.070Z -->
 | ✅ 处理完成（BLOCK-306；用户反馈「右侧 栏 上面 + 这个点击无效是出了什么异常吗？确定问题并修复」） | 2026-10-28 | **标题栏更多工具菜单弹出位置修复+图标语义校正（UI-606 verified）**：根因=「+」按钮（实为展开更多工具）的菜单 portal 到 body 后，.toolMenu 类残留 left:calc(100%+6px) 语义变「视口宽+6px」→ 菜单整体弹出窗口右外（实测 x=1608>vw=1602）——点击实际生效但不可见；修复=inline left:auto + 图标 plus→more-horizontal（+ 语义错位校正）+ 菜单 maxHeight 钳视口滚动。tsc 0 + titlebar 16/16 + 实机断言（acceptance/block-304/：icon=more-horizontal、菜单 inViewport x=1195/18 项）；closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-606 / BLOCK-306 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T09:06:02.163Z -->
+| ✅ 处理完成（BLOCK-307；用户四条反馈「enter 才可以确认？对号和 x 无法控制」「文本点击后没办法输入文字」「批注都可以点击拖拽方便移动」「图片居中+工具条列左侧」） | 2026-10-28 | **批注交互四条（UI-607/608/609 verified）**：①✓/× 真实鼠标失效根因=pointerdown 无条件 setPointerCapture 劫持 click（+preventDefault 阻断兼容序列）→ capture 延迟到首次 move + finish 显式释放；②text 开框统一 trusted 拖拽管线（单击为补充路径，与待填互斥）；③已存批注任意模式可拖拽移动（stopPropagation 防误采点、>3px 阈值、clamp 进画布），后端新增 store.updateGeometry + PATCH /geometry；④工具条列左 104px+图片水平居中。契约 26/26 + 批注域 36/36 + 9223 实机 8/8（acceptance/block-305/）；closeout 十三门 PASS。**遗留三条（用户 2026-10-28 追加：拖拽有延迟/箭头批注仍不可拖/左栏布局按截图优化）见 docs/block-307-annotation-handoff.md**。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-607/608/609 / BLOCK-307 |

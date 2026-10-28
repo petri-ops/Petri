@@ -73,7 +73,7 @@ describe('AnnotatableImagePane', () => {
       return jsonResponse({ error: 'unexpected' }, 500);
     });
 
-    const onAddToTask = vi.fn();
+    const onAddToContext = vi.fn();
     const { getByTestId, getByLabelText } = render(
       <AnnotatableImagePane
         src="http://mock/volcano.png"
@@ -81,7 +81,7 @@ describe('AnnotatableImagePane', () => {
         onOpenImage={() => undefined}
         scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-9', revisionOrdinal: 3 }}
-        onAddToTask={onAddToTask}
+        onAddToContext={onAddToContext}
       />,
     );
 
@@ -113,8 +113,8 @@ describe('AnnotatableImagePane', () => {
     expect(body.filePath).toBeUndefined();
 
     fireEvent.click(getByTestId('annotation-add-to-task'));
-    expect(onAddToTask).toHaveBeenCalledTimes(1);
-    const prompt = String(onAddToTask.mock.calls[0][0]);
+    expect(onAddToContext).toHaveBeenCalledTimes(1);
+    const prompt = String(onAddToContext.mock.calls[0][0]);
     expect(prompt).toContain('结果产物「volcano.png」');
     expect(prompt).toContain('任务 job-9');
     expect(prompt).toContain('第 3 版');
@@ -131,7 +131,7 @@ describe('AnnotatableImagePane', () => {
         alt="volcano.png"
         scope={null}
         target={{ surface: 'result-artifact' }}
-        onAddToTask={() => undefined}
+        onAddToContext={() => undefined}
       />,
     );
 
@@ -160,7 +160,7 @@ describe('AnnotatableImagePane', () => {
         alt="volcano.png"
         scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png' }}
-        onAddToTask={() => undefined}
+        onAddToContext={() => undefined}
       />,
     );
 
@@ -212,7 +212,7 @@ describe('AnnotatableImagePane', () => {
         alt="volcano.png"
         scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png' }}
-        onAddToTask={() => undefined}
+        onAddToContext={() => undefined}
       />,
     );
 
@@ -257,7 +257,7 @@ describe('AnnotatableImagePane', () => {
         onOpenImage={() => undefined}
         scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-9', revisionOrdinal: 3 }}
-        onAddToTask={() => undefined}
+        onAddToContext={() => undefined}
       />,
     );
 
@@ -324,7 +324,7 @@ describe('AnnotatableImagePane', () => {
         onOpenImage={() => undefined}
         scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
         target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-9', revisionOrdinal: 3 }}
-        onAddToTask={() => undefined}
+        onAddToContext={() => undefined}
       />,
     );
 

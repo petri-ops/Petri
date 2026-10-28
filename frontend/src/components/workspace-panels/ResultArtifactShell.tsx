@@ -128,7 +128,7 @@ export function ResultArtifactShell({
   workflow: HarnessWorkflowJobState | null;
   activeArtifact: ActiveArtifact | null;
   onActiveArtifactChange: (artifact: ActiveArtifact | null) => void;
-  onAskAgent: (prompt: string) => void;
+  onAskAgent: (prompt: string, options?: { compose?: boolean }) => void;
   onWorkflowChanged?: () => void;
   onAgentCodeRequest?: (request: 'explain' | 'modify' | 'replay') => void;
   replayContext?: { conversationId?: string | null; contextToken: string } | null;
@@ -809,7 +809,7 @@ export function ResultArtifactShell({
             revisionOrdinal: viewedRevision?.revisionOrdinal,
           }}
           conversationId={conversationId ?? null}
-          onAddToTask={onAskAgent}
+          onAddToContext={(prompt) => onAskAgent(prompt, { compose: true })}
           onLightbox={() => setLightboxSrc(selectedArtifactUrl)}
           onImageLoad={() => setPreviewAvailability({ key: previewAvailabilityKey, status: 'available', reason: null })}
           onImageError={() => setPreviewAvailability({
@@ -855,7 +855,7 @@ export function ResultArtifactShell({
             url={selectedArtifactUrl}
             name={selectedArtifactLabel || selectedArtifact.name}
             conversationId={conversationId ?? null}
-            onAddToTask={onAskAgent}
+            onAddToContext={(prompt) => onAskAgent(prompt, { compose: true })}
             {...annotationProps}
           />
         </>

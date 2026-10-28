@@ -93,7 +93,14 @@ export type IconName =
   | 'play'
   | 'info'
   | 'table'
-  | 'home';
+  | 'home'
+  | 'circle'
+  | 'arrow-up-right'
+  | 'type'
+  | 'highlighter'
+  | 'pen-tool'
+  | 'undo-2'
+  | 'mouse-pointer';
 
 interface IconProps {
   name: IconName;
@@ -657,6 +664,52 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M5 9.5V21h14V9.5" />
       <path d="M9.5 21v-6.5h5V21" />
     </>
+  ),
+  // Circle — ellipse annotation tool (Lucide circle)
+  circle: (
+    <circle cx="12" cy="12" r="9" />
+  ),
+  // Arrow up-right — arrow annotation tool (Lucide arrow-up-right)
+  'arrow-up-right': (
+    <>
+      <path d="M7 7h10v10" />
+      <path d="M7 17 17 7" />
+    </>
+  ),
+  // Type — text annotation tool (Lucide type)
+  type: (
+    <>
+      <polyline points="4 7 4 4 20 4 20 7" />
+      <line x1="9" y1="20" x2="15" y2="20" />
+      <line x1="12" y1="4" x2="12" y2="20" />
+    </>
+  ),
+  // Highlighter — text-selection annotation tool (Lucide highlighter)
+  highlighter: (
+    <>
+      <path d="m9 11-6 6v3h9l3-3" />
+      <path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4Z" />
+    </>
+  ),
+  // Pen tool — freehand annotation tool (Lucide pen-tool)
+  'pen-tool': (
+    <>
+      <path d="m12 19 7-7 3 3-7 7-3-3z" />
+      <path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+      <path d="m2 2 7.586 7.586" />
+      <circle cx="11" cy="11" r="2" />
+    </>
+  ),
+  // Undo 2 — undo last annotation action (Lucide undo-2)
+  'undo-2': (
+    <>
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+    </>
+  ),
+  // Mouse pointer — select/移动批注（Lucide mouse-pointer-2）
+  'mouse-pointer': (
+    <path d="m4 4 7.07 17 2.51-7.39L21 11.07z" />
   ),
 };
 

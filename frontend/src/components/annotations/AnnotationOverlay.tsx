@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   MAX_ANNOTATION_COMMENT_CHARS,
   MOSAIC_DISCLOSURE,
@@ -56,11 +56,14 @@ export interface AnnotationOverlayProps {
   pendingTextPoint?: [number, number] | null;
   /** BLOCK-300 — 文本标注点击上报（kind='text' 时点击图面即就地开框）。 */
   onCommitClick?: (point: [number, number]) => void;
-  /** BLOCK-307 — 拖拽移动提交（非绘制态拖动既有批注；提供即启用，缺省=不可拖）。 */
+  /**
+   * BLOCK-307 — 拖拽移动提交（非绘制态拖动既有批注；提供即启用，缺省=不可拖）。
+   * BLOCK-308 — 可返回 Promise：几何落地后再清理拖拽期直写的内联位移。
+   */
   onMoveAnnotation?: (
     annotationId: string,
     geometry: { rect?: number[]; path?: number[][] },
-  ) => void;
+  ) => void | Promise<unknown>;
   /**
    * BLOCK-300 — 就地确认：动作结束后输入框出现在结束位置，允许不填直接确认。
    * 提供即接管评论输入（bar 的 composer 在区域面退场）；返回 false=保存失败，框保留。
@@ -108,6 +111,74 @@ function samePage(annotation: ArtifactAnnotation, page: number | null): boolean 
   return annotationPage === page;
 }
 
+/** BLOCK-308 — 拖拽态只活在 ref 里（pointermove 不 setState）；位移直接写 DOM。 */
+interface MoveDragState {
+  id: string;
+  isPath: boolean;
+  origRect: [number, number, number, number] | null;
+  origPath: [number, number][] | null;
+  startClientX: number;
+  startClientY: number;
+  dx: number;
+  dy: number;
+  moved: boolean;
+  pointerId: number;
+  width: number;
+  height: number;
+  element: HTMLElement | SVGElement;
+}
+
+interface PendingMoveClear {
+  id: string;
+  element: HTMLElement | SVGElement;
+  origRect: number[] | null;
+  origPath: number[][] | null;
+  settled: boolean;
+}
+
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+
+function isSvgElement(element: Element): element is SVGElement {
+  return element.namespaceURI === SVG_NAMESPACE;
+}
+
+function sameNumbers(
+  a: readonly number[] | null | undefined,
+  b: readonly number[] | null | undefined,
+): boolean {
+  if (!a || !b || a.length !== b.length) return false;
+  return a.every((value, index) => value === b.at(index));
+}
+
+function samePath(
+  a: readonly (readonly number[])[] | null | undefined,
+  b: readonly (readonly number[])[] | null | undefined,
+): boolean {
+  if (!a || !b || a.length !== b.length) return false;
+  return a.every((point, index) => sameNumbers(point, b.at(index)));
+}
+
+/** box 用像素位移（不触发重排），SVG 用 viewBox 单位位移。 */
+function applyMoveOffset(
+  element: HTMLElement | SVGElement,
+  dx: number,
+  dy: number,
+  width: number,
+  height: number,
+): void {
+  if (isSvgElement(element)) {
+    element.setAttribute('transform', `translate(${dx * 100} ${dy * 100})`);
+    return;
+  }
+  element.style.transform = `translate(${dx * width}px, ${dy * height}px)`;
+}
+
+function clearMoveOffset(element: HTMLElement | SVGElement): void {
+  if (isSvgElement(element)) element.removeAttribute('transform');
+  else element.style.transform = '';
+  element.style.willChange = '';
+}
+
 export function AnnotationOverlay({
   annotations,
   page,
@@ -132,6 +203,17 @@ export function AnnotationOverlay({
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const startRef = useRef<NormalizedPoint | null>(null);
   const strokeRef = useRef<NormalizedPoint[] | null>(null);
+  // UI-612 — 选择态：drawing=false 时点批注=选中（不新建、不误触拖拽以外的绘制）。
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const activeSelectedId = !drawing && selectedId
+    && annotations.some((annotation) => annotation.annotationId === selectedId)
+    ? selectedId
+    : null;
+  const selectAnnotation = useCallback((annotationId: string) => {
+    if (drawing) return;
+    setSelectedId(annotationId);
+    onSelect?.(annotationId);
+  }, [drawing, onSelect]);
   const [draft, setDraft] = useState<[number, number, number, number] | null>(null);
   const [draftPath, setDraftPath] = useState<NormalizedPoint[] | null>(null);
   /** BLOCK-303 — 箭头拖拽实时预览（[起点, 当前点]；绘制中即最终形态，丝滑无「外部框」中间态）。 */
@@ -246,116 +328,144 @@ export function AnnotationOverlay({
     onCommitClick([point.x, point.y]);
   }, [drawing, kind, onCommitClick, pendingArrow, pendingPath, pendingRect, readPoint]);
 
-  // ── BLOCK-307 拖拽移动（非绘制态）：box / 箭头线 / 画笔线均可整体拖动 ──
-  const [moveDrag, setMoveDrag] = useState<{
-    id: string;
-    isPath: boolean;
-    origRect: number[] | null;
-    origPath: number[][] | null;
-    startClientX: number;
-    startClientY: number;
-    dx: number;
-    dy: number;
-    moved: boolean;
-  } | null>(null);
-  const surfaceSizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+  // ── BLOCK-307/308 拖拽移动（非绘制态）：box / 箭头线 / 画笔线均可整体拖动 ──
+  // BLOCK-308 手感修复：拖拽态只存 ref，pointermove 直写 DOM 位移（box 像素 /
+  // SVG viewBox），不 setState——旧实现每次 move 都重渲染整棵 overlay，跟手有延迟。
+  const moveRef = useRef<MoveDragState | null>(null);
+  const pendingClearsRef = useRef<PendingMoveClear[]>([]);
+  const [moveSettleTick, setMoveSettleTick] = useState(0);
+
+  useLayoutEffect(() => {
+    const pending = pendingClearsRef.current;
+    if (pending.length === 0) return;
+    const remaining: PendingMoveClear[] = [];
+    for (const entry of pending) {
+      const current = annotations.find((annotation) => annotation.annotationId === entry.id);
+      // 新几何已渲染（或条目已消失/请求已 settle）→ 内联位移完成使命，清除后由 props 接管。
+      const applied = current
+        ? entry.origPath
+          ? !samePath(current.path, entry.origPath)
+          : !sameNumbers(current.rect, entry.origRect)
+        : true;
+      if (applied || entry.settled) clearMoveOffset(entry.element);
+      else remaining.push(entry);
+    }
+    pendingClearsRef.current = remaining;
+  }, [annotations, moveSettleTick]);
 
   const startShapeMove = useCallback((annotation: ArtifactAnnotation, event: React.PointerEvent) => {
-    // 已存批注任何模式下都可拖（绘制态点在既有框上=拖框而非采新点；stopPropagation
-    // 阻止冒泡到覆盖层采新点——drawing gate 不设，避免绘制态拖拽被拦）。
-    if (!onMoveAnnotation) return;
+    // UI-612 — 只有选择态可拖/选：绘制态的批注层不吃指针（CSS 同步置 none），
+    // 画在批注上也不会被既有批注抢走；要移动批注先点右侧「选择」。
+    if (drawing || !onMoveAnnotation) return;
     const node = surfaceRef.current;
     if (!node) return;
     const bounds = node.getBoundingClientRect();
-    surfaceSizeRef.current = { w: bounds.width || 1, h: bounds.height || 1 };
     event.stopPropagation();
+    const element = event.currentTarget as HTMLElement | SVGElement;
     try {
-      event.currentTarget.setPointerCapture?.(event.pointerId);
+      element.setPointerCapture?.(event.pointerId);
     } catch {
       /* 测试环境无 capture 实现 */
     }
-    setMoveDrag({
+    element.style.willChange = 'transform';
+    moveRef.current = {
       id: annotation.annotationId,
       isPath: Array.isArray(annotation.path) && annotation.path.length >= 2,
-      origRect: Array.isArray(annotation.rect) && annotation.rect.length === 4 ? [...annotation.rect] : null,
-      origPath: Array.isArray(annotation.path) ? annotation.path.map((p) => [p[0], p[1]]) : null,
+      origRect: Array.isArray(annotation.rect) && annotation.rect.length === 4
+        ? [annotation.rect[0], annotation.rect[1], annotation.rect[2], annotation.rect[3]]
+        : null,
+      origPath: Array.isArray(annotation.path) ? annotation.path.map((point) => [point[0], point[1]]) : null,
       startClientX: event.clientX,
       startClientY: event.clientY,
       dx: 0,
       dy: 0,
       moved: false,
-    });
-  }, [onMoveAnnotation]);
+      pointerId: event.pointerId,
+      width: bounds.width || 1,
+      height: bounds.height || 1,
+      element,
+    };
+  }, [drawing, onMoveAnnotation]);
 
   const handleMoveDragPointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    if (!moveDrag) return;
-    const size = surfaceSizeRef.current;
-    const dx = (event.clientX - moveDrag.startClientX) / size.w;
-    const dy = (event.clientY - moveDrag.startClientY) / size.h;
-    const moved = Math.abs(event.clientX - moveDrag.startClientX) + Math.abs(event.clientY - moveDrag.startClientY) > 3;
-    setMoveDrag((current) => (current ? { ...current, dx, dy, moved } : current));
-  }, [moveDrag]);
+    const state = moveRef.current;
+    if (!state || event.pointerId !== state.pointerId) return;
+    state.dx = (event.clientX - state.startClientX) / state.width;
+    state.dy = (event.clientY - state.startClientY) / state.height;
+    if (!state.moved) {
+      // >3px 才算拖拽：更小的位移留给 click 选中。
+      state.moved = Math.abs(event.clientX - state.startClientX) + Math.abs(event.clientY - state.startClientY) > 3;
+    }
+    if (!state.moved) return;
+    applyMoveOffset(state.element, state.dx, state.dy, state.width, state.height);
+  }, []);
 
-  const commitMoveDrag = useCallback(() => {
-    if (!moveDrag) return;
-    const state = moveDrag;
-    setMoveDrag(null);
-    if (!state.moved || !onMoveAnnotation) return;
+  const finishShapeMove = useCallback((cancel = false) => {
+    const state = moveRef.current;
+    if (!state) return;
+    moveRef.current = null;
+    try {
+      state.element.releasePointerCapture?.(state.pointerId);
+    } catch {
+      /* 未 capture/测试环境无实现 */
+    }
+    if (cancel || !state.moved || !onMoveAnnotation) {
+      clearMoveOffset(state.element);
+      return;
+    }
+    // 平移整体 clamp 进画布（保持形状，逐点同 delta），视觉位移同步到 clamp 后的位置。
+    let dx = state.dx;
+    let dy = state.dy;
+    let geometry: { rect?: number[]; path?: number[][] };
     if (state.isPath && state.origPath) {
-      // 平移整体 clamp 进画布（保持形状，逐点同 delta）
       const minX = Math.min(...state.origPath.map((p) => p[0]));
       const maxX = Math.max(...state.origPath.map((p) => p[0]));
       const minY = Math.min(...state.origPath.map((p) => p[1]));
       const maxY = Math.max(...state.origPath.map((p) => p[1]));
-      const clampedDx = Math.max(-minX, Math.min(state.dx, 1 - maxX));
-      const clampedDy = Math.max(-minY, Math.min(state.dy, 1 - maxY));
-      onMoveAnnotation(state.id, {
+      dx = Math.max(-minX, Math.min(state.dx, 1 - maxX));
+      dy = Math.max(-minY, Math.min(state.dy, 1 - maxY));
+      geometry = {
         path: state.origPath.map((p) => [
-          Math.round(clamp01(p[0] + clampedDx) * 10000) / 10000,
-          Math.round(clamp01(p[1] + clampedDy) * 10000) / 10000,
+          Math.round(clamp01(p[0] + dx) * 10000) / 10000,
+          Math.round(clamp01(p[1] + dy) * 10000) / 10000,
         ]),
-      });
-      return;
-    }
-    if (state.origRect) {
+      };
+    } else if (state.origRect) {
       const [x, y, w, h] = state.origRect;
-      const clampedDx = Math.max(-x, Math.min(state.dx, 1 - x - w));
-      const clampedDy = Math.max(-y, Math.min(state.dy, 1 - y - h));
-      onMoveAnnotation(state.id, {
+      dx = Math.max(-x, Math.min(state.dx, 1 - x - w));
+      dy = Math.max(-y, Math.min(state.dy, 1 - y - h));
+      geometry = {
         rect: [
-          Math.round(clamp01(x + clampedDx) * 10000) / 10000,
-          Math.round(clamp01(y + clampedDy) * 10000) / 10000,
+          Math.round(clamp01(x + dx) * 10000) / 10000,
+          Math.round(clamp01(y + dy) * 10000) / 10000,
           w,
           h,
         ],
-      });
+      };
+    } else {
+      clearMoveOffset(state.element);
+      return;
     }
-  }, [moveDrag, onMoveAnnotation]);
-
-  // 拖拽中的渲染偏移（归一化）——box 用 style 覆盖、SVG 用 translate。
-  const moveOffsetFor = (annotationId: string): { dx: number; dy: number } => {
-    if (!moveDrag || moveDrag.id !== annotationId || !moveDrag.moved) return { dx: 0, dy: 0 };
-    return { dx: moveDrag.dx, dy: moveDrag.dy };
-  };
-  const surfaceMoveHandlers = {
-    onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
-      if (moveDrag) {
-        handleMoveDragPointerMove(event);
-        return;
-      }
-      handlePointerMove(event);
-    },
-    onPointerUp: (event: React.PointerEvent<HTMLDivElement>) => {
-      if (moveDrag) {
-        commitMoveDrag();
-        return;
-      }
-      finish(event);
-      // BLOCK-307 — text 采点的 pointerup 兜底：与 click 幂等（同点重复 beginTextAt
-      // 只是覆盖同 pending），trusted click 派发异常时此路径仍可达。
-      handleTextClick(event);
-    },
-  };
+    applyMoveOffset(state.element, dx, dy, state.width, state.height);
+    const entry: PendingMoveClear = {
+      id: state.id,
+      element: state.element,
+      origRect: state.origRect,
+      origPath: state.origPath,
+      settled: false,
+    };
+    pendingClearsRef.current = [...pendingClearsRef.current, entry];
+    const settle = () => {
+      entry.settled = true;
+      setMoveSettleTick((value) => value + 1);
+    };
+    const result = onMoveAnnotation(state.id, geometry);
+    if (result && typeof result.then === 'function') {
+      void result.then(settle, settle);
+    } else {
+      settle();
+    }
+  }, [onMoveAnnotation]);
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
@@ -434,6 +544,31 @@ export function AnnotationOverlay({
     onCommit(rect);
   }, [arrowDrawing, drawing, freehandDrawing, onCommit, onCommitArrow, onCommitPath, readPoint]);
 
+  // BLOCK-308 — 事件分发：拖拽态优先（ref 判定，不依赖渲染），否则走绘制管线。
+  const handleSurfacePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (moveRef.current) {
+      handleMoveDragPointerMove(event);
+      return;
+    }
+    handlePointerMove(event);
+  }, [handleMoveDragPointerMove, handlePointerMove]);
+
+  const handleSurfacePointerUp = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (moveRef.current) {
+      finishShapeMove();
+      return;
+    }
+    finish(event);
+    // BLOCK-307 — text 采点的 pointerup 兜底：与 click 幂等（同点重复 beginTextAt
+    // 只是覆盖同 pending），trusted click 派发异常时此路径仍可达。
+    handleTextClick(event);
+  }, [finish, finishShapeMove, handleTextClick]);
+
+  const handleSurfacePointerCancel = useCallback(() => {
+    // 触控/浏览器手势取消：放弃这一笔位移，不让内联 transform 卡在元素上。
+    if (moveRef.current) finishShapeMove(true);
+  }, [finishShapeMove]);
+
   return (
     <div
       ref={surfaceRef}
@@ -441,12 +576,14 @@ export function AnnotationOverlay({
       data-testid={testId}
       data-page={page === null ? 'none' : String(page)}
       data-drawing={drawing ? 'true' : 'false'}
+      data-select={drawing ? 'false' : 'true'}
       data-annotation-count={visible.length}
       role="group"
       aria-label={label}
       onPointerDown={handlePointerDown}
-      onPointerMove={surfaceMoveHandlers.onPointerMove}
-      onPointerUp={surfaceMoveHandlers.onPointerUp}
+      onPointerMove={handleSurfacePointerMove}
+      onPointerUp={handleSurfacePointerUp}
+      onPointerCancel={handleSurfacePointerCancel}
       onClick={handleTextClick}
       onPointerLeave={(event) => {
         if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
@@ -454,12 +591,7 @@ export function AnnotationOverlay({
       }}
     >
       {boxVisible.map((annotation, index) => {
-        const offset = moveOffsetFor(annotation.annotationId);
         const boxStyle = rectToStyle(annotation.rect);
-        if (offset.dx || offset.dy) {
-          boxStyle.left = `${clamp01(annotation.rect[0] + offset.dx) * 100}%`;
-          boxStyle.top = `${clamp01(annotation.rect[1] + offset.dy) * 100}%`;
-        }
         return (
         <button
           key={annotation.annotationId}
@@ -468,6 +600,7 @@ export function AnnotationOverlay({
           data-annotation-id={annotation.annotationId}
           data-color={annotation.color}
           data-kind={annotation.kind || 'region'}
+          data-selected={activeSelectedId === annotation.annotationId ? 'true' : 'false'}
           data-testid="annotation-box"
           style={boxStyle}
           title={annotation.kind === 'mosaic'
@@ -475,7 +608,7 @@ export function AnnotationOverlay({
             : `${describeAnnotationAnchor(annotation)}：${annotation.comment}`}
           aria-label={`批注 ${index + 1}：${annotation.comment}`}
           onPointerDown={(event) => startShapeMove(annotation, event)}
-          onClick={() => onSelect?.(annotation.annotationId)}
+          onClick={() => selectAnnotation(annotation.annotationId)}
         >
           {annotation.kind === 'text' ? (
             <span className={styles.textContent}>{annotation.comment}</span>
@@ -492,25 +625,22 @@ export function AnnotationOverlay({
           preserveAspectRatio="none"
           aria-hidden="false"
         >
-          {freehandVisible.map((annotation) => {
-            const offset = moveOffsetFor(annotation.annotationId);
-            return (
-              <path
-                key={annotation.annotationId}
-                data-annotation-id={annotation.annotationId}
-                data-testid="annotation-freehand-stroke"
-                data-color={annotation.color}
-                d={smoothFreehandPathD(annotation.path || [])}
-                fill="none"
-                className={styles.freehandStroke}
-                transform={`translate(${offset.dx * 100} ${offset.dy * 100})`}
-                onPointerDown={(event) => startShapeMove(annotation, event)}
-                onClick={() => onSelect?.(annotation.annotationId)}
-              >
-                <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
-              </path>
-            );
-          })}
+          {freehandVisible.map((annotation) => (
+            <path
+              key={annotation.annotationId}
+              data-annotation-id={annotation.annotationId}
+              data-testid="annotation-freehand-stroke"
+              data-color={annotation.color}
+              data-selected={activeSelectedId === annotation.annotationId ? 'true' : 'false'}
+              d={smoothFreehandPathD(annotation.path || [])}
+              fill="none"
+              className={styles.freehandStroke}
+              onPointerDown={(event) => startShapeMove(annotation, event)}
+              onClick={() => selectAnnotation(annotation.annotationId)}
+            >
+              <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
+            </path>
+          ))}
         </svg>
       )}
       {/* BLOCK-303 — 箭头真形态（两点 path）：线段+贴合方向的头部三角；旧 rect-only 数据仍走下方对角线。 */}
@@ -525,17 +655,25 @@ export function AnnotationOverlay({
           {arrowVisible.map((annotation) => {
             const start = annotation.path[0];
             const end = annotation.path[1];
-            const offset = moveOffsetFor(annotation.annotationId);
             return (
               <g
                 key={annotation.annotationId}
                 data-annotation-id={annotation.annotationId}
                 data-testid="annotation-arrow-stroke"
-                transform={`translate(${offset.dx * 100} ${offset.dy * 100})`}
+                data-selected={activeSelectedId === annotation.annotationId ? 'true' : 'false'}
                 onPointerDown={(event) => startShapeMove(annotation, event)}
-                onClick={() => onSelect?.(annotation.annotationId)}
+                onClick={() => selectAnnotation(annotation.annotationId)}
               >
                 <ArrowGlyph start={start} end={end} color={annotation.color} />
+                {/* BLOCK-308 — 细线/头部命中面积太小：透明宽描边承担拖拽热区。 */}
+                <line
+                  x1={start[0] * 100}
+                  y1={start[1] * 100}
+                  x2={end[0] * 100}
+                  y2={end[1] * 100}
+                  className={styles.arrowHit}
+                  data-testid="annotation-arrow-hit"
+                />
                 <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
               </g>
             );

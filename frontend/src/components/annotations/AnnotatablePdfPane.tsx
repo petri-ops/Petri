@@ -18,24 +18,25 @@ export function AnnotatablePdfPane({
   scope,
   conversationId = null,
   target,
-  onAddToTask,
+  onAddToContext,
 }: {
   url: string;
   name: string;
   scope: AnnotationScope | null;
   conversationId?: string | null;
   target: AnnotationTaskTarget;
-  onAddToTask: (prompt: string) => void;
+  onAddToContext: (prompt: string) => void;
 }): React.ReactElement {
   const session = useAnnotationSession({ scope, conversationId, target });
 
   return (
     <div className={styles.pane} data-testid="annotatable-pdf-pane">
       <ConnectedAnnotationBar
+        side="tools"
         session={session}
         canAnnotate={Boolean(scope)}
         unavailableReason="缺少产物身份，无法保存批注。"
-        onAddToTask={onAddToTask}
+        onAddToContext={onAddToContext}
       />
       <PdfResultViewer
         url={url}
@@ -55,13 +56,20 @@ export function AnnotatablePdfPane({
             onCommitPath={(path) => session.beginPath(path, page)}
             onCommitArrow={(start, end) => session.beginArrow(start, end, page)}
             onCommitClick={(point) => session.beginTextAt(point, page)}
-            onMoveAnnotation={(id, geometry) => { void session.moveGeometry(id, geometry); }}
+            onMoveAnnotation={(id, geometry) => session.moveGeometry(id, geometry)}
             onSubmitPending={session.submitComment}
             onCancelPending={session.cancelPending}
             label={`批注层：第 ${page} 页`}
             testId={`annotation-overlay-p${page}`}
           />
         )}
+      />
+      <ConnectedAnnotationBar
+        side="actions"
+        session={session}
+        canAnnotate={Boolean(scope)}
+        unavailableReason="缺少产物身份，无法保存批注。"
+        onAddToContext={onAddToContext}
       />
     </div>
   );

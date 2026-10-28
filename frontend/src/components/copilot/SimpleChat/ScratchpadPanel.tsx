@@ -121,10 +121,10 @@ export function ScratchpadPanel({ onClose, onQuote, projectId = null, api }: Scr
     surface: 'scratchpad-entry',
     artifactName: viewing?.title || '速记图片',
   };
-  const handleAnnotationAddToTask = useCallback((prompt: string) => {
+  const handleAnnotationAddToContext = useCallback((prompt: string) => {
     if (!prompt) return;
-    // 与其他批注面同一条进对话通道（copilotAsk），不新建第二条。
-    dispatchPetriEvent(petriEvents.copilotAsk, { prompt });
+    // 与其他批注面同一条进对话通道（copilotAsk）；UI-612 起只入草稿不发送。
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt, compose: true });
   }, []);
 
   return (
@@ -163,7 +163,7 @@ export function ScratchpadPanel({ onClose, onQuote, projectId = null, api }: Scr
               alt={viewing.title || '速记图片'}
               scope={annotationScope}
               target={annotationTarget}
-              onAddToTask={handleAnnotationAddToTask}
+              onAddToContext={handleAnnotationAddToContext}
             />
           ) : (
             <p className="sc-scratch-viewer-note" data-testid="sc-scratch-viewer-no-project">

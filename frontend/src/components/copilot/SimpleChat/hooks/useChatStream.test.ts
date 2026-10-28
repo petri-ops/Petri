@@ -30,9 +30,20 @@ vi.mock('@/components/copilot/conversationDraft', () => ({
   migrateConversationDraft: vi.fn(),
 }));
 
+const { copilotAskHandlers } = vi.hoisted(() => ({
+  copilotAskHandlers: [] as Array<(detail: { prompt: string; compose?: boolean; analysisMode?: boolean }) => void>,
+}));
+
 vi.mock('@/lib/events', () => ({
   petriEvents: { copilotAsk: 'copilotAsk' },
-  subscribePetriEvent: vi.fn(() => () => {}),
+  subscribePetriEvent: vi.fn((event: string, handler: (detail: { prompt: string; compose?: boolean; analysisMode?: boolean }) => void) => {
+    if (event !== 'copilotAsk') return () => {};
+    copilotAskHandlers.push(handler);
+    return () => {
+      const index = copilotAskHandlers.indexOf(handler);
+      if (index >= 0) copilotAskHandlers.splice(index, 1);
+    };
+  }),
 }));
 
 vi.mock('@/lib/brand', () => ({ readBrandStorage: vi.fn(() => null) }));
@@ -85,6 +96,7 @@ function lastRunOptions() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  copilotAskHandlers.length = 0;
   startConversationRunMock.mockReturnValue(true);
   isConversationRunningMock.mockReturnValue(false);
   getConversationRunSnapshotMock.mockReturnValue(null);
@@ -416,5 +428,26 @@ describe('useChatStream Stop 贯通后端（BLOCK-171 CP-1）', () => {
     });
 
     expect(vi.mocked(stopConversationRun)).toHaveBeenCalledWith('conv_test');
+  });
+});
+
+describe('useChatStream copilotAsk compose（UI-612）', () => {
+  it('compose 事件只追加到 composer 草稿，不启动 run', () => {
+    const setInput = vi.fn();
+    renderHook(() => useChatStream(makeArgs({ ownsCopilotAsk: true, setInput })));
+    expect(copilotAskHandlers).toHaveLength(1);
+
+    act(() => {
+      copilotAskHandlers[0]({ prompt: '请查看批注', compose: true });
+    });
+
+    const calls = setInput.mock.calls as unknown as Array<[unknown]>;
+    const updater = calls
+      .map(([arg]) => arg)
+      .find((arg): arg is (previous: string) => string => typeof arg === 'function');
+    expect(typeof updater).toBe('function');
+    expect(updater?.('')).toBe('请查看批注');
+    expect(updater?.('已有草稿\n')).toBe('已有草稿\n\n请查看批注');
+    expect(startConversationRunMock).not.toHaveBeenCalled();
   });
 });

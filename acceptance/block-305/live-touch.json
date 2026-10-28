@@ -1,16 +1,16 @@
 {
-  "capturedAt": "2026-10-28T08:56:40.305Z",
-  "head": "a7c6009ce9111e569c8a24cc15645a29a0b68060",
-  "projectId": "p_mvrvqqo5_mnss",
+  "capturedAt": "2026-10-28T09:51:25.438Z",
+  "head": "8c5dba6606a5545b990bc5c53b71c694a1fa578a",
+  "projectId": "p_mvrxpe1c_6wr9",
   "surface": "workspace-file 图像预览面（BLOCK-307 四条：✓ 真实点击/text 点击/拖拽移动/布局左列+居中）",
-  "total": 8,
-  "passed": 8,
+  "total": 9,
+  "passed": 9,
   "failed": 0,
   "records": [
     {
       "id": "P0a_project_created",
       "ok": true,
-      "detail": "id=p_mvrvqqo5_mnss"
+      "detail": "id=p_mvrxpe1c_6wr9"
     },
     {
       "id": "A0_pending_present",
@@ -35,12 +35,17 @@
     {
       "id": "C_drag_moves_geometry",
       "ok": true,
-      "detail": "rect=[0.4028,0.4081,0.2995,0.2664]（原 0.1,0.1 附近 → 右下平移）"
+      "detail": "rect=[0.3505,0.3517,0.3504,0.2983]（原 0.1,0.1 附近 → 右下平移）"
+    },
+    {
+      "id": "D_canvas_has_width",
+      "ok": true,
+      "detail": "canvasW=371"
     },
     {
       "id": "D_bar_left_column",
       "ok": true,
-      "detail": "{\"barX\":1250,\"canvasX\":1360,\"canvasW\":10,\"barW\":104,\"imgCenterOffset\":0}"
+      "detail": "{\"barX\":903,\"canvasX\":957,\"canvasW\":371,\"barW\":48,\"imgCenterOffset\":0}"
     },
     {
       "id": "D_image_centered",

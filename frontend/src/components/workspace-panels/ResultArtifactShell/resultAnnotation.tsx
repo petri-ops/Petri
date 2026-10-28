@@ -64,7 +64,7 @@ export function ResultImagePreview({
   conversationId,
   scope,
   target,
-  onAddToTask,
+  onAddToContext,
   onLightbox,
   onImageLoad,
   onImageError,
@@ -75,7 +75,7 @@ export function ResultImagePreview({
   projectId: string;
   artifact: ImageQuoteArtifact;
   conversationId: string | null;
-  onAddToTask: (prompt: string) => void;
+  onAddToContext: (prompt: string) => void;
   onLightbox: () => void;
   onImageLoad: () => void;
   onImageError: () => void;
@@ -104,7 +104,7 @@ export function ResultImagePreview({
           onOpenImage={onLightbox}
           onImageLoad={onImageLoad}
           onImageError={onImageError}
-          onAddToTask={onAddToTask}
+          onAddToContext={onAddToContext}
           scope={scope}
           target={target}
         />
@@ -122,7 +122,7 @@ function AnnotatedResultImage({
   onOpenImage,
   onImageLoad,
   onImageError,
-  onAddToTask,
+  onAddToContext,
 }: {
   url: string;
   alt: string;
@@ -130,7 +130,7 @@ function AnnotatedResultImage({
   onOpenImage: () => void;
   onImageLoad: () => void;
   onImageError: () => void;
-  onAddToTask: (prompt: string) => void;
+  onAddToContext: (prompt: string) => void;
 } & ResultAnnotationProps): React.ReactElement {
   return (
     <AnnotatableImagePane
@@ -142,7 +142,7 @@ function AnnotatedResultImage({
       scope={scope}
       conversationId={conversationId}
       target={target}
-      onAddToTask={onAddToTask}
+      onAddToContext={onAddToContext}
     />
   );
 }
@@ -153,12 +153,12 @@ export function AnnotatedResultPdf({
   scope,
   target,
   conversationId,
-  onAddToTask,
+  onAddToContext,
 }: {
   url: string;
   name: string;
   conversationId: string | null;
-  onAddToTask: (prompt: string) => void;
+  onAddToContext: (prompt: string) => void;
 } & ResultAnnotationProps): React.ReactElement {
   return (
     <AnnotatablePdfPane
@@ -167,7 +167,7 @@ export function AnnotatedResultPdf({
       scope={scope}
       conversationId={conversationId}
       target={target}
-      onAddToTask={onAddToTask}
+      onAddToContext={onAddToContext}
     />
   );
 }

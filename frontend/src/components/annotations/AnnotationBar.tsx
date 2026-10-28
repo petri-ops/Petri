@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Icon, type IconName } from '@/components/icons/Icon';
 import {
   ANNOTATION_COLORS,
   ANNOTATION_KINDS,
@@ -15,13 +16,13 @@ import {
 import styles from './AnnotationBar.module.css';
 
 /**
- * AnnotationBar — BLOCK-219 Q6 批注工具条（绘制开关 / 颜色 / 评论 / 列表 / 加入任务）。
+ * AnnotationBar — BLOCK-219 Q6 批注工具条（绘制开关 / 颜色 / 评论 / 列表 / 加入上下文）。
  *
  * 边界：
  * - 不支持批注的面（Office/表格/pack 渲染面）只显示**原因**，不渲染死按钮；
  * - 评论在此处收集（拖拽只产生矩形），提交结果由父层裁决；
- * - 「加入任务」不自己投递事件——父层用 `buildAnnotationTaskPrompt` + copilotAsk，
- *   保证只有一条进对话的通道。
+ * - 「加入上下文」不自己投递事件——父层用 `buildAnnotationTaskPrompt` + copilotAsk
+ *   （compose：只入草稿不发送），保证只有一条进对话的通道。
  */
 
 export interface AnnotationBarProps {
@@ -37,6 +38,11 @@ export interface AnnotationBarProps {
    * 'text' = 工作区文本面，批注由选区产生（不渲染绘制开关/形状/颜色）。
    */
   mode?: 'region' | 'text';
+  /**
+   * UI-611 — 区域面三段式布局：'tools' = 图片左侧工具集，'actions' = 图片右侧执行区；
+   * 'full'（默认）= 单条（文本锚点面 / 兼容既有调用）。
+   */
+  side?: 'full' | 'tools' | 'actions';
   /** false = 当前面不支持批注（只显示 cannotAnnotateReason）。 */
   canAnnotate: boolean;
   cannotAnnotateReason?: string;
@@ -53,7 +59,7 @@ export interface AnnotationBarProps {
   onSubmitComment: (comment: string) => Promise<boolean>;
   onCancelPending: () => void;
   onRemove: (annotationId: string) => void;
-  onAddToTask: () => void;
+  onAddToContext: () => void;
 }
 
 const COLOR_LABEL: Record<AnnotationColor, string> = {
@@ -61,6 +67,24 @@ const COLOR_LABEL: Record<AnnotationColor, string> = {
   sky: '天蓝',
   rose: '玫红',
 };
+
+/** UI-611 — 工具适配图标：左栏图标轨按工具压缩文字占用（标签进 aria/title）。 */
+const KIND_ICONS: Record<AnnotationKind, IconName> = {
+  region: 'square',
+  ellipse: 'circle',
+  arrow: 'arrow-up-right',
+  text: 'type',
+  mosaic: 'layout-grid',
+  'text-selection': 'highlighter',
+  freehand: 'pen-tool',
+};
+
+/** UI-611 — 工具少时单列窄轨，增多再两列/多列（列数由数量决定，不写死布局）。 */
+export function annotationKindColumns(count: number): 1 | 2 | 3 {
+  if (count <= 8) return 1;
+  if (count <= 12) return 2;
+  return 3;
+}
 
 export function AnnotationBar({
   annotations,
@@ -71,6 +95,7 @@ export function AnnotationBar({
   color,
   kind,
   mode = 'region',
+  side = 'full',
   canAnnotate,
   cannotAnnotateReason,
   pendingRect,
@@ -83,17 +108,23 @@ export function AnnotationBar({
   onSubmitComment,
   onCancelPending,
   onRemove,
-  onAddToTask,
+  onAddToContext,
 }: AnnotationBarProps): React.ReactElement {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   // 能力探测一次即可：CSS.supports 不随交互变化。
   const mosaicSupport = useMemo(() => supportsBackdropFilter(), []);
   const regionMode = mode !== 'text';
+  const toolsSide = regionMode && side === 'tools';
+  const actionsSide = regionMode && side === 'actions';
+  const showTools = regionMode && !actionsSide;
+  const showActions = !toolsSide;
 
   if (!canAnnotate) {
+    // 执行区没有可执行内容（原因只在工具区展示一次，避免两个栏各说一遍）。
+    if (actionsSide) return <></>;
     return (
-      <div className={styles.bar} data-testid="annotation-bar" data-annotatable="false">
+      <div className={styles.bar} data-testid="annotation-bar" data-annotatable="false" data-side={side}>
         <span className={styles.unavailable} data-testid="annotation-unavailable">
           {cannotAnnotateReason || '当前产物不支持批注（仅 PDF 与图像可批注）。'}
         </span>
@@ -111,21 +142,53 @@ export function AnnotationBar({
   };
 
   return (
-    <div className={styles.bar} data-testid="annotation-bar" data-annotatable="true" data-mode={mode}>
-      {regionMode && (
-        <button
-          type="button"
-          className={drawing ? `${styles.toggle} ${styles.toggleActive}` : styles.toggle}
-          data-testid="annotation-toggle"
-          aria-pressed={drawing}
-          onClick={onToggleDrawing}
-          title={drawing ? '退出批注模式' : '在图上拖拽框选区域添加批注'}
-        >
-          批注{annotations.length > 0 ? ` ${annotations.length}` : ''}
-        </button>
+    <div
+      className={styles.bar}
+      data-testid={actionsSide ? 'annotation-actions' : 'annotation-bar'}
+      data-annotatable="true"
+      data-mode={mode}
+      data-side={side}
+      data-kind-columns={regionMode && !actionsSide ? annotationKindColumns(ANNOTATION_KINDS.length) : undefined}
+    >
+      {regionMode && showActions && (
+        <div className={styles.modes} role="group" aria-label="批注工具模式">
+          <button
+            type="button"
+            className={drawing ? `${styles.toggle} ${styles.toggleActive}` : styles.toggle}
+            data-testid="annotation-toggle"
+            aria-pressed={drawing}
+            aria-label="批注模式"
+            onClick={() => { if (!drawing) onToggleDrawing(); }}
+            title="批注模式（在图上拖拽新建批注）"
+          >
+            <Icon name="pencil" size={15} />
+          </button>
+          <button
+            type="button"
+            className={!drawing ? `${styles.toggle} ${styles.toggleActive}` : styles.toggle}
+            data-testid="annotation-select-mode"
+            aria-pressed={!drawing}
+            aria-label="选择批注"
+            onClick={() => { if (drawing) onToggleDrawing(); }}
+            title="选择/移动批注（不新建）"
+          >
+            <Icon name="mouse-pointer" size={15} />
+          </button>
+        </div>
       )}
 
-      {canUndo && (
+      {showActions && canUndo && (regionMode ? (
+        <button
+          type="button"
+          className="petri-btn petri-btn--icon"
+          data-testid="annotation-undo"
+          aria-label="撤销上一步批注操作"
+          title={undoLabel || '撤销上一步批注操作'}
+          onClick={onUndo}
+        >
+          <Icon name="undo-2" size={15} />
+        </button>
+      ) : (
         <button
           type="button"
           className="petri-btn petri-btn--ghost petri-btn--sm"
@@ -135,9 +198,9 @@ export function AnnotationBar({
         >
           撤销
         </button>
-      )}
+      ))}
 
-      {drawing && (
+      {showTools && (
         <div className={styles.kinds} role="group" aria-label="批注形状">
           {ANNOTATION_KINDS.map((candidate) => (
             <button
@@ -149,15 +212,16 @@ export function AnnotationBar({
               data-active={candidate === kind ? 'true' : 'false'}
               aria-label={`批注形状 ${ANNOTATION_KIND_LABELS[candidate]}`}
               aria-pressed={candidate === kind}
+              title={ANNOTATION_KIND_LABELS[candidate]}
               onClick={() => onKindChange(candidate)}
             >
-              {ANNOTATION_KIND_LABELS[candidate]}
+              <Icon name={KIND_ICONS[candidate]} size={15} />
             </button>
           ))}
         </div>
       )}
 
-      {drawing && (
+      {showTools && (
         <div className={styles.swatches} role="group" aria-label="批注颜色">
           {ANNOTATION_COLORS.map((candidate) => (
             <button
@@ -175,7 +239,7 @@ export function AnnotationBar({
         </div>
       )}
 
-      {drawing && !pendingRect && (
+      {showTools && drawing && !pendingRect && (
         <span
           className={styles.hint}
           data-testid="annotation-hint"
@@ -239,14 +303,42 @@ export function AnnotationBar({
         </div>
       )}
 
-      {loading && <span className={styles.hint} data-testid="annotation-loading">读取批注…</span>}
-      {error && (
+      {showActions && loading && (regionMode ? (
+        <span
+          className={styles.statusIcon}
+          data-testid="annotation-loading"
+          title="读取批注…"
+          aria-label="读取批注…"
+        >
+          <Icon name="clock" size={14} />
+        </span>
+      ) : (
+        <span className={styles.hint} data-testid="annotation-loading">读取批注…</span>
+      ))}
+      {showActions && error && (regionMode ? (
+        <span
+          className={`${styles.statusIcon} ${styles.statusError}`}
+          role="alert"
+          data-testid="annotation-error"
+          title={error}
+          aria-label={error}
+        >
+          <Icon name="alert-circle" size={14} />
+        </span>
+      ) : (
         <span className={styles.error} role="alert" data-testid="annotation-error">{error}</span>
-      )}
+      ))}
 
-      {annotations.length > 0 && (
+      {showActions && annotations.length > 0 && (
         <details className={styles.list} data-testid="annotation-list">
-          <summary>{drawing ? '批注列表' : `批注 ${annotations.length}`}</summary>
+          <summary title={regionMode ? `批注列表（${annotations.length} 条）` : undefined}>
+            {regionMode ? (
+              <>
+                <Icon name="list-details" size={15} />
+                <span className={styles.count}>{annotations.length}</span>
+              </>
+            ) : (drawing ? '批注列表' : `批注 ${annotations.length}`)}
+          </summary>
           <div className={styles.items}>
             {annotations.map((annotation, index) => (
               <div className={styles.item} key={annotation.annotationId} data-testid="annotation-item">
@@ -272,16 +364,19 @@ export function AnnotationBar({
         </details>
       )}
 
-      <button
-        type="button"
-        className={styles.addToTask}
-        data-testid="annotation-add-to-task"
-        disabled={annotations.length === 0}
-        onClick={onAddToTask}
-        title="把这些批注作为结构化引用加入 Agent 对话"
-      >
-        加入任务
-      </button>
+      {showActions && (
+        <button
+          type="button"
+          className={styles.addToTask}
+          data-testid="annotation-add-to-task"
+          disabled={annotations.length === 0}
+          onClick={onAddToContext}
+          aria-label="加入上下文"
+          title="把批注作为结构化上下文加入对话草稿（按发送才启动任务）"
+        >
+          {regionMode ? <Icon name="message-circle" size={15} /> : '加入上下文'}
+        </button>
+      )}
     </div>
   );
 }

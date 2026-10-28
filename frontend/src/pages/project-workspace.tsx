@@ -874,13 +874,13 @@ export function ProjectWorkspace(): React.ReactElement {
     setPendingRequest,
   });
   /** Dispatch a copilot-ask event so the embedded SimpleChat picks it up */
-  const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean }) => {
-    if (activeConvId && isConversationRunning(activeConvId)) {
+  const handleAskAgent = useCallback((prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => {
+    if (!options?.compose && activeConvId && isConversationRunning(activeConvId)) {
       setWorkspaceNotice('当前 Agent 仍在处理上一个请求；完成或停止后再开始新分析。');
       return false;
     }
     setWorkspaceNotice('');
-    dispatchPetriEvent(petriEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode });
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt, analysisMode: options?.analysisMode, compose: options?.compose });
     return true;
   }, [activeConvId]);
   // BLOCK-80 — 欢迎页首问接力：欢迎页创建会话后经 sessionStorage 交接

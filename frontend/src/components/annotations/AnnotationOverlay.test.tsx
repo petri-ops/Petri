@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { AnnotationOverlay } from './AnnotationOverlay';
 import type { ArtifactAnnotation } from '@/lib/annotations';
 
@@ -502,6 +502,67 @@ describe('AnnotationOverlay', () => {
     expect(onSelect).toHaveBeenCalledWith('m1');
   });
 
+  it('BLOCK-308 — 拖拽绕过 React：pointermove 直写 transform（left 不变），松手提交后清理内联位移', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onMoveAnnotation = vi.fn(() => Promise.resolve(true));
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[annotation({ annotationId: 'fast', rect: [0.1, 0.1, 0.2, 0.2] })]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onMoveAnnotation={onMoveAnnotation}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    const box = getByTestId('annotation-box');
+    expect(box.style.left).toBe('10.00%');
+
+    fireEvent.pointerDown(box, { clientX: 30, clientY: 30, pointerId: 7 });
+    fireEvent.pointerMove(getByTestId('annotation-overlay'), { clientX: 70, clientY: 50, pointerId: 7 });
+    // 拖拽中：位移只落 DOM transform，不写 React props（left 仍是原值）。
+    expect(box.style.transform).toContain('translate(40px, 20px)');
+    expect(box.style.left).toBe('10.00%');
+
+    fireEvent.pointerUp(getByTestId('annotation-overlay'), { clientX: 70, clientY: 50, pointerId: 7 });
+    expect(onMoveAnnotation).toHaveBeenCalledWith('fast', { rect: [0.3, 0.3, 0.2, 0.2] });
+    await waitFor(() => expect(box.style.transform).toBe(''));
+  });
+
+  it('BLOCK-308 — 箭头批注提供透明命中热区，可拖拽整体平移 path', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onMoveAnnotation = vi.fn(() => Promise.resolve(true));
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[
+          annotation({ annotationId: 'arrow-1', kind: 'arrow', rect: [], path: [[0.1, 0.1], [0.5, 0.5]] }),
+        ]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onMoveAnnotation={onMoveAnnotation}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    const hit = getByTestId('annotation-arrow-hit');
+    expect(hit).toBeTruthy();
+
+    fireEvent.pointerDown(hit, { clientX: 60, clientY: 30, pointerId: 9 });
+    fireEvent.pointerMove(getByTestId('annotation-overlay'), { clientX: 100, clientY: 50, pointerId: 9 });
+    // 拖拽中：SVG 组直写 viewBox 位移（0..100），不重渲染。
+    expect(getByTestId('annotation-arrow-stroke').getAttribute('transform')).toBe('translate(20 20)');
+
+    fireEvent.pointerUp(getByTestId('annotation-overlay'), { clientX: 100, clientY: 50, pointerId: 9 });
+    expect(onMoveAnnotation).toHaveBeenCalledWith('arrow-1', {
+      path: [[0.3, 0.3], [0.7, 0.7]],
+    });
+    await waitFor(() => expect(getByTestId('annotation-arrow-stroke').getAttribute('transform')).toBeNull());
+  });
+
   it('BLOCK-303 — 箭头真形态：拖拽起点→终点提交两点，绘制中即最终形态（SVG 线+头）', () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
     const onCommitArrow = vi.fn();
@@ -575,5 +636,47 @@ describe('AnnotationOverlay', () => {
     expect(stroke.querySelector('line')).toBeTruthy();
     expect(stroke.querySelector('polygon')).toBeTruthy();
     expect(getAllByTestId('annotation-box').map((el) => el.dataset.kind)).toEqual(['arrow']);
+  });
+
+  it('UI-612 — 选择态点击批注进入选中；绘制态不选中（批注层不吃指针）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onSelect = vi.fn();
+    const { getByTestId, getAllByTestId, rerender } = render(
+      <AnnotationOverlay
+        annotations={[annotation({ annotationId: 'sel-1' })]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="region"
+        onSelect={onSelect}
+        onMoveAnnotation={() => Promise.resolve(true)}
+        onCommit={() => undefined}
+        label="批注层"
+      />,
+    );
+    expect(getByTestId('annotation-overlay').getAttribute('data-select')).toBe('true');
+    const box = getAllByTestId('annotation-box')[0];
+    fireEvent.click(box);
+    expect(box.getAttribute('data-selected')).toBe('true');
+    expect(onSelect).toHaveBeenCalledWith('sel-1');
+
+    rerender(
+      <AnnotationOverlay
+        annotations={[annotation({ annotationId: 'sel-1' })]}
+        page={null}
+        drawing
+        color="amber"
+        kind="region"
+        onSelect={onSelect}
+        onMoveAnnotation={() => Promise.resolve(true)}
+        onCommit={() => undefined}
+        label="批注层"
+      />,
+    );
+    expect(getByTestId('annotation-overlay').getAttribute('data-select')).toBe('false');
+    const drawingBox = getAllByTestId('annotation-box')[0];
+    fireEvent.click(drawingBox);
+    expect(drawingBox.getAttribute('data-selected')).toBe('false');
+    expect(onSelect).toHaveBeenCalledTimes(1);
   });
 });

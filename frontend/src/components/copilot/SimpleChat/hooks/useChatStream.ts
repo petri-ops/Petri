@@ -419,9 +419,25 @@ export function useChatStream({
   useEffect(() => {
     if (!ownsCopilotAsk) return undefined;
     const unsub = subscribePetriEvent(petriEvents.copilotAsk, (detail) => {
-      const { prompt, analysisMode } = detail;
+      const { prompt, analysisMode, compose } = detail;
       const p = typeof prompt === 'string' ? prompt.trim() : '';
       if (!p) return;
+      // UI-612 — compose：只入草稿不发送（批注「加入上下文」）；焦点与光标落到末尾，
+      // 用户按发送才启动任务。
+      if (compose) {
+        setInput((previous) => {
+          const existing = previous.trimEnd();
+          return existing ? `${existing}\n\n${p}` : p;
+        });
+        requestAnimationFrame(() => {
+          const ta = taRef.current;
+          if (!ta) return;
+          ta.focus();
+          const end = ta.value.length;
+          try { ta.setSelectionRange(end, end); } catch { /* 非焦点态 */ }
+        });
+        return;
+      }
       if (analysisMode) {
         // BLOCK-102 P2 — 经 ref 取最新引用：effect deps 只有 ownsCopilotAsk，
         // 直接闭包捕获会锁定首帧的 runInBackground（activeRun 恒 null）。
@@ -431,7 +447,7 @@ export function useChatStream({
       }
     });
     return unsub;
-  }, [ownsCopilotAsk]);
+  }, [ownsCopilotAsk, setInput, taRef]);
 
   // 6. `stop` — terminates the active run for the current conversation.
   // BLOCK-171 CP-1 — Stop 贯通后端：POST task/:taskId/cancel（context.js

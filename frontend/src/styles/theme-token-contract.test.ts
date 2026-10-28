@@ -401,6 +401,8 @@ describe('theme token contract', () => {
     // （装饰性新增即红）；W2 后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
       'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）
+      // UI-612 选择态：+2 = 选中批注 accent 外环（box）+ SVG 光晕（箭头/画笔）——「选中态」合法语义
+      'components/annotations/AnnotationOverlay.module.css': 2,
       // BLOCK-178 存量清偿定性：W3/W5 两件的交互态焦点环/拖拽把手态（宪章五类合法；
       // LineageViewSwitch 既有条目 2 已覆盖其选中态计数，不重复登记）
       'components/workspace-panels/ArtifactPinPane.module.css': 2, // 拖拽把手态+键盘可达 focus ring

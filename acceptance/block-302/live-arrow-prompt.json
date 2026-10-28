@@ -1,7 +1,7 @@
 {
-  "capturedAt": "2026-10-28T05:34:13.097Z",
-  "head": "bc6d88dcdb3eb5ad2f7b887dc886b446aa59c913",
-  "projectId": "p_mvroiqbi_jgrq",
+  "capturedAt": "2026-10-28T09:50:46.184Z",
+  "head": "8c5dba6606a5545b990bc5c53b71c694a1fa578a",
+  "projectId": "p_mvrxov9w_9d9n",
   "surface": "workspace-file 图像预览面（箭头真形态 + prompt 路径溯源）",
   "total": 7,
   "passed": 7,
@@ -10,7 +10,7 @@
     {
       "id": "P0a_project_created",
       "ok": true,
-      "detail": "id=p_mvroiqbi_jgrq"
+      "detail": "id=p_mvrxov9w_9d9n"
     },
     {
       "id": "D0a_auto_open",
@@ -30,7 +30,7 @@
     {
       "id": "D3_rest_arrow_path",
       "ok": true,
-      "detail": "comment=\"BLOCK-302 箭头真形态\" path=[[0.1502,0.1945],[0.5502,0.5946]]"
+      "detail": "comment=\"BLOCK-302 箭头真形态\" path=[[0.151,0.2008],[0.5499,0.5997]]"
     },
     {
       "id": "D4_saved_stroke_svg",
@@ -40,7 +40,7 @@
     {
       "id": "D5_prompt_carries_path",
       "ok": true,
-      "detail": "F1 部分跳过：投递面未在消息流/composer 命中（聊天面板态相关）；prompt 文本契约（相对路径指引+箭头坐标行）已由组件级 annotations.test BLOCK-303/304 两例钉住"
+      "detail": "channel=composer arrowCoord=true"
     }
   ]
 }

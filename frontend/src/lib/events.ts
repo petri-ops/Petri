@@ -240,6 +240,11 @@ export interface CopilotAskDetail {
    */
   analysisMode?: boolean;
   /**
+   * UI-612 — true = 只把 prompt 追加到 composer 草稿，不发送；批注「加入上下文」
+   * 走此模式（用户自己按发送才启动任务）。
+   */
+  compose?: boolean;
+  /**
    * P4R-3: 结果 Composer 的原子上下文快照。token 不写入 prompt;
    * SimpleChat 将该快照覆盖到本轮请求 context,避免异步建会话期间漂移。
    *
