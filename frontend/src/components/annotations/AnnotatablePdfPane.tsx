@@ -44,13 +44,17 @@ export function AnnotatablePdfPane({
           <AnnotationOverlay
             annotations={session.annotations}
             page={page}
-            drawing={session.drawing}
+            drawing={session.drawing && Boolean(scope)}
             color={session.color}
             kind={session.kind}
             pendingRect={session.pendingRect}
             pendingPath={session.pendingPath}
+            pendingTextPoint={session.pendingTextPoint}
             onCommit={(rect) => session.beginRect(rect, page)}
             onCommitPath={(path) => session.beginPath(path, page)}
+            onCommitClick={(point) => session.beginTextAt(point, page)}
+            onSubmitPending={session.submitComment}
+            onCancelPending={session.cancelPending}
             label={`批注层：第 ${page} 页`}
             testId={`annotation-overlay-p${page}`}
           />

@@ -93,8 +93,9 @@ describe('AnnotatableImagePane', () => {
     fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
     fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
 
-    fireEvent.change(getByTestId('annotation-comment-input'), { target: { value: '这个离群点需要复核' } });
-    fireEvent.click(getByTestId('annotation-save'));
+    // BLOCK-300 — 评论就地输入：画完形状，输入框出现在结束位置（overlay inlineComposer）。
+    fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '这个离群点需要复核' } });
+    fireEvent.click(getByTestId('annotation-inline-confirm'));
 
     await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
     const postCall = calls.find(([, init]) => init?.method === 'POST');
@@ -168,8 +169,8 @@ describe('AnnotatableImagePane', () => {
     fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
     fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
     fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
-    fireEvent.change(getByTestId('annotation-comment-input'), { target: { value: '这个离群点需要复核' } });
-    fireEvent.click(getByTestId('annotation-save'));
+    fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '这个离群点需要复核' } });
+    fireEvent.click(getByTestId('annotation-inline-confirm'));
 
     await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
     const undo = getByTestId('annotation-undo');
@@ -235,18 +236,21 @@ describe('AnnotatableImagePane', () => {
     await waitFor(() => expect(queryByTestId('annotation-undo')).toBeNull());
   });
 
-  it('BLOCK-292 — 连续批注动线：保存后绘制模式不退出，pending 预览保持可见直到保存', async () => {
+  it('BLOCK-292/300 — 连续批注动线：画完保持可见+就地输入，允许不填；text 点击就地开框', async () => {
+    const posts: Record<string, unknown>[] = [];
     const calls = installFetch((url, init) => {
       if (url.includes('/annotations?') && (!init || !init.method)) {
         return jsonResponse({ annotations: [], count: 0, limit: 200 });
       }
       if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
-        return jsonResponse({ annotation: createdAnnotation, count: 1 });
+        const body = parseBody(init);
+        posts.push(body);
+        return jsonResponse({ annotation: { ...createdAnnotation, ...body, annotationId: `ann-${posts.length}` }, count: posts.length });
       }
       return jsonResponse({ error: 'unexpected' }, 500);
     });
 
-    const { getByTestId, getByLabelText } = render(
+    const { getByTestId, getByLabelText, queryByTestId } = render(
       <AnnotatableImagePane
         src="http://mock/volcano.png"
         alt="volcano.png"
@@ -262,22 +266,40 @@ describe('AnnotatableImagePane', () => {
     // ①挂载即批注模式（UI-599 自动打开）
     expect(overlay.getAttribute('data-drawing')).toBe('true');
 
-    // ②画第一笔 → 松手后 pending 预览立即在场（「批注不要隐藏」）
+    // ②画第一笔 → pending 预览立即在场 + 就地输入框出现在结束位置
     fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
     fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
     fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
     expect(getByTestId('annotation-pending-rect')).toBeTruthy();
+    expect(getByTestId('annotation-inline-input')).toBeTruthy();
 
-    // ③保存 → pending 退场转正；绘制模式保持 true（可继续画下一笔）
-    fireEvent.change(getByTestId('annotation-comment-input'), { target: { value: '这个离群点需要复核' } });
-    fireEvent.click(getByTestId('annotation-save'));
+    // ③填写并就地确认（✓）→ pending 退场转正；绘制模式保持 true
+    fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '这个离群点需要复核' } });
+    fireEvent.click(getByTestId('annotation-inline-confirm'));
     await waitFor(() => expect(getByTestId('annotation-box')).toBeTruthy());
     expect(overlay.getAttribute('data-drawing')).toBe('true');
 
-    // ④第二笔无需重新进入批注模式 → pending 再次在场
+    // ④第二笔不填写直接确认（「允许不填写」→ 默认文案落库）
     fireEvent.pointerDown(overlay, { clientX: 40, clientY: 20 });
     fireEvent.pointerMove(overlay, { clientX: 150, clientY: 70 });
     fireEvent.pointerUp(overlay, { clientX: 150, clientY: 70 });
     expect(getByTestId('annotation-pending-rect')).toBeTruthy();
+    fireEvent.click(getByTestId('annotation-inline-confirm'));
+    await waitFor(() => expect(posts.length).toBe(2));
+    expect(posts[1]).toMatchObject({ comment: '矩形标注', kind: 'region' });
+
+    // ⑤text 工具：点击图面即就地开框（不拖拽），确认落库 kind=text
+    fireEvent.click(getByTestId('annotation-kind-text'));
+    fireEvent.pointerDown(overlay, { clientX: 80, clientY: 40 });
+    expect(queryByTestId('annotation-pending-rect')).toBeNull();
+    expect(getByTestId('annotation-inline-input')).toBeTruthy();
+    fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '看这里的峰值' } });
+    fireEvent.keyDown(getByTestId('annotation-inline-input'), { key: 'Enter' });
+    await waitFor(() => expect(posts.length).toBe(3));
+    expect(posts[2]).toMatchObject({ kind: 'text', comment: '看这里的峰值' });
+    const textRect = posts[2].rect as number[];
+    // 就地框实际渲染尺寸落库（jsdom 的 BOX mock 下量得全画布；真实尺寸由实机探针取证）
+    expect(textRect).toHaveLength(4);
+    expect(textRect.every((v) => v >= 0 && v <= 1)).toBe(true);
   });
 });

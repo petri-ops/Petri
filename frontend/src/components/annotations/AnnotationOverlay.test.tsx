@@ -380,4 +380,81 @@ describe('AnnotationOverlay', () => {
     expect(queryByTestId('annotation-pending-path')).toBeNull();
     expect(getByTestId('annotation-box').dataset.annotationId).toBe('saved');
   });
+
+  it('BLOCK-300 — 就地输入框锚在形状终点，Esc 取消 / blur 确认（允许不填）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onSubmitPending = vi.fn(() => Promise.resolve(true));
+    const onCancelPending = vi.fn();
+    const { getByTestId, queryByTestId, rerender } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="arrow"
+        pendingRect={[0.1, 0.1, 0.4, 0.4]}
+        pendingTextPoint={null}
+        onSubmitPending={onSubmitPending}
+        onCancelPending={onCancelPending}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    // 锚点=拖拽终点（0.5, 0.5）→ 55%/72% clamp 内
+    const composer = getByTestId('annotation-inline-composer');
+    expect(composer.style.left).toBe('50%');
+    expect(composer.style.top).toBe('50%');
+    expect(getByTestId('annotation-inline-input').getAttribute('placeholder')).toContain('可不填');
+
+    // Esc → 取消，不提交
+    fireEvent.keyDown(getByTestId('annotation-inline-input'), { key: 'Escape' });
+    expect(onCancelPending).toHaveBeenCalledTimes(1);
+    expect(onSubmitPending).not.toHaveBeenCalled();
+
+    // 重挂（取消后 pending 已清）→ blur 直接确认空串（「允许不填写」由会话层落默认文案）
+    rerender(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="freehand"
+        pendingPath={[[0.1, 0.1], [0.5, 0.5], [0.9, 0.2]]}
+        pendingTextPoint={null}
+        onSubmitPending={onSubmitPending}
+        onCancelPending={onCancelPending}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    expect(queryByTestId('annotation-pending-rect')).toBeNull();
+    // 锚点=路径尾点（0.9, 0.2）→ left clamp 到 55%
+    expect(getByTestId('annotation-inline-composer').style.left).toBe('55%');
+    fireEvent.blur(getByTestId('annotation-inline-input'));
+    expect(onSubmitPending).toHaveBeenCalledWith('', undefined);
+  });
+
+  it('BLOCK-300 — text 工具点击图面即上报点击点（不采点不拖拽）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommitClick = vi.fn();
+    const onCommit = vi.fn();
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="amber"
+        kind="text"
+        onCommitClick={onCommitClick}
+        onCommit={onCommit}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    fireEvent.pointerDown(overlay, { clientX: 60, clientY: 30 });
+    fireEvent.pointerUp(overlay, { clientX: 60, clientY: 30 });
+    expect(onCommitClick).toHaveBeenCalledWith([0.3, 0.3]);
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(getByTestId('annotation-overlay').getAttribute('data-drawing')).toBe('true');
+  });
 });

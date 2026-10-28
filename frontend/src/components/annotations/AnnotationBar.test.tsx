@@ -103,7 +103,7 @@ describe('AnnotationBar', () => {
     expect(onKindChange).toHaveBeenCalledWith('arrow');
   });
 
-  it('BLOCK-254 — 绘制态含文字/马赛克两档，选择回传 kind 且输入语义随形状变化', () => {
+  it('BLOCK-254 — 绘制态含文字/马赛克两档，选择回传 kind；BLOCK-300 起 region 面评论就地输入（composer 退场）', () => {
     const onKindChange = vi.fn();
     const drawing = render(
       <AnnotationBar {...props({ drawing: true, kind: 'region', onKindChange })} />,
@@ -114,19 +114,25 @@ describe('AnnotationBar', () => {
     expect(onKindChange).toHaveBeenCalledWith('text');
     drawing.unmount();
 
+    // BLOCK-300 — 区域面评论输入移到图上就地框：bar 不再渲染 composer（含待填态）。
     const textPending = render(
       <AnnotationBar {...props({ drawing: true, kind: 'text', pendingRect: true })} />,
     );
-    expect((textPending.getByTestId('annotation-comment-input') as HTMLInputElement).placeholder)
-      .toContain('要显示在框内的文字');
+    expect(textPending.queryByTestId('annotation-comment-input')).toBeNull();
+    expect(textPending.queryByTestId('annotation-save')).toBeNull();
     textPending.unmount();
 
+    // text 工具的指引在绘制态 hint：点击图上位置就地输入。
+    const textHint = render(<AnnotationBar {...props({ drawing: true, kind: 'text' })} />);
+    expect(textHint.getByTestId('annotation-hint').textContent).toContain('就地输入文字');
+    textHint.unmount();
+
+    // 马赛克不是脱敏：就地语义的「仅屏显遮蔽 / 不改原图」声明保留在 hint 里。
     const mosaicPending = render(
-      <AnnotationBar {...props({ drawing: true, kind: 'mosaic', pendingRect: true })} />,
+      <AnnotationBar {...props({ drawing: true, kind: 'mosaic' })} />,
     );
-    // 马赛克不是脱敏：输入说明必须显式声明「仅屏显遮蔽 / 不改原图」。
-    expect((mosaicPending.getByTestId('annotation-comment-input') as HTMLInputElement).placeholder)
-      .toContain('仅屏显遮蔽');
+    expect(mosaicPending.queryByTestId('annotation-comment-input')).toBeNull();
+    expect(mosaicPending.getByTestId('annotation-hint').textContent).toContain('仅屏显遮蔽');
   });
 
   it('BLOCK-254 P5 — 文本面模式：不渲染绘制开关，列表按行号显示且保留撤销/加入任务', () => {
@@ -219,10 +225,10 @@ describe('AnnotationBar', () => {
     expect(getByTestId('annotation-item').textContent).toContain('椭圆');
   });
 
-  it('待填评论时提交文本，空文本不能提交', async () => {
+  it('BLOCK-300 — 文本锚点面（mode=text）保留工具条输入：待填时激活，空文本不能提交', async () => {
     const onSubmitComment = vi.fn(() => Promise.resolve(true));
     const { getByTestId } = render(
-      <AnnotationBar {...props({ drawing: true, pendingRect: true, onSubmitComment })} />,
+      <AnnotationBar {...props({ mode: 'text', drawing: true, pendingRect: true, onSubmitComment })} />,
     );
     const save = getByTestId('annotation-save') as HTMLButtonElement;
     expect(save.disabled).toBe(true);

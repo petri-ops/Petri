@@ -40,6 +40,14 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-600: 批注就地输入——动作结束即出现输入框，允许不填（2026-10-28 **verified（BLOCK-300/299；组件级 33/33 + 主题门 + 实机 10/10）**）
+
+- **变化面**：①**所有形状工具**（箭头/矩形/椭圆/画笔/马赛克）画完松手后，就地输入框出现在**动作结束位置**（拖拽终点/画笔尾点）——Enter/失焦/✓ 确认、Esc/× 取消，bar 的 composer 在区域面退场（用户裁决原话「任何一个用于批注的动作 鼠标停止的时候 批注输入框就应该在结束位置出现…允许不填写」）；②**文本工具**：点击图面即就地开框（不拖拽），保存时量取输入框实际渲染尺寸落库（rectOverride）；③**允许不填写**：空评论确认落 `defaultAnnotationComment` 占位文案（箭头标注/矩形标注…），后端 comment_required 契约不变；④hook 新增 beginTextAt/pendingTextPoint/submitComment(comment, rectOverride?)；⑤工作区文本锚点面（mode='text'）保留工具条输入（选区产生批注，无图面就地语义）；⑥宿主 drawing 门控补 `Boolean(scope)`（缺产物身份不再进绘制态）。
+- **为什么这样设计**：连续批注动线的最后一块——画完→确认位置→就地写说明→确认→再画，全程手不离图；「允许不填写」降低记号成本（画个箭头标位置不需要打字）。
+- **验证（代码）**：annotations 域 33/33（Overlay 15 含就地契约：终点锚定/Esc 取消/blur 确认空串/text 点击上报 + Bar 13 含 composer 退场与文本面保留 + ImagePane 5 含不填写默认文案落库与 text 点击落库）+ 主题门棘轮零上调（按钮走全局 petri-btn 变体、accent 换批注域琥珀、输入框继承正文字号）。
+- **实机证据**：9223 dev Electron 工作区图像面实断（acceptance/block-299/live-inline.json + clip，10/10 PASS）：D1b 箭头松手后就地框左缘精确锚在终点（leftEdge=0.55/cy=0.597）；D2 不填写直接 ✓ → REST comment=「箭头标注」；D3a text 点击就地框锚在点击点（cx=0.55/cy=0.28，无形状预览）；D3b Enter 落库 kind=text + 键入文案 + 量取 rect 在点击点；D4 × 取消退场且条目数不增。
+- **边界（reopen）**：①就地框定位 clamp（left≤55%/top≤72%）在极靠右下终点会偏向形状内侧；②小预览面（120px 宽）就地框向右溢出属布局事实；③**CDP trusted 鼠标事件在 text 点击分支存在输入管线差异**（探针改用合成 PointerEvent 取证，走完整 React 合成事件链与真实用户点击一致；真实用户鼠标点击待日常使用复核）；马赛克/文本锚点面输入语义不变。
+
 ## UI-599: 批注模式自动打开+输入框常驻+pending 预览（2026-10-28 **verified（BLOCK-292/298；组件级 31/31 + 定向 121/121 + 实机 10/10）**）
 
 - **变化面**：①useAnnotationSession drawing 初始 true（图像面挂载即批注模式，免点「批注」钮；toggle 仍可退出）；②AnnotationBar composer 从「pendingRect 门控」改「drawing 常驻」——保存后输入框不消失（disabled+提示「画下一笔后可填写」），pendingRect 恢复时自动激活；③**pending 预览（2026-10-28 补，用户裁决「批注不要隐藏」）**：hook 暴露 pendingRect/pendingPath 几何，overlay 新增 `annotation-pending-rect`/`annotation-pending-path` 渲染块——箭头/画笔等画完松手后图形**立即保持可见**，直到填写评论保存（或取消）才转正/退场；AnnotatableImagePane 与 AnnotatablePdfPane 双宿主接线；④AnnotatableImagePane 测试去 toggle 前置点击（自动打开语义）。

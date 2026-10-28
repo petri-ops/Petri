@@ -201,3 +201,31 @@
 .freehandStroke[data-color='rose'] {
   stroke: var(--petri-danger);
 }
+
+/* BLOCK-300 — 就地批注输入框：动作结束位置出现，允许不填直接确认（✓/回车/失焦），×/Esc 取消。
+   确认/取消按钮复用全局 petri-btn 变体（宪章 §6：组件文件不新增按钮类定义）。 */
+.inlineComposer {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(320px, 45%);
+  padding: 3px;
+  border: 1px dashed var(--petri-warning);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-float);
+  pointer-events: auto;
+  z-index: 3;
+}
+
+.inlineInput {
+  flex: 1;
+  min-width: 0;
+  width: 170px;
+  padding: 2px 6px;
+  border: none;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface, var(--petri-bg-subtle));
+  color: var(--petri-text);
+}

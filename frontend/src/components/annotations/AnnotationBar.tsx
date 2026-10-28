@@ -182,22 +182,24 @@ export function AnnotationBar({
           data-mosaic-fallback={kind === 'mosaic' ? String(!mosaicSupport) : undefined}
         >
           {kind === 'freehand'
-            ? '在图上拖动绘制画笔路径，松开后填写评论'
+            ? '在图上拖动绘制画笔路径，松开后在图上输入说明（可不填）'
             : kind === 'arrow'
-            ? '拖拽框选箭头范围（沿矩形对角线绘制），松开后填写评论'
+            ? '拖拽画箭头，松开后在图上输入说明（可不填）'
             : kind === 'ellipse'
-              ? '拖拽框选椭圆范围，松开后填写评论'
+              ? '拖拽框选椭圆范围，松开后在图上输入说明（可不填）'
               : kind === 'text'
-                ? '拖拽框选文本标注位置，松开后填写文本'
+                ? '点击图上位置，就地输入文字（回车确认，可不填）'
                 : kind === 'mosaic'
                   ? (mosaicSupport
-                    ? `拖拽框选需要遮蔽的区域，松开后填写说明（${MOSAIC_SHORT}）`
+                    ? `拖拽框选需要遮蔽的区域，松开后在图上输入说明（${MOSAIC_SHORT}；可不填）`
                     : `拖拽框选需要遮蔽的区域；当前环境不支持模糊，将改用不透明色块（${MOSAIC_SHORT}）`)
-                  : '拖拽框选区域，松开后填写评论'}
+                  : '拖拽框选区域，松开后在图上输入说明（可不填）'}
         </span>
       )}
 
-      {(drawing || pendingRect) && (
+      {/* BLOCK-300 — 区域面的评论输入就地化（overlay inlineComposer 接管）；
+          只有文本锚点面（mode='text'，批注由选区产生）仍走工具条输入。 */}
+      {!regionMode && (drawing || pendingRect) && (
         <div className={styles.composer} data-testid="annotation-composer">
           <input
             type="text"
@@ -206,15 +208,7 @@ export function AnnotationBar({
             value={comment}
             disabled={!pendingRect}
             maxLength={MAX_ANNOTATION_COMMENT_CHARS}
-            placeholder={!regionMode
-              ? '写下对这段文字的批注（会随「加入任务」发给 Agent）'
-              : kind === 'text'
-                ? '输入要显示在框内的文字（会随「加入任务」发给 Agent）'
-              : kind === 'mosaic'
-                ? `说明这块要遮什么（${MOSAIC_SHORT}；不会修改原图）`
-                : !pendingRect
-                ? '在图上画下一笔后，可在此填写批注内容'
-                : '写下这条批注的含义（会随「加入任务」发给 Agent）'}
+            placeholder="写下对这段文字的批注（会随「加入任务」发给 Agent）"
             onChange={(event) => setComment(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') void submit();

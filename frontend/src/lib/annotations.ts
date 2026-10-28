@@ -62,6 +62,14 @@ export function describeAnnotationKind(kind: AnnotationKind | null | undefined):
   return ANNOTATION_KIND_LABELS[kind || 'region'];
 }
 
+/**
+ * BLOCK-300 — 就地输入「允许不填写」的默认文案（后端 comment_required 契约不变）：
+ * 用户画完形状直接确认时，按工具类型生成可读的占位说明，列表/prompt 不出现空条目。
+ */
+export function defaultAnnotationComment(kind: AnnotationKind): string {
+  return `${ANNOTATION_KIND_LABELS[kind] || '批注'}标注`;
+}
+
 /** 与后端 MAX_ANNOTATION_COMMENT_CHARS 同一数值（后端拒绝，前端 maxLength 提前挡）。 */
 export const MAX_ANNOTATION_COMMENT_CHARS = 2000;
 /** 单条 prompt 最多列出的批注明细数；超出只报计数，不让上下文无界膨胀。 */
