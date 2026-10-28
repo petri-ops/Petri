@@ -5925,6 +5925,18 @@
       ]
     },
     {
+      "id": "block295-ui-final-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-278~289 批次终局实机走查探针：斜杠 chip v2/右栏最近使用徽章/计量条复验；斜杠面板在探针自动化下未开（env 状态），F1 部分如实跳过。",
+      "patterns": [
+        "scripts/block295-ui-final-live.cjs",
+        "acceptance/block-279/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/slashExecute.test.ts"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",
