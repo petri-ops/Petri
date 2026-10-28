@@ -234,4 +234,50 @@ describe('AnnotatableImagePane', () => {
     // 补偿动作本身不入栈：撤销后不应还能再撤销同一动作。
     await waitFor(() => expect(queryByTestId('annotation-undo')).toBeNull());
   });
+
+  it('BLOCK-292 — 连续批注动线：保存后绘制模式不退出，pending 预览保持可见直到保存', async () => {
+    const calls = installFetch((url, init) => {
+      if (url.includes('/annotations?') && (!init || !init.method)) {
+        return jsonResponse({ annotations: [], count: 0, limit: 200 });
+      }
+      if (url.endsWith('/result-studio/annotations') && init?.method === 'POST') {
+        return jsonResponse({ annotation: createdAnnotation, count: 1 });
+      }
+      return jsonResponse({ error: 'unexpected' }, 500);
+    });
+
+    const { getByTestId, getByLabelText } = render(
+      <AnnotatableImagePane
+        src="http://mock/volcano.png"
+        alt="volcano.png"
+        onOpenImage={() => undefined}
+        scope={{ projectId: 'p1', surface: 'result-artifact', artifactId: 'a1', revisionId: 'r1' }}
+        target={{ surface: 'result-artifact', artifactName: 'volcano.png', jobId: 'job-9', revisionOrdinal: 3 }}
+        onAddToTask={() => undefined}
+      />,
+    );
+
+    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+    const overlay = getByLabelText('批注层：volcano.png');
+    // ①挂载即批注模式（UI-599 自动打开）
+    expect(overlay.getAttribute('data-drawing')).toBe('true');
+
+    // ②画第一笔 → 松手后 pending 预览立即在场（「批注不要隐藏」）
+    fireEvent.pointerDown(overlay, { clientX: 20, clientY: 10 });
+    fireEvent.pointerMove(overlay, { clientX: 120, clientY: 60 });
+    fireEvent.pointerUp(overlay, { clientX: 120, clientY: 60 });
+    expect(getByTestId('annotation-pending-rect')).toBeTruthy();
+
+    // ③保存 → pending 退场转正；绘制模式保持 true（可继续画下一笔）
+    fireEvent.change(getByTestId('annotation-comment-input'), { target: { value: '这个离群点需要复核' } });
+    fireEvent.click(getByTestId('annotation-save'));
+    await waitFor(() => expect(getByTestId('annotation-box')).toBeTruthy());
+    expect(overlay.getAttribute('data-drawing')).toBe('true');
+
+    // ④第二笔无需重新进入批注模式 → pending 再次在场
+    fireEvent.pointerDown(overlay, { clientX: 40, clientY: 20 });
+    fireEvent.pointerMove(overlay, { clientX: 150, clientY: 70 });
+    fireEvent.pointerUp(overlay, { clientX: 150, clientY: 70 });
+    expect(getByTestId('annotation-pending-rect')).toBeTruthy();
+  });
 });

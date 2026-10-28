@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-10-28T03:17:16.373Z",
+  "head": "7c4b228e208c0edf73129c7c1448f71307dd12d0",
+  "projectId": "p_mvrjmrtv_4l7y",
+  "surface": "workspace-file 图像预览面（用户原话场景：箭头批注画完保持可见）",
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvrjmrtv_4l7y"
+    },
+    {
+      "id": "P0b_svg_fixture",
+      "ok": true,
+      "detail": "352B"
+    },
+    {
+      "id": "D0_annotation_auto_open",
+      "ok": true,
+      "detail": "data-drawing=true（未点 toggle）"
+    },
+    {
+      "id": "D1_arrow_kind_active",
+      "ok": true,
+      "detail": "data-active=true"
+    },
+    {
+      "id": "D2a_overlay_rect",
+      "ok": true,
+      "detail": "{\"x\":1261.97607421875,\"y\":423.47412109375,\"w\":120.00617218017578,\"h\":89.9969253540039}"
+    },
+    {
+      "id": "D2b_pending_preview_visible",
+      "ok": true,
+      "detail": "{\"visible\":true,\"left\":\"15.02%\",\"width\":\"40%\",\"inputEnabled\":true,\"savePresent\":true,\"cancelPresent\":true}"
+    },
+    {
+      "id": "D3_composer_active",
+      "ok": true,
+      "detail": "input=true save=true cancel=true"
+    },
+    {
+      "id": "D4_saved_converted",
+      "ok": true,
+      "detail": "{\"pendingGone\":true,\"boxKind\":\"arrow\"}"
+    },
+    {
+      "id": "D5_rest_arrow_contract",
+      "ok": true,
+      "detail": "rows=1 arrow=true rect=[0.1502,0.1947,0.4,0.4]"
+    },
+    {
+      "id": "D6_cancel_no_new_item",
+      "ok": true,
+      "detail": "pendingAgain=true after={\"pendingGone\":true,\"boxes\":1} before=1"
+    }
+  ]
+}

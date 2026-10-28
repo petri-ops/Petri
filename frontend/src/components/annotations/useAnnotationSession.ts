@@ -41,6 +41,9 @@ export interface AnnotationSession {
   kind: AnnotationKind;
   /** true = 已画好矩形，等待填写评论。 */
   pending: boolean;
+  /** BLOCK-292 — 待填批注的几何（overlay 据此在保存前保持可见；anchor 待填时两者皆 null）。 */
+  pendingRect: [number, number, number, number] | null;
+  pendingPath: readonly [number, number][] | null;
   /** 撤销栈是否可回退（仅本次会话、仅当前 scope）。 */
   canUndo: boolean;
   /** 下一步撤销会做什么（空栈为空串），用于按钮 title 如实说明。 */
@@ -112,19 +115,18 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     });
   }, [identity]);
 
+  // BLOCK-292 — begin* 不再退出绘制模式（旧语义画完即关，第二笔被拒识）：
+  // 批注模式保持 true，用户画→写→再画零摩擦；退出只走 toggle。
   const beginRect = useCallback((rect: [number, number, number, number], page: number | null = null) => {
     setPending({ target: { kind: 'rect', rect, page }, identity });
-    setDrawing(false);
   }, [identity]);
 
   const beginPath = useCallback((path: [number, number][], page: number | null = null) => {
     setPending({ target: { kind: 'path', path, page }, identity });
-    setDrawing(false);
   }, [identity]);
 
   const beginAnchor = useCallback((anchor: TextAnchor) => {
     setPending({ target: { kind: 'anchor', anchor }, identity });
-    setDrawing(false);
   }, [identity]);
 
   const cancelPending = useCallback(() => {
@@ -197,6 +199,8 @@ export function useAnnotationSession(input: AnnotationSessionInput): AnnotationS
     color,
     kind,
     pending: pending !== null,
+    pendingRect: pending?.target.kind === 'rect' ? pending.target.rect : null,
+    pendingPath: pending?.target.kind === 'path' ? pending.target.path : null,
     canUndo: undoActions.length > 0,
     undoLabel: undoActionLabel(lastUndo),
     toggleDrawing: () => setDrawing((value) => !value),

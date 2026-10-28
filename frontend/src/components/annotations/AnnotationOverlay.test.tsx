@@ -329,4 +329,55 @@ describe('AnnotationOverlay', () => {
     fireEvent.pointerUp(overlay, { clientX: 20, clientY: 10 });
     expect(onCommitPath).not.toHaveBeenCalled();
   });
+
+  it('BLOCK-292 — pending 批注在保存前保持可见（矩形与画笔路径预览，取消后消失）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const { getByTestId, queryByTestId, rerender } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="arrow"
+        pendingRect={[0.1, 0.1, 0.5, 0.5]}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    const preview = getByTestId('annotation-pending-rect');
+    expect(preview.style.left).toBe('10.00%');
+    expect(preview.style.width).toBe('50.00%');
+
+    rerender(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="freehand"
+        pendingPath={[[0.1, 0.1], [0.5, 0.5], [0.9, 0.2]]}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    expect(queryByTestId('annotation-pending-rect')).toBeNull();
+    expect(getByTestId('annotation-pending-path').querySelector('path')?.getAttribute('d')).toContain('M 10,10');
+
+    // 保存（pending 清空）后预览退场——批注转入 annotations 渲染面。
+    rerender(
+      <AnnotationOverlay
+        annotations={[annotation({ annotationId: 'saved', kind: 'arrow', rect: [0.1, 0.1, 0.5, 0.5] })]}
+        page={null}
+        drawing={false}
+        color="amber"
+        kind="arrow"
+        pendingRect={null}
+        onCommit={() => undefined}
+        label="批注层：图像"
+      />,
+    );
+    expect(queryByTestId('annotation-pending-rect')).toBeNull();
+    expect(queryByTestId('annotation-pending-path')).toBeNull();
+    expect(getByTestId('annotation-box').dataset.annotationId).toBe('saved');
+  });
 });

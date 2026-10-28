@@ -65,6 +65,8 @@ export function AnnotatableImagePane({
           drawing={session.drawing}
           color={session.color}
           kind={session.kind}
+          pendingRect={session.pendingRect}
+          pendingPath={session.pendingPath}
           onCommit={(rect) => session.beginRect(rect, null)}
           onCommitPath={(path) => session.beginPath(path, null)}
           label={`批注层：${alt}`}

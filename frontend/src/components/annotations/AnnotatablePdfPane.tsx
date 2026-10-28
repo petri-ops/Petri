@@ -47,6 +47,8 @@ export function AnnotatablePdfPane({
             drawing={session.drawing}
             color={session.color}
             kind={session.kind}
+            pendingRect={session.pendingRect}
+            pendingPath={session.pendingPath}
             onCommit={(rect) => session.beginRect(rect, page)}
             onCommitPath={(path) => session.beginPath(path, page)}
             label={`批注层：第 ${page} 页`}

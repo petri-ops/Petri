@@ -42,6 +42,9 @@ export interface AnnotationOverlayProps {
   /** 无障碍标签（如「批注层：第 2 页」）。 */
   label: string;
   testId?: string;
+  /** BLOCK-292 — pending 批注预览（画完→保存期间保持可见；会话层下放）。 */
+  pendingRect?: [number, number, number, number] | null;
+  pendingPath?: readonly (readonly [number, number])[] | null;
 }
 
 function samePage(annotation: ArtifactAnnotation, page: number | null): boolean {
@@ -60,6 +63,8 @@ export function AnnotationOverlay({
   onSelect,
   label,
   testId = 'annotation-overlay',
+  pendingRect = null,
+  pendingPath = null,
 }: AnnotationOverlayProps): React.ReactElement {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const startRef = useRef<NormalizedPoint | null>(null);
@@ -227,6 +232,29 @@ export function AnnotationOverlay({
             fill="none"
             className={styles.freehandStroke}
             data-color={color}
+          />
+        </svg>
+      )}
+      {/* BLOCK-292 — pending 批注预览：画完→保存期间保持可见（用户裁决「批注不要隐藏」）。
+          预览与 draft 互斥：draft 只在采点时存在，pending 只在采点结束后存在。 */}
+      {pendingRect && (
+        <div
+          className={styles.draft}
+          data-testid="annotation-pending-rect"
+          style={rectToStyle(pendingRect)}
+        />
+      )}
+      {pendingPath && pendingPath.length >= 2 && (
+        <svg
+          className={styles.freehandLayer}
+          data-testid="annotation-pending-path"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <path
+            d={smoothFreehandPathD(pendingPath.map((point) => [point[0], point[1]]))}
+            fill="none"
+            className={styles.freehandStroke}
           />
         </svg>
       )}

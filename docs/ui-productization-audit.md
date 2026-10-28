@@ -40,13 +40,13 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
-## UI-599: 批注模式自动打开+输入框常驻（2026-10-27 **in_progress（BLOCK-292；组件级 62/62，实机腿随批注实机批）**）
+## UI-599: 批注模式自动打开+输入框常驻+pending 预览（2026-10-28 **verified（BLOCK-292/298；组件级 31/31 + 定向 121/121 + 实机 10/10）**）
 
-- **变化面**：①useAnnotationSession drawing 初始 true（图像面挂载即批注模式，免点「批注」钮；toggle 仍可退出）；②AnnotationBar composer 从「pendingRect 门控」改「drawing 常驻」——保存后输入框不消失（disabled+提示「画下一笔后可填写」），pendingRect 恢复时自动激活；③AnnotatableImagePane 测试去 toggle 前置点击（自动打开语义）。
-- **为什么这样设计**：用户裁决「批注自动打开…确定了之后写批注内容的时候不要消失…用户可能随时增加内容，输入框可以一直在」——连续批注动线：画→写→再画→再写零摩擦。
-- **验证（代码）**：annotations 域 62/62（AnnotatableImagePane 4/4 去前置点击+Overlay 全量+AnnotationBar 回归）。
-- **实机证据**：待跑。
-- **边界（reopen）**：toggle 语义反转（画笔常开时 toggle=退出）如体感不佳随时回退。
+- **变化面**：①useAnnotationSession drawing 初始 true（图像面挂载即批注模式，免点「批注」钮；toggle 仍可退出）；②AnnotationBar composer 从「pendingRect 门控」改「drawing 常驻」——保存后输入框不消失（disabled+提示「画下一笔后可填写」），pendingRect 恢复时自动激活；③**pending 预览（2026-10-28 补，用户裁决「批注不要隐藏」）**：hook 暴露 pendingRect/pendingPath 几何，overlay 新增 `annotation-pending-rect`/`annotation-pending-path` 渲染块——箭头/画笔等画完松手后图形**立即保持可见**，直到填写评论保存（或取消）才转正/退场；AnnotatableImagePane 与 AnnotatablePdfPane 双宿主接线；④AnnotatableImagePane 测试去 toggle 前置点击（自动打开语义）。
+- **为什么这样设计**：用户裁决「批注自动打开…确定了之后写批注内容的时候不要消失」+「假如我使用了箭头批注，这个批注就不显示，需要输入文字内容后再保存才会显示。批注不要隐藏起来呀」——画完到保存之间批注图形不可见是动线断点：用户画完后无法确认形状/位置是否画对，填写评论时图形消失了。
+- **验证（代码）**：annotations 域 31/31（Overlay 13 含 pending 预览契约：pendingRect 在场/位置正确/pendingPath 平滑 d/保存后退场转正 + AnnotationBar 回归 + ImagePane 5/5 含连续批注动线契约「保存后绘制模式不退出，可继续画下一笔」）+ 定向 121/121（含 WorkspaceFilePreview save 按钮门控契约）。
+- **实机证据**：9223 dev Electron 工作区图像面实断（acceptance/block-298/live-pending.json + pending-preview.png，10/10 PASS）：D0 不点 toggle 自动打开；D1 箭头工具；D2b 松手后 `annotation-pending-rect` 立即可见（left=15.02%/width=40%）；D3 composer 激活；D4 保存转正 annotation-box kind=arrow；D5 REST rect 归一化；D6 取消退场且条目数不增。探针揭示并修复真 bug：begin* 残留旧语义 `setDrawing(false)`（画完即退出绘制模式，第二笔被拒识）——已删除，连续批注动线由组件级测试+实机 D6 双证。
+- **边界（reopen）**：toggle 语义反转（画笔常开时 toggle=退出）如体感不佳随时回退；anchor（文本选区）待填无 overlay 预览（选区本身即预览）。
 
 ## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **verified（BLOCK-277 轻量包；组件级 21/21 + 实机待 9223 走查落 acceptance/）**）
 
