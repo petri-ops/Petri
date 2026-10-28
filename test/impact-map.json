@@ -6006,6 +6006,17 @@
       "tests": []
     },
     {
+      "id": "block306-tool-menu-viewport",
+      "classifiesScripts": true,
+      "note": "BLOCK-306 UI-606 实机腿：标题栏更多工具菜单弹出位置修复（菜单回视口/图标语义/小屏钳高）验证证据目录。",
+      "patterns": [
+        "acceptance/block-304/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.toolMenu.test.tsx"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

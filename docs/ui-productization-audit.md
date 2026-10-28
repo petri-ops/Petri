@@ -40,6 +40,14 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-606: 标题栏「更多工具」菜单弹出位置修复+图标语义校正（2026-10-28 **verified（BLOCK-306；titlebar 16/16 + 实机断言落 acceptance/block-304/）**）
+
+- **变化面**：①**根因修复**——标题栏右区「+」按钮（实为「展开更多工具」）点击后菜单**弹出窗口右外不可见**（用户报「点击无效」）：`.toolMenu` 类残留 `left: calc(100% + 6px)`（旧挂锚布局的右侧弹出偏移），portal 到 body 后语义变为「视口宽+6px」→ 菜单整体飞出右缘（实测 x=1608 > vw=1602）。修复=portal inline style 显式 `left: 'auto'` 压掉 class 遗留（菜单回到按钮下方视口内 x=1195）。②**图标语义校正**——按钮图标从 plus（+，语义=新建）换 **more-horizontal（⋯，语义=更多）**：用户点 + 预期新建项，弹出 18 项工具清单即体感「无效」；more-horizontal 准确表达「更多」。③**小屏加固**——工具面全集可达 18+ 项（~588px 高），小窗口溢出屏幕底部；菜单钳 `max-height: calc(100vh - 120px)` + `overflow-y: auto`。
+- **为什么这样设计**：fixed 全屏浮层挂 body 后，布局类里的「相对锚点偏移」全部失效成「相对视口」——与 UI-601 灯箱 portal 同族陷阱的第二处（此处在 CSS 类的 left 偏移，彼处在渲染位置本身）。
+- **验证（代码）**：tsc 0 + titlebar 域 16/16。
+- **实机证据**：9223 dev Electron 实断（acceptance/block-304/menu-viewport.json）：icon=more-horizontal（3 circles，plus 双线消失）、菜单 inViewport=true（x=1195/y=36/176×588）、18 项全渲染、maxHeight=880px+overflow auto。修复前对照实测 x=1608（vw=1602，整体出屏）。
+- **边界（reopen）**：菜单项集由 hostToolItems+toolSurfaceItems 动态构成，18 项为当前实测值；notificationMenu 同族 left:auto 先例已在（无同类残留，已查）。
+
 ## UI-605: 形状批注透明淡染（2026-10-28 **verified（BLOCK-305；主题门 + 批注域 + 实机 3/3）**）
 
 - **变化面**：区域/椭圆/箭头外形状批注的内部填充从实色 token（`--petri-warning-bg` 等，截图实证遮挡区域内内容）改为 **12% 同色淡染**（`color-mix(in srgb, <色> 12%, transparent)`，三色族同步）——批注标位置不遮挡内容（用户反馈「这些形状的框是不是应该是没有内部填充的，能看到区域内内容」）。draft 预览与保存后同形同透明（所见即所得）；hover 淡染加深至 20% 作交互提示；text 衬底与 mosaic 模糊保持不变（各自特性）。

@@ -129,8 +129,11 @@ export function TitleBarRightZone(): React.ReactElement {
               aria-expanded={toolMenuOpen}
               aria-controls="titlebar-tool-menu"
             >
-              <Icon name="plus" size={15} />
-              {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂「+」按钮引导入口（点开审阅即熄）。
+              {/* UI-606 — 图标从 plus 换 more-horizontal：plus 语义是「新建」，与
+                  「更多工具面板」菜单行为错位——用户点 + 预期新建项，弹出工具清单
+                  即体感「点击无效」。more-horizontal（⋯）准确表达「更多」。 */}
+              <Icon name="more-horizontal" size={15} />
+              {/* UI-446 v4 — 审阅 tab 未打开时，计数徽章挂此按钮引导入口（点开审阅即熄）。
                   注意 >0 判定：&& 直接接 reviewCount 会在 0 时把数字渲染出来（React 渲染 falsy 数字）。 */}
               {(panels.titleBar.reviewCount ?? 0) > 0 && !tabs.some((tab) => tab.id === 'review') && (
                 <span className={styles.tabCountBadge} data-testid="review-menu-count">{formatShortstatBadge(panels.titleBar.reviewCount ?? 0, panels.titleBar.reviewStat)}</span>
@@ -148,7 +151,7 @@ export function TitleBarRightZone(): React.ReactElement {
                   id="titlebar-tool-menu"
                   className={styles.toolMenu}
                   role="menu"
-                  style={{ position: 'fixed', top: menuAnchor?.top ?? 42, right: menuAnchor?.right ?? 12 }}
+                  style={{ position: 'fixed', top: menuAnchor?.top ?? 42, right: menuAnchor?.right ?? 12, left: 'auto' }}
                 >
                   {toolMenuItems.map((item) => (
                     <button

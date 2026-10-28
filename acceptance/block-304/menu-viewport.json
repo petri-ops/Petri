@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-10-28T07:35:15.643Z",
+  "head": "b6339b04805c3297a786ed6e86947d119dc217c6",
+  "surface": "TitleBar 右区「展开更多工具」（用户报：右栏上面 + 点击无效）",
+  "rootCause": ".toolMenu 类残留 left:calc(100%+6px)（旧挂锚布局遗留）在 portal 到 body 后语义=视口宽+6px，菜单整体弹出窗口右外——点击实际生效但不可见",
+  "fix": [
+    "inline left:auto 压掉 class left（菜单回到视口内 x=1195）",
+    "图标 plus→more-horizontal（+ 语义=新建，与工具菜单行为错位）",
+    "max-height:calc(100vh-120px)+overflow-y:auto（18 项小屏溢出加固）"
+  ],
+  "verification": {
+    "icon": "more-horizontal",
+    "inViewport": true,
+    "rect": {
+      "x": 1195,
+      "y": 36,
+      "w": 176,
+      "h": 588
+    },
+    "vw": 1602,
+    "vh": 1000,
+    "items": 18,
+    "maxH": "880.247px",
+    "scroll": "auto"
+  },
+  "passed": true
+}
