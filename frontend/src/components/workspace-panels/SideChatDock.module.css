@@ -138,6 +138,26 @@
   flex-shrink: 0;
 }
 
+/* UI-623 — 悬浮态头部即拖动把手：抓到哪放到哪，双击复位。 */
+.surfaceHeader[data-draggable='true'] {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.surface[data-dragging='true'] .surfaceHeader {
+  cursor: grabbing;
+}
+
+/* 拖动期间取消透出/上浮过渡，避免跟手时视觉漂移。 */
+.surface[data-dragging='true'],
+.surface[data-dragging='true']:hover {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  animation: none;
+}
+
 .surfaceTitle {
   color: var(--petri-text);
   font-weight: 600;

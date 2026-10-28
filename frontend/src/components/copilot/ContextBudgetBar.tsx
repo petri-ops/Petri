@@ -2,6 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 // UI-523 — 数字格式单一源（与 composer 计量条共用；K/M/B 阶梯与既有输出逐字一致）
 import { formatTokens } from './formatCount';
 
+/** UI-622 — 请求载荷的真实构成分类（全部可由后端逐项对账）。 */
+interface TokenBreakdown {
+  systemPrompt: number;
+  /** 知识空间注入（系统提示词的子集，不重复计入 total） */
+  knowledge: number;
+  toolDefinitions: number;
+  messages: number;
+  toolResults: number;
+  otherSystem: number;
+  outputReserve: number;
+  total?: number;
+}
+
 export interface TokenBudget {
   contextWindow: number;
   messagesTokensUsed: number;
@@ -11,12 +24,8 @@ export interface TokenBudget {
   trimmed: boolean;
   /** BLOCK-69 — 知识空间自动召回注入块的估算 token（无注入为 0/缺省） */
   knowledgeTokens?: number;
-  categories?: {
-    systemInstructions: number;
-    messages: number;
-    tools: number;
-    other: number;
-  };
+  /** UI-622 — 构成分类（旧后端无此字段时回退汇总视图） */
+  breakdown?: TokenBreakdown;
 }
 
 interface ContextBudgetButtonProps {
@@ -35,6 +44,15 @@ const RING_SIZE = 18;
 const RING_STROKE = 2;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const BREAKDOWN_ROWS = [
+  { key: 'systemPrompt', label: '系统提示词', color: '#8b5cf6' },
+  { key: 'toolDefinitions', label: '工具定义', color: '#0ea5e9' },
+  { key: 'messages', label: '对话消息', color: '#3b82f6' },
+  { key: 'toolResults', label: '工具结果', color: '#22c55e' },
+  { key: 'otherSystem', label: '其他系统内容', color: '#f59e0b' },
+  { key: 'outputReserve', label: '输出预留', color: '#94a3b8' },
+] as const;
 
 /** SVG ring — `pct` is 0–100, `color` is the stroke. */
 function Ring({ pct, color }: { pct: number; color: string }) {
@@ -63,8 +81,6 @@ function Ring({ pct, color }: { pct: number; color: string }) {
     </svg>
   );
 }
-
-/** Idle ring — always at 0% but shows the configured context window size. */
 
 export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudgetButtonProps) {
   const [open, setOpen] = useState(false);
@@ -96,7 +112,12 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
   const pct = displayBudget?.pct ?? 0;
   const color = active ? barColor(pct) : '#9ca3af';
   const contextWindow = displayBudget?.contextWindow ?? activeContextWindow ?? 0;
-  const messageBudget = contextWindow > 0 ? contextWindow - 8192 : 0;
+  const breakdown = displayBudget?.breakdown;
+  const knowledgeTokens = breakdown?.knowledge ?? displayBudget?.knowledgeTokens ?? 0;
+  const usedTokens = breakdown?.total ?? displayBudget?.messagesTokensUsed ?? 0;
+  const freeTokens = contextWindow > 0 ? Math.max(0, contextWindow - usedTokens) : null;
+  const denominator = contextWindow > 0 ? contextWindow : usedTokens;
+  const pctOf = (value: number): number => (denominator > 0 ? Math.min(100, (value / denominator) * 100) : 0);
 
   // Content: ring only (no label)
   // UI-400-5 — 初始/待机也渲染 0% 空环，不再显示「—」占位（用户裁决：哪怕初始状态也该有 0%）
@@ -153,7 +174,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
             whiteSpace: 'nowrap',
             zIndex: 200,
-            minWidth: '240px',
+            minWidth: '260px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -176,29 +197,24 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-secondary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>消息 tokens</span>
+              <span>已用 / 窗口</span>
               <span style={{ fontFamily: 'monospace', color: 'var(--petri-text)' }}>
-                {hasData ? `${formatTokens(displayBudget.messagesTokensUsed)}${messageBudget > 0 ? ` / ${formatTokens(messageBudget)}` : ''}` : '—'}
+                {hasData ? `${formatTokens(usedTokens)} / ${contextWindow > 0 ? formatTokens(contextWindow) : '—'}` : '—'}
+                {freeTokens !== null ? ` · 剩余 ${formatTokens(freeTokens)}` : ''}
               </span>
             </div>
-            {/* BLOCK-69 — 知识空间注入块预算透明 */}
-            {(displayBudget?.knowledgeTokens ?? 0) > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b5cf6' }}>
-                <span>知识空间</span>
+            {!breakdown && (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>消息 tokens</span>
                 <span style={{ fontFamily: 'monospace', color: 'var(--petri-text)' }}>
-                  {formatTokens(displayBudget?.knowledgeTokens ?? 0)}
+                  {hasData ? formatTokens(displayBudget.messagesTokensUsed) : '—'}
                 </span>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>上下文窗口</span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--petri-text)' }}>
-                {contextWindow > 0 ? formatTokens(contextWindow) : '—'}
-              </span>
-            </div>
-            {contextWindow === 0 && (
-              <div style={{ fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-tertiary)', marginTop: '2px' }}>
-                模型上下文窗口未知，可在设置中配置
+            {!breakdown && knowledgeTokens > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b5cf6' }}>
+                <span>知识空间</span>
+                <span style={{ fontFamily: 'monospace', color: 'var(--petri-text)' }}>{formatTokens(knowledgeTokens)}</span>
               </div>
             )}
             {hasData ? (
@@ -224,36 +240,60 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
             )}
           </div>
 
-          {displayBudget?.categories && (
+          {breakdown && (
             <div style={{ marginTop: '8px', borderTop: '1px solid var(--petri-border)', paddingTop: '8px' }}>
               <div style={{ fontWeight: 600, fontSize: 'var(--petri-font-size-sm)', marginBottom: '6px', color: 'var(--petri-text-secondary)' }}>
-                用量分布（占上下文窗口）
+                构成（估算）
               </div>
-              {([
-                { key: 'systemInstructions' as const, label: '系统指令', color: '#8b5cf6' },
-                { key: 'messages' as const, label: '消息内容', color: '#3b82f6' },
-                { key: 'tools' as const, label: '工具调用', color: '#22c55e' },
-                { key: 'other' as const, label: '其他', color: '#9ca3af' },
-              ]).map(({ key, label, color }) => {
-                const catValue = displayBudget.categories![key];
-                const catPct = contextWindow > 0 ? (catValue / contextWindow) * 100 : 0;
+              {/* 堆叠条：六类 + 剩余（有窗口时） */}
+              <div style={{ display: 'flex', height: '6px', borderRadius: '3px', overflow: 'hidden', background: '#e5e7eb', marginBottom: '8px' }}>
+                {BREAKDOWN_ROWS.map(({ key, label, color: rowColor }) => {
+                  const value = breakdown[key] ?? 0;
+                  const width = pctOf(value);
+                  return value > 0 ? (
+                    <div key={key} title={`${label} ${formatTokens(value)}`} style={{ width: `${width}%`, background: rowColor, height: '100%' }} />
+                  ) : null;
+                })}
+                {freeTokens !== null && freeTokens > 0 && (
+                  <div title={`剩余 ${formatTokens(freeTokens)}`} style={{ width: `${pctOf(freeTokens)}%`, background: 'transparent', height: '100%' }} />
+                )}
+              </div>
+              {BREAKDOWN_ROWS.map(({ key, label, color: rowColor }) => {
+                const value = breakdown[key] ?? 0;
                 return (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <span style={{ width: '60px', fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-secondary)', flexShrink: 0 }}>{label}</span>
-                    <div style={{ flex: 1, height: '4px', background: '#e5e7eb', borderRadius: '2px' }}>
-                      <div style={{
-                        width: `${Math.min(catPct, 100)}%`,
-                        height: '100%',
-                        background: color,
-                        borderRadius: '2px',
-                      }} />
+                  <div key={key} style={{ marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: rowColor, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-secondary)' }}>{label}</span>
+                      <span style={{ fontSize: 'var(--petri-font-size-xs)', fontFamily: 'monospace', color: 'var(--petri-text)' }}>
+                        {formatTokens(value)}
+                      </span>
+                      {contextWindow > 0 && (
+                        <span style={{ width: '38px', fontSize: 'var(--petri-font-size-xs)', fontFamily: 'monospace', textAlign: 'right', color: 'var(--petri-text-tertiary)' }}>
+                          {pctOf(value).toFixed(1)}%
+                        </span>
+                      )}
                     </div>
-                    <span style={{ width: '45px', fontSize: 'var(--petri-font-size-xs)', fontFamily: 'monospace', textAlign: 'right', color: 'var(--petri-text)', flexShrink: 0 }}>
-                      {formatTokens(catValue)}
-                    </span>
+                    {key === 'systemPrompt' && knowledgeTokens > 0 && (
+                      <div style={{ marginLeft: '14px', marginTop: '1px', fontSize: 'var(--petri-font-size-xs)', color: '#8b5cf6' }}>
+                        其中知识空间 {formatTokens(knowledgeTokens)}
+                      </div>
+                    )}
                   </div>
                 );
               })}
+              {freeTokens !== null && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px', fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-tertiary)' }}>
+                  <span>剩余可用</span>
+                  <span style={{ fontFamily: 'monospace' }}>{formatTokens(freeTokens)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {contextWindow === 0 && (
+            <div style={{ fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-tertiary)', marginTop: '4px' }}>
+              模型上下文窗口未知，可在设置中配置
             </div>
           )}
         </div>

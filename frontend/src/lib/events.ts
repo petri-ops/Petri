@@ -204,6 +204,17 @@ export interface TokenBudgetDetail {
   messagesTokens: number;
   /** BLOCK-69 — 知识空间自动召回注入块估算 token（无注入为 0） */
   knowledgeTokens: number;
+  /** UI-622 — 真实构成分类（系统/工具定义/消息/工具结果/其他系统/输出预留） */
+  breakdown?: {
+    systemPrompt: number;
+    knowledge: number;
+    toolDefinitions: number;
+    messages: number;
+    toolResults: number;
+    otherSystem: number;
+    outputReserve: number;
+    total?: number;
+  };
   pct: number;
   trimmed: boolean;
 }

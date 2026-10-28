@@ -108,7 +108,7 @@ const {
   finalizeResultEditProgress,
 } = require('./agent-tools/result-context-binding');
 // BLOCK-51 P2 — 上下文熔断：预算估算 + 超窗修剪
-const { estimateRequestTokens } = require('./helpers/token-estimator');
+const { estimateRequestTokens, computeContextBreakdown, countTokens } = require('./helpers/token-estimator');
 const { trimMessagesToBudget } = require('./helpers/message-trimmer');
 const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/context-freshness');
 // BLOCK-155 — 真·单通道 vision：用户图片附件行在请求体侧内联为 image_url 部件
@@ -684,6 +684,15 @@ async function runLoop({
       }
     }
 
+    // UI-622 — 工具定义常量：schema JSON 也占上下文（每轮不再重复计数）。
+    const toolDefinitionsTokens = (() => {
+      try {
+        return Array.isArray(config.tools) && config.tools.length > 0
+          ? countTokens(JSON.stringify(config.tools))
+          : 0;
+      } catch { return 0; }
+    })();
+
     for (let iter = 0; iter < MAX_AGENT_ITERS && !aborted(); iter++) {
       // BLOCK-249（Q4a）— 暂停门：只在**迭代边界**生效（进行中的工具不冻结）。
       // 取消优先：暂停等待里一旦 shouldAbort 为真立即返回，由循环正常收口。
@@ -751,20 +760,28 @@ async function runLoop({
             messages: hasSystem ? messages.slice(1) : messages,
             maxTokens: reqMaxTokens, // 与下方 reqBody.max_tokens 一致（CP-7 可配）
           });
+          // UI-622 — 真实构成分类（系统/工具定义/消息/工具结果/其他系统/输出预留）
+          const breakdown = computeContextBreakdown({
+            systemPrompt: hasSystem ? (messages[0].content || '') : '',
+            messages: hasSystem ? messages.slice(1) : messages,
+            toolDefinitionsTokens,
+            maxTokens: reqMaxTokens,
+          });
           // BLOCK-163 W3 P5（MDL-2）— 按模型校准系数修正估算（cl100k 对 CJK 重度
           // 文本系统性高估；EWMA 自愈见 helpers/model-token-ratios.js）
           const { calibratedEstimate } = require('./helpers/model-token-ratios');
-          const calibratedTotal = calibratedEstimate(est.total, modelName);
+          const calibratedTotal = calibratedEstimate(breakdown.total, modelName);
           // BLOCK-172 CP-7 — 每轮发放 token_budget（trimmed=false）：预算环全程
           // 实数（原形态=仅 0.85 危机时发一次，UI 恒占位 `—`）。事件面 additive，
           // 既有消费方（agentTaskStream→petriEvents.tokenBudget→ContextBudgetBar）
-          // 零改动。
+          // 零改动；UI-622 起附 breakdown 分类。
           _emit({
             event: 'token_budget',
             contextWindow: loopContextWindow,
-            messagesTokensUsed: est.total,
+            messagesTokensUsed: breakdown.total,
             systemPromptTokens: est.systemPromptTokens,
-            messagesTokens: est.total,
+            messagesTokens: est.messagesTokens,
+            breakdown,
             pct: Math.min(100, Math.round((calibratedTotal / loopContextWindow) * 100)),
             trimmed: false,
             messagesDropped: 0,
@@ -825,13 +842,21 @@ ${compactSummaryText}`,
                 });
               }
               for (const m of trimmed) messages.push(m);
+              const trimmedHasSystem = messages.length > 0 && messages[0].role === 'system';
+              const trimmedBreakdown = computeContextBreakdown({
+                systemPrompt: trimmedHasSystem ? (messages[0].content || '') : '',
+                messages: trimmedHasSystem ? messages.slice(1) : messages,
+                toolDefinitionsTokens,
+                maxTokens: reqMaxTokens,
+              });
               _emit({
                 event: 'token_budget',
                 contextWindow: loopContextWindow,
-                messagesTokensUsed: result.stats.messagesTokensUsed,
-                systemPromptTokens: est.systemPromptTokens,
-                messagesTokens: result.stats.messagesTokensUsed,
-                pct: Math.min(100, Math.round((result.stats.messagesTokensUsed / loopContextWindow) * 100)),
+                messagesTokensUsed: trimmedBreakdown.total,
+                systemPromptTokens: trimmedBreakdown.systemPrompt,
+                messagesTokens: trimmedBreakdown.messages + trimmedBreakdown.toolResults,
+                breakdown: trimmedBreakdown,
+                pct: Math.min(100, Math.round((trimmedBreakdown.total / loopContextWindow) * 100)),
                 trimmed: true,
                 messagesDropped: result.stats.messagesDropped,
               });

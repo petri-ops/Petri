@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。**三推（2026-10-28，用户全权收尾指令「继续 搞完这个」）**：main `e9960ce6..72c1e061` 共 **11 笔**（BLOCK-275/276/277/278/279 五包 + UI-591 代落盘 + 对账/自稳治理批）+ 快照标签 snapshot-20261027-7 补推（远端=本地全集）；此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录已兑现授权，不构成常驻授权）。
 
+最后更新：2026-10-28（**BLOCK-318 completed（UI-622/623 verified）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：两条用户反馈已收口——①**上下文用量增加真实构成分类**：token_budget 新增 breakdown（系统提示词含知识子集 / 工具定义 / 对话消息 / 工具结果 / 其他系统内容 / 输出预留；total=和，pct 含工具定义），面板=已用/窗口/剩余 + 堆叠条 + 六类行，旧后端回退汇总；实机一轮 system=232/tools=12147/messages=15/otherSystem=1310/reserve=16384/total=30088。②**侧聊改可拖动悬浮面**：宽窗不再有固定右轨列区，侧聊统一悬浮；头部拖动跟手、抬手钳制视口并持久化、双击复位、resize 重钳制；实机拖 +120/+80、越界 right=1594/bottom=992、复位成功。证据=[`acceptance/block-316/live-context-breakdown-sidechat-drag.json`](../acceptance/block-316/live-context-breakdown-sidechat-drag.json)（12/12）+ Node 4/4 + 面板 7/7 + SideChatDock 18/18 + CenterPanel 21/21 + closeout 十三门。截图离屏不可得（如实标 unavailable）。**待用户动作**：右栏内容拖出独立窗 P1（方案已评估，等发令）/ UI-594/595/596 实机腿 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-28（**BLOCK-317 completed（UI-621 verified）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：输入框图片/引用区已完全落回 composer 卡内——附件区、选区/上下文引用条、图片引用条去掉自带 `border-top` 与 50% 底色；原方形分段底会画进 24px 圆角外（截图像素取证：圆角外为 #F9F9FA 而非页面白），视觉上像图片与背景越过输入框边界。现在附件条/strip 与每张图片卡片都在 composer rect 内，横向由 flex-wrap 承接。证据=[`acceptance/block-315/live-composer-attachments-containment.json`](../acceptance/block-315/live-composer-attachments-containment.json)（9/9）+ theme 17/17 + closeout 十三门。截图离屏不可得（如实标 unavailable）。**待用户动作**：右栏内容拖出独立窗 P1（方案已评估，等发令）/ UI-594/595/596 实机腿 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。

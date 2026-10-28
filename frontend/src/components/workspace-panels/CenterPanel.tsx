@@ -511,7 +511,7 @@ function SessionFrameView({
   );
   // UI-448 加映 v12 — 宽窄判定与摘要切换点同源（summaryVisibility 由
   // sessionFrameWidth 纯派生：expanded ⟺ 宽窗/未测量），保证两卡同刻切换。
-  const wide = ctx.summaryVisibility === 'expanded';
+  // UI-623 — 侧聊退役 docked 列后，此判定只服务摘要卡。
   // UI-448 加映 v25 — 摘要浮卡拖宽偏好优先；未拖过回落 summaryOpenWidth
   const [persistedSummaryWidth, setPersistedSummaryWidth] = React.useState<number | null>(
     () => readPersistedFloatWidth('petri:summary-float-width')
@@ -590,20 +590,17 @@ function SessionFrameView({
             <FloatCardResizeHandle {...summaryResizeHandlers} />
           </div>
         )}
-        {/* UI-448 加映 v12 — 右轨：摘要钉住列与侧聊列区垂直堆叠共享右缘；
-            两者同由 summaryVisibility==='expanded'（宽窗）判定，切换点恒同步 */}
-        {(ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float')
-          || (wide && sideChatOpen && ctx.projectId) ? (
+        {/* UI-623 — 侧聊不再占固定右轨列：宽窗与窄窗统一为可拖动悬浮面
+            （用户「悬浮无固定位置，可以移动到任意地方」）。右轨只保留摘要列。 */}
+        {(ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float') ? (
         <div className={styles.workspaceRightRail}>
-        {ctx.showPinnedSummary && ctx.summaryCardOpen && ctx.summaryVisibility !== 'float' && (
           <div className={styles.workspaceSummaryColumn}>
             {/* UI-448 加映 v26 — 钉住列形态同样可拖宽（v25 只适配了悬浮形态）：
                 宽度与悬浮形态共用同一偏好，窄宽切换不跳变 */}
             <WorkspaceSummaryCard
               open
               visibility={ctx.summaryVisibility}
-              width={summaryFloatWidth}
-              projectName={ctx.project.name}
+              width={summaryFloatWidth}              projectName={ctx.project.name}
               project={ctx.project}
               activeJob={ctx.activeJob}
               workflow={ctx.activeWorkflow}
@@ -626,33 +623,16 @@ function SessionFrameView({
             />
             <FloatCardResizeHandle {...summaryResizeHandlers} />
           </div>
-        )}
-        {/* UI-448 加映 v12 — 宽窗时侧聊是独立列区（占位、像摘要钉住列一样），
-            窄窗时退回悬浮（把手 + 右下角浮面）。切换点与摘要同源
-            （summaryVisibility==='expanded' ⟺ 宽窗）。 */}
-        {wide && sideChatOpen && ctx.projectId && onSideChatOpenChange && (
-          <SideChatDock
-            key={ctx.projectId}
-            projectId={ctx.projectId}
-            sourceConversationId={ctx.activeConvId}
-            variant="docked"
-            open={sideChatOpen}
-            onOpenChange={onSideChatOpenChange ?? (() => {})}
-          />
-        )}
         </div>
         ) : null}
         {/* UI-448 加映 v10 — 侧聊悬浮面与摘要卡同定位基准：同在 session layout 内
-            right:0，右缘结构性同源（v8/v9 的跨参照系对齐补丁由此退役）。
-            UI-448 加映 v12 — 仅窄窗用悬浮变体（宽窗走上面的独立列区）；
-            收起态把手两态共用（宽窗收起时仍给入口）。 */}
+            right:0，右缘结构性同源。
+            UI-623 — 宽窄窗统一悬浮（不再有 docked 列区），头部可拖动到任意位置。 */}
         {variant === 'chat' && ctx.projectId && (
           <SideChatDock
             key={ctx.projectId}
             projectId={ctx.projectId}
             sourceConversationId={ctx.activeConvId}
-            // 宽窗：面板已由上面的独立列区承载，这里只留常驻把手（图标仍在列区上方）
-            surfaceSuppressed={wide && sideChatOpen}
             open={sideChatOpen}
             onOpenChange={onSideChatOpenChange ?? (() => {})}
             // UI-448 加映 v21 — 悬浮面宽度与摘要浮卡同源同值（v4 的「同宽 300px」

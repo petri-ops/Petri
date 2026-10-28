@@ -1,5 +1,21 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-623: 侧聊改为可拖动悬浮面（宽窄窗统一，不再固定右轨列）（2026-10-28 **verified（BLOCK-318；SideChatDock 18/18 + 实机 12/12）**）
+
+- **变化面**：宽窗不再渲染 docked 侧聊右轨列；侧聊统一为悬浮面，头部即拖动把手（pointer 直写 DOM 跟手，抬手钳制到视口并持久化 `petri:side-chat-float-position`；双击头部复位右下默认锚点；`resize` 时重新钳制；拖动时关入场动画与 hover 位移）。左缘拖宽把手不变；docked 组件能力保留但中心面板不再使用。
+- **为什么这样设计**：用户「侧边聊天这个现在固定的位置不太友好，是否可以悬浮无固定位置呢，用户打开后可以移动到桌面的任何地方」——宽窗下它被固定在右轨列；改为可拖动悬浮面。
+- **验证（代码）**：SideChatDock 18/18（拖动 delta/持久化/视口钳制/双击复位/docked 无把手/既有 fork/只读传参零回归）+ CenterPanel 21/21 + tsc 0。
+- **实机证据**：`acceptance/block-316/live-context-breakdown-sidechat-drag.json`（与 UI-622 同一探针，12/12）：宽窗打开即有拖动把手；拖 +120/+80 → rect 732/672（top 触视口钳制）、inline `position:fixed`、localStorage 持久化；拖出边界 → right=1594/bottom=992（视口 1602×1000，8px 边距）；双击复位 computed=absolute + 存储清除。截图离屏不可得（`screenshot_unavailable`）。
+- **边界（reopen）**：移动范围限应用窗口视口（OS 级独立窗口是另一能力）；默认位置仍为右下；位置全项目共用（不按项目记忆）。
+
+## UI-622: 上下文用量增加真实构成分类（系统/工具定义/消息/工具结果/其他系统/输出预留）（2026-10-28 **verified（BLOCK-318；Node 4/4 + 面板 7/7 + 实机 12/12）**）
+
+- **变化面**：`token_budget` 事件新增 `breakdown`（后端按真实请求载荷逐项计数）：系统提示词（含知识空间子集）、工具定义（schema JSON，循环前一次计数）、对话消息、工具结果、其他系统内容（压缩摘要等）、输出预留（max_tokens）；`total`=逐项和，`pct` 按含工具定义的真实总量。面板：已用/窗口/剩余 + 堆叠构成条 + 六类行（含百分比）+ 知识空间子项 + 剩余；旧后端无 breakdown 回退原汇总视图；plain chat 同口径（无工具定义）。
+- **为什么这样设计**：用户「上下文分类是不是应该增加更多的分类内容了」——原面板只给消息 tokens/窗口，工具定义（实机 12K）等大头不可见；现在每类都能对账。
+- **验证（代码）**：Node `block318-context-breakdown` 4/4（六类和/知识子集钳制/源码钉）+ ContextBudgetBar 7/7（六行/子项/回退/待机/窗口未知）+ tsc 0。
+- **实机证据**：`acceptance/block-316/live-context-breakdown-sidechat-drag.json`（12/12）：真实一轮 agent 的 breakdown `system=232 tools=12147 messages=15 otherSystem=1310 reserve=16384 total=30088`（sum 相等）；面板六类行 + 构成（估算）+ 剩余全在；上下文窗口 resolved=1,000,000，无「窗口未知」提示。
+- **边界（reopen）**：knowledge 为系统提示词子集、不重复计总；token 数为 tiktoken cl100k 估算；附件/技能等仍含在系统/消息内（可按同口径继续拆分）；应用重载后待机态不恢复上次 breakdown（未做跨会话持久化）。
+
 ## UI-621: 输入框图片/引用区完全落在 composer 卡内（去除分段底色越出圆角）（2026-10-28 **verified（BLOCK-317；实机 9/9）**）
 
 - **变化面**：composer 内的附件区（`.sc-attachments`）、选区/上下文引用条（`.sc-selection-refs`）、图片引用条（`.sc-image-refs`）去掉自带的 `border-top` 与 50% subtle 底色。原先方形分段底在 composer（24px 圆角、`overflow: visible` 以容纳浮层）顶部画进圆角外区域，视觉上像图片/背景越出输入框；现在这些内容直接落在卡面上，附件条与每张图片卡片均在 composer 边界内，横向由 `flex-wrap` 承接。

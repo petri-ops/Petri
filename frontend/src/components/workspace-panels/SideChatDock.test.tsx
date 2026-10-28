@@ -337,3 +337,79 @@ describe('UI-448 加映 v25 浮卡拖宽', () => {
     expect(surface.style.width).toBe(`${capped}px`);
   });
 });
+
+describe('UI-623 悬浮面拖动（任意位置 + 持久化 + 钳制）', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    propBag().__sideChatSimpleChatProps = [];
+  });
+
+  afterEach(cleanup);
+
+  function mockRect(surface: HTMLElement, width = 320, height = 420) {
+    vi.spyOn(surface, 'getBoundingClientRect').mockImplementation(() => {
+      const left = surface.style.left ? Number.parseFloat(surface.style.left) : 600;
+      const top = surface.style.top ? Number.parseFloat(surface.style.top) : 100;
+      return {
+        left, top, width, height, right: left + width, bottom: top + height,
+        x: left, y: top, toJSON: () => ({}),
+      };
+    });
+  }
+
+  it('拖头部跟手移动，抬手持久化视口坐标', () => {
+    render(
+      <SideChatDock projectId="p_1" sourceConversationId="conv_main" open onOpenChange={vi.fn()} width={288} />
+    );
+    const surface = screen.getByTestId('side-chat-surface');
+    mockRect(surface);
+    const handle = screen.getByTestId('side-chat-drag-handle');
+    fireEvent.pointerDown(handle, { clientX: 700, clientY: 120, button: 0, pointerId: 1 });
+    expect(surface.style.position).toBe('fixed');
+    fireEvent.pointerMove(handle, { clientX: 750, clientY: 170, pointerId: 1 });
+    expect(surface.style.left).toBe('650px');
+    expect(surface.style.top).toBe('150px');
+    fireEvent.pointerUp(handle, { clientX: 750, clientY: 170, pointerId: 1 });
+    expect(JSON.parse(window.localStorage.getItem('petri:side-chat-float-position') || '{}'))
+      .toEqual({ left: 650, top: 150 });
+  });
+
+  it('拖出视口被钳制在 [8, 视口-卡片-8]', () => {
+    render(
+      <SideChatDock projectId="p_1" sourceConversationId="conv_main" open onOpenChange={vi.fn()} width={288} />
+    );
+    const surface = screen.getByTestId('side-chat-surface');
+    mockRect(surface);
+    const handle = screen.getByTestId('side-chat-drag-handle');
+    fireEvent.pointerDown(handle, { clientX: 700, clientY: 120, button: 0, pointerId: 1 });
+    fireEvent.pointerMove(handle, { clientX: 5000, clientY: 5000, pointerId: 1 });
+    fireEvent.pointerUp(handle, { clientX: 5000, clientY: 5000, pointerId: 1 });
+    const maxLeft = window.innerWidth - 320 - 8;
+    const maxTop = window.innerHeight - 420 - 8;
+    expect(surface.style.left).toBe(`${maxLeft}px`);
+    expect(surface.style.top).toBe(`${maxTop}px`);
+  });
+
+  it('挂载时恢复持久化位置；双击头部复位默认锚点', () => {
+    window.localStorage.setItem('petri:side-chat-float-position', JSON.stringify({ left: 120, top: 80 }));
+    render(
+      <SideChatDock projectId="p_1" sourceConversationId="conv_main" open onOpenChange={vi.fn()} />
+    );
+    const surface = screen.getByTestId('side-chat-surface');
+    expect(surface.style.position).toBe('fixed');
+    expect(surface.style.left).toBe('120px');
+    expect(surface.style.top).toBe('80px');
+    fireEvent.doubleClick(screen.getByTestId('side-chat-drag-handle'), { clientX: 130, clientY: 90 });
+    expect(surface.style.position).toBe('');
+    expect(surface.style.left).toBe('');
+    expect(window.localStorage.getItem('petri:side-chat-float-position')).toBeNull();
+  });
+
+  it('docked 列区不提供拖动把手（不改变列内布局语义）', () => {
+    render(
+      <SideChatDock projectId="p_1" sourceConversationId="conv_main" variant="docked" open onOpenChange={vi.fn()} />
+    );
+    expect(screen.getByTestId('side-chat-surface')).toBeTruthy();
+    expect(screen.queryByTestId('side-chat-drag-handle')).toBeNull();
+  });
+});

@@ -1,0 +1,139 @@
+{
+  "capturedAt": "2026-10-28T13:51:18.043Z",
+  "head": "3530dd000f1d87b13a24214b4058ffc2142f4939",
+  "projectId": "p_mvs6a4fx_8vbz",
+  "surface": "上下文用量分类（UI-622）+ 侧聊悬浮拖动（UI-623）",
+  "budget": {
+    "contextWindow": 1000000,
+    "messagesTokensUsed": 30088,
+    "systemPromptTokens": 232,
+    "messagesTokens": 1325,
+    "pct": 2,
+    "trimmed": false,
+    "knowledgeTokens": 0,
+    "breakdown": {
+      "systemPrompt": 232,
+      "knowledge": 0,
+      "toolDefinitions": 12147,
+      "messages": 15,
+      "toolResults": 0,
+      "otherSystem": 1310,
+      "outputReserve": 16384,
+      "total": 30088
+    }
+  },
+  "panel": {
+    "text": "上下文用量2%已用 / 窗口30K / 1M · 剩余 970K保留消息0 条构成（估算）系统提示词2320.0%工具定义12K1.2%对话消息150.0%工具结果00.0%其他系统内容1K0.1%输出预留16K1.6%剩余可用970K",
+    "hasSystem": true,
+    "hasTools": true,
+    "hasMessages": true,
+    "hasToolResults": true,
+    "hasOtherSystem": true,
+    "hasReserve": true,
+    "hasBreakdownHead": true,
+    "hasFree": true,
+    "unknownWindowHint": false
+  },
+  "before": {
+    "left": 612,
+    "top": 636,
+    "width": 276,
+    "height": 320,
+    "viewport": {
+      "width": 1602,
+      "height": 1000
+    }
+  },
+  "afterDrag": {
+    "left": 732,
+    "top": 672,
+    "stored": {
+      "left": 732.1976928710938,
+      "top": 672.0036926269531
+    },
+    "position": "fixed"
+  },
+  "clampResult": {
+    "left": 1318,
+    "top": 672,
+    "right": 1594,
+    "bottom": 992,
+    "viewport": {
+      "width": 1602,
+      "height": 1000
+    }
+  },
+  "reset": {
+    "inlinePosition": "",
+    "computed": "absolute",
+    "stored": null
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_failed:-32000"
+  },
+  "total": 12,
+  "passed": 12,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs6a4fx_8vbz"
+    },
+    {
+      "id": "A0_run_sent",
+      "ok": true,
+      "detail": "已发送一轮真实 agent 任务"
+    },
+    {
+      "id": "A1_breakdown_six_categories",
+      "ok": true,
+      "detail": "system=232 tools=12147 messages=15 toolResults=0 otherSystem=1310 reserve=16384"
+    },
+    {
+      "id": "A2_breakdown_total_is_sum",
+      "ok": true,
+      "detail": "sum=30088 total=30088"
+    },
+    {
+      "id": "A3_context_window_resolved",
+      "ok": true,
+      "detail": "window=1000000 pct=2"
+    },
+    {
+      "id": "A4_panel_six_rows",
+      "ok": true,
+      "detail": "{\"system\":true,\"tools\":true,\"messages\":true,\"toolResults\":true,\"otherSystem\":true,\"reserve\":true}"
+    },
+    {
+      "id": "A5_panel_breakdown_and_free",
+      "ok": true,
+      "detail": "breakdownHead=true free=true unknownHint=false"
+    },
+    {
+      "id": "B0_side_chat_floats_with_handle",
+      "ok": true,
+      "detail": "dragHandle=true"
+    },
+    {
+      "id": "B1_drag_moves_by_delta",
+      "ok": true,
+      "detail": "before={\"left\":612,\"top\":636,\"width\":276,\"height\":320,\"viewport\":{\"width\":1602,\"height\":1000}} after={\"left\":732,\"top\":672,\"stored\":{\"left\":732.1976928710938,\"top\":672.0036926269531},\"position\":\"fixed\"} expectedTopClamp=672"
+    },
+    {
+      "id": "B2_position_persisted",
+      "ok": true,
+      "detail": "stored={\"left\":732.1976928710938,\"top\":672.0036926269531} rect=732,672"
+    },
+    {
+      "id": "B3_clamped_to_viewport",
+      "ok": true,
+      "detail": "{\"left\":1318,\"top\":672,\"right\":1594,\"bottom\":992,\"viewport\":{\"width\":1602,\"height\":1000}}"
+    },
+    {
+      "id": "B4_double_click_resets",
+      "ok": true,
+      "detail": "{\"inlinePosition\":\"\",\"computed\":\"absolute\",\"stored\":null}"
+    }
+  ]
+}

@@ -33,6 +33,7 @@ const {
 } = require('../helpers/memory-vectors');
 const {
   estimateRequestTokens,
+  computeContextBreakdown,
 } = require('../helpers/token-estimator');
 
 const TOOL_SUMMARY_PRIVATE_KEYS = new Set([
@@ -274,6 +275,13 @@ module.exports = function registerAiChatRoute(app) {
         messages: trimmedMessages,
         maxTokens: 8192,
       });
+      // UI-622 — 与 agent loop 同一构成口径（plain chat 无工具定义）
+      const breakdown = computeContextBreakdown({
+        systemPrompt,
+        messages: trimmedMessages,
+        toolDefinitionsTokens: 0,
+        maxTokens: 8192,
+      });
       const ctxWindow = await getContextWindow(
         activeModel,
         activeProvider,
@@ -293,6 +301,7 @@ module.exports = function registerAiChatRoute(app) {
         messagesTokensUsed: total,
         systemPromptTokens,
         messagesTokens,
+        breakdown,
         pct,
         trimmed: total > (ctxWindow || 64000),
       }) + '\n\n');

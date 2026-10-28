@@ -10,7 +10,7 @@ export function useTokenBudgetState(): TokenBudget | null {
   // BLOCK-20: token budget event listener — updates ContextBudgetButton state
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ contextWindow: number; messagesTokensUsed: number; systemPromptTokens: number; messagesTokens: number; pct: number; trimmed: boolean; knowledgeTokens?: number }>).detail;
+      const detail = (e as CustomEvent<import('@/lib/events').TokenBudgetDetail>).detail;
       setTokenBudget({
         contextWindow: detail.contextWindow,
         messagesTokensUsed: detail.messagesTokensUsed,
@@ -19,6 +19,7 @@ export function useTokenBudgetState(): TokenBudget | null {
         pct: detail.pct,
         trimmed: detail.trimmed,
         knowledgeTokens: detail.knowledgeTokens,
+        breakdown: detail.breakdown,
       });
     };
     window.addEventListener(petriEvents.tokenBudget, handler);

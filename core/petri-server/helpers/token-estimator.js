@@ -103,10 +103,49 @@ async function getContextWindowForBudget(modelName, providerName, baseUrl, apiKe
   return { window: 32768, resolved: false };
 }
 
+/**
+ * UI-622 — 上下文构成分类（全部来自真实请求载荷，可逐项对账）：
+ * 系统提示词（含知识空间注入，knowledge 为其子集）/ 工具定义 / 对话消息 /
+ * 工具结果 / 其他系统内容（压缩摘要等）/ 输出预留（max_tokens）。
+ * @param {{ systemPrompt?: string, messages?: Array, toolDefinitionsTokens?: number, maxTokens?: number, knowledgeTokens?: number }} opts
+ */
+function computeContextBreakdown({
+  systemPrompt = '',
+  messages = [],
+  toolDefinitionsTokens = 0,
+  maxTokens = 0,
+  knowledgeTokens = 0,
+}) {
+  const systemPromptTokens = countTokens(systemPrompt);
+  let messagesTokens = 0;
+  let toolResults = 0;
+  let otherSystem = 0;
+  for (const msg of Array.isArray(messages) ? messages : []) {
+    const tokens = countMessages([msg]);
+    if (msg && msg.role === 'tool') toolResults += tokens;
+    else if (msg && msg.role === 'system') otherSystem += tokens;
+    else messagesTokens += tokens;
+  }
+  const toolDefinitions = Math.max(0, toolDefinitionsTokens || 0);
+  const outputReserve = Math.max(0, maxTokens || 0);
+  const knowledge = Math.min(Math.max(0, knowledgeTokens || 0), systemPromptTokens);
+  return {
+    systemPrompt: systemPromptTokens,
+    knowledge,
+    toolDefinitions,
+    messages: messagesTokens,
+    toolResults,
+    otherSystem,
+    outputReserve,
+    total: systemPromptTokens + toolDefinitions + messagesTokens + toolResults + otherSystem + outputReserve,
+  };
+}
+
 module.exports = {
   countTokens,
   countMessages,
   estimateRequestTokens,
+  computeContextBreakdown,
   getContextWindow,
   getContextWindowForBudget,
 };

@@ -6056,6 +6056,21 @@
       ]
     },
     {
+      "id": "block318-context-breakdown-sidechat-drag-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-318 UI-622/623 实机腿：上下文 breakdown 六类（system/tools/messages/toolResults/otherSystem/reserve,total=和；面板六行+构成+剩余）与侧聊悬浮拖动（把手/跟手/持久化/视口钳制/双击复位），12/12 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block318-context-breakdown-sidechat-drag-live.cjs",
+        "acceptance/block-316/**"
+      ],
+      "tests": [
+        "test/block318-context-breakdown.test.mjs",
+        "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx"
+      ]
+    },
+    {
       "id": "block317-composer-attachments-containment-live",
       "classifiesScripts": true,
       "note": "BLOCK-317 UI-621 实机腿：composer 图片/引用区完全在卡内（strip transparent/border-top 0/flex-wrap wrap；8 张图与 strip 全在 composer rect 内；直接子块无底色；圆角保持），9/9 PASS；取证探针与目录。",

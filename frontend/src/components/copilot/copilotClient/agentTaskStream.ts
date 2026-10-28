@@ -607,6 +607,11 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
     return;
   }
   if (obj.event === 'token_budget') {
+    // UI-622 — breakdown 分类（旧后端无此字段 = undefined，前端回退汇总视图）
+    const rawBreakdown = obj.breakdown && typeof obj.breakdown === 'object'
+      ? obj.breakdown as Record<string, unknown>
+      : null;
+    const num = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
     const detail: TokenBudgetDetail = {
       contextWindow: typeof obj.contextWindow === 'number' ? obj.contextWindow : 0,
       messagesTokensUsed: typeof obj.messagesTokensUsed === 'number' ? obj.messagesTokensUsed : 0,
@@ -615,6 +620,16 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
       pct: typeof obj.pct === 'number' ? obj.pct : 0,
       trimmed: typeof obj.trimmed === 'boolean' ? obj.trimmed : false,
       knowledgeTokens: typeof obj.knowledgeTokens === 'number' ? obj.knowledgeTokens : 0,
+      breakdown: rawBreakdown ? {
+        systemPrompt: num(rawBreakdown.systemPrompt),
+        knowledge: num(rawBreakdown.knowledge),
+        toolDefinitions: num(rawBreakdown.toolDefinitions),
+        messages: num(rawBreakdown.messages),
+        toolResults: num(rawBreakdown.toolResults),
+        otherSystem: num(rawBreakdown.otherSystem),
+        outputReserve: num(rawBreakdown.outputReserve),
+        total: num(rawBreakdown.total),
+      } : undefined,
     };
     dispatchPetriEvent(petriEvents.tokenBudget, detail);
     return;
