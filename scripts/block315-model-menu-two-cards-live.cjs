@@ -7,10 +7,10 @@
  * 用法：node scripts/block315-model-menu-two-cards-live.cjs
  * 证据：acceptance/block-313/live-model-menu-two-cards.json。
  *
- * 用户请求「模仿智谱展开形式，一级和二级页面不要在同一个卡片中」：
- * A 主卡只放当前供应商的模型（供应商入口行 + 模型段），不含供应商列表；
- * B 点入口 → 供应商列表是独立第二卡（portal 到 body、fixed、贴主卡右侧、z 高于主卡）；
- * C 点其它供应商 → 主卡模型切换，第二卡保持展开（其它供应商始终可见）；
+ * 用户请求「模仿智谱展开形式，一级和二级页面不要在同一个卡片中；左侧主卡片是供应商 右侧是模型」：
+ * A 左主卡=供应商列表（全部供应商 + 当前使用勾），卡内不再有模型列表；
+ * B 右侧模型卡是独立第二卡（portal 到 body、fixed、贴主卡右侧 8px、z 高于主卡）；
+ * C 点其它供应商 → 模型卡换内容、两卡同时在场（其它供应商始终可见）；
  * D 点模型 → 整组菜单关闭。
  */
 const fs = require('node:fs');
@@ -67,19 +67,10 @@ const READ_STATE = `(function(){
     };
   }
   var menu = document.querySelector('[data-testid="model-menu"]');
-  var trigger = document.querySelector('[data-testid="model-menu-supplier-trigger"]');
-  var panel = document.querySelector('[data-testid="model-menu-supplier-panel"]');
-  var modelsBox = document.querySelector('[data-testid="model-menu-models"]');
-  var inlineSupplierRows = menu ? menu.querySelectorAll('.sc-model-supplier').length : 0;
-  var models = modelsBox ? [...modelsBox.querySelectorAll('.sc-model-option')].map(function(row){
-    var title = row.querySelector('.sc-model-option-title');
-    return {
-      name: title ? title.textContent.trim() : '',
-      disabled: row.disabled === true,
-      active: row.classList.contains('sc-model-option-active'),
-    };
-  }) : [];
-  var panelRows = panel ? [...panel.querySelectorAll('[data-testid^="model-menu-supplier-"]')].map(function(row){
+  var supplierBox = document.querySelector('[data-testid="model-menu-suppliers"]');
+  var panel = document.querySelector('[data-testid="model-menu-models-panel"]');
+  var head = document.querySelector('[data-testid="model-menu-models-head"]');
+  var supplierRows = supplierBox ? [...supplierBox.querySelectorAll('.sc-model-supplier')].map(function(row){
     var title = row.querySelector('.sc-model-option-title');
     var meta = row.querySelector('.sc-model-option-meta');
     return {
@@ -90,14 +81,21 @@ const READ_STATE = `(function(){
       check: !!row.querySelector('svg'),
     };
   }) : [];
-  var triggerTitle = trigger ? trigger.querySelector('.sc-model-option-title') : null;
+  var models = panel ? [...panel.querySelectorAll('.sc-model-option')].map(function(row){
+    var title = row.querySelector('.sc-model-option-title');
+    return {
+      name: title ? title.textContent.trim() : '',
+      disabled: row.disabled === true,
+      active: row.classList.contains('sc-model-option-active'),
+    };
+  }) : [];
   return JSON.stringify({
     menu: !!menu,
     menuRect: rect(menu),
     menuWidth: menu ? Math.round(menu.getBoundingClientRect().width) : null,
-    inlineSupplierRows: inlineSupplierRows,
-    triggerText: trigger ? trigger.textContent.trim() : null,
-    triggerSupplier: triggerTitle ? triggerTitle.textContent.trim() : null,
+    auto: !!document.querySelector('[data-testid="model-menu-auto"]'),
+    mainHasModelList: menu ? menu.querySelectorAll('[data-testid="model-menu-models"], .sc-model-models-panel').length : null,
+    supplierRows: supplierRows,
     panel: !!panel,
     panelParentIsBody: panel ? panel.parentElement === document.body : null,
     panelInsideMenu: panel && menu ? menu.contains(panel) : null,
@@ -106,7 +104,7 @@ const READ_STATE = `(function(){
     panelZ: panel ? Number.parseInt(getComputedStyle(panel).zIndex, 10) : null,
     menuZ: menu ? Number.parseInt(getComputedStyle(menu).zIndex, 10) : null,
     panelRect: rect(panel),
-    panelRows: panelRows,
+    headText: head ? head.textContent.trim() : null,
     models: models,
     viewport: { width: window.innerWidth, height: window.innerHeight },
   });
@@ -143,52 +141,47 @@ async function main() {
   await pagePoll(client, `!!document.querySelector('[data-testid="model-chip-model"]')`, { label: 'model chip' });
   await sleep(700);
   await evalRetry(client, `(function(){ document.querySelector('[data-testid="model-chip-model"]').click(); return 'open'; })()`);
-  await pagePoll(client, `!!document.querySelector('[data-testid="model-menu-supplier-trigger"]')`, { label: 'supplier trigger' });
+  await pagePoll(client, `!!document.querySelector('[data-testid="model-menu-suppliers"]') && !!document.querySelector('[data-testid="model-menu-models-panel"]')`, { label: 'two cards' });
   await sleep(400);
 
   const main = JSON.parse(await evalRetry(client, READ_STATE));
-  assert('A0_main_card_models_only',
-    main.menu === true && Boolean(main.triggerSupplier) && main.models.length >= 1 && main.panel === false,
-    `trigger=${main.triggerSupplier} models=${main.models.length} panel=${main.panel}`);
-  assert('A1_no_inline_supplier_list',
-    main.inlineSupplierRows === 0,
-    `inline rows=${main.inlineSupplierRows}（主卡内不应有供应商行）`);
+  assert('A0_left_card_lists_suppliers',
+    main.menu === true && main.supplierRows.length >= 2 && main.panel === true && main.models.length >= 1,
+    `suppliers=${JSON.stringify(main.supplierRows.map((r) => r.supplier))} models=${main.models.length}`);
+  assert('A1_left_card_has_no_model_list',
+    main.mainHasModelList === 0,
+    `mainHasModelList=${main.mainHasModelList}（主卡内不应有模型列表）`);
   assert('A2_main_card_compact', main.menuWidth !== null && main.menuWidth <= 380,
-    `menuW=${main.menuWidth}（主卡单卡宽度）`);
+    `menuW=${main.menuWidth}（左主卡单卡宽度）`);
+  assert('A3_current_supplier_checked',
+    main.supplierRows.filter((row) => row.active === 'true').length === 1
+      && main.supplierRows.filter((row) => row.check).length === 1,
+    `active=${JSON.stringify(main.supplierRows.filter((r) => r.active === 'true').map((r) => r.supplier))} checks=${main.supplierRows.filter((r) => r.check).length}`);
 
-  // B 打开独立供应商第二卡
-  await evalRetry(client, `(function(){
-    document.querySelector('[data-testid="model-menu-supplier-trigger"]').click();
-    return 'open';
-  })()`);
-  await pagePoll(client, `!!document.querySelector('[data-testid="model-menu-supplier-panel"]')`, { label: 'supplier panel' });
-  await sleep(400);
-  const panel = JSON.parse(await evalRetry(client, READ_STATE));
-  assert('B0_second_card_separate_dom',
-    panel.panel === true && panel.panelParentIsBody === true && panel.panelInsideMenu === false,
-    `parentBody=${panel.panelParentIsBody} insideMenu=${panel.panelInsideMenu}`);
-  assert('B1_second_card_fixed_overlay',
-    panel.panelPosition === 'fixed' && panel.panelZ > panel.menuZ,
-    `position=${panel.panelPosition} z=${panel.panelZ}/${panel.menuZ}`);
-  const gap = panel.panelRect && panel.menuRect ? panel.panelRect.left - panel.menuRect.right : null;
-  assert('B2_second_card_beside_right',
-    panel.panelPlacement === 'right' && gap !== null && gap >= 4 && gap <= 24,
-    `placement=${panel.panelPlacement} gap=${gap}px panel=${JSON.stringify(panel.panelRect)} menu=${JSON.stringify(panel.menuRect)}`);
-  assert('B3_second_card_in_viewport',
-    Boolean(panel.panelRect)
-      && panel.panelRect.left >= 0 && panel.panelRect.right <= panel.viewport.width
-      && panel.panelRect.top >= 0 && panel.panelRect.bottom <= panel.viewport.height,
-    `rect=${JSON.stringify(panel.panelRect)} viewport=${JSON.stringify(panel.viewport)}`);
-  assert('B4_all_suppliers_with_current_check',
-    panel.panelRows.length >= 2
-      && panel.panelRows.filter((row) => row.active === 'true').length === 1
-      && panel.panelRows.filter((row) => row.check).length === 1,
-    `rows=${JSON.stringify(panel.panelRows.map((r) => r.supplier + (r.active === 'true' ? '*' : '')))} checks=${panel.panelRows.filter((r) => r.check).length}`);
+  assert('B0_model_card_separate_dom',
+    main.panel === true && main.panelParentIsBody === true && main.panelInsideMenu === false,
+    `parentBody=${main.panelParentIsBody} insideMenu=${main.panelInsideMenu}`);
+  assert('B1_model_card_fixed_overlay',
+    main.panelPosition === 'fixed' && main.panelZ > main.menuZ,
+    `position=${main.panelPosition} z=${main.panelZ}/${main.menuZ}`);
+  const gap = main.panelRect && main.menuRect ? main.panelRect.left - main.menuRect.right : null;
+  assert('B2_model_card_beside_right',
+    main.panelPlacement === 'right' && gap !== null && gap >= 4 && gap <= 24,
+    `placement=${main.panelPlacement} gap=${gap}px panel=${JSON.stringify(main.panelRect)} menu=${JSON.stringify(main.menuRect)}`);
+  assert('B3_model_card_in_viewport',
+    Boolean(main.panelRect)
+      && main.panelRect.left >= 0 && main.panelRect.right <= main.viewport.width
+      && main.panelRect.top >= 0 && main.panelRect.bottom <= main.viewport.height,
+    `rect=${JSON.stringify(main.panelRect)} viewport=${JSON.stringify(main.viewport)}`);
+  assert('B4_model_card_shows_current_supplier_models',
+    Boolean(main.headText) && main.headText.includes(main.supplierRows.find((row) => row.active === 'true')?.supplier || '')
+      && main.models.length >= 1,
+    `head=${main.headText} models=${JSON.stringify(main.models.map((m) => m.name))}`);
 
-  // C 点其它供应商：主卡换模型，第二卡保持展开
-  const first = panel.panelRows[0];
-  const second = panel.panelRows[1];
-  const firstModelNames = panel.models.map((m) => m.name).join('|');
+  // C 点其它供应商：右侧模型卡换内容，左主卡全部供应商保持
+  const first = main.supplierRows.find((row) => row.active === 'true') || main.supplierRows[0];
+  const second = main.supplierRows.find((row) => row.testid !== first.testid);
+  const firstModelNames = main.models.map((m) => m.name).join('|');
   await evalRetry(client, `(function(){
     var row = document.querySelector('[data-testid=${JSON.stringify(second.testid)}]');
     if (row) row.click();
@@ -197,20 +190,20 @@ async function main() {
   await sleep(450);
   const switched = JSON.parse(await evalRetry(client, READ_STATE));
   const switchedModelNames = switched.models.map((m) => m.name).join('|');
-  assert('C0_main_card_follows_supplier',
-    switched.triggerSupplier === second.supplier && switched.models.length >= 1
-      && (switchedModelNames !== firstModelNames || switched.models.length !== panel.models.length),
-    `trigger=${switched.triggerSupplier} models=${switchedModelNames.slice(0, 120)}`);
-  assert('C1_second_card_stays_open',
+  assert('C0_model_card_follows_supplier',
+    Boolean(switched.headText) && switched.headText.includes(second.supplier) && switched.models.length >= 1
+      && (switchedModelNames !== firstModelNames || switched.models.length !== main.models.length),
+    `head=${switched.headText} models=${switchedModelNames.slice(0, 120)}`);
+  assert('C1_both_cards_stay_visible',
     switched.panel === true && switched.panelParentIsBody === true
-      && switched.panelRows.length === panel.panelRows.length,
-    `panel=${switched.panel} rows=${switched.panelRows.length}/${panel.panelRows.length}`);
-  assert('C2_selected_moves_back',
-    switched.panelRows.filter((row) => row.active === 'true').length === 1
-      && switched.panelRows.find((row) => row.active === 'true')?.supplier === second.supplier,
-    `active=${JSON.stringify(switched.panelRows.filter((r) => r.active === 'true').map((r) => r.supplier))}`);
+      && switched.supplierRows.length === main.supplierRows.length,
+    `panel=${switched.panel} supplierRows=${switched.supplierRows.length}/${main.supplierRows.length}`);
+  assert('C2_active_moves',
+    switched.supplierRows.filter((row) => row.active === 'true').length === 1
+      && switched.supplierRows.find((row) => row.active === 'true')?.supplier === second.supplier,
+    `active=${JSON.stringify(switched.supplierRows.filter((r) => r.active === 'true').map((r) => r.supplier))}`);
 
-  // 回切第一个供应商，主卡恢复
+  // 回切第一个供应商，模型卡恢复
   await evalRetry(client, `(function(){
     var row = document.querySelector('[data-testid=${JSON.stringify(first.testid)}]');
     if (row) row.click();
@@ -219,28 +212,29 @@ async function main() {
   await sleep(400);
   const back = JSON.parse(await evalRetry(client, READ_STATE));
   assert('C3_switch_back_restores',
-    back.triggerSupplier === first.supplier && back.models.map((m) => m.name).join('|') === firstModelNames,
-    `trigger=${back.triggerSupplier} models=${back.models.map((m) => m.name).join('|').slice(0, 120)}`);
+    Boolean(back.headText) && back.headText.includes(first.supplier)
+      && back.models.map((m) => m.name).join('|') === firstModelNames,
+    `head=${back.headText} models=${back.models.map((m) => m.name).join('|').slice(0, 120)}`);
 
-  // D 点一个可用模型 → 整组菜单（含第二卡）关闭
+  // D 点右侧模型卡里的可用模型 → 整组菜单（含两卡）关闭
   const pickable = back.models.find((m) => !m.disabled);
   assert('D0_pickable_model_available', Boolean(pickable), `models=${JSON.stringify(back.models)}`);
   if (pickable) {
     await evalRetry(client, `(function(){
-      var rows = [...document.querySelectorAll('[data-testid="model-menu-models"] .sc-model-option')];
+      var rows = [...document.querySelectorAll('[data-testid="model-menu-models-panel"] .sc-model-option')];
       var row = rows.find(function(r){ return !r.disabled; });
       if (row) row.click();
       return 'clicked';
     })()`);
-    await pagePoll(client, `!document.querySelector('[data-testid="model-menu"]') && !document.querySelector('[data-testid="model-menu-supplier-panel"]')`, { label: 'menu closed' });
-    assert('D1_menu_and_panel_closed', true, '点模型后主卡与第二卡同时退场');
+    await pagePoll(client, `!document.querySelector('[data-testid="model-menu"]') && !document.querySelector('[data-testid="model-menu-models-panel"]')`, { label: 'menu closed' });
+    assert('D1_menu_and_model_card_closed', true, '点模型后左主卡与右模型卡同时退场');
   }
 
-  const union = panel.menuRect && panel.panelRect ? {
-    x: Math.min(panel.menuRect.left, panel.panelRect.left),
-    y: Math.min(panel.menuRect.top, panel.panelRect.top),
-    w: Math.max(panel.menuRect.right, panel.panelRect.right) - Math.min(panel.menuRect.left, panel.panelRect.left),
-    h: Math.max(panel.menuRect.bottom, panel.panelRect.bottom) - Math.min(panel.menuRect.top, panel.panelRect.top),
+  const union = main.menuRect && main.panelRect ? {
+    x: Math.min(main.menuRect.left, main.panelRect.left),
+    y: Math.min(main.menuRect.top, main.panelRect.top),
+    w: Math.max(main.menuRect.right, main.panelRect.right) - Math.min(main.menuRect.left, main.panelRect.left),
+    h: Math.max(main.menuRect.bottom, main.panelRect.bottom) - Math.min(main.menuRect.top, main.panelRect.top),
   } : null;
   let screenshot = 'not_attempted';
   if (union) {
@@ -261,8 +255,8 @@ async function main() {
     capturedAt: new Date().toISOString(),
     head: require('node:child_process').execSync('git rev-parse HEAD', { cwd: ROOT }).toString().trim(),
     projectId,
-    surface: 'composer 模型菜单（BLOCK-315/UI-619：主卡 + 独立供应商第二卡，仿智谱展开）',
-    main, panel, switched, back,
+    surface: 'composer 模型菜单（BLOCK-315/UI-619：左主卡=供应商 / 右独立卡=模型，仿智谱展开）',
+    main, switched, back,
     notes: { screenshot },
     total: records.length, passed: records.length - failed.length, failed: failed.length,
     records,

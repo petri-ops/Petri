@@ -1,78 +1,22 @@
 {
-  "capturedAt": "2026-10-28T11:46:06.144Z",
-  "head": "ff291949475ccd29af163eb85d00a3dce11dffd2",
-  "projectId": "p_mvs1szmb_9k92",
-  "surface": "composer 模型菜单（BLOCK-315/UI-619：主卡 + 独立供应商第二卡，仿智谱展开）",
+  "capturedAt": "2026-10-28T12:03:11.473Z",
+  "head": "f6c188b6090ec3a5039b8eeea9b99e5764590664",
+  "projectId": "p_mvs2ez2y_szjv",
+  "surface": "composer 模型菜单（BLOCK-315/UI-619：左主卡=供应商 / 右独立卡=模型，仿智谱展开）",
   "main": {
     "menu": true,
     "menuRect": {
       "left": 567,
-      "top": 567,
+      "top": 501,
       "right": 887,
       "bottom": 848,
       "width": 320,
-      "height": 281
+      "height": 347
     },
     "menuWidth": 320,
-    "inlineSupplierRows": 0,
-    "triggerText": "DeepSeek2 个模型",
-    "triggerSupplier": "DeepSeek",
-    "panel": false,
-    "panelParentIsBody": null,
-    "panelInsideMenu": null,
-    "panelPlacement": null,
-    "panelPosition": null,
-    "panelZ": null,
-    "menuZ": 81,
-    "panelRect": null,
-    "panelRows": [],
-    "models": [
-      {
-        "name": "deepseek-flash",
-        "disabled": false,
-        "active": true
-      },
-      {
-        "name": "deepseek-v4-pro",
-        "disabled": false,
-        "active": false
-      }
-    ],
-    "viewport": {
-      "width": 1602,
-      "height": 1000
-    }
-  },
-  "panel": {
-    "menu": true,
-    "menuRect": {
-      "left": 567,
-      "top": 567,
-      "right": 887,
-      "bottom": 848,
-      "width": 320,
-      "height": 281
-    },
-    "menuWidth": 320,
-    "inlineSupplierRows": 0,
-    "triggerText": "DeepSeek2 个模型",
-    "triggerSupplier": "DeepSeek",
-    "panel": true,
-    "panelParentIsBody": true,
-    "panelInsideMenu": false,
-    "panelPlacement": "right",
-    "panelPosition": "fixed",
-    "panelZ": 82,
-    "menuZ": 81,
-    "panelRect": {
-      "left": 895,
-      "top": 567,
-      "right": 1143,
-      "bottom": 839,
-      "width": 248,
-      "height": 272
-    },
-    "panelRows": [
+    "auto": true,
+    "mainHasModelList": 0,
+    "supplierRows": [
       {
         "testid": "model-menu-supplier-deepseek-chat",
         "supplier": "DeepSeek",
@@ -102,6 +46,22 @@
         "check": false
       }
     ],
+    "panel": true,
+    "panelParentIsBody": true,
+    "panelInsideMenu": false,
+    "panelPlacement": "right",
+    "panelPosition": "fixed",
+    "panelZ": 82,
+    "menuZ": 81,
+    "panelRect": {
+      "left": 895,
+      "top": 501,
+      "right": 1215,
+      "bottom": 672,
+      "width": 320,
+      "height": 170
+    },
+    "headText": "DeepSeek2 个模型",
     "models": [
       {
         "name": "deepseek-flash",
@@ -123,32 +83,16 @@
     "menu": true,
     "menuRect": {
       "left": 567,
-      "top": 617,
+      "top": 501,
       "right": 887,
       "bottom": 848,
       "width": 320,
-      "height": 231
+      "height": 347
     },
     "menuWidth": 320,
-    "inlineSupplierRows": 0,
-    "triggerText": "ninijoker1 个模型",
-    "triggerSupplier": "ninijoker",
-    "panel": true,
-    "panelParentIsBody": true,
-    "panelInsideMenu": false,
-    "panelPlacement": "right",
-    "panelPosition": "fixed",
-    "panelZ": 82,
-    "menuZ": 81,
-    "panelRect": {
-      "left": 895,
-      "top": 567,
-      "right": 1143,
-      "bottom": 839,
-      "width": 248,
-      "height": 272
-    },
-    "panelRows": [
+    "auto": true,
+    "mainHasModelList": 0,
+    "supplierRows": [
       {
         "testid": "model-menu-supplier-deepseek-chat",
         "supplier": "DeepSeek",
@@ -178,6 +122,22 @@
         "check": false
       }
     ],
+    "panel": true,
+    "panelParentIsBody": true,
+    "panelInsideMenu": false,
+    "panelPlacement": "right",
+    "panelPosition": "fixed",
+    "panelZ": 82,
+    "menuZ": 81,
+    "panelRect": {
+      "left": 895,
+      "top": 501,
+      "right": 1215,
+      "bottom": 622,
+      "width": 320,
+      "height": 121
+    },
+    "headText": "ninijoker1 个模型",
     "models": [
       {
         "name": "gemini-3.7-flash-tiered",
@@ -194,32 +154,16 @@
     "menu": true,
     "menuRect": {
       "left": 567,
-      "top": 567,
+      "top": 501,
       "right": 887,
       "bottom": 848,
       "width": 320,
-      "height": 281
+      "height": 347
     },
     "menuWidth": 320,
-    "inlineSupplierRows": 0,
-    "triggerText": "DeepSeek2 个模型",
-    "triggerSupplier": "DeepSeek",
-    "panel": true,
-    "panelParentIsBody": true,
-    "panelInsideMenu": false,
-    "panelPlacement": "right",
-    "panelPosition": "fixed",
-    "panelZ": 82,
-    "menuZ": 81,
-    "panelRect": {
-      "left": 895,
-      "top": 567,
-      "right": 1143,
-      "bottom": 839,
-      "width": 248,
-      "height": 272
-    },
-    "panelRows": [
+    "auto": true,
+    "mainHasModelList": 0,
+    "supplierRows": [
       {
         "testid": "model-menu-supplier-deepseek-chat",
         "supplier": "DeepSeek",
@@ -249,6 +193,22 @@
         "check": false
       }
     ],
+    "panel": true,
+    "panelParentIsBody": true,
+    "panelInsideMenu": false,
+    "panelPlacement": "right",
+    "panelPosition": "fixed",
+    "panelZ": 82,
+    "menuZ": 81,
+    "panelRect": {
+      "left": 895,
+      "top": 501,
+      "right": 1215,
+      "bottom": 672,
+      "width": 320,
+      "height": 170
+    },
+    "headText": "DeepSeek2 个模型",
     "models": [
       {
         "name": "deepseek-flash",
@@ -269,74 +229,79 @@
   "notes": {
     "screenshot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:15000ms"
   },
-  "total": 15,
-  "passed": 15,
+  "total": 16,
+  "passed": 16,
   "failed": 0,
   "records": [
     {
       "id": "P0_project_created",
       "ok": true,
-      "detail": "id=p_mvs1szmb_9k92"
+      "detail": "id=p_mvs2ez2y_szjv"
     },
     {
-      "id": "A0_main_card_models_only",
+      "id": "A0_left_card_lists_suppliers",
       "ok": true,
-      "detail": "trigger=DeepSeek models=2 panel=false"
+      "detail": "suppliers=[\"DeepSeek\",\"ninijoker\",\"sensenova\",\"bigmodel\"] models=2"
     },
     {
-      "id": "A1_no_inline_supplier_list",
+      "id": "A1_left_card_has_no_model_list",
       "ok": true,
-      "detail": "inline rows=0（主卡内不应有供应商行）"
+      "detail": "mainHasModelList=0（主卡内不应有模型列表）"
     },
     {
       "id": "A2_main_card_compact",
       "ok": true,
-      "detail": "menuW=320（主卡单卡宽度）"
+      "detail": "menuW=320（左主卡单卡宽度）"
     },
     {
-      "id": "B0_second_card_separate_dom",
+      "id": "A3_current_supplier_checked",
+      "ok": true,
+      "detail": "active=[\"DeepSeek\"] checks=1"
+    },
+    {
+      "id": "B0_model_card_separate_dom",
       "ok": true,
       "detail": "parentBody=true insideMenu=false"
     },
     {
-      "id": "B1_second_card_fixed_overlay",
+      "id": "B1_model_card_fixed_overlay",
       "ok": true,
       "detail": "position=fixed z=82/81"
     },
     {
-      "id": "B2_second_card_beside_right",
+      "id": "B2_model_card_beside_right",
       "ok": true,
-      "detail": "placement=right gap=8px panel={\"left\":895,\"top\":567,\"right\":1143,\"bottom\":839,\"width\":248,\"height\":272} menu={\"left\":567,\"top\":567,\"right\":887,\"bottom\":848,\"width\":320,\"height\":281}"
+      "detail": "placement=right gap=8px panel={\"left\":895,\"top\":501,\"right\":1215,\"bottom\":672,\"width\":320,\"height\":170} menu={\"left\":567,\"top\":501,\"right\":887,\"bottom\":848,\"width\":320,\"height\":347}"
     },
     {
-      "id": "B3_second_card_in_viewport",
+      "id": "B3_model_card_in_viewport",
       "ok": true,
-      "detail": "rect={\"left\":895,\"top\":567,\"right\":1143,\"bottom\":839,\"width\":248,\"height\":272} viewport={\"width\":1602,\"height\":1000}"
+      "detail": "rect={\"left\":895,\"top\":501,\"right\":1215,\"bottom\":672,\"width\":320,\"height\":170} viewport={\"width\":1602,\"height\":1000}"
     },
     {
-      "id": "B4_all_suppliers_with_current_check",
+      "id": "B4_model_card_shows_current_supplier_models",
       "ok": true,
-      "detail": "rows=[\"DeepSeek*\",\"ninijoker\",\"sensenova\",\"bigmodel\"] checks=1"
+      "detail": "head=DeepSeek2 个模型 models=[\"deepseek-flash\",\"deepseek-v4-pro\"]"
     },
     {
-      "id": "C0_main_card_follows_supplier",
+      "id": "C0_model_card_follows_supplier",
       "ok": true,
-      "detail": "trigger=ninijoker models=gemini-3.7-flash-tiered"
+      "detail": "head=ninijoker1 个模型 models=gemini-3.7-flash-tiered"
     },
     {
-      "id": "C1_second_card_stays_open",
+      "id": "C1_both_cards_stay_visible",
       "ok": true,
-      "detail": "panel=true rows=4/4"
+      "detail": "panel=true supplierRows=4/4"
     },
     {
-      "id": "C2_selected_moves_back",
+      "id": "C2_active_moves",
       "ok": true,
       "detail": "active=[\"ninijoker\"]"
     },
     {
       "id": "C3_switch_back_restores",
       "ok": true,
-      "detail": "trigger=DeepSeek models=deepseek-flash|deepseek-v4-pro"
+      "detail": "head=DeepSeek2 个模型 models=deepseek-flash|deepseek-v4-pro"
     },
     {
       "id": "D0_pickable_model_available",
@@ -344,9 +309,9 @@
       "detail": "models=[{\"name\":\"deepseek-flash\",\"disabled\":false,\"active\":true},{\"name\":\"deepseek-v4-pro\",\"disabled\":false,\"active\":false}]"
     },
     {
-      "id": "D1_menu_and_panel_closed",
+      "id": "D1_menu_and_model_card_closed",
       "ok": true,
-      "detail": "点模型后主卡与第二卡同时退场"
+      "detail": "点模型后左主卡与右模型卡同时退场"
     }
   ]
 }

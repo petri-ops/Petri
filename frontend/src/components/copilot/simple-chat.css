@@ -134,37 +134,11 @@
   box-shadow: var(--petri-shadow-float);
 }
 
-/* UI-619（用户「一级和二级页面不要在同一个卡片中」）——
-   主卡=供应商入口 + 模型；供应商列表是独立第二卡（portal 到 body），
-   不再同一卡片内分栏，也不再遮挡其它供应商。 */
-.sc-model-menu-head {
-  padding-bottom: var(--petri-space-1);
-  margin-bottom: var(--petri-space-1);
-  border-bottom: 1px solid var(--petri-divider);
-}
-.sc-model-supplier-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--petri-space-2);
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  border-radius: var(--petri-radius-md);
-  background: transparent;
-  color: var(--petri-text);
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-}
-.sc-model-supplier-trigger:hover,
-.sc-model-supplier-trigger[aria-expanded='true'] {
-  background: var(--petri-hover);
-}
-.sc-model-supplier-trigger-main {
+/* UI-619（用户「左侧主卡片是供应商 右侧是模型」）——
+   左主卡=供应商列表；右侧独立卡（portal 到 body）=该供应商模型。两张卡始终同时在场。 */
+.sc-model-menu-suppliers {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   min-width: 0;
 }
 .sc-model-section-label {
@@ -173,13 +147,10 @@
   font-weight: 650;
   letter-spacing: 0.02em;
 }
-.sc-model-menu-models {
-  min-width: 0;
-}
-.sc-model-supplier-panel {
+.sc-model-models-panel {
   position: fixed;
   z-index: 82;
-  max-height: min(360px, calc(100vh - 24px));
+  max-height: min(420px, calc(100vh - 24px));
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--petri-space-2);
@@ -188,11 +159,14 @@
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-float);
 }
-.sc-model-supplier-panel-head {
+.sc-model-models-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
   padding: 2px 10px 6px;
-  color: var(--petri-text-tertiary);
-  font-weight: 650;
-  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--petri-divider);
 }
 .sc-model-two-pane-empty {
   padding: 16px 10px;

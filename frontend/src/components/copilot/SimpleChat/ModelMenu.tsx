@@ -6,7 +6,7 @@
  * 加载中/零可用模型给出可读空态，而不是一张空菜单。
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { Icon } from '@/components/icons/Icon';
@@ -36,28 +36,28 @@ interface ModelMenuProps {
 
 const THINKING_LABELS: Record<string, string> = { off: '关闭思考', standard: '标准思考', high: '高思考' };
 
-/** UI-619 — 供应商第二卡：与主卡分离，默认贴主卡右侧；右侧放不下向左开。 */
-const SUPPLIER_PANEL_WIDTH = 248;
-const SUPPLIER_PANEL_GAP = 8;
-const SUPPLIER_PANEL_MARGIN = 12;
-const SUPPLIER_PANEL_MAX_HEIGHT = 360;
+/** UI-619 — 模型第二卡：左侧主卡列供应商，右侧独立卡列其模型；默认贴主卡右侧，右侧放不下向左开。 */
+const MODEL_PANEL_WIDTH = 320;
+const MODEL_PANEL_GAP = 8;
+const MODEL_PANEL_MARGIN = 12;
+const MODEL_PANEL_MAX_HEIGHT = 420;
 
-export function supplierPanelPosition(
+export function modelPanelPosition(
   anchor: { left: number; top: number; right: number },
   viewport: { width: number; height: number },
 ): { left: number; top: number; width: number; placement: 'right' | 'left' } {
-  const width = Math.min(SUPPLIER_PANEL_WIDTH, Math.max(0, viewport.width - SUPPLIER_PANEL_MARGIN * 2));
-  const openRight = anchor.right + SUPPLIER_PANEL_GAP + width <= viewport.width - SUPPLIER_PANEL_MARGIN;
+  const width = Math.min(MODEL_PANEL_WIDTH, Math.max(0, viewport.width - MODEL_PANEL_MARGIN * 2));
+  const openRight = anchor.right + MODEL_PANEL_GAP + width <= viewport.width - MODEL_PANEL_MARGIN;
   const left = openRight
-    ? anchor.right + SUPPLIER_PANEL_GAP
+    ? anchor.right + MODEL_PANEL_GAP
     : Math.max(
-        SUPPLIER_PANEL_MARGIN,
-        Math.min(anchor.left - SUPPLIER_PANEL_GAP - width, viewport.width - width - SUPPLIER_PANEL_MARGIN),
+        MODEL_PANEL_MARGIN,
+        Math.min(anchor.left - MODEL_PANEL_GAP - width, viewport.width - width - MODEL_PANEL_MARGIN),
       );
-  const maxHeight = Math.min(SUPPLIER_PANEL_MAX_HEIGHT, Math.max(160, viewport.height - SUPPLIER_PANEL_MARGIN * 2));
+  const maxHeight = Math.min(MODEL_PANEL_MAX_HEIGHT, Math.max(160, viewport.height - MODEL_PANEL_MARGIN * 2));
   const top = Math.min(
-    Math.max(SUPPLIER_PANEL_MARGIN, anchor.top),
-    Math.max(SUPPLIER_PANEL_MARGIN, viewport.height - maxHeight - SUPPLIER_PANEL_MARGIN),
+    Math.max(MODEL_PANEL_MARGIN, anchor.top),
+    Math.max(MODEL_PANEL_MARGIN, viewport.height - maxHeight - MODEL_PANEL_MARGIN),
   );
   return { left, top, width, placement: openRight ? 'right' : 'left' };
 }
@@ -190,46 +190,38 @@ export function ModelMenu({
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
   const access = useModelAccess();
-  // UI-619 — 一级卡（模型/自动）与二级卡（供应商）物理分离：供应商卡 portal 到 body，
-  // 默认贴主卡右侧、右侧放不下向左开；切换供应商后主卡换模型列表、供应商卡保持可见。
+  // UI-619 — 左主卡=供应商列表，右独立卡=该供应商模型（用户「左侧主卡片是供应商 右侧是模型」）：
+  // 两卡始终同时在场；模型卡 portal 到 body，默认贴主卡右侧、右侧放不下向左开。
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const [supplierPanelOpen, setSupplierPanelOpen] = useState(false);
-  const [supplierPanelPos, setSupplierPanelPos] = useState<ReturnType<typeof supplierPanelPosition> | null>(null);
-  // UI-617 — 默认选中当前模型所在供应商（打开即见可用模型，无需先点）。菜单关闭即卸载，状态自然复位。
+  const [modelPanelPos, setModelPanelPos] = useState<ReturnType<typeof modelPanelPosition> | null>(null);
+  const setMenuRef = useCallback((node: HTMLDivElement | null) => {
+    menuRef.current = node;
+    if (node) {
+      const rect = node.getBoundingClientRect();
+      setModelPanelPos(modelPanelPosition(rect, { width: window.innerWidth, height: window.innerHeight }));
+    }
+  }, []);
   const [selectedSupplierKey, setSelectedSupplierKey] = useState<string | null>(null);
   const activeSupplierGroup = groups.find((group) => group.rows.some((row) => row.preset.id === activeModelId));
   const effectiveSupplierGroup = groups.find((group) => group.key === selectedSupplierKey)
     || activeSupplierGroup
     || groups[0];
   useEffect(() => {
-    if (!supplierPanelOpen) return undefined;
+    if (mode !== 'all') return undefined;
     const reposition = () => {
       const rect = menuRef.current?.getBoundingClientRect();
       if (rect) {
-        setSupplierPanelPos(supplierPanelPosition(rect, { width: window.innerWidth, height: window.innerHeight }));
+        setModelPanelPos(modelPanelPosition(rect, { width: window.innerWidth, height: window.innerHeight }));
       }
     };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSupplierPanelOpen(false);
-    };
+    // 打开瞬间 composer 可能仍在落位：布局稳定后再对齐一次（rAF 后一帧）。
+    const settle = window.setTimeout(reposition, 80);
     window.addEventListener('resize', reposition);
-    window.addEventListener('keydown', onKey);
     return () => {
+      window.clearTimeout(settle);
       window.removeEventListener('resize', reposition);
-      window.removeEventListener('keydown', onKey);
     };
-  }, [supplierPanelOpen]);
-  const toggleSupplierPanel = () => {
-    if (supplierPanelOpen) {
-      setSupplierPanelOpen(false);
-      return;
-    }
-    const rect = menuRef.current?.getBoundingClientRect();
-    if (rect) {
-      setSupplierPanelPos(supplierPanelPosition(rect, { width: window.innerWidth, height: window.innerHeight }));
-    }
-    setSupplierPanelOpen(true);
-  };
+  }, [mode]);
   const accessDenied = (model: string): string | null => {
     if (access.mode !== 'allowlist') return null;
     if (access.allowedModels.includes(model)) return null;
@@ -239,7 +231,7 @@ export function ModelMenu({
   return (
     <>
       <div className="sc-model-overlay" onClick={onClose} />
-      <div className="sc-model-menu" role="menu" aria-label="模型选择" data-testid="model-menu" ref={menuRef}>
+      <div className="sc-model-menu" role="menu" aria-label="模型选择" data-testid="model-menu" ref={setMenuRef}>
         {summary.text && (
           <div
             className={`sc-model-menu-status sc-model-menu-status-${summary.level}`}
@@ -247,31 +239,6 @@ export function ModelMenu({
             data-testid="model-menu-status"
           >
             {summary.text}
-          </div>
-        )}
-        {mode === 'all' && (
-          <div className="sc-model-menu-head">
-            <button
-              type="button"
-              className="sc-model-supplier-trigger"
-              data-testid="model-menu-supplier-trigger"
-              aria-haspopup="menu"
-              aria-expanded={supplierPanelOpen}
-              title="选择供应商"
-              onClick={toggleSupplierPanel}
-            >
-              <span className="sc-model-supplier-trigger-main">
-                <span className="sc-model-option-title">{effectiveSupplierGroup?.supplier || '选择供应商'}</span>
-                <span className="sc-model-option-meta">
-                  {effectiveSupplierGroup
-                    ? groupSelectableRows(effectiveSupplierGroup).length === 0
-                      ? '无可用模型'
-                      : `${groupSelectableRows(effectiveSupplierGroup).length} 个模型`
-                    : '未配置供应商'}
-                </span>
-              </span>
-              <Icon name="chevron-right" size={15} />
-            </button>
           </div>
         )}
         {onToggleAuto && (
@@ -294,23 +261,35 @@ export function ModelMenu({
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
-          /* UI-619（用户「一级和二级页面不要在同一个卡片中」）——主卡只放模型，
-             供应商列表在独立第二卡（portal），切换供应商不再遮挡其它供应商。 */
-          <div className="sc-model-menu-models" data-testid="model-menu-models">
-            <div className="sc-model-section-label">模型</div>
-            {effectiveSupplierGroup ? (
-              renderGroupModelRows({
-                group: effectiveSupplierGroup,
-                activeModelId,
-                accessDenied,
-                pricing,
-                onPickModel,
-              })
-            ) : (
-              <div className="sc-model-two-pane-empty">
-                <span className="sc-model-option-meta">选择供应商查看模型</span>
-              </div>
-            )}
+          /* UI-619（用户「左侧主卡片是供应商 右侧是模型」）——左主卡列供应商，
+             右侧独立卡（portal）列该供应商模型；两卡始终同时在场。 */
+          <div className="sc-model-menu-suppliers" data-testid="model-menu-suppliers">
+            <div className="sc-model-section-label">供应商</div>
+            {groups.map((group) => {
+              const selectable = groupSelectableRows(group);
+              const current = group.rows.some((row) => row.preset.id === activeModelId);
+              const selected = effectiveSupplierGroup?.key === group.key;
+              return (
+                <button
+                  type="button"
+                  key={group.key}
+                  className={`sc-model-supplier${selected ? ' sc-model-supplier-selected' : ''}`}
+                  title={`查看 ${group.supplier} 的模型`}
+                  data-active={selected ? 'true' : 'false'}
+                  data-testid={`model-menu-supplier-${group.key}`}
+                  onClick={() => setSelectedSupplierKey(group.key)}
+                >
+                  <span className="sc-model-supplier-main">
+                    <span className="sc-model-option-title">{group.supplier}</span>
+                    <span className="sc-model-option-meta">
+                      {current ? '当前使用 · ' : ''}
+                      {selectable.length === 0 ? '无可用模型' : `${selectable.length} 个模型`}
+                    </span>
+                  </span>
+                  {current && <Icon name="check" size={14} />}
+                </button>
+              );
+            })}
           </div>
         ) : mode === 'supplier' ? (
 
@@ -361,42 +340,37 @@ export function ModelMenu({
           })
         )}
       </div>
-      {mode === 'all' && supplierPanelOpen && supplierPanelPos && createPortal(
+      {mode === 'all' && groups.length > 0 && modelPanelPos && createPortal(
         <div
-          className="sc-model-supplier-panel"
+          className="sc-model-models-panel"
           role="menu"
-          aria-label="供应商"
-          data-testid="model-menu-supplier-panel"
-          data-placement={supplierPanelPos.placement}
-          style={{ left: supplierPanelPos.left, top: supplierPanelPos.top, width: supplierPanelPos.width }}
+          aria-label="模型"
+          data-testid="model-menu-models-panel"
+          data-placement={modelPanelPos.placement}
+          style={{ left: modelPanelPos.left, top: modelPanelPos.top, width: modelPanelPos.width }}
         >
-          <div className="sc-model-supplier-panel-head">供应商</div>
-          {groups.map((group) => {
-            const selectable = groupSelectableRows(group);
-            const current = group.rows.some((row) => row.preset.id === activeModelId);
-            const selected = effectiveSupplierGroup?.key === group.key;
-            return (
-              <button
-                type="button"
-                key={group.key}
-                role="menuitem"
-                className={`sc-model-supplier${selected ? ' sc-model-supplier-selected' : ''}`}
-                title={`查看 ${group.supplier} 的模型`}
-                data-active={selected ? 'true' : 'false'}
-                data-testid={`model-menu-supplier-${group.key}`}
-                onClick={() => setSelectedSupplierKey(group.key)}
-              >
-                <span className="sc-model-supplier-main">
-                  <span className="sc-model-option-title">{group.supplier}</span>
-                  <span className="sc-model-option-meta">
-                    {current ? '当前使用 · ' : ''}
-                    {selectable.length === 0 ? '无可用模型' : `${selectable.length} 个模型`}
-                  </span>
+          {effectiveSupplierGroup ? (
+            <>
+              <div className="sc-model-models-head" data-testid="model-menu-models-head">
+                <span className="sc-model-option-title">{effectiveSupplierGroup.supplier}</span>
+                <span className="sc-model-option-meta">
+                  {groupSelectableRows(effectiveSupplierGroup).length} 个模型
                 </span>
-                {current && <Icon name="check" size={14} />}
-              </button>
-            );
-          })}
+              </div>
+              <div className="sc-model-section-label">模型</div>
+              {renderGroupModelRows({
+                group: effectiveSupplierGroup,
+                activeModelId,
+                accessDenied,
+                pricing,
+                onPickModel,
+              })}
+            </>
+          ) : (
+            <div className="sc-model-two-pane-empty">
+              <span className="sc-model-option-meta">选择供应商查看模型</span>
+            </div>
+          )}
         </div>,
         document.body,
       )}

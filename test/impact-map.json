@@ -6058,7 +6058,7 @@
     {
       "id": "block315-model-menu-two-cards-live",
       "classifiesScripts": true,
-      "note": "BLOCK-315 UI-619 实机腿：模型菜单一级/二级两张独立卡（主卡 320px 无内联供应商行 / 第二卡 portal body+fixed+z82 / 右缘 8px 顶部对齐 / 4 供应商当前唯一勾 / 切供应商第二卡保持 / 点模型两卡关闭），15/15 PASS；取证探针与目录。",
+      "note": "BLOCK-315 UI-619 实机腿：模型菜单左主卡=供应商 / 右独立卡=模型（左卡 320px 列 4 供应商+当前勾、无模型列表；右卡 portal body+fixed+z82、右缘 8px、与主卡同 top；切供应商右卡换内容两卡在场；点模型两卡关闭），16/16 PASS；取证探针与目录。",
       "patterns": [
         "scripts/block315-model-menu-two-cards-live.cjs",
         "acceptance/block-313/**"
