@@ -78,3 +78,17 @@ describe('ImagePreviewModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('ImagePreviewModal UI-616 顶层化', () => {
+  it('portal 到 body（脱离聊天树 stacking context），并锁定背景滚动、卸载恢复', () => {
+    const { container, unmount } = render(
+      <ImagePreviewModal attachment={gallery[0]} onClose={vi.fn()} />,
+    );
+    const overlay = screen.getByRole('dialog');
+    expect(overlay.parentElement).toBe(document.body);
+    expect(container.contains(overlay)).toBe(false);
+    expect(document.body.style.overflow).toBe('hidden');
+    unmount();
+    expect(document.body.style.overflow).toBe('');
+  });
+});

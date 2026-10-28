@@ -12,6 +12,7 @@
 // ============================================================
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
 import type { AttachmentFile } from './attachments';
 
@@ -95,8 +96,13 @@ export function ImagePreviewModal({
         goTo(index - 1);
       }
     };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
   }, [goTo, hasGallery, index, onClose]);
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + ZOOM_STEP, ZOOM_MAX));
@@ -105,7 +111,9 @@ export function ImagePreviewModal({
 
   const imageSrc = current.dataUrl || current.previewUrl || '';
 
-  return (
+  // UI-616 — portal 到 body：聊天树内的祖先 stacking context 会把 fixed 遮罩
+  // 降格/裁切，且 z-index=9999 低于标题栏/列分隔（10001）；挂 body + 100000 才真正顶层。
+  return createPortal(
     <div
       className="sc-preview-overlay"
       onClick={onClose}
@@ -243,6 +251,7 @@ export function ImagePreviewModal({
           </span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

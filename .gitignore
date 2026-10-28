@@ -105,3 +105,6 @@ sidecars/computer-use-windows/axfixture/obj/
 
 # ZCode 项目级运行时数据（会话计划/缓存），无入库面
 .zcode/
+
+# 会话附件运行目录（聊天图片上传的本地落盘，非源码）
+.chat-attachments/

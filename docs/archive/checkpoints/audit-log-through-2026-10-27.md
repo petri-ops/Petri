@@ -30,3 +30,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:50:58.172Z -->
 最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 completed（P5-CLOSED；UI-588 in_progress）**）：五处可调宽边界统一「细线+渐变高光」悬停规范（Qoder 式，用户实测反馈+截图裁决）——文件树 4px 全高实心带重构（6px 热区+渐隐 glow+`:has` 分隔线转 accent）/ FloatCardResizer 常驻线 3px→2px 变淡+hover 整块 tint 换渐变 / desktop.css 死把手样式删除 / 主列参照+两处 pill 标注归属。证据=theme 17/17（accent 棘轮 93→95 留痕）+组件 35/35+routing unknown=[]+亮/暗默认态实机断言（acceptance/block-273/）。**环境边界如实入册**：隐藏页 used 值缓存+离屏截图合成不可用（-32000）+`CSS.forcePseudoState` 本实例静默不生效——悬停激活态读数不可靠，UI-588 in_progress（30 秒人测路线随交付，确认后翻 verified）。顺手清偿 AnnotationOverlay 4 处死字面量 fallback。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:00:49.409Z -->
+最后更新：2026-10-27（**BLOCK-274 test-changed 内部优化 登记并同会话收口（轻量包·plan=本条目，对标 TEST-INFRA-DEBT 轻量模式）**）：用户裁决「行！ 按照建议来」。根修落地=scripts/test-affected.mjs validateMap 进程内 memoization（WeakMap 按影响图对象身份缓存成功校验，失败照常抛出不缓存）——消除 resolveImpact 每次调用重复全量校验（实测 ~2.1s/次，无缓存时第二次同样 2.0s；缓存后 11ms）。证据=「vitest 通道防复发」用例 solo 505-864s→**5.7s**（百倍）、31 用例路由套件 1058s→**12.8s**（82 倍，改前改后同套绿=纯重构行为基线）、closeout tests 门 704s→**14.6s**、整体 closeout ~14min→**~3min**（ui-audit 144s 成为新最大单项，普惠优化候选另案）。来源=两会话 Jev 建议收敛同一方案（本会话 block272-reopen conf 0.48 + 273 会话 conf 0.77）+ BLOCK-273 实撞 120s 超时结构性红（600s 兜底留痕「根修=本包」）。Jev=doc:suggest 全零建议（轻量包无 plan 文档，台账按下限照写）。G0 开发期常态 · 不外推 packaged/Provider/GA。

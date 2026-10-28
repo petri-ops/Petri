@@ -24,6 +24,19 @@
 - **实机证据**：未跑（斜杠面板选中链路实机腿待批；决策层与构造器已组件级锚定）。
 - **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
 
+## UI-616: 图片预览层级全排查——输入框/消息图片预览顶层化（2026-10-28 **verified（BLOCK-312；ImagePreviewModal 7/7 + 实机 11/11）**）
+
+- **变化面**：`ImagePreviewModal`（输入框附件与聊天消息图）从聊天树内 `position:fixed` + z=9999 改 **createPortal(document.body)** + `z-index:100000` + body 滚动锁（卸载恢复），与 `Lightbox` 同口径。全量审计：
+  | 预览入口 | 组件 | 层级处置 |
+  | --- | --- | --- |
+  | 输入框附件缩略图 / 聊天消息图 | ImagePreviewModal | **本次修复**：portal body + 100000 + 滚动锁 |
+  | 工作区文件图像 / markdown 资源 / 结果产物图 | Lightbox | 已合规（BLOCK-301 portal body + 100000），本次实机复核 |
+  | 附件行内缩略图 / 可批注图像 / 右栏图像预览 / 生成文件卡 | 内联元素 | 面板内元素，非浮层，不需要顶层化 |
+- **为什么这样设计**：用户截图「输入框图片预览被顶部标题栏和左右分隔线压住」；根因=overlay z=9999 低于标题栏/分隔线 10001，且未脱离聊天树 stacking context。统一到 Lightbox 的顶层口径，避免两套图片预览层级语义。
+- **验证（代码）**：ImagePreviewModal 7/7（新增 portal 父 body、滚动锁与卸载恢复）+ tsc 0 + lint 0 error。
+- **实机证据**：`acceptance/block-310/live-image-preview-layers.json`（11/11）：输入框附件 → 预览 overlay rect=(0,0,1600,1000)、parent=body、z=100000；标题栏 (w/2,16) 与全部 `resizeHandleV` 位置 `elementFromPoint` 命中 overlay（0 miss）；工作区灯箱同口径（parent body / z=100000 / 3 点 0 miss）。
+- **边界（reopen）**：内联预览不顶层化（设计使然）；预览交互（缩放/翻页/下载）语义不变；标题栏/分隔线层级未下调。
+
 ## UI-615: 右栏顶部标签条自适应（多标签自动折叠图标，少标签恢复全标签）（2026-10-28 **verified（BLOCK-311；helper 单测 + TitleBar 12/12 + 实机 9/9）**）
 
 - **变化面**：标签条按「标签数 × 可用宽度」估算完整标签所需宽度（固定约 58px/标签 + 文本最多 96px + 更多按钮 32px），不足时自动折叠为**图标态**：`.tabPillText` 隐藏（`title`/`aria-label` 保留）、关闭 × 仅 hover/激活显示、pill padding 收窄；仍放不下则保留横向滚动兜底。`ResizeObserver` + 记忆 labels 驱动，单标签/布局未就绪（宽 0）不折叠。

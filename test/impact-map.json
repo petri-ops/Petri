@@ -6056,6 +6056,18 @@
       ]
     },
     {
+      "id": "block312-image-preview-layers-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-312 UI-616 实机腿：输入框图片预览（ImagePreviewModal）与工作区灯箱（Lightbox）顶层化复核（parent body/覆盖视口/z=100000/标题栏与全部分隔线 elementFromPoint 0 miss），11/11 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block312-image-preview-layers-live.cjs",
+        "acceptance/block-310/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ImagePreviewModal.test.tsx"
+      ]
+    },
+    {
       "id": "block311-tab-strip-adaptive-live",
       "classifiesScripts": true,
       "note": "BLOCK-311 UI-615 实机腿：右栏顶部标签条多标签自动折叠图标 / 少标签恢复全标签（11 tabs compact+无溢出+图标齐全；关闭其他→1 tab full），9/9 PASS；取证探针与目录。",

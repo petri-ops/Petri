@@ -1,0 +1,160 @@
+{
+  "capturedAt": "2026-10-28T11:00:16.575Z",
+  "head": "d8568c13aa4facccc540fb86db3cf2dd1de53b52",
+  "projectId": "p_mvs05rtl_viqk",
+  "surface": "图片预览层级（BLOCK-312/UI-616：输入框预览 portal/顶层 + 灯箱同口径复核）",
+  "modal": {
+    "parentIsBody": true,
+    "zIndex": "100000",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 1000
+    },
+    "viewport": {
+      "w": 1600,
+      "h": 1000
+    },
+    "panelInViewport": true,
+    "handles": [
+      {
+        "x": 241,
+        "y": 500
+      },
+      {
+        "x": 901,
+        "y": 519
+      }
+    ],
+    "hits": [
+      {
+        "x": 800,
+        "y": 16,
+        "ok": true,
+        "hit": "DIV.sc-preview-overlay"
+      },
+      {
+        "x": 241,
+        "y": 500,
+        "ok": true,
+        "hit": "DIV.sc-preview-image-area"
+      },
+      {
+        "x": 901,
+        "y": 519,
+        "ok": true,
+        "hit": "DIV.sc-preview-image-area"
+      }
+    ]
+  },
+  "lightbox": {
+    "parentIsBody": true,
+    "zIndex": "100000",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 1000
+    },
+    "viewport": {
+      "w": 1600,
+      "h": 1000
+    },
+    "panelInViewport": true,
+    "handles": [
+      {
+        "x": 241,
+        "y": 500
+      },
+      {
+        "x": 901,
+        "y": 500
+      }
+    ],
+    "hits": [
+      {
+        "x": 800,
+        "y": 16,
+        "ok": true,
+        "hit": "DIV.petri-lightbox"
+      },
+      {
+        "x": 241,
+        "y": 500,
+        "ok": true,
+        "hit": "DIV.petri-lightbox"
+      },
+      {
+        "x": 901,
+        "y": 500,
+        "ok": true,
+        "hit": "IMG.petri-lightbox__img"
+      }
+    ]
+  },
+  "notes": {
+    "modalShot": "screenshot_unavailable: cdp_command_failed:-32000",
+    "lightboxShot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:20000ms"
+  },
+  "total": 11,
+  "passed": 11,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs05rtl_viqk"
+    },
+    {
+      "id": "A0_modal_open",
+      "ok": true,
+      "detail": "图片预览打开"
+    },
+    {
+      "id": "A1_modal_parent_body",
+      "ok": true,
+      "detail": "parentBody=true"
+    },
+    {
+      "id": "A2_modal_covers_viewport",
+      "ok": true,
+      "detail": "{\"rect\":{\"x\":0,\"y\":0,\"w\":1600,\"h\":1000},\"viewport\":{\"w\":1600,\"h\":1000}}"
+    },
+    {
+      "id": "A3_modal_z_top",
+      "ok": true,
+      "detail": "z-index=100000"
+    },
+    {
+      "id": "A4_modal_panel_in_viewport",
+      "ok": true,
+      "detail": "panelInViewport=true"
+    },
+    {
+      "id": "A5_modal_hits_titlebar_and_dividers",
+      "ok": true,
+      "detail": "points=3 misses=[]"
+    },
+    {
+      "id": "B0_lightbox_open",
+      "ok": true,
+      "detail": "工作区灯箱打开"
+    },
+    {
+      "id": "B1_lightbox_parent_body",
+      "ok": true,
+      "detail": "parentBody=true"
+    },
+    {
+      "id": "B2_lightbox_z_top",
+      "ok": true,
+      "detail": "z-index=100000"
+    },
+    {
+      "id": "B3_lightbox_hits_titlebar_and_dividers",
+      "ok": true,
+      "detail": "points=3 misses=[]"
+    }
+  ]
+}

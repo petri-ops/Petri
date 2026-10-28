@@ -37,3 +37,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:50:58.173Z -->
 | ✅ 处理完成（BLOCK-311；用户截图「右栏顶部标签多时拥挤，应自动变图标/折叠」） | 2026-10-28 | **右栏标签条自适应（UI-615 verified）**：按标签数×可用宽度估算，不足折叠为图标态（文本隐藏、title/aria 保留、关闭× hover/激活才出），少标签恢复全标签，仍放不下保留横向滚动；ResizeObserver 驱动。证据=helper 单测 + TitleBar 12/12 + theme 17/17 + 实机 9/9（11 标签 compact/无溢出/图标齐全；关闭其他→1 标签恢复）+ closeout 十三门。非范围=拖出独立窗另案（窗口系统已有 pop-out/return，右栏内容绑工作区 ctx）；标签顺序/菜单不变。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-615 / BLOCK-311 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:00:49.409Z -->
+| ✅ 处理完成（BLOCK-312；用户截图「输入框图片预览被顶部与左右分隔线影响；所有图片预览都查出来优化」） | 2026-10-28 | **图片预览层级全排查（UI-616 verified）**：ImagePreviewModal（输入框附件 + 聊天消息图）从 z=9999/未 portal 改 `createPortal(body)+z=100000+body 滚动锁`；Lightbox 已同口径实机复核；审计表见 UI-616（内联缩略图/批注图/右栏图不需要顶层化）。证据=ImagePreviewModal 7/7 + 实机 11/11（overlay 覆盖视口/父 body/z=100000/标题栏与全部 resizeHandleV elementFromPoint 0 miss；灯箱同口径）+ tsc/lint 0 error + closeout 十三门 PASS。非范围=预览交互语义与标题栏/分隔线层级不变。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-616 / BLOCK-312 |
