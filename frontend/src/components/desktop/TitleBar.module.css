@@ -488,9 +488,223 @@
 }
 
 /* BLOCK-226 — 通知中心固定在右缘铃铛旁，向左展开，避免被窗口右缘裁切。 */
-.notificationMenu {
-  left: auto;
+/* UI-625 — 通知中心独立弹层：不复用 .toolMenu（其直系 button 固定 32px 高，
+   会把多行通知压叠、把未读圆点 flex 成长条）。 */
+.noticePanel {
+  position: absolute;
+  top: calc(100% + 5px);
   right: 0;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  max-width: min(360px, calc(100vw - 24px));
+  max-height: min(480px, calc(100vh - 80px));
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--petri-text) 18%, transparent);
+  overflow: hidden;
+  /* UI-625 — 面板是内容面（标题/正文/元信息三级），基准字号取全局正文 token；
+     不显式声明会继承标题栏图标按钮的小字，整块看着像挤成一团的乱码。 */
+  font-size: var(--petri-font-size-body);
+  line-height: 1.45;
+  -webkit-app-region: no-drag;
+}
+
+.noticeHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--petri-divider);
+}
+
+.noticeTitle {
+  color: var(--petri-text);
+  font-weight: 600;
+}
+
+.noticeUnread {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
+
+.noticeHeaderActions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.noticeAction {
+  padding: 3px 8px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.noticeAction:hover:not(:disabled) {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.noticeAction:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.noticePrefs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--petri-divider);
+  color: var(--petri-text-tertiary);
+}
+
+.noticePrefsLabel {
+  color: var(--petri-text-tertiary);
+}
+
+.noticePrefsItems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.noticePref {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+}
+
+.noticePref input {
+  margin: 0;
+  accent-color: var(--petri-status-info);
+}
+
+.noticePrefsDivider {
+  width: 1px;
+  height: 12px;
+  background: var(--petri-divider);
+}
+
+.noticeList {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.noticeItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid var(--petri-divider);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.noticeItem:hover:not(:disabled) {
+  background: var(--petri-hover);
+}
+
+.noticeItem:disabled {
+  cursor: default;
+}
+
+.noticeItemRead {
+  opacity: 0.6;
+}
+
+.noticeKind {
+  margin-top: 1px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  white-space: nowrap;
+}
+
+.noticeKind[data-kind='turn_completed'] {
+  background: var(--petri-status-success-bg);
+  color: var(--petri-status-success-fg);
+}
+
+.noticeKind[data-kind='turn_failed'] {
+  background: var(--petri-status-error-bg);
+  color: var(--petri-status-error-fg);
+}
+
+.noticeKind[data-kind='approval_required'] {
+  background: var(--petri-warning-bg);
+  color: var(--petri-warning-text);
+}
+
+.noticeKind[data-kind='schedule_reminder'] {
+  background: var(--petri-accent-bg);
+  color: var(--petri-info);
+}
+
+.noticeMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.noticeItemTitle {
+  color: var(--petri-text);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.noticeBody {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--petri-text-secondary);
+  word-break: break-word;
+}
+
+.noticeMeta {
+  color: var(--petri-text-tertiary);
+}
+
+.noticeDot {
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--petri-status-info);
+  flex-shrink: 0;
+}
+
+.noticeEmpty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 14px;
+  color: var(--petri-text-tertiary);
 }
 
 .toolMenu > button {

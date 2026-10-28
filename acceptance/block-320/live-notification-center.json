@@ -1,0 +1,610 @@
+{
+  "capturedAt": "2026-10-28T15:20:40.250Z",
+  "head": "592e85a4f203b94e79e2a3223a959b743c42d12a",
+  "projectId": "p_mvs9gxz4_42pi",
+  "surface": "标题栏通知中心弹层（BLOCK-320/UI-625：独立弹层 + 类型标签/标题/正文两行/相对时间/未读圆点，不再复用 toolMenu）",
+  "seedCount": 4,
+  "panel": {
+    "panel": true,
+    "className": "_noticePanel_c8s3s_493",
+    "panelFont": 12.25,
+    "panelLineHeight": "17.7625px",
+    "rootFont": 14,
+    "vw": 1602,
+    "vh": 1000,
+    "rect": {
+      "top": 37,
+      "bottom": 445,
+      "left": 1065,
+      "right": 1425,
+      "width": 360,
+      "height": 408
+    },
+    "computedOverflow": "hidden",
+    "headText": "通知中心3 未读全部已读清空",
+    "emptyText": null,
+    "itemCount": 4,
+    "rows": [
+      {
+        "kindAttr": "turn_completed",
+        "readAttr": "false",
+        "disabled": false,
+        "row": {
+          "top": 114,
+          "bottom": 192,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 124,
+          "bottom": 142,
+          "left": 1125,
+          "right": 1395,
+          "width": 271,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 144,
+          "bottom": 161,
+          "left": 1125,
+          "right": 1395,
+          "width": 271,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "刚刚 · 点击打开",
+        "kindText": "完成",
+        "kindBg": "rgb(236, 253, 245)",
+        "kindColor": "rgb(5, 150, 105)",
+        "dotW": 7,
+        "dotH": 7,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "approval_required",
+        "readAttr": "false",
+        "disabled": false,
+        "row": {
+          "top": 192,
+          "bottom": 288,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 96
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": true,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 202,
+          "bottom": 220,
+          "left": 1137,
+          "right": 1395,
+          "width": 258,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 222,
+          "bottom": 257,
+          "left": 1137,
+          "right": 1395,
+          "width": 258,
+          "height": 36
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 89,
+        "metaText": "5 分钟前 · 点击打开",
+        "kindText": "待确认",
+        "kindBg": "rgb(254, 243, 199)",
+        "kindColor": "rgb(180, 83, 9)",
+        "dotW": 7,
+        "dotH": 7,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "turn_failed",
+        "readAttr": "false",
+        "disabled": false,
+        "row": {
+          "top": 288,
+          "bottom": 366,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 298,
+          "bottom": 316,
+          "left": 1125,
+          "right": 1395,
+          "width": 271,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 318,
+          "bottom": 336,
+          "left": 1125,
+          "right": 1395,
+          "width": 271,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "今天 21:20 · 点击打开",
+        "kindText": "失败",
+        "kindBg": "rgb(254, 242, 242)",
+        "kindColor": "rgb(220, 38, 38)",
+        "dotW": 7,
+        "dotH": 7,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "schedule_reminder",
+        "readAttr": "true",
+        "disabled": false,
+        "row": {
+          "top": 366,
+          "bottom": 445,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 376,
+          "bottom": 394,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 396,
+          "bottom": 414,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "10/23 23:20 · 点击打开",
+        "kindText": "提醒",
+        "kindBg": "rgb(240, 253, 250)",
+        "kindColor": "rgb(21, 101, 192)",
+        "dotW": null,
+        "dotH": null,
+        "hitSelf": true
+      }
+    ],
+    "badge": "3",
+    "dotCount": 3,
+    "prefInputs": 5,
+    "actions": [
+      {
+        "label": "全部已读",
+        "disabled": false
+      },
+      {
+        "label": "清空",
+        "disabled": false
+      }
+    ]
+  },
+  "afterRead": {
+    "panel": true,
+    "className": "_noticePanel_c8s3s_493",
+    "panelFont": 12.25,
+    "panelLineHeight": "17.7625px",
+    "rootFont": 14,
+    "vw": 1602,
+    "vh": 1000,
+    "rect": {
+      "top": 37,
+      "bottom": 445,
+      "left": 1065,
+      "right": 1425,
+      "width": 360,
+      "height": 408
+    },
+    "computedOverflow": "hidden",
+    "headText": "通知中心全部已读清空",
+    "emptyText": null,
+    "itemCount": 4,
+    "rows": [
+      {
+        "kindAttr": "turn_completed",
+        "readAttr": "true",
+        "disabled": false,
+        "row": {
+          "top": 114,
+          "bottom": 192,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 124,
+          "bottom": 142,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 144,
+          "bottom": 161,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "刚刚 · 点击打开",
+        "kindText": "完成",
+        "kindBg": "rgb(236, 253, 245)",
+        "kindColor": "rgb(5, 150, 105)",
+        "dotW": null,
+        "dotH": null,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "approval_required",
+        "readAttr": "true",
+        "disabled": false,
+        "row": {
+          "top": 192,
+          "bottom": 288,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 96
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": true,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 202,
+          "bottom": 220,
+          "left": 1137,
+          "right": 1402,
+          "width": 265,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 222,
+          "bottom": 257,
+          "left": 1137,
+          "right": 1402,
+          "width": 265,
+          "height": 36
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 89,
+        "metaText": "5 分钟前 · 点击打开",
+        "kindText": "待确认",
+        "kindBg": "rgb(254, 243, 199)",
+        "kindColor": "rgb(180, 83, 9)",
+        "dotW": null,
+        "dotH": null,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "turn_failed",
+        "readAttr": "true",
+        "disabled": false,
+        "row": {
+          "top": 288,
+          "bottom": 366,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 298,
+          "bottom": 316,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 318,
+          "bottom": 336,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "今天 21:20 · 点击打开",
+        "kindText": "失败",
+        "kindBg": "rgb(254, 242, 242)",
+        "kindColor": "rgb(220, 38, 38)",
+        "dotW": null,
+        "dotH": null,
+        "hitSelf": true
+      },
+      {
+        "kindAttr": "schedule_reminder",
+        "readAttr": "true",
+        "disabled": false,
+        "row": {
+          "top": 366,
+          "bottom": 445,
+          "left": 1066,
+          "right": 1424,
+          "width": 358,
+          "height": 78
+        },
+        "rowScrollOverflow": 0,
+        "titleClipped": false,
+        "titleWhiteSpace": "nowrap",
+        "titleFont": 12.25,
+        "bodyFont": 12.25,
+        "metaFont": 12.25,
+        "kindFont": 12.25,
+        "titleRect": {
+          "top": 376,
+          "bottom": 394,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyRect": {
+          "top": 396,
+          "bottom": 414,
+          "left": 1125,
+          "right": 1402,
+          "width": 278,
+          "height": 18
+        },
+        "bodyLineHeight": 17.7625,
+        "bodyClamp": "2",
+        "bodyScrollHeight": 18,
+        "metaText": "10/23 23:20 · 点击打开",
+        "kindText": "提醒",
+        "kindBg": "rgb(240, 253, 250)",
+        "kindColor": "rgb(21, 101, 192)",
+        "dotW": null,
+        "dotH": null,
+        "hitSelf": true
+      }
+    ],
+    "badge": null,
+    "dotCount": 0,
+    "prefInputs": 5,
+    "actions": [
+      {
+        "label": "全部已读",
+        "disabled": true
+      },
+      {
+        "label": "清空",
+        "disabled": false
+      }
+    ]
+  },
+  "afterClear": {
+    "panel": true,
+    "className": "_noticePanel_c8s3s_493",
+    "panelFont": 12.25,
+    "panelLineHeight": "17.7625px",
+    "rootFont": 14,
+    "vw": 1602,
+    "vh": 1000,
+    "rect": {
+      "top": 37,
+      "bottom": 186,
+      "left": 1065,
+      "right": 1425,
+      "width": 360,
+      "height": 149
+    },
+    "computedOverflow": "hidden",
+    "headText": "通知中心全部已读清空",
+    "emptyText": "暂无通知。回合完成、失败或等待确认时会出现在这里。",
+    "itemCount": 0,
+    "rows": [],
+    "badge": null,
+    "dotCount": 0,
+    "prefInputs": 5,
+    "actions": [
+      {
+        "label": "全部已读",
+        "disabled": true
+      },
+      {
+        "label": "清空",
+        "disabled": true
+      }
+    ]
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:15000ms"
+  },
+  "total": 24,
+  "passed": 24,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs9gxz4_42pi"
+    },
+    {
+      "id": "P1_seed_badge_unread",
+      "ok": true,
+      "detail": "badge=3（3 未读 / 共 4 条）"
+    },
+    {
+      "id": "A0_panel_open",
+      "ok": true,
+      "detail": "items=4"
+    },
+    {
+      "id": "A1_not_toolmenu_anymore",
+      "ok": true,
+      "detail": "class=_noticePanel_c8s3s_493"
+    },
+    {
+      "id": "A2_four_rows_in_order",
+      "ok": true,
+      "detail": "kinds=turn_completed|approval_required|turn_failed|schedule_reminder"
+    },
+    {
+      "id": "A3_rows_do_not_overlap",
+      "ok": true,
+      "detail": "overlaps=[]"
+    },
+    {
+      "id": "A4_rows_tall_enough_for_three_lines",
+      "ok": true,
+      "detail": "short=[]"
+    },
+    {
+      "id": "A5_no_content_clipped_inside_row",
+      "ok": true,
+      "detail": "overflow=[]"
+    },
+    {
+      "id": "B0_kind_chip_label_and_semantic_bg",
+      "ok": true,
+      "detail": "kinds=完成=rgb(236, 253, 245) | 待确认=rgb(254, 243, 199) | 失败=rgb(254, 242, 242) | 提醒=rgb(240, 253, 250)"
+    },
+    {
+      "id": "B1_title_single_line_ellipsis",
+      "ok": true,
+      "detail": "heights=18,18,18,18"
+    },
+    {
+      "id": "B2_long_body_clamped_two_lines",
+      "ok": true,
+      "detail": "clamp=2 lineH=17.7625 shown=36 full=89"
+    },
+    {
+      "id": "F0_panel_uses_body_font_size",
+      "ok": true,
+      "detail": "panelFont=12.25 bodySize=12.25 rootFont=14 lh=17.7625px tiny=[]"
+    },
+    {
+      "id": "B3_relative_time_per_row",
+      "ok": true,
+      "detail": "meta=[\"刚刚 · 点击打开\",\"5 分钟前 · 点击打开\",\"今天 21:20 · 点击打开\",\"10/23 23:20 · 点击打开\"]"
+    },
+    {
+      "id": "B3b_no_absolute_locale_dump",
+      "ok": true,
+      "detail": "meta=[\"刚刚 · 点击打开\",\"5 分钟前 · 点击打开\",\"今天 21:20 · 点击打开\",\"10/23 23:20 · 点击打开\"]"
+    },
+    {
+      "id": "B4_header_unread_count",
+      "ok": true,
+      "detail": "head=通知中心3 未读全部已读清空"
+    },
+    {
+      "id": "C0_unread_dot_is_circle",
+      "ok": true,
+      "detail": "dots=[{\"k\":\"turn_completed\",\"w\":7,\"h\":7},{\"k\":\"approval_required\",\"w\":7,\"h\":7},{\"k\":\"turn_failed\",\"w\":7,\"h\":7}]"
+    },
+    {
+      "id": "C1_read_row_has_no_dot",
+      "ok": true,
+      "detail": "dot=null disabled=false"
+    },
+    {
+      "id": "D0_panel_inside_viewport",
+      "ok": true,
+      "detail": "rect={\"top\":37,\"bottom\":445,\"left\":1065,\"right\":1425,\"width\":360,\"height\":408} vw=1602 vh=1000"
+    },
+    {
+      "id": "D1_row_center_hits_panel",
+      "ok": true,
+      "detail": "hits=true,true,true,true"
+    },
+    {
+      "id": "D2_prefs_row_present",
+      "ok": true,
+      "detail": "inputs=5"
+    },
+    {
+      "id": "E0_mark_all_read_clears_dots_and_badge",
+      "ok": true,
+      "detail": "markAll=clicked dots=0 badge=gone"
+    },
+    {
+      "id": "E1_clear_shows_empty_state",
+      "ok": true,
+      "detail": "cleared=clicked items=0 empty=暂无通知。回合完成、失败或等待确认时会出现在这里。"
+    },
+    {
+      "id": "E2_actions_disabled_when_empty",
+      "ok": true,
+      "detail": "actions=[{\"label\":\"全部已读\",\"disabled\":true},{\"label\":\"清空\",\"disabled\":true}]"
+    },
+    {
+      "id": "E3_storage_cleared",
+      "ok": true,
+      "detail": "stored=[]"
+    }
+  ]
+}

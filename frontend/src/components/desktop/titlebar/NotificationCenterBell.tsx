@@ -3,7 +3,8 @@
  *
  * 铃铛 + 未读徽章 + 弹层列表；事件由 useTurnNotifications 写入本地 store，
  * 不受系统通知偏好/聚焦/免打扰影响（免打扰只压系统 toast）。
- * 复用标题栏既有的 iconBtn / tabCountBadge / toolMenu 样式，不新增按钮形态。
+ * UI-625 — 弹层不再复用通用 toolMenu（其直系 button 固定 32px 高，会把
+ * 多行通知压叠、把未读圆点拉成长条）：独立 panel + 行式布局。
  */
 
 import React, { useState, useSyncExternalStore } from 'react';
@@ -40,6 +41,22 @@ const PREF_ITEMS: Array<{ kind: AppNoticeKind; label: string }> = [
   { kind: 'approval_required', label: '待确认' },
   { kind: 'schedule_reminder', label: '提醒' },
 ];
+
+/** UI-625 — 相对时间：刚刚 / N 分钟前 / 今天 HH:mm / 昨天 HH:mm / M/D HH:mm。 */
+function formatNoticeTime(iso: string, now = Date.now()): string {
+  const time = new Date(iso).getTime();
+  if (!Number.isFinite(time)) return '';
+  const diff = now - time;
+  if (diff >= 0 && diff < 60_000) return '刚刚';
+  if (diff >= 0 && diff < 3_600_000) return `${Math.floor(diff / 60_000)} 分钟前`;
+  const date = new Date(time);
+  const today = new Date(now);
+  const hhmm = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  if (date.toDateString() === today.toDateString()) return `今天 ${hhmm}`;
+  const yesterday = new Date(now - 86_400_000);
+  if (date.toDateString() === yesterday.toDateString()) return `昨天 ${hhmm}`;
+  return `${date.getMonth() + 1}/${date.getDate()} ${hhmm}`;
+}
 
 export function NotificationCenterBell(): React.ReactElement {
   const notices = useSyncExternalStore(subscribeNotices, listNotices, listNotices);
@@ -90,105 +107,101 @@ export function NotificationCenterBell(): React.ReactElement {
             aria-label="关闭通知中心"
           />
           <div
-            className={`${styles.toolMenu} ${styles.notificationMenu}`}
+            className={styles.noticePanel}
             role="dialog"
             aria-label="通知中心"
             data-testid="notification-center-panel"
-            style={{ width: 340, maxHeight: 380, overflowY: 'auto' }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderBottom: '1px solid var(--petri-divider)' }}>
-              <strong style={{ flex: 1, color: 'var(--petri-text)' }}>通知中心</strong>
-              <button
-                type="button"
-                className={styles.toolMenuItem}
-                onClick={() => markAllNoticesRead()}
-                disabled={unread === 0}
-                style={{ width: 'auto', padding: '0 6px' }}
-              >
-                全部已读
-              </button>
-              <button
-                type="button"
-                className={styles.toolMenuItem}
-                onClick={() => clearNotices()}
-                disabled={notices.length === 0}
-                style={{ width: 'auto', padding: '0 6px' }}
-              >
-                清空
-              </button>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '6px 10px', borderBottom: '1px solid var(--petri-divider)' }} data-testid="notification-center-prefs">
-              <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>接收</span>
-              {PREF_ITEMS.map((item) => (
-                <label key={item.kind} style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--petri-text-secondary)', fontSize: 12 }}>
+            <header className={styles.noticeHeader}>
+              <span className={styles.noticeTitle}>通知中心</span>
+              {unread > 0 && <span className={styles.noticeUnread}>{unread} 未读</span>}
+              <span className={styles.noticeHeaderActions}>
+                <button
+                  type="button"
+                  className={styles.noticeAction}
+                  onClick={() => markAllNoticesRead()}
+                  disabled={unread === 0}
+                >
+                  全部已读
+                </button>
+                <button
+                  type="button"
+                  className={styles.noticeAction}
+                  onClick={() => clearNotices()}
+                  disabled={notices.length === 0}
+                >
+                  清空
+                </button>
+              </span>
+            </header>
+            <div className={styles.noticePrefs} data-testid="notification-center-prefs">
+              <span className={styles.noticePrefsLabel}>接收</span>
+              <div className={styles.noticePrefsItems}>
+                {PREF_ITEMS.map((item) => (
+                  <label key={item.kind} className={styles.noticePref}>
+                    <input
+                      type="checkbox"
+                      checked={prefs.kinds[item.kind]}
+                      onChange={(event) => setNoticePrefs({ kinds: { [item.kind]: event.target.checked } })}
+                      data-testid={`notice-pref-${item.kind}`}
+                    />
+                    <span>{item.label}</span>
+                  </label>
+                ))}
+                <span className={styles.noticePrefsDivider} aria-hidden="true" />
+                <label className={styles.noticePref}>
                   <input
                     type="checkbox"
-                    checked={prefs.kinds[item.kind]}
-                    onChange={(event) => setNoticePrefs({ kinds: { [item.kind]: event.target.checked } })}
-                    data-testid={`notice-pref-${item.kind}`}
+                    checked={prefs.sound}
+                    onChange={(event) => setNoticePrefs({ sound: event.target.checked })}
+                    data-testid="notice-pref-sound"
                   />
-                  {item.label}
+                  <span>声音</span>
                 </label>
-              ))}
-              <label style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--petri-text-secondary)', fontSize: 12 }}>
-                <input
-                  type="checkbox"
-                  checked={prefs.sound}
-                  onChange={(event) => setNoticePrefs({ sound: event.target.checked })}
-                  data-testid="notice-pref-sound"
-                />
-                声音
-              </label>
+              </div>
             </div>
             {notices.length === 0 ? (
-              <div style={{ padding: 14, color: 'var(--petri-text-tertiary)', fontSize: 13 }}>
-                暂无通知。回合完成、失败或等待确认时会出现在这里。
+              <div className={styles.noticeEmpty}>
+                <Icon name="bell" size={18} />
+                <span>暂无通知。回合完成、失败或等待确认时会出现在这里。</span>
               </div>
             ) : (
-              notices.map((notice) => {
-                const target = noticeTarget(notice);
-                return (
-                  <button
-                    key={notice.id}
-                    type="button"
-                    onClick={() => openNotice(notice)}
-                    disabled={!target}
-                    data-testid="notification-center-item"
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 2,
-                      padding: '8px 10px',
-                      borderBottom: '1px solid var(--petri-divider)',
-                      borderTop: 'none',
-                      borderLeft: 'none',
-                      borderRight: 'none',
-                      width: '100%',
-                      textAlign: 'left',
-                      background: 'transparent',
-                      color: 'inherit',
-                      cursor: target ? 'pointer' : 'default',
-                      opacity: notice.read ? 0.65 : 1,
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>{KIND_LABELS[notice.kind]}</span>
-                      <span style={{ color: 'var(--petri-text)', fontSize: 13, flex: 1 }}>{notice.title}</span>
+              <div className={styles.noticeList}>
+                {notices.map((notice) => {
+                  const target = noticeTarget(notice);
+                  return (
+                    <button
+                      key={notice.id}
+                      type="button"
+                      onClick={() => openNotice(notice)}
+                      disabled={!target}
+                      data-testid="notification-center-item"
+                      data-kind={notice.kind}
+                      data-read={notice.read ? 'true' : 'false'}
+                      className={`${styles.noticeItem}${notice.read ? ` ${styles.noticeItemRead}` : ''}`}
+                    >
+                      <span className={styles.noticeKind} data-kind={notice.kind}>
+                        {KIND_LABELS[notice.kind]}
+                      </span>
+                      <span className={styles.noticeMain}>
+                        <span className={styles.noticeItemTitle}>{notice.title}</span>
+                        <span className={styles.noticeBody} title={notice.body}>{notice.body}</span>
+                        <span className={styles.noticeMeta}>
+                          {formatNoticeTime(notice.createdAt)}
+                          {target ? ' · 点击打开' : ''}
+                        </span>
+                      </span>
                       {!notice.read && (
                         <span
                           data-testid="notification-center-dot"
-                          style={{ width: 6, height: 6, borderRadius: 3, background: 'var(--petri-accent)' }}
+                          className={styles.noticeDot}
+                          aria-label="未读"
                         />
                       )}
-                    </div>
-                    <span style={{ color: 'var(--petri-text-secondary)', fontSize: 12 }}>{notice.body}</span>
-                    <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 11 }}>
-                      {new Date(notice.createdAt).toLocaleString()}
-                      {target ? ' · 点击打开' : ''}
-                    </span>
-                  </button>
-                );
-              })
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </>

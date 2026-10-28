@@ -1,6 +1,10 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。**三推（2026-10-28，用户全权收尾指令「继续 搞完这个」）**：main `e9960ce6..72c1e061` 共 **11 笔**（BLOCK-275/276/277/278/279 五包 + UI-591 代落盘 + 对账/自稳治理批）+ 快照标签 snapshot-20261027-7 补推（远端=本地全集）；此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录已兑现授权，不构成常驻授权）。
 
+最后更新：2026-10-28（**BLOCK-320 completed（UI-625 verified）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：通知中心「乱乱的」已按内容重排收口——根因是弹层复用了通用 `.toolMenu`（`> button{height:32px}` + `display:grid` + `span{flex:1}`），把每条通知的标签/标题/正文/时间四段压进 32px 行、把未读圆点拉成长条；现改独立 `.noticePanel` 行式布局（头部 + 接收偏好行 + 卡内滚动列表；每行=类型标签语义底色 + 标题单行省略 + 正文两行 clamp + 五档相对时间 + 7px 未读圆点，已读行 60% 透明），面板基准字号显式取正文 token（原继承标题栏图标按钮小字是次因）。实机 24/24：四行零重叠/行高≥44/行内无裁切、正文可见 36px vs 全文 89px、圆点 7×7、面板 360×408 完整在视口内且逐行 `elementFromPoint` 命中自身、全部已读→徽章与圆点归零、清空→空态 + 钮禁用。证据=[`acceptance/block-320/live-notification-center.json`](../acceptance/block-320/live-notification-center.json) + NotificationCenterBell 9/9（假时钟逐档钉死五档 + 禁止绝对时间戳串）+ theme 17/17（小字/accent 棘轮未上调）+ closeout 十三门。截图离屏不可得（如实标 unavailable）。**待用户动作**：右栏内容拖出独立窗 P1（方案已评估，等发令）/ UI-594/595/596 实机腿 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 最后更新：2026-10-28（**BLOCK-319 completed（UI-624 verified）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：文件文本批注条空闲态已清理——无批注/无待填锚点/无加载错误/无可撤销时整条不渲染，不再常驻禁用输入框与禁用「加入上下文」；选中文本 → 选区动作条「批注」→ 才出现评论框（保存/取消）；有批注时恢复列表 + 加入上下文；占位文案改为「加入上下文」。实机：空闲打开 notes.md 无任何批注条/输入框占位；种一条 text-selection 批注后恢复（列表/加入上下文），无拖拽开关。证据=[`acceptance/block-317/live-text-annotation-idle-cleanup.json`](../acceptance/block-317/live-text-annotation-idle-cleanup.json)（7/7）+ AnnotationBar 18/18 + 文件预览 2/2 + closeout 十三门。截图离屏不可得（如实标 unavailable）。**待用户动作**：右栏内容拖出独立窗 P1（方案已评估，等发令）/ UI-594/595/596 实机腿 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。

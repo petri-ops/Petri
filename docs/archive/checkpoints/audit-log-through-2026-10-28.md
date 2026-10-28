@@ -20,3 +20,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T14:35:36.991Z -->
 最后更新：2026-10-28（**BLOCK-311 completed（UI-615 verified）**）：右栏顶部标签条按标签数×可用宽度自动折叠为图标（文本隐藏、title/aria 保留、关闭× hover/激活才出），少标签恢复全标签，仍放不下保留横向滚动；ResizeObserver 驱动。证据=helper 单测 + TitleBar 12/12 + theme 17/17 + 实机 9/9（11 标签 compact/无溢出/图标齐全；关闭其他→1 标签恢复）+ closeout 十三门 PASS。拖出独立窗另案（窗口系统已有 pop-out/return，右侧内容绑工作区 ctx）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T15:25:43.228Z -->
+最后更新：2026-10-28（**BLOCK-312 completed（UI-616 verified）**）：输入框/消息图片预览 ImagePreviewModal 顶层化——createPortal(body)+z=100000+body 滚动锁（原 9999 且未 portal，被标题栏/分隔线 10001 压住）；Lightbox 已同口径并实机复核；全量图片预览入口审计入册（内联预览不需要顶层化）。实机 11/11（overlay 覆盖视口/父 body/z=100000/标题栏与全部分隔线 0 miss；灯箱同口径）。G0 开发期常态 · 不外推 packaged/Provider/GA。

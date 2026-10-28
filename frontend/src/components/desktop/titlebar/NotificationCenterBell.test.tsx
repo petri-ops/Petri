@@ -1,5 +1,5 @@
 import React from 'react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NotificationCenterBell } from './NotificationCenterBell';
@@ -15,7 +15,10 @@ beforeEach(() => {
   __resetNotificationCenterForTests();
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 function LocationProbe(): React.ReactElement {
   const location = useLocation();
@@ -61,6 +64,49 @@ describe('NotificationCenterBell', () => {
     fireEvent.click(screen.getByText('清空'));
     expect(listNotices()).toHaveLength(0);
     expect(screen.getByTestId('notification-center-panel').textContent).toContain('暂无通知');
+  });
+
+  it('UI-625 — 通知行=类型标签+标题+正文+相对时间，弹层不再复用 toolMenu（不再压叠）', () => {
+    pushNotice({ kind: 'turn_completed', title: '对话已完成', body: '这段正文比较长，用于验证两行截断与行内布局不再互相覆盖。' });
+    renderBell();
+    fireEvent.click(screen.getByTestId('notification-center-bell'));
+    const panel = screen.getByTestId('notification-center-panel');
+    expect(panel.className).not.toContain('toolMenu');
+    const item = screen.getByTestId('notification-center-item');
+    expect(item.getAttribute('data-kind')).toBe('turn_completed');
+    expect(item.getAttribute('data-read')).toBe('false');
+    expect(item.textContent).toContain('完成');
+    expect(item.textContent).toContain('对话已完成');
+    expect(item.textContent).toContain('刚刚');
+    expect(panel.textContent).toContain('1 未读');
+  });
+
+  it('UI-625 — 相对时间五档：刚刚 / N 分钟前 / 今天 HH:mm / 昨天 HH:mm / M/D HH:mm（不再甩绝对时间戳）', () => {
+    vi.useFakeTimers();
+    // 由旧到新写入（pushNotice 头插 = 列表新→旧），最后一次推进作为渲染时刻。
+    vi.setSystemTime(new Date(2026, 9, 20, 9, 0, 0));
+    pushNotice({ kind: 'schedule_reminder', title: '更早的提醒', body: 'A' });
+    vi.setSystemTime(new Date(2026, 9, 27, 18, 0, 0));
+    pushNotice({ kind: 'turn_failed', title: '昨天的失败', body: 'B' });
+    vi.setSystemTime(new Date(2026, 9, 28, 8, 0, 0));
+    pushNotice({ kind: 'approval_required', title: '今早待确认', body: 'C' });
+    vi.setSystemTime(new Date(2026, 9, 28, 11, 55, 0));
+    pushNotice({ kind: 'turn_completed', title: '几分钟前完成', body: 'D' });
+    vi.setSystemTime(new Date(2026, 9, 28, 11, 59, 40));
+    pushNotice({ kind: 'turn_completed', title: '刚刚完成', body: 'E' });
+    vi.setSystemTime(new Date(2026, 9, 28, 12, 0, 0));
+
+    renderBell();
+    fireEvent.click(screen.getByTestId('notification-center-bell'));
+    const items = screen.getAllByTestId('notification-center-item');
+    expect(items).toHaveLength(5);
+    expect(items[0].textContent).toContain('刚刚');
+    expect(items[1].textContent).toContain('5 分钟前');
+    expect(items[2].textContent).toContain('今天 08:00');
+    expect(items[3].textContent).toContain('昨天 18:00');
+    expect(items[4].textContent).toContain('10/20 09:00');
+    // 绝对时间戳（含年份/秒）回归即为「乱」的来源，任何一行都不该出现。
+    expect(items.some((item) => /2026|\d{2}:\d{2}:\d{2}/.test(item.textContent || ''))).toBe(false);
   });
 
   it('BLOCK-259 K4 — 点击通知跳转并置为已读；提醒进计划看板', () => {
