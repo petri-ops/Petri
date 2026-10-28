@@ -6056,6 +6056,18 @@
       ]
     },
     {
+      "id": "block313-model-menu-master-detail-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-313 UI-617 实机腿：模型菜单主从两栏（供应商常驻 / 右侧二级模型页 / 默认当前供应商 / 无灰底 / 620px / 切换供应商左列不消失），11/11 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block313-model-menu-master-detail-live.cjs",
+        "acceptance/block-311/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx"
+      ]
+    },
+    {
       "id": "block312-image-preview-layers-live",
       "classifiesScripts": true,
       "note": "BLOCK-312 UI-616 实机腿：输入框图片预览（ImagePreviewModal）与工作区灯箱（Lightbox）顶层化复核（parent body/覆盖视口/z=100000/标题栏与全部分隔线 elementFromPoint 0 miss），11/11 PASS；取证探针与目录。",

@@ -134,15 +134,37 @@
   box-shadow: var(--petri-shadow-float);
 }
 
-/* UI-613（用户裁决「供应商模型列表应该是新的页面；混在一起不专业、灰底不好看」）——
-   mode=all 两页下钻：供应商页只列供应商行，点供应商整页切到模型页。
-   不铺任何灰底容器；选中态只留左侧 accent 细线。 */
-.sc-model-menu:has(.sc-model-page) {
-  width: min(320px, calc(100vw - 32px));
+/* UI-617（用户追加「供应商常驻、模型列表在右侧二级页面，方便切换」）——
+   mode=all 主从两栏：左列供应商常驻（选中 accent 细线），右侧二级页显示其模型；
+   左右透明/白底 + 1px 边框分隔（不再用灰色 gap 容器），菜单加宽。 */
+.sc-model-menu:has(.sc-model-two-pane) {
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(520px, calc(100vh - 168px));
+  overflow: hidden;
 }
-.sc-model-page {
+.sc-model-two-pane {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.9fr) minmax(0, 1.1fr);
+  min-height: 0;
+  max-height: min(360px, calc(100vh - 300px));
+}
+.sc-model-two-pane-suppliers {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  padding-right: var(--petri-space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.sc-model-two-pane-models {
+  min-width: 0;
+  padding-left: var(--petri-space-3);
+  border-left: 1px solid var(--petri-border-card);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.sc-model-two-pane-empty {
+  padding: 16px 10px;
 }
 .sc-model-page-head {
   display: flex;
@@ -157,24 +179,6 @@
   flex-direction: column;
   gap: 1px;
   min-width: 0;
-}
-.sc-model-back {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: none;
-  border-radius: var(--petri-radius-md);
-  background: transparent;
-  color: var(--petri-text-secondary);
-  cursor: pointer;
-}
-.sc-model-back:hover {
-  background: var(--petri-hover);
-  color: var(--petri-text);
 }
 .sc-model-supplier {
   display: flex;
@@ -194,15 +198,14 @@
 .sc-model-supplier:hover {
   background: var(--petri-hover);
 }
+.sc-model-supplier-selected {
+  box-shadow: inset 2px 0 0 var(--petri-accent-border);
+}
 .sc-model-supplier-main {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-}
-.sc-model-supplier-chevron {
-  flex: 0 0 auto;
-  color: var(--petri-text-tertiary);
 }
 
 .sc-model-option {

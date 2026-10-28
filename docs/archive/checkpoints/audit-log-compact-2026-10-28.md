@@ -40,3 +40,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:00:49.409Z -->
 | ✅ 处理完成（BLOCK-312；用户截图「输入框图片预览被顶部与左右分隔线影响；所有图片预览都查出来优化」） | 2026-10-28 | **图片预览层级全排查（UI-616 verified）**：ImagePreviewModal（输入框附件 + 聊天消息图）从 z=9999/未 portal 改 `createPortal(body)+z=100000+body 滚动锁`；Lightbox 已同口径实机复核；审计表见 UI-616（内联缩略图/批注图/右栏图不需要顶层化）。证据=ImagePreviewModal 7/7 + 实机 11/11（overlay 覆盖视口/父 body/z=100000/标题栏与全部 resizeHandleV elementFromPoint 0 miss；灯箱同口径）+ tsc/lint 0 error + closeout 十三门 PASS。非范围=预览交互语义与标题栏/分隔线层级不变。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-616 / BLOCK-312 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:17:16.193Z -->
+| ✅ 处理完成（BLOCK-313；用户截图「供应商常驻、模型列表在右侧二级页面，方便切换；现在点供应商其它供应商看不见」） | 2026-10-28 | **模型菜单主从两栏（UI-617 verified；UI-613 整页下钻由用户追加取代）**：左列供应商常驻（当前使用/模型数/选中 accent 线），右侧二级页=供应商标题/数量+模型；默认当前供应商（打开即见可用模型）；点其它供应商只换右栏、左列不消失；去灰底 + 1px 边框 + 620px + 双列独立滚动。证据=ModelMenu 8/8 + tsc/lint 0 error + theme 17/17 + 实机 11/11（4 供应商常驻/默认 DeepSeek 2 模型/切 ninijoker 左列不消失/回切恢复/无灰底）+ closeout 十三门 PASS。非范围=单模式/目录/白名单/定价/auto 语义不变。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-617 / BLOCK-313 |

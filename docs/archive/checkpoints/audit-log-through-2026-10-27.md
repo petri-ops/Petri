@@ -33,3 +33,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:00:49.409Z -->
 最后更新：2026-10-27（**BLOCK-274 test-changed 内部优化 登记并同会话收口（轻量包·plan=本条目，对标 TEST-INFRA-DEBT 轻量模式）**）：用户裁决「行！ 按照建议来」。根修落地=scripts/test-affected.mjs validateMap 进程内 memoization（WeakMap 按影响图对象身份缓存成功校验，失败照常抛出不缓存）——消除 resolveImpact 每次调用重复全量校验（实测 ~2.1s/次，无缓存时第二次同样 2.0s；缓存后 11ms）。证据=「vitest 通道防复发」用例 solo 505-864s→**5.7s**（百倍）、31 用例路由套件 1058s→**12.8s**（82 倍，改前改后同套绿=纯重构行为基线）、closeout tests 门 704s→**14.6s**、整体 closeout ~14min→**~3min**（ui-audit 144s 成为新最大单项，普惠优化候选另案）。来源=两会话 Jev 建议收敛同一方案（本会话 block272-reopen conf 0.48 + 273 会话 conf 0.77）+ BLOCK-273 实撞 120s 超时结构性红（600s 兜底留痕「根修=本包」）。Jev=doc:suggest 全零建议（轻量包无 plan 文档，台账按下限照写）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:17:16.192Z -->
+最后更新：2026-10-27（**BLOCK-277 右栏空态重排 completed（UI-593 verified；轻量包 plan=本行）**）：用户裁决「右栏过于简约老土，看 Qoder CN 怎么布局，大幅提升布局合理性与美观」——对标 Qoder 0.4.8 工作区面板内容合同（ui-i18n-zh #3788255/#3788272：标题「工作区」+描述「Agent 动手的地方…」）重排 EmptyResult：顶部标题章/标题/描述块 + 六入口升级富卡片（图标章+标题+一句说明，2 列网格，margin:auto 垂直居中）；审阅徽章保留。证据=EmptyResult 3/3+RightPanel+theme 门（小字 52→54/accent 94→101 棘轮留痕：描述文案+入口卡交互态，宪章五类）+tsc 0+9223 welcome 实断（acceptance/block-275 同配方探针）。G0 开发期常态 · 不外推 packaged/Provider/GA。

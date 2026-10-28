@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Icon } from '@/components/icons/Icon';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { getApiPrefix } from '@/lib/env';
 import {
@@ -163,11 +162,13 @@ export function ModelMenu({
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
   const access = useModelAccess();
-  // UI-589 — mode=all 两级导航的钻取态（菜单关闭即卸载，状态自然复位）
-  const [drilledKey, setDrilledKey] = useState<string | null>(null);
-  const drilledGroup = mode === 'all' && drilledKey
-    ? groups.find((group) => group.key === drilledKey) ?? null
-    : null;
+  // UI-617 — 主从两栏：供应商常驻左列，右侧二级页显示选中供应商模型；
+  // 默认选中当前模型所在供应商（打开即见可用模型，无需先点）。菜单关闭即卸载，状态自然复位。
+  const [selectedSupplierKey, setSelectedSupplierKey] = useState<string | null>(null);
+  const activeSupplierGroup = groups.find((group) => group.rows.some((row) => row.preset.id === activeModelId));
+  const effectiveSupplierGroup = groups.find((group) => group.key === selectedSupplierKey)
+    || activeSupplierGroup
+    || groups[0];
   const accessDenied = (model: string): string | null => {
     if (access.mode !== 'allowlist') return null;
     if (access.allowedModels.includes(model)) return null;
@@ -187,7 +188,7 @@ export function ModelMenu({
             {summary.text}
           </div>
         )}
-        {onToggleAuto && !drilledGroup && (
+        {onToggleAuto && (
           <button
             type="button"
             className={`sc-model-option ${autoModel ? 'sc-model-option-active' : ''}`}
@@ -207,65 +208,61 @@ export function ModelMenu({
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
-          /* UI-613（用户裁决「供应商模型列表应该是新的页面，混在一起不专业、灰底不好看」）
-             ——供应商页 → 模型页两页下钻；选中态只留左侧 accent 细线，不铺灰底。 */
-          drilledGroup ? (
-            <div className="sc-model-page" data-testid="model-menu-model-page">
-              <div className="sc-model-page-head">
-                <button
-                  type="button"
-                  className="sc-model-back"
-                  data-testid="model-menu-back"
-                  aria-label="返回供应商列表"
-                  title="返回供应商列表"
-                  onClick={() => setDrilledKey(null)}
-                >
-                  <Icon name="arrow-left" size={14} />
-                </button>
-                <span className="sc-model-page-title">
-                  <span className="sc-model-option-title">{drilledGroup.supplier}</span>
-                  <span className="sc-model-option-meta">
-                    {groupSelectableRows(drilledGroup).length} 个模型
-                  </span>
-                </span>
-              </div>
-              {renderGroupModelRows({
-                group: drilledGroup,
-                activeModelId,
-                accessDenied,
-                pricing,
-                onPickModel,
-              })}
-            </div>
-          ) : (
-            <div className="sc-model-page" data-testid="model-menu-suppliers-page">
+          /* UI-617（用户追加「供应商常驻、模型列表在右侧二级页面，方便切换」）——
+             主从两栏：左列供应商常驻（选中 accent 细线），右侧二级页显示其模型；无灰底容器。 */
+          <div className="sc-model-two-pane" data-testid="model-menu-two-pane">
+            <div className="sc-model-two-pane-suppliers" data-testid="model-menu-suppliers">
               {groups.map((group) => {
                 const selectable = groupSelectableRows(group);
                 const current = group.rows.some((row) => row.preset.id === activeModelId);
+                const selected = effectiveSupplierGroup?.key === group.key;
                 return (
                   <button
                     type="button"
                     key={group.key}
-                    className="sc-model-supplier"
+                    className={`sc-model-supplier${selected ? ' sc-model-supplier-selected' : ''}`}
                     title={`查看 ${group.supplier} 的模型`}
+                    data-active={selected ? 'true' : 'false'}
                     data-testid={`model-menu-supplier-${group.key}`}
-                    onClick={() => setDrilledKey(group.key)}
+                    onClick={() => setSelectedSupplierKey(group.key)}
                   >
                     <span className="sc-model-supplier-main">
                       <span className="sc-model-option-title">{group.supplier}</span>
                       <span className="sc-model-option-meta">
                         {current ? '当前使用 · ' : ''}
-                        {selectable.length === 0
-                          ? '无可用模型（可查看原因）'
-                          : `${selectable.length} 个模型`}
+                        {selectable.length === 0 ? '无可用模型' : `${selectable.length} 个模型`}
                       </span>
                     </span>
-                    <Icon name="chevron-right" size={14} className="sc-model-supplier-chevron" />
                   </button>
                 );
               })}
             </div>
-          )
+            <div className="sc-model-two-pane-models" data-testid="model-menu-models">
+              {effectiveSupplierGroup ? (
+                <>
+                  <div className="sc-model-page-head" data-testid="model-menu-models-head">
+                    <span className="sc-model-page-title">
+                      <span className="sc-model-option-title">{effectiveSupplierGroup.supplier}</span>
+                      <span className="sc-model-option-meta">
+                        {groupSelectableRows(effectiveSupplierGroup).length} 个模型
+                      </span>
+                    </span>
+                  </div>
+                  {renderGroupModelRows({
+                    group: effectiveSupplierGroup,
+                    activeModelId,
+                    accessDenied,
+                    pricing,
+                    onPickModel,
+                  })}
+                </>
+              ) : (
+                <div className="sc-model-two-pane-empty">
+                  <span className="sc-model-option-meta">选择供应商查看模型</span>
+                </div>
+              )}
+            </div>
+          </div>
         ) : mode === 'supplier' ? (
 
           groups.map((group) => {
