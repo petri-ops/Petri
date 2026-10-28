@@ -146,16 +146,30 @@ BLOCK-307 把 `.bar` 改成 `flex-direction: column; width: 104px`，但 `.kinds
 
 证据目录：`acceptance/block-298/ ~ block-305/`（每包一个 json，部分带 clip PNG）。
 
-### 4.2 dev 栈状态与一个必须知道的坑
+### 4.2 dev 栈状态与两个必须知道的坑
 
-- 现行：vite `:3000` ✅、Electron 主实例 `:9222` ✅、测试实例 `:9223` ✅、后端 `:3001` ✅。
-- **⚠️ 3001 当前是「本会话手动后台起的 node 进程」，不在 Electron supervisor 树内**（`scripts/restart-dev-stack.sh` 退出时把它带走过一次）。下一位 Agent 收尾前必须先收掉它再正常起栈，否则端口冲突：
-  ```bash
-  occ=$(netstat -ano | grep ':3001' | grep LISTENING | awk '{print $5}' | head -1); MSYS_NO_PATHCONV=1 taskkill /PID "$occ" /F
-  bash scripts/restart-dev-stack.sh          # 清场 + 拉起主栈（含后端 supervisor）
-  bash scripts/start-test-instance.sh        # 9223 测试实例（独立 userData + attach 后端）
-  ```
-- 后端重启后**新路由才生效**（PATCH `/geometry` 需要重启；纯前端改动靠 vite HMR 即可）。
+- **现行状态（2026-10-28 复核，四端口全绿）**：vite `:3000` ✅、后端 `:3001` ✅（由 Electron 主进程 supervisor 拉起）、Electron 主实例 `:9222` ✅、测试实例 `:9223` ✅。
+- **⚠️ 坑 1：`run_in_background` 的后台 bash 任务结束时，其进程树会被连带回收**。本会话实测两次：`restart-dev-stack.sh` 作为后台任务跑完后主实例 Electron 被杀（`9222` 变 000）；手动用 `run_in_background` 起的 `node core/petri-server/server.js` 在被 stop 后端口即空。结论：
+  - **不要**用 `run_in_background` 起 dev 栈的长活进程；
+  - 起 Electron 用**前台** bash 调 PowerShell `Start-Process`（分离，`scripts/restart-dev-stack.sh:163` 同款），命令见下；
+  - 后端 `:3001` **交给 Electron 主进程自己的 supervisor**，不要手起（手起会与主实例 spawn 抢端口；若已手起，先用 `taskkill` 清掉 3001 再起主实例）。
+- **⚠️ 坑 2：`start-test-instance.sh` 只杀 9223 监听者，不碰主实例**（脚本内有注释与幂等清场），但 `restart-dev-stack.sh` 会 `taskkill /IM electron.exe /F`（含主实例）——所以「只补起主实例」不要跑整个 restart 脚本。
+
+补起主实例（保持 3000/3001/9223 现状不动）：
+```bash
+cd /d/1.WorkDir/petri
+occ=$(netstat -ano | grep ':3001' | grep LISTENING | awk '{print $5}' | head -1)
+[ -n "$occ" ] && MSYS_NO_PATHCONV=1 taskkill /PID "$occ" /F   # 仅当 3001 是手起进程
+export PETRI_DB_PATH="$(pwd)/.petri-dev-user-data/data/petri.db"
+export PETRI_LOCAL_DATA_DIR="$(pwd)/.petri-dev-user-data/data"
+FNMR="/c/Users/Admin/AppData/Roaming/fnm/node-versions/v24.20.0/installation"
+NODE_EXE="$(cygpath -w "$FNMR")
+ode.exe"; WROOT="$(cygpath -w "$(pwd)")"
+powershell -NoProfile -Command "Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue; Start-Process -FilePath '$NODE_EXE' -ArgumentList 'node_modules\electron\cli.js','.','--dev','--remote-debugging-port=9222' -WorkingDirectory '$WROOT' -WindowStyle Minimized -RedirectStandardOutput '$WROOT\.dev-stack-live.log' -RedirectStandardError '$WROOT\.dev-stack-err.log'"
+# 健康判定：cdp 9222/list 有 page + api 200 + vite 200（同 restart-dev-stack.sh 的 READY 判据）
+```
+- 后端重启后**新路由才生效**（PATCH `/geometry` 需重启；纯前端改动靠 vite HMR 即可）。
+- 日志：`.dev-stack-live.log` / `.dev-stack-err.log`（主实例）、`.petri-test-instance.log`（测试实例）。
 
 ### 4.3 CDP / React 事件踩坑清单（本会话血泪，避免重复踩）
 
