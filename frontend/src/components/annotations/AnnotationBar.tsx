@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon, type IconName } from '@/components/icons/Icon';
 import {
   ANNOTATION_COLORS,
@@ -86,6 +87,32 @@ export function annotationKindColumns(count: number): 1 | 2 | 3 {
   return 3;
 }
 
+const LIST_POPOVER_MAX_WIDTH = 420;
+const LIST_POPOVER_MAX_HEIGHT = 320;
+const POPOVER_MARGIN = 12;
+const POPOVER_GAP = 6;
+
+/**
+ * UI-618 — 批注列表弹层定位：右栏工具条时向**左**展开（不挡面板/不被裁切），
+ * 左右与上下都做视口钳制，保证整张列表完整可见。
+ */
+export function annotationListPopoverPosition(
+  anchor: { left: number; top: number; right: number; bottom: number },
+  viewport: { width: number; height: number },
+): { left: number; top: number; width: number; placement: 'left' | 'right' } {
+  const width = Math.min(LIST_POPOVER_MAX_WIDTH, Math.max(0, viewport.width - POPOVER_MARGIN * 2));
+  const openLeft = anchor.right + POPOVER_GAP + width > viewport.width - POPOVER_MARGIN;
+  const left = openLeft
+    ? Math.max(POPOVER_MARGIN, Math.min(anchor.left - POPOVER_GAP - width, viewport.width - width - POPOVER_MARGIN))
+    : Math.min(anchor.right + POPOVER_GAP, Math.max(POPOVER_MARGIN, viewport.width - width - POPOVER_MARGIN));
+  const maxHeight = Math.min(LIST_POPOVER_MAX_HEIGHT, Math.max(160, viewport.height - POPOVER_MARGIN * 2));
+  const top = Math.min(
+    Math.max(POPOVER_MARGIN, anchor.top),
+    Math.max(POPOVER_MARGIN, viewport.height - maxHeight - POPOVER_MARGIN),
+  );
+  return { left, top, width, placement: openLeft ? 'left' : 'right' };
+}
+
 export function AnnotationBar({
   annotations,
   loading,
@@ -119,6 +146,36 @@ export function AnnotationBar({
   const actionsSide = regionMode && side === 'actions';
   const showTools = regionMode && !actionsSide;
   const showActions = !toolsSide;
+
+  // UI-618 — 批注列表弹层：portal 到 body + fixed 定位，右栏向左展开，避免被面板裁切。
+  const [listOpen, setListOpen] = useState(false);
+  const [listPosition, setListPosition] = useState<ReturnType<typeof annotationListPopoverPosition> | null>(null);
+  const listSummaryRef = useRef<HTMLElement | null>(null);
+  const listPopoverRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    if (!listOpen) return undefined;
+    const close = () => setListOpen(false);
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (listPopoverRef.current?.contains(target) || listSummaryRef.current?.contains(target)) return;
+      close();
+    };
+    window.addEventListener('resize', close);
+    window.addEventListener('scroll', close, true);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => {
+      window.removeEventListener('resize', close);
+      window.removeEventListener('scroll', close, true);
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+    };
+  }, [listOpen]);
 
   if (!canAnnotate) {
     // 执行区没有可执行内容（原因只在工具区展示一次，避免两个栏各说一遍）。
@@ -330,38 +387,65 @@ export function AnnotationBar({
       ))}
 
       {showActions && annotations.length > 0 && (
-        <details className={styles.list} data-testid="annotation-list">
-          <summary title={regionMode ? `批注列表（${annotations.length} 条）` : undefined}>
-            {regionMode ? (
-              <>
-                <Icon name="list-details" size={15} />
-                <span className={styles.count}>{annotations.length}</span>
-              </>
-            ) : (drawing ? '批注列表' : `批注 ${annotations.length}`)}
-          </summary>
-          <div className={styles.items}>
-            {annotations.map((annotation, index) => (
-              <div className={styles.item} key={annotation.annotationId} data-testid="annotation-item">
-                <span className={styles.dot} data-color={annotation.color} aria-hidden="true" />
-                <span className={styles.kindTag}>{describeAnnotationKind(annotation.kind)}</span>
-                <span className={styles.anchor}>{describeAnnotationAnchor(annotation)}</span>
-                <span className={styles.comment} title={annotation.comment}>{annotation.comment}</span>
-                <button
-                  type="button"
-                  className={styles.remove}
-                  data-testid="annotation-remove"
-                  aria-label={`删除批注 ${index + 1}`}
-                  onClick={() => onRemove(annotation.annotationId)}
-                >
-                  ×
-                </button>
+        <>
+          <details
+            className={styles.list}
+            data-testid="annotation-list"
+            open={listOpen}
+            onToggle={(event) => {
+              const nextOpen = event.currentTarget.open;
+              const summary = listSummaryRef.current;
+              if (nextOpen && summary) {
+                const rect = summary.getBoundingClientRect();
+                setListPosition(annotationListPopoverPosition(
+                  { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+                  { width: window.innerWidth, height: window.innerHeight },
+                ));
+              }
+              setListOpen(nextOpen);
+            }}
+          >
+            <summary ref={listSummaryRef} title={regionMode ? `批注列表（${annotations.length} 条）` : undefined}>
+              {regionMode ? (
+                <>
+                  <Icon name="list-details" size={15} />
+                  <span className={styles.count}>{annotations.length}</span>
+                </>
+              ) : (drawing ? '批注列表' : `批注 ${annotations.length}`)}
+            </summary>
+          </details>
+          {listOpen && listPosition && createPortal(
+            <div
+              ref={listPopoverRef}
+              className={styles.items}
+              data-testid="annotation-list-popover"
+              data-placement={listPosition.placement}
+              style={{ left: listPosition.left, top: listPosition.top, width: listPosition.width }}
+            >
+              {annotations.map((annotation, index) => (
+                <div className={styles.item} key={annotation.annotationId} data-testid="annotation-item">
+                  <span className={styles.dot} data-color={annotation.color} aria-hidden="true" />
+                  <span className={styles.kindTag}>{describeAnnotationKind(annotation.kind)}</span>
+                  <span className={styles.anchor}>{describeAnnotationAnchor(annotation)}</span>
+                  <span className={styles.comment} title={annotation.comment}>{annotation.comment}</span>
+                  <button
+                    type="button"
+                    className={styles.remove}
+                    data-testid="annotation-remove"
+                    aria-label={`删除批注 ${index + 1}`}
+                    onClick={() => onRemove(annotation.annotationId)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <div className={styles.footer}>
+                上限 {limit || annotations.length} 条 · 批注只存旁路元数据，不改原始产物
               </div>
-            ))}
-            <div className={styles.footer}>
-              上限 {limit || annotations.length} 条 · 批注只存旁路元数据，不改原始产物
-            </div>
-          </div>
-        </details>
+            </div>,
+            document.body,
+          )}
+        </>
       )}
 
       {showActions && (

@@ -52,6 +52,11 @@ function parseBody(init?: RequestInit): Record<string, unknown> {
   return JSON.parse(raw) as Record<string, unknown>;
 }
 
+function openAnnotationList(getByTestId: (id: string) => HTMLElement): void {
+  const summary = getByTestId('annotation-list').querySelector('summary');
+  if (summary) fireEvent.click(summary);
+}
+
 beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
 });
@@ -97,6 +102,8 @@ describe('AnnotatableImagePane', () => {
     fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '这个离群点需要复核' } });
     fireEvent.click(getByTestId('annotation-inline-confirm'));
 
+    await waitFor(() => expect(getByTestId('annotation-list')).toBeTruthy());
+    openAnnotationList(getByTestId);
     await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
     const postCall = calls.find(([, init]) => init?.method === 'POST');
     expect(postCall).toBeTruthy();
@@ -172,6 +179,8 @@ describe('AnnotatableImagePane', () => {
     fireEvent.change(getByTestId('annotation-inline-input'), { target: { value: '这个离群点需要复核' } });
     fireEvent.click(getByTestId('annotation-inline-confirm'));
 
+    await waitFor(() => expect(getByTestId('annotation-list')).toBeTruthy());
+    openAnnotationList(getByTestId);
     await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
     const undo = getByTestId('annotation-undo');
     expect(undo.getAttribute('title')).toContain('撤销刚才的创建');
@@ -216,6 +225,8 @@ describe('AnnotatableImagePane', () => {
       />,
     );
 
+    await waitFor(() => expect(getByTestId('annotation-list')).toBeTruthy());
+    openAnnotationList(getByTestId);
     await waitFor(() => expect(getByTestId('annotation-item')).toBeTruthy());
     fireEvent.click(getByTestId('annotation-remove'));
     await waitFor(() => expect(queryByTestId('annotation-item')).toBeNull());

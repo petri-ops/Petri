@@ -1,0 +1,103 @@
+{
+  "capturedAt": "2026-10-28T11:29:32.729Z",
+  "head": "961a14ed7e9f5b6e7e18998e5311594e53d69cdc",
+  "projectId": "p_mvrvqqo5_mnss",
+  "surface": "workspace-file 图像批注列表（BLOCK-314/UI-618：右栏左展、portal 顶层、完整可见）",
+  "annotations": 10,
+  "beforeOpen": {
+    "summaryRect": {
+      "left": 1338,
+      "top": 187,
+      "right": 1378,
+      "bottom": 219
+    },
+    "countText": "10",
+    "viewport": {
+      "w": 1602,
+      "h": 1000
+    }
+  },
+  "popover": {
+    "parentIsBody": true,
+    "position": "fixed",
+    "zIndex": "10002",
+    "placement": "left",
+    "rect": {
+      "left": 912,
+      "top": 187,
+      "right": 1332,
+      "bottom": 488
+    },
+    "summaryRect": {
+      "left": 1338,
+      "top": 187,
+      "right": 1378,
+      "bottom": 219
+    },
+    "viewport": {
+      "w": 1602,
+      "h": 1000
+    },
+    "itemCount": 10,
+    "itemTexts": [
+      "矩形文件区域矩形标注×",
+      "矩形文件区域列表弹层验收 1×",
+      "矩形文件区域列表弹层验收 2×"
+    ],
+    "itemWidths": [
+      406,
+      406,
+      406
+    ],
+    "scrollHeight": 299,
+    "clientHeight": 299
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:15000ms"
+  },
+  "total": 8,
+  "passed": 8,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_annotations_seeded",
+      "ok": true,
+      "detail": "count=10"
+    },
+    {
+      "id": "A0_summary_present",
+      "ok": true,
+      "detail": "{\"summaryRect\":{\"left\":1338,\"top\":187,\"right\":1378,\"bottom\":219},\"countText\":\"10\",\"viewport\":{\"w\":1602,\"h\":1000}}"
+    },
+    {
+      "id": "A1_popover_open",
+      "ok": true,
+      "detail": "{\"items\":10,\"parent\":true}"
+    },
+    {
+      "id": "A2_portal_fixed_top_z",
+      "ok": true,
+      "detail": "parent=true position=fixed z=10002"
+    },
+    {
+      "id": "A3_fully_in_viewport",
+      "ok": true,
+      "detail": "rect={\"left\":912,\"top\":187,\"right\":1332,\"bottom\":488} viewport={\"w\":1602,\"h\":1000}"
+    },
+    {
+      "id": "A4_opens_left_of_right_rail",
+      "ok": true,
+      "detail": "placement=left popRight=1332 summaryLeft=1338"
+    },
+    {
+      "id": "A5_items_fully_visible",
+      "ok": true,
+      "detail": "count=10/10 widths=[406,406,406] texts=[\"矩形文件区域矩形标注×\",\"矩形文件区域列表弹层验收 1×\",\"矩形文件区域列表弹层验收 2×\"]"
+    },
+    {
+      "id": "A6_list_height_bounded",
+      "ok": true,
+      "detail": "h=301 clientH=299 scrollH=299"
+    }
+  ]
+}

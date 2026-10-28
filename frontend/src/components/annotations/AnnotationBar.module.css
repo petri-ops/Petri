@@ -224,21 +224,14 @@
   color: var(--petri-text);
 }
 
-/* 右栏贴右缘：批注列表向左展开，避免 420px 浮层飞出窗口。 */
-.bar[data-side='actions'] .items {
-  left: auto;
-  right: 0;
-}
-
+/* UI-618 — 列表弹层 portal 到 body + fixed 定位（左/上由 JS 视口钳制）：
+   脱离面板 overflow 裁切；右栏工具条时向左展开；z 高于标题栏（10001）。 */
 .items {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 30;
+  position: fixed;
+  z-index: 10002;
   display: grid;
   gap: 2px;
-  width: min(420px, calc(100vw - 32px));
-  max-height: 260px;
+  max-height: min(320px, 60vh);
   overflow: auto;
   padding: var(--petri-space-2);
   border: 1px solid var(--petri-border-card);

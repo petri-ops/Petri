@@ -6056,6 +6056,18 @@
       ]
     },
     {
+      "id": "block314-annotation-list-popover-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-314 UI-618 实机腿：批注列表弹层 portal/固定定位/右栏左展/完整可见（10 条：parent body/fixed/z10002/视口内/placement left/条目完整），8/8 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block314-annotation-list-popover-live.cjs",
+        "acceptance/block-312/**"
+      ],
+      "tests": [
+        "frontend/src/components/annotations/AnnotationBar.test.tsx"
+      ]
+    },
+    {
       "id": "block313-model-menu-master-detail-live",
       "classifiesScripts": true,
       "note": "BLOCK-313 UI-617 实机腿：模型菜单主从两栏（供应商常驻 / 右侧二级模型页 / 默认当前供应商 / 无灰底 / 620px / 切换供应商左列不消失），11/11 PASS；取证探针与目录。",

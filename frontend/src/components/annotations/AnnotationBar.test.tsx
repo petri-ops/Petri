@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
-import { AnnotationBar, annotationKindColumns, type AnnotationBarProps } from './AnnotationBar';
+import { AnnotationBar, annotationKindColumns, annotationListPopoverPosition, type AnnotationBarProps } from './AnnotationBar';
 import type { ArtifactAnnotation } from '@/lib/annotations';
 
 /** BLOCK-219 Q6 — 批注工具条：能力门、评论提交、列表删除、加入任务。 */
@@ -60,6 +60,11 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+
+function openAnnotationList(getByTestId: (id: string) => HTMLElement): void {
+  const summary = getByTestId('annotation-list').querySelector('summary');
+  if (summary) fireEvent.click(summary);
+}
 
 describe('AnnotationBar', () => {
   it('不支持批注的面只显示原因，不渲染工具按钮', () => {
@@ -187,6 +192,7 @@ describe('AnnotationBar', () => {
     // 文本面没有「拖拽画框」这回事：绘制开关与形状档都不该出现。
     expect(queryByTestId('annotation-toggle')).toBeNull();
     expect(queryByTestId('annotation-kind-region')).toBeNull();
+    openAnnotationList(getByTestId);
     const item = getByTestId('annotation-item').textContent || '';
     expect(item).toContain('文本批注');
     expect(item).toContain('第 12 行');
@@ -230,7 +236,7 @@ describe('AnnotationBar', () => {
   });
 
   it('BLOCK-254 — 列表标出文字/马赛克形状', () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId, getByTestId } = render(
       <AnnotationBar
         {...props({
           annotations: [annotation({ annotationId: 'a-text', kind: 'text' }), annotation({ annotationId: 'a-mosaic', kind: 'mosaic' })],
@@ -238,6 +244,7 @@ describe('AnnotationBar', () => {
         })}
       />,
     );
+    openAnnotationList(getByTestId);
     const items = getAllByTestId('annotation-item').map((el) => el.textContent || '');
     expect(items[0]).toContain('文本');
     expect(items[1]).toContain('马赛克');
@@ -247,6 +254,7 @@ describe('AnnotationBar', () => {
     const { getByTestId } = render(
       <AnnotationBar {...props({ annotations: [annotation({ kind: 'ellipse' })], drawing: true })} />,
     );
+    openAnnotationList(getByTestId);
     expect(getByTestId('annotation-item').textContent).toContain('椭圆');
   });
 
@@ -269,6 +277,7 @@ describe('AnnotationBar', () => {
     const { getByTestId } = render(
       <AnnotationBar {...props({ annotations: [annotation()], drawing: true, onRemove })} />,
     );
+    openAnnotationList(getByTestId);
     expect(getByTestId('annotation-item').textContent).toContain('第 2 页');
     expect(getByTestId('annotation-item').textContent).toContain('离群点需要复核');
     fireEvent.click(getByTestId('annotation-remove'));
@@ -317,5 +326,41 @@ describe('AnnotationBar', () => {
     const error = getByTestId('annotation-error');
     expect(error.getAttribute('title')).toContain('最多 200 条');
     expect(error.getAttribute('aria-label')).toContain('最多 200 条');
+  });
+});
+
+describe('AnnotationBar UI-618 列表弹层', () => {
+  it('定位：右栏向左展开、左栏向右展开、窄视口钳制', () => {
+    const rightSide = annotationListPopoverPosition({ left: 1500, top: 300, right: 1548, bottom: 332 }, { width: 1600, height: 1000 });
+    expect(rightSide.placement).toBe('left');
+    expect(rightSide.left).toBeGreaterThanOrEqual(12);
+    expect(rightSide.left + rightSide.width).toBeLessThanOrEqual(1500);
+
+    const leftSide = annotationListPopoverPosition({ left: 12, top: 300, right: 60, bottom: 332 }, { width: 1600, height: 1000 });
+    expect(leftSide.placement).toBe('right');
+    expect(leftSide.left).toBeGreaterThan(60);
+
+    const clamped = annotationListPopoverPosition({ left: 900, top: 900, right: 948, bottom: 932 }, { width: 1000, height: 400 });
+    expect(clamped.width).toBeLessThanOrEqual(1000 - 24);
+    expect(clamped.left + clamped.width).toBeLessThanOrEqual(1000 - 12 + 0.01);
+    expect(clamped.top).toBeLessThanOrEqual(400 - 12 - Math.min(320, 400 - 24) + 0.01);
+  });
+
+  it('弹层 portal 到 body，右栏时向左展开且完整在视口内', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      left: 900, top: 300, right: 948, bottom: 332, x: 900, y: 300,
+      width: 48, height: 32, toJSON: () => ({}),
+    });
+    const { getByTestId } = render(
+      <AnnotationBar {...props({ annotations: [annotation()], drawing: true })} />,
+    );
+    openAnnotationList(getByTestId);
+    const popover = getByTestId('annotation-list-popover');
+    expect(popover.parentElement).toBe(document.body);
+    expect(popover.getAttribute('data-placement')).toBe('left');
+    const left = Number.parseFloat(popover.style.left);
+    const width = Number.parseFloat(popover.style.width);
+    expect(left).toBeGreaterThanOrEqual(12);
+    expect(left + width).toBeLessThanOrEqual(900);
   });
 });
