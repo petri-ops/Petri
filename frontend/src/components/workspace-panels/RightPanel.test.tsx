@@ -11,6 +11,8 @@ vi.mock('@/components/result-studio/ResultStudioSurface', () => ({
 }));
 vi.mock('@/pages/project-workspace', () => ({
   EmptyResult: () => <div>empty</div>,
+  readLastPanel: () => null,
+  writeLastPanel: () => undefined,
   RightFileTree: () => <div>files</div>,
   TerminalPanel: () => <div>terminal</div>,
   BrowserPanel: () => <div>browser</div>,

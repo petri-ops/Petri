@@ -15,3 +15,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-27T14:58:20.392Z -->
 最后更新：2026-10-27（**BLOCK-270 批注画笔前端渲染器 completed（C-43 尾项·批次 3/5）**）：freehand 前端镜像全链——KINDS/LABELS/ArtifactAnnotation.path/decimatePath 抽稀镜像（≤512 等距保留首尾）、client locator 三态互斥（freehand 发 path 不发 rect）、session beginPath（undo 重建保持互斥）、Overlay SVG polyline 渲染+画笔采点（down 采点/move 预览/up 相邻去重提交 ≥2 点）、两 pane 接线、任务 prompt 画笔报点数不报假矩形。组件级 **59/59**（Overlay 11/契约/client/Bar）；tsc 0。实机抓真=采点 up 终点与末次 move 重合产生重复点（去重修复）。UI-587 in_progress（实机需结果面真实 job+artifact seed，随结果面实机批）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T00:53:52.668Z -->
+最后更新：2026-10-27（**BLOCK-271 批次 5/5 backlog 滞后注记对账批 completed（治理无代码）**）：pending-work-backlog 队列表滞后注记修正——序 0（W3=BLOCK-163 整波/W6=BLOCK-176-WAVE6 已收口，**两大纲无剩余波次**）；2b 评测 v2 七包（BLOCK-188~194）闭合→completed；2a/2d/2e 补对应交付注记（BLOCK-200/202/206/207/209/210），剩余面标待核；2c/1z 未确凿不冒进只标待核。**教训入册**：queue 表注记不随包收口自动回写是本次误导源头——后续每包收口的 canonical 回写应含 backlog 行（已在 handoff 批间纪律提示）。治理门=docs:check（本批无代码，test:changed 沿用上一轮 PASS）。G0 开发期常态 · 不外推 packaged/Provider/GA。

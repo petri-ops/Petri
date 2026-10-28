@@ -7,6 +7,7 @@ import {
   normalizePointerRect,
   pointToNormalized,
   rectToStyle,
+  smoothFreehandPathD,
   type AnnotationColor,
   type AnnotationKind,
   type ArtifactAnnotation,
@@ -75,11 +76,22 @@ export function AnnotationOverlay({
     return pointToNormalized(node.getBoundingClientRect(), event.clientX, event.clientY);
   }, []);
 
+  // BLOCK-288 — 触屏防误触：活动笔触期间只认同一 pointerId（第二根手指/手掌
+  // 落屏不篡改当前笔画）；pointerUp/cancel 释放。
+  const activePointerRef = useRef<number | null>(null);
+
   const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
     const point = readPoint(event);
     if (!point) return;
     event.preventDefault();
+    if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
+    activePointerRef.current = event.pointerId;
+    try {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    } catch {
+      /* 测试环境无 capture 实现 */
+    }
     if (freehandDrawing) {
       strokeRef.current = [point];
       setDraftPath([point]);
@@ -91,6 +103,7 @@ export function AnnotationOverlay({
 
   const handlePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
+    if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
     const point = readPoint(event);
     if (!point) return;
     if (freehandDrawing && strokeRef.current) {
@@ -105,6 +118,8 @@ export function AnnotationOverlay({
 
   const finish = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     if (!drawing) return;
+    if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
+    activePointerRef.current = null;
     if (freehandDrawing) {
       const stroke = strokeRef.current;
       strokeRef.current = null;
@@ -146,7 +161,8 @@ export function AnnotationOverlay({
       onPointerMove={handlePointerMove}
       onPointerUp={finish}
       onPointerLeave={(event) => {
-        if (startRef.current) finish(event);
+        if (activePointerRef.current !== null && event.pointerId !== activePointerRef.current) return;
+        if (startRef.current || strokeRef.current) finish(event);
       }}
     >
       {visible.map((annotation, index) => (
@@ -180,18 +196,18 @@ export function AnnotationOverlay({
           aria-hidden="false"
         >
           {freehandVisible.map((annotation) => (
-            <polyline
+            <path
               key={annotation.annotationId}
               data-annotation-id={annotation.annotationId}
               data-testid="annotation-freehand-stroke"
               data-color={annotation.color}
-              points={(annotation.path || []).map(([x, y]) => `${x * 100},${y * 100}`).join(' ')}
+              d={smoothFreehandPathD(annotation.path || [])}
               fill="none"
               className={styles.freehandStroke}
               onClick={() => onSelect?.(annotation.annotationId)}
             >
               <title>{`${describeAnnotationAnchor(annotation)}：${annotation.comment}`}</title>
-            </polyline>
+            </path>
           ))}
         </svg>
       )}
@@ -206,8 +222,8 @@ export function AnnotationOverlay({
       )}
       {freehandDrawing && draftPath && draftPath.length >= 2 && (
         <svg className={styles.freehandLayer} data-testid="annotation-freehand-draft" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <polyline
-            points={draftPath.map((point) => `${point.x * 100},${point.y * 100}`).join(' ')}
+          <path
+            d={smoothFreehandPathD(draftPath.map((point) => [point.x, point.y]))}
             fill="none"
             className={styles.freehandStroke}
             data-color={color}

@@ -12,6 +12,30 @@ import { Icon } from '@/components/icons/Icon';
 import { formatShortstatBadge } from '@/components/copilot/conversationChangesStore';
 import styles from '../project-workspace.module.css';
 
+
+/** BLOCK-289 — 最近使用面板记忆（按项目；UI-593 reopen 清偿）。
+ *  记录面=右栏 tab 切换（RightPanel effect 调 writeLastPanel）；消费面=空态卡片
+ *  「上次使用」徽章（不自动跳转——用户动线自主）。localStorage 不可用=静默降级
+ *  （与 FloatCardResizer.readPersistedFloatWidth 同款兜底）。 */
+export function readLastPanel(projectId: string | null | undefined): string | null {
+  if (!projectId) return null;
+  try {
+    const value = window.localStorage.getItem("petri-last-panel:" + projectId);
+    return value && value.trim() ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeLastPanel(projectId: string | null | undefined, tab: string): void {
+  if (!projectId || !tab || tab === 'home') return;
+  try {
+    window.localStorage.setItem("petri-last-panel:" + projectId, tab);
+  } catch {
+    // localStorage 不可用：会话内降级，仅不跨重启
+  }
+}
+
 export function EmptyResult({
   onOpenResults,
   onOpenBrowser,
@@ -19,6 +43,7 @@ export function EmptyResult({
   onOpenChat,
   onOpenReview,
   onOpenJobs,
+  recentPanel = null,
   reviewCount,
   reviewStat,
 }: {
@@ -33,6 +58,8 @@ export function EmptyResult({
   /** UI-362 — 打开指挥中心 tab（项目绑定作业俯瞰）。 */
   onOpenJobs?: () => void;
   /** UI-446 v4 — 当前会话有未看工作区改动：审阅磁贴亮计数徽章引导。 */
+  /** BLOCK-289 — 最近使用的右栏面板（readLastPanel 结果；匹配卡亮「上次使用」徽章）。 */
+  recentPanel?: string | null;
   reviewCount?: number;
   /** UI-449（C-16）— ±行数（权威源=后端 git shortstat；缺省回落纯计数）。 */
   reviewStat?: { added: number; removed: number } | null;
@@ -55,28 +82,28 @@ export function EmptyResult({
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="bar-chart" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>结果</span>
-              <span className={styles.emptyResultLaunchDesc}>查看 Agent 作业的产物与运行结果</span>
+              <span className={styles.emptyResultLaunchDesc}>查看 Agent 作业的产物与运行结果</span>{recentPanel === "results" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-results">上次使用</span> : null}
             </span>
           </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenBrowser} disabled={!onOpenBrowser}>
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="globe" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>浏览器</span>
-              <span className={styles.emptyResultLaunchDesc}>内嵌浏览器，直接查看与操作网页</span>
+              <span className={styles.emptyResultLaunchDesc}>内嵌浏览器，直接查看与操作网页</span>{recentPanel === "browser" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-browser">上次使用</span> : null}
             </span>
           </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenFiles} disabled={!onOpenFiles}>
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="folder" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>文件</span>
-              <span className={styles.emptyResultLaunchDesc}>浏览工作区文件与目录</span>
+              <span className={styles.emptyResultLaunchDesc}>浏览工作区文件与目录</span>{recentPanel === "files" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-files">上次使用</span> : null}
             </span>
           </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenChat} disabled={!onOpenChat}>
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="sidebar" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>侧边聊天</span>
-              <span className={styles.emptyResultLaunchDesc}>不离开工作区，继续与 Agent 对话</span>
+              <span className={styles.emptyResultLaunchDesc}>不离开工作区，继续与 Agent 对话</span>{recentPanel === "chat" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-chat">上次使用</span> : null}
             </span>
           </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenReview} disabled={!onOpenReview}>
@@ -86,12 +113,13 @@ export function EmptyResult({
               <span className={styles.emptyResultLaunchDesc}>审查 Agent 的工作区改动</span>
             </span>
             {reviewCount ? <span className={styles.emptyResultLaunchCount} data-testid="review-tile-count">{formatShortstatBadge(reviewCount, reviewStat)}</span> : null}
+            {recentPanel === "review" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-review">上次使用</span> : null}
           </button>
           <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenJobs} disabled={!onOpenJobs}>
             <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="command" size={16} /></span>
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>指挥中心</span>
-              <span className={styles.emptyResultLaunchDesc}>项目作业与编排俯瞰</span>
+              <span className={styles.emptyResultLaunchDesc}>项目作业与编排俯瞰</span>{recentPanel === "jobs" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-jobs">上次使用</span> : null}
             </span>
           </button>
         </div>

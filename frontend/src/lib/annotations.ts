@@ -211,6 +211,30 @@ export function normalizeFreehandPoints(points: readonly NormalizedPoint[]): [nu
   return points.map((point) => [round4(clamp01(point.x)), round4(clamp01(point.y))]);
 }
 
+/** 渲染层贝塞尔平滑（BLOCK-288）：归一化点序列 → SVG path d（二次中点平滑）。
+ *  存储 path 契约**不变**（原始采点仍原样入库，平滑只在渲染面）——曲线不经过中间
+ *  采点本身（原始点作 Q 控制点、中点作锚），视觉上消除采样折角。少于 2 点=空路径。
+ *  入参放宽为 number[][]：ArtifactAnnotation.path 与采点元组两种形态都吃（运行时
+ *  均为二元数组，类型面以宽松口径对齐存量契约）。 */
+export function smoothFreehandPathD(
+  points: readonly (readonly [number, number] | number[])[],
+  scale = 100
+): string {
+  if (!points || points.length < 2) return '';
+  const fmt = (value: number) => String(Math.round(value * 100) / 100);
+  const px = (index: number) => fmt(points[index][0] * scale);
+  const py = (index: number) => fmt(points[index][1] * scale);
+  if (points.length === 2) return `M ${px(0)},${py(0)} L ${px(1)},${py(1)}`;
+  let d = `M ${px(0)},${py(0)}`;
+  for (let index = 1; index < points.length - 1; index += 1) {
+    const midX = ((points[index][0] + points[index + 1][0]) / 2) * scale;
+    const midY = ((points[index][1] + points[index + 1][1]) / 2) * scale;
+    d += ` Q ${px(index)},${py(index)} ${fmt(midX)},${fmt(midY)}`;
+  }
+  d += ` L ${px(points.length - 1)},${py(points.length - 1)}`;
+  return d;
+}
+
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) return 0;
   if (value < 0) return 0;

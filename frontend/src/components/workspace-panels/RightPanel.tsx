@@ -14,6 +14,8 @@ import {
   type ActiveArtifact,
   type ActiveWorkspaceFile,
   EmptyResult,
+  readLastPanel,
+  writeLastPanel,
   RightFileTree,
   BrowserPanel,
 } from '@/pages/project-workspace';
@@ -160,6 +162,13 @@ export function RightPanel({
   // UI-449（C-16）— 磁贴 ±行数（权威源=后端 git shortstat；有未审改动才拉）
   const reviewStat = useConversationShortstat(ctx.activeConvId, ctx.projectId ?? null, reviewCount > 0);
 
+  // BLOCK-289 — 最近使用面板记忆：tab 离开 home 即记录（按项目）；空态消费亮徽章。
+  // 回 home 后 recentPanel 重新读取（依赖 rightTab 触发重渲）。
+  React.useEffect(() => {
+    if (ctx.rightTab && ctx.rightTab !== 'home') writeLastPanel(ctx.projectId, ctx.rightTab);
+  }, [ctx.rightTab, ctx.projectId]);
+  const recentPanel = ctx.rightTab === 'home' ? readLastPanel(ctx.projectId) : null;
+
   // UI-341 加映二 — 侧栏开合平滑：原实现 !visible 直接 return null（卸载 =
   // 开合瞬时跳变）。现保持挂载、宽度收到 0，走 .rightCol 的 width transition 平滑收起。
   return (
@@ -195,6 +204,7 @@ export function RightPanel({
               >
                 {tab === 'home' && (
                   <EmptyResult
+                    recentPanel={recentPanel}
                     onOpenResults={ctx.handleOpenRightResults}
                     onOpenBrowser={ctx.handleOpenRightBrowser}
                     onOpenFiles={ctx.handleOpenRightFiles}

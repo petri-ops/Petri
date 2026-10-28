@@ -14,6 +14,7 @@ import {
   describeAnnotationKind,
   mosaicTaskNote,
   normalizePointerRect,
+  smoothFreehandPathD,
   pointToNormalized,
   rectToStyle,
   supportsBackdropFilter,
@@ -334,5 +335,28 @@ describe('buildAnnotationTaskPrompt（加入任务的唯一构造点）', () => 
     ], { surface: 'result-artifact', artifactName: 'volcano.png' });
     expect(prompt).toContain('画笔路径（3 个点）');
     expect(prompt).not.toContain('0%');
+  });
+});
+
+describe('smoothFreehandPathD（BLOCK-288 渲染层贝塞尔平滑；存储 path 契约不变）', () => {
+  it('两点=直线段 M/L', () => {
+    const d = smoothFreehandPathD([[0, 0], [1, 1]]);
+    expect(d).toMatch(/^M 0,0 L 100,100$/);
+  });
+
+  it('多点=二次中点平滑（M + Q 段，终点 L 收尾）', () => {
+    const d = smoothFreehandPathD([[0, 0], [0.5, 0.2], [1, 0]]);
+    expect(d.startsWith('M 0,0 Q')).toBe(true);
+    expect(d).toContain('Q');
+    expect(d.endsWith('L 100,0')).toBe(true);
+    // 平滑曲线不经过中间控制点本身（与 polyline 的逐点连线不同）——Q 控制点是原始点
+    expect(d).not.toContain('L 50,20');
+  });
+
+  it('少于两点=空路径；坐标按 scale 缩放保留两位小数', () => {
+    expect(smoothFreehandPathD([])).toBe('');
+    expect(smoothFreehandPathD([[0.12345, 0.99999]])).toBe('');
+    const d = smoothFreehandPathD([[0.12345, 0.12345], [0.9, 0.9]]);
+    expect(d).toBe('M 12.35,12.35 L 90,90');
   });
 });

@@ -245,7 +245,10 @@ describe('AnnotationOverlay', () => {
       />,
     );
     const stroke = getByTestId('annotation-freehand-stroke');
-    expect(stroke.getAttribute('points')).toBe('10,20 50,60 90,30');
+    // BLOCK-288 — 渲染面平滑：path d（二次中点），曲线不逐点连线
+    expect(stroke.getAttribute('d')).toBe(
+      'M 10,20 Q 50,60 70,45 L 90,30',
+    );
     expect(stroke.getAttribute('data-annotation-id')).toBe('k-free');
   });
 
@@ -276,6 +279,34 @@ describe('AnnotationOverlay', () => {
       [0.3, 0.5],
       [0.5, 0.9],
     ]);
+  });
+
+  it('BLOCK-288 — 触屏防误触：第二 pointerId 的移动不篡改当前笔画（手掌拒识）', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(BOX);
+    const onCommitPath = vi.fn();
+    const { getByTestId } = render(
+      <AnnotationOverlay
+        annotations={[]}
+        page={null}
+        drawing
+        color="sky"
+        kind="freehand"
+        onCommit={() => undefined}
+        onCommitPath={onCommitPath}
+        label="批注层：图像"
+      />,
+    );
+    const overlay = getByTestId('annotation-overlay');
+    fireEvent.pointerDown(overlay, { pointerId: 1, clientX: 20, clientY: 10 });
+    // 手掌/第二指落屏（pointerId=2）——不得进当前笔画
+    fireEvent.pointerMove(overlay, { pointerId: 2, clientX: 200, clientY: 300 });
+    fireEvent.pointerMove(overlay, { pointerId: 1, clientX: 100, clientY: 90 });
+    fireEvent.pointerUp(overlay, { pointerId: 1, clientX: 100, clientY: 90 });
+    expect(onCommitPath).toHaveBeenCalledTimes(1);
+    const path = onCommitPath.mock.calls[0][0] as [number, number][];
+    // 掌点（clientX 200→clamp 1.0，clientY 300→clamp 1.0）不得出现在路径
+    expect(path.some(([x, y]) => x >= 0.99 && y >= 0.99)).toBe(false);
+    expect(path).toEqual([[0.1, 0.1], [0.5, 0.9]]);
   });
 
   it('BLOCK-270 — 画笔模式单点（<2 点）不提交', () => {

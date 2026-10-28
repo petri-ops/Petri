@@ -1,5 +1,21 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-596: 右栏空态最近使用面板记忆（2026-10-27 **in_progress（BLOCK-289；UI-593 reopen 清偿；组件级 62/62，实机腿随下次右栏实机批）**）
+
+- **变化面**：右栏 tab 离开 home 即按项目持久化最近面板（localStorage petri-last-panel:<projectId>）；空态六卡中匹配卡亮「上次使用」徽章（accent pill，绝对定位右上角）——不自动跳转（用户动线自主）。helpers=readLastPanel/writeLastPanel（EmptyResult.tsx 单源，localStorage 不可用静默降级）。
+- **为什么这样设计**：UI-593 reopen 项——多面板用户回空态时提示上次的动线，降低重新寻找成本；不代用户做决定。
+- **验证（代码）**：EmptyResult 徽章测+RightPanel mock 补导出+annotations 域回归 62/62+tsc 0。
+- **实机证据**：未跑（右栏实机批补）。
+- **边界（reopen）**：最近使用栈（仅记最后一个）；跨设备同步。
+
+## UI-595: 批注画笔渲染平滑与触屏防误触（2026-10-27 **in_progress（BLOCK-288；UI-587 reopen 两项清偿；组件级 62/62，实机腿随下次批注实机批）**）
+
+- **变化面**：①freehand 渲染层贝塞尔平滑——smoothFreehandPathD（二次中点：原始点作 Q 控制点、中点作锚）持久笔画与草稿预览统一 polyline→path，**存储 path 契约不变**（原始采点原样入库，平滑纯渲染面）；②触屏防误触——活动笔触期间只认同一 pointerId（第二指/手掌落屏不篡改笔画），pointerCapture 兜底 try/catch（happy-dom 无 capture 实现），pointerLeave 守卫同口径。
+- **为什么这样设计**：UI-587 reopen（压感/贝塞尔/触屏）三项中贝塞尔与触屏可代码化（压感需硬件感知，维持 reopen）；渲染层平滑不改存储契约=已入库批注零迁移。
+- **验证（代码）**：annotations.test 平滑 3 例（直线/多点 Q 段/空路径）+Overlay 采点/防误触+pane 回归 62/62+tsc 0。
+- **实机证据**：未跑（批注实机批补）。
+- **边界（reopen）**：压感线宽（需 pointer pressure 硬件）；触屏双指缩放手势与画笔的互斥细节。
+
 ## UI-594: 斜杠 skill 条目结构化 chip（2026-10-27 **in_progress（BLOCK-284；C-29 chip v2；组件级锚齐 5/5+312/312，实机腿随下次斜杠面实机批）**）
 
 - **变化面**：斜杠菜单选中 skill 条目从「注入文本模板」升级为「结构化 chip」——buildSkillItem 单源构造器（与 @ 菜单 buildSkillCandidates 同形同源）→ ComposerContextItem 走 composerContext 通道；classifySlashCommand 新增 add-skill-chip 动作类；template 条目保持文本注入（v1 预裁决不变）。

@@ -352,7 +352,8 @@ describe('theme token contract', () => {
       'components/annotations/AnnotationOverlay.module.css': 1, // BLOCK-254 文字批注正文（图内注释；框内需小于页面正文，非正文性小字）
       'components/ui/controls/status.module.css': 3, // W4 三件套元信息（ErrorNotice/LoadingLabel）合法 sm 域
       // UI-593 空态重排：+2 = 工作区描述文案 + 入口卡说明行（次级元信息合法 sm 域，对标 status.module.css 先例）
-      'pages/project-workspace.module.css': 54,
+      // UI-596 最近使用徽章：+1 = 「上次使用」pill（合法徽标域，对标 OrchestrationGraph 先例）
+      'pages/project-workspace.module.css': 55,
       'components/copilot/simple-chat.css': 24,
       'components/workspace-panels/OrchestrationGraph.module.css': 1, // BLOCK-178 定性：节点状态徽标 pill（合法徽标域）
       'components/desktop/desktop.css': 16,
@@ -409,7 +410,8 @@ describe('theme token contract', () => {
       // UI-591 指针跟随渐晕：+1 = resizeHandleV::before 跟手 radial glow；
       // 用户裁决「有光晕后同色竖带冗余」：hover accent 线与 :has 分隔线转色退场（-2）
       // UI-593 空态重排：+7 = 工作区标题章底色/入口卡图标章（默认+hover）/卡片 hover accent 描边与底色——宪章五类「交互态入口卡」合法语义（同 ArtifactPinPane/拖拽把手先例）
-      'pages/project-workspace.module.css': 101,
+      // UI-596 最近使用徽章：+2 = pill 底色+文字色（交互态入口卡语义延续）
+      'pages/project-workspace.module.css': 103,
       'components/copilot/simple-chat.css': 31,
       'components/desktop/desktop.css': 24,
       'pages/extensions/styles.module.css': 20,

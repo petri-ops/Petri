@@ -5679,6 +5679,18 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text);
 }
 
+.emptyResultLaunchRecent {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 1px 8px;
+  border-radius: var(--petri-radius-pill);
+  background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
+  color: var(--petri-accent);
+  font-size: var(--petri-font-size-sm);
+  font-weight: 600;
+}
+
 .emptyResultLaunchDesc {
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-tertiary);

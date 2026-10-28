@@ -1263,4 +1263,4 @@ export function ProjectWorkspace(): React.ReactElement {
 export { RightFileTree } from './project-workspace/RightFileTree';
 export { TerminalPanel } from './project-workspace/TerminalPanel';
 export { BrowserPanel } from './project-workspace/BrowserPanel';
-export { EmptyResult } from './project-workspace/EmptyResult';
+export { EmptyResult, readLastPanel, writeLastPanel } from './project-workspace/EmptyResult';
