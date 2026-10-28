@@ -5884,6 +5884,35 @@
       ]
     },
     {
+      "id": "block281-judge-refusal-scale",
+      "classifiesScripts": true,
+      "note": "BLOCK-281 C-27 清偿：judge fit 量表拒绝读数口径（3/4 级含恰当拒绝条款 + 指令拒绝评分指引；行为级红绿=Jev cloud probe 同一拒绝 2.38→ESCALATE / 3.73→PASS）。",
+      "patterns": [
+        "test/block281-judge-refusal-scale.test.mjs",
+        "core/petri-server/helpers/judge-core.js"
+      ],
+      "tests": [
+        "test/block281-judge-refusal-scale.test.mjs",
+        "test/block119-output-judge.test.mjs",
+        "test/block194-evals-llm-judge.test.mjs"
+      ]
+    },
+    {
+      "id": "block280-cache-prefix",
+      "classifiesScripts": true,
+      "note": "BLOCK-280 C-34 复核证伪+加固：累计可缓存前缀锚测试（tools+system ≥2048）+ Anthropic 转换层 tools 断点红绿；纠正 backlog 过期判词（漏计 92 工具定义 ≈21k tokens）。",
+      "patterns": [
+        "test/block280-cache-prefix.test.mjs",
+        "core/shared-backend/llm-providers/protocol-conversion.js"
+      ],
+      "tests": [
+        "test/block280-cache-prefix.test.mjs",
+        "test/block212-prompt-prefix.test.mjs",
+        "test/anthropic-provider.test.mjs",
+        "test/provider-protocol.test.mjs"
+      ]
+    },
+    {
       "id": "block279-ui-walkthrough",
       "classifiesScripts": true,
       "note": "BLOCK-279 七批 UI 改动合并自动化走查（用户裁决免人测参与）：计量条文字形态/页脚图标化/两级菜单/空态重排/拖拽边界 glow 注入激活，亮暗双主题断言与取证。",

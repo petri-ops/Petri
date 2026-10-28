@@ -113,6 +113,12 @@ function openAIToAnthropicRequest(body) {
       description: (tool.function && tool.function.description) || tool.description || '',
       input_schema: (tool.function && tool.function.parameters) || tool.input_schema || {},
     }));
+    // BLOCK-280 — C-34 加固：tools 段独立缓存断点。C-34 判词「system 前缀 < 最小可缓存
+    // ⇒ 失效」复核不成立（累计前缀含 92 工具定义 ≈21k tokens，见 test/block280-cache-prefix），
+    // 但 tools 自身无断点意味着 system 文本一变（版本/身份块）tools 段缓存连带失效——
+    // 给最后一个工具补 ephemeral 断点成两段式：tools 段跨 system 变化仍可复用。
+    const lastTool = result.tools[result.tools.length - 1];
+    lastTool.cache_control = { type: 'ephemeral' };
   }
   // BLOCK-81 P1 — 思考档位：Anthropic 协议用 thinking:{type,budget_tokens}，本函数是
   // **白名单重建**（非展开透传），不显式搬运会被静默丢弃 → 档位在 anthropic 渠道失效。
