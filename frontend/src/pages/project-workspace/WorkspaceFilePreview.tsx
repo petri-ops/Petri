@@ -557,8 +557,9 @@ export function WorkspaceFilePreview({
           />
         )}
         {((status === 'ready' && (fallbackKind === 'text' || fallbackKind === 'json' || isMarkdown)) || officeAnnotatable) && (
-          /* BLOCK-254 P5 — 文本族面的批注条：列表/撤销/加入任务常驻，
-             新增批注由选区动作条触发（预览视图无行号时按钮禁用并说明原因）。 */
+          /* BLOCK-254 P5 — 文本族面的批注条：选区产生待填锚点后才出现输入框，
+             无批注/无待填时整条不渲染（UI-624：不再常驻空输入与禁用按钮）。
+             新增批注由选区动作条的「批注」触发。 */
           <ConnectedAnnotationBar
             mode="text"
             session={textAnnotation}

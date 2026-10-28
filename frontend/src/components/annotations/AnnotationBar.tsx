@@ -198,6 +198,13 @@ export function AnnotationBar({
     if (ok) setComment('');
   };
 
+  // UI-624 — 文本面空闲态不渲染空批注条：没有批注、没有待填锚点、也没有
+  // 加载/错误/可撤销动作时，常驻的禁用输入框看起来像无效控件；入口在选区
+  // 动作条的「批注」，选中文本后才出现输入区。
+  if (!regionMode && !pendingRect && annotations.length === 0 && !loading && !error && !canUndo) {
+    return <></>;
+  }
+
   return (
     <div
       className={styles.bar}
@@ -319,17 +326,16 @@ export function AnnotationBar({
       )}
 
       {/* BLOCK-300 — 区域面的评论输入就地化（overlay inlineComposer 接管）；
-          只有文本锚点面（mode='text'，批注由选区产生）仍走工具条输入。 */}
-      {!regionMode && (drawing || pendingRect) && (
+          文本锚点面只在选区产生待填锚点后渲染评论框（UI-624：空闲不再常驻禁用框）。 */}
+      {!regionMode && pendingRect && (
         <div className={styles.composer} data-testid="annotation-composer">
           <input
             type="text"
             className={styles.input}
             data-testid="annotation-comment-input"
             value={comment}
-            disabled={!pendingRect}
             maxLength={MAX_ANNOTATION_COMMENT_CHARS}
-            placeholder="写下对这段文字的批注（会随「加入任务」发给 Agent）"
+            placeholder="写下对这段文字的批注（会随「加入上下文」发给 Agent）"
             onChange={(event) => setComment(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') void submit();
@@ -448,7 +454,7 @@ export function AnnotationBar({
         </>
       )}
 
-      {showActions && (
+      {showActions && (regionMode || annotations.length > 0) && (
         <button
           type="button"
           className={styles.addToTask}

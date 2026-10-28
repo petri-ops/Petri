@@ -4,7 +4,7 @@
 // 这里只钉「文本面有批注条、且没有拖拽画框的开关」这一条接线事实，互不干扰断言基线。
 
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveWorkspaceFile } from './types';
 import { ThemeProvider } from '@/themes/ThemeProvider';
@@ -43,8 +43,67 @@ afterEach(() => {
 });
 
 describe('BLOCK-254 P5 — 文本面批注条', () => {
-  it('文本族预览渲染文本模式批注条，且不渲染拖拽画框开关', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('# 标题\n\n正文\n', { status: 200 }))));
+  it('UI-624 — 空闲态（无批注/无待填）不渲染空批注条', async () => {
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      if (url.includes('/annotations')) {
+        return Promise.resolve(new Response(JSON.stringify({ annotations: [], count: 0, limit: 200 }), { status: 200 }));
+      }
+      return Promise.resolve(new Response('# 标题\n\n正文\n', { status: 200 }));
+    }));
+
+    render(
+      <ThemeProvider>
+        <WorkspaceFilePreview
+          file={textFile()}
+          refreshVersion={0}
+          openError=""
+          opening={false}
+          onOpen={() => undefined}
+          onDownload={() => undefined}
+          projectId="p_x"
+        />
+      </ThemeProvider>,
+    );
+
+    await screen.findByText('正文');
+    await waitFor(() => expect(screen.queryByTestId('annotation-bar')).toBeNull());
+    expect(screen.queryByTestId('annotation-add-to-task')).toBeNull();
+  });
+
+  it('有文本批注时渲染批注条（列表 + 加入上下文），且无拖拽画框开关', async () => {
+    vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+      if (url.includes('/annotations')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          annotations: [{
+            annotationId: 'ann_text_1',
+            contractVersion: 1,
+            projectId: 'p_x',
+            conversationId: null,
+            surface: 'workspace-file',
+            artifactId: null,
+            revisionId: null,
+            filePath: 'notes.md',
+            entryId: null,
+            artifactName: 'notes.md',
+            kind: 'text-range',
+            page: null,
+            rect: [],
+            path: [],
+            anchor: { kind: 'text-range', startLine: 3, endLine: 3, startColumn: null, endColumn: null, quote: '正文', language: 'md' },
+            comment: '这段需要复核',
+            color: 'amber',
+            author: 'user',
+            createdAt: '2026-10-20T00:00:00.000Z',
+            updatedAt: '2026-10-20T00:00:00.000Z',
+          }],
+          count: 1,
+          limit: 200,
+        }), { status: 200 }));
+      }
+      return Promise.resolve(new Response('# 标题\n\n正文\n', { status: 200 }));
+    }));
 
     render(
       <ThemeProvider>
@@ -62,9 +121,7 @@ describe('BLOCK-254 P5 — 文本面批注条', () => {
 
     const bar = await screen.findByTestId('annotation-bar');
     expect(bar.dataset.mode).toBe('text');
-    // 文本面没有「拖拽框选」这回事，只能由选区产生锚点。
     expect(screen.queryByTestId('annotation-toggle')).toBeNull();
-    // 列表/加入任务常驻（空批注时禁用但可见）。
-    expect(screen.getByTestId('annotation-add-to-task')).toBeTruthy();
+    expect(screen.getByTestId('annotation-add-to-task').textContent).toBe('加入上下文');
   });
 });

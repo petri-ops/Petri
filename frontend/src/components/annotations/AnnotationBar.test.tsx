@@ -200,6 +200,18 @@ describe('AnnotationBar', () => {
     expect(getByTestId('annotation-add-to-task').textContent).toBe('加入上下文');
   });
 
+  it('UI-624 — 文本面空闲不渲染空批注条；待填锚点才出现评论框', () => {
+    const idle = render(<AnnotationBar {...props({ mode: 'text' })} />);
+    expect(idle.container.firstChild).toBeNull();
+    idle.unmount();
+
+    const pending = render(<AnnotationBar {...props({ mode: 'text', pendingRect: true })} />);
+    expect(pending.getByTestId('annotation-comment-input')).toBeTruthy();
+    expect(pending.getByTestId('annotation-save')).toBeTruthy();
+    // 无批注时不渲染「加入上下文」（避免空条里的禁用按钮）。
+    expect(pending.queryByTestId('annotation-add-to-task')).toBeNull();
+  });
+
   it('BLOCK-254 B-2 — 撤销按钮：栈空不渲染，栈非空带下一步说明并回传', () => {
     const onUndo = vi.fn();
     const empty = render(<AnnotationBar {...props({ canUndo: false, onUndo })} />);

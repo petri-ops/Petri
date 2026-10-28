@@ -17,3 +17,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T13:41:36.219Z -->
 最后更新：2026-10-28（**BLOCK-310 completed（UI-614 verified）**）：图片入口识图门改按「有图时的自动决议」判断（自动模式有图会选 DeepSeek 视觉能力），手动/遗留 preset 补能力位，notice 指路；红→绿实机（临时非视觉绑定复现原提示 → 修复后无提示 + 附件入列，共享设置 finally 恢复），auto-model 9/9 + attachments 10/10 + closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T14:35:36.991Z -->
+最后更新：2026-10-28（**BLOCK-311 completed（UI-615 verified）**）：右栏顶部标签条按标签数×可用宽度自动折叠为图标（文本隐藏、title/aria 保留、关闭× hover/激活才出），少标签恢复全标签，仍放不下保留横向滚动；ResizeObserver 驱动。证据=helper 单测 + TitleBar 12/12 + theme 17/17 + 实机 9/9（11 标签 compact/无溢出/图标齐全；关闭其他→1 标签恢复）+ closeout 十三门 PASS。拖出独立窗另案（窗口系统已有 pop-out/return，右侧内容绑工作区 ctx）。G0 开发期常态 · 不外推 packaged/Provider/GA。

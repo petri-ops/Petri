@@ -1,0 +1,69 @@
+{
+  "capturedAt": "2026-10-28T14:32:25.362Z",
+  "head": "f5a2fb98ea3f8a1b2e0195fce9a08b9be294c7fe",
+  "projectId": "p_mvs7r0v0_weoq",
+  "surface": "文件预览文本批注条（BLOCK-319/UI-624：空闲不渲染空输入条；有批注恢复列表+加入上下文）",
+  "idle": {
+    "bar": false,
+    "barMode": null,
+    "input": false,
+    "addToContext": false,
+    "addLabel": null,
+    "toggle": false,
+    "placeholderInDom": false,
+    "hasList": false
+  },
+  "annotated": {
+    "bar": true,
+    "barMode": "text",
+    "input": false,
+    "addToContext": true,
+    "addLabel": "加入上下文",
+    "toggle": false,
+    "placeholderInDom": false,
+    "hasList": true
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_failed:-32000"
+  },
+  "total": 7,
+  "passed": 7,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs7r0v0_weoq"
+    },
+    {
+      "id": "P1_note_opened",
+      "ok": true,
+      "detail": "open=clicked"
+    },
+    {
+      "id": "A0_idle_no_annotation_bar",
+      "ok": true,
+      "detail": "{\"bar\":false,\"barMode\":null,\"input\":false,\"addToContext\":false,\"addLabel\":null,\"toggle\":false,\"placeholderInDom\":false,\"hasList\":false}"
+    },
+    {
+      "id": "B0_annotation_seeded",
+      "ok": true,
+      "detail": "status=200 body={\"annotation\":{\"annotationId\":\"ann_92be54e3-be99-490a-8372-517ad2a9fc0d\",\"contractVersion\":2,\"projectId\":\"p_mvs7r0v0_weoq\",\"conversationId\":null,\"surface\":\"workspace-file\",\"artifac"
+    },
+    {
+      "id": "B1_note_reopened",
+      "ok": true,
+      "detail": "open=clicked"
+    },
+    {
+      "id": "B2_annotation_bar_restored",
+      "ok": true,
+      "detail": "{\"bar\":true,\"barMode\":\"text\",\"input\":false,\"addToContext\":true,\"addLabel\":\"加入上下文\",\"toggle\":false,\"placeholderInDom\":false,\"hasList\":true}"
+    },
+    {
+      "id": "B3_no_idle_input_confusion",
+      "ok": true,
+      "detail": "input=false placeholder=false"
+    }
+  ]
+}
