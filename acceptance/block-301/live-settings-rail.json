@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-10-28T04:55:23.129Z",
+  "head": "d02666d3747a3909820c4030b2c5f930a5eeea26",
+  "surface": "壳层左栏（AppRail+LeftPanel）×设置独立页",
+  "total": 4,
+  "passed": 4,
+  "failed": 0,
+  "records": [
+    {
+      "id": "D0_home_rail_present",
+      "ok": true,
+      "detail": "{\"rail\":true,\"path\":\"/\"}"
+    },
+    {
+      "id": "D1_settings_rail_hidden",
+      "ok": true,
+      "detail": "{\"rail\":false,\"railRoot\":false,\"settingsPage\":true}"
+    },
+    {
+      "id": "D2_settings_fullwidth",
+      "ok": true,
+      "detail": "page=1602px viewport=1602px"
+    },
+    {
+      "id": "D3_back_restores_rail",
+      "ok": true,
+      "detail": "{\"rail\":true,\"path\":\"/\"}"
+    }
+  ]
+}

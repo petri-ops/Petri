@@ -166,7 +166,10 @@ function AppShell(): React.ReactElement {
             </div>
           </>
         )}
-        {(!projectionMobile) && <AppRail />}
+        {/* UI-602 — 设置独立页隐藏壳层左栏（用户裁决「点击设置按钮的时候左侧栏应该隐藏，
+            保持好的使用习惯」）：设置页自带返回出路（DesktopSettingsPanel onClose=history.back），
+            全窗设置不拖壳层导航；其余页面 AppRail 常驻不变。 */}
+        {(!projectionMobile && location.pathname !== '/settings') && <AppRail />}
         <main
           className="petri-spa-main"
           style={{

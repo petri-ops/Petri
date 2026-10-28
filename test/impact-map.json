@@ -5973,6 +5973,16 @@
       ]
     },
     {
+      "id": "block301-settings-rail-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-302 UI-602 实机腿：设置页隐藏壳层左栏走查（首页在场→/settings 退场+占满→返回恢复，4/4 PASS）；取证探针与目录。",
+      "patterns": [
+        "scripts/block301-settings-rail-live.cjs",
+        "acceptance/block-301/**"
+      ],
+      "tests": []
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

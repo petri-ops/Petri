@@ -40,6 +40,14 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-602: 设置页隐藏壳层左栏（2026-10-28 **verified（BLOCK-302；实机 4/4）**）
+
+- **变化面**：App 壳层 AppRail 渲染条件加路由判断——`/settings` 独立页下壳层左栏（AppRail+LeftPanel 全系统）退场，设置页占满窗口；其余页面常驻不变（用户裁决「点击设置按钮的时候左侧栏应该隐藏，保持好的使用习惯」）。
+- **为什么这样设计**：设置是设备级全窗工作流，壳层导航在其上无操作价值且挤压设置内容宽度；设置页自带返回出路（DesktopSettingsPanel「← 返回」=history.back，与 Skills/知识空间页头同形态），藏栏后无困死风险。
+- **验证（代码）**：App.tsx 单点渲染条件（桌面态；移动投影抽屉态不涉及——手机端本为 overlay 交互）。
+- **实机证据**：9223 dev Electron 实断（acceptance/block-301/live-settings-rail.json，4/4 PASS）：D0 首页左栏在场；D1 /settings 下左栏全退场（设置入口与 aside 均不在）+ 设置页在场；D2 设置页宽度=视口（1602px）；D3「← 返回」后左栏恢复。
+- **边界（reopen）**：/extensions、/knowledge 等其它全窗页仍保留左栏（用户仅裁决设置页）；返回语义=history.back（深链直入设置时回浏览器上一条）。
+
 ## UI-601: 图片灯箱 portal 全屏置顶（2026-10-28 **verified（BLOCK-301；组件级 9/9 + 实机 6/6）**）
 
 - **变化面**：Lightbox 渲染从面板组件树内改为 **createPortal 到 document.body**——此前灯箱留在面板树内时，祖先的 stacking context（面板 transform 过渡层/z-index）把 `position:fixed` 的全屏能力降格为「相对祖先定位」：遮罩被裁、盖不住聊天 composer 与顶栏（用户反馈「图片预览是不是应该顶层，输入框和顶层栏应该回到它们该有的层」）。portal 后灯箱脱离一切祖先上下文，遮罩真全屏、层级唯一最高。
