@@ -8374,8 +8374,29 @@
         "G0"
       ],
       "notes": "2026-10-27 用户裁决「鼠标放到拖拽的地方有渐变的渲染效果……任何可以变化的窗口不应该被固定宽度的条带干扰影响美观」+「项目摘要和侧边聊天的窗口左侧也不要默认有这么宽 换成 一致的统一规范」（附截图）。拖拽边界悬停统一「细线+渐变高光」规范：workspaceFileTreeResize 4px 实心带重构 / FloatCardResizer 常驻线 3px 收窄（可发现性不回退，v25 教训在案）/ 清 desktop.css 死把手样式；QODER-ESSENCE-ABSORPTION 切片（用户实测反馈，非矩阵行）。"
+    },
+    {
+      "id": "BLOCK-307-ANNOTATION-HANDOFF",
+      "path": "docs/block-307-annotation-handoff.md",
+      "kind": "handoff",
+      "status": "active",
+      "canonical": false,
+      "archivePolicy": "archive_when_superseded",
+      "tags": [
+        "handoff",
+        "block-303",
+        "block-304",
+        "block-305",
+        "block-306",
+        "block-307",
+        "annotation",
+        "ui",
+        "g0"
+      ],
+      "notes": "批注交互线交接：BLOCK-303~307 五包已交付（箭头真形态/prompt 溯源/透明淡染/标题栏菜单修复/✓×真实鼠标+拖拽移动+布局）；遗留三条待办（拖拽延迟根因与修法、箭头 pointer-events 漏配、左栏 .kinds 网格布局）+ 验证探针清单 + 3001 手动后端坑 + CDP 踩坑清单。",
+      "registeredAt": "2026-10-28"
     }
   ],
-  "lastUpdated": "2026-10-27",
-  "documentCount": 405
+  "lastUpdated": "2026-10-28",
+  "documentCount": 427
 }

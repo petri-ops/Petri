@@ -199,6 +199,8 @@
 3. [`project-workspace-handoff.md`](./project-workspace-handoff.md) — 当前可恢复 Git/工程检查点。
    只有任务实际涉及阶段顺序、UI 或模块边界时，才读取 [`v1-productization-roadmap.md`](./v1-productization-roadmap.md)、[`ui-productization-audit.md`](./ui-productization-audit.md) 或 [`development-module-map.md`](./development-module-map.md)。其他 G0 资格、插件、发布和历史材料从上方核心指引、下方专项规范或 `DOC-REGISTRY.json` 按需定位；已完成工作包和 Acceptance 不属于默认启动上下文。
 
+**批注线交接（2026-10-28）**：[`block-307-annotation-handoff.md`](./block-307-annotation-handoff.md) —— BLOCK-303~307 五包交付结果 + 三条遗留（拖拽延迟 / 箭头不可拖 / 左栏布局）的根因与修法 + 探针清单 + CDP 踩坑。接手批注相关任务时先读它。
+
 ## 当前有效专项规范
 
 - [`codex-style-workbench-direction.md`](./codex-style-workbench-direction.md) — UI 产品方向。
