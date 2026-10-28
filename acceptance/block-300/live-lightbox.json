@@ -1,0 +1,41 @@
+{
+  "capturedAt": "2026-10-28T04:40:35.252Z",
+  "head": "4592a1d42e8a595b651311dc93b5068171b54804",
+  "projectId": "p_mvrmm2e4_jnkz",
+  "surface": "workspace-file 图像预览面（BLOCK-301 灯箱 portal：body 直挂/遮罩全屏/盖住 composer 与顶栏）",
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvrmm2e4_jnkz"
+    },
+    {
+      "id": "D0_preview_ready",
+      "ok": true,
+      "detail": "预览面图像加载完成"
+    },
+    {
+      "id": "D1_portal_to_body",
+      "ok": true,
+      "detail": "{\"parentIsBody\":true,\"inPanel\":false}"
+    },
+    {
+      "id": "D2_overlay_fullscreen",
+      "ok": true,
+      "detail": "{\"w\":1602,\"h\":1000,\"vw\":1602,\"vh\":1000}"
+    },
+    {
+      "id": "D3_covers_composer_and_topbar",
+      "ok": true,
+      "detail": "[{\"sel\":\"[data-testid=\\\"composer-input\\\"], [placeholder*=\\\"输入消息\\\"]\",\"hit\":\"lightbox\"},{\"sel\":\"[class*=\\\"titleBar\\\"], header\",\"hit\":\"lightbox\"}]"
+    },
+    {
+      "id": "D4_esc_closes",
+      "ok": true,
+      "detail": "lightbox gone=true"
+    }
+  ]
+}

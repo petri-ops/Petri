@@ -40,6 +40,14 @@
 - **实机证据**：待跑。
 - **边界（reopen）**：图标态如需回归须用户再裁决（UI-584 已推翻）。
 
+## UI-601: 图片灯箱 portal 全屏置顶（2026-10-28 **verified（BLOCK-301；组件级 9/9 + 实机 6/6）**）
+
+- **变化面**：Lightbox 渲染从面板组件树内改为 **createPortal 到 document.body**——此前灯箱留在面板树内时，祖先的 stacking context（面板 transform 过渡层/z-index）把 `position:fixed` 的全屏能力降格为「相对祖先定位」：遮罩被裁、盖不住聊天 composer 与顶栏（用户反馈「图片预览是不是应该顶层，输入框和顶层栏应该回到它们该有的层」）。portal 后灯箱脱离一切祖先上下文，遮罩真全屏、层级唯一最高。
+- **为什么这样设计**：全屏浮层（灯箱/模态）挂 body 是 stacking context 陷阱的标准解；四类使用处（ResultArtifactShell/resultAnnotation/ImageRenderer/WorkspaceFilePreview）共用同一组件，一处修复全部生效。
+- **验证（代码）**：Lightbox 6/6（Esc/点击关闭、滚轮缩放钳制、拖拽平移、双击复位、新增 portal 契约「body 直挂+面板内不可见+关闭退场」）+ resultAnnotation 3/3（消费方回归）。
+- **实机证据**：9223 dev Electron 工作区图像面实断（acceptance/block-300/live-lightbox.json，6/6 PASS）：D1 灯箱 parentElement===body 且不在面板容器内；D2 遮罩尺寸=视口（1602×1000）；D3 **composer 中心与顶栏中心 elementFromPoint 均命中灯箱**（盖住输入框/顶栏=用户问题核心）；D4 Esc 关闭退场。
+- **边界（reopen）**：灯箱内滚轮缩放/拖拽平移行为不变；若未来出现第二个全屏浮层需与灯箱互斥，另行裁决层级表。
+
 ## UI-600: 批注就地输入——动作结束即出现输入框，允许不填（2026-10-28 **verified（BLOCK-300/299；组件级 33/33 + 主题门 + 实机 10/10）**）
 
 - **变化面**：①**所有形状工具**（箭头/矩形/椭圆/画笔/马赛克）画完松手后，就地输入框出现在**动作结束位置**（拖拽终点/画笔尾点）——Enter/失焦/✓ 确认、Esc/× 取消，bar 的 composer 在区域面退场（用户裁决原话「任何一个用于批注的动作 鼠标停止的时候 批注输入框就应该在结束位置出现…允许不填写」）；②**文本工具**：点击图面即就地开框（不拖拽），保存时量取输入框实际渲染尺寸落库（rectOverride）；③**允许不填写**：空评论确认落 `defaultAnnotationComment` 占位文案（箭头标注/矩形标注…），后端 comment_required 契约不变；④hook 新增 beginTextAt/pendingTextPoint/submitComment(comment, rectOverride?)；⑤工作区文本锚点面（mode='text'）保留工具条输入（选区产生批注，无图面就地语义）；⑥宿主 drawing 门控补 `Boolean(scope)`（缺产物身份不再进绘制态）。

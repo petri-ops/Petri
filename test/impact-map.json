@@ -5961,6 +5961,18 @@
       ]
     },
     {
+      "id": "block300-lightbox-portal-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-300 UI-601 实机腿：灯箱 portal 全屏置顶走查（body 直挂/遮罩全屏/composer 与顶栏 hit-test 命中灯箱/Esc 关闭，6/6 PASS）；取证探针与目录，前端改动面经 frontend 通道自动路由 vitest。",
+      "patterns": [
+        "scripts/block300-lightbox-portal-live.cjs",
+        "acceptance/block-300/**"
+      ],
+      "tests": [
+        "frontend/src/components/ui/Lightbox.test.tsx"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

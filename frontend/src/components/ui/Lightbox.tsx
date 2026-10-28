@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './Lightbox.css';
 
 const MIN_ZOOM = 1;
@@ -81,7 +82,10 @@ export function Lightbox({
     if (drag && !drag.moved) onClose();
   };
 
-  return (
+  // BLOCK-301 — portal 到 body：灯箱若留在面板组件树内，祖先的 stacking context
+  // （transform/z-index 的面板过渡层）会把 fixed 全屏降格为「相对祖先定位」，
+  // 遮罩被裁、盖不住 composer/顶栏；挂到 body 后脱离一切祖先上下文真正全屏置顶。
+  return createPortal(
     <div
       className="petri-lightbox"
       onPointerDown={onPointerDown}
@@ -109,6 +113,7 @@ export function Lightbox({
         ×
       </button>
       <span className="petri-lightbox__hint">滚轮缩放 · 拖拽平移 · 双击复位</span>
-    </div>
+    </div>,
+    document.body,
   );
 }

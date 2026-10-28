@@ -60,4 +60,20 @@ describe('Lightbox', () => {
     expect(img.getAttribute('data-zoom')).toBe('1');
     expect(img.getAttribute('data-pan')).toBe('0,0');
   });
+
+  it('BLOCK-301 — portals to document.body（脱离面板 stacking context 真全屏置顶）', () => {
+    const { baseElement } = render(
+      <div data-testid="panel-root" style={{ transform: 'translateX(0)' }}>
+        <Lightbox src="plot.png" alt="volcano" onClose={() => {}} />
+      </div>,
+    );
+    // 灯箱不在组件树容器内，而是 body 直挂——面板祖先的 transform/z-index 不再降格 fixed 全屏。
+    const lightbox = document.body.querySelector(':scope > .petri-lightbox');
+    expect(lightbox).toBeTruthy();
+    expect(baseElement.querySelector('[data-testid="panel-root"] .petri-lightbox')).toBeNull();
+    // 关闭后 portal 节点随卸载退场
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
+    cleanup();
+    expect(document.body.querySelector(':scope > .petri-lightbox')).toBeNull();
+  });
 });
