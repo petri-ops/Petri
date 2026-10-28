@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { Icon } from '@/components/icons/Icon';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { getApiPrefix } from '@/lib/env';
 import {
@@ -38,34 +39,12 @@ interface ModelPrice { input: number; output: number }
 type PricingTable = Record<string, ModelPrice>;
 
 /**
- * BLOCK-266 并钮——组合菜单行渲染。UI-589（用户裁决「点击模型供应商，出现对应的
- * 模型选择」）：mode=all 改两级导航——第一级供应商标题行（点击=钻取进入该渠道
- * 模型列表），第二级=该渠道模型行 + 返回行；不再供应商/模型平铺混排。
+ * BLOCK-266 并钮——组合菜单行渲染。UI-613（用户裁决「供应商模型列表应该是新的
+ * 页面」）：mode=all 两页下钻——供应商页只列供应商行，点供应商整页切到该渠道
+ * 模型页（返回行 + 标题/数量）；不再左右两列混排，也不铺灰底容器。
  * 纯投影：模型行点击=选该模型（selectModel 连带切渠道默认，供应商级联隐式成立）；
  * 白名单禁行与价格元信息与 model 分支同源。
  */
-function renderSupplierHeaderRows(
-  groups: ModelCatalogGroup[],
-  onDrill: (group: ModelCatalogGroup) => void,
-): React.ReactElement[] {
-  return groups.map((group) => {
-    const selectable = groupSelectableRows(group);
-    return (
-      <button
-        type="button"
-        key={"hdr-" + group.key}
-        className="sc-model-option sc-model-group-header"
-        onClick={() => onDrill(group)}
-        title={`查看 ${group.supplier} 的模型`}
-        data-testid={`model-menu-supplier-${group.key}`}
-      >
-        <span className="sc-model-option-title">{group.supplier}</span>
-        <span className="sc-model-option-meta">{selectable.length} 个模型</span>
-      </button>
-    );
-  });
-}
-
 function renderGroupModelRows(opts: {
   group: ModelCatalogGroup;
   activeModelId: string;
@@ -208,7 +187,7 @@ export function ModelMenu({
             {summary.text}
           </div>
         )}
-        {onToggleAuto && (
+        {onToggleAuto && !drilledGroup && (
           <button
             type="button"
             className={`sc-model-option ${autoModel ? 'sc-model-option-active' : ''}`}
@@ -228,29 +207,65 @@ export function ModelMenu({
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
-          /* UI-597（用户裁决「模型列表在供应商右侧的新窗口列出，不在下面」）——
-             两级导航从垂直钻取改左右两列：左列供应商常驻（点选切换右列），
-             右列=选中供应商的模型列表；未选中时右列给引导态。 */
-          <div className="sc-model-two-pane" data-testid="model-menu-two-pane">
-            <div className="sc-model-two-pane-suppliers">
-              {renderSupplierHeaderRows(groups, (group) => setDrilledKey(group.key))}
+          /* UI-613（用户裁决「供应商模型列表应该是新的页面，混在一起不专业、灰底不好看」）
+             ——供应商页 → 模型页两页下钻；选中态只留左侧 accent 细线，不铺灰底。 */
+          drilledGroup ? (
+            <div className="sc-model-page" data-testid="model-menu-model-page">
+              <div className="sc-model-page-head">
+                <button
+                  type="button"
+                  className="sc-model-back"
+                  data-testid="model-menu-back"
+                  aria-label="返回供应商列表"
+                  title="返回供应商列表"
+                  onClick={() => setDrilledKey(null)}
+                >
+                  <Icon name="arrow-left" size={14} />
+                </button>
+                <span className="sc-model-page-title">
+                  <span className="sc-model-option-title">{drilledGroup.supplier}</span>
+                  <span className="sc-model-option-meta">
+                    {groupSelectableRows(drilledGroup).length} 个模型
+                  </span>
+                </span>
+              </div>
+              {renderGroupModelRows({
+                group: drilledGroup,
+                activeModelId,
+                accessDenied,
+                pricing,
+                onPickModel,
+              })}
             </div>
-            <div className="sc-model-two-pane-models">
-              {drilledGroup ? (
-                renderGroupModelRows({
-                  group: drilledGroup,
-                  activeModelId,
-                  accessDenied,
-                  pricing,
-                  onPickModel,
-                })
-              ) : (
-                <div className="sc-model-two-pane-hint" data-testid="model-menu-hint">
-                  <span className="sc-model-option-meta">← 选择供应商查看模型</span>
-                </div>
-              )}
+          ) : (
+            <div className="sc-model-page" data-testid="model-menu-suppliers-page">
+              {groups.map((group) => {
+                const selectable = groupSelectableRows(group);
+                const current = group.rows.some((row) => row.preset.id === activeModelId);
+                return (
+                  <button
+                    type="button"
+                    key={group.key}
+                    className="sc-model-supplier"
+                    title={`查看 ${group.supplier} 的模型`}
+                    data-testid={`model-menu-supplier-${group.key}`}
+                    onClick={() => setDrilledKey(group.key)}
+                  >
+                    <span className="sc-model-supplier-main">
+                      <span className="sc-model-option-title">{group.supplier}</span>
+                      <span className="sc-model-option-meta">
+                        {current ? '当前使用 · ' : ''}
+                        {selectable.length === 0
+                          ? '无可用模型（可查看原因）'
+                          : `${selectable.length} 个模型`}
+                      </span>
+                    </span>
+                    <Icon name="chevron-right" size={14} className="sc-model-supplier-chevron" />
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          )
         ) : mode === 'supplier' ? (
 
           groups.map((group) => {

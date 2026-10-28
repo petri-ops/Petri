@@ -134,33 +134,75 @@
   box-shadow: var(--petri-shadow-float);
 }
 
-/* UI-597（用户裁决「模型列表在供应商右侧的新窗口列出，不在下面」）——
-   mode=all 两列布局：左列供应商常驻、右列选中供应商的模型；加宽菜单容纳两列。 */
-.sc-model-menu:has(.sc-model-two-pane) {
-  width: min(460px, calc(100vw - 32px));
+/* UI-613（用户裁决「供应商模型列表应该是新的页面；混在一起不专业、灰底不好看」）——
+   mode=all 两页下钻：供应商页只列供应商行，点供应商整页切到模型页。
+   不铺任何灰底容器；选中态只留左侧 accent 细线。 */
+.sc-model-menu:has(.sc-model-page) {
+  width: min(320px, calc(100vw - 32px));
 }
-.sc-model-two-pane {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 1px;
-  background: var(--sc-divider, rgba(128,128,128,0.15));
-}
-.sc-model-two-pane > div {
+.sc-model-page {
   display: flex;
   flex-direction: column;
+}
+.sc-model-page-head {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: 2px 4px 8px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--petri-divider);
+}
+.sc-model-page-title {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   min-width: 0;
 }
-.sc-model-two-pane-suppliers .sc-model-option {
-  border-radius: 0;
+.sc-model-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
 }
-.sc-model-two-pane-suppliers [data-active='true'],
-.sc-model-two-pane-suppliers .sc-model-group-header:has(+ .sc-model-option-active) {
-  background: color-mix(in srgb, var(--sc-accent, var(--petri-accent, #14b8a6)) 12%, transparent);
+.sc-model-back:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
 }
-.sc-model-two-pane-hint {
-  padding: 18px 12px;
-  text-align: center;
-  color: var(--sc-text-tertiary, var(--petri-text-tertiary, #888));
+.sc-model-supplier {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.sc-model-supplier:hover {
+  background: var(--petri-hover);
+}
+.sc-model-supplier-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.sc-model-supplier-chevron {
+  flex: 0 0 auto;
+  color: var(--petri-text-tertiary);
 }
 
 .sc-model-option {
@@ -191,9 +233,14 @@
   letter-spacing: 0.02em;
 }
 
-.sc-model-option:hover,
-.sc-model-option-active {
+.sc-model-option:hover {
   background: var(--petri-hover);
+}
+
+/* UI-613 — 选中态不再铺灰底：左侧 accent 细线 + 保持透明底（深/亮主题都干净）。 */
+.sc-model-option-active {
+  background: transparent;
+  box-shadow: inset 2px 0 0 var(--petri-accent-border);
 }
 
 .sc-model-option-title {
@@ -5325,11 +5372,3 @@
 }
 
 /* BLOCK-266 并钮组合菜单——供应商分组标题行（非输入语义，弱化样式） */
-.sc-model-group-header {
-  cursor: pointer;
-  opacity: 0.85;
-}
-
-.sc-model-group-header:hover {
-  background: var(--petri-hover);
-}

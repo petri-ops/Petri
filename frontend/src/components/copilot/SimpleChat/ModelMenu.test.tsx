@@ -183,10 +183,11 @@ describe('ModelMenu', () => {
   });
 });
 
-describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级导航 + UI-597 左右两列）', () => {
-  it('all 模式：左列供应商常驻 → 点供应商右列显示其模型 → 点模型回调', () => {
+describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-613 供应商页→模型页下钻）', () => {
+  it('供应商页 → 点供应商进入模型页 → 返回 → 选模型回调', () => {
     const onPickSupplier = vi.fn();
     const onPickModel = vi.fn();
+    const onToggleAuto = vi.fn();
     render(
       <ModelMenu
         mode="all"
@@ -194,31 +195,41 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-589 两级�
         selectedGroup={groups[0]}
         activeModelId="a1"
         summary={{ level: 'ok', text: '' }}
+        autoModel={false}
+        autoPreview=""
+        onToggleAuto={onToggleAuto}
         onClose={() => {}}
         onPickSupplier={onPickSupplier}
         onPickModel={onPickModel}
       />,
     );
-    // 左列供应商常驻；未点选前右列无模型
-    expect(screen.getByText('DeepSeek')).toBeTruthy();
+    // 供应商页：只有供应商行 + 自动档；没有模型行、没有右列提示、没有两列容器。
+    expect(screen.getByTestId('model-menu-suppliers-page')).toBeTruthy();
+    expect(screen.getByTestId('model-menu-auto')).toBeTruthy();
     expect(screen.queryByText('model-a')).toBeNull();
-    expect(screen.queryByText('model-b')).toBeNull();
-    expect(screen.queryByTestId('model-menu-back')).toBeNull();
-    // 点供应商标题 = 钻取（不直接 onPickSupplier 切默认）
+    expect(screen.queryByTestId('model-menu-hint')).toBeNull();
+    expect(screen.queryByTestId('model-menu-two-pane')).toBeNull();
+    // 点供应商 = 进入模型页（不直接 onPickSupplier 切默认）
     fireEvent.click(screen.getByText('DeepSeek'));
     expect(onPickSupplier).not.toHaveBeenCalled();
-    // 右列出现该渠道模型行（供应商左列保持常驻——两列布局无返回行）
+    expect(screen.getByTestId('model-menu-model-page')).toBeTruthy();
+    expect(screen.getByTestId('model-menu-back')).toBeTruthy();
     expect(screen.getByText('model-a')).toBeTruthy();
     expect(screen.getByText('model-b')).toBeTruthy();
-    // 点模型 = onPickModel 回调（selectModel 连带切渠道默认，供应商级联隐式成立）
+    // 模型页聚焦该供应商：不重复自动档
+    expect(screen.queryByTestId('model-menu-auto')).toBeNull();
+    // 返回供应商页
+    fireEvent.click(screen.getByTestId('model-menu-back'));
+    expect(screen.getByTestId('model-menu-suppliers-page')).toBeTruthy();
+    expect(screen.queryByText('model-a')).toBeNull();
+    // 再进入并点模型 = onPickModel 回调（selectModel 连带切渠道默认，供应商级联隐式成立）
+    fireEvent.click(screen.getByText('DeepSeek'));
     fireEvent.click(screen.getByText('model-b'));
     expect(onPickModel).toHaveBeenCalledWith(groups[0].rows[1].preset);
     expect(onPickSupplier).not.toHaveBeenCalled();
-    // 供应商左列在点模型后仍常驻
-    expect(screen.getByText('DeepSeek')).toBeTruthy();
   });
 
-  it('all 模式：钻取后缺密钥行禁行 + 拒绝理由与 model 模式同源', () => {
+  it('all 模式：模型页缺密钥行禁行 + 拒绝理由与 model 模式同源', () => {
     const locked = buildModelGroups(presets, {
       ...EMPTY_MODEL_CATALOG,
       credentialStatus: { anthropic: false },

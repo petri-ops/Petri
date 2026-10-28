@@ -21,3 +21,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T09:52:48.079Z -->
 最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 启动登记（active·P0-LAUNCH）**）：用户裁决「每次优化升级只是部分代码，收口只需要校验有改动的部分即可」。范围=eslint --cache + tsc --incremental + arch 两门/knip 域跳过 + cruise 同轮去重 + closeout:full 转义；非范围=test:changed 内部语义、knip/arch 判定规则与基线、npm run check 发布链。基线实测=重量静态门 98.4s/轮（eslint 79s 占 80%）。fail-open 全护栏（状态缺失/损坏/锚点不可达即全量）。plan=docs/block-272-closeout-targeted-plan.md。无 UI 台账增量（纯治理门禁）。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:16:56.840Z -->
+最后更新：2026-10-27（**BLOCK-272 closeout 收口定向化 completed（P4-CLOSED）**）：三层机制落地——eslint --cache + tsc --incremental + arch 两门/knip 域跳过（decideSkip 状态锚定，fail-open）+ cruise 同轮共享 + closeout:full --force-full 转义。证据=红绿 13/13 + 回归 31/31 + closeout 十三门 PASS exit 0（域自纠实证：arch 两门因实现脚本改动域内命中→全量）+ closeout:full PASS 零跳过行；**静态门热态 98.4s→10.4s**（lint 79→1.5s/tsc 12.1→1.6s，timing 三件落 acceptance/block-272/）。抓真三处：test-affected 18 红=新脚本未登记 impact-map（复绿）；platform-freeze 抓探针平台分支（含注释字面量，Jev 追加建议命中，shell:true 收敛）；域设计自纠=门禁实现脚本纳入自身域。Jev=doc:suggest planDoc 0.89 采纳/uiAudit 0.06 零建议（无 UI 增量）。G0 开发期常态 · 不外推 packaged/Provider/GA。

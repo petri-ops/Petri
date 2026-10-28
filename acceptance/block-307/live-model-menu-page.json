@@ -1,0 +1,87 @@
+{
+  "capturedAt": "2026-10-28T10:14:13.386Z",
+  "head": "baafe7d3c8da93c078a178eaa1e784f1386ffde8",
+  "projectId": "p_mvryib6j_y5mr",
+  "surface": "composer 模型菜单（BLOCK-309/UI-613：供应商页 → 模型页下钻 + 去灰底）",
+  "total": 14,
+  "passed": 14,
+  "failed": 0,
+  "notes": {
+    "screenshotSupplier": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:20000ms",
+    "screenshotModel": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:20000ms",
+    "menuWidth": 320,
+    "supplierChosen": "DeepSeek"
+  },
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvryib6j_y5mr"
+    },
+    {
+      "id": "A0_supplier_page",
+      "ok": true,
+      "detail": "{\"menu\":true,\"menuBg\":\"rgb(255, 255, 255)\",\"menuW\":320,\"page\":true,\"pageBg\":\"rgba(0, 0, 0, 0)\",\"auto\":true,\"twoPane\":false,\"hint\":false,\"modelRowsInPage\":0,\"suppliers\":[{\"testid\":\""
+    },
+    {
+      "id": "A1_suppliers_listed",
+      "ok": true,
+      "detail": "suppliers=4 样本=[{\"testid\":\"model-menu-supplier-deepseek-chat\",\"supplier\":\"DeepSeek\",\"meta\":\"当前使用 · 2 个模型\",\"bg\":\"rgba(0, 0, 0, 0)\",\"chevron\":true},{\"testid\":\"model-menu-supplier-model-1787541766966\",\"supplier\":\"ninijoker\",\"meta\":\"1 个模型\",\"bg\":\"rgba(0, 0, 0, 0)\","
+    },
+    {
+      "id": "A2_no_mixed_models",
+      "ok": true,
+      "detail": "modelRowsInPage=0 twoPane=false hint=false"
+    },
+    {
+      "id": "A3_no_gray_blocks",
+      "ok": true,
+      "detail": "pageBg=rgba(0, 0, 0, 0) rowBg=rgba(0, 0, 0, 0) menuBg=rgb(255, 255, 255)"
+    },
+    {
+      "id": "A4_auto_on_supplier_page",
+      "ok": true,
+      "detail": "auto=true"
+    },
+    {
+      "id": "B0_supplier_with_models",
+      "ok": true,
+      "detail": "{\"testid\":\"model-menu-supplier-deepseek-chat\",\"supplier\":\"DeepSeek\",\"meta\":\"当前使用 · 2 个模型\",\"bg\":\"rgba(0, 0, 0, 0)\",\"chevron\":true}"
+    },
+    {
+      "id": "B1_model_page",
+      "ok": true,
+      "detail": "{\"page\":true,\"back\":true,\"headText\":\"DeepSeek2 个模型\",\"menuW\":320,\"menuBg\":\"rgb(255, 255, 255)\",\"pageBg\":\"rgba(0, 0, 0, 0)\",\"auto\":false,\"twoPane\":false,\"modelCount\":2,\"rows\":[\"deeps"
+    },
+    {
+      "id": "B2_head_shows_supplier",
+      "ok": true,
+      "detail": "head=DeepSeek2 个模型"
+    },
+    {
+      "id": "B3_models_listed",
+      "ok": true,
+      "detail": "rows=2 期望=2 样本=[\"deepseek-flash\",\"deepseek-v4-pro\"]"
+    },
+    {
+      "id": "B4_page_focus_no_auto_no_mix",
+      "ok": true,
+      "detail": "auto=false twoPane=false"
+    },
+    {
+      "id": "B5_active_row_clean",
+      "ok": true,
+      "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"boxShadow\":\"rgba(13, 148, 136, 0.4) 2px 0px 0px 0px inset\"}"
+    },
+    {
+      "id": "B6_menu_surface_not_gray",
+      "ok": true,
+      "detail": "menuBg=rgb(255, 255, 255)"
+    },
+    {
+      "id": "C0_back_returns_to_suppliers",
+      "ok": true,
+      "detail": "{\"supplierPage\":true,\"modelPage\":false,\"auto\":true}"
+    }
+  ]
+}

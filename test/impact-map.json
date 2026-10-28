@@ -6044,6 +6044,18 @@
       ]
     },
     {
+      "id": "block309-model-menu-page-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-309 UI-613 实机腿：模型菜单供应商页→模型页下钻 + 去灰底（供应商页无模型行/无 two-pane/透明底；模型页返回/模型行/active inset 细线；返回恢复），14/14 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block309-model-menu-page-live.cjs",
+        "acceptance/block-307/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx"
+      ]
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",
