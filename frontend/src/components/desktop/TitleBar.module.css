@@ -637,6 +637,24 @@
   line-height: 16px;
 }
 
+/* UI-615 — 标签多/栏窄时折叠为图标：文本隐藏（title/aria 保留），关闭钮仅 hover/激活显示。 */
+.tabsRailCompact .tabPill {
+  padding: 0 5px;
+}
+
+.tabsRailCompact .tabPillText {
+  display: none;
+}
+
+.tabsRailCompact .tabClose {
+  display: none;
+}
+
+.tabsRailCompact .tabPill:hover .tabClose,
+.tabsRailCompact .tabPillActive .tabClose {
+  display: flex;
+}
+
 .tabPillMain > svg {
   flex-shrink: 0;
 }

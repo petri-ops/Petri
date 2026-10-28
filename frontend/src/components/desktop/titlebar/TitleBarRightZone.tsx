@@ -24,6 +24,17 @@ import { NotificationCenterBell } from './NotificationCenterBell';
  * UI-365 — modeUsesRightRail 随 settings 模式退役移除：右栏开合只由路由
  * 与用户偏好决定。
  */
+/**
+ * UI-615 — 右栏顶部标签条自适应判据：按标签数与可用宽度估算「完整标签」所需宽度，
+ * 不足则折叠为图标态（文本进 title/aria）；单标签或布局未就绪（宽 0）不折叠。
+ * 估算口径：图标 14 + 关闭 14 + 内边距/间距 ≈ 58，标签文本最多 96；尾部更多按钮 ≈ 32。
+ */
+export function tabStripShouldCompact(labels: readonly string[], railWidth: number): boolean {
+  if (labels.length <= 1 || railWidth <= 0) return false;
+  const estimated = labels.reduce((sum, label) => sum + 58 + Math.min(label.length * 13, 96), 0) + 32;
+  return railWidth < estimated;
+}
+
 export function TitleBarRightZone(): React.ReactElement {
   const panels = useWorkspacePanelsContext();
   const location = useLocation();
@@ -50,6 +61,25 @@ export function TitleBarRightZone(): React.ReactElement {
   const moreButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const [menuAnchor, setMenuAnchor] = React.useState<{ top: number; right: number } | null>(null);
   const tabsRailRef = React.useRef<HTMLDivElement | null>(null);
+  const [compactTabs, setCompactTabs] = React.useState(false);
+  const tabLabels = React.useMemo(() => tabs.map((tab) => tab.label), [tabs]);
+
+  // UI-615 — 标签多/栏窄时自动折叠为图标（仍放不下则保留横向滚动兜底）。
+  React.useLayoutEffect(() => {
+    const rail = tabsRailRef.current;
+    if (!rail || !panels.rightOpen) {
+      setCompactTabs(false);
+      return undefined;
+    }
+    const measure = () => {
+      setCompactTabs(tabStripShouldCompact(tabLabels, rail.clientWidth));
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(rail);
+    return () => observer.disconnect();
+  }, [panels.rightOpen, tabLabels]);
 
   // 多 surface 横向滚动后，激活项必须自动回到视野（新开 pack 视图不在首屏时尤其重要）。
   React.useEffect(() => {
@@ -73,7 +103,11 @@ export function TitleBarRightZone(): React.ReactElement {
   return (
     <div className={`${styles.rightZone} ${!panels.rightOpen ? styles.rightZoneCollapsed : ''}`}>
       {panels.rightOpen && workspacePanelsAvailable && (
-        <div className={styles.tabsRail} ref={tabsRailRef}>
+        <div
+          className={`${styles.tabsRail} ${compactTabs ? styles.tabsRailCompact : ''}`}
+          data-compact={compactTabs ? 'true' : 'false'}
+          ref={tabsRailRef}
+        >
           {tabs.map((tab) => {
             const active = tab.id === activeTabId;
             return (
@@ -91,6 +125,7 @@ export function TitleBarRightZone(): React.ReactElement {
                   className={styles.tabPillMain}
                   onClick={() => onSelectTab?.(tab.id)}
                   title={tab.label}
+                  aria-label={tab.label}
                   aria-pressed={active}
                 >
                   <Icon name={tab.icon} size={14} />

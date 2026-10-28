@@ -6056,6 +6056,19 @@
       ]
     },
     {
+      "id": "block311-tab-strip-adaptive-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-311 UI-615 实机腿：右栏顶部标签条多标签自动折叠图标 / 少标签恢复全标签（11 tabs compact+无溢出+图标齐全；关闭其他→1 tab full），9/9 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block311-tab-strip-adaptive-live.cjs",
+        "acceptance/block-309/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.toolMenu.test.tsx",
+        "frontend/src/components/desktop/titlebar/TitleBarRightZone.unread.test.tsx"
+      ]
+    },
+    {
       "id": "block310-image-vision-gate-live",
       "classifiesScripts": true,
       "note": "BLOCK-310 UI-614 实机腿：图片入口识图门红→绿（临时切非视觉 chat/agent 绑定 + auto on 拖图：旧门禁复现提示 → 修复后无提示 + 附件入列；finally 恢复共享设置），8/8 PASS；取证探针与目录。",

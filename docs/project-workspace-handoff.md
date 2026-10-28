@@ -1,7 +1,9 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。**三推（2026-10-28，用户全权收尾指令「继续 搞完这个」）**：main `e9960ce6..72c1e061` 共 **11 笔**（BLOCK-275/276/277/278/279 五包 + UI-591 代落盘 + 对账/自稳治理批）+ 快照标签 snapshot-20261027-7 补推（远端=本地全集）；此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录已兑现授权，不构成常驻授权）。
 
-最后更新：2026-10-28（**BLOCK-310 completed（UI-614 verified）；无 active 工作包**）
+最后更新：2026-10-28（**BLOCK-311 completed（UI-615 verified）；无 active 工作包**）
+
+**恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户反馈右栏顶部标签多时拥挤，BLOCK-311 已收口：按标签数×可用宽度自动折叠为图标（文本隐藏、title/aria 保留、关闭× hover/激活才出），少标签恢复全标签，仍放不下保留横向滚动；实机 9/9（11 标签 compact/无溢出/图标齐全；关闭其他→1 标签恢复）。**拖出独立窗**未并入本包（用户询问可行性）：窗口系统已有 `window:pop-out/return`（terminal/command-center/rail），但右侧 tab 内容依赖 ProjectWorkspace ctx，需要「工作区窗宿主 + 上下文快照/同步 + 拖拽手势 + 恢复」，建议另立包评估；P1 可先做 Files/Browser/Generated/Evidence 等相对独立面，Analysis/Review 等需 job/artifact 上下文的另片。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：用户反馈拖图片被「识图模型未配置」拦住，BLOCK-310 已收口：图片入口按「有图时的自动决议」判断（自动模式有图会选 DeepSeek 视觉模型）/ 手动与 legacy preset 补能力位 / notice 指路；红→绿实机验证（临时把 chat/agent 切到非视觉 gemini、auto on：旧门禁复现原提示 → 修复后无提示+附件入列；finally 恢复共享设置，C0 相等）。非范围=后端 vision 角色绑定/模型目录不动；手动非视觉 + 关自动仍如实阻断。证据=[`acceptance/block-308/live-image-vision-gate.json`](../acceptance/block-308/live-image-vision-gate.json)（8/8）+ auto-model 9/9 + attachments 10/10 + closeout 十三门 PASS。**待用户动作**：UI-594/595/596 实机腿补跑 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

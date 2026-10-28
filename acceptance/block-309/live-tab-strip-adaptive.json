@@ -1,0 +1,125 @@
+{
+  "capturedAt": "2026-10-28T10:50:17.510Z",
+  "head": "61c69fd80d04d9c5bbe419ac42ff34d854fecfa8",
+  "projectId": "p_mvrzsyo7_g3pr",
+  "surface": "右栏顶部标签条（BLOCK-311/UI-615：多标签自动折叠图标 / 少标签恢复全标签）",
+  "opened": [
+    "文件",
+    "生成文件",
+    "浏览器",
+    "分析",
+    "审阅",
+    "指挥中心",
+    "轨迹",
+    "模型 I/O",
+    "智能体",
+    "计划",
+    "证据"
+  ],
+  "missed": [],
+  "crowded": {
+    "compact": "true",
+    "count": 11,
+    "labels": [
+      "files",
+      "generated",
+      "browser",
+      "analyze",
+      "review",
+      "jobs",
+      "trace",
+      "io",
+      "agent",
+      "plan",
+      "evidence"
+    ],
+    "textDisplays": [
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "textCount": 11,
+    "iconCount": 11,
+    "railW": 491,
+    "scrollW": 491,
+    "more": true,
+    "windowToolButtons": 3
+  },
+  "single": {
+    "compact": "false",
+    "count": 1,
+    "labels": [
+      "evidence"
+    ],
+    "textDisplays": [
+      "block"
+    ],
+    "textCount": 1,
+    "iconCount": 1,
+    "railW": 491,
+    "scrollW": 491,
+    "more": true,
+    "windowToolButtons": 3
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:20000ms"
+  },
+  "total": 9,
+  "passed": 9,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvrzsyo7_g3pr"
+    },
+    {
+      "id": "A0_tabs_opened",
+      "ok": true,
+      "detail": "count=11 opened=11 missed=[]"
+    },
+    {
+      "id": "A1_compact_when_crowded",
+      "ok": true,
+      "detail": "compact=true railW=491 scrollW=491 count=11"
+    },
+    {
+      "id": "A2_labels_hidden",
+      "ok": true,
+      "detail": "texts=11 displays=[\"none\",\"none\",\"none\",\"none\",\"none\",\"none\",\"none\",\"none\",\"none\",\"none\",\"none\"]"
+    },
+    {
+      "id": "A3_icons_remain",
+      "ok": true,
+      "detail": "icons=11/11"
+    },
+    {
+      "id": "A4_controls_intact",
+      "ok": true,
+      "detail": "more=true windowTools=3"
+    },
+    {
+      "id": "A5_icons_fit_no_overflow",
+      "ok": true,
+      "detail": "railW=491 scrollW=491"
+    },
+    {
+      "id": "B0_close_others_ready",
+      "ok": true,
+      "detail": "context=context close=closed"
+    },
+    {
+      "id": "B1_few_tabs_full_labels",
+      "ok": true,
+      "detail": "count=1 compact=false displays=[\"block\"]"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { TitleBarRightZone } from './TitleBarRightZone';
+import { TitleBarRightZone, tabStripShouldCompact } from './TitleBarRightZone';
 
 vi.mock('@/components/desktop/WorkspacePanelsContext', () => ({
   useWorkspacePanelsContext: () => mockPanels,
@@ -54,5 +54,22 @@ describe('TitleBarRightZone 工具菜单（BLOCK-257 宿主菜单复开缺陷回
     expect(menu.style.position).toBe('fixed');
     expect(screen.getByRole('menuitem', { name: /终端/ })).toBeTruthy();
     expect(screen.getByLabelText('关闭工具菜单')).toBeTruthy();
+  });
+});
+
+describe('tabStripShouldCompact（UI-615 右栏顶部标签条自适应）', () => {
+  it('单标签/布局未就绪（宽 0）不折叠', () => {
+    expect(tabStripShouldCompact(['文件'], 80)).toBe(false);
+    expect(tabStripShouldCompact(['文件', '浏览器', '分析'], 0)).toBe(false);
+  });
+
+  it('三标签窄栏折叠为图标，宽栏保持全标签', () => {
+    expect(tabStripShouldCompact(['文件', '浏览器', '分析'], 190)).toBe(true);
+    expect(tabStripShouldCompact(['文件', '浏览器', '分析'], 900)).toBe(false);
+  });
+
+  it('长标签/多标签按估算宽度更早折叠', () => {
+    expect(tabStripShouldCompact(['分析结果对比', '浏览器', '审阅'], 300)).toBe(true);
+    expect(tabStripShouldCompact(['文件', '浏览器'], 400)).toBe(false);
   });
 });

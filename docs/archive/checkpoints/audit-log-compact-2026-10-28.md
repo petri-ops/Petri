@@ -34,3 +34,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:31:51.531Z -->
 | ✅ 处理完成（BLOCK-310；用户「拖图提示识图模型未配置，如何避免？默认识图模型就是 deepseek 可好」） | 2026-10-28 | **图片入口识图门（UI-614 verified）**：根因=入口只读手动 activeModel，自动模式有图会选 DeepSeek（唯一 vision 聊天模型）却判死；修法=按 hasImages=true 自动决议 + 手动/legacy 补能力位 + notice 指路。红→绿实机（探测期临时切 chat/agent 到非视觉 gemini、auto on：旧门禁复现用户原话提示 → 修复后无提示 + 附件入列；finally 恢复绑定，C0 相等）+ auto-model 9/9 + attachments 10/10 + tsc/lint 0 error + closeout 十三门 PASS。非范围=后端 vision 角色绑定/模型目录不动；手动非视觉 + 关自动仍如实阻断。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-614 / BLOCK-310 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:50:58.173Z -->
+| ✅ 处理完成（BLOCK-311；用户截图「右栏顶部标签多时拥挤，应自动变图标/折叠」） | 2026-10-28 | **右栏标签条自适应（UI-615 verified）**：按标签数×可用宽度估算，不足折叠为图标态（文本隐藏、title/aria 保留、关闭× hover/激活才出），少标签恢复全标签，仍放不下保留横向滚动；ResizeObserver 驱动。证据=helper 单测 + TitleBar 12/12 + theme 17/17 + 实机 9/9（11 标签 compact/无溢出/图标齐全；关闭其他→1 标签恢复）+ closeout 十三门。非范围=拖出独立窗另案（窗口系统已有 pop-out/return，右栏内容绑工作区 ctx）；标签顺序/菜单不变。G0 开发期常态 · 不外推 packaged/Provider/GA | UI-615 / BLOCK-311 |

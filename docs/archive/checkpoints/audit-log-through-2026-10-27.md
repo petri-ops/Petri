@@ -27,3 +27,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:31:51.531Z -->
 最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 启动登记（active·P0-LAUNCH）**）：用户裁决「qoder……鼠标放到拖拽的地方有渐变的渲染效果……任何可以变化的窗口不应该被固定宽度的条带干扰影响美观」+「项目摘要和侧边聊天的窗口左侧也不要默认有这么宽 换成 一致的统一规范」（附截图）。范围=五处可调宽边界统一「细线+渐变高光」悬停规范（workspaceFileTreeResize 4px 实心带重构 / FloatCardResizer 常驻线 3px 收窄 / 清 desktop.css 死把手样式 / 主列 resizeHandleV 参照核对）；红线=可发现性不回退（v25 隐形热区抓真在案）、纯视觉层不动拖拽逻辑；非范围=指针跟随渐晕（reopen）。归属 QODER-ESSENCE-ABSORPTION 切片（用户实测反馈）。plan=docs/block-273-resize-affordance-gradient-plan.md。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T10:50:58.172Z -->
+最后更新：2026-10-27（**BLOCK-273 拖拽边界统一渐变暗示规范 completed（P5-CLOSED；UI-588 in_progress）**）：五处可调宽边界统一「细线+渐变高光」悬停规范（Qoder 式，用户实测反馈+截图裁决）——文件树 4px 全高实心带重构（6px 热区+渐隐 glow+`:has` 分隔线转 accent）/ FloatCardResizer 常驻线 3px→2px 变淡+hover 整块 tint 换渐变 / desktop.css 死把手样式删除 / 主列参照+两处 pill 标注归属。证据=theme 17/17（accent 棘轮 93→95 留痕）+组件 35/35+routing unknown=[]+亮/暗默认态实机断言（acceptance/block-273/）。**环境边界如实入册**：隐藏页 used 值缓存+离屏截图合成不可用（-32000）+`CSS.forcePseudoState` 本实例静默不生效——悬停激活态读数不可靠，UI-588 in_progress（30 秒人测路线随交付，确认后翻 verified）。顺手清偿 AnnotationOverlay 4 处死字面量 fallback。G0 开发期常态 · 不外推 packaged/Provider/GA。

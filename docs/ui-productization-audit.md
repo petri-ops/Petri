@@ -24,6 +24,14 @@
 - **实机证据**：未跑（斜杠面板选中链路实机腿待批；决策层与构造器已组件级锚定）。
 - **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
 
+## UI-615: 右栏顶部标签条自适应（多标签自动折叠图标，少标签恢复全标签）（2026-10-28 **verified（BLOCK-311；helper 单测 + TitleBar 12/12 + 实机 9/9）**）
+
+- **变化面**：标签条按「标签数 × 可用宽度」估算完整标签所需宽度（固定约 58px/标签 + 文本最多 96px + 更多按钮 32px），不足时自动折叠为**图标态**：`.tabPillText` 隐藏（`title`/`aria-label` 保留）、关闭 × 仅 hover/激活显示、pill padding 收窄；仍放不下则保留横向滚动兜底。`ResizeObserver` + 记忆 labels 驱动，单标签/布局未就绪（宽 0）不折叠。
+- **为什么这样设计**：用户截图反馈「右栏顶部打开较多内容时拥挤，是否自动变图标/收缩折叠以适应宽度」。此前 `.tabsRail` 只做全标签 + 横向滚动，标签多/栏窄时挤成一排。
+- **验证（代码）**：`tabStripShouldCompact` 3 例（单标签/宽 0 不折叠、3 标签窄/宽两态、长标签更早折叠）+ TitleBar toolMenu/unread 12/12 + theme 17/17 + tsc 0 + lint 0 error。
+- **实机证据**：`acceptance/block-309/live-tab-strip-adaptive.json`（9/9）：打开 11 个右栏 surface → `data-compact=true`、railW=491/scrollW=491（无溢出）、11 个标签文本全部 display:none、11 个图标在场、工具菜单/窗口控件不变；右键「关闭其他」剩 1 个 → `data-compact=false`、标签文本恢复（display:block）。
+- **边界（reopen）**：标签极多时图标仍可能横向滚动（兜底，不隐藏入口）；折叠阈值为估算，长标签更早折叠；拖出独立窗另案（窗口系统已有 pop-out/return，但右栏内容绑工作区 ctx）。
+
 ## UI-614: 图片入口识图门——自动模式按「有图决议」放行 + 手动/遗留 preset 补能力位（2026-10-28 **verified（BLOCK-310；auto-model 9/9 + attachments 10/10 + 实机红→绿 8/8）**）
 
 - **变化面**：①新增 `resolveImageVisionPreset/imageVisionCapable`——图片入口门禁在**自动模式**用 `hasImages=true` 的自动决议（有图会选 vision 能力的模型，当前配置=DeepSeek），不再按「无图时的 agent 绑定 / 手动 activeModel」判死；手动模式用当前模型；旧 bridge/legacy preset 缺 `capabilities` 时按同 id/endpoint 从完整 presets 补能力位。②notice 文案补「在模型菜单选择支持视觉的模型，或开启自动（按任务选择）」。
