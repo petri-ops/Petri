@@ -1,0 +1,279 @@
+{
+  "capturedAt": "2026-10-28T12:39:49.438Z",
+  "head": "e75942c25d66541f27057873ab206d152f079509",
+  "projectId": "p_mvs3q0un_inx5",
+  "surface": "composer 图片附件（BLOCK-317/UI-621：附件区与图片卡片完全落在输入框圆角卡内，无分段底色）",
+  "wide": {
+    "composer": {
+      "left": 267,
+      "top": 801,
+      "right": 888,
+      "bottom": 955,
+      "width": 621,
+      "height": 154
+    },
+    "composerRadius": "24px",
+    "composerOverflow": "visible",
+    "strip": {
+      "left": 268,
+      "top": 802,
+      "right": 887,
+      "bottom": 856,
+      "width": 619,
+      "height": 54
+    },
+    "stripBg": "rgba(0, 0, 0, 0)",
+    "stripBorderTop": "0px",
+    "stripFlexWrap": "wrap",
+    "cardCount": 8,
+    "cards": [
+      {
+        "left": 280,
+        "top": 810,
+        "right": 322,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 330,
+        "top": 810,
+        "right": 372,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 380,
+        "top": 810,
+        "right": 422,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 430,
+        "top": 810,
+        "right": 472,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 480,
+        "top": 810,
+        "right": 522,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 530,
+        "top": 810,
+        "right": 572,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 580,
+        "top": 810,
+        "right": 622,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 630,
+        "top": 810,
+        "right": 671,
+        "bottom": 852,
+        "width": 42,
+        "height": 42
+      }
+    ],
+    "cardsInside": true,
+    "stripInside": true,
+    "composerChildren": [
+      {
+        "cls": "sc-attachments",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      },
+      {
+        "cls": "sc-composer-body",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      },
+      {
+        "cls": "sc-composer-bar",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      }
+    ],
+    "notices": []
+  },
+  "narrow": {
+    "composer": {
+      "left": 26,
+      "top": 911,
+      "right": 677,
+      "bottom": 1065,
+      "width": 651,
+      "height": 154
+    },
+    "composerRadius": "24px",
+    "composerOverflow": "visible",
+    "strip": {
+      "left": 27,
+      "top": 912,
+      "right": 676,
+      "bottom": 966,
+      "width": 649,
+      "height": 54
+    },
+    "stripBg": "rgba(0, 0, 0, 0)",
+    "stripBorderTop": "0px",
+    "stripFlexWrap": "wrap",
+    "cardCount": 8,
+    "cards": [
+      {
+        "left": 39,
+        "top": 920,
+        "right": 81,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 89,
+        "top": 920,
+        "right": 131,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 139,
+        "top": 920,
+        "right": 181,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 189,
+        "top": 920,
+        "right": 231,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 239,
+        "top": 920,
+        "right": 281,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 289,
+        "top": 920,
+        "right": 331,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 339,
+        "top": 920,
+        "right": 381,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      },
+      {
+        "left": 389,
+        "top": 920,
+        "right": 430,
+        "bottom": 962,
+        "width": 42,
+        "height": 42
+      }
+    ],
+    "cardsInside": true,
+    "stripInside": true,
+    "composerChildren": [
+      {
+        "cls": "sc-attachments",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      },
+      {
+        "cls": "sc-composer-body",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      },
+      {
+        "cls": "sc-composer-bar",
+        "bg": "rgba(0, 0, 0, 0)",
+        "borderTop": "0px"
+      }
+    ],
+    "notices": []
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_timeout:Page.captureScreenshot:15000ms"
+  },
+  "total": 9,
+  "passed": 9,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs3q0un_inx5"
+    },
+    {
+      "id": "A0_images_dropped",
+      "ok": true,
+      "detail": "dropped:8"
+    },
+    {
+      "id": "A1_attachments_strip_has_no_band",
+      "ok": true,
+      "detail": "bg=rgba(0, 0, 0, 0) borderTop=0px"
+    },
+    {
+      "id": "A2_strip_inside_composer",
+      "ok": true,
+      "detail": "strip={\"left\":268,\"top\":802,\"right\":887,\"bottom\":856,\"width\":619,\"height\":54} composer={\"left\":267,\"top\":801,\"right\":888,\"bottom\":955,\"width\":621,\"height\":154}"
+    },
+    {
+      "id": "A3_strip_wraps",
+      "ok": true,
+      "detail": "flex-wrap=wrap"
+    },
+    {
+      "id": "B0_every_image_card_inside_composer",
+      "ok": true,
+      "detail": "cards=8 inside=true"
+    },
+    {
+      "id": "B1_no_composer_child_band",
+      "ok": true,
+      "detail": "children=[\"sc-attachments:rgba(0, 0, 0, 0)\",\"sc-composer-body:rgba(0, 0, 0, 0)\",\"sc-composer-bar:rgba(0, 0, 0, 0)\"]"
+    },
+    {
+      "id": "B2_composer_radius_intact",
+      "ok": true,
+      "detail": "radius=24px"
+    },
+    {
+      "id": "C0_emulated_narrow_cards_inside",
+      "ok": true,
+      "detail": "viewport=560 composerW=651 cards=8 inside=true（composer 受工作区最小列宽约束；横向不溢出由 flex-wrap 保证）"
+    }
+  ]
+}

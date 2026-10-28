@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T12:20:34.405Z -->
 最后更新：2026-10-28（**BLOCK-308 completed（UI-610/611/612 verified）**）：拖拽跟手（ref+直写 DOM transform/settle 清场）+ 箭头命中热区 + 三段式图标轨（左工具/中图片/右执行；少时单列、增多自动加列；窄栏换行回退）+ 加入上下文（compose 草稿不发送，顺带修结果面 prompt 丢弃）+ 选择工具（选择态选中/移动、绘制态不抢指针）。证据=批注 41/41 + 受影响前端域 78/78 + 实机 30/30 + 回归 302/303/304；closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T12:40:20.619Z -->
+最后更新：2026-10-28（**BLOCK-309 completed（UI-613 verified；UI-597 两列由用户推翻）**）：模型菜单 mode=all 改「供应商页 → 模型页」下钻（返回行+标题/数量），删除 two-pane 灰底容器与右列提示，选中态改左侧 accent 细线（透明底），菜单 320px；整组不可用仍可进入查看原因。证据=ModelMenu 8/8 + theme 17/17 + 实机 14/14（acceptance/block-307/）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

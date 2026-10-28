@@ -3723,13 +3723,13 @@
   background: color-mix(in srgb, var(--petri-accent-bg) 30%, transparent) !important;
 }
 
+/* UI-621 — 粘贴/拖入的图片与引用条只作为 composer 卡内内容：不再自带分段底色
+   与顶边线（方形底会画进 24px 圆角外的区域，看起来图片/背景越出输入框边界）。 */
 .sc-attachments {
   display: flex;
   flex-wrap: wrap;
   gap: var(--petri-space-3);
   padding: var(--petri-space-3) var(--petri-space-4) var(--petri-space-1);
-  border-top: 1px solid var(--petri-divider);
-  background: color-mix(in srgb, var(--petri-bg-subtle) 50%, transparent);
 }
 
 .sc-attachment {
@@ -3830,8 +3830,6 @@
   flex-wrap: wrap;
   gap: var(--petri-space-2);
   padding: var(--petri-space-3) var(--petri-space-4) var(--petri-space-1);
-  border-top: 1px solid var(--petri-divider);
-  background: color-mix(in srgb, var(--petri-bg-subtle) 50%, transparent);
 }
 
 .sc-selection-ref {
@@ -3892,8 +3890,6 @@
   flex-wrap: wrap;
   gap: var(--petri-space-2);
   padding: var(--petri-space-3) var(--petri-space-4) var(--petri-space-1);
-  border-top: 1px solid var(--petri-divider);
-  background: color-mix(in srgb, var(--petri-bg-subtle) 50%, transparent);
 }
 
 .sc-image-ref {

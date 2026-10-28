@@ -6056,6 +6056,18 @@
       ]
     },
     {
+      "id": "block317-composer-attachments-containment-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-317 UI-621 实机腿：composer 图片/引用区完全在卡内（strip transparent/border-top 0/flex-wrap wrap；8 张图与 strip 全在 composer rect 内；直接子块无底色；圆角保持），9/9 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block317-composer-attachments-containment-live.cjs",
+        "acceptance/block-315/**"
+      ],
+      "tests": [
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ]
+    },
+    {
       "id": "block316-queued-message-steer-live",
       "classifiesScripts": true,
       "note": "BLOCK-316 UI-620 实机腿：消息排队 per-row 插话（无全局开关/行内 插话+编辑+移除+更多/点击插话 POST steer body=该条/行出队/已插话提示/Ctrl+Enter 直接插话），10/10 PASS；取证探针与目录。",

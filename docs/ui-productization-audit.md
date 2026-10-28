@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-621: 输入框图片/引用区完全落在 composer 卡内（去除分段底色越出圆角）（2026-10-28 **verified（BLOCK-317；实机 9/9）**）
+
+- **变化面**：composer 内的附件区（`.sc-attachments`）、选区/上下文引用条（`.sc-selection-refs`）、图片引用条（`.sc-image-refs`）去掉自带的 `border-top` 与 50% subtle 底色。原先方形分段底在 composer（24px 圆角、`overflow: visible` 以容纳浮层）顶部画进圆角外区域，视觉上像图片/背景越出输入框；现在这些内容直接落在卡面上，附件条与每张图片卡片均在 composer 边界内，横向由 `flex-wrap` 承接。
+- **为什么这样设计**：用户截图「粘贴/拖拽到输入框中的图片应该在输入框内部，不应该超出边界，哪怕是背景也不应该有」。截图像素取证确认根因不是图片卡片本身，而是附件条的分段底色（圆角外区域为 `#F9F9FA` 而非页面白）。
+- **验证（代码）**：theme token 17/17（去 `color-mix` 底色后无新 token / 无 accent 增量）+ tsc 0 + lint 0 error。
+- **实机证据**：`acceptance/block-315/live-composer-attachments-containment.json`（**9/9**）：拖入 8 张图 → 附件条 `background=transparent`、`border-top=0`、`flex-wrap=wrap`；附件条与 8 张卡片全部在 composer rect 内；composer 直接子块无分段底色；圆角保持 24px；560px 模拟宽下卡片仍在卡内（composer 受工作区最小列宽约束为 651px）。截图离屏不可得（`screenshot_unavailable`）。
+- **边界（reopen）**：composer 在 560px 模拟视口下仍为 651px（工作区最小列宽导致的布局响应式问题，另案）；附件条不再有独立底色的视觉分组，靠间距与卡片自身边框区分。
+
 ## UI-620: 消息排队——控制从 composer 全局开关下放到每条消息（插话/编辑/移除）（2026-10-28 **verified（BLOCK-316；面板 5/5 + hook 3/3 + block178 9/9 + 实机 10/10）**）
 
 - **变化面**：移除 composer 的全局「转向/排队」开关；运行中发送默认进「消息排队」。每条排队行自带 **插话**（Qoder chatQueue 语义：POST `task/:id/steer`，在下一个安全执行边界交给 Agent，不停止当前执行）、**编辑**（撤回输入框）、**移除**；「立即执行（打断当前任务）/上移/下移」收进行内「更多」。运行中 **Ctrl/Alt+Enter 或 Ctrl+点击发送** = 直接插话（不入队）。插话受理后该行出队并提示「已插话：将在当前任务的下一个安全边界交给 Agent」；未受理保留队列并诚实提示。
