@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { ModelMenu } from './ModelMenu';
+import { ModelMenu, supplierPanelPosition } from './ModelMenu';
 import { buildModelGroups, EMPTY_MODEL_CATALOG } from '@/lib/model-catalog';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
@@ -190,8 +190,31 @@ describe('ModelMenu', () => {
   });
 });
 
-describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-617 主从两栏）', () => {
-  it('默认选中当前供应商；点其它供应商只换右栏、左列常驻；点模型回调', () => {
+describe('ModelMenu · 并钮组合菜单（UI-619 主卡/供应商第二卡物理分离）', () => {
+  it('supplierPanelPosition：默认右侧、右侧不足向左、视口钳制', () => {
+    expect(supplierPanelPosition(
+      { left: 100, top: 100, right: 420 },
+      { width: 1200, height: 800 },
+    )).toEqual({ left: 428, top: 100, width: 248, placement: 'right' });
+    const leftFallback = supplierPanelPosition(
+      { left: 860, top: 100, right: 1180 },
+      { width: 1200, height: 800 },
+    );
+    expect(leftFallback.placement).toBe('left');
+    expect(leftFallback.left).toBe(604);
+    const clamped = supplierPanelPosition(
+      { left: 40, top: 780, right: 360 },
+      { width: 600, height: 800 },
+    );
+    expect(clamped.left).toBe(12);
+    expect(clamped.top).toBe(428);
+    expect(supplierPanelPosition(
+      { left: 10, top: 10, right: 50 },
+      { width: 200, height: 400 },
+    ).width).toBe(176);
+  });
+
+  it('供应商列表在独立第二卡：入口展开 portal 到 body；切换供应商主卡换模型、第二卡仍在；点模型回调', () => {
     const onPickSupplier = vi.fn();
     const onPickModel = vi.fn();
     const onToggleAuto = vi.fn();
@@ -210,32 +233,35 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-617 主从�
         onPickModel={onPickModel}
       />,
     );
-    // 主从两栏 + 自动档；默认右栏=当前模型所在供应商（DeepSeek）的模型，打开即见可用模型。
-    expect(screen.getByTestId('model-menu-two-pane')).toBeTruthy();
-    expect(screen.getByTestId('model-menu-suppliers')).toBeTruthy();
+    // 主卡：供应商入口 + 当前供应商模型；第二卡默认不存在
+    expect(screen.getByTestId('model-menu-supplier-trigger').textContent).toContain('DeepSeek');
     expect(screen.getByTestId('model-menu-models')).toBeTruthy();
-    expect(screen.getByTestId('model-menu-auto')).toBeTruthy();
+    expect(screen.queryByTestId('model-menu-supplier-panel')).toBeNull();
     expect(screen.getByText('model-a')).toBeTruthy();
     expect(screen.getByText('model-b')).toBeTruthy();
-    expect(screen.queryByTestId('model-menu-back')).toBeNull();
-    // 左列两个供应商同时可见（不再整页替换）
+    // 展开第二卡：独立卡片挂在 body，两个供应商同时可见，当前使用方有勾
+    fireEvent.click(screen.getByTestId('model-menu-supplier-trigger'));
+    const panel = screen.getByTestId('model-menu-supplier-panel');
+    expect(panel.parentElement).toBe(document.body);
+    expect(panel.getAttribute('data-placement')).toBe('right');
     expect(screen.getByTestId('model-menu-supplier-a')).toBeTruthy();
     expect(screen.getByTestId('model-menu-supplier-b')).toBeTruthy();
-    expect(screen.getByTestId('model-menu-supplier-a').getAttribute('data-active')).toBe('true');
-    // 点其它供应商：右栏切换到 Other，左列仍在
+    expect(screen.getByTestId('model-menu-supplier-a').querySelector('svg')).toBeTruthy();
+    expect(screen.getByTestId('model-menu-supplier-b').querySelector('svg')).toBeNull();
+    // 切其它供应商：主卡换模型，第二卡保持展开（不再出现「其它供应商看不见」）
     fireEvent.click(screen.getByTestId('model-menu-supplier-b'));
-    expect(screen.getByTestId('model-menu-supplier-a')).toBeTruthy();
+    expect(screen.getByTestId('model-menu-supplier-panel')).toBeTruthy();
     expect(screen.getByTestId('model-menu-supplier-b').getAttribute('data-active')).toBe('true');
-    expect(screen.getByTestId('model-menu-models-head').textContent).toContain('Other');
+    expect(screen.getByTestId('model-menu-supplier-trigger').textContent).toContain('Other');
     expect(screen.getByText('other-1')).toBeTruthy();
     expect(screen.queryByText('model-a')).toBeNull();
-    // 点模型 = onPickModel 回调（selectModel 连带切渠道默认，供应商级联隐式成立）
+    // 点模型 = onPickModel（selectModel 连带切渠道默认）
     fireEvent.click(screen.getByText('other-1'));
     expect(onPickModel).toHaveBeenCalledWith(twoGroups[1].rows[0].preset);
     expect(onPickSupplier).not.toHaveBeenCalled();
   });
 
-  it('all 模式：右栏缺密钥行禁行 + 拒绝理由与 model 模式同源；左列供应商不消失', () => {
+  it('all 模式：缺密钥行禁行 + 拒绝理由与 model 模式同源；供应商第二卡仍列出全部', () => {
     const locked = buildModelGroups(twoSupplierPresets, {
       ...EMPTY_MODEL_CATALOG,
       credentialStatus: { anthropic: false },
@@ -252,10 +278,11 @@ describe('ModelMenu · 并钮组合菜单（BLOCK-266 mode=all；UI-617 主从�
         onPickModel={() => {}}
       />,
     );
-    // 默认右栏=DeepSeek：禁用行 + 原因；左列供应商仍在
     const row = screen.getByText('model-a').closest('button') as HTMLButtonElement;
     expect(row.disabled).toBe(true);
     expect(screen.getAllByText('未配置密钥').length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(screen.getByTestId('model-menu-supplier-trigger'));
     expect(screen.getByTestId('model-menu-supplier-a')).toBeTruthy();
+    expect(screen.getByTestId('model-menu-supplier-b')).toBeTruthy();
   });
 });

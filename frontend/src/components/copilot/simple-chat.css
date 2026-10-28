@@ -123,8 +123,8 @@
   bottom: calc(100% + 8px);
   right: 0;
   z-index: 81;
-  width: min(280px, calc(100vw - 32px));
-  max-height: min(360px, calc(100vh - 168px));
+  width: min(320px, calc(100vw - 32px));
+  max-height: min(420px, calc(100vh - 168px));
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--petri-space-2);
@@ -134,51 +134,68 @@
   box-shadow: var(--petri-shadow-float);
 }
 
-/* UI-617（用户追加「供应商常驻、模型列表在右侧二级页面，方便切换」）——
-   mode=all 主从两栏：左列供应商常驻（选中 accent 细线），右侧二级页显示其模型；
-   左右透明/白底 + 1px 边框分隔（不再用灰色 gap 容器），菜单加宽。 */
-.sc-model-menu:has(.sc-model-two-pane) {
-  width: min(620px, calc(100vw - 32px));
-  max-height: min(520px, calc(100vh - 168px));
-  overflow: hidden;
+/* UI-619（用户「一级和二级页面不要在同一个卡片中」）——
+   主卡=供应商入口 + 模型；供应商列表是独立第二卡（portal 到 body），
+   不再同一卡片内分栏，也不再遮挡其它供应商。 */
+.sc-model-menu-head {
+  padding-bottom: var(--petri-space-1);
+  margin-bottom: var(--petri-space-1);
+  border-bottom: 1px solid var(--petri-divider);
 }
-.sc-model-two-pane {
-  display: grid;
-  grid-template-columns: minmax(190px, 0.9fr) minmax(0, 1.1fr);
-  min-height: 0;
-  max-height: min(360px, calc(100vh - 300px));
+.sc-model-supplier-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
 }
-.sc-model-two-pane-suppliers {
+.sc-model-supplier-trigger:hover,
+.sc-model-supplier-trigger[aria-expanded='true'] {
+  background: var(--petri-hover);
+}
+.sc-model-supplier-trigger-main {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
-  padding-right: var(--petri-space-2);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
-.sc-model-two-pane-models {
+.sc-model-section-label {
+  padding: 4px 10px 2px;
+  color: var(--petri-text-tertiary);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+.sc-model-menu-models {
   min-width: 0;
-  padding-left: var(--petri-space-3);
-  border-left: 1px solid var(--petri-border-card);
+}
+.sc-model-supplier-panel {
+  position: fixed;
+  z-index: 82;
+  max-height: min(360px, calc(100vh - 24px));
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-float);
+}
+.sc-model-supplier-panel-head {
+  padding: 2px 10px 6px;
+  color: var(--petri-text-tertiary);
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 .sc-model-two-pane-empty {
   padding: 16px 10px;
-}
-.sc-model-page-head {
-  display: flex;
-  align-items: center;
-  gap: var(--petri-space-2);
-  padding: 2px 4px 8px;
-  margin-bottom: 2px;
-  border-bottom: 1px solid var(--petri-divider);
-}
-.sc-model-page-title {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
 }
 .sc-model-supplier {
   display: flex;

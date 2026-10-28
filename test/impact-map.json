@@ -6056,6 +6056,18 @@
       ]
     },
     {
+      "id": "block315-model-menu-two-cards-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-315 UI-619 实机腿：模型菜单一级/二级两张独立卡（主卡 320px 无内联供应商行 / 第二卡 portal body+fixed+z82 / 右缘 8px 顶部对齐 / 4 供应商当前唯一勾 / 切供应商第二卡保持 / 点模型两卡关闭），15/15 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block315-model-menu-two-cards-live.cjs",
+        "acceptance/block-313/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx"
+      ]
+    },
+    {
       "id": "block314-annotation-list-popover-live",
       "classifiesScripts": true,
       "note": "BLOCK-314 UI-618 实机腿：批注列表弹层 portal/固定定位/右栏左展/完整可见（10 条：parent body/fixed/z10002/视口内/placement left/条目完整），8/8 PASS；取证探针与目录。",
