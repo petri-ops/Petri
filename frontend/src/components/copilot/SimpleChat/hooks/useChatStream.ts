@@ -180,6 +180,10 @@ export interface UseChatStreamReturn {
   moveQueued: (id: string, dir: -1 | 1) => void;
   /** BLOCK-178 P1 — 立即发送：挪到会话子序列首位并停当前轮，排水优先消费。 */
   sendNowQueued: (id: string) => boolean;
+  /** UI-620 — 逐条插话：运行中把该排队项交给当前任务的下一个安全边界（不停止当前执行）。 */
+  steerQueuedPrompt: (id: string) => Promise<{ ok: boolean; error?: string; depth?: number }>;
+  /** UI-620 — 直接插话：运行中把一段文本交给当前任务的下一个安全边界（Ctrl+Enter）。 */
+  steerText: (text: string) => Promise<{ ok: boolean; error?: string; depth?: number }>;
 }
 
 /**
@@ -593,6 +597,48 @@ export function useChatStream({
     return true;
   }, [queuedPrompts, setQueuedPrompts, stop, streaming]);
 
+  // UI-620 — 运行中把一段文本插话到当前任务的下一安全边界（send 在 streaming
+  // 时会被 `if (streaming) return false` 挡住，故插话必须走独立入口）。
+  const steerText = useCallback(async (text: string): Promise<{ ok: boolean; error?: string; depth?: number }> => {
+    const trimmed = text.trim();
+    if (!trimmed) return { ok: false, error: '消息为空' };
+    const runTaskId = conversationId ? getConversationRunSnapshot(conversationId)?.taskId : undefined;
+    if (!runTaskId) return { ok: false, error: '当前没有运行中的任务' };
+    try {
+      const resp = await fetch(getApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId) + '/steer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+        },
+        body: JSON.stringify({ message: trimmed }),
+      });
+      const data = (await resp.json().catch(() => ({}))) as { ok?: unknown; depth?: unknown; error?: unknown; message?: unknown };
+      if (resp.ok && data.ok) {
+        const depth = typeof data.depth === 'number' ? data.depth : undefined;
+        onSteer?.({ ok: true, text: trimmed, depth });
+        return { ok: true, depth };
+      }
+      const reason = typeof data.message === 'string' && data.message
+        ? data.message
+        : typeof data.error === 'string' && data.error ? data.error : 'HTTP ' + resp.status;
+      return { ok: false, error: reason };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : '网络错误' };
+    }
+  }, [conversationId, onSteer]);
+
+  // UI-620 — 逐条插话（Qoder chatQueue 「插话」语义）：把该排队项交给当前任务
+  // 的 steer 端点，在下一个安全执行边界注入，不停止当前执行；受理才出队。
+  const steerQueuedPrompt = useCallback(async (id: string): Promise<{ ok: boolean; error?: string; depth?: number }> => {
+    const target = queuedPrompts.find((q) => q.id === id);
+    if (!target) return { ok: false, error: '该排队消息已不存在' };
+    if (!streaming) return { ok: false, error: '当前没有运行中的任务' };
+    const result = await steerText(target.text);
+    if (result.ok) setQueuedPrompts((current) => current.filter((q) => q.id !== id));
+    return result;
+  }, [queuedPrompts, setQueuedPrompts, steerText, streaming]);
+
   // 10. Queue drain effect — fires one queued prompt only after
   // the completed run has been reconciled from SQLite, so the
   // next turn receives the durable conversation history. Replaces
@@ -634,5 +680,7 @@ export function useChatStream({
     withdrawQueued,
     moveQueued,
     sendNowQueued,
+    steerQueuedPrompt,
+    steerText,
   };
 }

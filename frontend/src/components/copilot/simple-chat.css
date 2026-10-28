@@ -2384,6 +2384,7 @@
 }
 
 .sc-queue-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--petri-space-2);
@@ -2438,6 +2439,72 @@
 
 .sc-queue-row__btn--danger:hover {
   color: var(--petri-danger);
+}
+
+/* UI-620 — 逐条「插话」：Qoder chatQueue 形态（下一个安全边界交给 Agent）。 */
+.sc-queue-row__steer {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  padding: 0 7px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-pill);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sc-queue-row__steer:hover:not(:disabled) {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.sc-queue-row__steer:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sc-queue-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.sc-queue-row__menu {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 4px);
+  z-index: 96;
+  display: flex;
+  flex-direction: column;
+  min-width: 172px;
+  padding: var(--petri-space-1);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-float);
+}
+
+.sc-queue-row__menu button {
+  padding: 6px 9px;
+  border: none;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sc-queue-row__menu button:hover {
+  background: var(--petri-hover);
 }
 
 /* HLE-C4R: durable loop status panel. Shows the backend loop phase, attempt

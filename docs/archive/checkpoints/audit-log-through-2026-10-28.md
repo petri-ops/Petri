@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T11:46:13.570Z -->
 最后更新：2026-10-28（**BLOCK-280~289 预授权批 completed（用户「一次性推完 W1-W4，中间不需要我参与」；四波收官）**）：W1=280 C-34 复核证伪+tools 断点加固（原判词漏计 92 工具 ≈21k tokens）/281 C-27 judge 拒绝口径（probe 红绿 2.38→3.73 PASS）/282 C-33 销号核验+标记；W2=283 C-25 合并 v2（同 ts 不丢+ts 稳定排序，BLOCK-169 锁测按授权改写）/284 C-29 chip v2（skill 斜杠→buildSkillItem 结构化通道，UI-594；D15 清单行 stale 纠正）/285 C-31 按裁决跳过；W3=286/287 C-30 按裁决跳过（本机 memory_vectors 实测 0 行，远低于 5 万重开门槛——证据复验留痕）；W4=288 画笔渲染平滑+手掌拒识（存储契约不变，UI-595）/289 右栏空态最近使用面板记忆（按项目 localStorage+上次使用徽章，UI-596）。**教训**：候选池三连过期判词（C-34/C-30/C-31 均为 BLOCK-211 已裁决项）——预授权批启动前逐项读行尾裁定段；UI 面改动即触发 ui:audit 门（UI-594 补行才绿）。UI-594/595/596 in_progress（实机腿随各自实机批）。closeout 十三门全程 PASS；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-28T12:20:34.405Z -->
+最后更新：2026-10-28（**BLOCK-308 completed（UI-610/611/612 verified）**）：拖拽跟手（ref+直写 DOM transform/settle 清场）+ 箭头命中热区 + 三段式图标轨（左工具/中图片/右执行；少时单列、增多自动加列；窄栏换行回退）+ 加入上下文（compose 草稿不发送，顺带修结果面 prompt 丢弃）+ 选择工具（选择态选中/移动、绘制态不抢指针）。证据=批注 41/41 + 受影响前端域 78/78 + 实机 30/30 + 回归 302/303/304；closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

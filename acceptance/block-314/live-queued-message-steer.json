@@ -1,0 +1,105 @@
+{
+  "capturedAt": "2026-10-28T12:25:29.825Z",
+  "head": "a52005265af9b76707afd32d7a27781959643490",
+  "projectId": "p_mvs37spt_ybib",
+  "surface": "composer 消息排队（BLOCK-316/UI-620：每条排队消息自带插话/编辑/移除，插话=下一安全边界）",
+  "queued": {
+    "panel": true,
+    "rowCount": 1,
+    "rows": [
+      {
+        "testid": "queue-row-q_mvs37ufl_1",
+        "text": "排队探针：收到后只回复「已插话」四个字",
+        "steer": true,
+        "steerDisabled": false,
+        "withdraw": true,
+        "remove": true,
+        "more": true
+      }
+    ],
+    "legacyToggle": false,
+    "stopVisible": true,
+    "notice": null,
+    "input": ""
+  },
+  "after": {
+    "panel": false,
+    "rowCount": 0,
+    "rows": [],
+    "legacyToggle": false,
+    "stopVisible": true,
+    "notice": "已插话：将在当前任务的下一个安全边界交给 Agent · 排队探针：收到后只回复「已插话」四个字",
+    "input": ""
+  },
+  "steerCall": {
+    "url": "http://localhost:3001/api/ai/agent/task/3653a99f-4155-495c-bc45-a4d645d2fba5/steer",
+    "body": "{\"message\":\"排队探针：收到后只回复「已插话」四个字\"}"
+  },
+  "shortcut": {
+    "calls": 1,
+    "first": {
+      "url": "http://localhost:3001/api/ai/agent/task/3653a99f-4155-495c-bc45-a4d645d2fba5/steer",
+      "body": "{\"message\":\"快捷键插话探针：只回复收到\"}"
+    },
+    "rows": 0,
+    "notice": "已插话：将在当前任务的下一个安全边界交给 Agent · 快捷键插话探针：只回复收到"
+  },
+  "notes": {
+    "screenshot": "screenshot_unavailable: cdp_command_failed:-32000"
+  },
+  "total": 10,
+  "passed": 10,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvs37spt_ybib"
+    },
+    {
+      "id": "A0_no_global_toggle",
+      "ok": true,
+      "detail": "composer 全局 转向/排队 开关已移除"
+    },
+    {
+      "id": "A1_task_submit",
+      "ok": true,
+      "detail": "submit=sent"
+    },
+    {
+      "id": "A2_streaming_started",
+      "ok": true,
+      "detail": "运行中（Stop 可见）"
+    },
+    {
+      "id": "B0_running_send_goes_to_queue",
+      "ok": true,
+      "detail": "rows=1 legacyToggle=false"
+    },
+    {
+      "id": "B1_row_has_steer_edit_remove_more",
+      "ok": true,
+      "detail": "{\"testid\":\"queue-row-q_mvs37ufl_1\",\"text\":\"排队探针：收到后只回复「已插话」四个字\",\"steer\":true,\"steerDisabled\":false,\"withdraw\":true,\"remove\":true,\"more\":true}"
+    },
+    {
+      "id": "B2_more_menu_secondary_actions",
+      "ok": true,
+      "detail": "[\"立即执行（打断当前任务）\",\"上移\",\"下移\"]"
+    },
+    {
+      "id": "C0_steer_request_observed",
+      "ok": true,
+      "detail": "url=http://localhost:3001/api/ai/agent/task/3653a99f-4155-495c-bc45-a4d645d2fba5/steer body={\"message\":\"排队探针：收到后只回复「已插话」四个字\"}"
+    },
+    {
+      "id": "C1_steer_accepted_row_left_queue",
+      "ok": true,
+      "detail": "rows=0 notice=已插话：将在当前任务的下一个安全边界交给 Agent · 排队探针：收到后只回复「已插话」四个字 stop=true"
+    },
+    {
+      "id": "D0_ctrl_enter_direct_steer",
+      "ok": true,
+      "detail": "calls=1 rows=0 notice=已插话：将在当前任务的下一个安全边界交给 Agent · 快捷键插话探针：只回复收到（受理=不入队；未受理=诚实回退排队）"
+    }
+  ]
+}
