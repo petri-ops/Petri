@@ -35,7 +35,13 @@ export interface OlderMessagesState {
   loadOlder: () => Promise<boolean>;
 }
 
-/** 重建（对账/镜像）时保留 current 中比 persisted 窗口更旧的已加载前缀。 */
+/** 重建（对账/镜像）时保留 current 中不晚于 persisted 窗口首条的已加载前缀。
+ *  BLOCK-283（C-25 清偿）— v2 语义：①同 ts 不再丢（≤ boundary，id 对账去重，
+ *  persisted 权威——同 ts 边界重复的实际风险位是窗口最旧端的乐观气泡，概率位
+ *  不成立，见 C-25 裁决记录）；②合并结果按 ts 稳定排序（ES2019+ 稳定排序，
+ *  同 ts 保持 current-先/persisted-后）。窗口内（ts > boundary）本地-only 消息
+ *  仍让位 SQLite 权威（BLOCK-151 契约不变）；windowOffset 由分页游标承载，
+ *  不经本函数（语义不破硬约束）。hole/压缩标记交互需服务端序号感知，另行登记。 */
 export function mergeKeepOlderPrefix(
   current: SimpleMessage[],
   persisted: SimpleMessage[]
@@ -45,10 +51,12 @@ export function mergeKeepOlderPrefix(
   if (!boundary) return persisted;
   const persistedIds = new Set(persisted.map((m) => m.id).filter(Boolean) as string[]);
   const olderPrefix = current.filter(
-    (m) => m.ts && m.ts < boundary && !(m.id && persistedIds.has(m.id))
+    (m) => m.ts && m.ts <= boundary && !(m.id && persistedIds.has(m.id))
   );
   if (olderPrefix.length === 0) return persisted;
-  return [...olderPrefix, ...persisted];
+  return [...olderPrefix, ...persisted].sort((a, b) =>
+    String(a.ts ?? '').localeCompare(String(b.ts ?? ''))
+  );
 }
 
 export function useConversationResume({

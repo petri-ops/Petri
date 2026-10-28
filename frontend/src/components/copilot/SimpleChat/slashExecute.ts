@@ -7,8 +7,10 @@
  *  · 组件只负责"执行某一类动作"（副作用留在组件）；
  *  · 判定本身可被单测覆盖，D15 从此有真锚（`slashExecute.test.ts`）。
  *
- * 边界：`skill:` / `template:` 前缀仍走"注入文本模板"（结构化 chip 通道是 slashSources 里
- * 登记的 v2，不在本包范围）。
+ * BLOCK-284（C-29 chip v2 落地）：`skill:` 前缀升级为 `add-skill-chip`——组件侧经
+ * `contextSources.buildSkillItem` 构造结构化 ComposerContextItem 入上下文通道（与 @ 菜单
+ * 同源），不再注入文本模板；`template:` 前缀保持 `insert-template`（v1 预裁决不变，
+ * 结构化执行意图挂 workflow 面另案）。
  */
 
 export type SlashCommandKind =
@@ -19,7 +21,8 @@ export type SlashCommandKind =
   | 'compact-context'
   | 'schedule-task'
   | 'dismiss-slash'
-  | 'insert-template';
+  | 'insert-template'
+  | 'add-skill-chip';
 
 const KNOWN: Record<string, SlashCommandKind> = {
   new: 'new-conversation',
@@ -38,6 +41,7 @@ const KNOWN: Record<string, SlashCommandKind> = {
  */
 export function classifySlashCommand(commandId: string): SlashCommandKind {
   const id = String(commandId ?? '');
-  if (id.startsWith('skill:') || id.startsWith('template:')) return 'insert-template';
+  if (id.startsWith('skill:')) return 'add-skill-chip';
+  if (id.startsWith('template:')) return 'insert-template';
   return KNOWN[id] ?? 'dismiss-slash';
 }

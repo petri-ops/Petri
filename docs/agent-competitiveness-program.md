@@ -79,7 +79,7 @@ status: planned
 | D12 主聊天无 Stop | `SimpleChat.tsx:1032-1034`（BLOCK-28.8 用户裁决移除；hook 能力在） | 常驻 Stop | 复出+取消留痕；工具级取消见 D6 |
 | D13 Cmd+K 空壳 | `App.tsx:176-181` `commands={[]}`（395 行组件在） | 命令面板即动作中枢 | 命令源=真数据（会话/项目/技能/设置深链） |
 | D14 队列/steer 不可见 | `useChatStream.ts:437-445` drain 在、无 UI | 排队可见可撤 | 队列列表+撤销+插队位次=编排透明的一部分 |
-| D15 斜杠只注入不执行 | `slashSources.ts` v1 文本注入 | 斜杠即动作 | chip v2 结构化执行意图（复用 BLOCK-139 注入通道） |
+| D15 斜杠只注入不执行 | ~~v1 全文本注入~~ **BLOCK-206 锚 + BLOCK-284 chip v2**：UI 动作族判定层可测（slashExecute.test）+ skill 条目结构化 chip（buildSkillItem → ComposerContextItem，与 @ 菜单同源）；template 条目保持文本注入（如实） | 斜杠即动作 | ✅ 动作族+skill 面已对齐；workflow 模板结构化执行挂 workflow 面另案 |
 
 ### 2.6 表达面 Gen UI（dim6）
 

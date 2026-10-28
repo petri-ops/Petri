@@ -238,7 +238,7 @@ describe('BLOCK-95 A1 mergeKeepOlderPrefix（重建链保留更旧前缀）', ()
     expect(merged.some((m) => (m as { id: string }).id === 'local-new')).toBe(false);
   });
 
-  it('ts 边界：ts === boundary 不保留（严格小于），缺 ts 消息不保留', () => {
+  it('BLOCK-283 v2 — ts === boundary 的本地-only 消息保留（同 ts 不再丢），缺 ts 仍不保留', () => {
     const boundary = '2026-09-17T01:00:00.000Z';
     const current = [
       { id: 'eq', role: 'user', content: '恰好等于边界', ts: boundary },
@@ -247,7 +247,21 @@ describe('BLOCK-95 A1 mergeKeepOlderPrefix（重建链保留更旧前缀）', ()
     ] as never[];
     const persisted = [{ id: 'w1', role: 'user', content: '窗口首条', ts: boundary }] as never[];
     const merged = mergeKeepOlderPrefix(current, persisted);
-    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['older', 'w1']);
+    // v2：同 ts 边界消息并入（C-25「同 ts 本地丢失」边界清偿）；缺 ts 无排序依据仍不保留
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['older', 'eq', 'w1']);
+  });
+
+  it('BLOCK-283 v2 — 合并结果按 ts 稳定排序（乱序 current 前缀对账为时间序）', () => {
+    const current = [
+      { id: 'o2', role: 'user', content: '更旧-B', ts: '2026-09-17T00:30:00.000Z' },
+      { id: 'o1', role: 'user', content: '更旧-A', ts: '2026-09-17T00:10:00.000Z' },
+    ] as never[];
+    const persisted = [
+      { id: 'w1', role: 'user', content: '窗口首条', ts: '2026-09-17T01:00:00.000Z' },
+    ] as never[];
+    const merged = mergeKeepOlderPrefix(current, persisted);
+    // v1 仅前置（保持 current 顺序 o2,o1）；v2 按 ts 对账排序（o1,o2,w1）
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['o1', 'o2', 'w1']);
   });
 });
 
@@ -350,15 +364,15 @@ describe('BLOCK-169 A1 反例行为测锁（现状语义；升级登记见 C-24 
     expect(merged.map((m) => (m as { id: string }).id)).toEqual(['old1', 'hole', 'w1', 'w2']);
   });
 
-  it('同 ts 边界：本地与窗口首条同 ts 时本地被丢弃（严格早于）', () => {
+  it('同 ts 边界（BLOCK-283 v2 改写）：本地与窗口首条同 ts 时本地保留且排前（同 ts 不再丢）', () => {
     const current = [msg('twin', '2026-09-17T01:00:00.000Z')] as never[];
     const persisted = [
       msg('w1', '2026-09-17T01:00:00.000Z'),
       msg('w2', '2026-09-17T02:00:00.000Z'),
     ] as never[];
     const merged = mergeKeepOlderPrefix(current, persisted);
-    // 现状：严格 `<` 使同 ts 本地消息丢失（即便 id 不同、内容不同）
-    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['w1', 'w2']);
+    // v2：`≤` 使同 ts 本地消息并入（C-25「同 ts 本地丢失」清偿）；稳定排序保持 current-先
+    expect(merged.map((m) => (m as { id: string }).id)).toEqual(['twin', 'w1', 'w2']);
   });
 
   it('id 冲突去重：同 id 且 ts 更旧的本地产物不重复入列（既有防线锁）', () => {

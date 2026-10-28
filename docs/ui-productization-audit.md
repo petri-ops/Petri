@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-594: 斜杠 skill 条目结构化 chip（2026-10-27 **in_progress（BLOCK-284；C-29 chip v2；组件级锚齐 5/5+312/312，实机腿随下次斜杠面实机批）**）
+
+- **变化面**：斜杠菜单选中 skill 条目从「注入文本模板」升级为「结构化 chip」——buildSkillItem 单源构造器（与 @ 菜单 buildSkillCandidates 同形同源）→ ComposerContextItem 走 composerContext 通道；classifySlashCommand 新增 add-skill-chip 动作类；template 条目保持文本注入（v1 预裁决不变）。
+- **为什么这样设计**：C-29 剩余真缺口=chip v2（BLOCK-206 只落了动作族判定锚）；结构化 chip 使 skill 引用成为可审计的上下文项（与 @ 菜单同一去重/引用面），而非一次性文本。
+- **验证（代码）**：slashExecute.test 5/5（skill:→add-skill-chip 分流）+ buildSkillItem 同形测 + SimpleChat 域 312/312 + tsc 0。
+- **实机证据**：未跑（斜杠面板选中链路实机腿待批；决策层与构造器已组件级锚定）。
+- **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
+
 ## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **verified（BLOCK-277 轻量包；组件级 21/21 + 实机待 9223 走查落 acceptance/）**）
 
 - **变化面**：EmptyResult 从「底部 6 枚图标+文字小卡 + 上方全空」重排为 Qoder 式空态——顶部「工作区」标题章/标题/描述块（内容合同=Qoder 0.4.8 ui-i18n #3788255/#3788272「工作区就是 Agent 动手的地方…」）+ 六入口升级富卡片（图标章 30px + 标题 + 一句说明，2 列网格，margin:auto 垂直居中）；审阅徽章/±行数保留；卡片悬停 accent 描边+底色（BLOCK-273 悬停规范同源）。

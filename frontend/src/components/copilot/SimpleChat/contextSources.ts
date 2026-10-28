@@ -228,6 +228,24 @@ export interface SkillRow {
   description: string;
 }
 
+/** 单个 skill 的结构化 ComposerContextItem 构造（单源：@ 菜单与斜杠 chip v2 共用；
+ *  BLOCK-284 — C-29 chip v2 落地：斜杠选中 skill 不再注入文本模板，走本通道）。 */
+export function buildSkillItem(skill: { id: string; label?: string; description?: string }): ComposerContextItem {
+  return {
+    id: `ctx-skill-${skill.id}`,
+    kind: 'skill',
+    group: 'reference',
+    label: skill.label || skill.id,
+    source: CONTEXT_SOURCE_LABELS.skill,
+    lines: referenceLines('技能', [
+      ['技能', skill.id],
+      ['说明', skill.description || ''],
+    ]),
+    dedupeKey: `skill|${skill.id}`,
+    payload: { id: skill.id },
+  };
+}
+
 export function buildSkillCandidates(rows: SkillRow[]): ContextSourceResult {
   const candidates: ContextCandidate[] = [];
   for (const row of rows) {
@@ -237,19 +255,7 @@ export function buildSkillCandidates(rows: SkillRow[]): ContextSourceResult {
       sourceId: 'skill',
       label: row.label || row.id,
       detail: row.description || '产品技能',
-      item: {
-        id: `ctx-skill-${row.id}`,
-        kind: 'skill',
-        group: 'reference',
-        label: row.label || row.id,
-        source: CONTEXT_SOURCE_LABELS.skill,
-        lines: referenceLines('技能', [
-          ['技能', row.id],
-          ['说明', row.description || ''],
-        ]),
-        dedupeKey: `skill|${row.id}`,
-        payload: { id: row.id },
-      },
+      item: buildSkillItem(row),
     });
   }
   return sourceResult('skill', candidates);

@@ -31,6 +31,7 @@ import {
 // 选中注入执行意图文本模板，v1 不跳页不自动执行）
 import { fetchSlashEntries, filterSlashEntries, slashIntentTemplate, type SlashEntry } from './SimpleChat/slashSources';
 import { classifySlashCommand } from './SimpleChat/slashExecute';
+import { buildSkillItem } from './SimpleChat/contextSources';
 // BLOCK-245 P4 — 斜杠面板 JSX 平移 + 统一 `@` 上下文菜单（composer 浮层两件套）
 import { SlashCommandPanel } from './SimpleChat/SlashCommandPanel';
 import { ContextMentionMenu } from './SimpleChat/ContextMentionMenu';
@@ -1424,11 +1425,21 @@ export function SimpleChat({
         setSlashQuery('');
         break;
     }
-    // BLOCK-160 W2 P3（KNW-3）— 执行意图条目：注入文本模板而非执行 UI 动作
-    if (commandId.startsWith('skill:') || commandId.startsWith('template:')) {
-      const kind = commandId.startsWith('skill:') ? 'skill' : 'template';
-      const id = commandId.slice(kind.length + 1);
-      const template = slashIntentTemplate({ kind, id, label: '', description: '' });
+    // BLOCK-160 W2 P3（KNW-3）— 执行意图条目。BLOCK-284（C-29 chip v2）：skill 条目
+    // 走结构化 chip（buildSkillItem → composerContext，与 @ 菜单同源同形）；template
+    // 条目保持文本模板注入（v1 预裁决不变）。
+    if (commandId.startsWith('skill:')) {
+      const id = commandId.slice('skill:'.length);
+      const entry = combinedSlashEntries.find((e) => e.id === commandId);
+      composerContext.addItem(buildSkillItem({ id, label: entry?.label, description: entry?.description }));
+      setSlashOpen(false);
+      setSlashQuery('');
+      historyNavRef.current = INITIAL_NAV_STATE;
+      return;
+    }
+    if (commandId.startsWith('template:')) {
+      const id = commandId.slice('template:'.length);
+      const template = slashIntentTemplate({ kind: 'template', id, label: '', description: '' });
       setInput(template);
       saveConversationDraft(projectId, conversationId, template);
       setSlashOpen(false);

@@ -261,7 +261,10 @@ test('Anthropic schema conversion explicitly strips internal contract metadata',
     messages: [{ role: 'user', content: 'hello' }],
     tools: [{ ...definition('lookup'), riskTier: 'R0', resources: ['project.database'] }],
   });
-  assert.deepEqual(Object.keys(converted.tools[0]).sort(), ['description', 'input_schema', 'name']);
+  // BLOCK-280 — 最后一个工具带 ephemeral 缓存断点（单工具请求=唯一工具即最后）；
+  // 内部契约元数据（riskTier/resources）仍被剥离。
+  assert.deepEqual(Object.keys(converted.tools[0]).sort(), ['cache_control', 'description', 'input_schema', 'name']);
+  assert.deepEqual(converted.tools[0].cache_control, { type: 'ephemeral' });
   assert.equal(converted.tools[0].riskTier, undefined);
   assert.equal(converted.tools[0].resources, undefined);
 });
