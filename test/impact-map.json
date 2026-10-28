@@ -5996,6 +5996,16 @@
       ]
     },
     {
+      "id": "block303-transparent-fill-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-305 UI-605 实机腿：形状批注透明淡染走查（draft/box 背景 alpha=0.12 断言+clip 截图，3/3 PASS）；取证探针与目录。",
+      "patterns": [
+        "scripts/block303-transparent-fill-live.cjs",
+        "acceptance/block-303/**"
+      ],
+      "tests": []
+    },
+    {
       "id": "block278-freehand-dark-live",
       "classifiesScripts": true,
       "note": "BLOCK-278 UI-587 实机腿：批注画笔暗主题走查（工作区文件预览图像面，CDP 真实鼠标绘制 8 点采点 + REST freehand 契约 + 暗主题 stroke 渲染）取证探针与目录；前端改动面经 frontend 通道自动路由 vitest。",

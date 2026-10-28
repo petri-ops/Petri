@@ -20,7 +20,8 @@
   padding: 0;
   border: 2px solid var(--petri-warning);
   border-radius: var(--petri-radius-sm);
-  background: var(--petri-accent-bg);
+  /* UI-605 — 形状批注内部只做 12% 淡染不做实底：批注标位置，不遮挡区域内内容。 */
+  background: color-mix(in srgb, var(--petri-warning) 12%, transparent);
   box-shadow: var(--petri-shadow-float);
   pointer-events: auto;
   cursor: pointer;
@@ -28,22 +29,22 @@
 }
 
 .box:hover {
-  background: var(--petri-accent-soft);
+  background: color-mix(in srgb, var(--petri-warning) 20%, transparent);
 }
 
 .box[data-color='amber'] {
   border-color: var(--petri-warning);
-  background: var(--petri-warning-bg);
+  background: color-mix(in srgb, var(--petri-warning) 12%, transparent);
 }
 
 .box[data-color='sky'] {
   border-color: var(--petri-info);
-  background: var(--petri-accent-bg);
+  background: color-mix(in srgb, var(--petri-info) 12%, transparent);
 }
 
 .box[data-color='rose'] {
   border-color: var(--petri-danger);
-  background: var(--petri-danger-bg);
+  background: color-mix(in srgb, var(--petri-danger) 12%, transparent);
 }
 
 .badge {
@@ -62,29 +63,29 @@
   text-align: center;
 }
 
-/* BLOCK-303 — draft 形状特征化：绘制中即最终形态（实线+色底+形状），
-   不再是「外部虚线框」中间态；箭头 draft 走 SVG（ArrowGlyph），无对角线近似。 */
+/* BLOCK-303 — draft 形状特征化：绘制中即最终形态（实线+形状），与保存后同为
+   12% 淡染不遮挡内容（UI-605）；箭头 draft 走 SVG（ArrowGlyph），无对角线近似。 */
 .draft {
   position: absolute;
   border: 2px solid var(--petri-warning);
   border-radius: var(--petri-radius-sm);
-  background: var(--petri-warning-bg);
+  background: color-mix(in srgb, var(--petri-warning) 12%, transparent);
   pointer-events: none;
 }
 
 .draft[data-color='amber'] {
   border-color: var(--petri-warning);
-  background: var(--petri-warning-bg);
+  background: color-mix(in srgb, var(--petri-warning) 12%, transparent);
 }
 
 .draft[data-color='sky'] {
   border-color: var(--petri-info);
-  background: var(--petri-accent-bg);
+  background: color-mix(in srgb, var(--petri-info) 12%, transparent);
 }
 
 .draft[data-color='rose'] {
   border-color: var(--petri-danger);
-  background: var(--petri-danger-bg);
+  background: color-mix(in srgb, var(--petri-danger) 12%, transparent);
 }
 
 .draft[data-kind='ellipse'] {

@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-10-28T06:47:15.514Z",
+  "head": "ffa47fe92f26d1ea013ec4690552585ecefdbbcd",
+  "projectId": "p_mvrr4u6p_6376",
+  "surface": "workspace-file 图像预览面（UI-605 形状批注透明淡染：区域内内容可透视）",
+  "total": 3,
+  "passed": 3,
+  "failed": 0,
+  "records": [
+    {
+      "id": "P0a_project_created",
+      "ok": true,
+      "detail": "id=p_mvrr4u6p_6376"
+    },
+    {
+      "id": "D1_draft_translucent",
+      "ok": true,
+      "detail": "{\"color\":\"color(srgb 0.976471 0.45098 0.0862745 / 0.12)\",\"alpha\":0.12}（12% 淡染）"
+    },
+    {
+      "id": "D2_box_translucent",
+      "ok": true,
+      "detail": "{\"color\":\"color(srgb 0.976471 0.45098 0.0862745 / 0.12)\",\"alpha\":0.12}（保存后仍淡染可透视）"
+    }
+  ]
+}
