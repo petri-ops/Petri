@@ -8459,8 +8459,29 @@
         "G0"
       ],
       "notes": "RW 队首 completed（2026-10-30）：3D 产物接入成果面四线（kind=model3d/导出即登记桥/薄壳 viewer/一方 validator 描述符）；closeout 十三门 + 实机 18/18（真实 Blender 5.2.3 LTS）；UI-638 in_progress（面板发现腿随 RW-02）。"
+    },
+    {
+      "id": "RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE",
+      "capability": "rw-02-ui-evidence-pack-write-bridge",
+      "path": "docs/rw-02-ui-evidence-pack-write-bridge-plan.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "rw-02-ui-evidence-pack-write-bridge",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-30",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "rw",
+        "ui-evidence",
+        "pack",
+        "write-bridge",
+        "approval",
+        "G0"
+      ],
+      "notes": "RW 第二包：71 条 UI in_progress 四档分诊清偿（CDP 代行/条件腿/人眼集中清单/判销改判）+ C-44 pack iframe 写桥（selection/revisions/annotations/export 白名单+快照+审批过期+回退，沿用既有审批通道）；证据 acceptance/rw-02-*/。"
     }
   ],
   "lastUpdated": "2026-10-30",
-  "documentCount": 430
+  "documentCount": 431
 }

@@ -40,7 +40,7 @@ status: planned
 | 序 | ID | 量级 | 目标一句话 | 前置 | 状态 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | `RW-01-3D-ARTIFACT-REVISION` | 2–4 天 | 3D 链产物（SceneSpec/manifest/GLB/STL/OBJ/revision）接入成果面 revision 与血缘体系 | 无（Jev 建议，confidence 0.68） | **completed**（2026-10-30；closeout 十三门 + 实机 18/18；UI-638 面板发现腿随 RW-02；plan=docs/rw-01-3d-artifact-revision-plan.md） |
-| 2 | `RW-02-UI-EVIDENCE-DEBT` | 1–2 周 | 71 条 UI 台账 in_progress 分诊清偿；同包补 C-44 pack iframe 写桥 | RW-01 收口 | planned |
+| 2 | `RW-02-UI-EVIDENCE-DEBT` | 1–2 周 | 71 条 UI 台账 in_progress 分诊清偿；同包补 C-44 pack iframe 写桥 | RW-01 收口 | **active**（2026-10-30 预授权串行推进；plan=docs/rw-02-ui-evidence-pack-write-bridge-plan.md） |
 | 3 | `RW-03-C32-DECISION-ENV-GOV` | 2–3 天 | 修 C-32：decision-config env='1' 运行时强开违反自身语义 | RW-02 收口 | planned |
 | 4 | `RW-04-LEDGER-RECONCILE` | 0.5–1 天 | 台账待核注记逐项核实回写（2a/2c/2d/2e 现状），治理无代码 | RW-03 收口 | planned |
 | 5 | `RW-05-HARNESS-FOUNDATION` | 视核实 3–10 天 | harness 地基缺口实施（事件信封/工具元数据单源/存储能力协商） | RW-04 核实结论 | planned |
