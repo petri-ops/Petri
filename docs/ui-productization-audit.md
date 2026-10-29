@@ -4805,67 +4805,67 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：任务完成后顶栏「+」钮/审阅药丸「N·+A−D」徽章确认呈现，审阅归零语义正常。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v2 (2026-09-27 in_progress，用户实机三点反馈：去双层背景/右下角半高与摘要卡共存/悬挂面锁只读档)
+## UI-448 加映 v2 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户实机三点反馈：去双层背景/右下角半高与摘要卡共存/悬挂面锁只读档)
 
 - **反馈与修法**：①「背景多了一层」=面板内 SimpleChat 自带 `.sc-root` 卡片底（26px 圆角+surface 底+阴影）未中性化——比照中栏 agentMain 同款 `:global(.sc-root)` 中性化，只留悬浮面自身圆角面板（与摘要卡同特点）；②「不应从上到下占据」=surface 改贴底 `height: 50%` 右下角半高，与右上角摘要浮层同屏共存，中栏让位原则不变；③「仅聊天不能编辑/修改/新增文件」=`useModelAccessMenus` 增 `lockedAccessMode`（初始锁定+setter 失效守卫），悬挂面锁 `read` 档（后端 agent-tool-policy 权威门禁同口径：只读工具放行、全部写入/执行拒绝），访问档位选择器禁用并提示「文件修改请回中栏」。HK-01 红绿先行（锁档 harness 契约+传参契约两红→28/28 绿）。**实机走查 allPass（2026-09-27）**：面板贴底半高（top 467/bottom 942/h 475=视口正 50%）、sc-root 中性化实测（透明底/0 边框/0 圆角=单层面板）、composer「只读模式」无下拉（锁定）、与摘要卡同屏零重叠（摘要底 351 < 面板顶 467，间隙 116px）；前端全量 155 文件/1237 用例 0 红+tsc 0+eslint 0 error；证据=acceptance/ui-448/walkthrough-v2.json + 3 截图。（v1 已于 2026-09-27 晨 verified；**v2 为其后新增量，in_progress 待用户过目 v2 形态后翻 verified**）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v3 (2026-09-27 in_progress，用户过目 v2 后三点反馈：主题对齐摘要面板/独立会话不并入主会话 agent/composer 删减)
+## UI-448 加映 v3 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户过目 v2 后三点反馈：主题对齐摘要面板/独立会话不并入主会话 agent/composer 删减)
 
 - **反馈与修法**：①悬浮面底色 surface→`--petri-bg-elevated` 对齐摘要卡，头部对齐摘要顶栏规格（52px/分隔线 color-mix(text 6%)）；②悬挂面**自立每项目独立会话**（localStorage 持久化 + 首发 useChatStream 既有建话路径），不再镜像中栏 activeConvId——主会话编码 agent 内容不再出现在悬挂面，两会话 run 互不干扰；组件签名收缩为只收 projectId；③SimpleChat 增 `slimComposer` prop：隐藏导出/知识开关/上下文环/模型供应商/思考档位，只留只读徽标+发送键。**实机走查 allPass（2026-09-27）**：底色实测 elevated（rgb(29,41,69)）与摘要卡一致、头部 52px 同规格；端到端探针=悬挂面发消息自动建独立会话（localStorage 落 conv id+侧栏独立条目），read 档 1 次只读工具读 package.json 正确作答，中栏会话分毫未动；composer 实测只余只读徽标+发送键（知识开关/模型对 display:none 实证）；探针会话已回收清场。红绿 5 红→29/29 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v3.json+2 截图。**待用户过目 v3 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v4 (2026-09-27 in_progress，用户裁决「完全一致：文字大小/宽度/贴右侧边；就是个聊天窗口但可以选择模型」)
+## UI-448 加映 v4 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决「完全一致：文字大小/宽度/贴右侧边；就是个聊天窗口但可以选择模型」)
 
 - **修法**：①surface 宽 380→300px（同摘要）+ right:0 贴右缘 + 开态隐把手（关闭=✕/Esc/外点）；②聊天文字级联降到摘要正文档（caption）；③slim 隐藏名单收缩：模型/供应商选择恢复（窄面板图标化），知识开关仍隐藏；只读锁/独立会话不变。**实机走查 allPass（2026-09-27）**：宽 300（摘要 288 shrink-to-fit）、右缘 delta=0（贴摘要同缘）、消息字级 12.1275px=摘要正文（fontMatch=true）、开态把手隐藏、模型菜单面板内可弹出可选；波折登记=max-width 百分比参照系误用致面板夹塌 2px（改回视口单位）+字档实测纠正（摘要正文是 sm 档非 caption）；红绿 3 红→20/20 绿+前端全量 1238 用例 0 红；证据=acceptance/ui-448/walkthrough-v4.json+2 截图。**待用户过目 v4 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v5 (2026-09-27 in_progress，用户过目 v4 后两点反馈：内容贴左去早换行/常驻化外点不收起)
+## UI-448 加映 v5 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户过目 v4 后两点反馈：内容贴左去早换行/常驻化外点不收起)
 
 - **修法**：①悬挂面隐藏 MessageRail（slimComposer 条件）+ sc-body/sc-messages 内边距 dock scope 收窄（8px/6px），300px 面板内容区扩容 ~30px/侧，终结过早换行；②移除外点收起与 Esc 收起（输入时误触），折叠/展开仅经把手与头部 ✕——与摘要卡同款常驻特性。**实机走查 allPass（2026-09-27）**：点标题栏外部面板仍开（stillOpen=true）、rail 隐藏、bodyPadding 8px/msgPadding 0 4px 实测生效；契约反转 3 红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v5.json。**待用户过目 v5 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v6 (2026-09-27 in_progress，用户裁决：侧聊把手像摘要概览按钮一样常驻显示，卡片挂图标下方)
+## UI-448 加映 v6 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决：侧聊把手像摘要概览按钮一样常驻显示，卡片挂图标下方)
 
 - **修法**：把手开/关两态恒显示（v4 曾开态隐藏），位置锚定面板上方 bottom: calc(50% + 14px)——卡片打开时挂在图标正下方，再点图标收起（D1 契约恢复）；✕ 仍可用。**实机走查 allPass（2026-09-27）**：开态把手常显（handleVisible/ariaExpanded=true）、卡片挂图标下方（handleAbovePanel=true、gap 6px）、再点收起 D1 实证；契约反转先红→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v6.json。**待用户过目 v6 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v7 (2026-09-27 in_progress，用户裁决：把手图标极简化——去外框/底板，只留气泡图标，运行指示由图标色呼吸承担)
+## UI-448 加映 v7 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决：把手图标极简化——去外框/底板，只留气泡图标，运行指示由图标色呼吸承担)
 
 - **修法**：把手 30x64 带框竖条→28x28 裸气泡描边图标（border/底板/阴影全去除，例图同款）；独立圆点退役，运行指示改由图标本体色承担（handleRunning=--petri-status-online 绿呼吸）；激活态=accent 色；锚定面板上方布局不变。
 - **证据**：呼吸灯契约随形态重构先红（圆点退役断言）→20/20 绿；前端全量 155 文件/1238 用例 0 红；tsc 0；eslint 0 error；实机实测 border 0/底 transparent/阴影 none、开态卡片挂图标下方不变；截图=acceptance/ui-448/ui448v7-minimal-icon.png + ui448v7-open-below-icon.png + walkthrough-v7.json。**待用户过目 v7 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v8 (2026-09-27 in_progress，用户反馈：摘要与会话面板右缘应共享距离、不应叠加)
+## UI-448 加映 v8 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户反馈：摘要与会话面板右缘应共享距离、不应叠加)
 
 - **修法**：①SideChatDock 注入 `--dock-right`（14px 内缩 + 摘要钉住列宽 + 8px 间隙联动），摘要钉住时面板让到列左、悬浮时与摘要卡同缘；②会话面板打开时摘要悬浮 max-height 封顶上半（`workspaceSessionLayoutSideChatOpen`），上摘要下会话永不叠加；③agentMain 让位随钉住扩容（`--side-chat-pinned`）。**实机走查 allPass（2026-09-27）**：悬浮态实测摘要右 1325=面板右 1325（horizontalGap 0）、垂直零重叠（摘要底 351<面板顶 467）；钉住态三断言由契约覆盖（--dock-right=322px/--side-chat-pinned=300px/封顶类）；契约先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v8.json。收口波折=lint 抓 CenterPanel.test 三处多余断言（no-unnecessary-type-assertion/no-unsafe-call），改 querySelector<HTMLElement> 泛型形态清偿。
 **加映 v9（同日）：v8 钉住联动偏移被实测证伪（computed 状态与实际形态脱节把面板甩到半空），回退为面板恒贴右缘 right:14px（悬浮/钉住通吃），保留摘要悬浮封顶与常驻类；窄窗 1000px 实测右缘 delta=0 零重叠。待用户过目 v9 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v10 (2026-09-27 in_progress，用户裁决「全方位核查摘要卡片实现 精准识别后调整会话卡片」)
+## UI-448 加映 v10 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决「全方位核查摘要卡片实现 精准识别后调整会话卡片」)
 
 - **修法**：SideChatDock 挂载点迁入 `.workspaceSessionLayout`（与摘要悬浮同层同 `right:0` 基准，结构性同源）；surface 贴 layout 右缘；yield 让位 432→308px 解决「推的太狠」；结果模式面板随 chat 投影隐藏（与摘要行为对齐，plan 留痕）。
 - **实机走查 allPass（2026-09-27）**：同基准实证 dockInsideLayout=true、rightEdgeDeltaVsSummary=0、垂直零重叠；让位 432→308 解决「推的太狠」；结果模式随投影隐藏与摘要行为对齐；契约（挂载位置）先红→22/22 绿；前端全量 155 文件/1240 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v10.json。**加映 v16（同日三次）：面板改为沉底锚定（bottom:44px 挂 FAB 上方，FAB 右下角 bottom:8/right:14 常驻），右轨去 space-between 改顶部堆叠；FAB 曾误入右轨条件块致关闭态不渲染（鸡生蛋），已移出。待用户过目 v16 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v11 (2026-09-27 in_progress，用户「问题依旧」——直连用户窗口诊断：视口 2481×1876 下摘要为钉住列形态，yield 让位叠在列带上致「推得太狠」)
+## UI-448 加映 v11 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户「问题依旧」——直连用户窗口诊断：视口 2481×1876 下摘要为钉住列形态，yield 让位叠在列带上致「推得太狠」)
 
 - **修法**：yield 让位只在摘要非钉住时应用（钉住列自身即隔离带）；钉住态面板嵌列带下半与摘要卡垂直堆叠共享右缘；悬浮/关闭态保持 308px 让位。诊断探针 scripts/ui448-diagnose-user-window.mjs（只读，禁导航用户窗口红线内）随包登记。**实机双宽度 allPass（2026-09-27）**：2481 钉住态 yieldApplied=false/cardDockOverlap=false（列带即隔离带、面板嵌列下半与摘要卡垂直堆叠）；1000 悬浮态让位保留零重叠；契约 13/13 绿；前端全量 155 文件/1242 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v11.json+2 截图。**待用户过目 v11 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v12 (2026-09-27 in_progress，用户裁决：侧聊=独立区域——继承主会话记录但不影响主上下文；宽窗占位/窄窗悬浮)
+## UI-448 加映 v12 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决：侧聊=独立区域——继承主会话记录但不影响主上下文；宽窗占位/窄窗悬浮)
 
 - **修法**：①首次展开自动 fork 主会话（复制消息的现成原语）→ 继承记录 + 独立演化（不写回/不 steer/不入主上下文），只读锁保留；②宽窗（与摘要同切换点 summaryVisibility==='expanded'）→ 右轨独立列区 300px 与摘要钉住列同轨垂直堆叠共享右缘；窄窗 → 悬浮（把手+右下角浮面）；把手两态常驻；yield 仅窄窗悬浮态应用。
 - **证据**：fork 三契约+docked 变体契约 28/28 绿；前端全量 155 文件/1246 用例 0 红；tsc 0；eslint 0 error；实机双形态 allPass（宽=右轨堆叠/共右缘/继承 38 条记录；窄=悬浮/继承记录）；证据=acceptance/ui-448/walkthrough-v12.json+2 截图。**待用户过目 v12 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v13 (2026-09-27 in_progress，用户问「图标位置是否不友好·哪里更合适」——裁决=入口归位顶栏摘要开关邻居)
+## UI-448 加映 v13 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户问「图标位置是否不友好·哪里更合适」——裁决=入口归位顶栏摘要开关邻居)
 
 - **修法**：新增 titlebar/SideChatToggleButton（iconBtn 族/aria-pressed/运行呼吸色迁入/仅工作区 chat 模式渲染），与摘要概览同排；SideChatDock 中栏浮动把手整体退役（组件只留浮面/列区两形态）；右栏「侧边聊天」tab 双入口保留。
 - **证据**：dock 测试改造+按钮契约 27/27+33/33 绿；前端全量 156 文件/1249 用例 0 红；tsc 0；eslint 0 error（陈旧抑制槽位 prune 5 条）；实机双形态 allPass（宽=顶栏开关→右轨列区；窄=顶栏开关→悬浮）；测试残留分叉已回收；证据=acceptance/ui-448/walkthrough-v13.json+2 截图。**待用户过目 v13 形态后翻 verified**。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-448 加映 v14 (2026-09-27 in_progress，用户裁决「会话点开时主会话不要收起来 两者并不冲突」——撤销 v2 单一输入面)
+## UI-448 加映 v14 (2026-09-27 **判销（RW-02 d 档 2026-10-30：迭代形态被同系列后续版本取代，v15 起 2026-09-28 用户整批过目 verified，整链 SideChatDock 由 UI-627 原生独立窗退役下线——收口目标失义，非缺陷未修）**，用户裁决「会话点开时主会话不要收起来 两者并不冲突」——撤销 v2 单一输入面)
 
 - **修法**：侧聊打开时主会话 composer 不再让位（v2 的「同一会话单一输入面」设定由用户明确反转）；ComposerYieldHint 让位件/契约/CSS 整链退役，ComposerYield 瘦身为 composerPlaceholder 工具（compact 短占位符保留）。
 - **证据**：实机双输入框并存（主 718px 可输入+侧聊 compact 同屏，totalComposers=2，让位提示条消失）；受影响面 47 文件/415 用例绿；前端全量 155 文件/1245 用例 0 红；tsc 0；eslint 0 error；证据=acceptance/ui-448/walkthrough-v14.json+截图。**待用户过目 v14 形态后翻 verified**。
