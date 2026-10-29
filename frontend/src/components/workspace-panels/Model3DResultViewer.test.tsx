@@ -4,20 +4,42 @@
  * plan: docs/rw01 §1.2/§1.5：
  * 1. 挂载即把 artifact 绑定进选择总线（setSelectionBusArtifact 语义）
  * 2. 点击面写 artifact 级选择（entityIds=[artifactId]，origin=point_select）
- * 3. WebGL 不可用（happy-dom）时如实降级提示，不假装渲染成功
+ * 3. WebGL 不可用时如实降级提示（经 Model3DScene onError 路径），不假装渲染成功
+ *
+ * Model3DScene 以 stub 代入：three.js/WebGL 在 happy-dom 无渲染上下文（真挂载会
+ * V8 OOM——RW-06 vitest 通道债在册），薄壳契约（总线绑定/点击选择/降级 UI）不依赖
+ * three.js 内部；Model3DScene 自身的渲染行为由 work-surface 实机腿承索。
  */
 import assert from 'node:assert/strict';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import {
   getSelectionBusState,
   setSelectionBusArtifact,
   subscribeSelectionBus,
 } from '@/lib/selectionBus';
+
+const onErrorSpy = vi.fn();
+
+vi.mock('@/components/work-surface/Model3DScene', () => ({
+  Model3DScene: (props: {
+    onError?: (message: string) => void;
+    onReady?: (info: { objects: number; bounds: number[] }) => void;
+  }) => {
+    // 模拟 happy-dom 无 WebGL 的内核降级路径（onError 一次）
+    React.useEffect(() => {
+      props.onError?.('webgl_unavailable');
+    }, []);
+    return <div data-testid="model3d-scene-stub" />;
+  },
+}));
+
 import Model3DResultViewer from './Model3DResultViewer';
 
 afterEach(() => {
   cleanup();
+  onErrorSpy.mockClear();
   setSelectionBusArtifact({ artifactId: '', revisionId: null });
 });
 
@@ -63,7 +85,7 @@ describe('RW01 Model3DResultViewer', () => {
     assert.equal(selection.revisionId, 'rev1');
   });
 
-  it('happy-dom 无 WebGL：渲染降级提示而非崩溃', () => {
+  it('WebGL 降级：onError 路径显示如实提示而非崩溃', () => {
     render(
       <Model3DResultViewer
         url="http://localhost:3000/api/files/model3d/runs/r1/enclosure.glb"
@@ -72,7 +94,7 @@ describe('RW01 Model3DResultViewer', () => {
         revisionId="rev1"
       />,
     );
-    // WebGL 上下文在 happy-dom 不可得 → Model3DScene onError 路径 → 组件显示降级文案
-    expect(screen.getByTestId('model3d-result-viewer-surface')).toBeDefined();
+    expect(screen.getByText('3D 预览不可用')).toBeDefined();
+    expect(screen.getByText(/WebGL/)).toBeDefined();
   });
 });

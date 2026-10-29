@@ -169,9 +169,8 @@ function registerModel3DExportRevision({ repository, job, manifest, sceneRelativ
   }
 
   const changeSetId = randomId('cs_model3d');
-  let changeSet;
   try {
-    changeSet = repository.createChangeSet({
+    repository.createChangeSet({
       changeSetId,
       projectId,
       conversationId: job.conversation_id || null,

@@ -81,19 +81,6 @@ function makeManifest(sceneHash, outputs, overrides = {}) {
   };
 }
 
-/** 已完成并盖章的作业行（tools-executor 收尾后的形状）。 */
-function stampedJobRow(jobId, projectId, stampedResult) {
-  return {
-    id: jobId,
-    tool_id: 'model3d_export',
-    project_id: projectId,
-    user_id: 'agent',
-    status: 'completed',
-    params: {},
-    result: stampedResult,
-  };
-}
-
 const SCENE_REL = 'model3d/recipes/box-enclosure.scene3d.json';
 
 test('RW01 stamp：导出结果盖自证 provenance + artifactTruth，verifyExecutionProvenance 通过', (context) => {

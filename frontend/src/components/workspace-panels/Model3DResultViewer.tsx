@@ -29,12 +29,19 @@ export function Model3DResultViewer({
   artifactId: string;
   revisionId: string | null;
 }) {
-  const [error, setError] = React.useState<string | null>(null);
-  const [readyInfo, setReadyInfo] = React.useState<{ objects: number; bounds: number[] } | null>(null);
+  // BLOCK-250 同类纪律：artifact 换上下文的重置在 render 期派生（不在 effect 里同步 setState）。
+  const [viewState, setViewState] = React.useState<{
+    artifactId: string;
+    error: string | null;
+    ready: { objects: number; bounds: number[] } | null;
+  }>({ artifactId, error: null, ready: null });
+  if (viewState.artifactId !== artifactId) {
+    setViewState({ artifactId, error: null, ready: null });
+  }
+  const error = viewState.artifactId === artifactId ? viewState.error : null;
+  const readyInfo = viewState.artifactId === artifactId ? viewState.ready : null;
 
   React.useEffect(() => {
-    setError(null);
-    setReadyInfo(null);
     setSelectionBusArtifact({ artifactId, revisionId });
   }, [artifactId, revisionId]);
 
@@ -74,8 +81,8 @@ export function Model3DResultViewer({
           viewAngle="iso"
           modelUrl={url}
           modelFormat={modelFormatFor(url)}
-          onReady={(info) => setReadyInfo(info)}
-          onError={(message) => setError(message)}
+          onReady={(info) => setViewState((prev) => ({ ...prev, ready: info }))}
+          onError={(message) => setViewState((prev) => ({ ...prev, error: message }))}
         />
         {error && (
           <div className={styles.fallback}>

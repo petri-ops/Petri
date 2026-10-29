@@ -45,7 +45,7 @@
 
 - **变化面**：`ResultArtifactKind` 增 `model3d`（SECTION_LABELS「3D 模型」）；viewerRegistry 新增 model3d adapter（kind 恒胜 + `.glb/.gltf/.stl/.obj/.scene3d.json` 先于 json/binary 兜底，canSelect=true artifact 级选择）；`Model3DResultViewer` 薄壳（复用 work-surface Model3DScene 零复制，挂载即绑定 selectionBus、点击面写 artifact 级选择、WebGL 缺席如实降级）；ResultArtifactShell 渲染分支。
 - **为什么这样设计**：NEXT-04A~06 建成的 3D 链产物此前与成果面 revision/lineage/viewer/selectionBus 四线零接线；RW-01 经「导出即登记」桥（manifest→change-set+appendRevisionBatch，parametersHash=sceneHash 溯源，family=`model3d:<projectId>:<scenePath>:<ext>` 稳定跨导出 stacking）把 3D 产物接入既有内核真值，不建第二真相。
-- **验证（代码）**：桥契约 5/5（stamp 自证 provenance / 登记 / 幂等 / blocked 不 adopt / lineage 独立复投影）+ 注册表 4/4 + viewer 3/3 + 主题门 17/17 + tsc 0；内核邻域 72/72 + 3D 链 12/12 + plugin-loader 2/2。
+- **验证（代码）**：桥契约 5/5（stamp 自证 provenance / 登记 / 幂等 / blocked 不 adopt / lineage 独立复投影）+ 注册表 4/4 + viewer 3/3（Model3DScene 以 stub 代入——happy-dom 真挂 three.js 触发 V8 OOM，RW-06 vitest 通道债在册；薄壳契约不依赖 three.js 内部）+ 主题门 17/17 + tsc 0 + lint 0 error（viewer setState 改 render 期派生，BLOCK-250 同类纪律）；内核邻域 72/72 + 3D 链 12/12 + plugin-loader 2/2。
 - **实机证据**：`acceptance/rw-01-3d-revision/rw01-model3d-live-live.json`（**18/18**，主栈 :3001 + 9223 离屏，真实 Blender 5.2.3 LTS）：REST 导出（与 agent 工具同一生产路径）→ 盖章作业 + change-set(adopted) + 三格式 revision + 权威图落库；history/lineage REST 可查；revision 文件服务字节 sha 对账 manifest；场景编辑 v2 → 同 family stacking v2 登基；场景语义 diff。
 - **边界（reopen）**：①工作区面板怎么把 model3d family 列进 Result Studio 结果列表（发现路径）未接——viewer 打开依赖 revision 上下文已就位，面板发现腿待补实机；②restore 资格链三关（cohort/validator/图覆盖）已过，终点 `restore_material_unavailable` 是 git 物化域前提（历史脚本/参数快照须在工作区 git 绑定域验证；临时项目工作区为仓库子目录不具备）——既有内核机制非 3D 专项；③子网格级语义拾取、网格 diff、3D 文件「打开原文件」出口不在本包。
 
