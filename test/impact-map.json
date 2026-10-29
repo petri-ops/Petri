@@ -3328,9 +3328,6 @@
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/types.ts",
         "frontend/src/components/copilot/simple-chat.css",
-        "frontend/src/components/workspace-panels/SideChatDock.tsx",
-        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
-        "frontend/src/components/workspace-panels/SideChatDock.module.css",
         "frontend/src/components/workspace-panels/CenterPanel.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/pages/project-workspace.module.css",
@@ -3339,7 +3336,6 @@
         "scripts/ui448-diagnose-user-window.mjs"
       ],
       "tests": [
-        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
         "frontend/src/styles/theme-token-contract.test.ts"
       ],
@@ -6091,7 +6087,6 @@
       "tests": [
         "test/block318-context-breakdown.test.mjs",
         "frontend/src/components/copilot/ContextBudgetBar.test.tsx",
-        "frontend/src/components/workspace-panels/SideChatDock.test.tsx",
         "frontend/src/components/workspace-panels/CenterPanel.test.tsx"
       ]
     },
@@ -6228,6 +6223,20 @@
       ],
       "tests": [
         "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx"
+      ]
+    },
+    {
+      "id": "block321-side-chat-window-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-321 UI-627 实机腿：侧聊原生独立窗——主窗无 FAB/dock、真实菜单链（更多工具→侧聊）开窗、新 target 带 query 白名单 projectId、极简 chrome（无旧会话头/窄拖动条+✕）、SimpleChat 挂载，7/7 PASS；取证探针与目录。",
+      "patterns": [
+        "scripts/block321-side-chat-window-live.cjs",
+        "acceptance/block-321/**"
+      ],
+      "tests": [
+        "frontend/src/pages/window/SideChatWindowPage.test.tsx",
+        "frontend/src/lib/sideChatWindow.test.ts",
+        "test/block59-window-manager.test.mjs"
       ]
     }
   ]

@@ -55,12 +55,6 @@ export const petriEvents = {
   approvalCardFocus: 'petri:approval-card-focus',
 
   /**
-   * UI-417 — 侧边聊天悬挂化：请求展开悬挂聊天面（原右栏 chat tab 入口收编——
-   * home 空态卡「打开聊天」/分析完成跳转等）。SideChatDock 订阅后滑出 overlay；
-   * 中央 ownsCopilotAsk 归属不变，本事件只管展开不投递内容。
-   */
-  sideChatOpen: 'petri:side-chat-open',
-
   /** Fired by the shared TitleBar; listened by BrowserPanel */
   browserBack: 'petri:browser-back',
   browserForward: 'petri:browser-forward',
@@ -354,7 +348,6 @@ export type PetriEventMap = {
   [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;
   [petriEvents.uiActionRequest]: UiActionRequestDetail;
-  [petriEvents.sideChatOpen]: undefined;
   [petriEvents.browserBack]: undefined;
   [petriEvents.browserForward]: undefined;
   [petriEvents.conversationForked]: ConversationForkedDetail;

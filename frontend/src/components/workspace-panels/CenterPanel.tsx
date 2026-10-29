@@ -37,7 +37,6 @@ import {
 } from '@/components/workspace-panels/ResultView';
 import { ScheduledWorkspacePanel } from '@/components/workspace-panels/ScheduledWorkspacePanel';
 import { ResultsLibrary } from '@/components/workspace-panels/ResultsLibrary';
-import { SideChatDock } from '@/components/workspace-panels/SideChatDock';
 import { resolveResultSurfaceHost } from '@/components/result-studio/resultSurfaceHost';
 import { PackSurfaceFrame } from '@/components/work-surface/PackSurfaceFrame';
 import type { WorkSurfaceDescriptor } from '@/lib/workSurface/types';
@@ -51,7 +50,6 @@ import {
   persistFloatWidth,
   readPersistedFloatWidth,
 } from '@/components/workspace-panels/FloatCardResizer';
-import { Icon } from '@/components/icons/Icon';
 // UI-448 — 悬浮聊天面开态：中栏会话内容列让位（不遮切割），与 composer 让位同源
 import type { RightPanelMode } from '@/pages/project-workspace/rightPanelTabs';
 
@@ -137,9 +135,6 @@ export interface CenterPanelContext {
   setLeftOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setSummaryOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
-  /** UI-448 加映 v15 — 侧聊面板开合（壳状态，摘要概览同机制）。 */
-  sideChatOpen: boolean;
-  setSideChatOpen: (next: boolean | ((prev: boolean) => boolean)) => void;
   handleShowPlugins: () => void;
   handleOpenResult: (jobId: string, projectId?: string | null) => void | Promise<boolean>;
   handleAskAgent: (prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => void;
@@ -169,9 +164,6 @@ export interface CenterPanelProps {
 export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement {
   const { workspaceMode, bottomTerminalOpen, bottomTerminalHeight } = ctx;
   const { centerColRef, sessionFrameRef } = refs;
-  // UI-448 — 悬浮聊天面展开时中栏会话内容列让位（chat 模式才有会话内容可让）
-  const sideChatOpen = ctx.sideChatOpen;
-  const setSideChatOpen = ctx.setSideChatOpen;
   const [returnConversationMs, setReturnConversationMs] = React.useState<number | null>(null);
   // Reuse the durable conversation run; the result Composer does not create a
   // second progress store and therefore survives tool switches/stop/failure by
@@ -341,8 +333,6 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
           ctx={ctx}
           sessionFrameRef={sessionFrameRef}
           variant="chat"
-          sideChatOpen={sideChatOpen}
-          onSideChatOpenChange={setSideChatOpen}
         >
           <div
             className={styles.agentMain}
@@ -484,17 +474,11 @@ function SessionFrameView({
   sessionFrameRef,
   children,
   variant = 'default',
-  sideChatOpen = false,
-  onSideChatOpenChange,
 }: {
   ctx: CenterPanelContext;
   sessionFrameRef: React.Ref<HTMLDivElement>;
   children: React.ReactNode;
   variant?: 'default' | 'chat';
-  /** UI-448 加映 v8 — 会话面板开启时摘要悬浮封顶上半，两面板同屏不叠加。 */
-  sideChatOpen?: boolean;
-  /** UI-448 加映 v15 — 侧聊面板收起回调（列区 ✕ 经它回写壳状态）。 */
-  onSideChatOpenChange?: (open: boolean) => void;
 }): React.ReactElement {
   // HLE-C4R: surface the active conversation's durable-loop projection in the
   // pinned summary. Reads the same shared run store the chat renders from, so
@@ -531,7 +515,7 @@ function SessionFrameView({
     <div
       className={`${styles.workspaceSessionLayout} ${
         variant === 'chat' ? styles.workspaceSessionFrameChat : ''
-      } ${sideChatOpen ? styles.workspaceSessionLayoutSideChatOpen : ''}`}
+      }`}
       ref={sessionFrameRef}
     >
       <div className={styles.workspaceSessionLayout}>
@@ -625,42 +609,10 @@ function SessionFrameView({
           </div>
         </div>
         ) : null}
-        {/* UI-448 加映 v10 — 侧聊悬浮面与摘要卡同定位基准：同在 session layout 内
-            right:0，右缘结构性同源。
-            UI-623 — 宽窄窗统一悬浮（不再有 docked 列区），头部可拖动到任意位置。 */}
-        {variant === 'chat' && ctx.projectId && (
-          <SideChatDock
-            key={ctx.projectId}
-            projectId={ctx.projectId}
-            sourceConversationId={ctx.activeConvId}
-            open={sideChatOpen}
-            onOpenChange={onSideChatOpenChange ?? (() => {})}
-            // UI-448 加映 v21 — 悬浮面宽度与摘要浮卡同源同值（v4 的「同宽 300px」
-            // 与摘要实际 276–292 动态宽不一致，用户实测指认；缺省回落 300）
-            width={ctx.summaryOpenWidth}
-          />
-        )}
+        {/* UI-627（BLOCK-321）— 页内侧聊悬浮面与右下角 FAB 双退役：侧聊升级为
+            frameless 原生独立窗（/window/side-chat，可拖出软件边界跨屏、OS 八方位
+            resize），唯一入口 = 标题栏「侧聊」按钮（openSideChatWindow）。 */}
       </div>
-        {/* UI-448 加映 v16 — 入口按钮沉底：右下角常驻小气泡（开/收切换），
-            与顶栏摘要概览按钮上下对应。
-            UI-448 加映 v28 — FAB 挂到外层（带 padding 的 frame）而非内层布局：
-            内层被外层 padding-right:14 推进且 overflow:hidden 会剪掉越界部分，
-            与摘要按钮对齐所需的负偏移必被剪。外层 padding-box 右缘=分隔线，
-            right:5px 与摘要按钮相对分隔线的内缩量一致 → 两钮中心线精确重合
-            （IAB 实测 fabCenter==summaryCenter）。 */}
-        {variant === 'chat' && ctx.projectId && (
-          <button
-            type="button"
-            className={styles.sideChatFab}
-            onClick={() => onSideChatOpenChange?.(!sideChatOpen)}
-            aria-label={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
-            aria-pressed={sideChatOpen}
-            title={sideChatOpen ? '收起侧边聊天' : '侧边聊天'}
-            data-testid="side-chat-fab"
-          >
-            <Icon name="message-circle" size={16} />
-          </button>
-        )}
     </div>
   );
 }

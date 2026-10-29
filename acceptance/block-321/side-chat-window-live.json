@@ -1,0 +1,67 @@
+{
+  "capturedAt": "2026-10-29T02:14:20.879Z",
+  "cdp": "http://127.0.0.1:9223",
+  "route": "menu-click",
+  "pass": true,
+  "checks": [
+    {
+      "name": "main-window-found",
+      "ok": true,
+      "detail": {
+        "url": "http://localhost:3000/project/p_mvs9gxz4_42pi"
+      }
+    },
+    {
+      "name": "project-available",
+      "ok": true,
+      "detail": {
+        "id": "p_mvs9gxz4_42pi",
+        "name": "BLOCK320-验收-1793200822520"
+      }
+    },
+    {
+      "name": "in-page-fab-retired",
+      "ok": true,
+      "detail": {
+        "fabGone": true,
+        "dockGone": true
+      }
+    },
+    {
+      "name": "open-triggered",
+      "ok": true,
+      "detail": {
+        "route": "menu-click",
+        "itemClicked": {
+          "ok": true
+        }
+      }
+    },
+    {
+      "name": "side-chat-window-target",
+      "ok": true,
+      "detail": {
+        "url": "http://localhost:3000/window/side-chat?projectId=p_mvs9gxz4_42pi",
+        "title": "Petri"
+      }
+    },
+    {
+      "name": "window-chrome-minimal",
+      "ok": true,
+      "detail": {
+        "strip": true,
+        "closeBtn": true,
+        "legacyHeaderGone": true,
+        "chatMounted": true,
+        "title": "Petri"
+      }
+    },
+    {
+      "name": "simple-chat-mounted",
+      "ok": true,
+      "detail": {
+        "chatMounted": true
+      }
+    }
+  ]
+}

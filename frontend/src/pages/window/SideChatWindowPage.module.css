@@ -1,0 +1,82 @@
+/* SideChatWindowPage.module.css — UI-627（BLOCK-321）侧聊原生独立窗页面
+   frameless 单例窗：窄拖动条（app-region drag）+ 右上角 ✕，无标题头
+   （旧 52px「会话」头挤压会话内容，用户裁决退役，只保留关闭按钮）。 */
+
+.page {
+  position: relative;
+  /* 拖动条高度预留：内容从条下开始，✕ 不遮消息 */
+  padding-top: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text);
+  overflow: hidden;
+}
+
+/* frameless 窗移动把手：窄条即拖动区（OS 承担拖动，跨屏自由、丝滑） */
+.dragStrip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  -webkit-app-region: drag;
+  touch-action: none;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text-tertiary);
+  cursor: pointer;
+  /* ✕ 必须可点：从拖动区摘出 */
+  -webkit-app-region: no-drag;
+}
+
+.closeBtn:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.body :global(.sc-root) {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.body :global(.sc-body) {
+  padding: var(--petri-space-3) var(--petri-space-3) 10px;
+}
+
+.body :global(.sc-messages) {
+  padding: 0 var(--petri-space-1);
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--petri-space-4);
+  color: var(--petri-text-secondary);
+  text-align: center;
+}

@@ -12,6 +12,8 @@
 // ============================================================
 import { useCallback, useMemo, useState, type RefObject } from 'react';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+// UI-627（BLOCK-321）— 侧聊入口改开原生独立窗
+import { openSideChatWindow } from '@/lib/sideChatWindow';
 import { createScratchpad } from '@/lib/scratchpadClient';
 import {
   buildSelectionActions,
@@ -159,7 +161,7 @@ export function usePreviewSelection(options: PreviewSelectionOptions): PreviewSe
       }
       if (id === 'side-chat') {
         await navigator.clipboard.writeText(text);
-        dispatchPetriEvent(petriEvents.sideChatOpen);
+        void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: null });
         onNotice?.('已复制选中文字并打开侧边会话：粘贴即可提问');
         setSelection(null);
         return;

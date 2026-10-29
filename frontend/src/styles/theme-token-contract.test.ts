@@ -512,7 +512,8 @@ describe('theme token contract', () => {
       'components/knowledge/KnowledgeConsoleDock.module.css': 1,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 1,
       'components/ui/controls/button.module.css': 6,
-      'components/workspace-panels/SideChatDock.module.css': 1,
+      // UI-627（BLOCK-321）— 侧聊独立窗 ✕ 按钮（同 SideChatDock closeBtn 先例：窗口级关闭钮）
+      'pages/window/SideChatWindowPage.module.css': 1,
       'components/workspace-panels/SshStatusDot.module.css': 1,
       'pages/extensions/extensions.module.css': 1,
       'pages/global-page.module.css': 1,

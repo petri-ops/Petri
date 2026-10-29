@@ -148,21 +148,15 @@ export interface CopilotContext {
 }
 
 let current: CopilotContext = { page: 'unknown' };
-const listeners = new Set<(c: CopilotContext) => void>();
 
 export function setCopilotContext(patch: Partial<CopilotContext>): void {
   current = { ...current, ...patch };
-  listeners.forEach((fn) => fn(current));
 }
 
 export function getCopilotContext(): CopilotContext {
   return current;
 }
 
-export function subscribeCopilotContext(fn: (c: CopilotContext) => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+// UI-627（BLOCK-321）— subscribeCopilotContext 退役：唯一消费者曾是页内侧聊
+// 悬浮面（「copilotAsk 归属不在悬挂面」订阅守卫），悬浮面随独立窗化删除。
 

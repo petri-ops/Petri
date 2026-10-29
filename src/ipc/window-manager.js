@@ -23,8 +23,27 @@ const { app, BrowserWindow, ipcMain, screen } = require("electron");
 const {
   createWindowManagerCore,
   CONTENT_TYPES,
+  KEY_PATTERN,
 } = require("../main/_window-manager");
 const { windowTitle } = require("../main/brand");
+
+// UI-627（BLOCK-321）— popOut 跨窗初始状态白名单：只允许这两个键经 URL query
+// 传入弹窗页（localStorage 跨进程写入/读取无 happens-before，实机抓真竞态——
+// 主窗写 ctx 后立刻 loadURL，弹窗渲染进程概率性读到空）。值复用内容键安全模式。
+const POP_OUT_QUERY_KEYS = ["projectId", "convId"];
+
+/** 只保留白名单键且值过 KEY_PATTERN 的 query；其余静默丢弃（fail-closed）。 */
+function sanitizePopOutQuery(query) {
+  if (!query || typeof query !== "object") return {};
+  const out = {};
+  for (const key of POP_OUT_QUERY_KEYS) {
+    const value = query[key];
+    if (typeof value === "string" && value !== "" && KEY_PATTERN.test(value)) {
+      out[key] = value;
+    }
+  }
+  return out;
+}
 
 const GEOMETRY_RECORD_DEBOUNCE_MS = 400;
 const RAIL_CONTENT_ID = "rail:";
@@ -305,7 +324,7 @@ function setupWindowManagerIpc({
     } catch {}
   };
 
-  const createContentWindow = (id, spec, bounds) => {
+  const createContentWindow = (id, spec, bounds, query) => {
     const spaBase = typeof getSpaBaseUrl === "function" ? getSpaBaseUrl() : null;
     if (!spaBase) {
       return { ok: false, code: "spa_server_unavailable", error: "SPA 服务未就绪，无法创建窗口" };
@@ -316,7 +335,11 @@ function setupWindowManagerIpc({
     }
     let url;
     try {
-      url = new URL(route, spaBase).toString();
+      url = new URL(route, spaBase);
+      // UI-627 — 白名单 query 附加在白名单路由之后（route 本体仍由核心唯一构建）
+      for (const [key, value] of Object.entries(sanitizePopOutQuery(query))) {
+        url.searchParams.set(key, value);
+      }
     } catch {
       return { ok: false, code: "route_not_allowed", error: "路由解析失败" };
     }
@@ -326,8 +349,10 @@ function setupWindowManagerIpc({
       height: bounds.h,
       x: bounds.x,
       y: bounds.y,
-      minWidth: 480,
-      minHeight: 360,
+      // UI-627 — 窗口下限规格化：内容规格可声明 minBounds（侧聊窗小于通用
+      // 下限）；未声明保持 480/360 既有契约不变。
+      minWidth: spec.minBounds?.width ?? 480,
+      minHeight: spec.minBounds?.height ?? 360,
       title: windowTitle(spec.title || "窗口"),
       frame: false,
       backgroundColor: "#1f2330",
@@ -399,14 +424,14 @@ function setupWindowManagerIpc({
       }
     });
 
-    win.loadURL(url).catch((e) => {
+    win.loadURL(url.toString()).catch((e) => {
       console.error(`[window-manager] loadURL failed (${id}):`, e.message);
     });
 
     return { ok: true, id };
   };
 
-  const ensureSingletonWindow = (id, spec) => {
+  const ensureSingletonWindow = (id, spec, query) => {
     const rec = windows.get(id);
     if (rec && !rec.win.isDestroyed()) {
       showAndFocus(rec);
@@ -417,11 +442,11 @@ function setupWindowManagerIpc({
       displays: currentDisplays(),
       mainBounds: getMainBounds(),
     });
-    const created = createContentWindow(id, spec, bounds.bounds);
+    const created = createContentWindow(id, spec, bounds.bounds, query);
     return created.ok ? { ok: true, id, action: "created" } : created;
   };
 
-  const ensurePoppedWindow = (id, spec, result) => {
+  const ensurePoppedWindow = (id, spec, result, query) => {
     const rec = windows.get(id);
     if (rec && !rec.win.isDestroyed()) {
       showAndFocus(rec);
@@ -432,7 +457,7 @@ function setupWindowManagerIpc({
       displays: currentDisplays(),
       mainBounds: getMainBounds(),
     });
-    const created = createContentWindow(id, spec, bounds.bounds);
+    const created = createContentWindow(id, spec, bounds.bounds, query);
     return created.ok ? result : created;
   };
 
@@ -455,7 +480,7 @@ function setupWindowManagerIpc({
     const { id, spec } = verdict;
 
     if (spec.singleton) {
-      return ensureSingletonWindow(id, spec);
+      return ensureSingletonWindow(id, spec, sanitizePopOutQuery(payload?.query));
     }
     const result = core.popOut({ type: payload.type, key: payload.key });
     if (!result.ok) return result;
@@ -481,14 +506,14 @@ function setupWindowManagerIpc({
           });
         } catch {}
       }
-      return ensurePoppedWindow(id, spec, result);
+      return ensurePoppedWindow(id, spec, result, sanitizePopOutQuery(payload?.query));
     }
     // created
     const bounds = core.resolveLaunchBounds(id, {
       displays: currentDisplays(),
       mainBounds: getMainBounds(),
     });
-    const created = createContentWindow(id, spec, bounds.bounds);
+    const created = createContentWindow(id, spec, bounds.bounds, sanitizePopOutQuery(payload?.query));
     return created.ok ? result : created;
   });
 

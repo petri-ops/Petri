@@ -174,7 +174,8 @@ const desktopBridgeSurface = {
   // BLOCK-59 窗口系统 — 弹出窗 / 边缘轨道 / 指挥中心。
   // × 永远是降格（minimizeToRail），销毁只有轨道显式 remove（plan §3 契约）。
   windowManager: {
-    popOut: (type, key) => ipcRenderer.invoke('window:pop-out', { type, key }),
+    // UI-627 — query: 白名单键由主进程 sanitizePopOutQuery 过滤（跨窗初始状态走 URL）
+    popOut: (type, key, query) => ipcRenderer.invoke('window:pop-out', { type, key, query }),
     returnToDock: (id) => ipcRenderer.invoke('window:return', { id }),
     minimizeToRail: (id) => ipcRenderer.invoke('window:minimize', { id }),
     restore: (id) => ipcRenderer.invoke('window:restore', { id }),

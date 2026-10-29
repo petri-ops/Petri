@@ -52,9 +52,6 @@ export interface UseWorkspaceLayoutResult {
   // Summary card
   summaryOpen: boolean;
   setSummaryOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  /** UI-448 加映 v15 — 侧边聊天面板开合（与摘要概览同机制）。 */
-  sideChatOpen: boolean;
-  setSideChatOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
   // Measured refs (for passing to children who observe them)
   centerColRef: React.RefObject<HTMLElement | null>;
@@ -95,11 +92,6 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
 
   const summaryOpen = ctxAvailable ? ctx.summaryOpen : summaryOpenLocal;
   const setSummaryOpen = ctxAvailable ? ctx.setSummaryOpen : setSummaryOpenLocal;
-
-  // ── Side chat (UI-448 加映 v15 — 壳状态，摘要概览同机制) ────────
-  const [sideChatOpenLocal, setSideChatOpenLocal] = useState(false);
-  const sideChatOpen = ctxAvailable ? ctx.sideChatOpen : sideChatOpenLocal;
-  const setSideChatOpen = ctxAvailable ? ctx.setSideChatOpen : setSideChatOpenLocal;
 
   // ── Measured DOM dimensions ─────────────────────────────────────
   const [centerColWidth, setCenterColWidth] = useState(0);
@@ -251,8 +243,6 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
     setBottomTerminalOpen,
     summaryOpen,
     setSummaryOpen,
-    sideChatOpen,
-    setSideChatOpen,
     centerColRef,
     sessionFrameRef,
     centerColWidth,

@@ -1751,20 +1751,8 @@
    padding-right 让位与 v16 的 display:none 补丁一并废除）。
    浮面覆盖到什么就显示什么，与摘要浮卡同一取舍。 */
 
-/* UI-448 加映 v8 — 会话面板开启时摘要悬浮封顶上半：
-   上摘要（≤50%-24px）下会话（50%）同屏各占一角，永不叠加 */
-.workspaceSessionLayoutSideChatOpen .workspaceSummaryFloat {
-  max-height: calc(50% - 24px);
-}
-
-/* UI-448 加映 v12 — 会话列区开启时摘要钉住列同样封顶上半：
-   同一右轨内垂直堆叠（摘要上、会话下），共享右缘永不叠加
-   UI-448 加映 v16 — 会话列推到右轨底部（margin-top:auto），
-   紧贴沉底的入口按钮；摘要列占顶部 */
-.workspaceSessionLayoutSideChatOpen .workspaceSummaryColumn {
-  max-height: calc(50% - 44px);
-  overflow: hidden;
-}
+/* UI-627（BLOCK-321）— v8/v12 让位类随页内侧聊退役：
+   侧聊为原生独立窗（/window/side-chat），不再与摘要同轨堆叠。 */
 
 /* UI-448 加映 v12 — 右轨：摘要钉住列 + 侧聊独立列区垂直堆叠共享右缘 */
 /* UI-448 加映 v14 — 子卡从顶部堆叠（摘要上、会话下），对齐顶栏按钮弹出方向 */
@@ -7489,43 +7477,8 @@ body:global(.petri-resizing-columns) * {
   text-align: center;
 }
 
-/* UI-448 加映 v16 — 侧聊入口按钮沉底：右下角常驻小气泡（v7 极简语言），
-   与顶栏摘要概览按钮上下对应；面板展开时挂其上方。
-   注意：类必须在 project-workspace.module.css（CenterPanel 的 styles 来源），
-   放错模块会导致 className 落空（v16 首版实测）。
-   UI-448 加映 v27 — 对齐修正（用户截图指认「摘要和会话按钮上下不是对齐的」）：
-   absolute 锚会话框时与顶栏按钮差 ~23px（会话框 padding 14 vs 按钮内缩 5）；
-   v27 改 fixed 窗口角后又错位到软件角落（用户指正「右下角是中间栏分隔线的
-   那个角度」）。v28 定版：absolute 回会话框 + right:5px——与摘要按钮相对
-   分隔线的内缩量（5px）一致，两钮中心线精确重合（实测 center 637==637），
-   且同锚中栏容器，右栏开合/窗口尺寸变化恒对齐。 */
-.sideChatFab {
-  position: absolute;
-  right: 5px;
-  bottom: 8px;
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  border-radius: var(--petri-radius-lg);;
-  background: transparent;
-  color: var(--petri-text-tertiary);
-  cursor: pointer;
-  z-index: 45;
-}
-
-.sideChatFab:hover {
-  background: var(--petri-hover);
-  color: var(--petri-text);
-}
-
-.sideChatFab[aria-pressed='true'] {
-  color: var(--petri-accent);
-}
-
+/* UI-627（BLOCK-321）— 侧聊入口 FAB（v16-v28 沉底气泡）退役：
+   入口收编为标题栏「侧聊」按钮，侧聊本体为原生独立窗（/window/side-chat）。 */
 /* ============================================================
    UI-451 — 文件面板多 tab 常驻：tab 条 + keep-alive 预览栈。
    颜色全部走 --petri-* token（亮暗自动跟随）；隐藏实例沿用右栏 tab 内容同款

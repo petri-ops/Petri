@@ -65,7 +65,6 @@ function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext 
     showPinnedSummary: mode === 'chat' || mode === 'scheduled',
     bottomTerminalOpen: false, bottomTerminalHeight: 0, leftOpen: true, rightOpen: true, inputHeight: 120,
     summaryCardOpen: false, summaryVisibility: 'hidden', summaryOpenWidth: 0,
-    sideChatOpen: false,
     activeJob: { id: 'job-1', tool_id: 'deseq2', status: 'done', created_at: 1 },
     activeWorkflow: { jobStatus: 'done', artifactTruth: { status: 'valid' } },
     activeArtifact: {
@@ -303,9 +302,7 @@ describe('G0-RS-P1 CenterPanel projection', () => {
   // UI-448 加映 v23 — 会话浮面纯悬浮（用户双图对比裁决：摘要点击就悬浮，
   // 会话却把消息框向左推）——让位机制整体退役，开合态消息列恒全宽。
   it('never yields the conversation column for the side chat float (UI-448 加映 v23 纯悬浮)', () => {
-    const openCtx = context('chat');
-    openCtx.sideChatOpen = true;
-    const { unmount } = render(<CenterPanel ctx={openCtx} refs={refs} />);
+    const { unmount } = render(<CenterPanel ctx={context('chat')} refs={refs} />);
     expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
     unmount();
     const ctx = context('chat');
@@ -313,17 +310,8 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="agentMainSideChatYield"]')).toBeNull();
   });
 
-  // UI-448 加映 v9 — 会话面板开启时布局挂常驻类（摘要悬浮封顶上半，两卡不叠加）
-  it('marks the session layout while the side chat dock is open (UI-448 加映 v9)', () => {
-    const openCtx = context('chat');
-    openCtx.sideChatOpen = true;
-    const { unmount } = render(<CenterPanel ctx={openCtx} refs={refs} />);
-    expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeTruthy();
-    unmount();
-    const ctx = context('chat');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(document.querySelector('[class*="workspaceSessionLayoutSideChatOpen"]')).toBeNull();
-  });
+  // UI-627（BLOCK-321）— v9/v10 侧聊 dock 挂载与让位类测试随页内悬浮面退役
+  // （side-chat 升级为原生独立窗 /window/side-chat，见 SideChatWindowPage.test.tsx）。
 
 
   it('routes result mode to a matching pack result surface (BLOCK-218)', () => {
@@ -372,10 +360,9 @@ describe('G0-RS-P1 CenterPanel projection', () => {
 
   // UI-448 加映 v23 — 让位退役后的恒定不变式：摘要钉住列形态同样不推挤
   // （原 v11「钉住列跳过让位/浮层保留让位」两个分叉用例随机制一并退役）。
-  it('keeps full-width content in every summary form while the side chat is open (v23)', () => {
+  it('keeps full-width content in every summary form (v23 不变式；UI-627 后无让位机制)', () => {
     for (const visibility of ['expanded', 'float'] as const) {
       const ctx = context('chat');
-      ctx.sideChatOpen = true;
       ctx.summaryCardOpen = true;
       ctx.summaryVisibility = visibility;
       const { unmount } = render(<CenterPanel ctx={ctx} refs={refs} />);
@@ -384,15 +371,8 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     }
   });
 
-  // UI-448 加映 v10 — 面板与摘要卡同定位基准：dock 挂载于 session layout 内部
-  it('mounts the dock inside the session layout (UI-448 加映 v10 summary-parity)', () => {
-    const ctx = context('chat');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    const dock = document.querySelector("[data-testid='side-chat-dock']");
-    const layout = document.querySelector("[class*='workspaceSessionLayout']");
-    expect(dock).toBeTruthy();
-    expect(layout?.contains(dock ?? null)).toBe(true);
-  });
+  // UI-627 — 页内 dock 挂载点退役：侧聊渲染在独立原生窗，不在 session layout 内。
+
 });
 
 // UI-448 加映 v26 — 摘要钉住列形态同样带拖宽把手（v25 只适配了悬浮形态）

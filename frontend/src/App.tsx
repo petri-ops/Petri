@@ -59,6 +59,8 @@ const TerminalWindowPage = lazy(() => import('@/pages/window/TerminalWindowPage'
 const RailPage = lazy(() => import('@/components/window/RailPage').then((m) => ({ default: m.RailPage })));
 // BLOCK-59 P3 — 指挥中心（多任务俯瞰单例窗）
 const CommandCenterPage = lazy(() => import('@/pages/window/CommandCenterPage').then((m) => ({ default: m.CommandCenterPage })));
+// UI-627（BLOCK-321）— 侧聊独立窗（frameless 单例窗，页内悬浮面退役）
+const SideChatWindowPage = lazy(() => import('@/pages/window/SideChatWindowPage').then((m) => ({ default: m.SideChatWindowPage })));
 // BLOCK-59 P4 — agent 详情窗（BLOCK-49 spawn 链路只读投影）
 import '@/components/desktop/desktop.css';
 // 断点6：注入平台 API 给 @petri/shared 渲染层组件（如 ActResultCard）
@@ -261,6 +263,7 @@ export default function App(): React.ReactElement {
       <Routes>
         <Route path="/window/terminal/:sessionId" element={<TerminalWindowPage />} />
         <Route path="/window/command-center" element={<CommandCenterPage />} />
+        <Route path="/window/side-chat" element={<SideChatWindowPage />} />
         <Route path="/window/rail" element={<RailPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

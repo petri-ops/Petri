@@ -51,6 +51,17 @@ const CONTENT_TYPES = {
     title: "指挥中心",
     defaultBounds: { width: 1200, height: 820 },
   },
+  // UI-627（BLOCK-321）— 侧聊独立窗：页内悬浮面退役（无法画出软件边界、拖动
+  // 跨屏/八方位 resize/丝滑度都受 DOM 限制），升级为 frameless 原生窗——
+  // OS 边框八方位 resize、全屏任意拖动、跨显示器（位置记忆走 geometry）。
+  "side-chat": {
+    routePrefix: "/window/side-chat",
+    closeBehavior: "close", // stateless singleton: × = real close
+    singleton: true,
+    title: "侧边聊天",
+    defaultBounds: { width: 380, height: 520 },
+    minBounds: { width: 280, height: 320 }, // 通用窗下限 480/360 对侧聊过宽
+  },
   rail: {
     internal: true, // rail container: no route, no ×, adapter-only
     closeBehavior: "none",
@@ -441,4 +452,5 @@ module.exports = {
   clampBoundsToWorkArea,
   CONTENT_TYPES,
   MAX_POPPED_WINDOWS,
+  KEY_PATTERN, // UI-627 — 适配器 popOut query 白名单复用同一安全模式
 };

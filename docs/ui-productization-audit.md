@@ -1,5 +1,15 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-627: 侧聊升级为原生独立窗（可拖出软件边界跨屏；入口收编 + 极简 chrome）（2026-10-29 **verified（BLOCK-321；block59 43/43 + 窗口页/helper 12/12 + CenterPanel 19/19 + 实机 7/7）**）
+
+- **变化面**：①侧聊从页内悬浮面升级为 **frameless 原生独立窗**（`/window/side-chat`，BLOCK-59 弹出窗注册表新内容类型，singleton + closeBehavior=close）：OS 边框八方位 resize、全屏任意拖动、可拖出软件边界到第二显示器，位置记忆走主进程 geometry（`minBounds 280×320` 规格化，通用 480/360 下限不再硬编码）；②入口收编：中栏右下角沉底 FAB 退役，唯一入口=标题栏「更多工具→侧聊」（划词「侧聊」与 home 空态卡同走）；③极简 chrome：旧 52px「会话」标题头退役（挤压会话内容），只留 20px 窄拖动条（app-region drag）+ 右上角 ✕（真关闭）；④跨窗初始状态走 URL query（主进程 `POP_OUT_QUERY_KEYS` 白名单 projectId/convId，值复用 KEY_PATTERN fail-closed）。
+- **为什么这样设计**：用户三条裁决「把它当成一个独立窗口进行八个方位都可以调整」「聊天窗口是否可以超出软件边界，整个电脑的屏幕要可以随意拖动，比如我有第二个屏幕。同时优化拖拽移动的丝滑程度」「顶层哪一部分太宽了影响会话内容呈现取消掉，只保留右上角的关闭按钮」——页内 DOM 悬浮面物理上画不出软件边界，跨屏/八方位/丝滑度都受视口钳制，唯一正解是原生窗（OS 承担全部三项）；头部只承担拖动与关闭两个职责，收窄到 20px。
+- **实机抓真（红绿根治）**：初版跨窗上下文经 localStorage 交接，实机探针抓到**竞态**——主窗写 ctx 与弹窗渲染进程读之间无 happens-before（Chromium DOM Storage 跨进程批量提交），弹窗概率性读空走错误空态。根治=localStorage 跨窗通道退役：fork 移到主窗 helper（`openSideChatWindow`，REST 同步完成后再开窗），弹窗页只从 URL query 读初始状态（主进程白名单二次过滤）；localStorage 仅留「本页自己读写」的 per-project 会话记忆。
+- **退役面**：页内侧聊悬浮面整体退役（SideChatDock.tsx/.module.css/.test.tsx 三件删除，UI-448→UI-623 的 float/docked 两形态与 UI-626 页内八方位 resize 原型一并下线——UI-626 实现当日被本条原生窗路线取代）；CenterPanel `sideChatOpen`/`workspaceSessionLayoutSideChatOpen` 让位面、`subscribeCopilotContext`（唯一消费者是旧悬浮面）随之清偿；UI-623 的「移动范围限应用窗口视口」reopen 边界由本条兑现。
+- **验证（代码）**：block59 43/43（side-chat 白名单/单例不进状态机/minBounds/query 白名单/preload 透传静态契约）+ SideChatWindowPage 7/7（URL 读初始态/记忆兜底/极简 chrome/✕ 真关闭）+ sideChatWindow helper 5/5（fork 记忆/复用/降级/非 Electron 拒开）+ CenterPanel 19/19 + 主题契约 17/17 + knip 棘轮绿（连锁死代码 subscribeCopilotContext 清偿）+ tsc 0 + test:changed 869 项 0 红。
+- **实机证据**：`acceptance/block-321/side-chat-window-live.json`（**7/7**，9223 离屏实例）：主窗无 `side-chat-fab`/`side-chat-dock`；**真实菜单点击链**（`aria-label="展开更多工具"` → `#titlebar-tool-menu` → 「侧聊」menuitem）触发开窗；新 target `/window/side-chat?projectId=p_mvs9gxz4_42pi`（query 白名单实机生效）；窗口页 chrome：旧「会话」头不在场、窄拖动条 + ✕ 在场；SimpleChat 挂载（`.sc-root`/composer/textarea 在场，诚实空态文案渲染）。截图离屏不可得（`screenshot_unavailable`）。
+- **边界（reopen）**：窗口开关态主窗不可感知（标题栏「侧聊」无高亮）；多项目各自开侧聊复用同一单例窗（后开覆盖先开的项目上下文，聚焦既有窗）；主窗关闭项目后侧聊窗不联动关闭（会话数据仍在）；侧聊窗内仅聊天（lockedAccessMode=read 继承旧语义），不承接 copilotAsk。
+
 ## UI-625: 通知中心弹层按内容重排（不再复用通用工具菜单，行内三级信息 + 相对时间）（2026-10-28 **verified（BLOCK-320；NotificationCenterBell 9/9 + 实机 24/24）**）
 
 - **变化面**：通知弹层从 `.toolMenu` 换成独立 `.noticePanel` 行式布局——头部（标题 + 「N 未读」pill + 全部已读/清空两个文本钮）、接收偏好行（四类 + 声音，带分隔竖线）、列表区（`overflow-y:auto` 卡内滚动，钳到 `min(480px, 100vh-80px)`）。每条通知= 类型标签（完成/待确认/失败/提醒，各取成功/警告/错误/信息语义底色）+ 主区（标题单行省略 → 正文最多两行 `-webkit-line-clamp` → 相对时间）+ 未读圆点；已读行整行 60% 透明且无圆点。时间由 `new Date().toLocaleString()` 整串绝对时间戳改为五档相对时间（刚刚 / N 分钟前 / 今天 HH:mm / 昨天 HH:mm / M/D HH:mm），无跳转目标的条目仍禁用。面板基准字号显式取正文 token（`--petri-font-size-body`），不再继承标题栏图标按钮的小字。

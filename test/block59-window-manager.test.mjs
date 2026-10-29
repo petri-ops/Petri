@@ -246,9 +246,55 @@ describe('路由白名单（fail-closed）', () => {
     assert.equal(buildRouteForId('terminal:art_1'), '/window/terminal/art_1');
     assert.equal(buildRouteForId('terminal:default'), '/window/terminal/default');
     assert.equal(buildRouteForId('command-center:'), '/window/command-center');
+    assert.equal(buildRouteForId('side-chat:'), '/window/side-chat');
     // 键经 encodeURIComponent，特殊字符不产生路径段
     assert.equal(buildRouteForId('terminal:a.b-c_d:e'), '/window/terminal/a.b-c_d%3Ae');
     assert.equal(buildRouteForId('rail:'), null, '内部类型不产生路由');
+  });
+});
+
+// ── 2b. UI-627 侧聊独立窗（BLOCK-321）──────────────────────────
+
+describe('UI-627 侧聊独立窗（单例 + close 语义 + minBounds）', () => {
+  test('side-chat 在白名单内且为单例（不接受内容键）', () => {
+    const v = validateContent({ type: 'side-chat' });
+    assert.equal(v.ok, true);
+    assert.equal(v.spec.singleton, true, '侧聊为单例窗（跨项目复用，位置记忆同源）');
+    assert.equal(v.spec.closeBehavior, 'close', '× = 真关闭（不进边缘轨道）');
+    const keyed = validateContent({ type: 'side-chat', key: 'p_1' });
+    assert.equal(keyed.ok, false);
+    assert.equal(keyed.code, 'invalid_key');
+  });
+
+  test('side-chat 单例不进状态机注册表（popOut = singleton 动作）', () => {
+    const core = makeCore({});
+    const r = core.popOut({ type: 'side-chat' });
+    assert.equal(r.ok, true);
+    assert.equal(r.action, 'singleton');
+    assert.equal(core.getSnapshot().entries.filter((e) => e.type === 'side-chat').length, 0);
+  });
+
+  test('spec 声明 minBounds（适配器按规格创建窗口，不再硬编码 480/360）', () => {
+    const spec = validateContent({ type: 'side-chat' }).spec;
+    assert.ok(spec.minBounds, '侧聊规格必须声明 minBounds（侧聊窗小于通用窗下限）');
+    assert.ok(spec.minBounds.width >= 240 && spec.minBounds.height >= 240);
+    const adapterSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'window-manager.js'), 'utf8');
+    assert.match(adapterSrc, /spec\.minBounds/, '适配器必须消费 spec.minBounds（minWidth/minHeight 规格化）');
+  });
+
+  test('query 白名单：仅 projectId/convId 两键且值过 KEY_PATTERN（跨窗初始状态走 URL，不走 localStorage 竞态）', () => {
+    const adapterSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'window-manager.js'), 'utf8');
+    assert.match(adapterSrc, /POP_OUT_QUERY_KEYS/, '适配器必须声明 popOut query 白名单键集');
+    assert.match(adapterSrc, /KEY_PATTERN\.test/, 'query 值必须复用内容键安全模式（fail-closed）');
+    assert.doesNotMatch(adapterSrc, /petri:side-chat-window-ctx/, 'localStorage 交接通道退役（跨进程竞态，实机抓真）');
+  });
+
+  test('preload popOut 第三参透传 query；前端弹窗页从 URL 读初始状态', () => {
+    const preloadSrc = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8');
+    assert.match(preloadSrc, /popOut: \(type, key, query\)/, 'preload popOut 必须透传 query 第三参');
+    const pageSrc = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'src', 'pages', 'window', 'SideChatWindowPage.tsx'), 'utf8');
+    assert.match(pageSrc, /URLSearchParams/, '弹窗页必须从 URL 读初始状态');
+    assert.doesNotMatch(pageSrc, /readSideChatWindowCtx/, '弹窗页不得再读 localStorage ctx（竞态通道退役）');
   });
 });
 

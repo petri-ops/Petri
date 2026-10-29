@@ -52,7 +52,7 @@ interface UseWorkspaceTitleBarOptions {
   onSwitchWorkspaceMode: (mode: 'result' | 'code' | 'compare' | 'history') => void;
   bottomTerminalOpen: boolean;
   onToggleBottomTerminal: () => void;
-  sideChatOpen: boolean;
+  /** UI-627 — 侧聊入口：开/聚焦侧聊原生独立窗（唯一保留入口）。 */
   onToggleSideChat: () => void;
 }
 
@@ -87,7 +87,6 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     onSwitchWorkspaceMode,
     bottomTerminalOpen,
     onToggleBottomTerminal,
-    sideChatOpen,
     onToggleSideChat,
   } = options;
 
@@ -127,8 +126,9 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     { id: 'host:mode:compare', label: '审查', icon: 'git-branch' as const, isOpen: workspaceMode === 'compare' },
     { id: 'host:mode:history', label: '历史', icon: 'message-circle' as const, isOpen: workspaceMode === 'history' },
     { id: 'host:terminal', label: '终端', icon: 'terminal' as const, isOpen: bottomTerminalOpen },
-    { id: 'host:side-chat', label: '侧聊', icon: 'message-circle' as const, isOpen: sideChatOpen },
-  ], [workspaceMode, bottomTerminalOpen, sideChatOpen]);
+    // UI-627 — 侧聊为原生独立窗，主窗无法感知开关态，高亮退场（标签保留）
+    { id: 'host:side-chat', label: '侧聊', icon: 'message-circle' as const },
+  ], [workspaceMode, bottomTerminalOpen]);
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
       ? '完成'

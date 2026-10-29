@@ -35,6 +35,8 @@ import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWor
 import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
+// UI-627（BLOCK-321）— 侧聊原生独立窗入口 helper
+import { openSideChatWindow } from '@/lib/sideChatWindow';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useAppRail } from '@/components/desktop/AppRailContext';
@@ -209,8 +211,6 @@ export function ProjectWorkspace(): React.ReactElement {
     bottomTerminalOpen,
     setBottomTerminalOpen,
     summaryOpen,
-    sideChatOpen,
-    setSideChatOpen,
 
     setSummaryOpen,
     centerColRef,
@@ -486,11 +486,11 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('files');
   }, [openRightPanel, setRightOpen]);
-  // UI-417 — 右栏 chat tab 退役：聊天入口收编为悬挂聊天面（SideChatDock）。
-  // 原入口（home 空态卡/分析完成跳转）改派 sideChatOpen 事件展开悬挂面。
+  // UI-627（BLOCK-321）— 侧聊入口统一为原生独立窗：home 空态卡/分析完成跳转
+  // 与标题栏「侧聊」同走 openSideChatWindow（页内悬浮面退役）。
   const handleOpenRightChat = useCallback(() => {
-    dispatchPetriEvent(petriEvents.sideChatOpen);
-  }, []);
+    void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: activeConvId });
+  }, [projectId, activeConvId]);
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
     [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
@@ -505,10 +505,10 @@ export function ProjectWorkspace(): React.ReactElement {
     () => setBottomTerminalOpen((value) => !value),
     [setBottomTerminalOpen],
   );
-  const handleToggleSideChat = useCallback(
-    () => setSideChatOpen((value) => !value),
-    [setSideChatOpen],
-  );
+  // UI-627 — 标题栏「侧聊」：开/聚焦侧聊原生独立窗（唯一保留入口）。
+  const handleToggleSideChat = useCallback(() => {
+    void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: activeConvId });
+  }, [projectId, activeConvId]);
   // TitleBar 注册 effect 簇已外迁 ./project-workspace/useWorkspaceTitleBar.ts
   // （BLOCK-92 Wave B-1，含 titleBarTabs/titleBarResultItems 派生；纯搬运零行为变化）。
   useWorkspaceTitleBar({
@@ -533,7 +533,7 @@ export function ProjectWorkspace(): React.ReactElement {
     closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
     setRightOpen, setRightTab, setRightToolMenuOpen,
     workspaceMode, onSwitchWorkspaceMode: handleSwitchWorkspaceMode,
-    bottomTerminalOpen, onToggleBottomTerminal: handleToggleBottomTerminal, sideChatOpen, onToggleSideChat: handleToggleSideChat,
+    bottomTerminalOpen, onToggleBottomTerminal: handleToggleBottomTerminal, onToggleSideChat: handleToggleSideChat,
   });
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
   // UI-327 向导①：连通性检测（runSshOp echo $HOME，经 /api/ssh-projects/connect）
@@ -1006,8 +1006,6 @@ export function ProjectWorkspace(): React.ReactElement {
     onResultEditSubmit: handleResultEditSubmit,
     setBottomTerminalOpen,
     setSummaryOpen,
-    sideChatOpen,
-    setSideChatOpen,
     setLeftOpen,
     setRightOpen,
     handleShowPlugins,

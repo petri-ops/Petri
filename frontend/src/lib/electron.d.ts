@@ -122,7 +122,8 @@ declare global {
       /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */
       windowManager: {
         /** 把内容弹出为独立窗口；同内容已弹出 = 聚焦既有窗（禁双开）。 */
-        popOut: (type: string, key?: string) => Promise<{
+        /** UI-627 — query 键值经主进程白名单（POP_OUT_QUERY_KEYS）过滤后拼入弹窗 URL。 */
+        popOut: (type: string, key?: string, query?: Record<string, string>) => Promise<{
           ok: boolean;
           id?: string;
           action?: 'created' | 'focused' | 'restored' | 'singleton';
