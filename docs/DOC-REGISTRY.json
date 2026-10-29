@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 428,
-    "lastUpdated": "2026-10-29",
-    "managedMarkdown": 162
+    "documentCount": 429,
+    "lastUpdated": "2026-10-30",
+    "managedMarkdown": 163
   },
   "documents": [
     {
@@ -8437,9 +8437,9 @@
         "hygiene",
         "G0"
       ],
-      "notes": "蓝图八包收口后的剩余工作全量执行纲：RW-01 3D Artifact Revision 接入成果面（Jev 0.33 队首）→ RW-02 UI 证据债分诊清偿 → RW-03 C-32 decision-config env 语义治理 → RW-04 台账对账（2a/2c/2d/2e 核实）→ RW-05 harness 地基 → RW-06 工程卫生（ui-audit 门/vitest 通道/PATH 环境债）；六包 planned、单工作包串行、逐包待用户发令；§3 为换模型恢复唯一执行契约。"
+      "notes": "蓝图八包收口后的剩余工作全量执行纲：RW-01 3D Artifact Revision 接入成果面（Jev 0.68）→ RW-02 UI 证据债分诊清偿+C-44 pack 写桥 → RW-03 C-32 env 语义治理 → RW-04 台账对账 → RW-05 harness 地基 → RW-06 可靠性/soak+工程卫生+独立重放复盘；六包 planned、单工作包串行、逐包待用户发令；§3 为换模型恢复唯一执行契约。"
     }
   ],
   "lastUpdated": "2026-10-30",
-  "documentCount": 429
+  "documentCount": 428
 }
