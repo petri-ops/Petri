@@ -23,3 +23,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-28T15:25:43.228Z -->
 最后更新：2026-10-28（**BLOCK-312 completed（UI-616 verified）**）：输入框/消息图片预览 ImagePreviewModal 顶层化——createPortal(body)+z=100000+body 滚动锁（原 9999 且未 portal，被标题栏/分隔线 10001 压住）；Lightbox 已同口径并实机复核；全量图片预览入口审计入册（内联预览不需要顶层化）。实机 11/11（overlay 覆盖视口/父 body/z=100000/标题栏与全部分隔线 0 miss；灯箱同口径）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T03:32:31.503Z -->
+最后更新：2026-10-28（**BLOCK-313 completed（UI-617 verified；UI-613 整页下钻交互由用户追加取代）**）：模型菜单主从两栏——左列供应商常驻（当前使用/模型数/选中 accent 线），右侧二级页显示选中供应商模型；默认当前供应商，点其它供应商只换右栏；去灰底+1px 边框+620px+双列独立滚动。证据=ModelMenu 8/8 + tsc/lint + theme + 实机 11/11（4 供应商常驻/默认 DeepSeek 2 模型/切 ninijoker 左列不消失/回切恢复）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-628: 发送/停止单钮态机（同一位置：流式空输入=停止，输入新内容=发送排队）（2026-10-29 **verified（BLOCK-321b；静态契约 3/3 + 实机 8/8）**）
+
+- **变化面**：composer 右下角发送/停止从**并存两钮**（BLOCK-178 形态：流式时左侧多出方块 Stop）改为**同位单钮态机**——空闲=发送（空输入禁用）；流式中且无新输入=停止生成（发送钮不在场）；流式中输入了新内容=变回发送（点击进 BLOCK-316 消息排队，Ctrl/Alt+Enter 直接插话语义不变）；点击停止/回合结束=回空闲发送。
+- **为什么这样设计**：用户裁决「发送消息/停止生成按钮是不是应该在同一位置，发送消息后就变成停止生成？当输入框有新的内容时候，又会变成发送消息」——与 BLOCK-316 的「运行中发送默认排队」天然衔接：空输入时运行中唯一有意义的动作就是停止；一旦开始输入，意图转为追加消息，按钮随之切换，位置恒定不跳动（主流 agent 产品标准形态）。
+- **验证（代码）**：`test/block321b-send-stop-morph.test.mjs` 3/3（红绿先行：Stop 渲染必须三元单钮形态 `streaming && !input.trim()`、旧并存形态退场、chat-stop/stop/aria 语义锚保留、BLOCK-316 排队 title 与 steer 保留）+ tsc 0 + 门禁 lint 0 error + test:changed 413 项 0 红。
+- **实机证据**：`acceptance/block-321b/live-send-stop-morph.json`（**8/8**，9223 离屏实例 + 真实模型流式回合）：T1a 空闲空输入=仅 Send 禁用；T1b 输入文字=Send 启用；T2 提交长任务进入流式=仅 Stop（Send 不在场、两钮零并存）；T3 流式中输入=变回 Send 可点；T4a 清空=变回 Stop；T4b 点击 Stop→回空闲 Send。
+- **边界（reopen）**：按钮态跟随输入框内容实时切换（无防误触确认）；排队行侧的逐条控制（BLOCK-316）不受影响；批量队列存在时输入态按钮同为「发送·排队」。
+
 ## UI-627: 侧聊升级为原生独立窗（可拖出软件边界跨屏；入口收编 + 极简 chrome）（2026-10-29 **verified（BLOCK-321；block59 43/43 + 窗口页/helper 12/12 + CenterPanel 19/19 + 实机 7/7）**）
 
 - **变化面**：①侧聊从页内悬浮面升级为 **frameless 原生独立窗**（`/window/side-chat`，BLOCK-59 弹出窗注册表新内容类型，singleton + closeBehavior=close）：OS 边框八方位 resize、全屏任意拖动、可拖出软件边界到第二显示器，位置记忆走主进程 geometry（`minBounds 280×320` 规格化，通用 480/360 下限不再硬编码）；②入口收编：中栏右下角沉底 FAB 退役，唯一入口=标题栏「更多工具→侧聊」（划词「侧聊」与 home 空态卡同走）；③极简 chrome：旧 52px「会话」标题头退役（挤压会话内容），只留 20px 窄拖动条（app-region drag）+ 右上角 ✕（真关闭）；④跨窗初始状态走 URL query（主进程 `POP_OUT_QUERY_KEYS` 白名单 projectId/convId，值复用 KEY_PATTERN fail-closed）。

@@ -6238,6 +6238,19 @@
         "frontend/src/lib/sideChatWindow.test.ts",
         "test/block59-window-manager.test.mjs"
       ]
+    },
+    {
+      "id": "block321b-send-stop-morph",
+      "classifiesScripts": true,
+      "note": "BLOCK-321b UI-628 发送/停止单钮态机：空闲=Send（空输入禁用）、流式空输入=单钮 Stop（Send 不在场）、流式有输入=Send（BLOCK-316 排队/Ctrl+Enter 插话语义保留）、点击 Stop 回空闲；静态契约 3/3+实机 8/8。",
+      "patterns": [
+        "scripts/block321b-send-stop-morph-live.cjs",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "acceptance/block-321b/**"
+      ],
+      "tests": [
+        "test/block321b-send-stop-morph.test.mjs"
+      ]
     }
   ]
 }

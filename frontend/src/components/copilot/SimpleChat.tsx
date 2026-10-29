@@ -1958,11 +1958,10 @@ export function SimpleChat({
                 </div>
                 {/* BLOCK-246 C13 — 速记板入口（引用结果入同一条 ContextItem 通道） */}
                 <ScratchpadDock onQuote={composerContext.addItem} projectId={projectId} />
-                {/* BLOCK-171 CP-1 — Stop 复出（推翻 BLOCK-28.8；hook 内接后端级联取消）。
-                    BLOCK-178 P0 — Stop 与发送并存：运行中发送钮保持可点，
-                    点击按投递模式路由（转向=立即注入下一轮边界；排队=收尾后自动发）。 */}
+                {/* BLOCK-171 CP-1 Stop 复出（级联取消）；BLOCK-178 运行中发送可点
+                    （转向/排队路由）；UI-628 单钮态机：流式无新输入=停止，有新输入=发送。 */}
                 <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                  {streaming && (
+                  {streaming && !input.trim() ? (
                     <button
                       type="button"
                       className="sc-send-cta sc-send-cta-stop"
@@ -1973,19 +1972,20 @@ export function SimpleChat({
                     >
                       <Icon name="square" size={12} />
                     </button>
+                  ) : (
+                    <button
+                      className="sc-send-cta sc-send-cta-send"
+                      onClick={(e) => void submitComposer(input, { steer: e.ctrlKey || e.altKey })}
+                      disabled={!input.trim()}
+                      title={streaming
+                        ? '发送 · 加入消息排队（Ctrl+Enter 或 Ctrl+点击 直接插话）'
+                        : '发送消息'}
+                      aria-label={streaming ? '发送（运行中加入消息排队）' : '发送消息'}
+                      data-testid="chat-send"
+                    >
+                      <Icon name="arrow-up" size={12} />
+                    </button>
                   )}
-                  <button
-                    className="sc-send-cta sc-send-cta-send"
-                    onClick={(e) => void submitComposer(input, { steer: e.ctrlKey || e.altKey })}
-                    disabled={!input.trim()}
-                    title={streaming
-                      ? '发送 · 加入消息排队（Ctrl+Enter 或 Ctrl+点击 直接插话）'
-                      : '发送消息'}
-                    aria-label={streaming ? '发送（运行中加入消息排队）' : '发送消息'}
-                    data-testid="chat-send"
-                  >
-                    <Icon name="arrow-up" size={12} />
-                  </button>
                 </div>
               </div>
             </div>
