@@ -10,7 +10,7 @@ status: active
 
 # RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE 执行计划
 
-最后更新：2026-10-30（P0 立项：双探查进行中——证据债盘点 + C-44 写桥现状；骨架先行，探查回填 §2/§3。）
+最后更新：2026-10-30（**里程碑：B 线 completed + A 线 7/13 a 档 verified + d 档 28 条处置 + b 档 18 条注记 + c 档清单产出**。B 线=写桥契约 5/5+宿主 6/6+实机 9/9（70a4f230）；A 线 a 档已翻 verified=UI-598/543/596/462/303/594/331（rw02-ui-evidence-live 11/11）。**下一会话第一个动作**=A 线 a 档剩余 6 条（UI-248/301/385/484/595/638）——需种子管线（review diff 上下文/spawn 数据/task_events/结果面解析），每条先读台账断言目标再写探针；探查结论与逐条依据在 acceptance/rw-02-ui-evidence/triage.json。收口前置=A 线清零（a 档翻完或如实降档）。恢复协议：读本 §4.1 分诊表 + triage.json → 核对 git log → 续探针。）
 
 ## 0. 发令与授权留痕
 
