@@ -169,9 +169,9 @@ status: planned
 | CP-21 依赖自检与安装治理 | skill 可用性 preflight（bins/平台探测，缺什么如实报告）+安装动作走审批确认+留痕（对齐 guard-ack 链）+Skills 页状态可视化（可用/缺依赖/待装） | 带外部依赖技能实机走通「探测→审批→安装→可用」 | CP-20（硬） |
 | CP-22 首批通用技能包迁移 | Obsidian 九技能转写 Petri 形态（生成类五直接迁；CLI 三挂依赖声明+安装配方）；可视化技能产出与 Gen UI 模板优先节打通 | w7-live：discover→get→按手册产出全链留痕实机（acceptance/block-176/） | CP-20（硬） |
 
-### W6 协作多端与可靠性长尾（4 包）——**partial（2026-10-21 P0 对账：CP-19 已由 BLOCK-183 交付；CP-16/17/18 在 DOC-REGISTRY 无独立承接包，属未立项）**
+### W6 协作多端与可靠性长尾（4 包）——**completed（2026-10-29 承接评估判销：四包全有落地包；2026-10-21 P0 对账「CP-16/17/18 未立项」系漏检，更正）**
 
-> 对账口径：W6 的四个包里只有 CP-19（移动数据桥 WS 化）有落地包 `BLOCK-183-DATA-BRIDGE-WS`（completed，2026-10-14）；CP-16 联邦委托 v2、CP-17 工作树安全网、CP-18 成本硬熔断**没有对应工作包**，因此 W6 不能标 completed。这三包需用户裁决后单独立项（不在 P0 台账对账范围内开工）。
+> 对账口径（2026-10-29 更正）：W6 四包的落地包是 **`block-176-competitiveness-wave6-plan.md`（frontmatter `status: completed`，十三门 PASS + w6-live 8/8，AUDIT-LOG 2026-10-12 整包行在案）**——CP-16/17/18 均在其范围与验收契约内，CP-19 另由 `BLOCK-183-DATA-BRIDGE-WS`（completed，2026-10-14）交付。2026-10-21 P0 对账「CP-16/17/18 在 DOC-REGISTRY 无独立承接包」系检索漏检（plan 在册但对不上名）；pending-work-backlog 2026-10-27 对账行「W6=BLOCK-176-WAVE6 已收口，两大纲无剩余波次」同此口径。码上抽验（2026-10-29）：CP-16=`federation-tools.js` 委托期对端任务 SSE 订阅（断流回退轮询）；CP-17=`git:checkpoint-create/rollback` 通道 + `working-tree-review.js` 挂 `shared-backend/workspace-checkpoint` 共享层；CP-18=`loop-orchestrator.js` costCapCny 任务级成本硬熔断（config-schema/ai-settings/config-transfer 设置面同在）。**W6 无剩余工作，竞争力纲全波次闭环。**
 
 | 包 | 范围 | 出口判据 | 依赖 |
 | --- | --- | --- | --- |

@@ -32,3 +32,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-29T09:57:47.200Z -->
 最后更新：2026-10-28（**BLOCK-315 completed（UI-619 verified；布局按用户纠偏=左供应商/右模型）**）：模型菜单一级/二级拆成两张独立卡片（仿智谱展开）——左主卡=供应商列表（当前使用勾/浏览 accent/自动行；320px）；右独立模型卡 portal 到 body + fixed + z=82，贴主卡右侧 8px、顶部对齐，右侧不足向左开并视口钳制；切供应商只换右卡模型、两卡同时在场；点模型两卡一起关闭。证据=ModelMenu 9/9 + tsc/lint + 实机 16/16（左卡 4 供应商唯一勾/右卡 parent body+gap 8px+同 top 501/切换保持/回切恢复）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T10:41:49.201Z -->
+最后更新：2026-10-28（**BLOCK-317 completed（UI-621 verified）**）：输入框图片/引用区完全落回 composer 卡内——附件区/选区引用条/图片引用条去掉自带 `border-top` 与 50% 底色（方形分段底会画进 24px 圆角外，视觉上像图片与背景越界）。证据=theme 17/17 + tsc/lint 0 + 实机 9/9（8 张图：strip transparent/border-top 0/flex-wrap wrap，strip 与全部卡片在 composer 内、直接子块无底色、圆角保持）；截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。
+最后更新：2026-10-28（**BLOCK-316 completed（UI-620 verified）**）：消息排队控制下放到每条消息——composer 全局「转向/排队」开关移除，运行中发送默认排队；每条排队行自带 插话/编辑/移除 + 更多（立即执行/上移/下移）；Ctrl/Alt+Enter 或 Ctrl+点击=直接插话。顺带修根因：旧「转向」被 `send()` 的 streaming 守卫挡掉从未真正生效，现拆独立 `steerText`。证据=面板 5/5 + hook 3/3 + block178 9/9 + tsc/lint + 实机 10/10（steer POST body=该条/行出队/已插话提示/Ctrl+Enter 直接插话）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
