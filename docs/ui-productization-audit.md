@@ -5246,7 +5246,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **待验**：dev Electron 实机（导出出口/钉住占位/对比图空态/title 悬浮语义）。
 - **边界**：mergeKeepOlderPrefix 核心语义与 B7 报告模板扩充非范围；跨 job 钉住静默失败与 lineage 空态两条 skipped 留痕（plan §2 处置数组）。
 
-## UI-468 加映: 徽标宣称叠加端到端探活证据——时长+probe 双判据（BLOCK-152 T）(2026-10-15 in_progress（BLOCK-184 代行批：徽标 live 在场+诚实态已证〔UI-468 本体翻 verified〕；端到端 probe 段无真实隧道环境，按 plan §6 分档挂起待环境）)
+## UI-468 加映: 徽标宣称叠加端到端探活证据——时长+probe 双判据（BLOCK-152 T）(2026-10-15 in_progress（BLOCK-184 代行批：徽标 live 在场+诚实态已证〔UI-468 本体翻 verified〕；端到端 probe 段无真实隧道环境，按 plan §6 分档挂起待环境）)；**RW-02 b 档对账 2026-10-30：触发条件=需真实数据/环境，如实保留 in_progress 不算失败（触发即补实机腿）**（条件：端到端 probe 段需真实隧道环境）
 
 - **来源**：BLOCK-152 重构候选批 T 轨（plan=[`block-152-refactor-candidates-plan.md`](./block-152-refactor-candidates-plan.md)）；即主条目「待验」行预留的「后端 publicUrl 周期自探活」，本批落地后端+前端消费两半。
 - **交付**：后端 `tunnel.js`——connected 后每 60s 经公网门 GET `/api/mobile/status` 期待 401（会话门活=端到端通；redirect:manual 按反代误配 3xx=fail），probeState ok/fail/unknown + probedAt 入 status()；单计时器串行绝不叠加、unref 不吊 event loop、断连即作废证据、在途结论陈旧不回写。前端 `MobileSync.tsx`——`isTunnelPublicReady` 升级「时长+探活」双判据：probe fail 即使 ≥15min 也不宣称，降级「● 连接建立中 · 公网未确认」；probe ok/unknown/旧后端缺省维持 stateSinceTs 原判据（向后兼容，从紧不变）。
@@ -5660,7 +5660,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：①「加入任务」沿用既有单一通道语义（立即 send，与「继续分析」一致），实机 flow 用页内探针拦截 payload 取证、不触发真实模型轮次；②六种图形工具（椭圆/箭头/画笔/文字/马赛克）与撤销重做未做，本轮只有矩形 + 删除；③文本选中批注与速记板随 Q2（未立项）reopen；④PPTX/DOCX/XLSX 无文本层可锚定，只显示「暂不支持批注」原因；⑤生信 pack 在位时 plot/table/report 由 pack iframe 渲染，核心覆盖层够不到，pack 侧批注需经窄桥契约另行提供。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-532: 生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMAIN P2b 垂直切片）
+## UI-532: 生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMAIN P2b 垂直切片）；**RW-02 b 档对账 2026-10-30：触发条件=需真实数据/环境，如实保留 in_progress 不算失败（触发即补实机腿）**（条件：需结果面 job+artifact seed）
 
 - **变化面**：`result` 模式下主结果 body 可由已安装 pack 的 `resultSurfaces` iframe 渲染——pack `ui/result.html` 接收 host 的 artifact truth/revision 上下文与只读 resultData（图→dataURL、表→前 200×50 行、文本/markdown/json/report 源码→有界文本、binary→诚实降级），按生信语义给出产物标签与可信状态；核心仅保留 context bar/composer 与 code/compare/history 过渡面。pack 缺失/无匹配/非 result mode → 现有核心结果面，`data-result-surface-source="core-transitional"`。
 - **为什么这样设计（自有形态）**：pack iframe 独立 origin 且 CSP 禁网络，不能自取 artifact；host 只做一次有界只读投影，不建第二套 artifact/truth。高级 tab（lineage/compare/history/selection/revisions）仍由核心 Renderer 提供，明确标注过渡，不把 Result Studio 压成通用文件浏览器。
@@ -5676,7 +5676,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **未做（reopen）**：货架上的信任/阻断**操作**入口（本轮无 UI 控件，故未做实机腿、不标记 verified）；OAuth、懒加载、深链安装安全面、三 hint 进策略。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-535: 段落级错误兜底（2026-10-20 **in_progress（代码+组件测试完成，未做实机腿）**，BLOCK-222 / Q9 垂直切片）
+## UI-535: 段落级错误兜底（2026-10-20 **in_progress（代码+组件测试完成，未做实机腿）**，BLOCK-222 / Q9 垂直切片）；**RW-02 b 档对账 2026-10-30：触发条件=需真实数据/环境，如实保留 in_progress 不算失败（触发即补实机腿）**（条件：需异常组件注入）
 
 - **变化面**：结果面预览与工作区文件预览各自被 `SegmentBoundary` 包住——某一段渲染异常时只有那一段变成可恢复卡片（标题 + 原因 + 重试 + 复制诊断），页面骨架、结论区、truth 面、上下文条照常可用；卡片带 `data-segment` 标注，实机走查能直接定位段落。
 - **为什么这样设计（自有形态）**：兜底粒度对齐真实失败面——插件产出的异形数据崩的是**预览**，不是整个结果页；把整页换成错误卡等于用一次渲染异常抹掉用户全部上下文。`resetKey` 让「换个产物/文件」自动脱离错误态，避免用户对着旧错误反复点重试。
