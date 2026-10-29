@@ -10,7 +10,7 @@ status: active
 
 # RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE 执行计划
 
-最后更新：2026-10-30（**里程碑：B 线 completed + A 线 7/13 a 档 verified + d 档 28 条处置 + b 档 18 条注记 + c 档清单产出**。B 线=写桥契约 5/5+宿主 6/6+实机 9/9（70a4f230）；A 线 a 档已翻 verified=UI-598/543/596/462/303/594/331（rw02-ui-evidence-live 11/11）。**下一会话第一个动作**=A 线 a 档剩余 6 条（UI-248/301/385/484/595/638）——需种子管线（review diff 上下文/spawn 数据/task_events/结果面解析），每条先读台账断言目标再写探针；探查结论与逐条依据在 acceptance/rw-02-ui-evidence/triage.json。收口前置=A 线清零（a 档翻完或如实降档）。恢复协议：读本 §4.1 分诊表 + triage.json → 核对 git log → 续探针。）
+最后更新：2026-10-30（**里程碑 2：A 线 a 档 8/13 verified + UI-638 发现腿清偿 + d 档 28 处置 + b 档 18 注记 + c 档清单 4 条**。a 档已翻=UI-598/543/596/462/303/594/331/484；638 发现腿实证（任务墙列出 model3d 作业）+点开腿入 c 档（探针红线：wm.openResultInMainWindow 用户主窗动作）。**下一会话第一个动作**=a 档剩余 4 条（UI-248 review diff 上下文 / UI-301+385 spawn 运行数据 / UI-595 图像批注面）——每条需种子管线：248=临时项目工作区文件改动+review 打开；301/385=mock provider 真跑一轮 spawn 会话（BLOCK-245 P5 隔离模式先例）；595=图像 artifact 批注面。经验：探针 selectors 用 data-testid/子串匹配（CSS Modules 哈希类名）；evalJs 返回值不带引号；flow API base 用 RW02_UAPI 环境变量（隔离 :3011 时必须传）。恢复协议：读本锚 + triage.json → 核对 git log → 续探针 → 收口。）
 
 ## 0. 发令与授权留痕
 
