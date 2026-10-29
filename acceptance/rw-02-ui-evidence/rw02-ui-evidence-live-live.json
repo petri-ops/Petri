@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-29T23:30:29.595Z",
-  "finishedAt": "2026-10-29T23:30:50.329Z",
+  "startedAt": "2026-10-29T23:46:48.592Z",
+  "finishedAt": "2026-10-29T23:47:19.204Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -11,7 +11,7 @@
     {
       "name": "spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr"
+      "detail": "http://localhost:3000/"
     },
     {
       "name": "ui598_runstats_hidden_without_consumption",
@@ -62,6 +62,16 @@
       "name": "ui484_federation_delegation_card",
       "pass": true,
       "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
+    },
+    {
+      "name": "ui638_seed_export_registered",
+      "pass": true,
+      "detail": "pid=p_mvu70io9_s5f0 export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu70jpg_g6zi\",\"revisions\":[{\"revisionId\":\"rev_model3d_36551b98a17a66e1\",\"artifactId\":\"model3d:p_mvu70io9_s5f0:model3d/recipes/rw02"
+    },
+    {
+      "name": "ui638_model3d_in_panel",
+      "pass": true,
+      "detail": "dump={\"wallListsModel3d\":true,\"tilePresent\":true,\"statusDone\":true}"
     }
   ],
   "allPass": true

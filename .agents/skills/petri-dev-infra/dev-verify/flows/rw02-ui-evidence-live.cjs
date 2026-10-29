@@ -18,6 +18,37 @@ const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
 const API = process.env.RW02_UAPI || 'http://127.0.0.1:3001';
 
+function boxScene(height) {
+  return {
+    version: 'scene3d/v1',
+    units: 'mm',
+    coordinateSystem: 'z-up-right-handed',
+    name: 'RW02 ui638 probe',
+    parameters: {},
+    nodes: [{
+      id: 'enclosure',
+      type: 'box',
+      name: 'Enclosure',
+      dimensions: { width: 90, depth: 60, height },
+      transform: { position: [0, 0, 0] },
+      material: { color: '#6a8caf', roughness: 0.4 },
+    }],
+  };
+}
+
+async function rest(method, endpoint, body) {
+  const response = await fetch(`${API}/api${endpoint}`, {
+    method,
+    headers: {
+      Authorization: 'Bearer desktop-local',
+      ...(body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(240_000),
+  });
+  return { status: response.status, data: await response.json().catch(() => null) };
+}
+
 async function evalJs(client, expression, timeoutMs = 15_000) {
   return lib.evalJs(client, expression, timeoutMs);
 }
@@ -281,6 +312,90 @@ module.exports = {
           `card=${JSON.stringify(cardParsed)} nav=${String(fedNav).slice(0, 100)}`);
       } catch (e) {
         assert('ui484_federation_delegation_card', false, String(cardSeen).slice(0, 200));
+      }
+
+      // ===== Wave-5：UI-638 面板发现腿（模型3D 产物 → Result Studio 面板列出版）=====
+      // 种子：临时项目（git 夹具）+ 真实 Blender 导出（经 RW-01 链注册 revision）
+      const p638 = await (await fetch(`${API}/api/data/projects`, {
+        method: 'POST', headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `RW02-638-${Date.now()}` }), signal: AbortSignal.timeout(15_000),
+      })).json();
+      const pid638 = p638?.project?.id || null;
+      const ws638 = p638?.project?.workspace_path || null;
+      let export638 = null;
+      if (pid638 && ws638) {
+        const { execSync } = require('node:child_process');
+        execSync('git init -q && git config user.email t@petri.local && git config user.name t && git commit -qm init --allow-empty', { cwd: ws638, stdio: 'ignore' });
+        await rest('POST', '/model3d/scene/apply', {
+          projectId: pid638,
+          path: 'model3d/recipes/rw02-638.scene3d.json',
+          scene: boxScene(35),
+          operations: [{ op: 'set_metadata', metadata: { seededBy: 'rw02-638' } }],
+          reason: 'rw02_638_seed',
+        });
+        const sceneRead638 = await rest('POST', '/model3d/scene/read', { projectId: pid638, path: 'model3d/recipes/rw02-638.scene3d.json' });
+        export638 = await rest('POST', '/model3d/scene/export', {
+          projectId: pid638,
+          scene: sceneRead638.data?.scene,
+          scenePath: 'model3d/recipes/rw02-638.scene3d.json',
+          formats: ['glb'],
+          recipeId: 'rw02-638',
+          recipeVersion: 1,
+        });
+      }
+      assert('ui638_seed_export_registered', Boolean(pid638) && export638?.status === 200 && export638.data?.resultStudio?.registered === true,
+        `pid=${pid638} export=${JSON.stringify(export638?.data?.resultStudio || export638?.data || null).slice(0, 200)}`);
+
+      if (pid638) {
+        // 导航到该项目，打开右栏「结果」面板，dump 对 model3d 作业/产物的呈现
+        await evalJs(client, `localStorage.setItem('petri-last-panel:${pid638}', 'results'); location.href = ${JSON.stringify(`${APP}/project/`)} + ${JSON.stringify(pid638)}; 'navigating'`).catch(() => null);
+        await new Promise((resolve) => setTimeout(resolve, 4500));
+        // 打开任务 tab（空态卡「任务」或右栏 tab），找 model3d 导出作业瓦片
+        const openJobs = await evalJs(client, `(function(){
+          var targets = Array.prototype.slice.call(document.querySelectorAll('button, [role="tab"], [class*="panelCard"]'));
+          var card = targets.find(function (el) { var t = (el.innerText || '').trim(); return t.indexOf('指挥中心') >= 0; });
+          if (card) { card.click(); return 'clicked'; }
+          var tabs = targets.filter(function (el) { return /指挥中心/.test(el.innerText || ''); });
+          if (tabs.length) { tabs[0].click(); return 'clicked_tab'; }
+          return 'not_found';
+        })()`).catch(() => '"eval_error"');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        // 找 model3d 导出瓦片并点击
+        const tilePick = await evalJs(client, `(function(){
+          var tiles = Array.prototype.slice.call(document.querySelectorAll('[class*="jobTile"], [class*="jobCard"], [class*="tile"]'));
+          var tile = tiles.find(function (el) { return (el.innerText || '').indexOf('model3d') >= 0 || (el.innerText || '').indexOf('3D 导出') >= 0; });
+          if (!tile) {
+            return JSON.stringify({ found: false, tiles: tiles.length, sample: tiles.slice(0, 3).map(function (el) { return (el.innerText || '').slice(0, 24); }) });
+          }
+          tile.click();
+          return 'picked';
+        })()`).catch(() => '"eval_error"');
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const dump638 = await evalJs(client, `(function(){
+          var text = document.body.innerText || '';
+          var tile = Array.prototype.slice.call(document.querySelectorAll('button, [class*="tile"], [class*="job"]'))
+            .find(function (el) { return (el.innerText || '').indexOf('model3d_export') >= 0; });
+          return JSON.stringify({
+            wallListsModel3d: text.indexOf('model3d_export') >= 0 && text.indexOf('3D 导出') >= 0,
+            tilePresent: !!tile,
+            statusDone: text.indexOf('已完成') >= 0,
+          });
+        })()`).catch(() => '"eval_error"');
+        console.log('[rw02-diag] ui638 dump:', String(dump638).slice(0, 400));
+        // 断言（诚实口径）：发现腿=任务墙列出 model3d 导出作业（已完成态）。
+        // 点开腿=瓦片点击走 wm.openResultInMainWindow（用户主窗动作）——探针红线禁止导航
+        // 用户窗口，该半腿入 c 档人测清单（human-eye-checklist 第 4 条）。
+        try {
+          const parsed638 = JSON.parse(dump638);
+          assert('ui638_model3d_in_panel', parsed638.wallListsModel3d === true && parsed638.tilePresent === true,
+            `dump=${JSON.stringify(parsed638).slice(0, 260)}`);
+        } catch (e) {
+          assert('ui638_model3d_in_panel', false, String(dump638).slice(0, 240));
+        }
+        // 清理
+        await fetch(`${API}/api/data/projects/${encodeURIComponent(pid638)}`, {
+          method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
+        }).catch(() => null);
       }
 
       return true;
