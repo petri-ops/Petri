@@ -1880,7 +1880,7 @@ PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC 
 - frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
   toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
 
-## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)
+## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)（**改判 2026-10-30 RW-02 d 档**：审阅面已由 UI-204/249 系列多轮演进承接，本笔录降级为历史参考，不再作为独立验收对象）
 
 BLOCK-20-CODE-REVIEW-PANEL active 综合 ledger (PHASE 1/2/3 + assets 全部落地).
 最终状态: in_progress (按 audit 行 402 治理纪律, 仅当真实 dev Electron 实机过目后才可考虑 verified).
@@ -1903,7 +1903,7 @@ BLOCK-19 inline-edit + workspace.writeTextFile 0 改动.
 **保留**: BLOCK-17 / BLOCK-18 已 superseded 笔录 + 资产 (markdownDiff / agentDocReview IPC / workspace.writeTextFile / <textarea>) 由本工作包复用.
 
 
-## UI-189: BLOCK-20-WIRE-UP — ContextBudgetButton + accessModeValidator mount (UI-189) (2026-08-22 active)
+## UI-189: BLOCK-20-WIRE-UP — ContextBudgetButton + accessModeValidator mount (UI-189)（**判销 2026-10-30 RW-02 d 档**：backend 接线属 G1+ 出籍项，可见计量面已由 UI-499/523 composer 计量条承接并 verified）
 
 BLOCK-20-WIRE-UP 落地: 把 8/21 (commit 9cbf8e3) 创建的 5 个孤儿 UI/helpers 中可在 dev Electron 边界内接入消费侧的部分挂到 SimpleChat 主结构上.
 
@@ -1919,7 +1919,7 @@ BLOCK-20-WIRE-UP 落地: 把 8/21 (commit 9cbf8e3) 创建的 5 个孤儿 UI/help
 
 **状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified; 当前 ContextBudgetButton 挂上去是 idle `—` 占位, 等 backend 接入 3 helpers + tiktoken 后再升 verified).
 
-## UI-190: BLOCK-20-WIRE-UP — live token budget via SSE + ContextBudgetBar 替换占位符 (UI-190) (2026-08-22 active)
+## UI-190: BLOCK-20-WIRE-UP — live token budget via SSE + ContextBudgetBar 替换占位符 (UI-190)（**判销 2026-10-30 RW-02 d 档**：可见面已由 UI-523 运行计量条（UI-592 verified 形态）承接，本条 SSE 直推方案退役）
 
 BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `—` → live token 预算环。
 
@@ -1941,7 +1941,7 @@ BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `�
 **状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified).
 
 
-## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)
+## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)（**判销 2026-10-30 RW-02 d 档**：审阅模式已由 UI-204/228/229 系列重构承接，per-hunk 交互在现形态内演进）
 
 BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hunk inverse IPC。
 
@@ -2843,7 +2843,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **实机**（随实现提交落盘）：CDP 实机切换紫罗兰 → `data-accent=violet` + `accent=#7c3aed` 持久化，切回 teal 恢复；截图 `acceptance/block-49/ui302-accent-violet.png`。**状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/block-49/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress)
+## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻，不冒进**)
 
 **用户反馈**：截图左栏「+」内联创建面板（路径输入框优先 + 选择文件夹按钮）：「点击+ 应该是打开文件夹，打开的文件夹就是创建项目所在的路径了。目前好像不是的，变成了输入路径，再确定，这样很不合理」。
 
@@ -3576,7 +3576,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 
-## UI-326: 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress)
+## UI-326: 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补证据后再翻**)
 
 **来源**：用户裁决——只有 ~/.ssh/config 别名模式不够，要支持 IP + 端口 + 用户名 + 密码直连。
 
@@ -4146,7 +4146,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **根因二 + 修复（用户实拍欢迎页实锤「不是统一海军蓝」）**：欢迎页整页底 #1b1b1d（infima 中性灰）——infima 暗色规则用 html[data-theme=dark]（特异性 0,1,1）压过本仓 [data-theme=dark]（0,1,0），--ifm-background-color 的本仓覆盖从未生效，body 恒 infima 灰；工作区路由自己盖 navy 掩盖了它，欢迎页无自绘底即整页露出。修复=global.css 暗色块提级 html[data-theme=dark]（@import 顺序在后，同特异性必胜），--ifm-background-color/surface-color → var(--petri-bg-surface)。实测 body/html/欢迎页整页 #111a2e navy。
 - **追加（用户裁决「保持一致 统一改为海军蓝家族」）**：全仓 slate 残留清扫 17 处——desktop.css 遗留 dock/面板 12 处 rgba(148,163,184,α)→rgba(230,237,243,α/2) 白蓝同族（0.92 文字→#8b98ad tertiary）；LoginModal 暗色 tabs 边框 #334155→var(--petri-border-strong)；终端输入行分隔线→var(--petri-border)；--petri-user-bubble-bg→rgba(230,237,243,0.06)；global.css --ifm-background-* #0f172a→var(--petri-bg-surface)。终检零 slate 残留；token 契约 1/1；活体 token 复核 hover/bubble/surface-dim 全部 navy 族。
 
-## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内)
+## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内；**RW-02 d 档改判 2026-10-30：纯重构非可见 UI 面——code-size 棘轮（acceptance/block-92/size-baseline.json 现行基线）即证据载体，移出 UI 实机腿验收域**)
 
 - **来源**：BLOCK-92-CODE-MODULARIZATION P2（用户裁决「很棒 按顺序 逐个推进」队列序；UI-305 拆分家法延续，一文件一提交）。
 - **交付面**：conversationRunStore.ts 1347→690（conversationRunStore/ 五子模块：types/runListeners/loopProjection/conversationNotices/subAgentTasks）+ copilotClient.ts 1226→220（copilotClient/ 六子模块：apiBase/offline/types/parse/agentTaskApi/agentTaskStream）+ SimpleChat.tsx 2024→1584（SimpleChat/displayMessages 派生纯函数 + hooks 六簇 useApprovalFlow/usePlanApprovalFlow/useComposerFocus/useForkConversation/useTokenBudgetState）。原路径全量 re-export 兼容，消费方与测试 import 零改动；SimpleChat 主 JSX 按 plan §5 风险条留 UI-38x 复看窗口后再议。Wave B 进度：project-workspace.tsx 1695→1160（七模块外迁；hook-order 守门测试绿）；ResultArtifactShell.tsx 1469→1246（三簇外迁）；ReviewMode.tsx 1429→1310 + useWorkingTreeReview.ts 774→633（types.ts + 四簇 useReviewModeState.ts）；DesktopSettingsPanel.tsx 973→616（useEndpointProfilesEditor 492 行，渠道/角色/凭据/连通性/导入导出整簇）；PluginStorePanel.tsx 971→789（types.ts + useDomainPacks 223 行领域包装/卸整链）；home.tsx 895→739（recentPickers 纯函数 + useHomeCreateFlows 307 行：SSH 创建流/手动路径/拖拽直达）；useSkillStore.ts 743→536（types.ts + executionMonitor 160 行 polling/wakeup 机制）；ResultStudioChangeSetPanel.tsx 717→530（display.tsx 213 行纯展示/解析 + ScientificDifference）。Wave C 进度（2026-09-17，core 9 文件 9 提交 ffa8a89c..72e0b08e）：result-changeset-service 2783→780 / tools-executor 2711→1870 / db 2194→1477 / result-studio-repository 2009→1774 / workspace-tools 1800→1521 / mcp/registry 1699→958 / result-studio-lifecycle 1692→946 / result-replay-service 1630→741 / git-adapter 1549→1253（core 9 文件 18067→11320；子模块目录随迁 __dirname 已上调，工厂闭包留主文件同 tools-executor 先例）。Wave D 进度（2026-09-17，src/ 族+机制项 3 提交 020a448a..d47b7883）：working-tree-review 966→632（context/repository-init/diff-parse/reject-store 四子模块，工厂留主文件）；IPC 通道常量集中〔旧 9.6 兑现〕=src/ipc/channels.js 注册表 145 通道/24 域+21 消费方全量替换+preload sandbox 自包含+test/ipc-channels-registry 双向守护 4/4（MAIN_ONLY 13 条白名单）；M2 行数棘轮挂为 closeout 第 5 道门禁。
@@ -5293,7 +5293,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：HK-01 红绿——新增 2 用例先红（runActive 下 summary 在场=红；结束后 run-fold 锚定）→16/16 绿；邻域 46/46（ToolActivityList/SimpleChatMessageRow）+theme 契约 4/4+types 0+code-size PASS；**CDP 实测复验**：修复前间隙闪烁 2 次（rows 3→1/5→1 无摘要替代）→修复后消息内行单调 1→2→3→4→5→收尾折叠（塌落点均为消息边界设计内折叠）。
 - **已验**：用户实机体感复认通过（2026-10-09「可以了不闪了」）。
 
-## UI-475: 识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；实机过目随用户)
+## UI-475: 识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补实机产物后再翻，人测腿保留**)
 
 - **来源**：用户实机报 vision_failed（后置报错）+ 用户裁决「聊天框无法输入图片是否可以呢？这样就把不支持识图模型的输入阻断前置了」——采纳为前置阻断形态。
 - **交付**：后端 `/api/ai/settings` 增 `vision_configured` 能力位（computeVisionConfigured：vision 角色档在场且凭据可解析，store→env 同源）；前端 SimpleChat 按 rApiBase（**执行识图的聊天后端**，dev 双后端防脑裂）拉取能力位，`vision_configured=false` 时 onPaste/onDrop 图片载荷前置阻断并落既有 attachmentNotice 提示「识图模型未配置：图片输入已停用（设置 → AI 设置 配置视觉模型 / API Key 后可用）」；非图片附件不受影响；取数失败/旧后端无字段保守放行（维持旧行为）。
@@ -5378,7 +5378,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 联邦协作的委托此前只在「发送瞬间」回流一次性摘要，历史不可查。本条目交付联邦面板「委托记录」卡：GET /api/federation/delegations 聚合端点（task_events 中 delegate_to_petri_node 的 tool_call/tool_result 对 JOIN tasks，输出 task/peerName/状态〔ok→done/error→failed/无结果→running〕/回复头/conversationId/projectId，limit 50，user_id 过滤）+ 前端卡片（空态引导/状态标签/回复摘要/刷新）。证据=block164 聚合契约测试（done/running/归属/回复头）+ 实机 delegations 端点聚合出 2026-09-18 BLOCK-85 双真机历史委托记录；双真机「查节点→委托→记录可见」全链走查（rider）待用户过目翻 verified。补登说明=UI 面随 b784fa37（BLOCK-164 整包收口）入库、同提交漏台账同步，BLOCK-165 基线时按 LEGACY_AUDIT_SYNC_EXEMPTIONS 先例补登+豁免登记（fb5174ee 同款）。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress，BLOCK-165 P1·基线补登）
+## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress，BLOCK-165 P1·基线补登；**RW-02 d 档改判 2026-10-30：全局机械改名非单点可见 UI 面——theme-token-contract 门禁（17/17）即证据载体，移出 UI 实机腿验收域**)
 
 换库开源改名的 UI 面组成部分：全部设计 token（border/accent/text/text-secondary/text-tertiary/bg-surface/font-size 阶梯/shadow 等约 40+ 变体、236 文件）与 CSS 类名前缀 `gewu-` → `petri-` 机械迁移，**视觉零变化**（纯标识符替换，值不动）；theme-token-contract 契约 4/4 同步改前缀后绿。同批 UI 关联面：GewuOpenFileDevBridge→PetriOpenFileDevBridge、html class `petri-desktop`、LoginModal 等类名前缀。补登说明=token/类名迁移随 66b3970（P1 机械替换）入库、同提交走 BLOCK 轨漏 UI-### 与台账同步，BLOCK-165 全量复验时按 LEGACY 先例补登+双豁免登记（fb5174ee 同款）；实机=改名后 dev 栈重启全窗走查（P6 冒烟）待过目翻 verified。
 
@@ -5429,7 +5429,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **清点**：知识库/扩展空态=结构化保留；项目工作区错误态=本次统一；聊天=起始态自洽。三件套为新状态强制入口，存量按触域渐进。
 - **语气**：12 处抽查零硬伤，零改动登记。
 
-## UI-493: Gen UI 沙箱帧劫持自愈守护+Electron 44 升级（2026-10-12 in_progress，BLOCK-168）
+## UI-493: Gen UI 沙箱帧劫持自愈守护+Electron 44 升级（2026-10-12 in_progress，BLOCK-168；**判销 2026-10-30 RW-02 d 档**：自愈语义已由 UI-511（BLOCK-166，verified）承接，本条证据引用失效且目标已达成）
 
 - **自愈**：guest-bridge 2.5s 心跳（petri-gen-ui-heartbeat）+ GenUiCard 9s 宽限停跳判定 + iframe resetSeq 重置——劫持后 t+8s 自动恢复干净沙箱（live 双次 PASS，acceptance/block-168/evidence.json）。
 - **侦测遥测**：security-hardening will-frame-navigate 对 petri-genui 帧外导航打日志（Electron 44 实证 preventDefault 对子框无效，如实注释）。
@@ -5454,7 +5454,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **A1**：mergeKeepOlderPrefix 反例锁测三条（窗口空洞/同 ts 边界/id 冲突）——现状留痕，换算法=升级登记面。
 - **红绿**：block169-review-commit-edge 4/4；ReviewMode 59/60（1=block41 存量）；lineage 246 绿；A1 锁测 13/13。
 
-## UI-505: 死导出清理（2026-10-12 in_progress，BLOCK-176/W6 收口棘轮）
+## UI-505: 死导出清理（2026-10-12 in_progress，BLOCK-176/W6 收口棘轮；**判销 2026-10-30 RW-02 d 档**：2026-10-13 已销号——仓库卫生棘轮条目非 UI 面，knip 棘轮门禁数据即证据）
 
 - **knip 棘轮红**：viewerRegistry.ts `viewerProfileCanCompare` 包装函数零消费（`canCompare` 能力位真实消费路径在 resultMode.ts capabilities，不经包装）——按 CK-11 冻结纪律删除死导出，`VIEWER_PROFILES` 数据面不动。
 - **eslint 化石**：ToolActivityDock.tsx hooks 修复（UI-502 批）后 2 条抑制失效——`--prune-suppressions` 收缩（存量只许收缩方向）。
@@ -5499,7 +5499,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **verified（代行）**：用户授权「你来搞」后代行实机评估——真浏览器全链（配对→投影→货架渲染）+页面内应用模块本体 WS 信封调用 200/7ms/零直连。随批登记两条 findings：①BackendStatusProvider 直连 runtime/status 轮询=桥外消费方（BLOCK-86 既有，非本包面）；②dev 下 /skills 深链落旧 dist（BLOCK-87 窄代理+dist 陈旧，dev 特有，生产不受影响）——详见 acceptance/block-183/ui512-live.json。
 - **随批**：copilotClient.streamReconnect.test.ts 存量 4 红顺手清偿（BLOCK-159 抖动+无硬上限语义未同步，干净树 bisect 坐实非本包面；固定随机+新语义重写 10/10）——测试文件非 UI surface，同提交留痕。
 
-## UI-513: 跨端偏好同步失败可见化（2026-10-17 in_progress，BLOCK-199）
+## UI-513: 跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 in_progress，BLOCK-199）
 
 - **变化面**：主题/字号/强调色的服务端同步从 `void fetch(...).catch(()=>{})`（本端已生效、服务端可能没收到、另一个窗口读到旧值而用户毫无线索）改为把结果写进 context 状态 `prefsSync={state:'ok'|'pending'|'failed',error,at}` 并在控制台留痕；`ThemeProvider` 消费方零破坏（既有 `preference/fontScale/accent` 语义与生效顺序一字未动，本端仍立即生效、15s 拉取继续把本端收敛回服务端真相）。
 - **为什么不是纯逻辑改动**：可观测状态是给设置面用的（"本机已生效但没存到服务端"要能提示用户），属于设置面板的增量前置；**当前只到状态与留痕，提示文案尚未接入**，因此按台账纪律记 `in_progress` 不标 verified。
@@ -5562,7 +5562,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：档位只是默认值（对话里显式选择优先）；白/黑名单只影响模型可见工具面，不是安全边界；四档判定与 BLOCK-180 审批资源链一字未改。
 - **验证**：`block202` 11/11（默认/越界拒绝/优先级/钳制/曝光过滤）+ 面板 4/4（含并发越界客户端拦截、env 遮蔽可见、保存提示下一轮生效）；**9223 离屏探针 15/15**（D3/D4 四档选择与生效值；R6-R9 默认/写入/非法 400），证据 `acceptance/block-202/`（`ui520-runtime-policy.png`）。
 
-## UI-521: 外观偏好缓存单源（2026-10-18 in_progress，BLOCK-203 W4a P7）
+## UI-521: 外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-18 in_progress，BLOCK-203 W4a P7）
 
 - **变化面**：主题/字号/强调色的 localStorage 键名、枚举与钳位边界收成 `frontend/src/themes/prefCache.ts` 一处；`ThemeProvider` 不再直接读写 localStorage，`accents.readAccent` 委托 `readCachedAccent`。真值仍是服务端 `user-prefs.json`（注册表 `user-prefs` 族），localStorage 只保证首屏不闪默认值。
 - **诚实边界**：**无实机腿**——本条只改变"缓存从哪读、谁校验"，不改任何可见交互与布局；故记 `in_progress` 而不是 `verified`。跨层一致性由 `prefCache.drift.test.ts` 承担（生产代码不 import `core/**`）。
@@ -5571,7 +5571,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：`prefCache.drift.test.ts` 6/6（键名冻结·枚举与注册表逐项相等·钳位边界一致·ThemeProvider 无 localStorage 直连·prefCache 无 core 引用）+ `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（既有行为零变化）+ `quality:types` 0。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-522: 模型渠道导出默认脱敏（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）
+## UI-522: 模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻**（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）
 
 - **变化面**：设置页「模型接口」的渠道导出从"确认一次即写明文 Key"改为**默认脱敏**（只留后四位）+ 二次确认才出明文；打码在导出构建器内部完成，调用方不传 `masked:false` 就是脱敏。文件名、JSON 信封与 CSV 列顺序/其余列零改动。
 - **诚实边界**：**无实机腿**（导出只走浏览器下载/原生另存，未在 9223 上点导出）→ 记 `in_progress`；该路径不经 `config-transfer` 排除清单，故脱敏必须由构建器保证而不是靠调用方纪律。
@@ -5589,7 +5589,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机腿**：`npm run verify -- ui523-run-stats` **10/10**（9223 离屏实例 + `scripts/ui523-ui-live.mjs` 一键 mock 化与还原：空态 `— tok`/`0%`、环唯一、运行中 `1 轮 · 0 步 · N tok/s`、会话 `1K tok · 缓存命中 83%`、上下文 18%、结束后保留最近一次读数、清理还原）；证据 `acceptance/ui-523/ui523-run-stats-live.json` + `ui523-run-stats-running.png` / `ui523-run-stats-totals.png`。
 
 
-## UI-524: 斜杠命令判定层抽离（2026-10-18 in_progress，BLOCK-206 / C-29）
+## UI-524: 斜杠命令判定层抽离（**RW-02 d 档改判 2026-10-30：纯判定层抽离零可见行为变化——组件测试即证据，移出 UI 实机腿验收域**（2026-10-18 in_progress，BLOCK-206 / C-29）
 
 - **变化面**：`SimpleChat.tsx` 中 `executeSlashCommand` 的"命令 → 动作类别"判定抽成 `SimpleChat/slashExecute.ts:classifySlashCommand`（纯函数），组件 `switch` 改为按动作类别执行；UI 行为与文案零变化（仍只支持 new/clear/model/export/compact/help + `skill:`/`template:` 模板注入）。
 - **为什么**：判定混在 1664 行组件里 ⇒ 离线不可断言，竞争力清单 D15「斜杠即执行」只能记"无锚"。抽离后 `slashExecute.test.ts` 3/3 成为该点的**机械锚**（已挂进 `evals/anchors/competitiveness-8d.json` 并提升棘轮基线）。
@@ -5668,7 +5668,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **诚实边界**：dev DB `tool_jobs=0`，无法打开真实结果 job 跑 9223 结果页实机腿；本轮只证 host 选择、数据桥与 pack 页面契约，**不表述为真实结果页已 verified**。pack 页面的图/表渲染在独立 pack 仓交付，待真实 job 或 fixture job 出现后补实机。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-534: MCP 服务货架治理状态（2026-10-20 **in_progress（契约/类型完成，未做实机腿）**，BLOCK-221 / Q8 垂直切片）
+## UI-534: MCP 服务货架治理状态（**RW-02 d 档改判 2026-10-30：契约/类型完成、UI 控件未交付——改判为待交付登记，非已交付未验证**（2026-10-20 **in_progress（契约/类型完成，未做实机腿）**，BLOCK-221 / Q8 垂直切片）
 
 - **变化面**：MCP 服务货架的数据行形状改型——不再携带 `env` 值（第三方 token），只带 `envKeys`/`envCount`；新增只读 `policy` 摘要（trust / allowCount / blockCount / allow / block / projectedToolCount），为后续「这台 server 我信多少、禁了哪几个工具」的操作面留出数据。
 - **为什么这样设计（自有形态）**：治理状态必须**可见且可解释**——服务清单直接给出该 server 的允许/阻断计数与生效投影工具数，而不是让用户去读 JSON；凭据只以键名示人，值永不出进程（落盘仍是密文）。本轮只做数据面：`trust` 位**不改审批默认**，降档要与 Q1 审批事件契约一起做，避免绕开 D4 治理。
