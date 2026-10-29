@@ -148,6 +148,81 @@ module.exports = {
           assert('ui303_plan_mode_in_menu', false, String(menuSeen || accessMenu).slice(0, 160));
         }
 
+        // UI-331：临时项目建会话（REST）→ 左栏会话行 .convItemTime 短式相对时间（刚刚）
+        const convCreate = await (await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/ai/conversations`, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: 'RW02 相对时间探针', projectId: probeProjectId }),
+          signal: AbortSignal.timeout(15_000),
+        })).json();
+        const convOk = convCreate?.status === 'ok';
+        await evalJs(client, `location.reload(); 'reloading'`).catch(() => null);
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+        const convTime = await evalJs(client, `(function(){
+          var times = Array.prototype.slice.call(document.querySelectorAll('[class*="convItemTime"]'));
+          return JSON.stringify({
+            count: times.length,
+            samples: times.slice(0, 3).map(function (t) { return (t.innerText || '').trim(); }),
+            valid: times.filter(function (t) { return /^(刚刚|\\d+分|\\d+小时|\\d+天|\\d{1,2}-\\d{1,2})$/.test((t.innerText || '').trim()); }).length,
+          });
+        })()`).catch(() => '"eval_error"');
+        try {
+          const convParsed = JSON.parse(convTime);
+          assert('ui331_conversation_relative_time', convOk === true && convParsed.count > 0 && convParsed.valid > 0,
+            `convOk=${convOk} convTime=${JSON.stringify(convParsed)}`);
+        } catch (e) {
+          assert('ui331_conversation_relative_time', false, String(convTime).slice(0, 160));
+        }
+
+        // UI-594：斜杠菜单选中 skill 条目 → 结构化 chip 进 composer（textarea.sc-input）
+        const composerReady = await evalJs(client, `(function(){
+          var composer = document.querySelector('textarea.sc-input');
+          if (!composer) return 'composer_missing';
+          composer.focus();
+          return 'focused';
+        })()`).catch(() => '"eval_error"');
+        let chipSeen = null;
+        if (composerReady === 'focused') {
+          await evalJs(client, `(function(){
+            var el = document.activeElement;
+            if (!el) return 'no-focus';
+            document.execCommand('insertText', false, '/');
+            return 'typed';
+          })()`).catch(() => null);
+          await new Promise((resolve) => setTimeout(resolve, 900));
+          const picked = await evalJs(client, `(function(){
+            var items = Array.prototype.slice.call(document.querySelectorAll('.sc-slash-panel .sc-slash-item'));
+            var skillItem = items.find(function (el) {
+              var t = (el.innerText || '');
+              return /技能/.test(t) || /skill/i.test(t);
+            });
+            if (!skillItem) {
+              return JSON.stringify({ found: false, items: items.length, sample: items.slice(0, 2).map(function (el) { return (el.innerText || '').slice(0, 30); }) });
+            }
+            skillItem.click();
+            return 'picked';
+          })()`).catch(() => '"eval_error"');
+          if (picked === 'picked') {
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            chipSeen = await evalJs(client, `(function(){
+              var chips = document.querySelectorAll('.sc-selection-refs .sc-selection-ref, [class*="contextItem"]');
+              return JSON.stringify({ chips: chips.length });
+            })()`).catch(() => '"eval_error"');
+          } else {
+            console.log('[rw02-diag] ui594 pick:', String(picked).slice(0, 240));
+            chipSeen = JSON.stringify({ skipped: 'pick_failed' });
+          }
+        } else {
+          chipSeen = JSON.stringify({ skipped: String(composerReady).slice(0, 120) });
+        }
+        try {
+          const chipParsed = JSON.parse(chipSeen);
+          assert('ui594_slash_skill_chip', chipParsed.chips > 0,
+            `chip=${JSON.stringify(chipParsed)}`);
+        } catch (e) {
+          assert('ui594_slash_skill_chip', false, String(chipSeen).slice(0, 160));
+        }
+
         // 清理临时项目
         await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
           method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),

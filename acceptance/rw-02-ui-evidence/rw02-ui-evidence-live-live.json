@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-29T20:35:51.121Z",
-  "finishedAt": "2026-10-29T20:35:58.288Z",
+  "startedAt": "2026-10-29T20:42:46.018Z",
+  "finishedAt": "2026-10-29T20:42:58.310Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -47,6 +47,16 @@
       "name": "ui303_plan_mode_in_menu",
       "pass": true,
       "detail": "menu={\"menus\":1,\"plan\":true,\"sub\":true,\"full\":true} trigger=clicked"
+    },
+    {
+      "name": "ui331_conversation_relative_time",
+      "pass": true,
+      "detail": "convOk=true convTime={\"count\":1,\"samples\":[\"刚刚\"],\"valid\":1}"
+    },
+    {
+      "name": "ui594_slash_skill_chip",
+      "pass": true,
+      "detail": "chip={\"chips\":1}"
     }
   ],
   "allPass": true

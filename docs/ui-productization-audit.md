@@ -183,12 +183,13 @@
 - **实机证据**：未跑（批注实机批补）。
 - **边界（reopen）**：压感线宽（需 pointer pressure 硬件）；触屏双指缩放手势与画笔的互斥细节。
 
-## UI-594: 斜杠 skill 条目结构化 chip（2026-10-27 **in_progress（BLOCK-284；C-29 chip v2；组件级锚齐 5/5+312/312，实机腿随下次斜杠面实机批）**）
+## UI-594: 斜杠 skill 条目结构化 chip（2026-10-30 **verified（RW-02 A 线 a 档批量取证；9223 实机）**）
 
 - **变化面**：斜杠菜单选中 skill 条目从「注入文本模板」升级为「结构化 chip」——buildSkillItem 单源构造器（与 @ 菜单 buildSkillCandidates 同形同源）→ ComposerContextItem 走 composerContext 通道；classifySlashCommand 新增 add-skill-chip 动作类；template 条目保持文本注入（v1 预裁决不变）。
 - **为什么这样设计**：C-29 剩余真缺口=chip v2（BLOCK-206 只落了动作族判定锚）；结构化 chip 使 skill 引用成为可审计的上下文项（与 @ 菜单同一去重/引用面），而非一次性文本。
 - **验证（代码）**：slashExecute.test 5/5（skill:→add-skill-chip 分流）+ buildSkillItem 同形测 + SimpleChat 域 312/312 + tsc 0。
-- **实机证据**：未跑（斜杠面板选中链路实机腿待批；决策层与构造器已组件级锚定）。
+- **实机证据**：`acceptance/rw-02-ui-evidence/rw02-ui-evidence-live-live.json`（RW-02 a 档批，9223 离屏）：textarea 输入 `/` → 斜杠面板技能条目点击 → `.sc-selection-ref` 结构化 chip 在场（chips=1）。
+- **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
 - **边界（reopen）**：template 条目的结构化执行意图（挂 workflow 面另案）。
 
 ## UI-618: 批注列表弹层——portal 顶层 + 右栏向左展开（2026-10-28 **verified（BLOCK-314；AnnotationBar 17/17 + 实机 8/8）**）
@@ -3668,7 +3669,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **改动**：① `lib/format.ts` 新增 `formatRelativeShort`（<1min 刚刚 / <60min N分 / <24h N小时 / <7d N天 / 更早 M/D；非法输入空串）；② `LeftPanel.tsx` ConversationItem 在标题后、hover 按钮前插入 `span.convItemTime`（`formatRelativeShort(updated_at)`，`title` 悬停显绝对时间「更新于 MM/DD HH:mm」）；③ `project-workspace.module.css` 新增 `.convItemTime`（11px/muted/不伸缩）+ `.convItemActive .convItemTime`（accent 色随激活态）。行布局 flex 零改动；运行中圆点/分支指示/hover 按钮原位。项目树行（folder/globe）不加时间（参考图仅会话行；项目维度时间属另一决策）。
 
-**门禁**：LeftPanel 定向 14/14（新增 2 用例：刚刚+7小时同屏渲染与 title 计数、3天降级）+ tsc 0。**实机**：随 UI-330 P3 收口窗口合做。
+**门禁**：LeftPanel 定向 14/14（新增 2 用例：刚刚+7小时同屏渲染与 title 计数、3天降级）+ tsc 0。**实机（2026-10-30 RW-02 清偿）**：`acceptance/rw02-ui-evidence-live-live.json`（9223）：REST 建临时项目会话 → 左栏 `.convItemTime`「刚刚」在场（1/1 有效）。**verified。**
 
 **状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
