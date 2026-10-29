@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { StatusBadge } from '@/components/ui/controls/Status';
+import { projectExecutionAxis } from '@/lib/statusProjection';
 import { formatToolDuration } from '@/components/copilot/toolActivity';
 import {
   fetchTrajectory,
@@ -35,14 +37,6 @@ const GROUP_LABEL: Record<TrajectoryGroup, string> = {
   user: '用户',
   assistant: '助手',
   system: '系统',
-};
-
-const TASK_STATE_LABEL: Record<string, string> = {
-  running: '进行中',
-  done: '已完成',
-  failed: '失败',
-  cancelled: '已取消',
-  retry_pending: '等待重试',
 };
 
 function isFailure(event: TrajectoryEvent): boolean {
@@ -242,7 +236,7 @@ export function TraceSurface({
 
   const data = state.data;
   const stats = data?.stats ?? null;
-  const taskState = data?.task?.status ? (TASK_STATE_LABEL[data.task.status] || data.task.status) : '—';
+  const taskStatus = projectExecutionAxis(data?.task?.status);
   const dataState = !conversationId
     ? 'no-conversation'
     : state.error && !data
@@ -260,7 +254,7 @@ export function TraceSurface({
           <Icon name="layers" size={15} />
           <strong>执行轨迹</strong>
         </span>
-        <span className={styles.taskState} data-testid="trace-task-state">{taskState}</span>
+        <StatusBadge projection={taskStatus} testId="trace-task-state" />
         <button
           type="button"
           className={`${buttonStyles.ghost} ${styles.headerAction}`}

@@ -142,6 +142,8 @@ export function ScheduledWorkspacePanel({
   const [kind, setKind] = React.useState<ScheduleKind>('task');
   const [intervalMinutes, setIntervalMinutes] = React.useState(60);
   const [reminderText, setReminderText] = React.useState('');
+  const [workflowScript, setWorkflowScript] = React.useState('');
+  const [workflowArgsText, setWorkflowArgsText] = React.useState('');
   const [goalId, setGoalId] = React.useState('');
 
   const refresh = React.useCallback(async () => {
@@ -179,6 +181,17 @@ export function ScheduledWorkspacePanel({
   const submitCreate = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!projectId) return;
+    let workflowArgs: Record<string, unknown> | null = null;
+    if (kind === 'workflow' && workflowArgsText.trim()) {
+      try {
+        const parsed = JSON.parse(workflowArgsText) as unknown;
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('args_not_object');
+        workflowArgs = parsed as Record<string, unknown>;
+      } catch {
+        setNotice('工作流参数必须是 JSON 对象');
+        return;
+      }
+    }
     await act('定时计划已创建', () => createSchedule({
       projectId,
       title,
@@ -186,12 +199,16 @@ export function ScheduledWorkspacePanel({
       kind,
       intervalMinutes,
       reminderText,
+      workflowScript,
+      workflowArgs,
       goalId: goalId || null,
     }));
     setFormOpen(false);
     setTitle('');
     setPrompt('');
     setReminderText('');
+    setWorkflowScript('');
+    setWorkflowArgsText('');
     setGoalId('');
   };
 
@@ -239,6 +256,7 @@ export function ScheduledWorkspacePanel({
                     <span>类型</span>
                     <select className={styles.input} value={kind} onChange={(e) => setKind(e.target.value as ScheduleKind)}>
                       <option value="task">自动分析</option>
+                      <option value="workflow">工作流</option>
                       <option value="reminder">提醒</option>
                     </select>
                   </label>
@@ -263,12 +281,31 @@ export function ScheduledWorkspacePanel({
                     </select>
                   </label>
                 </div>
-                {kind === 'task' ? (
+                {kind === 'task' && (
                   <label className={styles.field}>
                     <span>任务 Prompt</span>
                     <textarea className={styles.textarea} value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} placeholder="到点后交给 agent 的完整指令" />
                   </label>
-                ) : (
+                )}
+                {kind === 'workflow' && (
+                  <>
+                    <label className={styles.field}>
+                      <span>工作流脚本</span>
+                      <textarea
+                        className={styles.textarea}
+                        value={workflowScript}
+                        onChange={(e) => setWorkflowScript(e.target.value)}
+                        rows={8}
+                        placeholder={"export const meta = { name: 'scheduled-review', version: 1 }\nexport default async function run(ctx) { await agent({ prompt: '…' }); }"}
+                      />
+                    </label>
+                    <label className={styles.field}>
+                      <span>工作流参数（JSON 对象，可选）</span>
+                      <textarea className={styles.textarea} value={workflowArgsText} onChange={(e) => setWorkflowArgsText(e.target.value)} rows={3} placeholder='{ "focus": "每日质控" }' />
+                    </label>
+                  </>
+                )}
+                {kind === 'reminder' && (
                   <label className={styles.field}>
                     <span>提醒文本</span>
                     <input className={styles.input} value={reminderText} onChange={(e) => setReminderText(e.target.value)} placeholder="到点后进入通知中心的提醒" />
@@ -290,7 +327,7 @@ export function ScheduledWorkspacePanel({
                     <div className={styles.cardHead}>
                       <span className={styles.cardTitle}>{schedule.title}</span>
                       <span className={`${styles.badge} ${schedule.enabled ? styles.statusOk : ''}`}>
-                        {schedule.kind === 'reminder' ? '提醒' : '分析'} · {schedule.enabled ? '启用' : '暂停'}
+                        {schedule.kind === 'reminder' ? '提醒' : schedule.kind === 'workflow' ? '工作流' : '分析'} · {schedule.enabled ? '启用' : '暂停'}
                       </span>
                     </div>
                     <div className={styles.metaRow}>

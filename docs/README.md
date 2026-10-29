@@ -1,4 +1,5 @@
 # Petri Desktop（格物）文档入口
+299. [`next-stage-experience-blueprint.md`](./next-stage-experience-blueprint.md) — 2026-10-30 **completed（八包全部收口）**：UI 三轴可信基线 → Q4b-REM → TaskSpec 提示词增强 → SceneSpec+Three.js+Blender → 视觉回读 → 五类建模 recipe → 全局视觉收敛 → 集成复盘；UI-631~637，证据在 `acceptance/next-0*/`，§11 保留逐包验收、边界与换模型恢复协议；下一候选=3D Artifact Revision 接入 Result Studio（需发令）。
 298. [`block-273-resize-affordance-gradient-plan.md`](./block-273-resize-affordance-gradient-plan.md) — 2026-10-27 **completed（P5-CLOSED）**（拖拽边界统一渐变暗示规范；QODER-ESSENCE-ABSORPTION 切片，用户实测 Qoder 反馈+截图）：五处边界统一「细线+渐变高光」（文件树 4px 实心带重构 / 浮卡常驻线收窄 / 清死样式）；theme 17/17+组件 35/35+双主题默认态实机断言；UI-588 in_progress（暗主题+真实指针 hover 走查=30 秒人测路线）。
 297. [`block-272-closeout-targeted-plan.md`](./block-272-closeout-targeted-plan.md) — 2026-10-27 **completed（P4-CLOSED）**（closeout 收口定向化；用户裁决「收口只需要校验有改动的部分」）：eslint --cache + tsc --incremental + arch/knip 域跳过 + cruise 同轮去重 + closeout:full 转义；静态门热态 98.4s→10.4s；红绿 13/13+回归 31/31+双 closeout PASS。
 294. [](./../acceptance/block-265/) — 2026-10-26 **BLOCK-265 实机验证补腿批 completed**：UI-578~582 五条翻 verified（亮/暗各 12/12；PiP 真窗口 CDP 取证）；台账 154 verified。

@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "blenderVersion": "4.5.10 LTS",
+  "renderEngine": "BLENDER_WORKBENCH",
+  "mesh": {
+    "objects": 2,
+    "vertices": 16,
+    "triangles": 24,
+    "nonManifoldEdges": 0,
+    "watertight": true,
+    "volumesMm3": {
+      "base": 1000.0,
+      "imported:cube": 1000.0
+    }
+  },
+  "boundsMm": {
+    "min": [
+      -5.0,
+      -5.0,
+      -5.0
+    ],
+    "max": [
+      40.0,
+      10.0,
+      10.0
+    ],
+    "size": [
+      45.0,
+      15.0,
+      15.0
+    ]
+  },
+  "renders": {
+    "front": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscx0c-dsknqj\\front.png",
+    "iso": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscx0c-dsknqj\\iso.png"
+  },
+  "exports": {
+    "glb": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscx0c-dsknqj\\scene.glb"
+  },
+  "unsupported": []
+}

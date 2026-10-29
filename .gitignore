@@ -63,6 +63,7 @@ core/r-server/.tmp/
 core/r-server/backups/
 core/py-server/pyserver.db*
 core/**/__pycache__/
+resources/**/__pycache__/
 core/**/*.pyc
 core/r-server/tool-demo-data/
 core/r-server/tool-demo-results/

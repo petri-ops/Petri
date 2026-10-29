@@ -1,0 +1,83 @@
+{
+  "name": "next04b-model3d-review-ui-live",
+  "startedAt": "2026-10-29T15:45:19.162Z",
+  "finishedAt": "2026-10-29T15:45:43.446Z",
+  "assertions": [
+    {
+      "name": "U0_temp_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtpsvgt_k5ec\",\"name\":\"NEXT-04B-UI-1793288719167\",\"created_at\":\"2026-10-29T15:45:19.181Z\",\"updated_at\":\"2026-10-29T15:45:19.181Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"m"
+    },
+    {
+      "name": "U1_sample_loaded",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U2_qa_button_ready",
+      "pass": true,
+      "detail": "{\"found\":true,\"disabled\":false,\"text\":\"3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA草图转需求等轴前顶侧单位 mm · Z-up · 点选模型选择节点场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8\"}"
+    },
+    {
+      "name": "U3_node_selected",
+      "pass": true,
+      "detail": "{\"pressed\":\"true\",\"selectedShown\":true,\"text\":\"3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA草图转需求等轴前顶侧单位 mm · Z-up · 已选 enclosure场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8\"}"
+    },
+    {
+      "name": "U4_selection_shown",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA草图转需求等轴前顶侧单位 mm · Z-up · 已选 enclosure场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8"
+    },
+    {
+      "name": "U5_qa_opened",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U6_four_renders_visible",
+      "pass": true,
+      "detail": "[{\"src\":\"http://localhost:3011/api/workspaces/p_mvtpsvgt_k5ec/file?path=model3d%2Fruns%2Fm3d-mvtpswr5-4bqn7j%2Ffront.png\",\"complete\":true,\"width\":800},{\"src\":\"http://localhost:3011/api/workspaces/p_mvtpsvgt_k5ec/file?path=model3d%2Fruns%2Fm3d-mvtpswr5-4bqn7j%2Ftop.png\",\"complete\":true,\"width\":800},{\"src\":\"http://localhost:3011/api/workspaces/p_mvtpsvgt_k5ec/file?path=model3d%2Fruns%2Fm3d-mvtpswr5-"
+    },
+    {
+      "name": "U7_geometry_report",
+      "pass": true,
+      "detail": "视觉 QA已完成视觉 不可用前视图打开顶视图打开侧视图打开等轴视图打开几何报告已核验（未篡改）对象2顶点 / 三角面72 / 136非流形边0水密是体积 mm³enclosure 384000 · port 899视觉检查不可用（no_api_key）：渲染与 Blender 网格报告仍然有效； 可在设置中配置 vision 模型后重试，或直接把渲染路径加入对话。场景 57aed73ec5e5 · model3d/runs/m3d-mvtpswr5-4bqn7j引用渲染视图保存批注并引用加入对话（0）"
+    },
+    {
+      "name": "U8_vision_unavailable_honest",
+      "pass": true,
+      "detail": "视觉 QA已完成视觉 不可用前视图打开顶视图打开侧视图打开等轴视图打开几何报告已核验（未篡改）对象2顶点 / 三角面72 / 136非流形边0水密是体积 mm³enclosure 384000 · port 899视觉检查不可用（no_api_key）：渲染与 Blender 网格报告仍然有效； 可在设置中配置 vision 模型后重试，或直接把渲染路径加入对话。场景 57aed73ec5e5 · model3d/runs/m3d-mvtpswr5-4bqn7j引用渲染视图保存批注并引用加入对话（0）"
+    },
+    {
+      "name": "U10_reference_renders_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U11_composer_reference",
+      "pass": true,
+      "detail": "[3D 多视角渲染 · 场景 57aed73ec5e5 · Blender Blender 4.5.10 LTS]\n选择上下文：sceneRevision=57aed73ec5e5 · nodeId=enclosure · viewCamera=iso\n渲染图由本地 Blender 生成。请按路径用 read_image 读取，并按视图检查可见问题。\n- front（前视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/front.png\n- top（顶视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/top.png\n- side（侧视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/side.png\n- iso（等轴视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/iso.png\n请指出可见缺陷与"
+    },
+    {
+      "name": "U12_annotation_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U13_annotation_composer",
+      "pass": true,
+      "detail": "r 4.5.10 LTS]\n选择上下文：sceneRevision=57aed73ec5e5 · nodeId=enclosure · viewCamera=iso\n渲染图由本地 Blender 生成。请按路径用 read_image 读取，并按视图检查可见问题。\n- front（前视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/front.png\n- top（顶视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/top.png\n- side（侧视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/side.png\n- iso（等轴视图）：model3d/runs/m3d-mvtpswr5-4bqn7j/iso.png\n请指出可见缺陷与可执行的 SceneSpec 修改建议；渲染图不能替代尺寸与几何真值。\n批注：annot"
+    },
+    {
+      "name": "U14_sketch_dialog_opened",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U15_screenshot",
+      "pass": true,
+      "detail": "screenshot_unavailable: cdp_screenshot_timeout"
+    }
+  ],
+  "allPass": true
+}

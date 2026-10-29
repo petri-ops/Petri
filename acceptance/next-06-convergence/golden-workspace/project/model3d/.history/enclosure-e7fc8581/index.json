@@ -1,0 +1,13 @@
+{
+  "schema": "model3d-scene-history/v1",
+  "revisions": [
+    {
+      "revisionId": "rev-000001",
+      "ordinal": 1,
+      "hash": "fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d",
+      "reason": "golden_path_120_to_130",
+      "createdAt": "2026-10-29T16:57:05.769Z",
+      "file": "rev-000001.json"
+    }
+  ]
+}

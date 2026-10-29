@@ -57,6 +57,25 @@ export default tseslint.config(
     },
   },
 
+  // ── 产品 workflow 脚本（vm 沙箱宿主原语，非 Node 模块面）──
+  {
+    files: ['resources/model3d/workflows/**/*.js'],
+    languageOptions: {
+      globals: {
+        agent: 'readonly',
+        parallel: 'readonly',
+        pipeline: 'readonly',
+        phase: 'readonly',
+        recipe: 'readonly',
+        log: 'readonly',
+        budget: 'readonly',
+        now: 'readonly',
+        random: 'readonly',
+        console: 'readonly',
+      },
+    },
+  },
+
   // ── frontend/src TS/TSX：类型感知 lint（projectService 借 frontend/tsconfig.json）──
   ...tseslint.configs.recommendedTypeChecked.map((c) => ({
     ...c,

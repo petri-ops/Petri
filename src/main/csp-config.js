@@ -12,6 +12,26 @@ const { session, webContents } = require("electron");
 const { SCHEME: GEN_UI_SCHEME } = require("./gen-ui/scheme");
 const { SCHEME: PACK_UI_SCHEME } = require("./pack-ui/scheme");
 
+function buildCspHeader(isDevMode) {
+  const scriptSrc = isDevMode
+    ? "script-src 'self' 'unsafe-inline'; "
+    : "script-src 'self'; ";
+  const localNet = isDevMode
+    ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* "
+    : "http://localhost:* ws://localhost:* ";
+  return "default-src 'self'; " +
+    scriptSrc +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: blob: http://localhost:* ; " +
+    // NEXT-05 — Three.js 文件加载器（GLB/STL/OBJ）经 fetch(blob:) 读本地文件预览；
+    // blob: 仅由渲染进程自建，connect-src 放行不回扩网络面。
+    "connect-src 'self' blob: " + localNet + "; " +
+    "frame-src 'self' " + localNet + " " + GEN_UI_SCHEME + ": " + PACK_UI_SCHEME + ":; " +
+    "font-src 'self' data: ; " +
+    "worker-src 'self' blob: ; " +
+    "object-src 'none';";
+}
+
 function setupCsp({ isDevMode }) {
   // BLOCK-166 P3（实机渗透实证，勿回退）：gen-ui 沙箱页自身导航在网络栈层阻断。
   // CSP frame-src 只约束「嵌入子框架的 src」，frame 自身 location 赋值不受它管；
@@ -68,26 +88,10 @@ function setupCsp({ isDevMode }) {
       callback({ responseHeaders: details.responseHeaders });
       return;
     }
-    const scriptSrc = isDevMode
-      ? "script-src 'self' 'unsafe-inline'; "
-      : "script-src 'self'; ";
-    const localNet = isDevMode
-      ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* "
-      : "http://localhost:* ws://localhost:* ";
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        "Content-Security-Policy": [
-          "default-src 'self'; " +
-            scriptSrc +
-            "style-src 'self' 'unsafe-inline'; " +
-            "img-src 'self' data: blob: http://localhost:* ; " +
-            "connect-src 'self' " + localNet + "; " +
-            "frame-src 'self' " + localNet + " " + GEN_UI_SCHEME + ": " + PACK_UI_SCHEME + ":; " +
-            "font-src 'self' data: ; " +
-            "worker-src 'self' blob: ; " +
-            "object-src 'none';",
-        ],
+        "Content-Security-Policy": [buildCspHeader(isDevMode)],
       },
     });
   });
@@ -98,4 +102,4 @@ function setupCsp({ isDevMode }) {
   );
 }
 
-module.exports = { setupCsp };
+module.exports = { setupCsp, buildCspHeader };

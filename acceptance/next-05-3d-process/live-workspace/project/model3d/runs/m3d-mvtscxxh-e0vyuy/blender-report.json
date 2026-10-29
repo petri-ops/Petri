@@ -1,0 +1,40 @@
+{
+  "ok": false,
+  "blenderVersion": "4.5.10 LTS",
+  "renderEngine": "BLENDER_WORKBENCH",
+  "mesh": {
+    "objects": 1,
+    "vertices": 8,
+    "triangles": 12,
+    "nonManifoldEdges": 0,
+    "watertight": true,
+    "volumesMm3": {
+      "base": 1000.0
+    }
+  },
+  "boundsMm": {
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "size": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "renders": {},
+  "exports": {},
+  "unsupported": [
+    {
+      "id": "imported",
+      "error": "mesh_source_hash_mismatch"
+    }
+  ]
+}

@@ -24,6 +24,8 @@ import { AnalysisLaunchPanel } from '@/components/workspace-panels/AnalysisLaunc
 // UI-446 加映 v3 — 空态磁贴的审阅未读圆点数据源
 import { useConversationShortstat, useConversationUnreviewedCount } from '@/components/copilot/conversationChangesStore';
 import { CommandCenterJobsWall } from '@/pages/window/CommandCenterJobsWall';
+import { WorkflowRunsPanel } from '@/components/work-surface/WorkflowRunsPanel';
+import { Model3DSurface } from '@/components/work-surface/Model3DSurface';
 // BLOCK-28.5 — 审阅并入右侧边栏 tab 体系（复用 dock 紧凑形态，填满 tab 容器）
 import { ReviewMode } from '@/components/desktop/WorkingTreeReview/ReviewMode';
 // BLOCK-68 / UI-317 — 模型 I/O 信息流 dock（原 composer ⋯ 菜单 overlay 迁入）
@@ -211,6 +213,8 @@ export function RightPanel({
                     onOpenChat={ctx.handleOpenRightChat}
                     onOpenReview={() => ctx.openRightPanel('review')}
                     onOpenJobs={() => ctx.openRightPanel('jobs')}
+                    onOpenWorkflow={() => ctx.openRightPanel('workflow')}
+                    onOpenModel3D={() => ctx.openRightPanel('model3d')}
                     reviewCount={reviewCount}
                     reviewStat={reviewStat ? { added: reviewStat.tracked.added, removed: reviewStat.tracked.removed } : null}
                   />
@@ -222,6 +226,8 @@ export function RightPanel({
                     emptyText="本项目暂无作业——运行一个分析后，瓦片会出现在这里。"
                   />
                 )}
+                {tab === 'workflow' && <WorkflowRunsPanel />}
+                {tab === 'model3d' && <Model3DSurface key={ctx.projectId || 'no-project'} projectId={ctx.projectId} />}
                 {tab === 'results' && (
                   <ResultStudioInspector
                     artifact={ctx.activeArtifact}

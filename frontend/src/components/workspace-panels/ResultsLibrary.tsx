@@ -2,15 +2,8 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import type { ToolJob } from '@/lib/project-types';
 import { formatRelativeTime } from '@/lib/format';
+import { projectExecutionAxis } from '@/lib/statusProjection';
 import styles from '@/pages/project-workspace.module.css';
-
-const STATUS_LABELS: Record<ToolJob['status'], string> = {
-  pending: '排队中',
-  running: '运行中',
-  done: '已完成',
-  failed: '失败',
-  cancelled: '已取消',
-};
 
 function jobTitle(job: ToolJob): string {
   return job.name || job.tool_id || job.id;
@@ -63,7 +56,9 @@ export function ResultsLibrary({ jobs, onOpenJob }: ResultsLibraryProps): React.
         </div>
       ) : (
         <ul className={styles.resultsLibraryList}>
-          {sorted.map((job) => (
+          {sorted.map((job) => {
+            const execution = projectExecutionAxis(job.status);
+            return (
             <li key={job.id}>
               <button
                 type="button"
@@ -85,12 +80,18 @@ export function ResultsLibrary({ jobs, onOpenJob }: ResultsLibraryProps): React.
                     {jobDuration(job)}
                   </span>
                 </span>
-                <span className={styles.resultsLibraryBadge} data-status={job.status}>
-                  {STATUS_LABELS[job.status]}
+                <span
+                  className={styles.resultsLibraryBadge}
+                  data-status={job.status}
+                  data-execution-status={execution?.status || 'unknown'}
+                  title={execution?.detail}
+                >
+                  {execution?.label || '—'}
                 </span>
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

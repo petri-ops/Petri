@@ -1,0 +1,781 @@
+{
+  "schema": "next05-evidence/v1",
+  "generatedAt": "2026-10-29T16:56:56.637Z",
+  "provider": "Blender 4.5.10 LTS",
+  "recipes": [
+    {
+      "recipeId": "box-enclosure",
+      "hash": "fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d",
+      "path": "model3d/recipes/box-enclosure.scene3d.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/front.png",
+          "sha256": "126e55c898c0901e08ffe982f1f19a04ac6cf7f01e593a8c1be6c08c96774f1e",
+          "bytes": 323816
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/top.png",
+          "sha256": "2542e236a09f6f4b274eccda5795402a1f98224567dcbad3d1d54b2c42d4cbcd",
+          "bytes": 368712
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/side.png",
+          "sha256": "654754232e2ed1ce969b58fd71d455a31654782e38c5104e13231fec774863f0",
+          "bytes": 311252
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/iso.png",
+          "sha256": "855457b175b45bac18032be55d6a98f0daeee03f5923205cdcc293461c6d9d2d",
+          "bytes": 434243
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/scene.glb",
+          "sha256": "7d4b1c475c0c338c6d921040dd8914d752798b3a6147f242ad77c6030021300a",
+          "bytes": 9864
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/scene.stl",
+          "sha256": "2d95ced3349ffc7b310040b6d4a382b421d8b1e12afba6f59dca5c32844089c6",
+          "bytes": 6884
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscrr5-502yf7/scene.obj",
+          "sha256": "ee5fccc2e0f180ac8ca4275a8d75bb6cd644d4501efaef3323fc589830fde94e",
+          "bytes": 8428
+        }
+      ],
+      "manifest": "model3d/runs/m3d-mvtscrr5-502yf7/manifest.json",
+      "mesh": {
+        "objects": 2,
+        "vertices": 72,
+        "triangles": 136,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "enclosure": 384000,
+          "port": 898.976141
+        }
+      },
+      "taskSpec": {
+        "version": "task-spec/v1",
+        "taskType": "modeling",
+        "goal": "生成 120×80×40mm 的带端口外壳 SceneSpec 并导出。",
+        "deliverables": [
+          "scene3d/v1 SceneSpec",
+          "GLB/STL/OBJ 导出",
+          "manifest 与网格报告"
+        ],
+        "constraints": [
+          "外壳包围盒 120 × 80 × 40 mm（X × Y × Z）",
+          "端口位于 +X 面，半径 6mm，凸台长度 8mm",
+          "网格报告需 watertight 且非流形边为 0"
+        ],
+        "assumptions": [
+          "单位为 mm，Z-up 右手系",
+          "recipe=box-enclosure@1"
+        ],
+        "acceptance": [
+          "外壳包围盒 120 × 80 × 40 mm（X × Y × Z）",
+          "端口位于 +X 面，半径 6mm，凸台长度 8mm",
+          "网格报告需 watertight 且非流形边为 0"
+        ],
+        "missingInfo": [
+          "壁厚与内腔为参数占位，未做布尔抽壳",
+          "端口是凸台示意，未做真实通孔/螺纹",
+          "材料力学与制造公差未建模"
+        ]
+      },
+      "missingInfo": [
+        "壁厚与内腔为参数占位，未做布尔抽壳",
+        "端口是凸台示意，未做真实通孔/螺纹",
+        "材料力学与制造公差未建模"
+      ]
+    },
+    {
+      "recipeId": "bracket",
+      "hash": "f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e",
+      "path": "model3d/recipes/bracket.scene3d.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/front.png",
+          "sha256": "b66d680c195adddd338965e6c6f8e1530d3d0b4f556a379a3fd72e465e2e00c6",
+          "bytes": 371502
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/top.png",
+          "sha256": "d7b4296050322314a6d0fd0738cc899eb017b5f0706d8336851367dbe75c704f",
+          "bytes": 359236
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/side.png",
+          "sha256": "cb7649b6ab789be387323ec8c8c0c56425b816d3eb27123c7bf8abbd178a77be",
+          "bytes": 301747
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/iso.png",
+          "sha256": "bf381400b93f576e05ddfe0f08d1f4cc962090d2548b3ef4d0b1365a841d020d",
+          "bytes": 469619
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/scene.glb",
+          "sha256": "634bba2eea88a7449484b137f9f09c1d90faaaf127d2879fdcd255487f70589e",
+          "bytes": 20060
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/scene.stl",
+          "sha256": "72945991d5441b1224d0e06fb87c0138308e95aca8ad61aae1bd5eaf4996c291",
+          "bytes": 14284
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscsth-u6tfs0/scene.obj",
+          "sha256": "073c1fa799865abb1131a9161d00b921b0cf233efa6ec2e72978db53bc4d137b",
+          "bytes": 18311
+        }
+      ],
+      "manifest": "model3d/runs/m3d-mvtscsth-u6tfs0/manifest.json",
+      "mesh": {
+        "objects": 5,
+        "vertices": 152,
+        "triangles": 284,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "base": 24000,
+          "plate": 28800,
+          "gusset": 5760,
+          "boss-1": 749.146954,
+          "boss-2": 749.146954
+        }
+      },
+      "taskSpec": {
+        "version": "task-spec/v1",
+        "taskType": "modeling",
+        "goal": "生成 80×50、立板高 60mm 的支架 SceneSpec。",
+        "deliverables": [
+          "scene3d/v1 SceneSpec",
+          "GLB/STL/OBJ 导出",
+          "manifest 与网格报告"
+        ],
+        "constraints": [
+          "底座 80 × 50 × 6mm",
+          "立板高度 60mm，与底座同宽",
+          "两个螺栓凸台半径 5mm（凸台示意，非通孔）",
+          "网格报告需 watertight 且非流形边为 0"
+        ],
+        "assumptions": [
+          "单位为 mm，Z-up 右手系",
+          "recipe=bracket@1"
+        ],
+        "acceptance": [
+          "底座 80 × 50 × 6mm",
+          "立板高度 60mm，与底座同宽",
+          "两个螺栓凸台半径 5mm（凸台示意，非通孔）",
+          "网格报告需 watertight 且非流形边为 0"
+        ],
+        "missingInfo": [
+          "安装孔是凸台示意，未做布尔通孔",
+          "加强筋为矩形近似，未做三角肋/倒角",
+          "载荷、材料与安全系数未建模"
+        ]
+      },
+      "missingInfo": [
+        "安装孔是凸台示意，未做布尔通孔",
+        "加强筋为矩形近似，未做三角肋/倒角",
+        "载荷、材料与安全系数未建模"
+      ]
+    },
+    {
+      "recipeId": "room-layout",
+      "hash": "8b1735d8938b9404cfa2127e0ab54f31b88b3bc4efe5536efd2bb2ade884a4f8",
+      "path": "model3d/recipes/room-layout.scene3d.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/front.png",
+          "sha256": "1424911cb0d08b8afb5f546f6840f17d38fd3162645463812ef5b1edf3b6526d",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/top.png",
+          "sha256": "bc65363bf9db9245ebd54f4fe631be3b397158003bb19896c16c96f1e851334f",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/side.png",
+          "sha256": "7c0a33e725ac6e8d8998df0628c9d22c4e2b1e23d3849a918a25680a2bfe91c9",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/iso.png",
+          "sha256": "7c0a33e725ac6e8d8998df0628c9d22c4e2b1e23d3849a918a25680a2bfe91c9",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.glb",
+          "sha256": "6f8aba88da8755bd0b657f2b8ea3b70064df272c662b592e75e126b2bd5e1607",
+          "bytes": 11648
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.stl",
+          "sha256": "5e592b976232b89d349ac9747f42c2073635ade88283dfe017d84c1511f5e01a",
+          "bytes": 4284
+        },
+        {
+          "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.obj",
+          "sha256": "2d755ec28be25905bc6796153761d7e0b2975f2cde981e3066e7b3e4bf7a427b",
+          "bytes": 7061
+        }
+      ],
+      "manifest": "model3d/runs/m3d-mvtsctwb-6wqfxo/manifest.json",
+      "mesh": {
+        "objects": 7,
+        "vertices": 56,
+        "triangles": 84,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "floor": 240000000,
+          "wall-north": 1120000000,
+          "wall-south": 1120000000,
+          "wall-east": 840000000,
+          "wall-west": 840000000,
+          "desk-1": 567000000,
+          "cabinet-1": 486000000
+        }
+      },
+      "taskSpec": {
+        "version": "task-spec/v1",
+        "taskType": "modeling",
+        "goal": "生成 4000×3000×2800mm 房间与家具体块布局。",
+        "deliverables": [
+          "scene3d/v1 SceneSpec",
+          "GLB/STL/OBJ 导出",
+          "manifest 与网格报告"
+        ],
+        "constraints": [
+          "房间内空约 4000 × 3000mm，墙高 2800mm",
+          "地板与四面墙均在边界内，Z 轴向上",
+          "桌与柜不穿墙（包围盒在房间内）"
+        ],
+        "assumptions": [
+          "单位为 mm，Z-up 右手系",
+          "recipe=room-layout@1"
+        ],
+        "acceptance": [
+          "房间内空约 4000 × 3000mm，墙高 2800mm",
+          "地板与四面墙均在边界内，Z 轴向上",
+          "桌与柜不穿墙（包围盒在房间内）"
+        ],
+        "missingInfo": [
+          "门窗/通道净宽未建模",
+          "家具细节与人体工学尺寸未建模",
+          "照明、插座与设备散热未建模"
+        ]
+      },
+      "missingInfo": [
+        "门窗/通道净宽未建模",
+        "家具细节与人体工学尺寸未建模",
+        "照明、插座与设备散热未建模"
+      ]
+    },
+    {
+      "recipeId": "experiment-rig",
+      "hash": "01f9138741ab5021aacb585155fa8c070d4eb908b1bd8c6824ac86e0a172fa4e",
+      "path": "model3d/recipes/experiment-rig.scene3d.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/front.png",
+          "sha256": "0d66bdaa80b595251148a03af5f434f2b24796c3133b3903610db2880aa928cb",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/top.png",
+          "sha256": "c86ef4981fd460866e12eddeb862f6cfdb15299c63841d858b95bca7ee429254",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/side.png",
+          "sha256": "c86ef4981fd460866e12eddeb862f6cfdb15299c63841d858b95bca7ee429254",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/iso.png",
+          "sha256": "c86ef4981fd460866e12eddeb862f6cfdb15299c63841d858b95bca7ee429254",
+          "bytes": 275409
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/scene.glb",
+          "sha256": "13e83c9bc3d8294ae461c3d9e63e3301708615153340ee66fc6d5f7ee126ddd1",
+          "bytes": 14756
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/scene.stl",
+          "sha256": "44e556a05800b4e5409e31822dd1bafa306cf81a124a2b4d538a0ad6d67d2c63",
+          "bytes": 8684
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscuyr-9nsyx8/scene.obj",
+          "sha256": "118ae287e7c13cf78d60bb492f5978a2d87f46eb85c55d41d0b639a910ddb0eb",
+          "bytes": 11607
+        }
+      ],
+      "manifest": "model3d/runs/m3d-mvtscuyr-9nsyx8/manifest.json",
+      "mesh": {
+        "objects": 5,
+        "vertices": 96,
+        "triangles": 172,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "platform": 4800000,
+          "container": 1348464.256073,
+          "sensor-1": 1399.68042,
+          "sensor-2": 1399.680791,
+          "sensor-3": 1399.680791
+        }
+      },
+      "taskSpec": {
+        "version": "task-spec/v1",
+        "taskType": "modeling",
+        "goal": "生成平台 + 容器 + 3 个传感器的实验台架 SceneSpec。",
+        "deliverables": [
+          "scene3d/v1 SceneSpec",
+          "GLB/STL/OBJ 导出",
+          "manifest 与网格报告"
+        ],
+        "constraints": [
+          "平台 600 × 400 × 20mm",
+          "容器半径 60mm、高度 120mm，位于平台中心",
+          "3 个传感器围绕容器均匀布置"
+        ],
+        "assumptions": [
+          "单位为 mm，Z-up 右手系",
+          "recipe=experiment-rig@1"
+        ],
+        "acceptance": [
+          "平台 600 × 400 × 20mm",
+          "容器半径 60mm、高度 120mm，位于平台中心",
+          "3 个传感器围绕容器均匀布置"
+        ],
+        "missingInfo": [
+          "容器为实心圆柱示意，未做壁厚/液体体积",
+          "传感器安装孔、线缆走向未建模",
+          "采样位置只做体块标注，未做真实坐标标定"
+        ]
+      },
+      "missingInfo": [
+        "容器为实心圆柱示意，未做壁厚/液体体积",
+        "传感器安装孔、线缆走向未建模",
+        "采样位置只做体块标注，未做真实坐标标定"
+      ]
+    },
+    {
+      "recipeId": "from-table",
+      "hash": "b13dfab4f9232e04dbcc6bc18ac1baa466302efcb50c11fea5be30af964a9a6a",
+      "path": "model3d/recipes/from-table.scene3d.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/front.png",
+          "sha256": "bb8be268b3d45a6cc63c00c56df8abcae33fce380229046f5bc0f55c9b894280",
+          "bytes": 302421
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/top.png",
+          "sha256": "c0d6990b3191821c182ec8015f02cd76f16ec01c6965436ef6b599726bb40a6d",
+          "bytes": 314791
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/side.png",
+          "sha256": "e6bb2006930371fc79e9d7d80fb55a40cad6cdee4da332b75b0443385dfcdcee",
+          "bytes": 286763
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/iso.png",
+          "sha256": "20080987b1cac7d8009bde8ac0ecb9135be555fa85974b70997c41ecbb3a33d5",
+          "bytes": 384616
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/scene.glb",
+          "sha256": "6a1fb57c1cdcb2753b5ec40589e7bbe6634b36572aec70cfcfca85a8a4f27dcb",
+          "bytes": 5196
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/scene.stl",
+          "sha256": "28ef52c9e30b31eee619ca16523401b82db87566b37b1d2b34b3bfd53a3dd6b0",
+          "bytes": 1884
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscw1m-95o2xe/scene.obj",
+          "sha256": "dace9c8cd582097a1d1aa5f5ece7984f58905ad6ddc8e3483a63d1f4eff04dc2",
+          "bytes": 2898
+        }
+      ],
+      "manifest": "model3d/runs/m3d-mvtscw1m-95o2xe/manifest.json",
+      "mesh": {
+        "objects": 3,
+        "vertices": 24,
+        "triangles": 36,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "row-1": 24000,
+          "row-2": 24000,
+          "row-3": 24000
+        }
+      },
+      "taskSpec": {
+        "version": "task-spec/v1",
+        "taskType": "modeling",
+        "goal": "把 3 行表格数据生成为有界箱体阵列 SceneSpec。",
+        "deliverables": [
+          "scene3d/v1 SceneSpec",
+          "GLB/STL/OBJ 导出",
+          "manifest 与网格报告"
+        ],
+        "constraints": [
+          "3 行表格全部生成体块（上限 40）",
+          "每行 width/depth/height > 0，位置 x/y 为有限数值",
+          "异常行必须显式报错，不得静默跳过"
+        ],
+        "assumptions": [
+          "单位为 mm，Z-up 右手系",
+          "recipe=from-table@1"
+        ],
+        "acceptance": [
+          "3 行表格全部生成体块（上限 40）",
+          "每行 width/depth/height > 0，位置 x/y 为有限数值",
+          "异常行必须显式报错，不得静默跳过"
+        ],
+        "missingInfo": [
+          "单位与列映射由调用方保证；本 recipe 只接受 mm"
+        ]
+      },
+      "missingInfo": [
+        "单位与列映射由调用方保证；本 recipe 只接受 mm"
+      ]
+    }
+  ],
+  "meshImport": {
+    "source": "meshes/cube.stl",
+    "sourceSha256": "a2423ddf6c3ca45e98105fe43142b91f04008329efe25984e622cbf2f6f3326f",
+    "objects": 2,
+    "exports": {
+      "glb": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscx0c-dsknqj\\scene.glb"
+    },
+    "unsupportedRejected": [
+      {
+        "id": "imported",
+        "error": "mesh_source_hash_mismatch"
+      }
+    ]
+  },
+  "workflow": {
+    "runId": "wf-mvtscya2-09e9c2",
+    "status": "completed",
+    "calls": [
+      {
+        "dryRun": true,
+        "recipeId": "bracket"
+      },
+      {
+        "dryRun": false,
+        "recipeId": "bracket"
+      }
+    ],
+    "returned": {
+      "recipeId": "bracket",
+      "recipeVersion": 1,
+      "sceneHash": "f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e",
+      "written": {
+        "path": "model3d/recipes/workflow-bracket.scene3d.json",
+        "beforeHash": null,
+        "afterHash": "f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e",
+        "revision": null
+      },
+      "outDir": "model3d/runs/m3d-mvtscydr-cwu641",
+      "manifest": "model3d/runs/m3d-mvtscydr-cwu641/manifest.json",
+      "outputs": [
+        {
+          "path": "model3d/runs/m3d-mvtscydr-cwu641/front.png",
+          "sha256": "ed0bbad55345b3e479115ff4fffaa2e949647a283fc3959c15fec2e26da6ba47",
+          "bytes": 371502
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscydr-cwu641/top.png",
+          "sha256": "95c362374d83812fadf6fa1d993b639237920baf889276e01d317a487e848b59",
+          "bytes": 359236
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscydr-cwu641/side.png",
+          "sha256": "25aff368759b81751c62cd1fbd33941ffb71d4e3b6d82ce96aae7fd1530c4ecd",
+          "bytes": 301747
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscydr-cwu641/iso.png",
+          "sha256": "5756e95d12f059a36a38e0f5e4b91b873aa8e6fd72d7ee5ad9c032163b0d2f57",
+          "bytes": 469619
+        },
+        {
+          "path": "model3d/runs/m3d-mvtscydr-cwu641/scene.glb",
+          "sha256": "634bba2eea88a7449484b137f9f09c1d90faaaf127d2879fdcd255487f70589e",
+          "bytes": 20060
+        }
+      ],
+      "mesh": {
+        "objects": 5,
+        "vertices": 152,
+        "triangles": 284,
+        "nonManifoldEdges": 0,
+        "watertight": true,
+        "volumesMm3": {
+          "base": 24000,
+          "plate": 28800,
+          "gusset": 5760,
+          "boss-1": 749.146954,
+          "boss-2": 749.146954
+        }
+      }
+    }
+  },
+  "workflowCancelResume": {
+    "cancelledRunId": "wf-mvtsczed-fgobya",
+    "cancelledStatus": "cancelled",
+    "resumedRunId": "wf-mvtsczeh-ia38w5",
+    "resumedStatus": "completed",
+    "resumedCalls": [
+      false
+    ]
+  },
+  "assertions": [
+    {
+      "id": "B0_blender_ready",
+      "pass": true,
+      "detail": "Blender probe"
+    },
+    {
+      "id": "R_box-enclosure_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"box-enclosure\",\"version\":1,\"title\":\"箱体外壳\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":120,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"heigh"
+    },
+    {
+      "id": "R_box-enclosure_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/recipes/box-enclosure.scene3d.json"
+    },
+    {
+      "id": "R_box-enclosure_execute_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"box-enclosure\",\"version\":1,\"title\":\"箱体外壳\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":120,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"height\":\"height\",\"depth\":\"depth\"},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65},\"label\":\"外壳主体\"},{\"id\":\""
+    },
+    {
+      "id": "R_box-enclosure_four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\iso.png\"}"
+    },
+    {
+      "id": "R_box-enclosure_three_exports",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\scene.glb\",\"stl\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\scene.stl\",\"obj\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscrr5-502yf7\\\\scene.obj\"}"
+    },
+    {
+      "id": "R_box-enclosure_watertight",
+      "pass": true,
+      "detail": "{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"enclosure\":384000,\"port\":898.976141}}"
+    },
+    {
+      "id": "R_box-enclosure_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtscrr5-502yf7/manifest.json"
+    },
+    {
+      "id": "R_bracket_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"bracket\",\"version\":1,\"title\":\"安装支架\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":80,\"depth\":50,\"thickness\":6,\"plateHeight\":60,\"bossRadius\":5},\"nodes\":[{\"id\":\"base\",\"type\":\"box\",\"transform\":{\"position\":[0,0,3],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"height\":\"thickness\",\"d"
+    },
+    {
+      "id": "R_bracket_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/recipes/bracket.scene3d.json"
+    },
+    {
+      "id": "R_bracket_execute_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"bracket\",\"version\":1,\"title\":\"安装支架\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":80,\"depth\":50,\"thickness\":6,\"plateHeight\":60,\"bossRadius\":5},\"nodes\":[{\"id\":\"base\",\"type\":\"box\",\"transform\":{\"position\":[0,0,3],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"height\":\"thickness\",\"depth\":\"depth\"},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65},\"label\":\"底座\"},{\"id\":\"plate\",\"type\":\"b"
+    },
+    {
+      "id": "R_bracket_four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\iso.png\"}"
+    },
+    {
+      "id": "R_bracket_three_exports",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\scene.glb\",\"stl\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\scene.stl\",\"obj\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscsth-u6tfs0\\\\scene.obj\"}"
+    },
+    {
+      "id": "R_bracket_watertight",
+      "pass": true,
+      "detail": "{\"objects\":5,\"vertices\":152,\"triangles\":284,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"base\":24000,\"plate\":28800,\"gusset\":5760,\"boss-1\":749.146954,\"boss-2\":749.146954}}"
+    },
+    {
+      "id": "R_bracket_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtscsth-u6tfs0/manifest.json"
+    },
+    {
+      "id": "R_room-layout_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"room-layout\",\"version\":1,\"title\":\"房间布局\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"roomWidth\":4000,\"roomDepth\":3000,\"wallHeight\":2800,\"wallThickness\":100},\"nodes\":[{\"id\":\"floor\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"roomWidth\",\"height\":"
+    },
+    {
+      "id": "R_room-layout_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/recipes/room-layout.scene3d.json"
+    },
+    {
+      "id": "R_room-layout_execute_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"room-layout\",\"version\":1,\"title\":\"房间布局\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"roomWidth\":4000,\"roomDepth\":3000,\"wallHeight\":2800,\"wallThickness\":100},\"nodes\":[{\"id\":\"floor\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"roomWidth\",\"height\":20,\"depth\":\"roomDepth\"},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65},\"label\":\"地板\"},{\"id\":\"wall-no"
+    },
+    {
+      "id": "R_room-layout_four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\iso.png\"}"
+    },
+    {
+      "id": "R_room-layout_three_exports",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\scene.glb\",\"stl\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\scene.stl\",\"obj\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsctwb-6wqfxo\\\\scene.obj\"}"
+    },
+    {
+      "id": "R_room-layout_watertight",
+      "pass": true,
+      "detail": "{\"objects\":7,\"vertices\":56,\"triangles\":84,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"floor\":240000000,\"wall-north\":1120000000,\"wall-south\":1120000000,\"wall-east\":840000000,\"wall-west\":840000000,\"desk-1\":567000000,\"cabinet-1\":486000000}}"
+    },
+    {
+      "id": "R_room-layout_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtsctwb-6wqfxo/manifest.json"
+    },
+    {
+      "id": "R_experiment-rig_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"experiment-rig\",\"version\":1,\"title\":\"实验台架\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"platformWidth\":600,\"platformDepth\":400,\"platformHeight\":20,\"containerRadius\":60,\"containerHeight\":120,\"sensorCount\":3},\"nodes\":[{\"id\":\"platform\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\""
+    },
+    {
+      "id": "R_experiment-rig_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/recipes/experiment-rig.scene3d.json"
+    },
+    {
+      "id": "R_experiment-rig_execute_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"experiment-rig\",\"version\":1,\"title\":\"实验台架\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"platformWidth\":600,\"platformDepth\":400,\"platformHeight\":20,\"containerRadius\":60,\"containerHeight\":120,\"sensorCount\":3},\"nodes\":[{\"id\":\"platform\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"platformWidth\",\"height\":\"platformHeight\",\"depth\":\"platformDepth\"},\""
+    },
+    {
+      "id": "R_experiment-rig_four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\iso.png\"}"
+    },
+    {
+      "id": "R_experiment-rig_three_exports",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\scene.glb\",\"stl\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\scene.stl\",\"obj\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscuyr-9nsyx8\\\\scene.obj\"}"
+    },
+    {
+      "id": "R_experiment-rig_watertight",
+      "pass": true,
+      "detail": "{\"objects\":5,\"vertices\":96,\"triangles\":172,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"platform\":4800000,\"container\":1348464.256073,\"sensor-1\":1399.68042,\"sensor-2\":1399.680791,\"sensor-3\":1399.680791}}"
+    },
+    {
+      "id": "R_experiment-rig_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtscuyr-9nsyx8/manifest.json"
+    },
+    {
+      "id": "R_from-table_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"from-table\",\"version\":1,\"title\":\"表格驱动布局\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"rowCount\":3},\"nodes\":[{\"id\":\"row-1\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":40,\"height\":20,\"depth\":30},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65},\"lab"
+    },
+    {
+      "id": "R_from-table_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/recipes/from-table.scene3d.json"
+    },
+    {
+      "id": "R_from-table_execute_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"from-table\",\"version\":1,\"title\":\"表格驱动布局\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"rowCount\":3},\"nodes\":[{\"id\":\"row-1\",\"type\":\"box\",\"transform\":{\"position\":[0,0,10],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":40,\"height\":20,\"depth\":30},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65},\"label\":\"sample-a\"},{\"id\":\"row-2\",\"type\":\"box\",\"transform\":{\"position\":[60,0,10],\"rotation\":[0,0,0]},\"di"
+    },
+    {
+      "id": "R_from-table_four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\iso.png\"}"
+    },
+    {
+      "id": "R_from-table_three_exports",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\scene.glb\",\"stl\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\scene.stl\",\"obj\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscw1m-95o2xe\\\\scene.obj\"}"
+    },
+    {
+      "id": "R_from-table_watertight",
+      "pass": true,
+      "detail": "{\"objects\":3,\"vertices\":24,\"triangles\":36,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"row-1\":24000,\"row-2\":24000,\"row-3\":24000}}"
+    },
+    {
+      "id": "R_from-table_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtscw1m-95o2xe/manifest.json"
+    },
+    {
+      "id": "M1_mesh_import_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"outDir\":\"model3d/runs/m3d-mvtscx0c-dsknqj\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":16,\"triangles\":24,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"base\":1000,\"imported:cube\":1000}},\"boundsMm\":{\"min\":[-5,-5,-5],\"max\":[40,10,10],\"size\":[45,15,15]},\"renders\":{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscx0c-dsknqj\\\\front.png\",\"iso\":\"D:\\\\1"
+    },
+    {
+      "id": "M2_mesh_objects",
+      "pass": true,
+      "detail": "{\"objects\":2,\"vertices\":16,\"triangles\":24,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"base\":1000,\"imported:cube\":1000}}"
+    },
+    {
+      "id": "M3_mesh_import_manifest",
+      "pass": true,
+      "detail": "{\"glb\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-05-3d-process\\\\live-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtscx0c-dsknqj\\\\scene.glb\"}"
+    },
+    {
+      "id": "M4_mesh_hash_mismatch_rejected",
+      "pass": true,
+      "detail": "[{\"id\":\"imported\",\"error\":\"mesh_source_hash_mismatch\"}]"
+    },
+    {
+      "id": "W1_workflow_completed",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"returned\":{\"recipeId\":\"bracket\",\"recipeVersion\":1,\"sceneHash\":\"f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e\",\"written\":{\"path\":\"model3d/recipes/workflow-bracket.scene3d.json\",\"beforeHash\":null,\"afterHash\":\"f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e\",\"revision\":null},\"outDir\":\"model3d/runs/m3d-mvtscydr-cwu641\",\"manifest\":\"model3d/runs/m3d-mvtscydr-cwu641/manifest.json\",\"outputs\":[{\"path\":\"model3d/runs/m3d-mvtscydr-cwu641/front.png\",\"sha256\":\"ed0bbad55345b3e479115ff4fffaa2e949647a283fc3959c15fec2e26da6ba47\",\"bytes\":371502},{\"path\":"
+    },
+    {
+      "id": "W2_workflow_dryRun_then_execute",
+      "pass": true,
+      "detail": "[{\"dryRun\":true},{\"dryRun\":false}]"
+    },
+    {
+      "id": "W3_workflow_manifest",
+      "pass": true,
+      "detail": "{\"recipeId\":\"bracket\",\"recipeVersion\":1,\"sceneHash\":\"f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e\",\"written\":{\"path\":\"model3d/recipes/workflow-bracket.scene3d.json\",\"beforeHash\":null,\"afterHash\":\"f445cf63d0e446eb8da5e3bd134e7de90d2edb39c50139bcf94a893ade9d444e\",\"revision\":null},\"outDir\":\"model3d/runs/m3d-mvtscydr-cwu641\",\"manifest\":\"model3d/runs/m3d-mvtscydr-cwu641/manifest.json\",\"outputs\":[{\"path\":\"model3d/runs/m3d-mvtscydr-cwu641/front.png\",\"sha256\":\"ed0bbad55345b3e479115ff"
+    },
+    {
+      "id": "W4_cancel_status",
+      "pass": true,
+      "detail": "{\"status\":\"cancelled\",\"error\":\"workflow_cancelled\",\"runId\":\"wf-mvtsczed-fgobya\"}"
+    },
+    {
+      "id": "W5_resume_completed",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"returned\":{\"dry\":true,\"exec\":true},\"runId\":\"wf-mvtsczeh-ia38w5\"}"
+    },
+    {
+      "id": "W6_resume_prefix_reused",
+      "pass": true,
+      "detail": "[false]"
+    }
+  ],
+  "passed": true
+}

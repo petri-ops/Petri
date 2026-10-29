@@ -71,6 +71,42 @@
   text-decoration: underline;
 }
 
+/* NEXT-02A — 三轴状态徽标：语义色只表达状态，不用作装饰 */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 20px;
+  padding: 0 var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.statusBadge[data-tone='running'] {
+  color: var(--petri-text);
+}
+
+.statusBadge[data-tone='success'] {
+  color: var(--petri-success);
+}
+
+.statusBadge[data-tone='warning'] {
+  color: var(--petri-warning);
+}
+
+.statusBadge[data-tone='danger'] {
+  color: var(--petri-danger);
+}
+
+.statusBadge[data-tone='muted'] {
+  color: var(--petri-text-muted);
+}
+
 /* 加载块 */
 .loading {
   display: flex;

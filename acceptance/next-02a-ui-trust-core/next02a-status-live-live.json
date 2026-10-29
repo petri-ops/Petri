@@ -1,0 +1,53 @@
+{
+  "name": "next02a-status-live",
+  "startedAt": "2026-10-29T12:38:48.603Z",
+  "finishedAt": "2026-10-29T12:38:49.765Z",
+  "assertions": [
+    {
+      "name": "L0_project_route_ready",
+      "pass": true,
+      "detail": "/project/p_mvtj50s3_nmz5"
+    },
+    {
+      "name": "L1_jobs_surface_visible",
+      "pass": true,
+      "detail": "visible :: "
+    },
+    {
+      "name": "L2_long_list_bounded_to_12",
+      "pass": true,
+      "detail": "tiles=12 seeded=16"
+    },
+    {
+      "name": "L3_active_tiles_two",
+      "pass": true,
+      "detail": "[\"cc-tile-active\",\"cc-tile-active\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\",\"cc-tile-history\"]"
+    },
+    {
+      "name": "L4_running_axis_and_label",
+      "pass": true,
+      "detail": "{\"id\":\"tj_mvtj50s8_7gg9\",\"kind\":\"cc-tile-active\",\"rawStatus\":\"running\",\"execution\":\"running\",\"text\":\"NEXT-02A 运行中next02a-probe运行中已 1s查日志取消\",\"rect\":{\"width\":239.99693298339844,\"height\":133.47718811035156}}"
+    },
+    {
+      "name": "L5_completed_axis_and_label",
+      "pass": true,
+      "detail": "{\"id\":\"tj_mvtj50sa_5884\",\"kind\":\"cc-tile-history\",\"rawStatus\":\"done\",\"execution\":\"completed\",\"text\":\"NEXT-02A 历史 13next02a-probe已完成耗时 0s\",\"rect\":{\"width\":239.99693298339844,\"height\":80.7799072265625}}"
+    },
+    {
+      "name": "L6_pending_axis_preserves_queue_label",
+      "pass": true,
+      "detail": "{\"id\":\"tj_mvtj50s8_bpg8\",\"kind\":\"cc-tile-active\",\"rawStatus\":\"pending\",\"execution\":\"waiting\",\"text\":\"NEXT-02A 排队中next02a-probe排队中 #1已 1s查日志取消\",\"rect\":{\"width\":239.99693298339844,\"height\":133.47718811035156}}"
+    },
+    {
+      "name": "L7_tiles_have_geometry",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "L8_keyboard_focus_traverses_visible_control",
+      "pass": true,
+      "detail": "focused {\"tag\":\"BUTTON\",\"visible\":true,\"label\":\"选择访问模式\"}"
+    }
+  ],
+  "allPass": true
+}

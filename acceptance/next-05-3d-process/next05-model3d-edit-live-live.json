@@ -1,0 +1,68 @@
+{
+  "name": "next05-model3d-edit-live",
+  "startedAt": "2026-10-29T16:15:22.986Z",
+  "finishedAt": "2026-10-29T16:15:45.951Z",
+  "assertions": [
+    {
+      "name": "E0_temp_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtqvjaw_0waa\",\"name\":\"NEXT-05-UI-1793290522989\",\"created_at\":\"2026-10-29T16:15:23.000Z\",\"updated_at\":\"2026-10-29T16:15:23.000Z\",\"description\":\"\",\"is_public\":0,\"user_"
+    },
+    {
+      "name": "E1_width_draft_set",
+      "pass": true,
+      "detail": "130"
+    },
+    {
+      "name": "E2_preview_diff",
+      "pass": true,
+      "detail": "b059cc2d034a → 99b060c04033参数 width：120 → 130"
+    },
+    {
+      "name": "E3_apply_persisted",
+      "pass": true,
+      "detail": "{\"width\":130,\"height\":40,\"depth\":80,\"wall\":2}"
+    },
+    {
+      "name": "E4_restore_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "E5_restore_height",
+      "pass": true,
+      "detail": "{\"width\":130,\"height\":40,\"depth\":80,\"wall\":2}"
+    },
+    {
+      "name": "E6_measurement_distance",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA参数编辑草图转需求对比 SceneSpec测量清除测量保存视角截图等轴前顶侧单位 mm · Z-up · 依次点选两个表面点 · 测量 40.98 mm · 点选模型选择节点场景节点2参数4约束0渲染对象2包围盒 mm131 × 80 × 40节点enclosureboxwidth 130 · height 40 · depth 80portcylinderradius 6 · height 8视角书签保存当前相机视角后，可一键恢复。参数编辑本地项目SceneSpec 路径width原 130heigh"
+    },
+    {
+      "name": "E7_bookmark_saved",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA参数编辑草图转需求对比 SceneSpec测量清除测量保存视角截图等轴前顶侧单位 mm · Z-up · 依次点选两个表面点 · 测量 40.98 mm · 点选模型选择节点场景节点2参数4约束0渲染对象2包围盒 mm131 × 80 × 40节点enclosureboxwidth 130 · height"
+    },
+    {
+      "name": "E8_compare_injected",
+      "pass": true,
+      "detail": "injected"
+    },
+    {
+      "name": "E9_compare_diff",
+      "pass": true,
+      "detail": "SceneSpec 对比99b060c04033 → f4e09d5f8008关闭参数 width：130 → 150"
+    },
+    {
+      "name": "E10_stl_preview",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA参数编辑草图转需求对比 SceneSpec测量保存视角截图等轴前顶侧单位 mm · Z-up · 点选模型选择节点外部 STL/OBJ 仅几何预览，单位按文件原值；参数与约束请使用 SceneSpec。导入外部 GLB/GLTF/STL/OBJ 后仅显示几何预览（STL/OBJ 单位按文件原值）；参数与约束以 SceneSpec 为准。SceneSpec 对比99b060c04033 → f4e09d5f8008关闭参数 width：130 → 150"
+    },
+    {
+      "name": "E11_screenshot",
+      "pass": true,
+      "detail": "screenshot_unavailable: cdp_screenshot_timeout"
+    }
+  ],
+  "allPass": true
+}

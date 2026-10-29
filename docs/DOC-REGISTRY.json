@@ -9,11 +9,32 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 233,
-    "lastUpdated": "2026-09-02",
-    "managedMarkdown": 161
+    "documentCount": 428,
+    "lastUpdated": "2026-10-29",
+    "managedMarkdown": 162
   },
   "documents": [
+    {
+      "id": "NEXT-STAGE-EXPERIENCE-BLUEPRINT",
+      "capability": "next-stage-experience-blueprint",
+      "path": "docs/next-stage-experience-blueprint.md",
+      "kind": "living-plan",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "next-stage-experience-blueprint",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-29",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "ui-ux",
+        "workflow",
+        "3d",
+        "prompt",
+        "G0"
+      ],
+      "notes": "下一阶段方向与全量执行 canonical：8 串行包全部 completed（NEXT-02A/01/03/04A/04B/05/02B/06；UI-631~637）；逐包验收、边界与换模型恢复协议保留为 reference；下一候选=3D Artifact Revision 接入 Result Studio（需用户发令）。"
+    },
     {
       "id": "BLOCK-65-SUBAGENT-UX",
       "path": "docs/block-65-subagent-ux-plan.md",
@@ -8397,6 +8418,6 @@
       "registeredAt": "2026-10-28"
     }
   ],
-  "lastUpdated": "2026-10-28",
-  "documentCount": 427
+  "lastUpdated": "2026-10-30",
+  "documentCount": 428
 }

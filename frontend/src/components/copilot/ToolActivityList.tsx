@@ -19,6 +19,7 @@ import {
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
 import { ToolRowBoundary } from './TimelineBoundaries';
+import { projectExecutionAxis } from '@/lib/statusProjection';
 
 // ANSI CSI 序列（ESC=0x1b 开头）——预编译供输出尾逐行剥离
 const ANSI_CSI_RE = new RegExp(String.fromCharCode(27) + '\\[[0-9;]*[A-Za-z]', 'g');
@@ -33,12 +34,6 @@ const ACTIVITY_AGENT_TOOLS: ReadonlySet<string> = new Set([
   'followup_task',
 ]);
 
-const SUB_STATUS_LABEL: Record<string, string> = {
-  running: '运行中',
-  done: '已完成',
-  error: '失败',
-  stopped: '已停止',
-};
 import { parseAnsiToSpans } from './ansi';
 
 /**
@@ -51,14 +46,6 @@ import { parseAnsiToSpans } from './ansi';
  * UI-272 增补 — 两级折叠：手风琴内的「思考」块与每条「执行」记录默认收起，
  * 点击单条展开详细信息，避免一点开就全量铺开导致信息淹没。
  */
-
-const TOOL_STATUS_LABEL: Record<ToolActivityItem['status'], string> = {
-  running: '运行中',
-  awaiting_confirmation: '等待确认',
-  success: '已完成',
-  error: '失败',
-  denied: '已拒绝',
-};
 
 /** BLOCK-107 P2b（D4）— 未终结状态：运行中 / 待确认。 */
 const RUNNING_STATUSES: ReadonlySet<ToolActivityItem['status']> = new Set([
@@ -359,7 +346,7 @@ function ActivityBody({ activity, subSnap }: {
             </span>
             <span className="sc-tool-agent-status" data-status={subSnap.status}>
               <Icon name="bot" size={10} />
-              {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+              {projectExecutionAxis(subSnap.status)?.label || subSnap.status}
             </span>
           </div>
           <div className="sc-tool-subagent-actions">
@@ -529,10 +516,10 @@ function ActivityRow({ activity }: { activity: ToolActivityItem }) {
         {subSnap && (
           <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
             <Icon name="bot" size={10} />
-            {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+            {projectExecutionAxis(subSnap.status)?.label || subSnap.status}
           </span>
         )}
-        <span className="sc-tool-activity-status">{TOOL_STATUS_LABEL[activity.status]}</span>
+        <span className="sc-tool-activity-status">{projectExecutionAxis(activity.status)?.label || activity.status}</span>
         {duration && <span className="sc-tool-activity-duration">{duration}</span>}
         <span className="sc-tool-row-chevron" aria-hidden="true">
           <Icon name="chevron-right" size={12} />
@@ -684,7 +671,7 @@ function QoderRow({ activity }: { activity: ToolActivityItem }) {
         {subSnap && (
           <span className="sc-tool-agent-status" data-status={subSnap.status} title="子智能体实时状态">
             <Icon name="bot" size={10} />
-            {SUB_STATUS_LABEL[subSnap.status] || subSnap.status}
+            {projectExecutionAxis(subSnap.status)?.label || subSnap.status}
             {/* UI-431 P2 — 派发行运行计时：收缩态也有信息量 */}
             {subSnap.status === 'running' && spawnElapsedMs !== null
               ? ` · ${formatToolDuration(spawnElapsedMs) ?? ''}`

@@ -1,0 +1,156 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "width": 80,
+    "depth": 50,
+    "thickness": 6,
+    "plateHeight": 60,
+    "bossRadius": 5
+  },
+  "nodes": [
+    {
+      "id": "base",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          3
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 80,
+        "height": 6,
+        "depth": 50
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "底座"
+    },
+    {
+      "id": "plate",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          22,
+          36
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 80,
+        "height": 60,
+        "depth": 6
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.65
+      },
+      "label": "立板"
+    },
+    {
+      "id": "gusset",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          16.6,
+          21
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 32,
+        "height": 30,
+        "depth": 6
+      },
+      "material": {
+        "color": "#557a9e",
+        "roughness": 0.65
+      },
+      "label": "加强筋"
+    },
+    {
+      "id": "boss-1",
+      "type": "cylinder",
+      "transform": {
+        "position": [
+          -30,
+          -15,
+          10.8
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "radius": 5,
+        "height": 9.600000000000001
+      },
+      "material": {
+        "color": "#d29b42",
+        "roughness": 0.55
+      },
+      "label": "螺栓凸台 1"
+    },
+    {
+      "id": "boss-2",
+      "type": "cylinder",
+      "transform": {
+        "position": [
+          30,
+          -15,
+          10.8
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "radius": 5,
+        "height": 9.600000000000001
+      },
+      "material": {
+        "color": "#d29b42",
+        "roughness": 0.55
+      },
+      "label": "螺栓凸台 2"
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "align",
+      "a": "base",
+      "b": "plate",
+      "axis": "x"
+    }
+  ],
+  "metadata": {
+    "title": "安装支架",
+    "recipeId": "bracket",
+    "recipeVersion": 1,
+    "generatedAt": "2026-10-29T16:56:47.964Z"
+  }
+}

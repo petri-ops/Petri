@@ -1,0 +1,21 @@
+{
+  "schema": "model3d-scene-history/v1",
+  "revisions": [
+    {
+      "revisionId": "rev-000001",
+      "ordinal": 1,
+      "hash": "99b060c0403336ef925c6f8f76111400139d8c71368a17f9a5092152059f91d5",
+      "reason": "user_parameter_edit",
+      "createdAt": "2026-10-29T16:15:24.381Z",
+      "file": "rev-000001.json"
+    },
+    {
+      "revisionId": "rev-000002",
+      "ordinal": 2,
+      "hash": "9a49fbfaa2f2e184520e0e245c866cb5ee97ad5b6e7d16fccc4aea8d19cccb80",
+      "reason": "before_restore:rev-000001",
+      "createdAt": "2026-10-29T16:15:24.795Z",
+      "file": "rev-000002.json"
+    }
+  ]
+}

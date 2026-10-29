@@ -55,6 +55,8 @@ module.exports = async function registerRoutes(app) {
     ['Harness', () => require('./harness')(app)],
     ['Tools', () => require('./tools')(app)],
     ['Result Studio', () => require('./result-studio')(app)],
+    // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）
+    ['Model 3D', () => require('./model3d')(app)],
     ['Feedback', () => require('./feedback')(app)],
     // BLOCK-246 C13：速记板（用户资产旁路表；上限/清洗单源在 shared-backend/scratchpad-store）
     ['Scratchpad', () => require('./scratchpad')(app)],

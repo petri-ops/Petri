@@ -15,12 +15,14 @@ const domainModules = {
   'browser': require('./tool-defs/browser'),
   'computer': require('./tool-defs/computer'),
   'knowledge': require('./tool-defs/knowledge'),
+  'model3d': require('./tool-defs/model3d'),
   'remote': require('./tool-defs/remote'),
   'resident': require('./tool-defs/resident'),
   'result-studio': require('./tool-defs/result-studio'),
   'session': require('./tool-defs/session'),
   'skill': require('./tool-defs/skill'),
   'web': require('./tool-defs/web'),
+  'workflow': require('./tool-defs/workflow'),
   'workspace': require('./tool-defs/workspace'),
 };
 
@@ -29,12 +31,14 @@ const TOOL_DEFS = [
   ...domainModules['browser'],
   ...domainModules['computer'],
   ...domainModules['knowledge'],
+  ...domainModules['model3d'],
   ...domainModules['remote'],
   ...domainModules['resident'],
   ...domainModules['result-studio'],
   ...domainModules['session'],
   ...domainModules['skill'],
   ...domainModules['web'],
+  ...domainModules['workflow'],
   ...domainModules['workspace'],
 ];
 

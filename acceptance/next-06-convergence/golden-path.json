@@ -1,0 +1,246 @@
+{
+  "schema": "next06-golden-path/v1",
+  "generatedAt": "2026-10-29T16:57:08.574Z",
+  "project": "D:\\1.WorkDir\\petri\\acceptance\\next-06-convergence\\golden-workspace\\project",
+  "scenePath": "model3d/enclosure.scene3d.json",
+  "sceneHash120": "fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d",
+  "sceneHash130": "7e265e417aa7cd4d7e72e5c448d4c9ca2d0d9a1a38eb25780cfc18635f7b425c",
+  "revision": {
+    "revisionId": "rev-000001",
+    "ordinal": 1,
+    "hash": "fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d",
+    "reason": "golden_path_120_to_130",
+    "createdAt": "2026-10-29T16:57:05.769Z",
+    "file": "rev-000001.json"
+  },
+  "revisions": [
+    {
+      "revisionId": "rev-000001",
+      "ordinal": 1,
+      "hash": "fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d",
+      "reason": "golden_path_120_to_130",
+      "createdAt": "2026-10-29T16:57:05.769Z",
+      "file": "rev-000001.json"
+    }
+  ],
+  "outputs120": [
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/front.png",
+      "sha256": "c26c15f532ef6824ae9586b1cf423468983d3a345122c2f90f18b0ed5f4ba4e3",
+      "bytes": 323816
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/top.png",
+      "sha256": "d5707b04a94775d5455d2335ba7c19949c7f19f7776d2fc6cd42dd1b348cd8ca",
+      "bytes": 368712
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/side.png",
+      "sha256": "761fa56b6f2d3f464c398cef61ce2433c939432dcb80a8614f6a21e3eb9fec65",
+      "bytes": 311252
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/iso.png",
+      "sha256": "43d01e598d3c2695857c4f653e3d8ed2ad197f0d585fdcfca6d1bc05ee62269f",
+      "bytes": 434243
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/scene.glb",
+      "sha256": "7d4b1c475c0c338c6d921040dd8914d752798b3a6147f242ad77c6030021300a",
+      "bytes": 9864
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/scene.stl",
+      "sha256": "2d95ced3349ffc7b310040b6d4a382b421d8b1e12afba6f59dca5c32844089c6",
+      "bytes": 6884
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd5c6-r1clut/scene.obj",
+      "sha256": "ee5fccc2e0f180ac8ca4275a8d75bb6cd644d4501efaef3323fc589830fde94e",
+      "bytes": 8428
+    }
+  ],
+  "outputs130": [
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/front.png",
+      "sha256": "46108c734dfd171fd7f591ebf39739719ac3894f0762ac05f52ec5e95a465f01",
+      "bytes": 318324
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/top.png",
+      "sha256": "005aaadf6a08c7d013849aea19cb689cf376daa27e14f0a5c9f0449f79930ca8",
+      "bytes": 359300
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/side.png",
+      "sha256": "512b3446151c88b42c56915ef80d92208c508aeb56f3cd0cf2a6eda5f740b0fc",
+      "bytes": 304867
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/iso.png",
+      "sha256": "f45425489537f096b13815d60dd2362d8692c52dda4e3c571c44c83af8ae2f8b",
+      "bytes": 412728
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.glb",
+      "sha256": "96d5ba29a1766674a1f2f8a17c63d9c4aa46d4b9f8e4c0622b63969aa55b05c3",
+      "bytes": 9864
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.stl",
+      "sha256": "5db95adc80dda4c38828b5621f6a67214d2123ca569410a4e3055968d8c5279a",
+      "bytes": 6884
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.obj",
+      "sha256": "87ad827645df54cd61a4d432b967c9334f39ecd1ee00ea2dada181ebd61c4993",
+      "bytes": 8428
+    }
+  ],
+  "manifest130": "model3d\\runs\\m3d-mvtsd6gb-nuqm0t\\manifest-golden.json",
+  "manifest": {
+    "schema": "model3d-manifest/v1",
+    "generatedAt": "2026-10-29T16:57:07.304Z",
+    "sceneHash": "7e265e417aa7cd4d7e72e5c448d4c9ca2d0d9a1a38eb25780cfc18635f7b425c",
+    "taskSpecId": null,
+    "workflowRunId": null,
+    "recipeId": "box-enclosure",
+    "recipeVersion": 1,
+    "provider": "blender",
+    "providerVersion": "Blender 4.5.10 LTS",
+    "inputHashes": {},
+    "validation": {
+      "ok": true,
+      "watertight": true,
+      "nonManifoldEdges": 0
+    },
+    "outputs": [
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/front.png",
+        "sha256": "46108c734dfd171fd7f591ebf39739719ac3894f0762ac05f52ec5e95a465f01",
+        "bytes": 318324
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/top.png",
+        "sha256": "005aaadf6a08c7d013849aea19cb689cf376daa27e14f0a5c9f0449f79930ca8",
+        "bytes": 359300
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/side.png",
+        "sha256": "512b3446151c88b42c56915ef80d92208c508aeb56f3cd0cf2a6eda5f740b0fc",
+        "bytes": 304867
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/iso.png",
+        "sha256": "f45425489537f096b13815d60dd2362d8692c52dda4e3c571c44c83af8ae2f8b",
+        "bytes": 412728
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.glb",
+        "sha256": "96d5ba29a1766674a1f2f8a17c63d9c4aa46d4b9f8e4c0622b63969aa55b05c3",
+        "bytes": 9864
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.stl",
+        "sha256": "5db95adc80dda4c38828b5621f6a67214d2123ca569410a4e3055968d8c5279a",
+        "bytes": 6884
+      },
+      {
+        "path": "model3d/runs/m3d-mvtsd6gb-nuqm0t/scene.obj",
+        "sha256": "87ad827645df54cd61a4d432b967c9334f39ecd1ee00ea2dada181ebd61c4993",
+        "bytes": 8428
+      }
+    ]
+  },
+  "metrics": {
+    "dryRunMs": 0,
+    "buildRenderExportMs": 1578,
+    "rerenderMs": 1399,
+    "firstPreviewAvailable": true
+  },
+  "reproducibility": {
+    "geometrySame": true,
+    "binaryHashesSame": false,
+    "firstHashes": {
+      "front.png": "46108c734dfd171fd7f591ebf39739719ac3894f0762ac05f52ec5e95a465f01",
+      "top.png": "005aaadf6a08c7d013849aea19cb689cf376daa27e14f0a5c9f0449f79930ca8",
+      "side.png": "512b3446151c88b42c56915ef80d92208c508aeb56f3cd0cf2a6eda5f740b0fc",
+      "iso.png": "f45425489537f096b13815d60dd2362d8692c52dda4e3c571c44c83af8ae2f8b",
+      "scene.glb": "96d5ba29a1766674a1f2f8a17c63d9c4aa46d4b9f8e4c0622b63969aa55b05c3",
+      "scene.stl": "5db95adc80dda4c38828b5621f6a67214d2123ca569410a4e3055968d8c5279a",
+      "scene.obj": "87ad827645df54cd61a4d432b967c9334f39ecd1ee00ea2dada181ebd61c4993"
+    },
+    "secondHashes": {
+      "front.png": "63e07f3a25f38dd187e9777d0cb315d6d394d7617073e44e12ebdd0cfe906b17",
+      "top.png": "282e25274ef93751201bcb0807899ec4334cecb82a2a1b49c53f5a6d17fae5e7",
+      "side.png": "a1f8e19de7547c592833851dd83e44ac56adfb43bb5d2dfb856e7fbbcf919c32",
+      "iso.png": "cabdd94ea5731ca2acb85f0d1befc64d4bbf2a03ab1745fe8dd74d3431952576",
+      "scene.glb": "96d5ba29a1766674a1f2f8a17c63d9c4aa46d4b9f8e4c0622b63969aa55b05c3",
+      "scene.stl": "5db95adc80dda4c38828b5621f6a67214d2123ca569410a4e3055968d8c5279a",
+      "scene.obj": "87ad827645df54cd61a4d432b967c9334f39ecd1ee00ea2dada181ebd61c4993"
+    }
+  },
+  "assertions": [
+    {
+      "id": "G1_dryRun_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"box-enclosure\",\"version\":1,\"title\":\"箱体外壳\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":120,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8},\"nodes\":[{\"id\":\"enclosure\",\""
+    },
+    {
+      "id": "G2_dryRun_no_write",
+      "pass": true,
+      "detail": "model3d/enclosure.scene3d.json"
+    },
+    {
+      "id": "G3_build_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-recipe/v1\",\"recipe\":{\"id\":\"box-enclosure\",\"version\":1,\"title\":\"箱体外壳\"},\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":120,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"heigh"
+    },
+    {
+      "id": "G4_manifest",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtsd5c6-r1clut/manifest.json"
+    },
+    {
+      "id": "G5_edit_130",
+      "pass": true,
+      "detail": "{\"beforeHash\":\"fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d\",\"afterHash\":\"7e265e417aa7cd4d7e72e5c448d4c9ca2d0d9a1a38eb25780cfc18635f7b425c\",\"parameters\":[{\"name\":\"width\",\"before\":120,\"after\":130,\"status\":\"changed\"}],\"nodes\":[],\"constraints\":{\"added\":[],\"removed\":[]},\"changed\":true}"
+    },
+    {
+      "id": "G6_revision_recorded",
+      "pass": true,
+      "detail": "{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"fa5a514ddfe1a10068d2117cce994de5a480bd2d7e23a16a895e8e459d400b2d\",\"reason\":\"golden_path_120_to_130\",\"createdAt\":\"2026-10-29T16:57:05.769Z\",\"file\":\"rev-000001.json\"}"
+    },
+    {
+      "id": "G7_scene_persisted_130",
+      "pass": true,
+      "detail": "{\"width\":130,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8}"
+    },
+    {
+      "id": "G7b_resolve_130",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "id": "G8_render_130",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-06-convergence\\\\golden-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsd6gb-nuqm0t\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-06-convergence\\\\golden-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsd6gb-nuqm0t\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-06-convergence\\\\golden-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsd6gb-nuqm0t\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-06-convergence\\\\golden-workspace\\\\project\\\\model3d\\\\runs\\\\m3d-mvtsd6gb-nuqm0t\\\\iso.png\"}"
+    },
+    {
+      "id": "G9_manifest_130",
+      "pass": true,
+      "detail": "model3d\\runs\\m3d-mvtsd6gb-nuqm0t\\manifest-golden.json"
+    },
+    {
+      "id": "G10_reproducible_geometry",
+      "pass": true,
+      "detail": "mesh/bounds/renderEngine"
+    },
+    {
+      "id": "G11_manifest_scene_hash",
+      "pass": true,
+      "detail": "7e265e417aa7cd4d7e72e5c448d4c9ca2d0d9a1a38eb25780cfc18635f7b425c"
+    }
+  ],
+  "passed": true
+}

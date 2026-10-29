@@ -1,7 +1,35 @@
 import type { ReactNode } from 'react';
+import type { AxisProjection } from '@/lib/statusProjection';
 import styles from './status.module.css';
 
 /** BLOCK-167 W4 — 空/载/错三件套单源（宪章 §6）。新状态一律用这三件，禁止再手写形态。 */
+
+/** NEXT-02A — 执行/证据/能力三轴徽标；状态语义只从 statusProjection 消费。 */
+export function StatusBadge<TStatus extends string>({
+  projection,
+  className,
+  testId,
+}: {
+  projection: AxisProjection<TStatus> | null;
+  className?: string;
+  testId?: string;
+}): React.ReactElement {
+  const label = projection?.label || '—';
+  const detail = projection?.detail;
+  return (
+    <span
+      className={`${styles.statusBadge}${className ? ` ${className}` : ''}`}
+      data-testid={testId}
+      data-axis={projection?.axis || 'none'}
+      data-status={projection?.status || 'unknown'}
+      data-tone={projection?.tone || 'neutral'}
+      title={detail}
+      aria-label={detail ? `${label}：${detail}` : label}
+    >
+      {label}
+    </span>
+  );
+}
 
 export function EmptyState({
   icon,

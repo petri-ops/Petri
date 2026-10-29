@@ -37,6 +37,8 @@ module.exports = function registerAutomationRoutes(app) {
       kind: req.body && req.body.kind,
       intervalMinutes: req.body && req.body.intervalMinutes,
       reminderText: req.body && req.body.reminderText,
+      workflowScript: req.body && req.body.workflowScript,
+      workflowArgs: req.body && req.body.workflowArgs,
       enabled: req.body ? req.body.enabled !== false : true,
     });
     if (!result.ok) return fail(res, result, 400);

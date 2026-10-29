@@ -1,0 +1,63 @@
+{
+  "name": "next01-workflow-live",
+  "startedAt": "2026-10-29T13:06:53.612Z",
+  "finishedAt": "2026-10-29T13:06:54.394Z",
+  "assertions": [
+    {
+      "name": "W0_temp_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtk54xn_l63p\",\"name\":\"NEXT-01-工作流-1793279213613\",\"created_at\":\"2026-10-29T13:06:53.627Z\",\"updated_at\":\"2026-10-29T13:06:53.627Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"modality\":\"general\",\""
+    },
+    {
+      "name": "W1_dry_run_zero_execution",
+      "pass": true,
+      "detail": "{\"ok\":true,\"dryRun\":true,\"meta\":{\"name\":\"next01-live\",\"version\":1,\"budget\":{\"maxAgents\":2,\"maxSteps\":4,\"timeoutMs\":600000},\"concurrency\":1},\"estimate\":{\"estimate\":true,\"agentCallsInSource\":0,\"budget\":{\"maxAgents\":2,\"maxSteps\":4,\"timeoutMs\":600000},\"concurrency\":1,\"note\":\"静态上界估计；实际启动数以 budget 帽为准\"}}"
+    },
+    {
+      "name": "W2_workflow_started",
+      "pass": true,
+      "detail": "{\"ok\":true,\"runId\":\"wf-mvtk54ye-weqrio\",\"taskId\":\"f7c2c126-40a3-456b-9f65-1377191bce55\",\"status\":\"running\",\"resumeFromRunId\":null}"
+    },
+    {
+      "name": "W3_workflow_journal_completed",
+      "pass": true,
+      "detail": "status=completed journal=2"
+    },
+    {
+      "name": "W4_workflow_schedule_created",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schedule\":{\"id\":\"sch_76c75625-3dce-4bef-a59b-1306be9549d0\",\"user_id\":\"local-user\",\"project_id\":\"p_mvtk54xn_l63p\",\"goal_id\":null,\"title\":\"NEXT-01 workflow schedule\",\"prompt\":\"\",\"kind\":\"workflow\",\"interval_minutes\":60,\"reminder_text\":null,\"enabled\":true,\"next_run_at\":\"2026-10-29T14:06:53.6"
+    },
+    {
+      "name": "W5_workflow_schedule_started",
+      "pass": true,
+      "detail": "{\"ok\":true,\"result\":{\"scheduleId\":\"sch_76c75625-3dce-4bef-a59b-1306be9549d0\",\"status\":\"running\",\"taskId\":\"ac31fc3e-288a-494e-a505-35938813337b\",\"workflowRunId\":\"wf-mvtk54zt-69oir8\"}}"
+    },
+    {
+      "name": "W6_schedule_run_links_workflow",
+      "pass": true,
+      "detail": "{\"id\":\"run_3d2e9a5b-ef3d-45b1-9292-a3a3f6bbfd97\",\"schedule_id\":\"sch_76c75625-3dce-4bef-a59b-1306be9549d0\",\"task_id\":\"ac31fc3e-288a-494e-a505-35938813337b\",\"conversation_id\":null,\"status\":\"running\",\"error\":null,\"started_at\":\"2026-10-29T13:06:53.691Z\",\"finished_at\":null,\"workflow_run_id\":\"wf-mvtk54zt-"
+    },
+    {
+      "name": "W7_workflow_panel_visible",
+      "pass": true,
+      "detail": "{\"present\":true,\"state\":\"ready\",\"items\":[{\"id\":\"wf-mvtk54zt-69oir8\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk54ye-weqrio\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk10b2-72m8f3\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk109x-gpzhr4\",\"text\":\"next01-live已完成—\"}],\"selectedStatus\":\"已完成\",\"detail\":\"运行wf-mvtk54zt-69oir8预算2 agents · 4 steps · 600s并发1来源script 7f3cfda9ddcc时间— → 2026/10/29 21:06:53取消运行恢复运行Journalag"
+    },
+    {
+      "name": "W8_workflow_run_listed",
+      "pass": true,
+      "detail": "[{\"id\":\"wf-mvtk54zt-69oir8\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk54ye-weqrio\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk10b2-72m8f3\",\"text\":\"next01-live已完成—\"},{\"id\":\"wf-mvtk109x-gpzhr4\",\"text\":\"next01-live已完成—\"}]"
+    },
+    {
+      "name": "W9_detail_budget_and_journal",
+      "pass": true,
+      "detail": "journal=2 detail=运行wf-mvtk54zt-69oir8预算2 agents · 4 steps · 600s并发1来源script 7f3cfda9ddcc时间— → 2026/10/29 21:06:53取消运行恢复运行Journalagent 行 0 · 尾部 2 条2lognext01 live probe已完成3phaseprepare已完成"
+    },
+    {
+      "name": "W10_completed_status_projection",
+      "pass": true,
+      "detail": "selected=已完成"
+    }
+  ],
+  "allPass": true
+}

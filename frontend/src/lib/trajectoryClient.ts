@@ -77,7 +77,11 @@ export interface FetchTrajectoryInput {
   limit?: number;
   signal?: AbortSignal;
   fetchImpl?: typeof fetch;
+  /** NEXT-02A：默认 15s；超时以 trajectory_timeout 失败，不留下无限加载。 */
+  timeoutMs?: number;
 }
+
+const DEFAULT_TRAJECTORY_TIMEOUT_MS = 15_000;
 
 export async function fetchTrajectory(input: FetchTrajectoryInput): Promise<TrajectoryResponse> {
   const params = new URLSearchParams();
@@ -87,14 +91,34 @@ export async function fetchTrajectory(input: FetchTrajectoryInput): Promise<Traj
   if (input.beforeSeq && input.beforeSeq > 0) params.set('beforeSeq', String(input.beforeSeq));
   if (input.limit) params.set('limit', String(input.limit));
   const fetchImpl = input.fetchImpl || fetch;
-  const response = await fetchImpl(`${getApiPrefix()}/ai/agent/trajectory?${params.toString()}`, {
-    headers: { Authorization: `Bearer ${getToken()}` },
-    signal: input.signal,
-  });
-  const payload = (await response.json().catch(() => null)) as (TrajectoryResponse & { error?: unknown }) | null;
-  if (!response.ok || !payload || payload.ok !== true) {
-    const code = payload && typeof payload.error === 'string' ? payload.error : `http_${response.status}`;
-    throw new Error(code);
+  const controller = new AbortController();
+  let timedOut = false;
+  const forwardAbort = () => controller.abort(input.signal?.reason);
+  if (input.signal?.aborted) forwardAbort();
+  else input.signal?.addEventListener('abort', forwardAbort, { once: true });
+  const timeoutMs = Number.isFinite(input.timeoutMs) && Number(input.timeoutMs) > 0
+    ? Number(input.timeoutMs)
+    : DEFAULT_TRAJECTORY_TIMEOUT_MS;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  try {
+    const response = await fetchImpl(`${getApiPrefix()}/ai/agent/trajectory?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+      signal: controller.signal,
+    });
+    const payload = (await response.json().catch(() => null)) as (TrajectoryResponse & { error?: unknown }) | null;
+    if (!response.ok || !payload || payload.ok !== true) {
+      const code = payload && typeof payload.error === 'string' ? payload.error : `http_${response.status}`;
+      throw new Error(code);
+    }
+    return payload;
+  } catch (error) {
+    if (timedOut) throw new Error('trajectory_timeout');
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    input.signal?.removeEventListener('abort', forwardAbort);
   }
-  return payload;
 }

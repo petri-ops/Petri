@@ -41,6 +41,8 @@ function buildRealDeps({ parentTaskId, userId }) {
   const spawnTools = require('../../agent-tools/spawn-agent-tools');
   const agentTaskStore = require('../../agent-task-store');
   const dbMod = require('../../db');
+  const { authorizeProject } = require('../../agent-tools/workspace-tools/internals');
+  const { runModel3DRecipe } = require('../../helpers/model3d-recipe-runner');
   // 终态双写形态：markAgentTaskDone 落 status='completed'/agent_status='done'
   // （实测 DB 列序），failed/cancelled 同列同名——四个都收，避免漏识别。
   const TERMINAL = new Set(['done', 'completed', 'failed', 'cancelled']);
@@ -83,6 +85,32 @@ function buildRealDeps({ parentTaskId, userId }) {
         return null;
       }
     },
+    // NEXT-05 — recipe 领域原语：dryRun 纯生成；执行时授权项目后复用同一 runner。
+    recipe: async ({ recipeId, params, projectId, dryRun = true, path: relativePath, render, views, formats, signal } = {}) => {
+      if (dryRun) return runModel3DRecipe({ recipeId, params, dryRun: true });
+      if (signal?.aborted) return { ok: false, error: 'recipe_cancelled' };
+      const project = projectId ? dbMod.getProject(String(projectId)) : null;
+      if (!project || !project.workspace_path) return { ok: false, error: 'project_required' };
+      try {
+        authorizeProject(project, userId, dbMod);
+      } catch (error) {
+        return { ok: false, error: error.code || 'permission_denied', message: error.message };
+      }
+      if (project.workspace_kind === 'ssh') {
+        return { ok: false, error: 'local_project_required', message: 'recipe 渲染在本机执行，仅支持本地项目。' };
+      }
+      return runModel3DRecipe({
+        recipeId,
+        params,
+        workspaceRoot: project.workspace_path,
+        relativePath,
+        dryRun: false,
+        render,
+        views,
+        formats,
+        signal,
+      });
+    },
   };
 }
 
@@ -98,190 +126,231 @@ function dryRunEstimate(source, meta) {
   };
 }
 
-function loadRunForRequest(req, res, runId) {
+function readOwnedRunMeta(userId, runId) {
   const meta = workflowJournal.readRunMeta(workflowsRoot(), runId);
-  if (!meta.ok) {
-    res.status(404).json({ ok: false, error: 'run_not_found' });
-    return null;
-  }
-  const userId = userIdOf(req);
-  if (!userId) {
-    res.status(401).json({ ok: false, error: 'unauthorized' });
-    return null;
-  }
+  if (!meta.ok) return { ok: false, statusCode: 404, body: { ok: false, error: 'run_not_found' } };
+  if (!userId) return { ok: false, statusCode: 401, body: { ok: false, error: 'unauthorized' } };
   if (meta.meta.userId && String(meta.meta.userId) !== userId) {
-    res.status(403).json({ ok: false, error: 'forbidden' });
-    return null;
+    return { ok: false, statusCode: 403, body: { ok: false, error: 'forbidden' } };
   }
-  return meta.meta;
+  return { ok: true, meta: meta.meta };
+}
+
+function startWorkflow({ script, args, dryRun = false, resumeFromRunId = null, userId, deps } = {}) {
+  if (!workflowEnabled()) return { statusCode: 503, body: { ok: false, error: 'workflow_disabled' } };
+  if (!userId) return { statusCode: 401, body: { ok: false, error: 'unauthorized' } };
+  if (typeof script !== 'string' || script.length === 0) {
+    return { statusCode: 400, body: { ok: false, error: 'script_required' } };
+  }
+  if (script.length > 256 * 1024) {
+    return { statusCode: 400, body: { ok: false, error: 'script_too_large' } };
+  }
+
+  const loaded = loadWorkflowModule(script, { host: {}, seed: 0 });
+  if (!loaded.ok) {
+    return {
+      statusCode: 400,
+      body: { ok: false, error: loaded.error, diagnostics: loaded.diagnostics, message: loaded.message },
+    };
+  }
+  if (dryRun) {
+    return {
+      statusCode: 200,
+      body: {
+        ok: true,
+        dryRun: true,
+        meta: loaded.meta,
+        estimate: dryRunEstimate(script, loaded.meta),
+      },
+    };
+  }
+
+  let parentTaskId = null;
+  let effectiveDeps = deps;
+  let umbrellaTaskId = null;
+  if (!deps) {
+    const agentTaskStore = require('../../agent-task-store');
+    umbrellaTaskId = agentTaskStore
+      .createAgentTask({
+        status: 'running',
+        agentStatus: 'running',
+        userId,
+        params: { kind: 'workflow', spawnSource: 'workflow-route' },
+      })
+      .taskId;
+    parentTaskId = umbrellaTaskId;
+    effectiveDeps = buildRealDeps({ parentTaskId, userId });
+  }
+
+  const run = runnerMod.startWorkflowRun({
+    source: script,
+    args,
+    userId,
+    deps: effectiveDeps,
+    root: workflowsRoot(),
+    resumeFromRunId: resumeFromRunId || null,
+    extraRunMeta: umbrellaTaskId ? { taskId: umbrellaTaskId } : null,
+  });
+  if (run._loadError) {
+    return { statusCode: 400, body: { ok: false, error: run._loadError.error, message: run._loadError.message } };
+  }
+
+  activeRuns.set(run.runId, { run, userId });
+  run.promise
+    .then((result) => {
+      if (umbrellaTaskId) {
+        const agentTaskStore = require('../../agent-task-store');
+        try {
+          if (result.status === 'completed') agentTaskStore.markAgentTaskDone(umbrellaTaskId);
+          else if (result.status === 'cancelled') agentTaskStore.markAgentTaskCancelled(umbrellaTaskId);
+          else agentTaskStore.markAgentTaskFailed(umbrellaTaskId, result.error || 'workflow failed');
+        } catch { /* umbrella is diagnostic projection, not execution truth */ }
+      }
+    })
+    .finally(() => activeRuns.delete(run.runId));
+
+  return {
+    statusCode: 202,
+    body: {
+      ok: true,
+      runId: run.runId,
+      taskId: umbrellaTaskId,
+      status: 'running',
+      resumeFromRunId: resumeFromRunId || null,
+    },
+    run,
+  };
+}
+
+function listWorkflowRuns({ userId, limit = 20 } = {}) {
+  if (!workflowEnabled()) return { statusCode: 503, body: { ok: false, error: 'workflow_disabled' } };
+  if (!userId) return { statusCode: 401, body: { ok: false, error: 'unauthorized' } };
+  const bounded = Math.max(1, Math.min(Number(limit) || 20, 50));
+  const root = workflowsRoot();
+  const runs = [];
+  for (const runId of workflowJournal.listRunIds(root, { limit: bounded })) {
+    const meta = workflowJournal.readRunMeta(root, runId);
+    if (!meta.ok) continue;
+    if (meta.meta.userId && String(meta.meta.userId) !== userId) continue;
+    runs.push({
+      runId,
+      status: meta.meta.status,
+      name: meta.meta.meta && meta.meta.meta.name,
+      createdAt: meta.meta.createdAt,
+      finishedAt: meta.meta.finishedAt || null,
+    });
+  }
+  return { statusCode: 200, body: { ok: true, runs } };
+}
+
+function getWorkflowRun({ userId, runId } = {}) {
+  if (!workflowEnabled()) return { statusCode: 503, body: { ok: false, error: 'workflow_disabled' } };
+  const owned = readOwnedRunMeta(userId, runId);
+  if (!owned.ok) return owned;
+  const meta = owned.meta;
+  const tail = workflowJournal.readJournalLines(workflowsRoot(), meta.runId, {
+    limit: workflowJournal.MAX_JOURNAL_TAIL,
+  });
+  return {
+    statusCode: 200,
+    body: {
+      ok: true,
+      run: {
+        runId: meta.runId,
+        status: meta.status,
+        meta: meta.meta,
+        scriptHash: meta.scriptHash,
+        argsHash: meta.argsHash,
+        resumeFromRunId: meta.resumeFromRunId || null,
+        error: meta.error || null,
+        createdAt: meta.createdAt,
+        finishedAt: meta.finishedAt || null,
+      },
+      journalTail: tail,
+    },
+  };
+}
+
+async function cancelWorkflowRun({ userId, runId } = {}) {
+  if (!workflowEnabled()) return { statusCode: 503, body: { ok: false, error: 'workflow_disabled' } };
+  const owned = readOwnedRunMeta(userId, runId);
+  if (!owned.ok) return owned;
+  const meta = owned.meta;
+  const active = activeRuns.get(meta.runId);
+  if (active) {
+    await active.run.cancel();
+    return { statusCode: 200, body: { ok: true, cancelled: true, mode: 'in_process' } };
+  }
+  if (meta.taskId) {
+    try {
+      const agentTaskStore = require('../../agent-task-store');
+      const dbMod = require('../../db');
+      agentTaskStore.cancelAgentTaskCascade(String(meta.taskId), { dbMod });
+      return { statusCode: 200, body: { ok: true, cancelled: true, mode: 'cascade_via_umbrella_task' } };
+    } catch { /* fall through to explicit not-active */ }
+  }
+  return {
+    statusCode: 409,
+    body: {
+      ok: false,
+      error: 'run_not_active',
+      status: meta.status,
+      message: '该运行不在本进程且无伞任务可级联（可能已完成或经测试注入启动）',
+    },
+  };
+}
+
+function resumeWorkflowRun({ userId, runId, deps } = {}) {
+  if (!workflowEnabled()) return { statusCode: 503, body: { ok: false, error: 'workflow_disabled' } };
+  const owned = readOwnedRunMeta(userId, runId);
+  if (!owned.ok) return owned;
+  const meta = owned.meta;
+  if (!meta.scriptSource) return { statusCode: 409, body: { ok: false, error: 'run_script_unavailable' } };
+  if (meta.status === 'running') return { statusCode: 409, body: { ok: false, error: 'run_still_running' } };
+  return startWorkflow({
+    script: meta.scriptSource,
+    args: meta.args,
+    dryRun: false,
+    resumeFromRunId: meta.runId,
+    userId,
+    deps,
+  });
+}
+
+function register(app, { deps } = {}) {
+  const send = (res, result) => res.status(result.statusCode).json(result.body);
+
+  app.post('/api/ai/agent/workflow/run', async (req, res) => {
+    const { script, args, dryRun, resumeFromRunId } = req.body || {};
+    send(res, startWorkflow({
+      script,
+      args,
+      dryRun: Boolean(dryRun),
+      resumeFromRunId,
+      userId: userIdOf(req),
+      deps,
+    }));
+  });
+
+  app.get('/api/ai/agent/workflow/runs', (req, res) => {
+    send(res, listWorkflowRuns({ userId: userIdOf(req), limit: req.query.limit }));
+  });
+
+  app.get('/api/ai/agent/workflow/runs/:id', (req, res) => {
+    send(res, getWorkflowRun({ userId: userIdOf(req), runId: req.params.id }));
+  });
+
+  app.post('/api/ai/agent/workflow/runs/:id/cancel', async (req, res) => {
+    send(res, await cancelWorkflowRun({ userId: userIdOf(req), runId: req.params.id }));
+  });
+
+  app.post('/api/ai/agent/workflow/runs/:id/resume', (req, res) => {
+    send(res, resumeWorkflowRun({ userId: userIdOf(req), runId: req.params.id, deps }));
+  });
 }
 
 module.exports = {
-  register(app, { deps } = {}) {
-    app.post('/api/ai/agent/workflow/run', async (req, res) => {
-      if (!workflowEnabled()) return res.status(503).json({ ok: false, error: 'workflow_disabled' });
-      const userId = userIdOf(req);
-      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized' });
-
-      const { script, args, dryRun, resumeFromRunId } = req.body || {};
-      if (typeof script !== 'string' || script.length === 0) {
-        return res.status(400).json({ ok: false, error: 'script_required' });
-      }
-      if (script.length > 256 * 1024) {
-        return res.status(400).json({ ok: false, error: 'script_too_large' });
-      }
-
-      const loaded = loadWorkflowModule(script, { host: {}, seed: 0 });
-      if (!loaded.ok) {
-        return res.status(400).json({
-          ok: false,
-          error: loaded.error,
-          diagnostics: loaded.diagnostics,
-          message: loaded.message,
-        });
-      }
-
-      if (dryRun) {
-        return res.status(200).json({
-          ok: true,
-          dryRun: true,
-          meta: loaded.meta,
-          estimate: dryRunEstimate(script, loaded.meta),
-        });
-      }
-
-      // 真跑：默认走伞 task + 真实 deps；注入 deps（测试形态）时跳过伞 task
-      let parentTaskId = null;
-      let effectiveDeps = deps;
-      let umbrellaTaskId = null;
-      if (!deps) {
-        const agentTaskStore = require('../../agent-task-store');
-        umbrellaTaskId = agentTaskStore
-          .createAgentTask({
-            status: 'running',
-            agentStatus: 'running',
-            userId,
-            params: { kind: 'workflow', spawnSource: 'workflow-route' },
-          })
-          .taskId;
-        parentTaskId = umbrellaTaskId;
-        effectiveDeps = buildRealDeps({ parentTaskId, userId });
-      }
-
-      const run = runnerMod.startWorkflowRun({
-        source: script,
-        args,
-        userId,
-        deps: effectiveDeps,
-        root: workflowsRoot(),
-        resumeFromRunId: resumeFromRunId || null,
-        extraRunMeta: umbrellaTaskId ? { taskId: umbrellaTaskId } : null,
-      });
-
-      if (run._loadError) {
-        return res.status(400).json({ ok: false, error: run._loadError.error, message: run._loadError.message });
-      }
-
-      activeRuns.set(run.runId, { run, userId });
-
-      // 后台收尾：伞 task 终态 + 活跃表清理（best-effort）
-      run.promise
-        .then((result) => {
-          if (umbrellaTaskId) {
-            const agentTaskStore = require('../../agent-task-store');
-            try {
-              if (result.status === 'completed') agentTaskStore.markAgentTaskDone(umbrellaTaskId);
-              else if (result.status === 'cancelled') agentTaskStore.markAgentTaskCancelled(umbrellaTaskId);
-              else agentTaskStore.markAgentTaskFailed(umbrellaTaskId, result.error || 'workflow failed');
-            } catch {}
-          }
-        })
-        .finally(() => activeRuns.delete(run.runId));
-
-      return res.status(202).json({
-        ok: true,
-        runId: run.runId,
-        taskId: umbrellaTaskId,
-        status: 'running',
-        resumeFromRunId: resumeFromRunId || null,
-      });
-    });
-
-    app.get('/api/ai/agent/workflow/runs', (req, res) => {
-      if (!workflowEnabled()) return res.status(503).json({ ok: false, error: 'workflow_disabled' });
-      const userId = userIdOf(req);
-      if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized' });
-      const limit = Math.max(1, Math.min(Number(req.query.limit) || 20, 50));
-      const root = workflowsRoot();
-      const runs = [];
-      for (const runId of workflowJournal.listRunIds(root, { limit })) {
-        const meta = workflowJournal.readRunMeta(root, runId);
-        if (!meta.ok) continue;
-        if (meta.meta.userId && String(meta.meta.userId) !== userId) continue;
-        runs.push({
-          runId,
-          status: meta.meta.status,
-          name: meta.meta.meta && meta.meta.meta.name,
-          createdAt: meta.meta.createdAt,
-          finishedAt: meta.meta.finishedAt || null,
-        });
-      }
-      return res.status(200).json({ ok: true, runs });
-    });
-
-    app.get('/api/ai/agent/workflow/runs/:id', (req, res) => {
-      if (!workflowEnabled()) return res.status(503).json({ ok: false, error: 'workflow_disabled' });
-      const meta = loadRunForRequest(req, res, req.params.id);
-      if (!meta) return;
-      const tail = workflowJournal.readJournalLines(workflowsRoot(), meta.runId, {
-        limit: workflowJournal.MAX_JOURNAL_TAIL,
-      });
-      return res.status(200).json({
-        ok: true,
-        run: {
-          runId: meta.runId,
-          status: meta.status,
-          meta: meta.meta,
-          scriptHash: meta.scriptHash,
-          argsHash: meta.argsHash,
-          resumeFromRunId: meta.resumeFromRunId || null,
-          error: meta.error || null,
-          createdAt: meta.createdAt,
-          finishedAt: meta.finishedAt || null,
-        },
-        journalTail: tail,
-      });
-    });
-
-    app.post('/api/ai/agent/workflow/runs/:id/cancel', async (req, res) => {
-      if (!workflowEnabled()) return res.status(503).json({ ok: false, error: 'workflow_disabled' });
-      const runId = String(req.params.id || '');
-      const meta = loadRunForRequest(req, res, runId);
-      if (!meta) return;
-
-      const active = activeRuns.get(runId);
-      if (active) {
-        await active.run.cancel();
-        return res.status(200).json({ ok: true, cancelled: true, mode: 'in_process' });
-      }
-      // 进程重启后 runner 不在内存：按持久状态兜底——对伞 task 级联取消
-      if (meta.taskId) {
-        try {
-          const agentTaskStore = require('../../agent-task-store');
-          const dbMod = require('../../db');
-          agentTaskStore.cancelAgentTaskCascade(String(meta.taskId), { dbMod });
-          return res.status(200).json({ ok: true, cancelled: true, mode: 'cascade_via_umbrella_task' });
-        } catch {}
-      }
-      return res.status(409).json({
-        ok: false,
-        error: 'run_not_active',
-        status: meta.status,
-        message: '该运行不在本进程且无伞任务可级联（可能已完成或经测试注入启动）',
-      });
-    });
-  },
-
-  // 测试/子域 surface
+  register,
+  startWorkflow,
   _internals: { activeRuns, buildRealDeps, dryRunEstimate, workflowsRoot },
 };

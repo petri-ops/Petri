@@ -4,7 +4,9 @@ import { fetchTrajectory } from '@/lib/trajectoryClient';
 import type { ToolJob } from '@/lib/project-types';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { ActiveArtifact } from '@/components/workspace-panels/ResultView';
-import { describeTruthStatus, shortRevisionLabel } from '@/components/result-studio/resultSurface';
+import { StatusBadge } from '@/components/ui/controls/Status';
+import { composeTrustStatus } from '@/lib/statusProjection';
+import { shortRevisionLabel } from '@/components/result-studio/resultSurface';
 import styles from './WorkSurfacePanels.module.css';
 
 export function EvidenceSurface({
@@ -76,8 +78,16 @@ export function EvidenceSurface({
     : typeof activeWorkflow?.artifactTruth?.status === 'string'
       ? activeWorkflow.artifactTruth.status
       : null;
-  const truth = describeTruthStatus(truthStatus, activeJob?.status);
+  const executionRaw = activeJob?.status || activeWorkflow?.jobStatus || null;
   const hasEvidence = Boolean(activeArtifact || activeJob || activeWorkflow);
+  const trust = composeTrustStatus({
+    execution: executionRaw,
+    truthStatus,
+    hasEvidence,
+    jobStatus: executionRaw,
+  });
+  const truth = trust.evidence;
+  const execution = trust.execution;
   const hasTrace = Boolean(conversationId) || Boolean(onOpenTrace);
 
   return (
@@ -99,16 +109,16 @@ export function EvidenceSurface({
             <div className={styles.rowHeader}>
               <Icon name="bar-chart" size={13} />
               <strong>产物可信状态</strong>
-              <span className={styles.badge} data-tone={truth.tone}>{truth.label}</span>
+              <StatusBadge projection={truth} testId="evidence-truth-status" />
             </div>
             <dl className={styles.fields}>
               <dt>产物</dt><dd>{activeArtifact?.label || activeArtifact?.name || activeJob?.name || '—'}</dd>
               <dt>任务</dt><dd>{activeJob?.tool_id || '—'}</dd>
-              <dt>状态</dt><dd>{activeJob?.status || activeWorkflow?.jobStatus || '—'}</dd>
+              <dt>执行</dt><dd data-testid="evidence-execution-status">{execution?.label || '—'}</dd>
               <dt>版本</dt><dd>{shortRevisionLabel(activeArtifact?.revisionId, activeArtifact?.revisionOrdinal)}</dd>
               <dt>可用性</dt><dd>{activeArtifact?.availabilityStatus || '—'}</dd>
             </dl>
-            {truth.detail ? <p className={styles.muted}>{truth.detail}</p> : null}
+            {truth?.detail ? <p className={styles.muted}>{truth.detail}</p> : null}
           </section>
           <section className={styles.row}>
             <div className={styles.rowHeader}>

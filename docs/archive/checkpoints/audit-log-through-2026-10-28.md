@@ -36,3 +36,12 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-29T10:41:49.201Z -->
 最后更新：2026-10-28（**BLOCK-317 completed（UI-621 verified）**）：输入框图片/引用区完全落回 composer 卡内——附件区/选区引用条/图片引用条去掉自带 `border-top` 与 50% 底色（方形分段底会画进 24px 圆角外，视觉上像图片与背景越界）。证据=theme 17/17 + tsc/lint 0 + 实机 9/9（8 张图：strip transparent/border-top 0/flex-wrap wrap，strip 与全部卡片在 composer 内、直接子块无底色、圆角保持）；截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。
 最后更新：2026-10-28（**BLOCK-316 completed（UI-620 verified）**）：消息排队控制下放到每条消息——composer 全局「转向/排队」开关移除，运行中发送默认排队；每条排队行自带 插话/编辑/移除 + 更多（立即执行/上移/下移）；Ctrl/Alt+Enter 或 Ctrl+点击=直接插话。顺带修根因：旧「转向」被 `send()` 的 streaming 守卫挡掉从未真正生效，现拆独立 `steerText`。证据=面板 5/5 + hook 3/3 + block178 9/9 + tsc/lint + 实机 10/10（steer POST body=该条/行出队/已插话提示/Ctrl+Enter 直接插话）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T11:34:31.379Z -->
+最后更新：2026-10-28（**BLOCK-318 completed（UI-622/623 verified）**）：①上下文用量新增真实构成分类——token_budget 事件带 breakdown（系统提示词含知识子集/工具定义/对话消息/工具结果/其他系统内容/输出预留，total=和，pct 含工具定义），面板六类行+堆叠条+剩余，旧后端回退汇总；实机 system=232/tools=12147/…/total=30088。②侧聊改可拖动悬浮面——宽窗退役固定右轨列，头部拖动跟手+视口钳制+位置持久化+双击复位；实机拖 +120/+80、右/下越界钳制、复位。证据=Node 4/4 + 面板 7/7 + SideChatDock 18/18 + CenterPanel 21/21 + 实机 12/12 + closeout 十三门 PASS；截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T12:24:04.402Z -->
+最后更新：2026-10-28（**BLOCK-319 completed（UI-624 verified）**）：文件文本批注条空闲态清理——无批注/无待填/无加载错误/无可撤销时整条不渲染，不再常驻禁用输入框与禁用「加入上下文」；选中文本经选区动作条「批注」后才出现评论框；有批注时恢复列表+加入上下文；占位文案「加入任务」→「加入上下文」。证据=AnnotationBar 18/18 + 文件预览 2/2 + tsc 0 + 实机 7/7（空闲无条/种批注后恢复）+ closeout 十三门 PASS；截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T13:07:24.767Z -->
+最后更新：2026-10-28（**BLOCK-320 completed（UI-625 verified）**）：通知中心弹层按内容重排——不再复用通用 `.toolMenu`（其 `> button{height:32px}` + `display:grid` + `span{flex:1}` 把每条通知的标签/标题/正文/时间四段压进 32px 行、把未读圆点拉成长条，整块呈「乱」观感），改独立 `.noticePanel` 行式布局：头部（标题+「N 未读」pill+全部已读/清空）、接收偏好行、卡内滚动列表；每行=类型标签（成功/警告/错误/信息语义底色）+ 标题单行省略 + 正文两行 `-webkit-line-clamp` + 五档相对时间（刚刚/N 分钟前/今天/昨天/M/D，取代原 `toLocaleString()` 绝对时间戳）+ 7px 未读圆点，已读行 60% 透明；面板基准字号显式取正文 token（原继承标题栏图标按钮小字=次因）。证据=NotificationCenterBell 9/9（含假时钟逐档钉死五档 + 不得出现年份/秒级串）+ theme 17/17（小字/accent 棘轮未上调）+ tsc/lint 0 + 实机 24/24（四行零重叠/行高≥44/行内无裁切/正文 36 可见 vs 89 全文/圆点 7×7/面板 360×408 在视口内且逐行 elementFromPoint 命中自身/全部已读与清空生效）；截图离屏 unavailable。G0 开发期常态 · 不外推 packaged/Provider/GA。

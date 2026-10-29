@@ -143,12 +143,18 @@ function listRunIds(root, { limit = 50 } = {}) {
 function buildResumeTable(root, runId, { scriptHash, argsHash }) {
   const table = new Map();
   for (const line of readJournalLines(root, runId, { limit: MAX_READ_LINES })) {
-    if (!line || line.kind !== 'agent') continue;
+    if (!line || !['agent', 'phase'].includes(line.kind)) continue;
     if (line.scriptHash !== scriptHash || line.argsHash !== argsHash) continue;
     if (!['completed', 'failed', 'cancelled'].includes(line.status)) continue;
     if (!line.stepKey) continue;
     if (line.reusedFrom) {
       // 复用行本身也代表该步骤已 settle；沿用其原值
+    }
+    if (line.kind === 'phase') {
+      if (line.status === 'completed' && line.result !== undefined) {
+        table.set(line.stepKey, { status: line.status, result: line.result });
+      }
+      continue;
     }
     table.set(line.stepKey, {
       status: line.status,

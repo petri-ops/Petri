@@ -1,0 +1,124 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  margin-top: var(--petri-space-2);
+  padding: var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+  container-type: inline-size;
+  color: var(--petri-text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+}
+
+.meta {
+  color: var(--petri-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.pathField,
+.paramRow {
+  display: grid;
+  align-items: center;
+  gap: var(--petri-space-2);
+  color: var(--petri-text-secondary);
+}
+
+.pathField {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.pathField input,
+.paramRow input {
+  padding: 4px var(--petri-space-2);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-canvas);
+  color: var(--petri-text);
+  font: inherit;
+}
+
+.params {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paramRow {
+  grid-template-columns: minmax(80px, 0.6fr) minmax(90px, 0.4fr) auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--petri-space-2);
+}
+
+.error,
+.notice {
+  margin: 0;
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-canvas);
+}
+
+.error {
+  color: var(--petri-danger);
+}
+
+.notice {
+  color: var(--petri-text-secondary);
+}
+
+.diff,
+.revisions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+}
+
+.revisionRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+@container (max-width: 420px) {
+  .pathField {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .paramRow {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .paramRow .meta {
+    grid-column: 1 / -1;
+  }
+
+  .revisionRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .revisionRow .meta {
+    grid-column: 1 / -1;
+  }
+}

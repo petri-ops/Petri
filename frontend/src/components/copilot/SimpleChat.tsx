@@ -53,6 +53,7 @@ import { useComposerDrop } from './SimpleChat/hooks/useComposerDrop';
 import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attachmentUpload';
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 import { ScheduleDialog } from './SimpleChat/ScheduleDialog';
+import { PromptEnhanceControls } from './SimpleChat/PromptEnhanceControls';
 import { useScheduleComposer } from './SimpleChat/hooks/useScheduleComposer';
 import { runCompactSlash } from './SimpleChat/compactSlash';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
@@ -1464,7 +1465,7 @@ export function SimpleChat({
   }, [slashOpen]);
 
   // Handle example prompt selection
-  const handleExampleSelect = useCallback((prompt: string) => {
+  const handleInsertComposerText = useCallback((prompt: string) => {
     setInput(prompt);
     saveConversationDraft(projectId, conversationId, prompt);
     taRef.current?.focus();
@@ -1494,7 +1495,7 @@ export function SimpleChat({
               <p>开始新的对话</p>
               <span>在下方输入框中提问</span>
               {examplePromptsToShow.length > 0 && (
-                <ExamplePrompts prompts={examplePromptsToShow} onSelect={handleExampleSelect} />
+                <ExamplePrompts prompts={examplePromptsToShow} onSelect={handleInsertComposerText} />
               )}
             </div>
           )}
@@ -1837,8 +1838,7 @@ export function SimpleChat({
                     </>
                   )}
                 </div>
-                {/* UI-303 — 独立「计划模式」开关已并入左侧档位菜单第四档，composer 不再承载 */}
-                {/* BLOCK-57 UI-290 + BLOCK-60 — 执行目标选择已迁至 设置→计算与数据（默认执行目标），composer 不再承载 */}
+                {!slimComposer && <PromptEnhanceControls prompt={input} hasProject={Boolean(projectId)} contextItems={composerContext.items} onApplyText={handleInsertComposerText} />}
                 {/* BLOCK-69 / UI-318 — 知识空间大脑开关（独立 icon 开关，不挂已移除的 ⋯ 菜单） */}
                 <button
                   type="button"

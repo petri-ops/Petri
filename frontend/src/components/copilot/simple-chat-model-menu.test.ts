@@ -20,8 +20,8 @@ describe('SimpleChat model menu layout', () => {
   });
 
   it('keeps the menu usable in narrow and short windows', () => {
-    expect(rule('.sc-model-menu')).toContain('width: min(280px, calc(100vw - 32px))');
-    expect(rule('.sc-model-menu')).toContain('max-height: min(360px, calc(100vh - 168px))');
+    expect(rule('.sc-model-menu')).toContain('width: min(320px, calc(100vw - 32px))');
+    expect(rule('.sc-model-menu')).toContain('max-height: min(420px, calc(100vh - 168px))');
     expect(rule('.sc-model-menu')).toContain('overflow-y: auto');
   });
 });

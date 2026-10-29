@@ -1,0 +1,247 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  height: 100%;
+  min-height: 0;
+  padding: var(--petri-space-3);
+  overflow-y: auto;
+  container-type: inline-size;
+  color: var(--petri-text);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  margin-right: auto;
+}
+
+.capability {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta {
+  color: var(--petri-text-muted);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(220px, 0.8fr);
+  gap: var(--petri-space-3);
+  min-height: 0;
+  flex: 1;
+}
+
+.viewport {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-canvas);
+}
+
+.viewport :global(.model3d-canvas-host) {
+  position: absolute;
+  inset: 0;
+}
+
+.viewport canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--petri-space-2);
+  height: 100%;
+  min-height: 360px;
+  padding: var(--petri-space-4);
+  text-align: center;
+  color: var(--petri-text-secondary);
+}
+
+.empty p,
+.empty span {
+  margin: 0;
+}
+
+.viewSwitch {
+  position: absolute;
+  right: var(--petri-space-2);
+  bottom: var(--petri-space-2);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-elevated);
+}
+
+.tools {
+  position: absolute;
+  top: var(--petri-space-2);
+  right: var(--petri-space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-elevated);
+}
+
+.bookmarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  margin-top: var(--petri-space-2);
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+}
+
+.compareHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.compareRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--petri-text-secondary);
+}
+
+.viewActive {
+  color: var(--petri-text);
+  background: var(--petri-bg-subtle);
+}
+
+.unit {
+  position: absolute;
+  left: var(--petri-space-2);
+  bottom: var(--petri-space-2);
+  color: var(--petri-text-muted);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-subtle);
+}
+
+.info h4 {
+  margin: 0 0 var(--petri-space-1);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px var(--petri-space-2);
+  margin: 0;
+}
+
+.fields dt {
+  color: var(--petri-text-muted);
+}
+
+.fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.nodeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nodeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--petri-space-2);
+  width: 100%;
+  padding: var(--petri-space-1) 0;
+  border: 0;
+  border-bottom: 1px solid var(--petri-border-card);
+  border-radius: 0;
+  background: transparent;
+  color: var(--petri-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nodeRow:hover,
+.nodeRowSelected {
+  background: var(--petri-bg-canvas);
+}
+
+.nodeRowSelected {
+  box-shadow: inset 2px 0 0 var(--petri-border-strong);
+}
+
+.nodeName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.nodeDims {
+  grid-column: 1 / -1;
+  color: var(--petri-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.error,
+.warning {
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-md);
+  color: var(--petri-danger);
+  background: var(--petri-bg-canvas);
+}
+
+.warning {
+  color: var(--petri-warning);
+}
+
+@container (max-width: 720px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .info {
+    max-height: 240px;
+  }
+}

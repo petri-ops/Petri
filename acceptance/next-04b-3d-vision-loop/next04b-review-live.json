@@ -1,0 +1,241 @@
+{
+  "schema": "next04b-evidence/v1",
+  "generatedAt": "2026-10-29T15:42:31.549Z",
+  "worktree": "D:\\1.WorkDir\\petri",
+  "provider": {
+    "name": "blender",
+    "version": "Blender 4.5.10 LTS"
+  },
+  "visionProvider": "mock-openai-compatible",
+  "mockVisionRequests": [
+    {
+      "model": "mock-vl",
+      "kind": "qa",
+      "imageParts": 4,
+      "textChars": 245
+    },
+    {
+      "model": "mock-vl",
+      "kind": "sketch",
+      "imageParts": 1,
+      "textChars": 397
+    }
+  ],
+  "scenarioVision": {
+    "ok": true,
+    "sceneHash": "57aed73ec5e56626c3b75619dea101af873bd9674eb7a05894717b6e2e524fbd",
+    "renderOutDir": "model3d/runs/m3d-mvtpp89k-kgwfko",
+    "renders": {
+      "front": "model3d/runs/m3d-mvtpp89k-kgwfko/front.png",
+      "top": "model3d/runs/m3d-mvtpp89k-kgwfko/top.png",
+      "side": "model3d/runs/m3d-mvtpp89k-kgwfko/side.png",
+      "iso": "model3d/runs/m3d-mvtpp89k-kgwfko/iso.png"
+    },
+    "mesh": {
+      "objects": 2,
+      "vertices": 72,
+      "triangles": 136,
+      "nonManifoldEdges": 0,
+      "watertight": true,
+      "volumesMm3": {
+        "enclosure": 384000,
+        "port": 898.976141
+      }
+    },
+    "vision": {
+      "status": "ready",
+      "parseStatus": "structured",
+      "model": "mock-vl",
+      "views": [
+        {
+          "view": "front",
+          "observations": [
+            "外壳正面完整，开孔可见"
+          ],
+          "suspectedIssues": [],
+          "uncertain": []
+        },
+        {
+          "view": "top",
+          "observations": [
+            "顶部平面无缺口"
+          ],
+          "suspectedIssues": [],
+          "uncertain": []
+        },
+        {
+          "view": "side",
+          "observations": [
+            "侧面厚度均匀"
+          ],
+          "suspectedIssues": [],
+          "uncertain": []
+        },
+        {
+          "view": "iso",
+          "observations": [
+            "端口与外壳相交"
+          ],
+          "suspectedIssues": [
+            "端口边缘可能需要倒角"
+          ],
+          "uncertain": [
+            "无法从渲染确认精确半径"
+          ]
+        }
+      ]
+    },
+    "project": "D:\\1.WorkDir\\petri\\acceptance\\next-04b-3d-vision-loop\\live-workspace\\project-degraded"
+  },
+  "scenarioDegraded": {
+    "ok": true,
+    "sceneHash": "57aed73ec5e56626c3b75619dea101af873bd9674eb7a05894717b6e2e524fbd",
+    "renderOutDir": "model3d/runs/m3d-mvtpp99r-bc2mg1",
+    "renders": {
+      "front": "model3d/runs/m3d-mvtpp99r-bc2mg1/front.png",
+      "top": "model3d/runs/m3d-mvtpp99r-bc2mg1/top.png",
+      "side": "model3d/runs/m3d-mvtpp99r-bc2mg1/side.png",
+      "iso": "model3d/runs/m3d-mvtpp99r-bc2mg1/iso.png"
+    },
+    "mesh": {
+      "objects": 2,
+      "vertices": 72,
+      "triangles": 136,
+      "nonManifoldEdges": 0,
+      "watertight": true,
+      "volumesMm3": {
+        "enclosure": 384000,
+        "port": 898.976141
+      }
+    },
+    "vision": {
+      "status": "unavailable",
+      "reason": "model_profile_not_found",
+      "message": "模型配置不存在: vision"
+    },
+    "project": "D:\\1.WorkDir\\petri\\acceptance\\next-04b-3d-vision-loop\\live-workspace\\project"
+  },
+  "scenarioSketch": {
+    "ok": true,
+    "model": "mock-vl",
+    "optimizedPrompt": "设计一个 120×80×40mm 的 ABS 外壳，正面开 USB 口。",
+    "taskSpec": {
+      "version": "task-spec/v1",
+      "taskType": "modeling",
+      "goal": "设计带 USB 口的 ABS 外壳",
+      "deliverables": [
+        "scene3d/v1 SceneSpec",
+        "GLB 导出"
+      ],
+      "constraints": [
+        "宽度 120mm",
+        "深度 80mm",
+        "高度 40mm"
+      ],
+      "assumptions": [
+        "材料为 ABS"
+      ],
+      "acceptance": [
+        "USB 口与外壳相交且可导出"
+      ],
+      "missingInfo": [
+        "壁厚未给出",
+        "USB 口精确半径未给出"
+      ]
+    },
+    "changeSummary": []
+  },
+  "assertions": [
+    {
+      "id": "B0_blender_ready",
+      "pass": true,
+      "detail": "ready Blender 4.5.10 LTS"
+    },
+    {
+      "id": "V1_review_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-review/v1\",\"sceneHash\":\"57aed73ec5e56626c3b75619dea101af873bd9674eb7a05894717b6e2e524fbd\",\"provider\":{\"name\":\"blender\",\"version\":\"Blender 4.5.10 LTS\"},\"render\":{\"outDir\":\"model3d/runs/m3d-mvtpp89k-kgwfko\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertigh"
+    },
+    {
+      "id": "V2_four_renders",
+      "pass": true,
+      "detail": "{\"front\":\"model3d/runs/m3d-mvtpp89k-kgwfko/front.png\",\"top\":\"model3d/runs/m3d-mvtpp89k-kgwfko/top.png\",\"side\":\"model3d/runs/m3d-mvtpp89k-kgwfko/side.png\",\"iso\":\"model3d/runs/m3d-mvtpp89k-kgwfko/iso.png\"}"
+    },
+    {
+      "id": "V3_mesh_watertight",
+      "pass": true,
+      "detail": "{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"enclosure\":384000,\"port\":898.976141}}"
+    },
+    {
+      "id": "V4_vision_ready",
+      "pass": true,
+      "detail": "{\"status\":\"ready\",\"model\":\"mock-vl\",\"usage\":{\"prompt_tokens\":128,\"completion_tokens\":96,\"total_tokens\":224},\"parseStatus\":\"structured\",\"views\":[{\"view\":\"front\",\"observations\":[\"外壳正面完整，开孔可见\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"top\",\"observations\":[\"顶部平面无缺口\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"side\",\"observations\":[\"侧面厚度均匀\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"iso\",\"o"
+    },
+    {
+      "id": "V5_vision_structured",
+      "pass": true,
+      "detail": "{\"status\":\"ready\",\"model\":\"mock-vl\",\"usage\":{\"prompt_tokens\":128,\"completion_tokens\":96,\"total_tokens\":224},\"parseStatus\":\"structured\",\"views\":[{\"view\":\"front\",\"observations\":[\"外壳正面完整，开孔可见\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"top\",\"observations\":[\"顶部平面无缺口\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"side\",\"observations\":[\"侧面厚度均匀\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"iso\",\"o"
+    },
+    {
+      "id": "V6_vision_images_sent",
+      "pass": true,
+      "detail": "[{\"model\":\"mock-vl\",\"kind\":\"qa\",\"imageParts\":4,\"textChars\":245}]"
+    },
+    {
+      "id": "V7_vision_issue_surfaced",
+      "pass": true,
+      "detail": "[{\"view\":\"front\",\"observations\":[\"外壳正面完整，开孔可见\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"top\",\"observations\":[\"顶部平面无缺口\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"side\",\"observations\":[\"侧面厚度均匀\"],\"suspectedIssues\":[],\"uncertain\":[]},{\"view\":\"iso\",\"observations\":[\"端口与外壳相交\"],\"suspectedIssues\":[\"端口边缘可能需要倒角\"],\"uncertain\":[\"无法从渲染确认精确半径\"]}]"
+    },
+    {
+      "id": "V8_no_absolute_paths",
+      "pass": true,
+      "detail": "review payload must expose only workspace-relative paths"
+    },
+    {
+      "id": "V9_render_files_exist",
+      "pass": true,
+      "detail": "[\"model3d/runs/m3d-mvtpp89k-kgwfko/front.png\",\"model3d/runs/m3d-mvtpp89k-kgwfko/top.png\",\"model3d/runs/m3d-mvtpp89k-kgwfko/side.png\",\"model3d/runs/m3d-mvtpp89k-kgwfko/iso.png\"]"
+    },
+    {
+      "id": "S1_sketch_task_spec_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"optimizedPrompt\":\"设计一个 120×80×40mm 的 ABS 外壳，正面开 USB 口。\",\"taskSpec\":{\"version\":\"task-spec/v1\",\"taskType\":\"modeling\",\"goal\":\"设计带 USB 口的 ABS 外壳\",\"deliverables\":[\"scene3d/v1 SceneSpec\",\"GLB 导出\"],\"constraints\":[\"宽度 120mm\",\"深度 80mm\",\"高度 40mm\"],\"assumptions\":[\"材料为 ABS\"],\"acceptance\":[\"USB 口与外壳相交且可导出\"],\"missingInfo\":[\"壁厚未给出\",\"USB 口精确半径未给出\"]},\"changeSummary\":[],\"contextUsed\":[],\"model\":\"mock-vl"
+    },
+    {
+      "id": "S2_sketch_task_type_modeling",
+      "pass": true,
+      "detail": "{\"version\":\"task-spec/v1\",\"taskType\":\"modeling\",\"goal\":\"设计带 USB 口的 ABS 外壳\",\"deliverables\":[\"scene3d/v1 SceneSpec\",\"GLB 导出\"],\"constraints\":[\"宽度 120mm\",\"深度 80mm\",\"高度 40mm\"],\"assumptions\":[\"材料为 ABS\"],\"acceptance\":[\"USB 口与外壳相交且可导出\"],\"missingInfo\":[\"壁厚未给出\",\"USB 口精确半径未给出\"]}"
+    },
+    {
+      "id": "S3_sketch_missing_info_honest",
+      "pass": true,
+      "detail": "[\"壁厚未给出\",\"USB 口精确半径未给出\"]"
+    },
+    {
+      "id": "S4_sketch_prompt_forbids_invention",
+      "pass": true,
+      "detail": "[{\"model\":\"mock-vl\",\"kind\":\"qa\",\"imageParts\":4,\"textChars\":245},{\"model\":\"mock-vl\",\"kind\":\"sketch\",\"imageParts\":1,\"textChars\":397}]"
+    },
+    {
+      "id": "D1_render_still_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-review/v1\",\"sceneHash\":\"57aed73ec5e56626c3b75619dea101af873bd9674eb7a05894717b6e2e524fbd\",\"provider\":{\"name\":\"blender\",\"version\":\"Blender 4.5.10 LTS\"},\"render\":{\"outDir\":\"model3d/runs/m3d-mvtpp99r-bc2mg1\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertigh"
+    },
+    {
+      "id": "D2_renders_complete",
+      "pass": true,
+      "detail": "{\"front\":\"model3d/runs/m3d-mvtpp99r-bc2mg1/front.png\",\"top\":\"model3d/runs/m3d-mvtpp99r-bc2mg1/top.png\",\"side\":\"model3d/runs/m3d-mvtpp99r-bc2mg1/side.png\",\"iso\":\"model3d/runs/m3d-mvtpp99r-bc2mg1/iso.png\"}"
+    },
+    {
+      "id": "D3_vision_unavailable",
+      "pass": true,
+      "detail": "{\"status\":\"unavailable\",\"reason\":\"model_profile_not_found\",\"message\":\"模型配置不存在: vision\"}"
+    },
+    {
+      "id": "D4_degrade_reason_honest",
+      "pass": true,
+      "detail": "{\"status\":\"unavailable\",\"reason\":\"model_profile_not_found\",\"message\":\"模型配置不存在: vision\"}"
+    }
+  ],
+  "passed": true
+}

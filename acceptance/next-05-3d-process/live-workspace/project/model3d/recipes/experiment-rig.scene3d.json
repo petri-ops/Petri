@@ -1,0 +1,151 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "platformWidth": 600,
+    "platformDepth": 400,
+    "platformHeight": 20,
+    "containerRadius": 60,
+    "containerHeight": 120,
+    "sensorCount": 3
+  },
+  "nodes": [
+    {
+      "id": "platform",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": "platformWidth",
+        "height": "platformHeight",
+        "depth": "platformDepth"
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "实验平台"
+    },
+    {
+      "id": "container",
+      "type": "cylinder",
+      "transform": {
+        "position": [
+          0,
+          0,
+          80
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "radius": "containerRadius",
+        "height": "containerHeight"
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.55
+      },
+      "label": "实验容器"
+    },
+    {
+      "id": "sensor-1",
+      "type": "box",
+      "transform": {
+        "position": [
+          96,
+          0,
+          26
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 10.799999999999999,
+        "height": 12,
+        "depth": 10.799999999999999
+      },
+      "material": {
+        "color": "#8aa36a",
+        "roughness": 0.65
+      },
+      "label": "传感器 1"
+    },
+    {
+      "id": "sensor-2",
+      "type": "box",
+      "transform": {
+        "position": [
+          -47.99999999999998,
+          83.13843876330611,
+          26
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 10.799999999999999,
+        "height": 12,
+        "depth": 10.799999999999999
+      },
+      "material": {
+        "color": "#8aa36a",
+        "roughness": 0.65
+      },
+      "label": "传感器 2"
+    },
+    {
+      "id": "sensor-3",
+      "type": "box",
+      "transform": {
+        "position": [
+          -48.00000000000005,
+          -83.1384387633061,
+          26
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 10.799999999999999,
+        "height": 12,
+        "depth": 10.799999999999999
+      },
+      "material": {
+        "color": "#8aa36a",
+        "roughness": 0.65
+      },
+      "label": "传感器 3"
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "实验台架",
+    "recipeId": "experiment-rig",
+    "recipeVersion": 1,
+    "generatedAt": "2026-10-29T16:56:50.746Z"
+  }
+}

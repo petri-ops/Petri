@@ -1,0 +1,33 @@
+{
+  "name": "next06-resilience-live",
+  "startedAt": "2026-10-29T16:54:05.955Z",
+  "finishedAt": "2026-10-29T16:54:10.014Z",
+  "assertions": [
+    {
+      "name": "R0_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvts9bpm_qqoe\",\"name\":\"NEXT-06-R-1793292845956\",\"created_at\":\"2026-10-29T16:54:05.962Z\",\"updated_at\":\"2026-10-29T16:54:05.962Z\",\"description\":\"\",\""
+    },
+    {
+      "name": "R1_first_frame",
+      "pass": true,
+      "detail": "424ms"
+    },
+    {
+      "name": "R2_context_lost_dispatched",
+      "pass": true,
+      "detail": "dispatched"
+    },
+    {
+      "name": "R3_context_lost_honest",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型视觉 QA参数编辑草图转需求对比 SceneSpec测量保存视角截图等轴前顶侧单位 mm · Z-up · 点选模型选择节点webgl_context_lost场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "R4_recovered_after_reload",
+      "pass": true,
+      "detail": "{\"canvas\":true,\"text\":false}"
+    }
+  ],
+  "allPass": true
+}

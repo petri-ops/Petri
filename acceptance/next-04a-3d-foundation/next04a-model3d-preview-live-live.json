@@ -1,0 +1,43 @@
+{
+  "name": "next04a-model3d-preview-live",
+  "startedAt": "2026-10-29T14:12:15.926Z",
+  "finishedAt": "2026-10-29T14:12:17.948Z",
+  "assertions": [
+    {
+      "name": "W0_temp_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtmh7ew_tquf\",\"name\":\"NEXT-04A-3D-1793283135927\",\"created_at\":\"2026-10-29T14:12:15.944Z\",\"updated_at\":\"2026-10-29T14:12:15.944Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"m"
+    },
+    {
+      "name": "W1_sample_loaded",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "W2_three_canvas_present",
+      "pass": true,
+      "detail": "{\"present\":true,\"width\":648,\"height\":740,\"rect\":{\"width\":639.9926147460938,\"height\":730.9970092773438},\"snapshotLength\":121538,\"snapshotPrefix\":\"data:image/png;base64,iVBORw0KGg\",\"text\":\"3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth "
+    },
+    {
+      "name": "W3_scene_rendered_objects",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8"
+    },
+    {
+      "name": "W4_scene_stats",
+      "pass": true,
+      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8"
+    },
+    {
+      "name": "W5_canvas_has_pixels",
+      "pass": true,
+      "detail": "len=121538 prefix=data:image/png;base64,iVBORw0KGg"
+    },
+    {
+      "name": "W6_view_switch",
+      "pass": true,
+      "detail": "true"
+    }
+  ],
+  "allPass": true
+}

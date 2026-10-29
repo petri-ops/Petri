@@ -1,0 +1,73 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "width": 120,
+    "height": 40,
+    "depth": 80,
+    "wall": 2,
+    "portRadius": 6,
+    "portLength": 8
+  },
+  "nodes": [
+    {
+      "id": "enclosure",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": "width",
+        "height": "height",
+        "depth": "depth"
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "外壳主体"
+    },
+    {
+      "id": "port",
+      "type": "cylinder",
+      "transform": {
+        "position": [
+          60,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          90,
+          0
+        ]
+      },
+      "dimensions": {
+        "radius": "portRadius",
+        "height": "portLength"
+      },
+      "material": {
+        "color": "#d29b42",
+        "roughness": 0.55
+      },
+      "label": "正面端口凸台"
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "箱体外壳",
+    "recipeId": "box-enclosure",
+    "recipeVersion": 1,
+    "generatedAt": "2026-10-29T16:57:04.187Z"
+  }
+}

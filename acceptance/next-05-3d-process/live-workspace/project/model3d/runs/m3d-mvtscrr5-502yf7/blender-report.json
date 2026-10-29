@@ -1,0 +1,45 @@
+{
+  "ok": true,
+  "blenderVersion": "4.5.10 LTS",
+  "renderEngine": "BLENDER_WORKBENCH",
+  "mesh": {
+    "objects": 2,
+    "vertices": 72,
+    "triangles": 136,
+    "nonManifoldEdges": 0,
+    "watertight": true,
+    "volumesMm3": {
+      "enclosure": 384000.0,
+      "port": 898.976141
+    }
+  },
+  "boundsMm": {
+    "min": [
+      -60.0,
+      -40.0,
+      -20.0
+    ],
+    "max": [
+      60.0,
+      40.0,
+      20.0
+    ],
+    "size": [
+      120.0,
+      80.0,
+      40.0
+    ]
+  },
+  "renders": {
+    "front": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\front.png",
+    "top": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\top.png",
+    "side": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\side.png",
+    "iso": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\iso.png"
+  },
+  "exports": {
+    "glb": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\scene.glb",
+    "stl": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\scene.stl",
+    "obj": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscrr5-502yf7\\scene.obj"
+  },
+  "unsupported": []
+}

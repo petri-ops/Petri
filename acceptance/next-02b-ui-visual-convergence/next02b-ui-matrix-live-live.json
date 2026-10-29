@@ -1,0 +1,103 @@
+{
+  "name": "next02b-ui-matrix-live",
+  "startedAt": "2026-10-29T16:37:25.921Z",
+  "finishedAt": "2026-10-29T16:37:37.069Z",
+  "assertions": [
+    {
+      "name": "M0_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtrnw3b_9wc1\",\"name\":\"NEXT-02B-UI-1793291845922\",\"created_at\":\"2026-10-29T16:37:25.943Z\",\"updated_at\":\"2026-10-29T16:37:25.943Z\",\"description\":\"\""
+    },
+    {
+      "name": "M1_no_horizontal_overflow_1440",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1776,\"clientWidth\":1776}"
+    },
+    {
+      "name": "M2_composer_within_viewport_1440",
+      "pass": true,
+      "detail": "{\"x\":483.78546142578125,\"y\":964.81201171875,\"width\":719.9907836914062,\"height\":99.95376586914062,\"scrollWidth\":718,\"clientWidth\":718}"
+    },
+    {
+      "name": "M3_surface_within_panel_1440",
+      "pass": true,
+      "detail": "{\"x\":1435.5888671875,\"y\":37.993221282958984,\"width\":339.9969482421875,\"height\":1071.7479248046875,\"scrollWidth\":340,\"clientWidth\":340}"
+    },
+    {
+      "name": "M1_no_horizontal_overflow_1024",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1263,\"clientWidth\":1263}"
+    },
+    {
+      "name": "M2_composer_within_viewport_1024",
+      "pass": true,
+      "detail": "{\"x\":266.9852294921875,\"y\":802.0499877929688,\"width\":640.6597290039062,\"height\":99.95376586914062,\"scrollWidth\":639,\"clientWidth\":639}"
+    },
+    {
+      "name": "M3_surface_within_panel_1024",
+      "pass": true,
+      "detail": "{\"x\":922.641845703125,\"y\":37.993221282958984,\"width\":339.9969482421875,\"height\":908.98583984375,\"scrollWidth\":340,\"clientWidth\":340}"
+    },
+    {
+      "name": "M1_no_horizontal_overflow_720",
+      "pass": true,
+      "detail": "{\"scrollWidth\":888,\"clientWidth\":888}"
+    },
+    {
+      "name": "M2_composer_within_viewport_720",
+      "pass": true,
+      "detail": "{\"x\":89.88903045654297,\"y\":964.81201171875,\"width\":719.9907836914062,\"height\":99.95376586914062,\"scrollWidth\":718,\"clientWidth\":718}"
+    },
+    {
+      "name": "M1_no_horizontal_overflow_480",
+      "pass": true,
+      "detail": "{\"scrollWidth\":592,\"clientWidth\":592}"
+    },
+    {
+      "name": "M2_composer_within_viewport_480",
+      "pass": true,
+      "detail": "{\"x\":25.98643684387207,\"y\":841.5074462890625,\"width\":551.8804321289062,\"height\":99.95376586914062,\"scrollWidth\":550,\"clientWidth\":550}"
+    },
+    {
+      "name": "M1_no_horizontal_overflow_1280",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1578,\"clientWidth\":1578}"
+    },
+    {
+      "name": "M2_composer_within_viewport_1280",
+      "pass": true,
+      "detail": "{\"x\":385.1418151855469,\"y\":841.5074462890625,\"width\":719.9907836914062,\"height\":99.95376586914062,\"scrollWidth\":718,\"clientWidth\":718}"
+    },
+    {
+      "name": "M3_surface_within_panel_1280",
+      "pass": true,
+      "detail": "{\"x\":1238.301513671875,\"y\":37.993221282958984,\"width\":339.9969482421875,\"height\":948.4432983398438,\"scrollWidth\":340,\"clientWidth\":340}"
+    },
+    {
+      "name": "M4_dark_theme_applied",
+      "pass": true,
+      "detail": "{\"light\":\"rgb(255, 255, 255)\",\"dark\":\"rgb(29, 41, 69)\"}"
+    },
+    {
+      "name": "M5_dark_no_overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1263,\"clientWidth\":1263}"
+    },
+    {
+      "name": "M6_reduced_motion",
+      "pass": true,
+      "detail": "1e-06s"
+    },
+    {
+      "name": "M7_composer_focus",
+      "pass": true,
+      "detail": "focused"
+    },
+    {
+      "name": "M8_screenshot",
+      "pass": true,
+      "detail": "screenshot_unavailable: cdp_command_failed:-32000"
+    }
+  ],
+  "allPass": true
+}

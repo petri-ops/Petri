@@ -74,7 +74,7 @@ test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（工具
   const b = new Set(union);
   assert.ok(TOOL_DEFS.every((t) => b.has(t)), '每个 TOOL_DEFS 成员都来自某域模块（同引用）');
   assert.deepEqual(Object.keys(DOMAIN_TOOL_DEFS).sort(),
-    ['agent-orchestration', 'browser', 'computer', 'knowledge', 'remote', 'resident', 'result-studio', 'session', 'skill', 'web', 'workspace']);
+    ['agent-orchestration', 'browser', 'computer', 'knowledge', 'model3d', 'remote', 'resident', 'result-studio', 'session', 'skill', 'web', 'workflow', 'workspace']);
 });
 
 test('D-1/D-3 定版契约：九域+all 类目集、session 底座、θ=0.80', () => {

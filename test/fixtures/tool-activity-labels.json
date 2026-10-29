@@ -255,6 +255,42 @@
     "label": "已运行",
     "icon": "play"
   },
+  "run_workflow": {
+    "label": "已运行工作流",
+    "icon": "layers"
+  },
+  "model3d_inspect": {
+    "label": "已检查 3D 场景",
+    "icon": "layers"
+  },
+  "model3d_validate": {
+    "label": "已校验 3D 场景",
+    "icon": "shield"
+  },
+  "model3d_propose": {
+    "label": "已生成 3D 提案",
+    "icon": "sparkles"
+  },
+  "model3d_apply": {
+    "label": "已写入 3D 场景",
+    "icon": "pencil"
+  },
+  "model3d_render": {
+    "label": "已渲染 3D 视图",
+    "icon": "layers"
+  },
+  "model3d_export": {
+    "label": "已导出 3D 模型",
+    "icon": "download"
+  },
+  "model3d_visual_qa": {
+    "label": "已做 3D 视觉检查",
+    "icon": "shield"
+  },
+  "model3d_recipe": {
+    "label": "已生成 3D recipe",
+    "icon": "layers"
+  },
   "search": {
     "label": "已搜索",
     "icon": "globe"

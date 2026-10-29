@@ -3,6 +3,288 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "next04b-evidence-scripts",
+      "note": "NEXT-04B 验收执行器：直连 Blender+vision mock/降级证据与 9223 实机流；只随定向测试与文档门，不参与产品脚本分类。",
+      "patterns": [
+        "scripts/next04b-model3d-review-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next04b-model3d-review-ui-live.cjs"
+      ],
+      "tests": [
+        "test/next04b-model3d-review.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "next05-evidence-scripts",
+      "note": "NEXT-05 验收执行器：五类 recipe/STL 导入/recipe workflow 与 9223 编辑实机流；只随定向测试与文档门，不参与产品脚本分类。",
+      "patterns": [
+        "scripts/next05-recipes-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next05-model3d-edit-live.cjs"
+      ],
+      "tests": [
+        "test/next05-recipes.test.mjs",
+        "test/next05-recipe-workflow.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "next02b-ui-visual-convergence",
+      "note": "NEXT-02B UI 收敛：3D workSurface 容器查询/窄面板布局、双主题/reduced motion/视口矩阵与漂移清单；截图不可得按纪律标注。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next02b-ui-matrix-live.cjs",
+        "frontend/src/components/work-surface/model3d-layout.test.ts",
+        "acceptance/next-02b-ui-visual-convergence/**"
+      ],
+      "tests": [
+        "frontend/src/components/work-surface/model3d-layout.test.ts"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "next06-convergence",
+      "note": "NEXT-06 收敛：证据矩阵、黄金路径 120→130、可复现/指标、WebGL 丢失与刷新恢复；验收脚本只随定向测试与文档门。",
+      "patterns": [
+        "scripts/next06-golden-path.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next06-resilience-live.cjs",
+        "acceptance/next-06-convergence/**"
+      ],
+      "tests": [
+        "test/next05-recipes.test.mjs",
+        "test/next05-scene-store.test.mjs",
+        "frontend/src/components/work-surface/model3d-layout.test.ts"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "next04b-3d-vision-loop",
+      "note": "NEXT-04B 多视角渲染 + vision 辅助 QA + 几何报告并排 + 节点选择上下文进 Composer；视觉只作观察线索，几何事实由 Blender 网格报告背书。",
+      "patterns": [
+        "core/petri-server/helpers/model3d-review.js",
+        "core/petri-server/helpers/model3d-sketch.js",
+        "core/petri-server/routes/model3d.js",
+        "core/petri-server/agent-tools/model3d-tools.js",
+        "core/petri-server/agent-tools/tool-defs/model3d.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "frontend/src/lib/model3dClient.ts",
+        "frontend/src/lib/sketchSpecClient.ts",
+        "frontend/src/components/work-surface/Model3DReviewPanel.tsx",
+        "frontend/src/components/work-surface/Model3DReviewPanel.module.css",
+        "frontend/src/components/work-surface/Model3DReviewPanel.test.tsx",
+        "frontend/src/components/work-surface/SketchSpecDialog.tsx",
+        "frontend/src/components/work-surface/SketchSpecDialog.module.css",
+        "frontend/src/components/work-surface/SketchSpecDialog.test.tsx",
+        "frontend/src/components/work-surface/Model3DSurface.tsx",
+        "frontend/src/components/work-surface/Model3DSurface.module.css",
+        "frontend/src/components/work-surface/Model3DScene.tsx",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "frontend/src/lib/statusProjection.ts",
+        "test/next04b-*.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/fixtures/tool-activity-labels.json",
+        "acceptance/next-04b-3d-vision-loop/**"
+      ],
+      "tests": [
+        "test/next04b-model3d-review.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "frontend/src/components/work-surface/Model3DReviewPanel.test.tsx",
+        "frontend/src/components/work-surface/SketchSpecDialog.test.tsx",
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "frontend/src/components/workspace-panels/RightPanel.test.tsx",
+        "test/next05-recipes.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "next05-3d-process",
+      "note": "NEXT-05 参数化编辑/修订恢复/语义 diff/测量/书签/对比 + 五类 recipe（dryRun→执行→渲染→导出→manifest）+ recipe workflow 原语 + STL/OBJ 有界导入；SceneSpec 仍是源真相。",
+      "patterns": [
+        "core/petri-server/helpers/model3d-scene-store.js",
+        "core/petri-server/helpers/model3d-recipes.js",
+        "core/petri-server/helpers/model3d-recipe-runner.js",
+        "resources/model3d/workflows/recipe-build.js",
+        "frontend/src/lib/sceneEditClient.ts",
+        "frontend/src/components/work-surface/Model3DEditPanel.tsx",
+        "frontend/src/components/work-surface/Model3DEditPanel.module.css",
+        "frontend/src/components/work-surface/Model3DEditPanel.test.tsx",
+        "test/next05-*.test.mjs",
+        "acceptance/next-05-3d-process/**"
+      ],
+      "tests": [
+        "test/next05-scene-store.test.mjs",
+        "test/next05-recipes.test.mjs",
+        "test/next05-recipe-workflow.test.mjs",
+        "test/next05-csp.test.mjs",
+        "frontend/src/components/work-surface/Model3DEditPanel.test.tsx",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "next04a-blender-live-script",
+      "note": "NEXT-04A 真实 Blender 验收执行器（临时 DB/项目 → SceneSpec apply → 四视角渲染 → GLB/STL/OBJ + manifest 哈希）；只随定向测试与文档门，不参与产品脚本分类。",
+      "patterns": [
+        "scripts/next04a-blender-live.mjs"
+      ],
+      "tests": [
+        "test/next04a-scene3d.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "next04a-3d-foundation",
+      "note": "NEXT-04A SceneSpec + Three.js 只读预览 + 可选 Blender 本地 provider + model3d_* 工具 + 导出 manifest；Three 为 MIT 单依赖，Blender 不随包分发。",
+      "patterns": [
+        "core/petri-server/helpers/scene3d.js",
+        "core/petri-server/helpers/blender-provider.js",
+        "core/petri-server/routes/model3d.js",
+        "core/petri-server/agent-tools/model3d-tools.js",
+        "core/petri-server/agent-tools/tool-defs/model3d.js",
+        "resources/model3d/blender_scene.py",
+        "frontend/src/lib/scene3d.ts",
+        "frontend/src/lib/scene3d.test.ts",
+        "frontend/src/lib/model3dClient.ts",
+        "frontend/src/components/work-surface/Model3DScene.tsx",
+        "frontend/src/components/work-surface/Model3DSurface.tsx",
+        "frontend/src/components/work-surface/Model3DSurface.module.css",
+        "frontend/package.json",
+        "frontend/package-lock.json",
+        "test/next04a-*.test.mjs",
+        "acceptance/next-04a-3d-foundation/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next04a-*.cjs"
+      ],
+      "tests": [
+        "test/next04a-scene3d.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/block109-p2-tool-metadata.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "frontend/src/lib/scene3d.test.ts",
+        "frontend/src/lib/workSurface/registry.test.ts",
+        "frontend/src/components/workspace-panels/RightPanel.test.tsx",
+        "frontend/src/components/copilot/toolActivity.test.ts",
+        "test/next05-recipes.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "next03-prompt-enhance",
+      "note": "NEXT-03 Composer 提示词增强：task-spec/v1 草稿、能力快照、点击触发预览、零自动替换/发送；真实当前 chat profile 凭据链。",
+      "patterns": [
+        "core/petri-server/helpers/task-spec.js",
+        "core/petri-server/routes/ai-agent/suggestions.js",
+        "frontend/src/lib/promptEnhanceClient.ts",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceDialog.tsx",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceDialog.module.css",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceControls.tsx",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceDialog.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/lib/statusProjection.ts",
+        "test/next03-*.test.mjs",
+        "acceptance/next-03-prompt-enhance/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next03-*.cjs"
+      ],
+      "tests": [
+        "test/next03-task-spec.test.mjs",
+        "test/block264-assistant-suggestions.test.mjs",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceDialog.test.tsx",
+        "frontend/src/components/copilot/SimpleChat.test.tsx",
+        "frontend/src/lib/statusProjection.test.ts"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "next01-q4b-rem",
+      "note": "NEXT-01 Q4b-REM：run_workflow Agent 工具、workflow schedule 类型、workflow run resume、右侧工作流控制面与隔离实机；单一 runner/调度/审批链。",
+      "patterns": [
+        "core/petri-server/routes/ai-agent/workflow.js",
+        "core/petri-server/routes/automation.js",
+        "core/petri-server/helpers/automation-store.js",
+        "core/petri-server/helpers/automation-runner.js",
+        "core/petri-server/agent-tools/workflow-tools.js",
+        "core/petri-server/agent-tools/tool-defs/workflow.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "frontend/src/lib/workflowClient.ts",
+        "frontend/src/components/work-surface/WorkflowRunsPanel.tsx",
+        "frontend/src/components/work-surface/WorkflowRunsPanel.module.css",
+        "frontend/src/components/work-surface/WorkflowRunsPanel.test.tsx",
+        "frontend/src/lib/workSurface/registry.ts",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/workspace-panels/ScheduledWorkspacePanel.tsx",
+        "frontend/src/pages/project-workspace/EmptyResult.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "test/next01-*.test.mjs",
+        "acceptance/next-01-q4b-rem/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next01-*.cjs"
+      ],
+      "tests": [
+        "test/next01-q4b-rem.test.mjs",
+        "test/block262-workflow-routes.test.mjs",
+        "test/block256-automation.test.mjs",
+        "frontend/src/components/work-surface/WorkflowRunsPanel.test.tsx",
+        "frontend/src/lib/workSurface/registry.test.ts",
+        "frontend/src/components/workspace-panels/RightPanel.test.tsx",
+        "frontend/src/components/copilot/ToolActivityList.test.tsx"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "next02a-ui-trust-core",
+      "note": "NEXT-02A UI 可信基线：执行/证据/能力三轴投影与徽标、高频状态面接线、轨迹读取有界超时；后续 3D/workflow 面板复用同一语义。",
+      "patterns": [
+        "frontend/src/lib/statusProjection.ts",
+        "frontend/src/lib/statusProjection.test.ts",
+        "frontend/src/lib/trajectoryClient.ts",
+        "frontend/src/lib/trajectoryClient.timeout.test.ts",
+        "frontend/src/components/ui/controls/Status.tsx",
+        "frontend/src/components/ui/controls/status.module.css",
+        "frontend/src/components/ui/controls/StatusBadge.test.tsx",
+        "frontend/src/components/work-surface/TraceSurface.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.tsx",
+        "frontend/src/components/workspace-panels/ResultsLibrary.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+        "frontend/src/components/copilot/ToolActivityList.tsx",
+        "frontend/src/pages/window/CommandCenterJobsWall.tsx",
+        "test/next02a-*.test.mjs",
+        "acceptance/next-02a-ui-trust-core/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next02a-*.cjs"
+      ],
+      "tests": [
+        "frontend/src/lib/statusProjection.test.ts",
+        "frontend/src/lib/trajectoryClient.timeout.test.ts",
+        "frontend/src/components/ui/controls/StatusBadge.test.tsx",
+        "frontend/src/components/work-surface/TraceSurface.test.tsx",
+        "frontend/src/components/work-surface/EvidenceSurface.test.tsx",
+        "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx",
+        "frontend/src/components/copilot/ToolActivityList.test.tsx",
+        "frontend/src/pages/window/CommandCenterJobsWall.test.tsx",
+        "test/next02a-status-contract.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "ui591-resize-glow-follow",
       "classifiesScripts": true,
       "note": "UI-591 拖拽边界指针跟随渐晕（BLOCK-273 reopen 兑现；v2 用户裁决=光晕收窄 rx7px+悬停同色竖带退场，线保持中性）：lib/resize-glow.ts 跟手 helper + 三处 CSS radial-gradient 光晕 + 四组件 onPointerMove 接线；常驻探针 scripts/ui591-glow-follow-live.cjs（9222 主实例真实指针取证；测试不弹屏=用户裁决，禁用 --onscreen 弹窗路线）；取证目录 acceptance/ui-591/**；CSS 棘轮由 block273 规则的 theme 契约门覆盖。",
@@ -4648,7 +4930,8 @@
         "frontend/src/components/desktop/TitleBar.test.tsx",
         "frontend/src/pages/project-workspace/fileOps.test.tsx",
         "frontend/src/pages/project-workspace/WorkspaceFileTabStrip.test.tsx",
-        "frontend/src/pages/project-workspace/RightFileTree.shortcuts.test.tsx"
+        "frontend/src/pages/project-workspace/RightFileTree.shortcuts.test.tsx",
+        "test/next05-csp.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -5635,7 +5918,8 @@
         "test/block249-team.test.mjs",
         "test/block49-spawn-agent-tools.test.mjs",
         "test/agent-tool-registry.test.mjs",
-        "test/block198-spawn-depth.test.mjs"
+        "test/block198-spawn-depth.test.mjs",
+        "test/next05-recipe-workflow.test.mjs"
       ],
       "classifiesScripts": true
     },

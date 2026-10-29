@@ -1,0 +1,51 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {},
+  "nodes": [
+    {
+      "id": "base",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 10,
+        "height": 10,
+        "depth": 10
+      },
+      "material": {
+        "color": "#4c78a8"
+      }
+    },
+    {
+      "id": "imported",
+      "type": "mesh-reference",
+      "transform": {
+        "position": [
+          30,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "source": {
+        "path": "meshes/cube.stl",
+        "sourceSha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "NEXT-05 mesh import"
+  }
+}

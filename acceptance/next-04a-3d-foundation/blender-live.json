@@ -1,0 +1,84 @@
+{
+  "name": "next04a-blender-live",
+  "generatedAt": "2026-10-29T14:11:25.943Z",
+  "projectId": "p_mvtmg2h8_qopy",
+  "workspace": "acceptance/next-04a-3d-foundation/blender-live",
+  "checks": [
+    {
+      "name": "scene_valid",
+      "pass": true,
+      "detail": "{\"ok\":true,\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{\"width\":120,\"height\":40,\"depth\":80,\"wall\":2,\"portRadius\":6,\"portLength\":8},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]},\"dimensions\":{\"width\":\"width\",\"height\":\"height\",\"depth\":\"depth\"},\"material\":{\"color\":\"#4c78a8\",\"roughness\":0.65}},{\"id\":\"por"
+    },
+    {
+      "name": "apply_writes_scene",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/live.scene3d.json\",\"beforeHash\":\"862c4ca94c2ffe3a51f1eb0c57af3b7840293d83e511bda38a6383894900e662\",\"afterHash\":\"b37991a46a5cea09f661f65f249a0c598cf8b769539afda83d6b7d776a185487\",\"backupPath\":\"model3d/live.scene3d.json.bak\",\"message\":\"SceneSpec 已写入项目工作区；可经 .bak 回退。\"}"
+    },
+    {
+      "name": "apply_parameter_persisted",
+      "pass": true,
+      "detail": "130"
+    },
+    {
+      "name": "inspect_summary",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"b37991a46a5cea09f661f65f249a0c598cf8b769539afda83d6b7d776a185487\",\"meta\":{\"title\":\"NEXT-04A live enclosure\"},\"stats\":{\"nodes\":2,\"parameters\":6,\"constraints\":0,\"primitiveEstimate\":2},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"dimensions\":{\"width\":130,\"height\":40,\"depth\":80},\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]}},{\"id\":\"port\",\"type\":\"cylinder\",\"dimensions\":{\"radiu"
+    },
+    {
+      "name": "blender_render_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"provider\":\"blender\",\"providerVersion\":\"Blender 4.5.10 LTS\",\"scene\":\"model3d/runs/m3d-mvtmg2ll-nm57m7/scene.json\",\"outDir\":\"model3d/runs/m3d-mvtmg2ll-nm57m7\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"enclosure\":416000,\"port\":898.976141}},\"boundsMm\":{\"min\":[-65,-40,-20],\"max\":[65,40,20],\"size\":[130,80,40]},\"renders\":{\"front\":\"D:\\\\1.WorkDir\\\\"
+    },
+    {
+      "name": "four_views",
+      "pass": true,
+      "detail": "{\"front\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-04a-3d-foundation\\\\blender-live\\\\model3d\\\\runs\\\\m3d-mvtmg2ll-nm57m7\\\\front.png\",\"top\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-04a-3d-foundation\\\\blender-live\\\\model3d\\\\runs\\\\m3d-mvtmg2ll-nm57m7\\\\top.png\",\"side\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-04a-3d-foundation\\\\blender-live\\\\model3d\\\\runs\\\\m3d-mvtmg2ll-nm57m7\\\\side.png\",\"iso\":\"D:\\\\1.WorkDir\\\\petri\\\\acceptance\\\\next-04a-3d-foundation\\\\blender-live\\\\model3d\\\\runs\\\\m3d-mvtmg2ll-nm57m7\\\\iso.pn"
+    },
+    {
+      "name": "mesh_report",
+      "pass": true,
+      "detail": "{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"enclosure\":416000,\"port\":898.976141}}"
+    },
+    {
+      "name": "blender_export_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"b37991a46a5cea09f661f65f249a0c598cf8b769539afda83d6b7d776a185487\",\"provider\":\"blender\",\"providerVersion\":\"Blender 4.5.10 LTS\",\"outDir\":\"model3d/runs/m3d-mvtmg3q4-aujrjl\",\"manifest\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":72,\"triangles\":136,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"enclosure\":416000,\"port\":898.976141}},\"boundsMm\":{\"min\":["
+    },
+    {
+      "name": "glb_exported",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/scene.glb\",\"sha256\":\"e76d80b9bf4e082fbb5a793892a7afc1bca0787cb85747d24d97a2348927e3cb\",\"bytes\":9852}"
+    },
+    {
+      "name": "stl_exported",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/scene.stl\",\"sha256\":\"5db95adc80dda4c38828b5621f6a67214d2123ca569410a4e3055968d8c5279a\",\"bytes\":6884}"
+    },
+    {
+      "name": "obj_exported",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/scene.obj\",\"sha256\":\"87ad827645df54cd61a4d432b967c9334f39ecd1ee00ea2dada181ebd61c4993\",\"bytes\":8428}"
+    },
+    {
+      "name": "manifest_written",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvtmg3q4-aujrjl/manifest.json"
+    },
+    {
+      "name": "manifest_scene_hash",
+      "pass": true,
+      "detail": "b37991a46a5cea09f661f65f249a0c598cf8b769539afda83d6b7d776a185487"
+    },
+    {
+      "name": "manifest_provider_version",
+      "pass": true,
+      "detail": "Blender 4.5.10 LTS"
+    },
+    {
+      "name": "manifest_output_hashes",
+      "pass": true,
+      "detail": "[{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/front.png\",\"sha256\":\"d8246a1b0c247274813167250ea0994c4e57fea02e39e1ee9945d8bf3d805cbf\",\"bytes\":318324},{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/top.png\",\"sha256\":\"a8f85adbe9d4c2bb3c80f376009395d725d8b8e9081ba25c6aaccbe006ee1b58\",\"bytes\":359300},{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/side.png\",\"sha256\":\"62503107a654f4108fb8d5c1f1fa3af46a93fe3e6b9778d42f3466595a4a4131\",\"bytes\":304867},{\"path\":\"model3d/runs/m3d-mvtmg3q4-aujrjl/iso.png\",\"sha256\":\"38dfee"
+    }
+  ],
+  "allPass": true
+}

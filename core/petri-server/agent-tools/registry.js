@@ -22,6 +22,8 @@ const { tool_result_annotations_list } = require('./result-annotation-tools');
 const browserTools = require('./browser-tools');
 // BLOCK-256 Q7 — 目标状态机三工具（create/get/update；用量来自 ai_usage 真账本）
 const { tool_create_goal, tool_get_goal, tool_update_goal } = require('./goal-tools');
+// NEXT-01 — 工作流唯一 Agent 编排入口（复用 workflow runner，不建第二执行器）
+const { tool_run_workflow } = require('./workflow-tools');
 // BLOCK-157 W1 P1（KNW-1）— 产品 Skills 会话台只读工具（渐进披露：discover 无正文 / get 有界手册）
 const { tool_skill_discover, tool_skill_get, tool_skill_preflight } = require('./skill-tools');
 // BLOCK-124（C-13）— 符号图只读查询（内核单源 helpers/code-graph）
@@ -32,6 +34,16 @@ const {
 } = require('./learning');
 const { tool_verify_state } = require('./verify-dispatch');
 const { tool_read_image } = require('./vision-tools');
+const {
+  tool_model3d_inspect,
+  tool_model3d_validate,
+  tool_model3d_propose,
+  tool_model3d_apply,
+  tool_model3d_render,
+  tool_model3d_export,
+  tool_model3d_visual_qa,
+  tool_model3d_recipe,
+} = require('./model3d-tools');
 const {
   tool_result_edit_plan,
   tool_result_changeset_create,
@@ -172,6 +184,15 @@ const HANDLERS = {
   create_goal: tool_create_goal,
   get_goal: tool_get_goal,
   update_goal: tool_update_goal,
+  run_workflow: tool_run_workflow,
+  model3d_inspect: tool_model3d_inspect,
+  model3d_validate: tool_model3d_validate,
+  model3d_propose: tool_model3d_propose,
+  model3d_apply: tool_model3d_apply,
+  model3d_render: tool_model3d_render,
+  model3d_export: tool_model3d_export,
+  model3d_visual_qa: tool_model3d_visual_qa,
+  model3d_recipe: tool_model3d_recipe,
   // BLOCK-97 — 任务清单维护（整单幂等替换；快照经 task_todo 事件广播）
   todo_write: tool_todo_write,
   // BLOCK-116 W2（BK-04）— 决策台账只读观测面（数据源 helpers/decision-log 单源直调）
@@ -307,6 +328,16 @@ const CONTRACTS = {
   create_goal: contract('planning', 'state-write', 'R1', ['project.database'], 300),
   get_goal: contract('planning', 'none', 'R0', ['project.database'], 200),
   update_goal: contract('planning', 'state-write', 'R1', ['project.database'], 300),
+  // NEXT-01 — dryRun 只校验；真跑经 runner 启动子代理/写 journal，属执行类 R2
+  run_workflow: contract('agent-management', 'execution', 'R2', ['agent_tasks', 'local.process'], 60000),
+  model3d_inspect: contract('analysis', 'none', 'R1', ['project.files'], 500),
+  model3d_validate: contract('analysis', 'none', 'R1', ['project.files', 'local.process'], 3000),
+  model3d_propose: contract('analysis', 'none', 'R1', ['project.files'], 1000),
+  model3d_apply: contract('result-studio', 'workspace-write', 'R2', ['project.files', 'artifacts'], 2000),
+  model3d_render: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process'], 180000),
+  model3d_export: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process', 'artifacts'], 180000),
+  model3d_visual_qa: contract('vision', 'execution', 'R2', ['project.files', 'local.process', 'llm.provider'], 180000),
+  model3d_recipe: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process', 'artifacts'], 180000),
   // BLOCK-97 — 任务清单：任务运行内的临时 UI 态（事件流承载，非用户数据表），
   // 与 plan 同族 state-write/R1；不设 userId 门（访客会话可用，见 todo-tools.js 头注）
   todo_write: contract('planning', 'state-write', 'R1', ['ui.session'], 200),

@@ -16,6 +16,7 @@ import { getBridge } from '@/lib/desktopBridge';
 import { listAllJobs, listProjects } from '@/lib/project-store';
 import type { ToolJob } from '@/lib/project-types';
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { projectExecutionAxis } from '@/lib/statusProjection';
 import { useInvalidationStream } from '@/hooks/useInvalidationStream';
 import { computeQueuePositions, isActiveJob, orderJobsForWall } from './commandCenterModel';
 import styles from './command-center.module.css';
@@ -23,14 +24,6 @@ import styles from './command-center.module.css';
 const POLL_MS = 5000;
 const LOG_POLL_MS = 1000;
 const MAX_TILES = 12;
-
-const STATUS_LABEL: Record<ToolJob['status'], string> = {
-  pending: '排队中',
-  running: '运行中',
-  done: '已完成',
-  failed: '失败',
-  cancelled: '已取消',
-};
 
 function formatElapsed(fromMs: number, toMs: number): string {
   const sec = Math.max(0, Math.round((toMs - fromMs) / 1000));
@@ -401,11 +394,17 @@ export function CommandCenterJobsWall({
       <div className={styles.grid}>
         {jobs.map((job) => {
           const active = isActiveJob(job);
+          const execution = projectExecutionAxis(job.status);
           const logOpen = logJobId === job.id;
           const body = (
             <>
               <div className={styles.tileHead}>
-                <span className={styles.statusDot} data-status={job.status} />
+                <span
+                  className={styles.statusDot}
+                  data-status={job.status}
+                  data-execution-status={execution?.status || 'unknown'}
+                  title={execution?.detail}
+                />
                 <strong className={styles.tileName}>{job.name || job.tool_id}</strong>
               </div>
               <div className={styles.tileMeta}>
@@ -427,10 +426,10 @@ export function CommandCenterJobsWall({
                 </div>
               )}
               <div className={styles.tileStatus}>
-                <span data-status={job.status}>
+                <span data-status={job.status} data-execution-status={execution?.status || 'unknown'}>
                   {job.status === 'pending' && queuePositions.has(job.id)
                     ? `排队中 #${queuePositions.get(job.id)}`
-                    : STATUS_LABEL[job.status] || job.status}
+                    : execution?.label || '—'}
                 </span>
                 <span>
                   {job.status === 'running' || job.status === 'pending'

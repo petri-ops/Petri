@@ -1,0 +1,54 @@
+{
+  "schema": "model3d-manifest/v1",
+  "generatedAt": "2026-10-29T16:56:50.745Z",
+  "sceneHash": "8b1735d8938b9404cfa2127e0ab54f31b88b3bc4efe5536efd2bb2ade884a4f8",
+  "taskSpecId": null,
+  "workflowRunId": null,
+  "recipeId": "room-layout",
+  "recipeVersion": 1,
+  "provider": "blender",
+  "providerVersion": "Blender 4.5.10 LTS",
+  "inputHashes": {},
+  "validation": {
+    "ok": true,
+    "watertight": true,
+    "nonManifoldEdges": 0
+  },
+  "outputs": [
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/front.png",
+      "sha256": "1424911cb0d08b8afb5f546f6840f17d38fd3162645463812ef5b1edf3b6526d",
+      "bytes": 275409
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/top.png",
+      "sha256": "bc65363bf9db9245ebd54f4fe631be3b397158003bb19896c16c96f1e851334f",
+      "bytes": 275409
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/side.png",
+      "sha256": "7c0a33e725ac6e8d8998df0628c9d22c4e2b1e23d3849a918a25680a2bfe91c9",
+      "bytes": 275409
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/iso.png",
+      "sha256": "7c0a33e725ac6e8d8998df0628c9d22c4e2b1e23d3849a918a25680a2bfe91c9",
+      "bytes": 275409
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.glb",
+      "sha256": "6f8aba88da8755bd0b657f2b8ea3b70064df272c662b592e75e126b2bd5e1607",
+      "bytes": 11648
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.stl",
+      "sha256": "5e592b976232b89d349ac9747f42c2073635ade88283dfe017d84c1511f5e01a",
+      "bytes": 4284
+    },
+    {
+      "path": "model3d/runs/m3d-mvtsctwb-6wqfxo/scene.obj",
+      "sha256": "2d755ec28be25905bc6796153761d7e0b2975f2cde981e3066e7b3e4bf7a427b",
+      "bytes": 7061
+    }
+  ]
+}

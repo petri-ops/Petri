@@ -60,6 +60,22 @@ async function submitAgentTask({ schedule, conversationId, fetchImpl, baseUrl })
   return data.taskId;
 }
 
+async function submitWorkflowSchedule({ schedule, fetchImpl, baseUrl }) {
+  if (!schedule.workflow_script) throw new Error('workflow_script_missing');
+  let args = null;
+  try {
+    args = schedule.workflow_args_json ? JSON.parse(schedule.workflow_args_json) : null;
+  } catch {
+    throw new Error('workflow_args_invalid');
+  }
+  const data = await fetchJson(fetchImpl, `${baseUrl}/api/ai/agent/workflow/run`, {
+    method: 'POST',
+    body: JSON.stringify({ script: schedule.workflow_script, args }),
+  });
+  if (!data || typeof data.runId !== 'string' || !data.runId) throw new Error('workflow_submit_failed');
+  return { runId: data.runId, taskId: typeof data.taskId === 'string' ? data.taskId : null };
+}
+
 function goalGate(schedule) {
   if (!schedule.goal_id) return { ok: true };
   const result = store.getGoal({ id: schedule.goal_id });
@@ -100,6 +116,35 @@ async function executeSchedule(schedule, deps = {}) {
       return { scheduleId: schedule.id, status: gate.status, reason: gate.reason };
     }
 
+    if (schedule.kind === 'workflow') {
+      try {
+        const workflow = await submitWorkflowSchedule({ schedule, fetchImpl, baseUrl });
+        store.createRun({
+          scheduleId: schedule.id,
+          taskId: workflow.taskId,
+          workflowRunId: workflow.runId,
+          status: 'running',
+          startedAt: now.toISOString(),
+        });
+        store.advanceSchedule(schedule.id, now.getTime());
+        return {
+          scheduleId: schedule.id,
+          status: 'running',
+          taskId: workflow.taskId,
+          workflowRunId: workflow.runId,
+        };
+      } catch (error) {
+        store.createRun({
+          scheduleId: schedule.id,
+          status: 'failed',
+          error: error && error.message ? error.message : String(error),
+          startedAt: now.toISOString(),
+        });
+        store.advanceSchedule(schedule.id, now.getTime());
+        return { scheduleId: schedule.id, status: 'failed', error: error && error.message ? error.message : String(error) };
+      }
+    }
+
     let conversationId = null;
     try {
       conversationId = await createRunConversation({ schedule, fetchImpl, baseUrl });
@@ -129,14 +174,36 @@ async function executeSchedule(schedule, deps = {}) {
   }
 }
 
-function reconcileOpenRuns({ getTask } = {}) {
+async function reconcileOpenRuns({ getTask, getWorkflowRun, fetchImpl = fetch, baseUrl } = {}) {
   const lookup = typeof getTask === 'function'
     ? getTask
     : (taskId) => {
       try { return require('../agent-task-store').getAgentTask(taskId); } catch { return null; }
     };
+  const workflowLookup = typeof getWorkflowRun === 'function'
+    ? getWorkflowRun
+    : async (runId) => {
+      const data = await fetchJson(fetchImpl, `${baseUrl || defaultBaseUrl()}/api/ai/agent/workflow/runs/${encodeURIComponent(runId)}`);
+      return data && data.run ? data.run : data;
+    };
   const results = [];
   for (const run of store.listOpenRuns()) {
+    if (run.workflow_run_id) {
+      try {
+        const detail = await workflowLookup(run.workflow_run_id);
+        const status = String((detail && detail.status) || '');
+        if (status === 'completed') {
+          store.updateRun(run.id, { status: 'completed' });
+          results.push({ runId: run.id, status: 'completed' });
+        } else if (status === 'failed' || status === 'cancelled') {
+          store.updateRun(run.id, { status: 'failed', error: (detail && detail.error) || status });
+          results.push({ runId: run.id, status: 'failed' });
+        } else if (status === 'running') {
+          store.updateRun(run.id, { status: 'running' });
+        }
+      } catch { /* workflow detail unavailable: keep running, next tick retries */ }
+      continue;
+    }
     if (!run.task_id) continue;
     const task = lookup(run.task_id);
     if (!task) continue;
@@ -156,7 +223,7 @@ function reconcileOpenRuns({ getTask } = {}) {
 
 async function runDueSchedulesOnce(deps = {}) {
   const now = deps.now ? new Date(deps.now) : new Date();
-  const reconciled = reconcileOpenRuns(deps);
+  const reconciled = await reconcileOpenRuns(deps);
   const due = store.listDueSchedules(now.toISOString());
   const executed = [];
   for (const schedule of due) {

@@ -80,6 +80,10 @@ function ensureSchema() {
     CREATE INDEX IF NOT EXISTS idx_agent_schedule_reminders_due ON agent_schedule_reminders(project_id, acknowledged_at, due_at DESC);
   `);
   try { sqlite.exec('ALTER TABLE copilot_conversations ADD COLUMN goal_id TEXT'); } catch { /* exists */ }
+  // NEXT-01 — workflow schedule 持久脚本/args；运行行关联 workflowRunId
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN workflow_script TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN workflow_args_json TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedule_runs ADD COLUMN workflow_run_id TEXT'); } catch { /* exists */ }
 }
 
 ensureSchema();
@@ -91,7 +95,7 @@ const GOAL_TRANSITIONS = Object.freeze({
   blocked: new Set(['active', 'completed']),
   completed: new Set(['active']),
 });
-const SCHEDULE_KINDS = new Set(['task', 'reminder']);
+const SCHEDULE_KINDS = new Set(['task', 'reminder', 'workflow']);
 const RUN_STATUSES = new Set(['queued', 'running', 'completed', 'failed', 'reminder', 'skipped_budget', 'skipped_goal']);
 
 function nowIso() { return new Date().toISOString(); }
@@ -224,8 +228,11 @@ function scheduleView(row, { includeRuns = false } = {}) {
   if (!row) return null;
   const lastRun = db().prepare('SELECT * FROM agent_schedule_runs WHERE schedule_id=? ORDER BY started_at DESC LIMIT 1').get(row.id) || null;
   const goal = row.goal_id ? goalView(getGoalRow(row.goal_id)) : null;
+  const { workflow_script: workflowScript, workflow_args_json: workflowArgsJson, ...publicRow } = row;
   const view = {
-    ...parseRow(row),
+    ...parseRow(publicRow),
+    hasWorkflowScript: Boolean(workflowScript),
+    hasWorkflowArgs: Boolean(workflowArgsJson),
     enabled: Boolean(row.enabled),
     goal: goal ? { id: goal.id, title: goal.title, status: goal.status, budgetLimited: goal.budgetLimited, usageLimited: goal.usageLimited } : null,
     lastRun: lastRun ? { ...lastRun } : null,
@@ -245,12 +252,14 @@ function createSchedule({
   kind = 'task',
   intervalMinutes = 60,
   reminderText = '',
+  workflowScript = '',
+  workflowArgs = null,
   enabled = true,
 } = {}) {
   const pid = clampString(projectId, 120);
   if (!pid) return { ok: false, error: 'missing_projectId', message: '定时任务必须绑定项目（projectId）。' };
   const scheduleKind = String(kind || 'task');
-  if (!SCHEDULE_KINDS.has(scheduleKind)) return { ok: false, error: 'invalid_kind', message: 'kind 必须是 task 或 reminder。' };
+  if (!SCHEDULE_KINDS.has(scheduleKind)) return { ok: false, error: 'invalid_kind', message: 'kind 必须是 task、reminder 或 workflow。' };
   const minutes = Number(intervalMinutes);
   if (!Number.isFinite(minutes) || minutes < MIN_INTERVAL_MINUTES || minutes > MAX_INTERVAL_MINUTES) {
     return { ok: false, error: 'invalid_interval', message: `间隔必须在 ${MIN_INTERVAL_MINUTES}–${MAX_INTERVAL_MINUTES} 分钟。` };
@@ -259,17 +268,36 @@ function createSchedule({
   const cleanReminder = clampString(reminderText, 500);
   if (scheduleKind === 'task' && !cleanPrompt) return { ok: false, error: 'missing_prompt', message: '任务型定时计划需要 prompt。' };
   if (scheduleKind === 'reminder' && !cleanReminder) return { ok: false, error: 'missing_reminder', message: '提醒型计划需要 reminderText。' };
+  let cleanWorkflowScript = '';
+  let workflowArgsJson = null;
+  if (scheduleKind === 'workflow') {
+    cleanWorkflowScript = typeof workflowScript === 'string' ? workflowScript.trim() : '';
+    if (!cleanWorkflowScript) return { ok: false, error: 'missing_workflow_script', message: 'workflow 型定时计划需要 workflowScript。' };
+    if (cleanWorkflowScript.length > 256 * 1024) return { ok: false, error: 'workflow_script_too_large', message: 'workflowScript 超过 256KB。' };
+    const loaded = require('./workflow-sandbox').loadWorkflowModule(cleanWorkflowScript, { host: {}, seed: 0 });
+    if (!loaded.ok) return { ok: false, error: loaded.error, message: loaded.message || (loaded.diagnostics || []).join('; ') };
+    try {
+      const serialized = workflowArgs === null || workflowArgs === undefined ? null : JSON.stringify(workflowArgs);
+      if (serialized && serialized.length > 32 * 1024) return { ok: false, error: 'workflow_args_too_large', message: 'workflowArgs 超过 32KB。' };
+      workflowArgsJson = serialized;
+    } catch {
+      return { ok: false, error: 'workflow_args_invalid', message: 'workflowArgs 必须可序列化为 JSON。' };
+    }
+  }
   const goal = goalId ? getGoalRow(goalId) : null;
   if (goalId && !goal) return { ok: false, error: 'goal_not_found', message: '关联目标不存在。' };
   const id = newId('sch');
   const now = new Date();
   const next = new Date(now.getTime() + Math.round(minutes) * 60_000).toISOString();
-  const titleClean = clampString(title, 120) || (scheduleKind === 'reminder' ? cleanReminder : cleanPrompt).slice(0, 80) || '定时任务';
+  const titleClean = clampString(title, 120)
+    || (scheduleKind === 'reminder' ? cleanReminder : scheduleKind === 'workflow' ? '工作流' : cleanPrompt).slice(0, 80)
+    || '定时任务';
   db().prepare(`INSERT INTO agent_schedules
-    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,enabled,next_run_at,last_run_at,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,?,?)`)
+    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,workflow_script,workflow_args_json,enabled,next_run_at,last_run_at,created_at,updated_at)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?)`)
     .run(id, userId || null, pid, goal ? goal.id : null, titleClean, cleanPrompt, scheduleKind,
-      Math.round(minutes), cleanReminder || null, enabled ? 1 : 0, enabled ? next : next, now.toISOString(), now.toISOString());
+      Math.round(minutes), cleanReminder || null, cleanWorkflowScript || null, workflowArgsJson,
+      enabled ? 1 : 0, enabled ? next : next, now.toISOString(), now.toISOString());
   return { ok: true, schedule: scheduleView(getScheduleRow(id)) };
 }
 
@@ -335,19 +363,27 @@ function advanceSchedule(id, runAt = Date.now()) {
   return getScheduleRow(id);
 }
 
-function createRun({ scheduleId, taskId = null, conversationId = null, status, error = null, startedAt = nowIso() } = {}) {
+function createRun({
+  scheduleId,
+  taskId = null,
+  conversationId = null,
+  workflowRunId = null,
+  status,
+  error = null,
+  startedAt = nowIso(),
+} = {}) {
   const runStatus = String(status || 'queued');
   if (!RUN_STATUSES.has(runStatus)) throw new Error(`invalid run status: ${runStatus}`);
   const id = newId('run');
   db().prepare(`INSERT INTO agent_schedule_runs
-    (id,schedule_id,task_id,conversation_id,status,error,started_at,finished_at)
-    VALUES (?,?,?,?,?,?,?,?)`)
-    .run(id, scheduleId, taskId, conversationId, runStatus, error, startedAt,
+    (id,schedule_id,task_id,conversation_id,workflow_run_id,status,error,started_at,finished_at)
+    VALUES (?,?,?,?,?,?,?,?,?)`)
+    .run(id, scheduleId, taskId, conversationId, workflowRunId, runStatus, error, startedAt,
       ['completed', 'failed', 'reminder', 'skipped_budget', 'skipped_goal'].includes(runStatus) ? startedAt : null);
   return db().prepare('SELECT * FROM agent_schedule_runs WHERE id=?').get(id);
 }
 
-function updateRun(id, { status, taskId, conversationId, error } = {}) {
+function updateRun(id, { status, taskId, conversationId, workflowRunId, error } = {}) {
   const sets = [];
   const values = [];
   if (status !== undefined) {
@@ -359,6 +395,7 @@ function updateRun(id, { status, taskId, conversationId, error } = {}) {
   }
   if (taskId !== undefined) { sets.push('task_id=?'); values.push(taskId); }
   if (conversationId !== undefined) { sets.push('conversation_id=?'); values.push(conversationId); }
+  if (workflowRunId !== undefined) { sets.push('workflow_run_id=?'); values.push(workflowRunId); }
   if (error !== undefined) { sets.push('error=?'); values.push(error); }
   if (sets.length === 0) return;
   values.push(id);

@@ -1,0 +1,95 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "rowCount": 3
+  },
+  "nodes": [
+    {
+      "id": "row-1",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 40,
+        "height": 20,
+        "depth": 30
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "sample-a"
+    },
+    {
+      "id": "row-2",
+      "type": "box",
+      "transform": {
+        "position": [
+          60,
+          0,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 40,
+        "height": 20,
+        "depth": 30
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "sample-b"
+    },
+    {
+      "id": "row-3",
+      "type": "box",
+      "transform": {
+        "position": [
+          120,
+          0,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 40,
+        "height": 20,
+        "depth": 30
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "sample-c"
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "表格驱动布局",
+    "recipeId": "from-table",
+    "recipeVersion": 1,
+    "generatedAt": "2026-10-29T16:56:52.149Z"
+  }
+}

@@ -72,6 +72,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     phaseCounters: new Map(), // `${phasePath}/${kind}` -> next seq
   };
   const als = new AsyncLocalStorage();
+  const abortController = new AbortController();
   const semaphore = makeSemaphore(1); // 占位，装载 meta 后按 concurrency 重建
   let concurrencySemaphore = semaphore;
 
@@ -218,10 +219,20 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     const label = String(name || '').slice(0, MAX_PHASE_NAME);
     const parent = als.getStore() || {};
     const phasePath = parent.phasePath ? `${parent.phasePath}/${label}` : label;
+    // phase 结果进 resume 前缀：仅缓存有界 JSON（≤8KB），超界如实重跑。
+    const cached = resumeTable.get(phasePath);
+    if (cached && cached.status === 'completed' && cached.result !== undefined) {
+      record('phase', { stepKey: phasePath, label, status: 'completed', summaryHead: 'reused', result: cached.result, reusedFrom: resumeFromRunId });
+      return cached.result;
+    }
     try {
       const out = await als.run({ ...parent, phasePath, slots: {} }, () => fn());
-      // 每步骤一行：phase 完成时写一行（过程态不落 journal）
-      record('phase', { stepKey: `${phasePath}`, label, status: 'completed' });
+      let journalResult;
+      try {
+        const text = JSON.stringify(out);
+        if (typeof text === 'string' && text.length <= 8192) journalResult = JSON.parse(text);
+      } catch { /* non-serializable result is not cached */ }
+      record('phase', { stepKey: `${phasePath}`, label, status: 'completed', ...(journalResult === undefined ? {} : { result: journalResult }) });
       return out;
     } catch (e) {
       record('phase', { stepKey: `${phasePath}`, label, status: 'failed', errorHead: String(e && e.message ? e.message : e).slice(0, 200) });
@@ -269,6 +280,11 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     pipeline: pipelineImpl,
     phase: phaseImpl,
     log: logImpl,
+    // NEXT-05 — 领域原语：recipe 只走宿主注入的同一 runner（不建第二执行器）。
+    recipe: async (recipeId, params, options = {}) => {
+      if (typeof deps?.recipe !== 'function') return { ok: false, error: 'recipe_host_unavailable' };
+      return deps.recipe({ recipeId, params, ...(options || {}), signal: abortController.signal });
+    },
     get budget() {
       return budgetView;
     },
@@ -315,6 +331,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     timeoutHandle = setTimeout(() => {
       state.cancelled = true;
       state.status = 'cancelled';
+      abortController.abort();
       for (const agentId of state.activeAgentIds) {
         try {
           deps.requestCancellation(agentId);
@@ -329,20 +346,22 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     } catch (e) {
       if (timeoutHandle) clearTimeout(timeoutHandle);
       const errorText = e && e.message ? e.message : String(e);
+      const finalStatus = state.cancelled ? 'cancelled' : 'failed';
       journal.writeRunMeta(root, runId, {
         runId,
         userId,
         ...(extraRunMeta || {}),
-        status: 'failed',
+        status: finalStatus,
         meta,
         scriptHash,
         argsHash,
         args: args === undefined ? null : args,
+        scriptSource: String(source),
         resumeFromRunId,
         error: errorText,
         finishedAt: new Date().toISOString(),
       });
-      return { status: 'failed', error: errorText, runId };
+      return { status: finalStatus, error: errorText, runId };
     }
     if (timeoutHandle) clearTimeout(timeoutHandle);
 
@@ -357,6 +376,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
       scriptHash,
       argsHash,
       args: args === undefined ? null : args,
+      scriptSource: String(source),
       resumeFromRunId,
       finishedAt: new Date().toISOString(),
     });
@@ -368,6 +388,7 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
     promise,
     cancel: async () => {
       state.cancelled = true;
+      abortController.abort();
       for (const agentId of Array.from(state.activeAgentIds)) {
         try {
           const requested = deps.requestCancellation(agentId);

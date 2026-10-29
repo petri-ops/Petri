@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "blenderVersion": "4.5.10 LTS",
+  "renderEngine": "BLENDER_WORKBENCH",
+  "mesh": {
+    "objects": 5,
+    "vertices": 152,
+    "triangles": 284,
+    "nonManifoldEdges": 0,
+    "watertight": true,
+    "volumesMm3": {
+      "base": 24000.0,
+      "plate": 28800.0,
+      "gusset": 5760.0,
+      "boss-1": 749.146954,
+      "boss-2": 749.146954
+    }
+  },
+  "boundsMm": {
+    "min": [
+      -40.0,
+      -25.0,
+      -4.800000190734863
+    ],
+    "max": [
+      40.0,
+      25.0,
+      66.0
+    ],
+    "size": [
+      80.0,
+      50.0,
+      70.80000305175781
+    ]
+  },
+  "renders": {
+    "front": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\front.png",
+    "top": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\top.png",
+    "side": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\side.png",
+    "iso": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\iso.png"
+  },
+  "exports": {
+    "glb": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\scene.glb",
+    "stl": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\scene.stl",
+    "obj": "D:\\1.WorkDir\\petri\\acceptance\\next-05-3d-process\\live-workspace\\project\\model3d\\runs\\m3d-mvtscsth-u6tfs0\\scene.obj"
+  },
+  "unsupported": []
+}

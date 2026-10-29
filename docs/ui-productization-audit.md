@@ -1,5 +1,62 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-637: 全局视觉与布局收敛（NEXT-02B；2026-10-30 **verified（dev Electron 边界内；UI 矩阵 19/19 + closeout 13/13）**）
+
+- **变化面**：3D workSurface/视觉 QA/参数编辑三块从视口媒体查询改为容器查询（`container-type: inline-size`），在 340px 右栏内正确降为单列/窄行布局；新增 `acceptance/next-02b-ui-visual-convergence/ui-drift-inventory.md` 对 UI-A~F 逐项对账。矩阵覆盖 1440/1024/720/480 与 1280@2x、双主题、reduced motion、键盘焦点与横向溢出。
+- **为什么这样设计**：workSurface 的可用宽度由所在栏决定而非视口决定；用容器查询才能让同一面板在主窗、右栏、独立窗中保持层级与命中区。
+- **验证（代码）**：theme-token-contract 17/17；Model3D 三面板容器查询；改动文件 ESLint 0 error；tsc 0。
+- **实机证据**：`acceptance/next-02b-ui-visual-convergence/next02b-ui-matrix-live-live.json`（19/19，9223 离屏）：四种视口 + 2x DPR 无横向溢出，composer 均在视口内（480 档 551.88px/592px），3D 面板 340px 无内部溢出；暗色 composer `rgb(29,41,69)`；reduced-motion 动画 `1e-06s`；输入框可聚焦。截图 `cdp_command_failed:-32000` 按纪律标 unavailable。
+- **边界（reopen）**：未重验原生对话框/OS 权限；71 条存量 `in_progress` 逐条保留，不用本轮矩阵覆盖；旧 SideChatDock 假设未复活；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-636: 参数化编辑、测量对比与五类 recipe（NEXT-05；2026-10-30 **verified（dev Electron 边界内；后端定向 27/27 + 直连实机 46/46 + UI 实机 12/12 + closeout 13/13）**）
+
+- **变化面**：3D 工作面新增「参数编辑」（数值参数 draft → 预览语义 diff → 应用写盘；写入前自动保留本地修订快照，可列历史/恢复，恢复本身再生成新修订）、测量（画布点选两点显示 mm 距离并画线）、视角书签（localStorage 按项目保存/恢复/清除）、截图（canvas PNG 下载）、SceneSpec 对比（第二份 JSON 进语义 diff：参数/节点字段/约束）；STL/OBJ 加入几何预览（外部单位按原文件，参数与约束仍以 SceneSpec 为准）。Agent 侧新增 `model3d_recipe` 五类 recipe 与 workflow `recipe` 宿主原语，recipe 统一 dryRun→写盘→四视图→GLB/STL/OBJ→manifest。
+- **为什么这样设计**：SceneSpec 是唯一源真相，修订历史只是文件编辑历史，不另立 artifact/结果真相；recipe 只生成 SceneSpec + TaskSpec，未建模的布尔孔/抽壳/材料/公差全部进 missingInfo；几何通过性仍以 Blender 网格报告为准。
+- **验证（代码）**：编辑/修订/冲突/语义 diff 4/4、五类 recipe 4/4（含 from-table 有界与异常行）、recipe workflow 3/3（dryRun→execute、缺宿主 fail-closed、取消后 resume 复用 dryRun 前缀）、CSP blob 回归 1/1；Model3DEditPanel 3/3；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/next-05-3d-process/next05-recipes-live.json`（46/46）：五类 recipe 真实 Blender 各 4 视图 + 3 格式导出 + manifest，全部 watertight/0 非流形；ASCII STL mesh-reference 导入成功、篡改 sourceSha256 被拒；workflow 成功链 + cancel/resume（resume 只重跑 execute）。`next05-model3d-edit-live-live.json`（12/12，9223 离屏）：参数 diff 120→130 写盘、第二次编辑生成 rev-000001 并可恢复、测量 40.98mm、视角书签、SceneSpec 对比 130→150、STL 预览；截图 `screenshot_unavailable` 按纪律标注。
+- **实机抓真（已修）**：STL/OBJ/GLB 文件预览经 `fetch(blob:)` 读取时被应用 CSP `connect-src` 拦截（`Failed to fetch`）；`buildCspHeader` 放行 `blob:`（仍禁网络面扩面），并补 CSP 回归测试。
+- **边界（reopen）**：五类 recipe 以基础体块/圆柱表达，未做布尔抽壳/通孔/倒角，已逐项写入 missingInfo；法线/壁厚/间隙未实现，不声称通过；外部 STL/OBJ 仅几何预览、无参数/约束；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-635: 3D 视觉回读与草图需求（NEXT-04B；2026-10-29 **verified（dev Electron 边界内；后端 7/7 + 视觉管线实机 18/18 + UI 实机 15/15）**）
+
+- **变化面**：3D 工作面新增「视觉 QA」：本地 Blender 渲染前/顶/侧/等轴四视图，并排显示几何报告（对象/顶点/三角面/非流形边/水密/体积，确定性项用证据轴标「已核验」）与 vision 观察/疑似问题/不确定项；任一视图缩略图可打开原图，观察项可勾选后加入 Composer。节点支持在画布点选或在节点列表选择，Composer 提示带 `sceneRevision/nodeId/viewCamera` 与选择键。「保存批注并引用」把整视图批注写入渲染 PNG（workspace-file 批注）并把 `annotationId` 带入提示。新增「草图转需求」对话框：草图 + 已知尺寸/说明 → `task-spec/v1`（modeling）预览，缺失信息单列，只加入草稿不自动执行。
+- **为什么这样设计**：视觉只提供观察线索，几何通过/尺寸真值始终由 SceneSpec 与 Blender 网格报告背书；vision 缺席时渲染与几何报告不受影响，UI 明确「视觉检查不可用」。
+- **验证（代码）**：vision 报告解析/裁剪/降级 3/3、review 与 REST fail-closed 2/2、草图校验与 prompt 强制缺失信息 2/2；Model3DReviewPanel 4/4（多视图/几何/降级/批注 annotationId）、SketchSpecDialog 3/3；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/next-04b-3d-vision-loop/next04b-review-live.json`（18/18）：真实 Blender 四视图 + 网格 watertight/0 非流形，mock OpenAI-compatible vision 收到 4 张图片并返回结构化观察，草图链产出 modeling TaskSpec + missingInfo；移除视觉配置后渲染/网格仍完整、vision=`model_profile_not_found`。`next04b-model3d-review-ui-live-live.json`（15/15，9223 离屏）：四视图图片加载、几何报告、视觉不可用降级、节点选择、渲染路径与 annotationId 进 Composer、草图对话框入口；截图 `screenshot_unavailable: cdp_screenshot_timeout` 按纪律如实标注（离屏合成帧不可得）。
+- **边界（reopen）**：本机未配置真实 vision 凭据，视觉链证据用 mock 端点验证协议与解析，不冒充真实模型质量；框选/3D 区域批注与参数修改提案/差异属于 NEXT-05 的参数编辑与 revision/compare；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-634: SceneSpec 3D 预览工作面（NEXT-04A；2026-10-29 **verified（dev Electron 边界内；Three 预览实机 7/7 + Blender 真实链 15/15）**）
+
+- **变化面**：新增右侧「3D 模型」workSurface（core `model3d`）+ `Model3DSurface/Model3DScene`：示例 SceneSpec/导入 `.scene3d.json`/GLB/GLTF 只读预览、轨道/缩放/平移、前/顶/侧/等轴视角、Z-up 网格与坐标轴、单位 mm、节点/参数/约束/渲染对象/包围盒信息；Three 渲染器按需懒加载。空态工作区新增入口。
+- **为什么这样设计**：SceneSpec 是参数化源真相，Three.js 只承担交互预览，不冒充 Blender 的构建/渲染/导出；预览不写盘、不自动执行。
+- **验证（代码）**：SceneSpec viewer 归一 3/3 + 后端 SceneSpec 契约 5/5 + workSurface 6/6 + theme 17/17 + tsc 0。
+- **实机证据**：`acceptance/next-04a-3d-foundation/next04a-model3d-preview-live-live.json`（7/7，9223 离屏）：示例加载后 canvas 648×740、真实 PNG 快照 121538 bytes、渲染对象 2、包围盒 126×80×40、视角切换 aria-pressed；Blender 显示可用 + 4.5.10 LTS。`blender-live.json`（15/15）：真实 Blender 构建 130×80×40 外壳，四视角渲染，GLB 9852B/STL 6884B/OBJ 8428B，网格 0 非流形、watertight，体积修正为 416000mm³，manifest scene/provider/output 哈希齐备。
+- **边界（reopen）**：节点编辑/比较/测量/五类 recipe 属 NEXT-05；Blender 为外部 4.5 LTS 可选后端，不随产品分发；隐藏窗截图仍不可得，Canvas 像素/Blender PNG/属性和哈希为证据。
+
+## UI-633: Composer 提示词增强预览（NEXT-03；2026-10-29 **verified（dev Electron 边界内；组件 3/3 + 真实模型实机 13/13）**）
+
+- **变化面**：composer 新增「优化提示词」图标入口；点击后冻结当前原稿并调用 `prompt-enhance`，弹出 portal 预览（Esc/焦点环/focus trap）：优化稿、`task-spec/v1`（目标/交付物/约束/假设/验收/缺失信息）、改变摘要、使用上下文、能力快照（含 Blender unavailable 真值）、原稿对照。动作=保留原稿、复制、插入原文后、替换原稿；所有生成只进 composer 草稿，不自动发送/替换/执行。
+- **为什么这样设计**：NEXT-03 要求把“润色一句话”升级为可审阅任务规格；用户必须能在同一处看到原稿、结构化契约、能力边界和上下文来源，再自行决定是否应用。后端按当前活动 chat profile 的 credentialRef 取凭据（修自定义 Provider 误报 no_credential）。
+- **验证（代码）**：TaskSpec 纯函数/能力快照 3/3 + 端点 prompt 必填/无凭据诚实 503 1/1 + PromptEnhanceDialog 3/3（加载/结果/替换/插入/失败重试/Escape）；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
+- **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
+
+## UI-632: 工作流运行控制面（NEXT-01；2026-10-29 **verified（dev Electron 边界内；组件 4/4 + 实机 11/11）**）
+
+- **变化面**：新增右侧「工作流」工作面（core `workflow`）+ `WorkflowRunsPanel`：运行列表、选中详情、执行三轴徽标、预算（agents/steps/timeout）、并发、scriptHash/来源、journal 尾部行、取消与从持久前缀恢复；空/载/错/未启用状态齐备。空态工作区新增「工作流」入口；自动化面板新增 workflow 计划类型与脚本/JSON 参数输入。所有按钮复用共享 button controls。
+- **为什么这样设计**：BLOCK-262 已有 REST runner，但用户只能经接口或手工流程使用；NEXT-01 需要把 run、journal、预算、取消/恢复放回可见控制面，同时不建 DAG 编辑器或第二执行器。
+- **验证（代码）**：WorkflowRunsPanel 4/4（列表/选中/取消/恢复/未启用）+ workSurface registry 6/6 + RightPanel + theme 17/17 + tsc 0；Node 定向 15/15（run_workflow dryRun/默认关、schedule workflow 校验与关联、reconcile、resume 前缀来源）。
+- **实机证据**：`acceptance/next-01-q4b-rem/next01-workflow-live-live.json`（11/11，隔离 :3011 workflow-enabled + 9223 离屏）：dryRun 零执行；无代理工作流真实完成且 journal 2 条；workflow schedule 创建/立即运行/automation run 关联 workflowRunId；控制面可见预算 2 agents·4 steps·600s、journal 行、完成状态。
+- **边界（reopen）**：v1 只读运行 + 取消/恢复，不含 DAG 可视化编辑；本轮 live 工作流为无 agent 的确定性脚本，真实子代理链由 route 注入测试与既有 BLOCK-262 mock 实机覆盖；工作流脚本正文不回传前端；截图不可得按隐藏窗边界处理。
+
+## UI-631: 执行/证据/能力三轴状态统一（NEXT-02A；2026-10-29 **verified（dev Electron 边界内；定向 74/74 + 实机 9/9）**）
+
+- **变化面**：新增 `lib/statusProjection.ts` 与 `ui/controls/StatusBadge`——执行轴（draft/running/waiting/partial/completed/failed/cancelled + 未识别态）、证据轴（verified/unverified/stale）、能力轴（ready/degraded/unavailable/disabled）分轴投影；未知原始状态保留 `raw` 并显示“未知状态”，不再回落到成功/等待。轨迹、证据面、结果库、项目摘要、聊天工具行与指挥中心统一消费该投影；轨迹读取增加 15s 有界超时（`trajectory_timeout`），不再无限等待。
+- **为什么这样设计**：同一后端状态此前在轨迹（`done`）、作业墙（`done`）和项目摘要（`currentJobStatus`）各写一套标签；证据面直接显示原始状态字符串。三轴拆分避免“任务完成=证据可信=能力可用”的错误合并，并为 NEXT-01 工作流与 3D 工作面复用同一语义。
+- **验证（代码）**：状态投影 5/5 + 徽标 3/3 + 轨迹超时 2/2 + 轨迹/证据/结果库/摘要/工具/指挥中心定向 74/74；`test/next02a-status-contract.test.mjs` 3/3 防本地标签表复活；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/next-02a-ui-trust-core/next02a-status-live-live.json`（9/9，9223 离屏测试实例）：临时项目 16 个作业，活跃 2 + 历史 10 共 12 瓦片（长列表有界）；running→`data-execution-status=running` 且显示“运行中”；done→`completed` 且“已完成”；pending→`waiting` 且保留“排队中 #1”；全部瓦片有正几何。测试结束临时项目/作业已删除。
+- **边界（reopen）**：全站仍有 Plan/Goal/变更集等领域专用状态词表，本包只收高频执行/证据面；长会话未引入通用虚拟化（当前会话按 200 条分页、轨迹上限 2000 事件、工具输出默认折叠），后续以实测基线决定；截图取证受隐藏窗限制未产出，几何/DOM 断言为准。
+
 ## UI-630: 侧栏拖窄自动折叠阈值 140→240（拖过默认宽快速折叠）（2026-10-29 **verified（BLOCK-321c 追加；纯函数 17/17 + 实机 3/3）**）
 
 - **变化面**：`SIDEBAR_AUTO_COLLAPSE_WIDTH` 140→**240**——侧栏拖窄到 240 以下即自动折叠（width 旗，不自动还原），不再有 96~140 的「拖到很窄还挂着」尴尬区。手动重开时宽度回弹默认值（240/340）逻辑同源自动跟随，重开 240 恰不触发再收。

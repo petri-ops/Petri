@@ -14,6 +14,30 @@ const {
   generateFollowUpSuggestions,
   MAX_INPUT_CHARS,
 } = require('../../helpers/assistant-suggestions');
+const {
+  MAX_PROMPT_CHARS,
+  buildCapabilitySnapshot,
+  generateTaskSpecDraft,
+} = require('../../helpers/task-spec');
+
+function capabilityInputs() {
+  let visionAvailable = false;
+  try {
+    const settings = require('../../helpers/ai-settings').getAiSettings();
+    visionAvailable = Array.isArray(settings.model_profiles)
+      && settings.model_profiles.some((profile) => Array.isArray(profile.capabilities) && profile.capabilities.includes('vision'));
+  } catch { /* missing settings = vision unavailable */ }
+  let mcpConnected = 0;
+  try {
+    mcpConnected = require('../../mcp/client-manager').getStatuses()
+      .filter((row) => row && row.status === 'connected').length;
+  } catch { /* MCP unavailable */ }
+  return {
+    workflowEnabled: process.env.PETRI_WORKFLOW_ENABLED === '1',
+    visionAvailable,
+    mcpConnected,
+  };
+}
 
 function requireUser(req, res) {
   const userId = req.user && req.user.id;
@@ -53,6 +77,41 @@ module.exports = {
         return res.status(status).json({ ok: false, error: result.error });
       }
       return res.json({ ok: true, draft: result.draft, model: result.model });
+    });
+
+    app.post('/api/ai/agent/prompt-enhance', async (req, res) => {
+      const userId = requireUser(req, res);
+      if (!userId) return;
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const prompt = typeof body.prompt === 'string' ? body.prompt : '';
+      if (!prompt.trim()) return res.status(400).json({ ok: false, error: 'prompt_required' });
+      if (prompt.length > MAX_PROMPT_CHARS * 2) return res.status(400).json({ ok: false, error: 'prompt_too_large' });
+      const capabilitySnapshot = buildCapabilitySnapshot(capabilityInputs());
+      const result = await generateTaskSpecDraft({
+        prompt,
+        userId,
+        context: body.context,
+        capabilitySnapshot,
+      });
+      if (!result.ok) {
+        const status = result.error === 'no_credential'
+          ? 503
+          : result.error === 'prompt_too_large'
+            ? 400
+            : result.error === 'timeout'
+              ? 504
+              : 502;
+        return res.status(status).json({ ok: false, error: result.error });
+      }
+      return res.json({
+        ok: true,
+        optimizedPrompt: result.optimizedPrompt,
+        taskSpec: result.taskSpec,
+        changeSummary: result.changeSummary,
+        contextUsed: result.contextUsed,
+        capabilitySnapshot: result.capabilitySnapshot,
+        model: result.model,
+      });
     });
   },
 };

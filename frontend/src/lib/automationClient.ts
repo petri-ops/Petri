@@ -8,7 +8,7 @@
 import { getApiPrefix } from '@/components/copilot/copilotClient';
 
 export type GoalStatus = 'active' | 'paused' | 'completed' | 'blocked';
-export type ScheduleKind = 'task' | 'reminder';
+export type ScheduleKind = 'task' | 'reminder' | 'workflow';
 type ScheduleRunStatus = 'queued' | 'running' | 'completed' | 'failed' | 'reminder' | 'skipped_budget' | 'skipped_goal';
 
 export interface AutomationGoal {
@@ -38,6 +38,7 @@ export interface AutomationRun {
   schedule_kind?: ScheduleKind;
   task_id: string | null;
   conversation_id: string | null;
+  workflow_run_id?: string | null;
   status: ScheduleRunStatus;
   error: string | null;
   started_at: string;
@@ -53,6 +54,8 @@ export interface AutomationSchedule {
   kind: ScheduleKind;
   interval_minutes: number;
   reminder_text: string | null;
+  hasWorkflowScript?: boolean;
+  hasWorkflowArgs?: boolean;
   enabled: boolean;
   next_run_at: string;
   last_run_at: string | null;
@@ -103,6 +106,8 @@ export function createSchedule(input: {
   kind?: ScheduleKind;
   intervalMinutes?: number;
   reminderText?: string;
+  workflowScript?: string;
+  workflowArgs?: Record<string, unknown> | null;
   goalId?: string | null;
   enabled?: boolean;
 }): Promise<{ ok: true; schedule: AutomationSchedule }> {
@@ -115,6 +120,8 @@ export function createSchedule(input: {
       kind: input.kind,
       intervalMinutes: input.intervalMinutes,
       reminderText: input.reminderText,
+      workflowScript: input.workflowScript,
+      workflowArgs: input.workflowArgs ?? null,
       goalId: input.goalId || null,
       enabled: input.enabled !== false,
     }),

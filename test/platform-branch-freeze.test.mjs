@@ -40,6 +40,9 @@ const BASELINE = new Set([
   'core/petri-server/federation-terminal.js',
   'core/petri-server/helpers/chat-file-references.js',
   'core/petri-server/helpers/computer-use-host.js',
+  // NEXT-04A — Blender 可执行文件发现天然是 OS 路径差异（Windows Program Files /
+  // macOS .app / where|which），属外部能力探测原语；不涉及产品行为分支，登记留痕。
+  'core/petri-server/helpers/blender-provider.js',
   'core/petri-server/helpers/credential-store.js',
   'core/petri-server/helpers/desktop-agent-prompt.js',
   'core/petri-server/helpers/remote-execution/ssh-multiplexer.js',

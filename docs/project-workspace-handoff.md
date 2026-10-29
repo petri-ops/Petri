@@ -1,6 +1,12 @@
 # Petri Desktop Current Handoff
 **已完成（用户 2026-10-17 拍板「等 BLOCK-199 收口后一起推」）**：main 已推 `1e73233f..033072e5` 共 93 笔。**再已完成（用户 2026-10-27 发令「行 推」）**：**main 已推到 `origin/main`**——`3040dc00..e9960ce6`，共 **9 笔**（含 BLOCK-272/273/274 三个已收口包），快进推送、未改写历史、未强推、未碰其它分支；**91 个积压快照锚点标签（snapshot-20260917~20261027-3）同步补推**（远端 177=本地全集）。**三推（2026-10-28，用户全权收尾指令「继续 搞完这个」）**：main `e9960ce6..72c1e061` 共 **11 笔**（BLOCK-275/276/277/278/279 五包 + UI-591 代落盘 + 对账/自稳治理批）+ 快照标签 snapshot-20261027-7 补推（远端=本地全集）；此后新工作包照常本地提交；是否再 push 由用户后续发令决定（本行只记录已兑现授权，不构成常驻授权）。
 
+最后更新：2026-10-30（**NEXT-06 completed；八包全部收口，无 active**）
+
+**恢复要点（换会话/换模型必读·本段取代下方全部「恢复要点」段）**：唯一方向与执行 canonical=[`docs/next-stage-experience-blueprint.md`](./next-stage-experience-blueprint.md) §3/§11。八个串行包全部 completed：`NEXT-02A`（UI-631）、`NEXT-01`（UI-632）、`NEXT-03`（UI-633）、`NEXT-04A`（UI-634）、`NEXT-04B`（UI-635）、`NEXT-05`（UI-636）、`NEXT-02B`（UI-637）、`NEXT-06`（证据矩阵/黄金路径 12/12/resilience 5/5/agent-replay）；证据在 `acceptance/next-0*/`。Blender 4.5.10 LTS 已装于 `C:/Program Files/Blender Foundation/Blender 4.5/blender.exe`，仅作可选后端。**当前无 active 工作包**；下一候选=3D Artifact Revision 接入 Result Studio（Jev confidence 0.73，需用户发令）；其余 C-35～C-44 产品包、71 条 UI in_progress、长会话 soak 保留为后续候选。关键边界：真实 vision Provider、packaged/GA、Provider 矩阵属 G1+；3D 布尔抽壳/通孔、法线/壁厚/间隙、像素级图像 diff 未实现；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+此前（**superseded · 仅保留规划沿革；旧首包、旧顺序与“工作区干净”快照均不得用于当前恢复**）：2026-10-29 初版方向蓝图曾按 Q4b-REM → UI → 提示词增强 → 3D 基础 → 建模流程 → 集成验收排序，并设 `NEXT-01-Q4B-REM` 为首个候选。现行恢复只读顶部最新恢复段与主蓝图 §3/§11。
+
 最后更新：2026-10-28（**BLOCK-320 completed（UI-625 verified）；无 active 工作包**）
 
 **恢复要点（换会话必读·本段取代下方全部「恢复要点」段）**：通知中心「乱乱的」已按内容重排收口——根因是弹层复用了通用 `.toolMenu`（`> button{height:32px}` + `display:grid` + `span{flex:1}`），把每条通知的标签/标题/正文/时间四段压进 32px 行、把未读圆点拉成长条；现改独立 `.noticePanel` 行式布局（头部 + 接收偏好行 + 卡内滚动列表；每行=类型标签语义底色 + 标题单行省略 + 正文两行 clamp + 五档相对时间 + 7px 未读圆点，已读行 60% 透明），面板基准字号显式取正文 token（原继承标题栏图标按钮小字是次因）。实机 24/24：四行零重叠/行高≥44/行内无裁切、正文可见 36px vs 全文 89px、圆点 7×7、面板 360×408 完整在视口内且逐行 `elementFromPoint` 命中自身、全部已读→徽章与圆点归零、清空→空态 + 钮禁用。证据=[`acceptance/block-320/live-notification-center.json`](../acceptance/block-320/live-notification-center.json) + NotificationCenterBell 9/9（假时钟逐档钉死五档 + 禁止绝对时间戳串）+ theme 17/17（小字/accent 棘轮未上调）+ closeout 十三门。截图离屏不可得（如实标 unavailable）。**待用户动作**：右栏内容拖出独立窗 P1（方案已评估，等发令）/ UI-594/595/596 实机腿 / UI-501、503、504、457 过目 / R 运行时 657MB（已裁决暂缓）。G0 开发期常态 · 不外推 packaged/Provider/GA。

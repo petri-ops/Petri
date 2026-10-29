@@ -43,6 +43,8 @@ export function EmptyResult({
   onOpenChat,
   onOpenReview,
   onOpenJobs,
+  onOpenWorkflow,
+  onOpenModel3D,
   recentPanel = null,
   reviewCount,
   reviewStat,
@@ -57,6 +59,10 @@ export function EmptyResult({
   onOpenReview?: () => void;
   /** UI-362 — 打开指挥中心 tab（项目绑定作业俯瞰）。 */
   onOpenJobs?: () => void;
+  /** NEXT-01 — 打开工作流运行控制面。 */
+  onOpenWorkflow?: () => void;
+  /** NEXT-04A — 打开 SceneSpec/3D 预览面。 */
+  onOpenModel3D?: () => void;
   /** UI-446 v4 — 当前会话有未看工作区改动：审阅磁贴亮计数徽章引导。 */
   /** BLOCK-289 — 最近使用的右栏面板（readLastPanel 结果；匹配卡亮「上次使用」徽章）。 */
   recentPanel?: string | null;
@@ -120,6 +126,20 @@ export function EmptyResult({
             <span className={styles.emptyResultLaunchText}>
               <span className={styles.emptyResultLaunchTitle}>指挥中心</span>
               <span className={styles.emptyResultLaunchDesc}>项目作业与编排俯瞰</span>{recentPanel === "jobs" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-jobs">上次使用</span> : null}
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenWorkflow} disabled={!onOpenWorkflow}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="layers" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>工作流</span>
+              <span className={styles.emptyResultLaunchDesc}>dryRun、步骤、预算、取消与恢复</span>{recentPanel === "workflow" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-workflow">上次使用</span> : null}
+            </span>
+          </button>
+          <button type="button" className={styles.emptyResultLaunchCard} onClick={onOpenModel3D} disabled={!onOpenModel3D}>
+            <span className={styles.emptyResultLaunchIcon} aria-hidden="true"><Icon name="layers" size={16} /></span>
+            <span className={styles.emptyResultLaunchText}>
+              <span className={styles.emptyResultLaunchTitle}>3D 模型</span>
+              <span className={styles.emptyResultLaunchDesc}>SceneSpec 参数化预览与外部模型</span>{recentPanel === "model3d" ? <span className={styles.emptyResultLaunchRecent} data-testid="recent-model3d">上次使用</span> : null}
             </span>
           </button>
         </div>

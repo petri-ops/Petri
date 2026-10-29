@@ -1,0 +1,202 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "roomWidth": 4000,
+    "roomDepth": 3000,
+    "wallHeight": 2800,
+    "wallThickness": 100
+  },
+  "nodes": [
+    {
+      "id": "floor",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          0,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 4000,
+        "height": 20,
+        "depth": 3000
+      },
+      "material": {
+        "color": "#4c78a8",
+        "roughness": 0.65
+      },
+      "label": "地板"
+    },
+    {
+      "id": "wall-north",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          1500,
+          1400
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 4000,
+        "height": 2800,
+        "depth": 100
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.65
+      },
+      "label": "北墙"
+    },
+    {
+      "id": "wall-south",
+      "type": "box",
+      "transform": {
+        "position": [
+          0,
+          -1500,
+          1400
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 4000,
+        "height": 2800,
+        "depth": 100
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.65
+      },
+      "label": "南墙"
+    },
+    {
+      "id": "wall-east",
+      "type": "box",
+      "transform": {
+        "position": [
+          2000,
+          0,
+          1400
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 100,
+        "height": 2800,
+        "depth": 3000
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.65
+      },
+      "label": "东墙"
+    },
+    {
+      "id": "wall-west",
+      "type": "box",
+      "transform": {
+        "position": [
+          -2000,
+          0,
+          1400
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 100,
+        "height": 2800,
+        "depth": 3000
+      },
+      "material": {
+        "color": "#6a8caf",
+        "roughness": 0.65
+      },
+      "label": "西墙"
+    },
+    {
+      "id": "desk-1",
+      "type": "box",
+      "transform": {
+        "position": [
+          -720,
+          0,
+          375
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 1400,
+        "height": 750,
+        "depth": 540
+      },
+      "material": {
+        "color": "#d29b42",
+        "roughness": 0.65
+      },
+      "label": "工位桌"
+    },
+    {
+      "id": "cabinet-1",
+      "type": "box",
+      "transform": {
+        "position": [
+          1120,
+          840.0000000000001,
+          900
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "dimensions": {
+        "width": 600,
+        "height": 1800,
+        "depth": 450
+      },
+      "material": {
+        "color": "#8aa36a",
+        "roughness": 0.65
+      },
+      "label": "设备柜"
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "房间布局",
+    "recipeId": "room-layout",
+    "recipeVersion": 1,
+    "generatedAt": "2026-10-29T16:56:49.365Z"
+  }
+}

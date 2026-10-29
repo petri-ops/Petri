@@ -22,6 +22,7 @@ import { listBackgroundProcesses } from '@/components/copilot/backgroundProcesse
 import { getBridge } from '@/lib/desktopBridge';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import { formatDate } from '@/lib/format';
+import { projectExecutionAxis } from '@/lib/statusProjection';
 
 export interface WorkspaceSummaryCardProps {
   open: boolean;
@@ -108,29 +109,23 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
   const currentJob = activeJob || liveJobsPreview[0] || null;
   const currentJobStatus: ToolJob['status'] = workflow?.jobStatus === 'completed'
     ? 'done'
-    : workflow?.jobStatus === 'failed' || workflow?.jobStatus === 'cancelled'
+    : workflow?.jobStatus === 'failed'
       ? 'failed'
-      : workflow?.jobStatus === 'running'
-        ? 'running'
-        : workflow?.jobStatus === 'pending' || workflow?.jobStatus === 'queued'
-          ? 'pending'
-          : currentJob?.status || 'pending';
+      : workflow?.jobStatus === 'cancelled'
+        ? 'cancelled'
+        : workflow?.jobStatus === 'running'
+          ? 'running'
+          : workflow?.jobStatus === 'pending' || workflow?.jobStatus === 'queued'
+            ? 'pending'
+            : currentJob?.status || 'pending';
   const runningCount = jobStats.running + jobStats.pending;
   const totalCount = runningCount + jobStats.done + jobStats.failed;
   const historyJobs = (recentJobs.length > 0 ? recentJobs : liveJobsPreview).slice(0, workflow ? 2 : 3);
   const additionalLiveJobs = liveJobsPreview
     .filter((job) => job.id !== currentJob?.id)
     .slice(0, 2);
-  const statusLabel =
-    currentJobStatus === 'done'
-      ? '已完成'
-      : currentJobStatus === 'failed'
-        ? '失败'
-        : currentJobStatus === 'running'
-          ? '运行中'
-          : currentJob
-            ? '等待中'
-            : '空闲';
+  const execution = projectExecutionAxis(currentJobStatus);
+  const statusLabel = currentJob ? execution?.label || '状态未识别' : '空闲';
 
   // BLOCK-78 P1 — 失败任务强调：jobStats.failed 是全量计数，最近失败 job 供直达。
   const firstFailedJob = recentJobs.find((job) => job.status === 'failed')
@@ -172,6 +167,8 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
               <span
                 className={styles.workspacePinnedSummaryStatus}
                 data-status={currentJob ? currentJobStatus : 'idle'}
+                data-execution-status={currentJob ? execution?.status || 'unknown' : 'idle'}
+                title={execution?.detail}
               >
                 <span />
                 {statusLabel}
@@ -301,6 +298,7 @@ export const WorkspaceSummaryCard = React.memo(function WorkspaceSummaryCard({
               <span
                 className={styles.workspacePinnedSummaryActivityIcon}
                 data-status={currentJobStatus}
+                data-execution-status={execution?.status || 'unknown'}
               >
                 <Icon name={currentJobStatus === 'failed' ? 'flag' : 'terminal'} size={14} />
               </span>
