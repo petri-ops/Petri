@@ -18,6 +18,8 @@ const { runModel3DReview } = require('../helpers/model3d-review');
 const {
   authorizeProject,
 } = require('./workspace-tools/internals');
+const { createResultStudioRepository } = require('../../shared-backend/result-studio-repository');
+const { registerModel3DExportRevision } = require('../../shared-backend/model3d-revision-bridge');
 
 async function projectWorkspace(ctx = {}) {
   const projectId = typeof ctx.projectId === 'string' ? ctx.projectId.trim() : '';
@@ -175,6 +177,76 @@ async function tool_model3d_export(args = {}, ctx = {}) {
   });
   const manifestPath = path.join(workspace.root, result.outDir, 'manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+
+  // RW-01 导出即登记：真实作业记录 → 盖章 → 成果面真值桥（change-set + revision + lineage 图）。
+  // fail-open：登记失败不吞导出结果——导出文件与 manifest 已是事实，登记错误如实随结果上报。
+  let resultStudio = null;
+  try {
+    const repository = createResultStudioRepository(db.getDatabase());
+    const job = db.createToolJob({
+      toolId: 'model3d_export',
+      userId: ctx.userId || 'agent',
+      params: { sceneHash, recipeId: args.recipeId || null, outDir: result.outDir },
+      status: 'running',
+      name: 'model3d_export 3D 导出',
+      projectId: ctx.projectId,
+      conversationId: ctx.conversationId || null,
+    });
+    if (job && job.id) {
+      const registration = registerModel3DExportRevision({
+        repository,
+        job: {
+          id: job.id,
+          tool_id: 'model3d_export',
+          project_id: ctx.projectId,
+          user_id: ctx.userId || 'agent',
+          params: {},
+          conversation_id: ctx.conversationId || null,
+        },
+        manifest,
+        // 产物家族身份锚：调用方声明的稳定场景源文件路径（真实编辑线产物）优先；
+        // 内联场景无锚时回退 run 目录场景副本（身份随 run，不跨导出 stack）。
+        sceneRelativePath: (typeof args.scenePath === 'string' && args.scenePath.trim())
+          ? args.scenePath.trim()
+          : (result.sceneHashFile || null),
+        workspaceRoot: workspace.root,
+        outputs: result.outputs || [],
+      });
+      if (registration.ok) {
+        resultStudio = {
+          registered: true,
+          idempotent: registration.idempotent === true,
+          adopted: registration.adopted === true,
+          toolJobId: job.id,
+          revisions: (registration.revisions || []).map((revision) => ({
+            revisionId: revision.revisionId,
+            artifactId: revision.artifactId,
+            artifactFamilyId: revision.artifactFamilyId,
+            outputPath: revision.outputPath,
+            outputHash: revision.outputHash,
+            validationStatus: revision.validationStatus,
+          })),
+          graphId: registration.graph?.graphId || null,
+          changeSetId: registration.changeSet?.changeSetId || null,
+        };
+      } else {
+        resultStudio = { registered: false, toolJobId: job.id, error: registration.error };
+      }
+      const jobResult = {
+        ok: true,
+        sceneHash,
+        outDir: result.outDir,
+        outputs: result.outputs,
+        resultStudio,
+      };
+      db.updateToolJob(job.id, { status: 'completed', resultJson: JSON.stringify(jobResult), completedAt: Date.now() });
+    } else {
+      resultStudio = { registered: false, error: { code: 'model3d_job_create_failed' } };
+    }
+  } catch (error) {
+    resultStudio = { registered: false, error: { code: 'model3d_register_failed', message: error.message } };
+  }
+
   return {
     ok: true,
     sceneHash,
@@ -185,6 +257,7 @@ async function tool_model3d_export(args = {}, ctx = {}) {
     report: result.report,
     outputs: result.outputs,
     durationMs: result.durationMs,
+    resultStudio,
   };
 }
 

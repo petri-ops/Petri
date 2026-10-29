@@ -6,6 +6,7 @@ const scene3d = require('../helpers/scene3d');
 const { runModel3DReview } = require('../helpers/model3d-review');
 const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
+const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
 
 const REVIEW_VIEWS = new Set(['front', 'top', 'side', 'iso']);
@@ -141,6 +142,33 @@ module.exports = function registerModel3DRoutes(app) {
       });
     }
     return res.json({ ok: true, diff: sceneStore.diffScenes(before, after) });
+  });
+
+  // RW-01 — 导出即登记执行面：与 agent 工具同一生产路径（tool_model3d_export），
+  // 产物落工作区 + 成果面真值桥登记（change-set/revision/lineage 图）。非第二真相。
+  app.post('/api/model3d/scene/export', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const validated = scene3d.validateSceneSpec(req.body?.scene);
+    if (!validated.ok) {
+      return res.status(400).json({ ok: false, error: 'scene_invalid', errors: validated.errors });
+    }
+    try {
+      const outcome = await tool_model3d_export(
+        {
+          scene: req.body.scene,
+          scenePath: req.body?.scenePath ?? null,
+          formats: Array.isArray(req.body?.formats) ? req.body.formats : undefined,
+          recipeId: req.body?.recipeId ?? null,
+          recipeVersion: req.body?.recipeVersion ?? null,
+          taskSpecId: req.body?.taskSpecId ?? null,
+        },
+        { userId: auth.userId, projectId: auth.project.id, conversationId: null },
+      );
+      return res.status(outcome.ok === false ? 400 : 200).json(outcome);
+    } catch (error) {
+      return res.status(500).json({ ok: false, error: 'model3d_export_failed', message: error.message });
+    }
   });
 
   // NEXT-04B P3-1 — 草图 → task-spec/v1 草稿（只预览；不建场景/不执行）。

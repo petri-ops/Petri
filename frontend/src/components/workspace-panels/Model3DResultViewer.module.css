@@ -1,0 +1,56 @@
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 260px;
+}
+
+.surface {
+  position: relative;
+  flex: 1;
+  min-height: 240px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats {
+  flex-shrink: 0;
+}
+
+.hint {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0.75;
+}

@@ -1,4 +1,4 @@
-export type ResultArtifactKind = 'report' | 'plot' | 'table' | 'text' | 'data' | 'file';
+export type ResultArtifactKind = 'report' | 'plot' | 'table' | 'text' | 'data' | 'file' | 'model3d';
 
 export interface ResultArtifactRecord {
   name: string;
@@ -38,8 +38,8 @@ export interface ResultArtifactNavSection {
   kind: ResultArtifactKind | 'mixed';
 }
 
-const SECTION_ORDER: ResultArtifactKind[] = ['report', 'plot', 'table', 'text', 'data', 'file'];
-const PREVIEW_ORDER: ResultArtifactKind[] = ['plot', 'table', 'text', 'data', 'file', 'report'];
+const SECTION_ORDER: ResultArtifactKind[] = ['report', 'plot', 'table', 'text', 'data', 'file', 'model3d'];
+const PREVIEW_ORDER: ResultArtifactKind[] = ['plot', 'table', 'text', 'data', 'file', 'report', 'model3d'];
 
 const SECTION_LABELS: Record<ResultArtifactKind, string> = {
   report: '报告',
@@ -48,6 +48,7 @@ const SECTION_LABELS: Record<ResultArtifactKind, string> = {
   text: '文本',
   data: '数据',
   file: '其他',
+  model3d: '3D 模型',
 };
 
 function asString(value: unknown): string {

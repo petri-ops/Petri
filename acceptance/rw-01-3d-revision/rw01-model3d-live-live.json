@@ -1,0 +1,98 @@
+{
+  "name": "rw01-model3d-live",
+  "startedAt": "2026-10-29T19:10:51.176Z",
+  "finishedAt": "2026-10-29T19:10:58.810Z",
+  "assertions": [
+    {
+      "name": "W0_blender_capability",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\"}"
+    },
+    {
+      "name": "W1_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtx5a62_333d\",\"name\":\"RW01-3D-1793301055410\",\"created_at\":\"2026-10-29T19:10:55.418Z\",\"updated_at\":\"2026-10-29T19:10:55.418Z\","
+    },
+    {
+      "name": "W2a_scene_file_created",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/recipes/rw01-live.scene3d.json\",\"beforeHash\":\"a61ed86db028fba696de7218884ff02f98d33f3410fb85bdf7419733074d3d41\",\"afterHash\":\"a61ed86db028fba696de7218884ff02f98d33f3410fb85bdf7419733074d3d41\",\"revision\":null,\"diff\""
+    },
+    {
+      "name": "W2a_scene_readback",
+      "pass": true,
+      "detail": "{\"ok\":true,\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"name\":\"RW01 live enclosure\",\"parameters\":{},\"nodes\":[{\"id\":\"enclosure\",\"type\":\"box\",\"name\":\"Enclosure\",\""
+    },
+    {
+      "name": "W2_export_v1_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"a61ed86db028fba696de7218884ff02f98d33f3410fb85bdf7419733074d3d41\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvtx5ads-qmjulv\",\"manifest\":\"model3d/runs/m3d-mvtx5ads-qmjulv/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS"
+    },
+    {
+      "name": "W2_registration_registered",
+      "pass": true,
+      "detail": "{\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvtx5bnx_k84o\",\"revisions\":[{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"artifactFamilyId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3"
+    },
+    {
+      "name": "W2_registration_adopted",
+      "pass": true,
+      "detail": "{\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvtx5bnx_k84o\",\"revisions\":[{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01"
+    },
+    {
+      "name": "W2_three_format_revisions",
+      "pass": true,
+      "detail": "[{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"artifactFamilyId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"outputPath\":\"model3d/runs/m3d-mvtx5ads-qmjulv/scene.glb\",\"outputHash\":\"7039cdb9289a82c8225cb73cbd170e1bb777542b7885a59f51418ce15f583abc\",\"validationStatus\":\"valid\"},{\"revisionId\":\"rev"
+    },
+    {
+      "name": "W2_job_recorded",
+      "pass": true,
+      "detail": "{\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvtx5bnx_k84o\",\"revisions\":[{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01"
+    },
+    {
+      "name": "W3_history_lists_family",
+      "pass": true,
+      "detail": "{\"ok\":true,\"jobId\":\"tj_mvtx5bnx_k84o\",\"projectId\":\"p_mvtx5a62_333d\",\"revisions\":[{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactFamilyId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"ordinal\":1,\"createdAt\":\"2026-10-29T19:10:57.375Z\",\"isCurrent\":true,\"validationStatus\""
+    },
+    {
+      "name": "W4_lineage_projects_3d",
+      "pass": true,
+      "detail": "{\"ok\":true,\"projectId\":\"p_mvtx5a62_333d\",\"graphId\":\"wfg_2a6b6d097d73434f18ce3fff\",\"lineage\":{\"chain\":[{\"toolJobId\":\"tj_mvtx5bnx_k84o\",\"toolId\":\"model3d_export\",\"isCurrent\":true}],\"downstreamCount\":0}}"
+    },
+    {
+      "name": "W5_artifact_bytes_match_manifest",
+      "pass": true,
+      "detail": "status=200 bytes=2008 manifestHash=7039cdb9289a82c8225cb73cbd170e1bb777542b7885a59f51418ce15f583abc manifestFound=true"
+    },
+    {
+      "name": "W6_scene_edited",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/recipes/rw01-live.scene3d.json\",\"beforeHash\":\"a61ed86db028fba696de7218884ff02f98d33f3410fb85bdf7419733074d3d41\",\"afterHash\":\"40d87d84d69d0e264c483ba67292bf767060911d313787784e9ce404bb95fe6f\",\"revision\":{\"revisionI"
+    },
+    {
+      "name": "W6_export_v2_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"40d87d84d69d0e264c483ba67292bf767060911d313787784e9ce404bb95fe6f\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvtx5bwm-y4pnle\",\"manifest\":\"model3d/runs/m3d-mvtx5bwm-y4pnle/ma"
+    },
+    {
+      "name": "W6_same_family_stacks",
+      "pass": true,
+      "detail": "{\"v1\":{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactFamilyId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"ordinal\":1,\"createdAt\":\"2026-10-29T19:10:57.375Z\",\"isCurrent\":true,\"validationStatus\":\"valid\"},\"v2\":"
+    },
+    {
+      "name": "W6_v2_supersedes_v1_current",
+      "pass": true,
+      "detail": "{\"v1Row\":{\"revisionId\":\"rev_model3d_028bea2932853ca1\",\"artifactFamilyId\":\"model3d:p_mvtx5a62_333d:model3d/recipes/rw01-live.scene3d.json:glb\",\"ordinal\":1,\"createdAt\":\"2026-10-29T19:10:57.375Z\",\"isCurrent\":false,\"validationStatus\":\"valid\"},\"v2Row\":{\"revisionId\":\"rev_model3d_3c884f2c62d081b0\",\"artifac"
+    },
+    {
+      "name": "W6_restore_semantics",
+      "pass": true,
+      "detail": "restore status=409 error=restore_material_unavailable body={\"error\":\"restore_material_unavailable\",\"message\":\"Every historical script and parameter snapshot must verify in Git.\",\"detail\":null}"
+    },
+    {
+      "name": "W7_scene_diff_reports_change",
+      "pass": true,
+      "detail": "{\"ok\":true,\"diff\":{\"beforeHash\":\"a61ed86db028fba696de7218884ff02f98d33f3410fb85bdf7419733074d3d41\",\"afterHash\":\"ea7f0fb1a9baa31e66f86d8fd67172f3f744dd1c45654d9fe955f8b2668a906f\",\"parameters\":[],\"nodes\":[{\"id\":\"enclosure\",\"status\":\"changed\","
+    }
+  ],
+  "allPass": true
+}

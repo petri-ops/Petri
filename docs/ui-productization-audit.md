@@ -41,6 +41,14 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-638: Result Studio 内嵌 3D viewer + 3D 产物入成果面真值（RW-01；2026-10-30 **in_progress（viewer 组件 3/3 + 注册表 4/4 + 实机 18/18；工作区面板发现路径实机腿待补）**）
+
+- **变化面**：`ResultArtifactKind` 增 `model3d`（SECTION_LABELS「3D 模型」）；viewerRegistry 新增 model3d adapter（kind 恒胜 + `.glb/.gltf/.stl/.obj/.scene3d.json` 先于 json/binary 兜底，canSelect=true artifact 级选择）；`Model3DResultViewer` 薄壳（复用 work-surface Model3DScene 零复制，挂载即绑定 selectionBus、点击面写 artifact 级选择、WebGL 缺席如实降级）；ResultArtifactShell 渲染分支。
+- **为什么这样设计**：NEXT-04A~06 建成的 3D 链产物此前与成果面 revision/lineage/viewer/selectionBus 四线零接线；RW-01 经「导出即登记」桥（manifest→change-set+appendRevisionBatch，parametersHash=sceneHash 溯源，family=`model3d:<projectId>:<scenePath>:<ext>` 稳定跨导出 stacking）把 3D 产物接入既有内核真值，不建第二真相。
+- **验证（代码）**：桥契约 5/5（stamp 自证 provenance / 登记 / 幂等 / blocked 不 adopt / lineage 独立复投影）+ 注册表 4/4 + viewer 3/3 + 主题门 17/17 + tsc 0；内核邻域 72/72 + 3D 链 12/12 + plugin-loader 2/2。
+- **实机证据**：`acceptance/rw-01-3d-revision/rw01-model3d-live-live.json`（**18/18**，主栈 :3001 + 9223 离屏，真实 Blender 5.2.3 LTS）：REST 导出（与 agent 工具同一生产路径）→ 盖章作业 + change-set(adopted) + 三格式 revision + 权威图落库；history/lineage REST 可查；revision 文件服务字节 sha 对账 manifest；场景编辑 v2 → 同 family stacking v2 登基；场景语义 diff。
+- **边界（reopen）**：①工作区面板怎么把 model3d family 列进 Result Studio 结果列表（发现路径）未接——viewer 打开依赖 revision 上下文已就位，面板发现腿待补实机；②restore 资格链三关（cohort/validator/图覆盖）已过，终点 `restore_material_unavailable` 是 git 物化域前提（历史脚本/参数快照须在工作区 git 绑定域验证；临时项目工作区为仓库子目录不具备）——既有内核机制非 3D 专项；③子网格级语义拾取、网格 diff、3D 文件「打开原文件」出口不在本包。
+
 ## UI-632: 工作流运行控制面（NEXT-01；2026-10-29 **verified（dev Electron 边界内；组件 4/4 + 实机 11/11）**）
 
 - **变化面**：新增右侧「工作流」工作面（core `workflow`）+ `WorkflowRunsPanel`：运行列表、选中详情、执行三轴徽标、预算（agents/steps/timeout）、并发、scriptHash/来源、journal 尾部行、取消与从持久前缀恢复；空/载/错/未启用状态齐备。空态工作区新增「工作流」入口；自动化面板新增 workflow 计划类型与脚本/JSON 参数输入。所有按钮复用共享 button controls。

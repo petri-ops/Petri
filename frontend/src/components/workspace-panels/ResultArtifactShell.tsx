@@ -54,6 +54,7 @@ import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
 import { MarkdownResultViewer } from './MarkdownResultViewer';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
+import { Model3DResultViewer } from './Model3DResultViewer';
 // BLOCK-219 Q6 — 批注接线（身份推导/两个宿主/不可批注提示）外置，见同目录 resultAnnotation.tsx
 import {
   AnnotatedResultPdf,
@@ -859,6 +860,17 @@ export function ResultArtifactShell({
             {...annotationProps}
           />
         </>
+      );
+    }
+    // RW-01 — 3D 产物内嵌预览：薄壳复用 Model3DScene；artifact 级选择进选择总线。
+    if (viewerAdapter === 'model3d' && selectedArtifactUrl) {
+      return (
+        <Model3DResultViewer
+          url={selectedArtifactUrl}
+          name={selectedArtifactLabel || selectedArtifact.name}
+          artifactId={viewedRevision?.artifactId || selectedArtifact.name}
+          revisionId={viewedRevision?.revisionId ?? null}
+        />
       );
     }
     if (previewLoading && !previewText && !previewData) {

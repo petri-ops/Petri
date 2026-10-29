@@ -386,9 +386,19 @@ function normalizePluginManifest(plugin, def) {
   };
 }
 
+// RW-01 — 一方工具（agent-tools 直注册、无插件 manifest）的成果面描述符。
+// validator.id 是历史恢复资格校验（restore_validator_proof_mismatch）的信任锚，
+// 必须与登记桥 validationSummary.validatorIds 同源（model3d-revision-bridge.js）。
+const FIRST_PARTY_RESULT_STUDIO_DESCRIPTORS = Object.freeze({
+  model3d_export: Object.freeze({ validator: Object.freeze({ id: 'model3d-manifest/v1' }) }),
+});
+
 function getPluginManifest(pluginId) {
   const plugin = getPlugin(pluginId);
-  if (!plugin) return null;
+  if (!plugin) {
+    const firstParty = FIRST_PARTY_RESULT_STUDIO_DESCRIPTORS[pluginId];
+    return firstParty ? { resultStudio: { ...firstParty } } : null;
+  }
   return normalizePluginManifest(plugin, getToolDefinition(pluginId));
 }
 

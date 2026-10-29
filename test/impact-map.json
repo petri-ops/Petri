@@ -6571,6 +6571,31 @@
         "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",
         "test/block321c-center-priority.test.mjs"
       ]
+    },
+    {
+      "id": "rw01-model3d-bridge",
+      "note": "RW-01 3D 产物接入成果面：导出即登记桥、kind=model3d/viewer/selectionBus、model3d export REST、一方 validator 描述符；验收脚本只随定向测试与文档门。",
+      "patterns": [
+        "core/shared-backend/model3d-revision-bridge.js",
+        "core/petri-server/routes/model3d.js",
+        "core/petri-server/agent-tools/model3d-tools.js",
+        "core/petri-server/plugin-loader.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/rw01-model3d-live.cjs",
+        "acceptance/rw-01-3d-revision/**",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.tsx",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.module.css",
+        "frontend/src/components/result-studio/viewerRegistry.ts"
+      ],
+      "tests": [
+        "test/rw01-model3d-revision-bridge.test.mjs",
+        "test/next04a-scene3d.test.mjs",
+        "test/next05-recipes.test.mjs",
+        "frontend/src/components/result-studio/viewerRegistry.rw01.test.ts",
+        "frontend/src/components/result-studio/viewerRegistry.test.ts",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.test.tsx"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
