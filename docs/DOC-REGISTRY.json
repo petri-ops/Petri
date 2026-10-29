@@ -8444,7 +8444,7 @@
       "capability": "rw-01-3d-artifact-revision",
       "path": "docs/rw-01-3d-artifact-revision-plan.md",
       "kind": "living-plan",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "rw-01-3d-artifact-revision",
       "entrypoint": "docs/README.md",
@@ -8458,7 +8458,7 @@
         "lineage",
         "G0"
       ],
-      "notes": "RW 队首：3D 链产物（SceneSpec/manifest/GLB/STL/OBJ）接入成果面 revision/lineage/viewer/selectionBus 四线（kind=model3d 契约扩展 + 导出即登记桥 + 纯投影 lineage）；用户预授权六包串行 + Blender 安装授权留痕；证据 acceptance/rw-01-3d-revision/。"
+      "notes": "RW 队首 completed（2026-10-30）：3D 产物接入成果面四线（kind=model3d/导出即登记桥/薄壳 viewer/一方 validator 描述符）；closeout 十三门 + 实机 18/18（真实 Blender 5.2.3 LTS）；UI-638 in_progress（面板发现腿随 RW-02）。"
     }
   ],
   "lastUpdated": "2026-10-30",

@@ -5,12 +5,12 @@ acceptance:
   - 方向级验收 = 按 parent 执行纲（docs/remaining-work-execution-plan.md §3.1）的逐包任务与完成判据执行；本 plan 是其立项展开。
   - 门禁级验收 = §5 六门（G1 契约红绿四件 / G2 后端定向 / G3 前端定向+tsc / G4 实机 flow / G5 closeout 十三门 / G6 台账回写）收口逐项对账。
   - 证据级验收 = 实机断言落 acceptance/rw-01-3d-revision/；实现未完成只能 in_progress，verified 需真实实机证据，不凑不伪造。
-status: active
+status: completed
 ---
 
 # RW-01-3D-ARTIFACT-REVISION 执行计划
 
-最后更新：2026-10-30（P0 立项：探查+设计+登记；用户预授权六包串行全量推进。）
+最后更新：2026-10-30（**P0-P4 全链收口 completed**：closeout 十三门 PASS + 实机 18/18（acceptance/rw-01-3d-revision/，真实 Blender 5.2.3 LTS）；实机抓真三连=family 需 projectId 前缀（内核 uq_rs_revisions_family_current 全局唯一）/scenePath 稳定锚（run 副本路径不 stacking）/restore 资格三字段+validator 描述符（plugin-loader 一方表）。边界如实：UI-638 面板发现路径实机腿随 RW-02；restore 物化域=git 绑定前提（既有内核域）；vitest 通道债+1 实证（three.js 真挂载 V8 OOM，薄壳测试以 stub 代入）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ## 0. 发令与授权留痕
 
