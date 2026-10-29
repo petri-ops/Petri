@@ -9,6 +9,8 @@ import {
   WORK_SURFACE_UI_ACTION_EVENT,
   type WorkSurfaceUiActionDetail,
 } from '@/lib/workSurface/uiActionBus';
+import { createPackWriteHost } from '@/lib/workSurface/packWriteBridge';
+import type { AnnotationScope } from '@/lib/annotations';
 import styles from './PackSurfaceFrame.module.css';
 
 function packOrigin(packId: string): string {
@@ -101,6 +103,30 @@ export function PackSurfaceFrame({
     }, origin);
   }, [origin, surfaceActions]);
 
+  // RW-02 — 宿主写代理：scope 由宿主注入（annotationScope 从 artifactContext 派生，pack 不可自宣）。
+  const annotationScope: AnnotationScope | null = React.useMemo(() => {
+    if (!projectId || !artifactContext) return null;
+    const revisionId = typeof artifactContext.revisionId === 'string' ? artifactContext.revisionId : null;
+    const name = typeof artifactContext.name === 'string' ? artifactContext.name : null;
+    if (!revisionId && !name) return null;
+    return {
+      projectId,
+      surface: 'result-artifact',
+      artifactId: name,
+      revisionId,
+    };
+  }, [artifactContext, projectId]);
+  const writeHostRef = React.useRef<ReturnType<typeof createPackWriteHost> | null>(null);
+  const writeHost = React.useMemo(() => createPackWriteHost({
+    surfaceDecl: (descriptor.writes ?? descriptor.annotations ?? null) as never,
+    projectId: projectId ?? '',
+    conversationId: conversationId ?? null,
+    annotationScope,
+  }), [annotationScope, conversationId, descriptor.annotations, descriptor.writes, projectId]);
+  React.useEffect(() => {
+    writeHostRef.current = writeHost;
+  }, [writeHost]);
+
   const markReady = React.useCallback(() => {
     readyRef.current = true;
     setState('ready');
@@ -135,6 +161,22 @@ export function PackSurfaceFrame({
       if (!data || typeof data.type !== 'string') return;
       if (data.type === 'petri:ready') {
         markReady();
+        return;
+      }
+      // RW-02（C-44 扩展）— pack 写请求：校验→授权→去重→核心客户端，回执 postMessage。
+      if (data.type === 'petri:pack-write' || data.type === 'petri:annotation-write' || data.type === 'petri:annotation-delete') {
+        const requestType = data.type;
+        void writeHostRef.current?.handlePackWrite(data).then((result) => {
+          const target = iframeRef.current?.contentWindow;
+          if (!target || !origin) return;
+          target.postMessage({
+            type: requestType === 'petri:pack-write' ? 'petri:pack-write-result' : 'petri:annotation-write-result',
+            requestId: typeof data.requestId === 'string' ? data.requestId : '',
+            ...(requestType === 'petri:pack-write' ? { kind: result.kind } : {}),
+            ok: result.ok,
+            ...(result.ok ? { payload: result.payload } : { error: result.error }),
+          }, origin);
+        });
         return;
       }
       if (data.type === 'petri:ui-action-result') {

@@ -18,6 +18,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const packRegistry = require('../../shared-backend/pack-registry');
 const { resolveDataDir } = require('../../shared-backend/data-paths');
+const { validateSurfaceWritesDecl } = require('../../shared-backend/pack-write-bridge-contract');
 const {
   resolvePackAssetPath,
   mimeForPackAsset,
@@ -173,6 +174,20 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
       }
     }
     seen.add(id);
+    // RW-02（C-44 扩展）— 写能力声明透传：v2 writes（bridgeVersion 门）+ v1 annotations 兼容。
+    // 校验失败=丢弃声明 + diagnostic（fail-closed，写动作不出现），manifest 原文不修改。
+    let normalizedWrites = null;
+    if (item.writes !== undefined) {
+      const writesCheck = validateSurfaceWritesDecl(item.writes);
+      if (writesCheck.ok) {
+        normalizedWrites = item.writes;
+      } else {
+        diagnostics.push(diagnostic(packId, `resultSurfaces/${id}`, `writes_decl_invalid:${writesCheck.code}`));
+      }
+    }
+    const legacyAnnotationsWrite = Boolean(
+      item.annotations && typeof item.annotations === 'object' && item.annotations.write === true,
+    );
     surfaces.push({
       id,
       publicId: `pack:${packId}:result:${id}`,
@@ -181,6 +196,8 @@ function normalizeResultSurfaces(packId, packRoot, provides, diagnostics) {
       artifactTypes,
       modes,
       ...(tabs.length > 0 ? { tabs } : {}),
+      ...(legacyAnnotationsWrite ? { annotations: { write: true } } : {}),
+      ...(normalizedWrites ? { writes: normalizedWrites } : {}),
       priority: Number.isFinite(item.priority) ? item.priority : 0,
       ...(typeof item.emptyState === 'string'
         ? { emptyState: item.emptyState.slice(0, LIMITS.emptyStateLength) }

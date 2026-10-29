@@ -37,9 +37,19 @@ status: active
 
 ## 4. 设计裁决（探查回填）
 
-- D1 分诊判据（待探查回填：四档计数与逐条表）。
-- D2 写桥白名单形状（待探查回填：四类写操作契约）。
-- D3 审批/ack 复用点（待探查回填）。
+- **D1 分诊判据**（盘点探查进行中，回填 §4.1 逐条表）。
+- **D2 写桥白名单形状**：扩既有冻结契约 `core/shared-backend/pack-annotation-bridge-contract.js`（批注窄桥→四类写操作）。pack 侧权限仍由 pack.json `provides.resultSurfaces[].writes` **显式声明、宿主校验**（C-44 红线「写权限不得由 pack 侧自宣」=宿主校验声明，非 pack 运行时自宣）；消息统一上行 `petri:pack-write`（requestId + kind ∈ annotation|annotation-delete|selection|revision-restore|revision-replay|export）+ 下行 `petri:pack-write-result`；既有 `petri:annotation-write/delete` 作为 annotation kind 的别名保持兼容。
+- **D3 审批/ack 复用**：pack 发起的写是**用户在 pack 面上的操作代理**（非 agent 动作）→ 走 host 侧 requestId 短 TTL + 去重（act-ack 同型纪律），落到既有核心 REST（selection.js / revisions.js replay+restore / annotations.js / methods-export）由核心自身授权（canAccessProject / projectContext write）把关——**不建第二审批链**；agent 发起的 export 仍走 generate_methods 既有 gates。
+- **D4 项目归属**：projectId/conversationId 由 host 注入快照（pack 只能写自己 surface 绑定的项目），pack 消息里的归属字段一律忽略（防越权声明）。
+- **D5 版本门**：resultSurfaces.writes 声明带 `bridgeVersion`（本包=1）；host 对 pack manifest 的 resultSurfaces 版本做最小版本校验，不满足按「未声明写能力」回退（写动作不出现）。
+- **D6 回退**：pack 停用/缺失 → scheme.js 404 已兜底 + resultSurfaceHost core-transitional 回落已存在；写桥在停用/回退态直接不挂消息监听（写动作不可达）。
+
+## 4.1 A 线分诊表（P1 盘点探查回填，2026-10-30）
+
+**实测 62 条**（台账旧口径 71 = 含 UI-448 加映 v15-v28 已整批 verified 与旧 G0 RS P 系）。四档计数：**a=13 / b=18 / c=3 / d=28**。逐条表与依据落 `acceptance/rw-02-ui-evidence/triage.json`（分诊执行契约）。关键更正：UI-457 已 verified（2026-10-16）、UI-587 已 verified（压感 reopen 由 UI-595 承接）；**人眼最小集=UI-443/445/501 三条**（RW 纲旧引用的 503/504 实为 b 档数据前置）。
+
+- **处置规则**：a 档 → 本包批量 CDP 取证 flow 翻 verified；b 档 → 台账补「触发条件」显式注记（数据/环境/第二机/R 运行时），如实保留 in_progress 不算失败；c 档 → 本包产出**集中过目清单+测试路线**（末尾交付用户一次栈窗口确认）；d 档 → 逐条判销/改判回写台账（判销依据引用既有证据或台账自述）。
+- **D1 裁决定型**：d 档 28 条中 UI-448 加映 12 条整批判销（同因同注记）；其余逐条改判（退役承接/非 UI 面改判/证据链断裂按 P0 先例标「补证据后再翻」）。
 
 ## 5. 门禁（收口逐项对账）
 

@@ -28,6 +28,19 @@ export interface WorkSurfaceDescriptor {
    * 未声明 = 只接管模式主 body（BLOCK-218 行为）；白名单见 registry.ts。
    */
   tabs?: { id: string; label: string }[];
+  /** RW-02（C-44 扩展）— v1 兼容：批注窄桥写声明（pack.json 原文透传，宿主校验）。 */
+  annotations?: { write?: boolean };
+  /**
+   * RW-02（C-44 扩展）— v2 写能力声明（bridgeVersion 门 + 未知键 fail-closed，
+   * 服务端 pack-contributions 校验后透传；pack 侧不能自宣写权限，宿主执行时复核）。
+   */
+  writes?: {
+    bridgeVersion: number;
+    annotations?: { write?: boolean };
+    selection?: { write?: boolean };
+    revisions?: { restore?: boolean; replay?: boolean };
+    export?: { run?: boolean };
+  };
   /** pack-result only: higher wins when multiple surfaces match. */
   priority?: number;
   capabilities?: Record<string, unknown>;

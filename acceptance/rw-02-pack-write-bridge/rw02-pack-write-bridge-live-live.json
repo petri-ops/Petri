@@ -1,0 +1,53 @@
+{
+  "name": "rw02-pack-write-bridge-live",
+  "startedAt": "2026-10-29T20:25:45.995Z",
+  "finishedAt": "2026-10-29T20:25:47.381Z",
+  "assertions": [
+    {
+      "name": "W1_fixture_writes_passthrough",
+      "pass": true,
+      "detail": "{\"id\":\"write-probe\",\"publicId\":\"pack:rw02-fixture:result:write-probe\",\"title\":\"write-probe\",\"artifactTypes\":[\"model3d\"],\"modes\":[\"result\"],\"writes\":{\"bridgeVersion\":1,\"annotations\":{\"write\":true},\"selection\":{\"write\":true},\"revisions\":{\"res"
+    },
+    {
+      "name": "W1_baddecl_dropped_with_diagnostic",
+      "pass": true,
+      "detail": "[{\"packId\":\"rw02-baddecl\",\"contribution\":\"resultSurfaces/bad-probe\",\"code\":\"writes_decl_invalid:bridge_version_unsupported\"}]"
+    },
+    {
+      "name": "W2_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtztj5a_zhfm\",\"name\":\"RW02-BRIDGE-1793305546028\",\"created_at\":\"2026-10-29T20:25:46.030Z\",\"updated_at\":\"2026-10-29T20:25:46.03"
+    },
+    {
+      "name": "W2_scene_seeded",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/recipes/rw02-bridge.scene3d.json\",\"beforeHash\":\"34dc800f810a7cd081406e487ed9f4fc00dcc45efd9f9d7a549a03bf2105adff\",\"afterHash\":\"34dc800f810a7cd081406e487ed9f4fc00dcc45efd9f9d"
+    },
+    {
+      "name": "W2_export_revision_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"34dc800f810a7cd081406e487ed9f4fc00dcc45efd9f9d7a549a03bf2105adff\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvtztje6-ed8ysr\",\"manifest\":\"model3d/runs/m3d-mvtztje6-ed8ysr/manifest.json\",\"report"
+    },
+    {
+      "name": "W3_selection_save_chain",
+      "pass": true,
+      "detail": "status=200 body={\"selection\":{\"contractVersion\":1,\"selectionId\":\"sel_rw02_mvtztk52\",\"projectId\":\"p_mvtztj5a_zhfm\",\"conversationId\":null,\"artifactId\":\"model3d:p_mvtztj5a_zhfm:model3d/recipes/rw02-bridge.scene3d.json:glb\",\"revisionId\":\"rev_model3d_31638b52b9"
+    },
+    {
+      "name": "W4_annotation_create_chain",
+      "pass": true,
+      "detail": "status=200 body={\"annotation\":{\"annotationId\":\"ann_f2ee8757-7715-490d-b683-f0bd5c5ac8d4\",\"contractVersion\":2,\"projectId\":\"p_mvtztj5a_zhfm\",\"conversationId\":null,\"surface\":\"result-artifact\",\"artifactId\":\"model3d:p_mvtztj5a_zhfm:model3d/recipes/rw02-bridge.s"
+    },
+    {
+      "name": "W4_annotation_delete_chain",
+      "pass": true,
+      "detail": "status=200 body={\"deleted\":true,\"annotationId\":\"ann_f2ee8757-7715-490d-b683-f0bd5c5ac8d4\"}"
+    },
+    {
+      "name": "W5_restore_qualification_chain",
+      "pass": true,
+      "detail": "status=200 error=null body={\"ok\":true,\"restored\":false,\"idempotent\":true,\"revision\":{\"contractVersion\":1,\"revisionId\":\"rev_model3d_31638b52b92ec941\",\"projectId\":\"p_mvtztj5a_zhfm\",\"artifactFamilyId\":\"model3d:p_mvtztj5a_zhfm:mode"
+    }
+  ],
+  "allPass": true
+}

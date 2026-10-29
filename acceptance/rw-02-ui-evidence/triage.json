@@ -1,0 +1,276 @@
+{
+ "schema": "rw02-ui-evidence-triage/v1",
+ "generatedAt": "2026-10-30",
+ "source": "RW-02 P1 盘点探查（只读代理；台账=docs/ui-productization-audit.md）",
+ "counts": {
+  "total": 62,
+  "a_cdp_batch": 13,
+  "b_conditional": 18,
+  "c_human_eye": 3,
+  "d_no_evidence_chain": 28
+ },
+ "corrections_vs_plan": [
+  "台账旧口径 71 → 实测 62（UI-448 加映 v15-v28 已整批翻 verified；旧 G0 RS P 系全 verified）",
+  "UI-457 已于 2026-10-16 翻 verified（BLOCK-184 P1），RW 纲人眼清单中的 UI-457 为过期引用",
+  "UI-587 已 verified（BLOCK-270/278），reopen 压感项由 UI-595 承接",
+  "人眼最小集实为 UI-443/445/501 三条（UI-503/504 为 b-conditional 数据前置项）",
+  "UI-448 加映 v2-v14 共 12 条判 d（v15 起整批 verified + UI-627 原生窗退役整链下线）"
+ ],
+ "items": [
+  {
+   "ui": "UI-638",
+   "tier": "a",
+   "reason": "仅剩面板发现路径实机腿，DOM 可断言"
+  },
+  {
+   "ui": "UI-596",
+   "tier": "a",
+   "reason": "右栏实机批可代行"
+  },
+  {
+   "ui": "UI-595",
+   "tier": "a",
+   "reason": "批注实机批可代行（压感 reopen 留用户）"
+  },
+  {
+   "ui": "UI-594",
+   "tier": "a",
+   "reason": "斜杠面实机批可代行"
+  },
+  {
+   "ui": "UI-598",
+   "tier": "a",
+   "reason": "计量条隐藏 DOM 断言"
+  },
+  {
+   "ui": "UI-303",
+   "tier": "a",
+   "reason": "四档下拉 DOM 断言"
+  },
+  {
+   "ui": "UI-301",
+   "tier": "a",
+   "reason": "面板纯展示层，数据面已覆盖"
+  },
+  {
+   "ui": "UI-248",
+   "tier": "a",
+   "reason": "展开/收起 DOM 断言"
+  },
+  {
+   "ui": "UI-331",
+   "tier": "a",
+   "reason": "相对时间纯 DOM 断言"
+  },
+  {
+   "ui": "UI-385",
+   "tier": "a",
+   "reason": "退役面 route_not_allowed+tab 在场可断言"
+  },
+  {
+   "ui": "UI-462",
+   "tier": "a",
+   "reason": "无仓库提示+历史正常 DOM 断言"
+  },
+  {
+   "ui": "UI-484",
+   "tier": "a",
+   "reason": "seed task_events 后 DOM 断言"
+  },
+  {
+   "ui": "UI-543",
+   "tier": "a",
+   "reason": "9223 走查无数据前置"
+  },
+  {
+   "ui": "UI-390",
+   "tier": "b",
+   "reason": "需真实 spawn 子代理数据"
+  },
+  {
+   "ui": "UI-388",
+   "tier": "b",
+   "reason": "需 IPv6 黑洞/WSL 环境"
+  },
+  {
+   "ui": "UI-389",
+   "tier": "b",
+   "reason": "需 500+ 文件大目录夹具"
+  },
+  {
+   "ui": "UI-384",
+   "tier": "b",
+   "reason": "需真实任务工具输出"
+  },
+  {
+   "ui": "UI-383",
+   "tier": "b",
+   "reason": "需真实工具流水"
+  },
+  {
+   "ui": "UI-382",
+   "tier": "b",
+   "reason": "需真实 spawn 数据"
+  },
+  {
+   "ui": "UI-387",
+   "tier": "b",
+   "reason": "需真实子智能体数据"
+  },
+  {
+   "ui": "UI-386",
+   "tier": "b",
+   "reason": "需真实子智能体会话"
+  },
+  {
+   "ui": "UI-458",
+   "tier": "b",
+   "reason": "retention 需老化 tool_jobs 数据"
+  },
+  {
+   "ui": "UI-459",
+   "tier": "b",
+   "reason": "T5 残留需真实运行态"
+  },
+  {
+   "ui": "UI-468 加映",
+   "tier": "b",
+   "reason": "需真实隧道环境"
+  },
+  {
+   "ui": "UI-471",
+   "tier": "b",
+   "reason": "需真隧道/公网门 probe"
+  },
+  {
+   "ui": "UI-526",
+   "tier": "b",
+   "reason": "需 R 运行时（用户已裁决暂缓）"
+  },
+  {
+   "ui": "UI-532",
+   "tier": "b",
+   "reason": "需结果面 job+artifact seed"
+  },
+  {
+   "ui": "UI-535",
+   "tier": "b",
+   "reason": "需异常组件注入"
+  },
+  {
+   "ui": "UI-502",
+   "tier": "b",
+   "reason": "需 visualize 任务数据"
+  },
+  {
+   "ui": "UI-503",
+   "tier": "b",
+   "reason": "需 artifact_revisions 数据（viewer 已证）"
+  },
+  {
+   "ui": "UI-504",
+   "tier": "b",
+   "reason": "需第二台机器（CP-16 先例分档）"
+  },
+  {
+   "ui": "UI-443",
+   "tier": "c",
+   "reason": "待用户实机过目（人为触发异常形态）"
+  },
+  {
+   "ui": "UI-445",
+   "tier": "c",
+   "reason": "待用户实机过目翻 verified"
+  },
+  {
+   "ui": "UI-501",
+   "tier": "c",
+   "reason": "dock 时序竞争无法 CDP 断言，待用户真窗确认"
+  },
+  {
+   "ui": "UI-448 加映 v2..v14（12 条）",
+   "tier": "d",
+   "reason": "v15 起整批 verified + UI-627 原生窗退役"
+  },
+  {
+   "ui": "UI-304",
+   "tier": "d",
+   "reason": "声称实机无证据产物，链断"
+  },
+  {
+   "ui": "UI-326",
+   "tier": "d",
+   "reason": "同上"
+  },
+  {
+   "ui": "UI-391",
+   "tier": "d",
+   "reason": "纯重构非 UI 面+证据引用失效"
+  },
+  {
+   "ui": "UI-475",
+   "tier": "d",
+   "reason": "证据链断裂（另有人测腿登记）"
+  },
+  {
+   "ui": "UI-485",
+   "tier": "d",
+   "reason": "全局改名非单点 UI 面，theme 契约承载"
+  },
+  {
+   "ui": "UI-493",
+   "tier": "d",
+   "reason": "证据失效，语义由 UI-511 承接"
+  },
+  {
+   "ui": "UI-505",
+   "tier": "d",
+   "reason": "已销号（仓库卫生棘轮非 UI 面）"
+  },
+  {
+   "ui": "UI-513",
+   "tier": "d",
+   "reason": "UI 面尚未交付（下一批待办）"
+  },
+  {
+   "ui": "UI-521",
+   "tier": "d",
+   "reason": "非可见 UI 面（drift 单测即证据）"
+  },
+  {
+   "ui": "UI-522",
+   "tier": "d",
+   "reason": "证据链断裂"
+  },
+  {
+   "ui": "UI-524",
+   "tier": "d",
+   "reason": "零可见行为变化"
+  },
+  {
+   "ui": "UI-534",
+   "tier": "d",
+   "reason": "UI 控件未交付"
+  },
+  {
+   "ui": "UI-185",
+   "tier": "d",
+   "reason": "2026-08 悬置，审阅面已多轮演进"
+  },
+  {
+   "ui": "UI-189",
+   "tier": "d",
+   "reason": "依赖未接线（G1+）"
+  },
+  {
+   "ui": "UI-190",
+   "tier": "d",
+   "reason": "被 UI-499/523 取代"
+  },
+  {
+   "ui": "UI-197",
+   "tier": "d",
+   "reason": "审阅模式已重构，悬置改判"
+  }
+ ]
+}

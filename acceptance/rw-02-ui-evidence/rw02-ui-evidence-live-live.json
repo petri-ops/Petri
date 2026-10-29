@@ -1,0 +1,38 @@
+{
+  "name": "rw02-ui-evidence-live",
+  "startedAt": "2026-10-29T20:27:59.762Z",
+  "finishedAt": "2026-10-29T20:28:02.822Z",
+  "assertions": [
+    {
+      "name": "cdp_targets_listed",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr"
+    },
+    {
+      "name": "ui598_runstats_hidden_without_consumption",
+      "pass": true,
+      "detail": "runStats=absent"
+    },
+    {
+      "name": "ui598_starter_chips_generic",
+      "pass": true,
+      "detail": "generic=[\"整理笔记\",\"写一份总结\",\"代码走查\",\"规划任务\"] bioLeak=[]"
+    },
+    {
+      "name": "ui543_welcome_copy_neutral",
+      "pass": true,
+      "detail": "bioLeak=[]"
+    },
+    {
+      "name": "ui543_no_domain_example_cards_without_packs",
+      "pass": true,
+      "detail": "count=0"
+    }
+  ],
+  "allPass": true
+}
