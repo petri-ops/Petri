@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-29T20:27:59.762Z",
-  "finishedAt": "2026-10-29T20:28:02.822Z",
+  "startedAt": "2026-10-29T20:35:51.121Z",
+  "finishedAt": "2026-10-29T20:35:58.288Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -32,6 +32,21 @@
       "name": "ui543_no_domain_example_cards_without_packs",
       "pass": true,
       "detail": "count=0"
+    },
+    {
+      "name": "ui596_last_used_badge",
+      "pass": true,
+      "detail": "badge={\"badge\":true,\"rightCol\":true}"
+    },
+    {
+      "name": "ui462_no_own_repo_hint",
+      "pass": true,
+      "detail": "hints=[]"
+    },
+    {
+      "name": "ui303_plan_mode_in_menu",
+      "pass": true,
+      "detail": "menu={\"menus\":1,\"plan\":true,\"sub\":true,\"full\":true} trigger=clicked"
     }
   ],
   "allPass": true

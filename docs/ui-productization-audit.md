@@ -166,11 +166,12 @@
 - **实机证据**：`acceptance/block-313/live-model-menu-two-cards.json`（**16/16**）：左主卡 320px 列 4 个供应商（当前使用唯一勾、无模型列表）；右模型卡 parent=body、不在主卡内、position=fixed、z=82/81、placement=right、gap=8px、与主卡顶部对齐（同 top=501；panel 895..1215 / menu 567..887）、全在视口内；右卡标题=DeepSeek 2 个模型；切 ninijoker → 右卡换 1 模型、左卡 4 行保持、选中迁移；回切 DeepSeek 恢复 2 模型；点模型两卡同时关闭。截图离屏不可得（`screenshot_unavailable`：Page.captureScreenshot 15s 超时）。
 - **边界（reopen）**：左主卡未显示厂商类型标签（个人/API，模型目录无此元数据）；未加「管理模型」入口；窄视口向左开由单测覆盖（实机仅验右侧展开）。
 
-## UI-596: 右栏空态最近使用面板记忆（2026-10-27 **in_progress（BLOCK-289；UI-593 reopen 清偿；组件级 62/62，实机腿随下次右栏实机批）**）
+## UI-596: 右栏空态最近使用面板记忆（2026-10-30 **verified（RW-02 A 线 a 档批量取证；9223 实机）**）
 
 - **变化面**：右栏 tab 离开 home 即按项目持久化最近面板（localStorage petri-last-panel:<projectId>）；空态六卡中匹配卡亮「上次使用」徽章（accent pill，绝对定位右上角）——不自动跳转（用户动线自主）。helpers=readLastPanel/writeLastPanel（EmptyResult.tsx 单源，localStorage 不可用静默降级）。
 - **为什么这样设计**：UI-593 reopen 项——多面板用户回空态时提示上次的动线，降低重新寻找成本；不代用户做决定。
 - **验证（代码）**：EmptyResult 徽章测+RightPanel mock 补导出+annotations 域回归 62/62+tsc 0。
+- **实机证据（RW-02 清偿 2026-10-30）**：`acceptance/rw-02-ui-evidence/rw02-ui-evidence-live-live.json`（9223 离屏）：localStorage 持久 results 面板 → 空态「上次使用」徽章在场。
 - **实机证据**：未跑（右栏实机批补）。
 - **边界（reopen）**：最近使用栈（仅记最后一个）；跨设备同步。
 
@@ -2863,7 +2864,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **UI-304 终版（2026-09-07，完全对齐 Codex —— 极简创建流程）**：用户反馈 Codex 可以正常选择目录，说明问题不是 macOS 系统 bug，而是调用方式差异。关键修复：**目录选择时不传 parent window**（`dialog.showOpenDialog(null, opts)` 而非 `dialog.showOpenDialog(mainWindow, opts)`）。[file-dialog.js](../src/ipc/file-dialog.js) 改为 `const parent = isDirectory ? null : mainWindow`；文件选择仍传 parent 保持模态行为。**最终 UX（原生面板直接可用，无需兜底）**：「+」→ 原生面板（分栏视图/列表视图均可正常选择）→ 选中直达 confirm → 创建；取消 → 应用内 FolderPicker 作为备选；粘贴路径/拖拽为第三/四通道。撤销 message 引导方案（不需要了）。门禁：tsc 0 / LeftPanel vitest 11/11 / docs:check / ui:audit:check（存量红 5 个旧提交）。
 - **P0 台账核查（2026-10-21）**：正文声称实机/live 通过，但仓内无对应证据产物：按纪律不得标 `verified`，保持 `in_progress`，补证据后再翻。
 
-## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-09-07 in_progress)
+## UI-303: 增量 — 计划模式并入访问档位菜单第四档（移除独立开关，四模式一处切换） (2026-10-30 **verified（RW-02 A 线 a 档批量取证；9223 实机）**)
 
 **用户反馈**：截图 composer 档位下拉（完全访问/项目写/只读模式）：「计划模式 应该放到这里 这几种模式可以切换的」。
 
@@ -5155,7 +5156,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **验收（2026-10-03）**：用户真窗过目认可（主代理会话原话「可以了 没什么问题 继续下去」）→ **verified**（走查取证+换眼复核+用户过目三环齐）。pending ChangeSet 的审阅队列 adopt 流体验属 RS 审阅域未走查（如实保留，随 RS 审阅域后续包）。
 - **边界**：/lineage 字段不足=前端可投影子集（后端扩字段=artifact 节点/下游分支，留后续包）；切换器空态常驻（无链/单节点时按钮组可见而两形态各自自隐）=D1 未裁决形态，登记 rider（plan §8 R-1）；@xyflow/react bundle 增量 ~100-150KB gz 无登记机制（code-size 台账只管行数/指纹），plan 验收项如实降格为指纹重打（plan §8 R-3）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-462: Result Studio「用户自有 Git 仓库接入」能力整体退役——managed-only 收敛（用户裁决）(2026-10-03 in_progress，契约级全绿；实机复认随下次 dev 栈会话)
+## UI-462: Result Studio「用户自有 Git 仓库接入」能力整体退役——managed-only 收敛（用户裁决）(2026-10-30 **verified（RW-02 A 线 a 档批量取证；9223 实机）**，契约级全绿)
 
 - **来源**：用户产品裁决（2026-10-03 会话原话「Result Studio 是独立的内容 不应该和开发内容混在一起……那应该是个独立的版本控制仓库 不和项目开发混合在一起……提示都不需要有的」）——推翻 UI-127 的 opt-in 设计：不是「默认不启用、授权才开」，而是能力不存在。形式=UI 轨（UI-384 先例：动了服务端但边界单一、单会话可收口）；形态判定时已核对单工作包纪律（BLOCK-138 active 未让位，本包为其相邻域快速刀，文件面与其 F1 修复零重叠）。
 - **交付**：①前端删 `GitRepositoryConsent.tsx`/`.test.tsx`/`.module.css` 三件 + `RightPanel.tsx` results tab 摘挂载 + `resultStudioClient.ts` 删 `fetchRepositoryBinding`/`submitExistingRepositoryConsent` 及四个类型；②后端删 `routes/result-studio/repository.js` 子域（GET /repository-binding + POST /repository-binding/consent 两端点）、`_helpers/workflow.js` 的 `attachExistingRepositoryWithExplicitConsent`、facade `_test` 转发、`result-studio-repository.js` consent 存储三方法与 `git-repository-consent-schema.js` 模块（004 迁移文件保留：历史迁移不可回撤，consent 表停止新建于全新库之外的路径、旧表不被读写）；③`git-repository-binding.js` 收敛 managed-only——删 `existing` 模式/`allowExistingRepository`/`preferManaged` 参数、`inspectExistingRepositoryDirty`/`findEnclosingGitRepository`/`resolveGitDirFromFile`/`resolveManagedPaths`/`pathsOverlap`/`detectDirtyConflict` 及 inspection.existing 字段，`BINDING_STATUSES` 去 `blocked_dirty_conflict`；④四个生产调用点（result-studio/index.js projectContext、result-studio-background-child.js bind、result-edit-tools.js、result-selection-tools.js）删 consent 查询，11 处 `gitPathPrefix` existing 分支坍缩为 `''`；⑤`result-studio-contracts.js` `BINDING_PERSIST_MODES` 收敛 `['managed']`。

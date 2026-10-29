@@ -69,6 +69,95 @@ module.exports = {
       const exampleParsed = JSON.parse(exampleCards);
       assert('ui543_no_domain_example_cards_without_packs', exampleParsed.count === 0, `count=${exampleParsed.count}`);
 
+      // ===== Wave-2：项目工作页面 =====
+      // 临时项目（隔离断言对象；结束删除）
+      const project = await (await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/data/projects`, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `RW02-UIEVID-${Date.now()}` }),
+        signal: AbortSignal.timeout(15_000),
+      })).json();
+      const probeProjectId = project?.project?.id || null;
+      if (probeProjectId) {
+        // UI-596：右栏空态最近使用徽章（localStorage 持久化 + 匹配卡亮「上次使用」）
+        await evalJs(client, `localStorage.setItem('petri-last-panel:${probeProjectId}', 'results'); 'set'`).catch(() => null);
+        await evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/`)} + ${JSON.stringify(probeProjectId)}; 'navigating'`).catch(() => null);
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+        const badge = await evalJs(client, `(function(){
+          var text = document.body.innerText || '';
+          return JSON.stringify({
+            badge: text.indexOf('上次使用') >= 0,
+            rightCol: !!document.querySelector('[class*="rightCol"]'),
+          });
+        })()`).catch(() => '"eval_error"');
+        try {
+          const badgeParsed = JSON.parse(badge);
+          assert('ui596_last_used_badge', badgeParsed.badge === true && badgeParsed.rightCol === true,
+            `badge=${JSON.stringify(badgeParsed)}`);
+        } catch (e) {
+          assert('ui596_last_used_badge', false, String(badge).slice(0, 160));
+        }
+
+        // UI-462：results tab 无自有仓库提示（managed-only 退役）
+        const repoHint = await evalJs(client, `(function(){
+          var text = document.body.innerText || '';
+          return JSON.stringify({
+            ownRepoHint: ['自有仓库', '接入仓库', '仓库授权'].filter(function (t) { return text.indexOf(t) >= 0; }),
+          });
+        })()`).catch(() => '"eval_error"');
+        try {
+          const repoParsed = JSON.parse(repoHint);
+          assert('ui462_no_own_repo_hint', repoParsed.ownRepoHint.length === 0, `hints=${JSON.stringify(repoParsed.ownRepoHint)}`);
+        } catch (e) {
+          assert('ui462_no_own_repo_hint', false, String(repoHint).slice(0, 160));
+        }
+
+        // UI-303：composer 档位下拉含第四档「计划模式」（副文案只读探索并起草计划）
+        const accessMenu = await evalJs(client, `(function(){
+          var buttons = Array.prototype.slice.call(document.querySelectorAll('button.sc-access-btn'));
+          var trigger = buttons.find(function (b) { return !b.disabled && b.title === '选择访问模式'; })
+            || buttons.find(function (b) { return !b.disabled; });
+          if (!trigger) return JSON.stringify({ found: false, total: buttons.length });
+          trigger.click();
+          return 'clicked';
+        })()`).catch(() => '"eval_error"');
+        let menuSeen = null;
+        if (accessMenu === 'clicked') {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          menuSeen = await evalJs(client, `(function(){
+            var menus = Array.prototype.slice.call(document.querySelectorAll('.sc-access-menu'));
+            var text = menus.map(function (m) { return m.innerText || ''; }).join('|');
+            if (!text) {
+              var body = document.body.innerText || '';
+              text = body.indexOf('sc-access-menu') >= 0 ? body : '';
+            }
+            return JSON.stringify({
+              menus: menus.length,
+              plan: text.indexOf('计划模式') >= 0,
+              sub: text.indexOf('只读探索并起草计划') >= 0,
+              full: text.indexOf('完全访问') >= 0,
+            });
+          })()`).catch(() => '"eval_error"');
+          await evalJs(client, "var ov = document.querySelector('.sc-access-overlay'); if (ov) ov.click(); 'close'").catch(() => null);
+        }
+        try {
+          const menuParsed = JSON.parse(menuSeen || '{}');
+          assert('ui303_plan_mode_in_menu', menuParsed.plan === true && menuParsed.sub === true && menuParsed.full === true,
+            `menu=${JSON.stringify(menuParsed)} trigger=${String(accessMenu).slice(0, 60)}`);
+        } catch (e) {
+          assert('ui303_plan_mode_in_menu', false, String(menuSeen || accessMenu).slice(0, 160));
+        }
+
+        // 清理临时项目
+        await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
+          method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
+        }).catch(() => null);
+      } else {
+        assert('ui596_last_used_badge', false, 'probe project unavailable');
+        assert('ui462_no_own_repo_hint', false, 'probe project unavailable');
+        assert('ui303_plan_mode_in_menu', false, 'probe project unavailable');
+      }
+
       return true;
     } finally {
       try { client.socket.close(); } catch { /* already closed */ }
