@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-29T20:42:46.018Z",
-  "finishedAt": "2026-10-29T20:42:58.310Z",
+  "startedAt": "2026-10-29T23:30:29.595Z",
+  "finishedAt": "2026-10-29T23:30:50.329Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -57,6 +57,11 @@
       "name": "ui594_slash_skill_chip",
       "pass": true,
       "detail": "chip={\"chips\":1}"
+    },
+    {
+      "name": "ui484_federation_delegation_card",
+      "pass": true,
+      "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
     }
   ],
   "allPass": true

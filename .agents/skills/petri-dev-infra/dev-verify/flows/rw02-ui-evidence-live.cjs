@@ -16,6 +16,7 @@ const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
+const API = process.env.RW02_UAPI || 'http://127.0.0.1:3001';
 
 async function evalJs(client, expression, timeoutMs = 15_000) {
   return lib.evalJs(client, expression, timeoutMs);
@@ -71,7 +72,7 @@ module.exports = {
 
       // ===== Wave-2：项目工作页面 =====
       // 临时项目（隔离断言对象；结束删除）
-      const project = await (await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/data/projects`, {
+      const project = await (await fetch(`${API}/api/data/projects`, {
         method: 'POST',
         headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: `RW02-UIEVID-${Date.now()}` }),
@@ -149,7 +150,7 @@ module.exports = {
         }
 
         // UI-331：临时项目建会话（REST）→ 左栏会话行 .convItemTime 短式相对时间（刚刚）
-        const convCreate = await (await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/ai/conversations`, {
+        const convCreate = await (await fetch(`${API}/api/ai/conversations`, {
           method: 'POST',
           headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: 'RW02 相对时间探针', projectId: probeProjectId }),
@@ -224,13 +225,62 @@ module.exports = {
         }
 
         // 清理临时项目
-        await fetch(`${APP.replace('localhost:3000', '127.0.0.1:3001')}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
+        await fetch(`${API}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
           method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
         }).catch(() => null);
       } else {
         assert('ui596_last_used_badge', false, 'probe project unavailable');
         assert('ui462_no_own_repo_hint', false, 'probe project unavailable');
         assert('ui303_plan_mode_in_menu', false, 'probe project unavailable');
+      }
+
+      // ===== Wave-4：UI-484 联邦委托记录卡（隔离 :3011 + task_events 种子，会话预置）=====
+      await evalJs(client, `location.href = ${JSON.stringify(`${APP}/settings`)}; 'navigating'`).catch(() => null);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // 回项目页（联邦入口在左栏页脚）
+      await evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtu0b52_9cbr`)}; 'navigating'`).catch(() => null);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // 点左栏页脚联邦按钮（data-testid=sidebar-federation）
+      const fedNav = await evalJs(client, `(function(){
+        var btn = document.querySelector('[data-testid="sidebar-federation"]');
+        if (!btn) return JSON.stringify({ found: false });
+        btn.click();
+        return 'clicked';
+      })()`).catch(() => '"eval_error"');
+      let cardSeen = null;
+      if (fedNav === 'clicked') {
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        // 委托记录卡可能落在 peers tab：不在场则点协作成员 tab
+        cardSeen = await evalJs(client, `(function(){
+          var card = document.querySelector('[data-testid="federation-delegations"]');
+          if (!card) {
+            var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"], button'));
+            var peers = tabs.find(function (el) { return /协作成员|委托/.test(el.innerText || ''); });
+            if (peers) peers.click();
+            return 'tab_clicked';
+          }
+          return 'card_present';
+        })()`).catch(() => '"eval_error"');
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        cardSeen = await evalJs(client, `(function(){
+          var card = document.querySelector('[data-testid="federation-delegations"]');
+          var text = (card && card.innerText) || document.body.innerText || '';
+          return JSON.stringify({
+            cardPresent: !!card,
+            taskCard: text.indexOf('RW02 委托记录卡探针任务') >= 0,
+            peerName: text.indexOf('RW02 探针对端') >= 0,
+          });
+        })()`).catch(() => '"eval_error"');
+      } else {
+        console.log('[rw02-diag] ui484 nav:', String(fedNav).slice(0, 240));
+        cardSeen = JSON.stringify({ skipped: 'nav_not_found' });
+      }
+      try {
+        const cardParsed = JSON.parse(cardSeen);
+        assert('ui484_federation_delegation_card', cardParsed.taskCard === true && cardParsed.peerName === true,
+          `card=${JSON.stringify(cardParsed)} nav=${String(fedNav).slice(0, 100)}`);
+      } catch (e) {
+        assert('ui484_federation_delegation_card', false, String(cardSeen).slice(0, 200));
       }
 
       return true;
