@@ -8416,8 +8416,30 @@
       ],
       "notes": "批注交互线交接：BLOCK-303~307 五包已交付（箭头真形态/prompt 溯源/透明淡染/标题栏菜单修复/✓×真实鼠标+拖拽移动+布局）；遗留三条待办（拖拽延迟根因与修法、箭头 pointer-events 漏配、左栏 .kinds 网格布局）+ 验证探针清单 + 3001 手动后端坑 + CDP 踩坑清单。",
       "registeredAt": "2026-10-28"
+    },
+    {
+      "id": "REMAINING-WORK-EXECUTION-PLAN",
+      "capability": "remaining-work-execution-plan",
+      "path": "docs/remaining-work-execution-plan.md",
+      "kind": "living-plan",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "remaining-work-execution-plan",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-30",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "remaining-work",
+        "artifact-plane",
+        "ui-evidence",
+        "governance",
+        "harness",
+        "hygiene",
+        "G0"
+      ],
+      "notes": "蓝图八包收口后的剩余工作全量执行纲：RW-01 3D Artifact Revision 接入成果面（Jev 0.33 队首）→ RW-02 UI 证据债分诊清偿 → RW-03 C-32 decision-config env 语义治理 → RW-04 台账对账（2a/2c/2d/2e 核实）→ RW-05 harness 地基 → RW-06 工程卫生（ui-audit 门/vitest 通道/PATH 环境债）；六包 planned、单工作包串行、逐包待用户发令；§3 为换模型恢复唯一执行契约。"
     }
   ],
   "lastUpdated": "2026-10-30",
-  "documentCount": 428
+  "documentCount": 429
 }
