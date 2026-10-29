@@ -204,8 +204,10 @@ export function useResizableColumns(
       let pendingMove: MouseEvent | null = null;
 
       const applyMove = (ev: MouseEvent) => {
+        // UI-629 — clamp.max 对左右栏同样生效（此前只用于 resultRight）：侧栏
+        // 不得拖过调用方声明的上限（中栏保底预留），越界拖动停在 max。
         if (which === 'left') {
-          const w = Math.max(MIN_LEFT_WIDTH, sl + ev.clientX - startX);
+          const w = Math.max(MIN_LEFT_WIDTH, Math.min(clamp.max ?? Number.POSITIVE_INFINITY, sl + ev.clientX - startX));
           setLeftWidth(w);
           // UI-309 加映 / BLOCK-62 P2 重述角色 — 拖动期写实时 CSS 变量：
           // -width 让左栏 aside 零延迟跟随指针（列内 ColumnHeader 在 aside 内、
@@ -214,7 +216,7 @@ export function useResizableColumns(
           document.documentElement.style.setProperty('--petri-live-left-width', `${w}px`);
           document.documentElement.style.setProperty('--petri-live-left-span', `${w + 1}px`);
         } else if (which === 'right') {
-          const w = Math.max(MIN_RIGHT_WIDTH, sr - (ev.clientX - startX));
+          const w = Math.max(MIN_RIGHT_WIDTH, Math.min(clamp.max ?? Number.POSITIVE_INFINITY, sr - (ev.clientX - startX)));
           setRightWidth(w);
           document.documentElement.style.setProperty('--petri-live-right-width', `${w}px`);
           document.documentElement.style.setProperty('--petri-live-right-span', `${w + 1}px`);

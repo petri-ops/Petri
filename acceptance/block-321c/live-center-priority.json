@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-10-29T04:39:30.232Z",
+  "projectId": "p_mvt20jqe_2lwv",
+  "pass": true,
+  "checks": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvt20jqe_2lwv"
+    },
+    {
+      "id": "T1_default_both_open_center_ok",
+      "ok": true,
+      "detail": "{\"vw\":1602,\"left\":240,\"center\":1020,\"rightOpen\":true,\"right\":340}"
+    },
+    {
+      "id": "T2_drag_started_and_clamped",
+      "ok": true,
+      "detail": "{\"drag\":{\"dispatched\":\"react-props\",\"resizingAfterDown\":true},\"expectedMax\":562,\"vw\":1602,\"left\":240,\"center\":918,\"rightOpen\":true,\"right\":441}"
+    }
+  ]
+}

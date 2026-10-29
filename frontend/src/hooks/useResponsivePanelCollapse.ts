@@ -1,17 +1,25 @@
 /**
- * useResponsivePanelCollapse — UI-479 侧栏自适应收起
+ * useResponsivePanelCollapse — UI-479 侧栏自适应收起 + UI-629 中栏优先宽度模型
  *
- * 需求（用户 2026-10-09）：窗口变小、或左右侧栏自身宽度低于阈值时，
+ * UI-479 需求（用户 2026-10-09）：窗口变小、或左右侧栏自身宽度低于阈值时，
  * 侧栏自动收起——「这应该是个自然的过程」。复用既有收起路径（宽度动画到 0、
  * 列头开关内联、resize 把手隐藏），零新增 CSS。
+ *
+ * UI-629（BLOCK-321c，2026-10-29 用户裁决「固定中间栏宽度，除非手动调整」）：
+ *   ① 中栏保底 560→760（迟滞还原 640→840）——560 的中栏对聊天/工作区已不可用，
+ *     用户实指「打开右栏后中间被两侧挤压覆盖」；
+ *   ② gap 计入：.workspaceSessionLayout 两侧 gap 共 40px，原 centerWith 漏减；
+ *   ③ 让位规则：一侧挂手动哨兵、另一侧可让 → 收非哨兵侧（右先 tie-break），
+ *     不再因哨兵放任中栏被挤穿；两侧都哨兵 → 尊重用户显式选择；
+ *   ④ 拖宽把手钳制（调用点消费 CENTER_MIN_RESERVED）。
  *
  * 历史语境（UI-341 加映二 2026-09-11 裁决的定向反转）：当时移除 compact 自动
  * 收起的根因是「侧栏自己消失 + 变宽不还原（状态残留）+ 与用户手动操作打架」。
  * 本实现三道护栏：
  *   1. 自动还原——视口收起（viewport 旗）的侧栏在宽裕回去时自动弹回；
- *   2. 迟滞带——中栏可用宽 <560 收、还原判据 ≥640，边界不抖动；
+ *   2. 迟滞带——中栏可用宽 <760 收、还原判据 ≥840，边界不抖动；
  *   3. 手动优先——窄窗里用户手动重开的侧栏挂 manual-open-narrow 哨兵，
- *      系统不再压回，直到两侧都放得下才恢复自动行为。
+ *      系统不收**该侧**；但中栏不足时会向**另一侧非哨兵栏**让位（③）。
  *
  * 挂载点：WorkspacePanelsProvider（全壳唯一 useWorkspacePanels 实例所在，
  * 外层是 AppRailProvider，可直接读 resizable 列宽单真相）。
@@ -22,12 +30,27 @@ import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from './useResizableColumns';
 
 /** 侧栏自身拖窄于此 → 该侧自动收起（拖窄=收起意图；MIN 拖拽钳 96 之上留手感带）。 */
 const SIDEBAR_AUTO_COLLAPSE_WIDTH = 140;
-/** 中栏可用宽（视口 − 两侧开放栏宽）低于此 → 收侧栏让位（右先左后）。 */
-const CENTER_SPACE_COLLAPSE_BELOW = 560;
+/** 中栏可用宽（视口 − 两侧开放栏宽 − gap）低于此 → 收侧栏让位（非哨兵侧先）。 */
+const CENTER_SPACE_COLLAPSE_BELOW = 760;
 /** 迟滞带上沿：还原判据 = 还原后中栏可用宽仍 ≥ 此值。 */
-const CENTER_SPACE_RESTORE_ABOVE = 640;
+const CENTER_SPACE_RESTORE_ABOVE = 840;
 /** compact 断点（≤960 侧栏转浮层不占中栏）——该区不参与视口判定。 */
 const VIEWPORT_TRIGGER_MAX = 960;
+/** UI-629 — 布局 gap 计入：.workspaceSessionLayout gap: 20px × 两侧。 */
+const CENTER_GAP_TOTAL = 40;
+/**
+ * UI-629 — 中栏保底宽（拖宽把手钳制上限的消费值，单一源）：
+ * 侧栏拖宽不得把中栏压到此值以下（「中栏固定保底，侧栏手动可调」）。
+ */
+const CENTER_MIN_RESERVED = CENTER_SPACE_COLLAPSE_BELOW;
+
+/**
+ * UI-629 — 侧栏拖宽上限：视口 − 对侧开放宽 − gap − 中栏保底（下限钳 MIN 96）。
+ * 拖宽把手 mousedown 时现算（「中栏固定保底，侧栏手动可调」）。
+ */
+export function sidebarResizeMax(viewportWidth: number, otherSideOpenWidth: number): number {
+  return Math.max(96, viewportWidth - otherSideOpenWidth - CENTER_GAP_TOTAL - CENTER_MIN_RESERVED);
+}
 
 type PanelAutoFlag = 'width' | 'viewport' | 'manual-open-narrow' | null;
 
@@ -53,8 +76,9 @@ interface ResponsivePanelOutcome {
 /**
  * 纯决策函数：给定视口/开合/列宽与当前旗标，给出目标开合态与新旗标。
  * 规则顺序：① 拖窄触发（width，永不自动还原）→ ② 视口触发（compact 区跳过；
- * 右先左后）→ ③ 宽裕还原（viewport 旗，贪心左先，判据=还原后仍 ≥640）→
- * ④ 全契合清理（manual-open-narrow → null）。560≤中栏<640 为迟滞冻结带。
+ * 非哨兵侧先收、右先 tie-break——UI-629 让位规则：一侧哨兵时向另一侧让位）→
+ * ③ 宽裕还原（viewport 旗，贪心左先，判据=还原后仍 ≥840）→
+ * ④ 全契合清理（manual-open-narrow → null）。760≤中栏<840 为迟滞冻结带。
  */
 export function deriveResponsivePanels(
   input: PanelSizeInput,
@@ -76,26 +100,29 @@ export function deriveResponsivePanels(
 
   if (viewportWidth > VIEWPORT_TRIGGER_MAX) {
     const centerWith = (lo: boolean, ro: boolean) =>
-      viewportWidth - (lo ? input.leftWidth : 0) - (ro ? input.rightWidth : 0);
+      viewportWidth
+      - (lo ? input.leftWidth : 0)
+      - (ro ? input.rightWidth : 0)
+      - CENTER_GAP_TOTAL;
 
-    // ② 视口触发：中栏可用宽不足 → 先收右（对齐「结果列让位主内容」），仍不足再收左
+    // ② 视口触发：中栏可用宽不足 → 先收非哨兵侧（右先 tie-break——对齐「结果列
+    //    让位主内容」，同时满足 UI-629 让位：哨兵侧保留，向另一侧让位）
     if (centerWith(leftOpen, rightOpen) < CENTER_SPACE_COLLAPSE_BELOW) {
-      if (rightOpen && next.right !== 'manual-open-narrow') {
+      const rightCollapsible = rightOpen && next.right !== 'manual-open-narrow';
+      const leftCollapsible = leftOpen && next.left !== 'manual-open-narrow';
+      if (rightCollapsible) {
         rightOpen = false;
         next.right = 'viewport';
       }
-      if (
-        !rightOpen
-        && leftOpen
-        && centerWith(leftOpen, false) < CENTER_SPACE_COLLAPSE_BELOW
-        && next.left !== 'manual-open-narrow'
-      ) {
+      // 右侧不可收（已收或手动哨兵）且左栏可让 → 收左（UI-629 让位）；
+      // 右已收但中栏仍不足 → 继续收左（原右先左后规则）。
+      if (leftOpen && leftCollapsible && centerWith(leftOpen, rightOpen) < CENTER_SPACE_COLLAPSE_BELOW) {
         leftOpen = false;
         next.left = 'viewport';
       }
     } else {
       // ③④ 宽裕侧：还原 viewport 收起的侧栏（贪心左先）+ 清理 manual 哨兵。
-      // 还原判据带迟滞：还原后中栏可用宽仍 ≥640 才动手。
+      // 还原判据带迟滞：还原后中栏可用宽仍 ≥840 才动手。
       if (!leftOpen && next.left === 'viewport' && centerWith(true, rightOpen) >= CENTER_SPACE_RESTORE_ABOVE) {
         leftOpen = true;
         next.left = null;

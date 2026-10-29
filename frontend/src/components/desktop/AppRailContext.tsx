@@ -94,7 +94,11 @@ export interface AppRailState {
   setLeftWidth: (width: number) => void;
   setRightWidth: (width: number) => void;
   bottomTerminalHeight: number;
-  startColumnResize: (which: 'left' | 'right' | 'resultRight' | 'input') => (event: React.MouseEvent) => void;
+  startColumnResize: (
+    which: 'left' | 'right' | 'resultRight' | 'input',
+    /** UI-629 — 拖宽钳制（max 等），透传 useResizableColumns。 */
+    clamp?: { min?: number; max?: number },
+  ) => (event: React.MouseEvent) => void;
   startBottomTerminalResize: (event: React.MouseEvent, opts?: { min?: number; max?: number }) => void;
 
   // ── 动作 ──

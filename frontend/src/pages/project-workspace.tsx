@@ -37,6 +37,7 @@ import { useSetCopilotContext } from '@/lib/copilotContextProvider';
 import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
 // UI-627（BLOCK-321）— 侧聊原生独立窗入口 helper
 import { openSideChatWindow } from '@/lib/sideChatWindow';
+import { sidebarResizeMax } from '@/hooks/useResponsivePanelCollapse';
 import { usePendingScroll } from '@/lib/pendingScrollContext';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
 import { useAppRail } from '@/components/desktop/AppRailContext';
@@ -486,8 +487,7 @@ export function ProjectWorkspace(): React.ReactElement {
     setRightOpen(true);
     openRightPanel('files');
   }, [openRightPanel, setRightOpen]);
-  // UI-627（BLOCK-321）— 侧聊入口统一为原生独立窗：home 空态卡/分析完成跳转
-  // 与标题栏「侧聊」同走 openSideChatWindow（页内悬浮面退役）。
+  // UI-627 — 侧聊入口统一为原生独立窗（openSideChatWindow），页内悬浮面退役。
   const handleOpenRightChat = useCallback(() => {
     void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: activeConvId });
   }, [projectId, activeConvId]);
@@ -1150,7 +1150,7 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightRailVisible}
           workspaceMode={workspaceMode}
-          onResize={startColumnResize('right')}
+          onResize={startColumnResize('right', { max: sidebarResizeMax(window.innerWidth, leftOpen ? leftWidth : 0) })}
         />
         {/* UI-451 加映 v3 (P2-8) — 整窗关闭脏守卫确认弹层（beforeunload 拦下后出现） */}
         {pendingAppClose && (

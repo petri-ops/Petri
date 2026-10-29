@@ -26,3 +26,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-29T03:32:31.503Z -->
 最后更新：2026-10-28（**BLOCK-313 completed（UI-617 verified；UI-613 整页下钻交互由用户追加取代）**）：模型菜单主从两栏——左列供应商常驻（当前使用/模型数/选中 accent 线），右侧二级页显示选中供应商模型；默认当前供应商，点其它供应商只换右栏；去灰底+1px 边框+620px+双列独立滚动。证据=ModelMenu 8/8 + tsc/lint + theme + 实机 11/11（4 供应商常驻/默认 DeepSeek 2 模型/切 ninijoker 左列不消失/回切恢复）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T04:44:26.986Z -->
+最后更新：2026-10-28（**BLOCK-314 completed（UI-618 verified）**）：批注列表弹层改 portal 到 body + fixed 定位——右栏向左展开、左右/上下视口钳制、点外/Esc/滚动关闭、z=10002、高度受限内部滚动；不再被面板/分隔线裁切。证据=AnnotationBar 17/17 + tsc/lint + 实机 8/8（10 条列表全在视口内/placement left/条目完整）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -13,6 +13,7 @@ import { ColumnHeader } from '@/components/desktop/titlebar/ColumnizedTitleBar';
 import { useAppRail } from '@/components/desktop/AppRailContext';
 import { segmentToMode } from '@/hooks/useWorkspaceRouting';
 import { useWorkspaceLayout } from '@/hooks/useWorkspaceLayout';
+import { sidebarResizeMax } from '@/hooks/useResponsivePanelCollapse';
 import { trackResizeGlow } from '@/lib/resize-glow';
 import styles from '@/pages/project-workspace.module.css';
 
@@ -27,7 +28,7 @@ export function AppRail(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
   const rail = useAppRail();
-  const { leftOpen, compactLayout } = useWorkspaceLayout();
+  const { leftOpen, rightOpen, compactLayout } = useWorkspaceLayout();
 
   const {
     allProjects,
@@ -42,6 +43,7 @@ export function AppRail(): React.ReactElement {
     creatingConversation,
     createError,
     leftWidth,
+    rightWidth,
     startColumnResize,
     switchToProject,
     switchConversation,
@@ -127,7 +129,8 @@ export function AppRail(): React.ReactElement {
       {leftOpen && (
         <div
           className={styles.resizeHandleV}
-          onMouseDown={startColumnResize('left')}
+          // UI-629 — 拖宽钳制：左栏不得把中栏压到保底以下（右栏开时按其现宽预留）
+          onMouseDown={startColumnResize('left', { max: sidebarResizeMax(window.innerWidth, rightOpen ? rightWidth : 0) })}
           onPointerMove={trackResizeGlow}
         />
       )}
