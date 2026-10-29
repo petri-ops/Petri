@@ -13,6 +13,8 @@ status: planned
 
 # 剩余工作全量执行纲（Remaining Work Execution Plan）
 
+最后更新：2026-10-30（**RW-01 转 active**：用户预授权「一次性搞定所有内容 不需要我的参与」=六包串行全量发令（预授权连续工作模式）+「授权安装任何需要的软件」=Blender 本机安装；RW-01 立项 docs/rw-01-3d-artifact-revision-plan.md。）
+
 最后更新：2026-10-30（复核优化批：RW-01~06 六包 planned；本轮仅规划与复核，未启动实现。）
 
 ## 1. 定位与来源
@@ -35,7 +37,7 @@ status: planned
 
 | 序 | ID | 量级 | 目标一句话 | 前置 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `RW-01-3D-ARTIFACT-REVISION` | 2–4 天 | 3D 链产物（SceneSpec/manifest/GLB/STL/OBJ/revision）接入成果面 revision 与血缘体系 | 无（Jev 建议，confidence 0.68） | planned |
+| 1 | `RW-01-3D-ARTIFACT-REVISION` | 2–4 天 | 3D 链产物（SceneSpec/manifest/GLB/STL/OBJ/revision）接入成果面 revision 与血缘体系 | 无（Jev 建议，confidence 0.68） | **active**（2026-10-30 用户预授权六包串行发令；plan=docs/rw-01-3d-artifact-revision-plan.md） |
 | 2 | `RW-02-UI-EVIDENCE-DEBT` | 1–2 周 | 71 条 UI 台账 in_progress 分诊清偿；同包补 C-44 pack iframe 写桥 | RW-01 收口 | planned |
 | 3 | `RW-03-C32-DECISION-ENV-GOV` | 2–3 天 | 修 C-32：decision-config env='1' 运行时强开违反自身语义 | RW-02 收口 | planned |
 | 4 | `RW-04-LEDGER-RECONCILE` | 0.5–1 天 | 台账待核注记逐项核实回写（2a/2c/2d/2e 现状），治理无代码 | RW-03 收口 | planned |

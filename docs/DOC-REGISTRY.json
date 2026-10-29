@@ -8438,8 +8438,29 @@
         "G0"
       ],
       "notes": "蓝图八包收口后的剩余工作全量执行纲：RW-01 3D Artifact Revision 接入成果面（Jev 0.68）→ RW-02 UI 证据债分诊清偿+C-44 pack 写桥 → RW-03 C-32 env 语义治理 → RW-04 台账对账 → RW-05 harness 地基 → RW-06 可靠性/soak+工程卫生+独立重放复盘；六包 planned、单工作包串行、逐包待用户发令；§3 为换模型恢复唯一执行契约。"
+    },
+    {
+      "id": "RW-01-3D-ARTIFACT-REVISION",
+      "capability": "rw-01-3d-artifact-revision",
+      "path": "docs/rw-01-3d-artifact-revision-plan.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "rw-01-3d-artifact-revision",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-30",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "rw",
+        "3d",
+        "result-studio",
+        "revision",
+        "lineage",
+        "G0"
+      ],
+      "notes": "RW 队首：3D 链产物（SceneSpec/manifest/GLB/STL/OBJ）接入成果面 revision/lineage/viewer/selectionBus 四线（kind=model3d 契约扩展 + 导出即登记桥 + 纯投影 lineage）；用户预授权六包串行 + Blender 安装授权留痕；证据 acceptance/rw-01-3d-revision/。"
     }
   ],
   "lastUpdated": "2026-10-30",
-  "documentCount": 428
+  "documentCount": 430
 }
