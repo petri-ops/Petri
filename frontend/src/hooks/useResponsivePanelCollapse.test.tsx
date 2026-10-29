@@ -49,6 +49,16 @@ describe('deriveResponsivePanels（纯函数）', () => {
     expect(out.flags.right).toBeNull();
   });
 
+  it('UI-630 折叠阈值上调 240：右栏拖到 200（旧阈值 140 不触发）→ 快速折叠', () => {
+    const out = deriveResponsivePanels(
+      { viewportWidth: 1400, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 200 },
+      NO_FLAGS,
+    );
+    expect(out.rightOpen).toBe(false);
+    expect(out.flags.right).toBe('width');
+    expect(out.leftOpen).toBe(true);
+  });
+
   it('中栏可用宽不足 → 先收右栏（viewport），够用即止（UI-629：1200−580−40=580<760）', () => {
     // 1200 − 240 − 340 − 40(gap) = 580 < 760 → 收右；收后 920 ≥760 → 左保留
     const out = deriveResponsivePanels(
@@ -233,7 +243,7 @@ describe('useResponsivePanelCollapse（hook 行为）', () => {
 
   it('侧栏拖窄低于阈值 → 收起；手动重开时宽度回弹默认值（避免重开即再收）', () => {
     const rig = setup({ vw: 1400, leftWidth: 240, rightWidth: 340 });
-    rig.state.leftWidth = 120; // 模拟拖窄（<140）
+    rig.state.leftWidth = 120; // 模拟拖窄（<240）
     act(() => rig.rerenderWith(1400));
     expect(rig.panels.leftOpen).toBe(false);
     // 用户手动重开

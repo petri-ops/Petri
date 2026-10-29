@@ -6273,6 +6273,20 @@
         "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",
         "test/block321c-center-priority.test.mjs"
       ]
+    },
+    {
+      "id": "block321c-collapse-threshold",
+      "classifiesScripts": true,
+      "note": "BLOCK-321c UI-630 折叠阈值 140→240（用户实测 140 太小：拖到很窄还挂着、中栏被挤到文字竖排；240=左栏默认宽，拖过即快速折叠）；纯函数 17/17 + 实机拖窄 200px 即折叠 3/3。",
+      "patterns": [
+        "scripts/block321c-collapse-threshold-live.cjs",
+        "frontend/src/hooks/useResponsivePanelCollapse.ts",
+        "acceptance/block-321c/**"
+      ],
+      "tests": [
+        "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",
+        "test/block321c-center-priority.test.mjs"
+      ]
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-10-29T09:52:07.915Z",
+  "projectId": "p_mvtd6lsq_wytq",
+  "pass": true,
+  "checks": [
+    {
+      "id": "P0_project_created",
+      "ok": true,
+      "detail": "id=p_mvtd6lsq_wytq"
+    },
+    {
+      "id": "T1_right_default_open_340",
+      "ok": true,
+      "detail": "{\"vw\":1602,\"rightOpen\":true,\"right\":340}"
+    },
+    {
+      "id": "T2_drag_narrow_auto_collapse",
+      "ok": true,
+      "detail": "{\"drag\":{\"dispatched\":\"react-props\",\"resizingAfterDown\":true},\"vw\":1602,\"rightOpen\":false,\"right\":340}"
+    }
+  ]
+}

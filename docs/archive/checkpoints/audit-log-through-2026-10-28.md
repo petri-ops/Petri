@@ -29,3 +29,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-29T04:44:26.986Z -->
 最后更新：2026-10-28（**BLOCK-314 completed（UI-618 verified）**）：批注列表弹层改 portal 到 body + fixed 定位——右栏向左展开、左右/上下视口钳制、点外/Esc/滚动关闭、z=10002、高度受限内部滚动；不再被面板/分隔线裁切。证据=AnnotationBar 17/17 + tsc/lint + 实机 8/8（10 条列表全在视口内/placement left/条目完整）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-29T09:57:47.200Z -->
+最后更新：2026-10-28（**BLOCK-315 completed（UI-619 verified；布局按用户纠偏=左供应商/右模型）**）：模型菜单一级/二级拆成两张独立卡片（仿智谱展开）——左主卡=供应商列表（当前使用勾/浏览 accent/自动行；320px）；右独立模型卡 portal 到 body + fixed + z=82，贴主卡右侧 8px、顶部对齐，右侧不足向左开并视口钳制；切供应商只换右卡模型、两卡同时在场；点模型两卡一起关闭。证据=ModelMenu 9/9 + tsc/lint + 实机 16/16（左卡 4 供应商唯一勾/右卡 parent body+gap 8px+同 top 501/切换保持/回切恢复）+ closeout 十三门 PASS。G0 开发期常态 · 不外推 packaged/Provider/GA。

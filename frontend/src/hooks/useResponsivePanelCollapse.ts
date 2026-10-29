@@ -28,8 +28,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from './useResizableColumns';
 
-/** 侧栏自身拖窄于此 → 该侧自动收起（拖窄=收起意图；MIN 拖拽钳 96 之上留手感带）。 */
-const SIDEBAR_AUTO_COLLAPSE_WIDTH = 140;
+/** 侧栏自身拖窄于此 → 该侧自动收起（UI-630：140→240，用户实测 140 太小——
+ * 拖到很窄还挂着，中栏被挤到文字竖排；240=左栏默认宽，拖过默认宽即快速折叠）。 */
+const SIDEBAR_AUTO_COLLAPSE_WIDTH = 240;
 /** 中栏可用宽（视口 − 两侧开放栏宽 − gap）低于此 → 收侧栏让位（非哨兵侧先）。 */
 const CENTER_SPACE_COLLAPSE_BELOW = 760;
 /** 迟滞带上沿：还原判据 = 还原后中栏可用宽仍 ≥ 此值。 */
