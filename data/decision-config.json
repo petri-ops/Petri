@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "points": {
+    "topic-shift": {
+      "enabled": true
+    },
+    "knowledge-guard": {
+      "enabled": false
+    },
+    "marker-celltype": {
+      "enabled": false,
+      "threshold": 0.55
+    },
+    "intent-route": {
+      "enabled": false,
+      "threshold": 0.7
+    },
+    "tool-route": {
+      "enabled": true,
+      "threshold": 0.8
+    },
+    "report-guard": {
+      "enabled": false
+    }
+  }
+}

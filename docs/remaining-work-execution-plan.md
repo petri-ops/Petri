@@ -13,6 +13,8 @@ status: planned
 
 # 剩余工作全量执行纲（Remaining Work Execution Plan）
 
+最后更新：2026-10-30（**RW-03 判销**：C-32 已由 BLOCK-211 清偿在案（回归锁 4/4+实证复验），立项前提过时；RW-04 台账对账与 RW-05 harness 核实顺位前移。下一包=RW-04-LEDGER-RECONCILE。）
+
 最后更新：2026-10-30（**RW-02 completed**：A 线 62 条四档全处置 + B 线 C-44 写桥实机 9/9；UI-639 in_progress 随 UI-532。下一包=RW-03-C32-DECISION-ENV-GOV。）
 
 最后更新：2026-10-30（**RW-01 completed**：closeout 十三门 PASS + 实机 18/18（真实 Blender 5.2.3 LTS）；UI-638 in_progress，面板发现路径实机腿随 RW-02 证据债批清偿。下一包=RW-02-UI-EVIDENCE-DEBT。）
@@ -43,7 +45,7 @@ status: planned
 | --- | --- | --- | --- | --- | --- |
 | 1 | `RW-01-3D-ARTIFACT-REVISION` | 2–4 天 | 3D 链产物（SceneSpec/manifest/GLB/STL/OBJ/revision）接入成果面 revision 与血缘体系 | 无（Jev 建议，confidence 0.68） | **completed**（2026-10-30；closeout 十三门 + 实机 18/18；UI-638 面板发现腿随 RW-02；plan=docs/rw-01-3d-artifact-revision-plan.md） |
 | 2 | `RW-02-UI-EVIDENCE-DEBT` | 1–2 周 | 62 条 UI 台账 in_progress 分诊清偿；同包补 C-44 pack iframe 写桥 | RW-01 收口 | **completed**（2026-10-30；四档全处置 a 档 9 verified+638 发现腿、写桥实机 9/9；UI-639 in_progress 随 UI-532；plan=docs/rw-02-ui-evidence-pack-write-bridge-plan.md） |
-| 3 | `RW-03-C32-DECISION-ENV-GOV` | 2–3 天 | 修 C-32：decision-config env='1' 运行时强开违反自身语义 | RW-02 收口 | planned |
+| 3 | `RW-03-C32-DECISION-ENV-GOV` | 2–3 天 | 修 C-32：decision-config env='1' 运行时强开违反自身语义 | RW-02 收口 | **判销**（2026-10-30 RW-02 收口后核实：C-32 已由 BLOCK-211 清偿在案——decision-config.js 头注「现已按注释语义修正」+ resolvePointEnabled 实现即修正语义 + 回归锁 test/block211-c32-env-seed.test.mjs 4/4 在库 + RW-02 会话实证复验双判据过（设置关+env=1 残留→false；设置开+env=0→false）。立项前提过时，不硬造重复包） |
 | 4 | `RW-04-LEDGER-RECONCILE` | 0.5–1 天 | 台账待核注记逐项核实回写（2a/2c/2d/2e 现状），治理无代码 | RW-03 收口 | planned |
 | 5 | `RW-05-HARNESS-FOUNDATION` | 视核实 3–10 天 | harness 地基缺口实施（事件信封/工具元数据单源/存储能力协商） | RW-04 核实结论 | planned |
 | 6 | `RW-06-ENGINEERING-HYGIENE` | 2–4 天 | 长会话/复杂场景/内存与首帧基线 + ui-audit/vitest/PATH 环境债 + 最终复盘 | RW-05 收口 | planned |
