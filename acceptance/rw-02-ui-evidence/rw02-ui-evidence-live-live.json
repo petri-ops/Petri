@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-29T23:46:48.592Z",
-  "finishedAt": "2026-10-29T23:47:19.204Z",
+  "startedAt": "2026-10-30T00:02:10.593Z",
+  "finishedAt": "2026-10-30T00:02:47.583Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -59,6 +59,11 @@
       "detail": "chip={\"chips\":1}"
     },
     {
+      "name": "ui248_review_expand_all",
+      "pass": true,
+      "detail": "rev={\"btn\":true,\"before\":\"收起所有文件的行内差异\",\"stats\":true} after={\"after\":\"展开所有文件的行内差异\"}"
+    },
+    {
       "name": "ui484_federation_delegation_card",
       "pass": true,
       "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
@@ -66,7 +71,7 @@
     {
       "name": "ui638_seed_export_registered",
       "pass": true,
-      "detail": "pid=p_mvu70io9_s5f0 export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu70jpg_g6zi\",\"revisions\":[{\"revisionId\":\"rev_model3d_36551b98a17a66e1\",\"artifactId\":\"model3d:p_mvu70io9_s5f0:model3d/recipes/rw02"
+      "detail": "pid=p_mvu7kf1e_945j export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu7kg1t_sxei\",\"revisions\":[{\"revisionId\":\"rev_model3d_496de48e49f8d343\",\"artifactId\":\"model3d:p_mvu7kf1e_945j:model3d/recipes/rw02"
     },
     {
       "name": "ui638_model3d_in_panel",

@@ -110,6 +110,7 @@ module.exports = {
         signal: AbortSignal.timeout(15_000),
       })).json();
       const probeProjectId = project?.project?.id || null;
+      const workspacePath = project?.project?.workspace_path || null;
       if (probeProjectId) {
         // UI-596：右栏空态最近使用徽章（localStorage 持久化 + 匹配卡亮「上次使用」）
         await evalJs(client, `localStorage.setItem('petri-last-panel:${probeProjectId}', 'results'); 'set'`).catch(() => null);
@@ -253,6 +254,63 @@ module.exports = {
             `chip=${JSON.stringify(chipParsed)}`);
         } catch (e) {
           assert('ui594_slash_skill_chip', false, String(chipSeen).slice(0, 160));
+        }
+
+        // UI-248：工作区文件改动 → 审阅 dock 改动分区 → 展开全部/收起全部
+        if (workspacePath) {
+          const fs248 = require('node:fs');
+          const path248 = require('node:path');
+          fs248.writeFileSync(path248.join(workspacePath, 'README.md'), '# RW02 探针项目\n\n改动一行用于审阅差异。\n');
+          fs248.writeFileSync(path248.join(workspacePath, 'notes.txt'), 'seed v2\n');
+          // 提交基线后制造工作区改动
+          const { execSync } = require('node:child_process');
+          try {
+            execSync('git init -q && git config user.email t@petri.local && git config user.name t && git add -A && git commit -qm seed', { cwd: workspacePath, stdio: 'ignore' });
+            fs248.writeFileSync(path248.join(workspacePath, 'notes.txt'), 'seed v2\nchanged line\n');
+            fs248.writeFileSync(path248.join(workspacePath, 'new-file.txt'), 'untracked\n');
+          } catch { /* 种子失败如实 */ }
+          // 刷新页面让审阅面拿到改动
+          await evalJs(client, `location.reload(); 'reloading'`).catch(() => null);
+          await new Promise((resolve) => setTimeout(resolve, 3500));
+          // 打开审阅卡（空态卡「审阅」）
+          await evalJs(client, `(function(){
+            var targets = Array.prototype.slice.call(document.querySelectorAll('button, [role="tab"], [class*="panelCard"]'));
+            var card = targets.find(function (el) { var t = (el.innerText || '').trim(); return t.indexOf('审阅') === 0 && t.length < 40; });
+            if (card) card.click();
+            return card ? 'clicked' : 'not_found';
+          })()`).catch(() => null);
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          const rev248 = await evalJs(client, `(function(){
+            var btn = document.querySelector('.rvw-expand-all-btn');
+            var stats = document.querySelector('[data-testid="rvw-summary-stats"]');
+            if (!btn) {
+              return JSON.stringify({ btn: false, stats: !!stats, bodyTail: (document.body.innerText || '').slice(-260) });
+            }
+            var before = btn.title;
+            btn.click();
+            return JSON.stringify({ btn: true, before: before, stats: !!stats });
+          })()`).catch(() => '"eval_error"');
+          let flipSeen = null;
+          try {
+            const rev = JSON.parse(rev248);
+            if (rev.btn === true) {
+              await new Promise((resolve) => setTimeout(resolve, 800));
+              flipSeen = await evalJs(client, `(function(){
+                var btn = document.querySelector('.rvw-expand-all-btn');
+                return JSON.stringify({ after: btn ? btn.title : null });
+              })()`).catch(() => '"eval_error"');
+            } else {
+              console.log('[rw02-diag] ui248:', String(rev248).slice(0, 300));
+            }
+          } catch (e) { /* diag 已打印 */ }
+          try {
+            const after = flipSeen ? JSON.parse(flipSeen) : {};
+            const rev = JSON.parse(rev248);
+            assert('ui248_review_expand_all', rev.btn === true && after.after && rev.before !== after.after,
+              `rev=${JSON.stringify(rev).slice(0, 200)} after=${JSON.stringify(after)}`);
+          } catch (e) {
+            assert('ui248_review_expand_all', false, String(rev248).slice(0, 200));
+          }
         }
 
         // 清理临时项目

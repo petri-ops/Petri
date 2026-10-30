@@ -3405,7 +3405,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **BLOCK-46 实机复核（2026-09-03）**：非法路径（/tmp/petri-tmp\x 下含非法字符）创建失败后左栏错误提示实机 PASS（`acceptance/block-46/ui-251-left-panel-error.png`）；首页创建路径错误行 PASS（`acceptance/block-46/ui-251-invalid-path-error.png`）。**状态**: verified（2026-09-03 BLOCK-46 dev Electron 实机复核，证据 `acceptance/block-46/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 - **P0 台账核查（2026-10-21）**：证据在库：`acceptance/block-46/ui-251-left-panel-error.png`（截图在库）、`acceptance/block-46/ui-251-invalid-path-error.png`（截图在库）。据此翻 `verified`（证据为历史实机产物，非本轮重跑）。
 
-## UI-248: BLOCK-29 增量 — 改动分区「展开全部/收起全部」批量文件差异 (2026-08-31 in_progress)
+## UI-248: BLOCK-29 增量 — 改动分区「展开全部/收起全部」批量文件差异 (2026-10-30 **verified（RW-02 A 线 a 档批量取证；隔离 :3011 + 9223 实机 15/15）**)
 
 **用户反馈**：「审阅中增加 按钮 展开或者关闭 全部文件变更 按钮 优化使用体验」。
 
