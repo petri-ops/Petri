@@ -132,7 +132,7 @@ function diffScenes(before, after) {
     const next = afterNodes.get(id);
     if (!prev) { nodeChanges.push({ id, status: 'added', fields: [] }); continue; }
     if (!next) { nodeChanges.push({ id, status: 'removed', fields: [] }); continue; }
-    const fields = ['type', 'transform', 'dimensions', 'material', 'label', 'source']
+    const fields = ['type', 'transform', 'dimensions', 'material', 'label', 'source', 'modifiers']
       .filter((field) => JSON.stringify(prev[field] ?? null) !== JSON.stringify(next[field] ?? null));
     if (fields.length > 0) nodeChanges.push({ id, status: 'changed', fields });
   }

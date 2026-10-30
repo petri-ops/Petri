@@ -17,6 +17,15 @@ const NODE_TYPES = new Set(['box', 'cylinder', 'sphere', 'plane', 'group', 'mesh
 // BLOCK-322 P2-02：灯种与引擎名的唯一声明处（Python 构建脚本与前端镜像由对账门逐值核对）。
 const LIGHT_KINDS = new Set(['sun', 'point', 'spot', 'area']);
 const RENDER_ENGINES = new Set(['workbench', 'cycles']);
+// BLOCK-322 P3-01：几何操作白名单。求值只发生在 Blender（唯一执行器）；
+// 预览端不参与建模，避免造出第二套几何内核（见 plan §4 红线 2）。
+const MODIFIER_KINDS = new Set(['bevel', 'array', 'boolean']);
+const BOOLEAN_OPERATIONS = new Set(['union', 'difference', 'intersect']);
+const MODIFIER_FIELDS = {
+  bevel: ['kind', 'width', 'segments'],
+  array: ['kind', 'count', 'offset'],
+  boolean: ['kind', 'operation', 'target'],
+};
 const LIMITS = Object.freeze({
   maxNodes: 500,
   maxParameters: 200,
@@ -25,6 +34,7 @@ const LIMITS = Object.freeze({
   maxKeyLength: 80,
   maxResolutionPx: 4096,
   maxLights: 16,
+  maxModifiers: 8,
 });
 
 function isPlainObject(value) {
@@ -150,6 +160,56 @@ function validateParameterRef(value, parameters, errors, where) {
   errors.push(`${where} 引用未知参数 ${String(value)}`);
 }
 
+/**
+ * BLOCK-322 P3-01 — 节点级几何操作白名单校验（形状与参数）。
+ * 引用合法性（boolean 目标必须是更早的已存在节点）在 validateSceneSpec 的二次遍历里查，
+ * 与 constraints 同一手法：此处还不知道全量节点 id。
+ */
+function validateModifiers(node, index, errors) {
+  const where = `nodes[${index}]`;
+  if (node.modifiers === undefined) return;
+  if (!Array.isArray(node.modifiers)) {
+    errors.push(`${where}.modifiers 必须是数组`);
+    return;
+  }
+  if (node.modifiers.length === 0) {
+    errors.push(`${where}.modifiers 不能为空数组`);
+    return;
+  }
+  if (node.modifiers.length > LIMITS.maxModifiers) errors.push(`${where}.modifiers 数量超限（≤${LIMITS.maxModifiers}）`);
+  node.modifiers.forEach((modifier, position) => {
+    const at = `${where}.modifiers[${position}]`;
+    if (!isPlainObject(modifier)) {
+      errors.push(`${at} 必须是对象`);
+      return;
+    }
+    if (!MODIFIER_KINDS.has(modifier.kind)) {
+      errors.push(`${at}.kind 只支持 bevel/array/boolean`);
+      return;
+    }
+    for (const key of Object.keys(modifier)) {
+      if (!MODIFIER_FIELDS[modifier.kind].includes(key)) errors.push(`${at}.${key} 不在 ${modifier.kind} 白名单`);
+    }
+    if (modifier.kind === 'bevel') {
+      if (!finiteNumber(modifier.width) || modifier.width <= 0 || modifier.width > 100) {
+        errors.push(`${at}.width 须在 (0,100] mm`);
+      }
+      if (modifier.segments !== undefined
+        && (!Number.isInteger(modifier.segments) || modifier.segments < 1 || modifier.segments > 8)) {
+        errors.push(`${at}.segments 须是 1..8 的整数`);
+      }
+    } else if (modifier.kind === 'array') {
+      if (!Number.isInteger(modifier.count) || modifier.count < 1 || modifier.count > 64) {
+        errors.push(`${at}.count 须是 1..64 的整数`);
+      }
+      if (modifier.offset !== undefined && !validateVector(modifier.offset)) errors.push(`${at}.offset 非法`);
+    } else {
+      if (!BOOLEAN_OPERATIONS.has(modifier.operation)) errors.push(`${at}.operation 只支持 union/difference/intersect`);
+      if (!isSafeId(modifier.target)) errors.push(`${at}.target 非法`);
+    }
+  });
+}
+
 function validateNode(node, index, parameters, ids, errors) {
   const where = `nodes[${index}]`;
   if (!isPlainObject(node)) {
@@ -202,6 +262,7 @@ function validateNode(node, index, parameters, ids, errors) {
       errors.push('mesh_source_hash_required');
     }
   }
+  validateModifiers(node, index, errors);
 }
 
 /**
@@ -252,6 +313,33 @@ function validateEnvironment(environment, errors) {
   }
 }
 
+/**
+ * boolean 目标必须是「更早的已存在节点」：Blender 侧按节点顺序求值，后建的刀体不能
+ * 给先建的节点当刀（顺序不确定 = 同一 SceneSpec 两次构建结果不同的隐患）。
+ */
+function validateModifierReferences(nodes, errors) {
+  const firstIndexOf = new Map();
+  nodes.forEach((node, index) => {
+    const id = isPlainObject(node) && typeof node.id === 'string' ? node.id : null;
+    if (id && !firstIndexOf.has(id)) firstIndexOf.set(id, index);
+  });
+  nodes.forEach((node, index) => {
+    if (!isPlainObject(node) || !Array.isArray(node.modifiers)) return;
+    node.modifiers.forEach((modifier, position) => {
+      if (!isPlainObject(modifier) || modifier.kind !== 'boolean') return;
+      const target = modifier.target;
+      if (typeof target !== 'string' || !target) return;
+      if (target === node.id) {
+        errors.push(`nodes[${index}].modifiers[${position}] 不能对节点自身做 boolean`);
+        return;
+      }
+      const targetIndex = firstIndexOf.get(target);
+      if (targetIndex === undefined) errors.push(`boolean 目标 ${target} 不是已存在节点`);
+      else if (targetIndex >= index) errors.push(`boolean 目标 ${target} 必须排在被操作节点之前`);
+    });
+  });
+}
+
 function validateSceneSpec(input) {
   const errors = [];
   if (!isPlainObject(input)) return { ok: false, error: 'scene_invalid', errors: ['SceneSpec 必须是对象'] };
@@ -282,6 +370,7 @@ function validateSceneSpec(input) {
       if (!['x', 'y', 'z'].includes(constraint.axis)) errors.push(`constraints[${index}].axis 非法`);
     });
   }
+  if (Array.isArray(input.nodes)) validateModifierReferences(input.nodes, errors);
   if (input.camera !== undefined) validateCamera(input.camera, errors);
   if (input.render !== undefined) validateRenderSettings(input.render, errors);
   if (input.lights !== undefined) {
@@ -355,7 +444,7 @@ function applySceneOperations(input, operations) {
       if (!node) return { ok: false, error: 'node_not_found' };
       const changes = isPlainObject(operation.changes) ? operation.changes : {};
       for (const key of Object.keys(changes)) {
-        if (!['transform', 'dimensions', 'material', 'label'].includes(key)) return { ok: false, error: 'operation_not_allowed' };
+        if (!['transform', 'dimensions', 'material', 'label', 'modifiers'].includes(key)) return { ok: false, error: 'operation_not_allowed' };
       }
       Object.assign(node, changes);
     } else if (operation.op === 'add_node') {

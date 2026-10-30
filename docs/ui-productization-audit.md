@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-643: 3D 几何操作的预览诚实性（BLOCK-322 P3-01；2026-10-30 **verified（dev Electron 边界内；实机 10/10）**）
+
+- **变化面**：SceneSpec 节点增可选 `modifiers`（`bevel{width,segments}` / `array{count,offset}` / `boolean{operation,target}`，≤8 条按序求值）；3D 工作台在带几何操作的场景下**显式声明「预览显示未加工基元，倒角/布尔/阵列在构建导出时生效」**，并照常渲染基元（不空屏、也不假装加工过）。
+- **为什么这样设计（不做什么也是决策）**：预览端重做 CSG 等于引入**第二套几何执行器**——两侧结果一旦不一致，SceneSpec 就不再是唯一真值，且违反本纲第 2 条红线（Blender 唯一）。因此 P3-01 的一致性主张放在**数值可复核**上，而不是像素观感上：同一份 SceneSpec 经 Blender 求值后的体积/水密/包围盒必须等于解析解。
+- **验证（代码）**：`test/block322-p3-geometry.test.mjs` 8/8（白名单形状/参数边界/未知键/数量上限、boolean 目标须为更早节点且非自身、`update_node` 开放 modifiers 而 `source` 仍拒（在册债不静默扩权）、语义 diff 可见几何变化、modifier 与布尔运算名跨 JS/TS/Python 逐值对账、求值顺序静态锁「先烘焙后删刀体、烘焙后清 modifier」、预览端禁止出现 CSG 实现）+ `frontend/src/lib/scene3d.test.ts` 10/10。
+- **实机证据**：`acceptance/block-322-p3/block322-p3-geometry-live-live.json`（**10/10 allPass**，真实 Blender 4.5.10 LTS 无头 + 9223 离屏）。基线 120×80×40 体积 384000 mm³；倒角 8mm → **370372**（仍水密）；布尔差 → **240000** = 384000−144000（与解析重叠体积逐位相符）且刀体从报告与导出中被消费（`volumes` 只剩 `base`、`geometry.consumed/dropped` 有记录）；布尔并 → **456000** = 384000+216000−144000；阵列 count 3 偏移 140 → 体积 **1152000**（精确 ×3）、包围盒 X **400**（=120+2×140）；GLB 导出仍成功（bytes/sha 在册）。UI 侧断言警告文案真实出现在面板文本中。
+- **本票被数值回归抓出的三处真缺陷**（都在收口前修复并复跑，全部转成静态锁）：① 原语尺寸此前用 `obj.scale` 承载，modifier 在局部单位下工作 ⇒ 「8mm 倒角」把 40mm 边削掉一半、140mm 阵列偏移变成 67200mm（改为把尺寸烘进顶点，世界矩阵不变故存量数值不受影响）；② Blender 4.x 布尔属性名是 `solver` 而非 `solver_mode` ⇒ 挂 modifier 直接 AttributeError（按属性名探测，EXACT 求解器）；③ 烘焙后未清 modifier ⇒ 下游二次求值把阵列平方成 ×9（烘焙即消费，清完再报告）。
+- **边界（reopen）**：①预览仍是未加工基元（这是设计选择，不是缺陷）；要预览端也看得到结果，只有「读回构建产物」或依赖裁决两条路；②`mesh-reference` 上的 modifier 作用于其全部子网格；③圆角/抽壳/挤出/放样与装配约束（distance/angle/mate）不在本票，属 `P3-02`；④`update_node` 仍不能改 `source`（改指向需要重锚语义，见 plan §3 在册债）。
+
 ## UI-642: 3D 声明灯光与环境（预览 + 导出双侧照明一致）（BLOCK-322 P2-02；2026-10-30 **verified（dev Electron 边界内；实机 9/9）**）
 
 - **变化面**：SceneSpec 增可选 `lights[]`（`kind: sun|point|spot|area` + energy/color/position/target/size/spotDeg，≤16 盏）与 `environment`（background/worldStrength 0..10/samples 1..128/engine workbench|cycles）；3D 预览端不再固定用默认摄影棚灯——**声明灯存在即整体替换默认灯组**（sun→Directional、point→Point、spot→Spot、area→RectArea，位置/目标/颜色/强度按声明），`environment.background` 同时成为预览场景背景，`worldStrength` 映射为环境光。

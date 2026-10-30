@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-10-30T14:21:09.089Z",
+  "platform": "win32-x64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "expectedBaseVolumeMm3": 384000,
+  "geometryReports": {
+    "bevel": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "bevel"
+        }
+      ],
+      "consumed": [],
+      "dropped": [],
+      "errors": []
+    },
+    "difference": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "boolean"
+        }
+      ],
+      "consumed": [
+        {
+          "target": "cutter",
+          "on": "base",
+          "operation": "DIFFERENCE"
+        }
+      ],
+      "dropped": [
+        "cutter"
+      ],
+      "errors": []
+    },
+    "union": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "boolean"
+        }
+      ],
+      "consumed": [
+        {
+          "target": "cutter",
+          "on": "base",
+          "operation": "UNION"
+        }
+      ],
+      "dropped": [
+        "cutter"
+      ],
+      "errors": []
+    },
+    "array": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "array"
+        }
+      ],
+      "consumed": [],
+      "dropped": [],
+      "errors": []
+    }
+  },
+  "watertight": {
+    "bevel": true,
+    "cut": true
+  },
+  "volumes": {
+    "plain": 384000,
+    "bevel": 370372.429978,
+    "cut": 240000,
+    "join": 456000,
+    "array": 1152000,
+    "arrayBoundsX": 400
+  }
+}

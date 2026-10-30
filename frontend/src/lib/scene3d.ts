@@ -20,6 +20,11 @@ export interface Scene3DConstraint {
   axis: 'x' | 'y' | 'z';
 }
 
+export type Scene3DModifier =
+  | { kind: 'bevel'; width: number; segments?: number }
+  | { kind: 'array'; count: number; offset?: number[] }
+  | { kind: 'boolean'; operation: 'union' | 'difference' | 'intersect'; target: string };
+
 export interface Scene3DNode {
   id: string;
   type: Scene3DNodeType;
@@ -27,6 +32,7 @@ export interface Scene3DNode {
   dimensions?: Record<string, number | string>;
   material?: { color?: string; roughness?: number };
   source?: { path: string; sourceSha256: string };
+  modifiers?: Scene3DModifier[];
   label?: string;
 }
 
@@ -204,6 +210,81 @@ function validateEnvironmentForView(raw: unknown, errors: string[]): void {
   }
 }
 
+/** BLOCK-322 P3-01 — 几何操作白名单镜像（判据与文案与后端 scene3d.js 同源）。 */
+const MODIFIER_KINDS: readonly string[] = ['bevel', 'array', 'boolean'];
+const BOOLEAN_OPERATIONS: readonly string[] = ['union', 'difference', 'intersect'];
+const MODIFIER_FIELDS: Record<string, readonly string[]> = {
+  bevel: ['kind', 'width', 'segments'],
+  array: ['kind', 'count', 'offset'],
+  boolean: ['kind', 'operation', 'target'],
+};
+const MAX_MODIFIERS = 8;
+
+function validateModifiersForNode(item: Record<string, unknown>, index: number, errors: string[]): void {
+  const nodeWhere = `nodes[${index}]`;
+  if (item.modifiers === undefined) return;
+  if (!Array.isArray(item.modifiers)) {
+    errors.push(`${nodeWhere}.modifiers 必须是数组`);
+    return;
+  }
+  if (item.modifiers.length === 0) errors.push(`${nodeWhere}.modifiers 不能为空数组`);
+  if (item.modifiers.length > MAX_MODIFIERS) errors.push(`${nodeWhere}.modifiers 数量超限（≤${MAX_MODIFIERS}）`);
+  item.modifiers.forEach((entry, position) => {
+    const at = `${nodeWhere}.modifiers[${position}]`;
+    if (!isRecord(entry)) {
+      errors.push(`${at} 必须是对象`);
+      return;
+    }
+    const kind = typeof entry.kind === 'string' ? entry.kind : '';
+    if (!MODIFIER_KINDS.includes(kind)) {
+      errors.push(`${at}.kind 只支持 bevel/array/boolean`);
+      return;
+    }
+    for (const key of Object.keys(entry)) {
+      if (!MODIFIER_FIELDS[kind].includes(key)) errors.push(`${at}.${key} 不在 ${kind} 白名单`);
+    }
+    if (kind === 'bevel') {
+      if (!finite(entry.width) || entry.width <= 0 || entry.width > 100) errors.push(`${at}.width 须在 (0,100] mm`);
+      if (entry.segments !== undefined
+        && (!Number.isInteger(entry.segments) || (entry.segments as number) < 1 || (entry.segments as number) > 8)) {
+        errors.push(`${at}.segments 须是 1..8 的整数`);
+      }
+    } else if (kind === 'array') {
+      if (!Number.isInteger(entry.count) || (entry.count as number) < 1 || (entry.count as number) > 64) {
+        errors.push(`${at}.count 须是 1..64 的整数`);
+      }
+      if (entry.offset !== undefined && !vector3(entry.offset)) errors.push(`${at}.offset 非法`);
+    } else if (!BOOLEAN_OPERATIONS.includes(typeof entry.operation === 'string' ? entry.operation : '')) {
+      errors.push(`${at}.operation 只支持 union/difference/intersect`);
+    } else if (typeof entry.target !== 'string' || !SAFE_ID.test(entry.target)) {
+      errors.push(`${at}.target 非法`);
+    }
+  });
+}
+
+/** boolean 目标须是「排在前面且已存在的节点」，且不能是自己（与后端同一顺序语义）。 */
+function validateModifierReferencesForView(rawNodes: unknown[], errors: string[]): void {
+  const firstIndexOf = new Map<string, number>();
+  rawNodes.forEach((item, index) => {
+    if (!isRecord(item) || typeof item.id !== 'string') return;
+    if (!firstIndexOf.has(item.id)) firstIndexOf.set(item.id, index);
+  });
+  rawNodes.forEach((item, index) => {
+    if (!isRecord(item) || !Array.isArray(item.modifiers) || typeof item.id !== 'string') return;
+    item.modifiers.forEach((entry, position) => {
+      if (!isRecord(entry) || entry.kind !== 'boolean' || typeof entry.target !== 'string' || !entry.target) return;
+      const at = `nodes[${index}].modifiers[${position}]`;
+      if (entry.target === item.id) {
+        errors.push(`${at} 不能对节点自身做 boolean`);
+        return;
+      }
+      const targetIndex = firstIndexOf.get(entry.target);
+      if (targetIndex === undefined) errors.push(`boolean 目标 ${entry.target} 不是已存在节点`);
+      else if (targetIndex >= index) errors.push(`boolean 目标 ${entry.target} 必须排在被操作节点之前`);
+    });
+  });
+}
+
 function validateRenderForView(raw: unknown, errors: string[]): void {
   if (!isRecord(raw)) {
     errors.push('render 必须是对象');
@@ -271,11 +352,16 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
         if (!finite(dimensions[key]) || dimensions[key] <= 0) errors.push(`nodes[${index}].dimensions.${key} 缺失/无效`);
       }
     }
+    validateModifiersForNode(item, index, errors);
+    if (Array.isArray(item.modifiers) && item.modifiers.length > 0) {
+      warnings.push(`节点 ${item.id} 带几何操作（${item.modifiers.map((modifier) => (isRecord(modifier) ? String(modifier.kind) : '?')).join('/')}）：预览显示未加工基元，倒角/布尔/阵列在构建导出时生效。`);
+    }
     nodes.push({
       ...(item as unknown as Scene3DNode),
       dimensions,
     });
   }
+  validateModifierReferencesForView(rawNodes, errors);
   if (raw.camera !== undefined) validateCameraForView(raw.camera, errors);
   if (raw.render !== undefined) validateRenderForView(raw.render, errors);
   if (raw.lights !== undefined) validateLightsForView(raw.lights, errors);

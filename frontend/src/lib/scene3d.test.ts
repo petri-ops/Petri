@@ -102,6 +102,44 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     expect(result.view.warnings.join('；')).toContain('不假装投影一致');
   });
 
+  it('BLOCK-322 P3-01 几何操作白名单：合法通过、非法逐条拒、并声明预览不重做几何', () => {
+    const valid = normalizeScene3DForView({
+      ...sampleScene3D(),
+      nodes: [
+        { id: 'cutter', type: 'box', dimensions: { width: 40, height: 40, depth: 40 } },
+        {
+          id: 'base',
+          type: 'box',
+          dimensions: { width: 120, height: 40, depth: 80 },
+          modifiers: [
+            { kind: 'boolean', operation: 'difference', target: 'cutter' },
+            { kind: 'bevel', width: 2, segments: 2 },
+            { kind: 'array', count: 3, offset: [140, 0, 0] },
+          ],
+        },
+      ],
+    });
+    expect(valid.ok).toBe(true);
+    if (!valid.ok) return;
+    expect(valid.view.warnings.join('；')).toContain('预览显示未加工基元');
+    expect(valid.view.warnings.join('；')).toContain('boolean/bevel/array');
+
+    const cases: Array<{ nodes: unknown[]; keyword: string }> = [
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'shell', width: 1 }] }], keyword: 'kind 只支持 bevel/array/boolean' },
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'bevel', width: 0 }] }], keyword: 'width 须在 (0,100] mm' },
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'array', count: 999 }] }], keyword: 'count 须是 1..64 的整数' },
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'boolean', operation: 'difference', target: 'ghost' }] }], keyword: 'boolean 目标 ghost 不是已存在节点' },
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'boolean', operation: 'difference', target: 'a' }] }], keyword: '不能对节点自身做 boolean' },
+      { nodes: [{ id: 'a', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, modifiers: [{ kind: 'bevel', width: 2, radius: 1 }] }], keyword: 'radius 不在 bevel 白名单' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({ ...sampleScene3D(), nodes: item.nodes });
+      expect(result.ok, JSON.stringify(item.nodes)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
+  });
+
   it('BLOCK-322 P2-02 灯光与环境声明通过解析并保留在 scene 上', () => {
     const result = normalizeScene3DForView({
       ...sampleScene3D(),

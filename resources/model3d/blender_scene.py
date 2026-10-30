@@ -55,17 +55,31 @@ def apply_transform(obj, node):
     obj.rotation_euler = tuple(math.radians(float(v)) for v in rotation)
 
 
+def bake_scale(obj, dimensions):
+    """把尺寸烘进 mesh 顶点，使 obj.scale 归一。
+
+    modifier（bevel 宽度、array 偏移、boolean 余量）都在**局部单位**下工作：
+    留着 obj.scale 就等于让「8mm 倒角」按缩放后的倍数生效（实测把 40mm 的边削掉一半、
+    140mm 阵列偏移变成 67200mm）。世界矩阵不变 ⇒ 未加 modifier 的存量场景体积与出图不受影响。
+    """
+    for vert in obj.data.vertices:
+        vert.co.x *= dimensions[0]
+        vert.co.y *= dimensions[1]
+        vert.co.z *= dimensions[2]
+    obj.scale = (1.0, 1.0, 1.0)
+
+
 def add_node(node):
     dimensions = node.get('dimensions') or {}
     kind = node.get('type')
     if kind == 'box':
         bpy.ops.mesh.primitive_cube_add(size=1)
         obj = bpy.context.object
-        obj.scale = (
+        bake_scale(obj, (
             float(dimensions['width']),
             float(dimensions['depth']),
             float(dimensions['height']),
-        )
+        ))
     elif kind == 'cylinder':
         bpy.ops.mesh.primitive_cylinder_add(radius=float(dimensions['radius']), depth=float(dimensions['height']))
         obj = bpy.context.object
@@ -75,7 +89,7 @@ def add_node(node):
     elif kind == 'plane':
         bpy.ops.mesh.primitive_plane_add(size=1)
         obj = bpy.context.object
-        obj.scale = (float(dimensions['width']), float(dimensions['height']), 1.0)
+        bake_scale(obj, (float(dimensions['width']), float(dimensions['height']), 1.0))
     elif kind in ('group', 'mesh-reference'):
         return None
     else:
@@ -161,14 +175,129 @@ def clear_scene():
         bpy.data.collections.remove(collection)
 
 
+MODIFIER_KINDS = {'bevel': 'BEVEL', 'array': 'ARRAY', 'boolean': 'BOOLEAN'}
+BOOLEAN_OPERATIONS = {'union': 'UNION', 'difference': 'DIFFERENCE', 'intersect': 'INTERSECT'}
+
+
+def apply_modifiers(nodes, hosts):
+    """按声明顺序给节点挂 modifier（BLOCK-322 P3-01）。
+
+    求值发生在 Blender 一侧：预览端不重做几何（客户端 CSG 会造出第二套几何执行器，
+    且两侧结果不一致时 SceneSpec 就不再是唯一真值），故预览只显示基元并显式声明差异。
+    boolean 的刀体在求值后被消费（它不是产品几何的一部分），因此导出与网格报告都不含它。
+    """
+    consumed = []
+    applied = []
+    for node in nodes:
+        node_id = node.get('id')
+        modifiers = node.get('modifiers') or []
+        targets = hosts.get(node_id) or []
+        if not modifiers:
+            continue
+        for spec in modifiers:
+            kind = str(spec.get('kind') or '')
+            modifier_kind = MODIFIER_KINDS.get(kind)
+            if not modifier_kind:
+                raise ValueError(f"unsupported_modifier:{kind or 'unknown'}")
+            if kind == 'boolean':
+                cutter_id = spec.get('target')
+                cutters = hosts.get(cutter_id) or []
+                if not cutters:
+                    raise ValueError(f'boolean_target_missing:{cutter_id}')
+                operation = BOOLEAN_OPERATIONS.get(str(spec.get('operation') or 'difference'))
+                if not operation:
+                    raise ValueError(f"boolean_operation_unknown:{spec.get('operation')}")
+                for obj in targets:
+                    modifier = obj.modifiers.new(f'petri-boolean-{cutter_id}', modifier_kind)
+                    modifier.operation = operation
+                    modifier.object = cutters[0]
+                    # Blender 4.x 属性名是 solver（旧版为 solver_mode）；EXACT 才给体积/水密可信结果。
+                    for attr in ('solver', 'solver_mode'):
+                        if hasattr(modifier, attr):
+                            setattr(modifier, attr, 'EXACT')
+                            break
+                consumed.append({'target': cutter_id, 'on': node_id, 'operation': operation})
+            elif kind == 'array':
+                offset = spec.get('offset') or [0, 0, 0]
+                for obj in targets:
+                    modifier = obj.modifiers.new('petri-array', modifier_kind)
+                    modifier.count = int(spec.get('count') or 1)
+                    modifier.use_relative_offset = False
+                    modifier.use_constant_offset = True
+                    modifier.constant_offset_displace = Vector(offset)
+            else:
+                for obj in targets:
+                    modifier = obj.modifiers.new('petri-bevel', modifier_kind)
+                    modifier.width = float(spec.get('width') or 1.0)
+                    modifier.segments = int(spec.get('segments') or 2)
+                    modifier.limit_method = 'NONE'
+            applied.append({'node': node_id, 'kind': kind})
+    return {'applied': applied, 'consumed': [item for item in consumed if item]}
+
+
+def realize_modifiers(objects):
+    """把 modifier 结果烘焙回真实 mesh 数据。
+
+    必须先烘焙再删刀体：Boolean modifier 引用被删对象后会失效，
+    求值结果连带丢失（表现为「刀白切了」）。
+    """
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    for obj in objects:
+        if obj.type != 'MESH' or not obj.modifiers:
+            continue
+        evaluated = obj.evaluated_get(depsgraph)
+        if evaluated is None:
+            continue
+        baked = bpy.data.meshes.new_from_object(evaluated)
+        previous = obj.data
+        obj.data = baked
+        evaluated.to_mesh_clear()
+        # 烘焙即消费：modifier 留着会被下游二次求值（实测阵列被平方成 ×9 而非 ×3）。
+        obj.modifiers.clear()
+        if previous is not None and previous.users == 0:
+            bpy.data.meshes.remove(previous)
+
+
+def drop_consumed(objects, consumed):
+    """刀体求值后从场景移除：留在场景里会被当成产品几何导出（体积与外观都会双计）。"""
+    if not consumed:
+        return objects, []
+    doomed = set()
+    for item in consumed:
+        for obj in objects:
+            if obj.name == item['target'] or obj.name.startswith(f"{item['target']}:"):
+                doomed.add(obj.name)
+    kept = []
+    for obj in objects:
+        if obj.name in doomed:
+            try:
+                bpy.data.objects.remove(obj, do_unlink=True)
+            except Exception:
+                kept.append(obj)
+            continue
+        kept.append(obj)
+    return kept, sorted(doomed)
+
+
+def evaluated_mesh(obj, depsgraph):
+    evaluated = obj.evaluated_get(depsgraph)
+    return evaluated.to_mesh() if evaluated is not None else None
+
+
 def mesh_report(objects):
     report = {'objects': 0, 'vertices': 0, 'triangles': 0, 'nonManifoldEdges': 0, 'watertight': True, 'volumesMm3': {}}
+    depsgraph = bpy.context.evaluated_depsgraph_get()
     for obj in objects:
         if obj.type != 'MESH':
             continue
+        mesh = evaluated_mesh(obj, depsgraph) or obj.data
+        if not mesh or not mesh.polygons:
+            if mesh is not None:
+                obj.evaluated_get(depsgraph).to_mesh_clear()
+            continue
         report['objects'] += 1
         bm = bmesh.new()
-        bm.from_mesh(obj.data)
+        bm.from_mesh(mesh)
         bm.transform(obj.matrix_world)
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()
@@ -181,15 +310,19 @@ def mesh_report(objects):
         if non_manifold > 0:
             report['watertight'] = False
         bm.free()
+        if mesh is not obj.data:
+            obj.evaluated_get(depsgraph).to_mesh_clear()
     return report
 
 
 def scene_bounds(objects):
     points = []
+    depsgraph = bpy.context.evaluated_depsgraph_get()
     for obj in objects:
         if obj.type != 'MESH':
             continue
-        for corner in obj.bound_box:
+        source = obj.evaluated_get(depsgraph) or obj
+        for corner in source.bound_box:
             points.append(obj.matrix_world @ Vector(corner))
     if not points:
         points = [Vector((0, 0, 0)), Vector((10, 10, 10))]
@@ -470,16 +603,28 @@ def main():
     clear_scene()
     objects = []
     unsupported = []
+    hosts = {}
     for node in scene.get('nodes', []):
         try:
             if node.get('type') == 'mesh-reference':
-                objects.extend(import_mesh_reference(node, args.root))
-                continue
-            obj = add_node(node)
-            if obj is not None:
-                objects.append(obj)
+                built = import_mesh_reference(node, args.root)
+            else:
+                obj = add_node(node)
+                built = [obj] if obj is not None else []
+            if built:
+                objects.extend(built)
+                hosts[str(node.get('id'))] = built
         except Exception as error:
             unsupported.append({'id': node.get('id'), 'error': str(error)})
+    geometry_errors = []
+    geometry = {'applied': [], 'consumed': [], 'dropped': []}
+    try:
+        geometry = apply_modifiers(scene.get('nodes', []), hosts)
+        realize_modifiers(objects)
+        objects, dropped = drop_consumed(objects, geometry['consumed'])
+        geometry['dropped'] = dropped
+    except Exception as error:
+        geometry_errors.append(str(error))
     views = [item.strip() for item in args.views.split(',') if item.strip()]
     formats = [item.strip() for item in args.formats.split(',') if item.strip()]
     bounds = scene_bounds(objects)
@@ -495,12 +640,13 @@ def main():
     render_paths, declared = render_views(args.out, views, bounds, scene.get('camera'))
     export_paths = export_formats(args.out, formats, objects)
     report = {
-        'ok': len(unsupported) == 0 and not light_errors,
+        'ok': len(unsupported) == 0 and not light_errors and not geometry_errors,
         'blenderVersion': bpy.app.version_string,
         'renderEngine': bpy.context.scene.render.engine,
         'display': display,
         'environment': environment_echo,
         'lights': {'created': lights_created, 'errors': light_errors},
+        'geometry': {**geometry, 'errors': geometry_errors},
         'mesh': mesh_report(objects),
         'camera': {
             'declared': isinstance(scene.get('camera'), dict),
