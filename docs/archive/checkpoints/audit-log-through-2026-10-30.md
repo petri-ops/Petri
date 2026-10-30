@@ -21,3 +21,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T06:11:03.301Z -->
 最后更新：2026-10-30（**RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE completed（UI-639 in_progress；closeout 十三门 PASS + skills:check 报告级）**：B 线 C-44 写桥全链——pack-write-bridge-contract（四类写操作+bridgeVersion 门+fail-closed，后端 5/5）+ packWriteBridge.ts 宿主代理（同源移植+TTL 去重+分发核心客户端，前端 6/6）+ PackSurfaceFrame 写消息接线 + contributions 透传 writes 声明（非法丢弃+诊断）；实机 9/9（隔离 :3011+夹具双包：selection-save/annotations create+delete/revision-restore 全链 200）。A 线 62 条四档全处置：a 档 9 条实机翻 verified（UI-598/543/596/462/303/594/331/248/484，rw02-ui-evidence-live 15/15）+ UI-638 发现腿清偿（任务墙列出 model3d 作业）；d 档 28 处置（UI-448 加映 12 整批判销+16 逐条）；b 档 18 触发条件注记；c 档 6 条集中过目清单（human-eye-checklist.md）。301/385 spawn 链 live 实证（mock provider 真跑 spawn 会话：mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天）、面板视觉离屏 CDP 不可达降 c（UI-501 同类）；595 降 b（图像 artifact 前提同 UI-532）。实机抓真：family 全局唯一撞（projectId 前缀）/声明形态平铺定版/探针跨栈错配（RW02_UAPI）/弱断言放水收紧。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:12:57.391Z -->
+最后更新：2026-10-30（**RW-03-C32-DECISION-ENV-GOV 判销（轻量对账批；plan=本条目）**：RW 纲 §3.3 立项前提过时——C-32 已由 BLOCK-211 清偿在案（decision-config.js 头注「现已按注释语义修正」+ resolvePointEnabled 实现即修正语义 + 回归锁 test/block211-c32-env-seed.test.mjs 4/4 在库）+ RW-02 会话实证复验双判据过（setPointConfig 设置关+env=1 残留→enabled=false；设置开+env=0 杀开关→false）。C-32 治理透明魂面语义在库且被锁。G0 开发期常态 · 不外推 packaged/Provider/GA。

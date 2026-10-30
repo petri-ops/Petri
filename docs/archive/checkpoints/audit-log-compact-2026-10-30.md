@@ -21,3 +21,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T06:11:03.301Z -->
 | ✅ backlog 滞后注记对账批 completed（批次 5/5；治理无代码） | 2026-10-27 | 序 0/2b/2a/2d/2e 有据修正，2c/1z 标待核不冒进 | docs:check |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:12:57.391Z -->
+| ✅ BLOCK-272 closeout 收口定向化 completed（用户裁决「收口只需要校验有改动的部分」） | 2026-10-27 | 三层机制+closeout:full 转义；红绿 13/13+回归 31/31+双 closeout PASS exit 0；静态门热态 98.4s→10.4s | quality:lint/types 0；plan §6 |
