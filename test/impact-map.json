@@ -153,9 +153,10 @@
     },
     {
       "id": "next04a-3d-foundation",
-      "note": "NEXT-04A SceneSpec + Three.js 只读预览 + 可选 Blender 本地 provider + model3d_* 工具 + 导出 manifest；Three 为 MIT 单依赖，Blender 不随包分发。",
+      "note": "NEXT-04A SceneSpec + Three.js 只读预览 + 可选 Blender 本地 provider + model3d_* 工具 + 导出 manifest；Three 为 MIT 单依赖，Blender 不随包分发。BLOCK-322 P1 外部资产入链（mesh-assets 格式单源 + 预览渲染 mesh-reference + UI 导入为场景节点）同属本面。",
       "patterns": [
         "core/petri-server/helpers/scene3d.js",
+        "core/petri-server/helpers/mesh-assets.js",
         "core/petri-server/helpers/blender-provider.js",
         "core/petri-server/routes/model3d.js",
         "core/petri-server/agent-tools/model3d-tools.js",
@@ -163,6 +164,11 @@
         "resources/model3d/blender_scene.py",
         "frontend/src/lib/scene3d.ts",
         "frontend/src/lib/scene3d.test.ts",
+        "frontend/src/lib/meshAssets.ts",
+        "frontend/src/lib/workspaceFileUpload.ts",
+        "frontend/src/lib/workspaceFileUpload.test.ts",
+        "frontend/src/lib/model3dAssetImport.ts",
+        "frontend/src/lib/model3dAssetImport.test.ts",
         "frontend/src/lib/model3dClient.ts",
         "frontend/src/components/work-surface/Model3DScene.tsx",
         "frontend/src/components/work-surface/Model3DSurface.tsx",
@@ -170,8 +176,11 @@
         "frontend/package.json",
         "frontend/package-lock.json",
         "test/next04a-*.test.mjs",
+        "test/block322-*.test.mjs",
         "acceptance/next-04a-3d-foundation/**",
-        ".agents/skills/petri-dev-infra/dev-verify/flows/next04a-*.cjs"
+        "acceptance/block-322-p1/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/next04a-*.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-*.cjs"
       ],
       "tests": [
         "test/next04a-scene3d.test.mjs",
@@ -183,7 +192,11 @@
         "frontend/src/components/workspace-panels/RightPanel.test.tsx",
         "frontend/src/components/copilot/toolActivity.test.ts",
         "test/next05-recipes.test.mjs",
-        "test/block322-p1-mesh-formats.test.mjs"
+        "test/block322-p1-mesh-formats.test.mjs",
+        "test/block322-mesh-format-single-source.test.mjs",
+        "test/block322-p1c-asset-intake.test.mjs",
+        "frontend/src/lib/workspaceFileUpload.test.ts",
+        "frontend/src/lib/model3dAssetImport.test.ts"
       ],
       "classifiesScripts": false
     },

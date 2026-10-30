@@ -8,6 +8,7 @@
  */
 
 const crypto = require('node:crypto');
+const { meshFormatForPath } = require('./mesh-assets');
 
 const SCENE_VERSION = 'scene3d/v1';
 const UNITS = new Set(['mm']);
@@ -125,6 +126,7 @@ function validateNode(node, index, parameters, ids, errors) {
     }
   } else if (node.type === 'mesh-reference') {
     if (!isPlainObject(node.source) || !isSafeRelativePath(node.source.path)) errors.push(`${where}.source.path 非法`);
+    else if (!meshFormatForPath(node.source.path)) errors.push('mesh_format_unsupported');
     if (!isPlainObject(node.source) || !/^[a-f0-9]{64}$/i.test(String(node.source.sourceSha256 || ''))) {
       errors.push('mesh_source_hash_required');
     }
@@ -163,6 +165,7 @@ function validateSceneSpec(input) {
   }
   const uniqueErrors = [...new Set(errors)];
   if (uniqueErrors.includes('mesh_source_hash_required')) return { ok: false, error: 'mesh_source_hash_required', errors: uniqueErrors };
+  if (uniqueErrors.includes('mesh_format_unsupported')) return { ok: false, error: 'mesh_format_unsupported', errors: uniqueErrors };
   if (uniqueErrors.some((error) => /未知参数/.test(error))) return { ok: false, error: 'invalid_reference', errors: uniqueErrors };
   if (uniqueErrors.length > 0) return { ok: false, error: 'scene_invalid', errors: uniqueErrors };
   return {

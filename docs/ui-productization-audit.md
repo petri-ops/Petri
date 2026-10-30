@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-640: 3D 工作台外部资产导入与 mesh-reference 预览渲染（BLOCK-322 P1b/P1c；2026-10-30 **verified（dev Electron 边界内；实机 29/29）**）
+
+- **变化面**：3D 工作台（`Model3DSurface`）新增「导入为场景节点」入口——选中本地 GLB/GLTF/STL/OBJ 后走「分片写入工作区 `model3d/assets/` → 服务端预检算 sha256 → `add_node` 白名单写入 SceneSpec」，导入即成为场景图一部分；`Model3DScene` 不再对 `mesh-reference` 静默跳过，改为按 `workspaceFileUrlFor` 从工作区文件路由真加载（STL/OBJ/GLTF 各自 loader，`.gltf` 经 `setResourcePath` 让同目录外部 `.bin`/贴图可达），套用节点 transform、纳入包围盒与相机取景、可点选（递归命中后回溯到场景直接子级取节点 id）。
+- **为什么这样设计**：P1a 已让 GLB/GLTF 进 SceneSpec，但预览端 `Model3DScene.tsx:250` 对 `mesh-reference` 直接 `continue`——侧栏列出节点、视口永不显示，是「UI 声称存在而画面没有」的静默失败；导入链此前只有浏览器 blob 只读预览（且会销毁 SceneSpec 视图），外部资产无法与参数化场景共存。写链全部复用既有 REST（`fs/upload` 分片 + `scene/apply` 白名单 + 修订历史），不新增第二写面、不新增 IPC 通道。
+- **失败语义（红线4）**：加载失败/无项目工作区按节点报 `mesh_reference_load_failed:<id>` / `mesh_reference_unavailable:<id>`，进告警区累积而非互相覆盖；基本体照常渲染，不伪造成功。
+- **验证（代码）**：`test/block322-p1c-asset-intake.test.mjs` 7/7 + `test/block322-mesh-format-single-source.test.mjs` 7/7（跨 JS/TS/Python 逐值对账格式白名单与 64MB 上限）+ `frontend/src/lib/workspaceFileUpload.test.ts` 6/6 + `model3dAssetImport.test.ts` 7/7 + `scene3d.test.ts` 4/4；tsc 0、theme-token-contract 17/17（新增 `.notice` 全用 token）。
+- **实机证据**：`acceptance/block-322-p1/block322-p1-external-asset-live-live.json`（**29/29 allPass**，9223 离屏 + 真实 Blender 4.5.10 LTS，win32-x64）：真实文件句柄经 `DOM.setFileInputFiles` 走 UI 导入 → 资产落 `model3d/assets/scene.glb`、SceneSpec 写入 `model3d/scene.scene3d.json`、预览「渲染对象」2→3、帧内像素在场；随后删除磁盘资产并重载同一 SceneSpec → 显式报 `mesh_reference_load_failed:asset-scene（model3d/assets/scene.glb）` 且基本体仍渲染（对象 2）；REST 侧另有 sha 与盘面独立重算对账、四类拒绝（非法格式/缺失/路径逃逸/敏感段）、篡改 sha 构建 400 `mesh_source_hash_mismatch`、`volumesMm3` 含 `asset-donor:donor` 288000 mm³。数值明细同目录 `block322-p1-detail.json`。
+- **边界（reopen）**：①多文件 `.gltf`（外部 `.bin`/贴图）的解析路径已实现但本轮实机只覆盖自包含 `.glb`，`.gltf` 端到端腿未取证；②非网格内容（相机/灯光/骨骼）进 `mesh-reference` 时预览与 Blender 都只取 MESH，静默不显示——登记 P2 候选；③导出格式白名单（glb/stl/obj）与输入白名单是不同概念，仍各自声明，收敛另案；④截图取证受离屏合成帧限制（`toDataURL` 长度随帧时序波动，断言只作下限）。
+
 ## UI-639: pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；iframe 端到端腿随 UI-532 同前提）**）
 
 - **变化面**：`pack-write-bridge-contract.js`（批注窄桥扩四类写操作：selection-save/revision-restore/revision-replay/export-run + v1 批注别名；bridgeVersion 门 + 未知键 fail-closed）；前端同源移植 `packWriteBridge.ts`（宿主代理：校验→授权→requestId TTL 去重→分发核心客户端；scope/项目归属宿主注入不可自宣）；PackSurfaceFrame 写消息处理（petri:pack-write + v1 别名 → petri:pack-write-result 回执）；pack-contributions 透传 writes 声明（非法丢弃+诊断）。

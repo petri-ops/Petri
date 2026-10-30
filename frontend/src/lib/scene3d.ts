@@ -1,5 +1,15 @@
+import { meshFormatForPath } from './meshAssets';
+
 export const SCENE3D_VERSION = 'scene3d/v1';
 export const SCENE3D_NODE_TYPES = Object.freeze(['box', 'cylinder', 'sphere', 'plane', 'group', 'mesh-reference'] as const);
+
+/** 展示侧兜底：绝对路径/盘符/空段/.. 一律不消费（写侧真值在服务端 scene3d.js）。 */
+function isSafeRelativePath(value: unknown): boolean {
+  if (typeof value !== 'string' || !value) return false;
+  const text = value.replace(/\\/g, '/');
+  if (text.startsWith('/') || /^[A-Za-z]:/.test(text)) return false;
+  return text.split('/').every((segment) => segment !== '..' && segment !== '');
+}
 
 export type Scene3DNodeType = (typeof SCENE3D_NODE_TYPES)[number];
 
@@ -86,7 +96,13 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
     if (item.type === 'group') {
       // no geometry
     } else if (item.type === 'mesh-reference') {
-      warnings.push(`节点 ${item.id} 为外部 mesh 引用；本视图只显示引用信息，请在结果面打开原文件。`);
+      const source = isRecord(item.source) ? item.source : null;
+      const sourcePath = typeof source?.path === 'string' ? source.path : '';
+      const sourceSha = typeof source?.sourceSha256 === 'string' ? source.sourceSha256 : '';
+      if (!source || !isSafeRelativePath(sourcePath)) errors.push(`nodes[${index}].source.path 非法`);
+      else if (!meshFormatForPath(sourcePath)) errors.push(`nodes[${index}] mesh_format_unsupported`);
+      if (!/^[a-f0-9]{64}$/i.test(sourceSha)) errors.push('mesh_source_hash_required');
+      warnings.push(`节点 ${item.id} 为外部 mesh 引用（${sourcePath || '—'}）；预览从项目工作区文件加载，导出按 sha256 锚定。`);
     } else {
       const required = item.type === 'sphere' ? ['radius']
         : item.type === 'cylinder' ? ['radius', 'height']

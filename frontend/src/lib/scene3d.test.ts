@@ -23,15 +23,35 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     expect(invalid.errors.join('；')).toContain('引用无效');
   });
 
-  it('mesh-reference 保留警告但不伪造几何', () => {
+  it('mesh-reference 校验源路径与 sha，并给出工作区加载提示', () => {
     const result = normalizeScene3DForView({
       ...sampleScene3D(),
       nodes: [{
-        id: 'mesh', type: 'mesh-reference', source: { path: 'a.glb', sourceSha256: 'a'.repeat(64) },
+        id: 'mesh', type: 'mesh-reference', source: { path: 'model3d/assets/a.glb', sourceSha256: 'a'.repeat(64) },
       }],
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.view.warnings[0]).toContain('外部 mesh');
+    expect(result.view.warnings[0]).toContain('工作区');
+    expect(result.view.nodes[0].type).toBe('mesh-reference');
+  });
+
+  it('mesh-reference 缺 sha / 非法扩展名 / 绝对路径 fail-closed（与服务端同判据）', () => {
+    const cases: Array<{ source: unknown; keyword: string }> = [
+      { source: { path: 'a.glb' }, keyword: 'mesh_source_hash_required' },
+      { source: { path: 'notes.txt', sourceSha256: 'a'.repeat(64) }, keyword: 'mesh_format_unsupported' },
+      { source: { path: '/etc/passwd.glb', sourceSha256: 'a'.repeat(64) }, keyword: 'source.path 非法' },
+      { source: { path: '../outside.glb', sourceSha256: 'a'.repeat(64) }, keyword: 'source.path 非法' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({
+        ...sampleScene3D(),
+        nodes: [{ id: 'mesh', type: 'mesh-reference', source: item.source }],
+      });
+      expect(result.ok, JSON.stringify(item.source)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
   });
 });

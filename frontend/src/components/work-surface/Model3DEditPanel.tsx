@@ -2,6 +2,7 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import {
   applySceneOperations,
+  DEFAULT_SCENE_PATH,
   diffSceneSpecs,
   listSceneRevisions,
   readSceneFile,
@@ -37,7 +38,7 @@ function diffText(diff: SceneDiff): string[] {
 }
 
 export function Model3DEditPanel({ projectId, scene, onSceneUpdated }: Model3DEditPanelProps): React.ReactElement {
-  const [scenePath, setScenePath] = React.useState('model3d/scene.scene3d.json');
+  const [scenePath, setScenePath] = React.useState(DEFAULT_SCENE_PATH);
   const [savedHash, setSavedHash] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, string>>({});
   const [preview, setPreview] = React.useState<SceneDiff | null>(null);

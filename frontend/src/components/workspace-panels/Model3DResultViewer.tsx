@@ -1,13 +1,12 @@
 import React from 'react';
 import { Model3DScene } from '@/components/work-surface/Model3DScene';
+import { meshFormatForPath } from '@/lib/meshAssets';
 import { setSelectionBusArtifact, setSelectionBusSelection } from '@/lib/selectionBus';
 import styles from './Model3DResultViewer.module.css';
 
-function modelFormatFor(url: string): 'glb' | 'stl' | 'obj' {
-  const lower = String(url || '').toLowerCase();
-  if (lower.endsWith('.stl')) return 'stl';
-  if (lower.endsWith('.obj')) return 'obj';
-  return 'glb';
+// 格式判定走 meshAssets 单源；无法识别时保持既有兜底语义（按 glb 交给 GLTFLoader）。
+function modelFormatFor(url: string) {
+  return meshFormatForPath(url) ?? 'glb';
 }
 
 /**

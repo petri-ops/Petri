@@ -10,13 +10,17 @@ import {
 } from '@/lib/sceneEditClient';
 import type { Scene3DSpec } from '@/lib/scene3d';
 
-vi.mock('@/lib/sceneEditClient', () => ({
-  readSceneFile: vi.fn(),
-  listSceneRevisions: vi.fn(),
-  diffSceneSpecs: vi.fn(),
-  applySceneOperations: vi.fn(),
-  restoreSceneRevision: vi.fn(),
-}));
+vi.mock('@/lib/sceneEditClient', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/sceneEditClient')>();
+  return {
+    ...actual,
+    readSceneFile: vi.fn(),
+    listSceneRevisions: vi.fn(),
+    diffSceneSpecs: vi.fn(),
+    applySceneOperations: vi.fn(),
+    restoreSceneRevision: vi.fn(),
+  };
+});
 
 const readMock = vi.mocked(readSceneFile);
 const revisionsMock = vi.mocked(listSceneRevisions);

@@ -1,4 +1,17 @@
 import { getApiPrefix } from '@/components/copilot/copilotClient';
+import type { MeshInputFormat } from './meshAssets';
+
+/** SceneSpec 默认落盘路径（3D 工作台与编辑面板共用，勿在别处再写一遍字面量）。 */
+export const DEFAULT_SCENE_PATH = 'model3d/scene.scene3d.json';
+
+export interface MeshAssetInspection {
+  ok: true;
+  path: string;
+  format: MeshInputFormat;
+  bytes: number;
+  sourceSha256: string;
+  maxBytes: number;
+}
 
 export interface SceneRevisionSummary {
   revisionId: string;
@@ -37,6 +50,19 @@ async function parse<T>(response: Response): Promise<T> {
     throw new Error((data && (data.message || data.error)) || `HTTP ${response.status}`);
   }
   return data;
+}
+
+export async function inspectMeshAsset(input: {
+  projectId: string;
+  path: string;
+}): Promise<MeshAssetInspection> {
+  const response = await fetch(`${getApiPrefix()}/model3d/asset/inspect`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(30_000),
+  });
+  return parse<MeshAssetInspection>(response);
 }
 
 export async function readSceneFile(projectId: string, path: string): Promise<{ scene: unknown; hash: string }> {

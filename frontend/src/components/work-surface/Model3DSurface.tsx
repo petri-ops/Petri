@@ -4,6 +4,14 @@ import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
 import { fetchModel3DCapability } from '@/lib/model3dClient';
 import { normalizeScene3DForView, sampleScene3D, type Scene3DView } from '@/lib/scene3d';
+import {
+  MESH_INPUT_ACCEPT_ATTR,
+  MAX_MESH_BYTES,
+  meshFormatForPath,
+  meshTooLargeMessage,
+  type MeshInputFormat,
+} from '@/lib/meshAssets';
+import { importMeshAssetAsNode } from '@/lib/model3dAssetImport';
 import type { Model3DCameraApi, Model3DPoint } from './Model3DScene';
 import { Model3DReviewPanel } from './Model3DReviewPanel';
 import { SketchSpecDialog } from './SketchSpecDialog';
@@ -32,7 +40,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   const [capability, setCapability] = React.useState<Awaited<ReturnType<typeof fetchModel3DCapability>> | null>(null);
   const [canvasInfo, setCanvasInfo] = React.useState<{ objects: number; bounds: number[] } | null>(null);
   const [modelUrl, setModelUrl] = React.useState<string | null>(null);
-  const [modelFormat, setModelFormat] = React.useState<'glb' | 'stl' | 'obj'>('glb');
+  const [modelFormat, setModelFormat] = React.useState<MeshInputFormat>('glb');
+  const [importing, setImporting] = React.useState(false);
+  const [assetNotice, setAssetNotice] = React.useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [sketchOpen, setSketchOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
@@ -60,6 +70,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   const cameraApiRef = React.useRef<Model3DCameraApi | null>(null);
   const compareFileRef = React.useRef<HTMLInputElement | null>(null);
   const fileRef = React.useRef<HTMLInputElement | null>(null);
+  const assetFileRef = React.useRef<HTMLInputElement | null>(null);
 
   const persistBookmarks = (next: Array<{ id: string; position: number[]; target: number[] }>) => {
     setBookmarks(next);
@@ -105,16 +116,17 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     if (!file) return;
     setError(null);
     setWarnings([]);
-    if (file.size > 64 * 1024 * 1024) {
-      setError('文件超过 64MB 预览上限；请打开原文件或先简化模型。');
+    setAssetNotice(null);
+    if (file.size > MAX_MESH_BYTES) {
+      setError(meshTooLargeMessage());
       return;
     }
-    const extension = (file.name.split('.').pop() || '').toLowerCase();
-    if (['glb', 'gltf', 'stl', 'obj'].includes(extension)) {
+    const format = meshFormatForPath(file.name);
+    if (format) {
       if (modelUrl) URL.revokeObjectURL(modelUrl);
       setModelUrl(URL.createObjectURL(file));
-      setModelFormat(extension === 'stl' ? 'stl' : extension === 'obj' ? 'obj' : 'glb');
-      setWarnings(extension === 'stl' || extension === 'obj'
+      setModelFormat(format);
+      setWarnings(format === 'stl' || format === 'obj'
         ? ['外部 STL/OBJ 仅几何预览，单位按文件原值；参数与约束请使用 SceneSpec。']
         : []);
       setView(null);
@@ -132,10 +144,38 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     }
   };
 
+  const onAssetFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!projectId || !view) {
+      setError('导入为场景节点需要已加载的 SceneSpec 与已打开的项目工作区。');
+      return;
+    }
+    setImporting(true);
+    setError(null);
+    setAssetNotice(null);
+    try {
+      const imported = await importMeshAssetAsNode({ projectId, file, scene: view.scene });
+      loadStructured(imported.scene);
+      setWarnings((previous) => [...previous,
+        `已导入 ${imported.path}（${imported.bytes} 字节 · sha256 ${imported.sourceSha256.slice(0, 12)}…）`]);
+      setAssetNotice(`已作为节点 ${imported.node.id} 写入 ${imported.scenePath}`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'asset_import_failed');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const onReady = React.useCallback((info: { objects: number; bounds: number[] }) => {
     setCanvasInfo(info);
   }, []);
   const onSceneError = React.useCallback((message: string) => {
+    // 外部 mesh 是逐节点观察，可能同时多条：累积进告警区，不互相覆盖（红线4 既不伪造也不吞掉）；
+    // 其余（WebGL 初始化/上下文丢失）仍是阻断性错误，走错误条。
+    if (message.startsWith('mesh_reference_')) {
+      setWarnings((previous) => (previous.includes(message) ? previous : [...previous, message]));
+      return;
+    }
     setError(message);
   }, []);
   const onSelectNode = React.useCallback((nodeId: string | null) => {
@@ -216,6 +256,17 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         <button
           type="button"
           className={button.ghost}
+          disabled={!view || !projectId || importing}
+          title={!view || !projectId
+            ? '需要先加载 SceneSpec 并打开项目工作区'
+            : '上传到工作区 model3d/assets/，并作为 mesh-reference 节点写入 SceneSpec'}
+          onClick={() => assetFileRef.current?.click()}
+        >
+          {importing ? '导入中…' : '导入为场景节点'}
+        </button>
+        <button
+          type="button"
+          className={button.ghost}
           disabled={!view || !projectId || capability?.status !== 'ready'}
           title={!projectId ? '视觉 QA 需要已打开的项目工作区' : '多视角渲染 + 视觉辅助检查'}
           aria-pressed={reviewOpen}
@@ -248,9 +299,18 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         <input
           ref={fileRef}
           type="file"
-          accept=".json,.scene3d.json,.glb,.gltf,.stl,.obj"
+          data-testid="model3d-file-input"
+          accept={`.json,.scene3d.json,${MESH_INPUT_ACCEPT_ATTR}`}
           hidden
           onChange={(event) => { void onFile(event.target.files?.[0]); event.target.value = ''; }}
+        />
+        <input
+          ref={assetFileRef}
+          type="file"
+          data-testid="model3d-asset-input"
+          accept={MESH_INPUT_ACCEPT_ATTR}
+          hidden
+          onChange={(event) => { void onAssetFile(event.target.files?.[0]); event.target.value = ''; }}
         />
       </header>
 
@@ -272,6 +332,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                 viewAngle={viewAngle}
                 modelUrl={modelUrl}
                 modelFormat={modelFormat}
+                projectId={projectId}
                 onReady={onReady}
                 onError={onSceneError}
                 onSelectNode={onSelectNode}
@@ -323,6 +384,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         <aside className={styles.info}>
           {error ? <div className={styles.error} role="alert">{error}</div> : null}
           {warnings.map((warning) => <div key={warning} className={styles.warning}>{warning}</div>)}
+          {assetNotice ? <div className={styles.notice}>{assetNotice}</div> : null}
           {view ? (
             <>
               <section>

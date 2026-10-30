@@ -17,7 +17,8 @@ import { WorkspaceFilePreview } from './WorkspaceFilePreview';
 import { FileTreeContextMenu, FileTreeDialogHost, type FileTreeDialog, type FileTreeMenuAction, type FileTreeMenuTarget, type FileTreeOpResult } from './FileTreeOpsOverlay';
 import { WorkspaceFileTabStrip, type FileTabMenuAction as FileTabMenuActionKind } from './WorkspaceFileTabStrip';
 import { fileTabPanelId } from './workspaceFileTabOps';
-import { fsImportFrom, fsMkdir, fsMove, fsCopy, fsUpload, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
+import { fsImportFrom, fsMkdir, fsMove, fsCopy, joinPath, uniqueTargetName, type DraggedTreeItem } from './fileOps';
+import { uploadFileToWorkspace } from '@/lib/workspaceFileUpload';
 import { TREE_DRAG_MIME } from './FileTreeItem';
 
 // BLOCK-96 F2 — 树游标分页：每目录限量拉取，截断目录尾部出现「加载更多」。
@@ -443,19 +444,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
   }, []);
 
   const uploadOsFile = useCallback(async (file: File, toPath: string) => {
-    const CHUNK = 64 * 1024;
-    if (file.size === 0) {
-      await fsUpload(project.id, toPath, '', 0);
-      return;
-    }
-    for (let offset = 0; offset < file.size; offset += CHUNK) {
-      const buf = new Uint8Array(await file.slice(offset, offset + CHUNK).arrayBuffer());
-      let binary = '';
-      for (let i = 0; i < buf.length; i += 0x8000) {
-        binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
-      }
-      await fsUpload(project.id, toPath, btoa(binary), offset);
-    }
+    await uploadFileToWorkspace(project.id, toPath, file);
   }, [project.id]);
 
   const importFromOsDrop = useCallback(async (

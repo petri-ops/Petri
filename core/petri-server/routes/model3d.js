@@ -6,10 +6,13 @@ const scene3d = require('../helpers/scene3d');
 const { runModel3DReview } = require('../helpers/model3d-review');
 const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
+const { inspectMeshAsset } = require('../helpers/mesh-assets');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
 
 const REVIEW_VIEWS = new Set(['front', 'top', 'side', 'iso']);
+// resolveWorkspaceTarget 的路径拒绝码 → 403（与 400「请求本身不合法」区分）。
+const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'symlink_not_allowed', 'workspace_unavailable'];
 
 function requestUserId(req) {
   return req.userId || (req.user && req.user.id) || null;
@@ -169,6 +172,26 @@ module.exports = function registerModel3DRoutes(app) {
     } catch (error) {
       return res.status(500).json({ ok: false, error: 'model3d_export_failed', message: error.message });
     }
+  });
+
+  // BLOCK-322 P1c — 外部 mesh 资产入链预检：服务端从工作区磁盘真实计算 sha256/字节，
+  // 格式与上限走 helpers/mesh-assets 单源。只读，不写文件、不产生第二份真相；
+  // 之后 Blender 构建仍逐字节复验（resources/model3d/blender_scene.py）。
+  app.post('/api/model3d/asset/inspect', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const result = await inspectMeshAsset({
+      workspaceRoot: auth.project.workspace_path,
+      relativePath: req.body?.path,
+    });
+    if (!result.ok) {
+      const status = result.error === 'mesh_not_found' ? 404
+        : result.error === 'mesh_too_large' ? 413
+          : PATH_REJECT_ERRORS.includes(result.error) ? 403
+            : 400;
+      return res.status(status).json(result);
+    }
+    return res.json(result);
   });
 
   // NEXT-04B P3-1 — 草图 → task-spec/v1 草稿（只预览；不建场景/不执行）。

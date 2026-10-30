@@ -1,4 +1,5 @@
 import { isTextFile } from '@/lib/previewFileUtils';
+import { MESH_INPUT_FORMATS } from '@/lib/meshAssets';
 import type { ResultArtifactKind } from '@/lib/result-manifest';
 
 /**
@@ -101,8 +102,9 @@ const ADAPTER_RULES: readonly AdapterRule[] = [
   // resultSurface.ts:80 — table kind 恒胜；.csv/.tsv 先于 text 判定命中 table
   { adapter: 'table', kind: 'table', extension: /\.(csv|tsv)$/ },
   // RW-01 — 3D 产物族：kind=model3d 恒胜；.glb/.gltf/.stl/.obj 与 .scene3d.json
-  // 先于 .json/binary 兜底命中 model3d（.scene3d.json 是 SceneSpec 源真相文件）
-  { adapter: 'model3d', kind: 'model3d', extension: /\.(glb|gltf|stl|obj)$|\.scene3d\.json$/ },
+  // 先于 .json/binary 兜底命中 model3d（.scene3d.json 是 SceneSpec 源真相文件）。
+  // 格式集合取 meshAssets 单源，规则顺序仍由本档案表决定。
+  { adapter: 'model3d', kind: 'model3d', extension: new RegExp(`\\.(${MESH_INPUT_FORMATS.join('|')})$|\\.scene3d\\.json$`) },
   // resultSurface.ts:81 — .json 先于 isTextFile 判定命中 json（.jsonl 不匹配，落 text）
   { adapter: 'json', extension: /\.json$/ },
   // BLOCK-142 新增（plan §1.4：md 先于 isTextFile）— .md/.markdown → markdown viewer，先于 text 规则

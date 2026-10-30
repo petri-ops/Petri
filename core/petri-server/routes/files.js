@@ -62,6 +62,12 @@ function contentTypeFor(filePath) {
     '.h5': 'application/octet-stream',
     '.hdf5': 'application/octet-stream',
     '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    // BLOCK-322 P1b：外部 mesh 资产从工作区文件路由直供 3D 预览。
+    // 格式集合以 helpers/mesh-assets 为唯一来源（逐值对账见 block322-mesh-format-single-source）。
+    '.glb': 'model/gltf-binary',
+    '.gltf': 'model/gltf+json',
+    '.stl': 'model/stl',
+    '.obj': 'model/obj',
   }[ext] || 'application/octet-stream';
 }
 

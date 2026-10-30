@@ -225,7 +225,8 @@
 }
 
 .error,
-.warning {
+.warning,
+.notice {
   padding: var(--petri-space-2);
   border-radius: var(--petri-radius-md);
   color: var(--petri-danger);
@@ -234,6 +235,10 @@
 
 .warning {
   color: var(--petri-warning);
+}
+
+.notice {
+  color: var(--petri-text-secondary);
 }
 
 @container (max-width: 720px) {

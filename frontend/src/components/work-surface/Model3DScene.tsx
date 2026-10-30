@@ -5,6 +5,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import type { Scene3DView, Scene3DViewNode } from '@/lib/scene3d';
+import { meshFormatForPath, type MeshInputFormat } from '@/lib/meshAssets';
+import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
 
 export type Model3DViewAngle = 'iso' | 'front' | 'top' | 'side';
 
@@ -19,6 +21,35 @@ function geometryFor(node: Scene3DViewNode): THREE.BufferGeometry | null {
   if (node.type === 'cylinder') return new THREE.CylinderGeometry(dims.radius, dims.radius, dims.height, 32);
   if (node.type === 'plane') return new THREE.PlaneGeometry(dims.width, dims.height);
   return null;
+}
+
+function loadMeshObject(format: MeshInputFormat, url: string, resourcePath = ''): Promise<THREE.Object3D> {
+  return new Promise((resolve, reject) => {
+    if (format === 'stl') {
+      new STLLoader().load(url, (geometry) => {
+        geometry.computeVertexNormals();
+        resolve(new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x8aa3b8, roughness: 0.62 })));
+      }, undefined, reject);
+      return;
+    }
+    if (format === 'obj') {
+      new OBJLoader().load(url, resolve, undefined, reject);
+      return;
+    }
+    const loader = new GLTFLoader();
+    // 多文件 .gltf 的外部 .bin/贴图走同一个工作区文件路由：Three 的 resolveURL 对相对
+    // 资源是字符串拼接，故基址带上 ?path=<目录>/，不另立第二份静态文件服务。
+    if (resourcePath) loader.setResourcePath(resourcePath);
+    loader.load(url, (gltf) => resolve(gltf.scene), undefined, reject);
+  });
+}
+
+function countMeshes(object: THREE.Object3D): number {
+  let count = 0;
+  object.traverse((child) => {
+    if ((child as THREE.Mesh).isMesh) count += 1;
+  });
+  return count;
 }
 
 function disposeGroup(group: THREE.Group): void {
@@ -44,6 +75,7 @@ export function Model3DScene({
   viewAngle,
   modelUrl,
   modelFormat = 'glb',
+  projectId = null,
   onReady,
   onError,
   onSelectNode,
@@ -55,7 +87,8 @@ export function Model3DScene({
   view: Scene3DView | null;
   viewAngle: Model3DViewAngle;
   modelUrl?: string | null;
-  modelFormat?: 'glb' | 'stl' | 'obj';
+  modelFormat?: MeshInputFormat;
+  projectId?: string | null;
   onReady?: (info: { objects: number; bounds: number[] }) => void;
   onError?: (message: string) => void;
   onSelectNode?: (nodeId: string | null) => void;
@@ -198,12 +231,16 @@ export function Model3DScene({
       );
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects(content.children, false)[0];
+      // 递归命中：导入资产是嵌套层级，命中叶子后回溯到 content 直接子级（其 name = 节点 id）。
+      const hit = raycaster.intersectObjects(content.children, true)[0];
+      let picked: THREE.Object3D | null = hit ? hit.object : null;
+      while (picked && picked.parent && picked.parent !== content) picked = picked.parent;
+      const nodeId = picked ? (picked.name || null) : null;
       if (measureMode && onMeasurePoint) {
         if (hit) onMeasurePoint([hit.point.x, hit.point.y, hit.point.z]);
         return;
       }
-      onSelectNode?.(hit && hit.object.name ? hit.object.name : null);
+      onSelectNode?.(nodeId);
     };
     dom.addEventListener('pointerdown', onPointerDown);
     dom.addEventListener('pointerup', onPointerUp);
@@ -215,39 +252,69 @@ export function Model3DScene({
 
   React.useEffect(() => {
     const content = contentRef.current;
-    if (!content) return;
+    if (!content) return undefined;
+    let cancelled = false;
     disposeGroup(content);
     boundsRef.current = new THREE.Box3();
+
+    const report = (objects: number) => {
+      if (cancelled) return;
+      boundsRef.current.setFromObject(content);
+      applyView(viewAngle);
+      onReady?.({ objects, bounds: boundsRef.current.getSize(new THREE.Vector3()).toArray() });
+    };
+    const fail = (message: string) => {
+      if (!cancelled) onError?.(message);
+    };
+
     if (modelUrl) {
-      const finish = (object: THREE.Object3D, objects: number) => {
+      void loadMeshObject(modelFormat, modelUrl).then((object) => {
+        if (cancelled) return;
+        object.name = `imported-${modelFormat}`;
         content.add(object);
-        boundsRef.current.setFromObject(object);
-        applyView(viewAngle);
-        onReady?.({ objects, bounds: boundsRef.current.getSize(new THREE.Vector3()).toArray() });
-      };
-      if (modelFormat === 'stl') {
-        new STLLoader().load(modelUrl, (geometry) => {
-          geometry.computeVertexNormals();
-          const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x8aa3b8, roughness: 0.62 }));
-          mesh.name = 'imported-stl';
-          finish(mesh, 1);
-        }, undefined, (error) => onError?.(error instanceof Error ? error.message : 'stl_load_failed'));
-      } else if (modelFormat === 'obj') {
-        new OBJLoader().load(modelUrl, (group) => {
-          group.name = 'imported-obj';
-          finish(group, group.children.length);
-        }, undefined, (error) => onError?.(error instanceof Error ? error.message : 'obj_load_failed'));
-      } else {
-        new GLTFLoader().load(modelUrl, (gltf) => {
-          finish(gltf.scene, gltf.scene.children.length);
-        }, undefined, (error) => onError?.(error instanceof Error ? error.message : 'glb_load_failed'));
-      }
-      return;
+        report(object.children.length > 0 ? object.children.length : 1);
+      }, () => fail(`${modelFormat}_load_failed`));
+      return () => { cancelled = true; };
     }
-    if (!view) return;
+    if (!view) return undefined;
+
     let objects = 0;
+    const pending: Array<Promise<void>> = [];
     for (const node of view.nodes) {
-      if (node.type === 'group' || node.type === 'mesh-reference') continue;
+      if (node.type === 'group') continue;
+      if (node.type === 'mesh-reference') {
+        const sourcePath = String(node.source?.path || '');
+        const format = meshFormatForPath(sourcePath);
+        if (!format) {
+          fail(`mesh_reference_invalid:${node.id}（source.path=${sourcePath || '—'}）`);
+          continue;
+        }
+        if (!projectId) {
+          fail(`mesh_reference_unavailable:${node.id} 需要已打开的项目工作区才能从工作区文件加载。`);
+          continue;
+        }
+        const directory = sourcePath.slice(0, sourcePath.lastIndexOf('/') + 1);
+        pending.push(loadMeshObject(
+          format,
+          workspaceFileUrlFor(projectId, sourcePath),
+          workspaceFileUrlFor(projectId, directory),
+        ).then((object) => {
+          if (cancelled) return;
+          object.name = node.id;
+          const transform = node.transform || {};
+          const position = transform.position || [0, 0, 0];
+          const rotation = transform.rotation || [0, 0, 0];
+          object.position.set(position[0], position[1], position[2]);
+          object.rotation.set(
+            THREE.MathUtils.degToRad(rotation[0]),
+            THREE.MathUtils.degToRad(rotation[1]),
+            THREE.MathUtils.degToRad(rotation[2]),
+          );
+          content.add(object);
+          objects += countMeshes(object) || 1;
+        }, () => fail(`mesh_reference_load_failed:${node.id}（${sourcePath}）`)));
+        continue;
+      }
       const geometry = geometryFor(node);
       if (!geometry) continue;
       const material = new THREE.MeshStandardMaterial({
@@ -272,10 +339,12 @@ export function Model3DScene({
       content.add(mesh);
       objects += 1;
     }
-    boundsRef.current.setFromObject(content);
-    applyView(viewAngle);
-    onReady?.({ objects, bounds: boundsRef.current.getSize(new THREE.Vector3()).toArray() });
-  }, [applyView, modelFormat, modelUrl, onError, onReady, view, viewAngle]);
+    report(objects);
+    if (pending.length > 0) {
+      void Promise.allSettled(pending).then(() => report(objects));
+    }
+    return () => { cancelled = true; };
+  }, [applyView, modelFormat, modelUrl, onError, onReady, projectId, view, viewAngle]);
 
   React.useEffect(() => {
     const overlay = overlayRef.current;

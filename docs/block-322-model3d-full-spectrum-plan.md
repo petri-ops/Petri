@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（P0-LAUNCH，2026-10-30 立项）
+**状态**：active（P1 COMPLETED，2026-10-30；下一段=P2 场景表现力与叙事，启动按 §7 单包串行待令）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -36,14 +36,15 @@ status: active
 
 **已有**
 - SceneSpec v1：`box / sphere / cylinder / plane / group / mesh-reference`；mm、z-up-right-handed；`align` 约束（x/y/z）；白名单操作（set_parameter / update_node / add_node / remove_node / set_metadata）。
-- 外部网格：`mesh-reference` **仅 STL/OBJ**（工作区相对路径 + sha256 + ≤64MB），Blender 构建时导入。
-- Blender 5.2.3 无头：构建 + 4 视角渲染（front/top/side/iso）+ 导出 GLB/STL/OBJ + manifest + 网格报告（顶点/三角面/非流形边/水密/体积）。
+- 外部网格：`mesh-reference` 支持 **STL/OBJ/GLB/GLTF**（P1a 扩入 GLB/GLTF）；契约层校验工作区相对路径 + sha256 + 扩展名白名单（`helpers/mesh-assets.js` 单源，≤64MB），Blender 构建时逐字节复验 sha。
+- Blender 无头：构建 + 4 视角渲染（front/top/side/iso）+ 导出 GLB/STL/OBJ + manifest + 网格报告（顶点/三角面/非流形边/水密/体积）。
 - Agent 工具：inspect / validate / propose / apply / render / visual_qa / export / recipe（5 类模板）。
-- UI：3D 工作台（打开 SceneSpec / 导入 GLB/GLTF/STL/OBJ **只读预览** / 参数编辑 / 草图转需求 / 对比 / 测量 / 视角书签 / 截图 / 节点点选 / 视觉 QA）。
+- UI：3D 工作台（打开 SceneSpec / 导入 GLB/GLTF/STL/OBJ 只读预览 / **导入为场景节点（P1c）** / 参数编辑 / 草图转需求 / 对比 / 测量 / 视角书签 / 截图 / 节点点选 / 视觉 QA）。
+- 预览渲染：SceneSpec 视图内的 `mesh-reference` 节点按工作区文件 URL 真加载并纳入包围盒与点选（P1b）；失败/无工作区按节点显式报，不静默省略。
 - 成果面：3D viewer + revision/change-set/lineage + selectionBus。
 
 **缺口（按域）**
-- A：GLB/GLTF 不能进 SceneSpec；UI 不能创建 `mesh-reference` 节点；无布尔/圆角/阵列/挤出；约束只有 align；无 STEP/IGES。
+- A：无布尔/圆角/阵列/挤出；约束只有 align；无 STEP/IGES。（GLB/GLTF 进 SceneSpec、UI 创建 `mesh-reference` 节点、预览渲染三项已随 P1a/P1b/P1c 关闭）
 - B：无灯光/相机/贴图/动画/序列帧/视频；渲染固定 4 视角静帧；无 AI 生成资产。
 - C：无 2D 工程图/BOM/公差/切片对接；质量属性仅网格报告。
 - D：导出格式仅 GLB/STL/OBJ；无资产库/分享。
@@ -54,7 +55,19 @@ status: active
 - 范围：GLB/GLTF 进 `mesh-reference`（Blender `import_scene.gltf`）；预览渲染 `mesh-reference`（按工作区 URL 加载）；UI 添加外部资产（上传到工作区 → 计算 sha → add_node）；导出/登记链保持。
 - 验收：单测（校验/扩展名契约）+ 实机（导入 GLB → 预览可见 → 导出成功 → revision 登记）。
 - 证据：`acceptance/block-322-p1/`。
-- **进度（2026-10-30）**：**P1a 已完成**——Blender 构建支持 GLB/GLTF（`import_scene.gltf`），契约测试 2/2；实机 REST 导出（SceneSpec 含 GLB `mesh-reference`）成功并登记，网格报告 `objects=2`（`base` + `asset:enclosure`，体积各 600000/528000 mm³）。**P1b（预览渲染 mesh-reference）/ P1c（UI 上传 + 添加节点）待续**。
+- **进度（2026-10-30，P1 整段 completed）**
+  - **P1a**：Blender 构建支持 GLB/GLTF（`import_scene.gltf`），契约测试 2/2。
+  - **P1b**：预览端渲染 `mesh-reference`——`Model3DScene` 按 `workspaceFileUrlFor` 从工作区文件路由真加载，纳入包围盒/相机取景/递归点选；原 `node.type === 'mesh-reference') continue` 静默跳过（侧栏列出节点、画面永不显示）已消除，且由 `test/block322-mesh-format-single-source.test.mjs` 反向锁定禁止回归。
+  - **P1c**：UI「导入为场景节点」= 分片写入 `model3d/assets/`（同名不覆盖，换名新建）→ `POST /api/model3d/asset/inspect` 服务端从磁盘真实算 sha256/字节并按单源白名单拒绝 → `add_node` 走既有 `scene/apply` 白名单（乐观锁 + 修订历史）。零新增 IPC 通道、零第二写面。
+  - **证据**：`acceptance/block-322-p1/block322-p1-external-asset-live-live.json`（**29/29 allPass**；win32-x64 + 真实 Blender 4.5.10 LTS + 9223 离屏：预览「渲染对象」2→3、资产落盘、SceneSpec 写入、缺失资产显式报 `mesh_reference_load_failed`、篡改 sha 构建 `mesh_source_hash_mismatch`、四类拒绝）+ 数值明细 `block322-p1-detail.json`。
+  - **本批裁决留痕（补丁 vs 重构）**：实码盘点发现 12 份硬编码 mesh 格式列表 + 4 份大小上限 + 分片上传两处重复，而 §4 红线要求的「大小上限」在契约层根本没有执法点（只在 Blender 构建中途炸）。判定为重构信号（再加一片就是摞第二套真值），故本批建 `helpers/mesh-assets.js`（后端声明处）+ `frontend/src/lib/meshAssets.ts`（渲染层镜像，跨语言逐值对账门守护）+ `lib/workspaceFileUpload.ts`（分片上传单源，回改 RightFileTree 与 attachmentUpload 两处旧副本，行为基线=改前后同套定向测试绿）；并把格式/上限执法点前移到 SceneSpec 校验与预检端点。**未一并收敛**：导出侧格式白名单（glb/stl/obj）属另一概念、仍各自声明 → 登记为后续债，不在 P1 范围内硬合。
+  - **未验证面（如实登记）**：①多文件 `.gltf`（外部 `.bin`/贴图）经 `setResourcePath` 的解析路径已实现，但本轮实机只覆盖自包含 `.glb`；②`mesh-reference` 指向非网格内容（相机/灯光/骨骼）时预览与 Blender 均只取 MESH、其余静默不显示（P2 候选）；③`asset/inspect` 沿用既有同步 sha256 helper（≤64MB 读盘 ~0.1–0.3s 阻塞事件循环，与 scene-store/artifact-truth 同形态），若后续大资产频繁导入再评估流式化。
+  - **顺带澄清的既有语义**：`scene/apply` 首次写入不产生 revision（无历史可快照），第二次编辑才留痕，且 `revision.reason` 记的是触发快照的当前编辑——非缺陷，实机腿已按此契约断言。
+- **P1 收口门禁总账（2026-10-30，`npm run closeout` 十三门全绿 PASS）**：audit:compact 自稳 → hygiene:check → docs:check PASS(432 文档) → ui:audit:check（Git 历史 571 个带证据 UI 编号）→ test:changed（Node 656 项 **654 pass / 0 fail / 2 skipped**；前端 related 29 + 定向 63 = **92 个测试文件全绿**）→ gate:code-size → gate:arch-cycles → gate:css-modules → quality:secret → quality:arch → quality:lint（**0 error**，2064 条存量 warning 全在抑制基线内）→ quality:types → quality:knip:check；报告级 skills:check OK。
+  - **收口过程真红三条（非环境抖动，逐条根修后复绿）**：①`frontend npm run check` 全量 tsc 在新增测试的 `File` 构造报 `Uint8Array<ArrayBufferLike>` 不可赋给 `BlobPart`（`quality:types` 的门面 tsconfig 不含测试文件，故先前漏过——门禁面差异如实登记）；②ESLint 新增 13 条 error（`require-await` / `no-base-to-string` / `no-unsafe-*` / 多余类型断言），逐条真修：`scene3d.ts` 的 `String(unknown)` 改判型、测试桩去 async 改显式 `Promise.resolve`、删除无必要断言，未使用全局关规则、未加 `eslint-disable`；③knip 棘轮 2 处新增：`MESH_INPUT_EXTENSIONS` 确属死导出（改内部常量），新实机 flow 属目录扫描动态入口（与基线内既有 108 个 `files::…/flows/*.cjs` 同形态），`--update` 后基线实测恰好 +1、零移除。
+  - **评审**：`acceptance/block-322-p1/review.md`（七维全跑；P1 级 0 条；P2 一条「多资产同时失败错误互相覆盖」收口前已修并重跑实机复绿，其余 P2 已登记去向；本轮未做 ocr AI 跑查并如实声明原因=评审对象为未提交工作区 diff）。
+  - **docs:reconcile**：Registered 432 / Unregistered 0 / Validation issues 0；归档候选 136 条**本轮零处理**——它们与本包无因果，且每条需逐一核入向引用，混批移动违反「他包 active 期间不批量搬文档」纪律，留作专门归档轮。
+- **P1 非范围（保持纲内后续阶段）**：灯光/相机/PBR/序列帧视频=P2；布尔/装配约束=P3；STEP/IGES 与 2D 工程图=P4（内核依赖须用户裁决）；AI 生成资产=P5（服务/成本/隐私须用户裁决）；切片/资产库/分享=P6。
 
 ### P2 · 场景表现力与叙事
 - 范围：SceneSpec 扩展灯光/环境/背景；相机（位置/目标/FOV/构图）；渲染分辨率与视角自定义；PBR 贴图；序列帧与转盘视频输出；结果面视频预览。
@@ -86,7 +99,7 @@ status: active
 
 ## §5 依赖
 
-- 本地 Blender（已装 5.2.3 LTS，`capability: ready`）。
+- 本地 Blender（分平台事实，均为可选后端）：Windows=`Blender 4.5.10 LTS`（本批 P1 实机证据出于此，`capability: ready`）；macOS=`Blender 5.2.3 LTS`。跨平台收口需两侧各自取证，不得以一侧代另一侧。
 - 现有 SceneSpec/Blender/结果面/登记桥（RW-01）链路。
 - 可选外部服务（P5）需用户提供凭据与成本裁决。
 
