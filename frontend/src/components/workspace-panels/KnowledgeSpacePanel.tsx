@@ -94,7 +94,7 @@ export function KnowledgeSpacePanel() {
           {state && !embeddingAvailable && (
             <div className={styles.noticeRow} data-testid="knowledge-embed-unavailable">
               <span className={styles.noticeText}>
-                配置 DashScope key（设置 → 模型）后可启用知识空间的语义检索。当前无法启用。
+                绑定向量模型（设置 → 模型 → 向量模型）后可启用知识空间的语义检索。当前无法启用。
               </span>
               <button
                 type="button"
@@ -146,7 +146,7 @@ export function KnowledgeSpacePanel() {
             disabled={!embeddingAvailable || !state}
             onClick={() => { void handleToggle(); }}
             data-testid="knowledge-toggle"
-            title={embeddingAvailable ? (enabled ? '对话自动检索已开启' : '开启后对话自动检索') : '需要先配置 DashScope key'}
+            title={embeddingAvailable ? (enabled ? '对话自动检索已开启' : '开启后对话自动检索') : '需要先绑定向量模型（1024 维）'}
           >
             <span className={styles.switchKnob} />
             <span className={styles.switchLabel}>{enabled ? '已启用' : '未启用'}</span>

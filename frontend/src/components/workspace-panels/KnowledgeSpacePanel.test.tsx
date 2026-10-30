@@ -48,11 +48,11 @@ afterEach(() => {
 });
 
 describe('BLOCK-69 KnowledgeSpacePanel', () => {
-  it('无 DashScope key 时渲染诚实空态并禁用开关（D7）', async () => {
+  it('无可用向量模型时渲染诚实空态并禁用开关（D7）', async () => {
     mockFetchSequence([{ match: /knowledge\/space/, body: spaceState({ embeddingAvailable: false }) }]);
     renderPanel();
     await waitFor(() => expect(screen.getByTestId('knowledge-panel')).toBeTruthy());
-    expect(screen.getByTestId('knowledge-embed-unavailable').textContent).toContain('DashScope');
+    expect(screen.getByTestId('knowledge-embed-unavailable').textContent).toContain('向量模型');
     const toggle = screen.getByTestId<HTMLButtonElement>('knowledge-toggle');
     expect(toggle.disabled).toBe(true);
     // BLOCK-103 D3 — hero 空态 + 缺 key 附「去设置」动作卡

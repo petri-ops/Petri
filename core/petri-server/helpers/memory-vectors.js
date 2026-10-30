@@ -59,7 +59,7 @@ try {
   `);
 } catch {}
 
-const EMBEDDING_DIM = 1024;
+const { EMBEDDING_DIM, acceptedEmbeddingVectors } = require('./embedding-dim-guard');
 const EMBEDDING_MODEL = 'text-embedding-v3';
 // BLOCK-205（W6）— 检索/上限参数改由 `helpers/memory-policy` 供（默认值逐字等于原常量）。
 const memoryPolicy = require('./memory-policy');
@@ -77,7 +77,7 @@ async function dashscopeEmbed(texts, _telemetry) {
     texts: texts.map((text) => (text || '').slice(0, memoryPolicy.memorySettings().maxChars)),
     telemetry: _telemetry || {},
   });
-  return Array.isArray(result) ? result : null;
+  return acceptedEmbeddingVectors(result);
 }
 
 function _bufFromVec(vec) {
@@ -189,6 +189,7 @@ async function retrieveForPrompt(userId, queryText, projectId = null) {
 }
 
 module.exports = {
+  acceptedEmbeddingVectors,
   dashscopeEmbed,
   saveMemoryVector,
   cosineSim,

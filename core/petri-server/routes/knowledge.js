@@ -3,13 +3,15 @@
  *
  * D6：启用状态单一真相 = DB（knowledge_spaces.enabled），前端经端点读写。
  * D9：「打开知识目录」入口返回 knowledgeRoot 供前端经既有 reveal 通道打开。
- * D7：embeddingAvailable 诚实呈现（DashScope key 未配置时前端渲染诚实空态）。
+ * D7：embeddingAvailable 诚实呈现（向量模型角色不可用/未绑定时前端渲染诚实空态；
+ *     判定按角色绑定而非固定 DashScope key——UI-638 加映四）。
  */
 
 const express = require('express');
 const fs = require('fs');
 const multer = require('multer');
 const sqlite = require('../db').getDatabase();
+const { embeddingRoleAvailable } = require('../helpers/embedding-availability');
 const ks = require('../helpers/knowledge-space');
 const ingest = require('../helpers/knowledge-ingest');
 const { getAiSettings } = require('../helpers/ai-settings');
@@ -24,8 +26,7 @@ const upload = multer({
 
 function embeddingAvailable() {
   try {
-    const settings = getAiSettings();
-    return !!(settings && settings.credential_status && settings.credential_status.dashscope);
+    return embeddingRoleAvailable(getAiSettings());
   } catch {
     return false;
   }

@@ -6599,7 +6599,7 @@
     },
     {
       "id": "ui638-viewer-open-leg",
-      "note": "UI-638 点开腿两缺陷修复：model3d artifacts 投影补工作区读面 url（/api/workspaces/:projectId/file?path=，缺 url 时结果面回落 tools/file 必 404）+ Result Studio 3D viewer 宿主 absolute-fill（canvas 不再钉死 420、面板变矮不裁切）；红绿契约 + 实机 flow。加映：纯 spawn 流 dock 空壳（自动弹出即进编排图 + 标题按内容切换）+ /api/ai/chat 上游无响应兜底超时。 加映二：UI-301/385/501 代行验收（真实 spawn flow）+ dock 空壳修复。 加映三：识图默认 DeepSeek（模型档案 vision 能力 + 默认角色绑定 + 旧配置一次性迁移）。",
+      "note": "UI-638 点开腿两缺陷修复：model3d artifacts 投影补工作区读面 url（/api/workspaces/:projectId/file?path=，缺 url 时结果面回落 tools/file 必 404）+ Result Studio 3D viewer 宿主 absolute-fill（canvas 不再钉死 420、面板变矮不裁切）；红绿契约 + 实机 flow。加映：纯 spawn 流 dock 空壳（自动弹出即进编排图 + 标题按内容切换）+ /api/ai/chat 上游无响应兜底超时。 加映二：UI-301/385/501 代行验收（真实 spawn flow）+ dock 空壳修复。 加映三：识图默认 DeepSeek（模型档案 vision 能力 + 默认角色绑定 + 旧配置一次性迁移）。 加映四：embedding 换绑入口（向量模型角色 + 「向量」能力位）+ 1024 维闸门 + 知识空间可用性按角色绑定判定。",
       "patterns": [
         "core/petri-server/helpers/model3d-artifact-projection.js",
         "core/petri-server/helpers/model-timeout.js",
@@ -6621,7 +6621,17 @@
         "acceptance/ui-301-385-spawn/**",
         "core/shared-backend/llm-providers/model-profile.js",
         "core/petri-server/helpers/ai-settings.js",
-        "acceptance/ui638-vision-default/**"
+        "acceptance/ui638-vision-default/**",
+        "core/petri-server/helpers/embedding-dim-guard.js",
+        "core/petri-server/helpers/embedding-availability.js",
+        "core/petri-server/helpers/memory-vectors.js",
+        "core/petri-server/routes/knowledge.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EmbeddingRoleBinding.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EmbeddingRoleBinding.test.tsx",
+        "frontend/src/components/desktop/desktop.css",
+        "frontend/src/components/workspace-panels/KnowledgeSpacePanel.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx"
       ],
       "tests": [
         "test/ui638-model3d-artifact-url.test.mjs",
@@ -6630,7 +6640,10 @@
         "frontend/src/components/workspace-panels/Model3DResultViewer.test.tsx",
         "frontend/src/components/copilot/ToolActivityDock.test.tsx",
         "test/rw01-model3d-revision-bridge.test.mjs",
-        "test/ui638-vision-default.test.mjs"
+        "test/ui638-vision-default.test.mjs",
+        "test/ui638-embedding-dim-guard.test.mjs",
+        "test/ui638-embedding-availability.test.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EmbeddingRoleBinding.test.tsx"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,

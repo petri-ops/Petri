@@ -32,6 +32,7 @@ import {
 import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
 import { getBridge } from '@/lib/desktopBridge';
 import { VisionRoleBinding, hasVisionCapability } from './DesktopSettingsPanel/VisionRoleBinding';
+import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
@@ -263,6 +264,11 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               value={roleBindings.vision}
               onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, vision: profileId }))}
             />
+            <EmbeddingRoleBinding
+              profiles={modelProfiles}
+              value={roleBindings.embedding}
+              onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, embedding: profileId }))}
+            />
             <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="petri-endpoint-list-header" aria-hidden="true">
@@ -274,6 +280,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                   <span>上下文</span>
                   <span>思考</span>
                   <span>视觉</span>
+                  <span>向量</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -452,6 +459,24 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                           updateProfile(profile.id, { capabilities: next });
                         }}
                         aria-label={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
+                      />
+                    </label>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">向量</span>
+                    <label
+                      className="petri-endpoint-reasoning"
+                      title="声明该渠道可用于向量化（embedding）：勾选后可在上方「向量模型」换绑；端点需支持 /embeddings 且输出 1024 维（如 bge-m3），否则整批拒收并降级"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!!profile.capabilities?.includes('embedding')}
+                        onChange={(e) => {
+                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
+                          const next = e.target.checked
+                            ? Array.from(new Set([...current, 'embedding']))
+                            : current.filter((cap) => cap !== 'embedding');
+                          updateProfile(profile.id, { capabilities: next });
+                        }}
+                        aria-label={`${profile.label || '自定义渠道'} 支持向量化（embedding）`}
                       />
                     </label>
                     <ModelSelectorControls profile={profile} onUpdate={updateProfile} />
