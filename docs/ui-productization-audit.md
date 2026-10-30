@@ -176,7 +176,7 @@
 - **实机证据**：未跑（右栏实机批补）。
 - **边界（reopen）**：最近使用栈（仅记最后一个）；跨设备同步。
 
-## UI-595: 批注画笔渲染平滑与触屏防误触（2026-10-27 **in_progress（BLOCK-288；UI-587 reopen 两项清偿；组件级 62/62，实机腿随下次批注实机批）**）
+## UI-595: 批注画笔渲染平滑与触屏防误触（2026-10-30 **RW-02 A 线处置：降档 b——批注面需图像 artifact 在结果面打开（UI-638 点开腿同前提），组件级 62/62 已锚**；BLOCK-288；UI-587 reopen 两项清偿；
 
 - **变化面**：①freehand 渲染层贝塞尔平滑——smoothFreehandPathD（二次中点：原始点作 Q 控制点、中点作锚）持久笔画与草稿预览统一 polyline→path，**存储 path 契约不变**（原始采点原样入库，平滑纯渲染面）；②触屏防误触——活动笔触期间只认同一 pointerId（第二指/手掌落屏不篡改笔画），pointerCapture 兜底 try/catch（happy-dom 无 capture 实现），pointerLeave 守卫同口径。
 - **为什么这样设计**：UI-587 reopen（压感/贝塞尔/触屏）三项中贝塞尔与触屏可代码化（压感需硬件感知，维持 reopen）；渲染层平滑不改存储契约=已入库批注零迁移。
@@ -2877,7 +2877,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **实机**：待 dev Electron 实机过目（四档下拉切换、计划档起草→批准→执行闭环、批准后档位恢复）后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-301: 多智能体活动面板——子 agent 活动条（列表/中断/详情窗，BLOCK-49 加映二） (2026-09-06 in_progress)
+## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-30 **RW-02 A 线处置：spawn 链 live 实证（mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天，隔离 :3011 15/15）；面板视觉=离屏实例 CDP 不可达（UI-501 同类 dock 时序竞争）→ c 档人测确认**；列表/中断/详情窗，BLOCK-49 加映二） 
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。
 
@@ -4192,7 +4192,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：运行中即时计数不再常驻聊天区——由内联卡与右栏自动切换承接；「需要关注」失败智能体节保持不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（用户裁决「1」启动）(2026-09-16 in_progress，dev Electron 边界内)
+## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（2026-10-30 **RW-02 A 线处置：同 UI-301——spawn 链 live 实证（子代理任务文本/汇报在场），详情窗视觉=离屏 CDP 不可达 → c 档人测确认**；用户裁决「1」启动） 2026-09-16 in_progress，dev Electron 边界内)
 
 - **来源**：用户复看 UI-382 时提出「子智能体点击应该嵌入右侧栏，不需要弹窗；桌面最右侧的悬浮结果展示也没必要了，都应展示在右侧栏」——Agent 评估合理（延续 BLOCK-68 io tab / UI-362 tab 化 / UI-382 内联的「浮动面→停靠面」收敛路线），用户裁决「1」启动三步走。
 - **交付面**：①右栏新增「智能体」tab（`RightPanelMode 'agent'`）+ 新组件 `AgentRunPanel`（自 AgentWindowPage 提取：SSE 订阅 + 中断两步确认/留言队列/继续派交互完整保留；续派改经 `onSpawnedAgent` 回调切面板）；②事件 `agentOpenInRail` 统一四个入口（工具行内联卡「详情」/活动条行/俯瞰行/spawn 自动唤起——每 task 只自动切一次）；③退役 agent/result 两类独立窗：App 路由与页面删除（AgentWindowPage/WindowResultPage）、`_window-manager` 白名单移除两 kind（route_not_allowed fail-closed）、ResultArtifactShell「弹出」按钮移除；④指挥中心下钻改走新增 `window:open-result-in-main` relay（单一白名单事件类型 + sender 校验，主窗经既有 projectOpenArtifact 链右栏打开，跨项目自动导航）。终端/指挥中心独立窗不动。

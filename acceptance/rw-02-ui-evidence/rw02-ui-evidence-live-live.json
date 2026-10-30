@@ -1,7 +1,7 @@
 {
   "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-30T00:02:10.593Z",
-  "finishedAt": "2026-10-30T00:02:47.583Z",
+  "startedAt": "2026-10-30T00:25:12.028Z",
+  "finishedAt": "2026-10-30T00:26:14.450Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
@@ -64,6 +64,16 @@
       "detail": "rev={\"btn\":true,\"before\":\"收起所有文件的行内差异\",\"stats\":true} after={\"after\":\"展开所有文件的行内差异\"}"
     },
     {
+      "name": "ui301_agent_team_panel",
+      "pass": false,
+      "detail": "dockSeenDuringRun=false dump={\"dock\":false,\"spawnMentioned\":true,\"bodyTail\":\"\\n子任务完成：要点甲、要点乙、要点丙已核对。\\n\\n刚刚\\n命令\\n↑↓ 导航 · Enter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file."
+    },
+    {
+      "name": "ui385_subagent_detail",
+      "pass": true,
+      "detail": "dump={\"detailVisible\":true,\"bodyTail\":\"ter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file.txt\\nTXT\\nnotes.txt\\n+1\\n测试实例 · TEST\\n内"
+    },
+    {
       "name": "ui484_federation_delegation_card",
       "pass": true,
       "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
@@ -71,7 +81,7 @@
     {
       "name": "ui638_seed_export_registered",
       "pass": true,
-      "detail": "pid=p_mvu7kf1e_945j export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu7kg1t_sxei\",\"revisions\":[{\"revisionId\":\"rev_model3d_496de48e49f8d343\",\"artifactId\":\"model3d:p_mvu7kf1e_945j:model3d/recipes/rw02"
+      "detail": "pid=p_mvu8eknr_dxbn export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu8ellg_5ngk\",\"revisions\":[{\"revisionId\":\"rev_model3d_8b92f7de54c85c7e\",\"artifactId\":\"model3d:p_mvu8eknr_dxbn:model3d/recipes/rw02"
     },
     {
       "name": "ui638_model3d_in_panel",
@@ -79,5 +89,5 @@
       "detail": "dump={\"wallListsModel3d\":true,\"tilePresent\":true,\"statusDone\":true}"
     }
   ],
-  "allPass": true
+  "allPass": false
 }

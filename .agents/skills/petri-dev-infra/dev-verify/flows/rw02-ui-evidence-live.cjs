@@ -313,6 +313,101 @@ module.exports = {
           }
         }
 
+        // ===== UI-301/385：mock provider 真跑 spawn 会话 → 任务 dock 子智能体活动条/详情 =====
+        const send301 = await evalJs(client, `(function(){
+          var ta = document.querySelector('textarea.sc-input');
+          if (!ta) return 'composer_missing';
+          ta.focus();
+          document.execCommand('insertText', false, 'spawn 一个子代理跑探针任务');
+          return 'typed';
+        })()`).catch(() => '"eval_error"');
+        if (send301 === 'typed') {
+          await evalJs(client, `(function(){
+            var btn = document.querySelector('.sc-send-cta-send');
+            if (!btn) return 'send_missing';
+            btn.click();
+            return 'sent';
+          })()`).catch(() => null);
+          // 等审批卡出现（spawn_agent needsApproval）→ 一次性批准
+          let acked = false;
+          let dockSeenDuringRun = false;
+          for (let i = 0; i < 20 && !(acked && dockSeenDuringRun); i += 1) {
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            if (!acked) {
+              const ackState = await evalJs(client, `(function(){
+                var card = document.querySelector('[data-testid="guard-ack-card"]');
+                if (!card) return 'waiting';
+                var once = document.querySelector('[data-testid="guard-ack-once"]');
+                if (once) { once.click(); return 'acked'; }
+                return 'card_no_once';
+              })()`).catch(() => 'eval_error');
+              acked = ackState === 'acked';
+            }
+            // dock 在 spawn 时自动弹出（CP-9）——run 期间轮询捕捉
+            if (!dockSeenDuringRun) {
+              dockSeenDuringRun = await evalJs(client, `!!document.querySelector('[data-testid="tool-activity-dock"]')`).catch(() => false);
+            }
+          }
+          // 等 run 完成（mock 秒回；子代理 + wait_agent 数秒）
+          await new Promise((resolve) => setTimeout(resolve, 6000));
+          // dock 开合时序竞争（UI-501 在册）：触发器重试最多 3 次
+          let dockOpen = false;
+          for (let attempt = 0; attempt < 3 && !dockOpen; attempt += 1) {
+            dockOpen = await evalJs(client, `(function(){
+              var dock = document.querySelector('[data-testid="tool-activity-dock"]');
+              if (dock) return true;
+              var trigger = document.querySelector('[data-testid="tool-activity-dock-trigger"]');
+              if (trigger) trigger.click();
+              return false;
+            })()`).catch(() => false);
+            if (!dockOpen) await new Promise((resolve) => setTimeout(resolve, 800));
+          }
+          const dump301 = await evalJs(client, `(function(){
+            var dock = document.querySelector('[data-testid="tool-activity-dock"]');
+            return JSON.stringify({
+              dock: !!dock,
+              spawnMentioned: (document.body.innerText || '').indexOf('spawn') >= 0 || (document.body.innerText || '').indexOf('子智能体') >= 0 || (document.body.innerText || '').indexOf('要点乙') >= 0,
+              bodyTail: (document.body.innerText || '').slice(-300),
+            });
+          })()`, 15000).catch(() => '"eval_error"');
+          console.log('[rw02-diag] ui301 dump:', String(dump301).slice(0, 500));
+          try {
+            const parsed301 = JSON.parse(dump301);
+            assert('ui301_agent_team_panel', (parsed301.dock === true || dockSeenDuringRun === true) && parsed301.spawnMentioned === true,
+              `dockSeenDuringRun=${dockSeenDuringRun} dump=${JSON.stringify(parsed301).slice(0, 320)}`);
+          } catch (e) {
+            assert('ui301_agent_team_panel', false, String(dump301).slice(0, 260));
+          }
+          // UI-385：dock 内子智能体条目点击 → 详情（ExpandedAgentDetail/详情窗）
+          const detail385 = await evalJs(client, `(function(){
+            var items = Array.prototype.slice.call(document.querySelectorAll('[data-testid="tool-activity-dock"] [class*="item"], [data-testid="tool-activity-dock"] li, [data-testid="tool-activity-dock"] button'));
+            var agentItem = items.find(function (el) { return (el.innerText || '').indexOf('探针子任务') >= 0; });
+            if (!agentItem) {
+              return JSON.stringify({ found: false, items: items.length, sample: items.slice(0, 4).map(function (el) { return (el.innerText || '').slice(0, 20); }) });
+            }
+            agentItem.click();
+            return 'clicked';
+          })()`).catch(() => '"eval_error"');
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const dump385 = await evalJs(client, `(function(){
+            var text = document.body.innerText || '';
+            return JSON.stringify({
+              detailVisible: text.indexOf('要点甲') >= 0 && (text.indexOf('详情') >= 0 || text.indexOf('journal') >= 0 || text.indexOf('子智能体') >= 0 || text.indexOf('快照') >= 0),
+              bodyTail: text.slice(-260),
+            });
+          })()`).catch(() => '"eval_error"');
+          console.log('[rw02-diag] ui385 dump:', String(dump385).slice(0, 400));
+          try {
+            const parsed385 = JSON.parse(dump385);
+            assert('ui385_subagent_detail', parsed385.detailVisible === true,
+              `dump=${JSON.stringify(parsed385).slice(0, 300)}`);
+          } catch (e) {
+            assert('ui385_subagent_detail', false, String(dump385).slice(0, 240));
+          }
+        } else {
+          assert('ui301_agent_team_panel', false, String(send301).slice(0, 120));
+        }
+
         // 清理临时项目
         await fetch(`${API}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
           method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
