@@ -47,6 +47,7 @@ async function tool_model3d_inspect(args = {}) {
   const checked = requireScene(args);
   if (checked.error) return checked.error;
   const resolved = scene3d.resolveSceneSpec(checked.scene);
+  if (!resolved.ok) return resolved;
   return {
     ok: true,
     sceneHash: scene3d.hashSceneSpec(checked.scene),
@@ -59,6 +60,7 @@ async function tool_model3d_inspect(args = {}) {
       transform: node.transform || null,
     })),
     constraints: checked.scene.constraints || [],
+    appliedConstraints: resolved.appliedConstraints,
   };
 }
 

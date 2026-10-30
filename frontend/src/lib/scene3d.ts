@@ -13,11 +13,15 @@ function isSafeRelativePath(value: unknown): boolean {
 
 export type Scene3DNodeType = (typeof SCENE3D_NODE_TYPES)[number];
 
+export type Scene3DConstraintKind = 'align' | 'distance' | 'angle';
+
 export interface Scene3DConstraint {
-  kind: 'align';
+  kind: Scene3DConstraintKind;
   a: string;
   b: string;
   axis: 'x' | 'y' | 'z';
+  /** distance=mm（沿轴带符号）；angle=度（绕轴带符号）；align 不消费。 */
+  value?: number;
 }
 
 export type Scene3DModifier =
@@ -285,6 +289,53 @@ function validateModifierReferencesForView(rawNodes: unknown[], errors: string[]
   });
 }
 
+/** BLOCK-322 P3-02a — 装配约束白名单镜像（判据与文案与后端 scene3d.js 同源）。
+ * 求值只在服务端 resolveSceneSpec 发生（唯一真值处），展示侧只校验能否安全求值。 */
+const CONSTRAINT_KINDS: readonly string[] = ['align', 'distance', 'angle'];
+const CONSTRAINT_AXES: readonly string[] = ['x', 'y', 'z'];
+const CONSTRAINT_FIELDS: Record<string, readonly string[]> = {
+  align: ['kind', 'a', 'b', 'axis'],
+  distance: ['kind', 'a', 'b', 'axis', 'value'],
+  angle: ['kind', 'a', 'b', 'axis', 'value'],
+};
+const MAX_CONSTRAINTS = 200;
+
+function validateConstraintsForView(rawConstraints: unknown, nodeIds: Set<string>, errors: string[]): void {
+  if (rawConstraints === undefined) return;
+  if (!Array.isArray(rawConstraints)) {
+    errors.push('constraints 必须是数组');
+    return;
+  }
+  if (rawConstraints.length > MAX_CONSTRAINTS) {
+    errors.push('约束数量超限');
+    return;
+  }
+  rawConstraints.forEach((entry, index) => {
+    const where = `constraints[${index}]`;
+    if (!isRecord(entry)) {
+      errors.push(`${where} 必须是对象`);
+      return;
+    }
+    const kind = typeof entry.kind === 'string' ? entry.kind : '';
+    if (!CONSTRAINT_KINDS.includes(kind)) {
+      errors.push(`${where}.kind 只支持 align/distance/angle`);
+      return;
+    }
+    for (const key of Object.keys(entry)) {
+      if (!CONSTRAINT_FIELDS[kind].includes(key)) errors.push(`${where}.${key} 不在 ${kind} 白名单`);
+    }
+    const a = typeof entry.a === 'string' ? entry.a : '';
+    const b = typeof entry.b === 'string' ? entry.b : '';
+    if (!SAFE_ID.test(a) || !SAFE_ID.test(b)) errors.push(`${where} 节点 id 非法`);
+    else if (!nodeIds.has(a) || !nodeIds.has(b)) errors.push(`${where} 引用未知节点`);
+    else if (a === b) errors.push(`${where} 不能约束自身`);
+    if (!CONSTRAINT_AXES.includes(typeof entry.axis === 'string' ? entry.axis : '')) errors.push(`${where}.axis 非法`);
+    if (kind !== 'align' && !finite(entry.value)) {
+      errors.push(`${where}.value 必须是有限数值（${kind === 'distance' ? 'mm，可为负' : '度，可为负'}）`);
+    }
+  });
+}
+
 function validateRenderForView(raw: unknown, errors: string[]): void {
   if (!isRecord(raw)) {
     errors.push('render 必须是对象');
@@ -362,12 +413,16 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
     });
   }
   validateModifierReferencesForView(rawNodes, errors);
+  validateConstraintsForView(raw.constraints, seen, errors);
   if (raw.camera !== undefined) validateCameraForView(raw.camera, errors);
   if (raw.render !== undefined) validateRenderForView(raw.render, errors);
   if (raw.lights !== undefined) validateLightsForView(raw.lights, errors);
   if (raw.environment !== undefined) validateEnvironmentForView(raw.environment, errors);
   if (isRecord(raw.camera) && raw.camera.projection === 'orthographic') {
     warnings.push('相机声明为正交投影：导出按正交取景，预览端仍是透视相机（只对齐机位与目标，不假装投影一致）。');
+  }
+  if (Array.isArray(raw.constraints) && raw.constraints.length > 0) {
+    warnings.push('装配约束在服务端求值后烘进 transform（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。');
   }
   if (errors.length > 0) return { ok: false, errors: [...new Set(errors)] };
   const scene: Scene3DSpec = {
@@ -378,10 +433,7 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
     nodes: rawNodes as Scene3DNode[],
     constraints: Array.isArray(raw.constraints)
       ? raw.constraints.filter((row): row is Scene3DConstraint => isRecord(row)
-        && row.kind === 'align'
-        && typeof row.a === 'string'
-        && typeof row.b === 'string'
-        && ['x', 'y', 'z'].includes(String(row.axis)))
+        && CONSTRAINT_KINDS.includes(typeof row.kind === 'string' ? row.kind : ''))
       : [],
     ...(isRecord(raw.camera) ? { camera: raw.camera as unknown as Scene3DCamera } : {}),
     ...(isRecord(raw.render) ? { render: raw.render } : {}),

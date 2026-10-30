@@ -1,0 +1,88 @@
+{
+  "name": "block322-p3-constraints-live",
+  "startedAt": "2026-10-30T14:53:34.704Z",
+  "finishedAt": "2026-10-30T14:53:43.689Z",
+  "assertions": [
+    {
+      "name": "C0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 4.5.10 LTS\"}"
+    },
+    {
+      "name": "C1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvv3e6te_g81b\"}"
+    },
+    {
+      "name": "C2_resolve_endpoint_moves_target",
+      "pass": true,
+      "detail": "{\"status\":200,\"portPosition\":[0,0,0],\"ledger\":[{\"index\":0,\"kind\":\"align\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"x\",\"field\":\"position\",\"from\":100,\"to\":0,\"changed\":true}]}"
+    },
+    {
+      "name": "C3_distance_and_angle_values",
+      "pass": true,
+      "detail": "{\"port\":[60,5,5],\"cap\":[0,-70,-70],\"portRot\":[0,0,100]}"
+    },
+    {
+      "name": "C4_chain_uses_evaluated_anchor",
+      "pass": true,
+      "detail": "[{\"index\":0,\"kind\":\"distance\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"x\",\"field\":\"position\",\"from\":100,\"to\":60,\"changed\":true},{\"index\":1,\"kind\":\"distance\",\"a\":\"port\",\"b\":\"cap\",\"axis\":\"x\",\"field\":\"position\",\"from\":-70,\"to\":0,\"changed\":true},{\"index\":2,\"kind\":\"angle\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"z\",\"field\":\"r（cap 参照的是 port 求值后的 x=60，故 60-60=0）"
+    },
+    {
+      "name": "C5_over_constrained_fails_closed",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_conflict\",\"errors\":[\"constraint_conflict: port.position.x 已由 constraints[0] 定为 60，constraints[1]（align）要求 0\"]}"
+    },
+    {
+      "name": "C6_unsupported_kind_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"scene_invalid\",\"errors\":[\"constraints[0].kind 只支持 align/distance/angle\"]}"
+    },
+    {
+      "name": "C6b_out_of_range_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_out_of_range\",\"errors\":[\"constraint_out_of_range: constraints[0]（distance）把 port.position.x 求值为 1999998，超出 ±1000000mm\"]}"
+    },
+    {
+      "name": "C7_align_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"plain\":[190,80,40],\"aligned\":[120,80,40]}"
+    },
+    {
+      "name": "C8_distance_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"distance\":[150,80,40],\"expect\":[150,80,40]}"
+    },
+    {
+      "name": "C9_angle_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"plain\":[200,80,40],\"angled\":[120,200,40],\"expect\":[120,200,40]}"
+    },
+    {
+      "name": "C10_export_refuses_over_constrained",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_conflict\",\"errors\":[\"constraint_conflict: port.position.x 已由 constraints[0] 定为 60，constraints[1]（align）要求 0\"]}"
+    },
+    {
+      "name": "C11_export_artifact_intact",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvv3e822-czd03u/scene.glb\",\"sha256\":\"17772906d673f0cc32c87a3ef6895ed2bb2c2c5dd1de53d46e0ea33e38152d23\",\"bytes\":3504}"
+    },
+    {
+      "name": "U1_preview_declares_non_evaluation",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec正在加载3D渲染器…测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点装配约束在服务端求值后烘进transform（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。场景节点3参数0约束3渲染对象—包围盒mm—节点baseboxwidth120·height40·depth80portboxwidth60·height40·depth40capboxwidth20·height20·depth20约束对齐base→port（y"
+    },
+    {
+      "name": "U2_three_kinds_visible",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec正在加载3D渲染器…测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点装配约束在服务端求值后烘进transform（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。场景节点3参数0约束3渲染对象—包围盒mm—节点baseboxwidth120·height40·depth80portboxwidth60·height40·depth40capboxwidth20·height20·depth20约束对齐base→port（y）；间距base→port（x60mm）；转角base→cap（z45°）视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "U3_scene_still_renders",
+      "pass": true,
+      "detail": "{\"canvas\":true,\"objects\":3}"
+    }
+  ],
+  "allPass": true
+}

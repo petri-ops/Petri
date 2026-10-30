@@ -46,3 +46,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T14:23:14.687Z -->
 最后更新：2026-10-30（**识图默认 DeepSeek completed（用户裁决「软件写定！识图模型默认使用 DeepSeek，以后省得再设置」；closeout 十三门 PASS）**：默认模型档案 DeepSeek → `deepseek-flash` + 声明 `vision` 能力（V4.1 原生多模态），`DEFAULT_MODEL_ROLE_BINDINGS.vision=deepseek-chat`；旧配置把 vision 显式绑到「未配置凭据的 dashscope-vision」且 chat 档案已声明 vision 时自动改绑并落盘（chat 无 vision 能力不迁移，显式配置真相优先）。红绿 3/3 + 模型/设置回归 48/48；实机 9223 + 真实 key：重启后绑定已迁移、`read_image` 真实调用成功（8.6s，准确描述截图），**不再需要阿里云 DashScope**。同批：TCC 辅助功能生效（probe trusted=true；屏幕录制未授权，截图类动作需另勾）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T15:00:14.123Z -->
+最后更新：2026-10-30（**embedding 换绑入口 completed（用户「换掉吧 … 能否换成别的」；closeout 十三门 PASS）**：①设置页新增「向量模型（语义检索）」角色选择器 + 渠道行「向量」能力位（与识图同构）——任意 OpenAI 兼容 `/embeddings` 渠道都可绑，**默认落地=本地 Ollama bge-m3（1024 维，零成本）**，DashScope 彻底出籍；②新增 1024 维闸门（`helpers/embedding-dim-guard.js`：异维整批拒收，避免余弦算出垃圾分）；③知识空间可用性改按「角色绑定→档案能力→provider 是否需凭据」判定（旧硬编码只看 DashScope key 会把本地 provider 误判不可用）+ 文案去 DashScope 化。红绿：dim guard 4/4 + availability 3/3 + EmbeddingRoleBinding 4/4 + KnowledgeSpacePanel 9/9；实机：网关 `dashscopeEmbed` 走 Ollama 返回 1024 维（bge-m3 已安装），设置已绑定 `embedding=ollama-embedding`、`vision=deepseek-chat`。DeepSeek 官方不提供 embeddings（仅 chat），云替代清单=OpenAI 3-small(dimensions=1024)/Jina v3/Cohere v3/BGE-M3 托管。G0 开发期常态 · 不外推 packaged/Provider/GA。

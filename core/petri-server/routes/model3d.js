@@ -143,6 +143,22 @@ module.exports = function registerModel3DRoutes(app) {
     return res.json({ ok: true, diff: sceneStore.diffScenes(before, after) });
   });
 
+  // BLOCK-322 P3-02a — 只读求值：参数引用 + 装配约束烘进 transform，与送 Blender 的同一函数
+  // （resolveSceneSpec）。纯函数、不读盘不写盘、无项目前置（对标 scene/diff），不产生第二份真相。
+  app.post('/api/model3d/scene/resolve', (req, res) => {
+    const resolved = scene3d.resolveSceneSpec(req.body?.scene);
+    if (!resolved.ok) {
+      return res.status(400).json({ ok: false, error: resolved.error, errors: resolved.errors });
+    }
+    return res.json({
+      ok: true,
+      sceneHash: scene3d.hashSceneSpec(req.body.scene),
+      scene: resolved.scene,
+      stats: resolved.stats,
+      appliedConstraints: resolved.appliedConstraints,
+    });
+  });
+
   // RW-01 — 导出即登记执行面：与 agent 工具同一生产路径（tool_model3d_export），
   // 产物落工作区 + 成果面真值桥登记（change-set/revision/lineage 图）。非第二真相。
   app.post('/api/model3d/scene/export', async (req, res) => {

@@ -3,7 +3,7 @@ import { Icon } from '@/components/icons/Icon';
 import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
 import { fetchModel3DCapability } from '@/lib/model3dClient';
-import { normalizeScene3DForView, sampleScene3D, type Scene3DView } from '@/lib/scene3d';
+import { normalizeScene3DForView, sampleScene3D, type Scene3DConstraintKind, type Scene3DView } from '@/lib/scene3d';
 import {
   MESH_INPUT_ACCEPT_ATTR,
   MAX_MESH_BYTES,
@@ -33,6 +33,7 @@ const VIEWS: Array<{ id: ViewAngle; label: string }> = [
 ];
 // 仅当场景声明了 camera 才出现「机位」按钮（未声明时不提供假机位选项）。
 const DECLARED_CAMERA_VIEW = { id: 'camera' as const, label: '机位' };
+const CONSTRAINT_KIND_LABEL: Record<Scene3DConstraintKind, string> = { align: '对齐', distance: '间距', angle: '转角' };
 
 export function Model3DSurface({ projectId = null }: { projectId?: string | null }): React.ReactElement {
   const [view, setView] = React.useState<Scene3DView | null>(null);
@@ -425,7 +426,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                 <section>
                   <h4>约束</h4>
                   <p className={styles.meta}>
-                    {view.scene.constraints.map((constraint) => `${constraint.a} ↔ ${constraint.b} (${constraint.axis})`).join('；')}
+                    {view.scene.constraints.map((constraint) => `${CONSTRAINT_KIND_LABEL[constraint.kind]} ${constraint.a}→${constraint.b}（${constraint.axis}${constraint.value === undefined ? '' : ` ${constraint.value}${constraint.kind === 'angle' ? '°' : 'mm'}`}）`).join('；')}
                   </p>
                 </section>
               ) : null}

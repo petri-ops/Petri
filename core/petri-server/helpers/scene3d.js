@@ -26,6 +26,19 @@ const MODIFIER_FIELDS = {
   array: ['kind', 'count', 'offset'],
   boolean: ['kind', 'operation', 'target'],
 };
+// BLOCK-322 P3-02a — 装配约束白名单。求值只发生在 resolveSceneSpec（唯一真值处），
+// 结果烘进 transform 后交给 Blender；构建脚本与预览端都不再各自解一遍（红线 2）。
+const CONSTRAINT_KINDS = new Set(['align', 'distance', 'angle']);
+const CONSTRAINT_AXES = new Set(['x', 'y', 'z']);
+const CONSTRAINT_FIELDS = {
+  align: ['kind', 'a', 'b', 'axis'],
+  distance: ['kind', 'a', 'b', 'axis', 'value'],
+  angle: ['kind', 'a', 'b', 'axis', 'value'],
+};
+/** 每条约束只改写 b 的一个分量：align/distance 定位置，angle 定姿态。 */
+const CONSTRAINT_TARGET_FIELD = { align: 'position', distance: 'position', angle: 'rotation' };
+const AXIS_INDEX = { x: 0, y: 1, z: 2 };
+const CONFLICT_TOLERANCE = 1e-9;
 const LIMITS = Object.freeze({
   maxNodes: 500,
   maxParameters: 200,
@@ -340,6 +353,42 @@ function validateModifierReferences(nodes, errors) {
   });
 }
 
+/**
+ * BLOCK-322 P3-02a — 约束声明校验（形状与引用）。
+ * 过约束（同一分量被定为两个不同值）要到 resolve 才知道，此处只保证能安全求值。
+ */
+function validateConstraints(constraints, ids, errors) {
+  if (!Array.isArray(constraints)) {
+    errors.push('constraints 必须是数组');
+    return;
+  }
+  if (constraints.length > LIMITS.maxConstraints) {
+    errors.push('约束数量超限');
+    return;
+  }
+  constraints.forEach((constraint, index) => {
+    const where = `constraints[${index}]`;
+    if (!isPlainObject(constraint)) {
+      errors.push(`${where} 必须是对象`);
+      return;
+    }
+    if (!CONSTRAINT_KINDS.has(constraint.kind)) {
+      errors.push(`${where}.kind 只支持 align/distance/angle`);
+      return;
+    }
+    for (const key of Object.keys(constraint)) {
+      if (!CONSTRAINT_FIELDS[constraint.kind].includes(key)) errors.push(`${where}.${key} 不在 ${constraint.kind} 白名单`);
+    }
+    if (!isSafeId(constraint.a) || !isSafeId(constraint.b)) errors.push(`${where} 节点 id 非法`);
+    else if (!ids.has(constraint.a) || !ids.has(constraint.b)) errors.push(`${where} 引用未知节点`);
+    else if (constraint.a === constraint.b) errors.push(`${where} 不能约束自身`);
+    if (!CONSTRAINT_AXES.has(constraint.axis)) errors.push(`${where}.axis 非法`);
+    if (constraint.kind !== 'align' && !finiteNumber(constraint.value)) {
+      errors.push(`${where}.value 必须是有限数值（${constraint.kind === 'distance' ? 'mm，可为负' : '度，可为负'}）`);
+    }
+  });
+}
+
 function validateSceneSpec(input) {
   const errors = [];
   if (!isPlainObject(input)) return { ok: false, error: 'scene_invalid', errors: ['SceneSpec 必须是对象'] };
@@ -357,19 +406,7 @@ function validateSceneSpec(input) {
   if (Array.isArray(input.nodes) && input.nodes.length > LIMITS.maxNodes) errors.push('节点数量超限');
   const ids = new Set();
   if (Array.isArray(input.nodes)) input.nodes.forEach((node, index) => validateNode(node, index, parameters, ids, errors));
-  if (input.constraints !== undefined) {
-    if (!Array.isArray(input.constraints)) errors.push('constraints 必须是数组');
-    else if (input.constraints.length > LIMITS.maxConstraints) errors.push('约束数量超限');
-    else input.constraints.forEach((constraint, index) => {
-      if (!isPlainObject(constraint)) {
-        errors.push(`constraints[${index}] 必须是对象`);
-        return;
-      }
-      if (constraint.kind !== 'align') errors.push(`constraints[${index}].kind 不支持`);
-      if (!ids.has(constraint.a) || !ids.has(constraint.b)) errors.push(`constraints[${index}] 引用未知节点`);
-      if (!['x', 'y', 'z'].includes(constraint.axis)) errors.push(`constraints[${index}].axis 非法`);
-    });
-  }
+  if (input.constraints !== undefined) validateConstraints(input.constraints, ids, errors);
   if (Array.isArray(input.nodes)) validateModifierReferences(input.nodes, errors);
   if (input.camera !== undefined) validateCamera(input.camera, errors);
   if (input.render !== undefined) validateRenderSettings(input.render, errors);
@@ -404,6 +441,78 @@ function resolveDimension(value, parameters) {
   return typeof value === 'string' ? parameters[value] : value;
 }
 
+function componentOf(node, field, axisIndex) {
+  const list = isPlainObject(node.transform) ? node.transform[field] : undefined;
+  const value = Array.isArray(list) ? list[axisIndex] : undefined;
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+function writeComponent(node, field, axisIndex, value) {
+  if (!isPlainObject(node.transform)) node.transform = {};
+  const list = Array.isArray(node.transform[field]) && node.transform[field].length === 3
+    ? [...node.transform[field]]
+    : [0, 0, 0];
+  const before = typeof list[axisIndex] === 'number' && Number.isFinite(list[axisIndex]) ? list[axisIndex] : 0;
+  list[axisIndex] = value;
+  node.transform[field] = list;
+  return before;
+}
+
+/**
+ * BLOCK-322 P3-02a — 单遍、按声明顺序求值装配约束，结果写回 b 的 transform。
+ *
+ * 参照面读的是「已求过约束的当前值」，所以 a→b→c 链会自然传递。同一分量被两条约束定为不同值
+ * 即过约束：显式 constraint_conflict，不猜优先级也不静默取后值——静默取值的装配不可复现。
+ * mate（面/边贴合，需要特征级引用）未实现，见 plan §3.5 RULING-04。
+ */
+function applyConstraints(scene) {
+  const constraints = Array.isArray(scene.constraints) ? scene.constraints : [];
+  const applied = [];
+  const errors = [];
+  let errorCode = null;
+  const fail = (code, message) => {
+    errors.push(message);
+    if (!errorCode) errorCode = code;
+  };
+  const nodesById = new Map();
+  for (const node of scene.nodes) {
+    if (isPlainObject(node) && !nodesById.has(node.id)) nodesById.set(node.id, node);
+  }
+  const decided = new Map();
+  constraints.forEach((constraint, index) => {
+    const target = nodesById.get(constraint.b);
+    const anchor = nodesById.get(constraint.a);
+    if (!target || !anchor) return;
+    const field = CONSTRAINT_TARGET_FIELD[constraint.kind];
+    const axis = AXIS_INDEX[constraint.axis];
+    const to = componentOf(anchor, field, axis) + (constraint.kind === 'align' ? 0 : constraint.value);
+    const key = `${constraint.b}|${field}|${constraint.axis}`;
+    const prior = decided.get(key);
+    if (prior && Math.abs(prior.value - to) > CONFLICT_TOLERANCE) {
+      fail('constraint_conflict', `constraint_conflict: ${constraint.b}.${field}.${constraint.axis} 已由 constraints[${prior.index}] 定为 ${prior.value}，constraints[${index}]（${constraint.kind}）要求 ${to}`);
+      return;
+    }
+    if (!prior) decided.set(key, { value: to, index });
+    if (Math.abs(to) > LIMITS.maxDimensionMm) {
+      fail('constraint_out_of_range', `constraint_out_of_range: constraints[${index}]（${constraint.kind}）把 ${constraint.b}.${field}.${constraint.axis} 求值为 ${to}，超出 ±${LIMITS.maxDimensionMm}mm`);
+      return;
+    }
+    const from = writeComponent(target, field, axis, to);
+    applied.push({
+      index,
+      kind: constraint.kind,
+      a: constraint.a,
+      b: constraint.b,
+      axis: constraint.axis,
+      field,
+      from,
+      to,
+      changed: Math.abs(from - to) > CONFLICT_TOLERANCE,
+    });
+  });
+  return { applied, errors, errorCode };
+}
+
 function resolveSceneSpec(input) {
   const validated = validateSceneSpec(input);
   if (!validated.ok) return { ok: false, ...validated };
@@ -415,7 +524,9 @@ function resolveSceneSpec(input) {
       Object.entries(node.dimensions).map(([key, value]) => [key, resolveDimension(value, parameters)])
     );
   }
-  return { ok: true, scene, stats: validated.stats };
+  const { applied, errors, errorCode } = applyConstraints(scene);
+  if (errors.length > 0) return { ok: false, error: errorCode, errors: [...new Set(errors)] };
+  return { ok: true, scene, stats: validated.stats, appliedConstraints: applied };
 }
 
 function canonicalGeometry(scene) {

@@ -130,6 +130,7 @@
         "test/next05-recipes.test.mjs",
         "test/next05-recipe-workflow.test.mjs",
         "test/next05-csp.test.mjs",
+        "test/block322-p3-constraints.test.mjs",
         "frontend/src/components/work-surface/Model3DEditPanel.test.tsx",
         "test/agent-tool-registry.test.mjs",
         "test/tool-activity-labels.test.mjs"
@@ -201,6 +202,7 @@
         "test/block322-p2-camera.test.mjs",
         "test/block322-p2-lighting.test.mjs",
         "test/block322-p3-geometry.test.mjs",
+        "test/block322-p3-constraints.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts"
       ],

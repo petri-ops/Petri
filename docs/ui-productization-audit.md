@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-644: 3D 装配约束求值与预览诚实性（BLOCK-322 P3-02a；2026-10-30 **verified（dev Electron 边界内；契约 8/8 + 前端 12/12 + 实机 16/16）**）
+
+- **变化面**：SceneSpec `constraints` 从「只允许 `align`，且没有任何执行面求值」扩为 `align` / `distance`（沿轴带符号间距 mm）/ `angle`（绕同轴相对转角 °）三类白名单，**在唯一真值处 `resolveSceneSpec` 单遍按声明顺序求值并把结果烘进 `transform`**，构建/渲染/导出与配方 Runner 自动吃到（Blender 侧零改动）；新增只读端点 `POST /api/model3d/scene/resolve`（纯函数、无项目前置，对标 `scene/diff`，返回求值后场景 + `appliedConstraints` 台账 + 声明态 `sceneHash`）；过约束显式 `constraint_conflict`、求值越界显式 `constraint_out_of_range`，两者均拒写盘与拒导出；3D 工作台约束列表按类型显示（`对齐 base→port（x）；间距 base→port（x 60mm）；转角 base→cap（z 45°）`），带约束场景如实声明「装配约束在服务端求值后烘进 transform……预览未取回求值结果，按声明位置显示」。
+- **为什么这样设计**：存量缺陷是「写了约束但几何不动」的静默空操作——比报错更糟，因为用户以为装配关系生效了。求值落点选在 `resolveSceneSpec` 而不是原计划的「Blender constraint 求解器」：后者等于引入第二套求解语义，同一份 SceneSpec 的结果会随求解器版本/迭代顺序漂移，SceneSpec 就不再是唯一真值。预览端不自建 TS 求解器（红线 2「零第二执行器」），改由 P3-02b 消费服务端求值结果；`mate`（面/边贴合）需要特征级引用，属数据模型变更 → 撞 **RULING-04**，本票不实现也不假装支持（白名单里没有该 kind，写入即拒）。
+- **验证（代码）**：`test/block322-p3-constraints.test.mjs` 8/8（三类白名单通过并随值换哈希、解析式位置/姿态数值、链式传递与闭合环按声明序收敛、冗余同值不算冲突而双值定一则 `constraint_conflict`、过约束场景经 `applySceneOperations` 拒写、求值越界归 resolve 而非 validate、非法约束 10 组逐条 fail-closed、白名单跨 JS/TS **逐值**对账含字段白名单、Python 侧出现 `constraint` 字样即红=第二求解器锁、预览端不出现求解）+ `frontend/src/lib/scene3d.test.ts` 12/12（新增约束三类解析与 fail-closed 两组，存量 `align` 场景不被新白名单误拒）；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p3/block322-p3-constraints-live-live.json`（**16/16 allPass**，真实 Blender 4.5.10 LTS 无头 + 9223 离屏，明细 `block322-p3-constraints-detail.json`）。端点侧：`align` ledger 如实记 `from=100 → to=0`；`distance`+`angle` 组合给出 port x=60、cap x=0（链式参照读已求值后的 60）、port 绕 z=100°（基线 10°+相对 90°）；过约束与越界均 400 且错误码原样可见。**构建侧包围盒由网格实测**（不是 SceneSpec 自述数字）：未加约束 `[190,80,40]` → `align` 后 `[120,80,40]`、`distance` 后 `[150,80,40]`；`angle` 把 200mm 长的翼片转 90° 后 `[200,80,40] → [120,200,40]`（X/Y 尺寸互换，与解析解逐位相符）；同一过约束场景在导出链上同样被拒（`constraint_conflict`），GLB 产物 bytes/sha256 在册。UI 侧：三类约束文案与统计「约束 3」真实渲染，预览仍出 3 个对象（不空屏）。
+- **实机抓真（归属如实）**：① 首跑 `C6b` 红——后端进程加载的是改动前代码，`core/` 求值逻辑必须重启 dev 栈后实机才有意义（探针/环境问题，非产品缺陷）；② `U3` 首跑 `objects=0`——面板计数来自异步 state，单次读取撞上「正在加载 3D 渲染器…」占位，改为轮询到目标态（已并入 dev-verify README 的既有硬规则）。
+- **边界（reopen）**：①预览仍按声明位置渲染，消费 `/scene/resolve` 求值结果属 `P3-02b`；②求值是**单遍**语义（按声明顺序，参照面读已求过的值），不做迭代/环优化，也不承诺最小改动求解——这不是完整 CAD 求解器；③`angle` 是绕同轴的相对姿态角，不是两面夹角（无特征级引用）；④`mate` 待 RULING-04；⑤约束数量上限沿用 200；⑥G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-643: 3D 几何操作的预览诚实性（BLOCK-322 P3-01；2026-10-30 **verified（dev Electron 边界内；实机 10/10）**）
 
 - **变化面**：SceneSpec 节点增可选 `modifiers`（`bevel{width,segments}` / `array{count,offset}` / `boolean{operation,target}`，≤8 条按序求值）；3D 工作台在带几何操作的场景下**显式声明「预览显示未加工基元，倒角/布尔/阵列在构建导出时生效」**，并照常渲染基元（不空屏、也不假装加工过）。

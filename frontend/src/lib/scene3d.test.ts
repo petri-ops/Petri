@@ -140,6 +140,46 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     }
   });
 
+  it('BLOCK-322 P3-02a 三类装配约束通过解析，并如实声明预览未求值', () => {
+    const result = normalizeScene3DForView({
+      ...sampleScene3D(),
+      constraints: [
+        { kind: 'align', a: 'enclosure', b: 'port', axis: 'x' },
+        { kind: 'distance', a: 'enclosure', b: 'port', axis: 'z', value: 60 },
+        { kind: 'angle', a: 'enclosure', b: 'port', axis: 'z', value: -12.5 },
+      ],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.view.scene.constraints).toHaveLength(3);
+    expect(result.view.stats.constraints).toBe(3);
+    expect(result.view.warnings.join('；')).toContain('装配约束在服务端求值后烘进 transform');
+    expect(result.view.warnings.join('；')).toContain('按声明位置显示');
+  });
+
+  it('BLOCK-322 P3-02a 非法约束 fail-closed（不再静默丢弃，与服务端同判据）', () => {
+    const cases: Array<{ constraints: unknown; keyword: string }> = [
+      { constraints: [{ kind: 'mate', a: 'enclosure', b: 'port', axis: 'x' }], keyword: 'kind 只支持 align/distance/angle' },
+      { constraints: [{ kind: 'align', a: 'enclosure', b: 'ghost', axis: 'x' }], keyword: '引用未知节点' },
+      { constraints: [{ kind: 'align', a: 'enclosure', b: 'enclosure', axis: 'x' }], keyword: '不能约束自身' },
+      { constraints: [{ kind: 'distance', a: 'enclosure', b: 'port', axis: 'x' }], keyword: 'value 必须是有限数值' },
+      { constraints: [{ kind: 'align', a: 'enclosure', b: 'port', axis: 'w' }], keyword: 'axis 非法' },
+      { constraints: [{ kind: 'align', a: 'enclosure', b: 'port', axis: 'x', offset: 2 }], keyword: 'offset 不在 align 白名单' },
+      { constraints: 'nope', keyword: 'constraints 必须是数组' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({ ...sampleScene3D(), constraints: item.constraints });
+      expect(result.ok, JSON.stringify(item.constraints)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
+    const legacy = normalizeScene3DForView({
+      ...sampleScene3D(),
+      constraints: [{ kind: 'align', a: 'enclosure', b: 'port', axis: 'x' }],
+    });
+    expect(legacy.ok, '存量 align 场景不得因新白名单被拒').toBe(true);
+  });
+
   it('BLOCK-322 P2-02 灯光与环境声明通过解析并保留在 scene 上', () => {
     const result = normalizeScene3DForView({
       ...sampleScene3D(),

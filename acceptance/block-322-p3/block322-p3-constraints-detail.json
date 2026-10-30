@@ -1,0 +1,162 @@
+{
+  "generatedAt": "2026-10-30T14:53:43.684Z",
+  "platform": "win32-x64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "expectedBuiltBounds": {
+    "alignedX": 120,
+    "distanceX": 150,
+    "plainX": 190,
+    "angle": [
+      120,
+      200,
+      40
+    ],
+    "turnPlain": [
+      200,
+      80,
+      40
+    ]
+  },
+  "reports": {
+    "align": {
+      "min": [
+        -60,
+        -40,
+        -20
+      ],
+      "max": [
+        60,
+        40,
+        20
+      ],
+      "size": [
+        120,
+        80,
+        40
+      ]
+    },
+    "distance": {
+      "min": [
+        -60,
+        -40,
+        -20
+      ],
+      "max": [
+        90,
+        40,
+        20
+      ],
+      "size": [
+        150,
+        80,
+        40
+      ]
+    },
+    "angle": {
+      "min": [
+        -60,
+        -100,
+        -20
+      ],
+      "max": [
+        60,
+        100,
+        20
+      ],
+      "size": [
+        120,
+        200,
+        40
+      ]
+    }
+  },
+  "resolve": {
+    "align": [
+      {
+        "index": 0,
+        "kind": "align",
+        "a": "base",
+        "b": "port",
+        "axis": "x",
+        "field": "position",
+        "from": 100,
+        "to": 0,
+        "changed": true
+      }
+    ],
+    "mixed": [
+      {
+        "index": 0,
+        "kind": "distance",
+        "a": "base",
+        "b": "port",
+        "axis": "x",
+        "field": "position",
+        "from": 100,
+        "to": 60,
+        "changed": true
+      },
+      {
+        "index": 1,
+        "kind": "distance",
+        "a": "port",
+        "b": "cap",
+        "axis": "x",
+        "field": "position",
+        "from": -70,
+        "to": 0,
+        "changed": true
+      },
+      {
+        "index": 2,
+        "kind": "angle",
+        "a": "base",
+        "b": "port",
+        "axis": "z",
+        "field": "rotation",
+        "from": 0,
+        "to": 100,
+        "changed": true
+      }
+    ],
+    "conflict": {
+      "ok": false,
+      "error": "constraint_conflict",
+      "errors": [
+        "constraint_conflict: port.position.x 已由 constraints[0] 定为 60，constraints[1]（align）要求 0"
+      ]
+    }
+  },
+  "builtBounds": {
+    "plain": [
+      190,
+      80,
+      40
+    ],
+    "aligned": [
+      120,
+      80,
+      40
+    ],
+    "distance": [
+      150,
+      80,
+      40
+    ],
+    "turnPlain": [
+      200,
+      80,
+      40
+    ],
+    "angled": [
+      120,
+      200,
+      40
+    ]
+  }
+}

@@ -63,7 +63,7 @@ async function runModel3DRecipe({
     return { ...result, render: { ok: false, error: 'capability_unavailable', reason: capability.reason } };
   }
   const resolved = scene3d.resolveSceneSpec(built.scene);
-  if (!resolved.ok) return { ...result, render: { ok: false, error: 'scene_invalid', errors: resolved.errors } };
+  if (!resolved.ok) return { ...result, render: { ok: false, error: resolved.error, errors: resolved.errors } };
   const run = await blender.runBlenderScene({
     scene: resolved.scene,
     workspaceRoot,
