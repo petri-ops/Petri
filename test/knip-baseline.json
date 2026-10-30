@@ -171,6 +171,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui558-trace-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-ui.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",
