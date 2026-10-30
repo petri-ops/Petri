@@ -232,11 +232,21 @@ async function tool_model3d_export(args = {}, ctx = {}) {
       } else {
         resultStudio = { registered: false, toolJobId: job.id, error: registration.error };
       }
+      // artifacts/files 投影：/tools/status 下钻链（CommandCenterJobsWall handleDrill）
+      // 读 result_json.artifacts[].name——缺位即「无产物可下钻」（RW-06 代行评估抓真）。
+      const artifacts = (result.outputs || []).map((output) => ({
+        name: path.basename(output.path),
+        filename: path.basename(output.path),
+        path: output.path,
+        sha256: output.sha256 || null,
+      }));
       const jobResult = {
         ok: true,
         sceneHash,
         outDir: result.outDir,
         outputs: result.outputs,
+        artifacts,
+        files: artifacts.map((item) => ({ ...item })),
         resultStudio,
       };
       db.updateToolJob(job.id, { status: 'completed', resultJson: JSON.stringify(jobResult), completedAt: Date.now() });

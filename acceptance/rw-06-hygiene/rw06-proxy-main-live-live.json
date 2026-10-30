@@ -1,0 +1,38 @@
+{
+  "name": "rw06-proxy-main-live",
+  "startedAt": "2026-10-30T02:17:48.637Z",
+  "finishedAt": "2026-10-30T02:18:19.629Z",
+  "assertions": [
+    {
+      "name": "a1_ui443_error_boundary",
+      "pass": true,
+      "detail": "err443={\"blank\":false,\"boundaryHint\":true,\"snippet\":\"工作台\\n新建任务\\n扩展\\n知识空间\\n项目\\nPetri\\n梳理开发进展\\n5\\n\\n项目不存在或无权访问\\n\\n← 返回工作台\\n测试实例 · TEST\\n内容已穿透 · Control+Alt+Shift+M 解锁窗口管理\"}"
+    },
+    {
+      "name": "a2_projects_seeded",
+      "pass": true,
+      "detail": "a=p_mvucebt9_qf7q b=p_mvucebte_hnm6"
+    },
+    {
+      "name": "a2_conv_b_seeded",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"conversation\":{\"id\":\"conv_32fe208c-abf\",\"title\":\"跨项目探针 rw06xsearchmvucebsz\",\"status\":\"active\",\"last_page\":null,\"project_id\":\"p_mvucebte_hnm6\",\"m"
+    },
+    {
+      "name": "a2_ui445_cross_project_search",
+      "pass": true,
+      "detail": "search={\"tokenVisible\":true,\"hitCount\":2}"
+    },
+    {
+      "name": "a3_export_registered",
+      "pass": true,
+      "detail": "{\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvucehek_925u\",\"revisions\":[{\"revisionId\":\"rev_model3d_987b94baa49b0692\",\"artifactId\":\"model3d:p_mvucebt9_qf7q:model3d/recipes/rw06-proxy.scene3d.json:"
+    },
+    {
+      "name": "a3_ui638_viewer_on_main",
+      "pass": false,
+      "detail": "pick=picked main={}"
+    }
+  ],
+  "allPass": false
+}

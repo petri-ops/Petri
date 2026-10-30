@@ -56,7 +56,8 @@
 - **验证（代码）**：桥契约 5/5（stamp 自证 provenance / 登记 / 幂等 / blocked 不 adopt / lineage 独立复投影）+ 注册表 4/4 + viewer 3/3（Model3DScene 以 stub 代入——happy-dom 真挂 three.js 触发 V8 OOM，RW-06 vitest 通道债在册；薄壳契约不依赖 three.js 内部）+ 主题门 17/17 + tsc 0 + lint 0 error（viewer setState 改 render 期派生，BLOCK-250 同类纪律）；内核邻域 72/72 + 3D 链 12/12 + plugin-loader 2/2。
 - **实机证据**：`acceptance/rw-01-3d-revision/rw01-model3d-live-live.json`（**18/18**，主栈 :3001 + 9223 离屏，真实 Blender 5.2.3 LTS）：REST 导出（与 agent 工具同一生产路径）→ 盖章作业 + change-set(adopted) + 三格式 revision + 权威图落库；history/lineage REST 可查；revision 文件服务字节 sha 对账 manifest；场景编辑 v2 → 同 family stacking v2 登基；场景语义 diff。
 - **实机证据（发现腿清偿 2026-10-30 RW-02）**：`acceptance/rw02-ui-evidence-live-live.json`（隔离 :3011+9223）：指挥中心任务墙列出 model3d_export 3D 导出作业（已完成态、瓦片在场）。
-- **边界（reopen）**：①**点开腿=瓦片点击走 wm.openResultInMainWindow（用户主窗动作）**——探针红线禁止导航用户窗口，入 c 档人测清单（human-eye-checklist 第 4 条：用户点自己窗口的任务瓦片确认 3D viewer 渲染）；②restore 资格链三关（cohort/validator/图覆盖）已过，终点 `restore_material_unavailable` 是 git 物化域前提（历史脚本/参数快照须在工作区 git 绑定域验证；临时项目工作区为仓库子目录不具备）——既有内核机制非 3D 专项；③子网格级语义拾取、网格 diff、3D 文件「打开原文件」出口不在本包。
+- **实机证据（点开腿代行评估 2026-10-30 RW-06）**：`acceptance/rw-06-hygiene/rw06-proxy-main-live-live.json`：下钻链实证推进两层——①**真缺陷修复**：桥写 jobResult 缺 artifacts/files 投影（下钻守卫恒「无产物可下钻」）已补（model3d-tools.js）；②下钻 relay 链实证通到结果 tab（petri:project-open-artifact → relay → results tab 打开）。
+- **边界（reopen）**：①**点开腿终段=下钻打开首个产物（artifacts[0]=渲染图非 GLB）+ activeArtifact 上下文装配未建立（「尚未打开结果」）**——结果打开上下文装配属产品深水区，3D viewer 点开腿保留 c 档人测（human-eye-checklist 第 4 条，路线更新=先在结果面选 scene.glb 产物）；②②restore 资格链三关（cohort/validator/图覆盖）已过，终点 `restore_material_unavailable` 是 git 物化域前提（历史脚本/参数快照须在工作区 git 绑定域验证；临时项目工作区为仓库子目录不具备）——既有内核机制非 3D 专项；③子网格级语义拾取、网格 diff、3D 文件「打开原文件」出口不在本包。
 
 ## UI-632: 工作流运行控制面（NEXT-01；2026-10-29 **verified（dev Electron 边界内；组件 4/4 + 实机 11/11）**）
 
@@ -4730,7 +4731,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - 2026-09-30 勘正：状态字样滞后同步（复核证据=3a0ff3e6）——标题 in_progress 与上方 verified 翻转注记不一致，标题同步 verified。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-443: 路由级错误边界——页面渲染异常不再白屏整树（健壮性兜底轻量批）(2026-09-26 in_progress，契约已验+dev 栈旁证，实机过目待补)
+## UI-443: 路由级错误边界防白屏（2026-10-30 **verified（代行评估·RW-06；9223 实机：非法项目路由 → 「项目不存在或无权访问」兜底卡非白屏）**）
 
 - **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；勘察发现全仓零 ErrorBoundary——任何路由页渲染抛异常（如结果页渲染插件产出的异形数据）都会卸载整棵 React 树=整窗白屏，只能重启应用。
 - **改动**：新增 `RouteErrorBoundary`（frontend/src/components/）——class 边界 getDerivedStateFromError + componentDidCatch（console.error 保留诊断可见性）；回退 UI=「页面出错了」说明 + 错误摘要（等宽 pre 限高滚动）+ 双动作钮「重新加载」（location.reload）/「返回主页」（location.assign('/') 整页重建 React 树）；样式走 --petri-* token 阶梯（surface 上浮 subtle 卡，暗色安全）；接线 App.tsx 两棵路由树（主窗 + /window 独立窗），页面骨架（标题栏/侧栏）在边界之外不被波及。
@@ -4752,7 +4753,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据（加映二）**：用户实机（hello.md 保存至桌面+回执确认）+ 主进程日志（payload/opts 全量正确下发）+ 隔离探针对照截图（acceptance/ui-444/{dlg-pid26220,probe-inview}.png：app 内空对话框 vs 探针正确预填）+ file:save-text-file 通道经 ipc-channels-registry 双向守护 + D7 基线跟账（描述文案随 def 搬家净零）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-445: 左栏会话标题搜索——跨项目过滤、点结果直达会话（自主动作批轻量批）(2026-09-26 in_progress，契约已验，实机过目待用户)
+## UI-445: 左栏会话标题搜索跨项目（2026-10-30 **verified（代行评估·RW-06；9223 实机：双项目种子+唯一 token → 跨项目命中 2 处）**）
 
 - **来源**：自主动作批（用户授权「你找找其它能做的事情…不想你闲着」）；会话与项目增多后找不到历史会话——左栏仅按项目折叠展示、无任何搜索。
 - **改动**：左栏「项目」头部新增搜索钮（search 图标，与 ssh/新建钮同排）+行内输入框（250ms 防抖）：非空时项目树切换为搜索结果视图——`listConversations('all')` 全量拉取按标题不区分大小写过滤（上限 50），每行=标题+所属项目名（未绑定如实标注）；点结果→`switchToProject`+`handleSwitchConversation` 直达会话；空态「无匹配会话」诚实可见；清空查询恢复项目树。样式走 --petri-* token（input-bg/border/text 四级）。
