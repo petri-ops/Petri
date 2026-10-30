@@ -12,7 +12,7 @@ const path = require('node:path');
 const db = require('../db');
 const scene3d = require('../helpers/scene3d');
 const sceneStore = require('../helpers/model3d-scene-store');
-const { DEFAULT_RENDER_VIEWS } = require('../helpers/model3d-views');
+const { DEFAULT_RENDER_VIEWS, normalizeTurntable } = require('../helpers/model3d-views');
 const { runModel3DRecipe } = require('../helpers/model3d-recipe-runner');
 const blender = require('../helpers/blender-provider');
 const { runModel3DReview } = require('../helpers/model3d-review');
@@ -124,6 +124,9 @@ async function runProvider(args, ctx) {
   if (checked.error) return checked.error;
   const resolved = scene3d.resolveSceneSpec(checked.scene);
   if (!resolved.ok) return resolved;
+  // 转盘参数是输出请求（不进 SceneSpec/hash）；边界只在 helpers/model3d-views 声明一处。
+  const requestedTurntable = normalizeTurntable(args.turntable);
+  if (!requestedTurntable.ok) return { ok: false, error: requestedTurntable.error };
   const capability = await blender.probeBlender();
   if (capability.status !== 'ready') {
     return {
@@ -138,6 +141,7 @@ async function runProvider(args, ctx) {
     workspaceRoot: workspace.root,
     views: Array.isArray(args.views) ? args.views : [...DEFAULT_RENDER_VIEWS],
     formats: args.renderOnly ? [] : normalizeFormats(args.formats),
+    turntable: requestedTurntable.turntable,
   });
   return { ...result, provider: { status: capability.status, version: capability.version } };
 }
@@ -153,6 +157,7 @@ async function tool_model3d_render(args = {}, ctx = {}) {
     outDir: result.outDir,
     report: result.report,
     outputs: result.outputs,
+    frameAssets: result.frameAssets || [],
     durationMs: result.durationMs,
   };
 }
@@ -267,6 +272,7 @@ async function tool_model3d_export(args = {}, ctx = {}) {
     manifest: path.relative(workspace.root, manifestPath).replace(/\\/g, '/'),
     report: result.report,
     outputs: result.outputs,
+    frameAssets: result.frameAssets || [],
     durationMs: result.durationMs,
     resultStudio,
   };

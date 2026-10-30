@@ -2,12 +2,30 @@
  * agent-tools/tool-defs/model3d.js — NEXT-04A SceneSpec / 3D 工具 Schema。
  */
 
-const { RENDER_VIEWS } = require('../../helpers/model3d-views');
+const {
+  RENDER_VIEWS,
+  DEFAULT_TURNTABLE_FRAMES,
+  TURNTABLE_MIN_FRAMES,
+  TURNTABLE_MAX_FRAMES,
+  TURNTABLE_MIN_ELEVATION_DEG,
+  TURNTABLE_MAX_ELEVATION_DEG,
+} = require('../../helpers/model3d-views');
 
 const scene = {
   type: 'object',
   description: 'SceneSpec v1（mm、z-up-right-handed）；由 model3d_validate 校验',
   additionalProperties: true,
+};
+
+// 边界数值取自 helpers/model3d-views（唯一声明处），schema 不再自己抄一份。
+const turntable = {
+  type: 'object',
+  description: `转盘视频请求（属输出参数，不进 SceneSpec、不参与 hash）：产出 ${TURNTABLE_MIN_FRAMES}..${TURNTABLE_MAX_FRAMES} 帧 PNG 序列 + 同名 mp4（Blender 内置 ffmpeg，零新依赖）；缺省 ${DEFAULT_TURNTABLE_FRAMES} 帧。`,
+  properties: {
+    frames: { type: 'integer', minimum: TURNTABLE_MIN_FRAMES, maximum: TURNTABLE_MAX_FRAMES },
+    elevationDeg: { type: 'number', minimum: TURNTABLE_MIN_ELEVATION_DEG, maximum: TURNTABLE_MAX_ELEVATION_DEG },
+  },
+  additionalProperties: false,
 };
 
 module.exports = [
@@ -74,12 +92,13 @@ module.exports = [
     type: 'function',
     function: {
       name: 'model3d_render',
-      description: '用本地 Blender 构建 SceneSpec 并渲染 front/top/side/iso 多视角；Blender 缺席时诚实返回 capability_unavailable。',
+      description: '用本地 Blender 构建 SceneSpec 并渲染 front/top/side/iso 多视角；可附 turntable 请求转盘序列帧与 mp4；Blender 缺席时诚实返回 capability_unavailable。',
       parameters: {
         type: 'object',
         properties: {
           scene,
           views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
+          turntable,
         },
         required: ['scene'],
       },
@@ -104,12 +123,13 @@ module.exports = [
     type: 'function',
     function: {
       name: 'model3d_export',
-      description: '用本地 Blender 构建 SceneSpec 并导出 GLB/STL/OBJ，写 manifest（scene hash、provider 版本、输出哈希、网格报告）。',
+      description: '用本地 Blender 构建 SceneSpec 并导出 GLB/STL/OBJ，写 manifest（scene hash、provider 版本、输出哈希、网格报告）；可附 turntable 同时产出转盘序列帧与 mp4。',
       parameters: {
         type: 'object',
         properties: {
           scene,
           formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj'] } },
+          turntable,
           taskSpecId: { type: 'string' },
           workflowRunId: { type: 'string' },
           recipeId: { type: 'string' },

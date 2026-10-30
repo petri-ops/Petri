@@ -180,6 +180,7 @@ module.exports = function registerModel3DRoutes(app) {
           scene: req.body.scene,
           scenePath: req.body?.scenePath ?? null,
           formats: Array.isArray(req.body?.formats) ? req.body.formats : undefined,
+          turntable: req.body?.turntable ?? null,
           recipeId: req.body?.recipeId ?? null,
           recipeVersion: req.body?.recipeVersion ?? null,
           taskSpecId: req.body?.taskSpecId ?? null,

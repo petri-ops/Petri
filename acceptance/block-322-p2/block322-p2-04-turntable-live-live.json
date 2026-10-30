@@ -1,0 +1,63 @@
+{
+  "name": "block322-p2-04-turntable-live",
+  "startedAt": "2026-10-30T16:52:52.923Z",
+  "finishedAt": "2026-10-30T16:52:56.580Z",
+  "assertions": [
+    {
+      "name": "V0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 4.5.10 LTS\"}"
+    },
+    {
+      "name": "V1_temp_project_with_workspace",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvv7nm5q_tbbz\"}"
+    },
+    {
+      "name": "V2_out_of_bounds_rejected_before_execution",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"turntable_frames_invalid（须是 2..48 的整数）\"}"
+    },
+    {
+      "name": "V3_absent_turntable_is_noop",
+      "pass": true,
+      "detail": "{\"turntable\":{\"requested\":0,\"frames\":0,\"stills\":[],\"video\":null,\"elevationDeg\":null,\"fps\":null,\"errors\":[]},\"outputs\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\"]}"
+    },
+    {
+      "name": "V4_turntable_built_and_report_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"turn\":{\"requested\":8,\"frames\":8,\"stills\":8,\"video\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block322-p204-1793379173089-mvv7nm5q\\\\model3d\\\\runs\\\\m3d-mvv7nnio-pk0cc7\\\\turntable0001-0008.mp4\",\"elevationDeg\":18,\"fps\":12,\"errors\":[]}}"
+    },
+    {
+      "name": "V5_video_exists_and_registered_hash_matches_disk",
+      "pass": true,
+      "detail": "{\"registered\":{\"path\":\"model3d/runs/m3d-mvv7nnio-pk0cc7/turntable0001-0008.mp4\",\"sha256\":\"e43e2ac15dad…\",\"bytes\":23298},\"reportVideo\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block322-p204-1793379173089-mvv7nm5q\\\\model3d\\\\runs\\\\m3d-mvv7nnio-pk0cc7\\\\turntable0001-0008.mp4\"}"
+    },
+    {
+      "name": "V6_payload_is_real_mp4_not_renamed_image",
+      "pass": true,
+      "detail": "header=\"000000206674797069736f6d\""
+    },
+    {
+      "name": "V7_frame_sequence_real_and_auditable",
+      "pass": true,
+      "detail": "[{\"name\":\"turntable-frame-001.png\",\"exists\":true,\"bytes\":360804,\"shaMatches\":true},{\"name\":\"turntable-frame-002.png\",\"exists\":true,\"bytes\":435903,\"shaMatches\":true},{\"name\":\"turntable-frame-003.png\",\"exists\":true,\"bytes\":400480,\"shaMatches\":true},{\"name\":\"turntable-frame-004.png\",\"exists\":true,\"bytes\":438470,\"shaMatches\":true},{\"name\":\"turntable-frame-005.png\",\"exists\":true,\"bytes\":361366,\"shaMatc"
+    },
+    {
+      "name": "V8_stills_do_not_flood_result_surface",
+      "pass": true,
+      "detail": "{\"outputs\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\",\"turntable0001-0008.mp4\"],\"frames\":8}"
+    },
+    {
+      "name": "V9_frames_differ_camera_actually_rolled",
+      "pass": true,
+      "detail": "{\"unique\":8,\"total\":8}（空列表不得算通过）"
+    },
+    {
+      "name": "V10_double_render_cost_visible_and_bounded",
+      "pass": true,
+      "detail": "{\"plain\":1305,\"spun\":1628}（两次渲染路线的代价必须可见，且留在 180s 超时之内）"
+    }
+  ],
+  "allPass": true
+}

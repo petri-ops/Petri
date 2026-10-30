@@ -100,7 +100,7 @@ function resolveInside(root, relativePath) {
   return target;
 }
 
-async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], signal } = {}) {
+async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], turntable = null, signal } = {}) {
   const binary = findBlenderBinary();
   if (!binary) {
     return { ok: false, error: 'capability_unavailable', reason: 'blender_not_installed' };
@@ -122,6 +122,9 @@ async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d
     '--formats', formats.join(','),
     '--root', workspaceRoot,
   ];
+  if (turntable) {
+    args.push('--turntable', String(turntable.frames), '--spin-elevation', String(turntable.elevationDeg));
+  }
   const started = Date.now();
   const result = await new Promise((resolve) => {
     const child = spawn(binary, args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -171,20 +174,28 @@ async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d
     };
   }
   const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-  const outputFiles = [];
-  for (const found of [...Object.values(report.renders || {}), ...Object.values(report.exports || {})]) {
-    if (!found || !fs.existsSync(found)) continue;
-    outputFiles.push({
+  const describe = (found) => {
+    if (!found || !fs.existsSync(found)) return null;
+    return {
       path: path.relative(workspaceRoot, found).replace(/\\/g, '/'),
       sha256: hashFile(found),
       bytes: fs.statSync(found).size,
-    });
-  }
+    };
+  };
+  const outputFiles = [
+    ...Object.values(report.renders || {}),
+    ...Object.values(report.exports || {}),
+    report.turntable?.video || null,
+  ].map(describe).filter(Boolean);
+  // 序列帧算过程产物：路径/哈希/字节可核（frameAssets），但不进成果面——终态产物是 mp4，
+  // 把 N 张几乎相同的帧图也登记成成果会把面板淹没（P2-05 负责结果面播放）。
+  const frameAssets = (report.turntable?.stills || []).map(describe).filter(Boolean);
   return {
     ok: report.ok === true,
     outDir: path.relative(workspaceRoot, outDir).replace(/\\/g, '/'),
     report,
     outputs: outputFiles,
+    frameAssets,
     sceneHashFile: path.relative(workspaceRoot, scenePath).replace(/\\/g, '/'),
     durationMs: Date.now() - started,
   };

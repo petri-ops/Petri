@@ -36,11 +36,52 @@ function normalizeRenderViews(input) {
   return views.length > 0 ? views : null;
 }
 
+/**
+ * BLOCK-322 P2-04 — 转盘/序列帧的请求参数唯一声明处。
+ *
+ * 动画是**输出请求**而不是场景真相：不进 SceneSpec、不参与 hash（同一份 SceneSpec
+ * 转 24 帧还是 48 帧不改变几何，若写进场景就会为纯出图理由刷出新 revision）。
+ * 上下界只在这里写一遍：provider、agent 工具与 REST 三条入口共用同一判定，
+ * 免得某一处漏检而把 5000 帧的请求送进 Blender 撞 180s 超时。
+ */
+const DEFAULT_TURNTABLE_FRAMES = 24;
+const TURNTABLE_MIN_FRAMES = 2;
+const TURNTABLE_MAX_FRAMES = 48;
+const DEFAULT_TURNTABLE_ELEVATION_DEG = 20;
+const TURNTABLE_MIN_ELEVATION_DEG = -89;
+const TURNTABLE_MAX_ELEVATION_DEG = 89;
+
+/**
+ * @returns {{ok: true, turntable: {frames:number, elevationDeg:number}|null} | {ok: false, error: string}}
+ * 未请求（undefined/null/false）→ `turntable: null` 且 ok（存量行为零变化）；
+ * 请求但越界 → 显式错误，不静默夹到边界值（静默改参就是「你要 8 帧给你 48 帧」）。
+ */
+function normalizeTurntable(raw) {
+  if (raw === undefined || raw === null || raw === false) return { ok: true, turntable: null };
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, error: 'turntable_invalid' };
+  const frames = raw.frames === undefined ? DEFAULT_TURNTABLE_FRAMES : raw.frames;
+  if (!Number.isInteger(frames) || frames < TURNTABLE_MIN_FRAMES || frames > TURNTABLE_MAX_FRAMES) {
+    return { ok: false, error: `turntable_frames_invalid（须是 ${TURNTABLE_MIN_FRAMES}..${TURNTABLE_MAX_FRAMES} 的整数）` };
+  }
+  const elevationDeg = raw.elevationDeg === undefined ? DEFAULT_TURNTABLE_ELEVATION_DEG : raw.elevationDeg;
+  if (typeof elevationDeg !== 'number' || !Number.isFinite(elevationDeg)
+    || elevationDeg < TURNTABLE_MIN_ELEVATION_DEG || elevationDeg > TURNTABLE_MAX_ELEVATION_DEG) {
+    return { ok: false, error: `turntable_elevation_invalid（须在 ${TURNTABLE_MIN_ELEVATION_DEG}..${TURNTABLE_MAX_ELEVATION_DEG} 度）` };
+  }
+  return { ok: true, turntable: { frames, elevationDeg } };
+}
+
 module.exports = {
   STANDARD_VIEWS,
   CAMERA_VIEW,
   RENDER_VIEWS,
   DEFAULT_RENDER_VIEWS,
+  DEFAULT_TURNTABLE_FRAMES,
+  TURNTABLE_MIN_FRAMES,
+  TURNTABLE_MAX_FRAMES,
+  TURNTABLE_MIN_ELEVATION_DEG,
+  TURNTABLE_MAX_ELEVATION_DEG,
   isRenderView,
   normalizeRenderViews,
+  normalizeTurntable,
 };

@@ -27,6 +27,8 @@ def parse_args():
     parser.add_argument('--views', default='front,top,side,iso')
     parser.add_argument('--formats', default='glb,stl,obj')
     parser.add_argument('--root', default='')
+    parser.add_argument('--turntable', type=int, default=0)
+    parser.add_argument('--spin-elevation', type=float, default=20.0)
     return parser.parse_args(tail)
 
 
@@ -655,6 +657,120 @@ def render_views(out_dir, views, bounds, declared_spec=None):
     return paths, declared
 
 
+TURNTABLE_FPS = 12
+TURNTABLE_STILL_STEM = 'turntable-frame'
+TURNTABLE_VIDEO_STEM = 'turntable'
+_spin = {'camera': None, 'center': None, 'distance': 0.0, 'frames': 1, 'cos_elev': 1.0, 'sin_elev': 0.0}
+
+
+def _spin_apply(scene):
+    """按当前帧把相机摆到转盘角度（frame_change_pre handler）。
+
+    不用关键帧：实测 4.5 里位置/欧拉曲线只给 `AUTO/EASE_IN/EASE_OUT/EASE_IN_OUT` 四种插值，
+    设 `LINEAR` 被 enum 拒（`bpy_struct: enum "LINEAR" not found`），而 bezier 系会让转盘
+    两头变速——转盘视频不匀速就是坏产物。handler 逐帧显式定角，速度天然均匀且无 API 名赌注。
+    """
+    camera = _spin['camera']
+    if camera is None:
+        return
+    frames = max(1, int(_spin['frames']))
+    index = (int(scene.frame_current) - 1) % frames
+    angle = 2.0 * math.pi * index / frames
+    center = _spin['center']
+    horizontal = _spin['distance'] * _spin['cos_elev']
+    location = (
+        center.x + horizontal * math.cos(angle),
+        center.y + horizontal * math.sin(angle),
+        center.z + _spin['distance'] * _spin['sin_elev'],
+    )
+    aim(camera, location, center)
+
+
+def discover_new_files(out_dir, before):
+    """按目录发现取真实产物名。
+
+    Blender 自己拼动画文件名（`<stem>0001-0024.mp4`），代码里猜名字 =「文件确实在但登记不到」；
+    所以视频路径只认渲染前后目录差的实测结果。
+    """
+    entries = []
+    for entry in sorted(os.listdir(out_dir)):
+        full = os.path.join(out_dir, entry)
+        if entry in before or not os.path.isfile(full):
+            continue
+        if entry.lower().endswith('.json'):
+            continue
+        entries.append(full)
+    return entries
+
+
+def render_turntable(out_dir, frames, elevation_deg, bounds):
+    """序列帧 + 转盘视频（BLOCK-322 P2-04）。
+
+    先逐帧 `write_still` 出 PNG 序列（帧名由我们定，可断言），再跑一遍 FFMPEG 动画出 mp4
+    （名字由 Blender 拼，靠目录发现）。探针实测（plan §5）：4.5 无头内置 ffmpeg 能出 H264；
+    `Scene.use_sequencer`/`Scene.editor_type` 在该版本已不存在 ⇒ 不走 VSE 单次编码，
+    多花一遍渲染时间换**已验证可用**的 API 路径，而不是靠猜的省法。
+    """
+    scene = bpy.context.scene
+    min_v, max_v = bounds
+    center = (min_v + max_v) / 2.0
+    size = max(1.0, max(max_v.x - min_v.x, max_v.y - min_v.y, max_v.z - min_v.z))
+    distance = size * 2.5
+    camera_data = bpy.data.cameras.new('petri-turntable')
+    camera_data.type = 'ORTHO'
+    camera_data.ortho_scale = size * 1.5
+    camera = bpy.data.objects.new('petri-turntable', camera_data)
+    scene.collection.objects.link(camera)
+    scene.camera = camera
+    elevation = math.radians(float(elevation_deg))
+    _spin.update({
+        'camera': camera,
+        'center': center,
+        'distance': distance,
+        'frames': frames,
+        'cos_elev': math.cos(elevation),
+        'sin_elev': math.sin(elevation),
+    })
+    if _spin_apply not in bpy.app.handlers.frame_change_pre:
+        bpy.app.handlers.frame_change_pre.append(_spin_apply)
+
+    scene.frame_start = 1
+    scene.frame_end = frames
+    scene.render.fps = TURNTABLE_FPS
+    scene.render.image_settings.file_format = 'PNG'
+    stills = []
+    for index in range(frames):
+        scene.frame_set(index + 1)
+        still_path = os.path.join(out_dir, '%s-%03d.png' % (TURNTABLE_STILL_STEM, index + 1))
+        scene.render.filepath = still_path
+        bpy.ops.render.render(write_still=True)
+        stills.append(still_path)
+
+    before = set(os.listdir(out_dir))
+    scene.render.image_settings.file_format = 'FFMPEG'
+    scene.render.ffmpeg.format = 'MPEG4'
+    scene.render.ffmpeg.codec = 'H264'
+    # 4.5 的实名是 constant_rate_factor（旧文档里的 constant_rate_mode 已不存在，
+    # 设错属性名在 Python 里是 AttributeError，整个 turntable 会失败并显式回显）。
+    scene.render.ffmpeg.constant_rate_factor = 'MEDIUM'
+    scene.render.ffmpeg.audio_codec = 'NONE'
+    scene.render.filepath = os.path.join(out_dir, TURNTABLE_VIDEO_STEM)
+    bpy.ops.render.render(animation=True)
+    movies = [item for item in discover_new_files(out_dir, before) if item.lower().endswith('.mp4')]
+
+    if _spin_apply in bpy.app.handlers.frame_change_pre:
+        bpy.app.handlers.frame_change_pre.remove(_spin_apply)
+    _spin['camera'] = None
+    return {
+        'requested': frames,
+        'frames': len(stills),
+        'stills': stills,
+        'elevationDeg': float(elevation_deg),
+        'fps': TURNTABLE_FPS,
+        'video': movies[0] if movies else None,
+    }
+
+
 def select_mesh_objects(objects):
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objects:
@@ -725,8 +841,17 @@ def main():
     render_settings = apply_render_settings(scene.get('render'))
     render_paths, declared = render_views(args.out, views, bounds, scene.get('camera'))
     export_paths = export_formats(args.out, formats, objects)
+    # 转盘放最后：它会改写 scene.render 的输出格式，先跑完静态图与导出再动它。
+    requested_frames = int(args.turntable or 0)
+    turntable = {'requested': requested_frames, 'frames': 0, 'stills': [], 'video': None,
+                 'elevationDeg': None, 'fps': None, 'errors': []}
+    if requested_frames > 0:
+        try:
+            turntable.update(render_turntable(args.out, requested_frames, float(args.spin_elevation), bounds))
+        except Exception as error:
+            turntable['errors'].append(str(error))
     report = {
-        'ok': len(unsupported) == 0 and not light_errors and not geometry_errors,
+        'ok': len(unsupported) == 0 and not light_errors and not geometry_errors and not turntable['errors'],
         'blenderVersion': bpy.app.version_string,
         'renderEngine': bpy.context.scene.render.engine,
         'display': display,
@@ -748,6 +873,7 @@ def main():
         },
         'renders': render_paths,
         'exports': export_paths,
+        'turntable': turntable,
         'unsupported': unsupported,
     }
     report_path = os.path.join(args.out, 'blender-report.json')

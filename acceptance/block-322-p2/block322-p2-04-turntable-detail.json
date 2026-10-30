@@ -1,0 +1,154 @@
+{
+  "generatedAt": "2026-10-30T16:52:56.568Z",
+  "platform": "win32-x64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "video": {
+    "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable0001-0008.mp4",
+    "sha256": "e43e2ac15dad9159af4172c55d777cc7886bb41ffaef2d38ddbc78451fa02194",
+    "bytes": 23298
+  },
+  "frameAssets": [
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-001.png",
+      "sha256": "be51c8a99490647a6e42b320b868e2ece6088d94502a02128b44dc2a0721f01b",
+      "bytes": 360804
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-002.png",
+      "sha256": "0ceb36fa6a6f3d83a5dd4573b29da87583ca635c1cd38bc895ca49ef130280dc",
+      "bytes": 435903
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-003.png",
+      "sha256": "53f7898561dc56d64ba3c05d3fd30e89e460ed8675b2a47c459c750dfdccdef6",
+      "bytes": 400480
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-004.png",
+      "sha256": "c5c103fcfde928cf8db791c48c894b06bdc88f28833e98fabe013d772ec133d5",
+      "bytes": 438470
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-005.png",
+      "sha256": "f01676bcf2557cbcd70b74d54750387ca1986a13887571ea6c9e3e84bd8ca470",
+      "bytes": 361366
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-006.png",
+      "sha256": "66e3d7f4224306559bda8e916fbe59218366057400410bb70a567ec70c5e5f06",
+      "bytes": 456503
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-007.png",
+      "sha256": "983998d43d0871c2c2012dcf808ac68ab621a92cc0ba366565d1ae27ba1ae221",
+      "bytes": 424546
+    },
+    {
+      "path": "model3d/runs/m3d-mvv7nnio-pk0cc7/turntable-frame-008.png",
+      "sha256": "1834c522b157e37a765458c046cafe616de2a3418fd7b3b1b45df0c9e2cf99ee",
+      "bytes": 477120
+    }
+  ],
+  "stillChecks": [
+    {
+      "name": "turntable-frame-001.png",
+      "exists": true,
+      "bytes": 360804,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-002.png",
+      "exists": true,
+      "bytes": 435903,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-003.png",
+      "exists": true,
+      "bytes": 400480,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-004.png",
+      "exists": true,
+      "bytes": 438470,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-005.png",
+      "exists": true,
+      "bytes": 361366,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-006.png",
+      "exists": true,
+      "bytes": 456503,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-007.png",
+      "exists": true,
+      "bytes": 424546,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-008.png",
+      "exists": true,
+      "bytes": 477120,
+      "shaMatches": true
+    }
+  ],
+  "durationMs": {
+    "plain": 1305,
+    "spun": 1628
+  },
+  "reportTurntable": {
+    "requested": 8,
+    "frames": 8,
+    "stills": [
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-001.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-002.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-003.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-004.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-005.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-006.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-007.png",
+      "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable-frame-008.png"
+    ],
+    "video": "D:\\1.WorkDir\\petri\\.petri-dev-user-data\\data\\projects\\block322-p204-1793379173089-mvv7nm5q\\model3d\\runs\\m3d-mvv7nnio-pk0cc7\\turntable0001-0008.mp4",
+    "elevationDeg": 18,
+    "fps": 12,
+    "errors": []
+  },
+  "display": {
+    "engine": "BLENDER_WORKBENCH",
+    "declaredLighting": false,
+    "declaredMaterial": false,
+    "requestedEngine": "workbench",
+    "samples": null,
+    "device": null
+  },
+  "boundsMm": {
+    "min": [
+      -60,
+      -20,
+      -40
+    ],
+    "max": [
+      60,
+      80,
+      100
+    ],
+    "size": [
+      120,
+      100,
+      140
+    ]
+  }
+}

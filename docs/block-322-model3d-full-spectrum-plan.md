@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（放量连续执行中，用户发令 2026-10-30；已收口 P1 + P2-01 + P2-02 + P3-01 + P3-02a + P3-02b + P2-03，下一票=P2-04 序列帧与转盘视频，队列见 §3.5）
+**状态**：active（放量连续执行中，用户发令 2026-10-30；已收口 P1 + P2-01 + P2-02 + P3-01 + P3-02a + P3-02b + P2-03 + P2-04，下一票=P2-05 结果面视频预览，队列见 §3.5）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -100,7 +100,7 @@ status: active
 | `P2-01` 相机与构图 **completed（2026-10-30，实机 18/18 + next04a 回归 7/7）** | SceneSpec 增可选 `camera`（position/target/up/fovDeg/projection/orthoScaleMm）与 `render`（width/height 16..4096）；Blender **新增 `camera` 视角**用声明机位出图（标准四视角保留，未声明即跳过不伪造），Blender 侧 `sensor_fit='VERTICAL'`+`sensor_height=24` 使 fov 与 Three 的**垂直** fov 同轴；预览端多出「机位」视角并真按声明取景 | 校验双层（退化视线/up 共线/fov 越界/正交缺画幅均拒收）+ 前端镜像同判据 + 报告回显 `effectiveAngleYDeg`/`orthoScaleMm`/`upApplied` 与声明对账 + camera.png 与 front.png 不同图 + 实机腿 | `acceptance/block-322-p2/block322-p2-camera-live-live.json` + `block322-p2-camera-detail.json` |
 | `P2-02` 灯光与环境 **completed（2026-10-30，实机 9/9）** | SceneSpec 增可选 `lights[]`（sun/point/spot/area + energy/color/position/target/size/spotDeg，≤16）与 `environment`（background/worldStrength/samples/engine）；**声明灯光或环境时才切 CYCLES(CPU)**，未声明仍是 WORKBENCH；预览端声明灯存在即整体替换默认摄影棚灯组 | 灯种/能量/位置/重复/数量/环境四字段双层 fail-closed + 哈希随灯光变化 + 灯种与引擎名跨 JS/TS/Python 逐值对账 + **像素平均亮度单调对照**（world=0：导出 0.08→11.73；预览 3.25→59.29）+ 报告回显生效值 | `acceptance/block-322-p2/block322-p2-lighting-live-live.json` + `block322-p2-lighting-detail.json` |
 | `P2-03` PBR 材质与贴图 **completed（2026-10-31，契约 8/8 + 前端 15/15 + 实机 14/14；P2-02 灯光腿重构后回归 9/9）** | `material` 白名单化为 `color/roughness/metallic/emissive/baseColorTexture`（未知键直接拒，不再「写了不认也不报」）；贴图走 **工作区相对路径 + sha256 锚定 + 独立 16MB 上限**，与 mesh 共用同一预检内核（`helpers/mesh-assets.js` 内 `inspectAssetFile`，只换格式白名单/上限/错误码前缀，不复制第二份「路径解析+大小+sha」实现）；新增 `POST /api/model3d/texture/inspect`，两端点共用同一 `assetErrorStatus` 映射（404/413/403/400）；Blender 侧 Principled 挂 Image Texture→Base Color 并**逐字节复验 sha**（篡改→`texture_source_hash_mismatch` 落进 `unsupported[]`，同场景其余基本体照常构建）；预览端 `MeshStandardMaterial` 消费 metallic/emissive + `TextureLoader` 从工作区 URL 取贴图，取不到按节点显式报 `texture_reference_*` 并进告警区（前缀清单收敛一处）。**关键设计裁决**：`configure_display` 的切引擎条件由「声明灯光/环境」扩为「**或声明 PBR 材质**」——Workbench 的 MATERIAL 着色只看基础色，不认 metallic/emissive/贴图，不同步切 Cycles 就是 P2-02 刚修过的同一类「加了但看不见」静默失真；报告回显 `declaredMaterial` 与 `materials.declared[]` 供与像素对照 | **像素单调对照**（同环境光、同引擎、同采样：贴图换纯红后 front.png `R 157.1→204.7`、`B 183.5→142.2`）+ 篡改 sha 显式失败 + 预检格式/缺失/越界三态 + 白名单与上限跨 JS/TS/Python 逐值对账 + 「Python 出现 `images.load(... check_data` 即红」回归锁 + 实机腿 | `test/block322-p2-03-material.test.mjs` + `frontend/src/lib/scene3d.test.ts` + `acceptance/block-322-p2/block322-p2-03-material-live-live.json`（14/14）+ `…-material-detail.json` |
-| `P2-04` 序列帧与转盘视频 | 渲染面扩 `frames`/`turntable`（角度步进）；视频由 **Blender 内置 ffmpeg** 输出 mp4（不引入系统/npm 依赖）。**前置实测已扫清不确定性（见 §5）**：ffmpeg/H264 可用、`constant_rate_factor` 实名、产物名需目录发现、走「两次渲染」路线不依赖 VSE | 产物含 mp4 + 序列帧；bytes/sha/帧数可断言；登记进成果面 | 同上 |
+| `P2-04` 序列帧与转盘视频 **completed（2026-10-31，契约 5/5 + 实机 11/11）** | `turntable` 属**输出请求**而非场景真相：不进 SceneSpec、不参与 hash（同一份场景转 8 帧还是 48 帧不改几何，写进场景就会为纯出图理由刷 revision）；上下界唯一声明在 `helpers/model3d-views.js::normalizeTurntable`（`frames 2..48` 缺省 24、`elevationDeg -89..89` 缺省 20），MCP schema 引用常量不抄数字，provider 只透传不夹取；Blender 侧用 `frame_change_pre` handler 逐帧定角（**不用关键帧**：4.5 的位置/欧拉曲线只给 `AUTO/EASE_*` 四种插值，`LINEAR` 被 enum 拒 ⇒ bezier 系会让转盘两头变速），先逐帧 `write_still` 出 PNG 序列（帧名自己定，可断言），再 FFMPEG 动画跑出 mp4（名字由 Blender 拼 ⇒ **按目录发现**取，不猜）；未请求时零额外渲染；转盘失败计入 `report.ok` | 实机 **11/11 allPass**：mp4 存在且 sha/bytes 与**盘面重算全等**（23298 B）+ 文件头 `ftypisom` 证明是真 mp4 而非改名 PNG + 8 帧序列逐张 sha 全等且**8 个哈希互不相同**（证明相机真的在转，不是同一帧复制）+ 序列帧不进 `outputs`（只 1 个 mp4 进成果登记，N 张近似帧不淹面板）而单独以 `frameAssets` 可核 + 越界 `{frames:49}` 在探 Blender 之前 400 + 未请求场景 `turntable.requested=0` 且无 mp4（存量零变化） | `test/block322-p2-04-turntable.test.mjs` + `acceptance/block-322-p2/block322-p2-04-turntable-live-live.json` + `…-detail.json` |
 | `P2-05` 结果面视频预览 | viewer 注册 `.mp4/.webm`（`<video>` 有界加载 + 失败如实报） | 组件测试 + 实机：结果面打开视频可播放 | 同上 |
 
 ### P3 · 几何与装配
@@ -149,7 +149,7 @@ status: active
 **推荐队列序**：`P2-01 → P2-02 → P2-03 → P2-04 → P2-05 → P3-01 → P3-02a → P3-02b → P4-01 → P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`（撞 RULING 即停取材料；RULING 解锁项插回队尾；P3-03=mate 待 RULING-04，不入队）。**理由**：先把「看得见的表现力」做完（P2 是用户对 3D 能力最直观的感知面），再做几何正确性（P3），再做生产交付（P4 无依赖项/P6），最后是需要外部条件的项。
 
 **实际执行序（用户改序 2026-10-30「提交 P2-02 并开冲 P3」，覆盖上面的推荐序；§0 第 5 条允许阶段顺序因用户裁决调整）**：
-`P2-01 ✅ → P2-02 ✅ → P3-01 ✅ → P3-02a ✅ → P3-02b ✅ → P2-03 ✅（2026-10-31）→ P2-04 ▶（当前）→ P2-05 → P4-01 → P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`
+`P2-01 ✅ → P2-02 ✅ → P3-01 ✅ → P3-02a ✅ → P3-02b ✅ → P2-03 ✅ → P2-04 ✅（2026-10-31）→ P2-05 ▶（当前）→ P4-01 → P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`
 即 P2 剩余三票（PBR 贴图 / 序列帧视频 / 结果面视频）后移到 P3 之后，**未取消、未出籍**。原 `P3-02` 在执行中拆为 a/b 两票（求值器落真值处 / 预览消费求值结果），并把 `mate` 单列为撞裁决点的 `P3-03`。
 
 ---
@@ -168,6 +168,7 @@ status: active
 - **渲染引擎实测（2026-10-30，win32 + Blender 4.5.10 LTS 无头）**：`CYCLES(CPU)` 640×480/16 采样 **0.61s** 可用；`BLENDER_EEVEE_NEXT` 无头走软件回退 **13.34s** 不可用；`BLENDER_WORKBENCH` 不吃场景灯（声明灯光对它无效）。故 P2-02 起：未声明灯光/环境仍用 Workbench（存量耗时不变），声明后自动切 Cycles CPU（`environment.engine/samples` 可覆写，采样上限 128）。
 - 现有 SceneSpec/Blender/结果面/登记桥（RW-01）链路。
 - **P2-04 前置实测（2026-10-31，win32 + Blender 4.5.10 LTS 无头，探针脚本在仓库外临时目录跑完即删）**：内置 ffmpeg **可用**——`render.ffmpeg.format` 枚举含 `MPEG4/MKV/WEBM/AVI/...`，`codec` 含 `H264/H265/AV1/FFV1/...`；8 帧 320×240 Workbench 动画渲染产出 `turntable0001-0008.mp4` **8554 bytes**，单次 `bpy.ops.render.render(animation=True)` 即可成片。三条跨版本 API 名漂移当场抓到（写产品代码必须按这些实名，别再照旧文档猜）：①`Scene.use_sequencer` 与 `Scene.editor_type` 在 4.5 **已不存在**（VSE 路线需改用 `scene.sequence_editor`，且新场景是否自带该编辑器未验证）→ 本票取**两次渲染**路线（先 `write_still` 逐帧出 PNG 序列，再 FFMPEG 动画跑出 mp4），不依赖 VSE；②`render.ffmpeg.constant_rate_mode` 已改名 **`constant_rate_factor`**（枚举 `NONE/LOSSLESS/PERC_LOSSLESS/HIGH/MEDIUM/LOW/VERYLOW/LOWEST`）；③动画产物的真实文件名由 Blender 拼出 `<前缀><start>-<end>.mp4`，**必须由目录发现得出路径**，不得在代码里猜文件名（猜错就是产物存在但登记不到）。
+- **P2-04 执行中又抓一条（2026-10-31，实机腿首跑 V4-V8 五连红后改写路线）**：关键帧路线也不成立——4.5 里相机 `location`/`rotation_euler` 的 FCurve 插值枚举只有 `AUTO / EASE_IN / EASE_OUT / EASE_IN_OUT`，设 `LINEAR` 直接 `bpy_struct: enum "LINEAR" not found` 把整个 turntable 打挂，而 bezier 系会让转盘两头变速 ⇒ 最终用 **`frame_change_pre` handler 逐帧显式定角**（天然匀速，且不赌属性名/枚举）。跨版本 API 名与枚举漂移至此累计四条：布尔 `solver` vs `solver_mode`、`images.load` 无 `check_data`、`constant_rate_mode` → `constant_rate_factor`、关键帧插值无 `LINEAR`。**结论固化为纪律**：本纲凡新增 Blender 能力，先写一次性探针实测属性名/枚举/产物名，结论入 §5、探针跑完即删，再动产品代码——这不是可选步骤，四次教训都是实机腿才暴露的。
 - 可选外部服务（P5）需用户提供凭据与成本裁决。
 
 ## §6 验收与证据
