@@ -30,3 +30,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T08:02:33.188Z -->
 最后更新：2026-10-30（**RW-06-ENGINEERING-HYGIENE completed + RW 六包全部收口（终局；closeout 十三门 PASS + skills:check 报告级）**：B 线=ui-audit 门 109×（54.92s→0.50s，batchCommitMetadata 单次 git log 替代 per-commit fork ~1700 次；merge commit diff-tree/log --name-only 对照等价）/vitest 通道判销留痕（BLOCK-274 已根修，实测 8.97s）/PATH 债=Windows 侧专属登记（macOS 不适用实测核对）；A 线=可靠性基线落盘（3D 链 0ms/1578ms/恢复 5/5 + 门耗时新基线；长会话 soak 不伪造负载如实不测）；C 线=只读 Agent 独立重放「可用但有盲点」——4 处定位级盲点（RW-06 状态漂移/RW-05 证据目录缺席/triage 过期/evidence 处置缺位）全部修复，无产物缺失级。执行纲整体转 reference；C 档 6 条人眼清单（human-eye-checklist.md）待用户一次栈窗口。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T10:51:52.792Z -->
+最后更新：2026-10-30（**推送兑现记录**（用户口令「推」）——main 32 笔（d22f89f2..6e4469d6）+ snapshot-20261030/−2/−3/−4 四标签；快进推送、未改写历史、未碰其它分支；内容=RW-01~06 六包全链（含判销与对账）。本行只记录本轮已兑现授权，不构成常驻授权。G0 开发期常态 · 不外推 packaged/Provider/GA。
