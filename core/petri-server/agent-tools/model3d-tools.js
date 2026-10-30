@@ -16,6 +16,9 @@ const { DEFAULT_RENDER_VIEWS, normalizeTurntable } = require('../helpers/model3d
 const { runModel3DRecipe } = require('../helpers/model3d-recipe-runner');
 const blender = require('../helpers/blender-provider');
 const { runModel3DReview } = require('../helpers/model3d-review');
+const bomHelper = require('../helpers/model3d-bom');
+const assets = require('../helpers/model3d-assets');
+const { createModel3DSharePackage } = require('../helpers/model3d-share-package');
 const { buildModel3dArtifactRecords } = require('../helpers/model3d-artifact-projection');
 const {
   authorizeProject,
@@ -110,7 +113,7 @@ async function tool_model3d_apply(args = {}, ctx = {}) {
 }
 
 function normalizeFormats(formats) {
-  const allowed = new Set(['glb', 'stl', 'obj']);
+  const allowed = new Set(['glb', 'stl', 'obj', 'fbx', 'usdz']);
   const list = (Array.isArray(formats) ? formats : ['glb'])
     .map((item) => String(item).toLowerCase())
     .filter((item) => allowed.has(item));
@@ -142,6 +145,7 @@ async function runProvider(args, ctx) {
     views: Array.isArray(args.views) ? args.views : [...DEFAULT_RENDER_VIEWS],
     formats: args.renderOnly ? [] : normalizeFormats(args.formats),
     turntable: requestedTurntable.turntable,
+    lineart: args.lineart === true,
   });
   return { ...result, provider: { status: capability.status, version: capability.version } };
 }
@@ -149,6 +153,13 @@ async function runProvider(args, ctx) {
 async function tool_model3d_render(args = {}, ctx = {}) {
   const result = await runProvider({ ...args, renderOnly: true }, ctx);
   if (result.ok === false) return result;
+  const workspace = await projectWorkspace(ctx);
+  if (workspace.error) return workspace.error;
+  const relative = (value) => (value ? path.relative(workspace.root, value).replace(/\\/g, '/') : value);
+  const lineart = result.report?.lineart ? {
+    ...result.report.lineart,
+    views: Object.fromEntries(Object.entries(result.report.lineart.views || {}).map(([view, value]) => [view, relative(value)])),
+  } : null;
   return {
     ok: true,
     provider: 'blender',
@@ -156,6 +167,7 @@ async function tool_model3d_render(args = {}, ctx = {}) {
     scene: result.sceneHashFile,
     outDir: result.outDir,
     report: result.report,
+    lineart,
     outputs: result.outputs,
     frameAssets: result.frameAssets || [],
     durationMs: result.durationMs,
@@ -289,6 +301,91 @@ async function tool_model3d_visual_qa(args = {}, ctx = {}) {
   });
 }
 
+async function tool_model3d_share(args = {}, ctx = {}) {
+  const workspace = await projectWorkspace(ctx);
+  if (workspace.error) return workspace.error;
+  if (typeof args.scenePath !== 'string' || typeof args.manifestPath !== 'string') {
+    return { ok: false, error: 'share_scene_and_manifest_required' };
+  }
+  return createModel3DSharePackage({
+    workspaceRoot: workspace.root,
+    scenePath: args.scenePath,
+    manifestPath: args.manifestPath,
+    outputs: args.outputs,
+    packageName: args.name,
+  });
+}
+
+async function tool_model3d_asset(args = {}, ctx = {}) {
+  const action = String(args.action || 'list');
+  if (action === 'list') {
+    const workspace = await projectWorkspace(ctx);
+    if (workspace.error) return workspace.error;
+    return assets.listAssets({ workspaceRoot: workspace.root, query: args.query, limit: args.limit });
+  }
+  if (action === 'get') {
+    const workspace = await projectWorkspace(ctx);
+    if (workspace.error) return workspace.error;
+    return assets.getAsset({ workspaceRoot: workspace.root, assetId: args.assetId });
+  }
+  if (action !== 'import') return { ok: false, error: 'asset_action_invalid' };
+  const workspace = await projectWorkspace(ctx);
+  if (workspace.error) return workspace.error;
+  return assets.importMeshAsset({
+    workspaceRoot: workspace.root,
+    sourcePath: args.sourcePath,
+    name: args.name,
+    provenance: args.provenance,
+  });
+}
+
+async function tool_model3d_bom(args = {}, ctx = {}) {
+  const workspace = await projectWorkspace(ctx);
+  if (workspace.error) return workspace.error;
+  const checked = requireScene(args);
+  if (checked.error) return checked.error;
+  const resolved = scene3d.resolveSceneSpec(checked.scene);
+  if (!resolved.ok) return resolved;
+  const capability = await blender.probeBlender();
+  if (capability.status !== 'ready') {
+    return { ok: false, error: 'capability_unavailable', reason: capability.reason };
+  }
+  const run = await blender.runBlenderScene({
+    scene: resolved.scene,
+    workspaceRoot: workspace.root,
+    views: [],
+    formats: [],
+  });
+  if (!run.ok) return run;
+  const bom = bomHelper.buildBom(
+    checked.scene,
+    run.report,
+    { defaultDensityKgM3: Number.isFinite(args.defaultDensityKgM3) ? args.defaultDensityKgM3 : undefined },
+  );
+  if (!bom.ok) return bom;
+  const artifacts = bomHelper.writeBomArtifacts({
+    workspaceRoot: workspace.root,
+    bom,
+    runId: `bom-${Date.now().toString(36)}`,
+  });
+  if (!artifacts.ok) return artifacts;
+  return {
+    ok: true,
+    schema: bom.schema,
+    sceneHash: bom.sceneHash,
+    totals: bom.totals,
+    rows: bom.rows,
+    assumptions: bom.assumptions,
+    mesh: bom.mesh,
+    dir: artifacts.dir,
+    files: artifacts.files,
+    artifacts: buildModel3dArtifactRecords(ctx.projectId, artifacts.files),
+    manifest: artifacts.manifest,
+    csv: artifacts.csv,
+    markdown: artifacts.markdown,
+  };
+}
+
 async function tool_model3d_recipe(args = {}, ctx = {}) {
   if (args.dryRun !== false) {
     return runModel3DRecipe({ recipeId: args.recipeId, params: args.params, dryRun: true });
@@ -316,4 +413,7 @@ module.exports = {
   tool_model3d_export,
   tool_model3d_visual_qa,
   tool_model3d_recipe,
+  tool_model3d_bom,
+  tool_model3d_asset,
+  tool_model3d_share,
 };

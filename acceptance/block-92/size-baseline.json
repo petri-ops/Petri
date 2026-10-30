@@ -48,7 +48,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 1321,
-      "sha256": "f2b4ff5044805920822ae610568068a2805f07b05bb976948f947eab7881cfd4"
+      "sha256": "31948b92f4b2c2953230f82b55786719e83cf5004830bd513258ecdad6310ef7"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",

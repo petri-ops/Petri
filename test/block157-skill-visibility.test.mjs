@@ -42,7 +42,7 @@ test('BLOCK-157 KNW-1 注册表：skill_discover/skill_get 进静态面（含 W7
   const names = TOOL_DEFS.map((d) => d.function.name);
   assert.ok(names.includes('skill_discover'), 'skill_discover 应在 TOOL_DEFS');
   assert.ok(names.includes('skill_get'), 'skill_get 应在 TOOL_DEFS');
-  assert.equal(TOOL_DEFS.length, 101, '静态工具总数 93→101（NEXT-04A model3d_* +6；NEXT-04B model3d_visual_qa +1；NEXT-05 model3d_recipe +1）');
+  assert.equal(TOOL_DEFS.length, 104, '静态工具总数 93→104（NEXT-04A model3d_* +6；NEXT-04B model3d_visual_qa +1；NEXT-05 model3d_recipe +1；BLOCK-322 model3d_bom +1）');
   // 三方一致性：handler/contract 已接线（registry 模块加载即校验，此处显式双查）
   assert.equal(typeof registry.getToolHandler('skill_discover'), 'function');
   assert.equal(typeof registry.getToolHandler('skill_get'), 'function');

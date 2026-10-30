@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段已全部收口（P2-01~05）+ P3-01 + P3-02a/b，下一票=P4-01 BOM 与质量属性，队列见 §3.5）
+**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04/P4-05/P5-02/P6-05，等用户裁决）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -116,9 +116,9 @@ status: active
 
 | ID | 范围 | 验收 | 依赖 |
 | --- | --- | --- | --- |
-| `P4-01` BOM 与质量属性 | 装配树 → BOM 表（CSV/MD）+ 体积×密度→质量（密度缺省可声明） | 表格产物 + sha + 登记 + 与网格报告体积一致 | 无（可先做） |
-| `P4-02` 公差字段 | `metadata.tolerances` 结构化（标称/上下偏差/单位）+ 报告渲染 | 校验 + 报告产出 | 无 |
-| `P4-03` 三视图线稿 | Blender freestyle/lineart 出前/顶/侧线稿 PNG + 视图标注（**不是 GD&T 工程图**） | PNG 产物 + 视图可区分 + 实机 | 无 |
+| `P4-01` BOM 与质量属性 **completed（2026-10-31，定向 5/5 + 实机 BOM 全绿）** | SceneSpec 节点 → BOM CSV/MD/JSON + `bom-manifest.json`；体积取 Blender 网格报告（watertight 才生成），质量=volume×density；密度可经节点 `material.densityKgM3` 或 `metadata.defaultDensityKgM3` 声明（缺省 1000 kg/m³）；非水密拒绝 | 表格产物 + sha + manifest 登记 + 与网格报告体积一致；实机 392000mm³/405.6g、半写/缺件 fail-closed | `acceptance/block-322-p4/block322-p4-p6-live.json` |
+| `P4-02` 公差字段 **completed（2026-10-31，后端/前端双层校验）** | `metadata.tolerances` 结构化（nodeId/feature/nominal/lower/upper/unit=mm，≤50 条）；未知节点/上下限倒置/非 mm fail-closed；BOM Markdown 增加「公差声明」表 | 校验 + 报告产出；前端镜像同判据 | `test/block322-p4-bom.test.mjs` + BOM 实机 |
+| `P4-03` 三视图线稿 **completed（2026-10-31，真实 Blender Freestyle）** | `model3d_render` 增 `lineart` 输出请求：前/顶/侧 Freestyle 线稿 PNG + `lineart.labels` 视图标注；不声明即零额外渲染；**不是 GD&T 工程图** | 三张 PNG 哈希互不相同 + labels 在场 + 实机 | `acceptance/block-322-p4/block322-p4-p6-live.json` |
 | `P4-04` STEP/IGES 导入导出 | 需几何内核选型 | — | **RULING-01** |
 | `P4-05` 2D 工程图（标注/剖视） | 真工程图（尺寸链/GD&T） | — | **RULING-01** |
 
@@ -126,17 +126,17 @@ status: active
 
 | ID | 范围 | 验收 | 依赖 |
 | --- | --- | --- | --- |
-| `P5-01` 生成资产入链管道 | 任意来源的 GLB → 资产目录 → sha 锚定 → `add_node`（复用 P1c）+ **provenance 留痕**（model/prompt 哈希/参数快照，不存明文提示词以外的敏感物） | 篡改 sha 拒绝 + provenance 落盘 + 实机 | 无 |
+| `P5-01` 生成资产入链管道 **completed（2026-10-31，定向 3/3 + 实机）** | 工作区 glb/gltf/stl/obj → `model3d/assets/<sha256>.<ext>` 单份字节；`model3d_asset` import 返回 mesh-reference 节点 + provenance（model/promptHash/parameters）；目标字节被篡改 → `asset_copy_hash_mismatch` 拒绝 | 篡改拒绝 + provenance 落盘 + 实机 | `test/block322-p5-assets.test.mjs` + 实机 |
 | `P5-02` 真实生成服务接线 | 文/图生 3D | — | **RULING-02**（服务/成本/隐私） |
 
 ### P6 · 生产交付与协作
 
 | ID | 范围 | 验收 | 依赖 |
 | --- | --- | --- | --- |
-| `P6-01` 导出矩阵扩展 | USDZ（Blender 内置）/ FBX（内置） | 产物 + sha + 登记 + 实机 | 无 |
-| `P6-02` 资产库 | `model3d/assets/` 注册表 + 列表/检索/复用（引用而非复制） | 检索命中 + 引用同一 sha + 实机 | 无 |
-| `P6-03` 版本对比增强 | 场景 diff 之上加几何差值投影（bounds/体积/对象数变化） | 纯函数 + 组件 + 实机 | 无 |
-| `P6-04` 分享包 | 本地导出包（场景 + manifest + 产物 + 校验和），不做云端 | 包可复算 + 缺件拒绝 | 无 |
+| `P6-01` 导出矩阵扩展 **completed（2026-10-31，真实 Blender）** | 导出格式白名单扩 `fbx`/`usdz`；Blender 侧 `export_scene.fbx` + `wm.usd_export(selected_objects_only)`；输出进入 manifest/登记 | FBX 二进制头 + USDZ ZIP 头 + sha + 实机 | `test/block322-p6-share.test.mjs` + 实机 |
+| `P6-02` 资产库 **completed（2026-10-31，定向 3/3 + 实机）** | `model3d/assets/index.json` 注册表 + `model3d_asset` list/get/import；列表按名称/路径/sha/model 检索，复用返回同一 sha 的 mesh-reference | 检索命中 + 引用同一 sha + 实机 | `test/block322-p5-assets.test.mjs` + 实机 |
+| `P6-03` 版本对比增强 **completed（2026-10-31，纯函数 2/2 + UI 4/4）** | `compareGeometryReports` 消费真实 Blender 网格报告，输出对象/三角面/体积/bounds 差值；`POST /api/model3d/scene/compare-geometry` + 对比面板「几何差异」显示 Δ，不重算几何 | 纯函数 + 组件 + 实机（Δ bounds 30×0×0） | `test/block322-p6-geometry-compare.test.mjs` + `acceptance/block-322-p6/block322-p6-geometry-compare-live-live.json` |
+| `P6-04` 分享包 **completed（2026-10-31，定向 2/2 + 实机）** | `model3d_share` 生成 `checksums.json` + zip（SceneSpec + manifest + 已登记产物）；打包前逐件校验存在性/工作区边界/manifest sha，缺件或哈希不符拒绝；不接云端 | zip PK 头 + bundle 校验和 + 缺件/篡改拒绝 | `test/block322-p6-share.test.mjs` + 实机 |
 | `P6-05` 切片对接 | Orca/Cura CLI（**外部可执行，默认关 + capability 探测 + 缺失如实报**） | 探测三态 + 真实切片产物 | **RULING-03**（是否允许外部 CLI） |
 
 ### 裁决点（材料就绪即停，不自行选型）
@@ -149,7 +149,7 @@ status: active
 **推荐队列序**：`P2-01 → P2-02 → P2-03 → P2-04 → P2-05 → P3-01 → P3-02a → P3-02b → P4-01 → P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`（撞 RULING 即停取材料；RULING 解锁项插回队尾；P3-03=mate 待 RULING-04，不入队）。**理由**：先把「看得见的表现力」做完（P2 是用户对 3D 能力最直观的感知面），再做几何正确性（P3），再做生产交付（P4 无依赖项/P6），最后是需要外部条件的项。
 
 **实际执行序（用户改序 2026-10-30「提交 P2-02 并开冲 P3」，覆盖上面的推荐序；§0 第 5 条允许阶段顺序因用户裁决调整）**：
-`P2-01 ✅ → P2-02 ✅ → P3-01 ✅ → P3-02a ✅ → P3-02b ✅ → P2-03 ✅ → P2-04 ✅ → P2-05 ✅（2026-10-31，P2 段收官）→ P4-01 ▶（当前）→ P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`
+`P2-01 ✅ → P2-02 ✅ → P3-01 ✅ → P3-02a ✅ → P3-02b ✅ → P2-03 ✅ → P2-04 ✅ → P2-05 ✅ → P4-01 ✅ → P4-02 ✅ → P4-03 ✅ → P5-01 ✅ → P6-01 ✅ → P6-02 ✅ → P6-03 ✅ → P6-04 ✅（2026-10-31，无裁决项队列收官）→ 余下=RULING-01 P4-04/05、RULING-02 P5-02、RULING-03 P6-05、RULING-04 P3-03`
 即 P2 剩余三票（PBR 贴图 / 序列帧视频 / 结果面视频）后移到 P3 之后，**未取消、未出籍**。原 `P3-02` 在执行中拆为 a/b 两票（求值器落真值处 / 预览消费求值结果），并把 `mate` 单列为撞裁决点的 `P3-03`。
 
 ---
@@ -169,6 +169,7 @@ status: active
 - 现有 SceneSpec/Blender/结果面/登记桥（RW-01）链路。
 - **P2-04 前置实测（2026-10-31，win32 + Blender 4.5.10 LTS 无头，探针脚本在仓库外临时目录跑完即删）**：内置 ffmpeg **可用**——`render.ffmpeg.format` 枚举含 `MPEG4/MKV/WEBM/AVI/...`，`codec` 含 `H264/H265/AV1/FFV1/...`；8 帧 320×240 Workbench 动画渲染产出 `turntable0001-0008.mp4` **8554 bytes**，单次 `bpy.ops.render.render(animation=True)` 即可成片。三条跨版本 API 名漂移当场抓到（写产品代码必须按这些实名，别再照旧文档猜）：①`Scene.use_sequencer` 与 `Scene.editor_type` 在 4.5 **已不存在**（VSE 路线需改用 `scene.sequence_editor`，且新场景是否自带该编辑器未验证）→ 本票取**两次渲染**路线（先 `write_still` 逐帧出 PNG 序列，再 FFMPEG 动画跑出 mp4），不依赖 VSE；②`render.ffmpeg.constant_rate_mode` 已改名 **`constant_rate_factor`**（枚举 `NONE/LOSSLESS/PERC_LOSSLESS/HIGH/MEDIUM/LOW/VERYLOW/LOWEST`）；③动画产物的真实文件名由 Blender 拼出 `<前缀><start>-<end>.mp4`，**必须由目录发现得出路径**，不得在代码里猜文件名（猜错就是产物存在但登记不到）。
 - **P2-04 执行中又抓一条（2026-10-31，实机腿首跑 V4-V8 五连红后改写路线）**：关键帧路线也不成立——4.5 里相机 `location`/`rotation_euler` 的 FCurve 插值枚举只有 `AUTO / EASE_IN / EASE_OUT / EASE_IN_OUT`，设 `LINEAR` 直接 `bpy_struct: enum "LINEAR" not found` 把整个 turntable 打挂，而 bezier 系会让转盘两头变速 ⇒ 最终用 **`frame_change_pre` handler 逐帧显式定角**（天然匀速，且不赌属性名/枚举）。跨版本 API 名与枚举漂移至此累计四条：布尔 `solver` vs `solver_mode`、`images.load` 无 `check_data`、`constant_rate_mode` → `constant_rate_factor`、关键帧插值无 `LINEAR`。**结论固化为纪律**：本纲凡新增 Blender 能力，先写一次性探针实测属性名/枚举/产物名，结论入 §5、探针跑完即删，再动产品代码——这不是可选步骤，四次教训都是实机腿才暴露的。
+- **媒体加载实测（2026-10-31，win32 + Electron/Chromium，P2-05 实机腿抓真）**：`<video src="http://127.0.0.1:3001/...">` 这种**跨源**媒体加载会被 Chromium 直接拒绝——`MEDIA_ELEMENT_ERROR: Media load rejected by URL safety check`（页面在 :3000、产物读面在 :3001；`<img>` 与 fetch 不受这条限制，所以此前图片/模型预览从未暴露它）。同源（页面 origin）虽过安全检查，但 Vite dev 不代理 `/api` ⇒ 取回的是 SPA HTML，FFmpeg demuxer 照样打不开（`DEMUXER_ERROR_COULD_NOT_OPEN`）。**结论固化为形态**：媒体一律「fetch 取字节（connect-src 已放行）→ 自建 `blob:` 源 → 交给 `<video>`」，并补 CSP `media-src 'self' blob:`；这也顺带成为有界加载的执法点（超上限不读入内存）。未来音频等其他媒体面沿用同一形态。
 - 可选外部服务（P5）需用户提供凭据与成本裁决。
 
 ## §6 验收与证据

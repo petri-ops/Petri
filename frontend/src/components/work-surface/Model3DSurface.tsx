@@ -22,7 +22,7 @@ import type { Model3DCameraApi, Model3DPoint } from './Model3DScene';
 import { Model3DReviewPanel } from './Model3DReviewPanel';
 import { SketchSpecDialog } from './SketchSpecDialog';
 import { Model3DEditPanel } from './Model3DEditPanel';
-import { diffSceneSpecs, type SceneDiff } from '@/lib/sceneEditClient';
+import { compareSceneGeometry, diffSceneSpecs, type GeometryCompareResult, type SceneDiff } from '@/lib/sceneEditClient';
 import button from '@/components/ui/controls/button.module.css';
 import styles from './Model3DSurface.module.css';
 
@@ -77,6 +77,8 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   });
   const [compareScene, setCompareScene] = React.useState<Scene3DView['scene'] | null>(null);
   const [compareDiff, setCompareDiff] = React.useState<SceneDiff | null>(null);
+  const [geometryDiff, setGeometryDiff] = React.useState<GeometryCompareResult | null>(null);
+  const [geometryError, setGeometryError] = React.useState<string | null>(null);
   const [compareError, setCompareError] = React.useState<string | null>(null);
   const cameraApiRef = React.useRef<Model3DCameraApi | null>(null);
   const compareFileRef = React.useRef<HTMLInputElement | null>(null);
@@ -269,6 +271,8 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         return;
       }
       setCompareScene(normalized.view.scene);
+      setGeometryDiff(null);
+      setGeometryError(null);
       setCompareDiff(await diffSceneSpecs(view.scene, normalized.view.scene));
     } catch (caught) {
       setCompareError(caught instanceof Error ? caught.message : 'compare_failed');
@@ -511,7 +515,8 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           <header className={styles.compareHead}>
             <strong>SceneSpec 对比</strong>
             <span className={styles.meta}>{compareDiff.beforeHash.slice(0, 12)} → {compareDiff.afterHash.slice(0, 12)}</span>
-            <button type="button" className={button.ghost} onClick={() => { setCompareScene(null); setCompareDiff(null); }}>关闭</button>
+            <button type="button" className={button.ghost} disabled={!projectId} onClick={() => { void compareSceneGeometry({ projectId: projectId || '', before: view?.scene, after: compareScene }).then(setGeometryDiff).catch((caught) => setGeometryError(caught instanceof Error ? caught.message : 'geometry_compare_failed')); }}>几何差异</button>
+            <button type="button" className={button.ghost} onClick={() => { setCompareScene(null); setCompareDiff(null); setGeometryDiff(null); setGeometryError(null); }}>关闭</button>
           </header>
           {compareDiff.changed ? (
             <div className={styles.compareRows}>
@@ -525,6 +530,15 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
               {compareDiff.constraints.removed.length > 0 ? <span>移除约束 {compareDiff.constraints.removed.length}</span> : null}
             </div>
           ) : <p className={styles.meta}>两个 SceneSpec 的语义一致。</p>}
+          {geometryError ? <p className={styles.error} role="alert">{geometryError}</p> : null}
+          {geometryDiff ? (
+            <div className={styles.compareRows} data-testid="model3d-geometry-diff">
+              <span>对象 {geometryDiff.before.objects} → {geometryDiff.after.objects}（Δ {geometryDiff.deltas.objects ?? '—'}）</span>
+              <span>三角面 {geometryDiff.before.triangles} → {geometryDiff.after.triangles}（Δ {geometryDiff.deltas.triangles ?? '—'}）</span>
+              <span>体积 mm³ {geometryDiff.before.totalVolumeMm3 ?? '—'} → {geometryDiff.after.totalVolumeMm3 ?? '—'}（Δ {geometryDiff.deltas.totalVolumeMm3 ?? '—'}）</span>
+              <span>包围盒 {geometryDiff.before.boundsMm ? `${geometryDiff.before.boundsMm.x}×${geometryDiff.before.boundsMm.y}×${geometryDiff.before.boundsMm.z}` : '—'} → {geometryDiff.after.boundsMm ? `${geometryDiff.after.boundsMm.x}×${geometryDiff.after.boundsMm.y}×${geometryDiff.after.boundsMm.z}` : '—'}（Δ {geometryDiff.deltas.boundsMm ? `${geometryDiff.deltas.boundsMm.x ?? '—'}×${geometryDiff.deltas.boundsMm.y ?? '—'}×${geometryDiff.deltas.boundsMm.z ?? '—'}` : '—'}）</span>
+            </div>
+          ) : null}
         </section>
       ) : null}
       {sketchOpen ? <SketchSpecDialog onClose={() => setSketchOpen(false)} /> : null}

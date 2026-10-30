@@ -43,6 +43,9 @@ const {
   tool_model3d_export,
   tool_model3d_visual_qa,
   tool_model3d_recipe,
+  tool_model3d_bom,
+  tool_model3d_asset,
+  tool_model3d_share,
 } = require('./model3d-tools');
 const {
   tool_result_edit_plan,
@@ -193,6 +196,9 @@ const HANDLERS = {
   model3d_export: tool_model3d_export,
   model3d_visual_qa: tool_model3d_visual_qa,
   model3d_recipe: tool_model3d_recipe,
+  model3d_bom: tool_model3d_bom,
+  model3d_asset: tool_model3d_asset,
+  model3d_share: tool_model3d_share,
   // BLOCK-97 — 任务清单维护（整单幂等替换；快照经 task_todo 事件广播）
   todo_write: tool_todo_write,
   // BLOCK-116 W2（BK-04）— 决策台账只读观测面（数据源 helpers/decision-log 单源直调）
@@ -338,6 +344,9 @@ const CONTRACTS = {
   model3d_export: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process', 'artifacts'], 180000),
   model3d_visual_qa: contract('vision', 'execution', 'R2', ['project.files', 'local.process', 'llm.provider'], 180000),
   model3d_recipe: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process', 'artifacts'], 180000),
+  model3d_bom: contract('result-studio', 'execution', 'R2', ['project.files', 'local.process', 'artifacts'], 180000),
+  model3d_asset: contract('result-studio', 'workspace-write', 'R2', ['project.files', 'artifacts'], 20000),
+  model3d_share: contract('result-studio', 'workspace-write', 'R2', ['project.files', 'artifacts'], 30000),
   // BLOCK-97 — 任务清单：任务运行内的临时 UI 态（事件流承载，非用户数据表），
   // 与 plan 同族 state-write/R1；不设 userId 门（访客会话可用，见 todo-tools.js 头注）
   todo_write: contract('planning', 'state-write', 'R1', ['ui.session'], 200),

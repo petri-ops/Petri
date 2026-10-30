@@ -27,6 +27,7 @@ def parse_args():
     parser.add_argument('--views', default='front,top,side,iso')
     parser.add_argument('--formats', default='glb,stl,obj')
     parser.add_argument('--root', default='')
+    parser.add_argument('--lineart', default='0')
     parser.add_argument('--turntable', type=int, default=0)
     parser.add_argument('--spin-elevation', type=float, default=20.0)
     return parser.parse_args(tail)
@@ -626,7 +627,9 @@ def add_lights(lights):
     return created
 
 
-def render_views(out_dir, views, bounds, declared_spec=None):
+def render_views(out_dir, views, bounds, declared_spec=None, prefix='', lineart=False):
+    bpy.context.scene.render.use_freestyle = bool(lineart)
+    bpy.context.scene.view_layers[0].use_freestyle = bool(lineart)
     camera, center, size = setup_camera(bounds)
     declared = build_declared_camera(declared_spec) if isinstance(declared_spec, dict) else None
     bpy.context.scene.render.resolution_percentage = 100
@@ -650,7 +653,7 @@ def render_views(out_dir, views, bounds, declared_spec=None):
             aim(camera, locations[view], center)
         else:
             continue
-        path = os.path.join(out_dir, f'{view}.png')
+        path = os.path.join(out_dir, f'{prefix}{view}.png')
         bpy.context.scene.render.filepath = path
         bpy.ops.render.render(write_still=True)
         paths[view] = path
@@ -794,6 +797,14 @@ def export_formats(out_dir, formats, objects):
         path = os.path.join(out_dir, 'scene.obj')
         bpy.ops.wm.obj_export(filepath=path, export_selected_objects=True)
         paths['obj'] = path
+    if 'fbx' in formats:
+        path = os.path.join(out_dir, 'scene.fbx')
+        bpy.ops.export_scene.fbx(filepath=path, use_selection=True)
+        paths['fbx'] = path
+    if 'usdz' in formats:
+        path = os.path.join(out_dir, 'scene.usdz')
+        bpy.ops.wm.usd_export(filepath=path, selected_objects_only=True, export_cameras=False, export_lights=False)
+        paths['usdz'] = path
     return paths
 
 
@@ -840,6 +851,12 @@ def main():
         light_errors.append(str(error))
     render_settings = apply_render_settings(scene.get('render'))
     render_paths, declared = render_views(args.out, views, bounds, scene.get('camera'))
+    lineart = {'requested': args.lineart == '1', 'views': {}, 'labels': {'front': '前视图', 'top': '顶视图', 'side': '侧视图'}, 'error': None}
+    if lineart['requested']:
+        try:
+            lineart['views'], _ = render_views(args.out, ['front', 'top', 'side'], bounds, None, prefix='lineart-', lineart=True)
+        except Exception as error:
+            lineart['error'] = str(error)
     export_paths = export_formats(args.out, formats, objects)
     # 转盘放最后：它会改写 scene.render 的输出格式，先跑完静态图与导出再动它。
     requested_frames = int(args.turntable or 0)
@@ -851,7 +868,7 @@ def main():
         except Exception as error:
             turntable['errors'].append(str(error))
     report = {
-        'ok': len(unsupported) == 0 and not light_errors and not geometry_errors and not turntable['errors'],
+        'ok': len(unsupported) == 0 and not light_errors and not geometry_errors and not turntable['errors'] and not (lineart['requested'] and lineart['error']),
         'blenderVersion': bpy.app.version_string,
         'renderEngine': bpy.context.scene.render.engine,
         'display': display,
@@ -872,6 +889,7 @@ def main():
             'size': list(bounds[1] - bounds[0]),
         },
         'renders': render_paths,
+        'lineart': lineart,
         'exports': export_paths,
         'turntable': turntable,
         'unsupported': unsupported,

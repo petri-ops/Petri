@@ -291,6 +291,18 @@
     "label": "已生成 3D recipe",
     "icon": "layers"
   },
+  "model3d_bom": {
+    "label": "已生成 BOM",
+    "icon": "file"
+  },
+  "model3d_asset": {
+    "label": "已处理 3D 资产",
+    "icon": "layers"
+  },
+  "model3d_share": {
+    "label": "已生成 3D 分享包",
+    "icon": "download"
+  },
   "search": {
     "label": "已搜索",
     "icon": "globe"

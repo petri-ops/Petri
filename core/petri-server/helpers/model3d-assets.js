@@ -1,0 +1,140 @@
+'use strict';
+
+/**
+ * helpers/model3d-assets.js — BLOCK-322 P5-01/P6-02 外部资产入链与资产库。
+ *
+ * 资产只存一份字节：model3d/assets/<sha256>.<ext>；SceneSpec 只保存工作区相对路径 +
+ * sourceSha256 引用。索引/来源留痕是检索元数据，不是第二份资产真相。
+ */
+
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { inspectMeshAsset } = require('./mesh-assets');
+const { resolveWorkspaceTarget } = require('../agent-tools/workspace-tools/internals');
+
+const ASSET_ROOT = 'model3d/assets';
+const INDEX_SCHEMA = 'model3d-assets/v1';
+const MAX_PROVENANCE_CHARS = 4000;
+
+function indexRelativePath() { return `${ASSET_ROOT}/index.json`; }
+
+function readIndex(workspaceRoot) {
+  const indexPath = path.join(workspaceRoot, ...ASSET_ROOT.split('/'), 'index.json');
+  try {
+    const parsed = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
+    if (parsed && parsed.schema === INDEX_SCHEMA && Array.isArray(parsed.assets)) return parsed;
+  } catch { /* missing or corrupt index is an empty library */ }
+  return { schema: INDEX_SCHEMA, assets: [] };
+}
+
+function writeIndex(workspaceRoot, index) {
+  const dir = path.join(workspaceRoot, ...ASSET_ROOT.split('/'));
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, 'index.json');
+  const temp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(temp, `${JSON.stringify(index, null, 2)}\n`);
+  fs.renameSync(temp, file);
+}
+
+function cleanProvenance(input) {
+  const source = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+  const clean = {};
+  for (const key of ['model', 'promptHash', 'parameters', 'source', 'generator', 'license']) {
+    if (source[key] === undefined) continue;
+    const text = typeof source[key] === 'string' ? source[key] : JSON.stringify(source[key]);
+    clean[key] = text.slice(0, MAX_PROVENANCE_CHARS);
+  }
+  return clean;
+}
+
+function assetId(sha) { return `asset-${String(sha).slice(0, 16)}`; }
+
+async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const inspected = await inspectMeshAsset({ workspaceRoot, relativePath: sourcePath });
+  if (!inspected.ok) return inspected;
+  const extension = path.extname(inspected.path).toLowerCase();
+  const destinationRel = `${ASSET_ROOT}/${inspected.sourceSha256}${extension}`;
+  let sourceTarget;
+  let destinationTarget;
+  try {
+    sourceTarget = await resolveWorkspaceTarget(workspaceRoot, inspected.path, { createRoot: false });
+    destinationTarget = await resolveWorkspaceTarget(workspaceRoot, destinationRel, { createRoot: true });
+  } catch (error) {
+    return { ok: false, error: error.code || 'path_rejected', message: error.message };
+  }
+  fs.mkdirSync(path.dirname(destinationTarget.target), { recursive: true });
+  if (!fs.existsSync(destinationTarget.target)) {
+    fs.copyFileSync(sourceTarget.target, destinationTarget.target);
+  }
+  const copiedSha = crypto.createHash('sha256').update(fs.readFileSync(destinationTarget.target)).digest('hex');
+  if (copiedSha !== inspected.sourceSha256) {
+    return { ok: false, error: 'asset_copy_hash_mismatch', expected: inspected.sourceSha256, actual: copiedSha };
+  }
+  const clean = cleanProvenance(provenance);
+  const provenanceRel = `${ASSET_ROOT}/${inspected.sourceSha256}.provenance.json`;
+  const provenanceRecord = {
+    schema: 'model3d-asset-provenance/v1',
+    sha256: inspected.sourceSha256,
+    bytes: inspected.bytes,
+    format: inspected.format,
+    name: String(name || path.basename(inspected.path)).slice(0, 200),
+    sourcePath: inspected.path,
+    importedAt: new Date().toISOString(),
+    ...clean,
+  };
+  const provenancePath = path.join(workspaceRoot, ...provenanceRel.split('/'));
+  fs.writeFileSync(provenancePath, `${JSON.stringify(provenanceRecord, null, 2)}\n`);
+  const index = readIndex(workspaceRoot);
+  const id = assetId(inspected.sourceSha256);
+  const entry = {
+    id,
+    name: provenanceRecord.name,
+    path: destinationRel,
+    sha256: inspected.sourceSha256,
+    bytes: inspected.bytes,
+    format: inspected.format,
+    sourcePath: inspected.path,
+    provenancePath: provenanceRel,
+    importedAt: provenanceRecord.importedAt,
+    model: clean.model || null,
+  };
+  const existing = index.assets.findIndex((asset) => asset.sha256 === inspected.sourceSha256);
+  if (existing >= 0) index.assets[existing] = entry;
+  else index.assets.push(entry);
+  writeIndex(workspaceRoot, index);
+  return {
+    ok: true,
+    asset: entry,
+    node: {
+      id,
+      type: 'mesh-reference',
+      source: { path: destinationRel, sourceSha256: inspected.sourceSha256 },
+      label: entry.name,
+    },
+    provenance: provenanceRecord,
+  };
+}
+
+function listAssets({ workspaceRoot, query = '', limit = 20 } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const text = String(query || '').trim().toLowerCase();
+  const max = Math.min(50, Math.max(1, Number(limit) || 20));
+  const index = readIndex(workspaceRoot);
+  const matches = index.assets
+    .filter((asset) => !text || `${asset.name} ${asset.path} ${asset.sha256} ${asset.model || ''}`.toLowerCase().includes(text))
+    .sort((a, b) => String(b.importedAt).localeCompare(String(a.importedAt)))
+    .slice(0, max);
+  return { ok: true, count: matches.length, total: index.assets.length, assets: matches, indexPath: indexRelativePath() };
+}
+
+function getAsset({ workspaceRoot, assetId: requestedId } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const index = readIndex(workspaceRoot);
+  const asset = index.assets.find((entry) => entry.id === requestedId || entry.sha256 === requestedId);
+  if (!asset) return { ok: false, error: 'asset_not_found' };
+  return { ok: true, asset, node: { id: asset.id, type: 'mesh-reference', source: { path: asset.path, sourceSha256: asset.sha256 }, label: asset.name } };
+}
+
+module.exports = { ASSET_ROOT, INDEX_SCHEMA, importMeshAsset, listAssets, getAsset, indexRelativePath };

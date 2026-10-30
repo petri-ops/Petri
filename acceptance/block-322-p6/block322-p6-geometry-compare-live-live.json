@@ -1,0 +1,28 @@
+{
+  "name": "block322-p6-geometry-compare-live",
+  "startedAt": "2026-10-30T23:20:59.453Z",
+  "finishedAt": "2026-10-30T23:21:02.475Z",
+  "assertions": [
+    {
+      "name": "G0_project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvvliq14_cx92\",\"name\":\"B322-P6-1793402459456\",\"created_at\":\"2026-10-30T23:20:59.464Z\",\"updated_at\":\"2026-10-30T23:20:59.464Z\",\"description\":\"\",\"is"
+    },
+    {
+      "name": "G1_geometry_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "G2_geometry_diff",
+      "pass": true,
+      "detail": "对象 2 → 2（Δ 0）三角面 136 → 136（Δ 0）体积 mm³ 384898.976141 → 480898.976141（Δ 96000）包围盒 124×80×40 → 154×80×40（Δ 30×0×0）"
+    },
+    {
+      "name": "G3_bounds_delta_30",
+      "pass": true,
+      "detail": "对象 2 → 2（Δ 0）三角面 136 → 136（Δ 0）体积 mm³ 384898.976141 → 480898.976141（Δ 96000）包围盒 124×80×40 → 154×80×40（Δ 30×0×0）"
+    }
+  ],
+  "allPass": true
+}

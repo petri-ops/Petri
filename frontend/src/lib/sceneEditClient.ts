@@ -125,3 +125,41 @@ export async function diffSceneSpecs(before: unknown, after: unknown): Promise<S
   const data = await parse<{ diff: SceneDiff }>(response);
   return data.diff;
 }
+
+interface GeometryFacts {
+  objects: number | null;
+  triangles: number | null;
+  nonManifoldEdges: number | null;
+  watertight: boolean;
+  totalVolumeMm3: number | null;
+  boundsMm: { x: number; y: number; z: number } | null;
+}
+
+export interface GeometryCompareResult {
+  ok: true;
+  schema: 'model3d-geometry-compare/v1';
+  before: GeometryFacts;
+  after: GeometryFacts;
+  deltas: {
+    objects: number | null;
+    triangles: number | null;
+    totalVolumeMm3: number | null;
+    boundsMm: { x: number | null; y: number | null; z: number | null } | null;
+  };
+  changed: boolean;
+  provider: { name: string; version: string | null };
+}
+
+export async function compareSceneGeometry(input: {
+  projectId: string;
+  before: unknown;
+  after: unknown;
+}): Promise<GeometryCompareResult> {
+  const response = await fetch(`${getApiPrefix()}/model3d/scene/compare-geometry`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(380_000),
+  });
+  return parse<GeometryCompareResult>(response);
+}

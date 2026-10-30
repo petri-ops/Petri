@@ -29,7 +29,7 @@ const MODIFIER_FIELDS = {
 // BLOCK-322 P2-03 — 材质白名单。贴图走 helpers/mesh-assets 的资产单源（工作区相对路径 +
 // sha256 锚定 + 大小上限），与 mesh-reference 同一执法口径；未声明的字段一律拒收，
 // 免得「写了个 metalness 结果两边都不认」成为第三类静默失真。
-const MATERIAL_FIELDS = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture'];
+const MATERIAL_FIELDS = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture', 'densityKgM3'];
 // BLOCK-322 P3-02a — 装配约束白名单。求值只发生在 resolveSceneSpec（唯一真值处），
 // 结果烘进 transform 后交给 Blender；构建脚本与预览端都不再各自解一遍（红线 2）。
 const CONSTRAINT_KINDS = new Set(['align', 'distance', 'angle']);
@@ -250,6 +250,10 @@ function validateMaterial(node, where, errors) {
     }
   }
   if (material.emissive !== undefined && !validateColor(material.emissive)) errors.push(`${where}.material.emissive 非法`);
+  if (material.densityKgM3 !== undefined
+    && (!finiteNumber(material.densityKgM3) || material.densityKgM3 < 0.1 || material.densityKgM3 > 30000)) {
+    errors.push(`${where}.material.densityKgM3 须在 0.1..30000`);
+  }
   if (material.baseColorTexture === undefined) return;
   const texture = material.baseColorTexture;
   if (!isPlainObject(texture) || !isSafeRelativePath(texture.path)) errors.push(`${where}.material.baseColorTexture.path 非法`);
@@ -416,6 +420,24 @@ function validateConstraints(constraints, ids, errors) {
   });
 }
 
+function validateMetadataTolerances(metadata, ids, errors) {
+  if (!isPlainObject(metadata) || metadata.tolerances === undefined) return;
+  const list = metadata.tolerances;
+  if (!Array.isArray(list)) { errors.push('metadata.tolerances 必须是数组'); return; }
+  if (list.length > 50) errors.push('metadata.tolerances 数量超限');
+  list.slice(0, 50).forEach((row, index) => {
+    const where = `metadata.tolerances[${index}]`;
+    if (!isPlainObject(row)) { errors.push(`${where} 必须是对象`); return; }
+    if (typeof row.nodeId !== 'string' || !ids.has(row.nodeId)) errors.push(`${where}.nodeId 不存在`);
+    if (typeof row.feature !== 'string' || !row.feature.trim() || row.feature.length > 80) errors.push(`${where}.feature 非法`);
+    for (const key of ['nominal', 'lower', 'upper']) {
+      if (!finiteNumber(row[key])) errors.push(`${where}.${key} 须为有限数值`);
+    }
+    if (finiteNumber(row.lower) && finiteNumber(row.upper) && row.lower > row.upper) errors.push(`${where}.lower 不能大于 upper`);
+    if (row.unit !== 'mm') errors.push(`${where}.unit 必须是 mm`);
+  });
+}
+
 function validateSceneSpec(input) {
   const errors = [];
   if (!isPlainObject(input)) return { ok: false, error: 'scene_invalid', errors: ['SceneSpec 必须是对象'] };
@@ -434,6 +456,7 @@ function validateSceneSpec(input) {
   const ids = new Set();
   if (Array.isArray(input.nodes)) input.nodes.forEach((node, index) => validateNode(node, index, parameters, ids, errors));
   if (input.constraints !== undefined) validateConstraints(input.constraints, ids, errors);
+  validateMetadataTolerances(input.metadata, ids, errors);
   if (Array.isArray(input.nodes)) validateModifierReferences(input.nodes, errors);
   if (input.camera !== undefined) validateCamera(input.camera, errors);
   if (input.render !== undefined) validateRenderSettings(input.render, errors);

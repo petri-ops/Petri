@@ -44,7 +44,7 @@ export function VideoResultViewer({ url, name }: { url: string; name: string }) 
   React.useEffect(() => {
     let cancelled = false;
     let objectUrl: string | null = null;
-    (async () => {
+    void (async () => {
       try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -151,4 +151,3 @@ export function VideoResultViewer({ url, name }: { url: string; name: string }) 
   );
 }
 
-export default VideoResultViewer;

@@ -99,6 +99,7 @@ module.exports = [
           scene,
           views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
           turntable,
+          lineart: { type: 'boolean', description: 'P4-03：额外输出前/顶/侧 Freestyle 线稿（非 GD&T 工程图）' },
         },
         required: ['scene'],
       },
@@ -128,12 +129,64 @@ module.exports = [
         type: 'object',
         properties: {
           scene,
-          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj'] } },
+          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj', 'fbx', 'usdz'] } },
           turntable,
           taskSpecId: { type: 'string' },
           workflowRunId: { type: 'string' },
           recipeId: { type: 'string' },
           recipeVersion: { type: 'integer' },
+        },
+        required: ['scene'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'model3d_share',
+      description: '生成本地 3D 分享包（SceneSpec + manifest + 已登记产物 + checksums.json）并返回 zip sha/bytes；缺件或 manifest sha 不符直接拒绝，不上传云端。',
+      parameters: {
+        type: 'object',
+        properties: {
+          scenePath: { type: 'string', description: '项目内 SceneSpec 相对路径' },
+          manifestPath: { type: 'string', description: '项目内 manifest 相对路径' },
+          outputs: { type: 'array', items: { type: 'object', additionalProperties: true }, description: '缺省取 manifest.outputs' },
+          name: { type: 'string' },
+        },
+        required: ['scenePath', 'manifestPath'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'model3d_asset',
+      description: '外部资产入链与资产库：action=import 把工作区 glb/gltf/stl/obj 复制到 model3d/assets/<sha> 并记录 provenance，返回可直接 add_node 的 mesh-reference；action=list 检索；action=get 取回引用。',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: { type: 'string', enum: ['import', 'list', 'get'] },
+          sourcePath: { type: 'string', description: 'import：工作区相对路径' },
+          name: { type: 'string' },
+          provenance: { type: 'object', additionalProperties: true, description: 'model/promptHash/parameters 等来源留痕' },
+          query: { type: 'string', description: 'list：名称/路径/sha/model 检索' },
+          limit: { type: 'integer', description: 'list 上限 ≤50' },
+          assetId: { type: 'string', description: 'get：asset id 或 sha256' },
+        },
+        required: ['action'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'model3d_bom',
+      description: '用本地 Blender 网格报告生成 BOM/质量属性（CSV/MD/JSON + sha + manifest）：体积×密度→质量；要求 watertight 且 0 非流形边。密度可经节点 material.densityKgM3 或 scene.metadata.defaultDensityKgM3 声明，缺省 1000 kg/m³。',
+      parameters: {
+        type: 'object',
+        properties: {
+          scene,
+          defaultDensityKgM3: { type: 'number', description: '缺省密度，默认 1000 kg/m³' },
         },
         required: ['scene'],
       },
@@ -152,7 +205,7 @@ module.exports = [
           dryRun: { type: 'boolean', description: '默认 true：只生成候选，不写盘/不渲染' },
           path: { type: 'string', description: '项目相对路径，默认 model3d/recipes/<recipeId>.scene3d.json' },
           render: { type: 'boolean', description: '执行时是否渲染四视图（默认 true）' },
-          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj'] } },
+          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj', 'fbx', 'usdz'] } },
           views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
         },
         required: ['recipeId'],

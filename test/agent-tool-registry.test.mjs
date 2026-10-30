@@ -184,8 +184,8 @@ test('schema-first loading does not capture partial act helper exports', () => {
       // BLOCK-157 W1（KNW-1）skill_discover/skill_get +2 = 78；BLOCK-164 W1 federation_list_peers +1 = 79；
       // BLOCK-176 W7（CP-21）skill_preflight +1 = 80；BLOCK-244 Q1-REM ask_user_question +1 = 81；
       // BLOCK-247（Q2b）web_search + web_fetch +2 = 83；BLOCK-249 read_agent_journal +1 = 84；
-      // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101
-      if (getToolDefs().length !== 101) throw new Error('unexpected tool count');
+      // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101；BLOCK-322 P4-01 model3d_bom +1 = 102；P5-01/P6-02 model3d_asset +1 = 103；P6-04 model3d_share +1 = 104
+      if (getToolDefs().length !== 104) throw new Error('unexpected tool count');
       if (typeof actTools.actUiAction !== 'function') throw new Error('ui action dispatcher unavailable');
       if (typeof actTools.actOpenTool !== 'function') throw new Error('open_tool dispatcher unavailable');
       process.exit(0);
@@ -301,8 +301,8 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
     // BLOCK-99 G4 71 件 + BLOCK-116 W2（BK-04）决策观测 2 件 = 73；BLOCK-121 result_summary +1 = 74；
     // BLOCK-124（C-13）codegraph +2 = 76；BLOCK-176 W7（CP-21）skill_preflight +1 = 80；
     // BLOCK-244 +1=81；BLOCK-254 +1=85；BLOCK-256 +3=88；BLOCK-264 C-40 浏览器连接器 +4 = 92；
-    // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101
-    assert.equal(receivedBody.tools.length, 101);
+    // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101；BLOCK-322 P4-01 model3d_bom +1 = 102；P5-01/P6-02 model3d_asset +1 = 103；P6-04 model3d_share +1 = 104
+    assert.equal(receivedBody.tools.length, 104);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

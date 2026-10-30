@@ -274,12 +274,12 @@ test('BK-04：decision_recent 逐条回放 + point 过滤 + limit 钳制', async
   assert.equal(byPoint.decisions.length, 0, '超长 point 截断后无命中（不抛错）');
 });
 
-test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数 101）', () => {
+test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数 104）', () => {
   const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
   const names = TOOL_DEFS.map((t) => t.function.name);
   assert.ok(names.includes('decision_summary') && names.includes('decision_recent'), 'defs 在位');
   // BLOCK-121 result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76（73 系 BLOCK-121 漏改的存量红，本批清偿）
-  assert.equal(names.length, 101, '工具总数 93→101（NEXT-04A model3d_* +6；NEXT-04B model3d_visual_qa +1；NEXT-05 model3d_recipe +1）');
+  assert.equal(names.length, 104, '工具总数 93→104（NEXT-04A model3d_* +6；NEXT-04B model3d_visual_qa +1；NEXT-05 model3d_recipe +1；BLOCK-322 model3d_bom +1）');
   // 恒等：新工具经 session 域模块进入（⋃ 域 = 全集）
   const union = Object.values(DOMAIN_TOOL_DEFS).flat().map((t) => t.function.name);
   assert.ok(union.includes('decision_summary') && union.includes('decision_recent'));

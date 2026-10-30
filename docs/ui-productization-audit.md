@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-648: 3D 对比面板几何差值（BLOCK-322 P6-03；2026-10-31 **verified（dev Electron 边界内；纯函数 2/2 + UI 实机 4/4）**）
+
+- **变化面**：SceneSpec 对比面板新增「几何差异」：调用只读 `POST /api/model3d/scene/compare-geometry`，两侧真实 Blender 网格报告投影为对象/三角面/体积/包围盒及 Δ，语义 diff 与几何差值分开显示；不重算几何、不建第二执行器。
+- **为什么这样设计**：文本语义 diff 看不见加工后体积/包围盒变化；几何差值必须来自 Blender 构建结果，SceneSpec diff 只负责声明层。
+- **验证（代码）**：`compareGeometryReports` 2/2；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p6/block322-p6-geometry-compare-live-live.json`（4/4，9223 离屏）：示例 120mm → 对比 150mm，面板显示对象/三角面/体积/包围盒及 `Δ 30×0×0`；截图不计入通过。
+- **边界（reopen）**：几何差值来自两侧 Blender 报告，不是 CAD B-rep 差分；无报告时 fail-closed，不用 0 冒充。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-637: 全局视觉与布局收敛（NEXT-02B；2026-10-30 **verified（dev Electron 边界内；UI 矩阵 19/19 + closeout 13/13）**）
 
 - **变化面**：3D workSurface/视觉 QA/参数编辑三块从视口媒体查询改为容器查询（`container-type: inline-size`），在 340px 右栏内正确降为单列/窄行布局；新增 `acceptance/next-02b-ui-visual-convergence/ui-drift-inventory.md` 对 UI-A~F 逐项对账。矩阵覆盖 1440/1024/720/480 与 1280@2x、双主题、reduced motion、键盘焦点与横向溢出。

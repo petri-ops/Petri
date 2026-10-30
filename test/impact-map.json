@@ -6713,6 +6713,34 @@
       ],
       "tests": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block322-p4-p6",
+      "note": "BLOCK-322 P4-P6：BOM/公差/线稿/资产入链与库/FBX-USDZ/几何差值/分享包；定向测试与实机证据。",
+      "patterns": [
+        "core/petri-server/helpers/model3d-bom.js",
+        "core/petri-server/helpers/model3d-assets.js",
+        "core/petri-server/helpers/model3d-geometry-compare.js",
+        "core/petri-server/helpers/model3d-share-package.js",
+        "scripts/block322-p4-p6-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-p6-geometry-compare-live.cjs",
+        "test/block322-p4-bom.test.mjs",
+        "test/block322-p5-assets.test.mjs",
+        "test/block322-p6-geometry-compare.test.mjs",
+        "test/block322-p6-share.test.mjs",
+        "acceptance/block-322-p4/**",
+        "acceptance/block-322-p6/**"
+      ],
+      "tests": [
+        "test/block322-p4-bom.test.mjs",
+        "test/block322-p5-assets.test.mjs",
+        "test/block322-p6-geometry-compare.test.mjs",
+        "test/block322-p6-share.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

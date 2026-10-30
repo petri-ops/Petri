@@ -150,7 +150,7 @@ test('BLOCK-322 P2-03 — 贴图格式/上限跨 JS/TS/Python 逐值一致', () 
     '大小上限两侧同值（红线 3）');
   assert.match(frontend, /const MAX_MESH_BYTES = 64 \* 1024 \* 1024/);
 
-  const materialFields = ['baseColorTexture', 'color', 'emissive', 'metallic', 'roughness'];
+  const materialFields = ['baseColorTexture', 'color', 'densityKgM3', 'emissive', 'metallic', 'roughness'];
   const backendScene = read('../core/petri-server/helpers/scene3d.js');
   const frontendScene = read('../frontend/src/lib/scene3d.ts');
   assert.deepEqual(

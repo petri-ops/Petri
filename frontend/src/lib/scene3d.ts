@@ -36,9 +36,10 @@ interface Scene3DMaterial {
   metallic?: number;
   emissive?: string;
   baseColorTexture?: { path: string; sourceSha256: string };
+  densityKgM3?: number;
 }
 
-const MATERIAL_FIELDS: readonly string[] = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture'];
+const MATERIAL_FIELDS: readonly string[] = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture', 'densityKgM3'];
 
 export interface Scene3DNode {
   id: string;
@@ -247,6 +248,10 @@ function validateMaterialForView(item: Record<string, unknown>, index: number, e
   if (material.emissive !== undefined && !(typeof material.emissive === 'string' && HEX_COLOR.test(material.emissive))) {
     errors.push(`${where}.material.emissive 非法`);
   }
+  if (material.densityKgM3 !== undefined
+    && (!finite(material.densityKgM3) || material.densityKgM3 < 0.1 || material.densityKgM3 > 30000)) {
+    errors.push(`${where}.material.densityKgM3 须在 0.1..30000`);
+  }
   if (material.baseColorTexture === undefined) return;
   const texture = isRecord(material.baseColorTexture) ? material.baseColorTexture : null;
   const texturePath = typeof texture?.path === 'string' ? texture.path : '';
@@ -395,6 +400,24 @@ function validateRenderForView(raw: unknown, errors: string[]): void {
 export const SCENE3D_CONSTRAINT_NOTE_PREFIX = '装配约束在服务端求值后烘进 transform';
 export const SCENE3D_CONSTRAINT_NOTE = `${SCENE3D_CONSTRAINT_NOTE_PREFIX}（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。`;
 
+function validateTolerancesForView(metadata: unknown, ids: Set<string>, errors: string[]): void {
+  if (!isRecord(metadata) || metadata.tolerances === undefined) return;
+  const list = metadata.tolerances;
+  if (!Array.isArray(list)) { errors.push('metadata.tolerances 必须是数组'); return; }
+  if (list.length > 50) errors.push('metadata.tolerances 数量超限');
+  list.slice(0, 50).forEach((row, index) => {
+    const where = `metadata.tolerances[${index}]`;
+    if (!isRecord(row)) { errors.push(`${where} 必须是对象`); return; }
+    if (typeof row.nodeId !== 'string' || !ids.has(row.nodeId)) errors.push(`${where}.nodeId 不存在`);
+    if (typeof row.feature !== 'string' || !row.feature.trim() || row.feature.length > 80) errors.push(`${where}.feature 非法`);
+    for (const key of ['nominal', 'lower', 'upper'] as const) {
+      if (!finite(row[key])) errors.push(`${where}.${key} 须为有限数值`);
+    }
+    if (finite(row.lower) && finite(row.upper) && row.lower > row.upper) errors.push(`${where}.lower 不能大于 upper`);
+    if (row.unit !== 'mm') errors.push(`${where}.unit 必须是 mm`);
+  });
+}
+
 export function normalizeScene3DForView(raw: unknown, options?: { constraintsEvaluated?: boolean }): { ok: true; view: Scene3DView } | { ok: false; errors: string[] } {
   const errors: string[] = [];
   if (!isRecord(raw)) return { ok: false, errors: ['SceneSpec 必须是 JSON 对象'] };
@@ -464,6 +487,7 @@ export function normalizeScene3DForView(raw: unknown, options?: { constraintsEva
   }
   validateModifierReferencesForView(rawNodes, errors);
   validateConstraintsForView(raw.constraints, seen, errors);
+  validateTolerancesForView(raw.metadata, seen, errors);
   if (raw.camera !== undefined) validateCameraForView(raw.camera, errors);
   if (raw.render !== undefined) validateRenderForView(raw.render, errors);
   if (raw.lights !== undefined) validateLightsForView(raw.lights, errors);

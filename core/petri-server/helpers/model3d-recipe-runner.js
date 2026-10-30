@@ -9,7 +9,7 @@ const sceneStore = require('./model3d-scene-store');
 const recipes = require('./model3d-recipes');
 
 function normalizeFormats(formats) {
-  const allowed = new Set(['glb', 'stl', 'obj']);
+  const allowed = new Set(['glb', 'stl', 'obj', 'fbx', 'usdz']);
   const list = (Array.isArray(formats) ? formats : [])
     .map((item) => String(item).toLowerCase())
     .filter((item) => allowed.has(item));

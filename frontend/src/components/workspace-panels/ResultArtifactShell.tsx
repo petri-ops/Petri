@@ -865,16 +865,7 @@ export function ResultArtifactShell({
         />
       );
     }
-    // BLOCK-322 P2-05 — 视频产物内嵌播放（转盘 mp4 / webm）：档案 canExport=true，
-    // 故与 markdown/pdf 同构挂 ViewerExportAction 出口；解码失败由组件自身如实降级。
-    if (viewerAdapter === 'video' && selectedArtifactUrl) {
-      return (
-        <>
-          <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
-          <VideoResultViewer url={selectedArtifactUrl} name={selectedArtifactLabel || selectedArtifact.name} />
-        </>
-      );
-    }
+    if (viewerAdapter === 'video' && selectedArtifactUrl) return <><ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} /><VideoResultViewer url={selectedArtifactUrl} name={selectedArtifactLabel || selectedArtifact.name} /></>;
     if (previewLoading && !previewText && !previewData) {
       return <div className={styles.resultPreviewPlaceholder}>加载预览中…</div>;
     }
@@ -1318,8 +1309,6 @@ export function ResultArtifactShell({
     </div>
   );
 }
-
-
 // UI-305 P2 - moved from ResultView.tsx (only consumer is this shell empty state):
 function EmptyAnalysisResult(): React.ReactElement {
   return (

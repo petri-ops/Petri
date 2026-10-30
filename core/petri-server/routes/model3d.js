@@ -6,6 +6,7 @@ const scene3d = require('../helpers/scene3d');
 const { runModel3DReview } = require('../helpers/model3d-review');
 const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
+const { compareGeometryReports } = require('../helpers/model3d-geometry-compare');
 const { inspectMeshAsset, inspectTextureAsset } = require('../helpers/mesh-assets');
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
@@ -222,6 +223,32 @@ module.exports = function registerModel3DRoutes(app) {
       return res.status(assetErrorStatus(result.error, 'texture')).json(result);
     }
     return res.json(result);
+  });
+
+  // BLOCK-322 P6-03 — 场景 diff 之上的几何差值投影：两侧都跑一次 Blender 网格报告
+  // （views/formats 为空，只取 mesh/bounds），差值由纯函数计算；不写盘、不建 revision。
+  app.post('/api/model3d/scene/compare-geometry', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const before = req.body?.before;
+    const after = req.body?.after;
+    const validatedBefore = scene3d.validateSceneSpec(before);
+    const validatedAfter = scene3d.validateSceneSpec(after);
+    if (!validatedBefore.ok || !validatedAfter.ok) {
+      return res.status(400).json({ ok: false, error: 'scene_invalid', errors: [...(validatedBefore.errors || []), ...(validatedAfter.errors || [])] });
+    }
+    const capability = await blender.probeBlender();
+    if (capability.status !== 'ready') return res.status(503).json({ ok: false, error: 'capability_unavailable', reason: capability.reason });
+    const resolvedBefore = scene3d.resolveSceneSpec(before);
+    const resolvedAfter = scene3d.resolveSceneSpec(after);
+    if (!resolvedBefore.ok || !resolvedAfter.ok) {
+      return res.status(400).json({ ok: false, error: 'scene_invalid', errors: [...(resolvedBefore.errors || []), ...(resolvedAfter.errors || [])] });
+    }
+    const beforeReport = await blender.runBlenderScene({ scene: resolvedBefore.scene, workspaceRoot: auth.project.workspace_path, views: [], formats: [] });
+    if (!beforeReport.ok) return res.status(422).json({ ok: false, error: 'before_report_failed', report: beforeReport.report || null, message: beforeReport.message || null });
+    const afterReport = await blender.runBlenderScene({ scene: resolvedAfter.scene, workspaceRoot: auth.project.workspace_path, views: [], formats: [] });
+    if (!afterReport.ok) return res.status(422).json({ ok: false, error: 'after_report_failed', report: afterReport.report || null, message: afterReport.message || null });
+    return res.json({ ...compareGeometryReports(beforeReport.report, afterReport.report), provider: { name: 'blender', version: capability.version } });
   });
 
   // NEXT-04B P3-1 — 草图 → task-spec/v1 草稿（只预览；不建场景/不执行）。

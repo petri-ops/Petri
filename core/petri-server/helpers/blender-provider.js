@@ -100,7 +100,7 @@ function resolveInside(root, relativePath) {
   return target;
 }
 
-async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], turntable = null, signal } = {}) {
+async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], turntable = null, lineart = false, signal } = {}) {
   const binary = findBlenderBinary();
   if (!binary) {
     return { ok: false, error: 'capability_unavailable', reason: 'blender_not_installed' };
@@ -121,6 +121,7 @@ async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d
     '--views', views.join(','),
     '--formats', formats.join(','),
     '--root', workspaceRoot,
+    '--lineart', lineart ? '1' : '0',
   ];
   if (turntable) {
     args.push('--turntable', String(turntable.frames), '--spin-elevation', String(turntable.elevationDeg));
