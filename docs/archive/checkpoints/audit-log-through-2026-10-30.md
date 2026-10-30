@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:12:57.391Z -->
 最后更新：2026-10-30（**RW-03-C32-DECISION-ENV-GOV 判销（轻量对账批；plan=本条目）**：RW 纲 §3.3 立项前提过时——C-32 已由 BLOCK-211 清偿在案（decision-config.js 头注「现已按注释语义修正」+ resolvePointEnabled 实现即修正语义 + 回归锁 test/block211-c32-env-seed.test.mjs 4/4 在库）+ RW-02 会话实证复验双判据过（setPointConfig 设置关+env=1 残留→enabled=false；设置开+env=0 杀开关→false）。C-32 治理透明魂面语义在库且被锁。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:42:31.644Z -->
+最后更新：2026-10-30（**RW-05-HARNESS-FOUNDATION completed（收缩后单件；closeout 十三门 PASS；plan=本条目+RW 纲 §3.5）**：存储能力协商三件落地——declareStorageCapabilities（KNOWN_CAPABILITY_KEYS 词表，开放词汇表未知键 fail-closed 忽略）/getStorageCapabilities/getActiveStorageCapabilities + LocalFileStorageCapabilities（诚实位：直传/删除=true，presigned/服务端复制/留存=false）+ init.js 注册时声明 + GET /api/storage/capabilities 只读面（惰性 require 保注册先行）。红绿 4 件先红后绿；实机隔离 :3011 REST 返回 local 全量能力位；邻域 43/43。未做（如实）=消费方接线（UI/适配器切换面按能力分支）留后续 UI 需求牵引，能力真值已可查询。G0 开发期常态 · 不外推 packaged/Provider/GA。

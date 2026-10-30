@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:12:57.391Z -->
 | ✅ BLOCK-272 closeout 收口定向化 completed（用户裁决「收口只需要校验有改动的部分」） | 2026-10-27 | 三层机制+closeout:full 转义；红绿 13/13+回归 31/31+双 closeout PASS exit 0；静态门热态 98.4s→10.4s | quality:lint/types 0；plan §6 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:42:31.644Z -->
+| ✅ BLOCK-273 拖拽边界统一渐变暗示规范 completed（P5-CLOSED；UI-588 in_progress） | 2026-10-27 | 五处边界「细线+渐变高光」统一（实心带退场）；theme 17/17+组件 35/35+双主题默认态实机断言；暗主题+真实指针 hover=30 秒人测路线 | theme 门/UI-588；plan §6 |

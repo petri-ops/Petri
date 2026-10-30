@@ -9,7 +9,7 @@
 
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
-export function hasVisionCapability(profile: ChatModelPreset): boolean {
+function hasVisionCapability(profile: ChatModelPreset): boolean {
   return !!profile.capabilities?.includes('vision');
 }
 
