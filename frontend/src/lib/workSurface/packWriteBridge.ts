@@ -65,13 +65,14 @@ export function validateSurfaceWritesDecl(decl: unknown): { ok: true } | { ok: f
     annotations: ['write'], selection: ['write'], revisions: ['restore', 'replay'], export: ['run'],
   };
   let declared = 0;
-  for (const [key, section] of Object.entries(d)) {
+  const sectionEntries = Object.entries(d) as Array<[string, Record<string, unknown> | undefined]>;
+  for (const [key, section] of sectionEntries) {
     if (!allowedTop.has(key)) return { ok: false, code: 'writes_key_unknown' };
     if (key === 'bridgeVersion') continue;
     if (!section || typeof section !== 'object') return { ok: false, code: 'writes_section_invalid' };
     for (const flag of Object.keys(section)) {
       if (!allowedFlags[key].includes(flag)) return { ok: false, code: 'writes_flag_unknown' };
-      if ((section as Record<string, unknown>)[flag] !== true) return { ok: false, code: 'writes_flag_not_boolean_true' };
+      if (section[flag] !== true) return { ok: false, code: 'writes_flag_not_boolean_true' };
     }
     declared += 1;
   }
