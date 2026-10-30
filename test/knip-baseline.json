@@ -129,6 +129,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p1-external-asset-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-03-material-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-04-turntable-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-05-video-preview-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-camera-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-lighting-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-02b-preview-eval-live.cjs",

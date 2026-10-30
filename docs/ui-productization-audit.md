@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-647: 结果面视频预览（BLOCK-322 P2-05；2026-10-31 **verified（dev Electron 边界内；组件 7/7 + 注册表 4/4 + CSP 1/1 + 实机 10/10）**）
+
+- **变化面**：结果面 viewer 注册表新增 `video` adapter（`.mp4/.webm` 按扩展名命中，先于 image/json/text/binary 兜底），新增 `VideoResultViewer`：`<video controls preload="metadata">` 内嵌播放转盘/序列动画产物，**不自动播放**；读取中/已解出（面板显示「时长 0.5s · 800×600」）/失败三态；失败区分「取字节失败」与「解码失败」并保留「打开或下载原文件」出口；64MB 内嵌播放上限，超限直接拒绝且不把字节读进渲染进程内存。服务端补齐 `video/mp4`、`video/webm` 的 Content-Type。
+- **为什么这样设计（关键平台发现）**：**不能把产物 URL 直接塞给 `<video>`**——实测 Chromium 对**跨源**媒体返回 `MEDIA_ELEMENT_ERROR: Media load rejected by URL safety check`（页面在 :3000、产物读面在 :3001；`<img>`/fetch 不受这条限制，所以图片与模型预览从未暴露它）。改为与本仓 GLB/STL/OBJ 预览同一形态：`fetch` 取字节（`connect-src` 已放行）→ 自建 `blob:` 源 → 交给 `<video>`，并补 CSP `media-src 'self' blob:`（不放时它回落 `default-src 'self'`，blob 也会被挡）。这条同时给了「有界加载」一个真实执法点。
+- **验证（代码）**：`VideoResultViewer.test.tsx` 7/7（先取字节再喂 blob 源/不自动播/读数只在 metadata 到达后出现/Infinity 时长不写成 0 秒/解码失败与取字节失败分开说明/超上限不调 arrayBuffer/换产物时状态与 objectURL 都重置）+ `viewerRegistry.p205.test.ts` 4/4（三种 kind 下 .mp4/.webm 均命中 video、能力位如实、相邻形态与 preview=false 短路不回归）+ `test/next05-csp.test.mjs` 补 media-src 断言 1/1 + theme 17/17；全量 tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p2/block322-p2-05-video-preview-live-live.json`（**10/10 allPass**，9223 离屏 + 真实 Blender 4.5.10 LTS）。判据不是「DOM 里有 `<video>`」而是 **Chromium 真解出媒体**：经结果面真实点击链（作业卡 → `turntable0001-0006.mp4` 产物）打开后 `readyState=4`、`duration=0.5s`、`width=800/height=600`，`src` 是 `blob:` 且 `autoplay=false`、`preload=metadata`；产物投影带 `/api/workspaces/:id/file?path=…` 读面 URL，服务端按 `video/mp4` 回 16650 字节；失败态不在场。
+- **实机抓真两条（均非产品缺陷，如实归属）**：①首跑 X8 红=`api_origin` 跨源直连被 URL safety check 拒（诊断里 `canPlay="probably"` 证明不是编解码问题）→ 改 blob 形态并补 CSP；②改完后 X7 红=探针在「字节还没取回」的瞬间判定挂载 → 轮询条件改为等到 `<video>` 真在场（与 README「UI 断言一律轮询到目标态」同族）。
+- **边界（reopen）**：①内嵌播放是**一次性取全量字节**（无 Range/流式），上限 64MB，超大视频走原文件出口；②未做播放进度/首帧封面/字幕轨；③视频不进 3D 产物的 revision 族（`MODEL3D_EXPORT_EXTENSIONS` 仍只含模型格式），故没有「视频版本叠加/回滚」语义——需要时按数据模型裁决（与 RULING-04 同类）；④G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-646: 3D PBR 材质与工作区贴图（BLOCK-322 P2-03；2026-10-31 **verified（dev Electron 边界内；契约 8/8 + 前端 15/15 + 实机 14/14，灯光腿重构回归 9/9）**）
 
 - **变化面**：`material` 由「只认 color/roughness」升为**白名单化**的 `color/roughness/metallic/emissive/baseColorTexture`（未知键如 `metalness` 直接拒，不再「写了不认也不报」）；基础色贴图按 `mesh-reference` 同一执法口径进场景——**工作区相对路径 + sha256 必填 + 独立 16MB 上限**，新增只读 `POST /api/model3d/texture/inspect`（服务端从盘面真实算 sha/bytes）；预览端 `MeshStandardMaterial` 真消费 metallic/emissive，并经工作区文件 URL 用 `TextureLoader` 挂上贴图，取不到时按节点显式报 `texture_reference_unavailable / _load_failed` 并累积进告警区（不空屏、不静默留白）；面板对声明了贴图的节点显示「声明基础色贴图（路径）」与「构建侧按 sha256 复验」。
