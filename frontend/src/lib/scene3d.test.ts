@@ -54,4 +54,51 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
       expect(result.errors.join('；')).toContain(item.keyword);
     }
   });
+
+  it('BLOCK-322 P2-01 声明相机与分辨率通过解析并保留在 scene 上', () => {
+    const result = normalizeScene3DForView({
+      ...sampleScene3D(),
+      camera: { position: [300, -300, 260], target: [0, 0, 20], fovDeg: 35 },
+      render: { width: 1600, height: 900 },
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.view.scene.camera).toMatchObject({ fovDeg: 35 });
+    expect(result.view.scene.render).toEqual({ width: 1600, height: 900 });
+    expect(result.view.warnings).toHaveLength(0);
+  });
+
+  it('BLOCK-322 P2-01 非法相机声明 fail-closed（同后端判据）', () => {
+    const cases: Array<{ camera: unknown; keyword: string }> = [
+      { camera: { position: [1, 2, 3] }, keyword: 'camera.target 非法' },
+      { camera: { position: [1, 2, 3], target: [1, 2, 3] }, keyword: '视线退化' },
+      { camera: { position: [1, 2, 3], target: [4, 5, 6], fovDeg: 200 }, keyword: 'camera.fovDeg' },
+      { camera: { position: [1, 2, 3], target: [4, 5, 6], projection: 'orthographic' }, keyword: 'orthoScaleMm' },
+      { camera: { position: [0, 0, 0], target: [0, 0, 100], up: [0, 0, 1] }, keyword: 'camera.up 与视线共线' },
+      { camera: 'nope', keyword: 'camera 必须是对象' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({ ...sampleScene3D(), camera: item.camera });
+      expect(result.ok, JSON.stringify(item.camera)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
+    const badRender = normalizeScene3DForView({ ...sampleScene3D(), render: { width: 8 } });
+    expect(badRender.ok).toBe(false);
+    if (badRender.ok) return;
+    expect(badRender.errors.join('；')).toContain('render.width 须是 16..4096 的整数');
+  });
+
+  it('BLOCK-322 P2-01 正交机位在预览端如实声明差异，不假装一致', () => {
+    const result = normalizeScene3DForView({
+      ...sampleScene3D(),
+      camera: {
+        position: [0, -400, 200], target: [0, 0, 0], projection: 'orthographic', orthoScaleMm: 320,
+      },
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.view.warnings.join('；')).toContain('正交');
+    expect(result.view.warnings.join('；')).toContain('不假装投影一致');
+  });
 });

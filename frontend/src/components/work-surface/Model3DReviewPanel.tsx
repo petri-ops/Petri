@@ -10,12 +10,14 @@ import type { Scene3DSpec } from '@/lib/scene3d';
 import button from '@/components/ui/controls/button.module.css';
 import styles from './Model3DReviewPanel.module.css';
 
-const VIEW_ORDER: Model3DReviewView[] = ['front', 'top', 'side', 'iso'];
+// camera 视角只在场景声明了 camera 时后端才出图；未声明时 renders['camera'] 缺席即自然跳过。
+const VIEW_ORDER: Model3DReviewView[] = ['front', 'top', 'side', 'iso', 'camera'];
 const VIEW_LABEL: Record<Model3DReviewView, string> = {
   front: '前视图',
   top: '顶视图',
   side: '侧视图',
   iso: '等轴视图',
+  camera: '声明机位',
 };
 
 interface SelectedRow {

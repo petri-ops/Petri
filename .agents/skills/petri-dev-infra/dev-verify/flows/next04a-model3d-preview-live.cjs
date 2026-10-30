@@ -133,8 +133,18 @@ async function run({ assert }) {
       return parsed.present ? parsed : null;
     }, { timeoutMs: 30_000, intervalMs: 600, label: 'three_canvas' });
     assert('W2_three_canvas_present', canvas.width > 0 && canvas.height > 0 && canvas.rect.width > 0, JSON.stringify(canvas).slice(0, 300));
-    assert('W3_scene_rendered_objects', String(canvas.text).includes('渲染对象2') || String(canvas.text).includes('渲染对象 2'), String(canvas.text).slice(0, 500));
-    assert('W4_scene_stats', String(canvas.text).includes('节点2') || String(canvas.text).includes('节点 2'), String(canvas.text).slice(0, 500));
+    // 纪律修正（BLOCK-322 P2-01 实机暴露）：渲染对象计数来自 onReady → setCanvasInfo 的下一个
+    // React commit，单次读取会稳定读到「—」。UI 面断言必须轮询到目标态，不押注提交时序。
+    const stats = await poll(async () => {
+      const text = await evalJsWithTimeout(client, `(function(){
+        var panel = document.querySelector('[data-testid="model3d-surface"]');
+        return panel ? (panel.textContent || '').replace(/\\s+/g, '') : '';
+      })()`).catch(() => '');
+      const value = String(text || '');
+      return /渲染对象\d+/.test(value) && /节点\d+/.test(value) ? value : null;
+    }, { timeoutMs: 15_000, intervalMs: 300, label: 'scene_stats_landed' });
+    assert('W3_scene_rendered_objects', stats.includes('渲染对象2'), stats.slice(0, 500));
+    assert('W4_scene_stats', stats.includes('节点2'), stats.slice(0, 500));
     assert('W5_canvas_has_pixels', canvas.snapshotLength > 1000 && String(canvas.snapshotPrefix).startsWith('data:image/png'), `len=${canvas.snapshotLength} prefix=${canvas.snapshotPrefix}`);
 
     await evalJsWithTimeout(client, `(function(){

@@ -15,6 +15,7 @@ const { execFile, spawn } = require('node:child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 const SCRIPT_PATH = path.join(REPO_ROOT, 'resources', 'model3d', 'blender_scene.py');
+const { DEFAULT_RENDER_VIEWS } = require('./model3d-views');
 const TIMEOUT_MS = 180_000;
 let cachedBinary;
 
@@ -99,7 +100,7 @@ function resolveInside(root, relativePath) {
   return target;
 }
 
-async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = ['front', 'top', 'side', 'iso'], formats = ['glb', 'stl', 'obj'], signal } = {}) {
+async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], signal } = {}) {
   const binary = findBlenderBinary();
   if (!binary) {
     return { ok: false, error: 'capability_unavailable', reason: 'blender_not_installed' };

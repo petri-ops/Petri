@@ -210,6 +210,97 @@ def setup_camera(bounds):
     bpy.context.scene.camera = camera
     return camera, center, size
 
+# BLOCK-322 P2-01 — 声明相机：Sensor 垂直贴合，使 camera.fovDeg 与 Three.js
+# PerspectiveCamera 的垂直 fov 同轴可对账（Blender 默认 sensor_fit 为 AUTO，
+# 不显式指定时会按宽边折算，两侧就不是同一个角）。
+BLENDER_VERTICAL_SENSOR_MM = 24.0
+
+
+def fov_to_lens(fov_deg):
+    return BLENDER_VERTICAL_SENSOR_MM / 2.0 / math.tan(math.radians(float(fov_deg)) / 2.0)
+
+
+def aim_with_up(camera, position, target, up):
+    """显式上向量的 look-at：Blender 相机沿 -Z 看、+Y 为上，故旋转矩阵列=(右, 上, 后)。"""
+    forward = (Vector(target) - Vector(position)).normalized()
+    up_vec = Vector(up).normalized()
+    right = forward.cross(up_vec)
+    if right.length < 1e-9:
+        return False
+    right.normalize()
+    true_up = right.cross(forward).normalized()
+    backward = forward * -1.0
+    rotation = Matrix((
+        (right[0], true_up[0], backward[0]),
+        (right[1], true_up[1], backward[1]),
+        (right[2], true_up[2], backward[2]),
+    ))
+    camera.rotation_mode = 'QUATERNION'
+    camera.rotation_quaternion = rotation.to_quaternion()
+    return True
+
+
+def build_declared_camera(spec):
+    data = bpy.data.cameras.new('petri-declared-camera')
+    data.sensor_fit = 'VERTICAL'
+    projection = str(spec.get('projection') or 'perspective').lower()
+    fov_deg = float(spec.get('fovDeg') or 40.0)
+    if projection == 'orthographic':
+        data.type = 'ORTHO'
+        data.ortho_scale = float(spec.get('orthoScaleMm') or 100.0)
+    else:
+        data.type = 'PERSP'
+        data.sensor_height = BLENDER_VERTICAL_SENSOR_MM
+        data.lens = fov_to_lens(fov_deg)
+    camera = bpy.data.objects.new('petri-declared-camera', data)
+    bpy.context.scene.collection.objects.link(camera)
+    position = spec.get('position') or [0, 0, 0]
+    target = spec.get('target') or [0, 0, 0]
+    camera.location = Vector(position)
+    up_applied = False
+    if spec.get('up'):
+        up_applied = aim_with_up(camera, position, target, spec['up'])
+    if not up_applied:
+        aim(camera, position, target)
+    return {
+        'object': camera,
+        'summary': {
+            'projection': data.type,
+            'declaredFovDeg': fov_deg,
+            'effectiveAngleYDeg': round(math.degrees(data.angle_y), 6) if data.type == 'PERSP' else None,
+            'orthoScaleMm': float(data.ortho_scale) if data.type == 'ORTHO' else None,
+            'sensorFit': str(data.sensor_fit),
+            'position': [float(v) for v in position],
+            'target': [float(v) for v in target],
+            'declaredUp': [float(v) for v in spec['up']] if spec.get('up') else None,
+            'upApplied': up_applied,
+        },
+    }
+
+
+DEFAULT_RESOLUTION = (800, 600)
+MIN_RESOLUTION_PX = 16
+MAX_RESOLUTION_PX = 4096
+
+
+def effective_resolution(render_spec):
+    """渲染分辨率取值的唯一判定：非法/缺失一律回落 800×600（与校验层同界）。"""
+    spec = render_spec if isinstance(render_spec, dict) else {}
+
+    def pick(value, fallback):
+        if isinstance(value, bool) or not isinstance(value, int):
+            return fallback
+        return value if MIN_RESOLUTION_PX <= value <= MAX_RESOLUTION_PX else fallback
+
+    return pick(spec.get('width'), DEFAULT_RESOLUTION[0]), pick(spec.get('height'), DEFAULT_RESOLUTION[1])
+
+
+def apply_render_settings(render_spec):
+    width, height = effective_resolution(render_spec)
+    bpy.context.scene.render.resolution_x = width
+    bpy.context.scene.render.resolution_y = height
+    return {'width': width, 'height': height, 'declared': bool(render_spec)}
+
 
 def aim(camera, location, target):
     camera.location = location
@@ -217,15 +308,15 @@ def aim(camera, location, target):
     camera.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
 
 
-def render_views(out_dir, views, bounds):
+def render_views(out_dir, views, bounds, declared_spec=None):
     camera, center, size = setup_camera(bounds)
+    declared = build_declared_camera(declared_spec) if isinstance(declared_spec, dict) else None
     bpy.context.scene.render.engine = 'BLENDER_WORKBENCH'
     bpy.context.scene.display.shading.light = 'STUDIO'
     bpy.context.scene.display.shading.color_type = 'MATERIAL'
     bpy.context.scene.display.shading.show_shadows = True
     bpy.context.scene.display.shading.show_cavity = True
-    bpy.context.scene.render.resolution_x = 800
-    bpy.context.scene.render.resolution_y = 600
+    # 分辨率由 apply_render_settings 统一决定（SceneSpec.render，缺省 800×600）。
     bpy.context.scene.render.resolution_percentage = 100
     bpy.context.scene.render.image_settings.file_format = 'PNG'
     paths = {}
@@ -237,14 +328,21 @@ def render_views(out_dir, views, bounds):
         'iso': (center.x + distance * 0.75, center.y - distance * 0.75, center.z + distance * 0.8),
     }
     for view in views:
-        if view not in locations:
+        if view == 'camera':
+            # 未声明相机即跳过：不出「假装是声明机位」的图。
+            if declared is None:
+                continue
+            bpy.context.scene.camera = declared['object']
+        elif view in locations:
+            bpy.context.scene.camera = camera
+            aim(camera, locations[view], center)
+        else:
             continue
-        aim(camera, locations[view], center)
         path = os.path.join(out_dir, f'{view}.png')
         bpy.context.scene.render.filepath = path
         bpy.ops.render.render(write_still=True)
         paths[view] = path
-    return paths
+    return paths, declared
 
 
 def select_mesh_objects(objects):
@@ -294,13 +392,20 @@ def main():
     views = [item.strip() for item in args.views.split(',') if item.strip()]
     formats = [item.strip() for item in args.formats.split(',') if item.strip()]
     bounds = scene_bounds(objects)
-    render_paths = render_views(args.out, views, bounds)
+    render_settings = apply_render_settings(scene.get('render'))
+    render_paths, declared = render_views(args.out, views, bounds, scene.get('camera'))
     export_paths = export_formats(args.out, formats, objects)
     report = {
         'ok': len(unsupported) == 0,
         'blenderVersion': bpy.app.version_string,
         'renderEngine': bpy.context.scene.render.engine,
         'mesh': mesh_report(objects),
+        'camera': {
+            'declared': isinstance(scene.get('camera'), dict),
+            'applied': declared is not None,
+            **((declared or {}).get('summary') or {}),
+        },
+        'render': render_settings,
         'boundsMm': {
             'min': list(bounds[0]),
             'max': list(bounds[1]),

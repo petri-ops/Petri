@@ -30,6 +30,20 @@ export interface Scene3DNode {
   label?: string;
 }
 
+export interface Scene3DCamera {
+  position: number[];
+  target: number[];
+  up?: number[];
+  fovDeg?: number;
+  projection?: 'perspective' | 'orthographic';
+  orthoScaleMm?: number;
+}
+
+export interface Scene3DRenderSettings {
+  width?: number;
+  height?: number;
+}
+
 export interface Scene3DSpec {
   version: 'scene3d/v1';
   units: 'mm';
@@ -37,6 +51,8 @@ export interface Scene3DSpec {
   parameters: Record<string, number>;
   nodes: Scene3DNode[];
   constraints?: Scene3DConstraint[];
+  camera?: Scene3DCamera;
+  render?: Scene3DRenderSettings;
   metadata?: Record<string, unknown>;
 }
 
@@ -57,6 +73,65 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function finite(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 1_000_000;
+}
+
+function vector3(value: unknown): number[] | null {
+  if (!Array.isArray(value) || value.length !== 3 || !value.every((item) => finite(item))) return null;
+  return value;
+}
+
+/** BLOCK-322 P2-01 — 与后端 scene3d.js validateCamera 同判据（展示侧兜底）。 */
+function validateCameraForView(raw: unknown, errors: string[]): void {
+  if (!isRecord(raw)) {
+    errors.push('camera 必须是对象');
+    return;
+  }
+  const position = vector3(raw.position);
+  const target = vector3(raw.target);
+  if (!position) errors.push('camera.position 非法');
+  if (!target) errors.push('camera.target 非法');
+  if (position && target && position.every((value, index) => value === target[index])) {
+    errors.push('camera 视线退化（position 与 target 重合）');
+  }
+  if (raw.up !== undefined) {
+    const up = vector3(raw.up);
+    if (!up || (up[0] === 0 && up[1] === 0 && up[2] === 0)) errors.push('camera.up 必须是非零三维向量');
+    else if (position && target) {
+      const forward = target.map((value, index) => value - position[index]);
+      const cross = [
+        up[1] * forward[2] - up[2] * forward[1],
+        up[2] * forward[0] - up[0] * forward[2],
+        up[0] * forward[1] - up[1] * forward[0],
+      ];
+      const forwardLength = Math.hypot(...forward);
+      const upLength = Math.hypot(...up);
+      if (forwardLength > 0 && upLength > 0 && Math.hypot(...cross) / (forwardLength * upLength) < 1e-9) {
+        errors.push('camera.up 与视线共线，无法确定倾角');
+      }
+    }
+  }
+  if (raw.fovDeg !== undefined && (!finite(raw.fovDeg) || raw.fovDeg <= 1 || raw.fovDeg >= 179)) {
+    errors.push('camera.fovDeg 须在 (1,179) 度之间');
+  }
+  const projection = raw.projection === undefined ? 'perspective' : raw.projection;
+  if (projection !== 'perspective' && projection !== 'orthographic') errors.push('camera.projection 只支持 perspective/orthographic');
+  if (projection === 'orthographic' && !(finite(raw.orthoScaleMm) && raw.orthoScaleMm > 0)) {
+    errors.push('camera.orthoScaleMm 在正交投影下必填且须 >0');
+  }
+}
+
+function validateRenderForView(raw: unknown, errors: string[]): void {
+  if (!isRecord(raw)) {
+    errors.push('render 必须是对象');
+    return;
+  }
+  for (const key of ['width', 'height'] as const) {
+    const value = raw[key];
+    if (value === undefined) continue;
+    if (!Number.isInteger(value) || (value as number) < 16 || (value as number) > 4096) {
+      errors.push(`render.${key} 须是 16..4096 的整数`);
+    }
+  }
 }
 
 export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3DView } | { ok: false; errors: string[] } {
@@ -117,6 +192,11 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
       dimensions,
     });
   }
+  if (raw.camera !== undefined) validateCameraForView(raw.camera, errors);
+  if (raw.render !== undefined) validateRenderForView(raw.render, errors);
+  if (isRecord(raw.camera) && raw.camera.projection === 'orthographic') {
+    warnings.push('相机声明为正交投影：导出按正交取景，预览端仍是透视相机（只对齐机位与目标，不假装投影一致）。');
+  }
   if (errors.length > 0) return { ok: false, errors: [...new Set(errors)] };
   const scene: Scene3DSpec = {
     version: SCENE3D_VERSION,
@@ -131,6 +211,8 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
         && typeof row.b === 'string'
         && ['x', 'y', 'z'].includes(String(row.axis)))
       : [],
+    ...(isRecord(raw.camera) ? { camera: raw.camera as unknown as Scene3DCamera } : {}),
+    ...(isRecord(raw.render) ? { render: raw.render } : {}),
     metadata: isRecord(raw.metadata) ? raw.metadata : {},
   };
   return {

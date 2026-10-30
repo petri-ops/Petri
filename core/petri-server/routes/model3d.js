@@ -7,10 +7,10 @@ const { runModel3DReview } = require('../helpers/model3d-review');
 const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
 const { inspectMeshAsset } = require('../helpers/mesh-assets');
+const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
 
-const REVIEW_VIEWS = new Set(['front', 'top', 'side', 'iso']);
 // resolveWorkspaceTarget 的路径拒绝码 → 403（与 400「请求本身不合法」区分）。
 const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'symlink_not_allowed', 'workspace_unavailable'];
 
@@ -18,15 +18,11 @@ function requestUserId(req) {
   return req.userId || (req.user && req.user.id) || null;
 }
 
+// 视角合法性判据取自 helpers/model3d-views 单源（本处原先自写一份清单）。
 function normalizeViews(input) {
   if (!Array.isArray(input)) return undefined;
-  const views = [];
-  for (const item of input) {
-    const view = String(item || '').trim().toLowerCase();
-    if (!REVIEW_VIEWS.has(view)) return { error: 'invalid_views' };
-    if (!views.includes(view)) views.push(view);
-  }
-  return views.length > 0 ? { views } : { error: 'invalid_views' };
+  const views = normalizeRenderViews(input);
+  return views ? { views } : { error: 'invalid_views' };
 }
 
 // 本地项目授权 + ssh 拒绝：SceneSpec 编辑/渲染都发生在宿主工作区。

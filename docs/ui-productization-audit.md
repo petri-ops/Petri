@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-641: 3D 声明相机与渲染分辨率（BLOCK-322 P2-01；2026-10-30 **verified（dev Electron 边界内；实机 18/18）**）
+
+- **变化面**：SceneSpec 新增可选 `camera`（position/target/up/fovDeg/projection/orthoScaleMm）与 `render`（width/height，16..4096）；3D 工作台在场景声明机位后多出「机位」视角按钮，点击即按声明机位取景（未声明时不提供该选项，也不拿等轴冒充）；视觉 QA 面板视角序增列 `camera`，导出侧按声明相机真出 `camera.png`。
+- **为什么这样设计**：P2 的叙事能力要有可复现的构图真相，所以机位是 **SceneSpec 字段**而不是 UI 里的临时相机状态；`hashSceneSpec` 含 camera/render ⇒ 机位变更自然产生新 revision。两侧 fov 对齐是硬点：Blender 显式 `sensor_fit='VERTICAL'` + `sensor_height=24`，使 `camera.fovDeg` 与 Three.js `PerspectiveCamera` 的**垂直** fov 同轴（不指定时 Blender 按宽边折算，两侧就不是同一个角）。
+- **验证（代码）**：`test/block322-p2-camera.test.mjs` 8/8（含非法相机 fail-closed、向后兼容、视角名单源、跨语言合同锁）+ `frontend/src/lib/scene3d.test.ts` 7/7 + ReviewPanel 4/4 + viewerRegistry 19/19 + next04b REST 邻域回归；全量 `frontend npm run check` 0 红。
+- **实机证据**：`acceptance/block-322-p2/block322-p2-camera-live-live.json`（**18/18 allPass**，win32-x64 + 真实 Blender 4.5.10 LTS + 9223 离屏）：无 camera 场景仍只出 front/top/side/iso 且分辨率回显 800×600；声明 fov 35 → 生效 `angle_y=34.999996`；1200×800 声明生效；`camera.png` 575KB 与 `front.png` 772KB sha 不同（真出图非复制）；退化视线与 `up` 共线分别按精确错误拒收；正交声明回显 `ORTHO / orthoScaleMm=320`；UI 侧「机位」按钮仅在声明后出现，点击后 `aria-pressed=true` 且画布帧变化。明细 `block322-p2-camera-detail.json`。
+- **同批收敛（单一真相）**：`front/top/side/iso` 这组视角名此前在 6 个后端文件里各写一份（10 处），P2-01 要加 `camera` 即触发第三类重复 → 收敛到 `core/petri-server/helpers/model3d-views.js` 单源（`RENDER_VIEWS`/`DEFAULT_RENDER_VIEWS`/`normalizeRenderViews`），routes 自写的视图校验改调单源函数；由 `block322-p2-camera` 内的消费面扫描门守护（任何文件再写字面量清单即红）。
+- **边界（reopen）**：①预览端相机始终是透视相机——场景声明 `orthographic` 时只对齐机位与目标，投影差异以告警如实声明，不假装一致；②`up` 与视线共线在校验层拒收（不提供「忽略 up」的静默回落）；③帧对比取证仍受离屏合成时序限制（断言只作下限与哈希差异）。
+
 ## UI-640: 3D 工作台外部资产导入与 mesh-reference 预览渲染（BLOCK-322 P1b/P1c；2026-10-30 **verified（dev Electron 边界内；实机 29/29）**）
 
 - **变化面**：3D 工作台（`Model3DSurface`）新增「导入为场景节点」入口——选中本地 GLB/GLTF/STL/OBJ 后走「分片写入工作区 `model3d/assets/` → 服务端预检算 sha256 → `add_node` 白名单写入 SceneSpec」，导入即成为场景图一部分；`Model3DScene` 不再对 `mesh-reference` 静默跳过，改为按 `workspaceFileUrlFor` 从工作区文件路由真加载（STL/OBJ/GLTF 各自 loader，`.gltf` 经 `setResourcePath` 让同目录外部 `.bin`/贴图可达），套用节点 transform、纳入包围盒与相机取景、可点选（递归命中后回溯到场景直接子级取节点 id）。

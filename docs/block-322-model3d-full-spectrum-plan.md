@@ -97,7 +97,7 @@ status: active
 
 | ID | 范围 | 验收（可机械断言） | 证据 |
 | --- | --- | --- | --- |
-| `P2-01` 相机与构图 | SceneSpec 增 `camera`（position/target/up/fov/ortho 比例）；Blender 用该相机替换固定 4 视角相机；预览端同参数 | 校验层 + 前端镜像 + Blender 消费；导出渲染图的机位/张角与声明一致（渲染尺寸与几何投影可测）；实机腿 | `acceptance/block-322-p2/p2-01-*` |
+| `P2-01` 相机与构图 **completed（2026-10-30，实机 18/18 + next04a 回归 7/7）** | SceneSpec 增可选 `camera`（position/target/up/fovDeg/projection/orthoScaleMm）与 `render`（width/height 16..4096）；Blender **新增 `camera` 视角**用声明机位出图（标准四视角保留，未声明即跳过不伪造），Blender 侧 `sensor_fit='VERTICAL'`+`sensor_height=24` 使 fov 与 Three 的**垂直** fov 同轴；预览端多出「机位」视角并真按声明取景 | 校验双层（退化视线/up 共线/fov 越界/正交缺画幅均拒收）+ 前端镜像同判据 + 报告回显 `effectiveAngleYDeg`/`orthoScaleMm`/`upApplied` 与声明对账 + camera.png 与 front.png 不同图 + 实机腿 | `acceptance/block-322-p2/block322-p2-camera-live-live.json` + `block322-p2-camera-detail.json` |
 | `P2-02` 灯光与环境 | `environment`（背景色/环境光强/三点灯 key-fill-rim 参数）；Blender world + 灯组；Three 侧同名灯组 | 背景色与亮度可按像素采样断言；两侧同参数同观感（容差内）；实机腿 | 同上 |
 | `P2-03` PBR 材质与贴图 | `material` 扩 metallic/emissive/baseColorTexture（工作区贴图，**sha256 锚定，复用 P1 资产单源**）；Blender Principled + 贴图节点；Three `MeshStandardMaterial` + 贴图经工作区 URL | 贴图 sha 校验（篡改即拒）；渲染像素差异（有/无贴图）；实机腿 | 同上 |
 | `P2-04` 序列帧与转盘视频 | 渲染面扩 `frames`/`turntable`（角度步进）；视频由 **Blender 内置 ffmpeg** 输出 mp4（不引入系统/npm 依赖） | 产物含 mp4 + 序列帧；bytes/sha/帧数可断言；登记进成果面 | 同上 |

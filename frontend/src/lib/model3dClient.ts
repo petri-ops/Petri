@@ -15,7 +15,7 @@ export async function fetchModel3DCapability(): Promise<Model3DCapability> {
   return data;
 }
 
-export type Model3DReviewView = 'front' | 'top' | 'side' | 'iso';
+export type Model3DReviewView = 'front' | 'top' | 'side' | 'iso' | 'camera';
 
 interface Model3DReviewViewReport {
   view: Model3DReviewView;

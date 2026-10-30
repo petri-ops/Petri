@@ -157,6 +157,7 @@
       "patterns": [
         "core/petri-server/helpers/scene3d.js",
         "core/petri-server/helpers/mesh-assets.js",
+        "core/petri-server/helpers/model3d-views.js",
         "core/petri-server/helpers/blender-provider.js",
         "core/petri-server/routes/model3d.js",
         "core/petri-server/agent-tools/model3d-tools.js",
@@ -179,6 +180,7 @@
         "test/block322-*.test.mjs",
         "acceptance/next-04a-3d-foundation/**",
         "acceptance/block-322-p1/**",
+        "acceptance/block-322-p2/**",
         ".agents/skills/petri-dev-infra/dev-verify/flows/next04a-*.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/block322-*.cjs"
       ],
@@ -195,6 +197,7 @@
         "test/block322-p1-mesh-formats.test.mjs",
         "test/block322-mesh-format-single-source.test.mjs",
         "test/block322-p1c-asset-intake.test.mjs",
+        "test/block322-p2-camera.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts"
       ],

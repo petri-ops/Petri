@@ -11,6 +11,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const scene3d = require('./scene3d');
 const blender = require('./blender-provider');
+const { DEFAULT_RENDER_VIEWS } = require('./model3d-views');
 const { callVision } = require('./llm-client');
 const { imageDataUrlFromBuffer } = require('../agent-tools/vision-image-io');
 
@@ -117,14 +118,14 @@ async function runModel3DReview({ scene, workspaceRoot, userId, views } = {}) {
   const render = await blender.runBlenderScene({
     scene: resolved.scene,
     workspaceRoot,
-    views: Array.isArray(views) && views.length > 0 ? views : ['front', 'top', 'side', 'iso'],
+    views: Array.isArray(views) && views.length > 0 ? views : [...DEFAULT_RENDER_VIEWS],
     formats: [],
   });
   if (!render.ok) return { ok: false, ...render };
   const vision = await reviewRenders({
     report: render.report,
     userId,
-    viewOrder: Array.isArray(views) && views.length > 0 ? views : ['front', 'top', 'side', 'iso'],
+    viewOrder: Array.isArray(views) && views.length > 0 ? views : [...DEFAULT_RENDER_VIEWS],
   });
   const relative = (absolute) => {
     if (!absolute) return null;

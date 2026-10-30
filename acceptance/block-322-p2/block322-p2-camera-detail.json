@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-10-30T13:43:21.100Z",
+  "platform": "win32-x64",
+  "api": "http://127.0.0.1:3001",
+  "projectId": "p_mvv0vq9v_idc5",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "cameraShot": {
+    "declared": {
+      "position": [
+        420,
+        -380,
+        300
+      ],
+      "target": [
+        0,
+        0,
+        20
+      ],
+      "fovDeg": 35,
+      "up": [
+        0,
+        0,
+        1
+      ]
+    },
+    "report": {
+      "declared": true,
+      "applied": true,
+      "projection": "PERSP",
+      "declaredFovDeg": 35,
+      "effectiveAngleYDeg": 34.999996,
+      "orthoScaleMm": null,
+      "sensorFit": "VERTICAL",
+      "position": [
+        420,
+        -380,
+        300
+      ],
+      "target": [
+        0,
+        0,
+        20
+      ],
+      "declaredUp": [
+        0,
+        0,
+        1
+      ],
+      "upApplied": true
+    },
+    "render": {
+      "width": 1200,
+      "height": 800,
+      "declared": true
+    },
+    "renders": [
+      "camera",
+      "front",
+      "iso",
+      "side",
+      "top"
+    ],
+    "cameraPngBytes": 575173,
+    "cameraPngSha": "348320c516ab1840",
+    "frontPngSha": "474bfc4677acfd36"
+  },
+  "ui": {
+    "baselineLabels": [
+      "等轴",
+      "前",
+      "顶",
+      "侧"
+    ],
+    "declaredLabels": [
+      "等轴",
+      "前",
+      "顶",
+      "侧",
+      "机位"
+    ],
+    "pressedAfterClick": [
+      "机位"
+    ],
+    "frameLengthBefore": 6490,
+    "frameLengthAfter": 64906
+  }
+}

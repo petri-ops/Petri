@@ -8,7 +8,7 @@ import type { Scene3DView, Scene3DViewNode } from '@/lib/scene3d';
 import { meshFormatForPath, type MeshInputFormat } from '@/lib/meshAssets';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
 
-export type Model3DViewAngle = 'iso' | 'front' | 'top' | 'side';
+export type Model3DViewAngle = 'iso' | 'front' | 'top' | 'side' | 'camera';
 
 function colorHex(value: string | undefined): number {
   return /^#[0-9a-f]{6}$/i.test(value || '') ? Number.parseInt(String(value).slice(1), 16) : 0x6a8caf;
@@ -110,22 +110,36 @@ export function Model3DScene({
     const camera = cameraRef.current;
     const controls = controlsRef.current;
     if (!camera || !controls) return;
+    const declared = view?.scene.camera;
+    if (angle === 'camera') {
+      // 未声明机位即不动相机——不拿等轴取景冒充「声明机位」。
+      if (!declared?.position || !declared?.target) return;
+      const [tx, ty, tz] = declared.target;
+      if (typeof declared.fovDeg === 'number') camera.fov = declared.fovDeg;
+      camera.up.fromArray(declared.up ?? [0, 0, 1]);
+      camera.position.fromArray(declared.position);
+      camera.lookAt(new THREE.Vector3(tx, ty, tz));
+      camera.updateProjectionMatrix();
+      controls.target.set(tx, ty, tz);
+      controls.update();
+      return;
+    }
     const box = boundsRef.current;
     const center = box.isEmpty() ? new THREE.Vector3(0, 0, 0) : box.getCenter(new THREE.Vector3());
     const size = box.isEmpty() ? new THREE.Vector3(100, 80, 60) : box.getSize(new THREE.Vector3());
     const distance = Math.max(40, Math.max(size.x, size.y, size.z) * 2.2);
-    const positions: Record<Model3DViewAngle, THREE.Vector3> = {
+    const positions: Record<Exclude<Model3DViewAngle, 'camera'>, THREE.Vector3> = {
       iso: new THREE.Vector3(center.x + distance * 0.8, center.y - distance * 0.8, center.z + distance * 0.65),
       front: new THREE.Vector3(center.x, center.y - distance, center.z),
       top: new THREE.Vector3(center.x, center.y, center.z + distance),
       side: new THREE.Vector3(center.x + distance, center.y, center.z),
     };
-    camera.position.copy(positions[angle]);
     camera.up.set(0, 0, 1);
+    camera.position.copy(positions[angle]);
     camera.lookAt(center);
     controls.target.copy(center);
     controls.update();
-  }, []);
+  }, [view]);
 
   React.useEffect(() => {
     const host = hostRef.current;

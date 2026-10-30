@@ -24,13 +24,15 @@ const Model3DScene = React.lazy(() =>
   import('./Model3DScene').then((module) => ({ default: module.Model3DScene }))
 );
 
-type ViewAngle = 'iso' | 'front' | 'top' | 'side';
+type ViewAngle = 'iso' | 'front' | 'top' | 'side' | 'camera';
 const VIEWS: Array<{ id: ViewAngle; label: string }> = [
   { id: 'iso', label: '等轴' },
   { id: 'front', label: '前' },
   { id: 'top', label: '顶' },
   { id: 'side', label: '侧' },
 ];
+// 仅当场景声明了 camera 才出现「机位」按钮（未声明时不提供假机位选项）。
+const DECLARED_CAMERA_VIEW = { id: 'camera' as const, label: '机位' };
 
 export function Model3DSurface({ projectId = null }: { projectId?: string | null }): React.ReactElement {
   const [view, setView] = React.useState<Scene3DView | null>(null);
@@ -360,7 +362,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
             <button type="button" className={button.ghost} disabled={!view && !modelUrl} onClick={captureScreenshot}>截图</button>
           </div>
           <div className={styles.viewSwitch} role="group" aria-label="3D 视角">
-            {VIEWS.map((entry) => (
+            {(view?.scene.camera ? [...VIEWS, DECLARED_CAMERA_VIEW] : VIEWS).map((entry) => (
               <button
                 key={entry.id}
                 type="button"

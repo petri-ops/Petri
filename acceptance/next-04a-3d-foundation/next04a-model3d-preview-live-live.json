@@ -1,12 +1,12 @@
 {
   "name": "next04a-model3d-preview-live",
-  "startedAt": "2026-10-29T14:12:15.926Z",
-  "finishedAt": "2026-10-29T14:12:17.948Z",
+  "startedAt": "2026-10-30T13:50:50.137Z",
+  "finishedAt": "2026-10-30T13:50:51.539Z",
   "assertions": [
     {
       "name": "W0_temp_project_created",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvtmh7ew_tquf\",\"name\":\"NEXT-04A-3D-1793283135927\",\"created_at\":\"2026-10-29T14:12:15.944Z\",\"updated_at\":\"2026-10-29T14:12:15.944Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"m"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvv15hya_08jf\",\"name\":\"NEXT-04A-3D-1793368250138\",\"created_at\":\"2026-10-30T13:50:50.146Z\",\"updated_at\":\"2026-10-30T13:50:50.146Z\",\"description\":\"\",\"is_public\":0,\"user_id\":\"local-user\",\"m"
     },
     {
       "name": "W1_sample_loaded",
@@ -16,22 +16,22 @@
     {
       "name": "W2_three_canvas_present",
       "pass": true,
-      "detail": "{\"present\":true,\"width\":648,\"height\":740,\"rect\":{\"width\":639.9926147460938,\"height\":730.9970092773438},\"snapshotLength\":121538,\"snapshotPrefix\":\"data:image/png;base64,iVBORw0KGg\",\"text\":\"3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth "
+      "detail": "{\"present\":true,\"width\":326,\"height\":465,\"rect\":{\"width\":321.9860534667969,\"height\":459.9888916015625},\"snapshotLength\":6490,\"snapshotPrefix\":\"data:image/png;base64,iVBORw0KGg\",\"text\":\"3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型导入为场景节点视觉 QA参数编辑草图转需求对比 SceneSpec测量保存视角截图等轴前顶侧单位 mm · Z-up · 点选模型选择节点场景节点2"
     },
     {
       "name": "W3_scene_rendered_objects",
       "pass": true,
-      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8"
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点场景节点2参数4约束0渲染对象2包围盒mm126×80×40节点enclosureboxwidth120·height40·depth80portcylinderradius6·height8视角书签保存当前相机视角后，可一键恢复。"
     },
     {
       "name": "W4_scene_stats",
       "pass": true,
-      "detail": "3D 模型Blender 可用Blender 4.5.10 LTS加载示例导入模型等轴前顶侧单位 mm · Z-up场景节点2参数4约束0渲染对象2包围盒 mm126 × 80 × 40节点enclosureboxwidth 120 · height 40 · depth 80portcylinderradius 6 · height 8"
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点场景节点2参数4约束0渲染对象2包围盒mm126×80×40节点enclosureboxwidth120·height40·depth80portcylinderradius6·height8视角书签保存当前相机视角后，可一键恢复。"
     },
     {
       "name": "W5_canvas_has_pixels",
       "pass": true,
-      "detail": "len=121538 prefix=data:image/png;base64,iVBORw0KGg"
+      "detail": "len=6490 prefix=data:image/png;base64,iVBORw0KGg"
     },
     {
       "name": "W6_view_switch",

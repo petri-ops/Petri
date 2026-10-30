@@ -9,6 +9,11 @@
 | capture | `evalJs` / `screenshotPng` | 带超时/异常透传的页面求值与 PNG 取证 |
 | assert | `createRun({name, evidenceDir})` | 断言记录 + `<id>-live.json` 证据落盘（与 block*-live 证据契约同构） |
 
+## 硬规则：UI 面断言一律轮询到目标态（BLOCK-322 P2-01 实机暴露）
+
+- 来自 `onReady`/异步 state 的可见数值（如 3D 面板的「渲染对象」「包围盒」）在**下一个 React commit** 才落地；点击后单次 `textContent` 读取会稳定读到占位「—」。旧 `next04a-model3d-preview-live` 的 W3/W4 即因单次读取在同一票后必红（产品无缺陷，计数确实落）。
+- 写法：`poll()` 到目标值再断言，超时才判失败；不得把「读到过一次」当证据，也不得为让单次读取变绿而延时盲等。
+
 ## 新增一个校验 flow
 
 1. 拷贝 `flows/_template.cjs` 为 `flows/<id>.cjs`，导出：

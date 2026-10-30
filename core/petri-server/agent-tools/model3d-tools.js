@@ -12,6 +12,7 @@ const path = require('node:path');
 const db = require('../db');
 const scene3d = require('../helpers/scene3d');
 const sceneStore = require('../helpers/model3d-scene-store');
+const { DEFAULT_RENDER_VIEWS } = require('../helpers/model3d-views');
 const { runModel3DRecipe } = require('../helpers/model3d-recipe-runner');
 const blender = require('../helpers/blender-provider');
 const { runModel3DReview } = require('../helpers/model3d-review');
@@ -133,7 +134,7 @@ async function runProvider(args, ctx) {
   const result = await blender.runBlenderScene({
     scene: resolved.scene,
     workspaceRoot: workspace.root,
-    views: Array.isArray(args.views) ? args.views : ['front', 'top', 'side', 'iso'],
+    views: Array.isArray(args.views) ? args.views : [...DEFAULT_RENDER_VIEWS],
     formats: args.renderOnly ? [] : normalizeFormats(args.formats),
   });
   return { ...result, provider: { status: capability.status, version: capability.version } };
@@ -276,7 +277,7 @@ async function tool_model3d_visual_qa(args = {}, ctx = {}) {
     scene: args.scene,
     workspaceRoot: workspace.root,
     userId: ctx.userId,
-    views: Array.isArray(args.views) ? args.views : ['front', 'top', 'side', 'iso'],
+    views: Array.isArray(args.views) ? args.views : [...DEFAULT_RENDER_VIEWS],
   });
 }
 

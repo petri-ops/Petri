@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-30T12:19:20.886Z",
+  "generatedAt": "2026-10-30T13:47:02.002Z",
   "platform": "win32-x64",
   "node": "v24.20.0",
   "api": "http://127.0.0.1:3001",
-  "projectId": "p_mvuxvndz_u3kt",
+  "projectId": "p_mvv10em1_qaom",
   "capability": {
     "ok": true,
     "status": "ready",
@@ -11,7 +11,7 @@
     "version": "Blender 4.5.10 LTS"
   },
   "donorAsset": {
-    "path": "model3d/runs/m3d-mvuxvnij-649kff/scene.glb",
+    "path": "model3d/runs/m3d-mvv10eqn-z5am4x/scene.glb",
     "sha256": "ec74a0b536250f10f95b3b9314291c7fb5dbf9142aa5b60f714516ab7320100d",
     "bytes": 2000
   },
@@ -28,23 +28,23 @@
     },
     "outputs": [
       {
-        "path": "model3d/runs/m3d-mvuxvqt6-agx8u7/front.png",
+        "path": "model3d/runs/m3d-mvv10i91-v1dqk7/front.png",
         "bytes": 302575
       },
       {
-        "path": "model3d/runs/m3d-mvuxvqt6-agx8u7/top.png",
+        "path": "model3d/runs/m3d-mvv10i91-v1dqk7/top.png",
         "bytes": 332106
       },
       {
-        "path": "model3d/runs/m3d-mvuxvqt6-agx8u7/side.png",
+        "path": "model3d/runs/m3d-mvv10i91-v1dqk7/side.png",
         "bytes": 290305
       },
       {
-        "path": "model3d/runs/m3d-mvuxvqt6-agx8u7/iso.png",
+        "path": "model3d/runs/m3d-mvv10i91-v1dqk7/iso.png",
         "bytes": 359320
       },
       {
-        "path": "model3d/runs/m3d-mvuxvqt6-agx8u7/scene.glb",
+        "path": "model3d/runs/m3d-mvv10i91-v1dqk7/scene.glb",
         "bytes": 3592
       }
     ]

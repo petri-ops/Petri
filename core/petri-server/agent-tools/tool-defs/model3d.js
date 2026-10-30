@@ -2,6 +2,8 @@
  * agent-tools/tool-defs/model3d.js — NEXT-04A SceneSpec / 3D 工具 Schema。
  */
 
+const { RENDER_VIEWS } = require('../../helpers/model3d-views');
+
 const scene = {
   type: 'object',
   description: 'SceneSpec v1（mm、z-up-right-handed）；由 model3d_validate 校验',
@@ -77,7 +79,7 @@ module.exports = [
         type: 'object',
         properties: {
           scene,
-          views: { type: 'array', items: { type: 'string', enum: ['front', 'top', 'side', 'iso'] } },
+          views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
         },
         required: ['scene'],
       },
@@ -92,7 +94,7 @@ module.exports = [
         type: 'object',
         properties: {
           scene,
-          views: { type: 'array', items: { type: 'string', enum: ['front', 'top', 'side', 'iso'] } },
+          views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
         },
         required: ['scene'],
       },
@@ -131,7 +133,7 @@ module.exports = [
           path: { type: 'string', description: '项目相对路径，默认 model3d/recipes/<recipeId>.scene3d.json' },
           render: { type: 'boolean', description: '执行时是否渲染四视图（默认 true）' },
           formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj'] } },
-          views: { type: 'array', items: { type: 'string', enum: ['front', 'top', 'side', 'iso'] } },
+          views: { type: 'array', items: { type: 'string', enum: [...RENDER_VIEWS] } },
         },
         required: ['recipeId'],
       },

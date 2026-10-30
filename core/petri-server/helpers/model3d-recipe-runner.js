@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const scene3d = require('./scene3d');
+const { DEFAULT_RENDER_VIEWS } = require('./model3d-views');
 const blender = require('./blender-provider');
 const sceneStore = require('./model3d-scene-store');
 const recipes = require('./model3d-recipes');
@@ -66,7 +67,7 @@ async function runModel3DRecipe({
   const run = await blender.runBlenderScene({
     scene: resolved.scene,
     workspaceRoot,
-    views: renderWanted ? (Array.isArray(views) ? views : ['front', 'top', 'side', 'iso']) : [],
+    views: renderWanted ? (Array.isArray(views) ? views : [...DEFAULT_RENDER_VIEWS]) : [],
     formats: outputFormats,
     signal,
   });

@@ -20,6 +20,7 @@ const LIMITS = Object.freeze({
   maxConstraints: 200,
   maxDimensionMm: 1_000_000,
   maxKeyLength: 80,
+  maxResolutionPx: 4096,
 });
 
 function isPlainObject(value) {
@@ -66,6 +67,72 @@ function validateVector(value) {
 
 function validateColor(value) {
   return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
+}
+
+function sameVector(a, b) {
+  return Array.isArray(a) && Array.isArray(b) && a.length === 3 && b.length === 3
+    && a[0] === b[0] && a[1] === b[1] && a[2] === b[2];
+}
+
+/**
+ * BLOCK-322 P2-01 — 声明相机：position/target 必填，up 非零，fov 在 (1,179)，
+ * 正交投影必须给 orthoScaleMm。退化视线（position===target）直接拒绝，
+ * 免得渲染阶段才发现「拍不到东西」。
+ */
+function validateCamera(camera, errors) {
+  if (!isPlainObject(camera)) {
+    errors.push('camera 必须是对象');
+    return;
+  }
+  const hasPosition = validateVector(camera.position);
+  const hasTarget = validateVector(camera.target);
+  if (!hasPosition) errors.push('camera.position 非法');
+  if (!hasTarget) errors.push('camera.target 非法');
+  if (hasPosition && hasTarget && sameVector(camera.position, camera.target)) {
+    errors.push('camera 视线退化（position 与 target 重合）');
+  }
+  if (camera.up !== undefined) {
+    if (!validateVector(camera.up) || (camera.up[0] === 0 && camera.up[1] === 0 && camera.up[2] === 0)) {
+      errors.push('camera.up 必须是非零三维向量');
+    } else if (hasPosition && hasTarget) {
+      const forward = camera.target.map((value, index) => value - camera.position[index]);
+      const cross = [
+        camera.up[1] * forward[2] - camera.up[2] * forward[1],
+        camera.up[2] * forward[0] - camera.up[0] * forward[2],
+        camera.up[0] * forward[1] - camera.up[1] * forward[0],
+      ];
+      const forwardLength = Math.hypot(...forward);
+      const upLength = Math.hypot(...camera.up);
+      if (forwardLength > 0 && upLength > 0 && Math.hypot(...cross) / (forwardLength * upLength) < 1e-9) {
+        errors.push('camera.up 与视线共线，无法确定倾角');
+      }
+    }
+  }
+  if (camera.fovDeg !== undefined && (!finiteNumber(camera.fovDeg) || camera.fovDeg <= 1 || camera.fovDeg >= 179)) {
+    errors.push('camera.fovDeg 须在 (1,179) 度之间');
+  }
+  const projection = camera.projection === undefined ? 'perspective' : camera.projection;
+  if (!['perspective', 'orthographic'].includes(projection)) errors.push('camera.projection 只支持 perspective/orthographic');
+  if (projection === 'orthographic') {
+    if (!finiteNumber(camera.orthoScaleMm) || camera.orthoScaleMm <= 0) errors.push('camera.orthoScaleMm 在正交投影下必填且须 >0');
+  } else if (camera.orthoScaleMm !== undefined && (!finiteNumber(camera.orthoScaleMm) || camera.orthoScaleMm <= 0)) {
+    errors.push('camera.orthoScaleMm 非法');
+  }
+}
+
+/** BLOCK-322 P2-01 — 渲染分辨率（不写则沿用提供方默认 800×600）。 */
+function validateRenderSettings(render, errors) {
+  if (!isPlainObject(render)) {
+    errors.push('render 必须是对象');
+    return;
+  }
+  for (const key of ['width', 'height']) {
+    const value = render[key];
+    if (value === undefined) continue;
+    if (!Number.isInteger(value) || value < 16 || value > LIMITS.maxResolutionPx) {
+      errors.push(`render.${key} 须是 16..${LIMITS.maxResolutionPx} 的整数`);
+    }
+  }
 }
 
 function validateParameterRef(value, parameters, errors, where) {
@@ -163,6 +230,8 @@ function validateSceneSpec(input) {
       if (!['x', 'y', 'z'].includes(constraint.axis)) errors.push(`constraints[${index}].axis 非法`);
     });
   }
+  if (input.camera !== undefined) validateCamera(input.camera, errors);
+  if (input.render !== undefined) validateRenderSettings(input.render, errors);
   const uniqueErrors = [...new Set(errors)];
   if (uniqueErrors.includes('mesh_source_hash_required')) return { ok: false, error: 'mesh_source_hash_required', errors: uniqueErrors };
   if (uniqueErrors.includes('mesh_format_unsupported')) return { ok: false, error: 'mesh_format_unsupported', errors: uniqueErrors };

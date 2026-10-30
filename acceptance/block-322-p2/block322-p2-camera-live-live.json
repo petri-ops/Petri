@@ -1,0 +1,98 @@
+{
+  "name": "block322-p2-camera-live",
+  "startedAt": "2026-10-30T13:43:14.208Z",
+  "finishedAt": "2026-10-30T13:43:21.106Z",
+  "assertions": [
+    {
+      "name": "B0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 4.5.10 LTS\"}"
+    },
+    {
+      "name": "B1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvv0vq9v_idc5\"}"
+    },
+    {
+      "name": "B2a_no_camera_no_fake_shot",
+      "pass": true,
+      "detail": "{\"declared\":false,\"applied\":false}"
+    },
+    {
+      "name": "B2b_four_standard_views_only",
+      "pass": true,
+      "detail": "[\"front\",\"iso\",\"side\",\"top\"]"
+    },
+    {
+      "name": "B2c_default_resolution_echo",
+      "pass": true,
+      "detail": "{\"width\":800,\"height\":600,\"declared\":false}"
+    },
+    {
+      "name": "B3a_declared_camera_applied",
+      "pass": true,
+      "detail": "{\"declared\":true,\"applied\":true,\"projection\":\"PERSP\",\"declaredFovDeg\":35,\"effectiveAngleYDeg\":34.999996,\"orthoScaleMm\":null,\"sensorFit\":\"VERTICAL\",\"position\":[420,-380,300],\"target\":[0,0,20],\"declaredUp\":[0,0,1],\"upApplied\":true}"
+    },
+    {
+      "name": "B3b_fov_vertical_parity",
+      "pass": true,
+      "detail": "declared=35 effective=34.999996"
+    },
+    {
+      "name": "B3c_resolution_declaration_effective",
+      "pass": true,
+      "detail": "{\"width\":1200,\"height\":800,\"declared\":true}"
+    },
+    {
+      "name": "B3d_camera_render_produced",
+      "pass": true,
+      "detail": "[\"camera\",\"front\",\"iso\",\"side\",\"top\"]"
+    },
+    {
+      "name": "B3e_camera_png_is_real_and_distinct",
+      "pass": true,
+      "detail": "{\"cameraBytes\":575173,\"frontBytes\":772631}"
+    },
+    {
+      "name": "B4a_metadata_seed_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/bad.scene3d.json\",\"beforeHash\":\"e522120d770ce207c6eef7bb69a7f2ff63d6745163495f858e45be0b74b75d80\",\"afterHash\":\"e522120d770ce207c6eef7"
+    },
+    {
+      "name": "B4b_degenerate_camera_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"scene_invalid\",\"errors\":[\"camera 视线退化（position 与 target 重合）\"]}"
+    },
+    {
+      "name": "B4c_scene_read_still_valid",
+      "pass": true,
+      "detail": "{\"ok\":true,\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{},\"nodes\":[{\"id\":\"base\",\"type\":\"box\",\"dimensions\":{"
+    },
+    {
+      "name": "B4d_collinear_up_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"scene_invalid\",\"errors\":[\"camera.up 与视线共线，无法确定倾角\"]}"
+    },
+    {
+      "name": "B5_orthographic_applied",
+      "pass": true,
+      "detail": "{\"declared\":true,\"applied\":true,\"projection\":\"ORTHO\",\"declaredFovDeg\":40,\"effectiveAngleYDeg\":null,\"orthoScaleMm\":320,\"sensorFit\":\"VERTICAL\",\"position\":[0,-600,300],\"target\":[0,0,0],\"declaredUp\":null,\"upApplied\":false}"
+    },
+    {
+      "name": "U1_no_camera_no_shot_button",
+      "pass": true,
+      "detail": "[\"等轴\",\"前\",\"顶\",\"侧\"]"
+    },
+    {
+      "name": "U2a_shot_button_appears_on_declaration",
+      "pass": true,
+      "detail": "{\"labels\":[\"等轴\",\"前\",\"顶\",\"侧\",\"机位\"],\"alert\":\"\"}"
+    },
+    {
+      "name": "U2b_declared_shot_adopted_and_framing_changes",
+      "pass": true,
+      "detail": "{\"pressed\":[\"机位\"],\"before\":\"v48oYCYCSwT+\",\"after\":\"WLDK7y36PwAA\"}"
+    }
+  ],
+  "allPass": true
+}

@@ -1,7 +1,7 @@
 {
   "name": "block322-p1-external-asset-live",
-  "startedAt": "2026-10-30T12:19:11.608Z",
-  "finishedAt": "2026-10-30T12:19:20.890Z",
+  "startedAt": "2026-10-30T13:46:52.279Z",
+  "finishedAt": "2026-10-30T13:47:02.007Z",
   "assertions": [
     {
       "name": "A0_blender_ready",
@@ -11,7 +11,7 @@
     {
       "name": "A1_temp_project",
       "pass": true,
-      "detail": "{\"projectId\":\"p_mvuxvndz_u3kt\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block322-p1-1793362751780-mvuxvndz\"}"
+      "detail": "{\"projectId\":\"p_mvv10em1_qaom\",\"workspacePath\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\\\\projects\\\\block322-p1-1793368012533-mvv10em1\"}"
     },
     {
       "name": "A2a_source_scene",
@@ -21,22 +21,22 @@
     {
       "name": "A2b_donor_glb_exported",
       "pass": true,
-      "detail": "{\"ok\":true,\"sceneHash\":\"6c23eb0d495af379b2f1a9a32514d69cefd71e18a2472ac84aca7ef3cfcc6c07\",\"provider\":\"blender\",\"providerVersion\":\"Blender 4.5.10 LTS\",\"outDir\":\"model3d/runs/m3d-mvuxvnij-649kff\",\"manifest\":\"model3d/runs/m3d-mvuxvnij-649kff/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 L"
+      "detail": "{\"ok\":true,\"sceneHash\":\"6c23eb0d495af379b2f1a9a32514d69cefd71e18a2472ac84aca7ef3cfcc6c07\",\"provider\":\"blender\",\"providerVersion\":\"Blender 4.5.10 LTS\",\"outDir\":\"model3d/runs/m3d-mvv10eqn-z5am4x\",\"manifest\":\"model3d/runs/m3d-mvv10eqn-z5am4x/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"4.5.10 L"
     },
     {
       "name": "A2c_donor_glb_on_disk",
       "pass": true,
-      "detail": "ts\\block322-p1-1793362751780-mvuxvndz\\model3d\\runs\\m3d-mvuxvnij-649kff\\scene.glb"
+      "detail": "ts\\block322-p1-1793368012533-mvv10em1\\model3d\\runs\\m3d-mvv10eqn-z5am4x\\scene.glb"
     },
     {
       "name": "A3_inspect_matches_disk",
       "pass": true,
-      "detail": "{\"ok\":true,\"path\":\"model3d/runs/m3d-mvuxvnij-649kff/scene.glb\",\"format\":\"glb\",\"bytes\":2000,\"sourceSha256\":\"ec74a0b536250f10f95b3b9314291c7fb5dbf9142aa5b60f714516ab7320100d\",\"maxBytes\":67108864}"
+      "detail": "{\"ok\":true,\"path\":\"model3d/runs/m3d-mvv10eqn-z5am4x/scene.glb\",\"format\":\"glb\",\"bytes\":2000,\"sourceSha256\":\"ec74a0b536250f10f95b3b9314291c7fb5dbf9142aa5b60f714516ab7320100d\",\"maxBytes\":67108864}"
     },
     {
       "name": "A3b_relative_path_only",
       "pass": true,
-      "detail": "model3d/runs/m3d-mvuxvnij-649kff/scene.glb"
+      "detail": "model3d/runs/m3d-mvv10eqn-z5am4x/scene.glb"
     },
     {
       "name": "A4a_unsupported_format_400",
@@ -61,17 +61,17 @@
     {
       "name": "A5a_add_node_written",
       "pass": true,
-      "detail": "{\"beforeHash\":\"e522120d770ce207c6eef7bb69a7f2ff63d6745163495f858e45be0b74b75d80\",\"afterHash\":\"0fae6b8726de18c090a9180f0a174759a4d2cbef85846c3f54cb09dc7c32a4fc\",\"parameters\":[],\"nodes\":[{\"id\":\"asset-donor\",\"status\":\"added\",\"fields\":[]}],\"con"
+      "detail": "{\"beforeHash\":\"e522120d770ce207c6eef7bb69a7f2ff63d6745163495f858e45be0b74b75d80\",\"afterHash\":\"d3f0f130880363b13864da51f192d7f09eb1f4e93f94da780f273d40af797975\",\"parameters\":[],\"nodes\":[{\"id\":\"asset-donor\",\"status\":\"added\",\"fields\":[]}],\"con"
     },
     {
       "name": "A5b_revision_snapshots_asset_version",
       "pass": true,
-      "detail": "{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"0fae6b8726de18c090a9180f0a174759a4d2cbef85846c3f54cb09dc7c32a4fc\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-10-30T12:19:13.287Z\",\"file\":\"rev-000001."
+      "detail": "{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"d3f0f130880363b13864da51f192d7f09eb1f4e93f94da780f273d40af797975\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-10-30T13:46:54.087Z\",\"file\":\"rev-000001."
     },
     {
       "name": "A5c_revision_history_lists_asset_version",
       "pass": true,
-      "detail": "{\"ok\":true,\"path\":\"model3d/main.scene3d.json\",\"revisions\":[{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"0fae6b8726de18c090a9180f0a174759a4d2cbef85846c3f54cb09dc7c32a4fc\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-1"
+      "detail": "{\"ok\":true,\"path\":\"model3d/main.scene3d.json\",\"revisions\":[{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"d3f0f130880363b13864da51f192d7f09eb1f4e93f94da780f273d40af797975\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-1"
     },
     {
       "name": "A5d_readback_sha_stable",
@@ -81,12 +81,12 @@
     {
       "name": "A6_tampered_hash_build_fails",
       "pass": true,
-      "detail": "{\"ok\":false,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":1,\"vertices\":8,\"triangles\":12,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"base\":384000}},\"boundsMm\":{\"min\":[-0.5,-0.5,-0.5],\"max\":[0.5,0.5,0.5],\"size\":[1,1"
+      "detail": "{\"ok\":false,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":1,\"vertices\":8,\"triangles\":12,\"nonManifoldEdges\":0,\"watertight\":true,\"volumesMm3\":{\"base\":384000}},\"camera\":{\"declared\":false,\"applied\":false},\"render\":{\"width\":800,"
     },
     {
       "name": "A7a_valid_build_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":32,\"triangles\":24,\"nonManifoldEdges\":24,\"watertight\":false,\"volumesMm3\":{\"base\":384000,\"asset-donor:donor\":288000}},\"boundsMm\":{\"min\""
+      "detail": "{\"ok\":true,\"blenderVersion\":\"4.5.10 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"mesh\":{\"objects\":2,\"vertices\":32,\"triangles\":24,\"nonManifoldEdges\":24,\"watertight\":false,\"volumesMm3\":{\"base\":384000,\"asset-donor:donor\":288000}},\"camera\":{\"declar"
     },
     {
       "name": "A7b_asset_increases_objects",
@@ -111,7 +111,7 @@
     {
       "name": "U2_baseline_objects_and_pixels",
       "pass": true,
-      "detail": "{\"baselineObjects\":2,\"pixels\":44962,\"alert\":\"\"}"
+      "detail": "{\"baselineObjects\":2,\"pixels\":57758,\"alert\":\"\"}"
     },
     {
       "name": "U3a_asset_written_into_scene",
@@ -121,7 +121,7 @@
     {
       "name": "U3b_asset_rendered_in_preview",
       "pass": true,
-      "detail": "{\"baselineObjects\":2,\"importedObjects\":3,\"pixels\":46942}"
+      "detail": "{\"baselineObjects\":2,\"importedObjects\":3,\"pixels\":60866}"
     },
     {
       "name": "U3c_mesh_node_in_tree",
@@ -136,7 +136,7 @@
     {
       "name": "U3e_ui_write_wrote_scene_file",
       "pass": true,
-      "detail": "projects\\block322-p1-1793362751780-mvuxvndz\\model3d\\scene.scene3d.json"
+      "detail": "projects\\block322-p1-1793368012533-mvv10em1\\model3d\\scene.scene3d.json"
     },
     {
       "name": "U4a_missing_asset_reports_failure",
@@ -146,7 +146,7 @@
     {
       "name": "U4b_primitives_still_rendered",
       "pass": true,
-      "detail": "{\"alert\":\"\",\"pixels\":46942,\"objects\":\"渲染对象2\"}"
+      "detail": "{\"alert\":\"\",\"pixels\":60866,\"objects\":\"渲染对象2\"}"
     }
   ],
   "allPass": true

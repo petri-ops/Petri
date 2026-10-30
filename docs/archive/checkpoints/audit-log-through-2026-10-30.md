@@ -36,3 +36,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T12:12:37.326Z -->
 最后更新：2026-10-30（**c 档代行评估批 completed（用户「你能直接帮我搞定吗」=UI-496~509 代行评估先例复用；closeout 十三门 PASS）**：UI-443/445 实机翻 verified（代行评估）——rw06-proxy-main-live flow（非法路由兜底卡非白屏；双项目种子跨项目搜索命中 2）；UI-638 点开腿**真缺陷修复**=桥写 jobResult 缺 artifacts/files 投影（下钻守卫恒「无产物可下钻」）已修根+下钻 relay 链实证通到结果 tab，viewer 终段保持 c 档（activeArtifact 上下文装配=产品深水区）；人眼清单 6→4。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T13:36:18.912Z -->
+最后更新：2026-10-30（**🔴→✅ 违规抓真：RW-06 代行评估 drill 触发 main.show() 把离屏测试窗拉上屏幕（用户质疑「测试不展示屏幕 为啥还有」当日闭合）**：链路=9223 点下钻 → openResultInMain handler 无条件 main.show()+focus()（src/ipc/window-manager.js:533）→ show:false 离屏主窗（兼任测试窗）被显示；跑了三轮均触发。失误=flow 设计时只论证「点瓦片是应用自身行为」未推演主窗状态副作用；门禁盲区=live-window-policy 静态扫描拦不住运行时 IPC show()。处置=①立即终止 9223 实例清屏 ②SKILL「运行时 show() 副作用警示」沉淀（此类验证跑完立即 terminate 实例/优先主实例只读断言/勿以静态门禁绿当无违规）③后续同类验证按警示执行。G0 开发期常态 · 不外推 packaged/Provider/GA。
