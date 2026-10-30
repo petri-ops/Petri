@@ -51,7 +51,7 @@ const DEFAULT_CHAT_MODEL_PRESETS = [
     id: 'deepseek-chat',
     label: 'DeepSeek Chat',
     provider: 'deepseek',
-    model: 'deepseek-chat',
+    model: 'deepseek-flash',
   },
 ];
 
@@ -88,6 +88,20 @@ function getAiSettings() {
     _cache = {};
   }
   _cache = normalizeAiSettings(_cache);
+  // UI-638 加映 — 迁移落盘（仅当磁盘上原本显式写了不同的 vision 绑定；缺省不写）。
+  try {
+    const disk = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+    const diskVision = disk && disk.model_role_bindings && disk.model_role_bindings.vision;
+    const runtimeVision = _cache && _cache.model_role_bindings && _cache.model_role_bindings.vision;
+    if (diskVision && runtimeVision && diskVision !== runtimeVision) {
+      disk.model_role_bindings = { ...(disk.model_role_bindings || {}), vision: runtimeVision };
+      _ensureDir();
+      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(disk, null, 2));
+      fs.chmodSync(SETTINGS_FILE, 0o600);
+    }
+  } catch {
+    // 落盘失败不阻断读取：运行时绑定已生效，下次保存设置会自然带出。
+  }
   _cacheSignature = _settingsFileSignature();
   return _cache;
 }
@@ -128,6 +142,19 @@ function normalizeAiSettings(settings) {
   next.credential_status = Object.fromEntries(providers.map((provider) => [provider, !!getApiKey(provider)]));
   next.deepseek_configured = !!next.credential_status.deepseek;
   next.dashscope_configured = !!next.credential_status.dashscope;
+  // UI-638 加映 — 识图默认走 DeepSeek（用户裁决 2026-10-30「软件写定」）：
+  // 旧配置把 vision 显式绑到「未配置凭据的 dashscope-vision」时，若 chat 档案
+  // 已声明 vision 能力，自动改绑到 chat 档案；chat 无 vision 能力则保持显式
+  // 配置真相（resolve 会诚实报 model_capability_mismatch）。落盘见 getAiSettings。
+  const visionBinding = next.model_role_bindings && next.model_role_bindings.vision;
+  if (visionBinding === 'dashscope-vision' && next.credential_status.dashscope !== true) {
+    const chatProfile = next.model_profiles.find(
+      (profile) => profile.id === (next.model_role_bindings && next.model_role_bindings.chat),
+    );
+    if (chatProfile && Array.isArray(chatProfile.capabilities) && chatProfile.capabilities.includes('vision')) {
+      next.model_role_bindings = { ...next.model_role_bindings, vision: chatProfile.id };
+    }
+  }
   return next;
 }
 

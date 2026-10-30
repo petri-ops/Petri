@@ -1,0 +1,19 @@
+{
+  "flow": "ui638-vision-default",
+  "date": "2026-10-30",
+  "decision": "用户裁决：识图模型默认使用 DeepSeek（软件写定，不再依赖 DashScope）",
+  "codeChanges": [
+    "core/shared-backend/llm-providers/model-profile.js：默认 DeepSeek 档案 model=deepseek-flash + capabilities 含 vision + roles 含 vision；DEFAULT_MODEL_ROLE_BINDINGS.vision=deepseek-chat",
+    "core/petri-server/helpers/ai-settings.js：DEFAULT_CHAT_MODEL_PRESETS model=deepseek-flash；旧配置 vision→未配置的 dashscope-vision 且 chat 档案声明 vision 时自动改绑并落盘（一次性迁移，chat 无 vision 能力不迁移）"
+  ],
+  "tests": [
+    "test/ui638-vision-default.test.mjs 3/3（零配置默认 / 旧配置迁移落盘 / chat 无 vision 不迁移）",
+    "模型与设置回归 48/48（model-profile / model-gateway / ai-settings / block150 vision / block155 inline）"
+  ],
+  "live": {
+    "instance": "9223 离屏 + 真实 DeepSeek key",
+    "afterRestartSettings": { "vision": "deepseek-chat", "chat": "deepseek-chat", "embedding": "dashscope-embedding", "dashscope_configured": false },
+    "readImage": { "toolRows": "执行工具 1 次 · 1 轮 8.6 s", "visionFailed": false, "reply": "这是一张 AI 智能体工作台界面截图：左侧是项目导航，中间是任务执行详情，右侧是团队与子智能体编排面板…" }
+  },
+  "tcc": { "accessibilityTrusted": true, "screenRecordingTrusted": false, "note": "辅助功能已生效（computer-use probe trusted=true）；屏幕录制未授权，截图类动作需另勾一项" }
+}

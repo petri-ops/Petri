@@ -49,10 +49,12 @@ const DEFAULT_MODEL_PROFILES = Object.freeze([
     label: 'DeepSeek Chat',
     provider: 'deepseek',
     protocol: 'openai-compatible',
-    model: 'deepseek-chat',
+    // DeepSeek V4.1 Flash 原生多模态：默认档案同时承担识图（vision），
+    // 新装机不再依赖 DashScope（UI-638 加映 · 用户裁决 2026-10-30）。
+    model: 'deepseek-flash',
     credentialRef: 'provider:deepseek',
-    capabilities: Object.freeze(['chat', 'streaming', 'tools']),
-    roles: Object.freeze(['chat', 'agent', 'planner', 'summary', 'report', 'explanation']),
+    capabilities: Object.freeze(['chat', 'streaming', 'tools', 'vision']),
+    roles: Object.freeze(['chat', 'agent', 'planner', 'vision', 'summary', 'report', 'explanation']),
     parameters: Object.freeze({}),
   }),
   Object.freeze({
@@ -85,7 +87,7 @@ const DEFAULT_MODEL_ROLE_BINDINGS = Object.freeze({
   chat: 'deepseek-chat',
   agent: 'deepseek-chat',
   planner: 'deepseek-chat',
-  vision: 'dashscope-vision',
+  vision: 'deepseek-chat',
   embedding: 'dashscope-embedding',
   summary: 'deepseek-chat',
   report: 'deepseek-chat',
