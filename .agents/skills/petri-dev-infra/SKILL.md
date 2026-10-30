@@ -57,6 +57,7 @@ description: Use Petri development infrastructure when starting or resuming a se
     不得靠开窗换证据。机械门禁=`test/live-window-policy.test.mjs`（扫 `scripts/` 与 `dev-verify/flows/`，命中即红）；
     人要看测试过程只能手动跑启动器 `--onscreen`。
   - 无法离屏的验证（原生对话框/OS 权限）按无人化阶梯降级并如实登记，不为取证开可见窗口。
+  - **运行时 show() 副作用警示（2026-10-30 用户抓真）**：静态门禁只扫 `PETRI_TEST_ONSCREEN` 字面量，拦不住**应用运行时行为**——凡经 CDP 触发 `openResultInMain`/下钻类操作，测试实例 IPC handler 会无条件 `main.show()+focus()` 把离屏主窗拉上屏幕。纪律：①此类验证跑完**立即终止测试实例**（窗口随进程消失），不得留到会话尾统一清理；②能改在主实例（9222 用户窗，show 无副作用）验证的优先主实例并只读断言；③flow 内对这类操作加「触发后 terminate」收尾步骤。源码扫描门禁对此是盲区，勿以门禁绿当无违规。
 - 前置：后端代码变更后必须重启 backend（`lsof -ti :3001 | xargs kill` 后重起）；Vite 保持运行即可被 9223 页面复用。
 - 从 `dev-verify/flows/_template.cjs` 拷贝新建 flow，用 `dev-verify/lib.cjs` 原语组装断言（pollTargets / filterPageTargets+selectPageTarget / evalJs / screenshotPng / createRun），跑 `npm run verify -- <flow>`；清单 `npm run verify -- --list`。
 - 主窗判定按项目树+右栏探测，不信任 visibilityState（BLOCK-68 教训）；证据 JSON/PNG 落 `acceptance/`，断言不可编造。
