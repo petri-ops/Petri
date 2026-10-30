@@ -1,0 +1,48 @@
+{
+  "name": "ui301-385-spawn-live",
+  "startedAt": "2026-10-30T06:09:29.788Z",
+  "finishedAt": "2026-10-30T06:09:39.491Z",
+  "assertions": [
+    {
+      "name": "project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvuko7oo_iu9r\",\"name\":\"UI301-Spawn-1793340569829\",\"created_at\":\"2026-10-30T06:09:29.832Z\",\"updated_at\":\"2026-10-30T06:09:29.83"
+    },
+    {
+      "name": "prompt_filled",
+      "pass": true,
+      "detail": "filled"
+    },
+    {
+      "name": "prompt_sent",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "dock_auto_opens_with_graph",
+      "pass": true,
+      "detail": "dock=true nodes=3 title=子智能体编排"
+    },
+    {
+      "name": "dock_title_matches_content",
+      "pass": true,
+      "detail": "title=子智能体编排"
+    },
+    {
+      "name": "agent_panel_auto_opens",
+      "pass": true,
+      "detail": "{\"dock\":true,\"dockTitle\":\"子智能体编排\",\"graphNodes\":3,\"agentPanel\":true,\"agentTimeline\":\"实时工作流（工具调用时间线）· 0 次调用\",\"agentTaskText\":\"🤖你只需原样回复一句话：「B-OK」。不要做任何工具调用，不要做任何其他事情。运行中事件流连接中…父会话：新对话团队2 成员 · 2 在跑 · 0 已"
+    },
+    {
+      "name": "agent_panel_has_task_and_timeline",
+      "pass": true,
+      "detail": "timeline=实时工作流（工具调用时间线）· 0 次调用 task=🤖你只需原样回复一句话：「B-OK」。不要做任何工具调用，不要做任何其他事情。运行中事件流连接中…父会话：新对话团队2 成员 · 2 在跑 · 0 已结束 主"
+    },
+    {
+      "name": "timeline_dispatch_rows",
+      "pass": true,
+      "detail": "rows=2"
+    }
+  ],
+  "allPass": true
+}

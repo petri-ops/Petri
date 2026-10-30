@@ -153,6 +153,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw02-pack-write-bridge-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw02-ui-evidence-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw06-proxy-main-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui301-385-spawn-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui342-endpoint-grid.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs",

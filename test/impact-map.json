@@ -6599,10 +6599,14 @@
     },
     {
       "id": "ui638-viewer-open-leg",
-      "note": "UI-638 点开腿两缺陷修复：model3d artifacts 投影补工作区读面 url（/api/workspaces/:projectId/file?path=，缺 url 时结果面回落 tools/file 必 404）+ Result Studio 3D viewer 宿主 absolute-fill（canvas 不再钉死 420、面板变矮不裁切）；红绿契约 + 实机 flow。",
+      "note": "UI-638 点开腿两缺陷修复：model3d artifacts 投影补工作区读面 url（/api/workspaces/:projectId/file?path=，缺 url 时结果面回落 tools/file 必 404）+ Result Studio 3D viewer 宿主 absolute-fill（canvas 不再钉死 420、面板变矮不裁切）；红绿契约 + 实机 flow。加映：纯 spawn 流 dock 空壳（自动弹出即进编排图 + 标题按内容切换）+ /api/ai/chat 上游无响应兜底超时。 加映二：UI-301/385/501 代行验收（真实 spawn flow）+ dock 空壳修复。",
       "patterns": [
         "core/petri-server/helpers/model3d-artifact-projection.js",
+        "core/petri-server/helpers/model-timeout.js",
+        "core/petri-server/routes/ai-chat.js",
         "core/petri-server/agent-tools/model3d-tools.js",
+        "frontend/src/components/copilot/ToolActivityDock.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.test.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
         "frontend/src/components/workspace-panels/ResultView/helpers.ts",
         "frontend/src/components/workspace-panels/Model3DResultViewer.tsx",
@@ -6612,12 +6616,16 @@
         "test/ui638-model3d-artifact-url.test.mjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
         "acceptance/ui-638-viewer-clip/**",
-        "acceptance/rw-02-ui-evidence/**"
+        "acceptance/rw-02-ui-evidence/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui301-385-spawn-live.cjs",
+        "acceptance/ui-301-385-spawn/**"
       ],
       "tests": [
         "test/ui638-model3d-artifact-url.test.mjs",
+        "test/ui638-chat-timeout.test.mjs",
         "frontend/src/components/workspace-panels/ResultView/helpers.test.ts",
         "frontend/src/components/workspace-panels/Model3DResultViewer.test.tsx",
+        "frontend/src/components/copilot/ToolActivityDock.test.tsx",
         "test/rw01-model3d-revision-bridge.test.mjs"
       ],
       "frontendRelated": true,

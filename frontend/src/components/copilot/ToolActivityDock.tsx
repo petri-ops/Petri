@@ -192,8 +192,8 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
         type="button"
         className={`sc-composer-icon-btn ${styles.composerIcon}`}
         onClick={() => setExpanded(true)}
-        title={runningProcessCount > 0 ? `后台进程 ${runningProcessCount} 运行中` : '编排子任务'}
-        aria-label="后台进程"
+        title={runningProcessCount > 0 ? `后台进程 ${runningProcessCount} 运行中` : '子智能体编排'}
+        aria-label={runningProcessCount > 0 ? '后台进程' : '子智能体编排'}
         data-testid="tool-activity-dock-trigger"
       >
         <span className={styles.glyph} aria-hidden="true">⎇</span>
@@ -209,7 +209,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           data-status={runningProcessCount > 0 ? 'running' : 'idle'}
           aria-hidden="true"
         />
-        <span className={styles.title}>后台进程</span>
+        <span className={styles.title}>{activeProcess ? '后台进程' : '子智能体编排'}</span>
         <div className={styles.headerActions}>
           {activeProcess && (
             <span className={styles.statusLabel} data-status={activeProcess.status}>
@@ -217,7 +217,7 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
               {isProcessActive(activeProcess.status) ? ` · ${formatDuration(activeProcess.durationMs)}` : ''}
             </span>
           )}
-          {subAgentTasks.length > 0 && (
+          {activeProcess && subAgentTasks.length > 0 && (
             <button
               type="button"
               className={`${button.iconBase} ${styles.iconBtn}`}
@@ -249,17 +249,18 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
           </button>
         </div>
       </div>
-      {/* BLOCK-181 代行评估抓真 — 纯 spawn 流没有 activeProcess（后台进程事件仅
-          workspace_exec_background 发），但编排图的数据源是 subAgentTasks：
-          图形态开启或有子任务时渲染 dock 体，不再被 activeProcess 一票否决。 */}
-      {(activeProcess || (showGraph && subAgentTasks.length > 0)) && (
+      {/* BLOCK-181 代行评估抓真 + UI-301/501 空壳修复 — 纯 spawn 流没有
+          activeProcess（后台进程事件仅 workspace_exec_background 发），编排图
+          才是这类会话的唯一内容：无进程时直接渲染图，不再被
+          (activeProcess || showGraph) 一票否决成空壳。 */}
+      {(activeProcess || subAgentTasks.length > 0) && (
         <>
           {activeProcess && (
             <div className={styles.command} title={activeProcess.command}>
               {activeProcess.command}
             </div>
           )}
-          {showGraph && subAgentTasks.length > 0 ? (
+          {(subAgentTasks.length > 0 && (showGraph || !activeProcess)) ? (
             <OrchestrationGraph
               tasks={subAgentTasks.map((t) => ({
                 taskId: t.taskId,

@@ -2878,8 +2878,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **实机**：待 dev Electron 实机过目（四档下拉切换、计划档起草→批准→执行闭环、批准后档位恢复）后转 verified。**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
+- **代行验收（2026-10-30，`npm run verify -- ui301-385-spawn-live` 8/8）**：9223 离屏 + 真实模型 spawn 2 子代理 → 时间线展开后「已派发」折叠行 ×2（状态 ✓ + 任务首行）；旧清单「dock 列表」表述作废（dock 无列表，已按代码事实更正）。同轮修复纯 spawn 流 dock 空壳（自动弹出即渲染编排图）。
 
-## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-30 **RW-02 A 线处置：spawn 链 live 实证（mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天，隔离 :3011 15/15）；面板视觉=离屏实例 CDP 不可达（UI-501 同类 dock 时序竞争）→ c 档人测确认**；列表/中断/详情窗，BLOCK-49 加映二） 
+## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-30 **verified（dev Electron 边界内；代行 8/8）**：真实 spawn 2 子代理 → 对话时间线「已派发 · <任务首行>」折叠行 ×2；证据 `acceptance/ui-301-385-spawn/`；列表/中断/详情窗，BLOCK-49 加映二） 
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。
 
@@ -4169,7 +4170,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **交付面**：target-registry probe 记录 handshakeMs（>2000 落 last_probe_json）；RemoteTargets 探测结果显示「os · 首连 X.Xs ⚠」+ 悬停指引（~/.ssh/config 加 AddressFamily inet 即效缓解）。R/Python/slurm 徽标同步退役（F6 裁决：运行时在位改由已装包 requires.runtimes 契约驱动，BLOCK-86 同向）。
 - **证据**：tsc 0；实机 WSL 首连 330ms（黑洞基线 21.2s，`acceptance/block-96/block96-p1-live.json`）。
 - **边界**：settings 页信息展示；addressFamily 目标级 setter UI 为后续增量（传输层/gateway/mux 参数化管线已通）。
-- **P0 台账核查（2026-10-21）**：正文含「退役/替代」语义，但指的是**本条退役了别的能力**（不是本条被替代），故不判 stale；缺实机证据产物 → 保持 `in_progress`。
+- **P0 台账核查（2026-10-21）**：正文含「退役/替代」语义，但指的是**本条退役了别的能力**（不是本条被替代），故不判 stale；缺实机证据产物 → 当时保持 `in_progress`。
+- **代行验收（2026-10-30，`npm run verify -- ui301-385-spawn-live` 8/8）**：`agentOpenInRail` 自动切右栏 → AgentRunPanel 成对出现 `agent-parent-conversation`（父会话）/`agent-run-actions`（操作节）/`agent-timeline-title`（实时工作流 · N 次调用）+ 子代理任务全文；旧清单「dock 内点条目」表述作废（详情入口=派发行「详情」或图标带 chip）。
 
 ## UI-389: 文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账 2026-10-30：触发条件=需 500+ 文件大目录夹具——如实保留 in_progress 不算失败，触发即补实机腿**
 
@@ -4194,7 +4196,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：运行中即时计数不再常驻聊天区——由内联卡与右栏自动切换承接；「需要关注」失败智能体节保持不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（2026-10-30 **RW-02 A 线处置：同 UI-301——spawn 链 live 实证（子代理任务文本/汇报在场），详情窗视觉=离屏 CDP 不可达 → c 档人测确认**；用户裁决「1」启动） 2026-09-16 in_progress，dev Electron 边界内)
+## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（2026-10-30 **verified（dev Electron 边界内；代行 8/8）**：真实 spawn 后右栏「智能体」tab 自动打开，AgentRunPanel 渲染任务全文/父会话/团队 2 成员/实时工作流时间线；证据 `acceptance/ui-301-385-spawn/`；用户裁决「1」启动）
 
 - **来源**：用户复看 UI-382 时提出「子智能体点击应该嵌入右侧栏，不需要弹窗；桌面最右侧的悬浮结果展示也没必要了，都应展示在右侧栏」——Agent 评估合理（延续 BLOCK-68 io tab / UI-362 tab 化 / UI-382 内联的「浮动面→停靠面」收敛路线），用户裁决「1」启动三步走。
 - **交付面**：①右栏新增「智能体」tab（`RightPanelMode 'agent'`）+ 新组件 `AgentRunPanel`（自 AgentWindowPage 提取：SSE 订阅 + 中断两步确认/留言队列/继续派交互完整保留；续派改经 `onSpawnedAgent` 回调切面板）；②事件 `agentOpenInRail` 统一四个入口（工具行内联卡「详情」/活动条行/俯瞰行/spawn 自动唤起——每 task 只自动切一次）；③退役 agent/result 两类独立窗：App 路由与页面删除（AgentWindowPage/WindowResultPage）、`_window-manager` 白名单移除两 kind（route_not_allowed fail-closed）、ResultArtifactShell「弹出」按钮移除；④指挥中心下钻改走新增 `window:open-result-in-main` relay（单一白名单事件类型 + sender 校验，主窗经既有 projectOpenArtifact 链右栏打开，跨项目自动导航）。终端/指挥中心独立窗不动。

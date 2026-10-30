@@ -19,6 +19,7 @@ const { callModelTask } = require('../helpers/model-tasks');
 const { buildSystemPrompt } = require('../helpers/system-prompt');
 const { buildSiteSnapshotAsync, renderSiteSnapshotForPrompt } = require('../helpers/site-snapshot');
 const { buildFactsBlockAsync, backgroundExtractFacts } = require('../helpers/user-facts');
+const { armAbortTimeout } = require('../helpers/model-timeout');
 const {
   getChatSummaryAsync,
   summarizeMessages,
@@ -408,6 +409,14 @@ module.exports = function registerAiChatRoute(app) {
     };
 
     const abortController = new AbortController();
+    // UI-638 加映 — 上游无响应兜底：此前只在客户端断开时 abort，上游挂住会让
+    // 请求永不结束（实机 150s 零 token、零报错）。到点 abort 并回显诚实错误。
+    const chatTimeout = armAbortTimeout({
+      timeoutMs: Number(process.env.PETRI_CHAT_TIMEOUT_MS) || 120_000,
+      abort: () => abortController.abort(),
+      onTimeout: () => writeError('模型响应超时（上游无返回），请重试或切换模型'),
+    });
+    const clearChatTimeout = () => { try { chatTimeout.clear(); } catch { /* ignore */ } };
     modelGateway.chat({
       role: 'chat',
       body: {
@@ -432,6 +441,7 @@ module.exports = function registerAiChatRoute(app) {
         } catch {}
       },
     }).then((result) => {
+      clearChatTimeout();
       if (ended) return;
       if (!result || result.error) {
         writeError((result && (result.message || result.error)) || '模型请求失败');
@@ -443,9 +453,13 @@ module.exports = function registerAiChatRoute(app) {
         ended = true;
       } catch {}
       finalizeAssistant();
-    }).catch((error) => writeError('模型请求失败: ' + error.message));
+    }).catch((error) => {
+      clearChatTimeout();
+      writeError('模型请求失败: ' + error.message);
+    });
 
     req.on('aborted', () => {
+      clearChatTimeout();
       if (!ended) {
         ended = true;
         try {
@@ -454,6 +468,7 @@ module.exports = function registerAiChatRoute(app) {
       }
     });
     res.on('close', () => {
+      clearChatTimeout();
       if (!ended) {
         ended = true;
         try {

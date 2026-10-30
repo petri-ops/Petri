@@ -3,6 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ToolActivityDock } from './ToolActivityDock';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
+import {
+  __resetSubAgentTaskStoresForTests,
+  recordModelSubAgent,
+} from './conversationRunStore/subAgentTasks';
+
+// 编排图内部是 @xyflow/react 画布（happy-dom 无布局）；这里只验 dock 的挂载契约。
+vi.mock('@/components/workspace-panels/OrchestrationGraph', () => ({
+  OrchestrationGraph: () => <div data-testid="orchestration-graph" />,
+}));
 
 const { listBackgroundProcesses, fetchProcessLogTail } = vi.hoisted(() => ({
   listBackgroundProcesses: vi.fn(),
@@ -33,6 +42,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   listBackgroundProcesses.mockResolvedValue([]);
   fetchProcessLogTail.mockResolvedValue({ ...runningProc });
+  __resetSubAgentTaskStoresForTests();
 });
 
 afterEach(() => {
@@ -133,5 +143,20 @@ describe('ToolActivityDock (UI-268 后台进程浮窗)', () => {
     });
     rerender(<ToolActivityDock conversationId="conv-2" projectId="p-1" />);
     expect(screen.queryByTestId('tool-activity-dock')).toBeNull();
+  });
+
+  // UI-301/501 实机前置 — 纯 spawn 流（无后台进程）自动弹出时曾渲染空壳：
+  // 0→>0 跳变只清 dismissed，showGraph 仍 false → body 条件一票否决。
+  it('纯 spawn 流：自动弹出即渲染编排图，不出现空壳（标题也不再叫后台进程）', async () => {
+    render(<ToolActivityDock conversationId="conv-spawn" projectId="p-1" />);
+    act(() => {
+      recordModelSubAgent('conv-spawn', 'p-1', 'task-child-1', '子任务 A');
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('tool-activity-dock')).toBeTruthy();
+    });
+    expect(screen.getByTestId('orchestration-graph')).toBeTruthy();
+    expect(screen.getByText('子智能体编排')).toBeTruthy();
+    expect(screen.queryByText('后台进程')).toBeNull();
   });
 });
