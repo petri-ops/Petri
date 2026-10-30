@@ -182,7 +182,8 @@
         "frontend/src/lib/workSurface/registry.test.ts",
         "frontend/src/components/workspace-panels/RightPanel.test.tsx",
         "frontend/src/components/copilot/toolActivity.test.ts",
-        "test/next05-recipes.test.mjs"
+        "test/next05-recipes.test.mjs",
+        "test/block322-p1-mesh-formats.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -6677,6 +6678,15 @@
       "note": "RW-06 工程卫生验收证据目录（收口时漏登记）：证据/基线产物，无对应产品测试，只走治理门。",
       "patterns": [
         "acceptance/rw-06-hygiene/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "local-import-samples",
+      "note": "本地导入样例（用户放置在 data/model3d-samples 的 GLB/OBJ/STL，用于手动试导入）；非源码，不选测试。",
+      "patterns": [
+        "data/model3d-samples/**"
       ],
       "tests": [],
       "classifiesScripts": false

@@ -88,7 +88,7 @@ def add_node(node):
 
 
 MAX_MESH_BYTES = 64 * 1024 * 1024
-MESH_EXTENSIONS = {'.stl', '.obj'}
+MESH_EXTENSIONS = {'.stl', '.obj', '.glb', '.gltf'}
 
 
 def sha256_file(path):
@@ -131,6 +131,9 @@ def import_mesh_reference(node, root):
             bpy.ops.wm.stl_import(filepath=full)
         except Exception:
             bpy.ops.import_mesh.stl(filepath=full)
+    elif extension in ('.glb', '.gltf'):
+        # BLOCK-322 P1 — GLB/GLTF 作为场景资产：glTF 导入保留自带节点层级与材质。
+        bpy.ops.import_scene.gltf(filepath=full)
     else:
         bpy.ops.wm.obj_import(filepath=full)
     imported = [obj for obj in bpy.data.objects if obj not in before]

@@ -8480,6 +8480,27 @@
         "G0"
       ],
       "notes": "RW 第二包 completed（2026-10-30）：B 线 C-44 写桥全链（实机 9/9）+ A 线 62 条四档全处置（a 档 9 verified+638 发现腿+d28+b18+c6 清单）；UI-639 in_progress（iframe 端到端随 UI-532）。"
+    },
+    {
+      "id": "BLOCK-322-MODEL3D-FULL-SPECTRUM",
+      "capability": "block-322-model3d-full-spectrum",
+      "path": "docs/block-322-model3d-full-spectrum-plan.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-322-model3d-full-spectrum",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-30",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "3d",
+        "model3d",
+        "scene",
+        "blender",
+        "capability",
+        "G0"
+      ],
+      "notes": "3D 全方位能力纲（用户裁决「全方位、不设限制、满足所有应用场景」）：P1 外部资产一等公民 → P2 场景表现力/叙事 → P3 几何与装配 → P4 CAD 交换与工程 → P5 AI 生成资产 → P6 生产交付与协作。"
     }
   ],
   "lastUpdated": "2026-10-30",
