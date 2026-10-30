@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T01:14:26.079Z -->
 | ✅ BLOCK-269 浏览器连接器前端桥 completed（批次 2/5；C-40 尾项） | 2026-10-27 | transport 桥 SSE 下发+回传 resolve+REST 四面；实机亮/暗 12/12 含真面板 webview 执行；抓真=event-bus 顶层 payload/SSE abort 连接重置 | UI-586 verified |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T02:33:38.555Z -->
+| ✅ BLOCK-270 批注画笔前端渲染器 completed（批次 3/5；C-43 尾项） | 2026-10-27 | freehand 前端全链（契约/三态/采点/渲染/接线）；组件级 59/59 | UI-587 in_progress（实机需 job+artifact seed） |
