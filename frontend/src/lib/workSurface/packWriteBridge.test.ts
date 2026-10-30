@@ -19,11 +19,11 @@ const restoreArtifactRevision = vi.fn();
 const coreFetch = vi.fn();
 
 vi.mock('@/lib/annotation-client', () => ({
-  createAnnotation: (...args: unknown[]) => createAnnotation(...args),
-  deleteAnnotation: (...args: unknown[]) => deleteAnnotation(...args),
+  createAnnotation: (...args: unknown[]) => Promise.resolve(createAnnotation(...args)),
+  deleteAnnotation: (...args: unknown[]) => Promise.resolve(deleteAnnotation(...args)),
 }));
 vi.mock('@/components/result-studio/resultStudioClient', () => ({
-  restoreArtifactRevision: (...args: unknown[]) => restoreArtifactRevision(...args),
+  restoreArtifactRevision: (...args: unknown[]) => Promise.resolve(restoreArtifactRevision(...args)),
 }));
 vi.mock('@/lib/authToken', () => ({ getToken: () => 'test-token' }));
 
@@ -66,7 +66,7 @@ describe('RW02 packWriteBridge host', () => {
 
   it('分发：annotation-write 注入宿主 scope + selection-save 注入项目归属 + restore 走核心客户端', async () => {
     createAnnotation.mockResolvedValue({ annotation: { id: 'ann_1' }, count: 3 });
-    coreFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({ selectionId: 'sel_9' }) });
+    coreFetch.mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ selectionId: 'sel_9' }) });
     restoreArtifactRevision.mockResolvedValue({ revision: { revisionId: 'rev_2' }, changeSet: { changeSetId: 'cs_1' } });
 
     const host = createPackWriteHost({
@@ -88,7 +88,8 @@ describe('RW02 packWriteBridge host', () => {
       payload: { selection: { contractVersion: 1, entityType: 'gene', entityIds: ['TP53'], entityIdCount: 1 } },
     });
     expect(selResult.ok).toBe(true);
-    const body = JSON.parse(String(coreFetch.mock.calls[0][1].body));
+    const call = coreFetch.mock.calls[0] as unknown[];
+    const body = JSON.parse(String((call[1] as { body: string }).body)) as { projectId: string };
     expect(body.projectId).toBe('p_1');
 
     const restoreResult = await host.handlePackWrite({
@@ -99,7 +100,7 @@ describe('RW02 packWriteBridge host', () => {
   });
 
   it('防重放：同 requestId 二次写被拒且不触达核心客户端', async () => {
-    coreFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ({ selectionId: 'sel_1' }) });
+    coreFetch.mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({ selectionId: 'sel_1' }) });
     const host = createPackWriteHost({
       surfaceDecl: DECL, projectId: 'p_1', conversationId: null, annotationScope: null,
     });

@@ -130,7 +130,6 @@ function validateSurfaceWritesDecl(decl) {
   if (!decl || typeof decl !== 'object' || Array.isArray(decl)) return { ok: false, code: 'decl_shape_invalid' };
   if (decl.bridgeVersion !== BRIDGE_VERSION) return { ok: false, code: 'bridge_version_unsupported' };
   const allowedTop = new Set(['bridgeVersion', 'annotations', 'selection', 'revisions', 'export']);
-  const sections = ['annotations', 'selection', 'revisions', 'export'];
   const allowedFlags = { annotations: ['write'], selection: ['write'], revisions: ['restore', 'replay'], export: ['run'] };
   let declared = 0;
   for (const key of Object.keys(decl)) {
@@ -176,7 +175,7 @@ function evaluateWriteGrant(surfaceDecl, kind) {
   return { granted: false, reason: 'bridge_version_unsupported' };
 }
 
-function evaluateWriteGrantLegacy(surfaceDecl, kind) {
+function evaluateWriteGrantLegacy(surfaceDecl, _kind) {
   const legacy = v1.evaluateWriteGrant(surfaceDecl);
   if (legacy.granted) return { granted: true };
   return { granted: false, reason: 'annotation_write_not_granted' };
