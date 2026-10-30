@@ -31,8 +31,9 @@ import {
 } from '@/lib/model-provider-options';
 import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
 import { getBridge } from '@/lib/desktopBridge';
-import { VisionRoleBinding, hasVisionCapability } from './DesktopSettingsPanel/VisionRoleBinding';
+import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
 import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
+import { EndpointCapabilityToggle } from './DesktopSettingsPanel/EndpointCapabilityToggle';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
@@ -425,60 +426,30 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       aria-label="上下文窗口"
                       title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
                     />
-                    <span className="petri-endpoint-field-label" aria-hidden="true">思考</span>
-                    <label
-                      className="petri-endpoint-reasoning"
+                    <EndpointCapabilityToggle
+                      profile={profile}
+                      capability="reasoning"
+                      label="思考"
                       title="声明该渠道支持思考档位：勾选后 composer 的档位控件才会出现，并按协议映射上游参数"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={(profile.capabilities || []).includes('reasoning')}
-                        onChange={(e) => {
-                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
-                          const next = e.target.checked
-                            ? Array.from(new Set([...current, 'reasoning']))
-                            : current.filter((cap) => cap !== 'reasoning');
-                          updateProfile(profile.id, { capabilities: next });
-                        }}
-                        aria-label={`${profile.label || '自定义渠道'} 支持思考档位`}
-                      />
-                    </label>
-                    <span className="petri-endpoint-field-label" aria-hidden="true">视觉</span>
-                    <label
-                      className="petri-endpoint-reasoning"
+                      ariaLabel={`${profile.label || '自定义渠道'} 支持思考档位`}
+                      onUpdate={updateProfile}
+                    />
+                    <EndpointCapabilityToggle
+                      profile={profile}
+                      capability="vision"
+                      label="视觉"
                       title="声明该渠道支持图片输入（识图）：勾选后可在上方「识图模型」换绑；网关须真正支持 image_url 多模态，否则识图调用诚实报错"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={hasVisionCapability(profile)}
-                        onChange={(e) => {
-                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
-                          const next = e.target.checked
-                            ? Array.from(new Set([...current, 'vision']))
-                            : current.filter((cap) => cap !== 'vision');
-                          updateProfile(profile.id, { capabilities: next });
-                        }}
-                        aria-label={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
-                      />
-                    </label>
-                    <span className="petri-endpoint-field-label" aria-hidden="true">向量</span>
-                    <label
-                      className="petri-endpoint-reasoning"
+                      ariaLabel={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
+                      onUpdate={updateProfile}
+                    />
+                    <EndpointCapabilityToggle
+                      profile={profile}
+                      capability="embedding"
+                      label="向量"
                       title="声明该渠道可用于向量化（embedding）：勾选后可在上方「向量模型」换绑；端点需支持 /embeddings 且输出 1024 维（如 bge-m3），否则整批拒收并降级"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={!!profile.capabilities?.includes('embedding')}
-                        onChange={(e) => {
-                          const current = profile.capabilities || ['chat', 'streaming', 'tools'];
-                          const next = e.target.checked
-                            ? Array.from(new Set([...current, 'embedding']))
-                            : current.filter((cap) => cap !== 'embedding');
-                          updateProfile(profile.id, { capabilities: next });
-                        }}
-                        aria-label={`${profile.label || '自定义渠道'} 支持向量化（embedding）`}
-                      />
-                    </label>
+                      ariaLabel={`${profile.label || '自定义渠道'} 支持向量化（embedding）`}
+                      onUpdate={updateProfile}
+                    />
                     <ModelSelectorControls profile={profile} onUpdate={updateProfile} />
                     <span className="petri-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
