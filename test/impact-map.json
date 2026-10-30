@@ -198,6 +198,7 @@
         "test/block322-mesh-format-single-source.test.mjs",
         "test/block322-p1c-asset-intake.test.mjs",
         "test/block322-p2-camera.test.mjs",
+        "test/block322-p2-lighting.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts"
       ],

@@ -41,6 +41,15 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-642: 3D 声明灯光与环境（预览 + 导出双侧照明一致）（BLOCK-322 P2-02；2026-10-30 **verified（dev Electron 边界内；实机 9/9）**）
+
+- **变化面**：SceneSpec 增可选 `lights[]`（`kind: sun|point|spot|area` + energy/color/position/target/size/spotDeg，≤16 盏）与 `environment`（background/worldStrength 0..10/samples 1..128/engine workbench|cycles）；3D 预览端不再固定用默认摄影棚灯——**声明灯存在即整体替换默认灯组**（sun→Directional、point→Point、spot→Spot、area→RectArea，位置/目标/颜色/强度按声明），`environment.background` 同时成为预览场景背景，`worldStrength` 映射为环境光。
+- **为什么这样设计**：导出侧此前固定 `BLENDER_WORKBENCH + STUDIO` 着色，**场景灯对它没有任何作用**——若在契约里加了 `lights` 而引擎不变，就是「声明了灯但灯不亮」的静默失真。实测 Blender 4.5.10 无头：`CYCLES(CPU)` 640×480/16 采样 0.61s 可用，`BLENDER_EEVEE_NEXT` 走软件回退 13.34s 不可用 ⇒ 策略=**只在场景声明灯光/环境时切 Cycles CPU**，未声明仍是 Workbench（存量场景的行为与耗时零变化）。引擎与生效值在 `blender-report.json` 回显（`display.engine/samples/device`、`lights.created[]`、`environment.effectiveWorldStrength/effectiveColor`）。
+- **验证（代码）**：`test/block322-p2-lighting.test.mjs` 6/6（含灯种/能量/位置/重复 id/数量上限/环境四字段 fail-closed、哈希随灯光变化、灯种与引擎名跨 JS/TS/Python 逐值对账、预览端灯组重建契约静态锁）+ `frontend/src/lib/scene3d.test.ts` 9/9（P2-01/P2-02 用例合并在同一契约面）+ 全量 `frontend npm run check` 0 红。
+- **实机证据**：`acceptance/block-322-p2/block322-p2-lighting-live-live.json`（**9/9 allPass**，win32-x64 + 真实 Blender 4.5.10 LTS + 9223 离屏）。证据不是参数回显而是**像素平均亮度**（纯 Node PNG 解码 + 预览侧 canvas 取样）：同一场景 world=0 时 `sun energy 0` → 导出均值 **0.08**、`sun energy 900` → **11.73**；预览侧同对照 **3.25 → 59.29**——两侧都真的在按声明照明。另锁：未声明时 `engine=BLENDER_WORKBENCH, declaredLighting=false`；声明后 `CYCLES/CPU/samples=16` 且 `lights.created[0].kind='SUN', energy=900`、`effectiveWorldStrength=0`、`effectiveColor≈0`；未知灯种在 REST 层 400 拒收（不静默丢灯）。明细 `block322-p2-lighting-detail.json`。
+- **实机暴露的探针纪律（第二条）**：预览亮度首跑两条读数相同（3.25/3.25），根因是 canvas 在场景变更前仍保留**上一帧**，只要求 `mean>0` 会把残影当证据。修法不是放宽断言而是要求「先观察到新帧（帧哈希变化）再读数」，并写进 flow；改后 9/9。与 UI-641 的「UI 面断言一律轮询到目标态」同族。
+- **边界（reopen）**：①两侧亮度**单位不同源**（Blender W/m² vs Three 无单位强度），本票证明的是「同声明→两侧都变亮」的单调一致，**不宣称像素级亮度对齐**；②`area` 灯预览用 RectAreaLight 不支持阴影、`spot` 锥角按声明张角一半映射；③Cycles 无降噪 + 16 采样默认，复杂场景耗时随面数增长（`samples` 可在 environment 声明内调整，上限 128）；④HDRI 环境贴图未做（`background` 仅纯色），归后续票。
+
 ## UI-641: 3D 声明相机与渲染分辨率（BLOCK-322 P2-01；2026-10-30 **verified（dev Electron 边界内；实机 18/18）**）
 
 - **变化面**：SceneSpec 新增可选 `camera`（position/target/up/fovDeg/projection/orthoScaleMm）与 `render`（width/height，16..4096）；3D 工作台在场景声明机位后多出「机位」视角按钮，点击即按声明机位取景（未声明时不提供该选项，也不拿等轴冒充）；视觉 QA 面板视角序增列 `camera`，导出侧按声明相机真出 `camera.png`。

@@ -308,15 +308,106 @@ def aim(camera, location, target):
     camera.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
 
 
+LIGHT_KINDS = {'sun': 'SUN', 'point': 'POINT', 'spot': 'SPOT', 'area': 'AREA'}
+
+
+def hex_to_rgbaf(value, fallback=(1.0, 1.0, 1.0, 1.0)):
+    color = str(value or '')
+    if len(color) != 7 or not color.startswith('#'):
+        return fallback
+    try:
+        return tuple(srgb_to_linear(int(color[i:i + 2], 16) / 255.0) for i in (1, 3, 5)) + (1.0,)
+    except ValueError:
+        return fallback
+
+
+def configure_display(scene_spec):
+    """引擎与着色策略（BLOCK-322 P2-02）。
+
+    实测：Blender 4.5.10 无头 CYCLES(CPU) 640×480/8 采样 0.61s 可用；BLENDER_EEVEE_NEXT
+    无头走软件回退，同场景 13.34s 不可用。故只在场景**声明**灯光/环境时才切 CYCLES，
+    未声明仍是 WORKBENCH——既让灯真的起作用，也不给存量场景加时延。
+    """
+    environment = scene_spec.get('environment')
+    lights = scene_spec.get('lights') or []
+    declared = bool(environment) or bool(lights)
+    requested = str((environment or {}).get('engine') or ('cycles' if declared else 'workbench')).lower()
+    scene = bpy.context.scene
+    if requested == 'cycles':
+        scene.render.engine = 'CYCLES'
+        scene.cycles.device = 'CPU'
+        scene.cycles.use_denoising = False
+        scene.cycles.samples = int((environment or {}).get('samples') or 8)
+    else:
+        scene.render.engine = 'BLENDER_WORKBENCH'
+        scene.display.shading.light = 'STUDIO'
+        scene.display.shading.color_type = 'MATERIAL'
+        scene.display.shading.show_shadows = True
+        scene.display.shading.show_cavity = True
+    return {
+        'engine': scene.render.engine,
+        'declaredLighting': declared,
+        'requestedEngine': requested,
+        'samples': int(scene.cycles.samples) if scene.render.engine == 'CYCLES' else None,
+        'device': 'CPU' if scene.render.engine == 'CYCLES' else None,
+    }
+
+
+def apply_environment(environment):
+    """World 背景：声明即写入；未声明则保留工厂默认并在回显里说明（预览端同基准）。"""
+    world = bpy.context.scene.world or bpy.data.worlds.new('petri-world')
+    bpy.context.scene.world = world
+    world.use_nodes = True
+    background = world.node_tree.nodes.get('Background')
+    echo = {'declared': bool(environment), 'background': None, 'worldStrength': None}
+    if isinstance(environment, dict):
+        strength = float(environment.get('worldStrength') if environment.get('worldStrength') is not None else 1.0)
+        if background is not None:
+            if environment.get('background'):
+                background.inputs['Color'].default_value = hex_to_rgbaf(environment['background'])
+            background.inputs['Strength'].default_value = strength
+        echo['background'] = environment.get('background')
+        echo['worldStrength'] = strength
+    echo['effectiveWorldStrength'] = float(background.inputs['Strength'].default_value) if background is not None else None
+    echo['effectiveColor'] = [round(float(v), 6) for v in background.inputs['Color'].default_value[:3]] if background is not None else None
+    return echo
+
+
+def add_lights(lights):
+    created = []
+    for spec in lights:
+        kind = LIGHT_KINDS.get(str(spec.get('kind') or '').lower())
+        if not kind:
+            raise ValueError(f"unsupported_light_kind:{spec.get('kind')}")
+        data = bpy.data.lights.new(str(spec.get('id') or 'light'), kind)
+        data.energy = float(spec.get('energy') if spec.get('energy') is not None else 1.0)
+        if spec.get('color'):
+            data.color = hex_to_rgbaf(spec['color'])[:3]
+        position = spec.get('position') or [0, 0, 0]
+        target = spec.get('target') or [0, 0, 0]
+        if kind in ('POINT', 'SPOT') and spec.get('size') is not None:
+            data.shadow_soft_size = float(spec['size'])
+        if kind == 'AREA' and spec.get('size') is not None:
+            data.size = float(spec['size'])
+        if kind == 'SPOT' and spec.get('spotDeg') is not None:
+            data.spot_size = math.radians(float(spec['spotDeg']))
+        obj = bpy.data.objects.new(data.name, data)
+        bpy.context.scene.collection.objects.link(obj)
+        aim(obj, position, target)
+        created.append({
+            'id': data.name,
+            'kind': kind,
+            'energy': data.energy,
+            'color': [round(float(v), 6) for v in data.color],
+            'position': [float(v) for v in position],
+            'target': [float(v) for v in target],
+        })
+    return created
+
+
 def render_views(out_dir, views, bounds, declared_spec=None):
     camera, center, size = setup_camera(bounds)
     declared = build_declared_camera(declared_spec) if isinstance(declared_spec, dict) else None
-    bpy.context.scene.render.engine = 'BLENDER_WORKBENCH'
-    bpy.context.scene.display.shading.light = 'STUDIO'
-    bpy.context.scene.display.shading.color_type = 'MATERIAL'
-    bpy.context.scene.display.shading.show_shadows = True
-    bpy.context.scene.display.shading.show_cavity = True
-    # 分辨率由 apply_render_settings 统一决定（SceneSpec.render，缺省 800×600）。
     bpy.context.scene.render.resolution_percentage = 100
     bpy.context.scene.render.image_settings.file_format = 'PNG'
     paths = {}
@@ -392,13 +483,24 @@ def main():
     views = [item.strip() for item in args.views.split(',') if item.strip()]
     formats = [item.strip() for item in args.formats.split(',') if item.strip()]
     bounds = scene_bounds(objects)
+    display = configure_display(scene)
+    environment_echo = apply_environment(scene.get('environment'))
+    light_errors = []
+    try:
+        lights_created = add_lights(scene.get('lights') or [])
+    except Exception as error:
+        lights_created = []
+        light_errors.append(str(error))
     render_settings = apply_render_settings(scene.get('render'))
     render_paths, declared = render_views(args.out, views, bounds, scene.get('camera'))
     export_paths = export_formats(args.out, formats, objects)
     report = {
-        'ok': len(unsupported) == 0,
+        'ok': len(unsupported) == 0 and not light_errors,
         'blenderVersion': bpy.app.version_string,
         'renderEngine': bpy.context.scene.render.engine,
+        'display': display,
+        'environment': environment_echo,
+        'lights': {'created': lights_created, 'errors': light_errors},
         'mesh': mesh_report(objects),
         'camera': {
             'declared': isinstance(scene.get('camera'), dict),

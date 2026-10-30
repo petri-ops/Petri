@@ -14,6 +14,9 @@ const SCENE_VERSION = 'scene3d/v1';
 const UNITS = new Set(['mm']);
 const COORDINATE_SYSTEMS = new Set(['z-up-right-handed']);
 const NODE_TYPES = new Set(['box', 'cylinder', 'sphere', 'plane', 'group', 'mesh-reference']);
+// BLOCK-322 P2-02：灯种与引擎名的唯一声明处（Python 构建脚本与前端镜像由对账门逐值核对）。
+const LIGHT_KINDS = new Set(['sun', 'point', 'spot', 'area']);
+const RENDER_ENGINES = new Set(['workbench', 'cycles']);
 const LIMITS = Object.freeze({
   maxNodes: 500,
   maxParameters: 200,
@@ -21,6 +24,7 @@ const LIMITS = Object.freeze({
   maxDimensionMm: 1_000_000,
   maxKeyLength: 80,
   maxResolutionPx: 4096,
+  maxLights: 16,
 });
 
 function isPlainObject(value) {
@@ -200,6 +204,54 @@ function validateNode(node, index, parameters, ids, errors) {
   }
 }
 
+/**
+ * BLOCK-322 P2-02 — 灯光与环境声明校验。
+ *
+ * 引擎策略由构建脚本按声明决定（实测：Blender 4.5.10 无头 Cycles CPU 640×480/8 采样 0.61s 可用，
+ * EEVEE Next 无头走软件回退 13.3s 不可用）：未声明灯光/环境时仍是 BLENDER_WORKBENCH，
+ * 声明后才切 CYCLES——否则「加了灯但灯不起作用」会被静默吞掉。
+ */
+function validateLight(light, index, errors, ids) {
+  const where = `lights[${index}]`;
+  if (!isPlainObject(light)) {
+    errors.push(`${where} 必须是对象`);
+    return;
+  }
+  if (!isSafeId(light.id)) errors.push(`${where}.id 非法`);
+  else if (ids.has(light.id)) errors.push(`重复灯光 id ${light.id}`);
+  else ids.add(light.id);
+  if (!LIGHT_KINDS.has(light.kind)) errors.push(`${where}.kind 只支持 sun/point/spot/area`);
+  if (!finiteNumber(light.energy) || light.energy < 0 || light.energy > 1000) errors.push(`${where}.energy 须在 0..1000`);
+  if (light.color !== undefined && !validateColor(light.color)) errors.push(`${where}.color 非法`);
+  if (!validateVector(light.position)) errors.push(`${where}.position 非法`);
+  if (light.target !== undefined && !validateVector(light.target)) errors.push(`${where}.target 非法`);
+  if (light.size !== undefined && (!finiteNumber(light.size) || light.size < 0)) errors.push(`${where}.size 非法`);
+  if (light.spotDeg !== undefined && (!finiteNumber(light.spotDeg) || light.spotDeg <= 1 || light.spotDeg >= 179)) {
+    errors.push(`${where}.spotDeg 须在 (1,179) 度之间`);
+  }
+}
+
+function validateEnvironment(environment, errors) {
+  if (!isPlainObject(environment)) {
+    errors.push('environment 必须是对象');
+    return;
+  }
+  if (environment.background !== undefined && !validateColor(environment.background)) {
+    errors.push('environment.background 须是 #rrggbb');
+  }
+  if (environment.worldStrength !== undefined
+    && (!finiteNumber(environment.worldStrength) || environment.worldStrength < 0 || environment.worldStrength > 10)) {
+    errors.push('environment.worldStrength 须在 0..10');
+  }
+  if (environment.samples !== undefined
+    && (!Number.isInteger(environment.samples) || environment.samples < 1 || environment.samples > 128)) {
+    errors.push('environment.samples 须是 1..128 的整数');
+  }
+  if (environment.engine !== undefined && !RENDER_ENGINES.has(environment.engine)) {
+    errors.push('environment.engine 只支持 workbench/cycles');
+  }
+}
+
 function validateSceneSpec(input) {
   const errors = [];
   if (!isPlainObject(input)) return { ok: false, error: 'scene_invalid', errors: ['SceneSpec 必须是对象'] };
@@ -232,6 +284,15 @@ function validateSceneSpec(input) {
   }
   if (input.camera !== undefined) validateCamera(input.camera, errors);
   if (input.render !== undefined) validateRenderSettings(input.render, errors);
+  if (input.lights !== undefined) {
+    if (!Array.isArray(input.lights)) errors.push('lights 必须是数组');
+    else if (input.lights.length > LIMITS.maxLights) errors.push(`灯光数量超限（≤${LIMITS.maxLights}）`);
+    else {
+      const lightIds = new Set();
+      input.lights.forEach((light, index) => validateLight(light, index, errors, lightIds));
+    }
+  }
+  if (input.environment !== undefined) validateEnvironment(input.environment, errors);
   const uniqueErrors = [...new Set(errors)];
   if (uniqueErrors.includes('mesh_source_hash_required')) return { ok: false, error: 'mesh_source_hash_required', errors: uniqueErrors };
   if (uniqueErrors.includes('mesh_format_unsupported')) return { ok: false, error: 'mesh_format_unsupported', errors: uniqueErrors };

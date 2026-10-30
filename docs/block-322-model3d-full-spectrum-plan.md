@@ -98,7 +98,7 @@ status: active
 | ID | 范围 | 验收（可机械断言） | 证据 |
 | --- | --- | --- | --- |
 | `P2-01` 相机与构图 **completed（2026-10-30，实机 18/18 + next04a 回归 7/7）** | SceneSpec 增可选 `camera`（position/target/up/fovDeg/projection/orthoScaleMm）与 `render`（width/height 16..4096）；Blender **新增 `camera` 视角**用声明机位出图（标准四视角保留，未声明即跳过不伪造），Blender 侧 `sensor_fit='VERTICAL'`+`sensor_height=24` 使 fov 与 Three 的**垂直** fov 同轴；预览端多出「机位」视角并真按声明取景 | 校验双层（退化视线/up 共线/fov 越界/正交缺画幅均拒收）+ 前端镜像同判据 + 报告回显 `effectiveAngleYDeg`/`orthoScaleMm`/`upApplied` 与声明对账 + camera.png 与 front.png 不同图 + 实机腿 | `acceptance/block-322-p2/block322-p2-camera-live-live.json` + `block322-p2-camera-detail.json` |
-| `P2-02` 灯光与环境 | `environment`（背景色/环境光强/三点灯 key-fill-rim 参数）；Blender world + 灯组；Three 侧同名灯组 | 背景色与亮度可按像素采样断言；两侧同参数同观感（容差内）；实机腿 | 同上 |
+| `P2-02` 灯光与环境 **completed（2026-10-30，实机 9/9）** | SceneSpec 增可选 `lights[]`（sun/point/spot/area + energy/color/position/target/size/spotDeg，≤16）与 `environment`（background/worldStrength/samples/engine）；**声明灯光或环境时才切 CYCLES(CPU)**，未声明仍是 WORKBENCH；预览端声明灯存在即整体替换默认摄影棚灯组 | 灯种/能量/位置/重复/数量/环境四字段双层 fail-closed + 哈希随灯光变化 + 灯种与引擎名跨 JS/TS/Python 逐值对账 + **像素平均亮度单调对照**（world=0：导出 0.08→11.73；预览 3.25→59.29）+ 报告回显生效值 | `acceptance/block-322-p2/block322-p2-lighting-live-live.json` + `block322-p2-lighting-detail.json` |
 | `P2-03` PBR 材质与贴图 | `material` 扩 metallic/emissive/baseColorTexture（工作区贴图，**sha256 锚定，复用 P1 资产单源**）；Blender Principled + 贴图节点；Three `MeshStandardMaterial` + 贴图经工作区 URL | 贴图 sha 校验（篡改即拒）；渲染像素差异（有/无贴图）；实机腿 | 同上 |
 | `P2-04` 序列帧与转盘视频 | 渲染面扩 `frames`/`turntable`（角度步进）；视频由 **Blender 内置 ffmpeg** 输出 mp4（不引入系统/npm 依赖） | 产物含 mp4 + 序列帧；bytes/sha/帧数可断言；登记进成果面 | 同上 |
 | `P2-05` 结果面视频预览 | viewer 注册 `.mp4/.webm`（`<video>` 有界加载 + 失败如实报） | 组件测试 + 实机：结果面打开视频可播放 | 同上 |
@@ -158,6 +158,7 @@ status: active
 ## §5 依赖
 
 - 本地 Blender（分平台事实，均为可选后端）：Windows=`Blender 4.5.10 LTS`（本批 P1 实机证据出于此，`capability: ready`）；macOS=`Blender 5.2.3 LTS`。跨平台收口需两侧各自取证，不得以一侧代另一侧。
+- **渲染引擎实测（2026-10-30，win32 + Blender 4.5.10 LTS 无头）**：`CYCLES(CPU)` 640×480/16 采样 **0.61s** 可用；`BLENDER_EEVEE_NEXT` 无头走软件回退 **13.34s** 不可用；`BLENDER_WORKBENCH` 不吃场景灯（声明灯光对它无效）。故 P2-02 起：未声明灯光/环境仍用 Workbench（存量耗时不变），声明后自动切 Cycles CPU（`environment.engine/samples` 可覆写，采样上限 128）。
 - 现有 SceneSpec/Blender/结果面/登记桥（RW-01）链路。
 - 可选外部服务（P5）需用户提供凭据与成本裁决。
 

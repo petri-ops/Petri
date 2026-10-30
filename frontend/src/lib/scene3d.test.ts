@@ -101,4 +101,41 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     expect(result.view.warnings.join('；')).toContain('正交');
     expect(result.view.warnings.join('；')).toContain('不假装投影一致');
   });
+
+  it('BLOCK-322 P2-02 灯光与环境声明通过解析并保留在 scene 上', () => {
+    const result = normalizeScene3DForView({
+      ...sampleScene3D(),
+      lights: [
+        { id: 'key', kind: 'sun', energy: 3, color: '#ffffff', position: [200, -300, 400], target: [0, 0, 20] },
+        { id: 'fill', kind: 'area', energy: 1.2, size: 180, position: [-220, -160, 120] },
+      ],
+      environment: { background: '#101418', worldStrength: 0.35, samples: 16, engine: 'cycles' },
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.view.scene.lights).toHaveLength(2);
+    expect(result.view.scene.environment).toEqual({ background: '#101418', worldStrength: 0.35, samples: 16, engine: 'cycles' });
+  });
+
+  it('BLOCK-322 P2-02 非法灯光/环境 fail-closed（与后端同判据）', () => {
+    const base = { ...sampleScene3D() };
+    const cases: Array<{ extra: Record<string, unknown>; keyword: string }> = [
+      { extra: { lights: [{ id: 'k', kind: 'laser', energy: 3, position: [0, 0, 1] }] }, keyword: 'kind 只支持 sun/point/spot/area' },
+      { extra: { lights: [{ id: 'k', kind: 'sun', energy: 9000, position: [0, 0, 1] }] }, keyword: 'energy 须在 0..1000' },
+      { extra: { lights: [{ id: 'k', kind: 'sun', energy: 3 }] }, keyword: 'position 非法' },
+      { extra: { lights: [{ id: 'k', kind: 'sun', energy: 3, position: [0, 0, 1] }, { id: 'k', kind: 'point', energy: 1, position: [0, 0, 2] }] }, keyword: '重复灯光 id' },
+      { extra: { lights: Array.from({ length: 17 }, (_, index) => ({ id: `l${index}`, kind: 'sun', energy: 1, position: [0, 0, index + 1] })) }, keyword: '灯光数量超限' },
+      { extra: { lights: 'nope' }, keyword: 'lights 必须是数组' },
+      { extra: { environment: { background: 'nope' } }, keyword: 'environment.background 须是 #rrggbb' },
+      { extra: { environment: { samples: 0 } }, keyword: 'samples 须是 1..128 的整数' },
+      { extra: { environment: { engine: 'eevee' } }, keyword: 'engine 只支持 workbench/cycles' },
+      { extra: { environment: [] }, keyword: 'environment 必须是对象' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({ ...base, ...item.extra });
+      expect(result.ok, JSON.stringify(item.extra)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
+  });
 });

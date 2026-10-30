@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-10-30T14:10:42.357Z",
+  "platform": "win32-x64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "display": {
+    "plain": {
+      "engine": "BLENDER_WORKBENCH",
+      "declaredLighting": false,
+      "requestedEngine": "workbench",
+      "samples": null,
+      "device": null
+    },
+    "lit": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    }
+  },
+  "lightsEcho": {
+    "created": [
+      {
+        "id": "key",
+        "kind": "SUN",
+        "energy": 900,
+        "color": [
+          1,
+          1,
+          1
+        ],
+        "position": [
+          260,
+          -320,
+          420
+        ],
+        "target": [
+          0,
+          0,
+          20
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "environmentEcho": {
+    "declared": true,
+    "background": "#000000",
+    "worldStrength": 0,
+    "effectiveWorldStrength": 0,
+    "effectiveColor": [
+      0,
+      0,
+      0
+    ]
+  },
+  "luminance": {
+    "engineDark": "CYCLES",
+    "darkMean": 0.083,
+    "litMean": 11.733,
+    "samples": 307200
+  },
+  "preview": {
+    "darkMean": 3.246,
+    "litMean": 59.176
+  }
+}

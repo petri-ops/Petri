@@ -44,6 +44,27 @@ export interface Scene3DRenderSettings {
   height?: number;
 }
 
+export type Scene3DLightKind = 'sun' | 'point' | 'spot' | 'area';
+export type Scene3DEngine = 'workbench' | 'cycles';
+
+export interface Scene3DLight {
+  id: string;
+  kind: Scene3DLightKind;
+  energy: number;
+  color?: string;
+  position: number[];
+  target?: number[];
+  size?: number;
+  spotDeg?: number;
+}
+
+export interface Scene3DEnvironment {
+  background?: string;
+  worldStrength?: number;
+  samples?: number;
+  engine?: Scene3DEngine;
+}
+
 export interface Scene3DSpec {
   version: 'scene3d/v1';
   units: 'mm';
@@ -53,6 +74,8 @@ export interface Scene3DSpec {
   constraints?: Scene3DConstraint[];
   camera?: Scene3DCamera;
   render?: Scene3DRenderSettings;
+  lights?: Scene3DLight[];
+  environment?: Scene3DEnvironment;
   metadata?: Record<string, unknown>;
 }
 
@@ -117,6 +140,67 @@ function validateCameraForView(raw: unknown, errors: string[]): void {
   if (projection !== 'perspective' && projection !== 'orthographic') errors.push('camera.projection 只支持 perspective/orthographic');
   if (projection === 'orthographic' && !(finite(raw.orthoScaleMm) && raw.orthoScaleMm > 0)) {
     errors.push('camera.orthoScaleMm 在正交投影下必填且须 >0');
+  }
+}
+
+/** BLOCK-322 P2-02 — 灯光/环境声明校验，判据与文案与后端 scene3d.js 同源（对账门守护）。 */
+const LIGHT_KINDS: readonly string[] = ['sun', 'point', 'spot', 'area'];
+const RENDER_ENGINES: readonly string[] = ['workbench', 'cycles'];
+const MAX_LIGHTS = 16;
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const SAFE_ID = /^[A-Za-z_][A-Za-z0-9_.-]*$/;
+
+function validateLightsForView(raw: unknown, errors: string[]): void {
+  if (!Array.isArray(raw)) {
+    errors.push('lights 必须是数组');
+    return;
+  }
+  if (raw.length > MAX_LIGHTS) {
+    errors.push(`灯光数量超限（≤${MAX_LIGHTS}）`);
+    return;
+  }
+  const ids = new Set<string>();
+  raw.forEach((item, index) => {
+    const where = `lights[${index}]`;
+    if (!isRecord(item)) {
+      errors.push(`${where} 必须是对象`);
+      return;
+    }
+    const id = typeof item.id === 'string' ? item.id : '';
+    if (!id || !SAFE_ID.test(id)) errors.push(`${where}.id 非法`);
+    else if (ids.has(id)) errors.push(`重复灯光 id ${id}`);
+    else ids.add(id);
+    if (!LIGHT_KINDS.includes(String(item.kind))) errors.push(`${where}.kind 只支持 sun/point/spot/area`);
+    if (!finite(item.energy) || item.energy < 0 || item.energy > 1000) errors.push(`${where}.energy 须在 0..1000`);
+    if (item.color !== undefined && !(typeof item.color === 'string' && HEX_COLOR.test(item.color))) errors.push(`${where}.color 非法`);
+    if (!vector3(item.position)) errors.push(`${where}.position 非法`);
+    if (item.target !== undefined && !vector3(item.target)) errors.push(`${where}.target 非法`);
+    if (item.size !== undefined && (!finite(item.size) || item.size < 0)) errors.push(`${where}.size 非法`);
+    if (item.spotDeg !== undefined
+      && (!finite(item.spotDeg) || item.spotDeg <= 1 || item.spotDeg >= 179)) {
+      errors.push(`${where}.spotDeg 须在 (1,179) 度之间`);
+    }
+  });
+}
+
+function validateEnvironmentForView(raw: unknown, errors: string[]): void {
+  if (!isRecord(raw)) {
+    errors.push('environment 必须是对象');
+    return;
+  }
+  if (raw.background !== undefined && !(typeof raw.background === 'string' && HEX_COLOR.test(raw.background))) {
+    errors.push('environment.background 须是 #rrggbb');
+  }
+  if (raw.worldStrength !== undefined
+    && (!finite(raw.worldStrength) || raw.worldStrength < 0 || raw.worldStrength > 10)) {
+    errors.push('environment.worldStrength 须在 0..10');
+  }
+  if (raw.samples !== undefined
+    && (!Number.isInteger(raw.samples) || (raw.samples as number) < 1 || (raw.samples as number) > 128)) {
+    errors.push('environment.samples 须是 1..128 的整数');
+  }
+  if (raw.engine !== undefined && (typeof raw.engine !== 'string' || !RENDER_ENGINES.includes(raw.engine))) {
+    errors.push('environment.engine 只支持 workbench/cycles');
   }
 }
 
@@ -194,6 +278,8 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
   }
   if (raw.camera !== undefined) validateCameraForView(raw.camera, errors);
   if (raw.render !== undefined) validateRenderForView(raw.render, errors);
+  if (raw.lights !== undefined) validateLightsForView(raw.lights, errors);
+  if (raw.environment !== undefined) validateEnvironmentForView(raw.environment, errors);
   if (isRecord(raw.camera) && raw.camera.projection === 'orthographic') {
     warnings.push('相机声明为正交投影：导出按正交取景，预览端仍是透视相机（只对齐机位与目标，不假装投影一致）。');
   }
@@ -213,6 +299,8 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
       : [],
     ...(isRecord(raw.camera) ? { camera: raw.camera as unknown as Scene3DCamera } : {}),
     ...(isRecord(raw.render) ? { render: raw.render } : {}),
+    ...(Array.isArray(raw.lights) ? { lights: raw.lights } : {}),
+    ...(isRecord(raw.environment) ? { environment: raw.environment } : {}),
     metadata: isRecord(raw.metadata) ? raw.metadata : {},
   };
   return {

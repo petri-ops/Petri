@@ -127,6 +127,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block232-permissions-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p1-external-asset-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-camera-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-lighting-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",

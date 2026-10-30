@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-import type { Scene3DView, Scene3DViewNode } from '@/lib/scene3d';
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
+import type { Scene3DLight, Scene3DView, Scene3DViewNode } from '@/lib/scene3d';
 import { meshFormatForPath, type MeshInputFormat } from '@/lib/meshAssets';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
 
@@ -50,6 +51,44 @@ function countMeshes(object: THREE.Object3D): number {
     if ((child as THREE.Mesh).isMesh) count += 1;
   });
   return count;
+}
+
+function hexColor(value: string | undefined, fallback: number): number {
+  return /^#[0-9a-f]{6}$/i.test(value || '') ? Number.parseInt(String(value).slice(1), 16) : fallback;
+}
+
+/**
+ * BLOCK-322 P2-02 — 声明灯到 Three.js 的同参数映射。
+ * 灯种/颜色/位置/目标两侧一致；亮度各按自家单位标定（Blender Watts vs Three 无单位强度），
+ * 不宣称像素级一致。spot 锥角取声明张角一半（与 Blender spot_size 同义）。
+ */
+function buildDeclaredLight(light: Scene3DLight): THREE.Object3D {
+  const color = hexColor(light.color, 0xffffff);
+  const [px, py, pz] = light.position;
+  const [tx, ty, tz] = light.target || [0, 0, 0];
+  if (light.kind === 'sun') {
+    const key = new THREE.DirectionalLight(color, light.energy);
+    key.position.set(px, py, pz);
+    key.target.position.set(tx, ty, tz);
+    return key;
+  }
+  if (light.kind === 'point') {
+    const point = new THREE.PointLight(color, light.energy);
+    point.position.set(px, py, pz);
+    return point;
+  }
+  if (light.kind === 'spot') {
+    const spot = new THREE.SpotLight(color, light.energy, 0, THREE.MathUtils.degToRad((light.spotDeg ?? 40) / 2));
+    spot.position.set(px, py, pz);
+    spot.target.position.set(tx, ty, tz);
+    return spot;
+  }
+  RectAreaLightUniformsLib.init();
+  const side = light.size && light.size > 0 ? light.size : 100;
+  const area = new THREE.RectAreaLight(color, light.energy, side, side);
+  area.position.set(px, py, pz);
+  area.lookAt(tx, ty, tz);
+  return area;
 }
 
 function disposeGroup(group: THREE.Group): void {
@@ -104,6 +143,7 @@ export function Model3DScene({
   const controlsRef = React.useRef<OrbitControls | null>(null);
   const contentRef = React.useRef<THREE.Group | null>(null);
   const overlayRef = React.useRef<THREE.Group | null>(null);
+  const lightsRef = React.useRef<THREE.Group | null>(null);
   const boundsRef = React.useRef(new THREE.Box3());
 
   const applyView = React.useCallback((angle: Model3DViewAngle) => {
@@ -170,10 +210,8 @@ export function Model3DScene({
     grid.rotation.x = Math.PI / 2;
     scene.add(grid);
     scene.add(new THREE.AxesHelper(80));
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x203040, 1.2));
-    const directional = new THREE.DirectionalLight(0xffffff, 2.1);
-    directional.position.set(120, -180, 220);
-    scene.add(directional);
+    // 灯组不在这里建：默认摄影棚灯与声明灯互斥，统一由下方灯光同步 effect 按声明重建，
+    // 避免「拿默认光冒充声明光」。
     const content = new THREE.Group();
     scene.add(content);
     rendererRef.current = renderer;
@@ -222,6 +260,44 @@ export function Model3DScene({
       rendererRef.current = null;
     };
   }, [onCameraApi, onError]);
+
+  // BLOCK-322 P2-02 — 灯组同步：声明灯存在即整体替换默认摄影棚灯（不拿默认光冒充声明光），
+  // environment 声明映射为环境光 + 场景背景；未声明时保持既有默认灯组与透明背景。
+  React.useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return undefined;
+    if (lightsRef.current) {
+      scene.remove(lightsRef.current);
+      lightsRef.current.clear();
+    }
+    const group = new THREE.Group();
+    const declared = view?.scene.lights || [];
+    if (declared.length === 0) {
+      group.add(new THREE.HemisphereLight(0xffffff, 0x203040, 1.2));
+      const key = new THREE.DirectionalLight(0xffffff, 2.1);
+      key.position.set(120, -180, 220);
+      group.add(key);
+    } else {
+      for (const light of declared) {
+        const object = buildDeclaredLight(light);
+        group.add(object);
+        const target = (object as unknown as { target?: THREE.Object3D }).target;
+        if (target) group.add(target);
+      }
+    }
+    const environment = view?.scene.environment;
+    if (environment) {
+      const background = hexColor(environment.background, 0xffffff);
+      const strength = environment.worldStrength ?? 1;
+      if (strength > 0) group.add(new THREE.AmbientLight(background, strength));
+      scene.background = environment.background ? new THREE.Color(background) : null;
+    } else {
+      scene.background = null;
+    }
+    scene.add(group);
+    lightsRef.current = group;
+    return undefined;
+  }, [view]);
 
   // 点选节点：与 OrbitControls 共用指针事件，拖动超过 4px 视为旋转而非选择。
   React.useEffect(() => {
