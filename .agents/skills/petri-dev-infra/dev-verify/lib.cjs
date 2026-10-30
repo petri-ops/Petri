@@ -12,6 +12,7 @@
  *                                 必须按项目树+右栏判真主窗，visibilityState 不可靠）
  *   assert  createRun()          断言记录 + PASS/FAIL 日志 + 证据 JSON 落盘
  *   capture evalJs()/screenshotPng()  带超时/异常透传的页面求值与截图
+ *   pixels  pngPixelStats()      PNG 像素统计（把「真的进成像了」变成可数值断言）
  *
  * 环境纪律（AUDIT-LOG 2026-09-09）：dev 栈以 fnm Node 24 启动且带
  * PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222"；本库默认连 9222，
@@ -206,6 +207,99 @@ function createRun({ name, evidenceDir }) {
   };
 }
 
+/**
+ * PNG 像素统计（BLOCK-322 P2-02 首用，P2-03 复用）：纯 Node 解 IDAT（zlib inflate +
+ * 五种行滤波），只支持 8bit 非隔行。用途=把「声明的东西真的进成像了」变成**可数值断言**，
+ * 而不是靠观感。第二次出现即从 flow 里抽到公共原语，避免两份解码器彼此漂移。
+ */
+function pngPixelStats(buffer) {
+  const zlib = require('node:zlib');
+  if (buffer.readUInt32BE(0) !== 0x89504e47) throw new Error('not_png');
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  const idat = [];
+  while (offset < buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString('ascii', offset + 4, offset + 8);
+    const data = buffer.subarray(offset + 8, offset + 8 + length);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      if (data[12] !== 0) throw new Error('interlaced_unsupported');
+    } else if (type === 'IDAT') idat.push(data);
+    else if (type === 'IEND') break;
+    offset += 12 + length;
+  }
+  if (bitDepth !== 8 || ![0, 2, 4, 6].includes(colorType)) throw new Error(`unsupported_png_depth_or_color(depth=${bitDepth},color=${colorType})`);
+  const channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[colorType];
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  const out = Buffer.alloc(height * stride);
+  let previous = Buffer.alloc(stride);
+  let cursor = 0;
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[cursor];
+    cursor += 1;
+    const line = Buffer.from(raw.subarray(cursor, cursor + stride));
+    cursor += stride;
+    for (let x = 0; x < stride; x += 1) {
+      const left = x >= channels ? line[x - channels] : 0;
+      const up = previous[x];
+      const upLeft = x >= channels ? previous[x - channels] : 0;
+      let value = line[x];
+      if (filter === 1) value = (value + left) & 0xff;
+      else if (filter === 2) value = (value + up) & 0xff;
+      else if (filter === 3) value = (value + ((left + up) >> 1)) & 0xff;
+      else if (filter === 4) {
+        const p = left + up - upLeft;
+        const pa = Math.abs(p - left);
+        const pb = Math.abs(p - up);
+        const pc = Math.abs(p - upLeft);
+        const predictor = (pa <= pb && pa <= pc) ? left : (pb <= pc ? up : upLeft);
+        value = (value + predictor) & 0xff;
+      }
+      line[x] = value;
+    }
+    line.copy(out, y * stride);
+    previous = line;
+  }
+  let sum = 0;
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+  let samples = 0;
+  for (let i = 0; i < out.length; i += channels) {
+    if (channels === 1) {
+      sum += out[i];
+      red += out[i];
+      green += out[i];
+      blue += out[i];
+      samples += 1;
+      continue;
+    }
+    red += out[i];
+    green += out[i + 1];
+    blue += out[i + 2];
+    sum += 0.2126 * out[i] + 0.7152 * out[i + 1] + 0.0722 * out[i + 2];
+    samples += 1;
+  }
+  if (!samples) return { mean: 0, r: 0, g: 0, b: 0, width, height, samples: 0 };
+  return {
+    mean: sum / samples,
+    r: red / samples,
+    g: green / samples,
+    b: blue / samples,
+    width,
+    height,
+    samples,
+  };
+}
+
 module.exports = {
   DEFAULT_PORT,
   TEST_INSTANCE_PORT,
@@ -220,5 +314,6 @@ module.exports = {
   selectPageTarget,
   evalJs,
   screenshotPng,
+  pngPixelStats,
   createRun,
 };

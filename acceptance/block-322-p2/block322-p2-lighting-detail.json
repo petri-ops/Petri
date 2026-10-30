@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T14:10:42.357Z",
+  "generatedAt": "2026-10-30T16:29:18.474Z",
   "platform": "win32-x64",
   "capability": {
     "ok": true,
@@ -11,6 +11,7 @@
     "plain": {
       "engine": "BLENDER_WORKBENCH",
       "declaredLighting": false,
+      "declaredMaterial": false,
       "requestedEngine": "workbench",
       "samples": null,
       "device": null
@@ -18,6 +19,7 @@
     "lit": {
       "engine": "CYCLES",
       "declaredLighting": true,
+      "declaredMaterial": false,
       "requestedEngine": "cycles",
       "samples": 16,
       "device": "CPU"
@@ -66,7 +68,7 @@
     "samples": 307200
   },
   "preview": {
-    "darkMean": 3.246,
-    "litMean": 59.176
+    "darkMean": 3.252,
+    "litMean": 59.294
   }
 }

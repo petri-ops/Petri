@@ -30,3 +30,13 @@ export function meshFormatForPath(value?: string | null): MeshInputFormat | null
 export function meshTooLargeMessage(): string {
   return `外部 mesh 超过 ${MAX_MESH_MB}MB 入链上限；请先简化模型或拆分资产。`;
 }
+
+// BLOCK-322 P2-03 — 基础色贴图镜像：格式白名单与上限与服务端 mesh-assets.js 同源，
+// 逐值对账由 test/block322-mesh-format-single-source.test.mjs 守护。
+const TEXTURE_INPUT_FORMATS = Object.freeze(['png', 'jpg', 'jpeg'] as const);
+
+/** 工作区相对路径或文件名 → 受支持的贴图格式；不支持返回 null。 */
+export function textureFormatForPath(value?: string | null): string | null {
+  const extension = extensionOf(value);
+  return (TEXTURE_INPUT_FORMATS as readonly string[]).includes(extension) ? extension : null;
+}

@@ -40,6 +40,8 @@ const VIEWS: Array<{ id: ViewAngle; label: string }> = [
 // 仅当场景声明了 camera 才出现「机位」按钮（未声明时不提供假机位选项）。
 const DECLARED_CAMERA_VIEW = { id: 'camera' as const, label: '机位' };
 const CONSTRAINT_KIND_LABEL: Record<Scene3DConstraintKind, string> = { align: '对齐', distance: '间距', angle: '转角' };
+// 逐节点资产观察（外部 mesh / 基础色贴图）走告警区而非错误条；前缀集中一处，新增资产类别不再漏配。
+const ASSET_NOTICE_PREFIXES = ['mesh_reference_', 'texture_reference_'];
 
 export function Model3DSurface({ projectId = null }: { projectId?: string | null }): React.ReactElement {
   const [view, setView] = React.useState<Scene3DView | null>(null);
@@ -209,9 +211,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     setCanvasInfo(info);
   }, []);
   const onSceneError = React.useCallback((message: string) => {
-    // 外部 mesh 是逐节点观察，可能同时多条：累积进告警区，不互相覆盖（红线4 既不伪造也不吞掉）；
+    // 外部 mesh / 贴图都是逐节点观察，可能同时多条：累积进告警区，不互相覆盖（红线4 既不伪造也不吞掉）；
     // 其余（WebGL 初始化/上下文丢失）仍是阻断性错误，走错误条。
-    if (message.startsWith('mesh_reference_')) {
+    if (ASSET_NOTICE_PREFIXES.some((prefix) => message.startsWith(prefix))) {
       setWarnings((previous) => (previous.includes(message) ? previous : [...previous, message]));
       return;
     }

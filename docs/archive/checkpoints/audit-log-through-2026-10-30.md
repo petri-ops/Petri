@@ -52,3 +52,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T16:07:44.946Z -->
 最后更新：2026-10-30（**中栏保底收窄到手机宽度 completed（用户「中间栏固定宽度太宽…手机屏幕宽度更合适」；closeout 十三门 PASS）**：UI-629 修订——`CENTER_SPACE_COLLAPSE_BELOW` 760→420、`RESTORE` 840→500，左右栏拖宽上限同步放宽（1600 宽下右栏 560→900）；纯函数/迟滞/让位 17/17 全量重算；实机 9223：右栏拖到 900 时中栏 458、聊天卡片 **418px ≈ 手机宽度**（旧钳制 560）。证据 `acceptance/ui-629-center-width/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T16:33:26.097Z -->
+最后更新：2026-10-30（**BLOCK-322-MODEL3D-FULL-SPECTRUM 启动登记（active；用户裁决「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」）**：3D 全方位能力纲——P1 外部资产一等公民（GLB/GLTF 进 SceneSpec + 预览 + UI 添加）→ P2 场景表现力与叙事（灯光/相机/PBR/序列帧/视频）→ P3 几何与装配 → P4 CAD 交换与工程（STEP/2D 图/BOM）→ P5 AI 生成资产 → P6 生产交付与协作；红线=零第二 revision 真值/零第二执行器（Blender 唯一）/外部资产 sha256 锚定+工作区路径+大小上限/能力缺失如实报。非范围=本阶段仅 P1；能力型缺口按阶段排队而非永久出籍。plan=docs/block-322-model3d-full-spectrum-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。

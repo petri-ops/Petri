@@ -1,4 +1,4 @@
-import { meshFormatForPath } from './meshAssets';
+import { meshFormatForPath, textureFormatForPath } from './meshAssets';
 
 export const SCENE3D_VERSION = 'scene3d/v1';
 export const SCENE3D_NODE_TYPES = Object.freeze(['box', 'cylinder', 'sphere', 'plane', 'group', 'mesh-reference'] as const);
@@ -29,12 +29,23 @@ export type Scene3DModifier =
   | { kind: 'array'; count: number; offset?: number[] }
   | { kind: 'boolean'; operation: 'union' | 'difference' | 'intersect'; target: string };
 
+/** BLOCK-322 P2-03 — 材质白名单镜像（未声明字段一律拒，与服务端同一判据）。 */
+interface Scene3DMaterial {
+  color?: string;
+  roughness?: number;
+  metallic?: number;
+  emissive?: string;
+  baseColorTexture?: { path: string; sourceSha256: string };
+}
+
+const MATERIAL_FIELDS: readonly string[] = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture'];
+
 export interface Scene3DNode {
   id: string;
   type: Scene3DNodeType;
   transform?: { position?: number[]; rotation?: number[] };
   dimensions?: Record<string, number | string>;
-  material?: { color?: string; roughness?: number };
+  material?: Scene3DMaterial;
   source?: { path: string; sourceSha256: string };
   modifiers?: Scene3DModifier[];
   label?: string;
@@ -212,6 +223,37 @@ function validateEnvironmentForView(raw: unknown, errors: string[]): void {
   if (raw.engine !== undefined && (typeof raw.engine !== 'string' || !RENDER_ENGINES.includes(raw.engine))) {
     errors.push('environment.engine 只支持 workbench/cycles');
   }
+}
+
+/** BLOCK-322 P2-03 — 材质校验镜像：判据与文案与后端 scene3d.js validateMaterial 同源。 */
+function validateMaterialForView(item: Record<string, unknown>, index: number, errors: string[]): void {
+  const material = item.material;
+  if (material === undefined) return;
+  const where = `nodes[${index}]`;
+  if (!isRecord(material)) {
+    errors.push(`${where}.material 必须是对象`);
+    return;
+  }
+  for (const key of Object.keys(material)) {
+    if (!MATERIAL_FIELDS.includes(key)) errors.push(`${where}.material.${key} 不在材质白名单`);
+  }
+  if (material.color !== undefined && !(typeof material.color === 'string' && HEX_COLOR.test(material.color))) {
+    errors.push(`${where}.material.color 非法`);
+  }
+  for (const key of ['roughness', 'metallic'] as const) {
+    const value = material[key];
+    if (value !== undefined && (!finite(value) || value < 0 || value > 1)) errors.push(`${where}.material.${key} 须在 0..1`);
+  }
+  if (material.emissive !== undefined && !(typeof material.emissive === 'string' && HEX_COLOR.test(material.emissive))) {
+    errors.push(`${where}.material.emissive 非法`);
+  }
+  if (material.baseColorTexture === undefined) return;
+  const texture = isRecord(material.baseColorTexture) ? material.baseColorTexture : null;
+  const texturePath = typeof texture?.path === 'string' ? texture.path : '';
+  if (!texture || !isSafeRelativePath(texturePath)) errors.push(`${where}.material.baseColorTexture.path 非法`);
+  else if (!textureFormatForPath(texturePath)) errors.push(`${where} texture_format_unsupported`);
+  const textureSha = typeof texture?.sourceSha256 === 'string' ? texture.sourceSha256 : '';
+  if (!texture || !/^[a-f0-9]{64}$/i.test(textureSha)) errors.push('texture_source_hash_required');
 }
 
 /** BLOCK-322 P3-01 — 几何操作白名单镜像（判据与文案与后端 scene3d.js 同源）。 */
@@ -405,6 +447,11 @@ export function normalizeScene3DForView(raw: unknown, options?: { constraintsEva
       for (const key of required) {
         if (!finite(dimensions[key]) || dimensions[key] <= 0) errors.push(`nodes[${index}].dimensions.${key} 缺失/无效`);
       }
+    }
+    validateMaterialForView(item, index, errors);
+    const textureSpec = isRecord(item.material) && isRecord(item.material.baseColorTexture) ? item.material.baseColorTexture : null;
+    if (textureSpec) {
+      warnings.push(`节点 ${item.id} 声明基础色贴图（${typeof textureSpec.path === 'string' ? textureSpec.path : '—'}）：预览从项目工作区文件加载，构建侧按 sha256 复验。`);
     }
     validateModifiersForNode(item, index, errors);
     if (Array.isArray(item.modifiers) && item.modifiers.length > 0) {

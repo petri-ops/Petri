@@ -8,7 +8,7 @@
  */
 
 const crypto = require('node:crypto');
-const { meshFormatForPath } = require('./mesh-assets');
+const { meshFormatForPath, textureFormatForPath } = require('./mesh-assets');
 
 const SCENE_VERSION = 'scene3d/v1';
 const UNITS = new Set(['mm']);
@@ -26,6 +26,10 @@ const MODIFIER_FIELDS = {
   array: ['kind', 'count', 'offset'],
   boolean: ['kind', 'operation', 'target'],
 };
+// BLOCK-322 P2-03 — 材质白名单。贴图走 helpers/mesh-assets 的资产单源（工作区相对路径 +
+// sha256 锚定 + 大小上限），与 mesh-reference 同一执法口径；未声明的字段一律拒收，
+// 免得「写了个 metalness 结果两边都不认」成为第三类静默失真。
+const MATERIAL_FIELDS = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture'];
 // BLOCK-322 P3-02a — 装配约束白名单。求值只发生在 resolveSceneSpec（唯一真值处），
 // 结果烘进 transform 后交给 Blender；构建脚本与预览端都不再各自解一遍（红线 2）。
 const CONSTRAINT_KINDS = new Set(['align', 'distance', 'angle']);
@@ -223,6 +227,38 @@ function validateModifiers(node, index, errors) {
   });
 }
 
+/**
+ * BLOCK-322 P2-03 — 材质与基础色贴图声明校验。
+ * 贴图与 mesh-reference 同执法口径：工作区相对路径 + 格式白名单（helpers/mesh-assets 单源）
+ * + sha256 必填；越界即拒，不静默忽略（否则又是一类「写了但不生效」）。
+ */
+function validateMaterial(node, where, errors) {
+  const material = node.material;
+  if (material === undefined) return;
+  if (!isPlainObject(material)) {
+    errors.push(`${where}.material 必须是对象`);
+    return;
+  }
+  for (const key of Object.keys(material)) {
+    if (!MATERIAL_FIELDS.includes(key)) errors.push(`${where}.material.${key} 不在材质白名单`);
+  }
+  if (material.color !== undefined && !validateColor(material.color)) errors.push(`${where}.material.color 非法`);
+  for (const key of ['roughness', 'metallic']) {
+    if (material[key] !== undefined
+      && (!finiteNumber(material[key]) || material[key] < 0 || material[key] > 1)) {
+      errors.push(`${where}.material.${key} 须在 0..1`);
+    }
+  }
+  if (material.emissive !== undefined && !validateColor(material.emissive)) errors.push(`${where}.material.emissive 非法`);
+  if (material.baseColorTexture === undefined) return;
+  const texture = material.baseColorTexture;
+  if (!isPlainObject(texture) || !isSafeRelativePath(texture.path)) errors.push(`${where}.material.baseColorTexture.path 非法`);
+  else if (!textureFormatForPath(texture.path)) errors.push('texture_format_unsupported');
+  if (!isPlainObject(texture) || !/^[a-f0-9]{64}$/i.test(String(texture.sourceSha256 || ''))) {
+    errors.push('texture_source_hash_required');
+  }
+}
+
 function validateNode(node, index, parameters, ids, errors) {
   const where = `nodes[${index}]`;
   if (!isPlainObject(node)) {
@@ -240,16 +276,7 @@ function validateNode(node, index, parameters, ids, errors) {
       if (node.transform.rotation !== undefined && !validateVector(node.transform.rotation)) errors.push(`${where}.transform.rotation 非法`);
     }
   }
-  if (node.material !== undefined) {
-    if (!isPlainObject(node.material)) errors.push(`${where}.material 必须是对象`);
-    else {
-      if (node.material.color !== undefined && !validateColor(node.material.color)) errors.push(`${where}.material.color 非法`);
-      if (node.material.roughness !== undefined
-        && (!finiteNumber(node.material.roughness) || node.material.roughness < 0 || node.material.roughness > 1)) {
-        errors.push(`${where}.material.roughness 须在 0..1`);
-      }
-    }
-  }
+  validateMaterial(node, where, errors);
   if (node.type === 'box') {
     for (const key of ['width', 'height', 'depth']) {
       if (!isPlainObject(node.dimensions) || node.dimensions[key] === undefined) errors.push(`${where}.dimensions.${key} 缺失`);
@@ -422,6 +449,8 @@ function validateSceneSpec(input) {
   const uniqueErrors = [...new Set(errors)];
   if (uniqueErrors.includes('mesh_source_hash_required')) return { ok: false, error: 'mesh_source_hash_required', errors: uniqueErrors };
   if (uniqueErrors.includes('mesh_format_unsupported')) return { ok: false, error: 'mesh_format_unsupported', errors: uniqueErrors };
+  if (uniqueErrors.includes('texture_source_hash_required')) return { ok: false, error: 'texture_source_hash_required', errors: uniqueErrors };
+  if (uniqueErrors.includes('texture_format_unsupported')) return { ok: false, error: 'texture_format_unsupported', errors: uniqueErrors };
   if (uniqueErrors.some((error) => /未知参数/.test(error))) return { ok: false, error: 'invalid_reference', errors: uniqueErrors };
   if (uniqueErrors.length > 0) return { ok: false, error: 'scene_invalid', errors: uniqueErrors };
   return {

@@ -204,6 +204,56 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     expect(evaluated.view.stats.constraints, '求值后约束仍在场景里声明（transform 是求值投影，不是新真相）').toBe(1);
   });
 
+  it('BLOCK-322 P2-03 PBR 材质与贴图通过解析并给出工作区加载提示', () => {
+    const result = normalizeScene3DForView({
+      ...sampleScene3D(),
+      nodes: [{
+        id: 'panel',
+        type: 'box',
+        dimensions: { width: 120, height: 40, depth: 80 },
+        material: {
+          color: '#4c78a8',
+          roughness: 0.3,
+          metallic: 0.85,
+          emissive: '#101418',
+          baseColorTexture: { path: 'model3d/textures/panel.png', sourceSha256: 'b'.repeat(64) },
+        },
+      }],
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.view.nodes[0].material).toMatchObject({ metallic: 0.85, emissive: '#101418' });
+    expect(result.view.warnings.join('；')).toContain('声明基础色贴图');
+    expect(result.view.warnings.join('；')).toContain('构建侧按 sha256 复验');
+  });
+
+  it('BLOCK-322 P2-03 非法材质 fail-closed（与服务端同判据，未知键不静默忽略）', () => {
+    const cases: Array<{ material: unknown; keyword: string }> = [
+      { material: { metalness: 0.5 }, keyword: '不在材质白名单' },
+      { material: { metallic: 1.5 }, keyword: 'material.metallic 须在 0..1' },
+      { material: { roughness: -0.2 }, keyword: 'material.roughness 须在 0..1' },
+      { material: { emissive: 'white' }, keyword: 'material.emissive 非法' },
+      { material: { baseColorTexture: { path: 'a.svg', sourceSha256: 'a'.repeat(64) } }, keyword: 'texture_format_unsupported' },
+      { material: { baseColorTexture: { path: 'a.png' } }, keyword: 'texture_source_hash_required' },
+      { material: { baseColorTexture: { path: '../outside.png', sourceSha256: 'a'.repeat(64) } }, keyword: 'baseColorTexture.path 非法' },
+      { material: 'nope', keyword: 'material 必须是对象' },
+    ];
+    for (const item of cases) {
+      const result = normalizeScene3DForView({
+        ...sampleScene3D(),
+        nodes: [{ id: 'panel', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, material: item.material }],
+      });
+      expect(result.ok, JSON.stringify(item.material)).toBe(false);
+      if (result.ok) continue;
+      expect(result.errors.join('；')).toContain(item.keyword);
+    }
+    const legacy = normalizeScene3DForView({
+      ...sampleScene3D(),
+      nodes: [{ id: 'panel', type: 'box', dimensions: { width: 1, height: 1, depth: 1 }, material: { color: '#4c78a8', roughness: 0.6 } }],
+    });
+    expect(legacy.ok, '存量材质不得因新白名单被拒').toBe(true);
+  });
+
   it('BLOCK-322 P2-02 灯光与环境声明通过解析并保留在 scene 上', () => {
     const result = normalizeScene3DForView({
       ...sampleScene3D(),

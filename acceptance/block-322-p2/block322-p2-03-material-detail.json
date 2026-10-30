@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-10-30T16:28:59.051Z",
+  "platform": "win32-x64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 4.5.10 LTS"
+  },
+  "expectation": "纯红贴图应让 front.png 的 R 均值上升、B 均值下降（同一环境光、同一引擎、同一采样数）",
+  "display": {
+    "plain": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "declaredMaterial": false,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    },
+    "textured": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "declaredMaterial": true,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    }
+  },
+  "materials": {
+    "declared": [
+      {
+        "id": "panel",
+        "metallic": 0.6,
+        "emissive": "#061018",
+        "baseColorTexture": "model3d/textures/panel.png"
+      }
+    ]
+  },
+  "pixelStats": {
+    "before": {
+      "mean": 168.81133023790508,
+      "r": 157.11899166666666,
+      "g": 170.80737708333334,
+      "b": 183.46809583333334,
+      "width": 800,
+      "height": 600,
+      "samples": 480000
+    },
+    "after": {
+      "mean": 159.35493083106982,
+      "r": 204.70780625,
+      "g": 147.60822916666666,
+      "b": 142.16960833333334,
+      "width": 800,
+      "height": 600,
+      "samples": 480000
+    }
+  },
+  "tamperedUnsupported": [
+    {
+      "id": "panel",
+      "error": "texture_source_hash_mismatch"
+    }
+  ],
+  "outputs": {
+    "textured": [
+      {
+        "path": "model3d/runs/m3d-mvv6sr4z-hwwz0o/front.png",
+        "sha256": "bff513485c0a84cbd96db06695779ee0e67d24eaaa5ce9d022bbd2d01e4c53b7",
+        "bytes": 480751
+      },
+      {
+        "path": "model3d/runs/m3d-mvv6sr4z-hwwz0o/top.png",
+        "sha256": "9e74151300e92b95bbd66391c9e4bca4c59afb761a08da7a556d5a2549a870f3",
+        "bytes": 378412
+      },
+      {
+        "path": "model3d/runs/m3d-mvv6sr4z-hwwz0o/side.png",
+        "sha256": "62133db8e8c9e50c8f464d101d0b9a91c0ad162804bb9e21c6d25ba8b0d9b8b5",
+        "bytes": 362186
+      },
+      {
+        "path": "model3d/runs/m3d-mvv6sr4z-hwwz0o/iso.png",
+        "sha256": "2cbb14ed7a785540acefb951647eb38f3627a7a3ac3551f9b049a2440f43c5ff",
+        "bytes": 598877
+      },
+      {
+        "path": "model3d/runs/m3d-mvv6sr4z-hwwz0o/scene.glb",
+        "sha256": "4cb657c12bd1d554783853f9334f88ad9d82b4bd19c7ec6fa969385828683aa2",
+        "bytes": 2284
+      }
+    ]
+  }
+}

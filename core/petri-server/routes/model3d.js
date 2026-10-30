@@ -6,13 +6,19 @@ const scene3d = require('../helpers/scene3d');
 const { runModel3DReview } = require('../helpers/model3d-review');
 const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
-const { inspectMeshAsset } = require('../helpers/mesh-assets');
+const { inspectMeshAsset, inspectTextureAsset } = require('../helpers/mesh-assets');
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
 
 // resolveWorkspaceTarget 的路径拒绝码 → 403（与 400「请求本身不合法」区分）。
 const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'symlink_not_allowed', 'workspace_unavailable'];
+
+/** 资产预检错误 → HTTP 语义（mesh 与贴图共用同一映射，只是错误码前缀不同）。 */
+const assetErrorStatus = (error, kind) => (error === `${kind}_not_found` ? 404
+  : error === `${kind}_too_large` ? 413
+    : PATH_REJECT_ERRORS.includes(error) ? 403
+      : 400);
 
 function requestUserId(req) {
   return req.userId || (req.user && req.user.id) || null;
@@ -197,11 +203,22 @@ module.exports = function registerModel3DRoutes(app) {
       relativePath: req.body?.path,
     });
     if (!result.ok) {
-      const status = result.error === 'mesh_not_found' ? 404
-        : result.error === 'mesh_too_large' ? 413
-          : PATH_REJECT_ERRORS.includes(result.error) ? 403
-            : 400;
-      return res.status(status).json(result);
+      return res.status(assetErrorStatus(result.error, 'mesh')).json(result);
+    }
+    return res.json(result);
+  });
+
+  // BLOCK-322 P2-03 — 贴图入链预检：与 mesh 同一内核（helpers/mesh-assets），只换格式白名单、
+  // 上限与错误码前缀。只读算 sha256/字节，不写文件；Blender 构建时仍逐字节复验。
+  app.post('/api/model3d/texture/inspect', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const result = await inspectTextureAsset({
+      workspaceRoot: auth.project.workspace_path,
+      relativePath: req.body?.path,
+    });
+    if (!result.ok) {
+      return res.status(assetErrorStatus(result.error, 'texture')).json(result);
     }
     return res.json(result);
   });

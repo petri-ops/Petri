@@ -203,6 +203,7 @@
         "test/block322-p2-lighting.test.mjs",
         "test/block322-p3-geometry.test.mjs",
         "test/block322-p3-constraints.test.mjs",
+        "test/block322-p2-03-material.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts"
       ],

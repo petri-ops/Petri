@@ -20,7 +20,6 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const os = require('node:os');
-const zlib = require('node:zlib');
 const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
@@ -64,71 +63,6 @@ async function poll(fn, { timeoutMs, intervalMs = 500, label }) {
 }
 
 /** 纯 Node 解 8bit 非隔行 PNG 的平均亮度（Blender 与 WebGL toDataURL 都是这一形制）。 */
-function pngMeanLuminance(buffer) {
-  if (buffer.readUInt32BE(0) !== 0x89504e47) throw new Error('not_png');
-  let offset = 8;
-  let width = 0;
-  let height = 0;
-  let bitDepth = 0;
-  let colorType = 0;
-  const idat = [];
-  while (offset < buffer.length) {
-    const length = buffer.readUInt32BE(offset);
-    const type = buffer.toString('ascii', offset + 4, offset + 8);
-    const data = buffer.subarray(offset + 8, offset + 8 + length);
-    if (type === 'IHDR') {
-      width = data.readUInt32BE(0);
-      height = data.readUInt32BE(4);
-      bitDepth = data[8];
-      colorType = data[9];
-      if (data[12] !== 0) throw new Error('interlaced_unsupported');
-    } else if (type === 'IDAT') idat.push(data);
-    else if (type === 'IEND') break;
-    offset += 12 + length;
-  }
-  if (bitDepth !== 8 || ![0, 2, 4, 6].includes(colorType)) throw new Error(`unsupported_png_depth_or_color(depth=${bitDepth},color=${colorType})`);
-  const channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[colorType];
-  const raw = zlib.inflateSync(Buffer.concat(idat));
-  const stride = width * channels;
-  const out = Buffer.alloc(height * stride);
-  let previous = Buffer.alloc(stride);
-  let cursor = 0;
-  for (let y = 0; y < height; y += 1) {
-    const filter = raw[cursor];
-    cursor += 1;
-    const line = Buffer.from(raw.subarray(cursor, cursor + stride));
-    cursor += stride;
-    for (let x = 0; x < stride; x += 1) {
-      const left = x >= channels ? line[x - channels] : 0;
-      const up = previous[x];
-      const upLeft = x >= channels ? previous[x - channels] : 0;
-      let value = line[x];
-      if (filter === 1) value = (value + left) & 0xff;
-      else if (filter === 2) value = (value + up) & 0xff;
-      else if (filter === 3) value = (value + ((left + up) >> 1)) & 0xff;
-      else if (filter === 4) {
-        const p = left + up - upLeft;
-        const pa = Math.abs(p - left);
-        const pb = Math.abs(p - up);
-        const pc = Math.abs(p - upLeft);
-        const predictor = (pa <= pb && pa <= pc) ? left : (pb <= pc ? up : upLeft);
-        value = (value + predictor) & 0xff;
-      }
-      line[x] = value;
-    }
-    line.copy(out, y * stride);
-    previous = line;
-  }
-  let sum = 0;
-  let samples = 0;
-  for (let i = 0; i < out.length; i += channels) {
-    if (channels === 1) { sum += out[i]; samples += 1; continue; }
-    sum += 0.2126 * out[i] + 0.7152 * out[i + 1] + 0.0722 * out[i + 2];
-    samples += 1;
-  }
-  return { mean: samples ? sum / samples : 0, width, height, samples };
-}
-
 function boxScene(extra = {}) {
   return {
     version: 'scene3d/v1',
@@ -234,8 +168,8 @@ async function run(ctx) {
     const litPath = litReport.renders?.camera;
     assert('C4_both_renders_exist', Boolean(darkPath) && fs.existsSync(darkPath) && Boolean(litPath) && fs.existsSync(litPath),
       JSON.stringify({ darkPath: Boolean(darkPath), litPath: Boolean(litPath) }));
-    const darkLum = pngMeanLuminance(fs.readFileSync(darkPath));
-    const litLum = pngMeanLuminance(fs.readFileSync(litPath));
+    const darkLum = lib.pngPixelStats(fs.readFileSync(darkPath));
+    const litLum = lib.pngPixelStats(fs.readFileSync(litPath));
     assert('C5_sun_energy_raises_luminance', darkLum.mean < 8 && litLum.mean > darkLum.mean * 2,
       JSON.stringify({ darkMean: +darkLum.mean.toFixed(2), litMean: +litLum.mean.toFixed(2), size: litLum.width }));
     detail.luminance = {

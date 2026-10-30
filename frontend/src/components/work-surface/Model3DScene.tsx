@@ -410,8 +410,40 @@ export function Model3DScene({
       const material = new THREE.MeshStandardMaterial({
         color: colorHex(node.material?.color),
         roughness: node.material?.roughness ?? 0.65,
-        metalness: 0.05,
+        // BLOCK-322 P2-03 — 未声明 metallic 时保持 0.05 的存量观感；声明后按 SceneSpec 值走。
+        metalness: node.material?.metallic ?? 0.05,
       });
+      if (node.material?.emissive) {
+        material.emissive = new THREE.Color(hexColor(node.material.emissive, 0x000000));
+      }
+      const textureSpec = node.material?.baseColorTexture;
+      const texturePath = textureSpec?.path;
+      if (texturePath) {
+        if (!projectId) {
+          fail(`texture_reference_unavailable:${node.id} 需要已打开的项目工作区才能从工作区文件加载贴图。`);
+        } else {
+          pending.push(new Promise<void>((done) => {
+            new THREE.TextureLoader().load(
+              workspaceFileUrlFor(projectId, texturePath),
+              (texture) => {
+                if (cancelled) {
+                  texture.dispose();
+                } else {
+                  texture.colorSpace = THREE.SRGBColorSpace;
+                  material.map = texture;
+                  material.needsUpdate = true;
+                }
+                done();
+              },
+              undefined,
+              () => {
+                fail(`texture_reference_load_failed:${node.id}（${texturePath}）`);
+                done();
+              },
+            );
+          }));
+        }
+      }
       const mesh = new THREE.Mesh(geometry, material);
       if (node.type === 'cylinder') mesh.rotation.x = Math.PI / 2;
       const transform = node.transform || {};

@@ -34,7 +34,52 @@ def srgb_to_linear(value):
     return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
 
 
-def material_for(spec):
+def set_bsdf_input(bsdf, names, value):
+    """按候选属性名设置 Principled 输入。
+
+    Blender 小版本会改输入名（实测布尔的 solver/solver_mode 同名漂移），设错名字是**静默无效**
+    而非报错——因此按候选名探测，探不到就不假装生效。
+    """
+    for name in names:
+        if name in bsdf.inputs:
+            bsdf.inputs[name].default_value = value
+            return True
+    return False
+
+
+def apply_base_color_texture(mat, bsdf, texture, root):
+    """基础色贴图：工作区相对路径 + 逐字节 sha256 复验，再挂 Image Texture → Base Color。
+
+    路径守卫复用 resolve_mesh_path（同一份工作区逃逸检查，不另写第二套；因此逃逸错误沿用
+    mesh_ 前缀）。缺失/越界/篡改一律显式抛错，由 main() 落进 unsupported[]——「贴图没生效但
+    渲染照常出图」正是要防的静默失真（红线 3 + 红线 4）。
+    """
+    relative_path = str(texture.get('path') or '')
+    expected = str(texture.get('sourceSha256') or '').lower()
+    if not root:
+        raise ValueError('texture_root_required')
+    if not expected:
+        raise ValueError('texture_source_hash_required')
+    full = resolve_mesh_path(root, relative_path)
+    if os.path.splitext(full)[1].lower() not in TEXTURE_EXTENSIONS:
+        raise ValueError('texture_format_unsupported')
+    if not os.path.isfile(full):
+        raise ValueError('texture_not_found')
+    if os.path.getsize(full) > MAX_TEXTURE_BYTES:
+        raise ValueError('texture_too_large')
+    if sha256_file(full) != expected:
+        raise ValueError('texture_source_hash_mismatch')
+    image = bpy.data.images.load(full)
+    image.colorspace_settings.name = 'sRGB'
+    tree = mat.node_tree
+    texture_node = tree.nodes.new(type='ShaderNodeTexImage')
+    texture_node.image = image
+    texture_node.location = (-420, 300)
+    tree.links.new(texture_node.outputs['Color'], bsdf.inputs['Base Color'])
+    return image
+
+
+def material_for(spec, root=''):
     color = (spec or {}).get('color', '#8899aa')
     rgba = tuple(srgb_to_linear(int(color[i:i + 2], 16) / 255.0) for i in (1, 3, 5)) + (1.0,)
     mat = bpy.data.materials.new(name=f"mat-{color}")
@@ -44,6 +89,14 @@ def material_for(spec):
     if bsdf:
         bsdf.inputs['Base Color'].default_value = rgba
         bsdf.inputs['Roughness'].default_value = float((spec or {}).get('roughness', 0.7))
+        # BLOCK-322 P2-03 — PBR 扩展：未声明的字段保持 Blender 默认，不顺手改存量外观。
+        if (spec or {}).get('metallic') is not None:
+            set_bsdf_input(bsdf, ('Metallic',), float(spec['metallic']))
+        if (spec or {}).get('emissive'):
+            set_bsdf_input(bsdf, ('Emission Color', 'Emission'), hex_to_rgbaf(spec['emissive']))
+            set_bsdf_input(bsdf, ('Emission Strength',), 1.0)
+        if (spec or {}).get('baseColorTexture'):
+            apply_base_color_texture(mat, bsdf, spec['baseColorTexture'], root)
     return mat
 
 
@@ -69,7 +122,7 @@ def bake_scale(obj, dimensions):
     obj.scale = (1.0, 1.0, 1.0)
 
 
-def add_node(node):
+def add_node(node, root=''):
     dimensions = node.get('dimensions') or {}
     kind = node.get('type')
     if kind == 'box':
@@ -96,13 +149,16 @@ def add_node(node):
         raise ValueError(f'unsupported_node_type:{kind}')
     obj.name = node.get('id') or kind
     obj.data.name = f"{obj.name}-mesh"
-    obj.data.materials.append(material_for(node.get('material')))
+    obj.data.materials.append(material_for(node.get('material'), root))
     apply_transform(obj, node)
     return obj
 
 
 MAX_MESH_BYTES = 64 * 1024 * 1024
 MESH_EXTENSIONS = {'.stl', '.obj', '.glb', '.gltf'}
+# BLOCK-322 P2-03 — 基础色贴图白名单与上限（与 core/petri-server/helpers/mesh-assets.js 逐值对账）。
+MAX_TEXTURE_BYTES = 16 * 1024 * 1024
+TEXTURE_EXTENSIONS = {'.png', '.jpg', '.jpeg'}
 
 
 def sha256_file(path):
@@ -454,16 +510,45 @@ def hex_to_rgbaf(value, fallback=(1.0, 1.0, 1.0, 1.0)):
         return fallback
 
 
+def has_pbr_material(scene_spec):
+    """场景是否声明了 Workbench 不认的材质项（metallic/emissive/基础色贴图）。"""
+    for node in scene_spec.get('nodes') or []:
+        spec = (node or {}).get('material') or {}
+        if float(spec.get('metallic') or 0) > 0 or spec.get('emissive') or spec.get('baseColorTexture'):
+            return True
+    return False
+
+
+def materials_report(scene_spec):
+    """回显声明的 PBR 材质项：报告里能看到「哪个节点声明了什么」，与像素对照可复核。"""
+    rows = []
+    for node in scene_spec.get('nodes') or []:
+        spec = (node or {}).get('material') or {}
+        if spec.get('metallic') is None and not spec.get('emissive') and not spec.get('baseColorTexture'):
+            continue
+        texture = spec.get('baseColorTexture') or {}
+        rows.append({
+            'id': node.get('id'),
+            'metallic': float(spec.get('metallic') or 0),
+            'emissive': spec.get('emissive') or None,
+            'baseColorTexture': texture.get('path') or None,
+        })
+    return rows
+
+
 def configure_display(scene_spec):
-    """引擎与着色策略（BLOCK-322 P2-02）。
+    """引擎与着色策略（BLOCK-322 P2-02 / P2-03）。
 
     实测：Blender 4.5.10 无头 CYCLES(CPU) 640×480/8 采样 0.61s 可用；BLENDER_EEVEE_NEXT
-    无头走软件回退，同场景 13.34s 不可用。故只在场景**声明**灯光/环境时才切 CYCLES，
+    无头走软件回退，同场景 13.34s 不可用。故只在场景**声明**灯光/环境/PBR 材质时才切 CYCLES，
     未声明仍是 WORKBENCH——既让灯真的起作用，也不给存量场景加时延。
+    P2-03 同一条理由扩到材质：Workbench 的 MATERIAL 着色只看基础色，metallic/emissive/贴图
+    在它下面完全不生效，若不同步切引擎就是「加了贴图但图上看不见」的第二类静默失真。
     """
     environment = scene_spec.get('environment')
     lights = scene_spec.get('lights') or []
-    declared = bool(environment) or bool(lights)
+    declared_material = has_pbr_material(scene_spec)
+    declared = bool(environment) or bool(lights) or declared_material
     requested = str((environment or {}).get('engine') or ('cycles' if declared else 'workbench')).lower()
     scene = bpy.context.scene
     if requested == 'cycles':
@@ -480,6 +565,7 @@ def configure_display(scene_spec):
     return {
         'engine': scene.render.engine,
         'declaredLighting': declared,
+        'declaredMaterial': declared_material,
         'requestedEngine': requested,
         'samples': int(scene.cycles.samples) if scene.render.engine == 'CYCLES' else None,
         'device': 'CPU' if scene.render.engine == 'CYCLES' else None,
@@ -609,7 +695,7 @@ def main():
             if node.get('type') == 'mesh-reference':
                 built = import_mesh_reference(node, args.root)
             else:
-                obj = add_node(node)
+                obj = add_node(node, args.root)
                 built = [obj] if obj is not None else []
             if built:
                 objects.extend(built)
@@ -647,6 +733,7 @@ def main():
         'environment': environment_echo,
         'lights': {'created': lights_created, 'errors': light_errors},
         'geometry': {**geometry, 'errors': geometry_errors},
+        'materials': {'declared': materials_report(scene)},
         'mesh': mesh_report(objects),
         'camera': {
             'declared': isinstance(scene.get('camera'), dict),
