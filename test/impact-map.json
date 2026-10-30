@@ -6539,7 +6539,7 @@
     {
       "id": "block321c-center-priority",
       "classifiesScripts": true,
-      "note": "BLOCK-321c UI-629 中栏优先宽度模型：保底 560→760（迟滞 840）+gap40 计入+非哨兵侧先收让位（哨兵不再放任中栏被挤穿）+左右把手拖宽钳制（clamp.max 消费）；纯函数 16/16+静态契约 3/3+实机 3/3。",
+      "note": "BLOCK-321c UI-629 中栏优先宽度模型：保底 560→760（迟滞 840）+gap40 计入+非哨兵侧先收让位（哨兵不再放任中栏被挤穿）+左右把手拖宽钳制（clamp.max 消费）；纯函数 16/16+静态契约 3/3+实机 3/3。 2026-10-30 修订：用户裁决中栏保底 760→420（手机宽度），证据 acceptance/ui-629-center-width/。",
       "patterns": [
         "scripts/block321c-center-priority-live.cjs",
         "scripts/block321c-resize-window.ps1",
@@ -6551,7 +6551,8 @@
         "frontend/src/components/desktop/AppRail.tsx",
         "frontend/src/components/desktop/AppRailContext.tsx",
         "frontend/src/pages/project-workspace.tsx",
-        "acceptance/block-321c/**"
+        "acceptance/block-321c/**",
+        "acceptance/ui-629-center-width/**"
       ],
       "tests": [
         "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",

@@ -5,7 +5,7 @@
  * 手动优先（manual-open-narrow 哨兵）。
  *
  * UI-629（BLOCK-321c，2026-10-29 用户裁决「固定中间栏宽度，除非手动调整」）：
- *   ① 中栏保底 560→760（迟滞还原 640→840）；
+ *   ① 中栏保底 560→760→420（2026-10-30 修订；迟滞还原 640→840→500）；
  *   ② gap 计入计算（.workspaceSessionLayout 两侧 gap 共 40px，原计算漏掉）；
  *   ③ 让位规则：一侧挂手动哨兵、另一侧可让 → 收**非哨兵侧**（右先 tie-break），
  *      不再因哨兵放任中栏被挤穿；两侧都哨兵 → 尊重用户显式选择。
@@ -30,7 +30,7 @@ function setViewport(px: number) {
 }
 
 describe('deriveResponsivePanels（纯函数）', () => {
-  it('宽裕时零动作（1400 双栏默认：中栏 780 ≥760）', () => {
+  it('宽裕时零动作（1400 双栏默认：中栏 780 ≥420）', () => {
     const out = deriveResponsivePanels(
       { viewportWidth: 1400, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
       NO_FLAGS,
@@ -59,10 +59,10 @@ describe('deriveResponsivePanels（纯函数）', () => {
     expect(out.leftOpen).toBe(true);
   });
 
-  it('中栏可用宽不足 → 先收右栏（viewport），够用即止（UI-629：1200−580−40=580<760）', () => {
-    // 1200 − 240 − 340 − 40(gap) = 580 < 760 → 收右；收后 920 ≥760 → 左保留
+  it('中栏可用宽不足 → 先收右栏（viewport），够用即止（1000−580−40=380<420）', () => {
+    // 1000 − 240 − 340 − 40(gap) = 380 < 420 → 收右；收后 720 ≥420 → 左保留
     const out = deriveResponsivePanels(
-      { viewportWidth: 1200, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
+      { viewportWidth: 1000, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
       NO_FLAGS,
     );
     expect(out.rightOpen).toBe(false);
@@ -70,9 +70,9 @@ describe('deriveResponsivePanels（纯函数）', () => {
     expect(out.leftOpen).toBe(true);
   });
 
-  it('UI-629 gap 计入：旧算法 1140 双栏恰 560 不收，新算法 520 <760 收右', () => {
+  it('UI-629 gap 计入：不计 gap 450 ≥420 不收，计 gap 410 <420 收右（1030）', () => {
     const out = deriveResponsivePanels(
-      { viewportWidth: 1140, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
+      { viewportWidth: 1030, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
       NO_FLAGS,
     );
     expect(out.rightOpen).toBe(false);
@@ -80,9 +80,9 @@ describe('deriveResponsivePanels（纯函数）', () => {
   });
 
   it('右栏收后仍不足 → 左栏也收', () => {
-    // 1000 − 500 − 500 − 40 = −40 → 收右后 460 仍 <760 → 左也收
+    // 1000 − 560 − 500 − 40 = −100 → 收右后 400 仍 <420 → 左也收
     const out = deriveResponsivePanels(
-      { viewportWidth: 1000, leftOpen: true, leftWidth: 500, rightOpen: true, rightWidth: 500 },
+      { viewportWidth: 1000, leftOpen: true, leftWidth: 560, rightOpen: true, rightWidth: 500 },
       NO_FLAGS,
     );
     expect(out.rightOpen).toBe(false);
@@ -132,7 +132,7 @@ describe('deriveResponsivePanels（纯函数）', () => {
     expect(out.leftOpen).toBe(true);
   });
 
-  it('宽裕到两侧都放得下 → manual-open-narrow 旗清理（≥840；1500 双栏 880）', () => {
+  it('宽裕到两侧都放得下 → manual-open-narrow 旗清理（≥500；1500 双栏 880）', () => {
     const flags: ResponsivePanelFlags = { left: null, right: 'manual-open-narrow' };
     const out = deriveResponsivePanels(
       { viewportWidth: 1500, leftOpen: true, leftWidth: 240, rightOpen: true, rightWidth: 340 },
@@ -142,22 +142,22 @@ describe('deriveResponsivePanels（纯函数）', () => {
     expect(out.rightOpen).toBe(true);
   });
 
-  it('迟滞带内（760≤中栏<840）冻结：不新收也不还原', () => {
+  it('迟滞带内（420≤中栏<500）冻结：不新收也不还原', () => {
     const flags: ResponsivePanelFlags = { left: 'viewport', right: null };
-    // 左收、右开 340：中栏 = vw−340−40；vw 1200 → 820 ∈ [760,840) → 冻结
-    const out = deriveResponsivePanels({ viewportWidth: 1200, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 340 }, flags);
+    // 左收、右开 500：中栏 = vw−500−40；vw 1000 → 460 ∈ [420,500) → 冻结
+    const out = deriveResponsivePanels({ viewportWidth: 1000, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 500 }, flags);
     expect(out.leftOpen).toBe(false);
     expect(out.flags).toEqual(flags);
   });
 
-  it('还原带迟滞：还原后 <840 不还原，≥840 才还原', () => {
+  it('还原带迟滞：还原后 <500 不还原，≥500 才还原', () => {
     const flags: ResponsivePanelFlags = { left: 'viewport', right: null };
-    // vw 1440：当前中栏 1060 ≥760 不收；还原左后 820 <840 → 不还原
+    // vw 1100：当前中栏 720 ≥420 不收；还原左后 480 <500 → 不还原
     expect(
-      deriveResponsivePanels({ viewportWidth: 1440, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 340 }, flags).leftOpen,
+      deriveResponsivePanels({ viewportWidth: 1100, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 340 }, flags).leftOpen,
     ).toBe(false);
-    // vw 1500 → 还原左后 880 ≥840 → 还原并清旗
-    const restored = deriveResponsivePanels({ viewportWidth: 1500, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 340 }, flags);
+    // vw 1140 → 还原左后 520 ≥500 → 还原并清旗
+    const restored = deriveResponsivePanels({ viewportWidth: 1140, leftOpen: false, leftWidth: 240, rightOpen: true, rightWidth: 340 }, flags);
     expect(restored.leftOpen).toBe(true);
     expect(restored.flags.left).toBeNull();
   });
@@ -224,18 +224,18 @@ describe('useResponsivePanelCollapse（hook 行为）', () => {
 
   it('窗口缩到中栏不足 → 右栏自动收起；手动重开后右保留、左栏让位收起；宽到双栏放得下后全部还原', () => {
     const rig = setup({ vw: 1500, leftWidth: 240, rightWidth: 340 });
-    // 缩窗：1500 → 1100（中栏 480 <760）→ 右收（收后 820 ≥760，左保留）
-    act(() => rig.rerenderWith(1100));
+    // 缩窗：1500 → 1000（中栏 380 <420）→ 右收（收后 720 ≥420，左保留）
+    act(() => rig.rerenderWith(1000));
     expect(rig.panels.rightOpen).toBe(false);
     expect(rig.panels.leftOpen).toBe(true);
     // 用户在窄窗手动重开右栏（挂 manual 哨兵）
     act(() => rig.rig.setRightOpen(true));
     expect(rig.panels.rightOpen).toBe(true);
     // 仍是窄窗：右哨兵不压回；中栏不足 → 左栏让位收起（UI-629）
-    act(() => rig.rerenderWith(1100));
+    act(() => rig.rerenderWith(1000));
     expect(rig.panels.rightOpen).toBe(true);
     expect(rig.panels.leftOpen).toBe(false);
-    // 变宽：迟滞带上沿 840 后先还原左；两侧都放得下 → 右哨兵清理保持打开
+    // 变宽：迟滞带上沿 500 后先还原左；两侧都放得下 → 右哨兵清理保持打开
     act(() => rig.rerenderWith(1500));
     expect(rig.panels.rightOpen).toBe(true);
     expect(rig.panels.leftOpen).toBe(true);
@@ -257,9 +257,9 @@ describe('useResponsivePanelCollapse（hook 行为）', () => {
 
   it('视口收起后变宽 → 自动还原', () => {
     const rig = setup({ vw: 1400, leftWidth: 240, rightWidth: 340 });
-    act(() => rig.rerenderWith(1000)); // 右收（中栏 380<760）
+    act(() => rig.rerenderWith(1000)); // 右收（中栏 380<420）
     expect(rig.panels.rightOpen).toBe(false);
-    act(() => rig.rerenderWith(1500)); // 还原右后中栏 880 ≥840
+    act(() => rig.rerenderWith(1500)); // 还原右后中栏 880 ≥500
     expect(rig.panels.rightOpen).toBe(true);
     expect(rig.panels.leftOpen).toBe(true);
   });

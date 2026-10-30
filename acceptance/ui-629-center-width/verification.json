@@ -1,0 +1,18 @@
+{
+  "flow": "ui-629-center-width",
+  "date": "2026-10-30",
+  "decision": "用户裁决：中间栏固定宽度太宽、影响左右内容延伸 → 收窄到手机屏幕宽度（420）",
+  "change": {
+    "CENTER_SPACE_COLLAPSE_BELOW": "760 → 420",
+    "CENTER_SPACE_RESTORE_ABOVE": "840 → 500",
+    "reserveEffect": "左右栏拖宽上限 = 视口 − 对侧宽 − gap(40) − 420"
+  },
+  "tests": "useResponsivePanelCollapse.test.tsx 17/17（阈值/迟滞/让位/hook 全量重算）",
+  "live": {
+    "instance": "9223 离屏（1600 CSS 宽）",
+    "before": { "left": 240, "center": 1018, "right": 340, "chatCard": 860 },
+    "afterDragRightPlus420": { "left": 240, "center": 598, "right": 760, "chatCard": 558 },
+    "atFloorMaxDrag": { "left": 240, "center": 458, "right": 900, "chatCard": 418, "note": "右栏撞新钳制 900（旧钳制 560）；聊天卡片 418px ≈ 手机宽度" }
+  },
+  "screenshots": ["center-phone-width.png", "center-at-floor.png"]
+}
