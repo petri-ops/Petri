@@ -1,0 +1,18 @@
+{
+  "schema": "rw06-reliability-baseline/v1",
+  "recordedAt": "2026-10-30",
+  "principle": "先记录真实基线，不预设通过阈值（plan §3.6 纪律）",
+  "baselines": [
+    { "item": "3D 链 dryRun", "value": "0ms", "source": "acceptance/next-06-convergence/golden-path.json metrics" },
+    { "item": "3D 链 构建+渲染+导出", "value": "1578ms（重渲染 1399ms）", "source": "同上" },
+    { "item": "3D 首次可预览", "value": "true（WebGL 丢失刷新恢复 5/5）", "source": "同上 resilience" },
+    { "item": "ui:audit 门耗时", "value": "0.50s（优化后新基线；前值 54.92s）", "source": "acceptance/rw-06-hygiene/ui-audit-baseline.json" },
+    { "item": "test-affected 套件", "value": "8.97s（memoization 后基线；前值 solo 864s）", "source": "本轮实测" },
+    { "item": "RW-01 3D 集成链", "value": "18/18（REST 导出→登记→历史→血缘→文件服务→stacking→restore→diff）", "source": "acceptance/rw-01-3d-revision/" },
+    { "item": "RW-02 写桥链", "value": "9/9（声明透传/selection/annotations/restore 全链）", "source": "acceptance/rw-02-pack-write-bridge/" }
+  ],
+  "notMeasuredThisRound": [
+    { "item": "长会话 soak（>200 轮）", "reason": "需真实长会话运行时；台账既有 soak 项保持 b 档条件注记" },
+    { "item": "内存/慢后端/模型超时基线", "reason": "同上——有真实触发场景再采，不伪造负载" }
+  ]
+}

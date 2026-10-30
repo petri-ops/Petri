@@ -1,0 +1,26 @@
+{
+  "schema": "rw06-engineering-debts/v1",
+  "measuredAt": "2026-10-30",
+  "debts": [
+    {
+      "id": "ui-audit-gate-time",
+      "before": "54.92s (macOS 实测本轮；~144s 旧值出自 Windows 侧)",
+      "after": "0.50s (109×；batchCommitMetadata 单次 git log 替代 ~1700 次 per-commit fork)",
+      "status": "fixed-rw06",
+      "commit": "本轮 B1"
+    },
+    {
+      "id": "vitest-channel-prevention-test",
+      "before": "864s (solo，59 探针 × 全量 validateMap ~2s/次)",
+      "after": "8.97s (block274 WeakMap memoization 已根修在库；本轮实测复验)",
+      "status": "fixed-block274-verified"
+    },
+    {
+      "id": "bash-tar-path",
+      "before": "Windows 侧：bash 解析到 WSL launcher → fs 测试整类误红；规避=Git Bash 前置 PATH",
+      "after": "本机 macOS 不适用（bash=/bin/zsh 真 shell、tar=bsdtar 3.5.3 与仓库用法兼容，实测核对）",
+      "status": "windows-only-delegated",
+      "note": "根治动作（改 Windows 系统 PATH 顺序）属 Windows 侧会话；登记保留待 Windows 侧执行，不在本 Mac 会话冒进"
+    }
+  ]
+}

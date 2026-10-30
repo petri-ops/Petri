@@ -1013,6 +1013,24 @@ const UI_AUDIT_HOOKS_WHITELIST = Object.freeze({
   ]),
 })
 
+// RW-06 B1 — 批量 commit 元数据：单次 `git log` 拿全量（hash/文件/消息），替代
+// 每 commit 2-3 次 spawn（570+ 提交 → ~1700 次 fork 是 ui-audit 门 55-144s 的主因）。
+function batchCommitMetadata(baseRef) {
+  const raw = git(['log', '--reverse', '--format=%H%x00%B%x00', '--name-only', `${baseRef}..HEAD`])
+  const commits = []
+  for (const block of raw.split('\u0000\n')) {
+    const trimmed = block.replace(/^\n+/, '')
+    if (!trimmed.trim()) continue
+    const parts = trimmed.split('\u0000')
+    if (parts.length < 2) continue
+    const hash = parts[0].trim()
+    const message = parts[1] ?? ''
+    const files = lines(parts.slice(2).join('\n').trim())
+    commits.push({ commit: hash, message, files })
+  }
+  return commits
+}
+
 function git(args, options = {}) {
   return execFileSync('git', args, {
     cwd: process.cwd(),
@@ -1190,11 +1208,9 @@ async function runUiAuditAsync(options = {}) {
 
   const extras = []
   if (baselineIsAvailable()) {
-    const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
-    for (const commit of commits) {
-      const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
+    for (const entry of batchCommitMetadata(ENFORCEMENT_BASELINE)) {
+      const { commit, message, files } = entry
       if (!files.some(isUiSurface)) continue
-      const message = git(['show', '-s', '--format=%s%n%b', commit])
       const subject = message.split('\n', 1)[0] ?? ''
       if (isChoreCommit(subject)) continue
       const failure = detectUnmappedSurface({
@@ -1235,13 +1251,10 @@ function runUiAudit() {
   const structuredFailures = []
 
   if (baselineIsAvailable()) {
-    const commits = lines(git(['rev-list', '--reverse', `${ENFORCEMENT_BASELINE}..HEAD`]))
-
-    for (const commit of commits) {
-      const files = lines(git(['diff-tree', '--no-commit-id', '--name-only', '-r', commit]))
+    for (const entry of batchCommitMetadata(ENFORCEMENT_BASELINE)) {
+      const { commit, message, files } = entry
       if (!files.some(isUiSurface)) continue
 
-      const message = git(['show', '-s', '--format=%s%n%b', commit])
       const subject = message.split('\n', 1)[0] ?? ''
       const shortCommit = commit.slice(0, 7)
 

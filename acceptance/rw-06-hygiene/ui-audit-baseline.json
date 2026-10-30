@@ -1,0 +1,10 @@
+{
+  "schema": "rw06-gate-baseline/v1",
+  "gate": "ui:audit:check",
+  "before": { "seconds": 54.92, "method": "per-commit forks (rev-list + diff-tree + show × ~570 commits ≈ 1700 forks)" },
+  "after": { "seconds": 0.50, "method": "single git log batch (batchCommitMetadata, 1 fork)" },
+  "speedup": "109×",
+  "equivalence": "门禁结果一致（PASS，571 个带实现证据的 UI 编号）；merge commit 行为对照=diff-tree 与 log --name-only 均空输出（等价）",
+  "measuredAt": "2026-10-30",
+  "note": "本机 macOS 实测；~144s 旧值出自 Windows 侧（fork 更贵），优化原理相同"
+}
