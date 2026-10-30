@@ -8465,7 +8465,7 @@
       "capability": "rw-02-ui-evidence-pack-write-bridge",
       "path": "docs/rw-02-ui-evidence-pack-write-bridge-plan.md",
       "kind": "living-plan",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "rw-02-ui-evidence-pack-write-bridge",
       "entrypoint": "docs/README.md",
@@ -8479,7 +8479,7 @@
         "approval",
         "G0"
       ],
-      "notes": "RW 第二包：71 条 UI in_progress 四档分诊清偿（CDP 代行/条件腿/人眼集中清单/判销改判）+ C-44 pack iframe 写桥（selection/revisions/annotations/export 白名单+快照+审批过期+回退，沿用既有审批通道）；证据 acceptance/rw-02-*/。"
+      "notes": "RW 第二包 completed（2026-10-30）：B 线 C-44 写桥全链（实机 9/9）+ A 线 62 条四档全处置（a 档 9 verified+638 发现腿+d28+b18+c6 清单）；UI-639 in_progress（iframe 端到端随 UI-532）。"
     }
   ],
   "lastUpdated": "2026-10-30",

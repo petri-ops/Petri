@@ -5,7 +5,7 @@ acceptance:
   - 方向级验收 = 按执行纲 docs/remaining-work-execution-plan.md §3.2 执行；本 plan 是其立项展开。
   - 门禁级验收 = §5 门禁清单收口逐项对账（分诊表落 backlog/台账 + 每条四档处置留痕 + 可翻账条目翻 verified + 写面各一条真实写链 + 审批过期/权限拒绝/恢复）。
   - 证据级验收 = 翻 verified 只认仓内可核产物；人眼档（c）只产出测试路线与集中过目清单，确认必须出自人；不凑证据、不伪造实机断言。
-status: active
+status: completed
 ---
 
 # RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE 执行计划
