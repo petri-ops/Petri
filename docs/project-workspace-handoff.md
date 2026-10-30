@@ -7,7 +7,7 @@
 
 最后更新：2026-10-30（**剩余工作执行规划入册（治理批）；无 active**）
 
-**恢复要点（换会话/换模型必读·本段取代下方全部「恢复要点」段）**：蓝图八包已全部收口（NEXT-02A/01/03/04A/04B/05/02B/06，UI-631~637，证据 `acceptance/next-0*/`）。**当前唯一方向与执行 canonical=[`docs/remaining-work-execution-plan.md`](./remaining-work-execution-plan.md) §2/§3**：RW-01 3D Artifact Revision 接入成果面（Jev 0.68）→ RW-02 UI 证据债分诊清偿+C-44 pack 写桥 → RW-03 C-32 治理 → RW-04 台账对账 → RW-05 harness 地基 → RW-06 可靠性/soak+工程卫生+独立重放复盘，六包 planned、单工作包串行、逐包待用户发令；条件触发/用户事项见该文件 §4/§5（vision 凭据、R 运行时已裁决暂缓、UI-501/503/504/457 过目）。Blender 4.5.10 LTS 已装（可选后端）。关键边界：真实 vision Provider、packaged/GA、Provider 矩阵属 G1+；G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（superseded·已由 2026-10-30 BLOCK-322 段取代，不得据此恢复）**：蓝图八包已全部收口（NEXT-02A/01/03/04A/04B/05/02B/06，UI-631~637，证据 `acceptance/next-0*/`）。**当前唯一方向与执行 canonical=[`docs/remaining-work-execution-plan.md`](./remaining-work-execution-plan.md) §2/§3**：RW-01 3D Artifact Revision 接入成果面（Jev 0.68）→ RW-02 UI 证据债分诊清偿+C-44 pack 写桥 → RW-03 C-32 治理 → RW-04 台账对账 → RW-05 harness 地基 → RW-06 可靠性/soak+工程卫生+独立重放复盘，六包 planned、单工作包串行、逐包待用户发令；条件触发/用户事项见该文件 §4/§5（vision 凭据、R 运行时已裁决暂缓、UI-501/503/504/457 过目）。Blender 4.5.10 LTS 已装（可选后端）。关键边界：真实 vision Provider、packaged/GA、Provider 矩阵属 G1+；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 最后更新：2026-10-30（**NEXT-06 completed；八包全部收口，无 active**）
 
