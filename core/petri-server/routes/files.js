@@ -68,6 +68,10 @@ function contentTypeFor(filePath) {
     '.gltf': 'model/gltf+json',
     '.stl': 'model/stl',
     '.obj': 'model/obj',
+    // BLOCK-322 P2-05：转盘视频要在结果面 <video> 里播。Content-Type 属媒体契约的一部分——
+    // 缺这两行时文件字节完好、路径也对，Chromium 仍会拒绝解码（表现为「播放器黑屏」的静默失真）。
+    '.mp4': 'video/mp4',
+    '.webm': 'video/webm',
   }[ext] || 'application/octet-stream';
 }
 

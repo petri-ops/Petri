@@ -1,0 +1,63 @@
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* 与 Model3DResultViewer 同口径：viewer 随面板高度，不自定高（UI-638 教训）。 */
+  height: 100%;
+  min-height: 0;
+}
+
+.frame {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 8px;
+  background: var(--petri-bg-elevated);
+}
+
+.note {
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+}
+
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+  border: 1px solid var(--petri-border-card);
+  border-radius: 8px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats {
+  flex-shrink: 0;
+}
+
+.hint {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0.75;
+}

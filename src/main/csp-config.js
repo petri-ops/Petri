@@ -26,6 +26,11 @@ function buildCspHeader(isDevMode) {
     // NEXT-05 — Three.js 文件加载器（GLB/STL/OBJ）经 fetch(blob:) 读本地文件预览；
     // blob: 仅由渲染进程自建，connect-src 放行不回扩网络面。
     "connect-src 'self' blob: " + localNet + "; " +
+    // BLOCK-322 P2-05 — 视频产物（转盘 mp4/webm）经 fetch→blob: 交给 <video>：与 GLB/STL/OBJ
+    // 预览同一形态。直连跨源的 media 会被 Chromium 的 URL safety check 拒（实测
+    // MEDIA_ELEMENT_ERROR: Media load rejected by URL safety check），而 blob: 由渲染进程自建、
+    // 不回扩网络面；不放 media-src 时它回落到 default-src 'self'，blob 源会被 CSP 挡下。
+    "media-src 'self' blob: ; " +
     "frame-src 'self' " + localNet + " " + GEN_UI_SCHEME + ": " + PACK_UI_SCHEME + ":; " +
     "font-src 'self' data: ; " +
     "worker-src 'self' blob: ; " +

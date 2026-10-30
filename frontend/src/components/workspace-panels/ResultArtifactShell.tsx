@@ -55,6 +55,7 @@ import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
 import { MarkdownResultViewer } from './MarkdownResultViewer';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
 import { Model3DResultViewer } from './Model3DResultViewer';
+import { VideoResultViewer } from './VideoResultViewer';
 // BLOCK-219 Q6 — 批注接线（身份推导/两个宿主/不可批注提示）外置，见同目录 resultAnnotation.tsx
 import {
   AnnotatedResultPdf,
@@ -862,6 +863,16 @@ export function ResultArtifactShell({
           artifactId={viewedRevision?.artifactId || selectedArtifact.name}
           revisionId={viewedRevision?.revisionId ?? null}
         />
+      );
+    }
+    // BLOCK-322 P2-05 — 视频产物内嵌播放（转盘 mp4 / webm）：档案 canExport=true，
+    // 故与 markdown/pdf 同构挂 ViewerExportAction 出口；解码失败由组件自身如实降级。
+    if (viewerAdapter === 'video' && selectedArtifactUrl) {
+      return (
+        <>
+          <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
+          <VideoResultViewer url={selectedArtifactUrl} name={selectedArtifactLabel || selectedArtifact.name} />
+        </>
       );
     }
     if (previewLoading && !previewText && !previewData) {

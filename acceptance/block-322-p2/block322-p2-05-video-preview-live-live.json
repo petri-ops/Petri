@@ -1,0 +1,58 @@
+{
+  "name": "block322-p2-05-video-preview-live",
+  "startedAt": "2026-10-30T17:22:30.159Z",
+  "finishedAt": "2026-10-30T17:22:36.454Z",
+  "assertions": [
+    {
+      "name": "X0_backend_healthy",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-10-30T17:22:30.167Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "X1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvv8ppcu_9mlk\"}"
+    },
+    {
+      "name": "X2_export_registered_with_video",
+      "pass": true,
+      "detail": "{\"registered\":true,\"toolJobId\":\"tj_mvv8pqml_6u7m\",\"video\":\"model3d/runs/m3d-mvv8pph2-i9lnxh/turntable0001-0006.mp4\"}"
+    },
+    {
+      "name": "X3_video_artifact_projected_with_url",
+      "pass": true,
+      "detail": "{\"names\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\",\"turntable0001-0006.mp4\"],\"url\":\"/api/workspaces/p_mvv8ppcu_9mlk/file?path=model3d%2Fruns%2Fm3d-mvv8pph2-i9lnxh%2Fturntable0001-0006.mp4\"}"
+    },
+    {
+      "name": "X4_served_as_video_mime",
+      "pass": true,
+      "detail": "{\"status\":200,\"contentType\":\"video/mp4\",\"bytes\":16650}"
+    },
+    {
+      "name": "X5_job_card_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "X6_video_artifact_selected",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "X7_video_viewer_mounted_no_autoplay",
+      "pass": true,
+      "detail": "{\"hasVideo\":true,\"controls\":true,\"autoplay\":false,\"preload\":\"metadata\",\"src\":\"blob:http://localhost:30\",\"docHidden\":false}"
+    },
+    {
+      "name": "X8_chromium_actually_decoded_the_media",
+      "pass": true,
+      "detail": "{\"readyState\":4,\"duration\":0.5,\"width\":800,\"height\":600}"
+    },
+    {
+      "name": "X9_readout_visible_and_no_failure_state",
+      "pass": true,
+      "detail": "{\"stateText\":\"\",\"meta\":\"turntable0001-0006.mp4时长 0.50s · 800×600序列帧与 mp4 由 Blender 内置 ffmpeg 产出；帧清单见导出报告的 frameAssets\"}"
+    }
+  ],
+  "allPass": true
+}

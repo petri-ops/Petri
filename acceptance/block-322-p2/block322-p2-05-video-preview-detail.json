@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-10-30T17:22:36.451Z",
+  "platform": "win32-x64",
+  "note": "播放判据=Chromium 解出 duration 与真实分辨率（800×600），不是 DOM 里存在 <video>",
+  "video": {
+    "name": "turntable0001-0006.mp4",
+    "url": "/api/workspaces/p_mvv8ppcu_9mlk/file?path=model3d%2Fruns%2Fm3d-mvv8pph2-i9lnxh%2Fturntable0001-0006.mp4",
+    "served": {
+      "status": 200,
+      "contentType": "video/mp4",
+      "bytes": 16650
+    },
+    "registered": {
+      "toolJobId": "tj_mvv8pqml_6u7m"
+    }
+  },
+  "playback": {
+    "found": true,
+    "hasVideo": true,
+    "src": "blob:http://localhost:3000/c25dc45c-9a23-49b1-bbde-c767dc3d2177",
+    "readyState": 4,
+    "networkState": 1,
+    "mediaError": null,
+    "canPlay": "probably",
+    "docHidden": false,
+    "duration": 0.5,
+    "width": 800,
+    "height": 600,
+    "autoplay": false,
+    "controls": true,
+    "preload": "metadata",
+    "stateText": "",
+    "metaText": "turntable0001-0006.mp4时长 0.50s · 800×600序列帧与 mp4 由 Blender 内置 ffmpeg 产出；帧清单见导出报告的 frameAssets"
+  }
+}

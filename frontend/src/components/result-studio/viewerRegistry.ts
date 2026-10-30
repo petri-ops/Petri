@@ -37,7 +37,8 @@ export type ResultViewerAdapter =
   | 'markdown'
   | 'spreadsheet'
   | 'pdf'
-  | 'model3d';
+  | 'model3d'
+  | 'video';
 
 /** 一次 viewer 解析的结果：adapter + 能力声明位。 */
 export interface ResolvedResultViewer {
@@ -72,6 +73,9 @@ const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'a
   // RW-01：3D 产物 artifact 级选择进选择总线（Composer 结构化引用）；比较/导出位如实 false
   // （网格级 diff 与原文出口不在本包范围）。
   model3d: { canSelect: true, canCompare: false, canExport: false },
+  // BLOCK-322 P2-05 — 视频：无文本选择语义（canSelect false）、无可比较对象（canCompare false）；
+  // 原文可导出成立（产物就是可下载可外发的 mp4/webm），故 canExport true 由 ViewerExportAction 消费。
+  video: { canSelect: false, canCompare: false, canExport: true },
 };
 
 /**
@@ -93,6 +97,10 @@ const ADAPTER_RULES: readonly AdapterRule[] = [
   { adapter: 'report', kind: 'report', extension: /\.html?$/ },
   // BLOCK-142（原位替换 resultSurface.ts:77 .pdf→binary）— .pdf → pdf viewer，仍先于 image
   { adapter: 'pdf', extension: /\.pdf$/ },
+  // BLOCK-322 P2-05 — 转盘/序列动画视频：.mp4/.webm → video viewer（<video> 内嵌播放）。
+  // 必须先于 image/json/text 诸规则：kind 为 'data'/'file' 的产物若按文件名不命中就会落
+  // binary 兜底（下载壳），而视频的正确出口是「能播」而不是「能存」。
+  { adapter: 'video', extension: /\.(mp4|webm)$/ },
   // resultSurface.ts:78 — plot kind 恒胜（含 plot+xls 落 image 的现状行为）
   { adapter: 'image', kind: 'plot', extension: /\.(png|jpe?g|gif|svg|webp)$/ },
   // BLOCK-142（原位替换 resultSurface.ts:79 .xls/.xlsx→binary）— .xlsx/.xlsm → spreadsheet viewer（先于 table）
