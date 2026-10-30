@@ -18,3 +18,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T03:27:52.142Z -->
 | ✅ BLOCK-271 1b 实机生效腿 completed（批次 4/5；BIO-2/UI-454） | 2026-10-27 | 隔离栈直证 4/4（项目布局兜底+全局链不回退）；backlog 对账抓真=W3/W6 旧注记误导（实际已收口） | UI-454 verified |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T06:11:03.301Z -->
+| ✅ backlog 滞后注记对账批 completed（批次 5/5；治理无代码） | 2026-10-27 | 序 0/2b/2a/2d/2e 有据修正，2c/1z 标待核不冒进 | docs:check |
