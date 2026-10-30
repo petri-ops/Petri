@@ -272,5 +272,6 @@
    "tier": "d",
    "reason": "审阅模式已重构，悬置改判"
   }
- ]
+ ],
+ "finalStateNote": "终态权威=docs/ui-productization-audit.md 逐条 + AUDIT-LOG RW-02 收口行。本文件是 P1 分诊过程快照（四档初始计数 a13/b18/c3/d17+判销依据）；终态=a 档 9 verified（含 248/484 后批）+638 发现腿+d28+b18+c6（301/385 spawn 链实证降 c、595 降 b、443/445/501 人测）——恢复时以台账逐条为准，本快照仅提供分诊依据溯源。"
 }

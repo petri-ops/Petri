@@ -1,93 +1,94 @@
 {
-  "name": "rw02-ui-evidence-live",
-  "startedAt": "2026-10-30T00:25:12.028Z",
-  "finishedAt": "2026-10-30T00:26:14.450Z",
-  "assertions": [
-    {
-      "name": "cdp_targets_listed",
-      "pass": true,
-      "detail": "1 targets"
-    },
-    {
-      "name": "spa_page_target_present",
-      "pass": true,
-      "detail": "http://localhost:3000/"
-    },
-    {
-      "name": "ui598_runstats_hidden_without_consumption",
-      "pass": true,
-      "detail": "runStats=absent"
-    },
-    {
-      "name": "ui598_starter_chips_generic",
-      "pass": true,
-      "detail": "generic=[\"整理笔记\",\"写一份总结\",\"代码走查\",\"规划任务\"] bioLeak=[]"
-    },
-    {
-      "name": "ui543_welcome_copy_neutral",
-      "pass": true,
-      "detail": "bioLeak=[]"
-    },
-    {
-      "name": "ui543_no_domain_example_cards_without_packs",
-      "pass": true,
-      "detail": "count=0"
-    },
-    {
-      "name": "ui596_last_used_badge",
-      "pass": true,
-      "detail": "badge={\"badge\":true,\"rightCol\":true}"
-    },
-    {
-      "name": "ui462_no_own_repo_hint",
-      "pass": true,
-      "detail": "hints=[]"
-    },
-    {
-      "name": "ui303_plan_mode_in_menu",
-      "pass": true,
-      "detail": "menu={\"menus\":1,\"plan\":true,\"sub\":true,\"full\":true} trigger=clicked"
-    },
-    {
-      "name": "ui331_conversation_relative_time",
-      "pass": true,
-      "detail": "convOk=true convTime={\"count\":1,\"samples\":[\"刚刚\"],\"valid\":1}"
-    },
-    {
-      "name": "ui594_slash_skill_chip",
-      "pass": true,
-      "detail": "chip={\"chips\":1}"
-    },
-    {
-      "name": "ui248_review_expand_all",
-      "pass": true,
-      "detail": "rev={\"btn\":true,\"before\":\"收起所有文件的行内差异\",\"stats\":true} after={\"after\":\"展开所有文件的行内差异\"}"
-    },
-    {
-      "name": "ui301_agent_team_panel",
-      "pass": false,
-      "detail": "dockSeenDuringRun=false dump={\"dock\":false,\"spawnMentioned\":true,\"bodyTail\":\"\\n子任务完成：要点甲、要点乙、要点丙已核对。\\n\\n刚刚\\n命令\\n↑↓ 导航 · Enter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file."
-    },
-    {
-      "name": "ui385_subagent_detail",
-      "pass": true,
-      "detail": "dump={\"detailVisible\":true,\"bodyTail\":\"ter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file.txt\\nTXT\\nnotes.txt\\n+1\\n测试实例 · TEST\\n内"
-    },
-    {
-      "name": "ui484_federation_delegation_card",
-      "pass": true,
-      "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
-    },
-    {
-      "name": "ui638_seed_export_registered",
-      "pass": true,
-      "detail": "pid=p_mvu8eknr_dxbn export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu8ellg_5ngk\",\"revisions\":[{\"revisionId\":\"rev_model3d_8b92f7de54c85c7e\",\"artifactId\":\"model3d:p_mvu8eknr_dxbn:model3d/recipes/rw02"
-    },
-    {
-      "name": "ui638_model3d_in_panel",
-      "pass": true,
-      "detail": "dump={\"wallListsModel3d\":true,\"tilePresent\":true,\"statusDone\":true}"
-    }
-  ],
-  "allPass": false
+ "name": "rw02-ui-evidence-live",
+ "startedAt": "2026-10-30T00:25:12.028Z",
+ "finishedAt": "2026-10-30T00:26:14.450Z",
+ "assertions": [
+  {
+   "name": "cdp_targets_listed",
+   "pass": true,
+   "detail": "1 targets"
+  },
+  {
+   "name": "spa_page_target_present",
+   "pass": true,
+   "detail": "http://localhost:3000/"
+  },
+  {
+   "name": "ui598_runstats_hidden_without_consumption",
+   "pass": true,
+   "detail": "runStats=absent"
+  },
+  {
+   "name": "ui598_starter_chips_generic",
+   "pass": true,
+   "detail": "generic=[\"整理笔记\",\"写一份总结\",\"代码走查\",\"规划任务\"] bioLeak=[]"
+  },
+  {
+   "name": "ui543_welcome_copy_neutral",
+   "pass": true,
+   "detail": "bioLeak=[]"
+  },
+  {
+   "name": "ui543_no_domain_example_cards_without_packs",
+   "pass": true,
+   "detail": "count=0"
+  },
+  {
+   "name": "ui596_last_used_badge",
+   "pass": true,
+   "detail": "badge={\"badge\":true,\"rightCol\":true}"
+  },
+  {
+   "name": "ui462_no_own_repo_hint",
+   "pass": true,
+   "detail": "hints=[]"
+  },
+  {
+   "name": "ui303_plan_mode_in_menu",
+   "pass": true,
+   "detail": "menu={\"menus\":1,\"plan\":true,\"sub\":true,\"full\":true} trigger=clicked"
+  },
+  {
+   "name": "ui331_conversation_relative_time",
+   "pass": true,
+   "detail": "convOk=true convTime={\"count\":1,\"samples\":[\"刚刚\"],\"valid\":1}"
+  },
+  {
+   "name": "ui594_slash_skill_chip",
+   "pass": true,
+   "detail": "chip={\"chips\":1}"
+  },
+  {
+   "name": "ui248_review_expand_all",
+   "pass": true,
+   "detail": "rev={\"btn\":true,\"before\":\"收起所有文件的行内差异\",\"stats\":true} after={\"after\":\"展开所有文件的行内差异\"}"
+  },
+  {
+   "name": "ui301_agent_team_panel",
+   "pass": false,
+   "detail": "dockSeenDuringRun=false dump={\"dock\":false,\"spawnMentioned\":true,\"bodyTail\":\"\\n子任务完成：要点甲、要点乙、要点丙已核对。\\n\\n刚刚\\n命令\\n↑↓ 导航 · Enter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file.",
+   "disposition": "处置=如实降档 c（2026-10-30）：spawn 链本身 live 实证（mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天，见 bodyTail「要点乙、要点丙已核对」）；dock 自动弹出在离屏实例时序不可达（UI-501 同类在册）→ 面板视觉入 human-eye-checklist 第 5/6 条人测。终态见 docs/ui-productization-audit.md UI-301 行。"
+  },
+  {
+   "name": "ui385_subagent_detail",
+   "pass": true,
+   "detail": "dump={\"detailVisible\":true,\"bodyTail\":\"ter 执行 · Esc 关闭\\n未找到匹配命令\\n完全访问\\n本次\\n1 轮\\n·\\n0 步\\n·\\n—\\n会话\\n0 tok\\n·\\n缓存命中 —\\n85%\\n审阅\\n×\\n5\\n审阅\\n改动\\n历史\\n+1\\n−0\\n0/2 已审\\n展开全部\\nmain（当前）\\ntask: 1203b08b-e529-4d57-bdb0-d3949487c0fb\\n快照\\n全部还原\\n提交审阅\\n更改\\n2\\n（根目录）\\n2\\nTXT\\nnew-file.txt\\nTXT\\nnotes.txt\\n+1\\n测试实例 · TEST\\n内"
+  },
+  {
+   "name": "ui484_federation_delegation_card",
+   "pass": true,
+   "detail": "card={\"cardPresent\":true,\"taskCard\":true,\"peerName\":true} nav=clicked"
+  },
+  {
+   "name": "ui638_seed_export_registered",
+   "pass": true,
+   "detail": "pid=p_mvu8eknr_dxbn export={\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvu8ellg_5ngk\",\"revisions\":[{\"revisionId\":\"rev_model3d_8b92f7de54c85c7e\",\"artifactId\":\"model3d:p_mvu8eknr_dxbn:model3d/recipes/rw02"
+  },
+  {
+   "name": "ui638_model3d_in_panel",
+   "pass": true,
+   "detail": "dump={\"wallListsModel3d\":true,\"tilePresent\":true,\"statusDone\":true}"
+  }
+ ],
+ "allPass": false
 }

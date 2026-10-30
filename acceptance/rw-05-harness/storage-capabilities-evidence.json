@@ -1,0 +1,13 @@
+{
+ "schema": "rw05-storage-capabilities-evidence/v1",
+ "recordedAt": "2026-10-30",
+ "unitTests": "test/rw05-storage-capabilities.test.mjs (4/4：local 诚实位/活跃查询+未声明拒绝/开放词汇表未知键忽略/REST 面)",
+ "live": "隔离 :3011 GET /api/storage/capabilities → local 全量能力位（supportsDirectUpload/SupportsDelete=true；Presigned/ServerSideCopy/RetentionPolicy=false）",
+ "implementation": [
+  "core/shared-backend/storage/index.js（declareStorageCapabilities/getStorageCapabilities/getActiveStorageCapabilities + KNOWN_CAPABILITY_KEYS）",
+  "core/shared-backend/storage/local-storage.js（LocalFileStorageCapabilities）",
+  "core/shared-backend/init.js（注册时声明）",
+  "core/petri-server/routes/storage-capabilities.js（REST 只读面）"
+ ],
+ "note": "本目录为 RW-06 独立重放复盘 B2 盲点修复——§3.5 宣称路径补齐集中证据"
+}
