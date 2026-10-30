@@ -15,3 +15,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T02:33:38.555Z -->
 | ✅ BLOCK-270 批注画笔前端渲染器 completed（批次 3/5；C-43 尾项） | 2026-10-27 | freehand 前端全链（契约/三态/采点/渲染/接线）；组件级 59/59 | UI-587 in_progress（实机需 job+artifact seed） |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T03:27:52.142Z -->
+| ✅ BLOCK-271 1b 实机生效腿 completed（批次 4/5；BIO-2/UI-454） | 2026-10-27 | 隔离栈直证 4/4（项目布局兜底+全局链不回退）；backlog 对账抓真=W3/W6 旧注记误导（实际已收口） | UI-454 verified |

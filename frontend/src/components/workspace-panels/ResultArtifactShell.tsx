@@ -85,7 +85,7 @@ import { useArtifactInteractionSelection } from './ResultArtifactShell/useArtifa
 import { ViewerExportAction } from './ResultArtifactShell/ViewerExportAction';
 import { isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
 import {
-  artifactName,
+  artifactRecordsFromFiles,
   artifactKindIcon,
   workflowStageLabel,
 } from './ResultView/helpers';
@@ -369,17 +369,8 @@ export function ResultArtifactShell({
 
   const files = result?.artifacts || result?.files || [];
   const fallbackArtifacts = useMemo<ResultArtifactRecord[]>(
-    () =>
-      files.map((file) => ({
-        name: artifactName(file),
-        type: file.type,
-        label: file.label || file.title,
-        title: file.title,
-        url: buildUrl(artifactName(file)),
-        preview: file.preview,
-        download: file.download,
-      })),
-    [buildUrl, files]
+    () => artifactRecordsFromFiles(files, buildUrl, getApiPrefix(lang)),
+    [buildUrl, files, lang]
   );
 
   useEffect(() => {

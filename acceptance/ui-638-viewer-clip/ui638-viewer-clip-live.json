@@ -1,0 +1,108 @@
+{
+  "name": "ui638-viewer-clip",
+  "startedAt": "2026-10-30T03:25:25.844Z",
+  "finishedAt": "2026-10-30T03:25:46.223Z",
+  "assertions": [
+    {
+      "name": "capability_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\"}"
+    },
+    {
+      "name": "project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mvuet93h_85x7\",\"name\":\"UI638-Viewer-1793330727242\",\"created_at\":\"2026-10-30T03:25:27.245Z\",\"updated_at\":\"2026-10-30T03:25:27.2"
+    },
+    {
+      "name": "export_registered",
+      "pass": true,
+      "detail": "{\"registered\":true,\"idempotent\":false,\"adopted\":true,\"toolJobId\":\"tj_mvuetbst_jkao\",\"revisions\":[{\"revisionId\":\"rev_model3d_ed55647922b77a24\",\"artifactId\":\"model3d:p_mvuet93h_85x7:model3d/recipes/ui638-viewer.scene3d.json:glb\",\"artifactFami"
+    },
+    {
+      "name": "artifact_projected_with_name",
+      "pass": true,
+      "detail": "[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\"]"
+    },
+    {
+      "name": "artifact_url_workspace_route",
+      "pass": true,
+      "detail": "/api/workspaces/p_mvuet93h_85x7/file?path=model3d%2Fruns%2Fm3d-mvuet9lg-t3hius%2Fscene.glb"
+    },
+    {
+      "name": "artifact_url_serves_bytes",
+      "pass": true,
+      "detail": "status=200 bytes=2008"
+    },
+    {
+      "name": "artifact_bytes_match_manifest_hash",
+      "pass": true,
+      "detail": "manifestHash=7039cdb9289a82c8225cb73cbd170e1bb777542b7885a59f51418ce15f583abc servedHash=7039cdb9289a82c8225cb73cbd170e1bb777542b7885a59f51418ce15f583abc"
+    },
+    {
+      "name": "job_card_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "scene_glb_selected",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "viewer_mounted",
+      "pass": true,
+      "detail": "{\"found\":true,\"panelHeight\":773,\"surfaceHeight\":746,\"hostHeight\":745,\"canvasCssHeight\":745,\"canvasBitmapHeight\":1192,\"hostPosition\":\"absolute\",\"hiddenBelowPanelPx\":0,\"canvasFullyInside\":true,\"canvasFi"
+    },
+    {
+      "name": "glb_loaded_no_fallback",
+      "pass": true,
+      "detail": "fallback=false stats=对象 1 · bounds 120×40×80"
+    },
+    {
+      "name": "render_draws_pixels",
+      "pass": true,
+      "detail": "samples=316 maxAlpha=256 "
+    },
+    {
+      "name": "host_absolute_fill",
+      "pass": true,
+      "detail": "position=absolute"
+    },
+    {
+      "name": "canvas_fills_surface_tall",
+      "pass": true,
+      "detail": "surface=746 canvas=745"
+    },
+    {
+      "name": "viewer_fills_panel_tall",
+      "pass": true,
+      "detail": "panel=773 surface=746"
+    },
+    {
+      "name": "terminal_drag_applied",
+      "pass": true,
+      "detail": "opened / dragged"
+    },
+    {
+      "name": "panel_shrank",
+      "pass": true,
+      "detail": "tall=773 compressed=253"
+    },
+    {
+      "name": "canvas_follows_panel",
+      "pass": true,
+      "detail": "tallCanvas=745 compressedCanvas=225"
+    },
+    {
+      "name": "canvas_fills_surface_compressed",
+      "pass": true,
+      "detail": "surface=226 canvas=225"
+    },
+    {
+      "name": "no_clip_when_panel_below_448",
+      "pass": true,
+      "detail": "panel=253 hidden=0px"
+    }
+  ],
+  "allPass": true
+}

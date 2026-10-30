@@ -1,0 +1,170 @@
+[
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 462,
+      "height": 312,
+      "scrollH": 448,
+      "clientH": 312,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 109,
+    "canvasFullyInside": false,
+    "surfaceFullyInside": false,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  },
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 542,
+      "height": 392,
+      "scrollH": 448,
+      "clientH": 392,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 29,
+    "canvasFullyInside": false,
+    "surfaceFullyInside": false,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  },
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 622,
+      "height": 472,
+      "scrollH": 472,
+      "clientH": 472,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 0,
+    "canvasFullyInside": true,
+    "surfaceFullyInside": true,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  },
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 702,
+      "height": 552,
+      "scrollH": 552,
+      "clientH": 552,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 0,
+    "canvasFullyInside": true,
+    "surfaceFullyInside": true,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  },
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 782,
+      "height": 632,
+      "scrollH": 632,
+      "clientH": 632,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 0,
+    "canvasFullyInside": true,
+    "surfaceFullyInside": true,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  },
+  {
+    "found": true,
+    "preview": {
+      "top": 150,
+      "bottom": 782,
+      "height": 632,
+      "scrollH": 632,
+      "clientH": 632,
+      "overflow": "hidden"
+    },
+    "viewerH": 448,
+    "surface": {
+      "top": 150,
+      "bottom": 572,
+      "height": 422
+    },
+    "canvasCss": {
+      "top": 151,
+      "bottom": 571,
+      "height": 420
+    },
+    "hiddenPxBelowPanel": 0,
+    "canvasFullyInside": true,
+    "surfaceFullyInside": true,
+    "canvasInline": "display: block; width: 1531px; height: 420px; cursor: auto; touch-action: none;",
+    "hostPosition": "static",
+    "surfaceOverflowY": "hidden"
+  }
+]

@@ -1,0 +1,50 @@
+{
+  "flow": "ui638-viewer-clip",
+  "claimUnderTest": "Result Studio 3D viewer：结果面板高度 < 420px 时模型下半截被裁掉（上一轮称 '.viewport 缺失 + setSize 只取一次 clientHeight'）",
+  "verdict": "REAL_DEFECT",
+  "date": "2026-10-30",
+  "environment": {
+    "instance": "CDP 9223 离屏测试实例（show:false，无可见窗口；跑完已终止）",
+    "viewportCss": "1600x1000 固定逻辑视口（测试实例 zoomFactor 等比吸收窗口变化，见 src/main/_window-create.js:173-184）",
+    "backend": "127.0.0.1:3001（dev 栈，PETRI_LOCAL_DATA_DIR=.petri-dev-user-data/data）",
+    "project": "p_mvudxwlz_zb92（本会话临时项目，已在取证后 DELETE）",
+    "jobId": "tj_mvudy1ik_etpv",
+    "artifact": "model3d:p_mvudxwlz_zb92:model3d/recipes/ui638-probe.scene3d.json:glb / scene.glb",
+    "blender": "Blender 5.2.3 LTS（GET /api/model3d/capability status=ready）"
+  },
+  "method": "产品路径实机：结果库作业卡点开 → 右侧产物列表选中 scene.glb → 展开底部终端 → 拖拽终端上缘（真实 startBottomTerminalResize 链路，clamp 140..520）逐级压缩结果面板；每次停点量测 DOM 几何。不伪造断言，未改产品代码。",
+  "measurements": [
+    { "panelHeightPx": 252, "surfaceHeightPx": 422, "canvasCssHeightPx": 420, "canvasHiddenBelowPanelPx": 169, "canvasFullyInside": false, "panelOverflow": "hidden", "panelScrollHeight": 448 },
+    { "panelHeightPx": 312, "surfaceHeightPx": 422, "canvasCssHeightPx": 420, "canvasHiddenBelowPanelPx": 109, "canvasFullyInside": false, "panelOverflow": "hidden", "panelScrollHeight": 448 },
+    { "panelHeightPx": 392, "surfaceHeightPx": 422, "canvasCssHeightPx": 420, "canvasHiddenBelowPanelPx": 29, "canvasFullyInside": false, "panelOverflow": "hidden", "panelScrollHeight": 448 },
+    { "panelHeightPx": 472, "surfaceHeightPx": 422, "canvasCssHeightPx": 420, "canvasHiddenBelowPanelPx": 0, "canvasFullyInside": true, "panelOverflow": "hidden", "panelScrollHeight": 472 },
+    { "panelHeightPx": 632, "surfaceHeightPx": 422, "canvasCssHeightPx": 420, "canvasHiddenBelowPanelPx": 0, "canvasFullyInside": true, "panelOverflow": "hidden", "panelScrollHeight": 632, "note": "面板 632 时 canvas 仍 420 —— 反向浪费 212px，证明 viewer 不随容器高度自适应" }
+  ],
+  "threshold": {
+    "clipsWhenPanelBelowPx": 448,
+    "derivation": "canvas 钉死 420 + metaRow/gap ≈ 28 = 448；面板 392 → 隐 29px，472 → 0",
+    "noScrollEscape": "面板 overflow:hidden 且内容不可滚动读取（scrollHeight 448 > clientHeight，但用户无法滚到被裁部分）"
+  },
+  "rootCause": {
+    "hostMissingAbsoluteFill": "frontend/src/components/workspace-panels/Model3DResultViewer.module.css 的 .surface 未给 .model3d-canvas-host 任何定位规则（对照 frontend/src/components/work-surface/Model3DSurface.module.css:54 .viewport :global(.model3d-canvas-host){position:absolute;inset:0}）；实测 host computed position=static",
+    "sizeFeedbackLoop": "frontend/src/components/work-surface/Model3DScene.tsx:108 setSize(host.clientWidth||640, host.clientHeight||420)；host 为块级且高度由 canvas 撑开 ⇒ 挂载时 clientHeight=0 → 落到 420 → host 高变 420 → ResizeObserver（:147-154）读到的仍是 420 ⇒ 等效于「只取一次 clientHeight」。实测全档位 hostH=canvasH=420，宽度随容器自适应、高度不自适应",
+    "clipLevel": "裁切发生在上层 .resultSidebarPreviewBody{overflow:hidden}（panel），非 .surface 自身；效果一致：模型/网格下半截不可见且无滚动条"
+  },
+  "sideFindings": [
+    {
+      "id": "UI638-GLB-URL-404",
+      "severity": "blocking-for-open-leg",
+      "detail": "默认路径打开 scene.glb 时 viewer 取流 404：GET /api/tools/file/tj_mvudy1ik_etpv/scene.glb → 404 text/plain；Model3DResultViewer 渲染 '3D 预览不可用'。同源 front.png 预览亦报『文件不可用』",
+      "root": "core/petri-server/agent-tools/model3d-tools.js:237-242 artifacts 投影只有 name/filename/path/sha256，无 url；ResultArtifactShell.tsx:514-518 回落 buildUrl(name) → /api/tools/file/<job>/<name>，而 model3d 产物实际位于 workspace model3d/runs/<runId>/（不在 tool run output 布局）",
+      "contrast": "同一产物的 revision 读面正常：GET /api/result-studio/revisions/rev_model3d_ea6fd3502807b3f3/artifact → 200, 2008 bytes（与 REST 导出 W5 断言一致）；即走 viewedRevision 时可用，默认投影路径不可用"
+    }
+  ],
+  "screenshots": [
+    "panel-252.png", "panel-312.png", "panel-392.png", "panel-472.png", "panel-552.png", "panel-632.png"
+  ],
+  "honestyBoundary": [
+    "取证时 glb 因上条 404 未真正加载，画面为 three.js 场景（网格/坐标轴）而非 mesh；裁切对象是 canvas，与内容无关——数值证据独立成立，但『肉眼看到模型下半截被切』需要 404 修复后复看一眼",
+    "测试实例固定 1600x1000 逻辑视口，窗口拖拽被 zoom 吸收；本报告用真实终端拖拽压缩面板，未改 CSS/DOM 做人为约束",
+    "模型实际被裁的可视终点未在本轮覆盖（需 UI638-GLB-URL-404 修复）"
+  ]
+}

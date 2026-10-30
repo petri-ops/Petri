@@ -15,6 +15,7 @@ const sceneStore = require('../helpers/model3d-scene-store');
 const { runModel3DRecipe } = require('../helpers/model3d-recipe-runner');
 const blender = require('../helpers/blender-provider');
 const { runModel3DReview } = require('../helpers/model3d-review');
+const { buildModel3dArtifactRecords } = require('../helpers/model3d-artifact-projection');
 const {
   authorizeProject,
 } = require('./workspace-tools/internals');
@@ -233,13 +234,10 @@ async function tool_model3d_export(args = {}, ctx = {}) {
         resultStudio = { registered: false, toolJobId: job.id, error: registration.error };
       }
       // artifacts/files 投影：/tools/status 下钻链（CommandCenterJobsWall handleDrill）
-      // 读 result_json.artifacts[].name——缺位即「无产物可下钻」（RW-06 代行评估抓真）。
-      const artifacts = (result.outputs || []).map((output) => ({
-        name: path.basename(output.path),
-        filename: path.basename(output.path),
-        path: output.path,
-        sha256: output.sha256 || null,
-      }));
+      // 读 result_json.artifacts[].name——缺位即「无产物可下钻」（RW-06 代行评估抓真）；
+      // url 走项目工作区读面（model3d 产物在 workspace model3d/runs/，不在 tool run
+      // output 布局，缺 url 时结果面回落 /api/tools/file/<job>/<name> 必然 404——UI-638）。
+      const artifacts = buildModel3dArtifactRecords(ctx.projectId, result.outputs);
       const jobResult = {
         ok: true,
         sceneHash,

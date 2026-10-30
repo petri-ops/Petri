@@ -2,17 +2,34 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 260px;
+  /* UI-638 — panel-fill：内容定高会让 viewer 恒 448px，面板变矮时被上层
+     overflow:hidden 裁掉且无滚动（实机 2026-10-30 抓真）。 */
+  height: 100%;
+  min-height: 0;
 }
 
 .surface {
   position: relative;
   flex: 1;
-  min-height: 240px;
+  min-height: 160px;
   border: 1px solid var(--petri-border-card);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
+}
+
+/* UI-638 — 宿主必须 absolute-fill：否则 host 高度由 canvas 反撑成自反馈环，
+   setSize 恒定 420px（Model3DScene 的 ResizeObserver 读到的就是 canvas 自己）。
+   与 work-surface .viewport 同口径（Model3DSurface.module.css）。 */
+.surface :global(.model3d-canvas-host) {
+  position: absolute;
+  inset: 0;
+}
+
+.surface :global(.model3d-canvas-host canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .fallback {

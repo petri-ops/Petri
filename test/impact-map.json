@@ -6596,6 +6596,64 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "ui638-viewer-open-leg",
+      "note": "UI-638 点开腿两缺陷修复：model3d artifacts 投影补工作区读面 url（/api/workspaces/:projectId/file?path=，缺 url 时结果面回落 tools/file 必 404）+ Result Studio 3D viewer 宿主 absolute-fill（canvas 不再钉死 420、面板变矮不裁切）；红绿契约 + 实机 flow。",
+      "patterns": [
+        "core/petri-server/helpers/model3d-artifact-projection.js",
+        "core/petri-server/agent-tools/model3d-tools.js",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "frontend/src/components/workspace-panels/ResultView/helpers.ts",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.tsx",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.module.css",
+        "frontend/src/components/workspace-panels/ResultView/helpers.test.ts",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.test.tsx",
+        "test/ui638-model3d-artifact-url.test.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
+        "acceptance/ui-638-viewer-clip/**",
+        "acceptance/rw-02-ui-evidence/**"
+      ],
+      "tests": [
+        "test/ui638-model3d-artifact-url.test.mjs",
+        "frontend/src/components/workspace-panels/ResultView/helpers.test.ts",
+        "frontend/src/components/workspace-panels/Model3DResultViewer.test.tsx",
+        "test/rw01-model3d-revision-bridge.test.mjs"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "rw-02-pack-write-bridge-evidence",
+      "note": "RW-02 C-44 写桥验收证据目录（收口时漏登记，test-affected 证据读取面自检抓真）：证据只选择写桥契约测试。",
+      "patterns": [
+        "acceptance/rw-02-pack-write-bridge/**"
+      ],
+      "tests": [
+        "test/rw02-pack-write-bridge.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "rw-05-harness-evidence",
+      "note": "RW-05 存储能力协商验收证据目录（收口时漏登记）：证据只选择存储能力契约测试。",
+      "patterns": [
+        "acceptance/rw-05-harness/**"
+      ],
+      "tests": [
+        "test/rw05-storage-capabilities.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "rw-06-hygiene-evidence",
+      "note": "RW-06 工程卫生验收证据目录（收口时漏登记）：证据/基线产物，无对应产品测试，只走治理门。",
+      "patterns": [
+        "acceptance/rw-06-hygiene/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
     }
   ]
 }

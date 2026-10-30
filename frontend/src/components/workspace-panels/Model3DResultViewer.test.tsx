@@ -11,6 +11,9 @@
  * three.js 内部；Model3DScene 自身的渲染行为由 work-surface 实机腿承索。
  */
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
@@ -96,5 +99,25 @@ describe('RW01 Model3DResultViewer', () => {
     );
     expect(screen.getByText('3D 预览不可用')).toBeDefined();
     expect(screen.getByText(/WebGL/)).toBeDefined();
+  });
+
+  // UI-638 点开腿 — 实机抓真（2026-10-30）：宿主 .model3d-canvas-host 无定位规则，
+  // 高度被 canvas 反撑成自反馈环（setSize 恒定 420），结果面板 <448px 时 canvas
+  // 底部被上层 overflow:hidden 裁掉且无滚动。布局契约：宿主 absolute-fill 到
+  // .surface、canvas 跟随宿主、viewer 填满面板（不再内容定高）。
+  it('布局契约：宿主 absolute-fill 到 .surface，canvas 跟随而非钉死 420', () => {
+    const cssPath = path.join(
+      path.dirname(fileURLToPath(import.meta.url)),
+      'Model3DResultViewer.module.css',
+    );
+    const css = fs.readFileSync(cssPath, 'utf8');
+    const hostRule = css.match(/:global\(\.model3d-canvas-host\)\s*\{[^}]*\}/)?.[0] || '';
+    assert.match(hostRule, /position:\s*absolute/, `宿主必须绝对定位: ${hostRule}`);
+    assert.match(hostRule, /inset:\s*0/, `宿主必须铺满 .surface: ${hostRule}`);
+    const canvasRule = css.match(/:global\(\.model3d-canvas-host canvas\)\s*\{[^}]*\}/)?.[0] || '';
+    assert.match(canvasRule, /width:\s*100%/, `canvas 宽度必须跟随宿主: ${canvasRule}`);
+    assert.match(canvasRule, /height:\s*100%/, `canvas 高度必须跟随宿主: ${canvasRule}`);
+    const viewerRule = css.match(/\.viewer\s*\{[^}]*\}/)?.[0] || '';
+    assert.match(viewerRule, /height:\s*100%/, `viewer 必须填满面板而非内容定高: ${viewerRule}`);
   });
 });
