@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-10-29",
+  "updatedAt": "2026-10-30",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -22,6 +22,8 @@
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::screenshotPng",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::withInputShield",
+    "exports::frontend/src/lib/workSurface/packWriteBridge.ts::PACK_WRITE_BRIDGE_VERSION",
+    "exports::frontend/src/lib/workSurface/packWriteBridge.ts::validateSurfaceWritesDecl",
     "exports::src/main/core-utils.js::IS_DEV",
     "exports::src/main/core-utils.js::resolveCoreRoot",
     "exports::src/main/core-utils.js::resolveNodeBin",
@@ -148,6 +150,8 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q9rem-slice-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/q9rem-tail-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw01-model3d-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw02-pack-write-bridge-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/rw02-ui-evidence-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui342-endpoint-grid.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs",
