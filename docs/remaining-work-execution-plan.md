@@ -8,10 +8,12 @@ acceptance:
   - 证据级验收 = 实现未完成只能 in_progress，证据充分才可 verified；长会话/内存、原生对话框、Provider、macOS 或平台项缺证据必须如实标未覆盖。
   - 边界级验收 = §4 条件触发/观察区不进串行序；G0 纪律出籍项（D 档、packaged/Provider/GA）不列为待办。
 reopen: 逐包启动需用户发令（单工作包串行不变）；本纲要重估 = 队列外的候选池/条件项触发重开条件、或用户对标尺/方向改判
-status: planned
+status: reference
 ---
 
 # 剩余工作全量执行纲（Remaining Work Execution Plan）
+
+最后更新：2026-10-30（**RW-06 completed；六包全收口，本文件整体转 reference**——RW-01 completed（3D 接入成果面）/RW-02 completed（62 条四档+写桥）/RW-03 判销（C-32 已清偿）/RW-04 completed（对账+RW-05 收缩）/RW-05 completed（存储能力协商）/RW-06 completed（ui-audit 109×+基线落盘+独立重放「可用但有盲点」4 处修复）。C 档 6 条人眼清单在 acceptance/rw-02-ui-evidence/human-eye-checklist.md 待用户一次栈窗口。§7 恢复协议保留为历史参考。
 
 最后更新：2026-10-30（**RW-05 completed**：存储能力协商三件+REST 面落地（红绿 4/4+实机 local 全量能力位）；closeout 十三门 PASS。下一包=RW-06-ENGINEERING-HYGIENE（终包）。）
 
@@ -52,7 +54,7 @@ status: planned
 | 3 | `RW-03-C32-DECISION-ENV-GOV` | 2–3 天 | 修 C-32：decision-config env='1' 运行时强开违反自身语义 | RW-02 收口 | **判销**（2026-10-30 RW-02 收口后核实：C-32 已由 BLOCK-211 清偿在案——decision-config.js 头注「现已按注释语义修正」+ resolvePointEnabled 实现即修正语义 + 回归锁 test/block211-c32-env-seed.test.mjs 4/4 在库 + RW-02 会话实证复验双判据过（设置关+env=1 残留→false；设置开+env=0→false）。立项前提过时，不硬造重复包） |
 | 4 | `RW-04-LEDGER-RECONCILE` | 0.5–1 天 | 台账待核注记逐项核实回写（2a/2c/2d/2e 现状），治理无代码 | RW-03 判销 | **completed**（2026-10-30；2a 四件全有主判销 / 2c 逐项核实=元数据单源已清偿+事件信封部分在库+存储协商零在库真缺口 / 2d MCP 策略已交付+schema 部分定性 / 2e 两项清偿） |
 | 5 | `RW-05-HARNESS-FOUNDATION` | 收缩后 1–2 天 | **范围收缩定版（RW-04 核实）**：仅存储能力协商（supports_* 式可插拔，全仓零在库）；工具元数据单源已由 BLOCK-233 清偿、事件信封 traceId/事件目录部分在库（turnId 细粒度=可选增量不立项） | RW-04 核实结论 | **completed**（2026-10-30；红绿 4 件+REST 实机+邻域 43/43+closeout 十三门 PASS；plan=本条目+RW 纲 §3.5 收缩定版，轻量包） |
-| 6 | `RW-06-ENGINEERING-HYGIENE` | 2–4 天 | 长会话/复杂场景/内存与首帧基线 + ui-audit/vitest/PATH 环境债 + 最终复盘 | RW-05 收口 | planned |
+| 6 | `RW-06-ENGINEERING-HYGIENE` | 2–4 天 | 长会话/复杂场景/内存与首帧基线 + ui-audit/vitest/PATH 环境债 + 最终复盘 | RW-05 收口 | **completed**（2026-10-30；B1 ui-audit 109×（54.9s→0.5s）+B2 判销留痕（block274 已根修 9s）+B3 Windows 侧专属登记；A 线基线落盘不预设阈值；C 线独立重放「可用但有盲点」4 处全修复；closeout 十三门 PASS） |
 
 > 串行纪律不变：同一时间只有一个 active 工作包；包号是稳定责任边界，不跳号并行。顺序原则=用户可见价值与真值前置 → 证据/治理债 → 可靠性/工程卫生。依赖或顺序需调整时先回写本节与 backlog 再执行。
 

@@ -8422,7 +8422,7 @@
       "capability": "remaining-work-execution-plan",
       "path": "docs/remaining-work-execution-plan.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "reference",
       "canonical": true,
       "truthDomain": "remaining-work-execution-plan",
       "entrypoint": "docs/README.md",
@@ -8437,7 +8437,7 @@
         "hygiene",
         "G0"
       ],
-      "notes": "蓝图八包收口后的剩余工作全量执行纲：RW-01 3D Artifact Revision 接入成果面（Jev 0.68）→ RW-02 UI 证据债分诊清偿+C-44 pack 写桥 → RW-03 C-32 env 语义治理 → RW-04 台账对账 → RW-05 harness 地基 → RW-06 可靠性/soak+工程卫生+独立重放复盘；六包 planned、单工作包串行、逐包待用户发令；§3 为换模型恢复唯一执行契约。"
+      "notes": "RW 六包全部收口（2026-10-30：RW-01/02/04/05 completed、RW-03 判销、RW-06 completed 含独立重放复盘）；C 档 6 条人眼清单待用户一次栈窗口；本文件转 reference 保留恢复协议历史。"
     },
     {
       "id": "RW-01-3D-ARTIFACT-REVISION",

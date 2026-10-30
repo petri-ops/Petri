@@ -9,3 +9,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T00:58:15.324Z -->
 | ✅ BLOCK-268 UI-585 实机腿补验 completed（批次 1/5；用户「行！ 你规划一下 按顺序批次完成」） | 2026-10-27 | 隔离 9223 亮/暗各 7/7；实机抓真=Page.navigate 误用改 SPA 切换；knip+1 留痕 | UI-585 verified |
 | ✅ dev-verify flow env 陷阱固化为静态门（BLOCK-267 ④；原 🟡「建议固化成门」清偿） | 2026-10-26 | test/block267-flow-env-trap.test.mjs（findTopLevelEnvConst + 全 flow 棘轮 3/3）；首批清偿 8 flow（block107×3/block214/pack-lifecycle/ui554/ui557） | flow 顶层 const=process.env 即红 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T01:14:26.079Z -->
+| ✅ BLOCK-269 浏览器连接器前端桥 completed（批次 2/5；C-40 尾项） | 2026-10-27 | transport 桥 SSE 下发+回传 resolve+REST 四面；实机亮/暗 12/12 含真面板 webview 执行；抓真=event-bus 顶层 payload/SSE abort 连接重置 | UI-586 verified |
