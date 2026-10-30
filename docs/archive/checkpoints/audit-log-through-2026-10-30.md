@@ -27,3 +27,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:42:31.644Z -->
 最后更新：2026-10-30（**RW-05-HARNESS-FOUNDATION completed（收缩后单件；closeout 十三门 PASS；plan=本条目+RW 纲 §3.5）**：存储能力协商三件落地——declareStorageCapabilities（KNOWN_CAPABILITY_KEYS 词表，开放词汇表未知键 fail-closed 忽略）/getStorageCapabilities/getActiveStorageCapabilities + LocalFileStorageCapabilities（诚实位：直传/删除=true，presigned/服务端复制/留存=false）+ init.js 注册时声明 + GET /api/storage/capabilities 只读面（惰性 require 保注册先行）。红绿 4 件先红后绿；实机隔离 :3011 REST 返回 local 全量能力位；邻域 43/43。未做（如实）=消费方接线（UI/适配器切换面按能力分支）留后续 UI 需求牵引，能力真值已可查询。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T08:02:33.188Z -->
+最后更新：2026-10-30（**RW-06-ENGINEERING-HYGIENE completed + RW 六包全部收口（终局；closeout 十三门 PASS + skills:check 报告级）**：B 线=ui-audit 门 109×（54.92s→0.50s，batchCommitMetadata 单次 git log 替代 per-commit fork ~1700 次；merge commit diff-tree/log --name-only 对照等价）/vitest 通道判销留痕（BLOCK-274 已根修，实测 8.97s）/PATH 债=Windows 侧专属登记（macOS 不适用实测核对）；A 线=可靠性基线落盘（3D 链 0ms/1578ms/恢复 5/5 + 门耗时新基线；长会话 soak 不伪造负载如实不测）；C 线=只读 Agent 独立重放「可用但有盲点」——4 处定位级盲点（RW-06 状态漂移/RW-05 证据目录缺席/triage 过期/evidence 处置缺位）全部修复，无产物缺失级。执行纲整体转 reference；C 档 6 条人眼清单（human-eye-checklist.md）待用户一次栈窗口。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -27,3 +27,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-10-30T07:42:31.644Z -->
 | ✅ BLOCK-273 拖拽边界统一渐变暗示规范 completed（P5-CLOSED；UI-588 in_progress） | 2026-10-27 | 五处边界「细线+渐变高光」统一（实心带退场）；theme 17/17+组件 35/35+双主题默认态实机断言；暗主题+真实指针 hover=30 秒人测路线 | theme 门/UI-588；plan §6 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-10-30T08:02:33.189Z -->
+| ✅ BLOCK-274 test-changed 内部优化 登记并同会话收口（轻量包·用户「行！ 按照建议来」） | 2026-10-27 | validateMap memoization（WeakMap 按图对象缓存成功校验）；重用例 505-864s→5.7s、31 套件 1058s→12.8s、closeout tests 门 704s→14.6s、整体 ~14min→~3min | 31/31 同套绿；两会话 Jev 收敛同案 |
