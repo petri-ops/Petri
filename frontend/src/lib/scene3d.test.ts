@@ -180,6 +180,30 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     expect(legacy.ok, '存量 align 场景不得因新白名单被拒').toBe(true);
   });
 
+  it('BLOCK-322 P3-02b 求值后的场景不再挂「未取回求值结果」告警', () => {
+    const raw = {
+      ...sampleScene3D(),
+      constraints: [{ kind: 'distance', a: 'enclosure', b: 'port', axis: 'x', value: 60 }],
+    };
+    const declared = normalizeScene3DForView(raw);
+    expect(declared.ok).toBe(true);
+    if (!declared.ok) return;
+    expect(declared.view.warnings.join('；')).toContain('预览未取回求值结果，按声明位置显示');
+
+    const evaluatedScene = {
+      ...raw,
+      nodes: raw.nodes.map((node) => (node.id === 'port'
+        ? { ...node, transform: { position: [60, 0, 0], rotation: [0, 90, 0] } }
+        : node)),
+    };
+    const evaluated = normalizeScene3DForView(evaluatedScene, { constraintsEvaluated: true });
+    expect(evaluated.ok).toBe(true);
+    if (!evaluated.ok) return;
+    expect(evaluated.view.warnings.join('；')).not.toContain('预览未取回求值结果');
+    expect(evaluated.view.nodes[1].transform?.position).toEqual([60, 0, 0]);
+    expect(evaluated.view.stats.constraints, '求值后约束仍在场景里声明（transform 是求值投影，不是新真相）').toBe(1);
+  });
+
   it('BLOCK-322 P2-02 灯光与环境声明通过解析并保留在 scene 上', () => {
     const result = normalizeScene3DForView({
       ...sampleScene3D(),

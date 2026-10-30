@@ -1,0 +1,53 @@
+{
+  "name": "block322-p3-02b-preview-eval-live",
+  "startedAt": "2026-10-30T15:24:48.414Z",
+  "finishedAt": "2026-10-30T15:24:50.038Z",
+  "assertions": [
+    {
+      "name": "P0_backend_reachable",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-10-30T15:24:48.421Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "P1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvv4ich8_ju06\"}"
+    },
+    {
+      "name": "P2_preview_shows_evaluated_bounds",
+      "pass": true,
+      "detail": "{\"bounds\":[120,80,40],\"expect\":[120,80,40]}"
+    },
+    {
+      "name": "P3_evaluated_notice_replaced",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点场景节点2参数0约束1渲染对象2包围盒mm120×80×40节点baseboxwidth120·height40·depth80portboxwidth60·height40·depth40约束对齐base→port（x）视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "P4_both_nodes_render_after_eval",
+      "pass": true,
+      "detail": "{\"objects\":2}"
+    },
+    {
+      "name": "P5_fallback_keeps_declared_bounds",
+      "pass": true,
+      "detail": "{\"bounds\":[190,80,40],\"expect\":[190,80,40]}"
+    },
+    {
+      "name": "P6_reason_visible_from_server_message",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender4.5.10LTS加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点装配约束在服务端求值后烘进transform：未能向本地后端取回求值结果，预览按声明位置显示（constraint_conflict:port.position.x已由constraints[0]定为60，constraints[1]（align）要求0）。场景节点2参数0约束2渲染对象2包围盒mm190×80×40节点baseboxwidth120·height40·depth80portboxwidth60·height40·depth40约束间距base→port（x60mm）；对齐base→port（x）视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "P7_still_renders_on_failure",
+      "pass": true,
+      "detail": "{\"objects\":2}"
+    },
+    {
+      "name": "P8_stored_scene_keeps_declared_position",
+      "pass": true,
+      "detail": "{\"status\":200,\"position\":[100,0,0]}"
+    }
+  ],
+  "allPass": true
+}

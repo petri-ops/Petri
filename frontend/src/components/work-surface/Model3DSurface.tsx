@@ -2,8 +2,14 @@ import React from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
-import { fetchModel3DCapability } from '@/lib/model3dClient';
-import { normalizeScene3DForView, sampleScene3D, type Scene3DConstraintKind, type Scene3DView } from '@/lib/scene3d';
+import { fetchModel3DCapability, resolveModel3DScene } from '@/lib/model3dClient';
+import {
+  normalizeScene3DForView,
+  sampleScene3D,
+  SCENE3D_CONSTRAINT_NOTE_PREFIX,
+  type Scene3DConstraintKind,
+  type Scene3DView,
+} from '@/lib/scene3d';
 import {
   MESH_INPUT_ACCEPT_ATTR,
   MAX_MESH_BYTES,
@@ -98,6 +104,35 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     if (modelUrl) URL.revokeObjectURL(modelUrl);
   }, [modelUrl]);
 
+  const evalSeqRef = React.useRef(0);
+
+  /**
+   * BLOCK-322 P3-02b — 有约束就向本地后端要一次求值结果（纯函数端点，不写盘、不改场景文件）。
+   * 求值只在服务端发生；失败或后端缺席时保持声明位置并把原因如实显示，绝不在前端重解一遍
+   * （第二套求解器=plan §4 红线 2）。序号守卫防止用户换场景后旧响应覆盖新画面。
+   */
+  const evaluateConstraintsForPreview = async (loaded: Scene3DView) => {
+    const sequence = evalSeqRef.current + 1;
+    evalSeqRef.current = sequence;
+    if ((loaded.scene.constraints?.length || 0) === 0) return;
+    try {
+      const resolved = await resolveModel3DScene(loaded.scene);
+      if (evalSeqRef.current !== sequence) return;
+      const evaluated = normalizeScene3DForView(resolved.scene, { constraintsEvaluated: true });
+      // 求值后仍不合前端契约=两侧判据漂移：保守地保留声明位置与通用告警，不改画面。
+      if (!evaluated.ok) return;
+      setView(evaluated.view);
+      setWarnings(evaluated.view.warnings);
+    } catch (failure) {
+      if (evalSeqRef.current !== sequence) return;
+      const reason = failure instanceof Error ? failure.message : '未知原因';
+      setWarnings([
+        ...loaded.warnings.filter((item) => !item.startsWith(SCENE3D_CONSTRAINT_NOTE_PREFIX)),
+        `${SCENE3D_CONSTRAINT_NOTE_PREFIX}：未能向本地后端取回求值结果，预览按声明位置显示（${reason}）。`,
+      ]);
+    }
+  };
+
   const loadStructured = (raw: unknown) => {
     const normalized = normalizeScene3DForView(raw);
     if (!normalized.ok) {
@@ -113,6 +148,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     setSelectedNodeId(null);
     setMeasurePoints([]);
     setMeasureMode(false);
+    void evaluateConstraintsForPreview(normalized.view);
   };
 
   const onFile = async (file: File | undefined) => {

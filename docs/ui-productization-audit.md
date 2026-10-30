@@ -41,6 +41,14 @@
 - **实机证据**：`acceptance/next-03-prompt-enhance/next03-prompt-enhance-live-live.json`（**13/13**，隔离 :3011 + 9223；真实 DeepSeek profile）：点击前无请求/无弹层；点击后真实模型返回优化稿与 TaskSpec；原稿保持、Blender unavailable 可见、conversation 消息数为 0；替换只回填 composer，仍未发送。大模型 2200 token 截断已由 5000 预算+数组上限修复。
 - **边界（reopen）**：真实模型输出来自测试用隔离配置（不修改用户设置）；优化内容质量随模型波动，不做“更好”保证；`capabilitySnapshot` 的 MCP 为连接数快照，具体工具 schema 不进入增强上下文；i18n deferred。
 
+## UI-645: 3D 预览消费服务端约束求值结果（BLOCK-322 P3-02b；2026-10-30 **verified（dev Electron 边界内；前端 13/13 + 实机 9/9）**）
+
+- **变化面**：3D 工作台加载带装配约束的 SceneSpec 后，**向只读 `POST /api/model3d/scene/resolve` 取一次求值结果并渲染其 `transform`**——面板「包围盒 mm」与画布位置随之变为求值后的装配位置；求值成功时不再挂「预览未取回求值结果」告警，失败（过约束/后端缺席/超时）时**保持声明位置**并把服务端原因原样写进告警（如 `constraint_conflict: port.position.x 已由 constraints[0] 定为 60…`）；`normalizeScene3DForView(raw, { constraintsEvaluated: true })` 只是「已求值」的声明位开关，求值文案前缀收敛为 `SCENE3D_CONSTRAINT_NOTE / SCENE3D_CONSTRAINT_NOTE_PREFIX` 单源（此前告警文案在 lib 与组件两处各写一份字面量，属可漂移的第二来源）。
+- **为什么这样设计**：P3-02a 把求值落在唯一真值处之后，预览若自己再解一遍就是第二套求解器（红线 2），两侧一旦不同 SceneSpec 就不再可信；因此前端只做「取回并显示」，并保留序号守卫（`evalSeqRef`）防止用户换场景后旧响应覆盖新画面。求值端点是纯函数投影：**不写盘、不改 revision**——写回声明位置才是要防的第二真相。
+- **验证（代码）**：`frontend/src/lib/scene3d.test.ts` 13/13（求值态不挂未求值告警、位置随投影变化、约束仍随场景声明保留；非法约束 fail-closed 与存量 `align` 兼容不回归）+ 全量 tsc 0 + 改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p3/block322-p3-02b-preview-eval-live-live.json`（**9/9 allPass**，9223 离屏 + 真实 :3001 后端；明细 `…-detail.json`）。判据用**数字而不是文案**：同一场景（base 120 宽 + port 60 宽在 x=100）声明态包围盒 `190×80×40`，`align` 求值后面板读数变 **`120×80×40`**（Three 侧实测场景盒），渲染对象仍 2；过约束场景走回落——包围盒保持 **190**、告警原样显示服务端 `constraint_conflict` 原因、画面不空；求值后写盘对账：`scene/apply` + `scene/read` 读回的 `port.transform.position` 仍是声明值 **`[100,0,0]`**，证明预览求值没有回写场景真值。
+- **边界（reopen）**：①求值仍是一次性拉取（编辑参数后随下一次加载/应用重新求值），未做订阅式增量；②求值失败的回落位置=声明位置，与构建结果可能不同，这一点由告警文案显式说明；③`constraintsEvaluated` 只关告警不改几何，前端零求解代码由 `test/block322-p3-constraints.test.mjs` 的「预览端不出现 constraint 求解」静态锁守护；④G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-644: 3D 装配约束求值与预览诚实性（BLOCK-322 P3-02a；2026-10-30 **verified（dev Electron 边界内；契约 8/8 + 前端 12/12 + 实机 16/16）**）
 
 - **变化面**：SceneSpec `constraints` 从「只允许 `align`，且没有任何执行面求值」扩为 `align` / `distance`（沿轴带符号间距 mm）/ `angle`（绕同轴相对转角 °）三类白名单，**在唯一真值处 `resolveSceneSpec` 单遍按声明顺序求值并把结果烘进 `transform`**，构建/渲染/导出与配方 Runner 自动吃到（Blender 侧零改动）；新增只读端点 `POST /api/model3d/scene/resolve`（纯函数、无项目前置，对标 `scene/diff`，返回求值后场景 + `appliedConstraints` 台账 + 声明态 `sceneHash`）；过约束显式 `constraint_conflict`、求值越界显式 `constraint_out_of_range`，两者均拒写盘与拒导出；3D 工作台约束列表按类型显示（`对齐 base→port（x）；间距 base→port（x 60mm）；转角 base→cap（z 45°）`），带约束场景如实声明「装配约束在服务端求值后烘进 transform……预览未取回求值结果，按声明位置显示」。

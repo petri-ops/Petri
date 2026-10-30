@@ -128,6 +128,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p1-external-asset-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-camera-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-lighting-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-02b-preview-eval-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-constraints-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-geometry-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",

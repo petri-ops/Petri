@@ -350,7 +350,10 @@ function validateRenderForView(raw: unknown, errors: string[]): void {
   }
 }
 
-export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3DView } | { ok: false; errors: string[] } {
+export const SCENE3D_CONSTRAINT_NOTE_PREFIX = '装配约束在服务端求值后烘进 transform';
+export const SCENE3D_CONSTRAINT_NOTE = `${SCENE3D_CONSTRAINT_NOTE_PREFIX}（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。`;
+
+export function normalizeScene3DForView(raw: unknown, options?: { constraintsEvaluated?: boolean }): { ok: true; view: Scene3DView } | { ok: false; errors: string[] } {
   const errors: string[] = [];
   if (!isRecord(raw)) return { ok: false, errors: ['SceneSpec 必须是 JSON 对象'] };
   if (raw.version !== SCENE3D_VERSION) errors.push(`version 必须是 ${SCENE3D_VERSION}`);
@@ -421,8 +424,8 @@ export function normalizeScene3DForView(raw: unknown): { ok: true; view: Scene3D
   if (isRecord(raw.camera) && raw.camera.projection === 'orthographic') {
     warnings.push('相机声明为正交投影：导出按正交取景，预览端仍是透视相机（只对齐机位与目标，不假装投影一致）。');
   }
-  if (Array.isArray(raw.constraints) && raw.constraints.length > 0) {
-    warnings.push('装配约束在服务端求值后烘进 transform（对齐/间距/角度在构建导出时生效）：预览未取回求值结果，按声明位置显示。');
+  if (Array.isArray(raw.constraints) && raw.constraints.length > 0 && options?.constraintsEvaluated !== true) {
+    warnings.push(SCENE3D_CONSTRAINT_NOTE);
   }
   if (errors.length > 0) return { ok: false, errors: [...new Set(errors)] };
   const scene: Scene3DSpec = {

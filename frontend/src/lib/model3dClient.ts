@@ -17,6 +17,39 @@ export async function fetchModel3DCapability(): Promise<Model3DCapability> {
 
 export type Model3DReviewView = 'front' | 'top' | 'side' | 'iso' | 'camera';
 
+export interface Model3DAppliedConstraint {
+  index: number;
+  kind: string;
+  a: string;
+  b: string;
+  axis: string;
+  field: string;
+  from: number;
+  to: number;
+  changed: boolean;
+}
+
+/**
+ * BLOCK-322 P3-02b — 只读求值预览：参数引用与装配约束由服务端 `resolveSceneSpec` 烘进 transform
+ * 后回传（同一函数即送 Blender 的那一份）。求值只在服务端发生，前端不重解=不建第二套求解器。
+ */
+export async function resolveModel3DScene(scene: unknown): Promise<{ scene: unknown; appliedConstraints: Model3DAppliedConstraint[] }> {
+  const response = await fetch(`${getApiPrefix()}/model3d/scene/resolve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ scene }),
+    signal: AbortSignal.timeout(10_000),
+  });
+  const data = await response.json().catch(() => null) as
+    | { ok?: boolean; scene?: unknown; appliedConstraints?: Model3DAppliedConstraint[]; error?: string; errors?: string[] }
+    | null;
+  if (!response.ok || !data || data.ok !== true) {
+    const reason = data?.errors?.[0] || data?.error || `HTTP ${response.status}`;
+    throw new Error(reason);
+  }
+  return { scene: data.scene, appliedConstraints: data.appliedConstraints || [] };
+}
+
 interface Model3DReviewViewReport {
   view: Model3DReviewView;
   observations: string[];
