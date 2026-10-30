@@ -10,7 +10,7 @@ status: active
 
 # RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE 执行计划
 
-最后更新：2026-10-30（**里程碑 2：A 线 a 档 8/13 verified + UI-638 发现腿清偿 + d 档 28 处置 + b 档 18 注记 + c 档清单 4 条**。a 档已翻=UI-598/543/596/462/303/594/331/484；638 发现腿实证（任务墙列出 model3d 作业）+点开腿入 c 档（探针红线：wm.openResultInMainWindow 用户主窗动作）。**下一会话第一个动作**=a 档剩余 4 条（UI-248 review diff 上下文 / UI-301+385 spawn 运行数据 / UI-595 图像批注面）——每条需种子管线：248=临时项目工作区文件改动+review 打开；301/385=mock provider 真跑一轮 spawn 会话（BLOCK-245 P5 隔离模式先例）；595=图像 artifact 批注面。经验：探针 selectors 用 data-testid/子串匹配（CSS Modules 哈希类名）；evalJs 返回值不带引号；flow API base 用 RW02_UAPI 环境变量（隔离 :3011 时必须传）。恢复协议：读本锚 + triage.json → 核对 git log → 续探针 → 收口。）
+最后更新：2026-10-30（**里程碑 2：A 线 a 档 8/13 verified + UI-638 发现腿清偿 + d 档 28 处置 + b 档 18 注记 + c 档清单 4 条**。a 档已翻=UI-598/543/596/462/303/594/331/484；638 发现腿实证（任务墙列出 model3d 作业）+点开腿入 c 档（探针红线：wm.openResultInMainWindow 用户主窗动作）。**剩余 3 条种子方案（2026-10-30 第二次更新；248 已 verified）**：UI-301+385=mock provider 真跑一轮 spawn 会话——**完整模板=scripts/block246-q2-rem-live.mjs**（本地 mock SSE 服务 :39054 + ai-settings.json 写 openai-compatible preset 指向 mock + 迁移自举 + 隔离栈全家桶；主回合 mock 返回 tool_calls=spawn_agent → 子代理回合 mock 返回文本 → 面板断言子代理活动条/详情）；UI-595=图像 artifact 批注面（model3d 渲染 PNG 在工作区 + 文件面板预览/结果面打开 → 批注画笔 → SVG path 断言）。**已验证探针经验**：selectors 用 data-testid/子串匹配（CSS Modules 哈希类名）；evalJs 返回值不带引号；审阅/面板卡 innerText 含描述需宽匹配；flow API base 用 RW02_UAPI（隔离 :3011 必传）；种子 git 仓要显式 init（commit 不建仓）。恢复协议：读本锚 + triage.json → 核对 git log → 续探针 → 收口。）
 
 ## 0. 发令与授权留痕
 
