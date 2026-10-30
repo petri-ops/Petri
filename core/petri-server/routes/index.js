@@ -54,6 +54,7 @@ module.exports = async function registerRoutes(app) {
     ['AI Loop API', () => require('./ai-loop').registerAiLoopRoutes(app)],
     ['Harness', () => require('./harness')(app)],
     ['Tools', () => require('./tools')(app)],
+    ['Storage capabilities', () => require('./storage-capabilities').registerStorageCapabilitiesRoute(app)],
     ['Result Studio', () => require('./result-studio')(app)],
     // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）
     ['Model 3D', () => require('./model3d')(app)],

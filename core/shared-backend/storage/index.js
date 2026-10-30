@@ -16,7 +16,46 @@
 const logger = require('../logger');
 
 const _storages = new Map();
+const _capabilities = new Map();
 let _activeName = null;
+
+// RW-05 — 能力协商：适配器声明 supports_* 能力位，消费方按能力分支（可插拔）。
+// 开放词汇表：未知键 fail-closed 忽略（不授予）；未声明的适配器 = 全 false 形态。
+const KNOWN_CAPABILITY_KEYS = Object.freeze([
+  'supportsDirectUpload',
+  'supportsDelete',
+  'supportsPresignedUrl',
+  'supportsServerSideCopy',
+  'supportsRetentionPolicy',
+]);
+
+function declareStorageCapabilities(name, capabilities) {
+  if (!_storages.has(name)) {
+    throw new Error(`declareStorageCapabilities: 适配器未注册: ${name}`);
+  }
+  if (!capabilities || typeof capabilities !== 'object' || Array.isArray(capabilities)) {
+    throw new Error('declareStorageCapabilities: capabilities must be an object');
+  }
+  const normalized = {};
+  for (const [key, value] of Object.entries(capabilities)) {
+    if (!KNOWN_CAPABILITY_KEYS.includes(key)) continue; // 未知键 fail-closed 忽略
+    if (typeof value !== 'boolean') continue; // 非布尔不授予
+    normalized[key] = value;
+  }
+  _capabilities.set(name, { name, ...normalized });
+  logger.info(`[storage] capabilities declared: ${name}`);
+}
+
+function getStorageCapabilities(name) {
+  if (!_storages.has(name)) {
+    throw new Error(`存储适配器未注册: ${name}`);
+  }
+  return _capabilities.get(name) || { name };
+}
+
+function getActiveStorageCapabilities() {
+  return getStorageCapabilities(_activeName || 'local');
+}
 
 function registerStorage(name, adapter) {
   if (!name || !adapter) {
@@ -57,4 +96,8 @@ module.exports = {
   getActiveStorage,
   setActiveStorage,
   listStorages,
+  declareStorageCapabilities,
+  getStorageCapabilities,
+  getActiveStorageCapabilities,
+  KNOWN_CAPABILITY_KEYS,
 };

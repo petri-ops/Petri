@@ -13,7 +13,7 @@
 const { registerExecutor } = require('./executors');
 
 // 存储注册表
-const { registerStorage, setActiveStorage } = require('./storage');
+const { registerStorage, setActiveStorage, declareStorageCapabilities } = require('./storage');
 
 let _initialized = false;
 
@@ -38,8 +38,9 @@ function initSharedBackend() {
 
   // ── 注册并激活本地存储适配器 ────────────────────────────────
   try {
-    const { LocalFileStorage } = require('./storage/local-storage');
+    const { LocalFileStorage, LocalFileStorageCapabilities } = require('./storage/local-storage');
     registerStorage('local', new LocalFileStorage());
+    declareStorageCapabilities('local', LocalFileStorageCapabilities);
     setActiveStorage('local');
   } catch (e) {
     console.warn('[init] Local storage registration failed:', e.message);

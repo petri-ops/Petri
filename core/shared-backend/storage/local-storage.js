@@ -128,4 +128,13 @@ class LocalFileStorage {
   }
 }
 
-module.exports = { LocalFileStorage, resolveLocalStorageKey: _resolveKey };
+// RW-05 — 本地适配器能力声明（诚实位：直传/删除=true；presigned/服务端复制/留存策略=false）。
+const LocalFileStorageCapabilities = Object.freeze({
+  supportsDirectUpload: true,
+  supportsDelete: true,
+  supportsPresignedUrl: false,
+  supportsServerSideCopy: false,
+  supportsRetentionPolicy: false,
+});
+
+module.exports = { LocalFileStorage, resolveLocalStorageKey: _resolveKey, LocalFileStorageCapabilities };
