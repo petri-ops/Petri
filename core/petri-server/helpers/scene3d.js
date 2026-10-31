@@ -442,10 +442,8 @@ function validateConstraints(constraints, nodesById, errors) {
         const faces = MATE_PLANAR_FACES[node.type];
         if (!faces) errors.push(`${where}.${side} 节点类型 ${node.type} 不支持 mate（只支持 box/cylinder/plane 的平面）`);
         else if (!faces.includes(face)) errors.push(`${where}.${side}Face ${face} 不是 ${node.type} 的可贴合平面`);
-        const rotation = node.transform && node.transform.rotation;
-        if (Array.isArray(rotation) && rotation.some((value) => Number(value) !== 0)) {
-          errors.push(`${where}.${side} mate 仅支持无旋转节点（当前 rotation 非零）`);
-        }
+        // P3-03 v2a — 旋转平面贴合已支持（局→世合成 Rz·Ry·Rx 与 Blender 同源，探针定案）；
+        // 仅曲面/边（v2c）与任意 B-rep 仍拒绝（MATE_PLANAR_FACES 白名单兜住）。
       }
       const aAxis = MATE_FACE_AXIS[constraint.aFace];
       const bAxis = MATE_FACE_AXIS[constraint.bFace];
@@ -572,10 +570,72 @@ function mateHalfExtent(node, axis) {
   return null;
 }
 
+// P3-03 v2a — 欧拉序探针定案（Blender 5.2.3 实测）：默认 rotation_mode='XYZ'，
+// 矩阵合成 Rz·Ry·Rx（X 先转，列向量右乘）；euler 度 → 弧度。与前端求值器同源。
+function rotationMatrixDeg(eulerDeg) {
+  const [rx, ry, rz] = (Array.isArray(eulerDeg) ? eulerDeg : [0, 0, 0]).map((v) => (Number(v) || 0) * Math.PI / 180);
+  const cx = Math.cos(rx), sx = Math.sin(rx);
+  const cy = Math.cos(ry), sy = Math.sin(ry);
+  const cz = Math.cos(rz), sz = Math.sin(rz);
+  // Rz·Ry·Rx（列向量右乘；矩阵按行存储）
+  return [
+    [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
+    [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx],
+    [-sy, cy * sx, cy * cx],
+  ];
+}
+
+function applyMatrix(m, v) {
+  return [m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2], m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2], m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]];
+}
+
+/** 局部面心（半 extent × 面法向符号）。 */
+function localFaceCenter(dimensions, face) {
+  const meta = MATE_FACE_AXIS[face];
+  if (!meta) return null;
+  const half = { x: (Number(dimensions.width) || 0) / 2, y: (Number(dimensions.depth) || 0) / 2, z: (Number(dimensions.height) || 0) / 2 };
+  const center = [0, 0, 0];
+  center[AXIS_INDEX[meta.axis]] = half[meta.axis] * meta.sign;
+  return { center, normalAxis: meta.axis, sign: meta.sign };
+}
+
+/** 旋转是否为零（逐分量）。 */
+function rotationIsZero(node) {
+  const rotation = node.transform && node.transform.rotation;
+  return !Array.isArray(rotation) || rotation.every((value) => Number(value) === 0);
+}
+
+/** P3-03 v2a — 两平面的**世界法向**（面法向 = 局部法向经 Rz·Ry·Rx 合成）。 */
+function worldFaceNormal(node, face) {
+  if (rotationIsZero(node)) {
+    const meta = MATE_FACE_AXIS[face];
+    const v = [0, 0, 0];
+    v[AXIS_INDEX[meta.axis]] = meta.sign;
+    return { normal: v, axis: meta.axis, sign: meta.sign, rotated: false };
+  }
+  const meta = MATE_FACE_AXIS[face];
+  const local = [0, 0, 0];
+  local[AXIS_INDEX[meta.axis]] = meta.sign;
+  const m = rotationMatrixDeg(node.transform && node.transform.rotation);
+  const normal = applyMatrix(m, local).map((v) => Number(v.toFixed(9)));
+  const axis = Math.abs(normal[0]) > 0.999 ? 'x' : Math.abs(normal[1]) > 0.999 ? 'y' : Math.abs(normal[2]) > 0.999 ? 'z' : null;
+  return { normal, axis, sign: normal[axis === 'x' ? 0 : axis === 'y' ? 1 : 2] > 0 ? 1 : -1, rotated: true };
+}
+
 function applyMateConstraint({ constraint, index, anchor, target, decided, fail, applied }) {
   const aFace = MATE_FACE_AXIS[constraint.aFace];
   const bFace = MATE_FACE_AXIS[constraint.bFace];
-  if (!aFace || !bFace || aFace.axis !== bFace.axis || aFace.sign !== -bFace.sign) {
+  if (!aFace || !bFace) {
+    fail('mate_face_incompatible', `constraint ${index}（mate）面标识非法（${constraint.aFace}/${constraint.bFace}）`);
+    return;
+  }
+  // P3-03 v2a — 任一节点带旋转 → 局→世合成路径（世界法向校验 + 面点旋转求值 + 姿态写入）
+  const aRotated = !rotationIsZero(anchor);
+  const bRotated = !rotationIsZero(target);
+  if (aRotated || bRotated) {
+    return applyMateConstraintV2a({ constraint, index, anchor, target, decided, fail, applied, aFace, bFace, aRotated, bRotated });
+  }
+  if (aFace.axis !== bFace.axis || aFace.sign !== -bFace.sign) {
     fail('mate_face_incompatible', `constraint ${index}（mate）需要法向相反的同轴平面（${constraint.aFace}/${constraint.bFace}）`);
     return;
   }
@@ -628,6 +688,188 @@ function applyMateConstraint({ constraint, index, anchor, target, decided, fail,
     });
   }
 }
+
+/**
+ * P3-03 v2a — 带旋转节点的平面贴合求值（局→世合成 Rz·Ry·Rx，与 Blender 5.2.3 探针同源）。
+ *
+ * 语义：
+ *   1. 两贴合面的世界法向经各自节点的 rotation 合成；法向必须相反（贴合定义，同 v1 但在世界系判）；
+ *   2. 面点求值：a 面心（局→世，含 a 的 position 平移）与 b 面心（局→世）沿世界贴合法向对齐；
+ *   3. b 的 rotation 改写为「使 b 贴合面世界法向 = −a 贴合面世界法向」的最小姿态：
+ *      a 无旋转时=把 b 的贴合面法向转回 a 的轴对齐反方向（本刀只解轴对齐结果姿态，
+ *      一般姿态合成=材料 §5 v2b 后续票）；a 也旋转时=保持 b.rotation 不变、只对位置（如实登记）。
+ *   4. 未转一方按零旋转路径求值（与 v1 数值逐位一致——兼容锚①）。
+ */
+/** P3-03 v2a — 在 90° 欧拉组合（XYZ 序，三轴各 0/90/180/270）内枚举：
+ * 找到使 face 的世界法向 = targetNormal 的最小姿态（改动量最小者）；找不到返回 null。 */
+function solveRotationForFaceNormal(currentEuler, face, targetNormal) {
+  const local = [0, 0, 0];
+  const meta = MATE_FACE_AXIS[face];
+  local[AXIS_INDEX[meta.axis]] = meta.sign;
+  const steps = [0, 90, 180, 270];
+  let best = null;
+  let bestCost = Infinity;
+  for (const dx of steps) for (const dy of steps) for (const dz of steps) {
+    const euler = [dx, dy, dz];
+    const m = rotationMatrixDeg(euler);
+    const world = applyMatrix(m, local).map((v) => Number(v.toFixed(6)));
+    if (!world.some((v, i) => Math.abs(v - targetNormal[i]) > 1e-6)) {
+      const cost = euler.reduce((acc, v, i) => acc + Math.abs(v - (currentEuler[i] || 0)) * (i === 0 ? 1 : i === 1 ? 2 : 3), 0);
+      if (cost < bestCost) { bestCost = cost; best = euler; }
+    }
+  }
+  return best;
+}
+
+function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fail, applied, aFace, bFace, aRotated, bRotated }) {
+  const aWorld = worldFaceNormal(anchor, constraint.aFace);
+  // v2a 姿态改写先于法向校验：贴合=两世界法向相反。a 无旋转 → 目标轴对齐；
+  // 90° 欧拉组合可枚举（XYZ 序三轴 0/90/180/270 共 64 组合），找到使 b 贴合面
+  // 世界法向 = −aWorld.normal 的最小姿态即改写（找不到 → mate_face_incompatible，
+  // 一般姿态合成属 v2b 后续票，不静默伪造）。
+  const originalBRotation = (target.transform && Array.isArray(target.transform.rotation) ? target.transform.rotation : [0, 0, 0]).map(Number);
+  let bRotationFinal = [...originalBRotation];
+  const bRotatedNow = bRotationFinal.some((v) => v !== 0);
+  const aWorldForPose = aWorld;
+  if (!aWorldForPose.axis) {
+    fail('mate_face_incompatible', `constraint ${index}（mate）a 旋转后贴合面法向非轴对齐（${JSON.stringify(aWorldForPose.normal)}）——一般姿态合成属 v2b 后续票`);
+    return;
+  }
+  const targetNormal = aWorldForPose.normal.map((v) => -v);
+  if (bRotatedNow) {
+    const solved = solveRotationForFaceNormal(bRotationFinal, constraint.bFace, targetNormal);
+    if (solved === null) {
+      fail('mate_face_incompatible', `constraint ${index}（mate）90° 欧拉组合内无可使贴合面法向对齐的姿态（目标 ${JSON.stringify(targetNormal)}）——一般姿态合成属 v2b 后续票`);
+      return;
+    }
+    bRotationFinal = solved;
+    target.transform.rotation = [...solved];
+    applied.push({
+      index,
+      kind: 'mate',
+      a: constraint.a,
+      b: constraint.b,
+      axis: 'x',
+      field: 'rotation',
+      from: originalBRotation,
+      to: [...solved],
+      changed: true,
+      v2a: true,
+      poseSolve: true,
+    });
+  }
+  const bWorld = worldFaceNormal(target, constraint.bFace);
+  if (!bWorld.axis) {
+    fail('mate_face_incompatible', `constraint ${index}（mate）姿态改写后贴合面法向非轴对齐——一般姿态合成属 v2b 后续票`);
+    return;
+  }
+  if (bWorld.axis !== aWorldForPose.axis || bWorld.sign !== -aWorldForPose.sign) {
+    fail('mate_face_incompatible', `constraint ${index}（mate）世界法向须相反且同轴（a=${JSON.stringify(aWorldForPose.normal)} b=${JSON.stringify(bWorld.normal)}）`);
+    return;
+  }
+  const normalAxis = aWorld.axis;
+  const normalIndex = AXIS_INDEX[normalAxis];
+  const dimsOf = (node) => (node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : {});
+  const aDims = dimsOf(anchor);
+  const bDims = dimsOf(target);
+  const aHalf = { x: (Number(aDims.width) || 0) / 2, y: (Number(aDims.depth) || 0) / 2, z: (Number(aDims.height) || 0) / 2 };
+  const bHalf = { x: (Number(bDims.width) || 0) / 2, y: (Number(bDims.depth) || 0) / 2, z: (Number(bDims.height) || 0) / 2 };
+  const offset = constraint.offset === undefined ? 0 : Number(constraint.offset);
+
+  // a 面心世界坐标 = a.position + Ra·(局部面心)
+  const aLocal = localFaceCenter(aDims, constraint.aFace);
+  const bLocal = localFaceCenter(bDims, constraint.bFace);
+  if (!aLocal || !bLocal) {
+    fail('mate_dimensions_missing', `constraint ${index}（mate）缺可求值尺寸`);
+    return;
+  }
+  const aRot = aRotated ? rotationMatrixDeg(anchor.transform.rotation) : [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  const bRot = bRotated ? rotationMatrixDeg(target.transform.rotation) : [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+  const aPos = (anchor.transform && Array.isArray(anchor.transform.position) ? anchor.transform.position : [0, 0, 0]).map(Number);
+  const bPos = (target.transform && Array.isArray(target.transform.position) ? target.transform.position : [0, 0, 0]).map(Number);
+  const aFaceCenter = applyMatrix(aRot, aLocal.center).map((v, i) => v + aPos[i]);
+  const bFaceCenterLocal = applyMatrix(bRot, bLocal.center);
+
+  // b 的新姿态：贴合面世界法向 = −aWorld.normal。a 未转 → 目标=轴对齐反方向；
+  // 最小姿态=清零/翻转 b 的 euler 使局部贴合面指对目标（本刀只解「目标为轴对齐」情形）。
+  const targetWorld = aWorld.normal.map((v) => -v);
+  const newBRotation = (() => {
+    if (!bRotated) return (target.transform.rotation || [0, 0, 0]).map(Number);
+    // b 已旋转：若其贴合面局部法向 × 任一 90° 组合可达目标 → 用最小改动=目标轴对齐时的
+    // 局部法向映射反推。本刀如实边界：非零旋转 b 的姿态保留原值、位置按原姿态求值——
+    // 姿态改写的一般解（四元数最短弧）属 v2b 后续票，不静默伪造。
+    const worldAfter = applyMatrix(bRot, [0, 0, 0]);
+    void worldAfter;
+    return (target.transform.rotation || [0, 0, 0]).map(Number);
+  })();
+
+  // b 面心世界坐标目标 = a 面心 + offset·(−法向)——沿贴合法向对齐
+  const bFaceTarget = aFaceCenter.map((v, i) => (i === normalIndex ? v + offset * -aWorld.normal[i] : v));
+  // b.position = bFaceTarget − Rb·(局部面心)
+  const bNewPos = bFaceTarget.map((v, i) => v - applyMatrix(bRot, bLocal.center)[i]);
+
+  const axes = ['x', 'y', 'z'].map((axis) => ({
+    axis,
+    index: AXIS_INDEX[axis],
+    value: round6(bNewPos[AXIS_INDEX[axis]]),
+  }));
+  for (const item of axes) {
+    const key = `${constraint.b}|position|${item.axis}`;
+    const prior = decided.get(key);
+    if (prior && Math.abs(prior.value - item.value) > CONFLICT_TOLERANCE) {
+      fail('constraint_conflict', `constraint_conflict: ${constraint.b}.position.${item.axis} 已由 constraints[${prior.index}] 定为 ${prior.value}，constraints[${index}]（mate v2a）要求 ${item.value}`);
+      return;
+    }
+    if (Math.abs(item.value) > LIMITS.maxDimensionMm) {
+      fail('constraint_out_of_range', `constraint_out_of_range: constraints[${index}]（mate v2a）把 ${constraint.b}.position.${item.axis} 求值为 ${item.value}，超出 ±${LIMITS.maxDimensionMm}mm`);
+      return;
+    }
+  }
+  for (const item of axes) {
+    const key = `${constraint.b}|position|${item.axis}`;
+    if (!decided.has(key)) decided.set(key, { value: item.value, index });
+    const from = writeComponent(target, 'position', item.index, item.value);
+    applied.push({
+      index,
+      kind: 'mate',
+      a: constraint.a,
+      b: constraint.b,
+      axis: item.axis,
+      field: 'position',
+      from,
+      to: item.value,
+      changed: Math.abs(from - item.value) > CONFLICT_TOLERANCE,
+      aFace: constraint.aFace,
+      bFace: constraint.bFace,
+      v2a: true,
+    });
+  }
+  // 姿态写入（本刀只写 a 无旋转 → b 对齐轴对齐反方向的情形；b 已旋转时姿态保留原值如实不写）
+  if (!bRotated) {
+    const from = (target.transform.rotation || [0, 0, 0]).map(Number);
+    const to = aRotated ? from : [0, 0, 0];
+    void newBRotation;
+    const changed = to.some((v, i) => Math.abs(v - from[i]) > CONFLICT_TOLERANCE);
+    if (changed) {
+      if (!isPlainObject(target.transform)) target.transform = {};
+      target.transform.rotation = [...to];
+    }
+    applied.push({
+      index,
+      kind: 'mate',
+      a: constraint.a,
+      b: constraint.b,
+      axis: normalAxis,
+      field: 'rotation',
+      from,
+      to,
+      changed,
+      v2a: true,
+    });
+  }
+}
+
+function round6(v) { return Number(v.toFixed(6)); }
 
 /**
  * BLOCK-322 P3-02a — 单遍、按声明顺序求值装配约束，结果写回 b 的 transform。

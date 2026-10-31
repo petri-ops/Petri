@@ -1,0 +1,14 @@
+{
+  "schema": "block322-p3-03-v2a-live/v1",
+  "recordedAt": "2026-10-30",
+  "leg": "P3-03 v2a 实机（RULING-04 v2 §5 开工序第 2 票）",
+  "checks": {
+    "gapZero": true,
+    "rotationConsistent": true,
+    "evaluatedPose": [0, 0, 0],
+    "evaluatedPosition": [0, 0, 20]
+  },
+  "method": "欧拉序探针定案（Blender 5.2.3 默认 XYZ 序、Rz·Ry·Rx 合成、dimensions=scale 实现）→ 求值器解出带旋转 mate（b 绕 X 90° + -z 面贴 a +z 面 → 姿态改写 [90,0,0]→[0,0,0]、位置 [0,0,20]）→ Blender unit-cube 面心对账 gap=0、rotation 读回一致",
+  "unitTests": "test/block322-p3-03-v2a-mate-rotation.test.mjs 5/5 + v1 兼容块 block322-p4-mate 2/2（90° 组合可解语义锁 + 45° 不可解 fail-closed）+ 邻域 37/37",
+  "pass": true
+}

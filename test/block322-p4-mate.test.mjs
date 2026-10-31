@@ -74,10 +74,15 @@ test('BLOCK-322 P3-03 mate — 非法面/曲面/旋转/同法向/越界/冲突�
   const side = scene3d.validateSceneSpec(scene([cylinder, cap], [{ kind: 'mate', a: 'cyl', b: 'cap', aFace: '+x', bFace: '-z' }]));
   assert.equal(side.ok, false);
   assert.ok(side.errors.some((error) => error.includes('不是 cylinder 的可贴合平面')));
+  // P3-03 v2a — 旋转节点 mate 已支持（姿态求解器改写 rotation）；「非 90° 组合不可解」
+  // 的 fail-closed 改锁到欧拉枚举失败路径（v2a 契约测在 block322-p3-03-v2a-mate-rotation）。
   const rotated = { ...base, transform: { position: [0, 0, 0], rotation: [0, 0, 30] } };
   const rotatedResult = scene3d.validateSceneSpec(scene([rotated, cap], [{ kind: 'mate', a: 'base', b: 'cap', aFace: '+z', bFace: '-z' }]));
-  assert.equal(rotatedResult.ok, false);
-  assert.ok(rotatedResult.errors.some((error) => error.includes('无旋转节点')));
+  assert.equal(rotatedResult.ok, true, 'v2a：90° 组合可解的旋转节点 mate 不再被 validate 拒绝');
+  const rotated45 = { ...base, transform: { position: [0, 0, 0], rotation: [45, 0, 0] } };  // X 45°：+z 面法向倾斜出轴对齐栅格
+  const rotated45Result = scene3d.resolveSceneSpec(scene([rotated45, cap], [{ kind: 'mate', a: 'base', b: 'cap', aFace: '+z', bFace: '-z' }]));
+  assert.equal(rotated45Result.ok, false, '45° 面法向非轴对齐 → 求值显式拒绝（v2a 边界）');
+  assert.ok(rotated45Result.errors.some((error) => error.includes('mate')), '45° 拒绝走 mate 显式错误');
 
   const conflict = scene3d.resolveSceneSpec(scene([base, cap], [
     { kind: 'distance', a: 'base', b: 'cap', axis: 'x', value: 99 },
