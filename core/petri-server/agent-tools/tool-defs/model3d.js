@@ -65,7 +65,7 @@ module.exports = [
           operations: {
             type: 'array',
             items: { type: 'object', additionalProperties: true },
-            description: 'set_parameter / update_node / add_node / remove_node / set_metadata',
+            description: 'set_parameter / update_node / add_node / remove_node / add_constraint / remove_constraint / set_metadata',
           },
         },
         required: ['scene', 'operations'],

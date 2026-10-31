@@ -983,6 +983,29 @@ function applySceneOperations(input, operations) {
     } else if (operation.op === 'remove_node') {
       if (nodeById().size <= 1) return { ok: false, error: 'scene_requires_node' };
       base.nodes = base.nodes.filter((node) => node.id !== operation.id);
+    } else if (operation.op === 'add_constraint') {
+      // P3-03 v2b 第二票 — 约束创建操作：校验走 validateSceneSpec 同源单源
+      // （mate 面白名单/法向相反/数值域全复用），不建第二校验真相。
+      if (!isPlainObject(operation.constraint)) return { ok: false, error: 'operation_invalid' };
+      base.constraints = Array.isArray(base.constraints) ? base.constraints : [];
+      if (base.constraints.length >= (LIMITS.maxConstraints || 200)) return { ok: false, error: 'constraints_limit' };
+      base.constraints.push(clone(operation.constraint));
+      // v2b — 约束创建即求值（fail-closed）：不可解/冲突/越界的约束整个 apply 拒收，
+      // 不落一个「存进去但装配不动」的死约束。校验=applyConstraints 同源单源。
+      const evaluation = applyConstraints(base);
+      if (evaluation.errorCode) {
+        return { ok: false, error: evaluation.errorCode, message: evaluation.errors.join('; ') };
+      }
+      // 校验同源：validateSceneSpec 的 mate 面白名单/法向/旋转检查复用（不建第二校验真相）
+      const validated = validateSceneSpec(base);
+      if (!validated.ok) {
+        return { ok: false, error: 'constraint_invalid', message: validated.errors.join('; ') };
+      }
+    } else if (operation.op === 'remove_constraint') {
+      if (!Array.isArray(base.constraints)) return { ok: false, error: 'no_constraints' };
+      const idx = base.constraints.findIndex((c) => isPlainObject(c) && c.id === operation.id);
+      if (idx < 0) return { ok: false, error: 'constraint_not_found' };
+      base.constraints.splice(idx, 1);
     } else if (operation.op === 'set_metadata') {
       if (!isPlainObject(operation.metadata)) return { ok: false, error: 'operation_invalid' };
       base.metadata = { ...(base.metadata || {}), ...operation.metadata };
