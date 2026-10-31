@@ -1,0 +1,40 @@
+{
+  "version": "scene3d/v1",
+  "units": "mm",
+  "coordinateSystem": "z-up-right-handed",
+  "parameters": {
+    "width": 120,
+    "depth": 80,
+    "height": 30,
+    "wall": 2.5,
+    "portRadius": 6,
+    "portLength": 8
+  },
+  "nodes": [
+    {
+      "id": "enclosure",
+      "type": "box",
+      "label": "外壳主体",
+      "transform": { "position": [0, 0, 0], "rotation": [0, 0, 0] },
+      "dimensions": { "width": "width", "depth": "depth", "height": "height" },
+      "material": { "color": "#e9e7e2", "roughness": 0.55 }
+    },
+    {
+      "id": "port",
+      "type": "cylinder",
+      "label": "正面端口凸台",
+      "transform": { "position": [60, 0, 0], "rotation": [0, 90, 0] },
+      "dimensions": { "radius": "portRadius", "height": "portLength" },
+      "material": { "color": "#e9e7e2", "roughness": 0.55 }
+    }
+  ],
+  "constraints": [],
+  "metadata": {
+    "title": "ABS 外壳 120×80×30",
+    "material": "ABS",
+    "defaultDensityKgM3": 1040,
+    "wall": 2.5,
+    "recipeId": "box-enclosure",
+    "recipeVersion": 1
+  }
+}

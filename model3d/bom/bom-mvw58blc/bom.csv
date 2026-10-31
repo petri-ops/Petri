@@ -1,0 +1,4 @@
+id,type,label,volumeMm3,densityKgM3,densitySource,massG,massKg,meshObject
+enclosure,box,外壳主体,288000,1040,scene.metadata,299.52,0.29952,true
+port,cylinder,正面端口凸台,898.976141,1040,scene.metadata,0.934935,0.000934935,true
+TOTAL,,,288898.976141,,,300.454935,0.300454935,

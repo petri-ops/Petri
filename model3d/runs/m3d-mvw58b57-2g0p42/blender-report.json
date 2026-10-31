@@ -1,0 +1,98 @@
+{
+  "ok": true,
+  "blenderVersion": "5.2.3 LTS",
+  "renderEngine": "BLENDER_WORKBENCH",
+  "display": {
+    "engine": "BLENDER_WORKBENCH",
+    "declaredLighting": false,
+    "declaredMaterial": false,
+    "requestedEngine": "workbench",
+    "samples": null,
+    "device": null
+  },
+  "environment": {
+    "declared": false,
+    "background": null,
+    "worldStrength": null,
+    "effectiveWorldStrength": 1.0,
+    "effectiveColor": [
+      0.050876,
+      0.050876,
+      0.050876
+    ]
+  },
+  "lights": {
+    "created": [],
+    "errors": []
+  },
+  "geometry": {
+    "applied": [],
+    "consumed": [],
+    "dropped": [],
+    "errors": []
+  },
+  "materials": {
+    "declared": []
+  },
+  "mesh": {
+    "objects": 2,
+    "vertices": 72,
+    "triangles": 136,
+    "nonManifoldEdges": 0,
+    "watertight": true,
+    "volumesMm3": {
+      "enclosure": 288000.0,
+      "port": 898.976141
+    }
+  },
+  "camera": {
+    "declared": false,
+    "applied": false
+  },
+  "render": {
+    "width": 800,
+    "height": 600,
+    "declared": false
+  },
+  "boundsMm": {
+    "min": [
+      -60.0,
+      -40.0,
+      -15.0
+    ],
+    "max": [
+      64.0,
+      40.0,
+      15.0
+    ],
+    "size": [
+      124.0,
+      80.0,
+      30.0
+    ]
+  },
+  "renders": {},
+  "lineart": {
+    "requested": false,
+    "views": {},
+    "labels": {
+      "front": "前视图",
+      "top": "顶视图",
+      "side": "侧视图"
+    },
+    "error": null
+  },
+  "exports": {},
+  "turntable": {
+    "requested": 0,
+    "frames": 0,
+    "stills": [],
+    "video": null,
+    "elevationDeg": null,
+    "fps": null,
+    "movieCapability": null,
+    "videoError": null,
+    "errors": []
+  },
+  "unsupported": []
+}

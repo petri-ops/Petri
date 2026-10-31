@@ -1,0 +1,35 @@
+{
+  "schema": "model3d-bom-manifest/v1",
+  "generatedAt": "2026-10-31T08:32:46.513Z",
+  "sceneHash": "2483c2c56f04204141943886332dd7de8d2f413fcec277024fbffdf4d9c2e06f",
+  "totals": {
+    "nodes": 2,
+    "meshNodes": 2,
+    "totalVolumeMm3": 288898.976141,
+    "totalMassG": 300.454935,
+    "totalMassKg": 0.300454935
+  },
+  "files": [
+    {
+      "path": "model3d/bom/bom-mvw58blc/bom.csv",
+      "name": "bom.csv",
+      "mime": "text/csv",
+      "sha256": "7de5b59253c4984c0fcf80d37a84485ca52c9c51c7e5af0e89a6d1d77b4249d5",
+      "bytes": 286
+    },
+    {
+      "path": "model3d/bom/bom-mvw58blc/bom.md",
+      "name": "bom.md",
+      "mime": "text/markdown",
+      "sha256": "fdfa326f8ebb03e8658d4aed0b185859b7ee4543b5e6910673c76a2fb390973b",
+      "bytes": 708
+    },
+    {
+      "path": "model3d/bom/bom-mvw58blc/bom.json",
+      "name": "bom.json",
+      "mime": "application/json",
+      "sha256": "3d7681c0c6ab1a343675cb9f0b53e3eb0bf76f2ea4fe058bfff126a82c288208",
+      "bytes": 1111
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
+import { ChatTool3DPreview } from './SimpleChat/ChatTool3DPreview';
 import { ToolRowBoundary } from './TimelineBoundaries';
 import { projectExecutionAxis } from '@/lib/statusProjection';
 
@@ -728,8 +729,10 @@ export function ToolActivityList({
   collapseWhenSettled = false,
   showRunningStopwatch = false,
   forceOpen = false,
+  projectId,
 }: {
   activities: ToolActivityItem[];
+  projectId?: string | null;
   processingDurationMs?: number;
   /** UI-272 — 按迭代聚合的模型思考段，展开时展示每次工具调用前的衔接思路。 */
   reasoningByIteration?: Record<number, string>;
@@ -758,6 +761,13 @@ export function ToolActivityList({
   const runningElapsedMs = useRunningElapsed(showRunningStopwatch && anyRunning);
 
   const running = activities.filter((activity) => activity.status === 'running').length;
+  // BLOCK-322 产品洞察 — model3d_export 完成后检测（供内嵌 3D 预览卡渲染）
+  const hasCompleted3DExport = activities.some(
+    (a) => a.name === 'model3d_export' && a.status === 'success',
+  );
+  const export3DJobId = activities.find(
+    (a) => a.name === 'model3d_export' && a.status === 'success',
+  )?.toolJobId ?? null;
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
     (activity) => activity.status === 'error' || activity.status === 'denied'
@@ -986,6 +996,9 @@ export function ToolActivityList({
           })()}
         </div>
       )}
+      {hasCompleted3DExport && export3DJobId && projectId ? (
+        <ChatTool3DPreview projectId={projectId} jobId={export3DJobId} glbPath="model3d/scene.glb" />
+      ) : null}
     </div>
   );
 }

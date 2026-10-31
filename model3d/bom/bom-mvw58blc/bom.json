@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "schema": "model3d-bom/v1",
+  "sceneHash": "2483c2c56f04204141943886332dd7de8d2f413fcec277024fbffdf4d9c2e06f",
+  "rows": [
+    {
+      "id": "enclosure",
+      "type": "box",
+      "label": "外壳主体",
+      "volumeMm3": 288000,
+      "densityKgM3": 1040,
+      "densitySource": "scene.metadata",
+      "massG": 299.52,
+      "massKg": 0.29952,
+      "meshObject": true
+    },
+    {
+      "id": "port",
+      "type": "cylinder",
+      "label": "正面端口凸台",
+      "volumeMm3": 898.976141,
+      "densityKgM3": 1040,
+      "densitySource": "scene.metadata",
+      "massG": 0.934935,
+      "massKg": 0.000934935,
+      "meshObject": true
+    }
+  ],
+  "totals": {
+    "nodes": 2,
+    "meshNodes": 2,
+    "totalVolumeMm3": 288898.976141,
+    "totalMassG": 300.454935,
+    "totalMassKg": 0.300454935
+  },
+  "assumptions": [
+    "默认密度 1040 kg/m³（可在节点 material.densityKgM3 或 metadata.defaultDensityKgM3 覆盖）"
+  ],
+  "tolerances": [],
+  "mesh": {
+    "objects": 2,
+    "vertices": 72,
+    "triangles": 136,
+    "nonManifoldEdges": 0,
+    "watertight": true
+  }
+}

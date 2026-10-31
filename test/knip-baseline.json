@@ -23,6 +23,7 @@
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::screenshotPng",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::selectPageTarget",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::withInputShield",
+    "exports::frontend/src/components/copilot/SimpleChat/ChatTool3DPreview.tsx::default",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::PACK_WRITE_BRIDGE_VERSION",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::validateSurfaceWritesDecl",
     "exports::src/main/core-utils.js::IS_DEV",
