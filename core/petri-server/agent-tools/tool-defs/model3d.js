@@ -124,12 +124,12 @@ module.exports = [
     type: 'function',
     function: {
       name: 'model3d_export',
-      description: '用本地 Blender 构建 SceneSpec 并导出 GLB/STL/OBJ，写 manifest（scene hash、provider 版本、输出哈希、网格报告）；可附 turntable 同时产出转盘序列帧与 mp4。',
+      description: '用本地 Blender 构建 SceneSpec 并导出 GLB/STL/OBJ/FBX/USDZ，写 manifest（scene hash、provider 版本、输出哈希、网格报告）；formats 含 step 时由 OCCT 把 Blender STL 转为 faceted STEP（非解析曲面/特征保真）；可附 turntable 同时产出转盘序列帧与 mp4。',
       parameters: {
         type: 'object',
         properties: {
           scene,
-          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj', 'fbx', 'usdz'] } },
+          formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj', 'fbx', 'usdz', 'step'] } },
           turntable,
           taskSpecId: { type: 'string' },
           workflowRunId: { type: 'string' },
@@ -161,7 +161,7 @@ module.exports = [
     type: 'function',
     function: {
       name: 'model3d_asset',
-      description: '外部资产入链与资产库：action=import 把工作区 glb/gltf/stl/obj 复制到 model3d/assets/<sha> 并记录 provenance，返回可直接 add_node 的 mesh-reference；action=list 检索；action=get 取回引用。',
+      description: '外部资产入链与资产库：action=import 把工作区 glb/gltf/stl/obj 复制到 model3d/assets/<sha>，或把 step/stp/iges/igs 转换为派生 GLB/STL 后入链，记录 provenance，返回可直接 add_node 的 mesh-reference；action=list 检索；action=get 取回引用。',
       parameters: {
         type: 'object',
         properties: {

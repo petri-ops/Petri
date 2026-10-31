@@ -8501,6 +8501,29 @@
         "G0"
       ],
       "notes": "3D 全方位能力纲（用户裁决「全方位、不设限制、满足所有应用场景」）：P1 外部资产一等公民 → P2 场景表现力/叙事 → P3 几何与装配 → P4 CAD 交换与工程 → P5 AI 生成资产 → P6 生产交付与协作。"
+    },
+    {
+      "id": "BLOCK-322-RULING-01-CAD-KERNEL",
+      "capability": "block-322-ruling-01-cad-kernel",
+      "path": "docs/block-322-ruling-01-cad-kernel.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "block-322-ruling-01-cad-kernel",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-31",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "3d",
+        "model3d",
+        "cad",
+        "step",
+        "iges",
+        "dependency",
+        "ruling",
+        "G0"
+      ],
+      "notes": "RULING-01 选型材料：occt-wasm 主内核 + occt-import-js 仅 IGES 导入；STEP/IGES 导入与 STEP faceted 导出边界、Mac 跟随行为、依赖检查单四问；真工程图/GD&T 留后续裁决。"
     }
   ],
   "lastUpdated": "2026-10-30",

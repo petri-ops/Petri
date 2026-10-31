@@ -1,0 +1,3 @@
+Source: generated CAD sample from Autodesk Inventor 2019, distributed with occt-import-js test data
+Upstream: https://github.com/kovacsv/occt-import-js/tree/master/test/testfiles/cube-10x10mm
+Purpose: test fixture for IGES import only; not a product asset.

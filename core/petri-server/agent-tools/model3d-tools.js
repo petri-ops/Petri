@@ -9,6 +9,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const db = require('../db');
 const scene3d = require('../helpers/scene3d');
 const sceneStore = require('../helpers/model3d-scene-store');
@@ -18,6 +19,7 @@ const blender = require('../helpers/blender-provider');
 const { runModel3DReview } = require('../helpers/model3d-review');
 const bomHelper = require('../helpers/model3d-bom');
 const assets = require('../helpers/model3d-assets');
+const cadExchange = require('../helpers/cad-exchange');
 const { createModel3DSharePackage } = require('../helpers/model3d-share-package');
 const { buildModel3dArtifactRecords } = require('../helpers/model3d-artifact-projection');
 const {
@@ -113,7 +115,7 @@ async function tool_model3d_apply(args = {}, ctx = {}) {
 }
 
 function normalizeFormats(formats) {
-  const allowed = new Set(['glb', 'stl', 'obj', 'fbx', 'usdz']);
+  const allowed = new Set(['glb', 'stl', 'obj', 'fbx', 'usdz', 'step']);
   const list = (Array.isArray(formats) ? formats : ['glb'])
     .map((item) => String(item).toLowerCase())
     .filter((item) => allowed.has(item));
@@ -139,15 +141,68 @@ async function runProvider(args, ctx) {
       message: 'Blender 未安装或不可用；Three.js 预览仍可用，构建/渲染/导出需本地 Blender。',
     };
   }
+  const requestedFormats = args.renderOnly ? [] : normalizeFormats(args.formats);
+  const wantsStep = requestedFormats.includes('step');
+  const blenderFormats = requestedFormats.filter((format) => format !== 'step');
+  if (wantsStep && !blenderFormats.includes('stl')) blenderFormats.push('stl');
   const result = await blender.runBlenderScene({
     scene: resolved.scene,
     workspaceRoot: workspace.root,
     views: Array.isArray(args.views) ? args.views : [...DEFAULT_RENDER_VIEWS],
-    formats: args.renderOnly ? [] : normalizeFormats(args.formats),
+    formats: blenderFormats,
     turntable: requestedTurntable.turntable,
     lineart: args.lineart === true,
   });
-  return { ...result, provider: { status: capability.status, version: capability.version } };
+  if (!result.ok || !wantsStep) {
+    return { ...result, provider: { status: capability.status, version: capability.version } };
+  }
+  const stlOutput = (result.outputs || []).find((item) => String(item.path || '').toLowerCase().endsWith('.stl'));
+  if (!stlOutput) {
+    return { ...result, ok: false, error: 'stl_required_for_step', provider: { status: capability.status, version: capability.version } };
+  }
+  let stlBytes;
+  try {
+    stlBytes = fs.readFileSync(path.join(workspace.root, stlOutput.path));
+  } catch (error) {
+    return { ...result, ok: false, error: 'step_source_unreadable', message: error.message, provider: { status: capability.status, version: capability.version } };
+  }
+  const converted = await cadExchange.stlToStep({ bytes: stlBytes });
+  if (!converted.ok) {
+    return {
+      ...result,
+      ok: false,
+      error: converted.error,
+      message: converted.message || 'STL→STEP conversion failed.',
+      provider: { status: capability.status, version: capability.version },
+    };
+  }
+  const stepPath = path.join(workspace.root, result.outDir, 'scene.step');
+  fs.writeFileSync(stepPath, converted.step);
+  const stepRel = path.relative(workspace.root, stepPath).replace(/\\/g, '/');
+  const stepOutput = {
+    path: stepRel,
+    sha256: crypto.createHash('sha256').update(converted.step).digest('hex'),
+    bytes: Buffer.byteLength(converted.step),
+    format: 'step',
+    derivedFrom: stlOutput.path,
+    faceted: true,
+  };
+  return {
+    ...result,
+    outputs: [...(result.outputs || []), stepOutput],
+    cad: {
+      kernel: converted.summary.kernel,
+      kernelVersion: converted.summary.kernelVersion,
+      schema: converted.summary.schema,
+      faceted: true,
+      solidCount: converted.summary.solidCount,
+      source: stlOutput.path,
+      step: stepOutput,
+      volumeMm3: converted.summary.volumeMm3,
+      bbox: converted.summary.bbox,
+    },
+    provider: { status: capability.status, version: capability.version },
+  };
 }
 
 async function tool_model3d_render(args = {}, ctx = {}) {
@@ -284,6 +339,7 @@ async function tool_model3d_export(args = {}, ctx = {}) {
     manifest: path.relative(workspace.root, manifestPath).replace(/\\/g, '/'),
     report: result.report,
     outputs: result.outputs,
+    cad: result.cad || null,
     frameAssets: result.frameAssets || [],
     durationMs: result.durationMs,
     resultStudio,
@@ -331,6 +387,14 @@ async function tool_model3d_asset(args = {}, ctx = {}) {
   if (action !== 'import') return { ok: false, error: 'asset_action_invalid' };
   const workspace = await projectWorkspace(ctx);
   if (workspace.error) return workspace.error;
+  if (cadExchange.cadFormatForPath(args.sourcePath)) {
+    return assets.importCadAsset({
+      workspaceRoot: workspace.root,
+      sourcePath: args.sourcePath,
+      name: args.name,
+      provenance: args.provenance,
+    });
+  }
   return assets.importMeshAsset({
     workspaceRoot: workspace.root,
     sourcePath: args.sourcePath,

@@ -10,7 +10,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { inspectMeshAsset } = require('./mesh-assets');
+const { inspectMeshAsset, inspectCadAsset } = require('./mesh-assets');
+const cadExchange = require('./cad-exchange');
 const { resolveWorkspaceTarget } = require('../agent-tools/workspace-tools/internals');
 
 const ASSET_ROOT = 'model3d/assets';
@@ -40,7 +41,11 @@ function writeIndex(workspaceRoot, index) {
 function cleanProvenance(input) {
   const source = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
   const clean = {};
-  for (const key of ['model', 'promptHash', 'parameters', 'source', 'generator', 'license']) {
+  for (const key of [
+    'model', 'promptHash', 'parameters', 'source', 'generator', 'license',
+    'sourceSha256', 'sourceFormat', 'derivedFormat', 'derivedSha256',
+    'kernel', 'kernelVersion', 'faceted', 'notes',
+  ]) {
     if (source[key] === undefined) continue;
     const text = typeof source[key] === 'string' ? source[key] : JSON.stringify(source[key]);
     clean[key] = text.slice(0, MAX_PROVENANCE_CHARS);
@@ -50,7 +55,7 @@ function cleanProvenance(input) {
 
 function assetId(sha) { return `asset-${String(sha).slice(0, 16)}`; }
 
-async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance } = {}) {
+async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance, originalSource } = {}) {
   if (!workspaceRoot) return { ok: false, error: 'project_required' };
   const inspected = await inspectMeshAsset({ workspaceRoot, relativePath: sourcePath });
   if (!inspected.ok) return inspected;
@@ -79,8 +84,8 @@ async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance } =
     sha256: inspected.sourceSha256,
     bytes: inspected.bytes,
     format: inspected.format,
-    name: String(name || path.basename(inspected.path)).slice(0, 200),
-    sourcePath: inspected.path,
+    name: String(name || path.basename(originalSource || inspected.path)).slice(0, 200),
+    sourcePath: originalSource || inspected.path,
     importedAt: new Date().toISOString(),
     ...clean,
   };
@@ -95,7 +100,7 @@ async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance } =
     sha256: inspected.sourceSha256,
     bytes: inspected.bytes,
     format: inspected.format,
-    sourcePath: inspected.path,
+    sourcePath: provenanceRecord.sourcePath,
     provenancePath: provenanceRel,
     importedAt: provenanceRecord.importedAt,
     model: clean.model || null,
@@ -115,6 +120,83 @@ async function importMeshAsset({ workspaceRoot, sourcePath, name, provenance } =
     },
     provenance: provenanceRecord,
   };
+}
+
+function sha256Buffer(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+/**
+ * STEP/IGES 源文件 → 派生网格资产（GLB/STL）→ 现有资产索引。
+ * 原始 CAD 文件留在工作区，provenance 记录 sourcePath/sourceSha256；资产只存派生网格。
+ */
+async function importCadAsset({ workspaceRoot, sourcePath, name, provenance } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const inspected = await inspectCadAsset({ workspaceRoot, relativePath: sourcePath });
+  if (!inspected.ok) return inspected;
+  const format = cadExchange.cadFormatForPath(inspected.path);
+  if (!format) return { ok: false, error: 'cad_format_unsupported' };
+  let sourceTarget;
+  try {
+    sourceTarget = await resolveWorkspaceTarget(workspaceRoot, inspected.path, { createRoot: false });
+  } catch (error) {
+    return { ok: false, error: error.code || 'path_rejected', message: error.message };
+  }
+  const sourceBytes = fs.readFileSync(sourceTarget.target);
+  const converted = format === 'step'
+    ? await cadExchange.stepToGlb({ bytes: sourceBytes })
+    : await cadExchange.igesToStl({ bytes: sourceBytes });
+  if (!converted.ok) return converted;
+  const derivedBytes = converted.glb || converted.stl;
+  if (!derivedBytes || derivedBytes.length === 0) return { ok: false, error: 'cad_conversion_empty' };
+  const derivedFormat = converted.glb ? 'glb' : 'stl';
+  const derivedSha = sha256Buffer(derivedBytes);
+  const tempRel = `${ASSET_ROOT}/.cad-${derivedSha}.${derivedFormat}`;
+  let tempTarget;
+  try {
+    tempTarget = await resolveWorkspaceTarget(workspaceRoot, tempRel, { createRoot: true });
+  } catch (error) {
+    return { ok: false, error: error.code || 'path_rejected', message: error.message };
+  }
+  fs.mkdirSync(path.dirname(tempTarget.target), { recursive: true });
+  fs.writeFileSync(tempTarget.target, derivedBytes);
+  try {
+    const imported = await importMeshAsset({
+      workspaceRoot,
+      sourcePath: tempRel,
+      name: String(name || path.basename(inspected.path)).slice(0, 200),
+      originalSource: inspected.path,
+      provenance: {
+        ...(provenance && typeof provenance === 'object' ? provenance : {}),
+        source: inspected.path,
+        sourceSha256: inspected.sourceSha256,
+        sourceFormat: format,
+        derivedFormat,
+        derivedSha256: derivedSha,
+        kernel: converted.summary?.kernel,
+        kernelVersion: converted.summary?.kernelVersion,
+        notes: format === 'iges'
+          ? 'IGES import is mesh-based; assembly hierarchy/colors are not guaranteed.'
+          : 'STEP imported through occt-wasm XCAF; derived GLB preserves names/colors where present.',
+      },
+    });
+    if (!imported.ok) return imported;
+    return {
+      ...imported,
+      cad: {
+        sourceFormat: format,
+        derivedFormat,
+        sourceSha256: inspected.sourceSha256,
+        derivedSha256: derivedSha,
+        sourcePath: inspected.path,
+        kernel: converted.summary?.kernel || null,
+        kernelVersion: converted.summary?.kernelVersion || null,
+        ...(converted.summary || {}),
+      },
+    };
+  } finally {
+    try { fs.rmSync(tempTarget.target, { force: true }); } catch { /* temp already gone */ }
+  }
 }
 
 function listAssets({ workspaceRoot, query = '', limit = 20 } = {}) {
@@ -137,4 +219,4 @@ function getAsset({ workspaceRoot, assetId: requestedId } = {}) {
   return { ok: true, asset, node: { id: asset.id, type: 'mesh-reference', source: { path: asset.path, sourceSha256: asset.sha256 }, label: asset.name } };
 }
 
-module.exports = { ASSET_ROOT, INDEX_SCHEMA, importMeshAsset, listAssets, getAsset, indexRelativePath };
+module.exports = { ASSET_ROOT, INDEX_SCHEMA, importMeshAsset, importCadAsset, listAssets, getAsset, indexRelativePath };

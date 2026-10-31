@@ -258,6 +258,8 @@
     "better-sqlite3": "^12.11.1",
     "extract-zip": "^2.0.1",
     "node-pty": "1.1.0-beta34",
+    "occt-import-js": "0.0.23",
+    "occt-wasm": "5.11.0",
     "qrcode-generator": "^1.4.4",
     "typescript": "^5.9.3",
     "uuid": "^9.0.1"

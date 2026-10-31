@@ -15,6 +15,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { sha256File } = require('./artifact-truth');
+const { CAD_INPUT_FORMATS, CAD_INPUT_EXTENSIONS, MAX_CAD_BYTES } = require('./cad-exchange');
 
 const MESH_INPUT_FORMATS = Object.freeze(['glb', 'gltf', 'stl', 'obj']);
 const MESH_INPUT_EXTENSIONS = Object.freeze(MESH_INPUT_FORMATS.map((format) => `.${format}`));
@@ -117,6 +118,23 @@ async function inspectTextureAsset({ workspaceRoot, relativePath, maxBytes = MAX
   });
 }
 
+/** BLOCK-322 P4-04 — STEP/IGES 源文件预检；转换由 helpers/cad-exchange 负责。 */
+async function inspectCadAsset({ workspaceRoot, relativePath, maxBytes = MAX_CAD_BYTES } = {}) {
+  return inspectAssetFile({
+    workspaceRoot,
+    relativePath,
+    formats: CAD_INPUT_FORMATS,
+    extensions: CAD_INPUT_EXTENSIONS,
+    maxBytes,
+    codes: {
+      pathRequired: 'cad_path_required',
+      formatUnsupported: 'cad_format_unsupported',
+      notFound: 'cad_source_not_found',
+      tooLarge: 'cad_source_too_large',
+    },
+  });
+}
+
 module.exports = {
   MESH_INPUT_FORMATS,
   MESH_INPUT_EXTENSIONS,
@@ -124,8 +142,12 @@ module.exports = {
   TEXTURE_INPUT_FORMATS,
   TEXTURE_INPUT_EXTENSIONS,
   MAX_TEXTURE_BYTES,
+  CAD_INPUT_FORMATS,
+  CAD_INPUT_EXTENSIONS,
+  MAX_CAD_BYTES,
   meshFormatForPath,
   textureFormatForPath,
   inspectMeshAsset,
   inspectTextureAsset,
+  inspectCadAsset,
 };
