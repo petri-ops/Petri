@@ -220,6 +220,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               UI-305 的两条语义（首条=意图故省略、运行中补标记）在此判定。 */}
           <ConversationTimeline
             segments={segments}
+            projectId={projectId}
             runActive={Boolean(m.pending)}
             onCancelTools={onCancelTools}
             renderProgress={(segment, meta) => {

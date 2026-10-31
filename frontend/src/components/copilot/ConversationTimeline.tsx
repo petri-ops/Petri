@@ -64,9 +64,10 @@ function ReasoningSegmentRow({ segment }: { segment: ReasoningSegment }): React.
  * 内部 `processingDurationMs ?? totalDurationMs` 的既有回退）。
  * UI-437 v4 — `forceOpen`：运行级展开后由外层托管折叠态，簇内无簇头、行常驻。
  */
-function ToolsSegmentBlock({ segment, forceOpen, onCancelTools }: {
+function ToolsSegmentBlock({ segment, forceOpen, onCancelTools, projectId }: {
   segment: ToolsSegment;
   forceOpen: boolean;
+  projectId?: string | null;
   onCancelTools?: (callIds: string[]) => void;
 }): React.ReactElement {
   // BLOCK-108 P2 — 本迭代思考折入簇内（Qoder 形态：已思考单行在工具行之上）。
@@ -102,6 +103,7 @@ function ToolsSegmentBlock({ segment, forceOpen, onCancelTools }: {
         collapseWhenSettled
         showRunningStopwatch
         forceOpen={forceOpen}
+        projectId={projectId}
       />
     </div>
   );
@@ -116,6 +118,7 @@ export interface ProgressSegmentMeta {
 
 export interface ConversationTimelineProps {
   segments: ConversationSegment[];
+  projectId?: string | null;
   /**
    * BLOCK-154 UI-473 — run 仍在进行（宿主传消息 pending 态）。运行中工具与工具
    * 之间存在「无 running 活动」的间隙（模型推理中），仅靠 runRunning 判据会在
@@ -149,6 +152,7 @@ export function ConversationTimeline({
   className,
   runActive = false,
   onCancelTools,
+  projectId,
 }: ConversationTimelineProps): React.ReactElement | null {
   // UI-437 v4 — 运行级折叠：一次任务的多轮工具段收敛为一行运行摘要。
   const toolsSegments = segments.filter((segment): segment is ToolsSegment => segment.kind === 'tools');
@@ -181,6 +185,7 @@ export function ConversationTimeline({
       nodes.push(
         <ToolsSegmentBlock
           key={`tools:${segment.iteration}`}
+          projectId={projectId}
           segment={segment}
           // BLOCK-150 加映 — runActive 也传 forceOpen：run 进行中簇内禁落定折叠
           // （落定簇换装成摘要按钮=每工具一次「卡片→摘要行→新卡片」闪烁残根，
