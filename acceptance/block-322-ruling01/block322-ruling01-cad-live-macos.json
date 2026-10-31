@@ -1,0 +1,369 @@
+{
+  "schema": "block322-ruling01-cad-live/v1",
+  "generatedAt": "2026-10-31T06:23:05.103Z",
+  "provider": "Blender 5.2.3 LTS",
+  "assertions": [
+    {
+      "id": "S0_scene_written",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/live.scene3d.json\",\"beforeHash\":null,\"afterHash\":\"b04022761b9354a76e9b379bc005e93e02273ac164df8a63d38802b3f6d9574e\",\"revision\":null,\"diff\":null}"
+    },
+    {
+      "id": "S1_kernel_probe",
+      "pass": true,
+      "detail": "{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\":\"5.11.0\",\"formats\":{\"stepImport\":true,\"stepExport\":true,\"igesImport\":true,\"igesExport\":false,\"drawingSvg\":true},\"notes\":[\"STEP: occt-wasm\",\"IGES: occt-import-js import-only\",\"STEP export: faceted B-rep from Blender STL\"]}"
+    },
+    {
+      "id": "S2_export_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"b04022761b9354a76e9b379bc005e93e02273ac164df8a63d38802b3f6d9574e\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvw0li1c-92wgkf\",\"manifest\":\"model3d/runs/m3d-mvw0li1c-92wgkf/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"display\":{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null},\"environment\":{\"declared\":false,\"background\":null,\"worldStrength\":null,\"effectiveWorldStrength\":1,\"effectiveColor\":[0.050876,0.050876,0.050876]},\"lights\":{\"created\":[],\"errors\":[]},\"geometry\":{\"applied\":[],\"consum"
+    },
+    {
+      "id": "S2_step_output",
+      "pass": true,
+      "detail": "[\"png\",\"glb\",\"stl\",\"step\"]"
+    },
+    {
+      "id": "S2_step_header",
+      "pass": true,
+      "detail": "ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(("
+    },
+    {
+      "id": "S2_step_sha",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"sha256\":\"c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2\",\"bytes\":48999,\"format\":\"step\",\"derivedFrom\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl\",\"faceted\":true}"
+    },
+    {
+      "id": "S2_step_manifold",
+      "pass": true,
+      "detail": "solids=2"
+    },
+    {
+      "id": "S2_step_volume",
+      "pass": true,
+      "detail": "{\"kernel\":\"occt-wasm\",\"kernelVersion\":\"5.11.0\",\"schema\":\"AP214\",\"faceted\":true,\"solidCount\":2,\"source\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl\",\"step\":{\"path\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"sha256\":\"c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2\",\"bytes\":48999,\"format\":\"step\",\"derivedFrom\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl\",\"faceted\":true},\"volumeMm3\":392000.0000000001,\"bbox\":{\"xmin\":-60,\"ymin\":-40,\"zmin\":-20,\"xmax\":60,\"ymax\":40,\"zmax\":50}}"
+    },
+    {
+      "id": "S2_step_faceted",
+      "pass": true,
+      "detail": "{\"kernel\":\"occt-wasm\",\"kernelVersion\":\"5.11.0\",\"schema\":\"AP214\",\"faceted\":true,\"solidCount\":2,\"source\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl\",\"step\":{\"path\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"sha256\":\"c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2\",\"bytes\":48999,\"format\":\"step\",\"derivedFrom\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl\",\"faceted\":true},\"volumeMm3\":392000.0000000001,\"bbox\":{\"xmin\":-60,\"ymin\":-40,\"zmin\":-20,\"xmax\":60,\"ymax\":40,\"zmax\":50}}"
+    },
+    {
+      "id": "S3_step_asset_import",
+      "pass": true,
+      "detail": "{\"ok\":true,\"asset\":{\"id\":\"asset-4a146f41425d77a5\",\"name\":\"blender-export-step\",\"path\":\"model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb\",\"sha256\":\"4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55\",\"bytes\":11036,\"format\":\"glb\",\"sourcePath\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"provenancePath\":\"model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.provenance.json\",\"importedAt\":\"2026-10-31T06:23:04.542Z\",\"model\":null},\"node\":{\"id\":\"asset-4a146f41425d77a5\",\"type\":\"mesh-reference\",\"source\":{\"path\":\"model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb\",\"sourceSha256\":\"4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55\"},\"label\":\"blender-export-step\"},\"provenance\":{\"s"
+    },
+    {
+      "id": "S3_step_asset_node",
+      "pass": true,
+      "detail": "{\"id\":\"asset-4a146f41425d77a5\",\"type\":\"mesh-reference\",\"source\":{\"path\":\"model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb\",\"sourceSha256\":\"4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55\"},\"label\":\"blender-export-step\"}"
+    },
+    {
+      "id": "S3_step_asset_glb",
+      "pass": true,
+      "detail": "model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb"
+    },
+    {
+      "id": "S3_step_provenance",
+      "pass": true,
+      "detail": "{\"schema\":\"model3d-asset-provenance/v1\",\"sha256\":\"4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55\",\"bytes\":11036,\"format\":\"glb\",\"name\":\"blender-export-step\",\"sourcePath\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"importedAt\":\"2026-10-31T06:23:04.542Z\",\"source\":\"model3d/runs/m3d-mvw0li1c-92wgkf/scene.step\",\"sourceSha256\":\"c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2\",\"sourceFormat\":\"step\",\"derivedFormat\":\"glb\",\"derivedSha256\":\"4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55\",\"kernel\":\"occt-wasm\",\"kernelVersion\":\"5.11.0\",\"notes\":\"STEP imported through occt-wasm XCAF; derived GLB preserves names/colors where present.\"}"
+    },
+    {
+      "id": "S4_iges_asset_import",
+      "pass": true,
+      "detail": "{\"ok\":true,\"asset\":{\"id\":\"asset-980eadcbf8172ef0\",\"name\":\"legacy-iges\",\"path\":\"model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.stl\",\"sha256\":\"980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a\",\"bytes\":684,\"format\":\"stl\",\"sourcePath\":\"model3d/incoming/legacy.igs\",\"provenancePath\":\"model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.provenance.json\",\"importedAt\":\"2026-10-31T06:23:04.669Z\",\"model\":null},\"node\":{\"id\":\"asset-980eadcbf8172ef0\",\"type\":\"mesh-reference\",\"source\":{\"path\":\"model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.stl\",\"sourceSha256\":\"980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a\"},\"label\":\"legacy-iges\"},\"provenance\":{\"schema\":\"model3d-asset-provenance/v"
+    },
+    {
+      "id": "S4_iges_triangles",
+      "pass": true,
+      "detail": "{\"sourceFormat\":\"iges\",\"derivedFormat\":\"stl\",\"sourceSha256\":\"8bcbc86a044f592ba2a1a18f89a905358a85aa5093c0dd0756771b1b022b4c6f\",\"derivedSha256\":\"980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a\",\"sourcePath\":\"model3d/incoming/legacy.igs\",\"kernel\":\"occt-import-js\",\"kernelVersion\":\"0.0.23\",\"meshCount\":1,\"triangleCount\":12,\"bbox\":{\"xmin\":-5,\"ymin\":0,\"zmin\":-5,\"xmax\":5,\"ymax\":10,\"zmax\":5}}"
+    },
+    {
+      "id": "S4_iges_asset_stl",
+      "pass": true,
+      "detail": "model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.stl"
+    },
+    {
+      "id": "S5_step_svg",
+      "pass": true,
+      "detail": "{\"ok\":true,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"480\\\" height=\\\"502\\\" viewBox=\\\"0 0 480 502\\\"><rect width=\\\"480\\\" height=\\\"502\\\" fill=\\\"#ffffff\\\"/><g transform=\\\"translate(0 0)\\\"><rect x=\\\"0.5\\\" y=\\\"0.5\\\" width=\\\"239\\\" height=\\\"239\\\" fill=\\\"#ffffff\\\" stroke=\\\"#e0e0e0\\\"/><path d=\\\"M30.06 112.5L30.06 172.47M30.06 112.5L30.06 172.47M30.06 112.5L209.94 112.5M209.94 112.5L209.94 172.47M209.94 172.47L30.06 172.47M209.94 112.5L209.94 172.47M209.94 172.47L30.06 172.47M30.06 112.5L209."
+    },
+    {
+      "id": "S5_iges_svg",
+      "pass": true,
+      "detail": "{\"ok\":true,\"svg\":\"<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"480\\\" height=\\\"502\\\" viewBox=\\\"0 0 480 502\\\"><rect width=\\\"480\\\" height=\\\"502\\\" fill=\\\"#ffffff\\\"/><g transform=\\\"translate(0 0)\\\"><rect x=\\\"0.5\\\" y=\\\"0.5\\\" width=\\\"239\\\" height=\\\"239\\\" fill=\\\"#ffffff\\\" stroke=\\\"#e0e0e0\\\"/><path d=\\\"M55.09 55.09L55.09 184.91M55.09 55.09L55.09 184.91M55.09 184.91L184.91 184.91M55.09 184.91L184.91 184.91M184.91 184.91L184.91 55.09M184.91 184.91L184.91 55.09M184.91 55.09L55.09 55.09M184.91 55.09L55."
+    }
+  ],
+  "passed": true,
+  "kernel": {
+    "status": "ready",
+    "reason": null,
+    "kernel": "occt-wasm",
+    "version": "5.11.0",
+    "formats": {
+      "stepImport": true,
+      "stepExport": true,
+      "igesImport": true,
+      "igesExport": false,
+      "drawingSvg": true
+    },
+    "notes": [
+      "STEP: occt-wasm",
+      "IGES: occt-import-js import-only",
+      "STEP export: faceted B-rep from Blender STL"
+    ]
+  },
+  "export": {
+    "outDir": "model3d/runs/m3d-mvw0li1c-92wgkf",
+    "outputs": [
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/front.png",
+        "sha256": "24668c82cb737415d2dd958ee1d438589c1dfe4dbc48218135eb0d774c76c821",
+        "bytes": 322406
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/top.png",
+        "sha256": "f730919d4714b6aaed9f66b791748305b91deba22cbed4f807ed192e56a8023e",
+        "bytes": 358569
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/side.png",
+        "sha256": "e157e588182f51f9df9741a141429f75d723f17599362dc86d95593362d8fabe",
+        "bytes": 309221
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/iso.png",
+        "sha256": "5b8871a440381560b4bb64a5cfb7897463bbedb0dabeb2ad886b8e3cb9590007",
+        "bytes": 431459
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.glb",
+        "sha256": "385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5",
+        "bytes": 3524
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl",
+        "sha256": "c8b28dc401771bb4b647442ce4758024d9070221a81188b3a071017c1a3fa174",
+        "bytes": 1284
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+        "sha256": "c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2",
+        "bytes": 48999,
+        "format": "step",
+        "derivedFrom": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl",
+        "faceted": true
+      }
+    ],
+    "cad": {
+      "kernel": "occt-wasm",
+      "kernelVersion": "5.11.0",
+      "schema": "AP214",
+      "faceted": true,
+      "solidCount": 2,
+      "source": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl",
+      "step": {
+        "path": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+        "sha256": "c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2",
+        "bytes": 48999,
+        "format": "step",
+        "derivedFrom": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl",
+        "faceted": true
+      },
+      "volumeMm3": 392000.0000000001,
+      "bbox": {
+        "xmin": -60,
+        "ymin": -40,
+        "zmin": -20,
+        "xmax": 60,
+        "ymax": 40,
+        "zmax": 50
+      }
+    },
+    "manifest": "model3d/runs/m3d-mvw0li1c-92wgkf/manifest.json",
+    "resultStudio": {
+      "registered": true,
+      "idempotent": false,
+      "adopted": true,
+      "toolJobId": "tj_mvw0liu5_jlum",
+      "revisions": [
+        {
+          "revisionId": "rev_model3d_19df30e2934bc5ff",
+          "artifactId": "model3d:p_mvw0lhrx_umup:model3d/live.scene3d.json:glb",
+          "artifactFamilyId": "model3d:p_mvw0lhrx_umup:model3d/live.scene3d.json:glb",
+          "outputPath": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.glb",
+          "outputHash": "385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5",
+          "validationStatus": "valid"
+        },
+        {
+          "revisionId": "rev_model3d_9688379ec06fd89b",
+          "artifactId": "model3d:p_mvw0lhrx_umup:model3d/live.scene3d.json:stl",
+          "artifactFamilyId": "model3d:p_mvw0lhrx_umup:model3d/live.scene3d.json:stl",
+          "outputPath": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.stl",
+          "outputHash": "c8b28dc401771bb4b647442ce4758024d9070221a81188b3a071017c1a3fa174",
+          "validationStatus": "valid"
+        }
+      ],
+      "graphId": "wfg_b0a3339298ddc690e7e1bb68",
+      "changeSetId": "cs_model3d_d99861467fe08934"
+    }
+  },
+  "stepAsset": {
+    "asset": {
+      "id": "asset-4a146f41425d77a5",
+      "name": "blender-export-step",
+      "path": "model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb",
+      "sha256": "4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55",
+      "bytes": 11036,
+      "format": "glb",
+      "sourcePath": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+      "provenancePath": "model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.provenance.json",
+      "importedAt": "2026-10-31T06:23:04.542Z",
+      "model": null
+    },
+    "node": {
+      "id": "asset-4a146f41425d77a5",
+      "type": "mesh-reference",
+      "source": {
+        "path": "model3d/assets/4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55.glb",
+        "sourceSha256": "4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55"
+      },
+      "label": "blender-export-step"
+    },
+    "provenance": {
+      "schema": "model3d-asset-provenance/v1",
+      "sha256": "4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55",
+      "bytes": 11036,
+      "format": "glb",
+      "name": "blender-export-step",
+      "sourcePath": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+      "importedAt": "2026-10-31T06:23:04.542Z",
+      "source": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+      "sourceSha256": "c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2",
+      "sourceFormat": "step",
+      "derivedFormat": "glb",
+      "derivedSha256": "4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55",
+      "kernel": "occt-wasm",
+      "kernelVersion": "5.11.0",
+      "notes": "STEP imported through occt-wasm XCAF; derived GLB preserves names/colors where present."
+    },
+    "cad": {
+      "sourceFormat": "step",
+      "derivedFormat": "glb",
+      "sourceSha256": "c181dd9735b022c8e18734413d6487365755a1eb52d532004d1758bfb74888b2",
+      "derivedSha256": "4a146f41425d77a5ce0fb8c9da8fb08cd9cff98c0bcb4455c5da602ec90fcf55",
+      "sourcePath": "model3d/runs/m3d-mvw0li1c-92wgkf/scene.step",
+      "kernel": "occt-wasm",
+      "kernelVersion": "5.11.0",
+      "rootCount": 1,
+      "labelCount": 3,
+      "componentCount": 2,
+      "assemblyCount": 1,
+      "names": [
+        "Open CASCADE STEP translator 8.0 1",
+        "1",
+        "2"
+      ]
+    }
+  },
+  "igesAsset": {
+    "asset": {
+      "id": "asset-980eadcbf8172ef0",
+      "name": "legacy-iges",
+      "path": "model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.stl",
+      "sha256": "980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a",
+      "bytes": 684,
+      "format": "stl",
+      "sourcePath": "model3d/incoming/legacy.igs",
+      "provenancePath": "model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.provenance.json",
+      "importedAt": "2026-10-31T06:23:04.669Z",
+      "model": null
+    },
+    "node": {
+      "id": "asset-980eadcbf8172ef0",
+      "type": "mesh-reference",
+      "source": {
+        "path": "model3d/assets/980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a.stl",
+        "sourceSha256": "980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a"
+      },
+      "label": "legacy-iges"
+    },
+    "provenance": {
+      "schema": "model3d-asset-provenance/v1",
+      "sha256": "980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a",
+      "bytes": 684,
+      "format": "stl",
+      "name": "legacy-iges",
+      "sourcePath": "model3d/incoming/legacy.igs",
+      "importedAt": "2026-10-31T06:23:04.669Z",
+      "source": "model3d/incoming/legacy.igs",
+      "sourceSha256": "8bcbc86a044f592ba2a1a18f89a905358a85aa5093c0dd0756771b1b022b4c6f",
+      "sourceFormat": "iges",
+      "derivedFormat": "stl",
+      "derivedSha256": "980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a",
+      "kernel": "occt-import-js",
+      "kernelVersion": "0.0.23",
+      "notes": "IGES import is mesh-based; assembly hierarchy/colors are not guaranteed."
+    },
+    "cad": {
+      "sourceFormat": "iges",
+      "derivedFormat": "stl",
+      "sourceSha256": "8bcbc86a044f592ba2a1a18f89a905358a85aa5093c0dd0756771b1b022b4c6f",
+      "derivedSha256": "980eadcbf8172ef0b6df72dcfaa6e6d5bf2c217981c5c68c8b492deba373340a",
+      "sourcePath": "model3d/incoming/legacy.igs",
+      "kernel": "occt-import-js",
+      "kernelVersion": "0.0.23",
+      "meshCount": 1,
+      "triangleCount": 12,
+      "bbox": {
+        "xmin": -5,
+        "ymin": 0,
+        "zmin": -5,
+        "xmax": 5,
+        "ymax": 10,
+        "zmax": 5
+      }
+    }
+  },
+  "drawings": {
+    "step": {
+      "kernel": "occt-wasm",
+      "kernelVersion": "5.11.0",
+      "bbox": {
+        "xmin": -60.0000000000222,
+        "ymin": -40.000000000000014,
+        "zmin": -20.000000000000007,
+        "xmax": 60.0000000000222,
+        "ymax": 40.000000000000014,
+        "zmax": 50
+      },
+      "views": [
+        "front",
+        "top",
+        "right",
+        "iso"
+      ]
+    },
+    "iges": {
+      "kernel": "occt-import-js",
+      "kernelVersion": "0.0.23",
+      "meshCount": 1,
+      "triangleCount": 12,
+      "bbox": {
+        "xmin": -5,
+        "ymin": 0,
+        "zmin": -5,
+        "xmax": 5,
+        "ymax": 10,
+        "zmax": 5
+      },
+      "solidCount": 1,
+      "views": [
+        "front",
+        "top",
+        "right",
+        "iso"
+      ]
+    }
+  }
+}

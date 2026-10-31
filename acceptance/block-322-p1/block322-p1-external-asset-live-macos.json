@@ -1,0 +1,153 @@
+{
+  "name": "block322-p1-external-asset-live",
+  "startedAt": "2026-10-31T06:20:06.099Z",
+  "finishedAt": "2026-10-31T06:20:14.642Z",
+  "assertions": [
+    {
+      "name": "A0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\":\"5.11.0\",\"formats\":{\"stepImport\":true,\"stepExport\":true,\"ig"
+    },
+    {
+      "name": "A1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0hpug_8k5l\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p1-1793427606805-mvw0hpug\"}"
+    },
+    {
+      "name": "A2a_source_scene",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/source.scene3d.json\",\"beforeHash\":\"6c23eb0d495af379b2f1a9a32514d69cefd71e18a2472ac84aca7ef3cfcc6c07\",\"afterHash\":\"6c23eb0d495af379b2f1a9a32514d69cefd71e18a2472ac84aca7ef3cfc"
+    },
+    {
+      "name": "A2b_donor_glb_exported",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"6c23eb0d495af379b2f1a9a32514d69cefd71e18a2472ac84aca7ef3cfcc6c07\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvw0hq1y-onwjmd\",\"manifest\":\"model3d/runs/m3d-mvw0hq1y-onwjmd/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS"
+    },
+    {
+      "name": "A2c_donor_glb_on_disk",
+      "pass": true,
+      "detail": "ts/block322-p1-1793427606805-mvw0hpug/model3d/runs/m3d-mvw0hq1y-onwjmd/scene.glb"
+    },
+    {
+      "name": "A3_inspect_matches_disk",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/runs/m3d-mvw0hq1y-onwjmd/scene.glb\",\"format\":\"glb\",\"bytes\":1972,\"sourceSha256\":\"54962d26e44c1d8b3cc9f1792b038d941cee5951d001259f8aba8d61ef0859f8\",\"maxBytes\":67108864}"
+    },
+    {
+      "name": "A3b_relative_path_only",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvw0hq1y-onwjmd/scene.glb"
+    },
+    {
+      "name": "A4a_unsupported_format_400",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"mesh_format_unsupported\",\"extensions\":[\".glb\",\".gltf\",\".stl\",\".obj\"]}"
+    },
+    {
+      "name": "A4b_missing_404",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"mesh_not_found\",\"path\":\"model3d/assets/gone.glb\"}"
+    },
+    {
+      "name": "A4c_escape_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"path_escape\",\"message\":\"路径逃逸出当前项目工作区\"}"
+    },
+    {
+      "name": "A4d_sensitive_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"sensitive_path\",\"message\":\"该路径属于敏感文件或元数据目录\"}"
+    },
+    {
+      "name": "A5a_add_node_written",
+      "pass": true,
+      "detail": "{\"beforeHash\":\"e522120d770ce207c6eef7bb69a7f2ff63d6745163495f858e45be0b74b75d80\",\"afterHash\":\"3791165e22fcb666fb35d04220b9e055aee55e7283f8a2d64e25bd0e146dca23\",\"parameters\":[],\"nodes\":[{\"id\":\"asset-donor\",\"status\":\"added\",\"fields\":[]}],\"con"
+    },
+    {
+      "name": "A5b_revision_snapshots_asset_version",
+      "pass": true,
+      "detail": "{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"3791165e22fcb666fb35d04220b9e055aee55e7283f8a2d64e25bd0e146dca23\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-10-31T06:20:08.369Z\",\"file\":\"rev-000001."
+    },
+    {
+      "name": "A5c_revision_history_lists_asset_version",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/main.scene3d.json\",\"revisions\":[{\"revisionId\":\"rev-000001\",\"ordinal\":1,\"hash\":\"3791165e22fcb666fb35d04220b9e055aee55e7283f8a2d64e25bd0e146dca23\",\"reason\":\"block322_p1_touch\",\"createdAt\":\"2026-1"
+    },
+    {
+      "name": "A5d_readback_sha_stable",
+      "pass": true,
+      "detail": "[{\"id\":\"base\",\"type\":\"box\",\"dimensions\":{\"width\":120,\"depth\":80,\"height\":40},\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]},\"material\":{\"color\":\"#6a8caf\",\"roughness\":0.4}},{\"id\":\"asset-donor\",\"type\":\"mesh-reference\",\"transform\":{\"position\":[60,0,0],\"rotat"
+    },
+    {
+      "name": "A6_tampered_hash_build_fails",
+      "pass": true,
+      "detail": "{\"ok\":false,\"blenderVersion\":\"5.2.3 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"display\":{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null},\"environment\":{\"declared\":false,\"b"
+    },
+    {
+      "name": "A7a_valid_build_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"display\":{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null},\"environment\":{"
+    },
+    {
+      "name": "A7b_asset_increases_objects",
+      "pass": true,
+      "detail": "base=1 withAsset=2"
+    },
+    {
+      "name": "A7c_volumes_report_asset",
+      "pass": true,
+      "detail": "{\"base\":384000,\"asset-donor:donor\":288000}"
+    },
+    {
+      "name": "A8_spec_layer_rejects",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"mesh_format_unsupported\",\"errors\":[\"mesh_format_unsupported\"]}"
+    },
+    {
+      "name": "U1_sample_baseline_loaded",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U2_baseline_objects_and_pixels",
+      "pass": true,
+      "detail": "{\"baselineObjects\":2,\"pixels\":189590,\"alert\":\"\"}"
+    },
+    {
+      "name": "U3a_asset_written_into_scene",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-scene为外部mesh引用（model3d/assets/scene.glb）；预览从项目工作区文件加载，导出按sha256锚定。已导入model3d/assets/scene.glb（1972字节·sha25654962d26e44c…）已作为节点asset-scene写入model3d/scene.scene3d.json场景节点3参数4约束0渲染对象3包围盒mm126"
+    },
+    {
+      "name": "U3b_asset_rendered_in_preview",
+      "pass": true,
+      "detail": "{\"baselineObjects\":2,\"importedObjects\":3,\"pixels\":197582}"
+    },
+    {
+      "name": "U3c_mesh_node_in_tree",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-scene为外部mesh引用（model3d/assets/scene.glb）；预览从项目工作区文件加载，导出按sha256锚定。已导入model3d/assets/scene.glb（1972字节·sha25654962d26e44c…）已作为节点asset-scene写入model3d/scene.scene3d.json场景节点3参数4约束0渲染对象3包围盒mm126"
+    },
+    {
+      "name": "U3d_asset_landed_in_workspace",
+      "pass": true,
+      "detail": "[\"scene.glb\"]"
+    },
+    {
+      "name": "U3e_ui_write_wrote_scene_file",
+      "pass": true,
+      "detail": "projects/block322-p1-1793427606805-mvw0hpug/model3d/scene.scene3d.json"
+    },
+    {
+      "name": "U4a_missing_asset_reports_failure",
+      "pass": true,
+      "detail": "alert= :: 3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-scene为外部mesh引用（model3d/assets/scene.glb）；预览从项目工作区文件加载，导出按sha256锚定。mes"
+    },
+    {
+      "name": "U4b_primitives_still_rendered",
+      "pass": true,
+      "detail": "{\"alert\":\"\",\"pixels\":189590,\"objects\":\"渲染对象2\"}"
+    }
+  ],
+  "allPass": true
+}

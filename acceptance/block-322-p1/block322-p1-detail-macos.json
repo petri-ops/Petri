@@ -1,0 +1,93 @@
+{
+  "generatedAt": "2026-10-31T06:20:14.640Z",
+  "platform": "darwin-arm64",
+  "node": "v24.16.0",
+  "api": "http://127.0.0.1:3001",
+  "projectId": "p_mvw0hpug_8k5l",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "donorAsset": {
+    "path": "model3d/runs/m3d-mvw0hq1y-onwjmd/scene.glb",
+    "sha256": "54962d26e44c1d8b3cc9f1792b038d941cee5951d001259f8aba8d61ef0859f8",
+    "bytes": 1972
+  },
+  "buildComparison": {
+    "provider": "Blender 5.2.3 LTS",
+    "baseObjects": 1,
+    "assetObjects": 2,
+    "baseVolumeMm3": {
+      "base": 384000
+    },
+    "assetVolumeMm3": {
+      "base": 384000,
+      "asset-donor:donor": 288000
+    },
+    "outputs": [
+      {
+        "path": "model3d/runs/m3d-mvw0ht46-mfgw9p/front.png",
+        "bytes": 295900
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ht46-mfgw9p/top.png",
+        "bytes": 326112
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ht46-mfgw9p/side.png",
+        "bytes": 282726
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ht46-mfgw9p/iso.png",
+        "bytes": 354161
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ht46-mfgw9p/scene.glb",
+        "bytes": 3540
+      }
+    ]
+  },
+  "ui": {
+    "baselineObjects": 2,
+    "importedObjects": 3,
+    "meshNodeIds": [
+      "asset-scene"
+    ],
+    "failureAlert": ""
+  }
+}

@@ -14,7 +14,7 @@ const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
-const API = process.env.BLOCK322_API || 'http://127.0.0.1:3002';
+const API = process.env.BLOCK322_API || 'http://127.0.0.1:3001';
 
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 

@@ -1,0 +1,43 @@
+{
+  "name": "block322-p3-03-mate-ui-live",
+  "startedAt": "2026-10-31T06:22:30.697Z",
+  "finishedAt": "2026-10-31T06:22:32.324Z",
+  "assertions": [
+    {
+      "name": "P0_backend_reachable",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-10-31T06:22:30.725Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "P1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0kswc_t9zz\"}"
+    },
+    {
+      "name": "U1_mate_bounds_in_preview",
+      "pass": true,
+      "detail": "{\"bounds\":[120,80,55],\"expect\":[120,80,55]}"
+    },
+    {
+      "name": "U2_mate_label_visible",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点场景节点2参数0约束1渲染对象2包围盒mm120×80×55节点baseboxwidth120·height40·depth80capboxwidth40·height10·depth20约束贴合base+z→cap-z（offset5mm）视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "U3_mate_no_fallback_warning",
+      "pass": true,
+      "detail": "{\"objects\":2}"
+    },
+    {
+      "name": "U4_invalid_mate_keeps_declared_bounds",
+      "pass": true,
+      "detail": "{\"bounds\":[120,80,125],\"expect\":[120,80,125]}"
+    },
+    {
+      "name": "U5_invalid_mate_reason_visible",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点装配约束在服务端求值后烘进transform：未能向本地后端取回求值结果，预览按声明位置显示（constraints[0]mate需要法向相反的同轴平面（+z/+z））。场景节点2参数0约束1渲染对象2包围盒mm120×80×125节点baseboxwidth120·height40·depth80capboxwidth40·height10·depth20约束贴合base+z→cap+z视角书签保存当前相机视角后，可一键恢复。"
+    }
+  ],
+  "allPass": true
+}

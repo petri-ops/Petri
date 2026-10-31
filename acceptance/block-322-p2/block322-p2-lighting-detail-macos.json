@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-10-31T06:20:34.255Z",
+  "platform": "darwin-arm64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "display": {
+    "plain": {
+      "engine": "BLENDER_WORKBENCH",
+      "declaredLighting": false,
+      "declaredMaterial": false,
+      "requestedEngine": "workbench",
+      "samples": null,
+      "device": null
+    },
+    "lit": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "declaredMaterial": false,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    }
+  },
+  "lightsEcho": {
+    "created": [
+      {
+        "id": "key",
+        "kind": "SUN",
+        "energy": 900,
+        "color": [
+          1,
+          1,
+          1
+        ],
+        "position": [
+          260,
+          -320,
+          420
+        ],
+        "target": [
+          0,
+          0,
+          20
+        ]
+      }
+    ],
+    "errors": []
+  },
+  "environmentEcho": {
+    "declared": true,
+    "background": "#000000",
+    "worldStrength": 0,
+    "effectiveWorldStrength": 0,
+    "effectiveColor": [
+      0,
+      0,
+      0
+    ]
+  },
+  "luminance": {
+    "engineDark": "CYCLES",
+    "darkMean": 0.083,
+    "litMean": 11.733,
+    "samples": 307200
+  },
+  "preview": {
+    "darkMean": 0.676,
+    "litMean": 58.182
+  }
+}

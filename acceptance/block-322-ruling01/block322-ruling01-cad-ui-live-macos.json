@@ -1,0 +1,53 @@
+{
+  "name": "block322-ruling01-cad-ui-live",
+  "startedAt": "2026-10-31T06:27:49.582Z",
+  "finishedAt": "2026-10-31T06:27:53.114Z",
+  "assertions": [
+    {
+      "name": "A0_capability",
+      "pass": true,
+      "detail": "{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\":\"5.11.0\",\"formats\":{\"stepImport\":true,\"stepExport\":true,\"igesImport\":true,\"igesExport\":false,\"drawingSvg\":true},\"notes\":[\"STEP: occt-wasm\",\"IGES: occt-import-js import-only\",\"STEP export: faceted B-rep from Blender STL\"]}"
+    },
+    {
+      "name": "A1_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0rn5i_ig6n\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-cad-1793428069873-mvw0rn5i\"}"
+    },
+    {
+      "name": "U0_cad_capability_visible",
+      "pass": true,
+      "detail": "{\"present\":true,\"hasCanvas\":false,\"text\":\"3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec打开一个SceneSpec，或导入GLB/GLTF/STL/OBJ预览；STEP/IGES请用「导入为场景节点」。SceneSpec是参数化源真相；GLB/STL/OBJ是导出物。加载示例SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点导入外部GLB/GLTF/STL/OBJ后仅显示几何预览（STL"
+    },
+    {
+      "name": "U1_cad_imported_as_node",
+      "pass": true,
+      "detail": "{\"present\":true,\"hasCanvas\":true,\"text\":\"3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-a2fcc35c849d6a76为外部mesh引用（model3d/assets/a2fcc35c849d6a76417023d8c1072293a1724ca8d526ca380e7df64ee1ba6184.glb）；预览从项目工作区文件加载，导出按sha256锚定。已导入CADblock322-ruling01-e5d8ecfe.step（STEP·源sha25632940aeb5834…·派生GLB3272字节）已作为节点asset-a2fcc"
+    },
+    {
+      "name": "U2_derived_mesh_on_disk",
+      "pass": true,
+      "detail": "[\"a2fcc35c849d6a76417023d8c1072293a1724ca8d526ca380e7df64ee1ba6184.glb\"]"
+    },
+    {
+      "name": "U3_scene_references_derived_mesh",
+      "pass": true,
+      "detail": "ata/data/projects/block322-cad-1793428069873-mvw0rn5i/model3d/scene.scene3d.json"
+    },
+    {
+      "name": "U4a_drawing_button_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U4b_drawing_link_present",
+      "pass": true,
+      "detail": "{\"present\":true,\"hasCanvas\":true,\"text\":\"3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-a2fcc35c849d6a76为外部mesh引用（model3d/assets/a2fcc35c849d6a76417023d8c1072293a1724ca8d526ca380e7df64ee1ba6184.glb）；预览从项目工作区文件加载，导出按sha256锚定。已导入CADblock322-ruling01-e5d8ecfe.step（STEP·源sha25632940aeb5834…·派生GLB3272字节）已生成线框工程图model3d/"
+    },
+    {
+      "name": "U4c_svg_on_disk",
+      "pass": true,
+      "detail": "[\"block322-ruling01-e5d8ecfe-mvw0rp55.svg\"]"
+    }
+  ],
+  "allPass": true
+}

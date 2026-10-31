@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-10-31T06:23:41.777Z",
+  "platform": "darwin-arm64",
+  "node": "v24.16.0",
+  "api": "http://127.0.0.1:3001",
+  "projectId": "p_mvw0m9uv_8yxb",
+  "generationCapability": {
+    "status": "ready",
+    "reason": "generation_provider_mock",
+    "provider": "mock",
+    "model": "mock",
+    "privacy": {
+      "external": false,
+      "prompt": true,
+      "image": false,
+      "note": "Mock provider for local verification; no network request is made.",
+      "pricingUrl": "https://www.tripo3d.ai/pricing",
+      "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+    },
+    "message": "mock 生成器（仅测试/演示，不会调用外部服务）。"
+  },
+  "ui": {
+    "badge": "AI生成可用mock",
+    "notice": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成可用mock加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-4eb58ef9a719565b为外部mesh引用（model3d/assets/4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc14e48.glb）；预览从项目工作区文件加载，导出按sha256锚定。AI生成mock/mock→model3d/assets/4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc14e48.glb（3232字节·sha2564eb58ef9a719…）AI生成结果已作为节点asset-4eb58ef9a719565b写入model3d/scene.scene3d.json场景节点3参数4约束0渲染对象8包围盒mm126×80×40节点enclosurebox",
+    "assets": [
+      "4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc14e48.glb"
+    ]
+  }
+}

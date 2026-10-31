@@ -1,0 +1,53 @@
+{
+  "name": "block322-p5-generation-ui-live",
+  "startedAt": "2026-10-31T06:23:38.996Z",
+  "finishedAt": "2026-10-31T06:23:41.780Z",
+  "assertions": [
+    {
+      "name": "A0_mock_generation_ready",
+      "pass": true,
+      "detail": "{\"status\":\"ready\",\"reason\":\"generation_provider_mock\",\"provider\":\"mock\",\"model\":\"mock\",\"privacy\":{\"external\":false,\"prompt\":true,\"image\":false,\"note\":\"Mock provider for local verification; no network request is made.\",\"pricingUrl\":\"https://www.tripo3d.ai/pricing\",\"costNote\":\"Per-generation billing depends on model/texture quality; check the provider pricing page before generating.\"},\"message\":\"moc"
+    },
+    {
+      "name": "A1_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0m9uv_8yxb\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-gen-1793427819359-mvw0m9uv\"}"
+    },
+    {
+      "name": "U0_generation_badge",
+      "pass": true,
+      "detail": "{\"present\":true,\"hasCanvas\":false,\"text\":\"3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成可用mock加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec打开一个SceneSpec，或导入GLB/GLTF/STL/OBJ预览；STEP/IGES请用「导入为场景节点」。SceneSpec是参数化源真相；GLB/STL/OBJ是导出物。加载示例SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点导入外部GLB/GLTF/STL/OBJ后仅显示几何预览（"
+    },
+    {
+      "name": "U1a_dialog_open",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U1b_prompt_typed",
+      "pass": true,
+      "detail": "a mock bracket for generation live"
+    },
+    {
+      "name": "U2a_generate_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "U2b_generation_notice",
+      "pass": true,
+      "detail": "{\"present\":true,\"hasCanvas\":true,\"text\":\"3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成可用mock加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-4eb58ef9a719565b为外部mesh引用（model3d/assets/4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc14e48.glb）；预览从项目工作区文件加载，导出按sha256锚定。AI生成mock/mock→model3d/assets/4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc1"
+    },
+    {
+      "name": "U3_glb_on_disk",
+      "pass": true,
+      "detail": "[\"4eb58ef9a719565bcb102d83ed3a7d84a7f353299510d6b797a218a49cc14e48.glb\"]"
+    },
+    {
+      "name": "U4_scene_has_generated_node",
+      "pass": true,
+      "detail": "ri/.petri-dev-user-data/data/projects/block322-gen-1793427819359-mvw0m9uv/model3d/scene.scene3d.json"
+    }
+  ],
+  "allPass": true
+}

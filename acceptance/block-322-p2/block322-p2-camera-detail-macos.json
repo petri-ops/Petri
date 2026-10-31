@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-10-31T06:20:23.438Z",
+  "platform": "darwin-arm64",
+  "api": "http://127.0.0.1:3001",
+  "projectId": "p_mvw0hyqz_9kgn",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "cameraShot": {
+    "declared": {
+      "position": [
+        420,
+        -380,
+        300
+      ],
+      "target": [
+        0,
+        0,
+        20
+      ],
+      "fovDeg": 35,
+      "up": [
+        0,
+        0,
+        1
+      ]
+    },
+    "report": {
+      "declared": true,
+      "applied": true,
+      "projection": "PERSP",
+      "declaredFovDeg": 35,
+      "effectiveAngleYDeg": 34.999996,
+      "orthoScaleMm": null,
+      "sensorFit": "VERTICAL",
+      "position": [
+        420,
+        -380,
+        300
+      ],
+      "target": [
+        0,
+        0,
+        20
+      ],
+      "declaredUp": [
+        0,
+        0,
+        1
+      ],
+      "upApplied": true
+    },
+    "render": {
+      "width": 1200,
+      "height": 800,
+      "declared": true
+    },
+    "renders": [
+      "camera",
+      "front",
+      "iso",
+      "side",
+      "top"
+    ],
+    "cameraPngBytes": 559748,
+    "cameraPngSha": "4b43655057e89cff",
+    "frontPngSha": "c99a62ee167d298d"
+  },
+  "ui": {
+    "baselineLabels": [
+      "等轴",
+      "前",
+      "顶",
+      "侧"
+    ],
+    "declaredLabels": [
+      "等轴",
+      "前",
+      "顶",
+      "侧",
+      "机位"
+    ],
+    "pressedAfterClick": [
+      "机位"
+    ],
+    "frameLengthBefore": 189590,
+    "frameLengthAfter": 185174
+  }
+}

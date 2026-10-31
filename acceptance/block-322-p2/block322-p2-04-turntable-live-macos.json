@@ -1,0 +1,63 @@
+{
+  "name": "block322-p2-04-turntable-live",
+  "startedAt": "2026-10-31T06:20:50.461Z",
+  "finishedAt": "2026-10-31T06:20:53.659Z",
+  "assertions": [
+    {
+      "name": "V0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\""
+    },
+    {
+      "name": "V1_temp_project_with_workspace",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0inrg_kxbp\"}"
+    },
+    {
+      "name": "V2_out_of_bounds_rejected_before_execution",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"turntable_frames_invalid（须是 2..48 的整数）\"}"
+    },
+    {
+      "name": "V3_absent_turntable_is_noop",
+      "pass": true,
+      "detail": "{\"turntable\":{\"requested\":0,\"frames\":0,\"stills\":[],\"video\":null,\"elevationDeg\":null,\"fps\":null,\"movieCapability\":null,\"videoError\":null,\"errors\":[]},\"outputs\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\"]}"
+    },
+    {
+      "name": "V4_turntable_built_and_report_ok",
+      "pass": true,
+      "detail": "{\"tier\":\"unavailable\",\"videoError\":\"movie_format_unavailable\",\"ok\":true,\"turn\":{\"requested\":8,\"frames\":8,\"stills\":8,\"video\":null,\"elevationDeg\":18,\"fps\":12,\"movieCapability\":\"unavailable\",\"videoError\":\"movie_format_unavailable\",\"errors\":[]}}"
+    },
+    {
+      "name": "V5_video_exists_and_registered_hash_matches_disk",
+      "pass": true,
+      "detail": "{\"tier\":\"unavailable\",\"registered\":null,\"reportVideo\":null,\"videoError\":\"movie_format_unavailable\"}"
+    },
+    {
+      "name": "V6_payload_is_real_mp4_not_renamed_image",
+      "pass": true,
+      "detail": "tier=unavailable header=\"\" stray=[]"
+    },
+    {
+      "name": "V7_frame_sequence_real_and_auditable",
+      "pass": true,
+      "detail": "[{\"name\":\"turntable-frame-001.png\",\"exists\":true,\"bytes\":356009,\"shaMatches\":true},{\"name\":\"turntable-frame-002.png\",\"exists\":true,\"bytes\":432280,\"shaMatches\":true},{\"name\":\"turntable-frame-003.png\",\"exists\":true,\"bytes\":396640,\"shaMatches\":true},{\"name\":\"turntable-frame-004.png\",\"exists\":true,\"bytes\":434157,\"shaMatches\":true},{\"name\":\"turntable-frame-005.png\",\"exists\":true,\"bytes\":356110,\"shaMatc"
+    },
+    {
+      "name": "V8_stills_do_not_flood_result_surface",
+      "pass": true,
+      "detail": "{\"tier\":\"unavailable\",\"outputs\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\"],\"frames\":8}"
+    },
+    {
+      "name": "V9_frames_differ_camera_actually_rolled",
+      "pass": true,
+      "detail": "{\"unique\":8,\"total\":8}（空列表不得算通过）"
+    },
+    {
+      "name": "V10_double_render_cost_visible_and_bounded",
+      "pass": true,
+      "detail": "{\"plain\":996,\"spun\":1307}（两次渲染路线的代价必须可见，且留在 180s 超时之内）"
+    }
+  ],
+  "allPass": true
+}

@@ -1,0 +1,186 @@
+{
+  "generatedAt": "2026-10-31T06:20:53.657Z",
+  "platform": "darwin-arm64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "movieTier": "unavailable",
+  "videoError": "movie_format_unavailable",
+  "frameAssets": [
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-001.png",
+      "sha256": "299320f9766e0d9d654c3e3cf38bad87c259aca8a6266ec6b6eb0fbcb76f3ade",
+      "bytes": 356009
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-002.png",
+      "sha256": "de6c9e6764580a2e91e420ebd0ce9cbc305ac2ab321a60f7bd8e4d6a58f5877f",
+      "bytes": 432280
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-003.png",
+      "sha256": "e44cb3f47b653f603b338ad64ca3ca62a47f6ca749f449bb2cb258048af8b2da",
+      "bytes": 396640
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-004.png",
+      "sha256": "a2b18f1b6ae58e3633e3076d543f91e28f676b6cb7cd989c45cbb9a4c75a1acd",
+      "bytes": 434157
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-005.png",
+      "sha256": "6a8cbb9246087d752839ca53a81604156a984fc62bdde6246df9be9c7f6b0fd2",
+      "bytes": 356110
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-006.png",
+      "sha256": "2ab32fbcc7a559ff5e61df5ebd07c59788cec0882695b7eb11ba0112bd1dcade",
+      "bytes": 454043
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-007.png",
+      "sha256": "5dddf7d11acdda92fff02bed6656374f9357e2f56ceb046a315a4abf66e7b12a",
+      "bytes": 422554
+    },
+    {
+      "path": "model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-008.png",
+      "sha256": "0b7cb1d9864bbc36837aa69712d7ca863d00aeb421afaa8c658630bf645b126c",
+      "bytes": 473670
+    }
+  ],
+  "stillChecks": [
+    {
+      "name": "turntable-frame-001.png",
+      "exists": true,
+      "bytes": 356009,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-002.png",
+      "exists": true,
+      "bytes": 432280,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-003.png",
+      "exists": true,
+      "bytes": 396640,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-004.png",
+      "exists": true,
+      "bytes": 434157,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-005.png",
+      "exists": true,
+      "bytes": 356110,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-006.png",
+      "exists": true,
+      "bytes": 454043,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-007.png",
+      "exists": true,
+      "bytes": 422554,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-008.png",
+      "exists": true,
+      "bytes": 473670,
+      "shaMatches": true
+    }
+  ],
+  "durationMs": {
+    "plain": 996,
+    "spun": 1307
+  },
+  "reportTurntable": {
+    "requested": 8,
+    "frames": 8,
+    "stills": [
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-001.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-002.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-003.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-004.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-005.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-006.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-007.png",
+      "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p204-1793427650762-mvw0inrg/model3d/runs/m3d-mvw0ioyq-0t8zsa/turntable-frame-008.png"
+    ],
+    "video": null,
+    "elevationDeg": 18,
+    "fps": 12,
+    "movieCapability": "unavailable",
+    "videoError": "movie_format_unavailable",
+    "errors": []
+  },
+  "display": {
+    "engine": "BLENDER_WORKBENCH",
+    "declaredLighting": false,
+    "declaredMaterial": false,
+    "requestedEngine": "workbench",
+    "samples": null,
+    "device": null
+  },
+  "boundsMm": {
+    "min": [
+      -60,
+      -20,
+      -40
+    ],
+    "max": [
+      60,
+      80,
+      100
+    ],
+    "size": [
+      120,
+      100,
+      140
+    ]
+  }
+}

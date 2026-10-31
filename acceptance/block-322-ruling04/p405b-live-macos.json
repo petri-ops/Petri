@@ -1,0 +1,17 @@
+{
+  "schema": "block322-p405b-live/v1",
+  "recordedAt": "2026-10-30",
+  "leg": "P4-05b 第一刀实机（RULING-04 v2 §5 开工序第 1 票）",
+  "checks": {
+    "annotationLayer": true,
+    "height30ResolvedAndMatched": true,
+    "width120_4MismatchedHonest": true,
+    "manifestSvgShaMatchesDisk": true
+  },
+  "method": "真实 occt-wasm STEP（makeBox 120×80×30, AP214, 26428→confirm bytes）→ createCadDrawing + tolerances + scene → SVG data-gdt-annotations 层数值对账（height 30 ✓ / width 120.4 ✗ 带 +0.4 偏差）→ manifest sha 与磁盘一致",
+  "probeFindings": [
+    "occt-wasm 枚举漂移勘误：getSubShapes/subShapeHashes 的 shape type 用小写 'face'（RULING-04 §6 记的 'Face' 在本机 occt-wasm 报 Unknown shape type——材料 §5『先探针后写产品代码』纪律再次应验）",
+    "本机复现 §6：makeBox+makeCylinder 分体导出→importStep → 10 面 {plane:9, cylinder:1}、subShapeHashes 10 唯一、getFaceCylinderData 返回 radius:40（P4-05b 尺寸数据源在位）；体积 382247.78 与 §6 的 413663.71 不同=分体未 fuse（booleanOp 签名待 v2b 探针适配），不影响标注链"
+  ],
+  "pass": true
+}

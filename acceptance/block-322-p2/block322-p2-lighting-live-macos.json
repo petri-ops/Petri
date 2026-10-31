@@ -1,0 +1,53 @@
+{
+  "name": "block322-p2-lighting-live",
+  "startedAt": "2026-10-31T06:20:26.815Z",
+  "finishedAt": "2026-10-31T06:20:34.257Z",
+  "assertions": [
+    {
+      "name": "C0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\":\"5.11.0\",\"formats\":"
+    },
+    {
+      "name": "C1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0i5if_l89v\"}"
+    },
+    {
+      "name": "C2_undeclared_keeps_workbench",
+      "pass": true,
+      "detail": "{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null}"
+    },
+    {
+      "name": "C3_declared_switches_to_cycles",
+      "pass": true,
+      "detail": "{\"engine\":\"CYCLES\",\"declaredLighting\":true,\"declaredMaterial\":false,\"requestedEngine\":\"cycles\",\"samples\":16,\"device\":\"CPU\"}"
+    },
+    {
+      "name": "C3b_lights_and_world_echoed",
+      "pass": true,
+      "detail": "{\"lights\":{\"created\":[{\"id\":\"key\",\"kind\":\"SUN\",\"energy\":900,\"color\":[1,1,1],\"position\":[260,-320,420],\"target\":[0,0,20]}],\"errors\":[]},\"environment\":{\"declared\":true,\"background\":\"#000000\",\"worldStrength\":0,\"effectiveWorldStrength\":0,\"effectiveColor\":[0,0,0]}}"
+    },
+    {
+      "name": "C4_both_renders_exist",
+      "pass": true,
+      "detail": "{\"darkPath\":true,\"litPath\":true}"
+    },
+    {
+      "name": "C5_sun_energy_raises_luminance",
+      "pass": true,
+      "detail": "{\"darkMean\":0.08,\"litMean\":11.73,\"size\":640}"
+    },
+    {
+      "name": "C6_unknown_light_kind_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"scene_invalid\",\"errors\":[\"lights[0].kind 只支持 sun/point/spot/area\"]}"
+    },
+    {
+      "name": "U1_preview_lights_actually_light_the_scene",
+      "pass": true,
+      "detail": "{\"darkMean\":0.68,\"litMean\":58.18}"
+    }
+  ],
+  "allPass": true
+}

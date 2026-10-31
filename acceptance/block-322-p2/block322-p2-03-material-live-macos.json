@@ -1,0 +1,78 @@
+{
+  "name": "block322-p2-03-material-live",
+  "startedAt": "2026-10-31T06:20:37.612Z",
+  "finishedAt": "2026-10-31T06:20:47.071Z",
+  "assertions": [
+    {
+      "name": "T0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\""
+    },
+    {
+      "name": "T1_temp_project_with_workspace",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0iduf_sp8b\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/projects/block322-p203-1793427637908-mvw0iduf\"}"
+    },
+    {
+      "name": "T2a_texture_fixture_roundtrip",
+      "pass": true,
+      "detail": "{\"mean\":54.212999999999994,\"r\":255,\"g\":0,\"b\":0,\"width\":4,\"height\":4,\"samples\":16}（自编码贴图必须被同一解码器读回为纯红）"
+    },
+    {
+      "name": "T2_texture_inspect_real_sha",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/textures/panel.png\",\"format\":\"png\",\"bytes\":73,\"sourceSha256\":\"3fd6e6be528c182d768563a63b65ac5a70d022149a01eeeaaa30396d75f426e0\",\"maxBytes\":16777216}"
+    },
+    {
+      "name": "T3_texture_format_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"texture_format_unsupported\",\"extensions\":[\".png\",\".jpg\",\".jpeg\"]}"
+    },
+    {
+      "name": "T4_texture_not_found_status",
+      "pass": true,
+      "detail": "{\"status\":404,\"data\":{\"ok\":false,\"error\":\"texture_not_found\",\"path\":\"model3d/textures/gone.png\"}}"
+    },
+    {
+      "name": "T5_build_accepts_pbr_and_declares_cycles",
+      "pass": true,
+      "detail": "{\"engine\":{\"engine\":\"CYCLES\",\"declaredLighting\":true,\"declaredMaterial\":true,\"requestedEngine\":\"cycles\",\"samples\":16,\"device\":\"CPU\"},\"materials\":{\"declared\":[{\"id\":\"panel\",\"metallic\":0.6,\"emissive\":\"#061018\",\"baseColorTexture\":\"model3d/textures/panel.png\"}]},\"unsupported\":[]}"
+    },
+    {
+      "name": "T6_engine_unchanged_without_pbr_declaration",
+      "pass": true,
+      "detail": "{\"engine\":\"CYCLES\",\"declaredLighting\":true,\"declaredMaterial\":false,\"requestedEngine\":\"cycles\",\"samples\":16,\"device\":\"CPU\"}（对照场景只声明环境光，declaredMaterial 必须为 false）"
+    },
+    {
+      "name": "T7_texture_changes_imaging_monotonically",
+      "pass": true,
+      "detail": "{\"before\":{\"mean\":168.8123041137469,\"r\":157.1139,\"g\":170.80921041666667,\"b\":183.47841666666667,\"width\":800,\"height\":600,\"samples\":480000},\"after\":{\"mean\":159.3524115377427,\"r\":204.70172083333333,\"g\":147.60611875,\"b\":142.17353958333334,\"width\":800,\"height\":600,\"samples\":480000}}"
+    },
+    {
+      "name": "T8_tampered_sha_fails_loudly_not_silently",
+      "pass": true,
+      "detail": "{\"ok\":false,\"unsupported\":[{\"id\":\"panel\",\"error\":\"texture_source_hash_mismatch\"}],\"volumes\":[\"keepme\"]}"
+    },
+    {
+      "name": "T9_export_artifact_intact",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvw0ifvx-nx53g9/scene.glb\",\"sha256\":\"da41b1717eb6d8fdaaa45506ed1f61ce13eef0c7911d2dbf27097b365f90a25e\",\"bytes\":2284}"
+    },
+    {
+      "name": "U1_preview_loads_workspace_texture",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点panel声明基础色贴图（model3d/textures/panel.png）：预览从项目工作区文件加载，构建侧按sha256复验。场景节点2参数0约束0渲染对象2包围盒mm320×40×80节点panelboxwidth120·height80·depth40keepmeboxwidth120·height80·depth40视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "U2_missing_texture_reported_per_node",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点panel声明基础色贴图（model3d/textures/deleted.png）：预览从项目工作区文件加载，构建侧按sha256复验。texture_reference_load_failed:panel（model3d/textures/deleted.png）场景节点2参数0约束0渲染对象2包围盒mm320×40×80节点panelboxwidth120·height80·depth40keepmeboxwidth120·height80·depth40视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "U3_other_primitives_still_render",
+      "pass": true,
+      "detail": "{\"objects\":2}"
+    }
+  ],
+  "allPass": true
+}

@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-10-31T06:21:09.394Z",
+  "platform": "darwin-arm64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "expectedBaseVolumeMm3": 384000,
+  "geometryReports": {
+    "bevel": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "bevel"
+        }
+      ],
+      "consumed": [],
+      "dropped": [],
+      "errors": []
+    },
+    "difference": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "boolean"
+        }
+      ],
+      "consumed": [
+        {
+          "target": "cutter",
+          "on": "base",
+          "operation": "DIFFERENCE"
+        }
+      ],
+      "dropped": [
+        "cutter"
+      ],
+      "errors": []
+    },
+    "union": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "boolean"
+        }
+      ],
+      "consumed": [
+        {
+          "target": "cutter",
+          "on": "base",
+          "operation": "UNION"
+        }
+      ],
+      "dropped": [
+        "cutter"
+      ],
+      "errors": []
+    },
+    "array": {
+      "applied": [
+        {
+          "node": "base",
+          "kind": "array"
+        }
+      ],
+      "consumed": [],
+      "dropped": [],
+      "errors": []
+    }
+  },
+  "watertight": {
+    "bevel": true,
+    "cut": true
+  },
+  "volumes": {
+    "plain": 384000,
+    "bevel": 370372.429978,
+    "cut": 240000,
+    "join": 456000,
+    "array": 1152000,
+    "arrayBoundsX": 400
+  }
+}

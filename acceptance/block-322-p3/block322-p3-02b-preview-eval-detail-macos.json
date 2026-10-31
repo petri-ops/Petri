@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-10-31T06:22:13.992Z",
+  "platform": "darwin-arm64",
+  "expectation": "声明态包围盒 X=190（base 半宽 60 + port 中心 100 + 半宽 30）；align 求值后 port 中心=0 ⇒ X=120",
+  "aligned": {
+    "bounds": [
+      120,
+      80,
+      40
+    ],
+    "objects": 2
+  },
+  "conflict": {
+    "bounds": [
+      190,
+      80,
+      40
+    ],
+    "objects": 2,
+    "notice": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点装配约束在服务端求值后烘进transform：未能向本地后端取回求值结果，预览按声明位置显示（constraint_conflict:port.position.x已由constraints[0]定为60，constraints[1]（align）要求0）。场景节点2参数0约束2渲染对象2包围盒mm190×80×40节点baseboxwidth120·height40·depth80portboxwidth60·height40·depth40约束间距base→port（x60mm）；对齐base→port（x）视角书签保存当前相机视角后，可一键恢复。"
+  },
+  "storedPortPosition": [
+    100,
+    0,
+    0
+  ]
+}

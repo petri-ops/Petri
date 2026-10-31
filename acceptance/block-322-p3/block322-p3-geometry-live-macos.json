@@ -1,0 +1,58 @@
+{
+  "name": "block322-p3-geometry-live",
+  "startedAt": "2026-10-31T06:21:02.041Z",
+  "finishedAt": "2026-10-31T06:21:09.396Z",
+  "assertions": [
+    {
+      "name": "G0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\""
+    },
+    {
+      "name": "G1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0iwov_vs3w\"}"
+    },
+    {
+      "name": "G2_baseline_volume_exact",
+      "pass": true,
+      "detail": "{\"volume\":384000,\"geometry\":{\"applied\":[],\"consumed\":[],\"dropped\":[],\"errors\":[]}}"
+    },
+    {
+      "name": "G3_bevel_removes_material",
+      "pass": true,
+      "detail": "{\"plainVolume\":384000,\"bevelVolume\":370372.429978,\"watertight\":true}"
+    },
+    {
+      "name": "G4_boolean_difference_cuts_and_consumes",
+      "pass": true,
+      "detail": "{\"cutVolume\":240000,\"volumes\":[\"base\"],\"geometry\":{\"applied\":[{\"node\":\"base\",\"kind\":\"boolean\"}],\"consumed\":[{\"target\":\"cutter\",\"on\":\"base\",\"operation\":\"DIFFERENCE\"}],\"dropped\":[\"cutter\"],\"errors\":[]}}"
+    },
+    {
+      "name": "G5_boolean_union_adds_material",
+      "pass": true,
+      "detail": "{\"joinVolume\":456000,\"keys\":[\"base\"]}"
+    },
+    {
+      "name": "G6_array_multiplies_volume_and_bounds",
+      "pass": true,
+      "detail": "{\"arrayVolume\":1152000,\"expectVolume\":1152000,\"arrayX\":400,\"expectX\":400}"
+    },
+    {
+      "name": "G7_export_carries_geometry",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvw0j0md-5uozxs/scene.glb\",\"sha256\":\"f31777221b5bd6c3979cd01a56b1dbb2d2bf160b70442f76e55fd3e0b0060a77\",\"bytes\":3660}"
+    },
+    {
+      "name": "U1_preview_declares_non_participation",
+      "pass": true,
+      "detail": "3D模型Blender可用Blender5.2.3LTSCAD可用occt-wasmAI生成不可用加载示例导入模型导入为场景节点视觉QAAI生成参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点base带几何操作（boolean/bevel）：预览显示未加工基元，倒角/布尔/阵列在构建导出时生效。场景节点2参数0约束0渲染对象2包围盒mm120×80×60节点cutterboxwidth60·height60·depth60baseboxwidth120·height40·depth80视角书签保存当前相机视角后，可一键恢复。"
+    },
+    {
+      "name": "U2_scene_still_renders_with_modifiers",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

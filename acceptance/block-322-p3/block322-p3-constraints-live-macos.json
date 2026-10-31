@@ -1,0 +1,78 @@
+{
+  "name": "block322-p3-constraints-live",
+  "startedAt": "2026-10-31T06:21:12.751Z",
+  "finishedAt": "2026-10-31T06:21:49.958Z",
+  "assertions": [
+    {
+      "name": "C0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\""
+    },
+    {
+      "name": "C1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0j503_qs3n\"}"
+    },
+    {
+      "name": "C2_resolve_endpoint_moves_target",
+      "pass": true,
+      "detail": "{\"status\":200,\"portPosition\":[0,0,0],\"ledger\":[{\"index\":0,\"kind\":\"align\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"x\",\"field\":\"position\",\"from\":100,\"to\":0,\"changed\":true}]}"
+    },
+    {
+      "name": "C3_distance_and_angle_values",
+      "pass": true,
+      "detail": "{\"port\":[60,5,5],\"cap\":[0,-70,-70],\"portRot\":[0,0,100]}"
+    },
+    {
+      "name": "C4_chain_uses_evaluated_anchor",
+      "pass": true,
+      "detail": "[{\"index\":0,\"kind\":\"distance\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"x\",\"field\":\"position\",\"from\":100,\"to\":60,\"changed\":true},{\"index\":1,\"kind\":\"distance\",\"a\":\"port\",\"b\":\"cap\",\"axis\":\"x\",\"field\":\"position\",\"from\":-70,\"to\":0,\"changed\":true},{\"index\":2,\"kind\":\"angle\",\"a\":\"base\",\"b\":\"port\",\"axis\":\"z\",\"field\":\"r（cap 参照的是 port 求值后的 x=60，故 60-60=0）"
+    },
+    {
+      "name": "C5_over_constrained_fails_closed",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_conflict\",\"errors\":[\"constraint_conflict: port.position.x 已由 constraints[0] 定为 60，constraints[1]（align）要求 0\"]}"
+    },
+    {
+      "name": "C6_unsupported_kind_rejected",
+      "pass": false,
+      "detail": "{\"ok\":false,\"error\":\"scene_invalid\",\"errors\":[\"constraints[0].axis 不在 mate 白名单\",\"constraints[0] aFace/bFace 只支持 +x/-x/+y/-y/+z/-z\"]}"
+    },
+    {
+      "name": "C6b_out_of_range_rejected",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_out_of_range\",\"errors\":[\"constraint_out_of_range: constraints[0]（distance）把 port.position.x 求值为 1999998，超出 ±1000000mm\"]}"
+    },
+    {
+      "name": "C7_align_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"plain\":[190,80,40],\"aligned\":[120,80,40]}"
+    },
+    {
+      "name": "C8_distance_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"distance\":[150,80,40],\"expect\":[150,80,40]}"
+    },
+    {
+      "name": "C9_angle_changes_built_bounds",
+      "pass": true,
+      "detail": "{\"plain\":[200,80,40],\"angled\":[120,200,40],\"expect\":[120,200,40]}"
+    },
+    {
+      "name": "C10_export_refuses_over_constrained",
+      "pass": true,
+      "detail": "{\"ok\":false,\"error\":\"constraint_conflict\",\"errors\":[\"constraint_conflict: port.position.x 已由 constraints[0] 定为 60，constraints[1]（align）要求 0\"]}"
+    },
+    {
+      "name": "C11_export_artifact_intact",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/runs/m3d-mvw0j65o-2skzcx/scene.glb\",\"sha256\":\"415c41acb24ddcbaa5cd6761ef485c8779dd1167b911558d03f04c97870abfbf\",\"bytes\":3504}"
+    },
+    {
+      "name": "flow_completed_without_exception",
+      "pass": false,
+      "detail": "poll_timeout: constraint_notice :: null"
+    }
+  ],
+  "allPass": false
+}

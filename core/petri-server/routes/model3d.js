@@ -278,6 +278,8 @@ module.exports = function registerModel3DRoutes(app) {
       width: req.body?.width,
       height: req.body?.height,
       showHidden: req.body?.showHidden,
+      tolerances: req.body?.tolerances ?? null,
+      scene: req.body?.scene ?? null,
     });
     if (!result.ok) {
       return res.status(assetErrorStatus(result.error, 'cad_source')).json(result);

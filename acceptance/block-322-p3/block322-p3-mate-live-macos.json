@@ -1,0 +1,112 @@
+{
+  "schema": "block322-p3-mate-live/v1",
+  "generatedAt": "2026-10-31T06:23:06.948Z",
+  "provider": "Blender 5.2.3 LTS",
+  "assertions": [
+    {
+      "id": "M1_resolve_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"scene\":{\"version\":\"scene3d/v1\",\"units\":\"mm\",\"coordinateSystem\":\"z-up-right-handed\",\"parameters\":{},\"nodes\":[{\"id\":\"base\",\"type\":\"box\",\"dimensions\":{\"width\":120,\"depth\":80,\"height\":40},\"transform\":{\"position\":[0,0,0],\"rotation\":[0,0,0]}},{\"id\":\"cap\",\"type\":\"box\",\"dimensions\":{\"width\":40,\"depth\":20,\"height\":10},\"transform\":{\"position\":[0,0,30],\"rotation\":[0,0,0]}}],\"constraints\":[{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"cap\",\"aFace\":\"+z\",\"bFace\":\"-z\",\"offset\":5}]},\"stats\":{\"nodes\":2,\"parameters\":0,\"constraints\":1,\"primitiveEstimate\":2},\"appliedConstraints\":[{\"index\":0,\"kind\":\"mate\",\"a\":\"base\","
+    },
+    {
+      "id": "M2_cap_mated_position",
+      "pass": true,
+      "detail": "[0,0,30]"
+    },
+    {
+      "id": "M3_source_not_mutated",
+      "pass": true,
+      "detail": "[0,0,100]"
+    },
+    {
+      "id": "M4_mate_ledger",
+      "pass": true,
+      "detail": "[{\"index\":0,\"kind\":\"mate\",\"a\":\"base\",\"b\":\"cap\",\"axis\":\"x\",\"field\":\"position\",\"from\":0,\"to\":0,\"changed\":false,\"aFace\":\"+z\",\"bFace\":\"-z\"},{\"index\":0,\"kind\":\"mate\",\"a\":\"base\",\"b\":\"cap\",\"axis\":\"y\",\"field\":\"position\",\"from\":0,\"to\":0,\"changed\":false,\"aFace\":\"+z\",\"bFace\":\"-z\"},{\"index\":0,\"kind\":\"mate\",\"a\":\"base\",\"b\":\"cap\",\"axis\":\"z\",\"field\":\"position\",\"from\":100,\"to\":30,\"changed\":true,\"aFace\":\"+z\",\"bFace\":\"-z\"}]"
+    },
+    {
+      "id": "M5_blender_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"outDir\":\"model3d/runs/m3d-mvw0lkd0-au1zsu\",\"report\":{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"display\":{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null},\"environment\":{\"declared\":false,\"background\":null,\"worldStrength\":null,\"effectiveWorldStrength\":1,\"effectiveColor\":[0.050876,0.050876,0.050876]},\"lights\":{\"created\":[],\"errors\":[]},\"geometry\":{\"applied\":[],\"cons"
+    },
+    {
+      "id": "M6_bounds",
+      "pass": true,
+      "detail": "[120,80,55]"
+    },
+    {
+      "id": "M7_volumes",
+      "pass": true,
+      "detail": "[384000,8000]"
+    }
+  ],
+  "passed": true,
+  "resolved": {
+    "capPosition": [
+      0,
+      0,
+      30
+    ],
+    "appliedConstraints": [
+      {
+        "index": 0,
+        "kind": "mate",
+        "a": "base",
+        "b": "cap",
+        "axis": "x",
+        "field": "position",
+        "from": 0,
+        "to": 0,
+        "changed": false,
+        "aFace": "+z",
+        "bFace": "-z"
+      },
+      {
+        "index": 0,
+        "kind": "mate",
+        "a": "base",
+        "b": "cap",
+        "axis": "y",
+        "field": "position",
+        "from": 0,
+        "to": 0,
+        "changed": false,
+        "aFace": "+z",
+        "bFace": "-z"
+      },
+      {
+        "index": 0,
+        "kind": "mate",
+        "a": "base",
+        "b": "cap",
+        "axis": "z",
+        "field": "position",
+        "from": 100,
+        "to": 30,
+        "changed": true,
+        "aFace": "+z",
+        "bFace": "-z"
+      }
+    ],
+    "boundsMm": {
+      "min": [
+        -60,
+        -40,
+        -20
+      ],
+      "max": [
+        60,
+        40,
+        35
+      ],
+      "size": [
+        120,
+        80,
+        55
+      ]
+    },
+    "volumesMm3": {
+      "base": 384000,
+      "cap": 8000
+    }
+  }
+}

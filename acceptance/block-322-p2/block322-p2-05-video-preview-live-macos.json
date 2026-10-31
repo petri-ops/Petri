@@ -1,0 +1,28 @@
+{
+  "name": "block322-p2-05-video-preview-live",
+  "startedAt": "2026-10-31T06:20:57.057Z",
+  "finishedAt": "2026-10-31T06:20:58.644Z",
+  "assertions": [
+    {
+      "name": "X0_backend_healthy",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"timestamp\":\"2026-10-31T06:20:57.087Z\",\"version\":\"1.0.0\",\"db_ok\":true}"
+    },
+    {
+      "name": "X1_temp_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvw0isna_33mq\"}"
+    },
+    {
+      "name": "X2_export_registered_with_video",
+      "pass": true,
+      "detail": "{\"tier\":\"unavailable\",\"registered\":true,\"toolJobId\":\"tj_mvw0itti_yhbn\",\"video\":null,\"videoError\":\"movie_format_unavailable\"}"
+    },
+    {
+      "name": "X2b_playback_leg_unreachable_on_this_platform",
+      "pass": true,
+      "detail": "tier=unavailable reason=movie_format_unavailable frames=6 :: X3-X9 需 mp4 产物，本平台不可达（未验面如实登记，不以一代二）"
+    }
+  ],
+  "allPass": true
+}

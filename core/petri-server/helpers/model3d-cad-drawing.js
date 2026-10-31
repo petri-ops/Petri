@@ -34,7 +34,7 @@ function drawingViews(input) {
   return normalized || null;
 }
 
-async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240, height = 240, showHidden = true } = {}) {
+async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240, height = 240, showHidden = true, tolerances = null, scene = null } = {}) {
   if (!workspaceRoot) return { ok: false, error: 'project_required' };
   const inspected = await inspectCadAsset({ workspaceRoot, relativePath: sourcePath });
   if (!inspected.ok) return inspected;
@@ -53,14 +53,22 @@ async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240,
     ? await cadExchange.stepToSvg({ bytes: sourceBytes, views: normalizedViews, width: size(width), height: size(height), showHidden: showHidden !== false })
     : await cadExchange.igesToSvg({ bytes: sourceBytes, views: normalizedViews, width: size(width), height: size(height), showHidden: showHidden !== false });
   if (!converted.ok) return converted;
+  // P4-05b 第一刀 — 特征锚定尺寸标注：解析 tolerances → SVG 尾部叠加标注层
+  let annotatedSvg = converted.svg;
+  let gdtRows = null;
+  if (Array.isArray(tolerances) && tolerances.length > 0 && scene && typeof scene === 'object') {
+    const { resolveToleranceFeatures, buildGdtAnnotationLayer } = require('./model3d-dimensions');
+    gdtRows = resolveToleranceFeatures(scene, tolerances);
+    annotatedSvg = buildGdtAnnotationLayer(converted.svg, gdtRows);
+  }
   const outDir = path.join(workspaceRoot, ...DRAWING_DIR.split('/'));
   fs.mkdirSync(outDir, { recursive: true });
   const id = `${safeStem(inspected.path)}-${Date.now().toString(36)}`;
   const svgRel = `${DRAWING_DIR}/${id}.svg`;
   const svgPath = path.join(workspaceRoot, ...svgRel.split('/'));
-  fs.writeFileSync(svgPath, converted.svg);
-  const svgBytes = Buffer.byteLength(converted.svg);
-  const svgSha = sha256(Buffer.from(converted.svg, 'utf8'));
+  fs.writeFileSync(svgPath, annotatedSvg);
+  const svgBytes = Buffer.byteLength(annotatedSvg);
+  const svgSha = sha256(Buffer.from(annotatedSvg, 'utf8'));
   const manifestRel = `${DRAWING_DIR}/${id}.json`;
   const manifest = {
     schema: 'model3d-drawing-manifest/v1',

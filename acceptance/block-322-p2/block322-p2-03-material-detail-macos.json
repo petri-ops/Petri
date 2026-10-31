@@ -1,0 +1,127 @@
+{
+  "generatedAt": "2026-10-31T06:20:47.062Z",
+  "platform": "darwin-arm64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "expectation": "纯红贴图应让 front.png 的 R 均值上升、B 均值下降（同一环境光、同一引擎、同一采样数）",
+  "display": {
+    "plain": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "declaredMaterial": false,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    },
+    "textured": {
+      "engine": "CYCLES",
+      "declaredLighting": true,
+      "declaredMaterial": true,
+      "requestedEngine": "cycles",
+      "samples": 16,
+      "device": "CPU"
+    }
+  },
+  "materials": {
+    "declared": [
+      {
+        "id": "panel",
+        "metallic": 0.6,
+        "emissive": "#061018",
+        "baseColorTexture": "model3d/textures/panel.png"
+      }
+    ]
+  },
+  "pixelStats": {
+    "before": {
+      "mean": 168.8123041137469,
+      "r": 157.1139,
+      "g": 170.80921041666667,
+      "b": 183.47841666666667,
+      "width": 800,
+      "height": 600,
+      "samples": 480000
+    },
+    "after": {
+      "mean": 159.3524115377427,
+      "r": 204.70172083333333,
+      "g": 147.60611875,
+      "b": 142.17353958333334,
+      "width": 800,
+      "height": 600,
+      "samples": 480000
+    }
+  },
+  "tamperedUnsupported": [
+    {
+      "id": "panel",
+      "error": "texture_source_hash_mismatch"
+    }
+  ],
+  "outputs": {
+    "textured": [
+      {
+        "path": "model3d/runs/m3d-mvw0ifvx-nx53g9/front.png",
+        "sha256": "a1907e714abc8668ec7a0d673df6c5ea2592feacb1e948a13769b5f16cfe060a",
+        "bytes": 477610
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ifvx-nx53g9/top.png",
+        "sha256": "2e5124dc0c3f2c3378bbcd9b28645b3e15d003f11129031f6b1d55afde8c3100",
+        "bytes": 373559
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ifvx-nx53g9/side.png",
+        "sha256": "4e1055144c6ed135062fa26f1f7e281af11b8dae99b5cde3b8d277740e88c8f5",
+        "bytes": 357808
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ifvx-nx53g9/iso.png",
+        "sha256": "854be791d652e6769b83ff35c1c12ecdbf9b859fe0226093b2a31223dca89372",
+        "bytes": 596220
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0ifvx-nx53g9/scene.glb",
+        "sha256": "da41b1717eb6d8fdaaa45506ed1f61ce13eef0c7911d2dbf27097b365f90a25e",
+        "bytes": 2284
+      }
+    ]
+  }
+}

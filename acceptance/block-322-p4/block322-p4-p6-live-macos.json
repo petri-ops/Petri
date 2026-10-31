@@ -1,0 +1,355 @@
+{
+  "schema": "block322-p4-p6-live/v1",
+  "generatedAt": "2026-10-31T06:23:02.473Z",
+  "provider": "Blender 5.2.3 LTS",
+  "assertions": [
+    {
+      "id": "S0_scene_written",
+      "pass": true,
+      "detail": "{\"ok\":true,\"path\":\"model3d/live.scene3d.json\",\"beforeHash\":null,\"afterHash\":\"07ea36feff7fbdf66d7924d9b4eaa0f1801f8db219f3922358c6b4ac7dc5e633\",\"revision\":null,\"diff\":null}"
+    },
+    {
+      "id": "P401_bom_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-bom/v1\",\"sceneHash\":\"7e64f575f6f8ead587f7e1dc0ca17cb7592dee6dd79a6cd2437688dca77cedf8\",\"totals\":{\"nodes\":2,\"meshNodes\":2,\"totalVolumeMm3\":392000,\"totalMassG\":405.6,\"totalMassKg\":0.4056},\"rows\":[{\"id\":\"base\",\"type\":\"box\",\"label\":\"底座\",\"volumeMm3\":384000,\"densityKgM3\":1000,\"densitySource\":\"node.material\",\"massG\":384,\"massKg\":0.384,\"meshObject\":true},{\"id\":\"block\",\"type\":\""
+    },
+    {
+      "id": "P401_bom_totals",
+      "pass": true,
+      "detail": "{\"nodes\":2,\"meshNodes\":2,\"totalVolumeMm3\":392000,\"totalMassG\":405.6,\"totalMassKg\":0.4056}"
+    },
+    {
+      "id": "P401_bom_tolerance",
+      "pass": true,
+      "detail": "tolerance section"
+    },
+    {
+      "id": "P401_bom_file_bom.csv",
+      "pass": true,
+      "detail": "model3d/bom/bom-mvw0ldq2/bom.csv"
+    },
+    {
+      "id": "P401_bom_file_bom.md",
+      "pass": true,
+      "detail": "model3d/bom/bom-mvw0ldq2/bom.md"
+    },
+    {
+      "id": "P401_bom_file_bom.json",
+      "pass": true,
+      "detail": "model3d/bom/bom-mvw0ldq2/bom.json"
+    },
+    {
+      "id": "P403_lineart_ok",
+      "pass": true,
+      "detail": "{\"requested\":true,\"views\":{\"front\":\"model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-front.png\",\"top\":\"model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-top.png\",\"side\":\"model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-side.png\"},\"labels\":{\"front\":\"前视图\",\"top\":\"顶视图\",\"side\":\"侧视图\"},\"error\":null}"
+    },
+    {
+      "id": "P403_lineart_distinct",
+      "pass": true,
+      "detail": "[\"f68b70a20230e6152670696ef9ebcdf81808c8fd6c0112add887cb5c4f2f8bf9\",\"7cf1739a29cc9914d6efc4f9bb0e2739400808a88d50d19468c8a74989edcb59\",\"26bef1979521574f6db23586b539c23d9e99434fa59b40af3267dcad234b05f7\"]"
+    },
+    {
+      "id": "P403_lineart_labels",
+      "pass": true,
+      "detail": "{\"front\":\"前视图\",\"top\":\"顶视图\",\"side\":\"侧视图\"}"
+    },
+    {
+      "id": "P601_export_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"sceneHash\":\"07ea36feff7fbdf66d7924d9b4eaa0f1801f8db219f3922358c6b4ac7dc5e633\",\"provider\":\"blender\",\"providerVersion\":\"Blender 5.2.3 LTS\",\"outDir\":\"model3d/runs/m3d-mvw0lfij-p1biqi\",\"manifest\":\"model3d/runs/m3d-mvw0lfij-p1biqi/manifest.json\",\"report\":{\"ok\":true,\"blenderVersion\":\"5.2.3 LTS\",\"renderEngine\":\"BLENDER_WORKBENCH\",\"display\":{\"engine\":\"BLENDER_WORKBENCH\",\"declaredLighting\":false,\"declaredMaterial\":false,\"requestedEngine\":\"workbench\",\"samples\":null,\"device\":null},\"environment\""
+    },
+    {
+      "id": "P601_outputs",
+      "pass": true,
+      "detail": "[\"png\",\"glb\",\"fbx\",\"usdz\"]"
+    },
+    {
+      "id": "P601_fbx_header",
+      "pass": true,
+      "detail": "fbx binary header"
+    },
+    {
+      "id": "P601_usdz_zip",
+      "pass": true,
+      "detail": "usdz zip header"
+    },
+    {
+      "id": "P501_asset_import",
+      "pass": true,
+      "detail": "{\"ok\":true,\"asset\":{\"id\":\"asset-4a432fdf8e450e8a\",\"name\":\"robot-arm\",\"path\":\"model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.glb\",\"sha256\":\"4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0\",\"bytes\":19,\"format\":\"glb\",\"sourcePath\":\"model3d/incoming/robot.glb\",\"provenancePath\":\"model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.provenance.json\",\"importedAt\":\"2026-10-31T06:23:01.173Z\",\"model\":\"mock-generator\"},\"node\":{\"id\":"
+    },
+    {
+      "id": "P501_asset_sha_path",
+      "pass": true,
+      "detail": "model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.glb"
+    },
+    {
+      "id": "P602_asset_list",
+      "pass": true,
+      "detail": "{\"ok\":true,\"count\":1,\"total\":1,\"assets\":[{\"id\":\"asset-4a432fdf8e450e8a\",\"name\":\"robot-arm\",\"path\":\"model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.glb\",\"sha256\":\"4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0\",\"bytes\":19,\"format\":\"glb\",\"sourcePath\":\""
+    },
+    {
+      "id": "P602_asset_get_same_sha",
+      "pass": true,
+      "detail": "{\"ok\":true,\"asset\":{\"id\":\"asset-4a432fdf8e450e8a\",\"name\":\"robot-arm\",\"path\":\"model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.glb\",\"sha256\":\"4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0\",\"bytes\":19,\"format\":\"glb\",\"sourcePath\":\"model3d/incoming/robot"
+    },
+    {
+      "id": "P603_geometry_compare",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-geometry-compare/v1\",\"before\":{\"objects\":2,\"triangles\":24,\"nonManifoldEdges\":0,\"watertight\":true,\"totalVolumeMm3\":392000,\"boundsMm\":{\"x\":120,\"y\":80,\"z\":70}},\"after\":{\"objects\":2,\"triangles\":24,\"nonManifoldEdges\":0,\"watertight\":true,\"totalVolumeMm3\":424000,\"boundsMm\":{\"x\":130,\"y\":80,\"z\":70}},\"deltas\":{\"objects\":0,\"triangles\":0,\"totalVolumeMm3\":32000,\"boundsMm\":{\"x\":10,\"y\":0,\"z\":0}},\"changed\":true}"
+    },
+    {
+      "id": "P603_bounds_delta",
+      "pass": true,
+      "detail": "{\"x\":10,\"y\":0,\"z\":0}"
+    },
+    {
+      "id": "P604_share_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"schema\":\"model3d-share-bundle/v1\",\"bundle\":{\"schema\":\"model3d-share-bundle/v1\",\"generatedAt\":\"2026-10-31T06:23:02.428Z\",\"scene\":{\"path\":\"model3d/live.scene3d.json\",\"sha256\":\"8e5551dd74c98e33a4f45f6ddd8440b91521a8fe7b38d41c8b09f204346c8d6b\",\"bytes\":1110},\"manifest\":{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/manifest.json\",\"sha256\":\"5af0f62303ac7d8b434db2140c67f32c027997d81e951dcd8a64b00501f1d8f4\",\"bytes\":1697},\"files\":[{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/front.png\",\"sha256\":\"4706"
+    },
+    {
+      "id": "P604_share_zip",
+      "pass": true,
+      "detail": "{\"path\":\"model3d/share/block322-p4-live-abaf2aa295da.zip\",\"sha256\":\"f5ffd857cbeb7d72225da9c0c155fe00c172cad27647f38d558fa9c3760aae35\",\"bytes\":1415357}"
+    },
+    {
+      "id": "P604_share_checksums",
+      "pass": true,
+      "detail": "[{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/front.png\",\"sha256\":\"4706563231e2c41d8e1811a97b18e0e9118a829b9beb42c6b4f1b05d3fc299cc\",\"bytes\":322406},{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/top.png\",\"sha256\":\"a02a27e327b77fd26a88773dd967f1c5a39b12cbcc4ef90a79ef030c788a2bb1\",\"bytes\":358569},{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/side.png\",\"sha256\":\"f78c9a72f2a03bec61a88d189e31a565bd66e75f78903eb8016e9527b56c52d0\",\"bytes\":309221},{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/iso.png\",\"sha256\":\"4543d51684161d97b61fce0997b0982473071883dd956f7fcce406b27474eda5\",\"bytes\":431459},{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/scene.glb\",\"sha256\":\"385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5\",\"bytes\":3524},{\"path\":\"model3d/runs/m3d-mvw0lfij-p1biqi/scene.fbx\",\"sha256\":\"10e76c6a021af819f0"
+    }
+  ],
+  "passed": true,
+  "bom": {
+    "totals": {
+      "nodes": 2,
+      "meshNodes": 2,
+      "totalVolumeMm3": 392000,
+      "totalMassG": 405.6,
+      "totalMassKg": 0.4056
+    },
+    "files": [
+      {
+        "path": "model3d/bom/bom-mvw0ldq2/bom.csv",
+        "name": "bom.csv",
+        "mime": "text/csv",
+        "sha256": "2b51ae1ca504ce2fb7ec3cea5c6c9bb35ced7df40c50dce691af691a1f6d1a51",
+        "bytes": 220
+      },
+      {
+        "path": "model3d/bom/bom-mvw0ldq2/bom.md",
+        "name": "bom.md",
+        "mime": "text/markdown",
+        "sha256": "3e25957df75cef3d7525d81b2d0f0318b9fd0d2eda266c6b029c0c0f1b84f668",
+        "bytes": 813
+      },
+      {
+        "path": "model3d/bom/bom-mvw0ldq2/bom.json",
+        "name": "bom.json",
+        "mime": "application/json",
+        "sha256": "0244369adcae29f0c3792c39a58e16d3df0a6ad5bfba054a1437fc8eba722d2f",
+        "bytes": 1191
+      }
+    ],
+    "toleranceSection": true
+  },
+  "lineart": {
+    "requested": true,
+    "views": {
+      "front": "model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-front.png",
+      "top": "model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-top.png",
+      "side": "model3d/runs/m3d-mvw0ldxf-pmmnnv/lineart-side.png"
+    },
+    "labels": {
+      "front": "前视图",
+      "top": "顶视图",
+      "side": "侧视图"
+    },
+    "error": null
+  },
+  "export": {
+    "outputs": [
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/front.png",
+        "sha256": "4706563231e2c41d8e1811a97b18e0e9118a829b9beb42c6b4f1b05d3fc299cc",
+        "bytes": 322406
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/top.png",
+        "sha256": "a02a27e327b77fd26a88773dd967f1c5a39b12cbcc4ef90a79ef030c788a2bb1",
+        "bytes": 358569
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/side.png",
+        "sha256": "f78c9a72f2a03bec61a88d189e31a565bd66e75f78903eb8016e9527b56c52d0",
+        "bytes": 309221
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/iso.png",
+        "sha256": "4543d51684161d97b61fce0997b0982473071883dd956f7fcce406b27474eda5",
+        "bytes": 431459
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.glb",
+        "sha256": "385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5",
+        "bytes": 3524
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.fbx",
+        "sha256": "10e76c6a021af819f01c2be135294440b3c4ae085face8cee70ddd8db9ad7e0c",
+        "bytes": 18876
+      },
+      {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.usdz",
+        "sha256": "f9475200943c9c48e352d62a708aff19e892a3e4153c044734375a1d16d80151",
+        "bytes": 3695
+      }
+    ],
+    "manifest": "model3d/runs/m3d-mvw0lfij-p1biqi/manifest.json",
+    "resultStudio": {
+      "registered": true,
+      "idempotent": false,
+      "adopted": true,
+      "toolJobId": "tj_mvw0lgd3_w9s2",
+      "revisions": [
+        {
+          "revisionId": "rev_model3d_07844bd0aa520ad6",
+          "artifactId": "model3d:p_mvw0ld1f_u2p6:model3d/live.scene3d.json:glb",
+          "artifactFamilyId": "model3d:p_mvw0ld1f_u2p6:model3d/live.scene3d.json:glb",
+          "outputPath": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.glb",
+          "outputHash": "385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5",
+          "validationStatus": "valid"
+        }
+      ],
+      "graphId": "wfg_7c58c2b1b8a2317db5e2d2d5",
+      "changeSetId": "cs_model3d_7cb09b58b1852748"
+    }
+  },
+  "asset": {
+    "asset": {
+      "id": "asset-4a432fdf8e450e8a",
+      "name": "robot-arm",
+      "path": "model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.glb",
+      "sha256": "4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0",
+      "bytes": 19,
+      "format": "glb",
+      "sourcePath": "model3d/incoming/robot.glb",
+      "provenancePath": "model3d/assets/4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0.provenance.json",
+      "importedAt": "2026-10-31T06:23:01.173Z",
+      "model": "mock-generator"
+    },
+    "provenance": {
+      "schema": "model3d-asset-provenance/v1",
+      "sha256": "4a432fdf8e450e8a5006762541c51b1a23e9168a86f1f84b971da43c301cb6d0",
+      "bytes": 19,
+      "format": "glb",
+      "name": "robot-arm",
+      "sourcePath": "model3d/incoming/robot.glb",
+      "importedAt": "2026-10-31T06:23:01.173Z",
+      "model": "mock-generator",
+      "promptHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "parameters": "{\"seed\":322}"
+    },
+    "listed": 1
+  },
+  "geometry": {
+    "ok": true,
+    "schema": "model3d-geometry-compare/v1",
+    "before": {
+      "objects": 2,
+      "triangles": 24,
+      "nonManifoldEdges": 0,
+      "watertight": true,
+      "totalVolumeMm3": 392000,
+      "boundsMm": {
+        "x": 120,
+        "y": 80,
+        "z": 70
+      }
+    },
+    "after": {
+      "objects": 2,
+      "triangles": 24,
+      "nonManifoldEdges": 0,
+      "watertight": true,
+      "totalVolumeMm3": 424000,
+      "boundsMm": {
+        "x": 130,
+        "y": 80,
+        "z": 70
+      }
+    },
+    "deltas": {
+      "objects": 0,
+      "triangles": 0,
+      "totalVolumeMm3": 32000,
+      "boundsMm": {
+        "x": 10,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "changed": true
+  },
+  "share": {
+    "ok": true,
+    "schema": "model3d-share-bundle/v1",
+    "bundle": {
+      "schema": "model3d-share-bundle/v1",
+      "generatedAt": "2026-10-31T06:23:02.428Z",
+      "scene": {
+        "path": "model3d/live.scene3d.json",
+        "sha256": "8e5551dd74c98e33a4f45f6ddd8440b91521a8fe7b38d41c8b09f204346c8d6b",
+        "bytes": 1110
+      },
+      "manifest": {
+        "path": "model3d/runs/m3d-mvw0lfij-p1biqi/manifest.json",
+        "sha256": "5af0f62303ac7d8b434db2140c67f32c027997d81e951dcd8a64b00501f1d8f4",
+        "bytes": 1697
+      },
+      "files": [
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/front.png",
+          "sha256": "4706563231e2c41d8e1811a97b18e0e9118a829b9beb42c6b4f1b05d3fc299cc",
+          "bytes": 322406
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/top.png",
+          "sha256": "a02a27e327b77fd26a88773dd967f1c5a39b12cbcc4ef90a79ef030c788a2bb1",
+          "bytes": 358569
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/side.png",
+          "sha256": "f78c9a72f2a03bec61a88d189e31a565bd66e75f78903eb8016e9527b56c52d0",
+          "bytes": 309221
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/iso.png",
+          "sha256": "4543d51684161d97b61fce0997b0982473071883dd956f7fcce406b27474eda5",
+          "bytes": 431459
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.glb",
+          "sha256": "385f62052d88a226857420454c21cb04ffcd9e69727f535a5356ef2dd87d0ae5",
+          "bytes": 3524
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.fbx",
+          "sha256": "10e76c6a021af819f01c2be135294440b3c4ae085face8cee70ddd8db9ad7e0c",
+          "bytes": 18876
+        },
+        {
+          "path": "model3d/runs/m3d-mvw0lfij-p1biqi/scene.usdz",
+          "sha256": "f9475200943c9c48e352d62a708aff19e892a3e4153c044734375a1d16d80151",
+          "bytes": 3695
+        }
+      ]
+    },
+    "bundleSha256": "abaf2aa295dae683b36837d4e87acea279cb39bbc381036112c2b23f719034e6",
+    "zip": {
+      "path": "model3d/share/block322-p4-live-abaf2aa295da.zip",
+      "sha256": "f5ffd857cbeb7d72225da9c0c155fe00c172cad27647f38d558fa9c3760aae35",
+      "bytes": 1415357
+    }
+  }
+}
