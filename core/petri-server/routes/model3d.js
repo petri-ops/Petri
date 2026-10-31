@@ -9,6 +9,9 @@ const sceneStore = require('../helpers/model3d-scene-store');
 const { compareGeometryReports } = require('../helpers/model3d-geometry-compare');
 const { inspectMeshAsset, inspectTextureAsset } = require('../helpers/mesh-assets');
 const cadExchange = require('../helpers/cad-exchange');
+const assets = require('../helpers/model3d-assets');
+const { createCadDrawing } = require('../helpers/model3d-cad-drawing');
+const { buildWorkspaceArtifactUrl } = require('../helpers/model3d-artifact-projection');
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
@@ -226,6 +229,44 @@ module.exports = function registerModel3DRoutes(app) {
       return res.status(assetErrorStatus(result.error, 'texture')).json(result);
     }
     return res.json(result);
+  });
+
+  // BLOCK-322 P4-04a — STEP/IGES 源文件入链：OCCT 转派生 GLB/STL，原 CAD 留工作区。
+  app.post('/api/model3d/asset/import-cad', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const result = await assets.importCadAsset({
+      workspaceRoot: auth.project.workspace_path,
+      sourcePath: req.body?.path,
+      name: req.body?.name,
+      provenance: req.body?.provenance,
+    });
+    if (!result.ok) {
+      return res.status(assetErrorStatus(result.error, 'cad_source')).json(result);
+    }
+    return res.json(result);
+  });
+
+  // BLOCK-322 P4-05 — STEP/IGES → HLR 多视图 SVG（只读源 + 新产物；不含尺寸链/GD&T）。
+  app.post('/api/model3d/cad/drawing', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const result = await createCadDrawing({
+      workspaceRoot: auth.project.workspace_path,
+      sourcePath: req.body?.path,
+      views: req.body?.views,
+      width: req.body?.width,
+      height: req.body?.height,
+      showHidden: req.body?.showHidden,
+    });
+    if (!result.ok) {
+      return res.status(assetErrorStatus(result.error, 'cad_source')).json(result);
+    }
+    return res.json({
+      ...result,
+      svgUrl: buildWorkspaceArtifactUrl(auth.project.id, result.svgPath),
+      manifestUrl: buildWorkspaceArtifactUrl(auth.project.id, result.manifestPath),
+    });
   });
 
   // BLOCK-322 P6-03 — 场景 diff 之上的几何差值投影：两侧都跑一次 Blender 网格报告

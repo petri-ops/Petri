@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-10-31T00:23:43.792Z",
+  "platform": "win32-x64",
+  "node": "v24.20.0",
+  "api": "http://127.0.0.1:3001",
+  "projectId": "p_mvvnrcky_o686",
+  "capability": {
+    "status": "ready",
+    "reason": null,
+    "kernel": "occt-wasm",
+    "version": "5.11.0",
+    "formats": {
+      "stepImport": true,
+      "stepExport": true,
+      "igesImport": true,
+      "igesExport": false,
+      "drawingSvg": true
+    },
+    "notes": [
+      "STEP: occt-wasm",
+      "IGES: occt-import-js import-only",
+      "STEP export: faceted B-rep from Blender STL"
+    ]
+  },
+  "ui": {
+    "capability": "CAD可用occt-wasm",
+    "importedText": "3D模型Blender可用Blender4.5.10LTSCAD可用occt-wasm加载示例导入模型导入为场景节点视觉QA参数编辑草图转需求对比SceneSpec测量保存视角截图等轴前顶侧单位mm·Z-up·点选模型选择节点节点asset-a2fcc35c849d6a76为外部mesh引用（model3d/assets/a2fcc35c849d6a76417023d8c1072293a1724ca8d526ca380e7df64ee1ba6184.glb）；预览从项目工作区文件加载，导出按sha256锚定。已导入CADblock322-ruling01-6611e6a7.step（STEP·源sha2562a1ee7a3ee93…·派生GLB3272字节）已作为节点asset-a2fcc35c849d6a76写入model3d/scene.scene3d.json；可生成HLR线框工程图生成工程图场景节点3参数4约束0渲染对象8包围盒mm126×80×40节点enclosureboxwidth120·height40·depth80portcylinderradius6·height",
+    "derived": [
+      "a2fcc35c849d6a76417023d8c1072293a1724ca8d526ca380e7df64ee1ba6184.glb"
+    ],
+    "svgFiles": [
+      "block322-ruling01-6611e6a7-mvvnre3b.svg"
+    ]
+  }
+}

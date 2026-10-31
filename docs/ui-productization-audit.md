@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-649: 3D 工作面 CAD 导入与线框工程图（BLOCK-322 P4-04a/P4-05；2026-10-31 **verified（dev Electron 边界内；前端 10/10 + REST 1/1 + UI 实机 9/9）**）
+
+- **变化面**：3D 工作面新增 CAD 能力徽标（Blender + CAD/occt-wasm 双状态）；「导入为场景节点」接受 `.step/.stp/.iges/.igs`，前端只负责上传到 `model3d/incoming/`，由服务端转换为派生 GLB/STL 后走既有 `scene/apply add_node`；导入成功提示源 sha 与派生格式；STEP/IGES 导入后出现「生成工程图」，调用 `POST /api/model3d/cad/drawing` 生成 HLR 多视图 SVG 并显示打开入口。普通「导入模型」对 STEP/IGES 明确提示改用节点导入，不把 CAD 直接塞进 mesh 预览。
+- **为什么这样设计**：STEP/IGES 不是网格格式，前端做几何转换会成为第二执行器；转换只在服务端 `cad-exchange` 适配层发生，原始 CAD 留工作区、派生网格入 `model3d/assets/<sha>`，SceneSpec 仍只引用派生 mesh-reference。
+- **验证（代码）**：`model3dAssetImport` CAD 用例 3/3 + 既有 mesh 7/7；格式单源测试（前端 CAD 镜像与后端逐值一致）；`block322-p4-cad-routes` REST 1/1（capability/import-cad/drawing）；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-ruling01/block322-ruling01-cad-ui-live-live.json`（9/9，9223 离屏）：真实 STEP 文件经「导入为场景节点」→ 派生 GLB 节点出现并落盘 → 点击「生成工程图」→ 出现「打开工程图」链接 → `model3d/drawings/*.svg` 真实含 `<svg>`；CAD 能力徽标显示 `CAD 可用 · occt-wasm`。截图不计入通过。
+- **边界（reopen）**：工程图只含 HLR 多视图线框，**不含尺寸链/GD&T**（需 RULING-04 特征级引用）；IGES 导出仍 unsupported；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-648: 3D 对比面板几何差值（BLOCK-322 P6-03；2026-10-31 **verified（dev Electron 边界内；纯函数 2/2 + UI 实机 4/4）**）
 
 - **变化面**：SceneSpec 对比面板新增「几何差异」：调用只读 `POST /api/model3d/scene/compare-geometry`，两侧真实 Blender 网格报告投影为对象/三角面/体积/包围盒及 Δ，语义 diff 与几何差值分开显示；不重算几何、不建第二执行器。

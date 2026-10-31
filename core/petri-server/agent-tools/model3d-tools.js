@@ -20,6 +20,7 @@ const { runModel3DReview } = require('../helpers/model3d-review');
 const bomHelper = require('../helpers/model3d-bom');
 const assets = require('../helpers/model3d-assets');
 const cadExchange = require('../helpers/cad-exchange');
+const { createCadDrawing } = require('../helpers/model3d-cad-drawing');
 const { createModel3DSharePackage } = require('../helpers/model3d-share-package');
 const { buildModel3dArtifactRecords } = require('../helpers/model3d-artifact-projection');
 const {
@@ -383,6 +384,18 @@ async function tool_model3d_asset(args = {}, ctx = {}) {
     const workspace = await projectWorkspace(ctx);
     if (workspace.error) return workspace.error;
     return assets.getAsset({ workspaceRoot: workspace.root, assetId: args.assetId });
+  }
+  if (action === 'drawing') {
+    const workspace = await projectWorkspace(ctx);
+    if (workspace.error) return workspace.error;
+    return createCadDrawing({
+      workspaceRoot: workspace.root,
+      sourcePath: args.sourcePath,
+      views: args.views,
+      width: args.width,
+      height: args.height,
+      showHidden: args.showHidden,
+    });
   }
   if (action !== 'import') return { ok: false, error: 'asset_action_invalid' };
   const workspace = await projectWorkspace(ctx);

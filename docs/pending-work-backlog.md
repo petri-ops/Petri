@@ -1,4 +1,5 @@
 # 全局未完成项计划表（Pending Work Backlog）
+最后更新：2026-10-31（**BLOCK-322 P4-05 HLR 线框工程图工具/REST/UI completed（UI-649 verified）**：STEP/IGES → HLR 多视图 SVG + manifest；3D 工作面 CAD 徽标/导入/生成工程图已接；证据单测 7/7 + REST 1/1 + UI 9/9；尺寸链/GD&T 待 RULING-04，P4-04b IGES 导出/解析 B-rep 仍 in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-31（**BLOCK-322 RULING-01 材料 + P4-04a CAD 交换落地**：选型 occt-wasm + occt-import-js（仅 IGES 导入）；STEP→GLB、Blender STL→faceted STEP、IGES→STL、HLR SVG；单测 6/6 + 实机 18/18（`acceptance/block-322-ruling01/`）；IGES 导出/真工程图/GD&T 仍待 RULING-04，P4-04b/P4-05 保持 in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-31（**BLOCK-322 无裁决项队列收官（P4-01~03 / P5-01 / P6-01~04 completed）**：N+2 行状态改为「余下仅四组 RULING」；P4-P6 证据入 `acceptance/block-322-p4/`（实机 23/23）与 `acceptance/block-322-p6/`（UI 4/4），UI-648 verified；未实现面=P4-04/05、P5-02、P6-05、P3-03 全部撞 RULING 待用户裁决，不假装支持。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-31（**BLOCK-322 队列位次刷新（P2-05 结果面视频预览 completed，P2 段收官）**：N+2 行「下一票」推进到 `P4-01` BOM 与质量属性；P2-05 证据入 `acceptance/block-322-p2/`（实机 10/10），UI-647 verified；平台发现（跨源 media 被 Chromium 拒 → fetch→blob: + CSP media-src）已入 plan §5。G0 开发期常态 · 不外推 packaged/Provider/GA。）

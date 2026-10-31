@@ -6734,7 +6734,13 @@
         "scripts/block322-ruling01-cad-live.mjs",
         "test/block322-p4-cad-exchange.test.mjs",
         "test/fixtures/model3d/**",
-        "acceptance/block-322-ruling01/**"
+        "acceptance/block-322-ruling01/**",
+        "core/petri-server/helpers/model3d-cad-drawing.js",
+        "test/block322-p4-cad-routes.test.mjs",
+        "test/block322-mesh-format-single-source.test.mjs",
+        "frontend/src/lib/meshAssets.ts",
+        "frontend/src/lib/sceneEditClient.ts",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-ruling01-cad-ui-live.cjs"
       ],
       "tests": [
         "test/block322-p4-bom.test.mjs",
@@ -6743,7 +6749,8 @@
         "test/block322-p6-share.test.mjs",
         "test/agent-tool-registry.test.mjs",
         "test/tool-activity-labels.test.mjs",
-        "test/block322-p4-cad-exchange.test.mjs"
+        "test/block322-p4-cad-exchange.test.mjs",
+        "test/block322-p4-cad-routes.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"

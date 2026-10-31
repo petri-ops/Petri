@@ -65,6 +65,67 @@ export async function inspectMeshAsset(input: {
   return parse<MeshAssetInspection>(response);
 }
 
+export interface CadAssetImportResult {
+  ok: true;
+  asset: { id: string; name: string; path: string; sha256: string; bytes: number; format: string; sourcePath: string };
+  node: { id: string; type: 'mesh-reference'; source: { path: string; sourceSha256: string }; label: string };
+  provenance: Record<string, unknown>;
+  cad: {
+    sourceFormat: 'step' | 'iges';
+    derivedFormat: 'glb' | 'stl';
+    sourceSha256: string;
+    derivedSha256: string;
+    sourcePath: string;
+    kernel: string | null;
+    kernelVersion: string | null;
+    [key: string]: unknown;
+  };
+}
+
+export async function importCadAsset(input: {
+  projectId: string;
+  path: string;
+  name?: string;
+}): Promise<CadAssetImportResult> {
+  const response = await fetch(`${getApiPrefix()}/model3d/asset/import-cad`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(180_000),
+  });
+  return parse<CadAssetImportResult>(response);
+}
+
+export interface CadDrawingResult {
+  ok: true;
+  source: { path: string; format: string; sha256: string; bytes: number };
+  svgPath: string;
+  svgSha256: string;
+  bytes: number;
+  manifestPath: string;
+  svgUrl: string | null;
+  manifestUrl: string | null;
+  summary: Record<string, unknown>;
+  capabilities: { hiddenLineRemoval: boolean; dimensions: boolean; gdt: boolean; note: string };
+}
+
+export async function generateCadDrawing(input: {
+  projectId: string;
+  path: string;
+  views?: string[];
+  width?: number;
+  height?: number;
+  showHidden?: boolean;
+}): Promise<CadDrawingResult> {
+  const response = await fetch(`${getApiPrefix()}/model3d/cad/drawing`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(180_000),
+  });
+  return parse<CadDrawingResult>(response);
+}
+
 export async function readSceneFile(projectId: string, path: string): Promise<{ scene: unknown; hash: string }> {
   const response = await fetch(`${getApiPrefix()}/model3d/scene/read`, {
     method: 'POST',

@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04b〔IGES 导出/解析 B-rep〕/P4-05〔真工程图/GD&T〕/P5-02/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a 批提交=2f8fa437 + cebec6c7（capability）+ 回写 03bbf6f0/1877af97〔本地，领先数以 git 为准，推送待发令〕）
+**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P4-05 HLR 线框工程图（UI-649 verified）、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04b〔IGES 导出/解析 B-rep〕/P4-05 GD&T〔真工程图尺寸链〕/P5-02/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a 批提交=2f8fa437 + cebec6c7（capability）+ 回写 03bbf6f0/1877af97〔本地，领先数以 git 为准，推送待发令〕）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -119,8 +119,8 @@ status: active
 | `P4-01` BOM 与质量属性 **completed（2026-10-31，定向 5/5 + 实机 BOM 全绿）** | SceneSpec 节点 → BOM CSV/MD/JSON + `bom-manifest.json`；体积取 Blender 网格报告（watertight 才生成），质量=volume×density；密度可经节点 `material.densityKgM3` 或 `metadata.defaultDensityKgM3` 声明（缺省 1000 kg/m³）；非水密拒绝 | 表格产物 + sha + manifest 登记 + 与网格报告体积一致；实机 392000mm³/405.6g、半写/缺件 fail-closed | `acceptance/block-322-p4/block322-p4-p6-live.json` |
 | `P4-02` 公差字段 **completed（2026-10-31，后端/前端双层校验）** | `metadata.tolerances` 结构化（nodeId/feature/nominal/lower/upper/unit=mm，≤50 条）；未知节点/上下限倒置/非 mm fail-closed；BOM Markdown 增加「公差声明」表 | 校验 + 报告产出；前端镜像同判据 | `test/block322-p4-bom.test.mjs` + BOM 实机 |
 | `P4-03` 三视图线稿 **completed（2026-10-31，真实 Blender Freestyle）** | `model3d_render` 增 `lineart` 输出请求：前/顶/侧 Freestyle 线稿 PNG + `lineart.labels` 视图标注；不声明即零额外渲染；**不是 GD&T 工程图** | 三张 PNG 哈希互不相同 + labels 在场 + 实机 | `acceptance/block-322-p4/block322-p4-p6-live.json` |
-| `P4-04` STEP/IGES 导入导出 **in_progress（2026-10-31，P4-04a 已完成：STEP 导入/导出 + IGES 导入）** | `occt-wasm` STEP↔XCAF/GLB、Blender STL→OCCT faceted solid→STEP、`occt-import-js` IGES→STL；均走资产入链 sha/provenance；**IGES 导出、解析曲面 B-rep 未做**（需另一裁决） | 实机 18/18：STEP 头/2 个 MANIFOLD_SOLID_BREP/体积 392000；STEP→GLB 资产；IGES→STL 12 三角面；HLR SVG | `test/block322-p4-cad-exchange.test.mjs` + `acceptance/block-322-ruling01/block322-ruling01-cad-live.json` |
-| `P4-05` 2D 工程图（标注/剖视） **in_progress（仅 HLR 多视图 SVG 基础验证）** | `occt-wasm` HLR 多视图 SVG 可从 STEP/IGES 生成；**尺寸链/GD&T 仍待特征级引用（RULING-04）**，本批不接工具/UI | HLR SVG 实机通过；真工程图未验收 | `acceptance/block-322-ruling01/` + RULING-04 |
+| `P4-04` STEP/IGES 导入导出 **in_progress（2026-10-31，P4-04a 已完成：STEP 导入/导出 + IGES 导入 + UI 导入）** | `occt-wasm` STEP↔XCAF/GLB、Blender STL→OCCT faceted solid→STEP、`occt-import-js` IGES→STL；均走资产入链 sha/provenance；3D 工作面可上传 STEP/IGES 为派生网格节点；**IGES 导出、解析曲面 B-rep 未做**（需另一裁决） | 实机 18/18 + UI 9/9：STEP 头/2 个 MANIFOLD_SOLID_BREP/体积 392000；STEP→GLB 资产；IGES→STL 12 三角面；HLR SVG | `test/block322-p4-cad-exchange.test.mjs` + `acceptance/block-322-ruling01/` |
+| `P4-05` 2D 工程图（标注/剖视） **in_progress（2026-10-31：HLR 多视图 SVG 工具/REST/UI 已完成）** | `occt-wasm` HLR 多视图 SVG 可从 STEP/IGES 生成；`model3d_asset drawing` 与 `/api/model3d/cad/drawing` 落 `model3d/drawings/*.svg` + manifest；**尺寸链/GD&T 仍待特征级引用（RULING-04）** | 单测 7/7 + REST 1/1 + UI 9/9；真工程图未验收 | `acceptance/block-322-ruling01/` + RULING-04 |
 
 ### P5 · AI 生成资产
 

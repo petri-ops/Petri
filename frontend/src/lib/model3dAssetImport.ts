@@ -7,12 +7,22 @@
 //   3) POST /api/model3d/scene/apply 的 add_node 白名单操作写入 SceneSpec（乐观锁 + 修订历史在既有链路内）
 // 前端不算哈希、不自报通过；Blender 构建时仍逐字节复验 sourceSha256。
 // ============================================================
-import { MAX_MESH_BYTES, meshFormatForPath, meshTooLargeMessage, type MeshInputFormat } from './meshAssets';
+import {
+  cadFormatForPath,
+  cadTooLargeMessage,
+  MAX_CAD_BYTES,
+  MAX_MESH_BYTES,
+  meshFormatForPath,
+  meshTooLargeMessage,
+  type MeshInputFormat,
+} from './meshAssets';
 import {
   applySceneOperations,
   DEFAULT_SCENE_PATH,
+  importCadAsset,
   inspectMeshAsset,
   readSceneFile,
+  type CadAssetImportResult,
 } from './sceneEditClient';
 import type { Scene3DNode, Scene3DSpec } from './scene3d';
 import { isTargetAlreadyExists, uploadFileToWorkspace } from './workspaceFileUpload';
@@ -115,5 +125,70 @@ export async function importMeshAssetAsNode(input: {
     bytes: inspected.bytes,
     sourceSha256: inspected.sourceSha256,
     scenePath,
+  };
+}
+
+export interface ImportedCadAssetNode extends ImportedMeshAssetNode {
+  cad: CadAssetImportResult['cad'];
+  provenance: Record<string, unknown>;
+}
+
+/**
+ * BLOCK-322 P4-04a — STEP/IGES 源文件先上传到 model3d/incoming，再由服务端转换并
+ * 返回派生 mesh-reference；写入仍走既有 scene/apply add_node，前端不做几何转换。
+ */
+export async function importCadAssetAsNode(input: {
+  projectId: string;
+  file: File;
+  scene: Scene3DSpec;
+  scenePath?: string;
+  reason?: string;
+}): Promise<ImportedCadAssetNode> {
+  const { projectId, file, scene } = input;
+  const scenePath = input.scenePath || DEFAULT_SCENE_PATH;
+  const format = cadFormatForPath(file.name);
+  if (!format) throw new Error(`不支持的 CAD 格式：${file.name}（只接受 .step/.stp/.iges/.igs）`);
+  if (file.size > MAX_CAD_BYTES) throw new Error(cadTooLargeMessage());
+
+  const { stem, ext } = splitAssetName(file.name);
+  let target = `model3d/incoming/${stem}${ext}`;
+  let uploaded = false;
+  for (let attempt = 1; attempt <= MAX_NAME_ATTEMPTS && !uploaded; attempt += 1) {
+    try {
+      await uploadFileToWorkspace(projectId, target, file);
+      uploaded = true;
+    } catch (error) {
+      if (!isTargetAlreadyExists(error)) throw error;
+      target = `model3d/incoming/${stem}-${attempt + 1}${ext}`;
+    }
+  }
+  if (!uploaded) throw new Error(`model3d/incoming/ 下同名 CAD 源文件已满 ${MAX_NAME_ATTEMPTS} 个，请先清理后再导入。`);
+
+  const imported = await importCadAsset({ projectId, path: target, name: file.name });
+  let expectedHash: string | null = null;
+  try {
+    expectedHash = (await readSceneFile(projectId, scenePath)).hash;
+  } catch {
+    expectedHash = null;
+  }
+  const applied = await applySceneOperations({
+    projectId,
+    path: scenePath,
+    scene,
+    operations: [{ op: 'add_node', node: imported.node }],
+    expectedHash,
+    reason: input.reason || 'import_external_cad_asset',
+  });
+
+  return {
+    node: imported.node,
+    scene: applied.scene,
+    path: imported.asset.path,
+    format: imported.cad.derivedFormat,
+    bytes: imported.asset.bytes,
+    sourceSha256: imported.cad.sourceSha256,
+    scenePath,
+    cad: imported.cad,
+    provenance: imported.provenance,
   };
 }

@@ -11,18 +11,29 @@ import {
   type Scene3DView,
 } from '@/lib/scene3d';
 import {
-  MESH_INPUT_ACCEPT_ATTR,
+  CAD_INPUT_ACCEPT_ATTR,
+  MAX_CAD_BYTES,
   MAX_MESH_BYTES,
+  cadFormatForPath,
+  cadTooLargeMessage,
   meshFormatForPath,
   meshTooLargeMessage,
+  MESH_INPUT_ACCEPT_ATTR,
   type MeshInputFormat,
 } from '@/lib/meshAssets';
-import { importMeshAssetAsNode } from '@/lib/model3dAssetImport';
+import { importCadAssetAsNode, importMeshAssetAsNode } from '@/lib/model3dAssetImport';
 import type { Model3DCameraApi, Model3DPoint } from './Model3DScene';
 import { Model3DReviewPanel } from './Model3DReviewPanel';
 import { SketchSpecDialog } from './SketchSpecDialog';
 import { Model3DEditPanel } from './Model3DEditPanel';
-import { compareSceneGeometry, diffSceneSpecs, type GeometryCompareResult, type SceneDiff } from '@/lib/sceneEditClient';
+import {
+  compareSceneGeometry,
+  diffSceneSpecs,
+  generateCadDrawing,
+  type CadDrawingResult,
+  type GeometryCompareResult,
+  type SceneDiff,
+} from '@/lib/sceneEditClient';
 import button from '@/components/ui/controls/button.module.css';
 import styles from './Model3DSurface.module.css';
 
@@ -54,6 +65,10 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   const [modelFormat, setModelFormat] = React.useState<MeshInputFormat>('glb');
   const [importing, setImporting] = React.useState(false);
   const [assetNotice, setAssetNotice] = React.useState<string | null>(null);
+  const [cadSource, setCadSource] = React.useState<{ path: string; format: 'step' | 'iges'; name: string } | null>(null);
+  const [drawingBusy, setDrawingBusy] = React.useState(false);
+  const [drawingResult, setDrawingResult] = React.useState<CadDrawingResult | null>(null);
+  const [drawingError, setDrawingError] = React.useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [sketchOpen, setSketchOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
@@ -179,6 +194,10 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
       setMeasureMode(false);
       return;
     }
+    if (cadFormatForPath(file.name)) {
+      setError('STEP/IGES 需要先经 CAD 内核转换：请使用「导入为场景节点」，转换后可生成线框工程图。');
+      return;
+    }
     try {
       const text = await file.text();
       loadStructured(JSON.parse(text));
@@ -193,10 +212,27 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
       setError('导入为场景节点需要已加载的 SceneSpec 与已打开的项目工作区。');
       return;
     }
+    const cadFormat = cadFormatForPath(file.name);
+    if (cadFormat && file.size > MAX_CAD_BYTES) {
+      setError(cadTooLargeMessage());
+      return;
+    }
     setImporting(true);
     setError(null);
     setAssetNotice(null);
+    setDrawingResult(null);
+    setDrawingError(null);
     try {
+      if (cadFormat) {
+        const imported = await importCadAssetAsNode({ projectId, file, scene: view.scene });
+        loadStructured(imported.scene);
+        setCadSource({ path: imported.cad.sourcePath, format: imported.cad.sourceFormat, name: file.name });
+        setWarnings((previous) => [...previous,
+          `已导入 CAD ${file.name}（${cadFormat.toUpperCase()} · 源 sha256 ${imported.cad.sourceSha256.slice(0, 12)}… · 派生 ${imported.cad.derivedFormat.toUpperCase()} ${imported.bytes} 字节）`]);
+        setAssetNotice(`已作为节点 ${imported.node.id} 写入 ${imported.scenePath}；可生成 HLR 线框工程图`);
+        return;
+      }
+      setCadSource(null);
       const imported = await importMeshAssetAsNode({ projectId, file, scene: view.scene });
       loadStructured(imported.scene);
       setWarnings((previous) => [...previous,
@@ -206,6 +242,22 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
       setError(caught instanceof Error ? caught.message : 'asset_import_failed');
     } finally {
       setImporting(false);
+    }
+  };
+
+  const onGenerateDrawing = async () => {
+    if (!projectId || !cadSource) return;
+    setDrawingBusy(true);
+    setDrawingError(null);
+    setDrawingResult(null);
+    try {
+      const result = await generateCadDrawing({ projectId, path: cadSource.path });
+      setDrawingResult(result);
+      setAssetNotice(`已生成线框工程图 ${result.svgPath}（sha256 ${result.svgSha256.slice(0, 12)}…；不含尺寸链/GD&T）`);
+    } catch (caught) {
+      setDrawingError(caught instanceof Error ? caught.message : 'drawing_failed');
+    } finally {
+      setDrawingBusy(false);
     }
   };
 
@@ -292,6 +344,12 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
             {capability.version ? <span className={styles.meta}>{capability.version}</span> : null}
           </span>
         ) : null}
+        {capability?.cad ? (
+          <span className={styles.capability} data-testid="model3d-cad-capability">
+            CAD <StatusBadge projection={projectCapabilityAxis(capability.cad.status)} />
+            {capability.cad.kernel ? <span className={styles.meta}>{capability.cad.kernel}</span> : null}
+          </span>
+        ) : null}
         <button type="button" className={button.ghost} onClick={() => { loadStructured(sampleScene3D()); setViewAngle('iso'); }}>
           加载示例
         </button>
@@ -304,7 +362,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           disabled={!view || !projectId || importing}
           title={!view || !projectId
             ? '需要先加载 SceneSpec 并打开项目工作区'
-            : '上传到工作区 model3d/assets/，并作为 mesh-reference 节点写入 SceneSpec'}
+            : '上传 mesh 到 model3d/assets/ 或 STEP/IGES 源文件到 model3d/incoming/，转换后作为 mesh-reference 节点写入 SceneSpec'}
           onClick={() => assetFileRef.current?.click()}
         >
           {importing ? '导入中…' : '导入为场景节点'}
@@ -353,7 +411,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           ref={assetFileRef}
           type="file"
           data-testid="model3d-asset-input"
-          accept={MESH_INPUT_ACCEPT_ATTR}
+          accept={`${MESH_INPUT_ACCEPT_ATTR},${CAD_INPUT_ACCEPT_ATTR}`}
           hidden
           onChange={(event) => { void onAssetFile(event.target.files?.[0]); event.target.value = ''; }}
         />
@@ -364,7 +422,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           {!view && !modelUrl ? (
             <div className={styles.empty}>
               <Icon name="layers" size={30} />
-              <p>打开一个 SceneSpec，或导入 GLB/GLTF/STL/OBJ 预览。</p>
+              <p>打开一个 SceneSpec，或导入 GLB/GLTF/STL/OBJ 预览；STEP/IGES 请用「导入为场景节点」。</p>
               <span>SceneSpec 是参数化源真相；GLB/STL/OBJ 是导出物。</span>
               <button type="button" className={button.primary} onClick={() => loadStructured(sampleScene3D())}>
                 加载示例 SceneSpec
@@ -429,7 +487,25 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         <aside className={styles.info}>
           {error ? <div className={styles.error} role="alert">{error}</div> : null}
           {warnings.map((warning) => <div key={warning} className={styles.warning}>{warning}</div>)}
-          {assetNotice ? <div className={styles.notice}>{assetNotice}</div> : null}
+          {assetNotice ? (
+            <div className={styles.notice}>
+              <span>{assetNotice}</span>
+              {cadSource ? (
+                <button type="button" className={button.ghost} disabled={drawingBusy} onClick={() => { void onGenerateDrawing(); }}>
+                  {drawingBusy ? '生成中…' : '生成工程图'}
+                </button>
+              ) : null}
+              {drawingResult?.svgUrl ? (
+                <a className={styles.meta} href={drawingResult.svgUrl} target="_blank" rel="noreferrer">打开工程图</a>
+              ) : null}
+            </div>
+          ) : null}
+          {drawingError ? <div className={styles.error} role="alert">{drawingError}</div> : null}
+          {drawingResult ? (
+            <p className={styles.meta}>
+              线框工程图：{drawingResult.svgPath}（{drawingResult.bytes} 字节 · sha256 {drawingResult.svgSha256.slice(0, 12)}…）· 隐藏线已画 / 尺寸链与 GD&T 未包含
+            </p>
+          ) : null}
           {view ? (
             <>
               <section>
@@ -492,7 +568,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
               </section>
             </>
           ) : (
-            <p className={styles.meta}>导入外部 GLB/GLTF/STL/OBJ 后仅显示几何预览（STL/OBJ 单位按文件原值）；参数与约束以 SceneSpec 为准。</p>
+            <p className={styles.meta}>导入外部 GLB/GLTF/STL/OBJ 后仅显示几何预览（STL/OBJ 单位按文件原值）；STEP/IGES 经 CAD 内核转换为派生网格资产；参数与约束以 SceneSpec 为准。</p>
           )}
         </aside>
       </div>

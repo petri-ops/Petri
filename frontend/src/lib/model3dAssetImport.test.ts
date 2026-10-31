@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { importMeshAssetAsNode } from './model3dAssetImport';
+import { importCadAssetAsNode, importMeshAssetAsNode } from './model3dAssetImport';
 import { DEFAULT_SCENE_PATH } from './sceneEditClient';
 import { WorkspaceUploadError } from './workspaceFileUpload';
 import type { Scene3DSpec } from './scene3d';
@@ -14,13 +14,14 @@ vi.mock('@/lib/sceneEditClient', async (importOriginal) => {
   return {
     ...actual,
     inspectMeshAsset: vi.fn(),
+    importCadAsset: vi.fn(),
     applySceneOperations: vi.fn(),
     readSceneFile: vi.fn(),
   };
 });
 
 const { uploadFileToWorkspace } = await import('@/lib/workspaceFileUpload');
-const { inspectMeshAsset, applySceneOperations, readSceneFile } = await import('@/lib/sceneEditClient');
+const { inspectMeshAsset, importCadAsset, applySceneOperations, readSceneFile } = await import('@/lib/sceneEditClient');
 
 const SHA = 'b'.repeat(64);
 const BASE_SCENE: Scene3DSpec = {
@@ -40,11 +41,19 @@ function meshFile(name = 'enclosure.glb', size = 1024): File {
 beforeEach(() => {
   vi.mocked(uploadFileToWorkspace).mockReset();
   vi.mocked(inspectMeshAsset).mockReset();
+  vi.mocked(importCadAsset).mockReset();
   vi.mocked(applySceneOperations).mockReset();
   vi.mocked(readSceneFile).mockReset();
 
   vi.mocked(inspectMeshAsset).mockResolvedValue({
     ok: true, path: 'model3d/assets/enclosure.glb', format: 'glb', bytes: 1024, sourceSha256: SHA, maxBytes: 64 * 1024 * 1024,
+  });
+  vi.mocked(importCadAsset).mockResolvedValue({
+    ok: true,
+    asset: { id: 'asset-step', name: 'part.step', path: 'model3d/assets/derived.glb', sha256: SHA, bytes: 2048, format: 'glb', sourcePath: 'model3d/incoming/part.step' },
+    node: { id: 'asset-part', type: 'mesh-reference', source: { path: 'model3d/assets/derived.glb', sourceSha256: SHA }, label: 'part.step' },
+    provenance: { sourcePath: 'model3d/incoming/part.step', sourceFormat: 'step' },
+    cad: { sourceFormat: 'step', derivedFormat: 'glb', sourceSha256: SHA, derivedSha256: SHA, sourcePath: 'model3d/incoming/part.step', kernel: 'occt-wasm', kernelVersion: '5.11.0' },
   });
   vi.mocked(applySceneOperations).mockResolvedValue({
     ok: true,
@@ -133,5 +142,41 @@ describe('BLOCK-322 P1c 导入为场景节点', () => {
     expect(operation.node.id).toMatch(/^asset-[A-Za-z0-9._-]+$/);
     expect(operation.node.source.path).toBe(target);
     expect(imported.path).toBe(target);
+  });
+});
+
+describe('BLOCK-322 P4-04a 导入 STEP/IGES 为场景节点', () => {
+  it('上传到 model3d/incoming → 服务端转换 → add_node 派生 mesh-reference', async () => {
+    const imported = await importCadAssetAsNode({ projectId: 'p1', file: meshFile('part.step', 2048), scene: BASE_SCENE });
+    expect(uploadFileToWorkspace).toHaveBeenCalledWith('p1', 'model3d/incoming/part.step', expect.anything());
+    expect(importCadAsset).toHaveBeenCalledWith({ projectId: 'p1', path: 'model3d/incoming/part.step', name: 'part.step' });
+    const applyInput = vi.mocked(applySceneOperations).mock.calls[0][0];
+    expect(applyInput.reason).toBe('import_external_cad_asset');
+    const added = applyInput.operations[0] as { op: string; node: { id: string; type: string } };
+    expect(added.op).toBe('add_node');
+    expect(added.node.id).toBe('asset-part');
+    expect(added.node.type).toBe('mesh-reference');
+    expect(imported.cad.sourceFormat).toBe('step');
+    expect(imported.format).toBe('glb');
+    expect(imported.path).toBe('model3d/assets/derived.glb');
+  });
+
+  it('CAD 超上限/非法扩展名：上传前拒绝，零副作用', async () => {
+    for (const file of [meshFile('big.step', 128 * 1024 * 1024 + 1), meshFile('part.dwg', 10)]) {
+      vi.mocked(uploadFileToWorkspace).mockClear();
+      await expect(importCadAssetAsNode({ projectId: 'p1', file, scene: BASE_SCENE })).rejects.toThrow();
+      expect(uploadFileToWorkspace).not.toHaveBeenCalled();
+    }
+    expect(importCadAsset).not.toHaveBeenCalled();
+    expect(applySceneOperations).not.toHaveBeenCalled();
+  });
+
+  it('CAD 源文件同名不覆盖，换名后仍转换', async () => {
+    vi.mocked(uploadFileToWorkspace)
+      .mockRejectedValueOnce(new WorkspaceUploadError('目标已存在', 409, 'target_already_exists'));
+    await importCadAssetAsNode({ projectId: 'p1', file: meshFile('part.step'), scene: BASE_SCENE });
+    const targets = vi.mocked(uploadFileToWorkspace).mock.calls.map((call) => call[1]);
+    expect(targets).toEqual(['model3d/incoming/part.step', 'model3d/incoming/part-2.step']);
+    expect(importCadAsset).toHaveBeenCalledWith({ projectId: 'p1', path: 'model3d/incoming/part-2.step', name: 'part.step' });
   });
 });

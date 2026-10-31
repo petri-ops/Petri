@@ -31,6 +31,28 @@ export function meshTooLargeMessage(): string {
   return `外部 mesh 超过 ${MAX_MESH_MB}MB 入链上限；请先简化模型或拆分资产。`;
 }
 
+// BLOCK-322 P4-04 — CAD 源文件镜像：值与 core/petri-server/helpers/cad-exchange.js 同源；
+// 前端只做格式识别与上传前拦截，真实转换/拒绝语义在服务端。
+const CAD_INPUT_FORMATS = Object.freeze(['step', 'stp', 'iges', 'igs'] as const);
+
+export type CadInputFormat = 'step' | 'iges';
+
+const CAD_INPUT_EXTENSIONS: string[] = CAD_INPUT_FORMATS.map((format) => `.${format}`);
+export const CAD_INPUT_ACCEPT_ATTR = CAD_INPUT_EXTENSIONS.join(',');
+export const MAX_CAD_BYTES = 128 * 1024 * 1024;
+
+export function cadFormatForPath(value?: string | null): CadInputFormat | null {
+  const extension = extensionOf(value);
+  if (!(CAD_INPUT_FORMATS as readonly string[]).includes(extension)) return null;
+  if (extension === 'stp') return 'step';
+  if (extension === 'igs') return 'iges';
+  return extension as CadInputFormat;
+}
+
+export function cadTooLargeMessage(): string {
+  return `CAD 源文件超过 ${MAX_CAD_BYTES / (1024 * 1024)}MB 转换上限；请先简化模型或拆分装配。`;
+}
+
 // BLOCK-322 P2-03 — 基础色贴图镜像：格式白名单与上限与服务端 mesh-assets.js 同源，
 // 逐值对账由 test/block322-mesh-format-single-source.test.mjs 守护。
 const TEXTURE_INPUT_FORMATS = Object.freeze(['png', 'jpg', 'jpeg'] as const);

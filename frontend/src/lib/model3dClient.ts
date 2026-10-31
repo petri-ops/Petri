@@ -4,6 +4,19 @@ export interface Model3DCapability {
   status: 'ready' | 'unavailable';
   reason: string | null;
   version: string | null;
+  cad?: {
+    status: 'ready' | 'unavailable';
+    reason: string | null;
+    kernel: string | null;
+    version: string | null;
+    formats: {
+      stepImport: boolean;
+      stepExport: boolean;
+      igesImport: boolean;
+      igesExport: boolean;
+      drawingSvg: boolean;
+    };
+  } | null;
 }
 
 export async function fetchModel3DCapability(): Promise<Model3DCapability> {

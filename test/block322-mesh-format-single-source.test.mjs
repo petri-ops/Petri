@@ -28,6 +28,7 @@ function jsArray(source, name) {
 }
 
 const backend = read('../core/petri-server/helpers/mesh-assets.js');
+const cadBackend = read('../core/petri-server/helpers/cad-exchange.js');
 const frontend = read('../frontend/src/lib/meshAssets.ts');
 const blender = read('../resources/model3d/blender_scene.py');
 const filesRoute = read('../core/petri-server/routes/files.js');
@@ -36,6 +37,7 @@ const scene = read('../frontend/src/components/work-surface/Model3DScene.tsx');
 const surface = read('../frontend/src/components/work-surface/Model3DSurface.tsx');
 
 const canonical = ['glb', 'gltf', 'obj', 'stl'];
+const canonicalCad = ['iges', 'igs', 'step', 'stp'];
 
 test('BLOCK-322 — mesh 格式白名单后端为唯一声明处', () => {
   assert.deepEqual(jsArray(backend, 'MESH_INPUT_FORMATS'), canonical);
@@ -43,6 +45,20 @@ test('BLOCK-322 — mesh 格式白名单后端为唯一声明处', () => {
 
 test('BLOCK-322 — 前端镜像与后端逐值一致', () => {
   assert.deepEqual(jsArray(frontend, 'MESH_INPUT_FORMATS'), canonical);
+});
+
+test('BLOCK-322 — CAD 格式白名单后端单源、前端镜像逐值一致', () => {
+  assert.deepEqual(jsArray(cadBackend, 'CAD_INPUT_FORMATS'), canonicalCad);
+  assert.deepEqual(jsArray(frontend, 'CAD_INPUT_FORMATS'), canonicalCad);
+  const limit = (source, name) => {
+    const match = source.match(new RegExp(`${name}\\s*=\\s*([^\\n;]+)`));
+    assert.ok(match, `未找到常量 ${name}`);
+    return match[1].trim().replace(/\s+/g, ' ');
+  };
+  assert.equal(limit(cadBackend, 'MAX_CAD_BYTES'), '128 * 1024 * 1024');
+  assert.equal(limit(frontend, 'MAX_CAD_BYTES'), '128 * 1024 * 1024');
+  assert.match(frontend, /cadFormatForPath/, '前端必须复用 CAD 格式识别');
+  assert.match(surface, /CAD_INPUT_ACCEPT_ATTR/, 'CAD 导入入口 accept 应来自单源');
 });
 
 test('BLOCK-322 — Blender 构建脚本白名单与契约层一致', () => {

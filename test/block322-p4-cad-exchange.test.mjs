@@ -10,6 +10,7 @@ import { OcctKernel } from 'occt-wasm';
 const require = createRequire(import.meta.url);
 const cad = require('../core/petri-server/helpers/cad-exchange.js');
 const assets = require('../core/petri-server/helpers/model3d-assets.js');
+const { createCadDrawing } = require('../core/petri-server/helpers/model3d-cad-drawing.js');
 const FIXTURE_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures', 'model3d');
 
 function workspace() {
@@ -123,4 +124,27 @@ test('BLOCK-322 P4-04 失败面 — 非法格式/缺失/空源 fail-closed', asy
   assert.equal((await assets.importCadAsset({ workspaceRoot: root, sourcePath: 'model3d/none.step' })).error, 'cad_source_not_found');
   assert.equal((await cad.stepToGlb({ bytes: Buffer.alloc(0) })).error, 'cad_source_empty');
   assert.equal((await cad.igesToStl({ bytes: Buffer.alloc(0) })).error, 'cad_source_empty');
+});
+
+test('BLOCK-322 P4-05 工程图 — STEP/IGES 生成 HLR SVG 与 manifest，尺寸/GD&T 如实关闭', async () => {
+  const root = workspace();
+  fs.mkdirSync(path.join(root, 'model3d'), { recursive: true });
+  const { step } = await sampleStepAndStl();
+  fs.writeFileSync(path.join(root, 'model3d', 'part.step'), Buffer.from(step));
+  const stepDrawing = await createCadDrawing({ workspaceRoot: root, sourcePath: 'model3d/part.step' });
+  assert.equal(stepDrawing.ok, true, JSON.stringify(stepDrawing));
+  assert.match(stepDrawing.svgPath, /^model3d\/drawings\/.+\.svg$/);
+  assert.match(fs.readFileSync(path.join(root, stepDrawing.svgPath), 'utf8'), /<svg/);
+  assert.equal(stepDrawing.svgSha256.length, 64);
+  assert.equal(stepDrawing.manifest.capabilities.dimensions, false);
+  assert.equal(stepDrawing.manifest.capabilities.gdt, false);
+  assert.equal(stepDrawing.manifest.capabilities.hiddenLineRemoval, true);
+  assert.equal(stepDrawing.manifest.source.sha256.length, 64);
+  fs.copyFileSync(path.join(FIXTURE_DIR, 'iges-cube-10mm.igs'), path.join(root, 'model3d', 'legacy.igs'));
+  const igesDrawing = await createCadDrawing({ workspaceRoot: root, sourcePath: 'model3d/legacy.igs', views: ['front', 'top'] });
+  assert.equal(igesDrawing.ok, true, JSON.stringify(igesDrawing));
+  assert.deepEqual(igesDrawing.manifest.views, ['front', 'top']);
+  assert.equal(igesDrawing.summary.solidCount, 1);
+  assert.equal((await createCadDrawing({ workspaceRoot: root, sourcePath: 'model3d/legacy.igs', views: ['nope'] })).error, 'drawing_views_invalid');
+  assert.equal((await createCadDrawing({ workspaceRoot: root, sourcePath: 'model3d/none.step' })).error, 'cad_source_not_found');
 });
