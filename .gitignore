@@ -109,3 +109,4 @@ sidecars/computer-use-windows/axfixture/obj/
 
 # 会话附件运行目录（聊天图片上传的本地落盘，非源码）
 .chat-attachments/
+model3d/runs/
