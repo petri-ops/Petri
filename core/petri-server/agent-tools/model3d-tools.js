@@ -397,6 +397,11 @@ async function tool_model3d_asset(args = {}, ctx = {}) {
       showHidden: args.showHidden,
     });
   }
+  if (action === 'generate') {
+    const workspace = await projectWorkspace(ctx);
+    if (workspace.error) return workspace.error;
+    return assets.generateAndImport({ workspaceRoot: workspace.root, prompt: args.prompt, name: args.name });
+  }
   if (action !== 'import') return { ok: false, error: 'asset_action_invalid' };
   const workspace = await projectWorkspace(ctx);
   if (workspace.error) return workspace.error;

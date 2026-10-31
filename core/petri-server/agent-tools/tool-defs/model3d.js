@@ -161,13 +161,14 @@ module.exports = [
     type: 'function',
     function: {
       name: 'model3d_asset',
-      description: '外部资产入链与资产库：action=import 把工作区 glb/gltf/stl/obj 复制到 model3d/assets/<sha>，或把 step/stp/iges/igs 转换为派生 GLB/STL 后入链，记录 provenance，返回可直接 add_node 的 mesh-reference；action=list 检索；action=get 取回引用；action=drawing 对 STEP/IGES 源文件生成 HLR 多视图 SVG（线框工程图基础，不含尺寸链/GD&T）。',
+      description: '外部资产入链与资产库：action=import 把工作区 glb/gltf/stl/obj 复制到 model3d/assets/<sha>，或把 step/stp/iges/igs 转换为派生 GLB/STL 后入链，记录 provenance，返回可直接 add_node 的 mesh-reference；action=list 检索；action=get 取回引用；action=drawing 对 STEP/IGES 源文件生成 HLR 多视图 SVG（线框工程图基础，不含尺寸链/GD&T）；action=generate 调用已配置的外部文生 3D 服务（默认关；mock 仅测试），生成 GLB 后走同一资产链。',
       parameters: {
         type: 'object',
         properties: {
-          action: { type: 'string', enum: ['import', 'list', 'get', 'drawing'] },
+          action: { type: 'string', enum: ['import', 'list', 'get', 'drawing', 'generate'] },
           sourcePath: { type: 'string', description: 'import/drawing：工作区相对路径（drawing 需 step/stp/iges/igs）' },
-          name: { type: 'string' },
+          name: { type: 'string', description: 'import/generate：资产名称' },
+          prompt: { type: 'string', description: 'generate：文生 3D 提示词（3..1024 字）' },
           provenance: { type: 'object', additionalProperties: true, description: 'model/promptHash/parameters 等来源留痕' },
           query: { type: 'string', description: 'list：名称/路径/sha/model 检索' },
           limit: { type: 'integer', description: 'list 上限 ≤50' },

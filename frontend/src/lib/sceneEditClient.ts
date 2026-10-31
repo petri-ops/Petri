@@ -96,6 +96,36 @@ export async function importCadAsset(input: {
   return parse<CadAssetImportResult>(response);
 }
 
+export interface GeneratedModelAssetResult {
+  ok: true;
+  asset: { id: string; name: string; path: string; sha256: string; bytes: number; format: string; sourcePath: string };
+  node: { id: string; type: 'mesh-reference'; source: { path: string; sourceSha256: string }; label: string };
+  provenance: Record<string, unknown>;
+  generation: {
+    provider: string;
+    model: string | null;
+    taskId: string | null;
+    usage: unknown;
+    promptHash: string;
+    glbSha256?: string;
+    bytes?: number;
+  };
+}
+
+export async function generateModelAsset(input: {
+  projectId: string;
+  prompt: string;
+  name?: string;
+}): Promise<GeneratedModelAssetResult> {
+  const response = await fetch(`${getApiPrefix()}/model3d/asset/generate`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(input),
+    signal: AbortSignal.timeout(360_000),
+  });
+  return parse<GeneratedModelAssetResult>(response);
+}
+
 export interface CadDrawingResult {
   ok: true;
   source: { path: string; format: string; sha256: string; bytes: number };

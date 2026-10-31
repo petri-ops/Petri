@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-650: 3D 工作面外部文生 3D 生成入口（BLOCK-322 P5-02；2026-10-31 **verified（dev Electron 边界内；mock provider + UI 9/9；真实 Tripo 未验证）**）
+
+- **变化面**：3D 工作面新增「AI 生成」：对话框显示生成服务/模型与隐私/费用提示，输入 3–1024 字提示词，生成成功后由服务端下载 GLB、走 `model3d/assets/<sha>` 资产链并自动 `add_node`；CAD 徽标旁新增 AI 生成能力徽标（未配置时如实标不可用）。默认 provider=none，不出站；mock 只用于本地验证；Tripo v3 适配器支持请求/轮询/下载与可信域名/大小/GLB 头校验。
+- **为什么这样设计**：生成服务是外部成本与外发隐私面，必须默认关、显式配置；生成结果只是外部资产，最终仍进 SceneSpec 的 `mesh-reference`，不建第二场景真值。浏览器不做几何处理，资产 sha/provenance 由服务端落盘。
+- **验证（代码）**：generation provider 单测 4/4（none/缺 key/mock/Tripo 请求形状/失败态）；REST 1/1（capability + mock generate）；前端 11/11；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p5/block322-p5-generation-ui-live-live.json`（9/9，9223 离屏，mock）：AI 生成徽标 → 对话框 → 输入提示词 → 生成 → 自动节点/预览/磁盘 GLB 与 SceneSpec 对账；截图不计入通过。
+- **边界（reopen）**：真实 Tripo 生成需要 `TRIPO_API_KEY`（或凭据存储 tripo）并会产生费用，本轮**未验证真实外部生成**；图片生 3D 未接；外部提示词/生成资产的使用条款由服务商决定；provider=none/缺 key 时 UI 明确不可用，不发请求。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-649: 3D 工作面 CAD 导入与线框工程图（BLOCK-322 P4-04a/P4-05；2026-10-31 **verified（dev Electron 边界内；前端 10/10 + REST 1/1 + UI 实机 9/9）**）
 
 - **变化面**：3D 工作面新增 CAD 能力徽标（Blender + CAD/occt-wasm 双状态）；「导入为场景节点」接受 `.step/.stp/.iges/.igs`，前端只负责上传到 `model3d/incoming/`，由服务端转换为派生 GLB/STL 后走既有 `scene/apply add_node`；导入成功提示源 sha 与派生格式；STEP/IGES 导入后出现「生成工程图」，调用 `POST /api/model3d/cad/drawing` 生成 HLR 多视图 SVG 并显示打开入口。普通「导入模型」对 STEP/IGES 明确提示改用节点导入，不把 CAD 直接塞进 mesh 预览。

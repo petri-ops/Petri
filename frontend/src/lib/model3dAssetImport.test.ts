@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { importCadAssetAsNode, importMeshAssetAsNode } from './model3dAssetImport';
+import { generateModelAssetAsNode, importCadAssetAsNode, importMeshAssetAsNode } from './model3dAssetImport';
 import { DEFAULT_SCENE_PATH } from './sceneEditClient';
 import { WorkspaceUploadError } from './workspaceFileUpload';
 import type { Scene3DSpec } from './scene3d';
@@ -14,6 +14,7 @@ vi.mock('@/lib/sceneEditClient', async (importOriginal) => {
   return {
     ...actual,
     inspectMeshAsset: vi.fn(),
+    generateModelAsset: vi.fn(),
     importCadAsset: vi.fn(),
     applySceneOperations: vi.fn(),
     readSceneFile: vi.fn(),
@@ -21,7 +22,7 @@ vi.mock('@/lib/sceneEditClient', async (importOriginal) => {
 });
 
 const { uploadFileToWorkspace } = await import('@/lib/workspaceFileUpload');
-const { inspectMeshAsset, importCadAsset, applySceneOperations, readSceneFile } = await import('@/lib/sceneEditClient');
+const { inspectMeshAsset, importCadAsset, generateModelAsset, applySceneOperations, readSceneFile } = await import('@/lib/sceneEditClient');
 
 const SHA = 'b'.repeat(64);
 const BASE_SCENE: Scene3DSpec = {
@@ -42,6 +43,7 @@ beforeEach(() => {
   vi.mocked(uploadFileToWorkspace).mockReset();
   vi.mocked(inspectMeshAsset).mockReset();
   vi.mocked(importCadAsset).mockReset();
+  vi.mocked(generateModelAsset).mockReset();
   vi.mocked(applySceneOperations).mockReset();
   vi.mocked(readSceneFile).mockReset();
 
@@ -54,6 +56,13 @@ beforeEach(() => {
     node: { id: 'asset-part', type: 'mesh-reference', source: { path: 'model3d/assets/derived.glb', sourceSha256: SHA }, label: 'part.step' },
     provenance: { sourcePath: 'model3d/incoming/part.step', sourceFormat: 'step' },
     cad: { sourceFormat: 'step', derivedFormat: 'glb', sourceSha256: SHA, derivedSha256: SHA, sourcePath: 'model3d/incoming/part.step', kernel: 'occt-wasm', kernelVersion: '5.11.0' },
+  });
+  vi.mocked(generateModelAsset).mockResolvedValue({
+    ok: true,
+    asset: { id: 'asset-gen', name: 'generated-model', path: 'model3d/assets/gen.glb', sha256: SHA, bytes: 4096, format: 'glb', sourcePath: 'generated' },
+    node: { id: 'asset-generated', type: 'mesh-reference', source: { path: 'model3d/assets/gen.glb', sourceSha256: SHA }, label: 'generated-model' },
+    provenance: { source: 'generated', generator: 'mock' },
+    generation: { provider: 'mock', model: 'mock', taskId: null, usage: null, promptHash: 'e'.repeat(64) },
   });
   vi.mocked(applySceneOperations).mockResolvedValue({
     ok: true,
@@ -178,5 +187,21 @@ describe('BLOCK-322 P4-04a 导入 STEP/IGES 为场景节点', () => {
     const targets = vi.mocked(uploadFileToWorkspace).mock.calls.map((call) => call[1]);
     expect(targets).toEqual(['model3d/incoming/part.step', 'model3d/incoming/part-2.step']);
     expect(importCadAsset).toHaveBeenCalledWith({ projectId: 'p1', path: 'model3d/incoming/part-2.step', name: 'part.step' });
+  });
+});
+
+describe('BLOCK-322 P5-02 外部文生 3D 入链', () => {
+  it('服务端生成/建资产后，前端走既有 add_node 写入 SceneSpec', async () => {
+    const generated = await generateModelAssetAsNode({ projectId: 'p1', prompt: 'a bracket', scene: BASE_SCENE, name: 'bracket' });
+    expect(generateModelAsset).toHaveBeenCalledWith({ projectId: 'p1', prompt: 'a bracket', name: 'bracket' });
+    const applyInput = vi.mocked(applySceneOperations).mock.calls[0][0];
+    expect(applyInput.reason).toBe('generate_external_asset');
+    const added = applyInput.operations[0] as { op: string; node: { id: string; type: string } };
+    expect(added.op).toBe('add_node');
+    expect(added.node.id).toBe('asset-generated');
+    expect(added.node.type).toBe('mesh-reference');
+    expect(generated.generation.provider).toBe('mock');
+    expect(generated.format).toBe('glb');
+    expect(generated.path).toBe('model3d/assets/gen.glb');
   });
 });

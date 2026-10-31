@@ -11,6 +11,7 @@ const { inspectMeshAsset, inspectTextureAsset } = require('../helpers/mesh-asset
 const cadExchange = require('../helpers/cad-exchange');
 const assets = require('../helpers/model3d-assets');
 const { createCadDrawing } = require('../helpers/model3d-cad-drawing');
+const generation = require('../helpers/model3d-generation-provider');
 const { buildWorkspaceArtifactUrl } = require('../helpers/model3d-artifact-projection');
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
@@ -80,6 +81,7 @@ module.exports = function registerModel3DRoutes(app) {
       reason: capability.reason,
       version: capability.version,
       cad,
+      generation: generation.probeGenerationProvider(),
     });
   });
 
@@ -243,6 +245,24 @@ module.exports = function registerModel3DRoutes(app) {
     });
     if (!result.ok) {
       return res.status(assetErrorStatus(result.error, 'cad_source')).json(result);
+    }
+    return res.json(result);
+  });
+
+  // BLOCK-322 P5-02 — 外部文生 3D（默认关；未配置/未同意不发送）。
+  app.post('/api/model3d/asset/generate', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.body?.projectId);
+    if (!auth) return;
+    const result = await assets.generateAndImport({
+      workspaceRoot: auth.project.workspace_path,
+      prompt: req.body?.prompt,
+      name: req.body?.name,
+    });
+    if (!result.ok) {
+      const status = result.error === 'generation_provider_none' || result.error === 'generation_key_missing'
+        ? 503
+        : /^generation_(timeout|submit_failed|poll_failed|download_failed|failed)$/.test(String(result.error)) ? 502 : 400;
+      return res.status(status).json(result);
     }
     return res.json(result);
   });

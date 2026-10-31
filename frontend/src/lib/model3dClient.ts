@@ -17,6 +17,14 @@ export interface Model3DCapability {
       drawingSvg: boolean;
     };
   } | null;
+  generation?: {
+    status: 'ready' | 'unavailable';
+    reason: string | null;
+    provider: 'none' | 'mock' | 'tripo';
+    model: string | null;
+    message?: string;
+    privacy?: { external: boolean; prompt: boolean; image: boolean; note: string; costNote?: string; pricingUrl?: string };
+  } | null;
 }
 
 export async function fetchModel3DCapability(): Promise<Model3DCapability> {

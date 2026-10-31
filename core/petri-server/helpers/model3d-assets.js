@@ -12,6 +12,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { inspectMeshAsset, inspectCadAsset } = require('./mesh-assets');
 const cadExchange = require('./cad-exchange');
+const generation = require('./model3d-generation-provider');
 const { resolveWorkspaceTarget } = require('../agent-tools/workspace-tools/internals');
 
 const ASSET_ROOT = 'model3d/assets';
@@ -199,6 +200,76 @@ async function importCadAsset({ workspaceRoot, sourcePath, name, provenance } = 
   }
 }
 
+async function importGeneratedAsset({ workspaceRoot, glb, name, provenance } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const buffer = Buffer.isBuffer(glb) ? glb : Buffer.from(glb || []);
+  if (buffer.length === 0) return { ok: false, error: 'generation_empty_glb' };
+  if (buffer.subarray(0, 4).toString('ascii') !== 'glTF') return { ok: false, error: 'generation_invalid_glb' };
+  const sha = sha256Buffer(buffer);
+  const tempRel = `${ASSET_ROOT}/.generated-${sha}.glb`;
+  let tempTarget;
+  try {
+    tempTarget = await resolveWorkspaceTarget(workspaceRoot, tempRel, { createRoot: true });
+  } catch (error) {
+    return { ok: false, error: error.code || 'path_rejected', message: error.message };
+  }
+  fs.mkdirSync(path.dirname(tempTarget.target), { recursive: true });
+  fs.writeFileSync(tempTarget.target, buffer);
+  try {
+    const imported = await importMeshAsset({
+      workspaceRoot,
+      sourcePath: tempRel,
+      name: String(name || 'generated-model').slice(0, 200),
+      originalSource: 'generated',
+      provenance: {
+        ...(provenance && typeof provenance === 'object' ? provenance : {}),
+        source: 'generated',
+        derivedFormat: 'glb',
+        derivedSha256: sha,
+      },
+    });
+    if (!imported.ok) return imported;
+    return { ...imported, generation: { ...(provenance || {}), glbSha256: sha, bytes: buffer.length } };
+  } finally {
+    try { fs.rmSync(tempTarget.target, { force: true }); } catch { /* temp already gone */ }
+  }
+}
+
+async function generateAndImport({ workspaceRoot, prompt, name } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const generated = await generation.generateModel({ prompt });
+  if (!generated.ok) return generated;
+  const promptHash = generated.promptHash || generation.promptHash(prompt);
+  const imported = await importGeneratedAsset({
+    workspaceRoot,
+    glb: generated.glb,
+    name: name || 'generated-model',
+    provenance: {
+      model: `${generated.provider}:${generated.model}`,
+      promptHash,
+      parameters: {
+        provider: generated.provider,
+        model: generated.model,
+        taskId: generated.taskId,
+        usage: generated.usage,
+      },
+      generator: generated.provider,
+      license: 'provider terms; generated asset provenance recorded locally',
+    },
+  });
+  if (!imported.ok) return imported;
+  return {
+    ...imported,
+    generation: {
+      provider: generated.provider,
+      model: generated.model,
+      taskId: generated.taskId,
+      usage: generated.usage,
+      promptHash,
+    },
+  };
+}
+
 function listAssets({ workspaceRoot, query = '', limit = 20 } = {}) {
   if (!workspaceRoot) return { ok: false, error: 'project_required' };
   const text = String(query || '').trim().toLowerCase();
@@ -219,4 +290,4 @@ function getAsset({ workspaceRoot, assetId: requestedId } = {}) {
   return { ok: true, asset, node: { id: asset.id, type: 'mesh-reference', source: { path: asset.path, sourceSha256: asset.sha256 }, label: asset.name } };
 }
 
-module.exports = { ASSET_ROOT, INDEX_SCHEMA, importMeshAsset, importCadAsset, listAssets, getAsset, indexRelativePath };
+module.exports = { ASSET_ROOT, INDEX_SCHEMA, importMeshAsset, importCadAsset, importGeneratedAsset, generateAndImport, listAssets, getAsset, indexRelativePath };

@@ -93,6 +93,24 @@ test('BLOCK-322 P4-04a/P4-05 REST — capability 暴露 CAD 内核，STEP 导入
   assert.equal(drawingRes.body.capabilities.gdt, false);
   assert.match(drawingRes.body.svgUrl, /^\/api\/workspaces\/.+\/file\?path=/);
 
+  process.env.PETRI_MODEL3D_GENERATION_PROVIDER = 'mock';
+  try {
+    const genCapability = mockResponse();
+    await capabilityHandler({}, genCapability);
+    assert.equal(genCapability.body.generation.status, 'ready');
+    const genRes = mockResponse();
+    await routes.get('POST /api/model3d/asset/generate')({
+      userId,
+      body: { projectId: project.id, prompt: 'a local test cube', name: 'mock-generated' },
+    }, genRes);
+    assert.equal(genRes.statusCode, 200, JSON.stringify(genRes.body));
+    assert.equal(genRes.body.generation.provider, 'mock');
+    assert.equal(genRes.body.node.type, 'mesh-reference');
+    assert.equal(fs.readFileSync(path.join(workspace, genRes.body.asset.path)).subarray(0, 4).toString('ascii'), 'glTF');
+  } finally {
+    delete process.env.PETRI_MODEL3D_GENERATION_PROVIDER;
+  }
+
   const invalidRes = mockResponse();
   await routes.get('POST /api/model3d/cad/drawing')({
     userId,

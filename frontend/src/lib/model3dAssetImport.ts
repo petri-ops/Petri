@@ -19,10 +19,12 @@ import {
 import {
   applySceneOperations,
   DEFAULT_SCENE_PATH,
+  generateModelAsset,
   importCadAsset,
   inspectMeshAsset,
   readSceneFile,
   type CadAssetImportResult,
+  type GeneratedModelAssetResult,
 } from './sceneEditClient';
 import type { Scene3DNode, Scene3DSpec } from './scene3d';
 import { isTargetAlreadyExists, uploadFileToWorkspace } from './workspaceFileUpload';
@@ -190,5 +192,52 @@ export async function importCadAssetAsNode(input: {
     scenePath,
     cad: imported.cad,
     provenance: imported.provenance,
+  };
+}
+
+export interface GeneratedModelAssetNode extends ImportedMeshAssetNode {
+  generation: GeneratedModelAssetResult['generation'];
+  provenance: Record<string, unknown>;
+}
+
+/**
+ * BLOCK-322 P5-02 — 外部文生 3D 结果入链；服务端已完成生成与资产落盘，
+ * 前端只走既有 scene/apply add_node，不在浏览器里二次处理几何。
+ */
+export async function generateModelAssetAsNode(input: {
+  projectId: string;
+  prompt: string;
+  scene: Scene3DSpec;
+  scenePath?: string;
+  name?: string;
+  reason?: string;
+}): Promise<GeneratedModelAssetNode> {
+  const { projectId, prompt, scene } = input;
+  const scenePath = input.scenePath || DEFAULT_SCENE_PATH;
+  const generated = await generateModelAsset({ projectId, prompt, name: input.name });
+  let expectedHash: string | null = null;
+  try {
+    expectedHash = (await readSceneFile(projectId, scenePath)).hash;
+  } catch {
+    expectedHash = null;
+  }
+  const applied = await applySceneOperations({
+    projectId,
+    path: scenePath,
+    scene,
+    operations: [{ op: 'add_node', node: generated.node }],
+    expectedHash,
+    reason: input.reason || 'generate_external_asset',
+  });
+  return {
+    node: generated.node,
+    scene: applied.scene,
+    path: generated.asset.path,
+    format: 'glb',
+    bytes: generated.asset.bytes,
+    sourceSha256: generated.generation.glbSha256 || generated.asset.sha256,
+    scenePath,
+    generation: generated.generation,
+    provenance: generated.provenance,
   };
 }

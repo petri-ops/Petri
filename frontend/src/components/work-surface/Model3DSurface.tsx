@@ -26,6 +26,7 @@ import type { Model3DCameraApi, Model3DPoint } from './Model3DScene';
 import { Model3DReviewPanel } from './Model3DReviewPanel';
 import { SketchSpecDialog } from './SketchSpecDialog';
 import { Model3DEditPanel } from './Model3DEditPanel';
+import { Model3DGenerateDialog } from './Model3DGenerateDialog';
 import {
   compareSceneGeometry,
   diffSceneSpecs,
@@ -69,6 +70,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   const [drawingBusy, setDrawingBusy] = React.useState(false);
   const [drawingResult, setDrawingResult] = React.useState<CadDrawingResult | null>(null);
   const [drawingError, setDrawingError] = React.useState<string | null>(null);
+  const [generateOpen, setGenerateOpen] = React.useState(false);
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [sketchOpen, setSketchOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
@@ -350,6 +352,14 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
             {capability.cad.kernel ? <span className={styles.meta}>{capability.cad.kernel}</span> : null}
           </span>
         ) : null}
+        {capability?.generation ? (
+          <span className={styles.capability} data-testid="model3d-generation-capability">
+            AI 生成 <StatusBadge projection={projectCapabilityAxis(capability.generation.status)} />
+            {capability.generation.provider && capability.generation.provider !== 'none'
+              ? <span className={styles.meta}>{capability.generation.provider}</span>
+              : null}
+          </span>
+        ) : null}
         <button type="button" className={button.ghost} onClick={() => { loadStructured(sampleScene3D()); setViewAngle('iso'); }}>
           加载示例
         </button>
@@ -376,6 +386,17 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           onClick={() => setReviewOpen((open) => !open)}
         >
           视觉 QA
+        </button>
+        <button
+          type="button"
+          className={button.ghost}
+          disabled={!view || !projectId}
+          title={!view || !projectId
+            ? '需要先加载 SceneSpec 并打开项目工作区'
+            : '外部文生 3D（默认关；未配置 key 时只显示不可用原因）'}
+          onClick={() => setGenerateOpen(true)}
+        >
+          AI 生成
         </button>
         <button
           type="button"
@@ -618,6 +639,23 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         </section>
       ) : null}
       {sketchOpen ? <SketchSpecDialog onClose={() => setSketchOpen(false)} /> : null}
+      {generateOpen && view && projectId ? (
+        <Model3DGenerateDialog
+          projectId={projectId}
+          scene={view.scene}
+          generation={capability?.generation ?? null}
+          onClose={() => setGenerateOpen(false)}
+          onGenerated={(result) => {
+            loadStructured(result.scene);
+            setWarnings((previous) => [...previous,
+              `AI 生成 ${result.generation.provider}/${result.generation.model || 'unknown'} → ${result.path}（${result.bytes} 字节 · sha256 ${result.sourceSha256.slice(0, 12)}…）`]);
+            setAssetNotice(`AI 生成结果已作为节点 ${result.node.id} 写入 ${result.scenePath}`);
+            setCadSource(null);
+            setDrawingResult(null);
+            setGenerateOpen(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

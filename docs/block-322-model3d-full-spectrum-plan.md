@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P4-05 HLR 线框工程图（UI-649 verified）、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04b〔IGES 导出/解析 B-rep〕/P4-05 GD&T〔真工程图尺寸链〕/P5-02/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a+P4-05 HLR 批提交=2f8fa437 + cebec6c7（capability）+ ec26c569 + 回写 03bbf6f0/1877af97〔本地，领先数以 git 为准，推送待发令〕）
+**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P4-05 HLR 线框工程图（UI-649 verified）、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04b〔IGES 导出/解析 B-rep〕/P4-05 GD&T〔真工程图尺寸链〕/P5-02 真实 key/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a+P4-05 HLR 批提交=2f8fa437 + cebec6c7（capability）+ ec26c569 + 回写 03bbf6f0/1877af97〔本地，领先数以 git 为准，推送待发令〕）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -127,7 +127,7 @@ status: active
 | ID | 范围 | 验收 | 依赖 |
 | --- | --- | --- | --- |
 | `P5-01` 生成资产入链管道 **completed（2026-10-31，定向 3/3 + 实机）** | 工作区 glb/gltf/stl/obj → `model3d/assets/<sha256>.<ext>` 单份字节；`model3d_asset` import 返回 mesh-reference 节点 + provenance（model/promptHash/parameters）；目标字节被篡改 → `asset_copy_hash_mismatch` 拒绝 | 篡改拒绝 + provenance 落盘 + 实机 | `test/block322-p5-assets.test.mjs` + 实机 |
-| `P5-02` 真实生成服务接线 | 文/图生 3D | — | **RULING-02**（服务/成本/隐私） |
+| `P5-02` 真实生成服务接线 **in_progress（2026-10-31：provider 契约 + Tripo 适配器 + mock + UI；真实 key 未验证）** | 外部文生 3D 默认关；Tripo v3 请求/轮询/下载（域名/大小/GLB 头校验）；mock 仅本地验证；结果走 `model3d/assets/<sha>` + provenance + `add_node`；图片生 3D 未接 | 单测 4/4 + REST 1/1 + UI 9/9（mock）；真实 Tripo 需 key，未验证 | `test/block322-p5-generation.test.mjs` + `acceptance/block-322-p5/` |
 
 ### P6 · 生产交付与协作
 
