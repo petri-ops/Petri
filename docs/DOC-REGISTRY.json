@@ -8524,8 +8524,31 @@
         "G0"
       ],
       "notes": "RULING-01 选型材料：occt-wasm 主内核 + occt-import-js 仅 IGES 导入；STEP/IGES 导入与 STEP faceted 导出边界、Mac 跟随行为、依赖检查单四问；真工程图/GD&T 留后续裁决。"
+    },
+    {
+      "id": "BLOCK-322-RULING-04-FEATURE-REFERENCE-V2",
+      "capability": "block-322-ruling-04-feature-reference-v2",
+      "path": "docs/block-322-ruling-04-feature-reference-v2.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "block-322-ruling-04-feature-reference-v2",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-10-31",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "3d",
+        "model3d",
+        "assembly",
+        "mate",
+        "gdt",
+        "cad",
+        "ruling",
+        "G0"
+      ],
+      "notes": "RULING-04 特征级引用 v2 裁决材料（未启动实现）：mate 任意面/边贴合与 GD&T 的数据模型选型；实测证明特征抽取零新依赖、分面 STEP 不能承载特征引用；候选 A/B/C/D/E 对照 + 需裁决 D1–D5；推荐 B 主干、D 第一刀、拒绝内核求解。"
     }
   ],
-  "lastUpdated": "2026-10-30",
-  "documentCount": 431
+  "lastUpdated": "2026-10-31",
+  "documentCount": 434
 }
