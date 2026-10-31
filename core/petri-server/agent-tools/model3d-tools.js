@@ -258,6 +258,8 @@ async function tool_model3d_export(args = {}, ctx = {}) {
   // RW-01 导出即登记：真实作业记录 → 盖章 → 成果面真值桥（change-set + revision + lineage 图）。
   // fail-open：登记失败不吞导出结果——导出文件与 manifest 已是事实，登记错误如实随结果上报。
   let resultStudio = null;
+  let exportJobId = null;
+  let artifacts = [];
   try {
     const repository = createResultStudioRepository(db.getDatabase());
     const job = db.createToolJob({
@@ -333,6 +335,7 @@ async function tool_model3d_export(args = {}, ctx = {}) {
 
   return {
     ok: true,
+    toolJobId: exportJobId,
     sceneHash,
     provider: 'blender',
     providerVersion: result.provider?.version || null,
@@ -340,6 +343,8 @@ async function tool_model3d_export(args = {}, ctx = {}) {
     manifest: path.relative(workspace.root, manifestPath).replace(/\\/g, '/'),
     report: result.report,
     outputs: result.outputs,
+    artifacts: artifacts,
+    files: artifacts.map((item) => ({ ...item })),
     cad: result.cad || null,
     frameAssets: result.frameAssets || [],
     durationMs: result.durationMs,
