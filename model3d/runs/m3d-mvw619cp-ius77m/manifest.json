@@ -1,0 +1,44 @@
+{
+  "schema": "model3d-manifest/v1",
+  "generatedAt": "2026-10-31T08:55:17.769Z",
+  "sceneHash": "e738a047de652a566553325bee1b27334a4d979764956e20636d6d33b543a1ab",
+  "taskSpecId": null,
+  "workflowRunId": null,
+  "recipeId": null,
+  "recipeVersion": null,
+  "provider": "blender",
+  "providerVersion": "Blender 5.2.3 LTS",
+  "inputHashes": {},
+  "validation": {
+    "ok": true,
+    "watertight": true,
+    "nonManifoldEdges": 0
+  },
+  "outputs": [
+    {
+      "path": "model3d/runs/m3d-mvw619cp-ius77m/front.png",
+      "sha256": "a16b0f76f3189acc56d04ca83e04978eccf52cd66261eb781d2a8a5cbdbe32d8",
+      "bytes": 301643
+    },
+    {
+      "path": "model3d/runs/m3d-mvw619cp-ius77m/top.png",
+      "sha256": "6b69c260fab0f3c40428ce2d755aad7b71a4ef9f1aa3dda08e8c6204ef54cbe8",
+      "bytes": 355572
+    },
+    {
+      "path": "model3d/runs/m3d-mvw619cp-ius77m/side.png",
+      "sha256": "b2259a261d8bd7af59cdc319fd6ed42cca4b2ed9c406613918c6ac1661a18c69",
+      "bytes": 292766
+    },
+    {
+      "path": "model3d/runs/m3d-mvw619cp-ius77m/iso.png",
+      "sha256": "81c2f7cc5a326b396207b7d6ccf2d5084eda98e401d26c27beac65f32ad66920",
+      "bytes": 401138
+    },
+    {
+      "path": "model3d/runs/m3d-mvw619cp-ius77m/scene.glb",
+      "sha256": "25013263f52c22463a1340d46ec7d5dc6b44dc40ad3d887dedb0049408088451",
+      "bytes": 9840
+    }
+  ]
+}

@@ -7,6 +7,7 @@ Invoked as:
 Input is a resolved SceneSpec v1 JSON. Only whitelisted primitive nodes are built.
 """
 import argparse
+import re
 import json
 import math
 import os
@@ -154,7 +155,48 @@ def add_node(node, root=''):
     obj.data.name = f"{obj.name}-mesh"
     obj.data.materials.append(material_for(node.get('material'), root))
     apply_transform(obj, node)
+    # P3-03 v2c — 抽壳：metadata.shell.wall 存在时布尔挖内腔（诚实中空几何）。
+    shell_meta = (node.get('metadata') or {}).get('shell') or {}
+    wall = shell_meta.get('wall')
+    if wall is not None and float(wall) > 0:
+        apply_shell(obj, kind, dimensions, float(wall), shell_meta.get('openFaces'))
     return obj
+
+
+def apply_shell(obj, kind, dimensions, wall, open_faces=None):
+    """布尔挖内腔（抽壳）。open_faces 指定的面偏移内腔使该面开口。"""
+    dims = {k: float(v) for k, v in dimensions.items()}
+    inner_dims = {k: max(0.1, v - 2 * wall) for k, v in dims.items()}
+    if any(v <= 0 for v in inner_dims.values()):
+        return  # 壁厚超过尺寸一半 → 内腔消失，保持实心
+    if kind == 'box':
+        bpy.ops.mesh.primitive_cube_add(size=1)
+        inner = bpy.context.object
+        bake_scale(inner, (inner_dims['width'], inner_dims['depth'], inner_dims['height']))
+    elif kind == 'cylinder':
+        bpy.ops.mesh.primitive_cylinder_add(
+            radius=max(0.05, inner_dims.get('radius', 0.1)),
+            depth=max(0.1, inner_dims.get('height', 0.1)),
+        )
+        inner = bpy.context.object
+    else:
+        return  # sphere/plane 第一刀不支持抽壳
+    inner.location = obj.location.copy()
+    inner.rotation_euler = obj.rotation_euler.copy()
+    if open_faces:
+        for face in open_faces:
+            axis_map = {'x': 0, 'y': 1, 'z': 2}
+            face_match = re.match(r'([+-])([xyz])', str(face))
+            if face_match:
+                axis_idx = axis_map[face_match.group(2)]
+                sign = 1 if face_match.group(1) == '+' else -1
+                inner.location[axis_idx] += sign * wall
+    mod = obj.modifiers.new(name='Shell', type='BOOLEAN')
+    mod.operation = 'DIFFERENCE'
+    mod.object = inner
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier='Shell')
+    bpy.data.objects.remove(inner, do_unlink=True)
 
 
 MAX_MESH_BYTES = 64 * 1024 * 1024
