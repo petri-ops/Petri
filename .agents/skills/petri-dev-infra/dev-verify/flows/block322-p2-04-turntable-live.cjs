@@ -113,27 +113,48 @@ async function run(ctx) {
     });
     const spunReport = spun.data?.report || {};
     const turn = spunReport.turntable || {};
+    // 平台能力分档（macOS 复验实测）：Blender 5.2.3 无头不放行 movie 格式，4.5.10 win32 放行。
+    // unavailable 档的判据换成「缺席有没有被诚实声明」，不硬要一个本平台出不了的 mp4；
+    // available 档维持原判据。两档都必须把已出盘的序列帧拿住（连坐丢弃是缺陷，不是平台差异）。
+    const movieTier = turn.movieCapability === 'unavailable' ? 'unavailable' : 'available';
+    const movieDeclaredAbsent = turn.video == null && turn.videoError === 'movie_format_unavailable'
+      && (turn.stills || []).length === 8;
     assert('V4_turntable_built_and_report_ok', spun.status === 200 && spun.data?.ok === true && spunReport.ok === true
       && turn.requested === 8 && turn.frames === 8 && (turn.errors || []).length === 0
-      && typeof turn.video === 'string' && turn.elevationDeg === 18 && turn.fps === 12,
-      JSON.stringify({ ok: spunReport.ok, turn: { ...turn, stills: (turn.stills || []).length } }).slice(0, 420));
+      && turn.elevationDeg === 18 && turn.fps === 12
+      && (movieTier === 'available' ? typeof turn.video === 'string' : movieDeclaredAbsent),
+      JSON.stringify({
+        tier: movieTier,
+        videoError: turn.videoError ?? null,
+        ok: spunReport.ok,
+        turn: { ...turn, stills: (turn.stills || []).length },
+      }).slice(0, 420));
 
     const videoRegistered = (spun.data?.outputs || []).find((item) => String(item.path).toLowerCase().endsWith('.mp4'));
     const videoAbsolute = videoRegistered ? path.join(workspacePath, videoRegistered.path) : null;
-    assert('V5_video_exists_and_registered_hash_matches_disk', Boolean(videoRegistered)
+    assert('V5_video_exists_and_registered_hash_matches_disk', movieTier === 'unavailable'
+      ? !videoRegistered && movieDeclaredAbsent
+      : Boolean(videoRegistered)
       && fs.existsSync(videoAbsolute)
       && videoRegistered.sha256 === sha256Of(videoAbsolute)
       && videoRegistered.bytes === fs.statSync(videoAbsolute).size
       && videoRegistered.bytes > 1000
       && path.basename(String(turn.video || '')) === path.basename(videoRegistered.path),
       JSON.stringify({
+        tier: movieTier,
         registered: videoRegistered ? { ...videoRegistered, sha256: `${videoRegistered.sha256.slice(0, 12)}…` } : null,
         reportVideo: turn.video,
+        videoError: turn.videoError ?? null,
       }).slice(0, 320));
 
+    const strayMp4 = spun.data?.outDir && fs.existsSync(path.join(workspacePath, spun.data.outDir))
+      ? fs.readdirSync(path.join(workspacePath, spun.data.outDir)).filter((name) => /\.mp4$/i.test(name))
+      : [];
     const header = videoAbsolute ? fs.readFileSync(videoAbsolute).subarray(0, 12) : Buffer.alloc(0);
-    assert('V6_payload_is_real_mp4_not_renamed_image', header.toString('ascii', 4, 8) === 'ftyp',
-      `header=${JSON.stringify(header.toString('hex').slice(0, 24))}`);
+    assert('V6_payload_is_real_mp4_not_renamed_image', movieTier === 'unavailable'
+      ? strayMp4.length === 0
+      : header.toString('ascii', 4, 8) === 'ftyp',
+      `tier=${movieTier} header=${JSON.stringify(header.toString('hex').slice(0, 24))} stray=${JSON.stringify(strayMp4)}`);
 
     const frameAssets = spun.data?.frameAssets || [];
     const stillChecks = frameAssets.map((item) => {
@@ -148,10 +169,15 @@ async function run(ctx) {
     assert('V7_frame_sequence_real_and_auditable', stillChecks.length === 8
       && stillChecks.every((row) => row.exists && row.bytes > 1000 && row.shaMatches),
       JSON.stringify(stillChecks).slice(0, 420));
-    assert('V8_stills_do_not_flood_result_surface', (spun.data?.outputs || []).filter((item) => /\.mp4$/i.test(item.path)).length === 1
+    assert('V8_stills_do_not_flood_result_surface', (spun.data?.outputs || []).filter((item) => /\.mp4$/i.test(item.path)).length
+      === (movieTier === 'available' ? 1 : 0)
       && (spun.data?.outputs || []).every((item) => !/turntable-frame/i.test(item.path))
       && frameAssets.length === 8,
-      JSON.stringify({ outputs: (spun.data?.outputs || []).map((item) => path.basename(item.path)), frames: frameAssets.length }).slice(0, 380));
+      JSON.stringify({
+        tier: movieTier,
+        outputs: (spun.data?.outputs || []).map((item) => path.basename(item.path)),
+        frames: frameAssets.length,
+      }).slice(0, 380));
 
     // —— V9：匀速转动的可复核证据：相邻帧画面确实不同（同一帧重复 = 相机没动）——
     const distinct = frameAssets.map((item) => sha256Of(path.join(workspacePath, item.path)).slice(0, 16));
@@ -169,6 +195,8 @@ async function run(ctx) {
       generatedAt: new Date().toISOString(),
       platform: `${process.platform}-${process.arch}`,
       capability: capability.data,
+      movieTier,
+      videoError: turn.videoError ?? null,
       video: videoRegistered,
       frameAssets: spun.data?.frameAssets || [],
       stillChecks,

@@ -750,16 +750,34 @@ def render_turntable(out_dir, frames, elevation_deg, bounds):
         stills.append(still_path)
 
     before = set(os.listdir(out_dir))
-    scene.render.image_settings.file_format = 'FFMPEG'
-    scene.render.ffmpeg.format = 'MPEG4'
-    scene.render.ffmpeg.codec = 'H264'
-    # 4.5 的实名是 constant_rate_factor（旧文档里的 constant_rate_mode 已不存在，
-    # 设错属性名在 Python 里是 AttributeError，整个 turntable 会失败并显式回显）。
-    scene.render.ffmpeg.constant_rate_factor = 'MEDIUM'
-    scene.render.ffmpeg.audio_codec = 'NONE'
-    scene.render.filepath = os.path.join(out_dir, TURNTABLE_VIDEO_STEM)
-    bpy.ops.render.render(animation=True)
-    movies = [item for item in discover_new_files(out_dir, before) if item.lower().endswith('.mp4')]
+    movies = []
+    video_error = None
+    movie_capability = 'available'
+    failure = None
+    try:
+        scene.render.image_settings.file_format = 'FFMPEG'
+        scene.render.ffmpeg.format = 'MPEG4'
+        scene.render.ffmpeg.codec = 'H264'
+        # 4.5 的实名是 constant_rate_factor（旧文档里的 constant_rate_mode 已不存在，
+        # 设错属性名在 Python 里是 AttributeError，整个 turntable 会失败并显式回显）。
+        scene.render.ffmpeg.constant_rate_factor = 'MEDIUM'
+        scene.render.ffmpeg.audio_codec = 'NONE'
+        scene.render.filepath = os.path.join(out_dir, TURNTABLE_VIDEO_STEM)
+        bpy.ops.render.render(animation=True)
+        movies = [item for item in discover_new_files(out_dir, before) if item.lower().endswith('.mp4')]
+    except Exception as error:
+        # 出片段单独兜住，并与「渲染真失败」分流：Blender 5.2.3 macOS 无头把 movie 格式从
+        # file_format 的动态枚举里摘掉了（4.5.10 win32 不摘），而此时序列帧其实已经出盘——
+        # 能力缺席若翻转 ok，整批产物会被 provider 侧 `if (ok === false) return` 连坐丢弃。
+        # 缺席如实声明（video=None + 固定码 + 三态），真失败仍进 errors 翻转 ok（静默出图=欺骗）。
+        text = str(error)
+        if 'FFMPEG' in text and 'not found in' in text:
+            movie_capability = 'unavailable'
+            video_error = 'movie_format_unavailable'
+        else:
+            movie_capability = 'unknown'
+            video_error = 'movie_render_failed'
+            failure = text
 
     if _spin_apply in bpy.app.handlers.frame_change_pre:
         bpy.app.handlers.frame_change_pre.remove(_spin_apply)
@@ -771,6 +789,9 @@ def render_turntable(out_dir, frames, elevation_deg, bounds):
         'elevationDeg': float(elevation_deg),
         'fps': TURNTABLE_FPS,
         'video': movies[0] if movies else None,
+        'movieCapability': movie_capability,
+        'videoError': video_error,
+        'errors': [failure] if failure else [],
     }
 
 
@@ -861,7 +882,8 @@ def main():
     # 转盘放最后：它会改写 scene.render 的输出格式，先跑完静态图与导出再动它。
     requested_frames = int(args.turntable or 0)
     turntable = {'requested': requested_frames, 'frames': 0, 'stills': [], 'video': None,
-                 'elevationDeg': None, 'fps': None, 'errors': []}
+                 'elevationDeg': None, 'fps': None, 'movieCapability': None, 'videoError': None,
+                 'errors': []}
     if requested_frames > 0:
         try:
             turntable.update(render_turntable(args.out, requested_frames, float(args.spin_elevation), bounds))

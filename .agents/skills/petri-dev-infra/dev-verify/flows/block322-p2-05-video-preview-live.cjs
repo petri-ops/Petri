@@ -156,10 +156,40 @@ async function run(ctx) {
       turntable: { frames: 6, elevationDeg: 15 },
     });
     const studio = spun.data?.resultStudio || {};
+    const turn = spun.data?.report?.turntable || {};
+    const movieUnavailable = turn.movieCapability === 'unavailable';
     const mp4 = (spun.data?.outputs || []).find((item) => String(item.path).toLowerCase().endsWith('.mp4'));
     assert('X2_export_registered_with_video', spun.status === 200 && studio.registered === true && Boolean(studio.toolJobId)
-      && Boolean(mp4) && fs.existsSync(path.join(workspacePath, mp4.path)),
-      JSON.stringify({ registered: studio.registered, toolJobId: studio.toolJobId, video: mp4?.path || null }).slice(0, 280));
+      && (movieUnavailable
+        ? !mp4 && turn.videoError === 'movie_format_unavailable' && (turn.stills || []).length > 0
+        : Boolean(mp4) && fs.existsSync(path.join(workspacePath, mp4.path))),
+      JSON.stringify({
+        tier: movieUnavailable ? 'unavailable' : 'available',
+        registered: studio.registered,
+        toolJobId: studio.toolJobId,
+        video: mp4?.path || null,
+        videoError: turn.videoError ?? null,
+      }).slice(0, 300));
+
+    if (movieUnavailable) {
+      // 本平台 Blender 无头出不了 mp4（macOS 5.2.3 实测 movie 格式被动态枚举摘除）：X3-X9 的
+      // 播放判据都以 mp4 产物为前提，够不着就按无人化阶梯第 2 级如实收——不开窗凑证据、
+      // 不伪造「视频能播」，也不像旧版那样在 mp4 缺席时抛 undefined.path 崩掉。
+      assert('X2b_playback_leg_unreachable_on_this_platform', !mp4
+        && (spun.data?.outputs || []).every((item) => !/\.mp4$/i.test(String(item.path)))
+        && (turn.stills || []).length > 0,
+        `tier=unavailable reason=${turn.videoError} frames=${(turn.stills || []).length}`
+        + ' :: X3-X9 需 mp4 产物，本平台不可达（未验面如实登记，不以一代二）');
+      detail.legOutcome = 'unavailable:movie_format_unavailable（播放面 X3-X9 不可达；序列帧面见 P2-04 腿）';
+      fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+      fs.writeFileSync(path.join(EVIDENCE_DIR, 'block322-p2-05-video-preview-detail.json'), `${JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        platform: `${process.platform}-${process.arch}`,
+        note: '本机 Blender 无头不支持 movie 输出 ⇒ 播放面不可达；本证据只登记缺席声明的诚实性，不含播放结论',
+        ...detail,
+      }, null, 2)}\n`, 'utf8');
+      return true;
+    }
 
     // —— 成果面投影：产物必须带工作区读面 URL 且 MIME 是视频（缺一项就是「有记录播不动」）——
     const status = await rest('GET', `/tools/status/${encodeURIComponent(studio.toolJobId)}`);

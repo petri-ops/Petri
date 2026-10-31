@@ -80,6 +80,35 @@ test('BLOCK-322 P2-04 — Blender 侧按实测实名跑两遍并按目录发现�
   assert.match(python, /requested_frames > 0/, '未请求时零额外渲染成本');
 });
 
+test('BLOCK-322 P2-04 — 出片两步解耦：movie 能力缺席不得连坐丢弃已出盘的序列帧', () => {
+  const python = read('../resources/model3d/blender_scene.py');
+  const provider = read('../core/petri-server/helpers/blender-provider.js');
+
+  // ① 序列帧先记账：mp4 段异常时 stills 必须已经在返回值里（macOS Blender 5.2.3 实测
+  //    file_format 拒收 'FFMPEG'，旧实现把整批转盘判失败并丢掉 8 张已出盘的帧）。
+  assert.match(python, /stills\.append\(still_path\)/);
+  assert.match(python, /'stills': stills,/, 'stills 要在 return 里带回，异常路径才不丢成果');
+  assert.match(python, /def render_turntable[\s\S]*?movies = \[\][\s\S]*?try:[\s\S]*?animation=True[\s\S]*?except Exception/,
+    'mp4 段要单独兜住：一处可选产物不得拖垮整批产物');
+
+  // ② 能力缺席与执行失败要分流：缺席如实声明（不 ok 翻转），失败仍算错。
+  assert.match(python, /movieCapability/, '要声明本平台 movie 输出能力三态');
+  assert.match(python, /movie_format_unavailable/, '能力缺席用固定错误码，不是把 bpy_struct 原文当结论');
+  assert.match(python, /videoError/, 'mp4 缺席要带原因回显');
+  assert.doesNotMatch(python, /and not turntable\.get\('videoError'\)/,
+    '能力缺席不得翻转 ok——否则整批产物（含已出盘帧图）被连坐丢弃，且与「执行失败」混为一谈');
+  assert.match(python, /and not turntable\['errors'\]/, '真失败（渲染异常等）仍必须影响 ok：静默出图就是欺骗');
+
+  // ③ 缺席态不得伪造产物：video 为 None 时 provider 不能凭空登记 mp4。
+  assert.match(provider, /report\.turntable\?\.video \|\| null,/, 'video 缺席时 outputs 里不该出现 mp4');
+  assert.match(provider, /const frameAssets = \(report\.turntable\?\.stills \|\| \[\]\)\.map\(describe\)/,
+    'frameAssets 逐字节哈希可核：能力缺席平台上这就是唯一的转盘产物面');
+
+  // ④ 三态取值只声明一处（避免 JS/TS/Python 各写一份能力名）。
+  const capabilityLiterals = (python.match(/'(available|unavailable|unknown)'/g) || []).length;
+  assert.ok(capabilityLiterals <= 4, `能力三态字面量散落 ${capabilityLiterals} 处，应收敛在判定分支内（第二处声明=漂移源）`);
+});
+
 test('BLOCK-322 P2-04 — mp4 进成果登记、序列帧只作可核过程产物', () => {
   const provider = read('../core/petri-server/helpers/blender-provider.js');
   assert.match(provider, /report\.turntable\?\.video \|\| null,/);
