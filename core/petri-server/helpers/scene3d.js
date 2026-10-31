@@ -440,7 +440,7 @@ function validateConstraints(constraints, nodesById, errors) {
       for (const [side, node, face] of [['a', aNode, constraint.aFace], ['b', bNode, constraint.bFace]]) {
         if (!node) continue;
         const faces = MATE_PLANAR_FACES[node.type];
-        if (!faces) errors.push(`${where}.${side} 节点类型 ${node.type} 不支持 mate（只支持 box/cylinder/plane 的平面）`);
+        if (!faces) errors.push(`${where}.${side} 节点类型 ${node.type} 不支持 mate（平面特征表：box/cylinder/plane；sphere/其他类型属 v2b+ 扩展）`);
         else if (!faces.includes(face)) errors.push(`${where}.${side}Face ${face} 不是 ${node.type} 的可贴合平面`);
         // P3-03 v2a — 旋转平面贴合已支持（局→世合成 Rz·Ry·Rx 与 Blender 同源，探针定案）；
         // 仅曲面/边（v2c）与任意 B-rep 仍拒绝（MATE_PLANAR_FACES 白名单兜住）。

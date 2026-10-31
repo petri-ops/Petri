@@ -1,0 +1,11 @@
+{
+  "schema": "block322-v2b-stability-probe/v1",
+  "probedAt": "2026-10-30",
+  "verdict": "geometric-signature-stable",
+  "findings": {
+    "kernelHashUnusable": "subShapeHashes 同进程两次 import 同一 STEP → 哈希不同（sameProcessTwoImports=false）——内核哈希受导入实例绑定，不可作跨会话特征 id（RULING-04 §7 风险实证确认）",
+    "geometricSignatureStable": "几何签名（surfaceType + 体积 + 量化 bbox）同进程与跨进程两次 import 全部 10 face 逐一匹配（crossProcessAllFaceSigsMatch=true）"
+  },
+  "decision": "特征 id = sha256(kind | 量化体积 | 量化 bbox)，即几何签名；内核哈希仅作同会话内参考",
+  "probeMethod": "makeBox(120,80,30) → exportStep AP214 → 两次独立进程 importStep → face 枚举对比"
+}
