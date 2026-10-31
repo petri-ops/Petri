@@ -20,7 +20,6 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const scene3d = require('../core/petri-server/helpers/scene3d');
 
-const DEG = Math.PI / 180;
 const round = (v) => Number(v.toFixed(6));
 
 function mateScene(bRotation = [0, 0, 0]) {
