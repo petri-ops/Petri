@@ -24,6 +24,7 @@ import {
 import { importCadAssetAsNode, importMeshAssetAsNode } from '@/lib/model3dAssetImport';
 import type { Model3DCameraApi, Model3DPoint } from './Model3DScene';
 import { Model3DReviewPanel } from './Model3DReviewPanel';
+import { SceneConstraintEditor } from './SceneConstraintEditor';
 import { SketchSpecDialog } from './SketchSpecDialog';
 import { Model3DEditPanel } from './Model3DEditPanel';
 import { Model3DGenerateDialog } from './Model3DGenerateDialog';
@@ -561,16 +562,28 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                   ))}
                 </div>
               </section>
-              {view.scene.constraints && view.scene.constraints.length > 0 ? (
-                <section>
-                  <h4>约束</h4>
+              <section>
+                <h4>约束</h4>
+                {view.scene.constraints && view.scene.constraints.length > 0 ? (
                   <p className={styles.meta}>
                     {view.scene.constraints.map((constraint) => (constraint.kind === 'mate'
                       ? `贴合 ${constraint.a}${constraint.aFace || '?'} → ${constraint.b}${constraint.bFace || '?'}${constraint.offset === undefined ? '' : `（offset ${constraint.offset}mm）`}`
                       : `${CONSTRAINT_KIND_LABEL[constraint.kind]} ${constraint.a}→${constraint.b}（${constraint.axis || '?'}${constraint.value === undefined ? '' : ` ${constraint.value}${constraint.kind === 'angle' ? '°' : 'mm'}`}）`)).join('；')}
                   </p>
-                </section>
-              ) : null}
+                ) : (
+                  <p className={styles.meta}>暂无约束。</p>
+                )}
+                {/* P3-03 v2b 第二票 — 约束编辑器：feature 下拉引用特征表，add/remove_constraint 走 scene/apply */}
+                {projectId && (
+                  <SceneConstraintEditor
+                    projectId={projectId}
+                    scene={view.scene}
+                    scenePath={view.scene.nodes.find((n) => n.source?.path)?.source?.path || 'model3d/scene.scene3d.json'}
+                    expectedHash={null}
+                    onSceneUpdated={(updated) => { if (updated) loadStructured(updated); }}
+                  />
+                )}
+              </section>
               <section>
                 <h4>视角书签</h4>
                 {bookmarks.length === 0 ? <p className={styles.meta}>保存当前相机视角后，可一键恢复。</p> : (

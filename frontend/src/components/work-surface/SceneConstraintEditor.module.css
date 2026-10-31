@@ -1,0 +1,53 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.existing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.constraintRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--petri-font-size-body);
+}
+
+.constraintLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--petri-font-size-body);
+}
+
+.submitBtn {
+  align-self: flex-start;
+}
+
+.error {
+  color: var(--petri-color-danger, #c62828);
+  font-size: var(--petri-font-size-body);
+}
+
+.notice {
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+}
