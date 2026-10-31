@@ -8,6 +8,7 @@ const { sketchToTaskSpec } = require('../helpers/model3d-sketch');
 const sceneStore = require('../helpers/model3d-scene-store');
 const { compareGeometryReports } = require('../helpers/model3d-geometry-compare');
 const { inspectMeshAsset, inspectTextureAsset } = require('../helpers/mesh-assets');
+const cadExchange = require('../helpers/cad-exchange');
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
@@ -69,11 +70,13 @@ function loadLocalProject(req, res, projectId) {
 module.exports = function registerModel3DRoutes(app) {
   app.get('/api/model3d/capability', async (_req, res) => {
     const capability = await blender.probeBlender();
+    const cad = await cadExchange.probeCadExchange();
     res.json({
       ok: true,
       status: capability.status,
       reason: capability.reason,
       version: capability.version,
+      cad,
     });
   });
 
