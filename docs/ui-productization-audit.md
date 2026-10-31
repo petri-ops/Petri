@@ -159,7 +159,7 @@
 - **验证（代码）**：后端操作契约 4/4（合法 mate 写入求值生效/非法 fail-closed/移除幂等/旋转不可解拒收）+ 前端组件 4/4（提交/失败透传/移除/少节点诚实）+ sceneFeatures 移植 4/4（跨端对账锚）+ tsc 0 + lint 0。
 - **边界（reopen）**：①工作区实机腿（真实项目页操作流程）未跑；②face 下拉目前只含基元 dimensions 引用（face:cylinder 等导入件引用属 v2b 特征表 SceneSpec 契约后续）。
 
-## UI-638: Result Studio 内嵌 3D viewer + 3D 产物入成果面真值（RW-01；2026-10-30 **verified（dev Electron 边界内；点开腿两缺陷修复后实机 20/20）**）
+## UI-638: Result Studio 内嵌 3D viewer + 3D 产物入成果面真值（RW-01；2026-10-31 **verified（用户确认「确认」·发现腿+点开腿全通：任务墙列出→下钻→viewer 挂载；artifacts 投影缺陷修复）**）
 
 - **变化面**：`ResultArtifactKind` 增 `model3d`（SECTION_LABELS「3D 模型」）；viewerRegistry 新增 model3d adapter（kind 恒胜 + `.glb/.gltf/.stl/.obj/.scene3d.json` 先于 json/binary 兜底，canSelect=true artifact 级选择）；`Model3DResultViewer` 薄壳（复用 work-surface Model3DScene 零复制，挂载即绑定 selectionBus、点击面写 artifact 级选择、WebGL 缺席如实降级）；ResultArtifactShell 渲染分支。
 - **为什么这样设计**：NEXT-04A~06 建成的 3D 链产物此前与成果面 revision/lineage/viewer/selectionBus 四线零接线；RW-01 经「导出即登记」桥（manifest→change-set+appendRevisionBatch，parametersHash=sceneHash 溯源，family=`model3d:<projectId>:<scenePath>:<ext>` 稳定跨导出 stacking）把 3D 产物接入既有内核真值，不建第二真相。
@@ -2990,7 +2990,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 - **代行验收（2026-10-30，`npm run verify -- ui301-385-spawn-live` 8/8）**：9223 离屏 + 真实模型 spawn 2 子代理 → 时间线展开后「已派发」折叠行 ×2（状态 ✓ + 任务首行）；旧清单「dock 列表」表述作废（dock 无列表，已按代码事实更正）。同轮修复纯 spawn 流 dock 空壳（自动弹出即渲染编排图）。
 
-## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-30 **verified（dev Electron 边界内；代行 8/8）**：真实 spawn 2 子代理 → 对话时间线「已派发 · <任务首行>」折叠行 ×2；证据 `acceptance/ui-301-385-spawn/`；列表/中断/详情窗，BLOCK-49 加映二） 
+## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-31 **verified（用户确认「确认」·RW-06 代行评估批·spawn 链 live 实证：mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天）**）
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。
 
@@ -4306,7 +4306,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **边界**：运行中即时计数不再常驻聊天区——由内联卡与右栏自动切换承接；「需要关注」失败智能体节保持不变。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-385: 子智能体详情迁入右栏「智能体」tab + agent/result 独立窗退役（2026-10-30 **verified（dev Electron 边界内；代行 8/8）**：真实 spawn 后右栏「智能体」tab 自动打开，AgentRunPanel 渲染任务全文/父会话/团队 2 成员/实时工作流时间线；证据 `acceptance/ui-301-385-spawn/`；用户裁决「1」启动）
+## UI-385: 子智能体详情迁入右栏「智能体」tab（2026-10-31 **verified（用户确认「确认」·RW-06 代行评估批·同 UI-301）**）
 
 - **来源**：用户复看 UI-382 时提出「子智能体点击应该嵌入右侧栏，不需要弹窗；桌面最右侧的悬浮结果展示也没必要了，都应展示在右侧栏」——Agent 评估合理（延续 BLOCK-68 io tab / UI-362 tab 化 / UI-382 内联的「浮动面→停靠面」收敛路线），用户裁决「1」启动三步走。
 - **交付面**：①右栏新增「智能体」tab（`RightPanelMode 'agent'`）+ 新组件 `AgentRunPanel`（自 AgentWindowPage 提取：SSE 订阅 + 中断两步确认/留言队列/继续派交互完整保留；续派改经 `onSpawnedAgent` 回调切面板）；②事件 `agentOpenInRail` 统一四个入口（工具行内联卡「详情」/活动条行/俯瞰行/spawn 自动唤起——每 task 只自动切一次）；③退役 agent/result 两类独立窗：App 路由与页面删除（AgentWindowPage/WindowResultPage）、`_window-manager` 白名单移除两 kind（route_not_allowed fail-closed）、ResultArtifactShell「弹出」按钮移除；④指挥中心下钻改走新增 `window:open-result-in-main` relay（单一白名单事件类型 + sender 校验，主窗经既有 projectOpenArtifact 链右栏打开，跨项目自动导航）。终端/指挥中心独立窗不动。
