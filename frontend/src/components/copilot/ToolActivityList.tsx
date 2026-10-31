@@ -18,7 +18,7 @@ import {
   type ToolActivityItem,
 } from './toolActivity';
 import { reasoningPreview } from './conversationSegments';
-import { ChatTool3DPreview } from './SimpleChat/ChatTool3DPreview';
+import { ChatArtifactCard } from './ChatArtifactCard';
 import { ToolRowBoundary } from './TimelineBoundaries';
 import { projectExecutionAxis } from '@/lib/statusProjection';
 
@@ -762,12 +762,10 @@ export function ToolActivityList({
 
   const running = activities.filter((activity) => activity.status === 'running').length;
   // BLOCK-322 产品洞察 — model3d_export 完成后检测（供内嵌 3D 预览卡渲染）
-  const hasCompleted3DExport = activities.some(
-    (a) => a.name === 'model3d_export' && a.status === 'success',
-  );
-  const export3DJobId = activities.find(
-    (a) => a.name === 'model3d_export' && a.status === 'success',
-  )?.toolJobId ?? null;
+  // BLOCK-322 产品洞察 — 完成的产出工具行下方渲染通用产物卡（不限 3D）
+  const artifactWorthyJobs = activities.filter(
+    (a) => a.status === 'success' && a.toolJobId && a.name,
+  ).map((a) => ({ toolJobId: a.toolJobId!, name: a.name }));
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
     (activity) => activity.status === 'error' || activity.status === 'denied'
@@ -996,9 +994,9 @@ export function ToolActivityList({
           })()}
         </div>
       )}
-      {hasCompleted3DExport && export3DJobId && projectId ? (
-        <ChatTool3DPreview projectId={projectId} jobId={export3DJobId} glbPath="model3d/scene.glb" />
-      ) : null}
+      {artifactWorthyJobs.map((job) => (
+        <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded={true} projectId={projectId} />
+      ))}
     </div>
   );
 }
