@@ -721,7 +721,7 @@ function solveRotationForFaceNormal(currentEuler, face, targetNormal) {
   return best;
 }
 
-function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fail, applied, aFace, bFace, aRotated, bRotated }) {
+function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fail, applied, aRotated, bRotated }) {
   const aWorld = worldFaceNormal(anchor, constraint.aFace);
   // v2a 姿态改写先于法向校验：贴合=两世界法向相反。a 无旋转 → 目标轴对齐；
   // 90° 欧拉组合可枚举（XYZ 序三轴 0/90/180/270 共 64 组合），找到使 b 贴合面
@@ -770,13 +770,11 @@ function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fa
   const normalAxis = aWorld.axis;
   const normalIndex = AXIS_INDEX[normalAxis];
   const dimsOf = (node) => (node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : {});
-  const aDims = dimsOf(anchor);
   const bDims = dimsOf(target);
-  const aHalf = { x: (Number(aDims.width) || 0) / 2, y: (Number(aDims.depth) || 0) / 2, z: (Number(aDims.height) || 0) / 2 };
-  const bHalf = { x: (Number(bDims.width) || 0) / 2, y: (Number(bDims.depth) || 0) / 2, z: (Number(bDims.height) || 0) / 2 };
   const offset = constraint.offset === undefined ? 0 : Number(constraint.offset);
 
   // a 面心世界坐标 = a.position + Ra·(局部面心)
+  const aDims = dimsOf(anchor);
   const aLocal = localFaceCenter(aDims, constraint.aFace);
   const bLocal = localFaceCenter(bDims, constraint.bFace);
   if (!aLocal || !bLocal) {
@@ -786,9 +784,7 @@ function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fa
   const aRot = aRotated ? rotationMatrixDeg(anchor.transform.rotation) : [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   const bRot = bRotated ? rotationMatrixDeg(target.transform.rotation) : [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
   const aPos = (anchor.transform && Array.isArray(anchor.transform.position) ? anchor.transform.position : [0, 0, 0]).map(Number);
-  const bPos = (target.transform && Array.isArray(target.transform.position) ? target.transform.position : [0, 0, 0]).map(Number);
   const aFaceCenter = applyMatrix(aRot, aLocal.center).map((v, i) => v + aPos[i]);
-  const bFaceCenterLocal = applyMatrix(bRot, bLocal.center);
 
   // b 的新姿态：贴合面世界法向 = −aWorld.normal。a 未转 → 目标=轴对齐反方向；
   // 最小姿态=清零/翻转 b 的 euler 使局部贴合面指对目标（本刀只解「目标为轴对齐」情形）。
