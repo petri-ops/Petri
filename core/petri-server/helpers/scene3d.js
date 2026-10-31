@@ -32,15 +32,29 @@ const MODIFIER_FIELDS = {
 const MATERIAL_FIELDS = ['color', 'roughness', 'metallic', 'emissive', 'baseColorTexture', 'densityKgM3'];
 // BLOCK-322 P3-02a — 装配约束白名单。求值只发生在 resolveSceneSpec（唯一真值处），
 // 结果烘进 transform 后交给 Blender；构建脚本与预览端都不再各自解一遍（红线 2）。
-const CONSTRAINT_KINDS = new Set(['align', 'distance', 'angle']);
+const CONSTRAINT_KINDS = new Set(['align', 'distance', 'angle', 'mate']);
 const CONSTRAINT_AXES = new Set(['x', 'y', 'z']);
+const MATE_FACES = Object.freeze(['+x', '-x', '+y', '-y', '+z', '-z']);
+const MATE_FACE_SET = new Set(MATE_FACES);
+const MATE_FACE_AXIS = {
+  '+x': { axis: 'x', sign: 1 }, '-x': { axis: 'x', sign: -1 },
+  '+y': { axis: 'y', sign: 1 }, '-y': { axis: 'y', sign: -1 },
+  '+z': { axis: 'z', sign: 1 }, '-z': { axis: 'z', sign: -1 },
+};
+// RULING-04 第一切片：只对「无旋转、轴对齐的平面」做贴合；曲面/边/旋转/任意 B-rep 仍显式拒绝。
+const MATE_PLANAR_FACES = Object.freeze({
+  box: ['+x', '-x', '+y', '-y', '+z', '-z'],
+  cylinder: ['+z', '-z'],
+  plane: ['+z', '-z'],
+});
 const CONSTRAINT_FIELDS = {
   align: ['kind', 'a', 'b', 'axis'],
   distance: ['kind', 'a', 'b', 'axis', 'value'],
   angle: ['kind', 'a', 'b', 'axis', 'value'],
+  mate: ['kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
 };
-/** 每条约束只改写 b 的一个分量：align/distance 定位置，angle 定姿态。 */
-const CONSTRAINT_TARGET_FIELD = { align: 'position', distance: 'position', angle: 'rotation' };
+/** 每条约束只改写 b 的指定分量：align/distance/mate 定位置，angle 定姿态。 */
+const CONSTRAINT_TARGET_FIELD = { align: 'position', distance: 'position', angle: 'rotation', mate: 'position' };
 const AXIS_INDEX = { x: 0, y: 1, z: 2 };
 const CONFLICT_TOLERANCE = 1e-9;
 const LIMITS = Object.freeze({
@@ -388,7 +402,7 @@ function validateModifierReferences(nodes, errors) {
  * BLOCK-322 P3-02a — 约束声明校验（形状与引用）。
  * 过约束（同一分量被定为两个不同值）要到 resolve 才知道，此处只保证能安全求值。
  */
-function validateConstraints(constraints, ids, errors) {
+function validateConstraints(constraints, nodesById, errors) {
   if (!Array.isArray(constraints)) {
     errors.push('constraints 必须是数组');
     return;
@@ -404,15 +418,42 @@ function validateConstraints(constraints, ids, errors) {
       return;
     }
     if (!CONSTRAINT_KINDS.has(constraint.kind)) {
-      errors.push(`${where}.kind 只支持 align/distance/angle`);
+      errors.push(`${where}.kind 只支持 align/distance/angle/mate`);
       return;
     }
     for (const key of Object.keys(constraint)) {
       if (!CONSTRAINT_FIELDS[constraint.kind].includes(key)) errors.push(`${where}.${key} 不在 ${constraint.kind} 白名单`);
     }
     if (!isSafeId(constraint.a) || !isSafeId(constraint.b)) errors.push(`${where} 节点 id 非法`);
-    else if (!ids.has(constraint.a) || !ids.has(constraint.b)) errors.push(`${where} 引用未知节点`);
+    else if (!nodesById.has(constraint.a) || !nodesById.has(constraint.b)) errors.push(`${where} 引用未知节点`);
     else if (constraint.a === constraint.b) errors.push(`${where} 不能约束自身`);
+    if (constraint.kind === 'mate') {
+      const aNode = nodesById.get(constraint.a);
+      const bNode = nodesById.get(constraint.b);
+      if (!MATE_FACE_SET.has(constraint.aFace) || !MATE_FACE_SET.has(constraint.bFace)) {
+        errors.push(`${where} aFace/bFace 只支持 ${MATE_FACES.join('/')}`);
+        return;
+      }
+      if (constraint.offset !== undefined && !finiteNumber(constraint.offset)) {
+        errors.push(`${where}.offset 必须是有限数值（mm）`);
+      }
+      for (const [side, node, face] of [['a', aNode, constraint.aFace], ['b', bNode, constraint.bFace]]) {
+        if (!node) continue;
+        const faces = MATE_PLANAR_FACES[node.type];
+        if (!faces) errors.push(`${where}.${side} 节点类型 ${node.type} 不支持 mate（只支持 box/cylinder/plane 的平面）`);
+        else if (!faces.includes(face)) errors.push(`${where}.${side}Face ${face} 不是 ${node.type} 的可贴合平面`);
+        const rotation = node.transform && node.transform.rotation;
+        if (Array.isArray(rotation) && rotation.some((value) => Number(value) !== 0)) {
+          errors.push(`${where}.${side} mate 仅支持无旋转节点（当前 rotation 非零）`);
+        }
+      }
+      const aAxis = MATE_FACE_AXIS[constraint.aFace];
+      const bAxis = MATE_FACE_AXIS[constraint.bFace];
+      if (aAxis && bAxis && (aAxis.axis !== bAxis.axis || aAxis.sign !== -bAxis.sign)) {
+        errors.push(`${where} mate 需要法向相反的同轴平面（${constraint.aFace}/${constraint.bFace}）`);
+      }
+      return;
+    }
     if (!CONSTRAINT_AXES.has(constraint.axis)) errors.push(`${where}.axis 非法`);
     if (constraint.kind !== 'align' && !finiteNumber(constraint.value)) {
       errors.push(`${where}.value 必须是有限数值（${constraint.kind === 'distance' ? 'mm，可为负' : '度，可为负'}）`);
@@ -455,7 +496,9 @@ function validateSceneSpec(input) {
   if (Array.isArray(input.nodes) && input.nodes.length > LIMITS.maxNodes) errors.push('节点数量超限');
   const ids = new Set();
   if (Array.isArray(input.nodes)) input.nodes.forEach((node, index) => validateNode(node, index, parameters, ids, errors));
-  if (input.constraints !== undefined) validateConstraints(input.constraints, ids, errors);
+  const nodesById = new Map();
+  if (Array.isArray(input.nodes)) input.nodes.forEach((node) => { if (isPlainObject(node) && isSafeId(node.id) && !nodesById.has(node.id)) nodesById.set(node.id, node); });
+  if (input.constraints !== undefined) validateConstraints(input.constraints, nodesById, errors);
   validateMetadataTolerances(input.metadata, ids, errors);
   if (Array.isArray(input.nodes)) validateModifierReferences(input.nodes, errors);
   if (input.camera !== undefined) validateCamera(input.camera, errors);
@@ -510,12 +553,89 @@ function writeComponent(node, field, axisIndex, value) {
   return before;
 }
 
+function mateHalfExtent(node, axis) {
+  const dimensions = node && isPlainObject(node.dimensions) ? node.dimensions : {};
+  const value = (key) => Number(dimensions[key]);
+  if (node.type === 'box') {
+    const byAxis = { x: value('width') / 2, y: value('depth') / 2, z: value('height') / 2 };
+    return Number.isFinite(byAxis[axis]) ? byAxis[axis] : null;
+  }
+  if (node.type === 'cylinder') {
+    const extent = axis === 'z' ? value('height') / 2 : value('radius');
+    return Number.isFinite(extent) ? extent : null;
+  }
+  if (node.type === 'plane') {
+    if (axis === 'z') return 0;
+    const byAxis = { x: value('width') / 2, y: value('height') / 2 };
+    return Number.isFinite(byAxis[axis]) ? byAxis[axis] : null;
+  }
+  return null;
+}
+
+function applyMateConstraint({ constraint, index, anchor, target, decided, fail, applied }) {
+  const aFace = MATE_FACE_AXIS[constraint.aFace];
+  const bFace = MATE_FACE_AXIS[constraint.bFace];
+  if (!aFace || !bFace || aFace.axis !== bFace.axis || aFace.sign !== -bFace.sign) {
+    fail('mate_face_incompatible', `constraint ${index}（mate）需要法向相反的同轴平面（${constraint.aFace}/${constraint.bFace}）`);
+    return;
+  }
+  const aHalf = mateHalfExtent(anchor, aFace.axis);
+  const bHalf = mateHalfExtent(target, bFace.axis);
+  if (aHalf === null || bHalf === null) {
+    fail('mate_dimensions_missing', `constraint ${index}（mate）的 ${constraint.b} 缺少可求值的尺寸`);
+    return;
+  }
+  const normalAxis = aFace.axis;
+  const normalIndex = AXIS_INDEX[normalAxis];
+  const aFaceCoord = componentOf(anchor, 'position', normalIndex) + aHalf * aFace.sign;
+  const offset = constraint.offset === undefined ? 0 : Number(constraint.offset);
+  const targetValue = aFaceCoord + offset - bHalf * bFace.sign;
+  const axes = ['x', 'y', 'z'].map((axis) => ({
+    axis,
+    index: AXIS_INDEX[axis],
+    value: axis === normalAxis
+      ? targetValue
+      : componentOf(anchor, 'position', AXIS_INDEX[axis]),
+  }));
+  for (const item of axes) {
+    const key = `${constraint.b}|position|${item.axis}`;
+    const prior = decided.get(key);
+    if (prior && Math.abs(prior.value - item.value) > CONFLICT_TOLERANCE) {
+      fail('constraint_conflict', `constraint_conflict: ${constraint.b}.position.${item.axis} 已由 constraints[${prior.index}] 定为 ${prior.value}，constraints[${index}]（mate）要求 ${item.value}`);
+      return;
+    }
+    if (Math.abs(item.value) > LIMITS.maxDimensionMm) {
+      fail('constraint_out_of_range', `constraint_out_of_range: constraints[${index}]（mate）把 ${constraint.b}.position.${item.axis} 求值为 ${item.value}，超出 ±${LIMITS.maxDimensionMm}mm`);
+      return;
+    }
+  }
+  for (const item of axes) {
+    const key = `${constraint.b}|position|${item.axis}`;
+    if (!decided.has(key)) decided.set(key, { value: item.value, index });
+    const from = writeComponent(target, 'position', item.index, item.value);
+    applied.push({
+      index,
+      kind: 'mate',
+      a: constraint.a,
+      b: constraint.b,
+      axis: item.axis,
+      field: 'position',
+      from,
+      to: item.value,
+      changed: Math.abs(from - item.value) > CONFLICT_TOLERANCE,
+      aFace: constraint.aFace,
+      bFace: constraint.bFace,
+    });
+  }
+}
+
 /**
  * BLOCK-322 P3-02a — 单遍、按声明顺序求值装配约束，结果写回 b 的 transform。
  *
  * 参照面读的是「已求过约束的当前值」，所以 a→b→c 链会自然传递。同一分量被两条约束定为不同值
  * 即过约束：显式 constraint_conflict，不猜优先级也不静默取后值——静默取值的装配不可复现。
- * mate（面/边贴合，需要特征级引用）未实现，见 plan §3.5 RULING-04。
+ * RULING-04 第一切片：mate 只支持无旋转 box/cylinder/plane 的轴对齐平面贴合（法向相反、
+ * 面心对齐、沿法向 offset）；曲面/边/旋转/任意 B-rep 仍拒绝，不假装支持。
  */
 function applyConstraints(scene) {
   const constraints = Array.isArray(scene.constraints) ? scene.constraints : [];
@@ -535,6 +655,10 @@ function applyConstraints(scene) {
     const target = nodesById.get(constraint.b);
     const anchor = nodesById.get(constraint.a);
     if (!target || !anchor) return;
+    if (constraint.kind === 'mate') {
+      applyMateConstraint({ constraint, index, anchor, target, decided, fail, applied });
+      return;
+    }
     const field = CONSTRAINT_TARGET_FIELD[constraint.kind];
     const axis = AXIS_INDEX[constraint.axis];
     const to = componentOf(anchor, field, axis) + (constraint.kind === 'align' ? 0 : constraint.value);

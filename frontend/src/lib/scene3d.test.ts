@@ -140,26 +140,29 @@ describe('scene3d viewer normalization (NEXT-04A)', () => {
     }
   });
 
-  it('BLOCK-322 P3-02a 三类装配约束通过解析，并如实声明预览未求值', () => {
+  it('BLOCK-322 P3-02a/P3-03 四类装配约束通过解析，并如实声明预览未求值', () => {
+    const sample = sampleScene3D();
+    sample.nodes[1].transform = { position: [60, 0, 0], rotation: [0, 0, 0] };
     const result = normalizeScene3DForView({
-      ...sampleScene3D(),
+      ...sample,
       constraints: [
         { kind: 'align', a: 'enclosure', b: 'port', axis: 'x' },
         { kind: 'distance', a: 'enclosure', b: 'port', axis: 'z', value: 60 },
         { kind: 'angle', a: 'enclosure', b: 'port', axis: 'z', value: -12.5 },
+        { kind: 'mate', a: 'enclosure', b: 'port', aFace: '+z', bFace: '-z', offset: 2 },
       ],
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.view.scene.constraints).toHaveLength(3);
-    expect(result.view.stats.constraints).toBe(3);
+    expect(result.view.scene.constraints).toHaveLength(4);
+    expect(result.view.stats.constraints).toBe(4);
     expect(result.view.warnings.join('；')).toContain('装配约束在服务端求值后烘进 transform');
     expect(result.view.warnings.join('；')).toContain('按声明位置显示');
   });
 
   it('BLOCK-322 P3-02a 非法约束 fail-closed（不再静默丢弃，与服务端同判据）', () => {
     const cases: Array<{ constraints: unknown; keyword: string }> = [
-      { constraints: [{ kind: 'mate', a: 'enclosure', b: 'port', axis: 'x' }], keyword: 'kind 只支持 align/distance/angle' },
+      { constraints: [{ kind: 'mate', a: 'enclosure', b: 'port' }], keyword: 'aFace/bFace 只支持' },
       { constraints: [{ kind: 'align', a: 'enclosure', b: 'ghost', axis: 'x' }], keyword: '引用未知节点' },
       { constraints: [{ kind: 'align', a: 'enclosure', b: 'enclosure', axis: 'x' }], keyword: '不能约束自身' },
       { constraints: [{ kind: 'distance', a: 'enclosure', b: 'port', axis: 'x' }], keyword: 'value 必须是有限数值' },

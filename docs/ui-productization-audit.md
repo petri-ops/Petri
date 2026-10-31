@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-651: 3D 工作面 mate 特征贴合与预览（BLOCK-322 P3-03；2026-10-31 **verified（dev Electron 边界内；UI 实机 7/7）**）
+
+- **变化面**：约束区新增 `mate` 显示（`贴合 a面 → b面（offset）`）；预览沿用服务端 `resolveSceneSpec` 求值结果——同一 SceneSpec 的 cap 从声明 z=100 变为贴合后 z=30，面板包围盒由 `120×80×125` 变为 `120×80×55`；非法法向（+z/+z）服务端 400，预览保持声明包围盒并把原因写进告警，不空屏。
+- **为什么这样设计**：mate 的特征引用与求解仍只在服务端唯一求值处；前端只显示和消费，不建第二套求解器。第一切片限定无旋转 box 六面 / cylinder、plane 端面；任意面/边/旋转留给 v2 数据模型裁决。
+- **验证（代码）**：后端契约 `test/block322-p4-mate.test.mjs` 7/7；前端 `scene3d.test.ts` 15/15；实机 Blender `scripts/block322-p3-03-mate-live.mjs` 7/7；UI 7/7（9223 离屏）；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p3/block322-p3-mate-live.json` + `block322-p3-03-mate-ui-live-live.json`；截图不计入通过。
+- **边界（reopen）**：只支持轴对齐平面、无旋转、面心对齐；不支持任意边/曲面/B-rep、旋转贴合、横向 offset；参数化尺寸支持；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-650: 3D 工作面外部文生 3D 生成入口（BLOCK-322 P5-02；2026-10-31 **verified（dev Electron 边界内；mock provider + UI 9/9；真实 Tripo 未验证）**）
 
 - **变化面**：3D 工作面新增「AI 生成」：对话框显示生成服务/模型与隐私/费用提示，输入 3–1024 字提示词，生成成功后由服务端下载 GLB、走 `model3d/assets/<sha>` 资产链并自动 `add_node`；CAD 徽标旁新增 AI 生成能力徽标（未配置时如实标不可用）。默认 provider=none，不出站；mock 只用于本地验证；Tripo v3 适配器支持请求/轮询/下载与可信域名/大小/GLB 头校验。

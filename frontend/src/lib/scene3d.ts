@@ -13,15 +13,20 @@ function isSafeRelativePath(value: unknown): boolean {
 
 export type Scene3DNodeType = (typeof SCENE3D_NODE_TYPES)[number];
 
-export type Scene3DConstraintKind = 'align' | 'distance' | 'angle';
+export type Scene3DConstraintKind = 'align' | 'distance' | 'angle' | 'mate';
 
 export interface Scene3DConstraint {
   kind: Scene3DConstraintKind;
   a: string;
   b: string;
-  axis: 'x' | 'y' | 'z';
-  /** distance=mm（沿轴带符号）；angle=度（绕轴带符号）；align 不消费。 */
+  axis?: 'x' | 'y' | 'z';
+  /** distance=mm（沿轴带符号）；angle=度（绕轴带符号）；align/mate 不消费。 */
   value?: number;
+  /** mate：轴对齐平面选择器（+x/-x/+y/-y/+z/-z）。 */
+  aFace?: string;
+  bFace?: string;
+  /** mate：沿 a 面法向的间距 mm。 */
+  offset?: number;
 }
 
 export type Scene3DModifier =
@@ -338,12 +343,14 @@ function validateModifierReferencesForView(rawNodes: unknown[], errors: string[]
 
 /** BLOCK-322 P3-02a — 装配约束白名单镜像（判据与文案与后端 scene3d.js 同源）。
  * 求值只在服务端 resolveSceneSpec 发生（唯一真值处），展示侧只校验能否安全求值。 */
-const CONSTRAINT_KINDS: readonly string[] = ['align', 'distance', 'angle'];
+const CONSTRAINT_KINDS: readonly string[] = ['align', 'distance', 'angle', 'mate'];
+const MATE_FACES: readonly string[] = ['+x', '-x', '+y', '-y', '+z', '-z'];
 const CONSTRAINT_AXES: readonly string[] = ['x', 'y', 'z'];
 const CONSTRAINT_FIELDS: Record<string, readonly string[]> = {
   align: ['kind', 'a', 'b', 'axis'],
   distance: ['kind', 'a', 'b', 'axis', 'value'],
   angle: ['kind', 'a', 'b', 'axis', 'value'],
+  mate: ['kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
 };
 const MAX_CONSTRAINTS = 200;
 
@@ -365,7 +372,7 @@ function validateConstraintsForView(rawConstraints: unknown, nodeIds: Set<string
     }
     const kind = typeof entry.kind === 'string' ? entry.kind : '';
     if (!CONSTRAINT_KINDS.includes(kind)) {
-      errors.push(`${where}.kind 只支持 align/distance/angle`);
+      errors.push(`${where}.kind 只支持 align/distance/angle/mate`);
       return;
     }
     for (const key of Object.keys(entry)) {
@@ -376,6 +383,15 @@ function validateConstraintsForView(rawConstraints: unknown, nodeIds: Set<string
     if (!SAFE_ID.test(a) || !SAFE_ID.test(b)) errors.push(`${where} 节点 id 非法`);
     else if (!nodeIds.has(a) || !nodeIds.has(b)) errors.push(`${where} 引用未知节点`);
     else if (a === b) errors.push(`${where} 不能约束自身`);
+    if (kind === 'mate') {
+      const aFace = typeof entry.aFace === 'string' ? entry.aFace : '';
+      const bFace = typeof entry.bFace === 'string' ? entry.bFace : '';
+      if (!MATE_FACES.includes(aFace) || !MATE_FACES.includes(bFace)) {
+        errors.push(`${where} aFace/bFace 只支持 ${MATE_FACES.join('/')}`);
+      }
+      if (entry.offset !== undefined && !finite(entry.offset)) errors.push(`${where}.offset 必须是有限数值（mm）`);
+      return;
+    }
     if (!CONSTRAINT_AXES.includes(typeof entry.axis === 'string' ? entry.axis : '')) errors.push(`${where}.axis 非法`);
     if (kind !== 'align' && !finite(entry.value)) {
       errors.push(`${where}.value 必须是有限数值（${kind === 'distance' ? 'mm，可为负' : '度，可为负'}）`);

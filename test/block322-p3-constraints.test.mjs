@@ -142,7 +142,8 @@ test('BLOCK-322 P3-02a — 求值结果越界 fail-closed（声明合法不代�
 test('BLOCK-322 P3-02a — 非法约束逐条 fail-closed', () => {
   const nodes = [box('a'), box('b')];
   const cases = [
-    [{ kind: 'mate', a: 'a', b: 'b', axis: 'x' }, 'kind 只支持 align/distance/angle'],
+    [{ kind: 'mate', a: 'a', b: 'b' }, 'aFace/bFace 只支持'],
+    [{ kind: 'mate', a: 'a', b: 'b', aFace: '+z', bFace: '+z' }, '需要法向相反的同轴平面'],
     [{ kind: 'align', a: 'a', b: 'b', axis: 'w' }, 'axis 非法'],
     [{ kind: 'align', a: 'a', b: 'ghost', axis: 'x' }, '引用未知节点'],
     [{ kind: 'align', a: 'a', b: 'a', axis: 'x' }, '不能约束自身'],
@@ -195,7 +196,7 @@ test('BLOCK-322 P3-02a — 约束白名单跨语言逐值一致，预览端不�
     assert.ok(match, `未找到字典 ${name}`);
     return [...match[1].matchAll(/([A-Za-z_][A-Za-z0-9_]*)\s*:\s*\[/g)].map((item) => item[1]).sort();
   };
-  const kinds = ['align', 'angle', 'distance'];
+  const kinds = ['align', 'angle', 'distance', 'mate'];
   assert.deepEqual(grabSet(backend, 'CONSTRAINT_KINDS'), kinds);
   assert.deepEqual(grabArray(frontend, 'CONSTRAINT_KINDS'), kinds, '前端镜像必须与后端同集');
   assert.deepEqual(grabSet(backend, 'CONSTRAINT_AXES'), ['x', 'y', 'z']);

@@ -6746,7 +6746,13 @@
         "frontend/src/components/work-surface/Model3DGenerateDialog.tsx",
         "frontend/src/components/work-surface/Model3DGenerateDialog.module.css",
         ".agents/skills/petri-dev-infra/dev-verify/flows/block322-p5-generation-ui-live.cjs",
-        "acceptance/block-322-p5/**"
+        "acceptance/block-322-p5/**",
+        "test/block322-p4-mate.test.mjs",
+        "scripts/block322-p3-03-mate-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-03-mate-ui-live.cjs",
+        "acceptance/block-322-p3/**",
+        "test/block322-p3-constraints.test.mjs",
+        "frontend/src/lib/scene3d.test.ts"
       ],
       "tests": [
         "test/block322-p4-bom.test.mjs",
@@ -6757,7 +6763,8 @@
         "test/tool-activity-labels.test.mjs",
         "test/block322-p4-cad-exchange.test.mjs",
         "test/block322-p4-cad-routes.test.mjs",
-        "test/block322-p5-generation.test.mjs"
+        "test/block322-p5-generation.test.mjs",
+        "test/block322-p4-mate.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"

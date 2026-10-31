@@ -9,7 +9,7 @@ status: active
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）
 
-**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P4-05 HLR 线框工程图（UI-649 verified）、P5-01、P6-01~04 已收口；剩余=撞 RULING 的 P3-03/P4-04b〔IGES 导出/解析 B-rep〕/P4-05 GD&T〔真工程图尺寸链〕/P5-02 真实 key/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a+P4-05 HLR 批提交=2f8fa437 + cebec6c7（capability）+ ec26c569 + 回写 03bbf6f0/1877af97；P5-02 批提交=b6e99621〔本地，领先数以 git 为准，推送待发令〕）
+**状态**：active（放量连续执行中，用户发令 2026-10-30；P2 段、P3-01/P3-02a/b、P4-01~03、P4-04a、P4-05 HLR 线框工程图（UI-649 verified）、P5-01、P6-01~04、P3-03 第一切片（轴对齐平面 mate）已收口；剩余=撞 RULING 的 P4-04b〔IGES 导出/解析 B-rep〕/P4-05 GD&T〔真工程图尺寸链〕/P5-02 真实 key/P6-05，等用户裁决；P4-P6 无裁决项批提交=dc6adb43〔已随六推推送 origin/main=a971cf14〕；RULING-01/P4-04a+P4-05 HLR 批提交=2f8fa437 + cebec6c7（capability）+ ec26c569 + 回写 03bbf6f0/1877af97；P5-02 批提交=b6e99621〔本地，领先数以 git 为准，推送待发令〕）
 **用户裁决**（原话）：「我需要全方位的能力，不要对此设限制。应该要满足所有应用场景 按照这个目标前进」
 **定位**：把现有「参数化 SceneSpec + Blender 导出」的工程链，扩展为覆盖**内容生成 / 叙事场景 / 真实生产**的全方位 3D 能力；阶段化交付，但**能力型排除项只按"尚未排到的阶段"登记，不作为永久边界**。
 
@@ -110,7 +110,7 @@ status: active
 | `P3-01` 几何操作 **completed（2026-10-30，实机 10/10 数值全等）** | 节点级 `modifiers`（bevel / array / boolean union-difference-intersect）+ 白名单参数校验（boolean 目标须为更早节点且非自身，≤8 条按序求值）；Blender 侧求值并烘焙进 mesh、刀体消费后移出导出；**预览端不重做几何**（客户端 CSG=第二几何执行器，撞红线 2），改为显式声明「预览显示未加工基元」 | **解析式数值回归**（基线 384000；bevel→370372 水密；difference→240000=384000−144000；union→456000=384000+216000−144000；array count3/offset140→1152000 与包围盒 X=400）+ 白名单/引用/哈希/diff 契约测 8/8 + 前端 10/10 + 实机腿 | `acceptance/block-322-p3/` |
 | `P3-02a` 装配约束求值器 **completed（2026-10-30，契约 8/8 + 前端 12/12 + 实机 16/16）** | 约束白名单扩 `distance` / `angle`（`align` 存量保留），**求值落点裁决变更**：原表写「由 Blender constraint 求解」，实作为在唯一真值处 `resolveSceneSpec` 单遍求值并把结果烘进 `transform` 后交给 Blender——Blender 侧不引入约束求解器（否则=第二套求解语义，且同一场景两次构建结果依赖求解器版本）。语义：`align`=b 该轴分量等于 a 当前值；`distance`=a 该轴分量 + 带符号间距；`angle`=a 绕同轴姿态 + 相对角度。过约束显式 `constraint_conflict`（不猜优先级、不静默取后值）。新增只读 `POST /api/model3d/scene/resolve`（纯函数、无项目前置，对标 `scene/diff`）。**清偿存量缺陷：`align` 此前从未被任何执行面求值（写了不动）** | 解析式位置/姿态数值断言 + 链式传递与闭合环 + 冲突 fail-closed + 过约束场景不得写盘 + 白名单跨 JS/TS 逐值对账 + Python 侧出现 constraint 字样即红（第二求解器锁）+ 实机数值回归（包围盒由网格实测） | `test/block322-p3-constraints.test.mjs` + `frontend/src/lib/scene3d.test.ts` + `acceptance/block-322-p3/block322-p3-constraints-live-live.json`（16/16：align `[190,80,40]→[120,80,40]`、distance `→[150,80,40]`、angle `[200,80,40]→[120,200,40]`，均与解析解逐位相符；conflict/out_of_range 双 400；导出链同样拒过约束场景） |
 | `P3-02b` 预览消费服务端求值结果 **completed（2026-10-30，前端 13/13 + 实机 9/9）** | 预览端经只读 `POST /api/model3d/scene/resolve` 取求值后的 `transform` 渲染（`normalizeScene3DForView(raw, {constraintsEvaluated:true})` 只关掉「未求值」告警，**前端零求解代码**）；求值失败/后端缺席时保持声明位置并把服务端原因原样显示；文案前缀由 `SCENE3D_CONSTRAINT_NOTE*` 常量单源（不再两处字面量） | 组件层：求值态不挂「未取回求值结果」告警且位置随投影变化；实机：**面板包围盒 X 由声明态 190 变求值态 120**（数字来自 Three 侧实测盒而非文案）+ 过约束场景回落 190 且面板可见 `constraint_conflict` 原因 + **写盘 SceneSpec 仍保留声明位置 `[100,0,0]`（求值是投影不是新真相）** | `frontend/src/lib/scene3d.test.ts` + `acceptance/block-322-p3/block322-p3-02b-preview-eval-live-live.json`（9/9）+ `…-detail.json` |
-| `P3-03`（撞裁决点）`mate` 约束 | 面/边贴合需要**特征级引用**（哪个面、哪个边），SceneSpec v1 只有节点级 id + 向量，属数据模型变更 | — | **RULING-04** |
+| `P3-03` `mate` 约束 **in_progress（2026-10-31，第一切片 completed：轴对齐平面贴合）** | 新增 `mate` 约束（`aFace/bFace` 特征引用 + `offset`）：仅无旋转 box 的六面、cylinder/plane 的 ±z 端面；法向相接 + 面心对齐 + 沿法向 offset；曲面/边/旋转/任意 B-rep 显式拒；求值仍只在 `resolveSceneSpec` | 契约 7/7 + 实机 Blender 7/7 + UI 7/7（包围盒 120×80×55、非法法向回落 120×80×125） | `test/block322-p4-mate.test.mjs` + `acceptance/block-322-p3/block322-p3-mate-live.json` |
 
 ### P4 · CAD 交换与工程（含裁决点）
 
@@ -144,7 +144,7 @@ status: active
 - **RULING-01（P4-04/05 前置）**：STEP/IGES 与真工程图需要几何内核（OCCT / FreeCAD headless / Blender 插件），属重依赖 → 必须先过 DEPENDENCY-CHANGE-CHECKLIST 并由用户裁决；**材料已出（2026-10-31，用户「批准 批准 开整」）：[block-322-ruling-01-cad-kernel.md](./block-322-ruling-01-cad-kernel.md)**——推荐 `occt-wasm` 主内核 + `occt-import-js` 仅 IGES 导入；STEP 导出为 faceted B-rep（Blender 仍是唯一构建者），IGES 导出/真工程图/GD&T 如实留边界。
 - **RULING-02（P5-02 前置）**：外部生成服务=成本 + 提示词/图片外发（隐私）→ 用户裁决。
 - **RULING-03（P6-05 前置）**：调用外部切片 CLI（Orca/Cura）→ 用户裁决。
-- **RULING-04（P3-03 前置，2026-10-30 P3-02a 执行中撞出）**：`mate`（面/边贴合）需要**特征级引用**——SceneSpec v1 的约束只能引用节点 id 与轴向，没有「哪个面/哪条边」的表达；补齐需要节点子结构 + 哈希语义 + diff + 预览拾取四处同改，属**数据模型变更**而非参数扩展 → 需用户裁决是否扩 v1（或另立 v2）。裁决前 `mate` 不实现、不假装支持：白名单里根本没有该 kind，写入即 `kind 只支持 align/distance/angle` 显式拒。
+- **RULING-04（P3-03 前置，2026-10-30 P3-02a 执行中撞出）**：`mate`（面/边贴合）需要**特征级引用**；用户 2026-10-31 发令「继续其它未完成的工作」后开第一切片：`mate` 仅支持 **无旋转 box 六面 / cylinder、plane 的 ±z 端面**，法向相接、面心对齐、沿法向 offset；仍是 v1 的节点级 `aFace/bFace` 选择器，未扩任意 B-rep/边/旋转/特征树。剩余任意面/边贴合若要继续，需另立 v2 数据模型裁决。
 
 **推荐队列序**：`P2-01 → P2-02 → P2-03 → P2-04 → P2-05 → P3-01 → P3-02a → P3-02b → P4-01 → P4-02 → P4-03 → P5-01 → P6-01 → P6-02 → P6-03 → P6-04`（撞 RULING 即停取材料；RULING 解锁项插回队尾；P3-03=mate 待 RULING-04，不入队）。**理由**：先把「看得见的表现力」做完（P2 是用户对 3D 能力最直观的感知面），再做几何正确性（P3），再做生产交付（P4 无依赖项/P6），最后是需要外部条件的项。
 

@@ -51,7 +51,7 @@ const VIEWS: Array<{ id: ViewAngle; label: string }> = [
 ];
 // 仅当场景声明了 camera 才出现「机位」按钮（未声明时不提供假机位选项）。
 const DECLARED_CAMERA_VIEW = { id: 'camera' as const, label: '机位' };
-const CONSTRAINT_KIND_LABEL: Record<Scene3DConstraintKind, string> = { align: '对齐', distance: '间距', angle: '转角' };
+const CONSTRAINT_KIND_LABEL: Record<Scene3DConstraintKind, string> = { align: '对齐', distance: '间距', angle: '转角', mate: '贴合' };
 // 逐节点资产观察（外部 mesh / 基础色贴图）走告警区而非错误条；前缀集中一处，新增资产类别不再漏配。
 const ASSET_NOTICE_PREFIXES = ['mesh_reference_', 'texture_reference_'];
 
@@ -565,7 +565,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                 <section>
                   <h4>约束</h4>
                   <p className={styles.meta}>
-                    {view.scene.constraints.map((constraint) => `${CONSTRAINT_KIND_LABEL[constraint.kind]} ${constraint.a}→${constraint.b}（${constraint.axis}${constraint.value === undefined ? '' : ` ${constraint.value}${constraint.kind === 'angle' ? '°' : 'mm'}`}）`).join('；')}
+                    {view.scene.constraints.map((constraint) => (constraint.kind === 'mate'
+                      ? `贴合 ${constraint.a}${constraint.aFace || '?'} → ${constraint.b}${constraint.bFace || '?'}${constraint.offset === undefined ? '' : `（offset ${constraint.offset}mm）`}`
+                      : `${CONSTRAINT_KIND_LABEL[constraint.kind]} ${constraint.a}→${constraint.b}（${constraint.axis || '?'}${constraint.value === undefined ? '' : ` ${constraint.value}${constraint.kind === 'angle' ? '°' : 'mm'}`}）`)).join('；')}
                   </p>
                 </section>
               ) : null}
