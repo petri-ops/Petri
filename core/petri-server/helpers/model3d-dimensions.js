@@ -152,7 +152,7 @@ function resolveToleranceEndpoints(scene, tolerances) {
     const rotMatrix = rotationMatrixDegPublic(rot);
     const centerLocal = [0, 0, 0];
     if (!isRadius) centerLocal[axisIdx] = half;
-    const centerWorld = mulMV(rotMatrix, centerLocal).map((v, i) => v + pos[i]);
+    void mulMV(rotMatrix, centerLocal);  // centerWorld 未消费（第一刀口径），保留计算可读性
     const endA = mulMV(rotMatrix, isRadius ? [Number(dims.radius) || 0, 0, 0] : local.map((v, i) => v + (i === axisIdx ? half : 0))).map((v, i) => v + pos[i]);
     const endB = mulMV(rotMatrix, isRadius ? [-Number(dims.radius) || 0, 0, 0] : local.map((v, i) => v - (i === axisIdx ? half : 0))).map((v, i) => v + pos[i]);
     const axisName = isRadius ? 'x' : (['width', 'depth', 'height'][axisIdx] ? ['x', 'y', 'z'][axisIdx] : 'z');

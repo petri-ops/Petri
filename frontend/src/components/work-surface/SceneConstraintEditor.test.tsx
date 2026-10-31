@@ -5,7 +5,6 @@
  * ② 校验失败 → 错误如实显示（后端 fail-closed 透传）
  * ③ 移除按钮 → remove_constraint
  */
-import assert from 'node:assert/strict';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import SceneConstraintEditor from './SceneConstraintEditor';
@@ -13,7 +12,7 @@ import SceneConstraintEditor from './SceneConstraintEditor';
 const applySceneOperations = vi.fn();
 
 vi.mock('@/lib/sceneEditClient', () => ({
-  applySceneOperations: (...args: unknown[]) => applySceneOperations(...args),
+  applySceneOperations: vi.fn((...args: unknown[]) => Promise.resolve(applySceneOperations(...args))),
 }));
 
 const SCENE = {
@@ -49,7 +48,7 @@ describe('P3-03 v2b SceneConstraintEditor', () => {
     );
     fireEvent.click(screen.getByTestId('constraint-editor-submit'));
     await waitFor(() => expect(applySceneOperations).toHaveBeenCalledTimes(1));
-    const input = applySceneOperations.mock.calls[0][0];
+    const input = applySceneOperations.mock.calls[0][0] as { operations: Array<{ op: string; constraint: Record<string, unknown> }> };
     expect(input.operations[0].op).toBe('add_constraint');
     expect(input.operations[0].constraint.kind).toBe('mate');
     expect(input.operations[0].constraint.a).toBe('base');
@@ -89,7 +88,7 @@ describe('P3-03 v2b SceneConstraintEditor', () => {
     const removeBtn = screen.getByLabelText('移除约束 cs_1');
     fireEvent.click(removeBtn);
     await waitFor(() => expect(applySceneOperations).toHaveBeenCalledTimes(1));
-    expect(applySceneOperations.mock.calls[0][0].operations[0].op).toBe('remove_constraint');
+    expect((applySceneOperations.mock.calls[0][0] as { operations: Array<{ op: string }> }).operations[0].op).toBe('remove_constraint');
   });
 
   it('少于 2 个特征表节点 → 诚实提示（不渲染表单）', () => {

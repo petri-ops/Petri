@@ -152,6 +152,13 @@
 - **实机证据**：`acceptance/rw-02-pack-write-bridge/rw02-pack-write-bridge-live-live.json`（**9/9**，隔离 :3011 + 夹具双包）：合法声明全量透传、非法声明丢弃+诊断；selection-save/annotations create+delete 真实写链；revision-restore 全链 200（git 绑定工作区过物化门）。
 - **边界（reopen）**：①iframe 端到端腿（真 pack surface 在工作区面板渲染后经 postMessage 全链）随 UI-532 同前提（需结果面 job+artifact seed）；②revision-replay（contextToken 机制）/export-run（methods-export LLM 门）两子动词契约+授权已过、宿主分发点 pending（write_kind_host_wiring_pending 确定性回执）。
 
+## UI-639a: 约束编辑器 SceneConstraintEditor（BLOCK-322 P3-03 v2b 第二票；2026-10-30 **in_progress（组件 4/4 + 后端契约 4/4；工作区实机腿待补）**）
+
+- **变化面**：新增 `SceneConstraintEditor` 组件（Model3DSurface 约束 section 接线）——节点 A/B 下拉 + 面下拉从特征表派生（`deriveSceneFeatureTable` 同源移植，非自由文本）+ offset 输入；`add_constraint`/`remove_constraint` 走 scene/apply（后端创建即求值 fail-closed——不可解约束整个 apply 拒收）；后端 fail-closed 错误透传显示。scene/apply 操作白名单加 `add_constraint`/`remove_constraint`（校验走 validateSceneSpec+applyConstraints 同源单源）。
+- **为什么这样设计**：约束此前只能手写 JSON 入 spec（BLOCK-322 v2b 前无 UI 创建面）；编辑器让用户从特征表下拉选择而非自由文本（C-44 写权限同款纪律——用户选择受特征表约束，不冒充任意引用）；创建即求值 fail-closed 不落死约束。
+- **验证（代码）**：后端操作契约 4/4（合法 mate 写入求值生效/非法 fail-closed/移除幂等/旋转不可解拒收）+ 前端组件 4/4（提交/失败透传/移除/少节点诚实）+ sceneFeatures 移植 4/4（跨端对账锚）+ tsc 0 + lint 0。
+- **边界（reopen）**：①工作区实机腿（真实项目页操作流程）未跑；②face 下拉目前只含基元 dimensions 引用（face:cylinder 等导入件引用属 v2b 特征表 SceneSpec 契约后续）。
+
 ## UI-638: Result Studio 内嵌 3D viewer + 3D 产物入成果面真值（RW-01；2026-10-30 **verified（dev Electron 边界内；点开腿两缺陷修复后实机 20/20）**）
 
 - **变化面**：`ResultArtifactKind` 增 `model3d`（SECTION_LABELS「3D 模型」）；viewerRegistry 新增 model3d adapter（kind 恒胜 + `.glb/.gltf/.stl/.obj/.scene3d.json` 先于 json/binary 兜底，canSelect=true artifact 级选择）；`Model3DResultViewer` 薄壳（复用 work-surface Model3DScene 零复制，挂载即绑定 selectionBus、点击面写 artifact 级选择、WebGL 缺席如实降级）；ResultArtifactShell 渲染分支。

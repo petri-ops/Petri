@@ -788,7 +788,7 @@ function applyMateConstraintV2a({ constraint, index, anchor, target, decided, fa
 
   // b 的新姿态：贴合面世界法向 = −aWorld.normal。a 未转 → 目标=轴对齐反方向；
   // 最小姿态=清零/翻转 b 的 euler 使局部贴合面指对目标（本刀只解「目标为轴对齐」情形）。
-  const targetWorld = aWorld.normal.map((v) => -v);
+
   const newBRotation = (() => {
     if (!bRotated) return (target.transform.rotation || [0, 0, 0]).map(Number);
     // b 已旋转：若其贴合面局部法向 × 任一 90° 组合可达目标 → 用最小改动=目标轴对齐时的

@@ -15,7 +15,6 @@
 import { createHash } from 'node:crypto';
 
 const FEATURE_KINDS = Object.freeze(['plane', 'cylinder', 'cone', 'sphere', 'other']);
-const CONE_ORIENTATIONS = Object.freeze(['+z', '-z']);
 const AXIS_INDEX = { x: 0, y: 1, z: 2 };
 const MATE_PLANAR_FACES_BY_TYPE = {
   box: ['+x', '-x', '+y', '-y', '+z', '-z'],
