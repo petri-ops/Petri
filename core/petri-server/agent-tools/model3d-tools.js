@@ -272,6 +272,7 @@ async function tool_model3d_export(args = {}, ctx = {}) {
       conversationId: ctx.conversationId || null,
     });
     if (job && job.id) {
+      exportJobId = job.id;
       const registration = registerModel3DExportRevision({
         repository,
         job: {
