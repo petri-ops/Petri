@@ -1,6 +1,6 @@
 ---
 capability: block-325-model-surface-budget
-status: active
+status: completed
 goal: model-surface 尺寸预算 CI 门禁（借鉴 dsh model-surface.spec）：系统提示/工具定义字面量与工具数基线棘轮（任何增长即红，收缩经 --update 下调并说明理由）+ 核心模型可见面退役词扫描；prompt/工具定义通胀从此是 CI 红线。
 acceptance:
   - scripts/model-surface-baseline.mjs：measure（系统提示三确定性页取最大 + 逐工具字面量）/ compareAgainstBaseline / shrinkBaseline（--update 对增长拒绝写入）；自带 DB 自举零 dev 栈依赖。
@@ -14,6 +14,7 @@ reopen: token 级预算深化（CK-04 SECTION_CHAR_BUDGETS 已有，不重复建
 
 - 立项裁决：用户 2026-11-01「很棒 继续」（dsh-superagent 借鉴余项收官包；Jev 队列序首选候选）
 - 唯一真相域：本文件（block-325-model-surface-budget）
+- 状态：completed（2026-11-01 当日立项当日收口。证据：契约 4/4 + closeout 十一门 PASS；基线首测 systemPrompt=940 chars / toolDefs=104 个 56614 chars（top: plan=2586, run_tool=2407, spawn_agent=1639）；实机腿豁免（纯 CI 门禁包，测量即证据）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 1. 定位（立项自检问句）
 

@@ -8592,7 +8592,7 @@
       "capability": "block-325-model-surface-budget",
       "path": "docs/block-325-model-surface-budget-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-325-model-surface-budget",
       "entrypoint": "docs/README.md",
@@ -8605,7 +8605,7 @@
         "tools",
         "G0"
       ],
-      "notes": "model-surface 尺寸预算 CI 门禁（用户裁决 2026-11-01「很棒 继续」）：系统提示+工具定义字面量基线棘轮（任何增长即红，收缩需 --update 下调）+ 核心面退役词扫描；dsh model-surface.spec 同型。"
+      "notes": "model-surface 尺寸预算 CI 门禁（用户裁决 2026-11-01「很棒 继续」）completed（当日收口）：基线棘轮（任何增长即红）+ 退役词扫描；基线 systemPrompt=940/toolDefs=104 个 56614 chars；契约 4/4 + closeout PASS。"
     }
   ],
   "lastUpdated": "2026-11-01",
