@@ -6848,6 +6848,22 @@
         "test/block203-agent-rules.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block325-model-surface-budget",
+      "note": "BLOCK-325 model-surface 尺寸预算：测量/对账脚本 + 基线棘轮 + 退役词扫描；改动落点连契约测与 token 预算邻域。",
+      "patterns": [
+        "scripts/model-surface-baseline.mjs",
+        "test/model-surface-baselines.json",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/agent-tools/registry.js"
+      ],
+      "tests": [
+        "test/block325-model-surface-budget.test.mjs",
+        "test/block163-token-budget.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance-gate"
     }
   ]
 }

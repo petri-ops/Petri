@@ -8586,8 +8586,28 @@
         "G0"
       ],
       "notes": "统一结构化原因码 taxonomy（用户裁决 2026-11-01「开整」）completed（当日收口）：封闭 REASONS 注册表 + 渲染器 + 源码扫描机械锁（当场抓到 2 个漏注册码，锁有效实证）；第一批归并治理/审批族 20 码；GET /api/ai/reason-codes 词表出口；加性接线零行为变更。"
+    },
+    {
+      "id": "BLOCK-325-MODEL-SURFACE-BUDGET",
+      "capability": "block-325-model-surface-budget",
+      "path": "docs/block-325-model-surface-budget-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-325-model-surface-budget",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-01",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "governance",
+        "ci",
+        "prompt",
+        "tools",
+        "G0"
+      ],
+      "notes": "model-surface 尺寸预算 CI 门禁（用户裁决 2026-11-01「很棒 继续」）：系统提示+工具定义字面量基线棘轮（任何增长即红，收缩需 --update 下调）+ 核心面退役词扫描；dsh model-surface.spec 同型。"
     }
   ],
   "lastUpdated": "2026-11-01",
-  "documentCount": 436
+  "documentCount": 437
 }
