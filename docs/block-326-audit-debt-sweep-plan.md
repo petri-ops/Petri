@@ -1,6 +1,6 @@
 ---
 capability: block-326-audit-debt-sweep
-status: active
+status: completed
 goal: AUDIT-LOG 在案 🟡 工程债清偿批（五项，修法均已在案、无需产品裁决）：①server.js 信号 teardown 只关库不退出；②四个 dev-verify flow 缺 id 导出致 --list 必红；③npm run state 对 living-plan 漏报 active 槽位 + BLOCK-322 registry 状态漏翻转；④block322-p3-constraints-live C6 判据过时（mate 已入白名单）；⑤decision-api no_key 早退不落账（next:suggest 实跑台账不可见）。
 acceptance:
   - ①SIGTERM 后进程退出：捕获 httpServer，teardown 关库→server.close→exit(0) 带超时兜底；回归测试（spawn 真实 server + SIGTERM + 限时退出断言）。
@@ -16,6 +16,7 @@ reopen: mac mp4 外部 ffmpeg 合成 / dev-verify 证据文件名平台化（需
 
 - 立项裁决：用户 2026-11-01「继续冲 搞完」（C-35~C-44 池经核实已全清，本批=剩余可行动队列）
 - 唯一真相域：本文件（block-326-audit-debt-sweep）
+- 状态：completed（2026-11-01 当日收口。证据：回归 5/5（SIGTERM 真进程退出 + --list + state + C6 源码 + no_key 落账）+ closeout 十一门 PASS；AUDIT-LOG 对应五条 🟡 已移入处理记录。不含需裁决项如实留 🟡。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 1. 定位
 

@@ -8612,7 +8612,7 @@
       "capability": "block-326-audit-debt-sweep",
       "path": "docs/block-326-audit-debt-sweep-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-326-audit-debt-sweep",
       "entrypoint": "docs/README.md",
@@ -8624,7 +8624,7 @@
         "debt",
         "G0"
       ],
-      "notes": "审计台工程债清偿批（用户裁决 2026-11-01「继续冲 搞完」）：SIGTERM 退出/flow id/state living-plan/C6 判据/no_key 落账五项，修法均在案；不含需裁决项。"
+      "notes": "审计台工程债清偿批（用户裁决 2026-11-01「继续冲 搞完」）completed（当日收口）：SIGTERM 退出+回归测试/四 flow id/state living-plan+两处 registry 漏翻转/C6 夹具/no_key 落账；回归 5/5 + closeout PASS；对应 🟡 五条已移入处理记录。"
     }
   ],
   "lastUpdated": "2026-11-01",
