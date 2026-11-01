@@ -8573,7 +8573,7 @@
       "capability": "block-324-reason-taxonomy",
       "path": "docs/block-324-reason-taxonomy-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-324-reason-taxonomy",
       "entrypoint": "docs/README.md",
@@ -8585,7 +8585,7 @@
         "reason-codes",
         "G0"
       ],
-      "notes": "统一结构化原因码 taxonomy（用户裁决 2026-11-01「开整」）：封闭 REASONS 注册表 + 渲染器 + 源码扫描机械锁；第一批归并治理/审批族；加性接线零行为变更。"
+      "notes": "统一结构化原因码 taxonomy（用户裁决 2026-11-01「开整」）completed（当日收口）：封闭 REASONS 注册表 + 渲染器 + 源码扫描机械锁（当场抓到 2 个漏注册码，锁有效实证）；第一批归并治理/审批族 20 码；GET /api/ai/reason-codes 词表出口；加性接线零行为变更。"
     }
   ],
   "lastUpdated": "2026-11-01",

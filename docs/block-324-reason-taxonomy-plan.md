@@ -1,6 +1,6 @@
 ---
 capability: block-324-reason-taxonomy
-status: active
+status: completed
 goal: 统一结构化原因码 taxonomy（借鉴 dsh-superagent REASONS 封闭表）：封闭原因码注册表（code→{category,template}）+ 渲染器，第一批归并治理/审批族（判定序六层 deny/allow 原因 + 放权坡道审计），源码扫描锁「新增场景必须注册」；落点既有载体（拦截器信封/task_events），不建第二台账。
 acceptance:
   - 注册表 `core/petri-server/helpers/reason-codes.js`：封闭 REASONS 表（category 封闭集 + {placeholder} 模板）+ renderReason/isRegisteredReason/listReasonCodes + GET /api/ai/reason-codes。
@@ -15,6 +15,7 @@ reopen: 决策原语域（decision_log reason 自由文本语义不同不强行�
 - 立项裁决：用户 2026-11-01「开整」（承接同日建议：dsh-superagent 借鉴余项第一包；Jev 队列序首选候选）
 - 前置：BLOCK-323 放权坡道（observe→allow）已全绿收官——本包把治理面散落的原因表达收敛成可审计的封闭集
 - 唯一真相域：本文件（block-324-reason-taxonomy）
+- 状态：completed（2026-11-01 当日立项当日收口。证据：契约 test/block324-reason-taxonomy.test.mjs 5/5——**源码扫描机械锁当场抓到 2 个漏注册码（overwrite/replace_requires_sha256），锁有效实证**；邻域回归 15/15；closeout 十一门 PASS；实机腿豁免（纯后端词表层，REST 出口经契约测试覆盖，无 UI 面）。decision_log 不归并（reopen 判档）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 1. 定位（立项自检问句）
 
