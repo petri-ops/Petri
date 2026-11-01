@@ -8507,7 +8507,7 @@
       "capability": "block-323-progressive-autonomy",
       "path": "docs/block-323-progressive-autonomy-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-323-progressive-autonomy",
       "entrypoint": "docs/README.md",
@@ -8520,7 +8520,7 @@
         "autonomy",
         "G0"
       ],
-      "notes": "放权坡道（用户裁决 2026-11-01「行 规划好 开整吧」）：规则/工具层加 observe 中间档——命中只记录不执行，本地复盘后人工升级 allow；观察证据落 policy_observations UPSERT 合并表；判定序安全地板不变。"
+      "notes": "放权坡道（用户裁决 2026-11-01「行 规划好 开整吧」）completed（2026-11-01 当日收口）：规则/工具层 observe 中间档 + allow 坡道终点（复用既有 allow 语义）；观察证据落 policy_observations UPSERT 合并表；复盘面 + 自动放行审计 + 授权变更留痕 + review_available 通知；实机 13/13；closeout 十三门 PASS；UI-655 in_progress。"
     },
     {
       "id": "BLOCK-322-RULING-01-CAD-KERNEL",
