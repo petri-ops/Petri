@@ -6815,7 +6815,8 @@
         "core/packages/shared-config/config-schema.js",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx",
         "frontend/src/components/copilot/PolicyReviewBridge.tsx",
-        "frontend/src/lib/notification-center.ts"
+        "frontend/src/lib/notification-center.ts",
+        "scripts/block323-observe-live.mjs"
       ],
       "tests": [
         "test/block323-progressive-autonomy.test.mjs",
@@ -6825,7 +6826,8 @@
         "test/block243-approval-contract.test.mjs",
         "test/agent-tool-policy.test.mjs"
       ],
-      "classifiesScripts": false
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
