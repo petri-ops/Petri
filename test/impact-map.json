@@ -6816,7 +6816,11 @@
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx",
         "frontend/src/components/copilot/PolicyReviewBridge.tsx",
         "frontend/src/lib/notification-center.ts",
-        "scripts/block323-observe-live.mjs"
+        "scripts/block323-observe-live.mjs",
+        "scripts/block323-observe-ui-live.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block323-observe-ui-live.cjs",
+        "acceptance/block-323/**",
+        "acceptance/ui-655/**"
       ],
       "tests": [
         "test/block323-progressive-autonomy.test.mjs",

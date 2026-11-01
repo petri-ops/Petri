@@ -1,11 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
-## UI-655: 放权坡道复盘区——Agent 规则面板 observe/allow 档 + 待复盘/自动放行/变更留痕（BLOCK-323；2026-11-01 **in_progress（后端实机 13/13 全绿；UI 离屏实机腿未跑，不冒 verified）**）
+## UI-655: 放权坡道复盘区——Agent 规则面板 observe/allow 档 + 待复盘/自动放行/变更留痕（BLOCK-323；2026-11-01 **verified（dev Electron 边界内；隔离栈离屏实机 20/20，亮/暗双截图）**）
 
 - **变化面**：AgentRulesPanel 规则动作从 deny/require-ack 二档扩为四档（拒绝/需确认/观察/放行——observe=命中只记录「本可自动执行」不拦截，allow=命中自动放行）；新增「放权坡道 · 待复盘」区=未复盘观察行（规则/工具、命中次数、最近时间、脱敏样本、一键「升级为放行」「收权为需确认」「标为已复盘」）+ 近期自动放行审计 + 授权面变更留痕；通知中心新 kind `review_available`（PolicyReviewBridge 60s 轮询，≥3 条未复盘按最新观察 id 去重提醒一次，quiet by default）。
 - **为什么这样设计**：放权坡道=ZCode/Codex ask/deny 二态没有的「可审计放权升级流」；升级永远人工（复盘就是改配置直接落盘）；诚实状态公理=unreviewedCount 与待复盘列表同表同查询。
 - **验证（代码）**：契约 `test/block323-progressive-autonomy.test.mjs` 8/8（observe 不拦截透出/安全地板/UPSERT 合并/拦截器胶水）；前端 AgentRulesPanel 4/4 + PolicyReviewBridge 2/2；邻域回归 block160/180/203/243/244 全绿；tsc 0。
-- **实机证据（后端全链）**：`acceptance/block-323/block323-observe-live.json`（**13/13**，隔离后端 + mock provider）：A observe 命中未拦截且 rule-observe 行落账（hits/脱敏样本）→ B 真实 REST PUT 升级 allow + policy-change 留痕 → 重跑自动执行 + `permission.auto_allowed` task_event + rule-auto-allow 审计行 → C vssadmin allow 撞动态防护仍拦（requestId 信封）且无 auto-allow 审计行。**UI 离屏实机腿未跑**（重开条件：9223 离屏走查复盘区点按流）。
+- **实机证据（后端全链）**：`acceptance/block-323/block323-observe-live.json`（**13/13**，隔离后端 + mock provider）：A observe 命中未拦截且 rule-observe 行落账（hits/脱敏样本）→ B 真实 REST PUT 升级 allow + policy-change 留痕 → 重跑自动执行 + `permission.auto_allowed` task_event + rule-auto-allow 审计行 → C vssadmin allow 撞动态防护仍拦（requestId 信封）且无 auto-allow 审计行。
+- **实机证据（UI 离屏腿，UI-655 verified 依据）**：`acceptance/block-323/block323-observe-ui-live.json`（**20/20**，隔离栈 :3001 隔离后端 + :3000 Vite + 离屏 Electron 测试实例，端口被占自动换空闲端口不杀未知进程）：`/settings?section=decisions` 深链直达 → 四档动作下拉在场 → 规则行「观察」标签 → 待复盘行（命中 1 次 + `{"command":"npm --version"}` 脱敏样本）→ 真实点击「升级为放行」→ 提示 + **REST 同后端对账 action=allow**（页内 GET 双通道对账）→ REST 跑任务2（allow 档自动执行不询问）→ rule-auto-allow 审计行 hits=1 → 点「标为已复盘」→ 列表清空 → 重载后「近期自动放行」与「授权面变更留痕」含 r-npm → 亮/暗双截图（`ui655-review-panel.png` / `-dark.png`）。**实机抓真两处**：①flow 在模块顶层固化 `PETRI_B323_API`（wrapper require 在设 env 之前）→ REST 误落 ：3001 用户活后端（REST rules=[]、页内 [allow] 的双通道对比直接定位；误建 3 任务/会话已清偿：任务均 failed 终态无 npm 执行，会话已删）；②S2 断言字符串硬编码默认端口（装饰性，改真值）。
 
 ## UI-654: 3D 预览免手动导入 + 预览页一键转 3D（BLOCK-322；2026-11-01 **verified（dev Electron 边界内；三条入口实机 15/15）**）
 

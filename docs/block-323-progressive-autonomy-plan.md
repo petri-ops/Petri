@@ -14,8 +14,9 @@ reopen: 观察数据导出/跨设备；MCP 工具观察面（trust 天花板下�
 
 # BLOCK-323-PROGRESSIVE-AUTONOMY — 放权坡道（observe→allow 渐进放权）计划
 
-- 状态：completed（2026-11-01 当日立项当日收口。M1–M4 全段交付；证据：契约 `test/block323-progressive-autonomy.test.mjs` 8/8 + 前端 6/6 + 邻域回归（block160/180/203/243/244）全绿 + 实机 `acceptance/block-323/block323-observe-live.json` **13/13**（隔离后端全链；实机抓真=探针缺 `context.projectId` 致 exec `project_required`、B 腿假绿被 A 腿观察缺席暴露——修法=显式传 projectId，证据 JSON 在案）+ closeout 十三门 PASS（commit 1699ce6b 后复跑全绿）；UI-655 in_progress（UI 离屏实机腿未跑，不冒 verified，重开条件=9223 离屏走查复盘区点按流）；lint 抓真 7 个 unsafe-any（Array.isArray 把 ReadonlyArray 收窄 any[]）已修；test:changed 探针脚本补 acceptance-probe 分类）
-- 收口语录：门禁对账见本文件 §6 逐项——①契约红绿 ✅ ②定向回归 ✅ ③实机腿 ✅ ④前端+tsc ✅ ⑤closeout 十一门 ✅ ⑥UI-655 登记 ✅（in_progress 态如实）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- 状态：completed（2026-11-01 当日立项当日收口。M1–M4 + UI-655 全部交付；证据：契约 `test/block323-progressive-autonomy.test.mjs` 8/8 + 前端 6/6 + 邻域回归（block160/180/203/243/244）全绿 + 后端实机 `acceptance/block-323/block323-observe-live.json` **13/13** + UI 离屏实机 `block323-observe-ui-live.json` **20/20**（UI-655 verified，亮/暗双截图）+ closeout 十三门 PASS（commit `1699ce6b` 后复跑全绿）。
+- 实机抓真三处（均已修，教训入台账）：①探针缺 `context.projectId` → exec `project_required`、B 腿假绿被 A 腿观察缺席暴露；②flow 模块顶层固化 `PETRI_B323_API`（wrapper require 先于设 env）→ REST 误落 ：3001 用户活后端——页内/REST 双通道对比定位，误建 3 任务（均 failed 终态、无 npm 执行）+3 会话已清偿；③lint 抓真 7 个 unsafe-any（`Array.isArray` 把 ReadonlyArray 收窄 any[]）。
+- 收口语录：门禁对账见本文件 §6 逐项——①契约红绿 ✅ ②定向回归 ✅ ③实机腿（后端 13/13 + UI 20/20）✅ ④前端+tsc ✅ ⑤closeout 十一门 ✅ ⑥UI-655 verified ✅。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - 立项裁决：用户 2026-11-01「行 规划好 开整吧」（承接同日设计提案交付：dsh-superagent 渐进放权模式融入）
 - 前置研究：`reference/dsh-superagent-prototype/`（DeepSeek 开源原型，observe/accept 模式 + Mandate revalidate + 注意力经济学）
 - 唯一真相域：本文件（block-323-progressive-autonomy）

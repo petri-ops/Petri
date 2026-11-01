@@ -1,0 +1,110 @@
+{
+  "name": "block323-observe-ui-live",
+  "darkMode": false,
+  "startedAt": "2026-11-01T11:01:11.198Z",
+  "finishedAt": "2026-11-01T11:01:19.660Z",
+  "providerCalls": 4,
+  "assertions": [
+    {
+      "name": "S1_project_created",
+      "pass": true,
+      "detail": "projectId=p_mvxpz1mz_zu7w"
+    },
+    {
+      "name": "S1b_conversation_created",
+      "pass": true,
+      "detail": "conversationId=conv_5921d218-67b"
+    },
+    {
+      "name": "S1c_task_started",
+      "pass": true,
+      "detail": "taskId=ef11101c-cafa-40af-8925-43f57a89d196"
+    },
+    {
+      "name": "S1d_observe_task_completed",
+      "pass": true,
+      "detail": "事件=run_started,conversation,token_budget,iter,token_budget,tool_call,tool_output,tool_result,iter,token_budget,delta,done"
+    },
+    {
+      "name": "S1e_observation_seeded",
+      "pass": true,
+      "detail": "id=1 hits=1"
+    },
+    {
+      "name": "S2_isolated_stack",
+      "pass": true,
+      "detail": "backend :57918 / vite :57920 / cdp :57922 / data=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b323ui-live-Z3lTCD"
+    },
+    {
+      "name": "U1_spa_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/?test=1"
+    },
+    {
+      "name": "U2_decisions_section_reachable",
+      "pass": true,
+      "detail": "/settings?section=decisions 直达：工具栏 + 放权坡道区在场"
+    },
+    {
+      "name": "U3_rule_row_observe_label",
+      "pass": true,
+      "detail": "观察命令: npm删除"
+    },
+    {
+      "name": "U3b_four_action_options",
+      "pass": true,
+      "detail": "require-ack,deny,observe,allow"
+    },
+    {
+      "name": "U4_review_row_hits_sample",
+      "pass": true,
+      "detail": "规则「r-npm」 · 命中 1 次 · 最近 2026/11/1 19:01:11{\"command\":\"npm --version\"}升级为放行收权为需确认标为已复盘"
+    },
+    {
+      "name": "U4b_screenshot_light",
+      "pass": true,
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/block-323/ui655-review-panel.png"
+    },
+    {
+      "name": "U5_upgrade_to_allow",
+      "pass": true,
+      "detail": "REST raw={\"status\":\"ok\",\"rules\":[{\"id\":\"r-npm\",\"matcher\":{\"type\":\"command-token\",\"pattern\":\"npm\"},\"action\":\"allow\",\"scope\":\"global\"}]} | page=[\"r-npm:allow\"]"
+    },
+    {
+      "name": "U6b_allow_task_started",
+      "pass": true,
+      "detail": "taskId=a1aa297a-27bb-46b8-b57b-dd1e9189b108"
+    },
+    {
+      "name": "U6c_allow_task_completed",
+      "pass": true,
+      "detail": "任务2 收口（轮询终态）"
+    },
+    {
+      "name": "U6d_auto_allow_recorded",
+      "pass": true,
+      "detail": "hits=1"
+    },
+    {
+      "name": "U7_mark_reviewed_empties_list",
+      "pass": true,
+      "detail": "标复盘后待复盘列表清空"
+    },
+    {
+      "name": "U8_auto_allow_visible_in_panel",
+      "pass": true,
+      "detail": "规则「r-npm」· workspace_exec · 1 次 · 最近 2026/11/1 19:01:16"
+    },
+    {
+      "name": "U8b_policy_change_visible",
+      "pass": true,
+      "detail": "2026/11/1 19:01:15 · {\"changed\":[{\"id\":\"r-npm\",\"from\":\"observe\",\"to\":\"allow\"}],\"total\":1}"
+    },
+    {
+      "name": "U9_screenshot_dark",
+      "pass": true,
+      "detail": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/block-323/ui655-review-panel-dark.png"
+    }
+  ],
+  "allPass": true
+}
