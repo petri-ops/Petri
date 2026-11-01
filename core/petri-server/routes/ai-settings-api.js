@@ -229,6 +229,16 @@ function registerAiSettingsRoutes(app) {
     }
   });
 
+  // BLOCK-324 原因码 taxonomy — 词表出口：封闭 REASONS 注册表（code/category/template）。
+  app.get('/api/ai/reason-codes', (req, res) => {
+    try {
+      const registry = require('../helpers/reason-codes');
+      res.json({ status: 'ok', categories: registry.REASON_CATEGORIES, reasons: registry.listReasonCodes() });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
   // BLOCK-323 放权坡道 — 观察复盘面：未复盘观察分组 + 近期自动放行 + 规则变更留痕。
   // 诚实状态公理：unreviewedCount === unreviewed.length 的聚合来源同表同查询。
   app.get('/api/ai/policy-observations', async (req, res) => {

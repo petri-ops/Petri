@@ -6832,6 +6832,22 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block324-reason-taxonomy",
+      "note": "BLOCK-324 统一原因码 taxonomy：封闭注册表 + 渲染器 + 源码扫描机械锁；改动落点连契约测与治理邻域。",
+      "patterns": [
+        "core/petri-server/helpers/reason-codes.js",
+        "core/petri-server/agent-tools/agent-tool-policy.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/routes/ai-settings-api.js"
+      ],
+      "tests": [
+        "test/block324-reason-taxonomy.test.mjs",
+        "test/block323-progressive-autonomy.test.mjs",
+        "test/block203-agent-rules.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

@@ -234,6 +234,11 @@ function recordAutoAllow(ctx, autoAllowed, { name, args }) {
         ruleId: autoAllowed.ruleId || null,
         toolName: name,
         fingerprint: autoAllowed.fingerprint || '',
+        // BLOCK-324 原因码 taxonomy：审计事件携结构化原因码 + 渲染文本（加性，契约不变）
+        reasonCode: 'rule_auto_allow',
+        reasonText: require('../helpers/reason-codes').renderReason('rule_auto_allow', {
+          ruleId: autoAllowed.ruleId || '',
+        }),
         at: new Date().toISOString(),
       }
     );

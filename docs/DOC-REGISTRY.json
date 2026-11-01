@@ -8567,8 +8567,27 @@
         "G0"
       ],
       "notes": "RULING-04 特征级引用 v2 裁决材料（未启动实现）：mate 任意面/边贴合与 GD&T 的数据模型选型；实测证明特征抽取零新依赖、分面 STEP 不能承载特征引用；候选 A/B/C/D/E 对照 + 需裁决 D1–D5；推荐 B 主干、D 第一刀、拒绝内核求解。"
+    },
+    {
+      "id": "BLOCK-324-REASON-TAXONOMY",
+      "capability": "block-324-reason-taxonomy",
+      "path": "docs/block-324-reason-taxonomy-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-324-reason-taxonomy",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-01",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "governance",
+        "audit",
+        "reason-codes",
+        "G0"
+      ],
+      "notes": "统一结构化原因码 taxonomy（用户裁决 2026-11-01「开整」）：封闭 REASONS 注册表 + 渲染器 + 源码扫描机械锁；第一批归并治理/审批族；加性接线零行为变更。"
     }
   ],
   "lastUpdated": "2026-11-01",
-  "documentCount": 435
+  "documentCount": 436
 }
