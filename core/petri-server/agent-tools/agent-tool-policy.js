@@ -274,29 +274,41 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   //（拦截器 fail-soft 缓存读），policy 保持纯函数。
   // BLOCK-180 P1 — 指纹放行层：ctx.approvedFingerprints 含调用指纹时放行该调用
   // 一次（「放行一次」的请求级语义；维度级 always 仍走既有 guardKey Set）。
+  // BLOCK-323 放权坡道 — observe 命中（不拦截；随最终 allow 透出，拦截器落账）
+  // 与 allow 命中（坡道终点：用户显式放行该目标；层 3 动态防护/层 6 循环防护照走）。
+  let observation = null;
+  let autoAllowed = null;
   if (operation.mutating) {
     const match = evaluateUserRules(name, args, ctx);
     if (match) {
       const fingerprint = callFingerprint(name, args);
-      const acked = isGuardAcked(ctx, match.guardKey);
-      const fingerprintApproved = isFingerprintApproved(ctx, fingerprint);
-      if (match.rule.action === 'deny' || (!acked && !fingerprintApproved)) {
-        return deny(
-          match.rule.action === 'deny' ? 'user_rule_denied' : 'user_rule_require_ack',
-          'user_rule_triggered',
-          `用户规则拦截：规则「${match.rule.id}」（${match.rule.action === 'deny' ? '动作=拒绝' : '动作=需确认'}）。` +
-          `（guardKey=${match.guardKey}）`,
-          {
-            ruleId: match.rule.id,
-            guardKey: match.guardKey,
-            ...(match.rule.action === 'deny' ? {} : {
-              approvalVariant: 'warning',
-              explanation: `你的用户规则「${match.rule.id}」要求此调用先确认；批准仅放行本次调用（本任务范围可在卡内选择）。`,
-            }),
-          }
-        );
+      if (match.rule.action === 'observe') {
+        // 观察档：只记录「本可自动执行」的证据，不改变判定（复盘后人工升级 allow）。
+        observation = { kind: 'rule', ruleId: match.rule.id, guardKey: match.guardKey, fingerprint };
+      } else if (match.rule.action === 'allow') {
+        // 放行档：复用既有 allow 语义；更具体的目标级裁决优先于泛化工具档（层 4/5）。
+        autoAllowed = { ruleId: match.rule.id, guardKey: match.guardKey, fingerprint };
+      } else {
+        const acked = isGuardAcked(ctx, match.guardKey);
+        const fingerprintApproved = isFingerprintApproved(ctx, fingerprint);
+        if (match.rule.action === 'deny' || (!acked && !fingerprintApproved)) {
+          return deny(
+            match.rule.action === 'deny' ? 'user_rule_denied' : 'user_rule_require_ack',
+            'user_rule_triggered',
+            `用户规则拦截：规则「${match.rule.id}」（${match.rule.action === 'deny' ? '动作=拒绝' : '动作=需确认'}）。` +
+            `（guardKey=${match.guardKey}）`,
+            {
+              ruleId: match.rule.id,
+              guardKey: match.guardKey,
+              ...(match.rule.action === 'deny' ? {} : {
+                approvalVariant: 'warning',
+                explanation: `你的用户规则「${match.rule.id}」要求此调用先确认；批准仅放行本次调用（本任务范围可在卡内选择）。`,
+              }),
+            }
+          );
+        }
+        if (!acked && fingerprintApproved) fingerprintConsumable = fingerprint;
       }
-      if (!acked && fingerprintApproved) fingerprintConsumable = fingerprint;
     }
   }
 
@@ -339,6 +351,7 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
     && ctx.mcpApproval
     && ctx.mcpApproval.destructive === true
     && ctx.mcpApproval.serverId
+    && !autoAllowed
   ) {
     const serverId = String(ctx.mcpApproval.serverId);
     const guardKey = `mcp:${serverId}`;
@@ -364,7 +377,12 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
 
   // BLOCK-244 Q1-REM — 通用工具审批策略（A1/A8）：逐工具 allow/ask/deny。
   // allow=默认零漂移；ask 复用现有 guardKey/指纹通道（tool:<name>）；deny 直接拦截。
-  if (ctx.toolApprovalMode === 'deny') {
+  // BLOCK-323 — observe 档：仅 mutating 调用记录「本可自动执行」（读工具默认已放行，
+  // 观察无意义）；规则层已产出观察/放行时不重复记录。规则 allow 优先于泛化工具档。
+  if (ctx.toolApprovalMode === 'observe' && operation.mutating && !observation && !autoAllowed) {
+    observation = { kind: 'tool', ruleId: null, guardKey: `tool:${name}`, fingerprint: callFingerprint(name, args) };
+  }
+  if (ctx.toolApprovalMode === 'deny' && !autoAllowed) {
     return deny(
       'tool_denied_by_policy',
       'tool_denied_by_policy',
@@ -375,7 +393,7 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
       }
     );
   }
-  if (ctx.toolApprovalMode === 'ask') {
+  if (ctx.toolApprovalMode === 'ask' && !autoAllowed) {
     const guardKey = `tool:${name}`;
     if (!isGuardAcked(ctx, guardKey)) {
       const fingerprint = callFingerprint(name, args);
@@ -425,6 +443,8 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
     return allow(operation.delegatedApproval ? 'delegated_approval' : 'policy_allowed', {
       delegatedApproval: operation.delegatedApproval,
       ...(fingerprintConsumable ? { fingerprintConsumable } : {}),
+      ...(observation ? { observation } : {}),
+      ...(autoAllowed ? { autoAllowed } : {}),
     });
   }
   if (preflight.ok === false) return preflightDenial(preflight);
@@ -472,6 +492,8 @@ function decideAgentToolCall({ name, args = {}, ctx = {}, contract, preflight = 
   return allow(operation.delegatedApproval ? 'delegated_approval' : 'policy_allowed', {
     delegatedApproval: operation.delegatedApproval,
     ...(fingerprintConsumable ? { fingerprintConsumable } : {}),
+    ...(observation ? { observation } : {}),
+    ...(autoAllowed ? { autoAllowed } : {}),
   });
 }
 

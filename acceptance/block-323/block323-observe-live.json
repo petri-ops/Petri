@@ -1,0 +1,74 @@
+{
+  "probe": "block323-observe-live",
+  "at": "2026-11-01T08:19:14.613Z",
+  "platform": "darwin-arm64",
+  "pass": 13,
+  "total": 13,
+  "results": [
+    {
+      "id": "env.isolated-backend",
+      "ok": true,
+      "detail": "隔离后端 :60429 健康"
+    },
+    {
+      "id": "A.task-started",
+      "ok": true,
+      "detail": "taskId=784770f4-fc54-4bea-94f6-9fb54cd72320"
+    },
+    {
+      "id": "A.observe-not-intercepted",
+      "ok": true,
+      "detail": "observe 命中未拦截（无 require_ack 信封）"
+    },
+    {
+      "id": "A.task-completed",
+      "ok": true,
+      "detail": "任务正常收口"
+    },
+    {
+      "id": "A.observation-recorded",
+      "ok": true,
+      "detail": "hits=1 sample={\"command\":\"npm --version\"}"
+    },
+    {
+      "id": "B.rule-upgraded",
+      "ok": true,
+      "detail": "PUT /api/ai/agent-rules → 200"
+    },
+    {
+      "id": "B.policy-change-recorded",
+      "ok": true,
+      "detail": "摘要={\"changed\":[{\"id\":\"r-npm\",\"from\":\"observe\",\"to\":\"allow\"}],\"total\":1}"
+    },
+    {
+      "id": "B.auto-allowed-executes",
+      "ok": true,
+      "detail": "allow 档自动执行不询问"
+    },
+    {
+      "id": "B.task-event-auto-allowed",
+      "ok": true,
+      "detail": "ruleId=r-npm"
+    },
+    {
+      "id": "B.auto-allow-audit-row",
+      "ok": true,
+      "detail": "hits=1"
+    },
+    {
+      "id": "C.dynamic-guard-still-denies",
+      "ok": true,
+      "detail": "requestId=apr_128373c642a15c3115"
+    },
+    {
+      "id": "C.no-auto-allow-for-dangerous",
+      "ok": true,
+      "detail": "破坏命令无自动放行审计行（地板未被穿透）"
+    },
+    {
+      "id": "cleanup",
+      "ok": true,
+      "detail": "隔离后端+mock+临时目录已清场"
+    }
+  ]
+}

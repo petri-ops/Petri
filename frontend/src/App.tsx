@@ -18,6 +18,7 @@ import { isProjectionMobile } from '@/components/desktop/titlebar/shared';
 import { ProjectionLinkBanner } from '@/components/desktop/_ProjectionLinkBanner';
 import { CrashNoticeBanner } from '@/components/desktop/CrashNoticeBanner';
 import { ScheduleReminderBridge } from '@/components/copilot/ScheduleReminderBridge';
+import { PolicyReviewBridge } from '@/components/copilot/PolicyReviewBridge';
 import { BackendStatusProvider } from '@/components/backend/BackendStatusProvider';
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
@@ -283,6 +284,8 @@ export default function App(): React.ReactElement {
         <CrashNoticeBanner />
         {/* BLOCK-256 Q7 — 计划提醒 → 通知中心（全局轮询；只投递，不依赖系统通知权限） */}
         <ScheduleReminderBridge />
+        {/* BLOCK-323 放权坡道 — 观察待复盘 → 通知中心（quiet by default：≥3 条按最新 id 去重提醒一次） */}
+        <PolicyReviewBridge />
         {/* BLOCK-242 — petri-install:// 深链安装预览弹层（全局） */}
         <InstallDeepLinkDialog />
         <AppRailProvider>

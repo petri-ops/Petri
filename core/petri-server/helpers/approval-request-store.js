@@ -444,6 +444,7 @@ module.exports = {
   DEFAULT_TTL_MS,
   MAX_PREVIEW_CHARS,
   callFingerprint,
+  boundedJsonPreview,
   createApprovalRequests,
   getApprovalRequests,
   approveTaskFingerprint,

@@ -184,6 +184,62 @@ function attachApprovalRequest(ctx, { name, args, decision, entry }) {
   }
 }
 
+// BLOCK-323 放权坡道 — 观察/自动放行留痕（best-effort：证据失败绝不阻断执行）。
+// 观察证据落 policy_observations（UPSERT 合并：同指纹一行 hits 累计）；
+// auto-allow 另尽力追加 task_event permission.auto_allowed（ctx.taskId 在场时 SSE 可见）。
+function recordPolicyObservation(ctx, observation, { name, args }) {
+  if (!observation) return;
+  try {
+    const { boundedJsonPreview } = require('../helpers/approval-request-store');
+    const preview = boundedJsonPreview(args);
+    void require('../helpers/policy-observation-store')
+      .recordObservation({
+        kind: observation.kind === 'rule' ? 'rule-observe' : 'tool-observe',
+        ruleId: observation.ruleId || '',
+        toolName: name,
+        fingerprint: observation.fingerprint || '',
+        guardKey: observation.guardKey || '',
+        samplePreview: preview ? preview.text : null,
+      });
+  } catch { /* 观察失败不阻断执行 */ }
+}
+
+function recordAutoAllow(ctx, autoAllowed, { name, args }) {
+  if (!autoAllowed) return;
+  try {
+    const { boundedJsonPreview } = require('../helpers/approval-request-store');
+    const preview = boundedJsonPreview(args);
+    void require('../helpers/policy-observation-store')
+      .recordObservation({
+        kind: 'rule-auto-allow',
+        ruleId: autoAllowed.ruleId || '',
+        toolName: name,
+        fingerprint: autoAllowed.fingerprint || '',
+        guardKey: autoAllowed.guardKey || '',
+        samplePreview: preview ? preview.text : null,
+      });
+  } catch { /* 审计失败不阻断执行 */ }
+  try {
+    const taskId = (ctx && ctx.taskId) || null;
+    if (!taskId) return;
+    const agentTaskStore = require('../agent-task-store');
+    const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+    const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+    agentTaskStore.appendAgentTaskEvent(
+      taskId,
+      seq,
+      'permission.auto_allowed',
+      {
+        event: 'permission.auto_allowed',
+        ruleId: autoAllowed.ruleId || null,
+        toolName: name,
+        fingerprint: autoAllowed.fingerprint || '',
+        at: new Date().toISOString(),
+      }
+    );
+  } catch { /* SSE 可见性失败不阻断执行 */ }
+}
+
 /**
  * BLOCK-243 — 替换执行时只放行本次审批的 guardKey（代理 Set，不污染任务级 ack）；
  * 同时清空指纹集，确保生效参数重新走策略而不是被旧指纹放行。
@@ -298,6 +354,10 @@ function createAgentToolInterceptor(options = {}) {
         require('../helpers/approval-request-store').consumeFingerprint(ctx, decision.fingerprintConsumable);
       } catch { /* 消耗失败不阻断执行 */ }
     }
+    // BLOCK-323 放权坡道 — 观察/自动放行留痕：只在最终 allow 决策上落账
+    //（被拦调用"本不会执行"，无坡道证据意义）。
+    if (decision.observation) recordPolicyObservation(ctx, decision.observation, { name, args });
+    if (decision.autoAllowed) recordAutoAllow(ctx, decision.autoAllowed, { name, args });
     if (override) {
       // 生效参数已通过 schema/preflight/policy；一次性替换在执行前消费。
       consumeInputOverride(ctx, originalFingerprint);

@@ -33,6 +33,7 @@ const KIND_LABELS: Record<AppNoticeKind, string> = {
   turn_failed: '失败',
   approval_required: '待确认',
   schedule_reminder: '提醒',
+  review_available: '待复盘',
 };
 
 const PREF_ITEMS: Array<{ kind: AppNoticeKind; label: string }> = [
@@ -40,6 +41,7 @@ const PREF_ITEMS: Array<{ kind: AppNoticeKind; label: string }> = [
   { kind: 'turn_failed', label: '失败' },
   { kind: 'approval_required', label: '待确认' },
   { kind: 'schedule_reminder', label: '提醒' },
+  { kind: 'review_available', label: '复盘提醒' },
 ];
 
 /** UI-625 — 相对时间：刚刚 / N 分钟前 / 今天 HH:mm / 昨天 HH:mm / M/D HH:mm。 */

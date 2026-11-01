@@ -6801,6 +6801,31 @@
         "test/block322-p3-constraints.test.mjs",
         "test/block322-p4-bom.test.mjs"
       ]
+    },
+    {
+      "id": "block323-progressive-autonomy",
+      "note": "BLOCK-323 放权坡道：observe/allow 档 + policy_observations 存储 + 复盘面 + 通知桥；契约测 + 审批/规则族回归。",
+      "patterns": [
+        "core/petri-server/helpers/policy-observation-store.js",
+        "core/petri-server/agent-tools/agent-tool-policy.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/helpers/agent-user-rules.js",
+        "core/petri-server/helpers/tool-approval-policy.js",
+        "core/petri-server/routes/ai-settings-api.js",
+        "core/packages/shared-config/config-schema.js",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx",
+        "frontend/src/components/copilot/PolicyReviewBridge.tsx",
+        "frontend/src/lib/notification-center.ts"
+      ],
+      "tests": [
+        "test/block323-progressive-autonomy.test.mjs",
+        "test/block160-user-rules.test.mjs",
+        "test/block244-tool-approval-policy.test.mjs",
+        "test/block180-approval-resource.test.mjs",
+        "test/block243-approval-contract.test.mjs",
+        "test/agent-tool-policy.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

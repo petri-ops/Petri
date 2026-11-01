@@ -66,7 +66,8 @@ test('BLOCK-203 P4 — sanitizeItem：重建嵌套形状，未知字段/域外�
   assert.deepEqual(item, { id: 'r1', matcher: { type: 'path-glob', pattern: 'secrets/**' }, action: 'deny', scope: 'global' });
   assert.deepEqual(diagnostics.map((d) => d.path).sort(), ['matcher.depth', 'unknownTop']);
 
-  const bad = schema.sanitizeItem('agent-rules', { id: 'r2', matcher: { type: 'regex', pattern: 'x' }, action: 'allow' });
+  // BLOCK-323 起 observe/allow 为合法动作；非法夹具改用域外值 'auto'
+  const bad = schema.sanitizeItem('agent-rules', { id: 'r2', matcher: { type: 'regex', pattern: 'x' }, action: 'auto' });
   assert.ok(bad.diagnostics.some((d) => d.path === 'matcher.type' && d.code === 'not-allowed'));
   assert.ok(bad.diagnostics.some((d) => d.path === 'action' && d.code === 'not-allowed'));
 });
@@ -82,7 +83,7 @@ test('BLOCK-203 P4 — 写侧：未知字段整单拒绝（新码 rule_field_unk
   assert.equal(rules.saveUserRules([valid({ id: '' })]).error, 'rule_id_required');
   assert.equal(rules.saveUserRules([valid({ matcher: { type: 'regex', pattern: 'x' } })]).error, 'rule_matcher_type_invalid');
   assert.equal(rules.saveUserRules([valid({ matcher: { type: 'path-glob', pattern: '   ' } })]).error, 'rule_pattern_required');
-  assert.equal(rules.saveUserRules([valid({ action: 'allow' })]).error, 'rule_action_invalid');
+  assert.equal(rules.saveUserRules([valid({ action: 'auto' })]).error, 'rule_action_invalid');
   // 未知字段被拒 = 文件一个字节都不写
   assert.deepEqual(rules.loadUserRules(), []);
 }));

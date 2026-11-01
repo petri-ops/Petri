@@ -525,7 +525,9 @@ const CONFIG_KEYS = Object.freeze([
   },
   {
     key: 'agentRules.<item>.action', family: 'agent-rules', path: '<item>.action',
-    type: 'string', domain: { oneOf: ['deny', 'require-ack'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
+    // BLOCK-323 放权坡道：observe=命中只记录"本可自动执行"不拦截；allow=命中自动放行
+    // （复盘升级的坡道终点，复用既有 allow 语义；动态防护/循环防护不豁免）。
+    type: 'string', domain: { oneOf: ['deny', 'require-ack', 'observe', 'allow'] }, envKeys: [], aliases: [], mutable: true, ui: 'settings',
   },
   {
     key: 'agentRules.<item>.scope', family: 'agent-rules', path: '<item>.scope',

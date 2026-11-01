@@ -228,6 +228,38 @@ function registerAiSettingsRoutes(app) {
       res.status(500).json({ status: 'error', error: error.message });
     }
   });
+
+  // BLOCK-323 放权坡道 — 观察复盘面：未复盘观察分组 + 近期自动放行 + 规则变更留痕。
+  // 诚实状态公理：unreviewedCount === unreviewed.length 的聚合来源同表同查询。
+  app.get('/api/ai/policy-observations', async (req, res) => {
+    try {
+      const store = require('../helpers/policy-observation-store');
+      const [unreviewed, autoAllow, policyChanges, unreviewedCount] = await Promise.all([
+        store.listUnreviewed(),
+        store.listAutoAllow(20),
+        store.listPolicyChanges(20),
+        store.unreviewedCount(),
+      ]);
+      res.json({ status: 'ok', unreviewed, autoAllow, policyChanges, unreviewedCount });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.post('/api/ai/policy-observations/review', express.json(), async (req, res) => {
+    try {
+      const store = require('../helpers/policy-observation-store');
+      const body = req.body || {};
+      const result = await store.markReviewed({ ids: body.ids, all: body.all === true });
+      if (!result.ok) {
+        res.status(400).json({ status: 'error', error: 'review_input_invalid' });
+        return;
+      }
+      res.json({ status: 'ok', updated: result.updated || 0 });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
 }
 
 module.exports = { registerAiSettingsRoutes, computeVisionConfigured };

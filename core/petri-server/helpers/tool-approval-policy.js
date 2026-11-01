@@ -9,7 +9,9 @@
  * 语义：
  * - 未配置 = allow（保持历史行为，零默认漂移）；
  * - ask  = 每次调用需经既有审批资源/guardKey 通道确认（guardKey=tool:<name>）；
- * - deny = 直接拦截（用户显式的工具拒绝）。
+ * - deny = 直接拦截（用户显式的工具拒绝）；
+ * - observe = BLOCK-323 放权坡道：命中只记录"本可自动执行"（policy_observations）
+ *   不拦截，复盘后可升级 allow（仅 mutating 调用记录；读工具默认已放行）。
  * - 读侧 fail-soft（缺失/坏 JSON = 空策略）；写侧 fail-closed（非法模式/名拒绝）。
  * - MCP 服务级 trust / 逐工具 enabled 仍在各自 store；本表是通用工具层。
  */
@@ -20,7 +22,7 @@ const dataPaths = require('../../shared-backend/data-paths.js');
 
 const FILENAME = 'tool-approval-policy.json';
 const VERSION = 1;
-const MODE_VALUES = new Set(['allow', 'ask', 'deny']);
+const MODE_VALUES = new Set(['allow', 'ask', 'deny', 'observe']);
 const TOOL_NAME_RE = /^[A-Za-z0-9_.:-]{1,128}$/;
 const MAX_TOOLS = 200;
 

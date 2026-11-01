@@ -5,7 +5,7 @@
  * 最多 50 条，localStorage 持久化，未读计数供标题栏徽章使用。
  */
 
-export type AppNoticeKind = 'turn_completed' | 'turn_failed' | 'approval_required' | 'schedule_reminder';
+export type AppNoticeKind = 'turn_completed' | 'turn_failed' | 'approval_required' | 'schedule_reminder' | 'review_available';
 
 export interface AppNotice {
   id: string;
@@ -23,7 +23,7 @@ export interface AppNotice {
 const STORAGE_KEY = 'petri:notification-center:v1';
 const MAX_NOTICES = 50;
 
-const KINDS: ReadonlySet<string> = new Set(['turn_completed', 'turn_failed', 'approval_required', 'schedule_reminder']);
+const KINDS: ReadonlySet<string> = new Set(['turn_completed', 'turn_failed', 'approval_required', 'schedule_reminder', 'review_available']);
 
 export interface AppNoticePrefs {
   kinds: Record<AppNoticeKind, boolean>;
@@ -37,6 +37,7 @@ const DEFAULT_NOTICE_PREFS: AppNoticePrefs = Object.freeze({
     turn_failed: true,
     approval_required: true,
     schedule_reminder: true,
+    review_available: true,
   }),
   sound: false,
 });

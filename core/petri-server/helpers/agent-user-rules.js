@@ -5,11 +5,13 @@
  *
  * 规则文件：$PETRI_LOCAL_DATA_DIR/agent-rules.json
  *   { version: 1, rules: [{ id, matcher: { type: 'path-glob'|'command-token', pattern },
- *                           action: 'deny'|'require-ack', scope: 'global', note?, createdAt? }] }
+ *                           action: 'deny'|'require-ack'|'observe'|'allow', scope: 'global', note?, createdAt? }] }
  *
  * 语义（预裁决缺省）：first-match 先到先判（与领域确认 hook 同语义）；
  * deny = 直接拦截；require-ack = 拦截并要求确认（ctx.dynamicGuardAcks 含
- * `rule:<id>` 键时放行——与 ORC-2 动态防护共用统一确认通道）。
+ * `rule:<id>` 键时放行——与 ORC-2 动态防护共用统一确认通道）；
+ * observe = BLOCK-323 放权坡道：命中只记录「本可自动执行」不拦截；
+ * allow = 命中自动放行（复盘升级的坡道终点；动态防护/循环防护不豁免）。
  * 读缓存 fail-soft：文件缺失/损坏 = 空规则（零规则零行为，绝不因规则层故障阻断调用）。
  */
 
@@ -97,9 +99,25 @@ function loadUserRules() {
   return rules;
 }
 
+/** BLOCK-323 — 规则动作差异（policy-change 留痕用）：id → { from, to }，只列有变化的。 */
+function diffRuleActions(before, after) {
+  const beforeById = new Map(before.map((rule) => [String(rule.id), String(rule.action)]));
+  const afterById = new Map(after.map((rule) => [String(rule.id), String(rule.action)]));
+  const changes = [];
+  for (const [id, to] of afterById) {
+    const from = beforeById.has(id) ? beforeById.get(id) : null;
+    if (from !== to) changes.push({ id, from, to });
+  }
+  for (const [id, from] of beforeById) {
+    if (!afterById.has(id)) changes.push({ id, from, to: null });
+  }
+  return changes;
+}
+
 /** 保存规则（整单替换；CRUD 路由的持久化底座）。 */
 function saveUserRules(rules) {
   if (!Array.isArray(rules)) return { ok: false, error: 'rules_must_be_array' };
+  const previous = loadUserRules();
   const normalized = [];
   for (const raw of rules) {
     const { item, diagnostics } = normalizeRule(raw);
@@ -114,6 +132,15 @@ function saveUserRules(rules) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify({ version: RULES_VERSION, rules: normalized }, null, 2));
     _cache = { rules: normalized, loadedAt: Date.now(), key: `${file}:${fs.statSync(file).mtimeMs}` };
+    // BLOCK-323 — 授权面变更留痕（policy-change 行，best-effort：留痕失败不影响保存）。
+    try {
+      const changes = diffRuleActions(previous, normalized);
+      if (changes.length > 0) {
+        void require('./policy-observation-store').recordPolicyChange(
+          JSON.stringify({ changed: changes, total: normalized.length })
+        );
+      }
+    } catch { /* 留痕失败不影响保存 */ }
     return { ok: true, count: normalized.length };
   } catch (e) {
     return { ok: false, error: e.message, diagnostics: [] };
@@ -205,5 +232,6 @@ module.exports = {
   normalizeRule,
   saveUserRules,
   evaluateUserRules,
+  diffRuleActions,
   rulesFile,
 };

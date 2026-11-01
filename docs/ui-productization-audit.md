@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-655: 放权坡道复盘区——Agent 规则面板 observe/allow 档 + 待复盘/自动放行/变更留痕（BLOCK-323；2026-11-01 **in_progress（后端实机 13/13 全绿；UI 离屏实机腿未跑，不冒 verified）**）
+
+- **变化面**：AgentRulesPanel 规则动作从 deny/require-ack 二档扩为四档（拒绝/需确认/观察/放行——observe=命中只记录「本可自动执行」不拦截，allow=命中自动放行）；新增「放权坡道 · 待复盘」区=未复盘观察行（规则/工具、命中次数、最近时间、脱敏样本、一键「升级为放行」「收权为需确认」「标为已复盘」）+ 近期自动放行审计 + 授权面变更留痕；通知中心新 kind `review_available`（PolicyReviewBridge 60s 轮询，≥3 条未复盘按最新观察 id 去重提醒一次，quiet by default）。
+- **为什么这样设计**：放权坡道=ZCode/Codex ask/deny 二态没有的「可审计放权升级流」；升级永远人工（复盘就是改配置直接落盘）；诚实状态公理=unreviewedCount 与待复盘列表同表同查询。
+- **验证（代码）**：契约 `test/block323-progressive-autonomy.test.mjs` 8/8（observe 不拦截透出/安全地板/UPSERT 合并/拦截器胶水）；前端 AgentRulesPanel 4/4 + PolicyReviewBridge 2/2；邻域回归 block160/180/203/243/244 全绿；tsc 0。
+- **实机证据（后端全链）**：`acceptance/block-323/block323-observe-live.json`（**13/13**，隔离后端 + mock provider）：A observe 命中未拦截且 rule-observe 行落账（hits/脱敏样本）→ B 真实 REST PUT 升级 allow + policy-change 留痕 → 重跑自动执行 + `permission.auto_allowed` task_event + rule-auto-allow 审计行 → C vssadmin allow 撞动态防护仍拦（requestId 信封）且无 auto-allow 审计行。**UI 离屏实机腿未跑**（重开条件：9223 离屏走查复盘区点按流）。
+
 ## UI-654: 3D 预览免手动导入 + 预览页一键转 3D（BLOCK-322；2026-11-01 **verified（dev Electron 边界内；三条入口实机 15/15）**）
 
 - **变化面**：①右栏「3D 模型」不再每次空白等导入——无外部请求时自动恢复上次打开（localStorage 按项目），首次自动打开项目 `model3d/` 下最新 `.scene3d.json`；修掉 StrictMode 双挂载把恢复结果丢弃的守卫错误。②工作区文件预览：`.scene3d.json` 顶部「在 3D 模型打开」，网格（.glb/.gltf/.stl/.obj）顶部「在 3D 模型预览」。③结果面 3D 预览新增「在 3D 工作台打开」（从 `model3d/runs/<run>/` 产物反推同 run 的 `scene.json`）。事件 `model3dSceneOpen` 泛化为 `model3dOpen`（scenePath/meshPath 二选一）。

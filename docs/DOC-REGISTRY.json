@@ -8503,6 +8503,26 @@
       "notes": "3D 全方位能力纲（用户裁决「全方位、不设限制、满足所有应用场景」）：P1 外部资产一等公民 → P2 场景表现力/叙事 → P3 几何与装配 → P4 CAD 交换与工程 → P5 AI 生成资产 → P6 生产交付与协作。"
     },
     {
+      "id": "BLOCK-323-PROGRESSIVE-AUTONOMY",
+      "capability": "block-323-progressive-autonomy",
+      "path": "docs/block-323-progressive-autonomy-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-323-progressive-autonomy",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-01",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "governance",
+        "approval",
+        "observe",
+        "autonomy",
+        "G0"
+      ],
+      "notes": "放权坡道（用户裁决 2026-11-01「行 规划好 开整吧」）：规则/工具层加 observe 中间档——命中只记录不执行，本地复盘后人工升级 allow；观察证据落 policy_observations UPSERT 合并表；判定序安全地板不变。"
+    },
+    {
       "id": "BLOCK-322-RULING-01-CAD-KERNEL",
       "capability": "block-322-ruling-01-cad-kernel",
       "path": "docs/block-322-ruling-01-cad-kernel.md",
@@ -8549,6 +8569,6 @@
       "notes": "RULING-04 特征级引用 v2 裁决材料（未启动实现）：mate 任意面/边贴合与 GD&T 的数据模型选型；实测证明特征抽取零新依赖、分面 STEP 不能承载特征引用；候选 A/B/C/D/E 对照 + 需裁决 D1–D5；推荐 B 主干、D 第一刀、拒绝内核求解。"
     }
   ],
-  "lastUpdated": "2026-10-31",
-  "documentCount": 434
+  "lastUpdated": "2026-11-01",
+  "documentCount": 435
 }
