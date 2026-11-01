@@ -4,7 +4,7 @@ goal: 把现有「参数化 SceneSpec + Blender 导出」工程链扩展为覆�
 acceptance:
   - 阶段级验收 = 每阶段定向测试 + 专项门禁 + 实机 flow + acceptance/block-322-p<n>/ 证据；收口走 closeout 十三门。
   - 红线 = 零第二 revision 真值 / 零第二执行器（Blender 唯一）/ 外部资产 sha256 锚定 + 工作区路径 + 大小上限 / 能力缺失如实报。
-status: active
+status: completed
 ---
 
 # BLOCK-322 · 3D 全方位能力（不设能力上限）

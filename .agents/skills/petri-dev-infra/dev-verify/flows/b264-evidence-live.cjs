@@ -76,6 +76,10 @@ async function rest(method, p, body) {
 }
 
 module.exports = {
+  // BLOCK-326 — 补 id/description/evidenceDir 导出（README 契约；缺 id 曾致 verify --list 必红）
+  id: 'b264-evidence-live',
+  description: 'BLOCK-265 补腿批：UI-578 引导清单 / UI-579 导入面板（首启三步+预览确认回滚）',
+  evidenceDir: path.join(process.cwd(), 'acceptance', 'ui-578-579-onboarding-import'),
   async run({ assert, projectId, conversationId }) {
     // ---------- UI-578 首启引导清单 ----------
     // 引导清单只挂「空首页」分支（无项目时）——seed 库有项目，主链先端点直证三步判定；

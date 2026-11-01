@@ -12,6 +12,10 @@ const APP_ORIGIN = 'http://localhost:3000';
 function sleep(ms) { return new Promise((resolve) => setTimeout(resolve, ms)); }
 
 module.exports = {
+  // BLOCK-326 — 补 id/description/evidenceDir 导出（README 契约；缺 id 曾致 verify --list 必红）
+  id: 'b266-composer-shrink',
+  description: 'BLOCK-266 composer 视觉收缩：ModelChip 图标化 + RunStatsBar 图标态（亮/暗）',
+  evidenceDir: path.join(process.cwd(), 'acceptance', 'ui-582-583-composer-shrink'),
   async run({ assert }) {
     const client = await lib.connectTarget(
       (await lib.pollTargets({ port: lib.TEST_INSTANCE_PORT, timeoutMs: 20000 }))

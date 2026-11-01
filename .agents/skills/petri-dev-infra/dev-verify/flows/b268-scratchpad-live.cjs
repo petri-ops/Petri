@@ -59,6 +59,10 @@ async function pagePoll(_client, expr, { timeoutMs = 20000, label } = {}) {
 }
 
 module.exports = {
+  // BLOCK-326 — 补 id/description/evidenceDir 导出（README 契约；缺 id 曾致 verify --list 必红）
+  id: 'b268-scratchpad-live',
+  description: 'BLOCK-268 UI-585 速记板开态：开→跨路由重挂保留→Esc 关→刷新归零',
+  evidenceDir: path.join(process.cwd(), 'acceptance', 'ui-585-scratchpad'),
   async run({ assert }) {
     // 进首页（composer 所在）
     await navigate(`${APP_ORIGIN}/`);

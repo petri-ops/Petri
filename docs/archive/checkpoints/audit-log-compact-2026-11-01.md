@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-01T11:31:52.474Z -->
 | ✅ RW-02-UI-EVIDENCE-PACK-WRITE-BRIDGE completed（P4-CLOSED；UI-639 in_progress） | 2026-10-30 | B 线写桥全链（契约 5/5+宿主 6/6+实机 9/9）+ A 线 62 条四档全处置（a 档 9 verified+638 发现腿+d28+b18+c6 清单）；301/385 spawn 链实证降 c；实机抓真五连 | UI-639 in_progress（iframe 端到端随 UI-532）；plan=docs/rw-02-ui-evidence-pack-write-bridge-plan.md |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-01T12:03:13.407Z -->
+| ✅ RW-03-C32-DECISION-ENV-GOV 判销（轻量对账批；核实不硬造） | 2026-10-30 | C-32 已由 BLOCK-211 清偿在案（实现+回归锁 4/4）+ 实证复验双判据过；立项前提过时 | RW-04 顺位前移 |

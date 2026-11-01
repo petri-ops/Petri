@@ -1,6 +1,6 @@
 # 阶段 3–4 连续推进执行序（Runlist · 一次性推完计划）
 
-- 状态：`active`（2026-10-17 起草；用户「很棒 能否做个plan 一次性 推完呢」=要求把剩余全部工作变成可连续执行的序，中途不再逐项征询）
+- 状态：`completed`（2026-11-01 BLOCK-326 机械核对翻转：13 包 BLOCK-199 收尾~211 全部收口，各行 AUDIT-LOG 在案；本表明文「不是第二进度真相」，排序/验收语义由既有权威文档承载。原起草注记：用户「很棒 能否做个plan 一次性 推完呢」=要求把剩余全部工作变成可连续执行的序，中途不再逐项征询）
 - 性质：**执行展开表**，不是第二进度真相。排序权威仍是 [`Petri-Desktop-Evaluation-Report-2026-10-15.md`](./Petri-Desktop-Evaluation-Report-2026-10-15.md) §5.1 五阶段队列；当前状态权威仍是 [`next-steps-roadmap.md`](./next-steps-roadmap.md) + [`project-workspace-handoff.md`](./project-workspace-handoff.md)；逐项队列权威是 [`pending-work-backlog.md`](./pending-work-backlog.md)。本表只补它们没有的东西：**包与包的先后、每包的验收门、以及开工前就定好的决策规则**。
 - 体量诚实：下列 13 包**不可能在一次上下文里全部收口**（每包要过 closeout 十三门，UI 台账门单轮约 130s）。"一次性推完"在本表里的可执行含义=**不需你再发令**：按序连打，撞到边界就把断点写进 handoff，下一轮从断点继续，不回头问"下一个做什么"。
 

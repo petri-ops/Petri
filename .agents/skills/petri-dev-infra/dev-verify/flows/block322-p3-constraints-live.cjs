@@ -158,11 +158,11 @@ async function run(ctx) {
 
     const badKind = await rest('POST', '/model3d/scene/resolve', {
       scene: sceneOf([box('base', 120, 40, 80), box('port', 60, 40, 40)], [
-        { kind: 'mate', a: 'base', b: 'port', axis: 'x' },
+        { kind: 'bond', a: 'base', b: 'port', axis: 'x' }, // BLOCK-326：mate 已随 P3-03 7e5503b8 入白名单，改用从未在册的 bond
       ]),
     });
     assert('C6_unsupported_kind_rejected', badKind.status === 400 && badKind.data?.error === 'scene_invalid'
-      && String((badKind.data?.errors || []).join('；')).includes('kind 只支持 align/distance/angle'),
+      && String((badKind.data?.errors || []).join('；')).includes('kind 只支持 align/distance/angle/mate'),
       JSON.stringify(badKind.data ?? {}).slice(0, 300));
 
     const outOfRange = await rest('POST', '/model3d/scene/resolve', {

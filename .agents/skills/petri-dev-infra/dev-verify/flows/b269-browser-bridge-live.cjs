@@ -115,6 +115,10 @@ async function collectBrowserActions(windowMs) {
 }
 
 module.exports = {
+  // BLOCK-326 — 补 id/description/evidenceDir 导出（README 契约；缺 id 曾致 verify --list 必红）
+  id: 'b269-browser-bridge-live',
+  description: 'BLOCK-269 浏览器连接器前端桥：后端桥全链 + 真面板 webview 执行回传',
+  evidenceDir: path.join(process.cwd(), 'acceptance', 'ui-588-browser-bridge'),
   async run({ assert, projectId }) {
     // ---------- 链 A：后端桥全链（脚本扮演面板）----------
     const sseTask = collectBrowserActions(6000);

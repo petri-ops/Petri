@@ -215,6 +215,22 @@ async function askDecision({ state, questions, meta, overrides = {} } = {}) {
   const startedAt = Date.now();
   const config = resolveDecisionConfig(overrides || {});
   if (!config) {
+    // BLOCK-326 — 配置缺席同样落账（degraded）：否则 next:suggest 实跑次数在台账上
+    // 不可见（2026-10-30 🟡 抓真：3 次实跑 0 行，强制行使条款被架空）。
+    if (meta && meta.point) {
+      const { logDecision } = require('./decision-log');
+      try {
+        await logDecision({
+          point: meta.point,
+          threshold: typeof meta.threshold === 'number' ? meta.threshold : null,
+          state: typeof state === 'string' ? state : JSON.stringify(state),
+          degraded: 1,
+          reason: 'no_key',
+          model: 'none',
+          latencyMs: 0,
+        });
+      } catch { /* 记账永不影响决策 */ }
+    }
     return { ok: false, reason: 'no_key', detail: 'TYPESAFE_API_KEY 未配置，决策 API 降级', elapsedMs: 0, attempts: 0 };
   }
   const shape = validateQuestions(questions);

@@ -122,7 +122,9 @@ function registryState() {
   }
   const docs = Array.isArray(reg.documents) ? reg.documents : [];
   const active = docs.filter((d) => d.status === 'active');
-  const activeWps = active.filter((d) => d.kind === 'work-package');
+  // BLOCK-326 — living-plan 且 active 也是进行中工作（如 BLOCK-322 能力纲）；单包串行
+  // 纪律靠它可见（2026-10-30 🟡 抓真：kind 过滤把能力纲静默漏出 active 槽位）。
+  const activeWps = active.filter((d) => d.kind === 'work-package' || d.kind === 'living-plan');
   const activeOthers = active.filter((d) => d.kind !== 'work-package');
   const planned = docs.filter((d) => d.status === 'planned');
   if (!activeWps.length) console.log('当前无 active 工作包（启动需用户裁决）。');

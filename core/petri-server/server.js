@@ -250,6 +250,17 @@ function installBackendExitLifecycle({ db, log = console.log, logWarn = console.
         } catch (e) {
           logWarn(`[lifecycle] removeListener failed on ${signal}: ${e && e.message ? e.message : e}`);
         }
+        // BLOCK-326 — 关库之后必须真正退出：HTTP server 仍监听会让 owned-backend
+        // supervisor 的 SIGTERM 停不掉进程（2026-11-01 🟡 实机抓真：dev 栈残留孤儿持续
+        // 持有 DB/端口）。server.close 等在途请求排空，2000ms 超时兜底强退。
+        try {
+          if (typeof httpServer !== 'undefined' && httpServer && typeof httpServer.close === 'function') {
+            httpServer.close(() => process.exit(0));
+          }
+        } catch (e) {
+          logWarn(`[lifecycle] server.close failed on ${signal}: ${e && e.message ? e.message : e}`);
+        }
+        setTimeout(() => process.exit(0), 2000).unref();
       }
     };
     return handler;
@@ -362,7 +373,7 @@ setupAiBridge({ tempDir: TEMP_DIR });
   if (t.unref) t.unref();
 })();
 
-app.listen(PORT, '127.0.0.1', () => {
+const httpServer = app.listen(PORT, '127.0.0.1', () => {
   console.log(`🧬 Petri R Server running on port ${PORT}`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);

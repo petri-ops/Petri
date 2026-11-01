@@ -6864,6 +6864,26 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "governance-gate"
+    },
+    {
+      "id": "block326-audit-debt-sweep",
+      "note": "BLOCK-326 审计台工程债清偿批：SIGTERM 退出/flow id/state living-plan/C6 夹具/no_key 落账；改动落点连回归测与治理邻域。",
+      "patterns": [
+        "core/petri-server/server.js",
+        "core/petri-server/helpers/decision-api.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b264-evidence-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b266-composer-shrink.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b268-scratchpad-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b269-browser-bridge-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-p3-constraints-live.cjs",
+        ".agents/skills/petri-dev-infra/scripts/workspace-state.mjs"
+      ],
+      "tests": [
+        "test/block326-audit-debt-sweep.test.mjs",
+        "test/block118-doc-suggest.test.mjs",
+        "test/block119-output-judge.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
