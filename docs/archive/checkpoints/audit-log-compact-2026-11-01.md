@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-01T12:03:13.407Z -->
 | ✅ RW-03-C32-DECISION-ENV-GOV 判销（轻量对账批；核实不硬造） | 2026-10-30 | C-32 已由 BLOCK-211 清偿在案（实现+回归锁 4/4）+ 实证复验双判据过；立项前提过时 | RW-04 顺位前移 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-01T13:55:14.532Z -->
+| ✅ RW-05-HARNESS-FOUNDATION completed（收缩后单件；P4-CLOSED） | 2026-10-30 | 存储能力协商三件+REST 面（红绿 4/4+实机 local 能力位+邻域 43/43+十三门 PASS）；消费方接线留 UI 需求牵引 | RW-06 终包 |

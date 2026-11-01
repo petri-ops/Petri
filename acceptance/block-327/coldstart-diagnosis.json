@@ -1,0 +1,45 @@
+{
+  "probe": "block327-mac-coldstart-diagnosis",
+  "at": "2026-11-01T14:01:24.140Z",
+  "platform": "darwin-arm64",
+  "node": "v24.16.0",
+  "conclusion": {
+    "rootCause": "冷启动时另一后端/孤儿进程持 DB 写锁 → better-sqlite3 同步 busy 等待（上限 busy_timeout=10000ms，core/shared-backend/config-helper.js:60）阻塞事件循环；阻塞发生在模块加载期（db/connection.js:46 initSchema），内建 event-loop 监控（server.js:357 之后安装）不可见。",
+    "mechanismEvidence": [
+      "基线：干净冷启动 +0.2s 监听（隔离库/真实库副本/全配置目录副本三探针一致，healthy 0.5s，无告警）",
+      "机制证明：另一连接 BEGIN IMMEDIATE 持写锁 3.5s → 后端监听延迟到 +3.6s（=锁释放时刻），即模块加载期同步 busy 等待 3.4s；监控无输出（监控未安装）",
+      "极端对照：BEGIN EXCLUSIVE 持锁 → busy 等待 ~10s 后 SQLITE_BUSY 崩溃（busy_timeout 上限的独立证据）",
+      "busy_timeout=10000ms 与 2026-09-30 观测的 ~10s 量级精确吻合"
+    ],
+    "contentionSource": "孤儿后端/双后端脑裂家族（dev-infra §76）：SIGTERM teardown 只关库不退出（2026-11-01 🟡 抓真）使孤儿累积持有 DB；BLOCK-326 已修复该源 → 今日三探针均不可复现",
+    "disposition": "根因定位完成，产品未改动；修复选项留裁决：①启动链 schema init 写路径重试/异步化 ②event-loop 监控前移到 require 链最早点（获得加载期可见性）③dev 双后端 attach 收敛（§76）"
+  },
+  "probes": [
+    {
+      "name": "isolated-empty-db",
+      "result": "clean",
+      "healthy": "0.5s",
+      "blocked": "none"
+    },
+    {
+      "name": "real-db-copy",
+      "result": "clean",
+      "healthy": "0.5s",
+      "blocked": "none"
+    },
+    {
+      "name": "full-data-dir-copy+cpu-prof",
+      "result": "clean",
+      "healthy": "0.5s",
+      "blocked": "none"
+    },
+    {
+      "name": "exclusive-lock",
+      "result": "SQLITE_BUSY crash after ~10s busy wait（上限证据）"
+    },
+    {
+      "name": "transient-write-lock-3.5s",
+      "result": "listen delayed 0.2s→3.6s（机制证明，监控不可见）"
+    }
+  ]
+}

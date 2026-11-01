@@ -8625,8 +8625,27 @@
         "G0"
       ],
       "notes": "审计台工程债清偿批（用户裁决 2026-11-01「继续冲 搞完」）completed（当日收口）：SIGTERM 退出+回归测试/四 flow id/state living-plan+两处 registry 漏翻转/C6 夹具/no_key 落账；回归 5/5 + closeout PASS；对应 🟡 五条已移入处理记录。"
+    },
+    {
+      "id": "BLOCK-327-MAC-COLDSTART-DIAGNOSIS",
+      "capability": "block-327-mac-coldstart-diagnosis",
+      "path": "docs/block-327-mac-coldstart-diagnosis-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-327-mac-coldstart-diagnosis",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-01",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "diagnosis",
+        "macos",
+        "event-loop",
+        "G0"
+      ],
+      "notes": "Mac 冷启动 event-loop ~10s 阻塞取证 completed（2026-11-01）：根因=DB 写锁争用 × 同步 busy 等待（≤10s）× 模块加载期监控不可见；争用源=SIGTERM 孤儿（已修）；三探针不可复现；修复选项留裁决。"
     }
   ],
   "lastUpdated": "2026-11-01",
-  "documentCount": 438
+  "documentCount": 439
 }
