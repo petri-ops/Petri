@@ -139,6 +139,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p5-generation-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-p6-geometry-compare-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-ruling01-cad-ui-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block323-observe-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
