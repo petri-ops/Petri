@@ -1,0 +1,86 @@
+{
+  "name": "block322-chat-artifact-realturn",
+  "finishedAt": "2026-10-31T23:06:16.121Z",
+  "assertions": [
+    {
+      "name": "R1_activity_toolJobId_persisted",
+      "pass": true,
+      "detail": "tj_mvx06n6x_a2s6"
+    },
+    {
+      "name": "R2_job_artifacts",
+      "pass": true,
+      "detail": "front.png,top.png,side.png,iso.png,scene.glb"
+    },
+    {
+      "name": "R3_fold_line",
+      "pass": true,
+      "detail": "✓执行工具 11 次 · 8 轮2.8 s"
+    },
+    {
+      "name": "R4_card_in_last_assistant",
+      "pass": true,
+      "detail": "3D 预览展开 3D 预览"
+    },
+    {
+      "name": "R5_images_loaded",
+      "pass": true,
+      "detail": "[[800,600],[800,600],[800,600],[800,600]]"
+    },
+    {
+      "name": "R6_card_points_new_run",
+      "pass": true,
+      "detail": "http://localhost:3001/api/workspaces/p_mvtu0b52_9cbr/file?path=model3d%2Fruns%2Fm3d-mvx06lwi-kdwhkm%2Ffront.png"
+    }
+  ],
+  "allPass": true,
+  "prompt": "建一个 120×80×30 的外壳盒子，壁厚 3，导出 GLB（原 2.5 版被 Agent 幂等复用，改壁厚强制新导出）",
+  "turn": {
+    "assistantTs": "2026-10-31T22:59:40.899Z",
+    "jobId": "tj_mvx06n6x_a2s6",
+    "jobStatus": "completed",
+    "outDir": "model3d/runs/m3d-mvx06lwi-kdwhkm",
+    "artifactNames": [
+      "front.png",
+      "top.png",
+      "side.png",
+      "iso.png",
+      "scene.glb"
+    ],
+    "activityToolJobId": "tj_mvx06n6x_a2s6"
+  },
+  "dom": {
+    "msgCount": 18,
+    "cardCount": 1,
+    "foldLines": 8,
+    "lastAssistant": {
+      "timeline": true,
+      "foldText": "✓执行工具 11 次 · 8 轮2.8 s",
+      "card": true,
+      "cardText": "3D 预览展开 3D 预览",
+      "images": 4,
+      "inFoldSibling": false,
+      "textTail": "览页直接内联了这份新 GLB 的实际字节（13,168 字符 base64，解码后 sha256 与导出文件完全一致，已在生成时校验），不依赖网络，拖拽可旋转、滚轮缩放：enclosure 120×80×30 · wall 3.0 · GLB 预览沙箱页面复制图导出放大06:59",
+      "imageDims": [
+        [
+          800,
+          600
+        ],
+        [
+          800,
+          600
+        ],
+        [
+          800,
+          600
+        ],
+        [
+          800,
+          600
+        ]
+      ],
+      "firstSrc": "http://localhost:3001/api/workspaces/p_mvtu0b52_9cbr/file?path=model3d%2Fruns%2Fm3d-mvx06lwi-kdwhkm%2Ffront.png"
+    }
+  },
+  "conversation": "conv_35f0d393-f7d"
+}

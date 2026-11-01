@@ -219,6 +219,15 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
     }
   }
 
+  // BLOCK-322 — 直接工具自建的处理 job 也要把 toolJobId 提到事件顶层：前端活动行
+  // 只认顶层字段去 /tools/status/:id 取 artifacts（model3d_export 的导出 job 走这里；
+  // run_tool 的审批/普通两态已在上方分支处理，不重复覆盖）。
+  if (evt.toolJobId === undefined && envelope.tool !== 'run_tool'
+    && result && typeof result === 'object'
+    && typeof result.toolJobId === 'string' && result.toolJobId.trim()) {
+    evt.toolJobId = result.toolJobId;
+  }
+
   return redactSensitiveValue(evt);
 }
 

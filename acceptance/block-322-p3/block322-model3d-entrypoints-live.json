@@ -1,0 +1,161 @@
+{
+  "name": "block322-model3d-entrypoints",
+  "startedAt": "2026-11-01T02:50:30.232Z",
+  "finishedAt": "2026-11-01T02:50:33.885Z",
+  "assertions": [
+    {
+      "name": "E0_main_window_target",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr"
+    },
+    {
+      "name": "E1_auto_restore_on_boot",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mvtu0b52_9cbr\",\"msgs\":18,\"surface\":true,\"sceneSource\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）\",\"canvas\":true,\"previewActions\":false,\"previewActionText\":null,\"actionRows\":1,\"resultViewer\":false,\"resultWorkbenchBtn\":false,\"lastOpen\":\"{\\\"scenePath\\\":\\\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\\\"}\"}"
+    },
+    {
+      "name": "E2_scene_file_link_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "E3_file_preview_action_visible",
+      "pass": true,
+      "detail": "在 3D 模型打开"
+    },
+    {
+      "name": "E4_preview_action_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "E5_workbench_loaded_from_preview",
+      "pass": true,
+      "detail": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）"
+    },
+    {
+      "name": "E6_last_open_persisted",
+      "pass": true,
+      "detail": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+    },
+    {
+      "name": "E7_restore_last_after_reload",
+      "pass": true,
+      "detail": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）"
+    },
+    {
+      "name": "E8_result_card_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "E8_result_viewer_ready",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6\",\"msgs\":18,\"surface\":true,\"sceneSource\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）\",\"canvas\":true,\"previewActions\":false,\"previewActionText\":null,\"actionRows\":1,\"resultViewer\":true,\"resultWorkbenchBtn\":true,\"lastOpen\":\"{\\\"scenePath\\\":\\\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\\\"}\"}"
+    },
+    {
+      "name": "E9_result_workbench_button",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "E10_result_button_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "E11_workbench_loaded_run_snapshot",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）"
+    },
+    {
+      "name": "E12_snapshot_marked_readonly",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）"
+    },
+    {
+      "name": "E13_canvas_after_result_jump",
+      "pass": true,
+      "detail": "true"
+    }
+  ],
+  "allPass": true,
+  "boot": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）",
+    "canvas": true,
+    "previewActions": false,
+    "previewActionText": null,
+    "actionRows": 1,
+    "resultViewer": false,
+    "resultWorkbenchBtn": false,
+    "lastOpen": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+  },
+  "preview": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）",
+    "canvas": true,
+    "previewActions": true,
+    "previewActionText": "在 3D 模型打开",
+    "actionRows": 1,
+    "resultViewer": false,
+    "resultWorkbenchBtn": false,
+    "lastOpen": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+  },
+  "afterPreview": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）",
+    "canvas": true,
+    "previewActions": true,
+    "previewActionText": "在 3D 模型打开",
+    "actionRows": 1,
+    "resultViewer": false,
+    "resultWorkbenchBtn": false,
+    "lastOpen": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+  },
+  "reloaded": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）",
+    "canvas": true,
+    "previewActions": false,
+    "previewActionText": null,
+    "actionRows": 1,
+    "resultViewer": false,
+    "resultWorkbenchBtn": false,
+    "lastOpen": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+  },
+  "resultPage": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/enclosure-120x80x30-wall2p5.scene3d.json（项目场景）",
+    "canvas": true,
+    "previewActions": false,
+    "previewActionText": null,
+    "actionRows": 1,
+    "resultViewer": true,
+    "resultWorkbenchBtn": true,
+    "lastOpen": "{\"scenePath\":\"model3d/enclosure-120x80x30-wall2p5.scene3d.json\"}"
+  },
+  "afterResult": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6",
+    "msgs": 18,
+    "surface": true,
+    "sceneSource": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）",
+    "canvas": true,
+    "previewActions": false,
+    "previewActionText": null,
+    "actionRows": 1,
+    "resultViewer": true,
+    "resultWorkbenchBtn": true,
+    "lastOpen": "{\"scenePath\":\"model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json\"}"
+  }
+}

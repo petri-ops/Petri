@@ -107,4 +107,19 @@ describe('Model3DEditPanel (NEXT-05)', () => {
     fireEvent.click(screen.getByRole('button', { name: '应用参数' }));
     expect((await screen.findByRole('alert')).textContent).toContain('需要已打开的项目工作区');
   });
+
+  // UI-653 — 从聊天产物卡打开导出快照时，编辑锚定该快照路径（不猜默认项目场景）。
+  it('initialScenePath 作为默认 SceneSpec 路径并读取该文件', async () => {
+    readMock.mockResolvedValue({ scene, hash: 'b'.repeat(64) });
+    render(
+      <Model3DEditPanel
+        projectId="p_1"
+        scene={scene}
+        initialScenePath="model3d/runs/run_1/scene.json"
+        onSceneUpdated={() => {}}
+      />
+    );
+    expect(screen.getByDisplayValue('model3d/runs/run_1/scene.json')).toBeTruthy();
+    await waitFor(() => expect(readMock).toHaveBeenCalledWith('p_1', 'model3d/runs/run_1/scene.json'));
+  });
 });

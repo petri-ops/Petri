@@ -1,0 +1,65 @@
+{
+  "name": "block322-chat-artifact",
+  "startedAt": "2026-10-31T16:47:08.544Z",
+  "finishedAt": "2026-10-31T16:47:08.592Z",
+  "assertions": [
+    {
+      "name": "A0_main_window_target",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr"
+    },
+    {
+      "name": "A1_settled_fold_line",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A2_artifact_card_rendered",
+      "pass": true,
+      "detail": "3D 预览展开 3D 预览"
+    },
+    {
+      "name": "A3_status_rest_ok",
+      "pass": true,
+      "detail": "status=200 apiBase=http://localhost:59777/api"
+    },
+    {
+      "name": "A4_rendered_images",
+      "pass": true,
+      "detail": "images=4"
+    },
+    {
+      "name": "A5_first_image_loaded",
+      "pass": true,
+      "detail": "[800,600]"
+    },
+    {
+      "name": "A6_3d_entry_visible",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "A7_no_window_errors",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true,
+  "probe": {
+    "apiBase": "http://localhost:59777/api",
+    "fetchStatus": 200,
+    "foldLine": true,
+    "card": true,
+    "cardText": "3D 预览展开 3D 预览",
+    "images": 4,
+    "has3DToggle": true,
+    "imageLoaded": [
+      800,
+      600
+    ],
+    "firstImageSrc": "http://localhost:59777/api/workspaces/p_mvtu0b52_9cbr/file?path=model3d%2Fruns%2Fm3d-mvwm1qo4-iz64ul%2Ffront.png",
+    "errors": []
+  },
+  "jobId": "tj_mvwm1rkk_6shi",
+  "projectId": "p_mvtu0b52_9cbr"
+}

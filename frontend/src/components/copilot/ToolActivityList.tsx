@@ -766,6 +766,12 @@ export function ToolActivityList({
   const artifactWorthyJobs = activities.filter(
     (a) => a.status === 'success' && a.toolJobId && a.name,
   ).map((a) => ({ toolJobId: a.toolJobId!, name: a.name }));
+  // 三个渲染分支（运行级展开 / 落定折叠 / legacy 手风琴）都要带上产物卡：
+  // 此前只在 legacy 分支渲染，聊天时间线走 collapseWhenSettled 提前 return，
+  // 卡永远不可达（BLOCK-322 P3-03 v2b 接线断裂）。
+  const artifactCards = artifactWorthyJobs.map((job) => (
+    <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded projectId={projectId} />
+  ));
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(
     (activity) => activity.status === 'error' || activity.status === 'denied'
@@ -843,6 +849,7 @@ export function ToolActivityList({
             </div>
           ))}
         </div>
+        {artifactCards}
       </div>
     );
   }
@@ -901,6 +908,7 @@ export function ToolActivityList({
             ))}
           </div>
         )}
+        {artifactCards}
       </div>
     );
   }
@@ -994,9 +1002,7 @@ export function ToolActivityList({
           })()}
         </div>
       )}
-      {artifactWorthyJobs.map((job) => (
-        <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded={true} projectId={projectId} />
-      ))}
+      {artifactCards}
     </div>
   );
 }

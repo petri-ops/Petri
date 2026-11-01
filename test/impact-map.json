@@ -6735,6 +6735,7 @@
         "test/block322-p4-cad-exchange.test.mjs",
         "test/fixtures/model3d/**",
         "acceptance/block-322-ruling01/**",
+        "acceptance/block-322-ruling04/**",
         "core/petri-server/helpers/model3d-cad-drawing.js",
         "test/block322-p4-cad-routes.test.mjs",
         "test/block322-mesh-format-single-source.test.mjs",
@@ -6768,6 +6769,38 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block322-chat-artifact-live",
+      "classifiesScripts": true,
+      "note": "BLOCK-322 聊天通用产物卡实机腿：任何工具结果带 artifacts 即在聊天内渲染交互卡（model3d_export 的 scene.glb 可直接预览/打开）——取证探针、真机回放证据与被它覆盖的测试。",
+      "patterns": [
+        "scripts/block322-chat-artifact-live.mjs",
+        "acceptance/block-322-p3/block322-chat-artifact-**",
+        "acceptance/block-322-p3/block322-model3d-entrypoints-live.json",
+        "acceptance/block-322-p3/block322-model3d-webgl-context-live.json",
+        "frontend/src/components/copilot/ChatArtifactCard.tsx",
+        "frontend/src/components/copilot/ToolActivityList.tsx"
+      ],
+      "tests": [
+        "test/block322-chat-3d-preview.test.mjs",
+        "frontend/src/components/copilot/ChatArtifactCard.test.tsx",
+        "frontend/src/components/work-surface/Model3DSurface.test.tsx",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.model3d.test.tsx"
+      ]
+    },
+    {
+      "id": "model3d-sample-scenes",
+      "note": "model3d/ 下的样例场景 JSON 与 BOM 台账（可复现样例）；运行期产物在 model3d/runs/ 且已忽略——改样例即跑场景模型/场景库/BOM 测试。",
+      "patterns": [
+        "model3d/**"
+      ],
+      "tests": [
+        "test/next04a-scene3d.test.mjs",
+        "test/next05-scene-store.test.mjs",
+        "test/block322-p3-constraints.test.mjs",
+        "test/block322-p4-bom.test.mjs"
+      ]
     }
   ]
 }

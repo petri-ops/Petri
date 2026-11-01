@@ -1,5 +1,30 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-654: 3D 预览免手动导入 + 预览页一键转 3D（BLOCK-322；2026-11-01 **verified（dev Electron 边界内；三条入口实机 15/15）**）
+
+- **变化面**：①右栏「3D 模型」不再每次空白等导入——无外部请求时自动恢复上次打开（localStorage 按项目），首次自动打开项目 `model3d/` 下最新 `.scene3d.json`；修掉 StrictMode 双挂载把恢复结果丢弃的守卫错误。②工作区文件预览：`.scene3d.json` 顶部「在 3D 模型打开」，网格（.glb/.gltf/.stl/.obj）顶部「在 3D 模型预览」。③结果面 3D 预览新增「在 3D 工作台打开」（从 `model3d/runs/<run>/` 产物反推同 run 的 `scene.json`）。事件 `model3dSceneOpen` 泛化为 `model3dOpen`（scenePath/meshPath 二选一）。
+- **为什么这样设计**：预览→工作台是查看链路的自然延续；3D 页应「打开即有所见」，手动导入只留给真正的新文件。网格只做几何预览，场景才可编辑；导出 run 快照保持只读。
+- **验证（代码）**：Model3DSurface 4/4（StrictMode 自动发现最新场景 / 恢复上次 / 快照只读 / 网格来源）；WorkspaceFilePreview 2/2（scene/mesh 派发）；Model3DResultViewer 4/4（新增快照跳转）；ChatArtifactCard 3/3；契约 `test/block322-chat-3d-preview` 4/4；前端定向 **65/65**；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p3/block322-model3d-entrypoints-live.json`（15/15，dev Electron 主窗）：①3D 页开机自动恢复（首启观察到自动发现最新 wall3p0；最终证据记录重载恢复上次 wall2p5）；②聊天场景文件链接 → 文件预览出现「在 3D 模型打开」→ 工作台载入 wall2p5（项目场景），lastOpen 写盘；③重载后仍恢复 wall2p5；④产物卡「在结果中查看」→ 结果 3D viewer →「在 3D 工作台打开」→ 载入 `model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json`（只读快照）+ canvas 渲染。截图不计入通过。
+- **实机修复（2026-11-01 用户反馈「结果中闪烁 / 3D 工作台打开后没正常加载」）**：Electron 日志实锤 `Too many active WebGL contexts. Oldest context will be lost.`——`Model3DScene` 卸载只 `dispose()` 不释放上下文，且右栏非激活 tab 仍持有渲染器；结果 3D 与工作台互相踢上下文。修法=`forceContextLoss()` 卸载即回收 + `active` 门控（右栏非激活 tab 不创建渲染器）+ 上下文丢失有限次自动重建。复验：`acceptance/block-322-p3/block322-model3d-webgl-context-live.json`（**10/10**）：同一路径点击后 `alerts=[]`（无 webgl_context_lost）；结果页 10 次采样 viewer 稳定；3D↔结果来回切 3 轮 canvas 正确挂载/卸载；内联预览展开/收起 3 轮无泄漏；Electron 日志上下文告警 **0 条**。
+- **边界（reopen）**：自动发现只认项目 `model3d/` 根下 `.scene3d.json`（不递归猜 runs/）；网格预览不建 SceneSpec；结果面深链整页加载会被宿主路由恢复改回聊天，实机腿走真实点击路径（不属于本包改动面）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-653: 聊天产物卡一键落地——结果面与 3D 工作面（BLOCK-322 UI-652 续；2026-11-01 **verified（dev Electron 边界内；真实聊天卡片实机 10/10）**）
+
+- **变化面**：聊天 3D 产物卡新增「在结果中查看」「在 3D 工作台打开」。结果查看复用 `projectOpenArtifact` 并新增 `switchToResult` 选项（切结果视图、URL 带 job，结果面才会装载该 job 的 artifacts，选中 scene.glb 走既有 Model3DResultViewer）；工作台打开新增 `model3dSceneOpen` 事件，右栏「3D 模型」读取本次导出 run 的 `scene.json` 快照并在「场景源」标出来源。快照只读（scene store 写面仍只认 `.scene3d.json`），参数/约束编辑回落项目 SceneSpec。
+- **为什么这样设计**：产物卡是聊天一级交互面，但「查看产物」与「编辑场景」是两个语义——结果面看 artifact（血缘/修订/选择总线），工作面改 SceneSpec；不把 run 快照当可写场景，避免把编辑历史写进作业目录，也不猜另一份源场景。
+- **验证（代码）**：ChatArtifactCard 3/3（两动作派发 + 无项目禁用 + 快照路径推导）；Model3DEditPanel 4/4（含来源路径）；契约 `test/block322-chat-3d-preview.test.mjs` 4/4；scene store 快照只读 5/5（读面放行、写面拒绝）；前端定向 54/54；tsc 0；改动文件 ESLint 0 error。
+- **实机证据**：`acceptance/block-322-p3/block322-chat-artifact-actions-live.json`（10/10，dev Electron 主窗真实聊天卡片）：动作行 → 3D 工作台载入快照（6 节点 / 参数 10 / 包围盒 120×80×30 / canvas 渲染）→ 结果面切到 `/result?job=tj_mvx06n6x_a2s6` 并渲染 3D viewer 选中 scene.glb。截图不计入通过。
+- **边界（reopen）**：工作台打开的是导出快照（只读），不是可编辑源场景；从快照继续编辑需在「参数编辑」显式填写项目 SceneSpec 路径。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-652: 聊天时间线通用产物卡接线修复（BLOCK-322 P3-03 v2b；2026-11-01 **verified（dev Electron 边界内；真实聊天回合 6/6 + 活窗组件树 8/8）**）
+
+- **变化面**：`model3d_export` 等直接工具结果把自建 job 的 `toolJobId` 提到 `tool_result` 顶层（此前只对 `run_tool` 提取，活动行拿不到 job id，产物卡永不接线）；产物卡在时间线三个渲染分支（运行级展开 / 落定折叠 / legacy 手风琴）都可达——运行结束后折叠为「执行工具 N 次」时卡仍留在聊天内，不再随节点一起消失；产物 URL 统一经 `workspaceFileUrlFor` 拼绝对地址（dev :3000 下 `/api` 相对路径会打到 Vite 兜底）。
+- **为什么这样设计**：产物卡是聊天时间线的一等交互面，不是 `run_tool` 专用补丁；数据链只有一个真相（tool_result 顶层 toolJobId → `/api/tools/status/:id` 的 `result.artifacts`），前端不解析、不复制几何。
+- **验证（代码）**：`test/block322-chat-3d-preview.test.mjs` 3/3（顶层 toolJobId 单源 + 三分支渲染 + URL 出口）；前端定向 96/96（含新增「落定折叠后产物卡仍渲染」用例）；`quality:types` 0；改动文件 ESLint 0 error；真实 REST `/api/tools/status/tj_mvwm1rkk_6shi` 返回 5 个 artifacts，png/glb 以 renderer origin 200。
+- **实机证据**：①`acceptance/block-322-p3/block322-chat-artifact-realturn-live.json`（6/6，真实聊天回合）：发「建一个 120×80×30 的外壳盒子，壁厚 3，导出 GLB」→ 新 job `tj_mvx06n6x_a2s6`（5 artifacts，outDir `model3d/runs/m3d-mvx06lwi-kdwhkm`）→ 活动持久化 `toolJobId` → 最新 assistant 消息折叠摘要「执行工具 11 次 · 8 轮」下渲染产物卡，4 张渲染图全部 800×600 加载，图片 URL 指向新 run 目录。原 prompt（壁厚 2.5）被 Agent 幂等复用旧 job（`result_summary`，不产生新 job，属预期行为），故改壁厚强制新导出。②`block322-chat-artifact-live.json`（8/8，`scripts/block322-chat-artifact-live.mjs` 活窗离屏挂载真实 `ConversationTimeline`：折叠摘要 + 产物卡 + 4 图加载 + 3D 入口 + 无 window error）。截图不计入通过。
+- **边界（reopen）**：修复前的历史消息 `meta.toolActivities` 没有 toolJobId，不回溯出卡（不做数据回填）；Agent 幂等复用既有产物时本轮不产生新 job，聊天只显示文字结论（产物卡由原 job 所在轮次承载，不重复出卡）；G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-651: 3D 工作面 mate 特征贴合与预览（BLOCK-322 P3-03；2026-10-31 **verified（dev Electron 边界内；UI 实机 7/7）**）
 
 - **变化面**：约束区新增 `mate` 显示（`贴合 a面 → b面（offset）`）；预览沿用服务端 `resolveSceneSpec` 求值结果——同一 SceneSpec 的 cap 从声明 z=100 变为贴合后 z=30，面板包围盒由 `120×80×125` 变为 `120×80×55`；非法法向（+z/+z）服务端 400，预览保持声明包围盒并把原因写进告警，不空屏。

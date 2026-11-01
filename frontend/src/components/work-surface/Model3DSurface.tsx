@@ -3,6 +3,8 @@ import { Icon } from '@/components/icons/Icon';
 import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
 import { fetchModel3DCapability, resolveModel3DScene } from '@/lib/model3dClient';
+import { getApiPrefix, getToken } from '@/lib/authClient';
+import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
 import {
   normalizeScene3DForView,
   sampleScene3D,
@@ -32,6 +34,7 @@ import {
   compareSceneGeometry,
   diffSceneSpecs,
   generateCadDrawing,
+  readSceneFile,
   type CadDrawingResult,
   type GeometryCompareResult,
   type SceneDiff,
@@ -56,7 +59,66 @@ const CONSTRAINT_KIND_LABEL: Record<Scene3DConstraintKind, string> = { align: '�
 // 逐节点资产观察（外部 mesh / 基础色贴图）走告警区而非错误条；前缀集中一处，新增资产类别不再漏配。
 const ASSET_NOTICE_PREFIXES = ['mesh_reference_', 'texture_reference_'];
 
-export function Model3DSurface({ projectId = null }: { projectId?: string | null }): React.ReactElement {
+interface Model3DInitialOpen {
+  scenePath?: string;
+  meshPath?: string;
+  jobId?: string;
+  label?: string;
+  nonce: number;
+}
+
+const LAST_OPEN_KEY_PREFIX = 'petri.model3d.lastOpen.';
+
+function lastOpenKey(projectId: string): string {
+  return `${LAST_OPEN_KEY_PREFIX}${projectId}`;
+}
+
+function readLastOpen(projectId: string): { scenePath?: string; meshPath?: string } | null {
+  try {
+    const raw = window.localStorage.getItem(lastOpenKey(projectId));
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    const record = parsed as { scenePath?: unknown; meshPath?: unknown };
+    const scenePath = typeof record.scenePath === 'string' && record.scenePath ? record.scenePath : undefined;
+    const meshPath = typeof record.meshPath === 'string' && record.meshPath ? record.meshPath : undefined;
+    return scenePath || meshPath ? { scenePath, meshPath } : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveLastOpen(projectId: string, value: { scenePath?: string; meshPath?: string }): void {
+  try { window.localStorage.setItem(lastOpenKey(projectId), JSON.stringify(value)); } catch { /* storage unavailable */ }
+}
+
+/** 项目 model3d/ 下最新的 SceneSpec（只读发现；找不到就保持空态，不猜别处）。 */
+async function discoverLatestScene(projectId: string): Promise<string | null> {
+  try {
+    const token = getToken();
+    const resp = await fetch(`${getApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/tree?prefix=model3d%2F`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const data: unknown = await resp.json();
+    const record = data && typeof data === 'object' ? data as Record<string, unknown> : {};
+    const entries = Array.isArray(record.entries) ? record.entries as Array<Record<string, unknown>> : [];
+    const scenes = entries.filter((entry) => entry && entry.type === 'file'
+      && typeof entry.name === 'string' && entry.name.toLowerCase().endsWith('.scene3d.json'));
+    scenes.sort((a, b) => Number(b.modifiedAt || 0) - Number(a.modifiedAt || 0));
+    const newest = scenes[0];
+    return newest ? `model3d/${String(newest.name)}` : null;
+  } catch {
+    return null;
+  }
+}
+
+export function Model3DSurface({ projectId = null, initialOpen = null, active = true }: {
+  projectId?: string | null;
+  /** UI-653/654 — 从聊天产物卡/文件预览/结果预览请求打开的场景或网格。 */
+  initialOpen?: Model3DInitialOpen | null;
+  /** 右栏该 tab 是否可见；不可见时不持有 WebGL 上下文（上下文名额有限）。 */
+  active?: boolean;
+}): React.ReactElement {
   const [view, setView] = React.useState<Scene3DView | null>(null);
   const [viewAngle, setViewAngle] = React.useState<ViewAngle>('iso');
   const [error, setError] = React.useState<string | null>(null);
@@ -78,6 +140,12 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(null);
   const [measureMode, setMeasureMode] = React.useState(false);
   const [measurePoints, setMeasurePoints] = React.useState<Model3DPoint[]>([]);
+  // UI-653 — 当前场景的来源文件（聊天产物卡/文件预览打开）；参数/约束编辑锚定此路径。
+  const [sceneSourcePath, setSceneSourcePath] = React.useState<string | null>(null);
+  // UI-654 — 工作区网格来源（GLB/GLTF/STL/OBJ 只做几何预览，不是可编辑场景）。
+  const [meshSourcePath, setMeshSourcePath] = React.useState<string | null>(null);
+  // 导出 run 的 scene.json 只读（scene store 写面只认 .scene3d.json）：编辑目标回落项目场景。
+  const snapshotSourceReadOnly = Boolean(sceneSourcePath && !sceneSourcePath.toLowerCase().endsWith('.scene3d.json'));
   const bookmarkKey = `petri.model3d.bookmarks.${projectId || 'no-project'}`;
   const [bookmarks, setBookmarks] = React.useState<Array<{ id: string; position: number[]; target: number[] }>>(() => {
     try {
@@ -123,7 +191,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
   }, []);
 
   React.useEffect(() => () => {
-    if (modelUrl) URL.revokeObjectURL(modelUrl);
+    if (modelUrl && modelUrl.startsWith('blob:')) URL.revokeObjectURL(modelUrl);
   }, [modelUrl]);
 
   const evalSeqRef = React.useRef(0);
@@ -133,7 +201,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
    * 求值只在服务端发生；失败或后端缺席时保持声明位置并把原因如实显示，绝不在前端重解一遍
    * （第二套求解器=plan §4 红线 2）。序号守卫防止用户换场景后旧响应覆盖新画面。
    */
-  const evaluateConstraintsForPreview = async (loaded: Scene3DView) => {
+  const evaluateConstraintsForPreview = React.useCallback(async (loaded: Scene3DView) => {
     const sequence = evalSeqRef.current + 1;
     evalSeqRef.current = sequence;
     if ((loaded.scene.constraints?.length || 0) === 0) return;
@@ -153,9 +221,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         `${SCENE3D_CONSTRAINT_NOTE_PREFIX}：未能向本地后端取回求值结果，预览按声明位置显示（${reason}）。`,
       ]);
     }
-  };
+  }, []);
 
-  const loadStructured = (raw: unknown) => {
+  const loadStructured = React.useCallback((raw: unknown) => {
     const normalized = normalizeScene3DForView(raw);
     if (!normalized.ok) {
       setError(normalized.errors.join('；'));
@@ -171,20 +239,107 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
     setMeasurePoints([]);
     setMeasureMode(false);
     void evaluateConstraintsForPreview(normalized.view);
-  };
+  }, [evaluateConstraintsForPreview]);
+
+  // UI-653 — 聊天产物卡「在 3D 工作台打开」：读取本次导出 run 的场景快照。
+  // 快照是这次作业的真实场景（导出前后一致），编辑锚定同一路径，不猜另一份源场景。
+  const loadMeshFromWorkspace = React.useCallback((meshPath: string): boolean => {
+    if (!projectId) return false;
+    const format = meshFormatForPath(meshPath);
+    if (!format) {
+      setError(`网格格式不支持：${meshPath}`);
+      return false;
+    }
+    setView(null);
+    setError(null);
+    setReviewOpen(false);
+    setSelectedNodeId(null);
+    setMeasurePoints([]);
+    setMeasureMode(false);
+    setSceneSourcePath(null);
+    setMeshSourcePath(meshPath);
+    setModelUrl(workspaceFileUrlFor(projectId, meshPath));
+    setModelFormat(format);
+    setWarnings(format === 'stl' || format === 'obj'
+      ? ['外部 STL/OBJ 仅几何预览，单位按文件原值；参数与约束请使用 SceneSpec。']
+      : []);
+    setAssetNotice(`已打开工作区网格：${meshPath}（仅几何预览）`);
+    return true;
+  }, [projectId]);
+
+  const loadSceneFromWorkspace = React.useCallback(async (scenePath: string, notice: string): Promise<boolean> => {
+    if (!projectId) return false;
+    try {
+      const saved = await readSceneFile(projectId, scenePath);
+      loadStructured(saved.scene);
+      setSceneSourcePath(scenePath);
+      setMeshSourcePath(null);
+      setCadSource(null);
+      setAssetNotice(notice);
+      return true;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      setError(`场景读取失败：${reason}（${scenePath}）`);
+      return false;
+    }
+  }, [projectId, loadStructured]);
+
+  // UI-653/654 — 外部打开请求：场景（含导出快照）或工作区网格。
+  // 不用「已处理 ref」挡第二次 setup：StrictMode 开发态会 setup→cleanup→setup，
+  // 首轮 cleanup 已把 cancelled 置真，再用 ref 挡住二轮会把请求结果整个丢弃
+  // （实机抓真：树查询已发出但场景从未载入）。依赖稳定 → 重跑代价只是一次读。
+  React.useEffect(() => {
+    if (!initialOpen || !projectId) return undefined;
+    let active = true;
+    void (async () => {
+      if (initialOpen.scenePath) {
+        const ok = await loadSceneFromWorkspace(initialOpen.scenePath, `已打开场景：${initialOpen.scenePath}`);
+        if (active && ok) saveLastOpen(projectId, { scenePath: initialOpen.scenePath });
+        return;
+      }
+      if (initialOpen.meshPath && active) {
+        if (loadMeshFromWorkspace(initialOpen.meshPath)) saveLastOpen(projectId, { meshPath: initialOpen.meshPath });
+      }
+    })();
+    return () => { active = false; };
+  }, [initialOpen, loadMeshFromWorkspace, loadSceneFromWorkspace, projectId]);
+
+  // UI-654 — 无外部请求时自动恢复：上次打开 → 项目最新 SceneSpec；不再要求手动导入。
+  // 同上：StrictMode 双挂载下允许二轮重跑（重复读一次），而不是被 ref 永久挡住。
+  React.useEffect(() => {
+    if (!projectId || initialOpen) return undefined;
+    let active = true;
+    void (async () => {
+      const last = readLastOpen(projectId);
+      if (!active) return;
+      if (last?.scenePath) {
+        const ok = await loadSceneFromWorkspace(last.scenePath, `已恢复上次场景：${last.scenePath}`);
+        if (!active || ok) return;
+      }
+      if (last?.meshPath && active && loadMeshFromWorkspace(last.meshPath)) return;
+      const latest = await discoverLatestScene(projectId);
+      if (!active || !latest) return;
+      const ok = await loadSceneFromWorkspace(latest, `已自动打开项目最新场景：${latest}`);
+      if (active && ok) saveLastOpen(projectId, { scenePath: latest });
+    })();
+    return () => { active = false; };
+  }, [initialOpen, loadMeshFromWorkspace, loadSceneFromWorkspace, projectId]);
 
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     setError(null);
     setWarnings([]);
     setAssetNotice(null);
+    // 手动换来源即解除「导出快照/工作区网格」锚定，避免后续编辑误写回上一次作业或文件。
+    setSceneSourcePath(null);
+    setMeshSourcePath(null);
     if (file.size > MAX_MESH_BYTES) {
       setError(meshTooLargeMessage());
       return;
     }
     const format = meshFormatForPath(file.name);
     if (format) {
-      if (modelUrl) URL.revokeObjectURL(modelUrl);
+      if (modelUrl && modelUrl.startsWith('blob:')) URL.revokeObjectURL(modelUrl);
       setModelUrl(URL.createObjectURL(file));
       setModelFormat(format);
       setWarnings(format === 'stl' || format === 'obj'
@@ -233,6 +388,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
         setWarnings((previous) => [...previous,
           `已导入 CAD ${file.name}（${cadFormat.toUpperCase()} · 源 sha256 ${imported.cad.sourceSha256.slice(0, 12)}… · 派生 ${imported.cad.derivedFormat.toUpperCase()} ${imported.bytes} 字节）`]);
         setAssetNotice(`已作为节点 ${imported.node.id} 写入 ${imported.scenePath}；可生成 HLR 线框工程图`);
+        setSceneSourcePath(imported.scenePath);
+        setMeshSourcePath(null);
+        saveLastOpen(projectId, { scenePath: imported.scenePath });
         return;
       }
       setCadSource(null);
@@ -241,6 +399,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
       setWarnings((previous) => [...previous,
         `已导入 ${imported.path}（${imported.bytes} 字节 · sha256 ${imported.sourceSha256.slice(0, 12)}…）`]);
       setAssetNotice(`已作为节点 ${imported.node.id} 写入 ${imported.scenePath}`);
+      setSceneSourcePath(imported.scenePath);
+      setMeshSourcePath(null);
+      saveLastOpen(projectId, { scenePath: imported.scenePath });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'asset_import_failed');
     } finally {
@@ -458,6 +619,7 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                 modelUrl={modelUrl}
                 modelFormat={modelFormat}
                 projectId={projectId}
+                active={active}
                 onReady={onReady}
                 onError={onSceneError}
                 onSelectNode={onSelectNode}
@@ -522,6 +684,12 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
               ) : null}
             </div>
           ) : null}
+          {/* UI-654 — 网格预览没有 SceneSpec 视图，来源独立于场景字段显示 */}
+          {meshSourcePath ? (
+            <p className={styles.meta} data-testid="model3d-mesh-source">
+              {meshSourcePath}（工作区网格 · 仅几何预览）
+            </p>
+          ) : null}
           {drawingError ? <div className={styles.error} role="alert">{drawingError}</div> : null}
           {drawingResult ? (
             <p className={styles.meta}>
@@ -538,6 +706,18 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                   <dt>约束</dt><dd>{view.stats.constraints}</dd>
                   <dt>渲染对象</dt><dd>{canvasInfo?.objects ?? '—'}</dd>
                   <dt>包围盒 mm</dt><dd>{canvasInfo ? canvasInfo.bounds.map((value) => Math.round(value)).join(' × ') : '—'}</dd>
+                  {/* UI-653 — 从聊天产物卡载入时标出来源：编辑写回的是这份导出快照 */}
+                  {sceneSourcePath ? (
+                    <>
+                      <dt>场景源</dt>
+                      <dd data-testid="model3d-scene-source">
+                        {sceneSourcePath}
+                        {sceneSourcePath.toLowerCase().endsWith('.scene3d.json')
+                          ? '（项目场景）'
+                          : '（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）'}
+                      </dd>
+                    </>
+                  ) : null}
                 </dl>
               </section>
               <section>
@@ -578,7 +758,9 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
                   <SceneConstraintEditor
                     projectId={projectId}
                     scene={view.scene}
-                    scenePath={view.scene.nodes.find((n) => n.source?.path)?.source?.path || 'model3d/scene.scene3d.json'}
+                    scenePath={(!snapshotSourceReadOnly && sceneSourcePath)
+                      || view.scene.nodes.find((n) => n.source?.path)?.source?.path
+                      || 'model3d/scene.scene3d.json'}
                     expectedHash={null}
                     onSceneUpdated={(updated) => { if (updated) loadStructured(updated); }}
                   />
@@ -618,8 +800,16 @@ export function Model3DSurface({ projectId = null }: { projectId?: string | null
           onClose={() => setReviewOpen(false)}
         />
       ) : null}
+      {/* key 随来源切换重挂载：编辑面板的路径/草稿从新来源初始化（不在 effect 里同步 setState）。
+          run 快照只读 → 编辑目标回落项目 SceneSpec，不把作业目录当可写场景。 */}
       {editOpen && view ? (
-        <Model3DEditPanel projectId={projectId} scene={view.scene} onSceneUpdated={loadStructured} />
+        <Model3DEditPanel
+          key={snapshotSourceReadOnly ? 'default-scene' : (sceneSourcePath || 'default-scene')}
+          projectId={projectId}
+          scene={view.scene}
+          initialScenePath={snapshotSourceReadOnly ? undefined : (sceneSourcePath || undefined)}
+          onSceneUpdated={loadStructured}
+        />
       ) : null}
       {compareError ? <div className={styles.error} role="alert">{compareError}</div> : null}
       {compareScene && compareDiff ? (

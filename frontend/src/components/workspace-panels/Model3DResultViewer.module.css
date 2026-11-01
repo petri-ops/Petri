@@ -66,6 +66,24 @@
   flex-shrink: 0;
 }
 
+.openWorkbench {
+  flex-shrink: 0;
+  min-height: 22px;
+  padding: 2px var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.openWorkbench:hover {
+  border-color: var(--petri-border-strong);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+}
+
 .hint {
   margin-left: auto;
   flex-shrink: 0;

@@ -122,6 +122,7 @@ export function Model3DScene({
   measurement = null,
   onMeasurePoint,
   onCameraApi,
+  active = true,
 }: {
   view: Scene3DView | null;
   viewAngle: Model3DViewAngle;
@@ -135,9 +136,21 @@ export function Model3DScene({
   measurement?: { a: Model3DPoint; b: Model3DPoint } | null;
   onMeasurePoint?: (point: Model3DPoint) => void;
   onCameraApi?: (api: Model3DCameraApi | null) => void;
+  /**
+   * 宿主面是否可见（如右栏非激活 tab）。不可见时不创建 WebGL 上下文——
+   * Chromium 同时活跃上下文有上限，隐藏面占坑会把可见面（结果 3D / 工作台）
+   * 的上下文踢掉（实机抓真：Too many active WebGL contexts）。
+   */
+  active?: boolean;
 }): React.ReactElement {
   const hostRef = React.useRef<HTMLDivElement | null>(null);
   const rendererRef = React.useRef<THREE.WebGLRenderer | null>(null);
+  // 上下文丢失后有限次重建（避免 GPU 长期不可用时无限重试）。
+  const [rendererEpoch, setRendererEpoch] = React.useState(0);
+  const recoveryAttemptsRef = React.useRef(0);
+  React.useEffect(() => {
+    if (active) recoveryAttemptsRef.current = 0;
+  }, [active]);
   const sceneRef = React.useRef<THREE.Scene | null>(null);
   const cameraRef = React.useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = React.useRef<OrbitControls | null>(null);
@@ -184,6 +197,8 @@ export function Model3DScene({
   React.useEffect(() => {
     const host = hostRef.current;
     if (!host) return undefined;
+    // 非可见面不建上下文（隐藏 tab / 折叠面板不占 WebGL 名额）。
+    if (!active) return undefined;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -194,9 +209,16 @@ export function Model3DScene({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(host.clientWidth || 640, host.clientHeight || 420);
     renderer.domElement.dataset.testid = 'model3d-canvas';
+    let lostHandled = false;
     const onContextLost = (event: Event) => {
       event.preventDefault();
       onError?.('webgl_context_lost');
+      // 有限次自动重建：换 tab/换场景都会重挂载渲染器，这里兜住偶发失联。
+      if (!lostHandled && recoveryAttemptsRef.current < 2) {
+        lostHandled = true;
+        recoveryAttemptsRef.current += 1;
+        setRendererEpoch((value) => value + 1);
+      }
     };
     renderer.domElement.addEventListener('webglcontextlost', onContextLost);
     host.appendChild(renderer.domElement);
@@ -255,11 +277,14 @@ export function Model3DScene({
       }
       onCameraApi?.(null);
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
+      // dispose() 只释放 GPU 资源，不结束上下文；显式 forceContextLoss 让 Chromium
+      // 立即回收名额（实机抓真：反复挂载后 Too many active WebGL contexts）。
+      try { renderer.forceContextLoss(); } catch { /* context 已失联时忽略 */ }
       renderer.dispose();
       renderer.domElement.remove();
       rendererRef.current = null;
     };
-  }, [onCameraApi, onError]);
+  }, [active, onCameraApi, onError, rendererEpoch]);
 
   // BLOCK-322 P2-02 — 灯组同步：声明灯存在即整体替换默认摄影棚灯（不拿默认光冒充声明光），
   // environment 声明映射为环境光 + 场景背景；未声明时保持既有默认灯组与透明背景。
@@ -297,7 +322,7 @@ export function Model3DScene({
     scene.add(group);
     lightsRef.current = group;
     return undefined;
-  }, [view]);
+  }, [active, view]);
 
   // 点选节点：与 OrbitControls 共用指针事件，拖动超过 4px 视为旋转而非选择。
   React.useEffect(() => {
@@ -338,7 +363,7 @@ export function Model3DScene({
       dom.removeEventListener('pointerdown', onPointerDown);
       dom.removeEventListener('pointerup', onPointerUp);
     };
-  }, [measureMode, onMeasurePoint, onSelectNode]);
+  }, [active, measureMode, onMeasurePoint, onSelectNode]);
 
   React.useEffect(() => {
     const content = contentRef.current;
@@ -466,7 +491,7 @@ export function Model3DScene({
       void Promise.allSettled(pending).then(() => report(objects));
     }
     return () => { cancelled = true; };
-  }, [applyView, modelFormat, modelUrl, onError, onReady, projectId, view, viewAngle]);
+  }, [active, applyView, modelFormat, modelUrl, onError, onReady, projectId, view, viewAngle]);
 
   React.useEffect(() => {
     const overlay = overlayRef.current;
@@ -485,7 +510,7 @@ export function Model3DScene({
       sphere.position.set(...point);
       overlay.add(sphere);
     }
-  }, [measurement]);
+  }, [active, measurement]);
 
   React.useEffect(() => {
     applyView(viewAngle);

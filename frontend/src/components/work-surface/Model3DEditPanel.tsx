@@ -17,6 +17,8 @@ import styles from './Model3DEditPanel.module.css';
 interface Model3DEditPanelProps {
   projectId: string | null;
   scene: Scene3DSpec;
+  /** UI-653 — 场景来源路径（如聊天打开的导出快照）；缺省回落到默认项目场景。 */
+  initialScenePath?: string;
   onSceneUpdated: (scene: unknown) => void;
 }
 
@@ -37,8 +39,8 @@ function diffText(diff: SceneDiff): string[] {
   return lines;
 }
 
-export function Model3DEditPanel({ projectId, scene, onSceneUpdated }: Model3DEditPanelProps): React.ReactElement {
-  const [scenePath, setScenePath] = React.useState(DEFAULT_SCENE_PATH);
+export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUpdated }: Model3DEditPanelProps): React.ReactElement {
+  const [scenePath, setScenePath] = React.useState(initialScenePath || DEFAULT_SCENE_PATH);
   const [savedHash, setSavedHash] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, string>>({});
   const [preview, setPreview] = React.useState<SceneDiff | null>(null);
@@ -51,6 +53,7 @@ export function Model3DEditPanel({ projectId, scene, onSceneUpdated }: Model3DEd
     () => Object.entries(scene.parameters || {}).filter((entry): entry is [string, number] => typeof entry[1] === 'number'),
     [scene],
   );
+
 
   React.useEffect(() => {
     let cancelled = false;

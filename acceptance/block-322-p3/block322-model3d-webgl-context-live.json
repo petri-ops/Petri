@@ -1,0 +1,111 @@
+{
+  "name": "block322-model3d-webgl-context",
+  "startedAt": "2026-11-01T04:03:13.433Z",
+  "finishedAt": "2026-11-01T04:03:23.997Z",
+  "assertions": [
+    {
+      "name": "W0_main_window_target",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr"
+    },
+    {
+      "name": "W1_card_ready",
+      "pass": true,
+      "detail": "{\"activePill\":\"3D 模型×\",\"actionRows\":1,\"viewer\":false,\"surfaceCanvas\":true,\"sceneSource\":\"model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）\",\"alerts\":[],\"cardCanvas\":false,\"card\":true}"
+    },
+    {
+      "name": "W2_open_result",
+      "pass": true,
+      "detail": "click 在结果中查看"
+    },
+    {
+      "name": "W3_result_viewer",
+      "pass": true,
+      "detail": "result viewer"
+    },
+    {
+      "name": "W4_open_workbench",
+      "pass": true,
+      "detail": "click 在 3D 工作台打开"
+    },
+    {
+      "name": "W5_workbench_canvas",
+      "pass": true,
+      "detail": "{\"activePill\":\"3D 模型×\",\"actionRows\":1,\"viewer\":true,\"surfaceCanvas\":true,\"sceneSource\":\"model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）\",\"alerts\":[],\"cardCanvas\":false,\"card\":true}"
+    },
+    {
+      "name": "W6_no_context_loss_alert",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "W7_tab_switch_context_clean",
+      "pass": true,
+      "detail": "[{\"title\":\"结果\",\"canvas\":false,\"alerts\":0},{\"title\":\"3D 模型\",\"canvas\":true,\"alerts\":0},{\"title\":\"结果\",\"canvas\":false,\"alerts\":0},{\"title\":\"3D 模型\",\"canvas\":true,\"alerts\":0},{\"title\":\"结果\",\"canvas\":false,\"alerts\":0},{\"title\":\"3D 模型\",\"canvas\":true,\"alerts\":0}]"
+    },
+    {
+      "name": "W8_inline_preview_toggle_clean",
+      "pass": true,
+      "detail": "[{\"open\":true},{\"closed\":false},{\"open\":true},{\"closed\":false},{\"open\":true},{\"closed\":false}]"
+    },
+    {
+      "name": "W9_no_too_many_contexts_warning",
+      "pass": true,
+      "detail": "warnings=0"
+    }
+  ],
+  "allPass": true,
+  "switches": [
+    {
+      "title": "结果",
+      "canvas": false,
+      "alerts": 0
+    },
+    {
+      "title": "3D 模型",
+      "canvas": true,
+      "alerts": 0
+    },
+    {
+      "title": "结果",
+      "canvas": false,
+      "alerts": 0
+    },
+    {
+      "title": "3D 模型",
+      "canvas": true,
+      "alerts": 0
+    },
+    {
+      "title": "结果",
+      "canvas": false,
+      "alerts": 0
+    },
+    {
+      "title": "3D 模型",
+      "canvas": true,
+      "alerts": 0
+    }
+  ],
+  "inline": [
+    {
+      "open": true
+    },
+    {
+      "closed": false
+    },
+    {
+      "open": true
+    },
+    {
+      "closed": false
+    },
+    {
+      "open": true
+    },
+    {
+      "closed": false
+    }
+  ],
+  "warnings": 0
+}

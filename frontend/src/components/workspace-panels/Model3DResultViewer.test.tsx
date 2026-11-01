@@ -24,6 +24,12 @@ import {
 } from '@/lib/selectionBus';
 
 const onErrorSpy = vi.fn();
+const dispatchSpy = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/events', () => ({
+  petriEvents: { model3dOpen: 'petri:model3d-open' },
+  dispatchPetriEvent: dispatchSpy,
+}));
 
 vi.mock('@/components/work-surface/Model3DScene', () => ({
   Model3DScene: (props: {
@@ -43,10 +49,31 @@ import Model3DResultViewer from './Model3DResultViewer';
 afterEach(() => {
   cleanup();
   onErrorSpy.mockClear();
+  dispatchSpy.mockClear();
   setSelectionBusArtifact({ artifactId: '', revisionId: null });
 });
 
 describe('RW01 Model3DResultViewer', () => {
+  it('UI-654 — 结果预览可一键转 3D 工作台（载入同 run 场景快照）', () => {
+    render(
+      <Model3DResultViewer
+        url="http://localhost:3001/api/workspaces/p_x/file?path=model3d%2Fruns%2Frun_1%2Fscene.glb"
+        name="scene.glb"
+        artifactId="artifact-1"
+        revisionId={null}
+        projectId="p_x"
+        jobId="tj_1"
+      />,
+    );
+    fireEvent.click(screen.getByTestId('model3d-result-open-workbench'));
+    expect(dispatchSpy).toHaveBeenCalledWith('petri:model3d-open', {
+      projectId: 'p_x',
+      scenePath: 'model3d/runs/run_1/scene.json',
+      jobId: 'tj_1',
+      label: 'scene.glb',
+    });
+  });
+
   it('挂载即绑定 artifact 进选择总线（换 artifact 清旧选择）', () => {
     const seen: Array<{ artifactId: string; revisionId: string | null }> = [];
     const unsubscribe = subscribeSelectionBus((state) => seen.push({ artifactId: state.artifactId, revisionId: state.revisionId }));

@@ -48,6 +48,12 @@ export const petriEvents = {
   /** BLOCK-216 Q5 — 从计划卡打开计划面（payload: { planId }）。 */
   planSurfaceOpen: 'petri:plan-surface-open',
 
+  /**
+   * BLOCK-322 UI-653/654 — 在右栏「3D 模型」工作面打开一个来源：
+   * 场景文件/导出快照（scenePath）或工作区网格（meshPath），二选一。
+   */
+  model3dOpen: 'petri:model3d-open',
+
   /** BLOCK-217 — agent act(ui_action) → 前端 pack surface host 分发。 */
   uiActionRequest: 'petri:ui-action-request',
 
@@ -295,6 +301,25 @@ export interface ProjectOpenArtifactDetail {
   jobId: string;
   artifactName: string;
   projectId?: string | null;
+  /**
+   * UI-653 — true = 同时把中央工作面切到结果视图（URL 带 job，结果面才会装载
+   * 该 job 的 artifacts）。聊天产物卡「在结果中查看」用 true；正文内联链接等
+   * 保持缺省（preserve 当前视图）。
+   */
+  switchToResult?: boolean;
+}
+
+/**
+ * UI-653/654 — 在右栏「3D 模型」工作面打开一个来源（scenePath 与 meshPath 二选一）：
+ * - scenePath：SceneSpec 或导出 run 的 scene.json 快照（工作区相对路径）；
+ * - meshPath：工作区网格（.glb/.gltf/.stl/.obj），只做几何预览。
+ */
+export interface Model3DOpenDetail {
+  projectId: string;
+  scenePath?: string;
+  meshPath?: string;
+  jobId?: string;
+  label?: string;
 }
 
 /** UI-385: 右栏「智能体」tab 打开载荷（runId = 子 agent 任务 id）。 */
@@ -347,6 +372,7 @@ export type PetriEventMap = {
   /** BLOCK-264（C-39）— 待审批通知点击载荷（conversationId 定位会话；ackToken 冗余留痕） */
   [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;
+  [petriEvents.model3dOpen]: Model3DOpenDetail;
   [petriEvents.uiActionRequest]: UiActionRequestDetail;
   [petriEvents.browserBack]: undefined;
   [petriEvents.browserForward]: undefined;

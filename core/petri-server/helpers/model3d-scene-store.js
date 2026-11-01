@@ -25,6 +25,15 @@ function normalizeRelativePath(relativePath) {
   return text;
 }
 
+// UI-653 — 导出 run 目录的 scene.json 快照允许**只读**打开（聊天产物卡一键进 3D
+// 工作面）；写面（apply/revision/restore）仍只认 .scene3d.json，避免编辑历史作业。
+const RUN_SNAPSHOT_RE = /^model3d\/runs\/[^/]+\/scene\.json$/i;
+
+function normalizeSnapshotPath(relativePath) {
+  const text = String(relativePath || '').trim().replace(/\\/g, '/');
+  return RUN_SNAPSHOT_RE.test(text) ? text : null;
+}
+
 function historyDirFor(target) {
   const dir = path.dirname(target);
   const base = path.basename(target).replace(/\.scene3d\.json$/i, '');
@@ -262,7 +271,7 @@ async function writeScene({ workspaceRoot, relativePath, scene, reason = 'write'
 }
 
 async function readSceneInput({ workspaceRoot, relativePath } = {}) {  if (!workspaceRoot) return { ok: false, error: 'project_required' };
-  const normalized = normalizeRelativePath(relativePath);
+  const normalized = normalizeRelativePath(relativePath) || normalizeSnapshotPath(relativePath);
   if (!normalized) return { ok: false, error: 'scene_path_required' };
   let target;
   try {
@@ -277,6 +286,7 @@ module.exports = {
   HISTORY_SCHEMA,
   MAX_REVISIONS,
   normalizeRelativePath,
+  normalizeSnapshotPath,
   diffScenes,
   applyOperations,
   writeScene,

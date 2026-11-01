@@ -18,6 +18,7 @@ import { Icon } from '@/components/icons/Icon';
 
 import { formatToolDuration } from './toolActivity';
 import type { ConversationSegment, ReasoningSegment, ToolsSegment } from './conversationSegments';
+import { ChatArtifactCard } from './ChatArtifactCard';
 import { RowCopyButton, ToolActivityList } from './ToolActivityList';
 
 /**
@@ -170,6 +171,22 @@ export function ConversationTimeline({
   const totalDurationMs = toolsSegments.reduce((n, s) => n + (s.durationMs ?? 0), 0);
   const totalDuration = totalDurationMs > 0 ? formatToolDuration(totalDurationMs) : null;
 
+  // BLOCK-322 产物卡 — 落定折叠时节点整段不渲染，产物卡必须提到运行级：
+  // 否则「执行工具 N 次」折起来后 3D/图像/下载卡随节点一起消失（用户实机抓真）。
+  const artifactJobs = (() => {
+    const seen = new Set<string>();
+    const jobs: string[] = [];
+    for (const segment of toolsSegments) {
+      for (const activity of segment.activities) {
+        const toolJobId = activity.toolJobId;
+        if (activity.status !== 'success' || !toolJobId || seen.has(toolJobId)) continue;
+        seen.add(toolJobId);
+        jobs.push(toolJobId);
+      }
+    }
+    return jobs;
+  })();
+
   const nodes: React.ReactNode[] = [];
   const progressTotal = segments.reduce(
     (count, segment) => (segment.kind === 'progress' ? count + 1 : count),
@@ -244,6 +261,9 @@ export function ConversationTimeline({
             </span>
           </button>
         </div>
+        {artifactJobs.map((toolJobId) => (
+          <ChatArtifactCard key={toolJobId} toolJobId={toolJobId} expanded projectId={projectId} />
+        ))}
       </div>
     );
   }

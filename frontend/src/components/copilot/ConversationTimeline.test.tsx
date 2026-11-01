@@ -1,5 +1,5 @@
 import { fireEvent, render, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { ConversationSegment } from './conversationSegments';
 import { ConversationTimeline } from './ConversationTimeline';
@@ -253,5 +253,38 @@ describe('BLOCK-150 加映：runActive 期间簇内禁换装（运行中行只�
     );
     expect(container.querySelector('.sc-run-fold-line')).toBeTruthy();
     expect(container.querySelector('.sc-tool-activity-inline')).toBeNull();
+  });
+});
+
+describe('BLOCK-322 产物卡：落定折叠后仍在时间线可见', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('成功的产物 job 在运行摘要折叠态渲染 chat-artifact-card（不随节点折叠消失）', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      ok: true,
+      result: { artifacts: [{ name: 'scene.glb', path: 'model3d/runs/x/scene.glb' }] },
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }))));
+
+    const exportSegment: ConversationSegment = {
+      ...toolsSegment,
+      activities: [{
+        key: 'call-export',
+        name: 'model3d_export',
+        status: 'success',
+        toolJobId: 'tj_export_1',
+        actionLabel: '已导出 3D 模型',
+        iteration: 2,
+      }],
+    };
+    const { container, findByTestId } = render(
+      <ConversationTimeline segments={[exportSegment]} projectId="p_demo" />
+    );
+
+    // 折叠态=只一行运行摘要；产物卡必须仍在时间线内
+    expect(container.querySelector('.sc-run-fold-line')).toBeTruthy();
+    const card = await findByTestId('chat-artifact-card');
+    expect(card.textContent).toContain('3D 预览');
   });
 });

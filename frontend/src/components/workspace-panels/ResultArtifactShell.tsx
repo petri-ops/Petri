@@ -862,6 +862,8 @@ export function ResultArtifactShell({
           name={selectedArtifactLabel || selectedArtifact.name}
           artifactId={viewedRevision?.artifactId || selectedArtifact.name}
           revisionId={viewedRevision?.revisionId ?? null}
+          projectId={project.id}
+          jobId={job?.id ?? null}
         />
       );
     }

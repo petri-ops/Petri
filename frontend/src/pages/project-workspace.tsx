@@ -34,7 +34,7 @@ import { useWorkSurfaceTabs } from '@/hooks/useWorkSurfaceTabs'; import { useUiA
 import { segmentToMode, modeToSegment, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import { useHarnessWorkflowStatus } from '@/hooks/useHarnessWorkflowStatus';
 import { useSetCopilotContext } from '@/lib/copilotContextProvider';
-import { petriEvents, subscribePetriEvent, dispatchPetriEvent } from '@/lib/events';
+import { petriEvents, subscribePetriEvent, dispatchPetriEvent, type Model3DOpenDetail } from '@/lib/events';
 // UI-627（BLOCK-321）— 侧聊原生独立窗入口 helper
 import { openSideChatWindow } from '@/lib/sideChatWindow';
 import { sidebarResizeMax } from '@/hooks/useResponsivePanelCollapse';
@@ -368,6 +368,14 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [openRightPanel]);
   useEffect(() => subscribePetriEvent(petriEvents.planSurfaceOpen, () => openRightPanel('plan')), [openRightPanel]);
+  // BLOCK-322 UI-653/654 — 聊天产物卡/文件预览/结果预览「在 3D 工作台打开」：
+  // 切右栏 model3d 并把来源请求交给工作面（nonce 保证重复打开同一对象也会重新载入）。
+  const [model3dOpenRequest, setModel3dOpenRequest] = useState<(Model3DOpenDetail & { nonce: number }) | null>(null);
+  useEffect(() => subscribePetriEvent(petriEvents.model3dOpen, (detail) => {
+    if (!detail?.scenePath && !detail?.meshPath) return;
+    setModel3dOpenRequest({ ...detail, nonce: Date.now() });
+    openRightPanel('model3d');
+  }), [openRightPanel]);
   // UI-446 — 激活审阅 tab 即视为已读当前会话改动（tab 圆点熄灭；新改动重新点亮）
   useEffect(() => {
     if (rightTab === 'review' && activeConvId) {
@@ -1042,6 +1050,7 @@ export function ProjectWorkspace(): React.ReactElement {
     // UI-385 — 右栏「智能体」tab 数据源（agentOpenInRail 事件写入）
     agentRunId: agentTabRunId,
     onAgentRunSwitch: (runId: string) => { setAgentTabRunId(runId); openRightPanel('agent'); }, // BLOCK-249 团队 roster 点成员
+    model3dOpenRequest,
     openRightTabs,
     rightTab,
     rightToolMenuOpen,

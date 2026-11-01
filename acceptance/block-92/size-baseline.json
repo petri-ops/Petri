@@ -40,15 +40,15 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1264,
-      "sha256": "900aec5d0f944a3f2e1334fdd7519aa431eae60cc4dde074438e8b2d0b73c0ec"
+      "lines": 1273,
+      "sha256": "68607805ddabc57334be332cba102f9300e60d8e273d2d7b720232d36307435c"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1321,
-      "sha256": "31948b92f4b2c2953230f82b55786719e83cf5004830bd513258ecdad6310ef7"
+      "lines": 1323,
+      "sha256": "37b7918852b52e2cc66df992189dff874dc6205fb8a489e81cbd6d0d1e85938a"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23396
+  "total": 23407
 }

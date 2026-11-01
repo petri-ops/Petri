@@ -28,6 +28,7 @@ import type { EditorApi } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useTheme } from '@/themes/ThemeProvider';
 import { isImageFile, isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
+import { meshFormatForPath } from '@/lib/meshAssets';
 import { getBridge } from '@/lib/desktopBridge';
 import {
   loadOfficePreview,
@@ -373,6 +374,24 @@ export function WorkspaceFilePreview({
     >
     <div className={styles.workspacePreview}>
       {openError && <div className={styles.workspacePreviewError}>{openError}</div>}
+      {/* UI-654 — SceneSpec/网格文件预览直接转右栏 3D 模型，不再要求去 3D 页手动导入 */}
+      {projectId && file && (/\.scene3d\.json$/i.test(file.name) || meshFormatForPath(file.name)) ? (
+        <div className={styles.workspacePreviewActions} data-testid="workspace-preview-3d-actions">
+          <button
+            type="button"
+            className={styles.workspacePreviewOpen}
+            title={/\.scene3d\.json$/i.test(file.name)
+              ? '在右栏「3D 模型」打开这个场景'
+              : '在右栏「3D 模型」预览这个网格（仅几何）'}
+            onClick={() => dispatchPetriEvent(petriEvents.model3dOpen, /\.scene3d\.json$/i.test(file.name)
+              ? { projectId, scenePath: file.path, label: file.name }
+              : { projectId, meshPath: file.path, label: file.name })}
+          >
+            <Icon name="layers" size={13} />
+            {/\.scene3d\.json$/i.test(file.name) ? '在 3D 模型打开' : '在 3D 模型预览'}
+          </button>
+        </div>
+      ) : null}
       <div
         className={styles.workspacePreviewBody}
         ref={previewBodyRef}

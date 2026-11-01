@@ -139,19 +139,22 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
     return unsub;
   }, [handleOpenResult]);
   useEffect(() => {
-    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null }) => {
+    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null; switchToResult?: boolean }) => {
       if (!detail?.jobId || !detail?.artifactName) return;
       const targetProjectId = detail.projectId || projectId;
       pendingArtifactNameRef.current = detail.artifactName;
       pendingArtifactJobIdRef.current = detail.jobId;
       setPendingArtifactName(detail.artifactName);
       if (targetProjectId && targetProjectId !== projectId) {
+        const mode = detail.switchToResult ? 'result' : 'chat';
         void navigate(
-          `/project/${encodeURIComponent(targetProjectId)}?mode=chat&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
+          `/project/${encodeURIComponent(targetProjectId)}?mode=${mode}&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
         );
         return;
       }
-      void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: true });
+      // UI-653 — 显式要求结果视图时必须让 URL 带上 job，否则结果面拿不到 artifacts
+      // （preserve 路径只切右栏 tab，中央仍留 chat，结果面板会停空态）。
+      void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: detail.switchToResult !== true });
     };
     const unsub = subscribePetriEvent(petriEvents.projectOpenArtifact, handler);
     return unsub;

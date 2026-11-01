@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Project, ToolJob } from '@/lib/project-types';
+import type { Model3DOpenDetail } from '@/lib/events';
 import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
@@ -57,6 +58,8 @@ export interface RightPanelContext {
   agentRunId?: string | null;
   /** UI-385 — 续派成功后切换面板到新 agent。 */
   onAgentRunSwitch?: (runId: string) => void;
+  /** UI-653/654 — 请求在 3D 工作面打开的场景或网格来源（nonce 重新触发）。 */
+  model3dOpenRequest?: (Model3DOpenDetail & { nonce: number }) | null;
 
   // Tab state
   openRightTabs: string[];
@@ -227,7 +230,14 @@ export function RightPanel({
                   />
                 )}
                 {tab === 'workflow' && <WorkflowRunsPanel />}
-                {tab === 'model3d' && <Model3DSurface key={ctx.projectId || 'no-project'} projectId={ctx.projectId} />}
+                {tab === 'model3d' && (
+                  <Model3DSurface
+                    key={ctx.projectId || 'no-project'}
+                    projectId={ctx.projectId}
+                    initialOpen={ctx.model3dOpenRequest || null}
+                    active={ctx.rightTab === tab}
+                  />
+                )}
                 {tab === 'results' && (
                   <ResultStudioInspector
                     artifact={ctx.activeArtifact}

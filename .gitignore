@@ -110,3 +110,9 @@ sidecars/computer-use-windows/axfixture/obj/
 # 会话附件运行目录（聊天图片上传的本地落盘，非源码）
 .chat-attachments/
 model3d/runs/
+
+# 工作台会话运行目录（聊天内嵌可视化片段等会话产物，非源码）
+.petri/
+
+# 本地第三方源码镜像（只读参考用，无入库面）
+/reference/

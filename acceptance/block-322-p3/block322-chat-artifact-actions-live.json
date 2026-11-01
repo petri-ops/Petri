@@ -1,0 +1,80 @@
+{
+  "name": "block322-chat-artifact-actions",
+  "startedAt": "2026-10-31T23:43:11.837Z",
+  "finishedAt": "2026-10-31T23:43:15.099Z",
+  "assertions": [
+    {
+      "name": "C0_main_window_target",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6"
+    },
+    {
+      "name": "C1_action_row_present",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mvtu0b52_9cbr\",\"msgs\":18,\"actionRows\":1,\"surface\":true,\"surfaceVisible\":true,\"sourceText\":null,\"canvas\":false,\"resultViewer\":false,\"activeText\":\"尚未打开结果从对话、任务或文件中打开一个结果后，这里会显示必要信息。\"}"
+    },
+    {
+      "name": "C2_workbench_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "C3_workbench_visible",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mvtu0b52_9cbr\",\"msgs\":18,\"actionRows\":1,\"surface\":true,\"surfaceVisible\":true,\"sourceText\":\"model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）\",\"canvas\":true,\"resultViewer\":false,\"activeText\":\"3D 模型Blender 可用Blender 5.2.3 LTSCAD 可用occt-wasmAI 生成 不可用加载示例导入模型导入为场景节点视觉 QAAI 生成参数编辑草图转需求对比 SceneSpec测量保存视角截图等轴前顶侧单位 mm · Z-up · 点选模型选择节点已从"
+    },
+    {
+      "name": "C4_snapshot_loaded_readonly",
+      "pass": true,
+      "detail": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）"
+    },
+    {
+      "name": "C5_canvas_rendered",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "C6_result_click",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "C7_result_mode_job_url",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6"
+    },
+    {
+      "name": "C8_result_3d_viewer",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "C9_result_artifact_scene_glb",
+      "pass": true,
+      "detail": "当前结果scene.glb尚未核验版本原始结果类型file选择未选择对象来源model3d_export文件可读取解释当前结果打开原文件技术详情文件scene.glbJobtj_mvx06n6x_a2s6Family未建立Revision未建立实体未声明ID 字段未声明Selection未选择"
+    }
+  ],
+  "allPass": true,
+  "workbench": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr",
+    "msgs": 18,
+    "actionRows": 1,
+    "surface": true,
+    "surfaceVisible": true,
+    "sourceText": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）",
+    "canvas": true,
+    "resultViewer": false,
+    "activeText": "3D 模型Blender 可用Blender 5.2.3 LTSCAD 可用occt-wasmAI 生成 不可用加载示例导入模型导入为场景节点视觉 QAAI 生成参数编辑草图转需求对比 SceneSpec测量保存视角截图等轴前顶侧单位 mm · Z-up · 点选模型选择节点已从聊天载入本次导出的场景快照：model3"
+  },
+  "result": {
+    "url": "http://localhost:3000/project/p_mvtu0b52_9cbr/result?job=tj_mvx06n6x_a2s6",
+    "msgs": 18,
+    "actionRows": 1,
+    "surface": true,
+    "surfaceVisible": true,
+    "sourceText": "model3d/runs/m3d-mvx06lwi-kdwhkm/scene.json（本次导出快照 · 只读；参数/约束编辑写入项目 SceneSpec）",
+    "canvas": true,
+    "resultViewer": true,
+    "activeText": "当前结果scene.glb尚未核验版本原始结果类型file选择未选择对象来源model3d_export文件可读取解释当前结果打开原文件技术详情文件scene.glbJobtj_mvx06n6x_a2s6Family未建立Revision未建立实体未声明ID 字段未声明Selection未选择"
+  }
+}

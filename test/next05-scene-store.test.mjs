@@ -88,6 +88,27 @@ test('NEXT-05 冲突与非法路径 fail-closed', async () => {
   assert.equal((await store.applyOperations({ workspaceRoot: root, relativePath: rel, scene: scene(), operations: [{ op: 'remove_node', id: 'enclosure' }] })).ok, false);
 });
 
+// UI-653 — 聊天产物卡「在 3D 工作台打开」读导出 run 的 scene.json 快照：
+// 读面放行，写面仍只认 .scene3d.json（不把编辑历史写进作业目录）。
+test('UI-653 导出 run 快照只读可读，写面仍拒绝', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ui653-snapshot-'));
+  const rel = 'model3d/runs/m3d_run_1/scene.json';
+  fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
+  fs.writeFileSync(path.join(root, rel), JSON.stringify(scene()));
+  const read = await store.readSceneInput({ workspaceRoot: root, relativePath: rel });
+  assert.equal(read.ok, true, JSON.stringify(read));
+  assert.equal(read.hash, scene3d.hashSceneSpec(scene()));
+  assert.equal(store.normalizeSnapshotPath(rel), rel);
+  assert.equal(store.normalizeSnapshotPath('model3d/runs/m3d_run_1/scene.scene3d.json'), null);
+  const apply = await store.applyOperations({
+    workspaceRoot: root,
+    relativePath: rel,
+    scene: scene(),
+    operations: [{ op: 'set_parameter', name: 'width', value: 130 }],
+  });
+  assert.equal(apply.error, 'scene_path_required');
+});
+
 test('NEXT-05 diff — 节点增删/字段变化与约束变化可核对', () => {
   const before = scene();
   const after = scene({
