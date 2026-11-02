@@ -73,3 +73,9 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 - **P7-2 needs_restart 闭环语义**：self-optimize 判定升级为三态——`ready` 保留 / `blocked` 回滚 / **`ready+restartRequired` → `needs_restart` 保留改动不回滚**（改动经 lint 验证有效但测试面在主仓 closeout 兜底，闭环不伪造 ready）。
 - **P7-3 src/core 域 lint 收缩真跑**：16 条基线条目（no-control-regex ×11 全部码点化 / no-unused-vars ×2 契约名豁免保留 / no-var-requires 失效规则条目清除 / no-undef ×1 补 node:url import / loop-orchestrator 契约名豁免保留）经闭环跑（checkpoint → 修复 → verify lint → ready → 回灌主仓 closeout）。
 - **本切片不做**：require-await 测试域 ~150 条（下一批，机械但需逐类型注解调整）；react-hooks 域 ~100 条（真重构，独立任务线）；detect-object-injection 未覆盖面 ~2100（warning 级，工具域语义护理）。
+
+### §6.1 P7 真跑收口（2026-11-03 同日完成；提交 66acd02d + 75f688b8）
+
+- worktree + checkpoint 锚点（7c8c8f80）→ 16 条修复 → **verify kind lint ready（5.3s scoped eslint，9 改动文件，restartRequired=true 如实）** → 回灌主仓 → lint 0 error、test:changed 752 项全绿 → closeout PASS。
+- 实机抓真：①worktree 内 eslint 不认 `--no-suppressions` 旗标（flat config 后移除）；②修复后基线留 16 条未使用条目 → lint exit 2 如实暴露「修复未完成」，prune 后才 ready——验证器语义正确；③worktree 全仓 lint 有 40 个 type-aware 伪影 → scoped eslint 设计成立。
+- needs_restart 语义实跑验证：restartRequired=true 时闭环保留不回滚（若走 workflow 全链，outcome=needs_restart 留人工 closeout——契约 10/10 钉死）。

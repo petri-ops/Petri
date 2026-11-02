@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-03（**BLOCK-335 P7 切片完成——verify kind lint + needs_restart 语义 + src/core 域 16 条收缩（基线 304→293），closeout PASS**。lint 收缩任务线下批=require-await 测试域 ~150 条（待发令）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 首批题真跑完成——lint 收缩 7 条、基线 311→304、closeout PASS（4d581110）**；闭环首任务跑通，下批候选=src/core 域 299 条需重启面任务线。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 自优化闭环整包 COMPLETED**——判据驱动驾驶员上线：complete 声明必须结构化验证背书，红→retry≤2→block；verify/checkpoint 入 workflow 原语；self-optimize 闭环脚本过沙箱；实机 17/17（绿保留/红回滚树零 diff/observe 落账）。**闭环首个真实任务=lint 存量收缩（首批题已采纳），待发令跑**。详见 AUDIT-LOG 顶部条目与 plan §5。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-337 治理运行时化整包 COMPLETED（第二批 P2/P3/P4/P5/P6/P7③ 当日收口）**——「项目打开即装载」端到端成立、并行互斥进 docs:check 机械门、completed 硬绑 closeout 原语、落账模板化、坡道观察接入规则账本、实机五腿 35/35。详见 AUDIT-LOG 顶部条目与 plan §3.1。当前无 active 工作包；队列下一包=335（就绪，缺首批题）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
