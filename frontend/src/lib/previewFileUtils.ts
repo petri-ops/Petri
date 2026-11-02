@@ -8,9 +8,6 @@ export function fileExtension(name?: string): string {
   return idx >= 0 && name ? name.slice(idx + 1).toLowerCase() : '';
 }
 
-export function isImageFile(name?: string): boolean {
-  return ['png', 'apng', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'avif', 'bmp', 'ico', 'tif', 'tiff', 'heic', 'heif'].includes(fileExtension(name));
-}
 
 export function isTextFile(name?: string): boolean {
   return [

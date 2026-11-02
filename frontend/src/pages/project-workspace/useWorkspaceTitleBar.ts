@@ -47,9 +47,8 @@ interface UseWorkspaceTitleBarOptions {
   setRightOpen: (open: boolean) => void;
   setRightTab: (tab: RightPanelMode) => void;
   setRightToolMenuOpen: Dispatch<SetStateAction<boolean>>;
-  // BLOCK-253 E1 — 宿主入口统一：中心模式/终端/侧聊与右轨面同菜单列出。
-  workspaceMode: string;
-  onSwitchWorkspaceMode: (mode: 'result' | 'code' | 'compare' | 'history') => void;
+  // BLOCK-253 E1 — 宿主入口统一：终端/侧聊与右轨面同菜单列出。
+  // BLOCK-334 — 中央结果四态项（host:mode:*）随四态退役移除：结果子态切换在右栏结果 tab 内。
   bottomTerminalOpen: boolean;
   onToggleBottomTerminal: () => void;
   /** UI-627 — 侧聊入口：开/聚焦侧聊原生独立窗（唯一保留入口）。 */
@@ -83,8 +82,6 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     setRightOpen,
     setRightTab,
     setRightToolMenuOpen,
-    workspaceMode,
-    onSwitchWorkspaceMode,
     bottomTerminalOpen,
     onToggleBottomTerminal,
     onToggleSideChat,
@@ -119,16 +116,12 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     () => surfaces.filter((surface) => surface.id !== 'home' && isTabSurface(surface)),
     [surfaces]
   );
-  // BLOCK-253 E1 — 宿主入口统一：工作区模式/底部终端/侧聊与右轨面同一菜单。
+  // BLOCK-253 E1 — 宿主入口统一：底部终端/侧聊与右轨面同一菜单。
   const hostToolItems = useMemo(() => [
-    { id: 'host:mode:result', label: '结果', icon: 'bar-chart' as const, isOpen: workspaceMode === 'result' },
-    { id: 'host:mode:code', label: '代码', icon: 'layers' as const, isOpen: workspaceMode === 'code' },
-    { id: 'host:mode:compare', label: '审查', icon: 'git-branch' as const, isOpen: workspaceMode === 'compare' },
-    { id: 'host:mode:history', label: '历史', icon: 'message-circle' as const, isOpen: workspaceMode === 'history' },
     { id: 'host:terminal', label: '终端', icon: 'terminal' as const, isOpen: bottomTerminalOpen },
     // UI-627 — 侧聊为原生独立窗，主窗无法感知开关态，高亮退场（标签保留）
     { id: 'host:side-chat', label: '侧聊', icon: 'message-circle' as const },
-  ], [workspaceMode, bottomTerminalOpen]);
+  ], [bottomTerminalOpen]);
   const titleBarResultItems = useMemo(() => conversationJobs.map((job) => {
     const status = job.status === 'done'
       ? '完成'
@@ -220,11 +213,6 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
           setRightToolMenuOpen(false);
           return;
         }
-        if (itemId.startsWith('host:mode:')) {
-          onSwitchWorkspaceMode(itemId.slice('host:mode:'.length) as 'result' | 'code' | 'compare' | 'history');
-          setRightToolMenuOpen(false);
-          return;
-        }
         if (itemId === 'results') {
           handleOpenRightResults();
           setRightToolMenuOpen(false);
@@ -260,7 +248,6 @@ export function useWorkspaceTitleBar(options: UseWorkspaceTitleBarOptions): void
     surfaces,
     toolSurfaceItems,
     hostToolItems,
-    onSwitchWorkspaceMode,
     onToggleBottomTerminal,
     onToggleSideChat,
     projectName,

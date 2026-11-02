@@ -1,0 +1,44 @@
+{
+  "name": "block334-p2-text-selection-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T08:52:59.491Z",
+  "finishedAt": "2026-11-02T08:53:01.516Z",
+  "assertions": [
+    {
+      "name": "V0_repo_root_project_present",
+      "pass": true,
+      "detail": "p_mvtu0b52_9cbr"
+    },
+    {
+      "name": "V1_spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=model3d%2Fabs-enclosure-120x80x30.scene3d.json&job=tj_mvx06n6x_a2s6"
+    },
+    {
+      "name": "V2_codemirror_mounted_inside_preview_container",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "V3_dom_selection_inside_cm_is_sampleable_by_container_rule",
+      "pass": true,
+      "detail": "{\"text\":\"{\",\"collapsed\":false,\"contained\":true}"
+    },
+    {
+      "name": "V4_codemirror_state_synced_from_dom_selection",
+      "pass": true,
+      "detail": "{\"selectionLayer\":false,\"focusInCm\":true,\"stillText\":1}"
+    },
+    {
+      "name": "V5_host_selection_action_bar_appears_for_cm_selection",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "V6_screenshot_captured",
+      "pass": true,
+      "detail": "block334-p2-text-selection-live.png"
+    }
+  ],
+  "allPass": true
+}

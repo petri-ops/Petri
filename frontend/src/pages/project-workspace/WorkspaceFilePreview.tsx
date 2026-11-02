@@ -3,21 +3,6 @@
 // 零行为变化；主文件按既有惯例再导出保持 '@/pages/project-workspace' 导入路径兼容。
 // ============================================================
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
-
-// UI-305 P1 — sanitize schema（原 project-workspace.tsx 模块级常量，唯一消费方随迁）
-const markdownSanitizeSchema = {
-  ...defaultSchema,
-  attributes: {
-    ...defaultSchema.attributes,
-    code: [...(defaultSchema.attributes?.code || []), ['className']],
-    span: [...(defaultSchema.attributes?.span || []), ['className']],
-    div: [...(defaultSchema.attributes?.div || []), ['className']],
-  },
-};
 import { Icon } from '@/components/icons/Icon';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
@@ -27,7 +12,12 @@ import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import type { EditorApi } from '@/components/editor/CodeMirror/types';
 import { WorkspaceFilePreviewBridge } from '@/components/editor';
 import { useTheme } from '@/themes/ThemeProvider';
-import { isImageFile, isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
+import { formatPreviewText } from '@/lib/previewFileUtils';
+// BLOCK-334 P2 Slice A — 类型分派唯一源=viewerRegistry；Markdown/表格/HTML 渲染收敛到共享 viewer
+import { resolveResultViewer } from '@/components/result-studio/viewerRegistry';
+import { MarkdownViewer } from '@/components/viewers/MarkdownViewer';
+import { TableViewer } from '@/components/viewers/TableViewer';
+import { HtmlViewer } from '@/components/viewers/HtmlViewer';
 import { meshFormatForPath } from '@/lib/meshAssets';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -39,7 +29,7 @@ import styles from '../project-workspace.module.css';
 import type { ActiveWorkspaceFile } from './types';
 import { BinaryPreviewCard } from './BinaryPreviewCard';
 import { OfficePreviewPane } from './OfficePreviewPane';
-import { isCsvFile, isPdfFile, isHtmlFile, isJsonFile, withReportTheme, detectOfficeKind } from './helpers';
+import { withReportTheme, detectOfficeKind } from './helpers';
 // BLOCK-219 Q6 — 工作区文件批注（PDF/图像）；进对话仍走唯一通道 copilotAsk
 import { AnnotatableImagePane } from '@/components/annotations/AnnotatableImagePane';
 import { AnnotatablePdfPane } from '@/components/annotations/AnnotatablePdfPane';
@@ -109,13 +99,19 @@ export function WorkspaceFilePreview({
   const editorApiRef = useRef<EditorApi | null>(null);
   const previewBodyRef = useRef<HTMLDivElement | null>(null);
 
-  const isImage = isImageFile(file?.name);
-  const isText = isTextFile(file?.name);
-  const isMarkdown = isMarkdownFile(file?.name);
-  const isCsv = isCsvFile(file?.name);
-  const isPdf = isPdfFile(file?.name);
-  const isHtml = isHtmlFile(file?.name);
-  const isJson = isJsonFile(file?.name);
+  // BLOCK-334 P2 — 唯一分派源=viewerRegistry（office docx/pptx/odt/odp 不在其域，detectOfficeKind 先行）。
+  // 例外：.scene3d.json 在注册表命中 model3d（SceneSpec 源真相），文件宿主按 json 文本预览（顶部已有「在 3D 模型打开」）。
+  const isSceneSpec = /\.scene3d\.json$/i.test(file?.name || '');
+  const viewerAdapter = file
+    ? resolveResultViewer({ kind: 'file', fileName: file.name, preview: true }).adapter
+    : 'binary';
+  const isImage = viewerAdapter === 'image';
+  const isText = viewerAdapter === 'text';
+  const isMarkdown = viewerAdapter === 'markdown';
+  const isCsv = viewerAdapter === 'table';
+  const isPdf = viewerAdapter === 'pdf';
+  const isHtml = viewerAdapter === 'report';
+  const isJson = viewerAdapter === 'json' || isSceneSpec;
   const officeKind = detectOfficeKind(file?.name);
   const codeLanguage = codeLanguageForFile(file?.name);
   const previewUrl = useMemo(() => {
@@ -176,7 +172,7 @@ export function WorkspaceFilePreview({
         });
       return () => { cancelled = true; revokeOfficePreviewBlobs(); };
     }
-    if (!isText && !isCsv && !isJson) {
+    if (!isText && !isCsv && !isJson && !isMarkdown) {
       setStatus('unsupported');
       return () => { cancelled = true; };
     }
@@ -281,10 +277,10 @@ export function WorkspaceFilePreview({
   // 之前注册——否则无文件 → 打开文件的首次渲染 Hook 数从 N 变 N+2，React 抛
   // "Rendered more hooks" 导致整窗白屏（实机点击 md 复现）。
   const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' =
-    isCsv ? 'csv'
+    isSceneSpec || isJson ? 'json'
+    : isCsv ? 'csv'
     : isPdf ? 'pdf'
     : isHtml ? 'html'
-    : isJson ? 'json'
     : isMarkdown ? 'markdown'
     : isImage ? 'image'
     : isText ? 'text'
@@ -485,7 +481,8 @@ export function WorkspaceFilePreview({
           />
         )}
         {status === 'ready' && fallbackKind === 'html' && (
-          <iframe
+          /* BLOCK-334 P2 — HtmlViewer；主题参数由宿主算好传 src */
+          <HtmlViewer
             src={withReportTheme(previewUrl, resolvedTheme)}
             title={file.name}
             className={styles.workspaceHtmlIframe}
@@ -493,42 +490,23 @@ export function WorkspaceFilePreview({
           />
         )}
         {status === 'ready' && fallbackKind === 'csv' && previewData && previewData.length > 0 && (
-          <div className={styles.workspaceCsvPreview}>
-            <table>
-              <thead>
-                <tr>
-                  {previewData[0].map((cell, idx) => (
-                    <th key={`${cell || 'col'}-${idx}`}>{cell || `列 ${idx + 1}`}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {previewData.slice(1, 41).map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {previewData[0].map((_, cellIndex) => (
-                      <td key={cellIndex}>{row[cellIndex] || '—'}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {previewData.length > 41 && (
-              <p className={styles.workspaceCsvHint}>
-                已展示前 40 行 / 共 {previewData.length - 1} 行，完整数据请在外部工具打开。
-              </p>
-            )}
-          </div>
+          /* BLOCK-334 P2 — TableViewer（clipped：40 行截断 + 外部工具提示） */
+          <TableViewer
+            rows={previewData}
+            mode="clipped"
+            clipRows={40}
+            classNames={{ root: styles.workspaceCsvPreview, hint: styles.workspaceCsvHint }}
+          />
         )}
         {status === 'ready' && fallbackKind === 'markdown' && mdView === 'preview' && (
-          <div
-            ref={mdPreviewRef}
+          /* BLOCK-334 P2 — MarkdownViewer（text 源直渲染）；TOC gutter 与相对链接宿主化经 className/components/bodyRef 注入 */
+          <MarkdownViewer
+            source={{ kind: 'text', text }}
+            name={file.name}
+            bodyRef={mdPreviewRef}
             className={`${styles.workspaceMarkdownPreview}${mdTocOpen && mdTocItems.length > 0 ? ` ${styles.workspaceMarkdownPreviewTocGutter}` : ''}`}
-          >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight, [rehypeSanitize, markdownSanitizeSchema]]}
-              components={{
-                a: ({ href, children, ...props }) => {
+            components={{
+              a: ({ href, children, ...props }) => {
                   if (!href || !onOpenFile || !file) return <a {...props} href={href}>{children}</a>;
                   // Skip external links and anchors
                   if (href.startsWith('http') || href.startsWith('mailto') || href.startsWith('#')) {
@@ -558,10 +536,7 @@ export function WorkspaceFilePreview({
                   );
                 },
               }}
-            >
-              {text}
-            </ReactMarkdown>
-          </div>
+          />
         )}
         {status === 'ready' && fallbackKind === 'markdown' && mdView === 'edit' && (
           /* BLOCK-42 — pending-scroll 消费侧挂载：textarea → CodeMirror（跳转/pulse 联动） */

@@ -51,7 +51,6 @@ describe('BLOCK-322 UI-653 产物卡落地动作', () => {
       jobId: 'tj_1',
       artifactName: 'scene.glb',
       projectId: 'p1',
-      switchToResult: true,
     });
 
     fireEvent.click(within(row).getByRole('button', { name: '在 3D 工作台打开' }));

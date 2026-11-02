@@ -43,8 +43,6 @@ function options(overrides: Record<string, unknown> = {}) {
     setRightOpen: vi.fn(),
     setRightTab: vi.fn(),
     setRightToolMenuOpen: vi.fn(),
-    workspaceMode: 'chat',
-    onSwitchWorkspaceMode: vi.fn(),
     bottomTerminalOpen: false,
     onToggleBottomTerminal: vi.fn(),
     sideChatOpen: false,
@@ -76,21 +74,19 @@ describe('useWorkspaceTitleBar (BLOCK-250 loop regression)', () => {
 });
 
 describe('useWorkspaceTitleBar host entries (BLOCK-253 E1)', () => {
-  it('lists center modes/terminal/side-chat and dispatches via one menu', () => {
-    const onSwitchWorkspaceMode = vi.fn();
+  it('lists terminal/side-chat and dispatches via one menu; center result modes retired (BLOCK-334)', () => {
     const onToggleBottomTerminal = vi.fn();
     const onToggleSideChat = vi.fn();
     renderHook((props) => useWorkspaceTitleBar(props), {
-      initialProps: options({ onSwitchWorkspaceMode, onToggleBottomTerminal, onToggleSideChat }),
+      initialProps: options({ onToggleBottomTerminal, onToggleSideChat }),
     });
     const patch = updateTitleBar.mock.calls.at(-1)?.[0];
     expect(patch).toBeTruthy();
     if (!patch) return;
     const ids = (patch.toolMenuItems || []).map((item) => item.id);
-    expect(ids).toEqual(expect.arrayContaining([
-      'host:mode:result', 'host:mode:code', 'host:mode:compare', 'host:mode:history',
-      'host:terminal', 'host:side-chat',
-    ]));
+    expect(ids).toEqual(expect.arrayContaining(['host:terminal', 'host:side-chat']));
+    // 结果子态切换只在右栏结果 tab 内，标题栏菜单不再列中央四态项
+    expect(ids.some((id) => String(id).startsWith('host:mode:'))).toBe(false);
     expect(patch.onSelectToolItem).toBeTruthy();
     const onSelect = patch.onSelectToolItem;
     if (!onSelect) return;
@@ -98,7 +94,5 @@ describe('useWorkspaceTitleBar host entries (BLOCK-253 E1)', () => {
     expect(onToggleBottomTerminal).toHaveBeenCalledTimes(1);
     onSelect('host:side-chat');
     expect(onToggleSideChat).toHaveBeenCalledTimes(1);
-    onSelect('host:mode:compare');
-    expect(onSwitchWorkspaceMode).toHaveBeenCalledWith('compare');
   });
 });

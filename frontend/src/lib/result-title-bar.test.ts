@@ -2,26 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { buildResultTitleBarTitle } from './result-title-bar';
 
 describe('result-title-bar', () => {
-  it('keeps project identity in conversation mode', () => {
-    // chat mode (and any unrecognized mode) shows the project name only —
-    // handleOpenResult preserves 'chat' on auto-open from HomePage so the
-    // user sees WHICH project they're in instead of a lone artifact name.
-    expect(buildResultTitleBarTitle('chat', 'golden-path')).toBe('golden-path');
-    expect(buildResultTitleBarTitle('chat', 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('golden-path');
+  it('keeps project identity when no result is focused in the right rail', () => {
+    // 右栏结果 tab 未激活（或无任务）时只显示项目名——用户任何时候都要看见自己在哪个项目（UI-181）。
+    expect(buildResultTitleBarTitle(false, 'golden-path')).toBe('golden-path');
+    expect(buildResultTitleBarTitle(false, 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('golden-path');
   });
 
-  it('uses the active result as the top-level title with project as secondary', () => {
-    // BLOCK-10-audit-closeout: home.tsx previously auto-navigated with
-    // `?mode=scheduled` which fell through to `result` mode via
-    // handleOpenResult, hiding the project name behind '样本对齐详情·结果'.
-    // New shape keeps both visible so users always know the project context.
-    expect(buildResultTitleBarTitle('result', 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('GO-BP 气泡图 (PNG) · 结果 · golden-path');
-    expect(buildResultTitleBarTitle('code', 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('GO-BP 气泡图 (PNG) · 代码 · golden-path');
-    expect(buildResultTitleBarTitle('compare', 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('GO-BP 气泡图 (PNG) · 审查修改 · golden-path');
-    expect(buildResultTitleBarTitle('history', 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('GO-BP 气泡图 (PNG) · 版本历史 · golden-path');
+  it('prefixes the focused artifact while keeping the project as secondary context', () => {
+    // BLOCK-334 — 中央四态退役：不再拼「· 结果/代码/审查修改/版本历史」模式后缀，
+    // 判据改为右栏结果 tab 激活且有产物。
+    expect(buildResultTitleBarTitle(true, 'golden-path', 'GO-BP 气泡图 (PNG)')).toBe('GO-BP 气泡图 (PNG) · golden-path');
   });
 
-  it('falls back to mode + project when no artifact is selected', () => {
-    expect(buildResultTitleBarTitle('result', 'golden-path')).toBe('结果 · golden-path');
+  it('falls back to the project when the focused result has no artifact yet', () => {
+    expect(buildResultTitleBarTitle(true, 'golden-path')).toBe('golden-path');
+    expect(buildResultTitleBarTitle(true, undefined)).toBe('梳理开发进展');
   });
 });

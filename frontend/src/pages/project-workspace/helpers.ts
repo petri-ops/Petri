@@ -10,22 +10,8 @@
 // extracted by BLOCK-9 PHASE 3 senior-engineer-review split.
 // ============================================================
 
-import { fileExtension } from '@/lib/previewFileUtils';
+// BLOCK-334 P2 — isCsvFile/isPdfFile/isHtmlFile/isJsonFile 四个判定随 viewerRegistry 唯一分派退役。
 import type { OfficePreviewKind } from '@/lib/office-file-preview';
-
-export function isCsvFile(name?: string): boolean {
-  const ext = fileExtension(name);
-  return ext === 'csv' || ext === 'tsv';
-}
-
-export function isPdfFile(name?: string): boolean {
-  return fileExtension(name) === 'pdf';
-}
-
-export function isHtmlFile(name?: string): boolean {
-  const ext = fileExtension(name);
-  return ext === 'html' || ext === 'htm';
-}
 
 export function withReportTheme(url: string, theme: 'light' | 'dark'): string {
   if (!url) return url;
@@ -33,9 +19,6 @@ export function withReportTheme(url: string, theme: 'light' | 'dark'): string {
   return `${url}${separator}theme=${theme}`;
 }
 
-export function isJsonFile(name?: string): boolean {
-  return fileExtension(name) === 'json' || fileExtension(name) === 'jsonl';
-}
 
 export function detectOfficeKind(name?: string): OfficePreviewKind | null {
   if (!name) return null;

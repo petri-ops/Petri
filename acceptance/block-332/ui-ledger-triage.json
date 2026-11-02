@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-02T06:01:07.655Z",
+  "generatedAt": "2026-11-02T08:00:33.376Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 451,
-  "uniqueIds": 442,
+  "sections": 453,
+  "uniqueIds": 444,
   "counts": {
+    "verified": 414,
     "blocked": 23,
-    "verified": 412,
     "live-missing": 5,
     "closed": 11
   },

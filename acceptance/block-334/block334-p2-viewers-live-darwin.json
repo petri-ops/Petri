@@ -1,0 +1,54 @@
+{
+  "name": "block334-p2-viewers-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T07:51:25.504Z",
+  "finishedAt": "2026-11-02T07:51:29.473Z",
+  "assertions": [
+    {
+      "name": "V0_repo_root_project_present",
+      "pass": true,
+      "detail": "p_mvtu0b52_9cbr Petri"
+    },
+    {
+      "name": "V1_spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvwkuqg5_utcx"
+    },
+    {
+      "name": "V2_markdown_renders_via_shared_viewer_with_host_class",
+      "pass": true,
+      "detail": "{\"aria\":\"Markdown 预览：sample.md\",\"hostClass\":true,\"table\":true,\"tp53\":true,\"hljs\":true}"
+    },
+    {
+      "name": "V2b_markdown_unified_plugin_set_highlight",
+      "pass": true,
+      "detail": "{\"aria\":\"Markdown 预览：sample.md\",\"hostClass\":true,\"table\":true,\"tp53\":true,\"hljs\":true}"
+    },
+    {
+      "name": "V3_csv_renders_via_shared_table_viewer_clipped",
+      "pass": true,
+      "detail": "{\"rows\":40,\"hint\":true}"
+    },
+    {
+      "name": "V4_html_renders_via_shared_html_viewer_sandboxed_themed",
+      "pass": true,
+      "detail": "{\"sandbox\":\"\",\"themed\":true}"
+    },
+    {
+      "name": "V5a_scene3d_sample_exists",
+      "pass": true,
+      "detail": "abs-enclosure-120x80x30.scene3d.json"
+    },
+    {
+      "name": "V5_scene3d_json_keeps_text_preview_and_3d_open_button",
+      "pass": true,
+      "detail": "{\"button\":true,\"editor\":true,\"binaryCard\":false}"
+    },
+    {
+      "name": "V6_screenshot_captured",
+      "pass": true,
+      "detail": "block334-p2-viewers-live.png"
+    }
+  ],
+  "allPass": true
+}

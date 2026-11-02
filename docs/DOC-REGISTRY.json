@@ -8808,7 +8808,7 @@
         "checkpoint",
         "G0"
       ],
-      "notes": "自优化闭环 v1（用户裁决 2026-11-02「立项 自优化闭环」）planned：P0 勘察完成（evals-harness/test-affected/workspace-checkpoint/workflow-runner 接口锚定）；BLOCK-334 active 在制故排队，334 收口后顶队列头；撞裁决=worktree 纪律重开确认 + 首批任务清单。"
+      "notes": "任务推进闭环 v1（2026-11-02 升级定位：判据驱动驾驶员——验证结果投票 loop decision，模型自报 complete 但验证红不得 ready；改自己为首个用例）planned：P0 驾驶员 + P1 基座 + P2 脚本 + P3 worktree 隔离 + P4 实机 + P5 坡道护航；队列 334→338→336→337→335。"
     },
     {
       "id": "BLOCK-336-WORKTREE-INFRASTRUCTURE",
@@ -8849,8 +8849,28 @@
         "G0"
       ],
       "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）planned：P0 引擎/规则包分离（按项目类型自动挂载：软件治理包/bio pack 规则/轻量默认/零规则；Petri 治理只是第一个规则包，引擎不内嵌项目专属规则）；治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行；收口 completed 硬绑 closeout 全绿；台账自动落账。队列 336→337→334 收口→335。 P7 自我边界三防线：引擎无知（源码扫描禁业务词）/空规则合法默认/规则从坡道观察沉淀且误拦自动退化。"
+    },
+    {
+      "id": "BLOCK-338-STREAM-STALL-WATCHDOG",
+      "capability": "block-338-stream-stall-watchdog",
+      "path": "docs/block-338-stream-stall-watchdog-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-338-stream-stall-watchdog",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "reliability",
+        "llm",
+        "streaming",
+        "stability",
+        "G0"
+      ],
+      "notes": "模型流式 stall 看门狗（用户裁决 2026-11-02「事关推进稳定性 必须全力解决」）planned，插队 334 收口后首位：根因=全部提供者只有 socket idle timeout（上游发心跳不发 token 永不触发，150s>90s 数值矛盾即证）；修在 ModelGateway 单点（首 token 45s/idle 60s，心跳不续命）；根治 2026-10-30 起挂的 /api/ai/chat hang。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 449
+  "documentCount": 450
 }

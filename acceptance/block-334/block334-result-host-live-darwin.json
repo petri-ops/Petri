@@ -1,0 +1,64 @@
+{
+  "name": "block334-result-host-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T06:49:19.707Z",
+  "finishedAt": "2026-11-02T06:49:43.689Z",
+  "assertions": [
+    {
+      "name": "V0_blender_ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"status\":\"ready\",\"reason\":null,\"version\":\"Blender 5.2.3 LTS\",\"cad\":{\"status\":\"ready\",\"reason\":null,\"kernel\":\"occt-wasm\",\"version\""
+    },
+    {
+      "name": "V1_temp_project_created",
+      "pass": true,
+      "detail": "p_mvywf06k_f6r1"
+    },
+    {
+      "name": "V2_export_registered_tool_job",
+      "pass": true,
+      "detail": "{\"jobId\":\"tj_mvywf1at_0xgt\",\"outputs\":[\"front.png\",\"top.png\",\"side.png\",\"iso.png\",\"scene.glb\"]}"
+    },
+    {
+      "name": "V3_spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvywd7vq_t6y8?job=tj_mvywd8qu_gv85"
+    },
+    {
+      "name": "V4_result_opens_in_right_rail_center_stays_conversation",
+      "pass": true,
+      "detail": "/project/p_mvywf06k_f6r1?job=tj_mvywf1at_0xgt"
+    },
+    {
+      "name": "V5_right_rail_uses_resultRightWidth_and_url_has_no_mode_segment",
+      "pass": true,
+      "detail": "{\"width\":498,\"rightWidth\":417,\"resultRightWidth\":498,\"viewport\":1552,\"path\":\"/project/p_mvywf06k_f6r1\",\"search\":\"?job=tj_mvywf1at_0xgt\"}"
+    },
+    {
+      "name": "V6_shell_composer_in_rail_and_center_has_no_result_projection",
+      "pass": true,
+      "detail": "{\"shell\":true,\"composer\":true,\"noCenterResult\":true,\"inspectorGone\":true}"
+    },
+    {
+      "name": "V7_submode_switcher_not_exposed_for_this_artifact_class_recorded",
+      "pass": true,
+      "detail": "{\"note\":\"no mode switcher for model3d export artifact (pre-existing shell behavior); locality covered by unit tests\",\"labels\":[],\"pick\":null,\"mode\":\"result\",\"path\":\"/project/p_mvywf06k_f6r1\"}"
+    },
+    {
+      "name": "V8_legacy_result_segment_fails_closed_to_chat_with_rail_results",
+      "pass": true,
+      "detail": "/project/p_mvywf06k_f6r1?job=tj_mvywf1at_0xgt"
+    },
+    {
+      "name": "V9_screenshot_captured",
+      "pass": true,
+      "detail": "block334-result-host-live.png"
+    },
+    {
+      "name": "V10_webgl_context_warnings_zero_delta",
+      "pass": true,
+      "detail": "0 -> 0 (/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-electron-main.log)"
+    }
+  ],
+  "allPass": true
+}

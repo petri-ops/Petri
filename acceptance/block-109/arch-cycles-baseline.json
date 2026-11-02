@@ -10,7 +10,6 @@
     "core/petri-server/agent-runner.js -> core/petri-server/helpers/agent-fallback.js -> core/petri-server/routes/ai-agent/resume.js",
     "core/petri-server/agent-runner.js -> core/petri-server/loop-orchestrator.js -> core/petri-server/agent-tools/index.js -> core/petri-server/agent-tools/agent-tool-interceptor.js -> core/petri-server/agent-tools/registry.js -> core/petri-server/agent-tools/spawn-agent-tools.js",
     "core/petri-server/agent-tools/registry.js -> core/petri-server/agent-tools/tool-defs.js",
-    "core/petri-server/db/connection.js -> core/petri-server/db/schema.js",
     "core/petri-server/helpers/guest-permissions.js -> core/petri-server/helpers/permissions.js",
     "frontend/src/components/editor/CodeMirror/extensions/unifiedDiff.ts -> frontend/src/components/editor/CodeMirror/types.ts",
     "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",

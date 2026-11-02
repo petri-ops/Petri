@@ -41,11 +41,7 @@ interface UseWorkspaceOpenEffectsOptions {
   pendingArtifactNameRef: MutableRefObject<string | null>;
   pendingArtifactJobIdRef: MutableRefObject<string | null>;
   setPendingArtifactName: Dispatch<SetStateAction<string | null>>;
-  handleOpenResult: (
-    jobId: string,
-    targetProjectId?: string | null,
-    options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode }
-  ) => Promise<boolean>;
+  handleOpenResult: (jobId: string, targetProjectId?: string | null) => Promise<boolean>;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   openRightPanel: (tab: import('./rightPanelTabs').RightPanelMode) => void;
   navigate: NavigateFunction;
@@ -97,16 +93,11 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
         pendingArtifactJobIdRef.current = requestedJobId;
         setPendingArtifactName(requestedArtifactName);
       }
-      if (
-        activeJobId === requestedJobId &&
-        (workspaceMode === 'result' || workspaceMode === 'code' || workspaceMode === 'compare' || workspaceMode === 'history' || workspaceMode === 'chat')
-      ) return;
+      // BLOCK-334 — 结果统一落右栏：已绑定同一任务即不重复打开，与中央模式无关。
+      if (activeJobId === requestedJobId) return;
       if (autoOpenedJobRef.current === requestedJobId) return;
       autoOpenedJobRef.current = requestedJobId;
-      void handleOpenResult(requestedJobId, projectId, {
-        preserveWorkspaceMode: workspaceMode === 'chat' || workspaceMode === 'history',
-        workspaceMode,
-      }).then((opened) => {
+      void handleOpenResult(requestedJobId, projectId).then((opened) => {
         // BLOCK-185（Race A）：打开失败清一次性消费标记，让后续 jobs/activeJobId 变化时重试
         // （冷启动后端未就绪场景已由 handleOpenResult 内部退避重试兜住，此为二道防线）。
         if (!opened && autoOpenedJobRef.current === requestedJobId) autoOpenedJobRef.current = null;
@@ -139,22 +130,21 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
     return unsub;
   }, [handleOpenResult]);
   useEffect(() => {
-    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null; switchToResult?: boolean }) => {
+    const handler = (detail: { jobId: string; artifactName: string; projectId?: string | null }) => {
       if (!detail?.jobId || !detail?.artifactName) return;
       const targetProjectId = detail.projectId || projectId;
       pendingArtifactNameRef.current = detail.artifactName;
       pendingArtifactJobIdRef.current = detail.jobId;
       setPendingArtifactName(detail.artifactName);
       if (targetProjectId && targetProjectId !== projectId) {
-        const mode = detail.switchToResult ? 'result' : 'chat';
         void navigate(
-          `/project/${encodeURIComponent(targetProjectId)}?mode=${mode}&job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
+          `/project/${encodeURIComponent(targetProjectId)}?job=${encodeURIComponent(detail.jobId)}&artifact=${encodeURIComponent(detail.artifactName)}`,
         );
         return;
       }
-      // UI-653 — 显式要求结果视图时必须让 URL 带上 job，否则结果面拿不到 artifacts
-      // （preserve 路径只切右栏 tab，中央仍留 chat，结果面板会停空态）。
-      void handleOpenResult(detail.jobId, targetProjectId || null, { preserveWorkspaceMode: detail.switchToResult !== true });
+      // BLOCK-334 — 结果统一落右栏「结果」tab（原 UI-653 的 preserve/switchToResult
+      // 双路径随中央四态退役消失：不存在「只切 tab 但结果面停空态」的分支了）。
+      void handleOpenResult(detail.jobId, targetProjectId || null);
     };
     const unsub = subscribePetriEvent(petriEvents.projectOpenArtifact, handler);
     return unsub;
@@ -185,7 +175,7 @@ export function useWorkspaceOpenEffects(options: UseWorkspaceOpenEffectsOptions)
         // Cross-project workspace files are out of scope for the desktop
         // workspace (each project has its own file tree); the chat host
         // can decide to navigate or surface a toast.
-        void navigate(`/project/${encodeURIComponent(detail.projectId)}?mode=chat&file=${encodeURIComponent(detail.relativePath || '')}`);
+        void navigate(`/project/${encodeURIComponent(detail.projectId)}?file=${encodeURIComponent(detail.relativePath || '')}`);
         return;
       }
       const file: ActiveWorkspaceFile = {
