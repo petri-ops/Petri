@@ -4599,15 +4599,17 @@
     },
     {
       "id": "BLOCK-91-COMPOSER-ATTACH-EXPORT",
-      "path": "docs/block-91-composer-attach-export-plan.md",
+      "path": "docs/archive/checkpoints/block-91-composer-attach-export-plan.md",
       "kind": "work-package",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
-      "truthDomain": "block-91-composer-attach-export",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
+      "archivePolicy": "archive_after_completion",
       "phase": "COMPLETED",
-      "lastUpdated": "2026-09-16"
+      "lastUpdated": "2026-09-16",
+      "notes": "｜2026-11-02 BLOCK-331 批次收口按 docs:reconcile 归档清债（零入向引用，仅注册表自指）：文件原样搬移 docs/archive/checkpoints/，不改写内容。",
+      "tags": [
+        "archived-2026-11"
+      ]
     },
     {
       "id": "BLOCK-90-OS-DRAG-IMPORT",

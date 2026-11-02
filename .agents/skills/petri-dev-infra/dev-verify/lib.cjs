@@ -321,7 +321,6 @@ function pngPixelStats(buffer) {
 module.exports = {
   DEFAULT_PORT,
   TEST_INSTANCE_PORT,
-  PLATFORM_TAG,
   connectTestTarget,
   withInputShield,
   findRepoRoot,

@@ -218,7 +218,7 @@ async function run(ctx) {
 
     fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
     // 明细按平台落名（BLOCK-330 C 项同口径）：两侧各留一份，不互相覆盖。
-    fs.writeFileSync(path.join(EVIDENCE_DIR, `block322-p2-04-turntable-detail-${lib.PLATFORM_TAG}.json`), `${JSON.stringify({
+    fs.writeFileSync(path.join(EVIDENCE_DIR, `block322-p2-04-turntable-detail-${process.platform}.json`), `${JSON.stringify({
       generatedAt: new Date().toISOString(),
       platform: `${process.platform}-${process.arch}`,
       capability: capability.data,

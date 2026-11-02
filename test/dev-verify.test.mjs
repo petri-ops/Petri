@@ -64,7 +64,6 @@ describe('dev-verify lib.cjs 纯逻辑', () => {
       // BLOCK-330：证据名按平台自落（darwin/win32/linux 原值，不用 macos/mac 别名）
       const file = path.join(dir, `my-flow-1-live-${process.platform}.json`);
       assert.ok(fs.existsSync(file), '证据 JSON 以 slug + 平台命名落盘');
-      assert.equal(lib.PLATFORM_TAG, process.platform);
       const written = JSON.parse(fs.readFileSync(file, 'utf8'));
       assert.deepEqual(
         Object.keys(written).sort(),

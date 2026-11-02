@@ -1,8 +1,8 @@
 {
   "name": "block322-p2-04-turntable-live",
   "platform": "darwin",
-  "startedAt": "2026-11-02T02:58:26.907Z",
-  "finishedAt": "2026-11-02T02:58:30.129Z",
+  "startedAt": "2026-11-02T03:11:33.635Z",
+  "finishedAt": "2026-11-02T03:11:37.617Z",
   "assertions": [
     {
       "name": "V0_blender_ready",
@@ -12,7 +12,7 @@
     {
       "name": "V1_temp_project_with_workspace",
       "pass": true,
-      "detail": "{\"projectId\":\"p_mvyo6349_wyws\"}"
+      "detail": "{\"projectId\":\"p_mvyomyhc_ndf5\"}"
     },
     {
       "name": "V2_out_of_bounds_rejected_before_execution",
@@ -27,7 +27,7 @@
     {
       "name": "V4_turntable_built_and_report_ok",
       "pass": true,
-      "detail": "{\"tier\":\"ffmpeg\",\"videoSource\":\"ffmpeg\",\"videoError\":null,\"ok\":true,\"turn\":{\"requested\":8,\"frames\":8,\"stills\":8,\"video\":\"/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4\",\"elevationDeg\":18,\"fps\":12,\"movieCapability\":\"unavailable\",\"videoError\":null,\"errors\":[],\"videoSource\":\"ffmpeg\",\"blenderVideoError\":\"movie_format_unavai"
+      "detail": "{\"tier\":\"ffmpeg\",\"videoSource\":\"ffmpeg\",\"videoError\":null,\"ok\":true,\"turn\":{\"requested\":8,\"frames\":8,\"stills\":8,\"video\":\"/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable.mp4\",\"elevationDeg\":18,\"fps\":12,\"movieCapability\":\"unavailable\",\"videoError\":null,\"errors\":[],\"videoSource\":\"ffmpeg\",\"blenderVideoError\":\"movie_format_unavai"
     },
     {
       "name": "V4b_ffmpeg_fallback_source_is_honest",
@@ -37,7 +37,7 @@
     {
       "name": "V5_video_exists_and_registered_hash_matches_disk",
       "pass": true,
-      "detail": "{\"tier\":\"ffmpeg\",\"registered\":{\"path\":\"model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4\",\"sha256\":\"ba620e263cb6…\",\"bytes\":15797},\"reportVideo\":\"/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4\",\"videoError\":null}"
+      "detail": "{\"tier\":\"ffmpeg\",\"registered\":{\"path\":\"model3d/runs/m3d-mvyomzvv-epicsv/turntable.mp4\",\"sha256\":\"ba620e263cb6…\",\"bytes\":15797},\"reportVideo\":\"/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable.mp4\",\"videoError\":null}"
     },
     {
       "name": "V6_payload_is_real_mp4_not_renamed_image",
@@ -67,7 +67,7 @@
     {
       "name": "V10_double_render_cost_visible_and_bounded",
       "pass": true,
-      "detail": "{\"plain\":942,\"spun\":1336}（两次渲染路线的代价必须可见，且留在 180s 超时之内）"
+      "detail": "{\"plain\":1249,\"spun\":1357}（两次渲染路线的代价必须可见，且留在 180s 超时之内）"
     }
   ],
   "allPass": true

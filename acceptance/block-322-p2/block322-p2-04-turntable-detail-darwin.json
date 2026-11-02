@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-02T02:58:30.127Z",
+  "generatedAt": "2026-11-02T03:11:37.615Z",
   "platform": "darwin-arm64",
   "capability": {
     "ok": true,
@@ -45,49 +45,49 @@
   "blenderVideoError": "movie_format_unavailable",
   "videoError": null,
   "video": {
-    "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4",
+    "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable.mp4",
     "sha256": "ba620e263cb6a181f969433152cc7f64d993058a3b9e06bc0b746d9b448e6ef5",
     "bytes": 15797
   },
   "frameAssets": [
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-001.png",
-      "sha256": "a753dbfff75bf58e1c41266bb740da7c301ddac82cf7db99ff2c852e30355f31",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-001.png",
+      "sha256": "2f88d05c4345c6a8bceb6f11973abfdc10aa1822c62996f7d7a6e915c59780c8",
       "bytes": 356009
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-002.png",
-      "sha256": "fba8960253f56fe1e35969ec17bdb59052a3ee30f52853d46fd3e0ab05ce414f",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-002.png",
+      "sha256": "89a140d35aaa0cb98a476f83c6df7c0f5fd6f8185d95cbda4a062c2a2f90e709",
       "bytes": 432280
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-003.png",
-      "sha256": "255963cc7f3d9f08308869a3e3a62450b837bd888db482d4d8a163d57b47a26c",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-003.png",
+      "sha256": "19aea7710f76374229ec32b13b96d14a50419c297e6e91e5a7bdc3bc719abae7",
       "bytes": 396640
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-004.png",
-      "sha256": "261379d4fbe13e9adebc9e81149c16e07068bc4a148e2848eefcb003bc008d6a",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-004.png",
+      "sha256": "64ebcadd8d8573aeb637220765fea835a867512178f524b4cd0c3ff6bd69c32c",
       "bytes": 434157
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-005.png",
-      "sha256": "a320f8951d83c7f118052277f2b60711e47e957c557da09d98f80be30cfead50",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-005.png",
+      "sha256": "f499cbe1ab7bbc30fa90ea1695fba887975248a75f2637f900fec36f7a2e1771",
       "bytes": 356110
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-006.png",
-      "sha256": "475e57d64d31fb030af366cb6eeb1352fb66c9d6d66b7003eef7d1f8e15e3cb7",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-006.png",
+      "sha256": "98635636122fedc4e293b20b8abfc4114fe716e64e8752da2aa432b08aee586e",
       "bytes": 454043
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-007.png",
-      "sha256": "ee642ecd59a307a75f475c1d1aedaf241f8cc7af8bd3cc243012dfde60f417c8",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-007.png",
+      "sha256": "6a170a8d57a505c2374c67b3986fa29c37b6751fdc895be640216c8accf12197",
       "bytes": 422554
     },
     {
-      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-008.png",
-      "sha256": "8ce0845f44160847313eb834a55a20701c989bb4051216c139834378774920e0",
+      "path": "model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-008.png",
+      "sha256": "a7ed6da718725d3966f41ff5c94218fe06419e247ec04509562736bb0e326d87",
       "bytes": 473670
     }
   ],
@@ -142,23 +142,23 @@
     }
   ],
   "durationMs": {
-    "plain": 942,
-    "spun": 1336
+    "plain": 1249,
+    "spun": 1357
   },
   "reportTurntable": {
     "requested": 8,
     "frames": 8,
     "stills": [
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-001.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-002.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-003.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-004.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-005.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-006.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-007.png",
-      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-008.png"
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-001.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-002.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-003.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-004.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-005.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-006.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-007.png",
+      "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable-frame-008.png"
     ],
-    "video": "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4",
+    "video": "/tmp/petri-b329-live-XaBlQ1/data/projects/block322-p204-1793589094408-mvyomyhc/model3d/runs/m3d-mvyomzvv-epicsv/turntable.mp4",
     "elevationDeg": 18,
     "fps": 12,
     "movieCapability": "unavailable",
