@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-656: 长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **in_progress（测试面守卫，零渲染变更，无实机面可验）**）
+
+- **变化面**：新增 `frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.domBudget.test.tsx`——渲染真实消息行并数 DOM 节点（`querySelectorAll('*').length`），把「每行节点数 ≤60」钉成棘轮。**不改任何渲染代码、不改 props、不改样式**；本行登记用途=UI 台账门禁同步 + C-01「先实测量化再定形」的判据留痕，不计入 UI 实现债。
+- **实测数字**：user 行 **7** 节点 / assistant 行 **42** 节点（预算 60）；线性外推 100 条 ≈ 4200、**500 条 ≈ 21000**（Chromium 经验掉帧阈值 ~10k）、1000 条 ≈ 42000。
+- **为什么不做虚拟化**：C-01 原重开条件是「用户实测卡顿」，本机也取不到真实会话长度分布（无 userData 数据）；`react-virtuoso` 属依赖改动需用户裁决，2026-09-25 勘察的 cv-vs-prepend 锚定结构性冲突仍在。量化重开条件写在 `docs/pending-work-backlog.md` C-01 行与 `docs/block-331-tool-output-and-list-scale-plan.md` §5（首选零依赖 `content-visibility`）。
+- **验证（代码）**：该测 1/1（棘轮绿，外推数打印）；`tsc --noEmit` 0；eslint 0 error。
+
 ## UI-655: 放权坡道复盘区——Agent 规则面板 observe/allow 档 + 待复盘/自动放行/变更留痕（BLOCK-323；2026-11-01 **verified（dev Electron 边界内；隔离栈离屏实机 20/20，亮/暗双截图）**）
 
 - **变化面**：AgentRulesPanel 规则动作从 deny/require-ack 二档扩为四档（拒绝/需确认/观察/放行——observe=命中只记录「本可自动执行」不拦截，allow=命中自动放行）；新增「放权坡道 · 待复盘」区=未复盘观察行（规则/工具、命中次数、最近时间、脱敏样本、一键「升级为放行」「收权为需确认」「标为已复盘」）+ 近期自动放行审计 + 授权面变更留痕；通知中心新 kind `review_available`（PolicyReviewBridge 60s 轮询，≥3 条未复盘按最新观察 id 去重提醒一次，quiet by default）。

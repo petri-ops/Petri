@@ -59,7 +59,8 @@ test('BLOCK-328 防线①：server.js 源码契约（守卫先于 db require，�
 test('BLOCK-328 防线②：SQLITE_BUSY 按退避表重试（单元：注入失败序列）', async () => {
   // 直接验证重试器语义：用内存库 + 人造 busy 错误经 monkey 检查不可行（initSchema 内部），
   // 改为对导出的退避表与包装函数行为断言 + 真进程持锁集成测覆盖。
-  // 生产顺序：db.js → connection → schema（schema 先 require 的循环序是存量脆弱面，已登记 🟡）
+  // 生产顺序：db.js → connection → schema（BLOCK-330 已删掉 schema 侧的副作用 require，环不存在了；
+  // schema 先 require 的入口也已由 test/block330-db-require-order.test.mjs 独立验证）
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-b328-unit-'));
   const dbp = path.join(tmp, 'petri.db');
   { const Database = require('better-sqlite3'); const b = new Database(dbp); const md = path.join(root, 'src', 'migrations'); for (const f of fs.readdirSync(md).filter((x) => x.endsWith('.sql')).sort()) b.exec(fs.readFileSync(path.join(md, f), 'utf8')); b.close(); }

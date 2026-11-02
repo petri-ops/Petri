@@ -8663,8 +8663,68 @@
         "G0"
       ],
       "notes": "327 取证收口防线（用户裁决 2026-11-02「行呀 开整」）completed：加载期守卫（持锁 3.5s 实证告警可见）+ initSchema busy 重试；契约 5/5；存量循环加载 TDZ 登记 🟡。"
+    },
+    {
+      "id": "BLOCK-329-FFMPEG-TURNTABLE",
+      "capability": "block-329-ffmpeg-turntable",
+      "path": "docs/block-329-ffmpeg-turntable-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-329-ffmpeg-turntable",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "model3d",
+        "ffmpeg",
+        "macos",
+        "fallback",
+        "G0"
+      ],
+      "notes": "macOS 转盘 mp4 外部 ffmpeg 合成回退（用户裁决 2026-11-02「其它几项都确定开整」）completed：窄触发（能力缺席+帧在盘，真失败不代偿）+ 同名 turntable.mp4 + videoSource 留痕；契约 4/4 + mac 实机 13/13（tier=ffmpeg）。"
+    },
+    {
+      "id": "BLOCK-330-DB-REQUIRE-ORDER",
+      "capability": "block-330-db-require-order",
+      "path": "docs/block-330-db-require-order-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-330-db-require-order",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "reliability",
+        "sqlite",
+        "module-load",
+        "dev-verify",
+        "G0"
+      ],
+      "notes": "db 装配层循环加载收敛（schema 删副作用 require，依赖恢复单向）+ dev-verify 证据文件名平台化（加性，旧文件不动）；门禁 4/4+5/5+5/5+5/5。"
+    },
+    {
+      "id": "BLOCK-331-TOOL-OUTPUT-AND-LIST-SCALE",
+      "capability": "block-331-tool-output-and-list-scale",
+      "path": "docs/block-331-tool-output-and-list-scale-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-331-tool-output-and-list-scale",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "tools",
+        "token-budget",
+        "performance",
+        "measurement",
+        "G0"
+      ],
+      "notes": "C-14 工具输出压缩 + C-01 长列表虚拟化（用户裁决「先实测量化再定形，不硬造」）completed：测量腿 evidence + 超限结果头尾双保留修复 + 每行 DOM 节点棘轮；虚拟化不引依赖（重开条件量化）。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 440
+  "documentCount": 443
 }

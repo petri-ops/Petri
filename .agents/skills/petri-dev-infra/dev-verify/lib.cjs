@@ -182,6 +182,12 @@ async function withInputShield(client, fn) {
   }
 }
 
+/**
+ * 证据文件名的平台标签（BLOCK-330 / C 项）：直接取 `process.platform` 原值（darwin / win32 / linux），
+ * 不加别名表——`macos`/`mac`/`darwin` 三种写法并存正是历史证据要人工改名才分得清的原因。
+ */
+const PLATFORM_TAG = process.platform;
+
 function createRun({ name, evidenceDir }) {
   const slug = String(name || 'run').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'run';
   const startedAt = new Date().toISOString();
@@ -194,10 +200,22 @@ function createRun({ name, evidenceDir }) {
       log(`${pass ? 'PASS' : 'FAIL'} ${assertName}${detail ? ` :: ${String(detail).slice(0, 140)}` : ''}`);
     },
     async finish(extra = {}) {
-      const payload = { name, startedAt, finishedAt: new Date().toISOString(), assertions, allPass: this.allPass, ...extra };
+      const payload = {
+        name,
+        platform: PLATFORM_TAG,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        assertions,
+        allPass: this.allPass,
+        ...extra,
+      };
       if (evidenceDir) {
         fs.mkdirSync(evidenceDir, { recursive: true });
-        const file = path.join(evidenceDir, `${slug}-live.json`);
+        // 加性策略（BLOCK-330）：新跑按平台落名，旧证据文件一律不动——改名重构要同步
+        // impact-map 的 acceptance 路径与 ui-audit 引用，收益不抵迁移风险。
+        // flow id 本身已以 `-live` 结尾时不再叠加（旧 `...-live-live.json` 的双拼不再复制）。
+        const stem = slug.endsWith('-live') ? slug : `${slug}-live`;
+        const file = path.join(evidenceDir, `${stem}-${PLATFORM_TAG}.json`);
         fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
         log(`evidence: ${file}`);
       }
@@ -303,6 +321,7 @@ function pngPixelStats(buffer) {
 module.exports = {
   DEFAULT_PORT,
   TEST_INSTANCE_PORT,
+  PLATFORM_TAG,
   connectTestTarget,
   withInputShield,
   findRepoRoot,

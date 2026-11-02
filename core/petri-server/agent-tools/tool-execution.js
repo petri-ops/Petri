@@ -379,6 +379,31 @@ function projectToolData(tool, data, envelope, state) {
   return data;
 }
 
+/**
+ * BLOCK-331（C-14 第一刀）— 超限结果的「头 + 尾」保留，替代原来的「只留头」。
+ *
+ * 实测动因（见 acceptance/block-331/）：原实现的 dataSummary 是 `dataText.slice(0, room)`，
+ * 也就是说**尾巴被整段丢弃**。而工具输出里最需要被模型看到的往往是尾部——shell 末尾的错误行、
+ * 构建/测试的收尾统计、JSON 的结尾闭合与 error 字段。改成头尾双保留后，超限结果里
+ * 「头 40% / 尾 60%」都可读，中间用带**精确省略字符数**的标记标出，模型能自己判断要不要
+ * 用更窄的参数重跑一次（原文仍完整留在 tool_trace_store / tool_jobs 执行记录里，可回读）。
+ */
+const SUMMARY_HEAD_RATIO = 0.4;
+const SUMMARY_ELISION = (omitted) => `…[省略 ${omitted} 字符，原文见工具执行记录]…`;
+
+function headTailSummary(text, budget) {
+  if (budget <= 0) return '';
+  if (text.length <= budget) return text;
+  const head = Math.max(0, Math.floor(budget * SUMMARY_HEAD_RATIO));
+  for (let tail = Math.max(0, budget - head); tail > 0; tail -= 1) {
+    const marker = SUMMARY_ELISION(text.length - head - tail);
+    if (head + tail + marker.length <= budget) {
+      return text.slice(0, head) + marker + text.slice(text.length - tail);
+    }
+  }
+  return text.slice(0, budget);
+}
+
 function fitValidJson(value, maxChars) {
   const redacted = redactSensitiveValue(value);
   let serialized = safeJson(redacted);
@@ -397,7 +422,7 @@ function fitValidJson(value, maxChars) {
   const dataText = safeJson(redacted.data);
   let room = Math.max(0, maxChars - safeJson({ ...minimal, dataSummary: '' }).length - 8);
   while (room >= 0) {
-    serialized = safeJson({ ...minimal, dataSummary: dataText.slice(0, room) });
+    serialized = safeJson({ ...minimal, dataSummary: headTailSummary(dataText, room) });
     if (serialized.length <= maxChars) return serialized;
     room -= Math.max(1, Math.ceil((serialized.length - maxChars) / 2));
   }

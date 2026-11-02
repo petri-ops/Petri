@@ -130,7 +130,19 @@ const BASELINE = new Set([
   'test/remote-resource-snapshot.test.mjs',
   'test/result-studio-lifecycle.test.mjs',
   'test/scripts-platform-contract.test.mjs',
-  'test/workspace-data-import.test.mjs'
+  'test/workspace-data-import.test.mjs',
+  // BLOCK-323 — observe 实机腿在隔离栈里读 process.platform 判平台分支（mac 侧端口/截图路径差异），
+  // 落地时漏登记本基线（2026-11-02 BLOCK-331 收口时抓出并补登）：dev-only 一次性 flow，不收敛。
+  'scripts/block323-observe-ui-live.mjs',
+  // BLOCK-329 — ffmpeg 探测原语本身就是 OS 语义（win32 取 ffmpeg.exe / where，其余 which），
+  // 与 skill-preflight 的 where/which 同型理由，收敛到 platform-compat 无收益，登记留痕。
+  'core/petri-server/helpers/ffmpeg-turntable.js',
+  // BLOCK-331 — 测量脚本把 process.platform 写进证据头（跨平台证据可区分），非平台分支逻辑。
+  'scripts/block331-tool-output-measure.mjs',
+  // BLOCK-330/331 — 契约测以 process.platform 派生断言值（证据名平台化 / 跨平台命名），
+  // 测试据平台取值是断言语义本身，不是产品面平台分支。
+  'test/block330-db-require-order.test.mjs',
+  'test/dev-verify.test.mjs'
 ]);
 
 function scan() {

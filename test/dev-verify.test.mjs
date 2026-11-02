@@ -50,7 +50,7 @@ describe('dev-verify lib.cjs 纯逻辑', () => {
     assert.equal(await lib.selectPageTarget([], { probe: async () => true }), null);
   });
 
-  it('createRun 断言记录 + finish 证据落盘（契约与 block*-live 同构）', async () => {
+  it('createRun 断言记录 + finish 证据落盘（契约与 block*-live 同构 + 平台标签）', async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-verify-test-'));
     try {
       const run = lib.createRun({ name: 'My Flow_1', evidenceDir: dir });
@@ -61,13 +61,16 @@ describe('dev-verify lib.cjs 纯逻辑', () => {
       const payload = await run.finish({ extra: 1 });
       assert.equal(payload.allPass, false);
       assert.equal(payload.extra, 1);
-      const file = path.join(dir, 'my-flow-1-live.json');
-      assert.ok(fs.existsSync(file), '证据 JSON 以 slug 命名落盘');
+      // BLOCK-330：证据名按平台自落（darwin/win32/linux 原值，不用 macos/mac 别名）
+      const file = path.join(dir, `my-flow-1-live-${process.platform}.json`);
+      assert.ok(fs.existsSync(file), '证据 JSON 以 slug + 平台命名落盘');
+      assert.equal(lib.PLATFORM_TAG, process.platform);
       const written = JSON.parse(fs.readFileSync(file, 'utf8'));
       assert.deepEqual(
         Object.keys(written).sort(),
-        ['allPass', 'assertions', 'extra', 'finishedAt', 'name', 'startedAt'],
+        ['allPass', 'assertions', 'extra', 'finishedAt', 'name', 'platform', 'startedAt'],
       );
+      assert.equal(written.platform, process.platform, '证据自述平台：跨平台同名证据可区分');
       assert.equal(written.assertions[1].pass, false);
 
       // 全过场景

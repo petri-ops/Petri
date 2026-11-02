@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-11-02T03:04:15.034Z",
+  "platform": "darwin-arm64",
+  "modelResultLimitChars": 6000,
+  "corpus": "构造样本（本机无历史会话库）：构建日志 / git diff / 大 JSON / MCP 大载荷 / 搜索命中 / 目录列表",
+  "corpusCaveat": "样本量=6，按工具返回形态构造；只用于机制与量级判断，不作线上分布结论",
+  "rows": [
+    {
+      "id": "exec_build_log",
+      "note": "workspace_exec：2000 行构建日志，末尾才是失败结论",
+      "tool": "workspace_exec",
+      "sourceChars": 59207,
+      "modelChars": 2145,
+      "modelTokens": 537,
+      "keptRatio": 0.036,
+      "headKept": false,
+      "tailKept": true,
+      "elisionMarker": false,
+      "overHardCap": true
+    },
+    {
+      "id": "exec_git_diff",
+      "note": "workspace_exec：3000 行 git diff（头是文件名，尾是最后一处改动）",
+      "tool": "workspace_exec",
+      "sourceChars": 128200,
+      "modelChars": 2124,
+      "modelTokens": 531,
+      "keptRatio": 0.017,
+      "headKept": false,
+      "tailKept": true,
+      "elisionMarker": false,
+      "overHardCap": true
+    },
+    {
+      "id": "run_tool_large_result",
+      "note": "run_tool：结构化结果约 40k 字符（走 fitValidJson 硬上限）",
+      "tool": "run_tool",
+      "sourceChars": 48104,
+      "modelChars": 5999,
+      "modelTokens": 1500,
+      "keptRatio": 0.125,
+      "headKept": true,
+      "tailKept": true,
+      "elisionMarker": true,
+      "overHardCap": true
+    },
+    {
+      "id": "mcp_large_payload",
+      "note": "mcp 工具：大 JSON 载荷（外部连接器常见形态）",
+      "tool": "mcp_call",
+      "sourceChars": 44608,
+      "modelChars": 6000,
+      "modelTokens": 1500,
+      "keptRatio": 0.135,
+      "headKept": true,
+      "tailKept": true,
+      "elisionMarker": true,
+      "overHardCap": true
+    },
+    {
+      "id": "workspace_search_many",
+      "note": "workspace_search：120 处命中（投影按 12 条，尾部命中按设计丢弃）",
+      "tool": "workspace_search",
+      "sourceChars": 7087,
+      "modelChars": 1159,
+      "modelTokens": 290,
+      "keptRatio": 0.164,
+      "headKept": true,
+      "tailKept": false,
+      "elisionMarker": false,
+      "overHardCap": true
+    },
+    {
+      "id": "workspace_list_many",
+      "note": "workspace_list：300 个条目（投影按 40 条）",
+      "tool": "workspace_list",
+      "sourceChars": 22857,
+      "modelChars": 3412,
+      "modelTokens": 853,
+      "keptRatio": 0.149,
+      "headKept": false,
+      "tailKept": false,
+      "elisionMarker": false,
+      "overHardCap": true
+    }
+  ],
+  "accumulation": {
+    "oneRoundOfEach": {
+      "toolCalls": 6,
+      "toolResultTokens": 5211,
+      "shareOf64k": 0.08,
+      "shareOf128k": 0.04,
+      "shareOf200k": 0.025
+    },
+    "tenRoundsOfEach": {
+      "toolCalls": 60,
+      "toolResultTokens": 52110,
+      "shareOf64k": 0.795,
+      "shareOf128k": 0.398,
+      "shareOf200k": 0.254
+    }
+  },
+  "breakdownCrossCheck": {
+    "toolResultsTokens": 5235,
+    "sumOfRowsTokens": 5211,
+    "sameOrder": true
+  }
+}

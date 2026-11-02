@@ -6899,6 +6899,63 @@
         "test/block326-audit-debt-sweep.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block329-ffmpeg-turntable",
+      "note": "BLOCK-329 转盘 mp4 外部 ffmpeg 合成回退：回退 helper + provider 接线 + 实机 flow（三档判据）；改动落点连转盘契约测。",
+      "patterns": [
+        "core/petri-server/helpers/ffmpeg-turntable.js",
+        "core/petri-server/helpers/blender-provider.js",
+        "resources/model3d/blender_scene.py",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block322-p2-04-turntable-live.cjs",
+        "acceptance/block-322-p2/**"
+      ],
+      "tests": [
+        "test/block329-ffmpeg-turntable.test.mjs",
+        "test/block322-p2-04-turntable.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block330-db-require-order",
+      "note": "BLOCK-330 db 装配层循环收敛 + dev-verify 证据名平台化：schema/connection 单向依赖 + createRun 命名；改动落点连加载期守卫与审计债回归。",
+      "patterns": [
+        "core/petri-server/db/schema.js",
+        "core/petri-server/db/connection.js",
+        ".agents/skills/petri-dev-infra/dev-verify/lib.cjs"
+      ],
+      "tests": [
+        "test/block330-db-require-order.test.mjs",
+        "test/block328-early-loop-guard.test.mjs",
+        "test/block326-audit-debt-sweep.test.mjs",
+        "test/dev-verify.test.mjs"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block331-tool-output-and-list-scale",
+      "note": "BLOCK-331 C-14 工具输出压缩 + C-01 长列表量级：模型可见出口超限摘要 + 测量腿 + DOM 节点棘轮。",
+      "patterns": [
+        "core/petri-server/agent-tools/tool-execution.js",
+        "scripts/block331-tool-output-measure.mjs",
+        "acceptance/block-331/**",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.domBudget.test.tsx"
+      ],
+      "tests": [
+        "test/block331-tool-result-compaction.test.mjs",
+        "test/agent-tool-result.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block327-mac-coldstart",
+      "note": "BLOCK-327 Mac 冷启动阻塞取证（只取证不改产品）：证据目录补登记——原先未入影响图导致 acceptance/block-327/evidence.json 判未映射（2026-11-02 BLOCK-331 收口时抓出）。",
+      "patterns": [
+        "acceptance/block-327/**"
+      ],
+      "tests": [],
+      "classifiesScripts": false
     }
   ]
 }

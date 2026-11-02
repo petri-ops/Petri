@@ -1,11 +1,10 @@
 'use strict';
 
-// BLOCK-328 — 循环加载安全：connection.js 在本行 require 内回头取本模块导出，
-// 此刻文件尚未执行到末尾赋值；函数声明已提升，先把入口挂上（退避表 const 有 TDZ，末尾合并）。
-module.exports.initSchema = initSchema;
-module.exports.initSchemaWithBusyRetry = initSchemaWithBusyRetry;
-
-require('./connection');
+// BLOCK-330 — 装配层循环已断开：本模块不再 require('./connection')。原先那行只为「借副作用」
+// （schema 用到 connection 的任何导出都是零），却把 connection.js:46 的顶层回调变成 CJS 环：
+// 先 require 本模块的调用方会在环内拿到半成品导出，BLOCK-328 把入口前置挂载后崩点只是后移到
+// getCurrentG0Baseline 的 TDZ。现在依赖是单向的 connection → schema（DDL 只在连上后在 pragma
+// 之后执行），本模块可被独立 require（测试/工具/迁移脚本），导出只在文件末尾一次性合并。
 const { getCurrentG0Baseline } = require('../../shared-backend/g0-baseline');
 
 // BLOCK-92 Wave C-3 — DDL 与迁移外迁（原 db.js，纯搬运零行为变化）。
@@ -23,10 +22,8 @@ function sleepSync(ms) {
   Atomics.wait(new Int32Array(shared), 0, 0, ms);
 }
 
-function busyRetryDelays() { return [2000, 5000]; }
-
 function initSchemaWithBusyRetry(db) {
-  const delays = busyRetryDelays();
+  const delays = BUSY_RETRY_DELAYS_MS;
   let lastError = null;
   for (let attempt = 0; attempt <= delays.length; attempt += 1) {
     try {

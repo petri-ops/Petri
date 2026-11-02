@@ -16,6 +16,7 @@ const { execFile, spawn } = require('node:child_process');
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 const SCRIPT_PATH = path.join(REPO_ROOT, 'resources', 'model3d', 'blender_scene.py');
 const { DEFAULT_RENDER_VIEWS } = require('./model3d-views');
+const { shouldFallback, composeTurntable } = require('./ffmpeg-turntable');
 const TIMEOUT_MS = 180_000;
 let cachedBinary;
 
@@ -100,6 +101,38 @@ function resolveInside(root, relativePath) {
   return target;
 }
 
+/**
+ * BLOCK-329 — 转盘 mp4 外部 ffmpeg 补片（RULING-03 同型：外部可执行、默认探测、缺失如实报、不下载）。
+ *
+ * 只在 Blender 自身 movie 能力缺席（macOS 5.2.3 无头把 FFMPEG 从 file_format 枚举摘掉）且序列帧已出盘时
+ * 介入；Blender 原生出片成功时只补一个 `videoSource` 标记，产物面零变化。合成失败不改写 Blender 的原因码
+ * （`videoError` 保持原值），另记 `ffmpegError`——两条原因都要能看见，不能互相覆盖成「就一种失败」。
+ */
+async function applyTurntableVideoFallback({ report, outDir, signal }) {
+  const turntable = report?.turntable;
+  if (!turntable || typeof turntable !== 'object' || !(Number(turntable.requested) > 0)) return;
+  if (turntable.video) {
+    turntable.videoSource = turntable.videoSource || 'blender';
+    return;
+  }
+  if (!shouldFallback(turntable)) {
+    turntable.videoSource = null;
+    return;
+  }
+  const composed = await composeTurntable({ outDir, stills: turntable.stills, fps: turntable.fps, signal });
+  if (!composed.ok) {
+    turntable.videoSource = null;
+    turntable.ffmpegError = composed.error;
+    turntable.ffmpegMessage = composed.message || null;
+    return;
+  }
+  turntable.video = composed.video;
+  turntable.videoSource = composed.videoSource;
+  // 留痕：本机 Blender 仍然不出片（能力事实），只是产物由外部 ffmpeg 补齐。
+  turntable.blenderVideoError = turntable.videoError;
+  turntable.videoError = null;
+}
+
 async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d/runs', views = [...DEFAULT_RENDER_VIEWS], formats = ['glb', 'stl', 'obj'], turntable = null, lineart = false, signal } = {}) {
   const binary = findBlenderBinary();
   if (!binary) {
@@ -175,6 +208,7 @@ async function runBlenderScene({ scene, workspaceRoot, relativeOutDir = 'model3d
     };
   }
   const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  await applyTurntableVideoFallback({ report, outDir, signal });
   const describe = (found) => {
     if (!found || !fs.existsSync(found)) return null;
     return {

@@ -35,14 +35,13 @@ function now() {
   return new Date().toISOString();
 }
 
-// 增量导出且先于 schema require：schema.js 的迁移体在 CJS 循环加载期间
-// 就要读到 now（函数声明提升，此处导出赋值先行，避免"部分导出缺属性"）。
+// 导出先行于 schema require（BLOCK-330 后已无环，顺序仍保留）：schema 的 DDL 在 require 时
+// 立即执行，任何此刻需要 uid/now 的迁移体都能拿到完整导出；也避免未来再加 require 时重新
+// 出现「部分导出缺属性」的老坑。依赖方向固定为 connection → schema（单向）。
 module.exports.db = db;
 module.exports.uid = uid;
 module.exports.now = now;
 
-// uid/now 先于 schema 定义：schema.js 的迁移体引用 now()，
-// 在 CJS 循环加载时必须已存在于本模块的部分导出中。
 require('./schema').initSchemaWithBusyRetry(db); // BLOCK-328：SQLITE_BUSY 有界重试退避
 
 function getDatabase() {

@@ -114,21 +114,39 @@ async function run(ctx) {
     const spunReport = spun.data?.report || {};
     const turn = spunReport.turntable || {};
     // 平台能力分档（macOS 复验实测）：Blender 5.2.3 无头不放行 movie 格式，4.5.10 win32 放行。
-    // unavailable 档的判据换成「缺席有没有被诚实声明」，不硬要一个本平台出不了的 mp4；
-    // available 档维持原判据。两档都必须把已出盘的序列帧拿住（连坐丢弃是缺陷，不是平台差异）。
-    const movieTier = turn.movieCapability === 'unavailable' ? 'unavailable' : 'available';
+    // BLOCK-329 起 mac 侧由外部 ffmpeg 用同一批已出盘序列帧补片（videoSource='ffmpeg'），
+    // 三档判据：blender=原生出片 / ffmpeg=能力缺席但外部补齐 / unavailable=两边都没有（诚实缺席）。
+    const movieTier = turn.video
+      ? (turn.videoSource === 'ffmpeg' ? 'ffmpeg' : 'blender')
+      : 'unavailable';
     const movieDeclaredAbsent = turn.video == null && turn.videoError === 'movie_format_unavailable'
       && (turn.stills || []).length === 8;
     assert('V4_turntable_built_and_report_ok', spun.status === 200 && spun.data?.ok === true && spunReport.ok === true
       && turn.requested === 8 && turn.frames === 8 && (turn.errors || []).length === 0
       && turn.elevationDeg === 18 && turn.fps === 12
-      && (movieTier === 'available' ? typeof turn.video === 'string' : movieDeclaredAbsent),
+      && (movieTier === 'unavailable' ? movieDeclaredAbsent : typeof turn.video === 'string'),
       JSON.stringify({
         tier: movieTier,
+        videoSource: turn.videoSource ?? null,
         videoError: turn.videoError ?? null,
         ok: spunReport.ok,
         turn: { ...turn, stills: (turn.stills || []).length },
       }).slice(0, 420));
+
+    // ffmpeg 档的两个诚实面：Blender 的能力事实仍留在 movieCapability/blenderVideoError 上，
+    // 且 videoError 已清空（缺席原因不再是「没有视频」，而是被外部补上了）。
+    assert('V4b_ffmpeg_fallback_source_is_honest', movieTier !== 'ffmpeg'
+      || (turn.movieCapability === 'unavailable'
+        && turn.blenderVideoError === 'movie_format_unavailable'
+        && turn.videoError === null
+        && turn.ffmpegError == null),
+      JSON.stringify({
+        tier: movieTier,
+        movieCapability: turn.movieCapability,
+        blenderVideoError: turn.blenderVideoError ?? null,
+        videoError: turn.videoError ?? null,
+        ffmpegError: turn.ffmpegError ?? null,
+      }).slice(0, 300));
 
     const videoRegistered = (spun.data?.outputs || []).find((item) => String(item.path).toLowerCase().endsWith('.mp4'));
     const videoAbsolute = videoRegistered ? path.join(workspacePath, videoRegistered.path) : null;
@@ -147,14 +165,22 @@ async function run(ctx) {
         videoError: turn.videoError ?? null,
       }).slice(0, 320));
 
-    const strayMp4 = spun.data?.outDir && fs.existsSync(path.join(workspacePath, spun.data.outDir))
-      ? fs.readdirSync(path.join(workspacePath, spun.data.outDir)).filter((name) => /\.mp4$/i.test(name))
+    const outDirAbsolute = spun.data?.outDir ? path.join(workspacePath, spun.data.outDir) : null;
+    const strayMp4 = outDirAbsolute && fs.existsSync(outDirAbsolute)
+      ? fs.readdirSync(outDirAbsolute).filter((name) => /\.mp4$/i.test(name))
       : [];
     const header = videoAbsolute ? fs.readFileSync(videoAbsolute).subarray(0, 12) : Buffer.alloc(0);
     assert('V6_payload_is_real_mp4_not_renamed_image', movieTier === 'unavailable'
       ? strayMp4.length === 0
       : header.toString('ascii', 4, 8) === 'ftyp',
       `tier=${movieTier} header=${JSON.stringify(header.toString('hex').slice(0, 24))} stray=${JSON.stringify(strayMp4)}`);
+
+    // ffmpeg 合成用的临时帧清单不得留在工作区（产物只该有一个 mp4，不是清单+mp4）。
+    const leftoverList = outDirAbsolute && fs.existsSync(outDirAbsolute)
+      ? fs.readdirSync(outDirAbsolute).filter((name) => /-frames\.txt$/i.test(name))
+      : [];
+    assert('V6b_no_temp_frame_list_left_behind', leftoverList.length === 0,
+      `tier=${movieTier} leftover=${JSON.stringify(leftoverList)}`);
 
     const frameAssets = spun.data?.frameAssets || [];
     const stillChecks = frameAssets.map((item) => {
@@ -170,7 +196,7 @@ async function run(ctx) {
       && stillChecks.every((row) => row.exists && row.bytes > 1000 && row.shaMatches),
       JSON.stringify(stillChecks).slice(0, 420));
     assert('V8_stills_do_not_flood_result_surface', (spun.data?.outputs || []).filter((item) => /\.mp4$/i.test(item.path)).length
-      === (movieTier === 'available' ? 1 : 0)
+      === (movieTier === 'unavailable' ? 0 : 1)
       && (spun.data?.outputs || []).every((item) => !/turntable-frame/i.test(item.path))
       && frameAssets.length === 8,
       JSON.stringify({
@@ -191,11 +217,14 @@ async function run(ctx) {
       JSON.stringify(detail.durationMs).slice(0, 200) + '（两次渲染路线的代价必须可见，且留在 180s 超时之内）');
 
     fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
-    fs.writeFileSync(path.join(EVIDENCE_DIR, 'block322-p2-04-turntable-detail.json'), `${JSON.stringify({
+    // 明细按平台落名（BLOCK-330 C 项同口径）：两侧各留一份，不互相覆盖。
+    fs.writeFileSync(path.join(EVIDENCE_DIR, `block322-p2-04-turntable-detail-${lib.PLATFORM_TAG}.json`), `${JSON.stringify({
       generatedAt: new Date().toISOString(),
       platform: `${process.platform}-${process.arch}`,
       capability: capability.data,
       movieTier,
+      videoSource: turn.videoSource ?? null,
+      blenderVideoError: turn.blenderVideoError ?? null,
       videoError: turn.videoError ?? null,
       video: videoRegistered,
       frameAssets: spun.data?.frameAssets || [],

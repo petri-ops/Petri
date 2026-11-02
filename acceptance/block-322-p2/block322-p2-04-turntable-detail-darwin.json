@@ -1,0 +1,195 @@
+{
+  "generatedAt": "2026-11-02T02:58:30.127Z",
+  "platform": "darwin-arm64",
+  "capability": {
+    "ok": true,
+    "status": "ready",
+    "reason": null,
+    "version": "Blender 5.2.3 LTS",
+    "cad": {
+      "status": "ready",
+      "reason": null,
+      "kernel": "occt-wasm",
+      "version": "5.11.0",
+      "formats": {
+        "stepImport": true,
+        "stepExport": true,
+        "igesImport": true,
+        "igesExport": false,
+        "drawingSvg": true
+      },
+      "notes": [
+        "STEP: occt-wasm",
+        "IGES: occt-import-js import-only",
+        "STEP export: faceted B-rep from Blender STL"
+      ]
+    },
+    "generation": {
+      "status": "unavailable",
+      "reason": "generation_provider_none",
+      "provider": "none",
+      "model": null,
+      "privacy": {
+        "external": true,
+        "prompt": true,
+        "image": false,
+        "note": "Text prompt is sent to Tripo (external service). Model URLs expire quickly; the generated GLB is stored locally with sha256/provenance.",
+        "pricingUrl": "https://www.tripo3d.ai/pricing",
+        "costNote": "Per-generation billing depends on model/texture quality; check the provider pricing page before generating."
+      },
+      "message": "外部 3D 生成服务未启用。设置 PETRI_MODEL3D_GENERATION_PROVIDER=tripo 并提供 TRIPO_API_KEY 后启用。"
+    }
+  },
+  "movieTier": "ffmpeg",
+  "videoSource": "ffmpeg",
+  "blenderVideoError": "movie_format_unavailable",
+  "videoError": null,
+  "video": {
+    "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4",
+    "sha256": "ba620e263cb6a181f969433152cc7f64d993058a3b9e06bc0b746d9b448e6ef5",
+    "bytes": 15797
+  },
+  "frameAssets": [
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-001.png",
+      "sha256": "a753dbfff75bf58e1c41266bb740da7c301ddac82cf7db99ff2c852e30355f31",
+      "bytes": 356009
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-002.png",
+      "sha256": "fba8960253f56fe1e35969ec17bdb59052a3ee30f52853d46fd3e0ab05ce414f",
+      "bytes": 432280
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-003.png",
+      "sha256": "255963cc7f3d9f08308869a3e3a62450b837bd888db482d4d8a163d57b47a26c",
+      "bytes": 396640
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-004.png",
+      "sha256": "261379d4fbe13e9adebc9e81149c16e07068bc4a148e2848eefcb003bc008d6a",
+      "bytes": 434157
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-005.png",
+      "sha256": "a320f8951d83c7f118052277f2b60711e47e957c557da09d98f80be30cfead50",
+      "bytes": 356110
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-006.png",
+      "sha256": "475e57d64d31fb030af366cb6eeb1352fb66c9d6d66b7003eef7d1f8e15e3cb7",
+      "bytes": 454043
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-007.png",
+      "sha256": "ee642ecd59a307a75f475c1d1aedaf241f8cc7af8bd3cc243012dfde60f417c8",
+      "bytes": 422554
+    },
+    {
+      "path": "model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-008.png",
+      "sha256": "8ce0845f44160847313eb834a55a20701c989bb4051216c139834378774920e0",
+      "bytes": 473670
+    }
+  ],
+  "stillChecks": [
+    {
+      "name": "turntable-frame-001.png",
+      "exists": true,
+      "bytes": 356009,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-002.png",
+      "exists": true,
+      "bytes": 432280,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-003.png",
+      "exists": true,
+      "bytes": 396640,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-004.png",
+      "exists": true,
+      "bytes": 434157,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-005.png",
+      "exists": true,
+      "bytes": 356110,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-006.png",
+      "exists": true,
+      "bytes": 454043,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-007.png",
+      "exists": true,
+      "bytes": 422554,
+      "shaMatches": true
+    },
+    {
+      "name": "turntable-frame-008.png",
+      "exists": true,
+      "bytes": 473670,
+      "shaMatches": true
+    }
+  ],
+  "durationMs": {
+    "plain": 942,
+    "spun": 1336
+  },
+  "reportTurntable": {
+    "requested": 8,
+    "frames": 8,
+    "stills": [
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-001.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-002.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-003.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-004.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-005.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-006.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-007.png",
+      "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable-frame-008.png"
+    ],
+    "video": "/tmp/petri-b329-live-JXCRi4/data/projects/block322-p204-1793588307267-mvyo6349/model3d/runs/m3d-mvyo649s-pyr9es/turntable.mp4",
+    "elevationDeg": 18,
+    "fps": 12,
+    "movieCapability": "unavailable",
+    "videoError": null,
+    "errors": [],
+    "videoSource": "ffmpeg",
+    "blenderVideoError": "movie_format_unavailable"
+  },
+  "display": {
+    "engine": "BLENDER_WORKBENCH",
+    "declaredLighting": false,
+    "declaredMaterial": false,
+    "requestedEngine": "workbench",
+    "samples": null,
+    "device": null
+  },
+  "boundsMm": {
+    "min": [
+      -60,
+      -20,
+      -40
+    ],
+    "max": [
+      60,
+      80,
+      100
+    ],
+    "size": [
+      120,
+      100,
+      140
+    ]
+  }
+}
