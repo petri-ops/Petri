@@ -3,6 +3,24 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block337-governance-runtime",
+      "note": "BLOCK-337 治理运行时化：工作区规则引擎（零业务词）+ 规则包 JSON + 并行互斥契约 + 规则生命周期账本；改引擎/包/并行契约时跑本包契约测与文档门。",
+      "patterns": [
+        "core/shared-backend/governance/**",
+        "resources/governance-packs/**",
+        "core/petri-server/helpers/parallel-contract.js",
+        "acceptance/block-337/**"
+      ],
+      "tests": [
+        "test/block337-governance-runtime.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "block339-persona-debt",
       "note": "BLOCK-339 人设历史债清偿：核心 system prompt / chitchat / identity 零角色域词 + 退役词表补角色词 + 部署入口退役（interpret）。脚本=人设实机腿（抓上游实际收到的 system prompt），只随本包定向测试与文档门。",
       "patterns": [

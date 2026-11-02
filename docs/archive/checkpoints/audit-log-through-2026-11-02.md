@@ -33,3 +33,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T12:43:37.606Z -->
 最后更新：2026-11-02（**BLOCK-334 COMPLETED（当日立项当日收口）**：P1 结果迁右栏宿主 + P2 渲染层统一四片——A viewers/{Markdown,Table,Html} + viewerRegistry 唯一分派 / C image 去透传（引擎早在 219 Q6 统一）/ B TextViewer 统一 CodeMirror（验证腿先行，hook 优先 EditorApi）/ D SpreadsheetViewer **反向统一**（office 库 xlsx 仅首表→exceljs 引擎为准，文件宿主新获多表，依赖不减；原「删 exceljs」证伪）。证据=tsc 0/lint 0/vitest 17 文件 84/84/十门 PASS/台账契约 4/4/实机四 flow 11/11·9/9·7/7·7/7。事故 `22fe18b0` 卷入半套→`b5a72c45` 复位。**无 active 工作包**。plan §10。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T14:01:39.979Z -->
+最后更新：2026-11-02（🔵 **启动登记（active）：BLOCK-336 worktree 通用基础设施 v1**（用户裁决「加 全方位的加」立项 + 334 收口后 Jev 单一建议=336（0.25）+ 用户「行 按照建议来」发令）——P1 工具面四件 `workspace_worktree_create/list/remove/merge_request`（四档权限 + 审批 + observe 档可用；不自动 merge、脏树不可删、registry.json 唯一登记源）+ `helpers/worktree-contract.js` 契约函数 + 契约测红绿；P2 项目层 worktreeOf → P3 契约机械化 → P4 隔离后端实机 → P5 governance 回写。文件面=agent-tools git 域 / db.js 项目层 / helpers/worktree-contract.js / routes 项目路由；与并行方 planned 包（335/337/338/339）零交叠。前置 🔴 theme 存量已清（`11c0bee4`）。plan=docs/block-336-worktree-infrastructure-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）

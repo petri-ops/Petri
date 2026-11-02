@@ -503,6 +503,14 @@ function buildSystemPromptSections(context, runtimeIdentity = {}) {
     if (context.activeJobId) seg += '\n\n当前结果：jobId=' + context.activeJobId;
     seg += renderResultStudioContextForPrompt(context);
     add(seg);
+    // BLOCK-337 P2 — 工作区治理动态段：受治理仓自动装载规则包 + 未决审计前置（包 JSON
+    // 声明 auditSource，引擎零业务词）；非受治理仓返回 ''（零变化），失败不阻断 prompt。
+    if (typeof context.workspacePath === 'string' && context.workspacePath) {
+      try {
+        const { renderGovernanceRuntimeSection } = require('../../shared-backend/governance/workspace-rules.js');
+        add(renderGovernanceRuntimeSection({ workspacePath: context.workspacePath }));
+      } catch { /* 治理段失败不得影响正常对话 */ }
+    }
   }
 
   // BLOCK-16 PHASE 3：工作树 hunk 拒绝记录。所有页面都注入（不只是 desktop-project）；

@@ -1,0 +1,44 @@
+{
+  "id": "bio-analysis",
+  "version": 1,
+  "title": "生信分析项目（测序数据 / 计数矩阵在场）",
+  "priority": 50,
+  "detect": {
+    "any": [
+      { "globExists": "*.fastq" },
+      { "globExists": "*.fastq.gz" },
+      { "globExists": "*.fq.gz" },
+      { "globExists": "*.bam" },
+      { "globExists": "*.h5ad" },
+      { "pathExists": "counts.csv" },
+      { "pathExists": "counts.tsv" }
+    ]
+  },
+  "rules": [
+    {
+      "id": "source-data-immutable",
+      "kind": "mechanical",
+      "statement": "科学源数据不可原地修改；派生写入 derived/ 或 results/，覆写前必须提供 expectedSha256。",
+      "check": "workspace_write 的 sha 门",
+      "origin": "authored"
+    },
+    {
+      "id": "qc-gate-before-downstream",
+      "kind": "mechanical",
+      "statement": "下游分析前必须有 QC 结果与阈值记录，缺失即停在 QC 步骤上报。",
+      "origin": "authored"
+    },
+    {
+      "id": "provenance-trace",
+      "kind": "mechanical",
+      "statement": "每个产物必须可回溯到工具版本、参数与输入指纹（artifact truth 链）。",
+      "origin": "authored"
+    },
+    {
+      "id": "domain-parameter-judgment",
+      "kind": "judgment",
+      "statement": "方法学选择（归一化 / 统计模型 / 多重检验校正）由分析者判断并留依据，工具只执行已声明的参数。",
+      "origin": "authored"
+    }
+  ]
+}

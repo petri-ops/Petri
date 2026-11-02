@@ -1,0 +1,74 @@
+{
+  "id": "software-governed",
+  "version": 1,
+  "title": "受治理软件仓（文档注册表 + 工程指令同源）",
+  "priority": 100,
+  "auditSource": "docs/AUDIT-LOG.md",
+  "detect": {
+    "all": [
+      { "pathExists": "docs/DOC-REGISTRY.json" },
+      { "pathExists": "AGENTS.md" }
+    ]
+  },
+  "rules": [
+    {
+      "id": "read-audit-log-first",
+      "kind": "mechanical",
+      "statement": "开工前先读未决广播（🔴 先处理、🟢 评估），再动主线。",
+      "check": "npm run state",
+      "origin": "authored"
+    },
+    {
+      "id": "single-active-package",
+      "kind": "mechanical",
+      "statement": "同一时间只有一个 active 工作包；并行的唯一条件是 truthDomain / touchSurface / sharedBaselines 三者不相交。",
+      "check": "npm run docs:check",
+      "origin": "authored"
+    },
+    {
+      "id": "closeout-before-completed",
+      "kind": "mechanical",
+      "statement": "不得在 closeout 全绿 + 台账回写之前宣称 completed / verified。",
+      "check": "npm run closeout",
+      "origin": "authored"
+    },
+    {
+      "id": "ui-ledger-sync",
+      "kind": "mechanical",
+      "statement": "UI 改动必须在同一次提交同步实现审计台账。",
+      "check": "npm run ui:audit:check",
+      "origin": "authored"
+    },
+    {
+      "id": "tests-before-claim",
+      "kind": "mechanical",
+      "statement": "声明通过前必须跑与改动面对应的定向测试。",
+      "check": "npm run test:changed",
+      "origin": "authored"
+    },
+    {
+      "id": "explicit-paths-on-commit",
+      "kind": "mechanical",
+      "statement": "提交只按本包文件面显式登记路径，禁 `git add -A` / `git add .`（防卷入他包在制面）。",
+      "origin": "observed"
+    },
+    {
+      "id": "incident-to-regression-test",
+      "kind": "judgment",
+      "statement": "事故与抓真优先转成可执行契约，而不是只写进台账叙述。",
+      "origin": "authored"
+    },
+    {
+      "id": "review-six-dimensions",
+      "kind": "judgment",
+      "statement": "代码评审按六维度 + P1/P2/Minor 分级；P1 修复后方可收口。",
+      "origin": "authored"
+    },
+    {
+      "id": "g0-stage-discipline",
+      "kind": "boundary",
+      "statement": "G0 开发期不外推 packaged / Provider / GA；资格状态 false 是常态不是待办。",
+      "origin": "authored"
+    }
+  ]
+}
