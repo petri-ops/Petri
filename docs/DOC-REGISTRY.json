@@ -8848,7 +8848,7 @@
         "skills",
         "G0"
       ],
-      "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）planned：治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行；收口 completed 硬绑 closeout 全绿；台账自动落账。队列 336→337→334 收口→335。"
+      "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）planned：P0 引擎/规则包分离（按项目类型自动挂载：软件治理包/bio pack 规则/轻量默认/零规则；Petri 治理只是第一个规则包，引擎不内嵌项目专属规则）；治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行；收口 completed 硬绑 closeout 全绿；台账自动落账。队列 336→337→334 收口→335。"
     }
   ],
   "lastUpdated": "2026-11-02",
