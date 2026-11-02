@@ -1,0 +1,79 @@
+{
+  "name": "worktree-live",
+  "block": "BLOCK-336",
+  "phase": "P4",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T10:58:03.508Z",
+  "finishedAt": "2026-11-02T10:58:04.558Z",
+  "backend": "http://127.0.0.1:3181/api",
+  "assertions": [
+    {
+      "name": "V1_isolated_backend",
+      "pass": true,
+      "detail": "backend :3181 + temp dataDir（端口自适应，不杀未知进程）"
+    },
+    {
+      "name": "V2_source_project_created",
+      "pass": true,
+      "detail": "status=200 id=p_mvz5avhs_twzj path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b336-live-6h2hqU/source-repo"
+    },
+    {
+      "name": "V3_worktree_project_created",
+      "pass": true,
+      "detail": "status=200 worktree_of=p_mvz5avhs_twzj path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b336-live-6h2hqU/data/worktrees/p_mvz5avhw_qohu"
+    },
+    {
+      "name": "V4_git_claims_copy",
+      "pass": true,
+      "detail": "git worktree list 含副本=true"
+    },
+    {
+      "name": "V5_tool_list_sees_copy",
+      "pass": true,
+      "detail": "total=1 exists=true gitKnown=true"
+    },
+    {
+      "name": "V6_agent_edit_dirty",
+      "pass": true,
+      "detail": "dirty=true untracked=[\"agent-edit.txt\"]"
+    },
+    {
+      "name": "V7_merge_request_summary",
+      "pass": true,
+      "detail": "ok=true merged=false dirty=true ahead=0 主仓 HEAD 未变=true"
+    },
+    {
+      "name": "V8_delete_dirty_409",
+      "pass": true,
+      "detail": "status=409 code=worktree_dirty files=[\"agent-edit.txt\"]"
+    },
+    {
+      "name": "V9_409_leaves_project_intact",
+      "pass": true,
+      "detail": "GET 项目仍在 status=200"
+    },
+    {
+      "name": "V10_delete_confirmed_200",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "V11_copy_removed_branch_kept",
+      "pass": true,
+      "detail": "目录已移除=true 分支保留=true"
+    },
+    {
+      "name": "V12_registry_removed",
+      "pass": true,
+      "detail": "status=removed reason=confirmed_dirty"
+    },
+    {
+      "name": "V13_task_events_lifecycle",
+      "pass": true,
+      "detail": "create=true remove=true via=project-layer"
+    }
+  ],
+  "allPass": true,
+  "passed": 13,
+  "total": 13
+}

@@ -35,7 +35,7 @@
 | --- | --- | --- | --- |
 | 1 | BLOCK-334 结果宿主统一 | **completed**（P1+P2 全片；`b5a72c45` 复位 HEAD、`e72ea1dc` 收口） | — |
 | 2 | BLOCK-338 stall 看门狗（稳定性优先，根治 chat hang 根因=socket idle timeout 被 SSE 心跳喂活） | planned | 无裁决；**因 336 已插队启动，本包顺延至 336 收口后** |
-| 3 | BLOCK-336 worktree 基础设施（全方位版） | **active（P1 工具面 10/10 + P2 项目层 8/8 + P3 生命周期事件 4/4 收口；余 P4 实机对账 + P5 回写）** | 交付即自动闭合 worktree 休眠纪律重开（用户「加 全方位的加」已裁） |
+| 3 | BLOCK-336 worktree 基础设施（全方位版） | **active（P1 10/10 + P2 8/8 + P3 4/4 + P4 实机 13/13 收口；仅余 P5 governance 回写）** | 交付即自动闭合 worktree 休眠纪律重开（用户「加 全方位的加」已裁） |
 | 4 | BLOCK-337 治理运行时化 + 并行协议（P0 引擎/规则包分离、P7 自我边界三防线） | planned | 无裁决 |
 | 5 | BLOCK-335 任务推进闭环（判据驱动驾驶员；自优化为首个用例） | planned | **首批题**（建议 lint 存量收缩）需用户点头；judge 读数需 **Jev 密钥 TYPESAFE_API_KEY**（不挡开工） |
 

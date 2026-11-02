@@ -101,3 +101,37 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 **未做（后续片）**：P4 隔离后端实机全链 + governance §3～§8 逐节对账表；P5 `worktree-governance.md` 状态回写 + 335 撞裁决点①关闭。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 8. P4 收口记录（2026-11-02 同会话续片）
+
+**实机腿** `scripts/block336-worktree-live.mjs`（端口自适应，绝不杀未知进程；临时数据根；真后端进程 + 真 git）：
+
+| # | 断言 | 结果 |
+| --- | --- | --- |
+| V1 | 隔离后端 health（端口自适应） | PASS |
+| V2 | REST 建源项目（真 git 仓） | PASS（200） |
+| V3 | REST 建副本（`worktreeOf`）→ `workspace_path=<dataDir>/worktrees/<id>` | PASS（200） |
+| V4 | 源仓 `git worktree list` 认领副本 | PASS |
+| V5 | **跨进程 registry 一致**：工具面 `list` 看见后端建的副本（`exists`/`gitKnown` 均 true） | PASS |
+| V6 | 副本内改动 → list 判脏并列出 `agent-edit.txt` | PASS |
+| V7 | `merge_request` 只出摘要（`merged=false`/`worktreeDirty=true`）且**主仓 HEAD 不变** | PASS |
+| V8 | 脏树 DELETE → **409 + `worktree_dirty` + dirtyFiles** | PASS |
+| V9 | 409 后项目仍在（无半删除态） | PASS |
+| V10/V11 | 确认后 200 → 目录移除、**分支保留** | PASS |
+| V12 | registry 转 `removed`（`reason=confirmed_dirty`） | PASS |
+| V13 | `task_events` 生命周期双行（create + remove，`via=project-layer`） | PASS |
+
+证据：`acceptance/block-336/block336-p4-live-darwin.json`（**13/13 allPass**）。抓真一处：后端进程**不跑** `src/migrations`（那是桌面主进程 migration-runner 的职责），脚本须预建库——首跑 `no such table: projects` 已修（同 block262 姿势）。
+
+### governance §3～§8 逐节对账（如实标注未实现项）
+
+| § | 纪律 | 状态 | 落点 / 证据 |
+| --- | --- | --- | --- |
+| §3 | 适用标准（重开条件成立才用） | **已实现（流程面）** | 用户 2026-11-02 裁决即重开点；P5 回写后正式生效 |
+| §4 | 一一对应（一树/一分支/一 Agent/一包） | **已实现** | `checkContract` 四规则一次报全（P1 单测）；项目层分支固定 `worktree/<projectId>`（P2 单测） |
+| §5 | 环境隔离（端口/userData/SQLite/产物/日志） | **部分实现** | 端口偏移约定 `derivePortBase`（默认 3101、步长 10）已实现并写入 `entry.ports`；**userData / SQLite / 产物 / 日志隔离未装配**（v1 只约定端口，frontmatter reopen 已声明） |
+| §6 | 同步与合并（经 git 提交/评审流，绝不目录拷贝） | **已实现** | `merge_request` 只出摘要 + `merged=false` + 主仓 HEAD 不变（P1 单测 + P4 V7） |
+| §7 | 保留与移除（commit/快照 → 合并或显式保留 → 干净状态 → Artifact 检查后移除） | **部分实现** | 脏树 fail-closed、`allowUnmergedAhead` 显式档、确认后 `--force` 且分支保留（P1/P2 单测 + P4 V8-V11）；**Artifact 检查未实现**（v1 无 artifact 关联面，reopen） |
+| §8 | 集中管理（登记表） | **已实现** | `registry.json` 单源 + `worktree-audit.jsonl` 永久证据 + `task_events` 当下可观测流（P3 单测） |
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

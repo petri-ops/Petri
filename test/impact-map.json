@@ -3,6 +3,24 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block336-worktree-live",
+      "note": "BLOCK-336 P4 验收执行器：隔离后端（端口自适应）+ 真 git 全链——项目层 REST 建副本/脏树 409/确认删除、跨进程 registry 一致、task_events 生命周期；只随本包定向测试与文档门，不参与产品脚本分类。",
+      "patterns": [
+        "scripts/block336-worktree-live.mjs",
+        "acceptance/block-336/**"
+      ],
+      "tests": [
+        "test/block336-worktree-infrastructure.test.mjs",
+        "test/block336-worktree-project-layer.test.mjs",
+        "test/block336-worktree-events.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "next04b-evidence-scripts",
       "note": "NEXT-04B 验收执行器：直连 Blender+vision mock/降级证据与 9223 实机流；只随定向测试与文档门，不参与产品脚本分类。",
       "patterns": [

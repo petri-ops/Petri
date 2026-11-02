@@ -34,6 +34,10 @@ const BASELINE = new Set([
   'scripts/ui551-ui-live.mjs',
   // BLOCK-244 UI-552 — 同型隔离栈起停（win32 taskkill 进程树），dev-only 一次性探针。
   'scripts/block244-approval-tail-live.mjs',
+  // BLOCK-336 P4 — 同型隔离后端实机腿：process.platform 仅用于①证据文件名平台后缀
+  // （加性策略，跨平台不互相覆盖，BLOCK-330 先例）②killTree 的 taskkill/SIGTERM 差分。
+  // dev-only 一次性探针，收敛到 platform-compat 无收益，登记即留痕。
+  'scripts/block336-worktree-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',
