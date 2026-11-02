@@ -1,11 +1,47 @@
 'use strict';
 
+// BLOCK-328 — 循环加载安全：connection.js 在本行 require 内回头取本模块导出，
+// 此刻文件尚未执行到末尾赋值；函数声明已提升，先把入口挂上（退避表 const 有 TDZ，末尾合并）。
+module.exports.initSchema = initSchema;
+module.exports.initSchemaWithBusyRetry = initSchemaWithBusyRetry;
+
 require('./connection');
 const { getCurrentG0Baseline } = require('../../shared-backend/g0-baseline');
 
 // BLOCK-92 Wave C-3 — DDL 与迁移外迁（原 db.js，纯搬运零行为变化）。
 // initSchema(db) 由 connection.js 在连接建立、pragma 设置后立即调用，
 // 与拆分前"模块加载即执行 DDL"的时序逐行一致。
+
+// BLOCK-328 防线② — initSchema 的 SQLITE_BUSY 有界重试退避（327 取证：加载期
+// schema init 遇另一进程持写锁时同步 busy 等待，最长 busy_timeout=10s 后直接崩——
+// 孤儿/双后端争用窗口）。两次尝试 × 指数退避（2s/5s），给瞬态争用一个自愈窗口；
+// 持锁到超时仍失败则如实抛出（fail-closed，不掩盖真实锁冲突）。
+const BUSY_RETRY_DELAYS_MS = Object.freeze([2000, 5000]);
+
+function sleepSync(ms) {
+  const shared = new SharedArrayBuffer(4);
+  Atomics.wait(new Int32Array(shared), 0, 0, ms);
+}
+
+function busyRetryDelays() { return [2000, 5000]; }
+
+function initSchemaWithBusyRetry(db) {
+  const delays = busyRetryDelays();
+  let lastError = null;
+  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+    try {
+      return initSchema(db);
+    } catch (e) {
+      lastError = e;
+      const isBusy = e && (e.code === 'SQLITE_BUSY' || /database is locked/i.test(String(e.message)));
+      if (!isBusy || attempt === delays.length) break;
+      const delay = delays[attempt];
+      console.warn(`[schema] initSchema hit SQLITE_BUSY (attempt ${attempt + 1}); retrying in ${delay}ms`);
+      sleepSync(delay);
+    }
+  }
+  throw lastError;
+}
 
 function initSchema(db) {
 // HRT-3: durable ScientificTaskSpec + confirmation ledger. The immutable
@@ -514,4 +550,4 @@ try {
 // ============================================================
 }
 
-module.exports = { initSchema };
+Object.assign(module.exports, { initSchema, initSchemaWithBusyRetry, BUSY_RETRY_DELAYS_MS });

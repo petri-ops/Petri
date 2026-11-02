@@ -43,7 +43,7 @@ module.exports.now = now;
 
 // uid/now 先于 schema 定义：schema.js 的迁移体引用 now()，
 // 在 CJS 循环加载时必须已存在于本模块的部分导出中。
-require('./schema').initSchema(db);
+require('./schema').initSchemaWithBusyRetry(db); // BLOCK-328：SQLITE_BUSY 有界重试退避
 
 function getDatabase() {
   return db;

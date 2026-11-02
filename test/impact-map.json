@@ -6884,6 +6884,21 @@
         "test/block119-output-judge.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block328-early-loop-guard",
+      "note": "BLOCK-328 加载期守卫 + initSchema busy 重试；改动落点连契约测与 326 启动邻域。",
+      "patterns": [
+        "core/petri-server/helpers/early-loop-guard.js",
+        "core/petri-server/db/schema.js",
+        "core/petri-server/db/connection.js",
+        "core/petri-server/server.js"
+      ],
+      "tests": [
+        "test/block328-early-loop-guard.test.mjs",
+        "test/block326-audit-debt-sweep.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

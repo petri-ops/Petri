@@ -8644,8 +8644,27 @@
         "G0"
       ],
       "notes": "Mac 冷启动 event-loop ~10s 阻塞取证 completed（2026-11-01）：根因=DB 写锁争用 × 同步 busy 等待（≤10s）× 模块加载期监控不可见；争用源=SIGTERM 孤儿（已修）；三探针不可复现；修复选项留裁决。"
+    },
+    {
+      "id": "BLOCK-328-EARLY-LOOP-GUARD",
+      "capability": "block-328-early-loop-guard",
+      "path": "docs/block-328-early-loop-guard-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-328-early-loop-guard",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "reliability",
+        "startup",
+        "sqlite",
+        "G0"
+      ],
+      "notes": "327 取证收口防线（用户裁决 2026-11-02「行呀 开整」）completed：加载期守卫（持锁 3.5s 实证告警可见）+ initSchema busy 重试；契约 5/5；存量循环加载 TDZ 登记 🟡。"
     }
   ],
-  "lastUpdated": "2026-11-01",
-  "documentCount": 439
+  "lastUpdated": "2026-11-02",
+  "documentCount": 440
 }

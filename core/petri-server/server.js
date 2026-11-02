@@ -20,12 +20,16 @@ const os = require('os');
 const path = require('path');
 
 // Scientific analysis runs through the tools routes and tool_job persistence.
+// BLOCK-328 加载期守卫（327 取证收口防线①）：必须在 require('./db') 之前 require——
+// 记录加载基准，db 加载完成后 reportLoadBlock() 把加载期同步 busy 等待（监控盲区）变成可见。
+require('./helpers/early-loop-guard');
 const cacheManager = require('./cache-manager');
 // BLOCK-10 retention + lifecycle 闭包期望 better-sqlite3 实例（.prepare / .close），
 // 而 db.js 默认导出是 wrapper 对象（{...exports, db, getDatabase}）。两者解构出来
 // 不一致会让 retention-purge 全部失败 + lifecycle.db.close silently no-op。
 // 统一通过 destructure 取底层 better-sqlite3 实例。
 const { db } = require('./db');
+require('./helpers/early-loop-guard').reportLoadBlock(); // BLOCK-328：db require 链（含 initSchema 同步 busy 等待）耗时告警
 const config = require('./config');
 const { logError } = require('./helpers/error-log');
 const { recordFunnelEvent } = require('./helpers/funnel-log');
