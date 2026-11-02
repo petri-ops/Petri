@@ -4,11 +4,8 @@ import type { Model3DOpenDetail } from '@/lib/events';
 import type { BackendStatus } from '@/lib/electron';
 import type { HarnessWorkflowJobState } from '@/lib/harness-client';
 import type { WorkspaceMode } from '@/hooks/useWorkspaceRouting';
-import { ResultStudioInspector } from '@/components/result-studio/ResultStudioSurface';
-import {
-  ResultEditAdvancedDrawer,
-  type ResultEditSubmission,
-} from '@/components/result-studio/ResultEditPanel';
+import type { ResultEditSubmission } from '@/components/result-studio/ResultEditPanel';
+import type { ResultAgentComposerContext } from '@/components/result-studio/ResultAgentComposer';
 import type { ResultStudioEditControls } from '@/lib/result-studio-interaction-client';
 import { trackResizeGlow } from '@/lib/resize-glow';
 import {
@@ -34,6 +31,8 @@ import { LlmTranscriptViewer } from '@/components/copilot/LlmTranscriptViewer';
 // UI-385 — 子智能体实时详情面板（原独立专属窗迁入右栏）
 import { AgentRunPanel } from '@/components/workspace-panels/AgentRunPanel';
 import { GeneratedFilesSurface } from '@/components/work-surface/GeneratedFilesSurface';
+// BLOCK-334 — 结果查看自中央四态接管迁入右栏：本 surface 是「结果」tab 的唯一宿主
+import { ResultsSurface } from '@/components/work-surface/ResultsSurface';
 import { PlanSurface } from '@/components/work-surface/PlanSurface';
 import { EvidenceSurface } from '@/components/work-surface/EvidenceSurface';
 // BLOCK-248（Q3）— 事件级执行轨迹（与模型 I/O 互相链接，不互相替代）
@@ -82,17 +81,18 @@ export interface RightPanelContext {
   onWorkflowChanged: () => void;
   activeArtifact: ActiveArtifact | null;
   setActiveArtifact: (a: ActiveArtifact | null) => void;
-  /** G0-RS-P3: Agent 上下文就绪状态，由后端 context-envelope 投影而来。 */
-  resultContext?: {
-    status: 'ready' | 'blocked' | 'loading';
-    reason?: string | null;
-    selectionUsable?: boolean;
-    selectionCompatibility?: 'compatible' | 'stale' | 'invalid' | null;
-  } | null;
+  /** BLOCK-334 — 结果宿主所需：项目任务列表（无 activeJob 时的 ResultsLibrary）。 */
+  jobs: ToolJob[];
+  /** BLOCK-216 Q5 — pack 贡献的结果面（无匹配时保留核心 transitional 面）。 */
+  packResultSurfaces: WorkSurfaceDescriptor[];
+  /** G0-RS-P3: Agent 上下文就绪状态，由后端 context-envelope 投影而来（含 contextToken）。 */
+  resultContext?: ResultAgentComposerContext | null;
   /** G0-RS-P4: Schema 驱动的编辑控件，与 Agent 可见参数同源。 */
   resultEditControls?: ResultStudioEditControls | null;
   resultEditSubmitting?: boolean;
-  onResultEditSubmit?: (submission: ResultEditSubmission) => void;
+  resultAgentDraft: string;
+  setResultAgentDraft: (draft: string) => void;
+  onResultEditSubmit?: (submission: ResultEditSubmission) => boolean | void;
   openWorkspaceFiles: ActiveWorkspaceFile[];
   activeWorkspaceFile: ActiveWorkspaceFile | null;
   setActiveWorkspaceFile: (f: ActiveWorkspaceFile | null) => void;
@@ -105,7 +105,11 @@ export interface RightPanelContext {
   setBottomTerminalOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setRightOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   setActiveConvId: (id: string | null) => void;
-  handleAskAgent: (prompt: string) => boolean | void;
+  handleAskAgent: (prompt: string, options?: { analysisMode?: boolean; compose?: boolean }) => boolean | void;
+  /** BLOCK-334 — 结果壳「打开修订对应工作区文件」出口（事件走 projectOpenWorkspaceFile）。 */
+  openRevisionWorkspaceFile: (relativePath: string) => void;
+  /** BLOCK-334 — 结果壳「查看 HTML 报告」：写浏览器 URL 并切到 browser tab。 */
+  openResultBrowser: (url: string) => void;
   handleOpenWorkspaceFile: (file: ActiveWorkspaceFile) => void;
   /** UI-451 — tab 点击激活（传数组既有对象，身份不变 → 预览不重载 → 草稿保留）。 */
   handleActivateWorkspaceFile: (file: ActiveWorkspaceFile) => void;
@@ -239,32 +243,32 @@ export function RightPanel({
                   />
                 )}
                 {tab === 'results' && (
-                  <ResultStudioInspector
-                    artifact={ctx.activeArtifact}
-                    jobStatus={ctx.activeWorkflow?.jobStatus || ctx.activeJob?.status}
-                    truthStatus={
-                      typeof ctx.activeArtifact?.truthStatus === 'string'
-                        ? ctx.activeArtifact.truthStatus
-                        : typeof ctx.activeWorkflow?.artifactTruth?.status === 'string'
-                          ? ctx.activeWorkflow.artifactTruth.status
-                          : null
-                    }
-                    onAskAgent={ctx.handleAskAgent}
-                    context={workspaceMode === 'result' ? null : ctx.resultContext ?? null}
-                  />
-                )}
-                {tab === 'results' && ctx.activeArtifact && ctx.onResultEditSubmit && (
-                  <ResultEditAdvancedDrawer
-                    editControls={ctx.resultEditControls ?? null}
-                    disabledReason={
-                      ctx.resultContext?.status === 'blocked'
-                        ? ctx.resultContext.reason || '当前结果缺少可复现的来源坐标，暂时无法修改。'
-                        : ctx.resultContext?.status === 'loading'
-                          ? '正在读取结果坐标…'
-                          : null
-                    }
-                    submitting={ctx.resultEditSubmitting === true}
-                    onSubmit={ctx.onResultEditSubmit}
+                  <ResultsSurface
+                    active={ctx.rightTab === tab}
+                    ctx={{
+                      project: ctx.project,
+                      projectId: ctx.projectId,
+                      conversationId: ctx.activeConvId,
+                      activeJob: ctx.activeJob,
+                      activeWorkflow: ctx.activeWorkflow,
+                      activeArtifact: ctx.activeArtifact,
+                      setActiveArtifact: ctx.setActiveArtifact,
+                      jobs: ctx.jobs,
+                      packResultSurfaces: ctx.packResultSurfaces,
+                      resultContext: ctx.resultContext ?? null,
+                      resultEditControls: ctx.resultEditControls ?? null,
+                      resultEditSubmitting: ctx.resultEditSubmitting === true,
+                      resultAgentDraft: ctx.resultAgentDraft,
+                      setResultAgentDraft: ctx.setResultAgentDraft,
+                      onResultEditSubmit: ctx.onResultEditSubmit ?? (() => undefined),
+                      pendingArtifactName: ctx.pendingArtifactName,
+                      onPendingArtifactConsumed: ctx.onPendingArtifactConsumed,
+                      onWorkflowChanged: ctx.onWorkflowChanged,
+                      handleAskAgent: ctx.handleAskAgent,
+                      handleOpenResult: ctx.handleOpenResult,
+                      openRevisionWorkspaceFile: ctx.openRevisionWorkspaceFile,
+                      openResultBrowser: ctx.openResultBrowser,
+                    }}
                   />
                 )}
                 {tab === 'files' && (

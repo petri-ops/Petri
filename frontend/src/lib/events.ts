@@ -301,12 +301,7 @@ export interface ProjectOpenArtifactDetail {
   jobId: string;
   artifactName: string;
   projectId?: string | null;
-  /**
-   * UI-653 — true = 同时把中央工作面切到结果视图（URL 带 job，结果面才会装载
-   * 该 job 的 artifacts）。聊天产物卡「在结果中查看」用 true；正文内联链接等
-   * 保持缺省（preserve 当前视图）。
-   */
-  switchToResult?: boolean;
+  // BLOCK-334 — 原 UI-653 `switchToResult` 退役：结果统一落右栏「结果」tab，无「切中央」一说。
 }
 
 /**

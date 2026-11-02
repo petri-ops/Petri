@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ResultStudioCanvas,
   ResultStudioContextBar,
-  ResultStudioInspector,
 } from './ResultStudioSurface';
 import { beginResultSurfaceMeasure, RESULT_SURFACE_PERFORMANCE_MARKS } from './resultSurface';
 
@@ -60,7 +59,7 @@ describe('G0-RS-P1 Result Studio surface', () => {
         onAskAgent={onAsk}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
+    fireEvent.click(screen.getByRole('button', { name: '返回结果' }));
     fireEvent.click(screen.getByRole('button', { name: '询问 Agent' }));
     expect(onBack).toHaveBeenCalledTimes(1);
     expect(onAsk).toHaveBeenCalledTimes(1);
@@ -92,87 +91,5 @@ describe('G0-RS-P1 Result Studio surface', () => {
     expect(onModeChange).toHaveBeenNthCalledWith(3, 'code');
   });
 
-  it('keeps technical identifiers inside progressive disclosure', () => {
-    render(
-      <ResultStudioInspector
-        artifact={{
-          jobId: 'job-1', toolId: 'deseq2', name: 'deg.csv', type: 'table',
-          label: '差异表达结果', revisionId: 'rev-2', artifactFamilyId: 'family-1',
-          entityType: 'gene', selectionDurable: true, selection: null,
-        }}
-        jobStatus="done"
-        truthStatus="valid"
-        onAskAgent={() => undefined}
-      />,
-    );
-    expect(screen.getByText('当前结果')).toBeTruthy();
-    const summary = screen.getByText('技术详情');
-    const details = summary.closest('details');
-    expect(details?.hasAttribute('open')).toBe(false);
-    expect(details?.textContent).toContain('family-1');
-    expect(details?.textContent).toContain('job-1');
-  });
-
-  it('shows file availability separately from scientific validation', () => {
-    const onAsk = vi.fn();
-    render(
-      <>
-        <ResultStudioContextBar
-          title="差异表达火山图"
-          trust={{ tone: 'valid', label: '可信结果' }}
-          availabilityStatus="unavailable"
-          conclusion="科学校验记录仍保留，但当前产物文件不可读取。"
-          revisionLabel="当前 v2"
-          selectionLabel="未选择对象"
-          onBack={() => undefined}
-          onAskAgent={() => undefined}
-        />
-        <ResultStudioInspector
-          artifact={{
-            jobId: 'job-1', toolId: 'volcano-plot', name: 'volcano.png', type: 'image',
-            label: '差异表达火山图', revisionId: 'rev-2', artifactFamilyId: 'family-1',
-            availabilityStatus: 'unavailable', availabilityReason: 'artifact_truth_unavailable',
-          }}
-          jobStatus="done"
-          truthStatus="valid"
-          onAskAgent={onAsk}
-        />
-      </>,
-    );
-
-    // ContextBar 接收调用方传入的短标签；Inspector 走 describeTruthStatus 的
-    // 诚实长标签（BLOCK-211 bbcaafbe 语义化）。两者同一真值，但文案不同。
-    expect(screen.getAllByText('可信结果')).toHaveLength(1);
-    expect(screen.getAllByText('已核验（未篡改）')).toHaveLength(1);
-    expect(screen.getAllByText('文件不可用')).toHaveLength(2);
-    expect(screen.queryByText('打开原文件')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /检查并恢复文件/ }));
-    expect(onAsk).toHaveBeenCalledWith(expect.stringContaining('不要覆盖原始数据'));
-  });
-
-  // BIO-6（BIO-D4 裁决 b：单一真相）— 「解释当前结果」prompt 必须锚定任务与
-  // 产物坐标，并强制 Agent 先经 result_summary 读有界真值再解读，不接遗留模板。
-  it('解释当前结果 prompt 锚定任务坐标并强制 result_summary 真值（BIO-6）', () => {
-    const onAsk = vi.fn();
-    render(
-      <ResultStudioInspector
-        artifact={{
-          jobId: 'job-9', toolId: 'deseq2', name: 'deg_table.csv', type: 'table',
-          label: '差异表达结果',
-        }}
-        jobStatus="done"
-        truthStatus="valid"
-        onAskAgent={onAsk}
-      />,
-    );
-    fireEvent.click(screen.getByRole('button', { name: /解释当前结果/ }));
-    expect(onAsk).toHaveBeenCalledTimes(1);
-    const prompt = String(onAsk.mock.calls[0][0]);
-    expect(prompt).toContain('result_summary');
-    expect(prompt).toContain('job-9');
-    expect(prompt).toContain('deg_table.csv');
-    expect(prompt).toContain('不得编造');
-    // 遗留模板措辞退役：解读真相只剩 Agent + result_summary 链一条
-    expect(prompt).not.toContain('请解释当前结果');
-  });
+  // BIO-6 「解释当前结果」prompt 用例随 Inspector 退役迁址 work-surface/ResultsSurface.test.tsx（BLOCK-334）。
 });

@@ -1,25 +1,12 @@
-export type ResultTitleBarMode = string; // 后端值域：'chat' | 'result' | 'code' | 'compare' | 'history'
-
-const MODE_LABELS: Record<string, string> = {
-  result: '结果',
-  code: '代码',
-  compare: '审查修改',
-  history: '版本历史',
-};
-
+// BLOCK-334 — 中央 result/code/compare/history 四态退役后，标题不再按工作区模式拼
+// 「· 结果/代码/…」后缀；判据改为「右栏结果 tab 是否激活且有产物」。项目名始终在场
+// （UI-181：用户任何时候都要看见自己在哪个项目）。
 export function buildResultTitleBarTitle(
-  mode: ResultTitleBarMode,
+  resultsActive: boolean,
   projectTitle: string | null | undefined,
   artifactTitle?: string | null,
 ): string {
   const project = projectTitle || '梳理开发进展';
-  const modeLabel = MODE_LABELS[mode];
-  // chat mode (or any unrecognized mode) keeps project identity front-and-center
-  // so the user always sees WHICH project they're in. handleOpenResult preserves
-  // 'chat' on auto-open from HomePage; 'scheduled' / 'plugins' / null
-  // never end up here because ProjectWorkspace normalizes to 'chat' via T85.
-  if (!modeLabel) return project;
-  // Result/code/compare/history mode: artifact name dominates, project name
-  // remains visible as the secondary context marker.
-  return artifactTitle ? `${artifactTitle} · ${modeLabel} · ${project}` : `${modeLabel} · ${project}`;
+  if (!resultsActive || !artifactTitle) return project;
+  return `${artifactTitle} · ${project}`;
 }

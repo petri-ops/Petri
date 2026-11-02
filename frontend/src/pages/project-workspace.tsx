@@ -47,7 +47,6 @@ import {
   type HarnessIndexSummary,
 } from '@/lib/harness-client';
 import { buildResultTitleBarTitle } from '@/lib/result-title-bar';
-import { isResultWorkspaceMode } from '@/components/result-studio/resultFocusLayout';
 import {
   beginResultSurfaceMeasure,
   RESULT_SURFACE_PERFORMANCE_MARKS,
@@ -74,7 +73,6 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-341 加映三（档 2）——左栏数据/动作已上提 AppRailContext（单一真相）。
   // 以下别名保持本文件既有引用点零改动。
   const handleSwitchConversation = appRail.switchConversation;
-  const switchToProject = appRail.switchToProject;
   const updateTitleBar = shell.updateTitleBar;
   const { projectId, '*': modeSplat } = useParams<{ projectId: string; '*'?: string }>();
   const navigate = useNavigate();
@@ -198,6 +196,7 @@ export function ProjectWorkspace(): React.ReactElement {
   const {
     leftWidth,
     rightWidth,
+    resultRightWidth,
     inputHeight,
     bottomTerminalHeight,
     startColumnResize,
@@ -213,7 +212,6 @@ export function ProjectWorkspace(): React.ReactElement {
     setBottomTerminalOpen,
     summaryOpen,
 
-    setSummaryOpen,
     centerColRef,
     sessionFrameRef,
     sessionFrameWidth,
@@ -283,9 +281,11 @@ export function ProjectWorkspace(): React.ReactElement {
     return () => window.removeEventListener('keydown', onKey);
   }, [pendingAppClose]);
 
-  // Every right-side tool shares one width. Switching to Results must not
-  // jump to a separately constrained layout or change the drag feel.
-  const effectiveRightWidth = rightWidth;
+  // BLOCK-334 D2 — 结果 tab 激活且有任务时右栏取独立偏好 resultRightWidth（默认 720，
+  // 拖动写回该偏好而非文件/3D 共用的 rightWidth）；其余 tab 维持共用宽度。只动右栏
+  // 自己的宽度，不触碰左栏（UI-341 加映二「侧栏只由用户主动点击改变」维持）。
+  const resultsFocus = rightOpen && rightTab === 'results' && Boolean(activeJobId);
+  const effectiveRightWidth = resultsFocus ? resultRightWidth : rightWidth;
   // BLOCK-22 P4.5: Access PendingScrollContext so we can dispatch pending scroll
   // requests (line scroll + inline-diff) to WorkspaceFilePreviewBridge.
   const { setPendingRequest } = usePendingScroll();
@@ -327,33 +327,34 @@ export function ProjectWorkspace(): React.ReactElement {
   );
   // T85: mode 进 URL 子路径（`/project/:id/<mode>`）；`?job=`/`?artifact=`/`?file=` 深链保留。
   // 旧 `?mode=` 仍由下面的归一化 effect 迁到子路径。
-  const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true, jobId?: string | null) => {
-    const currentIsResult = isResultWorkspaceMode(workspaceMode);
-    const nextIsResult = isResultWorkspaceMode(nextMode);
-    if (nextIsResult && !currentIsResult) {
-      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
-    } else if (nextMode === 'chat' && currentIsResult) {
-      beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.returnStart);
-    }
+  // BLOCK-334 — 中央只剩 chat / scheduled 两态；`?job=&artifact=` 不再随中央模式增删，
+  // 它们描述的是右栏结果（见 syncResultQuery），切模式只改路径段。
+  const updateWorkspaceMode = useCallback((nextMode: WorkspaceMode, replace = true) => {
     const seg = modeToSegment(nextMode);
     const base = seg ? `/project/${projectId}/${seg}` : `/project/${projectId}`;
     // 读当前 URL（不是 useSearchParams 对象）：后者每轮新实例会让回调逐轮换引用（BLOCK-250 环）。
     const nextParams = new URLSearchParams(window.location.search);
-    const nextCarriesJob = (nextMode === 'scheduled' || nextMode === 'result' || nextMode === 'code' || nextMode === 'compare' || nextMode === 'history') && Boolean(jobId);
-    if (!nextCarriesJob || nextParams.get('job') !== jobId) {
-      openResultRequestSequenceRef.current += 1;
-    }
-    if (nextCarriesJob && jobId) {
-      if (nextParams.get('job') !== jobId) nextParams.delete('artifact');
-      nextParams.set('job', jobId);
-    } else {
-      nextParams.delete('job');
-      nextParams.delete('artifact');
-    }
     // mode now lives in the path segment, not the query string.
     nextParams.delete('mode');
     const query = nextParams.toString();
     void navigate(query ? `${base}?${query}` : base, { replace });
+  }, [navigate, projectId]);
+  // BLOCK-334 D1 — URL 上的 `?job=&artifact=` 跟右栏结果同步：打开/切换任务写入，
+  // 清空删除；换任务时顺带清 artifact（旧产物名对新任务无意义）并推进打开序号，
+  // 让仍在飞的旧打开请求作废（与原 updateWorkspaceMode 的 job 分支语义一致）。
+  const syncResultQuery = useCallback((jobId: string | null) => {
+    const nextParams = new URLSearchParams(window.location.search);
+    if (nextParams.get('job') !== jobId) {
+      openResultRequestSequenceRef.current += 1;
+      nextParams.delete('artifact');
+    }
+    if (jobId) nextParams.set('job', jobId);
+    else nextParams.delete('job');
+    nextParams.delete('mode');
+    const seg = modeToSegment(workspaceMode);
+    const base = seg ? `/project/${projectId}/${seg}` : `/project/${projectId}`;
+    const query = nextParams.toString();
+    void navigate(query ? `${base}?${query}` : base, { replace: true });
   }, [navigate, projectId, workspaceMode]);
   // openRightPanel: 打开右栏 tab。UI-341 加映二（用户裁决）——不再因 compact
   // 顺手收起左栏：侧栏只由用户主动点击改变。
@@ -361,6 +362,16 @@ export function ProjectWorkspace(): React.ReactElement {
     openSurface(tab);
     setRightOpen(true);
   }, [openSurface, setRightOpen]); useUiActionHost({ uiActions: workSurfaceUiActions, openRightPanel, descriptorFor: descriptorForSurface });
+  // BLOCK-334 — 打开结果的唯一落点：绑定任务 + 右栏「结果」tab + URL `?job=` 同步。
+  // 原四条路径（标题栏结果选择器 / 右栏结果入口 / 摘要卡 / handleOpenResult）各自
+  // 再 updateWorkspaceMode('result') 的分支随中央四态退役一并消失。
+  const openResultInRail = useCallback((jobId: string) => {
+    beginResultSurfaceMeasure(RESULT_SURFACE_PERFORMANCE_MARKS.openStart);
+    bindActiveJob(jobId);
+    setRightOpen(true);
+    openRightPanel('results');
+    syncResultQuery(jobId);
+  }, [bindActiveJob, openRightPanel, setRightOpen, syncResultQuery]);
   // BLOCK-28.7 — 聊天区改动卡片点击：打开审阅 tab（文件选中由 useWorkingTreeReview 监听）
   useEffect(() => {
     return subscribePetriEvent(petriEvents.reviewOpenFile, () => {
@@ -392,9 +403,8 @@ export function ProjectWorkspace(): React.ReactElement {
     });
   }, [openRightPanel]);
   // 项目列表 / 项目树展开 / 跨项目会话 / 创建态：全部来自 AppRailContext（单一真相）
+  // BLOCK-334 — allProjects / projectConversations 原只喂给 CenterPanel 且其未消费，随中央结果块一并清理。
   const {
-    allProjects,
-    projectConversations,
     refreshOtherConversations,
     setCreateError,
   } = appRail;
@@ -421,11 +431,8 @@ export function ProjectWorkspace(): React.ReactElement {
   const workspacePath = project?.workspacePath || '';
   const handleSelectTitleBarResult = useCallback((jobId: string) => {
     if (!conversationJobs.some((job) => job.id === jobId)) return;
-    bindActiveJob(jobId);
-    setRightOpen(true);
-    openRightPanel('results');
-    updateWorkspaceMode('result', true, jobId);
-  }, [bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
+    openResultInRail(jobId);
+  }, [conversationJobs, openResultInRail]);
   // Plan 1.6 §4.3 — the SWR hook already handles initial load + cleanup on
   // projectId change (it seeds from the shared cache and resets state when
   // projectId is null). What it doesn't know about is the auto-select rule
@@ -480,14 +487,14 @@ export function ProjectWorkspace(): React.ReactElement {
   // UI-348 — 右栏「后端」卡已删除（用户裁决）：后端管理面唯一入口 = 左栏工作台的
   // 全局 /backend 页；原 handleOpenRightTerminal（跳 /backend 的右栏快捷卡）随卡移除。
   const handleOpenRightResults = useCallback(() => {
-    openRightPanel('results');
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
     const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      bindActiveJob(nextJobId);
-      updateWorkspaceMode('result', true, nextJobId);
+      openResultInRail(nextJobId);
+      return;
     }
-  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, updateWorkspaceMode]);
+    openRightPanel('results');
+  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel]);
   const handleOpenRightBrowser = useCallback(() => {
     openRightPanel('browser');
   }, [openRightPanel]);
@@ -499,16 +506,13 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleOpenRightChat = useCallback(() => {
     void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: activeConvId });
   }, [projectId, activeConvId]);
+  // BLOCK-334 — 标题不再按中央模式拼「· 结果」：右栏结果 tab 激活且有产物时才前置产物名。
   const titleBarTitle = useMemo(
-    () => buildResultTitleBarTitle(workspaceMode, project?.name, activeArtifact?.label || activeArtifact?.name),
-    [activeArtifact?.label, activeArtifact?.name, project?.name, workspaceMode],
+    () => buildResultTitleBarTitle(resultsFocus, project?.name, activeArtifact?.label || activeArtifact?.name),
+    [activeArtifact?.label, activeArtifact?.name, project?.name, resultsFocus],
   );
-  // BLOCK-253 回归修复：这三个回调是 useWorkspaceTitleBar 主注册 effect 的依赖，
+  // BLOCK-253 回归修复：这两个回调是 useWorkspaceTitleBar 主注册 effect 的依赖，
   // 行内箭头每轮新引用会与 updateTitleBar setState 组成重渲染环（BLOCK-250 同款）。
-  const handleSwitchWorkspaceMode = useCallback(
-    (nextMode: 'result' | 'code' | 'compare' | 'history') => updateWorkspaceMode(nextMode, true, activeJobId || null),
-    [updateWorkspaceMode, activeJobId],
-  );
   const handleToggleBottomTerminal = useCallback(
     () => setBottomTerminalOpen((value) => !value),
     [setBottomTerminalOpen],
@@ -540,7 +544,6 @@ export function ProjectWorkspace(): React.ReactElement {
     closeRightPanelTab,
     closeOtherTabs: closeOtherSurfaceTabs, closeTabsToRight: closeSurfaceTabsToRight, closeAllTabs: closeAllSurfaceTabs,
     setRightOpen, setRightTab, setRightToolMenuOpen,
-    workspaceMode, onSwitchWorkspaceMode: handleSwitchWorkspaceMode,
     bottomTerminalOpen, onToggleBottomTerminal: handleToggleBottomTerminal, onToggleSideChat: handleToggleSideChat,
   });
   // UI-282 — 拖拽目录直达创建：路径经校验后直接走创建链（UI-304 后无内联面板）
@@ -611,13 +614,6 @@ export function ProjectWorkspace(): React.ReactElement {
       cancelled = true;
     };
   }, [projectId]);
-  const handleOpenWorkspacePath = useCallback(async () => {
-    if (!project?.workspacePath) return;
-    const result = await window.petriDesktop?.files?.openPath?.(project.workspacePath);
-    if (result && !result.ok) {
-      setWorkspaceNotice(result.error || '无法打开工作目录');
-    }
-  }, [project?.workspacePath]);
   useEffect(() => {
     void fetchData();
     const id = setInterval(() => { void fetchData(); }, 60_000); // CK-03：SSE 失效驱动为主，60s 兜底
@@ -707,11 +703,7 @@ export function ProjectWorkspace(): React.ReactElement {
     activeJob?.id,
     !!activeJob && (
       summaryCardOpen ||
-      (rightOpen && rightTab === 'results') ||
-      workspaceMode === 'result' ||
-      workspaceMode === 'code' ||
-      workspaceMode === 'compare' ||
-      workspaceMode === 'history'
+      (rightOpen && rightTab === 'results')
     ),
     workflowRefreshKey,
   );
@@ -764,17 +756,17 @@ export function ProjectWorkspace(): React.ReactElement {
     if (status === 'running') return 'running';
     return 'pending';
   }, []);
+  // BLOCK-334 — 打开结果不再有 preserveWorkspaceMode / workspaceMode 选项：结果永远
+  // 落右栏「结果」tab，中央保持会话；跨项目 navigate 只带 `?job=`。
   const handleOpenResult = useCallback(async (
     jobId: string,
     targetProjectId?: string | null,
-    options?: { preserveWorkspaceMode?: boolean; workspaceMode?: WorkspaceMode },
   ): Promise<boolean> => {
-    const targetMode = options?.workspaceMode ?? (options?.preserveWorkspaceMode ? 'chat' : 'result');
     const openRequestId = ++openResultRequestSequenceRef.current;
     const currentProjectId = projectId || null;
     const resolvedTargetProjectId = targetProjectId ?? currentProjectId;
     if (resolvedTargetProjectId && currentProjectId && resolvedTargetProjectId !== currentProjectId) {
-      void navigate(`/project/${resolvedTargetProjectId}?mode=${targetMode}&job=${encodeURIComponent(jobId)}`);
+      void navigate(`/project/${resolvedTargetProjectId}?job=${encodeURIComponent(jobId)}`);
       return true;
     }
     let nextJob = conversationJobs.find((job) => job.id === jobId)
@@ -816,7 +808,7 @@ export function ProjectWorkspace(): React.ReactElement {
         nextJob = outcome.value;
         nextProjectId = nextJob.project_id || nextProjectId;
         if (nextProjectId && currentProjectId && nextProjectId !== currentProjectId) {
-          void navigate(`/project/${nextProjectId}?mode=${targetMode}&job=${encodeURIComponent(nextJob.id)}`);
+          void navigate(`/project/${nextProjectId}?job=${encodeURIComponent(nextJob.id)}`);
           return true;
         }
         setJobs((prev) => (prev.some((j) => j.id === nextJob!.id) ? prev : [nextJob!, ...prev]));
@@ -825,34 +817,16 @@ export function ProjectWorkspace(): React.ReactElement {
     if (!nextJob) {
       bindActiveJob(null);
       setWorkspaceNotice('找不到这个结果，或当前项目无权访问它。');
-      if (!options?.preserveWorkspaceMode) updateWorkspaceMode('chat', true, null);
       return false;
     }
-    if (!nextJob.conversationId) {
-      // BLOCK-127（BIO-3）：无会话归属的 job（HTTP/API/联邦直跑）按「项目结果」
-      // 放行查看——不切会话、不混入对话，仅绑定结果视图。原「不能混入当前会话」
-      // 阻断退役（AUDIT-LOG 🟡 2026-09-28：四条打开路径不可达的根因）。
-      bindActiveJob(nextJob.id);
-      setRightOpen(true);
-      openRightPanel('results');
-      if (!options?.preserveWorkspaceMode) {
-        updateWorkspaceMode('result', true, nextJob.id);
-      }
-      return true;
+    // BLOCK-127（BIO-3）：无会话归属的 job（HTTP/API/联邦直跑）按「项目结果」放行
+    // 查看——不切会话、不混入对话，仅绑定结果视图；有会话归属的才切会话。
+    if (nextJob.conversationId && nextJob.conversationId !== activeConvId) {
+      setActiveConvId(nextJob.conversationId);
     }
-    if (nextJob) {
-      if (nextJob.conversationId !== activeConvId) {
-        setActiveConvId(nextJob.conversationId);
-      }
-      bindActiveJob(nextJob.id);
-      setRightOpen(true);
-      openRightPanel('results');
-      if (!options?.preserveWorkspaceMode) {
-        updateWorkspaceMode('result', true, nextJob.id);
-      }
-    }
+    openResultInRail(nextJob.id);
     return true;
-  }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openRightPanel, projectId, setRightOpen, updateWorkspaceMode]);
+  }, [activeConvId, bindActiveJob, conversationJobs, jobs, navigate, normalizeToolStatus, openResultInRail, projectId]);
   // BLOCK-92 Wave B-1 — 结果/文件打开事件 effects 簇外迁
   // （./project-workspace/useWorkspaceOpenEffects.ts：URL 请求参数自动打开、
   // projectOpenResult/projectOpenArtifact/独立窗 relay/projectOpenWorkspaceFile）。
@@ -913,12 +887,12 @@ export function ProjectWorkspace(): React.ReactElement {
     const currentJob = conversationJobs.find((job) => job.id === activeJobId);
     const nextJobId = currentJob?.id || conversationJobs[0]?.id || null;
     if (nextJobId) {
-      bindActiveJob(nextJobId);
-      updateWorkspaceMode('result', true, nextJobId);
+      openResultInRail(nextJobId);
+      return;
     }
     setRightOpen(true);
     openRightPanel('results');
-  }, [activeJobId, bindActiveJob, conversationJobs, openRightPanel, setRightOpen, updateWorkspaceMode]);
+  }, [activeJobId, conversationJobs, openResultInRail, openRightPanel, setRightOpen]);
   // backendStatus.rRuntime 可为 null（状态查询失败 = 未知）。用 `=== false`
   // 严格判定"确认缺失"，避免偶发 IPC 异常时误弹缺失横幅。
   // BLOCK-86 P2 — 领域感知：只有已装领域包声明运行时才提示（无包不提运行时），
@@ -969,77 +943,35 @@ export function ProjectWorkspace(): React.ReactElement {
   // CenterPanel ctx — bundles every piece of state/handler the middle column
   // needs to render its 8 workspaceMode layouts. ProjectWorkspace remains the
   // single source of truth; CenterPanel is a pure renderer.
+  // BLOCK-334 — 结果相关字段（activeArtifact/resultContext/Composer 草稿/pack 结果面/
+  // 打开修订文件/查看报告）随结果宿主迁入 rightPanelCtx；中央只剩会话与摘要卡所需。
   const centerPanelCtx: CenterPanelContext = {
     columnHeader: compactLayout ? undefined : <ColumnHeader side="center" />,
     project: project,
     projectId,
-    allProjects,
     activeConvId,
     conversations,
-    projectConversations,
     workspaceMode,
     showPinnedSummary,
     bottomTerminalOpen,
     bottomTerminalHeight,
-    leftOpen,
-    rightOpen,
     inputHeight,
     summaryCardOpen,
     summaryVisibility,
     summaryOpenWidth,
     activeJob,
     activeWorkflow,
-    activeArtifact,
-    resultContext: effectiveResultContextState,
-    resultEditSubmitting: resultEditBusy,
-    resultAgentDraft,
-    activeJobId,
-    pendingArtifactName: pendingArtifactJobIdRef.current === activeJob?.id ? pendingArtifactName : null,
     recentJobs: conversationJobs,
     liveJobsPreview,
     jobStats,
     backendStatus,
-    jobs,
     datasets,
-    packResultSurfaces: workResultSurfaces,
     updateWorkspaceMode,
     openRightPanel,
-    switchToProject,
-    navigate: (to: string) => { void navigate(to); },
     handleSwitchConversation,
     setActiveConvId,
     setActiveJobId,
-    setActiveArtifact,
-    setResultAgentDraft,
-    onResultEditSubmit: handleResultEditSubmit,
-    setBottomTerminalOpen,
-    setSummaryOpen,
-    setLeftOpen,
-    setRightOpen,
-    handleShowPlugins,
-    handleOpenResult,
-    handleAskAgent,
-    handleOpenWorkspacePath,
-    onPendingArtifactConsumed: () => {
-      pendingArtifactNameRef.current = null;
-      pendingArtifactJobIdRef.current = null;
-      setPendingArtifactName(null);
-    },
-    onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
-    openRevisionWorkspaceFile: (relativePath: string) => {
-      dispatchPetriEvent(petriEvents.projectOpenWorkspaceFile, {
-        projectId: projectId || '',
-        relativePath,
-        name: relativePath.split('/').pop() || relativePath,
-        openWithSystemApp: false,
-      });
-    },
-    openResultBrowser: (url: string) => {
-      setBrowserUrl(url);
-      openRightPanel('browser');
-    },
     openScheduledResults,
-    startColumnResize,
   };
   const rightPanelCtx: RightPanelContext = {
     width: effectiveRightWidth,
@@ -1066,10 +998,26 @@ export function ProjectWorkspace(): React.ReactElement {
     onWorkflowChanged: () => setWorkflowRefreshKey((value) => value + 1),
     activeArtifact,
     setActiveArtifact,
+    jobs,
+    packResultSurfaces: workResultSurfaces,
     resultContext: effectiveResultContextState,
     resultEditControls: effectiveResultEditControls,
     resultEditSubmitting: resultEditBusy,
+    resultAgentDraft,
+    setResultAgentDraft,
     onResultEditSubmit: handleResultEditSubmit,
+    openRevisionWorkspaceFile: (relativePath: string) => {
+      dispatchPetriEvent(petriEvents.projectOpenWorkspaceFile, {
+        projectId: projectId || '',
+        relativePath,
+        name: relativePath.split('/').pop() || relativePath,
+        openWithSystemApp: false,
+      });
+    },
+    openResultBrowser: (url: string) => {
+      setBrowserUrl(url);
+      openRightPanel('browser');
+    },
     openWorkspaceFiles,
     activeWorkspaceFile,
     setActiveWorkspaceFile,
@@ -1159,7 +1107,7 @@ export function ProjectWorkspace(): React.ReactElement {
           ctx={rightPanelCtx}
           visible={rightRailVisible}
           workspaceMode={workspaceMode}
-          onResize={startColumnResize('right', { max: sidebarResizeMax(window.innerWidth, leftOpen ? leftWidth : 0) })}
+          onResize={startColumnResize(resultsFocus ? 'resultRight' : 'right', { max: sidebarResizeMax(window.innerWidth, leftOpen ? leftWidth : 0) })}
         />
         {/* UI-451 加映 v3 (P2-8) — 整窗关闭脏守卫确认弹层（beforeunload 拦下后出现） */}
         {pendingAppClose && (

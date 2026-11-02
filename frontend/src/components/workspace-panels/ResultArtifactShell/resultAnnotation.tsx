@@ -97,53 +97,22 @@ export function ResultImagePreview({
         </button>
       </div>
       <div className={styles.resultPreviewImageCanvas}>
-        <AnnotatedResultImage
-          url={url}
+        {/* BLOCK-334 P2 Slice C — AnnotatedResultImage 纯透传层退役：图像引擎早在
+            BLOCK-219 Q6 统一为 AnnotatableImagePane（结果壳/文件预览/草稿面板三消费方），
+            scope 即批注身份参数，不再叠第二名字。 */}
+        <AnnotatableImagePane
+          src={url}
           alt={alt}
-          conversationId={conversationId}
           onOpenImage={onLightbox}
           onImageLoad={onImageLoad}
           onImageError={onImageError}
-          onAddToContext={onAddToContext}
           scope={scope}
+          conversationId={conversationId}
           target={target}
+          onAddToContext={onAddToContext}
         />
       </div>
     </div>
-  );
-}
-
-function AnnotatedResultImage({
-  url,
-  alt,
-  scope,
-  target,
-  conversationId,
-  onOpenImage,
-  onImageLoad,
-  onImageError,
-  onAddToContext,
-}: {
-  url: string;
-  alt: string;
-  conversationId: string | null;
-  onOpenImage: () => void;
-  onImageLoad: () => void;
-  onImageError: () => void;
-  onAddToContext: (prompt: string) => void;
-} & ResultAnnotationProps): React.ReactElement {
-  return (
-    <AnnotatableImagePane
-      src={url}
-      alt={alt}
-      onOpenImage={onOpenImage}
-      onImageLoad={onImageLoad}
-      onImageError={onImageError}
-      scope={scope}
-      conversationId={conversationId}
-      target={target}
-      onAddToContext={onAddToContext}
-    />
   );
 }
 

@@ -9,7 +9,6 @@ import { getApiPrefix, getToken } from '@/lib/authClient';
 import { ErrorNotice } from '@/components/ui/controls/Status';
 import { findCatalogTool, useToolCatalog } from '@/lib/tool-catalog';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
-import { csvPreviewPageCount, csvPreviewPageRows } from '@/lib/csv-preview-pagination';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { petriEvents, dispatchPetriEvent } from '@/lib/events';
 import { useTheme } from '@/themes/ThemeProvider';
@@ -52,7 +51,13 @@ import { ArtifactPinPane, type ArtifactPinSnapshot } from './ArtifactPinPane';
 import { fetchCrossJobPinSnapshot } from './crossJobPinSnapshot';
 // BLOCK-142 切片 E — md/xlsx/pdf 三 viewer（注册表 spreadsheet/markdown/pdf adapter 的挂载面）
 import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
-import { MarkdownResultViewer } from './MarkdownResultViewer';
+// BLOCK-334 P2 Slice A — 三类 viewer 收敛到 components/viewers（两宿主唯一）
+import { MarkdownViewer } from '@/components/viewers/MarkdownViewer';
+import { TableViewer } from '@/components/viewers/TableViewer';
+import { HtmlViewer } from '@/components/viewers/HtmlViewer';
+import { TextViewer } from '@/components/viewers/TextViewer';
+import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
+import type { EditorApi } from '@/components/editor/CodeMirror/types';
 import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
 import { Model3DResultViewer } from './Model3DResultViewer';
 import { VideoResultViewer } from './VideoResultViewer';
@@ -84,6 +89,7 @@ import { useResultReportActions } from './ResultArtifactShell/useResultReportAct
 import { useArtifactInteractionSelection } from './ResultArtifactShell/useArtifactInteractionSelection';
 // BLOCK-151 B 轨（审视吸收二波）— viewerRegistry canExport 声明位消费面。
 import { ViewerExportAction } from './ResultArtifactShell/ViewerExportAction';
+import { ResultTechnicalDetails } from './ResultArtifactShell/ResultTechnicalDetails';
 import { isTextFile, isMarkdownFile, formatPreviewText } from '@/lib/previewFileUtils';
 import {
   artifactRecordsFromFiles,
@@ -123,6 +129,7 @@ export function ResultArtifactShell({
   onAskCurrentResult,
   mode = 'result',
   onModeChange,
+  active = true,
 }: {
   project: Project;
   conversationId?: string | null;
@@ -149,10 +156,9 @@ export function ResultArtifactShell({
   onAskCurrentResult?: () => void;
   mode?: ResultSurfaceMode;
   onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
+  active?: boolean; // BLOCK-334 — 宿主 tab 非激活时 3D 预览不持有 WebGL 上下文
 }): React.ReactElement {
   const { resolvedTheme } = useTheme();
-  // BLOCK-59 P1 — 弹出独立窗入口（仅桌面桥可用时渲染；浏览器内为 null）
-  // UI-385 — 结果独立窗退役：windowManager 桥不再使用（结果统一右栏承载）
   const [result, setResult] = useState<JobResult | null>(null);
   // P0-3：结果请求的网络/服务错误必须与"确实没有结果文件"区分开，
   // 否则网络抖动会被谎报为"分析已完成，但未生成可视化结果文件"。
@@ -164,11 +170,11 @@ export function ResultArtifactShell({
   const bodyJobRef = useRef<string | null>(null);
   const activeBodyJobRef = useRef<string | null>(job?.id ?? null);
   activeBodyJobRef.current = job?.id ?? null;
-  // P4R-2: result↔chat scroll preservation. `.resultView` is the scroll
-  // container; the result projection layer unmounts in chat mode, so the
-  // position is held in the module-level memory keyed by job id and restored
-  // once the body is mounted. See resultScrollMemory.ts.
+  // P4R-2: `.resultView` scroll position lives in module-level memory keyed by job
+  // id (resultScrollMemory.ts) so a remount restores where the user left off.
   const resultViewRef = useRef<HTMLDivElement | null>(null);
+  // BLOCK-334 P2 Slice B — 文本族走 CodeMirror 后由 EditorApi 读精确选区文本（选择总线优先源）
+  const shellEditorRef = useRef<EditorApi | null>(null);
   const [loading, setLoading] = useState(false);
   const [manifestRaw, setManifestRaw] = useState<unknown>(null);
   const [manifestLoading, setManifestLoading] = useState(false);
@@ -779,7 +785,7 @@ export function ResultArtifactShell({
     if (unavailablePreview) return unavailablePreview;
     if (viewerAdapter === 'report' && selectedArtifactUrl) {
       return (
-        <iframe
+        <HtmlViewer
           className={styles.resultReportPreview}
           src={selectedArtifactUrl}
           title={selectedArtifactLabel || selectedArtifact.name}
@@ -812,17 +818,14 @@ export function ResultArtifactShell({
         />
       );
     }
-    // BLOCK-142 切片 E — markdown/spreadsheet/pdf 三分支：组件自取数（产物 URL 同
-    // 既有分支 selectedArtifactUrl），故置于 shell previewText 载荷闸门之前。
-    // BLOCK-151 B 轨：markdown/pdf 分支叠加 ViewerExportAction（viewerRegistry
-    // canExport=true 档案消费——此前声明位零消费，挂载面无打开/导出出口）；
-    // spreadsheet 档案 canExport=false → 出口自然不在场。viewer 渲染面不变。
+    // BLOCK-142 切片 E — markdown/spreadsheet/pdf 组件自取数，置于 previewText 闸门之前；
+    // BLOCK-151 B 轨 — markdown/pdf 叠加 ViewerExportAction（canExport 档案消费）。
     if (viewerAdapter === 'markdown' && selectedArtifactUrl) {
       return (
         <>
           <ViewerExportAction adapter={viewerAdapter} url={selectedArtifactUrl} />
-          <MarkdownResultViewer
-            url={selectedArtifactUrl}
+          <MarkdownViewer
+            source={{ kind: 'url', url: selectedArtifactUrl }}
             name={selectedArtifactLabel || selectedArtifact.name}
           />
         </>
@@ -864,6 +867,7 @@ export function ResultArtifactShell({
           revisionId={viewedRevision?.revisionId ?? null}
           projectId={project.id}
           jobId={job?.id ?? null}
+          active={active}
         />
       );
     }
@@ -872,39 +876,29 @@ export function ResultArtifactShell({
       return <div className={styles.resultPreviewPlaceholder}>加载预览中…</div>;
     }
     if (viewerAdapter === 'table' && previewData && previewData.length > 0) {
-      const [header, ...rows] = previewData;
-      const pageCount = csvPreviewPageCount(rows.length);
-      const pageRows = csvPreviewPageRows(rows, csvPreviewPage);
       return (
-        <div className={styles.csvPreviewBody}>
-          <table>
-            <thead>
-              <tr>
-                {header.map((cell, idx) => (
-                  <th key={`${cell || 'col'}-${idx}`} scope="col">{cell || `列 ${idx + 1}`}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {pageRows.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {header.map((_, cellIndex) => (
-                    <td key={cellIndex}>{row[cellIndex] || '—'}</td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className={styles.csvPreviewPager}>
-            <span>共 {rows.length.toLocaleString()} 行（预览文本预算内） · 第 {Math.min(csvPreviewPage, pageCount - 1) + 1}/{pageCount} 页</span>
-            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={csvPreviewPage <= 0} onClick={() => setCsvPreviewPage((p) => Math.max(0, p - 1))}>上一页</button>
-            <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={csvPreviewPage >= pageCount - 1} onClick={() => setCsvPreviewPage((p) => Math.min(pageCount - 1, p + 1))}>下一页</button>
-          </div>
-        </div>
+        <TableViewer
+          rows={previewData}
+          mode="paged"
+          page={csvPreviewPage}
+          onPageChange={setCsvPreviewPage}
+          classNames={{ root: styles.csvPreviewBody, pager: styles.csvPreviewPager }}
+        />
       );
     }
     if ((viewerAdapter === 'json' || viewerAdapter === 'text') && previewText) {
-      return <pre className={styles.textPreview}>{previewText}</pre>;
+      // BLOCK-334 P2 Slice B — <pre> 退役：与文件宿主同一 CodeMirror 引擎（只读）
+      return (
+        <TextViewer
+          value={previewText}
+          language={viewerAdapter === 'json' ? 'json' : (codeLanguageForFile(selectedArtifactName) || undefined)}
+          readonly
+          filePath={selectedArtifactName}
+          className={styles.workspaceCodeEditor}
+          editorRef={shellEditorRef}
+          testId="result-text-viewer"
+        />
+      );
     }
     return (
       <div className={styles.resultPreviewPlaceholder}>
@@ -927,6 +921,7 @@ export function ResultArtifactShell({
   useArtifactTextSelection({
     enabled: textSelectionEnabled,
     containerRef: previewBodyRef,
+    getSelectionText: () => shellEditorRef.current?.getSelection()?.text ?? null,
     artifactId: viewedRevision?.revisionId || job?.id || selectedArtifactName,
     revisionId: viewedRevision?.revisionId ?? null,
   });
@@ -969,15 +964,8 @@ export function ResultArtifactShell({
             ? `当前阶段：${workflowStageLabel(workflow.resumeFrom)}`
             : `结果已校验 · ${workflow.artifactCount} 项产物`}
         </span>
-        {/*
-          Trust state is stated once, by ResultStudioContextBar, in words the
-          user can act on (可信结果 / 需要复核 / 结果已阻断) — see
-          describeTruthStatus in result-studio/resultSurface.ts. This rendered
-          the same fact a second time as the raw enum (「truth valid」), which
-          both duplicated the header and leaked an internal value into a normal
-          view, against plan §P4R.3. The bar keeps what only it knows: the
-          current stage, the artifact count and the recovery action.
-        */}
+        {/* Trust state is stated once (describeTruthStatus via navigator/context bar);
+            this bar keeps only what it alone knows: stage, artifact count, recovery. */}
       </div>
       {recoveryAction && (
         <button className="petri-btn petri-btn--ghost petri-btn--sm"
@@ -1015,6 +1003,16 @@ export function ResultArtifactShell({
       {selectedArtifactName && (
         <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
       )}
+      {/* BLOCK-334 D3 — 原右栏 Inspector 的「技术详情」折进导航器次级动作区 */}
+      <ResultTechnicalDetails
+        jobId={viewedRevision?.toolJobId || job.id}
+        toolId={job.tool_id}
+        familyId={viewedRevision?.artifactFamilyId || boundInteractionManifest?.artifactFamilyId || activeArtifact?.artifactFamilyId}
+        revisionId={viewedRevision?.revisionId || boundInteractionManifest?.revisionId || activeArtifact?.revisionId}
+        entityType={boundInteractionManifest?.entityType}
+        idField={boundInteractionManifest?.idField}
+        selectionId={boundArtifactSelection?.selectionId}
+      />
       {/* UI-385 — 结果独立窗（「弹出」按钮）退役：结果统一由右栏承载 */}
       {selectedDisplayGroup && selectedDisplayGroup.variants.length > 1 && (
         <div className={styles.resultReportExportLinks}>

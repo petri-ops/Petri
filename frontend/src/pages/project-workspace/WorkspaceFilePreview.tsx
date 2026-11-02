@@ -10,7 +10,7 @@ import { Lightbox } from '@/components/ui/Lightbox';
 import { SegmentBoundary } from '@/components/shell/SegmentBoundary';
 import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import type { EditorApi } from '@/components/editor/CodeMirror/types';
-import { WorkspaceFilePreviewBridge } from '@/components/editor';
+import { TextViewer } from '@/components/viewers/TextViewer';
 import { useTheme } from '@/themes/ThemeProvider';
 import { formatPreviewText } from '@/lib/previewFileUtils';
 // BLOCK-334 P2 Slice A — 类型分派唯一源=viewerRegistry；Markdown/表格/HTML 渲染收敛到共享 viewer
@@ -540,7 +540,7 @@ export function WorkspaceFilePreview({
         )}
         {status === 'ready' && fallbackKind === 'markdown' && mdView === 'edit' && (
           /* BLOCK-42 — pending-scroll 消费侧挂载：textarea → CodeMirror（跳转/pulse 联动） */
-          <WorkspaceFilePreviewBridge
+          <TextViewer
             filePath={file.path}
             value={text}
             language="markdown"
@@ -564,7 +564,7 @@ export function WorkspaceFilePreview({
         )}
         {status === 'ready' && fallbackKind === 'text' && (
           /* BLOCK-42 — 同上：文本/代码预览切 CodeMirror */
-          <WorkspaceFilePreviewBridge
+          <TextViewer
             filePath={file.path}
             value={text}
             language={codeLanguage || undefined}
@@ -576,7 +576,7 @@ export function WorkspaceFilePreview({
         )}
         {status === 'ready' && fallbackKind === 'json' && (
           /* BLOCK-42 — 同上：JSON 预览切 CodeMirror */
-          <WorkspaceFilePreviewBridge
+          <TextViewer
             filePath={file.path}
             value={text}
             language="json"

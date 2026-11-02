@@ -5,15 +5,14 @@
 // 设备级能力，与项目无语义绑定），历史深链 /project/:id/plugins → 'chat'。
 // UI-365 — 'settings' 同口径移除（设置独立页化 /settings），历史深链
 // /project/:id/settings → 'chat'。
-export type WorkspaceMode = 'chat' | 'scheduled' | 'result' | 'code' | 'compare' | 'history';
+// UI-657（BLOCK-334）— 'result' / 'code' / 'compare' / 'history' 同口径移除：
+// 结果查看统一由右栏「结果」tab 承载（四态降为宿主局部子状态，不进 URL），
+// 历史深链 /project/:id/result?job=x → 'chat' + `?job=` 仍由 open-effects 打开右栏结果。
+export type WorkspaceMode = 'chat' | 'scheduled';
 
 const WORKSPACE_MODES: ReadonlySet<WorkspaceMode> = new Set([
   'chat',
   'scheduled',
-  'result',
-  'code',
-  'compare',
-  'history',
 ]);
 
 export function parseWorkspaceMode(raw: string | null | undefined): WorkspaceMode | null {

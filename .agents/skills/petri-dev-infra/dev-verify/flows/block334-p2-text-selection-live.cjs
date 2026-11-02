@@ -65,10 +65,11 @@ module.exports = {
       // V2 — CodeMirror 挂载在预览容器内（文件宿主 json 分支）
       const mounted = await waitFor(client, `(function(){
         const body = document.querySelector('${RAIL} [class*="workspacePreviewBody"]');
-        const cm = body && body.querySelector('.cm-editor .cm-content .cm-line');
-        return Boolean(body && cm);
+        const viewer = body && body.querySelector('[data-testid="text-viewer"]');
+        const cm = viewer && viewer.querySelector('.cm-editor .cm-content .cm-line');
+        return Boolean(body && viewer && cm);
       })()`, 30_000);
-      assert('V2_codemirror_mounted_inside_preview_container', mounted === true, String(mounted));
+      assert('V2_codemirror_mounted_inside_preview_container_via_TextViewer', mounted === true, String(mounted));
 
       // V3 — 程序化 DOM 选区覆盖第一行：window.getSelection 非空 + range 在容器内（=壳 hook 的 publish 判定）
       const probe = await lib.evalJs(client, `(function(){

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CenterPanel, type CenterPanelContext, type CenterPanelRefs } from './CenterPanel';
 
@@ -10,135 +10,56 @@ vi.mock('@/components/copilot/conversationRunStore', () => ({
   useConversationRun: () => null,
   useConversationTodoList: () => [],
   useConversationCitations: () => [],
-  resultEditProgressForContext: () => [],
   // UI-448 — 让位测试会把悬浮面置为开态，把手呼吸灯路径首次被该测试文件踩到
   isConversationRunning: () => false,
 }));
 vi.mock('@/hooks/useDurableConversationLoop', () => ({
   useDurableConversationLoop: () => ({ loop: null, summary: null }),
 }));
-vi.mock('@/lib/result-studio-interaction-client', () => ({
-  fetchArtifactInteraction: vi.fn(() => Promise.resolve({
-    manifest: { artifactId: 'art_1', revisionId: 'rev_1', artifactFamilyId: 'fam_1' },
-    revision: { revisionId: 'rev_1', revisionOrdinal: 2, artifactFamilyId: 'fam_1', changeSetId: 'cs_1' },
-  })),
-}));
-vi.mock('@/components/desktop/PluginStorePanel', () => ({ PluginStorePanel: () => <div>plugins</div> }));
-vi.mock('@/components/desktop/DesktopSettingsPanel', () => ({ DesktopSettingsPanel: () => <div>settings</div> }));
 vi.mock('@/components/workspace-panels/WorkspaceSummaryCard', () => ({ WorkspaceSummaryCard: () => <div>summary</div> }));
 vi.mock('@/components/workspace-panels/ScheduledWorkspacePanel', () => ({ ScheduledWorkspacePanel: () => <div>task</div> }));
-vi.mock('@/components/workspace-panels/ResultView', () => ({
-  ResultView: ({
-    mode,
-    onBack,
-    onModeChange,
-  }: {
-    mode: string;
-    onBack?: () => void;
-    onModeChange?: (mode: string) => void;
-  }) => (
-    <div data-testid="central-result-view" data-mode={mode}>
-      result body
-      {mode === 'result' && (
-        <>
-          <button type="button" onClick={onBack}>返回对话</button>
-          <button type="button" onClick={() => onModeChange?.('compare')}>审查</button>
-          <button type="button" onClick={() => onModeChange?.('history')}>历史</button>
-        </>
-      )}
-    </div>
-  ),
-}));
 
 afterEach(cleanup);
 
+// BLOCK-334 — 中央 result/code/compare/history 四态退役：结果投影、pack 接管、身份
+// 水化、BIO-6 prompt 等用例迁址 work-surface/ResultsSurface.test.tsx；本文件只剩
+// 会话常驻与摘要卡形态。
 function context(mode: CenterPanelContext['workspaceMode']): CenterPanelContext {
   return {
     project: { id: 'project-1', name: 'Project One' },
     projectId: 'project-1',
-    allProjects: [], activeConvId: 'conversation-1', conversations: [], projectConversations: {},
+    activeConvId: 'conversation-1', conversations: [],
     workspaceMode: mode,
-    // Derived exactly as production does (project-workspace.tsx:932). Hardcoding
-    // this to true put the fixture in a state production cannot reach, so the
-    // assertion below passed while the conversation was in fact unmounted in
-    // result mode — the precise requirement this test is named for.
+    // Derived exactly as production does: pinned summary is chat/scheduled only.
     showPinnedSummary: mode === 'chat' || mode === 'scheduled',
-    bottomTerminalOpen: false, bottomTerminalHeight: 0, leftOpen: true, rightOpen: true, inputHeight: 120,
+    bottomTerminalOpen: false, bottomTerminalHeight: 0, inputHeight: 120,
     summaryCardOpen: false, summaryVisibility: 'hidden', summaryOpenWidth: 0,
     activeJob: { id: 'job-1', tool_id: 'deseq2', status: 'done', created_at: 1 },
     activeWorkflow: { jobStatus: 'done', artifactTruth: { status: 'valid' } },
-    activeArtifact: {
-      jobId: 'job-1', toolId: 'deseq2', name: 'deg.csv', type: 'table', label: '差异表达结果',
-      revisionId: 'revision-abcdef123456', artifactFamilyId: 'family-1', truthStatus: 'valid', conclusion: '发现稳定差异表达信号。',
-    },
-    resultContext: { status: 'ready', contextToken: 'a'.repeat(64) },
-    resultEditSubmitting: false,
-    resultAgentDraft: '',
-    activeJobId: 'job-1', pendingArtifactName: null, recentJobs: [], liveJobsPreview: [],
+    recentJobs: [], liveJobsPreview: [],
     jobStats: { running: 0, failed: 0, done: 1, pending: 0 }, backendStatus: {} as CenterPanelContext['backendStatus'],
-    jobs: [], datasets: [], packResultSurfaces: [],
-    updateWorkspaceMode: vi.fn(), openRightPanel: vi.fn(), switchToProject: vi.fn(), navigate: vi.fn(),
-    setActiveConvId: vi.fn(), setActiveJobId: vi.fn(), setActiveArtifact: vi.fn(), setBottomTerminalOpen: vi.fn(),
-    setResultAgentDraft: vi.fn(), onResultEditSubmit: vi.fn(),
-    setLeftOpen: vi.fn(), setRightOpen: vi.fn(), setSummaryOpen: vi.fn(), handleShowPlugins: vi.fn(), handleOpenResult: vi.fn(),
-    handleAskAgent: vi.fn(), handleOpenWorkspacePath: vi.fn(), onPendingArtifactConsumed: vi.fn(), onWorkflowChanged: vi.fn(),
-    openResultBrowser: vi.fn(), openScheduledResults: vi.fn(), startColumnResize: vi.fn(),
+    datasets: [],
+    updateWorkspaceMode: vi.fn(), openRightPanel: vi.fn(),
+    handleSwitchConversation: vi.fn(), setActiveConvId: vi.fn(), setActiveJobId: vi.fn(),
+    openScheduledResults: vi.fn(),
   } as unknown as CenterPanelContext;
 }
 
-
 const refs: CenterPanelRefs = { centerColRef: { current: null }, sessionFrameRef: { current: null } };
 
-describe('G0-RS-P1 CenterPanel projection', () => {
-  it('keeps the Agent conversation mounted while the result owns the visible center', () => {
-    const ctx = context('result');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
+describe('CenterPanel conversation projection', () => {
+  it('keeps the Agent conversation mounted while the scheduled panel owns the visible center', () => {
+    render(<CenterPanel ctx={context('scheduled')} refs={refs} />);
     expect(screen.getByTestId('persistent-chat')).toBeTruthy();
-    expect(screen.getByTestId('persistent-chat').closest('[data-projection="conversation"]')?.getAttribute('aria-hidden')).toBe('true');
-    expect(screen.getAllByTestId('central-result-view')).toHaveLength(1);
-    expect(screen.queryByText('发现稳定差异表达信号。')).toBeNull();
-    const composer = screen.getByRole('region', { name: '用 Agent 修改当前结果' });
-    expect(composer.closest('[aria-label="结果主画布"]')).toBeTruthy();
+    expect(screen.getByText('task')).toBeTruthy();
+    const conversation = document.querySelector('[data-projection="conversation"]');
+    expect(conversation?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('returns to the same conversation projection through the visible context action', () => {
-    const ctx = context('result');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    fireEvent.click(screen.getByRole('button', { name: '返回对话' }));
-    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('chat');
-  });
-
-  it.each(['code', 'compare', 'history'] as const)('renders %s as a distinct central mode without the edit Composer', (mode) => {
-    const ctx = context(mode);
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(screen.getByTestId('central-result-view').getAttribute('data-mode')).toBe(mode);
-    expect(screen.queryByRole('region', { name: '用 Agent 修改当前结果' })).toBeNull();
-    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe(mode);
-  });
-
-  it('routes the visible review and history actions through the workspace state owner', () => {
-    const ctx = context('result');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    fireEvent.click(screen.getByRole('button', { name: '审查' }));
-    fireEvent.click(screen.getByRole('button', { name: '历史' }));
-    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('compare', true, 'job-1');
-    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('history', true, 'job-1');
-  });
-
-  // BIO-6（BIO-D4 裁决 b：单一真相）— 询问 Agent 的解读 prompt 必须锚定任务
-  // 与产物坐标，并强制 Agent 先经 result_summary 读有界真值，不接遗留模板。
-  it('询问 Agent prompt 锚定任务与产物坐标并强制 result_summary 真值（BIO-6）', () => {
-    const ctx = context('compare');
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    fireEvent.click(screen.getByRole('button', { name: '询问 Agent' }));
-    expect(ctx.handleAskAgent).toHaveBeenCalledTimes(1);
-    const prompt = String((ctx.handleAskAgent as ReturnType<typeof vi.fn>).mock.calls[0][0]);
-    expect(prompt).toContain('result_summary');
-    expect(prompt).toContain('job-1');
-    expect(prompt).toContain('deg.csv');
-    expect(prompt).toContain('不得编造');
-    // 遗留模板措辞退役：解读真相只剩 Agent + result_summary 链一条
-    expect(prompt).not.toContain('请解释当前结果');
+  it('never projects a result body in the center column (BLOCK-334 四态退役)', () => {
+    render(<CenterPanel ctx={context('chat')} refs={refs} />);
+    expect(document.querySelector('[data-projection="result"]')).toBeNull();
+    expect(document.querySelector('[data-projection="conversation"]')?.getAttribute('aria-hidden')).toBe('false');
   });
 
   // UI-351 — 中栏过窄时摘要卡转悬浮层（绝对定位），不再占列宽也不再整体消失
@@ -162,143 +83,6 @@ describe('G0-RS-P1 CenterPanel projection', () => {
     expect(document.querySelector('[class*="workspaceSummaryFloat"]')).toBeNull();
   });
 
-
-  it('routes result mode to a matching pack result surface (BLOCK-218)', () => {
-    const ctx = context('result');
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result'],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
-    expect(screen.queryByTestId('central-result-view')).toBeNull();
-  });
-
-  it('keeps core result for code mode even when a pack result surface matches (BLOCK-218)', () => {
-    const ctx = context('code');
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result'],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(screen.getByTestId('central-result-view')).toBeTruthy();
-    expect(screen.queryByTestId('pack-surface-unsupported')).toBeNull();
-  });
-
-  it('keeps the result mode switcher when a pack takes over result body (BLOCK-252)', () => {
-    const ctx = context('result');
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result', 'code'],
-      tabs: [{ id: 'revisions-source', label: '源码' }],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    const nav = screen.getByRole('navigation', { name: '结果视图' });
-    fireEvent.click(Array.from(nav.querySelectorAll('button')).find((btn) => btn.textContent === '代码')!);
-    expect(ctx.updateWorkspaceMode).toHaveBeenCalledWith('code', true, 'job-1');
-  });
-
-  it('hydrates revision/family/changeSet when a pack takes over result body (BLOCK-252)', async () => {
-    const ctx = context('result');
-    ctx.activeArtifact = { ...ctx.activeArtifact!, revisionId: null, artifactFamilyId: null, changeSetId: null };
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result', 'code'],
-      tabs: [{ id: 'revisions-source', label: '源码' }],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    await waitFor(() => {
-      expect(ctx.setActiveArtifact).toHaveBeenCalledWith(expect.objectContaining({
-        revisionId: 'rev_1',
-        artifactFamilyId: 'fam_1',
-        changeSetId: 'cs_1',
-        artifactId: 'art_1',
-      }));
-    });
-  });
-
-  it('uses the viewed revision changeSetId for pack compare after reload (BLOCK-252)', async () => {
-    const ctx = context('compare');
-    ctx.activeArtifact = { ...ctx.activeArtifact!, changeSetId: 'cs_viewed' };
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result', 'compare'],
-      tabs: [{ id: 'compare', label: '比较' }],
-      entry: 'ui/result.html',
-    }];
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      status: 200,
-      text: () => Promise.resolve(JSON.stringify({ files: [{ path: 'a.R', status: 'modified', added: 1, removed: 0 }] })),
-    } as unknown as Response);
-    try {
-      render(<CenterPanel ctx={ctx} refs={refs} />);
-      await waitFor(() => {
-        const urls = fetchSpy.mock.calls.map(([input]) => (
-          typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-        ));
-        expect(urls.some((url) => url.includes('changesets/cs_viewed/compare'))).toBe(true);
-      });
-      expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
-    } finally {
-      fetchSpy.mockRestore();
-    }
-  });
-
   // UI-448 加映 v23 — 会话浮面纯悬浮（用户双图对比裁决：摘要点击就悬浮，
   // 会话却把消息框向左推）——让位机制整体退役，开合态消息列恒全宽。
   it('never yields the conversation column for the side chat float (UI-448 加映 v23 纯悬浮)', () => {
@@ -313,51 +97,6 @@ describe('G0-RS-P1 CenterPanel projection', () => {
   // UI-627（BLOCK-321）— v9/v10 侧聊 dock 挂载与让位类测试随页内悬浮面退役
   // （side-chat 升级为原生独立窗 /window/side-chat，见 SideChatWindowPage.test.tsx）。
 
-
-  it('routes result mode to a matching pack result surface (BLOCK-218)', () => {
-    const ctx = context('result');
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result'],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(screen.getByTestId('pack-surface-unsupported')).toBeTruthy();
-    expect(screen.queryByTestId('central-result-view')).toBeNull();
-  });
-
-  it('keeps core result for code mode even when a pack result surface matches (BLOCK-218)', () => {
-    const ctx = context('code');
-    ctx.packResultSurfaces = [{
-      id: 'pack:bio:result:bio-result',
-      kind: 'pack-result',
-      title: '生信结果',
-      icon: 'bar-chart',
-      source: 'pack',
-      packId: 'bio',
-      singleton: true,
-      closeable: true,
-      persist: false,
-      order: 0,
-      artifactTypes: ['table'],
-      modes: ['result'],
-      entry: 'ui/result.html',
-    }];
-    render(<CenterPanel ctx={ctx} refs={refs} />);
-    expect(screen.getByTestId('central-result-view')).toBeTruthy();
-    expect(screen.queryByTestId('pack-surface-unsupported')).toBeNull();
-  });
-
   // UI-448 加映 v23 — 让位退役后的恒定不变式：摘要钉住列形态同样不推挤
   // （原 v11「钉住列跳过让位/浮层保留让位」两个分叉用例随机制一并退役）。
   it('keeps full-width content in every summary form (v23 不变式；UI-627 后无让位机制)', () => {
@@ -370,9 +109,6 @@ describe('G0-RS-P1 CenterPanel projection', () => {
       unmount();
     }
   });
-
-  // UI-627 — 页内 dock 挂载点退役：侧聊渲染在独立原生窗，不在 session layout 内。
-
 });
 
 // UI-448 加映 v26 — 摘要钉住列形态同样带拖宽把手（v25 只适配了悬浮形态）

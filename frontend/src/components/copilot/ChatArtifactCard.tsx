@@ -175,7 +175,6 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
                     jobId: toolJobId,
                     artifactName: artifact.name,
                     projectId: projectId || undefined,
-                    switchToResult: true,
                   })}
                 >
                   在结果中查看

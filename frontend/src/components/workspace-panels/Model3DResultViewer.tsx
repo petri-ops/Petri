@@ -37,6 +37,7 @@ export function Model3DResultViewer({
   revisionId,
   projectId = null,
   jobId = null,
+  active = true,
 }: {
   url: string;
   name: string;
@@ -44,6 +45,8 @@ export function Model3DResultViewer({
   revisionId: string | null;
   projectId?: string | null;
   jobId?: string | null;
+  /** BLOCK-334 — 宿主 tab 非激活时不持有 WebGL 上下文（透传 Model3DScene 的 block-322 P3 门控）。 */
+  active?: boolean;
 }) {
   // BLOCK-250 同类纪律：artifact 换上下文的重置在 render 期派生（不在 effect 里同步 setState）。
   const [viewState, setViewState] = React.useState<{
@@ -97,6 +100,7 @@ export function Model3DResultViewer({
           viewAngle="iso"
           modelUrl={url}
           modelFormat={modelFormatFor(url)}
+          active={active}
           onReady={(info) => setViewState((prev) => ({ ...prev, ready: info }))}
           onError={(message) => setViewState((prev) => ({ ...prev, error: message }))}
         />

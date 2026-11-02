@@ -36,6 +36,7 @@ export function ResultView({
   onAskCurrentResult,
   mode = 'result',
   onModeChange,
+  active = true,
 }: {
   project: Project;
   conversationId?: string | null;
@@ -55,6 +56,8 @@ export function ResultView({
   onAskCurrentResult?: () => void;
   mode?: ResultSurfaceMode;
   onModeChange?: (mode: ResultSurfaceMode, jobId?: string | null) => void;
+  /** BLOCK-334 — 宿主 tab 是否激活：非激活时 3D 预览不持有 WebGL 上下文。 */
+  active?: boolean;
 }): React.ReactElement {
   return (
     <ResultArtifactShell
@@ -76,6 +79,7 @@ export function ResultView({
       onAskCurrentResult={onAskCurrentResult}
       mode={mode}
       onModeChange={onModeChange}
+      active={active}
     />
   );
 }

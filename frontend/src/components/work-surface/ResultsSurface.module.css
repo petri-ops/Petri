@@ -1,0 +1,13 @@
+/* BLOCK-334 — 右栏「结果」宿主：只做布局，颜色/字号全走宿主既有 token。 */
+.surface {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.drawer {
+  flex: 0 0 auto;
+  min-width: 0;
+}

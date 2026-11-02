@@ -179,7 +179,7 @@ P2 切片顺序（每片独立可验、同包串行）：
 
 - **Slice A（本会话）**：`components/viewers/{MarkdownViewer,TableViewer,HtmlViewer}` 三类单 viewer；`WorkspaceFilePreview` 的类型分派改走 `resolveResultViewer({ kind: 'file' })`（office docx/pptx/odt/odp 仍由 `detectOfficeKind` 先行，不在注册表域内）；壳的 markdown / table / report 三分支改用共享 viewer；`MarkdownResultViewer` 退役。**CSS 策略**：viewer 只统一结构与逻辑，外观类名由宿主注入（两宿主零视觉变化），样式归并留后续切片——目标是「一种类型一个组件」，不是一次性把两套视觉也合掉。
 - **Slice C（2026-11-02 完成）**：勘察实证图像引擎早在 BLOCK-219 Q6 就已统一——`AnnotatableImagePane` 同一组件服务三消费方（结果壳/文件预览/草稿面板），scope 即批注身份参数。实做=去 `ResultImagePreview`→`AnnotatedResultImage` 纯透传一层（resultAnnotation 182→156 行）；**不新建 `viewers/ImageViewer`**（purity=更少结构，不是更新的名字）。未覆盖项撤销。
-- **Slice B**：text/json——壳 `<pre>` 与文件 CodeMirror 引擎不同，且壳的选择总线（`useArtifactTextSelection`）依赖 `<pre>` 文本选区；统一前须先验证 CodeMirror 选区能进总线，否则会回归「继续分析」链，故排在 C 之后。
+- **Slice B（2026-11-02 完成）**：验证腿 `block334-p2-text-selection-live` **7/7**（真 Chromium：CM 内 DOM 选区非折叠/容器内/文本可取、CM 接管焦点、宿主动作条弹出）→ 可合并。实施：`viewers/TextViewer`（两宿主唯一文本引擎=CodeMirror；壳只读、文件可写）；壳 `<pre>` 退役；`useArtifactTextSelection` 优先 EditorApi 精确选区 + DOM 兜底 + keyup。单测 6/6、定向 61/61、实机复跑 7/7。壳侧真实 text 产物实机留待首个含 json/text 产物的 tool job。
 - **Slice D**：spreadsheet——`exceljs` 仅 `SpreadsheetResultViewer` 一处消费，壳改用 `OfficePreviewPane` 后可做**依赖减法**（走 DEPENDENCY-CHANGE-CHECKLIST 的删除登记）。
 
 UI-658 的台账段在本切片实机腿跑绿后一次写入 verified（BLOCK-332 证据债棘轮 live-missing ≤5 不允许「代码绿、实机待跑」的 in_progress 段先登记——P1 已实证该规则）。
