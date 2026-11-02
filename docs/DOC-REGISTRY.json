@@ -8809,7 +8809,7 @@
         "G0"
       ],
       "notes": "任务推进闭环 v1（2026-11-02 升级定位：判据驱动驾驶员——验证结果投票 loop decision，模型自报 complete 但验证红不得 ready；改自己为首个用例）planned：P0 驾驶员 + P1 基座 + P2 脚本 + P3 worktree 隔离 + P4 实机 + P5 坡道护航；队列 334→338→336→337→335。",
-      "phase": "P7-COMPLETED",
+      "phase": "P7-COMPLETED-LINT-LINE-CLOSED",
       "completedAt": "2026-11-03"
     },
     {

@@ -102,3 +102,12 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 - **悬空 stash 归因**：/tmp worktree 内 per-worktree stash reflog（block336/335 实机腿遗留）——worktree 目录被 rm -rf 后 `.git/worktrees/<name>/` 元数据未同步清理 → `git stash list` 短暂可见悬空引用。非产品代码缺陷，worktree 生命周期清理不完整的副产品。
 - **已落地**：29 个 stale worktree 元数据全部清理（git worktree prune + 手动 rm）；2 个 /tmp 临时目录删除。
 - **纪律固化为修复落点**：①未提交工作不留窗（修复→立即提交）；②多文件 patch 禁用 `--3way` 改用直接 cp + 逐文件验证（--3way 部分失败的 index 余波是根因）；③实机腿 worktree 生命周期收口必须先 `git worktree remove` 再 `rm -rf`，不可只 rm。
+
+
+### §6.5 react-hooks 域 defer 决定 + lint 任务线收口（2026-11-03；用户「继续按照你的建议推进」确认 defer）
+
+- **普查数据**：react-hooks 活违规 235 条 / 97 文件（set-state-in-effect 91 / exhaustive-deps 83 基线外 / refs 35 / immutability 15 / 其余 13）——比原估 ~100 多 2.4 倍。
+- **defer 理由**：①非机械可修——`set-state-in-effect` 是"props→state 同步"的常见正确模式（React 新 lint 才标为反模式），`exhaustive-deps` 补依赖可致无限循环/双重请求；②修复需引入新抽象（自定义 hook / useMemo 派生 / 回调 ref）= 重构非收缩；③vitest 覆盖不足的组件（SimpleChat 1664 行 / project-workspace 1170 行）修复风险远大于收益。
+- **策略**：**基线保留作为已知债注册表 + 有机清偿**（组件因功能开发被触碰时顺带修复该组件的 react-hooks 违规）；不设批量截止日期。
+- **任务线收口**：require-await 域清零（124 条机械清偿）+ src/core 域 16 条 + 首批 7 条 = 累计基线 311→187（-40%）；任务线目标达成（机械可修域全清），react-hooks 域 defer 不影响收口。
+- **登记**：基线 187 条中 react-hooks 152 条为 defer 档（有机清偿）；require-await 0 条（全清）；control-regex 0 条（全清）；其余 35 条为 detect-object-injection 等语义护理档（低优先）。
