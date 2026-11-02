@@ -132,7 +132,7 @@
       "wave": "C",
       "module": "P-03",
       "lines": 1619,
-      "sha256": "67d6978c47058fcfad283a27269ffc87afc2ec77651c4304ecb3e41280ecd522"
+      "sha256": "50dff36e54c78f201930a76a57b15740d65a43bdb2a4d8cfd80714c0ed5a28a1"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
