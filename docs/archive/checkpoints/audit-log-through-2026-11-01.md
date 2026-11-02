@@ -9,3 +9,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T06:01:47.399Z -->
 最后更新：2026-11-01（**BLOCK-325-MODEL-SURFACE-BUDGET 启动登记（active；用户裁决「很棒 继续」）**：模型可见面尺寸预算 CI 门禁——系统提示/工具定义字面量与工具数基线棘轮（任何增长即红，--update 下调需说明）+ 核心面退役词扫描；基线 test/model-surface-baselines.json；pack 注入内容不在扫描面（合法域扩展通道）。plan=docs/block-325-model-surface-budget-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-01（**BLOCK-324-REASON-TAXONOMY 启动登记（active；用户裁决「开整」）**：统一结构化原因码 taxonomy——封闭 REASONS 注册表 + renderReason + 源码扫描机械锁（新增未注册即红）；第一批=治理/审批族归并；GET /api/ai/reason-codes 词表出口；加性接线零行为变更；decision_log 自由文本不归并（reopen）。plan=docs/block-324-reason-taxonomy-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T06:11:21.255Z -->
+最后更新：2026-11-01（**BLOCK-326-AUDIT-DEBT-SWEEP 启动登记（active；用户裁决「继续冲 搞完」）**：AUDIT-LOG 🟡 工程债清偿五项=①SIGTERM teardown 只关库不退出（修+spawn 回归测试）②四 flow 缺 id 致 verify --list 必红（补导出）③state living-plan 漏报+BLOCK-322 registry 漏翻转④C6 夹具过时（mate 已入白名单，改 bond）⑤decision-api no_key 早退不落账（补 degraded）。不含需裁决项（mac ffmpeg/平台文件名/R 下载留 🟡）。plan=docs/block-326-audit-debt-sweep-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）

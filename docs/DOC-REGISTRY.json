@@ -8789,8 +8789,28 @@
         "G0"
       ],
       "notes": "结果宿主统一（用户裁决 2026-11-02「把这个怎么做说的明白点 并且立包,下面开干」）active：P1 结果查看迁右栏「结果」tab 宿主（ResultsSurface；四态降为局部子状态不进 URL；resultRightWidth 独立偏好 + 左栏收起；Inspector 退役；WorkspaceMode='chat'|'scheduled'，旧四态深链 fail-closed 落 chat）→ P2 两宿主渲染层以 viewerRegistry 单一分派合并六类 viewer。推翻 UI-106 中央大画布形态裁决（前提已失效）。并行 BLOCK-333 文件面零触碰。"
+    },
+    {
+      "id": "BLOCK-335-SELF-OPTIMIZATION-LOOP",
+      "capability": "block-335-self-optimization-loop",
+      "path": "docs/block-335-self-optimization-loop-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-335-self-optimization-loop",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "autonomy",
+        "self-improvement",
+        "workflow",
+        "checkpoint",
+        "G0"
+      ],
+      "notes": "自优化闭环 v1（用户裁决 2026-11-02「立项 自优化闭环」）planned：P0 勘察完成（evals-harness/test-affected/workspace-checkpoint/workflow-runner 接口锚定）；BLOCK-334 active 在制故排队，334 收口后顶队列头；撞裁决=worktree 纪律重开确认 + 首批任务清单。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 446
+  "documentCount": 447
 }
