@@ -244,6 +244,36 @@ router.put('/projects/:id', (req, res) => {
   res.json({ status: 'ok', project: p });
 });
 
+// BLOCK-335 P1 — workspace-checkpoint 薄 REST（复用 shared 层，不建第二快照机制）。
+// 薄=只做授权 + 工作区解析；ref 由调用方（workflow journal / 响应）持久化，
+// 跨进程回滚因进程内登记表缺席而 fail-closed（诚实边界，不伪造可回滚）。
+router.post('/projects/:id/checkpoints', async (req, res) => {
+  if (!checkOwnership(req, res, req.params.id)) return;
+  const project = db.getProject(req.params.id);
+  if (!project || !project.workspace_path) return res.status(400).json({ status: 'error', error: 'workspace_required' });
+  const created = await require('../shared-backend/workspace-checkpoint').createCheckpoint(project.workspace_path);
+  if (!created.ok) return res.status(400).json({ status: 'error', error: created.code || 'checkpoint_failed', message: created.message });
+  res.json({ status: 'ok', created: created.created === true, ref: created.ref || null });
+});
+
+router.get('/projects/:id/checkpoints', (req, res) => {
+  if (!checkOwnership(req, res, req.params.id)) return;
+  const project = db.getProject(req.params.id);
+  if (!project || !project.workspace_path) return res.status(400).json({ status: 'error', error: 'workspace_required' });
+  res.json({ status: 'ok', checkpoints: require('../shared-backend/workspace-checkpoint').listCheckpoints(project.workspace_path) });
+});
+
+router.post('/projects/:id/checkpoints/rollback', async (req, res) => {
+  if (!checkOwnership(req, res, req.params.id)) return;
+  const ref = req.body && req.body.ref ? String(req.body.ref).slice(0, 80) : '';
+  if (!ref) return res.status(400).json({ status: 'error', error: 'ref_required', message: '回滚必须显式携带 checkpoint ref' });
+  const project = db.getProject(req.params.id);
+  if (!project || !project.workspace_path) return res.status(400).json({ status: 'error', error: 'workspace_required' });
+  const rolled = await require('../shared-backend/workspace-checkpoint').rollbackToCheckpoint(project.workspace_path, ref);
+  if (!rolled.ok) return res.status(400).json({ status: 'error', error: rolled.code || 'rollback_failed', message: rolled.message });
+  res.json({ status: 'ok', ref: rolled.ref || ref });
+});
+
 router.post('/projects/:id/status', (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
   const status = req.body?.status === 'archived' ? 'archived' : 'active';

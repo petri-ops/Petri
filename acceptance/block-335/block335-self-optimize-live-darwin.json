@@ -1,0 +1,109 @@
+{
+  "name": "self-optimize-live",
+  "block": "BLOCK-335",
+  "phase": "P4",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T18:54:27.150Z",
+  "finishedAt": "2026-11-02T18:54:51.756Z",
+  "backend": {
+    "port": 3211,
+    "pid": 4400,
+    "mockUpstreamPort": 49464
+  },
+  "tiers": {
+    "L1": "workflow-primitives（checkpoint/verify 真子进程；agent 段=确定性写桩）",
+    "L2": "full-rest-loop（REST workflow → spawn → runAgentLoop + mock 上游 + 决策验证器投票）",
+    "L3": "observe-guard（P5 放权坡道观察档落账）"
+  },
+  "assertions": [
+    {
+      "name": "L0_backend_and_mock",
+      "pass": true,
+      "detail": "backend :3211 + mock :49464 + workflow enabled"
+    },
+    {
+      "name": "L0_model_profile_seeded",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "L1_source_project",
+      "pass": true,
+      "detail": "status=200 id=p_mvzmbj9k_5w3q"
+    },
+    {
+      "name": "L1_worktree_children",
+      "pass": true,
+      "detail": "green=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmbj9n_5av9 red=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmbkhb_uyuy"
+    },
+    {
+      "name": "L1_green_workflow_completed",
+      "pass": true,
+      "detail": "{\"status\":\"completed\",\"returned\":{\"outcome\":\"ready\",\"checkpointRef\":\"f768e950b671dd4fd62f4ff813548a820f5adefe\",\"verify\":{\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":75"
+    },
+    {
+      "name": "L1_green_outcome_ready",
+      "pass": true,
+      "detail": "outcome=ready verify={\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":7529,\"changedFiles\":[\"docs/archive/b335-live-green-note.md\"],\"testsCount\":0,\"restartRequired\":false,\"restartReason\":null}"
+    },
+    {
+      "name": "L1_green_change_kept",
+      "pass": true,
+      "detail": "ready → 改动保留在 worktree"
+    },
+    {
+      "name": "L1_green_journal_refs",
+      "pass": true,
+      "detail": "journal kinds=checkpoint,phase,log,agent,phase,verify,phase"
+    },
+    {
+      "name": "L2_workflow_submitted",
+      "pass": true,
+      "detail": "status=202 body={\"ok\":true,\"runId\":\"wf-mvzmbtid-uj5ywn\",\"taskId\":\"7ad6b820-a8cb-4134-a3c0-7f6c9ee5434c\",\"status\":\"running\",\"resumeFromRunId\":null}"
+    },
+    {
+      "name": "L2_red_workflow_terminal",
+      "pass": true,
+      "detail": "status=completed"
+    },
+    {
+      "name": "L2_red_journal_rollback_ok",
+      "pass": true,
+      "detail": "journal=checkpoint/ok,phase/completed,log/,agent/completed,phase/completed,verify/blocked:  unmapped b335-live-red-probe.md, b335-unmapped-probe.md\n[t,phase/completed,checkpoint/ok,phase/completed,log/"
+    },
+    {
+      "name": "L2_red_outcome_rolled_back",
+      "pass": true,
+      "detail": "闭环脚本判定 rolled_back（verify 红 → 回滚路径）"
+    },
+    {
+      "name": "L2_loop_blocked_not_completed",
+      "pass": true,
+      "detail": "workflow 终态 completed（回滚路径）；loop 级 block 证据见下方 events 断言"
+    },
+    {
+      "name": "L2_red_rollback_byte_identical",
+      "pass": true,
+      "detail": "anchor=a3c50e8235ace59cd378def0639371f7af7cd318 treeDiff=\"\""
+    },
+    {
+      "name": "L2_red_agent_write_rolled_back",
+      "pass": true,
+      "detail": "agent 工具写的文件必须被回滚清理"
+    },
+    {
+      "name": "L2_red_seed_content_intact",
+      "pass": true,
+      "detail": "checkpoint 内的种子文件内容逐字节保留"
+    },
+    {
+      "name": "L3_observe_rule_recorded",
+      "pass": true,
+      "detail": "unreviewed=1 writeRow=b335-observe-write hits=1"
+    }
+  ],
+  "allPass": true,
+  "passed": 17,
+  "total": 17,
+  "note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

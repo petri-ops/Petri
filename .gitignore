@@ -116,3 +116,6 @@ model3d/runs/
 
 # 本地第三方源码镜像（只读参考用，无入库面）
 /reference/
+
+# BLOCK-335 P4 实机腿瞬态目录（dataDir/worktree 容器，跑完即删）
+.petri-b335-live/

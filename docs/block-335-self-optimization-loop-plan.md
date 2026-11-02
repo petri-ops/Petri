@@ -1,6 +1,6 @@
 ---
 capability: block-335-self-optimization-loop
-status: planned
+status: completed
 goal: 任务推进闭环 v1（用户裁决 2026-11-02 升级定位：「自动推进任务需求，用户只验收结果」；改自己是第一个用例）：判据驱动的驾驶员——loop 每轮 decision 不再只由模型自报，结构化验证结果（test:changed --report / evals:gate / judge 读数）参与判定，跑偏在验证红的那一刻被抓住而非用户验收时；第一个用例=让 Petri 的 agent 对 Petri 自身仓库（worktree 副本）做小改动后，自己跑验证门禁 → 结构化判定 ready/blocked/failed → 失败自动回滚 checkpoint；执行载体=工作流脚本（宿主侧注入 verify/checkpoint 原语），验证=evals-harness 隔离后端 + test:changed --report JSON，回滚=workspace-checkpoint 共享层（新增 petri-server 薄 REST）；放权坡道 observe 档护航首批任务。
 acceptance:
   - P0 判据驱动驾驶员（升级核心）：loop-orchestrator 的 iteration decision（complete|block|wait|continue|retry，loop-checkpoint.js:236-258）接入「验证器投票」——complete 声明必须附结构化验证结果（verify 原语产出），验证红则强制 retry（上限）或 block，模型自报 complete 不再单独有效；跑偏判据=验证红/预算超/同指纹循环（loop_guard 已有）三者任一；用户入口=一道需求进、推进过程可见（journal 时间线）、终态 ready 附 diff 与证据等验收。契约测：模型自报 complete 但验证红 → 不得终态 ready。
@@ -46,4 +46,21 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 ## 4. 撞裁决点（发令前须定）
 
 1. ~~**worktree 重开**：worktree-governance 休眠纪律的重开条件由本包触发——需用户确认"为自优化闭环重开 worktree 纪律"。~~ **已关闭（2026-11-02 BLOCK-336 收口）**：基础设施已交付并回写治理——[`worktree-governance.md`](./worktree-governance.md) §2 状态转「infrastructure ready (v1)」、§2.1 列明 v1 边界（§5 仅端口约定、§7 缺 Artifact 检查）；本包直接消费 `createProject({ worktreeOf })` 项目层副本，不再需要单独重开裁决。
-2. **首批任务清单**：v1 人工给题；建议首题=lint 存量收缩一批（低风险、可机械验证）。
+2. **首批任务清单**：v1 人工给题；~~建议首题=lint 存量收缩一批~~ **已采纳（2026-11-03）**：用户发令「继续按照你的建议推进」→ 首批题=**lint 存量收缩一批**（低风险、可机械验证；judge 读数仍需 Jev 密钥，不挡开工）。
+
+
+## 5. 收口记录（2026-11-03：P0-P5 整包完成，当日立项当日收口）
+
+**P0 判据驱动驾驶员**：决策瀑布抽纯函数 `core/petri-server/helpers/loop-decision.js`（`decideIterationOutcome`，优先级与原实现逐条对齐）+ loop-contract 新增 `VERIFY_RED_RETRY / VERIFY_RED_BLOCK / VERIFY_RESTART_REQUIRED` 三原因码。**验证器投票**：runLoop config 增 `decisionVerifier`；模型自报 complete 前先投票——验证红 → 强制 retry（连续上限 2）→ block；`needs_restart`（改动域越出可验证面）→ block 留人工；验证器缺席/故障/`unavailable` = 无投票（现状语义零变化，故障不伪装成红也不伪装成绿）。接线链：agent-runner runAgentLoop 参数 → loopConfig → spawn-agent-tools launchSubAgent `verify` spec（随任务落库）→ `createDecisionVerifier`。
+
+**P1 基座**：`helpers/verify-host.js`（两步形态：`--report` 取改动域 + `--run` 真跑门禁，退出码以 --run 为准——**实机抓真：单跑 --report 分支只写报告不跑门禁 = 假绿**；kind ∈ test-affected | evals-gate；改动域越出 `scripts/test/frontend/docs/resources/acceptance/evals/.agents` 前缀 → restartRequired）+ `helpers/checkpoint-host.js`（复用 shared workspace-checkpoint；**force 语义新增**：闭环 checkpoint 先于改动，干净树也要拿 HEAD 回滚锚点；回滚显式 ref，已回滚条目二次回滚 fail-closed）+ workspace-checkpoint 薄 REST 三端点（/api/data/projects/:id/checkpoints create/list/rollback）+ workflow 宿主第七/八原语 `verify` / `checkpoint`（deps 注入；**journal 行 kind 字段被载荷 kind 覆盖的抓真**——验证器种类改名 verifierKind）。
+
+**P2 闭环脚本**：`resources/workflows/self-optimize.mjs`（checkpoint → agent(verify spec + accessMode full + observe 护航) → verify → ready 保留 / 红回滚显式 ref）；sandbox 扫描通过；journal 每 phase 落 ref/verdict。
+
+**P3 自指隔离**：实机腿经 `createProject({ worktreeOf })`（336 生产路径）建 Petri 仓 worktree 副本 ×2；worktree 的 node_modules 用软链 + 主仓 `.git/info/exclude` 兜底（**实机抓真：gitignore 'node_modules/' 带斜杠不匹配 symlink，ls-files --others 会把它混进改动域**）。
+
+**P4 实机（`scripts/block335-self-optimize-live.mjs`，17/17 allPass，`acceptance/block-335/block335-self-optimize-live-darwin.json`）**：L1 GREEN（tier=workflow-primitives）：真 worktree + 真 checkpoint（HEAD 锚点）+ 真两步 verify（7.5s，真 changedFiles）→ ready 保留改动；L2 RED（tier=full-rest-loop）：真 REST workflow → 真 spawn → 真 runAgentLoop（mock 上游 + workspace_write 工具真写）→ 验证红（未映射文件 → exit 2）→ 闭环回滚 → **工作树 vs checkpoint 树零 diff**（checkout 会把 checkpoint 内文件写进 index，porcelain 'A' 属恢复语义，验收口径=树内容逐字节一致）；L3 P5 observe：workspace_write 走 observe 档 → policy_observations 落账 hits=1。**环境抓真：Bash 沙箱对 /var/folders 下派生进程的文件读取被虚拟化（脚本读成空文件 → node 静默 exit 0 → verify 假绿）——实机腿 dataDir/worktree 必须落仓库内临时目录（真实部署 worktree 在用户数据目录不受此影响）**。
+
+**P5 放权坡道护航**：首批任务 agent-rules `path-glob ** → observe`（写面不拦截、复盘面可见），实机腿 L3 断言观察行落账。
+
+**门禁**：335 契约 **8/8** · loop/contract/checkpoint/workflow 邻域 250/250 + 集成 98/98 · `test:changed` 1508 项 17 红（14=P4 配置中心门控家族既有 🟡 + p6 脏树自愈 + loop-fixtures pack 环境红 🟡 + branch-freeze 已登记）· 实机 17/17 · closeout 十三门（随包收口）。**首批题（lint 存量收缩）= 闭环建成后首个真实任务，待发令跑**。G0 开发期常态 · 不外推 packaged/Provider/GA。

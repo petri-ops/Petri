@@ -394,7 +394,7 @@ async function spawn_agent(args, ctx) {
  * 加映 3：goals 落 params（汇报门逐目标核对）+ 任务书尾部「完成判据」段。
  * @returns {{ok:true, agentId:string, model?:string, role?:string} | {ok:false, error, message, ...}}
  */
-function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], todoRefs = [], toolPolicy = null, structuredSchema = null, structuredAttempts = 0, spawnSource }) {
+function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, userContent, model, role, goals = [], todoRefs = [], toolPolicy = null, structuredSchema = null, structuredAttempts = 0, spawnSource, verify = null }) {
   const context = { ...(parentContext || {}) };
   // BLOCK-249（Q4a）— 工具约束随 context 进入子 loop（只收紧；父层照常全量）。
   if (toolPolicy) context.toolPolicy = toolPolicy;
@@ -405,6 +405,8 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
   const modelName = (preset && preset.model) || parentParams.modelName;
   const goalList = Array.isArray(goals) ? goals.filter(Boolean) : [];
   const refList = Array.isArray(todoRefs) ? todoRefs.filter(Boolean) : [];
+  // BLOCK-335 P1 — 验证 spec（{ kind, projectId }）：随任务落库并解析为决策验证器
+  const verifySpec = verify && typeof verify === 'object' ? verify : null;
   const userContentFinal = goalList.length
     ? `${userContent}\n\n【完成判据（终态汇报将逐条核对完备性，未达成会被点名）】\n${goalList.map((g, i) => `${i + 1}. ${g}`).join('\n')}`
     : userContent;
@@ -448,6 +450,9 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
         // BLOCK-88 P2（D3）— 联邦委托派生的 subagent 继承访客归属
         //（俯瞰面板 federatedFrom 角标数据源；宿主本地派生恒 undefined）。
         ...(parentParams && parentParams.federated ? { federated: parentParams.federated } : {}),
+        // BLOCK-335 P1 — 验证 spec 随任务落库（{ kind: 'test-affected'|'evals-gate', projectId }；
+        // loop 收尾按此解析决策验证器，模型自报 complete 需结构化验证背书）
+        ...(verifySpec ? { verify: verifySpec } : {}),
       },
     }).taskId;
   } catch (e) {
@@ -480,6 +485,8 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
       messages: [{ role: 'user', content: userContentFinal }],
       context,
       userId,
+      // BLOCK-335 P1 — 验证器投票（spec.kind 未注册/缺失 = null = 零变化）
+      decisionVerifier: verifySpec ? require('../helpers/verify-host').createDecisionVerifier(verifySpec, { userId }) : null,
       conversationId: _activeConv && _activeConv.id,
       _activeConv,
       apiKey: getChatModelCredential(preset),

@@ -165,6 +165,10 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
         userContent: prompt,
         role: opts.role || undefined,
         goals: Array.isArray(opts.goals) ? opts.goals : undefined,
+        // BLOCK-335 P2 — verify spec 随 agent 原语进子 loop（模型自报 complete 需验证背书）
+        verify: opts.verify && typeof opts.verify === 'object' ? opts.verify : undefined,
+        // BLOCK-335 P2 — 上下文（projectId 等）随 agent 原语进子 loop（workspace 工具解析）
+        context: opts.context && typeof opts.context === 'object' ? opts.context : undefined,
       });
       if (!spawn || spawn.ok === false) {
         record('agent', { stepKey, status: 'failed', errorHead: (spawn && spawn.error) || 'spawn_failed' });
@@ -323,6 +327,78 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
         hasLedgerDraft: Boolean(result && result.ledgerDraft),
       });
       return result && typeof result === 'object' ? result : { ok: false, verdict: 'blocked' };
+    },
+    // BLOCK-335 P1 — 验证原语：结构化验证投票（kind ∈ test-affected|evals-gate），消费
+    // 既有门禁的 report JSON，不建第二验证器。cwd 由宿主按 projectId 解析，不开放给脚本。
+    verify: async (options = {}) => {
+      const stepKey = stepKeyFor('verify');
+      if (typeof deps?.verify !== 'function') {
+        record('verify', { stepKey, status: 'unavailable', errorHead: 'verify_host_unavailable' });
+        return { ok: false, verdict: 'unavailable', error: 'verify_host_unavailable' };
+      }
+      if (state.cancelled) {
+        record('verify', { stepKey, status: 'cancelled', errorHead: 'workflow_cancelled' });
+        return { ok: false, verdict: 'cancelled', error: 'workflow_cancelled' };
+      }
+      const verifierKind = ['test-affected', 'evals-gate'].includes(options.kind) ? options.kind : 'test-affected';
+      const payload = {
+        kind: verifierKind,
+        projectId: options.projectId ? String(options.projectId).slice(0, 80) : '',
+        timeoutMs: Number(options.timeoutMs) > 0 ? Math.min(Number(options.timeoutMs), 30 * 60 * 1000) : undefined,
+        signal: abortController.signal,
+      };
+      let result;
+      try {
+        result = await deps.verify(payload);
+      } catch (error) {
+        result = { ok: false, verdict: 'blocked', errorHead: String((error && error.message) || error).slice(0, 200) };
+      }
+      const verdict = String((result && result.verdict) || (result && result.ok ? 'ready' : 'blocked'));
+      record('verify', {
+        stepKey,
+        status: verdict,
+        // 命名注意：journal 行的 kind 字段是行类型（'verify'），验证器种类用 verifierKind
+        verifierKind,
+        exitCode: result && result.exitCode !== undefined ? result.exitCode : undefined,
+        durationMs: result && result.durationMs,
+        restartRequired: Boolean(result && result.restartRequired),
+        errorHead: result && (result.errorHead || result.error) ? String(result.errorHead || result.error).slice(0, 200) : undefined,
+      });
+      return result && typeof result === 'object' ? result : { ok: false, verdict: 'blocked' };
+    },
+    // BLOCK-335 P1 — checkpoint 原语：复用 shared workspace-checkpoint（无副作用 git 快照），
+    // 回滚显式传 ref；ref 经 journal 持久化（进程内登记表缺席时 fail-closed）。
+    checkpoint: async (options = {}) => {
+      const stepKey = stepKeyFor('checkpoint');
+      if (typeof deps?.checkpoint !== 'function') {
+        record('checkpoint', { stepKey, status: 'unavailable', errorHead: 'checkpoint_host_unavailable' });
+        return { ok: false, error: 'checkpoint_host_unavailable' };
+      }
+      if (state.cancelled) {
+        record('checkpoint', { stepKey, status: 'cancelled', errorHead: 'workflow_cancelled' });
+        return { ok: false, error: 'workflow_cancelled' };
+      }
+      const action = ['create', 'rollback', 'list'].includes(options.action) ? options.action : 'create';
+      const payload = {
+        action,
+        projectId: options.projectId ? String(options.projectId).slice(0, 80) : '',
+        ref: options.ref ? String(options.ref).slice(0, 80) : undefined,
+        userId,
+      };
+      let result;
+      try {
+        result = await deps.checkpoint(payload);
+      } catch (error) {
+        result = { ok: false, error: String((error && error.message) || error).slice(0, 200) };
+      }
+      record('checkpoint', {
+        stepKey,
+        status: result && result.ok ? 'ok' : 'failed',
+        action,
+        ref: result && result.ref ? String(result.ref).slice(0, 80) : undefined,
+        errorHead: result && result.error ? String(result.error).slice(0, 200) : undefined,
+      });
+      return result && typeof result === 'object' ? result : { ok: false, error: 'checkpoint_failed' };
     },
     get budget() {
       return budgetView;

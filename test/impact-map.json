@@ -7153,6 +7153,40 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block335-self-optimization-loop",
+      "note": "BLOCK-335 任务推进闭环：P0 判据驱动驾驶员（loop-decision 纯函数 + loop-orchestrator 验证器投票 + spawn verify spec）+ P1 基座（verify-host/checkpoint-host 宿主 + checkpoint 薄 REST + workflow verify/checkpoint 原语）+ P2 闭环脚本（resources/workflows/self-optimize.mjs）。改任一登记源即跑本包契约 + loop/contract/checkpoint/workflow 邻域。",
+      "patterns": [
+        "core/petri-server/helpers/loop-decision.js",
+        "core/petri-server/helpers/verify-host.js",
+        "core/petri-server/helpers/checkpoint-host.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/agent-tools/spawn-agent-tools.js",
+        "core/petri-server/api-data.js",
+        "core/shared-backend/loop-contract.js",
+        "core/shared-backend/workspace-checkpoint.js",
+        "core/petri-server/helpers/workflow-runner.js",
+        "resources/workflows/**",
+        "scripts/block335-self-optimize-live.mjs",
+        "acceptance/block-335/**",
+        "docs/block-335-self-optimization-loop-plan.md"
+      ],
+      "tests": [
+        "test/block335-self-optimization.test.mjs",
+        "test/loop-contract.test.mjs",
+        "test/agent-runner-loop-orchestrator.test.mjs",
+        "test/block262-workflow-runner.test.mjs",
+        "test/block337-governance-batch2.test.mjs",
+        "test/block176-checkpoint.test.mjs",
+        "test/loop-checkpoint.test.cjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

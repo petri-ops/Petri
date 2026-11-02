@@ -47,6 +47,9 @@ const BASELINE = new Set([
   // BLOCK-337 P6 — 治理运行时实机腿（block336 同型隔离后端）：process.platform 仅用于
   // 证据文件名平台后缀（BLOCK-330 加性策略）+ killTree 的 taskkill/SIGTERM 差分。
   'scripts/block337-governance-live.mjs',
+  // BLOCK-335 P4 — 自优化闭环实机腿（block336/337 同型）：process.platform 仅用于
+  // 证据文件名平台后缀 + killTree 差分。登记即留痕。
+  'scripts/block335-self-optimize-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

@@ -28,6 +28,7 @@ const {
   deriveObservedStateDigest,
   mapDecisionToIterationStatus,
 } = require('../shared-backend/loop-controller');
+const { decideIterationOutcome } = require('./helpers/loop-decision');
 // BLOCK-171 CP-1 — 运行内工具协作取消注册表（cancellable 族 AbortSignal 原语）
 const {
   createToolCancellation,
@@ -192,6 +193,8 @@ async function runLoop({
     executionPolicy,
     contextWindow,
     thinkingLevel,
+    // BLOCK-335 P0 — 判据驱动驾驶员：验证器投票（async fn；未传=现状语义零变化）
+    decisionVerifier,
     // BLOCK-155 — 真·单通道 vision：chat.js 按所选渠道单源解析出（openai 系/
     // anthropic 且声明 vision 能力）；false/未传 = 恒等回旧 read_image 双通道
     visionInline,
@@ -203,6 +206,8 @@ async function runLoop({
   let loopSequence = 0;
   let loopIterations = [];
   let loopAbortedByController = false;
+  // BLOCK-335 P0 — 验证红连续计数（跨迭代持久；验证绿即清零；上限在 loop-decision）
+  let verifyRedStreak = 0;
   let loopPublicConclusion = null;
 
   // ---------- Internal state ----------
@@ -1470,37 +1475,53 @@ ${compactSummaryText}`,
         _loopEmitIterationEvent(iteration, 'cancel', null);
         _loopPersistPhase('cancelled', iteration.publicConclusion);
       } else {
-        let decision = 'continue';
-        let decisionReasonCode = REASON_CODES.TOOL_SUCCEEDED;
-        let publicConclusion = null;
-
         const requiresUserDecision = unresolvedFailedJobs.some((job) => job.requiresUserInput) ||
           (diagnosis?.defaultBehavior === 'require_user' || repairAttempt?.requiresUserAuth === true);
 
-        if (falseSuccessJobs.length > 0) {
-          decision = 'block';
-          decisionReasonCode = REASON_CODES.ARTIFACT_VALIDATION_FAILED;
-          publicConclusion = `检测到假成功：任务失败但产生了文件（${falseSuccessJobs.length} 个）。已验证结果不完整，禁止宣称完成。`;
-        } else if (requiresUserDecision) {
-          decision = 'wait';
-          decisionReasonCode = REASON_CODES.USER_INPUT_REQUIRED;
-          publicConclusion = '关键输入或科学设计尚未确认；系统未创建非法 Job，等待补齐必要信息。';
-        } else if (unresolvedFailedJobs.length > 0) {
-          decision = 'retry';
-          decisionReasonCode = REASON_CODES.TRANSIENT_RUNTIME_RETRY;
-          publicConclusion = diagnosis && diagnosis.message
-            ? `故障分类：${diagnosis.faultType}。${diagnosis.message}`
-            : `工具执行失败（${unresolvedFailedJobs.length} 个）。Loop Controller 将在下一轮决策中处理。`;
-        } else if (activeJobs.length > 0) {
-          decision = 'continue';
-          publicConclusion = `工具执行中（${activeJobs.length} 个运行中）。继续监控。`;
-        } else if (modelFinalized || activities.length === 0) {
-          decision = 'complete';
-          decisionReasonCode = REASON_CODES.GOAL_ACHIEVED;
-          publicConclusion = modelFinalized
-            ? '已根据真实工具与产物状态完成本轮交付。'
-            : '本轮无工具调用，已整理最终答复。';
-        } else {
+        // BLOCK-335 P0 — 判据驱动驾驶员：模型自报 complete 前先跑结构化验证投票。
+        // 验证器不在场/抛错 = 无投票（现状语义零变化）；红票由 loop-decision 纯函数
+        // 强制 retry（连续上限）→ block，模型自报 complete 不再单独有效。
+        let verifyVote = null;
+        if (typeof decisionVerifier === 'function') {
+          try {
+            const base = decideIterationOutcome({
+              falseSuccessJobsCount: falseSuccessJobs.length,
+              requiresUserDecision,
+              unresolvedFailedJobsCount: unresolvedFailedJobs.length,
+              activeJobsCount: activeJobs.length,
+              modelFinalized,
+              noActivities: activities.length === 0,
+              verifyRedStreak,
+              reasonCodes: REASON_CODES,
+            });
+            if (base.decision === 'complete') {
+              verifyVote = await decisionVerifier({
+                taskId,
+                projectId: toolCtx.projectId,
+                loopRunId,
+                iteration: loopSequence,
+              });
+              if (verifyVote && verifyVote.verdict === 'ready') verifyRedStreak = 0;
+            }
+          } catch { /* 验证器故障 = 无投票，现状语义；不把故障伪装成绿 */ }
+        }
+
+        const outcome = decideIterationOutcome({
+          falseSuccessJobsCount: falseSuccessJobs.length,
+          requiresUserDecision,
+          unresolvedFailedJobsCount: unresolvedFailedJobs.length,
+          activeJobsCount: activeJobs.length,
+          modelFinalized,
+          noActivities: activities.length === 0,
+          verifyVote,
+          verifyRedStreak,
+          reasonCodes: REASON_CODES,
+        });
+        if (outcome.verifyVoteConsumed && verifyVote && verifyVote.verdict !== 'ready') verifyRedStreak += 1;
+        const decision = outcome.decision;
+        const decisionReasonCode = outcome.decisionReasonCode;
+        let publicConclusion = outcome.publicConclusion;
+        if (publicConclusion === '') {
           publicConclusion = assistantProgress.snapshot().slice(-1)[0]?.content || '';
         }
 

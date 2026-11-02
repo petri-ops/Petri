@@ -45,22 +45,28 @@ function buildRealDeps({ parentTaskId, userId }) {
   const { runModel3DRecipe } = require('../../helpers/model3d-recipe-runner');
   // BLOCK-337 P4 — closeout 原语生产实现：子进程跑同一 closeout-gates.mjs（同一真相）
   const { createCloseoutHost } = require('../../helpers/closeout-host');
+  // BLOCK-335 P1 — verify / checkpoint 原语生产实现（复用既有门禁与快照层）
+  const { createVerifyHost } = require('../../helpers/verify-host');
+  const { createCheckpointHost } = require('../../helpers/checkpoint-host');
   // 终态双写形态：markAgentTaskDone 落 status='completed'/agent_status='done'
   // （实测 DB 列序），failed/cancelled 同列同名——四个都收，避免漏识别。
   const TERMINAL = new Set(['done', 'completed', 'failed', 'cancelled']);
   return {
-    launchSubAgent: ({ userContent, role, goals }) =>
+    launchSubAgent: ({ userContent, role, goals, verify, context }) =>
       spawnTools.launchSubAgent({
         parentTaskId,
         userId,
         parentParams: {},
-        parentContext: {},
+        // BLOCK-335 P2 — workflow agent() 的 context（projectId 等）进子 loop
+        parentContext: context && typeof context === 'object' ? context : {},
         // model 缺省={}：accessModeHint 不注入、preset 走默认 provider 回落
         // （与 spawn_agent 未显式选模时的 resolveSpawnModelSettings 语义一致）
         model: {},
         userContent,
         role: role || null,
         goals: goals || [],
+        // BLOCK-335 P2 — verify spec 转发进子 loop（模型自报 complete 需验证背书）
+        ...(verify && typeof verify === 'object' ? { verify } : {}),
         spawnSource: 'workflow',
       }),
     waitAgentTerminal: async (agentId) => {
@@ -115,6 +121,9 @@ function buildRealDeps({ parentTaskId, userId }) {
     },
     // BLOCK-337 P4 — 收口判定原语生产实现（completed 硬绑 closeout 全绿）
     closeout: createCloseoutHost(),
+    // BLOCK-335 P1 — verify / checkpoint 原语生产实现
+    verify: createVerifyHost(),
+    checkpoint: createCheckpointHost({ dbMod, authorizeProject }),
   };
 }
 

@@ -68,6 +68,35 @@ function useEnv(t, env) {
       else process.env[key] = saved[key];
     }
   });
+  // P4 配置中心运行时门控家族清偿（AUDIT-LOG 🟡 2026-11-02 处置落地）：
+  // env='1' 在 P4 契约下只是首载种子——测试要把接点真打开，须落 decision-config
+  // 文件层（文件 > env 种子 > 注册表默认）。env='0'（杀开关）与缺省不落文件。
+  const POINT_BY_ENV_KEY = {
+    PETRI_JEV_INTENT_ROUTE: 'intent-route',
+    PETRI_JEV_REPORT_GUARD: 'report-guard',
+    PETRI_JEV_MARKER_GUARD: 'marker-celltype',
+    PETRI_JEV_TOPIC_SHIFT: 'topic-shift',
+    PETRI_JEV_TOOL_ROUTE: 'tool-route',
+  };
+  const enabledPoints = Object.entries(env)
+    .filter(([key, value]) => value === '1' && POINT_BY_ENV_KEY[key])
+    .map(([key]) => POINT_BY_ENV_KEY[key]);
+  if (enabledPoints.length > 0) {
+    const fsMod = require('node:fs');
+    const osMod = require('node:os');
+    const configPathBefore = process.env.PETRI_DECISION_CONFIG_PATH;
+    const tmpConfig = path.join(osMod.tmpdir(), `decision-config-useenv-${process.pid}-${Date.now()}.json`);
+    fsMod.writeFileSync(tmpConfig, JSON.stringify({
+      version: 1,
+      points: Object.fromEntries(enabledPoints.map((point) => [point, { enabled: true }])),
+    }));
+    process.env.PETRI_DECISION_CONFIG_PATH = tmpConfig;
+    t.after(() => {
+      try { fsMod.unlinkSync(tmpConfig); } catch { /* best-effort */ }
+      if (configPathBefore === undefined) delete process.env.PETRI_DECISION_CONFIG_PATH;
+      else process.env.PETRI_DECISION_CONFIG_PATH = configPathBefore;
+    });
+  }
 }
 
 test('默认关：env≠1 → 原样返回零出站', async (t) => {

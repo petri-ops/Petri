@@ -47,7 +47,7 @@ async function isGitWorkspace(workspaceRoot) {
  * 全程**无副作用**（不动真实索引/工作树/HEAD），且捕获未跟踪文件。
  * 纯净工作树=created:false（诚实无快照）。
  */
-async function createCheckpoint(workspaceRoot) {
+async function createCheckpoint(workspaceRoot, { force = false } = {}) {
   if (!await isGitWorkspace(workspaceRoot)) {
     return { ok: false, code: 'not_a_git_repo', message: '工作空间不是 git 仓库，checkpoint 仅支持 git 工作空间' };
   }
@@ -66,8 +66,11 @@ async function createCheckpoint(workspaceRoot) {
     const tree = await withTmpIndex(['write-tree']);
     if (!tree.ok) return { ok: false, code: 'checkpoint_failed', message: tree.stderr };
     const treeSha = tree.stdout.trim();
-    // 纯净工作树检测：树与 HEAD 树一致=无变更（诚实 created:false，不产空 checkpoint）
-    if (headExists) {
+    // 纯净工作树检测：树与 HEAD 树一致=无变更（诚实 created:false，不产空 checkpoint）。
+    // BLOCK-335 P1 例外：force=true（闭环原语）时 HEAD 树本身即回滚锚点——闭环的
+    // checkpoint 发生在 agent 改动**之前**，干净树恰恰需要 HEAD 锚点供失败回滚，
+    // 否则闭环在干净工作区上没有安全网。
+    if (headExists && !force) {
       const headTree = await runGit(workspaceRoot, ['rev-parse', 'HEAD^{tree}']);
       if (headTree.ok && headTree.stdout.trim() === treeSha) {
         return { ok: true, created: false, ref: null, message: '工作树与 HEAD 一致，无需快照' };
@@ -92,8 +95,10 @@ async function createCheckpoint(workspaceRoot) {
 /** 回滚到指定（或最新）checkpoint：checkout 快照树 + 清理快照后新增的未跟踪文件。 */
 async function rollbackToCheckpoint(workspaceRoot, ref) {
   const list = checkpoints.get(workspaceRoot);
+  // BLOCK-335 P1 — 显式 ref 分支同样跳过已回滚条目（fail-closed：对已回滚 checkpoint
+  // 的二次回滚会把工作树拉回更旧状态、卷走其间的合法改动；登记只增不删，回滚一次性）
   const target = ref
-    ? (list || []).find((entry) => entry.ref === ref)
+    ? (list || []).find((entry) => entry.ref === ref && !entry.rolledBack)
     : (list || []).find((entry) => !entry.rolledBack);
   if (!target) return { ok: false, code: 'checkpoint_not_found', message: 'checkpoint 不存在或已回滚' };
   // 恢复跟踪文件到快照树

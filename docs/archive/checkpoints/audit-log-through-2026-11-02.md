@@ -36,3 +36,9 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T14:01:39.979Z -->
 最后更新：2026-11-02（🔵 **启动登记（active）：BLOCK-336 worktree 通用基础设施 v1**（用户裁决「加 全方位的加」立项 + 334 收口后 Jev 单一建议=336（0.25）+ 用户「行 按照建议来」发令）——P1 工具面四件 `workspace_worktree_create/list/remove/merge_request`（四档权限 + 审批 + observe 档可用；不自动 merge、脏树不可删、registry.json 唯一登记源）+ `helpers/worktree-contract.js` 契约函数 + 契约测红绿；P2 项目层 worktreeOf → P3 契约机械化 → P4 隔离后端实机 → P5 governance 回写。文件面=agent-tools git 域 / db.js 项目层 / helpers/worktree-contract.js / routes 项目路由；与并行方 planned 包（335/337/338/339）零交叠。前置 🔴 theme 存量已清（`11c0bee4`）。plan=docs/block-336-worktree-infrastructure-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T17:50:16.861Z -->
+最后更新：2026-11-02（🔵 **BLOCK-336 P1 收口（接手会话）**：实现体与接线已由上一会话落地，本会话补测试缺口——`block336-worktree-infrastructure.test` 10/10（纯函数六组 + 真 git 临时仓工具面四组：脏树 fail-closed / §6 绝不 merge / 分支保留 / 目录外删只收登记）；抓真 macOS `/var`→`/private/var` 使 `gitKnown` 恒 false → realpath 归一；lint control-regex 改码点判定；六处基线随「有意增长 +4」对齐（104→108 / 域集合补 worktree / 预算 108·58263）；标签双端同源，记入既有 UI-437（不新开 id，避免顶破证据债棘轮）。门禁 lint 0 / code-size / arch / cycles / docs / ui-audit / 台账契约 4-4 PASS。遗留=block112 六项既有红（见下表）+ p6 脏树红（提交后自愈）。plan §5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T18:59:37.094Z -->
+最后更新：2026-11-02（🔵 **BLOCK-336 P2 项目层 worktreeOf 收口**：迁移 021 + `helpers/project-worktree.js`（同步 git：attach/detach/inspectDirty）+ db 三处 + REST 三处；契约测试 **8/8**（真 git 仓 + 真 express）。三处收窄留痕=update 只许幂等/解除（改挂拒绝，防静默改写 workspace_path 归属）、DELETE 脏树预检**前置**于删会话（否则留半删除态）、确认后 `--force` 且分支保留。抓真=旧库缺 `worktree_of` 时 prepared 语句炸掉整个 db 模块 → 加载期自愈加列。code-size 台账登记 db.js 1476→1525（先把逻辑抽 helper 才登记）。门禁=lint 0 / arch 两门 PASS / 定向 705 项 690 绿（7 红=1 脏树自愈+6 block112 既有）。余 P3 契约机械化 → P4 实机 → P5 回写。plan §6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
