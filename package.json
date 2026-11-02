@@ -163,6 +163,7 @@
     "docs:reconcile": "node scripts/docs-governance.mjs --reconcile",
     "docs:roll-index": "node scripts/docs-roll-index.mjs",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",
+    "ui:audit:triage": "node scripts/ui-ledger-triage.mjs --json acceptance/block-332/ui-ledger-triage.json",
     "state": "node .agents/skills/petri-dev-infra/scripts/workspace-state.mjs",
     "task:run": "node .agents/skills/petri-dev-infra/scripts/dev-task-runner.cjs run",
     "task:wait": "node .agents/skills/petri-dev-infra/scripts/dev-task-runner.cjs wait",

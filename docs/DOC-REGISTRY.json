@@ -8725,8 +8725,28 @@
         "G0"
       ],
       "notes": "C-14 工具输出压缩 + C-01 长列表虚拟化（用户裁决「先实测量化再定形，不硬造」）completed：测量腿 evidence + 超限结果头尾双保留修复 + 每行 DOM 节点棘轮；虚拟化不引依赖（重开条件量化）。"
+    },
+    {
+      "id": "BLOCK-332-UI-LEDGER-EVIDENCE-DEBT",
+      "capability": "block-332-ui-ledger-evidence-debt",
+      "path": "docs/block-332-ui-ledger-evidence-debt-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-332-ui-ledger-evidence-debt",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-ledger",
+        "evidence-debt",
+        "governance",
+        "gate",
+        "G0"
+      ],
+      "notes": "UI 台账证据债分诊与状态规范化（用户裁决 2026-11-02「行的 按照建议推进」，承接 Jev 建议 ui-evidence-debt）completed：段首状态解析得可信计数（grep 218 → 真债 29：live-missing 6 + blocked 23，unknown 0）+ 13 处状态词规范化（判销/改判均有台账内既有裁决支撑）+ 状态契约与债上限棘轮 4/4。补腿按分诊表另立批次。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 443
+  "documentCount": 444
 }

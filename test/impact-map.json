@@ -6956,6 +6956,22 @@
       ],
       "tests": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block332-ui-ledger-evidence-debt",
+      "note": "BLOCK-332 UI 台账证据债分诊：状态契约 + 债棘轮 + 分诊测量腿；改动落点连台账门禁与文档治理。",
+      "patterns": [
+        "scripts/ui-ledger-triage.mjs",
+        "test/ui-ledger-status-contract.test.mjs",
+        "docs/ui-productization-audit.md",
+        "acceptance/block-332/**"
+      ],
+      "tests": [
+        "test/ui-ledger-status-contract.test.mjs",
+        "test/block326-audit-debt-sweep.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance-gate"
     }
   ]
 }

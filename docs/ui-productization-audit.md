@@ -328,7 +328,7 @@
 - **实机证据**：未跑（右栏实机批补）。
 - **边界（reopen）**：最近使用栈（仅记最后一个）；跨设备同步。
 
-## UI-595: 批注画笔渲染平滑与触屏防误触（2026-10-30 **RW-02 A 线处置：降档 b——批注面需图像 artifact 在结果面打开（UI-638 点开腿同前提），组件级 62/62 已锚**；BLOCK-288；UI-587 reopen 两项清偿；
+## UI-595: 批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-02 A 线处置：降档 b——批注面需图像 artifact 在结果面打开（UI-638 点开腿同前提），组件级 62/62 已锚**；BLOCK-288；UI-587 reopen 两项清偿；
 
 - **变化面**：①freehand 渲染层贝塞尔平滑——smoothFreehandPathD（二次中点：原始点作 Q 控制点、中点作锚）持久笔画与草稿预览统一 polyline→path，**存储 path 契约不变**（原始采点原样入库，平滑纯渲染面）；②触屏防误触——活动笔触期间只认同一 pointerId（第二指/手掌落屏不篡改笔画），pointerCapture 兜底 try/catch（happy-dom 无 capture 实现），pointerLeave 守卫同口径。
 - **为什么这样设计**：UI-587 reopen（压感/贝塞尔/触屏）三项中贝塞尔与触屏可代码化（压感需硬件感知，维持 reopen）；渲染层平滑不改存储契约=已入库批注零迁移。
@@ -1905,7 +1905,7 @@ _BLOCK-18 plan 已 superseded by BLOCK-20；原交付范围见 [`docs/block-18-w
 
 **说明**：原计划为 Petri Desktop 添加独立的「Agent 文档审阅」侧边栏面板，复用 WorkingTreeReview `.wt-*` 样式。2026-08-22 用户裁决"多一个审阅界面没有意义"，UI 入口改为文件页面内 diff toggle（BLOCK-18 接管），再升级为常驻审阅面板（BLOCK-20 接管）。已实现的 IPC handlers / preload namespace / bridge / 类型 / `.wt-*` 样式 / IPC 测试由 BLOCK-20 复用；独立面板 / 菜单项 / 状态槽被 BLOCK-18 → BLOCK-20 删完。详见 [`docs/block-17-agent-doc-review-panel-plan.md`](./block-17-agent-doc-review-panel-plan.md) §收口。
 
-## UI-185: BLOCK-20 — Code Review Panel（2026-08-22 active）
+## UI-185: BLOCK-20 — Code Review Panel（2026-08-22 active）**superseded（历史笔录；验收主体由 UI-204/249 系列承接，2026-10-30 RW-02 d 档改判）**
 
 | 属性 | 值 |
 |------|-----|
@@ -1921,14 +1921,14 @@ _BLOCK-18 plan 已 superseded by BLOCK-20；原交付范围见 [`docs/block-18-w
 
 ---
 
-## UI-185: BLOCK-20 — Code Review Panel — PHASE 1 git-adapter + IPC + 测试 (UI-185)
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 1 git-adapter + IPC + 测试 (UI-185) **superseded（历史阶段笔录）**
 
 PHASE 1 (commit b2c4edf, 仍 in_progress 待实机过目): 5 新 git-adapter 方法
 (listModified / fileHeadContent / fileWorkTreeContent / splitSideDiff / revertFile /
 applyInverseHunk) + 5 IPC 通道 + 38 单元测试 + 0 前端改动 + 0 npm 依赖新增.
 PHASE 2/3/4/5 进度在 docs/ui-productization-audit.md 主笔录段同步.
 
-## UI-185: BLOCK-20 — Code Review Panel — PHASE 2 常驻右侧审阅面板 (UI-185)
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 2 常驻右侧审阅面板 (UI-185) **superseded（历史阶段笔录）**
 
 PHASE 2 落地 (仍 in_progress 待实机过目): 把 BLOCK-16 WorkingTreeReview 浮层
 改造成常驻右侧审阅面板, 与 RightPanel / BottomTerminal 共享 chrome.
@@ -1948,7 +1948,7 @@ focusedHunk 蓝边高亮 + toolbar 快捷键提示条 + reject dialog ⌘+Enter 
 取消. 改动 DiffFileView 受控 prop `focusedHunk` + `onFocusedHunkChange` +
 `onRejectConfirm` (BLOCK-16 核心逻辑零改动, 仅扩接口).
 
-## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185) **superseded（历史阶段笔录）**
 
 PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
 
@@ -2017,7 +2017,7 @@ PHASE 4 测试增量 (test/git-adapter-block20-per-hunk.test.mjs, 436 行, 12 te
   (U1 context) / 单行变更 hunk / 未变更文件空 diff → patch_required / 整 patch ≡
   顺序 per-hunk ≡ HEAD baseline (parity).
 
-## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185)
+## UI-185: BLOCK-20 — Code Review Panel — PHASE 3 inline-edit drawer + workspace.writeTextFile (UI-185) **superseded（历史阶段笔录）**
 
 PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC + 项目文件 inline-edit.
 
@@ -2033,7 +2033,7 @@ PHASE 3 落地 (仍 in_progress 待实机过目): workspace:write-text-file IPC 
 - frontend/src/pages/project-workspace.module.css (199 行): workspaceMarkdownDiff
   toolbar / tabs / actions / hint / action 样式 (markdown 工具栏).
 
-## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)（**改判 2026-10-30 RW-02 d 档**：审阅面已由 UI-204/249 系列多轮演进承接，本笔录降级为历史参考，不再作为独立验收对象）
+## UI-185: BLOCK-20 — Code Review Panel — 综合笔录 (UI-185)（**superseded（改判 2026-10-30 RW-02 d 档**：审阅面已由 UI-204/249 系列多轮演进承接，本笔录降级为历史参考，不再作为独立验收对象））
 
 BLOCK-20-CODE-REVIEW-PANEL active 综合 ledger (PHASE 1/2/3 + assets 全部落地).
 最终状态: in_progress (按 audit 行 402 治理纪律, 仅当真实 dev Electron 实机过目后才可考虑 verified).
@@ -2094,7 +2094,7 @@ BLOCK-20-WIRE-UP token budget 落地: ContextBudgetButton 从 idle 占位符 `�
 **状态**: in_progress (按 audit 行 402 治理纪律: 仅当真实 dev Electron 实机过目后才可考虑 verified).
 
 
-## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)（**判销 2026-10-30 RW-02 d 档**：审阅模式已由 UI-204/228/229 系列重构承接，per-hunk 交互在现形态内演进）
+## UI-197: BLOCK-22-P4.9 — Per-hunk reject IPC 接入 (2026-08-27 active)（**cancelled（判销 2026-10-30 RW-02 d 档**：审阅模式已由 UI-204/228/229 系列重构承接，per-hunk 交互在现形态内演进））
 
 BLOCK-22 PHASE 2 落地：rejectHunk 从整文件 revert 改为真正的 per-hunk inverse IPC。
 
@@ -2133,7 +2133,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 2026-09-30 勘正：状态字样滞后同步（复核证据=f57089cb）——功能已被 BLOCK-43 整链退休、由 UI-206 承担，标题与状态行按 UI-193 同型先例标 superseded。
 
-## UI-200: BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active)
+## UI-200: BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **in_progress（代码+组件 8/8 已锚、production 已接线 ReviewMode，缺实机过目；2026-11-02 BLOCK-332 分诊补登）**
 
 **目标**：用 BLOCK-22 已交付的 CodeMirrorEditor inline-diff（语法高亮 + 字符级 diff）替换 Working Tree Review 面板的纯文本 DiffHunkView/DiffFileView 渲染层，同时清理 BLOCK-17 agent-doc-review 死代码全链路。
 
@@ -5296,7 +5296,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：pl4b 契约测试 3/3 + 前端 window 定向 6/6 + tsc 0 + eslint 净（set-state-in-effect 两处重构）+ 实机三端点全通（概览 7 目录/261KB/138 行；导出 200 PK 魔数 zip；空 ids 400 fail-closed）。
 - **边界**：history 分页在并行 WIP 文件（tools-metadata.js）延期登记；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-461: token 出 URL——PL-6 安全卫生刀（BLOCK-132，门禁对账补登） (2026-09-29，归属并行 BLOCK-132 域)
+## UI-461: token 出 URL——PL-6 安全卫生刀（BLOCK-132，门禁对账补登） (2026-09-29，归属并行 BLOCK-132 域) **verified（归属登记：守卫 3/3 + 相关 170/170 + tsc 0，UI 面零视觉/交互变化；2026-11-02 BLOCK-332 分诊补登）**
 
 - **来源**：实现提交 f9cf2f5c（`fix(BLOCK-132)` —— 改了前端 URL 构造点但 subject 走 BLOCK 轨无 UI-###，经门禁豁免登记 + 本条目补登对账；本条目为归属登记，若该域后续自行补登以该域为准）。
 - **交付**：四处 URL query token 拔除（revisionArtifactUrl / ResultArtifactShell buildUrl + scientificScriptUrl / agentTaskStream SSE URL）——事实核查修正修法：`desktop-local` 为前端硬编码常量、后端无条件放行（真边界=回环+Host 白名单），URL 携 token 无鉴权价值纯属日志/引用/历史污染，按「移除冗余」收口；files.js 拖出通道 DRAG_OUT_TOKEN（有真实判定语义）保留并测试钉住。
@@ -5533,7 +5533,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 联邦协作的委托此前只在「发送瞬间」回流一次性摘要，历史不可查。本条目交付联邦面板「委托记录」卡：GET /api/federation/delegations 聚合端点（task_events 中 delegate_to_petri_node 的 tool_call/tool_result 对 JOIN tasks，输出 task/peerName/状态〔ok→done/error→failed/无结果→running〕/回复头/conversationId/projectId，limit 50，user_id 过滤）+ 前端卡片（空态引导/状态标签/回复摘要/刷新）。证据=block164 聚合契约测试（done/running/归属/回复头）+ 实机 delegations 端点聚合出 2026-09-18 BLOCK-85 双真机历史委托记录；双真机「查节点→委托→记录可见」全链走查（rider）待用户过目翻 verified。补登说明=UI 面随 b784fa37（BLOCK-164 整包收口）入库、同提交漏台账同步，BLOCK-165 基线时按 LEGACY_AUDIT_SYNC_EXEMPTIONS 先例补登+豁免登记（fb5174ee 同款）。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress，BLOCK-165 P1·基线补登；**RW-02 d 档改判 2026-10-30：全局机械改名非单点可见 UI 面——theme-token-contract 门禁（17/17）即证据载体，移出 UI 实机腿验收域**)
+## UI-485: 全仓设计 token 前缀迁移 --gewu-* → --petri-*（2026-10-10 in_progress → **verified（2026-10-30 RW-02 d 档改判：全局机械改名非单点可见 UI 面，theme-token-contract 17/17 即证据载体，移出 UI 实机腿验收域）**，BLOCK-165 P1·基线补登；**RW-02 d 档改判 2026-10-30：全局机械改名非单点可见 UI 面——theme-token-contract 门禁（17/17）即证据载体，移出 UI 实机腿验收域**)
 
 换库开源改名的 UI 面组成部分：全部设计 token（border/accent/text/text-secondary/text-tertiary/bg-surface/font-size 阶梯/shadow 等约 40+ 变体、236 文件）与 CSS 类名前缀 `gewu-` → `petri-` 机械迁移，**视觉零变化**（纯标识符替换，值不动）；theme-token-contract 契约 4/4 同步改前缀后绿。同批 UI 关联面：GewuOpenFileDevBridge→PetriOpenFileDevBridge、html class `petri-desktop`、LoginModal 等类名前缀。补登说明=token/类名迁移随 66b3970（P1 机械替换）入库、同提交走 BLOCK 轨漏 UI-### 与台账同步，BLOCK-165 全量复验时按 LEGACY 先例补登+双豁免登记（fb5174ee 同款）；实机=改名后 dev 栈重启全窗走查（P6 冒烟）待过目翻 verified。
 
@@ -5609,7 +5609,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **A1**：mergeKeepOlderPrefix 反例锁测三条（窗口空洞/同 ts 边界/id 冲突）——现状留痕，换算法=升级登记面。
 - **红绿**：block169-review-commit-edge 4/4；ReviewMode 59/60（1=block41 存量）；lineage 246 绿；A1 锁测 13/13。
 
-## UI-505: 死导出清理（2026-10-12 in_progress，BLOCK-176/W6 收口棘轮；**判销 2026-10-30 RW-02 d 档**：2026-10-13 已销号——仓库卫生棘轮条目非 UI 面，knip 棘轮门禁数据即证据）
+## UI-505: 死导出清理（2026-10-12 **cancelled（判销 2026-10-30 RW-02 d 档）**，BLOCK-176/W6 收口棘轮：2026-10-13 已销号——仓库卫生棘轮条目非 UI 面，knip 棘轮门禁数据即证据）
 
 - **knip 棘轮红**：viewerRegistry.ts `viewerProfileCanCompare` 包装函数零消费（`canCompare` 能力位真实消费路径在 resultMode.ts capabilities，不经包装）——按 CK-11 冻结纪律删除死导出，`VIEWER_PROFILES` 数据面不动。
 - **eslint 化石**：ToolActivityDock.tsx hooks 修复（UI-502 批）后 2 条抑制失效——`--prune-suppressions` 收缩（存量只许收缩方向）。
@@ -5744,7 +5744,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机腿**：`npm run verify -- ui523-run-stats` **10/10**（9223 离屏实例 + `scripts/ui523-ui-live.mjs` 一键 mock 化与还原：空态 `— tok`/`0%`、环唯一、运行中 `1 轮 · 0 步 · N tok/s`、会话 `1K tok · 缓存命中 83%`、上下文 18%、结束后保留最近一次读数、清理还原）；证据 `acceptance/ui-523/ui523-run-stats-live.json` + `ui523-run-stats-running.png` / `ui523-run-stats-totals.png`。
 
 
-## UI-524: 斜杠命令判定层抽离（**RW-02 d 档改判 2026-10-30：纯判定层抽离零可见行为变化——组件测试即证据，移出 UI 实机腿验收域**（2026-10-18 in_progress，BLOCK-206 / C-29）
+## UI-524: 斜杠命令判定层抽离（**RW-02 d 档改判 2026-10-30：纯判定层抽离零可见行为变化——组件测试即证据，移出 UI 实机腿验收域**（2026-10-18 in_progress → **verified（2026-10-30 RW-02 d 档改判：纯判定层抽离零可见行为变化，组件测试即证据，移出 UI 实机腿验收域）**，BLOCK-206 / C-29）
 
 - **变化面**：`SimpleChat.tsx` 中 `executeSlashCommand` 的"命令 → 动作类别"判定抽成 `SimpleChat/slashExecute.ts:classifySlashCommand`（纯函数），组件 `switch` 改为按动作类别执行；UI 行为与文案零变化（仍只支持 new/clear/model/export/compact/help + `skill:`/`template:` 模板注入）。
 - **为什么**：判定混在 1664 行组件里 ⇒ 离线不可断言，竞争力清单 D15「斜杠即执行」只能记"无锚"。抽离后 `slashExecute.test.ts` 3/3 成为该点的**机械锚**（已挂进 `evals/anchors/competitiveness-8d.json` 并提升棘轮基线）。

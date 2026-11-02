@@ -1,0 +1,189 @@
+{
+  "generatedAt": "2026-11-02T03:20:55.226Z",
+  "ledger": "docs/ui-productization-audit.md",
+  "sections": 451,
+  "uniqueIds": 442,
+  "counts": {
+    "blocked": 23,
+    "verified": 411,
+    "live-missing": 6,
+    "closed": 11
+  },
+  "debt": 29,
+  "liveMissing": [
+    {
+      "id": "UI-639a",
+      "deps": [],
+      "title": "约束编辑器 SceneConstraintEditor（BLOCK-322 P3-03 v2b 第二票；2026-10-30 **in_progress（组件 4/4 + 后端契约"
+    },
+    {
+      "id": "UI-595",
+      "deps": [],
+      "title": "批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-"
+    },
+    {
+      "id": "UI-475",
+      "deps": [],
+      "title": "识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；**RW-02 d"
+    },
+    {
+      "id": "UI-522",
+      "deps": [],
+      "title": "模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻**（2026-10-18 in_progress，BLOC"
+    },
+    {
+      "id": "UI-526",
+      "deps": [],
+      "title": "Result Studio 真值徽标语义诚实化（2026-10-18 in_progress，BLOCK-211 / W8）；**RW-02 b 档对账 2026-10-30：触发"
+    },
+    {
+      "id": "UI-534",
+      "deps": [],
+      "title": "MCP 服务货架治理状态（**RW-02 d 档改判 2026-10-30：契约/类型完成、UI 控件未交付——改判为待交付登记，非已交付未验证**（2026-10-20 **in"
+    }
+  ],
+  "blocked": [
+    {
+      "id": "UI-656",
+      "deps": [],
+      "external": true,
+      "title": "长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **in_progress（测试面守卫，零渲染变更，无实机面可验）**）"
+    },
+    {
+      "id": "UI-639",
+      "deps": [
+        "UI-532"
+      ],
+      "external": false,
+      "title": "pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；ifra"
+    },
+    {
+      "id": "UI-200",
+      "deps": [],
+      "external": true,
+      "title": "BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **in_progress（代码+组件"
+    },
+    {
+      "id": "UI-304",
+      "deps": [],
+      "external": true,
+      "title": "增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress；**RW-02 d 档对账"
+    },
+    {
+      "id": "UI-326",
+      "deps": [],
+      "external": true,
+      "title": "创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补"
+    },
+    {
+      "id": "UI-331",
+      "deps": [],
+      "external": true,
+      "title": "左栏会话行短式相对时间（用户参考图裁决）(2026-09-10 in_progress)"
+    },
+    {
+      "id": "UI-391",
+      "deps": [],
+      "external": true,
+      "title": "BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内；**RW-"
+    },
+    {
+      "id": "UI-390",
+      "deps": [],
+      "external": true,
+      "title": "子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 in_progress，dev Electron 边界内)；**RW-0"
+    },
+    {
+      "id": "UI-388",
+      "deps": [],
+      "external": true,
+      "title": "远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev"
+    },
+    {
+      "id": "UI-389",
+      "deps": [],
+      "external": true,
+      "title": "文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账"
+    },
+    {
+      "id": "UI-387",
+      "deps": [],
+      "external": true,
+      "title": "子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b"
+    },
+    {
+      "id": "UI-386",
+      "deps": [],
+      "external": true,
+      "title": "聊天区子智能体聚合条退役——项目历史智能体图标化集中到摘要卡（用户提案确认「确定 开干」）(2026-09-16 in_progress，dev Electron 边界内)；**R"
+    },
+    {
+      "id": "UI-384",
+      "deps": [],
+      "external": true,
+      "title": "工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 in_progress，dev E"
+    },
+    {
+      "id": "UI-383",
+      "deps": [],
+      "external": true,
+      "title": "工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-09-15 in_progress，dev Electron 边界内)；**RW"
+    },
+    {
+      "id": "UI-382",
+      "deps": [],
+      "external": true,
+      "title": "子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 in_progress，dev Electron 边界内)；**RW-02 b 档对账 "
+    },
+    {
+      "id": "UI-456",
+      "deps": [],
+      "external": true,
+      "title": "结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 in_progress → 2026-10-08 **verified**〔由 U"
+    },
+    {
+      "id": "UI-458",
+      "deps": [],
+      "external": true,
+      "title": "继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 in_progres"
+    },
+    {
+      "id": "UI-459",
+      "deps": [],
+      "external": true,
+      "title": "解读入口统一 result_summary 锚定（BIO-6/BIO-D4=(b)）+ UI-457/458 实机走查（BLOCK-137 动态工作流收尾双件）(2026-09-3"
+    },
+    {
+      "id": "UI-471",
+      "deps": [],
+      "external": true,
+      "title": "隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 in_progress（BL"
+    },
+    {
+      "id": "UI-513",
+      "deps": [],
+      "external": true,
+      "title": "跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 "
+    },
+    {
+      "id": "UI-521",
+      "deps": [],
+      "external": true,
+      "title": "外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-"
+    },
+    {
+      "id": "UI-532",
+      "deps": [],
+      "external": true,
+      "title": "生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMA"
+    },
+    {
+      "id": "UI-535",
+      "deps": [],
+      "external": true,
+      "title": "段落级错误兜底（2026-10-20 **in_progress（代码+组件测试完成，未做实机腿）**，BLOCK-222 / Q9 垂直切片）；**RW-02 b 档对账 202"
+    }
+  ],
+  "unknown": [],
+  "duplicateOpenIds": []
+}
