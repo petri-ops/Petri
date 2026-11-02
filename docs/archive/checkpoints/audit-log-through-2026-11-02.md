@@ -42,3 +42,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T18:59:37.094Z -->
 最后更新：2026-11-02（🔵 **BLOCK-336 P2 项目层 worktreeOf 收口**：迁移 021 + `helpers/project-worktree.js`（同步 git：attach/detach/inspectDirty）+ db 三处 + REST 三处；契约测试 **8/8**（真 git 仓 + 真 express）。三处收窄留痕=update 只许幂等/解除（改挂拒绝，防静默改写 workspace_path 归属）、DELETE 脏树预检**前置**于删会话（否则留半删除态）、确认后 `--force` 且分支保留。抓真=旧库缺 `worktree_of` 时 prepared 语句炸掉整个 db 模块 → 加载期自愈加列。code-size 台账登记 db.js 1476→1525（先把逻辑抽 helper 才登记）。门禁=lint 0 / arch 两门 PASS / 定向 705 项 690 绿（7 红=1 脏树自愈+6 block112 既有）。余 P3 契约机械化 → P4 实机 → P5 回写。plan §6。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T19:37:01.835Z -->
+最后更新：2026-11-02（🔵 **BLOCK-336 P3 生命周期事件收口**：新 `helpers/worktree-events.js`（**零项目依赖**，连接注入，直写 `task_events`）+ 五处接入（tools create/merge_request/remove×2、project-layer attach/detach）。语义分工=jsonl 永久治理证据 / task_events 当下可观测（30 天清扫），双写且后者 best-effort（写失败不阻断 git、被拒的删除不伪造事件）。作用域 `task_id='worktree:<id>'` seq 自增、payload 带 `via`/`action`/`reason`。**抓真**：首版静态 require agent-task-store 被 `gate:arch-cycles` 抓到两条新环（db→project-worktree→worktree-events→db）→ 改连接注入、依赖单向。测试 4/4；定向 713 项 698 绿（7 红同上）；lint 0 / code-size 台账 +1 / arch 两门 PASS。余 P4 实机 + §3～§8 对账表 → P5 回写。plan §7。G0 开发期常态 · 不外推 packaged/Provider/GA。）
