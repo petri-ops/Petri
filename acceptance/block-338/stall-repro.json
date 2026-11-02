@@ -1,0 +1,36 @@
+{
+  "name": "stall-repro",
+  "block": "BLOCK-338",
+  "phase": "P0",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T12:14:47.930Z",
+  "finishedAt": "2026-11-02T12:14:51.945Z",
+  "socketIdle": {
+    "timedOut": false,
+    "atMs": 1204
+  },
+  "provider": {
+    "settled": true,
+    "finalError": "res_error"
+  },
+  "assertions": [
+    {
+      "name": "A_socket_idle_reset_by_heartbeat",
+      "pass": true,
+      "detail": "timeout=400ms 且上游每 100ms 发心跳 → 未触发（1204ms）；未触发即证明心跳续命 socket"
+    },
+    {
+      "name": "B_provider_zero_token_on_heartbeat_upstream",
+      "pass": true,
+      "detail": "2.5s 内 content/tool delta=0（心跳帧不产生 token 事件）"
+    },
+    {
+      "name": "B_provider_still_pending_after_2_5s",
+      "pass": true,
+      "detail": "provider promise settled=false（无看门狗时静默挂住，只能等 socket idle/外层兜底）"
+    }
+  ],
+  "allPass": true,
+  "passed": 3,
+  "total": 3
+}

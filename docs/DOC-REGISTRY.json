@@ -8856,7 +8856,8 @@
       "capability": "block-338-stream-stall-watchdog",
       "path": "docs/block-338-stream-stall-watchdog-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
+      "phase": "P4-COMPLETED",
       "canonical": true,
       "truthDomain": "block-338-stream-stall-watchdog",
       "entrypoint": "docs/README.md",
@@ -8869,7 +8870,7 @@
         "stability",
         "G0"
       ],
-      "notes": "模型流式 stall 看门狗（用户裁决 2026-11-02「事关推进稳定性 必须全力解决」）planned，插队 334 收口后首位：根因=全部提供者只有 socket idle timeout（上游发心跳不发 token 永不触发，150s>90s 数值矛盾即证）；修在 ModelGateway 单点（首 token 45s/idle 60s，心跳不续命）；根治 2026-10-30 起挂的 /api/ai/chat hang。"
+      "notes": "模型流式 stall 看门狗（用户裁决 2026-11-02「事关推进稳定性 必须全力解决」）completed（P0-P4 立项当日收口）：根因实证=裸 http timeout=400ms 被 100ms 心跳续命 + 真 provider 面向心跳上游 2.5s 零 token 且不结束；修在 ModelGateway 单点（stream-stall-watchdog 纯函数：续命集合封闭/两段计时/阈值 45s·60s 含 1s 下限）；chat 120s 兜底降为最后防线、agent 首 token 段重试一次（idle 不重试防重复）、结构化 stream_stalled 入 324 词表新类别 provider。证据=契约 9/9 + 复现 3/3 + 实机 6/6。"
     },
     {
       "id": "BLOCK-339-PERSONA-DEBT-SWEEP",

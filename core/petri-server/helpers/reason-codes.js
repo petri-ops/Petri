@@ -23,6 +23,7 @@ const REASON_CATEGORIES = Object.freeze([
   'data',       // 数据完整性：源数据不可变/sha 门
   'schema',     // 参数校验
   'autonomy',   // 放权坡道（BLOCK-323）：观察/自动放行
+  'provider',   // 模型提供者/上游通信（BLOCK-338）：流式停滞等上游侧异常
 ]);
 
 const REASONS = Object.freeze({
@@ -57,6 +58,11 @@ const REASONS = Object.freeze({
   delegated_approval: { category: 'governance', template: '插件委托执行（下游白名单内）。' },
   // —— 放权坡道（BLOCK-323）——
   rule_auto_allow: { category: 'autonomy', template: '规则「{ruleId}」放行档自动执行，未经逐次确认。' },
+  // —— 上游通信（BLOCK-338 流式 stall 看门狗）——
+  stream_stalled: {
+    category: 'provider',
+    template: '模型流式响应停滞（{phase}，{elapsedMs}ms 无有效输出），已中止本次调用。',
+  },
 });
 
 /** 渲染原因文本：{placeholder} 按 values 替换；未注册 code 走诚实的回退文本。 */

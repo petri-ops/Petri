@@ -411,6 +411,8 @@ module.exports = function registerAiChatRoute(app) {
     const abortController = new AbortController();
     // UI-638 加映 — 上游无响应兜底：此前只在客户端断开时 abort，上游挂住会让
     // 请求永不结束（实机 150s 零 token、零报错）。到点 abort 并回显诚实错误。
+    // BLOCK-338 降级为**最后防线**：ModelGateway 的 stall 看门狗（首 token 45s / idle 60s，
+    // 心跳不续命）会先触发并返回 stream_stalled；本兜底只兜「看门狗也没覆盖」的极端情形。
     const chatTimeout = armAbortTimeout({
       timeoutMs: Number(process.env.PETRI_CHAT_TIMEOUT_MS) || 120_000,
       abort: () => abortController.abort(),

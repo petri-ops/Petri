@@ -1,0 +1,45 @@
+{
+  "name": "stall-live",
+  "block": "BLOCK-338",
+  "phase": "P3",
+  "platform": "darwin",
+  "thresholdMs": 1000,
+  "coverage": "provider + ModelGateway + HTTP（未经 Express 进程）",
+  "startedAt": "2026-11-02T12:14:27.815Z",
+  "finishedAt": "2026-11-02T12:14:30.485Z",
+  "assertions": [
+    {
+      "name": "L1_normal_no_false_positive",
+      "pass": true,
+      "detail": "elapsed=495ms error=- deltas=4"
+    },
+    {
+      "name": "L2_first_token_stall",
+      "pass": true,
+      "detail": "elapsed=1003ms error=stream_stalled phase=first_token elapsedMs=1002"
+    },
+    {
+      "name": "L2_no_phantom_tokens",
+      "pass": true,
+      "detail": "deltas=0（不得伪造 token）"
+    },
+    {
+      "name": "L2_far_before_outer_timeout",
+      "pass": true,
+      "detail": "elapsed=1003ms << 外层 120s 兜底（看门狗先触发）"
+    },
+    {
+      "name": "L3_idle_stall",
+      "pass": true,
+      "detail": "elapsed=1156ms error=stream_stalled phase=idle elapsedMs=1002"
+    },
+    {
+      "name": "L3_partial_output_kept",
+      "pass": true,
+      "detail": "deltas=[\"partial\"]"
+    }
+  ],
+  "allPass": true,
+  "passed": 6,
+  "total": 6
+}

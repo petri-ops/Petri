@@ -1,6 +1,6 @@
 ---
 capability: block-338-stream-stall-watchdog
-status: planned
+status: completed
 goal: 模型流式 stall 看门狗（用户裁决 2026-11-02「事关工作推进稳定性 必须全力解决」）：根治 /api/ai/chat「150s 零 token 零报错静默挂住」——根因=全部提供者只有 socket idle timeout（上游持续发 SSE 心跳/空 chunk 即永不触发），无「多久没收到 token 就判死」的看门狗；修法=ModelGateway 单点加 stall 看门狗（首 token 上限 + 连续无 token 上限，默认保守，env 可调），超时 abort 并发结构化错误（reason code 注册）；一处修全提供者受益。
 acceptance:
   - P0 复现与证据：mock 上游「发心跳不发 token」场景——修复前 chat/agent 两路径均挂到 PETRI_CHAT_TIMEOUT_MS 兜底（120s）或永不结束（agent 路径无兜底）；证据 acceptance/block-338/stall-repro.json。
@@ -38,3 +38,21 @@ reopen: 看门狗阈值按模型/档位自适应（thinking 档首 token 本就�
 - 不改提供者各自的 socket timeout（CK-05 契约单源）；不建第二套超时体系——chat 的 120s 兜底降为最后防线而非删除。
 - 错误必须结构化入 BLOCK-324 词表，前端诚实显示原因，不吞成"模型无响应"。
 - G1+ 不外推。
+
+## 3. 收口记录（2026-11-02 立项当日 P0→P4 全收口）
+
+| 片 | 交付 | 证据 |
+| --- | --- | --- |
+| P0 复现 | `scripts/block338-stall-repro.mjs`：A) 裸 http `timeout=400ms` + 上游每 100ms 心跳 → **未触发**（心跳续命 socket）；B) 真 DeepSeek provider 面向心跳上游：2.5s 内 **0 个** content/tool delta 且 promise 未 settled | `acceptance/block-338/stall-repro.json` **3/3** |
+| P1 看门狗 | 新 `llm-providers/stream-stall-watchdog.js`（纯函数：续命集合封闭、两段计时、幂等、stop、阈值解析含下限 1s）+ `ModelGateway.chat` 单点接入（`AbortSignal.any` 组合 signal）+ 结构化 `stream_stalled{phase,elapsedMs}` + `reason-codes` 新类别 `provider` | 契约测 **7/7**（含「心跳不续命」「正常流零误杀」反向断言） |
+| P2 两路径 | `/api/ai/chat` 120s 兜底**降级为最后防线**（注释+既有 message 通路直接显示 `stream_stalled` 中文原因）；agent 路径 `callChatProvider` 首 token 段自动重试**一次**；首 token stall **不发** error 事件（避免前端先报错再成功） | 契约测 2 条（重试恰好 1 次 / idle 不重试 / 二次仍 stall 不无限重试） |
+| P3 实机 | `scripts/block338-stall-live.mjs`：真 provider + 真 gateway + 真 HTTP mock 三场景 | `acceptance/block-338/stall-live.json` **6/6**（正常零误杀 495ms·4 delta / 首 token 1003ms 判死且 0 伪造 token / idle 判死且部分输出保留） |
+| P4 收口 | 本记录 + AUDIT-LOG 翻 ✅ + handoff/roadmap 回写 | `test:changed` 268 项 267 绿（唯一红=p6 脏树，提交自愈） |
+
+**对计划字面的收窄（留痕）**：plan 写「stall 判瞬态可重试一次」，实现收窄为**仅 `phase='first_token'` 可重试**——idle 段已产出部分内容，重放会重复输出（用户可见的坏结果），因此 idle 段不重试、原样返回由上层如实报。这比「一律重试一次」更安全，且首 token 段正是「一次上游抽风毁掉整轮」的实际形态。
+
+**抓真两处**：① 复现脚本首版用 `req.on('close')` 清理心跳——Node ≥16 的 `IncomingMessage 'close'` 在**请求体读完**即触发，导致心跳被立刻清掉、A 场景假阳性（timeout 正常触发）；改用 `req.socket`/`res` 的 close。② 接入测试首版把阈值设 120ms，但产品下限是 1000ms（`MIN_THRESHOLD_MS`）→ 阈值被回落成默认 45s、测试必红；改为使用合法下限 1s。
+
+**未覆盖（如实）**：P3 未经 Express 进程（`/api/ai/chat` 只加注释降级，路由行为由既有 UI-638 兜底测试覆盖）；真实 deepseek 上游一轮正常对话属用户侧凭据条件，本机无 key 未跑；thinking 高档阈值放宽属 reopen。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

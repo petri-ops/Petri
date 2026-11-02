@@ -10,6 +10,22 @@
 const { normalizeModelConfig, resolveModelProfile } = require('./model-profile');
 // BLOCK-81 P1 — 思考档位：中性档位→上游参数的单一映射点 + 去参重试判据
 const { thinkingParamsFor, isUnknownParameterError } = require('./thinking-level');
+// BLOCK-338 — 流式 stall 看门狗（心跳/空 chunk 不续命，只认有效 token）
+const { createStreamStallWatchdog, resolveStallThresholds } = require('./stream-stall-watchdog');
+
+/** 组合外部 signal 与看门狗 signal（Node 20+ 用 AbortSignal.any，否则手动转发）。 */
+function combineSignals(external, internal) {
+  const list = [external, internal].filter(Boolean);
+  if (list.length === 0) return undefined;
+  if (list.length === 1) return list[0];
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.any === 'function') return AbortSignal.any(list);
+  const controller = new AbortController();
+  for (const signal of list) {
+    if (signal.aborted) { controller.abort(); break; }
+    signal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  return controller.signal;
+}
 
 function gatewayError(error, message, details) {
   return { error, message, ...(details || {}) };
@@ -251,16 +267,42 @@ class ModelGateway {
       let framesOverflow = 0;
       const startedAt = Date.now();
       if (canStream) {
-        result = await provider.chatStream(apiKey, requestBody, telemetry || {}, (event) => {
-          if (event && (event.type === 'content_delta' || event.type === 'tool_call_delta')) emittedOutput = true;
-          // Hold a failed attempt's terminal error until the gateway decides
-          // whether it will switch. Output and successful events remain live.
-          if (!event || event.type !== 'error') {
-            if (event && transcriptFrames.length < MAX_TRANSCRIPT_FRAMES) transcriptFrames.push(event);
-            else if (event) framesOverflow += 1;
-            onEvent(event);
-          }
-        }, options);
+        // BLOCK-338 — stall 看门狗：上游只发心跳时 socket idle 永不触发，
+        // 这里按「多久没收到有效 token」判死并 abort 本次 attempt。
+        const stallController = new AbortController();
+        let stallInfo = null;
+        const watchdog = createStreamStallWatchdog({
+          ...resolveStallThresholds(process.env),
+          onStall: (info) => {
+            stallInfo = info;
+            try { stallController.abort(); } catch { /* already aborted */ }
+          },
+        });
+        try {
+          result = await provider.chatStream(apiKey, requestBody, telemetry || {}, (event) => {
+            watchdog.observe(event);
+            if (event && (event.type === 'content_delta' || event.type === 'tool_call_delta')) emittedOutput = true;
+            // Hold a failed attempt's terminal error until the gateway decides
+            // whether it will switch. Output and successful events remain live.
+            if (!event || event.type !== 'error') {
+              if (event && transcriptFrames.length < MAX_TRANSCRIPT_FRAMES) transcriptFrames.push(event);
+              else if (event) framesOverflow += 1;
+              onEvent(event);
+            }
+          }, { ...options, signal: combineSignals(signal, stallController.signal) });
+        } catch (error) {
+          watchdog.stop();
+          if (!stallInfo) throw error;
+          result = gatewayError('aborted', error.message);
+        }
+        watchdog.stop();
+        if (stallInfo) {
+          result = gatewayError(
+            'stream_stalled',
+            `模型流式响应停滞（${stallInfo.phase === 'first_token' ? '首 token' : '连续无 token'} ${stallInfo.elapsedMs}ms），已中止本次调用`,
+            { phase: stallInfo.phase, elapsedMs: stallInfo.elapsedMs, profileId: profile.id }
+          );
+        }
       } else {
         result = await provider.chat(apiKey, requestBody, telemetry || {}, options);
       }
@@ -316,7 +358,11 @@ class ModelGateway {
         lastResult = result;
         continue;
       }
-      if (typeof onEvent === 'function' && result && result.error) {
+      // BLOCK-338 P2 — 首 token 段 stall 属「零输出、可安全重试」：不发 error 事件，
+      // 把决定权交给上层（agent 路径据此重试一次）；idle 段 stall 已产出内容，不发重试，
+      // 事件照发让前端诚实显示。二次仍 stall 时上层按 result.error 如实报。
+      const retryableStall = result && result.error === 'stream_stalled' && result.phase === 'first_token';
+      if (typeof onEvent === 'function' && result && result.error && !retryableStall) {
         onEvent({ type: 'error', error: errorCode(result), message: result.message });
       } else if (typeof onEvent === 'function' && result && !result.error && typeof provider.chatStream !== 'function') {
         const content = result.choices && result.choices[0] && result.choices[0].message

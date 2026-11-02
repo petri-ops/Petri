@@ -38,6 +38,10 @@ const BASELINE = new Set([
   // （加性策略，跨平台不互相覆盖，BLOCK-330 先例）②killTree 的 taskkill/SIGTERM 差分。
   // dev-only 一次性探针，收敛到 platform-compat 无收益，登记即留痕。
   'scripts/block336-worktree-live.mjs',
+  // BLOCK-338 — 同型 dev-only 实机/复现脚本：process.platform 仅写入证据头
+  // `platform` 字段（跨平台证据不互相覆盖），无行为分支。登记即留痕。
+  'scripts/block338-stall-live.mjs',
+  'scripts/block338-stall-repro.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',
