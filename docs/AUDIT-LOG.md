@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-03（🔵 **BLOCK-335 reopen（P7 lint 任务线）——用户发令**：verify 增 kind lint（--report 改动域 + scoped eslint 只跑改动文件，worktree 全仓 lint 有 type-aware 环境伪影）+ needs_restart 闭环语义（ready+restartRequired → 保留不回滚留人工）+ src/core 域 16 条收缩真跑。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（✅ **BLOCK-335 首批题真跑完成——lint 收缩一批（闭环首任务）**：worktree+checkpoint 锚点→7 条清偿（5×no-async-executor 包裹、2×control-regex 码点判定）→两步 verify→回灌主仓 prune→基线 311→304、lint 0 error、closeout PASS（4d581110）。抓真：直接 eslint 会应用抑制基线（静默≠消失）；prune 须配 --no-cache。🔴 事故=未提交文件被未知机制回退+5 个悬空 stash（详见待处理项）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（✅ **BLOCK-335 自优化闭环整包 COMPLETED（P0-P5 当日收口）**：P0 验证器投票（自报 complete 须结构化验证背书，红→retry≤2→block）；P1 verify-host（两步防假绿）+checkpoint-host+薄 REST+workflow verify/checkpoint 原语；P2 self-optimize 脚本；P3 worktree 自指生产路径；**P4 实机 17/17**（绿保留/红回滚树零 diff）；P5 observe 护航落账。门禁=契约 8/8+邻域 250/250。首批题已真跑见上。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（🔵 **BLOCK-335 自优化闭环启动登记（active；用户发令+首批题采纳 lint 收缩）**：撞裁决点①已由 336 关闭；插入点=决策瀑布纯函数化+验证器投票。P1 基座先行→P0→P2→P3→P4→P5。G0 开发期常态 · 不外推 packaged/Provider/GA。）

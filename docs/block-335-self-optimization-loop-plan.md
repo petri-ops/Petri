@@ -1,6 +1,6 @@
 ---
 capability: block-335-self-optimization-loop
-status: completed
+status: active
 goal: 任务推进闭环 v1（用户裁决 2026-11-02 升级定位：「自动推进任务需求，用户只验收结果」；改自己是第一个用例）：判据驱动的驾驶员——loop 每轮 decision 不再只由模型自报，结构化验证结果（test:changed --report / evals:gate / judge 读数）参与判定，跑偏在验证红的那一刻被抓住而非用户验收时；第一个用例=让 Petri 的 agent 对 Petri 自身仓库（worktree 副本）做小改动后，自己跑验证门禁 → 结构化判定 ready/blocked/failed → 失败自动回滚 checkpoint；执行载体=工作流脚本（宿主侧注入 verify/checkpoint 原语），验证=evals-harness 隔离后端 + test:changed --report JSON，回滚=workspace-checkpoint 共享层（新增 petri-server 薄 REST）；放权坡道 observe 档护航首批任务。
 acceptance:
   - P0 判据驱动驾驶员（升级核心）：loop-orchestrator 的 iteration decision（complete|block|wait|continue|retry，loop-checkpoint.js:236-258）接入「验证器投票」——complete 声明必须附结构化验证结果（verify 原语产出），验证红则强制 retry（上限）或 block，模型自报 complete 不再单独有效；跑偏判据=验证红/预算超/同指纹循环（loop_guard 已有）三者任一；用户入口=一道需求进、推进过程可见（journal 时间线）、终态 ready 附 diff 与证据等验收。契约测：模型自报 complete 但验证红 → 不得终态 ready。
@@ -64,3 +64,12 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 **P5 放权坡道护航**：首批任务 agent-rules `path-glob ** → observe`（写面不拦截、复盘面可见），实机腿 L3 断言观察行落账。
 
 **门禁**：335 契约 **8/8** · loop/contract/checkpoint/workflow 邻域 250/250 + 集成 98/98 · `test:changed` 1508 项 17 红（14=P4 配置中心门控家族既有 🟡 + p6 脏树自愈 + loop-fixtures pack 环境红 🟡 + branch-freeze 已登记）· 实机 17/17 · closeout 十三门（随包收口）。**首批题已真跑（2026-11-03，用户「继续按照你的建议推进」发令；提交 4d581110）**：worktree 副本 + checkpoint HEAD 锚点 → 7 条清偿（5×no-async-executor 包裹变换 + 2×control-regex 码点判定，含 1 条非抑制的真实 warning）→ 两步 verify → 回灌主仓 prune → 基线 311→304、lint 0 error、closeout PASS。**实机发现两处**：①直接 eslint 会应用抑制基线——静默≠违规消失，化石普查必须 --no-suppressions 对照；②prune 必须配 --no-cache（缓存跳过未变更文件→检测不到未使用条目）。**执行期事故**：未提交文件被未知机制回退一次 + 5 个悬空空壳 stash 条目（🔴 待归因，AUDIT-LOG）；经验=未提交工作落盘即提交。下一批候选=src/core 域 299 条（触及需重启面，待闭环 needs_restart 路径落地后重启任务线）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+
+## 6. Reopen 记录（2026-11-03：P7 needs_restart 路径 + lint verify kind + src/core 域收缩任务线；用户「继续按照你的建议推进」发令）
+
+- **reopen 判据**：首批题真跑发现 src/core 域收缩会触发 needs_restart（改动域越出可验证面）+ worktree 内全量测试验证撞 p6 源绑定与环境墙——闭环对「源码域任务」缺一条诚实路径：needs_restart 判定落地 + 逐任务适配的 verify kind。
+- **P7-1 verify kind 'lint'**：verify-host 增第三 kind——`--report` 取改动域 + `node node_modules/eslint/bin/eslint.js <changedFiles> --no-cache` 只对改动文件跑同源配置（worktree 内全仓 lint 有 type-aware 环境伪影 40 errors，改动域 scoped lint 无此问题）；退出码 0 → ready。
+- **P7-2 needs_restart 闭环语义**：self-optimize 判定升级为三态——`ready` 保留 / `blocked` 回滚 / **`ready+restartRequired` → `needs_restart` 保留改动不回滚**（改动经 lint 验证有效但测试面在主仓 closeout 兜底，闭环不伪造 ready）。
+- **P7-3 src/core 域 lint 收缩真跑**：16 条基线条目（no-control-regex ×11 全部码点化 / no-unused-vars ×2 契约名豁免保留 / no-var-requires 失效规则条目清除 / no-undef ×1 补 node:url import / loop-orchestrator 契约名豁免保留）经闭环跑（checkpoint → 修复 → verify lint → ready → 回灌主仓 closeout）。
+- **本切片不做**：require-await 测试域 ~150 条（下一批，机械但需逐类型注解调整）；react-hooks 域 ~100 条（真重构，独立任务线）；detect-object-injection 未覆盖面 ~2100（warning 级，工具域语义护理）。

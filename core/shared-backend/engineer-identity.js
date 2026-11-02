@@ -16,7 +16,10 @@ const FIELD_MAX = 40;
 
 function cleanField(value) {
   return typeof value === 'string'
-    ? value.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, FIELD_MAX)
+    ? [...value].filter((ch) => {
+        const c = ch.codePointAt(0);
+        return c > 0x1f && c !== 0x7f;
+      }).join('').trim().slice(0, FIELD_MAX)
     : '';
 }
 

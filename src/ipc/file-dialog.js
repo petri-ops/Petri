@@ -221,7 +221,7 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       if (typeof url !== "string" || typeof name !== "string" || !name) {
         return { ok: false, error: "invalid download payload" };
       }
-      if (/["<>|?*\u0000-\u001f]/.test(name) || name === "." || name === "..") {
+      if ([...name].some((ch) => '"<>|?*'.includes(ch) || ch.codePointAt(0) <= 0x1f) || name === "." || name === "..") {
         return { ok: false, error: "invalid file name" };
       }
       let parsed;

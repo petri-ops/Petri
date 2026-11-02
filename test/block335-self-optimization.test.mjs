@@ -164,7 +164,7 @@ test('BLOCK-335 P1 verify 宿主：门禁退出码映射（0 绿 / 1、2 红）+
   const noWs = await createVerifyHost({ getProject: () => null })({ kind: 'test-affected', projectId: 'ghost' });
   assert.equal(noWs.verdict, 'blocked');
   assert.equal(noWs.errorHead, 'workspace_required');
-  assert.deepEqual(VERIFY_KINDS, ['test-affected', 'evals-gate']);
+  assert.deepEqual(VERIFY_KINDS, ['test-affected', 'evals-gate', 'lint']);
 });
 
 test('BLOCK-335 P1 决策验证器：spec 缺失=无投票（零变化），红票如实透传', async () => {
@@ -298,4 +298,66 @@ test('BLOCK-335 P2 原语宿主缺席 → 诚实 unavailable（不伪造绿）',
   const result = await run.promise;
   assert.equal(result.returned.v, 'unavailable');
   assert.equal(result.returned.c, 'checkpoint_host_unavailable');
+});
+
+// ── P7 reopen：lint verify kind + needs_restart 闭环语义 ─────
+
+test('BLOCK-335 P7 verify kind lint：scoped eslint 只跑改动文件（绿/红两路）', async () => {
+  const fakeRepo = tempGitRepo();
+  fs.mkdirSync(path.join(fakeRepo.dir, 'scripts'), { recursive: true });
+  fs.writeFileSync(path.join(fakeRepo.dir, 'scripts', 'test-affected.mjs'), [
+    "import fs from 'node:fs';",
+    "const reportIdx = process.argv.indexOf('--report');",
+    "if (reportIdx > 0) {",
+    "  const files = JSON.parse(process.env.FAKE_CHANGED || '[]');",
+    "  fs.writeFileSync(process.argv[reportIdx + 1], JSON.stringify({ schemaVersion: 1, plan: { changedFiles: files }, tests: [], unknown: [] }));",
+    "  process.exit(0);",
+    "}",
+    "process.exit(0);",
+  ].join('\n'));
+  // 假 eslint bin：按 FAKE_LINT_EXIT 退出
+  fs.mkdirSync(path.join(fakeRepo.dir, 'node_modules', 'eslint', 'bin'), { recursive: true });
+  fs.writeFileSync(path.join(fakeRepo.dir, 'node_modules', 'eslint', 'bin', 'eslint.js'),
+    "process.exit(Number(process.env.FAKE_LINT_EXIT ?? '0'));");
+  // 改动文件落到 fixture（scoped lint 的参数来自 report.changedFiles）
+  fs.mkdirSync(path.join(fakeRepo.dir, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(fakeRepo.dir, 'src', 'demo.js'), 'x\n');
+  process.env.FAKE_CHANGED = JSON.stringify(['src/demo.js']);
+
+  const verify = createVerifyHost({ getProject: () => ({ workspace_path: fakeRepo.dir }) });
+  const ready = await verify({ kind: 'lint', projectId: 'p' });
+  assert.equal(ready.verdict, 'ready');
+  assert.deepEqual(ready.changedFiles, ['src/demo.js']);
+
+  process.env.FAKE_LINT_EXIT = '1';
+  const red = await verify({ kind: 'lint', projectId: 'p' });
+  assert.equal(red.verdict, 'blocked');
+  delete process.env.FAKE_LINT_EXIT;
+  delete process.env.FAKE_CHANGED;
+
+  // eslint bin 缺席 → blocked（不伪装绿）
+  const noBin = await createVerifyHost({ getProject: () => ({ workspace_path: fakeRepo.dir.replace('block335-repo', 'block335-nope') }) })({ kind: 'lint', projectId: 'p' });
+  assert.equal(noBin.verdict, 'blocked');
+});
+
+test('BLOCK-335 P7 needs_restart 闭环语义：ready+restartRequired → 保留不回滚', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'block335-p7-'));
+  const deps = {
+    launchSubAgent: () => ({ ok: true, agentId: 'stub' }),
+    waitAgentTerminal: async () => ({ status: 'completed', summary: 'stub' }),
+    requestCancellation: () => {},
+    verify: async () => ({ ok: true, verdict: 'ready', kind: 'test-affected', exitCode: 0, durationMs: 1, changedFiles: ['src/a.js'], testsCount: 0, restartRequired: true, restartReason: 'src/a.js' }),
+    checkpoint: async (payload) => payload.action === 'create'
+      ? { ok: true, action: 'create', created: true, ref: 'ckpt-nr' }
+      : { ok: true, action: 'rollback', ref: payload.ref },
+  };
+  const run = runnerMod.startWorkflowRun({
+    source: SELF_OPTIMIZE_SRC, args: { projectId: 'p1', taskPrompt: 'x' }, userId: 'u1', deps, root,
+  });
+  const result = await run.promise;
+  assert.equal(result.returned.outcome, 'needs_restart', JSON.stringify(result.returned).slice(0, 200));
+  // 保留不回滚：journal 无 rollback 行
+  const rows = fs.readFileSync(path.join(root, run.runId, 'journal.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  assert.ok(!rows.some((row) => row.action === 'rollback'), 'needs_restart 不得回滚');
+  assert.equal(result.returned.checkpointRef, 'ckpt-nr');
 });

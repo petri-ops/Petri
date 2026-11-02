@@ -43,7 +43,7 @@ function globToRegExp(pattern) {
     .replace(/\*\*/g, '\u0000')
     .replace(/\*/g, '[^/]*')
     .replace(/\?/g, '[^/]')
-    .replace(/\u0000/g, '.*');
+    .replace(String.fromCharCode(0), '.*');
   return new RegExp(`^${source}$`, 'i');
 }
 

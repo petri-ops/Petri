@@ -18,7 +18,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const VERIFY_KINDS = Object.freeze(['test-affected', 'evals-gate']);
+const VERIFY_KINDS = Object.freeze(['test-affected', 'evals-gate', 'lint']);
 const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_REPORT_CHARS = 256 * 1024;
 /** 改动域 v1 安全前缀：不需重启即可验证的面（plan P3）。 */
@@ -122,28 +122,54 @@ function createVerifyHost({ getProject } = {}) {
       return { ok: false, verdict: 'blocked', errorHead: 'workspace_required', kind, exitCode: null };
     }
 
-    const script = path.join(cwd, 'scripts', kind === 'test-affected' ? 'test-affected.mjs' : 'evals-gate.mjs');
+    if (kind === 'evals-gate') {
+      const script = path.join(cwd, 'scripts', 'evals-gate.mjs');
+      if (!fs.existsSync(script)) {
+        return { ok: false, verdict: 'blocked', errorHead: 'verifier_script_missing', kind, exitCode: null };
+      }
+      const startedAt = Date.now();
+      const runStep = await runChild(cwd, [script], { timeoutMs, signal: options.signal });
+      const durationMs = Date.now() - startedAt;
+      if (runStep.error) return { ok: false, verdict: 'blocked', errorHead: runStep.error, kind, exitCode: null, durationMs };
+      if (runStep.exitCode === 0) return { ok: true, verdict: 'ready', kind, exitCode: 0, durationMs };
+      return { ok: false, verdict: 'blocked', kind, exitCode: runStep.exitCode, durationMs, errorHead: String(runStep.stderr || runStep.stdout || '').slice(-400) };
+    }
+
+    const script = path.join(cwd, 'scripts', 'test-affected.mjs');
     if (!fs.existsSync(script)) {
       return { ok: false, verdict: 'blocked', errorHead: 'verifier_script_missing', kind, exitCode: null };
     }
 
     const startedAt = Date.now();
     // 两步形态（BLOCK-335 P4 实机抓真）：--report 分支只写报告**不跑门禁**，单跑它 =
-    // 假绿。先 --report 取改动域（restartRequired 判据），再 --run 真跑门禁，**退出码以
-    // --run 为准**（0 → ready；1/2 → blocked；崩溃/超时 → blocked）。
+    // 假绿。先 --report 取改动域（restartRequired 判据），再按 kind 跑真验证，**退出码以
+    // 真验证为准**（0 → ready；1/2 → blocked；崩溃/超时 → blocked）。
     let report = { changedFiles: [], testsCount: 0, unknownCount: 0 };
     let reportPath = null;
-    if (kind === 'test-affected') {
-      reportPath = path.join(os.tmpdir(), `petri-verify-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`);
-      const planStep = await runChild(cwd, [script, '--report', reportPath], { timeoutMs, signal: options.signal });
-      if (!planStep.error) {
-        report = parseReportFile(reportPath);
-      } else {
-        return { ok: false, verdict: 'blocked', errorHead: planStep.error, kind, exitCode: null };
-      }
-      if (reportPath) { try { fs.unlinkSync(reportPath); } catch { /* best-effort */ } }
+    reportPath = path.join(os.tmpdir(), `petri-verify-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`);
+    const planStep = await runChild(cwd, [script, '--report', reportPath], { timeoutMs, signal: options.signal });
+    if (planStep.error) {
+      return { ok: false, verdict: 'blocked', errorHead: planStep.error, kind, exitCode: null };
     }
-    const runStep = await runChild(cwd, [script, '--run'], { timeoutMs, signal: options.signal });
+    report = parseReportFile(reportPath);
+    if (reportPath) { try { fs.unlinkSync(reportPath); } catch { /* best-effort */ } }
+
+    // BLOCK-335 reopen P7-1 — kind 'lint'：只对改动文件跑同源 eslint 配置（worktree 内
+    // 全仓 lint 有 type-aware 环境伪影；改动域 scoped lint 无此问题）。lint 退出码 0 → ready。
+    let runStep;
+    if (kind === 'lint') {
+      const eslintBin = path.join(cwd, 'node_modules', 'eslint', 'bin', 'eslint.js');
+      if (!fs.existsSync(eslintBin)) {
+        return { ok: false, verdict: 'blocked', errorHead: 'eslint_bin_missing', kind, exitCode: null };
+      }
+      const changed = report.changedFiles.filter((f) => typeof f === 'string' && f && !f.includes('..')).slice(0, 100);
+      if (changed.length === 0) {
+        return { ok: true, verdict: 'ready', kind, exitCode: 0, durationMs: Date.now() - startedAt, changedFiles: [], testsCount: 0, restartRequired: false, restartReason: null };
+      }
+      runStep = await runChild(cwd, [eslintBin, '--no-cache', ...changed], { timeoutMs, signal: options.signal });
+    } else {
+      runStep = await runChild(cwd, [script, '--run'], { timeoutMs, signal: options.signal });
+    }
     const durationMs = Date.now() - startedAt;
     if (runStep.error) {
       return { ok: false, verdict: 'blocked', errorHead: runStep.error, kind, exitCode: null, durationMs };

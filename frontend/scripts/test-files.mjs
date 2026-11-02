@@ -16,6 +16,7 @@
  *
  * 其余参数原样透传；行为只是路径归一化，不改变 vitest 的选择与执行语义。
  */
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
@@ -28,7 +29,7 @@ const args = process.argv.slice(2).map((arg) => {
 
 const result = spawnSync('npx', ['vitest', 'run', ...args], {
   stdio: 'inherit',
-  cwd: new URL('..', import.meta.url),
+  cwd: fileURLToPath(new URL('..', import.meta.url)),
   shell: process.platform === 'win32',
   env: process.env,
 });

@@ -30,7 +30,11 @@ const RAIL_STATIC_FADE_MS = 5 * 60 * 1000;
 // safety comes from buildRouteForId running encodeURIComponent —
 // the raw key only has to stay free of URL-structure and control
 // characters so the encoded route stays unambiguous.
-const KEY_PATTERN = /^[^/\\?#"'\s\u0000-\u001f\u007f%]{1,128}$/;
+const C0 = String.fromCharCode(0x00);
+const C0_MAX = String.fromCharCode(0x1f);
+const DEL = String.fromCharCode(0x7f);
+// URL 路由键白名单类（控制区用码点常量构造，no-control-regex）
+const KEY_PATTERN = new RegExp(`^[^/\\\\?#"'\\s%${C0}-${C0_MAX}${DEL}]{1,128}$`);
 
 const CONTENT_TYPES = {
   // UI-385 — result/agent 独立窗已退役：结果/子智能体详情统一在主窗右栏

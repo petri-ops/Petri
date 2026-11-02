@@ -36,7 +36,12 @@ export default async function run(args) {
   // phase 3 — verify：独立复核，不信任 agent 自报
   const verdict = await phase('verify', () => verify({ kind: 'test-affected', projectId }));
 
-  // phase 4 — 判定：ready 留改动；红回滚到 checkpoint（显式 ref）
+  // phase 4 — 判定三态（BLOCK-335 reopen P7-2）：
+  //   ready → 留改动；ready+restartRequired → needs_restart（改动经 verify 有效但测试面
+  //   在主仓 closeout 兜底——保留不回滚也不伪造 ready）；红 → 回滚到 checkpoint（显式 ref）。
+  if (verdict && verdict.verdict === 'ready' && verdict.restartRequired === true) {
+    return { outcome: 'needs_restart', checkpointRef: (snap && snap.ref) || null, verify: verdict, agent: spawned };
+  }
   if (verdict && verdict.verdict === 'ready') {
     return { outcome: 'ready', checkpointRef: (snap && snap.ref) || null, verify: verdict, agent: spawned };
   }

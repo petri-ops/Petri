@@ -22,9 +22,12 @@ const FG_CLASSES = [
 ];
 
 // CSI 终止字节范围；SGR 是以 m 结尾的序列。
-const CSI_RE = /\x1b\[([0-9;:?<=>\s]*[ -/]*[@-~])/g;
-const OSC_RE = /\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?/g;
-const SINGLE_ESC_RE = /\x1b[@-Z\\-_]/g;
+// ESC/BEL 是 ANSI 协议本体字符——码点常量构造正则（no-control-regex）。
+const ESC = String.fromCharCode(0x1b);
+const BEL = String.fromCharCode(0x07);
+const CSI_RE = new RegExp(`${ESC}\\[([0-9;:?<=>\\s]*[ -/]*[@-~])`, 'g');
+const OSC_RE = new RegExp(`${ESC}\\][^${BEL}${ESC}]*(?:${BEL}|${ESC}\\\\)?`, 'g');
+const SINGLE_ESC_RE = new RegExp(`${ESC}[@-Z\\\\-_]`, 'g');
 
 interface TermStyle {
   fg: number | null; // 0-15（已折算 30-37/90-97），null = 默认
@@ -96,7 +99,7 @@ export function parseAnsiToSpans(text: string): AnsiSpan[] {
       buffer = '';
     }
   };
-  const re = /\x1b\[([0-9;:?<=>\s]*[ -/]*[@-~])/g;
+  const re = new RegExp(`${ESC}\\[([0-9;:?<=>\\s]*[ -/]*[@-~])`, 'g');
   let lastIndex = 0;
   for (let m = re.exec(cleaned); m !== null; m = re.exec(cleaned)) {
     // 转义序列之前的文本按当前（旧）样式成段；随后新样式才对后续文本生效

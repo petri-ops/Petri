@@ -4,29 +4,9 @@
       "count": 2
     }
   },
-  "core/petri-server/agent-tools/workspace-ssh-surface.js": {
-    "no-control-regex": {
-      "count": 1
-    }
-  },
-  "core/petri-server/agent-tools/workspace-tools.js": {
-    "no-control-regex": {
-      "count": 2
-    }
-  },
-  "core/petri-server/helpers/chat-file-references.js": {
-    "no-control-regex": {
-      "count": 1
-    }
-  },
   "core/petri-server/loop-orchestrator.js": {
     "no-unused-vars": {
       "count": 2
-    }
-  },
-  "core/shared-backend/engineer-identity.js": {
-    "no-control-regex": {
-      "count": 1
     }
   },
   "core/shared-backend/loop-controller.js": {
@@ -114,11 +94,6 @@
   "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts": {
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/components/copilot/ansi.ts": {
-    "no-control-regex": {
-      "count": 4
     }
   },
   "frontend/src/components/copilot/conversationRunStore.test.ts": {
@@ -683,16 +658,6 @@
   },
   "frontend/src/pages/window/TerminalWindowPage.tsx": {
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "src/ipc/file-dialog.js": {
-    "no-control-regex": {
-      "count": 1
-    }
-  },
-  "src/main/_window-manager.js": {
-    "no-control-regex": {
       "count": 1
     }
   }

@@ -29,7 +29,11 @@ function classifyReference(reference) {
   // purpose: the chat resolver must never surface raw absolute local paths
   // (e.g. `C:\Users\...\file.csv`), which are contained only via the
   // route-level absolute_path gate on POSIX. See classifyReference contract.
-  if (/[<>"|\\\x00-\x1F\x7F]/.test(normalized)) {
+  // 危险字符（<>"|\ + C0 区 + DEL）码点判定（no-control-regex）
+  if ([...normalized].some((ch) => {
+    const c = ch.codePointAt(0);
+    return '<>"|\\'.includes(ch) || c <= 0x1F || c === 0x7F;
+  })) {
     return null;
   }
 
