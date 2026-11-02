@@ -58,7 +58,7 @@ import { HtmlViewer } from '@/components/viewers/HtmlViewer';
 import { TextViewer } from '@/components/viewers/TextViewer';
 import { codeLanguageForFile } from '@/components/ui/CodeHighlight';
 import type { EditorApi } from '@/components/editor/CodeMirror/types';
-import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
+import { SpreadsheetViewer } from '@/components/viewers/SpreadsheetViewer';
 import { Model3DResultViewer } from './Model3DResultViewer';
 import { VideoResultViewer } from './VideoResultViewer';
 // BLOCK-219 Q6 — 批注接线（身份推导/两个宿主/不可批注提示）外置，见同目录 resultAnnotation.tsx
@@ -834,7 +834,7 @@ export function ResultArtifactShell({
     if (viewerAdapter === 'spreadsheet' && selectedArtifactUrl) {
       return (
         <>
-          <SpreadsheetResultViewer
+          <SpreadsheetViewer
             url={selectedArtifactUrl}
             name={selectedArtifactLabel || selectedArtifact.name}
           />

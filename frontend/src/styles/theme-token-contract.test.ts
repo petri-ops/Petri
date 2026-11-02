@@ -445,7 +445,7 @@ describe('theme token contract', () => {
       'components/RouteErrorBoundary.module.css': 2,
       'components/workspace-panels/FloatCardResizer.module.css': 2, // 拖拽把手态：UI-591 跟手渐晕（同色 hover 线按用户裁决退场，常驻线本就中性）
       'components/viewers/MarkdownViewer.module.css': 2, // BLOCK-334 P2 — 自 workspace-panels/MarkdownResultViewer.module.css 平移（accent 用法不变）
-      'components/workspace-panels/SpreadsheetResultViewer.module.css': 2,
+      'components/viewers/SpreadsheetViewer.module.css': 2, // BLOCK-334 P2 Slice D — 自 workspace-panels/SpreadsheetResultViewer.module.css 平移
       'components/copilot/LlmTranscriptViewer.css': 1,
       'components/copilot/renderers/TableRenderer.module.css': 1,
       'components/copilot/ResultCard.module.css': 1,

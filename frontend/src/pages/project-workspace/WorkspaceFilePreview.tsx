@@ -18,6 +18,7 @@ import { resolveResultViewer } from '@/components/result-studio/viewerRegistry';
 import { MarkdownViewer } from '@/components/viewers/MarkdownViewer';
 import { TableViewer } from '@/components/viewers/TableViewer';
 import { HtmlViewer } from '@/components/viewers/HtmlViewer';
+import { SpreadsheetViewer } from '@/components/viewers/SpreadsheetViewer';
 import { meshFormatForPath } from '@/lib/meshAssets';
 import { getBridge } from '@/lib/desktopBridge';
 import {
@@ -112,7 +113,10 @@ export function WorkspaceFilePreview({
   const isPdf = viewerAdapter === 'pdf';
   const isHtml = viewerAdapter === 'report';
   const isJson = viewerAdapter === 'json' || isSceneSpec;
-  const officeKind = detectOfficeKind(file?.name);
+  // Slice D — xlsx/xlsm 走两宿主唯一的 SpreadsheetViewer（多工作表 + 有界截断标注）；ods/numbers 仍走 office 库
+  const isSpreadsheet = viewerAdapter === 'spreadsheet';
+  const officeKind = isSpreadsheet ? null : detectOfficeKind(file?.name);
+  const [spreadsheetReady, setSpreadsheetReady] = useState(false);
   const codeLanguage = codeLanguageForFile(file?.name);
   const previewUrl = useMemo(() => {
     if (!file?.url) return '';
@@ -147,7 +151,7 @@ export function WorkspaceFilePreview({
       setStatus('idle');
       return () => { cancelled = true; };
     }
-    if (isImage || isPdf || isHtml) {
+    if (isImage || isPdf || isHtml || isSpreadsheet) {
       setStatus('ready');
       return () => { cancelled = true; };
     }
@@ -204,11 +208,12 @@ export function WorkspaceFilePreview({
         if (!cancelled) setStatus('error');
       });
     return () => { cancelled = true; };
-  }, [file, isCsv, isHtml, isImage, isJson, isPdf, isText, officeKind, previewUrl]);
+  }, [file, isCsv, isHtml, isImage, isJson, isMarkdown, isPdf, isSpreadsheet, isText, officeKind, previewUrl]);
 
   // BLOCK-20 — 文件切换时重置保存基准线和 Markdown 视图
   useEffect(() => {
     setTextSaved('');
+    setSpreadsheetReady(false);
     setMdView('preview');
     savedMtimeRef.current = null;
     setMdTocOpen(true);
@@ -316,8 +321,9 @@ export function WorkspaceFilePreview({
   // BLOCK-254 P7 — Office 文本面（docx/pptx/odt/odp/xlsx）也能批注：锚点是段落/行序号，
   // 不是版面坐标，所以和文本族共用同一个 workspace-file scope。
   const officeAnnotatable = officeStatus === 'ready' && Boolean(officePreview && !officePreview.fallback);
+  const spreadsheetAnnotatable = isSpreadsheet && spreadsheetReady;
   const textAnnotationScope: AnnotationScope | null =
-    fallbackKind === 'text' || fallbackKind === 'json' || fallbackKind === 'markdown' || officeAnnotatable
+    fallbackKind === 'text' || fallbackKind === 'json' || fallbackKind === 'markdown' || officeAnnotatable || spreadsheetAnnotatable
       ? annotationScope
       : null;
   const textAnnotation = useAnnotationSession({
@@ -489,6 +495,31 @@ export function WorkspaceFilePreview({
             sandbox=""
           />
         )}
+        {status === 'ready' && isSpreadsheet && (
+          /* BLOCK-334 P2 Slice D — xlsx/xlsm：与结果壳同一 SpreadsheetViewer（多工作表切换 + 有界截断标注），
+             行级批注锚在行号（BLOCK-254 P7 语义不变） */
+          <>
+            <SpreadsheetViewer
+              url={previewUrl}
+              name={file.name}
+              authToken={getToken() || undefined}
+              onLoaded={() => setSpreadsheetReady(true)}
+              onAnnotateRow={(rowIndex, quote) => textAnnotation.beginAnchor({
+                kind: 'text-range',
+                unit: 'row',
+                startLine: rowIndex + 1,
+                endLine: rowIndex + 1,
+                startColumn: null,
+                endColumn: null,
+                quote,
+                language: null,
+              })}
+            />
+            <p className={styles.resultAnnotationUnavailable} data-testid="annotation-unavailable-hint">
+              表格批注锚在行号上：点行尾「批注」即可（不改原始文件）
+            </p>
+          </>
+        )}
         {status === 'ready' && fallbackKind === 'csv' && previewData && previewData.length > 0 && (
           /* BLOCK-334 P2 — TableViewer（clipped：40 行截断 + 外部工具提示） */
           <TableViewer
@@ -550,7 +581,7 @@ export function WorkspaceFilePreview({
             editorRef={editorApiRef}
           />
         )}
-        {((status === 'ready' && (fallbackKind === 'text' || fallbackKind === 'json' || isMarkdown)) || officeAnnotatable) && (
+        {((status === 'ready' && (fallbackKind === 'text' || fallbackKind === 'json' || isMarkdown)) || officeAnnotatable || spreadsheetAnnotatable) && (
           /* BLOCK-254 P5 — 文本族面的批注条：选区产生待填锚点后才出现输入框，
              无批注/无待填时整条不渲染（UI-624：不再常驻空输入与禁用按钮）。
              新增批注由选区动作条的「批注」触发。 */

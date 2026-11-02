@@ -1,7 +1,7 @@
 import React from 'react';
-import { cleanup, render, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SpreadsheetResultViewer } from './SpreadsheetResultViewer';
+import { SpreadsheetViewer } from './SpreadsheetViewer';
 
 /**
  * BLOCK-142（成果面切片 E·renderer 补课）SpreadsheetResultViewer 契约测试。
@@ -55,7 +55,7 @@ afterEach(() => {
   sheetsHolder.sheets = [];
 });
 
-describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
+describe('SpreadsheetViewer（BLOCK-142 切片 E）', () => {
   it('exceljs 解析后渲染首工作表网格，并列出多工作表名', async () => {
     sheetsHolder.sheets = [
       makeSheet({ name: 'DEG', grid: [['基因', 'log2FC'], ['TP53', '2.4']] }),
@@ -63,7 +63,7 @@ describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
     ];
     vi.stubGlobal('fetch', mockFetchBuffer());
     const { container, getByRole, getByTestId } = render(
-      <SpreadsheetResultViewer url="http://mock/results.xlsx" name="results.xlsx" />,
+      <SpreadsheetViewer url="http://mock/results.xlsx" name="results.xlsx" />,
     );
     await waitFor(() => expect(getByTestId('spreadsheet-viewer')).toBeTruthy());
     // 首工作表网格
@@ -86,7 +86,7 @@ describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
     ];
     vi.stubGlobal('fetch', mockFetchBuffer());
     const { container, getByTestId } = render(
-      <SpreadsheetResultViewer url="http://mock/big.xlsx" name="big.xlsx" />,
+      <SpreadsheetViewer url="http://mock/big.xlsx" name="big.xlsx" />,
     );
     await waitFor(() => expect(getByTestId('spreadsheet-viewer')).toBeTruthy());
     // 有界：数据行 ≤200（表头行除外）
@@ -104,7 +104,7 @@ describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
     ];
     vi.stubGlobal('fetch', mockFetchBuffer());
     const { container, getByTestId } = render(
-      <SpreadsheetResultViewer url="http://mock/small.xlsx" name="small.xlsx" />,
+      <SpreadsheetViewer url="http://mock/small.xlsx" name="small.xlsx" />,
     );
     await waitFor(() => expect(getByTestId('spreadsheet-viewer')).toBeTruthy());
     // 单工作表不渲染 sheet 切换列；无截断标注
@@ -119,7 +119,7 @@ describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
     ];
     vi.stubGlobal('fetch', mockFetchBuffer());
     const { container, getByRole } = render(
-      <SpreadsheetResultViewer url="http://mock/multi.xlsx" name="multi.xlsx" />,
+      <SpreadsheetViewer url="http://mock/multi.xlsx" name="multi.xlsx" />,
     );
     await waitFor(() => expect(container.textContent).toContain('TP53'));
     getByRole('tab', { name: 'Summary' }).dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -130,9 +130,35 @@ describe('SpreadsheetResultViewer（BLOCK-142 切片 E）', () => {
   it('fetch 失败如实显示错误（role=alert）', async () => {
     vi.stubGlobal('fetch', mockFetchBuffer(false));
     const { getByTestId } = render(
-      <SpreadsheetResultViewer url="http://mock/gone.xlsx" name="gone.xlsx" />,
+      <SpreadsheetViewer url="http://mock/gone.xlsx" name="gone.xlsx" />,
     );
     await waitFor(() => expect(getByTestId('spreadsheet-error')).toBeTruthy());
     expect(getByTestId('spreadsheet-error').getAttribute('role')).toBe('alert');
+  });
+
+  it('onAnnotateRow（文件宿主）：每数据行尾出现「批注」按钮，点击回传 0 起行号与行文本；无回调不渲染死按钮（BLOCK-334 P2 Slice D）', async () => {
+    sheetsHolder.sheets = [makeSheet({ name: 'S1', grid: [['基因', 'log2FC'], ['TP53', '2.4'], ['BRCA1', '-1.1']] })];
+    vi.stubGlobal('fetch', mockFetchBuffer());
+    const onAnnotateRow = vi.fn();
+    const onLoaded = vi.fn();
+    const { findAllByTestId, queryAllByTestId, rerender } = render(
+      <SpreadsheetViewer url="http://mock/a.xlsx" name="a.xlsx" onAnnotateRow={onAnnotateRow} onLoaded={onLoaded} />,
+    );
+    const buttons = await findAllByTestId('spreadsheet-annotate-row');
+    expect(buttons).toHaveLength(2);
+    fireEvent.click(buttons[1]);
+    expect(onAnnotateRow).toHaveBeenCalledWith(1, 'BRCA1 | -1.1');
+    expect(onLoaded).toHaveBeenCalledWith({ sheets: 1, rows: 3 });
+    rerender(<SpreadsheetViewer url="http://mock/a.xlsx" name="a.xlsx" />);
+    expect(queryAllByTestId('spreadsheet-annotate-row')).toHaveLength(0);
+  });
+
+  it('authToken（文件宿主受保护 URL）：以 Bearer 头取数', async () => {
+    sheetsHolder.sheets = [makeSheet({ name: 'S1', grid: [['a'], ['1']] })];
+    const fetchMock = mockFetchBuffer();
+    vi.stubGlobal('fetch', fetchMock);
+    const { findByTestId } = render(<SpreadsheetViewer url="http://mock/p.xlsx" name="p.xlsx" authToken="tok" />);
+    await findByTestId('spreadsheet-viewer');
+    expect(fetchMock.mock.calls[0][1]).toEqual({ headers: { Authorization: 'Bearer tok' } });
   });
 });

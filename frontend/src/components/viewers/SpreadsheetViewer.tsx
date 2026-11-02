@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import styles from './SpreadsheetResultViewer.module.css';
+import React, { useEffect, useRef, useState } from 'react';
+import styles from './SpreadsheetViewer.module.css';
 
 /**
  * BLOCK-142（成果面切片 E·renderer 补课）— xlsx/xlsm 产物 viewer（只读预览）。
@@ -45,7 +45,26 @@ function extractBoundedSheet(sheet: ExcelWorksheetLike): SheetGrid {
   return { name: sheet.name, rows, totalRows: sheet.rowCount, totalCols: sheet.columnCount };
 }
 
-export function SpreadsheetResultViewer({ url, name }: { url: string; name: string }): React.ReactElement {
+// BLOCK-334 P2 Slice D — xlsx/xlsm 两宿主唯一 viewer（自 workspace-panels/SpreadsheetResultViewer 平移并泛化）。
+// 反向统一的理由：office-file-preview 的 xlsx 路径只解析首工作表且无截断元数据，exceljs 引擎
+// 有多工作表切换 + 行/列有界并如实标注——把壳改过去是能力减法，故文件宿主改用本 viewer（获得多表），
+// exceljs 依赖保留（原「可删依赖」假设被实证推翻）。行级批注经 onAnnotateRow 可选接入（无回调不渲染死按钮）。
+export function SpreadsheetViewer({
+  url,
+  name,
+  authToken,
+  onAnnotateRow,
+  onLoaded,
+}: {
+  url: string;
+  name: string;
+  /** 文件宿主的受保护工作区 URL 需 Bearer；结果壳产物 URL 无条件放行可不传。 */
+  authToken?: string | null;
+  /** 表格行批注（文件宿主）：rowIndex 从 0 起（数据行，不含表头），quote=该行拼接文本。 */
+  onAnnotateRow?: (rowIndex: number, quote: string) => void;
+  /** 解析成功回调（宿主据此启用批注条等就绪态）。 */
+  onLoaded?: (info: { sheets: number; rows: number }) => void;
+}): React.ReactElement {
   // state 携带其取数来源的 url：切换产物时由渲染期派生「陈旧 → 加载中」，
   // effect 内不做同步 setState（react-hooks set-state-in-effect 禁级联渲染），
   // 语义不变：url 变化即回加载态并重新取数。
@@ -56,13 +75,16 @@ export function SpreadsheetResultViewer({ url, name }: { url: string; name: stri
     error: string | null;
   }>(() => ({ url, sheets: null, activeSheet: 0, error: null }));
   const current = loaded.url === url ? loaded : null;
+  // 回调经 ref 转发（宿主每轮渲染换函数不触发重取数）
+  const onLoadedRef = useRef(onLoaded);
+  useEffect(() => { onLoadedRef.current = onLoaded; });
 
   useEffect(() => {
     let cancelled = false;
     if (!url) return undefined;
     void (async () => {
       try {
-        const resp = await fetch(url);
+        const resp = await fetch(url, authToken ? { headers: { Authorization: `Bearer ${authToken}` } } : undefined);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const buffer = await resp.arrayBuffer();
         const ExcelJS = await import('exceljs');
@@ -72,6 +94,7 @@ export function SpreadsheetResultViewer({ url, name }: { url: string; name: stri
         const extracted = workbook.worksheets.map((sheet) => extractBoundedSheet(sheet));
         if (extracted.length === 0) throw new Error('工作簿没有工作表');
         setLoaded({ url, sheets: extracted, activeSheet: 0, error: null });
+        onLoadedRef.current?.({ sheets: extracted.length, rows: extracted[0].rows.length });
       } catch (e: unknown) {
         if (!cancelled) setLoaded({ url, sheets: null, activeSheet: 0, error: (e as Error).message || '读取 Excel 文件失败' });
       }
@@ -126,6 +149,7 @@ export function SpreadsheetResultViewer({ url, name }: { url: string; name: stri
               {header.map((cell, idx) => (
                 <th key={`h-${idx}`}>{cell || `列 ${idx + 1}`}</th>
               ))}
+              {onAnnotateRow && <th key="h-annotate" aria-label="批注" />}
             </tr>
           </thead>
           <tbody>
@@ -134,6 +158,19 @@ export function SpreadsheetResultViewer({ url, name }: { url: string; name: stri
                 {header.map((_, cellIndex) => (
                   <td key={`c-${cellIndex}`}>{row[cellIndex] || '—'}</td>
                 ))}
+                {onAnnotateRow && (
+                  <td key="c-annotate">
+                    <button
+                      type="button"
+                      className="petri-btn petri-btn--ghost petri-btn--sm"
+                      title={`为第 ${rowIndex + 1} 行添加批注`}
+                      data-testid="spreadsheet-annotate-row"
+                      onClick={() => onAnnotateRow(rowIndex, row.filter(Boolean).join(' | '))}
+                    >
+                      批注
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

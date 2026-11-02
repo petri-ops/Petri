@@ -141,6 +141,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block322-ruling01-cad-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block323-observe-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block333-ui639a-constraint-editor-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-spreadsheet-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-text-selection-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-viewers-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-result-host-live.cjs",

@@ -1,6 +1,6 @@
 ---
 capability: block-334-result-host-unification
-status: active
+status: completed
 goal: 结果查看统一到右栏宿主（与文件预览 / 3D 工作面同栏同形态），中央栏永远是会话；退役中央 result/code/compare/history 四态接管与右栏「结果」Inspector 残骸；随后把两宿主各自一套的文件类型渲染合并为 viewerRegistry 单一分派。
 acceptance:
   - P1 宿主迁移：聊天产物卡 / 任务列表 / `?job=` 深链打开结果 → 右栏「结果」tab 承载完整 ResultArtifactShell（四态为宿主局部子状态），中央仍是会话；结果 tab 激活且有 job 时右栏切 `resultRightWidth`（默认 720，可拖、独立持久化；不触碰左栏），离开恢复；`ResultStudioInspector` 退役；`WorkspaceMode` 收敛为 `'chat' | 'scheduled'`，旧 `/project/:id/result|code|compare|history` 深链 fail-closed 落 chat 且 `?job=` 仍打开右栏结果。证据=tsc 0 + 定向 vitest 全绿 + `acceptance/block-334/result-host-live.json`（实机断言 allPass）+ UI-657 verified。
@@ -10,7 +10,7 @@ reopen: 实机走查若证明 720–900px 右栏对大报告 / 宽表 / 并排�
 
 # BLOCK-334 — 结果宿主统一（右栏承载 · 中央四态退役 · 渲染层合并）
 
-状态：**active（2026-11-02 立项；P1 宿主迁移当日收口 COMPLETED，UI-657 verified；P2 渲染层统一 2026-11-02 加映启动，用户「继续之前的工作」）**
+状态：**completed（2026-11-02 当日立项当日收口：P1 宿主迁移 + P2 渲染层统一四片 A/C/B/D 全部完成；UI-657/658 verified）**
 truthDomain：`block-334-result-host-unification`
 canonical 入口：本文件
 关联：`docs/ui-productization-audit.md` UI-657（本包 UI 行）；历史裁决 UI-106（G0-RS-P1 中央大画布）/ UI-116 / UI-181 / UI-653（本包推翻或吸收，行不改写，关系在 UI-657 注明）
@@ -180,7 +180,7 @@ P2 切片顺序（每片独立可验、同包串行）：
 - **Slice A（本会话）**：`components/viewers/{MarkdownViewer,TableViewer,HtmlViewer}` 三类单 viewer；`WorkspaceFilePreview` 的类型分派改走 `resolveResultViewer({ kind: 'file' })`（office docx/pptx/odt/odp 仍由 `detectOfficeKind` 先行，不在注册表域内）；壳的 markdown / table / report 三分支改用共享 viewer；`MarkdownResultViewer` 退役。**CSS 策略**：viewer 只统一结构与逻辑，外观类名由宿主注入（两宿主零视觉变化），样式归并留后续切片——目标是「一种类型一个组件」，不是一次性把两套视觉也合掉。
 - **Slice C（2026-11-02 完成）**：勘察实证图像引擎早在 BLOCK-219 Q6 就已统一——`AnnotatableImagePane` 同一组件服务三消费方（结果壳/文件预览/草稿面板），scope 即批注身份参数。实做=去 `ResultImagePreview`→`AnnotatedResultImage` 纯透传一层（resultAnnotation 182→156 行）；**不新建 `viewers/ImageViewer`**（purity=更少结构，不是更新的名字）。未覆盖项撤销。
 - **Slice B（2026-11-02 完成）**：验证腿 `block334-p2-text-selection-live` **7/7**（真 Chromium：CM 内 DOM 选区非折叠/容器内/文本可取、CM 接管焦点、宿主动作条弹出）→ 可合并。实施：`viewers/TextViewer`（两宿主唯一文本引擎=CodeMirror；壳只读、文件可写）；壳 `<pre>` 退役；`useArtifactTextSelection` 优先 EditorApi 精确选区 + DOM 兜底 + keyup。单测 6/6、定向 61/61、实机复跑 7/7。壳侧真实 text 产物实机留待首个含 json/text 产物的 tool job。
-- **Slice D**：spreadsheet——`exceljs` 仅 `SpreadsheetResultViewer` 一处消费，壳改用 `OfficePreviewPane` 后可做**依赖减法**（走 DEPENDENCY-CHANGE-CHECKLIST 的删除登记）。
+- **Slice D（2026-11-02 完成，定义反转）**：原「壳改 `OfficePreviewPane`、删 exceljs」被勘察证伪——office 库 xlsx 只解析首表且无截断元数据，exceljs 引擎有多表切换 + 有界截断标注（BLOCK-142 契约），改过去是能力减法。实施=`SpreadsheetResultViewer` 平移为 `viewers/SpreadsheetViewer`（+行级批注/就绪回调/鉴权），文件宿主 xlsx/xlsm 改走它（新获多表），ods/numbers 留 office 库；**依赖不减**（DEPENDENCY 清单：零增零减）。单测 8/8、实机 `block334-p2-spreadsheet-live` 7/7。
 
 UI-658 的台账段在本切片实机腿跑绿后一次写入 verified（BLOCK-332 证据债棘轮 live-missing ≤5 不允许「代码绿、实机待跑」的 in_progress 段先登记——P1 已实证该规则）。
 
@@ -194,5 +194,9 @@ UI-658 的台账段在本切片实机腿跑绿后一次写入 verified（BLOCK-3
 | 实机 `acceptance/block-334/block334-p2-viewers-live-darwin.json` | **9/9 allPass** + png（临时样本跑完即删） |
 
 顺手清理：`previewFileUtils.isImageFile` 与 `helpers.{isCsvFile,isPdfFile,isHtmlFile,isJsonFile}` 五个失去消费方的判定导出删除（注册表成为唯一来源的直接后果）。未覆盖：壳侧 md/csv/html 实机（本机无此类产物的 tool job），留 Slice C/D 同批补腿。
+
+## 10. 整包收口（2026-11-02）
+
+P1 + P2（A/C/B/D）全部完成。证据总账：tsc 0 / `quality:lint` 0 error / `gate:code-size` PASS / `quality:arch` PASS / `gate:arch-cycles` 13 环 / `quality:knip:check` PASS（四条 dev-verify flow 按动态入口登记）/ docs:check·ui:audit:check PASS / 台账状态契约 4/4；定向 vitest 17 文件 84/84（theme 契约另 4 条红=block-322 存量，AUDIT-LOG 🔴 在案）；实机四条 flow：`block334-result-host-live` 11/11、`block334-p2-viewers-live` 9/9、`block334-p2-text-selection-live` 7/7、`block334-p2-spreadsheet-live` 7/7（均落 `acceptance/block-334/*-darwin.json` + png）。两处裁决修正入册：D2 不触碰左栏（UI-341 加映二）、Slice D 定义反转（能力保全优先于依赖减法）。事故：并行提交 `22fe18b0` 卷入半套 WIP 致 HEAD 不自洽，`b5a72c45` 复位；教训落 BLOCK-337 并行协议（显式路径 add，禁 -A）。未覆盖项（壳侧 text/xlsx 产物实机）均因本机无此类 tool job，留待首个产出此类产物的任务顺带复核。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

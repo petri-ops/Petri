@@ -3819,28 +3819,37 @@
     },
     {
       "id": "block142-renderers",
-      "note": "BLOCK-142 成果面切片 E·renderer 补课（md/xlsx/pdf）：viewerRegistry 三条扩展名规则（.pdf→pdf 包装 WorkspacePdfPreview、.xlsx/.xlsm→exceljs 动态 import 有界网格、.md→react-markdown+remark-gfm 无 rehype-raw 防 XSS）+ 三个新 viewer（MarkdownResultViewer/PdfResultViewer/SpreadsheetResultViewer，样式只走 --petri-* token）+ Shell 挂载面接线。改任一登记文件即跑四条新契约测试（注册表 block142 + 三 viewer 组件）；前端面经 frontendRelated + frontend/src 自动路由进 vitest（改动源文件走 test:related 反查，ArtifactPinPane 并行受 block140 规则覆盖）。",
+      "note": "BLOCK-142 成果面切片 E·renderer 补课（md/xlsx/pdf）：viewerRegistry 三条扩展名规则（.pdf→pdf 包装 WorkspacePdfPreview、.xlsx/.xlsm→exceljs 动态 import 有界网格、.md→react-markdown+remark-gfm 无 rehype-raw 防 XSS）+ 三个新 viewer（MarkdownResultViewer/PdfResultViewer/SpreadsheetResultViewer，样式只走 --petri-* token）+ Shell 挂载面接线。**BLOCK-334 P2**：Markdown/Spreadsheet 平移为 components/viewers/{MarkdownViewer,SpreadsheetViewer}（两宿主唯一），同目录新增 Table/Html/TextViewer 一并登记。改任一登记文件即跑四条新契约测试（注册表 block142 + 三 viewer 组件）；前端面经 frontendRelated + frontend/src 自动路由进 vitest（改动源文件走 test:related 反查，ArtifactPinPane 并行受 block140 规则覆盖）。",
       "patterns": [
         "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.ts",
         "frontend/src/components/workspace-panels/ArtifactPinPane.tsx",
-        "frontend/src/components/workspace-panels/MarkdownResultViewer.module.css",
-        "frontend/src/components/workspace-panels/MarkdownResultViewer.test.tsx",
-        "frontend/src/components/workspace-panels/MarkdownResultViewer.tsx",
+        "frontend/src/components/viewers/MarkdownViewer.module.css",
+        "frontend/src/components/viewers/MarkdownViewer.test.tsx",
+        "frontend/src/components/viewers/MarkdownViewer.tsx",
         "frontend/src/components/workspace-panels/PdfResultViewer.test.tsx",
         "frontend/src/components/workspace-panels/PdfResultViewer.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
-        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.module.css",
-        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.test.tsx",
-        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.tsx",
+        "frontend/src/components/viewers/SpreadsheetViewer.module.css",
+        "frontend/src/components/viewers/SpreadsheetViewer.test.tsx",
+        "frontend/src/components/viewers/SpreadsheetViewer.tsx",
+        "frontend/src/components/viewers/TableViewer.tsx",
+        "frontend/src/components/viewers/TableViewer.test.tsx",
+        "frontend/src/components/viewers/HtmlViewer.tsx",
+        "frontend/src/components/viewers/HtmlViewer.test.tsx",
+        "frontend/src/components/viewers/TextViewer.tsx",
+        "frontend/src/components/viewers/TextViewer.test.tsx",
         "frontend/src/components/result-studio/resultSurface.test.ts"
       ],
       "tests": [
         "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
-        "frontend/src/components/workspace-panels/MarkdownResultViewer.test.tsx",
+        "frontend/src/components/viewers/MarkdownViewer.test.tsx",
         "frontend/src/components/workspace-panels/PdfResultViewer.test.tsx",
-        "frontend/src/components/workspace-panels/SpreadsheetResultViewer.test.tsx"
+        "frontend/src/components/viewers/SpreadsheetViewer.test.tsx",
+        "frontend/src/components/viewers/TableViewer.test.tsx",
+        "frontend/src/components/viewers/HtmlViewer.test.tsx",
+        "frontend/src/components/viewers/TextViewer.test.tsx"
       ],
       "frontendRelated": true,
       "classifiesScripts": false
@@ -6986,6 +6995,38 @@
         "test/block333-constraint-id-addressable.test.mjs",
         "test/block322-p3-constraints.test.mjs"
       ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block334-result-host-unification",
+      "note": "BLOCK-334 结果宿主统一：P1 结果迁右栏宿主（ResultsSurface/useResultSurfaceHost、中央四态退役、openResultInRail/syncResultQuery）+ P2 渲染层统一（viewerRegistry 唯一分派、viewers 四类单 viewer、useArtifactTextSelection 优先 EditorApi）。四条 dev-verify flow 与 acceptance/block-334 证据同归本规则；改任一登记源文件即跑宿主/路由/标题/选区/文件预览 xlsx 路由契约测试（前端面经 frontendRelated 进 vitest）。",
+      "patterns": [
+        "frontend/src/components/work-surface/ResultsSurface.tsx",
+        "frontend/src/components/work-surface/ResultsSurface.module.css",
+        "frontend/src/components/work-surface/useResultSurfaceHost.ts",
+        "frontend/src/components/workspace-panels/RightPanel.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactTextSelection.ts",
+        "frontend/src/components/workspace-panels/ResultArtifactShell/ResultTechnicalDetails.tsx",
+        "frontend/src/hooks/useWorkspaceRouting.ts",
+        "frontend/src/lib/result-title-bar.ts",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block334-result-host-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-viewers-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-text-selection-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-spreadsheet-live.cjs",
+        "acceptance/block-334/**"
+      ],
+      "tests": [
+        "frontend/src/components/work-surface/ResultsSurface.test.tsx",
+        "frontend/src/components/workspace-panels/RightPanel.test.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.test.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell/useArtifactTextSelection.test.tsx",
+        "frontend/src/hooks/useWorkspaceRouting.test.ts",
+        "frontend/src/lib/result-title-bar.test.ts",
+        "frontend/src/pages/project-workspace/WorkspaceFilePreview.spreadsheet.test.tsx"
+      ],
+      "frontendRelated": true,
       "classifiesScripts": false
     }
   ]
