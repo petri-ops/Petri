@@ -9,7 +9,7 @@ const fakePage = {
 };
 const fakeDoc = {
   numPages: 2,
-  getPage: vi.fn(async () => fakePage),
+  getPage: vi.fn(() => fakePage),
   destroy: vi.fn(async () => {}),
 };
 

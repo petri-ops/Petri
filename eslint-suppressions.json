@@ -39,11 +39,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/SimpleChat.extraRenderers.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
-    }
-  },
   "frontend/src/components/copilot/SimpleChat.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 3
@@ -96,29 +91,14 @@
       "count": 1
     }
   },
-  "frontend/src/components/copilot/conversationRunStore.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 3
-    }
-  },
   "frontend/src/components/copilot/conversationRunStore/subAgentTasks.ts": {
     "react-hooks/set-state-in-effect": {
       "count": 1
     }
   },
-  "frontend/src/components/copilot/copilotClient.streamReconnect.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 5
-    }
-  },
   "frontend/src/components/copilot/copilotMarkdown.test.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 3
-    }
-  },
-  "frontend/src/components/copilot/extraRenderers.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
     }
   },
   "frontend/src/components/copilot/integration/__tests__/ChatCardLinkBridge.test.tsx": {
@@ -144,11 +124,6 @@
   "frontend/src/components/desktop/AppRailContext.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 2
-    }
-  },
-  "frontend/src/components/desktop/DesktopSettingsPanel/UsageResourcePanel.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 4
     }
   },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/DataManagement.tsx": {
@@ -202,9 +177,6 @@
   "frontend/src/components/desktop/PluginStorePanel.test.tsx": {
     "@typescript-eslint/no-unsafe-return": {
       "count": 2
-    },
-    "@typescript-eslint/require-await": {
-      "count": 3
     }
   },
   "frontend/src/components/desktop/PluginStorePanel.tsx": {
@@ -338,9 +310,6 @@
   "frontend/src/components/result-studio/ScientificInteractionViewer.test.tsx": {
     "@typescript-eslint/no-unsafe-return": {
       "count": 1
-    },
-    "@typescript-eslint/require-await": {
-      "count": 1
     }
   },
   "frontend/src/components/result-studio/ScientificInteractionViewer.tsx": {
@@ -353,11 +322,6 @@
   },
   "frontend/src/components/result-studio/copilotAskDelivery.test.tsx": {
     "@typescript-eslint/no-unsafe-return": {
-      "count": 1
-    }
-  },
-  "frontend/src/components/settings/ExperimentalFeaturesSection.test.tsx": {
-    "@typescript-eslint/require-await": {
       "count": 1
     }
   },
@@ -422,11 +386,6 @@
       "count": 2
     }
   },
-  "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 2
-    }
-  },
   "frontend/src/hooks/useAiSettings.test.ts": {
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 2
@@ -439,7 +398,7 @@
   },
   "frontend/src/hooks/useAutoUpdate.test.ts": {
     "@typescript-eslint/require-await": {
-      "count": 4
+      "count": 1
     }
   },
   "frontend/src/hooks/useBranchStore.ts": {
@@ -449,11 +408,6 @@
   },
   "frontend/src/hooks/useConversationJobs.ts": {
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/hooks/useConversations.test.ts": {
-    "@typescript-eslint/require-await": {
       "count": 1
     }
   },
@@ -487,11 +441,6 @@
       "count": 1
     }
   },
-  "frontend/src/hooks/useSkillStore.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 2
-    }
-  },
   "frontend/src/hooks/useSkillStore.ts": {
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -510,33 +459,8 @@
       "count": 1
     }
   },
-  "frontend/src/lib/branchBridge.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 8
-    }
-  },
-  "frontend/src/lib/project-store.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 2
-    }
-  },
-  "frontend/src/lib/projectionDataBridges.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 2
-    }
-  },
   "frontend/src/lib/tool-catalog.ts": {
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/pages/global-pages.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
-    }
-  },
-  "frontend/src/pages/home.test.tsx": {
-    "@typescript-eslint/require-await": {
       "count": 1
     }
   },
@@ -571,11 +495,6 @@
       "count": 1
     }
   },
-  "frontend/src/pages/project-workspace/RightFileTree.refresh.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
-    }
-  },
   "frontend/src/pages/project-workspace/RightFileTree.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 3
@@ -586,23 +505,8 @@
       "count": 1
     }
   },
-  "frontend/src/pages/project-workspace/WorkspaceFilePreview.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
-    }
-  },
   "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx": {
     "react-hooks/set-state-in-effect": {
-      "count": 2
-    }
-  },
-  "frontend/src/pages/project-workspace/WorkspacePdfPreview.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
-    }
-  },
-  "frontend/src/pages/project-workspace/fileOps.test.tsx": {
-    "@typescript-eslint/require-await": {
       "count": 2
     }
   },
@@ -626,11 +530,6 @@
   },
   "frontend/src/pages/welcome.tsx": {
     "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
-  "frontend/src/pages/window/CommandCenterJobsWall.test.tsx": {
-    "@typescript-eslint/require-await": {
       "count": 1
     }
   },

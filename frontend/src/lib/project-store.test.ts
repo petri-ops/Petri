@@ -13,13 +13,13 @@ afterEach(() => {
 
 function response(jobs: Array<Record<string, unknown>>) {
   return {
-    json: async () => ({ status: 'ok', jobs }),
+    json: () => Promise.resolve({ status: 'ok', jobs }),
   } as Response;
 }
 
 function historyResponse(jobs: Array<Record<string, unknown>>) {
   return {
-    json: async () => ({ ok: true, jobs }),
+    json: () => Promise.resolve({ ok: true, jobs }),
   } as Response;
 }
 

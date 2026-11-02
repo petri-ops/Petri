@@ -125,10 +125,10 @@ describe('useConversations', () => {
 
 describe('useOtherConversations', () => {
   it('lazily loads each expanded project exactly once', async () => {
-    mockedList.mockImplementation(async (status, pid) => {
-      if (pid === 'p-a') return [makeConv('a-1', 'a', 'p-a')];
-      if (pid === 'p-b') return [makeConv('b-1', 'b', 'p-b')];
-      return [];
+    mockedList.mockImplementation((status, pid) => {
+      if (pid === 'p-a') return Promise.resolve([makeConv('a-1', 'a', 'p-a')]);
+      if (pid === 'p-b') return Promise.resolve([makeConv('b-1', 'b', 'p-b')]);
+      return Promise.resolve([]);
     });
     const { result } = renderHook(() =>
       useOtherConversations(new Set(['p-a', 'p-b']), 'p-current')

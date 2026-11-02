@@ -55,10 +55,10 @@ function makeBridge(initial: boolean, setResult: { ok: boolean; extraRenderers: 
 } {
   const listeners: Array<(value: boolean) => void> = [];
   let current = initial;
-  const setSpy = vi.fn(async (value: boolean) => {
+  const setSpy = vi.fn((value: boolean) => Promise.resolve((() => {
     current = setResult.ok ? value : current;
     return { ...setResult, extraRenderers: setResult.ok ? value : current };
-  });
+  })()));
   const bridge = {
     getExtraRenderers: () => current,
     set: setSpy,

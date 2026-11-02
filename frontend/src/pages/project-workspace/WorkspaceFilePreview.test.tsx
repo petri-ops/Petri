@@ -63,7 +63,7 @@ afterEach(() => {
 });
 
 function mockPreviewFetch() {
-  vi.stubGlobal('fetch', vi.fn(async () => new Response('# check.md\n\nbaseline\n', { status: 200 })));
+  vi.stubGlobal('fetch', vi.fn(() => new Response('# check.md\n\nbaseline\n', { status: 200 })));
 }
 
 describe('BLOCK-74 预览头部减负', () => {

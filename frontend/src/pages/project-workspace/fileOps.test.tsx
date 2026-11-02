@@ -33,13 +33,13 @@ function jsonResp(payload: unknown) {
   return {
     ok: true,
     status: 200,
-    json: async () => payload,
+    json: () => Promise.resolve(payload),
   } as Response;
 }
 
 function makeFetch(treeByPrefix: Record<string, { name: string; type: 'file' | 'dir' }[]>) {
   const calls: FetchCall[] = [];
-  const fn = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+  const fn = vi.fn((url: string | URL | Request, init?: RequestInit) => {
     const u = String(url instanceof Request ? url.url : url);
     if (u.includes('/tree')) {
       const prefix = new URL(u, 'http://localhost').searchParams.get('prefix') || '';

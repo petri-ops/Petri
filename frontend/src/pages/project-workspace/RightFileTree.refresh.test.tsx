@@ -13,11 +13,11 @@ import type { ActiveWorkspaceFile } from './types';
 
 const treeCalls: string[] = [];
 
-globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+globalThis.fetch = vi.fn((input: RequestInfo | URL) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
   if (url.includes('/tree')) {
     treeCalls.push(url);
-    return new Response(JSON.stringify({
+    return Promise.resolve(new Response(JSON.stringify({
       ok: true,
       entries: [
         { name: 'a.txt', type: 'file', path: 'a.txt', size: 10, modifiedAt: 1700000000000 },
@@ -25,9 +25,9 @@ globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       ],
       total: 2,
       truncated: false,
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } }));
   }
-  return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 });
 
 vi.mock('@/lib/desktopBridge', () => ({ getBridge: () => null }));

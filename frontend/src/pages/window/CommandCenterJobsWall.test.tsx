@@ -7,10 +7,10 @@ import { listAllJobs } from '@/lib/project-store';
 
 vi.mock('@/lib/project-store', () => ({
   listAllJobs: vi.fn(),
-  listProjects: vi.fn(async () => [
+  listProjects: vi.fn(() => Promise.resolve([
     { id: 'p1', name: 'Project One' },
     { id: 'p2', name: 'Project Two' },
-  ]),
+  ])),
 }));
 
 // BLOCK-150 ②——终态失效流消费（BLOCK-126 事件源的前端接线）：捕获传给

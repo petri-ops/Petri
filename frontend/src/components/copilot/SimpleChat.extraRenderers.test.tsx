@@ -206,7 +206,7 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
     (window as { petriAgentFlags?: unknown }).petriAgentFlags = {
       agentWorkbenchFlags: {
         getExtraRenderers: () => true,
-        set: async () => ({ ok: true, extraRenderers: true }),
+        set: () => ({ ok: true, extraRenderers: true }),
         onChange: (cb: (value: boolean) => void) => {
           listeners.push(cb);
           return () => {

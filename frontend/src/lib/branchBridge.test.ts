@@ -57,7 +57,7 @@ afterEach(() => {
 
 describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
   it('list：信封拆包 + snake→camel 映射返回裸 Branch 数组（崩溃回归锁定）', async () => {
-    const list = vi.fn(async (): Promise<Envelope> => ({
+    const list = vi.fn((): Promise<Envelope> => Promise.resolve({
       ok: true,
       data: [ROW_FIXTURE],
     }));
@@ -71,7 +71,7 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
 
   it('create：信封拆包返回裸 Branch；isActive 数字 0/1 → false/true', async () => {
     stubBridge({
-      create: vi.fn(async (): Promise<Envelope> => ({
+      create: vi.fn((): Promise<Envelope> => Promise.resolve({
         ok: true,
         data: { ...ROW_FIXTURE, is_active: 0 },
       })),
@@ -84,7 +84,7 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
   });
 
   it('switch：参数键 { branchId, projectId }（handler 契约），返回映射后 Branch', async () => {
-    const sw = vi.fn(async (): Promise<Envelope> => ({ ok: true, data: ROW_FIXTURE }));
+    const sw = vi.fn((): Promise<Envelope> => Promise.resolve({ ok: true, data: ROW_FIXTURE }));
     stubBridge({ switch: sw });
     const api = await loadBranchApi();
     const active = await api.switch('b1', 'p1');
@@ -93,8 +93,8 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
   });
 
   it('delete/rename：参数键为 id（非 branchId），按 handler 契约传参', async () => {
-    const del = vi.fn(async (): Promise<Envelope> => ({ ok: true }));
-    const rename = vi.fn(async (): Promise<Envelope> => ({ ok: true, data: ROW_FIXTURE }));
+    const del = vi.fn((): Promise<Envelope> => Promise.resolve({ ok: true }));
+    const rename = vi.fn((): Promise<Envelope> => Promise.resolve({ ok: true, data: ROW_FIXTURE }));
     stubBridge({ delete: del, rename });
     const api = await loadBranchApi();
     await expect(api.delete('b1')).resolves.toBeUndefined();
@@ -105,7 +105,7 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
 
   it('getActive：data null → null（项目尚无分支）', async () => {
     stubBridge({
-      getActive: vi.fn(async (): Promise<Envelope> => ({ ok: true, data: null })),
+      getActive: vi.fn((): Promise<Envelope> => Promise.resolve({ ok: true, data: null })),
     });
     const api = await loadBranchApi();
     await expect(api.getActive('p1')).resolves.toBeNull();
@@ -113,7 +113,7 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
 
   it('error 信封：抛出 handler 错误信息（store 侧进 error 态）', async () => {
     stubBridge({
-      list: vi.fn(async (): Promise<Envelope> => ({ ok: false, error: 'db closed' })),
+      list: vi.fn((): Promise<Envelope> => Promise.resolve({ ok: false, error: 'db closed' })),
     });
     const api = await loadBranchApi();
     await expect(api.list('p1')).rejects.toThrow('db closed');
@@ -121,7 +121,7 @@ describe('branchBridge envelope unwrap + row mapping (UI-P2-001)', () => {
 
   it('switch error 信封：UI 切分支失败不再被静默吞掉', async () => {
     stubBridge({
-      switch: vi.fn(async (): Promise<Envelope> => ({
+      switch: vi.fn((): Promise<Envelope> => Promise.resolve({
         ok: false,
         error: 'branchId and projectId are required',
       })),

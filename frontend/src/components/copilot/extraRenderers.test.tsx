@@ -140,7 +140,7 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
     (window as { petriAgentFlags?: unknown }).petriAgentFlags = {
       agentWorkbenchFlags: {
         getExtraRenderers: () => current,
-        set: async (value: boolean) => {
+        set: (value: boolean) => {
           current = value === true;
           listeners.forEach((cb) => cb(current));
           return { ok: true, extraRenderers: current };

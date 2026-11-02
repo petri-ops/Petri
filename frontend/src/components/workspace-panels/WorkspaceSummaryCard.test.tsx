@@ -307,9 +307,9 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => String(url).includes('usage-project')
+      json: () => Promise.resolve(String(url).includes('usage-project')
         ? { status: 'ok', calls: 12, inputTokens: 1000, outputTokens: 2000, estimatedCostCny: 0.1234, costStatus: 'partial' }
-        : { status: 'error' },
+        : { status: 'error' }),
     })));
     render(<WorkspaceSummaryCard {...baseProps()} />);
     expect(await screen.findByText(/¥0\.1234/)).toBeTruthy();
@@ -330,9 +330,9 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => String(url).includes('project-storage')
+      json: () => Promise.resolve(String(url).includes('project-storage')
         ? { ok: true, jobs: 4, bytes: 100 * 1024 * 1024, observedAt: '2026-09-10T09:00:00.000Z' }
-        : { status: 'error' },
+        : { status: 'error' }),
     })));
     render(<WorkspaceSummaryCard {...baseProps()} />);
     expect(await screen.findByText(/100 MB · 4 作业/)).toBeTruthy();

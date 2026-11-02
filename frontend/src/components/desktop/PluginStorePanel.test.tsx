@@ -41,9 +41,9 @@ const baseHook = {
   runtimeStatus: { r: { installed: false }, python: { installed: false } },
   updates: [] as Array<{ id: string; latestVersion: string }>,
   checkingUpdates: false,
-  install: vi.fn(async () => ({ ok: true })),
-  uninstall: vi.fn(async () => ({ ok: true })),
-  checkUpdates: vi.fn(async () => []),
+  install: vi.fn(() => ({ ok: true })),
+  uninstall: vi.fn(() => ({ ok: true })),
+  checkUpdates: vi.fn(() => []),
 };
 
 const packBridge = {

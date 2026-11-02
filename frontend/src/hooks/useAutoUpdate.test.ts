@@ -135,7 +135,7 @@ describe('useAutoUpdate', () => {
     const { result } = renderHook(() => useAutoUpdate());
     await act(async () => { await vi.runOnlyPendingTimersAsync(); });
     void result.current.download();
-    await act(async () => { doneFn(); }); // fire the hook's inline callback
+    act(() => { doneFn(); }); // fire the hook's inline callback
     expect(result.current.downloading).toBe(false);
     expect(result.current.downloaded).toBe(true);
     expect(result.current.progress).toBe(1);
@@ -180,8 +180,8 @@ describe('useAutoUpdate', () => {
     expect(result.current.available).toBe(false);
     expect(result.current.downloading).toBe(false);
     expect(result.current.installing).toBe(false);
-    await act(async () => { void result.current.check(); });
-    await act(async () => { void result.current.download(); });
-    await act(async () => { void result.current.install(); });
+    act(() => { void result.current.check(); });
+    act(() => { void result.current.download(); });
+    act(() => { void result.current.install(); });
   });
 });

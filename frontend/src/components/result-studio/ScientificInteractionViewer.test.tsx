@@ -91,9 +91,9 @@ describe('ScientificInteractionViewer', () => {
   });
 
   it('loads the next authoritative page at a virtual-scroll boundary', async () => {
-    queryResultStudioTable.mockImplementation(async (input: { offset?: number }) => {
+    queryResultStudioTable.mockImplementation((input: { offset?: number }) => {
       const pageOffset = input.offset || 0;
-      return {
+      return Promise.resolve({
         ...tableQuery(),
         offset: pageOffset,
         nextOffset: pageOffset + 200,
@@ -101,7 +101,7 @@ describe('ScientificInteractionViewer', () => {
           gene: `G${pageOffset + index}`,
           padj: String((pageOffset + index) / 1000),
         })),
-      };
+      });
     });
     render(<ScientificInteractionViewer language="r" jobId="job_1" artifactName="deg_table.csv" manifest={manifest('table')} selection={null} onSelectionChange={() => {}} />);
     const viewport = await screen.findByRole('generic', { name: '科学结果表格' });

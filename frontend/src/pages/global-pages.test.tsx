@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe('BLOCK-72 全局工作台页', () => {
   it('/knowledge 渲染知识空间管理面（标题 + 面板测试锚点）', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+    vi.stubGlobal('fetch', vi.fn(() => new Response(JSON.stringify({
       status: 'ok',
       space: { id: 'ks_default', name: '默认知识空间', enabled: false, embeddingModel: 'text-embedding-v3' },
       documents: [],

@@ -32,7 +32,7 @@ function sseResponse(chunks: string[]): Response {
     ok: true,
     body: {
       getReader: () => ({
-        read: async () => {
+        read: () => {
           if (i < chunks.length) {
             return { done: false, value: encoder.encode(chunks[i++]) };
           }
@@ -40,7 +40,7 @@ function sseResponse(chunks: string[]): Response {
         },
       }),
     },
-    text: async () => '',
+    text: () => '',
   } as unknown as Response;
 }
 
@@ -51,7 +51,7 @@ function brokenStreamResponse(chunks: string[]): Response {
     ok: true,
     body: {
       getReader: () => ({
-        read: async () => {
+        read: () => {
           if (i < chunks.length) {
             return { done: false, value: encoder.encode(chunks[i++]) };
           }
@@ -59,7 +59,7 @@ function brokenStreamResponse(chunks: string[]): Response {
         },
       }),
     },
-    text: async () => '',
+    text: () => '',
   } as unknown as Response;
 }
 
@@ -206,7 +206,7 @@ describe('BLOCK-39 agent 事件流断线重连', () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       status: 404,
-      text: async () => '{"error":"task 不存在"}',
+      text: () => '{"error":"task 不存在"}',
     });
     vi.stubGlobal('fetch', fetchMock);
 

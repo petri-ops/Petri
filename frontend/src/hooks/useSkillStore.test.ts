@@ -253,7 +253,7 @@ describe('useSkillStore', () => {
     expect(handles.onProgress).toHaveBeenCalled();
 
     // Trigger the wakeup callback with a progress payload
-    await act(async () => {
+    act(() => {
       const set = progressCallbacks.get('__default__');
       expect(set).toBeDefined();
       set!.forEach((cb) => {
@@ -313,7 +313,7 @@ describe('useSkillStore', () => {
     expect(onProgress).not.toHaveBeenCalled();
 
     // A subsequent wakeup callback firing must not write to store
-    await act(async () => {
+    act(() => {
       const set = progressCallbacks.get('__default__');
       if (set) {
         set.forEach((cb) => {

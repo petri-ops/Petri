@@ -79,7 +79,7 @@ describe('UI-141 startup gate', () => {
       configurable: true,
       value: {
         packs: {
-          listInstalled: vi.fn(async () => ({
+          listInstalled: vi.fn(() => ({
             ok: true,
             packs: [{ packId: 'petri-pack-bio', name: '格物 · 生信分析包', packRoot: '/p', version: '0.1.0', installedAt: 'x', requiresRuntimes: [{ pluginId: 'petri-r-runtime' }] }],
           })),

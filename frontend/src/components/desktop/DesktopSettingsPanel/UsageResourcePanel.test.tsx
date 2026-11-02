@@ -35,11 +35,11 @@ function usageResponse(overrides: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(async () => ({
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(({
     ok: true,
     status: 200,
-    json: async () => usageResponse(),
-  })));
+    json: () => usageResponse(),
+  }))));
 });
 
 afterEach(() => {
@@ -64,11 +64,11 @@ describe('UsageResourcePanel（BLOCK-79 按供应商速率）', () => {
   });
 
   it('无记录：诚实空态', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => ({
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(({
       ok: true,
       status: 200,
-      json: async () => usageResponse({ calls: 0, providers: [] }),
-    })));
+      json: () => usageResponse({ calls: 0, providers: [] }),
+    }))));
     render(<UsageResourcePanel />);
     expect(await screen.findByText('暂无可统计的调用记录。')).toBeTruthy();
   });

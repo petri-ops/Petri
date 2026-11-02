@@ -125,7 +125,7 @@ describe('P4.2 WorkspaceFilePreviewBridge — BridgeRoot auto-wrap', () => {
     );
     expect(getByTestId('mock-codemirror')).toBeTruthy();
     // Outer context should be usable (setPendingRequest not broken by double wrap)
-    await act(async () => {
+    act(() => {
       capture.setPendingRequest({
         filePath: '/workspace/outer.py',
         line: 1,
