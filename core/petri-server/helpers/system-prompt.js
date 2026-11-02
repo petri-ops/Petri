@@ -508,7 +508,12 @@ function buildSystemPromptSections(context, runtimeIdentity = {}) {
     if (typeof context.workspacePath === 'string' && context.workspacePath) {
       try {
         const { renderGovernanceRuntimeSection } = require('../../shared-backend/governance/workspace-rules.js');
-        add(renderGovernanceRuntimeSection({ workspacePath: context.workspacePath }));
+        // BLOCK-337 P7③ — 会话侧若装了规则账本（governanceLedgerEntries），降级 observe
+        // 的规则按观察档渲染；未装载时缺省 undefined = 全部 enforce（零行为变化）。
+        add(renderGovernanceRuntimeSection({
+          workspacePath: context.workspacePath,
+          ledgerEntries: context.governanceLedgerEntries,
+        }));
       } catch { /* 治理段失败不得影响正常对话 */ }
     }
   }

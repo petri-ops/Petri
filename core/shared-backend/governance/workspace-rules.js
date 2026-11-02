@@ -21,6 +21,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { parseOpenAuditItems, clip } = require('./audit-open-items');
+const { statusFromEntry } = require('./rule-lifecycle');
 
 const PACK_DIRNAME = path.join('resources', 'governance-packs');
 const MAX_SCAN_DEPTH = 3;
@@ -168,11 +169,23 @@ function rulesByKind(rules, kind) {
 }
 
 /**
+ * BLOCK-337 P7③ — 规则生效档位：账本 entries（pack::rule → {hits, misfires}）里
+ * 误拦率超阈的规则降级 observe；未装载账本/无记录 = enforce（零行为变化）。
+ */
+function ruleMode(pack, rule, ledgerEntries) {
+  if (!ledgerEntries || typeof ledgerEntries !== 'object') return 'enforce';
+  const entry = ledgerEntries[`${pack.id}::${rule.id}`];
+  if (!entry || typeof entry !== 'object') return 'enforce';
+  return statusFromEntry(entry).mode;
+}
+
+/**
  * BLOCK-337 P2 — 工作区治理动态段（system-prompt 注入用）。
  * 受治理仓 → 规则条目 + （包声明了 auditSource 时的）未决审计前置；blank → ''（零变化）。
  * auditSource 路径由包 JSON 声明（引擎零业务词），解析失败=空，不阻断。
+ * ledgerEntries（P7③）：降级 observe 的规则按观察档渲染，不硬性要求。
  */
-function renderGovernanceRuntimeSection({ workspacePath, packDir: packDirOverride, limit = 5 } = {}) {
+function renderGovernanceRuntimeSection({ workspacePath, packDir: packDirOverride, limit = 5, ledgerEntries } = {}) {
   const resolved = resolveWorkspaceGovernance(workspacePath, packDirOverride ? { packDir: packDirOverride } : undefined);
   if (resolved.kind === 'blank' || !resolved.pack) return '';
   const pack = resolved.pack;
@@ -181,7 +194,10 @@ function renderGovernanceRuntimeSection({ workspacePath, packDir: packDirOverrid
   if (mechanical.length === 0 && judgment.length === 0) return '';
 
   let section = `\n\n=== 工作区治理（自动装载：${clip(pack.title, 40)}） ===`;
-  for (const rule of mechanical) section += `\n- [必须] ${clip(rule.statement, 100)}`;
+  for (const rule of mechanical) {
+    const label = ruleMode(pack, rule, ledgerEntries) === 'observe' ? '观察·待复盘' : '必须';
+    section += `\n- [${label}] ${clip(rule.statement, 100)}`;
+  }
   for (const rule of judgment) section += `\n- [判断] ${clip(rule.statement, 100)}`;
 
   if (typeof pack.auditSource === 'string' && pack.auditSource) {

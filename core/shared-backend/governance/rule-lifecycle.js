@@ -23,6 +23,22 @@ function keyOf(packId, ruleId) {
   return `${packId}::${ruleId}`;
 }
 
+/** 纯判定：给定 {hits, misfires} 算生效档位（P7③ 桥接层与账本本体共用，防两套阈值）。 */
+function statusFromEntry(entry) {
+  const hits = Number(entry && entry.hits) || 0;
+  const misfires = Number(entry && entry.misfires) || 0;
+  const total = hits + misfires;
+  const misfireRate = total > 0 ? misfires / total : 0;
+  const downgraded = misfires >= MIN_MISFIRES_TO_DOWNGRADE && misfireRate >= DOWNGRADE_MISFIRE_RATE;
+  return {
+    hits,
+    misfires,
+    misfireRate: Math.round(misfireRate * 1000) / 1000,
+    total,
+    mode: downgraded ? 'observe' : 'enforce',
+  };
+}
+
 function createRuleLedger(initial = {}) {
   const entries = {};
   const source = initial && typeof initial.entries === 'object' ? initial.entries : {};
@@ -53,17 +69,7 @@ function createRuleLedger(initial = {}) {
 
     /** 当前生效档位：'enforce' | 'observe'（observe=只观察不硬拦，等人复盘）。 */
     status(packId, ruleId) {
-      const entry = entries[keyOf(packId, ruleId)] || emptyEntry();
-      const total = entry.hits + entry.misfires;
-      const misfireRate = total > 0 ? entry.misfires / total : 0;
-      const downgraded = entry.misfires >= MIN_MISFIRES_TO_DOWNGRADE && misfireRate >= DOWNGRADE_MISFIRE_RATE;
-      return {
-        hits: entry.hits,
-        misfires: entry.misfires,
-        misfireRate: Math.round(misfireRate * 1000) / 1000,
-        total,
-        mode: downgraded ? 'observe' : 'enforce',
-      };
+      return statusFromEntry(entries[keyOf(packId, ruleId)] || emptyEntry());
     },
 
     /** 人工复盘后复位（降级的规则确认保留则清计数，确认删除则 remove）。 */
@@ -86,4 +92,5 @@ module.exports = {
   MIN_MISFIRES_TO_DOWNGRADE,
   DOWNGRADE_MISFIRE_RATE,
   createRuleLedger,
+  statusFromEntry,
 };

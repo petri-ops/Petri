@@ -179,6 +179,12 @@ module.exports = function registerAiChatRoute(app) {
       return res.status(400).json({ status: 'error', error: '缺少消息' });
     }
 
+    // BLOCK-337 P2 — 会话侧治理装载：workspacePath 只从 projects 表派生（客户端传值
+    // 不采信），派生失败=零治理注入，不阻断对话。
+    try {
+      require('../helpers/session-workspace').applySessionWorkspacePath(context);
+    } catch { /* 治理上下文装载失败不影响 chat */ }
+
     const { modelGateway } = require('../helpers/model-gateway');
     const resolvedIdentity = modelGateway.resolve('chat');
     const identityProfile = resolvedIdentity && resolvedIdentity.profile;
@@ -266,6 +272,15 @@ module.exports = function registerAiChatRoute(app) {
         : messages;
     const fullMessages = [{ role: 'system', content: systemPrompt }, ...trimmedMessages];
 
+    // SSE response headers —— 必须先于任何 res.write：BLOCK-337 P6 实机抓真，token_budget
+    // 的 res.write 会隐式发出 200 头，此前的 setHeader 落在头发送之后 → ERR_HEADERS_SENT
+    // → async 路由未捕获 → unhandledRejection → SSE 流永不关闭（chat 挂死）。
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders && res.flushHeaders();
+
     // BLOCK-20: token budget estimation + SSE event — fires before stream starts
     try {
       const { getContextWindow } = require('../helpers/token-estimator');
@@ -309,13 +324,6 @@ module.exports = function registerAiChatRoute(app) {
     } catch (e) {
       console.log('[token-budget-estimation-error]', e && e.message);
     }
-
-    // SSE response headers
-    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.flushHeaders && res.flushHeaders();
 
     let ended = false;
     const writeError = (msg) => {

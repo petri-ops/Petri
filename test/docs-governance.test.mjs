@@ -89,30 +89,69 @@ test('validator enforces at most one active work package (document-governance §
   await fs.writeFile(path.join(tempRoot, 'docs', 'wp-a.md'), '# WP A\n', 'utf8');
   await fs.writeFile(path.join(tempRoot, 'docs', 'wp-b.md'), '# WP B\n', 'utf8');
 
-  const documents = [
-    { id: 'WP-A', path: 'docs/wp-a.md', kind: 'work-package', status: 'active', canonical: false, archivePolicy: 'archive_when_superseded' },
-    { id: 'WP-B', path: 'docs/wp-b.md', kind: 'work-package', status: 'planned', canonical: false, archivePolicy: 'archive_when_superseded' },
-  ];
+  const workPackage = (id, overrides = {}) => ({
+    id,
+    path: `docs/wp-${id.slice(3).toLowerCase()}.md`,
+    kind: 'work-package',
+    status: 'active',
+    canonical: false,
+    archivePolicy: 'archive_when_superseded',
+    truthDomain: `td-${id.toLowerCase()}`,
+    touchSurface: [`src/${id.toLowerCase()}/**`],
+    sharedBaselines: [],
+    ...overrides,
+  });
   const coverage = { managedRoots: ['docs'], excludedPrefixes: [], requireRegistration: false };
+  const validate = (documents) => validateDocumentRegistry({ schemaVersion: 1, coverage, documents }, { rootDir: tempRoot });
 
-  const single = await validateDocumentRegistry(
-    { schemaVersion: 1, coverage, documents },
-    { rootDir: tempRoot },
-  );
-  assert.equal(single.some((item) => item.code === 'MULTIPLE_ACTIVE_WORK_PACKAGES'), false);
+  const single = await validate([
+    workPackage('WP-A'),
+    workPackage('WP-B', { status: 'planned' }),
+  ]);
+  assert.equal(single.some((item) => item.code.startsWith('PARALLEL_')), false);
 
-  const bothActive = await validateDocumentRegistry(
-    {
-      schemaVersion: 1,
-      coverage,
-      documents: documents.map((document) => (document.id === 'WP-B' ? { ...document, status: 'active' } : document)),
-    },
-    { rootDir: tempRoot },
+  // BLOCK-337 P3 — 未声明文件面/基线：无法证明不相交，一律拦下
+  const undeclared = await validate([
+    workPackage('WP-A'),
+    workPackage('WP-B', { touchSurface: undefined, sharedBaselines: undefined }),
+  ]);
+  const missing = undeclared.filter((item) => item.code === 'PARALLEL_DECLARATION_MISSING');
+  assert.equal(missing.length, 2, `应报 touchSurface + sharedBaselines 两笔缺声明：${JSON.stringify(missing)}`);
+
+  // 三判据全不相交 → 放行并行（串行默认的机械例外，不再一刀切违例）
+  const disjoint = await validate([workPackage('WP-A'), workPackage('WP-B')]);
+  assert.equal(disjoint.some((item) => item.code.startsWith('PARALLEL_')), false);
+
+  // 同 truthDomain → 冲突（含双方 id，指名排队）
+  const sameDomain = await validate([
+    workPackage('WP-A'),
+    workPackage('WP-B', { truthDomain: 'td-wp-a' }),
+  ]);
+  const domainConflict = sameDomain.find((item) => item.code === 'PARALLEL_CONTRACT_CONFLICT');
+  assert.equal(typeof domainConflict?.message, 'string');
+  assert.match(domainConflict.message, /same_truth_domain/);
+  assert.match(domainConflict.message, /WP-A/);
+  assert.match(domainConflict.message, /WP-B/);
+
+  // 文件面相交 → 冲突
+  const overlapping = await validate([
+    workPackage('WP-A'),
+    workPackage('WP-B', { touchSurface: ['src/wp-a/child/**'] }),
+  ]);
+  assert.match(
+    overlapping.find((item) => item.code === 'PARALLEL_CONTRACT_CONFLICT')?.message || '',
+    /touch_surface_overlap/,
   );
-  const violation = bothActive.find((item) => item.code === 'MULTIPLE_ACTIVE_WORK_PACKAGES');
-  assert.equal(typeof violation?.message, 'string');
-  assert.match(violation.message, /WP-A/);
-  assert.match(violation.message, /WP-B/);
+
+  // 共享基线双改 → 冲突
+  const sharedBaseline = await validate([
+    workPackage('WP-A', { sharedBaselines: ['test/impact-map.json'] }),
+    workPackage('WP-B', { sharedBaselines: ['test/impact-map.json'] }),
+  ]);
+  assert.match(
+    sharedBaseline.find((item) => item.code === 'PARALLEL_CONTRACT_CONFLICT')?.message || '',
+    /shared_baseline_conflict/,
+  );
 });
 
 test('validator flags active review artefacts whose owning work package is retired', async (context) => {

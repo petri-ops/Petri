@@ -260,7 +260,8 @@ function registerAiSettingsRoutes(app) {
     try {
       const store = require('../helpers/policy-observation-store');
       const body = req.body || {};
-      const result = await store.markReviewed({ ids: body.ids, all: body.all === true });
+      // BLOCK-337 P7③ — decision: 'misfire' 让账本桥把该行命中计为误拦（降级数据源）
+      const result = await store.markReviewed({ ids: body.ids, all: body.all === true, decision: body.decision });
       if (!result.ok) {
         res.status(400).json({ status: 'error', error: 'review_input_invalid' });
         return;

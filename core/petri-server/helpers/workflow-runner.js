@@ -285,6 +285,45 @@ function startWorkflowRun({ source, args, userId, deps, root, resumeFromRunId = 
       if (typeof deps?.recipe !== 'function') return { ok: false, error: 'recipe_host_unavailable' };
       return deps.recipe({ recipeId, params, ...(options || {}), signal: abortController.signal });
     },
+    // BLOCK-337 P4 — 收口判定原语：completed 声明必须附 closeout 全绿（verdict='ready'）
+    // + 台账回写草稿；不绿即 blocked，不可宣称。唯一执行路径 = deps.closeout（生产侧
+    // closeout-host.js 经子进程跑同一 closeout-gates.mjs），不建第二套门禁判定。
+    // 判定结果不进 resume 前缀表（verdict 必须每次运行现算，缓存=伪造收口）。
+    closeout: async (options = {}) => {
+      const stepKey = stepKeyFor('closeout');
+      if (typeof deps?.closeout !== 'function') {
+        record('closeout', { stepKey, status: 'unavailable', errorHead: 'closeout_host_unavailable' });
+        return { ok: false, verdict: 'unavailable', error: 'closeout_host_unavailable' };
+      }
+      if (state.cancelled) {
+        record('closeout', { stepKey, status: 'cancelled', errorHead: 'workflow_cancelled' });
+        return { ok: false, verdict: 'cancelled', error: 'workflow_cancelled' };
+      }
+      const payload = {
+        gates: Array.isArray(options.gates) ? options.gates.filter((g) => typeof g === 'string' && g.trim()).slice(0, 16) : undefined,
+        noTests: options.noTests === true,
+        forceFull: options.forceFull === true,
+        ledger: options.ledger && typeof options.ledger === 'object' ? options.ledger : null,
+        signal: abortController.signal,
+      };
+      let result;
+      try {
+        result = await deps.closeout(payload);
+      } catch (error) {
+        result = { ok: false, verdict: 'failed', error: String((error && error.message) || error).slice(0, 200) };
+      }
+      const verdict = String((result && result.verdict) || (result && result.ok ? 'ready' : 'blocked'));
+      record('closeout', {
+        stepKey,
+        status: verdict,
+        ok: Boolean(result && result.ok),
+        exitCode: result && result.exitCode !== undefined ? result.exitCode : undefined,
+        durationMs: result && result.durationMs,
+        errorHead: result && result.error ? String(result.error).slice(0, 200) : undefined,
+        hasLedgerDraft: Boolean(result && result.ledgerDraft),
+      });
+      return result && typeof result === 'object' ? result : { ok: false, verdict: 'blocked' };
+    },
     get budget() {
       return budgetView;
     },

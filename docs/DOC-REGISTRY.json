@@ -8836,9 +8836,27 @@
       "capability": "block-337-governance-runtime",
       "path": "docs/block-337-governance-runtime-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-337-governance-runtime",
+      "touchSurface": [
+        "core/shared-backend/governance/**",
+        "core/petri-server/helpers/**",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/**",
+        "resources/governance-packs/**",
+        "scripts/docs-governance.mjs",
+        "scripts/block337-governance-live.mjs",
+        "test/block337-governance-runtime.test.mjs",
+        "test/block337-governance-batch2.test.mjs",
+        "docs/block-337-governance-runtime-plan.md",
+        "acceptance/block-337/**"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "eslint-suppressions.json",
+        "test/knip-baseline.json"
+      ],
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-11-02",
       "archivePolicy": "retain_stable_path",
@@ -8849,8 +8867,9 @@
         "skills",
         "G0"
       ],
-      "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）planned：P0 引擎/规则包分离（按项目类型自动挂载：软件治理包/bio pack 规则/轻量默认/零规则；Petri 治理只是第一个规则包，引擎不内嵌项目专属规则）；治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行；收口 completed 硬绑 closeout 全绿；台账自动落账。队列 336→337→334 收口→335。 P7 自我边界三防线：引擎无知（源码扫描禁业务词）/空规则合法默认/规则从坡道观察沉淀且误拦自动退化。",
-      "phase": "P0/P1/P3/P7-COMPLETED-P2-PARTIAL"
+      "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）：P0 引擎/规则包分离（按项目类型自动挂载：软件治理包/bio pack 规则/轻量默认/零规则；Petri 治理只是第一个规则包，引擎不内嵌项目专属规则）；治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行（docs:check active>1 时两两判定，本条目即首个带声明的工作包）；收口 completed 硬绑 closeout 全绿；台账自动落账。 P7 自我边界三防线：引擎无知（源码扫描禁业务词）/空规则合法默认/规则从坡道观察沉淀且误拦自动退化。",
+      "phase": "P6-COMPLETED",
+      "completedAt": "2026-11-03"
     },
     {
       "id": "BLOCK-338-STREAM-STALL-WATCHDOG",

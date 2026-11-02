@@ -35,16 +35,18 @@
 
 Git、SQLite、Artifact Truth、Acceptance Evidence 和实机结果优先于文档描述。发现不一致时先降级文档结论，再修复或补证据。
 
-### 2.1 单工作包串行
+### 2.1 单工作包串行（并行互斥是机械例外，BLOCK-337 P3）
 
-项目采用单线串行开发：同一时间只有一个工作包处于 `active`，且该工作包内只有一个阶段处于进行中。上一阶段的交付、门禁与证据收口后才启动下一个。
+项目采用单线串行开发：默认同一时间只有一个工作包处于 `active`，且该工作包内只有一个阶段处于进行中。上一阶段的交付、门禁与证据收口后才启动下一个。
+
+BLOCK-337 P3 起，并行是**机械例外**而非自觉：多个 `active` 工作包仅当 registry 条目三判据两两全部不相交（`truthDomain` 不同 ∧ `touchSurface` 文件面不相交 ∧ `sharedBaselines` 共享基线不相交）才放行；任一冲突即门禁 FAIL（相交自动排队，宁慢勿腐）。参与判定的条目必须显式声明 `touchSurface`（非空文件面 glob）与 `sharedBaselines`（空数组 = 显式声明「无」）——没有声明即无法证明不相交，一律拦下；机械可判是放行的前提，不靠 agent 自觉。合并顺序 = 先收口先合，后者 rebase 重跑门禁。
 
 因此：
 
 - 不为提高并发而同时开启多个工作包，也不提前实现后续阶段的契约、迁移或 UI。
 - 需要调整顺序时先修改 canonical 计划，再执行，不在实现中默默改序。
 - `g0-current-work-package` 这一 truthDomain 由当前正式启动的工作包按需声明；无人声明时保持空缺，当前任务事实以 `next-steps-roadmap.md` 为准。
-- 并行开发与 Worktree 属于例外，需满足 `worktree-governance.md` 的重开条件后才可启用。
+- 多 `active` 包并行只能经上述 registry 机械判定放行（`docs:check` 在 active>1 时强制两两判定）；Worktree 属于另一维度的物理隔离例外，需满足 `worktree-governance.md` 的重开条件后才可启用。
 
 ## 3. 注册表契约
 

@@ -50,9 +50,14 @@ async function ensureSchema(db) {
       hits INTEGER NOT NULL DEFAULT 1,
       first_seen_at TEXT NOT NULL,
       last_seen_at TEXT NOT NULL,
-      reviewed_at TEXT
+      reviewed_at TEXT,
+      review_decision TEXT
     )
   `);
+  // 旧库升级（BLOCK-337 P7③）：复盘结论列加性补齐，失败（已存在）忽略
+  try {
+    await db.exec('ALTER TABLE policy_observations ADD COLUMN review_decision TEXT');
+  } catch { /* column already exists */ }
   await db.exec(
     'CREATE UNIQUE INDEX IF NOT EXISTS idx_policy_obs_key ON policy_observations(kind, rule_id, tool_name, fingerprint)'
   );
@@ -133,6 +138,8 @@ function rowToView(row) {
     firstSeenAt: row.first_seen_at,
     lastSeenAt: row.last_seen_at,
     reviewedAt: row.reviewed_at || null,
+    // BLOCK-337 P7③ — 复盘结论（'confirmed' | 'misfire' | null），账本桥的误拦信号源
+    reviewDecision: row.review_decision || null,
   };
 }
 
@@ -147,6 +154,24 @@ async function listUnreviewed(limit = 200) {
        ORDER BY last_seen_at DESC LIMIT ?`
     )
     .all(Math.max(1, Math.min(500, Number(limit) || 200)));
+  return rows.map(rowToView);
+}
+
+/**
+ * 规则观察全量行（含已复盘）——BLOCK-337 P7③ 账本桥的数据源。
+ * 只取 rule-observe / tool-observe 两类（auto-allow 是授权审计、policy-change 是变更
+ * 留痕，都不参与规则命中/误拦记账）。
+ */
+async function listRuleObservations(limit = 500) {
+  const db = await getDb();
+  await ensureSchema(db);
+  const rows = await db
+    .prepare(
+      `SELECT * FROM policy_observations
+       WHERE kind IN ${REVIEWABLE_KINDS}
+       ORDER BY last_seen_at DESC LIMIT ?`
+    )
+    .all(Math.max(1, Math.min(2000, Number(limit) || 500)));
   return rows.map(rowToView);
 }
 
@@ -186,17 +211,23 @@ async function unreviewedCount() {
 
 /**
  * 标复盘（观察行退出待复盘列表；null 让位新观察再触发通知）。
- * @param {{ids?: number[], all?: boolean}} input
+ * @param {{ids?: number[], all?: boolean, decision?: 'confirmed'|'misfire'}} input
+ *   decision（BLOCK-337 P7③）：'misfire' = 该行命中整体计为误拦（账本桥降级数据源）；
+ *   'confirmed'/'缺省' = 保持命中。非法值按缺省处理。
  * @returns {Promise<{ok:boolean, updated?:number}>}
  */
 async function markReviewed(input = {}) {
   const db = await getDb();
   await ensureSchema(db);
   const now = new Date().toISOString();
+  const decision = input.decision === 'misfire' ? 'misfire' : input.decision === 'confirmed' ? 'confirmed' : null;
   if (input.all === true) {
     const result = await db
-      .prepare(`UPDATE policy_observations SET reviewed_at = ? WHERE reviewed_at IS NULL AND kind IN ${REVIEWABLE_KINDS}`)
-      .run(now);
+      .prepare(
+        `UPDATE policy_observations SET reviewed_at = ?, review_decision = ?
+         WHERE reviewed_at IS NULL AND kind IN ${REVIEWABLE_KINDS}`
+      )
+      .run(now, decision);
     return { ok: true, updated: result.changes };
   }
   const ids = Array.isArray(input.ids) ? input.ids.map(Number).filter((n) => Number.isInteger(n) && n > 0) : [];
@@ -204,8 +235,11 @@ async function markReviewed(input = {}) {
   let updated = 0;
   for (const id of ids.slice(0, 500)) {
     const result = await db
-      .prepare(`UPDATE policy_observations SET reviewed_at = ? WHERE id = ? AND reviewed_at IS NULL AND kind IN ${REVIEWABLE_KINDS}`)
-      .run(now, id);
+      .prepare(
+        `UPDATE policy_observations SET reviewed_at = ?, review_decision = ?
+         WHERE id = ? AND reviewed_at IS NULL AND kind IN ${REVIEWABLE_KINDS}`
+      )
+      .run(now, decision, id);
     updated += result.changes;
   }
   return { ok: true, updated };
@@ -216,6 +250,7 @@ module.exports = {
   recordObservation,
   recordPolicyChange,
   listUnreviewed,
+  listRuleObservations,
   listAutoAllow,
   listPolicyChanges,
   unreviewedCount,

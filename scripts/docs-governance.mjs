@@ -34,6 +34,9 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { GATE_REPORT_SCHEMA_VERSION, validateReport } from './lib/gate-report-schema.mjs';
+// BLOCK-337 P3 — 并行互斥契约（CJS 纯函数；registry 条目 truthDomain/touchSurface/
+// sharedBaselines 的机械校验源）
+import parallelContract from '../core/petri-server/helpers/parallel-contract.js';
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_ROOT = path.resolve(path.dirname(SCRIPT_PATH), '..');
@@ -438,19 +441,43 @@ export async function validateDocumentRegistry(registry, options = {}) {
     }
   }
 
-  // SINGLE_ACTIVE_WORK_PACKAGE: document-governance.md §2.1 mandates strictly serial
-  // development — at most one work package may be `active` at a time. `npm run state`
-  // already treats `kind === 'work-package' && status === 'active'` as the authoritative
-  // active-package signal, so this gate makes the same invariant fail loudly instead of
-  // letting drift accumulate silently (see docs/git-sync-agent-flow-eval-2026-09-13.md D-2).
+  // PARALLEL_CONTRACT (BLOCK-337 P3): document-governance.md §2.1 — 串行是默认，
+  // 并行是机械例外。active 工作包 >1 时不再一律违例，而是按 registry 三判据
+  // （truthDomain 不同 ∧ touchSurface 不相交 ∧ sharedBaselines 不相交）两两判定：
+  // 全不相交 → 放行并行；任一冲突 → FAIL（相交自动排队，宁慢勿腐）。
+  // 参与判定的条目必须显式声明文件面与共享基线（空数组 = 显式声明「无」），
+  // 没有声明就无法证明不相交，一律拦下——机械可判是放行的前提，不靠 agent 自觉。
+  // `npm run state` 已把 `kind === 'work-package' && status === 'active'` 当作
+  // authoritative active 信号，本门与其同源（见 docs/git-sync-agent-flow-eval-2026-09-13.md D-2）。
   const activeWorkPackages = normalizedDocuments.filter(
     (document) => document.kind === 'work-package' && document.status === 'active',
   );
   if (activeWorkPackages.length > 1) {
-    issues.push(issue(
-      'MULTIPLE_ACTIVE_WORK_PACKAGES',
-      `at most one work package may be active (found ${activeWorkPackages.length}): ${activeWorkPackages.map((d) => d.id || '<invalid id>').join(', ')}. Close out or downgrade the extras — see docs/document-governance.md §2.1.`,
-    ));
+    for (const pkg of activeWorkPackages) {
+      if (!Array.isArray(pkg.touchSurface) || pkg.touchSurface.length === 0) {
+        issues.push(issue(
+          'PARALLEL_DECLARATION_MISSING',
+          `active work package ${pkg.id || '<invalid id>'} must declare a non-empty touchSurface (file-face globs) for parallel adjudication — see docs/document-governance.md §2.1.`,
+        ));
+      }
+      if (!Array.isArray(pkg.sharedBaselines)) {
+        issues.push(issue(
+          'PARALLEL_DECLARATION_MISSING',
+          `active work package ${pkg.id || '<invalid id>'} must declare sharedBaselines (empty array = explicitly none) for parallel adjudication — see docs/document-governance.md §2.1.`,
+        ));
+      }
+    }
+    const verdict = parallelContract.validateParallelSet(activeWorkPackages);
+    for (const pair of verdict.pairs) {
+      if (!pair.ok) {
+        issues.push(issue(
+          'PARALLEL_CONTRACT_CONFLICT',
+          `active work packages ${pair.a} × ${pair.b} cannot run in parallel: ${pair.conflicts
+            .map((conflict) => `${conflict.rule}(${conflict.detail})`)
+            .join('; ')}. Close one out or queue serially.`,
+        ));
+      }
+    }
   }
 
   // ORPHAN_ACTIVE_REVIEW: a design-review / process artefact must not stay `active`

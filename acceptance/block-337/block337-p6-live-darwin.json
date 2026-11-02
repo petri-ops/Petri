@@ -1,0 +1,194 @@
+{
+  "name": "governance-live",
+  "block": "BLOCK-337",
+  "phase": "P6",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T17:28:13.890Z",
+  "finishedAt": "2026-11-02T17:28:44.956Z",
+  "backend": {
+    "port": 3199,
+    "pid": 87349,
+    "mockUpstreamPort": 61583
+  },
+  "assertions": [
+    {
+      "name": "L0_isolated_backend_and_mock_upstream",
+      "pass": true,
+      "detail": "backend :3199 + mock upstream :61583"
+    },
+    {
+      "name": "L0_model_profile_seeded",
+      "pass": true,
+      "detail": "status=200 dropped=[]"
+    },
+    {
+      "name": "L1_project_software",
+      "pass": true,
+      "detail": "status=200 id=p_mvzj8n27_o2wk path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-software"
+    },
+    {
+      "name": "L1_project_bio",
+      "pass": true,
+      "detail": "status=200 id=p_mvzj8n2a_7khg path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-bio"
+    },
+    {
+      "name": "L1_project_code",
+      "pass": true,
+      "detail": "status=200 id=p_mvzj8n2c_0kas path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-code"
+    },
+    {
+      "name": "L1_project_blank",
+      "pass": true,
+      "detail": "status=200 id=p_mvzj8n2d_9xll path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-blank"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=995f345d-b2b4-45e3-a9bc-88aebc6d2f1e"
+    },
+    {
+      "name": "L1_software_governed_loaded",
+      "pass": true,
+      "detail": "sysLen=6789"
+    },
+    {
+      "name": "L1_software_audit_prerequisite",
+      "pass": true,
+      "detail": "auditSource 的 🔴 行注入为开工前置"
+    },
+    {
+      "name": "L1_software_no_bio_leak",
+      "pass": true,
+      "detail": "软件仓不得挂生信包"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=32f594c0-8188-473f-936e-ac9077524c43"
+    },
+    {
+      "name": "L1_bio_pack_loaded",
+      "pass": true,
+      "detail": "sysLen=6557"
+    },
+    {
+      "name": "L1_bio_no_software_leak",
+      "pass": true,
+      "detail": "生信项目不得看到 Petri 工程纪律"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=e65463d9-c88b-4b59-aba0-9dbcb75b9d1b"
+    },
+    {
+      "name": "L1_code_light_loaded",
+      "pass": true,
+      "detail": "sysLen=6465"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=8f864bea-a8f5-4979-b895-4e579aa21ad7"
+    },
+    {
+      "name": "L1_blank_zero_rules",
+      "pass": true,
+      "detail": "未识别工作区=零规则零注入（合法默认）"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=660229bd-5604-42ef-acee-71d305a49a74"
+    },
+    {
+      "name": "L2_forged_workspace_path_stripped",
+      "pass": true,
+      "detail": "客户端伪造路径不得骗挂治理包（服务端只认 projects 表派生值；捕获 system 2 次）"
+    },
+    {
+      "name": "L1_agent_task_submitted",
+      "pass": true,
+      "detail": "status=200 taskId=4e0aa77d-7ae2-4f5c-98cb-d09d3f02d4dc"
+    },
+    {
+      "name": "L2_forged_without_project_stripped",
+      "pass": true,
+      "detail": "无 projectId 时客户端路径同样剥除"
+    },
+    {
+      "name": "L3_disjoint_parallel_allowed",
+      "pass": true,
+      "detail": "codes=[]"
+    },
+    {
+      "name": "L3_intersecting_parallel_blocked",
+      "pass": true,
+      "detail": "同真相域两 active 包必须 FAIL（相交自动排队）"
+    },
+    {
+      "name": "L3_real_repo_docs_check_pass",
+      "pass": true,
+      "detail": "docs-governance --check exit=0（新门在单 active 包时休眠）"
+    },
+    {
+      "name": "L4_closeout_phase_completed",
+      "pass": true,
+      "detail": "status=completed error=无"
+    },
+    {
+      "name": "L4_closeout_verdict_ready",
+      "pass": true,
+      "detail": "verdict=ready exit=0"
+    },
+    {
+      "name": "L4_journal_closeout_row",
+      "pass": true,
+      "detail": "rows=closeout,log"
+    },
+    {
+      "name": "L4_reconcile_next_step_brief",
+      "pass": true,
+      "detail": "draft=\"Jev 单一建议：337 收口后按队列进 335（就绪，缺首批题）\\n母纲波次顺序：Q 波次全收口；337 → 335（P4-REM 最后、Q4b 单列）\\n蓝图 / 全局计划进展：\\n- 母纲 Q-MATRIX：✅74 / 🟡21 /"
+    },
+    {
+      "name": "L4_reconcile_audit_log_row",
+      "pass": true,
+      "detail": "draft=\"| ✅ BLOCK-337 第二批收口（P2 调用侧/P3 registry 并行门/P4 closeout/P5 落账/P6 实机/P7③） | 2026-11-03 | 实机四腿全绿（acceptance/block-337/） | "
+    },
+    {
+      "name": "L4_reconcile_handoff_resume",
+      "pass": true,
+      "detail": "draft=\"- 工作包：BLOCK-337\\n- 阶段：P6-COMPLETED\\n- 恢复入口：docs/block-337-governance-runtime-plan.md §3\\n- 证据：acceptance/block-337/bloc"
+    },
+    {
+      "name": "L5_observation_visible",
+      "pass": true,
+      "detail": "hits=5"
+    },
+    {
+      "name": "L5_review_decision_misfire",
+      "pass": true,
+      "detail": "status=200 body={\"status\":\"ok\",\"updated\":1}"
+    },
+    {
+      "name": "L5_decision_persisted",
+      "pass": true,
+      "detail": "hits=5 decision=misfire"
+    },
+    {
+      "name": "L5_ledger_downgrade",
+      "pass": true,
+      "detail": "mode=observe misfires=5"
+    },
+    {
+      "name": "L5_render_observe_mode",
+      "pass": true,
+      "detail": "降级规则按观察档渲染，其余规则保持 [必须]"
+    }
+  ],
+  "allPass": true,
+  "passed": 35,
+  "total": 35,
+  "note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

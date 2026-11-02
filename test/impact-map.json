@@ -7106,6 +7106,53 @@
       ],
       "frontendRelated": true,
       "classifiesScripts": false
+    },
+    {
+      "id": "block337-governance-runtime",
+      "note": "BLOCK-337 治理运行时化：引擎/规则包分离（workspace-rules + governance-packs）、P2 调用侧接线（session-workspace→ai-chat/agent-runner/system-prompt 动态段）、P7③ 观察桥（observation-bridge + policy-observation-store review_decision + rule-lifecycle）、P3 并行互斥（parallel-contract + docs-governance 门）、P4/P5 closeout 原语（workflow-runner + closeout-host + closeout-ledger）。改任一登记源即跑本包契约 + prompt 邻域 + 观察存储邻域 + workflow runner 契约。",
+      "patterns": [
+        "core/shared-backend/governance/**",
+        "resources/governance-packs/**",
+        "core/petri-server/helpers/session-workspace.js",
+        "core/petri-server/helpers/closeout-host.js",
+        "core/petri-server/helpers/parallel-contract.js",
+        "core/petri-server/helpers/workflow-runner.js",
+        "core/petri-server/helpers/policy-observation-store.js",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/agent-runner.js",
+        "core/petri-server/routes/ai-chat.js",
+        "core/petri-server/routes/ai-settings-api.js",
+        "core/petri-server/routes/ai-agent/workflow.js",
+        "scripts/docs-governance.mjs"
+      ],
+      "tests": [
+        "test/block337-governance-runtime.test.mjs",
+        "test/block337-governance-batch2.test.mjs",
+        "test/docs-governance.test.mjs",
+        "test/block212-prompt-prefix.test.mjs",
+        "test/block198-prompt-layering.test.mjs",
+        "test/block323-progressive-autonomy.test.mjs",
+        "test/block262-workflow-runner.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "block337-governance-live",
+      "note": "BLOCK-337 P6 实机执行器：隔离后端 + mock 上游抓 agent 主链 system prompt（四类工作区装载/互不泄漏/反伪造）+ 真 docs-governance 并行门 + 真 closeout-host 收口落账对账 + P7③ 复盘降级链；只随本包定向测试与文档门。",
+      "patterns": [
+        "scripts/block337-governance-live.mjs",
+        "acceptance/block-337/**"
+      ],
+      "tests": [
+        "test/block337-governance-batch2.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

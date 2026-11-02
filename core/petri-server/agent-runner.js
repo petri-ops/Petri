@@ -311,6 +311,12 @@ async function runAgentLoop({
       ? { ...context, audience: isGuest ? 'guest' : 'user' }
       : { audience: isGuest ? 'guest' : 'user' };
 
+  // BLOCK-337 P2 — 会话侧治理装载：workspacePath 只从 projects 表派生（覆盖/剥除客户端
+  // 传值）；主链、resume、子代理三路都经 runAgentLoop，在此单点接线。失败=零治理注入。
+  try {
+    require('./helpers/session-workspace').applySessionWorkspacePath(ctxForPrompt);
+  } catch { /* 治理上下文装载失败不影响 agent 循环 */ }
+
   // BLOCK-16 PHASE 3：把 working-tree-review 拒绝清单注入 ctxForPrompt。
   // system-prompt.js 检测到 workingTreeRejects（已构造好的 entries）就直接渲染；
   // 否则用 workingTreeRejectsUserDataDir 自动从磁盘读。两条入口互斥：

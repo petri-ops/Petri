@@ -36,13 +36,15 @@ function userIdOf(req) {
   return req.user && req.user.id ? String(req.user.id) : '';
 }
 
-/** 真实 deps：launchSubAgent 唯一执行路径 + 轮询终态 + 级联取消。 */
+/** 真实 deps：launchSubAgent 唯一执行路径 + 轮询终态 + 级联取消 + closeout 收口判定。 */
 function buildRealDeps({ parentTaskId, userId }) {
   const spawnTools = require('../../agent-tools/spawn-agent-tools');
   const agentTaskStore = require('../../agent-task-store');
   const dbMod = require('../../db');
   const { authorizeProject } = require('../../agent-tools/workspace-tools/internals');
   const { runModel3DRecipe } = require('../../helpers/model3d-recipe-runner');
+  // BLOCK-337 P4 — closeout 原语生产实现：子进程跑同一 closeout-gates.mjs（同一真相）
+  const { createCloseoutHost } = require('../../helpers/closeout-host');
   // 终态双写形态：markAgentTaskDone 落 status='completed'/agent_status='done'
   // （实测 DB 列序），failed/cancelled 同列同名——四个都收，避免漏识别。
   const TERMINAL = new Set(['done', 'completed', 'failed', 'cancelled']);
@@ -111,6 +113,8 @@ function buildRealDeps({ parentTaskId, userId }) {
         signal,
       });
     },
+    // BLOCK-337 P4 — 收口判定原语生产实现（completed 硬绑 closeout 全绿）
+    closeout: createCloseoutHost(),
   };
 }
 

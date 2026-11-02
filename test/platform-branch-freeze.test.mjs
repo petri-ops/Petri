@@ -44,6 +44,9 @@ const BASELINE = new Set([
   'scripts/block338-stall-repro.mjs',
   // BLOCK-339 P6 — 人设实机腿：process.platform 仅写入证据头 platform 字段，无行为分支。
   'scripts/block339-persona-live.mjs',
+  // BLOCK-337 P6 — 治理运行时实机腿（block336 同型隔离后端）：process.platform 仅用于
+  // 证据文件名平台后缀（BLOCK-330 加性策略）+ killTree 的 taskkill/SIGTERM 差分。
+  'scripts/block337-governance-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',
