@@ -162,7 +162,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     // 未确认不执行：无同步广播、无额外消息
     expect(dispatched).toHaveLength(0);
 
-    await act(() => {
+    act(() => {
       result.current.confirmDestructive(toolEntry.id);
     });
     const messages = result.current.entries.filter((e) => e.kind === 'message' && e.role === 'user');
@@ -171,7 +171,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     expect(lastUser && lastUser.kind === 'message' && lastUser.content).toContain('id=ks_b');
 
     // 已确认的条目取消为无操作（pending 守卫，幂等）
-    await act(() => {
+    act(() => {
       result.current.cancelDestructive(toolEntry.id);
     });
     const updated = result.current.entries.find((e) => e.id === toolEntry.id) as Extract<
@@ -222,7 +222,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
       (e) => e.kind === 'message' && e.role === 'user'
     ).length;
 
-    await act(() => {
+    act(() => {
       result.current.cancelDestructive(toolEntry.id);
     });
     const updated = result.current.entries.find((e) => e.id === toolEntry.id) as Extract<
