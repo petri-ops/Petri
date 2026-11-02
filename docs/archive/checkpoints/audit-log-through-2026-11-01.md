@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T06:11:21.255Z -->
 最后更新：2026-11-01（**BLOCK-326-AUDIT-DEBT-SWEEP 启动登记（active；用户裁决「继续冲 搞完」）**：AUDIT-LOG 🟡 工程债清偿五项=①SIGTERM teardown 只关库不退出（修+spawn 回归测试）②四 flow 缺 id 致 verify --list 必红（补导出）③state living-plan 漏报+BLOCK-322 registry 漏翻转④C6 夹具过时（mate 已入白名单，改 bond）⑤decision-api no_key 早退不落账（补 degraded）。不含需裁决项（mac ffmpeg/平台文件名/R 下载留 🟡）。plan=docs/block-326-audit-debt-sweep-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T06:54:00.563Z -->
+最后更新：2026-11-01（**BLOCK-327-MAC-COLDSTART-DIAGNOSIS 启动登记（active；用户裁决「可以的 继续」）**：Mac 冷启动 event-loop ~10s 阻塞取证——2026-09-30 🟡 的本机复现与根因定位（--cpu-prof + 启动时间线），只取证不改产品；两个旧嫌疑（stale-running/retention sweeper）已排除在先。plan=docs/block-327-mac-coldstart-diagnosis-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）

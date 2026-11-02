@@ -8774,7 +8774,7 @@
       "path": "docs/block-334-result-host-unification-plan.md",
       "kind": "work-package",
       "status": "active",
-      "phase": "P0-LAUNCH",
+      "phase": "P2-IN-PROGRESS",
       "canonical": true,
       "truthDomain": "block-334-result-host-unification",
       "entrypoint": "docs/README.md",
@@ -8788,7 +8788,7 @@
         "viewer-registry",
         "G0"
       ],
-      "notes": "结果宿主统一（用户裁决 2026-11-02「把这个怎么做说的明白点 并且立包,下面开干」）active：P1 结果查看迁右栏「结果」tab 宿主（ResultsSurface；四态降为局部子状态不进 URL；resultRightWidth 独立偏好 + 左栏收起；Inspector 退役；WorkspaceMode='chat'|'scheduled'，旧四态深链 fail-closed 落 chat）→ P2 两宿主渲染层以 viewerRegistry 单一分派合并六类 viewer。推翻 UI-106 中央大画布形态裁决（前提已失效）。并行 BLOCK-333 文件面零触碰。"
+      "notes": "结果宿主统一（用户裁决 2026-11-02「把这个怎么做说的明白点 并且立包,下面开干」）active：P1 结果查看迁右栏「结果」tab 宿主（ResultsSurface；四态降为局部子状态不进 URL；resultRightWidth 独立偏好（不触碰左栏）；Inspector 退役；WorkspaceMode='chat'|'scheduled'，旧四态深链 fail-closed 落 chat）→ P2 两宿主渲染层以 viewerRegistry 单一分派合并六类 viewer。推翻 UI-106 中央大画布形态裁决（前提已失效）。并行 BLOCK-333 文件面零触碰。"
     },
     {
       "id": "BLOCK-335-SELF-OPTIMIZATION-LOOP",
@@ -8809,8 +8809,28 @@
         "G0"
       ],
       "notes": "自优化闭环 v1（用户裁决 2026-11-02「立项 自优化闭环」）planned：P0 勘察完成（evals-harness/test-affected/workspace-checkpoint/workflow-runner 接口锚定）；BLOCK-334 active 在制故排队，334 收口后顶队列头；撞裁决=worktree 纪律重开确认 + 首批任务清单。"
+    },
+    {
+      "id": "BLOCK-336-WORKTREE-INFRASTRUCTURE",
+      "capability": "block-336-worktree-infrastructure",
+      "path": "docs/block-336-worktree-infrastructure-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-336-worktree-infrastructure",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "worktree",
+        "infrastructure",
+        "agent-tools",
+        "governance",
+        "G0"
+      ],
+      "notes": "worktree 通用基础设施 v1（用户裁决 2026-11-02「加 全方位的加」）planned：governance 八节机械化——工具面四件（create/list/remove/merge-request，审批+observe 档）/项目层 worktreeOf 声明式副本/契约纯函数+registry.json 单源/治理留痕；消费者=335 自优化闭环+并行多任务+实验副本。与 334/335 文件面零交叠。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 447
+  "documentCount": 448
 }
