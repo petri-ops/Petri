@@ -11,11 +11,11 @@ vi.mock('@/components/copilot/conversationRunStore', () => ({
 }));
 
 vi.mock('@/components/copilot/copilotConversationsClient', () => ({
-  listConversations: vi.fn(async () => [
+  listConversations: vi.fn(() => Promise.resolve([
     { id: 'conv-deseq2', title: 'DESeq2 结果解读', status: 'active', last_page: null, message_count: 4, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: 'project-2' },
     { id: 'conv-deseq2-extra', title: 'DESeq2 补充分析', status: 'active', last_page: null, message_count: 2, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: null },
     { id: 'conv-chat', title: '闲聊一条', status: 'active', last_page: null, message_count: 1, created_at: '2026-09-26T00:00:00.000Z', updated_at: '2026-09-26T00:00:00.000Z', project_id: 'project-1' },
-  ]),
+  ])),
 }));
 
 vi.mock('@/components/icons/Icon', () => ({
@@ -50,17 +50,17 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
       onPickExternal: vi.fn(),
     },
     createConversationForProject: vi.fn(),
-    renameProject: vi.fn(async () => true),
-    renameConversation: vi.fn(async () => true),
-    archiveProject: vi.fn(async () => true),
-    archiveConversation: vi.fn(async () => true),
-    forkConversation: vi.fn(async () => null),
+    renameProject: vi.fn(() => Promise.resolve(true)),
+    renameConversation: vi.fn(() => Promise.resolve(true)),
+    archiveProject: vi.fn(() => Promise.resolve(true)),
+    archiveConversation: vi.fn(() => Promise.resolve(true)),
+    forkConversation: vi.fn(() => Promise.resolve(null)),
     workspaceMode,
     sshConnectProject: vi.fn(),
-    sshConnectHost: vi.fn(async () => ({ ok: true, home: '/root' })),
-    sshListDirs: vi.fn(async () => ({ ok: true, path: '/root', dirs: [{ name: 'petri-block67-demo', path: '/root/petri-block67-demo' }] })),
-    sshRegisterHost: vi.fn(async () => ({ ok: true, alias: 'petri-1-2-3-4' })),
-    sshCreateAt: vi.fn(async () => ({ ok: true })),
+    sshConnectHost: vi.fn(() => Promise.resolve({ ok: true, home: '/root' })),
+    sshListDirs: vi.fn(() => Promise.resolve({ ok: true, path: '/root', dirs: [{ name: 'petri-block67-demo', path: '/root/petri-block67-demo' }] })),
+    sshRegisterHost: vi.fn(() => Promise.resolve({ ok: true, alias: 'petri-1-2-3-4' })),
+    sshCreateAt: vi.fn(() => Promise.resolve({ ok: true })),
     handleShowScheduled: vi.fn(),
     handleShowExtensions: vi.fn(),
     handleShowSettings: vi.fn(),
@@ -294,7 +294,7 @@ describe('UI-327 左栏 globe 行内创建向导（终端式路径输入）', ()
 describe('UI-327 Tab 多候选：补全到公共前缀', () => {
   it('多候选匹配同一前缀时 Tab 补全到公共段，不误选', async () => {
     const ctx = buildCtx('chat');
-    ctx.sshListDirs = vi.fn(async () => ({
+    ctx.sshListDirs = vi.fn(() => Promise.resolve({
       ok: true, path: '/root',
       dirs: [
         { name: 'petri-a', path: '/root/petri-a' },

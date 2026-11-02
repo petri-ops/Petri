@@ -79,17 +79,17 @@ function installBridge() {
       cwd?: string,
       sessionId?: string
     ) => Promise<{ ok: boolean; error?: string; pid?: number; sessionId?: string }>
-  >(async (_cwd, sessionId) => ({
+  >((_cwd, sessionId) => Promise.resolve({
     ok: true,
     pid: 1000 + (startCalls += 1),
     sessionId,
   }));
   const bridge = {
     startSession,
-    stopSession: vi.fn(async () => ({ ok: true, wasRunning: true })),
-    writeSession: vi.fn(async () => ({ ok: true })),
-    resizeSession: vi.fn(async () => ({ ok: true })),
-    listSessions: vi.fn(async () => ({ ok: true, sessions: [], maxTabs: 4 })),
+    stopSession: vi.fn(() => Promise.resolve({ ok: true, wasRunning: true })),
+    writeSession: vi.fn(() => Promise.resolve({ ok: true })),
+    resizeSession: vi.fn(() => Promise.resolve({ ok: true })),
+    listSessions: vi.fn(() => Promise.resolve({ ok: true, sessions: [], maxTabs: 4 })),
     onData: vi.fn((cb: (p: DataPayload) => void) => {
       onDataListeners.push(cb);
       return () => {

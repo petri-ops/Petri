@@ -114,9 +114,6 @@
   "frontend/src/components/copilot/copilotMarkdown.test.tsx": {
     "@typescript-eslint/no-unsafe-assignment": {
       "count": 3
-    },
-    "@typescript-eslint/require-await": {
-      "count": 12
     }
   },
   "frontend/src/components/copilot/extraRenderers.test.tsx": {
@@ -316,9 +313,6 @@
   "frontend/src/components/knowledge/useKnowledgeConsole.test.tsx": {
     "@typescript-eslint/no-unsafe-return": {
       "count": 1
-    },
-    "@typescript-eslint/require-await": {
-      "count": 11
     }
   },
   "frontend/src/components/result-studio/LineageStrip.tsx": {
@@ -396,9 +390,6 @@
     "@typescript-eslint/no-unnecessary-type-assertion": {
       "count": 2
     },
-    "@typescript-eslint/require-await": {
-      "count": 11
-    },
     "@typescript-eslint/unbound-method": {
       "count": 4
     }
@@ -433,7 +424,7 @@
   },
   "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx": {
     "@typescript-eslint/require-await": {
-      "count": 22
+      "count": 2
     }
   },
   "frontend/src/hooks/useAiSettings.test.ts": {
@@ -504,11 +495,6 @@
   "frontend/src/hooks/useSkillStore.ts": {
     "react-hooks/set-state-in-effect": {
       "count": 1
-    }
-  },
-  "frontend/src/hooks/useTerminalTabs.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 5
     }
   },
   "frontend/src/hooks/useWorkspaceLayout.test.tsx": {

@@ -17,10 +17,10 @@ describe('CopilotMarkdown file references', () => {
   });
 
   it('turns a verified inline-code filename into a direct-open link', async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: () => Promise.resolve({
         ok: true,
         results: [{
           reference: 'report.html',
@@ -55,10 +55,10 @@ describe('CopilotMarkdown file references', () => {
   });
 
   it('auto-links a verified source filename in assistant prose', async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: () => Promise.resolve({
         ok: true,
         results: [{
           reference: 'model-registry.ts',
@@ -92,10 +92,10 @@ describe('CopilotMarkdown file references', () => {
   });
 
   it('auto-links a verified path with spaces in prose', async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: () => Promise.resolve({
         ok: true,
         results: [{
           reference: 'results/final report.html',
@@ -128,10 +128,10 @@ describe('CopilotMarkdown file references', () => {
   });
 
   it('auto-links a verified binary data file inside a table cell', async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: () => Promise.resolve({
         ok: true,
         results: [{
           reference: 'Fig5_intermediate.RData',
@@ -158,10 +158,10 @@ describe('CopilotMarkdown file references', () => {
   });
 
   it('leaves unresolved inline code inert', async () => {
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({ ok: true, results: [] }) satisfies ResolveResponse,
+      json: () => Promise.resolve({ ok: true, results: [] }) satisfies ResolveResponse,
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -179,10 +179,10 @@ describe('CopilotMarkdown file references', () => {
 
   it('reruns the resolver when resolveNonce changes', async () => {
     __resetFileReferenceCache();
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: () => Promise.resolve({
         ok: true,
         results: [{
           reference: 'report.html',

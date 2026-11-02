@@ -16,7 +16,7 @@ vi.mock('@/components/copilot/copilotClient', () => ({
 }));
 
 vi.mock('@/components/copilot/copilotConversationsClient', () => ({
-  createConversation: vi.fn(async () => ({
+  createConversation: vi.fn(() => Promise.resolve({
     id: 'conv_console_new',
     title: '知识空间管理台',
     status: 'active',
@@ -25,7 +25,7 @@ vi.mock('@/components/copilot/copilotConversationsClient', () => ({
     created_at: '',
     updated_at: '',
   })),
-  getConversation: vi.fn(async (id: string) =>
+  getConversation: vi.fn((id: string) => Promise.resolve(
     id === 'conv_console_existing'
       ? {
           id,
@@ -37,20 +37,20 @@ vi.mock('@/components/copilot/copilotConversationsClient', () => ({
           updated_at: '',
         }
       : null
-  ),
-  getConversationMessages: vi.fn(async (id: string) =>
+  )),
+  getConversationMessages: vi.fn((id: string) => Promise.resolve(
     id === 'conv_console_existing'
       ? [
           { id: 'm1', role: 'user', content: '上一条', ts: '' },
           { id: 'm2', role: 'assistant', content: '上一答', ts: '' },
         ]
       : []
-  ),
+  )),
 }));
 
 function captureStream() {
   let captured: Record<string, unknown> = {};
-  streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
+  streamChatMock.mockImplementation((opts: Record<string, unknown>) => {
     captured = opts;
   });
   return () => captured;
@@ -91,7 +91,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     const { result } = renderHook(() => useKnowledgeConsole());
     await waitFor(() => expect(result.current.ready).toBe(true));
 
-    streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
+    streamChatMock.mockImplementation((opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
       const onDelta = opts.onDelta as (d: string) => void;
       onDelta('第一段');
@@ -119,7 +119,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     const dispatched: string[] = [];
     window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
-    streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
+    streamChatMock.mockImplementation((opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
       const onToolCall = opts.onToolCall as (e: unknown) => void;
       const onToolResult = opts.onToolResult as (e: unknown) => void;
@@ -162,7 +162,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     // 未确认不执行：无同步广播、无额外消息
     expect(dispatched).toHaveLength(0);
 
-    await act(async () => {
+    await act(() => {
       result.current.confirmDestructive(toolEntry.id);
     });
     const messages = result.current.entries.filter((e) => e.kind === 'message' && e.role === 'user');
@@ -171,7 +171,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     expect(lastUser && lastUser.kind === 'message' && lastUser.content).toContain('id=ks_b');
 
     // 已确认的条目取消为无操作（pending 守卫，幂等）
-    await act(async () => {
+    await act(() => {
       result.current.cancelDestructive(toolEntry.id);
     });
     const updated = result.current.entries.find((e) => e.id === toolEntry.id) as Extract<
@@ -189,7 +189,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     const dispatched: string[] = [];
     window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
-    streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
+    streamChatMock.mockImplementation((opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
       const onToolCall = opts.onToolCall as (e: unknown) => void;
       const onToolResult = opts.onToolResult as (e: unknown) => void;
@@ -222,7 +222,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
       (e) => e.kind === 'message' && e.role === 'user'
     ).length;
 
-    await act(async () => {
+    await act(() => {
       result.current.cancelDestructive(toolEntry.id);
     });
     const updated = result.current.entries.find((e) => e.id === toolEntry.id) as Extract<
@@ -248,7 +248,7 @@ describe('BLOCK-99 G4 useKnowledgeConsole', () => {
     const dispatched: string[] = [];
     window.addEventListener(petriEvents.knowledgeConsoleSync, () => dispatched.push('sync'));
 
-    streamChatMock.mockImplementation(async (opts: Record<string, unknown>) => {
+    streamChatMock.mockImplementation((opts: Record<string, unknown>) => {
       Object.assign(getCaptured(), opts);
       const onToolCall = opts.onToolCall as (e: unknown) => void;
       const onToolResult = opts.onToolResult as (e: unknown) => void;

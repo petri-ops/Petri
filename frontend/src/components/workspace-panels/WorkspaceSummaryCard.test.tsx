@@ -131,16 +131,16 @@ beforeEach(() => {
     refresh: async () => {},
   });
   // 默认零用量（成本行不渲染）；成本行用例内覆写
-  vi.stubGlobal('fetch', vi.fn(async () => ({
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
     ok: true,
     status: 200,
-    json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
+    json: () => Promise.resolve({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
   })));
   getBridgeMock.mockImplementation(((name: string) => {
     if (name === 'terminal') {
-      return { listSessions: async () => ({ ok: true, sessions: [] }) };
+      return { listSessions: () => Promise.resolve({ ok: true, sessions: [] }) };
     }
-    return { popOut: vi.fn(async () => ({})) };
+    return { popOut: vi.fn(() => Promise.resolve({})) };
   }) as unknown as typeof getBridge);
 });
 
@@ -278,7 +278,7 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     getBridgeMock.mockImplementation(((name: string) => {
       if (name === 'terminal') {
         return {
-          listSessions: async () => ({
+          listSessions: () => Promise.resolve({
             ok: true,
             sessions: [
               { sessionId: 's1', pid: 100, cwd: '/tmp', running: true },
@@ -287,7 +287,7 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
           }),
         };
       }
-      return { popOut: vi.fn(async () => ({})) };
+      return { popOut: vi.fn(() => Promise.resolve({})) };
     }) as unknown as typeof getBridge);
     render(<WorkspaceSummaryCard {...baseProps()} />);
     expect(await screen.findByText('2 个会话运行中')).toBeTruthy();
@@ -295,16 +295,16 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     cleanup();
     getBridgeMock.mockImplementation(((name: string) => {
       if (name === 'terminal') {
-        return { listSessions: async () => ({ ok: true, sessions: [] }) };
+        return { listSessions: () => Promise.resolve({ ok: true, sessions: [] }) };
       }
-      return { popOut: vi.fn(async () => ({})) };
+      return { popOut: vi.fn(() => Promise.resolve({})) };
     }) as unknown as typeof getBridge);
     render(<WorkspaceSummaryCard {...baseProps()} />);
     await waitFor(() => expect(screen.queryByText(/个会话运行中/)).toBeNull());
   });
 
   it('P2-② 成本行：项目累计用量渲染（partial 口径标注；零调用不渲染）', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
+    vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve({
       ok: true,
       status: 200,
       json: async () => String(url).includes('usage-project')
@@ -317,17 +317,17 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     expect(screen.getByText(/部分估算/)).toBeTruthy();
 
     cleanup();
-    vi.stubGlobal('fetch', vi.fn(async () => ({
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
+      json: () => Promise.resolve({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }),
     })));
     render(<WorkspaceSummaryCard {...baseProps()} />);
     await waitFor(() => expect(screen.queryByText(/成本/)).toBeNull());
   });
 
   it('P2-③ 结果库占用行：有产物渲染字节+作业数，无产物不渲染', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => ({
+    vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve({
       ok: true,
       status: 200,
       json: async () => String(url).includes('project-storage')
@@ -338,23 +338,23 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
     expect(await screen.findByText(/100 MB · 4 作业/)).toBeTruthy();
 
     cleanup();
-    vi.stubGlobal('fetch', vi.fn(async () => ({
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => ({ ok: true, jobs: 0, bytes: 0, observedAt: '2026-09-10T09:00:00.000Z' }),
+      json: () => Promise.resolve({ ok: true, jobs: 0, bytes: 0, observedAt: '2026-09-10T09:00:00.000Z' }),
     })));
     render(<WorkspaceSummaryCard {...baseProps()} />);
     await waitFor(() => expect(screen.queryByText(/结果库/)).toBeNull());
   });
 
   it('P2-⑤ 未读通知徽标：渲染计数、点击标记已读（POST seen）', async () => {
-    const seenPost = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ ok: true, marked: 3 }) }));
+    const seenPost = vi.fn(() => Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ ok: true, marked: 3 }) }));
     vi.stubGlobal('fetch', vi.fn(async (url: string, opts?: { method?: string }) => {
       if (String(url).includes('/harness/notices') && (opts?.method || 'GET') === 'GET') {
-        return { ok: true, status: 200, json: async () => ({ ok: true, unread: 3, notices: [] }) };
+        return { ok: true, status: 200, json: () => Promise.resolve({ ok: true, unread: 3, notices: [] }) };
       }
       if (String(url).includes('/harness/notices/seen')) return seenPost();
-      return { ok: true, status: 200, json: async () => ({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }) };
+      return { ok: true, status: 200, json: () => Promise.resolve({ status: 'ok', calls: 0, inputTokens: 0, outputTokens: 0, estimatedCostCny: 0, costStatus: 'estimated' }) };
     }));
     render(<WorkspaceSummaryCard {...baseProps()} />);
     const badge = await screen.findByTestId('notices-unread-badge');
@@ -440,8 +440,8 @@ describe('WorkspaceSummaryCard (BLOCK-78 P1 项目运行时投影)', () => {
 
   it('失败智能体并入「需要关注」节，点击派发右栏智能体详情事件（UI-385 独立窗退役）', async () => {
     getBridgeMock.mockImplementation(((name: string) => {
-      if (name === 'windowManager') return { popOut: vi.fn(async () => ({})) };
-      if (name === 'terminal') return { listSessions: async () => ({ ok: true, sessions: [] }) };
+      if (name === 'windowManager') return { popOut: vi.fn(() => Promise.resolve({})) };
+      if (name === 'terminal') return { listSessions: () => Promise.resolve({ ok: true, sessions: [] }) };
       return {};
     }) as unknown as typeof getBridge);
     const dispatched: CustomEvent[] = [];
