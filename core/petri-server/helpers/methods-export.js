@@ -193,19 +193,19 @@ async function _renderMethodsParagraph(ctx, { language }) {
     messages.push({
       role: 'system',
       content:
-        '你是一位资深生物信息学家，擅长撰写学术论文 Methods 部分。先用中文写一段，然后用英文写一段，中间用 "---" 分隔。',
+        '你是一位严谨的学术写作助手，擅长撰写学术论文 Methods 部分（具体学科背景由请求中的数据与已安装领域包决定）。先用中文写一段，然后用英文写一段，中间用 "---" 分隔。',
     });
     messages.push({ role: 'user', content: userPromptZh + userPromptEn + dataBlock });
   } else if (lang === 'en') {
     messages.push({
       role: 'system',
-      content: 'You are a senior bioinformatician writing rigorous academic Methods paragraphs.',
+      content: 'You are a rigorous academic writing assistant drafting Methods paragraphs; the discipline comes from the supplied data and installed domain packs.',
     });
     messages.push({ role: 'user', content: userPromptEn + dataBlock });
   } else {
     messages.push({
       role: 'system',
-      content: '你是一位资深生物信息学家，擅长撰写学术论文 Methods 部分。',
+      content: '你是一位严谨的学术写作助手，擅长撰写学术论文 Methods 部分（具体学科背景由请求中的数据与已安装领域包决定）。',
     });
     messages.push({ role: 'user', content: userPromptZh + dataBlock });
   }

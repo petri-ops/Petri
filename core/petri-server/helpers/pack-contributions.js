@@ -32,6 +32,9 @@ const LIMITS = Object.freeze({
   views: 50,
   resultSurfaces: 50,
   uiActions: 200,
+  // BLOCK-339 P1 — 领域快捷意图（cue）：让核心零域词，领域语汇由包声明
+  quickIntents: 20,
+  quickIntentCues: 12,
   idLength: 64,
   titleLength: 120,
   entryLength: 300,
@@ -239,6 +242,44 @@ function normalizeUiActions(packId, provides, diagnostics) {
 }
 
 /**
+ * BLOCK-339 P1 — 领域快捷意图：`provides.quickIntents = [{ id, cues: string[], tool? }]`。
+ * 核心据此判定「用户这句是否在要求某领域的结果动作」，不再硬编码任何领域词。
+ * 无声明 = 核心零域词 = 不启用快捷判定（功能仍在工具清单里）。
+ */
+function normalizeQuickIntents(packId, provides, diagnostics) {
+  const raw = Array.isArray(provides.quickIntents) ? provides.quickIntents.slice(0, LIMITS.quickIntents) : [];
+  if (provides.quickIntents !== undefined && !Array.isArray(provides.quickIntents)) {
+    diagnostics.push(diagnostic(packId, 'quickIntents', 'invalid_shape'));
+    return [];
+  }
+  const intents = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const id = normalizeId(item && item.id);
+    if (!id) {
+      diagnostics.push(diagnostic(packId, 'quickIntents', 'missing_id'));
+      continue;
+    }
+    if (seen.has(id)) {
+      diagnostics.push(diagnostic(packId, `quickIntents/${id}`, 'duplicate_id'));
+      continue;
+    }
+    seen.add(id);
+    const cues = (Array.isArray(item.cues) ? item.cues : [])
+      .map((cue) => asSmallString(cue, 40))
+      .filter(Boolean)
+      .slice(0, LIMITS.quickIntentCues);
+    if (cues.length === 0) {
+      diagnostics.push(diagnostic(packId, `quickIntents/${id}`, 'cues_empty'));
+      continue;
+    }
+    const tool = normalizeId(item && item.tool);
+    intents.push({ id, cues, ...(tool ? { tool } : {}) });
+  }
+  return intents;
+}
+
+/**
  * 读取当前安装记录并投影工作面贡献。
  * 根级失败（安装记录不可读等）返回空 packs + diagnostic，不抛错阻断前端。
  */
@@ -273,7 +314,8 @@ function loadPackContributions(options = {}) {
     const resultSurfaces = normalizeResultSurfaces(packId, record.packRoot, provides, diagnostics);
     const uiActions = normalizeUiActions(packId, provides, diagnostics);
     const modalities = normalizePackModalities(packId, provides, diagnostics);
-    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0 && modalities.length === 0) continue;
+    const quickIntents = normalizeQuickIntents(packId, provides, diagnostics);
+    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0 && modalities.length === 0 && quickIntents.length === 0) continue;
     packs.push({
       packId,
       name: asSmallString(manifest.name, LIMITS.titleLength) || packId,
@@ -282,6 +324,7 @@ function loadPackContributions(options = {}) {
       resultSurfaces,
       uiActions,
       modalities,
+      quickIntents,
     });
   }
   return { packs, diagnostics };

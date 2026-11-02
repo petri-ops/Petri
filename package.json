@@ -2,7 +2,7 @@
   "name": "petri-desktop",
   "version": "0.0.1-rc.7",
   "private": true,
-  "description": "Petri 本地桌面版 — AI 陪伴的全组学学习与实战平台",
+  "description": "Petri 本地桌面版 — 跑在本机的通用 agent 内核 + 按需安装的垂直领域内容（本地主权 · 全链可审计 · 证据自证）",
   "author": "Petri",
   "license": "MIT",
   "main": "src/main.js",

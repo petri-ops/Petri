@@ -42,6 +42,8 @@ const BASELINE = new Set([
   // `platform` 字段（跨平台证据不互相覆盖），无行为分支。登记即留痕。
   'scripts/block338-stall-live.mjs',
   'scripts/block338-stall-repro.mjs',
+  // BLOCK-339 P6 — 人设实机腿：process.platform 仅写入证据头 platform 字段，无行为分支。
+  'scripts/block339-persona-live.mjs',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

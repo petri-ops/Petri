@@ -18,6 +18,19 @@ const {ackActToken} = require('../agent-tools');
 const dbMod = require('../db');
 
 module.exports = function mountAiLegacy(app) {
+  // BLOCK-339 P1 — `/api/ai/interpret`（marker→细胞类型等域解读）**退役**：
+  // 全仓零活消费者（前端明确注释「不接遗留 /api/ai/interpret 模板」），域能力待领域包侧
+  // 重建（plan reopen）。此处前置 410 先命中，下方旧实现保留仅作迁移参考、不再可达；
+  // act-ack / run-tool-ack 两个治理端点不受影响。
+  app.post('/api/ai/interpret', (_req, res) => {
+    res.status(410).json({
+      status: 'error',
+      error: 'interpret_retired',
+      message: '该遗留解读端点已退役；结果解读请走 result_summary 或已安装领域包声明的结果面。',
+    });
+  });
+
+  // —— 以下为退役前的实现（不可达，保留待 pack 迁移时删除）——
   app.post('/api/ai/interpret', express.json({limit: '128kb'}), async (req, res) => {
     const {analysisType, summary, topMarkers} = req.body || {};
     if (!analysisType || !summary) {

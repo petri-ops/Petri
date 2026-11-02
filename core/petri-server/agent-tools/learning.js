@@ -333,7 +333,7 @@ function _outcomesToQuestions(outcomes, count) {
 /** Optional explanation-role question generation. Best-effort. */
 async function _generateQuestionsViaLLM(doc, outcomes, count) {
   const sys =
-    '你是一位生信教学助手。基于一篇 docs 的标题、摘要和学习产出（learning_outcomes），生成 ' +
+    '你是一位教学助手。基于一篇 docs 的标题、摘要和学习产出（learning_outcomes），生成 ' +
     count +
     ' 道用来验证学生是否掌握的简短问题。' +
     '每个问题必须明确针对一条 learning_outcome（在 outcome 字段填出对应原文），' +

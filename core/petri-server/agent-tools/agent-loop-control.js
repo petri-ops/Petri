@@ -50,13 +50,40 @@ function recoverSealedResultEditArgs(name, value) {
   };
 }
 
+/**
+ * BLOCK-339 P1 — 领域语汇不再硬编码进核心（原「GO/KEGG/富集」正则属生信词表）。
+ * cue 由已安装领域包 `provides.quickIntents[].cues` 声明；**无声明 = 核心零域词 =
+ * 不启用富集快捷判定**，走通用「必须执行真实结果动作」纠正提示（工具本身照常可用）。
+ * reopen：pack 侧声明 enrichment 快捷意图（`{id:'enrichment', cues:[...], tool:'result_enrichment_from_context'}`）。
+ */
+function resolveQuickIntentCues() {
+  try {
+    const { loadPackContributions } = require('../helpers/pack-contributions');
+    const packs = loadPackContributions().packs || [];
+    const cues = [];
+    for (const pack of packs) {
+      for (const intent of pack.quickIntents || []) {
+        for (const cue of intent.cues || []) {
+          if (typeof cue === 'string' && cue.trim()) cues.push(cue.trim());
+        }
+      }
+    }
+    return cues;
+  } catch {
+    return [];
+  }
+}
+
 function isExplicitEnrichmentAction(value) {
   const text = typeof value === 'string' ? value.trim() : '';
-  if (!text || !/(?:\bGO\b|\bKEGG\b|富集)/i.test(text)) return false;
-  const presentationOnly = /(?:配色|颜色|字号|字体|布局|标注|标签|图例|展示|显示|排序)/i.test(text)
-    && !/(?:重算|重新计算|重跑|运行|执行|进行|开展|分析)/i.test(text);
+  if (!text) return false;
+  const presentationOnly = /(?:配色|颜色|字号|字体|布局|标注|标签|图例|展示|显示|排序)/.test(text)
+    && !/(?:重算|重新计算|重跑|运行|执行|进行|开展|分析)/.test(text);
   if (presentationOnly) return false;
-  return /(?:做|进行|运行|执行|开展|继续|分析|重算|重新计算|重跑)[^。！？]*(?:\bGO\b|\bKEGG\b|富集)|(?:\bGO\b|\bKEGG\b)[^。！？]*富集|富集(?:分析|计算)/i.test(text);
+  const cues = resolveQuickIntentCues();
+  if (cues.length === 0) return false;
+  if (!cues.some((cue) => text.includes(cue))) return false;
+  return /(?:做|进行|运行|执行|开展|继续|分析|重算|重新计算|重跑)/.test(text);
 }
 
 function createResultEditCompletionGuard({ expectation, required = false, requestedOutcome = '' } = {}) {
@@ -102,7 +129,7 @@ function createResultEditCompletionGuard({ expectation, required = false, reques
             reason: 'result_action_not_executed',
             message: '模型尚未执行真实结果动作，正在自动纠正执行…',
             prompt:
-              '本轮是由结果区自然语言 Composer 提交的受信结果动作，不等同于一律创建参数候选。你尚未成功执行任何与用户原始目标一致的结果动作，不能声称分析、修改或验证已完成。必须立即选择并调用正确的 Result Studio 执行工具：如果用户要求基于当前 DEG 或当前基因选择做 GO/KEGG 富集，直接调用 result_enrichment_from_context；如果用户要求修改当前结果的参数或呈现，才使用 result_edit_plan_in_context 后调用 result_changeset_create_in_context。不要把富集请求改写成候选创建，不要轮询无关或旧的 ChangeSet，也不要只复述上一轮结果。',
+              '本轮是由结果区自然语言 Composer 提交的受信结果动作，不等同于一律创建参数候选。你尚未成功执行任何与用户原始目标一致的结果动作，不能声称分析、修改或验证已完成。必须立即选择并调用正确的 Result Studio 执行工具：如果用户要的是已安装领域包声明的结果动作（结果增强类走 result_enrichment_from_context，其余领域动作走工具清单里对应执行工具），直接调用该工具；如果用户要求修改当前结果的参数或呈现，才使用 result_edit_plan_in_context 后调用 result_changeset_create_in_context。不要把领域动作请求改写成候选创建，不要轮询无关或旧的 ChangeSet，也不要只复述上一轮结果。',
           };
         }
         return {

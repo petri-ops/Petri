@@ -131,7 +131,7 @@ async function tool_read_image(args, ctx) {
   const dataUrl = dataUrlResult.dataUrl;
 
   // 调 vision provider 解读图
-  const question = (args.question || '描述这张生物信息学图的主要内容：图表类型、轴标签、数据分布、显著特征。').slice(0, 500);
+  const question = (args.question || '描述这张图的主要内容：图表类型、轴标签、数据分布、显著特征。').slice(0, 500);
   const visionBody = {
     messages: [
       {

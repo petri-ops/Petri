@@ -26,6 +26,9 @@ export const BASELINE_PATH = path.join(ROOT, 'test', 'model-surface-baselines.js
 /** BLOCK-215/217 域中性迁移后，核心模型可见面的退役词（pack 注入内容不在扫描面）。 */
 export const RETIRED_TERMS = Object.freeze([
   '单细胞', 'scRNA', 'DESeq2', 'Seurat', 'FigCode', '空间转录组',
+  // BLOCK-339 P3 — 215 漏网根因：词表只收「工具名词」，漏了「角色名词」。
+  // 人设是身份层，必须与工具词同表长期守住（核心零域词，领域语汇走 pack 通道）。
+  '生物信息', '生信', '科研伙伴',
 ]);
 
 /** 测量前自举：registry 族依赖已迁移的 DB（query-tools→db.js）；同 block244 测试姿势

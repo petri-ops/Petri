@@ -8877,7 +8877,8 @@
       "capability": "block-339-persona-debt-sweep",
       "path": "docs/block-339-persona-debt-sweep-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
+      "phase": "P6-COMPLETED",
       "canonical": true,
       "truthDomain": "block-339-persona-debt-sweep",
       "entrypoint": "docs/README.md",
@@ -8890,7 +8891,7 @@
         "generic-agent",
         "G0"
       ],
-      "notes": "产品人设历史债务清偿（用户裁决 2026-11-02「chat 仍有生信工程师人设；全方位核对清理，要通用 agent」）planned，队列 338 之后：核对=215 只清 6 个工具词漏掉人设主句（baseRole/identity×2「生物信息学分析助手」、chitchat「科研伙伴」绕主 prompt 直答=体感主因、GO/KEGG 硬编码、interpret 域功能、学习路径退役纪律、11 处生信示例）；必清 9/宜清 14/保留 6；RETIRED_TERMS 补角色词表防回潮；golden 重基准。"
+      "notes": "产品人设历史债务清偿（用户裁决 2026-11-02「chat 仍有生信工程师人设；要通用 agent」）completed（P0-P6 立项当日收口）：P0 人设一句话钉 AGENTS.md + baseRole/identity/chitchat/总结 mini-prompt 四处换通用 agent 身份；P1 methods/learning/vision 角色句中性化 + GO/KEGG 词表迁 pack `provides.quickIntents`（核心零域词、无声明走通用纠正提示）+ `/api/ai/interpret` 退役（410 前置，零活消费者）；P2 三段退役纪律删除 + 9 处域示例换中性；P3 RETIRED_TERMS 补角色词 + 新契约测 4/4（三条旁路零角色词）+ 预算棘轮有意增长 +53 登记；P4 保留清单（治理骨架）一字未改；P5 品牌对齐通用内核 + 垂直内容；P6 实机抓上游 system prompt 三轮 6/6（chitchat/主 prompt/identity）。reopen=pack quickIntents 声明、interpret helper 迁移、多语言人设。"
     },
     {
       "id": "BLOCK-340-VIDEO-INPUT-PLANE",

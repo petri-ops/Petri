@@ -15,7 +15,10 @@ test('system prompt keeps the assistant role brand-neutral and discloses the rea
     }
   );
 
-  assert.match(prompt, /生物信息学分析助手/);
+  // BLOCK-339 P0 — 人设改判：通用 agent 是身份，领域助手不是。
+  assert.match(prompt, /格物（Petri）/);
+  assert.match(prompt, /通用 agent/);
+  assert.doesNotMatch(prompt, /生物信息学分析助手/, '旧域身份句不得回潮');
   assert.doesNotMatch(prompt, /Petri 平台的 AI 助手 Copilot/);
   assert.doesNotMatch(prompt, /“Petri Copilot”是你在本产品中的工作角色/);
   assert.match(prompt, /供应商：DeepSeek/);

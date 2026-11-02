@@ -7,7 +7,7 @@
  * `globalThis._petriContentPlugins` as an array of objects with at least:
  *   {
  *     id:        'deseq2-tutorial',
- *     title:     'DESeq2 差异分析教程',
+ *     title:     '示例领域教程（由领域包声明）',
  *     docs:      [ { slug:'quickstart', title:'快速上手', file:'/abs/path/quickstart.md' } ],
  *     docsDir:   '/abs/path/to/docs',           // optional, used as scan root
  *     manifest:  { ... }                         // optional plugin manifest

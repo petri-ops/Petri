@@ -544,7 +544,7 @@ async function runAgentLoop({
     '\n- 最终回答里：页面跳转或外部链接可用 ```action 块（navigate / external_link）';
   systemPrompt += '\n- 控制工具调用次数：通常 0-3 次足够回答';
   systemPrompt +=
-    '\n- 当用户的请求是**多步骤任务**时（如"做完整 PBMC 分析"），应当先调用 plan(op="create", title, steps[])，再按步骤推进。每完成一步用 plan(op="update_step") 更新状态。';
+    '\n- 当用户的请求是**多步骤任务**时（如"做完整的端到端分析"），应当先调用 plan(op="create", title, steps[])，再按步骤推进。每完成一步用 plan(op="update_step") 更新状态。';
   systemPrompt +=
     '\n- 用户说"继续/下一步"且 system prompt 里已有 active plan 时，找到第一个 pending 步骤推进。';
   systemPrompt += '\n\n=== Act 工具的反馈识别 ===';
@@ -570,29 +570,10 @@ async function runAgentLoop({
       '\n- agent 看图（read_image）：仅用于历史轮次的图片与工具产出的结果图（toolJobId）——当前轮用户的图片已直接附在最后一条用户消息里（image_url 部件），回答当前轮图片内容时直接依据消息内图片作答，不要对当前轮用户图片调用 read_image（重复读图浪费 token）。';
   } else {
     systemPrompt +=
-      '\n- agent 看图（read_image）：当用户问图内容（如"图里上调基因集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
+      '\n- agent 看图（read_image）：当用户问图内容（如"图里某项数据集中在哪""这张图说明了什么"），调 read_image(toolJobId) 让 vision 角色模型解读图，返回的 description 可直接据此回答。token 较贵，仅用户明确问图内容时调，不要每次出图都读。';
   }
-  systemPrompt += '\n\n=== 学习路径推荐 ===';
-  systemPrompt += '\n不要调用旧版学习路径推荐工具。';
-  systemPrompt += '\n不要先解释一大段再调用，直接调用，把结果用人话讲给用户。';
-  systemPrompt += '\n用户询问后续方向时，只能依据当前项目事实回答。';
-  systemPrompt +=
-    '\n收到 suggestions 列表后，给出每条的 title / 大致耗时 / 为什么推荐它（基于 reasons），并附上点击 url。';
-  systemPrompt +=
-    '\n如果 note 字段说没有 metadata，老实告诉用户"暂时没有推荐数据"，别硬编。';
-  systemPrompt += '\n\n=== 理解验证 ===';
-  systemPrompt += '\n不要自动发起理解测验。';
-  systemPrompt +=
-    '\n收到 questions 列表后，逐道把题发给用户（一次发一道，等用户答），';
-  systemPrompt += '\n用户答完一道你给简短反馈（对/不对 + 一句修正或拓展），再发下一道。';
-  systemPrompt += '\n全部答完后做总结：哪些 outcome 看起来稳了，哪条还需补一下。';
-  systemPrompt += '\n如果工具返回 doc_not_found，老实告诉用户 url 没找到，别硬出题。';
-  systemPrompt += '\n\n=== 主动复习 ===';
-  systemPrompt +=
-    '\n如果用户之前学过的 doc 已经过去 7 天以上、且当前对话恰好处于"间歇/转场"时机（比如刚打招呼、问"接下来呢"），';
-  systemPrompt += '\n不要基于时间间隔主动发起复习。';
-  systemPrompt += '\n不要主动发起复习或学习内容推荐。';
-  systemPrompt += '\n同一会话最多触发 1-2 次复习提示，避免烦人。';
+  // BLOCK-339 P2 — 学习路径推荐 / 理解验证 / 主动复习三段退役纪律已删除：
+  // 对应工具早已下线，prompt 里再写「不要用 X」只是把已死功能留在模型上下文里。
   systemPrompt += '\n\n=== Action Card 协议 vs Tool Calling 区分 ===';
   systemPrompt +=
     '\n- ⚠️ 重要：action card（用 ```action JSON```代码块发的）只支持 navigate / external_link。分析执行必须调用 run_tool。';

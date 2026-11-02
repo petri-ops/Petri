@@ -121,7 +121,7 @@ module.exports = function registerAiChatRoute(app) {
         messages: [
           {
             role: 'system',
-            content: '你只总结已完成的生物信息学工具结果。不得调用工具、不得建议结果仍在运行、不得虚构未提供的统计量。用简洁中文说明关键结果、产物和下一步解读重点。',
+            content: '你只总结已完成的工具结果。不得调用工具、不得建议结果仍在运行、不得虚构未提供的统计量。用简洁中文说明关键结果、产物和下一步解读重点。',
           },
           {
             role: 'user',

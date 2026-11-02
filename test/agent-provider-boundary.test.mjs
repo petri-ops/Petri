@@ -123,6 +123,25 @@ test('result actions may complete through a trusted enrichment Job but candidate
 });
 
 test('explicit enrichment recovery forces only the sealed context enrichment tool', () => {
+  // BLOCK-339 P1 — 核心零域词：领域 cue 由已安装领域包 `provides.quickIntents` 声明。
+  // 本测注入一个声明了富集 cue 的假包，验证「有声明→强制 enrichment 工具」契约不变；
+  // 末尾再验「无声明→核心不猜领域词，走通用 required」新契约。
+  const pathMod = require('node:path');
+  const urlMod = require('node:url');
+  const packPath = pathMod.resolve(pathMod.dirname(urlMod.fileURLToPath(import.meta.url)), '..', 'core', 'petri-server', 'helpers', 'pack-contributions.js');
+  const originalPack = require.cache[packPath];
+  require.cache[packPath] = {
+    id: packPath,
+    filename: packPath,
+    loaded: true,
+    exports: {
+      loadPackContributions: () => ({
+        packs: [{ packId: 'test-pack', quickIntents: [{ id: 'enrichment', cues: ['富集', 'GO', 'KEGG'] }] }],
+        diagnostics: [],
+      }),
+    },
+  };
+  try {
   const enrichment = createResultEditCompletionGuard({
     expectation: 'result_action',
     requestedOutcome: '用当前差异基因做 GO 和 KEGG 富集。',
@@ -146,6 +165,20 @@ test('explicit enrichment recovery forces only the sealed context enrichment too
     edit.assessTerminal();
     assert.equal(edit.requiredToolChoice(), 'required');
     assert.equal(edit.snapshot().target, 'result_action');
+  }
+
+  // 无 pack 声明（核心零域词）→ 不猜领域词，走通用 required；工具本身仍可用
+  delete require.cache[packPath];
+  const generic = createResultEditCompletionGuard({
+    expectation: 'result_action',
+    requestedOutcome: '用当前差异基因做 GO 和 KEGG 富集。',
+  });
+  generic.assessTerminal();
+  assert.equal(generic.requiredToolChoice(), 'required', '无领域包声明时核心不得靠内置域词判定');
+  assert.equal(generic.snapshot().target, 'result_action');
+  } finally {
+    if (originalPack) require.cache[packPath] = originalPack;
+    else delete require.cache[packPath];
   }
 });
 

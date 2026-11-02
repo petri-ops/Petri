@@ -1,0 +1,44 @@
+{
+  "name": "persona-live",
+  "block": "BLOCK-339",
+  "phase": "P6",
+  "platform": "darwin",
+  "coverage": "provider + ModelGateway + HTTP（抓上游实际收到的 system prompt；未经 Express 进程）",
+  "startedAt": "2026-11-02T12:40:03.903Z",
+  "finishedAt": "2026-11-02T12:40:03.917Z",
+  "assertions": [
+    {
+      "name": "R1_chitchat_zero_role_terms",
+      "pass": true,
+      "detail": "systemLen=138 hits=无"
+    },
+    {
+      "name": "R1_chitchat_persona_present",
+      "pass": true,
+      "detail": "正面人设（格物（Petri）· 通用 agent）在场"
+    },
+    {
+      "name": "R2_main_prompt_zero_role_terms",
+      "pass": true,
+      "detail": "systemLen=687 hits=无"
+    },
+    {
+      "name": "R2_main_prompt_persona_present",
+      "pass": true,
+      "detail": "正面人设（格物（Petri）· 通用 agent）在场"
+    },
+    {
+      "name": "R3_identity_block_zero_role_terms",
+      "pass": true,
+      "detail": "systemLen=978 hits=无"
+    },
+    {
+      "name": "R3_identity_block_persona_present",
+      "pass": true,
+      "detail": "正面人设（格物（Petri）· 通用 agent）在场"
+    }
+  ],
+  "allPass": true,
+  "passed": 6,
+  "total": 6
+}

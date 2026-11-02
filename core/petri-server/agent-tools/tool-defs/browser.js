@@ -157,7 +157,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "read_image",
-      "description": "读取一张图交给多模态模型解读图内容。两种输入二选一：\n1) toolJobId：读取某个 tool_job 结果里的图（PNG）。run_tool 跑完出图后，如果你需要看图内容才能回答（如\"图里上调基因集中在哪？\"），调本工具拿图；可选 fileName 指定哪张图，不传读第一张 plot。\n2) filePath：读取项目工作区里的静态图片（相对路径，如 \"figures/map.png\"）。当用户在消息里引用了工作区图片（消息开头有 【引用图片 …】 块且含 path: 行）时，用该 path 调本工具看图。\n注意：token 消耗较高，仅在用户明确问图内容或引用图片提问时调，不要每次出图都读。",
+      "description": "读取一张图交给多模态模型解读图内容。两种输入二选一：\n1) toolJobId：读取某个 tool_job 结果里的图（PNG）。run_tool 跑完出图后，如果你需要看图内容才能回答（如\"图里某项数据集中在哪？\"），调本工具拿图；可选 fileName 指定哪张图，不传读第一张 plot。\n2) filePath：读取项目工作区里的静态图片（相对路径，如 \"figures/map.png\"）。当用户在消息里引用了工作区图片（消息开头有 【引用图片 …】 块且含 path: 行）时，用该 path 调本工具看图。\n注意：token 消耗较高，仅在用户明确问图内容或引用图片提问时调，不要每次出图都读。",
       "parameters": {
         "type": "object",
         "properties": {

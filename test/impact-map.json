@@ -3,6 +3,24 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block339-persona-debt",
+      "note": "BLOCK-339 人设历史债清偿：核心 system prompt / chitchat / identity 零角色域词 + 退役词表补角色词 + 部署入口退役（interpret）。脚本=人设实机腿（抓上游实际收到的 system prompt），只随本包定向测试与文档门。",
+      "patterns": [
+        "scripts/block339-persona-live.mjs",
+        "acceptance/block-339/**"
+      ],
+      "tests": [
+        "test/block339-persona-zero-domain.test.mjs",
+        "test/block325-model-surface-budget.test.mjs",
+        "test/block188-context-snapshot.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "block338-stall-watchdog",
       "note": "BLOCK-338 流式 stall 看门狗：gateway 单点接入 + llm-client 首 token 重试 + reason 词表；两个脚本=复现证据（真 provider + mock SSE）与实机三场景，只随本包定向测试与文档门。",
       "patterns": [

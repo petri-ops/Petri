@@ -1,6 +1,6 @@
 ---
 capability: block-339-persona-debt-sweep
-status: planned
+status: completed
 goal: 产品人设历史债务全方位清偿（用户裁决 2026-11-02「chat 回复仍有生信工程师角色定位与提示词限制；全方位核对清理，精准定位产品形态，要通用 agent 能力」）：核对结论=BLOCK-215 清的是 6 个工具词，漏掉人设主句本身——baseRole 第一句仍是「生物信息学分析助手」、runtime identity 块两句同、闲聊快路径「科研伙伴」绕过主 prompt 直答（打招呼即触发=用户体感来源）；另有 GO/KEGG 硬编码意图分支、interpret/ai-legacy 域功能、学习路径三段退役纪律、PBMC/基因名类示例散落 chat+agent 共用注入源。本包按「必清/宜清/保留」三档清偿，定义通用 agent 人设一句话并钉进基线。
 acceptance:
   - P0 人设定义（钉死，后续一切文案以此为准）：「格物（Petri）是跑在你机器上的通用 agent——本地主权、全链可审计、证据自证；以目标为输入、工具为手足、真实产物为交付；领域能力（生信等）由已安装领域包按需放大，不是与生俱来的身份。」写入 AGENTS.md 产品个性纪律 + system-prompt baseRole；identity 块「生物信息学分析助手」两句同改；chitchat 「科研伙伴」改中性；ai-chat.js:124 总结 mini-prompt 去域。
@@ -48,3 +48,25 @@ reopen: 领域包「快捷意图」接口（GO/KEGG 类意图泛化后的 pack �
 ## 3. 红线
 
 - 不删治理纪律；不把域能力直接删除（迁 pack 或留 reopen）；AGENTS.md 人设句一次写定；golden 重基准必须显式留痕；G1+ 不外推。
+
+## 4. 收口记录（2026-11-02 立项当日 P0→P6 全收口）
+
+**P0 人设钉死**：`AGENTS.md` 产品个性纪律新增「人设一句话（改动需用户裁决）」；`system-prompt.js` baseRole 换为通用 agent 句；identity 块两句去域（「工作角色是生物信息学分析助手」→「以格物（Petri）通用 agent 的身份工作」、「作为你的本地 agent 运行」）；`chitchat-fast-path.js`「科研伙伴」→「跑在用户机器上的通用 agent」；`ai-chat.js` 总结 mini-prompt 去域。
+
+**P1 必清**：methods-export（中/英三处「资深生物信息学家」→ 学术写作助手，学科背景由数据与已装领域包决定）、learning（「生信教学助手」→ 教学助手）、vision-tools 默认问句、**agent-loop-control 的 GO/KEGG 词表与硬编码分支**改为 pack `provides.quickIntents[].cues` 声明（新增 pack 贡献通道：LIMITS 20/12 + 校验 + diagnostic），无声明时核心零域词、走通用「必须执行真实结果动作」纠正提示（工具照常可用）；`/api/ai/interpret` **退役**（前置 410 + 旧实现保留不可达；全仓零活消费者，act-ack/run-tool-ack 两个治理端点不受影响）。
+
+**P2 宜清**：agent-runner 学习路径/理解验证/主动复习三段退役纪律删除（-19 行）；PBMC/DEG 类示例 9 处换中性（agent-runner ×2、tool-defs/session ×2、tool-defs/browser、chat-summary、preflight、system-prompt、user-facts ×3、content-plugins）；`run_tool` 描述改「能力由已安装领域包声明」。
+
+**P3 基线防回潮**：`RETIRED_TERMS` 补角色词（`生物信息|生信|科研伙伴`，215 漏网根因=词表只收工具名词）；新增契约测 `test/block339-persona-zero-domain.test.mjs` **4/4**（主 prompt / identity 块 / chitchat 三条旁路零角色词 + 正面人设在场）；预算棘轮按有意增长登记 `systemPromptChars 940→993`（+53，理由=通用 agent 人设句取代旧域身份句，已在 commit 说明；toolDefsChars 经压缩回落到基线下）；golden `context_snapshot` 现状是**行为契约**（断言「文案变则指纹变」）而非固定值，故无需重基准——如实记录。
+
+**P4 保留清单（不误删治理必需）**：identity 透明披露四句（不冒充供应商/Copilot、必须说出真实供应商与模型）、principles 的反谄媚与拒答纪律、只读与审批边界、`ERROR_I18N`、pack 侧 coding-playbook 角色句、FirstRunRoleReveal——**一字未改**。
+
+**P5 品牌对齐**：`package.json` description 与 `AGENTS.md` 定位句改为「跑在本机的通用 agent 内核 + 按需安装的垂直领域内容（本地主权 · 全链可审计 · 证据自证）」。
+
+**P6 实机**：`scripts/block339-persona-live.mjs` 真 provider + 真 HTTP mock，**抓上游实际收到的 system prompt** 三轮（chitchat 138 字 / 主 prompt 687 字 / identity 978 字）——零角色词 + 正面人设在场，**6/6 allPass**（`acceptance/block-339/persona-live.json`）。
+
+**门禁**：定向 1680 项 1646 绿 / 26 红——**26 条全部属既有「P4 配置中心运行时门控家族」**（block112 intent / block119 report-guard / block111 marker，实现与测试 HEAD 均未改，已在 AUDIT-LOG 🟡 扩范围登记）与 1 条 p6 脏树（提交自愈）；`quality:lint` 0 error。
+
+**未做 / reopen**：段级「身份句 A1-A7」的全仓普查以本包扫描面为界（生产 prompt/工具描述/示例已清，源码注释里的历史说明保留）；`interpret` helper 与 block111 契约测试保留（路由已退役，待 pack 侧重建 marker→类别能力时一并迁移）；领域包 `quickIntents` 声明（bio pack 仓未升级，升级后富集快捷判定自动恢复）；多语言人设（v1 中文）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

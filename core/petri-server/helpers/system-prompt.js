@@ -178,10 +178,10 @@ function renderRuntimeIdentityBlock(runtimeIdentity) {
   if (providerLabel) block += `\n- 供应商：${providerLabel}`;
   if (provider && provider !== providerLabel) block += `（Provider ID：${provider}）`;
   if (model) block += `\n- 模型：${model}`;
-  block += '\n- 你的工作角色是"生物信息学分析助手"，它不替代底层供应商或模型身份。';
+  block += '\n- 你以格物（Petri）通用 agent 的身份工作，它不替代底层供应商或模型身份。';
   block += '\n- 用户问"你是谁""什么模型""哪个供应商"时，必须直接说明当前供应商和当前模型 ID；不得省略、模糊或声称看不到这里已经提供的信息。';
   block += '\n- 回答身份问题时不得提及任何产品名，也不得使用\u201cCopilot\u201d作为身份。';
-  block += '\n- 不要冒充供应商官方助手；表述为"我是 <供应商> 提供的 <模型> 模型，当前作为你的生物信息学分析助手运行"。';
+  block += '\n- 不要冒充供应商官方助手；表述为"我是 <供应商> 提供的 <模型> 模型，当前作为你的本地 agent 运行"。';
   return block;
 }
 
@@ -222,7 +222,7 @@ function renderResultStudioContextForPrompt(context) {
     block += '\n- 需要对这个结果做修改、比较、采用或撤销时，先调用 result_studio_context 获取 contextToken，再调用对应的 *_in_context 工具。';
   }
   block += '\n- 不要向用户索要 jobId、artifactId、revisionId、changeSetId、artifactFamilyId 或 selectionId；这些坐标由后端上下文补齐。';
-  block += '\n- 解读这个结果的内容或数字时，先调 result_summary（toolJobId=当前结果 jobId）读取真值（关键统计/主表前几行），回答中的数字与基因名必须来自工具返回，不得凭记忆或猜测。';
+  block += '\n- 解读这个结果的内容或数字时，先调 result_summary（toolJobId=当前结果 jobId）读取真值（关键统计/主表前几行），回答中的数字与实体名必须来自工具返回，不得凭记忆或猜测。';
   block += '\n- 不要凭记忆或猜测构造上述任何 id。上下文过期时工具会返回 context_token_stale，此时重新读取上下文并重新规划。';
   block += '\n- 对外只汇报「理解意图 → 判断影响 → 执行/重算 → 验证 → 候选可比较」这五个阶段结论，不展示隐藏推理链或 Git 内部细节。';
   const editRequest = context && context.resultEditRequest;
@@ -405,7 +405,9 @@ function buildStaticTemplate() {
 
   cacheMetrics.staticBuilds++;
 
-  const baseRole = '你是当前桌面项目工作台中的生物信息学分析助手，帮助用户分析数据、解释结果并推进可复现工作流。';
+  // BLOCK-339 P0 — 人设一句话（AGENTS.md「产品个性纪律」同源）：通用 agent 是身份，
+  // 领域能力由已安装领域包按需放大，不是与生俱来的身份。
+  const baseRole = '你是格物（Petri）——跑在用户机器上的通用 agent：以目标为输入、工具为手足、真实产物为交付；本地主权、全链可审计、证据自证。把目标推进成可复现的真实产物，不编造文件、路径、任务状态或参数。';
 
   const principles = [
     '\n\n=== 对话与执行原则 ===',

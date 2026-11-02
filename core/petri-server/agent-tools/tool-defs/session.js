@@ -59,7 +59,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "plan",
-      "description": "PLAN_TOOL_v1 — 持久化任务计划。当用户给出一个**多步骤的任务**（例如\"做完整的 PBMC 分析\"或\"对比两种方案\"）时，应当先创建一个 plan，再按步骤执行。Plan 跨会话保存，用户和 AI 都能看到推进进度。\n\n操作： create（创建新 plan，需要 title + steps[]；计划模式下必须传 draft=true + specMd）; update_step（更新某 step 的状态/结果）; update_spec（BLOCK-55：更新 draft 计划的 specMd 正文）; propose_revision（BLOCK-55：执行期提交修订案 steps[]，用户批准后替换）; list（列用户所有 plan）; get（按 id 获取详情）; pause / resume（暂停/恢复整个 plan）; complete / cancel（完成或取消 plan）。",
+      "description": "PLAN_TOOL_v1 — 持久化任务计划。当用户给出一个**多步骤的任务**（例如\"做完整的端到端分析\"或\"对比两种方案\"）时，应当先创建一个 plan，再按步骤执行。Plan 跨会话保存，用户和 AI 都能看到推进进度。\n\n操作： create（创建新 plan，需要 title + steps[]；计划模式下必须传 draft=true + specMd）; update_step（更新某 step 的状态/结果）; update_spec（BLOCK-55：更新 draft 计划的 specMd 正文）; propose_revision（BLOCK-55：执行期提交修订案 steps[]，用户批准后替换）; list（列用户所有 plan）; get（按 id 获取详情）; pause / resume（暂停/恢复整个 plan）; complete / cancel（完成或取消 plan）。",
       "parameters": {
         "type": "object",
         "properties": {
@@ -307,7 +307,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "run_tool",
-      "description": "执行 Petri 的分析工具，真实跑 R/Python 脚本出图出表（不是模拟）。\n六个操作：\n - op=list：不带 toolId 时列紧凑工具目录；带 toolId 时返回该工具完整参数契约。先列目录再精确查询，禁止猜测工具 ID\n - op=plan：按标准模板生成 Agent 主导的多步骤计划，只规划、不自动执行\n - op=status：从真实 tool jobs 和 artifact truth 重建计划状态\n - op=next：返回当前可执行步骤与恢复建议，不自动执行\n - op=bind_artifact：校验上一步 tool_job 的 artifact truth，并把真实产物绑定到下游输入\n - op=run：执行指定工具，传 toolId + params\n可用工具以 op=list 返回的目录为准（涵盖差异分析、绘图、降维等模块）。\n用户提出分析、绘图或计算相关请求时使用。\n注意：file 类型参数传**本地绝对路径**（如 /Users/.../input.csv）。执行返回 jobDir + 输出文件路径 + toolJobId，可读取出图/表。\nplan 联动：跑完返回 toolJobId，若当前在 plan 推进中，立刻调 plan(op=update_step, toolJobId=<返回的 toolJobId>) 绑定，分析状态（completed/failed）自动同步 step。\n自动化边界：完全访问模式下，项目内可复现分析直接执行，由 Agent 检查结果并在安全范围内诊断重试，不弹二次确认。旧调用或非完全访问边界仍可能返回 {needApproval, ackToken}，此时必须遵守确认协议。",
+      "description": "执行 Petri 的分析工具，真实跑 R/Python 脚本出图出表（不是模拟）。\n六个操作：\n - op=list：不带 toolId 时列紧凑工具目录；带 toolId 时返回该工具完整参数契约。先列目录再精确查询，禁止猜测工具 ID\n - op=plan：按标准模板生成 Agent 主导的多步骤计划，只规划、不自动执行\n - op=status：从真实 tool jobs 和 artifact truth 重建计划状态\n - op=next：返回当前可执行步骤与恢复建议，不自动执行\n - op=bind_artifact：校验上一步 tool_job 的 artifact truth，并把真实产物绑定到下游输入\n - op=run：执行指定工具，传 toolId + params\n可用工具以 op=list 返回的目录为准（能力由已安装领域包声明）。\n用户提出分析、绘图或计算相关请求时使用。\n注意：file 类型参数传**本地绝对路径**（如 /Users/.../input.csv）。执行返回 jobDir + 输出文件路径 + toolJobId，可读取出图/表。\nplan 联动：跑完返回 toolJobId，若当前在 plan 推进中，立刻调 plan(op=update_step, toolJobId=<返回的 toolJobId>) 绑定，分析状态（completed/failed）自动同步 step。\n自动化边界：完全访问模式下，项目内可复现分析直接执行，由 Agent 检查结果并在安全范围内诊断重试，不弹二次确认。旧调用或非完全访问边界仍可能返回 {needApproval, ackToken}，此时必须遵守确认协议。",
       "parameters": {
         "type": "object",
         "properties": {

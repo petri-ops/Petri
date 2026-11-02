@@ -41,7 +41,7 @@ const R_ERROR_TRANSLATIONS = [
   },
   {
     pattern: /duplicate 'row\.names'/i,
-    msg: '行名重复：数据文件中有重复的基因名或样本名，请去重后重新上传。',
+    msg: '行名重复：数据文件中有重复的行标识或列标识，请去重后重新上传。',
   },
   {
     pattern: /non-numeric argument to binary operator/i,

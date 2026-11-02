@@ -97,7 +97,7 @@ async function summarizeMessages(userId, projectId, oldMessages, existingSummary
     .join('\n\n');
 
   const sysPrompt =
-    '你是对话归档助手。把下面这段较早的对话压缩成中文要点摘要，保留：用户研究的对象、关心的问题、关键结论、用过的参数、提到过的实体（cluster id、基因名、数据集名等）。\n\n要求：\n- 不超过 500 字\n- 用 "- " 列出，每点一句话\n- 时间顺序保留\n- 如果与已有摘要有重复，合并而非简单拼接\n- 保留专有名词和数字 精确';
+    '你是对话归档助手。把下面这段较早的对话压缩成中文要点摘要，保留：用户研究的对象、关心的问题、关键结论、用过的参数、提到过的实体（标识符、字段名、数据集名等）。\n\n要求：\n- 不超过 500 字\n- 用 "- " 列出，每点一句话\n- 时间顺序保留\n- 如果与已有摘要有重复，合并而非简单拼接\n- 保留专有名词和数字 精确';
 
   const userPrompt = existingSummary
     ? '已有摘要：\n' + existingSummary + '\n\n新增对话：\n' + lines + '\n\n请输出合并后的新摘要。'
