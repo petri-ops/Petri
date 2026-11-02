@@ -1,0 +1,74 @@
+{
+  "name": "block333-ui639a-constraint-editor-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-02T05:33:11.620Z",
+  "finishedAt": "2026-11-02T05:33:41.966Z",
+  "assertions": [
+    {
+      "name": "U0_spa_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mvyto1ir_1l1m?file=scene.scene3d.json"
+    },
+    {
+      "name": "U1_seed_project",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mvytp303_8txn\"}"
+    },
+    {
+      "name": "U2_file_preview_offers_3d_open",
+      "pass": true,
+      "detail": "在 3D 模型打开"
+    },
+    {
+      "name": "U3_surface_and_editor_visible",
+      "pass": true,
+      "detail": "form"
+    },
+    {
+      "name": "U4_editor_has_two_node_two_face_selects",
+      "pass": true,
+      "detail": "{\"count\":4,\"options\":[[\"base\",\"tower\"],[\"+x\",\"-x\",\"+y\",\"-y\",\"+z\",\"-z\"],[\"base\",\"tower\"],[\"+x\",\"-x\",\"+y\",\"-y\",\"+z\",\"-z\"]]}"
+    },
+    {
+      "name": "U5_selects_have_two_nodes",
+      "pass": true,
+      "detail": "{\"ok\":true,\"nodes\":[\"base\",\"tower\"]}"
+    },
+    {
+      "name": "U6_face_selects_populated",
+      "pass": true,
+      "detail": "[[\"base\",\"tower\"],[\"+x\",\"-x\",\"+y\",\"-y\",\"+z\",\"-z\"],[\"base\",\"tower\"],[\"+x\",\"-x\",\"+y\",\"-y\",\"+z\",\"-z\"]]"
+    },
+    {
+      "name": "U6b_submit_reported_no_error",
+      "pass": true,
+      "detail": "{\"error\":\"\",\"values\":[\"base\",\"+x\",\"tower\",\"-x\"]}"
+    },
+    {
+      "name": "U7_constraint_written_to_scene_file",
+      "pass": true,
+      "detail": "{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"tower\",\"aFace\":\"+x\",\"bFace\":\"-x\"}"
+    },
+    {
+      "name": "U8_ui_reflects_constraint_without_error",
+      "pass": true,
+      "detail": "{\"existing\":\"贴合 base·+x ↔ tower·-x\\n移除\",\"error\":\"\"}"
+    },
+    {
+      "name": "U9a_same_node_rejected_by_guard",
+      "pass": true,
+      "detail": "{\"error\":\"请选择两个不同的节点。\",\"unchanged\":true}"
+    },
+    {
+      "name": "U9b_invalid_constraint_fails_closed",
+      "pass": true,
+      "detail": "{\"error\":\"constraint 1（mate）需要法向相反的同轴平面（+y/+y）\",\"unchanged\":true}"
+    },
+    {
+      "name": "U10_constraint_removed_from_scene_file",
+      "pass": false,
+      "detail": "{\"error\":\"constraint 1（mate）需要法向相反的同轴平面（+y/+y）\",\"existing\":\"贴合 base·+x ↔ tower·-x\\n移除\",\"constraints\":[{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"tower\",\"aFace\":\"+x\",\"bFace\":\"-x\"}]}"
+    }
+  ],
+  "allPass": false
+}

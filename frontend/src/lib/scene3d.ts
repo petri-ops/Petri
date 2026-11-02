@@ -346,11 +346,13 @@ function validateModifierReferencesForView(rawNodes: unknown[], errors: string[]
 const CONSTRAINT_KINDS: readonly string[] = ['align', 'distance', 'angle', 'mate'];
 const MATE_FACES: readonly string[] = ['+x', '-x', '+y', '-y', '+z', '-z'];
 const CONSTRAINT_AXES: readonly string[] = ['x', 'y', 'z'];
+// BLOCK-333 — `id` 与后端 CONSTRAINT_FIELDS 逐值一致（约束可寻址：移除按 id 定位）。
+// 跨语言一致性由 test/block322-p3-constraints.test.mjs 机械锁死，两侧必须同改。
 const CONSTRAINT_FIELDS: Record<string, readonly string[]> = {
-  align: ['kind', 'a', 'b', 'axis'],
-  distance: ['kind', 'a', 'b', 'axis', 'value'],
-  angle: ['kind', 'a', 'b', 'axis', 'value'],
-  mate: ['kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
+  align: ['id', 'kind', 'a', 'b', 'axis'],
+  distance: ['id', 'kind', 'a', 'b', 'axis', 'value'],
+  angle: ['id', 'kind', 'a', 'b', 'axis', 'value'],
+  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
 };
 const MAX_CONSTRAINTS = 200;
 

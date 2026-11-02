@@ -8747,8 +8747,28 @@
         "G0"
       ],
       "notes": "UI 台账证据债分诊与状态规范化（用户裁决 2026-11-02「行的 按照建议推进」，承接 Jev 建议 ui-evidence-debt）completed：段首状态解析得可信计数（grep 218 → 真债 29：live-missing 6 + blocked 23，unknown 0）+ 13 处状态词规范化（判销/改判均有台账内既有裁决支撑）+ 状态契约与债上限棘轮 4/4。补腿按分诊表另立批次。"
+    },
+    {
+      "id": "BLOCK-333-UI-LEG-LIVE-BATCH",
+      "capability": "block-333-ui-leg-live-batch",
+      "path": "docs/block-333-ui-leg-live-batch-plan.md",
+      "kind": "work-package",
+      "status": "in_progress",
+      "canonical": true,
+      "truthDomain": "block-333-ui-leg-live-batch",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "archive_after_completion",
+      "tags": [
+        "ui-ledger",
+        "live-acceptance",
+        "model3d",
+        "constraint",
+        "G0"
+      ],
+      "notes": "UI 补腿批第一批=UI-639a 约束编辑器工作区实机腿（用户裁决 2026-11-02「行 按照建议继续推进」）：flow 12/13（U0-U9b 全绿，U10 待 dev 栈重启）；实机抓到真缺陷=约束建出来删不掉（add_constraint 不分配 id + 白名单不收 id），已修（id 为一等字段 + 跨语言白名单同步）+ 契约 5/5。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 444
+  "documentCount": 445
 }

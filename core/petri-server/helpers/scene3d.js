@@ -47,11 +47,15 @@ const MATE_PLANAR_FACES = Object.freeze({
   cylinder: ['+z', '-z'],
   plane: ['+z', '-z'],
 });
+// BLOCK-333 — `id` 纳入白名单：`remove_constraint` 与 UI 的「移除」按钮本就按 `c.id` 寻址
+// （scene3d.js remove_constraint / SceneConstraintEditor `disabled={!row.id}`），但创建侧从不
+// 分配 id、白名单也不收 id ⇒ 约束一旦建出就再也删不掉（实机腿 UI-639a 抓到）。这里是**补回
+// 既有契约**而不是新能力：id 可选（用户手写 SceneSpec 可省略），创建时自动分配唯一 id。
 const CONSTRAINT_FIELDS = {
-  align: ['kind', 'a', 'b', 'axis'],
-  distance: ['kind', 'a', 'b', 'axis', 'value'],
-  angle: ['kind', 'a', 'b', 'axis', 'value'],
-  mate: ['kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
+  align: ['id', 'kind', 'a', 'b', 'axis'],
+  distance: ['id', 'kind', 'a', 'b', 'axis', 'value'],
+  angle: ['id', 'kind', 'a', 'b', 'axis', 'value'],
+  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
 };
 /** 每条约束只改写 b 的指定分量：align/distance/mate 定位置，angle 定姿态。 */
 const CONSTRAINT_TARGET_FIELD = { align: 'position', distance: 'position', angle: 'rotation', mate: 'position' };
@@ -411,6 +415,7 @@ function validateConstraints(constraints, nodesById, errors) {
     errors.push('约束数量超限');
     return;
   }
+  const seenIds = new Set();
   constraints.forEach((constraint, index) => {
     const where = `constraints[${index}]`;
     if (!isPlainObject(constraint)) {
@@ -423,6 +428,12 @@ function validateConstraints(constraints, nodesById, errors) {
     }
     for (const key of Object.keys(constraint)) {
       if (!CONSTRAINT_FIELDS[constraint.kind].includes(key)) errors.push(`${where}.${key} 不在 ${constraint.kind} 白名单`);
+    }
+    // BLOCK-333 — id 可选但必须安全且唯一（remove_constraint 按 id 寻址，重复会让移除删错条）。
+    if (constraint.id !== undefined) {
+      if (!isSafeId(constraint.id)) errors.push(`${where}.id 非法`);
+      else if (seenIds.has(constraint.id)) errors.push(`${where}.id 重复`);
+      else seenIds.add(constraint.id);
     }
     if (!isSafeId(constraint.a) || !isSafeId(constraint.b)) errors.push(`${where} 节点 id 非法`);
     else if (!nodesById.has(constraint.a) || !nodesById.has(constraint.b)) errors.push(`${where} 引用未知节点`);
@@ -985,7 +996,17 @@ function applySceneOperations(input, operations) {
       if (!isPlainObject(operation.constraint)) return { ok: false, error: 'operation_invalid' };
       base.constraints = Array.isArray(base.constraints) ? base.constraints : [];
       if (base.constraints.length >= (LIMITS.maxConstraints || 200)) return { ok: false, error: 'constraints_limit' };
-      base.constraints.push(clone(operation.constraint));
+      // BLOCK-333 — 创建即分配可寻址 id（缺省 `cN`，与既有约束去重）；显式传入的 id 不得重复，
+      // 否则 remove_constraint 会误删第一条同 id 约束（按 id 匹配的第一条）。
+      const nextConstraint = clone(operation.constraint);
+      if (nextConstraint.id === undefined) {
+        let seq = base.constraints.length + 1;
+        while (base.constraints.some((c) => isPlainObject(c) && c.id === `c${seq}`)) seq += 1;
+        nextConstraint.id = `c${seq}`;
+      } else if (base.constraints.some((c) => isPlainObject(c) && c.id === nextConstraint.id)) {
+        return { ok: false, error: 'duplicate_constraint_id' };
+      }
+      base.constraints.push(nextConstraint);
       // v2b — 约束创建即求值（fail-closed）：不可解/冲突/越界的约束整个 apply 拒收，
       // 不落一个「存进去但装配不动」的死约束。校验=applyConstraints 同源单源。
       const evaluation = applyConstraints(base);

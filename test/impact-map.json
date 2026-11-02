@@ -6972,6 +6972,21 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "governance-gate"
+    },
+    {
+      "id": "block333-ui-leg-live-batch",
+      "note": "BLOCK-333 UI 补腿批：约束可寻址（id）+ UI-639a 实机腿（文件预览→3D 工作面→约束编辑器）。",
+      "patterns": [
+        "core/petri-server/helpers/scene3d.js",
+        "frontend/src/lib/scene3d.ts",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block333-ui639a-constraint-editor-live.cjs",
+        "acceptance/block-333/**"
+      ],
+      "tests": [
+        "test/block333-constraint-id-addressable.test.mjs",
+        "test/block322-p3-constraints.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }
