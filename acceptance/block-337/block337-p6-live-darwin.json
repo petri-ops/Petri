@@ -3,18 +3,18 @@
   "block": "BLOCK-337",
   "phase": "P6",
   "platform": "darwin",
-  "startedAt": "2026-11-02T17:28:13.890Z",
-  "finishedAt": "2026-11-02T17:28:44.956Z",
+  "startedAt": "2026-11-02T17:41:18.187Z",
+  "finishedAt": "2026-11-02T17:41:48.295Z",
   "backend": {
     "port": 3199,
-    "pid": 87349,
-    "mockUpstreamPort": 61583
+    "pid": 3674,
+    "mockUpstreamPort": 62542
   },
   "assertions": [
     {
       "name": "L0_isolated_backend_and_mock_upstream",
       "pass": true,
-      "detail": "backend :3199 + mock upstream :61583"
+      "detail": "backend :3199 + mock upstream :62542"
     },
     {
       "name": "L0_model_profile_seeded",
@@ -24,27 +24,27 @@
     {
       "name": "L1_project_software",
       "pass": true,
-      "detail": "status=200 id=p_mvzj8n27_o2wk path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-software"
+      "detail": "status=200 id=p_mvzjpg89_joyw path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-3gIQqp/ws-software"
     },
     {
       "name": "L1_project_bio",
       "pass": true,
-      "detail": "status=200 id=p_mvzj8n2a_7khg path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-bio"
+      "detail": "status=200 id=p_mvzjpg8d_eaz7 path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-3gIQqp/ws-bio"
     },
     {
       "name": "L1_project_code",
       "pass": true,
-      "detail": "status=200 id=p_mvzj8n2c_0kas path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-code"
+      "detail": "status=200 id=p_mvzjpg8e_6w5o path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-3gIQqp/ws-code"
     },
     {
       "name": "L1_project_blank",
       "pass": true,
-      "detail": "status=200 id=p_mvzj8n2d_9xll path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-x7yz1x/ws-blank"
+      "detail": "status=200 id=p_mvzjpg8g_hzic path=/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-b337-live-3gIQqp/ws-blank"
     },
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=995f345d-b2b4-45e3-a9bc-88aebc6d2f1e"
+      "detail": "status=200 taskId=46eb60b5-0daf-46e0-9196-e5e5fc1fe75a"
     },
     {
       "name": "L1_software_governed_loaded",
@@ -64,7 +64,7 @@
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=32f594c0-8188-473f-936e-ac9077524c43"
+      "detail": "status=200 taskId=510d71cb-655a-43dc-8761-adf06379c6ab"
     },
     {
       "name": "L1_bio_pack_loaded",
@@ -79,7 +79,7 @@
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=e65463d9-c88b-4b59-aba0-9dbcb75b9d1b"
+      "detail": "status=200 taskId=67ab4824-4f82-41a2-ae07-940be6119ac6"
     },
     {
       "name": "L1_code_light_loaded",
@@ -89,7 +89,7 @@
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=8f864bea-a8f5-4979-b895-4e579aa21ad7"
+      "detail": "status=200 taskId=b7cf82ec-b07d-4d1f-a263-28c8a089fc45"
     },
     {
       "name": "L1_blank_zero_rules",
@@ -99,7 +99,7 @@
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=660229bd-5604-42ef-acee-71d305a49a74"
+      "detail": "status=200 taskId=d93ce228-5b7d-4eda-93ad-5047764fbe53"
     },
     {
       "name": "L2_forged_workspace_path_stripped",
@@ -109,7 +109,7 @@
     {
       "name": "L1_agent_task_submitted",
       "pass": true,
-      "detail": "status=200 taskId=4e0aa77d-7ae2-4f5c-98cb-d09d3f02d4dc"
+      "detail": "status=200 taskId=8cff7ae1-fc96-4a30-8387-146c5a30cb11"
     },
     {
       "name": "L2_forged_without_project_stripped",

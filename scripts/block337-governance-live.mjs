@@ -157,8 +157,7 @@ async function rest(method, requestPath, body) {
  * 会话创建还会先发一个标题 mini 调用；all=true 时返回全部（供缺席断言）。 */
 function capturedSystem(captured, fromIndex, { all = false } = {}) {
   const systems = [];
-  for (let i = fromIndex; i < captured.length; i += 1) {
-    const body = captured[i];
+  for (const body of captured.slice(fromIndex)) {
     const messages = body && Array.isArray(body.messages) ? body.messages : null;
     if (!messages) continue;
     const joined = messages
@@ -282,16 +281,16 @@ try {
   fs.mkdirSync(path.join(codeWs, '.git'), { recursive: true });
   fs.writeFileSync(path.join(blankWs, 'notes.txt'), 'nothing here');
 
-  const projects = {};
+  const projects = new Map();
   for (const [key, wsPath] of [['software', softwareWs], ['bio', bioWs], ['code', codeWs], ['blank', blankWs]]) {
     const created = await rest('POST', '/data/projects', { name: `b337 ${key}`, workspacePath: wsPath });
     const project = (created.data && created.data.project) || {};
-    projects[key] = project.id;
-    assert(`L1_project_${key}`, created.ok && Boolean(projects[key]) && project.workspace_path === wsPath,
-      `status=${created.status} id=${projects[key]} path=${project.workspace_path}`);
+    projects.set(key, project.id);
+    assert(`L1_project_${key}`, created.ok && Boolean(projects.get(key)) && project.workspace_path === wsPath,
+      `status=${created.status} id=${projects.get(key)} path=${project.workspace_path}`);
   }
 
-  const softwareChat = await agentOnce(projects.software);
+  const softwareChat = await agentOnce(projects.get('software'));
   assert('L1_software_governed_loaded', softwareChat.system && softwareChat.system.includes('工作区治理（自动装载：受治理软件仓')
     && softwareChat.system.includes('[必须]'),
     `sysLen=${softwareChat.system && softwareChat.system.length}`);
@@ -301,18 +300,18 @@ try {
   assert('L1_software_no_bio_leak', softwareChat.system && !softwareChat.system.includes('自动装载：生信分析项目'),
     '软件仓不得挂生信包');
 
-  const bioChat = await agentOnce(projects.bio);
+  const bioChat = await agentOnce(projects.get('bio'));
   assert('L1_bio_pack_loaded', bioChat.system && bioChat.system.includes('自动装载：生信分析项目')
     && bioChat.system.includes('[必须]'), `sysLen=${bioChat.system && bioChat.system.length}`);
   assert('L1_bio_no_software_leak', bioChat.system && !bioChat.system.includes('自动装载：受治理软件仓')
     && !bioChat.system.includes('closeout 全绿'),
     '生信项目不得看到 Petri 工程纪律');
 
-  const codeChat = await agentOnce(projects.code);
+  const codeChat = await agentOnce(projects.get('code'));
   assert('L1_code_light_loaded', codeChat.system && codeChat.system.includes('自动装载：普通代码仓'),
     `sysLen=${codeChat.system && codeChat.system.length}`);
 
-  const blankChat = await agentOnce(projects.blank);
+  const blankChat = await agentOnce(projects.get('blank'));
   assert('L1_blank_zero_rules', blankChat.system && !blankChat.system.includes('工作区治理（自动装载'),
     '未识别工作区=零规则零注入（合法默认）');
 

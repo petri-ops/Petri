@@ -402,11 +402,6 @@
       "count": 1
     }
   },
-  "frontend/src/components/workspace-panels/CenterPanel.tsx": {
-    "react-hooks/set-state-in-effect": {
-      "count": 1
-    }
-  },
   "frontend/src/components/workspace-panels/KnowledgeDocLibrary.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
@@ -459,11 +454,6 @@
   "frontend/src/components/workspace-panels/ResultArtifactShell/useResultReportActions.ts": {
     "react-hooks/set-state-in-effect": {
       "count": 2
-    }
-  },
-  "frontend/src/components/workspace-panels/SideChatDock.test.tsx": {
-    "@typescript-eslint/require-await": {
-      "count": 1
     }
   },
   "frontend/src/components/workspace-panels/WorkspaceSummaryCard.test.tsx": {
@@ -598,11 +588,8 @@
     "react-hooks/immutability": {
       "count": 1
     },
-    "react-hooks/preserve-manual-memoization": {
-      "count": 1
-    },
     "react-hooks/refs": {
-      "count": 4
+      "count": 3
     },
     "react-hooks/set-state-in-effect": {
       "count": 5

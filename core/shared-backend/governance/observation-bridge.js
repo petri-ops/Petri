@@ -12,19 +12,22 @@
  * 'confirmed' → 保持命中；未复盘 → 乐观计命中（复盘翻案才会触发降级）。
  */
 
+const { createRuleLedger, statusFromEntry } = require('./rule-lifecycle');
+
 const OBSERVED_NAMESPACE = 'observed';
 
-function rowField(row, camel, snake) {
-  if (row[camel] !== undefined && row[camel] !== null) return row[camel];
-  if (row[snake] !== undefined && row[snake] !== null) return row[snake];
+/** camel / snake 两形态取值（观察存储行可能来自 rowToView 或裸 sqlite 行）。 */
+function pickText(primary, fallback) {
+  if (primary !== undefined && primary !== null) return String(primary);
+  if (fallback !== undefined && fallback !== null) return String(fallback);
   return '';
 }
 
 /** 行 → 账本键；无可用身份（空 rule_id 且空 tool_name）返回 null（丢弃，不猜）。 */
 function ledgerKeyFor(row) {
-  const ruleId = String(rowField(row, 'ruleId', 'rule_id') || '').trim();
+  const ruleId = pickText(row.ruleId, row.rule_id).trim();
   if (ruleId.includes('::')) return ruleId;
-  const toolName = String(rowField(row, 'toolName', 'tool_name') || '').trim();
+  const toolName = pickText(row.toolName, row.tool_name).trim();
   const candidate = ruleId || toolName;
   return candidate ? `${OBSERVED_NAMESPACE}::${candidate}` : null;
 }
@@ -34,21 +37,23 @@ function ledgerKeyFor(row) {
  * 同键多行合并累加；非 object 行忽略；hits 非法按 0 计。
  */
 function ledgerEntriesFromRows(rows) {
-  const entries = {};
+  const merged = new Map();
   for (const row of Array.isArray(rows) ? rows : []) {
     if (!row || typeof row !== 'object') continue;
     const key = ledgerKeyFor(row);
     if (!key) continue;
     const hits = Math.max(0, Number(row.hits) || 0);
-    if (!entries[key]) entries[key] = { hits: 0, misfires: 0 };
-    const decision = rowField(row, 'reviewDecision', 'review_decision');
-    if (decision === 'misfire') entries[key].misfires += hits;
-    else entries[key].hits += hits;
+    const entry = merged.get(key) || { hits: 0, misfires: 0 };
+    if (pickText(row.reviewDecision, row.review_decision) === 'misfire') entry.misfires += hits;
+    else entry.hits += hits;
+    merged.set(key, entry);
   }
-  return entries;
+  return Object.fromEntries(merged);
 }
 
 module.exports = {
   OBSERVED_NAMESPACE,
   ledgerEntriesFromRows,
+  createRuleLedger,
+  statusFromEntry,
 };
