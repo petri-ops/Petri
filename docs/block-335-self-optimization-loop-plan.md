@@ -1,6 +1,6 @@
 ---
 capability: block-335-self-optimization-loop
-status: active
+status: completed
 goal: 任务推进闭环 v1（用户裁决 2026-11-02 升级定位：「自动推进任务需求，用户只验收结果」；改自己是第一个用例）：判据驱动的驾驶员——loop 每轮 decision 不再只由模型自报，结构化验证结果（test:changed --report / evals:gate / judge 读数）参与判定，跑偏在验证红的那一刻被抓住而非用户验收时；第一个用例=让 Petri 的 agent 对 Petri 自身仓库（worktree 副本）做小改动后，自己跑验证门禁 → 结构化判定 ready/blocked/failed → 失败自动回滚 checkpoint；执行载体=工作流脚本（宿主侧注入 verify/checkpoint 原语），验证=evals-harness 隔离后端 + test:changed --report JSON，回滚=workspace-checkpoint 共享层（新增 petri-server 薄 REST）；放权坡道 observe 档护航首批任务。
 acceptance:
   - P0 判据驱动驾驶员（升级核心）：loop-orchestrator 的 iteration decision（complete|block|wait|continue|retry，loop-checkpoint.js:236-258）接入「验证器投票」——complete 声明必须附结构化验证结果（verify 原语产出），验证红则强制 retry（上限）或 block，模型自报 complete 不再单独有效；跑偏判据=验证红/预算超/同指纹循环（loop_guard 已有）三者任一；用户入口=一道需求进、推进过程可见（journal 时间线）、终态 ready 附 diff 与证据等验收。契约测：模型自报 complete 但验证红 → 不得终态 ready。
