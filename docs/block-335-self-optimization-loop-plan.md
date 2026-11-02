@@ -79,3 +79,11 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 - worktree + checkpoint 锚点（7c8c8f80）→ 16 条修复 → **verify kind lint ready（5.3s scoped eslint，9 改动文件，restartRequired=true 如实）** → 回灌主仓 → lint 0 error、test:changed 752 项全绿 → closeout PASS。
 - 实机抓真：①worktree 内 eslint 不认 `--no-suppressions` 旗标（flat config 后移除）；②修复后基线留 16 条未使用条目 → lint exit 2 如实暴露「修复未完成」，prune 后才 ready——验证器语义正确；③worktree 全仓 lint 有 40 个 type-aware 伪影 → scoped eslint 设计成立。
 - needs_restart 语义实跑验证：restartRequired=true 时闭环保留不回滚（若走 workflow 全链，outcome=needs_restart 留人工 closeout——契约 10/10 钉死）。
+
+
+### §6.2 lint 任务线第二片（2026-11-03 同日完成；提交 6639f97a + 8ce6ca01）
+
+- **require-await 测试域第一轮 69 条清偿**（6 文件：WorkspaceSummaryCard 22 / copilotMarkdown 12 / LeftPanel 11 / useKnowledgeConsole 11 / branchBridge 8 / useTerminalTabs 5）：codemod 机械变换（括号平衡表达式箭头 `async (p) => ({X})` → `(p) => Promise.resolve({X})`，Promise.resolve 包裹保持类型逐字不变）+ 27 处逐型手工（标量 `Promise.resolve(true)`、显式 `Promise<Envelope>`、act 同步回调、mockImplementation 块体、多行三元包裹）。
+- **随片抓真三处**：①`satisfies` 谓词在 Promise.resolve 包裹后落到外层（TS1360 ×6）——移入 resolve 括号内；②`await act(() => {...})` 同步重载返回非 Thenable（await-thenable ×3）——act 同步形式去外层 await；③worktree 内 type-aware lint 环境伪影 1917 errors（vitest 类型经 symlink 不可解析）——**前端文件的 lint 权威判定在主仓，worktree 内仅做行为验证（vitest）**。
+- **账目**：基线 293→234（-59 净收缩）；vitest 69/69 全绿；types 0 error；closeout PASS。
+- **任务线余量**：require-await 测试域尾批 ~40 条（1-2 条/文件 × 22 文件，逐文件碎片型）；react-hooks 域 ~100 条（真重构独立线）；detect-object-injection 未覆盖面 ~2100。
