@@ -94,3 +94,11 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 - **require-await 尾批 50 条清偿**（24 文件，全部机械）：async 移除 + 消费面分诊——`await` 消费 = 直接去 async；**`.then` 消费 = Promise.resolve 包裹**（去 async 即崩：UsageResourcePanel fetch(...).then 实测、JobsWall listProjects(...).then、ScientificInteractionViewer query(...).then）；Response 实参括号逐处核对（RightFileTree 两处）。
 - **验证**：vitest 24 文件 0 fail；types 0 error；基线 234→187（-47）。
 - **任务线累计**：311→187（-124 条，40%）；余=react-hooks 域 ~100 条（真重构独立线）+ detect-object-injection 未覆盖 ~2100 + 控制字符零星。
+
+
+### §6.4 事故归因（2026-11-03 同日完成；🔴→✅ 关闭）
+
+- **回退机制归因**：`git apply --3way` 部分失败（2 文件 does not match index → patch preimage 与 index blob 不一致）在 index 留余波；后续 `git add` 对部分文件读到 index 旧 blob 而非工作树新内容。受控复现实验确认：--3way 成功路径无回退（patch 正确应用），失败路径是根因。git reflog 取证排除 git reset（4 条全在 335 会话前）/ git checkout / p6 测试链（只读 git show+rev-parse）/ checkpoint rollback（仅 worktree 内 checkout）。
+- **悬空 stash 归因**：/tmp worktree 内 per-worktree stash reflog（block336/335 实机腿遗留）——worktree 目录被 rm -rf 后 `.git/worktrees/<name>/` 元数据未同步清理 → `git stash list` 短暂可见悬空引用。非产品代码缺陷，worktree 生命周期清理不完整的副产品。
+- **已落地**：29 个 stale worktree 元数据全部清理（git worktree prune + 手动 rm）；2 个 /tmp 临时目录删除。
+- **纪律固化为修复落点**：①未提交工作不留窗（修复→立即提交）；②多文件 patch 禁用 `--3way` 改用直接 cp + 逐文件验证（--3way 部分失败的 index 余波是根因）；③实机腿 worktree 生命周期收口必须先 `git worktree remove` 再 `rm -rf`，不可只 rm。

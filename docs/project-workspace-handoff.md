@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-03（**🔴事故归因完成——git apply --3way 部分失败 index 余波 + worktree 元数据残留**，24 个 stale worktree 全部清理，纪律=未提交不留窗+禁 --3way 多文件 patch+worktree 先 remove 再 rm。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 lint 任务线第三批完成——require-await 尾批 50 条（基线 293→187），累计 311→187（-40%）**。require-await 域清零；余=react-hooks ~100 条独立线（待裁决立项）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 lint 任务线第二片完成——require-await 测试域 69 条清偿（基线 293→234），累计 92 条**。任务线余量：尾批 ~40 条碎片+react-hooks ~100 条真重构线。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 P7 切片完成——verify kind lint + needs_restart 语义 + src/core 域 16 条收缩（基线 304→293），closeout PASS**。lint 收缩任务线下批=require-await 测试域 ~150 条（待发令）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
