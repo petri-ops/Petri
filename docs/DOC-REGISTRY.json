@@ -8889,8 +8889,48 @@
         "G0"
       ],
       "notes": "产品人设历史债务清偿（用户裁决 2026-11-02「chat 仍有生信工程师人设；全方位核对清理，要通用 agent」）planned，队列 338 之后：核对=215 只清 6 个工具词漏掉人设主句（baseRole/identity×2「生物信息学分析助手」、chitchat「科研伙伴」绕主 prompt 直答=体感主因、GO/KEGG 硬编码、interpret 域功能、学习路径退役纪律、11 处生信示例）；必清 9/宜清 14/保留 6；RETIRED_TERMS 补角色词表防回潮；golden 重基准。"
+    },
+    {
+      "id": "BLOCK-340-VIDEO-INPUT-PLANE",
+      "capability": "block-340-video-input-plane",
+      "path": "docs/block-340-video-input-plane-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-340-video-input-plane",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "multimodal",
+        "video",
+        "vision",
+        "agent-tools",
+        "G0"
+      ],
+      "notes": "视频输入面（用户 2026-11-02 对照 Kimi 游戏解决方案推文评估后裁决「这一块建 block 后续排队推进」）planned，队列 335 之后、341 之前：参考视频/试玩录像本地抽帧（复用 329 ffmpeg 发现与诚实降级，零新依赖）→关键帧→现有 vision 角色（gateway image_url 归一已在）；read_video 工具 + 聊天附件 video 门控同源扩展；无 vision 凭据诚实降级；帧预算入 model-surface 基线；341 截图序列共用此管线。"
+    },
+    {
+      "id": "BLOCK-341-GAME-ENGINE-BRIDGE",
+      "capability": "block-341-game-engine-bridge",
+      "path": "docs/block-341-game-engine-bridge-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-341-game-engine-bridge",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "godot",
+        "blender",
+        "engine-bridge",
+        "governed-ops",
+        "G0"
+      ],
+      "notes": "受治理本地游戏引擎桥 Godot 4 headless 先行 + Blender 现有工程扩档（同一裁决）planned，队列 340 之后：P0 形态裁决（本地主权/单真值/坡道审批/证据自证，不复刻云端直连）；P1 发现探针缺席诚实 unavailable（不内置不下载引擎）；P2 godot_run 采集 stdout/截图序列/退出码→manifest sha；P3 godot_scene_apply 白名单 propose/apply + 修订快照，白名单外默认 require-ack 走坡道；P4 闭环样例对齐 335 不建第二执行器；P5 blend_ops 白名单、RULING-01 边界启动时用户裁决；P6 契约 mock 三路 + mac 实机；Unity/UE reopen。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 451
+  "documentCount": 453
 }
