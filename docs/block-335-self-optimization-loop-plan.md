@@ -63,4 +63,4 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 
 **P5 放权坡道护航**：首批任务 agent-rules `path-glob ** → observe`（写面不拦截、复盘面可见），实机腿 L3 断言观察行落账。
 
-**门禁**：335 契约 **8/8** · loop/contract/checkpoint/workflow 邻域 250/250 + 集成 98/98 · `test:changed` 1508 项 17 红（14=P4 配置中心门控家族既有 🟡 + p6 脏树自愈 + loop-fixtures pack 环境红 🟡 + branch-freeze 已登记）· 实机 17/17 · closeout 十三门（随包收口）。**首批题（lint 存量收缩）= 闭环建成后首个真实任务，待发令跑**。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**门禁**：335 契约 **8/8** · loop/contract/checkpoint/workflow 邻域 250/250 + 集成 98/98 · `test:changed` 1508 项 17 红（14=P4 配置中心门控家族既有 🟡 + p6 脏树自愈 + loop-fixtures pack 环境红 🟡 + branch-freeze 已登记）· 实机 17/17 · closeout 十三门（随包收口）。**首批题已真跑（2026-11-03，用户「继续按照你的建议推进」发令；提交 4d581110）**：worktree 副本 + checkpoint HEAD 锚点 → 7 条清偿（5×no-async-executor 包裹变换 + 2×control-regex 码点判定，含 1 条非抑制的真实 warning）→ 两步 verify → 回灌主仓 prune → 基线 311→304、lint 0 error、closeout PASS。**实机发现两处**：①直接 eslint 会应用抑制基线——静默≠违规消失，化石普查必须 --no-suppressions 对照；②prune 必须配 --no-cache（缓存跳过未变更文件→检测不到未使用条目）。**执行期事故**：未提交文件被未知机制回退一次 + 5 个悬空空壳 stash 条目（🔴 待归因，AUDIT-LOG）；经验=未提交工作落盘即提交。下一批候选=src/core 域 299 条（触及需重启面，待闭环 needs_restart 路径落地后重启任务线）。G0 开发期常态 · 不外推 packaged/Provider/GA。
