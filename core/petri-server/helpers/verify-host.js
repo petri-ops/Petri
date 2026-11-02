@@ -179,7 +179,7 @@ function createVerifyHost({ getProject } = {}) {
  * @param {{kind?: string, projectId?: string}} spec
  * @param {{userId?: string}} deps
  */
-function createDecisionVerifier(spec, { userId } = {}) {
+function createDecisionVerifier(spec, { userId: _userId } = {}) {
   const kind = spec && VERIFY_KINDS.includes(spec.kind) ? spec.kind : null;
   if (!kind) return null;
   const verify = createVerifyHost({});

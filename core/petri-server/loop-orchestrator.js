@@ -1496,7 +1496,7 @@ ${compactSummaryText}`,
             });
             if (base.decision === 'complete') {
               verifyVote = await decisionVerifier({
-                taskId,
+                taskId: toolCtx.taskId,
                 projectId: toolCtx.projectId,
                 loopRunId,
                 iteration: loopSequence,

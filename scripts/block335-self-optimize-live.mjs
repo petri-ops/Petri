@@ -22,7 +22,6 @@ import http from 'node:http';
 import { createConnection } from 'node:net';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -265,7 +264,7 @@ async function main() {
     dbMod: require(path.join(ROOT, 'core/petri-server/db.js')),
   });
   const greenDeps = {
-    launchSubAgent: ({ userContent }) => {
+    launchSubAgent: () => {
       // 确定性写桩 = 模型净效果（tier 如实标注）；docs/archive/ 是注册排除区
       //（docs:check 放行），governance-docs 规则覆盖 → verify 的 docs-check 真跑且绿
       fs.mkdirSync(path.join(greenWs, 'docs', 'archive'), { recursive: true });
@@ -300,7 +299,6 @@ async function main() {
   // 种一个**根级未映射文件**：不匹配任何 impact 规则 → test-affected --run exit 2
   // （unknown 非空即 2，先于任何门禁子进程）→ 验证红确定性成立（不依赖 npm in worktree）
   fs.writeFileSync(path.join(redWs, 'b335-unmapped-probe.md'), 'seed red\n');
-  const porcelainBaseline = execFileSync('git', ['status', '--porcelain'], { cwd: redWs, encoding: 'utf8' }).trim();
   mockUpstream.plans.set('B335-RED-PROBE', {
     toolCall: { name: 'workspace_write', arguments: { path: 'b335-live-red-probe.md', content: 'b335 red probe\n' } },
   });
@@ -330,7 +328,6 @@ async function main() {
     '闭环脚本判定 rolled_back（verify 红 → 回滚路径）');
 
   // P0 契约实机：loop 的 agent 任务不得以 complete 收尾（决策=block）；工具写真发生（observe 不拦）
-  const eventsRes = await rest('GET', '/ai/agent/tasks');
   assert('L2_loop_blocked_not_completed', runMeta && runMeta.status === 'completed' && true,
     'workflow 终态 completed（回滚路径）；loop 级 block 证据见下方 events 断言');
 

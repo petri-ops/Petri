@@ -1,3 +1,6 @@
+// eslint-env node
+// workflow 宿主经 vm realm 注入的原语（BLOCK-262/335）：agent / phase / checkpoint / verify / log
+/* global agent, phase, checkpoint, verify, log */
 // BLOCK-335 P2 — 自优化闭环脚本（判据驱动驾驶员的执行载体）。
 //
 // phase 链：checkpoint → agent 改动 → verify → 判定（红即回滚）。

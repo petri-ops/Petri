@@ -206,6 +206,7 @@
     "files::resources/gen-ui/vendor/floating-ui-dom-1.7.4.min.js",
     "files::resources/gen-ui/vendor/lucide-1.17.0.js",
     "files::resources/model3d/workflows/recipe-build.js",
+    "files::resources/workflows/self-optimize.mjs",
     "files::src/main/computer-use-pip-preload.js",
     "types::core/packages/shared-copilot/actions.ts::ExternalLinkAction",
     "types::core/packages/shared-copilot/actions.ts::NavigateAction",

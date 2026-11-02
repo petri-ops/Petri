@@ -3,12 +3,12 @@
   "block": "BLOCK-335",
   "phase": "P4",
   "platform": "darwin",
-  "startedAt": "2026-11-02T18:54:27.150Z",
-  "finishedAt": "2026-11-02T18:54:51.756Z",
+  "startedAt": "2026-11-02T19:08:02.806Z",
+  "finishedAt": "2026-11-02T19:08:25.402Z",
   "backend": {
     "port": 3211,
-    "pid": 4400,
-    "mockUpstreamPort": 49464
+    "pid": 77971,
+    "mockUpstreamPort": 50444
   },
   "tiers": {
     "L1": "workflow-primitives（checkpoint/verify 真子进程；agent 段=确定性写桩）",
@@ -19,7 +19,7 @@
     {
       "name": "L0_backend_and_mock",
       "pass": true,
-      "detail": "backend :3211 + mock :49464 + workflow enabled"
+      "detail": "backend :3211 + mock :50444 + workflow enabled"
     },
     {
       "name": "L0_model_profile_seeded",
@@ -29,22 +29,22 @@
     {
       "name": "L1_source_project",
       "pass": true,
-      "detail": "status=200 id=p_mvzmbj9k_5w3q"
+      "detail": "status=200 id=p_mvzmt034_rtiz"
     },
     {
       "name": "L1_worktree_children",
       "pass": true,
-      "detail": "green=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmbj9n_5av9 red=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmbkhb_uyuy"
+      "detail": "green=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmt038_6p44 red=/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-b335-live/data/worktrees/p_mvzmt1iy_xncq"
     },
     {
       "name": "L1_green_workflow_completed",
       "pass": true,
-      "detail": "{\"status\":\"completed\",\"returned\":{\"outcome\":\"ready\",\"checkpointRef\":\"f768e950b671dd4fd62f4ff813548a820f5adefe\",\"verify\":{\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":75"
+      "detail": "{\"status\":\"completed\",\"returned\":{\"outcome\":\"ready\",\"checkpointRef\":\"f95a0eee1d900f3411d063fc3eaec50a9298bd66\",\"verify\":{\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":64"
     },
     {
       "name": "L1_green_outcome_ready",
       "pass": true,
-      "detail": "outcome=ready verify={\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":7529,\"changedFiles\":[\"docs/archive/b335-live-green-note.md\"],\"testsCount\":0,\"restartRequired\":false,\"restartReason\":null}"
+      "detail": "outcome=ready verify={\"ok\":true,\"verdict\":\"ready\",\"kind\":\"test-affected\",\"exitCode\":0,\"durationMs\":6455,\"changedFiles\":[\"docs/archive/b335-live-green-note.md\"],\"testsCount\":0,\"restartRequired\":false,\"restartReason\":null}"
     },
     {
       "name": "L1_green_change_kept",
@@ -59,7 +59,7 @@
     {
       "name": "L2_workflow_submitted",
       "pass": true,
-      "detail": "status=202 body={\"ok\":true,\"runId\":\"wf-mvzmbtid-uj5ywn\",\"taskId\":\"7ad6b820-a8cb-4134-a3c0-7f6c9ee5434c\",\"status\":\"running\",\"resumeFromRunId\":null}"
+      "detail": "status=202 body={\"ok\":true,\"runId\":\"wf-mvzmt9bv-8a1m20\",\"taskId\":\"a3586a2f-aecf-44e9-b2a7-72afb1f5c805\",\"status\":\"running\",\"resumeFromRunId\":null}"
     },
     {
       "name": "L2_red_workflow_terminal",
@@ -84,7 +84,7 @@
     {
       "name": "L2_red_rollback_byte_identical",
       "pass": true,
-      "detail": "anchor=a3c50e8235ace59cd378def0639371f7af7cd318 treeDiff=\"\""
+      "detail": "anchor=76f17f3fa44a433e9544a2e7a5e3b751f9108f01 treeDiff=\"\""
     },
     {
       "name": "L2_red_agent_write_rolled_back",
