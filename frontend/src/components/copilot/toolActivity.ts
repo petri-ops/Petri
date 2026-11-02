@@ -358,6 +358,10 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "workspace_replace": "已替换",
   "workspace_search": "已搜索",
   "workspace_write": "已写入",
+  "workspace_worktree_create": "已创建副本",
+  "workspace_worktree_list": "已列出副本",
+  "workspace_worktree_remove": "已移除副本",
+  "workspace_worktree_merge_request": "已生成合并评审",
 };
 
 /** UI-437 v5.18 — 工具分类图标（域感知：检索/知识空间/清单/系统/结果/网络/
@@ -464,6 +468,10 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "workspace_replace": "pencil",
   "workspace_search": "search",
   "workspace_write": "pencil",
+  "workspace_worktree_create": "folder",
+  "workspace_worktree_list": "list-details",
+  "workspace_worktree_remove": "archive",
+  "workspace_worktree_merge_request": "git-branch",
 };
 
 export function summarizeToolCall(

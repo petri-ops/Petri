@@ -48,6 +48,12 @@ const {
   tool_model3d_share,
 } = require('./model3d-tools');
 const {
+  tool_workspace_worktree_create,
+  tool_workspace_worktree_list,
+  tool_workspace_worktree_remove,
+  tool_workspace_worktree_merge_request,
+} = require('./worktree-tools');
+const {
   tool_result_edit_plan,
   tool_result_changeset_create,
   tool_result_changeset_status,
@@ -152,6 +158,10 @@ const HANDLERS = {
   workspace_write: tool_workspace_write,
   workspace_replace: tool_workspace_replace,
   workspace_exec: tool_workspace_exec,
+  workspace_worktree_create: tool_workspace_worktree_create,
+  workspace_worktree_list: tool_workspace_worktree_list,
+  workspace_worktree_remove: tool_workspace_worktree_remove,
+  workspace_worktree_merge_request: tool_workspace_worktree_merge_request,
   workspace_exec_background: tool_workspace_exec_background,
   process_status: tool_process_status,
   process_stop: tool_process_stop,
@@ -286,6 +296,11 @@ const CONTRACTS = {
   workspace_find: contract('workspace', 'none', 'R0', ['project.files'], 500),
   workspace_search: contract('workspace', 'none', 'R0', ['project.files'], 1000, true),
   workspace_read: contract('workspace', 'none', 'R0', ['project.files'], 100),
+  // BLOCK-336 P1 — worktree 域：目录级副作用走 R2/R3，摘要/列表不动工作区
+  workspace_worktree_create: contract('workspace', 'workspace-write', 'R2', ['project.files', 'local.process'], 60000),
+  workspace_worktree_list: contract('workspace', 'none', 'R0', ['project.files', 'local.process'], 20000),
+  workspace_worktree_remove: contract('workspace', 'workspace-write', 'R3', ['project.files', 'local.process'], 60000),
+  workspace_worktree_merge_request: contract('workspace', 'state-write', 'R1', ['project.files', 'local.process'], 30000),
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_exec: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 30000),

@@ -526,6 +526,10 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "workspace_replace": "已替换",
   "workspace_search": "已搜索",
   "workspace_write": "已写入",
+  "workspace_worktree_create": "已创建副本",
+  "workspace_worktree_list": "已列出副本",
+  "workspace_worktree_remove": "已移除副本",
+  "workspace_worktree_merge_request": "已生成合并评审",
 });
 
 /** Safe, compact activity details suitable for conversation metadata. */

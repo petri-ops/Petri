@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-01T11:58:14.608Z",
+  "updatedAt": "2026-11-02T10:34:06.441Z",
   "systemPromptChars": 940,
-  "toolDefsCount": 104,
-  "toolDefsChars": 56614,
+  "toolDefsCount": 108,
+  "toolDefsChars": 58263,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -107,6 +107,10 @@
     "workspace_write": 627,
     "workspace_replace": 596,
     "workspace_exec": 1261,
-    "workspace_exec_background": 694
+    "workspace_exec_background": 694,
+    "workspace_worktree_create": 540,
+    "workspace_worktree_list": 225,
+    "workspace_worktree_remove": 450,
+    "workspace_worktree_merge_request": 434
   }
 }

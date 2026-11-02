@@ -16,6 +16,9 @@ const {
   evaluateProjectBaselineCompatibility,
 } = require('../shared-backend/g0-baseline');
 const { runTaskConfirmationHooks } = require('../shared-backend/task-confirmation-hooks');
+// BLOCK-336 P2：项目层 worktreeOf 副本（git 调用与登记纪律在 helpers/project-worktree）
+const projectWorktree = require('./helpers/project-worktree');
+const { resolveDataDir } = require('../shared-backend/data-paths');
 
 // BLOCK-92 Wave C-3 — 连接/DDL/用户与设置/子集与标签已拆入 db/ 子模块
 // （纯搬运零行为变化）；本文件保留 stmts 预编译注册表与其余主 DAO 群，
@@ -60,6 +63,9 @@ const {
 } = require('./db/subsets-labels');
 
 
+// BLOCK-336 P2：旧库（未跑 021 迁移）加载期自愈加列，否则含 worktree_of 的 prepared 语句直接炸模块
+projectWorktree.ensureProjectWorktreeColumn(db);
+
 const stmts = {
   listProjects: db.prepare('SELECT * FROM projects WHERE status = ? ORDER BY updated_at DESC'),
   // W1-3: modality-filtered listing (used by /spatial and /single-cell pages)
@@ -68,10 +74,14 @@ const stmts = {
   ),
   getProject: db.prepare('SELECT * FROM projects WHERE id = ?'),
   insertProject: db.prepare(
-    'INSERT INTO projects (id, name, description, created_at, updated_at, modality, workspace_path, workspace_kind, ssh_host, remote_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO projects (id, name, description, created_at, updated_at, modality, workspace_path, workspace_kind, ssh_host, remote_path, worktree_of) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
   ),
   updateProject: db.prepare(
     'UPDATE projects SET name = COALESCE(?, name), description = COALESCE(?, description), workspace_path = COALESCE(?, workspace_path), updated_at = ? WHERE id = ?'
+  ),
+  // BLOCK-336 P2：worktree_of 需可置 NULL（解除声明），COALESCE 做不到
+  updateProjectWorktreeOf: db.prepare(
+    'UPDATE projects SET worktree_of = ?, updated_at = ? WHERE id = ?'
   ),
   updateProjectStatus: db.prepare(
     'UPDATE projects SET status = ?, updated_at = ? WHERE id = ?'
@@ -343,9 +353,21 @@ function getProject(id) {
   return hydrateProject(stmts.getProject.get(id) || null, { recordOpen: true });
 }
 
-function createProject({ name, description, modality, workspacePath, workspaceKind, sshHost, remotePath }) {
+function createProject({ name, description, modality, workspacePath, workspaceKind, sshHost, remotePath, worktreeOf }) {
   const id = uid('p');
   const ts = now();
+  // BLOCK-336 P2：声明式副本——先真建 git worktree（失败即抛，不插行），再落项目行。
+  if (worktreeOf) {
+    if (workspaceKind === 'ssh') {
+      const error = new Error('ssh 项目没有本地 git 仓，不能作为副本源');
+      error.code = 'worktree_ssh_incompatible';
+      throw error;
+    }
+    const source = stmts.getProject.get(worktreeOf) || null;
+    const attached = projectWorktree.attach({ dataDir: resolveDataDir(), projectId: id, source, database: getDatabase() });
+    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', attached.path, 'local', null, null, worktreeOf);
+    return hydrateProject(stmts.getProject.get(id), { createdByCurrent: true, recordOpen: true });
+  }
   // BLOCK-67：ssh 项目 —— workspace 三字段定死不可运行时切换（防双模式回潮），
   // 本地不建 workspace 目录；local 项目行为与既有逐字节同语义（零回归红线）。
   if (workspaceKind === 'ssh') {
@@ -355,12 +377,12 @@ function createProject({ name, description, modality, workspacePath, workspaceKi
       error.code = invalid;
       throw error;
     }
-    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', null, 'ssh', sshHost, remotePath);
+    stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', null, 'ssh', sshHost, remotePath, null);
     return hydrateProject(stmts.getProject.get(id), { createdByCurrent: true, recordOpen: true });
   }
   const finalWorkspacePath = workspacePath || defaultProjectWorkspacePath({ id, name });
   ensureWorkspaceDir(finalWorkspacePath);
-  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', finalWorkspacePath, 'local', null, null);
+  stmts.insertProject.run(id, name, description || '', ts, ts, modality || 'general', finalWorkspacePath, 'local', null, null, null);
   return hydrateProject(stmts.getProject.get(id), {
     createdByCurrent: true,
     recordOpen: true,
@@ -381,9 +403,14 @@ function setProjectPublic(projectId, isPublic) {
   db.prepare('UPDATE projects SET is_public = ? WHERE id = ?').run(isPublic ? 1 : 0, projectId);
 }
 
-function updateProject(id, { name, description, workspacePath }) {
+function updateProject(id, { name, description, workspacePath, worktreeOf }) {
+  const current = stmts.getProject.get(id);
+  if (!current) return null;
+  // BLOCK-336 P2：语义收窄（幂等 / 解除 / 改挂拒绝）在 helper 内单源
+  const nextWorktreeOf = projectWorktree.resolveWorktreeOfUpdate(current, worktreeOf);
   if (workspacePath) ensureWorkspaceDir(workspacePath);
   stmts.updateProject.run(name || null, description ?? null, workspacePath || null, now(), id);
+  if (nextWorktreeOf !== undefined) stmts.updateProjectWorktreeOf.run(nextWorktreeOf, now(), id);
   return hydrateProject(stmts.getProject.get(id), { recordOpen: true });
 }
 
@@ -393,7 +420,29 @@ function setProjectStatus(id, status) {
   return hydrateProject(stmts.getProject.get(id), { recordOpen: true });
 }
 
-function deleteProject(id) {
+/**
+ * BLOCK-336 P2：删除前的副本预检（不改状态）。
+ * 路由层必须先调它——`deleteProject` 前会先删会话/记忆，脏树 409 若发生在之后就成了「项目在、对话没了」。
+ */
+function inspectProjectWorktree(id) {
+  const project = stmts.getProject.get(id) || null;
+  if (!project || !project.worktree_of) return { isWorktree: false, dirty: false, files: [] };
+  const state = projectWorktree.inspectDirty(project.workspace_path);
+  return { isWorktree: true, dirty: state.dirty, files: state.files, dirtyCount: state.total || state.files.length };
+}
+
+function deleteProject(id, options = {}) {
+  // BLOCK-336 P2：副本项目先拆 worktree（脏树未显式确认即抛，项目与目录都保留）。
+  const project = stmts.getProject.get(id) || null;
+  if (project && project.worktree_of) {
+    projectWorktree.detach({
+      dataDir: resolveDataDir(),
+      project,
+      confirmDirty: options.confirmDirty === true,
+      userId: options.userId || null,
+      database: getDatabase(),
+    });
+  }
   const datasets = stmts.listDatasets.all(id);
   for (const ds of datasets) {
     stmts.deleteAnalysesByDataset.run(ds.id);
@@ -1378,6 +1427,7 @@ module.exports = {
   updateProject,
   setProjectStatus,
   deleteProject,
+  inspectProjectWorktree,
   listProjectsByModality,
   listDatasets,
   getDataset,

@@ -31,6 +31,11 @@ const TOOL_METADATA = {
   workspace_replace: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
   workspace_exec: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   workspace_exec_background: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
+  // ---- worktree 域（BLOCK-336 P1）：create/remove 走审批（目录级副作用）；list 纯读并发；merge_request 只写登记表不动工作区 ----
+  workspace_worktree_create: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 60000 },
+  workspace_worktree_list: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 20000 },
+  workspace_worktree_remove: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: 60000 },
+  workspace_worktree_merge_request: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: 30000 },
   process_status: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   process_stop: { readOnly: false, destructive: true, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
 

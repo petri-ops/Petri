@@ -117,8 +117,8 @@
       "path": "core/petri-server/db.js",
       "wave": "C",
       "module": "P-01",
-      "lines": 1476,
-      "sha256": "015dfc8c20c139b80679baf9d42386b8806994d1cb79ecc6a054070f9ee3b0ad"
+      "lines": 1526,
+      "sha256": "23bab5d6dd4ab0a627c2ff750d64cf5db63e3981f864b93d3b70f6055c723e86"
     },
     {
       "path": "core/shared-backend/result-studio-repository.js",
@@ -170,5 +170,5 @@
       "sha256": "6f08befd152ee1a707051d0131a521a85e2572a883a2c9e912bbd0994fa69e72"
     }
   ],
-  "total": 23353
+  "total": 23403
 }

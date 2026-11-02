@@ -381,6 +381,22 @@
     "label": "已写入",
     "icon": "pencil"
   },
+  "workspace_worktree_create": {
+    "label": "已创建副本",
+    "icon": "folder"
+  },
+  "workspace_worktree_list": {
+    "label": "已列出副本",
+    "icon": "list-details"
+  },
+  "workspace_worktree_remove": {
+    "label": "已移除副本",
+    "icon": "archive"
+  },
+  "workspace_worktree_merge_request": {
+    "label": "已生成合并评审",
+    "icon": "git-branch"
+  },
   "read_agent_journal": {
     "label": "已读 journal",
     "icon": "list-details"

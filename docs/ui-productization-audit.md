@@ -4836,6 +4836,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 ## UI-437: 会话时间线 ZCode 化——运行态单行最新事件 + 完成簇静音行常驻 + 写入行差异角标（轻量批）(2026-09-23 verified，用户实机认可整体节奏)
 
+- **BLOCK-336 P1 增补（2026-11-02，同一注册表不新开条目）**：`toolActivity.ts` 的 verbs/icons 各补 4 条 worktree 工具（create「已创建副本」folder / list「已列出副本」list-details / remove「已移除副本」archive / merge_request「已生成合并评审」git-branch），`tool-events.js` 动词表与 `test/fixtures/tool-activity-labels.json` 双端同源登记；覆盖判据仍是本条的「fixture 全量宇宙逐工具一致」（宇宙 104→108），验证=后端 `tool-activity-labels.test` 全绿 + 前端 `toolActivity.test` **20/20**。属守卫型映射扩展、无独立视觉面，状态沿用本条 verified；真实调用下的活动行外观留给 BLOCK-336 P4 隔离后端实机腿一并取证。
 - **来源**：用户两连裁决——「执行和阶段性反馈没有明显的区分……你看看 zcode 例图能找到特点吗」+「子智能体能否完全模仿 zocode 呢 我们现在的项目过于繁琐了」。
 - **ZCode 特征拆解**（对照图）：运行中=「工作中 N 秒」头部 + 仅最新一条事件单行 + spinner；完成后=过程**不折叠消失**，而是每个事件永久压成一行高静音行（类型图标+动词+对象+元数据）常驻可扫读，模型叙述为唯一全对比度正文。
 - **改动**：`ToolActivityList.tsx` 时间线模式——①完成簇默认展开为「一行一事件」静音时间线（取代旧「折叠成一行摘要」，簇头保留为折叠开关）；②运行簇只渲染最新一条事件单行（取代旧「最后一整轮」），簇头对齐 ZCode 文案「工作中 · 已运行 Ns」；③写入/编辑行增 `+N -N` 差异角标（changeDiff 预计算值，零值侧省略，绿/红 token）；④写入行图标 wrench→pencil。`simple-chat.css` 增 diffstat 样式。运行时数据结构零变化；非时间线（legacy）路径零变化。

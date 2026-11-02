@@ -197,7 +197,7 @@ router.get('/projects/:id/g0-baseline', (req, res) => {
 });
 
 router.post('/projects', (req, res) => {
-  const { name, description, modality, workspacePath, workspaceKind, sshHost, remotePath } = req.body;
+  const { name, description, modality, workspacePath, workspaceKind, sshHost, remotePath, worktreeOf } = req.body;
   const userId = req.user?.id;
   if (!name) return res.status(400).json({ status: 'error', error: '缺少 name' });
   // Desktop projects may be workflow-neutral (`general`) or carry a domain hint;
@@ -214,7 +214,8 @@ router.post('/projects', (req, res) => {
   let p;
   try {
     // BLOCK-67：ssh 项目（workspaceKind='ssh'）字段校验 fail-closed 在 createProject 内。
-    p = db.createProject({ name, description, modality: m, userId: ownerId, workspacePath, workspaceKind, sshHost, remotePath });
+    // BLOCK-336 P2：worktreeOf 的源校验与 git worktree add 也在 createProject 内（失败即抛，不插行）。
+    p = db.createProject({ name, description, modality: m, userId: ownerId, workspacePath, workspaceKind, sshHost, remotePath, worktreeOf });
   } catch (e) {
     return res.status(400).json({ status: 'error', error: e.message });
   }
@@ -232,8 +233,13 @@ router.post('/projects', (req, res) => {
 router.put('/projects/:id', (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
 
-  const { name, description, workspacePath } = req.body;
-  const p = db.updateProject(req.params.id, { name, description, workspacePath });
+  const { name, description, workspacePath, worktreeOf } = req.body;
+  let p;
+  try {
+    p = db.updateProject(req.params.id, { name, description, workspacePath, worktreeOf });
+  } catch (e) {
+    return res.status(400).json({ status: 'error', error: e.message, code: e.code || null });
+  }
   if (!p) return res.status(404).json({ status: 'error', error: '项目不存在' });
   res.json({ status: 'ok', project: p });
 });
@@ -248,6 +254,18 @@ router.post('/projects/:id/status', (req, res) => {
 
 router.delete('/projects/:id', async (req, res) => {
   if (!checkOwnership(req, res, req.params.id)) return;
+  const confirmWorktreeDirty = req.query?.confirmWorktreeDirty === '1' || req.query?.confirmWorktreeDirty === 'true';
+  // BLOCK-336 P2：副本脏树必须在删会话/记忆之前拦下（否则留「项目在、对话没了」的半删除态）
+  const worktree = db.inspectProjectWorktree(req.params.id);
+  if (worktree.isWorktree && worktree.dirty && !confirmWorktreeDirty) {
+    return res.status(409).json({
+      status: 'error',
+      error: '副本工作树有未提交改动，拒绝删除（governance §7：先 commit/快照，或显式 confirmWorktreeDirty=1）',
+      code: 'worktree_dirty',
+      dirtyFiles: worktree.files,
+      dirtyCount: worktree.dirtyCount,
+    });
+  }
   try {
     const adb = db.getAsyncDatabase();
     const conversations = await adb.prepare('SELECT id FROM copilot_conversations WHERE project_id=?').all(req.params.id);
@@ -258,9 +276,15 @@ router.delete('/projects/:id', async (req, res) => {
       await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(conversation.id);
     }
     await adb.prepare('DELETE FROM copilot_conversations WHERE project_id=?').run(req.params.id);
-    await db.deleteProject(req.params.id);
+    await db.deleteProject(req.params.id, { confirmDirty: confirmWorktreeDirty, userId: req.user?.id || null });
     res.json({ status: 'ok' });
   } catch (error) {
+    if (error.code === 'worktree_dirty') {
+      return res.status(409).json({
+        status: 'error', error: error.message, code: error.code,
+        dirtyFiles: error.dirtyFiles || [], dirtyCount: error.dirtyCount || 0,
+      });
+    }
     res.status(500).json({ status: 'error', error: error.message });
   }
 });

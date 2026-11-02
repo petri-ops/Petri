@@ -24,6 +24,7 @@ const domainModules = {
   'web': require('./tool-defs/web'),
   'workflow': require('./tool-defs/workflow'),
   'workspace': require('./tool-defs/workspace'),
+  'worktree': require('./tool-defs/worktree'),
 };
 
 const TOOL_DEFS = [
@@ -40,6 +41,7 @@ const TOOL_DEFS = [
   ...domainModules['web'],
   ...domainModules['workflow'],
   ...domainModules['workspace'],
+  ...domainModules['worktree'],
 ];
 
 // WORKSPACE_TOOL_DEFS = workspace-provider 评估子集（26 工具，**原顺序**；BLOCK-109-CORE-ARCH
