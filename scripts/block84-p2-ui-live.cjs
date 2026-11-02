@@ -44,7 +44,8 @@ function fetchJson(url) {
 }
 
 function cdpEval(expr, timeoutMs = 25000) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    (async () => {
     try {
       const targets = await fetchJson('http://127.0.0.1:9222/json/list');
       const page = targets.find((t) => t.type === 'page');
@@ -67,6 +68,7 @@ function cdpEval(expr, timeoutMs = 25000) {
       });
       ws.addEventListener('error', (e) => { clearTimeout(timer); reject(new Error('ws: ' + (e && e.message))); });
     } catch (e) { reject(e); }
+    })().catch(reject);
   });
 }
 
@@ -74,7 +76,8 @@ const RENDERER_BASE = 'http://localhost:3000';
 
 /** CDP 软导航：不改 location.href，避免欢迎页 auto-navigate 把 URL 弹回兜底项目。 */
 function cdpNavigate(url, timeoutMs = 25000) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    (async () => {
     try {
       const targets = await fetchJson('http://127.0.0.1:9222/json/list');
       const page = targets.find((t) => t.type === 'page');
@@ -94,6 +97,7 @@ function cdpNavigate(url, timeoutMs = 25000) {
       });
       ws.addEventListener('error', (e) => { clearTimeout(timer); reject(new Error('ws: ' + (e && e.message))); });
     } catch (e) { reject(e); }
+    })().catch(reject);
   });
 }
 

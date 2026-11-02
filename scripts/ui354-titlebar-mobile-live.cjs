@@ -36,7 +36,8 @@ function fetchJson(url) {
 }
 
 function cdpCall(method, params, timeoutMs = 25000) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    (async () => {
     try {
       const targets = await fetchJson('http://127.0.0.1:9222/json/list');
       const page = targets.find((t) => t.type === 'page');
@@ -59,6 +60,7 @@ function cdpCall(method, params, timeoutMs = 25000) {
       });
       ws.addEventListener('error', (e) => { clearTimeout(timer); reject(new Error('ws: ' + (e && e.message))); });
     } catch (e) { reject(e); }
+    })().catch(reject);
   });
 }
 

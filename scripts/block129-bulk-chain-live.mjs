@@ -86,7 +86,12 @@ function readManifestLabels(job) {
 
 function labelsReadable(labels) {
   if (labels.length === 0) return { pass: false, reason: 'no_labels' };
-  const bad = labels.filter((text) => /\uFFFD|[\x00-\x08\x0e-\x1f]/.test(text));
+  // 控制字符用码点判定（no-control-regex；区间同 \x00-\x08、\x0e-\x1f，外加 \uFFFD 替换符）
+  const hasControlChar = (text) => [...text].some((ch) => {
+    const c = ch.codePointAt(0);
+    return c === 0xFFFD || c <= 0x08 || (c >= 0x0e && c <= 0x1f);
+  });
+  const bad = labels.filter(hasControlChar);
   const cjk = labels.some((text) => /[\u4e00-\u9fff]/.test(text));
   return { pass: bad.length === 0 && cjk, bad, sample: labels.slice(0, 4) };
 }
@@ -106,12 +111,13 @@ function labelsReadable(labels) {
   if (!projectId) throw new Error('project create failed');
 
   for (const tool of TOOLS) {
-    const files = {};
+    const fileEntries = [];
     for (const [name, rel] of Object.entries(tool.files)) {
       const abs = path.join(PACK, rel);
       if (!fs.existsSync(abs)) throw new Error(`demo file missing: ${rel}`);
-      files[name] = fs.readFileSync(abs).toString('base64');
+      fileEntries.push([name, fs.readFileSync(abs).toString('base64')]);
     }
+    const files = Object.fromEntries(fileEntries);
     const submit = (await restJson('POST', '/api/tools/run', {
       toolId: tool.id, projectId, params: tool.params, files,
     })).data;

@@ -15,12 +15,16 @@ const toolRegistry = require('../core/petri-server/tool-registry.js');
 // 勿硬编码机器绝对路径——block-84 原版写死 D:/<workdir>/petri-pack-bio（作者 Windows 机），
 // 换机即 pack_json_missing 三连红；同级解析在原机上落点不变，跨机可移植。
 const REAL_PACK = path.resolve(root, '..', 'petri-pack-bio');
+// AUDIT-LOG 🟡（2026-11-02 同族处置）：真包断言依赖同级仓 petri-pack-bio——缺席时
+// 真包四测 skip 并如实打印（环境缺失不是产品回归；克隆 ../petri-pack-bio 后复跑）。
+const REAL_PACK_PRESENT = fs.existsSync(path.join(REAL_PACK, 'pack.json'));
+const needsRealPack = { skip: REAL_PACK_PRESENT ? undefined : '同级仓 petri-pack-bio 缺席（环境项，克隆后复跑）' };
 
 function tempDataDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'block84-packs-'));
 }
 
-test('BLOCK-84 pack validation: pack.json contract and loadability hard evidence', () => {
+test('BLOCK-84 pack validation: pack.json contract and loadability hard evidence', needsRealPack, () => {
   // 缺 pack.json
   const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'block84-empty-'));
   assert.equal(packRegistry.validatePackDir(empty).error, 'pack_json_missing');
@@ -36,7 +40,7 @@ test('BLOCK-84 pack validation: pack.json contract and loadability hard evidence
   assert.equal(real.pack.packId, 'petri-pack-bio');
 });
 
-test('BLOCK-84 install is an idempotent upsert; uninstall removes the record only', () => {
+test('BLOCK-84 install is an idempotent upsert; uninstall removes the record only', needsRealPack, () => {
   const dataDir = tempDataDir();
   const first = packRegistry.installPack(dataDir, REAL_PACK);
   assert.equal(first.ok, true);
@@ -57,12 +61,12 @@ test('BLOCK-84 install is an idempotent upsert; uninstall removes the record onl
   assert.equal(packRegistry.uninstallPack(dataDir, 'petri-pack-bio').error, 'pack_not_installed');
 });
 
-test('BLOCK-84 discovery finds the sibling pack automatically', () => {
+test('BLOCK-84 discovery finds the sibling pack automatically', needsRealPack, () => {
   const available = packRegistry.discoverAvailablePacks({ projectRoot: root });
   assert.ok(available.some((p) => p.packId === 'petri-pack-bio'), JSON.stringify(available.map((p) => p.packId)));
 });
 
-test('BLOCK-84 tool-registry supports additive domain registration (dev env + pack boot share one mechanism)', () => {
+test('BLOCK-84 tool-registry supports additive domain registration (dev env + pack boot share one mechanism)', needsRealPack, () => {
   // 空表起点（核心默认态）
   assert.equal(Object.keys(toolRegistry.TOOLS).length, 0);
   // 叠加注册：同 id 覆盖、别名合并、接口语义不变

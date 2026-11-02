@@ -53,7 +53,7 @@ test('resize-electron-window.ps1 用 Win32 SetWindowPos 并保持 ASCII-only', (
   const ps = read('scripts/resize-electron-window.ps1');
   assert.ok(/SetWindowPos/.test(ps), '窗口尺寸必须走 Win32 SetWindowPos');
   assert.ok(
-    /^[\x00-\x7F]*$/m.test(ps) && !/[\u4e00-\u9fff]/.test(ps),
+    [...ps].every((ch) => ch.codePointAt(0) <= 0x7F) && !/[\u4e00-\u9fff]/.test(ps),
     'PowerShell 5.1 对无 BOM 文件按 ANSI 解析，脚本必须 ASCII-only（中文注释会炸解析）'
   );
 });

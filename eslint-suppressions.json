@@ -686,42 +686,12 @@
       "count": 1
     }
   },
-  "scripts/block129-bulk-chain-live.mjs": {
-    "no-control-regex": {
-      "count": 1
-    }
-  },
-  "scripts/block84-p2-ui-live.cjs": {
-    "no-async-promise-executor": {
-      "count": 2
-    }
-  },
-  "scripts/ui354-titlebar-mobile-live.cjs": {
-    "no-async-promise-executor": {
-      "count": 1
-    }
-  },
-  "scripts/ui355-compute-card-removal-live.cjs": {
-    "no-async-promise-executor": {
-      "count": 1
-    }
-  },
-  "scripts/ui356-harness-copy-live.cjs": {
-    "no-async-promise-executor": {
-      "count": 1
-    }
-  },
   "src/ipc/file-dialog.js": {
     "no-control-regex": {
       "count": 1
     }
   },
   "src/main/_window-manager.js": {
-    "no-control-regex": {
-      "count": 1
-    }
-  },
-  "test/dev-debug-scripts.test.mjs": {
     "no-control-regex": {
       "count": 1
     }

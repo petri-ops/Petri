@@ -119,3 +119,6 @@ model3d/runs/
 
 # BLOCK-335 P4 实机腿瞬态目录（dataDir/worktree 容器，跑完即删）
 .petri-b335-live/
+
+# BLOCK-335 首批 lint 收缩的瞬态 worktree 容器
+.petri-b335-lint/
