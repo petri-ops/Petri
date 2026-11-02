@@ -1,6 +1,6 @@
 ---
 capability: block-340-video-input-plane
-status: planned
+status: active
 goal: 视频输入面：让参考视频 / 试玩录像 / 屏幕录制成为 agent 可读输入——本地抽帧（ffmpeg，复用 BLOCK-329 已验证的发现与诚实降级，零新依赖）→ 关键帧选择 → 现有 vision 角色消息（model-gateway `image_url` 归一已在）。对照 Kimi「游戏开发与创意工作解决方案」推文评估（2026-11-02）确认的能力缺口之一；也是 BLOCK-341 引擎桥「截图序列→判据」管线的共用前置。
 acceptance:
   - P0 边界钉死：ffmpeg 缺席 / 不可用 → 诚实 `capability_unavailable`（复用 `helpers/ffmpeg-turntable.js` 的 findFfmpegBinary / shouldFallback 模式）；帧数预算（默认 ≤8、硬顶 ≤16）与单帧尺寸上限入 model-surface 计量基线（任何增长需 `--update` 显式留痕）；无 vision 凭据时如实降级为「返回帧清单与 manifest，不解读」，不伪造观察。
@@ -12,6 +12,7 @@ reopen: 音轨转写（ASR）；长视频分段摘要与时间轴标注；帧级
 
 # BLOCK-340-VIDEO-INPUT-PLANE — 视频输入面计划
 
+- 登记状态：**active（2026-11-03 启动；用户连续五回「继续按照你的建议推进」=发令）**
 - 立项裁决：用户 2026-11-02 对照 Kimi 游戏解决方案推文的能力评估后「可以的 梳理好了 这一块是否要建个 block 后续排队推进？」→ 主代理答「要」并登记排队（planned，未启动）。
 - 队列位置：**335 之后、341 之前**（341 的截图序列→判据管线与本包共用「帧→vision」一条路；小体量，用户可裁决插队）
 - 唯一真相域：本文件（block-340-video-input-plane）

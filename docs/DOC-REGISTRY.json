@@ -8920,7 +8920,7 @@
       "capability": "block-340-video-input-plane",
       "path": "docs/block-340-video-input-plane-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "active",
       "canonical": true,
       "truthDomain": "block-340-video-input-plane",
       "entrypoint": "docs/README.md",
@@ -8933,7 +8933,8 @@
         "agent-tools",
         "G0"
       ],
-      "notes": "视频输入面（用户 2026-11-02 对照 Kimi 游戏解决方案推文评估后裁决「这一块建 block 后续排队推进」）planned，队列 335 之后、341 之前：参考视频/试玩录像本地抽帧（复用 329 ffmpeg 发现与诚实降级，零新依赖）→关键帧→现有 vision 角色（gateway image_url 归一已在）；read_video 工具 + 聊天附件 video 门控同源扩展；无 vision 凭据诚实降级；帧预算入 model-surface 基线；341 截图序列共用此管线。"
+      "notes": "视频输入面（用户 2026-11-02 对照 Kimi 游戏解决方案推文评估后裁决「这一块建 block 后续排队推进」）planned，队列 335 之后、341 之前：参考视频/试玩录像本地抽帧（复用 329 ffmpeg 发现与诚实降级，零新依赖）→关键帧→现有 vision 角色（gateway image_url 归一已在）；read_video 工具 + 聊天附件 video 门控同源扩展；无 vision 凭据诚实降级；帧预算入 model-surface 基线；341 截图序列共用此管线。",
+      "phase": "P0-LAUNCH"
     },
     {
       "id": "BLOCK-341-GAME-ENGINE-BRIDGE",
