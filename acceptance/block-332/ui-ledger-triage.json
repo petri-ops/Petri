@@ -1,21 +1,16 @@
 {
-  "generatedAt": "2026-11-02T03:20:55.226Z",
+  "generatedAt": "2026-11-02T06:01:07.655Z",
   "ledger": "docs/ui-productization-audit.md",
   "sections": 451,
   "uniqueIds": 442,
   "counts": {
     "blocked": 23,
-    "verified": 411,
-    "live-missing": 6,
+    "verified": 412,
+    "live-missing": 5,
     "closed": 11
   },
-  "debt": 29,
+  "debt": 28,
   "liveMissing": [
-    {
-      "id": "UI-639a",
-      "deps": [],
-      "title": "约束编辑器 SceneConstraintEditor（BLOCK-322 P3-03 v2b 第二票；2026-10-30 **in_progress（组件 4/4 + 后端契约"
-    },
     {
       "id": "UI-595",
       "deps": [],

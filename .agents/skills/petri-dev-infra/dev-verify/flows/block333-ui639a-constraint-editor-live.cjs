@@ -258,7 +258,7 @@ module.exports = {
         return true;
       })()`);
       await sleep(500);
-      await evalJs(client, `(() => {
+      const badPicked = await evalJs(client, `(() => {
         const form = document.querySelector('[data-testid="constraint-editor-form"]');
         const setSelect = (el, value) => {
           const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
@@ -268,10 +268,11 @@ module.exports = {
         const sels = [...form.querySelectorAll('select')];
         setSelect(sels[1], '+y');
         setSelect(sels[3], '+y');
-        const btn = document.querySelector('[data-testid="constraint-editor-submit"]');
-        if (btn) btn.click();
-        return true;
+        return { a: sels[0].value, aFace: sels[1].value, b: sels[2].value, bFace: sels[3].value };
       })()`);
+      detail.badPicked = badPicked;
+      await sleep(400);
+      await evalJs(client, `(() => { const b = document.querySelector('[data-testid="constraint-editor-submit"]'); if (b) b.click(); return !!b; })()`);
       await sleep(2500);
       const backendErr = await evalJs(client, `(() => { const e = document.querySelector('[data-testid="constraint-editor-error"]'); return e ? e.innerText.trim().slice(0, 200) : ''; })()`);
       const afterBad2 = JSON.stringify(readScene(workspacePath).constraints);

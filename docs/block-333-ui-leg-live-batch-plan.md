@@ -1,18 +1,18 @@
 ---
 capability: block-333-ui-leg-live-batch
-status: in_progress
+status: completed
 goal: 按 BLOCK-332 分诊表的「可补实机腿」清单补真实 UI 实机腿。第一批 = UI-639a（Model3D 约束编辑器工作区腿）：从真实入口（文件预览 →「在 3D 模型打开」）走完 选节点/面 → 提交 → 写盘 → 非法约束 fail-closed → 移除 的闭环。
 acceptance:
-  - 实机 flow `.agents/skills/petri-dev-infra/dev-verify/flows/block333-ui639a-constraint-editor-live.cjs`：12/13 断言通过（U0–U9b 全绿；U10「移除」端口因**后端未重启**未完成）。
+  - 实机 flow `block333-ui639a-constraint-editor-live`：**13/13 allPass**（dev 栈重启后复跑，U10 移除通过、约束 id=c1 由创建端分配）。
   - 契约 test/block333-constraint-id-addressable.test.mjs 5/5（创建即分配唯一 id / 按 id 可删 / 重复 id 拒 / 校验给错 / 老场景加性兼容）。
   - 跨语言白名单一致：test/block322-p3-constraints.test.mjs 8/8（前后端 CONSTRAINT_FIELDS 同步加入 id）。
   - 前端库回归：frontend/src/lib/scene3d.test.ts 15/15。
-reopen: U10 需要重启 dev 栈（core 变更不会热更）；重启后复跑同一 flow 应 13/13，届时把 UI-639a 翻 verified 并把 BLOCK-332 的 live-missing 棘轮下调 1。
+reopen: 已兑现（2026-11-02 重启后 13/13，UI-639a 翻 verified、live-missing 棘轮 6→5、债 29→28）。下一批候选=UI-475（需 mock 无 vision 模型）/ UI-522（设置面导出实机走查）。
 ---
 
 # BLOCK-333 — UI 补腿批（第一批：UI-639a 约束编辑器）
 
-状态：**in_progress（P1 实机腿 12/13；U10 待 dev 栈重启）**
+状态：**completed（2026-11-02 当日立项当日收口；实机 13/13）**
 truthDomain：`block-333-ui-leg-live-batch`
 canonical 入口：本文件
 
@@ -54,7 +54,7 @@ canonical 入口：本文件
 | U8 | UI 约束列表反映且无错误 | PASS（`贴合 base·+x ↔ tower·-x`） |
 | U9a | 同节点自贴合被前端守卫拒 | PASS（`请选择两个不同的节点。`，文件未变） |
 | U9b | 法向同向（+y/+y）被**后端**拒 | PASS（`需要法向相反的同轴平面（+y/+y）`，文件未变） |
-| U10 | 移除约束 → 文件归零 | **BLOCKED**：旧后端仍在跑，`row.id` 缺失导致按钮 disabled——修好的代码需要重启 dev 栈 |
+| U10 | 移除约束 → 文件归零 | PASS（重启后端后：约束带 id=c1 → 点「移除」→ 文件 constraints 归零、UI 空态） |
 
 ## 5. 环境抓真
 
@@ -70,6 +70,6 @@ canonical 入口：本文件
 
 ## 7. 完成语义
 
-第二阶段的完成条件：dev 栈重启后复跑 `npm run verify -- block333-ui639a-constraint-editor-live` → **13/13**，然后把 UI-639a 从 `in_progress` 翻 `verified`（dev Electron 边界内），并把 BLOCK-332 的 live-missing 上限 6→5 下调。
+`completed`＝flow **13/13 allPass**（含重启后 U10）+ UI-639a 翻 `verified`（dev Electron 边界内）+ 契约 5/5 + 跨语言白名单 8/8 + 前端 15/15 + BLOCK-332 棘轮下调（live-missing 6→5、债 29→28）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

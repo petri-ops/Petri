@@ -8753,12 +8753,12 @@
       "capability": "block-333-ui-leg-live-batch",
       "path": "docs/block-333-ui-leg-live-batch-plan.md",
       "kind": "work-package",
-      "status": "in_progress",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-333-ui-leg-live-batch",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-11-02",
-      "archivePolicy": "archive_after_completion",
+      "archivePolicy": "retain_stable_path",
       "tags": [
         "ui-ledger",
         "live-acceptance",
@@ -8766,9 +8766,31 @@
         "constraint",
         "G0"
       ],
-      "notes": "UI 补腿批第一批=UI-639a 约束编辑器工作区实机腿（用户裁决 2026-11-02「行 按照建议继续推进」）：flow 12/13（U0-U9b 全绿，U10 待 dev 栈重启）；实机抓到真缺陷=约束建出来删不掉（add_constraint 不分配 id + 白名单不收 id），已修（id 为一等字段 + 跨语言白名单同步）+ 契约 5/5。"
+      "notes": "UI 补腿批第一批=UI-639a 约束编辑器工作区实机腿 completed（用户裁决 2026-11-02「行 按照建议继续推进」）：flow 13/13 allPass（真实入口→约束四下拉→写盘→两类 fail-closed→移除归零）；实机抓到并修真缺陷「约束建出来删不掉」（id 一等字段 + 跨语言白名单同步），契约 5/5；UI-639a 翻 verified，BLOCK-332 债 29→28（棘轮下调）。"
+    },
+    {
+      "id": "BLOCK-334-RESULT-HOST-UNIFICATION",
+      "capability": "block-334-result-host-unification",
+      "path": "docs/block-334-result-host-unification-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "phase": "P0-LAUNCH",
+      "canonical": true,
+      "truthDomain": "block-334-result-host-unification",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "result-studio",
+        "artifact-plane",
+        "workspace-layout",
+        "right-panel",
+        "viewer-registry",
+        "G0"
+      ],
+      "notes": "结果宿主统一（用户裁决 2026-11-02「把这个怎么做说的明白点 并且立包,下面开干」）active：P1 结果查看迁右栏「结果」tab 宿主（ResultsSurface；四态降为局部子状态不进 URL；resultRightWidth 独立偏好 + 左栏收起；Inspector 退役；WorkspaceMode='chat'|'scheduled'，旧四态深链 fail-closed 落 chat）→ P2 两宿主渲染层以 viewerRegistry 单一分派合并六类 viewer。推翻 UI-106 中央大画布形态裁决（前提已失效）。并行 BLOCK-333 文件面零触碰。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 445
+  "documentCount": 446
 }

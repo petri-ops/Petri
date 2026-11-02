@@ -1,18 +1,18 @@
 {
   "name": "block333-ui639a-constraint-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-02T05:33:11.620Z",
-  "finishedAt": "2026-11-02T05:33:41.966Z",
+  "startedAt": "2026-11-02T06:00:46.847Z",
+  "finishedAt": "2026-11-02T06:00:57.486Z",
   "assertions": [
     {
       "name": "U0_spa_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvyto1ir_1l1m?file=scene.scene3d.json"
+      "detail": "http://localhost:3000/project/p_mvyunx40_vvak?file=scene.scene3d.json"
     },
     {
       "name": "U1_seed_project",
       "pass": true,
-      "detail": "{\"projectId\":\"p_mvytp303_8txn\"}"
+      "detail": "{\"projectId\":\"p_mvyuok6i_fl27\"}"
     },
     {
       "name": "U2_file_preview_offers_3d_open",
@@ -47,7 +47,7 @@
     {
       "name": "U7_constraint_written_to_scene_file",
       "pass": true,
-      "detail": "{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"tower\",\"aFace\":\"+x\",\"bFace\":\"-x\"}"
+      "detail": "{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"tower\",\"aFace\":\"+x\",\"bFace\":\"-x\",\"id\":\"c1\"}"
     },
     {
       "name": "U8_ui_reflects_constraint_without_error",
@@ -66,9 +66,9 @@
     },
     {
       "name": "U10_constraint_removed_from_scene_file",
-      "pass": false,
-      "detail": "{\"error\":\"constraint 1（mate）需要法向相反的同轴平面（+y/+y）\",\"existing\":\"贴合 base·+x ↔ tower·-x\\n移除\",\"constraints\":[{\"kind\":\"mate\",\"a\":\"base\",\"b\":\"tower\",\"aFace\":\"+x\",\"bFace\":\"-x\"}]}"
+      "pass": true,
+      "detail": "{\"error\":\"\",\"existing\":\"\",\"constraints\":[]}"
     }
   ],
-  "allPass": false
+  "allPass": true
 }

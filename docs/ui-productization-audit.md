@@ -192,7 +192,10 @@
 - **实机证据**：`acceptance/rw-02-pack-write-bridge/rw02-pack-write-bridge-live-live.json`（**9/9**，隔离 :3011 + 夹具双包）：合法声明全量透传、非法声明丢弃+诊断；selection-save/annotations create+delete 真实写链；revision-restore 全链 200（git 绑定工作区过物化门）。
 - **边界（reopen）**：①iframe 端到端腿（真 pack surface 在工作区面板渲染后经 postMessage 全链）随 UI-532 同前提（需结果面 job+artifact seed）；②revision-replay（contextToken 机制）/export-run（methods-export LLM 门）两子动词契约+授权已过、宿主分发点 pending（write_kind_host_wiring_pending 确定性回执）。
 
-## UI-639a: 约束编辑器 SceneConstraintEditor（BLOCK-322 P3-03 v2b 第二票；2026-10-30 **in_progress（组件 4/4 + 后端契约 4/4；工作区实机腿待补）**）
+## UI-639a: 约束编辑器 SceneConstraintEditor（BLOCK-322 P3-03 v2b 第二票；2026-11-02 **verified（BLOCK-333 补腿：dev Electron 边界内实机 13/13）**）
+
+- **实机证据（BLOCK-333，`acceptance/block-333/block333-ui639a-constraint-editor-live-darwin.json` 13/13）**：走**真实入口**——`/project/<id>?file=scene.scene3d.json` 文件预览出现「在 3D 模型打开」→ 点进右栏 3D 工作面 → 约束 section 四个下拉（节点 A / 面 A / 节点 B / 面 B，面选项来自特征表 +x…-z）→ 选 `base·+x ↔ tower·-x` 提交 → **读磁盘**确认 `scene.scene3d.json` 真写入 `{kind:mate, a:base, b:tower, aFace:+x, bFace:-x, id:c1}` → UI 列表显示「贴合 base·+x ↔ tower·-x」→ 同节点自贴合被前端守卫拒（`请选择两个不同的节点。`，文件未变）→ 法向同向 `+y/+y` 被**后端**拒（`需要法向相反的同轴平面（+y/+y）`，文件未变）→ 点「移除」→ 文件 constraints 归零、UI 空态。
+- **实机抓到并修**：约束建出来**删不掉**——「移除」按钮 `disabled={!row.id}`、后端 `remove_constraint` 按 `c.id` 匹配，但 `add_constraint` 从不分配 id 且 `CONSTRAINT_FIELDS` 白名单不收 id；修法=id 纳入四类白名单 + 创建即分配唯一 `cN` + 重复 id 拒 + `validateSceneSpec` 对重复/非法 id 给错（老场景无 id 仍合法）。契约 `test/block333-constraint-id-addressable.test.mjs` 5/5；前后端白名单一致性由 `block322-p3-constraints` 8/8 机械锁死。
 
 - **变化面**：新增 `SceneConstraintEditor` 组件（Model3DSurface 约束 section 接线）——节点 A/B 下拉 + 面下拉从特征表派生（`deriveSceneFeatureTable` 同源移植，非自由文本）+ offset 输入；`add_constraint`/`remove_constraint` 走 scene/apply（后端创建即求值 fail-closed——不可解约束整个 apply 拒收）；后端 fail-closed 错误透传显示。scene/apply 操作白名单加 `add_constraint`/`remove_constraint`（校验走 validateSceneSpec+applyConstraints 同源单源）。
 - **为什么这样设计**：约束此前只能手写 JSON 入 spec（BLOCK-322 v2b 前无 UI 创建面）；编辑器让用户从特征表下拉选择而非自由文本（C-44 写权限同款纪律——用户选择受特征表约束，不冒充任意引用）；创建即求值 fail-closed 不落死约束。
