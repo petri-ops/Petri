@@ -8869,8 +8869,28 @@
         "G0"
       ],
       "notes": "模型流式 stall 看门狗（用户裁决 2026-11-02「事关推进稳定性 必须全力解决」）planned，插队 334 收口后首位：根因=全部提供者只有 socket idle timeout（上游发心跳不发 token 永不触发，150s>90s 数值矛盾即证）；修在 ModelGateway 单点（首 token 45s/idle 60s，心跳不续命）；根治 2026-10-30 起挂的 /api/ai/chat hang。"
+    },
+    {
+      "id": "BLOCK-339-PERSONA-DEBT-SWEEP",
+      "capability": "block-339-persona-debt-sweep",
+      "path": "docs/block-339-persona-debt-sweep-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-339-persona-debt-sweep",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "persona",
+        "prompt",
+        "product",
+        "generic-agent",
+        "G0"
+      ],
+      "notes": "产品人设历史债务清偿（用户裁决 2026-11-02「chat 仍有生信工程师人设；全方位核对清理，要通用 agent」）planned，队列 338 之后：核对=215 只清 6 个工具词漏掉人设主句（baseRole/identity×2「生物信息学分析助手」、chitchat「科研伙伴」绕主 prompt 直答=体感主因、GO/KEGG 硬编码、interpret 域功能、学习路径退役纪律、11 处生信示例）；必清 9/宜清 14/保留 6；RETIRED_TERMS 补角色词表防回潮；golden 重基准。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 450
+  "documentCount": 451
 }
