@@ -4613,15 +4613,17 @@
     },
     {
       "id": "BLOCK-90-OS-DRAG-IMPORT",
-      "path": "docs/block-90-os-drag-import-plan.md",
+      "path": "docs/archive/checkpoints/block-90-os-drag-import-plan.md",
       "kind": "work-package",
-      "status": "completed",
+      "status": "archived",
       "canonical": false,
-      "truthDomain": "block-90-os-drag-import",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
+      "archivePolicy": "archive_after_completion",
       "phase": "COMPLETED",
-      "lastUpdated": "2026-09-15"
+      "lastUpdated": "2026-09-15",
+      "tags": [
+        "archived-2026-11"
+      ],
+      "notes": "｜2026-11-02 BLOCK-332 收口按 docs:reconcile 归档清债（零入向引用，仅注册表自指）：文件原样搬移 docs/archive/checkpoints/，不改写内容。"
     },
     {
       "id": "SESSION-HANDOFF-2026-09-15",
