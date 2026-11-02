@@ -87,3 +87,10 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 - **随片抓真三处**：①`satisfies` 谓词在 Promise.resolve 包裹后落到外层（TS1360 ×6）——移入 resolve 括号内；②`await act(() => {...})` 同步重载返回非 Thenable（await-thenable ×3）——act 同步形式去外层 await；③worktree 内 type-aware lint 环境伪影 1917 errors（vitest 类型经 symlink 不可解析）——**前端文件的 lint 权威判定在主仓，worktree 内仅做行为验证（vitest）**。
 - **账目**：基线 293→234（-59 净收缩）；vitest 69/69 全绿；types 0 error；closeout PASS。
 - **任务线余量**：require-await 测试域尾批 ~40 条（1-2 条/文件 × 22 文件，逐文件碎片型）；react-hooks 域 ~100 条（真重构独立线）；detect-object-injection 未覆盖面 ~2100。
+
+
+### §6.3 lint 任务线第三批（2026-11-03 同日完成；提交 b4227a93）
+
+- **require-await 尾批 50 条清偿**（24 文件，全部机械）：async 移除 + 消费面分诊——`await` 消费 = 直接去 async；**`.then` 消费 = Promise.resolve 包裹**（去 async 即崩：UsageResourcePanel fetch(...).then 实测、JobsWall listProjects(...).then、ScientificInteractionViewer query(...).then）；Response 实参括号逐处核对（RightFileTree 两处）。
+- **验证**：vitest 24 文件 0 fail；types 0 error；基线 234→187（-47）。
+- **任务线累计**：311→187（-124 条，40%）；余=react-hooks 域 ~100 条（真重构独立线）+ detect-object-injection 未覆盖 ~2100 + 控制字符零星。
