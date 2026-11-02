@@ -8829,8 +8829,28 @@
         "G0"
       ],
       "notes": "worktree 通用基础设施 v1（用户裁决 2026-11-02「加 全方位的加」）planned：governance 八节机械化——工具面四件（create/list/remove/merge-request，审批+observe 档）/项目层 worktreeOf 声明式副本/契约纯函数+registry.json 单源/治理留痕；消费者=335 自优化闭环+并行多任务+实验副本。与 334/335 文件面零交叠。"
+    },
+    {
+      "id": "BLOCK-337-GOVERNANCE-RUNTIME",
+      "capability": "block-337-governance-runtime",
+      "path": "docs/block-337-governance-runtime-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-337-governance-runtime",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-02",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "governance",
+        "runtime",
+        "parallel",
+        "skills",
+        "G0"
+      ],
+      "notes": "治理运行时化 + 并行协议（用户裁决 2026-11-02「需要的」）planned：治理 skill 三分类（可机械执行→运行时化/判断标准→留 skill/价值边界→留 AGENTS.md）；项目打开自动装载治理规则包；registry touchSurface+sharedBaselines 机械互斥校验放行并行；收口 completed 硬绑 closeout 全绿；台账自动落账。队列 336→337→334 收口→335。"
     }
   ],
   "lastUpdated": "2026-11-02",
-  "documentCount": 448
+  "documentCount": 449
 }
