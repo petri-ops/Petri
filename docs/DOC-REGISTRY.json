@@ -8815,8 +8815,8 @@
       "capability": "block-336-worktree-infrastructure",
       "path": "docs/block-336-worktree-infrastructure-plan.md",
       "kind": "work-package",
-      "status": "active",
-      "phase": "P0-LAUNCH",
+      "status": "completed",
+      "phase": "P5-COMPLETED",
       "canonical": true,
       "truthDomain": "block-336-worktree-infrastructure",
       "entrypoint": "docs/README.md",
@@ -8829,7 +8829,7 @@
         "governance",
         "G0"
       ],
-      "notes": "worktree 通用基础设施 v1（用户裁决 2026-11-02「加 全方位的加」）planned：governance 八节机械化——工具面四件（create/list/remove/merge-request，审批+observe 档）/项目层 worktreeOf 声明式副本/契约纯函数+registry.json 单源/治理留痕；消费者=335 自优化闭环+并行多任务+实验副本。与 334/335 文件面零交叠。"
+      "notes": "worktree 通用基础设施 v1（用户裁决 2026-11-02「加 全方位的加」）completed（P1-P5 立项当日全收口）：governance 八节机械化——P1 工具面四件（契约 10/10）/P2 项目层 worktreeOf 声明式副本（迁移 021，契约 8/8）/P3 生命周期事件（task_events 可观测 + jsonl 永久证据，契约 4/4）/P4 隔离后端实机 13/13/P5 governance 回写（§2 承载物对照表 + §2.1 v1 边界）。v1 边界=§5 仅端口约定、§7 缺 Artifact 检查、并发 merge 队列；消费者=335（已就绪，撞裁决点①关闭）+并行多任务+实验副本。"
     },
     {
       "id": "BLOCK-337-GOVERNANCE-RUNTIME",

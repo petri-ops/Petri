@@ -45,5 +45,5 @@ reopen: 自动选题（从审计台/lint 基线/失败归因自动出题，v1 �
 
 ## 4. 撞裁决点（发令前须定）
 
-1. **worktree 重开**：worktree-governance 休眠纪律的重开条件由本包触发——需用户确认"为自优化闭环重开 worktree 纪律"。
+1. ~~**worktree 重开**：worktree-governance 休眠纪律的重开条件由本包触发——需用户确认"为自优化闭环重开 worktree 纪律"。~~ **已关闭（2026-11-02 BLOCK-336 收口）**：基础设施已交付并回写治理——[`worktree-governance.md`](./worktree-governance.md) §2 状态转「infrastructure ready (v1)」、§2.1 列明 v1 边界（§5 仅端口约定、§7 缺 Artifact 检查）；本包直接消费 `createProject({ worktreeOf })` 项目层副本，不再需要单独重开裁决。
 2. **首批任务清单**：v1 人工给题；建议首题=lint 存量收缩一批（低风险、可机械验证）。

@@ -1,6 +1,6 @@
 ---
 capability: block-336-worktree-infrastructure
-status: active
+status: completed
 goal: worktree 通用基础设施 v1（用户裁决 2026-11-02「加 全方位的加」）：把 docs/worktree-governance.md 八节纪律从休眠文档变成机械可用的产品能力——agent 工具面（create/list/status/remove/merge-request 四档权限管）、项目层（worktreeOf 声明式副本，workspace_path 自动指向）、契约机械化（一树一分支一包 + 环境隔离端口约定）、治理留痕（生命周期全审计）。消费者：BLOCK-335 自优化闭环（第一个用户）、并行多任务、大胆实验副本、用户"试试看"。
 acceptance:
   - P1 工具面四件：workspace_worktree_create（源仓+分支+路径约定，四档权限+审批+observe 档可用）/ list（含 ahead/behind/脏树状态）/ remove（干净树才可删，脏树 fail-closed 报明）/ merge_request（不自动 merge——生成改动摘要+diff 引用，合并动作留人工）。契约测红绿（含 .git 敏感段/越界/symlink 复用既有守卫）。
@@ -14,7 +14,8 @@ reopen: 多副本并发写同一主仓的合并队列（v1 单副本串行）；
 # BLOCK-336-WORKTREE-INFRASTRUCTURE — worktree 通用基础设施 v1 计划
 
 - 立项裁决：用户 2026-11-02「加 全方位的加」（承接同日问答确认"有纪律无基础设施"——治理八节在、工具面为零）
-- 登记状态：**active（2026-11-02 接手启动：BLOCK-334 收口后 Jev `next:suggest` 单一建议=BLOCK-336（confidence 0.25，如实），用户「行 按照建议来」发令；P1 本会话）**
+- 登记状态：**completed（2026-11-02 立项当日全五片收口：P1 工具面 → P2 项目层 → P3 生命周期事件 → P4 隔离后端实机 13/13 → P5 governance 回写；提交 `44198f67`（P1-P3）+ `9e7f3a25`（P4）+ P5 收口笔）**
+- 启动沿革：BLOCK-334 收口后 Jev `next:suggest` 单一建议=BLOCK-336（confidence 0.25，如实），用户「行 按照建议来」发令
 - 唯一真相域：本文件（block-336-worktree-infrastructure）
 - 文件面隔离：agent-tools git 域、db.js 项目层、新 helpers/worktree-contract.js、routes 项目路由；与 334（前端结果面）/335（workflow+checkpoint）零交叠。
 
@@ -133,5 +134,27 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 | §6 | 同步与合并（经 git 提交/评审流，绝不目录拷贝） | **已实现** | `merge_request` 只出摘要 + `merged=false` + 主仓 HEAD 不变（P1 单测 + P4 V7） |
 | §7 | 保留与移除（commit/快照 → 合并或显式保留 → 干净状态 → Artifact 检查后移除） | **部分实现** | 脏树 fail-closed、`allowUnmergedAhead` 显式档、确认后 `--force` 且分支保留（P1/P2 单测 + P4 V8-V11）；**Artifact 检查未实现**（v1 无 artifact 关联面，reopen） |
 | §8 | 集中管理（登记表） | **已实现** | `registry.json` 单源 + `worktree-audit.jsonl` 永久证据 + `task_events` 当下可观测流（P3 单测） |
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 9. P5 收口记录 — 整包 COMPLETED（2026-11-02）
+
+**治理回写**：
+- [`worktree-governance.md`](./worktree-governance.md)：状态 `active policy / formal rollout deferred` → **`active policy / infrastructure ready (v1)`**；§2 由「休眠纪律」改为「启动门与基础设施现状（v1）」——新增**八节→承载物→证据**对照表（每次引用纪律可直接跳到实现与测试），新增 **§2.1 v1 能力边界**（§5 仅端口约定、§7 缺 Artifact 检查、并发 reopen），并写明「越界即停在边界上报，不得用文档措辞代偿实现缺口」。
+- [`block-335-self-optimization-loop-plan.md`](./block-335-self-optimization-loop-plan.md) 撞裁决点①**关闭**：335 直接消费 `createProject({ worktreeOf })` 项目层副本，不再需要单独重开裁决；撞裁决点只剩「首批题」（用户侧决策）。
+
+**整包验收总表**：
+
+| 片 | 交付 | 证据 |
+| --- | --- | --- |
+| P1 工具面四件 | defs/registry/handler/metadata + `worktree-contract` + `worktree-tools` | 契约测 **10/10**（真 git 临时仓） |
+| P2 项目层 worktreeOf | 迁移 021 + `project-worktree` + db 三处 + REST 三处 | 契约测 **8/8**（真 git 源仓 + 真 express） |
+| P3 生命周期事件 | `worktree-events`（零项目依赖）+ 五处接入 | 契约测 **4/4** |
+| P4 隔离后端实机 | `scripts/block336-worktree-live.mjs` 全链 | **13/13 allPass**（`acceptance/block-336/block336-p4-live-darwin.json`） |
+| P5 governance 回写 | 本文件 + governance §2/§2.1 + 335 撞点① | `docs:check` PASS |
+
+**门禁**：`test:changed`（P5 文档批：无生产改动，带出文档门 + 336 三套契约）· `quality:lint` 0 error · `gate:code-size` PASS · `gate:arch-cycles` PASS（13 环无新增）· `quality:arch` PASS · `docs:check` / `ui:audit:check` PASS。
+
+**reopen（如实保留，不代偿）**：多副本并发写同一主仓的合并队列；worktree 内跑完整后端实例（§5 只剩端口约定）；远端分支推送策略；§7 Artifact 检查。消费者就绪：BLOCK-335 可直接开工（首批题待用户点头）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

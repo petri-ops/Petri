@@ -1,10 +1,10 @@
 # Petri Git Worktree 开发治理规范
 
-最后更新：2026-07-24
+最后更新：2026-11-02
 
 规范编号：`GOV-WT-1`
 
-状态：`active policy / formal rollout deferred`（2026-07-24 决策：当前采用单线串行开发，不启用 Worktree；本规范继续作为重开时的唯一纪律来源）
+状态：`active policy / infrastructure ready (v1)`（2026-11-02 BLOCK-336 交付：休眠期结束，本规范 §3～§8 由「人工纪律」转为「有基础设施承载的正式流程」；v1 能力边界见 §2.1——**§5 只实现端口约定、§7 缺 Artifact 检查**，两项如实登记、不代偿、不外推）
 
 ## 1. 定位
 
@@ -12,13 +12,33 @@ Git Worktree 不是复制项目，也不是把当前目录转移到多个目录�
 
 Petri 使用 Worktree 的目标是隔离有边界的并行开发和运行环境，不是无限增加并发 Agent。最终交付仍通过 Git commit、review、merge 或明确的 patch 完成，禁止靠 `cp` 合并目录。
 
-## 2. 正式启动门
+## 2. 启动门与基础设施现状（v1）
 
-当前没有活跃 Worktree，也没有待创建的 Worktree。
+当前没有活跃 Worktree；基础设施已就绪，按本文件 §3～§8 正式流程使用。
 
-历史上曾规划的路径是 `G0-LF12 干净 checkpoint → G0-RS-WT0 → 创建 Result Studio 永久 Worktree → G0-RS0～G0-RS9`。LF12 已 `qualified + maintained`，该前置条件不再阻塞；但 2026-07-24 复核认定隔离收益已随 LF 开发线关闭而消失，`G0-RS-WT0` 标记 `deferred`，Result Studio 改为在主工作区单线串行开发。判据与重开条件记录在 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §14。
+历史上曾规划的路径是 `G0-LF12 干净 checkpoint → G0-RS-WT0 → 创建 Result Studio 永久 Worktree → G0-RS0～G0-RS9`。LF12 已 `qualified + maintained`，该前置条件不再阻塞；2026-07-24 复核认定隔离收益已随 LF 开发线关闭而消失，`G0-RS-WT0` 标记 `deferred`，Result Studio 改为在主工作区单线串行开发。判据与重开条件记录在 [`g0-result-studio-plan.md`](./g0-result-studio-plan.md) §14。
 
-因此本规范当前是**休眠纪律**：不主动创建 Worktree，但一旦重开条件成立，仍以本文件 §3～§8 为唯一执行标准，不得临时另立一套简化流程。
+**2026-11-02 重开点（BLOCK-336 交付生效）**：本规范的重开条件由 BLOCK-336「worktree 通用基础设施 v1」触发并由其交付关闭——八节纪律不再是纯文档，而是有机械承载：
+
+| § | 承载物 | 证据 |
+| --- | --- | --- |
+| §3 适用标准 | 用户裁决即重开点；首批消费者=BLOCK-335 自优化闭环（项目层副本） | 见本文件状态段 |
+| §4 一一对应 | agent 工具 `workspace_worktree_create/list/remove/merge_request` + `helpers/worktree-contract.checkContract`（分支/目录/Agent/包四规则一次报全） | `test/block336-worktree-infrastructure.test.mjs` 10/10 |
+| §5 环境隔离 | `derivePortBase`（`PETRI_WORKTREE_PORT_BASE`，默认 3101、步长 10）写入登记条目 `ports` | 同上（**仅端口约定**，见 §2.1） |
+| §6 同步与合并 | `merge_request` 只出摘要（`merged=false`）、主仓 HEAD 不变；**工具永不 merge** | 单测 + 实机 V7 |
+| §7 保留与移除 | 脏树 fail-closed 并列文件、`allowUnmergedAhead` 显式档、确认后 `--force`、**分支保留** | 单测 + 实机 V8-V11 |
+| §8 集中管理 | `<dataDir>/worktrees/registry.json` 单源 + `worktree-audit.jsonl` 永久证据 + `task_events` 当下可观测流 | 单测 + 实机 V12-V13 |
+
+**项目层入口**：`createProject({ worktreeOf })` 让「项目本身」是某个本地 git 项目的副本（`workspace_path` 指向 `<dataDir>/worktrees/<projectId>`，分支 `worktree/<projectId>`，删除时联动清理并保护脏树）。REST：`POST/PUT/DELETE /api/data/projects`（脏树删除需 `?confirmWorktreeDirty=1`，否则 409 + 文件清单）。
+
+### 2.1 v1 能力边界（如实登记，不得代偿）
+
+- **§5 只实现端口约定**：Electron `userData`、SQLite、结果/上传/tmp/日志的物理隔离**尚未自动装配**——在 Worktree 内跑完整后端实例仍属 reopen（见 plan frontmatter）。
+- **§7 缺 Artifact 检查**：移除前的「Artifact/ChangeSet 没有只存在于该目录」目前靠人工核对，v1 无关联面。
+- **并发**：v1 是「一包一副本」串行语义；多副本并发写同一主仓的合并队列属 reopen。
+- 上述三项的 reopen 判据以 [`block-336-worktree-infrastructure-plan.md`](./block-336-worktree-infrastructure-plan.md) frontmatter 为准（本文件不另立判据）。
+
+因此本规范自 2026-11-02 起是**生效纪律**：§3～§8 为唯一执行标准，不得临时另立简化流程；能力边界按 §2.1 如实执行，越界即停在边界上报，不得用文档措辞代偿实现缺口。
 
 ## 3. 适用标准
 

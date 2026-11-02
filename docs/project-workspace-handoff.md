@@ -35,13 +35,15 @@
 | --- | --- | --- | --- |
 | 1 | BLOCK-334 结果宿主统一 | **completed**（P1+P2 全片；`b5a72c45` 复位 HEAD、`e72ea1dc` 收口） | — |
 | 2 | BLOCK-338 stall 看门狗（稳定性优先，根治 chat hang 根因=socket idle timeout 被 SSE 心跳喂活） | planned | 无裁决；**因 336 已插队启动，本包顺延至 336 收口后** |
-| 3 | BLOCK-336 worktree 基础设施（全方位版） | **active（P1 10/10 + P2 8/8 + P3 4/4 + P4 实机 13/13 收口；仅余 P5 governance 回写）** | 交付即自动闭合 worktree 休眠纪律重开（用户「加 全方位的加」已裁） |
+| 3 | BLOCK-336 worktree 基础设施（全方位版） | **completed（P1 10/10 + P2 8/8 + P3 4/4 + P4 实机 13/13 + P5 governance 回写；立项当日整包收口）** | 已闭合 worktree 休眠纪律重开；335 撞裁决点①关闭、可直接开工 |
 | 4 | BLOCK-337 治理运行时化 + 并行协议（P0 引擎/规则包分离、P7 自我边界三防线） | planned | 无裁决 |
 | 5 | BLOCK-335 任务推进闭环（判据驱动驾驶员；自优化为首个用例） | planned | **首批题**（建议 lint 存量收缩）需用户点头；judge 读数需 **Jev 密钥 TYPESAFE_API_KEY**（不挡开工） |
 
 **用户待办（仅两项，均不挡 336 余片 / 338 / 337 开工）**：①补 Jev 密钥 TYPESAFE_API_KEY；②335 开工前点首批题。全部 plan 设计写死、P0 勘察在册，开工零勘察。单包串行；337 交付后并行按 registry 机械互斥放行。
 
-**恢复要点（换 Agent 必读·2026-11-02 四项裁决批收口·本段取代下方全部「恢复要点」段）**：**当前无 active 工作包、工作区无本包 WIP**（唯一未跟踪文件是用户 3D 运行时产物 `model3d/enclosure-*.scene3d.json`，不入库不触碰）。四项裁决全部 closed：`docs/block-329-ffmpeg-turntable-plan.md` / `docs/block-330-db-require-order-plan.md` / `docs/block-331-tool-output-and-list-scale-plan.md`（均 status=completed，DOC-REGISTRY 已登记，docs/README 312–314 在册）。**若要继续这条线**：A 项只剩「Windows 侧复跑对照」（本包未改原生出片路径，`videoSource='blender'` 分支零改动，非缺口）；C-01 的量化重开条件写在 backlog（≥400 条真实会话 + 用户卡顿 / >10k 节点，首选零依赖 `content-visibility`）；C-14 二次重开=单轮工具结果 tokens > 窗口 50%。**环境纪律沿用**：dev 栈端口 3000/3001/9223 常被占——隔离腿用端口自适应（占用即换空闲，绝不杀未知进程）；flow 读 wrapper 注入 env 必须运行时取；`npm run verify -- <flow>` 证据名已带平台后缀（darwin/win32/linux），跨平台不会互相覆盖。**不做**（用户裁决）：R 运行时 657MB 下载授权（UI-526 补腿继续挂起）、G1+（Provider/签名公证/GA）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**恢复要点（2026-11-02 BLOCK-336 收口·本段取代下方全部「恢复要点」段）**：**BLOCK-336 worktree 通用基础设施 COMPLETED**（P1-P5，提交 `44198f67` + `9e7f3a25` + P5 收口笔）——**当前无 active 工作包**，工作区干净（唯一未跟踪=用户 3D 运行时产物 `model3d/enclosure-*.scene3d.json`，不入库不触碰）。基础设施就绪：项目层 `createProject({ worktreeOf })` 声明式副本 + 四 agent 工具（`workspace_worktree_*`）+ `registry.json` 单源 + 审计 jsonl/task_events 双留痕；治理侧 `worktree-governance.md` 已转 `infrastructure ready (v1)`，**v1 边界=§5 仅端口约定、§7 缺 Artifact 检查、并发 merge 队列 reopen**（如实保留，不代偿）。**队列下一包=BLOCK-338 stall 看门狗**（chat hang 根因=socket idle timeout 被 SSE 心跳喂活，plan 已设计、无裁决、可直接发令）；再后 339 → 337 → 335（335 已就绪，仅缺首批题用户点头 + Jev 密钥 TYPESAFE_API_KEY）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+**恢复要点（superseded·2026-11-02 四项裁决批收口段·不得据此恢复）**：**当前无 active 工作包、工作区无本包 WIP**（唯一未跟踪文件是用户 3D 运行时产物 `model3d/enclosure-*.scene3d.json`，不入库不触碰）。四项裁决全部 closed：`docs/block-329-ffmpeg-turntable-plan.md` / `docs/block-330-db-require-order-plan.md` / `docs/block-331-tool-output-and-list-scale-plan.md`（均 status=completed，DOC-REGISTRY 已登记，docs/README 312–314 在册）。**若要继续这条线**：A 项只剩「Windows 侧复跑对照」（本包未改原生出片路径，`videoSource='blender'` 分支零改动，非缺口）；C-01 的量化重开条件写在 backlog（≥400 条真实会话 + 用户卡顿 / >10k 节点，首选零依赖 `content-visibility`）；C-14 二次重开=单轮工具结果 tokens > 窗口 50%。**环境纪律沿用**：dev 栈端口 3000/3001/9223 常被占——隔离腿用端口自适应（占用即换空闲，绝不杀未知进程）；flow 读 wrapper 注入 env 必须运行时取；`npm run verify -- <flow>` 证据名已带平台后缀（darwin/win32/linux），跨平台不会互相覆盖。**不做**（用户裁决）：R 运行时 657MB 下载授权（UI-526 补腿继续挂起）、G1+（Provider/签名公证/GA）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 **恢复要点（superseded·2026-11-02 交接段·已由上方收口段取代）**：**当时无 active 工作包；工作区有一个明确 WIP 未提交文件**（见下）。用户 2026-11-02 裁决四项开整、两项不做——**不做**：R 运行时 657MB 下载授权（UI-526 补腿因此继续挂起）、G1+（Provider/签名公证/GA）。**开整四项（勘察已完成，按序接力）**：
 
