@@ -31,7 +31,7 @@ describe('CopilotMarkdown file references', () => {
             projectId: 'proj-1',
           },
         }],
-      }) satisfies ResolveResponse,
+      } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
     const onFileReferenceClick = vi.fn();
@@ -69,7 +69,7 @@ describe('CopilotMarkdown file references', () => {
             name: 'model-registry.ts',
           },
         }],
-      }) satisfies ResolveResponse,
+      } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
     const onFileReferenceClick = vi.fn();
@@ -106,7 +106,7 @@ describe('CopilotMarkdown file references', () => {
             name: 'final report.html',
           },
         }],
-      }) satisfies ResolveResponse,
+      } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
     const onFileReferenceClick = vi.fn();
@@ -142,7 +142,7 @@ describe('CopilotMarkdown file references', () => {
             name: 'Fig5_intermediate.RData',
           },
         }],
-      }) satisfies ResolveResponse,
+      } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -161,7 +161,7 @@ describe('CopilotMarkdown file references', () => {
     const fetchMock = vi.fn(() => Promise.resolve({
       ok: true,
       status: 200,
-      json: () => Promise.resolve({ ok: true, results: [] }) satisfies ResolveResponse,
+      json: () => Promise.resolve({ ok: true, results: [] } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -193,7 +193,7 @@ describe('CopilotMarkdown file references', () => {
             projectId: 'proj-1',
           },
         }],
-      }) satisfies ResolveResponse,
+      } satisfies ResolveResponse),
     } as Response));
     vi.stubGlobal('fetch', fetchMock);
 
