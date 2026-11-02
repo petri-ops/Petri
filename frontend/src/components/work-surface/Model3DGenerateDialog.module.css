@@ -60,12 +60,12 @@
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-canvas);
   color: var(--petri-text-secondary);
-  font-size: 12px;
+  font-size: var(--petri-font-size-body); /* 宪章 §1：正文性元信息不落小字号域 */
   line-height: 1.5;
 }
 
 .error {
-  color: var(--petri-danger, #b42318);
+  color: var(--petri-status-error-fg);
 }
 
 .actions {
@@ -77,5 +77,5 @@
 
 .meta {
   color: var(--petri-text-muted);
-  font-size: 12px;
+  font-size: var(--petri-font-size-body); /* 宪章 §1：正文性元信息不落小字号域 */
 }

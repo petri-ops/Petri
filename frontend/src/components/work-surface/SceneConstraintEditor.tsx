@@ -196,7 +196,7 @@ export function SceneConstraintEditor({ projectId, scene, scenePath, expectedHas
         </label>
         <button
           type="button"
-          className={`${button.primary} ${styles.submitBtn}`}
+          className={`${button.primary} ${styles.submitAction}`}
           onClick={() => void submitMate()}
           disabled={busy || !form.aFeature || !form.bFeature}
           data-testid="constraint-editor-submit"

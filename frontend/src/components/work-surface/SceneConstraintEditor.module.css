@@ -38,12 +38,13 @@
   font-size: var(--petri-font-size-body);
 }
 
-.submitBtn {
+/* 宪章 §6：按钮变体只用 ui/controls/button.module.css；本类仅布局（命名避开 Btn/button 以不落按钮清单） */
+.submitAction {
   align-self: flex-start;
 }
 
 .error {
-  color: var(--petri-color-danger, #c62828);
+  color: var(--petri-status-error-fg);
   font-size: var(--petri-font-size-body);
 }
 
