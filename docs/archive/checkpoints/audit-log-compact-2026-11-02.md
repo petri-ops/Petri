@@ -8,3 +8,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-02T06:54:00.564Z -->
 | ✅ UI-638 点开腿两缺陷修复 completed（轻量批，用户「你搞定就行 能做的都做」预授权；UI-638→verified） | 2026-10-30 | ①glb 取流 404=artifacts 投影补 workspace 读面 url（新 helper + 前端挂 API base）②viewer 宿主 absolute-fill（canvas 不再钉死 420）；红绿 5+5+4、实机 20/20（面板 773→253 时 canvas 745→225、hidden=0、glb 真加载）；离屏 WebGL 截图限制入取证边界 | plan=acceptance/ui-638-viewer-clip/verdict.json + docs/ui-productization-audit.md UI-638 |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-02T08:14:15.124Z -->
+| ✅ 识图默认 DeepSeek completed（用户裁决「软件写定」） | 2026-10-30 | 默认档案 deepseek-flash+vision / vision 默认绑定 deepseek-chat / 旧配置一次性迁移落盘；红绿 3+回归 48；实机 read_image 8.6s 成功 | plan=acceptance/ui638-vision-default/verification.json |
+| ✅ UI-301/385/501 代行验收 + dock 空壳/chat 超时修复 completed（UI-301/385/501→verified） | 2026-10-30 | 真实 spawn 2 子代理：已派发行×2 + 编排图 3 节点 + AgentRunPanel 在场（8/8）；红绿 dock 6/6 + 超时 4/4 | flow=.agents/.../ui301-385-spawn-live.cjs；证据 acceptance/ui-301-385-spawn/ |
