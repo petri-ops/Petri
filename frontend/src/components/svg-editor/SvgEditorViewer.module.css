@@ -1537,3 +1537,81 @@
 .layers[data-open='0'] {
   display: none;
 }
+
+/* 布局定稿 v5（用户截图反馈）：属性栏加宽到能容内容、禁横向滚动；
+   左列图片占 2/3、图层占 1/3（原 1:1 让图片太小）。 */
+.body,
+.body[data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr) 272px;
+  grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.body[data-inspector='0'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.inspector {
+  width: auto;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+
+.inspector > *,
+.props,
+.field,
+.fieldRow,
+.changeRow,
+.propList,
+.propRow {
+  min-width: 0;
+}
+
+.field {
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.field input:not([type='color']),
+.field select {
+  width: 100%;
+  min-width: 0;
+}
+
+.note,
+.hint {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.changeRow {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.changeKind {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.layers {
+  overflow-x: hidden;
+}
+
+.layers .layerList {
+  gap: 2px 8px;
+}
+
+.layerRow,
+.layerRowActive {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
