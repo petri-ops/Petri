@@ -1,6 +1,6 @@
 ---
 capability: block-342-svg-editor
-status: active
+status: completed
 goal: 受治理的 SVG 编辑器（内建画布，人在画布上鼠标键盘修正细节）+ agent `svg_edit` 工具——人与 agent 共用同一套操作词汇表改同一份单真值文件；span 改写引擎保证无改动零 diff 与改动局部性；propose/apply 修订快照 + before-hash 冲突检测保证「agent 提案 → 人修正 → agent 继续」互不覆盖；渲染回验闭环（BLOCK-340 帧→vision 管线）。路线 A（内建修正面板，用户裁决「更丝滑的体验 路线A」）。
 acceptance:
   - W1 内核与直接操作（当前执行范围）：①span 改写引擎 `helpers/svg-ops.js`（零操作零 diff / 改动局部性 / before-hash 冲突 `svg_hash_mismatch` / 白名单 op 安全校验 / `sanitizeSvg` 脱敏），契约测试全绿；②`svg_edit` / `svg_inspect` agent 工具（白名单 op、propose/apply、修订快照与语义 diff=op 列表、路径守卫、白名单外 require-ack 走坡道）；③编辑器内核前端（viewerRegistry 登记 svg-editor 查看器 + 安全载入 + 画布缩放平移网格标尺 + 选择系统：点选/多选/框选/进组/悬停高亮/图层树 + 变换：拖拽/手柄/旋转/吸附智能参考线/数值面板/对齐分布/键盘微调 + 结构：组解组/层序/复制删除 + 撤销重做 op 逆栈 + 快捷键集 + Cmd+K 命令面板 + 写回 revision 链）；④实机（隔离栈离屏 flow：打开→选中→拖拽→改属性→保存→hash 变化→无改动打开保存零 diff）。
@@ -13,7 +13,7 @@ reopen: 位图像素编辑（PNG/JPG 像素级修改，另立包）；Inkscape G
 
 # BLOCK-342-SVG-EDITOR — 受治理 SVG 编辑器计划（母计划 · W1-W4 波次串行）
 
-- 登记状态：**active（2026-11-03 启动；W1 为当前执行范围）**。用户裁决原话：①「SVG 编辑桥 可以的 不过我觉得你列举的能力不太够 我希望更丝滑的体验 路线A」；②「BLOCK-341 应该已经收口了 继续」=发令（对标 BLOCK-340「继续推进」=发令先例）。
+- 登记状态：**completed（2026-11-03 当日收口）**。用户裁决原话：①「SVG 编辑桥 可以的 不过我觉得你列举的能力不太够 我希望更丝滑的体验 路线A」；②「BLOCK-341 应该已经收口了 继续」=发令；收口发令=「可以 按照你的建议开整 逐个进行直到完成」（2026-11-03）。完成对账：W1-W4 核心交付全绿（W1 15/15 → W2-W4 24/24 → 方案A+UI-668/669 31/31 → 七 reopen 切片 UI-670~676 至 53/53 allPass），closeout 十三门 PASS；§8-§9 reopen 七项全部交付或如实降档，剩余交接项已列 §10 归宿（不在 W1-W4 验收边界内，作为后续候选不阻塞 completed）。
 - 队列位置：BLOCK-341（completed，2026-11-03 当日收口）之后；启动时无其他 active 工作包（`npm run state` 核实）。
 - 唯一真相域：本文件（block-342-svg-editor）。W2-W4 启动时在本文件内细化各自 P 阶段，不另立第二份母计划。
 - 完成语义：**全系列 completed = W1-W4 四波次各自收口笔录在案**；单波次收口只记「W#-COMPLETED」，registry 保持 active 直至 W4 收口。
@@ -181,3 +181,16 @@ W1 收口门禁清单（收口时逐项对账）：
 - **门禁**：契约 22/22 + svg-editor 前端 34/34 + WorkspaceFilePreview 8/8 + theme 17/17 + tsc 0 + lint 0 error。
 
 reopen 不变：路径节点编辑/钢笔、图片嵌入、渐变编辑、Inkscape 协处理器、提案幽灵叠加、渲染回验、改动清单（UI-663，pendingOps 方向）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 10. 收口归宿（2026-11-03 completed；交接项去向）
+
+**已交付**：W1 受治理编辑内核 + W2 属性/色板/样式 + W3 绘制 + W4 选区进会话 + 方案 A（modal）+ 七 reopen 切片（UI-670 改动清单 / 671 路径节点+钢笔 / 672 图片嵌入 / 673 渐变 / 674 Inkscape 探针+守卫 / 675 提案幽灵 / 676 渲染回验）；UI-661~676 全 verified；flow `block342-svg-editor-live` 53/53。
+
+**交接项（不在本包验收边界内，按需另行立项）**：
+1. chat 派发侧接线——`petri:svg-proposal` 协议已定型、编辑器侧全链 verified；剩「svg_edit 结果面 → 派发事件」需动通用工具结果渲染链（SimpleChat 邻域，单独切片）。
+2. vision 判据附件通道——渲染回验的看图判据需附件进会话（涉 BLOCK-225 D4 附件面）。
+3. 位图描摹——Inkscape 动作之一，本机未装（装后即用，探针/守卫已就位）。
+4. 版本对比（洋葱皮）+ 历史面板（人+agent 同一时间线，读 .petri/svg-revisions/）。
+5. 小项：选区浮动工具条 / style CSS 简写可视化编辑 / 字体下拉品牌字体表 / 图片嵌入资产路径形态 / 其余模态挂 data-petri-layer。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

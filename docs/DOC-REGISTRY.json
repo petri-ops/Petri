@@ -8942,7 +8942,7 @@
       "capability": "block-342-svg-editor",
       "path": "docs/block-342-svg-editor-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-342-svg-editor",
       "entrypoint": "docs/README.md",
@@ -8955,7 +8955,7 @@
         "governed-ops",
         "G0"
       ],
-      "notes": "受治理 SVG 编辑器系列（母计划 W1-W4 波次串行）：人与 agent 共用同一套操作词汇表改同一份单真值文件。W1 span 改写引擎（零操作零 diff/局部性/before-hash 冲突）+ svg_edit/svg_inspect 工具 + 编辑器内核（画布/选择/变换/吸附/图层树/撤销/快捷键）；W2 文字与样式；W3 形状与路径（Inkscape 无头 actions 协处理器，缺席诚实）；W4 agent 协同（选区上下文/提案幽灵叠加/修订对比/渲染回验）。零新依赖；位图像素编辑另立 reopen。",
+      "notes": "受治理 SVG 编辑器系列（母计划 W1-W4 波次串行）：人与 agent 共用同一套操作词汇表改同一份单真值文件。W1 span 改写引擎（零操作零 diff/局部性/before-hash 冲突）+ svg_edit/svg_inspect 工具 + 编辑器内核（画布/选择/变换/吸附/图层树/撤销/快捷键）；W2 文字与样式；W3 形状与路径（Inkscape 无头 actions 协处理器，缺席诚实）；W4 agent 协同（选区上下文/提案幽灵叠加/修订对比/渲染回验）。零新依赖；位图像素编辑另立 reopen。 2026-11-03 当日收口 completed：W1-W4 + 方案A + 七 reopen 切片（UI-661~676 verified，flow 53/53，closeout 十三门 PASS）；交接项见 plan §10。",
       "phase": "P0-LAUNCH"
     },
     {
