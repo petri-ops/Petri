@@ -105,8 +105,17 @@ module.exports = {
       if (!mounted) return false;
       const mountInfo = JSON.parse(mounted);
       assert('V2b_initial_save_disabled', mountInfo.saveDisabled === true, `saveDisabled=${mountInfo.saveDisabled}`);
-      // 收起态只渲染图标（用户裁决：不要竖排文字）
-      assert('V2c_layers_collapsed_icon', /☰/.test(mountInfo.layers), mountInfo.layers);
+      // 图标上顶栏（用户裁决）：图层/属性图标与「工具」并列，aside 收起态不占位
+      const toolbarIcons = await lib.evalJs(client, `(function(){
+        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-toolbar"]');
+        return bar ? JSON.stringify({
+          layers: !!bar.querySelector('[data-action="expand-layers"]'),
+          inspector: !!bar.querySelector('[data-action="expand-inspector"]'),
+          tools: !!bar.querySelector('[data-action="toggle-tools"]')
+        }) : 'no toolbar';
+      })()`);
+      const icons = JSON.parse(toolbarIcons);
+      assert('V2c_rail_icons_in_toolbar', icons.layers === true && icons.inspector === true && icons.tools === true, toolbarIcons);
       // 折叠默认态：色板/改动区默认收起（无 open），工具组默认展开
       const panels = await lib.evalJs(client, `(function(){
         const palette = document.querySelector('${RAIL} [data-testid="svg-editor-doc-palette"]');

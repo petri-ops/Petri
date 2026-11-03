@@ -76,7 +76,7 @@ describe('BLOCK-342 W1 SvgEditorViewer', () => {
 
     await waitFor(() => expect(screen.getByTestId('svg-editor-canvas')).toBeTruthy());
     // 收起态只渲染图标按钮（用户裁决：不要竖排文字）
-    const expandLayersBtn = screen.getByTestId('svg-editor-layers').querySelector('[data-action="expand-layers"]');
+    const expandLayersBtn = document.querySelector('[data-action="expand-layers"]');
     expect(expandLayersBtn?.getAttribute('title')).toContain('展开图层');
     const save = screen.getByTestId<HTMLButtonElement>("svg-editor-save");
     expect(save.disabled).toBe(true);
