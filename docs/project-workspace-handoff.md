@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-03（**BLOCK-341 引擎桥整包 COMPLETED（当日收口）——Godot 4.7.1 桥（godot_run/scene_apply）+ Blender 扩档 model3d_blend_ops + 实机 13/13**；Kimi 对照评估四大缺口全部补齐（340 视频输入+341 引擎桥）。**全部 planned 包已清，无 active 工作包**；下一批候选需用户新裁决立项。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-340 视频输入面整包 COMPLETED（当日收口）——read_video 工具+抽帧 helper+附件门控+实机 10/10**；341 引擎桥管线的前置（帧→vision）已就绪。队列下一包=BLOCK-341（planned，需发令）。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**BLOCK-335 lint 任务线收口——react-hooks defer（基线保留+有机清偿），任务线最终账目=基线 311→187（-40%），require-await+control-regex 域清零**。react-hooks 152 条 defer 理由=非机械可修+vitest 覆盖不足。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（**🔴事故归因完成——git apply --3way 部分失败 index 余波 + worktree 元数据残留**，24 个 stale worktree 全部清理，纪律=未提交不留窗+禁 --3way 多文件 patch+worktree 先 remove 再 rm。当前无 active 工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。）

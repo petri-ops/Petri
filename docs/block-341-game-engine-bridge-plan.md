@@ -1,6 +1,6 @@
 ---
 capability: block-341-game-engine-bridge
-status: active
+status: completed
 goal: 受治理的本地游戏引擎桥（Godot 4 headless 先行）+ Blender 现有工程受治理扩档：把推文里「agent 操作引擎 → 运行 → 看画面 → 改 → 再验证」做成 Petri 形态——单真值 / manifest sha / propose-apply 修订快照 / 放权坡道审批 / 诚实 `capability_unavailable`。对照 Kimi「游戏开发与创意工作解决方案」推文评估（2026-11-02）的核心缺口。
 acceptance:
   - P0 形态裁决钉死（立项自检问句答案）：差别形态 = 本地主权（引擎 / 脚本 / 渲染全在用户机器，无云端中继）+ 单真值（改动经 propose/apply 落修订快照与语义 diff，不绕开 artifact 链）+ 治理透明（白名单外脚本 / 命令默认 require-ack，走放权坡道 observe→allow 与 ack 审计）+ 证据自证（运行截图 / 日志 / 退出码落 manifest sha 可复核）；不复刻「云端大模型直连专业软件」。P5 Blender 扩档边界与 BLOCK-322 RULING-01「不建第二场景真值」的关系在启动时由用户显式裁决。
@@ -51,3 +51,19 @@ P0 形态裁决 → P1 发现与探针 → P2 `godot_run` → P3 `godot_scene_ap
 - headless 渲染截图依赖 GPU / 软件渲染可用性：mac 实机为唯一真实证据，缺席路径必须诚实。
 - 引擎内截图不走屏幕录制权限（与 `computer_screenshot` 的 macOS 权限面无关），避免把平台权限问题混入本包。
 - 前置：BLOCK-340（帧→vision）、BLOCK-335（闭环接口）；BLOCK-323 放权坡道（completed）。
+
+
+## 收口记录（2026-11-03 立项当日收口；提交 698c4f5b + 97a7e2fb + 87129044）
+
+- **P0 形态裁决**：按 plan 预答钉死（本地主权/单真值/治理透明/证据自证四条）；P5 边界=用户确认按预答执行（.blend=外部资产、provenance 入 manifest、不产生第二场景真值）。
+- **P1 探针**：`helpers/godot-provider.js`——env+PATH+安装路径发现（mac 双份：/opt/homebrew/bin/godot + /Applications/Godot.app，4.7.1）；版本解析 major>=4 分支；缺席诚实 unavailable。
+- **P2 `godot_run`**：`--write-movie` PNG 序列 + `--quit-after` 帧数控制 + manifest（stdout 尾巴/截图 sha256 清单/退出码）落 `.petri/godot-runs/<runId>/`；超时杀进程；路径穿越/project.godot 缺席拒收。**探针抓真**：headless 模式 viewport 无渲染（截图空）→ godot_run 默认带显示驱动跑（mac 实机验证）。
+- **P3 `godot_scene_apply`**：propose/apply 两步——白名单三操作（set_node_property/set_resource_ref/replace_script_snippet）+ beforeSha256 一致性 + 语义 diff + stale_propose 防覆盖；白名单外 require-ack。
+- **P4 闭环样例实机 13/13**：真 Godot 4.7.1 最小项目 30 渲染帧 → 30 截图落盘 + PNG 魔数 + manifest/log 对账 + scene_apply 全链（脚本片段替换 + 语义 diff "var speed = 10 → var speed = 99"）+ 白名单拒绝。
+- **P5 Blender 扩档 `model3d_blend_ops`**：inspect（对象清单真跑：Cube=MESH/8v）/ transform（写盘 + **语义自检** loc=[2,0,0]）/ render（真渲染一帧 PNG 落盘）。**实机抓真两处**：①`--python-expr` 不自动保存 .blend（不显式 `save_mainfile` 则改动丢失——语义检查 location 仍为旧值暴露）；②render outputPath 须转绝对（Blender 以 .blend 所在目录为 CWD）。
+- **P6 契约 14/14**（godot 桥 12 + blend ops 2）+ 工具注册全链（registry/tool-defs/tool-metadata/活动标签 fixture+verbs/计数 109→112 五处 pin + model-surface 基线有意增长留痕 +2230 chars）。
+- **门禁**：契约 14/14 + 实机 13/13 + types 0 + test:changed 624 项仅余 p6 脏树（提交自愈）+ closeout PASS。
+- **事故纪律兑现**：P5 提交时 registry/tool-events 注册被 p6 链回退（同 2026-11-03 已归因机制）——发现即补提交（87129044），未留窗。
+- **reopen**（frontmatter）：Unity/UE 桥、Godot 编辑器 GUI 自动化、素材批量生产、游戏内助手部署。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
