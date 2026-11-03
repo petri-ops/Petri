@@ -8,12 +8,12 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 
-const inspectSvgFile = vi.fn((..._args: unknown[]): Promise<void> => Promise.resolve());
-const editSvgFile = vi.fn((..._args: unknown[]): Promise<void> => Promise.resolve());
+const inspectSvgFile = vi.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(undefined as unknown));
+const editSvgFile = vi.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(undefined as unknown));
 
 vi.mock('@/lib/svgEditClient', () => ({
-  inspectSvgFile: (...args: unknown[]): Promise<void> => inspectSvgFile(...args),
-  editSvgFile: (...args: unknown[]): Promise<void> => editSvgFile(...args),
+  inspectSvgFile: (...args: unknown[]): Promise<unknown> => inspectSvgFile(...args),
+  editSvgFile: (...args: unknown[]): Promise<unknown> => editSvgFile(...args),
   SvgEditError: class SvgEditError extends Error {
     code: string;
 
