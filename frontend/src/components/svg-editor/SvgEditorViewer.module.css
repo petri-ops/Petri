@@ -2126,3 +2126,10 @@
   max-height: 180px;
   overflow: auto;
 }
+
+.renderCheckPreview {
+  max-width: 320px;
+  max-height: 200px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+}

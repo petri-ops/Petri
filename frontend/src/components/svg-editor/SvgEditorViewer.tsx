@@ -224,6 +224,8 @@ export function SvgEditorViewer({
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
   // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
   const [proposal, setProposal] = React.useState<{ markup: string; ops: SvgOp[] } | null>(null);
+  // 切片7 渲染回验：当前视图 → PNG 自证 + 判据 prompt 注入会话
+  const [renderCheck, setRenderCheck] = React.useState<{ png: string; width: number; height: number } | null>(null);
   React.useEffect(() => {
     let cancelled = false;
     inkscapeStatus(projectId)
@@ -385,6 +387,61 @@ export function SvgEditorViewer({
     setProposal(null);
     setNotice('已拒绝该提案（未应用任何 op）');
   }, []);
+
+  /** 切片7 渲染回验：当前视图 → 离屏 canvas PNG（data: URL；渲染失败/画布污染如实报错）。 */
+  const runRenderCheck = React.useCallback(() => {
+    const markupText = currentMarkup();
+    const vb = /viewBox="([\d.\-+\s]+)"/.exec(markupText);
+    let width = 800; let height = 480;
+    if (vb) {
+      const parts = vb[1].trim().split(/[\s,]+/).map(Number);
+      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+        const cap = 1024;
+        const scale = Math.min(1, cap / Math.max(parts[2], parts[3]));
+        width = Math.max(1, Math.round(parts[2] * scale));
+        height = Math.max(1, Math.round(parts[3] * scale));
+      }
+    }
+    const blob = new Blob([markupText], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    const cleanup = () => URL.revokeObjectURL(url);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { setNotice('渲染回验失败：canvas 2D 上下文不可用'); cleanup(); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        const png = canvas.toDataURL('image/png');
+        setRenderCheck({ png, width, height });
+        setNotice(`渲染回验快照已生成（${width}×${height}）`);
+      } catch (drawError: unknown) {
+        setNotice(`渲染回验失败：${drawError instanceof Error ? drawError.message : String(drawError)}（含外链资源时浏览器会污染画布）`);
+      } finally {
+        cleanup();
+      }
+    };
+    img.onerror = () => { setNotice('渲染回验失败：视图无法解码为位图'); cleanup(); };
+    img.src = url;
+  }, [currentMarkup]);
+
+  /** 切片7 判据注入：copilotAsk 带路径 + 待保存 op 摘要 + 结构回验判据（指路 svg_inspect/svg_edit）。 */
+  const askRenderCheck = React.useCallback(() => {
+    if (!renderCheck) return;
+    const summary = pendingOps.length > 0
+      ? pendingOps.map((op) => opLabel(op)).join('；')
+      : '（无待保存改动）';
+    dispatchPetriEvent(petriEvents.copilotAsk, {
+      prompt: [
+        `渲染回验请求（${filePath}，快照 ${renderCheck.width}×${renderCheck.height}）：`,
+        `当前待保存改动：${summary}。`,
+        '请用 svg_inspect 读取该文件当前结构，对照以上渲染意图逐条核对是否落地且自洽（几何/属性引用/渐变与图片 id 存在等）；',
+        '发现可疑处先用 svg_edit propose 说方案，我确认后再 apply。',
+      ].join('\n'),
+    });
+    setNotice('已把渲染回验判据放进会话输入框');
+  }, [filePath, pendingOps, renderCheck]);
 
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
@@ -892,6 +949,21 @@ export function SvgEditorViewer({
           ) : null}
 
           <div className={layout.stage} onWheel={handleWheel}>
+            {renderCheck ? (
+              <div className={styles.proposalBar} data-testid="svg-editor-render-check">
+                <span className={styles.proposalTitle}>渲染回验快照（{renderCheck.width}×{renderCheck.height}）</span>
+                <img
+                  className={styles.renderCheckPreview}
+                  src={renderCheck.png}
+                  alt="当前视图渲染快照"
+                  data-testid="svg-editor-render-check-img"
+                />
+                <div className={styles.rowActions}>
+                  <button type="button" className={button.ghost} data-action="render-check-ask" onClick={askRenderCheck}>请 agent 回验</button>
+                  <button type="button" className={button.ghost} data-action="render-check-close" onClick={() => setRenderCheck(null)}>关闭</button>
+                </div>
+              </div>
+            ) : null}
             {proposal ? (
               <div className={styles.proposalBar} data-testid="svg-editor-proposal">
                 <span className={styles.proposalTitle}>agent 提案（{proposal.ops.length} 项 op）</span>
@@ -949,6 +1021,15 @@ export function SvgEditorViewer({
                 onClick={() => fileInputRef.current?.click()}
               >
                 图片
+              </button>
+              <button
+                type="button"
+                className={styles.tool}
+                data-action="render-check"
+                title="渲染回验：当前视图渲染成 PNG 快照 + 判据注入会话"
+                onClick={runRenderCheck}
+              >
+                回验
               </button>
               <input
                 ref={fileInputRef}

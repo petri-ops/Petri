@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-676: SVG 编辑器渲染回验——当前视图 PNG 快照 + 判据注入会话（BLOCK-342 切片7；2026-11-03 **verified（dev Electron 边界内；实机 53/53 allPass）**）
+
+- **交互**：工具栏「回验」→ 当前视图（serialize 后按 viewBox 等比，最长边 ≤1024）经 Blob→Image→离屏 canvas 渲染为 PNG 快照浮条（预览 + 尺寸标注）；「请 agent 回验」→ copilotAsk 注入判据 prompt（文件路径 + 待保存 op 摘要 + 结构回验判据，指路 svg_inspect/svg_edit propose-先说方案）。
+- **诚实边界**：vision 判据（快照图片进会话由模型看图）需附件通道（BLOCK-225 D4 附件面）——**如实 reopen**；当前判据为结构回验（svg_inspect 对照渲染意图逐条核对）。画布污染（外链资源）与解码失败如实报错。
+- **验证**：svg-editor 前端 62/62 + tsc 0 + lint 0 error；实机 flow 两新断言（`V20_render_check_snapshot` PNG data URL 快照浮条 / `V20b_render_check_asked` copilotAsk 载荷含路径与 svg_inspect 判据），总 **53/53 allPass**。
+
 ## UI-675: SVG 编辑器提案幽灵——agent 提案叠加层 + 逐项接受/拒绝（BLOCK-342 切片6；2026-11-03 **verified（dev Electron 边界内；实机 51/51 allPass）**）
 
 - **事件协议**：`petri:svg-proposal`（events.ts 中心登记 + PetriEventMap 类型化）——载荷 `{path, previewMarkup, ops, source}`；编辑器订阅并按 path 匹配当前文件，校验 markup/ops 形态（不猜）。**进入通道的 chat 派发侧 = reopen**（通用工具结果渲染链，单独切片接线；当前任何持有 propose 结果的面可派发，flow 以合成事件实机验证编辑器侧全链）。

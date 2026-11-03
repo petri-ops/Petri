@@ -100,7 +100,11 @@ W1 收口门禁清单（收口时逐项对账）：
 - **验证**：`svgProposal.test` **6/6**（四类差异、零改动空清单、恢复 op 形状、删除项如实拒绝、汇总跳过计数、解析失败不猜）；`tsc` 0；lint 0 error。
 - **实机状态（如实·两轮尝试未通）**：①第一轮用加载快照 `baseMarkup` 作基线 → 实机「列出改动」空清单；②第二轮改为**现读磁盘**（`cache:no-store` + 重新脱敏）并对比 `serializeRoot(view)` → **仍为空**，说明问题在 `diffElements(磁盘文本, 视图序列化)` 这一对输入的可比性（DOM 序列化形态 vs 解析器期望），不在基线来源。两轮均从 flow 回退（未验行为不计入通过），UI-663 保持 `in_progress`。
 - **下一步（已定方向，未实施）**：改动清单改由 `pendingOps` 直接生成（op 列表本就是语义 diff，无需反序列化视图）；撤销一项 = 从 pendingOps 移除该组 → 以磁盘文本重建视图再按序应用剩余 op。这样既避开 DOM 序列化可比性问题，也与「语义 diff = op 列表」的原始设计一致。
-- **reopen（承接）**：①agent 提案进入编辑器的 **chat 派发侧接线**（事件协议 `petri:svg-proposal` 已定型，编辑器侧全链 UI-675 verified；通用工具结果渲染链接线单独切片）；②版本对比（洋葱皮）与历史面板（人+agent 同一时间线）；③渲染回验（改→渲染→vision）。
+- **reopen（承接）**：①agent 提案进入编辑器的 **chat 派发侧接线**（事件协议 `petri:svg-proposal` 已定型，编辑器侧全链 UI-675 verified；通用工具结果渲染链接线单独切片）；②版本对比（洋葱皮）与历史面板（人+agent 同一时间线）；③渲染回验的 **vision 判据**（快照图片进会话需附件通道；结构回验已交付 UI-676 verified）。
+
+### §9.3 渲染回验（2026-11-03 切片7 → UI-676 verified）
+
+「回验」按钮 → 当前视图按 viewBox 等比渲染 PNG 快照（Blob→Image→离屏 canvas，最长边 ≤1024；画布污染/解码失败如实报错）→ 浮条预览 → 「请 agent 回验」copilotAsk 注入判据 prompt（路径 + 待保存 op 摘要 + 结构回验判据，指路 svg_inspect/svg_edit）。vision 判据（看图）如实 reopen 待附件通道。flow 两断言，总 53/53 allPass。
 
 ### §9.2 提案幽灵叠加（2026-11-03 切片6 → UI-675 verified）
 

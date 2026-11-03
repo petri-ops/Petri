@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T11:22:13.936Z",
-  "finishedAt": "2026-11-03T11:22:36.635Z",
+  "startedAt": "2026-11-03T11:25:34.692Z",
+  "finishedAt": "2026-11-03T11:25:58.464Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793704742496"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793704937126"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -32,7 +32,7 @@
     {
       "name": "V2d_default_state",
       "pass": true,
-      "detail": "{\"paletteOpen\":true,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":10}"
+      "detail": "{\"paletteOpen\":true,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":11}"
     },
     {
       "name": "V3_rect_dispatch_ok",
@@ -248,6 +248,16 @@
       "name": "V19c_proposal_persisted",
       "pass": true,
       "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#770000\"  transform=\"translate(48 24)\"/>"
+    },
+    {
+      "name": "V20_render_check_snapshot",
+      "pass": true,
+      "detail": "{\"png\":true}"
+    },
+    {
+      "name": "V20b_render_check_asked",
+      "pass": true,
+      "detail": "{\"prompt\":\"渲染回验请求（tmp-block342-live/scene.svg，快照 400×240）：\\n当前待保存改动：（无待保存改动）。\\n请用 svg_inspect 读取该文件当前结构，对照以上渲染意图逐条核对是否落地且自洽（几何/属性引用/渐变与图片 id"
     },
     {
       "name": "V8_stale_apply_rejected",

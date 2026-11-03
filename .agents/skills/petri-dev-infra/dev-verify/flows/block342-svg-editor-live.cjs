@@ -627,6 +627,28 @@ module.exports = {
       const afterProposal = fs.readFileSync(SAMPLE_ABS, 'utf8');
       assert('V19c_proposal_persisted', /fill="#770000"/.test(afterProposal), afterProposal.match(/<rect[^>]*>/)?.[0] || 'no rect');
 
+      // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="render-check"]'); if (b) b.click(); return true; })()`);
+      const checkReady = await waitFor(client, `(function(){
+        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-render-check"]');
+        const img = document.querySelector('${RAIL} [data-testid="svg-editor-render-check-img"]');
+        return bar && img && (img.getAttribute('src') || '').startsWith('data:image/png;base64,')
+          ? JSON.stringify({ png: true, w: (bar.textContent || '').match(/(\d+)×(\d+)/)?.[1] }) : null;
+      })()`, 10_000);
+      assert('V20_render_check_snapshot', Boolean(checkReady), checkReady || 'render check snapshot missing');
+      await lib.evalJs(client, `(function(){
+        window.__block342Asked = null;
+        const b = document.querySelector('${RAIL} [data-action="render-check-ask"]');
+        if (b) b.click();
+        return true;
+      })()`);
+      await sleep(600);
+      const askedRender = await lib.evalJs(client, `JSON.stringify(window.__block342Asked || null)`);
+      const renderPayload = JSON.parse(askedRender);
+      assert('V20b_render_check_asked',
+        Boolean(renderPayload && typeof renderPayload.prompt === 'string' && renderPayload.prompt.includes('渲染回验请求') && renderPayload.prompt.includes(SAMPLE_REL) && renderPayload.prompt.includes('svg_inspect')),
+        askedRender ? askedRender.slice(0, 140) : 'null');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');
