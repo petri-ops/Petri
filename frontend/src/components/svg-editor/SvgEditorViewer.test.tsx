@@ -99,6 +99,11 @@ describe('BLOCK-342 W1 SvgEditorViewer', () => {
     stubFetch('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><rect id="r" onclick="x()"/></svg>');
     render(<SvgEditorViewer projectId="p1" filePath="dirty.svg" />);
 
+    // 图层栏（含脱敏提示）默认收起：先展开再断言
+    await waitFor(() => expect(screen.getByTestId('svg-editor-canvas')).toBeTruthy());
+    const expandLayers = document.querySelector('[data-action="expand-layers"]') as HTMLButtonElement | null;
+    expect(expandLayers).toBeTruthy();
+    expandLayers?.click();
     await waitFor(() => expect(screen.getByTestId('svg-editor-sanitized')).toBeTruthy());
     expect(screen.getByTestId('svg-editor-sanitized').textContent).toContain('视图已脱敏');
     expect(screen.getByTestId('svg-editor-canvas').innerHTML.toLowerCase()).not.toContain('<script');

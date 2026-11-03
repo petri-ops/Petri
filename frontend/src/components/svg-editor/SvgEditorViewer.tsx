@@ -198,8 +198,10 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [baseMarkup, setBaseMarkup] = React.useState('');
   const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
   // 交互：右栏空间有限 —— 分区折叠（默认只开「图形属性」），整栏可收，工具栏可收
-  const [sections, setSections] = React.useState({ props: true, palette: false, changes: false, tools: true });
-  const [inspectorOpen, setInspectorOpen] = React.useState(true);
+  // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
+  const [sections, setSections] = React.useState({ props: false, palette: false, changes: false, tools: false });
+  const [inspectorOpen, setInspectorOpen] = React.useState(false);
+  const [layersOpen, setLayersOpen] = React.useState(false);
   const toggleSection = React.useCallback((key: keyof typeof sections) => {
     setSections((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
@@ -276,6 +278,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
     setSelected(next);
+    // 默认全收起省空间；用户一旦选中元素（明确要改它）才自动展开属性栏
+    if (next.size > 0) setInspectorOpen(true);
     const root = rootEl();
     const first = next.size > 0 ? Array.from(next)[0] : null;
     const el = root && first !== null ? findByPath(root, decodePath(first)) : null;
@@ -696,10 +700,21 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
       ) : null}
 
       {state.status === 'ready' ? (
-        <div className={styles.body}>
-          <aside className={styles.layers} data-testid="svg-editor-layers">
-            <div className={styles.panelTitle}>图层（{state.inspect.total}）</div>
-            <ul className={styles.layerList}>
+        <div className={styles.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
+          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
+            <div className={styles.layersHead}>
+              <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+              <button
+                type="button"
+                className={button.ghost}
+                data-action={layersOpen ? 'collapse-layers' : 'expand-layers'}
+                title={layersOpen ? '收起图层栏' : '展开图层栏'}
+                onClick={() => setLayersOpen((prev) => !prev)}
+              >
+                {layersOpen ? '«' : '»'}
+              </button>
+            </div>
+            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
               {layerRows.map((el) => {
                 const key = pathKey(el.path);
                 return (
@@ -718,7 +733,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 );
               })}
             </ul>
-            {state.removed > 0 ? (
+            {layersOpen && state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
               </div>

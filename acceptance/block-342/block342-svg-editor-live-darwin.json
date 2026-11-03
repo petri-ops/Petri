@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T05:25:41.929Z",
-  "finishedAt": "2026-11-03T05:25:51.875Z",
+  "startedAt": "2026-11-03T05:29:38.026Z",
+  "finishedAt": "2026-11-03T05:29:52.967Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,12 +12,12 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/?test=1"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793683758397"
     },
     {
       "name": "V2_editor_mounted",
       "pass": true,
-      "detail": "{\"canvas\":true,\"layers\":\"图层（5）<svg><title>BLOCK-342#plot#box#capt\",\"saveDisabled\":true}"
+      "detail": "{\"canvas\":true,\"layers\":\"图层（5）»<svg><title>BLOCK-342#plot#box#cap\",\"saveDisabled\":true}"
     },
     {
       "name": "V2b_initial_save_disabled",
@@ -27,17 +27,17 @@
     {
       "name": "V2c_layers_rendered",
       "pass": true,
-      "detail": "图层（5）<svg><title>BLOCK-342#plot#box#capt"
+      "detail": "图层（5）»<svg><title>BLOCK-342#plot#box#cap"
     },
     {
       "name": "V2d_panels_default_collapsed",
       "pass": true,
-      "detail": "{\"paletteOpen\":false,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"hasCollapse\":true}"
+      "detail": "{\"paletteOpen\":false,\"changesOpen\":false,\"toolGroupOpen\":\"0\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"hasExpand\":true}"
     },
     {
       "name": "V3_rect_dispatch_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"x\":1025,\"y\":383}"
+      "detail": "{\"ok\":true,\"x\":871,\"y\":325}"
     },
     {
       "name": "V4_selection_visible",

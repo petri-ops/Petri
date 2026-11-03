@@ -494,3 +494,41 @@
 .toolGroup[data-open='0'] {
   display: none;
 }
+
+/* 折叠列宽：null 默认全收起（图层 44 / 画布 / 属性 44），展开恢复 200/240 */
+.body[data-layers='0'] {
+  grid-template-columns: 46px minmax(0, 1fr) 240px;
+}
+
+.body[data-inspector='0'] {
+  grid-template-columns: 200px minmax(0, 1fr) 46px;
+}
+
+.body[data-layers='0'][data-inspector='0'] {
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+}
+
+.layers[data-open='0'],
+.inspector[data-open='0'] {
+  padding: 6px 4px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.layers[data-open='0'] .panelTitle,
+.inspector[data-open='0'] .panelTitle {
+  writing-mode: vertical-rl;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.layerList[data-open='0'] {
+  display: none;
+}
+
+.layersHead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}

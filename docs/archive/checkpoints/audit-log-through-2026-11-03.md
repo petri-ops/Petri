@@ -30,3 +30,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:26:09.442Z -->
 最后更新：2026-11-03（🔵 **BLOCK-341 引擎桥启动登记（active；用户「确认 一次性搞完 不用再问」=发令）**：Godot 4.7.1 已在本机（homebrew+App 双份）；P0 形态裁决按 plan 预答钉死、P5 边界按预答执行（.blend=外部资产不破 322 单真值）；执行序 P1 探针→P2 godot_run→P3 scene_apply→P4 闭环样例→P5 Blender 扩档→P6 契约+实机；截图序列走 340 帧→vision 管线。目标当日收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:30:07.286Z -->
+最后更新：2026-11-03（✅ **BLOCK-341 引擎桥整包 COMPLETED（P0-P6 立项当日收口）**：godot-provider 探针（4.7.1 双安装路径发现；缺席诚实）；godot_run（--write-movie PNG 序列+--quit-after+manifest 落 .petri/godot-runs/；**探针抓真 headless 无渲染→默认带显示驱动**）；godot_scene_apply（propose/apply 白名单三操作+sha+语义 diff+stale 防覆盖）；P4 闭环样例实机 13/13（真 Godot 30 帧+30 截图+scene_apply 全链）；P5 Blender 扩档 model3d_blend_ops（inspect/transform 语义自检 loc=[2,0,0]/render 真出图；.blend=外部资产不破 322）。契约 14/14+工具计数 109→112+model-surface +2230 留痕。抓真三处：headless 无渲染/-vsync 后代 -fps_mode/--python-expr 不自动保存。队列：全部 planned 包已清。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -111,17 +111,23 @@ module.exports = {
         const palette = document.querySelector('${RAIL} [data-testid="svg-editor-doc-palette"]');
         const changes = document.querySelector('${RAIL} [data-testid="svg-editor-changes"]');
         const group = document.querySelector('${RAIL} [data-testid="svg-editor-tool-group"]');
-        const collapse = document.querySelector('${RAIL} [data-action="collapse-inspector"]');
+        const layers = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
+        const inspector = document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]');
+        const expand = document.querySelector('${RAIL} [data-action="expand-inspector"]');
         return JSON.stringify({
           paletteOpen: palette ? palette.hasAttribute('open') : null,
           changesOpen: changes ? changes.hasAttribute('open') : null,
           toolGroupOpen: group ? group.dataset.open : null,
-          hasCollapse: !!collapse
+          layersOpen: layers ? layers.dataset.open : null,
+          inspectorOpen: inspector ? inspector.dataset.open : null,
+          hasExpand: !!expand
         });
       })()`);
       const panelInfo = JSON.parse(panels);
       assert('V2d_panels_default_collapsed',
-        panelInfo.paletteOpen === false && panelInfo.changesOpen === false && panelInfo.toolGroupOpen === '1' && panelInfo.hasCollapse === true,
+        panelInfo.paletteOpen === false && panelInfo.changesOpen === false
+          && panelInfo.toolGroupOpen === '0' && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
+          && panelInfo.hasExpand === true,
         panels);
 
       // V3 — 真实点选：在画布里点 <rect> 中心 → 选中框出现 + 属性面板出现该元素
