@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-03T08:40:00.000Z",
+  "updatedAt": "2026-11-03T09:35:00.000Z",
   "systemPromptChars": 993,
-  "toolDefsCount": 109,
-  "toolDefsChars": 58941,
+  "toolDefsCount": 112,
+  "toolDefsChars": 61171,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -112,6 +112,9 @@
     "workspace_worktree_list": 225,
     "workspace_worktree_remove": 450,
     "workspace_worktree_merge_request": 434,
-    "read_video": 685
+    "read_video": 685,
+    "godot_run": 640,
+    "godot_scene_apply": 876,
+    "model3d_blend_ops": 714
   }
 }

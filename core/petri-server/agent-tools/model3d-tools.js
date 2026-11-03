@@ -492,7 +492,45 @@ async function tool_model3d_recipe(args = {}, ctx = {}) {
   });
 }
 
+/**
+ * BLOCK-341 P5 — tool_model3d_blend_ops：对现有 .blend 工程的白名单受治理操作
+ * （inspect 对象清单 / transform 写盘带语义自检 / render 指定输出渲染一帧）。
+ * .blend 视为外部资产（provenance 入 manifest，不产生第二场景真值——plan P5 边界）。
+ */
+async function tool_model3d_blend_ops(args, ctx) {
+  const projectId = ctx && ctx.projectId;
+  if (!projectId) return { error: 'project_required', message: 'model3d_blend_ops 需要有效项目工作区' };
+  const dbMod = require('../db');
+  const project = dbMod.getProject(String(projectId));
+  if (!project || !project.workspace_path) {
+    return { error: 'workspace_required', message: 'model3d_blend_ops 需要本地工作区项目' };
+  }
+  const { runBlendOp } = require('../helpers/model3d-blend-ops');
+  const result = runBlendOp({
+    workspaceRoot: project.workspace_path,
+    blendPath: args ? args.blendPath : undefined,
+    op: args ? args.op : undefined,
+    payload: args ? args.payload : undefined,
+  });
+  if (!result.ok) {
+    return { error: result.code || 'blend_op_failed', message: result.message || 'blend 操作失败', requireAck: result.code === 'op_not_whitelisted' };
+  }
+  const lines = [`blend 操作完成：${result.op}（Blender=${result.blender}）`];
+  if (result.inspection) lines.push(`对象清单：${(result.inspection.objects || []).map((o) => `${o.name}(${o.type}/${o.verts}v)`).join('、')}`);
+  if (result.changed !== undefined) lines.push(`写盘：${result.changed ? '已变更' : '无变化'}（after=${String(result.afterSha256 || '').slice(0, 12)}），语义自检=${JSON.stringify(result.semanticVerify)}`);
+  if (result.rendered !== undefined) lines.push(`渲染：${result.rendered ? `已出图 ${result.renderedFile}` : '未产出'}`);
+  lines.push(`provenance：源 sha256=${String(result.beforeSha256 || result.sourceSha256 || '').slice(0, 12)}…（外部资产，不进 SceneSpec 真值）`);
+  return {
+    ok: true,
+    op: result.op,
+    blendPath: result.blendPath,
+    ...result,
+    description: lines.join('\n'),
+  };
+}
+
 module.exports = {
+  tool_model3d_blend_ops,
   tool_model3d_inspect,
   tool_model3d_validate,
   tool_model3d_propose,

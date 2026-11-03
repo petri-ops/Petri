@@ -7209,6 +7209,31 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block341-game-engine-bridge",
+      "note": "BLOCK-341 引擎桥：godot-provider 探针 + godot-tools（godotRun/scene_apply 白名单）+ godot-tools agent 工具 + model3d-blend-ops（.blend 白名单操作）。改任一登记源即跑本包契约 + 工具注册邻域。",
+      "patterns": [
+        "core/petri-server/helpers/godot-provider.js",
+        "core/petri-server/helpers/godot-tools.js",
+        "core/petri-server/helpers/model3d-blend-ops.js",
+        "core/petri-server/agent-tools/godot-tools.js",
+        "core/petri-server/agent-tools/tool-defs/godot.js",
+        "core/petri-server/agent-tools/tool-defs/model3d.js",
+        "scripts/block341-godot-live.mjs",
+        "acceptance/block-341/**"
+      ],
+      "tests": [
+        "test/block341-godot-bridge.test.mjs",
+        "test/block341-blend-ops.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/agent-tool-registry.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

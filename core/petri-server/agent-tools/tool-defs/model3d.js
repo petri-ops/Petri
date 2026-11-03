@@ -217,4 +217,30 @@ module.exports = [
       },
     },
   },
+  {
+    "type": "function",
+    "function": {
+      "name": "model3d_blend_ops",
+      "description": "对现有 .blend 工程（外部资产）做白名单受治理操作：inspect（对象清单，只读）/ transform（对象平移旋转缩放，写盘带语义自检）/ render（渲染一帧 PNG 到指定输出）。经本地 Blender CLI 执行（未安装返回 capability_unavailable）。.blend 的 provenance（源 sha256/引擎版本/操作清单）自动入 manifest，不产生第二场景真值。不开放任意 bpy 脚本。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "blendPath": {
+            "type": "string",
+            "description": "workspace 相对路径（.blend/.blend1）"
+          },
+          "op": {
+            "type": "string",
+            "enum": ["inspect", "transform", "render"],
+            "description": "白名单操作类型"
+          },
+          "payload": {
+            "type": "object",
+            "description": "操作载荷：inspect={}; transform={object, location?, rotation?, scale?}（rotation 为欧拉角度数）；render={outputPath}（workspace 相对 png）"
+          }
+        },
+        "required": ["blendPath", "op", "payload"]
+      }
+    }
+  },
 ];

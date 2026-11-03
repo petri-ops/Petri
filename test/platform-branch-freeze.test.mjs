@@ -53,6 +53,13 @@ const BASELINE = new Set([
   // BLOCK-340 P3 — 视频输入面实机腿（block336/337 同型）：process.platform 仅写入
   // 证据文件名平台后缀（BLOCK-330 加性策略），无行为分支。
   'scripts/block340-video-live.mjs',
+  // BLOCK-341 P1/P4 — Godot 桥：process.platform 仅用于二进制发现候选（win32 godot.exe）
+  // 与实机证据文件名平台后缀。
+  'core/petri-server/helpers/godot-provider.js',
+  'core/petri-server/helpers/godot-tools.js',
+  'scripts/block341-godot-live.mjs',
+  // BLOCK-341 P5 — Blender 扩档：process.platform 仅用于二进制发现候选（win32 blender.exe）。
+  'core/petri-server/helpers/model3d-blend-ops.js',
   'core/petri-server/agent-tools/system-info-tools.js',
   'core/petri-server/agent-tools/workspace-tools.js',
   'core/petri-server/agent-tools/workspace-tools/internals.js',

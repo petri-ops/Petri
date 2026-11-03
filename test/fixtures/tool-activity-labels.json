@@ -432,5 +432,17 @@
   "read_video": {
     "label": "已读取",
     "icon": "video"
+  },
+  "godot_run": {
+    "label": "已运行",
+    "icon": "play"
+  },
+  "godot_scene_apply": {
+    "label": "已应用",
+    "icon": "edit"
+  },
+  "model3d_blend_ops": {
+    "label": "已操作",
+    "icon": "cube"
   }
 }

@@ -3,8 +3,8 @@
   "block": "BLOCK-341",
   "phase": "P4",
   "platform": "darwin",
-  "startedAt": "2026-11-03T01:20:59.273Z",
-  "finishedAt": "2026-11-03T01:21:00.984Z",
+  "startedAt": "2026-11-03T01:40:20.818Z",
+  "finishedAt": "2026-11-03T01:40:22.836Z",
   "assertions": [
     {
       "name": "L0_godot_available",
@@ -19,12 +19,12 @@
     {
       "name": "L2_run_ok",
       "pass": true,
-      "detail": "exit=0 ms=961 shots=30"
+      "detail": "exit=0 ms=1193 shots=30"
     },
     {
       "name": "L2_screenshots_captured",
       "pass": true,
-      "detail": "count=30 dir=.petri/godot-runs/run-mw004lgp-uslb"
+      "detail": "count=30 dir=.petri/godot-runs/run-mw00thpq-zdoi"
     },
     {
       "name": "L2_frame_is_png",
@@ -44,7 +44,7 @@
     {
       "name": "L3_new_run_id",
       "pass": true,
-      "detail": "run1=run-mw004lgp-uslb run2=run-mw004m7j-iqaj"
+      "detail": "run1=run-mw00thpq-zdoi run2=run-mw00tin0-3ekk"
     },
     {
       "name": "L4_propose_ok",
