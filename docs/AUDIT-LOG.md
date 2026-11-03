@@ -7,7 +7,6 @@
 最后更新：2026-11-03（🔵 **BLOCK-341 引擎桥启动登记（active；用户「确认 一次性搞完 不用再问」=发令）**：Godot 4.7.1 已在本机（homebrew+App 双份）；P0 形态裁决按 plan 预答钉死、P5 边界按预答执行（.blend=外部资产不破 322 单真值）；执行序 P1 探针→P2 godot_run→P3 scene_apply→P4 闭环样例→P5 Blender 扩档→P6 契约+实机；截图序列走 340 帧→vision 管线。目标当日收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（✅ **BLOCK-340 视频输入面整包 COMPLETED（P0-P3 立项当日收口）**：video-frames 抽帧 helper（ffmpeg 复用 329 零新依赖；缺席诚实降级；帧预算 8/16 双策略；幂等缓存）；read_video 工具全注册（vision 域 readOnly）；附件面 video 门控同源（无 vision 诚实阻断）；契约 9/9+实机 10/10（真 ffmpeg 抽帧+幂等缓存+路径守卫）。抓真两处：ffmpeg 7.x -vsync 退役；工具计数 108→109 四处 pin+model-surface 有意增长留痕。设计修正=前端不抽帧（避免与 read_video 双路径违红线）。队列下一包=BLOCK-341 引擎桥（planned，需发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（🔵 **BLOCK-340 视频输入面启动登记（active；用户连续五回「继续按照你的建议推进」=发令）**：队列头（335 完成后、341 之前）；plan §4 P0-P3 四阶段；ffmpeg 复用 329 发现模式零新依赖；read_video 工具+聊天附件 video 门控+帧预算入 model-surface 基线。P0-P2 实施+P3 实机目标=当日收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-03（✅ **BLOCK-335 lint 任务线收口——react-hooks 域 defer（基线保留 + 有机清偿）**：普查 235 条/97 文件（set-state-in-effect 91/exhaustive-deps 83 基线外/refs 35）——非机械可修（修复需引入新抽象=重构，vitest 覆盖不足组件风险高）；策略=基线保留作已知债注册表+组件被触碰时顺带修复。任务线最终账目=基线 311→187（-40%）：require-await 域清零 124 条+src/core 16 条+首批 7 条。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 
 

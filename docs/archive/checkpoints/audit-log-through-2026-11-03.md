@@ -18,3 +18,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-03T03:47:02.194Z -->
 最后更新：2026-11-03（✅ **BLOCK-335 lint 任务线第三批——require-await 尾批 50 条清偿（24 文件，基线 293→187）**：消费面分诊（await 消费去 async / .then 消费 Promise.resolve 包裹——实测去 async 即崩 fetch(...).then）；vitest 24 文件 0 fail+types 0+closeout PASS（b4227a93）。任务线累计 311→187（-40%）；余=react-hooks ~100 条独立线。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-03T04:04:09.932Z -->
+最后更新：2026-11-03（✅ **BLOCK-335 lint 任务线收口——react-hooks 域 defer（基线保留 + 有机清偿）**：普查 235 条/97 文件（set-state-in-effect 91/exhaustive-deps 83 基线外/refs 35）——非机械可修（修复需引入新抽象=重构，vitest 覆盖不足组件风险高）；策略=基线保留作已知债注册表+组件被触碰时顺带修复。任务线最终账目=基线 311→187（-40%）：require-await 域清零 124 条+src/core 16 条+首批 7 条。G0 开发期常态 · 不外推 packaged/Provider/GA。）
