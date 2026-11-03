@@ -283,9 +283,16 @@ export function SvgEditorViewer({
 
   const currentMarkup = React.useCallback((): string => rootEl()?.outerHTML || markupRef.current, [rootEl]);
 
-  const handleOpsCommitted = React.useCallback((ops: SvgOp[]) => {
+  const handleOpsCommitted = React.useCallback((ops: SvgOp[], opts?: { keepSelection?: boolean }) => {
     commit(ops, currentMarkup());
-    setSelected(new Set());
+    if (!opts?.keepSelection) setSelected(new Set());
+  }, [commit, currentMarkup]);
+
+  /** 切片2 基础钢笔：insert op 落定 → commit + 回选择工具。 */
+  const handlePenCommit = React.useCallback((op: SvgOp) => {
+    commit([op], currentMarkup());
+    setTool('select');
+    setNotice('已插入 <path>；⌘S 保存到文件');
   }, [commit, currentMarkup]);
 
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
@@ -820,6 +827,8 @@ export function SvgEditorViewer({
               onOpsCommitted={preview ? () => {} : handleOpsCommitted}
               tool={tool}
               onDrawBox={handleDrawBox}
+              onPenCommit={handlePenCommit}
+              onNotice={setNotice}
             />
 
           </div>

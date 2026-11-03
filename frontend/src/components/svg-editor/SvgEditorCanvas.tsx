@@ -17,7 +17,21 @@ import {
   SvgOp,
   translateOp,
 } from './svgEditorModel';
+import {
+  anchorsOf,
+  deleteAnchor,
+  insertNodeAtSegMidpoint,
+  moveAnchor,
+  moveControl,
+  parsePathD,
+  PathPoint,
+  PathSeg,
+  penInsertMarkup,
+  penPathD,
+  smoothAnchor,
+} from './svgPathNodes';
 import styles from './SvgEditorViewer.module.css';
+import button from '../ui/controls/button.module.css';
 import type { DrawTool } from './svgEditorInspector';
 
 export interface CanvasProps {
@@ -27,10 +41,14 @@ export interface CanvasProps {
   /** 宿主共享的画布容器引用（宿主需要用同一 DOM 读回序列化视图 / 做结构命令）。 */
   hostRef: React.MutableRefObject<HTMLDivElement | null>;
   onSelectionChange: (next: Set<string>) => void;
-  onOpsCommitted: (ops: SvgOp[]) => void;
+  onOpsCommitted: (ops: SvgOp[], opts?: { keepSelection?: boolean }) => void;
   /** W3 绘制工具：非 select 时指针拖拽产生新元素（SVG 用户坐标）。 */
   tool: DrawTool;
   onDrawBox: (box: Box) => void;
+  /** 切片2 基础钢笔：点列落定 → insert op（宿主负责 commit + 回选择工具）。 */
+  onPenCommit: (op: SvgOp) => void;
+  /** 诚实拒绝/提示通道（M 锚不可删、d 含不支持命令等）。 */
+  onNotice?: (msg: string) => void;
 }
 
 interface OverlayBox extends Box {
@@ -39,11 +57,35 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
   const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
   const [rubber, setRubber] = React.useState<Box | null>(null);
+
+  // —— 切片2：路径节点编辑 ——
+  const [nodeTarget, setNodeTarget] = React.useState<{ key: string; path: number[]; id: string | null } | null>(null);
+  const [nodeSegs, setNodeSegs] = React.useState<PathSeg[] | null>(null);
+  const [nodeUnsupported, setNodeUnsupported] = React.useState(false);
+  const [activeAnchor, setActiveAnchor] = React.useState<number | null>(null);
+  const [nodePreviewD, setNodePreviewD] = React.useState<string | null>(null);
+  const nodeDragRef = React.useRef<{
+    kind: 'anchor' | 'handle';
+    anchorIndex?: number;
+    segIndex?: number;
+    which?: 1 | 2;
+    startClientX: number;
+    startClientY: number;
+    baseSegs: PathSeg[];
+    el: Element;
+    origD: string;
+    lastD: string;
+  } | null>(null);
+
+  // —— 切片2：基础钢笔 ——
+  const [penPoints, setPenPoints] = React.useState<PathPoint[]>([]);
+  // 同 tick 连续点列需要读到最新值（setState 批量更新下闭包是旧的——实机抓真），ref 镜像同步
+  const penPointsRef = React.useRef<PathPoint[]>([]);
 
   const dragRef = React.useRef<{
     startX: number;
@@ -119,8 +161,186 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     return { x: clientX - rect.left, y: clientY - rect.top };
   }, [getRoot]);
 
+  /** 用户坐标 → 宿主 px（节点 overlay 定位用；与 toUser 同源比例，互逆）。 */
+  const userToHost = React.useCallback((x: number, y: number): { x: number; y: number } | null => {
+    const root = getRoot();
+    const host = hostRef.current;
+    if (!root || !host) return null;
+    const rect = root.getBoundingClientRect();
+    const hostRect = host.getBoundingClientRect();
+    const viewBox = root.viewBox?.baseVal;
+    if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+      return {
+        x: (x - viewBox.x) * (rect.width / viewBox.width) + (rect.left - hostRect.left),
+        y: (y - viewBox.y) * (rect.height / viewBox.height) + (rect.top - hostRect.top),
+      };
+    }
+    return { x: x + (rect.left - hostRect.left), y: y + (rect.top - hostRect.top) };
+  }, [getRoot]);
+
+  // —— 切片2：路径节点 ——
+  // 节点编辑目标派生：node 工具 + 单选 path + d 可解析（不支持时给诚实提示 chip）
+  React.useEffect(() => {
+    if (tool !== 'node' || selected.size !== 1) {
+      setNodeTarget(null); setNodeSegs(null); setNodeUnsupported(false); setActiveAnchor(null); setNodePreviewD(null);
+      return;
+    }
+    const root = getRoot();
+    const key = Array.from(selected)[0];
+    const el = root ? findByPath(root, key === '' ? [] : key.split('.').map((n) => Number(n))) : null;
+    if (!el || el.tagName.toLowerCase() !== 'path') {
+      setNodeTarget(null); setNodeSegs(null); setNodeUnsupported(false);
+      return;
+    }
+    const segs = parsePathD(el.getAttribute('d') || '');
+    if (!segs) {
+      setNodeTarget(null); setNodeSegs(null); setNodeUnsupported(true);
+      return;
+    }
+    const path = elementPath(root as Element, el) || [];
+    setNodeTarget({ key, path, id: el.getAttribute('id') });
+    setNodeSegs(segs);
+    setNodeUnsupported(false);
+    setNodePreviewD(null);
+  }, [markup, getRoot, selected, tool]);
+
+  const commitPathD = React.useCallback((nextD: string) => {
+    if (!nodeTarget) return;
+    const op: SvgOp = nodeTarget.id
+      ? { op: 'set_attr', target: { id: nodeTarget.id }, name: 'd', value: nextD }
+      : { op: 'set_attr', target: { path: nodeTarget.path }, name: 'd', value: nextD };
+    onOpsCommitted([op], { keepSelection: true });
+  }, [nodeTarget, onOpsCommitted]);
+
+  /** 节点动作（加点/删点/平滑）：纯函数产出新 d → 单 set_attr op（keepSelection）。 */
+  const nodeAction = React.useCallback((action: 'insert' | 'delete' | 'smooth') => {
+    if (!nodeSegs || activeAnchor === null) return;
+    const anchor = anchorsOf(nodeSegs).find((a) => a.index === activeAnchor);
+    if (!anchor) return;
+    if (action === 'insert') {
+      const outIdx = anchor.segIndex + 1;
+      const outSeg = nodeSegs[outIdx];
+      if (!outSeg || (outSeg.cmd !== 'L' && outSeg.cmd !== 'C')) {
+        onNotice?.('加点需要锚点后方有可分割的线段/曲线段');
+        return;
+      }
+      commitPathD(insertNodeAtSegMidpoint(nodeSegs, outIdx));
+      return;
+    }
+    if (action === 'delete') {
+      const nextD = deleteAnchor(nodeSegs, anchor);
+      if (nextD === null) { onNotice?.('该锚点不可删（子路径起点或删除后子路径退化）'); return; }
+      commitPathD(nextD);
+      setActiveAnchor(null);
+      return;
+    }
+    const smoothD = smoothAnchor(nodeSegs, anchor);
+    if (smoothD === null) { onNotice?.('平滑需要锚点两侧都是曲线段'); return; }
+    commitPathD(smoothD);
+  }, [activeAnchor, commitPathD, nodeSegs, onNotice]);
+
+  // —— 切片2：基础钢笔 ——
+  const finalizePen = React.useCallback((closed: boolean) => {
+    const pts = penPointsRef.current;
+    const d = penPathD(pts, closed);
+    penPointsRef.current = [];
+    setPenPoints([]);
+    if (!d) {
+      if (pts.length > 0) onNotice?.('钢笔至少需要 2 个点（Esc 取消）');
+      return;
+    }
+    onPenCommit({
+      op: 'insert', parent: { path: [] }, index: 'end',
+      markup: penInsertMarkup(d, { closed }),
+    });
+  }, [onPenCommit]);
+
+  // 钢笔：Esc 取消 / Enter 结束（open 落定）
+  React.useEffect(() => {
+    if (tool !== 'pen') return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { penPointsRef.current = []; setPenPoints([]); }
+      if (event.key === 'Enter') finalizePen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [finalizePen, tool]);
+
+  /** 节点/手柄拖拽：live 改 DOM `d`（即时反馈），pointerup 落成单个 set_attr d op。 */
+  const beginNodeDrag = React.useCallback((
+    event: React.PointerEvent<SVGCircleElement>,
+    info: { kind: 'anchor' | 'handle'; anchorIndex?: number; segIndex?: number; which?: 1 | 2 },
+  ) => {
+    if (!nodeSegs) return;
+    const el = nodeTarget ? findByPath(getRoot() as Element, nodeTarget.path) : null;
+    if (!el) return;
+    event.stopPropagation();
+    event.preventDefault();
+    // 先落 drag 状态（合成指针的 setPointerCapture 会抛 NotFoundError，不能挡住赋值——实机抓真）
+    nodeDragRef.current = {
+      ...info,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      baseSegs: nodeSegs,
+      el,
+      origD: el.getAttribute('d') || '',
+      lastD: el.getAttribute('d') || '',
+    };
+    try {
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    } catch { /* 合成指针无活跃 pointerId：可安全忽略（指针事件仍派发在圆元素上） */ }
+    if (info.kind === 'anchor' && info.anchorIndex !== undefined) setActiveAnchor(info.anchorIndex);
+  }, [getRoot, nodeSegs, nodeTarget]);
+
+  const nodeDragMove = React.useCallback((event: React.PointerEvent<SVGCircleElement>) => {
+    const drag = nodeDragRef.current;
+    if (!drag) return;
+    const from = toUser(drag.startClientX, drag.startClientY);
+    const to = toUser(event.clientX, event.clientY);
+    if (!from || !to) return;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    let nextD: string;
+    if (drag.kind === 'anchor' && drag.anchorIndex !== undefined) {
+      const anchor = anchorsOf(drag.baseSegs).find((a) => a.index === drag.anchorIndex);
+      if (!anchor) return;
+      nextD = moveAnchor(drag.baseSegs, anchor, anchor.pos.x + dx, anchor.pos.y + dy);
+    } else if (drag.kind === 'handle' && drag.segIndex !== undefined && drag.which) {
+      const seg = drag.baseSegs[drag.segIndex];
+      if (!seg || seg.cmd !== 'C') return;
+      const h = seg.pts[drag.which - 1];
+      nextD = moveControl(drag.baseSegs, drag.segIndex, drag.which, h.x + dx, h.y + dy);
+    } else {
+      return;
+    }
+    drag.lastD = nextD;
+    drag.el.setAttribute('d', nextD);
+    setNodePreviewD(nextD);
+  }, [toUser]);
+
+  const nodeDragEnd = React.useCallback(() => {
+    const drag = nodeDragRef.current;
+    nodeDragRef.current = null;
+    if (!drag) return;
+    if (drag.lastD !== drag.origD) commitPathD(drag.lastD);
+  }, [commitPathD]);
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (tool !== 'select') {
+    if (tool === 'pen') {
+      // 基础钢笔：点列；点靠近首点（<8 用户单位且 ≥3 点）闭合，否则追加（ref 读最新，同 tick 连击可见）
+      const pt = toUser(event.clientX, event.clientY);
+      if (!pt) return;
+      const cur = penPointsRef.current;
+      const first = cur[0];
+      if (first && cur.length >= 3 && Math.hypot(pt.x - first.x, pt.y - first.y) < 8) {
+        finalizePen(true);
+        return;
+      }
+      penPointsRef.current = [...cur, pt];
+      setPenPoints(penPointsRef.current);
+      return;
+    }
+    if (tool !== 'select' && tool !== 'node') {
       const host = hostRef.current;
       if (!host) return;
       drawStartRef.current = { clientX: event.clientX, clientY: event.clientY };
@@ -299,6 +519,7 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       onPointerLeave={() => setHoverBox(null)}
+      onDoubleClick={() => { if (tool === 'pen') finalizePen(false); }}
     >
       <div
         className={styles.canvasInner}
@@ -324,6 +545,91 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
         {rubber ? (
           <div className={styles.rubber} style={{ left: rubber.x, top: rubber.y, width: rubber.width, height: rubber.height }} />
         ) : null}
+        {tool === 'node' && nodeTarget && nodeSegs && !nodeUnsupported ? (() => {
+          const anchors = anchorsOf(nodeSegs);
+          const displaySegs = nodePreviewD ? (parsePathD(nodePreviewD) || nodeSegs) : nodeSegs;
+          const toHost = (p: PathPoint) => userToHost(p.x, p.y);
+          const actionsAnchor = anchors.find((a) => a.index === activeAnchor) || anchors[0] || null;
+          const at = actionsAnchor ? toHost(actionsAnchor.pos) : null;
+          return (
+            <>
+              <svg className={styles.nodeOverlaySvg} data-testid="svg-editor-node-overlay">
+                {displaySegs.map((seg, i) => {
+                  if (seg.cmd !== 'C') return null;
+                  const p0 = i > 0 && displaySegs[i - 1].cmd !== 'Z'
+                    ? displaySegs[i - 1].pts[displaySegs[i - 1].pts.length - 1]
+                    : { x: 0, y: 0 };
+                  const h1 = toHost(seg.pts[0]); const h2 = toHost(seg.pts[1]);
+                  const e0 = toHost(p0); const e1 = toHost(seg.pts[2]);
+                  if (!h1 || !h2 || !e0 || !e1) return null;
+                  return (
+                    <g key={`h${i}`}>
+                      <line className={styles.handleLine} x1={e0.x} y1={e0.y} x2={h1.x} y2={h1.y} />
+                      <line className={styles.handleLine} x1={e1.x} y1={e1.y} x2={h2.x} y2={h2.y} />
+                      <circle
+                        className={styles.nodeHandle} data-testid="svg-editor-node-handle"
+                        cx={h1.x} cy={h1.y} r={4}
+                        onPointerDown={(e) => beginNodeDrag(e, { kind: 'handle', segIndex: i, which: 1 })}
+                        onPointerMove={nodeDragMove}
+                        onPointerUp={nodeDragEnd}
+                      />
+                      <circle
+                        className={styles.nodeHandle} data-testid="svg-editor-node-handle"
+                        cx={h2.x} cy={h2.y} r={4}
+                        onPointerDown={(e) => beginNodeDrag(e, { kind: 'handle', segIndex: i, which: 2 })}
+                        onPointerMove={nodeDragMove}
+                        onPointerUp={nodeDragEnd}
+                      />
+                    </g>
+                  );
+                })}
+                {anchors.map((a) => {
+                  const pos = toHost(a.pos);
+                  if (!pos) return null;
+                  return (
+                    <circle
+                      key={`a${a.index}`}
+                      className={a.index === activeAnchor ? styles.nodeAnchorActive : styles.nodeAnchor}
+                      data-testid="svg-editor-node-anchor"
+                      cx={pos.x} cy={pos.y} r={5}
+                      onPointerDown={(e) => beginNodeDrag(e, { kind: 'anchor', anchorIndex: a.index })}
+                      onPointerMove={nodeDragMove}
+                      onPointerUp={nodeDragEnd}
+                    />
+                  );
+                })}
+              </svg>
+              <div
+                className={styles.nodeActions}
+                style={at ? { left: at.x + 12, top: at.y - 16 } : undefined}
+              >
+                <button type="button" className={button.ghost} data-action="node-insert" onPointerDown={(e) => e.stopPropagation()} onClick={() => nodeAction('insert')}>加点</button>
+                <button type="button" className={button.ghost} data-action="node-delete" onPointerDown={(e) => e.stopPropagation()} onClick={() => nodeAction('delete')}>删点</button>
+                <button type="button" className={button.ghost} data-action="node-smooth" onPointerDown={(e) => e.stopPropagation()} onClick={() => nodeAction('smooth')}>平滑</button>
+              </div>
+            </>
+          );
+        })() : null}
+        {tool === 'node' && nodeUnsupported ? (
+          <div className={styles.nodeUnsupported} data-testid="svg-editor-node-unsupported">
+            该 path 的 d 含不支持的命令（仅支持 M/L/H/V/C/Z 绝对坐标），节点编辑不可用
+          </div>
+        ) : null}
+        {tool === 'pen' && penPoints.length > 0 ? (() => {
+          const pts = penPoints.map((p) => userToHost(p.x, p.y)).filter((p): p is PathPoint => !!p);
+          if (pts.length === 0) return null;
+          return (
+            <svg className={styles.nodeOverlaySvg} data-testid="svg-editor-pen-preview">
+              <path
+                className={styles.penPreviewPath}
+                d={pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')}
+              />
+              {pts.map((p, i) => (
+                <circle key={i} className={styles.penPreviewDot} cx={p.x} cy={p.y} r={3} />
+              ))}
+            </svg>
+          );
+        })() : null}
       </div>
     </div>
   );

@@ -2001,3 +2001,80 @@
   height: auto;
   min-height: 0;
 }
+
+/* ============ 切片2：路径节点编辑 + 基础钢笔（BLOCK-342 UI-671） ============ */
+
+.nodeOverlaySvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.nodeAnchor {
+  pointer-events: auto;
+  fill: var(--petri-accent);
+  stroke: var(--petri-bg-canvas);
+  stroke-width: 1.5px;
+  cursor: move;
+}
+
+.nodeAnchorActive {
+  pointer-events: auto;
+  fill: var(--petri-status-warning-fg);
+  stroke: var(--petri-bg-canvas);
+  stroke-width: 1.5px;
+  cursor: move;
+}
+
+.nodeHandle {
+  pointer-events: auto;
+  fill: var(--petri-bg-canvas);
+  stroke: var(--petri-accent);
+  stroke-width: 1.5px;
+  cursor: move;
+}
+
+.handleLine {
+  stroke: var(--petri-accent);
+  stroke-width: 1px;
+  opacity: 0.55;
+}
+
+.penPreviewPath {
+  fill: none;
+  stroke: var(--petri-accent);
+  stroke-width: 1px;
+  stroke-dasharray: 4 3;
+}
+
+.penPreviewDot {
+  fill: var(--petri-accent);
+}
+
+.nodeActions {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface);
+}
+
+.nodeUnsupported {
+  position: absolute;
+  z-index: 4;
+  left: 12px;
+  bottom: 12px;
+  max-width: 60%;
+  padding: 6px 10px;
+  border: 1px solid var(--petri-status-warning-border);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-hover);
+  color: var(--petri-status-warning-fg);
+}

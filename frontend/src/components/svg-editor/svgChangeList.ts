@@ -14,6 +14,13 @@ export interface SvgOpGroup {
   ops: SvgOp[];
 }
 
+/** op 字段的安全文本化（实践里都是 string；非字符串显式 JSON 化，不走 Object 默认 toString）。 */
+function asText(v: unknown): string {
+  if (typeof v === 'string') return v;
+  if (v === undefined || v === null) return '';
+  return JSON.stringify(v);
+}
+
 /** target 的可读标签：优先 #id，否则 path[1,0] 形态，异常兜底不猜。 */
 export function targetLabel(target: Record<string, unknown> | undefined): string {
   if (!target || typeof target !== 'object') return '(?)';
@@ -26,13 +33,13 @@ export function targetLabel(target: Record<string, unknown> | undefined): string
 function opLabel(op: SvgOp): string {
   const t = targetLabel(op.target as Record<string, unknown> | undefined);
   switch (op.op) {
-    case 'set_attr': return `set ${String(op.name)}=${String(op.value ?? '')}（${t}）`;
-    case 'remove_attr': return `删属性 ${String(op.name)}（${t}）`;
-    case 'set_style': return `set style ${String(op.name)}=${String(op.value ?? '')}（${t}）`;
+    case 'set_attr': return `set ${asText(op.name)}=${asText(op.value)}（${t}）`;
+    case 'remove_attr': return `删属性 ${asText(op.name)}（${t}）`;
+    case 'set_style': return `set style ${asText(op.name)}=${asText(op.value)}（${t}）`;
     case 'set_text': return `改文字（${t}）`;
     case 'remove': return `删除 ${t}`;
-    case 'insert': return `插入 <${String(op.tag ?? '?')}>`;
-    case 'move': return `调层级 ${String(op.direction ?? '')}（${t}）`;
+    case 'insert': return `插入 <${asText(op.tag) || '?'}>`;
+    case 'move': return `调层级 ${asText(op.direction)}（${t}）`;
     default: return `${op.op}（${t}）`;
   }
 }

@@ -444,6 +444,9 @@ describe('theme token contract', () => {
       'components/result-studio/LineageViewSwitch.module.css': 2,
       'components/RouteErrorBoundary.module.css': 2,
       'components/workspace-panels/FloatCardResizer.module.css': 2, // 拖拽把手态：UI-591 跟手渐晕（同色 hover 线按用户裁决退场，常驻线本就中性）
+      // BLOCK-342 切片2 — 路径节点编辑/钢笔 overlay：锚点/手柄/预览线 = 选中态编辑把手（五类合法语义，
+      // 同 AnnotationOverlay「选中批注 accent 外环」先例）
+      'components/svg-editor/SvgEditorViewer.module.css': 5,
       'components/viewers/MarkdownViewer.module.css': 2, // BLOCK-334 P2 — 自 workspace-panels/MarkdownResultViewer.module.css 平移（accent 用法不变）
       'components/viewers/SpreadsheetViewer.module.css': 2, // BLOCK-334 P2 Slice D — 自 workspace-panels/SpreadsheetResultViewer.module.css 平移
       'components/copilot/LlmTranscriptViewer.css': 1,

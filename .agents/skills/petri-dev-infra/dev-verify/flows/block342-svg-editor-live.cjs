@@ -31,6 +31,7 @@ const SVG = `<?xml version="1.0" encoding="UTF-8"?>
   <title>BLOCK-342</title>
   <g id="plot">
     <rect id="box" x="40" y="40" width="120" height="80" fill="#4a7cba" />
+    <path id="p1" d="M 240 40 L 330 40 L 330 110 Z" fill="#3a8f6b" />
     <text id="caption" x="40" y="160" font-size="16">draft</text>
   </g>
 </svg>
@@ -424,6 +425,79 @@ module.exports = {
       const askedPayload = await lib.evalJs(client, `JSON.stringify(window.__block342Asked || null)`);
       const payload = JSON.parse(askedPayload);
       assert('V12b_context_prompt_has_path', Boolean(payload && typeof payload.prompt === 'string' && payload.prompt.includes(SAMPLE_REL)), askedPayload ? askedPayload.slice(0, 160) : 'null');
+
+      // V14 — 路径节点编辑：node 工具 → 选 path → 锚点在场 → 拖动首锚 → d 变化 → 保存落盘
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="node"]'); if (b) b.click(); return true; })()`);
+      await sleep(300);
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const p = host && host.querySelector('svg #p1');
+        if (!p) return false;
+        const r = p.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerId: 21, pointerType: 'mouse', button: 0 };
+        p.dispatchEvent(new PointerEvent('pointerdown', { ...base, buttons: 1 }));
+        // pointerup 给 host（不走 window）：canvas 的 dragRef 依赖 pointerup 清理，泄漏会把
+        // 下一次手势当拖拽尾巴（实机抓真：stale dragRef 把 translate(-21 -17) 写上 path）
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }));
+        return true;
+      })()`);
+      const anchorsReady = await waitFor(client, `(function(){
+        const n = document.querySelectorAll('${RAIL} [data-testid="svg-editor-node-anchor"]').length;
+        return n >= 3 ? JSON.stringify({ anchors: n }) : null;
+      })()`, 8_000);
+      assert('V14_node_anchors_visible', Boolean(anchorsReady), anchorsReady || 'node overlay missing');
+      const anchorDragged = await lib.evalJs(client, `(function(){
+        const a = document.querySelectorAll('${RAIL} [data-testid="svg-editor-node-anchor"]')[0];
+        if (!a) return 'no anchor';
+        const r = a.getBoundingClientRect();
+        const sx = r.left + r.width / 2; const sy = r.top + r.height / 2;
+        const base = { bubbles: true, cancelable: true, pointerId: 22, pointerType: 'mouse', button: 0 };
+        a.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: sx, clientY: sy, buttons: 1 }));
+        a.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: sx + 24, clientY: sy + 18, buttons: 1 }));
+        a.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: sx + 24, clientY: sy + 18, buttons: 0 }));
+        const p = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #p1');
+        return JSON.stringify({ d: p ? p.getAttribute('d') : null });
+      })()`);
+      const dInfo = JSON.parse(anchorDragged);
+      assert('V14_node_drag_d_changed', typeof dInfo.d === 'string' && dInfo.d.includes('264') && dInfo.d.includes('58'), anchorDragged);
+      await sleep(400);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterNodeDrag = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V14b_node_drag_persisted', /<path id="p1"[^>]*d="M 264 58[^"]*"/.test(afterNodeDrag), afterNodeDrag.match(/<path[^>]*>/)?.[0] || 'no path');
+
+      // V15 — 基础钢笔：点列三击 → 第四击回首点闭合 → insert <path> → 保存落盘
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="pen"]'); if (b) b.click(); return true; })()`);
+      await sleep(300);
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const svg = host && host.querySelector('svg');
+        if (!svg) return false;
+        const r = svg.getBoundingClientRect();
+        const vb = svg.viewBox.baseVal;
+        const toScreen = (ux, uy) => ({ x: r.left + (ux - vb.x) * (r.width / vb.width), y: r.top + (uy - vb.y) * (r.height / vb.height) });
+        const base = { bubbles: true, cancelable: true, pointerId: 31, pointerType: 'mouse', button: 0 };
+        [[60, 150], [220, 150], [140, 205]].forEach(([ux, uy]) => {
+          const s = toScreen(ux, uy);
+          host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: s.x, clientY: s.y, buttons: 1 }));
+          host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: s.x, clientY: s.y, buttons: 0 }));
+        });
+        const c = toScreen(60, 150);
+        host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: c.x, clientY: c.y, buttons: 1 }));
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: c.x, clientY: c.y, buttons: 0 }));
+        return true;
+      })()`);
+      const penSaveEnabled = await waitFor(client, `(function(){
+        const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        const preview = document.querySelector('${RAIL} [data-testid="svg-editor-pen-preview"]');
+        return s && !s.disabled && !preview ? 'unlocked' : null;
+      })()`, 6_000);
+      assert('V15_pen_insert_pending', penSaveEnabled === 'unlocked', String(penSaveEnabled));
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterPen = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      const pathCount = (afterPen.match(/<path/g) || []).length;
+      assert('V15b_pen_persisted', pathCount === 2 && /d="M 60 150 L 220 150 L 140 205 Z"/.test(afterPen), `path count=${pathCount}`);
 
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）

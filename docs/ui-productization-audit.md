@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-671: SVG 编辑器路径节点编辑 + 基础钢笔（BLOCK-342 切片2；2026-11-03 **verified（dev Electron 边界内；实机 40/40 allPass）**）
+
+- **节点编辑**：工具栏「节点」+ 单选 `<path>` → 画布 overlay 锚点圆（M 起点 + 每段终点）+ C 段贝塞尔手柄（线 + 空心圆）；拖锚点/手柄 live 改 DOM `d`（即时反馈），pointerup 落单个白名单 `set_attr d` op（keepSelection）；锚点旁浮动动作条「加点 / 删点 / 平滑」——加点=L 取中点/C 用 de Casteljau t=0.5 一分为二，删点=C 段与出段合并为单 C（出段非 C/子路径起点/删后退化如实拒绝并提示），平滑=出手柄镜像到进手柄对侧（保留出手柄原长；两侧非曲线如实拒绝）。纯逻辑全部在 `svgPathNodes.ts`（只支持 M/L/H/V/C/Z 绝对命令，小写相对命令如实判不可编辑并给提示 chip，不假装支持）。
+- **基础钢笔**：工具栏「钢笔」→ 画布点列（overlay 虚线预览 + 点标），点回首点 <8 用户单位且 ≥3 点闭合（Z），Enter/double-click 开口落定，Esc 取消；落定 = 白名单 `insert` op（closed 填充色 / open 只描边），落定后回选择工具。
+- **实机抓真（两处）**：①合成指针的 `setPointerCapture` 抛 NotFoundError 会挡住 drag 状态赋值（真实指针无感）→ 先落状态再 try/catch capture；②钢笔同 tick 连击读 setState 批量更新下的旧闭包 → penPoints 走 ref 镜像。另修 flow 侧 dragRef 泄漏（pointerup 发 window 不进 canvas → stale 拖拽把 translate 写上 path；改发 host）。
+- **验证**：`svgPathNodes.test` 15/15（解析/序列化 round-trip/未知命令如实 null/锚点表/moveAnchor/moveControl/L+C 中点插入/C 并段删除/退化拒绝/平滑镜像/钢笔 d 与 insert markup）；svg-editor 前端 47/47 + theme 17/17（accent 棘轮 +5 登记：选中态编辑把手，同 AnnotationOverlay 先例）+ tsc 0 + lint 0 error（overlay 几何定位/重建回放的渲染期 DOM 读取为刻意形态，set-state-in-effect/refs 豁免入库留痕）；实机 flow 六新断言（`V14_node_anchors_visible` 3 锚 / `V14_node_drag_d_changed` d=M 264 58 / `V14b_node_drag_persisted` 落盘 / `V15_pen_insert_pending` / `V15b_pen_persisted` 2 path 含闭合 d），总 **40/40 allPass**。后端零改动（insert 收原始 markup，path 天然过安全校验）。
+
 ## UI-670: SVG 编辑器「未保存改动」改动清单按 pendingOps 重建——分组列出 + 单项撤销 + 全部撤销（BLOCK-342 · UI-663 收口；2026-11-03 **verified（dev Electron 边界内；实机 35/35 allPass）**）
 
 - **方向兑现（plan §9 已定方向落地）**：清单改由 `pendingOps` + history 的 opsLen 快照直接切组（`svgChangeList.ts` 纯函数）——**语义 diff = op 列表本身**，彻底绕开「磁盘文本 vs 视图序列化」的反序列化可比性问题（两轮实机空清单的根因）；撤销一组 = 移除该组 → 磁盘真值重建视图 → 按序回放剩余 op（快照栈跨重建如实清空）。5c172066 删掉旧实现时保留的 svgProposal 契约（6/6）原样保留供提案幽灵复用。

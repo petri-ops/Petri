@@ -157,8 +157,8 @@ function elementPathFrom(root: Element, el: Element): number[] | null {
   return node === root ? path : null;
 }
 
-/** 绘制工具：拖拽矩形 → insert op（白名单 markup，交给后端安全校验）。 */
-export type DrawTool = 'select' | 'rect' | 'ellipse' | 'line' | 'text';
+/** 绘制工具：拖拽矩形 → insert op（白名单 markup，交给后端安全校验）；pen 钢笔点列；node 路径节点编辑。 */
+export type DrawTool = 'select' | 'rect' | 'ellipse' | 'line' | 'text' | 'pen' | 'node';
 
 export const DRAW_TOOLS: ReadonlyArray<{ id: DrawTool; label: string; hint: string }> = [
   { id: 'select', label: '选择', hint: '点选/框选/拖拽移动' },
@@ -166,6 +166,8 @@ export const DRAW_TOOLS: ReadonlyArray<{ id: DrawTool; label: string; hint: stri
   { id: 'ellipse', label: '椭圆', hint: '拖拽画椭圆' },
   { id: 'line', label: '直线', hint: '拖拽画直线' },
   { id: 'text', label: '文字', hint: '拖拽出文字框后输入' },
+  { id: 'pen', label: '钢笔', hint: '点列画折线：点首点可闭合（Z），Enter 结束，Esc 取消' },
+  { id: 'node', label: '节点', hint: '选中单个 path 后编辑节点/手柄：拖动、加点、删点、平滑' },
 ];
 
 export function drawOp(

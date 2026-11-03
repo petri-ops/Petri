@@ -330,6 +330,19 @@
       "count": 1
     }
   },
+  "frontend/src/components/svg-editor/SvgEditorCanvas.tsx": {
+    "react-hooks/refs": {
+      "count": 2
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "frontend/src/components/svg-editor/SvgEditorViewer.tsx": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
   "frontend/src/components/window/WindowShell.tsx": {
     "react-hooks/set-state-in-effect": {
       "count": 1
