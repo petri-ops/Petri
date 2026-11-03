@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-661: 受治理 SVG 编辑器——画布选择/拖拽/图层树/撤销/保存 + viewerRegistry svg-editor 分派（BLOCK-342 W1；2026-11-03 **in_progress（代码面全绿；隔离栈离屏实机腿未跑）**）
+
+- **变化面**：①`frontend/src/components/svg-editor/` 新增编辑器（宿主 `SvgEditorViewer` + 画布 `SvgEditorCanvas` + 纯逻辑 `svgEditorModel`）：点选/Shift 多选/框选、悬停高亮、拖拽移动（手势结束折算 `set_attr transform` op）、图层树（后端 inspect 结构）、删除/复制/层序、方向键微移（⇧ 10px）、撤销/重做（未保存修改的视图回退）、⌘S 保存、⌘K 命令面板；视图载入前脱敏（script/foreignObject/on 事件属性/javascript:），真值不被编辑器删除。②`viewerRegistry` 新增 `svg-editor` adapter 与能力档案（canExport=true，选择/比较 false），`.svg` 从 image 扩展名集合移出并新增规则——`kind='plot'` 的 .svg 仍按图片预览（既有语义不回退），其余 .svg 走编辑器；`WorkspaceFilePreview` 的 `fallbackKind` 增 `svg` 分支挂载编辑器。③新增 REST 面 `routes/svg.js`（`POST /api/svg/inspect|edit`，与 agent 的 `svg_inspect/svg_edit` 同一套实现；错误码→HTTP 语义 404/409/413/403）。
+- **为什么这样设计**：编辑器 DOM 只是活视图——每个手势折算成与 agent 共用的白名单 op，保存时一次性交后端 span 引擎改写同一份真值（before-hash 冲突检测，人的修正不被覆盖）；撤销只回退**未保存**修改，已保存历史回滚留给结果面版本链（W4）。不引画布框架（fabric/paper 会把真值从 SVG DOM 挪走）。
+- **验证（代码）**：`tsc --noEmit` 0；`quality:lint` 0 error；`theme-token-contract` **17/17**；定向 vitest **6 文件 57/57**（svgEditorModel 7 + SvgEditorViewer 3 + viewerRegistry 家族 47，含存量两条断言随 `.svg → svg-editor` 有意变更对齐）。双端工具动词契约（`tool-activity-labels` Node 5/5 + 前端 20/20）随新增工具与存量四缺（read_video/godot×2/blend_ops）补齐。
+- **未覆盖**：隔离栈离屏实机（打开→点选→拖拽→保存→sha 变化→无改动零 diff）未跑，故不标 verified。
+
 ## UI-659: theme 契约四条存量债清偿——3D 约束编辑器/生成对话框 token 归位（BLOCK-322 存量；2026-11-02 **verified（守卫型：theme-token-contract 17/17 + 组件测试 + tsc 0；视觉变化仅 3D 生成对话框两处元信息 12→14px，宪章 §1 正文性小字归体）**）
 
 - **变化面**：`SceneConstraintEditor.module.css` 错误文案 `var(--petri-color-danger, #c62828)`（引用未定义 token + 裸色 fallback）→ `var(--petri-status-error-fg)`；`.submitBtn` → `.submitAction`（只有 `align-self`，按钮变体仍走 `button.primary`，命名出按钮清单棘轮）；`Model3DGenerateDialog.module.css` 两处 `font-size: 12px` → `var(--petri-font-size-body)`，`.error` 的 `var(--petri-danger, #b42318)` → `var(--petri-status-error-fg)`。

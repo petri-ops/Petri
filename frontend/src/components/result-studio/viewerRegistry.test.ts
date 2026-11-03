@@ -89,14 +89,18 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
     expect(resolveAdapter({ kind: 'file', fileName: 'paper.pdf' })).toBe('pdf');
   });
 
-  it("kind==='plot' 与图片扩展名 .png/.jpg/.jpeg/.gif/.svg/.webp 都落 image（resultSurface.ts:78）", () => {
+  it("kind==='plot' 与图片扩展名 .png/.jpg/.jpeg/.gif/.webp 都落 image（resultSurface.ts:78；.svg 于 BLOCK-342 转 svg-editor）", () => {
     // kind 分支：任意扩展名都 image
     expect(resolveAdapter({ kind: 'plot', fileName: 'heatmap.vega' })).toBe('image');
     // 扩展名分支（对无前置专属分支的 kind 生效）
-    for (const ext of ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp']) {
+    for (const ext of ['png', 'jpg', 'jpeg', 'gif', 'webp']) {
       expect(resolveAdapter({ kind: 'data', fileName: `figure.${ext}` })).toBe('image');
       expect(resolveAdapter({ kind: 'file', fileName: `figure.${ext}` })).toBe('image');
     }
+    // BLOCK-342 W1 有意变更：.svg 让位给受治理编辑器；kind='plot' 仍按图片预览
+    expect(resolveAdapter({ kind: 'data', fileName: 'figure.svg' })).toBe('svg-editor');
+    expect(resolveAdapter({ kind: 'file', fileName: 'figure.svg' })).toBe('svg-editor');
+    expect(resolveAdapter({ kind: 'plot', fileName: 'volcano.svg' })).toBe('image');
   });
 
   it('image 分支先于 .xls/.xlsx 覆盖分支（resultSurface.ts:78 < :79 顺序敏感）', () => {

@@ -58,6 +58,8 @@ module.exports = async function registerRoutes(app) {
     ['Result Studio', () => require('./result-studio')(app)],
     // NEXT-04A — 3D/Blender 只读能力探测（构建/渲染/导出仍走 agent tools）
     ['Model 3D', () => require('./model3d')(app)],
+    // BLOCK-342 W1 — SVG 编辑器读写面（与 agent 的 svg_inspect/svg_edit 同一套实现）
+    ['SVG editor', () => require('./svg')(app)],
     ['Feedback', () => require('./feedback')(app)],
     // BLOCK-246 C13：速记板（用户资产旁路表；上限/清洗单源在 shared-backend/scratchpad-store）
     ['Scratchpad', () => require('./scratchpad')(app)],

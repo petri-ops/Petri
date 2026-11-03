@@ -114,9 +114,11 @@ describe('BLOCK-142 回归：既有六类映射零变化（全部现状断言，
   });
 
   it('image 类：图片扩展名落 image + plot kind 恒胜 + plot+xlsx 仍落 image（位次在 spreadsheet 之前）', () => {
-    for (const ext of ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp']) {
+    // BLOCK-342 W1 有意变更：.svg 让位给 svg-editor（仍在 spreadsheet 之前判定）
+    for (const ext of ['png', 'jpg', 'jpeg', 'gif', 'webp']) {
       expect(resolveAdapter({ kind: 'data', fileName: `figure.${ext}` })).toBe('image');
     }
+    expect(resolveAdapter({ kind: 'data', fileName: 'figure.svg' })).toBe('svg-editor');
     expect(resolveAdapter({ kind: 'plot', fileName: 'heatmap.vega' })).toBe('image');
     expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('image');
   });

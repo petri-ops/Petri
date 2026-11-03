@@ -431,7 +431,7 @@
   },
   "read_video": {
     "label": "已读取",
-    "icon": "video"
+    "icon": "play"
   },
   "godot_run": {
     "label": "已运行",
@@ -439,10 +439,18 @@
   },
   "godot_scene_apply": {
     "label": "已应用",
-    "icon": "edit"
+    "icon": "pencil"
   },
   "model3d_blend_ops": {
     "label": "已操作",
-    "icon": "cube"
+    "icon": "layers"
+  },
+  "svg_inspect": {
+    "label": "已检视",
+    "icon": "search"
+  },
+  "svg_edit": {
+    "label": "已编辑",
+    "icon": "pencil"
   }
 }

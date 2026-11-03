@@ -485,6 +485,8 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "read_video": "已读取",
   "godot_run": "已运行",
   "godot_scene_apply": "已应用",
+  "svg_inspect": "已检视",
+  "svg_edit": "已编辑",
   "model3d_blend_ops": "已操作",
   "read_page": "已读取",
   "resident_task_create": "已创建",

@@ -63,3 +63,13 @@ W1 收口门禁清单（收口时逐项对账）：
 - 前端 contenteditable 在 SVG text 上不可靠：行内文字编辑用覆盖 HTML input 定位到元素bbox（W2），W1 不做文字编辑。
 - 编辑器与 span 引擎两端视图漂移：保存后 hash 校验 + 不符即从真值重载；契约测试锁 op schema 双端可解析。
 - 前置：无硬前置；W4 依赖 BLOCK-340 帧→vision（completed）与 335 闭环接口（completed）；viewerRegistry 依赖 BLOCK-334（completed）。
+
+## 7. W1 执行进度（2026-11-03 会话）
+
+**P1 span 引擎 COMPLETED**（`helpers/svg-ops.js`，682→约 800 行）：span 改写（零操作零 diff / 局部性 / `svg_hash_mismatch`）、`sanitizeSvg` 两级脱敏、`inspectSvg`、工具层不抛包装 `applyOpsSafe`。契约 `test/block342-svg-ops.test.mjs` **14/14**（首轮 13 红 → 终态全绿）。终审抓到并根修四处真缺陷：①`setAttrRaw` 替换区间 off-by-one（闭引号被重复，改写后文档不可解析）；②有子元素的容器 `textOnly` 从未置 false（`set_text` 会静默吞掉子结构）；③节点缺 `id`/`path` 便捷字段；④`insert` 的安全校验晚于形状校验（危险 markup 被报成形状错）。另加固：`script/style` 按 raw-text 元素跳过内部解析（CSS/JS 里的 `<` 不打断）；`sanitizeSvg` 改「原始文本层剥元素 → 解析层剥属性」，解析失败 fail-closed（不把未脱敏文本当已脱敏）。
+
+**P2 工具面 COMPLETED**：`agent-tools/svg-tools.js`（propose/apply、`before_sha_required`、`svg_hash_mismatch` 带重新 propose 指引、零改动不写盘、审计快照 `.petri/svg-revisions/`）+ registry/metadata/events/tool-defs 注册 + `routes/svg.js` REST 面。契约 `test/block342-svg-tools.test.mjs` **8/8**；工具计数 112→**114**（四处 pin + `test/fixtures/tool-activity-labels.json` + `model-surface-baselines.json` 有意增长留痕）。**顺带清存量**：`scripts/model-surface-baseline.mjs` 注释声明 `--force` 但实现缺分支（契约漂移）已补；前端 `toolActivity` 动词/图标表缺 `read_video`/`godot_run`/`godot_scene_apply`/`model3d_blend_ops` 四条存量（BLOCK-340/341 遗留，该双端契约测试在 HEAD 即红）一并补齐。
+
+**P3 编辑器内核 COMPLETED（代码面）**：`components/svg-editor/`（viewer/canvas/model/css）+ `lib/svgEditClient.ts` + `viewerRegistry` svg-editor 分派 + `WorkspaceFilePreview` 挂载。测试 `svgEditorModel.test.ts` 7 + `SvgEditorViewer.test.tsx` 3 + viewerRegistry 家族 47；`theme-token-contract` 17/17；tsc 0 / lint 0 error。
+
+**P4 实机：未跑**（隔离栈离屏 flow 待下一步执行）；**P5 收口：待 P4 后执行**。UI 台账 = **UI-661（in_progress）**，不冒 verified。

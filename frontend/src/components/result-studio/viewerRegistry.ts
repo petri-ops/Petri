@@ -38,7 +38,8 @@ export type ResultViewerAdapter =
   | 'spreadsheet'
   | 'pdf'
   | 'model3d'
-  | 'video';
+  | 'video'
+  | 'svg-editor';
 
 /** 一次 viewer 解析的结果：adapter + 能力声明位。 */
 export interface ResolvedResultViewer {
@@ -76,6 +77,9 @@ const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'a
   // BLOCK-322 P2-05 — 视频：无文本选择语义（canSelect false）、无可比较对象（canCompare false）；
   // 原文可导出成立（产物就是可下载可外发的 mp4/webm），故 canExport true 由 ViewerExportAction 消费。
   video: { canSelect: false, canCompare: false, canExport: true },
+  // BLOCK-342 W1 — SVG 编辑器：画布级选择（元素选择不是文本选择，不进选择总线），
+  // 无比较语义；原文可导出成立（就是可下载的 .svg 文件）。
+  'svg-editor': { canSelect: false, canCompare: false, canExport: true },
 };
 
 /**
@@ -101,8 +105,12 @@ const ADAPTER_RULES: readonly AdapterRule[] = [
   // 必须先于 image/json/text 诸规则：kind 为 'data'/'file' 的产物若按文件名不命中就会落
   // binary 兜底（下载壳），而视频的正确出口是「能播」而不是「能存」。
   { adapter: 'video', extension: /\.(mp4|webm)$/ },
-  // resultSurface.ts:78 — plot kind 恒胜（含 plot+xls 落 image 的现状行为）
-  { adapter: 'image', kind: 'plot', extension: /\.(png|jpe?g|gif|svg|webp)$/ },
+  // resultSurface.ts:78 — plot kind 恒胜（kind 命中即命中，与扩展名无关）；.svg 从 image 扩展名集合移除
+  { adapter: 'image', kind: 'plot', extension: /\.(png|jpe?g|gif|webp)$/ },
+  // BLOCK-342 W1 — 其余 .svg 进受治理编辑器（人鼠标键盘修正细节，agent 走 svg_edit 同一套 op）。
+  // 必须排在 image 之后：kind='plot' 的 .svg 仍按图片预览（既有语义不回退），
+  // 而 kind='file'/'data' 的 .png/.jpg 不命中本规则、仍由 image 规则按扩展名兜住。
+  { adapter: 'svg-editor', extension: /\.svg$/ },
   // BLOCK-142（原位替换 resultSurface.ts:79 .xls/.xlsx→binary）— .xlsx/.xlsm → spreadsheet viewer（先于 table）
   { adapter: 'spreadsheet', extension: /\.(xlsx|xlsm)$/ },
   // BLOCK-142 存量拆分保留（resultSurface.ts:79 的 .xls 半边）— legacy .xls 不在 exceljs 解析范围，维持 binary 兜底

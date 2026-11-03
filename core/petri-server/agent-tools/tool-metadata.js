@@ -160,6 +160,9 @@ const TOOL_METADATA = {
   godot_run: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 120000 },
   model3d_blend_ops: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 120000 },
   godot_scene_apply: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 5000 },
+  // BLOCK-342 W1 — SVG：inspect 纯读（并发安全）；edit 写工作区文件（propose 无写面，apply 落盘需审批）
+  svg_inspect: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 2000 },
+  svg_edit: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 5000 },
   act: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
 
   // ---- 远程执行/通用执行域（高风险串行）----

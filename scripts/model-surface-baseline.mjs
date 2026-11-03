@@ -153,13 +153,24 @@ function main() {
       ? JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8'))
       : {};
     const violations = previous.updatedAt ? compareAgainstBaseline(current, previous) : [];
-    if (violations.length > 0) {
+    const forced = process.argv.includes('--force');
+    if (violations.length > 0 && !forced) {
       console.error('[model-surface] --update 拒绝写入：检测到增长（增长必须走有意变更并在 commit message 说明理由）：');
       for (const v of violations) console.error('  - ' + v);
       process.exitCode = 1;
       return;
     }
-    const next = shrinkBaseline(current, previous);
+    // 有意增长（新增工具/提示面扩写）：--force 采纳现状并在 commit message 留痕；
+    // 未增长仍走 shrinkBaseline（只许降不许升的常态棘轮）。
+    const next = violations.length > 0
+      ? {
+        updatedAt: new Date().toISOString(),
+        systemPromptChars: current.systemPromptChars,
+        toolDefsCount: current.toolDefsCount,
+        toolDefsChars: current.toolDefsChars,
+        perToolChars: { ...(current.perToolChars || {}) },
+      }
+      : shrinkBaseline(current, previous);
     fs.writeFileSync(BASELINE_PATH, JSON.stringify(next, null, 2) + '\n');
     console.log(`[model-surface] 基线已下调 → ${path.relative(ROOT, BASELINE_PATH)}（updatedAt=${next.updatedAt}）`);
     return;

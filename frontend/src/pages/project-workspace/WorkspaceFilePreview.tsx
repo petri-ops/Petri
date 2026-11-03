@@ -42,6 +42,8 @@ import type { AnnotationScope, AnnotationTaskTarget } from '@/lib/annotations';
 // BLOCK-246 C12 — 划词动作（selectionQuote 的第一个生产者）+ 动作条
 import { SelectionActionBar } from '@/components/copilot/SimpleChat/SelectionActionBar';
 import { usePreviewSelection } from './usePreviewSelection';
+// BLOCK-342 W1 — 受治理 SVG 编辑器（viewerRegistry 的 svg-editor 适配器宿主）
+import { SvgEditorViewer } from '@/components/svg-editor/SvgEditorViewer';
 
 // UI-400-6 — Markdown 目录解析：1-3 级 ATX 标题，跳过 ```/~~~ 围栏内伪标题。
 function parseMdHeadings(text: string): Array<{ level: 1 | 2 | 3; text: string }> {
@@ -106,6 +108,8 @@ export function WorkspaceFilePreview({
   const viewerAdapter = file
     ? resolveResultViewer({ kind: 'file', fileName: file.name, preview: true }).adapter
     : 'binary';
+  // BLOCK-342 W1 — .svg 走受治理编辑器（人鼠标键盘修正细节 + agent 走 svg_edit 同一套 op）
+  const isSvgEditor = viewerAdapter === 'svg-editor';
   const isImage = viewerAdapter === 'image';
   const isText = viewerAdapter === 'text';
   const isMarkdown = viewerAdapter === 'markdown';
@@ -281,8 +285,9 @@ export function WorkspaceFilePreview({
   // BLOCK-74 修复（UI-323 回归）：自动保存 effect 与 Ctrl+S 回调必须在 `if (!file)` 提前返回
   // 之前注册——否则无文件 → 打开文件的首次渲染 Hook 数从 N 变 N+2，React 抛
   // "Rendered more hooks" 导致整窗白屏（实机点击 md 复现）。
-  const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' =
-    isSceneSpec || isJson ? 'json'
+  const fallbackKind: 'csv' | 'pdf' | 'html' | 'json' | 'markdown' | 'image' | 'text' | 'binary' | 'svg' =
+    isSvgEditor ? 'svg'
+    : isSceneSpec || isJson ? 'json'
     : isCsv ? 'csv'
     : isPdf ? 'pdf'
     : isHtml ? 'html'
@@ -463,6 +468,11 @@ export function WorkspaceFilePreview({
             </p>
           </>
         )}
+        {status === 'ready' && fallbackKind === 'svg' && projectId && file ? (
+          /* BLOCK-342 W1 — 受治理 SVG 编辑器：人改的每个手势折算成白名单 op，
+             保存时经后端 span 引擎写同一份真值（before-hash 冲突检测，人的修正不被覆盖）。 */
+          <SvgEditorViewer projectId={projectId} filePath={file.path} name={file.name} />
+        ) : null}
         {status === 'ready' && fallbackKind === 'image' && (
           /* BLOCK-74 — 图片头部「引用到对话」行随用户裁决移除；BLOCK-219 Q6 加批注宿主 */
           <AnnotatableImagePane

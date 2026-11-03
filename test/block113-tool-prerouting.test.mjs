@@ -73,8 +73,10 @@ test('恒等红线：⋃ DOMAIN_TOOL_DEFS 与 TOOL_DEFS 逐引用一致（工具
   assert.equal(union.length, TOOL_DEFS.length);
   const b = new Set(union);
   assert.ok(TOOL_DEFS.every((t) => b.has(t)), '每个 TOOL_DEFS 成员都来自某域模块（同引用）');
+  // BLOCK-342 W1 新增 svg 域（svg_inspect/svg_edit）：同 skill/web precedent——
+  // 入 DOMAIN_TOOL_DEFS 但不入 TOOL_FAMILIES 决策分类学，θ=0.80 校准契约不动，宁全勿缺。
   assert.deepEqual(Object.keys(DOMAIN_TOOL_DEFS).sort(),
-    ['agent-orchestration', 'browser', 'computer', 'godot', 'knowledge', 'model3d', 'remote', 'resident', 'result-studio', 'session', 'skill', 'web', 'workflow', 'workspace', 'worktree']);
+    ['agent-orchestration', 'browser', 'computer', 'godot', 'knowledge', 'model3d', 'remote', 'resident', 'result-studio', 'session', 'skill', 'svg', 'web', 'workflow', 'workspace', 'worktree']);
 });
 
 test('D-1/D-3 定版契约：九域+all 类目集、session 底座、θ=0.80', () => {

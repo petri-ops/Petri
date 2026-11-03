@@ -7234,6 +7234,32 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block342-svg-editor",
+      "note": "BLOCK-342 W1 SVG 编辑器：span 改写引擎（零操作零 diff/局部性/hash 冲突）+ svg_inspect/svg_edit 工具 + REST 面 + 前端编辑器与 viewerRegistry svg-editor 分派。改引擎/工具/路由/编辑器时跑本包契约测与前端定向；改 viewerRegistry 时连带既有 viewerRegistry 家族。",
+      "patterns": [
+        "core/petri-server/helpers/svg-ops.js",
+        "core/petri-server/agent-tools/svg-tools.js",
+        "core/petri-server/agent-tools/tool-defs/svg.js",
+        "core/petri-server/routes/svg.js",
+        "frontend/src/components/svg-editor/**",
+        "frontend/src/lib/svgEditClient.ts",
+        "frontend/src/components/result-studio/viewerRegistry.ts",
+        "acceptance/block-342/**"
+      ],
+      "tests": [
+        "test/block342-svg-ops.test.mjs",
+        "test/block342-svg-tools.test.mjs",
+        "frontend/src/components/svg-editor/svgEditorModel.test.ts",
+        "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
+        "frontend/src/components/result-studio/viewerRegistry.block342.test.ts",
+        "frontend/src/components/result-studio/viewerRegistry.test.ts",
+        "frontend/src/components/result-studio/viewerRegistry.block142.test.ts"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }
