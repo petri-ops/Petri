@@ -762,151 +762,155 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
           </div>
 
-          <aside className={layout.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
-            <div className={styles.inspectorHead}>
-              {inspectorOpen ? (
-                <>
-                  <span className={styles.panelTitle}>图形属性</span>
-                  <button
-                    type="button"
-                    className={button.ghost}
-                    data-action="collapse-inspector"
-                    title="收起属性栏（画布变宽）"
-                    onClick={() => setInspectorOpen(false)}
-                  >
-                    »
-                  </button>
-                </>
-              ) : null}
-            </div>
-            {selected.size === 0 ? <div className={styles.note}>未选中元素。点画布元素或用图层树选择。</div> : null}
-            <SelectedSummary rows={selectedRows} />
-            {selected.size > 0 ? (
-              <div className={styles.props} data-testid="svg-editor-props">
-                {EDITABLE_ATTRS.map((attr) => (
-                  <label key={attr.name} className={styles.field}>
-                    <span className={styles.fieldLabel}>{attr.label}</span>
-                    {attr.kind === 'select' ? (
-                      <select
-                        data-attr={attr.name}
-                        value={selectedProps[attr.name] || ''}
-                        onChange={(event) => applyAttr(attr.name, event.target.value)}
-                      >
-                        <option value="">—</option>
-                        {(attr.options || []).map((option) => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className={styles.fieldRow}>
-                        {attr.kind === 'color' ? (
-                          <input
-                            type="color"
-                            aria-label={`${attr.label}取色`}
-                            value={toHexColor(selectedProps[attr.name])}
-                            onChange={(event) => applyAttr(attr.name, event.target.value)}
-                          />
-                        ) : null}
-                        <input
-                          type={attr.kind === 'number' ? 'number' : 'text'}
-                          data-attr={attr.name}
-                          value={selectedProps[attr.name] || ''}
-                          placeholder={attr.placeholder || ''}
-                          onChange={(event) => applyAttr(attr.name, event.target.value)}
-                        />
-                      </span>
-                    )}
-                  </label>
-                ))}
-                {selected.size > 1 ? (
-                  <div className={styles.rowActions} data-testid="svg-editor-align">
-                    {ALIGN_MODES.map((mode) => (
-                      <button key={mode.id} type="button" className={button.ghost} onClick={() => applyAlign(mode.id)} data-align={mode.id}>
-                        {mode.label}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-                <div className={styles.rowActions} data-testid="svg-editor-prop-actions">
-                  <button type="button" className={button.ghost} onClick={openTextEditor} data-action="text">编辑文字</button>
-                  <button type="button" className={button.ghost} onClick={copyStyle} data-action="copy-style">复制样式</button>
-                  <button type="button" className={button.ghost} onClick={pasteStyle} disabled={!styleClip} data-action="paste-style">粘贴样式</button>
-                  <button type="button" className={button.ghost} onClick={askAgent} data-action="ask-agent">问 agent</button>
-                </div>
-              </div>
-            ) : null}
-            {preview ? (
-              <div className={styles.previewBar} data-testid="svg-editor-preview-bar">
-                <span>只读预览：{preview.at.replace('T', ' ').slice(0, 19)}</span>
-                <button type="button" className={button.ghost} data-action="exit-preview" onClick={() => setPreview(null)}>退出预览</button>
-              </div>
-            ) : null}
-
-            <details open className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
-              <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
-              {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
-              <div className={styles.swatches}>
-                {docPalette.map((item) => (
-                  <button
-                    key={item.color}
-                    type="button"
-                    className={styles.swatch}
-                    style={{ background: item.color }}
-                    title={`${item.color} ×${item.count}`}
-                    data-color={item.color}
-                    onClick={() => applyAttr('fill', item.color)}
-                  />
-                ))}
-              </div>
-            </details>
-            <div className={styles.hint}>
-              ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
-            </div>
-          </aside>
-          <aside className={layout.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
-            <div className={styles.layersHead}>
-              {layersOpen ? (
-                <>
-                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
-                  <button
-                    type="button"
-                    className={button.ghost}
-                    data-action="collapse-layers"
-                    title="收起图层栏"
-                    onClick={() => setLayersOpen(false)}
-                  >
-                    «
-                  </button>
-                </>
-              ) : null}
-            </div>
-            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
-              {layerRows.map((el) => {
-                const key = pathKey(el.path);
-                return (
-                  <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
+          {inspectorOpen ? (
+            <aside className={layout.inspector} data-testid="svg-editor-inspector">
+              <div className={styles.inspectorHead}>
+                {inspectorOpen ? (
+                  <>
+                    <span className={styles.panelTitle}>图形属性</span>
                     <button
                       type="button"
-                      className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                      onClick={(event) => {
-                        syncSelection(new Set([key]));
-                        event.currentTarget.scrollIntoView({ block: 'nearest' });
-                        const root = rootEl();
-                        const target = root ? findByPath(root, decodePath(key)) : null;
-                        target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                      }}
-                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
-                      title={`<${el.tag}> path=[${el.path.join(',')}]`}
+                      className={button.ghost}
+                      data-action="collapse-inspector"
+                      title="收起属性栏（画布变宽）"
+                      onClick={() => setInspectorOpen(false)}
                     >
-                      {el.id ? `#${el.id}` : `<${el.tag}>`}
-                      {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                      »
                     </button>
-                  </li>
-                );
-              })}
-            </ul>
+                  </>
+                ) : null}
+              </div>
+              {selected.size === 0 ? <div className={styles.note}>未选中元素。点画布元素或用图层树选择。</div> : null}
+              <SelectedSummary rows={selectedRows} />
+              {selected.size > 0 ? (
+                <div className={styles.props} data-testid="svg-editor-props">
+                  {EDITABLE_ATTRS.map((attr) => (
+                    <label key={attr.name} className={styles.field}>
+                      <span className={styles.fieldLabel}>{attr.label}</span>
+                      {attr.kind === 'select' ? (
+                        <select
+                          data-attr={attr.name}
+                          value={selectedProps[attr.name] || ''}
+                          onChange={(event) => applyAttr(attr.name, event.target.value)}
+                        >
+                          <option value="">—</option>
+                          {(attr.options || []).map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={styles.fieldRow}>
+                          {attr.kind === 'color' ? (
+                            <input
+                              type="color"
+                              aria-label={`${attr.label}取色`}
+                              value={toHexColor(selectedProps[attr.name])}
+                              onChange={(event) => applyAttr(attr.name, event.target.value)}
+                            />
+                          ) : null}
+                          <input
+                            type={attr.kind === 'number' ? 'number' : 'text'}
+                            data-attr={attr.name}
+                            value={selectedProps[attr.name] || ''}
+                            placeholder={attr.placeholder || ''}
+                            onChange={(event) => applyAttr(attr.name, event.target.value)}
+                          />
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                  {selected.size > 1 ? (
+                    <div className={styles.rowActions} data-testid="svg-editor-align">
+                      {ALIGN_MODES.map((mode) => (
+                        <button key={mode.id} type="button" className={button.ghost} onClick={() => applyAlign(mode.id)} data-align={mode.id}>
+                          {mode.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className={styles.rowActions} data-testid="svg-editor-prop-actions">
+                    <button type="button" className={button.ghost} onClick={openTextEditor} data-action="text">编辑文字</button>
+                    <button type="button" className={button.ghost} onClick={copyStyle} data-action="copy-style">复制样式</button>
+                    <button type="button" className={button.ghost} onClick={pasteStyle} disabled={!styleClip} data-action="paste-style">粘贴样式</button>
+                    <button type="button" className={button.ghost} onClick={askAgent} data-action="ask-agent">问 agent</button>
+                  </div>
+                </div>
+              ) : null}
+              {preview ? (
+                <div className={styles.previewBar} data-testid="svg-editor-preview-bar">
+                  <span>只读预览：{preview.at.replace('T', ' ').slice(0, 19)}</span>
+                  <button type="button" className={button.ghost} data-action="exit-preview" onClick={() => setPreview(null)}>退出预览</button>
+                </div>
+              ) : null}
+
+              <details open className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
+                <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
+                {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
+                <div className={styles.swatches}>
+                  {docPalette.map((item) => (
+                    <button
+                      key={item.color}
+                      type="button"
+                      className={styles.swatch}
+                      style={{ background: item.color }}
+                      title={`${item.color} ×${item.count}`}
+                      data-color={item.color}
+                      onClick={() => applyAttr('fill', item.color)}
+                    />
+                  ))}
+                </div>
+              </details>
+              <div className={styles.hint}>
+                ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
+              </div>
+          </aside>
+          ) : null}
+          {layersOpen ? (
+            <aside className={layout.layers} data-testid="svg-editor-layers">
+              <div className={styles.layersHead}>
+                {layersOpen ? (
+                  <>
+                    <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+                    <button
+                      type="button"
+                      className={button.ghost}
+                      data-action="collapse-layers"
+                      title="收起图层栏"
+                      onClick={() => setLayersOpen(false)}
+                    >
+                      «
+                    </button>
+                  </>
+                ) : null}
+              </div>
+              <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
+                {layerRows.map((el) => {
+                  const key = pathKey(el.path);
+                  return (
+                    <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
+                      <button
+                        type="button"
+                        className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
+                        onClick={(event) => {
+                          syncSelection(new Set([key]));
+                          event.currentTarget.scrollIntoView({ block: 'nearest' });
+                          const root = rootEl();
+                          const target = root ? findByPath(root, decodePath(key)) : null;
+                          target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                        }}
+                        onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
+                        title={`<${el.tag}> path=[${el.path.join(',')}]`}
+                      >
+                        {el.id ? `#${el.id}` : `<${el.tag}>`}
+                        {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
 
           </aside>
+          ) : null}
             <section className={layout.revisionCard} data-testid="svg-editor-revision-panel">
               <div className={styles.layersHead}>
                 <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
