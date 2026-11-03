@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T05:20:32.529Z",
-  "finishedAt": "2026-11-03T05:20:47.505Z",
+  "startedAt": "2026-11-03T05:25:41.929Z",
+  "finishedAt": "2026-11-03T05:25:51.875Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -30,9 +30,14 @@
       "detail": "图层（5）<svg><title>BLOCK-342#plot#box#capt"
     },
     {
+      "name": "V2d_panels_default_collapsed",
+      "pass": true,
+      "detail": "{\"paletteOpen\":false,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"hasCollapse\":true}"
+    },
+    {
       "name": "V3_rect_dispatch_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"x\":1025,\"y\":334}"
+      "detail": "{\"ok\":true,\"x\":1025,\"y\":383}"
     },
     {
       "name": "V4_selection_visible",
@@ -88,6 +93,16 @@
       "name": "V9b2_fill_live_rendered",
       "pass": true,
       "detail": "live"
+    },
+    {
+      "name": "V9b3_status_dirty_preview",
+      "pass": true,
+      "detail": "{\"state\":\"dirty\",\"text\":\"● 未保存 1 项改动 · 实时预览中，⌘S 确认写盘\"}"
+    },
+    {
+      "name": "V9d_status_saved_after_commit",
+      "pass": true,
+      "detail": "{\"state\":\"saved\",\"text\":\"✓ 已保存 · 40648b3b\"}"
     },
     {
       "name": "V9c_fill_persisted",

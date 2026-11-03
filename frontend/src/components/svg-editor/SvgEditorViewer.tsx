@@ -197,6 +197,12 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   // W4 逐元素取舍：磁盘真值基线 + 当前差异清单
   const [baseMarkup, setBaseMarkup] = React.useState('');
   const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
+  // 交互：右栏空间有限 —— 分区折叠（默认只开「图形属性」），整栏可收，工具栏可收
+  const [sections, setSections] = React.useState({ props: true, palette: false, changes: false, tools: true });
+  const [inspectorOpen, setInspectorOpen] = React.useState(true);
+  const toggleSection = React.useCallback((key: keyof typeof sections) => {
+    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  }, []);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
@@ -665,6 +671,18 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
           >
             {saving ? '保存中…' : `保存${pendingOps.length > 0 ? `（${pendingOps.length}）` : ''}`}
           </button>
+          <span
+            className={styles.status}
+            data-testid="svg-editor-status"
+            data-state={saving ? 'saving' : pendingOps.length > 0 ? 'dirty' : 'saved'}
+            title="实时预览只改视图；点「保存」（⌘S）才提交到文件"
+          >
+            {saving
+              ? '保存中…'
+              : pendingOps.length > 0
+                ? `● 未保存 ${pendingOps.length} 项改动 · 实时预览中，⌘S 确认写盘`
+                : `✓ 已保存${state.status === 'ready' ? ` · ${state.baseSha.slice(0, 8)}` : ''}`}
+          </span>
         </div>
       </header>
 
@@ -709,6 +727,16 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
           <div className={styles.stage} onWheel={handleWheel}>
             <div className={styles.toolbar} data-testid="svg-editor-toolbar">
+              <button
+                type="button"
+                className={styles.tool}
+                data-action="toggle-tools"
+                title={sections.tools ? '收起工具组' : '展开工具组'}
+                onClick={() => toggleSection('tools')}
+              >
+                {sections.tools ? '工具 »' : '工具 «'}
+              </button>
+              <span className={styles.toolGroup} data-testid="svg-editor-tool-group" data-open={sections.tools ? '1' : '0'}>
               <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>
               {DRAW_TOOLS.map((item) => (
                 <button
@@ -722,6 +750,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                   {item.label}
                 </button>
               ))}
+              </span>
             </div>
             {textEdit ? (
               <div className={styles.textEdit} data-testid="svg-editor-text-edit">
@@ -772,8 +801,19 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             />
           </div>
 
-          <aside className={styles.inspector} data-testid="svg-editor-inspector">
-            <div className={styles.panelTitle}>属性</div>
+          <aside className={styles.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
+            <div className={styles.inspectorHead}>
+              <span className={styles.panelTitle}>图形属性</span>
+              <button
+                type="button"
+                className={button.ghost}
+                data-action={inspectorOpen ? 'collapse-inspector' : 'expand-inspector'}
+                title={inspectorOpen ? '收起属性栏（画布变宽）' : '展开属性栏'}
+                onClick={() => setInspectorOpen((prev) => !prev)}
+              >
+                {inspectorOpen ? '»' : '«'}
+              </button>
+            </div>
             {selected.size === 0 ? <div className={styles.note}>未选中元素。点画布元素或用图层树选择。</div> : null}
             <SelectedSummary rows={selectedRows} />
             {selected.size > 0 ? (
@@ -830,8 +870,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 </div>
               </div>
             ) : null}
-            <div className={styles.changeBlock} data-testid="svg-editor-changes">
-              <div className={styles.panelTitle}>未保存改动（逐元素取舍）</div>
+            <details className={styles.changeBlock} data-testid="svg-editor-changes">
+              <summary className={styles.sectionSummary}>未保存改动（逐元素取舍）</summary>
               <div className={styles.rowActions}>
                 <button type="button" className={button.ghost} onClick={openChangeLog} data-action="open-changes">列出改动</button>
                 <button type="button" className={button.ghost} onClick={revertAllChanges} disabled={!changeLog || changeLog.length === 0} data-action="revert-all">全部撤销</button>
@@ -858,9 +898,9 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                   </>
                 )
               ) : null}
-            </div>
-            <div className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
-              <div className={styles.panelTitle}>文档色板（点色块填入选中）</div>
+            </details>
+            <details className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
+              <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
               {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
               <div className={styles.swatches}>
                 {docPalette.map((item) => (
@@ -875,7 +915,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                   />
                 ))}
               </div>
-            </div>
+            </details>
             <div className={styles.hint}>
               快捷键：⌘S 保存 · ⌘Z 撤销 · Delete 删除 · ⌘D 复制 · 方向键微移（⇧ 10px）· ⌘K 命令
             </div>

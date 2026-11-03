@@ -106,6 +106,23 @@ module.exports = {
       const mountInfo = JSON.parse(mounted);
       assert('V2b_initial_save_disabled', mountInfo.saveDisabled === true, `saveDisabled=${mountInfo.saveDisabled}`);
       assert('V2c_layers_rendered', /图层/.test(mountInfo.layers), mountInfo.layers);
+      // 折叠默认态：色板/改动区默认收起（无 open），工具组默认展开
+      const panels = await lib.evalJs(client, `(function(){
+        const palette = document.querySelector('${RAIL} [data-testid="svg-editor-doc-palette"]');
+        const changes = document.querySelector('${RAIL} [data-testid="svg-editor-changes"]');
+        const group = document.querySelector('${RAIL} [data-testid="svg-editor-tool-group"]');
+        const collapse = document.querySelector('${RAIL} [data-action="collapse-inspector"]');
+        return JSON.stringify({
+          paletteOpen: palette ? palette.hasAttribute('open') : null,
+          changesOpen: changes ? changes.hasAttribute('open') : null,
+          toolGroupOpen: group ? group.dataset.open : null,
+          hasCollapse: !!collapse
+        });
+      })()`);
+      const panelInfo = JSON.parse(panels);
+      assert('V2d_panels_default_collapsed',
+        panelInfo.paletteOpen === false && panelInfo.changesOpen === false && panelInfo.toolGroupOpen === '1' && panelInfo.hasCollapse === true,
+        panels);
 
       // V3 — 真实点选：在画布里点 <rect> 中心 → 选中框出现 + 属性面板出现该元素
       const clicked = await lib.evalJs(client, `(function(){
@@ -214,10 +231,23 @@ module.exports = {
         return el && el.getAttribute('fill') === '#cc0000' ? 'live' : null;
       })()`, 6_000);
       assert('V9b2_fill_live_rendered', liveFill === 'live', String(liveFill));
+      // 状态区分：未保存=实时预览态（dirty），且提示要 ⌘S 确认
+      const dirtyStatus = await lib.evalJs(client, `(function(){
+        const el = document.querySelector('${RAIL} [data-testid="svg-editor-status"]');
+        return el ? JSON.stringify({ state: el.dataset.state, text: (el.textContent || '').slice(0, 40) }) : 'missing';
+      })()`);
+      const dirty = JSON.parse(dirtyStatus);
+      assert('V9b3_status_dirty_preview', dirty.state === 'dirty' && /未保存/.test(dirty.text) && /确认/.test(dirty.text), dirtyStatus);
       await sleep(600);
       await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
       await sleep(1_500);
       const afterFill = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      const savedStatus = await lib.evalJs(client, `(function(){
+        const el = document.querySelector('${RAIL} [data-testid="svg-editor-status"]');
+        return el ? JSON.stringify({ state: el.dataset.state, text: (el.textContent || '').slice(0, 30) }) : 'missing';
+      })()`);
+      const saved = JSON.parse(savedStatus);
+      assert('V9d_status_saved_after_commit', saved.state === 'saved' && /已保存/.test(saved.text), savedStatus);
       assert('V9c_fill_persisted', /fill="#cc0000"/.test(afterFill), afterFill.match(/<rect[^>]*>/)?.[0] || 'no rect');
 
       // V10 — W2 文档色板：从文档提取到现有颜色色块

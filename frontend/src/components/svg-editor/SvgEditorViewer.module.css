@@ -445,3 +445,52 @@
   color: var(--petri-text-secondary);
   word-break: break-all;
 }
+
+/* BLOCK-342 交互批 — 保存状态条 / 分区折叠 / 整栏收起 / 工具组折叠 */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+  background: var(--petri-bg-elevated);
+}
+
+.status[data-state='dirty'] {
+  color: var(--petri-status-warning-fg);
+  border: 1px solid var(--petri-status-warning-border);
+}
+
+.status[data-state='saved'] {
+  color: var(--petri-status-success-fg);
+}
+
+.inspectorHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inspector[data-open='0'] > :not(.inspectorHead) {
+  display: none;
+}
+
+.sectionSummary {
+  cursor: pointer;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  user-select: none;
+}
+
+.toolGroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.toolGroup[data-open='0'] {
+  display: none;
+}
