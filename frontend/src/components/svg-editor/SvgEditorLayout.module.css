@@ -100,3 +100,14 @@
 .body[data-inspector='0'] .inspector {
   display: none;
 }
+
+/* 全屏编辑：整窗覆盖，按宽容器布局（用户裁决 A：给编辑器更宽的区域） */
+.expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  padding: 12px;
+  background: var(--petri-bg-canvas);
+  display: flex;
+  flex-direction: column;
+}
