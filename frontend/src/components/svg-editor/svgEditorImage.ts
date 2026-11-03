@@ -9,7 +9,7 @@
 import type { SvgOp } from './svgEditorModel';
 
 export const IMAGE_EMBED_MAX_BYTES = 2 * 1024 * 1024;
-export const IMAGE_EMBED_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+const IMAGE_EMBED_TYPES: ReadonlyArray<string> = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
 const DATA_URL_RE = /^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*$/;
 

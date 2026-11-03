@@ -7,7 +7,7 @@
  */
 import type { SvgOp } from './svgEditorModel';
 
-export interface GradientStop { offset: number; color: string; opacity?: number }
+interface GradientStop { offset: number; color: string; opacity?: number }
 export interface GradientDef {
   id: string;
   kind: 'linear' | 'radial';
