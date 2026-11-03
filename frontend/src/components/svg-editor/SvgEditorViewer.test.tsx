@@ -101,7 +101,7 @@ describe('BLOCK-342 W1 SvgEditorViewer', () => {
 
     // 图层栏（含脱敏提示）默认收起：先展开再断言
     await waitFor(() => expect(screen.getByTestId('svg-editor-canvas')).toBeTruthy());
-    const expandLayers = document.querySelector('[data-action="expand-layers"]') as HTMLButtonElement | null;
+    const expandLayers = document.querySelector<HTMLButtonElement>("[data-action=\"expand-layers\"]");
     expect(expandLayers).toBeTruthy();
     expandLayers?.click();
     await waitFor(() => expect(screen.getByTestId('svg-editor-sanitized')).toBeTruthy());
