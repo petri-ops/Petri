@@ -55,6 +55,9 @@ export interface CanvasProps {
   proposalMarkup?: string | null;
   /** P1.1 选区浮动工具条：选择工具且有选区时渲染；动作语义由宿主分发（与属性面板动作行同源）。 */
   onSelectionAction?: (action: 'delete' | 'duplicate' | 'ask' | 'text') => void;
+  /** P2.1 版本对比：修订版 markup 洋葱皮叠加（透明度由宿主滑杆控制）。 */
+  compareMarkup?: string | null;
+  compareOpacity?: number;
 }
 
 interface OverlayBox extends Box {
@@ -63,7 +66,7 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage, proposalMarkup, onSelectionAction }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage, proposalMarkup, onSelectionAction, compareMarkup, compareOpacity }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
   const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
@@ -548,6 +551,14 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
           data-testid="svg-editor-proposal-ghost"
           style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}
           dangerouslySetInnerHTML={{ __html: proposalMarkup }}
+        />
+      ) : null}
+      {compareMarkup ? (
+        <div
+          className={styles.compareGhostLayer}
+          data-testid="svg-editor-compare-ghost"
+          style={{ transform: `scale(${scale})`, transformOrigin: '0 0', opacity: compareOpacity ?? 0.5 }}
+          dangerouslySetInnerHTML={{ __html: compareMarkup }}
         />
       ) : null}
       <div className={styles.overlay} aria-hidden="true">

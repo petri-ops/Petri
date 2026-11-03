@@ -2146,3 +2146,11 @@
   pointer-events: auto;
   transform: translateX(-50%);
 }
+
+/* P2.1 版本对比洋葱皮：透明度由滑杆控制（内联 style），层本身不写死 */
+.compareGhostLayer {
+  position: absolute;
+  inset: 16px;
+  pointer-events: none;
+  outline: 1px dashed var(--petri-status-warning-border);
+}

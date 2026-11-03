@@ -687,6 +687,41 @@ module.exports = {
       const afterStyle = fs.readFileSync(SAMPLE_ABS, 'utf8');
       assert('V22c_style_persisted', /<rect id="box"[^>]*style="fill-opacity:0.8"/.test(afterStyle) || /style="fill-opacity:0.8"/.test(afterStyle), afterStyle.match(/<rect[^>]*style[^>]*>/)?.[0]?.slice(0, 120) || 'no style attr');
 
+      // V23 — P2.1 版本对比：修订行「对比」→ 洋葱皮层+控制条在场 → 滑杆调透明度 → 关闭退场
+      const compareBtn = await lib.evalJs(client, `(function(){
+        const b = document.querySelector('${RAIL} [data-action^="compare-revision-"]');
+        if (!b) return 'no compare button';
+        b.click();
+        return 'clicked';
+      })()`);
+      const compareReady = await waitFor(client, `(function(){
+        const ghost = document.querySelector('${RAIL} [data-testid="svg-editor-compare-ghost"]');
+        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-compare"]');
+        const slider = document.querySelector('${RAIL} [data-attr="compare-opacity"]');
+        return ghost && bar && slider ? JSON.stringify({ ghost: true, opacity: slider.value }) : null;
+      })()`, 10_000);
+      assert('V23_compare_overlay', Boolean(compareReady) && compareBtn === 'clicked', compareReady || String(compareBtn));
+      await lib.evalJs(client, `(function(){
+        const slider = document.querySelector('${RAIL} [data-attr="compare-opacity"]');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(slider, '0.8');
+        slider.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      })()`);
+      await sleep(300);
+      const opacitySet = await lib.evalJs(client, `(function(){
+        const ghost = document.querySelector('${RAIL} [data-testid="svg-editor-compare-ghost"]');
+        const slider = document.querySelector('${RAIL} [data-attr="compare-opacity"]');
+        return JSON.stringify({ ghostOpacity: ghost ? ghost.style.opacity : null, slider: slider ? slider.value : null });
+      })()`);
+      const op = JSON.parse(opacitySet);
+      assert('V23b_compare_opacity_slider', op.slider === '0.8' && Math.abs(parseFloat(op.ghostOpacity) - 0.8) < 0.01, opacitySet);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="compare-close"]'); if (b) b.click(); return true; })()`);
+      const compareClosed = await waitFor(client, `(function(){
+        return !document.querySelector('${RAIL} [data-testid="svg-editor-compare-ghost"]') && !document.querySelector('${RAIL} [data-testid="svg-editor-compare"]') ? 'closed' : null;
+      })()`, 6_000);
+      assert('V23c_compare_close', compareClosed === 'closed', String(compareClosed));
+
       // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="render-check"]'); if (b) b.click(); return true; })()`);
       const checkReady = await waitFor(client, `(function(){

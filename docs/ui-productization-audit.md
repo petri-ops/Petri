@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-679: SVG 编辑器 P2 版本对比——修订行「对比」+ 洋葱皮叠加 + 透明度滑杆（BLOCK-343 P2；2026-11-04 **verified（dev Electron 边界内；实机 61/61 allPass）**）
+
+- **交互**：修订历史每行加「对比」按钮（与预览主按钮兄弟、非嵌套）→ 读取该快照 → 与当前视图**同 scale 洋葱皮叠加**（compareGhostLayer，警示色虚线框区别于提案 accent 层，透明度由控制条滑杆 0–1 步进 0.05 实时驱动）→ 控制条（文件名尾段 + 百分比 + 关闭）。不改真值、不进 pendingOps；快照解析失败如实报错。
+- **历史面板执行者标注（P2.2 判定）**：查证 `writeRevisionSnapshot` 为纯 SVG 文件（文件名仅时间戳+sha8），**无执行者元数据**——按 plan 预案如实 reopen（补元数据=快照格式变更，属独立小包），不伪造标注。
+- **验证**：svg-editor 前端 63/63 + theme 17/17 + tsc 0 + lint 0 error；flow 三新断言（`V23_compare_overlay` 层+条+滑杆在场 / `V23b_compare_opacity_slider` 滑杆 0.8→层 opacity 0.8 / `V23c_compare_close` 退场），总 **61/61 allPass**。
+
 ## UI-678: SVG 编辑器 P1 小项批——选区浮动工具条 + 模态层补挂 + 字体品牌表 + 内联样式可视化（BLOCK-343 P1；2026-11-04 **verified（dev Electron 边界内；实机 58/58 allPass）**）
 
 - **选区浮动工具条**：选择工具+有选区时，画布选区包围盒上方（贴顶自动翻下方）浮条四动作（复制/文字/问 agent/删除）——与属性面板动作行/快捷键**同源回调**（deleteSelected/duplicateSelected/askAgent/openTextEditor），不建第二逻辑；预览态不启用（`onSelectionAction=undefined`）。

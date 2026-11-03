@@ -223,6 +223,8 @@ export function SvgEditorViewer({
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
   // P1.4 内联样式行（单选时采集；编辑走 set_style op）
   const [styleRows, setStyleRows] = React.useState<Array<{ name: string; value: string }>>([]);
+  // P2.1 版本对比：修订版与当前视图洋葱皮叠加（透明度滑杆）
+  const [compare, setCompare] = React.useState<{ revision: string; at: string; markup: string; opacity: number } | null>(null);
   // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
   // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
@@ -628,6 +630,20 @@ export function SvgEditorViewer({
       });
   }, [filePath, projectId]);
 
+  /** P2.1 版本对比：读取修订版 → 洋葱皮叠加（不改真值、不进 pendingOps）。 */
+  const openCompare = React.useCallback((item: { file: string; at: string }) => {
+    void readSvgRevision({ projectId, path: filePath, revision: item.file })
+      .then((content) => {
+        const view = sanitizeSvgForView(content.text);
+        if (!view.ok) { setNotice(`对比失败：快照无法解析（${view.error}）`); return; }
+        setCompare({ revision: item.file, at: item.at, markup: view.markup || '', opacity: 0.5 });
+        setNotice(`版本对比中：${item.file.slice(-24)}（拖滑杆调透明度）`);
+      })
+      .catch((error: unknown) => {
+        setNotice(`读取快照失败：${error instanceof Error ? error.message : String(error)}`);
+      });
+  }, [filePath, projectId]);
+
   const undo = React.useCallback(() => {
     setHistory((prev) => {
       if (prev.length === 0) return prev;
@@ -988,6 +1004,27 @@ export function SvgEditorViewer({
           ) : null}
 
           <div className={layout.stage} onWheel={handleWheel}>
+            {compare ? (
+              <div className={styles.proposalBar} data-testid="svg-editor-compare">
+                <span className={styles.proposalTitle}>版本对比 · {compare.revision.slice(-24)}</span>
+                <div className={styles.fieldRow}>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={compare.opacity}
+                    data-attr="compare-opacity"
+                    aria-label="对比层透明度"
+                    onChange={(event) => setCompare((prev) => (prev ? { ...prev, opacity: Number(event.target.value) } : prev))}
+                  />
+                  <span className={styles.changeKind}>{Math.round(compare.opacity * 100)}%</span>
+                </div>
+                <div className={styles.rowActions}>
+                  <button type="button" className={button.ghost} data-action="compare-close" onClick={() => setCompare(null)}>关闭对比</button>
+                </div>
+              </div>
+            ) : null}
             {renderCheck ? (
               <div className={styles.proposalBar} data-testid="svg-editor-render-check">
                 <span className={styles.proposalTitle}>渲染回验快照（{renderCheck.width}×{renderCheck.height}）</span>
@@ -1134,6 +1171,8 @@ export function SvgEditorViewer({
               onEmbedImage={embedImageFile}
               proposalMarkup={proposal?.markup || null}
               onSelectionAction={preview ? undefined : handleSelectionAction}
+              compareMarkup={compare?.markup || null}
+              compareOpacity={compare?.opacity}
             />
 
           </div>
@@ -1203,6 +1242,15 @@ export function SvgEditorViewer({
                       >
                         <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
                         <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                      </button>
+                      <button
+                        type="button"
+                        className={button.ghost}
+                        data-action={`compare-revision-${item.file.slice(-16)}`}
+                        title="与当前视图洋葱皮对比"
+                        onClick={() => openCompare(item)}
+                      >
+                        对比
                       </button>
                     </li>
                   ))}
