@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T06:03:45.078Z",
-  "finishedAt": "2026-11-03T06:03:59.950Z",
+  "startedAt": "2026-11-03T06:06:39.018Z",
+  "finishedAt": "2026-11-03T06:06:54.039Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/?test=1"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793685981639"
     },
     {
       "name": "V2_editor_mounted",

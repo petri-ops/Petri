@@ -1369,3 +1369,49 @@
 .layers[data-open='0'] {
   display: none;
 }
+
+/* 布局定稿 v2（用户裁决）：属性占用右侧区域（不悬浮）；图层坞矮化、不触底 */
+.body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.body[data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr) 220px;
+}
+
+.body[data-layers='0'][data-inspector='1'],
+.body[data-layers='1'][data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr) 220px;
+}
+
+.inspector {
+  position: static;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  max-height: none;
+  border: none;
+  border-left: 1px solid var(--petri-divider);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 10px 10px 10px 12px;
+}
+
+.layers {
+  max-height: 88px;
+  margin: 0 0 8px;
+  padding: 6px 8px;
+}
+
+.layers .layerList {
+  max-height: 52px;
+  overflow: auto;
+}
+
+.stage {
+  padding: 44px 12px 10px;
+}
