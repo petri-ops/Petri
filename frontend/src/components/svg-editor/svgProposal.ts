@@ -7,7 +7,7 @@
  */
 import type { SvgOp } from './svgEditorModel';
 
-export interface AttrChange {
+interface AttrChange {
   name: string;
   before: string | null;
   after: string | null;
