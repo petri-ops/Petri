@@ -5,7 +5,6 @@
  * 这里只负责「值 → op」的确定映射与只读提取，不持有 DOM 状态、不发请求。
  */
 import type { SvgOp } from './svgEditorModel';
-import { pathKey } from './svgEditorModel';
 
 /** 属性面板可编辑项（白名单：不进 SVG 规范外的自定义属性）。 */
 export const EDITABLE_ATTRS: ReadonlyArray<{
@@ -224,5 +223,3 @@ export function selectionContextPrompt(input: {
     '请用 svg_edit 修改（先说方案，我确认后再 apply）。',
   ].join('\n');
 }
-
-export { pathKey };
