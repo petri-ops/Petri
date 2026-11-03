@@ -246,18 +246,6 @@ export function alignOps(
   return ops;
 }
 
-/** 常用字体（下拉直接可选，避免用户手打拼错）。 */
-export const FONT_FAMILIES: ReadonlyArray<string> = [
-  'Helvetica',
-  'Arial',
-  'Times New Roman',
-  'Courier New',
-  'Georgia',
-  'Verdana',
-  'sans-serif',
-  'serif',
-];
-
 function escapeText(input: string): string {
   return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
