@@ -1,0 +1,79 @@
+{
+  "name": "godot-live",
+  "block": "BLOCK-341",
+  "phase": "P4",
+  "platform": "darwin",
+  "startedAt": "2026-11-03T01:20:59.273Z",
+  "finishedAt": "2026-11-03T01:21:00.984Z",
+  "assertions": [
+    {
+      "name": "L0_godot_available",
+      "pass": true,
+      "detail": "/opt/homebrew/bin/godot v4.7.1.stable.official.a13da4feb"
+    },
+    {
+      "name": "L1_min_project_created",
+      "pass": true,
+      "detail": "undefined"
+    },
+    {
+      "name": "L2_run_ok",
+      "pass": true,
+      "detail": "exit=0 ms=961 shots=30"
+    },
+    {
+      "name": "L2_screenshots_captured",
+      "pass": true,
+      "detail": "count=30 dir=.petri/godot-runs/run-mw004lgp-uslb"
+    },
+    {
+      "name": "L2_frame_is_png",
+      "pass": true,
+      "detail": "magic=89504e47"
+    },
+    {
+      "name": "L2_manifest_persisted",
+      "pass": true,
+      "detail": "manifest.json 落盘（projectDir 基准）"
+    },
+    {
+      "name": "L2_log_persisted",
+      "pass": true,
+      "detail": "stdout.log 落盘"
+    },
+    {
+      "name": "L3_new_run_id",
+      "pass": true,
+      "detail": "run1=run-mw004lgp-uslb run2=run-mw004m7j-iqaj"
+    },
+    {
+      "name": "L4_propose_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"filePath\":\"minproj/player.gd\",\"op\":\"replace_script_snippet\",\"payload\":{\"find\":\"var speed = 10\",\"replace\":\"var speed = 99\"},\"beforeSha256\":\"dbc802a3cef9a0cf60bf0e84d402ef39beb9630940e683eaf"
+    },
+    {
+      "name": "L4_apply_ok",
+      "pass": true,
+      "detail": "{\"ok\":true,\"filePath\":\"minproj/player.gd\",\"op\":\"replace_script_snippet\",\"beforeSha256\":\"dbc802a3cef9a0cf60bf0e84d402ef39beb9630940e683eaf0170af638970375\",\"afterSha256\":\"eac0a2c0bcf627382aba2154c96a033"
+    },
+    {
+      "name": "L4_apply_content",
+      "pass": true,
+      "detail": "\tvar speed = 99"
+    },
+    {
+      "name": "L4_semantic_diff",
+      "pass": true,
+      "detail": "L3: var speed = 10 → var speed = 99"
+    },
+    {
+      "name": "L5_whitelist_denied",
+      "pass": true,
+      "detail": "undefined"
+    }
+  ],
+  "allPass": true,
+  "passed": 13,
+  "total": 13,
+  "note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

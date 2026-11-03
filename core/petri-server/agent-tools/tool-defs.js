@@ -13,6 +13,7 @@
 const domainModules = {
   'agent-orchestration': require('./tool-defs/agent-orchestration'),
   'browser': require('./tool-defs/browser'),
+  'godot': require('./tool-defs/godot'),
   'computer': require('./tool-defs/computer'),
   'knowledge': require('./tool-defs/knowledge'),
   'model3d': require('./tool-defs/model3d'),
@@ -30,6 +31,7 @@ const domainModules = {
 const TOOL_DEFS = [
   ...domainModules['agent-orchestration'],
   ...domainModules['browser'],
+  ...domainModules['godot'],
   ...domainModules['computer'],
   ...domainModules['knowledge'],
   ...domainModules['model3d'],
