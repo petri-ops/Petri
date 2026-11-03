@@ -208,6 +208,12 @@ module.exports = {
         return JSON.stringify({ value: input.value });
       })()`);
       assert('V9b_fill_input_changed', JSON.parse(changed).value === '#cc0000', changed);
+      // 即时渲染（用户抓真）：未保存时画布元素属性就应变
+      const liveFill = await waitFor(client, `(function(){
+        const el = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #box');
+        return el && el.getAttribute('fill') === '#cc0000' ? 'live' : null;
+      })()`, 6_000);
+      assert('V9b2_fill_live_rendered', liveFill === 'live', String(liveFill));
       await sleep(600);
       await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
       await sleep(1_500);

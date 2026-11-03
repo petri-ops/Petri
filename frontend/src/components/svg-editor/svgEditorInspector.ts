@@ -5,6 +5,7 @@
  * 这里只负责「值 → op」的确定映射与只读提取，不持有 DOM 状态、不发请求。
  */
 import type { SvgOp } from './svgEditorModel';
+import { composeTranslate } from './svgEditorModel';
 
 /** 属性面板可编辑项（白名单：不进 SVG 规范外的自定义属性）。 */
 export const EDITABLE_ATTRS: ReadonlyArray<{
@@ -19,7 +20,7 @@ export const EDITABLE_ATTRS: ReadonlyArray<{
   { name: 'stroke-width', label: '描边宽', kind: 'number' },
   { name: 'opacity', label: '不透明度', kind: 'number' },
   { name: 'font-size', label: '字号', kind: 'number' },
-  { name: 'font-family', label: '字体', kind: 'text' },
+  { name: 'font-family', label: '字体', kind: 'select', options: ['Helvetica', 'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana', 'sans-serif', 'serif'] },
   { name: 'font-weight', label: '字重', kind: 'select', options: ['normal', 'bold', '300', '600', '700'] },
   { name: 'text-anchor', label: '对齐', kind: 'select', options: ['start', 'middle', 'end'] },
 ] as const;
@@ -202,6 +203,60 @@ export function drawOp(
   }
   return null;
 }
+
+/** 对齐模式（多选时可用）：相对整体包围盒。 */
+export type AlignMode = 'left' | 'centerX' | 'right' | 'top' | 'centerY' | 'bottom';
+
+export const ALIGN_MODES: ReadonlyArray<{ id: AlignMode; label: string }> = [
+  { id: 'left', label: '左对齐' },
+  { id: 'centerX', label: '水平居中' },
+  { id: 'right', label: '右对齐' },
+  { id: 'top', label: '顶对齐' },
+  { id: 'centerY', label: '垂直居中' },
+  { id: 'bottom', label: '底对齐' },
+];
+
+/**
+ * 对齐：按整体包围盒把每个元素平移到位（只产出 transform/set_attr op，不改几何定义）。
+ * boxes 由调用方从活视图 getBBox 采样（本函数保持纯计算，便于单测）。
+ */
+export function alignOps(
+  entries: ReadonlyArray<{ key: string; id?: string; path: number[]; box: { x: number; y: number; width: number; height: number }; transform: string | null }>,
+  mode: AlignMode,
+): SvgOp[] {
+  if (entries.length < 2) return [];
+  const minX = Math.min(...entries.map((e) => e.box.x));
+  const maxX = Math.max(...entries.map((e) => e.box.x + e.box.width));
+  const minY = Math.min(...entries.map((e) => e.box.y));
+  const maxY = Math.max(...entries.map((e) => e.box.y + e.box.height));
+  const ops: SvgOp[] = [];
+  for (const entry of entries) {
+    let dx = 0;
+    let dy = 0;
+    if (mode === 'left') dx = minX - entry.box.x;
+    else if (mode === 'right') dx = maxX - (entry.box.x + entry.box.width);
+    else if (mode === 'centerX') dx = (minX + maxX) / 2 - (entry.box.x + entry.box.width / 2);
+    else if (mode === 'top') dy = minY - entry.box.y;
+    else if (mode === 'bottom') dy = maxY - (entry.box.y + entry.box.height);
+    else if (mode === 'centerY') dy = (minY + maxY) / 2 - (entry.box.y + entry.box.height / 2);
+    if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) continue;
+    const locator = entry.id ? { id: entry.id } : { path: entry.path };
+    ops.push({ op: 'set_attr', target: locator, name: 'transform', value: composeTranslate(entry.transform, dx, dy) });
+  }
+  return ops;
+}
+
+/** 常用字体（下拉直接可选，避免用户手打拼错）。 */
+export const FONT_FAMILIES: ReadonlyArray<string> = [
+  'Helvetica',
+  'Arial',
+  'Times New Roman',
+  'Courier New',
+  'Georgia',
+  'Verdana',
+  'sans-serif',
+  'serif',
+];
 
 function escapeText(input: string): string {
   return input.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

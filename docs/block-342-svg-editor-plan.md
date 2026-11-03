@@ -101,3 +101,16 @@ W1 收口门禁清单（收口时逐项对账）：
 - **实机状态（如实·两轮尝试未通）**：①第一轮用加载快照 `baseMarkup` 作基线 → 实机「列出改动」空清单；②第二轮改为**现读磁盘**（`cache:no-store` + 重新脱敏）并对比 `serializeRoot(view)` → **仍为空**，说明问题在 `diffElements(磁盘文本, 视图序列化)` 这一对输入的可比性（DOM 序列化形态 vs 解析器期望），不在基线来源。两轮均从 flow 回退（未验行为不计入通过），UI-663 保持 `in_progress`。
 - **下一步（已定方向，未实施）**：改动清单改由 `pendingOps` 直接生成（op 列表本就是语义 diff，无需反序列化视图）；撤销一项 = 从 pendingOps 移除该组 → 以磁盘文本重建视图再按序应用剩余 op。这样既避开 DOM 序列化可比性问题，也与「语义 diff = op 列表」的原始设计一致。
 - **reopen（承接）**：①实机复核改动清单（定位基线时序）；②agent 提案进入编辑器的通道（`previewMarkup` 已在合约里，前端消费需工具结果桥）；③画布上的半透明 ghost 叠加与逐元素接受/拒绝按钮（当前只有列表形态）；④版本对比（洋葱皮）与历史面板（人+agent 同一时间线）；⑤渲染回验（改→渲染→vision）。
+
+## 10. 用户核查反馈批（2026-11-03）：即时渲染修复 + 能力扩容
+
+**反馈一：切换颜色不能实时渲染** → 根因确认=`commit()` 只 `setMarkup(nextMarkup)` 而**不把 op 落到活视图**；`nextMarkup` 又由 `currentMarkup()`（当前 DOM 序列化，尚未应用）产生 ⇒ 属性改动/绘制在视图上无变化，只有保存后由后端 span 引擎写入才生效（拖拽之所以即时，是因为 Canvas 自己先改了 DOM）。**修法**=commit 先 `applyOpsToDom(root, ops)`（set_attr/remove_attr/set_style/set_text/remove/insert/move 全族落地），再从 DOM 序列化作为新 markup。实机断言 `V9b2_fill_live_rendered`（**未保存时**元素 fill 已是新值）**PASS**。
+
+**反馈二：功能偏少** → 本批扩容（均在属性面板/工具栏，零新依赖）：
+- **多选对齐 6 种**（左/水平居中/右/顶/垂直居中/底）：按整体包围盒算位移，只改 `transform`（不动几何定义；已就位元素不出 op）。
+- **字体下拉**：`font-family` 由自由文本改常用字体选择（Helvetica/Arial/Times New Roman/Courier New/Georgia/Verdana/sans-serif/serif），避免手打拼错。
+- **适应窗口**：按 viewBox 与容器宽度定缩放（不改文档）。
+
+**验证**：契约 26/26（新增 alignOps 三条：位移量/已就位不出 op/单元素不出 op）；`tsc` 0；`lint` 0 error；实机 **25/25 allPass**。
+
+**仍在 reopen**（不假装支持）：路径节点编辑/钢笔、图片嵌入、渐变编辑、Inkscape 协处理器、提案幽灵叠加、版本对比/历史面板、渲染回验、改动清单（UI-663 空清单未定位）。

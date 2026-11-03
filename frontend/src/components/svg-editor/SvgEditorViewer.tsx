@@ -15,7 +15,10 @@ import button from '../ui/controls/button.module.css';
 import { SvgEditorCanvas } from './SvgEditorCanvas';
 import {
   DRAW_TOOLS,
+  ALIGN_MODES,
   EDITABLE_ATTRS,
+  alignOps,
+  type AlignMode,
   batchAttrOps,
   drawOp,
   extractPaletteFromMarkup,
@@ -87,6 +90,56 @@ async function fetchSvgDocument(projectId: string, filePath: string): Promise<Lo
   const view = sanitizeSvgForView(text);
   if (!view.ok) throw new Error(`SVG 无法载入（${view.error || 'parse_error'}）`);
   return { inspect, markup: view.markup || '', removed: view.removed };
+}
+
+/** 把白名单 op 落到活视图（即时反馈；真值仍以保存时的后端 span 改写为准）。 */
+function applyOpsToDom(root: SVGSVGElement, ops: ReadonlyArray<SvgOp>): void {
+  const resolve = (target: unknown): Element | null => {
+    if (!target || typeof target !== 'object') return null;
+    const t = target as { id?: string; path?: number[] };
+    if (t.id) return root.querySelector(`#${CSS.escape(t.id)}`);
+    return Array.isArray(t.path) ? findByPath(root, t.path) : null;
+  };
+  const str = (value: unknown): string => (typeof value === 'string' ? value : '');
+  for (const op of ops) {
+    const o = op as Record<string, unknown>;
+    const kind = str(o.op);
+    const el = resolve(o.target);
+    if (kind === 'set_attr') {
+      if (el) el.setAttribute(str(o.name), str(o.value));
+    } else if (kind === 'remove_attr') {
+      if (el) el.removeAttribute(str(o.name));
+    } else if (kind === 'set_style') {
+      const props = (o.props && typeof o.props === 'object' ? o.props : {}) as Record<string, unknown>;
+      if (el && el instanceof SVGElement) {
+        for (const [name, value] of Object.entries(props)) {
+          el.style.setProperty(name, typeof value === 'string' ? value : '');
+        }
+      }
+    } else if (kind === 'set_text') {
+      if (el) el.textContent = str(o.text);
+    } else if (kind === 'remove') {
+      if (el) el.remove();
+    } else if (kind === 'insert') {
+      const parent = resolve(o.parent) || root;
+      const markup = str(o.markup);
+      if (!parent || !markup) continue;
+      const doc = new DOMParser().parseFromString(`<svg xmlns="http://www.w3.org/2000/svg">${markup}</svg>`, 'image/svg+xml');
+      const fragment = doc.documentElement.firstElementChild;
+      if (!fragment) continue;
+      const imported = root.ownerDocument.importNode(fragment, true);
+      const index = o.index;
+      if (index === 'end' || typeof index !== 'number') parent.appendChild(imported);
+      else parent.insertBefore(imported, parent.children[index] || null);
+    } else if (kind === 'move') {
+      const parent = resolve(o.parent) || root;
+      const index = o.index;
+      if (el && parent) {
+        if (index === 'end' || typeof index !== 'number') parent.appendChild(el);
+        else parent.insertBefore(el, parent.children[index] || null);
+      }
+    }
+  }
 }
 
 /** 视图序列化（改动清单的「当前态」一侧）。 */
@@ -194,14 +247,18 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
   const commit = React.useCallback((ops: SvgOp[], nextMarkup: string) => {
     if (ops.length === 0) return;
+    // 先落到活视图（即时渲染），再从 DOM 序列化真值——只 setMarkup 不动 DOM 会导致「保存了才生效」
+    const root = rootEl();
+    if (root) applyOpsToDom(root, ops);
+    const resolvedMarkup = root ? root.outerHTML : nextMarkup;
     setHistory((prev) => [...prev, { markup: markupRef.current, opsLen: opsRef.current.length }]);
     setFuture([]);
     setPendingOps((prev) => [...prev, ...ops]);
-    markupRef.current = nextMarkup;
-    setMarkup(nextMarkup);
+    markupRef.current = resolvedMarkup;
+    setMarkup(resolvedMarkup);
     setNotice(null);
     setError(null);
-  }, []);
+  }, [rootEl]);
 
   const currentMarkup = React.useCallback((): string => rootEl()?.outerHTML || markupRef.current, [rootEl]);
 
@@ -306,6 +363,42 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
    * 基线现读磁盘（cache:no-store）而不是复用加载时快照——「磁盘真值」的定义就是文件当前内容，
    * 快照会与外部改动/上次保存脱节（UI-663 实机空清单的根因方向）。
    */
+  /** 多选对齐：按整体包围盒平移（只改 transform，不动几何定义）。 */
+  const applyAlign = React.useCallback((mode: AlignMode) => {
+    const root = rootEl();
+    if (!root || selected.size < 2) return;
+    const entries = Array.from(selected).map((key) => {
+      const path = decodePath(key);
+      const el = findByPath(root, path);
+      const box = el && typeof (el as SVGGraphicsElement).getBBox === 'function'
+        ? (el as SVGGraphicsElement).getBBox()
+        : { x: 0, y: 0, width: 0, height: 0 };
+      return {
+        key,
+        id: el?.getAttribute('id') || undefined,
+        path,
+        box: { x: box.x, y: box.y, width: box.width, height: box.height },
+        transform: el?.getAttribute('transform') ?? null,
+      };
+    });
+    const ops = alignOps(entries, mode);
+    if (ops.length === 0) { setNotice('已对齐，无需移动'); return; }
+    commit(ops, currentMarkup());
+    setNotice(`已对齐 ${entries.length} 个元素`);
+  }, [commit, currentMarkup, rootEl, selected]);
+
+  /** 适应窗口：按 viewBox 与容器宽度定缩放（不改文档）。 */
+  const fitToView = React.useCallback(() => {
+    const root = rootEl();
+    const host = hostRef.current;
+    if (!root || !host) return;
+    const viewBox = (root.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    const width = viewBox.length === 4 && viewBox[2] > 0 ? viewBox[2] : root.getBoundingClientRect().width / scale;
+    const available = host.clientWidth - 28;
+    if (!width || available <= 0) return;
+    setScale(clampScale(Math.min(2, available / width)));
+  }, [rootEl, scale]);
+
   const openChangeLog = React.useCallback(() => {
     const root = rootEl();
     void baseMarkup;
@@ -616,6 +709,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
           <div className={styles.stage} onWheel={handleWheel}>
             <div className={styles.toolbar} data-testid="svg-editor-toolbar">
+              <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>
               {DRAW_TOOLS.map((item) => (
                 <button
                   key={item.id}
@@ -719,6 +813,15 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                     )}
                   </label>
                 ))}
+                {selected.size > 1 ? (
+                  <div className={styles.rowActions} data-testid="svg-editor-align">
+                    {ALIGN_MODES.map((mode) => (
+                      <button key={mode.id} type="button" className={button.ghost} onClick={() => applyAlign(mode.id)} data-align={mode.id}>
+                        {mode.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 <div className={styles.rowActions} data-testid="svg-editor-prop-actions">
                   <button type="button" className={button.ghost} onClick={openTextEditor} data-action="text">编辑文字</button>
                   <button type="button" className={button.ghost} onClick={copyStyle} data-action="copy-style">复制样式</button>

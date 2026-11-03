@@ -6,7 +6,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  ALIGN_MODES,
   EDITABLE_ATTRS,
+  alignOps,
   attrOp,
   batchAttrOps,
   drawOp,
@@ -115,6 +117,21 @@ describe('BLOCK-342 W2/W3/W4 svgEditorInspector', () => {
 
     expect(drawOp('rect', { x: 0, y: 0, width: 1, height: 1 })).toBeNull();
     expect(drawOp('line', { x: 0, y: 0, width: 1, height: 1 })).toBeNull();
+  });
+
+  it('alignOps：按整体包围盒平移，已就位元素不出 op，单元素不出 op', () => {
+    const entries = [
+      { key: 'a', id: 'a', path: [0], box: { x: 10, y: 0, width: 20, height: 10 }, transform: null },
+      { key: 'b', id: 'b', path: [1], box: { x: 50, y: 0, width: 20, height: 10 }, transform: 'translate(5 0)' },
+    ];
+    expect(alignOps(entries, 'left')).toEqual([
+      { op: 'set_attr', target: { id: 'b' }, name: 'transform', value: 'translate(-35 0)' },
+    ]);
+    expect(alignOps(entries, 'right')).toEqual([
+      { op: 'set_attr', target: { id: 'a' }, name: 'transform', value: 'translate(40 0)' },
+    ]);
+    expect(alignOps([entries[0]], 'left')).toEqual([]);
+    expect(ALIGN_MODES.map((m) => m.id)).toContain('centerY');
   });
 
   it('selectionContextPrompt：含文件路径、path、标签与属性，且指路 svg_edit', () => {

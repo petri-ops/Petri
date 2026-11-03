@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-664: SVG 编辑器即时渲染修复 + 对齐/字体/适应窗口（BLOCK-342 用户核查反馈批；2026-11-03 **verified（dev Electron 边界内；实机 25/25 allPass）**）
+
+- **变化面**：①**修即时渲染**——`commit()` 先把白名单 op 落到活视图（set_attr/remove_attr/set_style/set_text/remove/insert/move），再从 DOM 序列化；此前只更新 markup 状态，属性改动与绘制要**保存后才可见**（用户抓真）。②多选对齐 6 种（左/水平居中/右/顶/垂直居中/底），按整体包围盒只改 `transform`。③`font-family` 改常用字体下拉。④工具栏「适应窗口」按 viewBox 与容器宽度定缩放。
+- **为什么这样设计**：视图是「活反馈」，真值仍由保存时的后端 span 引擎改写（先改 DOM 再序列化，与拖拽路径同构）；对齐只动 `transform` 不动几何定义，保证 round-trip 保真与逐元素可撤销。
+- **验证（代码）**：契约 26/26（alignOps 三条：位移量/已就位不出 op/单元素不出 op）；`tsc` 0；`lint` 0 error。
+- **实机证据**：`acceptance/block-342/block342-svg-editor-live-darwin.json` **25/25 allPass**，含 `V9b2_fill_live_rendered`（未保存时元素 fill 即为新值）。
+- **reopen**：路径节点编辑/钢笔、图片嵌入、渐变编辑、Inkscape 协处理器、提案幽灵叠加、版本对比/历史面板、渲染回验、改动清单（UI-663）。
+
 ## UI-663: SVG 编辑器「未保存改动」逐元素取舍（BLOCK-342 W4 reopen 第一刀；2026-11-03 **in_progress（代码面全绿；实机链列清单返回空，未定位，不冒 verified）**）
 
 - **变化面**：属性面板下方新增「未保存改动（逐元素取舍）」区块——「列出改动」计算磁盘真值与当前视图的逐元素差异（属性/文字/新增/删除四类，显示前后值），「全部撤销」与每行「撤销」把该元素恢复成磁盘形态（属性回填、新增属性删除、新增元素删除、文字还原）；被删元素如实提示「需手工恢复」不伪造片段。后端 `svg_edit` propose 增 `previewMarkup`（内存返回、不落盘、>1MB 截断标注）。

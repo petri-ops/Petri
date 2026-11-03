@@ -24,3 +24,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:09:24.034Z -->
 最后更新：2026-11-03（🔵 **BLOCK-340 视频输入面启动登记（active；用户连续五回「继续按照你的建议推进」=发令）**：队列头（335 完成后、341 之前）；plan §4 P0-P3 四阶段；ffmpeg 复用 329 发现模式零新依赖；read_video 工具+聊天附件 video 门控+帧预算入 model-surface 基线。P0-P2 实施+P3 实机目标=当日收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:21:03.003Z -->
+最后更新：2026-11-03（✅ **BLOCK-340 视频输入面整包 COMPLETED（P0-P3 立项当日收口）**：video-frames 抽帧 helper（ffmpeg 复用 329 零新依赖；缺席诚实降级；帧预算 8/16 双策略；幂等缓存）；read_video 工具全注册（vision 域 readOnly）；附件面 video 门控同源（无 vision 诚实阻断）；契约 9/9+实机 10/10（真 ffmpeg 抽帧+幂等缓存+路径守卫）。抓真两处：ffmpeg 7.x -vsync 退役；工具计数 108→109 四处 pin+model-surface 有意增长留痕。设计修正=前端不抽帧（避免与 read_video 双路径违红线）。队列下一包=BLOCK-341 引擎桥（planned，需发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
