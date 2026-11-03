@@ -89,6 +89,15 @@ async function fetchSvgDocument(projectId: string, filePath: string): Promise<Lo
   return { inspect, markup: view.markup || '', removed: view.removed };
 }
 
+/** 视图序列化（改动清单的「当前态」一侧）。 */
+function serializeRoot(root: SVGSVGElement): string {
+  try {
+    return new XMLSerializer().serializeToString(root);
+  } catch {
+    return '';
+  }
+}
+
 /** color input 只认 #rrggbb：非 hex 值（none/rgb()/渐变）给中性灰，避免受控值非法。 */
 function toHexColor(value: string | undefined): string {
   if (!value) return '#000000';
@@ -292,10 +301,29 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     setNotice(`已把 ${styleClip.label} 的样式套到 ${targets.length} 个元素`);
   }, [commit, currentMarkup, rootEl, selected, styleClip]);
 
-  /** W4 改动清单：磁盘真值 vs 当前未保存视图的逐元素差异。 */
+  /**
+   * W4 改动清单：磁盘真值 vs 当前未保存视图的逐元素差异。
+   * 基线现读磁盘（cache:no-store）而不是复用加载时快照——「磁盘真值」的定义就是文件当前内容，
+   * 快照会与外部改动/上次保存脱节（UI-663 实机空清单的根因方向）。
+   */
   const openChangeLog = React.useCallback(() => {
-    setChangeLog(diffElements(baseMarkup, markup));
-  }, [baseMarkup, markup]);
+    const root = rootEl();
+    void baseMarkup;
+    void (async () => {
+      try {
+        const response = await fetch(workspaceFileUrlFor(projectId, filePath), { cache: 'no-store' });
+        if (!response.ok) throw new Error(`读取失败 HTTP ${response.status}`);
+        const view = sanitizeSvgForView(await response.text());
+        if (!view.ok) throw new Error(view.error || 'parse_error');
+        const diskMarkup = view.markup || '';
+        setBaseMarkup(diskMarkup);
+        setChangeLog(diffElements(diskMarkup, root ? serializeRoot(root) : markup));
+      } catch (readError) {
+        setNotice(`无法读取磁盘版本：${readError instanceof Error ? readError.message : String(readError)}`);
+        setChangeLog([]);
+      }
+    })();
+  }, [baseMarkup, filePath, markup, projectId, rootEl]);
 
   /** W4 逐元素拒绝：把该元素恢复成磁盘形态（只产出白名单 op）。 */
   const revertOne = React.useCallback((change: ElementChange) => {

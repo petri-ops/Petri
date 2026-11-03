@@ -21,3 +21,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-03T04:04:09.932Z -->
 最后更新：2026-11-03（✅ **BLOCK-335 lint 任务线收口——react-hooks 域 defer（基线保留 + 有机清偿）**：普查 235 条/97 文件（set-state-in-effect 91/exhaustive-deps 83 基线外/refs 35）——非机械可修（修复需引入新抽象=重构，vitest 覆盖不足组件风险高）；策略=基线保留作已知债注册表+组件被触碰时顺带修复。任务线最终账目=基线 311→187（-40%）：require-await 域清零 124 条+src/core 16 条+首批 7 条。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:09:24.034Z -->
+最后更新：2026-11-03（🔵 **BLOCK-340 视频输入面启动登记（active；用户连续五回「继续按照你的建议推进」=发令）**：队列头（335 完成后、341 之前）；plan §4 P0-P3 四阶段；ffmpeg 复用 329 发现模式零新依赖；read_video 工具+聊天附件 video 门控+帧预算入 model-surface 基线。P0-P2 实施+P3 实机目标=当日收口。G0 开发期常态 · 不外推 packaged/Provider/GA。）
