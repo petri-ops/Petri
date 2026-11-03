@@ -32,7 +32,6 @@ import {
 } from './svgEditorInspector';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { listSvgRevisions } from '@/lib/svgEditClient';
-import { diffElements, revertAllOps, revertElementOps, summarizeChanges, type ElementChange } from './svgProposal';
 import {
   duplicateOp,
   findByPath,
@@ -143,14 +142,6 @@ function applyOpsToDom(root: SVGSVGElement, ops: ReadonlyArray<SvgOp>): void {
   }
 }
 
-/** 视图序列化（改动清单的「当前态」一侧）。 */
-function serializeRoot(root: SVGSVGElement): string {
-  try {
-    return new XMLSerializer().serializeToString(root);
-  } catch {
-    return '';
-  }
-}
 
 /** color input 只认 #rrggbb：非 hex 值（none/rgb()/渐变）给中性灰，避免受控值非法。 */
 function toHexColor(value: string | undefined): string {
@@ -196,12 +187,11 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [selectedProps, setSelectedProps] = React.useState<Record<string, string>>({});
   const [styleClip, setStyleClip] = React.useState<StyleSnapshot | null>(null);
   // W4 逐元素取舍：磁盘真值基线 + 当前差异清单
-  const [baseMarkup, setBaseMarkup] = React.useState('');
-  const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
   // 交互：右栏空间有限 —— 分区折叠（默认只开「图形属性」），整栏可收，工具栏可收
   // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
+  const [revisionOpen, setRevisionOpen] = React.useState(false);
   const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
@@ -219,8 +209,6 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   /** 把一次成功的载入结果落到组件状态（只在异步回调/事件里调用，不在 effect 同步段调用）。 */
   const applyLoaded = React.useCallback((doc: LoadedDocument) => {
     setMarkup(doc.markup);
-    setBaseMarkup(doc.markup);
-    setChangeLog(null);
     markupRef.current = doc.markup;
     setState({ status: 'ready', inspect: doc.inspect, baseSha: doc.inspect.sha256, removed: doc.removed });
     setPendingOps([]);
@@ -416,45 +404,10 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     setScale(clampScale(Math.min(2, available / width)));
   }, [rootEl, scale]);
 
-  const openChangeLog = React.useCallback(() => {
-    const root = rootEl();
-    void baseMarkup;
-    void (async () => {
-      try {
-        const response = await fetch(workspaceFileUrlFor(projectId, filePath), { cache: 'no-store' });
-        if (!response.ok) throw new Error(`读取失败 HTTP ${response.status}`);
-        const view = sanitizeSvgForView(await response.text());
-        if (!view.ok) throw new Error(view.error || 'parse_error');
-        const diskMarkup = view.markup || '';
-        setBaseMarkup(diskMarkup);
-        setChangeLog(diffElements(diskMarkup, root ? serializeRoot(root) : markup));
-      } catch (readError) {
-        setNotice(`无法读取磁盘版本：${readError instanceof Error ? readError.message : String(readError)}`);
-        setChangeLog([]);
-      }
-    })();
-  }, [baseMarkup, filePath, markup, projectId, rootEl]);
 
   /** W4 逐元素拒绝：把该元素恢复成磁盘形态（只产出白名单 op）。 */
-  const revertOne = React.useCallback((change: ElementChange) => {
-    const { ops, reason } = revertElementOps(change);
-    if (ops.length === 0) {
-      setNotice(reason || '该元素无法一键撤销');
-      return;
-    }
-    commit(ops, currentMarkup());
-    setNotice(`已撤销 ${change.label} 的未保存改动`);
-    setChangeLog(null);
-  }, [commit, currentMarkup]);
 
   /** W4 全部拒绝：回到磁盘真值形态（不可逆项如实跳过并提示）。 */
-  const revertAllChanges = React.useCallback(() => {
-    if (!changeLog || changeLog.length === 0) return;
-    const { ops, skipped } = revertAllOps(changeLog);
-    if (ops.length > 0) commit(ops, currentMarkup());
-    setNotice(skipped > 0 ? `已撤销全部可逆改动（${skipped} 项需手工处理）` : '已撤销全部未保存改动');
-    setChangeLog(null);
-  }, [changeLog, commit, currentMarkup]);
 
   const undo = React.useCallback(() => {
     setHistory((prev) => {
@@ -720,6 +673,26 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
           ) : null}
 
           <div className={styles.stage} onWheel={handleWheel}>
+            {revisionOpen ? (
+              <div className={styles.revisionPanel} data-testid="svg-editor-revision-panel">
+                <div className={styles.layersHead}>
+                  <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
+                  <button type="button" className={button.ghost} data-action="close-revisions" onClick={() => setRevisionOpen(false)}>×</button>
+                </div>
+                {revisions.length === 0 ? (
+                  <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
+                ) : (
+                  <ul className={styles.changeList} data-testid="svg-editor-revision-list">
+                    {revisions.map((item) => (
+                      <li key={item.file} className={styles.changeRow} data-revision={item.file}>
+                        <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
+                        <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
             {state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
@@ -865,50 +838,15 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 </div>
               </div>
             ) : null}
-            <details open className={styles.changeBlock} data-testid="svg-editor-changes">
-              <summary className={styles.sectionSummary}>未保存改动（逐元素取舍）</summary>
-              <div className={styles.rowActions}>
-                <button type="button" className={button.ghost} onClick={openChangeLog} data-action="open-changes">列出改动</button>
-                <button type="button" className={button.ghost} onClick={revertAllChanges} disabled={!changeLog || changeLog.length === 0} data-action="revert-all">全部撤销</button>
-              </div>
-              {changeLog ? (
-                changeLog.length === 0 ? (
-                  <div className={styles.note}>与磁盘一致（零改动）。</div>
-                ) : (
-                  <>
-                    <div className={styles.note}>{summarizeChanges(changeLog)}</div>
-                    <ul className={styles.changeList}>
-                      {changeLog.map((change) => (
-                        <li key={change.key} className={styles.changeRow} data-change={change.key}>
-                          <span className={styles.changeLabel}>{change.label}</span>
-                          <span className={styles.changeKind}>
-                            {change.kind === 'attr' ? change.attrs.map((a) => `${a.name}: ${a.before ?? '—'} → ${a.after ?? '—'}`).join('；')
-                              : change.kind === 'text' ? `“${change.textBefore}” → “${change.textAfter}”`
-                              : change.kind === 'added' ? '新增元素' : '已删除元素'}
-                          </span>
-                          <button type="button" className={button.ghost} onClick={() => revertOne(change)} data-action="revert-one">撤销</button>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )
-              ) : null}
-            </details>
-            <details open className={styles.changeBlock} data-testid="svg-editor-revisions">
-              <summary className={styles.sectionSummary}>修订历史（{revisions.length}）</summary>
-              {revisions.length === 0 ? (
-                <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
-              ) : (
-                <ul className={styles.changeList} data-testid="svg-editor-revision-list">
-                  {revisions.map((item) => (
-                    <li key={item.file} className={styles.changeRow} data-revision={item.file}>
-                      <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
-                      <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </details>
+            <button
+              type="button"
+              className={styles.sectionSummary}
+              data-action="open-revisions"
+              data-testid="svg-editor-revisions"
+              onClick={() => setRevisionOpen(true)}
+            >
+              修订历史（{revisions.length}）▸
+            </button>
             <details open className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
               <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
               {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
