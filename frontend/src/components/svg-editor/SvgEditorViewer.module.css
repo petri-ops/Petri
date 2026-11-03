@@ -1117,3 +1117,61 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
 }
+
+/* 顶栏/右栏减重（用户反馈「喧宾夺主」）：顶栏不再横跨全宽的白胶囊；
+   右栏收窄、留白收紧；工具组默认收起（sections.tools 初值 false）。 */
+.toolbar {
+  left: 12px;
+  right: auto;
+  width: max-content;
+  padding: 2px 4px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  gap: 2px;
+}
+
+.toolbar:hover {
+  background: color-mix(in srgb, var(--petri-bg-surface) 82%, transparent);
+  border-radius: var(--petri-radius-pill);
+}
+
+.layers,
+.inspector {
+  width: 220px;
+  padding: 8px;
+  gap: 6px;
+  top: 40px;
+}
+
+.props,
+.paletteBlock,
+.changeBlock {
+  padding: 8px 2px 2px;
+  gap: 6px;
+}
+
+.field {
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 8px;
+  padding: 1px 0;
+}
+
+.field input:not([type='color']),
+.field select {
+  min-height: 26px;
+  padding: 3px 7px;
+}
+
+.rowActions {
+  padding: 4px 0;
+  gap: 4px;
+}
+
+.hint {
+  margin-top: 4px;
+}
+
+.stage {
+  padding: 44px 12px 12px;
+}

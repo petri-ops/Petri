@@ -972,7 +972,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               </div>
             </details>
             <div className={styles.hint}>
-              快捷键：⌘S 保存 · ⌘Z 撤销 · Delete 删除 · ⌘D 复制 · 方向键微移（⇧ 10px）· ⌘K 命令
+              ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
             </div>
           </aside>
         </div>
