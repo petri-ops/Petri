@@ -1,0 +1,102 @@
+/**
+ * BLOCK-342 — SVG 编辑器**布局单一真源**。
+ *
+ * 硬性纪律（用户裁决 2026-11-03，已写入 petri-css-theme §5）：
+ * 布局层的修改必须**整体重构本文件**，禁止在别处追加覆盖规则。
+ * 本文件是 body / leftCol / stage / layers / revisionCard / inspector 六个容器类的唯一定义处；
+ * 组件里这些容器只引用 `layout.*`，主样式表（SvgEditorViewer.module.css）里同名的历史规则因不再被引用而失效。
+ *
+ * 结构（三卡同层级 + 右栏属性）：
+ *   body[2 列] ─┬─ leftCol[2 行] ─┬─ 图形卡（跨两列，row1）
+ *               │                 └─ row2: 图层卡 | 历史卡
+ *               └─ 图形属性（col2，占满整高）
+ */
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 272px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+/* 属性栏收起：左区独占整宽 */
+.body[data-inspector='0'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.leftCol {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 196px;
+  gap: 8px;
+  grid-column: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* 图层卡收起：历史卡独占 row2 整行 */
+.body[data-layers='0'] .leftCol {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.body[data-layers='0'] .layers {
+  display: none;
+}
+
+.stage {
+  position: relative;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 44px 12px 12px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-canvas);
+}
+
+.layers,
+.revisionCard {
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+  overflow: auto;
+}
+
+.layers {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.revisionCard {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.body[data-layers='0'] .revisionCard {
+  grid-column: 1 / -1;
+}
+
+.inspector {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.body[data-inspector='0'] .inspector {
+  display: none;
+}

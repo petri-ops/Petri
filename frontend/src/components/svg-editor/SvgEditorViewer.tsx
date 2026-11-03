@@ -45,6 +45,7 @@ import {
   clampScale,
 } from './svgEditorModel';
 import styles from './SvgEditorViewer.module.css';
+import layout from './SvgEditorLayout.module.css';
 
 export interface SvgEditorViewerProps {
   projectId: string;
@@ -675,8 +676,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
       ) : null}
 
       {state.status === 'ready' ? (
-        <div className={styles.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
-          <div className={styles.leftCol}>
+        <div className={layout.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
+          <div className={layout.leftCol}>
           {!layersOpen ? (
             <button type="button" className={styles.railToggle} data-action="expand-layers" style={{ left: 10 }} title="展开图层">
               图层
@@ -688,7 +689,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             </button>
           ) : null}
 
-          <div className={styles.stage} onWheel={handleWheel}>
+          <div className={layout.stage} onWheel={handleWheel}>
             {state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
@@ -761,7 +762,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
           </div>
 
-          <aside className={styles.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
+          <aside className={layout.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
             <div className={styles.inspectorHead}>
               {inspectorOpen ? (
                 <>
@@ -862,7 +863,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
             </div>
           </aside>
-          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
+          <aside className={layout.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
             <div className={styles.layersHead}>
               {layersOpen ? (
                 <>
@@ -906,7 +907,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             </ul>
 
           </aside>
-            <section className={styles.revisionCard} data-testid="svg-editor-revision-panel">
+            <section className={layout.revisionCard} data-testid="svg-editor-revision-panel">
               <div className={styles.layersHead}>
                 <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
               </div>
