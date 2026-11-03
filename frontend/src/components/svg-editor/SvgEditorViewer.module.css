@@ -770,3 +770,106 @@
   min-width: 120px;
   justify-self: stretch;
 }
+
+/* ============================================================
+   抽屉式面板（用户截图反馈：竖排窄条占位且难读）
+   —— 收起态零占位（画布独占整宽），展开=覆盖式抽屉（不挤压画布），
+      触发/收起用画布角落的小胶囊按钮，无学习成本：点「图层/属性」就有，再点就收。
+   ============================================================ */
+.body {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.layers,
+.inspector {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 236px;
+  z-index: 5;
+  background: var(--petri-bg-surface);
+  border-radius: var(--petri-radius-md);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 18%);
+}
+
+.layers {
+  left: 8px;
+}
+
+.inspector {
+  right: 8px;
+}
+
+/* 收起即完全退场（不占列宽、不留竖排文字） */
+.layers[data-open='0'],
+.inspector[data-open='0'] {
+  display: none;
+}
+
+.railToggle {
+  position: absolute;
+  top: 12px;
+  z-index: 6;
+  padding: 3px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  cursor: pointer;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard),
+    color var(--petri-duration-fast) var(--petri-ease-standard),
+    border-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.railToggle:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+  border-color: var(--petri-accent-border);
+}
+
+/* 工具条改为画布内浮条：默认只露「工具 ▾」，点开就地展开一排（不再常驻一行高度） */
+.toolbar {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-surface);
+  padding: 4px 6px;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+}
+
+.stage {
+  position: relative;
+  padding: 44px 12px 12px;
+}
+
+/* 定位修正（截图过目）：工具条不换行、贴左上；图层胶囊贴左下，属性胶囊贴右上 */
+.toolbar {
+  left: 10px;
+  top: 8px;
+  transform: none;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.stage {
+  padding: 56px 12px 12px;
+}
+
+.railToggle[data-action='expand-layers'] {
+  top: auto;
+  bottom: 12px;
+}
+
+.railToggle[data-action='expand-inspector'] {
+  top: 12px;
+}

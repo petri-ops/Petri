@@ -344,7 +344,8 @@ module.exports = {
       if (client) {
         try { client.socket.close(); } catch { /* already closed */ }
       }
-      try { fs.rmSync(path.join(ROOT, SAMPLE_DIR), { recursive: true, force: true }); } catch { /* ignore */ }
+      // 不在此清理样本目录：连续两次运行会互删（实机抓真 ENOENT 竞态）。
+      // 样本留盘供手工复现，目录已登记 impact-map 忽略规则。
     }
   },
 };

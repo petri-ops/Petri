@@ -177,6 +177,8 @@ export function sanitizeSvgForView(text: string): SanitizedView {
   if (parserError) return { ok: false, error: 'svg_parse_error', removed: 0 };
 
   let removed = 0;
+  // 视图里清空 <title> 文本：否则 hover 会弹原生 tooltip 盖住画布（真值不动，op 不涉及 title）
+  root.querySelectorAll('title').forEach((el) => { el.textContent = ''; });
   const kill: Element[] = [];
   // root 自身也要清（onload 常挂在 <svg> 上）
   const all: Element[] = [root, ...Array.from(root.querySelectorAll('*'))];

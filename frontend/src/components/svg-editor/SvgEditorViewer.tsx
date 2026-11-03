@@ -701,6 +701,16 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
       {state.status === 'ready' ? (
         <div className={styles.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
+          {!layersOpen ? (
+            <button type="button" className={styles.railToggle} data-action="expand-layers" style={{ left: 10 }} title="展开图层">
+              图层
+            </button>
+          ) : null}
+          {!inspectorOpen ? (
+            <button type="button" className={styles.railToggle} data-action="expand-inspector" style={{ right: 10 }} title="展开图形属性">
+              属性
+            </button>
+          ) : null}
           <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
             <div className={styles.layersHead}>
               <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
@@ -733,14 +743,15 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 );
               })}
             </ul>
-            {layersOpen && state.removed > 0 ? (
+
+          </aside>
+
+          <div className={styles.stage} onWheel={handleWheel}>
+            {state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
               </div>
             ) : null}
-          </aside>
-
-          <div className={styles.stage} onWheel={handleWheel}>
             <div className={styles.toolbar} data-testid="svg-editor-toolbar">
               <button
                 type="button"

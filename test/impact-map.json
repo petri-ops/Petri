@@ -7269,6 +7269,15 @@
       ],
       "tests": [],
       "commands": []
+    },
+    {
+      "id": "tmp-block342-live",
+      "note": "BLOCK-342 实机 flow 的样本目录（tmp-block342-live/，留盘供手工复现；不入库）。",
+      "patterns": [
+        "tmp-block342-live/**"
+      ],
+      "tests": [],
+      "commands": []
     }
   ]
 }
