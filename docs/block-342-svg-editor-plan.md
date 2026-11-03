@@ -75,3 +75,17 @@ W1 收口门禁清单（收口时逐项对账）：
 **P4 实机 COMPLETED**：dev-verify `block342-svg-editor-live` → `acceptance/block-342/` **15/15 allPass** + png（9223 离屏，跑完即终止；样本自动清理）。实机抓真一处真缺陷并修=文件加载白名单漏 `svg-editor`（`status='unsupported'` 落二进制卡、编辑器不可达）。**P5 收口：`npm run closeout` 十三门 + `skills:check` 报级全 PASS**（`ca535f18` 主体；`bf5b7e7d` 修 quality:types 抓真的 mock 泛型、`097d11bd` 修 knip 抓真的死代码保留面）。**W1 COMPLETED**（P1-P5 全绿）；母计划 registry 仍 active（W2 文字与样式、W3 形状与路径、W4 agent 协同待启动）。UI 台账 = **UI-661（verified，dev Electron 边界内）**。
 
 **收口抓真三处（门禁逐层剥出）**：①`quality:types` → 测试 mock 返回 `Promise<void>` 不接受 `mockResolvedValue` 载荷；②`quality:knip:check` → 11 处未消费导出（4 个尺度常量 / `isEditableTarget` / 未用 `removeOp` / 5 个 client 类型）；③`test:changed` → 工具宇宙 fixture 与前端动词表两侧脱节（`tool-activity-labels` 存量 4 缺 + 新增 2 件）。
+
+## 8. W2-W4 交付切片与 reopen（2026-11-03 一次推完）
+
+用户裁决「能一次性推完吗」→ 三波次各交付首个可验证切片并整链实机，剩余能力按 reopen 明确留档（不假装支持）。
+
+**W2 文字与样式 — 交付**：属性面板 8 类可编辑项（fill/stroke/stroke-width/opacity/font-size/font-family/font-weight/text-anchor，空值即删属性）；文档色板（从 markup 纯文本提取实色、按出现次数降序、点色块填入选中）；多选批量套样式（同一属性改动逐目标生成 op）；样式复制/粘贴（快照→逐属性粘贴）；行内文字编辑（覆盖输入层，**多行 tspan 逐段可选**，不碰 tspan 的 x/y 布局）。**reopen**：选区浮动工具条（当前走右侧属性面板动作行）；渐变编辑（线性/径向 UI）；style 属性的可视化编辑（现按属性族而非 CSS 简写）；字体下拉从品牌字体表取值。
+
+**W3 形状与路径 — 交付**：绘制工具四种（矩形/椭圆/直线/文字）——画布拖拽出框 → 白名单 `insert` op（过小框不出元素、文字转义）；绘制后自动回选择工具并提示保存。**reopen**：路径节点编辑（节点/贝塞尔手柄/增删/角点平滑）；基础钢笔；拖入图片嵌入（需确认 `data:`/资产路径安全边界）；布尔运算/位图描摹/文字转路径/PDF-EPS 导出经 Inkscape 无头协处理器（`PETRI_INKSCAPE_BIN` 探针 + 缺席诚实灰掉，本机未装）。
+
+**W4 agent 协同 — 交付**：选区 → 会话（选中元素的标签/id/path/属性白名单值合成结构化引用，经**唯一** `copilotAsk` 通道进输入框，不建第二注入面；提示词指路 `svg_edit` 并声明「先说方案再 apply」）。**reopen**：提案幽灵叠加层（半透明 ghost + 逐元素接受/拒绝/手调后接受，需要 propose 返回 markup 而非仅 ops）；任意两版本画布对比（洋葱皮/高亮变更节点）；历史面板（人 + agent 同一时间线标注执行者，需读 `.petri/svg-revisions/` 快照）；渲染回验（改→渲染→vision 判据→迭代，复用 BLOCK-340 帧→vision 与 335 闭环接口）。
+
+**实机证据（全链 24/24 allPass）**：`acceptance/block-342/block342-svg-editor-live-darwin.json` —— V2 挂载/图层/零改动禁用；V3/V4 点选 + 属性面板；V5 拖拽 `translate(48 24)`；V6 保存落盘 + 局部性；V7 重开零改动零 diff；**V9 属性面板改 fill=`#cc0000` 落盘**；**V10 文档色板提取 `#cc0000`**；**V11 矩形工具拖拽 → pending op → 保存后文件 2 个 `<rect>`**；**V12 选区 → `petri:copilot-ask` 载荷含文件路径/path/属性且指路 svg_edit**；V8 旧 sha 提案 409 `svg_hash_mismatch`。样本与实例跑完即清理。
+
+**实机抓真（本批第二处真缺陷，已修）**：绘制坐标换算原用 `getScreenCTM()`——**离屏（show:false）窗口下 Chromium 返回 null**，绘制静默失效；改 `boundingRect + viewBox` 比例换算（与 CSS 缩放无关，比例法自动抵掉 scale）。

@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T03:33:12.768Z",
-  "finishedAt": "2026-11-03T03:33:17.670Z",
+  "startedAt": "2026-11-03T03:45:37.659Z",
+  "finishedAt": "2026-11-03T03:45:47.134Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -32,7 +32,7 @@
     {
       "name": "V3_rect_dispatch_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"x\":1025,\"y\":268}"
+      "detail": "{\"ok\":true,\"x\":1025,\"y\":334}"
     },
     {
       "name": "V4_selection_visible",
@@ -75,9 +75,54 @@
       "detail": "bytes identical"
     },
     {
+      "name": "V9_props_panel_present",
+      "pass": true,
+      "detail": "ready"
+    },
+    {
+      "name": "V9b_fill_input_changed",
+      "pass": true,
+      "detail": "{\"value\":\"#cc0000\"}"
+    },
+    {
+      "name": "V9c_fill_persisted",
+      "pass": true,
+      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#cc0000\"  transform=\"translate(48 24)\"/>"
+    },
+    {
+      "name": "V10_doc_palette_extracted",
+      "pass": true,
+      "detail": "{\"count\":1,\"has\":true,\"chips\":[\"#cc0000\"]}"
+    },
+    {
+      "name": "V11_draw_pending_op",
+      "pass": true,
+      "detail": "unlocked"
+    },
+    {
+      "name": "V11b_draw_persisted",
+      "pass": true,
+      "detail": "rect count=2"
+    },
+    {
+      "name": "V12_pre_select",
+      "pass": true,
+      "detail": "picked"
+    },
+    {
+      "name": "V12_ask_agent_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "V12b_context_prompt_has_path",
+      "pass": true,
+      "detail": "{\"prompt\":\"关于 tmp-block342-live/scene.svg 的选中元素（共 1 个）：\\n- #box <rect> path=[1,0] fill=\\\"#cc0000\\\"\\n\\n请用 svg_edit 修改（先说方案，我确认后再 apply）。\"}"
+    },
+    {
       "name": "V8_stale_apply_rejected",
       "pass": true,
-      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"4d1a0118e36819f33dc9f20a0004ba9dde9006b7c0f27a2a58371f3f804f9675"
+      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"2b2aea07fc222db6bd85bcd62feb632f809ae4ed57e43294d8cd67e2af605388"
     }
   ],
   "allPass": true

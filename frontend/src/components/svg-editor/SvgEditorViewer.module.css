@@ -283,3 +283,129 @@
 .paletteItem:hover {
   border-color: var(--petri-border-card);
 }
+
+/* BLOCK-342 W2/W3/W4 — 工具栏 / 属性面板 / 色板 / 文字编辑覆盖层 */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--petri-border-card);
+  background: var(--petri-bg-surface);
+}
+
+.tool {
+  padding: 3px 9px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  cursor: pointer;
+}
+
+.tool:hover {
+  color: var(--petri-text-primary);
+  border-color: var(--petri-accent-border);
+}
+
+.toolActive {
+  composes: tool;
+  color: var(--petri-text-primary);
+  border-color: var(--petri-accent-border);
+  background: var(--petri-bg-elevated);
+}
+
+.textEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--petri-border-card);
+  background: var(--petri-bg-elevated);
+}
+
+.textEdit textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-primary);
+  font-size: var(--petri-font-size-body);
+}
+
+.props {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--petri-border-card);
+}
+
+.field {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--petri-font-size-body);
+}
+
+.fieldLabel {
+  color: var(--petri-text-secondary);
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field input:not([type='color']),
+.field select {
+  width: 100%;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 6px;
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-primary);
+  font-size: var(--petri-font-size-body);
+}
+
+.field input[type='color'] {
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 6px;
+  background: transparent;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.paletteBlock {
+  padding: 8px 10px;
+  border-top: 1px solid var(--petri-border-card);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 4px;
+  cursor: pointer;
+}

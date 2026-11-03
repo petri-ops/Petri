@@ -183,6 +183,100 @@ module.exports = {
       const afterIdle = fs.readFileSync(SAMPLE_ABS);
       assert('V7b_idle_resave_zero_diff', sha(beforeIdle) === sha(afterIdle), sha(beforeIdle) === sha(afterIdle) ? 'bytes identical' : 'bytes changed on idle resave');
 
+      // V9 — W2 属性面板：改 fill → 落盘生效（人用鼠标键盘修正细节）
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const rect = host && host.querySelector('svg #box');
+        const r = rect.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerId: 5, pointerType: 'mouse', button: 0 };
+        rect.dispatchEvent(new PointerEvent('pointerdown', { ...base, buttons: 1 }));
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }));
+        return true;
+      })()`);
+      const propsReady = await waitFor(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="fill"]:not([type="color"])');
+        return input ? 'ready' : null;
+      })()`);
+      assert('V9_props_panel_present', propsReady === 'ready', String(propsReady));
+      const changed = await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="fill"]:not([type="color"])');
+        if (!input) return 'no input';
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, '#cc0000');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return JSON.stringify({ value: input.value });
+      })()`);
+      assert('V9b_fill_input_changed', JSON.parse(changed).value === '#cc0000', changed);
+      await sleep(600);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterFill = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V9c_fill_persisted', /fill="#cc0000"/.test(afterFill), afterFill.match(/<rect[^>]*>/)?.[0] || 'no rect');
+
+      // V10 — W2 文档色板：从文档提取到现有颜色色块
+      const swatches = await lib.evalJs(client, `(function(){
+        const chips = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-doc-palette"] [data-color]')).map((el) => el.dataset.color);
+        return JSON.stringify({ count: chips.length, has: chips.includes('#cc0000') || chips.includes('#4a7cba'), chips: chips.slice(0, 6) });
+      })()`);
+      const sw = JSON.parse(swatches);
+      assert('V10_doc_palette_extracted', sw.count > 0 && sw.has === true, swatches);
+
+      // V11 — W3 绘制：矩形工具拖拽 → 新元素 → 保存落盘
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="rect"]'); if (b) b.click(); return true; })()`);
+      await sleep(300);
+      const drawn = await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const svg = host && host.querySelector('svg');
+        if (!svg) return 'no svg';
+        const r = svg.getBoundingClientRect();
+        const sx = r.left + 40;
+        const sy = r.top + 40;
+        const base = { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0 };
+        host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: sx, clientY: sy, buttons: 1 }));
+        host.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: sx + 80, clientY: sy + 60, buttons: 1 }));
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: sx + 80, clientY: sy + 60, buttons: 0 }));
+        return JSON.stringify({ rects: svg.querySelectorAll('rect').length });
+      })()`);
+      void drawn;
+      const drawSaveEnabled = await waitFor(client, `(function(){
+        const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        return s && !s.disabled ? 'unlocked' : null;
+      })()`, 6_000);
+      assert('V11_draw_pending_op', drawSaveEnabled === 'unlocked', String(drawSaveEnabled));
+      await sleep(400);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterDraw = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      const rectCount = (afterDraw.match(/<rect/g) || []).length;
+      assert('V11b_draw_persisted', rectCount === 2, `rect count=${rectCount}`);
+
+      // V12 — W4 选区 → 会话上下文（单一 copilotAsk 通道，不建第二注入面）
+      // 用图层树选中 #box（比画布指针更稳：绘制后布局有变化）
+      const layerPick = await lib.evalJs(client, `(function(){
+        const btn = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-layers"] button')).find((b) => (b.textContent || '').includes('#box'));
+        if (!btn) return 'no layer';
+        btn.click();
+        return 'picked';
+      })()`);
+      assert('V12_pre_select', layerPick === 'picked', String(layerPick));
+      await waitFor(client, `(function(){ return document.querySelector('${RAIL} [data-action="ask-agent"]') ? 'ready' : null; })()`, 6_000);
+      const asked = await lib.evalJs(client, `(function(){
+        window.__block342Asked = null;
+        if (!window.__block342Listener) {
+          window.__block342Listener = (event) => { window.__block342Asked = event.detail; };
+          window.addEventListener('petri:copilot-ask', window.__block342Listener);
+        }
+        const btn = document.querySelector('${RAIL} [data-action="ask-agent"]');
+        if (!btn) return 'no button';
+        btn.click();
+        return 'clicked';
+      })()`);
+      assert('V12_ask_agent_clicked', asked === 'clicked', String(asked));
+      await sleep(600);
+      const askedPayload = await lib.evalJs(client, `JSON.stringify(window.__block342Asked || null)`);
+      const payload = JSON.parse(askedPayload);
+      assert('V12b_context_prompt_has_path', Boolean(payload && typeof payload.prompt === 'string' && payload.prompt.includes(SAMPLE_REL)), askedPayload ? askedPayload.slice(0, 160) : 'null');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace('fill="#4a7cba"', 'fill="#111111"');
       fs.writeFileSync(SAMPLE_ABS, tampered);
@@ -191,7 +285,7 @@ module.exports = {
         path: SAMPLE_REL,
         ops: [{ op: 'set_attr', target: { id: 'caption' }, name: 'fill', value: '#ff0000' }],
         apply: true,
-        beforeSha256: afterSha,
+        beforeSha256: sha(Buffer.from(afterDraw, 'utf8')),
       });
       const staleCode = typeof stale.data?.error === 'string' ? stale.data.error : stale.data?.error?.code;
       assert('V8_stale_apply_rejected', stale.status === 409 && staleCode === 'svg_hash_mismatch', `status=${stale.status} code=${staleCode} body=${JSON.stringify(stale.data).slice(0, 160)}`);

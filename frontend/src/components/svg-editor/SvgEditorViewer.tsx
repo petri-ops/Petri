@@ -14,6 +14,21 @@ import { editSvgFile, inspectSvgFile, SvgEditError, SvgInspectResult } from '@/l
 import button from '../ui/controls/button.module.css';
 import { SvgEditorCanvas } from './SvgEditorCanvas';
 import {
+  DRAW_TOOLS,
+  EDITABLE_ATTRS,
+  batchAttrOps,
+  drawOp,
+  extractPaletteFromMarkup,
+  pasteStyleOps,
+  readAttrs,
+  selectionContextPrompt,
+  snapshotStyle,
+  textSegmentsOf,
+  type DrawTool,
+  type StyleSnapshot,
+} from './svgEditorInspector';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import {
   duplicateOp,
   findByPath,
   keyToCommand,
@@ -73,6 +88,15 @@ async function fetchSvgDocument(projectId: string, filePath: string): Promise<Lo
   return { inspect, markup: view.markup || '', removed: view.removed };
 }
 
+/** color input 只认 #rrggbb：非 hex 值（none/rgb()/渐变）给中性灰，避免受控值非法。 */
+function toHexColor(value: string | undefined): string {
+  if (!value) return '#000000';
+  const raw = value.trim().toLowerCase();
+  if (/^#[0-9a-f]{6}$/.test(raw)) return raw;
+  if (/^#[0-9a-f]{3}$/.test(raw)) return `#${raw[1]}${raw[1]}${raw[2]}${raw[2]}${raw[3]}${raw[3]}`;
+  return '#888888';
+}
+
 function decodePath(key: string): number[] {
   return key === '' ? [] : key.split('.').map((part) => Number(part));
 }
@@ -103,6 +127,11 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [notice, setNotice] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
+  // W2/W3/W4 — 绘制工具 / 选中属性 / 文档色板 / 样式剪贴板 / 行内文字编辑
+  const [tool, setTool] = React.useState<DrawTool>('select');
+  const [selectedProps, setSelectedProps] = React.useState<Record<string, string>>({});
+  const [styleClip, setStyleClip] = React.useState<StyleSnapshot | null>(null);
+  const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
   React.useEffect(() => {
@@ -165,6 +194,97 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     commit(ops, currentMarkup());
     setSelected(new Set());
   }, [commit, currentMarkup]);
+
+  /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
+  const syncSelection = React.useCallback((next: Set<string>) => {
+    setSelected(next);
+    const root = rootEl();
+    const first = next.size > 0 ? Array.from(next)[0] : null;
+    const el = root && first !== null ? findByPath(root, decodePath(first)) : null;
+    setSelectedProps(readAttrs(el));
+    setTextEdit(null);
+  }, [rootEl]);
+
+  /** 属性改动：批量应用到当前选中（多选天然支持「批量套样式」）。 */
+  const applyAttr = React.useCallback((name: string, value: string) => {
+    const root = rootEl();
+    if (!root || selected.size === 0) return;
+    const targets = Array.from(selected).map((key) => {
+      const path = decodePath(key);
+      const el = findByPath(root, path);
+      return { id: el?.getAttribute('id') || undefined, path };
+    });
+    const trimmed = value.trim();
+    const ops = batchAttrOps(targets, name, trimmed === '' ? null : trimmed);
+    if (ops.length === 0) return;
+    commit(ops, currentMarkup());
+    setSelectedProps((prev) => (trimmed === '' ? Object.fromEntries(Object.entries(prev).filter(([k]) => k !== name)) : { ...prev, [name]: trimmed }));
+  }, [commit, currentMarkup, rootEl, selected]);
+
+  /** W3 绘制：拖出的框 → 白名单 insert op。 */
+  const handleDrawBox = React.useCallback((box: { x: number; y: number; width: number; height: number }) => {
+    if (tool === 'select') return;
+    const color = selectedProps.fill || '#4a7cba';
+    const op = drawOp(tool, box, { color, strokeWidth: Number(selectedProps['stroke-width']) || 2 });
+    if (!op) return;
+    setTool('select');
+    commit([op], currentMarkup());
+    setNotice(`已插入 <${tool}>；⌘S 保存到文件`);
+  }, [commit, currentMarkup, selectedProps, tool]);
+
+  /** W2 行内文字：双击 text/tspan 打开覆盖输入（多行 tspan 逐段编辑）。 */
+  const openTextEditor = React.useCallback(() => {
+    const root = rootEl();
+    if (!root || selected.size !== 1) return;
+    const el = findByPath(root, decodePath(Array.from(selected)[0]));
+    const list = textSegmentsOf(root, el);
+    if (list.length === 0) return;
+    const first = list[0];
+    setTextEdit({ path: first.path, label: first.label, value: first.text, list });
+  }, [rootEl, selected]);
+
+  /** W4 选区 → 会话（单一 ContextItem 通道 copilotAsk，不建第二注入面）。 */
+  const askAgent = React.useCallback(() => {
+    const root = rootEl();
+    if (!root || selected.size === 0) return;
+    const elements = Array.from(selected).slice(0, 12).map((key) => {
+      const path = decodePath(key);
+      const el = findByPath(root, path);
+      return {
+        label: el?.getAttribute('id') ? `#${el.getAttribute('id')}` : `<${el?.tagName || '?'}>`,
+        path,
+        tag: (el?.tagName || '').toLowerCase(),
+        attrs: readAttrs(el),
+      };
+    });
+    dispatchPetriEvent(petriEvents.copilotAsk, { prompt: selectionContextPrompt({ filePath, elements }) });
+    setNotice('已把选中元素与属性放进会话输入框');
+  }, [filePath, rootEl, selected]);
+
+  /** W2 样式剪贴板：复制当前选中元素的样式（属性白名单内）。 */
+  const copyStyle = React.useCallback(() => {
+    const root = rootEl();
+    if (!root || selected.size !== 1) return;
+    const snapshot = snapshotStyle(findByPath(root, decodePath(Array.from(selected)[0])));
+    if (!snapshot) { setNotice('该元素没有可复制的样式属性'); return; }
+    setStyleClip(snapshot);
+    setNotice(`已复制样式：${snapshot.label}（${Object.keys(snapshot.attrs).length} 项）`);
+  }, [rootEl, selected]);
+
+  /** W2 样式粘贴：应用到当前全部选中（多元素批量套样式）。 */
+  const pasteStyle = React.useCallback(() => {
+    const root = rootEl();
+    if (!root || !styleClip || selected.size === 0) return;
+    const targets = Array.from(selected).map((key) => {
+      const path = decodePath(key);
+      const el = findByPath(root, path);
+      return { id: el?.getAttribute('id') || undefined, path };
+    });
+    const ops = pasteStyleOps(targets, styleClip);
+    if (ops.length === 0) return;
+    commit(ops, currentMarkup());
+    setNotice(`已把 ${styleClip.label} 的样式套到 ${targets.length} 个元素`);
+  }, [commit, currentMarkup, rootEl, selected, styleClip]);
 
   const undo = React.useCallback(() => {
     setHistory((prev) => {
@@ -332,6 +452,9 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     setScale((current) => zoomAtPoint(current, event.deltaY));
   };
 
+  // 文档色板：随 markup 纯计算（渲染期零 DOM/ref 访问）
+  const docPalette = React.useMemo(() => extractPaletteFromMarkup(markup), [markup]);
+
   const layerRows = state.status === 'ready'
     ? state.inspect.elements.filter((el) => el.path.length <= 3).slice(0, 300)
     : [];
@@ -413,7 +536,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                     <button
                       type="button"
                       className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                      onClick={() => setSelected(new Set([key]))}
+                      onClick={() => syncSelection(new Set([key]))}
+                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
                       title={`<${el.tag}> path=[${el.path.join(',')}]`}
                     >
                       {el.id ? `#${el.id}` : `<${el.tag}>`}
@@ -431,13 +555,66 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
           </aside>
 
           <div className={styles.stage} onWheel={handleWheel}>
+            <div className={styles.toolbar} data-testid="svg-editor-toolbar">
+              {DRAW_TOOLS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  data-tool={item.id}
+                  title={item.hint}
+                  className={tool === item.id ? styles.toolActive : styles.tool}
+                  onClick={() => setTool(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            {textEdit ? (
+              <div className={styles.textEdit} data-testid="svg-editor-text-edit">
+                <div className={styles.panelTitle}>{textEdit.label}</div>
+                {textEdit.list.length > 1 ? (
+                  <select
+                    value={textEdit.path.join('.')}
+                    onChange={(event) => {
+                      const seg = textEdit.list.find((item) => item.path.join('.') === event.target.value);
+                      if (seg) setTextEdit({ ...textEdit, path: seg.path, label: seg.label, value: seg.text });
+                    }}
+                  >
+                    {textEdit.list.map((seg) => (
+                      <option key={seg.path.join('.')} value={seg.path.join('.')}>{seg.label}</option>
+                    ))}
+                  </select>
+                ) : null}
+                <textarea
+                  rows={3}
+                  value={textEdit.value}
+                  onChange={(event) => setTextEdit({ ...textEdit, value: event.target.value })}
+                  data-testid="svg-editor-text-input"
+                />
+                <div className={styles.rowActions}>
+                  <button
+                    type="button"
+                    className={button.primary}
+                    onClick={() => {
+                      commit([{ op: 'set_text', target: { path: textEdit.path }, text: textEdit.value }], currentMarkup());
+                      setTextEdit(null);
+                    }}
+                  >
+                    应用文字
+                  </button>
+                  <button type="button" className={button.ghost} onClick={() => setTextEdit(null)}>取消</button>
+                </div>
+              </div>
+            ) : null}
             <SvgEditorCanvas
               markup={markup}
               scale={scale}
               selected={selected}
               hostRef={hostRef}
-              onSelectionChange={setSelected}
+              onSelectionChange={syncSelection}
               onOpsCommitted={handleOpsCommitted}
+              tool={tool}
+              onDrawBox={handleDrawBox}
             />
           </div>
 
@@ -445,6 +622,68 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             <div className={styles.panelTitle}>属性</div>
             {selected.size === 0 ? <div className={styles.note}>未选中元素。点画布元素或用图层树选择。</div> : null}
             <SelectedSummary rows={selectedRows} />
+            {selected.size > 0 ? (
+              <div className={styles.props} data-testid="svg-editor-props">
+                {EDITABLE_ATTRS.map((attr) => (
+                  <label key={attr.name} className={styles.field}>
+                    <span className={styles.fieldLabel}>{attr.label}</span>
+                    {attr.kind === 'select' ? (
+                      <select
+                        data-attr={attr.name}
+                        value={selectedProps[attr.name] || ''}
+                        onChange={(event) => applyAttr(attr.name, event.target.value)}
+                      >
+                        <option value="">—</option>
+                        {(attr.options || []).map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className={styles.fieldRow}>
+                        {attr.kind === 'color' ? (
+                          <input
+                            type="color"
+                            aria-label={`${attr.label}取色`}
+                            value={toHexColor(selectedProps[attr.name])}
+                            onChange={(event) => applyAttr(attr.name, event.target.value)}
+                          />
+                        ) : null}
+                        <input
+                          type={attr.kind === 'number' ? 'number' : 'text'}
+                          data-attr={attr.name}
+                          value={selectedProps[attr.name] || ''}
+                          placeholder={attr.placeholder || ''}
+                          onChange={(event) => applyAttr(attr.name, event.target.value)}
+                        />
+                      </span>
+                    )}
+                  </label>
+                ))}
+                <div className={styles.rowActions} data-testid="svg-editor-prop-actions">
+                  <button type="button" className={button.ghost} onClick={openTextEditor} data-action="text">编辑文字</button>
+                  <button type="button" className={button.ghost} onClick={copyStyle} data-action="copy-style">复制样式</button>
+                  <button type="button" className={button.ghost} onClick={pasteStyle} disabled={!styleClip} data-action="paste-style">粘贴样式</button>
+                  <button type="button" className={button.ghost} onClick={askAgent} data-action="ask-agent">问 agent</button>
+                </div>
+              </div>
+            ) : null}
+            <div className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
+              <div className={styles.panelTitle}>文档色板（点色块填入选中）</div>
+              {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
+              <div className={styles.swatches}>
+                {docPalette.map((item) => (
+                  <button
+                    key={item.color}
+                    type="button"
+                    className={styles.swatch}
+                    style={{ background: item.color }}
+                    title={`${item.color} ×${item.count}`}
+                    data-color={item.color}
+                    onClick={() => applyAttr('fill', item.color)}
+                  />
+                ))}
+              </div>
+            </div>
             <div className={styles.hint}>
               快捷键：⌘S 保存 · ⌘Z 撤销 · Delete 删除 · ⌘D 复制 · 方向键微移（⇧ 10px）· ⌘K 命令
             </div>

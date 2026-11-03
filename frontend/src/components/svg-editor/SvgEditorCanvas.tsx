@@ -18,6 +18,7 @@ import {
   translateOp,
 } from './svgEditorModel';
 import styles from './SvgEditorViewer.module.css';
+import type { DrawTool } from './svgEditorInspector';
 
 export interface CanvasProps {
   markup: string;
@@ -27,6 +28,9 @@ export interface CanvasProps {
   hostRef: React.MutableRefObject<HTMLDivElement | null>;
   onSelectionChange: (next: Set<string>) => void;
   onOpsCommitted: (ops: SvgOp[]) => void;
+  /** W3 绘制工具：非 select 时指针拖拽产生新元素（SVG 用户坐标）。 */
+  tool: DrawTool;
+  onDrawBox: (box: Box) => void;
 }
 
 interface OverlayBox extends Box {
@@ -35,8 +39,9 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
+  const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
   const [rubber, setRubber] = React.useState<Box | null>(null);
 
@@ -94,7 +99,36 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     return { el, path, id: el.getAttribute('id'), origin: el.getAttribute('transform') };
   };
 
+  /**
+   * 屏幕 → SVG 用户坐标。
+   * 不用 getScreenCTM：离屏（show:false）窗口下 Chromium 返回 null，绘制会静默失效。
+   * 改用 boundingRect + viewBox 比例（与 CSS scale 无关，比例法自动抵掉缩放）。
+   */
+  const toUser = React.useCallback((clientX: number, clientY: number): { x: number; y: number } | null => {
+    const root = getRoot();
+    if (!root) return null;
+    const rect = root.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const viewBox = root.viewBox?.baseVal;
+    if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+      return {
+        x: (clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x,
+        y: (clientY - rect.top) * (viewBox.height / rect.height) + viewBox.y,
+      };
+    }
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }, [getRoot]);
+
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (tool !== 'select') {
+      const host = hostRef.current;
+      if (!host) return;
+      drawStartRef.current = { clientX: event.clientX, clientY: event.clientY };
+      const hostRect = host.getBoundingClientRect();
+      setRubber({ x: event.clientX - hostRect.left, y: event.clientY - hostRect.top, width: 0, height: 0 });
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      return;
+    }
     const root = getRoot();
     const host = hostRef.current;
     if (!root || !host) return;
@@ -131,6 +165,18 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drawStart = drawStartRef.current;
+    const hostEl = hostRef.current;
+    if (drawStart && hostEl) {
+      const hostRect = hostEl.getBoundingClientRect();
+      setRubber({
+        x: drawStart.clientX - hostRect.left,
+        y: drawStart.clientY - hostRect.top,
+        width: event.clientX - drawStart.clientX,
+        height: event.clientY - drawStart.clientY,
+      });
+      return;
+    }
     const drag = dragRef.current;
     const host = hostRef.current;
     if (!drag || !host) return;
@@ -157,6 +203,23 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (drawStartRef.current) {
+      const start = drawStartRef.current;
+      drawStartRef.current = null;
+      setRubber(null);
+      const from = toUser(start.clientX, start.clientY);
+      const to = toUser(event.clientX, event.clientY);
+      if (!from) return;
+      if (!to) return;
+      const box = {
+        x: Math.min(from.x, to.x),
+        y: Math.min(from.y, to.y),
+        width: Math.abs(to.x - from.x),
+        height: Math.abs(to.y - from.y),
+      };
+      onDrawBox(box);
+      return;
+    }
     const drag = dragRef.current;
     dragRef.current = null;
     setRubber(null);

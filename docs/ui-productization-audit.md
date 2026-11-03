@@ -1,5 +1,14 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-662: SVG 编辑器 W2-W4 增强——属性面板/文档色板/批量样式/行内文字/绘制工具/选区进会话（BLOCK-342；2026-11-03 **verified（dev Electron 边界内；实机 24/24 allPass + 截图）**）
+
+- **变化面**：①属性面板 8 类可编辑项（fill/stroke/stroke-width/opacity/font-size/font-family/font-weight/text-anchor）——空值 = `remove_attr`，多选时逐目标生成 op（批量套样式）；②文档色板从 markup 纯文本提取实色（排除 none/url()/currentColor，按出现次数降序），点色块填入选中元素 fill；③样式复制/粘贴（属性白名单快照 → 逐属性粘贴到全部选中）；④行内文字编辑覆盖层：`set_text` 落到 text 或**逐个 tspan**（多行不丢行、不改各自 x/y）；⑤绘制工具栏：矩形/椭圆/直线/文字，拖拽出框 → 白名单 `insert` op，过小框不出元素、文字转义；⑥「问 agent」把选中元素的标签/id/path/属性合成结构化引用，经唯一 `copilotAsk` 通道进输入框。
+- **为什么这样设计**：人的每个手势与 agent 的 `svg_edit` 共用同一套 op——面板不产生第二真值，保存时一次性交后端 span 引擎（before-hash 冲突检测仍然生效）。色板改纯文本解析是因为渲染期读 DOM 会触发 ref/effect 纪律且离屏下不可靠。
+- **验证（代码）**：`svgEditorInspector.test` **10/10**（白名单/色板计数与排除/attrOp 空值删/batch/paste/多 tspan 拆段/绘制边界与转义/会话引用含路径）；`tsc` 0；`quality:lint` 0 error；`theme-token-contract` 17/17（1px 细线归 `--petri-border-card`/`--petri-divider` 语义族）。
+- **实机证据**：`acceptance/block-342/block342-svg-editor-live-darwin.json` **24/24 allPass**（V9 改 fill 落盘 `#cc0000`；V10 色板提取同色；V11 矩形拖拽 → 保存后 2 个 rect；V12 会话载荷含 `path=[1,0]` 与 `fill="#cc0000"`）。
+- **实机抓真（已修）**：绘制坐标用 `getScreenCTM()` 在离屏窗口返回 null → 绘制静默失效；改 `boundingRect + viewBox` 比例换算。
+- **reopen**：选区浮动工具条、渐变编辑、路径节点编辑/钢笔、图片嵌入、Inkscape 协处理器、提案幽灵叠加与逐元素接受、版本对比/历史面板、渲染回验（逐项条件见 plan §8）。
+
 ## UI-661: 受治理 SVG 编辑器——画布选择/拖拽/图层树/撤销/保存 + viewerRegistry svg-editor 分派（BLOCK-342 W1；2026-11-03 **verified（dev Electron 边界内；隔离栈离屏实机 flow 15/15 allPass + 截图）**）
 
 - **变化面**：①`frontend/src/components/svg-editor/` 新增编辑器（宿主 `SvgEditorViewer` + 画布 `SvgEditorCanvas` + 纯逻辑 `svgEditorModel`）：点选/Shift 多选/框选、悬停高亮、拖拽移动（手势结束折算 `set_attr transform` op）、图层树（后端 inspect 结构）、删除/复制/层序、方向键微移（⇧ 10px）、撤销/重做（未保存修改的视图回退）、⌘S 保存、⌘K 命令面板；视图载入前脱敏（script/foreignObject/on 事件属性/javascript:），真值不被编辑器删除。②`viewerRegistry` 新增 `svg-editor` adapter 与能力档案（canExport=true，选择/比较 false），`.svg` 从 image 扩展名集合移出并新增规则——`kind='plot'` 的 .svg 仍按图片预览（既有语义不回退），其余 .svg 走编辑器；`WorkspaceFilePreview` 的 `fallbackKind` 增 `svg` 分支挂载编辑器。③新增 REST 面 `routes/svg.js`（`POST /api/svg/inspect|edit`，与 agent 的 `svg_inspect/svg_edit` 同一套实现；错误码→HTTP 语义 404/409/413/403）。
