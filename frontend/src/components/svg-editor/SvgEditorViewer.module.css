@@ -1783,3 +1783,10 @@
   flex-wrap: wrap;
   gap: 4px;
 }
+
+/* 图层坞与图形属性栏等宽（用户裁决：两块信息区宽度一致） */
+.layers {
+  width: 272px;
+  max-width: 272px;
+  align-self: start;
+}

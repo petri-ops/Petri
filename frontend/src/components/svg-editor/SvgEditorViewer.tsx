@@ -288,7 +288,10 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     setTextEdit(null);
     void listSvgRevisions({ projectId, path: filePath, limit: 30 })
       .then((list) => setRevisions(list))
-      .catch(() => setRevisions([]));
+      .catch((revisionError: unknown) => {
+        setRevisions([]);
+        setNotice(`修订历史读取失败：${revisionError instanceof Error ? revisionError.message : String(revisionError)}`);
+      });
   }, [rootEl]);
 
   /** 属性改动：批量应用到当前选中（多选天然支持「批量套样式」）。 */

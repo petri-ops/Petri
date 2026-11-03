@@ -143,8 +143,8 @@ export interface SvgRevisionEntry {
 export async function listSvgRevisions(input: { projectId: string; path: string; limit?: number }): Promise<SvgRevisionEntry[]> {
   const query = new URLSearchParams({ projectId: input.projectId, path: input.path });
   if (input.limit) query.set('limit', String(input.limit));
-  const response = await fetch(`${getApiPrefix()}/api/svg/revisions?${query.toString()}`, {
-    headers: { Authorization: 'Bearer desktop-local' },
+  const response = await fetch(`${getApiPrefix()}/svg/revisions?${query.toString()}`, {
+    cache: 'no-store',
     signal: AbortSignal.timeout(20_000),
   });
   const payload = (await response.json().catch(() => null)) as { ok?: boolean; revisions?: SvgRevisionEntry[]; error?: string } | null;
