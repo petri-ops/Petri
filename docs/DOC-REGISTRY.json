@@ -8979,6 +8979,25 @@
       "notes": "受治理本地游戏引擎桥 Godot 4 headless 先行 + Blender 现有工程扩档（同一裁决）planned，队列 340 之后：P0 形态裁决（本地主权/单真值/坡道审批/证据自证，不复刻云端直连）；P1 发现探针缺席诚实 unavailable（不内置不下载引擎）；P2 godot_run 采集 stdout/截图序列/退出码→manifest sha；P3 godot_scene_apply 白名单 propose/apply + 修订快照，白名单外默认 require-ack 走坡道；P4 闭环样例对齐 335 不建第二执行器；P5 blend_ops 白名单、RULING-01 边界启动时用户裁决；P6 契约 mock 三路 + mac 实机；Unity/UE reopen。",
       "phase": "P6-COMPLETED",
       "completedAt": "2026-11-03"
+    },
+    {
+      "id": "BLOCK-343-SVG-EDITOR-TAIL",
+      "capability": "block-343-svg-editor-tail",
+      "path": "docs/block-343-svg-editor-tail-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-343-svg-editor-tail",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "svg",
+        "vector-editor",
+        "reopen-tail",
+        "G0"
+      ],
+      "notes": "2026-11-04 立项 active（用户「BLOCK-343 开整」）：P1 小项批/P2 版本对比+历史面板/P3 vision 附件通道；来源 BLOCK-342 §10 交接项。"
     }
   ],
   "lastUpdated": "2026-11-02",
