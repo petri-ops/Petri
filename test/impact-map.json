@@ -7260,6 +7260,15 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "tmp-review-scratch",
+      "note": "用户核查用临时样本目录（tmp-review/，不入库）；跑测试时无需覆盖，删除该目录后本规则可一并移除。",
+      "patterns": [
+        "tmp-review/**"
+      ],
+      "tests": [],
+      "commands": []
     }
   ]
 }
