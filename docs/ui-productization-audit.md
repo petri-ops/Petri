@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-670: SVG 编辑器「未保存改动」改动清单按 pendingOps 重建——分组列出 + 单项撤销 + 全部撤销（BLOCK-342 · UI-663 收口；2026-11-03 **verified（dev Electron 边界内；实机 35/35 allPass）**）
+
+- **方向兑现（plan §9 已定方向落地）**：清单改由 `pendingOps` + history 的 opsLen 快照直接切组（`svgChangeList.ts` 纯函数）——**语义 diff = op 列表本身**，彻底绕开「磁盘文本 vs 视图序列化」的反序列化可比性问题（两轮实机空清单的根因）；撤销一组 = 移除该组 → 磁盘真值重建视图 → 按序回放剩余 op（快照栈跨重建如实清空）。5c172066 删掉旧实现时保留的 svgProposal 契约（6/6）原样保留供提案幽灵复用。
+- **UI**：属性面板下方「未保存改动（逐元素取舍）」`<details>` 默认收起；有改动时标题带计数，行=组摘要（单 op 直出如 `set stroke=#00aa55（#box）`，多 op「首条 等 N 项」）+ 每行「撤销」+ 底部「全部撤销」；预览历史版本时撤销被守卫提示先退出；样式全复用旧类（changeBlock/changeList/changeRow 含暗色变体，CSS 零新增）。
+- **验证**：`svgChangeList.test` 6/6（targetLabel 三态/各 op 族标签/多 op 摘要/opsLen 切组/空清单/尾部余量兜底）；svg-editor 前端 40/40 + theme 17/17 + tsc 0 + lint 0 error；实机 flow 四新断言（`V9e_stroke_input_changed`/`V9e_changes_listed` 默认收起出组/`V9e2_changes_row_label`/`V9e3_revert_one_back_to_disk_truth`——撤销后 stroke 退场、已保存 fill 保留、保存禁用、状态回 saved、清单归零），总 **35/35 allPass**。
+- **flow 修正记录**：撤销等待腿首跑误报——waitFor 表达式无条件返回 JSON 把撤销前状态断言了；改「终态门」轮询（保存禁用+stroke 退场+saved 才返回）。UI-663 状态：**in_progress → verified**。
+
 ## UI-669: SVG 编辑器 modal 内属性栏 272 列宽修复 + 面板常挂载恢复 + flow 方案 A 适配（BLOCK-342 收口切片；2026-11-03 **verified（dev Electron 边界内；实机 31/31 allPass + 截图过目）**）
 
 - **272 列宽根因（行级定位）**：`SvgEditorViewer.tsx` 的属性栏 `<aside>` 被嵌在 `leftCol` 内而非 `body` 直接子层——CSS `.inspector { grid-column: 2 }` 被 leftCol 两列 grid 解释，落位与历史卡同 x、宽 644，`body` 的 272px 列整列空置（与 83e004a1 实测「644、与历史卡同 x」逐位吻合）。修法=aside 搬出 leftCol（回到 layout 单一真源头注释声明的 `body[2列] ─┬─ leftCol └─ 属性栏 col2` 结构），并删除 layout css 末尾给错嵌套打补丁的 `.body[data-inspector='1']` 冗余两列规则。

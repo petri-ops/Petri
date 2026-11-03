@@ -46,6 +46,7 @@ import {
 } from './svgEditorModel';
 import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
+import { splitOpGroups } from './svgChangeList';
 
 export interface SvgEditorViewerProps {
   projectId: string;
@@ -177,6 +178,8 @@ export function SvgEditorViewer({
   const hostRef = React.useRef<HTMLDivElement | null>(null);
   const markupRef = React.useRef('');
   const opsRef = React.useRef<SvgOp[]>([]);
+  // UI-663 撤销重建：磁盘重建后待按序回放的剩余 op（effect 里消费一次即清）
+  const rebuildOpsRef = React.useRef<SvgOp[] | null>(null);
 
   const [state, setState] = React.useState<LoadState>({ status: 'loading' });
   const [markup, setMarkup] = React.useState('');
@@ -215,6 +218,20 @@ export function SvgEditorViewer({
     const host = hostRef.current;
     return host ? (host.querySelector('svg')) : null;
   }, []);
+
+  // UI-663：磁盘重建后的剩余 op 回放（markup 落 DOM 后消费一次；空清单=纯回磁盘，零回放）
+  React.useEffect(() => {
+    const replay = rebuildOpsRef.current;
+    if (!replay || state.status !== 'ready') return;
+    rebuildOpsRef.current = null;
+    if (replay.length === 0) return;
+    const root = rootEl();
+    if (!root) return;
+    applyOpsToDom(root, replay);
+    const next = root.outerHTML;
+    markupRef.current = next;
+    setMarkup(next);
+  }, [markup, rootEl, state.status]);
 
   /** 把一次成功的载入结果落到组件状态（只在异步回调/事件里调用，不在 effect 同步段调用）。 */
   const applyLoaded = React.useCallback((doc: LoadedDocument) => {
@@ -373,11 +390,35 @@ export function SvgEditorViewer({
     setNotice(`已把 ${styleClip.label} 的样式套到 ${targets.length} 个元素`);
   }, [commit, currentMarkup, rootEl, selected, styleClip]);
 
+  // UI-663 改动清单：由 pendingOps + history 的 opsLen 快照直接切组（语义 diff = op 列表本身，
+  // 不做「磁盘文本 vs 视图序列化」的反序列化比对——两轮实机空清单的根因，见 plan §9）。
+  const changeGroups = React.useMemo(
+    () => splitOpGroups(pendingOps, history.map((entry) => entry.opsLen)),
+    [pendingOps, history],
+  );
+
   /**
-   * W4 改动清单：磁盘真值 vs 当前未保存视图的逐元素差异。
-   * 基线现读磁盘（cache:no-store）而不是复用加载时快照——「磁盘真值」的定义就是文件当前内容，
-   * 快照会与外部改动/上次保存脱节（UI-663 实机空清单的根因方向）。
+   * UI-663 撤销：移除指定组 → 磁盘真值重建视图 → 按序回放剩余 op。
+   * 快照栈（history/future）跨重建不可延续，如实清空；预览态先退出再撤销。
    */
+  const revertGroups = React.useCallback(async (removeIndexes: ReadonlySet<number>) => {
+    if (state.status !== 'ready' || saving) return;
+    if (preview) { setNotice('正在预览历史版本——退出预览后再撤销改动'); return; }
+    const remainingOps = changeGroups
+      .filter((group) => !removeIndexes.has(group.index))
+      .flatMap((group) => group.ops);
+    try {
+      const doc = await fetchSvgDocument(projectId, filePath);
+      rebuildOpsRef.current = remainingOps;
+      applyLoaded(doc);
+      setPendingOps(remainingOps);
+      setNotice(remainingOps.length > 0 ? `已撤销，回放剩余 ${remainingOps.length} 项改动（未保存）` : '已撤销，视图回到磁盘真值');
+    } catch (revertError: unknown) {
+      rebuildOpsRef.current = null;
+      setNotice(`撤销失败：${revertError instanceof Error ? revertError.message : String(revertError)}`);
+    }
+  }, [applyLoaded, changeGroups, filePath, preview, projectId, saving, state]);
+
   /** 多选对齐：按整体包围盒平移（只改 transform，不动几何定义）。 */
   const applyAlign = React.useCallback((mode: AlignMode) => {
     const root = rootEl();
@@ -414,10 +455,6 @@ export function SvgEditorViewer({
     setScale(clampScale(Math.min(2, available / width)));
   }, [rootEl, scale]);
 
-
-  /** W4 逐元素拒绝：把该元素恢复成磁盘形态（只产出白名单 op）。 */
-
-  /** W4 全部拒绝：回到磁盘真值形态（不可逆项如实跳过并提示）。 */
 
   /** 点历史条目：只读预览那一版（画布与图层树都切过去，不改真值、不进 pendingOps）。 */
   const openRevision = React.useCallback((item: { file: string; at: string }) => {
@@ -934,6 +971,42 @@ export function SvgEditorViewer({
                   </div>
                 </div>
               ) : null}
+              <details className={styles.changeBlock} data-testid="svg-editor-changes">
+                <summary className={styles.sectionSummary}>
+                  未保存改动（逐元素取舍）{changeGroups.length > 0 ? `（${changeGroups.length}）` : ''}
+                </summary>
+                {changeGroups.length === 0 ? (
+                  <div className={styles.note}>暂无未保存改动；每次操作会在这里分组列出，可单项撤销。</div>
+                ) : (
+                  <>
+                    <ul className={styles.changeList}>
+                      {changeGroups.map((group) => (
+                        <li key={group.index} className={styles.changeRow}>
+                          <span className={styles.changeLabel} title={group.label}>{group.label}</span>
+                          <button
+                            type="button"
+                            className={button.ghost}
+                            data-action="revert-change"
+                            onClick={() => { void revertGroups(new Set([group.index])); }}
+                          >
+                            撤销
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className={styles.rowActions}>
+                      <button
+                        type="button"
+                        className={button.ghost}
+                        data-action="revert-all"
+                        onClick={() => { void revertGroups(new Set(changeGroups.map((group) => group.index))); }}
+                      >
+                        全部撤销
+                      </button>
+                    </div>
+                  </>
+                )}
+              </details>
               {preview ? (
                 <div className={styles.previewBar} data-testid="svg-editor-preview-bar">
                   <span>只读预览：{preview.at.replace('T', ' ').slice(0, 19)}</span>

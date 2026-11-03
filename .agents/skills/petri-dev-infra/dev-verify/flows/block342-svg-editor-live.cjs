@@ -138,10 +138,10 @@ module.exports = {
         });
       })()`);
       const panelInfo = JSON.parse(panels);
-      // 默认态契约跟随产品裁决演进：色板默认展开（2114afa8）；「未保存改动」区块已移除（5c172066，
-      // svgProposal 契约保留，UI-663 按 pendingOps 方向重建时再更新本断言）
+      // 默认态契约跟随产品裁决演进：色板默认展开（2114afa8）；「未保存改动」区块按 pendingOps
+      // 方向重建（UI-663），默认收起在场
       assert('V2d_default_state',
-        panelInfo.paletteOpen === true && panelInfo.changesOpen === null
+        panelInfo.paletteOpen === true && panelInfo.changesOpen === false
           && panelInfo.toolGroupOpen === '1' && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
           && panelInfo.toolButtons >= 6,
         panels);
@@ -303,6 +303,67 @@ module.exports = {
       })()`);
       const sw = JSON.parse(swatches);
       assert('V10_doc_palette_extracted', sw.count > 0 && sw.has === true, swatches);
+
+      // V9e — UI-663 改动清单（pendingOps 分组）：二次改动 → 清单出组（默认收起）→ 打开见标签 → 单项撤销回磁盘真值
+      // （V9 保存后 load() 重建视图并清选中，先重新点选 #box）
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const rect = host && host.querySelector('svg #box');
+        if (!rect) return false;
+        const r = rect.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerId: 7, pointerType: 'mouse', button: 0 };
+        rect.dispatchEvent(new PointerEvent('pointerdown', { ...base, buttons: 1 }));
+        window.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }));
+        return true;
+      })()`);
+      await waitFor(client, `(function(){
+        return document.querySelector('${RAIL} [data-attr="stroke"]:not([type="color"])') ? 'ready' : null;
+      })()`, 6_000);
+      const strokeSet = await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="stroke"]:not([type="color"])');
+        if (!input) return 'no input';
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, '#00aa55');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return JSON.stringify({ value: input.value });
+      })()`);
+      assert('V9e_stroke_input_changed', JSON.parse(strokeSet).value === '#00aa55', strokeSet);
+      const changesReady = await waitFor(client, `(function(){
+        const block = document.querySelector('${RAIL} [data-testid="svg-editor-changes"]');
+        const rows = document.querySelectorAll('${RAIL} [data-testid="svg-editor-changes"] [data-action="revert-change"]').length;
+        return block && !block.hasAttribute('open') && rows > 0 ? JSON.stringify({ collapsed: true, rows }) : null;
+      })()`, 8_000);
+      assert('V9e_changes_listed', Boolean(changesReady), changesReady || 'changes block missing or empty');
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-changes"] summary'); if (s) s.click(); return true; })()`);
+      await sleep(300);
+      const listedLabel = await lib.evalJs(client, `(function(){
+        const btns = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-changes"] [data-action="revert-change"]'));
+        const first = btns[0] && btns[0].closest('li');
+        return JSON.stringify({ rows: btns.length, first: first ? (first.textContent || '').slice(0, 60) : null });
+      })()`);
+      assert('V9e2_changes_row_label', JSON.parse(listedLabel).rows > 0 && /stroke/.test(listedLabel), listedLabel);
+      // 单项撤销：磁盘重建视图（盘上已含上一步保存的 fill=#cc0000）→ stroke 组移除 → 保存禁用、状态回 saved
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-testid="svg-editor-changes"] [data-action="revert-change"]'); if (b) b.click(); return true; })()`);
+      const reverted = await waitFor(client, `(function(){
+        const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        const box = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #box');
+        const status = document.querySelector('${RAIL} [data-testid="svg-editor-status"]');
+        if (!save || !box || !status) return null;
+        // 终态门：撤销完成（保存禁用 + stroke 退场 + 状态回 saved）才返回，否则轮询等待
+        if (!(save.disabled === true && !box.getAttribute('stroke') && status.dataset.state === 'saved')) return null;
+        const rows = document.querySelectorAll('${RAIL} [data-testid="svg-editor-changes"] [data-action="revert-change"]').length;
+        return JSON.stringify({
+          saveDisabled: save.disabled,
+          stroke: box.getAttribute('stroke'),
+          fill: box.getAttribute('fill'),
+          state: status.dataset.state,
+          rows,
+        });
+      })()`, 10_000);
+      const rev = JSON.parse(reverted || '{}');
+      assert('V9e3_revert_one_back_to_disk_truth',
+        rev.saveDisabled === true && !rev.stroke && rev.fill === '#cc0000' && rev.state === 'saved' && rev.rows === 0,
+        reverted || 'not reverted');
 
       // V11 — W3 绘制：矩形工具拖拽 → 新元素 → 保存落盘
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="rect"]'); if (b) b.click(); return true; })()`);

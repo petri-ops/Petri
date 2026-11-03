@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T09:18:12.755Z",
-  "finishedAt": "2026-11-03T09:18:23.239Z",
+  "startedAt": "2026-11-03T09:45:42.541Z",
+  "finishedAt": "2026-11-03T09:45:53.825Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793697354926"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793699089337"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -32,7 +32,7 @@
     {
       "name": "V2d_default_state",
       "pass": true,
-      "detail": "{\"paletteOpen\":true,\"changesOpen\":null,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":7}"
+      "detail": "{\"paletteOpen\":true,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":7}"
     },
     {
       "name": "V3_rect_dispatch_ok",
@@ -123,6 +123,26 @@
       "name": "V10_doc_palette_extracted",
       "pass": true,
       "detail": "{\"count\":1,\"has\":true,\"chips\":[\"#cc0000\"]}"
+    },
+    {
+      "name": "V9e_stroke_input_changed",
+      "pass": true,
+      "detail": "{\"value\":\"#00aa55\"}"
+    },
+    {
+      "name": "V9e_changes_listed",
+      "pass": true,
+      "detail": "{\"collapsed\":true,\"rows\":1}"
+    },
+    {
+      "name": "V9e2_changes_row_label",
+      "pass": true,
+      "detail": "{\"rows\":1,\"first\":\"set stroke=#00aa55（#box）撤销\"}"
+    },
+    {
+      "name": "V9e3_revert_one_back_to_disk_truth",
+      "pass": true,
+      "detail": "{\"saveDisabled\":true,\"stroke\":null,\"fill\":\"#cc0000\",\"state\":\"saved\",\"rows\":0}"
     },
     {
       "name": "V11_draw_pending_op",
