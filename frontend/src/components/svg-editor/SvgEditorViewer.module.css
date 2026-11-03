@@ -2078,3 +2078,12 @@
   background: var(--petri-hover);
   color: var(--petri-status-warning-fg);
 }
+
+.gradientSwatch {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  flex: none;
+}

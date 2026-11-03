@@ -526,6 +526,53 @@ module.exports = {
         afterImage.includes(`<image href="data:image/png;base64,${PNG_1PX}"`) && afterImage.includes('width="64" height="64"'),
         afterImage.match(/<image[^>]*>/)?.[0]?.slice(0, 90) || 'no image');
 
+      // V17 — 渐变：选 #box → 打开渐变区 → 创建线性并应用 → fill=url(#g1) → 保存落盘 defs + url 引用；stop 色 op 落盘
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const rect = host && host.querySelector('svg #box');
+        if (!rect) return false;
+        const r = rect.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerId: 41, pointerType: 'mouse', button: 0 };
+        rect.dispatchEvent(new PointerEvent('pointerdown', { ...base, buttons: 1 }));
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }));
+        return true;
+      })()`);
+      const gradBlockReady = await waitFor(client, `(function(){
+        const block = document.querySelector('${RAIL} [data-testid="svg-editor-gradient"]');
+        return block ? 'ready' : null;
+      })()`, 6_000);
+      assert('V17_gradient_block_present', gradBlockReady === 'ready', String(gradBlockReady));
+      await lib.evalJs(client, `(function(){
+        const s = document.querySelector('${RAIL} [data-testid="svg-editor-gradient"] summary');
+        if (s && !s.parentElement?.hasAttribute('open')) s.click();
+        return true;
+      })()`);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="gradient-create"]'); if (b) b.click(); return true; })()`);
+      const gradApplied = await waitFor(client, `(function(){
+        const box = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #box');
+        const fill = box ? box.getAttribute('fill') : null;
+        return fill && fill.startsWith('url(#g') ? JSON.stringify({ fill }) : null;
+      })()`, 8_000);
+      assert('V17_gradient_created_applied', Boolean(gradApplied), gradApplied || 'gradient not applied');
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterGrad = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V17b_gradient_persisted', afterGrad.includes('<linearGradient id="g1"') && /fill="url\(#g1\)"/.test(afterGrad), afterGrad.match(/<linearGradient[^>]*>/)?.[0] || 'no gradient');
+      // stop 色编辑：面板 stop-0 色改 #112233 → set_attr → 保存落盘
+      const stopEdited = await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="gradient-stop-color-0"]');
+        if (!input) return 'no stop input';
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, '#112233');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return 'edited';
+      })()`);
+      await sleep(500);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterStop = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V17c_stop_edit_persisted', stopEdited === 'edited' && afterStop.includes('stop-color="#112233"'), afterStop.match(/<stop[^>]*>/)?.[0] || 'no stop');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');

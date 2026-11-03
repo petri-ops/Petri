@@ -34,6 +34,7 @@ import { dispatchPetriEvent, petriEvents } from '@/lib/events';
 import { listSvgRevisions, readSvgRevision } from '@/lib/svgEditClient';
 import {
   duplicateOp,
+  elementPath,
   findByPath,
   keyToCommand,
   orderOp,
@@ -48,6 +49,16 @@ import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
 import { splitOpGroups } from './svgChangeList';
 import { fitImageBox, imageInsertOp, isSafeImageDataUrl, validateEmbedFile } from './svgEditorImage';
+import {
+  applyGradientOps,
+  gradientInsertOps,
+  gradientMarkup,
+  gradientPreviewCss,
+  gradientRefOf,
+  newGradientId,
+  parseGradients,
+  stopEditOps,
+} from './svgEditorGradient';
 
 export interface SvgEditorViewerProps {
   projectId: string;
@@ -673,6 +684,60 @@ export function SvgEditorViewer({
   // 文档色板：随 markup 纯计算（渲染期零 DOM/ref 访问）
   const docPalette = React.useMemo(() => extractPaletteFromMarkup(markup), [markup]);
 
+  // —— 切片4 渐变：文档渐变清单（随 markup 纯计算）+ 新建表单态 ——
+  const docGradients = React.useMemo(() => parseGradients(markup), [markup]);
+  const selectedGradientId = gradientRefOf(selectedProps.fill || selectedProps.stroke);
+  const selectedGradient = docGradients.find((g) => g.id === selectedGradientId) || null;
+  const [gradKind, setGradKind] = React.useState<'linear' | 'radial'>('linear');
+  const [gradDir, setGradDir] = React.useState<'h' | 'v' | 'd'>('h');
+  const [gradFrom, setGradFrom] = React.useState('#4a7cba');
+  const [gradTo, setGradTo] = React.useState('#ffffff');
+
+  /** 创建渐变（无 defs 先建在根 end）并应用到选中（单 commit 单改动组）。 */
+  const createGradient = React.useCallback(() => {
+    const root = rootEl();
+    if (!root || selected.size === 0) return;
+    const gid = newGradientId(docGradients.map((g) => g.id));
+    const defsEl = root.querySelector('defs');
+    const ops = [
+      ...gradientInsertOps({ id: gid, kind: gradKind, from: gradFrom, to: gradTo, direction: gradDir }, defsEl ? elementPath(root, defsEl) : null, root.children.length),
+      ...applyGradientOps(Array.from(selected).map((key) => {
+        const path = decodePath(key);
+        const el = findByPath(root, path);
+        return { id: el?.getAttribute('id') || undefined, path };
+      }), gid),
+    ];
+    commit(ops, currentMarkup());
+    setSelectedProps((prev) => ({ ...prev, fill: `url(#${gid})` }));
+    setNotice(`已创建渐变 #${gid} 并应用到 ${selected.size} 个元素；⌘S 保存到文件`);
+  }, [commit, currentMarkup, docGradients, gradDir, gradFrom, gradKind, gradTo, rootEl, selected]);
+
+  /** 应用文档内已有渐变到选中。 */
+  const applyGradient = React.useCallback((gid: string) => {
+    const root = rootEl();
+    if (!root || selected.size === 0) return;
+    commit(applyGradientOps(Array.from(selected).map((key) => {
+      const path = decodePath(key);
+      const el = findByPath(root, path);
+      return { id: el?.getAttribute('id') || undefined, path };
+    }), gid), currentMarkup());
+    setSelectedProps((prev) => ({ ...prev, fill: `url(#${gid})` }));
+    setNotice(`已把 #${gid} 应用到 ${selected.size} 个元素`);
+  }, [commit, currentMarkup, rootEl, selected]);
+
+  /** 编辑 stop 颜色/偏移：自建 stop 有 id 走 id，外来 stop 走 live DOM path。 */
+  const editGradientStop = React.useCallback((stopIndex: number, patch: { color?: string; offset?: number }) => {
+    const root = rootEl();
+    if (!root || !selectedGradientId) return;
+    const gEl = Array.from(root.querySelectorAll('linearGradient, radialGradient'))
+      .find((el) => el.getAttribute('id') === selectedGradientId);
+    const stopEl = gEl?.querySelectorAll('stop')[stopIndex];
+    if (!stopEl) return;
+    const stopId = stopEl.getAttribute('id');
+    const ops = stopEditOps(stopId ? { id: stopId } : { path: elementPath(root, stopEl) || [] }, patch);
+    if (ops.length > 0) commit(ops, currentMarkup());
+  }, [commit, currentMarkup, rootEl, selectedGradientId]);
+
   const layerRows = preview
     ? preview.elements.filter((el) => el.path.length <= 3).slice(0, 300)
     : state.status === 'ready'
@@ -1030,6 +1095,64 @@ export function SvgEditorViewer({
                   </div>
                 </div>
               ) : null}
+              <details className={styles.paletteBlock} data-testid="svg-editor-gradient">
+                <summary className={styles.sectionSummary}>渐变{docGradients.length > 0 ? `（文档 ${docGradients.length}）` : ''}</summary>
+                <div className={styles.field}>
+                  <span className={styles.fieldLabel}>新建</span>
+                  <select data-attr="gradient-kind" value={gradKind} onChange={(event) => setGradKind(event.target.value as 'linear' | 'radial')}>
+                    <option value="linear">线性</option>
+                    <option value="radial">径向</option>
+                  </select>
+                </div>
+                {gradKind === 'linear' ? (
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>方向</span>
+                    <select data-attr="gradient-dir" value={gradDir} onChange={(event) => setGradDir(event.target.value as 'h' | 'v' | 'd')}>
+                      <option value="h">横向</option>
+                      <option value="v">竖向</option>
+                      <option value="d">对角</option>
+                    </select>
+                  </div>
+                ) : null}
+                <div className={styles.fieldRow}>
+                  <input type="color" aria-label="渐变起色" data-attr="gradient-from" value={toHexColor(gradFrom)} onChange={(event) => setGradFrom(event.target.value)} />
+                  <input type="color" aria-label="渐变止色" data-attr="gradient-to" value={toHexColor(gradTo)} onChange={(event) => setGradTo(event.target.value)} />
+                  <button type="button" className={button.ghost} data-action="gradient-create" onClick={createGradient}>创建并应用</button>
+                </div>
+                {docGradients.map((g) => (
+                  <div key={g.id} className={styles.changeRow}>
+                    <span className={styles.gradientSwatch} style={{ background: gradientPreviewCss(g) }} title={`#${g.id}`} />
+                    <span className={styles.changeLabel}>#{g.id}（{g.kind === 'radial' ? '径向' : '线性'}·{g.stops.length} stop）</span>
+                    <button type="button" className={button.ghost} data-action={`gradient-apply-${g.id}`} onClick={() => applyGradient(g.id)}>应用</button>
+                  </div>
+                ))}
+                {selectedGradient ? (
+                  <div className={styles.rowActions} data-testid="svg-editor-gradient-stops">
+                    <span className={styles.fieldLabel}>#{selectedGradient.id} stops</span>
+                    {selectedGradient.stops.map((stop, i) => (
+                      <div key={i} className={styles.fieldRow}>
+                        <input
+                          type="color"
+                          aria-label={`stop ${i} 颜色`}
+                          data-attr={`gradient-stop-color-${i}`}
+                          value={toHexColor(stop.color)}
+                          onChange={(event) => editGradientStop(i, { color: event.target.value })}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          aria-label={`stop ${i} 位置`}
+                          data-attr={`gradient-stop-offset-${i}`}
+                          value={stop.offset}
+                          onChange={(event) => editGradientStop(i, { offset: Number(event.target.value) })}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </details>
               <details className={styles.changeBlock} data-testid="svg-editor-changes">
                 <summary className={styles.sectionSummary}>
                   未保存改动（逐元素取舍）{changeGroups.length > 0 ? `（${changeGroups.length}）` : ''}

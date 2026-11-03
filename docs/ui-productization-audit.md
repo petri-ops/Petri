@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-673: SVG 编辑器渐变编辑——线性/径向创建与应用 + 文档渐变列表 + stop 颜色/偏移编辑（BLOCK-342 切片4；2026-11-03 **verified（dev Electron 边界内；实机 46/46 allPass）**）
+
+- **交互**：属性面板「渐变」区块——新建表单（线性/径向 + 横/竖/斜方向 + 起止色）「创建并应用」；文档渐变列表（parseGradients 随 markup 纯计算，预览条 + 一键应用）；选中元素 fill 引用渐变时展示该渐变 stops 行内编辑（颜色/偏移）。
+- **op 形态（合后端单元素口径）**：抓真后端 `insert` 的 markup 是「恰好一个元素」（`parseSvg.elements` 全量后代计数，`<linearGradient>` 带两 stop 被拒为 3 元素）→ 拆成**全单元素 op 序列**：无 `<defs>` 先在根 `end` 插 defs（不扰动既有 path 索引）→ 插空壳渐变（按 defs path）→ 逐个插 stop（parent 按渐变 id 定位，顺序应用语义下 id 已在场）；自建 stop 带 id（`g1-s0`），编辑走 id；应用=`set_attr fill="url(#id)"`。**后端零改动**。
+- **验证**：`svgEditorGradient.test` 9/9（解析/方向预设/空壳 markup/非法颜色回落/全单元素 op 序列/应用/stop 编辑钳位/url 引用提取/CSS 预览）；svg-editor 前端 62/62 + tsc 0 + lint 0 error；实机 flow 四新断言（`V17_gradient_block_present`/`V17_gradient_created_applied` fill=url(#g1)/`V17b_gradient_persisted` 落盘含 linearGradient 与 url 引用/`V17c_stop_edit_persisted` stop-color 落盘），总 **46/46 allPass**。
+
 ## UI-672: SVG 编辑器图片嵌入——本地文件 data: 内嵌 + 拖放/按钮双入口（BLOCK-342 切片3；2026-11-03 **verified（dev Electron 边界内；实机 42/42 allPass）**）
 
 - **安全边界（裁决留档）**：只把**本地文件**嵌为 `data:image/(png|jpeg|gif|webp);base64,…`，原始 ≤2MB；**SVG 显式拒绝**（base64 内嵌是脱敏走私面）并说明原因；外链不提供（断网裂图、违背本地主权）。前端 `svgEditorImage.ts` 只生成安全值（`isSafeImageDataUrl` 形态守卫），后端 DANGEROUS_HREF_RE 与视图脱敏天然放行 data:image——**后端零改动**。

@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T10:31:19.039Z",
-  "finishedAt": "2026-11-03T10:31:36.776Z",
+  "startedAt": "2026-11-03T10:50:20.025Z",
+  "finishedAt": "2026-11-03T10:50:41.043Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793701697678"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793702676715"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -205,9 +205,29 @@
       "detail": "<image href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR"
     },
     {
+      "name": "V17_gradient_block_present",
+      "pass": true,
+      "detail": "ready"
+    },
+    {
+      "name": "V17_gradient_created_applied",
+      "pass": true,
+      "detail": "{\"fill\":\"url(#g1)\"}"
+    },
+    {
+      "name": "V17b_gradient_persisted",
+      "pass": true,
+      "detail": "<linearGradient id=\"g1\" x1=\"0%\" y1=\"0%\" x2=\"100%\" y2=\"0%\">"
+    },
+    {
+      "name": "V17c_stop_edit_persisted",
+      "pass": true,
+      "detail": "<stop id=\"g1-s0\" offset=\"0\" stop-color=\"#112233\" />"
+    },
+    {
       "name": "V8_stale_apply_rejected",
       "pass": true,
-      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"eacbedbca26e627b5493bafd6cba4d48b6e7e264861b273aec203618a455cccb"
+      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"840bce8a11955fb84fbcdf4fb61a2d2618a2cb3c2544e06809852578b3a03536"
     },
     {
       "name": "V13_close_returns_to_thumb",
