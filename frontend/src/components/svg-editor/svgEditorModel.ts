@@ -20,10 +20,10 @@ export type EditorCommand =
   | { type: 'order'; direction: 'up' | 'down' }
   | { type: 'nudge'; dx: number; dy: number };
 
-export const MIN_SCALE = 0.1;
-export const MAX_SCALE = 8;
-export const NUDGE_STEP = 1;
-export const NUDGE_STEP_LARGE = 10;
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 8;
+const NUDGE_STEP = 1;
+const NUDGE_STEP_LARGE = 10;
 
 /** 元素在 <svg> 根下的子元素序号路径（与后端 {path} 定位器同源）。 */
 export function elementPath(root: Element, el: Element | null): number[] | null {
@@ -89,7 +89,7 @@ export function zoomAtPoint(scale: number, deltaY: number): number {
   return clampScale(scale * factor);
 }
 
-export function isEditableTarget(target: EventTarget | null): boolean {
+function isEditableTarget(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
   if (!el || typeof el.tagName !== 'string') return false;
   const tag = el.tagName.toLowerCase();
@@ -121,11 +121,6 @@ export function keyToCommand(event: {
   if (key === 'ArrowUp') return { type: 'nudge', dx: 0, dy: -(event.shiftKey ? NUDGE_STEP_LARGE : NUDGE_STEP) };
   if (key === 'ArrowDown') return { type: 'nudge', dx: 0, dy: event.shiftKey ? NUDGE_STEP_LARGE : NUDGE_STEP };
   return null;
-}
-
-/** 删除 op（根元素由后端拒收，前端也先挡一层给出可读原因）。 */
-export function removeOp(path: number[]): SvgOp {
-  return { op: 'remove', target: { path } };
 }
 
 /** 平移 op（拖拽/微移共用一条换算，保证两端语义一致）。 */

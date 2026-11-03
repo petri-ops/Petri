@@ -7,7 +7,7 @@
 
 import { getApiPrefix } from './env';
 
-export interface SvgInspectElement {
+interface SvgInspectElement {
   path: number[];
   tag: string;
   id?: string;
@@ -16,7 +16,7 @@ export interface SvgInspectElement {
   attrCount: number;
 }
 
-export interface SvgInspectTarget {
+interface SvgInspectTarget {
   tag: string;
   path: number[];
   id?: string;
@@ -26,7 +26,7 @@ export interface SvgInspectTarget {
   selfClosing: boolean;
 }
 
-export interface SvgUnsafeFlags {
+interface SvgUnsafeFlags {
   script: boolean;
   foreignObject: boolean;
   eventAttrs: number;
@@ -50,7 +50,7 @@ export interface SvgInspectResult {
   description: string;
 }
 
-export interface SvgSemanticDiffEntry {
+interface SvgSemanticDiffEntry {
   op: string;
   target: string;
   detail: string;
@@ -71,7 +71,7 @@ export interface SvgEditResult {
   next?: string;
 }
 
-export interface SvgEditFailure {
+interface SvgEditFailure {
   ok: false;
   error: string;
   message?: string;
