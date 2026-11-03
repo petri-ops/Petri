@@ -812,47 +812,6 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               tool={tool}
               onDrawBox={handleDrawBox}
             />
-          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
-            <div className={styles.layersHead}>
-              {layersOpen ? (
-                <>
-                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
-                  <button
-                    type="button"
-                    className={button.ghost}
-                    data-action="collapse-layers"
-                    title="收起图层栏"
-                    onClick={() => setLayersOpen(false)}
-                  >
-                    «
-                  </button>
-                </>
-              ) : null}
-            </div>
-            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
-              {layerRows.map((el) => {
-                const key = pathKey(el.path);
-                return (
-                  <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
-                    <button
-                      type="button"
-                      className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                      onClick={(event) => {
-                        syncSelection(new Set([key]));
-                        event.currentTarget.scrollIntoView({ block: 'nearest' });
-                      }}
-                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
-                      title={`<${el.tag}> path=[${el.path.join(',')}]`}
-                    >
-                      {el.id ? `#${el.id}` : `<${el.tag}>`}
-                      {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-          </aside>
 
           </div>
 
@@ -978,6 +937,47 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             <div className={styles.hint}>
               ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
             </div>
+          </aside>
+          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
+            <div className={styles.layersHead}>
+              {layersOpen ? (
+                <>
+                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+                  <button
+                    type="button"
+                    className={button.ghost}
+                    data-action="collapse-layers"
+                    title="收起图层栏"
+                    onClick={() => setLayersOpen(false)}
+                  >
+                    «
+                  </button>
+                </>
+              ) : null}
+            </div>
+            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
+              {layerRows.map((el) => {
+                const key = pathKey(el.path);
+                return (
+                  <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
+                    <button
+                      type="button"
+                      className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
+                      onClick={(event) => {
+                        syncSelection(new Set([key]));
+                        event.currentTarget.scrollIntoView({ block: 'nearest' });
+                      }}
+                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
+                      title={`<${el.tag}> path=[${el.path.join(',')}]`}
+                    >
+                      {el.id ? `#${el.id}` : `<${el.tag}>`}
+                      {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
           </aside>
         </div>
       ) : null}
