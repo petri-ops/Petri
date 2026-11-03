@@ -873,3 +873,92 @@
 .railToggle[data-action='expand-inspector'] {
   top: 12px;
 }
+
+/* 修正（用户抓真：抽屉改绝对定位后画布高度塌陷、打开无内容）：
+   面板回到 grid 流内（高度由 grid 拉伸保证），收起时列宽 0 + display:none = 仍然零占位。 */
+.body {
+  position: relative;
+  grid-template-columns: 200px minmax(0, 1fr) 240px;
+}
+
+.body[data-layers='0'] {
+  grid-template-columns: 0 minmax(0, 1fr) 240px;
+}
+
+.body[data-inspector='0'] {
+  grid-template-columns: 200px minmax(0, 1fr) 0;
+}
+
+.body[data-layers='0'][data-inspector='0'] {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+.layers,
+.inspector {
+  position: static;
+  width: auto;
+  box-shadow: none;
+}
+
+.layers[data-open='0'],
+.inspector[data-open='0'] {
+  display: none;
+}
+
+.stage {
+  padding: 56px 12px 12px;
+  min-height: 0;
+}
+
+/* 回滚布局（用户抓真：抽屉/浮条改造后画布内容不可见）——先恢复到稳定三列，布局美化另起一批 */
+.body {
+  position: static;
+  grid-template-columns: 200px minmax(0, 1fr) 240px;
+}
+
+.body[data-layers='0'] {
+  grid-template-columns: 40px minmax(0, 1fr) 240px;
+}
+
+.body[data-inspector='0'] {
+  grid-template-columns: 200px minmax(0, 1fr) 40px;
+}
+
+.body[data-layers='0'][data-inspector='0'] {
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+}
+
+.layers[data-open='0'],
+.inspector[data-open='0'] {
+  display: flex;
+  padding: 8px 4px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.stage {
+  position: static;
+  padding: 0;
+  min-height: 0;
+}
+
+.toolbar {
+  position: static;
+  transform: none;
+  left: auto;
+  top: auto;
+  width: auto;
+  max-width: none;
+  box-shadow: none;
+  border: none;
+  border-bottom: 1px solid var(--petri-divider);
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 8px;
+  white-space: normal;
+  flex-wrap: wrap;
+}
+
+.railToggle {
+  display: none;
+}
