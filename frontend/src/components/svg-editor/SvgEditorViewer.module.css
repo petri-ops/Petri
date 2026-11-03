@@ -1175,3 +1175,92 @@
 .stage {
   padding: 44px 12px 12px;
 }
+
+/* 底部属性坞（用户裁决：图片不占满窗口，属性/图层放图片下方）
+   画布占上方，图层与属性改为底部横条；字段横向流式排列，不再挤占左右两侧。 */
+.stage {
+  padding: 44px 12px 214px;
+}
+
+.layers {
+  top: auto;
+  bottom: 12px;
+  left: 12px;
+  width: 196px;
+  height: 194px;
+}
+
+.inspector {
+  top: auto;
+  bottom: 12px;
+  left: 216px;
+  right: 12px;
+  width: auto;
+  height: 194px;
+  overflow: auto;
+}
+
+.inspectorHead {
+  position: sticky;
+  top: 0;
+  background: var(--petri-bg-surface);
+  padding-bottom: 4px;
+  z-index: 1;
+}
+
+.layersHead {
+  position: sticky;
+  top: 0;
+  background: var(--petri-bg-surface);
+  padding-bottom: 4px;
+  z-index: 1;
+}
+
+/* 属性字段横向流式：一行多个，窄屏自动换行 */
+.props {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 18px;
+  padding: 4px 2px;
+}
+
+.field {
+  grid-template-columns: 56px 132px;
+  gap: 6px;
+}
+
+.propList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.propRow {
+  flex-direction: row;
+  gap: 6px;
+}
+
+.rowActions {
+  flex-basis: 100%;
+  padding: 2px 0;
+}
+
+/* 底部坞里的色板/改动块也横向铺开 */
+.paletteBlock,
+.changeBlock {
+  flex-basis: 100%;
+}
+
+.changeList {
+  max-height: 92px;
+}
+
+.swatches {
+  margin-top: 4px;
+}
+
+/* 图层收起时属性坞左对齐（不留 216px 空档） */
+.body:has(.layers[data-open='0']) .inspector {
+  left: 12px;
+}
