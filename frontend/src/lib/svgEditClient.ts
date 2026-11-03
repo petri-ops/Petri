@@ -130,3 +130,26 @@ export function editSvgFile(input: {
 }): Promise<SvgEditResult> {
   return postJson<SvgEditResult>('/svg/edit', input, 20_000);
 }
+
+
+export interface SvgRevisionEntry {
+  file: string;
+  at: string;
+  sha8: string;
+  sizeBytes: number;
+}
+
+/** 只读：该文件的修订快照历史（`.petri/svg-revisions/`，人与 agent 同一时间线）。 */
+export async function listSvgRevisions(input: { projectId: string; path: string; limit?: number }): Promise<SvgRevisionEntry[]> {
+  const query = new URLSearchParams({ projectId: input.projectId, path: input.path });
+  if (input.limit) query.set('limit', String(input.limit));
+  const response = await fetch(`${getApiPrefix()}/api/svg/revisions?${query.toString()}`, {
+    headers: { Authorization: 'Bearer desktop-local' },
+    signal: AbortSignal.timeout(20_000),
+  });
+  const payload = (await response.json().catch(() => null)) as { ok?: boolean; revisions?: SvgRevisionEntry[]; error?: string } | null;
+  if (!response.ok || !payload || payload.ok !== true) {
+    throw new SvgEditError(typeof payload?.error === 'string' ? payload.error : 'revisions_failed', '读取修订历史失败');
+  }
+  return Array.isArray(payload.revisions) ? payload.revisions : [];
+}

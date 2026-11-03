@@ -31,6 +31,7 @@ import {
   type StyleSnapshot,
 } from './svgEditorInspector';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import { listSvgRevisions } from '@/lib/svgEditClient';
 import { diffElements, revertAllOps, revertElementOps, summarizeChanges, type ElementChange } from './svgProposal';
 import {
   duplicateOp,
@@ -201,6 +202,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
+  const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
@@ -284,6 +286,9 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     const el = root && first !== null ? findByPath(root, decodePath(first)) : null;
     setSelectedProps(readAttrs(el));
     setTextEdit(null);
+    void listSvgRevisions({ projectId, path: filePath, limit: 30 })
+      .then((list) => setRevisions(list))
+      .catch(() => setRevisions([]));
   }, [rootEl]);
 
   /** 属性改动：批量应用到当前选中（多选天然支持「批量套样式」）。 */
@@ -857,7 +862,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 </div>
               </div>
             ) : null}
-            <details className={styles.changeBlock} data-testid="svg-editor-changes">
+            <details open className={styles.changeBlock} data-testid="svg-editor-changes">
               <summary className={styles.sectionSummary}>未保存改动（逐元素取舍）</summary>
               <div className={styles.rowActions}>
                 <button type="button" className={button.ghost} onClick={openChangeLog} data-action="open-changes">列出改动</button>
@@ -886,7 +891,22 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 )
               ) : null}
             </details>
-            <details className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
+            <details open className={styles.changeBlock} data-testid="svg-editor-revisions">
+              <summary className={styles.sectionSummary}>修订历史（{revisions.length}）</summary>
+              {revisions.length === 0 ? (
+                <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
+              ) : (
+                <ul className={styles.changeList} data-testid="svg-editor-revision-list">
+                  {revisions.map((item) => (
+                    <li key={item.file} className={styles.changeRow} data-revision={item.file}>
+                      <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
+                      <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </details>
+            <details open className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
               <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
               {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
               <div className={styles.swatches}>

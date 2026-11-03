@@ -1751,3 +1751,35 @@
   flex-wrap: nowrap;
   gap: 2px;
 }
+
+/* 横向溢出收口（用户截图「最右侧有内容展示不出」）：高特异性单列栅格 + 全链 max-width */
+.body[data-inspector='1'] .inspector,
+.body[data-inspector='1'] .inspector * {
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.body[data-inspector='1'] .inspector {
+  overflow-x: hidden;
+}
+
+.body[data-inspector='1'] .inspector .props {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.body[data-inspector='1'] .inspector .field,
+.body[data-inspector='1'] .inspector .changeRow,
+.body[data-inspector='1'] .inspector .propRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+}
+
+.body[data-inspector='1'] .inspector .rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

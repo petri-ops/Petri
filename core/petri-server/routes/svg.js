@@ -13,7 +13,7 @@
 
 const db = require('../db');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
-const { tool_svg_inspect, tool_svg_edit } = require('../agent-tools/svg-tools');
+const { tool_svg_inspect, tool_svg_edit, tool_svg_revisions } = require('../agent-tools/svg-tools');
 
 const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'workspace_unavailable'];
 
@@ -80,6 +80,17 @@ module.exports = function registerSvgRoutes(app) {
       target: req.body.target,
       tag: req.body.tag,
       limit: req.body.limit,
+    }, { projectId: auth.project.id });
+    return respondTool(res, result);
+  });
+
+  // 修订快照历史（只读）
+  app.get('/api/svg/revisions', (req, res) => {
+    const auth = loadLocalProject(req, res, req.query && req.query.projectId);
+    if (!auth) return;
+    const result = tool_svg_revisions({
+      filePath: req.query && req.query.path,
+      limit: req.query && req.query.limit ? Number(req.query.limit) : undefined,
     }, { projectId: auth.project.id });
     return respondTool(res, result);
   });

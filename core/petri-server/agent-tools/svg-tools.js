@@ -176,6 +176,41 @@ function capPreview(text) {
 }
 
 /**
+ * tool_svg_revisions — 只读：该文件的修订快照历史（.petri/svg-revisions/，人/agent 同一时间线）。
+ * 只列目录，不读内容、不写、不建第二真值。
+ * @param {object} args { filePath, limit? }
+ * @param {object} ctx { projectId }
+ */
+function tool_svg_revisions(args, ctx) {
+  const project = resolveProject(ctx);
+  if (!project.ok) return { error: project.code, message: project.message };
+  const file = resolveFile(project.workspaceRoot, args && args.filePath);
+  if (!file.ok) return { error: file.code, message: file.message };
+  const dir = path.join(project.workspaceRoot, SNAPSHOT_REL_DIR);
+  const base = path.basename(file.rel).replace(/\.svg$/i, '');
+  const limit = args && Number.isFinite(args.limit) ? Math.max(1, Math.min(100, Number(args.limit))) : 30;
+  let entries = [];
+  try {
+    entries = fs.readdirSync(dir)
+      .filter((name) => name.startsWith(`${base}-`) && name.endsWith('.svg'))
+      .map((name) => {
+        const match = /^(.*)-(\d{4}-\d{2}-\d{2}T[\d-]+Z)-([0-9a-f]{8})\.svg$/.exec(name);
+        return {
+          file: `${SNAPSHOT_REL_DIR}/${name}`,
+          at: match ? match[2] : '',
+          sha8: match ? match[3] : '',
+          sizeBytes: (() => { try { return fs.statSync(path.join(dir, name)).size; } catch { return 0; } })(),
+        };
+      })
+      .sort((a, b) => (a.at < b.at ? 1 : -1))
+      .slice(0, limit);
+  } catch {
+    entries = [];
+  }
+  return { ok: true, filePath: file.rel, total: entries.length, revisions: entries };
+}
+
+/**
  * tool_svg_edit — 白名单 op 的 propose/apply。
  * @param {object} args { filePath, ops, apply?, beforeSha256? }
  * @param {object} ctx { projectId }
@@ -269,6 +304,7 @@ function tool_svg_edit(args, ctx) {
 
 module.exports = {
   tool_svg_inspect,
+  tool_svg_revisions,
   tool_svg_edit,
   MAX_SVG_BYTES,
   SNAPSHOT_REL_DIR,
