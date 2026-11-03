@@ -199,12 +199,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
   // 交互：右栏空间有限 —— 分区折叠（默认只开「图形属性」），整栏可收，工具栏可收
   // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
-  const [sections, setSections] = React.useState({ props: false, palette: false, changes: false, tools: true });
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
-  const toggleSection = React.useCallback((key: keyof typeof sections) => {
-    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
@@ -722,37 +718,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               </div>
             ) : null}
             <div className={styles.toolbar} data-testid="svg-editor-toolbar">
-              <button
-                type="button"
-                className={styles.railIcon}
-                data-action={layersOpen ? 'collapse-layers' : 'expand-layers'}
-                title={layersOpen ? '收起图层' : `展开图层（${state.inspect.total}）`}
-                aria-label="图层"
-                onClick={() => setLayersOpen((prev) => !prev)}
-              >
-                ☰
-              </button>
-              <button
-                type="button"
-                className={styles.railIcon}
-                data-action={inspectorOpen ? 'collapse-inspector' : 'expand-inspector'}
-                title={inspectorOpen ? '收起图形属性' : '展开图形属性'}
-                aria-label="图形属性"
-                onClick={() => setInspectorOpen((prev) => !prev)}
-              >
-                ⚙
-              </button>
-              <span className={styles.toolSep} />
-              <button
-                type="button"
-                className={styles.tool}
-                data-action="toggle-tools"
-                title={sections.tools ? '收起工具组' : '展开工具组'}
-                onClick={() => toggleSection('tools')}
-              >
-                {sections.tools ? '工具 ▴' : '工具 ▾'}
-              </button>
-              <span className={styles.toolGroup} data-testid="svg-editor-tool-group" data-open={sections.tools ? '1' : '0'}>
+              <span className={styles.toolGroup} data-testid="svg-editor-tool-group" data-open="1">
               <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>
               {DRAW_TOOLS.map((item) => (
                 <button

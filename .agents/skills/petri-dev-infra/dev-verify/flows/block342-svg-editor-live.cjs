@@ -107,17 +107,6 @@ module.exports = {
       if (!mounted) return false;
       const mountInfo = JSON.parse(mounted);
       assert('V2b_initial_save_disabled', mountInfo.saveDisabled === true, `saveDisabled=${mountInfo.saveDisabled}`);
-      // 图标上顶栏（用户裁决）：图层/属性图标与「工具」并列，aside 收起态不占位
-      const toolbarIcons = await lib.evalJs(client, `(function(){
-        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-toolbar"]');
-        return bar ? JSON.stringify({
-          layers: !!bar.querySelector('[data-action="expand-layers"]'),
-          inspector: !!bar.querySelector('[data-action="expand-inspector"]'),
-          tools: !!bar.querySelector('[data-action="toggle-tools"]')
-        }) : 'no toolbar';
-      })()`);
-      const icons = JSON.parse(toolbarIcons);
-      assert('V2c_rail_icons_in_toolbar', icons.layers === true && icons.inspector === true && icons.tools === true, toolbarIcons);
       // 折叠默认态：色板/改动区默认收起（无 open），工具组默认展开
       const panels = await lib.evalJs(client, `(function(){
         const palette = document.querySelector('${RAIL} [data-testid="svg-editor-doc-palette"]');
@@ -125,21 +114,21 @@ module.exports = {
         const group = document.querySelector('${RAIL} [data-testid="svg-editor-tool-group"]');
         const layers = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
         const inspector = document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]');
-        const expand = document.querySelector('${RAIL} [data-action="expand-inspector"]');
+
         return JSON.stringify({
           paletteOpen: palette ? palette.hasAttribute('open') : null,
           changesOpen: changes ? changes.hasAttribute('open') : null,
           toolGroupOpen: group ? group.dataset.open : null,
           layersOpen: layers ? layers.dataset.open : null,
           inspectorOpen: inspector ? inspector.dataset.open : null,
-          hasExpand: !!expand
+          toolButtons: document.querySelectorAll('[data-testid="svg-editor-tool-group"] button').length
         });
       })()`);
       const panelInfo = JSON.parse(panels);
-      assert('V2d_panels_default_collapsed',
+      assert('V2d_default_state',
         panelInfo.paletteOpen === false && panelInfo.changesOpen === false
-           && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
-          && panelInfo.hasExpand === true,
+          && panelInfo.toolGroupOpen === '1' && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
+          && panelInfo.toolButtons >= 6,
         panels);
 
       // V3 — 真实点选：在画布里点 <rect> 中心 → 选中框出现 + 属性面板出现该元素

@@ -1740,3 +1740,14 @@
 .inspector * {
   max-width: 100%;
 }
+
+/* 顶栏只留工具（用户裁决：去掉图层/属性/折叠三个按钮）；工具栏常驻不折叠 */
+.toolbar {
+  gap: 2px;
+}
+
+.toolGroup {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
