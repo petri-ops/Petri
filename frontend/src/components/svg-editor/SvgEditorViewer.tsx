@@ -713,16 +713,31 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
           ) : null}
           <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
             <div className={styles.layersHead}>
-              <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
-              <button
-                type="button"
-                className={button.ghost}
-                data-action={layersOpen ? 'collapse-layers' : 'expand-layers'}
-                title={layersOpen ? '收起图层栏' : '展开图层栏'}
-                onClick={() => setLayersOpen((prev) => !prev)}
-              >
-                {layersOpen ? '«' : '»'}
-              </button>
+              {layersOpen ? (
+                <>
+                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+                  <button
+                    type="button"
+                    className={button.ghost}
+                    data-action="collapse-layers"
+                    title="收起图层栏"
+                    onClick={() => setLayersOpen(false)}
+                  >
+                    «
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.railIcon}
+                  data-action="expand-layers"
+                  title={`展开图层（${state.inspect.total}）`}
+                  aria-label={`展开图层（${state.inspect.total}）`}
+                  onClick={() => setLayersOpen(true)}
+                >
+                  ☰
+                </button>
+              )}
             </div>
             <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
               {layerRows.map((el) => {
@@ -829,16 +844,31 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
           <aside className={styles.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
             <div className={styles.inspectorHead}>
-              <span className={styles.panelTitle}>图形属性</span>
-              <button
-                type="button"
-                className={button.ghost}
-                data-action={inspectorOpen ? 'collapse-inspector' : 'expand-inspector'}
-                title={inspectorOpen ? '收起属性栏（画布变宽）' : '展开属性栏'}
-                onClick={() => setInspectorOpen((prev) => !prev)}
-              >
-                {inspectorOpen ? '»' : '«'}
-              </button>
+              {inspectorOpen ? (
+                <>
+                  <span className={styles.panelTitle}>图形属性</span>
+                  <button
+                    type="button"
+                    className={button.ghost}
+                    data-action="collapse-inspector"
+                    title="收起属性栏（画布变宽）"
+                    onClick={() => setInspectorOpen(false)}
+                  >
+                    »
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.railIcon}
+                  data-action="expand-inspector"
+                  title="展开图形属性"
+                  aria-label="展开图形属性"
+                  onClick={() => setInspectorOpen(true)}
+                >
+                  ⚙
+                </button>
+              )}
             </div>
             {selected.size === 0 ? <div className={styles.note}>未选中元素。点画布元素或用图层树选择。</div> : null}
             <SelectedSummary rows={selectedRows} />

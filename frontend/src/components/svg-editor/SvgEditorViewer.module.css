@@ -917,15 +917,15 @@
 }
 
 .body[data-layers='0'] {
-  grid-template-columns: 40px minmax(0, 1fr) 240px;
+  grid-template-columns: 36px minmax(0, 1fr) 240px;
 }
 
 .body[data-inspector='0'] {
-  grid-template-columns: 200px minmax(0, 1fr) 40px;
+  grid-template-columns: 200px minmax(0, 1fr) 36px;
 }
 
 .body[data-layers='0'][data-inspector='0'] {
-  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
 }
 
 .layers[data-open='0'],
@@ -988,5 +988,44 @@
 .toolActive {
   border-color: var(--petri-accent-border);
   background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
+
+/* 收起态 = 一个图标按钮（用户裁决：不要竖排文字、不要整列边框线条） */
+.layers[data-open='0'],
+.inspector[data-open='0'] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.layers[data-open='0'] .panelTitle,
+.inspector[data-open='0'] .panelTitle {
+  writing-mode: horizontal-tb;
+}
+
+.railIcon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard),
+    color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.railIcon:hover {
+  background: var(--petri-hover);
   color: var(--petri-text);
 }

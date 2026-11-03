@@ -75,7 +75,9 @@ describe('BLOCK-342 W1 SvgEditorViewer', () => {
     render(<SvgEditorViewer projectId="p1" filePath="figures/plot.svg" name="plot.svg" />);
 
     await waitFor(() => expect(screen.getByTestId('svg-editor-canvas')).toBeTruthy());
-    expect(screen.getByTestId('svg-editor-layers').textContent).toContain('图层');
+    // 收起态只渲染图标按钮（用户裁决：不要竖排文字）
+    const expandLayersBtn = screen.getByTestId('svg-editor-layers').querySelector('[data-action="expand-layers"]');
+    expect(expandLayersBtn?.getAttribute('title')).toContain('展开图层');
     const save = screen.getByTestId<HTMLButtonElement>("svg-editor-save");
     expect(save.disabled).toBe(true);
     expect(screen.getByTestId('svg-editor-zoom').textContent).toBe('100%');
