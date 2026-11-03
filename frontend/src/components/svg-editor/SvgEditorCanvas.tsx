@@ -51,6 +51,8 @@ export interface CanvasProps {
   onNotice?: (msg: string) => void;
   /** 切片3 图片嵌入：拖图进画布（宿主校验+嵌入）。 */
   onEmbedImage?: (file: File) => void;
+  /** 切片6 提案幽灵：agent propose 的 previewMarkup（半透明叠加，与画布同 scale 对齐）。 */
+  proposalMarkup?: string | null;
 }
 
 interface OverlayBox extends Box {
@@ -59,7 +61,7 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage, proposalMarkup }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
   const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
@@ -538,6 +540,14 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
         style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}
         dangerouslySetInnerHTML={{ __html: markup }}
       />
+      {proposalMarkup ? (
+        <div
+          className={styles.proposalGhostLayer}
+          data-testid="svg-editor-proposal-ghost"
+          style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}
+          dangerouslySetInnerHTML={{ __html: proposalMarkup }}
+        />
+      ) : null}
       <div className={styles.overlay} aria-hidden="true">
         {boxes.map((box) => (
           <div

@@ -358,7 +358,7 @@ function tool_svg_inkscape(args, ctx, onDone) {
   const tmpAbs = action === 'export-pdf'
     ? `${file.abs}.pdf`
     : path.join(path.dirname(file.abs), `.${path.basename(file.rel)}.inktmp.svg`);
-  return inkscape.runInkscapeAction({ action, svgAbs: file.abs, outAbs: tmpAbs }, (runErr, runOk) => {
+  return inkscape.runInkscapeAction({ action, svgAbs: file.abs, outAbs: tmpAbs }, (runErr, _runOk) => {
     if (runErr) {
       onDone({ error: runErr.code || 'inkscape_run_failed', message: runErr.message, hint: runErr.hint });
       return;

@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-675: SVG 编辑器提案幽灵——agent 提案叠加层 + 逐项接受/拒绝（BLOCK-342 切片6；2026-11-03 **verified（dev Electron 边界内；实机 51/51 allPass）**）
+
+- **事件协议**：`petri:svg-proposal`（events.ts 中心登记 + PetriEventMap 类型化）——载荷 `{path, previewMarkup, ops, source}`；编辑器订阅并按 path 匹配当前文件，校验 markup/ops 形态（不猜）。**进入通道的 chat 派发侧 = reopen**（通用工具结果渲染链，单独切片接线；当前任何持有 propose 结果的面可派发，flow 以合成事件实机验证编辑器侧全链）。
+- **ghost 叠加**：previewMarkup 以半透明（opacity .45 + accent 虚线框）渲染在与画布**同一 scale 容器**内（缩放天然对齐）；画布顶部提案浮条列出 op 逐项摘要（复用 svgChangeList 的 opLabel）——**op 序列即语义 diff**（与 UI-663 同哲学，不做 markup 反序列化比对）。
+- **逐项接受/拒绝**：每行「接受」=该 op 单独 commit（白名单语义变更直接落地）；「全部接受」=剩余 op 一次 commit；「拒绝」=整单清除不应用。接受/拒绝后提案态同步收敛（剩余 op 保留可继续逐项）。
+- **验证**：svg-editor 前端 62/62（补 inkscapeStatus/inkscapeAction mock）+ tsc 0 + lint 0 error；实机 flow 三新断言（`V19_proposal_ghost_visible` ghost 层+浮条在场/`V19b_proposal_accepted` 接受后 ghost 退场+fill 变更+save 解锁/`V19c_proposal_persisted` 落盘），总 **51/51 allPass**。
+
 ## UI-674: SVG 编辑器 Inkscape 无头协处理器——探针 + 诚实灰化 + 受治理动作守卫（BLOCK-342 切片5；2026-11-03 **verified（dev Electron 边界内；实机 48/48 allPass；动作执行链待装 Inkscape 后实机）**）
 
 - **能力面**：布尔联合/差集/交集（需多选）、全档文字转路径、导出 PDF（落同目录 .pdf）。探针 env 优先（`PETRI_INKSCAPE_BIN`）+ 常见安装路径，只查 X_OK 不 exec。

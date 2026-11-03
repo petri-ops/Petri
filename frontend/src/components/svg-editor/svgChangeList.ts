@@ -30,7 +30,8 @@ export function targetLabel(target: Record<string, unknown> | undefined): string
   return path.length > 0 ? `path[${path.map((n) => String(n)).join(',')}]` : '(根)';
 }
 
-function opLabel(op: SvgOp): string {
+/** 单 op 摘要（改动清单与提案幽灵逐项共用）。 */
+export function opLabel(op: SvgOp): string {
   const t = targetLabel(op.target as Record<string, unknown> | undefined);
   switch (op.op) {
     case 'set_attr': return `set ${asText(op.name)}=${asText(op.value)}（${t}）`;

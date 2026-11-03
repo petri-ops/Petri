@@ -30,7 +30,7 @@ import {
   type DrawTool,
   type StyleSnapshot,
 } from './svgEditorInspector';
-import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents, subscribePetriEvent } from '@/lib/events';
 import { listSvgRevisions, readSvgRevision } from '@/lib/svgEditClient';
 import {
   duplicateOp,
@@ -47,12 +47,11 @@ import {
 } from './svgEditorModel';
 import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
-import { splitOpGroups } from './svgChangeList';
+import { opLabel, splitOpGroups } from './svgChangeList';
 import { fitImageBox, imageInsertOp, isSafeImageDataUrl, validateEmbedFile } from './svgEditorImage';
 import {
   applyGradientOps,
   gradientInsertOps,
-  gradientMarkup,
   gradientPreviewCss,
   gradientRefOf,
   newGradientId,
@@ -223,6 +222,8 @@ export function SvgEditorViewer({
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
   // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
+  // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
+  const [proposal, setProposal] = React.useState<{ markup: string; ops: SvgOp[] } | null>(null);
   React.useEffect(() => {
     let cancelled = false;
     inkscapeStatus(projectId)
@@ -230,6 +231,18 @@ export function SvgEditorViewer({
       .catch(() => { if (!cancelled) setInkscape({ available: false, bin: null, source: null, hint: '探针不可达（后端未就绪？）' }); });
     return () => { cancelled = true; };
   }, [projectId]);
+
+  // 切片6 提案订阅：path 匹配当前文件才收（校验 markup/ops 形态，不猜）
+  React.useEffect(() => {
+    const off = subscribePetriEvent(petriEvents.svgProposal, (detail) => {
+      if (!detail || detail.path !== filePath) return;
+      if (typeof detail.previewMarkup !== 'string' || detail.previewMarkup === '') return;
+      if (!Array.isArray(detail.ops) || detail.ops.length === 0) return;
+      setProposal({ markup: detail.previewMarkup, ops: detail.ops as SvgOp[] });
+      setNotice('收到 agent 提案：已在画布上叠加 ghost，可逐项接受');
+    });
+    return off;
+  }, [filePath]);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
   React.useEffect(() => {
@@ -327,7 +340,7 @@ export function SvgEditorViewer({
     if (!check.ok) { setNotice(`图片未嵌入：${check.reason}`); return; }
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = String(reader.result || '');
+      const dataUrl = typeof reader.result === 'string' ? reader.result : '';
       if (!isSafeImageDataUrl(dataUrl)) { setNotice('图片未嵌入：读取结果不是安全形态'); return; }
       const probe = new Image();
       probe.onload = () => {
@@ -358,6 +371,20 @@ export function SvgEditorViewer({
       })
       .finally(() => setSaving(false));
   }, [filePath, load, projectId, saving, state]);
+
+  /** 切片6 提案接受：接受全部剩余 op（一次 commit）或逐项接受单个 op；拒绝=整单清除。 */
+  const acceptProposal = React.useCallback((only?: number) => {
+    if (!proposal) return;
+    const ops = only === undefined ? proposal.ops : [proposal.ops[only]];
+    const rest = only === undefined ? [] : proposal.ops.filter((_, i) => i !== only);
+    commit(ops, currentMarkup());
+    setProposal(rest.length > 0 ? { ...proposal, ops: rest } : null);
+    setNotice(`已接受提案改动（${ops.length} 项）；⌘S 保存到文件`);
+  }, [commit, currentMarkup, proposal]);
+  const rejectProposal = React.useCallback(() => {
+    setProposal(null);
+    setNotice('已拒绝该提案（未应用任何 op）');
+  }, []);
 
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
@@ -865,6 +892,23 @@ export function SvgEditorViewer({
           ) : null}
 
           <div className={layout.stage} onWheel={handleWheel}>
+            {proposal ? (
+              <div className={styles.proposalBar} data-testid="svg-editor-proposal">
+                <span className={styles.proposalTitle}>agent 提案（{proposal.ops.length} 项 op）</span>
+                <div className={styles.proposalOps}>
+                  {proposal.ops.map((op, i) => (
+                    <div key={i} className={styles.changeRow}>
+                      <span className={styles.changeLabel} title={opLabel(op)}>{opLabel(op)}</span>
+                      <button type="button" className={button.ghost} data-action={`proposal-accept-${i}`} onClick={() => acceptProposal(i)}>接受</button>
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.rowActions}>
+                  <button type="button" className={button.ghost} data-action="proposal-accept-all" onClick={() => acceptProposal()}>全部接受</button>
+                  <button type="button" className={button.ghost} data-action="proposal-reject" onClick={rejectProposal}>拒绝</button>
+                </div>
+              </div>
+            ) : null}
             {state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
@@ -968,6 +1012,7 @@ export function SvgEditorViewer({
               onPenCommit={handlePenCommit}
               onNotice={setNotice}
               onEmbedImage={embedImageFile}
+              proposalMarkup={proposal?.markup || null}
             />
 
           </div>

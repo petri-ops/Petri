@@ -14,6 +14,8 @@ const editSvgFile = vi.fn((..._args: unknown[]): Promise<unknown> => Promise.res
 vi.mock('@/lib/svgEditClient', () => ({
   inspectSvgFile: (...args: unknown[]): Promise<unknown> => inspectSvgFile(...args),
   editSvgFile: (...args: unknown[]): Promise<unknown> => editSvgFile(...args),
+  inkscapeStatus: (): Promise<unknown> => Promise.resolve({ available: false, bin: null, source: null, hint: '未检测到 Inkscape（测试）' }),
+  inkscapeAction: (): Promise<unknown> => Promise.resolve({ ok: true, action: 'union' }),
   SvgEditError: class SvgEditError extends Error {
     code: string;
 

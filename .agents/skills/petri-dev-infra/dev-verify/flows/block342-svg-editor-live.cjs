@@ -592,6 +592,41 @@ module.exports = {
         Boolean(inkPanel) && JSON.parse(inkPanel).actionButtons === 0 && /Inkscape|PETRI/.test(inkPanel),
         inkPanel || 'honest hint missing');
 
+      // V19 — 提案幽灵：合成 petri:svg-proposal（previewMarkup + 1 op）→ ghost 层出现 → 全部接受 → 落盘
+      const proposalSent = await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const svg = host && host.querySelector('svg');
+        if (!svg) return 'no svg';
+        // previewMarkup：当前视图文本（幽灵层原样叠加，缩放由 CSS 承担）
+        const preview = svg.outerHTML.replace(/fill="#cc0000"/, 'fill="#770000"');
+        window.dispatchEvent(new CustomEvent('petri:svg-proposal', { detail: {
+          path: '${SAMPLE_REL}',
+          previewMarkup: preview,
+          ops: [{ op: 'set_attr', target: { id: 'box' }, name: 'fill', value: '#770000' }],
+          source: 'flow-synthetic',
+        } }));
+        return 'sent';
+      })()`);
+      const ghostReady = await waitFor(client, `(function(){
+        const ghost = document.querySelector('${RAIL} [data-testid="svg-editor-proposal-ghost"]');
+        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-proposal"]');
+        return ghost && bar ? JSON.stringify({ ghost: true, ops: (bar.textContent || '').includes('1 项 op') }) : null;
+      })()`, 8_000);
+      assert('V19_proposal_ghost_visible', Boolean(ghostReady), ghostReady || 'ghost layer missing');
+      const boxBefore = await lib.evalJs(client, `document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #box').getAttribute('fill')`);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="proposal-accept-all"]'); if (b) b.click(); return true; })()`);
+      const accepted = await waitFor(client, `(function(){
+        const ghost = document.querySelector('${RAIL} [data-testid="svg-editor-proposal-ghost"]');
+        const box = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #box');
+        const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        return !ghost && box && box.getAttribute('fill') === '#770000' && save && !save.disabled ? 'accepted' : null;
+      })()`, 8_000);
+      assert('V19b_proposal_accepted', accepted === 'accepted' && boxBefore !== '#770000', `before=${boxBefore} after=${accepted}`);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterProposal = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V19c_proposal_persisted', /fill="#770000"/.test(afterProposal), afterProposal.match(/<rect[^>]*>/)?.[0] || 'no rect');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');

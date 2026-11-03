@@ -45,6 +45,13 @@ export const petriEvents = {
    */
   copilotAsk: 'petri:copilot-ask',
 
+  /**
+   * BLOCK-342 切片6 — agent SVG 提案进入编辑器（propose 的 previewMarkup + ops）。
+   * 派发侧：svg_edit 结果面（chat 工具结果接线 = reopen，当前可由任何持有提案的面派发）；
+   * 监听侧：SvgEditorViewer（路径匹配当前文件 → ghost 叠加 + 逐项接受/拒绝）。
+   */
+  svgProposal: 'petri:svg-proposal',
+
   /** BLOCK-216 Q5 — 从计划卡打开计划面（payload: { planId }）。 */
   planSurfaceOpen: 'petri:plan-surface-open',
 
@@ -364,6 +371,8 @@ export type PetriEventMap = {
   [petriEvents.projectOpenWorkspaceFile]: ProjectOpenWorkspaceFileDetail;
   [petriEvents.projectWorkspaceChanged]: ProjectWorkspaceChangedDetail;
   [petriEvents.copilotAsk]: CopilotAskDetail;
+  /** BLOCK-342 切片6 — agent SVG 提案进编辑器（propose 结果；监听方按 path 匹配当前文件） */
+  [petriEvents.svgProposal]: { path: string; previewMarkup: string; ops: Array<Record<string, unknown>>; source?: string };
   /** BLOCK-264（C-39）— 待审批通知点击载荷（conversationId 定位会话；ackToken 冗余留痕） */
   [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;
