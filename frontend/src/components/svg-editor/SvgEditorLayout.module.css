@@ -101,18 +101,14 @@
   display: none;
 }
 
-/* 全屏编辑：整窗覆盖，按宽容器布局（用户裁决 A：给编辑器更宽的区域） */
+/* 全屏编辑：填满整窗宿主（用户裁决 A：给编辑器更宽的区域；方案 A 的整窗 modal 即该宿主）。
+   UI-668 — 不自带 fixed/inset/z-index：宿主已是全窗模态层，再叠一层 fixed 会盖住宿主头部
+   （「关闭编辑器」不可见）并钻到标题栏下面（实机抓真）。 */
 .expanded {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
+  flex: 1;
+  min-height: 0;
   padding: 12px;
   background: var(--petri-bg-canvas);
   display: flex;
   flex-direction: column;
-}
-
-/* 属性栏展开态显式两列（缺失此条导致 insp 落进 1fr 列与历史卡重叠——量测 w=644 证实） */
-.body[data-inspector='1'] {
-  grid-template-columns: minmax(0, 1fr) 272px;
 }

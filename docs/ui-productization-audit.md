@@ -1,5 +1,23 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-669: SVG 编辑器 modal 内属性栏 272 列宽修复 + 面板常挂载恢复 + flow 方案 A 适配（BLOCK-342 收口切片；2026-11-03 **verified（dev Electron 边界内；实机 31/31 allPass + 截图过目）**）
+
+- **272 列宽根因（行级定位）**：`SvgEditorViewer.tsx` 的属性栏 `<aside>` 被嵌在 `leftCol` 内而非 `body` 直接子层——CSS `.inspector { grid-column: 2 }` 被 leftCol 两列 grid 解释，落位与历史卡同 x、宽 644，`body` 的 272px 列整列空置（与 83e004a1 实测「644、与历史卡同 x」逐位吻合）。修法=aside 搬出 leftCol（回到 layout 单一真源头注释声明的 `body[2列] ─┬─ leftCol └─ 属性栏 col2` 结构），并删除 layout css 末尾给错嵌套打补丁的 `.body[data-inspector='1']` 冗余两列规则。
+- **面板常挂载恢复**：方案 A 重构把图层/属性两 aside 改成条件渲染（收起即卸载），与 layout css 收起设计（`.body[data-layers='0'] .layers { display:none }`）、flow 契约（V2d 读 `dataset.open`）三方矛盾——modal 打开后图层树不在 DOM。修法=恢复常挂载 + 补回 data-open 标记（83e004a1 同时弄丢了该属性），收起仍走 display:none 完全退场，形态不变。
+- **flow 方案 A 适配**：83e004a1 落地时 flow 未跟（仍直接断言编辑器挂载，实机复跑 2/3 V2 红；未提交的 27/27 证据系 modal 落地前产物已失配）。补五腿：V1b 缩略卡形态断言（入口按钮在场 + 编辑器不常驻 DOM，防回退右栏挤编辑器）、点「在编辑器打开」进 modal、V4b 属性栏 272 列宽断言（实机量宽 `width:272, cols:1260.19px 271.991px`）、V7 重开腿（整页刷新后 modal 关闭须再点入口）、V13 关闭腿（modal 退场回缩略卡）。
+- **V2d 默认态契约跟随产品裁决演进**：色板默认展开（2114afa8）、「未保存改动」区块移除（5c172066，svgProposal 契约保留，UI-663 按 pendingOps 方向重建时再更新该断言）。
+- **验证**：实机 flow **31/31 allPass**（`acceptance/block-342/` json+png；截图过目：modal 顶栏「关闭编辑器」在位、属性栏 272px、图层/修订历史同行等宽、画布独占整宽）；契约 22/22 + svg-editor 前端 34/34 + WorkspaceFilePreview 8/8 + theme 17/17 + tsc 0 + lint 0 error。
+
+## UI-668: 会话输入框层级纠正——整窗编辑预览不再被会话框/列接缝穿透（BLOCK-342 随包；2026-11-03 **verified（dev Electron 边界内；实机 13/13 allPass + 截图过目）**）
+
+- **问题（用户反馈）**：「很多页面编辑预览都在会话框底部」——打开整窗 SVG 编辑器后，会话输入框、消息导轨、聊天滚动条、右栏头部图标、列接缝全部压在编辑器之上，编辑器自身头部（「关闭编辑器」）被盖住。
+- **根因（实机 CDP 取证）**：不是输入框层级过高（输入框 `z-index:2` 是基础层小值），而是编辑预览被困在了更低的层级：右栏 tab 容器 `.rightPanelTabContentActive` 与预览 keep-alive 容器 `.workspaceFilePreviewKeepAliveActive` 各写 `z-index:1` 成为堆叠上下文，把 tab 内全部 fixed 浮层（整窗编辑器 70、文件树对话框 340 / 右键菜单 320、3D 生成与草图对话框 80、评审悬停预览与菜单 80/90、划词条 120）困在全局 z≈1；中栏会话祖先链没有堆叠上下文，输入框 2 / 导轨 25·45 / 滚动条 26 直接参与全局比较 → 压在其上。居中对话框的中心恰好落在会话列，于是「预览都在会话框底下」。
+- **变化面**：①去掉两处困层 `z-index`（激活/非激活本就靠 visibility + pointer-events 区分；BLOCK-216 已实证 z-index 防不住 OOPIF 合成泄漏，该职责由 Pack 规则 `display:none` 承担）；②整窗编辑器与 3D 生成/草图对话框改全局阶梯 `--petri-z-modal`（原 70/80 低于会话侧 ToolActivityDock 90、队列菜单 95）；③整窗编辑器从 `--petri-titlebar-height` 下沿开始（列标题栏 9999 刻意压在模态之上，`inset:0` 会盖掉编辑器头部）；④SVG viewer 的 `.expanded` 在布局单一真源 `SvgEditorLayout.module.css` 内改为「填满宿主」，去掉第二层 fixed/inset/z（原先盖住宿主的「关闭编辑器」栏）；⑤全窗模态根节点挂 `data-petri-layer="modal"`，列接缝把手（z 10000，为压过列标题带）在其在场时 `visibility:hidden`——否则接缝竖线穿过模态，且 9px 命中带截走模态内的点击/拖动（实机抓真：在编辑器画布中间按下，拖动的是背后被盖住的列）。
+- **为什么这样修**：会话输入框本就在它该在的基础层；要纠正的是「该在模态层的编辑预览被容器困在了基础层以下」。不压低输入框、也不给会话列加堆叠上下文——后者会把会话自身未 portal 的浮层（ToolActivityDock、完全访问确认等）反困在列内。列标题栏压在模态之上的既定设计保持不变。
+- **验证**：`scripts/ui668-modal-layer-live.cjs`（9222 主实例）13/13 allPass——关闭态：缩略图可命中、激活 tab `z-index:auto`、接缝可见可命中；打开后：`z-index` = `--petri-z-modal`（6000）、`top` = 38px、标题栏以下 12×10 网格 120 个采样点全部命中模态（零穿透）、标题栏带仍在模态之上、关闭按钮可命中、viewer 非 fixed 且位于头部之下、已渲染分区两两不重叠且不越界、接缝隐藏；真实鼠标点击关闭后模态移除、接缝恢复。证据 `acceptance/ui-668/`（modal-layer-live.json + 修复前/后截图）。theme 17/17、tsc 0、触碰 TSX eslint 0 error、css-modules PASS；`test:changed` 前端影响面 54 文件 480/480，Node 261 项 258 过 / 1 跳过 / 2 红（P6 源绑定=未提交必红、提交后复绿；台账测量证据存量不同步，已 `npm run ui:audit:triage` 重生成，契约 4/4）。
+- **顺带修复的存量红（非本条引入）**：`WorkspaceFilePreview.test.tsx` 8/8 红（`fetch(...).then is not a function`；纯 HEAD 导出副本同样 8/8 红）。根因=`b4227a93`（BLOCK-335 require-await 尾批）给 `mockPreviewFetch` 去掉 async 后漏了该提交自己定下的 `Promise.resolve` 包裹；补上后 8/8 绿。
+- **边界**：文件树对话框（340）、settingsOverlay（998）以及会话侧对话框等其余低于 10000 的模态尚未挂 `data-petri-layer="modal"`，接缝在它们之上的存量穿透不在本条处理范围（契约已就位，按需挂载即可）。
+
 ## UI-667: SVG 编辑器抽屉式面板 + 按需展示（BLOCK-342 截图反馈批；2026-11-03 **verified（dev Electron 边界内；实机 28/28 + 截图过目两轮）**）
 
 - **变化面**：①左右面板**零占位**——画布独占整宽，面板改 `position:absolute` 覆盖式抽屉（236px、圆角、阴影、`data-open=0` 完全退场）；②**画布角落胶囊**触发（左下「图层」/右上「属性」/左上「工具」），点开即用、再点即收；③工具条改浮条默认只露「工具」，点开就地展开一排（`nowrap` 防竖排）；④脱敏提示移出折叠区常驻画布顶部；⑤视图清空 `<title>` 文本抑制原生 tooltip（真值不动）。

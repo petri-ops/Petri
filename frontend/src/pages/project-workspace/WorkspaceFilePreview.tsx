@@ -488,8 +488,8 @@ export function WorkspaceFilePreview({
           </div>
         ) : null}
         {svgEditorOpen && projectId && file ? (
-          /* 整窗编辑器：fixed 覆盖全应用（即「主区域」宽度），从右栏一键进入/退出 */
-          <div className={styles.svgEditorModal} data-testid="svg-editor-modal">
+          /* 整窗编辑器：fixed 覆盖标题栏以下全窗（模态档，见 .svgEditorModal），从右栏一键进入/退出 */
+          <div className={styles.svgEditorModal} data-testid="svg-editor-modal" data-petri-layer="modal">
             <div className={styles.svgEditorModalBar}>
               <span>图形编辑器 · {file.name}</span>
               <button

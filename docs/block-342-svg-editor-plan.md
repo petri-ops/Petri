@@ -156,3 +156,16 @@ W1 收口门禁清单（收口时逐项对账）：
 - **脱敏提示移出可折叠区**：安全信息常驻画布顶部（`视图已脱敏 N 处`），不再被图层折叠藏起来。
 - **抑制原生 tooltip**：视图渲染时清空 `<title>` 文本（真值不动、op 不涉及 title），hover 不再弹出盖住画布的文件标题。
 - **实机**：28/28 allPass（截图过目两轮：修工具条换行与胶囊定位；另抓真一处 flow 竞态——样本目录在 finally 自删导致连续两跑互删 ENOENT，改为留盘 + impact-map 忽略规则）。
+
+## 14. 方案 A 收口批：modal 层级 + 272 列宽 + flow 适配（2026-11-03，UI-668/669）
+
+83e004a1（右栏缩略卡 + 整窗编辑器 modal）落地时遗留三处未跟水面，本轮收口：
+
+- **flow 未适配（抓真）**：flow 仍直接断言编辑器挂载，实机 2/3 V2 红；工作区未提交的 27/27 证据系 modal 落地前产物（时间线：证据 14:29 < flow 提交 14:30 < 方案 A 15:40），与 HEAD 失配。补五腿后实机 **31/31 allPass**（V1b 缩略卡形态/入口点击/V4b 272 列宽/V7 重开/V13 关闭退场）。
+- **272 列宽根因（行级定位，不再"下轮专项"）**：属性栏 aside 嵌在 leftCol 内而非 body 直接子层，`grid-column:2` 被 leftCol 两列 grid 解释 → 落历史卡同位（644）。搬出后实机量宽 272 ✓；删 layout css 末尾补丁规则（冗余）。→ **UI-669**
+- **面板常挂载恢复**：方案 A 把图层/属性 aside 改条件渲染（收起即卸载），与 layout css display:none 收起设计、V2d dataset.open 契约矛盾（83e004a1 还弄丢了 data-open 属性）。恢复常挂载 + data-open，收起形态不变。→ **UI-669**
+- **同批并行修复（UI-668，独立 probe 13/13）**：整窗预览被困在右栏 tab/keep-alive 容器 z-index≈1 下（会话输入框/导轨/滚动条/列接缝穿透、编辑器头部被盖）——去两处困层 z-index、模态改 `--petri-z-modal` 全局阶梯、modal 根挂 `data-petri-layer="modal"` 时列接缝让位、`.expanded` 在 layout 单一真源内改「填满宿主」去第二层 fixed。台账见 ui-productization-audit UI-668（`scripts/ui668-modal-layer-live.cjs` + `acceptance/ui-668/`）。
+- **V2d 默认态契约演进**：色板默认展开（2114afa8）、未保存改动区块移除（5c172066；svgProposal 契约保留，UI-663 pendingOps 方向重建时再更新断言）。
+- **门禁**：契约 22/22 + svg-editor 前端 34/34 + WorkspaceFilePreview 8/8 + theme 17/17 + tsc 0 + lint 0 error。
+
+reopen 不变：路径节点编辑/钢笔、图片嵌入、渐变编辑、Inkscape 协处理器、提案幽灵叠加、渲染回验、改动清单（UI-663，pendingOps 方向）。G0 开发期常态 · 不外推 packaged/Provider/GA。

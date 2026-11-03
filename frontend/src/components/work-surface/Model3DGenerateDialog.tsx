@@ -54,7 +54,7 @@ export function Model3DGenerateDialog({
   };
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="AI 生成 3D 模型">
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="AI 生成 3D 模型" data-petri-layer="modal">
       <div className={styles.dialog}>
         <header className={styles.header}>
           <span className={styles.title}><Icon name="layers" size={15} /><strong>AI 生成 3D</strong></span>

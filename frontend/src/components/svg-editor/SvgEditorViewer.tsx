@@ -787,8 +787,81 @@ export function SvgEditorViewer({
 
           </div>
 
-          {inspectorOpen ? (
-            <aside className={layout.inspector} data-testid="svg-editor-inspector">
+          {/* 图层栏常挂载：收起态靠 data-open + display:none 退场（layout 单一真源），不条件卸载——
+             卸载会让 flow 契约（V2d 读 dataset.open）与收起列宽组合丢元素（实机抓真） */}
+            <aside className={layout.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
+              <div className={styles.layersHead}>
+                {layersOpen ? (
+                  <>
+                    <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+                    <button
+                      type="button"
+                      className={button.ghost}
+                      data-action="collapse-layers"
+                      title="收起图层栏"
+                      onClick={() => setLayersOpen(false)}
+                    >
+                      «
+                    </button>
+                  </>
+                ) : null}
+              </div>
+              <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
+                {layerRows.map((el) => {
+                  const key = pathKey(el.path);
+                  return (
+                    <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
+                      <button
+                        type="button"
+                        className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
+                        onClick={(event) => {
+                          syncSelection(new Set([key]));
+                          event.currentTarget.scrollIntoView({ block: 'nearest' });
+                          const root = rootEl();
+                          const target = root ? findByPath(root, decodePath(key)) : null;
+                          target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                        }}
+                        onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
+                        title={`<${el.tag}> path=[${el.path.join(',')}]`}
+                      >
+                        {el.id ? `#${el.id}` : `<${el.tag}>`}
+                        {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+
+          </aside>
+            <section className={layout.revisionCard} data-testid="svg-editor-revision-panel">
+              <div className={styles.layersHead}>
+                <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
+              </div>
+              {revisions.length === 0 ? (
+                <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
+              ) : (
+                <ul className={styles.revisionList} data-testid="svg-editor-revision-list">
+                  {revisions.map((item) => (
+                    <li key={item.file} className={styles.changeRow} data-revision={item.file}>
+                      <button
+                        type="button"
+                        className={styles.revisionItem}
+                        data-action="preview-revision"
+                        title="预览这一版（只读）"
+                        onClick={() => openRevision(item)}
+                      >
+                        <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
+                        <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          {/* 属性栏常挂载：同图层栏——收起靠 data-open + display:none，选中时 setInspectorOpen(true) 展开 */}
+            <aside className={layout.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
               <div className={styles.inspectorHead}>
                 {inspectorOpen ? (
                   <>
@@ -889,79 +962,6 @@ export function SvgEditorViewer({
                 ⌘S 保存 · ⌘Z 撤销 · ⌘K 命令
               </div>
           </aside>
-          ) : null}
-          {layersOpen ? (
-            <aside className={layout.layers} data-testid="svg-editor-layers">
-              <div className={styles.layersHead}>
-                {layersOpen ? (
-                  <>
-                    <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
-                    <button
-                      type="button"
-                      className={button.ghost}
-                      data-action="collapse-layers"
-                      title="收起图层栏"
-                      onClick={() => setLayersOpen(false)}
-                    >
-                      «
-                    </button>
-                  </>
-                ) : null}
-              </div>
-              <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
-                {layerRows.map((el) => {
-                  const key = pathKey(el.path);
-                  return (
-                    <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
-                      <button
-                        type="button"
-                        className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                        onClick={(event) => {
-                          syncSelection(new Set([key]));
-                          event.currentTarget.scrollIntoView({ block: 'nearest' });
-                          const root = rootEl();
-                          const target = root ? findByPath(root, decodePath(key)) : null;
-                          target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                        }}
-                        onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
-                        title={`<${el.tag}> path=[${el.path.join(',')}]`}
-                      >
-                        {el.id ? `#${el.id}` : `<${el.tag}>`}
-                        {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-
-          </aside>
-          ) : null}
-            <section className={layout.revisionCard} data-testid="svg-editor-revision-panel">
-              <div className={styles.layersHead}>
-                <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
-              </div>
-              {revisions.length === 0 ? (
-                <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
-              ) : (
-                <ul className={styles.revisionList} data-testid="svg-editor-revision-list">
-                  {revisions.map((item) => (
-                    <li key={item.file} className={styles.changeRow} data-revision={item.file}>
-                      <button
-                        type="button"
-                        className={styles.revisionItem}
-                        data-action="preview-revision"
-                        title="预览这一版（只读）"
-                        onClick={() => openRevision(item)}
-                      >
-                        <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
-                        <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
         </div>
       ) : null}
 

@@ -1,7 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  /* UI-668 — 模态档：原 80 低于会话侧浮窗（ToolActivityDock 90 / 队列菜单 95） */
+  z-index: var(--petri-z-modal);
   display: flex;
   align-items: center;
   justify-content: center;

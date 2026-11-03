@@ -3152,10 +3152,13 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   opacity: 0.52;
 }
 
+/* UI-668 — 激活/非激活只靠 visibility + pointer-events 区分，刻意不写 z-index：
+   z-index 会让本层成为堆叠上下文，把 tab 内的 fixed 浮层（整窗编辑器/对话框/右键菜单）
+   困在全局 z≈1，被中栏会话输入框（z 2）、消息导轨、滚动条压在下面（实机抓真）。
+   非激活 OOPIF 的合成泄漏 z-index 本就防不住，由下方 Pack 规则 display:none 处理。 */
 .rightPanelTabContent {
   position: absolute;
   inset: 0;
-  z-index: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -3166,7 +3169,6 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 }
 
 .rightPanelTabContentActive {
-  z-index: 1;
   visibility: visible;
   pointer-events: auto;
 }
@@ -3931,6 +3933,13 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
      带同样连续（compact 断点内本元素 display:none，不参与 backdrop/absolute 列竞争）。 */
   z-index: 10000;
   transition: background var(--petri-duration-fast) ease;
+}
+
+/* UI-668 — 全窗模态层（根节点 data-petri-layer="modal"）盖住各列时接缝让位：上面的 10000
+   只为压过列标题带；不让位就会穿过模态显示竖线，并截走模态内 9px 宽的点击/拖动
+   （实机抓真：在编辑器画布中间按下，拖动的是背后被盖住的列）。 */
+body:has([data-petri-layer='modal']) .resizeHandleV {
+  visibility: hidden;
 }
 
 .resizeHandleV::after {
@@ -7615,9 +7624,9 @@ body:global(.petri-resizing-columns) * {
   min-height: 0;
 }
 
+/* UI-668 — 同 rightPanelTabContentActive：不写 z-index，免得把预览内的整窗浮层困在全局 z≈1 */
 .workspaceFilePreviewKeepAliveActive {
   visibility: visible;
-  z-index: 1;
 }
 
 /* BLOCK-253 E4 — 文件管理器定位的可见状态（成功/测试实例干跑） */
@@ -7702,10 +7711,15 @@ body:global(.petri-resizing-columns) * {
   filter: brightness(1.08);
 }
 
+/* UI-668 — 整窗编辑器走全局模态档；从标题栏下沿开始：列内标题栏刻意压在模态之上
+   （ColumnizedTitleBar 9999），inset:0 会让编辑器自己的头部（关闭按钮）钻到标题栏下面。 */
 .svgEditorModal {
   position: fixed;
-  inset: 0;
-  z-index: 70;
+  top: var(--petri-titlebar-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--petri-z-modal);
   display: flex;
   flex-direction: column;
   background: var(--petri-bg-canvas);

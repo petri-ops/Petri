@@ -1,0 +1,194 @@
+{
+  "kind": "ui668-modal-layer-live",
+  "capturedAt": "2026-11-03T08:49:25.662Z",
+  "debugPort": "9222",
+  "pageUrl": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793692040896",
+  "allPass": true,
+  "checks": [
+    {
+      "name": "L1a thumb button hittable (closed)",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "L1b active right tab is not a stacking context",
+      "pass": true,
+      "detail": "zIndex=auto"
+    },
+    {
+      "name": "L1c seams visible+hittable (closed)",
+      "pass": true,
+      "detail": "[{\"x\":311,\"visibility\":\"visible\",\"hittable\":true},{\"x\":955,\"visibility\":\"visible\",\"hittable\":true}]"
+    },
+    {
+      "name": "L2a modal z-index = --petri-z-modal",
+      "pass": true,
+      "detail": "6000 vs 6000"
+    },
+    {
+      "name": "L2b modal top = --petri-titlebar-height",
+      "pass": true,
+      "detail": "38px vs 38px"
+    },
+    {
+      "name": "L3 grid below title bar all inside modal",
+      "pass": true,
+      "detail": "120 samples, offenders=[]"
+    },
+    {
+      "name": "L4 title band stays above modal (deliberate chrome)",
+      "pass": true,
+      "detail": "DIV._centerTitleMain_c8s3s_233"
+    },
+    {
+      "name": "L5 close button hittable",
+      "pass": true,
+      "detail": "{\"center\":{\"x\":1508.2202758789062,\"y\":56.75753593444824},\"hittable\":true}"
+    },
+    {
+      "name": "L6 viewer not fixed, below modal bar, inside modal",
+      "pass": true,
+      "detail": "{\"viewer\":{\"rect\":{\"x\":0,\"y\":76.14608001708984,\"w\":1564.1605224609375,\"h\":765.8032836914062,\"r\":1564.1605224609375,\"b\":841.9493637084961},\"position\":\"static\",\"expanded\":\"1\"},\"barBottom\":76.14608001708984}"
+    },
+    {
+      "name": "L7 editor parts no overlap & inside viewer",
+      "pass": true,
+      "detail": "{\"rendered\":[\"stage\",\"revision\"],\"overlapPairs\":[],\"outside\":[]}"
+    },
+    {
+      "name": "L8 seams hidden while modal open",
+      "pass": true,
+      "detail": "[\"hidden\",\"hidden\"]"
+    },
+    {
+      "name": "L9a real mouse click closes modal",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "L9b seams visible+hittable again",
+      "pass": true,
+      "detail": "[{\"x\":311,\"visibility\":\"visible\",\"hittable\":true},{\"x\":955,\"visibility\":\"visible\",\"hittable\":true}]"
+    }
+  ],
+  "closedBefore": {
+    "precondition": true,
+    "openButton": {
+      "x": 1096.664077758789,
+      "y": 296.51970958709717
+    },
+    "thumbHittable": true,
+    "activeTabZ": "auto",
+    "seams": [
+      {
+        "x": 311,
+        "visibility": "visible",
+        "hittable": true
+      },
+      {
+        "x": 955,
+        "visibility": "visible",
+        "hittable": true
+      }
+    ]
+  },
+  "open": {
+    "modalPresent": true,
+    "viewport": {
+      "vw": 1564,
+      "vh": 842
+    },
+    "modal": {
+      "rect": {
+        "x": 0,
+        "y": 37.99918746948242,
+        "w": 1564.1605224609375,
+        "h": 803.9501953125,
+        "r": 1564.1605224609375,
+        "b": 841.9493827819824
+      },
+      "zIndex": "6000",
+      "top": "38px"
+    },
+    "tokens": {
+      "zModal": "6000",
+      "titlebar": "38px"
+    },
+    "grid": {
+      "samples": 120,
+      "offenders": []
+    },
+    "titleBandTop": "DIV._centerTitleMain_c8s3s_233",
+    "titleBandInModal": false,
+    "closeButton": {
+      "center": {
+        "x": 1508.2202758789062,
+        "y": 56.75753593444824
+      },
+      "hittable": true
+    },
+    "bar": {
+      "x": 0,
+      "y": 37.99918746948242,
+      "w": 1564.1605224609375,
+      "h": 38.14689254760742,
+      "r": 1564.1605224609375,
+      "b": 76.14608001708984
+    },
+    "viewer": {
+      "rect": {
+        "x": 0,
+        "y": 76.14608001708984,
+        "w": 1564.1605224609375,
+        "h": 765.8032836914062,
+        "r": 1564.1605224609375,
+        "b": 841.9493637084961
+      },
+      "position": "static",
+      "expanded": "1"
+    },
+    "parts": {
+      "stage": {
+        "x": 11.993524551391602,
+        "y": 147.35887145996094,
+        "w": 1540.1734619140625,
+        "h": 478.6086120605469,
+        "r": 1552.166986465454,
+        "b": 625.9674835205078
+      },
+      "revision": {
+        "x": 11.993524551391602,
+        "y": 633.963134765625,
+        "w": 1540.1734619140625,
+        "h": 195.99270629882812,
+        "r": 1552.166986465454,
+        "b": 829.9558410644531
+      }
+    },
+    "seamsVisibility": [
+      "hidden",
+      "hidden"
+    ]
+  },
+  "closedAfter": {
+    "precondition": true,
+    "openButton": {
+      "x": 1096.664077758789,
+      "y": 296.51970958709717
+    },
+    "thumbHittable": true,
+    "activeTabZ": "auto",
+    "seams": [
+      {
+        "x": 311,
+        "visibility": "visible",
+        "hittable": true
+      },
+      {
+        "x": 955,
+        "visibility": "visible",
+        "hittable": true
+      }
+    ]
+  }
+}

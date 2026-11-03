@@ -63,7 +63,8 @@ afterEach(() => {
 });
 
 function mockPreviewFetch() {
-  vi.stubGlobal('fetch', vi.fn(() => new Response('# check.md\n\nbaseline\n', { status: 200 })));
+  // 组件以 fetch(...).then 消费：去掉 async（require-await）后须 Promise.resolve 包裹，否则返回裸 Response
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('# check.md\n\nbaseline\n', { status: 200 }))));
 }
 
 describe('BLOCK-74 预览头部减负', () => {

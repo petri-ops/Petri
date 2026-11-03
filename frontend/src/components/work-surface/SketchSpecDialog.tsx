@@ -98,7 +98,7 @@ export function SketchSpecDialog({ onClose }: { onClose: () => void }): React.Re
   };
 
   return (
-    <div className={styles.overlay} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <div className={styles.overlay} role="presentation" data-petri-layer="modal" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-label="草图转需求" data-testid="sketch-spec-dialog">
         <header className={styles.header}>
           <span className={styles.title}>

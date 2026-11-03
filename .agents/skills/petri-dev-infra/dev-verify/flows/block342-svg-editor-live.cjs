@@ -5,6 +5,7 @@
  * dev-verify flow：block342-svg-editor-live — BLOCK-342 W1 实机腿。
  *
  * 真实入口：当前项目工作区放一份临时 SVG（跑完即删）→ 主窗 `?file=` 深链打开
+ * → 右栏缩略卡点「在编辑器打开」进整窗 modal（方案 A：编辑器不常驻 DOM）
  * → 编辑器挂载（画布/图层树/保存禁用=零改动）→ 真实指针点选 → 拖拽移动
  * → 保存写盘（文件 sha 变化 + transform 落地）→ 重新打开保存仍禁用且字节零 diff
  * → REST 反向腿：外部改动后拿旧 sha 提案必须 `svg_hash_mismatch`（人的修正不被覆盖）。
@@ -62,7 +63,7 @@ const RAIL = '[class*="rightCol"]';
 
 module.exports = {
   id: 'block342-svg-editor-live',
-  description: 'BLOCK-342 W1：工作区 .svg 进受治理编辑器——点选/拖拽/保存/零改动零 diff/冲突拒绝',
+  description: 'BLOCK-342 W1+方案A：工作区 .svg 缩略卡→整窗 modal 编辑器——点选/拖拽/保存/零改动零 diff/272 列宽/冲突拒绝/关闭退场',
   evidenceDir: EVIDENCE_DIR,
 
   async run(ctx) {
@@ -95,15 +96,27 @@ module.exports = {
         await lib.evalJs(client, `location.assign('/project/${project.id}?file=${encodeURIComponent(rel)}&_t=${Date.now()}')`);
       };
 
-      // V2 — 编辑器挂载：画布 + 图层树 + 保存禁用（零操作零 diff 的呈现）
+      // V2 — 编辑器挂载：方案 A 入口=右栏缩略卡 → 点「在编辑器打开」→ 整窗 modal 承载
       await openFile(SAMPLE_REL);
+      // V1b — 缩略卡形态：缩略图 + 入口按钮在场，且编辑器不常驻 DOM（防回退「右栏挤编辑器」）
+      const thumb = await waitFor(client, `(function(){
+        const card = document.querySelector('${RAIL} [data-testid="svg-editor-thumb-card"]');
+        const btn = card && card.querySelector('[data-action="open-svg-editor"]');
+        const img = card && card.querySelector('img');
+        const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        return card && btn && img && !canvas ? JSON.stringify({ thumb: true, btn: (btn.textContent || '').trim() }) : null;
+      })()`);
+      assert('V1b_thumb_entry_no_inline_editor', Boolean(thumb), thumb || 'thumb card missing or editor mounted without entry click');
+      if (!thumb) return false;
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="open-svg-editor"]'); if (b) b.click(); return true; })()`);
       const mounted = await waitFor(client, `(function(){
+        const modal = document.querySelector('${RAIL} [data-testid="svg-editor-modal"]');
         const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
         const layers = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
         const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
-        return canvas && layers && save ? JSON.stringify({ canvas: true, layers: layers.textContent.slice(0, 40), saveDisabled: save.disabled }) : null;
+        return modal && canvas && layers && save ? JSON.stringify({ canvas: true, layers: layers.textContent.slice(0, 40), saveDisabled: save.disabled }) : null;
       })()`);
-      assert('V2_editor_mounted', Boolean(mounted), mounted || 'svg-editor not mounted');
+      assert('V2_editor_mounted', Boolean(mounted), mounted || 'svg-editor modal not mounted after entry click');
       if (!mounted) return false;
       const mountInfo = JSON.parse(mounted);
       assert('V2b_initial_save_disabled', mountInfo.saveDisabled === true, `saveDisabled=${mountInfo.saveDisabled}`);
@@ -125,8 +138,10 @@ module.exports = {
         });
       })()`);
       const panelInfo = JSON.parse(panels);
+      // 默认态契约跟随产品裁决演进：色板默认展开（2114afa8）；「未保存改动」区块已移除（5c172066，
+      // svgProposal 契约保留，UI-663 按 pendingOps 方向重建时再更新本断言）
       assert('V2d_default_state',
-        panelInfo.paletteOpen === false && panelInfo.changesOpen === false
+        panelInfo.paletteOpen === true && panelInfo.changesOpen === null
           && panelInfo.toolGroupOpen === '1' && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
           && panelInfo.toolButtons >= 6,
         panels);
@@ -152,6 +167,22 @@ module.exports = {
         return overlays > 0 && props > 0 ? JSON.stringify({ overlays, props }) : null;
       })()`);
       assert('V4_selection_visible', Boolean(selected), selected || 'no overlay/propRow after click');
+
+      // V4b — 272 列宽（modal 内属性栏专项）：属性栏必须是 body 直接子层（独占 col2 固定 272px），
+      // 嵌错进 leftCol 会被两列 grid 解释成 1fr（实测 644、与历史卡同 x）
+      const insp = await lib.evalJs(client, `(function(){
+        const aside = document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]');
+        if (!aside) return JSON.stringify({ ok: false, reason: 'no inspector after select' });
+        const body = aside.parentElement;
+        const r = aside.getBoundingClientRect();
+        const cols = body ? getComputedStyle(body).gridTemplateColumns : '';
+        return JSON.stringify({ ok: true, width: Math.round(r.width), left: Math.round(r.left), cols });
+      })()`);
+      const inspInfo = JSON.parse(insp);
+      assert('V4b_inspector_col_272',
+        inspInfo.ok === true && Math.abs(inspInfo.width - 272) <= 2
+          && String(inspInfo.cols).split(' ').some((v) => Math.abs(parseFloat(v) - 272) <= 2),
+        insp);
 
       // V5 — 真实拖拽：pointerdown → pointermove(+48/+24) → pointerup → 保存解锁
       const dragged = await lib.evalJs(client, `(function(){
@@ -190,12 +221,20 @@ module.exports = {
       assert('V6b_translate_persisted', /<rect[^>]*transform="translate\(48 24\)"/.test(afterSave), afterSave.match(/<rect[^>]*>/)?.[0] || 'no rect');
       assert('V6c_locality_preserved', afterSave.includes('<!-- BLOCK-342 live 样本') && afterSave.includes('<text id="caption"'), 'comment/text intact');
 
-      // V7 — 重新打开：零操作保存仍禁用；再点保存不得改字节（零改动零 diff）
+      // V7 — 重新打开：整页刷新后 modal 关闭（方案 A 形态回归）→ 再点入口进编辑器；零操作保存仍禁用
       await openFile(SAMPLE_REL);
+      const reopenThumb = await waitFor(client, `(function(){
+        const btn = document.querySelector('${RAIL} [data-action="open-svg-editor"]');
+        const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        return btn && !canvas ? 'thumb-ready' : null;
+      })()`);
+      assert('V7_reopen_thumb_entry', reopenThumb === 'thumb-ready', String(reopenThumb));
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="open-svg-editor"]'); if (b) b.click(); return true; })()`);
       const reopened = await waitFor(client, `(function(){
         const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
         const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
-        return save && canvas ? JSON.stringify({ saveDisabled: save.disabled }) : null;
+        const modal = document.querySelector('${RAIL} [data-testid="svg-editor-modal"]');
+        return save && canvas && modal ? JSON.stringify({ saveDisabled: save.disabled }) : null;
       })()`);
       assert('V7_reopen_save_disabled', Boolean(reopened) && JSON.parse(reopened).saveDisabled === true, reopened || 'not reopened');
       const beforeIdle = fs.readFileSync(SAMPLE_ABS);
@@ -340,6 +379,16 @@ module.exports = {
       assert('V8_stale_apply_rejected', stale.status === 409 && staleCode === 'svg_hash_mismatch', `status=${stale.status} code=${staleCode} body=${JSON.stringify(stale.data).slice(0, 160)}`);
 
       await lib.screenshotPng(client, EVIDENCE_DIR, 'block342-svg-editor-live.png');
+
+      // V13 — 关闭编辑器：modal 退场 + 缩略卡仍在（退出回「瞄一眼」形态，方案 A 出口可用）
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="close-svg-editor"]'); if (b) b.click(); return true; })()`);
+      const closed = await waitFor(client, `(function(){
+        const modal = document.querySelector('${RAIL} [data-testid="svg-editor-modal"]');
+        const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const card = document.querySelector('${RAIL} [data-testid="svg-editor-thumb-card"]');
+        return !modal && !canvas && card ? 'closed' : null;
+      })()`, 8_000);
+      assert('V13_close_returns_to_thumb', closed === 'closed', String(closed));
       return true;
     } finally {
       if (client) {
