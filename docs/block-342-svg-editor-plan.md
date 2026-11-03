@@ -187,7 +187,7 @@ reopen 不变：路径节点编辑/钢笔、图片嵌入、渐变编辑、Inksca
 **已交付**：W1 受治理编辑内核 + W2 属性/色板/样式 + W3 绘制 + W4 选区进会话 + 方案 A（modal）+ 七 reopen 切片（UI-670 改动清单 / 671 路径节点+钢笔 / 672 图片嵌入 / 673 渐变 / 674 Inkscape 探针+守卫 / 675 提案幽灵 / 676 渲染回验）；UI-661~676 全 verified；flow `block342-svg-editor-live` 53/53。
 
 **交接项（不在本包验收边界内，按需另行立项）**：
-1. chat 派发侧接线——`petri:svg-proposal` 协议已定型、编辑器侧全链 verified；剩「svg_edit 结果面 → 派发事件」需动通用工具结果渲染链（SimpleChat 邻域，单独切片）。
+1. ~~chat 派发侧接线~~ → **已收口（2026-11-03，UI-677）**：mergeToolResultActivity 实时派发 + 后端 ops 回显 + callId 去重，前端 85/85。
 2. vision 判据附件通道——渲染回验的看图判据需附件进会话（涉 BLOCK-225 D4 附件面）。
 3. 位图描摹——Inkscape 动作之一，本机未装（装后即用，探针/守卫已就位）。
 4. 版本对比（洋葱皮）+ 历史面板（人+agent 同一时间线，读 .petri/svg-revisions/）。

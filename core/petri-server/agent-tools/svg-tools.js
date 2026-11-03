@@ -290,6 +290,8 @@ function tool_svg_edit(args, ctx) {
       afterSha256: applied.afterSha,
       changed: applied.changed,
       semanticDiff: summary,
+      // 切片6 交接 — ops 回显（请求原文原样返回）：提案消费者（编辑器幽灵浮条）按 op 逐项取舍
+      ops,
       // BLOCK-342 W4 — 提案预览文本（仅在内存返回，不落盘、不进第二真值）：供编辑器做幽灵叠加与逐元素取舍
       previewMarkup: applied.changed ? capPreview(applied.text) : read.text,
       next: applied.changed

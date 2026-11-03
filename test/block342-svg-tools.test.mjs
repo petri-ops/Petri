@@ -157,6 +157,9 @@ test('BLOCK-342 P2 svg_edit propose：只校验不写盘，返回 before/after s
   assert.equal(r.semanticDiff[0].op, 'set_attr');
   assert.ok(r.semanticDiff[0].target.includes('bar'), r.semanticDiff[0].target);
 
+  // 切片6 交接 — ops 回显（提案消费者按 op 逐项取舍）
+  assert.deepEqual(r.ops, [{ op: 'set_attr', target: { id: 'bar' }, name: 'fill', value: '#cc0000' }]);
+
   // propose 绝不写盘
   assert.equal(fs.readFileSync(file, 'utf8'), SVG);
   assert.equal(fs.statSync(file).mtimeMs, beforeMtime);

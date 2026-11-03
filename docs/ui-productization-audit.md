@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-677: agent SVG 提案进编辑器——chat 派发侧接线（BLOCK-342 切片6 交接项收口；2026-11-03 **verified（dev Electron 边界内；前端 85/85 + flow 53/53 回归全绿）**）
+
+- **链路闭环**：`svg_edit` propose 的实时工具结果（`mergeToolResultActivity`——仅实时路径，历史恢复走 restoreToolActivities 不触发）→ 派发 `petri:svg-proposal`（path/previewMarkup/ops/source=chat:svg_edit）→ 编辑器 ghost 叠加 + 逐项接受/拒绝（UI-675 既有全链）。callId 去重 FIFO（cap 200）防重复派发/防膨胀。
+- **后端配套（零破坏）**：propose 返回补 `ops` 回显（请求原文原样返回）——此前只有 semanticDiff 摘要，逐项接受无 op 本体可 commit；契约补回显断言（block342-svg-tools 22/22）。
+- **验证**：`toolActivity.test` 3 条新契约（实时派发载荷/callId 去重/apply·空预览·空 ops·非 svg_edit 四不派发）→ copilot 前端 23/23 + svg-editor 62/62 = 85/85；tsc 0 + lint 0 error；flow 53/53 回归。**真实 agent 回合的端到端验证**（会话跑 svg_edit propose → 编辑器弹 ghost）随日常使用自然覆盖——事件协议与两侧实现均已契约钉死。
+
 ## UI-676: SVG 编辑器渲染回验——当前视图 PNG 快照 + 判据注入会话（BLOCK-342 切片7；2026-11-03 **verified（dev Electron 边界内；实机 53/53 allPass）**）
 
 - **交互**：工具栏「回验」→ 当前视图（serialize 后按 viewBox 等比，最长边 ≤1024）经 Blob→Image→离屏 canvas 渲染为 PNG 快照浮条（预览 + 尺寸标注）；「请 agent 回验」→ copilotAsk 注入判据 prompt（文件路径 + 待保存 op 摘要 + 结构回验判据，指路 svg_inspect/svg_edit propose-先说方案）。

@@ -7,6 +7,7 @@ import type {
   UserQuestion,
 } from './copilotClient';
 import type { IconName } from '@/components/icons/Icon';
+import { dispatchPetriEvent, petriEvents } from '../../lib/events';
 
 export type ToolActivityStatus = 'running' | 'awaiting_confirmation' | 'success' | 'error' | 'denied';
 
@@ -694,6 +695,36 @@ export function mergeToolOutputActivity(
   return next;
 }
 
+// BLOCK-342 切片6 交接 — svg_edit propose 实时结果 → 编辑器提案幽灵（petri:svg-proposal）。
+// 仅实时 merge 路径派发（历史恢复走 restoreToolActivities 不经过此处——历史提案不自动弹 ghost）；
+// callId 去重 FIFO 防重复派发/防膨胀。
+const SVG_PROPOSAL_SENT = new Set<string>();
+
+function maybeDispatchSvgProposal(
+  name: string,
+  callId: string | undefined,
+  resultData: Record<string, unknown> | undefined,
+): void {
+  if (name !== 'svg_edit' || !resultData || resultData.propose !== true) return;
+  const markup = resultData.previewMarkup;
+  const ops = resultData.ops;
+  if (typeof markup !== 'string' || markup === '' || !Array.isArray(ops) || ops.length === 0) return;
+  const beforeSha = typeof resultData.beforeSha256 === 'string' ? resultData.beforeSha256 : '';
+  const dedupKey = callId || `sha:${beforeSha.slice(0, 16)}`;
+  if (SVG_PROPOSAL_SENT.has(dedupKey)) return;
+  SVG_PROPOSAL_SENT.add(dedupKey);
+  if (SVG_PROPOSAL_SENT.size > 200) {
+    const oldest = SVG_PROPOSAL_SENT.values().next().value;
+    if (oldest !== undefined) SVG_PROPOSAL_SENT.delete(oldest);
+  }
+  dispatchPetriEvent(petriEvents.svgProposal, {
+    path: typeof resultData.filePath === 'string' ? resultData.filePath : '',
+    previewMarkup: markup,
+    ops: ops as Array<Record<string, unknown>>,
+    source: 'chat:svg_edit',
+  });
+}
+
 export function mergeToolResultActivity(
   current: ToolActivityItem[],
   event: ToolResultEvent
@@ -718,6 +749,7 @@ export function mergeToolResultActivity(
   // BLOCK-59 P4 — agent 管理工具结果携带 agentId（子 agent 任务 id），
   // 提取供活动行「详情窗」入口；其余工具 / 既有值原样保留。
   const resultData = result?.data as Record<string, unknown> | undefined;
+  maybeDispatchSvgProposal(name, result?.callId, resultData);
   // UI-315 优化 — exec 结果携带实际使用的 shell 可执行路径，派生短标签
   const resultShellLabel = (() => {
     const shell = resultData && typeof resultData.shell === 'string' ? resultData.shell : '';

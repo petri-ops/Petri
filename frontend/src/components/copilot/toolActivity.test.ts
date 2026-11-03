@@ -466,3 +466,82 @@ describe('BLOCK-247 联网来源标签派生', () => {
     expect(withLabel[0].sourceLabel).toBe('audit.example.org');
   });
 });
+
+describe('BLOCK-342 切片6交接 svg_edit propose → petri:svg-proposal 派发', () => {
+  const captured: Array<CustomEvent> = [];
+  const listener = (e: Event) => captured.push(e as CustomEvent);
+
+  const resultEvent = (overrides: Record<string, unknown> = {}, callId = 'call-1') => ({
+    name: 'svg_edit',
+    toolJobId: 'job-1',
+    toolResult: {
+      tool: 'svg_edit',
+      callId,
+      ok: true,
+      data: {
+        propose: true,
+        filePath: 'scenes/plot.svg',
+        beforeSha256: 'aaaaaaaaaaaaaaaa',
+        previewMarkup: '<svg xmlns="http://www.w3.org/2000/svg"><rect id="box" fill="#770000"/></svg>',
+        ops: [{ op: 'set_attr', target: { id: 'box' }, name: 'fill', value: '#770000' }],
+        ...overrides,
+      },
+    },
+  }) as never;
+
+  it('实时 svg_edit propose 结果派发 petri:svg-proposal（载荷含 path/previewMarkup/ops）', () => {
+    window.addEventListener('petri:svg-proposal', listener);
+    try {
+      captured.length = 0;
+      mergeToolResultActivity([], resultEvent({}, 'dedup-a'));
+      expect(captured).toHaveLength(1);
+      const detail = captured[0].detail as { path: string; previewMarkup: string; ops: unknown[]; source: string };
+      expect(detail.path).toBe('scenes/plot.svg');
+      expect(detail.previewMarkup).toContain('#770000');
+      expect(detail.ops).toHaveLength(1);
+      expect(detail.source).toBe('chat:svg_edit');
+    } finally {
+      window.removeEventListener('petri:svg-proposal', listener);
+    }
+  });
+
+  it('callId 去重：同一结果二次 merge 不重复派发（独立 callId 隔离其他用例）', () => {
+    window.addEventListener('petri:svg-proposal', listener);
+    try {
+      captured.length = 0;
+      const items = mergeToolResultActivity([], resultEvent({}, 'dedup-b'));
+      mergeToolResultActivity(items, resultEvent({}, 'dedup-b'));
+      expect(captured).toHaveLength(1);
+    } finally {
+      window.removeEventListener('petri:svg-proposal', listener);
+    }
+  });
+
+  it('apply 结果 / 空预览 / 空 ops / 非 svg_edit 一律不派发', () => {
+    window.addEventListener('petri:svg-proposal', listener);
+    try {
+      captured.length = 0;
+      mergeToolResultActivity([], resultEvent({ propose: false }, 'neg-1'));
+      mergeToolResultActivity([], resultEvent({ previewMarkup: '' }, 'neg-2'));
+      mergeToolResultActivity([], resultEvent({ ops: [] }, 'neg-3'));
+      mergeToolResultActivity([], {
+        name: 'read_file',
+        toolJobId: 'job-2',
+        toolResult: {
+          tool: 'read_file',
+          callId: 'neg-4',
+          ok: true,
+          data: {
+            propose: true,
+            filePath: 'scenes/plot.svg',
+            previewMarkup: '<svg/>',
+            ops: [{ op: 'set_attr', target: { id: 'box' }, name: 'fill', value: '#770000' }],
+          },
+        },
+      } as never);
+      expect(captured).toHaveLength(0);
+    } finally {
+      window.removeEventListener('petri:svg-proposal', listener);
+    }
+  });
+});
