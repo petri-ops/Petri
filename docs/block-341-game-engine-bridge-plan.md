@@ -1,6 +1,6 @@
 ---
 capability: block-341-game-engine-bridge
-status: planned
+status: active
 goal: 受治理的本地游戏引擎桥（Godot 4 headless 先行）+ Blender 现有工程受治理扩档：把推文里「agent 操作引擎 → 运行 → 看画面 → 改 → 再验证」做成 Petri 形态——单真值 / manifest sha / propose-apply 修订快照 / 放权坡道审批 / 诚实 `capability_unavailable`。对照 Kimi「游戏开发与创意工作解决方案」推文评估（2026-11-02）的核心缺口。
 acceptance:
   - P0 形态裁决钉死（立项自检问句答案）：差别形态 = 本地主权（引擎 / 脚本 / 渲染全在用户机器，无云端中继）+ 单真值（改动经 propose/apply 落修订快照与语义 diff，不绕开 artifact 链）+ 治理透明（白名单外脚本 / 命令默认 require-ack，走放权坡道 observe→allow 与 ack 审计）+ 证据自证（运行截图 / 日志 / 退出码落 manifest sha 可复核）；不复刻「云端大模型直连专业软件」。P5 Blender 扩档边界与 BLOCK-322 RULING-01「不建第二场景真值」的关系在启动时由用户显式裁决。
@@ -15,6 +15,7 @@ reopen: Unity（Tuanjie / batchmode）与 UE（commandlet）桥——闭源 / �
 
 # BLOCK-341-GAME-ENGINE-BRIDGE — 受治理游戏引擎桥计划（Godot 先行）
 
+- 登记状态：**active（2026-11-03 启动；用户「确认 一次性搞完 不用再问」=发令）**——P0 形态裁决按 plan 预答钉死；**P5 Blender 扩档边界裁决=用户已确认按 plan §P5 预答执行**（.blend 视为外部资产、provenance 入 manifest、不产生第二场景真值；实施中若发现与 322 单真值实质冲突则停下上报）。Godot 4.7.1 已在本机（/opt/homebrew/bin/godot + /Applications/Godot.app）。
 - 立项裁决：用户 2026-11-02 对照 Kimi 游戏解决方案推文的能力评估后「可以的 梳理好了 这一块是否要建个 block 后续排队推进？」→ 主代理答「要」并登记排队（planned，未启动）。
 - 队列位置：**340 之后（当前末位）**；依赖 340 的帧→vision 管线与 335 的闭环接口；336 worktree 便于与其它包并行，非硬依赖；323 放权坡道已完成可直接复用。
 - 唯一真相域：本文件（block-341-game-engine-bridge）
