@@ -28,6 +28,7 @@ import {
   type StyleSnapshot,
 } from './svgEditorInspector';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import { diffElements, revertAllOps, revertElementOps, summarizeChanges, type ElementChange } from './svgProposal';
 import {
   duplicateOp,
   findByPath,
@@ -131,6 +132,9 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [tool, setTool] = React.useState<DrawTool>('select');
   const [selectedProps, setSelectedProps] = React.useState<Record<string, string>>({});
   const [styleClip, setStyleClip] = React.useState<StyleSnapshot | null>(null);
+  // W4 逐元素取舍：磁盘真值基线 + 当前差异清单
+  const [baseMarkup, setBaseMarkup] = React.useState('');
+  const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
@@ -147,6 +151,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   /** 把一次成功的载入结果落到组件状态（只在异步回调/事件里调用，不在 effect 同步段调用）。 */
   const applyLoaded = React.useCallback((doc: LoadedDocument) => {
     setMarkup(doc.markup);
+    setBaseMarkup(doc.markup);
+    setChangeLog(null);
     markupRef.current = doc.markup;
     setState({ status: 'ready', inspect: doc.inspect, baseSha: doc.inspect.sha256, removed: doc.removed });
     setPendingOps([]);
@@ -285,6 +291,32 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
     commit(ops, currentMarkup());
     setNotice(`已把 ${styleClip.label} 的样式套到 ${targets.length} 个元素`);
   }, [commit, currentMarkup, rootEl, selected, styleClip]);
+
+  /** W4 改动清单：磁盘真值 vs 当前未保存视图的逐元素差异。 */
+  const openChangeLog = React.useCallback(() => {
+    setChangeLog(diffElements(baseMarkup, markup));
+  }, [baseMarkup, markup]);
+
+  /** W4 逐元素拒绝：把该元素恢复成磁盘形态（只产出白名单 op）。 */
+  const revertOne = React.useCallback((change: ElementChange) => {
+    const { ops, reason } = revertElementOps(change);
+    if (ops.length === 0) {
+      setNotice(reason || '该元素无法一键撤销');
+      return;
+    }
+    commit(ops, currentMarkup());
+    setNotice(`已撤销 ${change.label} 的未保存改动`);
+    setChangeLog(null);
+  }, [commit, currentMarkup]);
+
+  /** W4 全部拒绝：回到磁盘真值形态（不可逆项如实跳过并提示）。 */
+  const revertAllChanges = React.useCallback(() => {
+    if (!changeLog || changeLog.length === 0) return;
+    const { ops, skipped } = revertAllOps(changeLog);
+    if (ops.length > 0) commit(ops, currentMarkup());
+    setNotice(skipped > 0 ? `已撤销全部可逆改动（${skipped} 项需手工处理）` : '已撤销全部未保存改动');
+    setChangeLog(null);
+  }, [changeLog, commit, currentMarkup]);
 
   const undo = React.useCallback(() => {
     setHistory((prev) => {
@@ -667,6 +699,35 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 </div>
               </div>
             ) : null}
+            <div className={styles.changeBlock} data-testid="svg-editor-changes">
+              <div className={styles.panelTitle}>未保存改动（逐元素取舍）</div>
+              <div className={styles.rowActions}>
+                <button type="button" className={button.ghost} onClick={openChangeLog} data-action="open-changes">列出改动</button>
+                <button type="button" className={button.ghost} onClick={revertAllChanges} disabled={!changeLog || changeLog.length === 0} data-action="revert-all">全部撤销</button>
+              </div>
+              {changeLog ? (
+                changeLog.length === 0 ? (
+                  <div className={styles.note}>与磁盘一致（零改动）。</div>
+                ) : (
+                  <>
+                    <div className={styles.note}>{summarizeChanges(changeLog)}</div>
+                    <ul className={styles.changeList}>
+                      {changeLog.map((change) => (
+                        <li key={change.key} className={styles.changeRow} data-change={change.key}>
+                          <span className={styles.changeLabel}>{change.label}</span>
+                          <span className={styles.changeKind}>
+                            {change.kind === 'attr' ? change.attrs.map((a) => `${a.name}: ${a.before ?? '—'} → ${a.after ?? '—'}`).join('；')
+                              : change.kind === 'text' ? `“${change.textBefore}” → “${change.textAfter}”`
+                              : change.kind === 'added' ? '新增元素' : '已删除元素'}
+                          </span>
+                          <button type="button" className={button.ghost} onClick={() => revertOne(change)} data-action="revert-one">撤销</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )
+              ) : null}
+            </div>
             <div className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
               <div className={styles.panelTitle}>文档色板（点色块填入选中）</div>
               {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}

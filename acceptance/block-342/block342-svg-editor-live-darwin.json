@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T03:45:37.659Z",
-  "finishedAt": "2026-11-03T03:45:47.134Z",
+  "startedAt": "2026-11-03T04:03:37.167Z",
+  "finishedAt": "2026-11-03T04:03:51.849Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793678596302"
     },
     {
       "name": "V2_editor_mounted",
@@ -122,7 +122,7 @@
     {
       "name": "V8_stale_apply_rejected",
       "pass": true,
-      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"2b2aea07fc222db6bd85bcd62feb632f809ae4ed57e43294d8cd67e2af605388"
+      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"9413c3cbcc847832e03369cfffbe261beb2908b312d02f05bd5718126115748d"
     }
   ],
   "allPass": true

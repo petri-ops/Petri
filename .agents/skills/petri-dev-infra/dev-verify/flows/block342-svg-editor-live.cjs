@@ -89,7 +89,8 @@ module.exports = {
       client = await lib.connectTarget(main);
 
       const openFile = async (rel) => {
-        await lib.evalJs(client, `location.assign('/project/${project.id}?file=${encodeURIComponent(rel)}')`);
+        // cache-buster：同一 URL 重复 assign 不会重载，会带着上一轮编辑器状态跑（实机抓真）
+        await lib.evalJs(client, `location.assign('/project/${project.id}?file=${encodeURIComponent(rel)}&_t=${Date.now()}')`);
       };
 
       // V2 — 编辑器挂载：画布 + 图层树 + 保存禁用（零操作零 diff 的呈现）
@@ -224,24 +225,28 @@ module.exports = {
       // V11 — W3 绘制：矩形工具拖拽 → 新元素 → 保存落盘
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="rect"]'); if (b) b.click(); return true; })()`);
       await sleep(300);
-      const drawn = await lib.evalJs(client, `(function(){
-        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
-        const svg = host && host.querySelector('svg');
-        if (!svg) return 'no svg';
-        const r = svg.getBoundingClientRect();
-        const sx = r.left + 40;
-        const sy = r.top + 40;
-        const base = { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', button: 0 };
-        host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: sx, clientY: sy, buttons: 1 }));
-        host.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: sx + 80, clientY: sy + 60, buttons: 1 }));
-        host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: sx + 80, clientY: sy + 60, buttons: 0 }));
-        return JSON.stringify({ rects: svg.querySelectorAll('rect').length });
-      })()`);
-      void drawn;
-      const drawSaveEnabled = await waitFor(client, `(function(){
-        const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
-        return s && !s.disabled ? 'unlocked' : null;
-      })()`, 6_000);
+      // 绘制：工具切换 + 视口就绪存在时序竞争（离屏首帧），最多重试两次
+      let drawSaveEnabled = null;
+      for (let attempt = 0; attempt < 2 && !drawSaveEnabled; attempt += 1) {
+        await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="rect"]'); if (b) b.click(); return true; })()`);
+        await sleep(500);
+        await lib.evalJs(client, `(function(){
+          const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+          const svg = host && host.querySelector('svg');
+          if (!svg) return false;
+          const r = svg.getBoundingClientRect();
+          if (r.width < 10) return false;
+          const base = { bubbles: true, cancelable: true, pointerId: 11, pointerType: 'mouse', button: 0 };
+          host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: r.left + 60, clientY: r.top + 60, buttons: 1 }));
+          host.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: r.left + 140, clientY: r.top + 120, buttons: 1 }));
+          host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: r.left + 140, clientY: r.top + 120, buttons: 0 }));
+          return true;
+        })()`);
+        drawSaveEnabled = await waitFor(client, `(function(){
+          const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+          return s && !s.disabled ? 'unlocked' : null;
+        })()`, 4_000);
+      }
       assert('V11_draw_pending_op', drawSaveEnabled === 'unlocked', String(drawSaveEnabled));
       await sleep(400);
       await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
@@ -278,7 +283,8 @@ module.exports = {
       assert('V12b_context_prompt_has_path', Boolean(payload && typeof payload.prompt === 'string' && payload.prompt.includes(SAMPLE_REL)), askedPayload ? askedPayload.slice(0, 160) : 'null');
 
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
-      const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace('fill="#4a7cba"', 'fill="#111111"');
+      // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
+      const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');
       fs.writeFileSync(SAMPLE_ABS, tampered);
       const stale = await rest('POST', '/svg/edit', {
         projectId: project.id,

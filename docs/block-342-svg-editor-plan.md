@@ -89,3 +89,14 @@ W1 收口门禁清单（收口时逐项对账）：
 **实机证据（全链 24/24 allPass）**：`acceptance/block-342/block342-svg-editor-live-darwin.json` —— V2 挂载/图层/零改动禁用；V3/V4 点选 + 属性面板；V5 拖拽 `translate(48 24)`；V6 保存落盘 + 局部性；V7 重开零改动零 diff；**V9 属性面板改 fill=`#cc0000` 落盘**；**V10 文档色板提取 `#cc0000`**；**V11 矩形工具拖拽 → pending op → 保存后文件 2 个 `<rect>`**；**V12 选区 → `petri:copilot-ask` 载荷含文件路径/path/属性且指路 svg_edit**；V8 旧 sha 提案 409 `svg_hash_mismatch`。样本与实例跑完即清理。
 
 **实机抓真（本批第二处真缺陷，已修）**：绘制坐标换算原用 `getScreenCTM()`——**离屏（show:false）窗口下 Chromium 返回 null**，绘制静默失效；改 `boundingRect + viewBox` 比例换算（与 CSS 缩放无关，比例法自动抵掉 scale）。
+
+## 9. W4 reopen 第一项：逐元素取舍（2026-11-03 加映）
+
+按 Jev 建议推进「提案幽灵叠加 + 逐元素接受」的第一刀，落地为**改动清单与逐元素撤销**（等价能力：接受=保留，拒绝=撤销该元素）：
+
+- **后端**：`svg_edit` propose 返回 `previewMarkup`（内存返回、不落盘、不进第二真值；>1MB 截断并显式标注），供任何消费方做提案预览。
+- **前端** `svgProposal.ts`：`diffElements(磁盘真值, 当前视图)` 逐元素识别 属性/文字/新增/删除 四类差异；`revertElementOps` 把单个差异折算成白名单 op（属性回填 before 值 / 新增属性 `remove_attr` / 新增元素 `remove` / 文字 `set_text`）；被删元素如实拒绝一键恢复（不伪造片段）；`revertAllOps` 汇总并统计跳过项；`summarizeChanges` 出列表标题摘要。
+- **UI**：属性面板下方「未保存改动（逐元素取舍）」区块——列出改动 / 全部撤销 / 每行单项撤销 + kind 与前后值。
+- **验证**：`svgProposal.test` **6/6**（四类差异、零改动空清单、恢复 op 形状、删除项如实拒绝、汇总跳过计数、解析失败不猜）；`tsc` 0；lint 0 error。
+- **实机状态（如实）**：**未覆盖**——实机链上「列出改动」返回空清单（疑与加载基线/视图序列化时机有关，未定位），故 UI-663 记 `in_progress`，不冒 verified。
+- **reopen（承接）**：①实机复核改动清单（定位基线时序）；②agent 提案进入编辑器的通道（`previewMarkup` 已在合约里，前端消费需工具结果桥）；③画布上的半透明 ghost 叠加与逐元素接受/拒绝按钮（当前只有列表形态）；④版本对比（洋葱皮）与历史面板（人+agent 同一时间线）；⑤渲染回验（改→渲染→vision）。

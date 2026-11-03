@@ -166,6 +166,15 @@ function tool_svg_inspect(args, ctx) {
   };
 }
 
+/** 提案预览上限（1MB）：超出截断为前缀并显式标记，避免把大文件整份塞进会话/UI。 */
+const PREVIEW_LIMIT = 1024 * 1024;
+
+function capPreview(text) {
+  if (typeof text !== 'string') return '';
+  if (text.length <= PREVIEW_LIMIT) return text;
+  return `${text.slice(0, PREVIEW_LIMIT)}\n<!-- preview truncated at ${PREVIEW_LIMIT} chars -->`;
+}
+
 /**
  * tool_svg_edit — 白名单 op 的 propose/apply。
  * @param {object} args { filePath, ops, apply?, beforeSha256? }
@@ -215,6 +224,8 @@ function tool_svg_edit(args, ctx) {
       afterSha256: applied.afterSha,
       changed: applied.changed,
       semanticDiff: summary,
+      // BLOCK-342 W4 — 提案预览文本（仅在内存返回，不落盘、不进第二真值）：供编辑器做幽灵叠加与逐元素取舍
+      previewMarkup: applied.changed ? capPreview(applied.text) : read.text,
       next: applied.changed
         ? '确认无误后再次调用并携带 apply:true 与 beforeSha256 执行写盘。'
         : '本批操作不产生任何字节变化（零操作零 diff），无需写盘。',

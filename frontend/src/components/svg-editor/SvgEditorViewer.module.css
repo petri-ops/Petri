@@ -409,3 +409,39 @@
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* BLOCK-342 W4 — 未保存改动的逐元素取舍 */
+.changeBlock {
+  padding: 8px 10px;
+  border-top: 1px solid var(--petri-divider);
+}
+
+.changeList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.changeRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: 6px;
+  font-size: var(--petri-font-size-body);
+}
+
+.changeLabel {
+  color: var(--petri-text-primary);
+}
+
+.changeKind {
+  color: var(--petri-text-secondary);
+  word-break: break-all;
+}
