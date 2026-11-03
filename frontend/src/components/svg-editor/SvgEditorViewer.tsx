@@ -278,8 +278,11 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
     setSelected(next);
-    // 默认全收起省空间；用户一旦选中元素（明确要改它）才自动展开属性栏
-    if (next.size > 0) setInspectorOpen(true);
+    // 点图片内容（选中元素）= 用户进入编辑：图层与属性一起展开（用户裁决）
+    if (next.size > 0) {
+      setInspectorOpen(true);
+      setLayersOpen(true);
+    }
     const root = rootEl();
     const first = next.size > 0 ? Array.from(next)[0] : null;
     const el = root && first !== null ? findByPath(root, decodePath(first)) : null;
