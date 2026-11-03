@@ -15,6 +15,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const svgOps = require('../helpers/svg-ops');
+const inkscape = require('../helpers/inkscape');
 
 /** 单文件上限：科研出图 SVG 通常 <2MB；8MB 为解析/编辑的诚实边界。 */
 const MAX_SVG_BYTES = 8 * 1024 * 1024;
@@ -332,8 +333,84 @@ function tool_svg_edit(args, ctx) {
   };
 }
 
+
+/**
+ * 切片5 — Inkscape 无头协处理器动作（探针缺席时诚实 `inkscape_unavailable`）。
+ * 结构动作（union/difference/intersection/text-to-path）产物经 before-sha 守卫 + 审计快照写回原文件
+ * （与 svg_edit 同治理）；export-pdf 产物落同目录 .pdf，不写回 SVG。
+ * callback 风格（Inkscape 执行是异步的）：tool_svg_inkscape(args, ctx, onDone)。
+ */
+function tool_svg_inkscape(args, ctx, onDone) {
+  // 能力探针前置：缺席即 503 语义（路由层已做项目鉴权；工具层不因探针触 DB）
+  const status = inkscape.inkscapeStatus();
+  if (!status.available) {
+    onDone({ error: 'inkscape_unavailable', message: status.hint || 'Inkscape 不可用', available: false });
+    return null;
+  }
+  const project = resolveProject(ctx);
+  if (!project.ok) { onDone({ error: project.code, message: project.message }); return null; }
+  const file = resolveFile(project.workspaceRoot, args && args.filePath);
+  if (!file.ok) { onDone({ error: file.code, message: file.message }); return null; }
+  const read = readSvgFile(file.abs, file.rel);
+  if (!read.ok) { onDone({ error: read.code, message: read.message }); return null; }
+  const action = args && args.action;
+
+  const tmpAbs = action === 'export-pdf'
+    ? `${file.abs}.pdf`
+    : path.join(path.dirname(file.abs), `.${path.basename(file.rel)}.inktmp.svg`);
+  return inkscape.runInkscapeAction({ action, svgAbs: file.abs, outAbs: tmpAbs }, (runErr, runOk) => {
+    if (runErr) {
+      onDone({ error: runErr.code || 'inkscape_run_failed', message: runErr.message, hint: runErr.hint });
+      return;
+    }
+    if (action === 'export-pdf') {
+      onDone({
+        ok: true,
+        action,
+        filePath: file.rel,
+        outPath: `${file.rel}.pdf`,
+        description: `已导出 PDF：${file.rel}.pdf（未改动 SVG 文件）`,
+      });
+      return;
+    }
+    let outText;
+    try {
+      outText = fs.readFileSync(tmpAbs, 'utf8');
+    } catch (readErr) {
+      onDone({ error: 'inkscape_no_output', message: `结果文件不可读：${readErr.message}` });
+      return;
+    } finally {
+      try { fs.unlinkSync(tmpAbs); } catch { /* 临时文件清理失败不阻塞 */ }
+    }
+    if (outText === read.text) {
+      onDone({ ok: true, action, filePath: file.rel, changed: false, description: '协处理器输出与原文一致（零改动，未写盘）。' });
+      return;
+    }
+    // before-sha 守卫：执行期间文件被人改动 → 拒绝覆盖（协处理器不绕过治理）
+    const current = readSvgFile(file.abs, file.rel);
+    if (!current.ok) { onDone({ error: current.code, message: current.message }); return; }
+    const expectedSha = args && args.beforeSha256;
+    if (typeof expectedSha === 'string' && expectedSha !== '' && current.sha256 !== expectedSha) {
+      onDone({ error: 'svg_hash_mismatch', message: '文件在执行期间被外部改动，已阻止协处理器覆盖（人的修改优先）' });
+      return;
+    }
+    const snapshotPath = writeRevisionSnapshot(project.workspaceRoot, file.rel, current.text, current.sha256);
+    fs.writeFileSync(file.abs, outText, 'utf8');
+    onDone({
+      ok: true,
+      action,
+      filePath: file.rel,
+      changed: true,
+      beforeSha256: current.sha256,
+      snapshotPath,
+      description: `Inkscape ${action} 已写盘 ${file.rel}（旧版本审计快照：${snapshotPath}）`,
+    });
+  });
+}
+
 module.exports = {
   tool_svg_inspect,
+  tool_svg_inkscape,
   tool_svg_revisions,
   tool_svg_revision,
   tool_svg_edit,

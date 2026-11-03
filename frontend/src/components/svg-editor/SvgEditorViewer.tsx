@@ -10,7 +10,7 @@
 
 import * as React from 'react';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
-import { editSvgFile, inspectSvgFile, SvgEditError, SvgInspectResult } from '@/lib/svgEditClient';
+import { editSvgFile, inspectSvgFile, inkscapeAction, inkscapeStatus, InkscapeStatus, SvgEditError, SvgInspectResult } from '@/lib/svgEditClient';
 import button from '../ui/controls/button.module.css';
 import { SvgEditorCanvas } from './SvgEditorCanvas';
 import {
@@ -221,6 +221,15 @@ export function SvgEditorViewer({
   const [preview, setPreview] = React.useState<{ revision: string; at: string; markup: string; elements: Array<{ tag: string; path: number[]; id: string | null; attrCount: number; textPreview?: string }> } | null>(null);
   const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
+  // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
+  const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    inkscapeStatus(projectId)
+      .then((st) => { if (!cancelled) setInkscape(st); })
+      .catch(() => { if (!cancelled) setInkscape({ available: false, bin: null, source: null, hint: '探针不可达（后端未就绪？）' }); });
+    return () => { cancelled = true; };
+  }, [projectId]);
 
   // 事件回调需要「最新值」而闭包可能陈旧，故用镜像 ref；同步在 effect 里做（不在渲染期写 ref）。
   React.useEffect(() => {
@@ -334,6 +343,21 @@ export function SvgEditorViewer({
     reader.onerror = () => setNotice('图片未嵌入：文件读取失败');
     reader.readAsDataURL(file);
   }, [commit, currentMarkup]);
+
+  /** 切片5 Inkscape 协处理动作：before-sha 守卫（协处理器不绕过治理），成功后重载视图。 */
+  const runInkscape = React.useCallback((action: string) => {
+    if (state.status !== 'ready' || saving) return;
+    setSaving(true);
+    inkscapeAction({ projectId, path: filePath, action, beforeSha256: state.baseSha })
+      .then((result) => {
+        setNotice(result.description || `Inkscape ${action} 完成`);
+        return load();
+      })
+      .catch((runError: unknown) => {
+        setError(runError instanceof Error ? runError.message : String(runError));
+      })
+      .finally(() => setSaving(false));
+  }, [filePath, load, projectId, saving, state]);
 
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
@@ -1152,6 +1176,26 @@ export function SvgEditorViewer({
                     ))}
                   </div>
                 ) : null}
+              </details>
+              <details className={styles.paletteBlock} data-testid="svg-editor-inkscape">
+                <summary className={styles.sectionSummary}>Inkscape 协处理{inkscape?.available ? '（可用）' : ''}</summary>
+                {inkscape === null ? (
+                  <div className={styles.note}>探针中…</div>
+                ) : inkscape.available === false ? (
+                  <div className={styles.note} data-testid="svg-editor-inkscape-unavailable">{inkscape.hint || '未检测到 Inkscape'}</div>
+                ) : (
+                  <>
+                    <div className={styles.rowActions}>
+                      <button type="button" className={button.ghost} data-action="inkscape-union" disabled={saving || selected.size < 2} title="布尔联合：需选中 ≥2 个元素" onClick={() => runInkscape('union')}>联合</button>
+                      <button type="button" className={button.ghost} data-action="inkscape-difference" disabled={saving || selected.size < 2} title="布尔差集：需选中 ≥2 个元素" onClick={() => runInkscape('difference')}>差集</button>
+                      <button type="button" className={button.ghost} data-action="inkscape-intersection" disabled={saving || selected.size < 2} title="布尔交集：需选中 ≥2 个元素" onClick={() => runInkscape('intersection')}>交集</button>
+                    </div>
+                    <div className={styles.rowActions}>
+                      <button type="button" className={button.ghost} data-action="inkscape-text-to-path" disabled={saving} title="全档文字转路径（object-to-path）" onClick={() => runInkscape('text-to-path')}>文字转路径</button>
+                      <button type="button" className={button.ghost} data-action="inkscape-export-pdf" disabled={saving} title="导出 PDF（同目录同名 .pdf）" onClick={() => runInkscape('export-pdf')}>导出 PDF</button>
+                    </div>
+                  </>
+                )}
               </details>
               <details className={styles.changeBlock} data-testid="svg-editor-changes">
                 <summary className={styles.sectionSummary}>

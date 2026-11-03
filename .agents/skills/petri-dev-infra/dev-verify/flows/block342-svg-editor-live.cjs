@@ -573,6 +573,25 @@ module.exports = {
       const afterStop = fs.readFileSync(SAMPLE_ABS, 'utf8');
       assert('V17c_stop_edit_persisted', stopEdited === 'edited' && afterStop.includes('stop-color="#112233"'), afterStop.match(/<stop[^>]*>/)?.[0] || 'no stop');
 
+      // V18 — Inkscape 协处理器：本机未装 → REST 探针 available:false + 面板诚实灰化提示
+      const inkStatus = await rest('GET', `/svg/inkscape-status?projectId=${project.id}`);
+      assert('V18_inkscape_probe_unavailable',
+        inkStatus.status === 200 && inkStatus.data?.available === false && typeof inkStatus.data?.hint === 'string',
+        `status=${inkStatus.status} available=${inkStatus.data?.available}`);
+      await lib.evalJs(client, `(function(){
+        const s = document.querySelector('${RAIL} [data-testid="svg-editor-inkscape"] summary');
+        if (s && !s.parentElement?.hasAttribute('open')) s.click();
+        return true;
+      })()`);
+      const inkPanel = await waitFor(client, `(function(){
+        const hint = document.querySelector('${RAIL} [data-testid="svg-editor-inkscape-unavailable"]');
+        const buttons = document.querySelectorAll('${RAIL} [data-action^="inkscape-"]').length;
+        return hint ? JSON.stringify({ hint: (hint.textContent || '').slice(0, 50), actionButtons: buttons }) : null;
+      })()`, 6_000);
+      assert('V18b_inkscape_panel_honest',
+        Boolean(inkPanel) && JSON.parse(inkPanel).actionButtons === 0 && /Inkscape|PETRI/.test(inkPanel),
+        inkPanel || 'honest hint missing');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');

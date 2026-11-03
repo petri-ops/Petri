@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-674: SVG 编辑器 Inkscape 无头协处理器——探针 + 诚实灰化 + 受治理动作守卫（BLOCK-342 切片5；2026-11-03 **verified（dev Electron 边界内；实机 48/48 allPass；动作执行链待装 Inkscape 后实机）**）
+
+- **能力面**：布尔联合/差集/交集（需多选）、全档文字转路径、导出 PDF（落同目录 .pdf）。探针 env 优先（`PETRI_INKSCAPE_BIN`）+ 常见安装路径，只查 X_OK 不 exec。
+- **诚实缺席（本机未装=常态）**：REST `GET /api/svg/inkscape-status` 返回 `available:false + hint`；面板灰化提示「未检测到 Inkscape；安装后重启，或设 PETRI_INKSCAPE_BIN…」，动作按钮不渲染；动作 POST 缺席 503 `inkscape_unavailable`。**不假装支持**。
+- **治理写回（在场时）**：结构动作产物写临时文件 → before-sha 守卫（执行期间被外部改动即 409 拒绝覆盖）→ 审计快照（.petri/svg-revisions/）→ 写盘——协处理器**不绕过** svg_edit 同款治理；探针前置在工具层（路由层已鉴权），缺席零 DB 触达。
+- **实机抓真**：后端进程是 Electron 子进程，路由更新需重启——旧实例被杀后新实例曾落到 fallback 端口（3001 被占时的协商机制）→ dev 栈整体重启后 3001 干净绑定。
+- **验证**：`block342-inkscape` 契约 6/6（env 不存在 bin 诚实 false/env 真实可执行 source=env/默认环境稳定形态/ACTIONS 白名单与 buildArgs/runAction 缺席拒绝/tool 缺席 503 不碰文件）+ 既有 svg 契约 22/22 = 28/28 + tsc 0 + lint 0 error；实机 flow 三新断言（`V18_inkscape_probe_unavailable` REST 200 available:false / `V18b_inkscape_panel_honest` 灰化提示在场且动作按钮为 0），总 **48/48 allPass**。真实布尔/转路径/PDF 的执行链需要装 Inkscape 才能实机验证——如实留档为「装后即用」，不冒 verified。
+
 ## UI-673: SVG 编辑器渐变编辑——线性/径向创建与应用 + 文档渐变列表 + stop 颜色/偏移编辑（BLOCK-342 切片4；2026-11-03 **verified（dev Electron 边界内；实机 46/46 allPass）**）
 
 - **交互**：属性面板「渐变」区块——新建表单（线性/径向 + 横/竖/斜方向 + 起止色）「创建并应用」；文档渐变列表（parseGradients 随 markup 纯计算，预览条 + 一键应用）；选中元素 fill 引用渐变时展示该渐变 stops 行内编辑（颜色/偏移）。

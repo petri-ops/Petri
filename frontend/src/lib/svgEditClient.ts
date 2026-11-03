@@ -171,3 +171,33 @@ export async function readSvgRevision(input: { projectId: string; path: string; 
   }
   return { text: payload.text, total: payload.total, elements: payload.elements };
 }
+
+export interface InkscapeStatus {
+  available: boolean;
+  bin: string | null;
+  source: 'env' | 'path' | null;
+  hint?: string;
+}
+
+export interface InkscapeActionResult {
+  ok: true;
+  action: string;
+  filePath?: string;
+  outPath?: string;
+  changed?: boolean;
+  description?: string;
+}
+
+/** 切片5 — Inkscape 探针（缺席诚实 available:false）。 */
+export async function inkscapeStatus(projectId: string): Promise<InkscapeStatus> {
+  const query = new URLSearchParams({ projectId });
+  const response = await fetch(`${getApiPrefix()}/svg/inkscape-status?${query.toString()}`, { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+  const payload = (await response.json().catch(() => null)) as (InkscapeStatus & { ok?: boolean }) | null;
+  if (!payload) throw new SvgEditError('svg_response_invalid', `探针响应不是合法 JSON（HTTP ${response.status}）`);
+  return payload;
+}
+
+/** 切片5 — Inkscape 动作（缺席 503 inkscape_unavailable）。 */
+export function inkscapeAction(input: { projectId: string; path: string; action: string; beforeSha256?: string }): Promise<InkscapeActionResult> {
+  return postJson<InkscapeActionResult>('/svg/inkscape', input, 150_000);
+}

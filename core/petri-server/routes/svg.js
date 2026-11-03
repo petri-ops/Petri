@@ -13,7 +13,8 @@
 
 const db = require('../db');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
-const { tool_svg_inspect, tool_svg_edit, tool_svg_revisions, tool_svg_revision } = require('../agent-tools/svg-tools');
+const { tool_svg_inspect, tool_svg_edit, tool_svg_revisions, tool_svg_revision, tool_svg_inkscape } = require('../agent-tools/svg-tools');
+const inkscape = require('../helpers/inkscape');
 
 const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'workspace_unavailable'];
 
@@ -104,6 +105,31 @@ module.exports = function registerSvgRoutes(app) {
       revision: req.query && req.query.revision,
     }, { projectId: auth.project.id });
     return respondTool(res, result);
+  });
+
+  // 切片5 — Inkscape 协处理器：探针（缺席诚实）+ 动作（缺席 503 inkscape_unavailable）
+  app.get('/api/svg/inkscape-status', (req, res) => {
+    const auth = loadLocalProject(req, res, req.query && req.query.projectId);
+    if (!auth) return;
+    const status = inkscape.inkscapeStatus();
+    res.json({ ok: true, ...status });
+  });
+
+  app.post('/api/svg/inkscape', (req, res) => {
+    const auth = loadLocalProject(req, res, req.body && req.body.projectId);
+    if (!auth) return;
+    const result = tool_svg_inkscape({
+      filePath: req.body.path,
+      action: req.body.action,
+      beforeSha256: req.body.beforeSha256,
+    }, { projectId: auth.project.id }, (done) => {
+      if (done && done.error === 'inkscape_unavailable') {
+        res.status(503).json({ ok: false, ...done });
+        return;
+      }
+      respondTool(res, done);
+    });
+    void result;
   });
 
   // 白名单 op：apply 缺省 false = 只校验（propose）；apply:true 须带 beforeSha256
