@@ -532,3 +532,241 @@
   align-items: center;
   gap: 6px;
 }
+
+/* ============================================================
+   BLOCK-342 视觉精修层（产品级观感）
+   规则：只用 --petri-* token；字号走字号阶梯（不写裸 px）；
+        圆角走 radius 阶梯；过渡统一 140ms（global 的 reduced-motion 兜底生效）。
+   放在文件末尾 = 同名选择器后写覆盖，避免与既有规则冲突。
+   ============================================================ */
+
+.viewer {
+  font-size: var(--petri-font-size-body);
+  line-height: 1.55;
+  color: var(--petri-text);
+}
+
+.viewer :is(button, input, select, textarea) {
+  font-family: inherit;
+  font-size: var(--petri-font-size-body);
+  border-radius: var(--petri-radius-sm);
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard), border-color var(--petri-duration-fast) var(--petri-ease-standard), color var(--petri-duration-fast) var(--petri-ease-standard), opacity var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+/* 字号阶梯：面板标题 > 正文 > 元信息 */
+.panelTitle,
+.sectionSummary {
+  font-size: var(--petri-font-size-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--petri-text);
+}
+
+.note,
+.hint {
+  font-size: var(--petri-font-size-body);
+  line-height: 1.6;
+  color: var(--petri-text-secondary);
+}
+
+.hint {
+  opacity: 0.85;
+}
+
+/* 面板节奏：标题与内容同一左基线，块间距 8px，区内 10px */
+.layers,
+.inspector {
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--petri-radius-md);
+}
+
+.layersHead,
+.inspectorHead {
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--petri-divider);
+}
+
+.props,
+.paletteBlock,
+.changeBlock {
+  gap: 8px;
+  padding: 10px 2px 2px;
+}
+
+.layerList {
+  gap: 2px;
+}
+
+.layerRow,
+.layerRowActive {
+  border-radius: var(--petri-radius-sm);
+  padding: 4px 6px;
+  text-align: left;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard), color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.layerRowActive {
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
+
+/* 工具条：按钮等高、间距 6，激活态用强调底色而非仅描边 */
+.toolbar {
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--petri-divider);
+}
+
+.tool,
+.toolActive {
+  border-radius: var(--petri-radius-sm);
+  padding: 4px 10px;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard), border-color var(--petri-duration-fast) var(--petri-ease-standard), color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.tool:hover {
+  background: var(--petri-hover);
+}
+
+.toolActive {
+  background: var(--petri-accent-bg);
+  border-color: var(--petri-accent-border);
+  color: var(--petri-text);
+}
+
+/* 属性行：标签列定宽对齐，控件同高 */
+.field {
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 10px;
+  padding: 2px 0;
+}
+
+.fieldLabel {
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+}
+
+.field input:not([type='color']),
+.field select {
+  border-radius: var(--petri-radius-sm);
+  padding: 4px 8px;
+  min-height: 28px;
+  transition: border-color var(--petri-duration-fast) var(--petri-ease-standard), background-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.textEdit textarea:focus-visible {
+  outline: none;
+  border-color: var(--petri-accent-border);
+}
+
+.field input[type='color'] {
+  border-radius: var(--petri-radius-sm);
+  width: 28px;
+  height: 26px;
+}
+
+/* 色块：等距网格、悬停放大、焦点可见 */
+.swatches {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--petri-radius-sm);
+  transition: transform var(--petri-duration-fast) var(--petri-ease-standard), border-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.swatch:hover {
+  transform: scale(1.12);
+  border-color: var(--petri-accent-border);
+}
+
+/* 改动清单：行内三段对齐，撤销按钮右对齐 */
+.changeList {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.changeRow {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 6px 8px;
+  border-radius: var(--petri-radius-sm);
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.changeRow:hover {
+  background: var(--petri-hover);
+}
+
+.changeKind {
+  grid-column: 1 / -1;
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-body);
+  line-height: 1.5;
+}
+
+/* 状态条：等宽数字（sha）不跳格 */
+.status {
+  font-size: var(--petri-font-size-body);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--petri-duration-fast) var(--petri-ease-standard), border-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+/* 命令面板与弹层：统一圆角与浮层底 */
+.palette {
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-elevated);
+}
+
+.paletteItem {
+  border-radius: var(--petri-radius-sm);
+  padding: 6px 10px;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.paletteItem:hover {
+  background: var(--petri-hover);
+}
+
+/* 精修补充（截图过目后）：控件等宽拉伸 / 画布留白 / 收起条宽度容字 */
+.field select,
+.field input[type='number'],
+.fieldRow {
+  width: 100%;
+}
+
+.stage {
+  padding: 12px;
+}
+
+.body[data-layers='0'] {
+  grid-template-columns: 54px minmax(0, 1fr) 240px;
+}
+
+.body[data-inspector='0'] {
+  grid-template-columns: 200px minmax(0, 1fr) 54px;
+}
+
+.body[data-layers='0'][data-inspector='0'] {
+  grid-template-columns: 54px minmax(0, 1fr) 54px;
+}
+
+.layers[data-open='0'] .panelTitle,
+.inspector[data-open='0'] .panelTitle {
+  line-height: 1.2;
+}
+
+/* 精修补充二：下拉在 grid 第二列必须拉伸（截图过目：字体/字重/对齐曾偏窄） */
+.field > select,
+.field select {
+  width: 100%;
+  min-width: 120px;
+  justify-self: stretch;
+}

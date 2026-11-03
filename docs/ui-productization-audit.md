@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-666: SVG 编辑器产品级视觉精修（字号层级/间距节奏/圆角配色/过渡统一；BLOCK-342；2026-11-03 **verified（dev Electron 边界内；截图过目 + 实机 28/28）**）
+
+- **变化面**：字号全部归 `--petri-font-size-body`，层级靠字重 600 + 字距 + 文字色三级（小字号棘轮禁用 xs/sm）；面板 padding 10 / gap 8 / 标题底 6 + divider；属性行 `68px | 1fr` 标签列对齐、控件 min-height 28 且下拉强制拉伸；圆角统一 radius-sm/md；hover 用 `--petri-hover`、激活用 accent 底色+边；色块 hover scale；按钮/输入/图层行/色块/命令项统一 `--petri-duration-fast` + `--petri-ease-standard`（motion token，reduced-motion 全局兜底）；sha 等宽数字；path 差异 mono；画布留白 12px；收起列宽 54px。
+- **为什么这样设计**：编辑器右栏是密集控件区，粗糙感主要来自三处——字号乱（12/13/14 混用）、控件宽度不齐、状态无过渡。改用「字号恒定 + 字重/色阶分层 + 控件拉伸等高 + 统一过渡」后，密度不降而秩序感上来；全部走 token 以保证暗色与换肤一致。
+- **验证**：`theme-token-contract` **17/17**（小字号棘轮/motion 棘轮/1px 语义边/按钮清单四条全绿）；实机 **28/28** 无回归；元素级截图过目（`acceptance/block-342/block342-svg-editor-live.png`）后补控件等宽与画布留白两处。
+
 ## UI-665: SVG 编辑器分区折叠 + 实时预览/确认状态区分（BLOCK-342 交互设计批；2026-11-03 **verified（dev Electron 边界内；实机 28/28 allPass）**）
 
 - **折叠设计（用户裁决：默认就收起，别占空间）**：**默认全收起**——工具栏只留「工具 «」、图层栏收成 46px 竖排标题「图层（N）」、图形属性同款 46px 竖排、文档色板/未保存改动用 `<details>` 收起；打开文件即最大画布。按需展开：点 `»` 恢复 200px/240px 列宽；**选中元素时属性栏自动展开**。grid 列宽随展开态切换，收起态标题竖排保证可读；不改画布缩放与选中态。

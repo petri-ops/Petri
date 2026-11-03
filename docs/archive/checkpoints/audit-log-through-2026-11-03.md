@@ -33,3 +33,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:30:07.286Z -->
 最后更新：2026-11-03（✅ **BLOCK-341 引擎桥整包 COMPLETED（P0-P6 立项当日收口）**：godot-provider 探针（4.7.1 双安装路径发现；缺席诚实）；godot_run（--write-movie PNG 序列+--quit-after+manifest 落 .petri/godot-runs/；**探针抓真 headless 无渲染→默认带显示驱动**）；godot_scene_apply（propose/apply 白名单三操作+sha+语义 diff+stale 防覆盖）；P4 闭环样例实机 13/13（真 Godot 30 帧+30 截图+scene_apply 全链）；P5 Blender 扩档 model3d_blend_ops（inspect/transform 语义自检 loc=[2,0,0]/render 真出图；.blend=外部资产不破 322）。契约 14/14+工具计数 109→112+model-surface +2230 留痕。抓真三处：headless 无渲染/-vsync 后代 -fps_mode/--python-expr 不自动保存。队列：全部 planned 包已清。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-03T05:33:51.907Z -->
+最后更新：2026-11-03（🔵 **BLOCK-342 SVG 编辑器启动登记（active；用户裁决「更丝滑的体验 路线A」→「BLOCK-341 应该已经收口了 继续」=发令，对标 340「继续推进」先例；341 已当日收口 completed）**：受治理 SVG 编辑器母计划 W1-W4 波次串行——人与 agent 共用同一套操作词汇表改同一份单真值文件。W1 执行范围=span 改写引擎（零操作零 diff/改动局部性/hash 冲突 `svg_hash_mismatch`/安全校验/脱敏，零新依赖，子 Agent 委派实现主 Agent 终审）+ `svg_edit`/`svg_inspect` 工具（白名单 op/propose-apply/修订快照）+ 编辑器内核（画布/选择/变换吸附/图层树/撤销/快捷键，viewerRegistry 登记）+ 隔离栈离屏实机。红线=零新依赖/不建第二真值/不复刻 Inkscape GUI/位图像素编辑另立 reopen；W2-W4 启动时在本 plan 内细化。W1 分 P 阶段多会话推进。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -133,3 +133,14 @@ W1 收口门禁清单（收口时逐项对账）：
 4. **不产生未确认堆积**：保存失败（如外部改动 `svg_hash_mismatch`）保留改动并显式报错，不静默丢弃；关闭/切换文件前用户可据状态条判断是否有未确认改动。
 
 **实机证据**：`acceptance/block-342/` **28/28 allPass**，含 `V2d_panels_default_collapsed`（色板/改动默认收起、工具组展开、收起按钮在场）、`V9b3_status_dirty_preview`（改色后 dirty + 文案含「未保存/确认」）、`V9d_status_saved_after_commit`（保存后 saved + sha）。
+
+
+## 12. 产品级视觉精修批（2026-11-03 用户要求）
+
+按 `petri-css-theme` 规则做**编辑器面板**的视觉统一（不越包改全站）：
+- **字号层级**：全部走 `--petri-font-size-body`（小字号棘轮冻结，禁用 xs/sm；层级靠**字重 600 + 字距 0.02em + 文字色三级**区分——面板标题 / 正文 / 元信息）。
+- **间距节奏**：面板 padding 10、块间 gap 8、标题底 6 + `--petri-divider` 分隔线；属性行 `68px | 1fr` 定宽标签列，控件同高（min-height 28）并**强制拉伸**（下拉曾偏窄，截图过目后修）。
+- **圆角与配色**：统一 `--petri-radius-sm/md`；hover 用 `--petri-hover`（不再「只描边」），激活/选中用 `--petri-accent-bg` + `--petri-accent-border`；色块悬停 scale(1.12)。
+- **过渡**：按钮/输入/下拉/图层行/色块/命令项统一 `var(--petri-duration-fast) var(--petri-ease-standard)`；全局 reduced-motion 兜底生效（不新增字面量时长——motion 棘轮会咬）。
+- **细节**：sha 用 `tabular-nums` 不跳格；path/属性差异用 `--petri-font-mono`；画布留白 12px；收起列宽 46→54px 让竖排标题整行可读。
+- **门禁**：`theme-token-contract` **17/17**（含小字号棘轮、motion 棘轮、1px 语义边、按钮清单四条均绿）；实机 28/28 无功能回归；截图过目（`acceptance/block-342/*.png`）后补了两处（控件等宽、画布留白）。
