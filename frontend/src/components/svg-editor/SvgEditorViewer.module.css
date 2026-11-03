@@ -1415,3 +1415,21 @@
 .stage {
   padding: 44px 12px 10px;
 }
+
+/* 图层坞容纳更多条目但不遮挡内容（流内布局，天然不覆盖画布） */
+.layers {
+  max-height: 152px;
+}
+
+.layers .layerList {
+  max-height: 116px;
+  overflow: auto;
+}
+
+.layerRow,
+.layerRowActive {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -837,7 +837,10 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                     <button
                       type="button"
                       className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                      onClick={() => syncSelection(new Set([key]))}
+                      onClick={(event) => {
+                        syncSelection(new Set([key]));
+                        event.currentTarget.scrollIntoView({ block: 'nearest' });
+                      }}
                       onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
                       title={`<${el.tag}> path=[${el.path.join(',')}]`}
                     >
