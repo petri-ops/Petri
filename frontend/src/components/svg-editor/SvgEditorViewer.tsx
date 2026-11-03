@@ -50,6 +50,10 @@ import layout from './SvgEditorLayout.module.css';
 export interface SvgEditorViewerProps {
   projectId: string;
   filePath: string;
+  /** 宿主为全屏 modal 时初始即全宽（窄预览区放不下三卡+右栏）。 */
+  defaultExpanded?: boolean;
+  /** 宿主 modal 的「关闭编辑器」回调（工具条按钮与 Esc 都会触发）。 */
+  onExitExpanded?: () => void;
   name?: string;
   active?: boolean;
 }
@@ -167,7 +171,9 @@ function comparePathDesc(a: number[], b: number[]): number {
   return 0;
 }
 
-export function SvgEditorViewer({ projectId, filePath, name, active = true }: SvgEditorViewerProps) {
+export function SvgEditorViewer({
+  defaultExpanded = false,
+  onExitExpanded, projectId, filePath, name, active = true }: SvgEditorViewerProps) {
   const hostRef = React.useRef<HTMLDivElement | null>(null);
   const markupRef = React.useRef('');
   const opsRef = React.useRef<SvgOp[]>([]);
@@ -192,6 +198,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
+  // 宿主为全屏 modal 时初始即全宽（否则在窄预览区里三卡+右栏放不下）
+  const [expanded, setExpanded] = React.useState(defaultExpanded === true);
   // 历史预览：只读显示某一版（不改真值、不进 pendingOps）
   const [preview, setPreview] = React.useState<{ revision: string; at: string; markup: string; elements: Array<{ tag: string; path: number[]; id: string | null; attrCount: number; textPreview?: string }> } | null>(null);
   const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
@@ -628,7 +636,12 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   }, [deleteSelected, duplicateSelected, load, redo, reorder, save, undo]);
 
   return (
-    <div className={styles.viewer} data-testid="svg-editor-viewer" data-file={filePath}>
+    <div
+      className={expanded ? `${layout.expanded} ${styles.viewer}` : styles.viewer}
+      data-testid="svg-editor-viewer"
+      data-file={filePath}
+      data-expanded={expanded ? '1' : '0'}
+    >
       <header className={styles.header}>
         <div className={styles.title}>
           <strong className={styles.name}>{name || filePath}</strong>
@@ -697,6 +710,18 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             ) : null}
             <div className={styles.toolbar} data-testid="svg-editor-toolbar">
               <span className={styles.toolGroup} data-testid="svg-editor-tool-group" data-open="1">
+              <button
+                type="button"
+                className={styles.tool}
+                data-action={expanded ? 'exit-expanded' : 'enter-expanded'}
+                title={expanded ? '退出全屏编辑' : '全屏编辑'}
+                onClick={() => {
+                  setExpanded((prev) => !prev);
+                  if (expanded && onExitExpanded) onExitExpanded();
+                }}
+              >
+                {expanded ? '退出全屏' : '全屏编辑'}
+              </button>
               <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>
               {DRAW_TOOLS.map((item) => (
                 <button

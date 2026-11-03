@@ -7669,3 +7669,64 @@ body:global(.petri-resizing-columns) * {
   white-space: nowrap;
   padding: 0 var(--petri-space-1);
 }
+
+/* BLOCK-342 方案 A — .svg 缩略卡 + 整窗编辑器 modal */
+.svgThumbCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  padding: 8px;
+}
+
+.svgThumb {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-canvas);
+  object-fit: contain;
+}
+
+.svgThumbOpen {
+  padding: 6px 10px;
+  border: 1px solid var(--petri-accent-border);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+  cursor: pointer;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.svgThumbOpen:hover {
+  filter: brightness(1.08);
+}
+
+.svgEditorModal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--petri-bg-canvas);
+}
+
+.svgEditorModalBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--petri-divider);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+}
+
+.svgEditorModalClose {
+  padding: 3px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: var(--petri-text);
+  cursor: pointer;
+}

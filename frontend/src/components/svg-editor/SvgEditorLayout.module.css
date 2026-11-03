@@ -111,3 +111,8 @@
   display: flex;
   flex-direction: column;
 }
+
+/* 属性栏展开态显式两列（缺失此条导致 insp 落进 1fr 列与历史卡重叠——量测 w=644 证实） */
+.body[data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr) 272px;
+}

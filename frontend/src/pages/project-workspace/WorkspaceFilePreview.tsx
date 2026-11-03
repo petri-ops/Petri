@@ -110,6 +110,8 @@ export function WorkspaceFilePreview({
     : 'binary';
   // BLOCK-342 W1 — .svg 走受治理编辑器（人鼠标键盘修正细节 + agent 走 svg_edit 同一套 op）
   const isSvgEditor = viewerAdapter === 'svg-editor';
+  // BLOCK-342 方案 A — .svg 用缩略图（不挤右栏）；「在编辑器打开」才进入整窗编辑器
+  const [svgEditorOpen, setSvgEditorOpen] = useState(false);
   const isImage = viewerAdapter === 'image';
   const isText = viewerAdapter === 'text';
   const isMarkdown = viewerAdapter === 'markdown';
@@ -471,9 +473,36 @@ export function WorkspaceFilePreview({
           </>
         )}
         {status === 'ready' && fallbackKind === 'svg' && projectId && file ? (
-          /* BLOCK-342 W1 — 受治理 SVG 编辑器：人改的每个手势折算成白名单 op，
-             保存时经后端 span 引擎写同一份真值（before-hash 冲突检测，人的修正不被覆盖）。 */
-          <SvgEditorViewer projectId={projectId} filePath={file.path} name={file.name} />
+          /* BLOCK-342 方案 A — 右栏只放缩略图（不挤右栏）；整窗编辑器由下方 modal 承载。
+             缩略图复用 image 渲染管线，保证「瞄一眼」场景零成本。 */
+          <div className={styles.svgThumbCard} data-testid="svg-editor-thumb-card">
+            <img className={styles.svgThumb} src={previewUrl} alt={file.name} />
+            <button
+              type="button"
+              className={styles.svgThumbOpen}
+              data-action="open-svg-editor"
+              onClick={() => setSvgEditorOpen(true)}
+            >
+              在编辑器打开
+            </button>
+          </div>
+        ) : null}
+        {svgEditorOpen && projectId && file ? (
+          /* 整窗编辑器：fixed 覆盖全应用（即「主区域」宽度），从右栏一键进入/退出 */
+          <div className={styles.svgEditorModal} data-testid="svg-editor-modal">
+            <div className={styles.svgEditorModalBar}>
+              <span>图形编辑器 · {file.name}</span>
+              <button
+                type="button"
+                className={styles.svgEditorModalClose}
+                data-action="close-svg-editor"
+                onClick={() => setSvgEditorOpen(false)}
+              >
+                关闭编辑器
+              </button>
+            </div>
+            <SvgEditorViewer projectId={projectId} filePath={file.path} name={file.name} defaultExpanded />
+          </div>
         ) : null}
         {status === 'ready' && fallbackKind === 'image' && (
           /* BLOCK-74 — 图片头部「引用到对话」行随用户裁决移除；BLOCK-219 Q6 加批注宿主 */
