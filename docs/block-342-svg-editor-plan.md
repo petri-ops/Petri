@@ -72,6 +72,6 @@ W1 收口门禁清单（收口时逐项对账）：
 
 **P3 编辑器内核 COMPLETED（代码面）**：`components/svg-editor/`（viewer/canvas/model/css）+ `lib/svgEditClient.ts` + `viewerRegistry` svg-editor 分派 + `WorkspaceFilePreview` 挂载。测试 `svgEditorModel.test.ts` 7 + `SvgEditorViewer.test.tsx` 3 + viewerRegistry 家族 47；`theme-token-contract` 17/17；tsc 0 / lint 0 error。
 
-**P4 实机：未跑**（隔离栈离屏 flow 待下一步执行）；**P5 收口：`npm run closeout` 十三门 + `skills:check` 报级全 PASS**（`ca535f18` 主体；`bf5b7e7d` 修 quality:types 抓真的 mock 泛型、`097d11bd` 修 knip 抓真的死代码保留面）。registry 保持 active（W1 未含实机，不标 completed）。UI 台账 = **UI-661（in_progress）**，不冒 verified。
+**P4 实机 COMPLETED**：dev-verify `block342-svg-editor-live` → `acceptance/block-342/` **15/15 allPass** + png（9223 离屏，跑完即终止；样本自动清理）。实机抓真一处真缺陷并修=文件加载白名单漏 `svg-editor`（`status='unsupported'` 落二进制卡、编辑器不可达）。**P5 收口：`npm run closeout` 十三门 + `skills:check` 报级全 PASS**（`ca535f18` 主体；`bf5b7e7d` 修 quality:types 抓真的 mock 泛型、`097d11bd` 修 knip 抓真的死代码保留面）。**W1 COMPLETED**（P1-P5 全绿）；母计划 registry 仍 active（W2 文字与样式、W3 形状与路径、W4 agent 协同待启动）。UI 台账 = **UI-661（verified，dev Electron 边界内）**。
 
 **收口抓真三处（门禁逐层剥出）**：①`quality:types` → 测试 mock 返回 `Promise<void>` 不接受 `mockResolvedValue` 载荷；②`quality:knip:check` → 11 处未消费导出（4 个尺度常量 / `isEditableTarget` / 未用 `removeOp` / 5 个 client 类型）；③`test:changed` → 工具宇宙 fixture 与前端动词表两侧脱节（`tool-activity-labels` 存量 4 缺 + 新增 2 件）。

@@ -180,7 +180,9 @@ export function WorkspaceFilePreview({
         });
       return () => { cancelled = true; revokeOfficePreviewBlobs(); };
     }
-    if (!isText && !isCsv && !isJson && !isMarkdown) {
+    // BLOCK-342 W1 实机抓真：编辑器的输入是 SVG 文本，必须在文本加载白名单内，
+    // 否则 status 落 'unsupported' → 编辑器分支被二进制卡顶掉（实机复现）。
+    if (!isSvgEditor && !isText && !isCsv && !isJson && !isMarkdown) {
       setStatus('unsupported');
       return () => { cancelled = true; };
     }
