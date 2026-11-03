@@ -760,7 +760,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
                 title={sections.tools ? '收起工具组' : '展开工具组'}
                 onClick={() => toggleSection('tools')}
               >
-                {sections.tools ? '工具 »' : '工具 «'}
+                {sections.tools ? '工具 ▴' : '工具 ▾'}
               </button>
               <span className={styles.toolGroup} data-testid="svg-editor-tool-group" data-open={sections.tools ? '1' : '0'}>
               <button type="button" className={styles.tool} onClick={fitToView} data-action="fit">适应窗口</button>

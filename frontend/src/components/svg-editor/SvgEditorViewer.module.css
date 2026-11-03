@@ -962,3 +962,31 @@
 .railToggle {
   display: none;
 }
+
+/* 工具按钮去线（用户反馈「很多线条」）：默认无边框只靠 hover 底色，
+   仅当前工具保留 accent 边；工具条只用一条底部分隔线。 */
+.toolbar {
+  border: none;
+  border-bottom: 1px solid var(--petri-divider);
+  gap: 2px;
+  padding: 6px 8px;
+}
+
+.tool {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  padding: 3px 9px;
+}
+
+.tool:hover {
+  border-color: transparent;
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.toolActive {
+  border-color: var(--petri-accent-border);
+  background: var(--petri-accent-bg);
+  color: var(--petri-text);
+}
