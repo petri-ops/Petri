@@ -223,7 +223,7 @@ export function WorkspaceFileTabStrip({
       </div>
       {menu && (
         <div
-          className={styles.fileTreeMenuLayer}
+          className={styles.fileTreeMenuLayer} data-petri-layer="modal"
           data-testid="file-tab-menu-layer"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setMenu(null);

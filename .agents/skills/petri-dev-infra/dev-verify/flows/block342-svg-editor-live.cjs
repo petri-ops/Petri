@@ -627,6 +627,66 @@ module.exports = {
       const afterProposal = fs.readFileSync(SAMPLE_ABS, 'utf8');
       assert('V19c_proposal_persisted', /fill="#770000"/.test(afterProposal), afterProposal.match(/<rect[^>]*>/)?.[0] || 'no rect');
 
+      // V21 — P1.1 选区浮动工具条：图层树选无 id 的绘制 <rect> → 浮条在场 → 点删除 → 保存回 1 个 rect
+      await lib.evalJs(client, `(function(){
+        const btn = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-layers"] button')).find((b) => (b.textContent || '').includes('<rect>'));
+        if (!btn) return 'no rect layer';
+        btn.click();
+        return 'picked';
+      })()`);
+      const toolbarReady = await waitFor(client, `(function(){
+        const bar = document.querySelector('${RAIL} [data-testid="svg-editor-selection-actions"]');
+        const btns = bar ? bar.querySelectorAll('button').length : 0;
+        return bar && btns >= 4 ? JSON.stringify({ buttons: btns }) : null;
+      })()`, 8_000);
+      assert('V21_selection_toolbar', Boolean(toolbarReady), toolbarReady || 'selection actions missing');
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="sel-delete"]'); if (b) b.click(); return true; })()`);
+      await sleep(400);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterToolbarDelete = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      const rectAfterDelete = (afterToolbarDelete.match(/<rect/g) || []).length;
+      assert('V21b_toolbar_delete_persisted', rectAfterDelete === 1, `rect count=${rectAfterDelete}`);
+
+      // V22 — P1.4 内联样式可视化：选 #box → 加 fill-opacity → 改值 → 保存落盘 style 属性
+      await lib.evalJs(client, `(function(){
+        const btn = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-layers"] button')).find((b) => (b.textContent || '').includes('#box'));
+        if (!btn) return 'no box layer';
+        btn.click();
+        return 'picked';
+      })()`);
+      const styleSection = await waitFor(client, `(function(){
+        const sec = document.querySelector('${RAIL} [data-testid="svg-editor-style-props"]');
+        return sec && sec.querySelector('[data-attr="style-new-name"]') ? 'ready' : null;
+      })()`, 8_000);
+      assert('V22_style_section', styleSection === 'ready', String(styleSection));
+      await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="style-new-name"]');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, 'fill-opacity');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      })()`);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="style-add"]'); if (b) b.click(); return true; })()`);
+      const styleRow = await waitFor(client, `(function(){
+        const row = document.querySelector('${RAIL} [data-attr="style:fill-opacity"]');
+        return row ? JSON.stringify({ value: row.value }) : null;
+      })()`, 8_000);
+      assert('V22b_style_row_added', Boolean(styleRow), styleRow || 'row not added');
+      await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-attr="style:fill-opacity"]');
+        if (!input) return 'no row';
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, '0.8');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      })()`);
+      await sleep(400);
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterStyle = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V22c_style_persisted', /<rect id="box"[^>]*style="fill-opacity:0.8"/.test(afterStyle) || /style="fill-opacity:0.8"/.test(afterStyle), afterStyle.match(/<rect[^>]*style[^>]*>/)?.[0]?.slice(0, 120) || 'no style attr');
+
       // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="render-check"]'); if (b) b.click(); return true; })()`);
       const checkReady = await waitFor(client, `(function(){

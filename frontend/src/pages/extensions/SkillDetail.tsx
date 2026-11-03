@@ -245,7 +245,7 @@ export function SkillDetail({
 
   return (
     <div
-      className={styles.modalBackdrop}
+      className={styles.modalBackdrop} data-petri-layer="modal"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"

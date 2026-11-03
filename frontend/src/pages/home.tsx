@@ -353,7 +353,7 @@ export default function Home(): React.ReactElement {
   ) : null;
 
   const storeOverlay = storeOpen ? (
-    <div className={`${styles.setupStoreShell} ${styles.setupStoreShellOverlay}`}>
+    <div className={`${styles.setupStoreShell} ${styles.setupStoreShellOverlay}`} data-petri-layer="modal">
       <div className={styles.setupStoreFrame}>
         <PluginStorePanel onClose={() => setStoreOpen(false)} />
       </div>

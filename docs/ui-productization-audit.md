@@ -1,5 +1,14 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-678: SVG 编辑器 P1 小项批——选区浮动工具条 + 模态层补挂 + 字体品牌表 + 内联样式可视化（BLOCK-343 P1；2026-11-04 **verified（dev Electron 边界内；实机 58/58 allPass）**）
+
+- **选区浮动工具条**：选择工具+有选区时，画布选区包围盒上方（贴顶自动翻下方）浮条四动作（复制/文字/问 agent/删除）——与属性面板动作行/快捷键**同源回调**（deleteSelected/duplicateSelected/askAgent/openTextEditor），不建第二逻辑；预览态不启用（`onSelectionAction=undefined`）。
+- **模态层补挂（UI-668 契约按需挂载兑现）**：全仓排查 fixed+z<10000 模态，10 处真全窗模态根补挂 `data-petri-layer="modal"`（CommandPalette cp-overlay / QuitSummaryDialog / home setupStoreShellOverlay / CodeReviewDrawer drawerBackdrop / fileTreeDialogBackdrop×4 / fileTreeMenuLayer×2 / extensions SkillDetail modalBackdrop）——挂上后列接缝让位契约自动生效；`.settingsOverlay`/`.switcherOverlay` 为死 CSS（无 JSX 消费）如实跳过；workspaceNotice/拖拽高亮等非模态不挂。
+- **字体品牌表**：font-family 下拉从硬编码八字改接 `BRAND_FONT_OPTIONS`——成员取自品牌 sans 栈（custom.css `--ifm-font-family-base`，UI-242 统一真源）+ 经典衬线/等宽族，CJK 可写名（PingFang SC / Microsoft YaHei）前排。
+- **内联样式可视化**：单选元素出「内联样式（style）」区——`parseStyleAttr` 声明序逐属性行（value 编辑即 `set_style` op，空值=删键走 props null 语义）+ 新增属性行（属性名守卫禁空白/冒号/分号，重复名提示）；顺带修正 svgChangeList 的 set_style 标签（此前误用 name/value，实为 props 对象形态）。
+- **实机抓真**：新增样式行在空清单上 map 加不进（upsert 缺失）→ 改 some/map/append 三态。
+- **验证**：svgEditorInspector.test 补 parseStyleAttr 5 断言 → svg-editor 前端 63/63 + theme 17/17（accent 棘轮 +1=工具条边框选中态登记）+ tsc 0 + lint 0 error；flow 四新断言（`V21_selection_toolbar` 4 按钮 / `V21b_toolbar_delete_persisted` rect 回 1 / `V22b_style_row_added` / `V22c_style_persisted` style="fill-opacity:0.8" 落盘），总 **58/58 allPass**。
+
 ## UI-677: agent SVG 提案进编辑器——chat 派发侧接线（BLOCK-342 切片6 交接项收口；2026-11-03 **verified（dev Electron 边界内；前端 85/85 + flow 53/53 回归全绿）**）
 
 - **链路闭环**：`svg_edit` propose 的实时工具结果（`mergeToolResultActivity`——仅实时路径，历史恢复走 restoreToolActivities 不触发）→ 派发 `petri:svg-proposal`（path/previewMarkup/ops/source=chat:svg_edit）→ 编辑器 ghost 叠加 + 逐项接受/拒绝（UI-675 既有全链）。callId 去重 FIFO（cap 200）防重复派发/防膨胀。

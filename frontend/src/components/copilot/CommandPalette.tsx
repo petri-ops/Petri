@@ -247,7 +247,7 @@ export function CommandPalette({
   let currentIdx = -1;
 
   return (
-    <div className="cp-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="命令面板">
+    <div className="cp-overlay" data-petri-layer="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="命令面板">
       <div
         className="cp-panel"
         onClick={(e) => e.stopPropagation()}

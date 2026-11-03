@@ -129,7 +129,7 @@ export function CodeReviewDrawer({ isOpen, onClose, filePath, workspacePath }: C
   const hasChanges = contents && editedContent !== contents.workTree;
 
   return (
-    <div className={styles.drawerBackdrop} onClick={onClose} role="dialog" aria-modal="true" aria-label="File editor">
+    <div className={styles.drawerBackdrop} data-petri-layer="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="File editor">
       <div
         className={styles.drawerPanel}
         onClick={(e) => e.stopPropagation()}

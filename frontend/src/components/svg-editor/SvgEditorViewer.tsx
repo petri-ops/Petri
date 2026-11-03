@@ -29,6 +29,7 @@ import {
   textSegmentsOf,
   type DrawTool,
   type StyleSnapshot,
+  parseStyleAttr,
 } from './svgEditorInspector';
 import { dispatchPetriEvent, petriEvents, subscribePetriEvent } from '@/lib/events';
 import { listSvgRevisions, readSvgRevision } from '@/lib/svgEditClient';
@@ -220,6 +221,8 @@ export function SvgEditorViewer({
   const [preview, setPreview] = React.useState<{ revision: string; at: string; markup: string; elements: Array<{ tag: string; path: number[]; id: string | null; attrCount: number; textPreview?: string }> } | null>(null);
   const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
+  // P1.4 内联样式行（单选时采集；编辑走 set_style op）
+  const [styleRows, setStyleRows] = React.useState<Array<{ name: string; value: string }>>([]);
   // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
   // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
@@ -443,6 +446,7 @@ export function SvgEditorViewer({
     setNotice('已把渲染回验判据放进会话输入框');
   }, [filePath, pendingOps, renderCheck]);
 
+
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
   const syncSelection = React.useCallback((next: Set<string>) => {
     setSelected(next);
@@ -455,6 +459,7 @@ export function SvgEditorViewer({
     const first = next.size > 0 ? Array.from(next)[0] : null;
     const el = root && first !== null ? findByPath(root, decodePath(first)) : null;
     setSelectedProps(readAttrs(el));
+    setStyleRows(selected.size === 1 || (next.size === 1 && el !== null) ? parseStyleAttr(el?.getAttribute('style')) : []);
     setTextEdit(null);
     void listSvgRevisions({ projectId, path: filePath, limit: 30 })
       .then((list) => setRevisions(list))
@@ -717,6 +722,40 @@ export function SvgEditorViewer({
     commit([op], currentMarkup());
   }, [commit, currentMarkup, rootEl, selected]);
 
+  /** P1.1 选区浮动工具条：动作与属性面板动作行/快捷键同源（deleteSelected/duplicateSelected/askAgent/openTextEditor）。 */
+  const handleSelectionAction = React.useCallback((action: 'delete' | 'duplicate' | 'ask' | 'text') => {
+    if (action === 'delete') { deleteSelected(); return; }
+    if (action === 'duplicate') { duplicateSelected(); return; }
+    if (action === 'ask') { askAgent(); return; }
+    openTextEditor();
+  }, [askAgent, deleteSelected, duplicateSelected, openTextEditor]);
+
+  /** P1.4 内联样式编辑：value 空=删键（set_style props null）；单选限定向。 */
+  const commitStyleProp = React.useCallback((name: string, value: string) => {
+    const root = rootEl();
+    if (!root || selected.size !== 1) return;
+    const path = decodePath(Array.from(selected)[0]);
+    const el = findByPath(root, path);
+    const target = el?.getAttribute('id') ? { id: el.getAttribute('id') as string } : { path };
+    commit([{ op: 'set_style', target, props: { [name]: value === '' ? null : value } }], currentMarkup());
+    setStyleRows((prev) => {
+      if (value === '') return prev.filter((row) => row.name !== name);
+      // upsert：新增行在空清单上也要追加（实机抓真：map 对空清单加不进）
+      return prev.some((row) => row.name === name)
+        ? prev.map((row) => (row.name === name ? { name, value } : row))
+        : [...prev, { name, value }];
+    });
+  }, [commit, currentMarkup, rootEl, selected]);
+
+  /** P1.4 新增样式属性行。 */
+  const [newStyleName, setNewStyleName] = React.useState('');
+  const addStyleProp = React.useCallback(() => {
+    const name = newStyleName.trim();
+    if (name === '' || /[\s:;]/.test(name)) { setNotice('样式属性名非法（禁空白/冒号/分号）'); return; }
+    if (styleRows.some((row) => row.name === name)) { setNotice(`样式属性 ${name} 已存在`); return; }
+    commitStyleProp(name, 'initial');
+    setNewStyleName('');
+  }, [commitStyleProp, newStyleName, styleRows]);
   const nudge = React.useCallback((dx: number, dy: number) => {
     const root = rootEl();
     if (!root || selected.size === 0) return;
@@ -1094,6 +1133,7 @@ export function SvgEditorViewer({
               onNotice={setNotice}
               onEmbedImage={embedImageFile}
               proposalMarkup={proposal?.markup || null}
+              onSelectionAction={preview ? undefined : handleSelectionAction}
             />
 
           </div>
@@ -1242,6 +1282,31 @@ export function SvgEditorViewer({
                     <button type="button" className={button.ghost} onClick={copyStyle} data-action="copy-style">复制样式</button>
                     <button type="button" className={button.ghost} onClick={pasteStyle} disabled={!styleClip} data-action="paste-style">粘贴样式</button>
                     <button type="button" className={button.ghost} onClick={askAgent} data-action="ask-agent">问 agent</button>
+                  </div>
+                </div>
+              ) : null}
+              {selected.size === 1 ? (
+                <div data-testid="svg-editor-style-props">
+                  <div className={styles.inspectorHead}><span className={styles.panelTitle}>内联样式（style）</span></div>
+                  {styleRows.map((row) => (
+                    <div key={row.name} className={styles.field}>
+                      <span className={styles.fieldLabel} title={row.name}>{row.name}</span>
+                      <input
+                        data-attr={`style:${row.name}`}
+                        value={row.value}
+                        placeholder="空=删除该条"
+                        onChange={(event) => commitStyleProp(row.name, event.target.value)}
+                      />
+                    </div>
+                  ))}
+                  <div className={styles.fieldRow}>
+                    <input
+                      data-attr="style-new-name"
+                      value={newStyleName}
+                      placeholder="新属性名（如 fill-opacity）"
+                      onChange={(event) => setNewStyleName(event.target.value)}
+                    />
+                    <button type="button" className={button.ghost} data-action="style-add" onClick={addStyleProp}>添加</button>
                   </div>
                 </div>
               ) : null}

@@ -18,6 +18,7 @@ import {
   selectionContextPrompt,
   snapshotStyle,
   textSegmentsOf,
+  parseStyleAttr,
 } from './svgEditorInspector';
 
 const markupOf = (op: unknown): string => {
@@ -143,5 +144,18 @@ describe('BLOCK-342 W2/W3/W4 svgEditorInspector', () => {
     expect(prompt).toContain('#box <rect> path=[0,0]');
     expect(prompt).toContain('fill="#4a7cba"');
     expect(prompt).toContain('svg_edit');
+  });
+});
+
+describe('BLOCK-343 P1.4 parseStyleAttr', () => {
+  it('声明序逐属性行；空段/无冒号段跳过', () => {
+    expect(parseStyleAttr('fill:red;stroke-width:2px')).toEqual([
+      { name: 'fill', value: 'red' },
+      { name: 'stroke-width', value: '2px' },
+    ]);
+    expect(parseStyleAttr('  a:1 ; ; b:2 ')).toEqual([{ name: 'a', value: '1' }, { name: 'b', value: '2' }]);
+    expect(parseStyleAttr('nosplit')).toEqual([]);
+    expect(parseStyleAttr(null)).toEqual([]);
+    expect(parseStyleAttr('')).toEqual([]);
   });
 });

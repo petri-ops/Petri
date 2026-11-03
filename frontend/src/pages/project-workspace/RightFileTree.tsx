@@ -1013,7 +1013,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       {/* UI-451 — 脏 tab 关闭确认（复用 fileTreeDialog 样式族，按钮用 danger 色表达「丢弃」） */}
       {closeConfirm && (
         <div
-          className={styles.fileTreeDialogBackdrop}
+          className={styles.fileTreeDialogBackdrop} data-petri-layer="modal"
           data-testid="file-tab-close-dialog"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setCloseConfirm(null);

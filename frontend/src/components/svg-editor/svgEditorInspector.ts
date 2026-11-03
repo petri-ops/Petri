@@ -7,6 +7,33 @@
 import type { SvgOp } from './svgEditorModel';
 import { composeTranslate } from './svgEditorModel';
 
+/**
+ * P1.3 字体表——从品牌 sans 栈取成员（真源 custom.css `--ifm-font-family-base`，UI-242 统一），
+ * 补经典衬线/等宽族；SVG 文本常含中文，CJK 可写名（PingFang SC / Microsoft YaHei）必须在前排。
+ */
+export const BRAND_FONT_OPTIONS: ReadonlyArray<string> = [
+  'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', 'Arial',
+  'Times New Roman', 'Courier New', 'Georgia', 'Verdana', 'sans-serif', 'serif', 'monospace',
+];
+
+/**
+ * P1.4 — 解析 style 属性为逐属性行（保持声明序）；空段/无冒号段如实跳过。
+ * 编辑走白名单 `set_style` op（{op,target,props:{name:value}}；null 删键）。
+ */
+export function parseStyleAttr(style: string | null | undefined): Array<{ name: string; value: string }> {
+  if (typeof style !== 'string' || style.trim() === '') return [];
+  const rows: Array<{ name: string; value: string }> = [];
+  for (const part of style.split(';')) {
+    const i = part.indexOf(':');
+    if (i <= 0) continue;
+    const name = part.slice(0, i).trim();
+    const value = part.slice(i + 1).trim();
+    if (name === '' || value === '') continue;
+    rows.push({ name, value });
+  }
+  return rows;
+}
+
 /** 属性面板可编辑项（白名单：不进 SVG 规范外的自定义属性）。 */
 export const EDITABLE_ATTRS: ReadonlyArray<{
   name: string;
@@ -20,7 +47,7 @@ export const EDITABLE_ATTRS: ReadonlyArray<{
   { name: 'stroke-width', label: '描边宽', kind: 'number' },
   { name: 'opacity', label: '不透明度', kind: 'number' },
   { name: 'font-size', label: '字号', kind: 'number' },
-  { name: 'font-family', label: '字体', kind: 'select', options: ['Helvetica', 'Arial', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana', 'sans-serif', 'serif'] },
+  { name: 'font-family', label: '字体', kind: 'select', options: BRAND_FONT_OPTIONS },
   { name: 'font-weight', label: '字重', kind: 'select', options: ['normal', 'bold', '300', '600', '700'] },
   { name: 'text-anchor', label: '对齐', kind: 'select', options: ['start', 'middle', 'end'] },
 ] as const;

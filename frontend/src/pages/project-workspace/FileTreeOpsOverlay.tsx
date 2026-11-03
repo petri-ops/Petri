@@ -72,7 +72,7 @@ export function FileTreeContextMenu({
 
   return (
     <div
-      className={styles.fileTreeMenuLayer}
+      className={styles.fileTreeMenuLayer} data-petri-layer="modal"
       data-testid="file-tree-menu-layer"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -279,7 +279,7 @@ export function FileTreeDialogHost({
 
   return (
     <div
-      className={styles.fileTreeDialogBackdrop}
+      className={styles.fileTreeDialogBackdrop} data-petri-layer="modal"
       data-testid="file-tree-dialog"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();

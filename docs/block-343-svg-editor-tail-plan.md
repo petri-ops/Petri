@@ -18,13 +18,13 @@ reopen: 位图描摹（装 Inkscape 后即用）；资产路径嵌入形态（�
 - 完成语义：三 P 阶段串行，每阶段独立提交+实机；全部收口后 registry → completed。
 - 文件面：`frontend/src/components/svg-editor/**`、`frontend/src/pages/project-workspace/**`（模态挂层）、`frontend/src/components/settings/**`（模态挂层）、flow `block342-svg-editor-live.cjs`（断言扩展）、`acceptance/block-343/`。**零触碰**：SimpleChat 会话主链（P3 仅经既有附件 API）、后端 core（除非 P2 执行者元数据真缺口需最小补，届时先声明）。
 
-## P1 小项批（当前执行范围）
+## P1 小项批（completed 2026-11-04，UI-678 verified，实机 58/58）
 
 1. **选区浮动工具条**：画布选区上方浮条（复用 nodeActions 定位模式）：删除/复制/编辑文字（单选 text 时）/问 agent。动作与属性面板动作行同源（同一回调），不建第二逻辑。
 2. **模态层补挂**：全仓排查 `position: fixed` + `z-index` < 10000 的既有模态（文件树对话框/settingsOverlay/会话侧对话框等），按 UI-668 契约挂 `data-petri-layer="modal"` + 必要时 `--petri-z-modal` 阶梯；模态内 fixed 浮层穿透点逐个实机核对。
 3. **字体品牌表**：`svgEditorInspector.ts` 的 font-family options 从硬编码八字改接品牌字体表 token/常量（找 styles/custom.css 或 themes 既有字体清单为真源；无现成表则建 svg-editor 域内常量表并留注释）。
 4. **style 简写可视化**：元素带 `style="..."` 时属性面板出「内联样式」区，逐属性 key/value 行编辑 → `set_style` op（白名单既有）；不猜测未声明的 CSS 简写展开。
-5. **资产路径嵌入形态**：设计裁决点（入口 UX/显示改写/守卫）——随 P1 收口批问用户，裁决后本期实现或顺延 P3 后。
+5. **资产路径嵌入形态**：设计裁决点（入口 UX/显示改写/守卫）——待用户裁决；其余四项已交付。
 
 ## P2 版本对比 + 历史面板
 

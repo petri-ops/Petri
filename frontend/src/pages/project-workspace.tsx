@@ -1112,7 +1112,7 @@ export function ProjectWorkspace(): React.ReactElement {
         {/* UI-451 加映 v3 (P2-8) — 整窗关闭脏守卫确认弹层（beforeunload 拦下后出现） */}
         {pendingAppClose && (
           <div
-            className={styles.fileTreeDialogBackdrop}
+            className={styles.fileTreeDialogBackdrop} data-petri-layer="modal"
             data-testid="file-app-close-dialog"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) setPendingAppClose(false);
@@ -1154,7 +1154,7 @@ export function ProjectWorkspace(): React.ReactElement {
         {/* UI-451 加映 v2 (P1-2) — 关右栏「文件」tab 的脏确认弹层（复用 fileTreeDialog 样式族） */}
         {pendingFilesPanelClose !== null && (
           <div
-            className={styles.fileTreeDialogBackdrop}
+            className={styles.fileTreeDialogBackdrop} data-petri-layer="modal"
             data-testid="file-panel-close-dialog"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) setPendingFilesPanelClose(null);

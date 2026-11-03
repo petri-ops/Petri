@@ -36,7 +36,11 @@ export function opLabel(op: SvgOp): string {
   switch (op.op) {
     case 'set_attr': return `set ${asText(op.name)}=${asText(op.value)}（${t}）`;
     case 'remove_attr': return `删属性 ${asText(op.name)}（${t}）`;
-    case 'set_style': return `set style ${asText(op.name)}=${asText(op.value)}（${t}）`;
+    case 'set_style': {
+      const props = op.props && typeof op.props === 'object' ? op.props as Record<string, unknown> : {};
+      const head = Object.entries(props).slice(0, 2).map(([k, v]) => `${k}=${asText(v)}`).join(', ');
+      return `set style ${head || '(空)'}（${t}）`;
+    }
     case 'set_text': return `改文字（${t}）`;
     case 'remove': return `删除 ${t}`;
     case 'insert': return `插入 <${asText(op.tag) || '?'}>`;

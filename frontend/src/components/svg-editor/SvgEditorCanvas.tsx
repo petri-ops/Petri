@@ -53,6 +53,8 @@ export interface CanvasProps {
   onEmbedImage?: (file: File) => void;
   /** 切片6 提案幽灵：agent propose 的 previewMarkup（半透明叠加，与画布同 scale 对齐）。 */
   proposalMarkup?: string | null;
+  /** P1.1 选区浮动工具条：选择工具且有选区时渲染；动作语义由宿主分发（与属性面板动作行同源）。 */
+  onSelectionAction?: (action: 'delete' | 'duplicate' | 'ask' | 'text') => void;
 }
 
 interface OverlayBox extends Box {
@@ -61,7 +63,7 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage, proposalMarkup }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage, proposalMarkup, onSelectionAction }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
   const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
@@ -564,6 +566,25 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
             style={{ left: hoverBox.x, top: hoverBox.y, width: hoverBox.width, height: hoverBox.height }}
           />
         ) : null}
+        {tool === 'select' && boxes.length > 0 && onSelectionAction ? (() => {
+          const left = Math.min(...boxes.map((b) => b.x));
+          const right = Math.max(...boxes.map((b) => b.x + b.width));
+          const top = Math.min(...boxes.map((b) => b.y));
+          const bottom = Math.max(...boxes.map((b) => b.y + b.height));
+          const flip = top < 34; // 贴顶时翻到选区下方
+          return (
+            <div
+              className={styles.selectionActions}
+              data-testid="svg-editor-selection-actions"
+              style={{ left: (left + right) / 2, top: flip ? bottom + 8 : top - 32 }}
+            >
+              <button type="button" className={button.ghost} data-action="sel-copy" onPointerDown={(e) => e.stopPropagation()} onClick={() => onSelectionAction('duplicate')}>复制</button>
+              <button type="button" className={button.ghost} data-action="sel-text" onPointerDown={(e) => e.stopPropagation()} onClick={() => onSelectionAction('text')}>文字</button>
+              <button type="button" className={button.ghost} data-action="sel-ask" onPointerDown={(e) => e.stopPropagation()} onClick={() => onSelectionAction('ask')}>问 agent</button>
+              <button type="button" className={button.ghost} data-action="sel-delete" onPointerDown={(e) => e.stopPropagation()} onClick={() => onSelectionAction('delete')}>删除</button>
+            </div>
+          );
+        })() : null}
         {rubber ? (
           <div className={styles.rubber} style={{ left: rubber.x, top: rubber.y, width: rubber.width, height: rubber.height }} />
         ) : null}

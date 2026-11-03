@@ -2133,3 +2133,16 @@
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-sm);
 }
+
+.selectionActions {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--petri-accent-border);
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-bg-surface);
+  pointer-events: auto;
+  transform: translateX(-50%);
+}

@@ -97,6 +97,7 @@ export function QuitSummaryDialog({
   return (
     <div
       className={styles.overlay}
+      data-petri-layer="modal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="quit-summary-title"
