@@ -1101,3 +1101,19 @@
   max-width: none;
   white-space: nowrap;
 }
+
+/* 根因修复（用户抓真「图片又没了」）：早前的 [data-layers]/[data-inspector] 列宽规则
+   特异性高于单列规则，把 .stage 挤进 36px 的首列 → 画布宽度塌成 35px。
+   这里显式枚举所有状态组合，统一为「画布独占一列」（面板已是 absolute 浮层，不参与列）。 */
+.body,
+.body[data-layers='0'],
+.body[data-layers='1'],
+.body[data-inspector='0'],
+.body[data-inspector='1'],
+.body[data-layers='0'][data-inspector='0'],
+.body[data-layers='0'][data-inspector='1'],
+.body[data-layers='1'][data-inspector='0'],
+.body[data-layers='1'][data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
