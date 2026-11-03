@@ -1814,3 +1814,56 @@
   max-height: none;
   overflow: visible;
 }
+
+/* 修订历史浮层：紧邻按钮左侧（联动感），相对属性栏定位 */
+.inspector {
+  position: relative;
+  overflow: visible;
+}
+
+.revisionPanel {
+  position: absolute;
+  right: calc(100% + 10px);
+  bottom: 0;
+  top: auto;
+  left: auto;
+  width: 320px;
+  max-height: 66vh;
+  z-index: 12;
+}
+
+.revisionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--petri-duration-fast) var(--petri-ease-standard);
+}
+
+.revisionItem:hover {
+  background: var(--petri-hover);
+}
+
+.previewBar {
+  position: absolute;
+  top: 44px;
+  left: 12px;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  border: 1px solid var(--petri-status-warning-border);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-surface);
+  color: var(--petri-status-warning-fg);
+  font-size: var(--petri-font-size-body);
+}

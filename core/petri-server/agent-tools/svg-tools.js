@@ -211,6 +211,36 @@ function tool_svg_revisions(args, ctx) {
 }
 
 /**
+ * tool_svg_revision — 只读：按快照文件名读历史内容（供「点历史预览那一版」）。
+ * 路径双重限定：必须在 .petri/svg-revisions 下，且前缀与该文件 stem 匹配。
+ * @param {object} args { filePath, revision }
+ * @param {object} ctx { projectId }
+ */
+function tool_svg_revision(args, ctx) {
+  const project = resolveProject(ctx);
+  if (!project.ok) return { error: project.code, message: project.message };
+  const file = resolveFile(project.workspaceRoot, args && args.filePath);
+  if (!file.ok) return { error: file.code, message: file.message };
+  const name = typeof (args && args.revision) === 'string' ? path.basename(args.revision) : '';
+  const base = path.basename(file.rel).replace(/\.svg$/i, '');
+  if (!name || !name.startsWith(`${base}-`) || !name.endsWith('.svg')) {
+    return { error: 'revision_invalid', message: '快照文件名不合法（必须属于该 SVG 的修订）' };
+  }
+  const abs = path.join(project.workspaceRoot, SNAPSHOT_REL_DIR, name);
+  if (!fs.existsSync(abs)) return { error: 'file_not_found', message: `快照不存在：${name}` };
+  const text = fs.readFileSync(abs, 'utf8');
+  const inspected = svgOps.inspectSvg(text, { limit: 500 });
+  return {
+    ok: true,
+    filePath: file.rel,
+    revision: name,
+    text,
+    total: inspected.ok ? inspected.total : 0,
+    elements: inspected.ok ? inspected.elements : [],
+  };
+}
+
+/**
  * tool_svg_edit — 白名单 op 的 propose/apply。
  * @param {object} args { filePath, ops, apply?, beforeSha256? }
  * @param {object} ctx { projectId }
@@ -305,6 +335,7 @@ function tool_svg_edit(args, ctx) {
 module.exports = {
   tool_svg_inspect,
   tool_svg_revisions,
+  tool_svg_revision,
   tool_svg_edit,
   MAX_SVG_BYTES,
   SNAPSHOT_REL_DIR,

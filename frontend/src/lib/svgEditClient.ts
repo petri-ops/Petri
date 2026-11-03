@@ -153,3 +153,21 @@ export async function listSvgRevisions(input: { projectId: string; path: string;
   }
   return Array.isArray(payload.revisions) ? payload.revisions : [];
 }
+
+
+export interface SvgRevisionContent {
+  text: string;
+  total: number;
+  elements: Array<{ tag: string; path: number[]; id: string | null; attrCount: number; textPreview?: string }>;
+}
+
+/** 只读：读某份历史快照的正文与结构（供「点历史预览那一版」）。 */
+export async function readSvgRevision(input: { projectId: string; path: string; revision: string }): Promise<SvgRevisionContent> {
+  const query = new URLSearchParams({ projectId: input.projectId, path: input.path, revision: input.revision });
+  const response = await fetch(`${getApiPrefix()}/svg/revision?${query.toString()}`, { cache: 'no-store', signal: AbortSignal.timeout(20_000) });
+  const payload = (await response.json().catch(() => null)) as (SvgRevisionContent & { ok?: boolean; error?: string }) | null;
+  if (!response.ok || !payload || payload.ok !== true) {
+    throw new SvgEditError(typeof payload?.error === 'string' ? payload.error : 'revision_failed', '读取历史快照失败');
+  }
+  return { text: payload.text, total: payload.total, elements: payload.elements };
+}

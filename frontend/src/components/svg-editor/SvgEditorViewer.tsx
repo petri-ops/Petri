@@ -31,7 +31,7 @@ import {
   type StyleSnapshot,
 } from './svgEditorInspector';
 import { dispatchPetriEvent, petriEvents } from '@/lib/events';
-import { listSvgRevisions } from '@/lib/svgEditClient';
+import { listSvgRevisions, readSvgRevision } from '@/lib/svgEditClient';
 import {
   duplicateOp,
   findByPath,
@@ -192,6 +192,8 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
   const [revisionOpen, setRevisionOpen] = React.useState(false);
+  // 历史预览：只读显示某一版（不改真值、不进 pendingOps）
+  const [preview, setPreview] = React.useState<{ revision: string; at: string; markup: string; elements: Array<{ tag: string; path: number[]; id: string | null; attrCount: number; textPreview?: string }> } | null>(null);
   const [revisions, setRevisions] = React.useState<Array<{ file: string; at: string; sha8: string; sizeBytes: number }>>([]);
   const [textEdit, setTextEdit] = React.useState<{ path: number[]; label: string; value: string; list: Array<{ path: number[]; label: string; text: string }> } | null>(null);
 
@@ -409,6 +411,19 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
 
   /** W4 全部拒绝：回到磁盘真值形态（不可逆项如实跳过并提示）。 */
 
+  /** 点历史条目：只读预览那一版（画布与图层树都切过去，不改真值、不进 pendingOps）。 */
+  const openRevision = React.useCallback((item: { file: string; at: string }) => {
+    void readSvgRevision({ projectId, path: filePath, revision: item.file })
+      .then((content) => {
+        const view = sanitizeSvgForView(content.text);
+        setPreview({ revision: item.file, at: item.at, markup: view.ok ? (view.markup || '') : '', elements: content.elements });
+        setRevisionOpen(false);
+      })
+      .catch((error: unknown) => {
+        setNotice(`读取历史快照失败：${error instanceof Error ? error.message : String(error)}`);
+      });
+  }, [filePath, projectId]);
+
   const undo = React.useCallback(() => {
     setHistory((prev) => {
       if (prev.length === 0) return prev;
@@ -578,9 +593,11 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   // 文档色板：随 markup 纯计算（渲染期零 DOM/ref 访问）
   const docPalette = React.useMemo(() => extractPaletteFromMarkup(markup), [markup]);
 
-  const layerRows = state.status === 'ready'
-    ? state.inspect.elements.filter((el) => el.path.length <= 3).slice(0, 300)
-    : [];
+  const layerRows = preview
+    ? preview.elements.filter((el) => el.path.length <= 3).slice(0, 300)
+    : state.status === 'ready'
+      ? state.inspect.elements.filter((el) => el.path.length <= 3).slice(0, 300)
+      : [];
 
   // 属性面板数据源=后端 inspect（渲染期不读 DOM ref；删除/移动后以保存后的重新 inspect 为准）
   const selectedRows = state.status === 'ready'
@@ -673,26 +690,6 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
           ) : null}
 
           <div className={styles.stage} onWheel={handleWheel}>
-            {revisionOpen ? (
-              <div className={styles.revisionPanel} data-testid="svg-editor-revision-panel">
-                <div className={styles.layersHead}>
-                  <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
-                  <button type="button" className={button.ghost} data-action="close-revisions" onClick={() => setRevisionOpen(false)}>×</button>
-                </div>
-                {revisions.length === 0 ? (
-                  <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
-                ) : (
-                  <ul className={styles.changeList} data-testid="svg-editor-revision-list">
-                    {revisions.map((item) => (
-                      <li key={item.file} className={styles.changeRow} data-revision={item.file}>
-                        <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
-                        <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : null}
             {state.removed > 0 ? (
               <div className={styles.warn} data-testid="svg-editor-sanitized">
                 视图已脱敏 {state.removed} 处（script/事件属性/危险链接）；真值未被删除。
@@ -753,12 +750,12 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               </div>
             ) : null}
             <SvgEditorCanvas
-              markup={markup}
+              markup={preview ? preview.markup : markup}
               scale={scale}
               selected={selected}
               hostRef={hostRef}
               onSelectionChange={syncSelection}
-              onOpsCommitted={handleOpsCommitted}
+              onOpsCommitted={preview ? () => {} : handleOpsCommitted}
               tool={tool}
               onDrawBox={handleDrawBox}
             />
@@ -847,6 +844,41 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
             >
               修订历史（{revisions.length}）▸
             </button>
+            {preview ? (
+              <div className={styles.previewBar} data-testid="svg-editor-preview-bar">
+                <span>只读预览：{preview.at.replace('T', ' ').slice(0, 19)}</span>
+                <button type="button" className={button.ghost} data-action="exit-preview" onClick={() => setPreview(null)}>退出预览</button>
+              </div>
+            ) : null}
+            {revisionOpen ? (
+              <div className={styles.revisionPanel} data-testid="svg-editor-revision-panel">
+                <div className={styles.layersHead}>
+                  <span className={styles.panelTitle}>修订历史（{revisions.length}）</span>
+                  <button type="button" className={button.ghost} data-action="close-revisions" onClick={() => setRevisionOpen(false)}>×</button>
+                </div>
+                {revisions.length === 0 ? (
+                  <div className={styles.note}>尚无修订快照（每次保存会在 .petri/svg-revisions/ 留一份）。</div>
+                ) : (
+                  <ul className={styles.changeList} data-testid="svg-editor-revision-list">
+                    {revisions.map((item) => (
+                      <li key={item.file} className={styles.changeRow} data-revision={item.file}>
+                        <button
+                          type="button"
+                          className={styles.revisionItem}
+                          data-action="preview-revision"
+                          title="预览这一版（只读）"
+                          onClick={() => openRevision(item)}
+                        >
+                          <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
+                          <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+
             <details open className={styles.paletteBlock} data-testid="svg-editor-doc-palette">
               <summary className={styles.sectionSummary}>文档色板（点色块填入选中）</summary>
               {docPalette.length === 0 ? <div className={styles.note}>点一下画布或图层即可提取现有颜色</div> : null}
