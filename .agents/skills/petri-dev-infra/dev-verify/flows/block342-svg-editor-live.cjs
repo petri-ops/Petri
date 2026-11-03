@@ -138,7 +138,7 @@ module.exports = {
       const panelInfo = JSON.parse(panels);
       assert('V2d_panels_default_collapsed',
         panelInfo.paletteOpen === false && panelInfo.changesOpen === false
-          && panelInfo.toolGroupOpen === '0' && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
+           && panelInfo.layersOpen === '0' && panelInfo.inspectorOpen === '0'
           && panelInfo.hasExpand === true,
         panels);
 

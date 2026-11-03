@@ -1333,3 +1333,39 @@
 .body:has(.layers[data-open='0']) .inspector {
   left: auto;
 }
+
+/* 图层坞移入画布流内（紧跟图片下方，用户裁决「还是太远」）：stage 改纵向 flex，
+   画布按内容高度、图层紧随其后一起滚动；工具栏默认展开。 */
+.body {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 44px 12px 12px;
+  overflow: auto;
+}
+
+.stage > [data-testid='svg-editor-canvas'] {
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 0;
+}
+
+.layers {
+  position: static;
+  grid-row: auto;
+  flex: 0 0 auto;
+  margin: 0;
+  max-height: 132px;
+  padding: 6px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+}
+
+.layers[data-open='0'] {
+  display: none;
+}

@@ -199,7 +199,7 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
   const [changeLog, setChangeLog] = React.useState<ElementChange[] | null>(null);
   // 交互：右栏空间有限 —— 分区折叠（默认只开「图形属性」），整栏可收，工具栏可收
   // 默认全收起：先给画布空间，用户点开才占用（用户裁决：默认收起而非占位）
-  const [sections, setSections] = React.useState({ props: false, palette: false, changes: false, tools: false });
+  const [sections, setSections] = React.useState({ props: false, palette: false, changes: false, tools: true });
   const [inspectorOpen, setInspectorOpen] = React.useState(false);
   const [layersOpen, setLayersOpen] = React.useState(false);
   const toggleSection = React.useCallback((key: keyof typeof sections) => {
@@ -711,44 +711,6 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               属性
             </button>
           ) : null}
-          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
-            <div className={styles.layersHead}>
-              {layersOpen ? (
-                <>
-                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
-                  <button
-                    type="button"
-                    className={button.ghost}
-                    data-action="collapse-layers"
-                    title="收起图层栏"
-                    onClick={() => setLayersOpen(false)}
-                  >
-                    «
-                  </button>
-                </>
-              ) : null}
-            </div>
-            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
-              {layerRows.map((el) => {
-                const key = pathKey(el.path);
-                return (
-                  <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
-                    <button
-                      type="button"
-                      className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
-                      onClick={() => syncSelection(new Set([key]))}
-                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
-                      title={`<${el.tag}> path=[${el.path.join(',')}]`}
-                    >
-                      {el.id ? `#${el.id}` : `<${el.tag}>`}
-                      {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-          </aside>
 
           <div className={styles.stage} onWheel={handleWheel}>
             {state.removed > 0 ? (
@@ -850,6 +812,45 @@ export function SvgEditorViewer({ projectId, filePath, name, active = true }: Sv
               tool={tool}
               onDrawBox={handleDrawBox}
             />
+          <aside className={styles.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
+            <div className={styles.layersHead}>
+              {layersOpen ? (
+                <>
+                  <span className={styles.panelTitle}>图层（{state.inspect.total}）</span>
+                  <button
+                    type="button"
+                    className={button.ghost}
+                    data-action="collapse-layers"
+                    title="收起图层栏"
+                    onClick={() => setLayersOpen(false)}
+                  >
+                    «
+                  </button>
+                </>
+              ) : null}
+            </div>
+            <ul className={styles.layerList} data-open={layersOpen ? '1' : '0'}>
+              {layerRows.map((el) => {
+                const key = pathKey(el.path);
+                return (
+                  <li key={key} style={{ paddingLeft: 6 + el.path.length * 12 }}>
+                    <button
+                      type="button"
+                      className={selected.has(key) ? styles.layerRowActive : styles.layerRow}
+                      onClick={() => syncSelection(new Set([key]))}
+                      onDoubleClick={() => { syncSelection(new Set([key])); setTextEdit(null); }}
+                      title={`<${el.tag}> path=[${el.path.join(',')}]`}
+                    >
+                      {el.id ? `#${el.id}` : `<${el.tag}>`}
+                      {el.textPreview ? <span className={styles.layerText}>{el.textPreview.slice(0, 24)}</span> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+          </aside>
+
           </div>
 
           <aside className={styles.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
