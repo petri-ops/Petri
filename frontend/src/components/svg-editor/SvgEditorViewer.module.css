@@ -1490,3 +1490,50 @@
   grid-row: 1 / -1;
   grid-column: 2;
 }
+
+/* 布局定稿 v4（用户裁决）：右列属性占满上下全高；左列「图片 / 图层」上下等分 */
+.body,
+.body[data-inspector='1'] {
+  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* 属性栏收起时回到单列，图片独占 */
+.body[data-inspector='0'] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.stage {
+  grid-row: 1;
+  grid-column: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.layers {
+  grid-row: 2;
+  grid-column: 1;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  margin: 0 12px 10px;
+  overflow: hidden;
+}
+
+.inspector {
+  grid-row: 1 / -1;
+  grid-column: 2;
+  height: auto;
+  max-height: none;
+  overflow: auto;
+}
+
+/* 图层收起：让出下半区给图片 */
+.body:has(.layers[data-open='0']) {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.layers[data-open='0'] {
+  display: none;
+}
