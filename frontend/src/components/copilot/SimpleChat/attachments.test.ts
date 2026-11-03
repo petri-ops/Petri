@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   hasImagePayload,
+  hasVideoPayload,
   imageInputAllowed,
+  videoInputAllowed,
   onDragOver,
   onDrop,
   onPaste,
@@ -148,5 +150,24 @@ describe('BLOCK-255 C17 — 会话拖拽态与文件拖拽共存', () => {
       dataTransfer: { types: ['text/plain'] },
     } as unknown as React.DragEvent, fileGuard);
     expect(fileGuard).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('BLOCK-340 P2 视频输入门控', () => {
+  it('videoInputAllowed 与 imageInputAllowed 同源：两者皆无才阻断', () => {
+    expect(videoInputAllowed(false, false)).toBe(false);
+    expect(videoInputAllowed(true, false)).toBe(true);
+    expect(videoInputAllowed(false, true)).toBe(true);
+    expect(videoInputAllowed(undefined, undefined)).toBe(true);
+  });
+
+  it('hasVideoPayload：items/files 命中 video MIME 或视频扩展名', () => {
+    const fakeFile = (name: string, type: string) => ({ name, type } as unknown as File);
+    expect(hasVideoPayload({ items: [{ type: 'video/mp4' }] })).toBe(true);
+    expect(hasVideoPayload({ files: [fakeFile('demo.mov', '')] })).toBe(true);
+    expect(hasVideoPayload({ files: [fakeFile('demo.webm', 'video/webm')] })).toBe(true);
+    expect(hasVideoPayload({ files: [fakeFile('note.txt', 'text/plain')] })).toBe(false);
+    expect(hasVideoPayload(null)).toBe(false);
   });
 });

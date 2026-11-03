@@ -482,6 +482,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "process_stop": "已停止",
   "query": "已查询",
   "read_image": "已读取",
+  "read_video": "已读取",
   "read_page": "已读取",
   "resident_task_create": "已创建",
   "resident_task_list": "已列出",

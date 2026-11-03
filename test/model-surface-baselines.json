@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-02T12:39:00.000Z",
+  "updatedAt": "2026-11-03T08:40:00.000Z",
   "systemPromptChars": 993,
-  "toolDefsCount": 108,
-  "toolDefsChars": 58263,
+  "toolDefsCount": 109,
+  "toolDefsChars": 58941,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -111,6 +111,7 @@
     "workspace_worktree_create": 540,
     "workspace_worktree_list": 225,
     "workspace_worktree_remove": 450,
-    "workspace_worktree_merge_request": 434
+    "workspace_worktree_merge_request": 434,
+    "read_video": 685
   }
 }

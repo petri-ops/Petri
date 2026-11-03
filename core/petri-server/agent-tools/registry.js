@@ -33,7 +33,7 @@ const {
   tool_generate_methods,
 } = require('./learning');
 const { tool_verify_state } = require('./verify-dispatch');
-const { tool_read_image } = require('./vision-tools');
+const { tool_read_image, tool_read_video } = require('./vision-tools');
 const {
   tool_model3d_inspect,
   tool_model3d_validate,
@@ -225,6 +225,7 @@ const HANDLERS = {
   delegate_to_petri_node: tool_delegate_to_petri_node,
   federation_list_peers: tool_federation_list_peers,
   read_image: tool_read_image,
+  read_video: tool_read_video,
   generate_methods: tool_generate_methods,
   verify_state: tool_verify_state,
   result_edit_plan: tool_result_edit_plan,
@@ -381,6 +382,7 @@ const CONTRACTS = {
   // BLOCK-164 W1 — 节点清单：只读聚合（本地真值 + 对端 granted-projects 尽力探测），无写面
   federation_list_peers: contract('agent-management', 'external-request', 'R1', [], 8000),
   read_image: contract('vision', 'external-request', 'R1', ['artifacts', 'llm.provider'], 30000),
+  read_video: contract('vision', 'external-request', 'R1', ['artifacts', 'project.files'], 60000),
   generate_methods: contract('reporting', 'external-request', 'R1', ['project.database', 'llm.provider'], 30000),
   verify_state: contract('verification', 'none', 'R0', ['project.database', 'ui.session'], 500),
   result_edit_plan: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),

@@ -90,8 +90,15 @@ export function onDrop(
 
   // BLOCK-150 加映 / BLOCK-155 放宽 — 图片输入前置门（判据单源 imageInputAllowed：
   // 识图角色 || 聊天渠道视觉能力，两者皆无才阻断。非图片附件不受影响——不经视觉解读）。
+  // BLOCK-340 P2 — 视频（video/* MIME 或视频扩展名）同源门控 videoInputAllowed：
+  // 无 vision 时诚实阻断（抽帧后需要 vision 解读，放行只会上传死文件）。
+  const hasVideo = files.some((file) => file.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name));
+  const hasImage = files.some((file) => file.type.startsWith('image/'));
   if (options && !imageInputAllowed(options.visionEnabled, options.chatVisionCapable)
-      && files.some((file) => file.type.startsWith('image/'))) {
+      && (hasImage || hasVideo)) {
+    return VISION_NOT_CONFIGURED_NOTICE;
+  }
+  if (options && !videoInputAllowed(options.visionEnabled, options.chatVisionCapable) && hasVideo) {
     return VISION_NOT_CONFIGURED_NOTICE;
   }
 
@@ -161,6 +168,29 @@ export function imageInputAllowed(
 ): boolean {
   if (visionConfigured === false && chatVisionCapable !== true) return false;
   return true;
+}
+
+/** BLOCK-340 P2 — 视频输入前置门（与 imageInputAllowed 同源判据；video/* MIME）。
+ *  vision 角色或聊天渠道视觉能力任一为真即放行；否则阻断并返回提示。 */
+export function videoInputAllowed(
+  visionConfigured: boolean | undefined,
+  chatVisionCapable: boolean | undefined
+): boolean {
+  return imageInputAllowed(visionConfigured, chatVisionCapable);
+}
+
+/** BLOCK-340 P2 — 载荷里是否含视频文件（粘贴或拖拽任一命中）。 */
+export function hasVideoPayload(
+  dataTransfer: { items?: ArrayLike<{ type: string }>; files?: ArrayLike<File> } | null | undefined
+): boolean {
+  if (!dataTransfer) return false;
+  for (const item of Array.from(dataTransfer.items ?? [])) {
+    if (item.type && item.type.startsWith('video/')) return true;
+  }
+  for (const file of Array.from(dataTransfer.files ?? [])) {
+    if (file.type?.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name)) return true;
+  }
+  return false;
 }
 
 /** BLOCK-150 加映 — 载荷里是否含图片（粘贴 items 或拖拽 files 任一命中）。 */

@@ -428,5 +428,9 @@
   "browser_disconnect": {
     "label": "已断开浏览器",
     "icon": "globe"
+  },
+  "read_video": {
+    "label": "已读取",
+    "icon": "video"
   }
 }

@@ -184,6 +184,32 @@ module.exports = [
   {
     "type": "function",
     "function": {
+      "name": "read_video",
+      "description": "读取项目工作区内的视频文件（mp4/mov/webm/mkv/avi）并抽帧为 PNG，返回帧清单供你逐帧分析。适用于：用户让你看一段参考视频/试玩录像/屏幕录制时。\n抽帧在本地执行（ffmpeg），不改视频源文件。帧数有预算上限（默认 8 帧，最大 16 帧）。返回帧清单后，可用 read_image 逐帧解读，或在聊天中引用帧文件让 vision 角色分析。\n注意：需要 ffmpeg 在本机可用（未安装会返回 capability_unavailable）。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "workspace 相对路径（mp4/mov/webm/mkv/avi），如 \"demos/gameplay.mp4\""
+          },
+          "maxFrames": {
+            "type": "number",
+            "description": "可选：最大帧数（默认 8，硬顶 16）。帧越多 token 消耗越大"
+          },
+          "strategy": {
+            "type": "string",
+            "enum": ["uniform", "scene"],
+            "description": "可选：抽帧策略。uniform=均匀步长（默认）；scene=场景变化检测（适合镜头切换频繁的视频）"
+          }
+        },
+        "required": ["filePath"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "browser_connect",
       "description": "连接浏览器操作会话（BLOCK-264 C-40 垂直切片；opt-in；TTL 30 分钟）。连接后才能执行 browser_act。可选限定 allowedOrigins。私网/环回/云元数据地址一律拒绝。",
       "parameters": {

@@ -169,3 +169,65 @@ module.exports = {
   tool_read_image,
   resolveWorkspaceImagePath,
 };
+
+/**
+ * BLOCK-340 P1 — tool_read_video：视频抽帧 → 帧清单 manifest → agent 可读描述。
+ *
+ * 消费 helpers/video-frames.js 的 extractVideoFrames（复用 ffmpeg 发现与诚实降级）。
+ * 帧以 .petri/frames/<sha256>/ PNG 落盘（readOnly——不改工作区源文件）。
+ * agent 收到帧清单 + 文件路径 + manifest 元数据（帧数 / 时长 / 策略）——
+ * agent 可用 read_image 逐帧解读（帧 → image parts 的 vision 管线由 gateway 归一）。
+ * @param {object} args - { filePath, maxFrames?, strategy? }
+ * @param {object} ctx - { projectId, ... }（workspace 路径解析依赖 ctx.projectId）
+ */
+async function tool_read_video(args, ctx) {
+  const filePath = args && args.filePath;
+  if (!filePath) return { error: 'missing_filePath', message: '需要 filePath（工作区相对路径，mp4/mov/webm/mkv/avi）' };
+  const projectId = ctx && ctx.projectId;
+  if (!projectId) return { error: 'project_required', message: '视频抽帧需要有效项目工作区' };
+
+  const { extractVideoFrames } = require('../helpers/video-frames');
+  const project = dbMod.getProject(String(projectId));
+  if (!project || !project.workspace_path) {
+    return { error: 'workspace_required', message: '视频抽帧需要本地工作区项目' };
+  }
+
+  const result = extractVideoFrames({
+    workspaceRoot: project.workspace_path,
+    videoPath: String(filePath),
+    maxFrames: args ? args.maxFrames : undefined,
+    strategy: args ? args.strategy : undefined,
+  });
+  if (!result.ok) {
+    return { error: result.code || 'extract_failed', message: result.message || '视频抽帧失败' };
+  }
+
+  const frameLines = (result.frames || []).map((f, i) => `  帧 ${i + 1}: ${f.file}（${Math.round(f.sizeBytes / 1024)}KB）`);
+  const description = [
+    `视频抽帧完成：${result.frameCount} 帧（策略=${result.strategy}，上限=${result.maxFrames}）`,
+    `源=${result.sourcePath}（sha256=${String(result.sourceSha256).slice(0, 12)}…）`,
+    result.durationSec > 0 ? `时长=${result.durationSec.toFixed(1)}s` : '时长未知（ffprobe 缺席或失败）',
+    `帧目录=${result.framesDir}/`,
+    '帧清单:',
+    ...frameLines,
+    '',
+    '帧以 PNG 落盘。可用 read_image 逐帧解读（filePath 传上方帧路径），或直接在聊天中引用帧文件让 vision 角色分析。',
+  ].join('\n');
+
+  return {
+    ok: true,
+    filePath: result.sourcePath,
+    frameCount: result.frameCount,
+    frames: result.frames,
+    manifest: {
+      sourceSha256: result.sourceSha256,
+      durationSec: result.durationSec,
+      strategy: result.strategy,
+      maxFrames: result.maxFrames,
+      framesDir: result.framesDir,
+    },
+    description,
+  };
+}
+
+module.exports.tool_read_video = tool_read_video;

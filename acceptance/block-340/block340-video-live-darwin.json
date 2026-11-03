@@ -1,0 +1,64 @@
+{
+  "name": "video-live",
+  "block": "BLOCK-340",
+  "phase": "P3",
+  "platform": "darwin",
+  "startedAt": "2026-11-03T00:32:43.657Z",
+  "finishedAt": "2026-11-03T00:32:43.878Z",
+  "assertions": [
+    {
+      "name": "L0_ffmpeg_available",
+      "pass": true,
+      "detail": "bin=/opt/homebrew/bin/ffmpeg"
+    },
+    {
+      "name": "L1_fixture_generated",
+      "pass": true,
+      "detail": "size=14423B"
+    },
+    {
+      "name": "L2_uniform_ok",
+      "pass": true,
+      "detail": "frames=6 code=-"
+    },
+    {
+      "name": "L2_uniform_frame_count_in_budget",
+      "pass": true,
+      "detail": "frameCount=6"
+    },
+    {
+      "name": "L2_frames_on_disk",
+      "pass": true,
+      "detail": "全部帧文件在盘"
+    },
+    {
+      "name": "L2_manifest_persisted",
+      "pass": true,
+      "detail": "manifest.json 落盘"
+    },
+    {
+      "name": "L3_cache_hit",
+      "pass": true,
+      "detail": "cached=true"
+    },
+    {
+      "name": "L4_scene_no_crash",
+      "pass": true,
+      "detail": "ok=true frames=6"
+    },
+    {
+      "name": "L5_frame_is_png",
+      "pass": true,
+      "detail": "magic=89504e47"
+    },
+    {
+      "name": "L6_path_escape_blocked",
+      "pass": true,
+      "detail": "code=path_escape"
+    }
+  ],
+  "allPass": true,
+  "passed": 10,
+  "total": 10,
+  "note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

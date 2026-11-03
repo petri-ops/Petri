@@ -7187,6 +7187,28 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block340-video-input-plane",
+      "note": "BLOCK-340 视频输入面：video-frames 抽帧 helper（ffmpeg 复用 329 模式）+ read_video 工具（registry/tool-defs/tool-metadata）+ 附件面 video 门控（attachments.ts）。改任一登记源即跑本包契约 + 附件门控测试。",
+      "patterns": [
+        "core/petri-server/helpers/video-frames.js",
+        "core/petri-server/agent-tools/vision-tools.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-defs/browser.js",
+        "frontend/src/components/copilot/SimpleChat/attachments.ts",
+        "scripts/block340-video-live.mjs",
+        "acceptance/block-340/**"
+      ],
+      "tests": [
+        "test/block340-video-frames.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
