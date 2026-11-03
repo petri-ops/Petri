@@ -1867,3 +1867,137 @@
   color: var(--petri-status-warning-fg);
   font-size: var(--petri-font-size-body);
 }
+
+/* 布局定稿 v8（用户裁决）：三张卡同层级 —— 图形（上） + 图层卡（左下） + 历史卡（右下），属性在右栏 */
+.body {
+  grid-template-columns: minmax(0, 1fr) 272px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-row: auto;
+  grid-column: auto;
+}
+
+.layers,
+.revisionCard {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  height: 196px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+  overflow: hidden;
+}
+
+/* 左下两卡并排：左图层、右历史 */
+.leftCol > .layers,
+.leftCol > .revisionCard {
+  position: static;
+}
+
+.leftCol {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 196px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.leftCol > .stage {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.leftCol > .layers {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.leftCol > .revisionCard {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.revisionList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 140px;
+  overflow: auto;
+}
+
+.inspector {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+}
+
+/* 布局收口（量测发现：leftCol 被压成 222 → 历史卡与属性栏重叠）。高特异性定死两列。 */
+.viewer .body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 272px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.viewer .body > .leftCol {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 196px;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.viewer .body > .leftCol > .stage {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-height: 0;
+}
+
+.viewer .body > .leftCol > .layers {
+  grid-column: 1;
+  grid-row: 2;
+  width: auto;
+  max-width: none;
+  height: auto;
+  margin: 0;
+}
+
+.viewer .body > .leftCol > .revisionCard {
+  grid-column: 2;
+  grid-row: 2;
+  width: auto;
+  max-width: none;
+  height: auto;
+  margin: 0;
+}
+
+.viewer .body > .inspector {
+  grid-column: 2;
+  grid-row: 1;
+  width: auto;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+}
