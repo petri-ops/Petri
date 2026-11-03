@@ -499,6 +499,33 @@ module.exports = {
       const pathCount = (afterPen.match(/<path/g) || []).length;
       assert('V15b_pen_persisted', pathCount === 2 && /d="M 60 150 L 220 150 L 140 205 Z"/.test(afterPen), `path count=${pathCount}`);
 
+      // V16 — 图片嵌入：拖 1×1 PNG 进画布（data: 内嵌）→ insert <image> → 保存落盘
+      const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        if (!host) return false;
+        const bytes = Uint8Array.from(atob('${PNG_1PX}'), (c) => c.charCodeAt(0));
+        const file = new File([bytes], 'dot.png', { type: 'image/png' });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        host.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: dt }));
+        host.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: dt }));
+        return true;
+      })()`);
+      const imagePending = await waitFor(client, `(function(){
+        const img = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg image');
+        const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        return img && save && !save.disabled && (img.getAttribute('href') || '').startsWith('data:image/png;base64,')
+          ? JSON.stringify({ w: img.getAttribute('width'), h: img.getAttribute('height') }) : null;
+      })()`, 8_000);
+      assert('V16_image_embedded_pending', Boolean(imagePending), imagePending || 'image not inserted');
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterImage = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V16b_image_persisted',
+        afterImage.includes(`<image href="data:image/png;base64,${PNG_1PX}"`) && afterImage.includes('width="64" height="64"'),
+        afterImage.match(/<image[^>]*>/)?.[0]?.slice(0, 90) || 'no image');
+
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）
       const tampered = fs.readFileSync(SAMPLE_ABS, 'utf8').replace(/fill="[^"]*"/, 'fill="#111111"');

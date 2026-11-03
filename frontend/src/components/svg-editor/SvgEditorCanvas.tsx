@@ -49,6 +49,8 @@ export interface CanvasProps {
   onPenCommit: (op: SvgOp) => void;
   /** 诚实拒绝/提示通道（M 锚不可删、d 含不支持命令等）。 */
   onNotice?: (msg: string) => void;
+  /** 切片3 图片嵌入：拖图进画布（宿主校验+嵌入）。 */
+  onEmbedImage?: (file: File) => void;
 }
 
 interface OverlayBox extends Box {
@@ -57,7 +59,7 @@ interface OverlayBox extends Box {
 
 const DRAG_THRESHOLD = 3;
 
-export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice }: CanvasProps) {
+export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionChange, onOpsCommitted, tool, onDrawBox, onPenCommit, onNotice, onEmbedImage }: CanvasProps) {
   const [boxes, setBoxes] = React.useState<OverlayBox[]>([]);
   const drawStartRef = React.useRef<{ clientX: number; clientY: number } | null>(null);
   const [hoverBox, setHoverBox] = React.useState<Box | null>(null);
@@ -520,6 +522,16 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
       onPointerCancel={handlePointerUp}
       onPointerLeave={() => setHoverBox(null)}
       onDoubleClick={() => { if (tool === 'pen') finalizePen(false); }}
+      onDragOver={(event) => {
+        if (event.dataTransfer.types.includes('Files')) event.preventDefault();
+      }}
+      onDrop={(event) => {
+        const file = event.dataTransfer.files?.[0];
+        if (file && onEmbedImage) {
+          event.preventDefault();
+          onEmbedImage(file);
+        }
+      }}
     >
       <div
         className={styles.canvasInner}

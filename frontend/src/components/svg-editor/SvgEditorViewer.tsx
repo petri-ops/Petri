@@ -47,6 +47,7 @@ import {
 import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
 import { splitOpGroups } from './svgChangeList';
+import { fitImageBox, imageInsertOp, isSafeImageDataUrl, validateEmbedFile } from './svgEditorImage';
 
 export interface SvgEditorViewerProps {
   projectId: string;
@@ -180,6 +181,8 @@ export function SvgEditorViewer({
   const opsRef = React.useRef<SvgOp[]>([]);
   // UI-663 撤销重建：磁盘重建后待按序回放的剩余 op（effect 里消费一次即清）
   const rebuildOpsRef = React.useRef<SvgOp[] | null>(null);
+  // 切片3 图片嵌入：隐藏 file input（工具栏「图片」按钮触发）
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [state, setState] = React.useState<LoadState>({ status: 'loading' });
   const [markup, setMarkup] = React.useState('');
@@ -293,6 +296,32 @@ export function SvgEditorViewer({
     commit([op], currentMarkup());
     setTool('select');
     setNotice('已插入 <path>；⌘S 保存到文件');
+  }, [commit, currentMarkup]);
+
+  /**
+   * 切片3 图片嵌入：本地文件 → 安全校验 → data URL → 自然尺寸适配 → 白名单 insert op。
+   * 边界（裁决留档见 svgEditorImage.ts）：只收 PNG/JPEG/GIF/WebP ≤2MB；拒 SVG 与外链。
+   */
+  const embedImageFile = React.useCallback((file: File) => {
+    const check = validateEmbedFile(file);
+    if (!check.ok) { setNotice(`图片未嵌入：${check.reason}`); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      if (!isSafeImageDataUrl(dataUrl)) { setNotice('图片未嵌入：读取结果不是安全形态'); return; }
+      const probe = new Image();
+      probe.onload = () => {
+        const box = fitImageBox(probe.naturalWidth, probe.naturalHeight);
+        const op = imageInsertOp(dataUrl, box);
+        if (!op) { setNotice('图片未嵌入：data URL 校验失败'); return; }
+        commit([op], currentMarkup());
+        setNotice(`已嵌入图片（${box.width}×${box.height}）；⌘S 保存到文件`);
+      };
+      probe.onerror = () => setNotice('图片未嵌入：文件无法解码为位图');
+      probe.src = dataUrl;
+    };
+    reader.onerror = () => setNotice('图片未嵌入：文件读取失败');
+    reader.readAsDataURL(file);
   }, [commit, currentMarkup]);
 
   /** 选中变化：同时刷新属性面板与文档色板（都在事件里读活视图，渲染期不读 ref/DOM）。 */
@@ -779,6 +808,26 @@ export function SvgEditorViewer({
                   {item.label}
                 </button>
               ))}
+              <button
+                type="button"
+                className={styles.tool}
+                data-action="embed-image"
+                title="嵌入本地图片（PNG/JPEG/GIF/WebP ≤2MB，data: 内嵌；也可直接拖图进画布）"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                图片
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/gif,image/webp"
+                style={{ display: 'none' }}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) embedImageFile(file);
+                  event.target.value = '';
+                }}
+              />
               </span>
             </div>
             {textEdit ? (
@@ -829,6 +878,7 @@ export function SvgEditorViewer({
               onDrawBox={handleDrawBox}
               onPenCommit={handlePenCommit}
               onNotice={setNotice}
+              onEmbedImage={embedImageFile}
             />
 
           </div>

@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-672: SVG 编辑器图片嵌入——本地文件 data: 内嵌 + 拖放/按钮双入口（BLOCK-342 切片3；2026-11-03 **verified（dev Electron 边界内；实机 42/42 allPass）**）
+
+- **安全边界（裁决留档）**：只把**本地文件**嵌为 `data:image/(png|jpeg|gif|webp);base64,…`，原始 ≤2MB；**SVG 显式拒绝**（base64 内嵌是脱敏走私面）并说明原因；外链不提供（断网裂图、违背本地主权）。前端 `svgEditorImage.ts` 只生成安全值（`isSafeImageDataUrl` 形态守卫），后端 DANGEROUS_HREF_RE 与视图脱敏天然放行 data:image——**后端零改动**。
+- **交互**：工具栏「图片」按钮（file input，accept 白名单）+ 画布拖放双入口；嵌入时按自然尺寸适配最长边 [64,320]（小图放大可见、大图缩入、非法尺寸 160×120 诚实占位）→ 白名单 `insert` op（`<image href=… preserveAspectRatio>`）。
+- **验证**：`svgEditorImage.test` 6/6（白名单/SVG 拒/超限拒/data URL 形态守卫含 script 注入串/适配三例/insert markup 与危险值拒绝）；svg-editor 前端 53/53 + tsc 0 + lint 0 error；实机 flow 两新断言（`V16_image_embedded_pending` 画布 `<image>` data:image/png + save 解锁 / `V16b_image_persisted` 落盘含完整 base64 与 64×64），总 **42/42 allPass**。（flow 修正一处：正则字面量不插值，改 includes。）
+
 ## UI-671: SVG 编辑器路径节点编辑 + 基础钢笔（BLOCK-342 切片2；2026-11-03 **verified（dev Electron 边界内；实机 40/40 allPass）**）
 
 - **节点编辑**：工具栏「节点」+ 单选 `<path>` → 画布 overlay 锚点圆（M 起点 + 每段终点）+ C 段贝塞尔手柄（线 + 空心圆）；拖锚点/手柄 live 改 DOM `d`（即时反馈），pointerup 落单个白名单 `set_attr d` op（keepSelection）；锚点旁浮动动作条「加点 / 删点 / 平滑」——加点=L 取中点/C 用 de Casteljau t=0.5 一分为二，删点=C 段与出段合并为单 C（出段非 C/子路径起点/删后退化如实拒绝并提示），平滑=出手柄镜像到进手柄对侧（保留出手柄原长；两侧非曲线如实拒绝）。纯逻辑全部在 `svgPathNodes.ts`（只支持 M/L/H/V/C/Z 绝对命令，小写相对命令如实判不可编辑并给提示 chip，不假装支持）。
