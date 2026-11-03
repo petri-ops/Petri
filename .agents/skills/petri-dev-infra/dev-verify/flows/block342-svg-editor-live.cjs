@@ -75,6 +75,8 @@ module.exports = {
 
     let client = null;
     try {
+      // 每轮先清空样本目录再写：留盘复用会带上上一轮的 save/篡改结果（实机抓真 flaky）
+      fs.rmSync(path.join(ROOT, SAMPLE_DIR), { recursive: true, force: true });
       fs.mkdirSync(path.join(ROOT, SAMPLE_DIR), { recursive: true });
       fs.writeFileSync(SAMPLE_ABS, SVG);
       const baseSha = sha(fs.readFileSync(SAMPLE_ABS));

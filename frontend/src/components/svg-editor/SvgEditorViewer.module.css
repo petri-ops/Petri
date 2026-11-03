@@ -1264,3 +1264,72 @@
 .body:has(.layers[data-open='0']) .inspector {
   left: 12px;
 }
+
+/* 布局定稿（用户裁决）：图层贴画布下方（绑定感，不贴窗口底）；图形属性回右侧悬浮原样 */
+.body {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.stage {
+  grid-row: 1;
+  padding: 44px 12px 8px;
+}
+
+.layers {
+  position: static;
+  grid-row: 2;
+  width: auto;
+  height: auto;
+  max-height: 132px;
+  margin: 0 12px 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: var(--petri-bg-surface);
+  box-shadow: none;
+  overflow: auto;
+}
+
+.layers[data-open='0'] {
+  display: none;
+}
+
+.layersHead {
+  position: static;
+  padding-bottom: 2px;
+}
+
+.layerList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+}
+
+.inspector {
+  top: 44px;
+  right: 12px;
+  bottom: 12px;
+  left: auto;
+  width: 220px;
+  height: auto;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+}
+
+.inspector[data-open='0'] {
+  display: none;
+}
+
+.props {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field {
+  grid-template-columns: 58px minmax(0, 1fr);
+}
+
+.body:has(.layers[data-open='0']) .inspector {
+  left: auto;
+}
