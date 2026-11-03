@@ -1705,3 +1705,38 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+/* v7（用户截图）：属性栏显式跨两行 = 与图层区底部对齐；并保证 stretch 撑满 */
+.inspector {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: stretch;
+  height: auto;
+  max-height: none;
+  box-sizing: border-box;
+}
+
+.layers {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+/* 横向溢出根治：色块固定 + 输入框 flex 占满（此前 28px + 100% 叠加超宽） */
+.fieldRow > input[type='color'] {
+  flex: 0 0 auto;
+  width: 28px;
+}
+
+.fieldRow > input:not([type='color']) {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.inspector {
+  overflow-x: hidden;
+}
+
+.inspector * {
+  max-width: 100%;
+}
