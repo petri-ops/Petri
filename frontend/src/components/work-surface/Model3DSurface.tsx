@@ -154,7 +154,7 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
       // 路径匹配当前场景来源（缺省场景路径恒匹配）
       const current = sceneSourcePath || 'model3d/scene.scene3d.json';
       if (detail.path !== current) return;
-      setProposal({ scene: detail.scene, operations: detail.operations as Array<Record<string, unknown>>, beforeHash: detail.beforeHash, path: detail.path });
+      setProposal({ scene: detail.scene, operations: detail.operations, beforeHash: detail.beforeHash, path: detail.path });
     });
     return off;
   }, [sceneSourcePath]);

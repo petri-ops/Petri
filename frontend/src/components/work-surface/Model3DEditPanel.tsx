@@ -209,7 +209,7 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
         projectId,
         path: proposal.path,
         scene: disk.scene,
-        operations: proposal.operations as never,
+        operations: proposal.operations,
         expectedHash: disk.hash,
         reason: 'proposal_accept',
       });
@@ -283,7 +283,7 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
         <div className={styles.diff} data-testid="model3d-edit-proposal">
           <span className={styles.meta}>agent 提案（{proposal.operations.length} 项 op，before {proposal.beforeHash.slice(0, 12)}）</span>
           {proposal.operations.map((operation, index) => {
-            const o = operation as Record<string, unknown>;
+            const o = operation;
             const targetRecord = (o.target && typeof o.target === 'object' ? o.target : {}) as { id?: string };
             const targetLabel = targetRecord.id ? `#${targetRecord.id}` : (typeof o.id === 'string' ? `#${o.id}` : '');
             return (
