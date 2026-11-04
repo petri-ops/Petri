@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-692: SVG 编辑器图片引用模式——项目内相对路径引用 + 显示改写 + 白名单守卫（BLOCK-344 顺延项清偿；2026-11-04 **verified（dev Electron 边界内；前端 65/65 + flow 72/72 allPass）**）
+
+- **两种图片形态并存**：①data: 内嵌（UI-672，文件随 SVG 走）；②**引用模式**（新增）：`href` 存**项目内相对路径**（如 assets/logo.png）——资产随项目走、文件可替换不重新嵌入。
+- **白名单守卫（双层）**：前端 `validateAssetRefPath`（仅相对路径/位图扩展；拒外链、绝对路径、`..` 跨目录、非位图）→ `assetRefInsertOp` 真值存相对路径；后端 DANGEROUS_HREF_RE 同口径（拒 javascript/data:text/html）。
+- **显示改写**：相对路径在 inline svg 上下文解析不到文件（404 裂图）——`rewriteAssetHrefsForView` 把视图 markup 中相对路径 href 改写为 workspace 文件 URL（**真值不动**——保存仍走磁盘原文 + span 引擎 op）。
+- **入口**：工具栏「引用」按钮 → 相对路径输入行（Enter/按钮创建，Esc 取消）；创建前 HEAD 探在档 + content-type 位图校验。
+- **验证**：svgEditorImage.test 补 2 组（路径守卫六态/引用 op markup）→ svg-editor 前端 65/65 + tsc 0 + lint 0 error；flow `V30` 两断言（画布 `href="assets/logo.png"` 引用 / 落盘相对路径），总 **72/72 allPass**。
+
 ## UI-691: computer-use 闭环修补——控制类确认卡接入 + PiP 截帧链修复 + 工具面契约自洽（BLOCK-345 P1-P3；2026-11-04 **verified（dev Electron 边界内；契约 block344 8/8 + block345 16/16 默认跑法绿 + 前端 381/381 + REST 实机 ✓）**）
 
 - **P1 控制类确认卡（断链 #1）**：①后端审批事件上抬改**工具无关**（tool-events.js——此前只认 `run_tool`，控制类 computer_* 在完全访问档的两段式 ackToken 永远到不了前端；字段与语义零变化）；②`conversationRunStore` pendingApproval 生成去 `run_tool` 硬编码；③SimpleChat 确认卡渲染**不再与 full 档互斥**（控制类只在 full 档放行——full 档反而必须能看见确认卡）。批准/拒绝复用既有 useApprovalFlow→run-tool-ack + ackToolJob 零改动。

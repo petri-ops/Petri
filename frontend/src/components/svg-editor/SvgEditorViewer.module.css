@@ -2180,3 +2180,13 @@
   pointer-events: none;
   outline: 1px dashed var(--petri-status-warning-border);
 }
+
+.assetRefRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.assetRefRow input {
+  min-width: 220px;
+}

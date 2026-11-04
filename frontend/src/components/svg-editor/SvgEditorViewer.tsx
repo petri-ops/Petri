@@ -49,7 +49,7 @@ import {
 import styles from './SvgEditorViewer.module.css';
 import layout from './SvgEditorLayout.module.css';
 import { opLabel, splitOpGroups } from './svgChangeList';
-import { fitImageBox, imageInsertOp, isSafeImageDataUrl, validateEmbedFile } from './svgEditorImage';
+import { fitImageBox, imageInsertOp, isSafeImageDataUrl, rewriteAssetHrefsForView, validateAssetRefPath, validateEmbedFile, assetRefInsertOp } from './svgEditorImage';
 import {
   applyGradientOps,
   gradientInsertOps,
@@ -107,7 +107,12 @@ async function fetchSvgDocument(projectId: string, filePath: string): Promise<Lo
   const text = await response.text();
   const view = sanitizeSvgForView(text);
   if (!view.ok) throw new Error(`SVG 无法载入（${view.error || 'parse_error'}）`);
-  return { inspect, markup: view.markup || '', removed: view.removed };
+  // BLOCK-344 资产路径显示改写：href=项目内相对路径的 <image> 改写为 workspace 文件 URL
+  // （真值不动——保存仍走磁盘原文 + span 引擎 op；此处只改视图显示，防相对路径裂图）
+  const viewMarkup = rewriteAssetHrefsForView(view.markup || '', (relPath) =>
+    workspaceFileUrlFor(projectId, relPath),
+  );
+  return { inspect, markup: viewMarkup, removed: view.removed };
 }
 
 /** 把白名单 op 落到活视图（即时反馈；真值仍以保存时的后端 span 改写为准）。 */
@@ -194,6 +199,8 @@ export function SvgEditorViewer({
   const rebuildOpsRef = React.useRef<SvgOp[] | null>(null);
   // 切片3 图片嵌入：隐藏 file input（工具栏「图片」按钮触发）
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  // BLOCK-344 资产路径引用：输入项目内相对路径 → 校验在档 → 引用模式 insert（真值存相对路径）
+  const [assetPathInput, setAssetPathInput] = React.useState<string | null>(null);
 
   const [state, setState] = React.useState<LoadState>({ status: 'loading' });
   const [markup, setMarkup] = React.useState('');
@@ -369,6 +376,25 @@ export function SvgEditorViewer({
     reader.onerror = () => setNotice('图片未嵌入：文件读取失败');
     reader.readAsDataURL(file);
   }, [commit, currentMarkup]);
+
+  /** BLOCK-344 引用模式：校验在档（探 workspaceFileUrlFor）→ assetRefInsertOp（真值存相对路径）。 */
+  const insertAssetRef = React.useCallback(async (relPath: string) => {
+    const check = validateAssetRefPath(relPath);
+    if (!check.ok) { setNotice(`引用未创建：${check.reason}`); return; }
+    const url = workspaceFileUrlFor(projectId, relPath);
+    try {
+      const probe = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(10_000) });
+      const type = probe.headers.get('content-type') || '';
+      if (!probe.ok) { setNotice(`引用未创建：文件不存在（${relPath}）`); return; }
+      if (!/^image\//.test(type)) { setNotice(`引用未创建：目标不是图片（${type}）`); return; }
+      const op = assetRefInsertOp(relPath, { x: 20, y: 20, width: 160, height: 120 });
+      if (!op) { setNotice('引用未创建：路径校验失败'); return; }
+      commit([op], currentMarkup());
+      setNotice(`已创建图片引用（${relPath}）；⌘S 保存到文件`);
+    } catch (caught) {
+      setNotice(`引用未创建：${caught instanceof Error ? caught.message : String(caught)}`);
+    }
+  }, [commit, currentMarkup, projectId]);
 
   /** 切片5 Inkscape 协处理动作：before-sha 守卫（协处理器不绕过治理），成功后重载视图。 */
   const runInkscape = React.useCallback((action: string) => {
@@ -1106,6 +1132,15 @@ export function SvgEditorViewer({
               <button
                 type="button"
                 className={styles.tool}
+                data-action="asset-ref-toggle"
+                title="引用项目内已有图片文件（相对路径，文件可替换不重新嵌入）"
+                onClick={() => setAssetPathInput((prev) => (prev === null ? '' : null))}
+              >
+                引用
+              </button>
+              <button
+                type="button"
+                className={styles.tool}
                 data-action="render-check"
                 title="渲染回验：当前视图渲染成 PNG 快照 + 判据注入会话"
                 onClick={runRenderCheck}
@@ -1123,6 +1158,21 @@ export function SvgEditorViewer({
                   event.target.value = '';
                 }}
               />
+              {assetPathInput !== null ? (
+                <div className={styles.assetRefRow} data-testid="svg-editor-asset-ref">
+                  <input
+                    data-testid="svg-editor-asset-ref-input"
+                    value={assetPathInput}
+                    placeholder="项目内相对路径（如 assets/logo.png）"
+                    onChange={(event) => setAssetPathInput(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && assetPathInput.trim() !== '') { void insertAssetRef(assetPathInput.trim()); setAssetPathInput(null); }
+                      if (event.key === 'Escape') setAssetPathInput(null);
+                    }}
+                  />
+                  <button type="button" className={button.ghost} data-action="asset-ref-create" onClick={() => { const v = assetPathInput.trim(); if (v !== '') { void insertAssetRef(v); setAssetPathInput(null); } }}>引用</button>
+                </div>
+              ) : null}
               </span>
             </div>
             {textEdit ? (

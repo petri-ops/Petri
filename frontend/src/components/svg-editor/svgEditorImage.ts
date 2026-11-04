@@ -69,3 +69,50 @@ export function imageInsertOp(dataUrl: string, box: ImageBox, parentPath: number
     markup: `<image href="${dataUrl}" x="${r(box.x)}" y="${r(box.y)}" width="${r(box.width)}" height="${r(box.height)}" preserveAspectRatio="xMidYMid meet" />`,
   };
 }
+
+// ── BLOCK-344 资产路径形态（引用模式：项目内相对路径，非 base64 内嵌）──
+
+const ASSET_PATH_RE = /^[\w-\u4e00-\u9fa5][\w.\-\u4e00-\u9fa5/]*$/;
+
+/** 引用路径校验：仅项目内相对路径（拒 http/data/绝对/跨目录 ..），扩展名限位图。 */
+export function validateAssetRefPath(relPath: string): { ok: true } | { ok: false; reason: string } {
+  const p = (relPath || '').trim();
+  if (p === '') return { ok: false, reason: '路径为空' };
+  if (/^(https?:)?\/\//i.test(p) || p.startsWith('/')) {
+    return { ok: false, reason: '只接受项目内相对路径（拒绝外链与绝对路径——本地主权）' };
+  }
+  if (p.includes('..')) return { ok: false, reason: '路径含 ..（跨目录拒绝）' };
+  if (!/\.(png|jpe?g|gif|webp)$/i.test(p)) {
+    return { ok: false, reason: '只接受 .png/.jpg/.jpeg/.gif/.webp 引用' };
+  }
+  if (!ASSET_PATH_RE.test(p)) return { ok: false, reason: '路径含非法字符' };
+  return { ok: true };
+}
+
+/**
+ * 引用模式 insert op：href=项目内相对路径（真值存相对路径——资产随项目走、文件可替换）。
+ * 后端守卫同口径（拒 http/data:text/html）；前端校验在前，守卫在后，双层。
+ */
+export function assetRefInsertOp(relPath: string, box: ImageBox, parentPath: number[] = []): SvgOp | null {
+  const check = validateAssetRefPath(relPath);
+  if (!check.ok) return null;
+  const r = (n: number) => Math.round(n * 10) / 10;
+  return {
+    op: 'insert',
+    parent: { path: parentPath },
+    index: 'end',
+    markup: `<image href="${relPath}" x="${r(box.x)}" y="${r(box.y)}" width="${r(box.width)}" height="${r(box.height)}" preserveAspectRatio="xMidYMid meet" />`,
+  };
+}
+
+/**
+ * 显示改写：视图 markup 中 href=相对路径的 <image> 改写为 workspace 文件 URL（真值不动）。
+ * 相对路径在 dangerouslySetInnerHTML 上下文解析不到文件（404 裂图）——必须改写才能显示。
+ */
+export function rewriteAssetHrefsForView(markup: string, fileUrlFor: (relPath: string) => string): string {
+  return markup.replace(/(<image\b[^>]*\bhref=")([^"]+)(")/g, (full, head: string, hrefValue: string, tail: string) => {
+    if (/^(data:|https?:|\/)/i.test(hrefValue)) return full; // data:/外链/绝对路径不改写
+    const mapped = fileUrlFor(hrefValue);
+    return `${head}${mapped}${tail}`;
+  });
+}

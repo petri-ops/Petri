@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assetRefInsertOp, validateAssetRefPath,
   fitImageBox,
   IMAGE_EMBED_MAX_BYTES,
   imageInsertOp,
@@ -50,5 +51,25 @@ describe('BLOCK-342 图片嵌入（安全边界）', () => {
       markup: `<image href="${PNG_DATA_URL}" x="10.4" y="20" width="64" height="64" preserveAspectRatio="xMidYMid meet" />`,
     });
     expect(imageInsertOp('javascript:alert(1)', { x: 0, y: 0, width: 10, height: 10 })).toBeNull();
+  });
+});
+
+describe('BLOCK-344 资产路径形态（引用模式守卫）', () => {
+
+
+  it('validateAssetRefPath：项目内相对路径通过；外链/绝对/跨目录/非位图拒绝', () => {
+    expect(validateAssetRefPath('assets/logo.png').ok).toBe(true);
+    expect(validateAssetRefPath('figures/fig-1.jpeg').ok).toBe(true);
+    expect(validateAssetRefPath('https://x/y.png').ok).toBe(false);
+    expect(validateAssetRefPath('/abs/path.png').ok).toBe(false);
+    expect(validateAssetRefPath('../outside.png').ok).toBe(false);
+    expect(validateAssetRefPath('assets/anim.svg').ok).toBe(false);
+  });
+
+  it('assetRefInsertOp：href 存相对路径（真值随项目走，文件可替换）', () => {
+    const op = assetRefInsertOp('assets/logo.png', { x: 10, y: 20, width: 160, height: 90 });
+    expect(op?.markup).toContain('href="assets/logo.png"');
+    expect(op?.markup).toContain('preserveAspectRatio');
+    expect(assetRefInsertOp('http://x/y.png', { x: 0, y: 0, width: 10, height: 10 })).toBeNull();
   });
 });
