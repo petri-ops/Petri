@@ -167,7 +167,7 @@
       "id": "BLOCK-352",
       "capability": "block-352-extension-shelf-audit",
       "title": "扩展生态可用性核对",
-      "status": "planned",
+      "status": "completed",
       "priority": "P1",
       "plan": "docs/block-352-extension-shelf-audit-plan.md",
       "goal": "对插件 / 技能 / MCP 服务三货架逐件点验，解决上轮判词「货架可见不可用」，把可用性变成可复跑矩阵并接入门禁防复发。",

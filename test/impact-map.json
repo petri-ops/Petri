@@ -7400,6 +7400,24 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block352-extension-shelf-audit",
+      "note": "BLOCK-352 扩展生态三货架可用性矩阵：采集器（含插件真跑）/契约测试/负测。改货架判定或矩阵时跑本包测试。",
+      "patterns": [
+        "scripts/block352-*.mjs",
+        "test/block352-*.test.mjs",
+        "acceptance/block-352/**",
+        "docs/block-352-*.md"
+      ],
+      "tests": [
+        "test/block352-shelf-audit.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

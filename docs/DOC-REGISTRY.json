@@ -9287,6 +9287,23 @@
       "notes": "EAR 口径定义（冻结）：分子=acceptance 文件被 test 源码字面引用 ∧ impact-map 规则匹配；分母=acceptance 全量禁缩；达标线 40% 棘轮只进不退；不可资产化登记即止。"
     },
     {
+      "id": "BLOCK-352-SHELF-REPORT",
+      "path": "docs/block-352-shelf-report.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block352-shelf-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-352",
+        "evidence"
+      ],
+      "notes": "BLOCK-352 货架点验报告：三货架 21+2 项全判定（17 available/4 detour 带绕路步骤/0 shell）；插件 3 件真跑真 artifact；MCP stdio 握手 21 工具；判词修正=无空壳。"
+    },
+    {
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "path": "docs/block-349-evidence-clearance-plan.md",
@@ -9389,7 +9406,7 @@
       "capability": "block-352-extension-shelf-audit",
       "path": "docs/block-352-extension-shelf-audit-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-352-extension-shelf-audit",
       "entrypoint": "docs/README.md",
@@ -9414,7 +9431,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（总纲 NEXT-PHASE-PROGRAM-2026-11-05）。扩展生态可用性核对。目标：对插件 / 技能 / MCP 服务三货架逐件点验，解决上轮判词「货架可见不可用」，把可用性变成可复跑矩阵并接入门禁防复发。 依赖：BLOCK-351。逐包发令开工，不并行。"
+      "notes": "2026-11-05 收口 completed（总纲包 5/7）。三货架 21+2 项全判定=17 available（插件 3 件真跑真 artifact + 技能 14 契约合规 + MCP stdio 握手 21 工具）/4 detour（go-kegg/gsea=r-enrichment bundle 未就绪、deseq2=C-46 pack 语法错、validator=demo 输入差异——均带具体绕路步骤）/0 shell（「货架可见不可用」判词修正：无空壳，卡点全在运行时依赖）。矩阵=acceptance/block-352/shelf-matrix.json；契约测试 5/5 含负测。"
     },
     {
       "id": "BLOCK-353",

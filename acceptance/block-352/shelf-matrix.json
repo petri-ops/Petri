@@ -1,0 +1,176 @@
+{
+  "at": "2026-11-04T22:00:57.397Z",
+  "shelves": {
+    "skills": [
+      {
+        "shelf": "skills",
+        "name": "coding-playbook",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=coding-playbook，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "defuddle",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "excalidraw-diagram",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "json-canvas",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "knap",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "mermaid-visualizer",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "obsidian-bases",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "obsidian-cli",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "obsidian-markdown",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "obsidian-setup",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "visualize",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=visualize，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "deg-analysis-standard",
+        "source": "pack",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=deg-analysis-standard，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "go-enrichment-analysis",
+        "source": "pack",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=go-enrichment-analysis，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "sc-analysis-standard",
+        "source": "pack",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=sc-analysis-standard，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      }
+    ],
+    "plugins": [
+      {
+        "shelf": "plugins",
+        "name": "expression-qc",
+        "verdict": "available",
+        "basis": "真实动作=真跑完成 job=job_a294c6937f874932（demo 输入 → 10 产物）；catalog 在架",
+        "jobId": "job_a294c6937f874932"
+      },
+      {
+        "shelf": "plugins",
+        "name": "sample-metadata-validator",
+        "verdict": "detour",
+        "basis": "真跑未过：Process exited with code 1（catalog 在架、definition 可解析）绕路步骤=查看 tool_jobs error 全文定位脚本失败行（demo 输入组合与生产形态差异需逐一核对），或以生产 counts/metadata 真跑",
+        "jobId": null
+      },
+      {
+        "shelf": "plugins",
+        "name": "deg-standardizer",
+        "verdict": "available",
+        "basis": "真实动作=真跑完成 job=job_3672056504ad4364（demo 输入 → 7 产物）；catalog 在架",
+        "jobId": "job_3672056504ad4364"
+      },
+      {
+        "shelf": "plugins",
+        "name": "go-kegg",
+        "verdict": "detour",
+        "basis": "真跑未过：执行失败: 插件 go-kegg 必需的 capability bundle 未就绪，已停止执行：\n- r-enrichment：该 bundle 下载/校验/安装失败（status=provision_failed / error=provisioning_failed / message=download failed: HTTP 404）\n指引：平台不符时请在受支持的平台（如 macOS Apple Silicon）运行该分析——本机不会下载与当前平台不符的预编译二进制；下载/校验/安装失败请检查网络与磁盘后重试。（catalog 在架、definition 可解析）绕路步骤=预置 r-enrichment capability bundle（离线包或联网下载授权后 capability-provisioning 自动就绪），再真跑",
+        "jobId": null
+      },
+      {
+        "shelf": "plugins",
+        "name": "gsea",
+        "verdict": "detour",
+        "basis": "真跑未过：执行失败: 插件 gsea 必需的 capability bundle 未就绪，已停止执行：\n- r-enrichment：该 bundle 下载/校验/安装失败（status=provision_failed / error=provisioning_failed / message=download failed: HTTP 404）\n指引：平台不符时请在受支持的平台（如 macOS Apple Silicon）运行该分析——本机不会下载与当前平台不符的预编译二进制；下载/校验/安装失败请检查网络与磁盘后重试。（catalog 在架、definition 可解析）绕路步骤=预置 r-enrichment capability bundle（离线包或联网下载授权后 capability-provisioning 自动就绪），再真跑",
+        "jobId": null
+      },
+      {
+        "shelf": "plugins",
+        "name": "volcano-plot",
+        "verdict": "available",
+        "basis": "真实动作=真跑完成 job=job_974a631ea61b469a（demo 输入 → 5 产物）；catalog 在架",
+        "jobId": "job_974a631ea61b469a"
+      },
+      {
+        "shelf": "plugins",
+        "name": "deseq2",
+        "verdict": "detour",
+        "basis": "tool-definition 可解析=true；catalog 在架（隔离后端 count=7 实证）；真跑被 pack 仓 R 语法错阻断（C-46）。绕路步骤=pack 仓 plugins/deseq2/scripts/deseq2.R:72-73 两行字符串改 paste0 合并（另立票 C-46 已登记），修后真跑即通"
+      }
+    ],
+    "mcp": {
+      "server": {
+        "verdict": "available",
+        "basis": "stdio JSON-RPC 真实握手 initialize=成功；tools/list 返回 28 工具（真实动作证据；registry 单源=core/petri-server/mcp/registry.js）",
+        "toolCount": 28
+      },
+      "clientShelf": {
+        "verdict": "available",
+        "basis": "客户端货架=用户配置驱动的清单（/extensions 页）：隔离后端如实计数 0 条配置=货架空但货架本体功能在（CRUD API 与治理面 BLOCK-221 在案），无判定对象故不产空壳判定",
+        "configuredCount": 0
+      }
+    }
+  },
+  "totals": {
+    "skills": 14,
+    "plugins": 7,
+    "verdicts": {
+      "available": 17,
+      "detour": 4
+    },
+    "allJudged": true
+  }
+}

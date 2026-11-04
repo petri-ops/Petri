@@ -1,6 +1,6 @@
 ---
 capability: block-352-extension-shelf-audit
-status: planned
+status: completed
 goal: 对插件 / 技能 / MCP 服务三货架逐件点验，解决上轮判词「货架可见不可用」，把可用性变成可复跑矩阵并接入门禁防复发。
 acceptance:
   - 三货架 100% 条目有判定（可用 / 需绕路 / 空壳）+ 判定依据。
@@ -11,7 +11,7 @@ reopen: G1+ 项（第三方生态市场 / 远程技能市场）；i18n / hooks�
 
 # BLOCK-352 — 扩展生态可用性核对（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——报告 docs/block-352-shelf-report.md；21+2 全判定 17A/4D/0S
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §3.1 / §3.5；2026-10-15 评估「垂直-通用杠杆：拉动 4/5 vs 拖累 2.5/5」
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**
