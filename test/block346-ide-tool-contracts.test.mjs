@@ -70,8 +70,17 @@ describe('IDE MCP 契约完备性（BLOCK-346 T5）', () => {
   });
 
   test('dispatch 层实际拦截：terminal_write 无 confirm 直接返回 confirm_required', async () => {
-    const result = await ide.callIdeTool('ide_terminal_write', { terminalId: 't1', data: 'ls\n' });
-    assert.equal(result.ok, false);
-    assert.equal(result.error, 'confirm_required');
+    // 档位闸默认 workspace-write 会先拦 execution 类；本用例测的是 confirm 闸，
+    // 故显式放开到 full（档位闸的拦截另由 block346-ide-access-mode 覆盖）。
+    const saved = process.env.PETRI_IDE_MCP_ACCESS_MODE;
+    process.env.PETRI_IDE_MCP_ACCESS_MODE = 'full';
+    try {
+      const result = await ide.callIdeTool('ide_terminal_write', { terminalId: 't1', data: 'ls\n' });
+      assert.equal(result.ok, false);
+      assert.equal(result.error, 'confirm_required');
+    } finally {
+      if (saved === undefined) delete process.env.PETRI_IDE_MCP_ACCESS_MODE;
+      else process.env.PETRI_IDE_MCP_ACCESS_MODE = saved;
+    }
   });
 });
