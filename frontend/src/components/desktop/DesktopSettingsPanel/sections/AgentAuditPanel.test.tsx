@@ -62,10 +62,10 @@ describe('AgentAuditPanel（BLOCK-346 T4）', () => {
     fireEvent.click(screen.getByTestId('agent-pause-toggle'));
     await waitFor(() => expect(screen.getByTestId('agent-pause-toggle').textContent).toContain('已暂停'));
     const post = fetchMock.mock.calls.find(([url, init]) => String(url).includes('/ai/agent-settings')
-      && (init as RequestInit | undefined)?.method === 'POST');
+      && init?.method === 'POST');
     expect(post).toBeTruthy();
-    const body = (post![1] as RequestInit).body;
-    expect(typeof body).toBe('string');
-    expect(JSON.parse(String(body))).toEqual({ agentPaused: true });
+    const body = post![1]?.body;
+    if (typeof body !== 'string') throw new Error('POST body 应为字符串');
+    expect(JSON.parse(body)).toEqual({ agentPaused: true });
   });
 });
