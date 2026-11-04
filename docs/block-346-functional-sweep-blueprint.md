@@ -119,6 +119,13 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 | 4.5 | `canCompare` 无人消费 + 另一处硬编码 true | **DONE**：Canvas 改 prop（默认 false）由调用方按适配器传；测试补反向断言 |
 | 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | **部分 DONE**：markdown 文本可内嵌（快照填 `previewText` + Pane 分支）；spreadsheet/pdf 需二进制解析（exceljs 已退役 / pdf 渲染），登记 reopen |
 
+## §2.9 四批交付完成与收口例外（2026-11-04）
+
+- **交付**：批 1（T2 + T7）· 批 2（T1 + T3，P1 5→0）· 批 3（T6 + T4 6/7，P2 7→0）· 批 4（T5 精准修 + T8 台账对账）。共 9 次提交。
+- **矩阵终态**：P1=0 / P2=0 / P3=4（P3 全是卫生项：12 死通道待删或接线 + 3 存储键读无写）。
+- **收口例外（如实登记，不宣称 completed）**：`closeout` 前四门绿（audit:compact / hygiene / docs / ui-audit），停在 `test:changed` —— 其中 P6 产品验收契约测试报 `p6_current_source_tree_not_exact`（`test/impact-map.json` 在 P6 源绑定集，本次为其补了规则），重打证据失败于 `p6_restart_baseline_cohort_incomplete`（要求 baseline changeSet ≥3 revisions，需真实重启原型环境）。**属既有环境限制 + Result Studio P6 长期 `implemented_unverified`，非本包代码缺陷**；registry 状态保持 active，待例外裁定或环境就绪。
+- **遗留 reopen**：12 死通道删/接线、spreadsheet/pdf 钉住预览、科研计划/Loop 前端确认流（需 agent 侧改造）、IDE MCP 写面接统一审批轴、T4 4.2。
+
 ## §3 阶段与体量
 
 | 阶段 | 内容 | 体量 |
