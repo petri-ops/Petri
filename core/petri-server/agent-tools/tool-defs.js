@@ -15,6 +15,8 @@ const domainModules = {
   'browser': require('./tool-defs/browser'),
   'godot': require('./tool-defs/godot'),
   'computer': require('./tool-defs/computer'),
+  // BLOCK-346 方向2 — harness 计划生成（只读分析，不建任务）
+  'harness': require('./tool-defs/harness'),
   'knowledge': require('./tool-defs/knowledge'),
   'model3d': require('./tool-defs/model3d'),
   'remote': require('./tool-defs/remote'),
@@ -34,6 +36,7 @@ const TOOL_DEFS = [
   ...domainModules['browser'],
   ...domainModules['godot'],
   ...domainModules['computer'],
+  ...domainModules['harness'],
   ...domainModules['knowledge'],
   ...domainModules['model3d'],
   ...domainModules['remote'],

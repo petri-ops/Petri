@@ -1,15 +1,15 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T12:56:25.322Z
+> 基线：`HEAD`（工作区在制文件 5 个不计入判定）。生成时间：2026-11-04T13:36:30.149Z
 
 ## 0. 覆盖汇总
 
 | 面 | 数量 |
 | --- | --- |
-| 工具定义 | 115（16 域；文本降级 0 域） |
-| 工具契约 | 115 |
-| 调度元数据 | 116 |
+| 工具定义 | 116（17 域；文本降级 0 域） |
+| 工具契约 | 116 |
+| 调度元数据 | 117 |
 | IPC 通道 | 168（preload 缺包装 2；前端零消费 165） |
 | 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
@@ -65,6 +65,7 @@
 | `computer_wait` | computer | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
 | `computer_close` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `computer_authorize` | computer | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
+| `harness_plan_task` | harness | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `knowledge_search` | knowledge | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `knowledge_status` | knowledge | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `knowledge_read` | knowledge | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -157,4 +158,8 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-（无）
+- `M core/petri-server/agent-tools/registry.js`
+- `M core/petri-server/agent-tools/tool-defs.js`
+- `M core/petri-server/agent-tools/tool-metadata.js`
+- `?? core/petri-server/agent-tools/harness-tools.js`
+- `?? core/petri-server/agent-tools/tool-defs/harness.js`

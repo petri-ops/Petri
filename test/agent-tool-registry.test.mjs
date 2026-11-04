@@ -185,8 +185,8 @@ test('schema-first loading does not capture partial act helper exports', () => {
       // BLOCK-176 W7（CP-21）skill_preflight +1 = 80；BLOCK-244 Q1-REM ask_user_question +1 = 81；
       // BLOCK-247（Q2b）web_search + web_fetch +2 = 83；BLOCK-249 read_agent_journal +1 = 84；
       // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101；BLOCK-322 P4-01 model3d_bom +1 = 102；P5-01/P6-02 model3d_asset +1 = 103；P6-04 model3d_share +1 = 104；BLOCK-336 P1 worktree 域 +4 = 108；BLOCK-340 read_video +1 = 109；BLOCK-341 godot_run+godot_scene_apply+model3d_blend_ops +3 = 112；BLOCK-342 svg_inspect+svg_edit +2 = 114
-      // BLOCK-345 P3 computer_close +1 = 115（345 收口时漏同步本断言，BLOCK-346 修）
-      if (getToolDefs().length !== 115) throw new Error('unexpected tool count');
+      // BLOCK-345 P3 computer_close +1 = 115；BLOCK-346 方向2 harness_plan_task +1 = 116
+      if (getToolDefs().length !== 116) throw new Error('unexpected tool count');
       if (typeof actTools.actUiAction !== 'function') throw new Error('ui action dispatcher unavailable');
       if (typeof actTools.actOpenTool !== 'function') throw new Error('open_tool dispatcher unavailable');
       process.exit(0);
@@ -303,8 +303,8 @@ test('OpenAI-compatible outbound JSON contains Provider schema only', async () =
     // BLOCK-124（C-13）codegraph +2 = 76；BLOCK-176 W7（CP-21）skill_preflight +1 = 80；
     // BLOCK-244 +1=81；BLOCK-254 +1=85；BLOCK-256 +3=88；BLOCK-264 C-40 浏览器连接器 +4 = 92；
     // NEXT-01 run_workflow +1 = 93；NEXT-04A model3d_* +6 = 99；NEXT-04B model3d_visual_qa +1 = 100；NEXT-05 model3d_recipe +1 = 101；BLOCK-322 P4-01 model3d_bom +1 = 102；P5-01/P6-02 model3d_asset +1 = 103；P6-04 model3d_share +1 = 104；BLOCK-336 P1 worktree 域 +4 = 108；BLOCK-340 read_video +1 = 109；BLOCK-341 +3 = 112；BLOCK-342 svg +2 = 114
-    // BLOCK-345 computer_close +1 = 115（同文件另一处断言同步）
-    assert.equal(receivedBody.tools.length, 115);
+    // BLOCK-345 computer_close +1 = 115；BLOCK-346 harness_plan_task +1 = 116
+    assert.equal(receivedBody.tools.length, 116);
     const keys = collectKeys(receivedBody.tools);
     for (const key of INTERNAL_CONTRACT_KEYS) assert.equal(keys.has(key), false, `${key} leaked`);
   } finally {

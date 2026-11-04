@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-04T12:56:24.887Z",
-  "baselineSha": "6b555688",
+  "generatedAt": "2026-11-04T13:36:30.165Z",
+  "baselineSha": "4722d058",
   "note": "BLOCK-346 T7 棘轮基线：记录已知存量，--check 只对新增 P1/P2 判红。收敛后 --write-baseline 下调。",
   "counts": {
     "P1": 0,

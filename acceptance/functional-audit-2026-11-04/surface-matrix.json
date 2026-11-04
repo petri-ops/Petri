@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-04T12:56:25.322Z",
+  "generatedAt": "2026-11-04T13:36:30.149Z",
   "summary": {
     "baseline": "HEAD",
-    "tools": 115,
-    "toolDomains": 16,
-    "contracts": 115,
-    "metadata": 116,
+    "tools": 116,
+    "toolDomains": 17,
+    "contracts": 116,
+    "metadata": 117,
     "ipcChannels": 168,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 165,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 5,
     "defsFallbacks": 0
   },
   "findings": [
@@ -686,6 +686,27 @@
       },
       "undeclaredArgs": [],
       "schemaProps": 0
+    },
+    {
+      "name": "harness_plan_task",
+      "domain": "harness",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "harness_plan_task",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
     },
     {
       "name": "knowledge_search",
@@ -5854,6 +5875,12 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/agent-tools/registry.js",
+    "M core/petri-server/agent-tools/tool-defs.js",
+    "M core/petri-server/agent-tools/tool-metadata.js",
+    "?? core/petri-server/agent-tools/harness-tools.js",
+    "?? core/petri-server/agent-tools/tool-defs/harness.js"
+  ],
   "defNotes": []
 }

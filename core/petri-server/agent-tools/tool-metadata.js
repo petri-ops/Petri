@@ -98,6 +98,8 @@ const TOOL_METADATA = {
   // 未开启时 handler 返回 web_access_disabled）。needsApproval=false 的理由：
   // 授权已在设置面完成（一次性显式开启），逐次弹审批会把「查一次资料」变成打断流。
   web_search: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  // BLOCK-346 方向2 — 只读计划分析；串行（索引装配较重，不与其他调用并行抢 IO）
+  harness_plan_task: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: 30000 },
   web_fetch: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   // BLOCK-264（C-40）— 浏览器连接器：connect/status/disconnect 只读会话面；
   // act 逐动作分层（click/fill 写操作 → needsApproval；navigate/read/screenshot 只读）
