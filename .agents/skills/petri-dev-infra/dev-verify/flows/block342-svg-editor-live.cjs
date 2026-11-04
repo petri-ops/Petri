@@ -544,6 +544,45 @@ module.exports = {
       const pathCount = (afterPen.match(/<path/g) || []).length;
       assert('V15b_pen_persisted', pathCount === 2 && /d="M 60 150 L 220 150 L 140 205 Z"/.test(afterPen), `path count=${pathCount}`);
 
+      // V29 — UI-686 钢笔徒手模式：按住拖动采样 → 松手落成独立开口 path → 保存落盘
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="pen"]'); if (b) b.click(); return true; })()`);
+      await sleep(300);
+      const freehand = await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const svg = host && host.querySelector('svg');
+        if (!svg) return false;
+        const r = svg.getBoundingClientRect();
+        const vb = svg.viewBox.baseVal;
+        const k = Math.min(r.width / vb.width, r.height / vb.height);
+        const offX = (r.width - vb.width * k) / 2;
+        const offY = (r.height - vb.height * k) / 2;
+        const toScreen = (ux, uy) => ({ x: r.left + offX + (ux - vb.x) * k, y: r.top + offY + (uy - vb.y) * k });
+        const base = { bubbles: true, cancelable: true, pointerId: 71, pointerType: 'mouse', button: 0 };
+        // 锯齿轨迹（振幅 12，步 10 用户单位）：down + 12 段 move + up
+        const s0 = toScreen(40, 220);
+        host.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: s0.x, clientY: s0.y, buttons: 1 }));
+        for (let i = 1; i <= 12; i += 1) {
+          const s = toScreen(40 + i * 10, 220 + (i % 2 === 0 ? -12 : 12));
+          host.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: s.x, clientY: s.y, buttons: 1 }));
+        }
+        const sEnd = toScreen(160, 220);
+        host.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: sEnd.x, clientY: sEnd.y, buttons: 0 }));
+        return true;
+      })()`);
+      const strokeSave = await waitFor(client, `(function(){
+        const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        const preview = document.querySelector('${RAIL} [data-testid="svg-editor-pen-preview"]');
+        return s && !s.disabled && !preview ? 'unlocked' : null;
+      })()`, 8_000);
+      assert('V29_freehand_stroke_pending', strokeSave === 'unlocked', String(strokeSave));
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterFreehand = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      const pathCount29 = (afterFreehand.match(/<path/g) || []).length;
+      // 徒手 path 特征：多段 L（锯齿采样 ≥6 段）+ fill="none"
+      const freehandPathOk = /<path d="M [\d.]+ [\d.]+( L [\d.]+ [\d.]+){6,}" fill="none"/.test(afterFreehand);
+      assert('V29b_freehand_persisted', pathCount29 === 3 && freehandPathOk, `path count=${pathCount29} freehandOk=${freehandPathOk}`);
+
       // V16 — 图片嵌入：拖 1×1 PNG 进画布（data: 内嵌）→ insert <image> → 保存落盘
       const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
       await lib.evalJs(client, `(function(){

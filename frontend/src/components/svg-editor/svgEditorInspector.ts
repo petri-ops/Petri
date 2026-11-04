@@ -193,7 +193,7 @@ export const DRAW_TOOLS: ReadonlyArray<{ id: DrawTool; label: string; hint: stri
   { id: 'ellipse', label: '椭圆', hint: '拖拽画椭圆' },
   { id: 'line', label: '直线', hint: '拖拽画直线' },
   { id: 'text', label: '文字', hint: '拖拽出文字框后输入' },
-  { id: 'pen', label: '钢笔', hint: '点列画折线：点首点可闭合（Z），Enter 结束，Esc 取消' },
+  { id: 'pen', label: '钢笔', hint: '两种笔法：单击落点画折线（点首点可闭合，Enter 结束，Esc 取消）；按住拖动=徒手一笔，松手落成路径' },
   { id: 'node', label: '节点', hint: '选中单个 path 后编辑节点/手柄：拖动、加点、删点、平滑' },
 ];
 

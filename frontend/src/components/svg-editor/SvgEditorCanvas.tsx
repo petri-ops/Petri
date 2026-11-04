@@ -95,6 +95,8 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   const [penPoints, setPenPoints] = React.useState<PathPoint[]>([]);
   // 同 tick 连续点列需要读到最新值（setState 批量更新下闭包是旧的——实机抓真），ref 镜像同步
   const penPointsRef = React.useRef<PathPoint[]>([]);
+  // UI-686 徒手模式：按住拖动=高频采样一笔（与「单击点列」并存，up 时按位移分流）
+  const strokeRef = React.useRef<PathPoint[] | null>(null);
 
   const dragRef = React.useRef<{
     startX: number;
@@ -277,7 +279,7 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   React.useEffect(() => {
     if (tool !== 'pen') return undefined;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { penPointsRef.current = []; setPenPoints([]); }
+      if (event.key === 'Escape') { penPointsRef.current = []; strokeRef.current = null; setPenPoints([]); }
       if (event.key === 'Enter') finalizePen(false);
     };
     window.addEventListener('keydown', onKey);
@@ -345,17 +347,12 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (tool === 'pen') {
-      // 基础钢笔：点列；点靠近首点（<8 用户单位且 ≥3 点）闭合，否则追加（ref 读最新，同 tick 连击可见）
+      // 钢笔两笔法：按下先入徒手缓冲，up 按位移分流——
+      // 位移小=「点击落点」（点列：回首点闭合/追加）；位移大=「徒手一笔」松手落定（UI-686）
       const pt = toUser(event.clientX, event.clientY);
       if (!pt) return;
-      const cur = penPointsRef.current;
-      const first = cur[0];
-      if (first && cur.length >= 3 && Math.hypot(pt.x - first.x, pt.y - first.y) < 8) {
-        finalizePen(true);
-        return;
-      }
-      penPointsRef.current = [...cur, pt];
-      setPenPoints(penPointsRef.current);
+      strokeRef.current = [pt];
+      setPenPoints([pt]);
       return;
     }
     if (tool !== 'select' && tool !== 'node') {
@@ -403,6 +400,18 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    // UI-686 徒手采样：按住拖动时 ≥4 用户单位记一点（抽稀），实时进预览
+    if (tool === 'pen' && strokeRef.current) {
+      const pt = toUser(event.clientX, event.clientY);
+      if (!pt) return;
+      const pts = strokeRef.current;
+      const last = pts[pts.length - 1];
+      if (Math.hypot(pt.x - last.x, pt.y - last.y) >= 4) {
+        pts.push(pt);
+        setPenPoints([...pts]);
+      }
+      return;
+    }
     const drawStart = drawStartRef.current;
     const hostEl = hostRef.current;
     if (drawStart && hostEl) {
@@ -446,6 +455,35 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    // UI-686 徒手分流：位移 ≥6 用户单位且 ≥3 采样点 → 徒手一笔落定；否则回退为「点击落点」
+    if (tool === 'pen' && strokeRef.current) {
+      const pts = strokeRef.current;
+      strokeRef.current = null;
+      if (!pts) return;
+      const start = pts[0];
+      const end = pts[pts.length - 1];
+      const moved = Math.hypot(end.x - start.x, end.y - start.y);
+      if (pts.length >= 3 && moved >= 6) {
+        const d = penPathD(pts, false);
+        if (!d) { setPenPoints([]); return; }
+        setPenPoints([]);
+        penPointsRef.current = [];
+        onPenCommit({
+          op: 'insert', parent: { path: [] }, index: 'end',
+          markup: penInsertMarkup(d, { closed: false }),
+        });
+        return;
+      }
+      const cur = penPointsRef.current;
+      const first = cur[0];
+      if (first && cur.length >= 3 && Math.hypot(end.x - first.x, end.y - first.y) < 8) {
+        finalizePen(true);
+        return;
+      }
+      penPointsRef.current = [...cur, end];
+      setPenPoints(penPointsRef.current);
+      return;
+    }
     if (drawStartRef.current) {
       const start = drawStartRef.current;
       drawStartRef.current = null;
