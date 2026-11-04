@@ -25,6 +25,7 @@ const SAMPLE_REL = `${SAMPLE_DIR}/scene.svg`;
 const SAMPLE_ABS = path.join(ROOT, SAMPLE_DIR, 'scene.svg');
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const PNG_1PX_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
 const SVG = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- BLOCK-342 live 样本：保留注释/缩进/自闭合，验证 span 引擎零操作零 diff -->
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
@@ -583,12 +584,49 @@ module.exports = {
       const freehandPathOk = /<path d="M [\d.]+ [\d.]+( L [\d.]+ [\d.]+){6,}" fill="none"/.test(afterFreehand);
       assert('V29b_freehand_persisted', pathCount29 === 3 && freehandPathOk, `path count=${pathCount29} freehandOk=${freehandPathOk}`);
 
+      // V30 — 资产路径引用：输入相对路径 → 引用模式 insert（href 存相对路径）→ 保存落盘
+      // 前置：项目内放一个真实图片文件（assets/logo.png）
+      const assetsDir = path.join(ROOT, 'assets'); // 引用路径 = 工作区根相对（与面板输入同口径）
+      fs.mkdirSync(assetsDir, { recursive: true });
+      fs.writeFileSync(path.join(assetsDir, 'logo.png'), Buffer.from(PNG_1PX_BASE64, 'base64'));
+      await lib.evalJs(client, `(function(){
+        const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const box = host && host.querySelector('svg #box');
+        if (!box) return 'no box';
+        const r = box.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, pointerId: 81, pointerType: 'mouse', button: 0 };
+        box.dispatchEvent(new PointerEvent('pointerdown', { ...base, buttons: 1 }));
+        window.dispatchEvent(new PointerEvent('pointerup', { ...base, buttons: 0 }));
+        return true;
+      })()`);
+      await sleep(400);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="asset-ref-toggle"]'); if (b) b.click(); return true; })()`);
+      await sleep(300);
+      await lib.evalJs(client, `(function(){
+        const input = document.querySelector('${RAIL} [data-testid="svg-editor-asset-ref-input"]');
+        if (!input) return 'no input';
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+        setter.call(input, 'assets/logo.png');
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      })()`);
+      await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="asset-ref-create"]'); if (b) b.click(); return true; })()`);
+      const refApplied = await waitFor(client, `(function(){
+        const img = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg image[href="assets/logo.png"]');
+        const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
+        return img && save && !save.disabled ? JSON.stringify({ ref: true }) : null;
+      })()`, 10_000);
+      assert('V30_asset_ref_pending', Boolean(refApplied), refApplied || 'asset ref not inserted');
+      await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
+      await sleep(1_500);
+      const afterRef = fs.readFileSync(SAMPLE_ABS, 'utf8');
+      assert('V30b_asset_ref_persisted', /<image href="assets\/logo\.png"/.test(afterRef) || afterRef.includes('href="assets/logo.png"'), afterRef.match(/<image[^>]*>/)?.[0]?.slice(0, 120) || 'no ref image');
+
       // V16 — 图片嵌入：拖 1×1 PNG 进画布（data: 内嵌）→ insert <image> → 保存落盘
-      const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
       await lib.evalJs(client, `(function(){
         const host = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
         if (!host) return false;
-        const bytes = Uint8Array.from(atob('${PNG_1PX}'), (c) => c.charCodeAt(0));
+        const bytes = Uint8Array.from(atob('${PNG_1PX_BASE64}'), (c) => c.charCodeAt(0));
         const file = new File([bytes], 'dot.png', { type: 'image/png' });
         const dt = new DataTransfer();
         dt.items.add(file);
@@ -597,17 +635,20 @@ module.exports = {
         return true;
       })()`);
       const imagePending = await waitFor(client, `(function(){
-        const img = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg image');
+        // 多 image 场景（V30 资产引用先行）：querySelector 文档序第一个可能是 assets 引用——
+        // 改为遍历找 data: 内嵌的那个（UI-687 随批抓真）
+        const imgs = Array.from(document.querySelectorAll('${RAIL} [data-testid="svg-editor-canvas"] svg image'));
+        const img = imgs.find((el) => (el.getAttribute('href') || '').startsWith('data:image/png;base64,'));
         const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
-        return img && save && !save.disabled && (img.getAttribute('href') || '').startsWith('data:image/png;base64,')
+        return img && save && !save.disabled
           ? JSON.stringify({ w: img.getAttribute('width'), h: img.getAttribute('height') }) : null;
-      })()`, 8_000);
+      })()`, 12_000);
       assert('V16_image_embedded_pending', Boolean(imagePending), imagePending || 'image not inserted');
       await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
       await sleep(1_500);
       const afterImage = fs.readFileSync(SAMPLE_ABS, 'utf8');
       assert('V16b_image_persisted',
-        afterImage.includes(`<image href="data:image/png;base64,${PNG_1PX}"`) && afterImage.includes('width="64" height="64"'),
+        afterImage.includes(`<image href="data:image/png;base64,${PNG_1PX_BASE64}"`) && afterImage.includes('width="64" height="64"'),
         afterImage.match(/<image[^>]*>/)?.[0]?.slice(0, 90) || 'no image');
 
       // V17 — 渐变：选 #box → 打开渐变区 → 创建线性并应用 → fill=url(#g1) → 保存落盘 defs + url 引用；stop 色 op 落盘

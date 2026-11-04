@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-04T04:46:28.307Z",
-  "finishedAt": "2026-11-04T04:46:58.575Z",
+  "startedAt": "2026-11-04T06:40:41.167Z",
+  "finishedAt": "2026-11-04T06:41:13.765Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793756630336"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793774360018"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -37,7 +37,7 @@
     {
       "name": "V2d_default_state",
       "pass": true,
-      "detail": "{\"paletteOpen\":true,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":11}"
+      "detail": "{\"paletteOpen\":true,\"changesOpen\":false,\"toolGroupOpen\":\"1\",\"layersOpen\":\"0\",\"inspectorOpen\":\"0\",\"toolButtons\":12}"
     },
     {
       "name": "V3_rect_dispatch_ok",
@@ -210,6 +210,16 @@
       "detail": "path count=3 freehandOk=true"
     },
     {
+      "name": "V30_asset_ref_pending",
+      "pass": true,
+      "detail": "{\"ref\":true}"
+    },
+    {
+      "name": "V30b_asset_ref_persisted",
+      "pass": true,
+      "detail": "<image href=\"assets/logo.png\" x=\"20\" y=\"20\" width=\"160\" height=\"120\" preserveAspectRatio=\"xMidYMid meet\" />"
+    },
+    {
       "name": "V16_image_embedded_pending",
       "pass": true,
       "detail": "{\"w\":\"64\",\"h\":\"64\"}"
@@ -217,7 +227,7 @@
     {
       "name": "V16b_image_persisted",
       "pass": true,
-      "detail": "<image href=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR"
+      "detail": "<image href=\"assets/logo.png\" x=\"20\" y=\"20\" width=\"160\" height=\"120\" preserveAspectRatio=\""
     },
     {
       "name": "V17_gradient_block_present",
@@ -347,7 +357,7 @@
     {
       "name": "V8_stale_apply_rejected",
       "pass": true,
-      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"3fce0c5cc5031948ae1f8f56953a4a2116a78fa4a6045b0c935c3760b2082328"
+      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"8950d8a44da916aa84ae89ce8ca19f0d4181517a587d02951283dccce35817df"
     },
     {
       "name": "V13_close_returns_to_thumb",
