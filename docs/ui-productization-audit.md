@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-682: SVG 编辑器底排可调高 + 修订行对齐修正（2026-11-04 用户实时反馈批；**verified（dev Electron 边界内；实机 64/64 allPass + 截图过目）**）
+
+- **问题（用户反馈+截图）**：「这几个窗口能调整宽高吗？下面的布局就不太合理」——①底部图层/修订历史两卡固定 196px 不可调；②修订行加「对比」按钮后布局错位（按钮被挤到条目下方居中，因 revisionItem 纵向 flex 块级占满整行把兄弟按钮挤下去）。
+- **修法**：①底排高度可拖拽——layout 单一真源内 `grid-template-rows: minmax(0,1fr) 6px var(--svg-row2,196px)`（把手占 row2、卡片移 row3），leftCol 内联挂 `--svg-row2` 变量，把手 pointer 拖动 clamp 140–420（会话内生效不落盘）；②修订行改 `revisionRow` flex 容器（预览按钮 flex:1 + 对比按钮固定宽右对齐），消除块级挤下。
+- **验证**：截图过目（对比按钮行内右对齐、拖高后图层全列表露出）；flow `V26_row2_resizable`（拖把手 +60px → 卡片实测 250→310）；svg-editor 80/80 + tsc 0 + lint 0 error；总 **64/64 allPass**。
+
 ## UI-681: SVG 编辑器画布适应页面——modal 内图形 contain 填满（2026-11-04 用户实时反馈批；**verified（dev Electron 边界内；实机 63/63 allPass + 截图过目）**）
 
 - **问题（用户反馈）**：「在编辑器打开，图形页面卡片应该适应页面大小，目前图形界面有些局限、限定了宽高的样子」——SVG 文件自带 `width="400" height="240"`，画布容器又 `max-content` 撑开 → 整窗 modal 下图形只占左上一小块。

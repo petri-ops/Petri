@@ -225,6 +225,9 @@ export function SvgEditorViewer({
   const [styleRows, setStyleRows] = React.useState<Array<{ name: string; value: string }>>([]);
   // P2.1 版本对比：修订版与当前视图洋葱皮叠加（透明度滑杆）
   const [compare, setCompare] = React.useState<{ revision: string; at: string; markup: string; opacity: number } | null>(null);
+  // UI-682 — 底排（图层|修订历史）高度：把手拖拽驱动（clamp 140–420，会话内生效不落盘）
+  const [row2Height, setRow2Height] = React.useState(196);
+  const row2DragRef = React.useRef<{ startY: number; startH: number } | null>(null);
   // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
   // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
@@ -985,7 +988,7 @@ export function SvgEditorViewer({
 
       {state.status === 'ready' ? (
         <div className={layout.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
-          <div className={layout.leftCol}>
+          <div className={layout.leftCol} style={{ '--svg-row2': `${row2Height}px` } as React.CSSProperties}>
           {!layersOpen ? (
             <button type="button" className={styles.railToggle} data-action="expand-layers" style={{ left: 10 }} title="展开图层">
               图层
@@ -1173,6 +1176,23 @@ export function SvgEditorViewer({
 
           {/* 图层栏常挂载：收起态靠 data-open + display:none 退场（layout 单一真源），不条件卸载——
              卸载会让 flow 契约（V2d 读 dataset.open）与收起列宽组合丢元素（实机抓真） */}
+            <div
+              className={layout.row2Resizer}
+              data-testid="svg-row2-resizer"
+              title="拖动调整底部卡片高度"
+              onPointerDown={(event) => {
+                row2DragRef.current = { startY: event.clientY, startH: row2Height };
+                event.currentTarget.setPointerCapture?.(event.pointerId);
+              }}
+              onPointerMove={(event) => {
+                const drag = row2DragRef.current;
+                if (!drag) return;
+                const next = Math.max(140, Math.min(420, drag.startH + (event.clientY - drag.startY)));
+                setRow2Height(next);
+              }}
+              onPointerUp={() => { row2DragRef.current = null; }}
+              onPointerCancel={() => { row2DragRef.current = null; }}
+            />
             <aside className={layout.layers} data-testid="svg-editor-layers" data-open={layersOpen ? '1' : '0'}>
               <div className={styles.layersHead}>
                 {layersOpen ? (
@@ -1227,25 +1247,27 @@ export function SvgEditorViewer({
                 <ul className={styles.revisionList} data-testid="svg-editor-revision-list">
                   {revisions.map((item) => (
                     <li key={item.file} className={styles.changeRow} data-revision={item.file}>
-                      <button
-                        type="button"
-                        className={styles.revisionItem}
-                        data-action="preview-revision"
-                        title="预览这一版（只读）"
-                        onClick={() => openRevision(item)}
-                      >
-                        <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
-                        <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={button.ghost}
-                        data-action={`compare-revision-${item.file.slice(-16)}`}
-                        title="与当前视图洋葱皮对比"
-                        onClick={() => openCompare(item)}
-                      >
-                        对比
-                      </button>
+                      <div className={styles.revisionRow}>
+                        <button
+                          type="button"
+                          className={styles.revisionItem}
+                          data-action="preview-revision"
+                          title="预览这一版（只读）"
+                          onClick={() => openRevision(item)}
+                        >
+                          <span className={styles.changeLabel}>{item.at.replace('T', ' ').slice(0, 19)}</span>
+                          <span className={styles.changeKind}>{item.sha8} · {Math.round(item.sizeBytes / 1024)}KB</span>
+                        </button>
+                        <button
+                          type="button"
+                          className={button.ghost}
+                          data-action={`compare-revision-${item.file.slice(-16)}`}
+                          title="与当前视图洋葱皮对比"
+                          onClick={() => openCompare(item)}
+                        >
+                          对比
+                        </button>
+                      </div>
                     </li>
                   ))}
                 </ul>

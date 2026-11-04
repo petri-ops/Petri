@@ -752,6 +752,36 @@ module.exports = {
       })()`, 6_000);
       assert('V23c_compare_close', compareClosed === 'closed', String(compareClosed));
 
+      // V26 — UI-682 底排可调：拖把手 +60px → --svg-row2 生效（layers 卡实测增高）+ 修订行横向对齐
+      const hBefore = await lib.evalJs(client, `(function(){
+        const card = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
+        return card ? Math.round(card.getBoundingClientRect().height) : null;
+      })()`);
+      await lib.evalJs(client, `(function(){
+        const rz = document.querySelector('${RAIL} [data-testid="svg-row2-resizer"]');
+        if (!rz) return 'no resizer';
+        const r = rz.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, pointerId: 51, pointerType: 'mouse', button: 0 };
+        rz.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: r.left + 10, clientY: r.top + 3, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: r.left + 10, clientY: r.top + 3 + 60, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: r.left + 10, clientY: r.top + 3 + 60, buttons: 0 }));
+        return true;
+      })()`);
+      await sleep(400);
+      const hAfter = await lib.evalJs(client, `(function(){
+        const card = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
+        const row = document.querySelector('${RAIL} .revisionRow') || document.querySelector('${RAIL} [data-testid="svg-editor-revision-panel"] .revisionRow');
+        return JSON.stringify({
+          h: card ? Math.round(card.getBoundingClientRect().height) : null,
+          rowAligned: row ? Math.abs(row.getBoundingClientRect().height - 30) < 60 : null,
+        });
+      })()`);
+      const hInfo = JSON.parse(hAfter || '{}');
+      assert('V26_row2_resizable',
+        typeof hBefore === 'number' && typeof hInfo.h === 'number'
+          && hInfo.h >= hBefore + 40 && hInfo.rowAligned !== false,
+        `before=${hBefore} after=${hInfo.h} row=${JSON.stringify(hInfo.rowAligned)}`);
+
 
 
       // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据

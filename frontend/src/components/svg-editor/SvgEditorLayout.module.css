@@ -30,7 +30,8 @@
 .leftCol {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) 196px;
+  /* UI-682 — 底排（图层|修订历史）高度可拖拽：--svg-row2 由 Viewer 把手驱动，clamp 在消费侧 */
+  grid-template-rows: minmax(0, 1fr) 6px var(--svg-row2, 196px);
   gap: 8px;
   grid-column: 1;
   min-width: 0;
@@ -72,17 +73,31 @@
 
 .layers {
   grid-column: 1;
-  grid-row: 2;
+  grid-row: 3;
 }
 
 .revisionCard {
   grid-column: 2;
+  grid-row: 3;
+}
+
+/* UI-682 — 底排拖拽把手（6px 薄行）：横跨两列，拖动改 --svg-row2 */
+.row2Resizer {
+  grid-column: 1 / -1;
   grid-row: 2;
+  cursor: ns-resize;
+  border-radius: var(--petri-radius-sm);
+}
+
+.row2Resizer:hover {
+  background: var(--petri-hover);
 }
 
 .body[data-layers='0'] .revisionCard {
   grid-column: 1 / -1;
 }
+
+/* 收起图层时底排仍占 row3（resizer 保留 row2） */
 
 .inspector {
   grid-column: 2;

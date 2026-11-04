@@ -1841,6 +1841,18 @@
   z-index: 12;
 }
 
+.revisionRow {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+}
+
+.revisionRow .revisionItem {
+  flex: 1;
+  min-width: 0;
+}
+
 .revisionItem {
   display: flex;
   flex-direction: column;

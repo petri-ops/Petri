@@ -62,3 +62,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-04T00:17:03.728Z -->
 最后更新：2026-11-03（✅ **BLOCK-342 切片5：Inkscape 协处理器（UI-674；实机 48/48）**：探针（env PETRI_INKSCAPE_BIN 优先+常见路径，只查 X_OK）+ 面板诚实灰化（缺席提示+动作按钮不渲染）+ 受治理动作守卫（union/difference/intersection/text-to-path/export-pdf；临时产物 before-sha 守卫 + 审计快照写回，不绕过治理；缺席 503 inkscape_unavailable，工具层探针前置零 DB）。位图描摹仍 reopen；真实执行链装 Inkscape 后即用（本机未装=常态，不冒 verified）。契约 28/28 + tsc 0 + lint 0；实机抓真：后端路由更新须重启 Electron 子进程，重启竞态曾致 fallback 端口（63577）——dev 栈整体重启干净绑定 3001。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-03（✅ **BLOCK-342 切片4：渐变编辑（UI-673；实机 46/46）**：线性/径向新建+应用（横/竖/斜预设、起止色）、文档渐变列表+预览条、选中引用渐变的 stop 行内编辑（自建 stop 带 id 走 id 编辑）。抓真后端 insert markup=「恰好一个元素」口径（parseSvg.elements 全量后代计数）→ 渐变拆全单元素 op 序列：缺 defs 先插根 end（不扰动 path）→ 空壳渐变 → stop 逐个按 id 插；后端零改动。测试 9/9 + 前端 62/62 + tsc 0 + lint 0；flow V17 四断言全过。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T00:52:20.286Z -->
+最后更新：2026-11-03（✅ **BLOCK-342 切片6：提案幽灵叠加（UI-675；实机 51/51）**：事件协议 petri:svg-proposal（events.ts 类型化登记）+ 编辑器订阅（path 匹配/形态校验不猜）+ previewMarkup 半透明 ghost 同 scale 叠加 + 提案浮条逐项接受（op 序列即语义 diff，单 op commit）/全部接受/拒绝。**chat 派发侧接线=reopen**（通用工具结果渲染链单独切片，flow 以合成事件实机验证编辑器侧全链）。前端 62/62 + tsc 0 + lint 0；flow V19 三断言（ghost 在场/接受后退场+落盘前置/落盘）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
