@@ -1,5 +1,14 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-694: 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**）
+
+- **设置「决策与调度」新增五段**（后端能力早已存在、此前前端零调用）：①模型允许清单（读写 `allowedModels` + 理由账本逐行 `模型=理由`，开放/白名单两态如实标注）②原因码词表（折叠展示 `/api/ai/reason-codes`，点开才拉）③运行环境包「重新检测」（复用既有 list IPC，不新增通道）④Agent 操作审计与撤销（`agent-audit` 列表 + `agent-undo/:token` + `agent-settings` 暂停开关）⑤记忆压缩策略（`memory-policy` 读写 + 生效来源标注 + `memory-wipe` 二次确认）。
+- **侧聊窗档位锁定显式化**：`accessModeLocked` 上抛，菜单加锁定说明条 + 四项 `disabled`（原为点了静默无反应）。
+- **钉住快照预览**：markdown 走 `previewText`、pdf 走浏览器原生 iframe（spreadsheet 需 xlsx 二进制解析，保留「打开原文件」）。
+- **`canCompare` 能力位**：Canvas 去硬编码 `true`，改由调用方按适配器传（默认 false）。
+- **证据**：ModelAccessPanel 3/3 · FederationJobs 3/3（联邦作业提交/查状态/取产物）· AgentAuditPanel 3/3 · MemoryPolicyPanel 3/3 · ResultStudioSurface 5/5；`quality:types` 0；lint 0 error。
+- **待补**：dev Electron 实机腿（面板真连后端、pdf 真渲染），通过后转 verified。
+
 ### in_progress 三分类对账（BLOCK-346 T8，2026-11-04）
 
 > 目的：区分「代码没做完」与「代码做完了只缺实机证据」。不改变任何条目状态，只补分类，
