@@ -86,10 +86,11 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 - **纪律**：门禁编码「声明与消费必须对齐」这一过程规则，不固化当前状态事实（存量基线只许递减）。
 - **注意**：`--worktree` 与 `--check` 组合是刻意选择——若用默认 HEAD 模式，提交前跑等于跑旧代码，门禁失效。
 
-### T8 台账口径对账（治理，无代码）
+### T8 台账口径对账（**DONE 2026-11-04**，治理无代码）
 
-- **范围**：把 `ui-productization-audit` 的 28 条 `in_progress` 按「代码未完成 / 仅缺实机证据 / UI 面未交付」三分类重标；`implemented_unverified` 的唯一用法（Result Studio）与状态词表对齐；Q-MATRIX 计数回写。
-- **验收**：`docs:check` + `ui:audit:check` PASS；无「状态词与实际证据不符」条目。
+- **交付**：`ui-productization-audit` 顶部新增「in_progress 三分类对账」节，把 28 条按**五类**归并——A 仅缺实机证据 13 条 / B UI 面未交付 2 条（UI-513、UI-534）/ C 疑代码缺陷 1 条（UI-663）/ D 长期挂起 9 条 / E 移出 UI 验收域 3 条。
+- **不改状态词的理由**：状态语义只允许 `verified/in_progress/cancelled`，A 类改成任何新词都会破坏门禁契约；分类作为**附加标注**表达同一信息，且不掩盖「未验证」事实。
+- **验收**：`ui:audit:check` PASS（624 个带证据编号）· `docs:check` PASS（460）。
 
 ## §2.5 收口后复核门（用户裁决 2026-11-04，强制前置）
 
