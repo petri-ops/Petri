@@ -123,7 +123,8 @@ export function ArtifactPinPane({
         />
       );
     }
-    if (snapshot.viewerAdapter === 'table' && snapshot.previewData && snapshot.previewData.length > 0) {
+    if ((snapshot.viewerAdapter === 'table' || snapshot.viewerAdapter === 'spreadsheet')
+      && snapshot.previewData && snapshot.previewData.length > 0) {
       const [header, ...rows] = snapshot.previewData;
       return (
         <div className={styles.artifactPinTableScroll}>
