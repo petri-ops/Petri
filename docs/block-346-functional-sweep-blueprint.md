@@ -83,6 +83,20 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 - **基建**：`--write-baseline` / 增量 diff / `--check` 棘轮 / `--worktree` 模式（开发中验证未提交修复）；基线 `test/functional-surface-baseline.json`。
 - **接入**：`quality:surface` npm script（`--worktree --check`，读当前工作区与本批基线比对）+ `closeout --gate quality:surface` —— closeout 由九门扩为**十门**。
 - **负测（红/绿双样本）**：从基线删一条 P1 → 退出码 1；恢复 → 0。接入后复验通过（`FIXED` 项正确显示、无新增 PASS）。
+- **检测可信度负测（2026-11-04 追加，逐条注入验证非假门禁）**：
+
+| 检测 | 注入方式 | 实测结果 |
+| --- | --- | --- |
+| `tool_without_contract` | 删 `web_fetch` 契约 | P1 精确点名 + 棘轮 `+ NEW P1` ✅ |
+| `tool_without_contract`（恢复） | 还原 | P1=0 ✅ |
+| `defs_not_assembled` | 曾真实触发（goals 误报）→ 修口径后正确判定 | ✅（并留下「spread 写法合法」风险登记） |
+| `schema_undeclared_args` | 真实命中 5 条并全部修复 | ✅ |
+| `ipc_*`（preload/dead） | 真实命中 13→12 条，分诊后清理 | ✅ |
+| `route_endpoint_no_frontend_consumer` | 真实命中 10 条（抽查 5 条 0 引用） | ✅ |
+| `storage_*` | 修口径后覆盖 7→20 键 | ✅（误报 3→0） |
+
+**无效/已否决**：反向 `schema_declared_unused`（14 条全误报，ctx 注入 + 整体透传无法静态区分）——已在脚本内留注释。
+注意：负测必须用 `--worktree`（默认 HEAD 模式看不到工作区注入，首轮负测因此假通过）。
 - **纪律**：门禁编码「声明与消费必须对齐」这一过程规则，不固化当前状态事实（存量基线只许递减）。
 - **注意**：`--worktree` 与 `--check` 组合是刻意选择——若用默认 HEAD 模式，提交前跑等于跑旧代码，门禁失效。
 
