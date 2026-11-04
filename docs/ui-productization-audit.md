@@ -1,5 +1,10 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-690: 3D 编辑器渲染回验——视口 PNG 快照进会话 + 判据 prompt（BLOCK-344 P4；2026-11-04 **verified（dev Electron 边界内；前端 144/144 + 契约 36/36）**）
+
+- **通道**：Model3DScene 加 `onSnapshotApi`（renderer 已 `preserveDrawingBuffer: true`——capture=渲染一帧→`domElement.toDataURL('image/png')`，画布污染/未就绪如实 null）；Surface 工具栏「回验」按钮 → capture → **复用 `petri:composer-attach-image`**（UI-680 既有通道）+ copilotAsk 判据 prompt（SceneSpec 参数/节点清单 + 指路 model3d_inspect / model3d_propose 先说方案）——「改→渲染→模型看图→迭代」真闭环打通（与 SVG 侧 UI-676/680 同构）。
+- **验证**：work-surface/svg-editor/copilot 前端 144/144 + 契约 36/36 + tsc 0 + lint 0 error。WebGL 上下文在测试环境不可用——组件层不造假渲染测试，接线由 tsc/契约钉死 + 实机日常使用覆盖（如实留档，同 UI-677 先例）。
+
 ## UI-689: 3D 编辑器提案幽灵——model3d_propose 结果派发 + 工作台浮条逐项接受（BLOCK-344 P3；2026-11-04 **verified（dev Electron 边界内；契约 26/26 + REST 实机 ✓）**）
 
 - **后端**：model3d_propose 返回补 `path` 与 `operations` 回显（请求原文）——提案消费者（3D 工作台浮条）按 op 逐项取舍所需的本体（此前只返回候选 scene 整体）。

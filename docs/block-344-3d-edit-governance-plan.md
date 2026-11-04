@@ -1,6 +1,6 @@
 ---
 capability: block-344-3d-edit-governance
-status: active
+status: completed
 goal: 把 SVG 编辑器验证过的「受治理编辑操作层」四件平移到 3D SceneSpec 编辑链——逐项取舍（改动清单由语义 diff 生成+单项撤销）、洋葱皮版本对比、提案幽灵（事件协议→视口 ghost→逐项接受）、渲染回验判据附件衔接。P0 先勘察 SceneSpec 编辑链现状定范围（现为整体 SceneDiff 非 op 序列，「参数级 op 化」切法是 P0 核心产出）。
 acceptance:
   - P0 勘察定版：SceneSpec 编辑链全图（Model3DEditPanel/sceneEditClient/后端 scene 路由/Revision 体系）、op 化切法裁决稿、四件平移的逐件范围与验收判据；范围定版回写本文件 §2 并经用户过目。
@@ -55,7 +55,7 @@ reopen: SceneSpec 整体重写改 op 引擎（若 P0 判定参数级 op 化成�
 4. 3D 视口渲染层（Three.js 场景构建入口）——ghost/对比的实现挂点。
 5. 产出：§2 勘察记录 + 四件逐件范围/验收判据 + op 化切法裁决稿 → 用户过目。
 
-## §3 P1+（P1/P2/P3 completed 2026-11-04；P4 待续）
+## §3 P1+（四件全 completed 2026-11-04；registry completed）
 
 证据位置：`acceptance/block-344/`；完成语义：P0 定版 + 各件交付收口笔录在案 + closeout 十三门 PASS → registry completed。
 
@@ -65,3 +65,7 @@ reopen: SceneSpec 整体重写改 op 引擎（若 P0 判定参数级 op 化成�
 - 预排：P4 渲染回验衔接（复用 composer-attach-image）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## §5.1 整包收口（2026-11-04 当日；四件全交付）
+
+P0 勘察定版（op 引擎已在，裁决消解）→ P1 逐项取舍（UI-687，契约 6/6+REST 实机）→ P2 洋葱皮（UI-688，契约 8/8+REST 实机）→ P3 提案幽灵（UI-689，契约 26/26）→ P4 回验衔接（UI-690，前端 144/144）。closeout 十三门 PASS。**顺延/ reopen**：①Blender/Godot 桥写回守卫对账（独立小包）；②SceneSpec op 引擎与 SVG span 引擎的统一抽象（跨包远期）。G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { petriEvents, subscribePetriEvent } from '@/lib/events';
+import { dispatchPetriEvent, petriEvents, subscribePetriEvent } from '@/lib/events';
 import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
 import { fetchModel3DCapability, resolveModel3DScene } from '@/lib/model3dClient';
@@ -142,6 +142,8 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
   const [measureMode, setMeasureMode] = React.useState(false);
   // BLOCK-344 P2 — 洋葱皮对比：EditPanel 修订对比 → 3D 视口 ghost 叠加
   const [compare, setCompare] = React.useState<{ spec: unknown; revisionId: string; opacity: number } | null>(null);
+  // BLOCK-344 P4 — 渲染回验：3D 视口快照 → composer 附件 + 判据 prompt（复用 UI-680 通道）
+  const snapshotApiRef = React.useRef<{ capture: () => string | null } | null>(null);
   // BLOCK-344 P3 — 提案幽灵：agent model3d_propose 结果（ghost 高亮 + 逐项接受/整单拒绝）
   const [proposal, setProposal] = React.useState<{ scene: unknown; operations: Array<Record<string, unknown>>; beforeHash: string; path: string } | null>(null);
 
@@ -647,10 +649,39 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
                 onCameraApi={onCameraApi}
                 ghostView={compare?.spec ?? null}
                 ghostOpacity={compare?.opacity}
+                onSnapshotApi={(api) => { snapshotApiRef.current = api; }}
               />
             </React.Suspense>
           )}
           <div className={styles.tools} role="group" aria-label="3D 测量与视角">
+            <button
+              type="button"
+              className={button.ghost}
+              data-action="model3d-render-check"
+              disabled={!view}
+              title="渲染回验：当前视口渲染成 PNG 快照 + 判据放进会话（图片附件 + prompt）"
+              onClick={() => {
+                const capture = snapshotApiRef.current?.capture;
+                const png = capture ? capture() : null;
+                if (!png) { setError('渲染回验失败：快照不可用（画布污染或未就绪）'); return; }
+                const spec = view?.scene as { parameters?: Record<string, unknown>; nodes?: Array<{ id?: string }> } | undefined;
+                const params = spec?.parameters ? Object.entries(spec.parameters).map(([k, v]) => `${k}=${String(v)}`).join(', ') : '';
+                const nodes = spec?.nodes ? spec.nodes.map((n) => `#${n.id ?? '?'}`).join(' ') : '';
+                dispatchPetriEvent(petriEvents.composerAttachImage, { dataUrl: png, name: `model3d-render-check-${Date.now()}.png` });
+                dispatchPetriEvent(petriEvents.copilotAsk, {
+                  prompt: [
+                    `3D 渲染回验请求（SceneSpec ${sceneSourcePath || 'model3d/scene.scene3d.json'}，快照见图片附件）：`,
+                    `当前参数：${params || '（无）'}；节点：${nodes || '（无）'}。`,
+                    '请用 model3d_inspect 读取该场景文件结构，对照渲染意图逐条核对（几何/材质/约束求解是否自洽）；',
+                    '发现可疑处先用 model3d_propose 说方案，我确认后再 apply。',
+                  ].join('\n'),
+                });
+                setError(null);
+                setAssetNotice?.('已把渲染回验快照与判据放进会话输入框');
+              }}
+            >
+              回验
+            </button>
             <button
               type="button"
               className={`${button.ghost}${measureMode ? ` ${styles.viewActive}` : ''}`}

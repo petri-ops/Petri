@@ -124,6 +124,7 @@ export function Model3DScene({
   onCameraApi,
   ghostView,
   ghostOpacity,
+  onSnapshotApi,
   active = true,
 }: {
   view: Scene3DView | null;
@@ -142,6 +143,8 @@ export function Model3DScene({
   ghostView?: unknown;
   /** ghost 层透明度（0–1，宿主滑杆驱动）。 */
   ghostOpacity?: number;
+  /** BLOCK-344 P4 — 渲染回验：宿主持 capture 函数（渲染一帧→PNG data URL；画布污染时返回 null）。 */
+  onSnapshotApi?: (api: { capture: () => string | null }) => void;
   /**
    * 宿主面是否可见（如右栏非激活 tab）。不可见时不创建 WebGL 上下文——
    * Chromium 同时活跃上下文有上限，隐藏面占坑会把可见面（结果 3D / 工作台）
@@ -252,6 +255,21 @@ export function Model3DScene({
     scene.add(overlayRef.current);
     ghostRef.current = new THREE.Group();
     scene.add(ghostRef.current);
+    // BLOCK-344 P4 — 渲染回验 capture API（渲染一帧保证 buffer 新鲜 → PNG data URL）
+    onSnapshotApi?.({
+      capture: () => {
+        const currentRenderer = rendererRef.current;
+        const currentCamera = cameraRef.current;
+        const currentScene = sceneRef.current;
+        if (!currentRenderer || !currentCamera || !currentScene) return null;
+        try {
+          currentRenderer.render(currentScene, currentCamera);
+          return currentRenderer.domElement.toDataURL('image/png');
+        } catch {
+          return null; // 画布污染（外链资源）等如实 null
+        }
+      },
+    });
     onCameraApi?.({
       getView: () => ({ position: camera.position.toArray(), target: controls.target.toArray() }),
       setView: (position, target) => {
