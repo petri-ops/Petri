@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-689: 3D 编辑器提案幽灵——model3d_propose 结果派发 + 工作台浮条逐项接受（BLOCK-344 P3；2026-11-04 **verified（dev Electron 边界内；契约 26/26 + REST 实机 ✓）**）
+
+- **后端**：model3d_propose 返回补 `path` 与 `operations` 回显（请求原文）——提案消费者（3D 工作台浮条）按 op 逐项取舍所需的本体（此前只返回候选 scene 整体）。
+- **派发钩子**：`petri:model3d-proposal` 事件（events.ts 类型化）+ `maybeDispatchModel3dProposal`（toolActivity 实时钩子，callId 去重 FIFO cap200，对标 svg 先例 UI-677；历史恢复路径不触发）。
+- **工作台浮条**（Model3DSurface→EditPanel）：订阅 path 匹配当前场景来源 → 浮条（op 逐项摘要 + before 哈希）→「接受」=提案 ops 应用到磁盘当前态（readSceneFile→applySceneOperations→expectedHash CAS 守卫→刷新视图/修订/清提案）→「拒绝」=整单清除。**SimpleChat 只加派发钩子**（nonGoals 守住）。
+- **验证**：toolActivity.test 3 条新契约（实时派发载荷/callId 去重/空 ops·非 proposal·非本工具三不派发）→ copilot 26/26 + tsc 0 + lint 0 error。**真实 agent 回合端到端**（会话跑 model3d_propose → 工作台弹浮条）随日常使用自然覆盖——事件协议与两侧实现均已契约钉死（同 UI-677 先例）。
+
 ## UI-688: 3D 编辑器 P2 洋葱皮对比——修订行「对比」+ 半透明叠加 + 透明度滑杆 + 执行者标注（BLOCK-344 P2；2026-11-04 **verified（dev Electron 边界内；契约 8/8 + REST 实机 ✓）**）
 
 - **后端**：①`readRevision` 只读端点（GET /api/model3d/scene/revision——读 `.history/` 单个快照内容，洋葱皮数据源；SVG `readSvgRevision` 先例的 3D 对应物，此前缺失）；②revision entry 补结构化 **actor 字段**（reason 弱约定推导：agent_apply/recipe=agent、before_restore=system、其余=user——SVG 侧「执行者标注无元数据」的教训在 3D 侧提前落位）；③非法 id/缺席修订如实 404/400。

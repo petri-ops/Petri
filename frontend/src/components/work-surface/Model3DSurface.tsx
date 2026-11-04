@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@/components/icons/Icon';
+import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { StatusBadge } from '@/components/ui/controls/Status';
 import { projectCapabilityAxis } from '@/lib/statusProjection';
 import { fetchModel3DCapability, resolveModel3DScene } from '@/lib/model3dClient';
@@ -141,9 +142,23 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
   const [measureMode, setMeasureMode] = React.useState(false);
   // BLOCK-344 P2 — 洋葱皮对比：EditPanel 修订对比 → 3D 视口 ghost 叠加
   const [compare, setCompare] = React.useState<{ spec: unknown; revisionId: string; opacity: number } | null>(null);
+  // BLOCK-344 P3 — 提案幽灵：agent model3d_propose 结果（ghost 高亮 + 逐项接受/整单拒绝）
+  const [proposal, setProposal] = React.useState<{ scene: unknown; operations: Array<Record<string, unknown>>; beforeHash: string; path: string } | null>(null);
+
   const [measurePoints, setMeasurePoints] = React.useState<Model3DPoint[]>([]);
   // UI-653 — 当前场景的来源文件（聊天产物卡/文件预览打开）；参数/约束编辑锚定此路径。
   const [sceneSourcePath, setSceneSourcePath] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const off = subscribePetriEvent(petriEvents.model3dProposal, (detail) => {
+      if (!detail || typeof detail.path !== 'string') return;
+      // 路径匹配当前场景来源（缺省场景路径恒匹配）
+      const current = sceneSourcePath || 'model3d/scene.scene3d.json';
+      if (detail.path !== current) return;
+      setProposal({ scene: detail.scene, operations: detail.operations as Array<Record<string, unknown>>, beforeHash: detail.beforeHash, path: detail.path });
+    });
+    return off;
+  }, [sceneSourcePath]);
+
   // UI-654 — 工作区网格来源（GLB/GLTF/STL/OBJ 只做几何预览，不是可编辑场景）。
   const [meshSourcePath, setMeshSourcePath] = React.useState<string | null>(null);
   // 导出 run 的 scene.json 只读（scene store 写面只认 .scene3d.json）：编辑目标回落项目场景。
@@ -242,6 +257,7 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
     setMeasureMode(false);
     void evaluateConstraintsForPreview(normalized.view);
   }, [evaluateConstraintsForPreview]);
+
 
   // UI-653 — 聊天产物卡「在 3D 工作台打开」：读取本次导出 run 的场景快照。
   // 快照是这次作业的真实场景（导出前后一致），编辑锚定同一路径，不猜另一份源场景。
@@ -814,8 +830,11 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
           initialScenePath={snapshotSourceReadOnly ? undefined : (sceneSourcePath || undefined)}
           onSceneUpdated={loadStructured}
           onCompareChange={setCompare}
+          proposal={proposal}
+          onProposalAccept={setProposal}
         />
       ) : null}
+
       {compareError ? <div className={styles.error} role="alert">{compareError}</div> : null}
       {compareScene && compareDiff ? (
         <section className={styles.compare} data-testid="model3d-compare-panel">

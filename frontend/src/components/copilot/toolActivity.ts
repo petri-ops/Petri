@@ -725,6 +725,36 @@ function maybeDispatchSvgProposal(
   });
 }
 
+/** BLOCK-344 P3 — model3d_propose 实时结果 → 3D 工作台提案幽灵（同 svg 先例：仅实时路径+去重）。 */
+const MODEL3D_PROPOSAL_SENT = new Set<string>();
+
+function maybeDispatchModel3dProposal(
+  name: string,
+  callId: string | undefined,
+  resultData: Record<string, unknown> | undefined,
+): void {
+  if (name !== 'model3d_propose' || !resultData || resultData.proposal !== true) return;
+  const ops = resultData.operations;
+  if (!Array.isArray(ops) || ops.length === 0) return;
+  const scene = resultData.scene;
+  if (!scene || typeof scene !== 'object') return;
+  const dedupKey = callId || `sha:${typeof resultData.beforeHash === 'string' ? resultData.beforeHash.slice(0, 16) : ''}`;
+  if (MODEL3D_PROPOSAL_SENT.has(dedupKey)) return;
+  MODEL3D_PROPOSAL_SENT.add(dedupKey);
+  if (MODEL3D_PROPOSAL_SENT.size > 200) {
+    const oldest = MODEL3D_PROPOSAL_SENT.values().next().value;
+    if (oldest !== undefined) MODEL3D_PROPOSAL_SENT.delete(oldest);
+  }
+  dispatchPetriEvent(petriEvents.model3dProposal, {
+    path: typeof resultData.path === 'string' ? resultData.path : 'model3d/scene.scene3d.json',
+    scene,
+    operations: ops as Array<Record<string, unknown>>,
+    beforeHash: typeof resultData.beforeHash === 'string' ? resultData.beforeHash : '',
+    afterHash: typeof resultData.afterHash === 'string' ? resultData.afterHash : '',
+    source: 'chat:model3d_propose',
+  });
+}
+
 export function mergeToolResultActivity(
   current: ToolActivityItem[],
   event: ToolResultEvent
@@ -750,6 +780,7 @@ export function mergeToolResultActivity(
   // 提取供活动行「详情窗」入口；其余工具 / 既有值原样保留。
   const resultData = result?.data as Record<string, unknown> | undefined;
   maybeDispatchSvgProposal(name, result?.callId, resultData);
+  maybeDispatchModel3dProposal(name, result?.callId, resultData);
   // UI-315 优化 — exec 结果携带实际使用的 shell 可执行路径，派生短标签
   const resultShellLabel = (() => {
     const shell = resultData && typeof resultData.shell === 'string' ? resultData.shell : '';

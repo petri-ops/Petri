@@ -89,6 +89,9 @@ async function tool_model3d_propose(args = {}) {
   return {
     ok: true,
     proposal: true,
+    path: typeof args.path === 'string' && args.path.trim() ? args.path.trim() : 'model3d/scene.scene3d.json',
+    // BLOCK-344 P3 — ops 回显（请求原文原样返回）：提案消费者（3D 视口幽灵浮条）按 op 逐项取舍
+    operations: args.operations,
     scene: proposed.scene,
     beforeHash: proposed.beforeHash,
     afterHash: proposed.afterHash,

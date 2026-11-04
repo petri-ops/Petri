@@ -23,6 +23,10 @@ interface Model3DEditPanelProps {
   onSceneUpdated: (scene: unknown) => void;
   /** BLOCK-344 P2 — 洋葱皮对比：修订快照与当前视图叠加（状态由宿主 Surface 持有并传 3D 视口）。 */
   onCompareChange?: (compare: { spec: unknown; revisionId: string; opacity: number } | null) => void;
+  /** BLOCK-344 P3 — agent 提案（宿主订阅事件后传入；accept 在本面板执行，全套 apply 依赖在此）。 */
+  proposal?: { scene: unknown; operations: Array<Record<string, unknown>>; beforeHash: string; path: string } | null;
+  onProposalAccept?: (proposal: { scene: unknown; operations: Array<Record<string, unknown>>; beforeHash: string; path: string }) => void;
+  onProposalReject?: () => void;
 }
 
 function cloneScene(scene: Scene3DSpec): Scene3DSpec {
@@ -42,7 +46,7 @@ function diffText(diff: SceneDiff): string[] {
   return lines;
 }
 
-export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUpdated, onCompareChange }: Model3DEditPanelProps): React.ReactElement {
+export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUpdated, onCompareChange, proposal, onProposalAccept, onProposalReject }: Model3DEditPanelProps): React.ReactElement {
   const [scenePath, setScenePath] = React.useState(initialScenePath || DEFAULT_SCENE_PATH);
   const [savedHash, setSavedHash] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, string>>({});
@@ -193,6 +197,35 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
     if (onCompareChange) onCompareChange(null);
   }, [onCompareChange]);
 
+  /** BLOCK-344 P3 提案接受：提案 ops 应用到磁盘当前态（before-hash CAS 守卫）→ 刷新视图/修订/清提案。 */
+  const acceptProposal = React.useCallback(async () => {
+    if (!proposal || !projectId) return;
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const disk = await readSceneFile(projectId, proposal.path);
+      const result = await applySceneOperations({
+        projectId,
+        path: proposal.path,
+        scene: disk.scene,
+        operations: proposal.operations as never,
+        expectedHash: disk.hash,
+        reason: 'proposal_accept',
+      });
+      setDraft({});
+      setSavedHash(result.afterHash);
+      onSceneUpdated(result.scene);
+      setRevisions(await listSceneRevisions(projectId, proposal.path));
+      setNotice(`已接受提案改动（${proposal.operations.length} 项 op）· 修订 ${result.revision?.revisionId ?? ''}`);
+      if (onProposalAccept) onProposalAccept(proposal);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'proposal_apply_failed');
+    } finally {
+      setBusy(false);
+    }
+  }, [onProposalAccept, projectId, proposal]);
+
   const restore = async (revisionId: string) => {
     if (!projectId) return;
     setBusy(true);
@@ -246,6 +279,23 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
         <button type="button" className={button.ghost} disabled={busy} onClick={() => { void runPreview(); }}>预览变更</button>
         <button type="button" className={button.primary} disabled={busy} onClick={() => { void runApply(); }}>应用参数</button>
       </div>
+      {proposal ? (
+        <div className={styles.diff} data-testid="model3d-edit-proposal">
+          <span className={styles.meta}>agent 提案（{proposal.operations.length} 项 op，before {proposal.beforeHash.slice(0, 12)}）</span>
+          {proposal.operations.map((operation, index) => {
+            const o = operation as Record<string, unknown>;
+            const targetRecord = (o.target && typeof o.target === 'object' ? o.target : {}) as { id?: string };
+            const targetLabel = targetRecord.id ? `#${targetRecord.id}` : (typeof o.id === 'string' ? `#${o.id}` : '');
+            return (
+              <span key={index} className={styles.meta}>{String(o.op)} {targetLabel}</span>
+            );
+          })}
+          <div className={styles.revisionRow}>
+            <button type="button" className={button.ghost} data-action="proposal-accept" disabled={busy} onClick={() => { void acceptProposal(); }}>接受提案</button>
+            <button type="button" className={button.ghost} data-action="proposal-reject" disabled={busy} onClick={() => { if (onProposalReject) onProposalReject(); }}>拒绝</button>
+          </div>
+        </div>
+      ) : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
       {notice ? <p className={styles.notice}>{notice}</p> : null}
       {preview ? (

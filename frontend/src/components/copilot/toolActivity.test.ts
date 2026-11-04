@@ -545,3 +545,72 @@ describe('BLOCK-342 切片6交接 svg_edit propose → petri:svg-proposal 派发
     }
   });
 });
+
+describe('BLOCK-344 P3 — model3d_propose → petri:model3d-proposal 派发', () => {
+  const captured: Array<CustomEvent> = [];
+  const listener = (e: Event) => captured.push(e as CustomEvent);
+
+  const resultEvent = (overrides: Record<string, unknown> = {}, callId = 'm3d-1') => ({
+    name: 'model3d_propose',
+    toolJobId: 'm3d-job',
+    toolResult: {
+      tool: 'model3d_propose',
+      callId,
+      ok: true,
+      data: {
+        proposal: true,
+        path: 'model3d/scene.scene3d.json',
+        scene: { version: 'scene3d/v1', nodes: [{ id: 'n1' }] },
+        operations: [{ op: 'set_parameter', name: 'w', value: 120 }],
+        beforeHash: 'bbbbbbbbbbbbbbbb',
+        afterHash: 'cccccccccccccccc',
+        ...overrides,
+      },
+    },
+  }) as never;
+
+  it('实时 model3d_propose 结果派发 petri:model3d-proposal（载荷含 path/scene/ops/双哈希）', () => {
+    window.addEventListener('petri:model3d-proposal', listener);
+    try {
+      captured.length = 0;
+      mergeToolResultActivity([], resultEvent({}, 'm3d-first'));
+      expect(captured).toHaveLength(1);
+      const detail = captured[0].detail as { path: string; scene: unknown; operations: unknown[]; beforeHash: string; source: string };
+      expect(detail.path).toBe('model3d/scene.scene3d.json');
+      expect(detail.operations).toHaveLength(1);
+      expect(detail.beforeHash).toBe('bbbbbbbbbbbbbbbb');
+      expect(detail.source).toBe('chat:model3d_propose');
+    } finally {
+      window.removeEventListener('petri:model3d-proposal', listener);
+    }
+  });
+
+  it('callId 去重：同结果二次 merge 不重复派发（独立 callId 隔离其他用例）', () => {
+    window.addEventListener('petri:model3d-proposal', listener);
+    try {
+      captured.length = 0;
+      const items = mergeToolResultActivity([], resultEvent({}, 'm3d-dedup'));
+      mergeToolResultActivity(items, resultEvent({}, 'm3d-dedup'));
+      expect(captured).toHaveLength(1);
+    } finally {
+      window.removeEventListener('petri:model3d-proposal', listener);
+    }
+  });
+
+  it('空 ops / 非 proposal / 非 model3d_propose 一律不派发', () => {
+    window.addEventListener('petri:model3d-proposal', listener);
+    try {
+      captured.length = 0;
+      mergeToolResultActivity([], resultEvent({ operations: [] }, 'm3d-neg-1'));
+      mergeToolResultActivity([], resultEvent({ proposal: false }, 'm3d-neg-2'));
+      mergeToolResultActivity([], {
+        name: 'read_file',
+        toolJobId: 'j',
+        toolResult: { tool: 'read_file', callId: 'm3d-neg-3', ok: true, data: { proposal: true, operations: [{ op: 'x' }] } },
+      } as never);
+      expect(captured).toHaveLength(0);
+    } finally {
+      window.removeEventListener('petri:model3d-proposal', listener);
+    }
+  });
+});

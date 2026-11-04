@@ -58,6 +58,13 @@ export const petriEvents = {
    */
   composerAttachImage: 'petri:composer-attach-image',
 
+  /**
+   * BLOCK-344 P3 — agent 3D 提案进工作台（model3d_propose 结果）。
+   * 派发侧：model3d_propose 工具结果（toolActivity 实时钩子）；监听侧：Model3DSurface
+   * （路径匹配当前场景 → ghost 高亮 + 逐项接受/拒绝）。
+   */
+  model3dProposal: 'petri:model3d-proposal',
+
   /** BLOCK-216 Q5 — 从计划卡打开计划面（payload: { planId }）。 */
   planSurfaceOpen: 'petri:plan-surface-open',
 
@@ -381,6 +388,7 @@ export type PetriEventMap = {
   [petriEvents.svgProposal]: { path: string; previewMarkup: string; ops: Array<Record<string, unknown>>; source?: string };
   /** BLOCK-343 P3 — 外部图片进会话附件（渲染回验快照等；监听方=copilotAsk 拥有者的 composer） */
   [petriEvents.composerAttachImage]: { dataUrl: string; name?: string };
+  [petriEvents.model3dProposal]: { path: string; scene: unknown; operations: Array<Record<string, unknown>>; beforeHash: string; afterHash: string; source?: string };
   /** BLOCK-264（C-39）— 待审批通知点击载荷（conversationId 定位会话；ackToken 冗余留痕） */
   [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;

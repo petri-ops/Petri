@@ -55,12 +55,13 @@ reopen: SceneSpec 整体重写改 op 引擎（若 P0 判定参数级 op 化成�
 4. 3D 视口渲染层（Three.js 场景构建入口）——ghost/对比的实现挂点。
 5. 产出：§2 勘察记录 + 四件逐件范围/验收判据 + op 化切法裁决稿 → 用户过目。
 
-## §3 P1+（P1/P2 completed 2026-11-04；P3/P4 待续）
+## §3 P1+（P1/P2/P3 completed 2026-11-04；P4 待续）
 
 证据位置：`acceptance/block-344/`；完成语义：P0 定版 + 各件交付收口笔录在案 + closeout 十三门 PASS → registry completed。
 
 - **P1 逐项取舍（completed，UI-687）**：diff 三补齐 + `update_constraint` 新 op + `diffToOperations` 纯函数 + 面板 ops 勾选 UI + model3d_apply CAS schema；契约 6/6 + 面板 5/5 + REST 实机 ✓。**3D 特有语义留档**：约束是活求解器（add/update_constraint 求值自动落位），回放一致性=「声明+求解后」非字节一致。
 - **P2 洋葱皮对比（completed，UI-688）**：readRevision 端点 + actor 字段 + 修订行「对比」+ Model3DScene 独立 ghost Group（透明度滑杆只改材质）。
-- 预排：P3 提案幽灵+事件协议（model3d_propose 结果回显 ops 接线 petri:model3d-proposal 派发 + Model3DScene ghost 高亮 + 接受状态机）；P4 渲染回验衔接（复用 composer-attach-image）。
+- **P3 提案幽灵（completed，UI-689）**：propose 回显 path/operations + petri:model3d-proposal 事件 + toolActivity 派发钩子 + EditPanel 浮条（接受=CAS 守卫落盘）。
+- 预排：P4 渲染回验衔接（复用 composer-attach-image）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
