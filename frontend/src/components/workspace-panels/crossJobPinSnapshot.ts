@@ -11,7 +11,6 @@
 
 import { getApiPrefix, getToken } from '@/lib/authClient';
 import { buildPreviewTable } from '@/lib/file-preview/buildPreviewTable';
-import { readXlsxPreview } from '@/lib/xlsxPreview';
 import {
   classifyArtifact,
   pickPreferredArtifact,
@@ -77,15 +76,6 @@ export async function fetchCrossJobPinSnapshot({ toolJobId, lang }: {
       const fileResp = await fetch(snapshot.url, { headers: authHeaders() });
       if (fileResp.ok) {
         snapshot.previewData = buildPreviewTable(await fileResp.text(), preferred.name);
-      }
-    } else if (viewerAdapter === 'spreadsheet') {
-      // BLOCK-346 方向1 — xlsx/xlsm 走前端解析（ZIP+XML，只读 sheet1），失败则保留占位出口
-      const fileResp = await fetch(snapshot.url, { headers: authHeaders() });
-      if (fileResp.ok) {
-        try {
-          const parsed = await readXlsxPreview(await fileResp.arrayBuffer());
-          if (parsed) snapshot.previewData = parsed.rows;
-        } catch { /* 解析失败保持 null → Pane 走「打开原文件」 */ }
       }
     } else if (viewerAdapter === 'json' || viewerAdapter === 'text' || viewerAdapter === 'markdown') {
       // BLOCK-346 T4 — markdown 钉住快照此前落「无内嵌预览载荷」占位；文本可直接内嵌
