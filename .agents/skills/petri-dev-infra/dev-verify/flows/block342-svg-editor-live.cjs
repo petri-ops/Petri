@@ -121,6 +121,19 @@ module.exports = {
       if (!mounted) return false;
       const mountInfo = JSON.parse(mounted);
       assert('V2b_initial_save_disabled', mountInfo.saveDisabled === true, `saveDisabled=${mountInfo.saveDisabled}`);
+
+      // V2e — UI-681 画布适应：svg 元素盒覆盖画布内容区 ≥95% 宽（contain 填满，不再左上小一块）
+      const fill = await lib.evalJs(client, `(function(){
+        const canvas = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"]');
+        const svg = canvas && canvas.querySelector('svg');
+        if (!canvas || !svg) return null;
+        const c = canvas.getBoundingClientRect();
+        const r = svg.getBoundingClientRect();
+        return JSON.stringify({ cover: +(r.width / c.width).toFixed(3), svgW: Math.round(r.width), svgH: Math.round(r.height) });
+      })()`);
+      const fillInfo = JSON.parse(fill || '{}');
+      assert('V2e_canvas_filled_by_svg', (fillInfo.cover || 0) >= 0.95, fill || 'no svg');
+
       // 折叠默认态：色板/改动区默认收起（无 open），工具组默认展开
       const panels = await lib.evalJs(client, `(function(){
         const palette = document.querySelector('${RAIL} [data-testid="svg-editor-doc-palette"]');
@@ -447,24 +460,37 @@ module.exports = {
       })()`, 8_000);
       assert('V14_node_anchors_visible', Boolean(anchorsReady), anchorsReady || 'node overlay missing');
       const anchorDragged = await lib.evalJs(client, `(function(){
+        const svg = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg');
         const a = document.querySelectorAll('${RAIL} [data-testid="svg-editor-node-anchor"]')[0];
-        if (!a) return 'no anchor';
+        if (!svg || !a) return 'no anchor';
         const r = a.getBoundingClientRect();
         const sx = r.left + r.width / 2; const sy = r.top + r.height / 2;
         const base = { bubbles: true, cancelable: true, pointerId: 22, pointerType: 'mouse', button: 0 };
         a.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: sx, clientY: sy, buttons: 1 }));
         a.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: sx + 24, clientY: sy + 18, buttons: 1 }));
         a.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: sx + 24, clientY: sy + 18, buttons: 0 }));
+        // UI-681 letterbox 后 24px 屏幕 ≠ 24 用户单位：按实测 meet k 换算期望值
+        const sr = svg.getBoundingClientRect();
+        const vb = svg.viewBox.baseVal;
+        const k = Math.min(sr.width / vb.width, sr.height / vb.height);
         const p = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg #p1');
-        return JSON.stringify({ d: p ? p.getAttribute('d') : null });
+        return JSON.stringify({ d: p ? p.getAttribute('d') : null, expX: +(240 + 24 / k).toFixed(1), expY: +(40 + 18 / k).toFixed(1) });
       })()`);
       const dInfo = JSON.parse(anchorDragged);
-      assert('V14_node_drag_d_changed', typeof dInfo.d === 'string' && dInfo.d.includes('264') && dInfo.d.includes('58'), anchorDragged);
+      const m14 = typeof dInfo.d === 'string' ? dInfo.d.match(/^M ([\d.]+) ([\d.]+)/) : null;
+      assert('V14_node_drag_d_changed',
+        !!m14 && Math.abs(parseFloat(m14[1]) - dInfo.expX) < 1 && Math.abs(parseFloat(m14[2]) - dInfo.expY) < 1,
+        `${anchorDragged} got=${m14 && m14[0]}`);
       await sleep(400);
       await lib.evalJs(client, `(function(){ const s = document.querySelector('${RAIL} [data-testid="svg-editor-save"]'); if (s && !s.disabled) s.click(); return true; })()`);
       await sleep(1_500);
       const afterNodeDrag = fs.readFileSync(SAMPLE_ABS, 'utf8');
-      assert('V14b_node_drag_persisted', /<path id="p1"[^>]*d="M 264 58[^"]*"/.test(afterNodeDrag), afterNodeDrag.match(/<path[^>]*>/)?.[0] || 'no path');
+      // UI-681 letterbox 后拖拽位移随实测 k 变化：断言「首锚点已离开 (240,40) 且其余锚点不变」
+      const p1d = afterNodeDrag.match(/<path id="p1"[^>]*d="([^"]*)"/)?.[1] || '';
+      const m14b = p1d.match(/^M ([\d.]+) ([\d.]+) L 330 40 L 330 110 Z$/);
+      assert('V14b_node_drag_persisted',
+        !!m14b && !(Math.abs(parseFloat(m14b[1]) - 240) < 0.01 && Math.abs(parseFloat(m14b[2]) - 40) < 0.01),
+        `d=${p1d || 'missing'}`);
 
       // V15 — 基础钢笔：点列三击 → 第四击回首点闭合 → insert <path> → 保存落盘
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-tool="pen"]'); if (b) b.click(); return true; })()`);
@@ -475,7 +501,11 @@ module.exports = {
         if (!svg) return false;
         const r = svg.getBoundingClientRect();
         const vb = svg.viewBox.baseVal;
-        const toScreen = (ux, uy) => ({ x: r.left + (ux - vb.x) * (r.width / vb.width), y: r.top + (uy - vb.y) * (r.height / vb.height) });
+        // UI-681 meet letterbox 修正：k=min 比例 + 居中偏移（与产品侧 toUser 逆换算同式）
+        const k15 = Math.min(r.width / vb.width, r.height / vb.height);
+        const offX15 = (r.width - vb.width * k15) / 2;
+        const offY15 = (r.height - vb.height * k15) / 2;
+        const toScreen = (ux, uy) => ({ x: r.left + offX15 + (ux - vb.x) * k15, y: r.top + offY15 + (uy - vb.y) * k15 });
         const base = { bubbles: true, cancelable: true, pointerId: 31, pointerType: 'mouse', button: 0 };
         [[60, 150], [220, 150], [140, 205]].forEach(([ux, uy]) => {
           const s = toScreen(ux, uy);

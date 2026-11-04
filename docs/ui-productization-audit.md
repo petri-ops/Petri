@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-681: SVG 编辑器画布适应页面——modal 内图形 contain 填满（2026-11-04 用户实时反馈批；**verified（dev Electron 边界内；实机 63/63 allPass + 截图过目）**）
+
+- **问题（用户反馈）**：「在编辑器打开，图形页面卡片应该适应页面大小，目前图形界面有些局限、限定了宽高的样子」——SVG 文件自带 `width="400" height="240"`，画布容器又 `max-content` 撑开 → 整窗 modal 下图形只占左上一小块。
+- **修法**：①画布填满 stage（`.canvas`/`.canvasInner` 100%，去 max-content）+ 视图层 svg 拉满（CSS 覆盖 presentation 属性，真值不动）；SVG `preserveAspectRatio` 默认 meet 自动保真居中（letterbox）。②坐标换算补 meet 修正（`toUser`/`userToHost`：k=min 比例 + 居中偏移）——宽高比≠容器时点选/拖拽/绘制/节点全部仍准。③「适应窗口」语义更新=重置 contain 全览基准（scale 1）。
+- **flow 同步**：V2e 画布覆盖断言（svg rect ≥95% canvas，实测 0.98）；V14/V15 两腿换算改 meet 实测 k（24px 屏幕 ≈ 8.7 用户单位，249.25 vs 期望 249.3 端到端互证）；V14b 去硬编码（首锚点离开原位+其余不变）。旧比例法换算在 letterbox 下必然漂移——三处修正后全链绿。
+- **验证**：svg-editor 前端 80/80 + tsc 0 + lint 0 error；截图过目（图形充满画布、属性/图层/修订布局正常）；总 **63/63 allPass**。
+
 ## UI-680: SVG 编辑器 P3 vision 附件通道——渲染回验快照进会话（BLOCK-343 P3；2026-11-04 **verified（dev Electron 边界内；实机 62/62 allPass）**）
 
 - **通道**：新增 `petri:composer-attach-image` 事件（events.ts 类型化）→ copilotAsk 拥有者的 composer 订阅（`addExternalImage`：data:image 形态守卫 + 单件 10MB/总 8 件上限复用既有常量）→ 附件区缩略图（`composer-attachment-thumb` testid）；「请 agent 回验」一次点击同时派发判据 prompt（UI-676 既有）+ 快照 PNG 附件——「改→渲染→模型看图→迭代」真闭环打通。

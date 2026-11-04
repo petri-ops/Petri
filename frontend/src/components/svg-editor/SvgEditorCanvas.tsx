@@ -162,9 +162,14 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     if (rect.width <= 0 || rect.height <= 0) return null;
     const viewBox = root.viewBox?.baseVal;
     if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+      // UI-681 — contain（meet）letterbox 修正：内容按 min 比例缩放并居中，
+      // 屏幕坐标须先扣居中偏移再除实际缩放（否则宽高比 ≠ 容器时坐标漂移）
+      const k = Math.min(rect.width / viewBox.width, rect.height / viewBox.height);
+      const offX = (rect.width - viewBox.width * k) / 2;
+      const offY = (rect.height - viewBox.height * k) / 2;
       return {
-        x: (clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x,
-        y: (clientY - rect.top) * (viewBox.height / rect.height) + viewBox.y,
+        x: (clientX - rect.left - offX) / k + viewBox.x,
+        y: (clientY - rect.top - offY) / k + viewBox.y,
       };
     }
     return { x: clientX - rect.left, y: clientY - rect.top };
@@ -179,9 +184,13 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     const hostRect = host.getBoundingClientRect();
     const viewBox = root.viewBox?.baseVal;
     if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
+      // UI-681 — meet letterbox 逆换算（与 toUser 同一 k/offset）
+      const k = Math.min(rect.width / viewBox.width, rect.height / viewBox.height);
+      const offX = (rect.width - viewBox.width * k) / 2;
+      const offY = (rect.height - viewBox.height * k) / 2;
       return {
-        x: (x - viewBox.x) * (rect.width / viewBox.width) + (rect.left - hostRect.left),
-        y: (y - viewBox.y) * (rect.height / viewBox.height) + (rect.top - hostRect.top),
+        x: (x - viewBox.x) * k + offX + (rect.left - hostRect.left),
+        y: (y - viewBox.y) * k + offY + (rect.top - hostRect.top),
       };
     }
     return { x: x + (rect.left - hostRect.left), y: y + (rect.top - hostRect.top) };

@@ -140,12 +140,15 @@
   overflow: auto;
 }
 
+/* UI-681 — 画布填满 stage，SVG 以 contain 居中（letterbox）：不再被文件 width/height 限成
+   左上一小块。preserveAspectRatio 默认 xMidYMid meet 负责保真居中；坐标换算的 letterbox
+   修正在 SvgEditorCanvas.toUser/userToHost（meet 缩放 + 居中偏移）。缩放仍是 transform
+   视觉缩放（与旧模型一致，无布局滚动语义变化）。 */
 .canvas {
   position: relative;
   min-height: 320px;
-  min-width: 100%;
-  width: max-content;
-  height: max-content;
+  width: 100%;
+  height: 100%;
   padding: 16px;
   box-sizing: border-box;
   cursor: default;
@@ -154,8 +157,14 @@
 
 .canvasInner {
   display: block;
-  width: max-content;
-  height: max-content;
+  width: 100%;
+  height: 100%;
+}
+
+.canvasInner svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .overlay {

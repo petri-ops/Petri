@@ -606,17 +606,10 @@ export function SvgEditorViewer({
     setNotice(`已对齐 ${entries.length} 个元素`);
   }, [commit, currentMarkup, rootEl, selected]);
 
-  /** 适应窗口：按 viewBox 与容器宽度定缩放（不改文档）。 */
+  /** 适应窗口：重置为 contain 全览基准（UI-681 起画布填满、svg 自动 contain，scale=1 即适应；不改文档）。 */
   const fitToView = React.useCallback(() => {
-    const root = rootEl();
-    const host = hostRef.current;
-    if (!root || !host) return;
-    const viewBox = (root.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
-    const width = viewBox.length === 4 && viewBox[2] > 0 ? viewBox[2] : root.getBoundingClientRect().width / scale;
-    const available = host.clientWidth - 28;
-    if (!width || available <= 0) return;
-    setScale(clampScale(Math.min(2, available / width)));
-  }, [rootEl, scale]);
+    setScale(1);
+  }, []);
 
 
   /** 点历史条目：只读预览那一版（画布与图层树都切过去，不改真值、不进 pendingOps）。 */
