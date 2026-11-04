@@ -68,4 +68,4 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## §5.1 整包收口（2026-11-04 当日；四件全交付）
 
-P0 勘察定版（op 引擎已在，裁决消解）→ P1 逐项取舍（UI-687，契约 6/6+REST 实机）→ P2 洋葱皮（UI-688，契约 8/8+REST 实机）→ P3 提案幽灵（UI-689，契约 26/26）→ P4 回验衔接（UI-690，前端 144/144）。closeout 十三门 PASS。**顺延/ reopen**：①Blender/Godot 桥写回守卫对账（独立小包）；②SceneSpec op 引擎与 SVG span 引擎的统一抽象（跨包远期）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+P0 勘察定版（op 引擎已在，裁决消解）→ P1 逐项取舍（UI-687，契约 6/6+REST 实机）→ P2 洋葱皮（UI-688，契约 8/8+REST 实机）→ P3 提案幽灵（UI-689，契约 26/26）→ P4 回验衔接（UI-690，前端 144/144）。closeout 十三门 PASS。**顺延/ reopen**：①~~Blender/Godot 桥写回守卫对账~~ → **已对账清账（2026-11-04 桥对账断言落 test/block344）**：Blender=产物目录型（runs/<runId>/ 不覆盖源文件）、Godot=写前 before-sha 守卫（stale_propose）+ manifest 审计——两桥治理形态与 SVG/SceneSpec 同构，零缺口；②SceneSpec op 引擎与 SVG span 引擎的统一抽象（跨包远期）。G0 开发期常态 · 不外推 packaged/Provider/GA。

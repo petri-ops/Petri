@@ -197,3 +197,21 @@ describe('BLOCK-344 P2 — readRevision 只读 + actor 字段', () => {
     assert.equal(r2.revision.actor, 'agent');
   });
 });
+
+describe('BLOCK-344 桥对账（Blender/Godot 写回守卫）', () => {
+  it('godot 场景编辑写盘带 before-sha 守卫（stale_propose——与 SceneSpec CAS 同构）', () => {
+    const src = fs.readFileSync(path.join(process.cwd(), 'core/petri-server/helpers/godot-tools.js'), 'utf8');
+    assert.ok(src.includes('beforeSha256'), 'godot 场景编辑缺 before-sha 守卫');
+    assert.ok(src.includes('stale_propose'), 'godot 守卫缺 stale 拒绝语义');
+  });
+
+  it('blender/godot 产物写盘均为新建运行目录（不覆盖用户源文件——无 CAS 需求的对账结论）', () => {
+    const blender = fs.readFileSync(path.join(process.cwd(), 'core/petri-server/helpers/blender-provider.js'), 'utf8');
+    assert.ok(blender.includes("path.join(outDir, 'scene.json')"), 'blender 场景落 runs 产物目录');
+    const godot = fs.readFileSync(path.join(process.cwd(), 'core/petri-server/helpers/godot-tools.js'), 'utf8');
+    assert.ok(godot.includes('manifest.json'), 'godot manifest 落运行目录');
+    // 守卫性断言：两桥均无「对 workspace 根 SceneSpec 源文件的整体覆盖写」
+    assert.equal(blender.includes('writeFileSync(workspaceRoot'), false);
+    assert.equal(godot.includes('writeFileSync(workspaceRoot'), false);
+  });
+});
