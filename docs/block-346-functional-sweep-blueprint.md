@@ -63,11 +63,15 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 - **范围**：联邦 jobs（提交/状态/产物）、科研任务计划+确认、Loop 迭代、模型白名单 PUT、Harness 环境包操作、reason-codes 词表出口、`canCompare` 消费与硬编码移除、钉住快照三类预览。
 - **验收**：每项一条实机断言；无「只能 curl」的能力。
 
-### T5 安全口径（P1，需裁决）
+### T5 安全口径（**PARTIAL 2026-11-04**）
 
-- **范围**：`external-request` 是否纳入 mutating（影响 `delegate_to_petri_node` / `generate_methods` 在只读档的可执行性）；IDE MCP 写面是否并入统一审批轴。
-- **验收**：只读档 + 计划档的 `mutating` 面回归矩阵；裁决留痕后落代码。
-- **门禁**：本节必须先出裁决材料（两案对比 + 影响面），不得直接改。
+- **不做全局纳入**（原方案否决）：把 `external-request` 整体加入 `MUTATING_SIDE_EFFECTS` 会误伤浏览器只读动作（`navigate`/`read_text` 同属该工具契约，无法按参数区分档位）——等于让只读档连读网页都不许。
+- **改为精准修（已完成）**：两条真风险工具的**契约归类本身错了**，就地纠正——
+  - `delegate_to_petri_node`：`external-request` → `execution`（它是在他机上**执行**一个任务，不是只读出网；原分类使只读/计划档可远程执行）
+  - `generate_methods`：`external-request` → `state-write`（写 `project.database`）
+- **browser_act 保持 `external-request`**：写动作的审批由工具内两段式门（T1）承担，读动作在只读档仍应放行。
+- **IDE MCP 写面**：`mcp/ide-tools/{file,terminal}.js` 不经 `decideAgentToolCall`、无契约/元数据条目。要并入统一审批轴，需先给 ide-tools 建契约表（约 6 个写动词）+ 拦截器接线 + 回归，体量独立 → **登记 reopen**，不在本包硬塞。
+- **验收**：`agent-tool-registry` 27/27 绿（含两处 345 遗留的工具计数断言同步 114→115）。
 
 ### T6 通道与设置键卫生（P2/P3）
 

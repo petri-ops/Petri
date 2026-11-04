@@ -393,7 +393,9 @@ const CONTRACTS = {
   codegraph_who_imports: contract('workspace', 'none', 'R0', ['project.files'], 5000),
   codegraph_classify_edges: contract('workspace', 'none', 'R0', ['project.files'], 5000),
   // BLOCK-85 P3 — 联邦委托：外部请求（对端格物执行），预算 15 分钟（轮询等待）
-  delegate_to_petri_node: contract('agent-management', 'external-request', 'R2', ['project.files'], 900000),
+  // BLOCK-346 T5 — 归类纠正：这是「在**他机**上执行一个任务」，不是只读出网。
+  // 原 external-request 不在 MUTATING_SIDE_EFFECTS → 只读/计划档不拦，等于只读档可远程执行。
+  delegate_to_petri_node: contract('agent-management', 'execution', 'R2', ['project.files'], 900000),
   // BLOCK-164 W1 — 节点清单：只读聚合（本地真值 + 对端 granted-projects 尽力探测），无写面
   federation_list_peers: contract('agent-management', 'external-request', 'R1', [], 8000),
   read_image: contract('vision', 'external-request', 'R1', ['artifacts', 'llm.provider'], 30000),
@@ -404,7 +406,8 @@ const CONTRACTS = {
   // BLOCK-342 W1 — SVG：inspect 纯读；edit 写工作区文件（propose 阶段无写面，apply 才落盘）
   svg_inspect: contract('workspace', 'none', 'R0', ['project.files'], 2000),
   svg_edit: contract('workspace', 'workspace-write', 'R2', ['project.files'], 5000),
-  generate_methods: contract('reporting', 'external-request', 'R1', ['project.database', 'llm.provider'], 30000),
+  // BLOCK-346 T5 — 归类纠正：写 project.database（方法/引文库），不是只读出网。
+  generate_methods: contract('reporting', 'state-write', 'R1', ['project.database', 'llm.provider'], 30000),
   verify_state: contract('verification', 'none', 'R0', ['project.database', 'ui.session'], 500),
   result_edit_plan: contract('result-studio', 'none', 'R0', ['tool_jobs', 'artifacts', 'project.database'], 500),
   result_changeset_create: contract('result-studio', 'execution', 'R2', ['tool_jobs', 'artifacts', 'project.database', 'project.files', 'local.process'], 300000),
