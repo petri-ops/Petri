@@ -11,7 +11,7 @@ import { composeTranslate } from './svgEditorModel';
  * P1.3 字体表——从品牌 sans 栈取成员（真源 custom.css `--ifm-font-family-base`，UI-242 统一），
  * 补经典衬线/等宽族；SVG 文本常含中文，CJK 可写名（PingFang SC / Microsoft YaHei）必须在前排。
  */
-export const BRAND_FONT_OPTIONS: ReadonlyArray<string> = [
+const BRAND_FONT_OPTIONS: ReadonlyArray<string> = [
   'PingFang SC', 'Microsoft YaHei', 'Segoe UI', 'Helvetica Neue', 'Arial',
   'Times New Roman', 'Courier New', 'Georgia', 'Verdana', 'sans-serif', 'serif', 'monospace',
 ];
