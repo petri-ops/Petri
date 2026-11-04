@@ -137,7 +137,9 @@ export function ArtifactPinPane({
         </div>
       );
     }
-    if ((snapshot.viewerAdapter === 'json' || snapshot.viewerAdapter === 'text') && snapshot.previewText) {
+    if ((snapshot.viewerAdapter === 'json' || snapshot.viewerAdapter === 'text'
+      || snapshot.viewerAdapter === 'markdown') && snapshot.previewText) {
+      // BLOCK-346 T4 — markdown 钉住快照可内嵌（纯文本）；spreadsheet/pdf 仍走占位（需二进制解析，reopen）
       return <pre className={styles.artifactPinText}>{snapshot.previewText}</pre>;
     }
     // BLOCK-151 B 轨：BLOCK-142 三新 adapter（markdown/spreadsheet/pdf）快照载荷

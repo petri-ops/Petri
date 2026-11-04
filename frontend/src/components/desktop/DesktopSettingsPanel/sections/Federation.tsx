@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+import { FederationJobs } from './FederationJobs';
 import styles from './Federation.module.css';
 
 interface FederationPeer {
@@ -554,6 +555,9 @@ export function FederationPanel(): React.ReactElement {
           还没有协作节点 · 把本机配对码发给对方，或把对方的链接粘贴到上面
         </div>
       )}
+
+      {/* BLOCK-346 T4 — 作业级联邦（提交/查状态/取产物）：此前后端三端点零前端调用 */}
+      <FederationJobs peers={peers} />
 
       {peers && peers.length > 0 && (
         <ul className={styles.peerList}>

@@ -77,7 +77,9 @@ export async function fetchCrossJobPinSnapshot({ toolJobId, lang }: {
       if (fileResp.ok) {
         snapshot.previewData = buildPreviewTable(await fileResp.text(), preferred.name);
       }
-    } else if (viewerAdapter === 'json' || viewerAdapter === 'text') {
+    } else if (viewerAdapter === 'json' || viewerAdapter === 'text' || viewerAdapter === 'markdown') {
+      // BLOCK-346 T4 — markdown 钉住快照此前落「无内嵌预览载荷」占位；文本可直接内嵌
+      // （纯文本渲染，不做 markdown 富渲染——后者留 reopen）。
       const fileResp = await fetch(snapshot.url, { headers: authHeaders() });
       if (fileResp.ok) {
         const text = await fileResp.text();

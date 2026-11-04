@@ -109,10 +109,10 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 | 4.3 | 模型白名单 PUT 无写入 UI | **DONE**：新建 `ModelAccessPanel`（读写允许清单 + 理由账本逐行 `模型=理由`），挂设置「决策与调度」节；3/3 组件测试（开放态/白名单回填+PUT 载荷/失败展示 diagnostics） |
 | 4.7 | `/api/ai/reason-codes` 零调用 | **DONE**：同一面板内折叠展示原因码词表（按 category 分组），点击才拉取 |
 | 4.4 | Harness 环境包面板纯只读 | **DONE**：加「重新检测」按钮（复用既有 list IPC，不新增通道） |
-| 4.1 | 联邦作业三端点前端零调用 | TODO（需新面板：提交/状态/产物下载） |
-| 4.2 | 科研计划 5 + Loop 3 端点前端零调用 | TODO（需计划确认 UI + 迭代推进入口） |
-| 4.5 | `canCompare` 无人消费 + 另一处硬编码 true | TODO（需接适配器能力位） |
-| 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | TODO（需快照载荷内嵌） |
+| 4.1 | 联邦作业三端点前端零调用 | **DONE**：新建 `FederationJobs`（选节点 + toolId + 参数 JSON → 提交 / 查状态 / 产物下载），挂联邦面板；3/3 测试（含本地 JSON 拦截、下载链接条件） |
+| 4.2 | 科研计划 5 + Loop 3 端点前端零调用 | **登记为待接线（非本包硬造）**：全仓 grep 无任何内部调用方，且前端无 taskSpec 来源（taskSpec 由 agent 编排产生）——造「手填 taskSpec JSON」的 UI 无产品价值。正确接法=agent 侧产生确认请求 → 前端确认卡，属 loop 编排改造，另立 reopen |
+| 4.5 | `canCompare` 无人消费 + 另一处硬编码 true | **DONE**：Canvas 改 prop（默认 false）由调用方按适配器传；测试补反向断言 |
+| 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | **部分 DONE**：markdown 文本可内嵌（快照填 `previewText` + Pane 分支）；spreadsheet/pdf 需二进制解析（exceljs 已退役 / pdf 渲染），登记 reopen |
 
 ## §3 阶段与体量
 
