@@ -115,7 +115,7 @@ async function screenshot(name) {
     }
     try {
       await waitFor(`document.querySelector('[data-segment-crashed="true"]') ? true : null`, { label: 'segment crash card', timeoutMs: 15000 });
-    } catch (waitError) {
+    } catch {
       // 诊断转储（fail-visible：把页面实际形态写进异常消息，不再盲试）
       const diag = await EVAL(`(() => JSON.stringify({
         url: location.href,

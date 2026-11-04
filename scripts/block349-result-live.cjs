@@ -52,19 +52,6 @@ const waitFor = async (expr, { timeoutMs = 30000, label = '' } = {}) => {
   }
 };
 
-function demoContrastLevels() {
-  const coldata = fs.readFileSync(path.join(DEMO_DIR, 'demo-coldata.csv'), 'utf8').split(/\r?\n/).filter(Boolean);
-  const header = coldata[0].split(',');
-  const condCol = header.findIndex((h) => h.trim().toLowerCase() === 'condition');
-  const levels = [];
-  for (let i = 1; i < coldata.length; i += 1) {
-    const value = coldata[i].split(',')[condCol >= 0 ? condCol : 1].trim();
-    if (!levels.includes(value)) levels.push(value);
-  }
-  if (levels.length < 2) throw new Error(`demo coldata levels unusable: ${levels.join('/')}`);
-  return { design: condCol >= 0 ? header[condCol].trim() : 'condition', ref: levels[0], treat: levels[1] };
-}
-
 async function seedHttpDeseq2(projectId) {
   // v2 实机事实链：deseq2 脚本在 pack 仓 HEAD（c58d328）有 R 语法错（跨行字符串常量，
   // scripts/deseq2.R:72——另立票），改用 expression-qc（counts 单文件、R 真跑出真 artifact）。
