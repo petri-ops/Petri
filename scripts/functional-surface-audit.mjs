@@ -250,7 +250,10 @@ function collectArgsUsage() {
     for (const chunk of chunks) {
       const head = /^([\w$]+)/.exec(chunk);
       if (!head) continue;
-      const toolName = head[1].startsWith('tool_') ? head[1].slice(5) : head[1];
+      // 函数名归一：驼峰 → snake（`toolModel3dApply` → `tool_model3d_apply` → `model3d_apply`），
+      // 不归一会让驼峰命名的工具永远算不出 args，导致漂移检测静默失效。
+      const snakeFull = head[1].replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+      const toolName = snakeFull.startsWith('tool_') ? snakeFull.slice(5) : snakeFull;
       const keys = uniq([
         ...[...chunk.matchAll(/\bargs\.([A-Za-z_$][\w$]*)/g)].map((m) => m[1]),
         ...[...chunk.matchAll(/\bargs\[['"]([^'"]+)['"]\]/g)].map((m) => m[1]),
@@ -462,6 +465,9 @@ function build() {
     const m = metadata.get(tool.name);
     const args = argsUsage.get(tool.name) || [];
     const undeclared = tool.hasParameters ? args.filter((k) => !tool.props.includes(k)) : [];
+    // 注：反向检测（schema 声明但 args.X 未读）已评估后放弃——实现普遍用
+    // `withCore(ctx)` 注入（projectId/conversationId 不是 args）或整体透传（connector.act(args)），
+    // 静态规则会把合法写法全判成「声明未读」（试跑 14 条全为误报）。
     const r = reachByName.get(tool.name);
     const reachable = r ? ['read', 'workspace-write', 'full'].some((k) => r[k] === 'allow') : null;
 

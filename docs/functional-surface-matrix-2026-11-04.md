@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 5 个不计入判定）。生成时间：2026-11-04T12:19:31.738Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T12:31:54.999Z
 
 ## 0. 覆盖汇总
 
@@ -158,8 +158,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentAuditPanel.test.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentAuditPanel.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/MemoryPolicyPanel.test.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/MemoryPolicyPanel.tsx`
+（无）

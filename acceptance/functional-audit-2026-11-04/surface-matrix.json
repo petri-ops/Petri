@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T12:19:31.738Z",
+  "generatedAt": "2026-11-04T12:31:54.999Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 3
     },
-    "dirtyFiles": 5,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5860,12 +5860,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx",
-    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentAuditPanel.test.tsx",
-    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AgentAuditPanel.tsx",
-    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/MemoryPolicyPanel.test.tsx",
-    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/MemoryPolicyPanel.tsx"
-  ],
+  "dirty": [],
   "defNotes": []
 }
