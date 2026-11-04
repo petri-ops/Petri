@@ -44,6 +44,8 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
   const [savedHash, setSavedHash] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, string>>({});
   const [preview, setPreview] = React.useState<SceneDiff | null>(null);
+  // BLOCK-344 P1 — 逐项取舍：预览出的 ops 逐条勾选（默认全选），应用只落选中子集
+  const [selectedOpIndexes, setSelectedOpIndexes] = React.useState<Set<number>>(new Set());
   const [revisions, setRevisions] = React.useState<SceneRevisionSummary[]>([]);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -104,6 +106,7 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
       const next = cloneScene(scene);
       for (const operation of operations) next.parameters[String(operation.name)] = Number(operation.value);
       setPreview(await diffSceneSpecs(scene, next));
+      setSelectedOpIndexes(new Set(operations.map((_, index) => index)));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'diff_failed');
     } finally {
@@ -116,9 +119,19 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
       setError('参数编辑需要已打开的项目工作区。');
       return;
     }
-    const operations = buildOperations();
-    if (operations.length === 0) {
+    const allOperations = buildOperations();
+    if (allOperations.length === 0) {
       setNotice('参数没有变化。');
+      return;
+    }
+    // BLOCK-344 P1 — 逐项取舍：只应用勾选的 op（未勾选=该改动放弃，与 SVG 侧「拒绝=不要」同构）
+    const operations = preview && selectedOpIndexes.size > 0
+      ? allOperations.filter((_, index) => selectedOpIndexes.has(index))
+      : preview
+        ? []
+        : allOperations;
+    if (operations.length === 0) {
+      setNotice('未勾选任何改动——本次不应用（未勾选的改动将放弃）。');
       return;
     }
     setBusy(true);
@@ -134,6 +147,7 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
         reason: 'user_parameter_edit',
       });
       setPreview(result.diff);
+      setSelectedOpIndexes(new Set());
       setDraft({});
       setSavedHash(result.afterHash);
       onSceneUpdated(result.scene);
@@ -204,6 +218,27 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
       {preview ? (
         <div className={styles.diff} data-testid="model3d-edit-diff">
           <span className={styles.meta}>{preview.beforeHash.slice(0, 12)} → {preview.afterHash.slice(0, 12)}</span>
+          {buildOperations().length > 0 ? (
+            <div data-testid="model3d-edit-ops">
+              {buildOperations().map((operation, index) => (
+                <label key={operation.name} className={styles.meta} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input
+                    type="checkbox"
+                    data-testid={`model3d-edit-op-${index}`}
+                    checked={selectedOpIndexes.has(index)}
+                    onChange={(event) => {
+                      setSelectedOpIndexes((prev) => {
+                        const next = new Set(prev);
+                        if (event.target.checked) next.add(index); else next.delete(index);
+                        return next;
+                      });
+                    }}
+                  />
+                  <span>{operation.name}: {valueFor(operation.name, parameters.find(([n]) => n === operation.name)?.[1] ?? 0)} → {operation.value}</span>
+                </label>
+              ))}
+            </div>
+          ) : null}
           {diffText(preview).map((line) => <span key={line}>{line}</span>)}
         </div>
       ) : null}

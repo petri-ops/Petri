@@ -1,5 +1,14 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-687: 3D 编辑器逐项取舍——diff 三补齐 + update_constraint op + 面板 ops 勾选 + agent apply CAS 对齐（BLOCK-344 P1；2026-11-04 **verified（dev Electron 边界内；契约 6/6 + 面板 5/5 + REST 实机 ✓）**）
+
+- **diff↔op 对齐三补齐**（model3d-scene-store.js diffScenes）：①nodes.changed 补字段级 `changesBefore/changesAfter`（此前只给字段名）；②constraints 按 id 对齐出 **changed**（此前「改一条约束」只能表达为 added+removed 对）；③`source` 不入 diff 字段（update_node 白名单不含 source——「diff 列得出=op 改得了」对齐契约，显示侧过滤留档）。
+- **新 op `update_constraint {id, changes}`**：此前约束只能 remove+add 对；现按 id 定位 merge changes → 与 add_constraint 同款 fail-closed 校验链（applyConstraints 求值 + validateSceneSpec 同源），id 不可变/空 changes/缺席 id 拒收。
+- **`diffToOperations(before, after)` 纯函数**（导出+单测）：diff→白名单 op 序列，顺序设计防悬空（set_parameter→add_node→update_node→remove_constraint→update_constraint→add_constraint→remove_node）；**回放一致性语义=「声明+约束求解后」（约束是活求解器，add_constraint 求值自动落位——与 SVG 静态 op 的本质差异，字节比对过强已修正断言语义）**。
+- **面板逐项取舍 UI**（Model3DEditPanel）：「预览变更」出 **ops 清单逐条勾选**（默认全选，testid=model3d-edit-op-N）→「应用参数」只落**勾选子集**（未勾选=该改动放弃，与 SVG 侧「拒绝=不要」同构）；零勾选明确提示不应用。
+- **agent apply CAS 对齐**：`model3d_apply` schema 暴露 `expectedHash`（此前实现层支持但 schema 未暴露——agent 默认无冲突守卫写盘），描述明确 409 scene_conflict 语义。
+- **验证**：`block344-edit-governance` 契约 6/6（diff 字段级/约束 id 对齐/update_constraint fail-closed 四拒/diffToOperations 混合回放+删节点收尾顺序/schema CAS）+ Model3DEditPanel 5/5（取舍交互：默认全选/取消一项只应用子集）+ tsc 0 + lint 0 error；**REST 实机 ✓**（:3001 真后端 diff 返回 constraints.changed 完整 before/after——需两节点合法约束夹具，a=b 自身约束被校验拒属 fail-closed 正确行为）。
+
 ## UI-686: 钢笔徒手模式——按住拖动手写笔迹，松手落成路径（2026-11-04 用户需求「徒手模式加上」；**verified（dev Electron 边界内；实机 70/70 allPass）**）
 
 - **两种笔法并存（一个工具）**：①**单击落点**（原语义不变）：逐点连折线，回首点闭合（Z）/Enter 开口落定/Esc 取消；②**按住拖动=徒手一笔**（新增）：按下即采样（≥4 用户单位抽稀防点爆炸），松手按位移分流——位移 ≥6 单位且 ≥3 采样点 → 落成**独立开口 path**（fill=none 只描边，与点列落定共用 onPenCommit/白名单 insert）；位移小 → 回退为「点击落点」。徒手一笔落成即自动落定（一笔一划），与点列缓冲互不污染；Esc 同时清两者。

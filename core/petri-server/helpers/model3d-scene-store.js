@@ -141,18 +141,37 @@ function diffScenes(before, after) {
     const next = afterNodes.get(id);
     if (!prev) { nodeChanges.push({ id, status: 'added', fields: [] }); continue; }
     if (!next) { nodeChanges.push({ id, status: 'removed', fields: [] }); continue; }
-    const fields = ['type', 'transform', 'dimensions', 'material', 'label', 'source', 'modifiers']
+    // BLOCK-344 P1 — source 不列入 diff 字段：update_node 白名单不含 source（外部引用变更
+    // 属独立语义），显示侧过滤以保持「diff 列得出 = op 改得了」的对齐契约。
+    const fields = ['type', 'transform', 'dimensions', 'material', 'label', 'modifiers']
       .filter((field) => JSON.stringify(prev[field] ?? null) !== JSON.stringify(next[field] ?? null));
-    if (fields.length > 0) nodeChanges.push({ id, status: 'changed', fields });
+    if (fields.length > 0) {
+      const changesBefore = {};
+      const changesAfter = {};
+      for (const field of fields) {
+        changesBefore[field] = prev[field] ?? null;
+        changesAfter[field] = next[field] ?? null;
+      }
+      nodeChanges.push({ id, status: 'changed', fields, changesBefore, changesAfter });
+    }
   }
 
+  // BLOCK-344 P1 — 约束按 id 对齐：双侧在场的变更出 changed（此前只出 added+removed 对，
+  // 「改一条约束」无法表达）；无 id 的历史约束维持 added/removed 口径。
   const keyOf = (constraint) => JSON.stringify(constraint);
-  const beforeConstraints = new Set((before.constraints || []).map(keyOf));
-  const afterConstraints = new Set((after.constraints || []).map(keyOf));
+  const beforeConstraints = new Map((before.constraints || []).map((item) => [item && item.id ? `id:${item.id}` : `raw:${keyOf(item)}`, item]));
+  const afterConstraints = new Map((after.constraints || []).map((item) => [item && item.id ? `id:${item.id}` : `raw:${keyOf(item)}`, item]));
   const constraints = {
-    added: [...afterConstraints].filter((item) => !beforeConstraints.has(item)).map((item) => JSON.parse(item)),
-    removed: [...beforeConstraints].filter((item) => !afterConstraints.has(item)).map((item) => JSON.parse(item)),
+    added: [...afterConstraints.entries()].filter(([key]) => !beforeConstraints.has(key)).map(([, item]) => item),
+    removed: [...beforeConstraints.entries()].filter(([key]) => !afterConstraints.has(key)).map(([, item]) => item),
+    changed: [],
   };
+  for (const [key, afterItem] of afterConstraints.entries()) {
+    const beforeItem = beforeConstraints.get(key);
+    if (beforeItem && keyOf(beforeItem) !== keyOf(afterItem)) {
+      constraints.changed.push({ id: afterItem.id, before: beforeItem, after: afterItem });
+    }
+  }
 
   return {
     beforeHash: scene3d.hashSceneSpec(before),
@@ -160,8 +179,60 @@ function diffScenes(before, after) {
     parameters: parameterChanges,
     nodes: nodeChanges,
     constraints,
-    changed: parameterChanges.length + nodeChanges.length + constraints.added.length + constraints.removed.length > 0,
+    changed: parameterChanges.length + nodeChanges.length + constraints.added.length + constraints.removed.length + constraints.changed.length > 0,
   };
+}
+
+/**
+ * BLOCK-344 P1 — diff → 白名单 op 序列（纯函数）：逐项取舍/提案回显的语义 patch 源。
+ * 顺序设计：set_parameter → add_node → update_node → remove_constraint → update_constraint
+ * → add_constraint → remove_node（约束引用节点先建后连；删节点收尾防约束悬空）。
+ */
+function diffToOperations(before, after) {
+  const diff = diffScenes(before, after);
+  const ops = [];
+  for (const p of diff.parameters) {
+    if (p.status === 'removed') continue; // 参数删除不在 op 白名单（schema 只收 number 值），如实跳过
+    ops.push({ op: 'set_parameter', name: p.name, value: p.after });
+  }
+  for (const n of diff.nodes) {
+    if (n.status === 'added') {
+      const node = afterNodesOf(after).get(n.id);
+      if (node) ops.push({ op: 'add_node', node: JSON.parse(JSON.stringify(node)) });
+    } else if (n.status === 'changed') {
+      ops.push({ op: 'update_node', id: n.id, changes: n.changesAfter });
+    }
+  }
+  for (const c of diff.constraints.removed) {
+    if (c && c.id) ops.push({ op: 'remove_constraint', id: c.id });
+  }
+  for (const c of diff.constraints.changed) {
+    ops.push({ op: 'update_constraint', id: c.id, changes: diffPlain(c.after, c.before) });
+  }
+  for (const c of diff.constraints.added) {
+    if (c && c.id) ops.push({ op: 'add_constraint', constraint: c });
+  }
+  for (const n of diff.nodes) {
+    if (n.status === 'removed') ops.push({ op: 'remove_node', id: n.id });
+  }
+  return ops;
+}
+
+function afterNodesOf(scene) {
+  return new Map((scene.nodes || []).map((node) => [node.id, node]));
+}
+
+/** 逐字段拆 after 相对 before 的变更（浅层；数组/对象整体替换）。 */
+function diffPlain(after, before) {
+  const changes = {};
+  const keys = new Set([...Object.keys(after || {}), ...Object.keys(before || {})]);
+  for (const key of keys) {
+    if (key === 'id') continue;
+    if (JSON.stringify((after || {})[key] ?? null) !== JSON.stringify((before || {})[key] ?? null)) {
+      changes[key] = (after || {})[key] ?? null;
+    }
+  }
+  return changes;
 }
 
 async function applyOperations({ workspaceRoot, relativePath, operations, scene: baseScene = null, expectedHash = null, reason = 'edit' } = {}) {
@@ -283,6 +354,7 @@ async function readSceneInput({ workspaceRoot, relativePath } = {}) {  if (!work
 }
 
 module.exports = {
+  diffToOperations,
   HISTORY_SCHEMA,
   MAX_REVISIONS,
   normalizeRelativePath,

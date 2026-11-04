@@ -83,6 +83,7 @@ module.exports = [
           scene,
           operations: { type: 'array', items: { type: 'object', additionalProperties: true } },
           path: { type: 'string', description: '项目相对路径，默认 model3d/scene.scene3d.json' },
+          expectedHash: { type: 'string', description: 'BLOCK-344 P1 治理对齐——写入前提的 before 哈希（model3d_propose 返回值）；不匹配时 409 scene_conflict，人的修正不被 agent 覆盖。强烈建议携带。' },
         },
         required: ['scene', 'operations'],
       },

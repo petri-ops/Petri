@@ -9018,8 +9018,56 @@
         "G0"
       ],
       "notes": "2026-11-04 立项 active（用户「先 push 再立项 BLOCK-344」）：SVG 四件平移 SceneSpec 链（逐项取舍/洋葱皮对比/提案幽灵/回验衔接）；P0 勘察定范围（op 化切法裁决稿经用户过目再动工）。"
+    },
+    {
+      "id": "BLOCK-345-COMPUTER-USE-CLOSURE",
+      "capability": "block-345-computer-use-closure",
+      "path": "docs/block-345-computer-use-closure-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-345-computer-use-closure",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "computer-use",
+        "approval",
+        "pip",
+        "tool-contract",
+        "G0"
+      ],
+      "touchSurface": [
+        "core/petri-server/routes/computer-use.js",
+        "core/petri-server/agent-tools/computer-use-tools.js",
+        "core/petri-server/agent-tools/tool-defs/computer.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/helpers/computer-use-host.js",
+        "frontend/src/components/copilot/**",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ComputerUsePanel.tsx",
+        "src/main/computer-use-pip.js",
+        "src/main/computer-use-pip-preload.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "sidecars/computer-use/**",
+        "sidecars/computer-use-windows/**",
+        "test/block48-computer-tools.test.mjs",
+        "test/block264-computer-use-pip.test.mjs",
+        "test/block63-computer-host.test.mjs",
+        "docs/block-345-computer-use-closure-plan.md",
+        "acceptance/block-345/**"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/model-surface-baselines.json",
+        "eslint-suppressions.json",
+        "test/knip-baseline.json"
+      ],
+      "notes": "2026-11-04 立项 planned（用户「可以的 开整」；承接电脑使用核对报告单一建议），排队 BLOCK-344 之后不并行：修补三处结构性断链——①computer_* needApproval 桌面无确认卡入口（tool-events 只对 run_tool 上抬 + 前端 event.name 硬编码 + accessMode 互斥）②PiP 截帧链恒无画面（路由传空 params 而两侧 sidecar 要求 out 必填，且返回值无 base64）③computer_close 未暴露（Windows verb 已存在）；附元数据/schema/wait 超时漂移与 block48 默认跑法假红；三条机械门禁防复发。非范围=白名单/总开关/drag/右键/Linux/二进制分发（G1+）。"
     }
   ],
-  "lastUpdated": "2026-11-02",
-  "documentCount": 453
+  "lastUpdated": "2026-11-04",
+  "documentCount": 457
 }

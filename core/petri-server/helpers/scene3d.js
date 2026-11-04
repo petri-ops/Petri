@@ -1018,6 +1018,24 @@ function applySceneOperations(input, operations) {
       if (!validated.ok) {
         return { ok: false, error: 'constraint_invalid', message: validated.errors.join('; ') };
       }
+    } else if (operation.op === 'update_constraint') {
+      // BLOCK-344 P1 — 约束可变更（此前只能 remove+add 对，diff 无法表达「改约束」）：
+      // 按 id 定位 → merge changes → 与 add_constraint 同款 fail-closed 校验链（求值+validate 同源）
+      if (!Array.isArray(base.constraints)) return { ok: false, error: 'no_constraints' };
+      const idx = base.constraints.findIndex((c) => isPlainObject(c) && c.id === operation.id);
+      if (idx < 0) return { ok: false, error: 'constraint_not_found' };
+      const changes = isPlainObject(operation.changes) ? operation.changes : {};
+      if (Object.keys(changes).length === 0) return { ok: false, error: 'operation_invalid' };
+      if ('id' in changes && changes.id !== operation.id) return { ok: false, error: 'operation_invalid' };
+      base.constraints[idx] = { ...base.constraints[idx], ...clone(changes), id: operation.id };
+      const evaluation = applyConstraints(base);
+      if (evaluation.errorCode) {
+        return { ok: false, error: evaluation.errorCode, message: evaluation.errors.join('; ') };
+      }
+      const validated = validateSceneSpec(base);
+      if (!validated.ok) {
+        return { ok: false, error: 'constraint_invalid', message: validated.errors.join('; ') };
+      }
     } else if (operation.op === 'remove_constraint') {
       if (!Array.isArray(base.constraints)) return { ok: false, error: 'no_constraints' };
       const idx = base.constraints.findIndex((c) => isPlainObject(c) && c.id === operation.id);

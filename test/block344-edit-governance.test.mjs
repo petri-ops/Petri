@@ -1,0 +1,118 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import scene3d from '../core/petri-server/helpers/scene3d.js';
+import sceneStore from '../core/petri-server/helpers/model3d-scene-store.js';
+
+const SCENE = {
+  version: 'scene3d/v1',
+  units: 'mm',
+  coordinateSystem: 'z-up-right-handed',
+  parameters: { width: 100, height: 50 },
+  nodes: [
+    { id: 'base', type: 'box', transform: { position: [0, 0, 0] }, dimensions: { width: 40, height: 10, depth: 40 }, material: { color: '#4a7cba' } },
+    { id: 'post', type: 'cylinder', transform: { position: [0, 30, 0] }, dimensions: { radius: 8, height: 60 }, material: { color: '#3a8f6b' } },
+  ],
+  constraints: [],
+};
+
+describe('BLOCK-344 P1 — 3D 编辑治理对齐（逐项取舍/CAS/约束变更）', () => {
+  it('diffScenes：nodes.changed 出字段级 before/after；source 不入 diff 字段（与 op 白名单对齐）', () => {
+    const before = structuredClone(SCENE);
+    const after = structuredClone(SCENE);
+    after.nodes[0].dimensions = { width: 60, height: 10, depth: 40 };
+    after.nodes[0].source = 'stepped.stl'; // 白名单外字段：diff 不列（列得出=改不了 的对齐契约）
+    const diff = sceneStore.diffScenes(before, after);
+    const changed = diff.nodes.find((n) => n.id === 'base');
+    assert.ok(changed, 'changed entry missing');
+    assert.deepEqual(changed.fields, ['dimensions']);
+    assert.deepEqual(changed.changesBefore.dimensions, { width: 40, height: 10, depth: 40 });
+    assert.deepEqual(changed.changesAfter.dimensions, { width: 60, height: 10, depth: 40 });
+    assert.equal(changed.fields.includes('source'), false);
+  });
+
+  it('diffScenes：约束按 id 对齐出 changed（此前只能 added+removed 对）', () => {
+    const before = structuredClone(SCENE);
+    before.constraints = [{ id: 'c1', kind: 'distance', a: 'base', b: 'post', axis: 'z', value: 30 }];
+    const after = structuredClone(SCENE);
+    after.constraints = [{ id: 'c1', kind: 'distance', a: 'base', b: 'post', axis: 'z', value: 45 }];
+    const diff = sceneStore.diffScenes(before, after);
+    assert.equal(diff.constraints.added.length, 0);
+    assert.equal(diff.constraints.removed.length, 0);
+    assert.equal(diff.constraints.changed.length, 1);
+    assert.equal(diff.constraints.changed[0].id, 'c1');
+    assert.equal(diff.constraints.changed[0].after.value, 45);
+    assert.equal(diff.changed, true);
+  });
+
+  it('update_constraint op：按 id 变更且走 fail-closed 校验链', () => {
+    const scene = structuredClone(SCENE);
+    scene.constraints = [{ id: 'c1', kind: 'distance', a: 'base', b: 'post', axis: 'z', value: 30 }];
+    const applied = scene3d.applySceneOperations(scene, [
+      { op: 'update_constraint', id: 'c1', changes: { value: 45 } },
+    ]);
+    assert.equal(applied.ok, true, JSON.stringify(applied));
+    assert.equal(applied.scene.constraints[0].value, 45);
+    // id 不可变
+    assert.equal(scene3d.applySceneOperations(scene, [
+      { op: 'update_constraint', id: 'c1', changes: { id: 'c9' } },
+    ]).error, 'operation_invalid');
+    // 缺席 id
+    assert.equal(scene3d.applySceneOperations(scene, [
+      { op: 'update_constraint', id: 'c404', changes: { value: 1 } },
+    ]).error, 'constraint_not_found');
+    // 空 changes
+    assert.equal(scene3d.applySceneOperations(scene, [
+      { op: 'update_constraint', id: 'c1', changes: {} },
+    ]).error, 'operation_invalid');
+  });
+
+  it('diffToOperations：混合 diff → 白名单 op 序列（可回放且结果一致）', () => {
+    const before = structuredClone(SCENE);
+    const after = structuredClone(SCENE);
+    after.parameters.width = 120;
+    after.nodes[0].material = { color: '#cc0000' };
+    after.nodes.push({ id: 'leg', type: 'box', transform: { position: [0, 5, 0] }, dimensions: { width: 10, height: 10, depth: 10 }, material: { color: '#333333' } });
+    after.constraints = [{ id: 'c2', kind: 'distance', a: 'base', b: 'leg', axis: 'z', value: 12 }];
+    const ops = sceneStore.diffToOperations(before, after);
+    const kinds = ops.map((o) => o.op);
+    assert.ok(kinds.includes('set_parameter'), 'set_parameter missing');
+    assert.ok(kinds.includes('update_node'), 'update_node missing');
+    assert.ok(kinds.includes('add_node'), 'add_node missing');
+    assert.ok(kinds.includes('add_constraint'), 'add_constraint missing');
+    // 回放一致性 = 「声明 + 约束求解后」的物理一致（约束是活求解器：add_constraint 求值会把
+    // leg 落位到满足 distance 的位置——与 SVG 静态 op 的本质差异，字节比对过强）
+    const replayed = scene3d.applySceneOperations(before, ops);
+    assert.equal(replayed.ok, true, JSON.stringify(replayed));
+    const leg = replayed.scene.nodes.find((n) => n.id === 'leg');
+    assert.equal(leg.transform.position[2], 12, `约束未求解落位：${JSON.stringify(leg.transform)}`);
+    assert.equal(replayed.scene.constraints[0].value, 12);
+    assert.equal(replayed.scene.parameters.width, 120);
+    assert.equal(replayed.scene.nodes[0].material.color, '#cc0000');
+  });
+
+  it('diffToOperations：删节点收尾（其约束先移除不悬空）', () => {
+    const before = structuredClone(SCENE);
+    before.constraints = [{ id: 'c1', kind: 'distance', a: 'base', b: 'post', axis: 'z', value: 30 }];
+    const after = structuredClone(SCENE);
+    after.nodes = after.nodes.filter((n) => n.id !== 'post');
+    after.constraints = [];
+    const ops = sceneStore.diffToOperations(before, after);
+    const removeNodeIdx = ops.findIndex((o) => o.op === 'remove_node');
+    const removeConstraintIdx = ops.findIndex((o) => o.op === 'remove_constraint');
+    assert.ok(removeConstraintIdx >= 0 && removeNodeIdx > removeConstraintIdx, `order broken: ${JSON.stringify(kinds(ops))}`);
+    const replayed = scene3d.applySceneOperations(before, ops);
+    assert.equal(replayed.ok, true, JSON.stringify(replayed));
+    assert.equal(replayed.scene.nodes.some((n) => n.id === 'post'), false);
+    function kinds(list) { return list.map((o) => o.op).join(','); }
+  });
+
+  it('model3d_apply 的 schema 暴露 expectedHash（CAS 治理对齐）', () => {
+    const defs = fs.readFileSync(path.join(process.cwd(), 'core/petri-server/agent-tools/tool-defs/model3d.js'), 'utf8');
+    const block = defs.slice(defs.indexOf("name: 'model3d_apply'"), defs.indexOf("name: 'model3d_apply'") + 1200);
+    assert.ok(block.includes('expectedHash'), 'apply schema 缺 expectedHash（CAS 未对齐）');
+    assert.ok(block.includes('scene_conflict'), 'expectedHash 描述应说明冲突语义');
+  });
+});

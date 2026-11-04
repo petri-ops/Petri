@@ -11,3 +11,9 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-04T03:07:10.454Z -->
 最后更新：2026-11-04（✅ **BLOCK-343 P2 版本对比交付（UI-679；实机 61/61）**：修订行「对比」按钮（兄弟非嵌套）→ 快照与当前视图同 scale 洋葱皮叠加（警示色虚线框区别提案层）+ 0–1 滑杆实时透明度 + 控制条；不改真值不进 pendingOps。P2.2 执行者标注查证=writeRevisionSnapshot 纯 SVG 文件无元数据 → 按 plan 预案如实 reopen（快照格式变更为独立小包）。前端 63/63 + theme 17/17 + tsc 0 + lint 0；flow V23 三断言。P1 资产路径裁决问句未获回复 → 按推荐顺延留档。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T03:28:22.233Z -->
+最后更新：2026-11-04（✅ **BLOCK-343 收口总账（三阶段当日全交付；用户发令「BLOCK-343 开整」）**：P1 小项批 UI-678（选区浮条/模态补挂 10 处/字体品牌表/style 可视化；58/58）→ P2 版本对比 UI-679（洋葱皮+滑杆；61/61；执行者标注=快照无元数据如实 reopen）→ P3 vision 附件通道 UI-680（petri:composer-attach-image + addExternalImage 守卫 + 缩略图；62/62；「改→渲染→模型看图→迭代」真闭环）。flow 58→62 断言；前端 77/77 + tsc 0 + lint 0。资产路径=裁决问句未获回复按推荐顺延；渲染回验浮条 flow 时序单次观测探针不可复现=观察项。提交 6f9468bc→d88017ce→9a9217f3→收口批。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T03:51:55.019Z -->
+最后更新：2026-11-04（✅ **SVG 编辑器画布适应页面（UI-681；用户实时反馈批；实机 63/63）**：用户反馈「编辑器打开后图形限定了宽高」——修法=画布填满 stage + svg contain 居中（CSS 覆盖 presentation 属性真值不动）+ toUser/userToHost 补 meet letterbox 修正（k=min+居中偏移，点选/拖拽/绘制/节点全链仍准）+ 适应窗口重置为 contain 基准；flow V2e 覆盖断言 0.98 + V14/V15 换算改实测 k（249.25 vs 期望 249.3 互证）+ V14b 去硬编码。前端 80/80 + tsc 0 + lint 0。轻量包=本条目（TEST-INFRA-DEBT 先例）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

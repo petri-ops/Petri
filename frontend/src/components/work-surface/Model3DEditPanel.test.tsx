@@ -123,3 +123,33 @@ describe('Model3DEditPanel (NEXT-05)', () => {
     await waitFor(() => expect(readMock).toHaveBeenCalledWith('p_1', 'model3d/runs/run_1/scene.json'));
   });
 });
+
+describe('BLOCK-344 P1 — 逐项取舍（ops 清单勾选）', () => {
+  // 夹具复用上方 describe 的 scene（类型合法，参数 width=120/height=80 一致）。
+
+  it('预览出 ops 清单（默认全选）；取消一项后只应用勾选子集', async () => {
+    const onSceneUpdated = vi.fn();
+    const applyMock2 = vi.fn((input: { operations: unknown[] }) => Promise.resolve({
+      ok: true, path: 'model3d/scene.scene3d.json', beforeHash: 'a'.repeat(64), afterHash: 'b'.repeat(64),
+      changed: true, diff: { beforeHash: 'a'.repeat(64), afterHash: 'b'.repeat(64), parameters: [], nodes: [], constraints: { added: [], removed: [], changed: [] }, changed: false },
+      scene: scene, revision: { revisionId: 'rev-000009' },
+    }));
+    vi.mocked(applySceneOperations).mockImplementation(applyMock2 as never);
+    render(<Model3DEditPanel projectId="p_1" scene={scene} onSceneUpdated={onSceneUpdated} />);
+    const widthInput = await screen.findByDisplayValue('120');
+    const heightInput = await screen.findByDisplayValue('40');
+    fireEvent.change(widthInput, { target: { value: '130' } });
+    fireEvent.change(heightInput, { target: { value: '90' } });
+    fireEvent.click(screen.getByRole('button', { name: '预览变更' }));
+    const row0 = await screen.findByTestId('model3d-edit-op-0');
+    const row1 = screen.getByTestId('model3d-edit-op-1');
+    expect((row0 as HTMLInputElement).checked).toBe(true);
+    expect((row1 as HTMLInputElement).checked).toBe(true);
+    // 取消第一项（width）——只应用勾选的 height
+    fireEvent.click(row0);
+    fireEvent.click(screen.getByRole('button', { name: '应用参数' }));
+    await waitFor(() => expect(applyMock2).toHaveBeenCalledTimes(1));
+    const sent = applyMock2.mock.calls[0][0] as { operations: Array<{ name?: string }> };
+    expect(sent.operations).toEqual([{ op: 'set_parameter', name: 'height', value: 90 }]);
+  });
+});
