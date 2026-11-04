@@ -56,8 +56,8 @@ async function main() {
   for (const f of walkFiles(path.join(ROOT, 'test'))) {
     if (!/\.test\.mjs$/.test(f)) continue;
     const src = fs.readFileSync(f, 'utf8');
-    const exact = new Set([...src.matchAll(/acceptance\/[A-Za-z0-9_\-./]+\.[A-Za-z0-9]+/g)].map((m) => m[0]));
-    const prefix = new Set([...src.matchAll(/acceptance\/[A-Za-z0-9_\-]+/g)].map((m) => m[0]));
+    const exact = new Set([...src.matchAll(/acceptance\/[A-Za-z0-9_./-]+\.[A-Za-z0-9]+/g)].map((m) => m[0]));
+    const prefix = new Set([...src.matchAll(/acceptance\/[A-Za-z0-9_-]+/g)].map((m) => m[0]));
     if (exact.size || prefix.size) testRefs.push({ test: path.relative(ROOT, f), exact, prefix });
   }
   const impact = JSON.parse(fs.readFileSync(path.join(ROOT, 'test', 'impact-map.json'), 'utf8'));

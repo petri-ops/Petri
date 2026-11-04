@@ -36,10 +36,10 @@ for (const f of walkFiles(path.join(ROOT, 'test'))) {
   const src = fs.readFileSync(f, 'utf8');
   const exact = new Set();
   const prefix = new Set();
-  for (const m of src.matchAll(/acceptance\/[A-Za-z0-9_\-./]+\.[A-Za-z0-9]+/g)) {
+  for (const m of src.matchAll(/acceptance\/[A-Za-z0-9_./-]+\.[A-Za-z0-9]+/g)) {
     exact.add(m[0].replace(/\/$/, ''));
   }
-  for (const m of src.matchAll(/acceptance\/[A-Za-z0-9_\-]+/g)) {
+  for (const m of src.matchAll(/acceptance\/[A-Za-z0-9_-]+/g)) {
     prefix.add(m[0]);
   }
   if (exact.size || prefix.size) testRefs.push({ test: path.relative(ROOT, f), exact, prefix });
