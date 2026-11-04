@@ -19,11 +19,35 @@ reopen: SceneSpec 整体重写改 op 引擎（若 P0 判定参数级 op 化成�
 
 ## §1 已知边界（立项即声明）
 
-- SceneSpec 现为**整体 JSON 文档**（非 op 序列）——「参数级 op 化」是本包最重的架构裁决点，P0 产出切法稿（含成本/降档对比）后**经用户过目再动工**，不默认走重架构路线。
+- ~~SceneSpec「参数级 op 化」~~ **P0 消解（2026-11-04 勘察）**：op 白名单引擎/两段式 propose-apply/CAS 均已在 3D 侧（scene3d.js 7 op + model3d_propose/apply + expectedHash），无重架构；真实工作=diff↔op 对齐 + 四件 UI 平移（§2.2/§2.3）。
 - 3D 视口 ghost 的技术形态（Three.js 透明叠加/高亮描边）由 P0 一并勘察现有渲染层定。
 - 后端 core 触碰面仅限 scene 路由与 sceneEdit helper（若 op 化需要）；Blender/Godot 桥零触碰（对账另立小包）。
 
-## §2 P0 勘察范围（当前执行）
+## §2 P0 勘察定版（2026-11-04 勘察完成 → 四件范围定版）
+
+### 2.1 关键发现（op 化裁决消解）
+
+**op 白名单引擎已在 3D 侧**：`scene3d.js:975-1028` 已有 7 个白名单 op（set_parameter / update_node（字段级白名单）/ add_node / remove_node / add_constraint / remove_constraint / set_metadata），schema 全白名单（6 节点类型/6 材质字段/4 约束/3 modifier）；`model3d_propose` / `model3d_apply` 两段式已在且与用户面板走**同一** `sceneStore.applyOperations`；`expectedHash → scene_conflict 409` CAS 已在实现层（store:189-191）。**「整体重写改 op 引擎」的降档预案不需要**——本包是「diff↔op 对齐 + 四件 UI 平移」，无重架构。
+
+### 2.2 现状缺口（四件的真实工作量，均中小）
+
+| 缺口 | 证据 | 平移工作量 |
+|---|---|---|
+| SceneDiff 三处与 op 引擎不对齐 | `nodes.changed` 只给字段名不给字段内 before/after（sceneEditClient.ts:26-31）；`constraints` 无 id 对齐（改一条=added+removed 对）；diff 列得出 `source` 变化但 `update_node` 白名单改不了 | 补纯函数 `diffToOps(diff): Op[]`（diffScenes 输出与 op 白名单几乎一一对应）+ diff 三处补齐 → 中（偏小） |
+| agent apply 未启用 CAS | `model3d_apply` schema（tool-defs/model3d.js:78-90）只暴露 scene/operations/path，不传 expectedHash；base 优先请求 scene 非磁盘 | schema 暴露 expectedHash + 默认带 → 小（治理对齐点） |
+| 无「读单个修订内容」端点 | `.history/` 修订只有 list/restore；SVG 有 `readSvgRevision` 先例（svgEditClient.ts:158-172） | 新增只读端点 → 小 |
+| 执行者仅 reason 弱约定 | `.history` revision 元数据无结构化 actor（reason='user_parameter_edit'/'agent_apply' 等可伪造字符串）；成果面（RW-01）元数据丰富但 createdBy 硬编码 | recordRevision 加 `{actor}` 参数 → 小 |
+
+### 2.3 四件定版范围与挂点
+
+1. **P1 逐项取舍**：`diffToOps` 纯函数 + diff 三处补齐 + Model3DEditPanel 改动清单 UI（op 逐项+单项撤销=op 子集+expectedHash 重 apply，SVG UI-670 同构）+ model3d_apply CAS 对齐。
+2. **P2 洋葱皮对比**：`Model3DScene` 增 `ghostView` prop（候选版建进 **overlayRef 独立 overlay Group——挂点已存在**（:158,244-245,496-513 现用于测量线），材质 transparent+opacity + 滑杆对标 SVG compare）+ 修订内容只读端点；执行者 actor 字段随本阶段落。
+3. **P3 提案幽灵**：`petriEvents.model3dProposal` 事件 + toolActivity 派发钩子（`tool==='model3d_propose' && resultData.proposal`，callId 去重对标 UI-677）+ Model3DScene ghost 高亮（mesh.name=node.id 可直接定位；节点按 diff id 遍历 contentRef 改 emissive/线框，不上 OutlinePass）+ 接受状态机照抄 SvgEditorViewer:388-396。
+4. **P4 渲染回验衔接**：Model3DScene 快照 → 复用 `petri:composer-attach-image`（UI-680 既有通道）+ 判据 prompt；mesh.name 定位使「模型按 id 修复」闭环。
+
+### 2.4 勘察记录出处
+
+只读勘察子代理报告（2026-11-04）：编辑链全图/SceneDiff 形态/agent 工具权限合同（model3d_propose=analysis,R1；model3d_apply=result-studio,workspace-write,R2）/Three.js 挂点/Revision 元数据，逐条带文件:行号（见 §2.2/§2.3 引用）。
 
 1. SceneSpec 编辑链全图：前端（Model3DEditPanel/SketchSpecDialog/Model3DResultViewer）→ client（sceneEditClient.ts）→ 后端（routes/scene 或 scene3d helpers）→ 落盘与 Revision 体系。
 2. diffSceneSpecs 的 SceneDiff 形态（粒度=对象级/参数级？能否充当语义 diff 源）。
