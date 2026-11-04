@@ -96,7 +96,6 @@ const {
 const { tool_system_info } = require('./system-info-tools');
 // BLOCK-247（Q2b）— 联网检索与抓取：唯一出网入口（策略层见 helpers/web-fetch-policy）
 const { tool_web_search, tool_web_fetch } = require('./web-tools');
-const { tool_harness_plan_task } = require('./harness-tools');
 // BLOCK-244 Q1-REM — 结构化提问（C19）：暂停等用户回答，回答回传同一 tool 结果
 const { tool_ask_user_question } = require('./ask-user-tools');
 const { tool_knowledge_search, tool_knowledge_status, tool_knowledge_read } = require('./knowledge-tools');
@@ -175,7 +174,6 @@ const HANDLERS = {
   resident_task_read: tool_resident_task_read,
   system_info: tool_system_info,
   web_search: tool_web_search,
-  harness_plan_task: tool_harness_plan_task,
   web_fetch: tool_web_fetch,
   ask_user_question: tool_ask_user_question,
   computer_snapshot: tool_computer_snapshot,
@@ -334,8 +332,6 @@ const CONTRACTS = {
   // BLOCK-247（Q2b）— 联网只读：external-request/R1，资源面 `network.egress`（新词，
   // 用于审计与后续出网预算挂钩）；估时按搜索 8s / 抓取 12s（含一次重定向）。
   web_search: contract('retrieval', 'external-request', 'R1', ['network.egress'], 8000),
-  // BLOCK-346 方向2 — 只读计划分析（索引本机 harness 资产 + 纯函数规划），不建 job、不写库
-  harness_plan_task: contract('planning', 'none', 'R0', ['project.files'], 20000),
   web_fetch: contract('retrieval', 'external-request', 'R1', ['network.egress'], 12000),
   // BLOCK-264（C-40）浏览器连接器：会话面 R0；act=external-request R2（mutating 无 ackToken 在 connector 层硬拒）
   browser_connect: contract('action', 'none', 'R0', ['ui.session'], 3000),

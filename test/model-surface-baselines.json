@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-04T13:36:29.488Z",
+  "updatedAt": "2026-11-04T11:33:31.786Z",
   "systemPromptChars": 993,
-  "toolDefsCount": 116,
-  "toolDefsChars": 64447,
+  "toolDefsCount": 115,
+  "toolDefsChars": 63953,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -35,7 +35,6 @@
     "computer_wait": 479,
     "computer_close": 345,
     "computer_authorize": 243,
-    "harness_plan_task": 494,
     "knowledge_search": 445,
     "knowledge_status": 253,
     "knowledge_read": 375,
