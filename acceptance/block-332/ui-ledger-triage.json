@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-03T08:57:35.650Z",
+  "generatedAt": "2026-11-04T20:20:47.951Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 463,
-  "uniqueIds": 454,
+  "sections": 489,
+  "uniqueIds": 480,
   "counts": {
-    "verified": 423,
+    "verified": 449,
     "closed": 12,
     "blocked": 23,
     "live-missing": 5
@@ -29,7 +29,7 @@
     {
       "id": "UI-526",
       "deps": [],
-      "title": "Result Studio 真值徽标语义诚实化（2026-10-18 in_progress，BLOCK-211 / W8）；**RW-02 b 档对账 2026-10-30：触发"
+      "title": "Result Studio 真值徽标语义诚实化（2026-10-18 **verified（2026-11-05 探针 C：R 运行时已装〔重开条件成立〕→ 真 R artifac"
     },
     {
       "id": "UI-534",
@@ -86,7 +86,7 @@
       "id": "UI-390",
       "deps": [],
       "external": true,
-      "title": "子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 in_progress，dev Electron 边界内)；**RW-0"
+      "title": "子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 **verified（2026-11-05 探针 A：内联卡+摘要卡 c"
     },
     {
       "id": "UI-388",
@@ -98,37 +98,37 @@
       "id": "UI-389",
       "deps": [],
       "external": true,
-      "title": "文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账"
+      "title": "文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 **verified（2026-11-05 探针 B：520 夹具 200 行截断+「"
     },
     {
       "id": "UI-387",
       "deps": [],
       "external": true,
-      "title": "子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b"
+      "title": "子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 **verified（2026-11-05 探针 A：data-categor"
     },
     {
       "id": "UI-386",
       "deps": [],
       "external": true,
-      "title": "聊天区子智能体聚合条退役——项目历史智能体图标化集中到摘要卡（用户提案确认「确定 开干」）(2026-09-16 in_progress，dev Electron 边界内)；**R"
+      "title": "聊天区子智能体聚合条退役——项目历史智能体图标化集中到摘要卡（用户提案确认「确定 开干」）(2026-09-16 **verified（2026-11-05 探针 A：摘要卡智能体"
     },
     {
       "id": "UI-384",
       "deps": [],
       "external": true,
-      "title": "工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 in_progress，dev E"
+      "title": "工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 **verified（2026-1"
     },
     {
       "id": "UI-383",
       "deps": [],
       "external": true,
-      "title": "工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-09-15 in_progress，dev Electron 边界内)；**RW"
+      "title": "工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-09-15 **verified（2026-11-05 探针 A：真实工具行 ×"
     },
     {
       "id": "UI-382",
       "deps": [],
       "external": true,
-      "title": "子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 in_progress，dev Electron 边界内)；**RW-02 b 档对账 "
+      "title": "子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 **verified（2026-11-05 探针 A：真实 spawn ×3、内联卡 ×"
     },
     {
       "id": "UI-456",
@@ -140,7 +140,7 @@
       "id": "UI-458",
       "deps": [],
       "external": true,
-      "title": "继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 in_progres"
+      "title": "继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；BLOCK-136 动态工作流交付）(2026-09-30 **verified"
     },
     {
       "id": "UI-459",
@@ -152,7 +152,7 @@
       "id": "UI-471",
       "deps": [],
       "external": true,
-      "title": "隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 in_progress（BL"
+      "title": "隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 **cancelled（20"
     },
     {
       "id": "UI-513",
@@ -170,13 +170,13 @@
       "id": "UI-532",
       "deps": [],
       "external": true,
-      "title": "生信主结果面 pack resultSurface（2026-10-20 **in_progress（无真实 tool_jobs 实机腿）**，BLOCK-218 / Q-DOMA"
+      "title": "生信主结果面 pack resultSurface（2026-10-20 **cancelled（2026-11-05：环境不可得——最新可得 pack〔兄弟仓 origin/ma"
     },
     {
       "id": "UI-535",
       "deps": [],
       "external": true,
-      "title": "段落级错误兜底（2026-10-20 **in_progress（代码+组件测试完成，未做实机腿）**，BLOCK-222 / Q9 垂直切片）；**RW-02 b 档对账 202"
+      "title": "段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入：段卡 workspace-preview data-segment-crash"
     }
   ],
   "unknown": [],

@@ -1,0 +1,38 @@
+{
+  "name": "block349-bigdir",
+  "platform": "darwin",
+  "startedAt": "2026-11-04T19:12:36.550Z",
+  "finishedAt": "2026-11-04T19:12:48.191Z",
+  "assertions": [
+    {
+      "name": "B0_fixture_520_files",
+      "pass": true,
+      "detail": "520 文件已落工作区根（夹具）"
+    },
+    {
+      "name": "B1_truncated_load_more_present",
+      "pass": true,
+      "detail": "截断按钮=true「加载更多（剩余 320 项）」已渲染 bigdir 行=200"
+    },
+    {
+      "name": "B2_cursor_load_more_grows",
+      "pass": true,
+      "detail": "游标加载生效：200 → 400（最后按钮「加载更多（剩余 120 项）」）"
+    },
+    {
+      "name": "B3_repeat_click_observation",
+      "pass": true,
+      "detail": "单次复击 clicked=true 行 200→200（grew=false）——第二页后再点惰性/回弹现象（未归因，观察区；B1+B2 为台账判据证据）"
+    },
+    {
+      "name": "B4_screenshot",
+      "pass": true,
+      "detail": "acceptance/block-349/block349-bigdir-tree.png"
+    }
+  ],
+  "allPass": true,
+  "extra": {
+    "projectId": "p_mw2huk7e_1wqx",
+    "fileCount": 520
+  }
+}

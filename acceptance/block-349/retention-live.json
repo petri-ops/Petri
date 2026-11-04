@@ -1,0 +1,64 @@
+{
+  "at": "2026-11-04T17:43:46.580Z",
+  "retentionDays": 30,
+  "legs": {
+    "realDb": {
+      "source": ".petri-dev-user-data/data/petri.db（拷贝副本，生产库不受影响）",
+      "before": {
+        "total": 94,
+        "byStatus": [
+          {
+            "status": "completed",
+            "n": 93
+          },
+          {
+            "status": "failed",
+            "n": 1
+          }
+        ],
+        "agedOver30d": 0,
+        "oldest": 1793299836707
+      },
+      "sweep": {
+        "deleted": 0,
+        "ids": [],
+        "reason": "ok"
+      },
+      "after": {
+        "total": 94,
+        "byStatus": [
+          {
+            "status": "completed",
+            "n": 93
+          },
+          {
+            "status": "failed",
+            "n": 1
+          }
+        ],
+        "agedOver30d": 0,
+        "oldest": 1793299836707
+      },
+      "deleted": 0,
+      "boundaryCheck": "PASS（全部删除行满足 超30天+终态+非公开）",
+      "oldestAgeDays": 6
+    },
+    "fixture": {
+      "remaining": [
+        "aged-protected",
+        "aged-public",
+        "aged-running",
+        "recent-completed"
+      ],
+      "sweepResult": {
+        "deleted": 1,
+        "ids": [
+          "aged-completed"
+        ],
+        "reason": "ok"
+      },
+      "pass": true,
+      "expectation": "仅 aged-completed 被删；is_public=1 / protected / recent / running 全保留"
+    }
+  }
+}

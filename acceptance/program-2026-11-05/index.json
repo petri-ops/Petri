@@ -68,7 +68,7 @@
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "title": "13 条实机证据清偿",
-      "status": "planned",
+      "status": "completed",
       "priority": "P0",
       "plan": "docs/block-349-evidence-clearance-plan.md",
       "goal": "把 UI 台账里「代码完成、仅缺实机证据」的 13 条逐个实机跑通转 verified，或环境不可得时诚实降级 cancelled，使 in_progress 从 28 降至 ≤15。",

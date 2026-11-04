@@ -1,0 +1,72 @@
+{
+  "name": "block349-subagent",
+  "platform": "darwin",
+  "startedAt": "2026-11-04T18:16:48.686Z",
+  "finishedAt": "2026-11-04T18:17:19.784Z",
+  "assertions": [
+    {
+      "name": "T0_provider_sanity",
+      "pass": true,
+      "detail": "真实 agent 回合收口（0s）——active preset 可达"
+    },
+    {
+      "name": "T0b_setup",
+      "pass": true,
+      "detail": "9223 已连接 + project=p_mw2fuujp_agea 页面就绪"
+    },
+    {
+      "name": "T1_ui_send_spawn_prompt",
+      "pass": true,
+      "detail": "copilot-ask 投递进入发送路径（stop 钮出现=run 启动）"
+    },
+    {
+      "name": "T1b_run_settled",
+      "pass": true,
+      "detail": "主任务收口（stop 钮退场；420s 窗口内 settled=3）"
+    },
+    {
+      "name": "T2_expand_all_clusters",
+      "pass": true,
+      "detail": "展开 run 折叠行 4 个 + 簇头 0 个（各点击一次）"
+    },
+    {
+      "name": "T3_ui382_inline_subagent_cards",
+      "pass": true,
+      "detail": "内联实况卡 × 3（statuses=done,running,done）——spawn 行展开即归宿（真实 spawn ×3 渲染）"
+    },
+    {
+      "name": "T4_ui383_readonly_singleline_collapse",
+      "pass": true,
+      "detail": "真实工具行 × 12/12（labels=已读取/已列出/思考/已读取/已派发/已派发/已派发/已思考/已等待/已等待/已等待/思考；默认展开 3 行=单行折叠语义）"
+    },
+    {
+      "name": "T5_ui384_readonly_output_content",
+      "pass": true,
+      "detail": "行展开=true 输出体=true 内容片段=[读取 topics/a.md · 第 1-4 行 / 共 4 行] # 方向A 缓存调研 要点 QED-11：本地命中优先，TTL 15 分钟，命中率目标 60%。 "
+    },
+    {
+      "name": "T6_ui386_summary_agent_strip",
+      "pass": true,
+      "detail": "toggle=clicked 摘要卡=true 智能体节=true chips=3（cats=organize,read,read）"
+    },
+    {
+      "name": "T7a_ui387_category_shape_valid",
+      "pass": true,
+      "detail": "data-category 全部落在 AGENT_CATEGORIES 键集（形状=职能 emoji：organize,read,read）"
+    },
+    {
+      "name": "T7b_ui390_role_status_propagation",
+      "pass": true,
+      "detail": "团队头=true 已完成标记 × 10 角色词命中=读取/分析 状态色 chip × 9（时间线内联卡+摘要卡 chip+团队列表三处贯通）"
+    },
+    {
+      "name": "T8_screenshots",
+      "pass": true,
+      "detail": "timeline=acceptance/block-349/block349-subagent-timeline.png summary=acceptance/block-349/block349-subagent-summary.png"
+    }
+  ],
+  "allPass": true,
+  "extra": {
+    "projectId": "p_mw2fuujp_agea"
+  }
+}

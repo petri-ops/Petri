@@ -1,0 +1,38 @@
+{
+  "name": "block349-result",
+  "platform": "darwin",
+  "startedAt": "2026-11-04T20:12:08.334Z",
+  "finishedAt": "2026-11-04T20:12:41.786Z",
+  "assertions": [
+    {
+      "name": "C0_seed_real_deseq2",
+      "pass": true,
+      "detail": "R 真跑完成 job=job_106a0cabafa74b0c（demo counts/coldata → 真 artifact；环境=R /usr/local/bin/Rscript）"
+    },
+    {
+      "name": "C1_ui532_surface_routing_marker",
+      "pass": true,
+      "detail": "真 job 结果页 surface 路由标记在场：pack=false core-transitional=true（reason=no_matching_surface）iframe=null——pack 声明缺席时 host 诚实降级（pack 正面渲染=环境不可得，见 UI-532 终态）"
+    },
+    {
+      "name": "C2_ui526_truth_badge_honest",
+      "pass": true,
+      "detail": "live 徽标 label=「已核验（未篡改）」×1（真 artifact 结果页在场）+ detail 节点=壳层未透出 title（组件测 18/18 钉双重诚实声明） live detail=未透出"
+    },
+    {
+      "name": "C3_ui459_t5_prompt_capture",
+      "pass": false,
+      "detail": "入口演进后新口径捕获：conv=ok composer=typed send=sent prompt=null result_summary 锚定=false（如实登记：新入口未产出锚定 prompt）"
+    },
+    {
+      "name": "C4_screenshot",
+      "pass": true,
+      "detail": "block349-result-page.png"
+    }
+  ],
+  "allPass": false,
+  "extra": {
+    "projectId": "p_mw2jz47m_ggr3",
+    "jobId": "job_106a0cabafa74b0c"
+  }
+}

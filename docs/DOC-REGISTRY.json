@@ -9236,11 +9236,28 @@
       "notes": "BLOCK-348 实测报告：四项度量总表 + 逐任务结果 + 短板分级清单（P1 压缩断链/P2 headless 浏览器桥/P3×3）+ 复跑命令。判据表冻结指纹 4b69b2d092bcae22。"
     },
     {
+      "id": "BLOCK-349-CLEARANCE-REPORT",
+      "path": "docs/block-349-clearance-report.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-349-clearance-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-349",
+        "evidence"
+      ],
+      "notes": "BLOCK-349 清偿报告：环境清单 8 项 + 13 条终态表（10 verified + 3 cancelled 均带何时可补）+ 过程发现（pack deseq2.R 语法错 P2 / resultSurfaces 回流缺失 / 文件树复击惰性）+ 判据口径漂移如实登记。"
+    },
+    {
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "path": "docs/block-349-evidence-clearance-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-349-evidence-clearance",
       "entrypoint": "docs/README.md",

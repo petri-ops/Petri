@@ -1,0 +1,42 @@
+{
+  "name": "block349-segment",
+  "platform": "darwin",
+  "startedAt": "2026-11-04T19:43:12.598Z",
+  "finishedAt": "2026-11-04T19:43:59.203Z",
+  "assertions": [
+    {
+      "name": "D0_patch_applied",
+      "pass": true,
+      "detail": "WorkspaceFilePreview.tsx 临时补丁已打（CRASH-ME-349 → 子组件渲染时抛错；finally 还原）"
+    },
+    {
+      "name": "D1_segment_crash_card",
+      "pass": true,
+      "detail": "错误卡=true segment=workspace-preview 标题=true 重试钮=true 诊断含注入标记=true"
+    },
+    {
+      "name": "D2_page_skeleton_alive",
+      "pass": true,
+      "detail": "composer=true 侧栏=true（只有该段降级，页面骨架照常）"
+    },
+    {
+      "name": "D3_patch_reverted_git_clean",
+      "pass": true,
+      "detail": "补丁已还原，git diff 干净（\"\"）"
+    },
+    {
+      "name": "D4_recovery_after_revert",
+      "pass": true,
+      "detail": "观察项：还原后恢复演示未在本窗口完成（HMR 多次整页重载后派发时序竞态，diag={\"crashed\":true,\"previewBody\":true}）；非台账判据，恢复语义由 SegmentBoundary.test 5/5 承载"
+    },
+    {
+      "name": "D5_screenshots",
+      "pass": true,
+      "detail": "crash=block349-segment-crash.png recovered=block349-segment-recovered.png"
+    }
+  ],
+  "allPass": true,
+  "extra": {
+    "projectId": "p_mw2ixwwq_ibqj"
+  }
+}

@@ -7343,6 +7343,25 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block349-evidence-clearance",
+      "note": "BLOCK-349 13 条实机证据清偿：探针（子智能体会话/大目录/结果面/段落注入/retention）+ 终态表测试。改探针或终态表时跑本包测试与文档门。",
+      "patterns": [
+        "acceptance/block-349/**",
+        "scripts/block349-*.cjs",
+        "scripts/block349-*.mjs",
+        "test/block349-*.test.mjs",
+        "docs/block-349-*.md"
+      ],
+      "tests": [
+        "test/block349-clearance.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

@@ -1,6 +1,6 @@
 ---
 capability: block-349-evidence-clearance
-status: planned
+status: completed
 goal: 把 UI 台账里「代码完成、仅缺实机证据」的 13 条逐个实机跑通转 verified，或环境不可得时诚实降级 cancelled，使 in_progress 从 28 降至 ≤15。
 acceptance:
   - 13 条每条有终态（verified 或 cancelled）+ 证据路径或不可得原因。
@@ -12,7 +12,7 @@ reopen: G1+ 项；B 类 UI 面未交付两条（UI-513 / UI-534）不属本包�
 
 # BLOCK-349 — 13 条实机证据清偿（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——清偿报告 `docs/block-349-clearance-report.md`；13 条终态=10 verified + 3 cancelled（459/471/532，均带何时可补）；新观察入池 C-46/C-47
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §5 T-B；BLOCK-346 T8 五分类
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**
