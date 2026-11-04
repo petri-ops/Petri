@@ -1,6 +1,6 @@
 ---
 capability: block-345-computer-use-closure
-status: planned
+status: completed
 goal: 把 computer-use（电脑使用）从「底座齐全但用户可见闭环断开」修到「控制类真能被用户批准、画中画真能出画面、工具面契约自洽」：补上前端 ackToken 确认卡渲染路径、修通 PiP 截帧链（out 参数 + 帧回传形状）、暴露 computer_close 并清理元数据/schema/超时漂移，最后把三处断链变成机械门禁（第三条同类缺陷不再可能静默复发）。
 acceptance:
   - P1 控制类确认卡接入：computer_* 的 needApproval/ackToken 在桌面端有可见入口（卡片渲染 + 批准/拒绝走既有 run-tool-ack），且渲染条件不被 accessMode 与 run_tool 硬编码互斥锁死；契约=前端组件测试 + 后端事件上抬测试。
@@ -12,7 +12,7 @@ reopen: 应用/窗口白名单（default_app_access + macOS bundle_ids / Windows
 
 # BLOCK-345-COMPUTER-USE-CLOSURE — 电脑使用闭环修补计划
 
-- 登记状态：**planned（2026-11-04 立项；排队 BLOCK-344 之后，不并行开工）**
+- 登记状态：**completed（2026-11-04 当日收口；344 收口后按串行接手执行）**
 - 用户裁决原话：「可以的 开整」（承接 2026-11-04 电脑使用能力核对报告的单一建议「computer-use 闭环修补（拟立 BLOCK-345，planned 排队于 344 之后）」）
 - 与 BLOCK-344 关系：**串行排队**（单工作包纪律），文件面不相交（344=3D/SceneSpec 面；本包=computer-use 链），`touchSurface` 已登记供并行契约判据使用，但当前不并行
 
@@ -95,3 +95,11 @@ reopen: 应用/窗口白名单（default_app_access + macOS bundle_ids / Windows
 ## §7 进度记录
 
 - 2026-11-04 立项登记 `planned`（用户「可以的 开整」）；排队 BLOCK-344（active）之后。本日内只做立项文书，零产品代码改动。
+
+## §6 收口（2026-11-04 当日；P1-P3 全交付 + 门禁化）
+
+- **P1 确认卡（断链 #1 根修）**：审批事件上抬工具无关（tool-events.js）+ pendingApproval 去 run_tool 硬编码 + 确认卡不与 full 档互斥——控制类批准请求全链可达；批准/拒绝复用既有 ack 链零改动。
+- **P2 PiP（断链 #2 根修）**：out 临时 .png + 读盘转 base64 + 清临时；no_target_snapshot 200 可解释引导；真失败 503。
+- **P3 契约自洽（断链 #3+漂移）**：computer_close 暴露（Windows WM_CLOSE/macOS 诚实 unsupported）+ authorize 元数据对齐 R0 + hwnd/summary schema + wait 超时 30000 单源 + block48 默认跑法假红根修（host.stop() 收尾，16/16 绿）。
+- 门禁化：三机械断言=①事件契约（computer_click needApproval 上抬）②组件（pendingApproval 生成工具无关）③schema（close 在工具面）——均已落 test/agent-tool-result.test.mjs 与 block345/344 契约。
+- 证据：契约 block344-edit-governance 8/8 + block345 16/16（默认跑法绿）+ 审批 14/14 + 前端 381/381 + tsc 0 + lint 0 error + REST 实机。G0 开发期常态 · 不外推 packaged/Provider/GA。

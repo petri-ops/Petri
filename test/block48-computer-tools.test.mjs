@@ -49,6 +49,7 @@ const { ComputerUseHost, ComputerUseHostError, defaultSidecarPath } = require(
 const { decideAgentToolCall } = require(path.join(R_SERVER, 'agent-tools', 'agent-tool-policy.js'));
 const { getToolContract, getToolRegistry } = require(path.join(R_SERVER, 'agent-tools', 'registry.js'));
 const computerTools = require(path.join(R_SERVER, 'agent-tools', 'computer-use-tools.js'));
+const { getComputerUseHost } = require(path.join(R_SERVER, 'helpers', 'computer-use-host.js'));
 
 describe('托管：sidecar 协议与健康', { skip: process.platform !== 'darwin' && 'macOS sidecar 专属（Windows 侧见 block63-computer-host）' }, () => {
   test('二进制定位存在', () => {
@@ -252,5 +253,13 @@ describe('工具 handler：确认门 + 真实 sidecar', { skip: process.platform
     }
     assert.equal(res.ok, true);
     assert.equal(res.found, false);
+  });
+
+  // BLOCK-345 P3 — 显式收尾单例 host：sidecar 子进程不退出会挂到 watchdog 3min 判 fail
+  // （「默认跑法假红」根修——逻辑本身绿，进程收尾才是缺陷）。
+  test('host 收尾：sidecar 进程退出（默认跑法可绿）', () => {
+    const host = getComputerUseHost();
+    host.stop();
+    assert.equal(host.status().running, false);
   });
 });

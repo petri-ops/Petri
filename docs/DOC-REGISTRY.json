@@ -9024,7 +9024,7 @@
       "capability": "block-345-computer-use-closure",
       "path": "docs/block-345-computer-use-closure-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-345-computer-use-closure",
       "entrypoint": "docs/README.md",
@@ -9065,7 +9065,7 @@
         "eslint-suppressions.json",
         "test/knip-baseline.json"
       ],
-      "notes": "2026-11-04 立项 planned（用户「可以的 开整」；承接电脑使用核对报告单一建议），排队 BLOCK-344 之后不并行：修补三处结构性断链——①computer_* needApproval 桌面无确认卡入口（tool-events 只对 run_tool 上抬 + 前端 event.name 硬编码 + accessMode 互斥）②PiP 截帧链恒无画面（路由传空 params 而两侧 sidecar 要求 out 必填，且返回值无 base64）③computer_close 未暴露（Windows verb 已存在）；附元数据/schema/wait 超时漂移与 block48 默认跑法假红；三条机械门禁防复发。非范围=白名单/总开关/drag/右键/Linux/二进制分发（G1+）。"
+      "notes": "2026-11-04 立项 planned（用户「可以的 开整」；承接电脑使用核对报告单一建议），排队 BLOCK-344 之后不并行：修补三处结构性断链——①computer_* needApproval 桌面无确认卡入口（tool-events 只对 run_tool 上抬 + 前端 event.name 硬编码 + accessMode 互斥）②PiP 截帧链恒无画面（路由传空 params 而两侧 sidecar 要求 out 必填，且返回值无 base64）③computer_close 未暴露（Windows verb 已存在）；附元数据/schema/wait 超时漂移与 block48 默认跑法假红；三条机械门禁防复发。非范围=白名单/总开关/drag/右键/Linux/二进制分发（G1+）。 2026-11-04 当日收口 completed：P1 确认卡/P2 PiP/P3 契约自洽 全交付（block345 16/16 默认跑法绿 + 事件契约 + 前端 381/381 + REST 实机）。"
     },
     {
       "id": "FUNCTIONAL-AUDIT-2026-11-04",
@@ -9085,8 +9085,70 @@
         "G0"
       ],
       "notes": "2026-11-04 全仓功能面审计（专项/归因形态，四路只读：工具面/前端面/后端接线面/台账）。产出=「能力写完但用户用不到」分级清单：P1 同型断链（browser_act 无 ackToken 签发、worktree_remove R3 死门、默认执行目标键静默失效、needsApproval 元数据零读取者）+ 静默失效四项 + 安全口径二项（external-request 逃逸桶、IDE MCP 写面绕 policy）+ P2 零消费端点八项；附已核实完好清单与审计边界声明。账本锚点=AUDIT-LOG 同日四条 🟡 指针行。零产品代码改动。"
+    },
+    {
+      "id": "FUNCTIONAL-SURFACE-MATRIX-2026-11-04",
+      "path": "docs/functional-surface-matrix-2026-11-04.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "functional-surface-matrix-2026-11-04",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "generated",
+        "surface-matrix",
+        "G0"
+      ],
+      "notes": "由 scripts/functional-surface-audit.mjs 生成的全量核对矩阵（勿手改，复跑即刷新）：114 契约 / 111 已汇编工具 / 180 IPC 通道 / 285 路由端点 / 7 存储键逐点判定，基线取 git HEAD（在制文件不计入）。2026-11-04 首跑判定 P1=5、P2=5、P3=5；机器可读源=acceptance/functional-audit-2026-11-04/surface-matrix.json。"
+    },
+    {
+      "id": "BLOCK-346-FUNCTIONAL-SWEEP",
+      "capability": "block-346-functional-sweep",
+      "path": "docs/block-346-functional-sweep-blueprint.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-346-functional-sweep",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "functional-sweep",
+        "integration-debt",
+        "approval-chain",
+        "surface-matrix",
+        "G0"
+      ],
+      "touchSurface": [
+        "core/petri-server/agent-tools/**",
+        "core/petri-server/routes/**",
+        "core/shared-backend/**",
+        "frontend/src/components/copilot/**",
+        "frontend/src/components/desktop/DesktopSettingsPanel/**",
+        "frontend/src/lib/brand.ts",
+        "src/ipc/**",
+        "src/preload.js",
+        "scripts/functional-surface-audit.mjs",
+        "test/functional-surface-baseline.json",
+        "test/ipc-channels-registry.test.mjs",
+        "docs/functional-surface-matrix-2026-11-04.md",
+        "docs/functional-audit-2026-11-04.md",
+        "docs/block-346-functional-sweep-blueprint.md",
+        "acceptance/block-346/**"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/model-surface-baselines.json",
+        "eslint-suppressions.json",
+        "test/knip-baseline.json",
+        "test/functional-surface-baseline.json"
+      ],
+      "notes": "2026-11-04 立项 planned（用户「事无巨细的全方位核对 每个点都要明确清楚，之后建立优化蓝图，彻底清扫问题」）：以机械全量矩阵为唯一清单清扫集成债——T1 审批链统一 / T2 定义汇编门禁（goals 三工具未进 TOOL_DEFS，新发现 P1）/ T3 静默失效 / T4 零消费端点 / T5 安全口径（需裁决）/ T6 通道与存储键卫生 / T7 矩阵门禁化（P1 只许减不许增）/ T8 台账口径对账。排队 344 → 345 → 本包；与 345 文件面部分相交故必须串行。非范围=白名单/总开关/drag/右键/Linux/G1+。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 458
+  "documentCount": 460
 }

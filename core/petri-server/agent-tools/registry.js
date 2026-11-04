@@ -119,6 +119,7 @@ const {
   tool_computer_type,
   tool_computer_press,
   tool_computer_scroll,
+  tool_computer_close,
   tool_computer_screenshot,
   tool_computer_wait,
   tool_computer_authorize,
@@ -180,6 +181,7 @@ const HANDLERS = {
   computer_type: tool_computer_type,
   computer_press: tool_computer_press,
   computer_scroll: tool_computer_scroll,
+  computer_close: tool_computer_close,
   computer_screenshot: tool_computer_screenshot,
   computer_wait: tool_computer_wait,
   computer_authorize: tool_computer_authorize,
@@ -345,6 +347,7 @@ const CONTRACTS = {
   computer_type: contract('action', 'execution', 'R2', ['ui.session'], 8000),
   computer_press: contract('action', 'execution', 'R2', ['ui.session'], 4000),
   computer_scroll: contract('action', 'execution', 'R2', ['ui.session'], 4000),
+  computer_close: contract('action', 'execution', 'R2', ['ui.session'], 8000),
   computer_screenshot: contract('vision', 'workspace-write', 'R1', ['ui.session', 'local.process'], 8000),
   // BLOCK-49 二期 —— 多智能体协作三件套
   interrupt_agent: contract('agent-management', 'state-write', 'R2', ['ui.session'], 2000),

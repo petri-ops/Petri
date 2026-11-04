@@ -149,7 +149,8 @@ const TOOL_METADATA = {
   computer_type: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   computer_press: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   computer_scroll: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
-  computer_authorize: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
+  // BLOCK-345 P3 — authorize 对齐 R0 契约（诚实探测只读零副作用，registry.js:342 同源）
+  computer_authorize: { readOnly: true, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'low', timeoutMs: null },
 
   // ---- 浏览器/检索域 ----
   search: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },

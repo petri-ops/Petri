@@ -597,3 +597,25 @@ test('hard-capped workspace_read does not mark omitted lines as already read', (
   assert.equal(retried.data.omittedPreviouslyReadLines, 0);
   assert.equal(state.readRanges.size, 1);
 });
+
+
+test('BLOCK-345 P1 — 控制类工具审批事件上抬工具无关（computer_click 首调带 needApproval/ackToken）', () => {
+  const envelope = {
+    contractVersion: '1.0.0',
+    traceId: 'trace_b345_ack',
+    callId: 'call_b345_ack',
+    tool: 'computer_click', // 控制类：不再限定 run_tool（断链 #1 根修）
+    status: 'awaiting_confirmation',
+    terminationReason: 'need_approval',
+    durationMs: 5,
+    truncated: false,
+    sideEffects: { type: 'host_control', riskTier: 'R2', resources: [] },
+    data: { needApproval: true, toolJobId: 'job_b345', ackToken: 'ack_b345', message: '等待用户批准点击操作', params: { target: 'chrome' } },
+    result: { needApproval: true, toolJobId: 'job_b345', ackToken: 'ack_b345', toolId: 'computer_click', message: '等待用户批准点击操作', params: { target: 'chrome' } },
+  };
+  const event = buildToolResultEvent(envelope, {});
+  assert.equal(event.needApproval, true, 'needApproval 未上抬（控制类批准到不了前端）');
+  assert.equal(event.ackToken, 'ack_b345');
+  assert.equal(event.toolJobId, 'job_b345');
+  assert.equal(event.message, '等待用户批准点击操作');
+});

@@ -10,6 +10,9 @@
  * 输入注入仍走 computer_* 工具链（完全访问档 + ackToken 两段确认），本路由不提供任何控制动作。
  */
 
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
 const { getComputerUseHost } = require('../helpers/computer-use-host');
 
 function requireUser(req, res) {
@@ -40,15 +43,43 @@ module.exports = function registerComputerUse(app) {
   });
 
   // BLOCK-265（C-38 补）— PiP 截帧：主进程窗口经 HTTP 拉（主进程禁引 core 实现 R5；host 单例归后端）
+  // BLOCK-345 P2 — PiP 截帧链修复：两侧 sidecar 的 screenshot 要求 params.out（绝对 .png）
+  // 且返回 {path,width,height,bytes}（无 base64）——此前 {} 调用恒 invalid_params / 只认
+  // pngBase64 恒 frame_shape_unexpected（断链 #2）。修法：主进程出临时 .png → 读盘转 base64
+  // → 删临时文件；macOS 无 lastSnapshotPid 时诚实 need_snapshot 引导（不假装有画面）。
   app.get('/api/computer-use/pip-frame', async (req, res) => {
     if (!requireUser(req, res)) return;
+    const outAbs = path.join(os.tmpdir(), `petri-pip-${process.pid}-${Date.now()}.png`);
     try {
       const host = getComputerUseHost();
-      const shot = await host.requestWithRecovery('screenshot', {}, 8000);
-      const b64 = (shot && (shot.pngBase64 || shot.imageBase64 || shot.base64)) || null;
-      return res.json({ ok: true, pngBase64: b64, error: b64 ? null : 'frame_shape_unexpected', at: Date.now() });
+      const shot = await host.requestWithRecovery('screenshot', { out: outAbs }, 8000);
+      let pngBase64 = null;
+      try {
+        pngBase64 = fs.readFileSync(outAbs).toString('base64');
+      } finally {
+        try { fs.unlinkSync(outAbs); } catch { /* 临时文件清理失败不阻塞 */ }
+      }
+      if (!pngBase64) {
+        return res.json({ ok: false, pngBase64: null, error: 'frame_unreadable', at: Date.now() });
+      }
+      return res.json({
+        ok: true,
+        pngBase64,
+        width: shot && shot.width,
+        height: shot && shot.height,
+        error: null,
+        at: Date.now(),
+      });
     } catch (error) {
-      return res.status(503).json({ ok: false, pngBase64: null, error: (error && error.code) || 'screenshot_failed' });
+      const code = (error && error.code) || 'screenshot_failed';
+      const status = code === 'no_target_snapshot' ? 200 : 503; // 无目标=可解释引导（200 带 error），真失败=503
+      return res.status(status).json({
+        ok: false,
+        pngBase64: null,
+        error: code,
+        message: (error && error.message) || 'screenshot_failed',
+        at: Date.now(),
+      });
     }
   });
 

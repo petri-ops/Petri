@@ -243,6 +243,26 @@ module.exports = [
   {
     "type": "function",
     "function": {
+      "name": "computer_close",
+      "description": "【Windows】关闭目标应用窗口（WM_CLOSE 温和关闭；需先 snapshot 定目标）。【macOS】当前未实现，调用返回 unsupported_verb 诚实错误——不假装支持。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string",
+            "description": "目标应用（默认前台；须与 snapshot 同一应用）"
+          },
+          "hwnd": {
+            "type": "integer",
+            "description": "Windows 直投：目标顶层窗口句柄"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "computer_authorize",
       "description": "【macOS/Windows】诚实探测电脑控制可用性：macOS 返回辅助功能/屏幕录制权限态与系统设置引导；Windows 返回平台标识与宿主提权边界（无 TCC 式授权门）。使用任何 computer_* 工具前先调用。只读零副作用。",
       "parameters": {

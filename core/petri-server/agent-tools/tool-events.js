@@ -204,19 +204,20 @@ function buildToolResultEvent(envelope, args = {}, options = {}) {
     if (result.type === 'open_tool' && result.toolId) evt.toolId = result.toolId;
   }
 
-  if (envelope.tool === 'run_tool' && result && typeof result === 'object') {
-    if (result.needApproval) {
-      evt.needApproval = true;
-      if (result.ackToken) evt.ackToken = result.ackToken;
-      if (result.toolJobId) evt.toolJobId = result.toolJobId;
-      if (result.toolId) evt.toolId = result.toolId;
-      if (result.message) evt.message = result.message;
-      if (result.params) evt.params = redactSensitiveValue(result.params);
-    } else if (result.toolJobId) {
-      evt.toolJobId = result.toolJobId;
-      if (result.toolId) evt.toolId = result.toolId;
-      if (result.message || result.error) evt.message = String(result.message || result.error);
-    }
+  // BLOCK-345 P1 — 审批事件上抬改工具无关：控制类工具（computer_* 等）在完全访问档同样
+  // 走两段式 ackToken（needApproval/ackToken/toolJobId…），此前只认 run_tool 导致控制类
+  // 批准请求永远到不了前端（结构性断链 #1，见 block-345 plan §1）。字段与语义零变化。
+  if (result && typeof result === 'object' && result.needApproval) {
+    evt.needApproval = true;
+    if (result.ackToken) evt.ackToken = result.ackToken;
+    if (result.toolJobId) evt.toolJobId = result.toolJobId;
+    if (result.toolId) evt.toolId = result.toolId;
+    if (result.message) evt.message = result.message;
+    if (result.params) evt.params = redactSensitiveValue(result.params);
+  } else if (result && typeof result === 'object' && result.toolJobId) {
+    evt.toolJobId = result.toolJobId;
+    if (result.toolId) evt.toolId = result.toolId;
+    if (result.message || result.error) evt.message = String(result.message || result.error);
   }
 
   // BLOCK-322 — 直接工具自建的处理 job 也要把 toolJobId 提到事件顶层：前端活动行

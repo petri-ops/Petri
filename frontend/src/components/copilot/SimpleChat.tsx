@@ -1563,7 +1563,8 @@ export function SimpleChat({
               </div>
             </div>
           )}
-          {pendingApproval && accessMode !== 'full' && (
+          {/* BLOCK-345 P1 — 审批卡不再与 full 档互斥：控制类只在 full 档放行，full 档反而必须能看见确认卡 */}
+          {pendingApproval && (
             <ApprovalCard
               approval={pendingApproval}
               repairState={approvalRepair}

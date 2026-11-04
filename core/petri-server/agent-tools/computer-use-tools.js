@@ -210,6 +210,23 @@ async function tool_computer_scroll(args = {}, ctx = {}) {
   return runControlTool('computer_scroll', args, ctx, 'scroll', extra);
 }
 
+
+/** BLOCK-345 P3 — computer_close：Windows WM_CLOSE 温和关闭（sidecar close verb 已实现）；
+ * macOS Swift 侧无 close verb → host 上抬 unsupported_verb 诚实错误（不假装支持）。 */
+async function tool_computer_close(args = {}, _ctx = {}) {
+  const resolved = resolveScreenshotOutPath(args, _ctx); // 复用项目白名单定位（close 也需项目上下文）
+  if (resolved.denial) return resolved.denial;
+  try {
+    return okWrap(
+      await getComputerUseHost().requestWithRecovery('close', {
+        target: buildTarget(args),
+      }),
+    );
+  } catch (e) {
+    return hostErrorToResult(e);
+  }
+}
+
 async function tool_computer_screenshot(args = {}, ctx = {}) {
   const resolved = resolveScreenshotOutPath(args, ctx);
   if (resolved.denial) return resolved.denial;
@@ -236,7 +253,7 @@ async function tool_computer_wait(args = {}, _ctx = {}) {
       await getComputerUseHost().requestWithRecovery('wait', {
         target: buildTarget(args),
         ...extra,
-      }, 40000),
+      }, 30000), // BLOCK-345 P3 — 超时单源：契约与 sidecar 上限均为 30000（原 40000 三处漂移）
     );
   } catch (e) {
     return hostErrorToResult(e);
@@ -257,6 +274,7 @@ module.exports = {
   tool_computer_type,
   tool_computer_press,
   tool_computer_scroll,
+  tool_computer_close,
   tool_computer_screenshot,
   tool_computer_wait,
   tool_computer_authorize,

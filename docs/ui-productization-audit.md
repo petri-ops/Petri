@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-691: computer-use 闭环修补——控制类确认卡接入 + PiP 截帧链修复 + 工具面契约自洽（BLOCK-345 P1-P3；2026-11-04 **verified（dev Electron 边界内；契约 block344 8/8 + block345 16/16 默认跑法绿 + 前端 381/381 + REST 实机 ✓）**）
+
+- **P1 控制类确认卡（断链 #1）**：①后端审批事件上抬改**工具无关**（tool-events.js——此前只认 `run_tool`，控制类 computer_* 在完全访问档的两段式 ackToken 永远到不了前端；字段与语义零变化）；②`conversationRunStore` pendingApproval 生成去 `run_tool` 硬编码；③SimpleChat 确认卡渲染**不再与 full 档互斥**（控制类只在 full 档放行——full 档反而必须能看见确认卡）。批准/拒绝复用既有 useApprovalFlow→run-tool-ack + ackToolJob 零改动。
+- **P2 PiP 截帧链修复（断链 #2）**：路由传 `out`（主进程临时 .png）→ 读盘转 base64 → 删临时文件（两侧 sidecar 返回形状无 base64——此前 `{}` 调用恒 invalid_params + 只认 pngBase64 恒 frame_shape_unexpected 双断）；macOS 无 lastSnapshotPid 时 200+`no_target_snapshot` 可解释引导（不假装有画面）；真失败 503。
+- **P3 契约自洽（断链 #3+漂移）**：暴露 `computer_close`（Windows WM_CLOSE 走 sidecar close verb；macOS Swift 无 verb→host 上抬 unsupported_verb 诚实错误，工具面 8→9）；`computer_authorize` 元数据对齐 R0/只读/无审批（registry 同源）；click/type/press/scroll schema 补 `hwnd`（Windows 直投）与 `summary`（审批卡 message）——实现消费但 schema 未声明的漂移清偿；`computer_wait` 超时收敛 30000 单源（契约/sidecar 上限同值，handler 40000 漂移清偿）。
+- **测试基建假红根修**：block48 默认跑法挂 watchdog 3min（单例 host 的 sidecar 子进程不退出）→ 测试尾显式 `host.stop()` 收尾 → **默认跑法 16/16 绿**（逻辑本身一直绿，进程收尾才是缺陷）。
+- **验证**：契约 block344-edit-governance 8/8（含 readRevision/actor/diffToOperations）+ block345 事件契约（computer_click 首调 needApproval/ackToken 上抬）+ 审批回归 14/14 + 前端 381/381 + tsc 0 + lint 0 error；REST 实机 ✓（diff changed/apply actor=read 链）。
+
 ## UI-690: 3D 编辑器渲染回验——视口 PNG 快照进会话 + 判据 prompt（BLOCK-344 P4；2026-11-04 **verified（dev Electron 边界内；前端 144/144 + 契约 36/36）**）
 
 - **通道**：Model3DScene 加 `onSnapshotApi`（renderer 已 `preserveDrawingBuffer: true`——capture=渲染一帧→`domElement.toDataURL('image/png')`，画布污染/未就绪如实 null）；Surface 工具栏「回验」按钮 → capture → **复用 `petri:composer-attach-image`**（UI-680 既有通道）+ copilotAsk 判据 prompt（SceneSpec 参数/节点清单 + 指路 model3d_inspect / model3d_propose 先说方案）——「改→渲染→模型看图→迭代」真闭环打通（与 SVG 侧 UI-676/680 同构）。

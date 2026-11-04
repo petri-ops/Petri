@@ -510,8 +510,9 @@ export function startConversationRun(options: StartConversationRunOptions): bool
       replaceRun(conversationId, (current) => ({
         ...current,
         toolActivities: mergeToolResultActivity(current.toolActivities, event),
+        // BLOCK-345 P1 — 审批事件工具无关（控制类 computer_* 在完全访问档同样两段式 ack）
         pendingApproval:
-          event.name === 'run_tool' && event.needApproval && event.ackToken
+          event.needApproval && event.ackToken
             ? {
                 ackToken: event.ackToken,
                 toolJobId: event.toolJobId,
