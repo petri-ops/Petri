@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T11:29:19.222Z",
+  "generatedAt": "2026-11-04T11:31:14.013Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -7,7 +7,7 @@
     "contracts": 115,
     "metadata": 116,
     "ipcChannels": 180,
-    "ipcMissingPreload": 15,
+    "ipcMissingPreload": 14,
     "ipcUnusedInRenderer": 177,
     "routes": 285,
     "routeModules": 47,
@@ -15,8 +15,8 @@
     "storageKeys": 7,
     "findingsBySeverity": {
       "P1": 0,
-      "P2": 8,
-      "P3": 3
+      "P2": 7,
+      "P3": 4
     },
     "dirtyFiles": 0,
     "defsFallbacks": 0
@@ -65,10 +65,10 @@
       "detail": "metadata 需审批但契约 sideEffect=none"
     },
     {
-      "sev": "P2",
-      "kind": "ipc_channels_without_preload",
-      "subject": "13 个通道",
-      "detail": "已登记但 preload 无包装（需分诊：退役未删 or 漏接）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, petri:agent-workbench-flags, message:append, message:clear, message:count, message:delete, message:get, message:list"
+      "sev": "P3",
+      "kind": "ipc_dead_channels",
+      "subject": "12 个通道",
+      "detail": "登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, message:append, message:clear, message:count, message:delete, message:get, message:list"
     },
     {
       "sev": "P3",
@@ -2794,7 +2794,7 @@
     },
     {
       "channel": "petri:agent-workbench-flags",
-      "inPreload": false,
+      "inPreload": true,
       "usedInRenderer": false
     },
     {
@@ -3696,7 +3696,7 @@
     },
     {
       "channel": "petri:agent-workbench-flags",
-      "inPreload": false,
+      "inPreload": true,
       "usedInRenderer": false
     },
     {

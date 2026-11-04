@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T11:29:19.222Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T11:31:14.013Z
 
 ## 0. 覆盖汇总
 
@@ -10,10 +10,10 @@
 | 工具定义 | 115（16 域；文本降级 0 域） |
 | 工具契约 | 115 |
 | 调度元数据 | 116 |
-| IPC 通道 | 180（preload 缺包装 15；前端零消费 177） |
+| IPC 通道 | 180（preload 缺包装 14；前端零消费 177） |
 | 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 7 |
-| 判定 P1 / P2 / P3 | **0 / 8 / 3** |
+| 判定 P1 / P2 / P3 | **0 / 7 / 4** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -30,12 +30,12 @@
 | schema_undeclared_args | `model3d_export` | 实现读未声明键：scenePath |
 | approval_meta_contract_conflict | `result_edit_plan` | metadata 需审批但契约 sideEffect=none |
 | approval_meta_contract_conflict | `result_edit_plan_in_context` | metadata 需审批但契约 sideEffect=none |
-| ipc_channels_without_preload | `13 个通道` | 已登记但 preload 无包装（需分诊：退役未删 or 漏接）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, petri:agent-workbench-flags, message:append, message:clear, message:count, message:delete, message:get, message:list |
 
 ## 3. P3 明细（卫生；最多列 60 条）
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
+| ipc_dead_channels | `12 个通道` | 登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, message:append, message:clear, message:count, message:delete, message:get, message:list |
 | storage_read_never_written | `executionTargetId` | 2 处：readBrandStorage@frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts , readBrandStorage@frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx |
 | storage_read_never_written | `petri:notify-on-done` | 1 处：getItem@frontend/src/components/copilot/SimpleChat.tsx |
 | storage_read_never_written | `petri_token` | 5 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |

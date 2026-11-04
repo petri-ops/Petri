@@ -296,10 +296,19 @@ function collectChannels() {
 
 function collectPreloadChannels() {
   const text = src('src/preload.js') ?? '';
-  return uniq([
+  const out = [
     ...[...text.matchAll(/ipcRenderer\.(?:invoke|send)\(\s*'([^']+)'/g)].map((m) => m[1]),
     ...[...text.matchAll(/ipcRenderer\.on\(\s*'([^']+)'/g)].map((m) => m[1]),
-  ]);
+  ];
+  // 常量形式：preload 自包含字面量常量（如 AGENT_WORKBENCH_FLAG_CHANNEL = 'petri:agent-workbench-flags'）
+  // + `ipcRenderer.invoke(CONST)`。不解析会导致「有包装」被误判为漏包装。
+  const consts = new Map();
+  for (const m of text.matchAll(/const\s+([A-Z_][A-Z0-9_]*)\s*=\s*'([^']+)'/g)) consts.set(m[1], m[2]);
+  for (const m of text.matchAll(/ipcRenderer\.(?:invoke|send)\(\s*([A-Z_][A-Z0-9_]*)\s*[,)]/g)) {
+    const ch = consts.get(m[1]);
+    if (ch) out.push(ch);
+  }
+  return uniq(out);
 }
 
 function collectRendererStrings() {
@@ -491,9 +500,16 @@ function build() {
     'computer-use:pip-frame', 'computer-use:pip-status',
   ]);
   const missingPreload = ipcRows.filter((x) => !x.inPreload && !MAIN_ONLY.has(x.channel));
-  if (missingPreload.length > 0) {
-    add('P2', 'ipc_channels_without_preload', `${missingPreload.length} 个通道`,
-      `已登记但 preload 无包装（需分诊：退役未删 or 漏接）：${missingPreload.map((x) => x.channel).join(', ')}`);
+  // 分诊：有前端消费=真断链（P2，渲染侧够不着）；无任何消费=死通道（P3，卫生债，删或接线待裁决）
+  const missingWithConsumer = missingPreload.filter((x) => x.usedInRenderer);
+  const missingDead = missingPreload.filter((x) => !x.usedInRenderer);
+  if (missingWithConsumer.length > 0) {
+    add('P2', 'ipc_channels_without_preload', `${missingWithConsumer.length} 个通道`,
+      `前端仍在消费但 preload 无包装（渲染侧不可达）：${missingWithConsumer.map((x) => x.channel).join(', ')}`);
+  }
+  if (missingDead.length > 0) {
+    add('P3', 'ipc_dead_channels', `${missingDead.length} 个通道`,
+      `登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：${missingDead.map((x) => x.channel).join(', ')}`);
   }
   const ipcUnused = ipcRows.filter((r) => !r.usedInRenderer);
 
