@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-693: Inkscape 1.4.4 协处理器四项实机打通——布尔/文字转路径/PDF 导出 + 1.4 CLI 三处抓真（2026-11-04；**verified（dev Electron 边界内；REST 实机 ✓ + flow 待入腿）**）
+
+- **环境**：Inkscape 1.4.4 arm64（brew cask 安装，/Applications/Inkscape.app）——探针实时扫盘 `available=True`（source=path），SVG 编辑器「Inkscape 协处理」区块自动解锁（无需重启后端）。
+- **实机抓真三处（1.4 CLI 与旧文档差异）**：①布尔 action 名是 **path-union/path-difference/path-intersection**（旧名 union/difference/intersection 在 1.4 actions 表不存在，链遇未知 action 静默中断 → 导出原文件「假 changed」）；②`select-all` 裸用无效，参数枚举只有 all/layers/no-layers/groups/no-groups（用 no-groups=所有非组对象）；③**text 转路径是导出参数 `--export-text-to-path`**（非 action——1.4 无 text 专用 action）。
+- **四项 REST 实机**（:3001 真后端 → tool_svg_inkscape → CAS 守卫 + 审计快照写盘）：①union：两重叠 rect → **1 path** 合并；②text-to-path：text 消失转路径（--export-text-to-path）；③difference：真差集；④export-pdf：落同目录 .pdf（2680 bytes 非空）。
+- **治理**：写回走 tool_svg_inkscape 既有链（before-sha CAS + svg-revisions 审计快照），契约测试补 buildArgs 形态断言。
+
 ## UI-692: SVG 编辑器图片引用模式——项目内相对路径引用 + 显示改写 + 白名单守卫（BLOCK-344 顺延项清偿；2026-11-04 **verified（dev Electron 边界内；前端 65/65 + flow 72/72 allPass）**）
 
 - **两种图片形态并存**：①data: 内嵌（UI-672，文件随 SVG 走）；②**引用模式**（新增）：`href` 存**项目内相对路径**（如 assets/logo.png）——资产随项目走、文件可替换不重新嵌入。

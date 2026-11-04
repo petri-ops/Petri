@@ -51,15 +51,27 @@ function inkscapeStatus(env) {
   return probeInkscape(env);
 }
 
-/** 动作 → Inkscape CLI 参数（Inkscape 1.x --actions / 导出参数）。 */
+/**
+ * 动作 → Inkscape CLI 参数。
+ * Inkscape 1.4 实证（--action-list）：布尔= path-union/path-difference/path-intersection
+ * （旧名 union/difference/intersection 不存在，actions 链静默中断导致几何不执行——实机抓真）；
+ * select-all 参数枚举只有 all/layers/no-layers/groups/no-groups（无 objects/texts）。
+ * 文字转路径=全选后 object-to-path（1.4 对 text 同样生效；副作用=全档 shape 转 path，文档化）。
+ */
 function buildArgs(action, svgAbs, outAbs) {
   if (action === 'export-pdf') {
     return ['--export-type=pdf', `--export-filename=${outAbs}`, svgAbs];
   }
   if (action === 'text-to-path') {
-    return [`--actions=select-all:texts;object-to-path;export-filename:${outAbs};export-do`, svgAbs];
+    // 1.x 官方姿势——text 转路径是导出参数（--export-text-to-path），非 action
+    return ['--export-text-to-path', `--export-filename=${outAbs}`, svgAbs];
   }
-  return [`--actions=select-all:objects;${action};export-filename:${outAbs};export-do`, svgAbs];
+  // BLOCK-345 实机抓真——1.4 布尔 action 名是 path-*（union/difference/intersection 在
+  // 1.4 actions 表不存在，链遇未知 action 中断 → 导出原文件假 changed）
+  const verbs = { union: 'path-union', difference: 'path-difference', intersection: 'path-intersection' };
+  const verb = verbs[action];
+  if (!verb) return [`--actions=select-all:no-groups;${verb};export-filename:${outAbs};export-do`, svgAbs];
+  return [`--actions=select-all:no-groups;${verb};export-filename:${outAbs};export-do`, svgAbs];
 }
 
 /**

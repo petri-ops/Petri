@@ -215,3 +215,23 @@ describe('BLOCK-344 桥对账（Blender/Godot 写回守卫）', () => {
     assert.equal(godot.includes('writeFileSync(workspaceRoot'), false);
   });
 });
+
+describe('BLOCK-345 Inkscape 1.4 buildArgs 形态（实机抓真钉死）', () => {
+  const { buildArgs } = require('../core/petri-server/helpers/inkscape.js');
+
+  it('布尔/文字转路径用 1.4 实名 path-* + select-all:no-groups（旧名 union 在 1.4 不存在）', () => {
+    const args = buildArgs('union', '/a.svg', '/b.svg');
+    assert.equal(args[0], '--actions=select-all:no-groups;path-union;export-filename:/b.svg;export-do');
+    const diff = buildArgs('intersection', '/a.svg', '/b.svg');
+    assert.ok(diff[0].includes('path-intersection'));
+    const t2p = buildArgs('text-to-path', '/a.svg', '/b.svg');
+    assert.equal(t2p[0], '--export-text-to-path');
+    assert.equal(t2p[1], '--export-filename=/b.svg');
+  });
+
+  it('export-pdf 走导出参数', () => {
+    const args = buildArgs('export-pdf', '/a.svg', '/a.pdf');
+    assert.equal(args[0], '--export-type=pdf');
+    assert.equal(args[2], '/a.svg');
+  });
+});
