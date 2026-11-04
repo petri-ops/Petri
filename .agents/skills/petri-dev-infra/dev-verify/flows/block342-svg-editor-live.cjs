@@ -214,7 +214,18 @@ module.exports = {
         return JSON.stringify({ ok: true, transform: rect.getAttribute('transform') });
       })()`);
       const dragInfo = JSON.parse(dragged);
-      assert('V5_drag_applied_locally', dragInfo.ok === true && /translate\(/.test(dragInfo.transform || ''), JSON.stringify(dragInfo));
+      // UI-682 修漂移——精确位移断言：+48/+24 屏幕 → translate(48/k, 24/k)（k=meet 系数，页面内实测）
+      const drift = await lib.evalJs(client, `(function(){
+        const svg = document.querySelector('${RAIL} [data-testid="svg-editor-canvas"] svg');
+        const r = svg.getBoundingClientRect();
+        const vb = svg.viewBox.baseVal;
+        const k = Math.min(r.width / vb.width, r.height / vb.height);
+        const tf = svg.querySelector('#box').getAttribute('transform') || '';
+        return JSON.stringify({ k: +k.toFixed(3), tf, expTf: 'translate(' + +(48 / k).toFixed(2) + ' ' + +(24 / k).toFixed(2) + ')' });
+      })()`);
+      const dr = JSON.parse(drift || '{}');
+      // UI-682 修漂移——精确位移断言：+48/+24 屏幕 → translate(48/k, 24/k)（k=meet 系数页面内实测）
+      assert('V5_drag_applied_locally', dr.tf === dr.expTf, `drift=${drift}`);
 
       const saveEnabled = await waitFor(client, `(function(){
         const save = document.querySelector('${RAIL} [data-testid="svg-editor-save"]');
@@ -232,7 +243,11 @@ module.exports = {
       const afterSave = fs.readFileSync(SAMPLE_ABS, 'utf8');
       const afterSha = sha(Buffer.from(afterSave, 'utf8'));
       assert('V6_file_written', afterSha !== baseSha, `base=${baseSha.slice(0, 12)} now=${afterSha.slice(0, 12)}`);
-      assert('V6b_translate_persisted', /<rect[^>]*transform="translate\(48 24\)"/.test(afterSave), afterSave.match(/<rect[^>]*>/)?.[0] || 'no rect');
+      // UI-682 修漂移后 translate 数值=48/k,24/k（drift 实测值），不再硬编码 48/24
+      assert('V6b_translate_persisted',
+        afterSave.includes(dr.tf),
+        afterSave.match(/<rect[^>]*>/)?.[0] || 'no rect');
+
       assert('V6c_locality_preserved', afterSave.includes('<!-- BLOCK-342 live 样本') && afterSave.includes('<text id="caption"'), 'comment/text intact');
 
       // V7 — 重新打开：整页刷新后 modal 关闭（方案 A 形态回归）→ 再点入口进编辑器；零操作保存仍禁用

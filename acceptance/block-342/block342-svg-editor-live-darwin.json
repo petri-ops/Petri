@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-04T01:02:57.575Z",
-  "finishedAt": "2026-11-04T01:03:24.963Z",
+  "startedAt": "2026-11-04T01:13:48.884Z",
+  "finishedAt": "2026-11-04T01:14:15.978Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793753416033"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793754751418"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -32,7 +32,7 @@
     {
       "name": "V2e_canvas_filled_by_svg",
       "pass": true,
-      "detail": "{\"cover\":0.982,\"svgW\":1786,\"svgH\":813}"
+      "detail": "{\"cover\":0.979,\"svgW\":1507,\"svgH\":622}"
     },
     {
       "name": "V2d_default_state",
@@ -42,7 +42,7 @@
     {
       "name": "V3_rect_dispatch_ok",
       "pass": true,
-      "detail": "{\"ok\":true,\"x\":595,\"y\":480}"
+      "detail": "{\"ok\":true,\"x\":535,\"y\":415}"
     },
     {
       "name": "V4_selection_visible",
@@ -52,12 +52,12 @@
     {
       "name": "V4b_inspector_col_272",
       "pass": true,
-      "detail": "{\"ok\":true,\"width\":272,\"left\":1584,\"cols\":\"1563.76px 271.998px\"}"
+      "detail": "{\"ok\":true,\"width\":272,\"left\":1304,\"cols\":\"1284.12px 271.993px\"}"
     },
     {
       "name": "V5_drag_applied_locally",
       "pass": true,
-      "detail": "{\"ok\":true,\"transform\":\"translate(48 24)\"}"
+      "detail": "drift={\"k\":2.592,\"tf\":\"translate(18.52 9.26)\",\"expTf\":\"translate(18.52 9.26)\"}"
     },
     {
       "name": "V5b_save_unlocked_after_drag",
@@ -67,12 +67,12 @@
     {
       "name": "V6_file_written",
       "pass": true,
-      "detail": "base=7a4bdfe2f7b8 now=595b0506b89b"
+      "detail": "base=7a4bdfe2f7b8 now=01cac178b49e"
     },
     {
       "name": "V6b_translate_persisted",
       "pass": true,
-      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#4a7cba\"  transform=\"translate(48 24)\"/>"
+      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#4a7cba\"  transform=\"translate(18.52 9.26)\"/>"
     },
     {
       "name": "V6c_locality_preserved",
@@ -117,12 +117,12 @@
     {
       "name": "V9d_status_saved_after_commit",
       "pass": true,
-      "detail": "{\"state\":\"saved\",\"text\":\"✓ 已保存 · 11879eb7\"}"
+      "detail": "{\"state\":\"saved\",\"text\":\"✓ 已保存 · b3a1155b\"}"
     },
     {
       "name": "V9c_fill_persisted",
       "pass": true,
-      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#cc0000\"  transform=\"translate(48 24)\"/>"
+      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#cc0000\"  transform=\"translate(18.52 9.26)\"/>"
     },
     {
       "name": "V10_doc_palette_extracted",
@@ -182,12 +182,12 @@
     {
       "name": "V14_node_drag_d_changed",
       "pass": true,
-      "detail": "{\"d\":\"M 247.46 45.59 L 330 40 L 330 110 Z\",\"expX\":247.5,\"expY\":45.6} got=M 247.46 45.59"
+      "detail": "{\"d\":\"M 249.9 47.43 L 330 40 L 330 110 Z\",\"expX\":249.9,\"expY\":47.4} got=M 249.9 47.43"
     },
     {
       "name": "V14b_node_drag_persisted",
       "pass": true,
-      "detail": "d=M 247.46 45.59 L 330 40 L 330 110 Z"
+      "detail": "d=M 249.9 47.43 L 330 40 L 330 110 Z"
     },
     {
       "name": "V15_pen_insert_pending",
@@ -252,7 +252,7 @@
     {
       "name": "V19c_proposal_persisted",
       "pass": true,
-      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#770000\"  transform=\"translate(48 24)\"/>"
+      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#770000\"  transform=\"translate(18.52 9.26)\"/>"
     },
     {
       "name": "V21_selection_toolbar",
@@ -277,7 +277,7 @@
     {
       "name": "V22c_style_persisted",
       "pass": true,
-      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#770000\"  transform=\"translate(48 24)\" style=\"fill-opacity:0."
+      "detail": "<rect id=\"box\" x=\"40\" y=\"40\" width=\"120\" height=\"80\" fill=\"#770000\"  transform=\"translate(18.52 9.26)\" style=\"fill-opaci"
     },
     {
       "name": "V23_compare_overlay",
@@ -297,7 +297,7 @@
     {
       "name": "V26_row2_resizable",
       "pass": true,
-      "detail": "before=250 after=310 row=null"
+      "detail": "before=196 after=256 row=null"
     },
     {
       "name": "V20_render_check_snapshot",
@@ -317,7 +317,7 @@
     {
       "name": "V8_stale_apply_rejected",
       "pass": true,
-      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"1e5a1a57b7debe312588269bbf14e9d5b83c0a1fb07c8eceb243d8eb1ecfe7a7"
+      "detail": "status=409 code=svg_hash_mismatch body={\"ok\":false,\"error\":\"svg_hash_mismatch\",\"message\":\"expectedSha 与文本实际 sha256 不符\",\"beforeSha256\":\"5e354b07deebadc4d667c09542907ee0b979e204cc5b9275c084f7921d7e6992"
     },
     {
       "name": "V13_close_returns_to_thumb",

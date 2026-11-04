@@ -65,3 +65,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-04T00:52:20.286Z -->
 最后更新：2026-11-03（✅ **BLOCK-342 切片6：提案幽灵叠加（UI-675；实机 51/51）**：事件协议 petri:svg-proposal（events.ts 类型化登记）+ 编辑器订阅（path 匹配/形态校验不猜）+ previewMarkup 半透明 ghost 同 scale 叠加 + 提案浮条逐项接受（op 序列即语义 diff，单 op commit）/全部接受/拒绝。**chat 派发侧接线=reopen**（通用工具结果渲染链单独切片，flow 以合成事件实机验证编辑器侧全链）。前端 62/62 + tsc 0 + lint 0；flow V19 三断言（ghost 在场/接受后退场+落盘前置/落盘）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T01:04:32.981Z -->
+最后更新：2026-11-03（✅ **BLOCK-342 切片7：渲染回验（UI-676；实机 53/53）**：工具栏「回验」→ 当前视图按 viewBox 等比 PNG 快照（Blob→Image→离屏 canvas ≤1024；画布污染/解码失败如实报错）→ 浮条预览 → 「请 agent 回验」copilotAsk 注入判据（路径+待保存 op 摘要+svg_inspect 结构回验判据，propose 先说方案）。vision 判据（看图进会话）如实 reopen 待附件通道。前端 62/62 + tsc 0 + lint 0；flow V20 两断言。**至此 plan §8 reopen 七项全部交付或如实降档**（路径节点/钢笔/图片嵌入/渐变/Inkscape 探针+守卫/提案幽灵/渲染回验），余=chat 派发侧接线、vision 判据附件通道、位图描摹、版本对比/历史面板。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -418,8 +418,13 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     const drag = dragRef.current;
     const host = hostRef.current;
     if (!drag || !host) return;
-    const dx = (event.clientX - drag.startX) / scale;
-    const dy = (event.clientY - drag.startY) / scale;
+    // UI-682 修漂移——位移一律走 toUser 差值（meet letterbox + CSS 缩放复合系数都在换算里；
+    // 旧 /scale 只在「svg 布满=k==scale」的旧模型下成立，contain 填满后拖拽比指针快数倍）
+    const from = toUser(drag.startX, drag.startY);
+    const to = toUser(event.clientX, event.clientY);
+    if (!from || !to) return;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
     if (!drag.moved && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_THRESHOLD) return;
     drag.moved = true;
 
@@ -489,8 +494,11 @@ export function SvgEditorCanvas({ markup, scale, selected, hostRef, onSelectionC
     }
 
     if (!drag.moved) return;
-    const dx = (event.clientX - drag.startX) / scale;
-    const dy = (event.clientY - drag.startY) / scale;
+    const from = toUser(drag.startX, drag.startY);
+    const to = toUser(event.clientX, event.clientY);
+    if (!from || !to) return;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
     const ops: SvgOp[] = drag.targets
       .filter((t) => {
         const current = t.el.getAttribute('transform');
