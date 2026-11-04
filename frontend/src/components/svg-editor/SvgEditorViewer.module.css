@@ -1913,12 +1913,16 @@
 
 .layers,
 .revisionCard {
-  flex: 0 0 auto;
+  /* UI-684 — 高度链路纪律：卡片高度由 grid 行高（--svg-row2）决定，本卡只做 flex 列容器，
+     列表 flex:1 填满——禁止 height/max-height 固定值（固定=拖大后下半空白的根因） */
+  flex: 1;
   width: auto;
   max-width: none;
-  height: 196px;
+  min-height: 0;
   margin: 0;
   padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
@@ -1960,7 +1964,8 @@
   margin: 6px 0 0;
   padding: 0;
   list-style: none;
-  max-height: 140px;
+  flex: 1;
+  min-height: 0;
   overflow: auto;
 }
 

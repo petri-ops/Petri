@@ -68,3 +68,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-04T01:04:32.981Z -->
 最后更新：2026-11-03（✅ **BLOCK-342 切片7：渲染回验（UI-676；实机 53/53）**：工具栏「回验」→ 当前视图按 viewBox 等比 PNG 快照（Blob→Image→离屏 canvas ≤1024；画布污染/解码失败如实报错）→ 浮条预览 → 「请 agent 回验」copilotAsk 注入判据（路径+待保存 op 摘要+svg_inspect 结构回验判据，propose 先说方案）。vision 判据（看图进会话）如实 reopen 待附件通道。前端 62/62 + tsc 0 + lint 0；flow V20 两断言。**至此 plan §8 reopen 七项全部交付或如实降档**（路径节点/钢笔/图片嵌入/渐变/Inkscape 探针+守卫/提案幽灵/渲染回验），余=chat 派发侧接线、vision 判据附件通道、位图描摹、版本对比/历史面板。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T01:15:07.480Z -->
+最后更新：2026-11-03（✅ **BLOCK-342 收口总账（registry → completed；用户发令「按照你的建议开整 逐个进行直到完成」）**：八提交 e2d1d008→087dfeeb——方案A modal 批（UI-668/669）+ 七 reopen 切片（UI-670~676）；flow `block342-svg-editor-live` 31→53 断言逐刀实机 allPass；门禁=closeout 十三门 PASS + 契约 28/28 + svgEditorImage 6/6 + svgEditorGradient 9/9 + svgChangeList 6/6 + svgPathNodes 15/15 + 前端 70/70 + tsc 0 + lint 0 error（棘轮豁免留痕：set-state-in-effect×1/refs×2 刻意 overlay 形态 + accent +5 选中态把手）。实机抓真 5 处全修并留档（合成指针 capture/setState 批量旧闭包/flow dragRef 泄漏/insert 单元素口径/正则字面量不插值）。范围守住=前端 svg-editor 面 + flow + 治理文档；后端仅 svg-tools/routes/inkscape helper；**他包在制面零触碰**。遗留候选=reopen 交接项五类（plan §10，需裁决立项）；环境债 🟡 petri-pack-bio 未克隆另线处置。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-684: SVG 编辑器修订历史卡高度链路修复 + 底排拖拽（2026-11-04 用户实时反馈批+截图；**verified（dev Electron 边界内；实机 65/65 allPass + 截图过目）**）
+
+- **问题（用户反馈+截图）**：「修订历史的卡片高度应该和左侧图层卡片保持一致」——修订列表只显示上半 ~140px，卡片下半空白；且用户点出根因性缺陷：「每次新建卡片高度都是默认固定的，没有根据实际布局调整高度」。
+- **根因（两处固定值叠加）**：`.revisionCard { height: 196px }` 写死 + `.revisionList { max-height: 140px }` 写死——拖大底排后卡片背景随行高走，内部列表视口仍 140，下半空白死区。左侧图层卡「对」是因高度链恰好完整。
+- **修法**：高度链路完整化——revisionCard 改 flex 列容器（min-height:0，高度由 grid 行 `--svg-row2` 决定）+ revisionList `flex:1; min-height:0` 填满视口；layout 单一真源同步（revisionCard display:flex + row3 定位保留）。
+- **纪律沉淀（用户要求写入 skills）**：`petri-css-theme` 新增 **§6 卡片/容器高度链路纪律**（五条：高度链路完整 / 禁固定 height·max-height（var fallback 承载默认值）/ 布局敏感换算从活 DOM 量测 / 自查问句「拖到两倍大会怎样」/ 拖拽后视口≈内容区断言进实机 flow）——三连事故（UI-681 画布/682 底排/684 修订卡）制度化。
+- **验证**：截图过目（修订列表填满卡片、与图层卡等高、对比按钮行内右对齐）；flow `V27_revision_list_fills_card`（拖大后列表视口/卡片内容 = 0.91 ≥0.8），总 **65/65 allPass**。
+
 ## UI-683: SVG 编辑器拖拽漂移根修——位移换算统一走 toUser（2026-11-04 用户实时反馈批；**verified（dev Electron 边界内；实机 64/64 allPass）**）
 
 - **问题（用户反馈）**：「拖拽图形内部的内容有些漂移感」——选择拖拽的位移换算仍用旧模型 `/scale`（CSS 缩放），UI-681 画布改 contain 填满后实际比例是 **meet 系数 k（≠scale，如 1600×700 容器 k≈2.9 vs scale=1）→ 元素跑得比指针快数倍**，即「漂移感」。

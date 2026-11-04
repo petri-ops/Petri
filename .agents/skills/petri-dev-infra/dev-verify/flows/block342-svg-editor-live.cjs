@@ -797,6 +797,21 @@ module.exports = {
           && hInfo.h >= hBefore + 40 && hInfo.rowAligned !== false,
         `before=${hBefore} after=${hInfo.h} row=${JSON.stringify(hInfo.rowAligned)}`);
 
+      // V27 — UI-684 高度链路：拖大后修订列表视口填满卡片（无下半空白死区）
+      const chain = await lib.evalJs(client, `(function(){
+        const card = document.querySelector('${RAIL} [data-testid="svg-editor-revision-panel"]');
+        const list = document.querySelector('${RAIL} [data-testid="svg-editor-revision-list"]');
+        if (!card || !list) return null;
+        const c = card.getBoundingClientRect();
+        const l = list.getBoundingClientRect();
+        // 视口高 ≥ 卡片内容区 80%（flex 链生效；旧 max-height:140 在拖大后必然失衡）
+        return JSON.stringify({ cardH: Math.round(c.height), listH: Math.round(l.height), ratio: +(l.height / (c.height - 30)).toFixed(2) });
+      })()`);
+      const chainInfo = JSON.parse(chain || '{}');
+      assert('V27_revision_list_fills_card',
+        (chainInfo.ratio || 0) >= 0.8 && (chainInfo.listH || 0) > 200,
+        chain || 'revision list missing');
+
 
 
       // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据
