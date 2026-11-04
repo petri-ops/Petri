@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T12:31:54.999Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T12:56:25.322Z
 
 ## 0. 覆盖汇总
 
@@ -13,7 +13,7 @@
 | IPC 通道 | 168（preload 缺包装 2；前端零消费 165） |
 | 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
-| 判定 P1 / P2 / P3 | **0 / 0 / 3** |
+| 判定 P1 / P2 / P3 | **0 / 0 / 2** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -27,7 +27,6 @@
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
-| route_endpoint_no_frontend_consumer | `3 个端点` | 业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：GET /api/ai/site-snapshot, GET /api/ai/docs-index, POST /api/harness/context-checkpoint |
 | storage_read_never_written | `petri_token` | 3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
 | storage_read_never_written | `petri.simplechat.extraRenderers` | 1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx |
 

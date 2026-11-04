@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T12:31:54.999Z",
+  "generatedAt": "2026-11-04T12:56:25.322Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -16,18 +16,12 @@
     "findingsBySeverity": {
       "P1": 0,
       "P2": 0,
-      "P3": 3
+      "P3": 2
     },
     "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
-    {
-      "sev": "P3",
-      "kind": "route_endpoint_no_frontend_consumer",
-      "subject": "3 个端点",
-      "detail": "业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：GET /api/ai/site-snapshot, GET /api/ai/docs-index, POST /api/harness/context-checkpoint"
-    },
     {
       "sev": "P3",
       "kind": "storage_read_never_written",

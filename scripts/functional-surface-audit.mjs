@@ -559,10 +559,18 @@ function build() {
   // 零消费端点机械检测（T4 那批「后端齐、前端零调用」的通用化）。
   // 只覆盖业务面前缀，避免把 MCP/CLI/内部端点误报成缺口。
   const FRONTEND_FACING = ['/api/ai/', '/api/harness/', '/api/federation/', '/api/remote-targets/', '/api/knowledge/'];
+  // 内部面白名单：只服务 agent / harness 自身的数据源，**本就不该有用户 UI**。
+  // 放进这里而非硬做面板——否则等于为清零而造无用界面。
+  const INTERNAL_ONLY_ENDPOINTS = new Set([
+    'GET /api/ai/site-snapshot',             // agent 建站点上下文用的快照
+    'GET /api/ai/docs-index',                // agent RAG 的文档索引
+    'POST /api/harness/context-checkpoint',  // harness 崩溃恢复的上下文副本
+  ]);
   const corpus = collectFrontendCorpus();
   const orphanEndpoints = [];
   for (const ep of routes.endpoints) {
     if (!FRONTEND_FACING.some((p) => ep.route.startsWith(p))) continue;
+    if (INTERNAL_ONLY_ENDPOINTS.has(`${ep.method} ${ep.route}`)) continue;
     const segs = ep.route.replace(/:[^/]+/g, '').split('/').filter(Boolean);
     // 业务段（api/<域>/<资源> 的第 3 段）比 'api/ai' 这种公共前缀更有判别力
     const probe = segs[2] || segs[1] || '';
