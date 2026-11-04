@@ -7380,6 +7380,26 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block351-evidence-assetization",
+      "note": "BLOCK-351 证据资产化：EAR 口径/manifest builder/ear 复算与门/完整性断言批。改口径或批次时跑本包测试与 ear 门。",
+      "patterns": [
+        "scripts/block351-*.mjs",
+        "test/block351-*.test.mjs",
+        "acceptance/block-351/**",
+        "docs/block351-ear-definition.md",
+        "docs/block-351-*.md"
+      ],
+      "tests": [
+        "test/block351-ear.test.mjs",
+        "test/block351-assetization.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

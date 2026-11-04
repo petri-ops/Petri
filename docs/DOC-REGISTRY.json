@@ -9270,6 +9270,23 @@
       "canonical": true
     },
     {
+      "id": "BLOCK-351-EAR-DEFINITION",
+      "path": "docs/block351-ear-definition.md",
+      "kind": "governance",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block351-ear-definition",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-351",
+        "governance"
+      ],
+      "notes": "EAR 口径定义（冻结）：分子=acceptance 文件被 test 源码字面引用 ∧ impact-map 规则匹配；分母=acceptance 全量禁缩；达标线 40% 棘轮只进不退；不可资产化登记即止。"
+    },
+    {
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "path": "docs/block-349-evidence-clearance-plan.md",
@@ -9340,7 +9357,7 @@
       "capability": "block-351-evidence-assetization",
       "path": "docs/block-351-evidence-assetization-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-351-evidence-assetization",
       "entrypoint": "docs/README.md",
@@ -9365,7 +9382,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（总纲 NEXT-PHASE-PROGRAM-2026-11-05）。证据资产化 EAR 10%→40%。目标：把 acceptance 里的一次性验收笔录分批转成进门禁 / 可复跑探针，使证据资产化率 EAR 从 ≈10% 提升到 ≥40%，并让 EAR 本身可机械复算。 依赖：BLOCK-349,BLOCK-350。逐包发令开工，不并行。"
+      "notes": "2026-11-05 收口 completed（总纲包 4/7）。EAR=871/2013=43.3%（≥40% 达标，口径冻结于 docs/block351-ear-definition.md 带时间戳）；批次断言 24 目录 680 文件完整性（JSON/魔数/语义自洽+历史形态校准）；manifest 棘轮 + quality:ear 门入 closeout（15→16 门）；负测 8/8（删引用/删 entry/跌破棘轮/假探针拦截）。报告明细=acceptance/block-351/ear-snapshot.json。"
     },
     {
       "id": "BLOCK-352",

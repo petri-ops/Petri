@@ -1,6 +1,6 @@
 ---
 capability: block-351-evidence-assetization
-status: planned
+status: completed
 goal: 把 acceptance 里的一次性验收笔录分批转成进门禁 / 可复跑探针，使证据资产化率 EAR 从 ≈10% 提升到 ≥40%，并让 EAR 本身可机械复算。
 acceptance:
   - EAR 口径文档落盘且带时间戳；node scripts/block351-ear.mjs 可复算。
@@ -11,7 +11,7 @@ reopen: G1+ 项；追求 100% 资产化（历史环境不可复现者明确登�
 
 # BLOCK-351 — 证据资产化 EAR 10% → 40%（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——EAR 43.3% 达标；口径=docs/block351-ear-definition.md；quality:ear 入 closeout 16 门
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §3.7 / §4
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**

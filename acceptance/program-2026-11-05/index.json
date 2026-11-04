@@ -134,7 +134,7 @@
       "id": "BLOCK-351",
       "capability": "block-351-evidence-assetization",
       "title": "证据资产化 EAR 10%→40%",
-      "status": "planned",
+      "status": "completed",
       "priority": "P1",
       "plan": "docs/block-351-evidence-assetization-plan.md",
       "goal": "把 acceptance 里的一次性验收笔录分批转成进门禁 / 可复跑探针，使证据资产化率 EAR 从 ≈10% 提升到 ≥40%，并让 EAR 本身可机械复算。",
