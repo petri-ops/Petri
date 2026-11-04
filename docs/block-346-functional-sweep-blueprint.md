@@ -123,7 +123,7 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 
 矩阵新增 `route_endpoint_no_frontend_consumer` 检测（业务面前缀 `/api/{ai,harness,federation,remote-targets,knowledge}/` 下取第 3 段业务名比对前端语料）。首次运行命中 **10 个真零消费端点**（抽查 5 个全部 0 引用，且前端无 `/ai/${}` 变量拼接误报）：
 `POST /api/ai/memory-wipe` · `GET|PUT /api/ai/memory-policy` · `GET /api/ai/agent-audit` · `POST /api/ai/agent-undo/:token` · `GET|POST /api/ai/agent-settings` · `GET /api/ai/site-snapshot` · `GET /api/ai/docs-index` · `POST /api/harness/context-checkpoint`。
-性质=**后端能力已就绪、前端零入口**（与 T4 那批同型，但需逐个设计 UI，非纯接线）→ 登记 P3 待接线，不在本包硬做。
+性质=**后端能力已就绪、前端零入口**（与 T4 那批同型，但需逐个设计 UI，非纯接线）。**处置：已接线 7 条**——`AgentAuditPanel`（agent-audit + agent-undo + agent-settings 暂停）与 `MemoryPolicyPanel`（memory-policy GET|PUT + memory-wipe 二次确认），各 3/3 测试，零消费端点 **10 → 3**。剩 3 条为诊断/内部端点（site-snapshot / docs-index / harness context-checkpoint），无用户面需求，保留 P3 记录。
 
 ## §2.9 四批交付完成与收口例外（2026-11-04）
 
