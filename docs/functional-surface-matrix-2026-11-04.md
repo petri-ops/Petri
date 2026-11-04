@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 4 个不计入判定）。生成时间：2026-11-04T11:33:39.567Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T11:43:14.435Z
 
 ## 0. 覆盖汇总
 
@@ -94,12 +94,12 @@
 | `model3d_bom` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `model3d_recipe` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `model3d_blend_ops` | model3d | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | - |
-| `delegate_to_petri_node` | remote | ✓ | ✓ | ✓ | R2 | external-request | yes | yes | - |
+| `delegate_to_petri_node` | remote | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `federation_list_peers` | remote | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
 | `resident_task_create` | resident | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `resident_task_list` | resident | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `resident_task_read` | resident | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
-| `generate_methods` | result-studio | ✓ | ✓ | ✓ | R1 | external-request | yes | yes | - |
+| `generate_methods` | result-studio | ✓ | ✓ | ✓ | R1 | state-write | yes | yes | - |
 | `result_edit_plan` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `result_changeset_create` | result-studio | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `result_changeset_status` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -160,7 +160,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M core/petri-server/agent-tools/tool-defs/agent-orchestration.js`
-- `M core/petri-server/agent-tools/tool-defs/computer.js`
-- `M core/petri-server/agent-tools/tool-defs/model3d.js`
-- `M core/petri-server/agent-tools/tool-metadata.js`
+（无）

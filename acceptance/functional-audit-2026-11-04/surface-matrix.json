@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T11:33:39.567Z",
+  "generatedAt": "2026-11-04T11:43:14.435Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 4
     },
-    "dirtyFiles": 4,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -1274,15 +1274,15 @@
       "handlerStatic": "yes",
       "hasMetadata": true,
       "riskTier": "R2",
-      "sideEffect": "external-request",
+      "sideEffect": "execution",
       "needsApprovalMeta": true,
       "reachable": true,
       "reach": {
         "name": "delegate_to_petri_node",
-        "read": "allow",
-        "workspace-write": "allow",
+        "read": "deny",
+        "workspace-write": "deny",
         "full": "allow",
-        "planMode": "allow"
+        "planMode": "deny"
       },
       "undeclaredArgs": [],
       "schemaProps": 4
@@ -1379,15 +1379,15 @@
       "handlerStatic": "yes",
       "hasMetadata": true,
       "riskTier": "R1",
-      "sideEffect": "external-request",
+      "sideEffect": "state-write",
       "needsApprovalMeta": true,
       "reachable": true,
       "reach": {
         "name": "generate_methods",
-        "read": "allow",
-        "workspace-write": "allow",
+        "read": "deny",
+        "workspace-write": "deny",
         "full": "allow",
-        "planMode": "allow"
+        "planMode": "deny"
       },
       "undeclaredArgs": [],
       "schemaProps": 4
@@ -5996,11 +5996,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
-    "M core/petri-server/agent-tools/tool-defs/computer.js",
-    "M core/petri-server/agent-tools/tool-defs/model3d.js",
-    "M core/petri-server/agent-tools/tool-metadata.js"
-  ],
+  "dirty": [],
   "defNotes": []
 }
