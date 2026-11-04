@@ -1,16 +1,17 @@
 {
-  "generatedAt": "2026-11-04T11:51:51.219Z",
-  "baselineSha": "bb50d88c",
+  "generatedAt": "2026-11-04T12:16:22.499Z",
+  "baselineSha": "fcd988c0",
   "note": "BLOCK-346 T7 棘轮基线：记录已知存量，--check 只对新增 P1/P2 判红。收敛后 --write-baseline 下调。",
   "counts": {
     "P1": 0,
     "P2": 0,
-    "P3": 2
+    "P3": 3
   },
   "findings": {
     "P1": [],
     "P2": [],
     "P3": [
+      "route_endpoint_no_frontend_consumer::10 个端点",
       "storage_read_never_written::petri.simplechat.extraRenderers",
       "storage_read_never_written::petri_token"
     ]

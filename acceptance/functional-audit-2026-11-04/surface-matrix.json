@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T11:51:51.573Z",
+  "generatedAt": "2026-11-04T12:16:22.914Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -16,12 +16,18 @@
     "findingsBySeverity": {
       "P1": 0,
       "P2": 0,
-      "P3": 2
+      "P3": 3
     },
-    "dirtyFiles": 9,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
+    {
+      "sev": "P3",
+      "kind": "route_endpoint_no_frontend_consumer",
+      "subject": "10 个端点",
+      "detail": "业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：POST /api/ai/memory-wipe, GET /api/ai/memory-policy, PUT /api/ai/memory-policy, GET /api/ai/agent-audit, POST /api/ai/agent-undo/:token, GET /api/ai/agent-settings, POST /api/ai/agent-settings, GET /api/ai/site-snapshot, GET /api/ai/docs-index, POST /api/harness/context-checkpoint"
+    },
     {
       "sev": "P3",
       "kind": "storage_read_never_written",
@@ -5854,16 +5860,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M frontend/src/components/copilot/copilotClient/apiBase.ts",
-    "M frontend/src/components/copilot/extraRenderers.tsx",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.test.tsx",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.tsx",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/ModelAccessPanel.test.tsx",
-    "M frontend/src/hooks/useSshHeartbeat.ts",
-    "M src/database/branch-db.js",
-    "M src/ipc/branch-handlers.js",
-    "M src/ipc/channels.js"
-  ],
+  "dirty": [],
   "defNotes": []
 }

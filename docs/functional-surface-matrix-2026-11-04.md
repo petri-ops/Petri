@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 9 个不计入判定）。生成时间：2026-11-04T11:51:51.573Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T12:16:22.914Z
 
 ## 0. 覆盖汇总
 
@@ -13,7 +13,7 @@
 | IPC 通道 | 168（preload 缺包装 2；前端零消费 165） |
 | 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
-| 判定 P1 / P2 / P3 | **0 / 0 / 2** |
+| 判定 P1 / P2 / P3 | **0 / 0 / 3** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -27,6 +27,7 @@
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
+| route_endpoint_no_frontend_consumer | `10 个端点` | 业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：POST /api/ai/memory-wipe, GET /api/ai/memory-policy, PUT /api/ai/memory-policy, GET /api/ai/agent-audit, POST /api/ai/agent-undo/:token, GET /api/ai/agent-settings, POST /api/ai/agent-settings, GET /api/ai/site-snapshot, GET /api/ai/docs-index, POST /api/harness/context-checkpoint |
 | storage_read_never_written | `petri_token` | 3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
 | storage_read_never_written | `petri.simplechat.extraRenderers` | 1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx |
 
@@ -157,12 +158,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M frontend/src/components/copilot/copilotClient/apiBase.ts`
-- `M frontend/src/components/copilot/extraRenderers.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.test.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/ModelAccessPanel.test.tsx`
-- `M frontend/src/hooks/useSshHeartbeat.ts`
-- `M src/database/branch-db.js`
-- `M src/ipc/branch-handlers.js`
-- `M src/ipc/channels.js`
+（无）

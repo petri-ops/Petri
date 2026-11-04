@@ -119,6 +119,12 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 | 4.5 | `canCompare` 无人消费 + 另一处硬编码 true | **DONE**：Canvas 改 prop（默认 false）由调用方按适配器传；测试补反向断言 |
 | 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | **DONE（除 spreadsheet）**：markdown 文本内嵌（`previewText` + Pane 分支）；**pdf 走浏览器原生 iframe**（零解析依赖，同 report 分支）；spreadsheet 需 xlsx 二进制解析（exceljs 已退役）→ 保留「打开原文件」出口并登记 reopen |
 
+## §2.8 T7 增强：零消费端点机械化（2026-11-04 追加）
+
+矩阵新增 `route_endpoint_no_frontend_consumer` 检测（业务面前缀 `/api/{ai,harness,federation,remote-targets,knowledge}/` 下取第 3 段业务名比对前端语料）。首次运行命中 **10 个真零消费端点**（抽查 5 个全部 0 引用，且前端无 `/ai/${}` 变量拼接误报）：
+`POST /api/ai/memory-wipe` · `GET|PUT /api/ai/memory-policy` · `GET /api/ai/agent-audit` · `POST /api/ai/agent-undo/:token` · `GET|POST /api/ai/agent-settings` · `GET /api/ai/site-snapshot` · `GET /api/ai/docs-index` · `POST /api/harness/context-checkpoint`。
+性质=**后端能力已就绪、前端零入口**（与 T4 那批同型，但需逐个设计 UI，非纯接线）→ 登记 P3 待接线，不在本包硬做。
+
 ## §2.9 四批交付完成与收口例外（2026-11-04）
 
 - **交付**：批 1（T2 + T7）· 批 2（T1 + T3，P1 5→0）· 批 3（T6 + T4 6/7，P2 7→0）· 批 4（T5 精准修 + T8 台账对账）。共 9 次提交。

@@ -328,6 +328,24 @@ function collectRendererStrings() {
   return hits;
 }
 
+/** 前端源码全文语料（用于端点消费判定；拼接后 includes 检索）。 */
+function collectFrontendCorpus() {
+  const chunks = [];
+  const walk = (rel) => {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) return;
+    for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
+      const child = path.posix.join(rel, entry.name);
+      if (entry.isDirectory()) { if (!entry.name.startsWith('.') && entry.name !== 'node_modules') walk(child); continue; }
+      if (!/\.(ts|tsx)$/.test(entry.name) || /\.test\./.test(entry.name)) continue;
+      const text = fs.readFileSync(path.join(ROOT, child), 'utf8');
+      chunks.push(text);
+    }
+  };
+  walk('frontend/src');
+  return chunks.join('\n');
+}
+
 // ── 3. 路由面 ─────────────────────────────────────────────────
 
 function collectRoutes() {
@@ -531,6 +549,23 @@ function build() {
   }
   const unmounted = routes.files.filter((f) => !routes.mounted.includes(f) && f !== 'index' && !secondary.has(f));
   for (const f of unmounted) add('P2', 'route_module_unmounted', f, '路由文件既未在 routes/index.js 挂载、也未被其他路由模块 require');
+
+  // 零消费端点机械检测（T4 那批「后端齐、前端零调用」的通用化）。
+  // 只覆盖业务面前缀，避免把 MCP/CLI/内部端点误报成缺口。
+  const FRONTEND_FACING = ['/api/ai/', '/api/harness/', '/api/federation/', '/api/remote-targets/', '/api/knowledge/'];
+  const corpus = collectFrontendCorpus();
+  const orphanEndpoints = [];
+  for (const ep of routes.endpoints) {
+    if (!FRONTEND_FACING.some((p) => ep.route.startsWith(p))) continue;
+    const segs = ep.route.replace(/:[^/]+/g, '').split('/').filter(Boolean);
+    // 业务段（api/<域>/<资源> 的第 3 段）比 'api/ai' 这种公共前缀更有判别力
+    const probe = segs[2] || segs[1] || '';
+    if (probe && !corpus.includes(probe)) orphanEndpoints.push(`${ep.method} ${ep.route}`);
+  }
+  if (orphanEndpoints.length > 0) {
+    add('P3', 'route_endpoint_no_frontend_consumer', `${orphanEndpoints.length} 个端点`,
+      `业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：${orphanEndpoints.slice(0, 12).join(', ')}${orphanEndpoints.length > 12 ? ' …' : ''}`);
+  }
 
   // 设置键
   const storage = collectStorage();
