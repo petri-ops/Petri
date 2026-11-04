@@ -1,0 +1,33 @@
+{
+  "package": "BLOCK-348",
+  "at": "2026-11-04T16:54:20.497Z",
+  "criteriaFrozenAt": "2026-11-04T16:48:53Z",
+  "provider": {
+    "source": "none",
+    "model": null,
+    "hasKey": false,
+    "skipReason": "未在本机找到 ai-settings.json（已试 2 个候选数据目录）"
+  },
+  "backendUp": true,
+  "tasks": [
+    {
+      "id": "t4-browser-action",
+      "status": "skipped",
+      "reason": "real 凭据不可得：未在本机找到 ai-settings.json（已试 2 个候选数据目录）",
+      "criteriaResults": []
+    }
+  ],
+  "metrics": {
+    "autonomousCompletion": {
+      "numerator": 0,
+      "denominator": 1,
+      "note": "环境不可得任务如实单列（见各任务 reason），仍计入分母"
+    },
+    "interventionCount": 0,
+    "interrupted": 0,
+    "failed": 0,
+    "skipped": 1,
+    "notStarted": 0,
+    "humanEyePending": []
+  }
+}

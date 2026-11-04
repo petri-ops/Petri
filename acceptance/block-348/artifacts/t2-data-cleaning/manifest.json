@@ -1,0 +1,22 @@
+[
+  {
+    "path": "data/cleaned.csv",
+    "bytes": 711,
+    "sha256": "99d9912336890523a368148f2f31e8f3d51f5822d1ba9dfaf41848eb9614362d"
+  },
+  {
+    "path": "data/reads_dirty.csv",
+    "bytes": 811,
+    "sha256": "8bec9efcd766e077cbac111c2b1b2c952735df94efae7daeda0b5280413e04be"
+  },
+  {
+    "path": "out/chart.html",
+    "bytes": 4285,
+    "sha256": "ec3b1b6479a8f912bb2d19f73679c2406445276f6283d70dfb4e2b7d4622c7bc"
+  },
+  {
+    "path": "out/summary.md",
+    "bytes": 1284,
+    "sha256": "ca54b951f15625bd64cbbda2549b31bf7214fea32bd7243cdb92353c1c2f8f60"
+  }
+]

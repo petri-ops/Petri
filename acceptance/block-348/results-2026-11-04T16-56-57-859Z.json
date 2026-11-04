@@ -1,0 +1,68 @@
+{
+  "package": "BLOCK-348",
+  "at": "2026-11-04T16:56:57.859Z",
+  "criteriaFrozenAt": "2026-11-04T16:48:53Z",
+  "provider": {
+    "source": "local-store",
+    "model": "deepseek-chat",
+    "hasKey": true,
+    "skipReason": null
+  },
+  "backendUp": true,
+  "tasks": [
+    {
+      "id": "t4-browser-action",
+      "title": "操作：可控页面上完成一次浏览器具体动作",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_connect",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call browser_connect × 1"
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_act",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call browser_act × 2"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 4,
+      "compactionCount": 0,
+      "durationMs": 56244,
+      "tracePath": "acceptance/block-348/traces/t4-browser-action.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t4-browser-action/workspace",
+      "artifactCount": 0,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    }
+  ],
+  "metrics": {
+    "autonomousCompletion": {
+      "numerator": 1,
+      "denominator": 1,
+      "note": "环境不可得任务如实单列（见各任务 reason），仍计入分母"
+    },
+    "interventionCount": 0,
+    "interrupted": 0,
+    "failed": 0,
+    "skipped": 0,
+    "notStarted": 0,
+    "humanEyePending": [
+      "t4-browser-action"
+    ]
+  }
+}

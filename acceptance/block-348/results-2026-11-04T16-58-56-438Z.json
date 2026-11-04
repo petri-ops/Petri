@@ -1,0 +1,534 @@
+{
+  "package": "BLOCK-348",
+  "at": "2026-11-04T16:58:56.438Z",
+  "criteriaFrozenAt": "2026-11-04T16:48:53Z",
+  "provider": {
+    "source": "local-store",
+    "model": "deepseek-chat",
+    "hasKey": true,
+    "skipReason": null,
+    "envOverrides": {
+      "baseUrlFromEnv": true,
+      "modelFromEnv": "deepseek-chat",
+      "localDataDir": "/Users/zhangdiandian/Documents/BioF3-Local"
+    }
+  },
+  "backendUp": true,
+  "tasks": [
+    {
+      "id": "t1-code-bugfix",
+      "title": "代码：含 bug 小仓库定位+修复+跑测试证明",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_exec",
+          "minTimes": 2,
+          "passed": true,
+          "detail": "tool_call workspace_exec × 5"
+        },
+        {
+          "kind": "tool_output_contains",
+          "tool": "workspace_exec",
+          "value": "pass 3",
+          "passed": true,
+          "detail": "tool workspace_exec 输出含「pass 3」× 1"
+        },
+        {
+          "kind": "file_unmodified",
+          "path": "test/calc.test.mjs",
+          "passed": true,
+          "detail": "test/calc.test.mjs 未被改动"
+        },
+        {
+          "kind": "file_unmodified",
+          "path": "package.json",
+          "passed": true,
+          "detail": "package.json 未被改动"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 13,
+      "compactionCount": 0,
+      "durationMs": 15655,
+      "tracePath": "acceptance/block-348/traces/t1-code-bugfix.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t1-code-bugfix/workspace",
+      "artifactCount": 3,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t2-data-cleaning",
+      "title": "数据：脏 CSV 清洗+出图+结论",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "file_contains",
+          "path": "data/cleaned.csv",
+          "value": "2025-03-07",
+          "passed": true,
+          "detail": "文件 data/cleaned.csv 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "data/cleaned.csv",
+          "value": "2025-02-09",
+          "passed": true,
+          "detail": "文件 data/cleaned.csv 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/chart.html",
+          "value": "<svg",
+          "passed": true,
+          "detail": "文件 out/chart.html 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/chart.html",
+          "value": "2025-03",
+          "passed": true,
+          "detail": "文件 out/chart.html 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/summary.md",
+          "value": "33",
+          "passed": true,
+          "detail": "文件 out/summary.md 含目标内容"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "33",
+          "passed": true,
+          "detail": "最终答复含「33」"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_write",
+          "minTimes": 2,
+          "passed": true,
+          "detail": "tool_call workspace_write × 2"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 9,
+      "compactionCount": 0,
+      "durationMs": 21080,
+      "tracePath": "acceptance/block-348/traces/t2-data-cleaning.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t2-data-cleaning/workspace",
+      "artifactCount": 4,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t3-research-cited",
+      "title": "研究：联网抓取指定主题带引用报告",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "web_fetch",
+          "minTimes": 2,
+          "passed": true,
+          "detail": "tool_call web_fetch × 6"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/report.md",
+          "value": "illustrative examples",
+          "passed": false,
+          "detail": "文件 out/report.md 不含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/report.md",
+          "value": "iana.org",
+          "passed": true,
+          "detail": "文件 out/report.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/report.md",
+          "value": "[1]",
+          "passed": true,
+          "detail": "文件 out/report.md 含目标内容"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "来源",
+          "passed": true,
+          "detail": "最终答复含「来源」"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 10,
+      "compactionCount": 0,
+      "durationMs": 24087,
+      "tracePath": "acceptance/block-348/traces/t3-research-cited.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t3-research-cited/workspace",
+      "artifactCount": 1,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t4-browser-action",
+      "title": "操作：可控页面上完成一次浏览器具体动作",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_connect",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call browser_connect × 1"
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_act",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call browser_act × 3"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 6,
+      "compactionCount": 0,
+      "durationMs": 84787,
+      "tracePath": "acceptance/block-348/traces/t4-browser-action.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t4-browser-action/workspace",
+      "artifactCount": 0,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t5-docs-structuring",
+      "title": "文档：散乱笔记→结构化手册+摘要",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_read",
+          "minTimes": 5,
+          "passed": true,
+          "detail": "tool_call workspace_read × 8"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "背景与决策",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "当前任务",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "待办",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "QMA-3",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "SQLite",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "TTL-15",
+          "passed": true,
+          "detail": "文件 out/handbook.md 含目标内容"
+        },
+        {
+          "kind": "file_min_length",
+          "path": "out/summary.txt",
+          "min": 80,
+          "passed": true,
+          "detail": "out/summary.txt 331 字符（期望 ≥80）"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 11,
+      "compactionCount": 0,
+      "durationMs": 11063,
+      "tracePath": "acceptance/block-348/traces/t5-docs-structuring.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t5-docs-structuring/workspace",
+      "artifactCount": 8,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t6-multi-agent",
+      "title": "多 agent：并行探索 3 方向后汇总",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "subagent_completed",
+          "minTimes": 3,
+          "passed": true,
+          "detail": "done 子任务 × 3"
+        },
+        {
+          "kind": "tool_used",
+          "name": "spawn_agent",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call spawn_agent × 3"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "QED-11",
+          "passed": true,
+          "detail": "文件 out/synthesis.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "HILBERT-4",
+          "passed": true,
+          "detail": "文件 out/synthesis.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "TURING-9",
+          "passed": true,
+          "detail": "文件 out/synthesis.md 含目标内容"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 12,
+      "compactionCount": 0,
+      "durationMs": 14081,
+      "tracePath": "acceptance/block-348/traces/t6-multi-agent.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t6-multi-agent/workspace",
+      "artifactCount": 4,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t7-long-haul",
+      "title": "长任务：30+ 步、中途触发上下文压缩、验保持",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "min_tool_calls",
+          "min": 35,
+          "passed": true,
+          "detail": "全程 tool_call × 49（期望 ≥35）"
+        },
+        {
+          "kind": "event_present",
+          "event": "context_compacted",
+          "passed": false,
+          "detail": "事件缺席"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/final-report.md",
+          "value": "ORCHID-42",
+          "passed": true,
+          "detail": "文件 out/final-report.md 含目标内容"
+        },
+        {
+          "kind": "file_contains_all",
+          "path": "out/final-report.md",
+          "values": [
+            "FACT-003",
+            "FACT-006",
+            "FACT-009",
+            "FACT-012",
+            "FACT-015",
+            "FACT-018",
+            "FACT-021",
+            "FACT-024",
+            "FACT-027",
+            "FACT-030",
+            "FACT-033",
+            "FACT-036",
+            "FACT-039",
+            "FACT-042",
+            "FACT-045",
+            "FACT-048",
+            "FACT-051",
+            "FACT-054",
+            "FACT-057",
+            "FACT-060"
+          ],
+          "passed": true,
+          "detail": "out/final-report.md 含全部 20 项标记"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 49,
+      "compactionCount": 0,
+      "durationMs": 27123,
+      "tracePath": "acceptance/block-348/traces/t7-long-haul.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t7-long-haul/workspace",
+      "artifactCount": 41,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    },
+    {
+      "id": "t8-self-verify",
+      "title": "自我验证陷阱：易错点上看是否核验自己的产物",
+      "status": "completed",
+      "reason": null,
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": true,
+          "detail": "任务正常收口"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "47",
+          "passed": true,
+          "detail": "文件 out/totals.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "31",
+          "passed": true,
+          "detail": "文件 out/totals.md 含目标内容"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "24",
+          "passed": true,
+          "detail": "文件 out/totals.md 含目标内容"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_exec",
+          "minTimes": 1,
+          "passed": true,
+          "detail": "tool_call workspace_exec × 3"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "alpha",
+          "passed": true,
+          "detail": "最终答复含「alpha」"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 6,
+      "compactionCount": 0,
+      "durationMs": 11059,
+      "tracePath": "acceptance/block-348/traces/t8-self-verify.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t8-self-verify/workspace",
+      "artifactCount": 2,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    }
+  ],
+  "metrics": {
+    "autonomousCompletion": {
+      "numerator": 6,
+      "denominator": 8,
+      "note": "环境不可得任务如实单列（见各任务 reason），仍计入分母"
+    },
+    "interventionCount": 0,
+    "interrupted": 0,
+    "failed": 0,
+    "skipped": 0,
+    "notStarted": 0,
+    "humanEyePending": [
+      "t1-code-bugfix",
+      "t2-data-cleaning",
+      "t3-research-cited",
+      "t4-browser-action",
+      "t5-docs-structuring",
+      "t6-multi-agent",
+      "t7-long-haul",
+      "t8-self-verify"
+    ]
+  }
+}

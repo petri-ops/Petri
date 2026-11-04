@@ -1,0 +1,106 @@
+{
+  "package": "BLOCK-348",
+  "at": "2026-11-04T17:07:31.592Z",
+  "criteriaFrozenAt": "2026-11-04T16:48:53Z",
+  "provider": {
+    "source": "local-store",
+    "model": "deepseek-chat",
+    "hasKey": true,
+    "skipReason": null,
+    "envOverrides": {
+      "baseUrlFromEnv": true,
+      "modelFromEnv": "deepseek-chat",
+      "localDataDir": "/Users/zhangdiandian/Documents/BioF3-Local"
+    }
+  },
+  "backendUp": true,
+  "tasks": [
+    {
+      "id": "t7-long-haul",
+      "title": "长任务：30+ 步、中途触发上下文压缩、验保持",
+      "status": "failed",
+      "reason": "Messages with role 'tool' must be a response to a preceding message with 'tool_calls' (request_id: 7da343d0-659f-441f-9c2d-56a0bcf7a230)",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=Messages with role 'tool' must be a response to a preceding message with 'tool_calls' (request_id: 7da343d0-659f-441f-9c2d-56a0bcf7a230)）"
+        },
+        {
+          "kind": "min_tool_calls",
+          "min": 35,
+          "passed": false,
+          "detail": "全程 tool_call × 7（期望 ≥35）"
+        },
+        {
+          "kind": "event_present",
+          "event": "context_compacted",
+          "passed": true,
+          "detail": "事件在场（context_compacted）"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/final-report.md",
+          "value": "ORCHID-42",
+          "passed": false,
+          "detail": "文件不存在：out/final-report.md"
+        },
+        {
+          "kind": "file_contains_all",
+          "path": "out/final-report.md",
+          "values": [
+            "FACT-003",
+            "FACT-006",
+            "FACT-009",
+            "FACT-012",
+            "FACT-015",
+            "FACT-018",
+            "FACT-021",
+            "FACT-024",
+            "FACT-027",
+            "FACT-030",
+            "FACT-033",
+            "FACT-036",
+            "FACT-039",
+            "FACT-042",
+            "FACT-045",
+            "FACT-048",
+            "FACT-051",
+            "FACT-054",
+            "FACT-057",
+            "FACT-060"
+          ],
+          "passed": false,
+          "detail": "out/final-report.md 缺 20/20 项（如 FACT-003,FACT-006,FACT-009）"
+        }
+      ],
+      "interventions": [],
+      "interventionCount": 0,
+      "toolCallCount": 7,
+      "compactionCount": 1,
+      "durationMs": 3614,
+      "tracePath": "acceptance/block-348/traces/t7-long-haul.jsonl",
+      "artifactDir": "acceptance/block-348/artifacts/t7-long-haul/workspace",
+      "artifactCount": 20,
+      "pendingHumanJudgment": {
+        "toolSelectJudge": "按冻结表由操作者填写（见报告）",
+        "artifactJudge": "按冻结表由操作者填写（见报告）"
+      }
+    }
+  ],
+  "metrics": {
+    "autonomousCompletion": {
+      "numerator": 0,
+      "denominator": 1,
+      "note": "环境不可得任务如实单列（见各任务 reason），仍计入分母"
+    },
+    "interventionCount": 0,
+    "interrupted": 0,
+    "failed": 1,
+    "skipped": 0,
+    "notStarted": 0,
+    "humanEyePending": [
+      "t7-long-haul"
+    ]
+  }
+}

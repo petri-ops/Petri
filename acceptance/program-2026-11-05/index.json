@@ -36,7 +36,7 @@
       "id": "BLOCK-348",
       "capability": "block-348-universal-agent-eval",
       "title": "通用 agent 任务基准实测",
-      "status": "planned",
+      "status": "completed",
       "priority": "P0",
       "plan": "docs/block-348-universal-agent-eval-plan.md",
       "goal": "建立并跑通一套跨域（非生信垂类）通用任务基准，度量 Petri 作为通用 agent 的自主完成能力，产出可复跑任务定义、runner、实测报告与短板分级清单。",

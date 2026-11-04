@@ -7325,6 +7325,24 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block348-universal-agent-eval",
+      "note": "BLOCK-348 通用 agent 任务基准实测：8 跨域任务判据表（冻结）+ runner + 单测。改任务判据/runner/acceptance 证据时跑本包测试与文档门。",
+      "patterns": [
+        "acceptance/block-348/**",
+        "scripts/block348-*.mjs",
+        "test/block348-*.test.mjs",
+        "docs/block-348-*.md"
+      ],
+      "tests": [
+        "test/block348-task-suite.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

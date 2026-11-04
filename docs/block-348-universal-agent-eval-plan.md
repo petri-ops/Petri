@@ -1,6 +1,6 @@
 ---
 capability: block-348-universal-agent-eval
-status: planned
+status: completed
 goal: 建立并跑通一套跨域（非生信垂类）通用任务基准，度量 Petri 作为通用 agent 的自主完成能力，产出可复跑任务定义、runner、实测报告与短板分级清单。
 acceptance:
   - 8/8 任务定义落盘且 schema 校验通过；runner 至少完成一次完整回放。
@@ -13,7 +13,7 @@ reopen: G1+ 项（真实 Provider 矩阵 / 外部 LLM 评测服务）；新增�
 
 # BLOCK-348 — 通用 agent 任务基准实测（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口；开工发令原话「按 docs/next-phase-program-2026-11-05.md 总纲，逐个推进 BLOCK-348 → 354 共 7 个包」）**——实测报告 `docs/block-348-eval-report.md`；证据 `acceptance/block-348/`；P1 发现（压缩断链）入池 C-45
 - 总纲：`docs/next-phase-program-2026-11-05.md`（工作模式契约 / 检查单 / 红线以总纲为准）
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §5 T-A
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**
@@ -39,6 +39,14 @@ reopen: G1+ 项（真实 Provider 矩阵 / 外部 LLM 评测服务）；新增�
 - 建可复跑 runner（`scripts/block348-task-runner.mjs`）：按任务启动会话、记录事件轨迹与工具调用、标记人工干预点、采集产物。
 - 度量四项：**自主完成率**、**人工干预次数**、**工具选择合理性**（选对工具 / 是否绕路）、**产物可用性**（人眼判据表）。
 - 产出实测报告（`docs/block-348-eval-report.md`）：每任务一页结果 + 汇总 + 短板清单（P1/P2/P3 分级、逐条带证据）。
+- 复跑命令（real provider 全量）：
+
+  ```bash
+  PETRI_LOCAL_DATA_DIR="$HOME/Documents/BioF3-Local" \
+  PETRI_EVALS_BASE_URL="https://api.deepseek.com/v1" \
+  PETRI_EVALS_MODEL="deepseek-chat" \
+  node scripts/block348-task-runner.mjs
+  ```
 
 ## §3 非范围（越界即停工）
 

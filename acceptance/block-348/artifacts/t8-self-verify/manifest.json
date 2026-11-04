@@ -1,0 +1,12 @@
+[
+  {
+    "path": "inventory.csv",
+    "bytes": 118,
+    "sha256": "6b09ed354fd24cf2228e493dc592018ca288421aa472499df7c146d3ca4f8c93"
+  },
+  {
+    "path": "out/totals.md",
+    "bytes": 26,
+    "sha256": "435aa541c605ff9101eba624e177fcae7f71312a053d183d739709d8e4e269de"
+  }
+]

@@ -9191,7 +9191,7 @@
       "capability": "block-348-universal-agent-eval",
       "path": "docs/block-348-universal-agent-eval-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-348-universal-agent-eval",
       "entrypoint": "docs/README.md",
@@ -9216,7 +9216,24 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（总纲 NEXT-PHASE-PROGRAM-2026-11-05）。通用 agent 任务基准实测。目标：建立并跑通一套跨域（非生信垂类）通用任务基准，度量 Petri 作为通用 agent 的自主完成能力，产出可复跑任务定义、runner、实测报告与短板分级清单。 依赖：无。逐包发令开工，不并行。"
+      "notes": "2026-11-05 收口 completed（总纲包 1/7）。8 跨域任务 real provider（deepseek-chat）判据冻结实测：自主完成率 6/8（机械口径）/干预 0/工具选择 24/24/产物可用性 23/24；实锤 P1=上下文熔断裁剪破坏 tool 配对（入池 C-45 待裁决）；T4 浏览器 headless 环境不可得。报告=docs/block-348-eval-report.md，证据=acceptance/block-348/，单测 test/block348-task-suite.test.mjs 9/9（判据冻结指纹 4b69b2d092bcae22）。"
+    },
+    {
+      "id": "BLOCK-348-EVAL-REPORT",
+      "path": "docs/block-348-eval-report.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-348-eval-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-348",
+        "evidence"
+      ],
+      "notes": "BLOCK-348 实测报告：四项度量总表 + 逐任务结果 + 短板分级清单（P1 压缩断链/P2 headless 浏览器桥/P3×3）+ 复跑命令。判据表冻结指纹 4b69b2d092bcae22。"
     },
     {
       "id": "BLOCK-349",
