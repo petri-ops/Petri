@@ -9,6 +9,7 @@ import {
   onDrop,
   onPaste,
   VISION_NOT_CONFIGURED_NOTICE,
+  addExternalImage,
 } from './attachments';
 import { CONVERSATION_DRAG_MIME } from './dragTypes';
 
@@ -169,5 +170,32 @@ describe('BLOCK-340 P2 视频输入门控', () => {
     expect(hasVideoPayload({ files: [fakeFile('demo.webm', 'video/webm')] })).toBe(true);
     expect(hasVideoPayload({ files: [fakeFile('note.txt', 'text/plain')] })).toBe(false);
     expect(hasVideoPayload(null)).toBe(false);
+  });
+});
+
+describe('BLOCK-343 P3 addExternalImage', () => {
+  const PNG_1PX = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+
+  it('合法 data:image/png 注入为 AttachmentFile（size 按 base64 折算）', () => {
+    let out: unknown[] = [];
+    const set = (fn: (prev: unknown[]) => unknown[]) => { out = fn([]); };
+    addExternalImage(set as never, { dataUrl: PNG_1PX, name: 'rc.png' }, 0);
+    expect(out).toHaveLength(1);
+    const att = (out as Array<{ name: string; type: string; size: number; dataUrl: string }>)[0];
+    expect(att.name).toBe('rc.png');
+    expect(att.type).toBe('image/png');
+    expect(att.size).toBeGreaterThan(0);
+    expect(att.dataUrl).toBe(PNG_1PX);
+  });
+
+  it('非图片形态 / 超单件上限 / 超件数上限一律拒收', () => {
+    let out: unknown[] = [];
+    const set = (fn: (prev: unknown[]) => unknown[]) => { out = fn([]); };
+    addExternalImage(set as never, { dataUrl: 'data:text/html;base64,PGI+' }, 0);
+    addExternalImage(set as never, { dataUrl: 'https://x/y.png' }, 0);
+    const huge = `data:image/png;base64,${'A'.repeat(14 * 1024 * 1024)}`;
+    addExternalImage(set as never, { dataUrl: huge }, 0);
+    addExternalImage(set as never, { dataUrl: PNG_1PX }, 8);
+    expect(out).toHaveLength(0);
   });
 });

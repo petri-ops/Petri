@@ -1,6 +1,6 @@
 ---
 capability: block-343-svg-editor-tail
-status: active
+status: completed
 goal: 收完 SVG 编辑器线——BLOCK-342 §10 交接项按三阶段交付：P1 小项批（选区浮动工具条/其余模态挂 modal 层/字体品牌表/style 简写可视化）、P2 版本对比+历史面板、P3 vision 判据附件通道。位图描摹不进包（⛔ 需装 Inkscape，守卫已就位装后即用）。
 acceptance:
   - P1：选区浮动工具条（画布内跟随选区：删除/复制/问 agent 等高频动作）；BLOCK-342 之外低于 10000 的既有模态按 UI-668 契约补挂 `data-petri-layer="modal"`（接缝让位契约已就位）；字体下拉接品牌字体表；元素 `style` 属性可视化逐属性编辑（set_style op）。全项实机断言进 flow。
@@ -31,7 +31,7 @@ reopen: 位图描摹（装 Inkscape 后即用）；资产路径嵌入形态（�
 - 洋葱皮：修订卡点「对比」→ 该版与当前视图同 scale 叠加 + 透明度滑杆；退出回正常视图。
 - 历史时间线：现 revisionCard 增强；执行者标注以 `.petri/svg-revisions/` 快照真实元数据为限（查证后定，无则如实 reopen）。
 
-## P3 vision 判据附件通道
+## P3 vision 判据附件通道（completed 2026-11-04，UI-680 verified，实机 62/62）
 
 - 渲染回验 PNG → 会话附件（既有附件 API），判据 prompt 与图同发；模型看图回验真闭环。
 - 附件 API 不适用处如实降档并留 reopen。
@@ -42,3 +42,11 @@ reopen: 位图描摹（装 Inkscape 后即用）；资产路径嵌入形态（�
 - flow `block342-svg-editor-live` 断言扩展（P1 目标 ≥57 / P2 ≥60 / P3 ≥62，以实际设计为准）。
 - 每阶段：定向测试 + theme 17/17 + tsc 0 + lint 0 error + 实机 flow + 治理三件套 + 独立提交；UI 台账每增量同提交。
 - 节奏：一次会话内三阶段串行推进（用户裁决「逐个进行直到完成」同款授权语义），每阶段完成即提交，全部收口后整包 completed 登记。
+
+## 5. 收口归宿（2026-11-04 completed）
+
+**交付**：P1 小项批（UI-678：选区浮动工具条/模态层补挂 10 处/字体品牌表/内联样式可视化）+ P2 版本对比（UI-679：洋葱皮+滑杆；执行者标注=快照无元数据如实 reopen）+ P3 vision 附件通道（UI-680：快照进会话，真闭环打通）。flow 58→62 断言逐阶段 allPass。
+
+**顺延/ reopen**：①资产路径嵌入形态（P1 裁决问句未获回复，按推荐顺延，重开=用户发令）；②位图描摹（装 Inkscape 后即用）；③历史执行者标注（快照元数据独立小包）；④渲染回验浮条 flow 时序单次观测（探针不可复现，观察项）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

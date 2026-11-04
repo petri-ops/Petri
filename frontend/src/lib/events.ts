@@ -52,6 +52,12 @@ export const petriEvents = {
    */
   svgProposal: 'petri:svg-proposal',
 
+  /**
+   * BLOCK-343 P3 — 外部图片进会话附件（载荷 {dataUrl, name?}）。
+   * 派发侧：SVG 编辑器渲染回验；监听侧：copilotAsk 拥有者的 composer（拼进附件区）。
+   */
+  composerAttachImage: 'petri:composer-attach-image',
+
   /** BLOCK-216 Q5 — 从计划卡打开计划面（payload: { planId }）。 */
   planSurfaceOpen: 'petri:plan-surface-open',
 
@@ -373,6 +379,8 @@ export type PetriEventMap = {
   [petriEvents.copilotAsk]: CopilotAskDetail;
   /** BLOCK-342 切片6 — agent SVG 提案进编辑器（propose 结果；监听方按 path 匹配当前文件） */
   [petriEvents.svgProposal]: { path: string; previewMarkup: string; ops: Array<Record<string, unknown>>; source?: string };
+  /** BLOCK-343 P3 — 外部图片进会话附件（渲染回验快照等；监听方=copilotAsk 拥有者的 composer） */
+  [petriEvents.composerAttachImage]: { dataUrl: string; name?: string };
   /** BLOCK-264（C-39）— 待审批通知点击载荷（conversationId 定位会话；ackToken 冗余留痕） */
   [petriEvents.approvalCardFocus]: { conversationId?: string; ackToken?: string };
   [petriEvents.planSurfaceOpen]: PlanSurfaceOpenDetail;

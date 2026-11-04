@@ -273,3 +273,26 @@ export function closeImagePreview(
 ): void {
   setPreviewImage(null);
 }
+
+/** BLOCK-343 P3 — 外部事件注入的图片附件（渲染回验快照等）。形态守卫与上限复用既有常量。 */
+export function addExternalImage(
+  setAttachments: React.Dispatch<React.SetStateAction<AttachmentFile[]>>,
+  detail: { dataUrl: string; name?: string },
+  currentCount: number,
+): void {
+  const dataUrl = typeof detail?.dataUrl === 'string' ? detail.dataUrl : '';
+  if (!/^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*$/.test(dataUrl)) return;
+  if (currentCount >= MAX_ATTACHMENTS) return;
+  const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+  const size = Math.floor((base64.length * 3) / 4);
+  if (size > MAX_ATTACHMENT_BYTES) return;
+  const type = dataUrl.slice(5, dataUrl.indexOf(';'));
+  setAttachments((prev) => [...prev, {
+    id: `ext-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    name: detail?.name || `render-check-${Date.now()}.png`,
+    type,
+    size,
+    dataUrl,
+    previewUrl: dataUrl,
+  }]);
+}

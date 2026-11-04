@@ -722,6 +722,8 @@ module.exports = {
       })()`, 6_000);
       assert('V23c_compare_close', compareClosed === 'closed', String(compareClosed));
 
+
+
       // V20 — 渲染回验：点「回验」→ PNG 快照浮条 → 「请 agent 回验」→ copilotAsk 载荷含路径与判据
       await lib.evalJs(client, `(function(){ const b = document.querySelector('${RAIL} [data-action="render-check"]'); if (b) b.click(); return true; })()`);
       const checkReady = await waitFor(client, `(function(){
@@ -731,6 +733,7 @@ module.exports = {
           ? JSON.stringify({ png: true, w: (bar.textContent || '').match(/(\d+)×(\d+)/)?.[1] }) : null;
       })()`, 10_000);
       assert('V20_render_check_snapshot', Boolean(checkReady), checkReady || 'render check snapshot missing');
+      const attachBefore = await lib.evalJs(client, `document.querySelectorAll('[data-testid="composer-attachment-thumb"]').length`);
       await lib.evalJs(client, `(function(){
         window.__block342Asked = null;
         const b = document.querySelector('${RAIL} [data-action="render-check-ask"]');
@@ -743,6 +746,16 @@ module.exports = {
       assert('V20b_render_check_asked',
         Boolean(renderPayload && typeof renderPayload.prompt === 'string' && renderPayload.prompt.includes('渲染回验请求') && renderPayload.prompt.includes(SAMPLE_REL) && renderPayload.prompt.includes('svg_inspect')),
         askedRender ? askedRender.slice(0, 140) : 'null');
+      // V24 — P3 vision 附件通道：同一点击还派发 composer-attach-image → 快照以 PNG 附件进 composer
+      const attachAfter = await waitFor(client, `(function(){
+        const n = document.querySelectorAll('[data-testid="composer-attachment-thumb"]').length;
+        const imgs = Array.from(document.querySelectorAll('[data-testid="composer-attachment-thumb"]'));
+        const hasPng = imgs.some((img) => (img.getAttribute('src') || '').startsWith('data:image/png;base64,'));
+        return hasPng ? JSON.stringify({ count: n }) : null;
+      })()`, 10_000);
+      const before = parseInt(attachBefore, 10) || 0;
+      const after = JSON.parse(attachAfter || '{"count":0}').count;
+      assert('V24_render_check_attachment', after === before + 1, `before=${before} after=${after}`);
 
       // V8 — 冲突安全：外部改文件后拿旧 sha 提案必须 409 svg_hash_mismatch
       // 外部改动任一处即可（不依赖具体颜色：前面步骤已经改过 fill）

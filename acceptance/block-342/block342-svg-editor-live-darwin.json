@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-03T23:56:44.869Z",
-  "finishedAt": "2026-11-03T23:57:12.130Z",
+  "startedAt": "2026-11-04T00:13:20.211Z",
+  "finishedAt": "2026-11-04T00:13:48.001Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793749552027"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793751150371"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -298,6 +298,11 @@
       "name": "V20b_render_check_asked",
       "pass": true,
       "detail": "{\"prompt\":\"渲染回验请求（tmp-block342-live/scene.svg，快照 400×240）：\\n当前待保存改动：（无待保存改动）。\\n请用 svg_inspect 读取该文件当前结构，对照以上渲染意图逐条核对是否落地且自洽（几何/属性引用/渐变与图片 id"
+    },
+    {
+      "name": "V24_render_check_attachment",
+      "pass": true,
+      "detail": "before=0 after=1"
     },
     {
       "name": "V8_stale_apply_rejected",

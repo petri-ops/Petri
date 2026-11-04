@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-680: SVG 编辑器 P3 vision 附件通道——渲染回验快照进会话（BLOCK-343 P3；2026-11-04 **verified（dev Electron 边界内；实机 62/62 allPass）**）
+
+- **通道**：新增 `petri:composer-attach-image` 事件（events.ts 类型化）→ copilotAsk 拥有者的 composer 订阅（`addExternalImage`：data:image 形态守卫 + 单件 10MB/总 8 件上限复用既有常量）→ 附件区缩略图（`composer-attachment-thumb` testid）；「请 agent 回验」一次点击同时派发判据 prompt（UI-676 既有）+ 快照 PNG 附件——「改→渲染→模型看图→迭代」真闭环打通。
+- **边界**：SimpleChat 只加订阅 effect 与缩略图 testid（承载面接入，未动会话主链，plan nonGoals 守住）；模型侧视觉能力门（imageVisionCapable）保持既有语义——无能力渠道发送时的既有拒绝路径不变。
+- **观察项（如实留档）**：flow 旧时序（V21-V23 动作链后）单次观测渲染回验浮条不在场（diag bar:false），三轮全链复刻探针不可复现（浮条全程在场）——非稳定缺陷，V24 已移至 V20b 紧后时序（62/62 稳绿）；留观察不设门。
+- **验证**：attachments.test 补 addExternalImage 2 组（合法注入/四类拒收）→ copilot 14/14 + svg-editor 63/63 = 77/77 + tsc 0 + lint 0 error；flow `V24_render_check_attachment`（0→1 精确增量 + PNG data URL 形态），总 **62/62 allPass**。
+
 ## UI-679: SVG 编辑器 P2 版本对比——修订行「对比」+ 洋葱皮叠加 + 透明度滑杆（BLOCK-343 P2；2026-11-04 **verified（dev Electron 边界内；实机 61/61 allPass）**）
 
 - **交互**：修订历史每行加「对比」按钮（与预览主按钮兄弟、非嵌套）→ 读取该快照 → 与当前视图**同 scale 洋葱皮叠加**（compareGhostLayer，警示色虚线框区别于提案 accent 层，透明度由控制条滑杆 0–1 步进 0.05 实时驱动）→ 控制条（文件名尾段 + 百分比 + 关闭）。不改真值、不进 pendingOps；快照解析失败如实报错。

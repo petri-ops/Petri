@@ -48,6 +48,7 @@ import {
   removeAttachmentById,
   openImagePreview,
   closeImagePreview,
+  addExternalImage,
 } from './SimpleChat/attachments';
 import { useComposerDrop } from './SimpleChat/hooks/useComposerDrop';
 import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attachmentUpload';
@@ -495,6 +496,16 @@ export function SimpleChat({
   // BLOCK-92 Wave A-3 — 焦点管理簇外迁（挂载聚焦 + 窗口获焦/可打印击键兜底，
   // 仅 copilotAsk 拥有者执行；见 ./SimpleChat/hooks/useComposerFocus.ts）。
   useComposerFocus({ taRef, ownsCopilotAsk, accessMenuOpen, modelMenuOpen });
+
+  // BLOCK-343 P3 — 外部图片进附件区（渲染回验快照等；仅 copilotAsk 拥有者订阅，多实例不重复收）。
+  const attachmentsCountRef = useRef(0);
+  useEffect(() => { attachmentsCountRef.current = attachments.length; }, [attachments]);
+  useEffect(() => {
+    if (!ownsCopilotAsk) return undefined;
+    return subscribePetriEvent(petriEvents.composerAttachImage, (detail) => {
+      addExternalImage(setAttachments, detail, attachmentsCountRef.current);
+    });
+  }, [ownsCopilotAsk, setAttachments]);
 
   // 能力位门控（D3 双保险①的 UI 侧）：仅当当前渠道声明 reasoning 才渲染档位控件，
   // 避免对不支持的渠道出现「假开关」。后端仍会二次门控。
@@ -1707,6 +1718,7 @@ export function SimpleChat({
                           src={att.previewUrl}
                           alt={att.name}
                           className="sc-attachment-thumb"
+                          data-testid="composer-attachment-thumb"
                         />
                         <span className="sc-attachment-overlay">
                           <Icon name="eye" size={16} />

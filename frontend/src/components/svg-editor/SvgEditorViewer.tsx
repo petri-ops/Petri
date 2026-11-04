@@ -437,6 +437,7 @@ export function SvgEditorViewer({
     const summary = pendingOps.length > 0
       ? pendingOps.map((op) => opLabel(op)).join('；')
       : '（无待保存改动）';
+    dispatchPetriEvent(petriEvents.composerAttachImage, { dataUrl: renderCheck.png, name: `render-check-${renderCheck.width}x${renderCheck.height}.png` });
     dispatchPetriEvent(petriEvents.copilotAsk, {
       prompt: [
         `渲染回验请求（${filePath}，快照 ${renderCheck.width}×${renderCheck.height}）：`,
@@ -445,7 +446,7 @@ export function SvgEditorViewer({
         '发现可疑处先用 svg_edit propose 说方案，我确认后再 apply。',
       ].join('\n'),
     });
-    setNotice('已把渲染回验判据放进会话输入框');
+    setNotice('已把渲染回验快照与判据放进会话输入框（图片附件 + 判据 prompt）');
   }, [filePath, pendingOps, renderCheck]);
 
 
