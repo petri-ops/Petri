@@ -1,8 +1,8 @@
 {
   "name": "block342-svg-editor-live",
   "platform": "darwin",
-  "startedAt": "2026-11-04T01:17:37.724Z",
-  "finishedAt": "2026-11-04T01:18:05.060Z",
+  "startedAt": "2026-11-04T01:23:03.779Z",
+  "finishedAt": "2026-11-04T01:23:31.992Z",
   "assertions": [
     {
       "name": "V0_repo_root_project_present",
@@ -12,7 +12,7 @@
     {
       "name": "V1_spa_page_target_present",
       "pass": true,
-      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793754831409"
+      "detail": "http://localhost:3000/project/p_mvtu0b52_9cbr?file=tmp-block342-live%2Fscene.svg&_t=1793755339372"
     },
     {
       "name": "V1b_thumb_entry_no_inline_editor",
@@ -52,7 +52,7 @@
     {
       "name": "V4b_inspector_col_272",
       "pass": true,
-      "detail": "{\"ok\":true,\"width\":272,\"left\":1304,\"cols\":\"1284.12px 271.993px\"}"
+      "detail": "{\"ok\":true,\"width\":272,\"left\":1304,\"cols\":\"1270.13px 5.99687px 271.993px\"}"
     },
     {
       "name": "V5_drag_applied_locally",
@@ -297,12 +297,27 @@
     {
       "name": "V26_row2_resizable",
       "pass": true,
-      "detail": "before=196 after=256 row=null"
+      "detail": "before=196 after=140（向下拖 60 → 底排应变矮 40~60）row=true"
+    },
+    {
+      "name": "V26b_row2_direction_both_ways",
+      "pass": true,
+      "detail": "before=196 back=200"
     },
     {
       "name": "V27_revision_list_fills_card",
       "pass": true,
-      "detail": "{\"cardH\":256,\"listH\":205,\"ratio\":0.91}"
+      "detail": "{\"cardH\":200,\"listH\":149,\"ratio\":0.87}"
+    },
+    {
+      "name": "V28_inspector_wider_on_left_drag",
+      "pass": true,
+      "detail": "before=272 mid=332"
+    },
+    {
+      "name": "V28b_inspector_width_restores",
+      "pass": true,
+      "detail": "before=272 back=272"
     },
     {
       "name": "V20_render_check_snapshot",

@@ -228,6 +228,9 @@ export function SvgEditorViewer({
   // UI-682 — 底排（图层|修订历史）高度：把手拖拽驱动（clamp 140–420，会话内生效不落盘）
   const [row2Height, setRow2Height] = React.useState(196);
   const row2DragRef = React.useRef<{ startY: number; startH: number } | null>(null);
+  // UI-685 — 图形属性栏宽度：左缘把手拖拽驱动（clamp 220–420，会话内生效不落盘）
+  const [inspectorWidth, setInspectorWidth] = React.useState(272);
+  const inspectorDragRef = React.useRef<{ startX: number; startW: number } | null>(null);
   // 切片5 Inkscape 协处理探针（挂载即查，缺席诚实灰化）
   const [inkscape, setInkscape] = React.useState<InkscapeStatus | null>(null);
   // 切片6 提案幽灵：agent svg_edit propose 结果（previewMarkup + ops），路径匹配当前文件才收
@@ -987,7 +990,12 @@ export function SvgEditorViewer({
       ) : null}
 
       {state.status === 'ready' ? (
-        <div className={layout.body} data-layers={layersOpen ? '1' : '0'} data-inspector={inspectorOpen ? '1' : '0'}>
+        <div
+          className={layout.body}
+          data-layers={layersOpen ? '1' : '0'}
+          data-inspector={inspectorOpen ? '1' : '0'}
+          style={{ '--svg-inspector-w': `${inspectorWidth}px` } as React.CSSProperties}
+        >
           <div className={layout.leftCol} style={{ '--svg-row2': `${row2Height}px` } as React.CSSProperties}>
           {!layersOpen ? (
             <button type="button" className={styles.railToggle} data-action="expand-layers" style={{ left: 10 }} title="展开图层">
@@ -1187,7 +1195,8 @@ export function SvgEditorViewer({
               onPointerMove={(event) => {
                 const drag = row2DragRef.current;
                 if (!drag) return;
-                const next = Math.max(140, Math.min(420, drag.startH + (event.clientY - drag.startY)));
+                // UI-685 方向语义：把手在底排顶边——边缘跟随指针（向下拖=顶边下移=底排变矮）
+                const next = Math.max(140, Math.min(420, drag.startH - (event.clientY - drag.startY)));
                 setRow2Height(next);
               }}
               onPointerUp={() => { row2DragRef.current = null; }}
@@ -1276,6 +1285,24 @@ export function SvgEditorViewer({
           </div>
 
           {/* 属性栏常挂载：同图层栏——收起靠 data-open + display:none，选中时 setInspectorOpen(true) 展开 */}
+            <div
+              className={layout.inspectorResizer}
+              data-testid="svg-inspector-resizer"
+              title="拖动调整属性栏宽度"
+              onPointerDown={(event) => {
+                inspectorDragRef.current = { startX: event.clientX, startW: inspectorWidth };
+                event.currentTarget.setPointerCapture?.(event.pointerId);
+              }}
+              onPointerMove={(event) => {
+                const drag = inspectorDragRef.current;
+                if (!drag) return;
+                // 边缘跟随指针：把手左拖（clientX 减）= 属性栏变宽
+                const next = Math.max(220, Math.min(420, drag.startW + (drag.startX - event.clientX)));
+                setInspectorWidth(next);
+              }}
+              onPointerUp={() => { inspectorDragRef.current = null; }}
+              onPointerCancel={() => { inspectorDragRef.current = null; }}
+            />
             <aside className={layout.inspector} data-testid="svg-editor-inspector" data-open={inspectorOpen ? '1' : '0'}>
               <div className={styles.inspectorHead}>
                 {inspectorOpen ? (

@@ -14,7 +14,8 @@
 
 .body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 272px;
+  /* UI-685 — 属性栏宽度可拖拽：中列 6px 把手 + 右列 var（fallback 272）；收起态回单列 */
+  grid-template-columns: minmax(0, 1fr) 6px var(--svg-inspector-w, 272px);
   grid-template-rows: minmax(0, 1fr);
   gap: 8px;
   min-width: 0;
@@ -22,9 +23,25 @@
   flex: 1;
 }
 
-/* 属性栏收起：左区独占整宽 */
+/* 属性栏收起：左区独占整宽（含把手列一并隐藏） */
 .body[data-inspector='0'] {
   grid-template-columns: minmax(0, 1fr);
+}
+
+.body[data-inspector='0'] .inspectorResizer {
+  display: none;
+}
+
+/* UI-685 — 属性栏左缘把手（竖向 6px 薄列） */
+.inspectorResizer {
+  grid-column: 2;
+  grid-row: 1;
+  cursor: ew-resize;
+  border-radius: var(--petri-radius-sm);
+}
+
+.inspectorResizer:hover {
+  background: var(--petri-hover);
 }
 
 .leftCol {
@@ -103,7 +120,7 @@
 /* 收起图层时底排仍占 row3（resizer 保留 row2） */
 
 .inspector {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1;
   min-width: 0;
   min-height: 0;

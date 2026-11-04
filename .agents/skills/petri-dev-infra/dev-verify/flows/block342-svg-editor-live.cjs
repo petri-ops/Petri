@@ -772,6 +772,7 @@ module.exports = {
         const card = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
         return card ? Math.round(card.getBoundingClientRect().height) : null;
       })()`);
+      // UI-685 方向语义：把手在底排顶边——向下拖=顶边下移=底排变矮（边缘跟随指针）
       await lib.evalJs(client, `(function(){
         const rz = document.querySelector('${RAIL} [data-testid="svg-row2-resizer"]');
         if (!rz) return 'no resizer';
@@ -785,7 +786,7 @@ module.exports = {
       await sleep(400);
       const hAfter = await lib.evalJs(client, `(function(){
         const card = document.querySelector('${RAIL} [data-testid="svg-editor-layers"]');
-        const row = document.querySelector('${RAIL} .revisionRow') || document.querySelector('${RAIL} [data-testid="svg-editor-revision-panel"] .revisionRow');
+        const row = document.querySelector('${RAIL} [class*="revisionRow"]');
         return JSON.stringify({
           h: card ? Math.round(card.getBoundingClientRect().height) : null,
           rowAligned: row ? Math.abs(row.getBoundingClientRect().height - 30) < 60 : null,
@@ -794,8 +795,21 @@ module.exports = {
       const hInfo = JSON.parse(hAfter || '{}');
       assert('V26_row2_resizable',
         typeof hBefore === 'number' && typeof hInfo.h === 'number'
-          && hInfo.h >= hBefore + 40 && hInfo.rowAligned !== false,
-        `before=${hBefore} after=${hInfo.h} row=${JSON.stringify(hInfo.rowAligned)}`);
+          && hBefore - hInfo.h >= 40 && hBefore - hInfo.h <= 60 && hInfo.rowAligned !== false,
+        `before=${hBefore} after=${hInfo.h}（向下拖 60 → 底排应变矮 40~60）row=${JSON.stringify(hInfo.rowAligned)}`);
+      // 反向回拖：向上拖 60 → 底排复原
+      await lib.evalJs(client, `(function(){
+        const rz = document.querySelector('${RAIL} [data-testid="svg-row2-resizer"]');
+        const r = rz.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, pointerId: 52, pointerType: 'mouse', button: 0 };
+        rz.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: r.left + 10, clientY: r.top + 3, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: r.left + 10, clientY: r.top + 3 - 60, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: r.left + 10, clientY: r.top + 3 - 60, buttons: 0 }));
+        return true;
+      })()`);
+      await sleep(400);
+      const hBack = await lib.evalJs(client, `Math.round(document.querySelector('${RAIL} [data-testid="svg-editor-layers"]').getBoundingClientRect().height)`);
+      assert('V26b_row2_direction_both_ways', Math.abs(hBack - hBefore) <= 4, `before=${hBefore} back=${hBack}`);
 
       // V27 — UI-684 高度链路：拖大后修订列表视口填满卡片（无下半空白死区）
       const chain = await lib.evalJs(client, `(function(){
@@ -808,9 +822,35 @@ module.exports = {
         return JSON.stringify({ cardH: Math.round(c.height), listH: Math.round(l.height), ratio: +(l.height / (c.height - 30)).toFixed(2) });
       })()`);
       const chainInfo = JSON.parse(chain || '{}');
-      assert('V27_revision_list_fills_card',
-        (chainInfo.ratio || 0) >= 0.8 && (chainInfo.listH || 0) > 200,
-        chain || 'revision list missing');
+      assert('V27_revision_list_fills_card', (chainInfo.ratio || 0) >= 0.8, chain || 'revision list missing');
+
+      // V28 — UI-685 属性栏宽可调：把手左拖 +60 → 实测宽增；右拖回 → 复原
+      const wBefore = await lib.evalJs(client, `Math.round(document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]').getBoundingClientRect().width)`);
+      await lib.evalJs(client, `(function(){
+        const rz = document.querySelector('${RAIL} [data-testid="svg-inspector-resizer"]');
+        if (!rz) return 'no resizer';
+        const r = rz.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, pointerId: 61, pointerType: 'mouse', button: 0 };
+        rz.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: r.left + 3, clientY: r.top + 10, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: r.left + 3 - 60, clientY: r.top + 10, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: r.left + 3 - 60, clientY: r.top + 10, buttons: 0 }));
+        return true;
+      })()`);
+      await sleep(400);
+      const wMid = await lib.evalJs(client, `Math.round(document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]').getBoundingClientRect().width)`);
+      assert('V28_inspector_wider_on_left_drag', wMid >= wBefore + 40, `before=${wBefore} mid=${wMid}`);
+      await lib.evalJs(client, `(function(){
+        const rz = document.querySelector('${RAIL} [data-testid="svg-inspector-resizer"]');
+        const r = rz.getBoundingClientRect();
+        const base = { bubbles: true, cancelable: true, pointerId: 62, pointerType: 'mouse', button: 0 };
+        rz.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: r.left + 3, clientY: r.top + 10, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointermove', { ...base, clientX: r.left + 3 + 60, clientY: r.top + 10, buttons: 1 }));
+        rz.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: r.left + 3 + 60, clientY: r.top + 10, buttons: 0 }));
+        return true;
+      })()`);
+      await sleep(400);
+      const wBack = await lib.evalJs(client, `Math.round(document.querySelector('${RAIL} [data-testid="svg-editor-inspector"]').getBoundingClientRect().width)`);
+      assert('V28b_inspector_width_restores', Math.abs(wBack - wBefore) <= 4, `before=${wBefore} back=${wBack}`);
 
 
 
