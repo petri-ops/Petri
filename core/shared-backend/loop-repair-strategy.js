@@ -426,7 +426,8 @@ const REPAIR_STRATEGIES = Object.freeze([
     },
 
     attempt(diagnosis, context) {
-      const newParams = clampParams(context.originalParams || {});
+      const clamped = clampParams(context.originalParams || {});
+      const newParams = clamped.params;
       return buildRepairAttempt({
         strategyId: 'fix_enum_or_range',
         strategyVersion: '1.0.0',
@@ -441,9 +442,9 @@ const REPAIR_STRATEGIES = Object.freeze([
         },
         invalidatedArtifactIds: [],
         preservedArtifactIds: context.parentArtifactIds || [],
-        isActionable: true,
+        isActionable: false,
         requiresUserAuth: false,
-        publicMessage: '修正了超出范围的参数值。',
+        publicMessage: '未能自动修正越界/枚举参数（缺工具 schema 边界信息）；请按 schema 重新填写后重试。',
         costMultiplier: 1.0,
         safetyLevel: 'safe',
       });
@@ -865,12 +866,12 @@ function fixParamsFromSchema(params, schema, _diagnosis) {
 }
 
 function clampParams(params) {
-  // Returns params with out-of-range values clamped.
-  // Placeholder: in production, this consults tool schema min/max/enum.
-  return {
-    ...params,
-    _repair: 'clamp_fix',
-  };
+  // BLOCK-346 T3 — 诚实实现：真正的 clamp 需要工具 schema 的 min/max/enum，
+  // 而本策略的输入只有诊断文本（无 schema 边界），因此**不伪造修复**。
+  // 历史缺陷：此处只贴 `_repair: 'clamp_fix'` 标记、参数原样返回，上层却报
+  // `isActionable: true` 且文案称「修正了超出范围的参数值」→ 重试携带原样参数
+  // 必然复现同一错误，用户/证据链看到的是"已修复失败"。
+  return { params: { ...params }, repaired: false };
 }
 
 function describeTransformation(transformation) {

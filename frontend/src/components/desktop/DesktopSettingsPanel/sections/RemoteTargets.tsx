@@ -9,6 +9,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { getPlatformApiPrefix } from '@/lib/authClient';
 import { getToken } from '@/lib/authClient';
+import { readBrandStorage, writeBrandStorage, removeBrandStorage } from '@/lib/brand';
 
 interface TargetProbeInfo {
   os?: string;
@@ -91,9 +92,12 @@ function describeProbe(info: TargetProbeInfo | null): string {
   return info.os;
 }
 
-const DEFAULT_TARGET_STORAGE_KEY = 'petri.executionTargetId';
-// BLOCK-61 读旧兼容：历史 key petri.executionTargetId
-const LEGACY_TARGET_STORAGE_KEY = 'petri.executionTargetId';
+// BLOCK-346 T3 — 统一走 brand 命名空间（`petri-executionTargetId`）。
+// 历史缺陷：此处裸写 `petri.executionTargetId`（点号），而读取端
+// `readBrandStorage('executionTargetId')` 只认 `petri-`（连字符）→ 默认执行目标
+// 设置永远读不到，分析静默跑在本机。旧点号键仅作一次性迁移来源。
+const DEFAULT_TARGET_STORAGE_KEY = 'executionTargetId';
+const LEGACY_DOTTED_KEY = 'petri.executionTargetId';
 
 export function RemoteTargets(): React.ReactElement {
   const [data, setData] = useState<TargetsResponse>({ registered: [], discovered: [] });
@@ -103,20 +107,22 @@ export function RemoteTargets(): React.ReactElement {
   // 默认执行目标（BLOCK-57 UI-290 加映二：选择从 composer 迁至设置页；本机永远可选）
   const [defaultTargetId, setDefaultTargetId] = useState<string>(() => {
     try {
-      return (
-        window.localStorage.getItem(DEFAULT_TARGET_STORAGE_KEY)
-        ?? window.localStorage.getItem(LEGACY_TARGET_STORAGE_KEY)
-        ?? ''
-      );
+      const current = readBrandStorage(DEFAULT_TARGET_STORAGE_KEY);
+      const legacyDotted = window.localStorage.getItem(LEGACY_DOTTED_KEY);
+      // 存量兼容：点号键曾是唯一写入形态（读取端从不认它），有值时一次性迁到新键并清理
+      if (legacyDotted) {
+        if (!current) writeBrandStorage(DEFAULT_TARGET_STORAGE_KEY, legacyDotted);
+        window.localStorage.removeItem(LEGACY_DOTTED_KEY);
+        return current ?? legacyDotted;
+      }
+      return current ?? '';
     } catch { return ''; }
   });
 
   const setDefaultTarget = (id: string) => {
     setDefaultTargetId(id);
-    try {
-      if (id) window.localStorage.setItem(DEFAULT_TARGET_STORAGE_KEY, id);
-      else window.localStorage.removeItem(DEFAULT_TARGET_STORAGE_KEY);
-    } catch { /* 隐私模式等场景允许失败 */ }
+    if (id) writeBrandStorage(DEFAULT_TARGET_STORAGE_KEY, id);
+    else removeBrandStorage(DEFAULT_TARGET_STORAGE_KEY);
   };
 
   // BLOCK-105 §7 Batch-6 — remote-targets/federation REST 信封 wire 形状（JSON 解析出站边界契约文档）。

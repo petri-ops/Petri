@@ -310,7 +310,30 @@ async function tool_workspace_worktree_list(_args = {}, ctx = {}) {
   return withCore(ctx, (core) => listWorktrees(core));
 }
 async function tool_workspace_worktree_remove(args = {}, ctx = {}) {
-  return withCore(ctx, (core) => removeWorktree(core, args));
+  // BLOCK-346 T1 — 破坏性操作两段式审批（与 computer_* / browser_act 同协议、同 tool_jobs 表）。
+  // 惰性 require：本模块保持「无 DB 顶层依赖」设计（数据面经 ctx.database 注入）。
+  const { ensureControlConfirmation } = require('./computer-use-tools');
+  const target = String(args.id || args.branch || '').trim();
+  const gate = ensureControlConfirmation(args, ctx, {
+    toolId: 'workspace_worktree_remove',
+    summary: `删除工作树 ${target || '(未指定)'}（分支保留）`,
+  });
+  if (gate.denial) return gate.denial;
+  if (gate.needApproval) return gate.needApproval;
+
+  const result = await withCore(ctx, (core) => removeWorktree(core, args));
+  if (gate.jobId) {
+    try {
+      const dbMod = require('../db');
+      dbMod.updateToolJob(gate.jobId, {
+        status: result && result.ok === false ? 'failed' : 'done',
+        resultJson: result,
+        completedAt: new Date().toISOString(),
+        error: result && result.ok === false ? (result.error || 'failed') : null,
+      });
+    } catch { /* 审计回写失败不影响结果返回 */ }
+  }
+  return result;
 }
 async function tool_workspace_worktree_merge_request(args = {}, ctx = {}) {
   return withCore(ctx, (core) => mergeRequest(core, args));

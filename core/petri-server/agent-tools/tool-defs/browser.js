@@ -229,7 +229,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "browser_act",
-      "description": "在已连接的浏览器上执行一个白名单动作：navigate / read_text（≤20k 字）/ click / fill / screenshot。click 与 fill 属写操作：必须先经审批（guard-ack）携带 ackToken。未连接返回 browser_not_connected。",
+      "description": "在已连接的浏览器上执行白名单动作：navigate / read_text（≤20k）/ click / fill / screenshot。click/fill 首调返回 needApproval+ackToken，前端确认后携 confirm+ackToken 重调才执行。未连接返回 browser_not_connected。",
       "parameters": {
         "type": "object",
         "properties": {
@@ -241,7 +241,8 @@ module.exports = [
           "url": { "type": "string", "description": "navigate 目标 URL（https/http；私网拒绝）" },
           "selector": { "type": "string", "description": "click/fill 的目标元素选择器" },
           "text": { "type": "string", "description": "fill 的填充文本" },
-          "ackToken": { "type": "string", "description": "click/fill 必填：审批回执 token" }
+          "confirm": { "type": "boolean", "description": "批准后置 true（仅 click/fill）" },
+          "ackToken": { "type": "string", "description": "click/fill 首调由系统返回的确认 token（勿编造）" }
         },
         "required": ["action"]
       }

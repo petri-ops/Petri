@@ -34,6 +34,8 @@ export interface ModelAccessMenusController {
   setAccessMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
   accessMode: AccessMode;
   setAccessMode: React.Dispatch<React.SetStateAction<AccessMode>>;
+  /** BLOCK-346 T3 — 档位锁定（悬挂聊天面）：菜单须 disabled 并说明原因，不得静默失效。 */
+  accessModeLocked: boolean;
   planMode: boolean;
   prePlanAccessModeRef: React.MutableRefObject<'full' | 'workspace-write' | 'read' | null>;
   accessModeLabel: string;
@@ -121,6 +123,7 @@ export function useModelAccessMenus({
     setAccessMenuOpen,
     accessMode,
     setAccessMode,
+    accessModeLocked: Boolean(lockedAccessMode),
     planMode,
     prePlanAccessModeRef,
     accessModeLabel,

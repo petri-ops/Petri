@@ -269,6 +269,9 @@ async function tool_computer_authorize(_args = {}, _ctx = {}) {
 }
 
 module.exports = {
+  // BLOCK-346 T1 — 两段式审批编排复用出口：browser_act 的 click/fill 需要同一协议
+  // （同一 tool_jobs 表、同一 ack 语义），不新建第二套审批实现。
+  ensureControlConfirmation,
   tool_computer_snapshot,
   tool_computer_click,
   tool_computer_type,

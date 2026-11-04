@@ -157,13 +157,19 @@ describe('RS-4 invalid_arguments repair', () => {
     assert.strictEqual(s?.newParams?._repair, 'schema_fix');
   });
 
-  it('fix_enum_or_range clamps params', () => {
+  it('fix_enum_or_range 诚实失败（不伪造已修正，BLOCK-346 T3）', () => {
+    // 历史行为：只贴 `_repair: 'clamp_fix'` 标记、参数原样返回，却报 isActionable=true
+    // 且文案称「修正了超出范围的参数值」→ 重试必然复现同一错误。
+    // 现行为：缺 schema 边界信息时如实标记不可执行，参数原样交回由模型重填。
     const d = fd.diagnoseFailure({ error: 'enumerated value not allowed' });
     const s = selectRepairStrategy(d, {
       originalParams: { method: 'DESeq2' },
     });
     assert.strictEqual(s?.strategyId, 'fix_enum_or_range');
-    assert.strictEqual(s?.newParams?._repair, 'clamp_fix');
+    assert.strictEqual(s?.isActionable, false, '不得声称已自动修正');
+    assert.strictEqual(s?.newParams?._repair, undefined, '不得贴伪造修复标记');
+    assert.deepStrictEqual(s?.newParams, { method: 'DESeq2' }, '参数原样交回（未篡改）');
+    assert.match(String(s?.publicMessage || ''), /未能自动修正/, '文案须诚实');
   });
 });
 

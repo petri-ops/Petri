@@ -49,4 +49,28 @@ export function readBrandStorage(key: string): string | null {
   }
 }
 
+/**
+ * 品牌命名空间写入（与 readBrandStorage 成对，唯一前缀来源）。
+ * BLOCK-346 T3：此前调用方各自裸写 `petri.<key>`（点号），而读取端只认
+ * `petri-<key>`（连字符）→ 写入永远读不到。所有写入必须走本函数。
+ */
+export function writeBrandStorage(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(`petri-${key}`, value);
+  } catch {
+    /* 隐私模式等场景允许失败（读取端回落默认值） */
+  }
+}
+
+/** 品牌命名空间删除（与 writeBrandStorage 成对）。 */
+export function removeBrandStorage(key: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(`petri-${key}`);
+  } catch {
+    /* 同上 */
+  }
+}
+
 

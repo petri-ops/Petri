@@ -311,7 +311,10 @@ const CONTRACTS = {
   // BLOCK-336 P1 — worktree 域：目录级副作用走 R2/R3，摘要/列表不动工作区
   workspace_worktree_create: contract('workspace', 'workspace-write', 'R2', ['project.files', 'local.process'], 60000),
   workspace_worktree_list: contract('workspace', 'none', 'R0', ['project.files', 'local.process'], 20000),
-  workspace_worktree_remove: contract('workspace', 'workspace-write', 'R3', ['project.files', 'local.process'], 60000),
+  // BLOCK-346 T1（用户裁决 2026-11-04「按你推荐的来」）— R3 恒拒使该工具成为死工具
+  // （schema/handler/元数据三全但任何档位都调不通）。降至 R2 + 两段式审批：
+  // 破坏性操作由 ackToken 门 + inspectProjectWorktree 脏树 fail-closed 双保险。
+  workspace_worktree_remove: contract('workspace', 'workspace-write', 'R2', ['project.files', 'local.process'], 60000),
   workspace_worktree_merge_request: contract('workspace', 'state-write', 'R1', ['project.files', 'local.process'], 30000),
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),

@@ -473,6 +473,7 @@ export function SimpleChat({
     setAccessMenuOpen,
     accessMode,
     setAccessMode,
+    accessModeLocked,
     planMode,
     prePlanAccessModeRef,
     accessModeLabel,
@@ -1801,8 +1802,15 @@ export function SimpleChat({
                     <>
                       <div className="sc-access-overlay" onClick={() => setAccessMenuOpen(false)} />
                       <div className="sc-access-menu">
+                        {/* BLOCK-346 T3 — 锁定档（悬挂聊天面）必须显式说明，不得点了没反应 */}
+                        {accessModeLocked && (
+                          <div className="sc-access-locked-note" role="status" data-testid="access-locked-note">
+                            本窗口锁定为只读档（悬挂聊天面），档位切换不可用
+                          </div>
+                        )}
                         <button
                           type="button"
+                          disabled={accessModeLocked}
                           className={`sc-access-option ${accessMode === 'full' ? 'sc-access-option-active' : ''}`}
                           onClick={() => {
                             approvalSurfaces.requestFullAccess();
@@ -1814,6 +1822,7 @@ export function SimpleChat({
                         </button>
                         <button
                           type="button"
+                          disabled={accessModeLocked}
                           className={`sc-access-option ${accessMode === 'workspace-write' ? 'sc-access-option-active' : ''}`}
                           onClick={() => {
                             setAccessMode('workspace-write');
@@ -1826,6 +1835,7 @@ export function SimpleChat({
                         {/* UI-303 — 计划模式并入档位菜单（BLOCK-55 Spec 门）：只读探索 + 起草计划 */}
                         <button
                           type="button"
+                          disabled={accessModeLocked}
                           className={`sc-access-option ${accessMode === 'plan' ? 'sc-access-option-active' : ''}`}
                           onClick={() => {
                             if (accessMode !== 'plan') prePlanAccessModeRef.current = accessMode;
@@ -1838,6 +1848,7 @@ export function SimpleChat({
                         </button>
                         <button
                           type="button"
+                          disabled={accessModeLocked}
                           className={`sc-access-option ${accessMode === 'read' ? 'sc-access-option-active' : ''}`}
                           onClick={() => {
                             setAccessMode('read');

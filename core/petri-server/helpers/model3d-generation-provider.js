@@ -77,6 +77,8 @@ function probeGenerationProvider() {
   if (provider === 'mock') {
     return {
       status: 'ready',
+      // BLOCK-346 T3 — 与真实 provider 的 ready 显式区分：下游不得把模拟产物当真机结果
+      synthetic: true,
       reason: 'generation_provider_mock',
       provider,
       model: 'mock',
@@ -260,7 +262,9 @@ async function generateMock() {
     doc.addShape(box, { name: 'mock-generated' });
     const glb = doc.exportGLTF();
     doc.close();
-    return { ok: true, glb: Buffer.from(glb), provider: 'mock', model: 'mock', taskId: null, promptHash: null, usage: null };
+    // BLOCK-346 T3 — synthetic 随产物一起回传：调用方/UI 可据此标「模拟」，
+    // 不再与真实 Tripo 产物同形（历史缺陷：仅 reason 字段区分，下游常丢弃）。
+    return { ok: true, glb: Buffer.from(glb), provider: 'mock', model: 'mock', synthetic: true, taskId: null, promptHash: null, usage: null };
   } finally {
     try { kernel[Symbol.dispose](); } catch { /* disposed */ }
   }
