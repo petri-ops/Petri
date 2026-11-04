@@ -22,7 +22,6 @@
 
 const audit = require('./audit-log');
 const { IDE_TOOL_CONTRACTS, IDE_WRITE_TOOLS, checkConfirm } = require('./contracts');
-const { resolveIdeAccessMode, isAllowed, denyEnvelope } = require('./access-mode');
 const { fileToolDefinitions, HANDLERS: FILE_HANDLERS } = require('./file');
 const { terminalToolDefinitions, HANDLERS: TERMINAL_HANDLERS } = require('./terminal');
 const { searchToolDefinitions, HANDLERS: SEARCH_HANDLERS } = require('./search');
@@ -104,11 +103,8 @@ async function callIdeTool(name, args) {
   if (!handler) {
     return { ok: false, error: `unknown IDE tool: ${name}` };
   }
-  // BLOCK-346 T5 — ①档位闸（进程级 PETRI_IDE_MCP_ACCESS_MODE，默认 workspace-write）
-  // ②confirm 闸（高危写/执行类必须显式 confirm=true）。契约单源见 ./contracts.js。
-  const { mode } = resolveIdeAccessMode();
-  const gate = isAllowed(mode, IDE_TOOL_CONTRACTS[name]);
-  if (!gate.allowed) return denyEnvelope(name, mode, gate.requiredMode);
+  // BLOCK-346 T5 — 统一 confirm 闸（高危写/执行类必须显式 confirm=true）；
+  // 契约单源见 ./contracts.js。档位（accessMode）接入留 reopen。
   const denied = checkConfirm(name, args || {});
   if (denied) return denied;
   return handler(args);
@@ -124,8 +120,6 @@ module.exports = {
   // BLOCK-346 T5 — 契约单源（审计/门禁用；不含档位，档位接入留 reopen）
   IDE_TOOL_CONTRACTS,
   IDE_WRITE_TOOLS,
-  // BLOCK-346 T5 — 档位诊断（外部 IDE / 排查用）
-  resolveIdeAccessMode,
   // 供测试直连（不经过审计）
   _rawHandlers: ALL_HANDLERS,
 };
