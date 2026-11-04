@@ -147,6 +147,21 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 - **T6 死通道清理完成（2026-11-04 追加）**：12 条死通道（登记 + handler）+ branch-db 中仅服务它们的 11 个导出一并删除，净删 434 行；`channels.js` 275→261、`branch-db.js` 343→175、handler 12→6（正好=preload 暴露面）。连带修两处同键重复读取 bug（`petri_token ?? petri_token`）。矩阵 **P3 4→2**，余两条均为预期用途（`petri_token` 兼容读取、`extraRenderers` 手工调试开关），已在代码注释说明。
 - **遗留 reopen**：spreadsheet/pdf 钉住预览、科研计划/Loop 前端确认流（需 agent 侧改造）、IDE MCP 写面接统一审批轴、T4 4.2。
 
+## §2.10 用户裁决：四项取消（2026-11-04）
+
+用户原话：「看上去这 4 项不是很刚需，那可以取消了，防止干扰后续的其他开发」。
+
+| 取消项 | 原定做法 | 撤销方式 |
+| --- | --- | --- |
+| spreadsheet 钉住预览 | 引入 xlsx 二进制解析（exceljs 已退役） | 已做的前端解析器整体 revert（`c2def605`） |
+| 科研计划/Loop 确认流 | agent 侧产生确认请求 + 前端确认卡 | 立项包 BLOCK-347 撤销（`1012e993`）；已接的 `harness_plan_task` 工具一并 revert（`bb484d0d`） |
+| IDE MCP 档位协商 | 进程级 `PETRI_IDE_MCP_ACCESS_MODE` 过渡 | 整体 revert（`685c9f4e`）——默认收紧到 workspace-write 会改变外部 IDE 既有行为，属干扰源 |
+| 新工作包（BLOCK-347） | 科研任务闭环 planned 入队 | registry/roadmap/backlog/README 全部撤回 |
+
+**语义**：这四项**不再作为 reopen 跟踪**，后续规划不得自动捡起；如日后确有需求，须重新发令立项。
+**保留**：346 已交付的 T1-T8 本体（含 UI-694 设置面板五段、联邦作业、pdf/markdown 钉住预览、canCompare、IDE 契约表与 confirm 闸）不受影响。
+**可逆性**：全部通过 `git revert` 处理（保留历史），如需恢复对 revert 提交再 revert 即可。
+
 ## §3 阶段与体量
 
 | 阶段 | 内容 | 体量 |
