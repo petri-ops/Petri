@@ -9253,6 +9253,23 @@
       "notes": "BLOCK-349 清偿报告：环境清单 8 项 + 13 条终态表（10 verified + 3 cancelled 均带何时可补）+ 过程发现（pack deseq2.R 语法错 P2 / resultSurfaces 回流缺失 / 文件树复击惰性）+ 判据口径漂移如实登记。"
     },
     {
+      "id": "BLOCK-350-PERF-REPORT",
+      "path": "docs/block-350-perf-report.md",
+      "kind": "audit",
+      "status": "reference",
+      "truthDomain": "block-350-perf-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-350",
+        "evidence"
+      ],
+      "notes": "BLOCK-350 性能基线报告：三场景数值（冷启 546ms/长会话 20ms/大树 12ms，采样 5 中位+60% 容差）+ ④ packaged skipped（环境不可得，BLOCK-353 补建）+ 门接线（quality:perf 入 closeout 15 门）+ 负测契约 6/6 + electron-builder ABI 副作用注记。",
+      "canonical": true
+    },
+    {
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "path": "docs/block-349-evidence-clearance-plan.md",
@@ -9290,7 +9307,7 @@
       "capability": "block-350-performance-baseline",
       "path": "docs/block-350-performance-baseline-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-350-performance-baseline",
       "entrypoint": "docs/README.md",
@@ -9316,7 +9333,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（总纲 NEXT-PHASE-PROGRAM-2026-11-05）。性能基线四条。目标：为冷启动、长会话、大项目、打包态启动建立四条可复跑性能基线并接入 closeout 棘轮；本包只测量建基线，不做性能优化。 依赖：BLOCK-348,BLOCK-353。逐包发令开工，不并行。"
+      "notes": "2026-11-05 收口 completed（总纲包 3/7）。三场景基线在案（冷启 546ms/长会话 20ms/大树 12ms，采样 5、+60% 容差）；④ packaged skipped（headless 首启授权不可得，BLOCK-353 用同采集器补建）。quality:perf 新门入 closeout（14→15）；负测契约 6/6；electron-builder better-sqlite3 ABI 副作用已处置（npm rebuild）。报告=docs/block-350-perf-report.md。"
     },
     {
       "id": "BLOCK-351",

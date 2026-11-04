@@ -7362,6 +7362,24 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block350-performance-baseline",
+      "note": "BLOCK-350 性能基线四条：采集器/gate/基线棘轮/负测契约。改采集器或基线时跑本包测试与 perf 门。",
+      "patterns": [
+        "scripts/block350-*.mjs",
+        "test/perf-baseline.json",
+        "test/block350-*.test.mjs",
+        "docs/block-350-*.md"
+      ],
+      "tests": [
+        "test/block350-perf-gate.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

@@ -100,7 +100,7 @@
       "id": "BLOCK-350",
       "capability": "block-350-performance-baseline",
       "title": "性能基线四条",
-      "status": "planned",
+      "status": "completed",
       "priority": "P1",
       "plan": "docs/block-350-performance-baseline-plan.md",
       "goal": "为冷启动、长会话、大项目、打包态启动建立四条可复跑性能基线并接入 closeout 棘轮；本包只测量建基线，不做性能优化。",

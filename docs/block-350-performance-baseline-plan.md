@@ -1,6 +1,6 @@
 ---
 capability: block-350-performance-baseline
-status: planned
+status: completed
 goal: 为冷启动、长会话、大项目、打包态启动建立四条可复跑性能基线并接入 closeout 棘轮；本包只测量建基线，不做性能优化。
 acceptance:
   - 4 条基线均可复跑，数值落盘且带采样次数与容差。
@@ -11,7 +11,7 @@ reopen: G1+ 项（APM / 云监控 / 跨机可比性）；性能优化本身另�
 
 # BLOCK-350 — 性能基线四条（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——报告 docs/block-350-perf-report.md；三场景基线在案 + ④ skipped 交接 353；quality:perf 入 closeout 15 门
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §3.3（性能 2.5/5，七维度最弱）
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**

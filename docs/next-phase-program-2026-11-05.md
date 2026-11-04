@@ -216,7 +216,7 @@ npm run closeout
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 348 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-348/ + docs/block-348-eval-report.md（判据冻结指纹 4b69b2d092bcae22；单测 9/9） | 0/0（复核门） | **PASS（14 门；98cd623c + 9822295c）** | completed——自主完成 6/8、干预 0、工具选择 24/24、产物可用 23/24；**实锤 P1=压缩裁剪破坏 tool 配对**（入池 C-45 待裁决）；T4 环境不可得 |
 | 349 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-349/ + docs/block-349-clearance-report.md（探针 5 支 + 清偿测试 4/4） | 0/0（复核门） | **PASS（14 门）** | completed——A 类 13 条全终态=10 verified+3 cancelled（459/471/532 带何时可补）；R 已装新事实；C-46/C-47 入池；口径漂移如实登记 |
-| 350 | — | — | — | — | — | — | planned |
+| 350 | 2026-11-05 | 2026-11-05 | 2026-11-05 | test/perf-baseline.json + docs/block-350-perf-report.md（负测 6/6） | 0/0（复核门） | 见收口笔录 | completed——三场景基线在案（冷启 546/长会话 20/大树 12ms）；④ packaged skipped 交接 353；quality:perf 入 closeout 15 门 |
 | 351 | — | — | — | — | — | — | planned |
 | 352 | — | — | — | — | — | — | planned |
 | 353 | — | — | — | — | — | — | planned |
