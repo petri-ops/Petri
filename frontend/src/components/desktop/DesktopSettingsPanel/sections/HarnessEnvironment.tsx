@@ -21,6 +21,17 @@ export function HarnessEnvironment(): React.ReactElement | null {
   }>>([]);
   const [loading, setLoading] = useState(true);
 
+  // BLOCK-346 T4 — 面板原为纯只读（连刷新都没有）：装坏/缺包时用户无从处置。
+  // 至少给「重新检测」把 list 重拉一次（不新增 IPC，复用既有只读面）。
+  const reload = React.useCallback(() => {
+    if (!bridge) return;
+    setLoading(true);
+    bridge.list()
+      .then((result) => { setCapabilities((result.capabilities ?? [])); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [bridge]);
+
   useEffect(() => {
     if (!bridge) { setLoading(false); return; }
     bridge.list()
@@ -43,6 +54,17 @@ export function HarnessEnvironment(): React.ReactElement | null {
       <p className="petri-field__hint">
         运行分析时按需自动准备的运行时和依赖包（由插件按需声明），无需手动安装。
       </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button
+          type="button"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
+          data-testid="harness-caps-refresh"
+          disabled={loading}
+          onClick={reload}
+        >
+          {loading ? '读取中…' : '重新检测'}
+        </button>
+      </div>
       {loading ? (
         <p className="petri-field__hint">正在读取…</p>
       ) : capabilities.length === 0 ? (

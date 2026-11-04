@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 import styles from './SettingsQuickwins.module.css';
 import { ComputerUsePanel } from './ComputerUsePanel';
+import { ModelAccessPanel } from './ModelAccessPanel';
 
 /**
  * RuntimePolicyPanel — 全局审批默认档位 / 派生并发与深度 / 工具曝光黑名单（BLOCK-202 W3 / P0-2）。
@@ -221,6 +222,7 @@ export function RuntimePolicyPanel(): React.ReactElement {
         </div>
       )}
       <ComputerUsePanel />
+      <ModelAccessPanel />
     </div>
   );
 }
