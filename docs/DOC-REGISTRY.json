@@ -9109,7 +9109,7 @@
       "capability": "block-346-functional-sweep",
       "path": "docs/block-346-functional-sweep-blueprint.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-346-functional-sweep",
       "entrypoint": "docs/README.md",
@@ -9146,7 +9146,8 @@
         "test/knip-baseline.json",
         "test/functional-surface-baseline.json"
       ],
-      "notes": "2026-11-04 立项 planned（用户「事无巨细的全方位核对 每个点都要明确清楚，之后建立优化蓝图，彻底清扫问题」）：以机械全量矩阵为唯一清单清扫集成债——T1 审批链统一 / T2 定义汇编门禁（goals 三工具未进 TOOL_DEFS，新发现 P1）/ T3 静默失效 / T4 零消费端点 / T5 安全口径（需裁决）/ T6 通道与存储键卫生 / T7 矩阵门禁化（P1 只许减不许增）/ T8 台账口径对账。排队 344 → 345 → 本包；与 345 文件面部分相交故必须串行。非范围=白名单/总开关/drag/右键/Linux/G1+。"
+      "notes": "2026-11-04 立项 planned（用户「事无巨细的全方位核对 每个点都要明确清楚，之后建立优化蓝图，彻底清扫问题」）：以机械全量矩阵为唯一清单清扫集成债——T1 审批链统一 / T2 定义汇编门禁（goals 三工具未进 TOOL_DEFS，新发现 P1）/ T3 静默失效 / T4 零消费端点 / T5 安全口径（需裁决）/ T6 通道与存储键卫生 / T7 矩阵门禁化（P1 只许减不许增）/ T8 台账口径对账。排队 344 → 345 → 本包；与 345 文件面部分相交故必须串行。非范围=白名单/总开关/drag/右键/Linux/G1+。 | 2026-11-04 收口：closeout 14 门全绿；矩阵 P1 5→0 / P2 9→0 / P3 4→3（余 12 死通道已清后剩 2 预期用途键 + 3 诊断端点）；T4 接线 13 条（设置五段 + 联邦作业 + 钉住 md/pdf + canCompare）；T5 IDE MCP 契约单源；T6 净删 434 行；T8 台账五分类；检测可信度负测矩阵留痕。",
+      "phase": "COMPLETED"
     }
   ],
   "lastUpdated": "2026-11-04",

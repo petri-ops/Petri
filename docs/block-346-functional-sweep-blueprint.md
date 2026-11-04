@@ -1,6 +1,6 @@
 ---
 capability: block-346-functional-sweep
-status: planned
+status: completed
 goal: 把「能力写完但用户用不到」这类集成债一次清扫干净并机械防复发——以全量矩阵（工具×契约×handler×元数据×可达性 / IPC×preload / 路由×挂载 / 设置键×读写）为唯一清单，票式逐项收官，并把矩阵升级为 closeout 棘轮门禁（P1 只许减不许增），使同类缺陷不再依赖人工审计发现。
 acceptance:
   - P0 基线冻结：`node scripts/functional-surface-audit.mjs` 全量矩阵落盘（acceptance/functional-audit-2026-11-04/），P1/P2/P3 清单与本蓝图票单逐项对齐；基线 JSON 入 `test/functional-surface-baseline.json`。
