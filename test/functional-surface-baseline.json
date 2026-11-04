@@ -1,23 +1,15 @@
 {
-  "generatedAt": "2026-11-04T11:31:13.683Z",
-  "baselineSha": "fc3b8606",
+  "generatedAt": "2026-11-04T11:33:39.202Z",
+  "baselineSha": "15ede23b",
   "note": "BLOCK-346 T7 棘轮基线：记录已知存量，--check 只对新增 P1/P2 判红。收敛后 --write-baseline 下调。",
   "counts": {
     "P1": 0,
-    "P2": 7,
+    "P2": 0,
     "P3": 4
   },
   "findings": {
     "P1": [],
-    "P2": [
-      "approval_meta_contract_conflict::result_edit_plan",
-      "approval_meta_contract_conflict::result_edit_plan_in_context",
-      "schema_undeclared_args::computer_press",
-      "schema_undeclared_args::followup_task",
-      "schema_undeclared_args::model3d_apply",
-      "schema_undeclared_args::model3d_export",
-      "schema_undeclared_args::model3d_propose"
-    ],
+    "P2": [],
     "P3": [
       "ipc_dead_channels::12 个通道",
       "storage_read_never_written::executionTargetId",

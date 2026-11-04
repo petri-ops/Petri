@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T11:31:14.013Z",
+  "generatedAt": "2026-11-04T11:33:39.567Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -15,55 +15,13 @@
     "storageKeys": 7,
     "findingsBySeverity": {
       "P1": 0,
-      "P2": 7,
+      "P2": 0,
       "P3": 4
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 4,
     "defsFallbacks": 0
   },
   "findings": [
-    {
-      "sev": "P2",
-      "kind": "schema_undeclared_args",
-      "subject": "followup_task",
-      "detail": "实现读未声明键：role"
-    },
-    {
-      "sev": "P2",
-      "kind": "schema_undeclared_args",
-      "subject": "computer_press",
-      "detail": "实现读未声明键：ref"
-    },
-    {
-      "sev": "P2",
-      "kind": "schema_undeclared_args",
-      "subject": "model3d_propose",
-      "detail": "实现读未声明键：path"
-    },
-    {
-      "sev": "P2",
-      "kind": "schema_undeclared_args",
-      "subject": "model3d_apply",
-      "detail": "实现读未声明键：reason"
-    },
-    {
-      "sev": "P2",
-      "kind": "schema_undeclared_args",
-      "subject": "model3d_export",
-      "detail": "实现读未声明键：scenePath"
-    },
-    {
-      "sev": "P2",
-      "kind": "approval_meta_contract_conflict",
-      "subject": "result_edit_plan",
-      "detail": "metadata 需审批但契约 sideEffect=none"
-    },
-    {
-      "sev": "P2",
-      "kind": "approval_meta_contract_conflict",
-      "subject": "result_edit_plan_in_context",
-      "detail": "metadata 需审批但契约 sideEffect=none"
-    },
     {
       "sev": "P3",
       "kind": "ipc_dead_channels",
@@ -150,10 +108,8 @@
         "full": "allow",
         "planMode": "deny"
       },
-      "undeclaredArgs": [
-        "role"
-      ],
-      "schemaProps": 5
+      "undeclaredArgs": [],
+      "schemaProps": 6
     },
     {
       "name": "spawn_agent",
@@ -635,10 +591,8 @@
         "full": "allow",
         "planMode": "deny"
       },
-      "undeclaredArgs": [
-        "ref"
-      ],
-      "schemaProps": 6
+      "undeclaredArgs": [],
+      "schemaProps": 7
     },
     {
       "name": "computer_scroll",
@@ -1120,10 +1074,8 @@
         "full": "allow",
         "planMode": "allow"
       },
-      "undeclaredArgs": [
-        "path"
-      ],
-      "schemaProps": 2
+      "undeclaredArgs": [],
+      "schemaProps": 3
     },
     {
       "name": "model3d_apply",
@@ -1143,10 +1095,8 @@
         "full": "allow",
         "planMode": "deny"
       },
-      "undeclaredArgs": [
-        "reason"
-      ],
-      "schemaProps": 4
+      "undeclaredArgs": [],
+      "schemaProps": 5
     },
     {
       "name": "model3d_render",
@@ -1208,10 +1158,8 @@
         "full": "allow",
         "planMode": "deny"
       },
-      "undeclaredArgs": [
-        "scenePath"
-      ],
-      "schemaProps": 7
+      "undeclaredArgs": [],
+      "schemaProps": 8
     },
     {
       "name": "model3d_share",
@@ -1453,7 +1401,7 @@
       "hasMetadata": true,
       "riskTier": "R0",
       "sideEffect": "none",
-      "needsApprovalMeta": true,
+      "needsApprovalMeta": false,
       "reachable": true,
       "reach": {
         "name": "result_edit_plan",
@@ -1663,7 +1611,7 @@
       "hasMetadata": true,
       "riskTier": "R0",
       "sideEffect": "none",
-      "needsApprovalMeta": true,
+      "needsApprovalMeta": false,
       "reachable": true,
       "reach": {
         "name": "result_edit_plan_in_context",
@@ -6048,6 +5996,11 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/agent-tools/tool-defs/agent-orchestration.js",
+    "M core/petri-server/agent-tools/tool-defs/computer.js",
+    "M core/petri-server/agent-tools/tool-defs/model3d.js",
+    "M core/petri-server/agent-tools/tool-metadata.js"
+  ],
   "defNotes": []
 }

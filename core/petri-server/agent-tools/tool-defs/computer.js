@@ -112,6 +112,10 @@ module.exports = [
       "parameters": {
         "type": "object",
         "properties": {
+          "ref": {
+            "type": "string",
+            "description": "目标元素 ref（snapshot 返回）；给 ref 时先聚焦该元素再按键"
+          },
           "key": {
             "type": "string",
             "description": "键名（如 return、escape、left、f4）"

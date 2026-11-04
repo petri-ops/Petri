@@ -61,6 +61,7 @@ module.exports = [
       parameters: {
         type: 'object',
         properties: {
+          path: { type: 'string', description: '项目相对路径（缺省 model3d/scene.scene3d.json）；与 apply 同路径以便哈希对齐' },
           scene,
           operations: {
             type: 'array',
@@ -82,6 +83,7 @@ module.exports = [
         properties: {
           scene,
           operations: { type: 'array', items: { type: 'object', additionalProperties: true } },
+          reason: { type: 'string', description: '可选：本次修改的意图说明（写入审计与提案记录）' },
           path: { type: 'string', description: '项目相对路径，默认 model3d/scene.scene3d.json' },
           expectedHash: { type: 'string', description: 'BLOCK-344 P1 治理对齐——写入前提的 before 哈希（model3d_propose 返回值）；不匹配时 409 scene_conflict，人的修正不被 agent 覆盖。强烈建议携带。' },
         },
@@ -129,6 +131,7 @@ module.exports = [
       parameters: {
         type: 'object',
         properties: {
+          scenePath: { type: 'string', description: '项目内 SceneSpec 相对路径（缺省 model3d/scene.scene3d.json）' },
           scene,
           formats: { type: 'array', items: { type: 'string', enum: ['glb', 'stl', 'obj', 'fbx', 'usdz', 'step'] } },
           turntable,

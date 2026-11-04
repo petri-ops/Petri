@@ -59,6 +59,10 @@ module.exports = [
             "type": "string",
             "description": "要续派的子 agent ID（须已终态）"
           },
+          "role": {
+            "type": "string",
+            "description": "可选：续派子 agent 的角色标签（如 investigator / executor）"
+          },
           "task": {
             "type": "string",
             "description": "追加的子任务描述"

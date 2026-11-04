@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T11:31:14.013Z
+> 基线：`HEAD`（工作区在制文件 4 个不计入判定）。生成时间：2026-11-04T11:33:39.567Z
 
 ## 0. 覆盖汇总
 
@@ -13,7 +13,7 @@
 | IPC 通道 | 180（preload 缺包装 14；前端零消费 177） |
 | 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 7 |
-| 判定 P1 / P2 / P3 | **0 / 7 / 4** |
+| 判定 P1 / P2 / P3 | **0 / 0 / 4** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -21,15 +21,7 @@
 
 ## 2. P2 明细（契约不一致 / 半接线）
 
-| 类别 | 对象 | 说明 |
-| --- | --- | --- |
-| schema_undeclared_args | `followup_task` | 实现读未声明键：role |
-| schema_undeclared_args | `computer_press` | 实现读未声明键：ref |
-| schema_undeclared_args | `model3d_propose` | 实现读未声明键：path |
-| schema_undeclared_args | `model3d_apply` | 实现读未声明键：reason |
-| schema_undeclared_args | `model3d_export` | 实现读未声明键：scenePath |
-| approval_meta_contract_conflict | `result_edit_plan` | metadata 需审批但契约 sideEffect=none |
-| approval_meta_contract_conflict | `result_edit_plan_in_context` | metadata 需审批但契约 sideEffect=none |
+（无）
 
 ## 3. P3 明细（卫生；最多列 60 条）
 
@@ -46,7 +38,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `interrupt_agent` | agent-orchestration | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
 | `send_message` | agent-orchestration | ✓ | ✓ | ✓ | R1 | state-write | yes | yes | - |
-| `followup_task` | agent-orchestration | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | role |
+| `followup_task` | agent-orchestration | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
 | `spawn_agent` | agent-orchestration | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
 | `read_agent_journal` | agent-orchestration | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `list_agents` | agent-orchestration | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -69,7 +61,7 @@
 | `computer_snapshot` | computer | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `computer_click` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `computer_type` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
-| `computer_press` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | ref |
+| `computer_press` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `computer_scroll` | computer | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `computer_screenshot` | computer | ✓ | ✓ | ✓ | R1 | workspace-write | no | yes | - |
 | `computer_wait` | computer | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
@@ -92,11 +84,11 @@
 | `knowledge_doc_reindex` | knowledge | ✓ | ✓ | ✓ | R1 | state-write | yes | yes | - |
 | `model3d_inspect` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
 | `model3d_validate` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
-| `model3d_propose` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | path |
-| `model3d_apply` | model3d | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | reason |
+| `model3d_propose` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
+| `model3d_apply` | model3d | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | - |
 | `model3d_render` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `model3d_visual_qa` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
-| `model3d_export` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | scenePath |
+| `model3d_export` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `model3d_share` | model3d | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | - |
 | `model3d_asset` | model3d | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | - |
 | `model3d_bom` | model3d | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
@@ -108,7 +100,7 @@
 | `resident_task_list` | resident | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `resident_task_read` | resident | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `generate_methods` | result-studio | ✓ | ✓ | ✓ | R1 | external-request | yes | yes | - |
-| `result_edit_plan` | result-studio | ✓ | ✓ | ✓ | R0 | none | yes | yes | - |
+| `result_edit_plan` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `result_changeset_create` | result-studio | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `result_changeset_status` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `result_changeset_compare` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -118,7 +110,7 @@
 | `artifact_revision_restore` | result-studio | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
 | `result_selection_run` | result-studio | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `result_studio_context` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
-| `result_edit_plan_in_context` | result-studio | ✓ | ✓ | ✓ | R0 | none | yes | yes | - |
+| `result_edit_plan_in_context` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `result_changeset_create_in_context` | result-studio | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `result_enrichment_from_context` | result-studio | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `result_changeset_status_in_context` | result-studio | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -168,4 +160,7 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-（无）
+- `M core/petri-server/agent-tools/tool-defs/agent-orchestration.js`
+- `M core/petri-server/agent-tools/tool-defs/computer.js`
+- `M core/petri-server/agent-tools/tool-defs/model3d.js`
+- `M core/petri-server/agent-tools/tool-metadata.js`
