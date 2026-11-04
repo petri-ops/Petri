@@ -112,6 +112,17 @@ export function ArtifactPinPane({
     if (snapshot.viewerAdapter === 'image' && snapshot.url) {
       return <img className={styles.artifactPinImage} src={snapshot.url} alt={snapshot.artifactName} />;
     }
+    // BLOCK-346 T4 — pdf 此前落「无内嵌预览载荷」占位；浏览器原生可渲染，直接内嵌（零解析依赖）
+    if (snapshot.viewerAdapter === 'pdf' && snapshot.url) {
+      return (
+        <iframe
+          className={styles.artifactPinFrame}
+          src={snapshot.url}
+          title={snapshot.artifactName}
+          sandbox="allow-same-origin"
+        />
+      );
+    }
     if (snapshot.viewerAdapter === 'table' && snapshot.previewData && snapshot.previewData.length > 0) {
       const [header, ...rows] = snapshot.previewData;
       return (

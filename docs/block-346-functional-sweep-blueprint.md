@@ -70,7 +70,7 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
   - `delegate_to_petri_node`：`external-request` → `execution`（它是在他机上**执行**一个任务，不是只读出网；原分类使只读/计划档可远程执行）
   - `generate_methods`：`external-request` → `state-write`（写 `project.database`）
 - **browser_act 保持 `external-request`**：写动作的审批由工具内两段式门（T1）承担，读动作在只读档仍应放行。
-- **IDE MCP 写面**：`mcp/ide-tools/{file,terminal}.js` 不经 `decideAgentToolCall`、无契约/元数据条目。要并入统一审批轴，需先给 ide-tools 建契约表（约 6 个写动词）+ 拦截器接线 + 回归，体量独立 → **登记 reopen**，不在本包硬塞。
+- **IDE MCP 写面（已补契约，档位留 reopen）**：新建 `mcp/ide-tools/contracts.js` —— 18 个 `ide_*` 工具全部登记契约（sideEffect/riskTier/destructive/confirmPolicy），dispatch 层对 `confirmPolicy='always'` 的写/执行类强制 `confirm=true`（`ide_file_delete`、`ide_terminal_write`）。**档位接入仍 reopen**：MCP 调用方是外部 IDE（Cursor/VSCode），无 Petri 侧 `accessMode` 会话概念，硬接会产生「外部 IDE 永远被拒」的假门；正解要在 MCP 握手期协商会话档位，属协议层改造。回归：`test/block346-ide-tool-contracts.test.mjs` 6/6 + 既有 IDE 测试 72/72。
 - **验收**：`agent-tool-registry` 27/27 绿（含两处 345 遗留的工具计数断言同步 114→115）。
 
 ### T6 通道与设置键卫生（P2/P3）
@@ -117,7 +117,7 @@ reopen: 应用/窗口白名单与 computer 总开关（对标项，需单独裁�
 | 4.1 | 联邦作业三端点前端零调用 | **DONE**：新建 `FederationJobs`（选节点 + toolId + 参数 JSON → 提交 / 查状态 / 产物下载），挂联邦面板；3/3 测试（含本地 JSON 拦截、下载链接条件） |
 | 4.2 | 科研计划 5 + Loop 3 端点前端零调用 | **登记为待接线（非本包硬造）**：全仓 grep 无任何内部调用方，且前端无 taskSpec 来源（taskSpec 由 agent 编排产生）——造「手填 taskSpec JSON」的 UI 无产品价值。正确接法=agent 侧产生确认请求 → 前端确认卡，属 loop 编排改造，另立 reopen |
 | 4.5 | `canCompare` 无人消费 + 另一处硬编码 true | **DONE**：Canvas 改 prop（默认 false）由调用方按适配器传；测试补反向断言 |
-| 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | **部分 DONE**：markdown 文本可内嵌（快照填 `previewText` + Pane 分支）；spreadsheet/pdf 需二进制解析（exceljs 已退役 / pdf 渲染），登记 reopen |
+| 4.6 | 钉住快照 md/sheet/pdf 无内嵌预览 | **DONE（除 spreadsheet）**：markdown 文本内嵌（`previewText` + Pane 分支）；**pdf 走浏览器原生 iframe**（零解析依赖，同 report 分支）；spreadsheet 需 xlsx 二进制解析（exceljs 已退役）→ 保留「打开原文件」出口并登记 reopen |
 
 ## §2.9 四批交付完成与收口例外（2026-11-04）
 
