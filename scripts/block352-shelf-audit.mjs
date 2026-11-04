@@ -20,7 +20,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import http from 'node:http';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
@@ -29,7 +28,6 @@ const __filename = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(__filename), '..');
 const PACK_DIR = path.join(ROOT, '..', 'petri-pack-bio');
 const OUT = path.join(ROOT, 'acceptance', 'block-352', 'shelf-matrix.json');
-const PORT = Number(process.env.PETRI_BLOCK352_API_PORT) || 3102;
 
 const matrix = { at: new Date().toISOString(), shelves: { skills: [], plugins: [], mcp: {} }, totals: {} };
 
