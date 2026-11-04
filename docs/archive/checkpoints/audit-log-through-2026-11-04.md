@@ -17,3 +17,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-04T03:51:55.019Z -->
 最后更新：2026-11-04（✅ **SVG 编辑器画布适应页面（UI-681；用户实时反馈批；实机 63/63）**：用户反馈「编辑器打开后图形限定了宽高」——修法=画布填满 stage + svg contain 居中（CSS 覆盖 presentation 属性真值不动）+ toUser/userToHost 补 meet letterbox 修正（k=min+居中偏移，点选/拖拽/绘制/节点全链仍准）+ 适应窗口重置为 contain 基准；flow V2e 覆盖断言 0.98 + V14/V15 换算改实测 k（249.25 vs 期望 249.3 互证）+ V14b 去硬编码。前端 80/80 + tsc 0 + lint 0。轻量包=本条目（TEST-INFRA-DEBT 先例）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-04T03:54:23.859Z -->
+最后更新：2026-11-04（✅ **SVG 编辑器底排可调高+修订行对齐（UI-682；用户实时反馈批+截图；实机 64/64）**：用户反馈底排两卡固定 196 不可调+修订行对比按钮错位——修法=layout 单一真源 row2 变量化（6px 把手行+卡片移 row3，--svg-row2 内联挂变量，拖动 clamp 140–420）+ revisionRow flex 容器（预览 flex:1+对比固定宽）。截图过目+flow V26（拖 +60px 卡 250→310）。前端 80/80 + tsc 0 + lint 0。轻量包=本条目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
