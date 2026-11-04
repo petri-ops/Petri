@@ -128,6 +128,22 @@ module.exports = function registerModel3DRoutes(app) {
     return res.json({ ok: true, path: normalized, revisions });
   });
 
+  // BLOCK-344 P2 — 读单个修订快照（洋葱皮对比；只读）
+  app.get('/api/model3d/scene/revision', async (req, res) => {
+    const auth = loadLocalProject(req, res, req.query && req.query.projectId);
+    if (!auth) return;
+    const result = await sceneStore.readRevision({
+      workspaceRoot: auth.project ? auth.project.workspace_path : undefined,
+      relativePath: req.query.path,
+      revisionId: req.query.revisionId,
+    });
+    if (!result.ok) {
+      const status = result.error === 'revision_not_found' ? 404 : 400;
+      return res.status(status).json(result);
+    }
+    return res.json(result);
+  });
+
   app.post('/api/model3d/scene/restore', async (req, res) => {
     const auth = loadLocalProject(req, res, req.body?.projectId);
     if (!auth) return;

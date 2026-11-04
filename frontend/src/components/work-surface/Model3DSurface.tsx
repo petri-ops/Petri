@@ -139,6 +139,8 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
   const [editOpen, setEditOpen] = React.useState(false);
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(null);
   const [measureMode, setMeasureMode] = React.useState(false);
+  // BLOCK-344 P2 — 洋葱皮对比：EditPanel 修订对比 → 3D 视口 ghost 叠加
+  const [compare, setCompare] = React.useState<{ spec: unknown; revisionId: string; opacity: number } | null>(null);
   const [measurePoints, setMeasurePoints] = React.useState<Model3DPoint[]>([]);
   // UI-653 — 当前场景的来源文件（聊天产物卡/文件预览打开）；参数/约束编辑锚定此路径。
   const [sceneSourcePath, setSceneSourcePath] = React.useState<string | null>(null);
@@ -627,6 +629,8 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
                 measurement={measurement}
                 onMeasurePoint={onMeasurePoint}
                 onCameraApi={onCameraApi}
+                ghostView={compare?.spec ?? null}
+                ghostOpacity={compare?.opacity}
               />
             </React.Suspense>
           )}
@@ -809,6 +813,7 @@ export function Model3DSurface({ projectId = null, initialOpen = null, active = 
           scene={view.scene}
           initialScenePath={snapshotSourceReadOnly ? undefined : (sceneSourcePath || undefined)}
           onSceneUpdated={loadStructured}
+          onCompareChange={setCompare}
         />
       ) : null}
       {compareError ? <div className={styles.error} role="alert">{compareError}</div> : null}

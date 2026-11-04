@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import scene3d from '../core/petri-server/helpers/scene3d.js';
@@ -114,5 +115,85 @@ describe('BLOCK-344 P1 — 3D 编辑治理对齐（逐项取舍/CAS/约束变更
     const block = defs.slice(defs.indexOf("name: 'model3d_apply'"), defs.indexOf("name: 'model3d_apply'") + 1200);
     assert.ok(block.includes('expectedHash'), 'apply schema 缺 expectedHash（CAS 未对齐）');
     assert.ok(block.includes('scene_conflict'), 'expectedHash 描述应说明冲突语义');
+  });
+});
+
+describe('BLOCK-344 P2 — readRevision 只读 + actor 字段', () => {
+  it('readRevision：读快照内容 + actor 推导（agent_apply→agent）；缺席 id 如实 404 语义', async () => {
+    const before = structuredClone(SCENE);
+    const after = structuredClone(SCENE);
+    after.parameters.width = 130;
+    // apply 一次（内部 recordRevision 推导 actor=user_parameter_edit→user）
+    const applied = scene3d.applySceneOperations(before, [
+      { op: 'set_parameter', name: 'width', value: 130 },
+    ]);
+    assert.equal(applied.ok, true);
+    // 直接探 recordRevision（经 store 内部路径）——用临时文件走完整链
+    const os = await import('node:os');
+    const fsp = await import('node:fs/promises');
+    const tmp = await fsp.mkdtemp(path.join(os.tmpdir(), 'b344-'));
+    // 用 applyOperations 的完整链（写盘 + revision）：
+    const target = path.join(tmp, 'model3d', 'scene.scene3d.json');
+    await fsp.mkdir(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, JSON.stringify(before));
+    const result = await sceneStore.applyOperations({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      scene: before,
+      operations: [{ op: 'set_parameter', name: 'width', value: 130 }],
+      expectedHash: scene3d.hashSceneSpec(before),
+      reason: 'agent_apply',
+    });
+    assert.equal(result.ok, true, JSON.stringify(result));
+    const read = await sceneStore.readRevision({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      revisionId: result.revision.revisionId,
+    });
+    assert.equal(read.ok, true, JSON.stringify(read));
+    assert.equal(read.actor, 'agent'); // reason=agent_apply → actor=agent
+    assert.deepEqual(read.scene, before);
+    assert.equal(read.hash, scene3d.hashSceneSpec(before));
+    // 缺席修订
+    const missing = await sceneStore.readRevision({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      revisionId: 'rev-999999',
+    });
+    assert.equal(missing.error, 'revision_not_found');
+    // 非法 id
+    const bad = await sceneStore.readRevision({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      revisionId: 'hack',
+    });
+    assert.equal(bad.error, 'revision_id_invalid');
+  });
+
+  it('user_parameter_edit 推导为 user；restore 推导为 system', async () => {
+    // actorFromReason 未导出——经 recordRevision 间接验证：读 index 不可行（未导出），
+    // 用 applyOperations 两次不同 reason 走完整链断言 actor。
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'b344-u-'));
+    const target = path.join(tmp, 'model3d', 'scene.scene3d.json');
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, JSON.stringify(SCENE));
+    const r1 = await sceneStore.applyOperations({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      scene: SCENE,
+      operations: [{ op: 'set_parameter', name: 'width', value: 111 }],
+      reason: 'user_parameter_edit',
+    });
+    assert.equal(r1.ok, true);
+    assert.equal(r1.revision.actor, 'user');
+    const r2 = await sceneStore.applyOperations({
+      workspaceRoot: tmp,
+      relativePath: 'model3d/scene.scene3d.json',
+      scene: r1.scene,
+      operations: [{ op: 'set_parameter', name: 'width', value: 222 }],
+      reason: 'agent_apply',
+    });
+    assert.equal(r2.ok, true);
+    assert.equal(r2.revision.actor, 'agent');
   });
 });

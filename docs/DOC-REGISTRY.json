@@ -9066,8 +9066,27 @@
         "test/knip-baseline.json"
       ],
       "notes": "2026-11-04 立项 planned（用户「可以的 开整」；承接电脑使用核对报告单一建议），排队 BLOCK-344 之后不并行：修补三处结构性断链——①computer_* needApproval 桌面无确认卡入口（tool-events 只对 run_tool 上抬 + 前端 event.name 硬编码 + accessMode 互斥）②PiP 截帧链恒无画面（路由传空 params 而两侧 sidecar 要求 out 必填，且返回值无 base64）③computer_close 未暴露（Windows verb 已存在）；附元数据/schema/wait 超时漂移与 block48 默认跑法假红；三条机械门禁防复发。非范围=白名单/总开关/drag/右键/Linux/二进制分发（G1+）。"
+    },
+    {
+      "id": "FUNCTIONAL-AUDIT-2026-11-04",
+      "path": "docs/functional-audit-2026-11-04.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "functional-audit-2026-11-04",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "audit",
+        "functional-gap",
+        "approval-chain",
+        "silent-failure",
+        "G0"
+      ],
+      "notes": "2026-11-04 全仓功能面审计（专项/归因形态，四路只读：工具面/前端面/后端接线面/台账）。产出=「能力写完但用户用不到」分级清单：P1 同型断链（browser_act 无 ackToken 签发、worktree_remove R3 死门、默认执行目标键静默失效、needsApproval 元数据零读取者）+ 静默失效四项 + 安全口径二项（external-request 逃逸桶、IDE MCP 写面绕 policy）+ P2 零消费端点八项；附已核实完好清单与审计边界声明。账本锚点=AUDIT-LOG 同日四条 🟡 指针行。零产品代码改动。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 457
+  "documentCount": 458
 }

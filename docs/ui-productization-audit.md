@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-688: 3D 编辑器 P2 洋葱皮对比——修订行「对比」+ 半透明叠加 + 透明度滑杆 + 执行者标注（BLOCK-344 P2；2026-11-04 **verified（dev Electron 边界内；契约 8/8 + REST 实机 ✓）**）
+
+- **后端**：①`readRevision` 只读端点（GET /api/model3d/scene/revision——读 `.history/` 单个快照内容，洋葱皮数据源；SVG `readSvgRevision` 先例的 3D 对应物，此前缺失）；②revision entry 补结构化 **actor 字段**（reason 弱约定推导：agent_apply/recipe=agent、before_restore=system、其余=user——SVG 侧「执行者标注无元数据」的教训在 3D 侧提前落位）；③非法 id/缺席修订如实 404/400。
+- **前端**：修订行「对比」按钮（reason+actor 标注随行展示）→ 读快照 → Model3DScene **独立 ghost Group** 半透明叠加（警示色边框区别主视图；透明度滑杆 0–1 只改材质不重建几何；与测量 overlay 互不干扰）→ 关闭退场。ghost 节点按 SceneSpec 声明建几何（box/cylinder/sphere/plane，transform 落位，material 颜色映射）。
+- **验证**：契约 `block344-edit-governance` 8/8（readRevision 全链含 actor 推导 user/agent 双验 + 缺席/非法 id 拒收）；tsc 0 + lint 0 error；REST 实机 ✓（apply→revision actor=user→read 端点读回快照内容与 parameters）。
+
 ## UI-687: 3D 编辑器逐项取舍——diff 三补齐 + update_constraint op + 面板 ops 勾选 + agent apply CAS 对齐（BLOCK-344 P1；2026-11-04 **verified（dev Electron 边界内；契约 6/6 + 面板 5/5 + REST 实机 ✓）**）
 
 - **diff↔op 对齐三补齐**（model3d-scene-store.js diffScenes）：①nodes.changed 补字段级 `changesBefore/changesAfter`（此前只给字段名）；②constraints 按 id 对齐出 **changed**（此前「改一条约束」只能表达为 added+removed 对）；③`source` 不入 diff 字段（update_node 白名单不含 source——「diff 列得出=op 改得了」对齐契约，显示侧过滤留档）。

@@ -122,6 +122,8 @@ export function Model3DScene({
   measurement = null,
   onMeasurePoint,
   onCameraApi,
+  ghostView,
+  ghostOpacity,
   active = true,
 }: {
   view: Scene3DView | null;
@@ -136,6 +138,10 @@ export function Model3DScene({
   measurement?: { a: Model3DPoint; b: Model3DPoint } | null;
   onMeasurePoint?: (point: Model3DPoint) => void;
   onCameraApi?: (api: Model3DCameraApi | null) => void;
+  /** BLOCK-344 P2 — 洋葱皮对比：修订版 SceneSpec 半透明叠加（独立 ghost Group）。 */
+  ghostView?: unknown;
+  /** ghost 层透明度（0–1，宿主滑杆驱动）。 */
+  ghostOpacity?: number;
   /**
    * 宿主面是否可见（如右栏非激活 tab）。不可见时不创建 WebGL 上下文——
    * Chromium 同时活跃上下文有上限，隐藏面占坑会把可见面（结果 3D / 工作台）
@@ -156,6 +162,7 @@ export function Model3DScene({
   const controlsRef = React.useRef<OrbitControls | null>(null);
   const contentRef = React.useRef<THREE.Group | null>(null);
   const overlayRef = React.useRef<THREE.Group | null>(null);
+  const ghostRef = React.useRef<THREE.Group | null>(null);
   const lightsRef = React.useRef<THREE.Group | null>(null);
   const boundsRef = React.useRef(new THREE.Box3());
 
@@ -243,6 +250,8 @@ export function Model3DScene({
     contentRef.current = content;
     overlayRef.current = new THREE.Group();
     scene.add(overlayRef.current);
+    ghostRef.current = new THREE.Group();
+    scene.add(ghostRef.current);
     onCameraApi?.({
       getView: () => ({ position: camera.position.toArray(), target: controls.target.toArray() }),
       setView: (position, target) => {
@@ -511,6 +520,49 @@ export function Model3DScene({
       overlay.add(sphere);
     }
   }, [active, measurement]);
+
+  // BLOCK-344 P2 — 洋葱皮 ghost：修订版节点建进独立 Group（transparent 材质），与测量 overlay 互不干扰
+  React.useEffect(() => {
+    const ghost = ghostRef.current;
+    if (!ghost) return;
+    disposeGroup(ghost);
+    if (!ghostView) return;
+    const spec = ghostView as { nodes?: Array<Record<string, unknown>> };
+    const opacity = ghostOpacity ?? 0.5;
+    for (const node of spec.nodes || []) {
+      const n = node as unknown as Scene3DViewNode;
+      const geometry = geometryFor(n);
+      if (!geometry) continue;
+      const color = new THREE.Color(
+        typeof n.material?.color === 'string' ? n.material.color : '#888888',
+      );
+      const material = new THREE.MeshStandardMaterial({
+        color,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      if (n.type === 'plane') mesh.rotation.x = -Math.PI / 2;
+      const pos = Array.isArray(n.transform?.position) ? n.transform.position : [0, 0, 0];
+      mesh.position.set(pos[0] ?? 0, pos[1] ?? 0, pos[2] ?? 0);
+      mesh.name = `ghost-${n.id ?? ''}`;
+      ghost.add(mesh);
+    }
+  }, [ghostView]);
+
+  // opacity 滑杆：只改材质透明度（不重建几何）
+  React.useEffect(() => {
+    const ghost = ghostRef.current;
+    if (!ghost) return;
+    ghost.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh && mesh.material) {
+        const material = mesh.material as THREE.MeshStandardMaterial;
+        material.opacity = ghostOpacity ?? 0.5;
+      }
+    });
+  }, [ghostOpacity, ghostView]);
 
   React.useEffect(() => {
     applyView(viewAngle);

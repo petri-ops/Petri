@@ -6,6 +6,7 @@ import {
   diffSceneSpecs,
   listSceneRevisions,
   readSceneFile,
+  readSceneRevision,
   restoreSceneRevision,
   type SceneDiff,
   type SceneRevisionSummary,
@@ -20,6 +21,8 @@ interface Model3DEditPanelProps {
   /** UI-653 — 场景来源路径（如聊天打开的导出快照）；缺省回落到默认项目场景。 */
   initialScenePath?: string;
   onSceneUpdated: (scene: unknown) => void;
+  /** BLOCK-344 P2 — 洋葱皮对比：修订快照与当前视图叠加（状态由宿主 Surface 持有并传 3D 视口）。 */
+  onCompareChange?: (compare: { spec: unknown; revisionId: string; opacity: number } | null) => void;
 }
 
 function cloneScene(scene: Scene3DSpec): Scene3DSpec {
@@ -39,7 +42,7 @@ function diffText(diff: SceneDiff): string[] {
   return lines;
 }
 
-export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUpdated }: Model3DEditPanelProps): React.ReactElement {
+export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUpdated, onCompareChange }: Model3DEditPanelProps): React.ReactElement {
   const [scenePath, setScenePath] = React.useState(initialScenePath || DEFAULT_SCENE_PATH);
   const [savedHash, setSavedHash] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<Record<string, string>>({});
@@ -47,6 +50,8 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
   // BLOCK-344 P1 — 逐项取舍：预览出的 ops 逐条勾选（默认全选），应用只落选中子集
   const [selectedOpIndexes, setSelectedOpIndexes] = React.useState<Set<number>>(new Set());
   const [revisions, setRevisions] = React.useState<SceneRevisionSummary[]>([]);
+  // P2.1 洋葱皮对比：本面板持有修订选择与透明度，宿主 Surface 传给 3D 视口
+  const [compareRevision, setCompareRevision] = React.useState<{ revisionId: string; opacity: number } | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [notice, setNotice] = React.useState<string | null>(null);
@@ -160,6 +165,34 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
     }
   };
 
+  /** P2.1 洋葱皮对比：读修订快照 → 交宿主叠加到 3D 视口；透明度滑杆同通道。 */
+  const openCompare = React.useCallback((revisionId: string) => {
+    if (!projectId || !onCompareChange) return;
+    void (async () => {
+      try {
+        const content = await readSceneRevision({ projectId, path: scenePath, revisionId });
+        onCompareChange({ spec: content.scene, revisionId, opacity: 0.5 });
+        setCompareRevision({ revisionId, opacity: 0.5 });
+        setNotice(`版本对比中：${revisionId}（拖滑杆调透明度）`);
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : 'compare_failed');
+      }
+    })();
+  }, [onCompareChange, projectId, scenePath]);
+
+  const updateCompareOpacity = React.useCallback((opacity: number) => {
+    setCompareRevision((prev) => {
+      if (!prev || !onCompareChange) return prev;
+      onCompareChange({ revisionId: prev.revisionId, opacity, spec: null });
+      return { ...prev, opacity };
+    });
+  }, [onCompareChange]);
+
+  const closeCompare = React.useCallback(() => {
+    setCompareRevision(null);
+    if (onCompareChange) onCompareChange(null);
+  }, [onCompareChange]);
+
   const restore = async (revisionId: string) => {
     if (!projectId) return;
     setBusy(true);
@@ -248,10 +281,27 @@ export function Model3DEditPanel({ projectId, scene, initialScenePath, onSceneUp
           {revisions.slice(-5).reverse().map((revision) => (
             <div key={revision.revisionId} className={styles.revisionRow}>
               <span>{revision.revisionId}</span>
-              <span className={styles.meta}>{revision.reason}</span>
+              <span className={styles.meta}>{revision.reason}{revision.actor ? ` · ${revision.actor}` : ''}</span>
+              <button type="button" className={button.ghost} data-action={`compare-${revision.revisionId}`} disabled={busy} title="与当前视图洋葱皮对比" onClick={() => openCompare(revision.revisionId)}>对比</button>
               <button type="button" className={button.ghost} disabled={busy} onClick={() => { void restore(revision.revisionId); }}>恢复</button>
             </div>
           ))}
+          {compareRevision ? (
+            <div className={styles.revisionRow} data-testid="model3d-edit-compare">
+              <span className={styles.meta}>对比中：{compareRevision.revisionId}</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={compareRevision.opacity}
+                data-testid="model3d-edit-compare-opacity"
+                aria-label="对比层透明度"
+                onChange={(event) => updateCompareOpacity(Number(event.target.value))}
+              />
+              <button type="button" className={button.ghost} data-action="compare-close" onClick={closeCompare}>关闭对比</button>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </section>

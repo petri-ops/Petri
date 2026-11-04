@@ -69,7 +69,15 @@ function prune(indexPath, index, dir) {
   }
 }
 
-function recordRevision(target, scene, { reason = 'edit' } = {}) {
+/** BLOCK-344 P2 — 执行者推导：reason 弱约定 → 结构化 actor（agent_apply/recipe 前缀=agent；restore=system；其余=user）。 */
+function actorFromReason(reason) {
+  const r = String(reason || '');
+  if (r === 'agent_apply' || r.startsWith('recipe:')) return 'agent';
+  if (r.startsWith('before_restore:')) return 'system';
+  return 'user';
+}
+
+function recordRevision(target, scene, { reason = 'edit', actor } = {}) {
   const dir = historyDirFor(target);
   const indexPath = path.join(dir, 'index.json');
   const index = readIndex(indexPath);
@@ -83,6 +91,7 @@ function recordRevision(target, scene, { reason = 'edit' } = {}) {
     ordinal,
     hash: scene3d.hashSceneSpec(scene),
     reason: String(reason || 'edit').slice(0, MAX_REASON_CHARS),
+    actor: actor || actorFromReason(reason),
     createdAt: new Date().toISOString(),
     file,
   });
@@ -276,6 +285,31 @@ async function applyOperations({ workspaceRoot, relativePath, operations, scene:
   };
 }
 
+/** BLOCK-344 P2 — 读单个修订快照内容（洋葱皮对比用；只读，不落盘不写回）。 */
+async function readRevision({ workspaceRoot, relativePath, revisionId } = {}) {
+  if (!workspaceRoot) return { ok: false, error: 'project_required' };
+  const normalized = normalizeRelativePath(relativePath);
+  if (!normalized) return { ok: false, error: 'scene_path_required' };
+  const requested = String(revisionId || '').trim();
+  if (!/^rev-\d{6}$/.test(requested)) return { ok: false, error: 'revision_id_invalid' };
+  let target;
+  try {
+    target = await resolveWorkspaceTarget(workspaceRoot, normalized, { createRoot: true });
+  } catch (error) {
+    return { ok: false, error: error.code || 'path_rejected', message: error.message };
+  }
+  const dir = historyDirFor(target.target);
+  const index = readIndex(path.join(dir, 'index.json'));
+  const entry = index.revisions.find((item) => item.revisionId === requested);
+  if (!entry) return { ok: false, error: 'revision_not_found' };
+  try {
+    const scene = JSON.parse(fs.readFileSync(path.join(dir, entry.file), 'utf8'));
+    return { ok: true, revisionId: requested, actor: entry.actor || null, reason: entry.reason, createdAt: entry.createdAt, hash: entry.hash, scene };
+  } catch {
+    return { ok: false, error: 'revision_unreadable' };
+  }
+}
+
 async function restoreRevision({ workspaceRoot, relativePath, revisionId } = {}) {
   if (!workspaceRoot) return { ok: false, error: 'project_required' };
   const normalized = normalizeRelativePath(relativePath);
@@ -355,6 +389,7 @@ async function readSceneInput({ workspaceRoot, relativePath } = {}) {  if (!work
 
 module.exports = {
   diffToOperations,
+  readRevision,
   HISTORY_SCHEMA,
   MAX_REVISIONS,
   normalizeRelativePath,

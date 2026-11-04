@@ -19,6 +19,8 @@ export interface SceneRevisionSummary {
   hash: string;
   reason: string;
   createdAt: string;
+  /** BLOCK-344 P2 — 执行者（reason 推导：agent_apply/recipe=agent，restore=system，其余=user） */
+  actor?: string;
 }
 
 export interface SceneDiff {
@@ -190,6 +192,27 @@ export async function listSceneRevisions(projectId: string, path: string): Promi
   });
   const data = await parse<{ revisions: SceneRevisionSummary[] }>(response);
   return data.revisions;
+}
+
+/** BLOCK-344 P2 — 读单个修订快照内容（洋葱皮对比用；只读）。 */
+export interface SceneRevisionContent {
+  ok: true;
+  revisionId: string;
+  actor: string | null;
+  reason: string;
+  createdAt: string;
+  hash: string;
+  scene: unknown;
+}
+
+export async function readSceneRevision(input: { projectId: string; path: string; revisionId: string }): Promise<SceneRevisionContent> {
+  const query = new URLSearchParams({ projectId: input.projectId, path: input.path, revisionId: input.revisionId });
+  const response = await fetch(`${getApiPrefix()}/model3d/scene/revision?${query.toString()}`, { cache: 'no-store', signal: AbortSignal.timeout(20_000) });
+  const payload = (await response.json().catch(() => null)) as (SceneRevisionContent & { ok?: boolean }) | null;
+  if (!payload || payload.ok !== true) {
+    throw new Error(`读取修订快照失败：${(payload as { message?: string })?.message || `HTTP ${response.status}`}`);
+  }
+  return payload;
 }
 
 export async function restoreSceneRevision(input: {
