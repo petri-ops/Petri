@@ -7307,6 +7307,24 @@
       ],
       "tests": [],
       "commands": []
+    },
+    {
+      "id": "program-348-354-artifacts",
+      "note": "2026-11-05 更新计划总纲（7 个串行包）的证据目录预登记：只登记 acceptance 证据目录，避免与既有脚本分类规则重叠；各包新增 scripts/ 与 test/ 文件在开工时按总纲 §2.4 自行登记（计划里已列为门禁）。",
+      "patterns": [
+        "acceptance/program-2026-11-05/**",
+        "acceptance/block-348/**",
+        "acceptance/block-349/**",
+        "acceptance/block-350/**",
+        "acceptance/block-351/**",
+        "acceptance/block-352/**",
+        "acceptance/block-353/**",
+        "acceptance/block-354/**"
+      ],
+      "tests": [],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

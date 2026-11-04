@@ -1,0 +1,271 @@
+{
+  "program": "next-phase-program-2026-11-05",
+  "generatedAt": "2026-11-05",
+  "umbrella": "docs/next-phase-program-2026-11-05.md",
+  "evaluationBasis": "docs/Petri-Desktop-Evaluation-Report-2026-11-04.md",
+  "phase": "G0",
+  "discipline": [
+    "single active work package (serial, no parallel)",
+    "explicit user directive before each package starts",
+    "pre-start recheck: node scripts/functional-surface-audit.mjs --check",
+    "baseline ratchet: P1/P2 only decrease",
+    "canonical writeback on closeout (registry/README/roadmap/backlog/AUDIT-LOG/reconcile)",
+    "no unverified claims; G0 dev scope only, no packaged/Provider/GA extrapolation"
+  ],
+  "gates": [
+    "docs:check",
+    "docs:reconcile",
+    "ui:audit:check",
+    "quality:surface",
+    "quality:knip:check",
+    "quality:types",
+    "quality:lint",
+    "closeout"
+  ],
+  "order": [
+    "BLOCK-348",
+    "BLOCK-349",
+    "BLOCK-350",
+    "BLOCK-351",
+    "BLOCK-352",
+    "BLOCK-353",
+    "BLOCK-354"
+  ],
+  "packages": [
+    {
+      "id": "BLOCK-348",
+      "capability": "block-348-universal-agent-eval",
+      "title": "通用 agent 任务基准实测",
+      "status": "planned",
+      "priority": "P0",
+      "plan": "docs/block-348-universal-agent-eval-plan.md",
+      "goal": "建立并跑通一套跨域（非生信垂类）通用任务基准，度量 Petri 作为通用 agent 的自主完成能力，产出可复跑任务定义、runner、实测报告与短板分级清单。",
+      "dependsOn": [],
+      "acceptance": [
+        "8/8 任务定义落盘且 schema 校验通过；runner 至少完成一次完整回放。",
+        "每任务有当次结果记录：完成/中断/失败 + 事件轨迹指针 + 人工干预点列表。",
+        "四项度量（自主完成率 / 干预次数 / 工具选择合理性 / 产物可用性）均有数值，或明确「不可测 + 原因」。",
+        "短板清单按 P1/P2/P3 分级并逐条带证据；判据表在跑之前写死并留时间戳。",
+        "不出现「未跑表述为通过」；环境不可得的任务如实标记。"
+      ],
+      "touchSurface": [
+        "acceptance/block-348/**",
+        "scripts/block348-*.mjs",
+        "test/block348-*.test.mjs",
+        "docs/block-348-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-349",
+      "capability": "block-349-evidence-clearance",
+      "title": "13 条实机证据清偿",
+      "status": "planned",
+      "priority": "P0",
+      "plan": "docs/block-349-evidence-clearance-plan.md",
+      "goal": "把 UI 台账里「代码完成、仅缺实机证据」的 13 条逐个实机跑通转 verified，或环境不可得时诚实降级 cancelled，使 in_progress 从 28 降至 ≤15。",
+      "dependsOn": [],
+      "acceptance": [
+        "13 条每条有终态（verified 或 cancelled）+ 证据路径或不可得原因。",
+        "in_progress 条数 28 → ≤15（可机械复算）。",
+        "每条 verified 必须有当次实机证据路径；无证据的 verified = 不通过。",
+        "环境清单与终态表一一对应，无「未说明的挂起」；npm run ui:audit:check PASS。"
+      ],
+      "touchSurface": [
+        "docs/ui-productization-audit.md",
+        "acceptance/block-349/**",
+        "scripts/block349-*.mjs",
+        "test/block349-*.test.mjs",
+        "docs/block-349-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-350",
+      "capability": "block-350-performance-baseline",
+      "title": "性能基线四条",
+      "status": "planned",
+      "priority": "P1",
+      "plan": "docs/block-350-performance-baseline-plan.md",
+      "goal": "为冷启动、长会话、大项目、打包态启动建立四条可复跑性能基线并接入 closeout 棘轮；本包只测量建基线，不做性能优化。",
+      "dependsOn": [
+        "BLOCK-348",
+        "BLOCK-353"
+      ],
+      "acceptance": [
+        "4 条基线均可复跑，数值落盘且带采样次数与容差。",
+        "quality:perf 入 closeout 且红绿双样本负测通过（抬高基线 / 劣化指标均能判红，恢复后判绿）。",
+        "每条场景有波动源说明，容差设定有依据；不改被测产品代码。"
+      ],
+      "touchSurface": [
+        "scripts/block350-*.mjs",
+        "test/perf-baseline.json",
+        "test/block350-*.test.mjs",
+        "docs/block-350-*.md",
+        "package.json",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-351",
+      "capability": "block-351-evidence-assetization",
+      "title": "证据资产化 EAR 10%→40%",
+      "status": "planned",
+      "priority": "P1",
+      "plan": "docs/block-351-evidence-assetization-plan.md",
+      "goal": "把 acceptance 里的一次性验收笔录分批转成进门禁 / 可复跑探针，使证据资产化率 EAR 从 ≈10% 提升到 ≥40%，并让 EAR 本身可机械复算。",
+      "dependsOn": [
+        "BLOCK-349",
+        "BLOCK-350"
+      ],
+      "acceptance": [
+        "EAR 口径文档落盘且带时间戳；node scripts/block351-ear.mjs 可复算。",
+        "EAR ≥40%，分子分母明细可查；新增探针 100% 有真断言、100% 登记 impact-map、100% 跑过一次。",
+        "「不可资产化」清单逐条带原因，不混入分子；负测（删一条 impact-map 引用 → EAR 下降且门判红）通过。"
+      ],
+      "touchSurface": [
+        "scripts/block351-*.mjs",
+        "test/block351-*.test.mjs",
+        "docs/block-351-*.md",
+        "test/impact-map.json",
+        "acceptance/block-351/**"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-352",
+      "capability": "block-352-extension-shelf-audit",
+      "title": "扩展生态可用性核对",
+      "status": "planned",
+      "priority": "P1",
+      "plan": "docs/block-352-extension-shelf-audit-plan.md",
+      "goal": "对插件 / 技能 / MCP 服务三货架逐件点验，解决上轮判词「货架可见不可用」，把可用性变成可复跑矩阵并接入门禁防复发。",
+      "dependsOn": [
+        "BLOCK-351"
+      ],
+      "acceptance": [
+        "三货架 100% 条目有判定（可用 / 需绕路 / 空壳）+ 判定依据。",
+        "所有空壳件有处置（接线 / 下架 / 显式保留）且留痕；「需绕路」项有具体绕路步骤。",
+        "矩阵可复跑；负测（造无判定条目 → 判红）通过；不出现为清零而下架有用能力的情形。"
+      ],
+      "touchSurface": [
+        "scripts/block352-*.mjs",
+        "test/block352-*.test.mjs",
+        "acceptance/block-352/**",
+        "docs/block-352-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-353",
+      "capability": "block-353-packaged-regression",
+      "title": "packaged 回归",
+      "status": "planned",
+      "priority": "P2",
+      "plan": "docs/block-353-packaged-regression-plan.md",
+      "goal": "在 rc.6 发布验收之后又落了 20+ 个工作包，本包在打包态复验这些改动：构建 + 空目录启动 + 一次完整任务，产出与 dev 行为的一致性结论或差异清单。",
+      "dependsOn": [
+        "BLOCK-348",
+        "BLOCK-350"
+      ],
+      "acceptance": [
+        "构建产物结构核对表完整；空目录启动四项健康（migration / SPA / 后端 / 运行时探针）。",
+        "打包态完成一次完整任务，有事件轨迹与产物证据；复用 BLOCK-348 任务脚本。",
+        "差异清单逐条有原因与影响判定；阻断级问题明确标注并阻断言「一致」。",
+        "证据落 acceptance/block-353/**，含截图 / 日志指针。"
+      ],
+      "touchSurface": [
+        "acceptance/block-353/**",
+        "scripts/block353-*.mjs",
+        "test/block353-*.test.mjs",
+        "docs/block-353-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    },
+    {
+      "id": "BLOCK-354",
+      "capability": "block-354-g0-exit-criteria",
+      "title": "G0 → G1 出籍判据",
+      "status": "planned",
+      "priority": "P2",
+      "plan": "docs/block-354-g0-exit-criteria-plan.md",
+      "goal": "把「G0 什么时候算收尾」从模糊状态写成客观、可机械判定的条件表，并输出当前出籍就绪度；未达标前明确宣称红线。",
+      "dependsOn": [
+        "BLOCK-348",
+        "BLOCK-349",
+        "BLOCK-350",
+        "BLOCK-351",
+        "BLOCK-352",
+        "BLOCK-353"
+      ],
+      "acceptance": [
+        "判据表 6 项各有：达标条件、证据路径、判定命令、不可达标时的替代判据。",
+        "node scripts/block354-readiness.mjs 可复算并输出 N/6 达标 + 未达原因，零人工干预。",
+        "负测（人为移除一项证据 → 该项判未达且就绪度下降）通过；就绪度如实写入 AUDIT-LOG 与 roadmap。",
+        "宣称红线条款写进计划与广播：未达前不得表述 GA / Provider / 对外发布能力，G1 启动需用户显式发令。"
+      ],
+      "touchSurface": [
+        "scripts/block354-*.mjs",
+        "test/block354-*.test.mjs",
+        "docs/block-354-*.md",
+        "acceptance/block-354/**",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "dod": "证据落盘 + 全门禁绿 + canonical 回写 + 总纲 §8 填行 + registry→completed"
+    }
+  ]
+}
