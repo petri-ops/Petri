@@ -1,5 +1,4 @@
 # 审计广播台 (AUDIT-LOG)
-最后更新：2026-11-04（✅ **BLOCK-345 补全：Inkscape 1.4.4 安装 + 协处理器四项实机打通（UI-693；REST 实机 ✓，细节指针 ui-productization-audit.md）**：布尔 path-union/文字转路径 --export-text-to-path/difference/PDF 导出，CAS+审计快照在链；1.4 CLI 三处抓真已钉 buildArgs 契约。位图描摹 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-04（✅ **BLOCK-344 顺延项两件 + P3 提案幽灵交付（UI-689/692；细节指针 ui-productization-audit.md）**：桥对账清账（机械断言落 test/block344）/资产路径引用模式（相对路径+显示改写+双层守卫）/model3d-proposal 事件派发+EditPanel 浮条（CAS 接受）。前端 65/65 + copilot 26/26 + flow 72/72。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-04（✅ **BLOCK-344 P1/P2 交付（UI-687/688；细节指针 ui-productization-audit.md）**：P1 逐项取舍（diff 三补齐+update_constraint+diffToOperations+面板勾选+CAS schema）+ P2 洋葱皮（readRevision+actor+修订行对比+ghost Group 滑杆）；契约 8/8+面板 5/5+REST 实机。轻量包=各条目。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-04（🟡 **功能面核对矩阵化 + 清扫蓝图立项**：`scripts/functional-surface-audit.mjs` 全量判定（114 契约 / 180 IPC / 285 路由 / 7 存储键），首跑 **P1=5 P2=5 P3=5**；新发现 goals 三工具未汇编（模型不可见）；蓝图=BLOCK-346（T1-T8 票式，矩阵门禁 P1 只许减不许增）。详情=`docs/functional-audit-2026-11-04.md` + `docs/functional-surface-matrix-2026-11-04.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。）
