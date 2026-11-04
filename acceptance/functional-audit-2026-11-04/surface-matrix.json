@@ -1,0 +1,6053 @@
+{
+  "generatedAt": "2026-11-04T11:29:19.222Z",
+  "summary": {
+    "baseline": "HEAD",
+    "tools": 115,
+    "toolDomains": 16,
+    "contracts": 115,
+    "metadata": 116,
+    "ipcChannels": 180,
+    "ipcMissingPreload": 15,
+    "ipcUnusedInRenderer": 177,
+    "routes": 285,
+    "routeModules": 47,
+    "routeModulesUnmounted": 0,
+    "storageKeys": 7,
+    "findingsBySeverity": {
+      "P1": 0,
+      "P2": 8,
+      "P3": 3
+    },
+    "dirtyFiles": 0,
+    "defsFallbacks": 0
+  },
+  "findings": [
+    {
+      "sev": "P2",
+      "kind": "schema_undeclared_args",
+      "subject": "followup_task",
+      "detail": "实现读未声明键：role"
+    },
+    {
+      "sev": "P2",
+      "kind": "schema_undeclared_args",
+      "subject": "computer_press",
+      "detail": "实现读未声明键：ref"
+    },
+    {
+      "sev": "P2",
+      "kind": "schema_undeclared_args",
+      "subject": "model3d_propose",
+      "detail": "实现读未声明键：path"
+    },
+    {
+      "sev": "P2",
+      "kind": "schema_undeclared_args",
+      "subject": "model3d_apply",
+      "detail": "实现读未声明键：reason"
+    },
+    {
+      "sev": "P2",
+      "kind": "schema_undeclared_args",
+      "subject": "model3d_export",
+      "detail": "实现读未声明键：scenePath"
+    },
+    {
+      "sev": "P2",
+      "kind": "approval_meta_contract_conflict",
+      "subject": "result_edit_plan",
+      "detail": "metadata 需审批但契约 sideEffect=none"
+    },
+    {
+      "sev": "P2",
+      "kind": "approval_meta_contract_conflict",
+      "subject": "result_edit_plan_in_context",
+      "detail": "metadata 需审批但契约 sideEffect=none"
+    },
+    {
+      "sev": "P2",
+      "kind": "ipc_channels_without_preload",
+      "subject": "13 个通道",
+      "detail": "已登记但 preload 无包装（需分诊：退役未删 or 漏接）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, petri:agent-workbench-flags, message:append, message:clear, message:count, message:delete, message:get, message:list"
+    },
+    {
+      "sev": "P3",
+      "kind": "storage_read_never_written",
+      "subject": "executionTargetId",
+      "detail": "2 处：readBrandStorage@frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts , readBrandStorage@frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx"
+    },
+    {
+      "sev": "P3",
+      "kind": "storage_read_never_written",
+      "subject": "petri:notify-on-done",
+      "detail": "1 处：getItem@frontend/src/components/copilot/SimpleChat.tsx"
+    },
+    {
+      "sev": "P3",
+      "kind": "storage_read_never_written",
+      "subject": "petri_token",
+      "detail": "5 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts"
+    }
+  ],
+  "toolRows": [
+    {
+      "name": "interrupt_agent",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "interrupt_agent",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "send_message",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "send_message",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "followup_task",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "followup_task",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [
+        "role"
+      ],
+      "schemaProps": 5
+    },
+    {
+      "name": "spawn_agent",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "spawn_agent",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 8
+    },
+    {
+      "name": "read_agent_journal",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "read_agent_journal",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "list_agents",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "list_agents",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "wait_agent",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "wait_agent",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "create_goal",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "create_goal",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "get_goal",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "get_goal",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "update_goal",
+      "domain": "agent-orchestration",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "update_goal",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "query",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "query",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "read_page",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "read_page",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "search",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "search",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "act",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "act",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 9
+    },
+    {
+      "name": "read_image",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "read_image",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "read_video",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "read_video",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "browser_connect",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "browser_connect",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "browser_act",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "browser_act",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "browser_status",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "browser_status",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "browser_disconnect",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "browser_disconnect",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "godot_run",
+      "domain": "godot",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "godot_run",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "godot_scene_apply",
+      "domain": "godot",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "godot_scene_apply",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "computer_snapshot",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "computer_snapshot",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "computer_click",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "computer_click",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "computer_type",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "computer_type",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "computer_press",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "computer_press",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [
+        "ref"
+      ],
+      "schemaProps": 6
+    },
+    {
+      "name": "computer_scroll",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "computer_scroll",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "computer_screenshot",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "computer_screenshot",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "computer_wait",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "computer_wait",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "computer_close",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "computer_close",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "computer_authorize",
+      "domain": "computer",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "computer_authorize",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "knowledge_search",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_search",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "knowledge_status",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_status",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "knowledge_read",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_read",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_space_list",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "knowledge_space_impact",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_impact",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "knowledge_space_create",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_create",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "knowledge_space_rename",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_rename",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_space_enable",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_enable",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_space_bind",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_bind",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "knowledge_space_delete",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_delete",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_space_clear",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_space_clear",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_doc_list",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_doc_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_doc_move",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_doc_move",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_doc_delete",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_doc_delete",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "knowledge_doc_reindex",
+      "domain": "knowledge",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "knowledge_doc_reindex",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "model3d_inspect",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_inspect",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "model3d_validate",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_validate",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "model3d_propose",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_propose",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [
+        "path"
+      ],
+      "schemaProps": 2
+    },
+    {
+      "name": "model3d_apply",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_apply",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [
+        "reason"
+      ],
+      "schemaProps": 4
+    },
+    {
+      "name": "model3d_render",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_render",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "model3d_visual_qa",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_visual_qa",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "model3d_export",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_export",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [
+        "scenePath"
+      ],
+      "schemaProps": 7
+    },
+    {
+      "name": "model3d_share",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_share",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "model3d_asset",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_asset",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 12
+    },
+    {
+      "name": "model3d_bom",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_bom",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "model3d_recipe",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_recipe",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 7
+    },
+    {
+      "name": "model3d_blend_ops",
+      "domain": "model3d",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "model3d_blend_ops",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "delegate_to_petri_node",
+      "domain": "remote",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "delegate_to_petri_node",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "federation_list_peers",
+      "domain": "remote",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "federation_list_peers",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "resident_task_create",
+      "domain": "resident",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "resident_task_create",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "resident_task_list",
+      "domain": "resident",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "resident_task_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "resident_task_read",
+      "domain": "resident",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "resident_task_read",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "generate_methods",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "generate_methods",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "result_edit_plan",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_edit_plan",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 9
+    },
+    {
+      "name": "result_changeset_create",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_create",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "result_changeset_status",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_status",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "result_changeset_compare",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_compare",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "result_changeset_adopt",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_adopt",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "result_changeset_revert",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_revert",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "artifact_revision_list",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "artifact_revision_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "artifact_revision_restore",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "artifact_revision_restore",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "result_selection_run",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_selection_run",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "result_studio_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_studio_context",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "result_edit_plan_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_edit_plan_in_context",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 7
+    },
+    {
+      "name": "result_changeset_create_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_create_in_context",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "result_enrichment_from_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_enrichment_from_context",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "result_changeset_status_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_status_in_context",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "result_changeset_compare_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_compare_in_context",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "result_changeset_adopt_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_adopt_in_context",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "result_changeset_revert_in_context",
+      "domain": "result-studio",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "result_changeset_revert_in_context",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "process_status",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "process_status",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "process_stop",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "process_stop",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "system_info",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "system_info",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "plan",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "plan",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 14
+    },
+    {
+      "name": "todo_write",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "todo_write",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "verify_state",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "verify_state",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "decision_summary",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "decision_summary",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "decision_recent",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "decision_recent",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "run_tool",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "run_tool",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 14
+    },
+    {
+      "name": "result_summary",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_summary",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "codegraph_who_imports",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "codegraph_who_imports",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "codegraph_classify_edges",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "codegraph_classify_edges",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "ask_user_question",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "ask_user_question",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "result_annotations_list",
+      "domain": "session",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "result_annotations_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 7
+    },
+    {
+      "name": "skill_discover",
+      "domain": "skill",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "skill_discover",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "skill_get",
+      "domain": "skill",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "skill_get",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "skill_preflight",
+      "domain": "skill",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "skill_preflight",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "svg_inspect",
+      "domain": "svg",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "svg_inspect",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "svg_edit",
+      "domain": "svg",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "svg_edit",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "web_search",
+      "domain": "web",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "web_search",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "web_fetch",
+      "domain": "web",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "web_fetch",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "run_workflow",
+      "domain": "workflow",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "run_workflow",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "workspace_list",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "workspace_find",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_find",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "workspace_search",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_search",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "workspace_read",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_read",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "workspace_write",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_write",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "workspace_replace",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_replace",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 5
+    },
+    {
+      "name": "workspace_exec",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_exec",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 6
+    },
+    {
+      "name": "workspace_exec_background",
+      "domain": "workspace",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "execution",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_exec_background",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "workspace_worktree_create",
+      "domain": "worktree",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_worktree_create",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 4
+    },
+    {
+      "name": "workspace_worktree_list",
+      "domain": "worktree",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R0",
+      "sideEffect": "none",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_worktree_list",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 0
+    },
+    {
+      "name": "workspace_worktree_remove",
+      "domain": "worktree",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_worktree_remove",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "workspace_worktree_merge_request",
+      "domain": "worktree",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "workspace_worktree_merge_request",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    }
+  ],
+  "ipcRows": [
+    {
+      "channel": "agent:task-done",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-open",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-close",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-frame",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-status",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:get",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:get-credential",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:list-models",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:save",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:test",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:get-activity-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:get-shell-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:hide-to-tray",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:notification-clicked",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:notify",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:preview-quit-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:quit-decision",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:quit-requested",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:relaunch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:set-shell-prefs",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:show-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:soft-refresh",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "backend:status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:active",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:children",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:create",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:delete",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:create",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:list",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:update",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:rename",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:switch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:list-docs",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:read",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "data:info",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "data:open-dir",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:export",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-dump-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-open-dumps",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-simulate",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:list-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-workspace-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:show-in-folder",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:download-from-url",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:start-drag",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:save-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:save-text-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:validate-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "petri:agent-workbench-flags",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "startup:report",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "startup:marks",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:apply-inverse-hunk",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:blame",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:branch-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkout-branch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkpoint-create",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkpoint-rollback",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-file-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-index",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-log",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-review",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:discard-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:file-head-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:hunk-apply",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:hunk-reject-inverse",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:init-repository",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:list-modified",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:pull",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:push",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:remote-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:remote-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:revert-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-shortstat",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:split-side-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:stage-paths",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:stash-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:tag-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:undo-last-commit",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:unstage-paths",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-file-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-revert",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "harness-capabilities:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:append",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:clear",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:count",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:delete",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:list",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-from-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-progress",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-runtime",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:list-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:list-installed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:set-enabled",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:uninstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:uninstall-plan",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:preview-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:confirm-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:pending-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "plugin:list-installed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "plugin:list-remote",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "runtime:status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:cancel",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:discover",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:execute",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:getExecution",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:progress",
+      "inPreload": true,
+      "usedInRenderer": true
+    },
+    {
+      "channel": "skills:set-disabled",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:uninstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:get-install-info",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:reinstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:import-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:import-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "mcp-config:import-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "mcp-config:import-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ssh:register-host",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "telemetry:report",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:data",
+      "inPreload": true,
+      "usedInRenderer": true
+    },
+    {
+      "channel": "terminal:exit",
+      "inPreload": true,
+      "usedInRenderer": true
+    },
+    {
+      "channel": "terminal:open-log-dir",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:open-shell",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-resize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-start",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-stop",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-write",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:snapshot",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:check",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:download",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:download-progress",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:error",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:install",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-downloaded",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-not-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:close",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:fullscreen-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:get-zoom",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:isFullScreen",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:isMaximized",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:maximize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:maximize-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:minimize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:open-result-in-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:pop-out",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:rail-mouse",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:relay-to-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:remove",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:restore",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:return",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:self",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:set-always-on-top",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:set-ignore-mouse-events",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:test-manage-mode-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:snapshot",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:state-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:thumbnail",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:toggleFullScreen",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:zoom-by",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:zoom-reset",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "workspace:write-text-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:prepare",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:set-state",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:open-external",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:copy-image",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:export",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:get-data",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:sandbox-hijacked",
+      "inPreload": true,
+      "usedInRenderer": false
+    }
+  ],
+  "ipcUnused": [
+    {
+      "channel": "agent:task-done",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-open",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-close",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-frame",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "computer-use:pip-status",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:get",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:get-credential",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:list-models",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:save",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ai-settings:test",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:get-activity-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:get-shell-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:hide-to-tray",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:notification-clicked",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:notify",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:preview-quit-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:quit-decision",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:quit-requested",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:relaunch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:set-shell-prefs",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:show-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "app:soft-refresh",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "backend:status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:active",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:children",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:create",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:delete",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:create",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:list",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:project:update",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:rename",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "branch:switch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:list-docs",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "content-plugin:read",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "data:info",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "data:open-dir",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:export",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-dump-summary",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-open-dumps",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "diagnostic:crash-simulate",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:list-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:open-workspace-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:show-in-folder",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:download-from-url",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:start-drag",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:save-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:save-text-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "file:validate-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "petri:agent-workbench-flags",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "startup:report",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "startup:marks",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:apply-inverse-hunk",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:blame",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:branch-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkout-branch",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkpoint-create",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:checkpoint-rollback",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-file-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-index",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-log",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:commit-review",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:discard-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:file-head-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:hunk-apply",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:hunk-reject-inverse",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:init-repository",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:list-modified",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:pull",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:push",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:remote-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:remote-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:revert-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-shortstat",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:split-side-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:stage-paths",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:stash-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:tag-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:undo-last-commit",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:unstage-paths",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-diff",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-file-content",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-revert",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "git:working-tree-status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "harness-capabilities:list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:append",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:clear",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:count",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:delete",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:get",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "message:list",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-from-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-progress",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:install-runtime",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:list-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:list-installed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:set-enabled",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:uninstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "pack:uninstall-plan",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:preview-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:confirm-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "install:pending-deep-link",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "plugin:list-installed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "plugin:list-remote",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "runtime:status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:cancel",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:discover",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:execute",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:getExecution",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:set-disabled",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:uninstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:get-install-info",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:reinstall",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:import-directory",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "skills:import-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "mcp-config:import-dialog",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "mcp-config:import-path",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "ssh:register-host",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "telemetry:report",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:open-log-dir",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:open-shell",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-list",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-resize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-start",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-stop",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:session-write",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "terminal:snapshot",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:check",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:download",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:download-progress",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:error",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:install",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-downloaded",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "updater:update-not-available",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:close",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:fullscreen-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:get-zoom",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:isFullScreen",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:isMaximized",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:maximize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:maximize-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:minimize",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:open-result-in-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:pop-out",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:rail-mouse",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:relay-to-main",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:remove",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:restore",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:return",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:self",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:set-always-on-top",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:set-ignore-mouse-events",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:test-manage-mode-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:snapshot",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:state-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:thumbnail",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:toggleFullScreen",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:zoom-by",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:zoom-reset",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "workspace:write-text-file",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:prepare",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:set-state",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:open-external",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:copy-image",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:export",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:get-data",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:sandbox-hijacked",
+      "inPreload": true,
+      "usedInRenderer": false
+    }
+  ],
+  "routeRows": [
+    {
+      "module": "ai-admin",
+      "method": "GET",
+      "route": "/api/ai/admin/users-overview",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "GET",
+      "route": "/api/ai/admin/audit",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "POST",
+      "route": "/api/ai/admin/pause-user",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "GET",
+      "route": "/api/ai/admin/global-pause",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "POST",
+      "route": "/api/ai/admin/global-pause",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "GET",
+      "route": "/api/ai/admin/usage-stats",
+      "mounted": true
+    },
+    {
+      "module": "ai-admin",
+      "method": "GET",
+      "route": "/api/ai/admin/memory-stats",
+      "mounted": true
+    },
+    {
+      "module": "ai-chat",
+      "method": "POST",
+      "route": "/api/ai/tool-summary/retry",
+      "mounted": true
+    },
+    {
+      "module": "ai-chat",
+      "method": "POST",
+      "route": "/api/ai/chat",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "GET",
+      "route": "/api/ai/conversations",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "POST",
+      "route": "/api/ai/conversations",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "GET",
+      "route": "/api/ai/conversations/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "POST",
+      "route": "/api/ai/conversations/:id/update",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "PATCH",
+      "route": "/api/ai/conversations/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "DELETE",
+      "route": "/api/ai/conversations/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "GET",
+      "route": "/api/ai/conversations/:id/messages",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "GET",
+      "route": "/api/ai/conversations/:id/export.md",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "POST",
+      "route": "/api/ai/conversations/:id/compact",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "POST",
+      "route": "/api/ai/conversations/:id/dismiss-topic-shift",
+      "mounted": true
+    },
+    {
+      "module": "ai-conversations",
+      "method": "POST",
+      "route": "/api/ai/conversations/:id/fork",
+      "mounted": true
+    },
+    {
+      "module": "ai-legacy",
+      "method": "POST",
+      "route": "/api/ai/interpret",
+      "mounted": true
+    },
+    {
+      "module": "ai-legacy",
+      "method": "POST",
+      "route": "/api/ai/interpret",
+      "mounted": true
+    },
+    {
+      "module": "ai-legacy",
+      "method": "POST",
+      "route": "/api/ai/act-ack/:token",
+      "mounted": true
+    },
+    {
+      "module": "ai-legacy",
+      "method": "POST",
+      "route": "/api/ai/run-tool-ack/:token",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/facts",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "POST",
+      "route": "/api/ai/facts",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "PUT",
+      "route": "/api/ai/facts/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "DELETE",
+      "route": "/api/ai/facts/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "DELETE",
+      "route": "/api/ai/facts",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/memory-audit",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/summary",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "DELETE",
+      "route": "/api/ai/summary",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/memories",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "POST",
+      "route": "/api/ai/memories/search",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "DELETE",
+      "route": "/api/ai/memories/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "DELETE",
+      "route": "/api/ai/memories",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/memory-stats",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "POST",
+      "route": "/api/ai/memory-wipe",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "GET",
+      "route": "/api/ai/memory-policy",
+      "mounted": true
+    },
+    {
+      "module": "ai-memory",
+      "method": "PUT",
+      "route": "/api/ai/memory-policy",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/health",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/agent-audit",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "POST",
+      "route": "/api/ai/agent-undo/:token",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/agent-settings",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "POST",
+      "route": "/api/ai/agent-settings",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/usage-mine",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/usage-project",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/usage-conversation",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/site-snapshot",
+      "mounted": true
+    },
+    {
+      "module": "ai-misc",
+      "method": "GET",
+      "route": "/api/ai/docs-index",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "GET",
+      "route": "/api/ai/plans",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "GET",
+      "route": "/api/ai/plans/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "POST",
+      "route": "/api/ai/plans/:id/approve",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "GET",
+      "route": "/api/ai/plans/:id/revisions",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "POST",
+      "route": "/api/ai/plans/:id/revisions/:revNo/approve",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "PATCH",
+      "route": "/api/ai/plans/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-plans",
+      "method": "DELETE",
+      "route": "/api/ai/plans/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-progress",
+      "method": "POST",
+      "route": "/api/ai/progress",
+      "mounted": true
+    },
+    {
+      "module": "ai-progress",
+      "method": "GET",
+      "route": "/api/ai/progress/mine",
+      "mounted": true
+    },
+    {
+      "module": "ai-progress",
+      "method": "GET",
+      "route": "/api/ai/progress/summary",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/pricing",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/model-access",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "PUT",
+      "route": "/api/ai/model-access",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/settings",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "POST",
+      "route": "/api/ai/settings",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/generation-defaults",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "PUT",
+      "route": "/api/ai/generation-defaults",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/reasoning-defaults",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "PUT",
+      "route": "/api/ai/reasoning-defaults",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "POST",
+      "route": "/api/ai/settings/test",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/agent-rules",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "PUT",
+      "route": "/api/ai/agent-rules",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "DELETE",
+      "route": "/api/ai/agent-rules/:id",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/tool-approval-policy",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "PUT",
+      "route": "/api/ai/tool-approval-policy",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/reason-codes",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "GET",
+      "route": "/api/ai/policy-observations",
+      "mounted": true
+    },
+    {
+      "module": "ai-settings-api",
+      "method": "POST",
+      "route": "/api/ai/policy-observations/review",
+      "mounted": true
+    },
+    {
+      "module": "app-activity",
+      "method": "GET",
+      "route": "/api/app/activity-summary",
+      "mounted": true
+    },
+    {
+      "module": "app-activity",
+      "method": "GET",
+      "route": "/api/app/onboarding-status",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "GET",
+      "route": "/api/automation",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/schedules",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/schedules/:id/toggle",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/schedules/:id/run",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "DELETE",
+      "route": "/api/schedules/:id",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/goals/:id/status",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "GET",
+      "route": "/api/schedules/reminders",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/schedules/reminders/:id/ack",
+      "mounted": true
+    },
+    {
+      "module": "browser-connector",
+      "method": "POST",
+      "route": "/api/browser-connector/connect",
+      "mounted": true
+    },
+    {
+      "module": "browser-connector",
+      "method": "POST",
+      "route": "/api/browser-connector/act",
+      "mounted": true
+    },
+    {
+      "module": "browser-connector",
+      "method": "GET",
+      "route": "/api/browser-connector/status",
+      "mounted": true
+    },
+    {
+      "module": "browser-connector",
+      "method": "POST",
+      "route": "/api/browser-connector/disconnect",
+      "mounted": true
+    },
+    {
+      "module": "browser-connector",
+      "method": "POST",
+      "route": "/api/browser-connector/action-result",
+      "mounted": true
+    },
+    {
+      "module": "computer-use",
+      "method": "GET",
+      "route": "/api/computer-use/status",
+      "mounted": true
+    },
+    {
+      "module": "computer-use",
+      "method": "GET",
+      "route": "/api/computer-use/pip-frame",
+      "mounted": true
+    },
+    {
+      "module": "computer-use",
+      "method": "POST",
+      "route": "/api/computer-use/probe",
+      "mounted": true
+    },
+    {
+      "module": "config-transfer",
+      "method": "GET",
+      "route": "/api/config/export",
+      "mounted": true
+    },
+    {
+      "module": "config-transfer",
+      "method": "POST",
+      "route": "/api/config/import",
+      "mounted": true
+    },
+    {
+      "module": "config-transfer",
+      "method": "POST",
+      "route": "/api/config/reset",
+      "mounted": true
+    },
+    {
+      "module": "data-retention",
+      "method": "GET",
+      "route": "/api/data/retention",
+      "mounted": true
+    },
+    {
+      "module": "data-retention",
+      "method": "PUT",
+      "route": "/api/data/retention",
+      "mounted": true
+    },
+    {
+      "module": "data-retention",
+      "method": "POST",
+      "route": "/api/data/migration/plan",
+      "mounted": true
+    },
+    {
+      "module": "events-bus",
+      "method": "GET",
+      "route": "/api/events",
+      "mounted": true
+    },
+    {
+      "module": "external-import",
+      "method": "POST",
+      "route": "/api/import/external-agent/preview",
+      "mounted": true
+    },
+    {
+      "module": "external-import",
+      "method": "POST",
+      "route": "/api/import/external-agent/apply",
+      "mounted": true
+    },
+    {
+      "module": "external-import",
+      "method": "POST",
+      "route": "/api/import/external-agent/rollback",
+      "mounted": true
+    },
+    {
+      "module": "feature-flags",
+      "method": "GET",
+      "route": "/api/feature-flags",
+      "mounted": true
+    },
+    {
+      "module": "feature-flags",
+      "method": "POST",
+      "route": "/api/feature-flags",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/peers",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "POST",
+      "route": "/api/federation/peers/pair",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/members",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "POST",
+      "route": "/api/federation/peers/:id/probe",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "DELETE",
+      "route": "/api/federation/peers/:id",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/grants",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "POST",
+      "route": "/api/federation/grants",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "DELETE",
+      "route": "/api/federation/grants",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/delegations",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "POST",
+      "route": "/api/federation/peers/:id/projection-url",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "POST",
+      "route": "/api/federation/peers/:id/jobs",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/peers/:id/jobs/:jobId",
+      "mounted": true
+    },
+    {
+      "module": "federation-admin",
+      "method": "GET",
+      "route": "/api/federation/peers/:id/jobs/:jobId/file/:filename",
+      "mounted": true
+    },
+    {
+      "module": "feedback",
+      "method": "POST",
+      "route": "/api/feedback",
+      "mounted": true
+    },
+    {
+      "module": "feedback",
+      "method": "GET",
+      "route": "/api/feedback/admin",
+      "mounted": true
+    },
+    {
+      "module": "feedback",
+      "method": "PUT",
+      "route": "/api/feedback/admin/:id",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "GET",
+      "route": "/api/workspaces/:projectId/tree",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "GET",
+      "route": "/api/workspaces/:projectId/file",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "GET",
+      "route": "/api/workspaces/:projectId/ssh-ping",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "PUT",
+      "route": "/api/workspaces/:projectId/file",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/move",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/copy",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/delete",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/mkdir",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/upload",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/workspaces/:projectId/fs/import-from",
+      "mounted": true
+    },
+    {
+      "module": "files",
+      "method": "POST",
+      "route": "/api/upload",
+      "mounted": true
+    },
+    {
+      "module": "gen-ui",
+      "method": "GET",
+      "route": "/api/gen-ui/widget-state",
+      "mounted": true
+    },
+    {
+      "module": "gen-ui",
+      "method": "PUT",
+      "route": "/api/gen-ui/widget-state",
+      "mounted": true
+    },
+    {
+      "module": "keymap",
+      "method": "GET",
+      "route": "/api/keymap",
+      "mounted": true
+    },
+    {
+      "module": "keymap",
+      "method": "PUT",
+      "route": "/api/keymap",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/space",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/space",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/documents",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/documents/paste",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/documents",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/documents/retry-failed",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "DELETE",
+      "route": "/api/knowledge/documents/:id",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/documents/:id/reindex",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/documents/:id/preview",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/documents/batch-delete",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/space/clear",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/search",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/spaces",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/spaces",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/spaces/:id/rename",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/spaces/:id/enable",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/spaces/:id/impact",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "DELETE",
+      "route": "/api/knowledge/spaces/:id",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "GET",
+      "route": "/api/knowledge/binding",
+      "mounted": true
+    },
+    {
+      "module": "knowledge",
+      "method": "POST",
+      "route": "/api/knowledge/binding",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "GET",
+      "route": "/api/mcp/servers",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "GET",
+      "route": "/api/mcp/servers/:id/policy",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "PUT",
+      "route": "/api/mcp/servers/:id/policy",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
+      "route": "/api/mcp/servers/:id/authenticate",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "GET",
+      "route": "/api/mcp/oauth/callback/:serverId",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
+      "route": "/api/mcp/servers/:id/oauth/revoke",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
+      "route": "/api/mcp/servers",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "DELETE",
+      "route": "/api/mcp/servers/:id",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
+      "route": "/api/mcp/servers/:id/connect",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
+      "route": "/api/mcp/servers/:id/disconnect",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "GET",
+      "route": "/api/mcp/tool-policy",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "PUT",
+      "route": "/api/mcp/tool-policy",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "GET",
+      "route": "/api/mcp/servers/:id/tools",
+      "mounted": true
+    },
+    {
+      "module": "message-ratings",
+      "method": "PUT",
+      "route": "/api/message-ratings",
+      "mounted": true
+    },
+    {
+      "module": "message-ratings",
+      "method": "GET",
+      "route": "/api/message-ratings/:key",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "GET",
+      "route": "/api/mobile/status",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "GET",
+      "route": "/api/mobile/tunnel",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "POST",
+      "route": "/api/mobile/tunnel/config",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "POST",
+      "route": "/api/mobile/config",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "POST",
+      "route": "/api/mobile/pairing/token",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "GET",
+      "route": "/api/mobile/pairing/qr.svg",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "GET",
+      "route": "/api/mobile/devices",
+      "mounted": true
+    },
+    {
+      "module": "mobile-admin",
+      "method": "POST",
+      "route": "/api/mobile/devices/:id/revoke",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "GET",
+      "route": "/api/model3d/capability",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/read",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/apply",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "GET",
+      "route": "/api/model3d/scene/revisions",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "GET",
+      "route": "/api/model3d/scene/revision",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/restore",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/diff",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/resolve",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/export",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/asset/inspect",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/texture/inspect",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/asset/import-cad",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/asset/generate",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/cad/drawing",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/scene/compare-geometry",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/sketch-spec",
+      "mounted": true
+    },
+    {
+      "module": "model3d",
+      "method": "POST",
+      "route": "/api/model3d/review",
+      "mounted": true
+    },
+    {
+      "module": "perf-probe",
+      "method": "GET",
+      "route": "/api/__perf/event-loop",
+      "mounted": true
+    },
+    {
+      "module": "perf-probe",
+      "method": "POST",
+      "route": "/api/__perf/reset",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/skills/registry",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/skills/preflight",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/plugins/installed",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/plugins/catalog",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/runtime/status",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/packs/installed",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/packs/contributions",
+      "mounted": true
+    },
+    {
+      "module": "projection-data",
+      "method": "GET",
+      "route": "/api/packs/available",
+      "mounted": true
+    },
+    {
+      "module": "remote-targets",
+      "method": "GET",
+      "route": "/api/remote-targets",
+      "mounted": false
+    },
+    {
+      "module": "remote-targets",
+      "method": "POST",
+      "route": "/api/remote-targets",
+      "mounted": false
+    },
+    {
+      "module": "remote-targets",
+      "method": "POST",
+      "route": "/api/remote-targets/:id/probe",
+      "mounted": false
+    },
+    {
+      "module": "remote-targets",
+      "method": "DELETE",
+      "route": "/api/remote-targets/:id",
+      "mounted": false
+    },
+    {
+      "module": "runtime-config",
+      "method": "GET",
+      "route": "/api/network",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "PUT",
+      "route": "/api/network",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "GET",
+      "route": "/api/runtime-policy",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "PUT",
+      "route": "/api/runtime-policy",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "GET",
+      "route": "/api/web-access",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "PUT",
+      "route": "/api/web-access",
+      "mounted": true
+    },
+    {
+      "module": "scratchpad",
+      "method": "GET",
+      "route": "/api/scratchpad",
+      "mounted": true
+    },
+    {
+      "module": "scratchpad",
+      "method": "POST",
+      "route": "/api/scratchpad",
+      "mounted": true
+    },
+    {
+      "module": "scratchpad",
+      "method": "DELETE",
+      "route": "/api/scratchpad/:entryId",
+      "mounted": true
+    },
+    {
+      "module": "ssh-projects",
+      "method": "GET",
+      "route": "/api/ssh-projects/targets",
+      "mounted": true
+    },
+    {
+      "module": "ssh-projects",
+      "method": "POST",
+      "route": "/api/ssh-projects/connect",
+      "mounted": true
+    },
+    {
+      "module": "ssh-projects",
+      "method": "POST",
+      "route": "/api/ssh-projects/list",
+      "mounted": true
+    },
+    {
+      "module": "ssh-projects",
+      "method": "POST",
+      "route": "/api/ssh-projects/validate",
+      "mounted": true
+    },
+    {
+      "module": "storage-capabilities",
+      "method": "GET",
+      "route": "/api/storage/capabilities",
+      "mounted": true
+    },
+    {
+      "module": "subagent-profiles",
+      "method": "GET",
+      "route": "/api/subagent/profiles",
+      "mounted": true
+    },
+    {
+      "module": "subagent-profiles",
+      "method": "PUT",
+      "route": "/api/subagent/profiles",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "POST",
+      "route": "/api/svg/inspect",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "GET",
+      "route": "/api/svg/revisions",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "GET",
+      "route": "/api/svg/revision",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "GET",
+      "route": "/api/svg/inkscape-status",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "POST",
+      "route": "/api/svg/inkscape",
+      "mounted": true
+    },
+    {
+      "module": "svg",
+      "method": "POST",
+      "route": "/api/svg/edit",
+      "mounted": true
+    },
+    {
+      "module": "tools-catalog",
+      "method": "GET",
+      "route": "/api/tools/catalog",
+      "mounted": false
+    },
+    {
+      "module": "tools-catalog",
+      "method": "GET",
+      "route": "/api/tools/workflow-templates",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "GET",
+      "route": "/api/tools/status/:id",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "GET",
+      "route": "/api/tools/log/:id",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "GET",
+      "route": "/api/tools/stream/:id",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "GET",
+      "route": "/api/tools/history",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "GET",
+      "route": "/api/tools/manifest",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "PUT",
+      "route": "/api/tools/job/:id/name",
+      "mounted": false
+    },
+    {
+      "module": "tools-metadata",
+      "method": "PUT",
+      "route": "/api/tools/job/:id/public",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "POST",
+      "route": "/api/tools/run",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/file/:jobId/:filename",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "POST",
+      "route": "/api/tools/report/:jobId",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "POST",
+      "route": "/api/tools/cancel/:id",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/demo/:toolId/:filename",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/demo/:toolId",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "DELETE",
+      "route": "/api/tools/job/:id",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "POST",
+      "route": "/api/tools/jobs/batch-delete",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/storage-summary",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "POST",
+      "route": "/api/tools/jobs/export",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/demo-data/:toolId/:filename",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/public-demo/:toolId",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "GET",
+      "route": "/api/tools/public-file/:jobId/:filename",
+      "mounted": false
+    },
+    {
+      "module": "tools-platform",
+      "method": "PUT",
+      "route": "/api/tools/file/:jobId/:filename",
+      "mounted": false
+    },
+    {
+      "module": "trust-policy",
+      "method": "GET",
+      "route": "/api/trust/policy",
+      "mounted": true
+    },
+    {
+      "module": "trust-policy",
+      "method": "PUT",
+      "route": "/api/trust/policy",
+      "mounted": true
+    },
+    {
+      "module": "user-prefs",
+      "method": "GET",
+      "route": "/api/user/prefs",
+      "mounted": true
+    },
+    {
+      "module": "user-prefs",
+      "method": "PUT",
+      "route": "/api/user/prefs",
+      "mounted": true
+    },
+    {
+      "module": "harness/context",
+      "method": "POST",
+      "route": "/api/harness/context-checkpoint",
+      "mounted": true
+    },
+    {
+      "module": "harness/file-references",
+      "method": "POST",
+      "route": "/api/harness/file-references/resolve",
+      "mounted": true
+    },
+    {
+      "module": "harness/loop",
+      "method": "POST",
+      "route": "/api/loop/iterate",
+      "mounted": true
+    },
+    {
+      "module": "harness/loop",
+      "method": "GET",
+      "route": "/api/loop/:loopRunId",
+      "mounted": true
+    },
+    {
+      "module": "harness/loop",
+      "method": "POST",
+      "route": "/api/loop/snapshot",
+      "mounted": true
+    },
+    {
+      "module": "harness/notices",
+      "method": "GET",
+      "route": "/api/harness/notices",
+      "mounted": true
+    },
+    {
+      "module": "harness/notices",
+      "method": "POST",
+      "route": "/api/harness/notices/seen",
+      "mounted": true
+    },
+    {
+      "module": "harness/project-storage",
+      "method": "GET",
+      "route": "/api/harness/project-storage",
+      "mounted": true
+    },
+    {
+      "module": "harness/repair",
+      "method": "POST",
+      "route": "/api/harness/repair",
+      "mounted": true
+    },
+    {
+      "module": "harness/resources",
+      "method": "GET",
+      "route": "/api/harness/resource-snapshot",
+      "mounted": true
+    },
+    {
+      "module": "harness/resources",
+      "method": "GET",
+      "route": "/api/harness/index",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task/plan",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task/confirmation-preview",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task/confirm",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "GET",
+      "route": "/api/harness/scientific-task/:taskId",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "GET",
+      "route": "/api/harness/scientific-task-by-job/:toolJobId",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "GET",
+      "route": "/api/harness/scientific-task-by-job/:toolJobId/script",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task/:taskId/bind-job",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task/:taskId/delivery-manifest",
+      "mounted": true
+    },
+    {
+      "module": "harness/scientific-task",
+      "method": "POST",
+      "route": "/api/harness/scientific-task-by-job/:toolJobId/replay-package",
+      "mounted": true
+    },
+    {
+      "module": "harness/workflow",
+      "method": "POST",
+      "route": "/api/harness/workflow/action/:jobId",
+      "mounted": true
+    },
+    {
+      "module": "harness/workflow",
+      "method": "GET",
+      "route": "/api/harness/workflow/status/:jobId",
+      "mounted": true
+    },
+    {
+      "module": "harness/workflow",
+      "method": "POST",
+      "route": "/api/harness/workflow/plan",
+      "mounted": true
+    }
+  ],
+  "storage": {
+    "dangling": [
+      {
+        "key": "executionTargetId",
+        "kind": "read_never_written",
+        "sites": [
+          "readBrandStorage@frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
+          "readBrandStorage@frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx"
+        ]
+      },
+      {
+        "key": "petri:notify-on-done",
+        "kind": "read_never_written",
+        "sites": [
+          "getItem@frontend/src/components/copilot/SimpleChat.tsx"
+        ]
+      },
+      {
+        "key": "petri_token",
+        "kind": "read_never_written",
+        "sites": [
+          "getItem@frontend/src/components/copilot/copilotClient/apiBase.ts",
+          "getItem@frontend/src/components/copilot/copilotClient/apiBase.ts",
+          "getItem@frontend/src/components/copilot/copilotConversationsClient.ts",
+          "getItem@frontend/src/hooks/useSshHeartbeat.ts",
+          "getItem@frontend/src/hooks/useSshHeartbeat.ts"
+        ]
+      }
+    ],
+    "brandMismatch": []
+  },
+  "dirty": [],
+  "defNotes": []
+}
