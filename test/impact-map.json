@@ -7280,6 +7280,33 @@
       ],
       "tests": [],
       "commands": []
+    },
+    {
+      "id": "block346-surface-audit",
+      "note": "BLOCK-346 全量核对矩阵生成器：只读审计脚本（默认 git HEAD 基线，--worktree 读工作区），不参与产品构建与运行；改动它或基线/汇编契约时跑汇编契约与文档门。",
+      "patterns": [
+        "scripts/functional-surface-audit.mjs",
+        "test/block346-tool-defs-assembly.test.mjs",
+        "test/functional-surface-baseline.json",
+        "acceptance/functional-audit-2026-11-04/**"
+      ],
+      "tests": [
+        "test/block346-tool-defs-assembly.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "static-assets",
+      "note": "静态资源（图片/图标等）：不参与测试选择，只随文档/UI 门；任何代码改动都不因 assets 扩大测试面。",
+      "patterns": [
+        "assets/**"
+      ],
+      "tests": [],
+      "commands": []
     }
   ]
 }
