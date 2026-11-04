@@ -1,8 +1,9 @@
 [
   {
     "path": "data/cleaned.csv",
-    "bytes": 711,
-    "sha256": "99d9912336890523a368148f2f31e8f3d51f5822d1ba9dfaf41848eb9614362d"
+    "bytes": 677,
+    "sha256": "de2b76f2a82d57d48f89a3396545a2d34816560d83ece6669b4d6aaa88627a47",
+    "eolNote": "工作区原文 CRLF（收割 sha256=99d9912336890523a368148f2f31e8f3d51f5822d1ba9dfaf41848eb9614362d，bytes=711）；入库按仓库 EOL 规范归一 LF（BLOCK-348 收口卫生门）"
   },
   {
     "path": "data/reads_dirty.csv",
