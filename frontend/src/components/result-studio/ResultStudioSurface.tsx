@@ -21,12 +21,16 @@ export function ResultStudioCanvas({
   composer,
   children,
   canProjectSource = false,
+  canCompare = false,
 }: {
   mode: ResultSurfaceMode;
   contextBar?: React.ReactNode;
   composer?: React.ReactNode;
   children: React.ReactNode;
   canProjectSource?: boolean;
+  /** BLOCK-346 T4 — 原此处硬编码 `canCompare: true`（对所有适配器一律放开对照），
+   * 与 viewerRegistry 的能力位（仅 table 族 true）矛盾。改为由调用方按适配器传。 */
+  canCompare?: boolean;
 }): React.ReactElement {
   const [firstVisibleMs, setFirstVisibleMs] = React.useState<number | null>(null);
   React.useLayoutEffect(() => {
@@ -38,7 +42,7 @@ export function ResultStudioCanvas({
     if (duration !== null) setFirstVisibleMs(duration);
   }, []);
 
-  const activeMode = resolveResultMode(mode, { canProjectSource, canCompare: true, canSwitchVersions: true });
+  const activeMode = resolveResultMode(mode, { canProjectSource, canCompare, canSwitchVersions: true });
 
   return (
     <section

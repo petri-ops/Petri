@@ -37,8 +37,11 @@ describe('G0-RS-P1 Result Studio surface', () => {
   });
 
   it('exposes real Code, Compare and History canvas modes when their capabilities exist', () => {
-    const { rerender } = render(<ResultStudioCanvas mode="compare"><div>变更审查</div></ResultStudioCanvas>);
+    // BLOCK-346 T4 — 对照模式现在由 canCompare 能力位决定（不再对所有适配器硬编码放开）
+    const { rerender } = render(<ResultStudioCanvas mode="compare" canCompare><div>变更审查</div></ResultStudioCanvas>);
     expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('compare');
+    rerender(<ResultStudioCanvas mode="compare"><div>不支持对照</div></ResultStudioCanvas>);
+    expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).not.toBe('compare');
     rerender(<ResultStudioCanvas mode="history"><div>版本历史</div></ResultStudioCanvas>);
     expect(screen.getByRole('region', { name: '结果主画布' }).getAttribute('data-mode')).toBe('history');
     rerender(<ResultStudioCanvas mode="code" canProjectSource><div>精确代码</div></ResultStudioCanvas>);
