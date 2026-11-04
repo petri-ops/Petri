@@ -129,7 +129,7 @@ describe('BLOCK-344 P1 — 逐项取舍（ops 清单勾选）', () => {
 
   it('预览出 ops 清单（默认全选）；取消一项后只应用勾选子集', async () => {
     const onSceneUpdated = vi.fn();
-    const applyMock2 = vi.fn((input: { operations: unknown[] }) => Promise.resolve({
+    const applyMock2 = vi.fn((_input: { operations: unknown[] }) => Promise.resolve({
       ok: true, path: 'model3d/scene.scene3d.json', beforeHash: 'a'.repeat(64), afterHash: 'b'.repeat(64),
       changed: true, diff: { beforeHash: 'a'.repeat(64), afterHash: 'b'.repeat(64), parameters: [], nodes: [], constraints: { added: [], removed: [], changed: [] }, changed: false },
       scene: scene, revision: { revisionId: 'rev-000009' },
