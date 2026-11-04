@@ -68,7 +68,10 @@ export function FederationJobs({ peers }: { peers: PeerOption[] | null }): React
       setJobJson(JSON.stringify(job ?? record, null, 2));
       const id = job && typeof job.id === 'string' ? job.id : (job && typeof job.jobId === 'string' ? job.jobId : '');
       if (id) setJobId(id);
-      setNotice(`已提交到 ${String(record.peerName || record.peerId || effectivePeer)}${id ? `（job ${id}）` : ''}`);
+      const peerLabel = typeof record.peerName === 'string' && record.peerName
+        ? record.peerName
+        : (typeof record.peerId === 'string' && record.peerId ? record.peerId : effectivePeer);
+      setNotice(`已提交到 ${peerLabel}${id ? `（job ${id}）` : ''}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : '提交失败');
     } finally {

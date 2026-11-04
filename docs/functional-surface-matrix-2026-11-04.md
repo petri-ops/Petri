@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-04T11:43:14.435Z
+> 基线：`HEAD`（工作区在制文件 9 个不计入判定）。生成时间：2026-11-04T11:51:51.573Z
 
 ## 0. 覆盖汇总
 
@@ -10,10 +10,10 @@
 | 工具定义 | 115（16 域；文本降级 0 域） |
 | 工具契约 | 115 |
 | 调度元数据 | 116 |
-| IPC 通道 | 180（preload 缺包装 14；前端零消费 177） |
+| IPC 通道 | 168（preload 缺包装 2；前端零消费 165） |
 | 路由端点 | 285（47 模块；未挂载 0） |
-| 设置存储键 | 7 |
-| 判定 P1 / P2 / P3 | **0 / 0 / 4** |
+| 设置存储键 | 20 |
+| 判定 P1 / P2 / P3 | **0 / 0 / 2** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -27,10 +27,8 @@
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
-| ipc_dead_channels | `12 个通道` | 登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：branch:children, branch:get, branch:project:create, branch:project:get, branch:project:list, branch:project:update, message:append, message:clear, message:count, message:delete, message:get, message:list |
-| storage_read_never_written | `executionTargetId` | 2 处：readBrandStorage@frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts , readBrandStorage@frontend/src/components/desktop/DesktopSettingsPanel/sections/RemoteTargets.tsx |
-| storage_read_never_written | `petri:notify-on-done` | 1 处：getItem@frontend/src/components/copilot/SimpleChat.tsx |
-| storage_read_never_written | `petri_token` | 5 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
+| storage_read_never_written | `petri_token` | 3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
+| storage_read_never_written | `petri.simplechat.extraRenderers` | 1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx |
 
 ## 4. 工具全量矩阵
 
@@ -154,10 +152,17 @@
 
 ## 5. 设置键悬空与前缀不一致
 
-- `executionTargetId` — read_never_written（2 处）
-- `petri:notify-on-done` — read_never_written（1 处）
-- `petri_token` — read_never_written（5 处）
+- `petri_token` — read_never_written（3 处）
+- `petri.simplechat.extraRenderers` — read_never_written（1 处）
 
 ## 6. 在制文件（本轮不计入判定）
 
-（无）
+- `M frontend/src/components/copilot/copilotClient/apiBase.ts`
+- `M frontend/src/components/copilot/extraRenderers.tsx`
+- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.test.tsx`
+- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.tsx`
+- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/ModelAccessPanel.test.tsx`
+- `M frontend/src/hooks/useSshHeartbeat.ts`
+- `M src/database/branch-db.js`
+- `M src/ipc/branch-handlers.js`
+- `M src/ipc/channels.js`

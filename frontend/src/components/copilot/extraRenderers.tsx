@@ -31,6 +31,8 @@ import type { ResultNode, ResultNodeType, ResultCardVariant } from './types';
 import { ResultCardRenderer } from './ResultCardRenderer';
 import { registerDefaultRenderers } from './renderers';
 
+// BLOCK-346 T6 — 手工调试开关：代码内**无写入点**，只在控制台手动置 'true' 生效；
+// 审计矩阵的「读无写」判定对它是预期结果（非缺陷），故不做自动写入。
 const LS_KEY = 'petri.simplechat.extraRenderers';
 
 const ALLOWED_TYPES: ReadonlyArray<ResultNodeType> = ['text', 'table', 'chart', 'image'];

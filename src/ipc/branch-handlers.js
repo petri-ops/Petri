@@ -7,11 +7,11 @@ const CHANNELS = require('./channels');
 
 const { ipcMain } = require('electron');
 const { randomUUID } = require('crypto');
+// BLOCK-346 T6 — 只保留 preload 实际暴露的 6 个通道所需函数。
+// 删除的 12 条死通道（branch:children/get/project:*、message:*）此前登记了 handler
+// 但 preload 无包装、全仓零消费；branch-db 中仅服务于它们的 11 个导出已一并删除
+// （表结构与数据保留；若日后要接项目级分支，从 git 历史取回实现即可）。
 const {
-  createProject,
-  getProject,
-  updateProjectName,
-  listProjects,
   createBranch,
   getBranch,
   listBranches,
@@ -19,13 +19,6 @@ const {
   getActiveBranch,
   deleteBranch,
   renameBranch,
-  listChildBranches,
-  appendMessage,
-  listMessages,
-  getMessage,
-  countMessages,
-  deleteMessage,
-  clearMessages,
 } = require('../database/branch-db');
 // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.
 const { createSenderGuard } = require('./_sender-guard');
@@ -39,57 +32,9 @@ function setupBranchIpc(options = {}) {
   const assertSender = createSenderGuard(options.mainWindow);
   // ── Project Handlers ────────────────────────────────────────
 
-  ipcMain.handle(CHANNELS.branch.projectCreate, async (event, { id, name }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!id || !name) {
-        return { ok: false, error: 'id and name are required' };
-      }
-      const project = createProject(id, name);
-      return { ok: true, data: project };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.branch.projectGet, async (event, { id }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const project = getProject(id);
-      if (!project) {
-        return { ok: false, error: 'Project not found' };
-      }
-      return { ok: true, data: project };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.branch.projectUpdate, async (event, { id, name }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!id || !name) {
-        return { ok: false, error: 'id and name are required' };
-      }
-      const success = updateProjectName(id, name);
-      if (!success) {
-        return { ok: false, error: 'Project not found or update failed' };
-      }
-      return { ok: true, data: getProject(id) };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.branch.projectList, async (event) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const projects = listProjects();
-      return { ok: true, data: projects };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
   // ── Branch Handlers ─────────────────────────────────────────
 
@@ -107,18 +52,6 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle(CHANNELS.branch.get, async (event, { id }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const branch = getBranch(id);
-      if (!branch) {
-        return { ok: false, error: 'Branch not found' };
-      }
-      return { ok: true, data: branch };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
   ipcMain.handle(CHANNELS.branch.list, async (event, { projectId }) => {
     const deny = assertSender(event); if (deny) return deny;
@@ -194,105 +127,14 @@ function setupBranchIpc(options = {}) {
     }
   });
 
-  ipcMain.handle(CHANNELS.branch.children, async (event, { parentBranchId }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!parentBranchId) {
-        return { ok: false, error: 'parentBranchId is required' };
-      }
-      const children = listChildBranches(parentBranchId);
-      return { ok: true, data: children };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
   // ── Message Handlers ────────────────────────────────────────
 
-  ipcMain.handle(CHANNELS.message.append, async (event, { branchId, role, content, metadata }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!branchId || !role || !content) {
-        return { ok: false, error: 'branchId, role, and content are required' };
-      }
-      if (!['user', 'assistant'].includes(role)) {
-        return { ok: false, error: 'role must be "user" or "assistant"' };
-      }
-      const id = randomUUID();
-      const message = appendMessage(id, branchId, role, content, metadata || null);
-      return { ok: true, data: message };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.message.list, async (event, { branchId, limit, offset }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!branchId) {
-        return { ok: false, error: 'branchId is required' };
-      }
-      const messages = listMessages(branchId, limit || 100, offset || 0);
-      return { ok: true, data: messages };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.message.get, async (event, { id }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      const message = getMessage(id);
-      if (!message) {
-        return { ok: false, error: 'Message not found' };
-      }
-      return { ok: true, data: message };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.message.count, async (event, { branchId }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!branchId) {
-        return { ok: false, error: 'branchId is required' };
-      }
-      const count = countMessages(branchId);
-      return { ok: true, data: count };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.message.delete, async (event, { id }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!id) {
-        return { ok: false, error: 'id is required' };
-      }
-      const success = deleteMessage(id);
-      if (!success) {
-        return { ok: false, error: 'Message not found' };
-      }
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 
-  ipcMain.handle(CHANNELS.message.clear, async (event, { branchId }) => {
-    const deny = assertSender(event); if (deny) return deny;
-    try {
-      if (!branchId) {
-        return { ok: false, error: 'branchId is required' };
-      }
-      const count = clearMessages(branchId);
-      return { ok: true, data: count };
-    } catch (e) {
-      return { ok: false, error: e.message };
-    }
-  });
 }
 
 module.exports = { setupBranchIpc };

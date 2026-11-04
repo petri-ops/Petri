@@ -15,8 +15,10 @@ export function getApiPrefix(): string {
 export function getAuthHeader(): Record<string, string> {
   if (typeof window === 'undefined') return {};
   try {
-    // BLOCK-61 读旧兼容：历史 key petri_token
-    const token = localStorage.getItem('petri_token') ?? localStorage.getItem('petri_token');
+    // BLOCK-61 读旧兼容：历史 key petri_token。
+    // BLOCK-346 — 原为 `getItem('petri_token') ?? getItem('petri_token')`（同键重复，fallback 恒无效）；
+    // 现全仓无写入方，本地模式后端免鉴权时该头为空属预期，保留读取以兼容未来注入。
+    const token = localStorage.getItem('petri_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   } catch {
     return {};

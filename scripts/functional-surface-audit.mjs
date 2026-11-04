@@ -366,11 +366,20 @@ function collectStorage() {
       // 与工具面同基线（默认 HEAD / --worktree 工作区），避免两面取数不一致
       const text = src(child);
       if (!text) continue;
-      for (const m of text.matchAll(/localStorage\.(getItem|setItem|removeItem)\(\s*['"]([^'"]+)['"]/g)) {
-        pairs.push({ file: child, op: m[1], key: m[2] });
+      // 常量表：`const X = '...'`（写入常用常量而非字面量，不解析会误判「读无写」）
+      const consts = new Map();
+      for (const m of text.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*(?::\s*string)?\s*=\s*'([^']+)'/g)) consts.set(m[1], m[2]);
+      const argKey = (literal, ident) => (literal || consts.get(ident) || null);
+
+      for (const m of text.matchAll(/localStorage\.(getItem|setItem|removeItem)\(\s*(?:'([^']+)'|([A-Za-z_$][\w$]*))/g)) {
+        const key = argKey(m[2], m[3]);
+        if (key) pairs.push({ file: child, op: m[1], key });
       }
-      for (const m of text.matchAll(/readBrandStorage\(\s*['"]([^'"]+)['"]/g)) {
-        pairs.push({ file: child, op: 'readBrandStorage', key: m[1] });
+      // brand 封装统一折算为物理键 `petri-<key>`，与直接 localStorage 键同一坐标系
+      for (const m of text.matchAll(/(read|write|remove)BrandStorage\(\s*(?:'([^']+)'|([A-Za-z_$][\w$]*))/g)) {
+        const key = argKey(m[2], m[3]);
+        if (!key) continue;
+        pairs.push({ file: child, op: m[1] === 'read' ? 'getItem' : 'setItem', key: `petri-${key}` });
       }
       // 字面量形态的 brand 点号键（含常量声明里的）；记录所在行以判定是否为迁移用途
       for (const m of text.matchAll(/['"](petri\.[A-Za-z_$][\w$.]*)['"]/g)) {

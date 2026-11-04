@@ -49,7 +49,8 @@ async function pingOnce(projectId: string): Promise<void> {
   }
   setState(projectId, { status: 'connecting' });
   try {
-    const token = localStorage.getItem('petri_token') ?? localStorage.getItem('petri_token');
+    // BLOCK-346 — 原为同键重复读取（fallback 恒无效）；改为单次读取
+    const token = localStorage.getItem('petri_token');
     const controller = new AbortController();
     const abortTimer = setTimeout(() => controller.abort(), PING_TIMEOUT_MS);
     const resp = await fetch(`${getPlatformApiPrefix()}/workspaces/${encodeURIComponent(projectId)}/ssh-ping`, {

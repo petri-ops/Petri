@@ -46,15 +46,9 @@ const CHANNELS = {
   },
   branch: {
     active: 'branch:active',
-    children: 'branch:children',
     create: 'branch:create',
     delete: 'branch:delete',
-    get: 'branch:get',
     list: 'branch:list',
-    projectCreate: 'branch:project:create',
-    projectGet: 'branch:project:get',
-    projectList: 'branch:project:list',
-    projectUpdate: 'branch:project:update',
     rename: 'branch:rename',
     switch: 'branch:switch',
   },
@@ -134,14 +128,6 @@ const CHANNELS = {
   },
   harnessCapabilities: {
     list: 'harness-capabilities:list',
-  },
-  message: {
-    append: 'message:append',
-    clear: 'message:clear',
-    count: 'message:count',
-    delete: 'message:delete',
-    get: 'message:get',
-    list: 'message:list',
   },
   pack: {
     installFromDialog: 'pack:install-from-dialog',
