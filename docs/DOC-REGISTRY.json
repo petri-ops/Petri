@@ -8998,6 +8998,26 @@
         "G0"
       ],
       "notes": "2026-11-04 立项 active（用户「BLOCK-343 开整」）：P1 小项批/P2 版本对比+历史面板/P3 vision 附件通道；来源 BLOCK-342 §10 交接项。 2026-11-04 当日收口 completed：P1/P2/P3 全交付（UI-678/679/680 verified，flow 62/62）；顺延项见 plan §5。"
+    },
+    {
+      "id": "BLOCK-344-3D-EDIT-GOVERNANCE",
+      "capability": "block-344-3d-edit-governance",
+      "path": "docs/block-344-3d-edit-governance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-344-3d-edit-governance",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-04",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "3d",
+        "scenespec",
+        "governed-ops",
+        "governance-alignment",
+        "G0"
+      ],
+      "notes": "2026-11-04 立项 active（用户「先 push 再立项 BLOCK-344」）：SVG 四件平移 SceneSpec 链（逐项取舍/洋葱皮对比/提案幽灵/回验衔接）；P0 勘察定范围（op 化切法裁决稿经用户过目再动工）。"
     }
   ],
   "lastUpdated": "2026-11-02",
