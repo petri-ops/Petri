@@ -7418,6 +7418,24 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block353-packaged-regression",
+      "note": "BLOCK-353 packaged 回归：打包产物结构契约 + 全项检查（四项健康/T2 真跑/dev 对照）。改结构契约或检查脚本时跑本包测试。",
+      "patterns": [
+        "scripts/block353-*.mjs",
+        "test/block353-*.test.mjs",
+        "acceptance/block-353/**",
+        "docs/block-353-*.md"
+      ],
+      "tests": [
+        "test/block353-artifact-check.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
