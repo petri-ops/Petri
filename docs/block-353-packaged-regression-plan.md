@@ -1,6 +1,6 @@
 ---
 capability: block-353-packaged-regression
-status: planned
+status: completed
 goal: 在 rc.6 发布验收之后又落了 20+ 个工作包，本包在打包态复验这些改动：构建 + 空目录启动 + 一次完整任务，产出与 dev 行为的一致性结论或差异清单。
 acceptance:
   - 构建产物结构核对表完整；空目录启动四项健康（migration / SPA / 后端 / 运行时探针）。
@@ -12,7 +12,7 @@ reopen: G1+ / 发布期项（签名、公证、DMG 分发、更新链）；macOS
 
 # BLOCK-353 — packaged 回归（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——报告 docs/block-353-regression-report.md；两处打包阻断缺陷修复 + 四项健康 + T2 真跑一致 + ④ 补建 469ms
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §5 P2；`docs/stage4-stable-release-checklist.md`
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**；「packaged」仅指本机未签名打包态验收

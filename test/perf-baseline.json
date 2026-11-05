@@ -9,8 +9,18 @@
   "coreSha": "18965b62901c",
   "scenarios": {
     "packaged_start": {
-      "skipped": true,
-      "reason": "本机（macOS 26 arm64）headless 下打包 app（unsigned 本地构建）无法越过首启交互授权：直启二进制/open(LaunchServices)/g0 stdout 配方三种启动均静默挂起（主进程存活、无 stdout、无子进程、无监听端口，180s 不就绪）；TCC/Gatekeeper 首启许可需 GUI 在场。处置=BLOCK-353（打包回归，GUI 会话在场）用同一采集器（--only=packaged_start）补建基线。"
+      "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
+      "unit": "ms",
+      "samples": [
+        431,
+        429,
+        417
+      ],
+      "medianMs": 429,
+      "tolerancePct": 80,
+      "runs": 3,
+      "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
+      "env": "unsigned local mount：Petri.app（ELECTRON_RUN_AS_NODE 后端口径；数据面=临时空目录；BLOCK-353 修复链）"
     },
     "cold_start": {
       "metric": "isolated backend spawn→health 200（含 migrations 自举）",

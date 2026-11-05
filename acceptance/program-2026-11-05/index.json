@@ -199,7 +199,7 @@
       "id": "BLOCK-353",
       "capability": "block-353-packaged-regression",
       "title": "packaged 回归",
-      "status": "planned",
+      "status": "completed",
       "priority": "P2",
       "plan": "docs/block-353-packaged-regression-plan.md",
       "goal": "在 rc.6 发布验收之后又落了 20+ 个工作包，本包在打包态复验这些改动：构建 + 空目录启动 + 一次完整任务，产出与 dev 行为的一致性结论或差异清单。",

@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
@@ -31,7 +32,7 @@ const ONLY = onlyArg ? new Set(onlyArg.split(',')) : null;
 // --gate：quality:perf 用——每场景 1 样本、输出 {scenarios:{name:{sampleMs}}} 到 --out（不写基线）
 const GATE = args.includes('--gate');
 const OUT_ARG = (args.find((a) => a.startsWith('--out=')) || '').split('=')[1] || '';
-const RUNS = GATE ? 1 : null;
+const RUNS = GATE ? 2 : null; // gate=min-of-2：单次冷跑抖动（35/45 vs 中位 20）会假红；min-of-2 仍抓数量级退化
 const Database = require('better-sqlite3');
 const harness = await import('./lib/evals-harness.mjs');
 
@@ -185,50 +186,85 @@ async function scenarioPackagedStart() {
     return;
   }
   const appPath = path.join(macDir, apps[0]);
+  const resDir = path.join(appPath, 'Contents', 'Resources');
+  const bin = path.join(appPath, 'Contents', 'MacOS', apps[0].replace(/\.app$/, ''));
   const samples = [];
-  // 启动路径实机结论（采集期抓真）：直启二进制（spawn+注入 env/管道 stdio）主进程静默挂起
-  //（无 stdout/无子进程/无端口，180s 不就绪）；open（LaunchServices 干净环境）秒级启动。
-  // 故就绪配方=open 启动 → PPID 归因其 server.js 子进程 → lsof 取监听端口 → health。
-  // 数据面=打包默认目录（真实用户数据；启动仅幂等迁移与常规首启写入——与用户实跑同形态）。
-  const { execSync } = await import('node:child_process');
+  // BLOCK-353 打通后的 headless 口径：打包二进制 ELECTRON_RUN_AS_NODE 跑 Resources/core/petri-server
+  //（GUI app 直启在 headless 受 TCC/Gatekeeper 限——350 旧配方结论，GUI 会话归用户实机）。
+  // 指标=空数据目录 + 打包迁移（21 SQL）→ 后端 health 就绪总时长。
+  const { execFileSync } = await import('node:child_process');
   for (let i = 0; i < (RUNS || 3); i += 1) {
-    const t0 = performance.now();
-    execSync(`open ${JSON.stringify(appPath)}`, { cwd: ROOT });
-    let readyMs = null;
-    const deadline = Date.now() + 120000;
-    while (Date.now() < deadline) {
-      await sleep(300);
-      try {
-        // 实机抓真：打包后端 detached（PPID≠app 主进程）——PPID 归因不可用，
-        // 改 env 归因：petri-server 进程中排除 dev 栈（PETRI_DB_PATH 含 .petri-dev-user-data）。
-        const backendPid = execSync(`pgrep -f 'petri-server/server.js'`, { encoding: 'utf8' }).trim().split('\n')[0] || '';
-        if (!backendPid) continue;
-        let isDevBackend = false;
-        try { isDevBackend = execSync(`ps eww ${backendPid}`, { encoding: 'utf8' }).includes('.petri-dev-user-data'); } catch { /* 假定非 dev */ }
-        if (isDevBackend) continue;
-        const portLine = execSync(`lsof -nP -iTCP -sTCP:LISTEN -a -p ${backendPid}`, { encoding: 'utf8' });
-        const port = (portLine.match(/127\.0\.0\.1:(\d+)/) || [])[1];
-        if (!port) continue;
-        if (await fetchOk(`http://127.0.0.1:${port}/api/health`, 800)) { readyMs = Math.round(performance.now() - t0); break; }
-      } catch { /* poll again */ }
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), `block350-pkg-${i}-`));
+    const t0 = Date.now();
+    try {
+      const serverJs = path.join(resDir, 'core', 'petri-server', 'server.js');
+      // 迁移（打包 Resources/src/migrations 全量 SQL，经打包 electron 运行时 + 打包 better-sqlite3）
+      const migScriptPath = path.join(resDir, 'core', 'petri-server', 'block350-migrate.cjs');
+      fs.writeFileSync(migScriptPath, `
+        const Database = require('better-sqlite3');
+        const fs = require('fs');
+        const path = require('path');
+        const db = new Database(${JSON.stringify(path.join(dataDir, 'petri.db'))});
+        db.pragma('journal_mode = WAL');
+        const dir = ${JSON.stringify(path.join(resDir, 'src', 'migrations'))};
+        const files = fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort();
+        for (const f of files) { db.exec(fs.readFileSync(path.join(dir, f), 'utf8')); }
+        console.log('MIGRATED ' + files.length);
+        db.close();
+      `);
+      execFileSync(bin, [migScriptPath], {
+        cwd: path.join(resDir, 'core', 'petri-server'),
+        env: {
+          HOME: process.env.HOME, PATH: process.env.PATH, TMPDIR: process.env.TMPDIR,
+          ELECTRON_RUN_AS_NODE: '1',
+          NODE_PATH: [path.join(resDir, 'core', 'petri-server', 'node_modules'), path.join(resDir, 'node_modules')].join(':'),
+        },
+        encoding: 'utf8', timeout: 120000,
+      });
+      fs.unlinkSync(migScriptPath);
+      const child = spawn(bin, [serverJs], {
+        // whitelist env（BLOCK-353 同款）：node 父进程全量继承会让打包 Electron 静默挂
+        //（毒性变量二分未锁定，白名单实测通——353 检查脚本同款）
+        env: {
+          HOME: process.env.HOME, PATH: process.env.PATH, TMPDIR: process.env.TMPDIR,
+          ELECTRON_RUN_AS_NODE: '1',
+          R_SERVER_PORT: '3106',
+          PETRI_LOCAL_DATA_DIR: dataDir,
+          PETRI_DB_PATH: path.join(dataDir, 'petri.db'),
+          NODE_PATH: [path.join(resDir, 'core', 'petri-server', 'node_modules'), path.join(resDir, 'node_modules')].join(':'),
+        },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      let ok = false;
+      while (Date.now() - t0 < 120000 && !ok) {
+        await sleep(300);
+        try {
+          const r = await fetch('http://127.0.0.1:3106/api/health', { signal: AbortSignal.timeout(800) });
+          if (r.ok) { ok = true; }
+        } catch { /* poll */ }
+      }
+      if (ok) samples.push(Math.round(Date.now() - t0));
+    else console.log(`[block350] pkg run ${i}: health 未就绪（${Math.round((Date.now() - t0)/1000)}s）`);
+      try { child.kill('SIGKILL'); } catch { /* gone */ }
+    } catch (e) {
+      console.log(`[block350] packaged run ${i} 失败：${String(e && e.message).slice(0, 120)}`);
     }
-    if (readyMs) samples.push(readyMs);
-    else console.log('[block350] packaged run 未就绪（120s 窗口）');
     await sleep(1500);
+    try { fs.rmSync(dataDir, { recursive: true, force: true }); } catch { /* best-effort */ }
   }
   if (!samples.length) {
     baseline.scenarios.packaged_start = {
       skipped: true,
-      reason: '本机（macOS 26 arm64）headless 下打包 app（unsigned 本地构建）无法越过首启交互授权：直启二进制/open(LaunchServices)/g0 stdout 配方三种启动均静默挂起（主进程存活、无 stdout、无子进程、无监听端口，180s 不就绪）；TCC/Gatekeeper 首启许可需 GUI 在场。处置=BLOCK-353（打包回归，GUI 会话在场）用同一采集器（--only=packaged_start）补建基线。',
+      reason: '打包后端 headless 口径采样失败（GUI app 直启受 TCC/Gatekeeper 限；ELECTRON_RUN_AS_NODE 链见 BLOCK-353 报告 §2 修复记录）。',
     };
     return;
   }
   baseline.scenarios.packaged_start = {
-    metric: '打包 app 启动：open(LaunchServices) → 自 spawn 后端 health 就绪（env 归因）',
+    metric: '打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪',
     unit: 'ms', samples, medianMs: samples.length ? median(samples) : null, tolerancePct: 80,
     runs: 3,
-    noiseSources: '首启 LaunchServices/Gatekeeper 评估 / userData 首建 migrations / 轮询粒度 300ms（下限偏差 <1s）',
-    env: `unsigned local mount：${apps[0]}（open 启动；数据面=打包默认目录，真实用户数据、与用户实跑同形态；BLOCK-353 复用同产物）`,
+    noiseSources: '打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms',
+    env: `unsigned local mount：${apps[0]}（ELECTRON_RUN_AS_NODE 后端口径；数据面=临时空目录；BLOCK-353 修复链）`,
   };
 }
 
@@ -245,7 +281,7 @@ for (const name of ALL) {
 if (GATE) {
   const gateOut = { at: new Date().toISOString(), scenarios: {} };
   for (const [name, s] of Object.entries(baseline.scenarios)) {
-    gateOut.scenarios[name] = s.skipped ? { skipped: true, reason: s.reason } : { sampleMs: s.samples[0] };
+    gateOut.scenarios[name] = s.skipped ? { skipped: true, reason: s.reason } : { sampleMs: Math.min(...s.samples) };
   }
   const outPath = OUT_ARG || OUT;
   fs.mkdirSync(path.dirname(outPath), { recursive: true });

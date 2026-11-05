@@ -1,0 +1,107 @@
+{
+  "at": "2026-11-05T01:48:01.653Z",
+  "app": "dist/mac-arm64/Petri.app",
+  "sections": {
+    "structure": {
+      "must": [
+        {
+          "rel": "Contents/MacOS/Petri",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Frameworks/Electron Framework.framework",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/app.asar",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/app.asar.unpacked",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/core/petri-server/server.js",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/core/petri-server/node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/core/shared-backend",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/frontend/dist/index.html",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/skills/coding-playbook/skill.json",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/src/main/env-coordinator.js",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/src/main/backend-proc-manager.js",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/node_modules/express/package.json",
+          "ok": true
+        },
+        {
+          "rel": "Contents/Resources/g0-build-subject.json",
+          "ok": true
+        }
+      ],
+      "allOk": true
+    },
+    "migration": {
+      "files": 21,
+      "tables": 31
+    },
+    "fourHealth": {
+      "backendHealth": true,
+      "backendReadyMs": 1000,
+      "migrationTables": 71,
+      "migrationHealthy": true,
+      "migrationFiles": 21,
+      "spa": false,
+      "runtimeProbes": {
+        "r": true,
+        "python": true
+      }
+    },
+    "fullTask": {
+      "status": "completed",
+      "agentTaskId": "8ef91f0f-24b7-45b1-8b82-ad245bff4c80",
+      "criteria": {
+        "cleanedCsvHasNormalizedDate": true,
+        "cleanedCsvHasSlashNormalized": true,
+        "chartSvg": true,
+        "summaryRows33": true,
+        "realProvider": true,
+        "toolCalls": 0,
+        "toolCallNames": []
+      }
+    },
+    "devComparison": {
+      "devT2Status": "completed",
+      "devT2CriteriaPass": true,
+      "packagedStatus": "completed",
+      "packagedCriteria": {
+        "cleanedCsvHasNormalizedDate": true,
+        "cleanedCsvHasSlashNormalized": true,
+        "chartSvg": true,
+        "summaryRows33": true,
+        "realProvider": true,
+        "toolCalls": 0,
+        "toolCallNames": []
+      },
+      "consistent": true
+    }
+  }
+}

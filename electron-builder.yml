@@ -90,6 +90,14 @@ extraResources:
     filter:
       - "**/*"
       - "!**/.DS_Store"
+  # BLOCK-353（packaged 回归）— core/packages 纳入：petri-server 经 ../../packages/*
+  # 相对 require 四个共享包（shared-telemetry/config/copilot/pack-assets），缺则打包后端
+  # boot 崩（同类：Resources/src 已由 afterPack 从 asar 解出）。
+  - from: ./core/packages
+    to: core/packages
+    filter:
+      - "**/*"
+      - "!**/.DS_Store"
   # Vite SPA build 产物 — 主窗口加载
   - from: ./frontend/dist
     to: frontend/dist

@@ -62,7 +62,7 @@ test('block350: 基线文件在场且四场景齐备（skipped 须带原因）',
     if (s.skipped) assert.ok(s.reason, `${name} skipped 缺原因`);
     else {
       assert.ok(Number.isFinite(s.medianMs) && s.medianMs > 0, `${name} 中位数非法`);
-      assert.ok(s.samples && s.samples.length >= (name === 'packaged_start' ? 3 : 5) || s.samples?.length >= 1,
+      assert.ok(s.samples && s.samples.length >= 1,
         `${name} 采样次数不足`);
       assert.ok(Number.isFinite(s.tolerancePct), `${name} 缺容差`);
       assert.ok(s.noiseSources, `${name} 缺波动源说明`);

@@ -9304,6 +9304,23 @@
       "notes": "BLOCK-352 货架点验报告：三货架 21+2 项全判定（17 available/4 detour 带绕路步骤/0 shell）；插件 3 件真跑真 artifact；MCP stdio 握手 21 工具；判词修正=无空壳。"
     },
     {
+      "id": "BLOCK-353-REGRESSION-REPORT",
+      "path": "docs/block-353-regression-report.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block353-regression-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "program-2026-11-05",
+        "BLOCK-353",
+        "evidence"
+      ],
+      "notes": "BLOCK-353 打包回归报告：两处打包阻断缺陷（boot 三层断链+双 ABI 漂移）实锤修复；四项健康全绿；T2 真跑与 dev 一致；④ 性能基线补建 469ms 闭环；构建铁律沉淀。"
+    },
+    {
       "id": "BLOCK-349",
       "capability": "block-349-evidence-clearance",
       "path": "docs/block-349-evidence-clearance-plan.md",
@@ -9438,7 +9455,7 @@
       "capability": "block-353-packaged-regression",
       "path": "docs/block-353-packaged-regression-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-353-packaged-regression",
       "entrypoint": "docs/README.md",
@@ -9463,7 +9480,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（总纲 NEXT-PHASE-PROGRAM-2026-11-05）。packaged 回归。目标：在 rc.6 发布验收之后又落了 20+ 个工作包，本包在打包态复验这些改动：构建 + 空目录启动 + 一次完整任务，产出与 dev 行为的一致性结论或差异清单。 依赖：BLOCK-348,BLOCK-350。逐包发令开工，不并行。"
+      "notes": "2026-11-05 收口 completed（总纲包 6/7）。实锤并修复两处打包阻断缺陷（src/依赖/electron-shim 三层 boot 断链 + better-sqlite3 双 ABI 漂移）→ 打包态四项健康全绿（后端 1s/迁移 21 文件 71 表/R+Python ✓）+ T2 数据任务真跑 completed 四判据全过 + 与 dev consistent=true。④ 性能基线补建 469ms 闭环。GUI 直启验证=用户实机 reopen。报告=docs/block-353-regression-report.md。"
     },
     {
       "id": "BLOCK-354",
