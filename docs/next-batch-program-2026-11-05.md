@@ -12,6 +12,7 @@ reopen: C-46（pack 仓，兄弟仓不在工作区）、G1 启动（需显式发
 # 第二批更新计划（2026-11-05 · 一次性编排）
 
 - 依据：`docs/next-tasks-2026-11-05.md`（C-48 更新后精准任务卡，8 项）
+- **状态：4/4 全部 completed（2026-11-05 串行闭环，closeout 16 门全绿）**
 - 用户发令原话：「直白一点说，有几个 block 要做呢，能否一次性安排好，逐个推完，中间不用问我意见」
 - **本条即批量开工授权**：4 个包串行推进，包内不逐项确认；只有遇到「客观不可得」才如实登记并继续下一个包
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**
@@ -68,7 +69,7 @@ reopen: C-46（pack 仓，兄弟仓不在工作区）、G1 启动（需显式发
 | 355 | 2026-11-05 | 2026-11-05 | `acceptance/block-355/t7-rerun-c45-fix.json`（T7 completed）+ `test/block355-trimmer-atomicity.test.mjs` 6/6 | PASS 16 门 | C-45 三层修复；全套重跑归 356 |
 | 356 | 2026-11-05 | 2026-11-05 | `acceptance/block-356/results-v2final.json` + `tasks-v2.json` | PASS 16 门 | 两次全套 7/8；T3 判据全过、T6 波动如实登记 |
 | 357 | 2026-11-05 | 2026-11-05 | `acceptance/block-357/detour-rulings.json` + `docs/capability-map.md` + `test/block357-shelf-and-map.test.mjs` 8/8 | PASS 16 门 | 4D 逐件保留裁决，未清零（外部依赖） |
-| 358 | — | — | — | — | planned |
+| 358 | 2026-11-05 | 2026-11-05 | `acceptance/block-358/repro-result.json` + `test/block358-filetree-repro.test.mjs` 5/5 | PASS 16 门 | C-47 观察未复现、根因未归因、票保持 open |
 
 ---
 

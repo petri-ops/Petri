@@ -1,6 +1,6 @@
 ---
 capability: block-358-filetree-pagination
-status: planned
+status: completed
 goal: 对 C-47「文件树连翻页第二次点击惰性 / 回弹」做脚本化复现与根因判定；能归因则修复，不能则如实登记不硬修。
 acceptance:
   - 有可复跑的复现脚本 + 明确结论（已复现 / 未复现 + 客观原因）。

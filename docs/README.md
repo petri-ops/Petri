@@ -1,3 +1,4 @@
+353. [`block-358-report.md`](./block-358-report.md) — 2026-11-05 **reference（BLOCK-358 收口 / 第二批 4/4）**：C-47 结论观察在场但未复现、根因未归因、不猜测性修复不销票；契约 5/5
 352. [`block-357-report.md`](./block-357-report.md) — 2026-11-05 **reference（BLOCK-357 收口）**：4 个 detour 逐件裁决（外部依赖，保留不清零）+ 能力地图生成器；契约 8/8
 351. [`capability-map.md`](./capability-map.md) — 2026-11-05 **generated（勿手改）**：用户向能力地图，按 17 个能力域组织；生成器=`scripts/block357-capability-map.mjs`，含 G0 边界与越界宣称守卫
 # Petri Desktop（格物）文档入口
@@ -20,7 +21,7 @@
 350. [`block-356-suite-v2-report.md`](./block-356-suite-v2-report.md) — 2026-11-05 **reference（BLOCK-356 收口）**：v2 判据表独立 + runner 新增 file_contains_any；T3 双语判据全过；两次全套复跑 7/8（0 干预），T6 口令波动如实登记不宣称 8/8；headless 降级复核已存在故不改产品代码
 346. [`block-356-task-suite-v2-plan.md`](./block-356-task-suite-v2-plan.md) — 2026-11-05 **completed（报告=docs/block-356-suite-v2-report.md）** · 原 planned（第二批，自动推进）**：通用任务套件 v2（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
 347. [`block-357-shelf-and-capability-map-plan.md`](./block-357-shelf-and-capability-map-plan.md) — 2026-11-05 **completed（报告=docs/block-357-report.md）** · 原 planned（第二批，自动推进）**：货架 detour 与能力地图（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
-348. [`block-358-filetree-pagination-plan.md`](./block-358-filetree-pagination-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：文件树分页归因（C-47）（P2）；范围/非范围/验收/门禁/风险/DoD 见计划
+348. [`block-358-filetree-pagination-plan.md`](./block-358-filetree-pagination-plan.md) — 2026-11-05 **completed（报告=docs/block-358-report.md）** · 原 planned（第二批，自动推进）**：文件树分页归因（C-47）（P2）；范围/非范围/验收/门禁/风险/DoD 见计划
 343. [`next-tasks-2026-11-05.md`](./next-tasks-2026-11-05.md) — 2026-11-05 **reference（C-48 更新后精准任务卡）**：修订 11-05 早版评估两处偏差（quality:perf 波动非稳定红 / C-48 已销号），去重后精准任务 8 项，A 组需发令 4 项（C-45 P1 / C-46 pack 授权 / G1 裁决 / C-47 人工归因）、B 组可执行 3 项（348 套件 v2 / 4 个 detour / 用户向能力地图）、C 组人工观察 1 项（屏幕观感）；每项含精确文件·验收·命令·发令句式
 342. [`Petri-Desktop-Evaluation-Report-2026-11-05.md`](./Petri-Desktop-Evaluation-Report-2026-11-05.md) — 2026-11-05 **reference（七包 348→354 完成后整体重评）**：工程 A(4.5) / 产品 B(3.6)（上轮 A-4.2 / C+2.6）；四个价值兑现短板已清（6/8 任务实测 0 干预 / 13 条证据终态 / EAR 43.4% / 货架零空壳）；如实登记当前 closeout 红（quality:perf 稳定红，属门槛设计而非产品退化）；下阶段 P0=C-45 压缩 tool 配对 + perf 门 + C-46 deseq2，P1/P2 共 7 项
 341. [`block-354-readiness-report.md`](./block-354-readiness-report.md) — 2026-11-05 **reference（G0→G1 出籍就绪度，BLOCK-354）**：6/6 达标（scripts/block354-readiness.mjs 零人工干预复算；基准/清偿/性能/EAR/货架/packaged 六判据）+ 宣称红线=出籍就绪≠已出籍、G1 启动需用户显式发令

@@ -1,0 +1,57 @@
+{
+  "package": "BLOCK-358",
+  "at": "2026-11-05",
+  "source": "acceptance/block-349/block349-bigdir-live-darwin.json (B2/B3)",
+  "triState": "observed_but_not_reproduced",
+  "statement": "B3 观察证据在场（单次复击 grew=false），但 headless 无法重放 GUI 点击与面板轮询收敛，未独立复现；根因未归因。",
+  "observations": {
+    "b2CursorLoadMoreGrows": true,
+    "b3RepeatClickInert": true
+  },
+  "replay": {
+    "steps": [
+      {
+        "click": 1,
+        "rowsBefore": 200,
+        "rowsAfter": 400,
+        "grew": true,
+        "reset": false,
+        "label": "B2 游标加载生效（独立观察）"
+      },
+      {
+        "click": 1,
+        "rowsBefore": 200,
+        "rowsAfter": 200,
+        "grew": false,
+        "reset": false,
+        "label": "B3 单次复击惰性（独立观察）"
+      }
+    ],
+    "nonMonotonic": 1,
+    "resets": 0,
+    "cursorMonotonic": false
+  },
+  "candidateRacePoints": [
+    {
+      "file": "frontend/src/components/workspace-panels",
+      "symbol": "加载更多 / cursor / hasMore",
+      "note": "UI 层点击与游标推进的同步点"
+    },
+    {
+      "file": "frontend/src/components/copilot/SimpleChat/hooks/useScrollGuard.ts",
+      "symbol": "scroll guard",
+      "note": "滚动/轮询收敛可能触发列表重建"
+    },
+    {
+      "file": "frontend/src/components/copilot/SimpleChat/hooks/useConversationResume.ts",
+      "symbol": "resume",
+      "note": "会话恢复与面板状态重置的交叉面"
+    }
+  ],
+  "rootCauseAttributed": false,
+  "fixApplied": false,
+  "ticketStatus": "kept-open",
+  "ticketStatusNote": "C-47 保持「观察未归因」，不销票、不做猜测性修复；启动条件仍为人工复现归因后立票。",
+  "nextStep": "人工在 520 文件项目上连续点击「加载更多」并观察面板轮询收敛，记录每次游标与根列表状态；归因后再立修复票。",
+  "honestBoundary": "本脚本是证据回放与静态候选归因，不是 GUI 复现；不得表述为「已复现并修复」。"
+}
