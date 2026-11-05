@@ -9530,8 +9530,26 @@
         "eslint-suppressions.json"
       ],
       "notes": "2026-11-05 收口 completed（总纲包 7/7）。出籍就绪度 6/6 达标（脚本零人工干预复算）：①基准 ②清偿 ③性能基线 ④EAR 43.3% ⑤货架 ⑥packaged 一致；负测 6/6（移证据判未达/EAR 跌破/恢复回升）；**宣称红线=出籍就绪≠已出籍，G1 启动需用户显式发令**。本包不启动 G1。报告=docs/block-354-readiness-report.md。"
+    },
+    {
+      "id": "EVALUATION-2026-11-05",
+      "path": "docs/Petri-Desktop-Evaluation-Report-2026-11-05.md",
+      "kind": "audit",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "evaluation-2026-11-05",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "evaluation",
+        "G0",
+        "next-phase",
+        "post-program"
+      ],
+      "notes": "2026-11-05 七包（348→354）全部 completed 后的整体重评。工程成熟度 A(4.5/5) / 产品兑现度 B(3.6/5)（上轮 A-4.2 / C+2.6）。四个价值兑现短板已清：8 跨域任务实测 6/8 完成且 0 干预、13 条实机证据终态化、EAR 43.4%、三货架 21 项 17A/4D/0S。八维评级 + 七维度优化方向 + 下阶段任务清单 P0(T-1 C-45 压缩 tool 配对 / T-2 quality:perf 稳定红 / T-3 C-46 deseq2) P1(T-4~T-7) P2(T-8 G1 裁决~T-10)。如实登记：台账称 closeout 16 门全绿，当次复跑 quality:perf 稳定红（long_conversation 34-36ms vs 阈值 32ms），非产品退化而是低耗时场景纯百分比容差设计问题。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 469
+  "documentCount": 477
 }
