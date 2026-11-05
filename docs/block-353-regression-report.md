@@ -30,7 +30,7 @@
 | 事件轨迹 | SSE 事件流（tool_call/done） | terminal=done 留痕（事件端点为 SSE 流式、headless 采集器以 meta 轮询取终态——**采集口径差异**，非产品差异；产物判据为权威） | 一致（口径注记） |
 | SPA | Vite :3000 / 打包窗口载 frontend/dist | headless 无窗口；frontend/dist/index.html 在产物内（结构核对 ✓） | 一致（headless 口径） |
 
-**差异清单**：无阻断级未决项。SPA=false 为 headless 采集口径（无 GUI 窗口），非产品差异；GUI 窗口直启静默挂起已定位为本报告 §2 缺陷 1（修复后 headless 后端可正常 boot 佐证链路已通，GUI 会话验证归 BLOCK-353 reopen / 用户实机）。
+**差异清单（2026-11-05 用户实机后修正）**：后端链一致=true；**GUI 主进程 init 挂起=未解决（🔴入池 C-48）**——缺陷 1 修复打通了后端 spawn 链，但用户实机确认 GUI 直启仍挂死于 Electron 框架 init 极早期（0 helper/零 profile 写入/lldb 无法暂停/干净重建复现；--no-sandbox 半启动后仍全灭；stock 运行时+同一 asar 可正常 init 并暴露 asar→core 越界 require 缺口）。**不宣称打包态 GUI 可用**；深挖候选与五轮试错记录见 C-48。SPA=false 为 headless 采集口径（无 GUI 窗口）。
 
 ## 4. 遗留与交接
 
