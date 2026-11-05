@@ -7484,6 +7484,17 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "user-miora-artifacts",
+      "note": "用户侧 miora 概念图产物（非源码）：不参与测试选择。2026-11-05 test:changed unmapped 清偿；不得删除用户产物。",
+      "patterns": [
+        "petri-logo-concepts.miora",
+        "petri-logo-concepts_assets/**",
+        "petri-logo-concepts_assets/*"
+      ],
+      "tests": [],
+      "commands": []
     }
   ]
 }
