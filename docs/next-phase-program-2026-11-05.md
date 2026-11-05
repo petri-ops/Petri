@@ -12,7 +12,7 @@ reopen: G1+ 项（真实 Provider 矩阵、生态市场、i18n、hooks、签名�
 
 # 下一阶段更新计划总纲（2026-11-05）
 
-- 登记状态：**reference（常驻参照总纲）**；下辖 7 个工作包均为 **planned**，逐包发令开工
+- 登记状态：**reference（常驻参照总纲）**；下辖 7 个工作包 **全部 completed（348→354 串行闭环，2026-11-05）**——就绪度 6/6 见 docs/block-354-readiness-report.md
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md`（工程成熟度 A- / 产品兑现度 C+）
 - 用户发令原话：「我希望你按照我们的工作模式做个全方位的更新计划，后面就是逐个开发，所有计划一定要尽可能的标准详细，后续干活的时候就不会跑偏了」
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**；`packaged 回归` 仅指本机未签名打包态验收，不宣称对外发布
