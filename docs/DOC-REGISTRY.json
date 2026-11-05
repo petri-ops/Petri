@@ -9548,8 +9548,25 @@
         "post-program"
       ],
       "notes": "2026-11-05 七包（348→354）全部 completed 后的整体重评。工程成熟度 A(4.5/5) / 产品兑现度 B(3.6/5)（上轮 A-4.2 / C+2.6）。四个价值兑现短板已清：8 跨域任务实测 6/8 完成且 0 干预、13 条实机证据终态化、EAR 43.4%、三货架 21 项 17A/4D/0S。八维评级 + 七维度优化方向 + 下阶段任务清单 P0(T-1 C-45 压缩 tool 配对 / T-2 quality:perf 稳定红 / T-3 C-46 deseq2) P1(T-4~T-7) P2(T-8 G1 裁决~T-10)。如实登记：台账称 closeout 16 门全绿，当次复跑 quality:perf 稳定红（long_conversation 34-36ms vs 阈值 32ms），非产品退化而是低耗时场景纯百分比容差设计问题。"
+    },
+    {
+      "id": "NEXT-TASKS-2026-11-05",
+      "path": "docs/next-tasks-2026-11-05.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "next-tasks-2026-11-05",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "task-card",
+        "G0",
+        "post-C48"
+      ],
+      "notes": "2026-11-05 C-48 更新后复核的精准任务卡（HEAD a8796ed7）。修订 11-05 早版评估两处偏差：quality:perf 非稳定红（当次 4 绿 / closeout PASS 16 门，属波动）→ T-2 降级 J-1；C-48 打包 GUI 断链已销号 → T-4 移出。当前精准任务 8 项：A 组需发令/授权 4 项（A-1 C-45 P1 压缩 tool 配对 / A-2 C-46 pack 仓授权 / A-3 G1 裁决 / A-4 C-47 需人工归因）；B 组本仓可执行 3 项（B-1 348 套件 v2 / B-2 四个 detour / B-3 用户向能力地图）；C 组人工观察 1 项（O-1 屏幕观感与点击体感）。每项写死启动条件、精确文件、动作、验收、命令、体量。单一建议=先发 BLOCK-355 开整（C-45）。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 477
+  "documentCount": 478
 }

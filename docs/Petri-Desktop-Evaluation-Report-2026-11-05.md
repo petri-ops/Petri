@@ -187,3 +187,14 @@
 ---
 
 *可复跑：`node scripts/functional-surface-audit.mjs`、`npm run quality:ear`、`npm run quality:perf`、`npm run closeout`、`node scripts/block354-readiness.mjs`。*
+
+---
+
+## §9 增量修订（2026-11-05 晚，C-48 更新后）
+
+本节之后的核对发现两处需修正的判断，**以 `docs/next-tasks-2026-11-05.md` §0 为准**：
+
+1. `quality:perf` 并非「稳定红」——后续复跑 4 绿 / `closeout` PASS 16 门，历史 34–36ms 属波动（阈值 32ms 卡在波动带中间）。§7 的 T-2 由 P0 降级为可选加固 J-1。
+2. §7 的 T-4「GUI 直启用户实机」已由 C-48 修复闭环清偿（用户错误框截图钉死真因 + 目录版/DMG 实机全绿），移出任务清单，仅余人工观感确认 O-1。
+
+净效果：原 10 项 → **当前精准任务 8 项**（详见任务卡 §1）。
