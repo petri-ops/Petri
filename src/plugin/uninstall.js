@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
 const { getRuntimeBinCandidates, getPythonSitePackagesDir } = require('../platform-compat');
+const { resolveCore } = require('../main/core-utils');
 // BLOCK-10-audit-closeout: getPythonRuntimeExecutable lives in
 // core/shared-backend/runtime-paths.js, NOT in src/platform-compat.js.
 // L21 of this file previously tried to destructure it from '../platform-compat'
@@ -26,7 +27,7 @@ const { getRuntimeBinCandidates, getPythonSitePackagesDir } = require('../platfo
 // and surfaced as "[desktop] plugin load failed: getPythonRuntimeExecutable is not a function"
 // during the dev Electron boot (loadAllPlugins → uninstallPlugin → runtime check).
 // Mirror src/plugin/runtime.js L20: pull it from runtime-paths via __dirname.
-const { getPythonRuntimeExecutable } = require(path.join(__dirname, '..', '..', 'core', 'shared-backend', 'runtime-paths'));
+const { getPythonRuntimeExecutable } = require(resolveCore('shared-backend/runtime-paths'));
 const {
   PLUGINS_DIR,
   RUNTIMES_DIR,

@@ -272,8 +272,11 @@ function scanPluginManifests(rootDir) {
         const issues = parseError
           ? [`JSON parse error: ${parseError}`]
           : validatePluginManifest(parsed);
-        const rel = fullPath.replace(rootDir + '/', '').replace(/\\/g, '/');
-        results.push({ path: rel, manifest: parsed, issues });
+        // BLOCK-104 既定契约：输出跨平台绝对路径，消费方按文件名尾对账
+        // （test/plugin-schema-strict I.5）。相对路径会丢掉
+        // acceptance/harness-plugin-prototype 前缀，让该锚恒红。
+        const abs = fullPath.replace(/\\/g, '/');
+        results.push({ path: abs, manifest: parsed, issues });
       }
     }
   }

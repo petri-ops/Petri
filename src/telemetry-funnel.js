@@ -9,4 +9,5 @@
  * 仅转发，杜绝第二份清单。
  */
 
-module.exports = require('../core/packages/shared-telemetry/funnel-events.js');
+const { resolveCore } = require('./main/core-utils');
+module.exports = require(resolveCore('packages/shared-telemetry/funnel-events.js'));

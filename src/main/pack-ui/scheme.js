@@ -14,8 +14,12 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { resolveDataDir } = require('../../../core/shared-backend/data-paths');
-const { resolvePackAssetPath, mimeForPackAsset } = require('../../../core/packages/shared-pack-assets');
+// BLOCK-353/C-48 — core 必须经 resolveCore 解析（dev=repo/core，packaged=Resources/core）：
+// 本文件由主进程从 app.asar 加载，asar 内无 core/（core 走 extraResources 到 Resources/core），
+// 相对路径 ../../../core 在打包态落在 asar 内部 → Cannot find module → 主进程加载即崩。
+const { resolveCore } = require('../core-utils');
+const { resolveDataDir } = require(resolveCore('shared-backend', 'data-paths'));
+const { resolvePackAssetPath, mimeForPackAsset } = require(resolveCore('packages', 'shared-pack-assets'));
 const { buildPackCsp } = require('./csp');
 
 const SCHEME = 'petri-pack';
@@ -34,7 +38,7 @@ function registerPackSchemePrivileges() {
 function installedPackRoot(packId) {
   if (typeof packId !== 'string' || !packId) return null;
   try {
-    const packRegistry = require('../../../core/shared-backend/pack-registry');
+    const packRegistry = require(resolveCore('shared-backend', 'pack-registry'));
     const record = packRegistry.readInstalledPacks(resolveDataDir())
       .find((pack) => pack && pack.packId === packId);
     if (!record || record.enabled === false || !record.packRoot) return null;

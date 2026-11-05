@@ -20,9 +20,10 @@
 
 const path = require('path');
 const fs = require('fs');
+const { resolveCore } = require('./main/core-utils');
 
 function createPackLifecycle(deps = {}) {
-  const registry = deps.registry || require('../core/shared-backend/pack-registry');
+  const registry = deps.registry || require(resolveCore('shared-backend/pack-registry'));
   const getInstalledPlugins = deps.getInstalledPlugins
     || (() => require('./plugin-manager').getInstalledPlugins());
   const installPlugin = deps.installPlugin

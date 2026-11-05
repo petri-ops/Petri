@@ -107,8 +107,10 @@ test('BLOCK-152 委托契约：runtime.detectPlatform / build-r-bundle 薄委托
   // 实测 2026-10-09），故本锚对其取文本断言而非 require——与
   // platform-branch-freeze / scripts-platform-contract 的文本门禁同形态：
   const runtimeSrc = readFileSync(path.join(repoRoot, 'src', 'plugin', 'runtime.js'), 'utf8');
-  assert.match(runtimeSrc, /require\('\.\.\/\.\.\/core\/shared-backend\/host-platform'\)/,
-    'src/plugin/runtime.js 必须静态 require 平台键单源（委托面不得拆除）');
+  // C-48 后主图 core require 统一走 resolveCore（打包态可解析），静态字面量形态
+  // 与动态解析形态都满足「薄委托单源」；锚守护的是委托面本身，不是字符串写法。
+  assert.match(runtimeSrc, /require\([^)]*shared-backend\/host-platform[^)]*\)/,
+    'src/plugin/runtime.js 必须 require 平台键单源（静态相对路径或 resolveCore 均可，委托面不得拆除）');
   assert.doesNotMatch(runtimeSrc, /'(macos-arm64|macos-x64|windows-x64|linux-x64)'/,
     'src/plugin/runtime.js 不得再出现本地平台键字面量分支（副本复活）');
 

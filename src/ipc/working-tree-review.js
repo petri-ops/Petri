@@ -20,7 +20,8 @@ const CHANNELS = require('./channels');
 const path = require('path');
 const fs = require('fs');
 const { ipcMain, app } = require('electron');
-const { GitAdapterError } = require('../../core/shared-backend/git-adapter');
+const { resolveCore } = require('../main/core-utils');
+const { GitAdapterError } = require(resolveCore('shared-backend/git-adapter'));
 const { createSenderGuard } = require('./_sender-guard');
 // BLOCK-92 Wave D1 — 模块级 helpers 外迁 ./working-tree-review/*（纯搬运零行为变化）：
 // context（项目工作区/adapter 装配/safeInvoke）/ repository-init（git init 引导）/
@@ -33,7 +34,7 @@ const { _writeRejectEntry } = require('./working-tree-review/reject-store');
 // BLOCK-152 H 轨 — commitReview hunk 级 stage 面分类（纯函数：签名复算/diff 切片/patch 构造）。
 const { classifyReviewStageSurface } = require('./working-tree-review/review-stage');
 // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（shared-backend 共享层；R5 放行面）。
-const { createCheckpoint, rollbackToCheckpoint } = require('../../core/shared-backend/workspace-checkpoint');
+const { createCheckpoint, rollbackToCheckpoint } = require(resolveCore('shared-backend/workspace-checkpoint'));
 
 // BLOCK-125：拒绝清单根目录解析——与 core/petri-server/helpers/system-prompt.js
 // resolveWorkingTreeRejectRoot 同优先级（LOCAL_DATA_DIR 优先 / USER_DATA_DIR 回退），

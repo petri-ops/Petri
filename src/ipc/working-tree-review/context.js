@@ -3,7 +3,8 @@
 const path = require('path');
 const fs = require('fs');
 const { app } = require('electron');
-const { createGitAdapter, GitAdapterError } = require('../../../core/shared-backend/git-adapter');
+const { resolveCore } = require('../../main/core-utils');
+const { createGitAdapter, GitAdapterError } = require(resolveCore('shared-backend/git-adapter'));
 const { getBackendPort } = require('../../main/env-coordinator');
 
 // BLOCK-92 Wave D1 — 自 src/ipc/working-tree-review.js 纯搬运（零行为变化）：

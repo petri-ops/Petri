@@ -13,6 +13,7 @@ const path = require('node:path');
 const { ipcMain } = require('electron');
 const CHANNELS = require('./channels');
 const core = require('../main/install-deep-link-core');
+const { resolveCore } = require('../main/core-utils');
 
 function defaultDataDir() {
   return process.env.PETRI_LOCAL_DATA_DIR
@@ -36,7 +37,7 @@ async function backendJson(endpoint, init) {
 
 function readInstalledPacks(dataDir) {
   try {
-    const registry = require('../../core/shared-backend/pack-registry');
+    const registry = require(resolveCore('shared-backend/pack-registry'));
     return registry.readInstalledPacks(dataDir) || [];
   } catch {
     return [];

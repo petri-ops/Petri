@@ -11,6 +11,7 @@ const CHANNELS = require('./channels');
 const { ipcMain, dialog } = require('electron');
 const path = require('path');
 const { createPackLifecycle } = require('../pack-lifecycle');
+const { resolveCore } = require('../main/core-utils');
 
 function getDataDir() {
   // 与 BLOCK-79 环境事实同源：PETRI_LOCAL_DATA_DIR 由 dev-electron/主进程注入
@@ -40,7 +41,7 @@ function registerPackIpc() {
   }
 
   ipcMain.handle(CHANNELS.pack.listInstalled, async () => {
-    const packRegistry = require('../../core/shared-backend/pack-registry');
+    const packRegistry = require(resolveCore('shared-backend/pack-registry'));
     const packs = packRegistry.readInstalledPacks(getDataDir());
     // 记录含 packRoot——即使包源稍后被删，卸载前也能展示模块清单
     return {
@@ -54,7 +55,7 @@ function registerPackIpc() {
   });
 
   ipcMain.handle(CHANNELS.pack.listAvailable, async () => {
-    const packRegistry = require('../../core/shared-backend/pack-registry');
+    const packRegistry = require(resolveCore('shared-backend/pack-registry'));
     const available = packRegistry.discoverAvailablePacks({ projectRoot: process.env.PETRI_PROJECT_ROOT || path.resolve(__dirname, '..', '..') });
     const installed = packRegistry.readInstalledPacks(getDataDir());
     const installedIds = new Set(installed.map((p) => p.packId));
@@ -109,7 +110,7 @@ function registerPackIpc() {
   // BLOCK-157 加映（UI-481）— 整包启停（停用即不接线/启用免重装；重启后生效）
   ipcMain.handle(CHANNELS.pack.setEnabled, async (_event, packId, enabled) => {
     if (!packId || typeof packId !== 'string') return { ok: false, error: 'pack_id_required' };
-    const packRegistry = require('../../core/shared-backend/pack-registry');
+    const packRegistry = require(resolveCore('shared-backend/pack-registry'));
     return packRegistry.setPackEnabled(getDataDir(), packId, enabled);
   });
 

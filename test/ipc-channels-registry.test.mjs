@@ -43,27 +43,15 @@ const CONSUMERS = [
 const CH_RE = /^(?:[a-z][a-z0-9-]*)(?::[a-zA-Z0-9-]+)+$/;
 
 /**
- * 主进程已登记但 preload 刻意不暴露的通道（preload.js L369 注记：「不暴露
- * branch-handlers.js 里的 project/message 通道；d.ts 契约仅含以下 6 个」）。
- * （UI-457：result:* 全域已退役，MAIN_ONLY 相应收缩。）
+ * 主进程已登记但 preload 刻意不暴露的通道。
+ * （UI-457：result:* 全域已退役；2026-11-05：branch/message 十二通道已随
+ * registry 一并退役，按「allowlist stays tight」判据删去 stale 条目。）
  */
 const MAIN_ONLY = new Set([
-  // BLOCK-264（C-38）— PiP 四通道：主进程窗口/截帧面；PiP 页用独立 preload
+  // BLOCK-264（C-38）— PiP 通道：主进程窗口/截帧面；PiP 页用独立 preload
   // （computer-use-pip-preload.js），主窗 preload 刻意不暴露（渲染侧无消费）
   'computer-use:pip-frame',
   'computer-use:pip-status',
-  'branch:children',
-  'branch:get',
-  'branch:project:create',
-  'branch:project:get',
-  'branch:project:list',
-  'branch:project:update',
-  'message:append',
-  'message:clear',
-  'message:count',
-  'message:delete',
-  'message:get',
-  'message:list',
 ]);
 
 /** 非 IPC 通道的协议类型 tag（canonical=frontend/src/lib/events.ts），reflux 白名单。 */

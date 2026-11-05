@@ -44,7 +44,8 @@
 
 const path = require('path');
 const { loadDatabaseConstructor } = require('../migration-runner');
-const { getBusyTimeout } = require('../../core/shared-backend/config-helper');
+const { resolveCore } = require('../main/core-utils');
+const { getBusyTimeout } = require(resolveCore('shared-backend/config-helper'));
 
 const VALID_ROLES = new Set(['branch', 'result']);
 const _connections = new Map(); // resolved file path → better-sqlite3 Database

@@ -77,9 +77,18 @@ const PROJECT_ROOT = (() => {
 
 // ── Path resolution helpers ────────────────────────────────────────────────
 
+// BLOCK-353/C-48 — 第三上下文：纯 Node（无 Electron app）。
+// 主进程模块图（src/ipc、src/plugin、src/database …）会被 dev 后端经
+// ../../src/main 反向 require，也会被 node --test 直接加载；此时既非 dev-Electron
+// 也无 process.resourcesPath（undefined），path.join 会抛 ERR_INVALID_ARG_TYPE。
+// 打包 Electron 下 resourcesPath 必为字符串，此分支不可达，打包态行为不变。
+function _hasPackagedResourcesPath() {
+  return typeof process.resourcesPath === "string" && process.resourcesPath.length > 0;
+}
+
 function resolveCoreRoot() {
   _ensureElectronState();
-  if (_IS_DEV) {
+  if (_IS_DEV || !_hasPackagedResourcesPath()) {
     return path.join(_PROJECT_ROOT, "core");
   }
   return path.join(process.resourcesPath, "core");
@@ -87,7 +96,7 @@ function resolveCoreRoot() {
 
 function resolveResource(...parts) {
   _ensureElectronState();
-  if (_IS_DEV) {
+  if (_IS_DEV || !_hasPackagedResourcesPath()) {
     return path.join(_PROJECT_ROOT, ...parts);
   }
   return path.join(process.resourcesPath, ...parts);

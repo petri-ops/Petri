@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
-const { GitAdapterError } = require('../../../core/shared-backend/git-adapter');
+const { resolveCore } = require('../../main/core-utils');
+const { GitAdapterError } = require(resolveCore('shared-backend/git-adapter'));
 
 const execFileAsync = promisify(execFile);
 

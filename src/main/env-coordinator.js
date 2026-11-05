@@ -65,7 +65,18 @@ const rendererDevUrl =
 // extraction: same algorithms, same fallback order).
 
 const { getRuntimeBinCandidates } = require("../platform-compat");
-const { getPythonRuntimeExecutable } = require("../../core/shared-backend/runtime-paths");
+// BLOCK-353/C-48 — core 相对 require 双态兜底：本模块被两种上下文加载——
+// dev/打包 backend 从 Resources/src（../../core 命中 Resources/core，主路有效）；
+// 打包主进程从 app.asar/src 加载（asar 内无 core/，../../core 必失败）→
+// 失败时落 process.resourcesPath/core（extraResources 单源）。
+function _requireCore(rel) {
+  try {
+    return require(`../../core/shared-backend/${rel}`);
+  } catch {
+    return require(path.join(process.resourcesPath, "core", "shared-backend", rel));
+  }
+}
+const { getPythonRuntimeExecutable } = _requireCore("runtime-paths");
 
 function _detectSystemRLocal() {
   const { execFileSync } = require("child_process");
@@ -290,7 +301,7 @@ function setupDesktopEnv(backendPorts) {
   // 提示降到中性 debug，不再制造「缺了东西」的心理暗示。
   const packRequiresRuntimes = (() => {
     try {
-      const packRegistry = require("../../core/shared-backend/pack-registry");
+      const packRegistry = _requireCore("pack-registry");
       return packRegistry
         .readInstalledPacks(userDataDir)
         .some((p) => Array.isArray(p.requiresRuntimes) && p.requiresRuntimes.length > 0);
