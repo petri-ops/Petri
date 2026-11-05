@@ -18,7 +18,7 @@
   "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
   "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
   "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
-  "sourceCommit": "7bedfea06323ada1472de389701fb08781f1130c",
+  "sourceCommit": "70b46497d426ad90f3946512714b119bd57cbb92",
   "sourceFiles": {
     "core/petri-server/agent-runner.js": "core/petri-server/agent-runner.js",
     "core/petri-server/agent-tools/learning.js": "core/petri-server/agent-tools/learning.js",
@@ -369,7 +369,7 @@
     "test/g0-rs-p6-ui110-local-gateway.test.mjs": "89d4962e4f71f5d8b7fab135c62a3ae25399298afde269bc587207628c7d683a",
     "test/g0-rs-p6-ui110-observation.test.mjs": "8aa784f47a228ad746004d700bac9422e23e5175d6adc751c0f17adc2b3a2b8c",
     "test/git-adapter.test.mjs": "4e50b696e28c1edcf7ede279df1b0dcae55f9b06e5caf904ae4c0849ea87d862",
-    "test/impact-map.json": "4eab2c94574fc3f7a336fe8af2ae434416601757c3d0b2465b1a734a85bdd973",
+    "test/impact-map.json": "4cfce88ab091d24ac71b2f183270cd38b3d021d3a89bf517171abdf3ec62d4fc",
     "test/result-changeset-service.test.mjs": "537c162f30ead0b1ad59a7a9d56ca063c012fafa20ba37b992b9000d676ad388",
     "test/result-compare-service.test.mjs": "8cfdfe3e4524ff163e790d16f9400465931b9c060f03507f160ba4776e7c2320",
     "test/result-edit-agent-tool.test.mjs": "a140be51a92d32dc3814cd4983c4afc17b1cde2c7798bfbd47b4348318c04259",
@@ -399,7 +399,7 @@
     "test/tools-executor-job-context.test.mjs": "f4e37ba9010e6fde7013e49467cf619bae306731c2ea32c0b85134e8ede9882b",
     "test/tools-input-validation.test.mjs": "8fb1cd1e75dfc5db6f88766e563eaf6fe9ccbec6a9165ee3bc1566689416b762"
   },
-  "sourceBindingDigest": "1882fc45f78fa1fd24c2428687f1da3ee433ee60c37af606e82dcc57219634e8",
+  "sourceBindingDigest": "9d2a699f16f21cf7d4943e0ed9e6578c5399e9ae6e2461803589a925f3ca9417",
   "sourceCommitMatchesSourceHashes": true,
   "sourceBindingStableDuringCapture": true,
   "observations": {
