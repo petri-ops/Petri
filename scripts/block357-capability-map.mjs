@@ -45,7 +45,6 @@ function load() {
 }
 
 export function buildCapabilityMap(matrix) {
-  const s = matrix.summary || {};
   const tools = matrix.toolRows || [];
   const byDomain = new Map();
   for (const t of tools) {
