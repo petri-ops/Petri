@@ -7510,7 +7510,9 @@
       ],
       "commands": [
         "docs-check"
-      ]
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     },
     {
       "id": "block358-filetree-repro",
@@ -7523,7 +7525,9 @@
       "tests": [],
       "commands": [
         "docs-check"
-      ]
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
