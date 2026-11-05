@@ -18,7 +18,7 @@
   "providerBoundary": "controlled_loopback_503_429_only_real_provider_excluded_to_p7",
   "packagedBoundary": "development_electron_only_packaged_app_excluded_to_p7",
   "checkpointInterruptionBoundary": "macos_development_posix_sigstop_process_group_windows_not_exercised",
-  "sourceCommit": "caa9c1f0d8ad3481c81a6f41c9b629b3d80c800d",
+  "sourceCommit": "cabee3a004fe45c3083c3c6ccfe95741831f3002",
   "sourceFiles": {
     "core/petri-server/agent-runner.js": "core/petri-server/agent-runner.js",
     "core/petri-server/agent-tools/learning.js": "core/petri-server/agent-tools/learning.js",
@@ -399,7 +399,7 @@
     "test/tools-executor-job-context.test.mjs": "f4e37ba9010e6fde7013e49467cf619bae306731c2ea32c0b85134e8ede9882b",
     "test/tools-input-validation.test.mjs": "8fb1cd1e75dfc5db6f88766e563eaf6fe9ccbec6a9165ee3bc1566689416b762"
   },
-  "sourceBindingDigest": "ac08c107b9acb6ab68a8519818e80c0ec272935a4e55d87faf898af243e25b8d",
+  "sourceBindingDigest": "49d6fa728187c9675f596f5710b5821bcd1f9b513d18bc8df9bf95f207ed1077",
   "sourceCommitMatchesSourceHashes": false,
   "sourceBindingStableDuringCapture": true,
   "observations": {
