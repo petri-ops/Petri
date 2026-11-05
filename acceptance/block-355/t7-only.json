@@ -1,0 +1,106 @@
+{
+  "$meta": {
+    "package": "BLOCK-348",
+    "program": "docs/next-phase-program-2026-11-05.md",
+    "criteriaFrozenAt": "2026-11-04T16:48:53Z",
+    "frozenNote": "判据表在跑之前写死（总纲 §2.5）：本文件的 criteria / toolSelectJudge / artifactJudge 于首次实测前冻结；报告不得事后调口径。",
+    "provider": "real（隔离后端 + 本机凭据库回落；evals-harness spawnIsolatedBackend mode=real）",
+    "accessModeAll": "full",
+    "interventionPolicy": {
+      "mode": "auto-approve-and-record",
+      "maxPerTask": 20,
+      "note": "headless 实测无真人；每个 dynamic_guard 审批请求=1 个「人工干预点」，runner 按预登记策略自动放行并逐条记录（审批=会话中真人需介入的点位）。"
+    },
+    "customCriteriaKinds": {
+      "tool_output_contains": "任一 tool_result（tool 指定）输出含 value（used by t1）",
+      "file_unmodified": "workspace 相对路径文件 sha256 与种子一致（used by t1：测试与 package.json 未被改动）",
+      "min_tool_calls": "全程 tool_call 事件总数 ≥ min（used by t7）",
+      "file_contains_all": "文件含 values 数组中每一个子串（used by t7）",
+      "file_min_length": "文件存在且字符数 ≥ min（used by t5）"
+    },
+    "metrics": {
+      "autonomousCompletionRate": "status=completed 且 criteria 全过 的任务数 / 8（环境不可得任务如实单列，仍计入分母）",
+      "interventionCount": "各任务干预点（dynamic_guard 审批请求）次数合计（机械，来自事件轨迹）",
+      "toolSelectReasonableness": "各任务 toolSelectJudge 勾选是 / 总项（人眼判据，逐项带轨迹指针）",
+      "artifactUsability": "各任务 artifactJudge 勾选是 / 总项（人眼判据，逐项带产物证据指针）",
+      "interruptedVsFailed": "超时/步数耗尽=interrupted（中断）；任务 error 事件=faild（失败）；两者分开统计"
+    },
+    "environmentNotes": [
+      "web 访问：runner 预写 tmpDir/web-search.json enabled=true；web_search 后端未配置（provider=none）属预期，t3 以 web_fetch 为准，代理不得把 web_search_not_configured 解读为「网上没有」。",
+      "t7 压缩场景：runner 对该任务把 ai-settings.json 的 model_profiles[evals-provider].contextWindow 覆写为 20000（预设窗口是产品支持配置轴，非放宽检测口径；目的是让 30+ 步任务确定性触达熔断线）。",
+      "t4 浏览器：连接器传输桥依赖桌面 BrowserPanel webview，且环回/私网地址被 web-fetch-policy 硬拒——headless 隔离后端预计环境不可得；判据仍按能力口径写死，结果如实呈现。"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "t7-long-haul",
+      "title": "长任务：30+ 步、中途触发上下文压缩、验保持",
+      "domain": "endurance",
+      "prompt": "【口令 ORCHID-42】工作区 ledger/ 下有 20 份远征日志（seq-01.md 到 seq-20.md）。请按文件名顺序阅读全部 20 份日志（不得跳读或抽样），在 out/notes/ 下为每份日志写一个同名要点文件（seq-01.md 到 seq-20.md，每个一句话）。全部完成后写 out/final-report.md，必须包含：①口令原文；②20 份日志中形如 FACT-XXX 的标记编号完整清单（按顺序，每行一个）；③三句以内总结日志文风的演变。",
+      "accessMode": "full",
+      "timeoutMs": 2700000,
+      "windowOverride": 20000,
+      "seedGenerator": "ledger20",
+      "seedWorkspace": [],
+      "expectedArtifacts": [
+        "out/final-report.md",
+        "out/notes/seq-01.md",
+        "out/notes/seq-20.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "min_tool_calls",
+          "min": 35
+        },
+        {
+          "kind": "event_present",
+          "event": "context_compacted"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/final-report.md",
+          "value": "ORCHID-42"
+        },
+        {
+          "kind": "file_contains_all",
+          "path": "out/final-report.md",
+          "values": [
+            "FACT-003",
+            "FACT-006",
+            "FACT-009",
+            "FACT-012",
+            "FACT-015",
+            "FACT-018",
+            "FACT-021",
+            "FACT-024",
+            "FACT-027",
+            "FACT-030",
+            "FACT-033",
+            "FACT-036",
+            "FACT-039",
+            "FACT-042",
+            "FACT-045",
+            "FACT-048",
+            "FACT-051",
+            "FACT-054",
+            "FACT-057",
+            "FACT-060"
+          ]
+        }
+      ],
+      "toolSelectJudge": [
+        "按顺序或分批读完全部 20 份（未跳读：final-report 的 FACT 清单与种子一一对应可证）",
+        "要点文件逐份写（out/notes/ 下 20 个文件都在）",
+        "长程推进中有节奏（未在早期把全部内容一次性塞进单条答复）"
+      ],
+      "artifactJudge": [
+        "final-report.md 含口令 ORCHID-42（跨压缩保持的证据）",
+        "FACT 清单 20 项齐全且顺序正确",
+        "out/notes/ 20 个要点文件各一句话、与对应日志内容对应"
+      ]
+    }
+  ]
+}

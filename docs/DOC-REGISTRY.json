@@ -9588,7 +9588,7 @@
       "capability": "block-355-context-trimmer-atomicity",
       "path": "docs/block-355-context-trimmer-atomicity-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-355-context-trimmer-atomicity",
       "entrypoint": "docs/README.md",
@@ -9613,7 +9613,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。上下文裁剪原子性（C-45）。依据 docs/next-tasks-2026-11-05.md。"
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。上下文裁剪原子性（C-45）。依据 docs/next-tasks-2026-11-05.md。 | 2026-11-05 收口：三层修复（tool 链原子单元 / idx 顺序还原 / 孤立 tool 防御）；契约 6/6 含负测、回归 19/19、T7 冻结场景复跑 completed（49 tool_calls、compaction=1、20 项标记全收、干预 0）。报告=docs/block-355-report.md。"
     },
     {
       "id": "BLOCK-356",
@@ -9710,8 +9710,25 @@
         "eslint-suppressions.json"
       ],
       "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。文件树分页归因（C-47）。依据 docs/next-tasks-2026-11-05.md。"
+    },
+    {
+      "id": "BLOCK-355-REPORT",
+      "path": "docs/block-355-report.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-355-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-355",
+        "C-45",
+        "G0"
+      ],
+      "notes": "C-45 收口报告：根因=三档贪心拆链 + age 升序倒置；三层修复；T7 冻结场景复跑 completed。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 483
+  "documentCount": 484
 }

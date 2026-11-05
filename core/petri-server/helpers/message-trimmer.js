@@ -43,7 +43,9 @@ function scoreMessages(msgs) {
       tier = TIER_HISTORICAL;
     }
     const tokens = countMessageTokens(msg);
-    return { msg, tokens, tier, age };
+    // BLOCK-355 C-45 — 保留原始下标：输出顺序必须精确还原，不能用 age 排序
+    // （age = total - idx，升序会把新消息排到前面，导致 tool 出现在 tool_calls 之前）。
+    return { msg, tokens, tier, age, idx };
   });
 }
 
@@ -63,49 +65,106 @@ function countMessageTokens(msg) {
 }
 
 /**
+ * BLOCK-355 C-45 — 把 tool 调用链作为**原子单元**参与裁剪。
+ *
+ * 历史缺陷：三档独立贪心先把 `role: 'tool'` 结果按 TIER_TOOL_RESULT 挑走、
+ * 占满预算后 `assistant(tool_calls)` 被丢弃 → 输出里出现悬空 tool 消息，
+ * provider 收到后整体 400，长任务中断（BLOCK-348 T7 实锤）。
+ *
+ * 单元规则：`assistant(tool_calls)` 与其后紧随的、tool_call_id 属于该调用的
+ * `tool` 消息合并为一个不可拆单元；同留同裁。其余消息各自成单元。
+ */
+function groupToolChains(scored) {
+  const units = [];
+  let i = 0;
+  const makeUnit = (items) => ({
+    items,
+    tokens: items.reduce((n, s) => n + s.tokens, 0),
+    tier: Math.min(...items.map((s) => s.tier)),
+    age: Math.max(...items.map((s) => s.age)),
+  });
+
+  while (i < scored.length) {
+    const s = scored[i];
+    const msg = s.msg;
+    if (msg.role === 'assistant' && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
+      const ids = new Set(msg.tool_calls.map((tc) => tc && tc.id).filter(Boolean));
+      const items = [s];
+      let j = i + 1;
+      while (j < scored.length && scored[j].msg.role === 'tool'
+        && (!scored[j].msg.tool_call_id || ids.has(scored[j].msg.tool_call_id))) {
+        items.push(scored[j]);
+        j += 1;
+      }
+      units.push(makeUnit(items));
+      i = j;
+    } else {
+      units.push(makeUnit([s]));
+      i += 1;
+    }
+  }
+  return units;
+}
+
+/**
  * Greedily pick messages within the token budget, tier by tier.
+ * 以 tool 链原子单元为最小粒度，保证裁剪后不产生悬空 tool 消息。
  */
 function pickWithinBudget(scored, budget) {
-  const kept = [];
+  const units = groupToolChains(scored);
+  const keptUnits = [];
   let used = 0;
 
-  // Tier 1: Tool results (most recent)
-  const toolResults = scored
-    .filter(s => s.tier === TIER_TOOL_RESULT && s.age <= TOOL_RESULT_AGE_CUTOFF)
-    .sort((a, b) => a.age - b.age); // oldest first (they're already recent-limited)
-
-  for (const s of toolResults) {
-    if (used + s.tokens <= budget) {
-      kept.push(s);
-      used += s.tokens;
+  const take = (unit) => {
+    if (used + unit.tokens <= budget) {
+      keptUnits.push(unit);
+      used += unit.tokens;
     }
-  }
+  };
 
-  // Tier 2: Recent turns
-  const recentTurns = scored
-    .filter(s => s.tier === TIER_RECENT_TURN && s.age <= RECENT_TURN_AGE_CUTOFF)
-    .sort((a, b) => a.age - b.age);
+  // Tier 1: tool 结果（整链，含其 assistant(tool_calls)）
+  units
+    .filter(u => u.tier === TIER_TOOL_RESULT && u.age <= TOOL_RESULT_AGE_CUTOFF)
+    .sort((a, b) => a.age - b.age)
+    .forEach(take);
 
-  for (const s of recentTurns) {
-    if (used + s.tokens <= budget) {
-      kept.push(s);
-      used += s.tokens;
-    }
-  }
+  // Tier 2: 近期对话轮
+  units
+    .filter(u => u.tier === TIER_RECENT_TURN && u.age <= RECENT_TURN_AGE_CUTOFF)
+    .sort((a, b) => a.age - b.age)
+    .forEach(take);
 
-  // Tier 3: Remaining — fill budget by age (prefer older before newer, since newer already kept)
-  const remaining = scored
-    .filter(s => !kept.includes(s))
-    .sort((a, b) => a.age - b.age); // oldest first for fill
+  // Tier 3: 其余按 age 填充
+  units
+    .filter(u => !keptUnits.includes(u))
+    .sort((a, b) => a.age - b.age)
+    .forEach(take);
 
-  for (const s of remaining) {
-    if (used + s.tokens <= budget) {
-      kept.push(s);
-      used += s.tokens;
-    }
-  }
-
+  // 展开回 scored 项，保持原始顺序（按 idx，不按 age）
+  const kept = keptUnits
+    .flatMap(u => u.items)
+    .sort((a, b) => a.idx - b.idx);
   return { kept, used };
+}
+
+/**
+ * BLOCK-355 C-45 — 防御层：丢弃没有对应 tool_calls 声明的 tool 消息。
+ * 即使输入本身已带孤立 tool（历史遗留/上游裁剪），也不让它进入 provider 请求。
+ */
+function dropOrphanToolMessages(messages) {
+  const declared = new Set();
+  const out = [];
+  for (const msg of messages) {
+    if (msg.role === 'assistant' && Array.isArray(msg.tool_calls)) {
+      for (const tc of msg.tool_calls) if (tc && tc.id) declared.add(tc.id);
+      out.push(msg);
+    } else if (msg.role === 'tool') {
+      if (!msg.tool_call_id || declared.has(msg.tool_call_id)) out.push(msg);
+    } else {
+      out.push(msg);
+    }
+  }
+  return out;
 }
 
 /**
@@ -175,15 +234,16 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
     };
   }
 
-  // Build result: system + kept messages in original order
-  const result = [systemMsg];
-  for (const s of kept.sort((a, b) => a.age - b.age)) {
-    result.push(s.msg);
-  }
+  // BLOCK-355 C-45 — output 必须保持原始顺序（kept 已按 idx 排好），
+  // 且任何没有 tool_calls 声明的 tool 消息都不得进入 provider 请求。
+  const retainedMsgs = dropOrphanToolMessages(kept.map((s) => s.msg));
+  const retainedSet = new Set(retainedMsgs);
+  const retainedScored = kept.filter((s) => retainedSet.has(s.msg));
+  const result = [systemMsg, ...retainedMsgs];
 
   // Inject summary note if many historical messages were dropped
   const droppedHistorical = scored.filter(
-    s => !kept.includes(s) && s.tier === TIER_HISTORICAL
+    s => !retainedSet.has(s.msg) && s.tier === TIER_HISTORICAL
   );
   if (droppedHistorical.length > SUMMARY_TRIGGER_DROP) {
     result.push({
@@ -192,9 +252,9 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
     });
   }
 
-  const messagesKept = kept.length;
+  const messagesKept = retainedScored.length;
   const messagesDropped = msgs.length - messagesKept;
-  const messagesTokensUsed = kept.reduce((sum, s) => sum + s.tokens, 0);
+  const messagesTokensUsed = retainedScored.reduce((sum, s) => sum + s.tokens, 0);
 
   return {
     messages: result,

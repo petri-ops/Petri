@@ -7469,6 +7469,21 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block355-trimmer-atomicity",
+      "note": "BLOCK-355 C-45 契约：tool 链原子性与顺序还原。",
+      "patterns": [
+        "core/petri-server/helpers/message-trimmer.js",
+        "test/block355-trimmer-atomicity.test.mjs",
+        "docs/block-355-*.md"
+      ],
+      "tests": [
+        "test/block355-trimmer-atomicity.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

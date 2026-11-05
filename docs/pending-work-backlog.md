@@ -164,7 +164,7 @@
 | 0 | BLOCK-352 / EXTENSION-SHELF-AUDIT | **扩展生态可用性核对（planned，2026-11-05 总纲下辖；逐包发令开工）**：对插件 / 技能 / MCP 服务三货架逐件点验，解决上轮判词「货架可见不可用」，把可用性变成可复跑矩阵并接入门禁防复发。 | docs/block-352-extension-shelf-audit-plan.md | **planned（开工需发令）** |
 | 0 | BLOCK-353 / PACKAGED-REGRESSION | **packaged 回归（planned，2026-11-05 总纲下辖；逐包发令开工）**：在 rc.6 发布验收之后又落了 20+ 个工作包，本包在打包态复验这些改动：构建 + 空目录启动 + 一次完整任务，产出与 dev 行为的一致性结论或差异清单。 | docs/block-353-packaged-regression-plan.md | **planned（开工需发令）** |
 | 0 | BLOCK-354 / G0-EXIT-CRITERIA | **G0 → G1 出籍判据（planned，2026-11-05 总纲下辖；逐包发令开工）**：把「G0 什么时候算收尾」从模糊状态写成客观、可机械判定的条件表，并输出当前出籍就绪度；未达标前明确宣称红线。 | docs/block-354-g0-exit-criteria-plan.md | **planned（开工需发令）** |
-| 0 | BLOCK-355 / CONTEXT-TRIMMER-ATOMICITY | **上下文裁剪原子性（C-45）（planned，2026-11-05 第二批自动推进）**：依据 `docs/next-tasks-2026-11-05.md`；计划含范围/非范围/可度量验收/门禁/DoD | docs/block-355-context-trimmer-atomicity-plan.md | **planned（批量授权已给）** |
+| 0 | BLOCK-355 / CONTEXT-TRIMMER-ATOMICITY | **上下文裁剪原子性（C-45）（completed，2026-11-05）**：依据 `docs/next-tasks-2026-11-05.md`；计划含范围/非范围/可度量验收/门禁/DoD | docs/block-355-context-trimmer-atomicity-plan.md | **completed（355 收口）** |
 | 0 | BLOCK-356 / TASK-SUITE-V2 | **通用任务套件 v2（planned，2026-11-05 第二批自动推进）**：依据 `docs/next-tasks-2026-11-05.md`；计划含范围/非范围/可度量验收/门禁/DoD | docs/block-356-task-suite-v2-plan.md | **planned（批量授权已给）** |
 | 0 | BLOCK-357 / SHELF-AND-CAPABILITY-MAP | **货架 detour 与能力地图（planned，2026-11-05 第二批自动推进）**：依据 `docs/next-tasks-2026-11-05.md`；计划含范围/非范围/可度量验收/门禁/DoD | docs/block-357-shelf-and-capability-map-plan.md | **planned（批量授权已给）** |
 | 0 | BLOCK-358 / FILETREE-PAGINATION | **文件树分页归因（C-47）（planned，2026-11-05 第二批自动推进）**：依据 `docs/next-tasks-2026-11-05.md`；计划含范围/非范围/可度量验收/门禁/DoD | docs/block-358-filetree-pagination-plan.md | **planned（批量授权已给）** |

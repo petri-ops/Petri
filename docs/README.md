@@ -13,7 +13,8 @@
 339. [`block-352-shelf-report.md`](./block-352-shelf-report.md) — 2026-11-05 **reference（BLOCK-352 货架点验报告）**：三货架 21+2 项全判定=17 available（插件 3 件真跑真 artifact+技能 14 契约合规+MCP stdio 21 工具）/4 detour（bundle 未就绪、C-46、demo 差异——均带绕路步骤）/0 shell——「货架可见不可用」修正为无空壳；矩阵=acceptance/block-352/shelf-matrix.json 可复跑
 340. [`block-353-regression-report.md`](./block-353-regression-report.md) — 2026-11-05 **reference（BLOCK-353 打包回归报告）**：两处打包阻断缺陷实锤修复（boot 三层断链+双 ABI 漂移）→ 四项健康全绿 + T2 真跑与 dev consistent=true；④ 性能基线补建 469ms 闭环；构建铁律=install-app-deps→build→验收→npm rebuild
 344. [`next-batch-program-2026-11-05.md`](./next-batch-program-2026-11-05.md) — 2026-11-05 **reference（第二批一次性编排）**：4 个串行 BLOCK（355 C-45 裁剪原子性 / 356 任务套件 v2 / 357 货架 detour+能力地图 / 358 文件树分页归因），统一 9 步执行协议 + 进度台账；三项客观排除=C-46 pack 仓不在工作区 / G1 需显式发令 / O-1 人工观感；批量开工授权已给，中间不逐项确认
-345. [`block-355-context-trimmer-atomicity-plan.md`](./block-355-context-trimmer-atomicity-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：上下文裁剪原子性（C-45）（P0）；范围/非范围/验收/门禁/风险/DoD 见计划
+349. [`block-355-report.md`](./block-355-report.md) — 2026-11-05 **reference（BLOCK-355 收口报告）**：C-45 三层修复 + T7 冻结场景复跑 completed（49 工具调用 / 压缩触发 / 20 项标记全收 / 干预 0）；契约 6/6 含负测、回归 19/19
+345. [`block-355-context-trimmer-atomicity-plan.md`](./block-355-context-trimmer-atomicity-plan.md) — 2026-11-05 **completed（C-45 已修：T7 复跑 completed；报告=docs/block-355-report.md）** · 原 planned（第二批，自动推进）**：上下文裁剪原子性（C-45）（P0）；范围/非范围/验收/门禁/风险/DoD 见计划
 346. [`block-356-task-suite-v2-plan.md`](./block-356-task-suite-v2-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：通用任务套件 v2（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
 347. [`block-357-shelf-and-capability-map-plan.md`](./block-357-shelf-and-capability-map-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：货架 detour 与能力地图（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
 348. [`block-358-filetree-pagination-plan.md`](./block-358-filetree-pagination-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：文件树分页归因（C-47）（P2）；范围/非范围/验收/门禁/风险/DoD 见计划

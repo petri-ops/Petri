@@ -65,7 +65,7 @@ reopen: C-46（pack 仓，兄弟仓不在工作区）、G1 启动（需显式发
 
 | 包 | 开工 | 收口 | 关键证据 | closeout | 备注 |
 | --- | --- | --- | --- | --- | --- |
-| 355 | — | — | — | — | planned |
+| 355 | 2026-11-05 | 2026-11-05 | `acceptance/block-355/t7-rerun-c45-fix.json`（T7 completed）+ `test/block355-trimmer-atomicity.test.mjs` 6/6 | PASS 16 门 | C-45 三层修复；全套重跑归 356 |
 | 356 | — | — | — | — | planned |
 | 357 | — | — | — | — | planned |
 | 358 | — | — | — | — | planned |

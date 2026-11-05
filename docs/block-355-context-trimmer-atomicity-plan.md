@@ -1,6 +1,6 @@
 ---
 capability: block-355-context-trimmer-atomicity
-status: planned
+status: completed
 goal: 修复 C-45（上下文压缩裁剪破坏 tool 消息配对），使长任务不再因 provider 400 中断，并把 T7 冻结场景纳入回归。
 acceptance:
   - message-trimmer 裁剪后 assistant(tool_calls) 与其 tool 消息恒成对，契约测试覆盖「裁一半」与「全保留」两种边界。
@@ -10,6 +10,8 @@ reopen: G1+ 项；新增功能域；C-46 / G1 / O-1 三项排除项。
 ---
 
 # BLOCK-355 — 上下文裁剪原子性（C-45）
+
+> 状态：**completed（2026-11-05 收口）**；报告=`docs/block-355-report.md`
 
 - 批次总纲：`docs/next-batch-program-2026-11-05.md`；依据任务卡 `docs/next-tasks-2026-11-05.md` A-1
 - 阶段：**G0 开发期常态 · 不外推 packaged / Provider / GA**
