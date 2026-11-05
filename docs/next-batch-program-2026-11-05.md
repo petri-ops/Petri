@@ -67,7 +67,7 @@ reopen: C-46（pack 仓，兄弟仓不在工作区）、G1 启动（需显式发
 | --- | --- | --- | --- | --- | --- |
 | 355 | 2026-11-05 | 2026-11-05 | `acceptance/block-355/t7-rerun-c45-fix.json`（T7 completed）+ `test/block355-trimmer-atomicity.test.mjs` 6/6 | PASS 16 门 | C-45 三层修复；全套重跑归 356 |
 | 356 | 2026-11-05 | 2026-11-05 | `acceptance/block-356/results-v2final.json` + `tasks-v2.json` | PASS 16 门 | 两次全套 7/8；T3 判据全过、T6 波动如实登记 |
-| 357 | — | — | — | — | planned |
+| 357 | 2026-11-05 | 2026-11-05 | `acceptance/block-357/detour-rulings.json` + `docs/capability-map.md` + `test/block357-shelf-and-map.test.mjs` 8/8 | PASS 16 门 | 4D 逐件保留裁决，未清零（外部依赖） |
 | 358 | — | — | — | — | planned |
 
 ---

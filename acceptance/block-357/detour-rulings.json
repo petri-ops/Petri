@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-05",
+  "package": "BLOCK-357",
+  "source": "acceptance/block-352/shelf-matrix.json",
+  "principle": "逐件裁决、不批量下架、不为清零下架有用能力；本仓无法直连的外部依赖如实保留 detour 并写清偿触发条件。",
+  "rulings": [
+    {
+      "name": "sample-metadata-validator",
+      "shelf": "plugins",
+      "verdictBefore": "detour",
+      "ruling": "keep-with-detour",
+      "reason": "catalog 在架、definition 可解析；真跑未过是 demo 输入组合与生产形态差异（脚本 Process exited with code 1）。属插件自身脚本/输入契约问题，不是本仓接线缺陷。",
+      "detourSteps": "查看 tool_jobs error 全文定位失败行，或以生产 counts/metadata 真跑；修插件脚本与 demo 输入后重新点验。",
+      "clearTrigger": "插件仓修复脚本与 demo 输入并真跑通过后，由 shelf-audit 复判为 available",
+      "relatedTicket": null,
+      "rejudgeBy": "插件仓更新后"
+    },
+    {
+      "name": "go-kegg",
+      "shelf": "plugins",
+      "verdictBefore": "detour",
+      "ruling": "keep-with-detour",
+      "reason": "r-enrichment capability bundle 下载 HTTP 404 → provision_failed。属外部资源不可得/上游失效，本机不下载与平台不符的预编译二进制（设计如此）。",
+      "detourSteps": "预置 r-enrichment capability bundle（校验平台匹配），或检查网络/磁盘后重试。",
+      "clearTrigger": "bundle 可下载且 provision 成功后真跑通过",
+      "relatedTicket": null,
+      "rejudgeBy": "运行时资源恢复后"
+    },
+    {
+      "name": "gsea",
+      "shelf": "plugins",
+      "verdictBefore": "detour",
+      "ruling": "keep-with-detour",
+      "reason": "与 go-kegg 同源：r-enrichment bundle 下载 404，非插件本身缺陷。",
+      "detourSteps": "同 go-kegg：预置 r-enrichment bundle 后重试。",
+      "clearTrigger": "bundle 可下载且 provision 成功后真跑通过",
+      "relatedTicket": null,
+      "rejudgeBy": "运行时资源恢复后"
+    },
+    {
+      "name": "deseq2",
+      "shelf": "plugins",
+      "verdictBefore": "detour",
+      "ruling": "keep-with-detour",
+      "reason": "catalog 在架、definition 可解析；真跑被 pack 仓 R 脚本语法错阻断（C-46）。gewu-pack-bio 与 plugins/deseq2/scripts/deseq2.R 均不在本仓工作区，属兄弟仓授权范畴，本批排除项。",
+      "detourSteps": "pack 仓把 deseq2.R:72-73 跨行字符串改 paste0 合并并回流 latest 后真跑即通。",
+      "clearTrigger": "C-46 获 pack 仓工作授权并修复后",
+      "relatedTicket": "C-46",
+      "rejudgeBy": "C-46 清偿后"
+    }
+  ],
+  "summary": {
+    "detourTotal": 4,
+    "ruled": 4,
+    "downgradedToShell": 0,
+    "removed": 0,
+    "directPathCreated": 0,
+    "note": "四项均为外部依赖（插件仓脚本 / 运行时 bundle / 兄弟仓），本仓无直连修复路径；逐件保留并写清触发条件，不伪造直连、不批量下架。矩阵仍为 17A/4D/0S，零空壳。",
+    "honestStatement": "本包未把 4D 清零；清零需外部条件满足，届时由 shelf-audit 复判。"
+  }
+}

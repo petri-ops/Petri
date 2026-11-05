@@ -1,6 +1,6 @@
 ---
 capability: block-357-shelf-and-capability-map
-status: planned
+status: completed
 goal: 处置 352 遗留的 4 个 detour（需绕路）货架项，并产出面向使用者的能力地图（按任务组织、机器生成）。
 acceptance:
   - 4 个 detour 逐项有直连路径或逐件下架裁决；矩阵更新且负测仍能判红。

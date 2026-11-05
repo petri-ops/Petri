@@ -9652,7 +9652,7 @@
       "capability": "block-357-shelf-and-capability-map",
       "path": "docs/block-357-shelf-and-capability-map-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-357-shelf-and-capability-map",
       "entrypoint": "docs/README.md",
@@ -9677,7 +9677,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。货架 detour 与能力地图。依据 docs/next-tasks-2026-11-05.md。"
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。货架 detour 与能力地图。依据 docs/next-tasks-2026-11-05.md。 | 2026-11-05 收口：4 个 detour 逐件裁决（均为外部依赖，保留并写清偿触发条件，不伪造直连/不批量下架/未清零 4D）；用户向能力地图生成器（确定性 + 越界守卫 + 勿手改负测）。契约 8/8。报告=docs/block-357-report.md。"
     },
     {
       "id": "BLOCK-358",
@@ -9744,8 +9744,43 @@
         "G0"
       ],
       "notes": "通用任务套件 v2 收口报告：判据双语内容等价物、两次全套复跑 7/8、T6 波动如实登记。"
+    },
+    {
+      "id": "CAPABILITY-MAP",
+      "path": "docs/capability-map.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "capability-map",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "generated",
+        "capability-map",
+        "G0"
+      ],
+      "notes": "BLOCK-357 生成的用户向能力地图（按能力域组织，17 域）。生成器 scripts/block357-capability-map.mjs；勿手改；测试 test/block357-shelf-and-map.test.mjs 校验产物一致性。"
+    },
+    {
+      "id": "BLOCK-357-REPORT",
+      "path": "docs/block-357-report.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-357-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-357",
+        "shelf",
+        "capability-map",
+        "G0"
+      ],
+      "notes": "4 个 detour 逐件裁决 + 能力地图生成器收口报告；如实声明未清零 4D。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 485
+  "documentCount": 487
 }

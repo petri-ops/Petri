@@ -7495,6 +7495,37 @@
       ],
       "tests": [],
       "commands": []
+    },
+    {
+      "id": "block357-shelf-and-map",
+      "note": "BLOCK-357/358 第二批脚本与契约（358 为预登记，避免 P6 源绑定二次重打）",
+      "patterns": [
+        "scripts/block357-*.mjs",
+        "test/block357-*.test.mjs",
+        "docs/block-357-*.md",
+        "docs/capability-map.md"
+      ],
+      "tests": [
+        "test/block357-shelf-and-map.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "block358-filetree-repro",
+      "note": "BLOCK-357/358 第二批脚本与契约（358 为预登记，避免 P6 源绑定二次重打）",
+      "patterns": [
+        "scripts/block358-*.mjs",
+        "test/block358-*.test.mjs",
+        "docs/block-358-*.md"
+      ],
+      "tests": [
+        "test/block358-filetree-repro.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }
