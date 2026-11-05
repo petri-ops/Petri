@@ -58,13 +58,6 @@ async function timed(fn) {
   return Math.round(performance.now() - t0);
 }
 
-async function fetchOk(url, timeoutMs = 3000) {
-  try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
-    return r.ok;
-  } catch { return false; }
-}
-
 // ---------- ① 冷启动 ----------
 async function scenarioColdStart() {
   const samples = [];
