@@ -7,7 +7,6 @@
 最后更新：2026-11-05（✅ **BLOCK-352 扩展生态可用性核对 completed（总纲包 5/7）**：三货架 21+2 项全判定 17 available/4 detour/0 shell——「货架可见不可用」修正为「无空壳、卡点=运行时依赖与 pack 仓缺陷（C-46）且均有具体绕路步骤」；插件 3 件真跑真 artifact（expression-qc/deg-standardizer/volcano-plot）；MCP stdio 真实握手 21 工具；矩阵=acceptance/block-352/shelf-matrix.json；契约测试 5/5 含负测。采集期抓真=技能双契约形态（skill.json 非仅 SKILL.md）。**下一包=BLOCK-353**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-05（🔵 **BLOCK-352 扩展生态可用性核对 启动登记（active；总纲包 5/7）**：三货架=技能（内置+pack）/插件（pack 7 件逐件真跑=真实动作证据）/MCP（server 工具面 stdio smoke + 客户端货架如实记 0）。判定三态可用/需绕路（带具体步骤）/空壳（处置三选一留痕）。矩阵=block352-shelf-audit.mjs 机械生成；负测=造无判定条目判红。复核门 PASS。plan=docs/block-352-extension-shelf-audit-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-05（✅ **BLOCK-351 证据资产化 EAR→40% completed（总纲包 4/7）**：EAR=871/2013=43.3% 达标（口径冻结带时间戳；分母禁缩）；批次断言 24 目录 680 文件（历史形态校准两处=harness-loop .png 实为 JPEG 按内容魔数放行、.txt/.log 空=干净运行语义——历史证据不改写）；manifest 棘轮（builder 机械扫描）+ quality:ear 门入 closeout 16 门；负测 8/8。明细=acceptance/block-351/ear-snapshot.json。**下一包=BLOCK-352**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-05（🔵 **BLOCK-351 证据资产化 EAR→40% 启动登记（active；总纲包 4/7）**：开工复核门 PASS。EAR 口径冻结=分子=acceptance/ 文件被 impact-map 规则匹配 ∧ 被 *.test.mjs 源码字面引用；分母=acceptance/ 全部文件（排除 README）；机制=builder 机械扫描生成 manifest（防手写虚标）+ quality:ear manifest 完整性门；负测=删 impact-map 引用→漂移判红。plan=docs/block-351-evidence-assetization-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 
 
