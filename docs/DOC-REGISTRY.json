@@ -9620,7 +9620,7 @@
       "capability": "block-356-task-suite-v2",
       "path": "docs/block-356-task-suite-v2-plan.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-356-task-suite-v2",
       "entrypoint": "docs/README.md",
@@ -9645,7 +9645,7 @@
         "test/knip-baseline.json",
         "eslint-suppressions.json"
       ],
-      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。通用任务套件 v2。依据 docs/next-tasks-2026-11-05.md。"
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。通用任务套件 v2。依据 docs/next-tasks-2026-11-05.md。 | 2026-11-05 收口：v2 判据表独立（348 零改动）+ runner 通用 file_contains_any；T3 双语内容等价物判据全过；两次全套 8 任务复跑 7/8（0 干预），剩余 T6 口令波动如实登记不宣称 8/8；headless 浏览器链复核发现诚实降级已存在故不改产品代码。报告=docs/block-356-suite-v2-report.md。"
     },
     {
       "id": "BLOCK-357",
@@ -9727,8 +9727,25 @@
         "G0"
       ],
       "notes": "C-45 收口报告：根因=三档贪心拆链 + age 升序倒置；三层修复；T7 冻结场景复跑 completed。"
+    },
+    {
+      "id": "BLOCK-356-SUITE-V2-REPORT",
+      "path": "docs/block-356-suite-v2-report.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "block-356-report",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-356",
+        "task-suite",
+        "G0"
+      ],
+      "notes": "通用任务套件 v2 收口报告：判据双语内容等价物、两次全套复跑 7/8、T6 波动如实登记。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 484
+  "documentCount": 485
 }

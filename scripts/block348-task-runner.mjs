@@ -191,6 +191,14 @@ function evaluateCustomCriterion(c, ctx) {
         ? `${c.path} 含全部 ${c.values.length} 项标记`
         : `${c.path} 缺 ${missing.length}/${c.values.length} 项（如 ${missing.slice(0, 3).join(',')}）`);
     }
+    case 'file_contains_any': {
+      const abs = findWorkspaceFile(ctx.tmpDir, c.path);
+      const content = abs ? fs.readFileSync(abs, 'utf8') : null;
+      const hits = content === null ? [] : (c.values || []).filter((v) => content.includes(v));
+      return result(hits.length > 0, hits.length > 0
+        ? `${c.path} 命中双语内容等价物：${hits.slice(0, 3).join(',')}`
+        : `${c.path} 未命中任一内容等价物（${(c.values || []).slice(0, 3).join(',')}…）`);
+    }
     case 'file_min_length': {
       const abs = findWorkspaceFile(ctx.tmpDir, c.path);
       if (!abs) return result(false, `文件不存在：${c.path}`);

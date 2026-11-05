@@ -1,0 +1,541 @@
+{
+  "$meta": {
+    "package": "BLOCK-348",
+    "program": "docs/next-phase-program-2026-11-05.md",
+    "criteriaFrozenAt": "2026-11-05T08:42:00Z",
+    "frozenNote": "BLOCK-356 v2 判据表：相对 348 冻结表仅改 t3 一条（原英文原句→双语内容等价物），并在 customCriteriaKinds 登记 file_contains_any；其余七任务判据逐字不变。新旧对照见 docs/block-356-suite-v2-report.md。",
+    "provider": "real（隔离后端 + 本机凭据库回落；evals-harness spawnIsolatedBackend mode=real）",
+    "accessModeAll": "full",
+    "interventionPolicy": {
+      "mode": "auto-approve-and-record",
+      "maxPerTask": 20,
+      "note": "headless 实测无真人；每个 dynamic_guard 审批请求=1 个「人工干预点」，runner 按预登记策略自动放行并逐条记录（审批=会话中真人需介入的点位）。"
+    },
+    "customCriteriaKinds": {
+      "tool_output_contains": "任一 tool_result（tool 指定）输出含 value（used by t1）",
+      "file_unmodified": "workspace 相对路径文件 sha256 与种子一致（used by t1：测试与 package.json 未被改动）",
+      "min_tool_calls": "全程 tool_call 事件总数 ≥ min（used by t7）",
+      "file_contains_all": "文件含 values 数组中每一个子串（used by t7）",
+      "file_min_length": "文件存在且字符数 ≥ min（used by t5）",
+      "file_contains_any": "文件含 values 数组中任一个子串（双语内容等价物，used by t3）"
+    },
+    "metrics": {
+      "autonomousCompletionRate": "status=completed 且 criteria 全过 的任务数 / 8（环境不可得任务如实单列，仍计入分母）",
+      "interventionCount": "各任务干预点（dynamic_guard 审批请求）次数合计（机械，来自事件轨迹）",
+      "toolSelectReasonableness": "各任务 toolSelectJudge 勾选是 / 总项（人眼判据，逐项带轨迹指针）",
+      "artifactUsability": "各任务 artifactJudge 勾选是 / 总项（人眼判据，逐项带产物证据指针）",
+      "interruptedVsFailed": "超时/步数耗尽=interrupted（中断）；任务 error 事件=faild（失败）；两者分开统计"
+    },
+    "environmentNotes": [
+      "web 访问：runner 预写 tmpDir/web-search.json enabled=true；web_search 后端未配置（provider=none）属预期，t3 以 web_fetch 为准，代理不得把 web_search_not_configured 解读为「网上没有」。",
+      "t7 压缩场景：runner 对该任务把 ai-settings.json 的 model_profiles[evals-provider].contextWindow 覆写为 20000（预设窗口是产品支持配置轴，非放宽检测口径；目的是让 30+ 步任务确定性触达熔断线）。",
+      "t4 浏览器：连接器传输桥依赖桌面 BrowserPanel webview，且环回/私网地址被 web-fetch-policy 硬拒——headless 隔离后端预计环境不可得；判据仍按能力口径写死，结果如实呈现。"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "t1-code-bugfix",
+      "title": "代码：含 bug 小仓库定位+修复+跑测试证明",
+      "domain": "code",
+      "prompt": "工作区是一个小仓库，测试套件当前有失败的测试。请：①先运行测试看到失败；②定位原因并修复源码（只许改 src/ 目录，不许改 test/ 与 package.json）；③再运行测试证明全部通过。最后汇报你改了什么、为什么。",
+      "accessMode": "full",
+      "timeoutMs": 360000,
+      "seedWorkspace": [
+        {
+          "path": "package.json",
+          "content": "{\n  \"name\": \"calc-repo\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test test/\"\n  }\n}\n"
+        },
+        {
+          "path": "src/calc.js",
+          "content": "export function sum(items) {\n  return items.reduce((a, b) => a + b, 0);\n}\n\nexport function average(items) {\n  // 均值：当前实现把结果向下取整（bug）\n  if (items.length === 0) return 0;\n  return Math.floor(sum(items) / items.length);\n}\n\nexport function maxPair(a, b) {\n  return a > b ? a : b;\n}\n"
+        },
+        {
+          "path": "test/calc.test.mjs",
+          "content": "import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { sum, average, maxPair } from '../src/calc.js';\n\ntest('sum', () => {\n  assert.equal(sum([1, 2, 3]), 6);\n});\n\ntest('average keeps precision', () => {\n  assert.equal(average([1, 2]), 1.5);\n});\n\ntest('maxPair', () => {\n  assert.equal(maxPair(3, 7), 7);\n});\n"
+        }
+      ],
+      "expectedArtifacts": [
+        "src/calc.js"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_exec",
+          "minTimes": 2
+        },
+        {
+          "kind": "tool_output_contains",
+          "tool": "workspace_exec",
+          "value": "pass 3"
+        },
+        {
+          "kind": "file_unmodified",
+          "path": "test/calc.test.mjs"
+        },
+        {
+          "kind": "file_unmodified",
+          "path": "package.json"
+        }
+      ],
+      "toolSelectJudge": [
+        "先跑测试看到失败输出后再动源码（事件轨迹中 workspace_exec 失败运行早于首次 workspace_write/workspace_replace）",
+        "读源码用 workspace_read 而非 exec cat/sed 直灌（存在 workspace_read 调用且先于修复）",
+        "修复后重跑同一测试命令验证（第二次 workspace_exec 在修改之后）",
+        "未用破坏性手段（如直接重写整个测试文件、rm -rf）"
+      ],
+      "artifactJudge": [
+        "src/calc.js 的修改仅限于 average 的取整行为（sum/maxPair 未被顺手改动）",
+        "最终 node --test 输出 3 项全过（pass 3）"
+      ]
+    },
+    {
+      "id": "t2-data-cleaning",
+      "title": "数据：脏 CSV 清洗+出图+结论",
+      "domain": "data",
+      "prompt": "工作区 data/reads_dirty.csv 是一份 40 行的传感器读数（含表头）。请：①清洗——剔除重复行、剔除 reading 非数值（n/a 或空）的行，日期统一为 YYYY-MM-DD 格式，产出 data/cleaned.csv；②用纯 HTML+内联 SVG 画「按月汇总（每月条数或读数总和）」的柱状图 out/chart.html，不引外部 CDN，坐标轴要标注月份；③写 out/summary.md：清洗前后各多少行、峰值月份是哪个月、一句话结论。",
+      "accessMode": "full",
+      "timeoutMs": 480000,
+      "seedWorkspace": [
+        {
+          "path": "data/reads_dirty.csv",
+          "content": "date,site,reading\n2025-01-05,north,34\n2025-01-08,south,27\n2025-01-12,north,34\n2025-01-15,east,41\n2025-01-19,south,n/a\n2025-01-22,north,38\n2025-01-12,north,34\n2025-01-26,east,45\n2025-01-28,south,\n2025-01-30,north,29\n2025-02-02,south,31\n2025/02/09,south,22\n2025-02-11,north,40\n2025-02-14,east,n/a\n2025-02-17,south,36\n2025-02-20,north,44\n2025-02-23,east,\n2025-02-25,south,28\n2025-01-12,north,34\n2025-02-28,north,39\n2025-03-02,east,92\n2025-03-04,north,105\n2025-03-7,north,95\n2025-03-09,south,110\n2025-03-12,east,88\n2025-03-15,north,118\n2025-03-18,south,101\n2025-03-21,east,97\n2025-03-24,north,123\n2025-03-27,south,94\n2025-03-29,east,109\n2025-03-31,north,116\n2025-04-02,south,25\n2025/04/3,east,18\n2025-04-06,north,35\n2025-04-10,east,21\n2025-04-14,south,42\n2025-04-18,east,n/a\n2025-04-22,south,30\n2025-04-26,north,37\n"
+        }
+      ],
+      "expectedArtifacts": [
+        "data/cleaned.csv",
+        "out/chart.html",
+        "out/summary.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "file_contains",
+          "path": "data/cleaned.csv",
+          "value": "2025-03-07"
+        },
+        {
+          "kind": "file_contains",
+          "path": "data/cleaned.csv",
+          "value": "2025-02-09"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/chart.html",
+          "value": "<svg"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/chart.html",
+          "value": "2025-03"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/summary.md",
+          "value": "33"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "33"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_write",
+          "minTimes": 2
+        }
+      ],
+      "toolSelectJudge": [
+        "动手前先 workspace_read 原始 CSV 确认脏数据形态",
+        "清洗用脚本/命令（workspace_exec 跑 node/awk 等）或一次性 write 完成，而非手敲 33 行",
+        "图表为纯内联 SVG/HTML，未引入外部依赖"
+      ],
+      "artifactJudge": [
+        "cleaned.csv 恰 33 行数据 + 表头；无 n/a、无空 reading、无重复行；日期全部 YYYY-MM-DD",
+        "chart.html 浏览器可打开、柱状图有 2025-01..04 四个月份刻度且 3 月柱最高（数据自洽）",
+        "summary.md 数字与 cleaned.csv 一致（33）且峰值月=2025-03"
+      ]
+    },
+    {
+      "id": "t3-research-cited",
+      "title": "研究：联网抓取指定主题带引用报告",
+      "domain": "research",
+      "prompt": "请联网调研「保留域名（reserved domains）」这个主题：用抓取工具读取 https://example.com 与 https://www.iana.org/domains/reserved 两个页面（可按需再抓你认为必要的其他公开页面），写 out/report.md：每个来源一节，含来源 URL、3 句以内要点摘述、引用标记 [1][2]…；最后一段用 3 句说明你如何核对不同来源信息的一致性。注意：检索类工具若返回 web_search_not_configured 属后端未配置，不代表内容不存在，改用抓取工具即可。",
+      "accessMode": "full",
+      "timeoutMs": 480000,
+      "seedWorkspace": [],
+      "expectedArtifacts": [
+        "out/report.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "tool_used",
+          "name": "web_fetch",
+          "minTimes": 2
+        },
+        {
+          "kind": "file_contains_any",
+          "path": "out/report.md",
+          "values": [
+            "illustrative",
+            "example",
+            "示例",
+            "举例",
+            "例如",
+            "示例说明"
+          ],
+          "note": "BLOCK-356：把「英文原句逐字在场」改为双语内容等价物（任一在场即过）；iana.org / [1] / 来源 等引用判据不变，未降低引用要求"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/report.md",
+          "value": "iana.org"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/report.md",
+          "value": "[1]"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "来源"
+        }
+      ],
+      "toolSelectJudge": [
+        "用 web_fetch 抓取两个指定源（而非把 URL 编造进报告）",
+        "若 web_search 返回 not_configured，未反复重试检索、未误判「内容不存在」（轨迹中无 >3 次连续 web_search）",
+        "报告里的引用 URL 与轨迹中实际抓取的 URL 一致"
+      ],
+      "artifactJudge": [
+        "report.md 两个来源各有要点摘述且与页面正文相符（example.com 的示例域说明 / iana 保留域清单）",
+        "引用标记 [1][2] 与来源节对应，可回溯",
+        "末段一致性核对说明具体（提到交叉核对动作而非空话）"
+      ]
+    },
+    {
+      "id": "t4-browser-action",
+      "title": "操作：可控页面上完成一次浏览器具体动作",
+      "domain": "browser",
+      "prompt": "请连接浏览器，导航到 https://example.com ，读取页面文本并向我汇报页面标题与正文第一句。",
+      "accessMode": "full",
+      "timeoutMs": 300000,
+      "seedWorkspace": [],
+      "expectedArtifacts": [],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_connect",
+          "minTimes": 1
+        },
+        {
+          "kind": "tool_used",
+          "name": "browser_act",
+          "minTimes": 1
+        }
+      ],
+      "toolSelectJudge": [
+        "先 browser_connect 再 browser_act（顺序正确）",
+        "动作在白名单内（navigate / read_text），未越权",
+        "失败后行为合理（结构化拒绝时未无限重试，向用户如实转述）"
+      ],
+      "artifactJudge": [
+        "最终答复里出现了 example.com 页面的标题（Example Domain）或正文第一句",
+        "若环境不可得：答复如实转述结构化错误原因，未编造页面内容"
+      ],
+      "environmentUnavailableRule": "browser_act 返回结构化错误（transport 桥缺失 / browser_not_connected / web_url_private_host 等）且本 headless 后端无 BrowserPanel webview 传输桥时，判「环境不可得」：单独标注，不计为 agent 能力失败；轨迹与错误码如实留痕。"
+    },
+    {
+      "id": "t5-docs-structuring",
+      "title": "文档：散乱笔记→结构化手册+摘要",
+      "domain": "docs",
+      "prompt": "工作区 notes/ 下有 6 个散乱的笔记文件。请通读全部笔记，整理为 out/handbook.md：分三节——「背景与决策」「当前任务」「待办清单」，每节开头一句概述，笔记中的关键信息不得丢失或编造；最后写 out/summary.txt，用不超过 5 句话概括全部内容。",
+      "accessMode": "full",
+      "timeoutMs": 480000,
+      "seedWorkspace": [
+        {
+          "path": "notes/meeting-1014.md",
+          "content": "# 1014 周会摘记\n\n团队周会，半小时。\n- 北极星指标代号 QMA-3 已定稿，下周同步给全员。\n- 数据组反映导出链路慢，先记录不排期。\n- 下周三前各小组交 OKR 草稿。\n"
+        },
+        {
+          "path": "notes/meeting-1021.md",
+          "content": "# 1021 技术评审\n\n评审存储方案。\n- 决定：采用 SQLite 单库方案，理由是运维成本低、事务可靠。\n- 反对意见：并发写场景需要再评估，留到下季度。\n- 行动项：写一份迁移风险清单（负责人未定）。\n"
+        },
+        {
+          "path": "notes/scratch-todo.md",
+          "content": "随手记\n\n- 交付 0.0.2 前补回归测试\n- 联系供应商询价（周五前）\n- 报销上个月差旅\n- 把服务器日志保留期从 7 天改 30 天\n"
+        },
+        {
+          "path": "notes/decision-cache.md",
+          "content": "# 决策记录：缓存策略\n\n日期：1020。\n结论：读缓存 TTL 定为 15 分钟（代号 TTL-15），写操作直穿。\n复核条件：命中率低于 60% 时重审。\n"
+        },
+        {
+          "path": "notes/interview-notes.md",
+          "content": "# 用户访谈片段\n\n周三访谈了三位客户。\n- 三位都提到导出慢是首要痛点（与 1014 周会数据组反映一致）。\n- 一位希望有命令行入口。\n- 访谈-3：付费意愿与「报表一键出」强相关。\n"
+        },
+        {
+          "path": "notes/random-thoughts.md",
+          "content": "碎念\n\n- 把报告页改成单列布局试试。\n- 新同事入职引导文档好像还没写。\n- 机房空调 25 度是不是太高了？\n"
+        }
+      ],
+      "expectedArtifacts": [
+        "out/handbook.md",
+        "out/summary.txt"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_read",
+          "minTimes": 5
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "背景与决策"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "当前任务"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "待办"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "QMA-3"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "SQLite"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/handbook.md",
+          "value": "TTL-15"
+        },
+        {
+          "kind": "file_min_length",
+          "path": "out/summary.txt",
+          "min": 80
+        }
+      ],
+      "toolSelectJudge": [
+        "6 个笔记逐个 workspace_read（或 list 后全部读到），未凭文件名臆测内容",
+        "先读后写：全部/多数读调用早于 handbook 写入"
+      ],
+      "artifactJudge": [
+        "handbook.md 三节齐全、每节开头有概述句",
+        "抽查 4 个独特信息都在：QMA-3、SQLite、TTL-15、导出慢（访谈与周会两处呼应）",
+        "无编造内容（出现的具体数字/代号都能在源笔记找到）",
+        "summary.txt ≤5 句且覆盖三节主旨"
+      ]
+    },
+    {
+      "id": "t6-multi-agent",
+      "title": "多 agent：并行探索 3 方向后汇总",
+      "domain": "orchestration",
+      "prompt": "工作区 topics/ 下有三个调研方向文件（a.md、b.md、c.md）。请派出 3 个子代理并行工作：每个子代理读一个方向文件并返回 100 字以内要点。全部返回后，把三份要点汇总为 out/synthesis.md：分三节，每节含该方向要点与来源标记（A/B/C 对应三个文件）。不要自己代读代替子代理工作。",
+      "accessMode": "full",
+      "timeoutMs": 720000,
+      "seedWorkspace": [
+        {
+          "path": "topics/a.md",
+          "content": "# 方向A：缓存策略调研\n\n要点（标记 QED-11）：本地命中优先——读请求先查本地缓存，未命中再回源；TTL 15 分钟；命中率目标 60%，低于则触发重审。\n"
+        },
+        {
+          "path": "topics/b.md",
+          "content": "# 方向B：任务调度调研\n\n要点（标记 HILBERT-4）：公平队列——按项目维度隔离配额，长任务切片运行；抢占阈值 80%；超时任务进入降级通道而不是直接丢弃。\n"
+        },
+        {
+          "path": "topics/c.md",
+          "content": "# 方向C：评测方法调研\n\n要点（标记 TURING-9）：双盲评分——评审判据先冻结后跑；同一任务两次独立采样；分数只做相对比较，不设绝对达标线。\n"
+        }
+      ],
+      "expectedArtifacts": [
+        "out/synthesis.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "subagent_completed",
+          "minTimes": 3
+        },
+        {
+          "kind": "tool_used",
+          "name": "spawn_agent",
+          "minTimes": 1
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "QED-11"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "HILBERT-4"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/synthesis.md",
+          "value": "TURING-9"
+        }
+      ],
+      "toolSelectJudge": [
+        "用 spawn_agent 派出子代理（而非主代理自己把三个文件读完代替子代理）",
+        "子代理指令与文件一一对应（A→a.md，B→b.md，C→c.md）",
+        "收齐三份要点后才写汇总（wait/收齐语义在轨迹可见）"
+      ],
+      "artifactJudge": [
+        "synthesis.md 三节齐全且有 A/B/C 来源标记",
+        "三份要点与源文件实质一致（命中率 60%、公平队列 80%、判据先冻结等关键点在位）",
+        "无编造（要点内容可回溯到源文件）"
+      ]
+    },
+    {
+      "id": "t7-long-haul",
+      "title": "长任务：30+ 步、中途触发上下文压缩、验保持",
+      "domain": "endurance",
+      "prompt": "【口令 ORCHID-42】工作区 ledger/ 下有 20 份远征日志（seq-01.md 到 seq-20.md）。请按文件名顺序阅读全部 20 份日志（不得跳读或抽样），在 out/notes/ 下为每份日志写一个同名要点文件（seq-01.md 到 seq-20.md，每个一句话）。全部完成后写 out/final-report.md，必须包含：①口令原文；②20 份日志中形如 FACT-XXX 的标记编号完整清单（按顺序，每行一个）；③三句以内总结日志文风的演变。",
+      "accessMode": "full",
+      "timeoutMs": 2700000,
+      "windowOverride": 20000,
+      "seedGenerator": "ledger20",
+      "seedWorkspace": [],
+      "expectedArtifacts": [
+        "out/final-report.md",
+        "out/notes/seq-01.md",
+        "out/notes/seq-20.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "min_tool_calls",
+          "min": 35
+        },
+        {
+          "kind": "event_present",
+          "event": "context_compacted"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/final-report.md",
+          "value": "ORCHID-42"
+        },
+        {
+          "kind": "file_contains_all",
+          "path": "out/final-report.md",
+          "values": [
+            "FACT-003",
+            "FACT-006",
+            "FACT-009",
+            "FACT-012",
+            "FACT-015",
+            "FACT-018",
+            "FACT-021",
+            "FACT-024",
+            "FACT-027",
+            "FACT-030",
+            "FACT-033",
+            "FACT-036",
+            "FACT-039",
+            "FACT-042",
+            "FACT-045",
+            "FACT-048",
+            "FACT-051",
+            "FACT-054",
+            "FACT-057",
+            "FACT-060"
+          ]
+        }
+      ],
+      "toolSelectJudge": [
+        "按顺序或分批读完全部 20 份（未跳读：final-report 的 FACT 清单与种子一一对应可证）",
+        "要点文件逐份写（out/notes/ 下 20 个文件都在）",
+        "长程推进中有节奏（未在早期把全部内容一次性塞进单条答复）"
+      ],
+      "artifactJudge": [
+        "final-report.md 含口令 ORCHID-42（跨压缩保持的证据）",
+        "FACT 清单 20 项齐全且顺序正确",
+        "out/notes/ 20 个要点文件各一句话、与对应日志内容对应"
+      ]
+    },
+    {
+      "id": "t8-self-verify",
+      "title": "自我验证陷阱：易错点上看是否核验自己的产物",
+      "domain": "robustness",
+      "prompt": "工作区 inventory.csv 记录了各 category 的 count。请统计每个 category 的 count 总和，把结果写到 out/totals.md，每行格式「category <合计>」。数据可能有瑕疵——你的结果要站得住。写完后在最终答复里说明你是如何确认数字可靠的。",
+      "accessMode": "full",
+      "timeoutMs": 480000,
+      "seedWorkspace": [
+        {
+          "path": "inventory.csv",
+          "content": "category,count\nalpha,12\nbeta,10\nalpha,9\ngamma,4\nalpha,8\nTOTAL,9999\nbeta,6\nalpha,7\ngamma,20\nalpha,11\nbeta,15\ndelta,1O5\n"
+        }
+      ],
+      "expectedArtifacts": [
+        "out/totals.md"
+      ],
+      "criteria": [
+        {
+          "kind": "task_completed"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "47"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "31"
+        },
+        {
+          "kind": "file_contains",
+          "path": "out/totals.md",
+          "value": "24"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_exec",
+          "minTimes": 1
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "alpha"
+        }
+      ],
+      "toolSelectJudge": [
+        "对原始数据有检视动作（read 全文或脚本扫描），不是只取列求和",
+        "用脚本/命令独立重算过（workspace_exec 在产物写入前后有核验语义）",
+        "对可疑行（非法数值、非类别行）有显式处理说明"
+      ],
+      "artifactJudge": [
+        "totals.md 三行合计与真值一致：alpha 47 / beta 31 / gamma 24",
+        "伪合计行 TOTAL 9999 未计入任一合计，且在答复或产物中被识别剔除",
+        "非法值 1O5（字母 O）被识别并排除，delta 未作为有效类别出现（或显式说明剔除原因）",
+        "最终答复里有可核验的复核动作描述（脚本重算/二次校验），而非只说「我检查过了」"
+      ]
+    }
+  ]
+}

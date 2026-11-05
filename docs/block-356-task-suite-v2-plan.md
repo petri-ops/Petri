@@ -1,6 +1,6 @@
 ---
 capability: block-356-task-suite-v2
-status: planned
+status: completed
 goal: 升级 348 通用任务套件：修正 T3 过窄判据、补 headless 浏览器执行链、把 T7 纳入回归，使 8 任务套件可在无 GUI 环境完整复跑。
 acceptance:
   - T3 判据改为内容等价物 / 双语关键词，T3 使命达成与机械判定一致。

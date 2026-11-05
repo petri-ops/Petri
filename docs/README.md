@@ -15,7 +15,8 @@
 344. [`next-batch-program-2026-11-05.md`](./next-batch-program-2026-11-05.md) — 2026-11-05 **reference（第二批一次性编排）**：4 个串行 BLOCK（355 C-45 裁剪原子性 / 356 任务套件 v2 / 357 货架 detour+能力地图 / 358 文件树分页归因），统一 9 步执行协议 + 进度台账；三项客观排除=C-46 pack 仓不在工作区 / G1 需显式发令 / O-1 人工观感；批量开工授权已给，中间不逐项确认
 349. [`block-355-report.md`](./block-355-report.md) — 2026-11-05 **reference（BLOCK-355 收口报告）**：C-45 三层修复 + T7 冻结场景复跑 completed（49 工具调用 / 压缩触发 / 20 项标记全收 / 干预 0）；契约 6/6 含负测、回归 19/19
 345. [`block-355-context-trimmer-atomicity-plan.md`](./block-355-context-trimmer-atomicity-plan.md) — 2026-11-05 **completed（C-45 已修：T7 复跑 completed；报告=docs/block-355-report.md）** · 原 planned（第二批，自动推进）**：上下文裁剪原子性（C-45）（P0）；范围/非范围/验收/门禁/风险/DoD 见计划
-346. [`block-356-task-suite-v2-plan.md`](./block-356-task-suite-v2-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：通用任务套件 v2（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
+350. [`block-356-suite-v2-report.md`](./block-356-suite-v2-report.md) — 2026-11-05 **reference（BLOCK-356 收口）**：v2 判据表独立 + runner 新增 file_contains_any；T3 双语判据全过；两次全套复跑 7/8（0 干预），T6 口令波动如实登记不宣称 8/8；headless 降级复核已存在故不改产品代码
+346. [`block-356-task-suite-v2-plan.md`](./block-356-task-suite-v2-plan.md) — 2026-11-05 **completed（报告=docs/block-356-suite-v2-report.md）** · 原 planned（第二批，自动推进）**：通用任务套件 v2（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
 347. [`block-357-shelf-and-capability-map-plan.md`](./block-357-shelf-and-capability-map-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：货架 detour 与能力地图（P1）；范围/非范围/验收/门禁/风险/DoD 见计划
 348. [`block-358-filetree-pagination-plan.md`](./block-358-filetree-pagination-plan.md) — 2026-11-05 **planned（第二批，自动推进）**：文件树分页归因（C-47）（P2）；范围/非范围/验收/门禁/风险/DoD 见计划
 343. [`next-tasks-2026-11-05.md`](./next-tasks-2026-11-05.md) — 2026-11-05 **reference（C-48 更新后精准任务卡）**：修订 11-05 早版评估两处偏差（quality:perf 波动非稳定红 / C-48 已销号），去重后精准任务 8 项，A 组需发令 4 项（C-45 P1 / C-46 pack 授权 / G1 裁决 / C-47 人工归因）、B 组可执行 3 项（348 套件 v2 / 4 个 detour / 用户向能力地图）、C 组人工观察 1 项（屏幕观感）；每项含精确文件·验收·命令·发令句式
