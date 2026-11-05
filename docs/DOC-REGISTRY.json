@@ -9565,8 +9565,153 @@
         "post-C48"
       ],
       "notes": "2026-11-05 C-48 更新后复核的精准任务卡（HEAD a8796ed7）。修订 11-05 早版评估两处偏差：quality:perf 非稳定红（当次 4 绿 / closeout PASS 16 门，属波动）→ T-2 降级 J-1；C-48 打包 GUI 断链已销号 → T-4 移出。当前精准任务 8 项：A 组需发令/授权 4 项（A-1 C-45 P1 压缩 tool 配对 / A-2 C-46 pack 仓授权 / A-3 G1 裁决 / A-4 C-47 需人工归因）；B 组本仓可执行 3 项（B-1 348 套件 v2 / B-2 四个 detour / B-3 用户向能力地图）；C 组人工观察 1 项（O-1 屏幕观感与点击体感）。每项写死启动条件、精确文件、动作、验收、命令、体量。单一建议=先发 BLOCK-355 开整（C-45）。"
+    },
+    {
+      "id": "NEXT-BATCH-PROGRAM-2026-11-05",
+      "path": "docs/next-batch-program-2026-11-05.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "next-batch-program-2026-11-05",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "batch-program",
+        "G0",
+        "auto-advance"
+      ],
+      "notes": "2026-11-05 第二批一次性编排（用户「有几个 block 要做，一次性安排好，逐个推完，中间不用问我意见」）。4 个串行包 355→358；三项客观排除=C-46 pack 仓（兄弟仓不在工作区）/ G1 启动（需显式发令）/ O-1 屏幕观感（人工）。含统一执行协议 9 步与进度台账。"
+    },
+    {
+      "id": "BLOCK-355",
+      "capability": "block-355-context-trimmer-atomicity",
+      "path": "docs/block-355-context-trimmer-atomicity-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-355-context-trimmer-atomicity",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "batch-2026-11-05",
+        "P0",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/block-355/**",
+        "scripts/block355-*",
+        "test/block355-*",
+        "docs/block-355-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。上下文裁剪原子性（C-45）。依据 docs/next-tasks-2026-11-05.md。"
+    },
+    {
+      "id": "BLOCK-356",
+      "capability": "block-356-task-suite-v2",
+      "path": "docs/block-356-task-suite-v2-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-356-task-suite-v2",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "batch-2026-11-05",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/block-356/**",
+        "scripts/block356-*",
+        "test/block356-*",
+        "docs/block-356-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。通用任务套件 v2。依据 docs/next-tasks-2026-11-05.md。"
+    },
+    {
+      "id": "BLOCK-357",
+      "capability": "block-357-shelf-and-capability-map",
+      "path": "docs/block-357-shelf-and-capability-map-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-357-shelf-and-capability-map",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "batch-2026-11-05",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/block-357/**",
+        "scripts/block357-*",
+        "test/block357-*",
+        "docs/block-357-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。货架 detour 与能力地图。依据 docs/next-tasks-2026-11-05.md。"
+    },
+    {
+      "id": "BLOCK-358",
+      "capability": "block-358-filetree-pagination",
+      "path": "docs/block-358-filetree-pagination-plan.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "block-358-filetree-pagination",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-05",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "batch-2026-11-05",
+        "P2",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/block-358/**",
+        "scripts/block358-*",
+        "test/block358-*",
+        "docs/block-358-*.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/functional-surface-baseline.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json"
+      ],
+      "notes": "2026-11-05 立项 planned（第二批总纲，批量开工授权已给，逐包自动推进不逐项确认）。文件树分页归因（C-47）。依据 docs/next-tasks-2026-11-05.md。"
     }
   ],
   "lastUpdated": "2026-11-04",
-  "documentCount": 478
+  "documentCount": 483
 }

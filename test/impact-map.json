@@ -7454,6 +7454,21 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "batch-355-358-artifacts",
+      "note": "2026-11-05 第二批 4 包证据目录预登记（仅 acceptance 目录，各包新增 scripts/test 文件在开工时按总纲 §3 自行登记）",
+      "patterns": [
+        "acceptance/batch-2026-11-05/**",
+        "acceptance/block-355/**",
+        "acceptance/block-356/**",
+        "acceptance/block-357/**",
+        "acceptance/block-358/**"
+      ],
+      "tests": [],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }
