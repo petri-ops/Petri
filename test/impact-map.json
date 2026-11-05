@@ -7436,6 +7436,24 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block354-g0-exit-criteria",
+      "note": "BLOCK-354 G0→G1 出籍判据：readiness 复算脚本+负测契约。改判据表或证据路径时跑本包测试。",
+      "patterns": [
+        "scripts/block354-*.mjs",
+        "test/block354-*.test.mjs",
+        "acceptance/block-354/**",
+        "docs/block-354-*.md"
+      ],
+      "tests": [
+        "test/block354-readiness.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

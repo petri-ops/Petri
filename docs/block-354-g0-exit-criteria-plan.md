@@ -1,6 +1,6 @@
 ---
 capability: block-354-g0-exit-criteria
-status: planned
+status: completed
 goal: 把「G0 什么时候算收尾」从模糊状态写成客观、可机械判定的条件表，并输出当前出籍就绪度；未达标前明确宣称红线。
 acceptance:
   - 判据表 6 项各有：达标条件、证据路径、判定命令、不可达标时的替代判据。
@@ -12,7 +12,7 @@ reopen: G1 启动本身；真实 Provider 矩阵 / 生态市场 / i18n / hooks �
 
 # BLOCK-354 — G0 → G1 出籍判据（计划）
 
-- 登记状态：**planned（2026-11-05 立项，逐包发令开工）**
+- 登记状态：**completed（2026-11-05 当日收口）**——就绪度 6/6 达标（脚本复算）；报告=docs/block-354-readiness-report.md；**G1 启动仍需用户显式发令**
 - 总纲：`docs/next-phase-program-2026-11-05.md`
 - 依据：`docs/Petri-Desktop-Evaluation-Report-2026-11-04.md` §2 / §5 P2；`docs/g0-agent-maturity-blueprint.md`
 - 阶段边界：**G0 开发期常态 · 不外推 packaged / Provider / GA**

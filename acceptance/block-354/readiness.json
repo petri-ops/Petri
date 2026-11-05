@@ -1,0 +1,45 @@
+{
+  "at": "2026-11-05T02:33:17.144Z",
+  "criteriaFrozenAt": "2026-11-05（docs/block-354-g0-exit-criteria-plan.md §2）",
+  "readiness": "6/6",
+  "allPassed": true,
+  "redLine": "出籍就绪 ≠ 已出籍：未达 6/6 前不得表述 GA / Provider / 对外发布能力；6/6 达标后 G1 启动仍需用户显式发令。",
+  "criteria": [
+    {
+      "id": "universal-benchmark",
+      "ok": true,
+      "evidence": "acceptance/block-348/results.json",
+      "reason": "8/8 任务有终态，度量在场"
+    },
+    {
+      "id": "evidence-clearance",
+      "ok": true,
+      "evidence": "docs/block-349-clearance-report.md",
+      "reason": "A 类 13 条全终态（10 verified + 3 cancelled）"
+    },
+    {
+      "id": "perf-baseline",
+      "ok": true,
+      "evidence": "test/perf-baseline.json + package.json",
+      "reason": "四场景在案（含 packaged 补建）且 quality:perf 入 closeout"
+    },
+    {
+      "id": "evidence-assetization",
+      "ok": true,
+      "evidence": "acceptance/block-351/assetized-manifest.json",
+      "reason": "EAR = 43.3% ≥ 40%"
+    },
+    {
+      "id": "extension-shelf",
+      "ok": true,
+      "evidence": "acceptance/block-352/shelf-matrix.json",
+      "reason": "三货架 21 项全判定（无未处置空壳）"
+    },
+    {
+      "id": "packaged-regression",
+      "ok": true,
+      "evidence": "acceptance/block-353/packaged-regression.json",
+      "reason": "结构全过 + 四项健康 + T2 completed + 与 dev 一致"
+    }
+  ]
+}
