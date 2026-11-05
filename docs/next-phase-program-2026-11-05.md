@@ -220,7 +220,7 @@ npm run closeout
 | 351 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-351/（manifest+snapshot）+ docs/block351-ear-definition.md（EAR 43.3%） | 0/0（复核门） | 见收口笔录 | completed——批次断言 24 目录 680 文件；quality:ear 入 closeout 16 门；负测 8/8 |
 | 352 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-352/shelf-matrix.json + docs/block-352-shelf-report.md（契约测试 5/5） | 0/0（复核门） | **PASS（16 门）** | completed——21+2 全判定 17A/4D/0S；插件 3 件真跑真 artifact；判词修正=无空壳 |
 | 353 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-353/packaged-regression.json + docs/block-353-regression-report.md（结构契约 2/2） | 0/0（复核门） | **PASS（16 门）** | completed——两处打包阻断缺陷修复；四项健康全绿；T2 真跑一致；④ 补建 469ms 闭环 |
-| 354 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-354/readiness.json + docs/block-354-readiness-report.md（契约 6/6） | 0/0（复核门） | 见收口笔录 | completed——**就绪度 6/6 达标**；红线=出籍就绪≠已出籍，G1 需用户发令 |
+| 354 | 2026-11-05 | 2026-11-05 | 2026-11-05 | acceptance/block-354/readiness.json + docs/block-354-readiness-report.md（契约 6/6） | 0/0（复核门） | **PASS（16 门）** | completed——**就绪度 6/6 达标**；红线=出籍就绪≠已出籍，G1 需用户发令 |
 
 ---
 
