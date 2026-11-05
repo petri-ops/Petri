@@ -7514,15 +7514,13 @@
     },
     {
       "id": "block358-filetree-repro",
-      "note": "BLOCK-357/358 第二批脚本与契约（358 为预登记，避免 P6 源绑定二次重打）",
+      "note": "BLOCK-358 预登记（仅 patterns）：开工时新增测试由 test:changed「直接编辑的测试自动包含」机制覆盖，无需再改 impact-map / 重打 P6。",
       "patterns": [
         "scripts/block358-*.mjs",
         "test/block358-*.test.mjs",
         "docs/block-358-*.md"
       ],
-      "tests": [
-        "test/block358-filetree-repro.test.mjs"
-      ],
+      "tests": [],
       "commands": [
         "docs-check"
       ]
