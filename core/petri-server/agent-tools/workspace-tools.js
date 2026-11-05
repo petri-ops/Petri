@@ -708,6 +708,12 @@ function createWorkspaceTools(options = {}) {
       if (!stripped) return { ok: false, reason: 'command 不能为空' };
       return { ok: true, allowed: true, stripped };
     }
+    // BLOCK-346 后续裁决（2026-11-05，用户原话「不应该设置这些黑名单，后续模型会
+    // 成长出给行为合理的判断」）：这四条不再**默认静默拦截**。
+    // 改为：默认放行并把命中的风险以 riskWarnings 回传（可见、不静默）；需要恢复到
+    // 「硬拦」语义时设环境变量 PETRI_EXEC_STRICT_DENYLIST=1（运维/交付期可一键收紧，
+    // 不改代码）。档位约束（read 档不可执行）不在此列，仍由调用方前置判断。
+    const strictDenylist = process.env.PETRI_EXEC_STRICT_DENYLIST === '1';
     const nonNegotiableRisks = [
       {
         pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i,
@@ -726,8 +732,19 @@ function createWorkspaceTools(options = {}) {
         reason: '禁止下载远程内容后直接管道执行',
       },
     ];
-    const blocked = nonNegotiableRisks.find(({ pattern }) => pattern.test(normalized));
-    if (blocked) return { ok: false, reason: blocked.reason };
+    const hits = nonNegotiableRisks.filter(({ pattern }) => pattern.test(normalized));
+    if (strictDenylist) {
+      const blocked = hits[0];
+      if (blocked) return { ok: false, reason: blocked.reason };
+    }
+    // 默认路径：不拦，但把命中的风险回传 + 落一条可见日志（不静默）。
+    if (hits.length > 0) {
+      const warnings = hits.map((hit) => hit.reason);
+      try {
+        console.warn(`[workspace-exec] 风险提示（已放行；严格模式设 PETRI_EXEC_STRICT_DENYLIST=1 可恢复硬拦）：${warnings.join(' / ')}`);
+      } catch { /* 日志失败不影响执行 */ }
+      return { ok: true, riskWarnings: warnings };
+    }
     return { ok: true };
   }
 

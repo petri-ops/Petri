@@ -172,7 +172,9 @@ test('shell=cmd 在非 Windows 平台被拒绝', async () => {
   assert.equal(result.error, 'invalid_arguments');
 });
 
-maybeSkipShell('黑名单对携带 cwd/shell 的命令同样生效', async () => {
+maybeSkipShell('严格模式下黑名单对携带 cwd/shell 的命令同样生效', async () => {
+  process.env.PETRI_EXEC_STRICT_DENYLIST = '1';
+  try {
   for (const command of ['sudo ls', 'rm notes.md', 'git push origin main']) {
     const result = await tools.executeCommand(
       { command, cwd: 'data', shell: 'posix' },
@@ -182,6 +184,9 @@ maybeSkipShell('黑名单对携带 cwd/shell 的命令同样生效', async () =>
     assert.equal(result.error, 'command_blocked');
   }
   assert.equal(await fs.readFile(path.join(workspaceRoot, 'notes.md'), 'utf8'), '# Project\n');
+  } finally {
+    delete process.env.PETRI_EXEC_STRICT_DENYLIST;
+  }
 });
 
 maybeSkipShell('只读访问模式对 cwd/shell 组合同样拦截', async () => {

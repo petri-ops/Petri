@@ -522,7 +522,16 @@ maybeSkipShell('command handler requires full access even when called without th
   await assert.rejects(fs.access(path.join(workspaceRoot, 'read-mode-marker.txt')));
 });
 
-test('full access still rejects non-negotiable privilege, deletion, remote push, and pipe execution risks', async () => {
+test('默认不拦删除/提权类命令（用户裁决：不设黑名单），仅回传风险提示', async () => {
+  delete process.env.PETRI_EXEC_STRICT_DENYLIST;
+  // `rm --help` 命中 rm 风险正则但不产生删除副作用
+  const result = await tools.executeCommand({ command: 'rm --help >/dev/null 2>&1 || true' }, ctx);
+  assert.notEqual(result.error, 'command_blocked');
+});
+
+test('strict denylist mode still rejects privilege, deletion, remote push, and pipe execution risks', async () => {
+  process.env.PETRI_EXEC_STRICT_DENYLIST = '1';
+  try {
   const protectedFile = path.join(workspaceRoot, 'notes.md');
   const before = await fs.readFile(protectedFile, 'utf8');
   const commands = [
@@ -537,4 +546,7 @@ test('full access still rejects non-negotiable privilege, deletion, remote push,
     assert.equal(result.error, 'command_blocked');
   }
   assert.equal(await fs.readFile(protectedFile, 'utf8'), before);
+  } finally {
+    delete process.env.PETRI_EXEC_STRICT_DENYLIST;
+  }
 });

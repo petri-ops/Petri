@@ -186,11 +186,16 @@ maybeSkipShell('process_stop 信号链：SIGTERM 后收敛为 stopped，signal=S
   assert.equal(repeat.alreadyStopped, true);
 });
 
-test('黑名单对后台启动同样先行拦截', async () => {
+test('严格模式下黑名单对后台启动同样先行拦截', async () => {
+  process.env.PETRI_EXEC_STRICT_DENYLIST = '1';
+  try {
   for (const command of ['sudo ls', 'rm workspace', 'git push origin main']) {
     const result = await tools.execBackground({ command }, ctx);
     assert.equal(result.ok, false);
     assert.equal(result.error, 'command_blocked');
+  }
+  } finally {
+    delete process.env.PETRI_EXEC_STRICT_DENYLIST;
   }
 });
 

@@ -134,13 +134,19 @@ test('workspace_find / workspace_search ssh 分支', async () => {
   assert.ok(s.matches[0].path.includes('README.md'));
 });
 
-test('workspace_exec ssh 分支：shell 标注 ssh:bash + 命令黑名单同门（rm 拒绝）', async () => {
+test('workspace_exec ssh 分支：shell 标注 ssh:bash + 严格模式下黑名单同门（rm 拒绝）', async () => {
   const r = await tools.executeCommand({ command: 'ls -la' }, sshCtx);
   assert.strictEqual(r.ok, true);
   assert.strictEqual(r.shell, 'ssh:aliyun/bash');
   assert.strictEqual(r.stdout, 'ran:ls -la');
-  const blocked = await tools.executeCommand({ command: 'rm -rf /' }, sshCtx);
-  assert.strictEqual(blocked.code, 'command_blocked');
+  // 2026-11-05 用户裁决：执行面黑名单默认放行；严格模式（env）恢复硬拦
+  process.env.PETRI_EXEC_STRICT_DENYLIST = '1';
+  try {
+    const blocked = await tools.executeCommand({ command: 'rm -rf /' }, sshCtx);
+    assert.strictEqual(blocked.code, 'command_blocked');
+  } finally {
+    delete process.env.PETRI_EXEC_STRICT_DENYLIST;
+  }
 });
 
 test('后台进程三件套 ssh 分支：exec_bg → status → stop', async () => {
