@@ -122,3 +122,6 @@ model3d/runs/
 
 # BLOCK-335 首批 lint 收缩的瞬态 worktree 容器
 .petri-b335-lint/
+
+# 运行时代理临时目录（agent 工具产生的中间截图/探针，不入库）
+.petri-agent-tmp/
