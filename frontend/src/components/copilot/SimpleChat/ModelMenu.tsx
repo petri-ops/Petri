@@ -32,6 +32,16 @@ interface ModelMenuProps {
   onClose: () => void;
   onPickSupplier: (group: ModelCatalogGroup) => void;
   onPickModel: (preset: ChatModelPreset) => void;
+  /**
+   * UI-MODELCFG-1 — 聊天输入框内直接切换模型的两项配置，减少「进设置页→找模型→改」
+   * 的操作层级：上下文窗口（写回当前模型档案）与思考强度（会话级，与 composer 按钮同源）。
+   */
+  contextWindow?: number;
+  contextWindowOptions?: number[];
+  onChangeContextWindow?: (next: number) => void;
+  thinkingLevel?: string;
+  thinkingLevelOptions?: string[];
+  onChangeThinkingLevel?: (next: string) => void;
 }
 
 const THINKING_LABELS: Record<string, string> = { off: '关闭思考', standard: '标准思考', high: '高思考' };
@@ -187,6 +197,12 @@ export function ModelMenu({
   onClose,
   onPickSupplier,
   onPickModel,
+  contextWindow,
+  contextWindowOptions,
+  onChangeContextWindow,
+  thinkingLevel,
+  thinkingLevelOptions,
+  onChangeThinkingLevel,
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
   const access = useModelAccess();
@@ -258,6 +274,46 @@ export function ModelMenu({
         {autoError && (
           <div className="sc-model-menu-status sc-model-menu-status-degraded" role="alert">
             {autoError}
+          </div>
+        )}
+        {/* UI-MODELCFG-1 — 模型级快捷配置：原来要进设置页逐模型改，现就地切换 */}
+        {(contextWindowOptions?.length || thinkingLevelOptions?.length) && (
+          <div
+            data-testid="model-menu-quick"
+            style={{ display: 'grid', gap: 6, padding: '6px 10px', borderBottom: '1px solid rgba(127,127,127,0.18)' }}
+          >
+            {contextWindowOptions && contextWindowOptions.length > 0 && (
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <span className="sc-model-option-meta">上下文窗口</span>
+                <select
+                  data-testid="model-menu-context-window"
+                  aria-label="上下文窗口"
+                  value={contextWindow ?? contextWindowOptions[0]}
+                  onChange={(event) => onChangeContextWindow?.(Number(event.target.value))}
+                  style={{ minWidth: 96 }}
+                >
+                  {contextWindowOptions.map((size) => (
+                    <option key={size} value={size}>{formatContextWindow(size)}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {thinkingLevelOptions && thinkingLevelOptions.length > 0 && (
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <span className="sc-model-option-meta">思考强度</span>
+                <select
+                  data-testid="model-menu-thinking-level"
+                  aria-label="思考强度"
+                  value={thinkingLevel ?? 'standard'}
+                  onChange={(event) => onChangeThinkingLevel?.(event.target.value)}
+                  style={{ minWidth: 96 }}
+                >
+                  {thinkingLevelOptions.map((level) => (
+                    <option key={level} value={level}>{THINKING_LABELS[level] ?? level}</option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
         )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (

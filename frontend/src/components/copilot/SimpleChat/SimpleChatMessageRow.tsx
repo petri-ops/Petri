@@ -51,6 +51,14 @@ export interface SimpleChatMessageRowProps {
   segments: ConversationSegment[];
   streaming: boolean;
   /**
+   * UI-COLLAPSE-2 — 本消息属于「当前进行中的任务 run」。
+   * 历史行为：每条消息只在自身 pending 期间不折叠，run 跨多条消息时（durable loop /
+   * 分条输出）上一轮一结束就立即折叠 → 过程割裂、阅读跳动。
+   * 现行为：run 进行中，本次 run 产生的全部消息保持展开；run 结束（streaming=false）
+   * 后统一按既有 settled 逻辑折叠。
+   */
+  activeRun?: boolean;
+  /**
    * BLOCK-171 CP-1 — 运行簇取消（宿主提供，POST task/:taskId/tool-cancel）。
    * 宿主侧 useCallback 稳定标识（不破坏行级 memo）；不传=零变化。
    */
@@ -102,6 +110,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   topicShiftReason,
   segments,
   streaming,
+  activeRun = false,
   settledContext,
   resolveNonce,
   extraRenderersFlag,
@@ -221,7 +230,7 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
           <ConversationTimeline
             segments={segments}
             projectId={projectId}
-            runActive={Boolean(m.pending)}
+            runActive={Boolean(m.pending) || activeRun}
             onCancelTools={onCancelTools}
             renderProgress={(segment, meta) => {
               // BLOCK-108 P2 — 过渡叙述正文式渲染（Qoder 形态「模型说话 →

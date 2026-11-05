@@ -7528,6 +7528,26 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "ui-modelcfg-collapse",
+      "note": "UI-MODELCFG-1 / UI-COLLAPSE-2：模型菜单内快捷配置（上下文窗口 + 思考强度）与折叠时机改为 run 内统一展开。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
+        "frontend/src/components/copilot/SimpleChat/activeRunWindow.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useContextWindowQuickPick.ts",
+        "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "ui-contract"
     }
   ]
 }

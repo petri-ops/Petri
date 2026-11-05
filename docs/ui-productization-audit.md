@@ -9,6 +9,13 @@
 - **证据**：ModelAccessPanel 3/3 · FederationJobs 3/3（联邦作业提交/查状态/取产物）· AgentAuditPanel 3/3 · MemoryPolicyPanel 3/3 · ResultStudioSurface 5/5；`quality:types` 0；lint 0 error。
 - **待补**：dev Electron 实机腿（面板真连后端、pdf 真渲染），通过后转 verified。
 
+## UI-695: 聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**）
+
+- **模型配置下沉到输入框**（UI-MODELCFG-1）：模型菜单新增「上下文窗口 / 思考强度」两项就地切换——上下文窗口选档（32K/64K/128K/200K）后写回当前模型档案（`POST /api/ai/settings` 部分更新，设置页 SWR 同源刷新）；思考强度与 composer 既有按钮同源（`applyThinkingLevel`，会话级）。原先改这两项要进设置页逐模型操作。
+- **折叠时机改为任务级**（UI-COLLAPSE-2）：折叠判断从「单条消息 pending 结束即折叠」改为「本轮 run 内统一展开、run 结束统一折叠」。边界计算抽为纯函数 `SimpleChat/activeRunWindow.ts`（`resolveActiveRunStartIndex`），历史轮次不因本轮 run 而炸开。
+- **证据**：`modelConfigAndCollapse.test.tsx` 6/6（快捷区渲染/切换回调/无选项不渲染、run 中统一展开/结束后统一折叠/历史不炸开）+ 相邻回归 20/20；`types` 0、`lint` 0 error；`SimpleChat.tsx` 2051→2080（逻辑抽入 `useContextWindowQuickPick` 后净增 29，尺寸基线已重打并说明）。
+- **待补**：dev Electron 实机确认（切换后下一请求生效、长任务过程不再逐轮折叠、观感稳定）。
+
 ### in_progress 三分类对账（BLOCK-346 T8，2026-11-04）
 
 > 目的：区分「代码没做完」与「代码做完了只缺实机证据」。不改变任何条目状态，只补分类，

@@ -59,6 +59,7 @@ import { useScheduleComposer } from './SimpleChat/hooks/useScheduleComposer';
 import { runCompactSlash } from './SimpleChat/compactSlash';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
+import { useContextWindowQuickPick } from './SimpleChat/hooks/useContextWindowQuickPick';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
@@ -128,6 +129,13 @@ import {
   nextThinkingLevel,
   saveThinkingLevel,
 } from './thinkingLevel';
+import type { ThinkingLevel } from './thinkingLevel';
+
+/**
+ * UI-MODELCFG-1 — 输入框内可快捷切换的上下文窗口档位。
+ * 选档后写回当前模型档案（POST /api/ai/settings 部分更新），设置页同源刷新。
+ */
+const CONTEXT_WINDOW_OPTIONS: number[] = [32000, 64000, 128000, 200000];
 import { buildConversationSegments } from './conversationSegments';
 import type { ConversationSegment } from './conversationSegments';
 import {
@@ -147,6 +155,7 @@ import { Icon } from '@/components/icons/Icon';
 const EMPTY_ROW_SEGMENTS: ConversationSegment[] = [];
 import { getBridge } from '@/lib/desktopBridge';
 import { ModelMenu } from './SimpleChat/ModelMenu';
+import { resolveActiveRunStartIndex } from './SimpleChat/activeRunWindow';
 import { ModelChip } from './SimpleChat/ModelChip';
 import { useAutoModelPreference } from '@/hooks/useAutoModelPreference';
 import { describeAutoDecision, imageVisionCapable, resolveAutoPreset } from '@/lib/auto-model';
@@ -447,7 +456,15 @@ export function SimpleChat({
     catalog: modelCatalog,
     roleBindings,
     setActive: setActiveModelId,
+    refresh: refreshAiSettings,
   } = useAiSettings();
+
+  // UI-MODELCFG-1 — 输入框内快捷切换上下文窗口（逻辑见 useContextWindowQuickPick）。
+  const updateContextWindow = useContextWindowQuickPick({
+    activePreset: activeModel,
+    presets: modelPresets,
+    refresh: refreshAiSettings,
+  });
   // BLOCK-225 — D4 Auto：开关持久化；解析预览跟随当前附件。
   const { autoModel, setAutoModel, error: autoModelError } = useAutoModelPreference();
   const autoDecision = useMemo(() => resolveAutoPreset({
@@ -1066,6 +1083,11 @@ export function SimpleChat({
   // BLOCK-244 Q1-REM — 审批控制面收尾簇（完全访问确认/结构化提问/编辑重发 checkpoint）。
   const approvalSurfaces = useApprovalSurfaces({ conversationId, projectId, activeRun, messages, setMessages, setInput, taRef, streaming, setAccessMode });
 
+  // UI-COLLAPSE-2 — 折叠时机：本轮 run 内产生的全部消息保持展开，run 结束（streaming
+  // 转 false）后统一折叠；替代「每条消息各自 pending 结束时立即折叠」的逐轮跳动。
+  // 边界计算抽为纯函数（SimpleChat/activeRunWindow.ts），便于契约测试。
+  const activeRunStartIndex = resolveActiveRunStartIndex(displayMessages, streaming);
+
   // BLOCK-171 CP-4 — 排队追问可见可撤（当前会话的 queued 条目，带位次）。
   // BLOCK-178 P1 — 管理操作锚点改稳定 id；撤回=回填输入框编辑重发。
   const visibleQueuedPrompts = queuedPrompts.filter((q) => q.conversationId === conversationId);
@@ -1524,6 +1546,7 @@ export function SimpleChat({
                   messageKey={key}
                   isTopicShiftStart={i === topicShiftIndex}
                   topicShiftReason={topicShiftReason}
+                  activeRun={activeRunStartIndex >= 0 && i > activeRunStartIndex}
                   segments={timelineSegmentsByMessage.get(m.id ?? `idx:${i}`) ?? EMPTY_ROW_SEGMENTS}
                   streaming={streaming}
                   onCancelTools={handleCancelTools}
@@ -1965,6 +1988,12 @@ export function SimpleChat({
                         if (preferred) void selectModel(preferred);
                       }}
                       onPickModel={(preset) => void selectModel(preset)}
+                      contextWindow={activeModel?.contextWindow}
+                      contextWindowOptions={CONTEXT_WINDOW_OPTIONS}
+                      onChangeContextWindow={(next) => void updateContextWindow(next)}
+                      thinkingLevel={thinkingLevel}
+                      thinkingLevelOptions={reasoningSupported ? [...THINKING_LEVELS] : []}
+                      onChangeThinkingLevel={(next) => applyThinkingLevel(next as ThinkingLevel)}
                     />
                   )}
                 </div>
