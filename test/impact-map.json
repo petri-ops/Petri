@@ -7282,16 +7282,6 @@
       "commands": []
     },
     {
-      "id": "c48-asar-diagnostic-copies",
-      "note": "C-48 诊断期从 app.asar 提取到仓库根的源码副本（scheme.js / _db-singleton.js，仅用于比对修前/修后顺序；不入库、非产品路径）。",
-      "patterns": [
-        "scheme.js",
-        "_db-singleton.js"
-      ],
-      "tests": [],
-      "commands": []
-    },
-    {
       "id": "block346-surface-audit",
       "note": "BLOCK-346 全量核对矩阵生成器：只读审计脚本（默认 git HEAD 基线，--worktree 读工作区），不参与产品构建与运行；改动它或基线/汇编契约时跑汇编契约与文档门。",
       "patterns": [
