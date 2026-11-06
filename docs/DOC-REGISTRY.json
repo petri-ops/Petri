@@ -9942,7 +9942,7 @@
       "capability": "block-362-nso-w7a-governance-tooling",
       "path": "docs/block-362-nso-w7a-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-362-nso-w7a-governance-tooling",
       "entrypoint": "docs/README.md",
@@ -9961,7 +9961,7 @@
         "test/nso-w7-*.test.mjs"
       ],
       "sharedBaselines": [],
-      "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W7 0.37）。W7a=治理工具化（audit:compact 脏目标守卫〔同类第三次复发转机械门禁〕+ coverage 字段机械校验/生成）；W7b 最终 canonical 回写留到全部波次之后。"
+      "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W7 0.37）。W7a=治理工具化（audit:compact 脏目标守卫〔同类第三次复发转机械门禁〕+ coverage 字段机械校验/生成）；W7b 最终 canonical 回写留到全部波次之后。 | 2026-11-06 completed：compact 脏目标守卫 + coverage 校验（742f6875，5/5，相邻 54/54）；W7b 留到全部波次之后。"
     }
   ],
   "lastUpdated": "2026-11-06",
