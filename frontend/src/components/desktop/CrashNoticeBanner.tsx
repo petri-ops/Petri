@@ -117,7 +117,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
         </button>
       )}
       {detailsOpen && summary?.ok && (
-        <div data-testid="crash-notice-details" style={{ flexBasis: '100%', color: 'var(--petri-text-tertiary)', fontSize: 11 }}>
+        <div data-testid="crash-notice-details" style={{ flexBasis: '100%', color: 'var(--petri-text-tertiary)', fontSize: 'var(--petri-font-size-xs, 11px)' }}>
           {summary.processId ? `进程 ${summary.processId} · ` : ''}
           {summary.exception ? `线程 ${summary.exception.threadId} 异常 ${summary.exception.code}${summary.exception.address ? ` @ ${summary.exception.address}` : ''} · ` : ''}
           模块：{(summary.modules || []).slice(0, 5).map((module) => module.name).join('、') || '未记录'}

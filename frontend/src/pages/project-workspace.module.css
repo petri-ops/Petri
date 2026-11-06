@@ -1043,6 +1043,9 @@
 }
 
 .convItem {
+  /* BLOCK-369（NSO-W3b）DOM 预算：会话列表行视口外跳过渲染。 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
   display: flex;
   align-items: center;
   gap: var(--petri-space-2);
@@ -1251,6 +1254,10 @@
   gap: var(--petri-space-3);
 }
 .resultsLibraryItem {
+  /* BLOCK-369（NSO-W3b）DOM 预算起步：长列表行视口外跳过渲染（零依赖 content-visibility）。
+     行高由 contain-intrinsic-size 预估，滚动进入视口时真实渲染；hover/选中态不受影响。 */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 46px;
   display: flex;
   align-items: center;
   justify-content: space-between;

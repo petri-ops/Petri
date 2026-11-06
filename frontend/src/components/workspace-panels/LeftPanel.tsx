@@ -495,7 +495,7 @@ function ConversationSearchResults({ ctx, query }: { ctx: LeftPanelContext; quer
           >
             <Icon name="message-circle" size={12} />
             <span className={styles.convItemTitle}>{c.title}</span>
-            <span className={styles.convEmpty} style={{ marginLeft: 'auto', fontSize: 11 }}>
+            <span className={styles.convEmpty} style={{ marginLeft: 'auto', fontSize: 'var(--petri-font-size-xs, 11px)' }}>
               {c.project_id ? (projectNameById.get(c.project_id) || '其他项目') : '未绑定项目'}
             </span>
           </li>

@@ -72,6 +72,7 @@ export function TerminalWindowPage(): React.ReactElement {
       cursorBlink: true,
       cursorStyle: 'bar',
       fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      // BLOCK-369 W3b 豁免：XTerm fontSize 是数值 API（canvas 渲染），CSS token 不适用。
       fontSize: 11,
       lineHeight: 1.4,
       scrollback: 5000,

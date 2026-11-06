@@ -1,4 +1,11 @@
 # Petri Desktop UI 产品化审计台账
+## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（代码+回归完成，待实机观感与长列表实测）**）
+
+- **字号 token 收敛**：fontSize:11 → var(--petri-font-size-xs, 11px) 共 12 处 5 文件（ChatArtifactCard×8 / LeftSshCreatePanel×2 / LeftPanel / CrashNoticeBanner / TerminalWindowPage）；TerminalWindowPage XTerm 例豁免留痕（fontSize 为数值 canvas API，CSS token 不适用）。
+- **DOM 预算起步（零依赖）**：结果库行（resultsLibraryItem）与会话行（convItem）content-visibility:auto + contain-intrinsic-size——视口外行跳过渲染；hover/选中态不受影响。消息列表（SimpleChat）不在本批（改动面属 UI-696 邻接，留待其 verified 后）。
+- **证据**：theme-token-contract 17/17；ResultsLibrary/LeftPanel/ChatArtifactCard/CrashNoticeBanner 回归全绿；css-modules 门 PASS；tsc 0。
+- **待补**：实机长列表滚动实测（CDP 节点数/滚动帧率）与观感确认，通过后转 verified。
+
 ## UI-698: 隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）
 
 - **CenterPanel 非 chat 投影层 inert**：此前仅 aria-hidden（输入框/按钮仍可 Tab 进入不可见层）；现投影层带 inert（React 18 类型缺属性→展开旁路）。chat 模式不带。

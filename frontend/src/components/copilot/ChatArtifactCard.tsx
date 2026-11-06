@@ -35,7 +35,7 @@ const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.web
 const MODEL_3D_EXTENSIONS = new Set(['.glb', '.gltf']);
 
 const ACTION_BUTTON_STYLE: React.CSSProperties = {
-  fontSize: 11,
+  fontSize: 'var(--petri-font-size-xs, 11px)',
   background: 'none',
   border: 'none',
   padding: 0,
@@ -110,8 +110,8 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
   }, [expanded, toolJobId]);
 
   if (!expanded || !toolJobId) return null;
-  if (error) return <div className="chat-artifact-error" style={{ padding: '4px 8px', fontSize: 11, color: '#999' }}>产物信息获取失败</div>;
-  if (artifacts === null) return <div style={{ padding: '4px 8px', fontSize: 11, color: '#888' }}>加载产物…</div>;
+  if (error) return <div className="chat-artifact-error" style={{ padding: '4px 8px', fontSize: 'var(--petri-font-size-xs, 11px)', color: '#999' }}>产物信息获取失败</div>;
+  if (artifacts === null) return <div style={{ padding: '4px 8px', fontSize: 'var(--petri-font-size-xs, 11px)', color: '#888' }}>加载产物…</div>;
   if (artifacts.length === 0) return null;
 
   // 后端 artifacts.url 是 API 相对路径（/api/workspaces/…），渲染进程在 dev 下
@@ -143,10 +143,10 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
       {model3dArtifacts.length > 0 && (
         <div style={{ marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary, #888)' }}>3D 预览</span>
+            <span style={{ fontSize: 'var(--petri-font-size-xs, 11px)', fontWeight: 600, color: 'var(--text-secondary, #888)' }}>3D 预览</span>
             <button
               type="button"
-              style={{ fontSize: 11, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent, #3b82f6)' }}
+              style={{ fontSize: 'var(--petri-font-size-xs, 11px)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent, #3b82f6)' }}
               onClick={() => setShow3D((v) => !v)}
             >
               {show3D ? '收起' : '展开 3D 预览'}
@@ -165,7 +165,7 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
               <div
                 key={`actions:${artifact.name || artifact.path || artifact.url}`}
                 data-testid="chat-artifact-3d-actions"
-                style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 11, marginTop: 6 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 'var(--petri-font-size-xs, 11px)', marginTop: 6 }}
               >
                 <span style={{ color: 'var(--text-secondary, #888)' }}>{artifact.name}</span>
                 <button
@@ -232,11 +232,11 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
       {/* 其他产物下载 */}
       {otherArtifacts.map((artifact) => (
         <div key={artifact.name} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <span style={{ fontSize: 11 }}>{artifact.name}</span>
+          <span style={{ fontSize: 'var(--petri-font-size-xs, 11px)' }}>{artifact.name}</span>
           <a
             href={fileUrl(artifact)}
             download={artifact.name}
-            style={{ fontSize: 11, color: 'var(--accent, #3b82f6)', textDecoration: 'none' }}
+            style={{ fontSize: 'var(--petri-font-size-xs, 11px)', color: 'var(--accent, #3b82f6)', textDecoration: 'none' }}
           >
             下载
           </a>

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 500,
+    "documentCount": 501,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 483
+    "managedMarkdown": 484
   },
   "documents": [
     {
@@ -10150,8 +10150,39 @@
         "test/impact-map.json"
       ],
       "notes": "2026-11-06 启动 active（UI-696 已落地 348508f1，台账解锁；P6 已自然复绿 13/13）。F-09 viewer 分派/F-10 prefs 失败可见/F-18 a11y/实验开关失败可见/表单语义/DOM 预算/UI 台账终态化；视觉人眼项按无人化阶梯如实留 in_progress。 | 2026-11-06 completed（带例外）：F-09/10/18+字号首例（77b02e3c/f5dc6c1a；UI-697/698）；布局单源/DOM 预算/台账 52 条终态化/实机视觉走查移交 W3b。"
+    },
+    {
+      "id": "BLOCK-370",
+      "capability": "block-370-nso-w3b-polish",
+      "path": "docs/block-370-nso-w3b-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-370-nso-w3b-polish",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W3",
+        "P2",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-3b/**",
+        "frontend/src/components/copilot/ChatArtifactCard.tsx",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
+        "frontend/src/components/workspace-panels/LeftSshCreatePanel.tsx",
+        "frontend/src/components/workspace-panels/ResultsLibrary.tsx",
+        "frontend/src/components/desktop/CrashNoticeBanner.tsx",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/pages/window/TerminalWindowPage.tsx",
+        "docs/ui-productization-audit.md"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-06 启动 active（用户「继续推进」）。W3b 可机械验证子集：字号 token 收敛（12 处 5 文件；XTerm 数值 API 豁免留痕）+ DOM 预算起步（结果库行/会话行 content-visibility）。布局单源/台账 52 条终态化/实机走查如实挂起。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 500
+  "documentCount": 501
 }

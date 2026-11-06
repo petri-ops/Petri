@@ -322,7 +322,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             <span
               data-testid="ssh-connected-chip"
               title={`已连接 ${connectedAlias}`}
-              style={{ fontSize: 11, padding: '1px 8px', borderRadius: 8, border: '1px solid currentColor', opacity: 0.85, whiteSpace: 'nowrap' }}
+              style={{ fontSize: 'var(--petri-font-size-xs, 11px)', padding: '1px 8px', borderRadius: 8, border: '1px solid currentColor', opacity: 0.85, whiteSpace: 'nowrap' }}
             >
               {connectedAlias}
             </span>
@@ -403,7 +403,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
               取消
             </button>
           </div>
-          <p style={{ fontSize: 11, opacity: 0.65, margin: '6px 0 0' }}>Tab 补全 · ↓↑ 选候选 · Enter 采纳</p>
+          <p style={{ fontSize: 'var(--petri-font-size-xs, 11px)', opacity: 0.65, margin: '6px 0 0' }}>Tab 补全 · ↓↑ 选候选 · Enter 采纳</p>
           {error && (
             <p className={styles.leftCreateError} role="alert" style={{ marginTop: 6 }}>{error}</p>
           )}
