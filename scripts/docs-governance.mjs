@@ -235,6 +235,26 @@ function issue(code, message, documentId = null, documentPath = null) {
   return { code, message, documentId, path: documentPath };
 }
 
+// BLOCK-362（NSO-W7a-2，F-22）coverage 计数机械化：documentCount / managedMarkdown 此前手工同步
+// （NSO 程序内 4 次、评估采样时漂移 429/163 vs 488/471），漂移不红。现由 docs:check 校验，
+// `node scripts/docs-governance.mjs --write-coverage`（npm run docs:coverage）重算写回。
+export function computeCoverageCounts(registry, managedMarkdownCount) {
+  const documents = Array.isArray(registry?.documents) ? registry.documents : [];
+  return { documentCount: documents.length, managedMarkdown: managedMarkdownCount };
+}
+
+export function validateCoverageCounts(registry, computed) {
+  const coverage = registry?.coverage ?? {};
+  const out = [];
+  for (const key of ['documentCount', 'managedMarkdown']) {
+    if (coverage[key] !== computed[key]) {
+      out.push(issue('COVERAGE_COUNT_DRIFT',
+        `coverage.${key}=${coverage[key]} 与实际 ${computed[key]} 不一致——运行 npm run docs:coverage 重算写回。`));
+    }
+  }
+  return out;
+}
+
 export async function validateDocumentRegistry(registry, options = {}) {
   const rootDir = options.rootDir ?? DEFAULT_ROOT;
   const issues = [];
@@ -433,6 +453,7 @@ export async function validateDocumentRegistry(registry, options = {}) {
   const coverage = registry.coverage ?? {};
   const managedMarkdown = await collectManagedMarkdown(rootDir, coverage);
   const registeredPaths = new Set(normalizedDocuments.map((document) => document.path).filter(Boolean));
+  issues.push(...validateCoverageCounts(registry, computeCoverageCounts(registry, managedMarkdown.length)));
   if (coverage.requireRegistration === true) {
     for (const repoPath of managedMarkdown) {
       if (!registeredPaths.has(repoPath)) {
@@ -799,6 +820,17 @@ async function runReportMode(reportPathRaw) {
 
 async function runCli() {
   const args = new Set(process.argv.slice(2));
+  if (args.has('--write-coverage')) {
+    const registryPath = path.join(DEFAULT_ROOT, 'docs', 'DOC-REGISTRY.json');
+    const registry = JSON.parse(await fs.readFile(registryPath, 'utf8'));
+    const managed = await collectManagedMarkdown(DEFAULT_ROOT, registry.coverage);
+    const computed = computeCoverageCounts(registry, managed.length);
+    registry.coverage = { ...registry.coverage, ...computed, lastUpdated: new Date().toISOString().slice(0, 10) };
+    if (Object.prototype.hasOwnProperty.call(registry, 'documentCount')) registry.documentCount = computed.documentCount;
+    await fs.writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`, 'utf8');
+    console.log(`[docs:coverage] documentCount=${computed.documentCount} managedMarkdown=${computed.managedMarkdown}`);
+    return;
+  }
   const modes = ['--status', '--check', '--reconcile'].filter((mode) => args.has(mode));
   if (modes.length > 1) {
     console.error('Choose only one of --status, --check, or --reconcile.');

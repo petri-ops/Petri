@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 493,
+    "documentCount": 494,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 476
+    "managedMarkdown": 477
   },
   "documents": [
     {
@@ -9936,8 +9936,34 @@
         "test/knip-baseline.json"
       ],
       "notes": "2026-11-06 启动 active（用户预授权 W0→W7；Jev next:suggest=NSO-W4 0.62；W1 待在制批裁决、W3 待并发写入者提交 UI 台账，W4 与两组他方在制零交集）。 | 2026-11-06 completed（带例外）：W4-1~4 交付（c9d22abb，契约 5/5，邻域 285/0）；矩阵/货架/能力地图生成器化移交 W7。"
+    },
+    {
+      "id": "BLOCK-362",
+      "capability": "block-362-nso-w7a-governance-tooling",
+      "path": "docs/block-362-nso-w7a-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-362-nso-w7a-governance-tooling",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W7",
+        "P2",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-7a/**",
+        "scripts/audit-log-compact.mjs",
+        "scripts/docs-governance.mjs",
+        "test/nso-w7-*.test.mjs"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W7 0.37）。W7a=治理工具化（audit:compact 脏目标守卫〔同类第三次复发转机械门禁〕+ coverage 字段机械校验/生成）；W7b 最终 canonical 回写留到全部波次之后。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 493
+  "documentCount": 494
 }

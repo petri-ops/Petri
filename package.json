@@ -161,6 +161,7 @@
     "g0:sdc0:update": "npm run g0:sdc0:test && node scripts/g0-sdc0-profile-registry-acceptance.mjs --write-evidence",
     "docs:status": "node scripts/docs-governance.mjs --status",
     "docs:check": "node scripts/docs-governance.mjs --check",
+    "docs:coverage": "node scripts/docs-governance.mjs --write-coverage",
     "docs:reconcile": "node scripts/docs-governance.mjs --reconcile",
     "docs:roll-index": "node scripts/docs-roll-index.mjs",
     "ui:audit:check": "node scripts/check-ui-productization-audit.mjs",

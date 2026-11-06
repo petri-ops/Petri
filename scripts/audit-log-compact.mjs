@@ -24,6 +24,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const CHAIN_KEEP = Number(process.env.AUDIT_LOG_CHAIN_KEEP ?? 8);
@@ -89,6 +90,45 @@ export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = R
   return { outLines, chainCutLines, rowsCutLines, throughDate: dates[dates.length - 1] ?? null };
 }
 
+/**
+ * BLOCK-362（NSO-W7a-1）归档目标选择（纯函数）：永不追加进带未提交改动的归档文件。
+ * 背景：链淘汰行写 audit-log-through-<最新日期>.md；该文件若带他方未提交改动，追加即覆盖他人
+ * 在制（NSO 程序 W0/W2/W4 三次复发，均人工逐字迁回）→ 同类第三次出现，转机械规则：
+ *   不存在 → 新建标准名；存在且干净 → 追加标准名（既有行为）；存在且脏或 git 不可读（dirty=null）
+ *   → 写 `<stem>.r<UTC 时间戳>.md` 新文件（fail-safe）。
+ * @returns {{ path: string, redirected: boolean }}
+ */
+export function chooseArchiveTarget({ archiveDir, baseName, exists, dirty, nowIso }) {
+  const standard = path.join(archiveDir, baseName);
+  if (!exists || dirty === false) return { path: standard, redirected: false };
+  const stamp = String(nowIso || new Date().toISOString()).replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+  const stem = baseName.replace(/\.md$/, '');
+  return { path: path.join(archiveDir, `${stem}.r${stamp}.md`), redirected: true };
+}
+
+/** 归档文件是否带未提交改动；git 不可读返回 null（调用方按脏处理）。 */
+function archiveFileDirty(absPath) {
+  try {
+    const rel = path.relative(ROOT, absPath);
+    const out = execFileSync('git', ['status', '--porcelain', '--', rel], { cwd: ROOT, encoding: 'utf8' });
+    return out.trim().length > 0;
+  } catch {
+    return null;
+  }
+}
+
+function resolveArchiveTarget(baseName) {
+  const standard = path.join(ARCHIVE_DIR, baseName);
+  const exists = fs.existsSync(standard);
+  return chooseArchiveTarget({
+    archiveDir: ARCHIVE_DIR,
+    baseName,
+    exists,
+    dirty: exists ? archiveFileDirty(standard) : false,
+    nowIso: new Date().toISOString(),
+  });
+}
+
 function main() {
   const lines = fs.readFileSync(LEDGER, 'utf8').split('\n');
   const result = compactLedgerLines(lines);
@@ -102,7 +142,11 @@ function main() {
 
   if (result.chainCutLines.length > 0) {
     const throughDate = result.throughDate ?? stamp;
-    const throughPath = path.join(ARCHIVE_DIR, `audit-log-through-${throughDate}.md`);
+    const throughTarget = resolveArchiveTarget(`audit-log-through-${throughDate}.md`);
+    const throughPath = throughTarget.path;
+    if (throughTarget.redirected) {
+      console.log(`[audit-compact] 标准归档 audit-log-through-${throughDate}.md 带未提交改动（或 git 不可读）→ 改写 ${path.basename(throughPath)}（不触碰他方在制）`);
+    }
     const note = fs.existsSync(throughPath)
       ? `\n<!-- audit-log-compact.mjs 追加 @ ${new Date().toISOString()} -->\n`
       : [
@@ -118,7 +162,11 @@ function main() {
   }
 
   if (result.rowsCutLines.length > 0) {
-    const compactPath = path.join(ARCHIVE_DIR, `audit-log-compact-${stamp}.md`);
+    const compactTarget = resolveArchiveTarget(`audit-log-compact-${stamp}.md`);
+    const compactPath = compactTarget.path;
+    if (compactTarget.redirected) {
+      console.log(`[audit-compact] 标准归档 audit-log-compact-${stamp}.md 带未提交改动（或 git 不可读）→ 改写 ${path.basename(compactPath)}`);
+    }
     const note = fs.existsSync(compactPath)
       ? `\n<!-- audit-log-compact.mjs 追加 @ ${new Date().toISOString()} -->\n`
       : [
