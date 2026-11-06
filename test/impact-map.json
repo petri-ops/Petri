@@ -7566,7 +7566,7 @@
     },
     {
       "id": "block359-test-shards",
-      "note": "BLOCK-359（W0-9）全量测试三段分片：有界 task:runner + 超时 unknown 语义 + node-long 分类契约；改分片脚本时跑本契约。",
+      "note": "BLOCK-359（W0-9）全量测试三段分片：有界 task:runner + 超时 unknown 语义 + node-long 分类契约；改分片脚本时跑本契约。 BLOCK-368 二分定位：挂起为 627+ 文件单命令×并行调度形态（200/命令象限全通过），与具体测试无关；并行提速用多命令象限形态。",
       "classifiesScripts": true,
       "patterns": [
         "scripts/test-all-shards.mjs",

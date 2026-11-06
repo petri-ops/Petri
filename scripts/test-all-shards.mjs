@@ -52,9 +52,12 @@ export function buildShardPlan() {
   };
 }
 
-// BLOCK-359 实测注记：node --test 默认并行（~cores worker）在 627 文件规模下三次确定性
+// BLOCK-359 实测注记：node --test 默认并行（~cores worker）在 627 文件单命令规模下三次确定性
 // 挂起（父进程 100% CPU、零子进程、零文件句柄、输出停在同一点；run-1 完整跑完为唯一例外）。
-// 分片默认 --test-concurrency=1（串行隔离仍逐文件进程），可用 --concurrency=N 显式放宽。
+// BLOCK-368 二分定位（2026-11-06）：同一 638 文件按 200/命令分四个象限并行跑全部完整完成——
+// 挂起是调度层「单命令文件数 × 并行」规模形态，与具体测试无关。node-core 分片默认
+// --test-concurrency=1（逐文件进程隔离，必然完成），--concurrency=N 可显式放宽；
+// 若未来需要并行提速，按象限多命令形态即可（勿回退单命令大清单）。
 function shardCommand(plan, shard, concurrency = 1) {
   const entry = plan[shard];
   if (entry.kind === 'vitest') return entry.cmd;
