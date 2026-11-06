@@ -104,9 +104,10 @@ describe('BLOCK-142 新 adapter 能力声明档案（VIEWER_PROFILES，plan §1.
 });
 
 describe('BLOCK-142 回归：既有六类映射零变化（全部现状断言，本文件落库时必须全绿）', () => {
-  it('report 类：kind=report 恒胜 + .html/.htm 对任意 kind 生效（含 report+pdf 仍 report）', () => {
+  it('report 类：BLOCK-369（F-09）翻转后——.pdf 按扩展名落 pdf，.html/.htm 对任意 kind 仍 report', () => {
     expect(resolveAdapter({ kind: 'report', fileName: 'brief.unknownext' })).toBe('report');
-    expect(resolveAdapter({ kind: 'report', fileName: 'paper.pdf' })).toBe('report');
+    // BLOCK-369（NSO-W3 F-09）有意翻转：扩展名优先，report+pdf 按 .pdf 分派
+    expect(resolveAdapter({ kind: 'report', fileName: 'paper.pdf' })).toBe('pdf');
     for (const kind of ALL_KINDS) {
       expect(resolveAdapter({ kind, fileName: 'final-report.html' })).toBe('report');
       expect(resolveAdapter({ kind, fileName: 'legacy-page.htm' })).toBe('report');
@@ -120,7 +121,8 @@ describe('BLOCK-142 回归：既有六类映射零变化（全部现状断言，
     }
     expect(resolveAdapter({ kind: 'data', fileName: 'figure.svg' })).toBe('svg-editor');
     expect(resolveAdapter({ kind: 'plot', fileName: 'heatmap.vega' })).toBe('image');
-    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('image');
+    // BLOCK-369（NSO-W3 F-09）有意翻转：.xlsx 按扩展名分派 spreadsheet viewer
+    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('spreadsheet');
   });
 
   it('table 类：.csv/.tsv 先于 text 判定落 table + kind=table 恒胜', () => {

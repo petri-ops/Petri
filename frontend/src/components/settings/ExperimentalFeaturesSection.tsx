@@ -128,6 +128,8 @@ function ServerFlagRows(): React.ReactElement {
   const [flags, setFlags] = useState<ServerFlagView[]>([]);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // BLOCK-369（NSO-W3 F-10）拉取失败可见：此前静默空段（后端未就绪时整段开关凭空消失）。
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -135,9 +137,12 @@ function ServerFlagRows(): React.ReactElement {
       const body = (await resp.json()) as { status?: unknown; error?: unknown; flags?: Record<string, Record<string, unknown>> };
       if (body.status === 'ok') {
         setFlags(Object.entries(body.flags ?? {}).map(([key, view]) => ({ key, ...view } as ServerFlagView)));
+        setLoadError(null);
+      } else {
+        setLoadError(`HTTP ${resp.status}`);
       }
-    } catch {
-      // 后端未就绪时静默（设置页其余分区同策略）；下次进入页面重试
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : String(e));
     }
   }, []);
 
@@ -166,7 +171,17 @@ function ServerFlagRows(): React.ReactElement {
     }
   };
 
-  if (flags.length === 0) return <></>;
+  if (flags.length === 0) {
+    if (!loadError) return <></>;
+    // BLOCK-369（NSO-W3 F-10）失败可见：拉取失败给出原因与重试出口，不再凭空消失。
+    return (
+      <div className={styles.serverFlags} data-testid="experimental-flags-error">
+        <strong>实验开关加载失败</strong>
+        <div>{loadError}</div>
+        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" onClick={() => { void refresh(); }}>重试</button>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.serverFlags} data-testid="server-flags">

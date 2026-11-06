@@ -48,6 +48,10 @@ export interface ResolvedResultViewer {
   canSelect: boolean;
   canCompare: boolean;
   canExport: boolean;
+  /** BLOCK-369（NSO-W3 F-09）机器可读降级原因：仅 binary 兜底（preview_disabled / no_matching_viewer）。 */
+  reasonCode?: 'preview_disabled' | 'no_matching_viewer';
+  /** 命中方式（extension / kind / fallback），供审计与测试断言。 */
+  matchedBy?: 'extension' | 'kind' | 'fallback';
 }
 
 /**
@@ -148,17 +152,47 @@ export function resolveResultViewer(input: {
   fileName: string;
   preview?: boolean;
 }): ResolvedResultViewer {
-  // resultSurface.ts:75 — preview 显式 false 短路为 binary，先于一切规则
-  if (input.preview === false) return { adapter: 'binary', ...VIEWER_PROFILES.binary };
+  // BLOCK-369（NSO-W3 F-09）三段式分派：扩展名优先 → kind 兜底 → binary+降级原因。
+  // 旧「规则内 kind/extension 任一命中」让 kind='report' 的 .pdf/.mp4/.svg 被塞进 HTML 预览
+  // 且降级无解释（评估 F-09 错分派）。
+  if (input.preview === false) {
+    return { adapter: 'binary', ...VIEWER_PROFILES.binary, reasonCode: 'preview_disabled' };
+  }
   const kind = String(input.kind);
   const name = String(input.fileName || '').toLowerCase();
-  for (const rule of ADAPTER_RULES) {
-    const hit =
-      (rule.kind !== undefined && rule.kind === kind)
-      || (rule.extension !== undefined && rule.extension.test(name))
-      || (rule.textExtension === true && isTextFile(name));
-    if (hit) return { adapter: rule.adapter, ...VIEWER_PROFILES[rule.adapter] };
+
+  // A 段·扩展名优先（声明序；svg 规则对 kind='plot' 让位 image——BLOCK-342 语义保持）。
+  const extensionRules: readonly { adapter: ResultViewerAdapter; test: (n: string) => boolean; unlessKind?: string }[] = [
+    { adapter: 'pdf', test: (n) => /\.pdf$/.test(n) },
+    { adapter: 'video', test: (n) => /\.(mp4|webm)$/.test(n) },
+    { adapter: 'model3d', test: (n) => new RegExp(`\\.(${MESH_INPUT_FORMATS.join('|')})$|\\.scene3d\\.json$`).test(n) },
+    { adapter: 'spreadsheet', test: (n) => /\.(xlsx|xlsm)$/.test(n) },
+    { adapter: 'binary', test: (n) => /\.xls$/.test(n) },
+    { adapter: 'image', test: (n) => /\.(png|jpe?g|gif|webp)$/.test(n) },
+    { adapter: 'svg-editor', test: (n) => /\.svg$/.test(n), unlessKind: 'plot' },
+    { adapter: 'table', test: (n) => /\.(csv|tsv)$/.test(n) },
+    { adapter: 'report', test: (n) => /\.html?$/.test(n) },
+    { adapter: 'json', test: (n) => /\.json$/.test(n) && !/\.scene3d\.json$/.test(n) },
+    { adapter: 'markdown', test: (n) => /\.(md|markdown)$/.test(n) },
+    { adapter: 'text', test: (n) => isTextFile(n) },
+  ];
+  for (const rule of extensionRules) {
+    if (rule.unlessKind && rule.unlessKind === kind) continue;
+    if (rule.test(name)) return { adapter: rule.adapter, ...VIEWER_PROFILES[rule.adapter], matchedBy: 'extension' };
   }
-  // resultSurface.ts:83 — 兜底：'data'/'file' 与一切未知 kind 落 binary
-  return { adapter: 'binary', ...VIEWER_PROFILES.binary };
+
+  // B 段·kind 兜底：扩展名未命中时 kind 恒胜（report/plot/table/text/model3d 专属语义）。
+  const kindRules: readonly { kind: string; adapter: ResultViewerAdapter }[] = [
+    { kind: 'report', adapter: 'report' },
+    { kind: 'plot', adapter: 'image' },
+    { kind: 'table', adapter: 'table' },
+    { kind: 'text', adapter: 'text' },
+    { kind: 'model3d', adapter: 'model3d' },
+  ];
+  for (const rule of kindRules) {
+    if (rule.kind === kind) return { adapter: rule.adapter, ...VIEWER_PROFILES[rule.adapter], matchedBy: 'kind' };
+  }
+
+  // C 段·兜底：'data'/'file' 与一切未知 kind 落 binary，附机器可读降级原因。
+  return { adapter: 'binary', ...VIEWER_PROFILES.binary, reasonCode: 'no_matching_viewer', matchedBy: 'fallback' };
 }

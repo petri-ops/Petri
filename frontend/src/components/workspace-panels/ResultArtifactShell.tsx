@@ -69,7 +69,7 @@ import {
   buildResultAnnotationProps,
 } from './ResultArtifactShell/resultAnnotation';
 // BLOCK-175 CP-14 — 只读文本族选择总线接线（canSelect 位消费面）
-import { viewerProfileCanSelect } from '@/components/result-studio/viewerRegistry';
+import { viewerProfileCanSelect, resolveResultViewer as registryResolveResultViewer } from '@/components/result-studio/viewerRegistry';
 import { useArtifactTextSelection } from './ResultArtifactShell/useArtifactTextSelection';
 import {
   beginResultSurfaceMeasure,
@@ -525,13 +525,17 @@ export function ResultArtifactShell({
     !activeIsHtml &&
     (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
   const activeIsPreviewText = activeIsText && !activeIsHtml;
-  const viewerAdapter = selectedArtifact
-    ? resolveResultViewerAdapter({
+  // BLOCK-369（NSO-W3 F-09）解析完整结果以携带机器可读降级原因（binary 兜底时上抛 Shell）。
+  // BLOCK-369（NSO-W3 F-09）降级原因经注册表全量解析携带（binary 兜底时上抛 Shell）。
+  const viewerResolution = selectedArtifact
+    ? registryResolveResultViewer({
         kind: selectedArtifactKind,
         fileName: selectedArtifactName,
         preview: selectedArtifact.preview,
       })
-    : 'binary';
+    : undefined;
+  const viewerAdapter = viewerResolution ? viewerResolution.adapter : 'binary';
+  const viewerFallbackReasonCode = viewerResolution?.adapter === 'binary' ? viewerResolution.reasonCode : undefined;
   // BLOCK-92 Wave B-2 — 交互清单与选择状态簇外迁
   // （./ResultArtifactShell/useArtifactInteractionSelection.ts，纯搬运零行为变化；
   // interactionBindingKey/manifestArtifactRef/选择变更队列随之内聚）。
@@ -903,7 +907,15 @@ export function ResultArtifactShell({
     return (
       <div className={styles.resultPreviewPlaceholder}>
         <strong>当前文件暂不支持内嵌预览</strong>
+        {/* BLOCK-369（NSO-W3 F-09）降级原因上抛：binary 兜底不再静默——用户能看到「为什么」。 */}
         <span>{selectedArtifact.name}</span>
+        {viewerFallbackReasonCode && (
+          <span data-testid="viewer-fallback-reason" role="note">
+            {viewerFallbackReasonCode === 'preview_disabled'
+              ? '该产物声明为不可预览（preview=false）'
+              : '未识别的产物类型，未找到匹配的查看器'}
+          </span>
+        )}
         {selectedArtifactUrl && (
           <a href={selectedArtifactUrl} target="_blank" rel="noreferrer">打开或下载原文件</a>
         )}

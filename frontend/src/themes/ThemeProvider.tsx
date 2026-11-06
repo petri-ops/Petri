@@ -267,7 +267,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
     [preference, resolvedTheme, setPreference, fontScale, setFontScale, accent, setAccent, motion, setMotion, prefsSync],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      {prefsSync.state === 'failed' && (
+        <div role="status" data-testid="prefs-sync-failed-banner"
+          style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 1000, maxWidth: 320,
+            padding: '8px 12px', borderRadius: 8, border: '1px solid var(--petri-border, #c33)',
+            background: 'var(--petri-surface, #fff)', color: 'var(--petri-text, #222)', fontSize: 12 }}>
+          <strong>服务端同步失败（本端已生效）</strong>
+          <div style={{ marginTop: 2 }}>{prefsSync.error || '未知错误'}——跨端同步未完成，恢复后自动重试。</div>
+        </div>
+      )}
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 /**

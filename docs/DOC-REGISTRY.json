@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 499,
+    "documentCount": 500,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 482
+    "managedMarkdown": 483
   },
   "documents": [
     {
@@ -10114,8 +10114,44 @@
         "test/impact-map.json"
       ],
       "notes": "2026-11-06 启动 active。实核修正 F-06 预设：agent 主体 once 指纹已在拦截器执行前同步消耗（同步执行器无窗口可绕）；遗留=消耗事实未透传执行边界审计 + 外部 MCP 主体档位（协议层，待裁决）。交付=执行边界审计透传（capabilityEvidence）+ FK 证据门如实登记。 | 2026-11-06 completed：F-06 实核修正 + capabilityEvidence 透传（契约 1/1+源码契约；approval 31/31）。"
+    },
+    {
+      "id": "BLOCK-369",
+      "capability": "block-369-nso-w3-ux-trust",
+      "path": "docs/block-369-nso-w3-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-369-nso-w3-ux-trust",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W3",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-3/**",
+        "frontend/src/components/result-studio/viewerRegistry.ts",
+        "frontend/src/components/result-studio/ResultArtifactShell.tsx",
+        "frontend/src/components/result-studio/ResultStudioSurface.tsx",
+        "frontend/src/themes/ThemeProvider.tsx",
+        "frontend/src/components/settings/ExperimentalFeaturesSection.tsx",
+        "frontend/src/components/settings/ExternalImportPanel.tsx",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "frontend/src/components/workspace-panels/ResultsLibrary.tsx",
+        "docs/ui-productization-audit.md",
+        "test/nso-w3-*.test.*"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json"
+      ],
+      "notes": "2026-11-06 启动 active（UI-696 已落地 348508f1，台账解锁；P6 已自然复绿 13/13）。F-09 viewer 分派/F-10 prefs 失败可见/F-18 a11y/实验开关失败可见/表单语义/DOM 预算/UI 台账终态化；视觉人眼项按无人化阶梯如实留 in_progress。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 499
+  "documentCount": 500
 }

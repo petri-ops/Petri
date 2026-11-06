@@ -1,4 +1,12 @@
 # Petri Desktop UI 产品化审计台账
+## UI-697: viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）
+
+- **viewer 分派三段式（F-09 有意翻转旧错分派）**：扩展名优先 → kind 兜底 → binary+机器可读降级原因（preview_disabled / no_matching_viewer）。修复 kind=report 的 .pdf/.mp4/.svg 被塞进 HTML 预览；Shell binary 卡显示降级原因（data-testid=viewer-fallback-reason）；plot .svg 让位语义保持（unlessKind）。旧「现状平迁」期望逐条有意翻转留理由（viewerRegistry.test / viewerRegistry.block142.test）。
+- **prefsSync 失败可见（F-10）**：同步失败出 role=status 固定告警条（含错误与「本端已生效」说明），恢复成功自动消失（ThemeProvider）。
+- **实验开关拉取失败可见（F-10）**：网络失败显示原因+重试按钮（不再凭空消失）；成功空列表仍隐藏（既有语义）。
+- **证据**：nso-w3-viewer-dispatch 6/6 + registry 四套件 47/47（旧错分派期望有意翻转）+ nso-w3-failure-visibility 3/3 + settings 14/14；tsc 0。
+- **待补**：实机观感（binary 卡降级原因文案、告警条位置观感），通过后转 verified。
+
 
 ## UI-696: 模型上下文窗口 / 思考强度设置面按图 1+图 2 形态优化（2026-11-06 **verified（dev Electron 边界内；隔离后端 REST 实机 + 9223 离屏 DOM 13/13 + 截图）**）
 

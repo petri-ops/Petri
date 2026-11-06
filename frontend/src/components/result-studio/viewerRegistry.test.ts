@@ -68,12 +68,14 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
     }
   });
 
-  it('report 分支先于其后所有覆盖分支（resultSurface.ts:76 顺序敏感）', () => {
-    // kind report 恒胜：即使扩展名会命中后续 pdf/image/table/text 规则
-    expect(resolveAdapter({ kind: 'report', fileName: 'paper.pdf' })).toBe('report');
-    expect(resolveAdapter({ kind: 'report', fileName: 'cover.png' })).toBe('report');
-    expect(resolveAdapter({ kind: 'report', fileName: 'appendix.csv' })).toBe('report');
-    expect(resolveAdapter({ kind: 'report', fileName: 'brief.md' })).toBe('report');
+  it('BLOCK-369（NSO-W3 F-09）有意翻转：扩展名优先于 kind——kind=report 的 .pdf/.png/.csv/.md 按扩展名分派', () => {
+    // 旧「report 恒胜」让 kind=report 的 .pdf 被塞进 HTML 预览（评估 F-09 错分派）；翻转理由在案
+    expect(resolveAdapter({ kind: 'report', fileName: 'paper.pdf' })).toBe('pdf');
+    expect(resolveAdapter({ kind: 'report', fileName: 'cover.png' })).toBe('image');
+    expect(resolveAdapter({ kind: 'report', fileName: 'appendix.csv' })).toBe('table');
+    expect(resolveAdapter({ kind: 'report', fileName: 'brief.md' })).toBe('markdown');
+    // 扩展名不发言时 kind 仍恒胜
+    expect(resolveAdapter({ kind: 'report', fileName: 'brief.unknownext' })).toBe('report');
   });
 
   it('文件名先 toLowerCase 再匹配（resultSurface.ts:74），大小写不敏感', () => {
@@ -103,10 +105,10 @@ describe('viewerRegistry（BLOCK-138 P0 切片A）adapter 解析 = resultSurface
     expect(resolveAdapter({ kind: 'plot', fileName: 'volcano.svg' })).toBe('image');
   });
 
-  it('image 分支先于 .xls/.xlsx 覆盖分支（resultSurface.ts:78 < :79 顺序敏感）', () => {
-    // 现状行为：kind plot 的 .xls 也落 image——image 分支在 xlsx 覆盖之前
-    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xls' })).toBe('image');
-    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('image');
+  it('BLOCK-369（NSO-W3 F-09）有意翻转：.xls/.xlsx 按扩展名分派（spreadsheet/binary），不再被 image 抢先', () => {
+    // 旧「image 先于 xlsx 覆盖」让 kind=plot 的表格文件落图片查看器；翻转理由在案
+    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xls' })).toBe('binary');
+    expect(resolveAdapter({ kind: 'plot', fileName: 'sheet.xlsx' })).toBe('spreadsheet');
   });
 
   it('.xlsx/.xlsm 落 spreadsheet——先于 table 分支（BLOCK-142 原位替换 resultSurface.ts:79 的 binary 位）', () => {
