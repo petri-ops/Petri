@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-06（🏁 **NSO 全程序收尾 completed**：十六包（359-374）40 笔提交；实机走查终态 6/6 可达腿过；剩余全部需人工实机。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-372 completed——四批全收口**：Batch-1 链哈希/Batch-2 FK 回退留证/Batch-3 棘轮同步/Batch-4 两轴分离销号 🟡。NSO 全程序十三包 completed（359-374）。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-370 NSO-W3b completed**：字号 12 处收敛+content-visibility 起步+门禁清偿（03294048/11c352b4）；docs:coverage 守卫当场抓真。NSO 全程序收尾，实机腿项如实挂起。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-369 NSO-W3 completed（带例外）**：F-09/F-10/F-18+字号首例（77b02e3c/f5dc6c1a，UI-697/698）；余项移交 W3b。G0 常态 · 不外推 packaged/Provider/GA。）

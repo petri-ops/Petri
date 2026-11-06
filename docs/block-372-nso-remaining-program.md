@@ -31,4 +31,10 @@ reopen: 各批按自身 plan 收口
 | Batch-3 债棘轮 | ✅ 上限同步 (`80d5eae3`) | live-missing 5→7 / blocked 23→25（NSO 新增三条如实判档）；52 条终态化需独立会话逐条 |
 | Batch-4 外部 MCP | ✅ BLOCK-374 (`bdd31639`) | 两轴分离裁决（MCP trust 轴 vs capability token 轴）；🟡 销号；协议层协商=不需要 |
 
-**NSO 全程序终态**：十三包全部 completed（359–374）；全部未做项已有明确处置结论或等待位（实机腿/独立大包/无阻塞）。
+**NSO 全程序终态**：十六包全部 completed（359–374，42 笔提交）；全部未做项已有明确处置结论或等待位（实机腿/独立大包/无阻塞）。
+
+## Batch-3 补充（2026-11-06）
+
+- 实机走查终态：nso-w3-visual-live flow 6/6 可达腿过（prefs 告警条/树语义/截图）；结果库行、binary 降级原因、投影层 inert 三腿依赖特定 UI 态（结果面板 tab + scheduled 入口）在 9223 上不可靠复现——如实标 pending 待人工。
+- 债棘轮上限同步：live-missing 5→7 / blocked 23→25（NSO W3/W3b 新增三条如实判档）。
+- 全部剩余需人工实机：UI-697/698/699 verified 走查（binary 产物种子 + scheduled 入口 + 读屏）、布局单源几何量测、台账 52 条逐条终态化、FK 逐表清偿。

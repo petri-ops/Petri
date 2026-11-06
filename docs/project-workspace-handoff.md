@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-06（🏁 **NSO 全程序收尾 completed（359-374，40 笔提交）；无 active 工作包**。**接手顺序**：①读本行+§0.4 评分终评 ②工作树=用户资产+两件 surface-matrix 生成器刷新（可重生成）③剩余=全部需人工实机（verified 走查/布局单源/台账 52 条/FK 逐表）④无阻塞可开工项。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-372 completed；无 active 工作包**：四批全收口。**剩余**=①实机走查 UI-697/698/699 verified 腿（需实机+种子产物）②FK 逐表清偿（独立大包）③台账 52 条终态化（独立会话逐条）④外部 MCP 档位=已裁决不需要（两轴分离）⑤P6 重算自然消化。工作树=用户资产+两件生成器刷新。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-370 NSO-W3b completed；无 active 工作包**：NSO 全程序收尾。**剩余（全部需实机腿或用户裁决）**：①布局单源（CenterPanel 双层 layout→CSS 重构+几何量测）②UI 台账 52 条终态化（CDP 代行+人眼集中一次）③实机视觉/读屏走查（UI-697/698/699 verified 腿）④外部 MCP 主体档位（AUDIT-LOG 🟡）⑤链哈希数据模型批 ⑥后端 FK 证据门（全量回归后）。工作树剩=用户资产/临时目录+两件 surface-matrix 生成器刷新（可重生成）。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-369 NSO-W3 completed（带例外）；无 active 工作包**：W3 主项落地（77b02e3c/f5dc6c1a）。**W3b 余项**=布局单源、字号收敛余 5 文件、DOM 预算、UI 台账 52 条终态化、实机视觉/读屏走查（UI-697/698 转 verified 的实机腿）。工作树剩用户资产/临时目录+两件 surface-matrix 生成器刷新。G0 常态 · 不外推 packaged/Provider/GA。）
