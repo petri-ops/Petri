@@ -11,9 +11,9 @@
  * 路径：PETRI_DB_PATH > PETRI_LOCAL_DATA_DIR/petri.db > null（调用方自定兜底）。env-coordinator
  * 在桌面启动时把两者写成一致；两侧同读本函数后，即使 env 被单独覆写也不会各指一个库。
  *
- * foreign_keys 刻意**不**在基础集合内：桌面侧现为 ON、后端侧现为 OFF（历史分歧，
- * 本批实码核对确认）。后端开启 FK 会让当前能写入的违约行开始失败，属行为变更，
- * 需全量回归后单独裁决——先在两侧显式声明现值，不在这里静默统一。
+ * foreign_keys 刻意**不**在基础集合内：桌面侧现为 ON、后端侧为 OFF。BLOCK-372 Batch-2
+ * 实测 FK=ON 全量 179 fail（测试 setup + 可能存量数据大量不满足 FK 约束）——已回退为 OFF，
+ * 登录 wave-0/full-test-shards/ 证据。全量切换需独立大包逐表清偿。
  */
 
 const path = require('path');

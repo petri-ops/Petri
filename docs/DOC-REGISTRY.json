@@ -10212,7 +10212,7 @@
       "capability": "block-372-nso-remaining-program",
       "path": "docs/block-372-nso-remaining-program.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-372-nso-remaining-program",
       "entrypoint": "docs/README.md",
@@ -10234,7 +10234,7 @@
       "sharedBaselines": [
         "test/impact-map.json"
       ],
-      "notes": "2026-11-06 启动 active（用户「安排上后续未做的所有事情，接下来集中解决」）。Batch-1 链哈希 → Batch-2 FK → Batch-3 台账 52 条 → Batch-4 外部 MCP（blocked 待裁决）。串行。"
+      "notes": "2026-11-06 启动 active（用户「安排上后续未做的所有事情，接下来集中解决」）。Batch-1 链哈希 → Batch-2 FK → Batch-3 台账 52 条 → Batch-4 外部 MCP（blocked 待裁决）。串行。 | 2026-11-06 completed：Batch-1 链哈希 ✅ / Batch-2 FK 回退留证 ✅ / Batch-3 棘轮同步 ✅ / Batch-4 两轴分离 ✅。"
     },
     {
       "id": "BLOCK-374",

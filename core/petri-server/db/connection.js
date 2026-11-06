@@ -12,11 +12,14 @@ const path = require('path');
 // migration-runner 同一实现）：PETRI_DB_PATH > PETRI_LOCAL_DATA_DIR/petri.db > 包内旧默认。
 // 基础集合=WAL + busy_timeout 10s（"admin panel frozen" 根因：高频写占 WAL writer 时读立刻
 // SQLITE_BUSY）+ mmap 64MB（CK-05 实测大扫描 −8.5%/点查 −15%）+ wal_autocheckpoint 1000。
-// foreign_keys 后端侧维持现值（未开启）——与桌面侧 ON 的历史分歧另行裁决，见策略模块头注。
+// BLOCK-372 Batch-2（用户裁决「直接搞完剩余未做的内容」）：后端 FK 开启。
+// 此前桌面 ON / 后端 OFF 分歧（策略模块头注）；开启后存量违约行会开始失败——
+// 全量回归（test:all:sharded）作为证据门：绿则保持，红则回退并登记违约清单。
 const { resolveDbPath, applyCanonicalPragmas } = require('../../shared-backend/db-connection-policy');
 const DB_PATH = resolveDbPath(process.env) || path.join(__dirname, '..', 'petri.db');
 const db = new Database(DB_PATH);
 applyCanonicalPragmas(db, { busyTimeoutMs: 10000 });
+db.pragma('foreign_keys = ON');
 // Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {
   db.pragma('wal_checkpoint(TRUNCATE)');
