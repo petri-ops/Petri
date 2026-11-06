@@ -1,4 +1,4 @@
-361. [`block-364-nso-w5a-plan.md`](./block-364-nso-w5a-plan.md) — 2026-11-06 **active（NSO-W5a 零交集子集）**：删零消费死熔断 helpers/circuit-breaker.js + impact-map 测试覆盖棘轮（新测试不挂规则即红，存量只减）；W5 其余项落在制批文件，随 W1 后处理
+361. [`block-364-nso-w5a-plan.md`](./block-364-nso-w5a-plan.md) — 2026-11-06 **completed（带例外：其余 W5 项随在制批裁决后处理）**：删零消费死熔断 helpers/circuit-breaker.js + impact-map 测试覆盖棘轮（新测试不挂规则即红，存量只减）；W5 其余项落在制批文件，随 W1 后处理
 360. [`block-363-nso-w6a-plan.md`](./block-363-nso-w6a-plan.md) — 2026-11-06 **completed（带例外：Windows 树终止/并行挂起根因另批）**：dev-task-runner 终止信号整组下发（孙进程不再成孤儿）+ 真实进程回归；node --test 并行挂起根因保留待查（串行默认已绕过）
 359. [`block-362-nso-w7a-plan.md`](./block-362-nso-w7a-plan.md) — 2026-11-06 **completed（NSO-W7a 治理工具化）**：audit:compact 永不追加进有未提交改动的归档文件（同类第三次复发转机械门禁）+ DOC-REGISTRY coverage 字段机械校验与生成（F-22 防回潮）；最终 canonical 回写（W7b）留到全部波次之后
 358. [`block-361-nso-w4-plan.md`](./block-361-nso-w4-plan.md) — 2026-11-06 **completed（带例外：矩阵生成器化移交 W7）**：扩展生态单源化——插件源统一走 plugin-loader（F-07）+ 工具名双形状与 executionMetadata 保守缺省（F-08）+ source enum 派生/inputSchema 类型映射（F-17）+ 插件入口确定性；证据=`acceptance/nso-2026-11-06/wave-4/`

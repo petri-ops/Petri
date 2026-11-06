@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-06（🏁 **BLOCK-364 NSO-W5a completed（带例外）**：删零消费死熔断 + impact-map 测试覆盖棘轮；提交=ec39c6e3。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-363 NSO-W6a completed（带例外）**：dev-task-runner 终止整组下发（孤儿孙进程根修），真实进程回归红→绿；提交=06a12e2b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-362 NSO-W7a completed**：audit:compact 脏目标守卫（同类第三次复发转机械门禁）+ coverage 计数校验与 docs:coverage；提交=742f6875。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-361 NSO-W4 completed（带例外）**：插件源单源（F-07）/ 工具名双形状元数据（F-08）/ source enum 派生 + schema 类型映射（F-17）/ 插件入口确定性；契约 5/5、邻域 285/0；生成器化移交 W7。提交=c9d22abb。G0 常态 · 不外推 packaged/Provider/GA。）

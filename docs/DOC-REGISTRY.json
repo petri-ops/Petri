@@ -9994,7 +9994,7 @@
       "capability": "block-364-nso-w5a-dead-code-and-coverage",
       "path": "docs/block-364-nso-w5a-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-364-nso-w5a-dead-code-and-coverage",
       "entrypoint": "docs/README.md",
@@ -10016,7 +10016,7 @@
       "sharedBaselines": [
         "test/impact-map.json"
       ],
-      "notes": "2026-11-06 启动 active。W5a=与两组他方在制零交集子集：删零消费死熔断 helpers/circuit-breaker.js + impact-map 测试覆盖棘轮（新测试必须挂规则，存量 147 只减）。runLoop 拆分/恒 null 桩/legacy 文案/双重试分类均落在制批文件，随 W1 后处理。"
+      "notes": "2026-11-06 启动 active。W5a=与两组他方在制零交集子集：删零消费死熔断 helpers/circuit-breaker.js + impact-map 测试覆盖棘轮（新测试必须挂规则，存量 147 只减）。runLoop 拆分/恒 null 桩/legacy 文案/双重试分类均落在制批文件，随 W1 后处理。 | 2026-11-06 completed（带例外）：死熔断删除 + 测试覆盖棘轮（ec39c6e3）；W5 其余项随在制批裁决后处理。"
     }
   ],
   "lastUpdated": "2026-11-06",
