@@ -135,10 +135,13 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
       <h4>从外部 Agent 导入配置</h4>
       <p className="petr-hint">只读预览 → 勾选确认 → 应用（可回滚）；凭据永不导入。</p>
 
-      <div>
+      {/* BLOCK-369（NSO-W3 F-18）表单语义：fieldset/legend 组名 + label htmlFor 关联。 */}
+      <fieldset>
+        <legend>选择配置来源</legend>
         {SOURCE_OPTIONS.map((opt) => (
-          <label key={opt.id}>
+          <label key={opt.id} htmlFor={`external-import-source-${opt.id}`}>
             <input
+              id={`external-import-source-${opt.id}`}
               type="radio"
               name="external-import-source"
               value={opt.id}
@@ -148,9 +151,11 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
             {opt.label}
           </label>
         ))}
-      </div>
+      </fieldset>
 
+      <label htmlFor="external-import-content">配置内容</label>
       <textarea
+        id="external-import-content"
         data-external-import-content
         rows={5}
         value={content}
@@ -182,7 +187,7 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
                   setSelected(next);
                 }}
               />
-              <code>{key}</code> = <code>{String(preview.patch?.[key])}</code>
+              <code>{key}</code> = <code>{typeof preview.patch?.[key] === 'string' ? preview.patch[key] : JSON.stringify(preview.patch?.[key])}</code>
             </label>
           ))}
           {(preview.credentialsDetected?.length ?? 0) > 0 && (
@@ -226,7 +231,8 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
       {applyResult && !applyResult.ok && (
         <p data-external-import-error role="alert">应用失败：{applyResult.error}</p>
       )}
-      {message && <p data-external-import-message>{message}</p>}
+      {/* BLOCK-369（NSO-W3 F-18）回滚/操作回执 live region：读屏用户可听到结果。 */}
+      {message && <p data-external-import-message role="status" aria-live="polite">{message}</p>}
     </section>
   );
 }

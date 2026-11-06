@@ -105,6 +105,10 @@ export function CenterPanel({ ctx, refs }: CenterPanelProps): React.ReactElement
       <div
         className={`${styles.workspaceProjectionLayer} ${workspaceMode === 'chat' ? styles.workspaceProjectionLayerActive : ''}`}
         aria-hidden={workspaceMode !== 'chat'}
+        // BLOCK-369（NSO-W3 F-18）inert：隐藏投影层不可聚焦——此前仅 aria-hidden，
+        // 输入框/按钮仍可 Tab 进入（键盘用户在不可见层操作）。
+        // React 18 类型未收 inert 属性 → 展开旁路（运行时 DOM 属性生效）。
+        {...({ inert: workspaceMode !== 'chat' ? '' : undefined } as Record<string, unknown>)}
         data-projection="conversation"
       >
         <SessionFrameView

@@ -69,7 +69,7 @@ export function ResultsLibrary({ jobs, onOpenJob }: ResultsLibraryProps): React.
                   <span className={styles.resultsLibraryItemTitle}>
                     {jobTitle(job)}
                     {job.execution_target_id ? (
-                      <span title="此任务在远程执行目标上运行" style={{ marginLeft: 6, fontSize: 11, padding: '0 6px', borderRadius: 999, border: '1px solid currentColor', opacity: 0.75 }}>
+                      <span title="此任务在远程执行目标上运行" style={{ marginLeft: 6, fontSize: 'var(--petri-font-size-xs, 11px)', padding: '0 6px', borderRadius: 999, border: '1px solid currentColor', opacity: 0.75 }}>
                         远程
                       </span>
                     ) : null}

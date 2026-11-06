@@ -1,4 +1,13 @@
 # Petri Desktop UI 产品化审计台账
+## UI-698: 隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）
+
+- **CenterPanel 非 chat 投影层 inert**：此前仅 aria-hidden（输入框/按钮仍可 Tab 进入不可见层）；现投影层带 inert（React 18 类型缺属性→展开旁路）。chat 模式不带。
+- **项目树语义**：容器 role=tree+aria-label；节点 role=treeitem+aria-expanded（LeftPanel ProjectTree）。
+- **ExternalImportPanel 表单语义**：fieldset+legend「选择配置来源」；radio/textarea label 关联（htmlFor/id）；对象补丁渲染 JSON（修 [object Object]）；回执/回滚 message 带 role=status+aria-live=polite（走 apply+rollback 全链验证）。
+- **字号 token 首例**：ResultsLibrary 徽标 fontSize:11 → var(--petri-font-size-xs, 11px)（token 已有声明，宪章注释=出徽标域即违规）；其余 5 文件收敛列入 W3b。
+- **证据**：nso-w3-a11y 4/4（inert 双模式/树语义在 LeftPanel 契约/全链回滚 live region）；CenterPanel 21/21；settings 14/14；theme-token-contract 绿；tsc 0。
+- **待补**：实机读屏/键盘走查（Tab 不入不可见层），通过后转 verified。
+
 ## UI-697: viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）
 
 - **viewer 分派三段式（F-09 有意翻转旧错分派）**：扩展名优先 → kind 兜底 → binary+机器可读降级原因（preview_disabled / no_matching_viewer）。修复 kind=report 的 .pdf/.mp4/.svg 被塞进 HTML 预览；Shell binary 卡显示降级原因（data-testid=viewer-fallback-reason）；plot .svg 让位语义保持（unlessKind）。旧「现状平迁」期望逐条有意翻转留理由（viewerRegistry.test / viewerRegistry.block142.test）。

@@ -435,7 +435,8 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
 
 function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
   return (
-    <div className={styles.projectTreeScroll}>
+    // BLOCK-369（NSO-W3 F-18）树语义：role=tree + 节点 treeitem/aria-expanded。
+    <div className={styles.projectTreeScroll} role="tree" aria-label="项目树">
       {ctx.visibleProjects.map((p) => (
         <ProjectNode
           key={p.id}
@@ -552,7 +553,7 @@ function ProjectNode({
   };
 
   return (
-    <div className={styles.projectTreeNode}>
+    <div className={styles.projectTreeNode} role="treeitem" aria-expanded={isExpanded}>
       <div
         className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
         onClick={() => {
