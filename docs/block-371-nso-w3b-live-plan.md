@@ -5,7 +5,7 @@ goal: NSO-W3b 实机走查——9223 离屏实例跑 UI-697/698/699 的 live 腿
 acceptance:
   - nso-w3-visual-live flow 落盘证据 JSON+PNG；可达腿全 PASS；不可达腿如实 pending（不冒绿）
   - UI-697/698/699 台账回写实机结果
-reopen: 结果库行/binary 降级原因两腿待该项目结果面板行数据（其余两腿已 live 通过：会话行 cv + scheduled inert）
+reopen: 结果库行/binary 降级原因/inert 三腿依赖特定 UI 态（结果面板 tab + scheduled 入口）在 9223 上不可靠复现——需实机人工走查
 ---
 
 # BLOCK-371 · NSO-W3b 实机走查

@@ -1,5 +1,5 @@
 # Petri Desktop UI 产品化审计台账
-## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 content-visibility live 已过（p_mvtu0b52_9cbr 6 会话）；结果库行腿待该项目结果面板行数据）**）
+## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 cv live 在 p_mvtu0b52_9cbr 上过；结果库行 cv 在 p_mvtwf22y_9byo 上也未出现——结果面板 UI 态依赖，实机走查待人工）**）
 
 - **字号 token 收敛**：fontSize:11 → var(--petri-font-size-xs, 11px) 共 12 处 5 文件（ChatArtifactCard×8 / LeftSshCreatePanel×2 / LeftPanel / CrashNoticeBanner / TerminalWindowPage）；TerminalWindowPage XTerm 例豁免留痕（fontSize 为数值 canvas API，CSS token 不适用）。
 - **DOM 预算起步（零依赖）**：结果库行（resultsLibraryItem）与会话行（convItem）content-visibility:auto + contain-intrinsic-size——视口外行跳过渲染；hover/选中态不受影响。消息列表（SimpleChat）不在本批（改动面属 UI-696 邻接，留待其 verified 后）。
@@ -15,7 +15,7 @@
 - **证据**：nso-w3-a11y 4/4（inert 双模式/树语义在 LeftPanel 契约/全链回滚 live region）；CenterPanel 21/21；settings 14/14；theme-token-contract 绿；tsc 0。
 - **待补**：实机读屏/键盘走查（Tab 不入不可见层），通过后转 verified。
 
-## UI-697: viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（prefs 失败告警条 live 腿已过：role=status+文案+重载消失，flow=nso-w3-visual-live 6/6；binary 降级原因 live 腿待库内 binary 产物种子）**）
+## UI-697: viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（live 腿 6/6 过含 prefs 告警条+截图；binary 降级原因腿需特定 UI 态+binary 产物——结果库行在 9223 上不可靠复现，实机走查待人工）**）
 
 - **viewer 分派三段式（F-09 有意翻转旧错分派）**：扩展名优先 → kind 兜底 → binary+机器可读降级原因（preview_disabled / no_matching_viewer）。修复 kind=report 的 .pdf/.mp4/.svg 被塞进 HTML 预览；Shell binary 卡显示降级原因（data-testid=viewer-fallback-reason）；plot .svg 让位语义保持（unlessKind）。旧「现状平迁」期望逐条有意翻转留理由（viewerRegistry.test / viewerRegistry.block142.test）。
 - **prefsSync 失败可见（F-10）**：同步失败出 role=status 固定告警条（含错误与「本端已生效」说明），恢复成功自动消失（ThemeProvider）。

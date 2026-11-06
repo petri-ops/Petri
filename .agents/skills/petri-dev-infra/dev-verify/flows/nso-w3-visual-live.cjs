@@ -114,7 +114,7 @@ module.exports = {
       assert('F10_2_banner_gone_after_reload', bannerAfterReload === 'absent', `afterReload=${bannerAfterReload}`);
 
       // ── F18-1：项目树语义（chat 主页）─────────────────────────
-      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtu0b52_9cbr`)}; 'ok'`);
+      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtwf22y_9byo`)}; 'ok'`);
       await sleep(3000);
       const c4 = await lib.connectTestTarget({ timeoutMs: 15_000 });
       try { client.socket.close(); } catch { /* ignore */ }
@@ -133,10 +133,17 @@ module.exports = {
         (nameBtn || rows[0]).click();
         return 'selected';
       })()`).catch(() => 'no_treeitem');
-      await sleep(1800);
+      await sleep(3000);
       assert('F18_1_tree_semantics', tree.tree === true && tree.treeItems > 0 && tree.firstExpanded === true,
         JSON.stringify(tree) + ` projSelected=${projSelected}`);
 
+      // 尝试展开结果库（如有 tab/section header 可点）
+      await lib.evalJs(client, `(function(){
+        var hdrs = [].slice.call(document.querySelectorAll('[class*="resultsLibraryHeader"] button, [class*="resultsLibrary"] summary, [data-testid*="result"] button'));
+        for (var i = 0; i < hdrs.length; i++) { try { hdrs[i].click(); } catch(e) {} }
+        return hdrs.length;
+      })()`).catch(() => 0);
+      await sleep(800);
       // ── W3b-1/2：content-visibility（结果库行 / 会话行）────────
       const cv = await lib.evalJs(client, `(function(){
         function probe(sel){
@@ -163,7 +170,7 @@ module.exports = {
 
       // ── F18-2：scheduled 入口可达时的投影层 inert ─────────────
       // scheduled 模式 URL 直达（useWorkspaceRouting：/project/:id/scheduled）
-      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtu0b52_9cbr/scheduled`)}; 'ok'`);
+      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtwf22y_9byo/scheduled`)}; 'ok'`);
       await sleep(3000);
       const p = await lib.evalJs(client, `(function(){
         var layer = document.querySelector('[data-projection="conversation"]');

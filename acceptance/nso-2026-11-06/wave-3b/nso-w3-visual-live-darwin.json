@@ -1,8 +1,8 @@
 {
   "name": "nso-w3-visual-live",
   "platform": "darwin",
-  "startedAt": "2026-11-06T14:40:21.051Z",
-  "finishedAt": "2026-11-06T14:40:37.345Z",
+  "startedAt": "2026-11-06T15:47:07.657Z",
+  "finishedAt": "2026-11-06T15:47:25.857Z",
   "assertions": [
     {
       "name": "S1_test_instance_connected",
@@ -27,17 +27,7 @@
     {
       "name": "F18_1_tree_semantics",
       "pass": true,
-      "detail": "{\"tree\":true,\"treeItems\":43,\"firstExpanded\":true} projSelected=selected"
-    },
-    {
-      "name": "W3B_2_conv_row_content_visibility_auto",
-      "pass": true,
-      "detail": "[object Object]"
-    },
-    {
-      "name": "F18_2_hidden_projection_inert",
-      "pass": true,
-      "detail": "{\"layer\":true,\"ariaHidden\":\"true\",\"inert\":true}"
+      "detail": "{\"tree\":true,\"treeItems\":6,\"firstExpanded\":true} projSelected=selected"
     },
     {
       "name": "SHOT_screenshot_captured",
