@@ -16,3 +16,7 @@
 <!-- BLOCK-360 W2：closeout 首步 audit:compact 再次把链淘汰行写入在制集文件 audit-log-through-2026-11-05.md，原文逐字迁入本档（零触碰恢复，搬移不改写）。 -->
 <!-- audit-log-compact.mjs 追加 @ 2026-11-06T03:00:23.681Z -->
 最后更新：2026-11-05（🔵 **第二批 4 个 BLOCK 一次性立项（批量开工授权）**：用户「有几个 block 要做，一次性安排好，逐个推完，中间不用问我意见」。包序 355 C-45 裁剪原子性（P1 缺陷）/ 356 任务套件 v2 / 357 货架 detour+能力地图 / 358 文件树分页归因，串行自动推进。**三项客观排除**：C-46 pack 仓不在本仓工作区、G1 启动需显式发令（红线在场）、O-1 屏幕观感需人工实机；均如实登记不伪造。总纲=`docs/next-batch-program-2026-11-05.md`。G0 常态 · 不外推 packaged/Provider/GA。）
+
+<!-- BLOCK-361 W4：closeout 首步 audit:compact 写入在制集文件的链淘汰行，原文逐字迁入本档（零触碰恢复）。 -->
+<!-- audit-log-compact.mjs 追加 @ 2026-11-06T03:25:50.335Z -->
+最后更新：2026-11-05（✅ **BLOCK-355 C-45 收口（第二批 1/4）**：`message-trimmer.js` 三层修复——tool 链原子单元（同留同裁）/ idx 精确顺序还原（原 age 升序倒置）/ 孤立 tool 防御丢弃。契约 6/6 含负测（复刻旧算法被判红）、回归 19/19、**T7 冻结场景复跑 completed**（49 tool_calls、compaction=1、20 项 FACT 标记全收、干预 0）。证据已隔离到 acceptance/block-355/ 并恢复 348 原八任务结果。报告=docs/block-355-report.md。口径如实：未做全套 8 任务重跑，不提前宣称 8/8（归 356）。closeout 16 门绿。G0 常态 · 不外推 GA。）

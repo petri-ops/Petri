@@ -9914,7 +9914,7 @@
       "capability": "block-361-nso-w4-extension-single-source",
       "path": "docs/block-361-nso-w4-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-361-nso-w4-extension-single-source",
       "entrypoint": "docs/README.md",
@@ -9935,7 +9935,7 @@
       "sharedBaselines": [
         "test/knip-baseline.json"
       ],
-      "notes": "2026-11-06 启动 active（用户预授权 W0→W7；Jev next:suggest=NSO-W4 0.62；W1 待在制批裁决、W3 待并发写入者提交 UI 台账，W4 与两组他方在制零交集）。"
+      "notes": "2026-11-06 启动 active（用户预授权 W0→W7；Jev next:suggest=NSO-W4 0.62；W1 待在制批裁决、W3 待并发写入者提交 UI 台账，W4 与两组他方在制零交集）。 | 2026-11-06 completed（带例外）：W4-1~4 交付（c9d22abb，契约 5/5，邻域 285/0）；矩阵/货架/能力地图生成器化移交 W7。"
     }
   ],
   "lastUpdated": "2026-11-06",

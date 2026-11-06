@@ -1,6 +1,6 @@
 ---
 capability: block-361-nso-w4-extension-single-source
-status: active
+status: completed
 goal: NSO-W4 扩展生态单源化——插件源、MCP 工具名与元数据、schema 类型映射、插件入口在任意 dataDir/dev/pack 形态下都按同一套单源规则工作，初始化降级可见（W2-6 已落地 health）。
 acceptance:
   - registry.refreshPluginSources 改用 plugin-loader 单源解析（installed 含 PETRI_LOCAL_DATA_DIR/plugins 一档；built-in 含打包 Resources 回落），四源优先级有行为测试
@@ -21,3 +21,16 @@ reopen: 范围变化（如 shelf-matrix/能力地图生成器化扩入本包）�
 - 不新增依赖；不建第二插件源解析器（registry 改为消费 plugin-loader，不是再写一份）
 - 两组他方在制（22M+10?? 在制批、并发写入者的模型偏好 UI）零触碰
 - shelf-matrix 与 detour 复判生成器化、Skill artifacts sha256 补齐按体量另批（本包聚焦源/名/schema/入口四个单源缺口）
+
+## 交付与收口（2026-11-06）
+
+| 项 | 状态 | 证据 |
+| --- | --- | --- |
+| W4-1 插件源单源（F-07） | ✅ | registry `computePluginSources` 消费 plugin-loader；installed 补 `$PETRI_LOCAL_DATA_DIR/plugins`；built-in 打包回落收归 loader |
+| W4-2 工具名双形状 + executionMetadata（F-08） | ✅ | `{name}` 形 Skill/IDE 条目投影保守缺省元数据 |
+| W4-3 source enum 派生 + schema 类型映射（F-17） | ✅ | enum=SOURCE_PRIORITY 键（含 pack）；boolean/file/directory 显式映射 |
+| W4-4 插件入口确定性 | ✅ | `selectPluginEntryScript`；15 个 pack 插件实核均有同名入口，行为零变化 |
+| shelf-matrix / detour 复判生成器化、Skill artifacts sha256、三账本同源 | ⏸ 移交 W7 | 蓝图 W7「四账本生成器」同一责任面，避免两包各写一份生成器 |
+
+- 契约 `test/nso-w4-extension-single-source.test.mjs` 5/5（首跑 5/5 红）；插件/MCP 邻域 39 套件 285 pass / 0 fail / 12 skip。提交 `c9d22abb`。
+- **completed（带例外）**：蓝图 §7.3 出口中「三份矩阵可由同一命令重建」未达成，移交 W7。
