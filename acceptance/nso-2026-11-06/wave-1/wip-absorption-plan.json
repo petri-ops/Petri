@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave1-wip-absorption-plan",
+  "generatedOn": "2026-11-06",
+  "authorization": "用户 2026-11-06「行 要再规划一下吗 把剩下没做的 统一搞完」= 对上一轮唯一阻塞问题（在制批处置）的授权答复；AUDIT-LOG 🟡 处置注记在案",
+  "inScope": "22 modified + 3 new contract tests（见 wave-0/wip-inventory.json wip-agent-resilience-candidate 面 + 两件 surface-matrix 生成器刷新 + 11-05 归档补行）",
+  "outOfScope": [
+    "用户资产与临时目录：assets/、model3d/、petri-logo*、tmp-block342-live/、tmp-review/、docs/pelican-bicycle.html",
+    "并发写入者 UI-696 批（模型偏好 UI，11 项，10:21 后静默）"
+  ]
+}

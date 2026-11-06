@@ -1,6 +1,6 @@
 ---
 capability: next-stage-optimization-blueprint-2026-11-06
-status: active
+status: planned
 goal: 以全量评估为事实基线，在不扩展阶段边界、不新增依赖、不破坏通用 agent 身份的前提下，按波次把 Petri 优化成任务跑得完、错误看得见、证据可复跑、体验可信且结构可持续演进的本地通用 agent。
 acceptance:
   - W0-W7 每波有目标、具体改进点、优先级、依赖和出口判据
@@ -61,7 +61,7 @@ reopen: 用户逐波发令后按治理规范分配正式工作包编号并更新
 | Wave | 状态 | 承载包 | 完成证据 |
 | --- | --- | --- | --- |
 | W0 | ✅ completed（带例外） | BLOCK-359 | 干净树 closeout:full 与 P6 源绑定重算移交为 W1 入口门（阻断=在制批处置待裁决） |
-| W1 | ▶ 启动 | BLOCK-365 | 用户 2026-11-06「行 … 把剩下没做的统一搞完」= 授权接收在制批；首切片=审读+测试+显式提交+model-surface 重打，兑现 W0 干净树出口与 P6 重算 |
+| W1 | ▶ 启动 | BLOCK-365（active） | 用户 2026-11-06「行 … 把剩下没做的统一搞完」= 授权接收在制批；首切片=审读+测试+显式提交+model-surface 重打，兑现 W0 干净树出口与 P6 重算 |
 | W2 | ✅ completed（带例外） | BLOCK-360 | W2-5（外部 MCP 主体档位未决）、W2-7（数据模型批）显式移交 |
 | W3 | ⏸ deferred | 待立项 | 需改 UI 台账；并发写入者（模型偏好 UI，UI-696）11 项未提交，待其收口 |
 | W4 | ✅ completed（带例外） | BLOCK-361 | 矩阵/货架/能力地图生成器化移交 W7b |
