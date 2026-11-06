@@ -7548,6 +7548,27 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "ui-contract"
+    },
+    {
+      "id": "block359-test-shards",
+      "note": "BLOCK-359（W0-9）全量测试三段分片：有界 task:runner + 超时 unknown 语义 + node-long 分类契约；改分片脚本时跑本契约。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/test-all-shards.mjs",
+        "test/block359-test-shards.test.mjs"
+      ],
+      "tests": [
+        "test/block359-test-shards.test.mjs"
+      ]
+    },
+    {
+      "id": "nso-evaluation-artifacts",
+      "note": "NSO 2026-11-06 评估与蓝图证据面（机械基线/W0 清单与裁决 JSON）：证据记录改动不触发测试，只登记可见性（对标 program-348-354-artifacts 空测试惯例）。",
+      "patterns": [
+        "acceptance/evaluation-2026-11-06/**",
+        "acceptance/nso-2026-11-06/**"
+      ],
+      "tests": []
     }
   ]
 }

@@ -53,6 +53,43 @@ test('block350 gate: skipped 场景不参与判定（如实透传原因）', () 
   assert.equal(rows[0].status, 'skipped');
 });
 
+// ── BLOCK-359 双判据（绝对噪声地板 + 相对容差）───────────────────────────────
+// 低耗时场景（20ms 量级）纯百分比容差落在调度噪声带内（实测 32/34/36ms 跨 32ms 阈值
+// FAIL/PASS/FAIL）；双判据=阈值取 max(中位×(1+容差), 中位+absoluteSlackMs)。
+
+test('block359 gate: 低耗时场景噪声地板生效——噪声带内样本判绿（修复前判红）', () => {
+  const baseline = { scenarios: { long_conversation: { ...baseScenario(20), absoluteSlackMs: 20 } } };
+  const current = { scenarios: { long_conversation: { sampleMs: 36 } } };
+  const { ok, rows } = comparePerf(current, baseline);
+  assert.equal(ok, true, '36ms 是实测噪声带内样本（中位 20 + 地板 20 = 40 阈值），不得判红');
+  assert.equal(rows[0].status, 'green');
+  assert.match(rows[0].detail, /地板/);
+});
+
+test('block359 gate: 高耗时场景相对容差仍主导（地板不抬阈值）', () => {
+  const baseline = { scenarios: { cold_start: { ...baseScenario(546, 60), absoluteSlackMs: 20 } } };
+  const current = { scenarios: { cold_start: { sampleMs: 900 } } };
+  const { ok, rows } = comparePerf(current, baseline);
+  assert.equal(ok, false, '900 > max(874, 566)=874：相对容差主导，劣化照判红');
+  assert.equal(rows[0].status, 'red');
+});
+
+test('block359 gate: 植入慢样本必红（噪声地板不放过真实退化）', () => {
+  const baseline = { scenarios: { long_conversation: { ...baseScenario(20), absoluteSlackMs: 20 } } };
+  const current = { scenarios: { long_conversation: { sampleMs: 400 } } };
+  const { ok, rows } = comparePerf(current, baseline);
+  assert.equal(ok, false);
+  assert.equal(rows[0].status, 'red');
+});
+
+test('block359 gate: 未声明 absoluteSlackMs 的场景行为逐字节不变（纯百分比）', () => {
+  const baseline = { scenarios: { long_conversation: baseScenario(20) } };
+  const current = { scenarios: { long_conversation: { sampleMs: 33 } } };
+  const { ok, rows } = comparePerf(current, baseline);
+  assert.equal(ok, false, '33 > 32：无地板声明时保持旧行为（棘轮语义不变）');
+  assert.equal(rows[0].status, 'red');
+});
+
 test('block350: 基线文件在场且四场景齐备（skipped 须带原因）', () => {
   const baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8'));
   const names = ['cold_start', 'long_conversation', 'big_project_tree', 'packaged_start'];

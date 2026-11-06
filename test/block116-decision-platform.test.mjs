@@ -274,12 +274,16 @@ test('BK-04：decision_recent 逐条回放 + point 过滤 + limit 钳制', async
   assert.equal(byPoint.decisions.length, 0, '超长 point 截断后无命中（不抛错）');
 });
 
-test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数 104）', () => {
+test('BK-04：工具注册四件套在位（defs/registry handler/metadata/计数单源）', () => {
   const { TOOL_DEFS, DOMAIN_TOOL_DEFS } = require(path.join(root, 'core', 'petri-server', 'agent-tools', 'tool-defs.js'));
   const names = TOOL_DEFS.map((t) => t.function.name);
   assert.ok(names.includes('decision_summary') && names.includes('decision_recent'), 'defs 在位');
-  // BLOCK-121 result_summary +1 = 74；BLOCK-124（C-13）codegraph +2 = 76（73 系 BLOCK-121 漏改的存量红，本批清偿）
-  assert.equal(names.length, 114, '工具总数 93→109（NEXT/BLOCK-322/336/340）→112（BLOCK-341 +3）→114（BLOCK-342 svg +2）');
+  // BLOCK-359 工具数基线单源化：计数只认 test/model-surface-baselines.json 的
+  // toolDefsCount（新增/删除工具经 `node scripts/model-surface-baseline.mjs --update` 留因），
+  // 不再逐测试硬编码（114 系 BLOCK-342 时代硬编码，工具数已达 115 时恒红）。
+  const toolCountBaseline = require(path.join(root, 'test', 'model-surface-baselines.json')).toolDefsCount;
+  assert.ok(names.length >= 100, `工具数下限防静默萎缩：${names.length}`);
+  assert.equal(names.length, toolCountBaseline, `工具总数应与 model-surface 基线一致（基线=${toolCountBaseline}，实际=${names.length}）`);
   // 恒等：新工具经 session 域模块进入（⋃ 域 = 全集）
   const union = Object.values(DOMAIN_TOOL_DEFS).flat().map((t) => t.function.name);
   assert.ok(union.includes('decision_summary') && union.includes('decision_recent'));

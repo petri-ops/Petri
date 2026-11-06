@@ -42,7 +42,9 @@ test('BLOCK-157 KNW-1 注册表：skill_discover/skill_get 进静态面（含 W7
   const names = TOOL_DEFS.map((d) => d.function.name);
   assert.ok(names.includes('skill_discover'), 'skill_discover 应在 TOOL_DEFS');
   assert.ok(names.includes('skill_get'), 'skill_get 应在 TOOL_DEFS');
-  assert.equal(TOOL_DEFS.length, 114, '静态工具总数 93→109（NEXT/BLOCK-322/336/340）→112（BLOCK-341 godot×2+blend_ops +3）→114（BLOCK-342 svg×2）');
+  // BLOCK-359 工具数基线单源化：计数只认 test/model-surface-baselines.json 的 toolDefsCount。
+  const toolCountBaseline = require(path.join(ROOT, 'test/model-surface-baselines.json')).toolDefsCount;
+  assert.equal(TOOL_DEFS.length, toolCountBaseline, `静态工具总数应与 model-surface 基线一致（基线=${toolCountBaseline}，实际=${TOOL_DEFS.length}）`);
   // 三方一致性：handler/contract 已接线（registry 模块加载即校验，此处显式双查）
   assert.equal(typeof registry.getToolHandler('skill_discover'), 'function');
   assert.equal(typeof registry.getToolHandler('skill_get'), 'function');

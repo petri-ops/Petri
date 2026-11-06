@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave0-head-wip-inventory",
+  "generatedOn": "2026-11-06",
+  "source": { "branch": "main", "head": "fe44fceb" },
+  "method": "git status + per-file git diff review; file contents untouched (zero-touch mandate)",
+  "counts": { "modifiedTracked": 27, "untracked": 13, "diffInsertions": 376, "diffDeletions": 64 },
+  "planes": [
+    {
+      "id": "nso-charter",
+      "label": "评估批交付面（本次蓝图章程与文档同步）",
+      "owner": "NSO-2026-11-06 program（用户指定必读交付）",
+      "disposition": "committed at W0 governance-freeze commit after per-file diff verification",
+      "files": [
+        { "path": "docs/Petri-Desktop-Holistic-Evaluation-2026-11-06.md", "state": "untracked", "note": "十一维评估报告（蓝图唯一事实基线）" },
+        { "path": "docs/next-stage-optimization-blueprint-2026-11-06.md", "state": "untracked", "note": "planned 八波次优化蓝图（本程序章程）" },
+        { "path": "acceptance/evaluation-2026-11-06/", "state": "untracked-dir", "note": "机械基线 JSON" },
+        { "path": "docs/AUDIT-LOG.md", "state": "modified +1", "note": "仅追加评估批广播行" },
+        { "path": "docs/DOC-REGISTRY.json", "state": "modified +39", "note": "登记两份新文档 + coverage 490/473 同步" },
+        { "path": "docs/README.md", "state": "modified +2", "note": "入口 #354/#355" },
+        { "path": "docs/next-steps-roadmap.md", "state": "modified +1", "note": "顶部评估批摘要行" },
+        { "path": "docs/project-workspace-handoff.md", "state": "modified +1", "note": "顶部评估批摘要行" },
+        { "path": "docs/archive/checkpoints/audit-log-through-2026-11-05.md", "state": "modified +9", "note": "audit:compact 归档搬移行" },
+        { "path": "docs/functional-surface-matrix-2026-11-04.md", "state": "modified +12", "note": "生成器刷新：§6 在制文件清单 0→9" },
+        { "path": "acceptance/functional-audit-2026-11-04/surface-matrix.json", "state": "modified +16", "note": "生成器刷新：dirtyFiles 0→9 + dirty 数组" }
+      ]
+    },
+    {
+      "id": "wip-agent-resilience-candidate",
+      "label": "上一会话未收口在制批：输出预算自适应 + 截断续写 + 推理流看门狗 + DSML 字面量保护 + GenUI 完整文件优先级 + prompt 用户优先元规则",
+      "owner": "NSO-W1（BLOCK-360 候选接收；W1 评审、补测试、随 W1 收口落地）",
+      "disposition": "W0 零触碰（不覆盖/不暂存/不提交/不删除/不 stash/reset/checkout）；W1 以 diff 评审 + 契约测试验证后按 W1 提交纪律落地",
+      "quality": "diff 审读定性为自洽完整方向：含 3 个新增契约测试与 4 个存量测试更新；systemPromptChars 1083>993 的 model-surface 红由本面 system-prompt.js 增长导致（W1 落地时显式重打基线留因）",
+      "files": [
+        { "path": "core/petri-server/agent-tools/agent-loop-control.js", "state": "modified +76", "note": "resolveOutputBudget/mergeContinuationText/resolveTruncationTokens/截断三分类/CONTINUATION_PROMPT" },
+        { "path": "core/petri-server/agent-tools/index.js", "state": "modified +12", "note": "再导出新符号" },
+        { "path": "core/petri-server/agent-tools/result-context-binding.js", "state": "modified +4", "note": "失败消息携带真实 reason" },
+        { "path": "core/petri-server/loop-orchestrator.js", "state": "modified +40", "note": "接线输出预算/续写合并/终整理重试体/结果守卫仅可用态判定" },
+        { "path": "core/shared-backend/llm-providers/anthropic.js", "state": "modified +5", "note": "thinking_delta→reasoning_delta 归一" },
+        { "path": "core/shared-backend/llm-providers/dsml-guard.js", "state": "modified +31", "note": "字面量 DSML 标记保留 + flush 放行扣留尾" },
+        { "path": "core/shared-backend/llm-providers/model-gateway.js", "state": "modified +26", "note": "clampThinkingBudgetForOutput（思考预算不饿死正文）" },
+        { "path": "core/shared-backend/llm-providers/stream-stall-watchdog.js", "state": "modified +19", "note": "reasoning_delta 续命 + 首 token 45s→90s" },
+        { "path": "core/petri-server/helpers/desktop-agent-prompt.js", "state": "modified +4", "note": "用户索要真实绝对路径时允许给出" },
+        { "path": "core/petri-server/helpers/gen-ui-prompt.js", "state": "modified +10", "note": "完整单文件 HTML 优先于 fragment" },
+        { "path": "core/petri-server/helpers/model-fallback-policy.js", "state": "modified +5", "note": "缺原因不得擅自定性" },
+        { "path": "core/petri-server/helpers/pack-prompt-fragments.js", "state": "modified +6", "note": "领域包不得覆盖用户显式要求元规则" },
+        { "path": "core/petri-server/helpers/system-prompt.js", "state": "modified +4", "note": "用户要求优先原则 + 路径提示（model-surface 增长源）" },
+        { "path": "resources/skills/visualize/prompts/system.md", "state": "modified +7", "note": "visualize skill 优先级段" },
+        { "path": "scripts/lib/evals-harness.mjs", "state": "modified +15", "note": "PETRI_EVALS_CONTEXT_WINDOW 窗口覆写 + model_profiles 同源写" },
+        { "path": "test/continuation-text-contract.test.mjs", "state": "untracked", "note": "续写落库完整文本契约" },
+        { "path": "test/gen-ui-full-html-priority.test.mjs", "state": "untracked", "note": "完整文件优先级契约" },
+        { "path": "test/thinking-budget-headroom.test.mjs", "state": "untracked", "note": "思考预算钳制契约" },
+        { "path": "test/agent-provider-boundary.test.mjs", "state": "modified +25", "note": "预算/续写边界更新" },
+        { "path": "test/block338-stream-stall-watchdog.test.mjs", "state": "modified +37", "note": "reasoning_delta/90s 契约更新" },
+        { "path": "test/block56-model-fallback.test.mjs", "state": "modified +12", "note": "缺原因文案契约更新" },
+        { "path": "test/dsml-guard.test.mjs", "state": "modified +21", "note": "字面量保留契约更新" }
+      ]
+    },
+    {
+      "id": "user-assets-and-temp",
+      "label": "用户资产与临时目录（不动、不入库、不清理）",
+      "owner": "用户 / 历史 session 残留",
+      "disposition": "零触碰；hygiene:check 只列出不判失败",
+      "files": [
+        { "path": "assets/", "state": "untracked-dir", "note": "未知用户资产" },
+        { "path": "docs/pelican-bicycle.html", "state": "untracked", "note": "历史 session 产物" },
+        { "path": "model3d/enclosure-120x80x30-wall3p0.scene3d.json", "state": "untracked", "note": "用户 3D 运行时产物（handoff 已登记不入库）" },
+        { "path": "petri-logo-concepts.miora", "state": "untracked", "note": "用户资产" },
+        { "path": "petri-logo-concepts_assets/", "state": "untracked-dir", "note": "用户资产" },
+        { "path": "tmp-block342-live/", "state": "untracked-dir", "note": "BLOCK-342 时代临时目录" },
+        { "path": "tmp-review/", "state": "untracked-dir", "note": "评审临时目录" }
+      ]
+    }
+  ],
+  "filePlaneIsolation": {
+    "W0 touches": "HEAD 平面（lint/code-size/perf/工具数/领域中性/测试分片/canonical 文档/评估批章程面提交）",
+    "W0 never touches": "wip-agent-resilience-candidate 与 user-assets-and-temp 两面全部文件",
+    "W1 absorbs": "wip-agent-resilience-candidate 全部文件经评审后随 W1 收口提交；model-surface 基线随落地同批 --update 留因"
+  },
+  "attributedReds": [
+    { "test": "test/block325-model-surface-budget.test.mjs", "red": "systemPromptChars 1083 > 993", "attribution": "wip-agent-resilience-candidate（system-prompt.js 增长）", "resolution": "W1 落地同批重打基线留因" },
+    { "test": "test/g0-rs-p6-product-acceptance.test.mjs", "red": "p6_current_source_tree_not_exact", "attribution": "dirty-tree-by-design（WIP 在场即红，非重打信号）", "resolution": "W1 落地后干净树自动复绿" }
+  ]
+}

@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -193,6 +193,6 @@ function main() {
   console.log(`[model-surface] PASS——systemPrompt=${current.systemPromptChars} chars / toolDefs=${current.toolDefsCount} 个 ${current.toolDefsChars} chars（基线内）`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }

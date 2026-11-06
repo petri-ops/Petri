@@ -122,14 +122,20 @@ function registryState() {
   }
   const docs = Array.isArray(reg.documents) ? reg.documents : [];
   const active = docs.filter((d) => d.status === 'active');
-  // BLOCK-326 — living-plan 且 active 也是进行中工作（如 BLOCK-322 能力纲）；单包串行
-  // 纪律靠它可见（2026-10-30 🟡 抓真：kind 过滤把能力纲静默漏出 active 槽位）。
-  const activeWps = active.filter((d) => d.kind === 'work-package' || d.kind === 'living-plan');
-  const activeOthers = active.filter((d) => d.kind !== 'work-package');
+  // BLOCK-359（W0 canonical 对账）：active 槽位唯一语义拆两档——
+  //   work-package = 串行工作包（单包串行纪律的占槽者，🔴）；
+  //   living-plan  = 常驻能力纲/基础层（如 G0-LF 永久计划、BLOCK-322 能力纲），
+  //                  保持可见（BLOCK-326 🟡 抓真教训：不可静默漏出）但不占串行槽位（🔵）。
+  const activeWps = active.filter((d) => d.kind === 'work-package');
+  const standingPlans = active.filter((d) => d.kind === 'living-plan');
+  const activeOthers = active.filter((d) => d.kind !== 'work-package' && d.kind !== 'living-plan');
   const planned = docs.filter((d) => d.status === 'planned');
   if (!activeWps.length) console.log('当前无 active 工作包（启动需用户裁决）。');
   for (const d of activeWps) {
     console.log(`🔴active  ${d.id}  →  ${d.path}${d.truthDomain ? `  [truthDomain: ${d.truthDomain}]` : ''}`);
+  }
+  for (const d of standingPlans) {
+    console.log(`🔵standing ${d.id}  →  ${d.path}  [常驻·不占单包串行槽位]`);
   }
   if (activeOthers.length) {
     console.log(`其他 active canonical 文档: ${activeOthers.map((d) => d.id).join(', ')}`);

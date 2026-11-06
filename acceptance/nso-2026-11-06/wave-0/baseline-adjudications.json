@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave0-baseline-adjudications",
+  "generatedOn": "2026-11-06",
+  "adjudications": [
+    {
+      "id": "ADJ-1",
+      "baseline": "test/model-surface-baselines.json (systemPromptChars 993 → 实测 1083)",
+      "trigger": "test/block325-model-surface-budget.test.mjs 红：systemPromptChars 1083 > 993",
+      "attribution": "wip-agent-resilience-candidate（system-prompt.js 两处用户优先级原则 + 路径提示改写，diff 字符增量 ≈ +103 ≈ 993→1083；工作树 measureModelSurface()=1083 实证）",
+      "ruling": "显式裁决=基线不随 WIP 提前重打。W1 评审接收该 WIP 时，随 W1 收口同批 `node scripts/model-surface-baseline.mjs --update` 重打并留因（提交信息引用本裁决）；W0 不动基线文件，model-surface 测试保持 WIP 绑定红（inventory attributedReds 已登记）。",
+      "authority": "用户预授权「所有常规工程判断由你自决并留痕」；蓝图 W0 §3.2-7 允许「显式重打或收缩提示词」且 WIP 零触碰优先"
+    },
+    {
+      "id": "ADJ-2",
+      "baseline": "test/domain-neutrality-baseline.json（FederationJobs.tsx deseq2 ×2）",
+      "trigger": "test/domain-neutrality.test.mjs 红：FederationJobs.tsx 存量 deseq2",
+      "ruling": "裁决=改 UI 文案而非重扫基线。两处均为占位示例文案（错误提示与 input placeholder 的「如 deseq2」），非逻辑键；改为中性「对端节点已注册的工具名」。修后测试 3/3 绿，基线无需放宽（其本记 0，文件归 0 后自然对齐；d7-baseline --update 仅刷新 updatedAt）。",
+      "authority": "领域中性棘轮「新增即红、清理下调」原则；AUDIT-LOG 2026-11-05 🟡 的两个合法选项中择不放宽者"
+    },
+    {
+      "id": "ADJ-3",
+      "baseline": "acceptance/block-92/size-baseline.json（workspace-tools.js 1619 → 1636）",
+      "trigger": "gate:code-size FAIL：行数棘轮 + 指纹漂移",
+      "ruling": "裁决=合法增长重打。+17 行增量审计：`cabee3a0`（2026-11-05 用户裁决执行面黑名单默认放行 + riskWarnings + 严格开关）为用户裁决的行为变更，非补丁堆积；`node scripts/code-size-ledger.mjs --write` 重打并随本包提交留因。同批按「只出不进」棘轮移除 PluginStorePanel.tsx 过期例外（526 ≤ 700，17→16）。",
+      "authority": "蓝图 W0 §3.2-4「合法则 --write 重打并说明」"
+    },
+    {
+      "id": "ADJ-4",
+      "baseline": "test/perf-baseline.json（quality:perf 阈值公式）",
+      "trigger": "三次当次复跑 FAIL/PASS/FAIL（long_conversation 34/32/36ms vs 32ms 纯百分比阈值）",
+      "ruling": "裁决=双判据加固而非调基线：threshold=max(中位×(1+容差), 中位+absoluteSlackMs)；仅低耗时场景声明 absoluteSlackMs（long_conversation=20、big_project_tree=15），未声明场景公式逐字节不变。负测（植入慢样本必红）保留并新增 4 条契约。基线 samples/median 未动。",
+      "authority": "蓝图 W0 §3.2-5；红绿先行（先 4 条契约红→实现→10/10 绿）+ 连续 5 次 PASS（wave-0/perf-run-1..5.log）"
+    },
+    {
+      "id": "ADJ-5",
+      "baseline": "工具数计数（block116/157/tool-activity-labels 硬编码 114 vs 实际 115）",
+      "trigger": "三个测试在工具数 115 时代恒红",
+      "ruling": "裁决=单源化：三处改读 test/model-surface-baselines.json 的 toolDefsCount（115），删除硬编码；单源修复过程中抓真 BLOCK-345 遗漏——computer_close 无活动动词标签（tool-events.js verbs 114→115 补「已关闭」+ fixture 补键）。",
+      "authority": "蓝图 W0 §3.2-6「读取 tool-defs facade 计数；新增/删除工具仍需 --update 留因」"
+    }
+  ],
+  "discoveredDefects": [
+    {
+      "id": "DEF-1",
+      "finding": "core/petri-server/helpers/upload-domain-validation.js parseCsv 不剥 RFC-4180 引号——pack demo 的合法带引号 CSV（\"sample\",\"condition\"）被误拒 sample_column_missing，p4r-invariants corpus 因此 7 项取消",
+      "fix": "unquote 成对包裹引号 + \"\" 转义还原；红绿先行（block131 新增 2 条先红后绿 9/9）；引号内含分隔符/换行的完整 RFC 解析如实登记为边界",
+      "verification": "corpus 现推进到 R 执行层；剩余失败=C-46（pack 仓 deseq2.R 语法错，兄弟仓未授权不改）"
+    }
+  ],
+  "attributedUnresolved": [
+    { "item": "p4r-invariants 7 cancels", "cause": "C-46：../petri-pack-bio deseq2.R 语法错（`unexpected string constant`，BLOCK-349 已入池）；兄弟仓未授权不改", "reopen": "用户授权 C-46 修复后复跑 node scripts/g0-rs-p4r-corpus.mjs + test/p4r-invariants.test.mjs" },
+    { "item": "test/block325 model-surface 红", "cause": "WIP 绑定（ADJ-1）", "reopen": "W1 落地同批重打" },
+    { "item": "test/g0-rs-p6-product-acceptance dirty-tree 红", "cause": "WIP 在场即红（by-design 证据绑定）", "reopen": "W1 落地后干净树自动复绿" },
+    { "item": "node-core 分片 63 fail / 24 cancelled", "cause": "全量套件环境类（decision-api 需 key env、Inkscape/R 运行时、dev 栈）+ 已知基线项；W0 义务=有界完成+归因，全绿归 W6", "reopen": "W5/W6 按类清偿（honest-skip 化 + 环境注入化）" }
+  ]
+}

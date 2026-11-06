@@ -19,10 +19,15 @@ const fixture = JSON.parse(
 const { TOOL_DEFS } = require(`${repoRoot}/core/petri-server/agent-tools/tool-defs.js`);
 const { TOOL_ACTIVITY_VERBS, summarizeToolCallForActivity } = require(`${repoRoot}/core/petri-server/agent-tools/tool-events.js`);
 
-test('fixture 覆盖全量静态工具宇宙（TOOL_DEFS 114 个）', () => {
+test('fixture 覆盖全量静态工具宇宙（计数单源=model-surface 基线）', () => {
   const universe = TOOL_DEFS.map((t) => t.function.name).sort();
   const fixtureKeys = Object.keys(fixture).sort();
-  assert.equal(universe.length, 114);
+  // BLOCK-359 工具数基线单源化：不再硬编码（114 系 BLOCK-342 时代数字），
+  // 计数只认 test/model-surface-baselines.json 的 toolDefsCount（--update 留因）。
+  const toolCountBaseline = JSON.parse(
+    readFileSync(new URL('../test/model-surface-baselines.json', import.meta.url), 'utf8')
+  ).toolDefsCount;
+  assert.equal(universe.length, toolCountBaseline, `TOOL_DEFS 应与 model-surface 基线一致（基线=${toolCountBaseline}）`);
   assert.deepEqual(fixtureKeys, universe);
 });
 

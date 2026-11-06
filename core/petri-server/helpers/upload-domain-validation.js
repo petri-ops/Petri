@@ -30,7 +30,17 @@ function parseCsv(filePath) {
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
   if (lines.length === 0) return { header: [], rows: [], truncated: false };
   const delimiter = lines[0].includes('\t') && !lines[0].includes(',') ? '\t' : ',';
-  const split = (line) => line.split(delimiter).map((cell) => cell.trim());
+  // BLOCK-359（W0 抓真）：RFC-4180 带引号的表头/单元格是合法 CSV（pack demo 数据即此形态）。
+  // 朴素 split 不剥引号 → 「"sample"」匹配不上 ^(sample|sample_id)$，合法输入被误拒。
+  // 这里按单元格剥一层成对包裹引号并还原 "" 转义；引号内含分隔符/换行的完整 RFC 解析
+  // 仍超界（如实登记），该形态由上传前的通用嗅探兜底。
+  const unquote = (cell) => {
+    if (cell.length >= 2 && cell.startsWith('"') && cell.endsWith('"')) {
+      return cell.slice(1, -1).replace(/""/g, '"');
+    }
+    return cell;
+  };
+  const split = (line) => line.split(delimiter).map((cell) => unquote(cell.trim()));
   const header = split(lines[0]);
   const scanLines = lines.slice(1, MAX_SCAN_ROWS + 1);
   return {

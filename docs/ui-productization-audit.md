@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-## UI-694: 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**）
+## UI-694: 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**；2026-11-06 BLOCK-359 W0 维护注记）
 
 - **设置「决策与调度」新增五段**（后端能力早已存在、此前前端零调用）：①模型允许清单（读写 `allowedModels` + 理由账本逐行 `模型=理由`，开放/白名单两态如实标注）②原因码词表（折叠展示 `/api/ai/reason-codes`，点开才拉）③运行环境包「重新检测」（复用既有 list IPC，不新增通道）④Agent 操作审计与撤销（`agent-audit` 列表 + `agent-undo/:token` + `agent-settings` 暂停开关）⑤记忆压缩策略（`memory-policy` 读写 + 生效来源标注 + `memory-wipe` 二次确认）。
 - **侧聊窗档位锁定显式化**：`accessModeLocked` 上抛，菜单加锁定说明条 + 四项 `disabled`（原为点了静默无反应）。
@@ -8,8 +8,9 @@
 - **`canCompare` 能力位**：Canvas 去硬编码 `true`，改由调用方按适配器传（默认 false）。
 - **证据**：ModelAccessPanel 3/3 · FederationJobs 3/3（联邦作业提交/查状态/取产物）· AgentAuditPanel 3/3 · MemoryPolicyPanel 3/3 · ResultStudioSurface 5/5；`quality:types` 0；lint 0 error。
 - **待补**：dev Electron 实机腿（面板真连后端、pdf 真渲染），通过后转 verified。
+- **BLOCK-359 W0 维护注记（领域中性清偿，不新增交互面）**：FederationJobs 两处占位示例文案「如 deseq2」改「对端节点已注册的工具名」（错误提示 + input placeholder；领域中性棘轮基线本记 0，文件归 0 自然对齐，未放宽棘轮）；computer_close 活动词表双侧补齐（后端 TOOL_ACTIVITY_VERBS+fixture、前端 toolActivity 动词/图标 eye，5/5+26/26）。
 
-## UI-695: 聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**）
+## UI-695: 聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**；2026-11-06 BLOCK-359 W0 注记：modelConfigAndCollapse.test.tsx 断言双断言形态修复（lint/tsc 互斥，先例 RuntimePolicyPanel），vitest 6/6）
 
 - **模型配置下沉到输入框**（UI-MODELCFG-1）：模型菜单新增「上下文窗口 / 思考强度」两项就地切换——上下文窗口选档（32K/64K/128K/200K）后写回当前模型档案（`POST /api/ai/settings` 部分更新，设置页 SWR 同源刷新）；思考强度与 composer 既有按钮同源（`applyThinkingLevel`，会话级）。原先改这两项要进设置页逐模型操作。
 - **折叠时机改为任务级**（UI-COLLAPSE-2）：折叠判断从「单条消息 pending 结束即折叠」改为「本轮 run 内统一展开、run 结束统一折叠」。边界计算抽为纯函数 `SimpleChat/activeRunWindow.ts`（`resolveActiveRunStartIndex`），历史轮次不因本轮 run 而炸开。

@@ -51,8 +51,9 @@
       "medianMs": 20,
       "tolerancePct": 60,
       "runs": 5,
-      "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）",
-      "env": "mode=mock；纯读路径（product 分页 API）"
+      "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；BLOCK-359 实测噪声带 32-36ms（中位 20），地板=中位+20",
+      "env": "mode=mock；纯读路径（product 分页 API）",
+      "absoluteSlackMs": 20
     },
     "big_project_tree": {
       "metric": "520 文件工作区：tree 分页读全 3 页（200/页）",
@@ -67,8 +68,9 @@
       "medianMs": 12,
       "tolerancePct": 60,
       "runs": 5,
-      "noiseSources": "目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）",
-      "env": "mode=mock；API 层（无渲染）"
+      "noiseSources": "目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）；BLOCK-359 地板=中位+15",
+      "env": "mode=mock；API 层（无渲染）",
+      "absoluteSlackMs": 15
     }
   }
 }

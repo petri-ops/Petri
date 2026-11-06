@@ -452,5 +452,9 @@
   "svg_edit": {
     "label": "已编辑",
     "icon": "pencil"
+  },
+  "computer_close": {
+    "label": "已关闭",
+    "icon": "eye"
   }
 }

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave0-full-shard-triage",
+  "generatedOn": "2026-11-06",
+  "run": {
+    "nodeCore": { "log": ".petri-dev-user-data/task-runs/20261106-003823-nso-w0-shard-node-core-kh5e8.log", "tests": 5081, "pass": 4979, "fail": 44, "cancelled": 24, "skipped": 34, "exit": 1 },
+    "frontend": { "log": ".petri-dev-user-data/task-runs/20261106-004524-nso-w0-shard-frontend-n5g6s.log", "tests": 2539, "pass": 2538, "fail": 1, "exit": 1, "fixed": "toolActivity computer_close 前端镜像（补词+icon eye，26/26 复测绿）" },
+    "nodeLong": { "log": ".petri-dev-user-data/task-runs/20261106-004614-nso-w0-shard-node-long-rqd5j.log", "exit": 0, "verdict": "passed（live/e2e/soak/perf 六文件全绿）" }
+  },
+  "hangFinding": {
+    "observation": "node --test 默认并行（~cores worker）在 627 文件规模下三次确定性挂起：父进程 100% CPU、零子进程、零文件句柄、输出停在同一位置（1577 行 / block258 完成点）；分片首跑（并行，修复前树）完整跑完为唯一例外",
+    "mitigation": "分片脚本默认 --test-concurrency=1（串行）后三段完整跑完",
+    "disposition": "登记 W6（性能与规模化：全量测试稳定门）；非本包引入，node v24.16.0 test-runner 调度层形态",
+    "related": "评估会话 eval-full-tests SIGTERM（exit 143）遗留孤儿 node --test 空转 16 小时，本批已清理——W6 teardown 级联回归的实证案例"
+  },
+  "classes": {
+    "wip-or-dirty-tree-bound": [
+      { "file": "test/block325-model-surface-budget.test.mjs", "cause": "WIP system-prompt.js 增长（ADJ-1）", "reopen": "W1 落地同批 --update 重打" },
+      { "file": "test/g0-rs-p6-product-acceptance.test.mjs", "cause": "脏树证据绑定（by-design）", "reopen": "W1 落地后干净树复绿" },
+      { "file": "test/chat-file-references-server.test.mjs", "cause": "断言 prompt 的绝对路径禁令契约；WIP desktop-agent-prompt/system-prompt 改写该规则", "reopen": "W1 评审 WIP 时同步契约" },
+      { "file": "test/context-breaker.test.mjs", "cause": "超窗修剪+token_budget 事件契约，WIP 触碰 loop-orchestrator 预算面", "reopen": "W1 评审确认（或存量漂移归 W5）" }
+    ],
+    "sibling-repo-c46": [
+      { "file": "test/deseq2-multifactor-design.test.mjs (5)", "cause": "真跑 deseq2.R → unexpected string constant（C-46）" },
+      { "file": "test/p4r-baseline.test.mjs (1)", "cause": "corpus 依赖 deseq2（C-46）" },
+      { "file": "test/p4r-invariants.test.mjs (8)", "cause": "corpus 依赖 deseq2（C-46）", "reopen": "用户授权 C-46 修复后复跑" }
+    ],
+    "environment-missing": [
+      { "file": "test/block63-sidecar-contract.test.mjs (9) + block63-sidecar-tools.test.mjs (10) + block48-sidecar-tools.test.mjs (1)", "cause": "Windows sidecar 二进制 / UIA 通道（darwin 宿主）", "reopen": "W5 honest-skip 化（缺二进制显式 skip+打印）" },
+      { "file": "test/block342-inkscape.test.mjs (3) + block344-edit-governance.test.mjs (1)", "cause": "Inkscape 未安装", "reopen": "同上" },
+      { "file": "test/block111-marker-classification.test.mjs (10)", "cause": "decision-api 需 TYPESAFE key env 注入（shell 未导出）", "reopen": "W5 环境注入化或 no_key 诚实 skip" },
+      { "file": "test/block150-explicit-credentials.test.mjs (1) / next03-task-spec.test.mjs (1)", "cause": "凭据环境敏感断言", "reopen": "W5 同上" }
+    ],
+    "existing-head-reds-only-in-full-runs": [
+      { "file": "test/block267-flow-env-trap.test.mjs (1)", "cause": "14 个 block322/block333 时代 flow 顶层 env 固化（BLOCK-267 首批清偿 8 个后的存量）", "reopen": "W5 清偿批次" },
+      { "file": "test/loop-orchestrator-subdomains.test.mjs (3)", "cause": "行数棘轮与实际漂移（评估 §2.3 已记录 1250 vs 1675）", "reopen": "W5 runLoop 拆分时重打" },
+      { "file": "test/block321c-center-priority.test.mjs (2) / block322-chat-3d-preview (1) / block218-pack-result-surface (2) / preload-branch-result-namespaces (2) / ui-ledger-status-contract (2) / routes-result-studio-subdomains (1) / block357-shelf-and-map (1) / release-contract (1) / scripts-platform-contract (1)", "cause": "存量契约/棘轮漂移，仅全量运行暴露", "reopen": "W5 测试有效性批逐件归因" }
+    ],
+    "fixed-in-this-wave": [
+      { "file": "test/script-entry-guard.test.mjs", "fix": "test-all-shards.mjs（新脚本按契约形态）+ block350-perf-gate.mjs + model-surface-baseline.mjs 守卫归一 pathToFileURL（存量 offender 顺手清偿）" },
+      { "file": "frontend toolActivity mirror", "fix": "computer_close 补词+icon（fixture icon=settings→eye）" }
+    ]
+  }
+}

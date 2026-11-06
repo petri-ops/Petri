@@ -44,7 +44,7 @@ export function FederationJobs({ peers }: { peers: PeerOption[] | null }): React
     setBusy(true); setError(null); setNotice(null); setJobJson('');
     try {
       if (!effectivePeer) throw new Error('先选择一个协作节点');
-      if (!toolId.trim()) throw new Error('填写对端工具 id（如 deseq2）');
+      if (!toolId.trim()) throw new Error('填写对端工具 id（对端节点已注册的工具名）');
       let params: Record<string, unknown>;
       try {
         const parsed: unknown = JSON.parse(paramsText || '{}');
@@ -129,7 +129,7 @@ export function FederationJobs({ peers }: { peers: PeerOption[] | null }): React
         <input
           className="petri-input"
           data-testid="federation-job-tool"
-          placeholder="对端工具 id（如 deseq2）"
+          placeholder="对端工具 id（对端节点已注册的工具名）"
           value={toolId}
           onChange={(e) => setToolId(e.target.value)}
           style={{ maxWidth: 220 }}

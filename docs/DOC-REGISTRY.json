@@ -9,11 +9,44 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 429,
-    "lastUpdated": "2026-10-30",
-    "managedMarkdown": 163
+    "documentCount": 491,
+    "lastUpdated": "2026-11-06",
+    "managedMarkdown": 474
   },
   "documents": [
+    {
+      "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
+      "capability": "next-stage-optimization-blueprint-2026-11-06",
+      "path": "docs/next-stage-optimization-blueprint-2026-11-06.md",
+      "kind": "work-package",
+      "status": "planned",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "PLANNED",
+      "tags": [
+        "next-stage",
+        "ui-ux",
+        "workflow"
+      ],
+      "notes": "用户裁决的全维度优化蓝图；W0-W7 为候选波次，未启动任何新工作包；事实基线指向 2026-11-06 全量评估。"
+    },
+    {
+      "id": "PETRI-DESKTOP-HOLISTIC-EVALUATION-2026-11-06",
+      "capability": "holistic-evaluation-2026-11-06",
+      "path": "docs/Petri-Desktop-Holistic-Evaluation-2026-11-06.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "ui-ux",
+        "workflow"
+      ],
+      "notes": "十一维度全量评估；含当前门禁、源码证据、发现台账、评分与证据边界；机器摘要在 acceptance/evaluation-2026-11-06/。"
+    },
     {
       "id": "NEXT-STAGE-EXPERIENCE-BLUEPRINT",
       "capability": "next-stage-experience-blueprint",
@@ -9796,8 +9829,47 @@
         "G0"
       ],
       "notes": "文件树分页 C-47 归因收口报告：观察未复现、根因未归因、票保持 open；第二批四包全部收口。"
+    },
+    {
+      "id": "BLOCK-359",
+      "capability": "block-359-nso-wave0-fact-freeze",
+      "path": "docs/block-359-nso-w0-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-359-nso-wave0-fact-freeze",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W0",
+        "P0",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-0/**",
+        "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "scripts/block350-perf-gate.mjs",
+        "test/block116-decision-platform.test.mjs",
+        "test/block157-skill-visibility.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/FederationJobs.tsx",
+        "package.json",
+        "scripts/test-all-shards.mjs",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json",
+        "test/model-surface-baselines.json",
+        "test/knip-baseline.json",
+        "eslint-suppressions.json",
+        "test/domain-neutrality-baseline.json"
+      ],
+      "notes": "2026-11-06 启动 active（用户预授权「从头至尾执行下一阶段优化蓝图 W0→W7 不逐项请示」）。W0 事实冻结与门禁复绿：HEAD↔WIP 三面清单归零触碰、lint 2 errors、code-size 真红、perf 双判据、工具数单源、领域中性裁决、全量测试分片、canonical 对账。WIP 在制批归 NSO-W1 接收（acceptance/nso-2026-11-06/wave-0/wip-inventory.json）。 | 2026-11-06 交付项 1–7 完成；closeout test:changed 门 FAIL（红项全归因：在制批绑定 model-surface/P6、C-46 p4r、存量 UI-695 债棘轮）；在制批与 W1 文件面重叠→按用户红线停在收口前等裁决，裁决后干净树 closeout:full + P6 源绑定重算再翻 completed。"
     }
   ],
-  "lastUpdated": "2026-11-04",
-  "documentCount": 488
+  "lastUpdated": "2026-11-06",
+  "documentCount": 491
 }

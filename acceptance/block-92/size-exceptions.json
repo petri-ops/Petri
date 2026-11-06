@@ -57,13 +57,6 @@
       "linesAtGrant": 1307
     },
     {
-      "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
-      "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
-      "expires": "2026-12-31",
-      "sha256": null,
-      "linesAtGrant": 789
-    },
-    {
       "path": "frontend/src/pages/home.tsx",
       "reason": "BLOCK-92 遗留巨型文件，Wave 拆分进行中（P3 起带到期棘轮）",
       "expires": "2026-12-31",

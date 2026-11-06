@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-04T20:20:47.951Z",
+  "generatedAt": "2026-11-06T01:07:41.485Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 489,
-  "uniqueIds": 480,
+  "sections": 490,
+  "uniqueIds": 481,
   "counts": {
     "verified": 449,
+    "blocked": 24,
     "closed": 12,
-    "blocked": 23,
     "live-missing": 5
   },
-  "debt": 28,
+  "debt": 29,
   "liveMissing": [
     {
       "id": "UI-595",
@@ -38,6 +38,12 @@
     }
   ],
   "blocked": [
+    {
+      "id": "UI-695",
+      "deps": [],
+      "external": true,
+      "title": "聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**；2026-11-06 BLOCK-359 W"
+    },
     {
       "id": "UI-656",
       "deps": [],

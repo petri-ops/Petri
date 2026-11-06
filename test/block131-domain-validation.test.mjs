@@ -95,3 +95,22 @@ test('handleToolRun wiring: domain validation runs after the generic sniffer and
   const domainOrder = src.indexOf('validateDomainUploads(');
   assert.ok(callOrder >= 0 && domainOrder > callOrder, 'domain validation must run after the generic sniffer');
 });
+
+// BLOCK-359（W0 抓真）：RFC-4180 带引号表头/单元格是合法 CSV（pack 仓 demo 数据即此形态），
+// parseCsv 此前不剥引号 → 「"sample"」不匹配 ^(sample|sample_id)$ → 合法输入被误拒
+// sample_column_missing（p4r-invariants corpus 因此 7 项取消）。
+test('RFC-4180 quoted CSV (quoted header and cells) is accepted, not falsely rejected', () => {
+  const result = withFiles({
+    'counts.csv': '"gene","WT_1","WT_2"\n"Gene_A",100,110\n"Gene_B",50,55\n',
+    'metadata.csv': '"sample","condition"\n"WT_1","Control"\n"WT_2","Treatment"\n',
+  }, (dir) => validateDomainUploads(dir, ['counts.csv', 'metadata.csv']));
+  assert.deepEqual(result.findings, [], JSON.stringify(result.findings));
+});
+
+test('quoted CSV with escaped inner quote stays literal (no over-stripping)', () => {
+  const result = withFiles({
+    'metadata.csv': '"sample","condition"\n"WT_""1","Control"\n',
+  }, (dir) => validateDomainUploads(dir, ['metadata.csv']));
+  // "WT_""1" → WT_"1：合法字面量；sample 列被识别（不再误报缺列），样本 id 含引号不崩。
+  assert.ok(!result.findings.some((f) => f.code === 'sample_column_missing'), JSON.stringify(result.findings));
+});

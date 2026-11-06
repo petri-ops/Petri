@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "kind": "holistic-evaluation-baseline",
+  "generatedOn": "2026-11-06",
+  "source": {
+    "branch": "main",
+    "head": "fe44fceb",
+    "worktree": {
+      "modifiedTracked": 22,
+      "untracked": 10,
+      "diffInsertions": 335,
+      "diffDeletions": 61,
+      "ownedBy": "unknown WIP; not modified by evaluation"
+    }
+  },
+  "gates": [
+    { "name": "docs:status", "status": "PASS", "result": "sampling: registered=488 managedMarkdown=471 validation=PASS; post-delivery: registered=490 managedMarkdown=473; audit ledger 85KB > 50KB advisory; one 3732B row" },
+    { "name": "docs:check", "status": "PASS", "result": "sampling: 488 registered documents; post-delivery: 490 registered documents PASS" },
+    { "name": "docs:reconcile", "status": "PASS", "result": "read-only; registered=490 unregistered=0; 136 archive candidates were advisory only" },
+    { "name": "ui:audit:check", "status": "PASS", "result": "626 UI issue IDs with implementation evidence" },
+    { "name": "hygiene:check", "status": "PASS", "result": "no dead symlinks, EOL drift, symlink degradation, or control bytes; 36 untracked items listed" },
+    { "name": "quality:secret", "status": "PASS", "result": "production=0 fixtureExemptions=9" },
+    { "name": "quality:arch", "status": "PASS", "result": "R1-R5 no violations" },
+    { "name": "quality:surface", "status": "PASS", "result": "tools=115/115 ipc=168 routes=285 storageKeys=20 P1=0 P2=0 P3=2 dirty=9" },
+    { "name": "quality:ear", "status": "PASS", "result": "881/2026=43.5%; manifest=43.3%" },
+    { "name": "gate:code-size", "status": "FAIL", "result": "workspace-tools.js 1636 > baseline 1619; content fingerprint drift; PluginStorePanel.tsx exception removable" },
+    { "name": "gate:arch-cycles", "status": "PASS", "result": "13 existing cycles registered; no new cycles" },
+    { "name": "gate:css-modules", "status": "PASS", "result": "11 plain CSS files within 13-entry allowlist; 2 baseline entries removable" },
+    { "name": "quality:lint", "status": "FAIL", "result": "2 errors / 2296 warnings; errors at frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx:40-41" },
+    { "name": "quality:types", "status": "PASS", "result": "0 errors" },
+    { "name": "quality:knip:check", "status": "PASS", "result": "327 retained keys frozen; no additions" },
+    { "name": "quality:perf", "status": "FLAKY", "result": "three runs FAIL/PASS/FAIL; long_conversation 34ms/32ms/36ms vs threshold 32ms; other 3 scenarios green" },
+    { "name": "skills:check", "status": "PASS", "result": "11 built-in + 3 domain-pack skills" },
+    { "name": "config:doctor", "status": "PASS", "result": "unknownKeys=0 invalidValues=0 envShadowed=0; 9 optional config files absent" },
+    { "name": "theme-token-contract", "status": "PASS", "result": "17/17" },
+    { "name": "test:changed:list", "status": "PASS", "result": "changed=58 tests=151" },
+    { "name": "test:changed", "status": "FAIL", "result": "1568 tests, 1551 pass, 6 fail, 7 cancelled, 4 skipped, duration=43545ms" },
+    { "name": "test:all:workspace", "status": "UNKNOWN", "result": "task exitCode=143 signal=SIGTERM after roughly 40 minutes; no completion evidence" }
+  ],
+  "testChangedFailures": [
+    { "class": "stale-baseline", "case": "tool count 115 != 114", "files": ["test/block116-decision-platform.test.mjs:277", "test/block157-skill-visibility.test.mjs:41", "test/tool-activity-labels.test.mjs:22"] },
+    { "class": "wip-baseline", "case": "systemPromptChars 1083 > 993", "files": ["test/block325-model-surface-budget.test.mjs:23"] },
+    { "class": "existing-ratchet", "case": "deseq2 residue in FederationJobs.tsx", "files": ["test/domain-neutrality.test.mjs:20"] },
+    { "class": "dirty-tree-evidence", "case": "p6_current_source_tree_not_exact", "files": ["test/g0-rs-p6-product-acceptance.test.mjs:682"] },
+    { "class": "external-fixture", "case": "p4r deseq2 demo corpus failed and 7 subtests cancelled", "files": ["test/p4r-invariants.test.mjs:113"] }
+  ],
+  "historicalTasks": [
+    { "id": "c48-full-rebuild", "exitCode": 1, "classification": "environment", "reason": "CodeBuddy safe-delete guard blocked bulk deletion of dist/mac-arm64 (5473 items); not a product build failure" }
+  ],
+  "surface": {
+    "toolDefinitions": 115,
+    "toolContracts": 115,
+    "schedulingMetadata": 116,
+    "ipcChannels": 168,
+    "preloadWrappersMissing": 2,
+    "frontendZeroConsumers": 165,
+    "routeEndpoints": 285,
+    "settingsKeys": 20,
+    "p1": 0,
+    "p2": 0,
+    "p3": 2,
+    "capabilityDomains": 16
+  },
+  "documentation": {
+    "sampling": {
+      "registered": 488,
+      "managedMarkdown": 471,
+      "coverageDocumentCount": 429,
+      "coverageManagedMarkdown": 163,
+      "coverageLastUpdated": "2026-10-30"
+    },
+    "postDelivery": {
+      "registered": 490,
+      "managedMarkdown": 473,
+      "coverageDocumentCount": 490,
+      "coverageManagedMarkdown": 473,
+      "coverageLastUpdated": "2026-11-06",
+      "docsCheck": "PASS",
+      "uiAuditCheck": "PASS",
+      "qualitySecret": "PASS",
+      "gitDiffCheck": "PASS",
+      "remainingAdvisories": ["audit ledger 85KB > 50KB", "one 3732B row", "coverage generation still manual"]
+    },
+    "uiHeadings": { "verified": 494, "inProgress": 52, "cancelled": 7, "total": 538 },
+    "note": "UI counts are heading-based and not a substitute for per-entry evidence audit."
+  },
+  "userTaskEvidence": {
+    "baseline348": "6/8, 0 interventions",
+    "c45FixT7": "completed, 49 tool calls, compaction=1, 20 FACT markers, 0 interventions, windowOverride=20000",
+    "suiteV2": "two full runs 7/8, 0 interventions; T6 synthesis.md missing TURING-9; T7 48 tool calls",
+    "humanJudgements": "toolSelectJudge/artifactJudge/humanEyePending remain pending"
+  },
+  "boundaries": [
+    "G0 development stage; no packaged/Provider/GA extrapolation",
+    "C-46 belongs to sibling repository and requires authorization",
+    "C-47 observation not reproduced; root cause not attributed; ticket remains open",
+    "O-1 screen appearance and click feel require human confirmation",
+    "Current WIP was left untouched"
+  ]
+}

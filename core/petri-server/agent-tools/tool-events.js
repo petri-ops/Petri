@@ -435,6 +435,7 @@ const TOOL_ACTIVITY_VERBS = Object.freeze({
   "ask_user_question": "已提问",
   "computer_authorize": "已授权",
   "computer_click": "已点击",
+  "computer_close": "已关闭",
   "computer_press": "已按键",
   "computer_screenshot": "已截屏",
   "computer_scroll": "已滚动",

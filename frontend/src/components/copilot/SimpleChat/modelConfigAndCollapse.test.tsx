@@ -37,8 +37,8 @@ describe('UI-MODELCFG-1 模型菜单内快捷配置', () => {
       onChangeThinkingLevel: noop,
     });
     expect(screen.getByTestId('model-menu-quick')).toBeTruthy();
-    expect((screen.getByTestId('model-menu-context-window') as HTMLSelectElement).value).toBe('64000');
-    expect((screen.getByTestId('model-menu-thinking-level') as HTMLSelectElement).value).toBe('standard');
+    expect((screen.getByTestId('model-menu-context-window') as unknown as HTMLSelectElement).value).toBe('64000');
+    expect((screen.getByTestId('model-menu-thinking-level') as unknown as HTMLSelectElement).value).toBe('standard');
   });
 
   it('切换上下文窗口与思考强度触发回调（不再需要进设置页）', () => {

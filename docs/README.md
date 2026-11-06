@@ -1,3 +1,6 @@
+356. [`block-359-nso-w0-plan.md`](./block-359-nso-w0-plan.md) — 2026-11-06 **active（用户预授权「从头至尾执行下一阶段优化蓝图 W0→W7 不逐项请示」）**：NSO W0 事实冻结与门禁复绿——HEAD↔WIP 三面清单（在制批归 NSO-W1 接收、零触碰）+ lint 2 errors + code-size 真红 + perf 双判据 + 工具数单源 + 领域中性裁决 + 全量测试分片 + canonical 对账；证据=`acceptance/nso-2026-11-06/wave-0/`
+355. [`next-stage-optimization-blueprint-2026-11-06.md`](./next-stage-optimization-blueprint-2026-11-06.md) — 2026-11-06 **planned（用户裁决「全面评估…建立蓝图作为下一阶段工作计划」）**：W0 事实冻结/门禁复绿 → W1 Agent 韧性与错误可见性 → W2 安全准入/IPC/数据真值 → W3 体验可信化/a11y → W4 扩展生态单源 → W5 架构去补丁/测试有效性 → W6 性能规模化 → W7 治理证据运营；单包串行、零新增依赖、不设工作量上限但设证据上限
+354. [`Petri-Desktop-Holistic-Evaluation-2026-11-06.md`](./Petri-Desktop-Holistic-Evaluation-2026-11-06.md) — 2026-11-06 **reference（十一维度全量评估）**：功能/性能/代码质量/可维护性/可扩展性/安全/UI/错误边界/测试/文档/依赖架构逐维证据与评分；24 条 P1/P2/Minor 发现台账；机器基线=`acceptance/evaluation-2026-11-06/mechanical-baseline.json`
 353. [`block-358-report.md`](./block-358-report.md) — 2026-11-05 **reference（BLOCK-358 收口 / 第二批 4/4）**：C-47 结论观察在场但未复现、根因未归因、不猜测性修复不销票；契约 5/5
 352. [`block-357-report.md`](./block-357-report.md) — 2026-11-05 **reference（BLOCK-357 收口）**：4 个 detour 逐件裁决（外部依赖，保留不清零）+ 能力地图生成器；契约 8/8
 351. [`capability-map.md`](./capability-map.md) — 2026-11-05 **generated（勿手改）**：用户向能力地图，按 17 个能力域组织；生成器=`scripts/block357-capability-map.mjs`，含 G0 边界与越界宣称守卫
