@@ -377,9 +377,16 @@ function createAgentToolInterceptor(options = {}) {
       }
     }
 
+    // BLOCK-367（NSO-W2b）审批-执行边界审计透传：一次性指纹放行的消耗事实下沉到
+    // handlerOptions.capabilityEvidence（工具结果/审计面可区分「策略放行」与「指纹放行」）；
+    // 未消耗时字段不存在（零行为噪声）。BLOCK-338 先例：handlerOptions 透传安全。
+    const capabilityEvidence = decision.fingerprintConsumable
+      ? { fingerprintConsumed: true, source: 'once_fingerprint', guardKey: decision.guardKey || null }
+      : (handlerOptions && handlerOptions.capabilityEvidence) || undefined;
+    const handlerOptionsWithAudit = { ...(handlerOptions || {}), ...(capabilityEvidence ? { capabilityEvidence } : {}) };
     // BLOCK-33 P3 — handlerOptions（可选 { onOutput }）透传给 handler；
     // 现有 handler 均为 (args, ctx) 签名，多余的实参会被安全忽略。
-    return entry.handler(args, ctx, handlerOptions);
+    return entry.handler(args, ctx, handlerOptionsWithAudit);
   };
 }
 

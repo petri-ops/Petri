@@ -1,4 +1,6 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-06（🏁 **BLOCK-367 NSO-W2b completed**：F-06 实核修正+capabilityEvidence（契约=agent-tool-interceptor 规则）。剩余：W3 待 UI-696；W6b；W7b 终评。G0 常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：402bf045。loop-orchestrator 1570 行（-105），行数棘轮已锚定只减不增；新测试必须挂 impact-map（nso-w5-impact-coverage 判红）。下一包 W2b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-365 NSO-W1 completed（带例外）；无 active 工作包**：在制批已落地，会话起始 22M+10?? 中仅剩用户资产/临时目录（不入库）与两件 surface-matrix 生成器刷新（W7b 重生成）；并发写入者 UI-696 仍 11 项未提交。下一包 W5b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（▶ **NSO 收尾启动**：用户授权接收在制批（22M+3 新测试；用户资产/临时目录不在授权内），收尾顺序见蓝图 §2a。并发写入者 UI-696（11 项，10:21 后静默）仍零触碰，W3 待其收口。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-364 NSO-W5a completed（带例外）；无 active 工作包**：死熔断删除 + 影响图测试覆盖棘轮（ec39c6e3）。接手顺序同上一行（BLOCK-363），新增注意：新测试文件必须挂 impact-map 规则（test/nso-w5-impact-coverage 判红）。G0 常态 · 不外推 packaged/Provider/GA。）

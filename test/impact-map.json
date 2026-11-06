@@ -722,7 +722,8 @@
         "test/block166-gen-ui-external-link.test.mjs",
         "test/block166-gen-ui-p2.test.mjs",
         "test/block166-gen-ui-p3-pentest.test.mjs",
-        "test/block196-genui-data-binding.test.mjs"
+        "test/block196-genui-data-binding.test.mjs",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -964,7 +965,9 @@
       ],
       "tests": [
         "test/agent-tool-policy.test.mjs",
-        "test/result-studio-agent-binding.test.mjs"
+        "test/result-studio-agent-binding.test.mjs",
+        "test/nso-w2b-capability-audit.test.mjs",
+        "test/nso-w5b-second-truth.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -4360,7 +4363,8 @@
         "test/block160-skillmd-import.test.mjs",
         "test/mcp-client-settings.test.mjs",
         "test/mcp-client-manager.test.mjs",
-        "test/ipc-channels-registry.test.mjs"
+        "test/ipc-channels-registry.test.mjs",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -5333,7 +5337,8 @@
         "frontend/src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
         "frontend/src/components/copilot/toolActivity.test.ts",
         "frontend/src/pages/extensions/McpShelfPane.test.tsx",
-        "frontend/src/styles/theme-token-contract.test.ts"
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -5394,7 +5399,8 @@
         "frontend/src/lib/turn-checkpoints.test.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/ToolApprovalPanel.test.tsx",
         "frontend/src/components/copilot/toolActivity.test.ts",
-        "frontend/src/styles/theme-token-contract.test.ts"
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true
@@ -6924,7 +6930,8 @@
         "test/block244-tool-approval-policy.test.mjs",
         "test/block180-approval-resource.test.mjs",
         "test/block243-approval-contract.test.mjs",
-        "test/agent-tool-policy.test.mjs"
+        "test/agent-tool-policy.test.mjs",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
@@ -6941,7 +6948,8 @@
       "tests": [
         "test/block324-reason-taxonomy.test.mjs",
         "test/block323-progressive-autonomy.test.mjs",
-        "test/block203-agent-rules.test.mjs"
+        "test/block203-agent-rules.test.mjs",
+        "test/nso-w2b-capability-audit.test.mjs"
       ],
       "classifiesScripts": false
     },
