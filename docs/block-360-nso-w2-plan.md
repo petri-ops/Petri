@@ -1,6 +1,6 @@
 ---
 capability: block-360-nso-w2-security-admission
-status: active
+status: completed
 goal: NSO-W2 安全准入、IPC 与数据真值——在保持 workspace_exec 默认放行裁决的前提下，把「策略判定」与「真正执行」焊成可审计闭环：IPC sender guard 全局强制、审批令牌在执行边界校验消耗、exec token 收窄为 per-call、DB 连接与迁移单源化并补退出 checkpoint、产物链哈希、MCP health 降级可见。
 acceptance:
   - 所有 ipcMain.handle 经统一包装器强制 sender 校验（webview guest / 未知 origin 即拒），file-dialog workspace:write-text-file 的 root 改由主进程反查
@@ -34,3 +34,31 @@ reopen: 波次范围变化或 capability token 设计裁决点出现时由用户
 ## 3. 验收门禁清单
 
 见 front-matter acceptance。证据落 `acceptance/nso-2026-11-06/wave-2/`。
+
+## 4. 交付与移交（2026-11-06 收口）
+
+| 项 | 状态 | 证据 / 提交 |
+| --- | --- | --- |
+| W2-1 全局 IPC sender 信任门 + workspace 根反查 | ✅ | `src/ipc/_ipc-trust.js`、`src/ipc/_workspace-roots.js`；契约 7/7 + 4/4；`2d5bce4f` |
+| W2-2 IPC 双向集合相等门 | ✅ | `test/ipc-channels-registry.test.mjs` 8/8；glob 首扫抓到 `desktop-shell.js` 两处手写已登记通道并修正；`2d5bce4f` |
+| W2-3 exec 令牌收窄（F-04 红测实证：env 令牌下沉子进程 + 严格模式绕过） | ✅ | `commandVerdict` 迁 internals 单源；per-call 令牌；子进程 env 剥除；风险进工具结果；4/4 + 相邻 62/62；`2d5bce4f` |
+| W2-4 DB 策略单源 + 迁移定序 + 退出 WAL 收敛 | ✅ | `core/shared-backend/db-connection-policy.js` 三处消费；重号/非法名 fail-fast；will-quit `closeAll({checkpoint:true})`；8/8；`741d095e` |
+| W2-6 MCP registry 降级可见 | ✅ | `getRegistryHealth()` + listTools 逐工具 health；3/3 + MCP 26 套件 184/0；`64a6c99f` |
+| W2-5 执行边界一次性 capability token | ⏸ **显式移交（撞未决设计点）** | 见 §4.1 |
+| W2-7 revision/manifest 链哈希 + 独立校验器 | ⏸ **显式移交（数据模型变更）** | 见 §4.2 |
+
+### 4.1 W2-5 移交设计（触发条件 = 用户裁决「外部 MCP 主体档位协商方案」）
+
+- **阻断原因**：执行边界（tools-executor / run-plugin-script / SSH runner）强制出示 token 时，外部 MCP 调用方（Cursor/VSCode 经 stdio）没有 Petri `accessMode` 会话、也不经 agent 拦截器——不先定档位协商就会造「外部 IDE 永远被拒」假门。BLOCK-346 T5 已把同一问题登记 reopen（协议层改造）；本批同时更正 W0 对该票的过度核销（AUDIT-LOG 🟡 已恢复）。
+- **既有闭环（不重复建）**：agent 路径已由 `agent-tool-interceptor` 在执行前消耗 once 指纹（`consumeFingerprint`），参数改写走 `overrides`（原始/生效双指纹审计）——不建第二审批链。
+- **建议形态（待裁决后实施）**：拦截器放行时签发 `{ token, toolName, effectiveFingerprint, ctxSnapshot, expiresAt }` 经 handlerOptions 下传；三执行入口校验 + 消耗；主体分类 `agent`（必须 token）/ `human-ui`（路由层会话即授权）/ `external-mcp`（握手期协商档位后按档位映射）；负测=重放、参数改写、过期、跨 task。
+
+### 4.2 W2-7 移交设计（触发条件 = 排期到数据模型批；迁移需单独评审）
+
+- revision 增 `prev_chain_hash` / `chain_hash = sha256(prev + canonical(revision))` 需新迁移 + 存量回填（回填对历史 revision 只能证明「回填时刻起」的链完整）；deliver manifest 改为重算产物字节 sha256 + `prevManifestHash`；独立校验器 `scripts/verify-artifact-chain.mjs`（只读复算，篡改 fail-closed）。
+- 不在本批做的理由：迁移 + 回填 + 导出格式变更属数据模型面，需与 Result Studio（implemented_unverified）证据重打节奏对齐，单独成批更安全。
+
+### 4.3 收口判定
+
+- **completed（带例外）**：交付 5/7 项；W2-5 / W2-7 显式移交且写明触发条件，不宣称完成；蓝图 §5.3 出口中「三执行入口出示并消耗 capability token」「全链哈希可复算」两条**未达成**。
+- closeout 在当前树的红项全部归因：在制批绑定（model-surface / P6）、C-46（p4r）、并发写入者的 UI 台账改动（BLOCK-332 两项）、存量环境项（NEXT-03）。

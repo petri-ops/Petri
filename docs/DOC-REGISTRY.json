@@ -9874,7 +9874,7 @@
       "capability": "block-360-nso-w2-security-admission",
       "path": "docs/block-360-nso-w2-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-360-nso-w2-security-admission",
       "entrypoint": "docs/README.md",
@@ -9907,7 +9907,7 @@
         "acceptance/block-92/size-baseline.json",
         "test/knip-baseline.json"
       ],
-      "notes": "2026-11-06 启动 active（用户预授权 W0→W7；W1 因在制批处置待裁决挂起，W2 与在制批文件面零交集先行，仍串行）。D1 全局 sender 信任谓词 / D2 DB parity 单源 / D3 exec token per-call / D4 capability token 复用审批面。"
+      "notes": "2026-11-06 启动 active（用户预授权 W0→W7；W1 因在制批处置待裁决挂起，W2 与在制批文件面零交集先行，仍串行）。D1 全局 sender 信任谓词 / D2 DB parity 单源 / D3 exec token per-call / D4 capability token 复用审批面。 | 2026-11-06 completed（带例外）：交付 W2-1/2/3/4/6（2d5bce4f/741d095e/64a6c99f）；W2-5 capability token 撞未决设计点（外部 MCP 主体档位协商）显式移交；W2-7 链哈希属数据模型变更显式移交；蓝图 §5.3 两条出口未达成。"
     }
   ],
   "lastUpdated": "2026-11-06",

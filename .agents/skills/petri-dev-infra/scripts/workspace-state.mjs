@@ -130,7 +130,9 @@ function registryState() {
   const standingPlans = active.filter((d) => d.kind === 'living-plan');
   const activeOthers = active.filter((d) => d.kind !== 'work-package' && d.kind !== 'living-plan');
   const planned = docs.filter((d) => d.status === 'planned');
-  if (!activeWps.length) console.log('当前无 active 工作包（启动需用户裁决）。');
+  // BLOCK-326 不变量：存在 active living-plan 时不得报「无 active 工作包」（常驻计划不得被静默漏出）。
+  if (!activeWps.length && !standingPlans.length) console.log('当前无 active 工作包（启动需用户裁决）。');
+  else if (!activeWps.length) console.log('串行槽位空闲（新包启动需用户裁决）；常驻/能力纲计划在册，见下方 🔵 行。');
   for (const d of activeWps) {
     console.log(`🔴active  ${d.id}  →  ${d.path}${d.truthDomain ? `  [truthDomain: ${d.truthDomain}]` : ''}`);
   }
