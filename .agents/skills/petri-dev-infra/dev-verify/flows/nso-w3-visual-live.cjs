@@ -114,7 +114,7 @@ module.exports = {
       assert('F10_2_banner_gone_after_reload', bannerAfterReload === 'absent', `afterReload=${bannerAfterReload}`);
 
       // ── F18-1：项目树语义（chat 主页）─────────────────────────
-      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/?test=1`)}; 'ok'`);
+      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtu0b52_9cbr`)}; 'ok'`);
       await sleep(3000);
       const c4 = await lib.connectTestTarget({ timeoutMs: 15_000 });
       try { client.socket.close(); } catch { /* ignore */ }
@@ -162,32 +162,19 @@ module.exports = {
       }
 
       // ── F18-2：scheduled 入口可达时的投影层 inert ─────────────
-      const sched = await lib.evalJs(client, `(function(){
-        var cands = [].slice.call(document.querySelectorAll('button, [role="button"], a, [role="treeitem"], [title]'));
-        var hit = cands.find(function(x){
-          var t = ((x.title || '') + ' ' + (x.innerText || '')).trim();
-          return /任务工作台|自动化/.test(t) && x.offsetParent !== null;
-        });
-        if (!hit) return { entry: false };
-        hit.click();
-        return { entry: true };
+      // scheduled 模式 URL 直达（useWorkspaceRouting：/project/:id/scheduled）
+      await lib.evalJs(client, `location.href = ${JSON.stringify(`${APP}/project/p_mvtu0b52_9cbr/scheduled`)}; 'ok'`);
+      await sleep(3000);
+      const p = await lib.evalJs(client, `(function(){
+        var layer = document.querySelector('[data-projection="conversation"]');
+        if (!layer) return { layer: false };
+        return { layer: true, ariaHidden: layer.getAttribute('aria-hidden'),
+          inert: layer.hasAttribute('inert') };
       })()`).catch((e) => ({ error: e.message }));
-      const schedParsed = sched;
-      if (schedParsed.entry) {
-        await sleep(1200);
-        const p = await lib.evalJs(client, `(function(){
-          var layer = document.querySelector('[data-projection="conversation"]');
-          if (!layer) return { layer: false };
-          return { layer: true, ariaHidden: layer.getAttribute('aria-hidden'),
-            inert: layer.hasAttribute('inert') };
-        })()`).catch((e) => ({ error: e.message }));
-        if (p.layer && p.ariaHidden === 'true') {
-          assert('F18_2_hidden_projection_inert', p.inert === true, JSON.stringify(p));
-        } else {
-          pending.push('F18_2：scheduled 投影层状态未达（ariaHidden !== true），live 腿 pending');
-        }
+      if (p.layer && p.ariaHidden === 'true') {
+        assert('F18_2_hidden_projection_inert', p.inert === true, JSON.stringify(p));
       } else {
-        pending.push('F18_2：scheduled 入口当前不可达（入口依赖任务/自动化态），live 腿 pending');
+        pending.push(`F18_2：scheduled 投影层状态未达（${JSON.stringify(p).slice(0, 120)}），live 腿 pending`);
       }
 
       // ── F09-1：binary 产物降级原因可见 ─────────────────────────

@@ -1,5 +1,5 @@
 # Petri Desktop UI 产品化审计台账
-## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（content-visibility live 腿待项目行数据——当前首项目无会话/结果行；组件契约 17/17 已过）**）
+## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 content-visibility live 已过（p_mvtu0b52_9cbr 6 会话）；结果库行腿待该项目结果面板行数据）**）
 
 - **字号 token 收敛**：fontSize:11 → var(--petri-font-size-xs, 11px) 共 12 处 5 文件（ChatArtifactCard×8 / LeftSshCreatePanel×2 / LeftPanel / CrashNoticeBanner / TerminalWindowPage）；TerminalWindowPage XTerm 例豁免留痕（fontSize 为数值 canvas API，CSS token 不适用）。
 - **DOM 预算起步（零依赖）**：结果库行（resultsLibraryItem）与会话行（convItem）content-visibility:auto + contain-intrinsic-size——视口外行跳过渲染；hover/选中态不受影响。消息列表（SimpleChat）不在本批（改动面属 UI-696 邻接，留待其 verified 后）。
