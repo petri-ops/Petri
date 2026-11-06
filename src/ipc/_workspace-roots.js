@@ -46,5 +46,4 @@ function listRegisteredWorkspaceRoots() {
 module.exports = {
   isRegisteredWorkspaceRoot,
   listRegisteredWorkspaceRoots,
-  realpathOrNull,
 };

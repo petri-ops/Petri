@@ -111,5 +111,4 @@ function installGlobalIpcSenderGuard(ipcMain, { getTrustedOrigins = readTrustedO
 module.exports = {
   decideIpcSenderTrust,
   installGlobalIpcSenderGuard,
-  readTrustedOriginsFromEnv,
 };

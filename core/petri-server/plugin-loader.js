@@ -110,14 +110,40 @@ function getScriptForTool(toolId) {
   const scriptDir = plugin.scriptPath;
   if (!fs.existsSync(scriptDir)) return null;
 
-  // 根据 language 找对应扩展名的脚本
-  const ext = plugin.language === 'r' ? '.R' : '.py';
-  const files = fs.readdirSync(scriptDir).filter((f) => f.endsWith(ext));
+  const choice = selectPluginEntryScript({
+    toolId,
+    language: plugin.language,
+    files: fs.readdirSync(scriptDir),
+    entryScript: plugin.entryScript,
+  });
+  if (!choice.file) {
+    logger.warn(`[plugin-loader] ${toolId}: 无法确定入口脚本（${choice.reason}）`);
+    return null;
+  }
+  return path.join(scriptDir, choice.file);
+}
 
-  if (files.length === 0) return null;
-  // 优先找和 toolId 同名的脚本
-  const match = files.find((f) => f.replace(ext, '') === toolId);
-  return path.join(scriptDir, match || files[0]);
+/**
+ * BLOCK-361（NSO-W4-4）插件入口确定性（纯函数）：plugin.json 声明的 entryScript >
+ * 与 toolId 同名脚本 > 唯一非辅助脚本 > 否则 fail-closed。`_` 前缀为辅助脚本
+ * （如 _petri-theme.R），永不作为入口。此前精确匹配缺失时静默取未排序 readdir 的 files[0]，
+ * 哈希序文件系统上可能把辅助脚本当入口执行。
+ * @returns {{ file: string|null, reason: string|null }}
+ */
+function selectPluginEntryScript({ toolId, language, files, entryScript } = {}) {
+  const ext = language === 'r' ? '.R' : '.py';
+  const scripts = (Array.isArray(files) ? files : []).filter((f) => f.endsWith(ext)).sort();
+  if (typeof entryScript === 'string' && entryScript.trim()) {
+    const declared = entryScript.trim();
+    return scripts.includes(declared)
+      ? { file: declared, reason: null }
+      : { file: null, reason: 'plugin_entry_declared_missing' };
+  }
+  const exact = scripts.find((f) => f === `${toolId}${ext}`);
+  if (exact) return { file: exact, reason: null };
+  const candidates = scripts.filter((f) => !f.startsWith('_'));
+  if (candidates.length === 1) return { file: candidates[0], reason: null };
+  return { file: null, reason: candidates.length === 0 ? 'plugin_entry_missing' : 'plugin_entry_ambiguous' };
 }
 
 /**
@@ -439,12 +465,15 @@ function _inputsToInputSchema(inputs) {
   for (const inp of inputs || []) {
     if (!inp || !inp.id) continue;
     // 支持 number / integer / enum / string / boolean / file / directory
+    // BLOCK-361（NSO-W4-3）显式映射：此前除 number/integer 外一律 string（boolean 输入被
+    // 当字符串校验）。file/directory 是路径字符串；未知类型按 string 兜底并告警（不静默）。
     let schemaType;
-    if (inp.type === 'number' || inp.type === 'integer') {
+    if (inp.type === 'number' || inp.type === 'integer' || inp.type === 'boolean') {
       schemaType = inp.type;
-    } else if (inp.type === 'enum') {
+    } else if (inp.type === 'enum' || inp.type === 'string' || inp.type === 'file' || inp.type === 'directory') {
       schemaType = 'string';
     } else {
+      if (inp.type) logger.warn(`[plugin-loader] input ${inp.id}: 未知类型 ${inp.type}，按 string 处理`);
       schemaType = 'string';
     }
     const schema = { type: schemaType };
@@ -704,16 +733,26 @@ function loadBuiltInPlugins(builtInDir) {
 
 // BLOCK-83 D4：默认插件源解析（与 server.js 启动路径同源），供目录投影等
 // 非启动期消费者惰性加载使用，避免各处重复实现三源发现。
+// BLOCK-361（NSO-W4-1）built-in 目录单源（原 mcp/registry.js 另有一份带打包回落的实现）：
+// env > 仓库 resources/built-in-plugins（存在时）> 打包 Resources/built-in-plugins（存在时）> 仓库路径。
+function resolveBuiltInPluginsDir() {
+  if (process.env.PETRI_BUILT_IN_PLUGINS_DIR) return process.env.PETRI_BUILT_IN_PLUGINS_DIR;
+  const repoDir = path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins');
+  if (fs.existsSync(repoDir)) return repoDir;
+  if (process.resourcesPath) {
+    const packagedDir = path.join(process.resourcesPath, 'built-in-plugins');
+    if (fs.existsSync(packagedDir)) return packagedDir;
+  }
+  return repoDir;
+}
+
 function resolveDefaultPluginSources() {
-  const path = require('path');
   const developmentDirs = String(process.env.PETRI_DEVELOPMENT_PLUGIN_DIRS || '')
     .split(path.delimiter)
     .map((item) => item.trim())
     .filter(Boolean);
   return {
-    builtInDir:
-      process.env.PETRI_BUILT_IN_PLUGINS_DIR ||
-      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins'),
+    builtInDir: resolveBuiltInPluginsDir(),
     installedDir: resolveInstalledPluginsDir(),
     developmentDirs,
   };
@@ -860,5 +899,7 @@ module.exports = {
   loadPluginsFromSources,
   loadFromSourcesArray,
   resolveDefaultPluginSources,
+  resolveBuiltInPluginsDir,
+  selectPluginEntryScript,
   ensurePluginSourcesLoaded,
 };

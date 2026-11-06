@@ -84,6 +84,13 @@ function getSkillRuntimeFactory() {
 /**
  * Skill 相关 MCP 工具列表
  */
+function skillSourceEnum() {
+  try {
+    return Object.keys(require('../../shared-backend/skill-registry').SOURCE_PRIORITY);
+  } catch {
+    return null;
+  }
+}
 function getSkillToolDefinitions() {
   return [
     {
@@ -98,7 +105,8 @@ function getSkillToolDefinitions() {
           },
           source: {
             type: 'string',
-            enum: ['built-in', 'installed'], // BLOCK-156 D7 — marketplace 残迹移除（无加载代码）
+            // BLOCK-361（NSO-W4-3）enum 由 SOURCE_PRIORITY 派生（含 pack）；注册表不可用时不设 enum（不复制常量）
+            ...(skillSourceEnum() ? { enum: skillSourceEnum() } : {}),
             description: 'Filter by skill source',
           },
           search: {
@@ -363,34 +371,15 @@ try {
 // 自动发现 built-in 插件（resources/built-in-plugins/），不依赖 install。
 // 让外部 agent 即使没装任何插件也能看到/调用 built-in 工具（volcano-plot 等）。
 // 已装版本优先（loadBuiltInPlugins 内部去重）。
+// BLOCK-361（NSO-W4-1）插件源单源：built-in / installed / development 一律取 plugin-loader 解析，
+// 本文件只追加领域包源（pack-registry 记录制）。此前这里另写一份 installed 解析，漏掉
+// BLOCK-157 DIST-1 的 $PETRI_LOCAL_DATA_DIR/plugins 一档——主进程装到数据目录的插件 MCP 读不到。
 function resolveBuiltInPluginsDir() {
-  if (process.env.PETRI_BUILT_IN_PLUGINS_DIR) {
-    return path.resolve(process.env.PETRI_BUILT_IN_PLUGINS_DIR);
-  }
-  // 去 submodule 后：core 直接内嵌在 desktop 仓根 core/ 下，built-in-plugins 在 desktop 仓根 resources/
-  // petri-server/mcp/ → petri-server → core → desktop 仓根 → resources/built-in-plugins/
-  const splitPath = path.resolve(
-    __dirname,
-    '..',
-    '..',
-    '..',
-    'resources',
-    'built-in-plugins'
-  );
-  if (fs.existsSync(splitPath)) return splitPath;
-  // 打包模式：app bundle 的 Resources/built-in-plugins/
-  if (process.resourcesPath) {
-    const pkgPath = path.join(process.resourcesPath, 'built-in-plugins');
-    if (fs.existsSync(pkgPath)) return pkgPath;
-  }
-  return null;
+  return pluginLoader.resolveBuiltInPluginsDir();
 }
-function refreshPluginSources() {
-  const builtInDir = resolveBuiltInPluginsDir();
-  const developmentDirs = String(process.env.PETRI_DEVELOPMENT_PLUGIN_DIRS || '')
-    .split(path.delimiter)
-    .map((item) => item.trim())
-    .filter(Boolean);
+function computePluginSources() {
+  const { builtInDir, installedDir, developmentDirs } = pluginLoader.resolveDefaultPluginSources();
+
   // BLOCK-84：已装领域包源并入每次刷新（pack-registry 记录制；零包=零追加）
   const packSources = [];
   try {
@@ -407,15 +396,15 @@ function refreshPluginSources() {
   } catch (e) {
     noteRegistryIssue('pack sources（领域包工具缺席）', e);
   }
-  const sources = [
+  return [
     { type: 'builtin', root: builtInDir },
-    { type: 'installed', root:
-      process.env.PETRI_PLUGINS_DIR ||
-      path.join(os.homedir(), 'Documents', 'Petri-Local', 'plugins') },
+    { type: 'installed', root: installedDir },
     ...developmentDirs.map((root) => ({ type: 'development', root })),
     ...packSources,
   ];
-  return pluginLoader.loadFromSourcesArray(sources);
+}
+function refreshPluginSources() {
+  return pluginLoader.loadFromSourcesArray(computePluginSources());
 }
 
 try {
@@ -584,13 +573,17 @@ async function listTools() {
   getSkillRuntimeFactory();
   const health = getRegistryHealth();
   const healthMeta = health.degraded ? { health: { degraded: true, reasons: health.reasons } } : null;
+  // BLOCK-361（NSO-W4-2，F-08）双形状取名：OpenAI 形 {function.name} 与 MCP 形 {name}；
+  // 未知名由 getToolMetadata 给保守缺省（串行、非只读、需审批），不再让 MCP 形条目裸奔。
+  const toolNameOf = (t) => {
+    if (t && t.function && typeof t.function.name === 'string') return t.function.name;
+    if (t && typeof t.name === 'string') return t.name;
+    return null;
+  };
   const withMetadata = (t) => {
-    const name = t && t.function && typeof t.function.name === 'string' ? t.function.name : null;
-    if (name) return { ...t, executionMetadata: { ...getToolMetadata(name), ...(healthMeta || {}) } };
-    if (healthMeta && t && typeof t === 'object') {
-      return { ...t, executionMetadata: { ...(t.executionMetadata || {}), ...healthMeta } };
-    }
-    return t;
+    const name = toolNameOf(t);
+    if (!name) return t;
+    return { ...t, executionMetadata: { ...getToolMetadata(name), ...(healthMeta || {}) } };
   };
   return [...skillTools, ...ideTools, ...pluginTools].map(withMetadata);
 }
@@ -991,6 +984,7 @@ module.exports = {
     createMcpExecutionContext: _createMcpExecutionContext,
     normalizeArtifacts: _normalizeArtifacts,
     resolveBuiltInPluginsDir,
+    computePluginSources,
     resolveStagedInputPath: _resolveStagedInputPath,
     resolveMcpJobLayout: _resolveMcpJobLayout,
     resolveResultStudioScriptOverride,

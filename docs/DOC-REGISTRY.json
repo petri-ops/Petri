@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 492,
+    "documentCount": 493,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 475
+    "managedMarkdown": 476
   },
   "documents": [
     {
@@ -9908,8 +9908,36 @@
         "test/knip-baseline.json"
       ],
       "notes": "2026-11-06 启动 active（用户预授权 W0→W7；W1 因在制批处置待裁决挂起，W2 与在制批文件面零交集先行，仍串行）。D1 全局 sender 信任谓词 / D2 DB parity 单源 / D3 exec token per-call / D4 capability token 复用审批面。 | 2026-11-06 completed（带例外）：交付 W2-1/2/3/4/6（2d5bce4f/741d095e/64a6c99f）；W2-5 capability token 撞未决设计点（外部 MCP 主体档位协商）显式移交；W2-7 链哈希属数据模型变更显式移交；蓝图 §5.3 两条出口未达成。"
+    },
+    {
+      "id": "BLOCK-361",
+      "capability": "block-361-nso-w4-extension-single-source",
+      "path": "docs/block-361-nso-w4-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-361-nso-w4-extension-single-source",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W4",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-4/**",
+        "core/petri-server/mcp/registry.js",
+        "core/petri-server/plugin-loader.js",
+        "test/nso-w4-*.test.mjs"
+      ],
+      "sharedBaselines": [
+        "test/knip-baseline.json"
+      ],
+      "notes": "2026-11-06 启动 active（用户预授权 W0→W7；Jev next:suggest=NSO-W4 0.62；W1 待在制批裁决、W3 待并发写入者提交 UI 台账，W4 与两组他方在制零交集）。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 492
+  "documentCount": 493
 }
