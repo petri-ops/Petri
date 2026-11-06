@@ -161,7 +161,11 @@ function commandRun(options) {
   writeJsonAtomic(statusPath(runsDir, id), status);
 
   const log = fs.createWriteStream(logPath, { flags: 'a' });
-  const child = spawn(cmd, { shell: true, cwd: process.cwd(), env: process.env, windowsHide: true });
+  // BLOCK-363（NSO-W6a）POSIX 下子命令独立成组：终止时向整组下发信号。
+  // 此前 child.kill 只终止 shell，`sh -c "node --test …"` 的孙进程幸存成孤儿
+  // （W0 实测评估会话 SIGTERM 后 node --test 空转 16 小时）。Windows 保持原语义（树终止需 taskkill /T，另批）。
+  const ownGroup = process.platform !== 'win32';
+  const child = spawn(cmd, { shell: true, cwd: process.cwd(), env: process.env, windowsHide: true, detached: ownGroup });
   status.pid = child.pid || null;
   writeJsonAtomic(statusPath(runsDir, id), status);
   console.log(`[task] started ${id} pid=${status.pid} log=${logPath}`);
@@ -196,7 +200,12 @@ function commandRun(options) {
   child.on('exit', (code, signal) => finish(code, signal));
   for (const sig of ['SIGINT', 'SIGTERM']) {
     process.on(sig, () => {
-      try { child.kill(sig); } catch {}
+      try {
+        if (ownGroup && child.pid) process.kill(-child.pid, sig);
+        else child.kill(sig);
+      } catch {
+        try { child.kill(sig); } catch {}
+      }
       finish(codeFromSignal(sig), sig);
       setTimeout(() => process.exit(codeFromSignal(sig)), 100).unref();
     });
