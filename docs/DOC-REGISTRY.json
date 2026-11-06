@@ -9968,7 +9968,7 @@
       "capability": "block-363-nso-w6a-teardown",
       "path": "docs/block-363-nso-w6a-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-363-nso-w6a-teardown",
       "entrypoint": "docs/README.md",
@@ -9987,7 +9987,7 @@
         "test/platform-branch-freeze.test.mjs"
       ],
       "sharedBaselines": [],
-      "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W6 0.20）。W6a=teardown 孤儿进程根修：dev-task-runner SIGTERM 只杀 shell、孙进程（node --test）幸存（W0 实测孤儿空转 16h）。"
+      "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W6 0.20）。W6a=teardown 孤儿进程根修：dev-task-runner SIGTERM 只杀 shell、孙进程（node --test）幸存（W0 实测孤儿空转 16h）。 | 2026-11-06 completed（带例外）：POSIX 进程组 teardown（06a12e2b，真实进程回归红→绿）；Windows 树终止与并行挂起根因另批。"
     }
   ],
   "lastUpdated": "2026-11-06",

@@ -408,10 +408,12 @@
         ".agents/skills/petri-dev-infra/scripts/workspace-state.mjs",
         ".agents/skills/petri-dev-infra/SKILL.md",
         "package.json",
-        "test/dev-task-runner.test.mjs"
+        "test/dev-task-runner.test.mjs",
+        "test/nso-w6-task-runner-teardown.test.mjs"
       ],
       "tests": [
-        "test/dev-task-runner.test.mjs"
+        "test/dev-task-runner.test.mjs",
+        "test/nso-w6-task-runner-teardown.test.mjs"
       ],
       "classifiesScripts": false
     },

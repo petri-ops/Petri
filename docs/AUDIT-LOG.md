@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-06（🏁 **BLOCK-363 NSO-W6a completed（带例外）**：dev-task-runner 终止整组下发（孤儿孙进程根修），真实进程回归红→绿；提交=06a12e2b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-362 NSO-W7a completed**：audit:compact 脏目标守卫（同类第三次复发转机械门禁）+ coverage 计数校验与 docs:coverage；提交=742f6875。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-361 NSO-W4 completed（带例外）**：插件源单源（F-07）/ 工具名双形状元数据（F-08）/ source enum 派生 + schema 类型映射（F-17）/ 插件入口确定性；契约 5/5、邻域 285/0；生成器化移交 W7。提交=c9d22abb。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-360 NSO-W2 completed（带例外）**：交付 IPC 全局 sender 门/根反查/双向门禁/exec 令牌收窄（红测实证 F-04 泄漏+绕过）/DB 策略单源+迁移 fail-fast/退出 WAL 收敛/MCP health；**移交** W2-5 capability token（外部 MCP 主体档位协商设计点）与 W2-7 链哈希（数据模型批）；更正 W0 对 IDE MCP 写面票的过度核销（🟡 已恢复）。提交=2d5bce4f/741d095e/64a6c99f。G0 常态 · 不外推 packaged/Provider/GA。）
@@ -6,7 +7,6 @@
 最后更新：2026-11-06（📋 **全量评估批**：十一维评估报告 + planned 八波次优化蓝图 + 机械基线入册；当次门禁显示 lint 2 errors / code-size FAIL / perf FAIL-PASS-FAIL / test:changed 6 fail 7 cancelled / 全量测试 SIGTERM，报告均按真红、存量基线、脏树、外部环境分账；发现台账含 24 条 P1/P2/Minor。未改产品代码、未启动新工作包、未知 WIP 原样保留。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-05（⚖️ **执行面黑名单默认放行（用户裁决）**：`workspace_exec` 原四条不可协商拦截（sudo·提权 / rm 删除 / git push / curl|sh 管道执行）改为**默认放行 + 风险提示日志**，硬拦语义保留在 `PETRI_EXEC_STRICT_DENYLIST=1` 一键收紧。用户原话「不应该设置这些黑名单，后续模型会成长出给行为合理的判断」。档位约束（read 档不可执行、workspace-write 仅前台）不变；SSH 面独立策略未动。回滚=设该 env 或 revert 本次提交。证据=`test/harness-workspace-tools` 双契约（默认不拦 / 严格模式仍拦）。G0 常态 · 不外推 GA。）
 最后更新：2026-11-05（🏁 **第二批 4/4 全部收口（355→358 串行闭环，closeout 16 门全绿）**：355 C-45 三层修复 + T7 复跑 completed（49 工具调用 / 0 干预）；356 套件 v2 判据双语内容等价物 + 两次全套复跑 7/8（T6 口令波动如实登记）；357 四 detour 逐件裁决（外部依赖未清零）+ 能力地图生成器（8/8）；358 C-47 观察未复现、根因未归因、不猜测性修复不销票（5/5）。**三项排除项保持原状**：C-46 pack 仓（兄弟仓不在工作区）、G1 启动（需显式发令）、O-1 屏幕观感（人工实机）。总纲 §5 四行填满。G0 常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-05（✅ **BLOCK-357 收口（第二批 3/4）**：四个 detour 逐件裁决（demo 输入差异 / r-enrichment bundle 404 ×2 / C-46 兄弟仓）——均为外部依赖，本仓无直连路径，逐件 `keep-with-detour` 并写清偿触发条件，**不伪造直连、不批量下架、如实声明未清零 4D**；零空壳 17A/4D/0S 保持。新增用户向能力地图生成器（按 17 能力域、确定性输出、越界宣称守卫、勿手改负测）→ `docs/capability-map.md`。契约 8/8。报告=docs/block-357-report.md。下一包=358 文件树分页归因。G0 常态 · 不外推 GA。）
 
 
 
