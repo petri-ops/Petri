@@ -1,0 +1,39 @@
+{
+  "name": "nso-w3-visual-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-06T13:25:11.425Z",
+  "finishedAt": "2026-11-06T13:25:24.602Z",
+  "assertions": [
+    {
+      "name": "S1_test_instance_connected",
+      "pass": true,
+      "detail": "{\"ready\":\"complete\",\"title\":\"Petri\"}"
+    },
+    {
+      "name": "S2_settings_page_ready",
+      "pass": true,
+      "detail": "settingsReady=true generalTab=no_tab"
+    },
+    {
+      "name": "F10_1_prefs_failure_banner_visible",
+      "pass": true,
+      "detail": "{\"themeClicked\":\"clicked\",\"darkClicked\":\"clicked\",\"banner\":{\"present\":true,\"role\":\"status\",\"text\":\"服务端同步失败（本端已生效）\\nprobe-offline——跨端同步未完成，恢复后自动重试。\"}}"
+    },
+    {
+      "name": "F10_2_banner_gone_after_reload",
+      "pass": true,
+      "detail": "afterReload=absent"
+    },
+    {
+      "name": "F18_1_tree_semantics",
+      "pass": true,
+      "detail": "{\"tree\":true,\"treeItems\":6,\"firstExpanded\":true} projSelected=selected"
+    },
+    {
+      "name": "SHOT_screenshot_captured",
+      "pass": true,
+      "detail": "captured"
+    }
+  ],
+  "allPass": true
+}

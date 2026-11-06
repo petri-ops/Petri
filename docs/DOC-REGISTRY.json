@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 501,
+    "documentCount": 502,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 484
+    "managedMarkdown": 485
   },
   "documents": [
     {
@@ -10156,7 +10156,7 @@
       "capability": "block-370-nso-w3b-polish",
       "path": "docs/block-370-nso-w3b-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-370-nso-w3b-polish",
       "entrypoint": "docs/README.md",
@@ -10180,9 +10180,34 @@
         "docs/ui-productization-audit.md"
       ],
       "sharedBaselines": [],
-      "notes": "2026-11-06 启动 active（用户「继续推进」）。W3b 可机械验证子集：字号 token 收敛（12 处 5 文件；XTerm 数值 API 豁免留痕）+ DOM 预算起步（结果库行/会话行 content-visibility）。布局单源/台账 52 条终态化/实机走查如实挂起。"
+      "notes": "2026-11-06 启动 active（用户「继续推进」）。W3b 可机械验证子集：字号 token 收敛（12 处 5 文件；XTerm 数值 API 豁免留痕）+ DOM 预算起步（结果库行/会话行 content-visibility）。布局单源/台账 52 条终态化/实机走查如实挂起。 | 2026-11-06 completed：字号 12 处收敛+content-visibility 起步+UI-699（03294048）；门禁清偿（11c352b4）；实机腿挂起。"
+    },
+    {
+      "id": "BLOCK-371",
+      "capability": "block-371-nso-w3b-live-walkthrough",
+      "path": "docs/block-371-nso-w3b-live-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-371-nso-w3b-live-walkthrough",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W3",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-3b/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/nso-w3-visual-live.cjs",
+        "docs/ui-productization-audit.md"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-06 completed：实机走查 6/6 PASS（banner/inert 双模式外树语义/重载清零/截图），四腿 pending 如实（首项目无行/scheduled 入口不可达）；UI-697 banner live ✓、UI-698 树语义 live ✓、UI-699 待行数据。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 501
+  "documentCount": 502
 }
