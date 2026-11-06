@@ -1,6 +1,6 @@
 ---
 capability: block-369-nso-w3-ux-trust
-status: active
+status: completed
 goal: NSO-W3 体验可信化与可达性——把「看起来能用」推进到「任何状态下用户都知道发生了什么、能用什么、为什么不能用」。
 acceptance:
   - F-09 viewer 分派：扩展名优先、kind 兜底；preview=false 与未命中返回可读 reason 上抛 Shell（决策表快照测试）
@@ -21,3 +21,19 @@ reopen: 视觉人眼验收项按用户实机路线集中一次处理
 
 - 不新增依赖；不建第二 UI 真相；白名单外 plain CSS 不新增
 - 并发写入者已收口，无在制面；用户资产不动
+
+## 交付与收口（2026-11-06）
+
+| 项 | 状态 | 证据 |
+| --- | --- | --- |
+| F-09 viewer 三段式分派 + 降级原因上抛 Shell | ✅ | 决策表 6/6 + registry 四套件 47/47（旧错分派期望有意翻转留理由）+ result-studio 263/263；UI-697 |
+| F-10 prefsSync 告警条 + 实验开关失败可见 | ✅ | 3/3 + settings 14/14；UI-697 |
+| F-18 inert/tree 语义/表单语义/live region | ✅ | a11y 4/4 + CenterPanel 21/21；UI-698 |
+| 字号 token 首例（ResultsLibrary 徽标） | ✅ | theme-token-contract 17/17；其余 5 文件 → W3b |
+| 布局单源（CenterPanel 双层 layout） | ⏸ W3b | 涉 CSS 重构与几何量测 |
+| DOM 预算（消息/会话/结果库 content-visibility） | ⏸ W3b | 需 CDP 实测节点数定预算 |
+| 52 条 in_progress 终态化 | ⏸ W3b | 分诊+CDP 代行/人眼集中一次 |
+| 视觉验收四件套（实机） | ⏸ W3b | 无人化阶梯 CDP 腿未跑 |
+
+- **completed（带例外）**：P1 失败可见性与可达性契约全部落地；test:changed 29/29 exit 0；tsc 0；theme 契约 17/17。
+- **W3b reopen**：布局单源、字号收敛余量、DOM 预算、台账 52 条终态化、实机视觉/读屏走查（UI-697/698 待 verified）。

@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-06（🏁 **BLOCK-369 NSO-W3 completed（带例外）；无 active 工作包**：W3 主项落地（77b02e3c/f5dc6c1a）。**W3b 余项**=布局单源、字号收敛余 5 文件、DOM 预算、UI 台账 52 条终态化、实机视觉/读屏走查（UI-697/698 转 verified 的实机腿）。工作树剩用户资产/临时目录+两件 surface-matrix 生成器刷新。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **NSO 收尾（W7b 终评回写）**：十包收口、评分终评见评估报告 §0.4。工作树剩=用户资产/临时目录（不入库）+ 并发写入者 UI-696（11 项）。**接手顺序**：①UI-696 落地后启动 W3（viewer 分派/能力位/失败可见/a11y/DOM 预算/UI 台账终态化）→ ②W7b 余项（四账本生成器同源/证据元数据）→ ③P6 源绑定重算+干净树 closeout:full。新命令：test:all:sharded / docs:coverage。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-367 NSO-W2b completed**：F-06 实核修正+capabilityEvidence（契约=agent-tool-interceptor 规则）。剩余：W3 待 UI-696；W6b；W7b 终评。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：402bf045。loop-orchestrator 1570 行（-105），行数棘轮已锚定只减不增；新测试必须挂 impact-map（nso-w5-impact-coverage 判红）。下一包 W2b。G0 常态 · 不外推 packaged/Provider/GA。）

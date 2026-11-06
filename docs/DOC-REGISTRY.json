@@ -10120,7 +10120,7 @@
       "capability": "block-369-nso-w3-ux-trust",
       "path": "docs/block-369-nso-w3-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-369-nso-w3-ux-trust",
       "entrypoint": "docs/README.md",
@@ -10149,7 +10149,7 @@
       "sharedBaselines": [
         "test/impact-map.json"
       ],
-      "notes": "2026-11-06 启动 active（UI-696 已落地 348508f1，台账解锁；P6 已自然复绿 13/13）。F-09 viewer 分派/F-10 prefs 失败可见/F-18 a11y/实验开关失败可见/表单语义/DOM 预算/UI 台账终态化；视觉人眼项按无人化阶梯如实留 in_progress。"
+      "notes": "2026-11-06 启动 active（UI-696 已落地 348508f1，台账解锁；P6 已自然复绿 13/13）。F-09 viewer 分派/F-10 prefs 失败可见/F-18 a11y/实验开关失败可见/表单语义/DOM 预算/UI 台账终态化；视觉人眼项按无人化阶梯如实留 in_progress。 | 2026-11-06 completed（带例外）：F-09/10/18+字号首例（77b02e3c/f5dc6c1a；UI-697/698）；布局单源/DOM 预算/台账 52 条终态化/实机视觉走查移交 W3b。"
     }
   ],
   "lastUpdated": "2026-11-06",
