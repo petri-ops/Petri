@@ -1,0 +1,74 @@
+{
+  "name": "ui696-model-preferences",
+  "platform": "darwin",
+  "startedAt": "2026-11-06T08:57:23.429Z",
+  "finishedAt": "2026-11-06T08:57:32.772Z",
+  "assertions": [
+    {
+      "name": "R1_isolated_backend_healthy",
+      "pass": true,
+      "detail": "port 3399"
+    },
+    {
+      "name": "R2_seed_preferences",
+      "pass": true,
+      "detail": "{\"status\":\"ok\"}"
+    },
+    {
+      "name": "R3_quick_patch_accepted",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "R4_window_synced_to_authoritative_profiles",
+      "pass": true,
+      "detail": "model_profiles.contextWindow=200000（期望 200000）"
+    },
+    {
+      "name": "R5_other_preferences_preserved",
+      "pass": true,
+      "detail": "{\"visible\":false,\"level\":\"high\",\"caps\":[\"chat\",\"reasoning\"]}"
+    },
+    {
+      "name": "R6_compat_snapshot_window_in_sync",
+      "pass": true,
+      "detail": "chat_model_presets={\"id\":\"ui696-probe\",\"label\":\"UI696 Probe\",\"provider\":\"deepseek\",\"model\":\"deepseek-chat\",\"contextWindow\":200000}"
+    },
+    {
+      "name": "D1_default_custom_tabs",
+      "pass": true,
+      "detail": "[\"默认\",\"自定义\"]"
+    },
+    {
+      "name": "D2_context_scale_is_range",
+      "pass": true,
+      "detail": "[{\"type\":\"range\",\"value\":\"1000000\",\"testId\":\"settings-context-window-deepseek-chat\"},{\"type\":\"range\",\"value\":\"1000000\",\"testId\":\"settings-context-window-model-1787541766966\"},{\"type\":\"range\",\"value\":\"1000000\",\"testId\":\"settings-context-wind"
+    },
+    {
+      "name": "D3_effective_boundary_hint",
+      "pass": true,
+      "detail": "hint=true"
+    },
+    {
+      "name": "D4_no_horizontal_overflow_settings",
+      "pass": true,
+      "detail": "overflow=false"
+    },
+    {
+      "name": "D5_default_tab_switches",
+      "pass": true,
+      "detail": "clicked=clicked pane=true"
+    },
+    {
+      "name": "D6_model_menu_two_sliders",
+      "pass": true,
+      "detail": "{\"present\":true,\"ranges\":[{\"label\":\"上下文窗口\",\"testId\":\"model-menu-context-window\",\"disabled\":false},{\"label\":\"思考强度\",\"testId\":\"model-menu-thinking-level\",\"disabled\":true}],\"text\":\"上下文窗口\\n1M\\n32K\\n128K\\n1M\\n思考强度\\n标准\\n关闭\\n标准\\n高\\n该渠道未声明思考能力，档位不会发送给上游\\n上下文窗口用于本机预算与裁剪，不扩展上游模型能力\"}"
+    },
+    {
+      "name": "D7_screenshot_or_honest_degrade",
+      "pass": true,
+      "detail": "captured"
+    }
+  ],
+  "allPass": true
+}

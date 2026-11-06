@@ -1,0 +1,162 @@
+/* 模型偏好控件：颜色一律走 --petri-* token，零裸色值、零 slate 字面量。
+   字号继承宿主（不引入新文件的 small-font 计数），强调态走 accent-border 语义线。 */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-1);
+  min-width: 0;
+}
+
+.field[data-disabled='true'] {
+  opacity: 0.55;
+}
+
+.fieldHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.label {
+  color: var(--petri-text-secondary);
+}
+
+.value {
+  font-family: var(--petri-font-mono);
+  font-weight: 600;
+  color: var(--petri-text);
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin: 0;
+  border: 0;
+  border-radius: var(--petri-radius-sm);
+  background: linear-gradient(90deg,
+    var(--petri-accent-border),
+    color-mix(in srgb, var(--petri-accent-border) 40%, var(--petri-bg-subtle)));
+  cursor: pointer;
+}
+
+.slider:disabled {
+  cursor: not-allowed;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--petri-accent-border);
+  border-radius: 50%;
+  background: var(--petri-bg-elevated);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--petri-accent-border);
+  border-radius: 50%;
+  background: var(--petri-bg-elevated);
+  cursor: pointer;
+}
+
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--petri-space-1);
+  min-width: 0;
+}
+
+.tick {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--petri-text-tertiary);
+  cursor: pointer;
+}
+
+.tick:hover {
+  color: var(--petri-accent-border);
+}
+
+.tick:disabled {
+  cursor: not-allowed;
+}
+
+.tickActive {
+  font-weight: 600;
+  color: var(--petri-accent-border);
+}
+
+.tickStatic {
+  flex: 1;
+  color: var(--petri-text-tertiary);
+  text-align: center;
+}
+
+.reason {
+  color: var(--petri-warning);
+}
+
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border-bottom: 1px solid var(--petri-divider);
+}
+
+.quickNotice {
+  color: var(--petri-text-secondary);
+}
+
+.quickNotice[data-tone='error'] {
+  color: var(--petri-danger);
+}
+
+.quickHint {
+  color: var(--petri-text-tertiary);
+}
+
+.prefTabs {
+  display: flex;
+  gap: var(--petri-space-1);
+  margin-bottom: var(--petri-space-3);
+  border-bottom: 1px solid var(--petri-divider);
+}
+
+.prefTab {
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-size: inherit;
+  font-family: inherit;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+}
+
+.prefTabActive {
+  border-bottom-color: var(--petri-accent-border);
+  color: var(--petri-accent-border);
+  font-weight: 600;
+}
+
+.defaultPane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+}
+
+.saveHint {
+  color: var(--petri-text-tertiary);
+  margin-right: auto;
+}

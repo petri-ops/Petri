@@ -29,7 +29,10 @@ import {
   type UserModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
-import { parseContextWindow, formatContextWindow } from '@/lib/format-context-window';
+import { ContextWindowScale } from '@/components/copilot/SimpleChat/ModelPreferenceControls';
+import { ModelPreferenceTabs } from './DesktopSettingsPanel/ModelPreferenceTabs';
+import { CONTEXT_WINDOW_OPTIONS } from '@/lib/context-window-options';
+import prefStyles from '@/components/copilot/SimpleChat/ModelPreferenceControls.module.css';
 import { getBridge } from '@/lib/desktopBridge';
 import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
 import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
@@ -78,6 +81,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
   } = useSettingsTransferState({ activeSection, activeLabel: activeSectionMeta.label });
   const backendStatus = useBackendStatus();
   const { preference: themePreference, fontScale, setFontScale } = useTheme();
+  // UI-696 — 图 2 形态：默认（全局）/ 自定义（逐模型）双页签
+  const [modelPrefTab, setModelPrefTab] = useState<'default' | 'custom'>('custom');
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
   // （./useEndpointProfilesEditor.ts：渠道/角色绑定/凭据/连通性/导入导出，纯搬运零行为变化）。
   const {
@@ -103,8 +108,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
     profileErrors,
     credentialBackend,
     endpointTransferMessage,
-    contextWindowDrafts,
-    setContextWindowDrafts,
     endpointImportRef,
     userModelProfiles,
     telemetryEnabled,
@@ -251,7 +254,22 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
-            <GenerationDefaultsPanel />
+            {/* UI-696 — 图 2 形态：默认 / 自定义 双页签（组件见 ./DesktopSettingsPanel/ModelPreferenceTabs） */}
+            <ModelPreferenceTabs value={modelPrefTab} onChange={setModelPrefTab} />
+            {modelPrefTab === 'default' ? (
+              <div className={prefStyles.defaultPane}>
+                <div className="petri-settings-section__heading">
+                  <h3>默认偏好</h3>
+                  <p>所有模型继承的全局生成参数与思考档位。</p>
+                </div>
+                <GenerationDefaultsPanel />
+                <p className="petri-field__hint">
+                  思考档位的默认值、高档预算与逐协议参数映射在「推理档位」分区；逐模型覆盖请切到「自定义」。
+                  这些偏好对所有任务生效，运行中的回复保持当前设置，下一轮开始使用新设置。
+                </p>
+              </div>
+            ) : (
+              <>
             <div className="petri-settings-section__heading">
               <h3>API Endpoint</h3>
               <p>
@@ -278,7 +296,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                   <span>Base URL</span>
                   <span>Key</span>
                   <span>默认模型</span>
-                  <span>上下文</span>
+                  <span>上下文窗口</span>
                   <span>思考</span>
                   <span>视觉</span>
                   <span>向量</span>
@@ -395,36 +413,13 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
-                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文</span>
-                    <input
-                      type="text"
-                      className="petri-input petri-input--sm"
-                      // Render the user's literal text during editing so the
-                      // cursor doesn't jump mid-typing; only format on blur
-                      // and when state has a numeric value.
-                      value={contextWindowDrafts[profile.id] ?? formatContextWindow(profile.contextWindow)}
-                      onChange={(e) => {
-                        const text = e.target.value;
-                        setContextWindowDrafts((current) => ({ ...current, [profile.id]: text }));
-                        const parsed = parseContextWindow(text);
-                        updateProfile(profile.id, { contextWindow: parsed });
-                      }}
-                      onBlur={(e) => {
-                        // Drop the draft so subsequent renders show the
-                        // canonical formatted value (e.g. "128K" instead of
-                        // any partial state).
-                        setContextWindowDrafts((current) => {
-                          if (!(profile.id in current)) return current;
-                          const next = { ...current };
-                          delete next[profile.id];
-                          return next;
-                        });
-                        const parsed = parseContextWindow(e.target.value);
-                        updateProfile(profile.id, { contextWindow: parsed });
-                      }}
-                      placeholder="64K / 1M"
-                      aria-label="上下文窗口"
-                      title="模型上下文窗口，如 64K、128K、1M；留空则使用默认值"
+                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文窗口</span>
+                    <ContextWindowScale
+                      compact
+                      value={profile.contextWindow}
+                      options={CONTEXT_WINDOW_OPTIONS}
+                      onChange={(next) => updateProfile(profile.id, { contextWindow: next })}
+                      testId={`settings-context-window-${profile.id}`}
                     />
                     <EndpointCapabilityToggle
                       profile={profile}
@@ -552,6 +547,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                 </div>
               )}
             </div>
+              </>
+            )}
 
           </section>
         )}
@@ -657,6 +654,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
       </div>
 
       {showAiSave && <div className="petri-desktop-panel__footer petri-settings-footer">
+        <span className={prefStyles.saveHint}>运行中的回复保持当前设置，下一轮开始使用新设置</span>
         {saved && (
           <span className="petri-saved-toast">
             <Icon name="check" size={14} /> 已保存

@@ -9,6 +9,35 @@ const express = require('express');
 const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbedProviderName, getGenerationDefaults, saveGenerationDefaults } = require('../helpers/ai-settings');
 
 /**
+ * UI-696 — 模型菜单快捷面只送兼容快照 chat_model_presets 时，把窗口同步进
+ * 权威的 model_profiles（token 预算/裁剪实际读它），同时把同一窗口写回兼容快照，
+ * 避免读 presets 的消费者看到旧值（第二真相漂移）。不整坨替换快照，
+ * 每模型其它偏好一律沿用 current。设置页同时送两份时原样返回，行为不变。
+ */
+function syncPresetContextWindow(current, incoming) {
+  const patch = { ...incoming };
+  if (!Array.isArray(incoming.chat_model_presets) || Array.isArray(incoming.model_profiles)) return patch;
+  const windowById = new Map(
+    incoming.chat_model_presets
+      .filter((preset) => preset && typeof preset === 'object' && preset.id)
+      .map((preset) => [String(preset.id), preset.contextWindow]),
+  );
+  patch.model_profiles = (current.model_profiles || []).map((profile) => {
+    const next = windowById.get(profile.id);
+    return typeof next === 'number' && next > 0
+      ? { ...profile, contextWindow: Math.round(next) }
+      : profile;
+  });
+  patch.chat_model_presets = (current.chat_model_presets || []).map((preset) => {
+    const next = windowById.get(preset.id);
+    return typeof next === 'number' && next > 0
+      ? { ...preset, contextWindow: Math.round(next) }
+      : preset;
+  });
+  return patch;
+}
+
+/**
  * BLOCK-150 加映 — vision 角色是否可用（档位在场且凭据可解析）。
  * 前端据此对图片输入做前置阻断（未配置时贴图/拖图即提示，替代后置 vision_failed）。
  * getCredential 可注入（测试）；生产走 model-gateway 同源解析（credential store 显式配置唯一来源，env 兜底已移除）。
@@ -85,7 +114,8 @@ function registerAiSettingsRoutes(app) {
   app.post('/api/ai/settings', express.json(), (req, res) => {
     const incoming = req.body || {};
     const current = getAiSettings();
-    const saved = saveAiSettings({ ...current, ...incoming });
+    const patch = syncPresetContextWindow(current, incoming);
+    const saved = saveAiSettings({ ...current, ...patch });
     // BLOCK-203 W4a P6 — 被丢弃的未知顶层键要看得见（白名单过滤不静默）
     res.json({ status: 'ok', ...(saved && saved.dropped && saved.dropped.length ? { diagnostics: saved.dropped } : {}) });
   });
@@ -273,4 +303,4 @@ function registerAiSettingsRoutes(app) {
   });
 }
 
-module.exports = { registerAiSettingsRoutes, computeVisionConfigured };
+module.exports = { registerAiSettingsRoutes, computeVisionConfigured, syncPresetContextWindow };

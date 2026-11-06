@@ -1,5 +1,15 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-696: 模型上下文窗口 / 思考强度设置面按图 1+图 2 形态优化（2026-11-06 **verified（dev Electron 边界内；隔离后端 REST 实机 + 9223 离屏 DOM 13/13 + 截图）**）
+
+- **模型菜单（图 1 形态）**：`ModelMenu.tsx` 快捷区两个原生 `<select>` 换成 `ModelPreferenceControls.tsx` 的分段思考强度滑条与上下文窗口刻度滑条（32K/64K/128K/200K/400K/1M，档位单一真源 `@/lib/context-window-options.ts`）；`thinkingLevel.ts` 单一词表派生标签，删除 `ModelMenu` 内第二份 `THINKING_LABELS`。能力位未声明 `reasoning` 时控件不再整块消失，改常驻灰显 + 原因文案，并把快捷写回结果（成功「已保存 · 下一轮生效」/ 失败「已回退到服务端值」）显示出来，替代 `useContextWindowQuickPick.ts` 的静默失败。
+- **设置页（图 2 形态）**：`models` 分区新增「默认 / 自定义」页签（不新增第 11 个分区）；自定义页逐模型一行的渠道网格把「上下文」自由文本框换成同一刻度滑条，列名对齐图 2；保存条统一「运行中的回复保持当前设置，下一轮开始使用新设置」。新样式全部 `--petri-*` token + CSS Module，保留 UI-613 去灰底与 UI-619 双卡。
+- **生效链修根**：`POST /api/ai/settings` 在只收到 `chat_model_presets` 兼容快照时，通过 `syncPresetContextWindow` 把窗口同步进权威的 `model_profiles`（`agent-runner` / token 预算实际读它），并把同一窗口写回兼容快照（不整坨替换，避免 `normalizeAiSettings` 裁掉每模型其它偏好、也避免读 presets 的消费者看到旧值）；设置页同时送两份时行为不变。档位数仍守后端三档契约，未照抄图 2 的多档标签，避免「显示档 ≠ 出站参数」。
+- **证据**：`quality:types` 0；前端定向 `ModelMenu.test.tsx` 9/9 + `modelConfigAndCollapse.test.tsx` 10/10 + `ModelSelectorControls.test.tsx` 2/2；后端 `test/model-preference-sync.test.mjs` 4/4；主题门 `theme-token-contract.test.ts` 17/17；本包改动文件 `eslint --quiet` 0 error；`quality:secret` / `quality:arch` / `docs:check` / `ui:audit:check` 全绿。
+- **门禁终态（2026-11-06 收口）**：全量 `quality:lint` 0 error（并行会话在制批的 1 error 已随其提交消解）；`quality:knip:check` PASS（新增 1 键 = 本 flow 动态入口，由 `run.cjs` 按 id 动态 require，CK-11 定性后 `--update` 冻结 328 键）；`gate:code-size` PASS（24 文件 / `SimpleChat.tsx` 2079 行 / `DesktopSettingsPanel.tsx` 675 行均在基线下，指纹随 `--write` 重打）；`quality:secret` / `quality:arch` / `docs:check` / `ui:audit:check` 全绿。**并行面零触碰**：`--write` 曾按 MANIFEST 重扫移除并行会话 W5b 手工入册的 `loop-orchestrator.js`（1571 行，文件本身干净），已按原值恢复该基线条目；该文件不在 `scripts/code-size-ledger.mjs` 的 MANIFEST 内（既有矛盾，任何 `--write` 都会移除手工锚定），留 W5b 归属方定夺，本包不改其脚本。
+- **实机腿（13/13 allPass）**：`dev-verify/flows/ui696-model-preferences.cjs`，证据 `acceptance/ui-696/ui696-model-preferences-live-darwin.json` + `ui696-model-preferences.png`。隔离后端（临时端口 + SQLite backup 快照，跑完 kill + 删临时目录，未触碰用户库与 :3001 长活后端）验 R1–R6：快捷写回只送兼容快照时 `model_profiles.contextWindow` 64000→200000、`visible=false` / `defaultThinkingLevel=high` / `capabilities` 不丢、兼容快照同值；9223 离屏只读 DOM（记录并恢复原 URL）验 D1–D7：默认/自定义页签、设置页与模型菜单两个 `input[type=range]` 刻度条、生效边界文案、切页、无横向溢出、截图成功。**实机抓真**：R6 首轮读到兼容快照仍是旧窗口，按红绿先行补失败断言（`undefined !== 200000`）→ 修 `syncPresetContextWindow` 双侧同步 → 契约 4/4 转绿、实机复跑 13/13。
+- **边界**：未跑真实 Provider 长任务与用户主窗 9222；:3001 长活旧后端未重启（隔离后端已加载当前代码并验证）；思考档位出站参数由 `test/block200-reasoning-config.test.mjs` 既有出站腿承索。本包未提交（工作树含并行会话在制 WIP，不批量提交）。
+
 ## UI-694: 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**；2026-11-06 BLOCK-359 W0 维护注记）
 
 - **设置「决策与调度」新增五段**（后端能力早已存在、此前前端零调用）：①模型允许清单（读写 `allowedModels` + 理由账本逐行 `模型=理由`，开放/白名单两态如实标注）②原因码词表（折叠展示 `/api/ai/reason-codes`，点开才拉）③运行环境包「重新检测」（复用既有 list IPC，不新增通道）④Agent 操作审计与撤销（`agent-audit` 列表 + `agent-undo/:token` + `agent-settings` 暂停开关）⑤记忆压缩策略（`memory-policy` 读写 + 生效来源标注 + `memory-wipe` 二次确认）。

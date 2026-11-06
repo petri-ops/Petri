@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-06",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -194,6 +194,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-ui.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",

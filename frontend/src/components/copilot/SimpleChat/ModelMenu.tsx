@@ -10,6 +10,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { Icon } from '@/components/icons/Icon';
+import { ContextWindowScale, ThinkingEffortSlider } from './ModelPreferenceControls';
+import { THINKING_LEVEL_LABELS } from '@/components/copilot/thinkingLevel';
+import styles from './ModelPreferenceControls.module.css';
 import { getApiPrefix } from '@/lib/env';
 import {
   formatContextWindow,
@@ -42,9 +45,11 @@ interface ModelMenuProps {
   thinkingLevel?: string;
   thinkingLevelOptions?: string[];
   onChangeThinkingLevel?: (next: string) => void;
+  /** 渠道是否声明 reasoning 能力；未声明时档位常驻灰显并给出原因，不再整块消失。 */
+  reasoningSupported?: boolean;
+  /** 快捷写回结果提示，替代静默失败。 */
+  quickNotice?: { text: string; tone: 'ok' | 'error' } | null;
 }
-
-const THINKING_LABELS: Record<string, string> = { off: '关闭思考', standard: '标准思考', high: '高思考' };
 
 /** UI-619 — 模型第二卡：左侧主卡列供应商，右侧独立卡列其模型；默认贴主卡右侧，右侧放不下向左开。 */
 const MODEL_PANEL_WIDTH = 320;
@@ -149,7 +154,10 @@ function presetMeta(preset: ChatModelPreset, active: boolean, pricing: PricingTa
   if (active) parts.push('当前使用');
   const context = formatContextWindow(preset.contextWindow);
   if (context) parts.push(context);
-  if (preset.defaultThinkingLevel) parts.push(THINKING_LABELS[preset.defaultThinkingLevel] || preset.defaultThinkingLevel);
+  if (preset.defaultThinkingLevel) {
+    const label = THINKING_LEVEL_LABELS[preset.defaultThinkingLevel] || preset.defaultThinkingLevel;
+    parts.push(`${label}思考`);
+  }
   const price = formatPrice(pricing[preset.model]);
   if (price) parts.push(price);
   return parts.length > 0 ? parts.join(' · ') : active ? '当前使用' : '点击切换';
@@ -203,6 +211,8 @@ export function ModelMenu({
   thinkingLevel,
   thinkingLevelOptions,
   onChangeThinkingLevel,
+  reasoningSupported,
+  quickNotice,
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
   const access = useModelAccess();
@@ -276,43 +286,35 @@ export function ModelMenu({
             {autoError}
           </div>
         )}
-        {/* UI-MODELCFG-1 — 模型级快捷配置：原来要进设置页逐模型改，现就地切换 */}
+        {/* UI-MODELCFG-1 / UI-696 — 模型级快捷配置：分段滑条就地调，不进设置页 */}
         {(contextWindowOptions?.length || thinkingLevelOptions?.length) && (
-          <div
-            data-testid="model-menu-quick"
-            style={{ display: 'grid', gap: 6, padding: '6px 10px', borderBottom: '1px solid rgba(127,127,127,0.18)' }}
-          >
+          <div className={styles.quick} data-testid="model-menu-quick">
             {contextWindowOptions && contextWindowOptions.length > 0 && (
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                <span className="sc-model-option-meta">上下文窗口</span>
-                <select
-                  data-testid="model-menu-context-window"
-                  aria-label="上下文窗口"
-                  value={contextWindow ?? contextWindowOptions[0]}
-                  onChange={(event) => onChangeContextWindow?.(Number(event.target.value))}
-                  style={{ minWidth: 96 }}
-                >
-                  {contextWindowOptions.map((size) => (
-                    <option key={size} value={size}>{formatContextWindow(size)}</option>
-                  ))}
-                </select>
-              </label>
+              <ContextWindowScale
+                value={contextWindow ?? contextWindowOptions[0]}
+                options={contextWindowOptions}
+                onChange={(next) => onChangeContextWindow?.(next)}
+              />
             )}
             {thinkingLevelOptions && thinkingLevelOptions.length > 0 && (
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                <span className="sc-model-option-meta">思考强度</span>
-                <select
-                  data-testid="model-menu-thinking-level"
-                  aria-label="思考强度"
-                  value={thinkingLevel ?? 'standard'}
-                  onChange={(event) => onChangeThinkingLevel?.(event.target.value)}
-                  style={{ minWidth: 96 }}
-                >
-                  {thinkingLevelOptions.map((level) => (
-                    <option key={level} value={level}>{THINKING_LABELS[level] ?? level}</option>
-                  ))}
-                </select>
-              </label>
+              <ThinkingEffortSlider
+                value={thinkingLevel ?? 'standard'}
+                options={thinkingLevelOptions}
+                disabled={!(reasoningSupported ?? Boolean(thinkingLevelOptions.length))}
+                disabledReason="该渠道未声明思考能力，档位不会发送给上游"
+                onChange={(next) => onChangeThinkingLevel?.(next)}
+              />
+            )}
+            <div className={styles.quickHint}>上下文窗口用于本机预算与裁剪，不扩展上游模型能力</div>
+            {quickNotice && (
+              <div
+                className={styles.quickNotice}
+                data-tone={quickNotice.tone === 'error' ? 'error' : undefined}
+                role="status"
+                data-testid="model-menu-quick-notice"
+              >
+                {quickNotice.text}
+              </div>
             )}
           </div>
         )}

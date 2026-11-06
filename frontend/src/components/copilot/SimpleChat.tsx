@@ -12,6 +12,7 @@
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { CONTEXT_WINDOW_OPTIONS } from '@/lib/context-window-options';
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
   SLASH_COMMANDS,
@@ -131,11 +132,7 @@ import {
 } from './thinkingLevel';
 import type { ThinkingLevel } from './thinkingLevel';
 
-/**
- * UI-MODELCFG-1 — 输入框内可快捷切换的上下文窗口档位。
- * 选档后写回当前模型档案（POST /api/ai/settings 部分更新），设置页同源刷新。
- */
-const CONTEXT_WINDOW_OPTIONS: number[] = [32000, 64000, 128000, 200000];
+// UI-696 — 上下文档位单源见 @/lib/context-window-options（菜单与设置页刻度条共用）。
 import { buildConversationSegments } from './conversationSegments';
 import type { ConversationSegment } from './conversationSegments';
 import {
@@ -459,8 +456,8 @@ export function SimpleChat({
     refresh: refreshAiSettings,
   } = useAiSettings();
 
-  // UI-MODELCFG-1 — 输入框内快捷切换上下文窗口（逻辑见 useContextWindowQuickPick）。
-  const updateContextWindow = useContextWindowQuickPick({
+  // UI-MODELCFG-1 / UI-696 — 输入框内快捷切换上下文窗口（逻辑见 useContextWindowQuickPick）。
+  const { updateContextWindow, notice: quickSaveNotice } = useContextWindowQuickPick({
     activePreset: activeModel,
     presets: modelPresets,
     refresh: refreshAiSettings,
@@ -1989,10 +1986,12 @@ export function SimpleChat({
                       }}
                       onPickModel={(preset) => void selectModel(preset)}
                       contextWindow={activeModel?.contextWindow}
-                      contextWindowOptions={CONTEXT_WINDOW_OPTIONS}
+                      contextWindowOptions={[...CONTEXT_WINDOW_OPTIONS]}
                       onChangeContextWindow={(next) => void updateContextWindow(next)}
                       thinkingLevel={thinkingLevel}
-                      thinkingLevelOptions={reasoningSupported ? [...THINKING_LEVELS] : []}
+                      thinkingLevelOptions={[...THINKING_LEVELS]}
+                      reasoningSupported={reasoningSupported}
+                      quickNotice={quickSaveNotice}
                       onChangeThinkingLevel={(next) => applyThinkingLevel(next as ThinkingLevel)}
                     />
                   )}
