@@ -56,6 +56,19 @@ function errorCode(result) {
  */
 const OPENAI_FAMILY_PROVIDERS = new Set(['deepseek', 'openai', 'openai-compatible', 'ollama', 'lmstudio', 'vllm']);
 
+// 思考预算不能吃光正文：Anthropic 的 budget_tokens 与正文共享 max_tokens，
+// 16000 预算 + 16384 上限只剩 384 token 给正文（确定性空答复，2026-11-05 排查）。
+const MIN_CONTENT_TOKENS_FOR_THINKING = 4096;
+function clampThinkingBudgetForOutput(body) {
+  if (!body || !body.thinking || body.thinking.type !== 'enabled') return body;
+  const maxTokens = Number(body.max_tokens);
+  const budget = Number(body.thinking.budget_tokens);
+  if (!Number.isFinite(maxTokens) || maxTokens <= 0 || !Number.isFinite(budget) || budget <= 0) return body;
+  const maxBudget = Math.max(1024, maxTokens - MIN_CONTENT_TOKENS_FOR_THINKING);
+  if (budget <= maxBudget) return body;
+  return { ...body, thinking: { ...body.thinking, budget_tokens: maxBudget } };
+}
+
 /**
  * BLOCK-150 加映三 — openai 系 vision 响应归一化：DeepSeek 系 chat() 返回原始
  * API 信封（choices[0].message），而 vision 消费方（agent-tools/vision-tools.js）
@@ -253,12 +266,12 @@ class ModelGateway {
           protocol: profile.protocol,
           capabilities: profile.capabilities,
         });
-      const requestBody = {
+      const requestBody = clampThinkingBudgetForOutput({
         ...(profile.parameters || {}),
         ...thinkingParams,
         ...(body || {}),
         model: index === 0 && modelOverride ? modelOverride : profile.model,
-      };
+      });
       const options = { baseUrl: profile.baseUrl, signal, profile };
       let emittedOutput = false;
       let result;
@@ -484,4 +497,11 @@ class ModelGateway {
   }
 }
 
-module.exports = { ModelGateway, gatewayError, isRetryableProviderError, OPENAI_FAMILY_PROVIDERS };
+module.exports = {
+  ModelGateway,
+  gatewayError,
+  isRetryableProviderError,
+  OPENAI_FAMILY_PROVIDERS,
+  MIN_CONTENT_TOKENS_FOR_THINKING,
+  clampThinkingBudgetForOutput,
+};

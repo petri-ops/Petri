@@ -139,6 +139,11 @@ export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
     settingsFound: local ? local.settingsFound === true : false,
     triedDirs: local ? (local.lookedIn || []) : [],
   });
+  // 预算窗口可被评测调用方覆写（默认仍 32000，零行为变化）；用于复刻大窗口模型
+  // （如 1M 上下文的推理模型）在真实 agent-runner 预算链路上的行为。
+  const evalContextWindow = Number(process.env.PETRI_EVALS_CONTEXT_WINDOW) > 0
+    ? Math.floor(Number(process.env.PETRI_EVALS_CONTEXT_WINDOW))
+    : 32000;
   fs.writeFileSync(path.join(tmpDir, 'ai-settings.json'), JSON.stringify({
     active_chat_model_id: 'evals-provider',
     credential_updates: { 'openai-compatible': resolved.apiKey || 'evals-mock-key' },
@@ -148,7 +153,15 @@ export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
       provider: 'openai-compatible',
       model: resolved.model || 'evals-model',
       baseUrl: resolved.baseUrl || `http://127.0.0.1:${port}/placeholder`,
-      contextWindow: 32000,
+      contextWindow: evalContextWindow,
+    }],
+    // agent-runner 的预算链读 model_profiles（不是 chat_model_presets）；
+    // 两处同源写，评测才能复刻真实大窗口而不必改产品代码。
+    model_profiles: [{
+      id: 'evals-provider',
+      provider: 'openai-compatible',
+      model: resolved.model || 'evals-model',
+      contextWindow: evalContextWindow,
     }],
   }, null, 2));
   const backend = spawn(process.execPath, [path.join(root, 'core', 'petri-server', 'server.js')], {

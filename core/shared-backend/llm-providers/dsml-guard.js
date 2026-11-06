@@ -8,11 +8,16 @@
  *   - 全角：`｜｜DSML｜｜`（U+FF5C FULLWIDTH VERTICAL LINE，tokenizer 变体）
  * 这类标记永远不是合法的用户可见内容，因此在 provider 层单点清洗：
  *
- * - stripLeakedToolMarkup(text)：一次性清洗——从首个 DSML 标记起整段截断
- *   （泄漏块之后不会恢复合法正文，整块都是模型内部格式噪音）。
+ * - stripLeakedToolMarkup(text)：一次性清洗——只有「标记 + 内部工具调用格式」
+ *   才算泄漏块并从标记处截断；用户正文里作为字面量出现的 DSML 标记（例如
+ *   讲解 tokenizer 的文档）必须原样保留，不得整段丢弃。
  * - createDsmlStreamGuard()：流式增量清洗器——标记可能跨 chunk 分裂，扣留
  *   尾部可能是标记前缀的字符待下一个 chunk 判定；一旦确认命中泄漏，后续
- *   所有 delta 全部吞掉（poisoned）。flush() 在流结束时只放安全正文。
+ *   所有 delta 全部吞掉（poisoned）。flush() 在流结束时放行扣留的尾巴，
+ *   因为此时不可能再有跨 chunk 的标记前缀，丢尾等于丢用户可见的字。
+ *
+ * 已知边界（诚实登记）：流式通道无法可靠区分「用户正文里的字面量标记」与
+ * 「上游泄漏块」，仍按安全优先清洗；需要 provider 层协议级区分才能根治。
  */
 
 // 标记形态：开/闭边界字符（< 或 ｜）+ 1~2 个竖线（| 或 ｜）+ 可选 / + DSML
@@ -24,10 +29,22 @@ const DSML_MARK_CHARS = /[<|｜>/DSML]/;
 // 最长形态 ｜｜/DSML｜｜ = 10 字符；扣留上限取 11，保证「部分前缀」永不构成完整标记
 const HOLD_BACK_MAX = 11;
 
+// 真正的泄漏块：标记之后紧跟 invoke / parameter / tool_calls 等内部调用格式，
+// 或紧跟另一个 DSML 标记（连续标记串）。孤立的标记只是用户正文里的字面量。
+const DSML_TOOL_CALL_HINT = /^\s*(?:invoke|parameter|tool_calls|function|commentary|assistant\s+to=|(?:<|[｜])[|｜]{0,2}\/?DSML)/i;
+
+function leakMarkIndex(text) {
+  const s = String(text == null ? '' : text);
+  const match = DSML_MARK_RE.exec(s);
+  if (!match) return -1;
+  const after = s.slice(match.index + match[0].length);
+  return DSML_TOOL_CALL_HINT.test(after) ? match.index : -1;
+}
+
 function stripLeakedToolMarkup(text) {
   const s = String(text == null ? '' : text);
-  const match = s.search(DSML_MARK_RE);
-  return match === -1 ? s : s.slice(0, match);
+  const idx = leakMarkIndex(s);
+  return idx === -1 ? s : s.slice(0, idx);
 }
 
 // 尾部若为某个标记的前缀（如 "<"、"<|"、"｜"、"｜｜DS"、"｜｜/DSML｜"），返回该后缀长度。
@@ -72,8 +89,8 @@ function createDsmlStreamGuard() {
         poisoned = true;
         return rest.slice(0, hit);
       }
-      const keep = trailingPartialMarkLength(rest);
-      return keep ? rest.slice(0, rest.length - keep) : rest;
+      // 流已结束：扣留的尾巴不可能是「跨 chunk 的标记前缀」，原样放行，不丢用户的字。
+      return rest;
     },
   };
 }

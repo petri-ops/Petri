@@ -80,7 +80,10 @@ function resolveTaskFallbackProfile(config, primaryProfileId, role = 'agent') {
  * @returns {Array} 续跑 messages
  */
 function buildFallbackResumeMessages(originalMessages, digest, meta = {}) {
-  const reasonText = meta.reason ? `失败原因：${meta.reason}` : '失败原因：模型服务异常';
+  // 缺原因时不得擅自定性：用户看到「模型服务异常」就无法判断是限流、鉴权还是网络问题。
+  const reasonText = meta.reason
+    ? `失败原因：${meta.reason}`
+    : '失败原因：未随降级事件上报（请展开运行详情查看最后一个异常）';
   const lines = [
     '=== 任务恢复（系统注入，非用户输入） ===',
     `上次执行因模型服务异常中断，系统已自动切换到备用模型「${meta.label || '备用模型'}」继续本任务。`,

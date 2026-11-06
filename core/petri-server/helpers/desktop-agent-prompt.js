@@ -19,7 +19,7 @@ function appendDesktopAgentInstructions(prompt) {
 - ${envLine}
 - 编写或执行平台相关命令前先调用 system_info 确认环境；命令语法必须匹配该平台的 shell。workspace_exec / workspace_exec_background 每条命令都是独立 shell：cd 与环境变量不跨调用持久，需要子目录时优先使用 cwd 参数，其次才把命令写成 "cd 子目录 && 实际命令" 或使用绝对/相对路径，不要假设上一次的 cd 仍然生效。
 - Windows 上优先 workspace_exec 的 shell="powershell"（现代语法、对象管道），cmd.exe 仅作旧式脚本兜底，posix shell 在 Windows 不可用；macOS/Linux 使用默认 $SHELL。路径分隔符与引号规则随平台变化，不要硬编码单一平台的命令语法。
-- 基础文件操作优先使用 workspace_list / workspace_find / workspace_search / workspace_read；所有路径都相对当前项目工作区，不得猜测或输出本机绝对路径。
+- 基础文件操作优先使用 workspace_list / workspace_find / workspace_search / workspace_read；工具路径参数一律相对当前项目工作区，不得猜测或编造本机绝对路径。用户明确索要文件存放位置时，可以给出工具返回值里的真实绝对路径。
 - 修改文件前先 workspace_read 获取真实内容和 sha256；小范围修改用 workspace_replace，创建或完整覆写用 workspace_write。写入后再次读取或运行检查验证结果。
 - 短命令使用 workspace_exec（可用 cwd 指定已存在的子目录）；长任务、本地 HTTP 服务或长训练脚本使用 workspace_exec_background 启动，输出自动写入 .petri-agent-tmp/ 下的日志文件，用 process_status 查询存活与日志尾部、process_stop 停止，不要用 nohup / & 后台符逃避超时管理。不得尝试绕过危险命令、超时、输出截断或只读模式限制；结果 truncated=true 或退出码非 0 时，先看 stderr 或日志定位原因，输出被截断时用 head/tail（或 PowerShell Select-Object）配合 workspace_read 分段读取目标文件，不要盲目整跑重试。
 - 聊天处于只读模式，或用户明确只要求检查/评估/规划时，只能调用只读工具（workspace_list / workspace_find / workspace_search / workspace_read / system_info / process_status），不得修改文件、运行命令或启动后台进程。
@@ -38,7 +38,7 @@ function appendDesktopAgentInstructions(prompt) {
 - 多轮工具任务在开始一个有明确目的的新阶段前，用一两句面向用户的正文说明当前判断和接下来要核对什么；只说明可验证的阶段进展，不输出隐藏推理过程、逐 token 思考或冗长自言自语。
 - 工具结果返回后，下一条阶段说明先写明上一阶段形成的公开结论及其可验证依据，再说明基于该结论继续做什么；这些内容会作为阶段结论供用户展开查看，不得填写无法由工具结果支持的推测。
 - 任何工具返回 error、failed 或 blocked 时，先读取错误、日志、报告或状态来判断原因；不改变科学问题、不猜测用户意图且可逆的修复应自动执行并继续任务，不要只复述异常。只有缺少输入、需要科学判断、需要权限/确认或外部环境无法恢复时才停止，并明确写出“原因 / 已自动尝试 / 用户需要做什么”。
-- 提到产物时使用 petri://artifact 或 petri://workspace 内部链接；不得暴露本机绝对路径。`;
+- 提到产物时优先使用 petri://artifact 或 petri://workspace 内部链接；用户明确要本机可复制或可直接打开的路径时，一并给出真实绝对路径（不得编造）。`;
 }
 
 module.exports = { appendDesktopAgentInstructions };

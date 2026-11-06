@@ -32,3 +32,12 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-05T08:27:50.390Z -->
 最后更新：2026-11-05（✅ **BLOCK-353 packaged 回归 completed（总纲包 6/7）**：**实锤并修复两处打包阻断缺陷**——①打包后端 boot 三层断链（src 不在 Resources、express 等依赖对 RUN_AS_NODE 子进程不可见、electron require 无解→GUI 首启静默挂起真因；afterPack 解出 node_modules+src+electron 空导出 shim）②better-sqlite3 双 ABI 漂移（core 内包缺入口穿透解出树+builder 重建缓存跳过；cpSync 后根副本终覆盖+install-app-deps 前置固化）；修复后四项健康全绿（后端 1s/迁移 21 文件 71 表/R+Python ✓）+ **T2 数据任务打包态真跑 completed 四判据全过、与 dev consistent=true**（事件采集口径差异如实注记）；**④ packaged 性能基线补建 469ms**（350 交接闭环；gate 采样改 min-of-2 防单次冷跑假红）；构建铁律=install-app-deps→build→验收→npm rebuild。GUI 直启=用户实机 reopen。报告=docs/block-353-regression-report.md。**下一包=BLOCK-354**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-05（🔵 **BLOCK-353 packaged 回归 启动登记（active；总纲包 6/7）**：产物=BLOCK-350 构建（unsigned mac-arm64，含全部近期包改动）。结构事实=repo 挂载式打包（asar=src+node_modules；Resources 顶层带重编 better-sqlite3/node-pty；core/frontend/resources 走仓库布局——Stage 4「未签名本地挂载」同形态）。四项健康=打包二进制 ELECTRON_RUN_AS_NODE 跑 asar 内 core 后端（空数据目录 migration/SPA/health/运行时探针）；完整任务=T2 真跑对照 dev 基线；GUI app 直启静默挂起=350 已登记 headless 限。复核门 PASS。plan=docs/block-353-packaged-regression-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-05T08:54:28.032Z -->
+最后更新：2026-11-05（🔵 **BLOCK-354 G0→G1 出籍判据 启动登记（active；总纲包 7/7；本计划不是 G1 启动授权）**：判据表 6 项绑前序包稳定证据路径（348 报告/349 终态表/350 quality:perf/351 EAR/352 矩阵/353 回归 JSON）；readiness 脚本零人工干预复算 N/6；负测=移证据判未达；**宣称红线=未达标前不得表述 GA/Provider/对外发布能力，G1 启动需用户显式发令**。复核门 PASS。plan=docs/block-354-g0-exit-criteria-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-05T08:59:00.054Z -->
+最后更新：2026-11-05（✅ **BLOCK-354 G0→G1 出籍判据 completed（总纲包 7/7；本包不启动 G1）**：出籍就绪度 **6/6 达标**（scripts/block354-readiness.mjs 零人工干预复算，报告=acceptance/block-354/readiness.json）——①通用任务基准 8 任务终态+度量 ②A 类证据全终态（10V+3C）③四场景性能基线+quality:perf 入门 ④EAR 43.3%≥40% ⑤货架 21 项全判定 ⑥packaged 结构+健康+T2+consistent；负测 6/6（移证据判未达/EAR 跌破 40%/恢复回升）；**宣称红线=出籍就绪≠已出籍：未达前不得表述 GA/Provider/对外发布能力，6/6 达标后 G1 启动仍需用户显式发令**。**总纲 NEXT-PHASE-PROGRAM-2026-11-05 七包全部收口（348→354 串行闭环）**。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-05T09:05:43.246Z -->
+最后更新：2026-11-05（📋 **总纲 NEXT-PHASE-PROGRAM-2026-11-05 全局收尾完成**：7 包全部 completed（348→354 串行闭环，closeout 14→16 门全绿）；§8 七行台账填满；出籍就绪度 6/6（红线=G1 需用户发令）；剩余 reopen=C-45/46/47 + GUI 直启用户实机 + G1+ 清单；工作区剩用户侧 untracked（assets/model3d/tmp-*）不动。显式路径提交链=98cd623c→3ef7a31c。）

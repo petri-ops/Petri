@@ -226,6 +226,11 @@ class AnthropicProvider {
             if (event.delta.type === 'text_delta' && event.delta.text) {
               emitSafely(onEvent, { type: 'content_delta', content: event.delta.text });
             }
+            // 思考段必须归一成 reasoning_delta：上游协议叫 thinking_delta，但事件名统一走
+            // reasoning_delta，否则 stall 看门狗零续命 → 长思考模型被 45s 误杀（2026-11-05 实测）。
+            if (event.delta.type === 'thinking_delta' && event.delta.thinking) {
+              emitSafely(onEvent, { type: 'reasoning_delta', content: event.delta.thinking });
+            }
             if (event.delta.type === 'input_json_delta') {
               emitSafely(onEvent, {
                 type: 'tool_call_delta',

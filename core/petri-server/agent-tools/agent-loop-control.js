@@ -167,6 +167,8 @@ function shouldFinalizeAgentIteration(iteration, controller) {
   ));
 }
 
+const TRUNCATED_FINISH_REASONS = new Set(['length', 'max_tokens']);
+
 function assessFinalizationResult(result, streamedText = '') {
   const choice = result && Array.isArray(result.choices) ? result.choices[0] : null;
   const message = choice && choice.message && typeof choice.message === 'object' ? choice.message : {};
@@ -175,7 +177,8 @@ function assessFinalizationResult(result, streamedText = '') {
   // 方案 B：识别 finish_reason === 'length'（被 token 上限截断）
   // 虽然被截断，但内容仍可用；标记为 truncated 而不是 empty
   const finishReason = choice && choice.finish_reason;
-  const truncatedByLimit = finishReason === 'length';
+  const truncatedByLimit = TRUNCATED_FINISH_REASONS.has(finishReason);
+  const reasoning = String(message.reasoning_content || message.reasoning || '').trim();
   
   if (content) {
     return {
@@ -206,6 +209,19 @@ function assessFinalizationResult(result, streamedText = '') {
   if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) {
     return { usable: false, retryable: true, reason: 'unexpected_tool_calls_in_finalization', content: '' };
   }
+  // 预算耗尽但正文一个字都没有：这不是「模型空答复」。重试必须带「直接给结论」提示，
+  // 否则用户只会看到「上游返回了空正文」，而真因是输出预算被思考段吃光（2026-11-05 实测）。
+  if (truncatedByLimit) {
+    return { usable: false, retryable: true, reason: 'truncated_empty_content', content: '', truncated: true };
+  }
+  // 上游内容审核拦截：重试无意义，也不该混同空答复。
+  if (finishReason === 'content_filter') {
+    return { usable: false, retryable: false, reason: 'content_filtered', content: '' };
+  }
+  // 只有思考段、没有正文：原因在模型侧（思考耗尽/未收束），与「连续空答复」区分。
+  if (reasoning) {
+    return { usable: false, retryable: true, reason: 'reasoning_only_no_content', content: '' };
+  }
   return { usable: false, retryable: true, reason: 'empty_final_response', content: '' };
 }
 
@@ -217,6 +233,9 @@ function buildFinalizationFallbackMessage({
 } = {}) {
   const reasonLabels = {
     empty_final_response: '上游返回了空正文',
+    truncated_empty_content: '输出预算被思考段耗尽，正文未产出',
+    content_filtered: '上游内容审核拦截',
+    reasoning_only_no_content: '上游只返回了思考过程，没有正文',
     invalid_provider_response: '上游返回格式异常',
     unexpected_tool_calls_in_finalization: '上游忽略了最终整理约束',
     timeout: '上游响应超时',
@@ -238,6 +257,9 @@ function buildFinalizationFallbackMessage({
   const actionLabels = {
     unexpected_tool_calls_in_finalization: '当前模型没有遵守“停止调用工具并给出结论”的协议。若已配置备用模型，系统也已自动尝试；仍失败时请在模型设置中选择工具协议更稳定的模型。',
     empty_final_response: '当前模型连续返回空答复。请稍后重试，或切换备用模型。',
+    truncated_empty_content: '请调大输出上限或降低思考档位（思考 token 与正文共享输出预算）；已完成的工具结果与文件产物均已保留，不需要重跑已完成步骤。',
+    content_filtered: '请调整请求内容后重试；已完成的工具结果与文件产物均已保留。',
+    reasoning_only_no_content: '请重试，或切换到不会产生超长思考段的模型；已完成的工具结果与文件产物均已保留。',
     invalid_provider_response: '模型服务返回格式不完整。请检查该 Endpoint 的 OpenAI 兼容协议，或切换备用模型。',
     timeout: '请检查网络或 Endpoint 状态；任务结果已经保留，不需要重新运行已完成步骤。',
     network_error: '请检查网络或 Endpoint 状态；任务结果已经保留，不需要重新运行已完成步骤。',
@@ -270,11 +292,53 @@ function compactPublicText(value, maxLength = 280) {
   return text.length <= maxLength ? text : `${text.slice(0, maxLength - 1)}…`;
 }
 
-function finalizationFallbackReason(result) {
-  const assessment = assessFinalizationResult(result);
+function finalizationFallbackReason(result, streamedText = '') {
+  const assessment = assessFinalizationResult(result, streamedText);
   return !assessment.usable && assessment.retryable
     ? { code: assessment.reason || 'invalid_final_response' }
     : null;
+}
+
+// 续写提示：只说「继续」会让模型重写开头，用户拿到重复内容。
+const CONTINUATION_PROMPT = '接着上一段末尾继续写，不要重复已写出的内容，不要重写开头，也不要重新解释任务；直接输出剩余部分。';
+
+const DEFAULT_OUTPUT_BUDGET = 16384;
+const OUTPUT_BUDGET_CEILING = 65536;
+const OUTPUT_BUDGET_RATIO = 0.08;
+
+/**
+ * agent 请求的输出预算（思考段与正文共享 max_tokens）。
+ * 固定 16384 对 1M 窗口的推理模型是确定性自伤：思考段吃满后正文一个字都不剩。
+ * 用户显式配置优先；未配置时按上下文窗口比例给，下限 16384、上限 65536。
+ */
+function resolveOutputBudget(contextWindow, configured) {
+  const explicit = Number(configured);
+  if (Number.isFinite(explicit) && explicit >= 256) return Math.floor(explicit);
+  const ctx = Number(contextWindow);
+  const base = Number.isFinite(ctx) && ctx > 0 ? ctx : 64000;
+  return Math.max(
+    DEFAULT_OUTPUT_BUDGET,
+    Math.min(OUTPUT_BUDGET_CEILING, Math.floor(base * OUTPUT_BUDGET_RATIO))
+  );
+}
+
+/** 方案 B 各段正文拼成完整落库文本（用户刷新历史时不得变短）。 */
+function mergeContinuationText(parts, finalText = '') {
+  const chunks = Array.isArray(parts)
+    ? parts.filter((p) => typeof p === 'string' && p.length > 0)
+    : [];
+  const tail = typeof finalText === 'string' ? finalText : '';
+  return chunks.length ? chunks.join('') + tail : tail;
+}
+
+/** 截断计入真实 completion tokens；缺 usage 时保守回落到请求上限。 */
+function resolveTruncationTokens(result, requestMaxTokens) {
+  const usage = result && result.usage ? result.usage : null;
+  const raw = usage && (usage.completion_tokens ?? usage.completionTokens);
+  const completion = Number(raw);
+  if (Number.isFinite(completion) && completion > 0) return Math.floor(completion);
+  const requested = Number(requestMaxTokens);
+  return Number.isFinite(requested) && requested > 0 ? Math.floor(requested) : 0;
 }
 
 function buildFinalizationRetryRequest(requestBody) {
@@ -630,6 +694,12 @@ module.exports = {
   buildFinalizationRetryRequest,
   buildFinalizationFallbackMessage,
   finalizationFallbackReason,
+  CONTINUATION_PROMPT,
+  mergeContinuationText,
+  resolveTruncationTokens,
+  resolveOutputBudget,
+  DEFAULT_OUTPUT_BUDGET,
+  OUTPUT_BUDGET_CEILING,
   createAgentProgressRecorder,
   createContinuationGuard,
   createResultEditCompletionGuard,

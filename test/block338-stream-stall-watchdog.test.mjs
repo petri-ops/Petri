@@ -2,8 +2,10 @@
  * BLOCK-338 P1 — 流式 stall 看门狗契约。
  *
  * 红线（plan §2）：
- *   - 只有 content_delta / tool_call_delta / thinking_delta 续命；心跳、空 chunk、ping、
- *     其他事件一律**不续命**（否则看门狗形同虚设）。
+ *   - 只有 content_delta / tool_call_delta / reasoning_delta / thinking_delta 续命；心跳、
+ *     空 chunk、ping、其他事件一律**不续命**（否则看门狗形同虚设）。
+ *   - reasoning_delta 是 DeepSeek 系推理模型的思考段真实事件名；漏认它会让「长时间思考、
+ *     只发 reasoning」的慢推理模型在首 token 阈值处被误杀（2026-11-05 实测复现）。
  *   - 首 token 与 idle 两段分别计时：首 token 到达后转 idle 计时。
  *   - 触发一次即止（幂等），stop() 之后不再回调。
  *   - 阈值默认保守（45s / 60s），env 可调但有下限，不接受非法值。
@@ -59,8 +61,11 @@ function makeWatchdog(options = {}) {
   return { watchdog, clock, stalls };
 }
 
-test('BLOCK-338 续命集合封闭：只有三类 delta 续命（心跳/空 chunk/ping 一律不续命）', () => {
-  assert.deepEqual([...RENEWAL_EVENT_TYPES].sort(), ['content_delta', 'thinking_delta', 'tool_call_delta']);
+test('BLOCK-338 续命集合封闭：只有四类 delta 续命（心跳/空 chunk/ping 一律不续命）', () => {
+  assert.deepEqual(
+    [...RENEWAL_EVENT_TYPES].sort(),
+    ['content_delta', 'reasoning_delta', 'thinking_delta', 'tool_call_delta']
+  );
 
   const { watchdog, clock, stalls } = makeWatchdog({ firstTokenMs: 1000, idleTokenMs: 1000 });
   // 心跳/空/未知事件连发 3 次，累计超过首 token 阈值仍应判死
@@ -93,6 +98,21 @@ test('BLOCK-338 首 token 到达后转 idle 计时；真实 delta 续命', () =>
   watchdog.stop();
 });
 
+test('BLOCK-338 reasoning_delta 必须续命：慢推理模型不得在首 token 阈值被误杀', () => {
+  const { watchdog, clock, stalls } = makeWatchdog({ firstTokenMs: 1000, idleTokenMs: 1500 });
+  // 复刻实测事故：DeepSeek 系推理模型持续输出思考段，正文迟迟不来。
+  watchdog.observe({ type: 'reasoning_delta', content: '先理解需求，再规划 SVG 结构…' });
+  clock.advance(1200);
+  assert.equal(stalls.length, 0, 'reasoning_delta 已到达，不得再按首 token 判死');
+  watchdog.observe({ type: 'reasoning_delta', content: '继续推导几何…' });
+  clock.advance(1400);
+  assert.equal(stalls.length, 0, '连续 reasoning_delta 每次都要重置 idle 计时');
+  clock.advance(200);
+  assert.equal(stalls.length, 1, '思考结束超过 idle 阈值仍须判死（看门狗不得形同虚设）');
+  assert.equal(stalls[0].phase, 'idle');
+  watchdog.stop();
+});
+
 test('BLOCK-338 触发幂等 + stop() 后不再回调', () => {
   const { watchdog, clock, stalls } = makeWatchdog({ firstTokenMs: 500, idleTokenMs: 500 });
   clock.advance(500);
@@ -110,18 +130,19 @@ test('BLOCK-338 触发幂等 + stop() 后不再回调', () => {
 });
 
 test('BLOCK-338 阈值解析：保守默认 + env 覆盖 + 下限与非法值回落', () => {
-  assert.equal(DEFAULT_FIRST_TOKEN_MS, 45_000);
+  // 首 token 90s：与 provider socket timeout 对齐；45s 会稳定误杀长 prompt 的推理模型。
+  assert.equal(DEFAULT_FIRST_TOKEN_MS, 90_000);
   assert.equal(DEFAULT_IDLE_TOKEN_MS, 60_000);
-  assert.deepEqual(resolveStallThresholds({}), { firstTokenMs: 45_000, idleTokenMs: 60_000 });
+  assert.deepEqual(resolveStallThresholds({}), { firstTokenMs: 90_000, idleTokenMs: 60_000 });
   assert.deepEqual(
     resolveStallThresholds({ PETRI_STREAM_STALL_FIRST_MS: '30000', PETRI_STREAM_STALL_IDLE_MS: '90000' }),
     { firstTokenMs: 30_000, idleTokenMs: 90_000 }
   );
   // 非法/过低值回落默认（不可关到无穷、不可设 0）
   assert.deepEqual(resolveStallThresholds({ PETRI_STREAM_STALL_FIRST_MS: '0', PETRI_STREAM_STALL_IDLE_MS: 'abc' }),
-    { firstTokenMs: 45_000, idleTokenMs: 60_000 });
+    { firstTokenMs: 90_000, idleTokenMs: 60_000 });
   assert.deepEqual(resolveStallThresholds({ PETRI_STREAM_STALL_FIRST_MS: '10' }),
-    { firstTokenMs: 45_000, idleTokenMs: 60_000 }, '低于下限不接受');
+    { firstTokenMs: 90_000, idleTokenMs: 60_000 }, '低于下限不接受');
 });
 
 // ---------------------------------------------------------------------------

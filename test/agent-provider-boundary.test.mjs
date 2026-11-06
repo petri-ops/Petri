@@ -266,6 +266,31 @@ test('finalization recovery treats finish_reason length as usable-but-truncated,
   );
 });
 
+test('BLOCK-FIX 2026-11-05：length+空正文必须判「预算耗尽」，不得误报空答复', () => {
+  // 实测事故：推理模型把 16384 输出预算全部花在思考段，正文为空。
+  // 旧实现落到 empty_final_response → 用户看到「上游返回了空正文 / 模型连续返回空答复」，
+  // 真实原因（输出预算耗尽）被完全掩盖。
+  const truncatedEmpty = assessFinalizationResult(
+    { choices: [{ finish_reason: 'length', message: { content: '' } }] },
+    ''
+  );
+  assert.equal(truncatedEmpty.usable, false);
+  assert.equal(truncatedEmpty.reason, 'truncated_empty_content');
+  assert.equal(truncatedEmpty.truncated, true);
+  assert.equal(truncatedEmpty.retryable, true, '应带「直接给结论」提示重试一次，而不是直接判死');
+
+  // 上游内容审核拦截：不是模型空答复，也不该被重试掩盖
+  const filtered = assessFinalizationResult({ choices: [{ finish_reason: 'content_filter', message: { content: '' } }] });
+  assert.equal(filtered.reason, 'content_filtered');
+  assert.equal(filtered.retryable, false);
+
+  // 只有思考段、正文为空：单独 reason，不得混同「模型连续返回空答复」
+  const reasoningOnly = assessFinalizationResult({
+    choices: [{ finish_reason: 'stop', message: { content: '', reasoning_content: '我在思考…' } }],
+  });
+  assert.equal(reasoningOnly.reason, 'reasoning_only_no_content');
+});
+
 test('continuation guard caps repeated truncation to prevent infinite chains', () => {
   // 方案 B complete：截断自动续写必须有硬上限，避免模型无法收敛时无限循环。
   // 计数契约（record-then-check，与 loop-orchestrator/chat.js 调用序一致）：

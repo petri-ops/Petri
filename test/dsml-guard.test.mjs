@@ -58,11 +58,18 @@ test('stripLeakedToolMarkup also truncates fullwidth variants (U+FF5C)', () => {
   // 实机复验观察到的 tokenizer 变体：｜｜DSML｜｜
   assert.equal(stripLeakedToolMarkup('报告如下。｜｜DSML｜｜invoke name="process_status"'), '报告如下。');
   assert.equal(stripLeakedToolMarkup('｜｜DSML｜｜｜｜DSML｜｜'), '');
-  assert.equal(stripLeakedToolMarkup('正文 ｜｜/DSML｜｜ 尾部'), '正文 ');
   // 半角/全角混合
-  assert.equal(stripLeakedToolMarkup('正文 <｜DSML｜>x'), '正文 ');
-  // 普通全角竖线文本不受影响
   assert.equal(stripLeakedToolMarkup('A｜B 全角正文'), 'A｜B 全角正文');
+});
+
+test('用户正文里的 DSML 字面量不得被当成工具调用泄漏整段截断', () => {
+  // 用户让模型「写一篇讲 <|DSML|> tokenizer 的文档」时，正文里必然出现该字面量。
+  // 只有标记后跟 invoke/parameter/tool_calls 等内部调用格式才是泄漏块。
+  assert.equal(stripLeakedToolMarkup('文档中的标记是 <|DSML|>，它表示工具调用边界。'), '文档中的标记是 <|DSML|>，它表示工具调用边界。');
+  assert.equal(stripLeakedToolMarkup('正文 ｜｜/DSML｜｜ 尾部'), '正文 ｜｜/DSML｜｜ 尾部');
+  assert.equal(stripLeakedToolMarkup('正文 <｜DSML｜>x'), '正文 <｜DSML｜>x');
+  // 真正的泄漏块照旧整段截断
+  assert.equal(stripLeakedToolMarkup('结论已就绪。<|DSML|>invoke name="workspace_exec"'), '结论已就绪。');
 });
 
 test('stream guard keeps plain text intact across chunks including partial-bracket tails', () => {
@@ -93,12 +100,12 @@ test('stream guard swallows everything after a leak and flush stays empty', () =
   assert.equal(out, 'ok ');
 });
 
-test('stream guard holds a partial close-mark tail and releases it on flush', () => {
+test('stream guard releases a held partial mark on flush (no user text lost)', () => {
   const guard = createDsmlStreamGuard();
   let out = guard.push('结尾文本 <|/DS');
   assert.equal(out, '结尾文本 ');
   out += guard.flush();
-  assert.equal(out, '结尾文本 ');
+  assert.equal(out, '结尾文本 <|/DS', '流已结束，不可能再有跨 chunk 前缀，扣留的尾巴必须原样放行');
 });
 
 test('stream guard strips fullwidth ｜｜DSML｜｜ deltas (real-device variant)', () => {
@@ -121,12 +128,12 @@ test('stream guard strips a fullwidth mark split across chunks', () => {
   assert.equal(out, '完成。');
 });
 
-test('stream guard flush drops a trailing partial mark fragment', () => {
+test('stream guard flush returns the trailing partial mark instead of dropping it', () => {
   const guard = createDsmlStreamGuard();
   let out = guard.push('正文完整');
   out += guard.push(' ｜｜DS');
   out += guard.flush();
-  assert.equal(out, '正文完整 ');
+  assert.equal(out, '正文完整 ｜｜DS');
 });
 
 test('chatStream: leaked DSML in deltas never reaches SSE events or aggregate content', async () => {

@@ -9,15 +9,26 @@
  * 本看门狗按「多久没收到**有效 token**」判死，心跳不续命。
  *
  * 契约：
- *   - 续命集合封闭：只有 content_delta（且内容非空）/ tool_call_delta / thinking_delta 续命；
+ *   - 续命集合封闭：只有 content_delta（且内容非空）/ tool_call_delta /
+ *     reasoning_delta（DeepSeek 系思考段）/ thinking_delta 续命；
  *     心跳、空 chunk、ping、其它事件一律不续命。
  *   - 两段计时：首 token（创建起算）→ 首 token 到达后转 idle 计时（每次续命重置）。
  *   - 触发一次即止；stop() 之后不再回调；判死后迟到 delta 不复活。
- *   - 阈值保守（45s / 60s），env 可调但有下限（1s），非法值回落默认——不可关到无穷。
+ *   - 阈值保守（90s / 60s），env 可调但有下限（1s），非法值回落默认——不可关到无穷。
+ *     首 token 90s 与 provider socket timeout（deepseek 90s）对齐：16k 工具定义 + 长 prompt
+ *     的推理模型 prefill 经常超过 45s，45s 会稳定误杀（2026-11-05 实测 45002ms 连续两次）。
+ *
+ * reasoning_delta 必须续命（2026-11-05 实测）：推理模型思考期只发 reasoning_delta，
+ * 漏认它会让「首 token」永远不到 → 45s 误杀，用户侧只看到「上游模型响应异常」。
  */
 
-const RENEWAL_EVENT_TYPES = Object.freeze(['content_delta', 'tool_call_delta', 'thinking_delta']);
-const DEFAULT_FIRST_TOKEN_MS = 45_000;
+const RENEWAL_EVENT_TYPES = Object.freeze([
+  'content_delta',
+  'tool_call_delta',
+  'reasoning_delta',
+  'thinking_delta',
+]);
+const DEFAULT_FIRST_TOKEN_MS = 90_000;
 const DEFAULT_IDLE_TOKEN_MS = 60_000;
 const MIN_THRESHOLD_MS = 1_000;
 

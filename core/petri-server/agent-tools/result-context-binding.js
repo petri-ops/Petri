@@ -160,7 +160,9 @@ function finalizeResultEditProgress(recorder, { outcome, reason } = {}) {
         : '结果修改未完成；已完成的阶段结论已保留，可在当前会话中继续处理。')
       : (cancelled
         ? '任务已由用户停止。已完成的阶段结论、工具记录和结果已保留，未开始的步骤不会继续执行。'
-        : '本轮 Agent 请求未完成；上游模型响应异常，请稍后重试。'),
+        : (reason
+          ? `本轮 Agent 请求未完成：${String(reason).slice(0, 180)}。已完成的工具结果与产物已保留，请稍后重试。`
+          : '本轮 Agent 请求未完成；上游模型响应异常，请稍后重试。')),
   };
 }
 

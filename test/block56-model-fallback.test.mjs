@@ -163,6 +163,18 @@ test('resume messages: 保留原消息 + 尾部注入恢复指令', () => {
   assert.match(messages[2].content, /降级生成/);
 });
 
+test('resume messages: 缺省失败原因不得擅自定性，也不得吞掉真实错误', () => {
+  const withoutReason = buildFallbackResumeMessages([{ role: 'user', content: '继续' }], '已执行 workspace_read×1', {});
+  const text = withoutReason.map((m) => m.content).join('\n');
+  assert.doesNotMatch(text, /失败原因：模型服务异常/);
+  assert.match(text, /未随降级事件上报/);
+
+  const withReason = buildFallbackResumeMessages([{ role: 'user', content: '继续' }], '', {
+    reason: 'Authentication Fails, Your api key is invalid',
+  });
+  assert.match(withReason.at(-1).content, /Authentication Fails/);
+});
+
 // ---------- 编排：maybeLaunchTaskLevelFallback ----------
 
 function seedTask(overrides = {}) {

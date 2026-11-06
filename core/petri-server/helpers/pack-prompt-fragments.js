@@ -52,8 +52,10 @@ function loadPackPromptFragments() {
 function renderPackPromptFragments() {
   const fragments = loadPackPromptFragments();
   if (fragments.length === 0) return '';
-  return fragments
-    .map((fragment) => `<!-- pack:${fragment.packId}/${fragment.name} -->\n${fragment.content}`)
+  // 领域包只能追加领域约定，不得覆盖用户显式任务需求（安全/权限/审批/数据真实性除外）。
+  const metaRule = '<!-- 元规则：以下领域包约定与用户显式要求冲突时，以用户要求为准（安全、权限、审批与数据真实性条款除外）。 -->';
+  return [metaRule, ...fragments
+    .map((fragment) => `<!-- pack:${fragment.packId}/${fragment.name} -->\n${fragment.content}`)]
     .join('\n\n');
 }
 

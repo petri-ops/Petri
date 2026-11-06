@@ -82,6 +82,11 @@ const {
   MAX_CONTINUATION_TOKENS,
   shouldFinalizeAgentIteration,
   assessFinalizationResult,
+  CONTINUATION_PROMPT,
+  mergeContinuationText,
+  resolveTruncationTokens,
+  resolveOutputBudget,
+  buildFinalizationRetryRequest,
   createAgentProgressRecorder,
   createContinuationGuard,
   runAgentToolCallBatch,
@@ -636,6 +641,8 @@ async function runLoop({
   });
 
   let assistantAcc = '';
+  // 方案 B 续写各段正文：流式已逐帧下发，落库/历史必须拼成完整文本（刷新不得变短）。
+  const continuationParts = [];
   let providerFailureReason = null;
   let finalizationAttempts = 0;
   let finalizationFailureReason = null;
@@ -665,9 +672,9 @@ async function runLoop({
     const reqTemperature = typeof generationDefaults.temperature === 'number' && generationDefaults.temperature >= 0 && generationDefaults.temperature <= 2
       ? generationDefaults.temperature
       : 0.4;
-    const reqMaxTokens = typeof generationDefaults.maxTokens === 'number' && generationDefaults.maxTokens >= 256
-      ? Math.floor(generationDefaults.maxTokens)
-      : 16384;
+    // 输出预算按上下文窗口自适应：固定 16384 会让推理模型的思考段把正文饿死
+    // （1M 窗口的 deepseek-flash 实测：completion_tokens 恰好 16384、正文为空）。
+    const reqMaxTokens = resolveOutputBudget(loopContextWindow, generationDefaults.maxTokens);
     // BLOCK-176 CP-18 — 成本熔断上限一次性解析（env 覆盖 ai-settings costCapCny；
     // 未配置=null=不熔断）。每轮只查不解析；costCapAnnounced 防多轮重复提示。
     const costCapCny = resolveCostCapCny(getAiSettings(), process.env);
@@ -931,12 +938,17 @@ ${compactSummaryText}`,
         // UI-523 — 端到端耗时实测（含网络与首 token 前 prefill），与
         // ai_usage.latency_ms 同口径；用于 tok/s 与「最近一次调用」读数。
         const callStartedAt = Date.now();
+        // 最终整理重试换请求体：加「不要输出思考过程、只给完整最终答复」提示并去掉工具，
+        // 否则推理模型会在同一预算里再次把正文饿死（2026-11-05 用户实测）。
+        const attemptBody = protocolRecoveryAttempt
+          ? buildFinalizationRetryRequest(reqBody)
+          : reqBody;
         // BLOCK-109 P1 — 网络瞬断重试包裹（finalizing 走既有 attempt 循环不叠加）
         upJson = await callProviderWithNetworkRetry(
           () => callChatProvider(
             providerName,
             apiKey,
-            reqBody,
+            attemptBody,
             {
             userId,
             conversationId: _activeConv && _activeConv.id,
@@ -987,7 +999,9 @@ ${compactSummaryText}`,
             ...(config.disableProviderFallback ? { disableFallback: true } : {}),
             // BLOCK-81 P1 — 思考档位透传（未设置＝undefined＝不发任何思考参数）
             ...(thinkingLevel ? { thinkingLevel } : {}),
-            ...(protocolRecoveryAttempt ? { fallbackWhen: require('./agent-tools').finalizationFallbackReason } : {}),
+            ...(protocolRecoveryAttempt ? {
+              fallbackWhen: (result) => require('./agent-tools').finalizationFallbackReason(result, streamedText),
+            } : {}),
             // BLOCK-109-CORE-ARCH 增量（2026-09-21 用户裁决「按你的建议来」）— 流中断
             // 以异常穿透到重试包装：此前流中死亡（ECONNRESET 等）在 provider 层被
             // resolve-with-error 吞掉，网络重试零触发（run 80669989 三败 + 实测 2/4 轮
@@ -1028,7 +1042,6 @@ ${compactSummaryText}`,
       }
 
       if (!finalizing && (!upJson || upJson.error || !upJson.choices)) {
-        if (finalizing && finalizationAttempts > 0) break;
         providerFailureReason = String(
           (upJson && (upJson.message || upJson.error || (upJson.choices ? 'no choice' : 'bad response')))
           || 'upstream error'
@@ -1084,7 +1097,7 @@ ${compactSummaryText}`,
         // 任务完整性仍由模型自描述（finish_reason）决定；但若同一任务内
         // 连续截断到上限，主动收尾 + 提示用户继续，避免无限续写。
         if (assessment.usable && assessment.truncated && !finalizing) {
-          continuationGuard.recordTruncation(reqBody && reqBody.max_tokens);
+          continuationGuard.recordTruncation(resolveTruncationTokens(upJson, reqBody && reqBody.max_tokens));
           if (continuationGuard.capHit()) {
             _emit({
               event: 'agent_status',
@@ -1098,7 +1111,8 @@ ${compactSummaryText}`,
             break;
           }
           messages.push({ role: 'assistant', content: assessment.content });
-          messages.push({ role: 'user', content: '继续' });
+          continuationParts.push(assessment.content);
+          messages.push({ role: 'user', content: CONTINUATION_PROMPT });
           _emit({
             event: 'agent_status',
             phase: 'continuation',
@@ -1109,7 +1123,11 @@ ${compactSummaryText}`,
         }
         if (assessment.usable && !assessment.truncated) continuationGuard.recordStop();
         
-        const editCompletion = resultEditCompletionGuard.assessTerminal();
+        // 上游本次没有可用正文时不得让结果工具守卫改写真因（空答复/预算耗尽/上游错误
+        // 都必须原样透出），只在校验通过的回答上判定「伪成功结论」（2026-11-05 排查）。
+        const editCompletion = assessment.usable
+          ? resultEditCompletionGuard.assessTerminal()
+          : { action: 'none' };
         if (editCompletion.action === 'retry') {
           messages.push({ role: 'assistant', content: assessment.content || msg.content || '' });
           messages.push({ role: 'system', content: editCompletion.prompt });
@@ -1132,7 +1150,7 @@ ${compactSummaryText}`,
         }
         finalizationAttempts = 1;
         finalizationFailureReason = assessment.usable ? null : assessment.reason;
-        assistantAcc = assessment.content;
+        assistantAcc = mergeContinuationText(continuationParts, assessment.content);
         modelFinalized = assessment.usable;
         break;
       }
@@ -1574,7 +1592,7 @@ ${compactSummaryText}`,
     if (providerFailureReason) {
       fatalAgentError = new Error(providerFailureReason);
       const final = finalizeResultEditProgress(resultEditProgress, {
-        outcome: 'failed', reason: 'agent_run_failed',
+        outcome: 'failed', reason: providerFailureReason || 'agent_run_failed',
       });
       if (final.terminal) _emit({ event: 'result_edit_progress', ...final.terminal });
       assistantAcc = final.assistantMessage;
