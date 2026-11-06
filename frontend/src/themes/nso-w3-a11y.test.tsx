@@ -66,10 +66,10 @@ describe('W3-F18 CenterPanel 隐藏投影层 inert', () => {
 
 describe('W3-F18 ExternalImportPanel 表单语义', () => {
   function mockPreview(patch: Record<string, unknown>) {
-    vi.stubGlobal('fetch', vi.fn(async (input: unknown) => {
+    vi.stubGlobal('fetch', vi.fn((input: unknown) => {
       const url = String(input);
-      if (url.includes('/preview')) return { status: 200, ok: true, json: async () => ({ ok: true, patch, credentialsDetected: [], unsupported: [] }) } as unknown as Response;
-      return { status: 200, ok: true, json: async () => ({ status: 'ok' }) } as unknown as Response;
+      if (url.includes('/preview')) return { status: 200, ok: true, json: () => ({ ok: true, patch, credentialsDetected: [], unsupported: [] }) } as unknown as Response;
+      return { status: 200, ok: true, json: () => ({ status: 'ok' }) } as unknown as Response;
     }));
   }
 
@@ -87,11 +87,11 @@ describe('W3-F18 ExternalImportPanel 表单语义', () => {
   });
 
   it('回滚回执 live region：走 apply+rollback 链后 message 节点带 role=status aria-live=polite', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (input: unknown) => {
+    vi.stubGlobal('fetch', vi.fn((input: unknown) => {
       const url = String(input);
-      if (url.includes('/preview')) return { status: 200, ok: true, json: async () => ({ ok: true, patch: { k: 'v' }, credentialsDetected: [], unsupported: [] }) } as unknown as Response;
-      if (url.includes('/rollback')) return { status: 200, ok: true, json: async () => ({ status: 'ok', restored: ['k'] }) } as unknown as Response;
-      return { status: 200, ok: true, json: async () => ({ status: 'ok', appliedKeys: ['k'], applyId: 'imp-1', rollbackAvailable: true }) } as unknown as Response;
+      if (url.includes('/preview')) return { status: 200, ok: true, json: () => ({ ok: true, patch: { k: 'v' }, credentialsDetected: [], unsupported: [] }) } as unknown as Response;
+      if (url.includes('/rollback')) return { status: 200, ok: true, json: () => ({ status: 'ok', restored: ['k'] }) } as unknown as Response;
+      return { status: 200, ok: true, json: () => ({ status: 'ok', appliedKeys: ['k'], applyId: 'imp-1', rollbackAvailable: true }) } as unknown as Response;
     }));
     render(<ExternalImportPanel apiBase="http://mock/api" />);
     fireEvent.change(screen.getByPlaceholderText(/粘贴配置内容/), { target: { value: 'x = 1' } });

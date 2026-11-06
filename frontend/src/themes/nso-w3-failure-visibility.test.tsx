@@ -17,12 +17,12 @@ afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe('W3-F10 主题偏好同步失败可见', () => {
   it('pushPrefs 失败 → role=status 告警条出现；恢复成功后消失', async () => {
     let failNext = true;
-    vi.stubGlobal('fetch', vi.fn(async (_url: unknown, init?: { method?: string }) => {
+    vi.stubGlobal('fetch', vi.fn((_url: unknown, init?: { method?: string }) => {
       if (init?.method === 'PUT') {
-        if (failNext) return { ok: false, status: 503 } as Response;
-        return { ok: true } as Response;
+        if (failNext) return Promise.resolve({ ok: false, status: 503 } as Response);
+        return Promise.resolve({ ok: true } as Response);
       }
-      return { ok: true, json: async () => ({ ok: true, prefs: {} }) } as unknown as Response;
+      return Promise.resolve({ ok: true, json: () => ({ ok: true, prefs: {} }) } as unknown as Response);
     }));
     const { ThemeProvider, useTheme } = await import('./ThemeProvider');
     const Probe = () => {
@@ -48,7 +48,7 @@ describe('W3-F10 实验开关拉取失败可见', () => {
   const loadSection = async () => (await import('../components/settings/ExperimentalFeaturesSection')).ExperimentalFeaturesSection;
 
   it('拉取网络失败 → 显示失败原因与重试按钮（不静默空段）', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('ECONNREFUSED'); }));
+    vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('ECONNREFUSED'))));
     const Section = (await loadSection()) as React.ComponentType;
     render(<Section />);
     await waitFor(() => expect(screen.getByTestId('experimental-flags-error')).toBeInTheDocument());
@@ -58,9 +58,9 @@ describe('W3-F10 实验开关拉取失败可见', () => {
 
   it('成功但空列表 → 分段隐藏（既有语义保持）；重试按钮触发重新拉取', async () => {
     let failNext = true;
-    vi.stubGlobal('fetch', vi.fn(async () => {
-      if (failNext) throw new Error('ECONNREFUSED');
-      return { ok: true, json: async () => ({ status: 'ok', flags: {} }) } as unknown as Response;
+    vi.stubGlobal('fetch', vi.fn(() => {
+      if (failNext) return Promise.reject(new Error('ECONNREFUSED'));
+      return Promise.resolve({ ok: true, json: () => ({ status: 'ok', flags: {} }) } as unknown as Response);
     }));
     const Section = (await loadSection()) as React.ComponentType;
     render(<Section />);

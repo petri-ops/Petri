@@ -90,48 +90,6 @@ const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'a
  * 有序适配规则表：声明顺序即判定优先级，规则内 kind 与 extension 任一命中即命中。
  * kind 为原始 manifest 值的字符串化（未知 kind 无专属规则，自然落兜底）。
  */
-interface AdapterRule {
-  adapter: ResultViewerAdapter;
-  /** kind 严格相等命中（大小写敏感）；缺省 = 不看 kind。 */
-  kind?: string;
-  /** 小写文件名上的扩展名正则；缺省 = 不看文件名。 */
-  extension?: RegExp;
-  /** isTextFile 扩展名表命中；缺省 = 不查表。 */
-  textExtension?: boolean;
-}
-
-const ADAPTER_RULES: readonly AdapterRule[] = [
-  // resultSurface.ts:76 — report kind 恒胜，.html/.htm 对任意 kind 生效
-  { adapter: 'report', kind: 'report', extension: /\.html?$/ },
-  // BLOCK-142（原位替换 resultSurface.ts:77 .pdf→binary）— .pdf → pdf viewer，仍先于 image
-  { adapter: 'pdf', extension: /\.pdf$/ },
-  // BLOCK-322 P2-05 — 转盘/序列动画视频：.mp4/.webm → video viewer（<video> 内嵌播放）。
-  // 必须先于 image/json/text 诸规则：kind 为 'data'/'file' 的产物若按文件名不命中就会落
-  // binary 兜底（下载壳），而视频的正确出口是「能播」而不是「能存」。
-  { adapter: 'video', extension: /\.(mp4|webm)$/ },
-  // resultSurface.ts:78 — plot kind 恒胜（kind 命中即命中，与扩展名无关）；.svg 从 image 扩展名集合移除
-  { adapter: 'image', kind: 'plot', extension: /\.(png|jpe?g|gif|webp)$/ },
-  // BLOCK-342 W1 — 其余 .svg 进受治理编辑器（人鼠标键盘修正细节，agent 走 svg_edit 同一套 op）。
-  // 必须排在 image 之后：kind='plot' 的 .svg 仍按图片预览（既有语义不回退），
-  // 而 kind='file'/'data' 的 .png/.jpg 不命中本规则、仍由 image 规则按扩展名兜住。
-  { adapter: 'svg-editor', extension: /\.svg$/ },
-  // BLOCK-142（原位替换 resultSurface.ts:79 .xls/.xlsx→binary）— .xlsx/.xlsm → spreadsheet viewer（先于 table）
-  { adapter: 'spreadsheet', extension: /\.(xlsx|xlsm)$/ },
-  // BLOCK-142 存量拆分保留（resultSurface.ts:79 的 .xls 半边）— legacy .xls 不在 exceljs 解析范围，维持 binary 兜底
-  { adapter: 'binary', extension: /\.xls$/ },
-  // resultSurface.ts:80 — table kind 恒胜；.csv/.tsv 先于 text 判定命中 table
-  { adapter: 'table', kind: 'table', extension: /\.(csv|tsv)$/ },
-  // RW-01 — 3D 产物族：kind=model3d 恒胜；.glb/.gltf/.stl/.obj 与 .scene3d.json
-  // 先于 .json/binary 兜底命中 model3d（.scene3d.json 是 SceneSpec 源真相文件）。
-  // 格式集合取 meshAssets 单源，规则顺序仍由本档案表决定。
-  { adapter: 'model3d', kind: 'model3d', extension: new RegExp(`\\.(${MESH_INPUT_FORMATS.join('|')})$|\\.scene3d\\.json$`) },
-  // resultSurface.ts:81 — .json 先于 isTextFile 判定命中 json（.jsonl 不匹配，落 text）
-  { adapter: 'json', extension: /\.json$/ },
-  // BLOCK-142 新增（plan §1.4：md 先于 isTextFile）— .md/.markdown → markdown viewer，先于 text 规则
-  { adapter: 'markdown', extension: /\.(md|markdown)$/ },
-  // resultSurface.ts:82 — text kind 恒胜；isTextFile 扩展名表落 text（.md/.markdown 已被上一行抢先）
-  { adapter: 'text', kind: 'text', textExtension: true },
-];
 
 /**
  * 能力声明消费面（BLOCK-151 B 轨）：adapter 是否声明「原文可导出」。

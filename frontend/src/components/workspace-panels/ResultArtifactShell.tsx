@@ -78,7 +78,6 @@ import {
   describeTruthStatus,
   RESULT_SURFACE_PERFORMANCE_MARKS,
   resolveResultArtifactUrl,
-  resolveResultViewerAdapter,
   shouldShowResultInteraction,
   type ResultSurfaceMode,
 } from '@/components/result-studio/resultSurface';
@@ -526,7 +525,7 @@ export function ResultArtifactShell({
     (selectedArtifactKind === 'text' || isTextFile(selectedArtifactName) || isMarkdownFile(selectedArtifactName) || /\.json$/i.test(selectedArtifactName) || /\.(csv|tsv)$/i.test(selectedArtifactName));
   const activeIsPreviewText = activeIsText && !activeIsHtml;
   // BLOCK-369（NSO-W3 F-09）解析完整结果以携带机器可读降级原因（binary 兜底时上抛 Shell）。
-  // BLOCK-369（NSO-W3 F-09）降级原因经注册表全量解析携带（binary 兜底时上抛 Shell）。
+  // BLOCK-369（F-09）全量解析携带降级原因（binary 兜底上抛 Shell）。
   const viewerResolution = selectedArtifact
     ? registryResolveResultViewer({
         kind: selectedArtifactKind,
@@ -907,7 +906,7 @@ export function ResultArtifactShell({
     return (
       <div className={styles.resultPreviewPlaceholder}>
         <strong>当前文件暂不支持内嵌预览</strong>
-        {/* BLOCK-369（NSO-W3 F-09）降级原因上抛：binary 兜底不再静默——用户能看到「为什么」。 */}
+        {/* BLOCK-369（F-09）降级原因上抛：不再静默。 */}
         <span>{selectedArtifact.name}</span>
         {viewerFallbackReasonCode && (
           <span data-testid="viewer-fallback-reason" role="note">
