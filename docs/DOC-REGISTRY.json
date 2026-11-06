@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 502,
+    "documentCount": 503,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 485
+    "managedMarkdown": 486
   },
   "documents": [
     {
@@ -10206,8 +10206,37 @@
       ],
       "sharedBaselines": [],
       "notes": "2026-11-06 completed：实机走查 6/6 PASS（banner/inert 双模式外树语义/重载清零/截图），四腿 pending 如实（首项目无行/scheduled 入口不可达）；UI-697 banner live ✓、UI-698 树语义 live ✓、UI-699 待行数据。"
+    },
+    {
+      "id": "BLOCK-372",
+      "capability": "block-372-nso-remaining-program",
+      "path": "docs/block-372-nso-remaining-program.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-372-nso-remaining-program",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "收尾",
+        "G0"
+      ],
+      "touchSurface": [
+        "core/shared-backend/result-studio-contracts.js",
+        "core/petri-server/db/connection.js",
+        "scripts/verify-artifact-chain.mjs",
+        "frontend/src/**",
+        "docs/ui-productization-audit.md",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json"
+      ],
+      "notes": "2026-11-06 启动 active（用户「安排上后续未做的所有事情，接下来集中解决」）。Batch-1 链哈希 → Batch-2 FK → Batch-3 台账 52 条 → Batch-4 外部 MCP（blocked 待裁决）。串行。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 502
+  "documentCount": 503
 }
