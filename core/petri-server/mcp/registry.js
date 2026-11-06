@@ -29,25 +29,8 @@ require('../../shared-backend/execution-provenance');
 require('../../shared-backend/artifact-manifest');
 const { validateToolArgs, McpValidationError } = require('./_validate-tool-args');
 
-// ── BLOCK-360（NSO-W2-6）初始化降级汇总 ─────────────────────────────────────────────
-// 此前各初始化点 try/catch 仅 console.warn，listTools/callTool 照常宣称完整可用。
-// 关键组件（执行器/技能/插件/工具记录）缺失 → degraded；同步与可选面 → warning。
-// 懒加载组件后续成功时清除旧问题（瞬时失败不常驻）。
-const _registryIssues = { critical: new Map(), warnings: new Map() };
-function noteRegistryIssue(component, error, { critical = true } = {}) {
-  const message = error && error.message ? error.message : String(error);
-  const detail = `${component}: ${message}`;
-  (critical ? _registryIssues.critical : _registryIssues.warnings).set(component, detail);
-  console.warn(`[mcp-registry] ${critical ? '降级' : '警告'} ${detail}`);
-}
-function clearRegistryIssue(component) {
-  _registryIssues.critical.delete(component);
-  _registryIssues.warnings.delete(component);
-}
-function getRegistryHealth() {
-  const reasons = [..._registryIssues.critical.values()].map((detail) => ({ detail }));
-  return { degraded: reasons.length > 0, reasons, warnings: [..._registryIssues.warnings.values()] };
-}
+// BLOCK-360（NSO-W2-6）初始化降级汇总：账本见 ./registry-health（关键缺失=degraded，同步/可选面=warning）。
+const { noteRegistryIssue, clearRegistryIssue, getRegistryHealth } = require('./registry-health').createRegistryHealth();
 
 // Skill Registry & Runtime 导入（延迟加载避免循环依赖）
 let _skillRegistry = null;
@@ -85,13 +68,10 @@ function getSkillRuntimeFactory() {
  * Skill 相关 MCP 工具列表
  */
 function skillSourceEnum() {
-  try {
-    return Object.keys(require('../../shared-backend/skill-registry').SOURCE_PRIORITY);
-  } catch {
-    return null;
-  }
+  try { return Object.keys(require('../../shared-backend/skill-registry').SOURCE_PRIORITY); } catch { return null; }
 }
 function getSkillToolDefinitions() {
+  const sourceEnum = skillSourceEnum();
   return [
     {
       name: 'skill_discover',
@@ -105,8 +85,8 @@ function getSkillToolDefinitions() {
           },
           source: {
             type: 'string',
-            // BLOCK-361（NSO-W4-3）enum 由 SOURCE_PRIORITY 派生（含 pack）；注册表不可用时不设 enum（不复制常量）
-            ...(skillSourceEnum() ? { enum: skillSourceEnum() } : {}),
+            // BLOCK-361（NSO-W4-3）enum 由 SOURCE_PRIORITY 派生（含 pack）；注册表不可用时不设 enum
+            ...(sourceEnum ? { enum: sourceEnum } : {}),
             description: 'Filter by skill source',
           },
           search: {
@@ -371,12 +351,9 @@ try {
 // 自动发现 built-in 插件（resources/built-in-plugins/），不依赖 install。
 // 让外部 agent 即使没装任何插件也能看到/调用 built-in 工具（volcano-plot 等）。
 // 已装版本优先（loadBuiltInPlugins 内部去重）。
-// BLOCK-361（NSO-W4-1）插件源单源：built-in / installed / development 一律取 plugin-loader 解析，
-// 本文件只追加领域包源（pack-registry 记录制）。此前这里另写一份 installed 解析，漏掉
-// BLOCK-157 DIST-1 的 $PETRI_LOCAL_DATA_DIR/plugins 一档——主进程装到数据目录的插件 MCP 读不到。
-function resolveBuiltInPluginsDir() {
-  return pluginLoader.resolveBuiltInPluginsDir();
-}
+// BLOCK-361（NSO-W4-1）插件源单源：built-in/installed/development 取 plugin-loader（此前自写的
+// installed 解析漏掉 $PETRI_LOCAL_DATA_DIR/plugins 档）；本文件只追加领域包源。
+const resolveBuiltInPluginsDir = () => pluginLoader.resolveBuiltInPluginsDir();
 function computePluginSources() {
   const { builtInDir, installedDir, developmentDirs } = pluginLoader.resolveDefaultPluginSources();
 
@@ -565,24 +542,15 @@ async function listTools() {
   const pluginTools = pluginLoader.listToolsForMCP();
   const skillTools = getSkillToolDefinitions();
   const ideTools = getIdeToolDefinitionsSafe();
-  // BLOCK-360 — 关键初始化缺失时逐工具携带 health（不中断列表、不宣称完整可用）。
-  // 双形状取名/元数据保守缺省属 W4（F-08）；此处只保证降级对两种形状都可见。
-  // 技能工具定义是静态的，懒加载的 SkillRegistry/Runtime 若坏掉要等 callTool 才暴露——
-  // 列表前探针一次（成功即缓存，零重复成本），让降级在 tools/list 就可见。
+  // BLOCK-360 — 懒加载技能组件列表前探针一次，关键缺失时逐工具携带 health（不宣称完整可用）。
+  // BLOCK-361（F-08）双形状取名 {function.name}/{name}，未知名取保守缺省元数据。
   getSkillRegistry();
   getSkillRuntimeFactory();
   const health = getRegistryHealth();
   const healthMeta = health.degraded ? { health: { degraded: true, reasons: health.reasons } } : null;
-  // BLOCK-361（NSO-W4-2，F-08）双形状取名：OpenAI 形 {function.name} 与 MCP 形 {name}；
-  // 未知名由 getToolMetadata 给保守缺省（串行、非只读、需审批），不再让 MCP 形条目裸奔。
-  const toolNameOf = (t) => {
-    if (t && t.function && typeof t.function.name === 'string') return t.function.name;
-    if (t && typeof t.name === 'string') return t.name;
-    return null;
-  };
   const withMetadata = (t) => {
-    const name = toolNameOf(t);
-    if (!name) return t;
+    const name = (t && t.function && t.function.name) || (t && t.name);
+    if (typeof name !== 'string') return t;
     return { ...t, executionMetadata: { ...getToolMetadata(name), ...(healthMeta || {}) } };
   };
   return [...skillTools, ...ideTools, ...pluginTools].map(withMetadata);
