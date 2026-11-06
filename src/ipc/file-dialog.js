@@ -17,6 +17,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { app, ipcMain, dialog, net, shell, nativeImage } = require("electron");
+const { isRegisteredWorkspaceRoot, listRegisteredWorkspaceRoots } = require("./_workspace-roots");
 
 /**
  * File-type whitelist for the file:open-path IPC channel (SEC-002).
@@ -48,7 +49,9 @@ function isAllowedOpenExtension(ext) {
     || ALLOWED_OPEN_EXTENSION_PREFIXES.some((prefix) => ext.startsWith(prefix));
 }
 
-function setupFileDialogIpc({ mainWindow } = {}) {
+// BLOCK-360（NSO-W2-1）：workspace 根由主进程反查 projects 表登记根（不信任渲染层 root）。
+// listWorkspaceRoots 可注入（测试）；默认读 _db-singleton 同一连接。
+function setupFileDialogIpc({ mainWindow, listWorkspaceRoots = listRegisteredWorkspaceRoots } = {}) {
   ipcMain.handle(CHANNELS.file.saveDialog, async (event, defaultName) => {
     if (!mainWindow) return null;
     try {
@@ -378,6 +381,15 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       return { ok: false, error: "invalid workspace file path" };
     }
     const realRoot = fs.realpathSync(workspacePath);
+    let registeredRoots;
+    try {
+      registeredRoots = listWorkspaceRoots();
+    } catch (e) {
+      return { ok: false, error: `workspace_roots_unavailable: ${e.message}` };
+    }
+    if (!isRegisteredWorkspaceRoot(realRoot, registeredRoots)) {
+      return { ok: false, error: "workspace_not_registered" };
+    }
     const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
     if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
       return { ok: false, error: "file is outside the project workspace" };
@@ -439,15 +451,10 @@ function setupFileDialogIpc({ mainWindow } = {}) {
       ) {
         return { ok: false, error: "invalid args" };
       }
-      const realRoot = fs.realpathSync(workspacePath);
-      const realTarget = fs.realpathSync(path.resolve(realRoot, relativePath));
-      if (realTarget !== realRoot && !realTarget.startsWith(realRoot + path.sep)) {
-        return { ok: false, error: "file is outside the project workspace" };
-      }
-      if (!fs.statSync(realTarget).isFile()) {
-        return { ok: false, error: "target is not a file" };
-      }
-      fs.writeFileSync(realTarget, content, "utf-8");
+      // 与 open/showInFolder 共用同一解析边界（登记根 + realpath 不越界 + 必须已存在的文件）
+      const resolved = resolveWorkspaceFile(workspacePath, relativePath);
+      if (!resolved.ok) return resolved;
+      fs.writeFileSync(resolved.realTarget, content, "utf-8");
       return { ok: true, data: { savedAt: new Date().toISOString() } };
     } catch (e) {
       console.error("[desktop] write workspace file failed:", e.message);

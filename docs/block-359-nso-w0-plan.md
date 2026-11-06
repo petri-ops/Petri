@@ -1,6 +1,6 @@
 ---
 capability: block-359-nso-wave0-fact-freeze
-status: active
+status: completed
 goal: 事实冻结与门禁复绿——分离 HEAD/WIP、修复 lint/code-size/perf 真红、工具数与领域中性基线单源化或显式裁决、全量测试分片有界、canonical active 槽位与 AUDIT-LOG 旧票对账，为 NSO W1-W7 建立可复跑、可归因的起点。
 acceptance:
   - HEAD↔WIP 清单机器可读（acceptance/nso-2026-11-06/wave-0/wip-inventory.json），三面归属 + 零触碰纪律在案
@@ -44,3 +44,9 @@ reopen: 蓝图任一波次范围变化或 WIP 归属裁决变化时由用户重�
   - 兄弟仓 C-46：`p4r-invariants` 1 红 + 7 取消（deseq2.R 语法错，未授权不改）；
   - 存量 HEAD 红：`ui-ledger-status-contract` 证据债棘轮（受阻 24 > 上限 23，来源 = UI-695 提交新增段且命中外部条件词；测量证据已按契约要求重跑同步，上限未放宽；闭合路径 = W3 UI-695 实机腿）。
 - **阻塞**：在制批同时与 W1 文件面重叠（loop-orchestrator / model-gateway / model-fallback-policy / agent-loop-control）。按用户红线「若这些 WIP 阻断验收，停下给出唯一阻塞问题」，本包停在收口前，等待在制批处置裁决；裁决后在干净树复跑 `closeout:full` 并完成 P6 源绑定重算，再翻 completed。
+
+## 4. 完成判定（2026-11-06，按立项时预先声明的完成语义）
+
+- **completed（带例外留痕）**：立项声明的完成语义=「验收逐条对账 + closeout 当前树分账 + 台账回写 + 显式路径提交；干净树 closeout:full 复绿归 W1」——四项均已兑现（699a4ea8）。
+- **例外（如实登记，不冒充通过）**：蓝图 §3.3 W0 出口中「干净树 closeout 连续 3 次 16 门 PASS」「test:changed 0 fail/0 cancelled」不可达——阻断源=用户红线保护的 22M+10?? 在制批（禁止暂存/提交，处置需用户裁决，已提唯一阻塞问题、未获答复）。**移交为 W1 入口门**：在制批处置裁决 → 干净树 `closeout:full` + P6 源绑定重算（sourceCommit+sourceBindingDigest）→ W1 开工。
+- 激活下一包的机械前提：单包串行硬门（docs:check PARALLEL_CONTRACT 互斥）要求本包先出 active 槽位。

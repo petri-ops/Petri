@@ -117,3 +117,71 @@ test('every consumer can resolve its channels require (path guard — src/ vs sr
   }
   assert.deepEqual(broken, [], 'unresolvable channels require');
 });
+
+// ── BLOCK-360（NSO-W2-2）双向集合相等门（替代 includes 子串单向守护）──────────────────────
+// 缺口（评估 F-21）：①注册表→preload 用 includes 子串，通道名只在注释里出现也判绿；
+// ②preload→注册表方向缺失，preload 手加未登记通道不红；③CONSUMERS 固定清单，新模块手写
+// 字面量不被扫描（本批 glob 首扫即抓到 src/main/desktop-shell.js 两处遗漏，已改 CHANNELS 引用）。
+
+function stripJsComments(text) {
+  return text.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+}
+
+/** preload 真实调用点通道集合（去注释后正则抽取 + 具名 *_CHANNEL 常量）。 */
+export function extractPreloadCallSiteChannels(preloadText) {
+  const code = stripJsComments(preloadText);
+  const out = new Set();
+  const callRe = /ipcRenderer\.(?:invoke|send|sendSync|on|once|removeListener|removeAllListeners)\(\s*['"]([^'"]+)['"]/g;
+  for (const m of code.matchAll(callRe)) out.add(m[1]);
+  const constRe = /const\s+[A-Z_]+_CHANNEL\s*=\s*['"]([^'"]+)['"]/g;
+  for (const m of code.matchAll(constRe)) out.add(m[1]);
+  return out;
+}
+
+function listMainProcessSources() {
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) { walk(rel); continue; }
+      if (!rel.endsWith('.js')) continue;
+      if (/(^|\/)([a-z-]*preload)\.js$/.test(rel) || rel === 'src/ipc/channels.js') continue;
+      out.push(rel);
+    }
+  };
+  walk('src');
+  return out.sort();
+}
+
+test('W2-2 preload 调用点 ∪ MAIN_ONLY 与注册表集合相等（双向）', () => {
+  const preload = fs.readFileSync(path.join(ROOT, 'src/preload.js'), 'utf8');
+  const sites = extractPreloadCallSiteChannels(preload);
+  const registry = new Set(flattenRegistry().map(({ value }) => value));
+  const preloadOnly = [...sites].filter((v) => !registry.has(v)).sort();
+  const registryOnly = [...registry].filter((v) => !sites.has(v) && !MAIN_ONLY.has(v)).sort();
+  assert.deepEqual(preloadOnly, [], 'preload 存在未登记通道（先在 src/ipc/channels.js 登记）');
+  assert.deepEqual(registryOnly, [], '注册表通道在 preload 没有真实调用点（注释里出现不算）');
+});
+
+test('W2-2 负测：通道名只出现在注释里不计入调用点（堵 includes 假绿）', () => {
+  const text = `// ipcRenderer.invoke('ghost:in-comment')\n/* ipcRenderer.send('ghost:block') */\nconst x = ipcRenderer.invoke('real:call');\n`;
+  const sites = extractPreloadCallSiteChannels(text);
+  assert.deepEqual([...sites], ['real:call']);
+});
+
+test('W2-2 全量 glob：src 下任何主进程模块不得手写已登记通道字面量，也不得手写未登记 IPC 通道', () => {
+  const registry = new Set(flattenRegistry().map(({ value }) => value));
+  const reflux = [];
+  const unregistered = [];
+  for (const rel of listMainProcessSources()) {
+    const code = stripJsComments(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+    for (const m of code.matchAll(/(["'])([a-zA-Z0-9][a-zA-Z0-9:_-]*:[a-zA-Z0-9:_-]+)\1/g)) {
+      if (registry.has(m[2]) && !PROTOCOL_TAGS.has(m[2])) reflux.push(`${rel}: ${m[2]}`);
+    }
+    for (const m of code.matchAll(/(?:ipcMain\.(?:handle|handleOnce|on|once|removeHandler)|webContents\.send)\(\s*['"]([^'"]+)['"]/g)) {
+      if (m[1].includes(':') && !registry.has(m[1])) unregistered.push(`${rel}: ${m[1]}`);
+    }
+  }
+  assert.deepEqual(reflux, [], '主进程模块手写了已登记通道字面量（改用 CHANNELS 引用）');
+  assert.deepEqual(unregistered, [], '主进程模块注册了未登记的 IPC 通道（先在 channels.js 登记）');
+});

@@ -39,6 +39,81 @@ function errorResult(error, message, extra = {}) {
   return { ok: false, error, message, ...extra };
 }
 
+// ── BLOCK-360（NSO-W2-3）命令判定单源 + 令牌收窄 + 风险可见 ──────────────────────────
+// 迁自 workspace-tools.js 的 commandVerdict（纯函数，集中一处便于负测）。三处收窄：
+//  ①特权令牌只认 per-call 出示（handlerOptions.execToken）；进程级
+//    PETRI_WORKSPACE_EXEC_TOKEN 一律忽略——全仓无签发者，且 env 会随 spawn 下沉子进程，
+//    `printenv` 即可读回再拼进命令绕过严格模式（2026-11-06 红测实证）。
+//  ②令牌命中时风险正则照算、风险照回传（privilegedBypass 审计可见），令牌文本剥离后不进 shell。
+//  ③默认放行裁决（2026-11-05 用户裁决）不变：命中风险放行，但 riskWarnings + 严格模式开关
+//    提示进入工具结果（此前只进后端日志，工具结果丢弃，与「回传、可见、不静默」不符）。
+const MAX_COMMAND_BYTES = 64 * 1024;
+const EXEC_TOKEN_ENV = 'PETRI_WORKSPACE_EXEC_TOKEN';
+const STRICT_MODE_HINT = '严格模式可一键恢复硬拦：设环境变量 PETRI_EXEC_STRICT_DENYLIST=1';
+const NON_NEGOTIABLE_RISKS = Object.freeze([
+  { pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i, reason: '禁止通过命令行发起交互式提权' },
+  { pattern: /(^|[;&|]\s*)rm(\s|$)/i, reason: '禁止通过命令行执行不可恢复删除；请使用受控文件操作' },
+  { pattern: /(^|[;&|]\s*)git(?:\s+-C\s+\S+)?\s+push(\s|$)/i, reason: '禁止由工作区命令静默推送远端' },
+  { pattern: /\b(curl|wget)\b[^|]*\|\s*(sh|bash|zsh|fish|python(?:3)?|perl|ruby)\b/i, reason: '禁止下载远程内容后直接管道执行' },
+]);
+let envTokenDeprecationWarned = false;
+
+function commandVerdict(command, { execToken, env = process.env } = {}) {
+  const normalized = String(command || '').trim();
+  if (!normalized) return { ok: false, reason: 'command 不能为空' };
+  if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
+  if (normalized.includes('\0')) return { ok: false, reason: 'command 不能包含空字节' };
+  if (env[EXEC_TOKEN_ENV] && !envTokenDeprecationWarned) {
+    envTokenDeprecationWarned = true;
+    try {
+      console.warn(`[workspace-exec] ${EXEC_TOKEN_ENV} 已停用并被忽略（进程级令牌会下沉子进程）；特权放行只认 per-call handlerOptions.execToken`);
+    } catch { /* 日志失败不影响判定 */ }
+  }
+  const strictDenylist = env.PETRI_EXEC_STRICT_DENYLIST === '1';
+  const token = typeof execToken === 'string' && execToken.length >= 16 ? execToken : '';
+  if (token && normalized.includes(token)) {
+    const stripped = normalized.split(token).join('').trim();
+    if (!stripped) return { ok: false, reason: 'command 不能为空' };
+    const warnings = NON_NEGOTIABLE_RISKS.filter(({ pattern }) => pattern.test(stripped)).map((hit) => hit.reason);
+    if (warnings.length > 0) {
+      try {
+        console.warn(`[workspace-exec] 特权令牌放行（审计）：${warnings.join(' / ')}`);
+      } catch { /* 日志失败不影响执行 */ }
+    }
+    return {
+      ok: true, allowed: true, stripped, privilegedBypass: true,
+      ...(warnings.length > 0 ? { riskWarnings: warnings } : {}),
+    };
+  }
+  const hits = NON_NEGOTIABLE_RISKS.filter(({ pattern }) => pattern.test(normalized));
+  if (strictDenylist && hits[0]) return { ok: false, reason: hits[0].reason };
+  if (hits.length > 0) {
+    const warnings = hits.map((hit) => hit.reason);
+    try {
+      console.warn(`[workspace-exec] 风险提示（已放行；${STRICT_MODE_HINT}）：${warnings.join(' / ')}`);
+    } catch { /* 日志失败不影响执行 */ }
+    return { ok: true, riskWarnings: warnings, strictModeHint: STRICT_MODE_HINT };
+  }
+  return { ok: true };
+}
+
+/** 判定附带的风险/审计字段并入工具结果（结果非对象时原样返回）。 */
+function withRiskVisibility(result, verdict) {
+  if (!result || typeof result !== 'object' || !verdict) return result;
+  const extra = {};
+  if (Array.isArray(verdict.riskWarnings) && verdict.riskWarnings.length > 0) extra.riskWarnings = verdict.riskWarnings;
+  if (verdict.strictModeHint) extra.strictModeHint = verdict.strictModeHint;
+  if (verdict.privilegedBypass) extra.privilegedBypass = true;
+  return Object.keys(extra).length ? { ...result, ...extra } : result;
+}
+
+/** 子进程 env：剥除特权令牌（防 printenv 读回复用）。 */
+function childProcessEnv(base = process.env) {
+  const env = { ...base };
+  delete env[EXEC_TOKEN_ENV];
+  return env;
+}
+
 // BLOCK-33 P3 — spawn 执行命令：stdout/stderr 增量通过 onOutput({ stream, text })
 // 外抛供 SSE 流式转发，同时保留 execFile 的超时/maxBuffer 截断语义。
 // 返回统一形状：{ ok, code, signal, timedOut, stdout, stderr, truncated, errorMessage }
@@ -48,6 +123,7 @@ function spawnCommand(invocation, { cwd, timeout, maxBuffer, onOutput }) {
     try {
       child = spawn(invocation.executable, invocation.args, {
         cwd,
+        env: childProcessEnv(),
         shell: false,
         windowsHide: true,
       });
@@ -339,6 +415,9 @@ function countRunningBackgroundProcesses() {
 }
 
 module.exports = {
+  childProcessEnv,
+  commandVerdict,
+  withRiskVisibility,
   backgroundProcesses,
   countRunningBackgroundProcesses,
   BACKGROUND_LOG_DIR,

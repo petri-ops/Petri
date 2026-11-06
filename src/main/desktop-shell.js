@@ -16,6 +16,7 @@
  *   - 测试实例不弹真实 toast（返回 simulated_test_instance），避免打扰实机验收。
  */
 
+const CHANNELS = require('../ipc/channels');
 const path = require('node:path');
 const {
   DEFAULT_PREFS,
@@ -189,7 +190,7 @@ function createDesktopShell({
         const target = getMainWindow();
         if (target && !target.isDestroyed()) {
           try {
-            target.webContents.send('app:notification-clicked', {
+            target.webContents.send(CHANNELS.app.notificationClicked, {
               kind: payload && payload.kind,
               conversationId: (payload && payload.conversationId) || null,
             });
@@ -287,7 +288,7 @@ function createDesktopShell({
     // 但绝不 show() 到屏幕上。
     if (!isTestInstance) showMainWindow();
     quitFlow = { timer: null, preview };
-    const delivered = sendToRenderer('app:quit-requested', {
+    const delivered = sendToRenderer(CHANNELS.app.quitRequested, {
       ...summary,
       rows: quitSummaryRows(summary.counts),
       reason: reason || 'quit',

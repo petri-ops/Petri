@@ -131,8 +131,8 @@
       "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1636,
-      "sha256": "f89df2709bfddd810885fa2350bb514e5bb75d71713b246d320d1fd31f2e91d4"
+      "lines": 1584,
+      "sha256": "e86ab1da426be3c237880f6dba15d638b9228245b97b09ced844a3b007079a52"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
@@ -170,5 +170,5 @@
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
     }
   ],
-  "total": 23463
+  "total": 23411
 }

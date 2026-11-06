@@ -85,6 +85,9 @@ const {
   sha256,
   spawnCommand,
   terminateBackgroundProcess,
+  childProcessEnv,
+  commandVerdict,
+  withRiskVisibility,
 } = require('./workspace-tools/internals');
 
 function createWorkspaceTools(options = {}) {
@@ -687,67 +690,6 @@ function createWorkspaceTools(options = {}) {
     }, { createRoot: args.dryRun !== true, requireCompatible: true });
   }
 
-  function commandVerdict(command) {
-    const normalized = String(command || '').trim();
-    if (!normalized) return { ok: false, reason: 'command 不能为空' };
-    if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
-    if (normalized.includes('\0')) return { ok: false, reason: 'command 不能包含空字节' };
-    // BLOCK-10 S-005: capability token bypass.
-    // The token is set into `process.env.PETRI_WORKSPACE_EXEC_TOKEN` by the
-    // privileged caller (mcp-server / agent-task-store) right before invoking
-    // workspace_exec. The verdict reads it, strips it from the command, and
-    // returns { ok: true, allowed: true } so the blacklist regexes below
-    // never get to evaluate risk patterns the elevated layer already
-    // pre-approved. The strip + length cap is symmetric: removing the token
-    // shortens the command and is validated as part of the byte-length check
-    // before token evaluation, so a payload whose stripped form is empty
-    // fails the empty-string guard above.
-    const token = process.env.PETRI_WORKSPACE_EXEC_TOKEN;
-    if (token && normalized.includes(token)) {
-      const stripped = normalized.split(token).join('').trim();
-      if (!stripped) return { ok: false, reason: 'command 不能为空' };
-      return { ok: true, allowed: true, stripped };
-    }
-    // BLOCK-346 后续裁决（2026-11-05，用户原话「不应该设置这些黑名单，后续模型会
-    // 成长出给行为合理的判断」）：这四条不再**默认静默拦截**。
-    // 改为：默认放行并把命中的风险以 riskWarnings 回传（可见、不静默）；需要恢复到
-    // 「硬拦」语义时设环境变量 PETRI_EXEC_STRICT_DENYLIST=1（运维/交付期可一键收紧，
-    // 不改代码）。档位约束（read 档不可执行）不在此列，仍由调用方前置判断。
-    const strictDenylist = process.env.PETRI_EXEC_STRICT_DENYLIST === '1';
-    const nonNegotiableRisks = [
-      {
-        pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i,
-        reason: '禁止通过命令行发起交互式提权',
-      },
-      {
-        pattern: /(^|[;&|]\s*)rm(\s|$)/i,
-        reason: '禁止通过命令行执行不可恢复删除；请使用受控文件操作',
-      },
-      {
-        pattern: /(^|[;&|]\s*)git(?:\s+-C\s+\S+)?\s+push(\s|$)/i,
-        reason: '禁止由工作区命令静默推送远端',
-      },
-      {
-        pattern: /\b(curl|wget)\b[^|]*\|\s*(sh|bash|zsh|fish|python(?:3)?|perl|ruby)\b/i,
-        reason: '禁止下载远程内容后直接管道执行',
-      },
-    ];
-    const hits = nonNegotiableRisks.filter(({ pattern }) => pattern.test(normalized));
-    if (strictDenylist) {
-      const blocked = hits[0];
-      if (blocked) return { ok: false, reason: blocked.reason };
-    }
-    // 默认路径：不拦，但把命中的风险回传 + 落一条可见日志（不静默）。
-    if (hits.length > 0) {
-      const warnings = hits.map((hit) => hit.reason);
-      try {
-        console.warn(`[workspace-exec] 风险提示（已放行；严格模式设 PETRI_EXEC_STRICT_DENYLIST=1 可恢复硬拦）：${warnings.join(' / ')}`);
-      } catch { /* 日志失败不影响执行 */ }
-      return { ok: true, riskWarnings: warnings };
-    }
-    return { ok: true };
-  }
-
   function shellInvocation(command, shellPreference) {
     // BLOCK-33 P2 — shell 选择：auto（平台默认）| posix | powershell | cmd。
     // Windows 上 PowerShell 提供现代语法（对象管道、POSIX 风格引号），降低方言陷阱。
@@ -962,9 +904,12 @@ function createWorkspaceTools(options = {}) {
     if (ctx.accessMode !== 'full' && ctx.accessMode !== 'workspace-write') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
     }
-    const command = String(args.command || '').trim();
-    const verdict = commandVerdict(command);
+    const rawCommand = String(args.command || '').trim();
+    const verdict = commandVerdict(rawCommand, { execToken: handlerOptions && handlerOptions.execToken });
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+    // BLOCK-360 — 令牌命中时只执行剥离后的命令（令牌文本不进 shell）
+    const command = verdict.stripped || rawCommand;
+    if (verdict.stripped) args = { ...args, command };
     // BLOCK-54 P1 — yield 中间档分流：显式传 yield_ms（>0）才启用；不传 = 既有同步语义
     if (args.yield_ms != null && Number(args.yield_ms) > 0) {
       const yieldMs = clampInteger(args.yield_ms, DEFAULT_YIELD_MS, MIN_YIELD_MS, MAX_YIELD_MS);
@@ -974,10 +919,10 @@ function createWorkspaceTools(options = {}) {
         100,
         MAX_OUTPUT_TOKENS_CAP
       );
-      return executeCommandWithYield(args, ctx, yieldMs, maxOutputTokens);
+      return withRiskVisibility(await executeCommandWithYield(args, ctx, yieldMs, maxOutputTokens), verdict);
     }
     const shellPreference = String(args.shell || 'auto').toLowerCase();
-    return withWorkspace(ctx, async ({ root }) => {
+    return withRiskVisibility(await withWorkspace(ctx, async ({ root }) => {
       // BLOCK-33 P2 — cwd 参数：相对工作区根，过沙箱校验（逃逸/符号链接拒绝）
       let cwdRoot = root;
       let cwdLabel = '.';
@@ -1042,7 +987,7 @@ function createWorkspaceTools(options = {}) {
       if (spawnResult.errorMessage) failed.errorMessage = spawnResult.errorMessage;
       failed = await attachCommandNotFoundHint(failed, `${spawnResult.errorMessage || ''}\n${spawnResult.stderr || ''}`, cwdRoot);
       return failed;
-    }, { requireCompatible: true });
+    }, { requireCompatible: true }), verdict);
   }
 
   // BLOCK-54 P1 — workspace_exec yield 中间档：命令启动后等到产出或 yield_ms 超时。
@@ -1097,6 +1042,7 @@ function createWorkspaceTools(options = {}) {
       try {
         child = spawn(invocation.executable, invocation.args, {
           cwd: cwdRoot,
+          env: childProcessEnv(),
           detached: process.platform !== 'win32',
           stdio: ['ignore', 'pipe', 'pipe'],
           windowsHide: true,
@@ -1253,16 +1199,17 @@ function createWorkspaceTools(options = {}) {
 
   // BLOCK-33 P4 — 后台启动长任务：黑名单/accessMode/沙箱与 workspace_exec 相同，
   // 输出重定向到工作区 .petri-agent-tmp/ 日志文件，立即返回 processId。
-  async function execBackground(args = {}, ctx = {}) {
+  async function execBackground(args = {}, ctx = {}, handlerOptions = {}) {
     if (ctx.accessMode !== 'full') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止启动后台进程');
     }
-    const command = String(args.command || '').trim();
-    if (!command) return errorResult('invalid_arguments', 'command 不能为空');
-    const verdict = commandVerdict(command);
+    const rawCommand = String(args.command || '').trim();
+    if (!rawCommand) return errorResult('invalid_arguments', 'command 不能为空');
+    const verdict = commandVerdict(rawCommand, { execToken: handlerOptions && handlerOptions.execToken });
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);
+    const command = verdict.stripped || rawCommand;
     const shellPreference = String(args.shell || 'auto').toLowerCase();
-    return withWorkspace(ctx, async ({ root }) => {
+    return withRiskVisibility(await withWorkspace(ctx, async ({ root }) => {
       const sessionKey = backgroundSessionKey(ctx);
       let runningCount = 0;
       for (const record of backgroundProcesses.values()) {
@@ -1306,6 +1253,7 @@ function createWorkspaceTools(options = {}) {
       try {
         child = spawn(invocation.executable, invocation.args, {
           cwd: cwdRoot,
+          env: childProcessEnv(),
           // posix 下 detached 使子进程成为进程组长，process_stop 可整组终止
           detached: process.platform !== 'win32',
           stdio: ['ignore', logFd.fd, logFd.fd],
@@ -1366,7 +1314,7 @@ function createWorkspaceTools(options = {}) {
         logPath: logRelativePath,
         note: '输出已重定向到日志文件：workspace_read 可读取全文，process_status 查询存活与日志尾部，process_stop 停止',
       };
-    }, { requireCompatible: true });
+    }, { requireCompatible: true }), verdict);
   }
 
   // BLOCK-33 P4 — 查询本会话后台进程（存活状态 + 日志尾部）

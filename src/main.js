@@ -31,6 +31,12 @@ const {
   crashReporter,
 } = require("electron");
 
+// BLOCK-360（NSO-W2-1）全局 IPC sender 信任门——必须在任何 ipcMain.handle/on 注册之前
+// 安装（结构性保证「任何入口都先过信任判定」）。受信集合每事件现读
+// PETRI_TRUSTED_DESKTOP_ORIGINS（由下方 setupDesktopEnv 写入，安装早于写入是安全的：
+// 集合为空时 fail-closed，且窗口事件不会早于导航完成）。
+require("./ipc/_ipc-trust").installGlobalIpcSenderGuard(ipcMain);
+
 // UI-400-1 抓真（2026-09-17）——Windows 原生窗口遮挡追踪对无边框窗口（frame:false）
 // 会误报「已遮挡」→ document.visibilityState=hidden → Chromium PDF 查看器在
 // hidden frame 冻结渲染（用户实拍 PDF 预览整块空白；窗口明明在前台）。
