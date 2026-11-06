@@ -1,6 +1,6 @@
 ---
 capability: next-stage-optimization-blueprint-2026-11-06
-status: planned
+status: active
 goal: 以全量评估为事实基线，在不扩展阶段边界、不新增依赖、不破坏通用 agent 身份的前提下，按波次把 Petri 优化成任务跑得完、错误看得见、证据可复跑、体验可信且结构可持续演进的本地通用 agent。
 acceptance:
   - W0-W7 每波有目标、具体改进点、优先级、依赖和出口判据
@@ -55,6 +55,23 @@ reopen: 用户逐波发令后按治理规范分配正式工作包编号并更新
 > 这些是**蓝图出口判据**，不是当前已达成状态；任何 Wave 未完成都不得把总出口写成 completed/verified。
 
 ---
+
+## §2a 执行进度（2026-11-06 收尾回写 · W7b）
+
+| Wave | 状态 | 承载包 | 完成证据 |
+| --- | --- | --- | --- |
+| W0 | ✅ completed（带例外） | BLOCK-359 | 干净树 closeout:full 与 P6 源绑定重算移交为 W1 入口门（阻断=在制批处置待裁决） |
+| W1 | ▶ 启动 | BLOCK-365 | 用户 2026-11-06「行 … 把剩下没做的统一搞完」= 授权接收在制批；首切片=审读+测试+显式提交+model-surface 重打，兑现 W0 干净树出口与 P6 重算 |
+| W2 | ✅ completed（带例外） | BLOCK-360 | W2-5（外部 MCP 主体档位未决）、W2-7（数据模型批）显式移交 |
+| W3 | ⏸ deferred | 待立项 | 需改 UI 台账；并发写入者（模型偏好 UI，UI-696）11 项未提交，待其收口 |
+| W4 | ✅ completed（带例外） | BLOCK-361 | 矩阵/货架/能力地图生成器化移交 W7b |
+| W5 | 🔶 partial | BLOCK-364（W5a） | 死熔断删除+测试覆盖棘轮已交付；其余项落在制批文件 |
+| W6 | 🔶 partial | BLOCK-363（W6a） | 进程组 teardown 已交付；并行挂起根因另批（串行默认已绕过） |
+| W7 | 🔶 partial | BLOCK-362（W7a） | compact 脏目标守卫+coverage 校验已交付；W7b=本节回写+生成器同源+最终回写 |
+
+**收尾顺序（用户令「统一搞完」，串行不并行）**：W1（接收在制批 → W0 出口兑现 → W1 主项）→ W5b 其余项（runLoop 拆分等，在制批落地后零阻塞）→ W2b 遗留（agent 主体 capability token；外部 MCP 主体保持现状待档位裁决 · 链哈希迁移+回填+校验器 · 后端 FK 证据门）→ W3（待并发写入者 UI-696 收口；仍未收口则先 W6b）→ W6b（并行挂起根因 · 请求体预算核对）→ W7b（生成器同源 · 证据元数据 · closeout 全门出结果 · 评估评分终评 · canonical 终回写）。遇五类停止条件只问一个问题。
+
+程序级结论（如实）：「干净树 closeout 连续 3 次 16 门 PASS」「test:changed 0 fail/0 cancelled」两项程序级出口**未达成**——closeout 每轮 fail-fast 于 test:changed 门，红项均已逐件归因（在制批 model-surface/P6、C-46 p4r、并发写入者 UI 台账、存量 NEXT-03），无一为本程序引入；2026-11-06 收尾补跑 10 门（test:changed 之外全部），剩余红仅并发写入者两文件指纹（随其提交重打）。
 
 ## §2 波次总览
 

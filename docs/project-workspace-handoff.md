@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-06（▶ **NSO 收尾启动**：用户授权接收在制批（22M+3 新测试；用户资产/临时目录不在授权内），收尾顺序见蓝图 §2a。并发写入者 UI-696（11 项，10:21 后静默）仍零触碰，W3 待其收口。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-364 NSO-W5a completed（带例外）；无 active 工作包**：死熔断删除 + 影响图测试覆盖棘轮（ec39c6e3）。接手顺序同上一行（BLOCK-363），新增注意：新测试文件必须挂 impact-map 规则（test/nso-w5-impact-coverage 判红）。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-363 NSO-W6a completed（带例外）；无 active 工作包**：runner 进程组 teardown（06a12e2b）。**接手顺序**：①读本行与 AUDIT-LOG 顶部 🟡（IDE MCP 写面档位待裁决）②用户裁决在制批（22M+10?? 输出预算/续写/看门狗批）处置 → 若接收则 W1 首切片落地 + model-surface --update + P6 源绑定重算 + 干净树 closeout:full ③并发写入者（模型偏好 UI 12 项）提交后启动 W3 ④W5 零交集子集 / W6 并行挂起根因 / W7b 最终回写。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-362 NSO-W7a completed；无 active 工作包**：compact 脏目标守卫 + coverage 机械校验（742f6875）。新命令：`npm run docs:coverage`（注册表计数重算）、`npm run test:all:sharded`（全量三段有界）。两组他方在制仍零触碰。G0 常态 · 不外推 packaged/Provider/GA。）

@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-06（▶ **NSO 收尾启动（用户「行 … 统一搞完」）**：门禁债清偿 83990965（被 closeout fail-fast 遮住的 lint/code-size 两笔，教训→W7b closeout 全门出结果）；蓝图 §2a 进度+收尾顺序。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-364 NSO-W5a completed（带例外）**：删零消费死熔断 + impact-map 测试覆盖棘轮；提交=ec39c6e3。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-363 NSO-W6a completed（带例外）**：dev-task-runner 终止整组下发（孤儿孙进程根修），真实进程回归红→绿；提交=06a12e2b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-362 NSO-W7a completed**：audit:compact 脏目标守卫（同类第三次复发转机械门禁）+ coverage 计数校验与 docs:coverage；提交=742f6875。G0 常态 · 不外推 packaged/Provider/GA。）
