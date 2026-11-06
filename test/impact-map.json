@@ -7571,6 +7571,19 @@
         "acceptance/nso-2026-11-06/**"
       ],
       "tests": []
+    },
+    {
+      "id": "nso-w5-impact-coverage",
+      "note": "BLOCK-364（W5a）影响图测试覆盖棘轮：新增测试文件必须挂到某条规则 tests，否则判红；存量未映射清单见 impact-map-coverage-baseline.json（只减）。",
+      "patterns": [
+        "test/impact-map.json",
+        "test/impact-map-coverage-baseline.json",
+        "test/nso-w5-impact-coverage.test.mjs"
+      ],
+      "tests": [
+        "test/nso-w5-impact-coverage.test.mjs"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

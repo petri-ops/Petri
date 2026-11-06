@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 495,
+    "documentCount": 496,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 478
+    "managedMarkdown": 479
   },
   "documents": [
     {
@@ -9988,8 +9988,37 @@
       ],
       "sharedBaselines": [],
       "notes": "2026-11-06 启动 active（Jev next:suggest=NSO-W6 0.20）。W6a=teardown 孤儿进程根修：dev-task-runner SIGTERM 只杀 shell、孙进程（node --test）幸存（W0 实测孤儿空转 16h）。 | 2026-11-06 completed（带例外）：POSIX 进程组 teardown（06a12e2b，真实进程回归红→绿）；Windows 树终止与并行挂起根因另批。"
+    },
+    {
+      "id": "BLOCK-364",
+      "capability": "block-364-nso-w5a-dead-code-and-coverage",
+      "path": "docs/block-364-nso-w5a-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-364-nso-w5a-dead-code-and-coverage",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W5",
+        "P2",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-5a/**",
+        "core/petri-server/helpers/circuit-breaker.js",
+        "test/impact-map.json",
+        "test/impact-map-coverage-baseline.json",
+        "test/nso-w5-*.test.mjs"
+      ],
+      "sharedBaselines": [
+        "test/impact-map.json"
+      ],
+      "notes": "2026-11-06 启动 active。W5a=与两组他方在制零交集子集：删零消费死熔断 helpers/circuit-breaker.js + impact-map 测试覆盖棘轮（新测试必须挂规则，存量 147 只减）。runLoop 拆分/恒 null 桩/legacy 文案/双重试分类均落在制批文件，随 W1 后处理。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 495
+  "documentCount": 496
 }
