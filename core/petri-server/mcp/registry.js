@@ -29,6 +29,26 @@ require('../../shared-backend/execution-provenance');
 require('../../shared-backend/artifact-manifest');
 const { validateToolArgs, McpValidationError } = require('./_validate-tool-args');
 
+// ── BLOCK-360（NSO-W2-6）初始化降级汇总 ─────────────────────────────────────────────
+// 此前各初始化点 try/catch 仅 console.warn，listTools/callTool 照常宣称完整可用。
+// 关键组件（执行器/技能/插件/工具记录）缺失 → degraded；同步与可选面 → warning。
+// 懒加载组件后续成功时清除旧问题（瞬时失败不常驻）。
+const _registryIssues = { critical: new Map(), warnings: new Map() };
+function noteRegistryIssue(component, error, { critical = true } = {}) {
+  const message = error && error.message ? error.message : String(error);
+  const detail = `${component}: ${message}`;
+  (critical ? _registryIssues.critical : _registryIssues.warnings).set(component, detail);
+  console.warn(`[mcp-registry] ${critical ? '降级' : '警告'} ${detail}`);
+}
+function clearRegistryIssue(component) {
+  _registryIssues.critical.delete(component);
+  _registryIssues.warnings.delete(component);
+}
+function getRegistryHealth() {
+  const reasons = [..._registryIssues.critical.values()].map((detail) => ({ detail }));
+  return { degraded: reasons.length > 0, reasons, warnings: [..._registryIssues.warnings.values()] };
+}
+
 // Skill Registry & Runtime 导入（延迟加载避免循环依赖）
 let _skillRegistry = null;
 let _skillRuntimeFactory = null;
@@ -37,8 +57,9 @@ function getSkillRegistry() {
     try {
       const { SkillRegistry } = require('../../shared-backend/skill-registry');
       _skillRegistry = new SkillRegistry();
+      clearRegistryIssue('SkillRegistry');
     } catch (e) {
-      console.warn('[mcp-registry] SkillRegistry require failed:', e.message);
+      noteRegistryIssue('SkillRegistry', e);
       return null;
     }
   }
@@ -49,8 +70,9 @@ function getSkillRuntimeFactory() {
     try {
       const { createSkillRuntime } = require('../../shared-backend/skill-runtime');
       _skillRuntimeFactory = createSkillRuntime;
+      clearRegistryIssue('SkillRuntime');
     } catch (e) {
-      console.warn('[mcp-registry] SkillRuntime require failed:', e.message);
+      noteRegistryIssue('SkillRuntime', e);
       return null;
     }
   }
@@ -301,21 +323,21 @@ let db = null;
 try {
   db = require(path.join(R_SERVER, 'db.js'));
 } catch (e) {
-  console.warn('[mcp-registry] db.js require failed, tool_jobs 记录不可用:', e.message);
+  noteRegistryIssue('db.js（tool_jobs 记录不可用）', e);
 }
 // helpers/plans.js：tool_jobs 状态变化同步 plan step（agent-led Task 2）
 let plans = null;
 try {
   plans = require(path.join(R_SERVER, 'helpers', 'plans.js'));
 } catch (e) {
-  console.warn('[mcp-registry] plans.js require failed, plan step 同步不可用:', e.message);
+  noteRegistryIssue('plans.js（plan step 同步不可用）', e, { critical: false });
 }
 
 // 注册 R/Python 执行器（plugin-manager 同款，主进程子进程都要自己 init）
 try {
   require(path.join(SHARED_BACKEND, 'init')).initSharedBackend();
 } catch (e) {
-  console.warn('[mcp-registry] initSharedBackend failed:', e.message);
+  noteRegistryIssue('initSharedBackend（R/Python 执行器未注册）', e);
 }
 
 // 断点1（分仓前置）：注入 config 让执行器/storage 读到真 config（不走 env fallback）。
@@ -326,7 +348,7 @@ try {
     getConfig: () => config,
   });
 } catch (e) {
-  console.warn('[mcp-registry] shared-backend configure failed:', e.message);
+  noteRegistryIssue('shared-backend configure（执行器回落 env 配置）', e);
 }
 
 // 启动时自动加载用户已装插件（~/Documents/Petri-Local/plugins/）。
@@ -335,7 +357,7 @@ try {
 try {
   pluginLoader.loadPluginsFromDisk();
 } catch (e) {
-  console.warn('[mcp-registry] loadPluginsFromDisk failed:', e.message);
+  noteRegistryIssue('loadPluginsFromDisk（已装插件缺席）', e);
 }
 
 // 自动发现 built-in 插件（resources/built-in-plugins/），不依赖 install。
@@ -383,7 +405,7 @@ function refreshPluginSources() {
       }
     }
   } catch (e) {
-    console.warn('[mcp-registry] pack sources read failed:', e.message);
+    noteRegistryIssue('pack sources（领域包工具缺席）', e);
   }
   const sources = [
     { type: 'builtin', root: builtInDir },
@@ -399,7 +421,7 @@ function refreshPluginSources() {
 try {
   refreshPluginSources();
 } catch (e) {
-  console.warn('[mcp-registry] plugin source refresh failed:', e.message);
+  noteRegistryIssue('plugin source refresh', e, { critical: false });
 }
 
 // Phase 3 (project-result-sandbox): MCP/Agent 工具物理目录收敛。
@@ -554,9 +576,21 @@ async function listTools() {
   const pluginTools = pluginLoader.listToolsForMCP();
   const skillTools = getSkillToolDefinitions();
   const ideTools = getIdeToolDefinitionsSafe();
+  // BLOCK-360 — 关键初始化缺失时逐工具携带 health（不中断列表、不宣称完整可用）。
+  // 双形状取名/元数据保守缺省属 W4（F-08）；此处只保证降级对两种形状都可见。
+  // 技能工具定义是静态的，懒加载的 SkillRegistry/Runtime 若坏掉要等 callTool 才暴露——
+  // 列表前探针一次（成功即缓存，零重复成本），让降级在 tools/list 就可见。
+  getSkillRegistry();
+  getSkillRuntimeFactory();
+  const health = getRegistryHealth();
+  const healthMeta = health.degraded ? { health: { degraded: true, reasons: health.reasons } } : null;
   const withMetadata = (t) => {
     const name = t && t.function && typeof t.function.name === 'string' ? t.function.name : null;
-    return name ? { ...t, executionMetadata: getToolMetadata(name) } : t;
+    if (name) return { ...t, executionMetadata: { ...getToolMetadata(name), ...(healthMeta || {}) } };
+    if (healthMeta && t && typeof t === 'object') {
+      return { ...t, executionMetadata: { ...(t.executionMetadata || {}), ...healthMeta } };
+    }
+    return t;
   };
   return [...skillTools, ...ideTools, ...pluginTools].map(withMetadata);
 }
@@ -949,6 +983,7 @@ async function callTool(name, args, opts = {}) {
 module.exports = {
   listTools,
   callTool,
+  getRegistryHealth,
   listIdeMcpResources,
   readIdeMcpResource,
   _test: {
