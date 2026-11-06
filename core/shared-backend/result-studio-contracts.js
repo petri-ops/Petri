@@ -572,6 +572,30 @@ function summarizeSelection(selection, { maxSampleIds = 12 } = {}) {
 // WorkspaceCheckpoint v1
 // ---------------------------------------------------------------------------
 
+
+/**
+ * BLOCK-372（NSO Batch-1 / 评估 F-20）— revision 链哈希。
+ * chain_hash = sha256(canonical(prevChainHash) + canonical(revisionBusinessFields))。
+ * prevChainHash 为 NULL（首版）时 canonical 为 null 字面量——链首可复算；
+ * 任一历史版本的业务列被篡改即断链（verify-artifact-chain 校验器 fail-closed）。
+ * @param {string|null} prevChainHash
+ * @param {{ revisionId: string, revisionOrdinal: number, artifactId: string,
+ *            outputHash: string|null, validationStatus: string,
+ *            reproducibilityStatus: string, createdAt: string }} revision
+ */
+function computeRevisionChainHash(prevChainHash, revision) {
+  return sha256Hex(stableStringify({
+    prevChainHash: prevChainHash || null,
+    revisionId: revision.revisionId,
+    revisionOrdinal: revision.revisionOrdinal,
+    artifactId: revision.artifactId,
+    outputHash: revision.outputHash || null,
+    validationStatus: revision.validationStatus,
+    reproducibilityStatus: revision.reproducibilityStatus,
+    createdAt: revision.createdAt,
+  }));
+}
+
 /**
  * 计算 checkpoint 的稳定 hash。恢复时用它与 Git / SQLite / Artifact 三方核对。
  */
@@ -681,6 +705,7 @@ module.exports = {
   KNOWN_ENTITY_TYPES,
   MAX_PERSISTED_ENTITY_IDS,
   sha256Hex,
+  computeRevisionChainHash,
   isSafeRelativePath,
   validateChangeSet,
   // BLOCK-83 D1 兼容别名（一版后移除）：

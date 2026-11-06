@@ -28,6 +28,7 @@ const {
   validateChangeSet,
   validateSelectionContext,
   validateWorkspaceCheckpoint,
+  computeRevisionChainHash,
 } = require('./result-studio-contracts');
 const { ensureResultStudioSchema } = require('./result-studio-schema');
 const {
@@ -161,19 +162,30 @@ function createResultStudioRepository(db, options = {}) {
         { revisionId: rev.revisionId, changeSetId: rev.changeSetId, projectId: rev.projectId }
       );
     }
+    // BLOCK-372（NSO Batch-1 / F-20）链哈希：取同族最大 ordinal 的 chain_hash 作 prev，
+    // 本版 chain = sha256(canonical(prev) + canonical(本版业务列))。
+    const prevRow = db.prepare(
+      'SELECT chain_hash FROM artifact_revisions WHERE artifact_family_id = ? AND revision_ordinal = ?'
+    ).get(rev.artifactFamilyId, rev.revisionOrdinal - 1);
+    const prevChainHash = prevRow ? prevRow.chain_hash : null;
+    const chainHash = computeRevisionChainHash(prevChainHash, {
+      revisionId: rev.revisionId, revisionOrdinal: rev.revisionOrdinal, artifactId: rev.artifactId,
+      outputHash: rev.outputHash, validationStatus: rev.validationStatus,
+      reproducibilityStatus: rev.reproducibilityStatus, createdAt: rev.createdAt,
+    });
     db.prepare(`INSERT INTO artifact_revisions (
         revision_id, contract_version, project_id, artifact_family_id, artifact_id,
         parent_revision_ids_json, source_commit, source_script_ref_json, input_artifact_refs_json,
         parameters_ref, parameters_hash, tool_job_id, output_path, output_hash,
         validation_status, reproducibility_status, change_set_id, revision_ordinal,
-        is_current, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`)
+        is_current, created_at, prev_chain_hash, chain_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`)
       .run(
         rev.revisionId, rev.contractVersion, rev.projectId, rev.artifactFamilyId, rev.artifactId,
         toJson(rev.parentRevisionIds), rev.sourceCommit, toJson(rev.sourceScriptRef),
         toJson(rev.inputArtifactRefs), rev.parametersRef, rev.parametersHash, rev.toolJobId,
         rev.outputPath, rev.outputHash, rev.validationStatus, rev.reproducibilityStatus,
-        rev.changeSetId, rev.revisionOrdinal, rev.createdAt
+        rev.changeSetId, rev.revisionOrdinal, rev.createdAt, prevChainHash, chainHash
       );
     return rowToRevision(
       db.prepare('SELECT * FROM artifact_revisions WHERE revision_id = ?').get(rev.revisionId)
