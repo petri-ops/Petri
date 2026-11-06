@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-06（🏁 **BLOCK-370 NSO-W3b completed**：字号 12 处收敛+content-visibility 起步+门禁清偿（03294048/11c352b4）；docs:coverage 守卫当场抓真。NSO 全程序收尾，实机腿项如实挂起。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-369 NSO-W3 completed（带例外）**：F-09/F-10/F-18+字号首例（77b02e3c/f5dc6c1a，UI-697/698）；余项移交 W3b。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **NSO W7b 终评回写 completed**：评估报告 §0.4 十一维 NSO 后评分+依据；蓝图 §2a 终态；唯一剩余 W3 待 UI-696。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-368 W6b completed**：并行挂起=调度规模形态（象限二分实证），处置=串行默认+多命令象限提速路径。G0 常态 · 不外推 packaged/Provider/GA。）
@@ -6,8 +7,6 @@
 最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：第二真相清理+runLoop 首切片（402bf045，拆前拆后 54/54）；更正 BLOCK-364 误述。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-365 NSO-W1 completed（带例外）**：在制批落地 + F-01/02/03/14/15/16 + 重试可观测（46bdd0c7 / 95c242ad / 73cdeb5e / 4ee6f4d7）；Jev output:judge 3.52 PASS。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（▶ **NSO 收尾启动（用户「行 … 统一搞完」）**：门禁债清偿 83990965（被 closeout fail-fast 遮住的 lint/code-size 两笔，教训→W7b closeout 全门出结果）；蓝图 §2a 进度+收尾顺序。G0 常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-06（🏁 **BLOCK-364 NSO-W5a completed（带例外）**：删零消费死熔断 + impact-map 测试覆盖棘轮；提交=ec39c6e3。G0 常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-06（🏁 **BLOCK-363 NSO-W6a completed（带例外）**：dev-task-runner 终止整组下发（孤儿孙进程根修），真实进程回归红→绿；提交=06a12e2b。G0 常态 · 不外推 packaged/Provider/GA。）
 
 
 
@@ -71,7 +70,6 @@
 
 | 状态 | 日期 | 事项 | 处置边界 |
 | 🟡 | 2026-11-06 | **BLOCK-365 W1 接收在制批的处置注记**：用户授权接收会话起始在制批（22M+3 新测试；用户资产与临时目录、并发写入者 UI-696 批不在授权内）。首切片流程=逐文件审读→在制批自带测试+影响面测试→lint/types→model-surface 基线重打留因（993→1083，归因 system-prompt 用户优先级条款）→显式路径提交→P6 源绑定重算（观测数据原样保留）。授权范围为「提交这批既有工作」，不改变其中任何行为 | W1 主项随后：F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 |
-| 🟡 | 2026-11-06 | **IDE MCP 写面档位接入仍 reopen（更正 BLOCK-359 W0 过度核销）**：W0 把 11-04「功能面审计 · P1 安全口径破口」整条按 BLOCK-346 关闭，实核 BLOCK-346 T5 为 **PARTIAL**——`external-request` 归类已精准修（delegate_to_petri_node→execution / generate_methods→state-write），但「IDE MCP 写面是否入同一审批轴」未决：外部 IDE 无 Petri `accessMode` 会话，硬接会造「外部 IDE 永远被拒」假门，正解需 MCP 握手期协商会话档位（协议层改造）。同一设计点阻塞 BLOCK-360 W2-5（执行边界 capability token 对外部 MCP 主体的处置） | 需用户裁决：外部 MCP 主体档位协商方案；裁决前 W2-5 不实现、不造假门 |
 | 🟡待环境 | 2026-10-20 | **本机 `bash` 解析到 WSL launcher（`C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\bash.exe`）⇒ block67/block89 fs 测试整类误红**：`bash C:\...\x.sh` 被 WSL bash 读成 `C:UsersAdmin...`（反斜杠被吃），报 `No such file or directory`；与本批改动无关，**在 HEAD 同样复现**。规避=跑 `test:changed` / `closeout` 前把 Git Bash 前置：`$env:PATH="D:\Program Files\Git\bin;"+$env:PATH`（BLOCK-219 收口即用此法，Node 744 项 0 红）。根治=修正系统 PATH 顺序或测试改为显式 Git Bash 路径 ；**同一台机器的第二个坑**：`tar` 解析到 Windows bsdtar（不支持 `--force-local`），`capability-bundles` 等 5 项因此红——收口时 PATH 须同时前置 `D:\Program Files\Git\usr\bin`（GNU tar）与 `D:\Program Files\Git\bin`（bash，两处都要，缺一仍红） | 环境；不阻塞产品判据，但**会误伤任何一次 closeout**——修复前每次收口须前置 PATH 并在笔录里写明 |
 | 🟡 | 2026-10-18 | **C-34（BLOCK-212 reopen）**：Claude 缓存断点方案成文——会话级固定工具集 + tools 末项断点 + ≥1024 才打点；验收需真实调用、风险=路由精度，**先决=G1+ 预算** | BLOCK-212 / reopen |
 | --- | --- | --- | --- |
@@ -87,6 +85,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ IDE MCP 写面档位裁决收口（用户「直接搞完剩余未做的内容」=授权工程判断）——外部 MCP 主体由 **MCP trust 语义**治理（既有独立轴，BLOCK-243），**不进** agent capability token 面（两轴分离结构契约钉住：registry 不引拦截器 / capabilityEvidence 签发点唯一在 agent 拦截器 / mcp/ 目录零出现）。协议层档位协商不再需要——外部主体无 accessMode 概念本就按 trust 轴治理（BLOCK-374 契约 3/3） | 2026-11-06 | AUDIT-LOG 🟡 销号；test/nso-b4-mcp-subject.test.mjs | IDE MCP 写面 / CLOSED |
 | ✅ AUDIT-LOG 旧票核销批 1/3：2026-11-04 功能面五条 P1/P2 🟡 逐件对 BLOCK-346 收口结论核销（goals 三工具=T2 ⋃domainModules；审批链=T1 browser_act 签发+worktree_remove R2；静默失效=T3；安全归类=T5；零消费端点=T4 接线 13 条+T6 死通道净删）——当次矩阵 P1=0/P2=0/P3=2 与机械基线互证（BLOCK-359 W0） | 2026-11-06 | 逐条按 BLOCK-346 T1-T6 交付注记核对，非按日期推定；矩阵=docs/functional-surface-matrix-2026-11-04.md | 功能面五条 / CLOSED-BY-BLOCK-346（**2026-11-06 更正**：安全口径条 IDE MCP 写面档位仍 reopen，已恢复为当前待处理 🟡） |
 | ✅ AUDIT-LOG 旧票核销批 2/3：BLOCK-83 D7 deseq2 棘轮红（FederationJobs.tsx ×2）清偿——占位示例文案改中性「对端节点已注册的工具名」，测试 3/3 绿，基线未放宽（本记 0 自然对齐）（BLOCK-359 W0） | 2026-11-06 | 裁决=改 UI 文案非重扫基线（authority=蓝图 W0 §3.2-7）；证据=acceptance/nso-2026-11-06/wave-0/baseline-adjudications.json ADJ-2 | BLOCK-83 D7 / CLOSED |
 | ✅ AUDIT-LOG 旧票核销批 3/3：loop-fixtures 兄弟仓缺失 🟡 清偿——`../petri-pack-bio` 已在位（demo counts/coldata 齐），`test/loop-fixtures.test.mjs` 73/73 绿（BLOCK-359 W0 复测） | 2026-11-06 | p4r-invariants 剩余 7 cancels 已归因 C-46（pack deseq2.R 语法错，兄弟仓未授权不改）；另抓真并修本仓 parseCsv 引号缺陷（红绿 9/9，见 wave-0/baseline-adjudications.json DEF-1） | loop-fixtures 环境 / CLOSED |

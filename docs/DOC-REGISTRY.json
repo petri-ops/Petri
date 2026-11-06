@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 503,
+    "documentCount": 504,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 486
+    "managedMarkdown": 487
   },
   "documents": [
     {
@@ -10235,8 +10235,31 @@
         "test/impact-map.json"
       ],
       "notes": "2026-11-06 启动 active（用户「安排上后续未做的所有事情，接下来集中解决」）。Batch-1 链哈希 → Batch-2 FK → Batch-3 台账 52 条 → Batch-4 外部 MCP（blocked 待裁决）。串行。"
+    },
+    {
+      "id": "BLOCK-374",
+      "capability": "block-374-nso-batch4-mcp-subject",
+      "path": "docs/block-374-nso-batch4-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-374-nso-batch4-mcp-subject",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "Batch-4",
+        "G0"
+      ],
+      "touchSurface": [
+        "test/nso-b4-mcp-subject.test.mjs",
+        "docs/AUDIT-LOG.md"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-06 completed：外部 MCP 主体=MCP trust 语义治理（不进 capability token 面，两轴分离契约 3/3）；AUDIT-LOG 🟡 销号；协议层协商裁决为不需要。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 503
+  "documentCount": 504
 }
