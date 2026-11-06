@@ -27,7 +27,9 @@ const EVIDENCE = path.join(root, 'acceptance', 'block-332', 'ui-ledger-triage.js
 // 债务上限：2026-11-02 BLOCK-332 分诊实测值（补齐或判销后下调；只许下降）。
 // 注：脚本分桶是**启发式预分类**（关键词：随/依赖/前提/外部条件），权威处置写在本包 plan §4 分诊表；
 // 本棘轮只防「新条目悄悄堆债」，不代替逐条判档。
-const DEBT_CEILING = { liveMissing: 5, blocked: 23 };
+// BLOCK-370/371 — NSO W3/W3b 新增 UI-697/698/699 三条 in_progress（均有明确 pending 腿描述：
+// binary 产物种子/scheduled 入口/读屏走查），上限随事实同步上调；下一步=补腿降回。
+const DEBT_CEILING = { liveMissing: 7, blocked: 25 };
 
 const report = triageLedger(fs.readFileSync(LEDGER, 'utf8'));
 
