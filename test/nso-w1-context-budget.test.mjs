@@ -42,7 +42,7 @@ const config = () => ({
 });
 const loopArgs = (events, callChatProvider) => ({
   toolCtx: { accessMode: 'read' }, shouldAbort: () => false, emitToolResult: () => {},
-  emitAssistant: (e) => events.push(e), emitDone: () => {}, callChatProvider, conversationState: {},
+  emitAssistant: (e) => events.push(e), emitDone: () => {}, callChatProvider,
 });
 const isCompactor = (body) => body.temperature === 0.2 && body.messages.length === 2;
 
@@ -97,22 +97,29 @@ test('W1-F15 摘要失败：不得声称「上面有摘要」，改为诚实告�
   assert.equal(failed.reason, 'empty_summary');
 });
 
-test('W1-F14 增量摘要链路：上一份摘要在后续压缩时进入摘要源（当轮真实再修剪场景）', async () => {
-  // 单元级验证增量语义：模拟「上一轮已产出摘要第1版」的场景，直接驱动
-  // 修剪循环的前置事实由 orchestrator 组装（messages[0]=摘要），断言摘要源合并。
-  const { trimMessagesToBudget } = require('../core/petri-server/helpers/message-trimmer');
-  const big = [{ role: 'system', content: SYSTEM },
-    { role: 'system', content: '（BLOCK-172 CP-5 自动压缩摘要 · 覆盖较早 30 条对话）摘要第1版：用户目标已确认。' },
-    ...Array.from({ length: 60 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: `新历史 ${i}:${FILLER}` })),
+test('W1-F14 增量摘要（行为）：已有摘要时再次压缩，摘要源合并上一份、原系统提示仍首条、摘要只一份', async () => {
+  const { runContextBudgetStep } = require('../core/petri-server/agent-tools/context-budget-step');
+  const compactorBodies = [];
+  const callChatProvider = async (_p, _k, body) => {
+    compactorBodies.push(body);
+    return { choices: [{ message: { role: 'assistant', content: '摘要第2版' }, finish_reason: 'stop' }] };
+  };
+  const messages = [{ role: 'system', content: SYSTEM },
+    { role: 'system', content: '（BLOCK-172 CP-5 自动压缩摘要 · 覆盖较早 30 条对话，原文见 llm-transcripts）\n摘要第1版：用户目标已确认。' },
+    ...Array.from({ length: 80 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: `新历史 ${i}:${FILLER}` })),
     { role: 'user', content: '继续' }];
-  const r1 = trimMessagesToBudget({ fullMessages: big, contextWindow: 24000, headroom: 20000, systemPromptTokens: 10 });
-  assert.ok(r1.stats.trimmed, '第一轮修剪发生');
-  assert.ok(r1.dropped.length > 4, '确有历史被丢');
-  // orchestrator 契约：二次压缩的摘要源必须包含上一份摘要文本（实现在 summaryBody 拼接）
-  const fs = require('node:fs');
-  const src = fs.readFileSync('/Users/zhangdiandian/Documents/1.WorkDir/Petri/core/petri-server/loop-orchestrator.js', 'utf8');
-  assert.match(src, /previousSummary \? `\$\{previousSummary\}\\n\\n=== 以上为上一份摘要/, '增量摘要源拼接在案');
-  assert.match(src, /} else if \(previousSummary\) \{[\s\S]{0,80}上一份摘要原样延续/, '未重生摘要时上一份原样延续');
+  const events = [];
+  await runContextBudgetStep({
+    messages, loopContextWindow: 24000, reqMaxTokens: 16384, toolDefinitionsTokens: 0, modelName: 'test-model',
+    callChatProvider, providerName: 'p', apiKey: 'k', userId: 'u', emit: (e) => events.push(e),
+  });
+  assert.equal(compactorBodies.length, 1, '发生一次压缩');
+  assert.match(String(compactorBodies[0].messages[1].content), /摘要第1版/, '摘要源须合并上一份摘要（增量）');
+  assert.equal(messages[0].content, SYSTEM, '原系统提示仍为首条');
+  const summaries = messages.filter((m) => /自动压缩摘要/.test(String(m.content || '')));
+  assert.equal(summaries.length, 1, '摘要替换不叠加');
+  assert.match(String(summaries[0].content), /摘要第2版/);
+  assert.equal(messages[messages.length - 1].content, '继续', '活动轮保留');
 });
 
 test('W1-F14 二次修剪不重生摘要时（被丢 <4 条），上一份摘要原样延续不丢失', async () => {

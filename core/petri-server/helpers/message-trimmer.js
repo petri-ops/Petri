@@ -179,7 +179,6 @@ function dropOrphanToolMessages(messages) {
 
 /**
  * Main export: trim messages to fit within the token budget.
- * Also returns a categories breakdown for UI display.
  *
  * @param {{
  *   fullMessages: Array,      // includes system message at index 0
@@ -203,9 +202,6 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
   const budget = contextWindow - systemPromptTokens - headroom;
   const msgs = fullMessages.slice(1);
 
-  // Compute per-category token counts BEFORE any trimming
-  const categories = computeCategories(msgs, systemPromptTokens);
-
   const currentTokens = msgs.reduce((sum, m) => sum + countMessageTokens(m), 0);
 
   // No trimming needed — within budget
@@ -219,7 +215,6 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
         messagesDropped: 0,
         pct: budget > 0 ? Math.round((currentTokens / budget) * 100) : 0,
         trimmed: false,
-        categories,
       },
     };
   }
@@ -239,7 +234,6 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
         messagesDropped: 0,
         pct: budget > 0 ? Math.round((currentTokens / budget) * 100) : 0,
         trimmed: false,
-        categories,
       },
     };
   }
@@ -277,42 +271,10 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
       messagesDropped,
       pct: budget > 0 ? Math.round((messagesTokensUsed / budget) * 100) : 0,
       trimmed: messagesDropped > 0,
-      categories,
     },
   };
 }
 
-/**
- * Compute token breakdown by category for the given messages (before trimming).
- * @param {Array} msgs - Non-system messages
- * @param {number} systemPromptTokens - System prompt token count
- * @returns {{ systemInstructions: number, messages: number, tools: number, other: number }}
- */
-function computeCategories(msgs, systemPromptTokens) {
-  let tools = 0;
-  let messages = 0;
-
-  for (const msg of msgs) {
-    const msgTokens = countMessageTokens(msg);
-    if (msg.role === 'tool') {
-      tools += msgTokens;
-    } else {
-      // user / assistant — plain conversation content
-      messages += msgTokens;
-    }
-  }
-
-  // other: whatever is left after system + messages + tools
-  // (e.g. injected summary messages, system padding)
-  const other = Math.max(0, systemPromptTokens + messages + tools - systemPromptTokens - messages - tools);
-
-  return {
-    systemInstructions: systemPromptTokens,
-    messages,
-    tools,
-    other,
-  };
-}
 
 /**
  * Lightweight version: just return token counts for a message array
@@ -320,23 +282,9 @@ function computeCategories(msgs, systemPromptTokens) {
  * @param {Array} messages
  * @returns {{ count: number, breakdown: Array<{role: string, tokens: number, age: number}> }}
  */
-function analyzeMessageTokens(messages) {
-  const msgs = messages.filter(m => m.role !== 'system');
-  const scored = scoreMessages(msgs);
-  return {
-    count: scored.reduce((sum, s) => sum + s.tokens, 0),
-    breakdown: scored.map(s => ({
-      role: s.msg.role,
-      tokens: s.tokens,
-      age: s.age,
-      tier: s.tier,
-    })),
-  };
-}
 
 module.exports = {
   trimMessagesToBudget,
-  analyzeMessageTokens,
   countMessageTokens,
   // Expose for testing
   TIER_TOOL_RESULT,

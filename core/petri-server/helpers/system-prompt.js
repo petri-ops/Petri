@@ -66,8 +66,6 @@ function invalidateStaticCache() {
 // ============================================================================
 const ERROR_I18N = {
   missing_args: '缺少必要参数',
-  missing_datasetId: '请指定数据集',
-  missing_analysisId: '请指定分析',
   missing_projectId: '请指定项目',
   missing_planId: '请指定 plan',
   missing_actionId: '请提供 pack UI action id',
@@ -79,28 +77,17 @@ const ERROR_I18N = {
   project_not_found: '找不到这个项目',
   plan_not_found: '找不到这个 plan',
   parent_not_found: '父分析不存在',
-  parent_not_ready: '父分析还没完成，需要等它跑完',
-  parent_failed: '父分析失败了，无法继续基于它做分析',
   task_submit_failed: '提交任务失败，请稍后重试',
   agent_paused: '自动操作已暂停，请在助手设置中恢复。',
   rate_limited: '操作太频繁了（1 分钟最多 5 次），请稍候',
-  quota_exceeded: '月度分析次数已达上限',
-  too_many_inflight: '同一数据集上同类分析并发太多，请等其他任务完成',
   unknown_act: '不支持的操作类型',
   unknown_op: '不支持的 plan 操作',
-  unknown_resource: '不支持的资源类型',
-  invalid_tab: '不存在的 tab',
   invalid_status: '不允许的状态',
   invalid_category: '不支持的事实分类',
   exec_failed: '执行失败',
-  code_too_long: '代码超过 30K 字符上限',
   nothing_to_update: '没有可更新的字段',
-  need_2_datasets: '至少需要 2 个数据集才能合并',
-  fact_required: '内容不能为空',
   unauthorized: '未授权访问',
   guest_no_account: '未登录访客没有个人项目或分析数据',
-  fetch_failed: '请求失败',
-  fetch_timeout: '请求超时',
 };
 
 // ============================================================================
@@ -253,12 +240,6 @@ const WORKING_TREE_REJECT_BLOCK_TAG = '=== 工作树 hunk 拒绝记录 (WORKING_
 const WORKING_TREE_REJECT_LIMIT = 10;
 const WORKING_TREE_REJECT_TEXT_LINE_LIMIT = 80;
 const WORKING_TREE_REJECT_TOTAL_CHAR_BUDGET = 4096;
-
-function _loadWorkingTreeRejectEntries() {
-  // 故意不引 electron /app.getPath 在 helpers 中（保持 pure helper 可测）；
-  // 调用方在主进程 buildSystemPrompt 注入 entries。
-  return null;
-}
 
 /**
  * BLOCK-125：拒绝清单根目录解析——PETRI_LOCAL_DATA_DIR（全拓扑共享：主实例/测试实例/

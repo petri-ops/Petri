@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 497,
+    "documentCount": 498,
     "lastUpdated": "2026-11-06",
-    "managedMarkdown": 480
+    "managedMarkdown": 481
   },
   "documents": [
     {
@@ -10053,8 +10053,41 @@
         "acceptance/block-92/size-baseline.json"
       ],
       "notes": "2026-11-06 启动 active（用户「行 … 把剩下没做的统一搞完」= 授权接收会话起始在制批）。首切片：在制批审读+测试+显式提交+model-surface 重打+P6 源绑定重算（兑现 W0 出口）；主项 F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 + 重试可观测。 | 2026-11-06 completed（带例外）：在制批落地 46bdd0c7 + F-01 95c242ad + F-02/15/14/16 73cdeb5e + F-03/重试可观测 4ee6f4d7；例外=task.failed 前端投影/真实 provider 长任务/P6 重算待 UI-696/token 账本收编（W5b）。"
+    },
+    {
+      "id": "BLOCK-366",
+      "capability": "block-366-nso-w5b-second-truth-cleanup",
+      "path": "docs/block-366-nso-w5b-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-366-nso-w5b-second-truth-cleanup",
+      "entrypoint": "docs/README.md",
+      "registeredAt": "2026-11-06",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "nso-2026-11-06",
+        "W5",
+        "P1",
+        "G0"
+      ],
+      "touchSurface": [
+        "acceptance/nso-2026-11-06/wave-5b/**",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/helpers/message-trimmer.js",
+        "core/shared-backend/llm-providers/provider-reliability.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-tools/context-budget-step.js",
+        "test/nso-w5b-*.test.mjs",
+        "test/knip-baseline.json"
+      ],
+      "sharedBaselines": [
+        "test/knip-baseline.json",
+        "test/impact-map.json"
+      ],
+      "notes": "2026-11-06 启动 active（W1 收口后串行）。第二真相清理（ERROR_I18N 13 个零生产者码 / 零调用恒 null 桩 / 重试分类双源 / token 账本死口径）+ runLoop 首个拆分切片（上下文预算步骤外提，行为基线拆前拆后同套绿）。"
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 497
+  "documentCount": 498
 }
