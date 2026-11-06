@@ -27,6 +27,28 @@ function loadDatabaseConstructor() {
 
 const Database = loadDatabaseConstructor();
 
+/**
+ * BLOCK-360（NSO-W2-4）连接策略单源（core/shared-backend/db-connection-policy.js）。
+ * 本文件既被主进程 require，也作为 ELECTRON_RUN_AS_NODE 迁移子进程独立运行（无 electron），
+ * 故不经 resolveCore：开发态相对路径命中仓库 core/；打包态回落 Resources/core（双态兜底）。
+ * R5 只禁 src→core/petri-server/**，src→core/shared-backend/** 属合法共享层。
+ */
+function requireDbConnectionPolicy() {
+  const candidates = [path.join(__dirname, '..', 'core', 'shared-backend', 'db-connection-policy.js')];
+  if (process.resourcesPath) {
+    candidates.push(path.join(process.resourcesPath, 'core', 'shared-backend', 'db-connection-policy.js'));
+  }
+  for (const candidate of candidates) {
+    try {
+      return require(candidate);
+    } catch (error) {
+      if (!error || error.code !== 'MODULE_NOT_FOUND') throw error;
+    }
+  }
+  throw new Error(`db-connection-policy unavailable: ${candidates.join(' | ')}`);
+}
+const { applyCanonicalPragmas, orderMigrationFiles } = requireDbConnectionPolicy();
+
 const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
   version INTEGER PRIMARY KEY,
   applied_at TEXT DEFAULT (datetime('now'))
@@ -36,7 +58,7 @@ const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
  * 查询已应用的最新 migration 版本。空库返回 0。
  */
 function getAppliedVersion(dbPath) {
-  const db = new Database(dbPath);
+  const db = applyCanonicalPragmas(new Database(dbPath));
   try {
     db.exec(SCHEMA_TABLE_SQL);
     const row = db.prepare('SELECT MAX(version) AS v FROM schema_migrations').get();
@@ -53,28 +75,26 @@ function getAppliedVersion(dbPath) {
  * @returns {Promise<number>} 应用后的最新版本号
  */
 async function runMigrations(dbPath, migrationsDir) {
-  const db = new Database(dbPath);
+  const db = applyCanonicalPragmas(new Database(dbPath));
   try {
     db.exec(SCHEMA_TABLE_SQL);
     const row = db.prepare('SELECT MAX(version) AS v FROM schema_migrations').get();
     const applied = row?.v ?? 0;
 
-    // 列出所有 migration 文件，按版本号排序
-    let files = [];
+    // BLOCK-360 — 数值定序 + 重号/非法名 fail-fast（先于任何应用）。此前字典序 + parseInt：
+    // 重号时第二个文件 ver<=applied 被永久静默跳过，非法名静默忽略。
+    let entries;
     try {
-      files = fs
-        .readdirSync(migrationsDir)
-        .filter((f) => f.endsWith('.sql'))
-        .sort();
+      entries = fs.readdirSync(migrationsDir);
     } catch {
       // 目录不存在 → 无 migration，返回当前版本
       return applied;
     }
+    const ordered = orderMigrationFiles(entries);
 
     let lastVersion = applied;
-    for (const f of files) {
-      const ver = parseInt(f.split('_')[0], 10);
-      if (isNaN(ver) || ver <= applied) continue;
+    for (const { file: f, version: ver } of ordered) {
+      if (ver <= applied) continue;
 
       const sql = fs.readFileSync(path.join(migrationsDir, f), 'utf8');
       // 单个 migration 用事务包裹

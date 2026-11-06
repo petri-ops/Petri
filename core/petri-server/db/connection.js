@@ -8,22 +8,16 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const DB_PATH = process.env.PETRI_DB_PATH || path.join(__dirname, '..', 'petri.db');
+// BLOCK-360（NSO-W2-4）路径 precedence 与基础 pragma 单源（与桌面 _db-singleton /
+// migration-runner 同一实现）：PETRI_DB_PATH > PETRI_LOCAL_DATA_DIR/petri.db > 包内旧默认。
+// 基础集合=WAL + busy_timeout 10s（"admin panel frozen" 根因：高频写占 WAL writer 时读立刻
+// SQLITE_BUSY）+ mmap 64MB（CK-05 实测大扫描 −8.5%/点查 −15%）+ wal_autocheckpoint 1000。
+// foreign_keys 后端侧维持现值（未开启）——与桌面侧 ON 的历史分歧另行裁决，见策略模块头注。
+const { resolveDbPath, applyCanonicalPragmas } = require('../../shared-backend/db-connection-policy');
+const DB_PATH = resolveDbPath(process.env) || path.join(__dirname, '..', 'petri.db');
 const db = new Database(DB_PATH);
-
-// Enable WAL mode for better concurrent read performance
-db.pragma('journal_mode = WAL');
-// busy_timeout: if writer holds lock, wait up to 10s instead of immediately returning SQLITE_BUSY.
-// This is the #1 cause of "admin panel frozen" — a high-frequency write (page_view / heartbeat)
-// holding the WAL writer while an admin API read tries to acquire a shared lock.
-db.pragma('busy_timeout = 10000');
-// CK-05（C-05）— mmap 64MB：只读页映射进内存，大扫描 −8.5%/点查 −15%（实测
-// acceptance 数据，两轮稳定）；零风险 per-connection pragma，WAL 兼容。
-db.pragma('mmap_size = 67108864');
-// WAL auto-checkpoint: checkpoint every 1000 pages to keep WAL file from growing unbounded.
-// Default is 1000 pages (~4MB for 4KB pages) which is reasonable. Also run a manual
-// checkpoint on startup to close any stale WAL from a previous unclean shutdown.
-db.pragma('wal_autocheckpoint = 1000');
+applyCanonicalPragmas(db, { busyTimeoutMs: 10000 });
+// Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {
   db.pragma('wal_checkpoint(TRUNCATE)');
 } catch {}

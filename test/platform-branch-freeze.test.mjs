@@ -140,6 +140,9 @@ const BASELINE = new Set([
   'test/agent-workspace-exec-cwd-shell.test.mjs',
   'test/agent-workspace-exec-streaming.test.mjs',
   'test/agent-workspace-exec-yield.test.mjs',
+  // BLOCK-360（NSO-W2-3）exec 令牌契约：POSIX shell 语义（printenv / rm -f / `;` 串联）在
+  // Windows 下 skip——与上方 agent-workspace-exec-* 族同理由，收敛到 platform-compat 无收益，登记留痕。
+  'test/nso-w2-exec-token.test.mjs',
   'test/block34-background-processes-route.test.mjs',
   'test/block48-computer-tools.test.mjs',
   'test/block63-computer-host.test.mjs',

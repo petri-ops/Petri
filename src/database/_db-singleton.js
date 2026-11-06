@@ -42,10 +42,11 @@
  *   imported them keep working without changes.
  */
 
-const path = require('path');
 const { loadDatabaseConstructor } = require('../migration-runner');
 const { resolveCore } = require('../main/core-utils');
 const { getBusyTimeout } = require(resolveCore('shared-backend/config-helper'));
+// BLOCK-360（NSO-W2-4）路径 precedence 与基础 pragma 单源（与核心 connection.js / migration-runner 同一实现）
+const { resolveDbPath, applyCanonicalPragmas } = require(resolveCore('shared-backend/db-connection-policy'));
 
 const VALID_ROLES = new Set(['branch', 'result']);
 const _connections = new Map(); // resolved file path → better-sqlite3 Database
@@ -54,14 +55,16 @@ function _getDbPath(role) {
   if (!VALID_ROLES.has(role)) {
     throw new Error(`Unknown db role: ${role}; expected one of ${[...VALID_ROLES].join(', ')}`);
   }
-  const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
-  if (!dataDir) {
+  // Legacy single-file layout: branch-db.js + result-db.js both opened
+  // `petri.db` under PETRI_LOCAL_DATA_DIR — resolveDbPath keeps that exact
+  // filename (PR-012 dedup is per-process, not per-file). BLOCK-360: the
+  // precedence (PETRI_DB_PATH first) is now shared with the backend so the
+  // two processes can never open different files under divergent env.
+  const resolved = resolveDbPath(process.env);
+  if (!resolved) {
     throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');
   }
-  // Legacy single-file layout: branch-db.js + result-db.js both opened
-  // `petri.db`. Keep that exact filename so the singleton never silently
-  // moves an existing user's data (PR-012 dedup is per-process, not per-file).
-  return path.join(dataDir, 'petri.db');
+  return resolved;
 }
 
 /**
@@ -81,8 +84,7 @@ function openDb(role) {
   // Setting busy_timeout on every open guarantees that even when called
   // before any petri-server child process is spawned, the desktop handle is
   // already consistent with petri-server's policy.
-  db.pragma(`journal_mode = WAL`);
-  db.pragma(`busy_timeout = ${getBusyTimeout()}`);
+  applyCanonicalPragmas(db, { busyTimeoutMs: getBusyTimeout() });
   // foreign_keys=ON matches shared-backend/db.js behavior and prevents
   // accidental ON DELETE CASCADE surprises across the two db modules.
   db.pragma(`foreign_keys = ON`);
@@ -108,8 +110,12 @@ function closeDb(role) {
 }
 
 /** Close every cached connection. Safe to call repeatedly. */
-function closeAll() {
+function closeAll({ checkpoint = false } = {}) {
   for (const [dbPath, db] of _connections) {
+    // BLOCK-360 — 退出路径收敛 WAL（will-quit 调用 checkpoint:true）；失败不阻断关闭
+    if (checkpoint) {
+      try { db.pragma('wal_checkpoint(TRUNCATE)'); } catch { /* best-effort */ }
+    }
     try {
       db.close();
     } catch {

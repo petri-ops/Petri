@@ -849,6 +849,16 @@ app.on("before-quit", () => {
   rServerSupervisor.shutdown("app-quit");
 });
 
+// BLOCK-360（NSO-W2-4）桌面侧 SQLite 连接退出收敛：此前 closeAll 零生产调用点，WAL 不收敛。
+// will-quit 晚于 before-quit 的后端关停；checkpoint 失败不阻断退出。
+app.on("will-quit", () => {
+  try {
+    require("./database/_db-singleton").closeAll({ checkpoint: true });
+  } catch (error) {
+    console.warn("[desktop] closing desktop db connections failed:", error?.message || error);
+  }
+});
+
 // setupAppMenu moved to src/main/_app-menu.js (SUB-15.1 PHASE 2)
 
 // Initialize application menu
