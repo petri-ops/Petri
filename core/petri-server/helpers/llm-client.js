@@ -79,6 +79,12 @@ function callChatProvider(providerName, apiKey, body, telemetry, onEvent, option
     // 自动重试一次救回「一次上游抽风毁掉整轮」；idle 段 stall 已有部分输出，
     // 重放会重复内容 → 不重试，原样返回由上层如实报。第二次仍 stall 直接返回。
     if (result && result.error === 'stream_stalled' && result.phase === 'first_token') {
+      // BLOCK-365（W1）重试可观测：不把重试当错误，也不把重试藏起来。
+      if (typeof onEvent === 'function') {
+        try {
+          onEvent({ type: 'provider_retry', reason: 'stream_stalled_first_token', elapsedMs: result.elapsedMs || null, attempt: 2 });
+        } catch { /* 观测回调失败不影响重试 */ }
+      }
       return invoke();
     }
     return result;

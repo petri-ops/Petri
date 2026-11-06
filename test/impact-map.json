@@ -54,7 +54,8 @@
       "tests": [
         "test/block338-stream-stall-watchdog.test.mjs",
         "test/model-gateway.test.mjs",
-        "test/block324-reason-taxonomy.test.mjs"
+        "test/block324-reason-taxonomy.test.mjs",
+        "test/nso-w1-retry-observable.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -1334,7 +1335,10 @@
         "test/tools-executor-job-context.test.mjs",
         "test/artifact-truth.test.mjs",
         "test/project-sandbox-compat.test.mjs",
-        "test/project-sandbox-artifacts.test.mjs"
+        "test/project-sandbox-artifacts.test.mjs",
+        "test/nso-w1-context-budget.test.mjs",
+        "test/nso-w1-fallback-classification.test.mjs",
+        "test/nso-w1-compaction-mode.test.mjs"
       ],
       "classifiesScripts": false
     },

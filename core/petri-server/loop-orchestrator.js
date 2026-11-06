@@ -1026,6 +1026,17 @@ ${compactSummaryText}`,
               });
               return;
             }
+            // BLOCK-365（W1）重试可观测：首 token 停滞自动重试投影为 agent_status（带原因码）
+            if (event && event.type === 'provider_retry') {
+              _emit({
+                event: 'agent_status',
+                phase: 'provider_retry',
+                reasonCode: event.reason || 'provider_retry',
+                attempt: event.attempt || null,
+                message: '模型首 token 长时间无响应，已自动重试本次调用',
+              });
+              return;
+            }
             if (event.type === 'content_delta' && event.content && !aborted()) {
               streamedText += event.content;
               if (!resultEditCompletionGuard.required) {

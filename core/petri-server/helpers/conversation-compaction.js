@@ -168,13 +168,29 @@ async function compactConversationNow({ userId, conversationId, sqlite, telemetr
  * 自动触发检查（后台执行，不阻塞请求路径）：
  * 历史超阈值且无未覆盖增量（rowid > covers_rowid 的未压缩消息 token 超过增量阈值）时重新压缩。
  */
+/**
+ * BLOCK-365（NSO-W1 F-03）compaction 模式单源。旧形态 `resilienceOn = !b2 && …` 让 B2 开关屏蔽
+ * resilience（默认两开 → resilience 阈值公式与 9 章节摘要永不可达）。决策表：
+ *   resilience 开 → 'resilience'（窗口公式阈值 + 9 章节摘要）；仅 B2 开 → 'legacy'（12K）；双关 → 'disabled'。
+ * @param {object} env
+ * @param {(key: string) => boolean} [isFlagOn] 注入（测试）；默认读 feature-flags 解析链
+ */
+function resolveCompactionMode(env = process.env, isFlagOn = null) {
+  const flag = isFlagOn || ((key) => (key === 'session_compaction'
+    ? isSessionCompactionEnabled(env)
+    : require('./agent-resilience').isResilienceEnabled(env)));
+  if (flag('agent_resilience')) {
+    return { mode: 'resilience', thresholdResolver: (window, maxOutput) => require('./agent-resilience').planThreshold(window, maxOutput) };
+  }
+  if (flag('session_compaction')) return { mode: 'legacy', thresholdResolver: null };
+  return { mode: 'disabled', thresholdResolver: null };
+}
+
 function maybeCompactInBackground({ userId, conversationId, sqlite, presetId, maxOutput }) {
-  // BLOCK-98 M2 — 门控升级：B2 开关或 resilience 总开关任一开启即进入；
-  // resilience 模式阈值由公式（preset 窗口真值）给出，B2 模式维持 12K legacy。
-  const b2 = isSessionCompactionEnabled(process.env);
+  const compactionMode = resolveCompactionMode(process.env);
+  if (compactionMode.mode === 'disabled') return;
   const resilience = require('./agent-resilience');
-  const resilienceOn = !b2 && resilience.isResilienceEnabled(process.env);
-  if (!b2 && !resilienceOn) return;
+  const resilienceOn = compactionMode.mode === 'resilience';
   try {
     let threshold;
     if (resilienceOn) {
@@ -213,6 +229,7 @@ function maybeCompactInBackground({ userId, conversationId, sqlite, presetId, ma
 
 module.exports = {
   COMPACTION_ENV,
+  resolveCompactionMode,
   COMPACTION_TRIGGER_TOKENS,
   MIN_MESSAGES,
   KEEP_RECENT,
