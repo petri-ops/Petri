@@ -140,6 +140,16 @@ function pickWithinBudget(scored, budget) {
     .sort((a, b) => a.age - b.age)
     .forEach(take);
 
+  // BLOCK-365（W1-F15）当前活动轮兜底：最后一条 user/assistant 无论如何保留——
+  // 丢了它模型就失去本轮任务本身。
+  const lastTurn = [...units]
+    .filter(u => u.items.some(it => it.msg.role === 'user' || it.msg.role === 'assistant'))
+    .sort((a, b) => a.age - b.age)[0];
+  if (lastTurn && !keptUnits.includes(lastTurn)) {
+    keptUnits.push(lastTurn);
+    used += lastTurn.tokens;
+  }
+
   // 展开回 scored 项，保持原始顺序（按 idx，不按 age）
   const kept = keptUnits
     .flatMap(u => u.items)
@@ -241,16 +251,14 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
   const retainedScored = kept.filter((s) => retainedSet.has(s.msg));
   const result = [systemMsg, ...retainedMsgs];
 
-  // Inject summary note if many historical messages were dropped
+  // BLOCK-365（W1-F15）真实被丢集合 + 不注入不实摘要声明。
+  // 旧形态无条件写「上面"对话历史摘要"块中包含其要点」——上层摘要失败时这是对模型的不实
+  // 声明（BLOCK-355 评审同源教训：断言锚内容会变成自我欺骗）。诚实声明由上层按摘要是否
+  // 真实生成注入；trimmer 只报告事实。
   const droppedHistorical = scored.filter(
     s => !retainedSet.has(s.msg) && s.tier === TIER_HISTORICAL
   );
-  if (droppedHistorical.length > SUMMARY_TRIGGER_DROP) {
-    result.push({
-      role: 'system',
-      content: `\n\n[注意: 早期 ${droppedHistorical.length} 条消息因超出上下文窗口已压缩。上面"对话历史摘要"块中包含其要点。继续对话时如需引用早期信息，请明确告知用户。]`,
-    });
-  }
+  const dropped = msgs.filter(m => !retainedSet.has(m));
 
   const messagesKept = retainedScored.length;
   const messagesDropped = msgs.length - messagesKept;
@@ -258,6 +266,10 @@ function trimMessagesToBudget({ fullMessages, contextWindow = 64000, headroom = 
 
   return {
     messages: result,
+    // BLOCK-365（W1-F15）真实被丢集合（原始对象引用，供上层做增量摘要源）
+    dropped,
+    droppedHistoricalCount: droppedHistorical.length,
+    summaryEligible: droppedHistorical.length > SUMMARY_TRIGGER_DROP,
     stats: {
       contextWindow,
       messagesTokensUsed,

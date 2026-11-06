@@ -31,7 +31,10 @@ const DEGRADABLE_PATTERNS = [
   },
 ];
 
-const NON_DEGRADABLE_RE = /invalid request|invalid_request|bad request|unauthorized|\b401\b|forbidden|\b403\b|no_api_key|api key|provider_not_registered|model_profile_not_found|provider_method_missing|aborted|cancelled|serialize_error|未登录|无权/i;
+// BLOCK-365（W1-F16）两档：硬不可降级（取消/鉴权/配置）最先判；软不可降级（通用参数错误）
+// 在可降级特征之后判——InvalidRequest 包裹的上下文超限（OpenAI 风格 400）仍可降级。
+const HARD_NON_DEGRADABLE_RE = /unauthorized|\b401\b|forbidden|\b403\b|no_api_key|api key|provider_not_registered|model_profile_not_found|provider_method_missing|aborted|cancelled|serialize_error|未登录|无权/i;
+const SOFT_NON_DEGRADABLE_RE = /invalid request|invalid_request|bad request/i;
 
 /**
  * 分类一次 provider 失败是否可降级。
@@ -41,12 +44,16 @@ const NON_DEGRADABLE_RE = /invalid request|invalid_request|bad request|unauthori
 function classifyDegradableError(errorText) {
   const message = String((errorText && errorText.message) || errorText || '').trim();
   if (!message) return { degradable: false, category: null };
-  // 超限/配额/服务端的特征词优先判定——InvalidRequest 包裹的 context length
-  // （OpenAI 风格 400）仍属于可降级超限，所以先查可降级再查不可降级。
+  // BLOCK-365（W1-F16）硬不可降级**最先**判定（评估 F-16）：此前先查可降级特征，复合错误
+  // 「cancelled: timeout」（用户取消后的超时文案）命中 server.timeout、「401 api_error」命中
+  // api_error → 被误判可降级：前者在用户取消后自动续跑（违背用户意图），后者用换模型掩盖
+  // 鉴权错误。取消/鉴权/配置类先拦下；InvalidRequest 包裹的上下文超限不受影响（不含硬词）。
+  if (HARD_NON_DEGRADABLE_RE.test(message)) return { degradable: false, category: null };
   for (const { category, re } of DEGRADABLE_PATTERNS) {
     if (re.test(message)) return { degradable: true, category };
   }
-  if (NON_DEGRADABLE_RE.test(message)) return { degradable: false, category: null };
+  // 通用参数错误（软不可降级）与其余未识别错误一样不降级——换模型没用，诚实暴露。
+  if (SOFT_NON_DEGRADABLE_RE.test(message)) return { degradable: false, category: null };
   return { degradable: false, category: null };
 }
 

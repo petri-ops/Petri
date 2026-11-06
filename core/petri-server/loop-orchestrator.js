@@ -219,7 +219,10 @@ async function runLoop({
   // BLOCK-51 P2 — 上下文熔断：agent-runner 已把 safeCtx（>0）放入 config.contextWindow；
   // 这里做兜底归一（0/undefined → 64000），与 agent-runner 的 token_budget 口径一致。
   const loopContextWindow = (typeof contextWindow === 'number' && contextWindow > 0) ? contextWindow : 64000;
-  let contextBudgetTrimmed = false;
+  // BLOCK-365（W1-F02）一次性 latch → 每轮重估 + 滞回防抖：修剪后须真实增长重新越过
+  // 修剪后水位（滞回锚）才允许再修剪，防止贴线反复抖动。
+  let contextBudgetTrims = 0;
+  let contextBudgetHysteresisUntil = 0;
   // BLOCK-155 — vision 内联读图：与 read_image 工具同一条 resolveWorkspaceImagePath
   // 解析链（本地/SSH 双变体 + 4MB/白名单守卫）；data URL 按 attachment 相对路径
   // 记忆化，多轮迭代不重复读盘（fail-soft：任何失败返回 null，跳过该图）。
@@ -761,10 +764,13 @@ async function runLoop({
         } catch { /* fail-open：成本观测面故障不熔断任务 */ }
       }
 
+      let summaryFailure = null;
+      // W1-F02 — 滞回锚：记录最近一次估算总量，供下一轮判断是否再修剪。
+      let est_last = null;
       // BLOCK-51 P2 — 上下文熔断：每轮请求构造前预算检查，超过 ctxWindow*0.85 时
       // 用既有 trimMessagesToBudget 一次性修剪（保近期+工具结果/压缩历史/摘要提示）。
       // system prompt 不参与 trim（trimmer 语义本就如此）；就地替换内容保持数组引用稳定。
-      if (!contextBudgetTrimmed) {
+      {
         try {
           const hasSystem = messages.length > 0 && messages[0].role === 'system';
           const est = estimateRequestTokens({
@@ -783,6 +789,7 @@ async function runLoop({
           // 文本系统性高估；EWMA 自愈见 helpers/model-token-ratios.js）
           const { calibratedEstimate } = require('./helpers/model-token-ratios');
           const calibratedTotal = calibratedEstimate(breakdown.total, modelName);
+          est_last = { calibratedTotal };
           // BLOCK-172 CP-7 — 每轮发放 token_budget（trimmed=false）：预算环全程
           // 实数（原形态=仅 0.85 危机时发一次，UI 恒占位 `—`）。事件面 additive，
           // 既有消费方（agentTaskStream→petriEvents.tokenBudget→ContextBudgetBar）
@@ -798,29 +805,51 @@ async function runLoop({
             trimmed: false,
             messagesDropped: 0,
           });
-          if (calibratedTotal > loopContextWindow * 0.85) {
+          // W1-F02 — 每轮重估（latch 已移除）。修剪目标=把总量压到触发线以下并预留本输出：
+          // budget = 0.75×ctx − system − toolDefs − maxTokens（0.75 留出滞回带）。
+          // 修剪目标：消息预算 = 0.75×ctx − system − 工具定义 − 本轮输出上限（0.75 留滞回带，
+          // 修剪后总量低于 0.85 触发线）；trimmer 语义 budget = ctx − sys − headroom，故换算 headroom。
+          // 活动轮由 trimmer 兜底保留（预算再紧也不丢本轮任务）。
+          const messagesBudget = Math.max(512, Math.floor(loopContextWindow * 0.75)
+            - Math.ceil(est.systemPromptTokens) - Math.ceil(toolDefinitionsTokens) - reqMaxTokens);
+          const trimTargetBudget = loopContextWindow - Math.ceil(est.systemPromptTokens) - messagesBudget;
+          const shouldTrimNow = calibratedTotal > loopContextWindow * 0.85
+            && (contextBudgetTrims === 0 || calibratedTotal > contextBudgetHysteresisUntil);
+          if (shouldTrimNow) {
             const result = trimMessagesToBudget({
               fullMessages: messages,
               contextWindow: loopContextWindow,
-              headroom: reqMaxTokens, // 与 reqBody.max_tokens 一致，预算 = ctx - system - headroom
+              headroom: trimTargetBudget,
               systemPromptTokens: est.systemPromptTokens,
             });
             if (result.stats && result.stats.trimmed) {
-              contextBudgetTrimmed = true;
+              contextBudgetTrims += 1;
               const trimmed = result.messages;
+              // W1-F14/F15 — 上一份摘要与位置：二次压缩做增量摘要，原系统提示恒为首条不被挤出。
+              let previousSummary = null;
+              if (messages[0] && messages[0].role === 'system' && /自动压缩摘要/.test(String(messages[0].content || ''))) {
+                previousSummary = messages[0].content;
+              } else {
+                const idx = messages.findIndex((m) => m.role === 'system' && /自动压缩摘要/.test(String(m.content || '')));
+                if (idx > 0) previousSummary = messages[idx].content;
+              }
               // BLOCK-172 CP-5 — 摘要式 auto-compact：丢弃前对将丢头部生成摘要
               // （走既有 chat 通道→io-transcript 天然留证=可审计压缩），注入摘要
               // 系统消息到保留下文头部。fail-open：摘要失败/无渠道→回退纯丢弃
               // （既有行为），不阻塞任务。dropped 太少（<4 条）不值得一跳模型调用。
               const droppedCount = messages.length - trimmed.length;
+              // W1-F15 — trimmer 返回真实被丢集合（旧形态 slice(0, droppedCount) 前缀≠真实被丢集）
+              const droppedReal = Array.isArray(result.dropped) ? result.dropped : messages.slice(0, droppedCount);
               let compactSummaryText = null;
               if (droppedCount >= 4) {
                 try {
-                  const droppedForSummary = messages
-                    .slice(0, droppedCount)
+                  // W1-F14 — 增量摘要：摘要源携带上一份摘要（二次压缩不丢既有结论）
+                  const droppedForSummary = droppedReal
                     .slice(-24) // 摘要源窗口：最近 24 条将丢消息（更早的仪式性内容价值低）
                     .map((m) => `${m.role === 'user' ? '用户' : m.role === 'assistant' ? 'AI' : m.role}: ${String(m.content || '').slice(0, 400)}`);
-                  const summaryBody = droppedForSummary.join('\n\n').slice(-24000);
+                  const summaryBody = (previousSummary ? `${previousSummary}\n\n=== 以上为上一份摘要，合并下方新移除内容 ===\n\n` : '')
+                    + droppedForSummary.join('\n\n');
+                  const summaryInput = summaryBody.slice(-24000);
                   const summaryJson = await callProviderWithNetworkRetry(() =>
                     callChatProvider(
                       providerName,
@@ -829,7 +858,7 @@ async function runLoop({
                         ...(modelName ? { model: modelName } : {}),
                         messages: [
                           { role: 'system', content: '你是会话压缩器。把给定的较早对话压缩为一份事实性摘要：保留用户目标、已完成的步骤与工具、关键结论与数字、未完成事项。不新增臆测。直接输出摘要正文。' },
-                          { role: 'user', content: summaryBody },
+                          { role: 'user', content: summaryInput },
                         ],
                         temperature: 0.2,
                         max_tokens: 1200,
@@ -842,18 +871,41 @@ async function runLoop({
                     ? summaryChoice.message.content.trim()
                     : null;
                 } catch (e) {
+                  compactSummaryText = null;
+                  summaryFailure = `summary_call_failed: ${e && e.message}`;
                   console.log('[cp5-compact-summary] fail-open to plain trim:', e && e.message);
                 }
               }
+              if (droppedCount >= 4 && !compactSummaryText) {
+                // W1-F14/F15 — 摘要缺席必须可见且不撒谎：事件 + 诚实告知（旧形态无条件
+                // 声称「上面有摘要」，摘要失败时是对模型的不实声明）。
+                summaryFailure = summaryFailure || 'empty_summary';
+                _emit({ event: 'compaction_failed', reason: summaryFailure, dropped: droppedCount, at: new Date().toISOString() });
+              }
+              const priorSystem = messages.length > 0 && messages[0].role === 'system' && !/自动压缩摘要/.test(String(messages[0].content || ''))
+                ? messages[0] : null;
               messages.length = 0;
+              if (priorSystem) messages.push(priorSystem);
               if (compactSummaryText) {
                 messages.push({
                   role: 'system',
                   content: `（BLOCK-172 CP-5 自动压缩摘要 · 覆盖较早 ${droppedCount} 条对话，原文见 llm-transcripts）
 ${compactSummaryText}`,
                 });
+              } else if (previousSummary) {
+                // W1-F14 — 本次未重生摘要（被丢 <4 条或摘要失败）时，上一份摘要原样延续，绝不丢失既有结论
+                messages.push({ role: 'system', content: previousSummary });
               }
-              for (const m of trimmed) messages.push(m);
+              if (!compactSummaryText && droppedCount > 0) {
+                // 诚实告知：早期内容已移除且本次未能生成摘要
+                messages.push({
+                  role: 'system',
+                  content: `（上下文修剪：较早 ${droppedCount} 条对话已移除${summaryFailure ? '，且本次未能生成摘要（' + summaryFailure + '）' : ''}。如需引用早期信息，请向用户确认。）`,
+                });
+              }
+              for (const m of trimmed) {
+                if (m !== priorSystem && !(m.role === 'system' && /自动压缩摘要/.test(String(m.content || '')))) messages.push(m);
+              }
               const trimmedHasSystem = messages.length > 0 && messages[0].role === 'system';
               const trimmedBreakdown = computeContextBreakdown({
                 systemPrompt: trimmedHasSystem ? (messages[0].content || '') : '',
@@ -872,6 +924,9 @@ ${compactSummaryText}`,
                 trimmed: true,
                 messagesDropped: result.stats.messagesDropped,
               });
+              // W1-F02 — 滞回锚=修剪后校准总量：仅当再次增长越过它（仍高于触发线）才再修剪。
+              est_last = { calibratedTotal: calibratedEstimate(trimmedBreakdown.total, modelName) };
+              contextBudgetHysteresisUntil = est_last.calibratedTotal;
               _emit({
                 event: 'context_compacted',
                 dropped: droppedCount,
