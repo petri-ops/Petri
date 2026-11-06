@@ -168,7 +168,14 @@
       "module": "P-01",
       "lines": 777,
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
+    },
+    {
+      "path": "core/petri-server/loop-orchestrator.js",
+      "wave": "C",
+      "module": "P-03",
+      "lines": 1571,
+      "sha256": "1d3a0a439be23334727eb1cc0a89d80aa40cba0732efdab78b5547b2e4447aee"
     }
   ],
-  "total": 23407
+  "total": 24978
 }
