@@ -1167,7 +1167,8 @@
         "test/provider-streaming.test.mjs",
         "test/anthropic-provider.test.mjs",
         "test/harness-provider-eval.test.mjs",
-        "test/agent-provider-boundary.test.mjs"
+        "test/agent-provider-boundary.test.mjs",
+        "test/nso-w1-stream-retry-full-chain.test.mjs"
       ],
       "classifiesScripts": false
     },

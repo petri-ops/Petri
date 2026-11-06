@@ -71,6 +71,8 @@ function callChatProvider(providerName, apiKey, body, telemetry, onEvent, option
     disableFallback: !!(options && options.disableFallback),
     // BLOCK-81 P1 — 思考档位（中性档位随调用链进网关，映射与容错都在网关侧）
     thinkingLevel: options && options.thinkingLevel,
+    // BLOCK-365（F-01）流中断穿透到上层整轮重试（此前在此丢参，生产链路零重试）
+    errorsAsRejections: !!(options && options.errorsAsRejections),
   });
   return invoke().then((result) => {
     // BLOCK-338 P2 — 首 token 段 stall 是零输出的瞬态（上游在发心跳但没吐 token），

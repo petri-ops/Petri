@@ -217,7 +217,7 @@ class ModelGateway {
     return event;
   }
 
-  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen, disableFallback, thinkingLevel, __dropThinking = false } = {}) {
+  async chat({ role = 'chat', profileId, modelOverride, body, telemetry, onEvent, signal, apiKeyOverride, fallbackWhen, disableFallback, thinkingLevel, errorsAsRejections = false, __dropThinking = false } = {}) {
     const primary = this._prepare(role, profileId, apiKeyOverride);
     if (primary.error) return primary;
     // BLOCK-56 P1 — 任务级降级续跑的任务传 disableFallback: true：
@@ -272,7 +272,12 @@ class ModelGateway {
         ...(body || {}),
         model: index === 0 && modelOverride ? modelOverride : profile.model,
       });
-      const options = { baseUrl: profile.baseUrl, signal, profile };
+      // BLOCK-365（NSO-W1 / F-01）流中断穿透：此前网关重建 provider options 时丢掉 errorsAsRejections，
+      // provider 永远 resolve-with-error，上层网络重试包装（只 catch throw）对流中 ECONNRESET 零重试。
+      // 现透传给 provider，并在本 attempt 内把 rejection 还原成结果信封——降级判定照旧可见；
+      // 只有本 attempt 已是终局（不降级）时才以异常抛出，交给上层整轮重试。
+      const options = { baseUrl: profile.baseUrl, signal, profile, ...(errorsAsRejections ? { errorsAsRejections: true } : {}) };
+      let rejection = null;
       let emittedOutput = false;
       let result;
       // BLOCK-37 — 流式分支 tee delta 帧（上限内保留样本，超限诚实计数）
@@ -305,8 +310,14 @@ class ModelGateway {
           }, { ...options, signal: combineSignals(signal, stallController.signal) });
         } catch (error) {
           watchdog.stop();
-          if (!stallInfo) throw error;
-          result = gatewayError('aborted', error.message);
+          if (stallInfo) {
+            result = gatewayError('aborted', error.message);
+          } else if (errorsAsRejections) {
+            rejection = error;
+            result = gatewayError(error.code || 'network_error', error.message);
+          } else {
+            throw error;
+          }
         }
         watchdog.stop();
         if (stallInfo) {
@@ -371,6 +382,8 @@ class ModelGateway {
         lastResult = result;
         continue;
       }
+      // 终局 attempt 的流中断：不向前端发 error 事件（上层整轮重试还会再来），直接异常穿透。
+      if (rejection) throw rejection;
       // BLOCK-338 P2 — 首 token 段 stall 属「零输出、可安全重试」：不发 error 事件，
       // 把决定权交给上层（agent 路径据此重试一次）；idle 段 stall 已产出内容，不发重试，
       // 事件照发让前端诚实显示。二次仍 stall 时上层按 result.error 如实报。
