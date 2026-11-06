@@ -10023,7 +10023,7 @@
       "capability": "block-365-nso-w1-agent-resilience",
       "path": "docs/block-365-nso-w1-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-365-nso-w1-agent-resilience",
       "entrypoint": "docs/README.md",
@@ -10052,7 +10052,7 @@
         "test/impact-map.json",
         "acceptance/block-92/size-baseline.json"
       ],
-      "notes": "2026-11-06 启动 active（用户「行 … 把剩下没做的统一搞完」= 授权接收会话起始在制批）。首切片：在制批审读+测试+显式提交+model-surface 重打+P6 源绑定重算（兑现 W0 出口）；主项 F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 + 重试可观测。"
+      "notes": "2026-11-06 启动 active（用户「行 … 把剩下没做的统一搞完」= 授权接收会话起始在制批）。首切片：在制批审读+测试+显式提交+model-surface 重打+P6 源绑定重算（兑现 W0 出口）；主项 F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 + 重试可观测。 | 2026-11-06 completed（带例外）：在制批落地 46bdd0c7 + F-01 95c242ad + F-02/15/14/16 73cdeb5e + F-03/重试可观测 4ee6f4d7；例外=task.failed 前端投影/真实 provider 长任务/P6 重算待 UI-696/token 账本收编（W5b）。"
     }
   ],
   "lastUpdated": "2026-11-06",
