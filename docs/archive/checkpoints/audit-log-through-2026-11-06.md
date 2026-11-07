@@ -19,3 +19,7 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-07T01:20:30.620Z -->
 最后更新：2026-11-06（🏁 **BLOCK-365 NSO-W1 completed（带例外）**：在制批落地 + F-01/02/03/14/15/16 + 重试可观测（46bdd0c7 / 95c242ad / 73cdeb5e / 4ee6f4d7）；Jev output:judge 3.52 PASS。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（▶ **NSO 收尾启动（用户「行 … 统一搞完」）**：门禁债清偿 83990965（被 closeout fail-fast 遮住的 lint/code-size 两笔，教训→W7b closeout 全门出结果）；蓝图 §2a 进度+收尾顺序。G0 常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-07T04:36:41.917Z -->
+最后更新：2026-11-06（🏁 **BLOCK-367 NSO-W2b completed**：F-06 实核修正 + capabilityEvidence 审计透传。G0 常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：第二真相清理+runLoop 首切片（402bf045，拆前拆后 54/54）；更正 BLOCK-364 误述。G0 常态 · 不外推 packaged/Provider/GA。）

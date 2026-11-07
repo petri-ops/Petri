@@ -46,7 +46,7 @@ const { loadDatabaseConstructor } = require('../migration-runner');
 const { resolveCore } = require('../main/core-utils');
 const { getBusyTimeout } = require(resolveCore('shared-backend/config-helper'));
 // BLOCK-360（NSO-W2-4）路径 precedence 与基础 pragma 单源（与核心 connection.js / migration-runner 同一实现）
-const { resolveDbPath, applyCanonicalPragmas, openDatabase, registerDatabaseConstructor } = require(resolveCore('shared-backend/db-connection-policy'));
+const { resolveDbPath, openDatabase, registerDatabaseConstructor } = require(resolveCore('shared-backend/db-connection-policy'));
 
 const VALID_ROLES = new Set(['branch', 'result']);
 const _connections = new Map(); // resolved file path → better-sqlite3 Database

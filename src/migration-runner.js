@@ -47,7 +47,7 @@ function requireDbConnectionPolicy() {
   }
   throw new Error(`db-connection-policy unavailable: ${candidates.join(' | ')}`);
 }
-const { applyCanonicalPragmas, orderMigrationFiles, openDatabase } = requireDbConnectionPolicy();
+const { orderMigrationFiles, openDatabase } = requireDbConnectionPolicy();
 
 const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
   version INTEGER PRIMARY KEY,

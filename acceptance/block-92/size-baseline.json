@@ -124,8 +124,8 @@
       "path": "core/shared-backend/result-studio-repository.js",
       "wave": "C",
       "module": "W-04",
-      "lines": 1792,
-      "sha256": "d24a82cd71e817126ae71d91e30d27c3c0236028ef740a64a8facd9ecbd87f32"
+      "lines": 1793,
+      "sha256": "ef344a765d5a14899b5bd6d08002d5015fb6b959464a57d738e5dd6d35061201"
     },
     {
       "path": "core/petri-server/agent-tools/workspace-tools.js",
@@ -152,8 +152,8 @@
       "path": "core/shared-backend/result-replay-service.js",
       "wave": "C",
       "module": "W-04",
-      "lines": 708,
-      "sha256": "046873362abb311aae993902918c5f3ee9765ffb2cb6e7d3afeaf9233c4ef66b"
+      "lines": 712,
+      "sha256": "999488871d51b9233095b4bc2b12ae09d8881e2d4b20cf7996915557ecd52741"
     },
     {
       "path": "core/shared-backend/git-adapter.js",
@@ -170,5 +170,5 @@
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
     }
   ],
-  "total": 23471
+  "total": 23476
 }
