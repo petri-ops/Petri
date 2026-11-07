@@ -64,14 +64,18 @@ test('UI-653 产物落地动作：结果面复用既有事件，3D 工作台走�
   assert.ok(events.includes('Model3DOpenDetail'), '事件载荷必须类型化');
   assert.ok(events.includes('meshPath?: string'), '打开事件必须同时支持工作区网格来源');
 
-  assert.ok(card.includes('switchToResult: true'), '结果查看必须显式切换结果视图（否则结果面 URL 无 job、停空态）');
+  // BLOCK-375（S0）契约追新：BLOCK-334（b5a72c45）结果统一落右栏「结果」tab，
+  // 原 UI-653 的中央视图 switchToResult 语义退役（useWorkspaceOpenEffects 注释在案）——
+  // 打开链=projectOpenArtifact(jobId, artifactName) → 右栏结果宿主，无需视图切换。
+  assert.ok(card.includes('petriEvents.projectOpenArtifact'), '打开链唯一入口不变');
 
   const workspace = read('frontend/src/pages/project-workspace.tsx');
   assert.ok(workspace.includes('petriEvents.model3dOpen'), '宿主必须订阅工作台打开事件');
   assert.ok(workspace.includes('model3dOpenRequest'), '宿主必须把打开请求交给右栏');
 
   const openEffects = read('frontend/src/pages/project-workspace/useWorkspaceOpenEffects.ts');
-  assert.ok(openEffects.includes('detail.switchToResult !== true'), '打开结果必须尊重 switchToResult，缺省保持 preserve 语义');
+  // BLOCK-334 后打开链落右栏宿主；switchToResult 语义退役，断言打开效果链仍在位
+  assert.ok(openEffects.includes('petriEvents.projectOpenArtifact'), '打开效果链订阅在位（右栏宿主）');
 
   const rightPanel = read('frontend/src/components/workspace-panels/RightPanel.tsx');
   assert.ok(rightPanel.includes('initialOpen={ctx.model3dOpenRequest'), '右栏必须把打开请求透传给工作面');

@@ -81,16 +81,18 @@ function rawLine(text) {
 }
 
 before(async () => {
+  if (process.platform !== 'win32') return; // BLOCK-375 S0：非 win32 跳过（套件级 skip 已标注）
   assert.ok(fs.existsSync(BINARY),
     'sidecar 未发布：dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o bin/publish');
   await startSidecar();
 });
 
 after(() => {
+  if (process.platform !== 'win32') return;
   if (child && !child.killed) child.kill();
 });
 
-describe('BLOCK-63 Windows sidecar stdio 协议契约（P1）', () => {
+describe('BLOCK-63 Windows sidecar stdio 协议契约（P1）', { skip: process.platform !== 'win32' && 'Windows sidecar 专属（win-x64 发布物 + build.ps1 fixture；macOS 侧无真实被测物，skip 可见带指引——BLOCK-104 先例，BLOCK-375 S0 转正）' }, () => {
   test('probe：ok + trusted（UIA 无 TCC 门）+ 平台标识 + hostElevated + verbs 清单', async () => {
     const res = await request('probe');
     assert.equal(res.ok, true);

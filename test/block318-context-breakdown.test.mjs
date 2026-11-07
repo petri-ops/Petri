@@ -59,11 +59,15 @@ test('UI-622 知识空间不得大于系统提示词；缺省值全 0 不产生 
 });
 
 test('UI-622 源码钉：agent loop token_budget 带 breakdown 且工具定义只计数一次', () => {
+  // BLOCK-375（S0）锚点迁址：NSO-W5b（BLOCK-366）runLoop 首切片把 breakdown 组装
+  // 拆到 agent-tools/context-budget-step.js；工具定义 token 的「循环前一次计算」
+  // 留在 loop-orchestrator（作参数传入）。两处各扫其半，契约整体不变。
+  const step = fs.readFileSync(path.join(ROOT, 'core/petri-server/agent-tools/context-budget-step.js'), 'utf8');
+  assert.match(step, /computeContextBreakdown/);
+  assert.match(step, /toolDefinitionsTokens/);
+  assert.match(step, /breakdown,\n\s+pct:/);
   const loop = fs.readFileSync(path.join(ROOT, 'core/petri-server/loop-orchestrator.js'), 'utf8');
-  assert.match(loop, /computeContextBreakdown/);
-  assert.match(loop, /toolDefinitionsTokens/);
-  assert.match(loop, /breakdown,\n\s+pct:/);
-  // 常量提取在 for 循环之前（每轮不重复 JSON.stringify + tiktoken）
+  // 常量提取在 runLoop for 循环之前（每轮不重复 JSON.stringify + tiktoken）
   const defsIdx = loop.indexOf('const toolDefinitionsTokens');
   const loopIdx = loop.indexOf('for (let iter = 0');
   assert.ok(defsIdx > 0 && loopIdx > defsIdx, 'toolDefinitionsTokens 应在循环前计算');

@@ -7,7 +7,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const source = readFileSync(path.join(ROOT, 'core', 'petri-server', 'loop-orchestrator.js'), 'utf8');
+// BLOCK-375（S0）锚点迁址：NSO-W5b（BLOCK-366）把 runLoop 首切片（含 CP-5 压缩块）
+// 拆到 agent-tools/context-budget-step.js，锚点随之搬家——本文件改扫实现所在文件。
+const source = readFileSync(path.join(ROOT, 'core', 'petri-server', 'agent-tools', 'context-budget-step.js'), 'utf8');
 
 test('CP-5：0.85 断路丢弃前走摘要通道（agent_context_compaction 调用在场）', () => {
   assert.match(source, /kind: 'agent_context_compaction'/);

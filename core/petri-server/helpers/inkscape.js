@@ -79,7 +79,8 @@ function buildArgs(action, svgAbs, outAbs) {
  * export-pdf 的产物即交付物（PDF 二进制），调用方决定落点。
  */
 function runInkscapeAction(args, onDone) {
-  const status = inkscapeStatus();
+  // args.status 仅供测试/隔离栈注入（与 svg-tools ctx.db 同风格）；生产恒走实时探针
+  const status = (args && args.status) || inkscapeStatus();
   if (!status.available) {
     onDone(err('inkscape_unavailable', status.hint || 'Inkscape 不可用', { hint: status.hint }));
     return;

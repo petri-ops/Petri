@@ -7597,6 +7597,49 @@
         "test/nso-w5-impact-coverage.test.mjs"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block375-post-nso-s0",
+      "note": "BLOCK-375 post-nso 蓝图 S0 可信起点：code-size/knip 两红门归因重打留因、全量分片三段收口归因、6M+10?? WIP 机器可读归属清单、canonical 对账（旧蓝图 completed/G0-LF 常驻语义）。改 plan 或 stage-0 证据面时跑治理门。 并承载 BLOCK-372 遗产回填脚本 scripts/backfill-artifact-chain.mjs 的分类（S2 链哈希清偿时收编入库）；否则 test-affected 契约『每个脚本恰被一条规则覆盖』整簇红。",
+      "patterns": [
+        "docs/block-375-post-nso-s0-trusted-baseline-plan.md",
+        "acceptance/post-nso-2026-11-06/**",
+        "scripts/backfill-artifact-chain.mjs"
+      ],
+      "tests": [
+        "test/knip-ratchet.test.mjs",
+        "test/block375-schema-parity.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "ui696-model-preferences-evidence",
+      "note": "UI-696 模型偏好（并发写入者在制目录）的 acceptance 证据分类占位：test-affected 契约要求每个 acceptance/<dir>/evidence.json 恰被一条规则覆盖。读取者测试随 UI-696 批次落地时补登 tests；本规则只做映射不冒充验证。",
+      "patterns": [
+        "acceptance/ui-696/**"
+      ],
+      "tests": [],
+      "commands": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "nso-batch1-batch4-tests",
+      "note": "NSO Batch-1（BLOCK-373 链哈希）/Batch-4（BLOCK-374 MCP 两轴分离）守护测试登记。BLOCK-375 S0 全量分片归因时补挂规则（W5a 棘轮『新测试必须挂规则』抓真）。",
+      "patterns": [
+        "src/migrations/022_artifact_chain_hash.sql",
+        "scripts/verify-artifact-chain.mjs",
+        "core/petri-server/helpers/agent-tool-interceptor.js"
+      ],
+      "tests": [
+        "test/nso-b1-chain-hash.test.mjs",
+        "test/nso-b4-mcp-subject.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
     }
   ]
 }

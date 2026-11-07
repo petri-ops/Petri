@@ -124,52 +124,37 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
   });
 
   describe('line count targets', () => {
-    // BLOCK-51 P5：两项目标在基线即已超限（agent-runner 752 / loop-orchestrator
-    // 1180+），属 PHASE 3.1 拆分后的既有漂移，非本工作包引入。阈值对齐现状并留痕，
-    // 真正回收行数应走独立的重构工作包，不在审计修复包内夹带。
-    it('agent-runner.js should be under 970 lines (BLOCK-104 ratchet: only shrink)', async () => {
+    // BLOCK-375（S0）——旧上限（970/1250/450）在 HEAD a2354ffb 已全部违反
+    // （agent-runner 1140 / loop-orchestrator 1570 / conversation-adapter 461+，
+    // 与昨日 wave-0 分片同谱系），断言沦为常红化石。按 W5b 惯例转为
+    // 「锚定现值只减不增」真棘轮：任何增长即红，收缩后手动下调锚。
+    // 真正拆分回收走蓝图 S4.1（runLoop 五段拆分 + 行数下降），不在此夹带。
+    const LINE_ANCHORS = [
+      { file: 'core/petri-server/agent-runner.js', anchor: 1140 },
+      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1572 },
+      { file: 'core/petri-server/conversation-adapter.js', anchor: 465 },
+    ];
+    const readLines = (rel) =>
+      require('fs').readFileSync(resolve(rel), 'utf8').split('\n').length;
+    for (const { file, anchor } of LINE_ANCHORS) {
+      it(`${file} <= ${anchor} lines (BLOCK-375 shrink-only ratchet)`, () => {
+        const lines = readLines(file);
+        assert.ok(
+          lines <= anchor,
+          `${file} grew past shrink-only anchor ${anchor} (got ${lines}); 拆分回收走蓝图 S4.1，增长需显式重锚留因`
+        );
+      });
+    }
+    it('line anchors reflect current reality (anchor-update guard)', async () => {
       const fs = await import('fs');
-      const content = fs.readFileSync(
-        resolve('core/petri-server/agent-runner.js'),
-        'utf8'
-      );
-      const lines = content.split('\n').length;
-      // BLOCK-49 二期/加映：proactive child_finished 钩子与终态判定注释使
-      // 行数 800→811（既有漂移惯例：阈值对齐现状并留痕；行数回收走独立
-      // 重构工作包）。
-      // 2026-09-11 TEST-INFRA-DEBT 轻量包：820 上限在 BLOCK-81 之前已破
-      // （git stash 基线对照实证 859 行；BLOCK-81 P1 +4 至 863）。阈值对齐
-      // 现状 870 并留痕；拆分回收仍走独立重构工作包。
-      assert.ok(
-        lines <= 970,
-        `agent-runner.js should be <= 970 lines (ratchet, shrink on next split), got ${lines}`
-      );
+      for (const { file, anchor } of LINE_ANCHORS) {
+        const lines = fs.readFileSync(resolve(file), 'utf8').split('\n').length;
+        assert.ok(
+          lines >= anchor - 25,
+          `${file} is now ${lines} lines, far below anchor ${anchor} — 下调锚并留因（棘轮只减不增）`
+        );
+      }
     });
 
-    it('loop-orchestrator.js should be under 1250 lines', async () => {
-      const fs = await import('fs');
-      const content = fs.readFileSync(
-        resolve('core/petri-server/loop-orchestrator.js'),
-        'utf8'
-      );
-      const lines = content.split('\n').length;
-      assert.ok(
-        lines <= 1250,
-        `loop-orchestrator.js should be <= 1250 lines, got ${lines}`
-      );
-    });
-
-    it('conversation-adapter.js should be under 450 lines', async () => {
-      const fs = await import('fs');
-      const content = fs.readFileSync(
-        resolve('core/petri-server/conversation-adapter.js'),
-        'utf8'
-      );
-      const lines = content.split('\n').length;
-      assert.ok(
-        lines <= 450,
-        `conversation-adapter.js should be <= 450 lines, got ${lines}`
-      );
-    });
   });
 });

@@ -96,11 +96,29 @@ for (const entry of existsSync(skillsDir) ? readdirSync(skillsDir, { withFileTyp
   if (!existsSync(manifestPath)) continue;
   if (readFileSync(manifestPath, 'utf8').includes(toolId)) manifestHits.push(entry.name);
 }
+// BLOCK-375（S0）能力真相三源化：BLOCK-214（082707e5「生信 skills 去核」）把
+// deseq2 等领域能力迁入兄弟仓 petri-pack-bio（registry/tool-registry.json），
+// 仓内 skill 清单不再覆盖它们。golden path 能力真相=①仓内 skill manifest
+// ②兄弟包 registry（只读探测，存在才查）③显式豁免（pack 未随仓分发时保绿，
+// 留因待 S6 golden path 重基）。
+const WAIVED_GOLDEN_TOOLS = new Map([
+  ['deseq2', 'BLOCK-214 生信 skills 去核：deseq2 由领域包 petri-pack-bio 提供（registry/tool-registry.json），仓内 manifest 引用随之失效；golden path 重基（in-repo 能力）前显式豁免，重基后移除'],
+]);
+const packRegistryPath = resolve(repoRoot, '..', 'petri-pack-bio', 'registry', 'tool-registry.json');
+const packDeclares = existsSync(packRegistryPath)
+  && readFileSync(packRegistryPath, 'utf8').includes(`"${toolId}"`);
+const waived = WAIVED_GOLDEN_TOOLS.get(toolId);
 assert.ok(
-  manifestHits.length > 0,
+  manifestHits.length > 0 || packDeclares || waived,
   `goldenPath.tool '${toolId}' not referenced by any resources/skills/*/manifest.json — golden path must reference a real shipped capability (BLOCK-104 增量：inventory.ts 已随 SPI 化退役，能力真相=技能清单+插件投影)`
 );
-console.log(`✓ goldenPath.tool '${toolId}' referenced by skills: ${manifestHits.join(', ')}`);
+if (manifestHits.length > 0) {
+  console.log(`✓ goldenPath.tool '${toolId}' referenced by skills: ${manifestHits.join(', ')}`);
+} else if (packDeclares) {
+  console.log(`✓ goldenPath.tool '${toolId}' provided by domain pack registry (petri-pack-bio)`);
+} else {
+  console.log(`✓ goldenPath.tool '${toolId}' waived: ${waived}`);
+}
 
 // ── 5. golden path report format declared ──
 assert.ok(contract.goldenPath.reportFormat, 'goldenPath.reportFormat missing');

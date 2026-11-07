@@ -173,7 +173,9 @@ const BASELINE = new Set([
   // BLOCK-330/331 — 契约测以 process.platform 派生断言值（证据名平台化 / 跨平台命名），
   // 测试据平台取值是断言语义本身，不是产品面平台分支。
   'test/block330-db-require-order.test.mjs',
-  'test/dev-verify.test.mjs'
+  'test/dev-verify.test.mjs',
+  'test/block63-sidecar-contract.test.mjs', // BLOCK-375 S0：win32 sidecar 套件平台门（skip 可见带指引）
+  'test/block63-sidecar-tools.test.mjs', // BLOCK-375 S0：同上
 ]);
 
 function scan() {

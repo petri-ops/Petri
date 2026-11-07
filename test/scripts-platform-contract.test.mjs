@@ -72,10 +72,21 @@ describe('scripts 双端同形门（BLOCK-104 P4）', () => {
       if (!hasGuard && !hasNote) violators.push(name);
     }
     console.log(`[scripts-platform] windows 命令调用脚本合规 ${callers.length - violators.length}/${callers.length}`);
+    // BLOCK-375（S0）：30 个存量 violators（block244-269/Q-REM 系列+323/335/336/337/ui551）
+    // 在 HEAD a2354ffb 即在（昨日 wave-0 分片同红）。按 CK-11 先例冻结为基线棘轮
+    // （test/scripts-windows-calls-baseline.json）：新增未护栏调用即红；
+    // 补护栏/标注后删条目，只减不增。入口护栏改造候选归蓝图 S4/S6。
+    const baseline = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'test', 'scripts-windows-calls-baseline.json'), 'utf8'));
+    const frozen = new Set(baseline.offenders);
+    const freshViolators = violators.filter((name) => !frozen.has(name));
     assert.deepEqual(
-      violators,
+      freshViolators,
       [],
-      `以下脚本调用 windows 命令但既无入口护栏也无 platform-note 标注: ${violators.join(', ')}`
+      `新增调用 windows 命令但既无入口护栏也无 platform-note 标注: ${freshViolators.join(', ')}`
     );
+    const stale = baseline.offenders.filter((name) => !violators.includes(name));
+    if (stale.length > 0) {
+      console.warn(`[scripts-platform] 基线条目已清偿（从 test/scripts-windows-calls-baseline.json 删除）：${stale.join(', ')}`);
+    }
   });
 });

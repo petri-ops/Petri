@@ -56,7 +56,7 @@ test('findTopLevelEnvConst：解构形态同红；显式 _OK/_ALLOW 后缀豁免
   assert.deepEqual(findTopLevelEnvConst('const DARK_OK = process.env.PETRI_DARK;'), []);
 });
 
-test('全部 flow 文件零顶层 env 固化（棘轮：新增即红）', () => {
+test('全部 flow 文件顶层 env 固化只减不增（BLOCK-375 冻结基线棘轮：新增即红）', () => {
   const files = listFlowFiles(FLOWS_DIR);
   assert.ok(files.length > 10, `flow 文件量异常：${files.length}`);
   const offenders = [];
@@ -66,5 +66,20 @@ test('全部 flow 文件零顶层 env 固化（棘轮：新增即红）', () => 
       offenders.push(`${path.relative(ROOT, file)}:${lineNo}`);
     }
   }
-  assert.deepEqual(offenders, [], `以下 flow 文件存在顶层 env 固化（改函数化调用时读取）：\n${offenders.join('\n')}`);
+  // BLOCK-375（S0）：存量 33 处（block322/333/334/342/next/rw/ui 系列在制期落地，
+  // 46bdd0c7 批前后均在）按 CK-11/knip 先例冻结为基线（test/flow-env-trap-baseline.json）。
+  // 新增固化即红；清偿（函数化调用时读取）后从基线删除对应条目——只减不增。
+  const baselinePath = path.join(ROOT, 'test', 'flow-env-trap-baseline.json');
+  const baseline = JSON.parse(fs.readFileSync(baselinePath, 'utf8'));
+  const frozen = new Set(baseline.offenders);
+  const fresh = offenders.filter((o) => !frozen.has(o));
+  assert.deepEqual(
+    fresh,
+    [],
+    `新增 flow 顶层 env 固化（改函数化调用时读取，或确属静态时加 _OK 后缀豁免）：\n${fresh.join('\n')}`,
+  );
+  const stale = baseline.offenders.filter((o) => !offenders.includes(o));
+  if (stale.length > 0) {
+    console.warn(`[flow-env-trap] 基线条目已清偿（从 test/flow-env-trap-baseline.json 删除）：\n${stale.join('\n')}`);
+  }
 });

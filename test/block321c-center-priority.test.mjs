@@ -17,10 +17,12 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 
-test('UI-629 阈值单一源：保底 760 / 迟滞 840 / gap 40 / 钳制 helper 导出', () => {
+test('UI-629 阈值单一源：保底 420 / 迟滞 500 / gap 40 / 钳制 helper 导出', () => {
   const src = read('frontend/src/hooks/useResponsivePanelCollapse.ts');
-  assert.match(src, /CENTER_SPACE_COLLAPSE_BELOW = 760/, '中栏保底 760');
-  assert.match(src, /CENTER_SPACE_RESTORE_ABOVE = 840/, '迟滞还原 840');
+  // BLOCK-375（S0）契约追新：f312ebfd（UI-629 后续刀）按用户裁决 2026-10-30
+  // 「中间栏固定宽度太宽」把保底 760→420（手机宽度）、迟滞 840→500——锚随契约走。
+  assert.match(src, /CENTER_SPACE_COLLAPSE_BELOW = 420/, '中栏保底 420（UI-629 收窄后）');
+  assert.match(src, /CENTER_SPACE_RESTORE_ABOVE = 500/, '迟滞还原 500');
   assert.match(src, /CENTER_GAP_TOTAL = 40/, 'gap 计入（两侧 20px）');
   assert.match(src, /const CENTER_MIN_RESERVED = CENTER_SPACE_COLLAPSE_BELOW/, '钳制消费值（模块内常量，sidebarResizeMax 单一消费）');
   assert.match(src, /export function sidebarResizeMax/, '钳制计算 helper 导出');
@@ -38,7 +40,8 @@ test('UI-629 拖宽把手钳制：左右把手调用点都传 clamp.max（sideba
   const ws = read('frontend/src/pages/project-workspace.tsx');
   assert.match(
     ws,
-    /startColumnResize\('right', \{ max: sidebarResizeMax\(window\.innerWidth, leftOpen \? leftWidth : 0\) \}\)/,
+    // resultsFocus 时右栏把手切 resultRight 档（UI-457 后右栏双档），钳制消费不变
+    /startColumnResize\((resultsFocus \? 'resultRight' : 'right'), \{ max: sidebarResizeMax\(window\.innerWidth, leftOpen \? leftWidth : 0\) \}\)/,
     '右把手钳制（左栏开时按其现宽预留）',
   );
 });

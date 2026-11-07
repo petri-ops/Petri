@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { createRequire } from 'node:module';
+
+// BLOCK-375（S0）：ESM 文件内 describe 体的裸 require 在加载期即 ReferenceError
+// （BLOCK-345 Inkscape 套件因此整组未注册）。统一走 createRequire。
+const require = createRequire(import.meta.url);
 
 import scene3d from '../core/petri-server/helpers/scene3d.js';
 import sceneStore from '../core/petri-server/helpers/model3d-scene-store.js';

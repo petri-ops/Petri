@@ -2,20 +2,20 @@
  * Phase 1 IPC bridge namespace coverage — BLOCK-10-AUDIT-CLOSEOUT
  *
  * C-001 修复（contract audit §二 L49-174）：
- *   preload.js 必须暴露 `branch` + `result` 两个 namespace，
- *   1:1 镜像 frontend/src/lib/electron.d.ts L319-505 已声明的方法，
- *   才能让 Branch Tab / Result Studio 在渲染端
- *   getBridge('branch') / getBridge('result') 返回非 null。
+ *   preload.js 必须暴露 `branch` namespace，1:1 镜像
+ *   frontend/src/lib/electron.d.ts 已声明的方法，才能让 Branch Tab 在渲染端
+ *   getBridge('branch') 返回非 null。
  *
  * 测试策略（与 test/window-controls.test.mjs 同样的 vm harness）：
  *   1) 在 vm sandbox 内执行 src/preload.js（mock electron contextBridge + ipcRenderer）
  *   2) 校验 window.petriDesktop.branch.* 的 6 个方法
  *      ↔ ipcRenderer.invoke 调用 channel 一一对应
- *   3) 校验 window.petriDesktop.result.* 的 7 个方法
- *      + result.version.* 的 4 个子方法 ↔ channel 一一对应
- *   4) 校验 result:create 接受 conversation_export 类型
- *      （C-002 修复的 contract 一致性；运行时 validTypes 由 result-handlers.js
- *      测试覆盖：test/result-handlers-valid-types.test.mjs）
+ *   3) 校验既有 namespace 不被 shadow（C-001 不变量）
+ *
+ * BLOCK-375（S0）化石清理：`result` namespace 断言删除——fc3dedbd（UI-457 result
+ * 卫生批）已全退役 result:* IPC 面（channels/preload namespace/result-handlers/
+ * result-db 一并退役），本文件是漏删的守护化石；result 面现由 viewerRegistry/
+ * ResultsSurface（BLOCK-334 宿主统一）承载，通道契约由 ipc-channels-registry 守护。
  */
 
 import assert from 'node:assert/strict';
@@ -108,60 +108,7 @@ test('preload exposes petriDesktop.branch with 6 methods mapping to branch:* cha
   );
 });
 
-test('preload exposes petriDesktop.result with 7 methods + version sub-namespace (4 methods)', async () => {
-  const { desktop, invoked } = runPreload();
-  assert.ok(desktop.result, 'C-001: petriDesktop.result namespace must exist');
-
-  const expected = [
-    ['create', 'result:create'],
-    ['get', 'result:get'],
-    ['list', 'result:list'],
-    ['update', 'result:update'],
-    ['delete', 'result:delete'],
-    ['byProject', 'result:byProject'],
-    ['createFromConversation', 'result:createFromConversation'],
-  ];
-  for (const [method] of expected) {
-    assert.equal(
-      typeof desktop.result[method],
-      'function',
-      `result.${method} must be a function`,
-    );
-  }
-
-  // result.version sub-namespace
-  assert.ok(desktop.result.version, 'result.version sub-namespace must exist');
-  const expectedVersion = [
-    ['create', 'result:version:create'],
-    ['get', 'result:version:get'],
-    ['getByNumber', 'result:version:getByNumber'],
-    ['list', 'result:version:list'],
-  ];
-  for (const [method] of expectedVersion) {
-    assert.equal(
-      typeof desktop.result.version[method],
-      'function',
-      `result.version.${method} must be a function`,
-    );
-  }
-
-  // 实调一次确认 channel 一致
-  await desktop.result.create({
-    projectId: 'p1',
-    type: 'conversation_export', // C-002: 此类型 validTypes 已允许
-    name: 'export-1',
-    data: {},
-  });
-  await desktop.result.createFromConversation({ projectId: 'p1', branchId: 'b1' });
-  await desktop.result.version.create({ resultId: 'r1', data: {} });
-
-  assert.deepEqual(
-    invoked.slice(-3).map(({ channel }) => channel),
-    ['result:create', 'result:createFromConversation', 'result:version:create'],
-  );
-});
-
-test('preload branch + result namespaces do NOT shadow existing 16 namespaces', () => {
+test('preload branch namespace does NOT shadow existing 16 namespaces', () => {
   const { desktop } = runPreload();
   // 仅断言已有 namespace 的 key 仍在；plan §5.3 不变量守住
   for (const key of [
@@ -186,7 +133,6 @@ test('preload branch + result namespaces do NOT shadow existing 16 namespaces', 
       `existing namespace ${key} must be preserved (C-001 invariant)`,
     );
   }
-  // 新增 2 个 namespace
+  // 新增 namespace（result 已随 fc3dedbd 退役，仅 branch）
   assert.ok(desktop.branch, 'C-001: branch namespace must be added');
-  assert.ok(desktop.result, 'C-001: result namespace must be added');
 });

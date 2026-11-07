@@ -9,15 +9,15 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 504,
-    "lastUpdated": "2026-11-06",
-    "managedMarkdown": 487
+    "documentCount": 506,
+    "lastUpdated": "2026-11-07",
+    "managedMarkdown": 489
   },
   "documents": [
     {
-      "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
-      "capability": "next-stage-optimization-blueprint-2026-11-06",
-      "path": "docs/next-stage-optimization-blueprint-2026-11-06.md",
+      "id": "POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06",
+      "capability": "post-nso-optimization-blueprint-2026-11-06",
+      "path": "docs/post-nso-optimization-blueprint-2026-11-06.md",
       "kind": "work-package",
       "status": "planned",
       "canonical": false,
@@ -26,10 +26,47 @@
       "phase": "PLANNED",
       "tags": [
         "next-stage",
+        "post-nso",
         "ui-ux",
         "workflow"
       ],
-      "notes": "用户裁决的全维度优化蓝图；W0-W7 为候选波次，未启动任何新工作包；事实基线指向 2026-11-06 全量评估。 | 2026-11-06 执行进度回写于 §2a（registry kind=work-package，保持 planned 以免与执行包争串行槽位）：W0/W2/W4 completed 带例外，W5a/W6a/W7a 部分交付；W1 待在制批裁决、W3 待并发写入者收口；进度见 §2a。"
+      "notes": "承接已完成 NSO 全程序（BLOCK-359~374）之后的下一阶段方向蓝图；十一维独立证据复核 + S0-S7 八阶段目标/改进点/优先级/出口判据。保持 planned，不占单包串行槽位；事实基线为 HEAD a2354ffb 当次门禁与四路只读源码实证。不改写旧评估与旧蓝图的评分和收尾笔录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-375",
+      "capability": "block-375-post-nso-s0-trusted-baseline",
+      "path": "docs/block-375-post-nso-s0-trusted-baseline-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-375-post-nso-s0-trusted-baseline",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s0",
+        "gates",
+        "governance"
+      ],
+      "notes": "post-nso 蓝图 S0 承载包：completed。两红门归因重打（code-size 指纹/合法增长留因 + knip 动态入口定性）、全量分片 387→38（349 根修十六簇：schema 平价门/测试隔离/锚点追新/化石冻结棘轮/环境档 skip）、残红 16 C-46+1 P6+1 S1 逐件归因、WIP 清单、canonical 对账（旧蓝图 completed/G0-LF 语义钉死）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
+      "capability": "next-stage-optimization-blueprint-2026-11-06",
+      "path": "docs/next-stage-optimization-blueprint-2026-11-06.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "next-stage",
+        "ui-ux",
+        "workflow"
+      ],
+      "notes": "W0-W7 波次蓝图已由 NSO 全程序（BLOCK-359~374，40 笔提交）执行收尾；S0 canonical 对账裁定（BLOCK-375）：planned 与正文已收尾冲突解除，status=completed，历史评分与 §2a 进度笔录不改写。承接方向蓝图=POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06。"
     },
     {
       "id": "PETRI-DESKTOP-HOLISTIC-EVALUATION-2026-11-06",
@@ -10261,5 +10298,5 @@
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 504
+  "documentCount": 506
 }

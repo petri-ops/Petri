@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave0-full-test-shards",
+  "generatedAt": "2026-11-07T01:31:43.200Z",
+  "timeoutMsPerShard": 2700000,
+  "shards": [
+    {
+      "shard": "node-core",
+      "id": "20261107-012335-nso-w0-shard-node-core-x9gfc",
+      "state": "ended",
+      "exitCode": 1,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261107-012335-nso-w0-shard-node-core-x9gfc.log",
+      "timedOut": false,
+      "verdict": "failed"
+    },
+    {
+      "shard": "frontend",
+      "id": "20261107-013057-nso-w0-shard-frontend-nwxr7",
+      "state": "ended",
+      "exitCode": 0,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261107-013057-nso-w0-shard-frontend-nwxr7.log",
+      "timedOut": false,
+      "verdict": "passed"
+    },
+    {
+      "shard": "node-long",
+      "id": "20261107-013142-nso-w0-shard-node-long-kcjdk",
+      "state": "ended",
+      "exitCode": 0,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261107-013142-nso-w0-shard-node-long-kcjdk.log",
+      "timedOut": false,
+      "verdict": "passed"
+    }
+  ],
+  "allPassed": false,
+  "note": "verdict=unknown 表示超时或 runner 丢失——结论为未知，不得写 PASS（BLOCK-359 有界语义）。"
+}

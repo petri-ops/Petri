@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-07",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -158,6 +158,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/next04b-model3d-review-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/next05-model3d-edit-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/next06-resilience-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/nso-w3-visual-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-dialog-snapshot.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/os-save-dialog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/pack-lifecycle.cjs",

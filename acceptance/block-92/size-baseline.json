@@ -47,8 +47,8 @@
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1333,
-      "sha256": "2b1adde114a00eccc070d7bac834a77838a99057d8f8fe86f49db0aa53bfdfb6"
+      "lines": 1332,
+      "sha256": "c31615f0b6032b22554303574f4b3f12ab5c649ee7ec456ad7608a65eaa332d0"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
@@ -124,8 +124,8 @@
       "path": "core/shared-backend/result-studio-repository.js",
       "wave": "C",
       "module": "W-04",
-      "lines": 1751,
-      "sha256": "ad0e0c3f1551078791d53cb22a8c30a501a30f6c12ced822bcad99b68992e7a7"
+      "lines": 1763,
+      "sha256": "887745e881ee8e0737cb9f29155b1ccfa89b8f85b52b40ea2bf1246d910f2ad3"
     },
     {
       "path": "core/petri-server/agent-tools/workspace-tools.js",
@@ -168,14 +168,7 @@
       "module": "P-01",
       "lines": 777,
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
-    },
-    {
-      "path": "core/petri-server/loop-orchestrator.js",
-      "wave": "C",
-      "module": "P-03",
-      "lines": 1571,
-      "sha256": "1d3a0a439be23334727eb1cc0a89d80aa40cba0732efdab78b5547b2e4447aee"
     }
   ],
-  "total": 24987
+  "total": 23427
 }

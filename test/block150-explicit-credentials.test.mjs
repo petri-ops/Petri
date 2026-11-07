@@ -19,7 +19,10 @@ function probeWithStore(storeJson, extraEnv) {
     "const m=require('./core/petri-server/helpers/ai-settings.js');process.stdout.write(m.getApiKey('dashscope'))",
   ], {
     cwd: path.resolve(import.meta.dirname, '..'),
-    env: { ...process.env, PETRI_LOCAL_DATA_DIR: tmp, ...extraEnv },
+    // BLOCK-375（S0）：darwin 上 credential store 默认 keychain 后端（credential-store.js
+    // platform===darwin ? 'keychain' : 'file'），夹具写的 ai-credentials.json 会被无视。
+    // 本测试验证的是 file store 语义 → 显式钉 file 后端，跨平台确定性。
+    env: { ...process.env, PETRI_LOCAL_DATA_DIR: tmp, PETRI_CREDENTIAL_BACKEND: 'file', ...extraEnv },
   });
   fs.rmSync(tmp, { recursive: true, force: true });
   return out.toString();

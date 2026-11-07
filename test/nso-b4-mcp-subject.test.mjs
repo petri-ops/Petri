@@ -14,9 +14,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 
 test('B4 外部 MCP 调用不经 agent 拦截器（MCP registry 独立入口）', () => {

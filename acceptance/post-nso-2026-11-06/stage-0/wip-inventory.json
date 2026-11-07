@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-nso-s0-wip-inventory",
+  "generatedAt": "2026-11-07",
+  "capturedBy": "BLOCK-375 (S0)",
+  "headAtCapture": "a2354ffb",
+  "policy": "不覆盖 / 不暂存 / 不清理 / 除 adopt 项外不提交；本清单即蓝图 §6.3 要求的机器可读归属台账",
+  "items": [
+    {
+      "path": "docs/DOC-REGISTRY.json",
+      "state": "modified",
+      "classification": "charter-registration",
+      "owner": "post-nso 蓝图评估会话（2026-11-06）",
+      "content": "唯一未提交 hunk = post-nso-optimization-blueprint-2026-11-06 登记（planned）+ documentCount 504→505 / managedMarkdown 487→488",
+      "disposition": "adopt-into-BLOCK-375-commit",
+      "reason": "章程文件登记随 S0 收口入库（蓝图 §6.6 明示『本蓝图登记后同步 DOC-REGISTRY.coverage』）；非他方在制业务内容"
+    },
+    {
+      "path": "docs/README.md",
+      "state": "modified",
+      "classification": "charter-registration",
+      "owner": "post-nso 蓝图评估会话（2026-11-06）",
+      "content": "唯一未提交 hunk = 蓝图 README 条目 370",
+      "disposition": "adopt-into-BLOCK-375-commit",
+      "reason": "同 DOC-REGISTRY：章程登记单元"
+    },
+    {
+      "path": "docs/post-nso-optimization-blueprint-2026-11-06.md",
+      "state": "untracked",
+      "classification": "charter-document",
+      "owner": "post-nso 蓝图评估会话（2026-11-06）；用户 2026-11-07 发令按其执行",
+      "content": "本程序唯一范围真相（S0-S7 八阶段 + 26 缺口台账 + 十一维复核）",
+      "disposition": "adopt-into-BLOCK-375-commit",
+      "reason": "用户发令对象即本文件，属授权章程而非未知在制"
+    },
+    {
+      "path": "docs/block-370-nso-w3b-plan.md",
+      "state": "modified",
+      "classification": "concurrent-writer-writeback",
+      "owner": "BLOCK-370 NSO-W3b（已 completed，回写未入库）",
+      "content": "frontmatter status active→completed + 交付与收口表格（W3b 收尾回写）",
+      "disposition": "preserve-untouched",
+      "reason": "并发写入者文件，S0 不代提交；归 S6 治理批统一对账"
+    },
+    {
+      "path": "acceptance/block-332/ui-ledger-triage.json",
+      "state": "modified",
+      "classification": "generator-refresh",
+      "owner": "check-ui-productization-audit.mjs（W3/W3b 台账刷新：UI-697/698/699 入账）",
+      "content": "generatedAt + sections/uniqueIds/counts 与 UI 台账当前态一致（机械可再生）",
+      "disposition": "preserve-untouched",
+      "reason": "生成器时间戳/计数刷新，可重生成；不代提交"
+    },
+    {
+      "path": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+      "state": "modified",
+      "classification": "generator-refresh",
+      "owner": "quality:surface 生成器",
+      "content": "仅 generatedAt 时间戳一行（蓝图 §3 注记在案）",
+      "disposition": "adopt-into-BLOCK-375-commit",
+      "reason": "生成器自有产物（quality:surface 输出）：BLOCK-375 重刷恢复 doc↔matrix 确定性配对（block357 勿手改约束依赖两者 generatedAt 一致）；时间戳级漂移非他方在制内容，重刷即生成器幂等输出"
+    },
+    {
+      "path": "docs/functional-surface-matrix-2026-11-04.md",
+      "state": "modified",
+      "classification": "generator-refresh",
+      "owner": "quality:surface 生成器",
+      "content": "仅生成时间戳行",
+      "disposition": "adopt-into-BLOCK-375-commit",
+      "reason": "同上：生成器文档产物，随矩阵对重刷"
+    },
+    {
+      "path": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+      "state": "untracked",
+      "classification": "orphan-evidence",
+      "owner": "NSO W0（2026-11-06 分片跑）",
+      "content": "三段汇总：node-core exit=1 failed / frontend passed / node-long passed；即 G-02 的证据源",
+      "disposition": "preserve-untouched",
+      "reason": "孤儿证据，由 BLOCK-375 新分片汇总（新时间戳文件）取代；旧文件留档不删"
+    },
+    {
+      "path": "assets/",
+      "state": "untracked",
+      "classification": "user-asset",
+      "owner": "用户",
+      "content": "未检查内容（用户资产目录）",
+      "disposition": "preserve-never-commit",
+      "reason": "用户资产红线"
+    },
+    {
+      "path": "docs/pelican-bicycle.html",
+      "state": "untracked",
+      "classification": "user-asset",
+      "owner": "用户",
+      "content": "未检查内容",
+      "disposition": "preserve-never-commit",
+      "reason": "用户资产红线"
+    },
+    {
+      "path": "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+      "state": "untracked",
+      "classification": "user-asset",
+      "owner": "用户（3D 场景文件）",
+      "content": "scene3d 场景",
+      "disposition": "preserve-never-commit",
+      "reason": "用户资产红线"
+    },
+    {
+      "path": "petri-logo-concepts.miora",
+      "state": "untracked",
+      "classification": "user-asset",
+      "owner": "用户（logo 设计稿）",
+      "content": "miora 设计文件 + 配套 _assets/ 图片目录",
+      "disposition": "preserve-never-commit",
+      "reason": "用户资产红线"
+    },
+    {
+      "path": "petri-logo-concepts_assets/",
+      "state": "untracked",
+      "classification": "user-asset",
+      "owner": "用户（logo 设计稿配套图）",
+      "content": "10+ PNG 设计稿",
+      "disposition": "preserve-never-commit",
+      "reason": "用户资产红线"
+    },
+    {
+      "path": "scripts/backfill-artifact-chain.mjs",
+      "state": "untracked",
+      "classification": "closed-program-tool",
+      "owner": "BLOCK-372 Batch-1（文件头自述：artifact_revisions 链哈希惰性回填，幂等）",
+      "content": "S2 G-08/09 链哈希清偿（迁移/回填）将实际使用该脚本",
+      "disposition": "preserve-until-S2",
+      "reason": "NSO 遗产工具，S2 收编时随该包提交并留因"
+    },
+    {
+      "path": "tmp-block342-live/",
+      "state": "untracked",
+      "classification": "temp-dir",
+      "owner": "BLOCK-342 会话临时目录",
+      "content": "未检查",
+      "disposition": "preserve-untouched",
+      "reason": "临时目录红线；处置由所有者/用户裁决"
+    },
+    {
+      "path": "tmp-review/",
+      "state": "untracked",
+      "classification": "temp-dir",
+      "owner": "未知会话临时目录",
+      "content": "未检查",
+      "disposition": "preserve-untouched",
+      "reason": "临时目录红线；处置由所有者/用户裁决"
+    }
+  ],
+  "fileSurfaceDisjointness": "BLOCK-375 自身改动面 = §plan.5 touchSurface，与 preserve 项零交集；DOC-REGISTRY/README 的堆叠登记仅含 adopt 项（章程登记）+ 本包自身条目"
+}

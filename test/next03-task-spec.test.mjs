@@ -8,6 +8,9 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'next03-task-spec-'));
 process.env.PETRI_LOCAL_DATA_DIR = tempDir;
+// BLOCK-375（S0）：darwin 上 credential store 默认 keychain 后端，会读到本机真实凭据
+// 使「无凭据诚实 503」腿变成真打模型（502）。钉 file 后端 → temp 目录无凭据文件=诚实缺席。
+process.env.PETRI_CREDENTIAL_BACKEND = 'file';
 const spec = require('../core/petri-server/helpers/task-spec.js');
 
 test.after(() => {

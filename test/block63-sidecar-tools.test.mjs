@@ -78,6 +78,8 @@ function findEl(data, role, nameContains = '') {
 }
 
 before(async () => {
+  // BLOCK-375（S0）：非 win32 直接跳过（套件级 skip 已标注；file 级 hook 不再触发布物断言）
+  if (process.platform !== 'win32') return;
   assert.ok(fs.existsSync(SIDECAR), 'sidecar 未发布（build.ps1）');
   assert.ok(fs.existsSync(FIXTURE), 'fixture 未发布（build.ps1 一并发布 axfixture）');
   await startSidecar();
@@ -86,11 +88,12 @@ before(async () => {
 });
 
 after(() => {
+  if (process.platform !== 'win32') return;
   if (fixture && !fixture.killed) { try { fixture.kill(); } catch { } }
   if (sidecar && !sidecar.killed) sidecar.kill();
 });
 
-describe('BLOCK-63 Windows sidecar 工具面真行为（P2，fixture 靶）', () => {
+describe('BLOCK-63 Windows sidecar 工具面真行为（P2，fixture 靶）', { skip: process.platform !== 'win32' && 'Windows sidecar 专属（win-x64 发布物 + build.ps1 fixture；macOS 侧无真实被测物，skip 可见带指引——BLOCK-104 先例，BLOCK-375 S0 转正）' }, () => {
   test('snapshot：fixture 树含 Edit/Button/计数标签', async () => {
     const data = await snapshotFixture();
     assert.ok(data.elementCount > 3, '元素过少：' + data.elementCount);

@@ -1,12 +1,13 @@
 ---
 capability: next-stage-optimization-blueprint-2026-11-06
-status: planned
+status: completed
 goal: 以全量评估为事实基线，在不扩展阶段边界、不新增依赖、不破坏通用 agent 身份的前提下，按波次把 Petri 优化成任务跑得完、错误看得见、证据可复跑、体验可信且结构可持续演进的本地通用 agent。
 acceptance:
   - W0-W7 每波有目标、具体改进点、优先级、依赖和出口判据
   - 全部改进点锚定全量评估的发现台账或机械基线
   - 单工作包串行、红绿先行、零第二真相、零新增依赖、未知 WIP 原样保留
   - 本文件保持 planned，未把任何候选波次翻为 active
+  - 2026-11-07 S0 对账（BLOCK-375）：W0-W7 已由 NSO 全程序（BLOCK-359~374）执行收尾，状态翻 completed；§2a 进度笔录与评分历史不改写；承接方向蓝图 = docs/post-nso-optimization-blueprint-2026-11-06.md
 reopen: 用户逐波发令后按治理规范分配正式工作包编号并更新本蓝图状态
 ---
 

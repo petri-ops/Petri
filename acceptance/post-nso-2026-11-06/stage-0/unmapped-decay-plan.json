@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-nso-s0-unmapped-decay-plan",
+  "generatedAt": "2026-11-07",
+  "owner": "BLOCK-375 (S0)",
+  "policy": "分簇消亡计划：S0 只立簇与判据，不批量映射。消亡执行归属 S4（蓝图 §10.6『未登记测试全部进 impact-map 且 fail-closed』）；每消一簇：把该簇测试挂到既有 impact-map 规则（或建域规则）→ 从 baseline 删除对应条目（棘轮只减不增）→ 定向测试绿 → 同批登记。禁一次性盲挂（挂错域=假覆盖）。",
+  "clusterSummary": [
+    {
+      "id": "C1-agent-orchestration",
+      "title": "Agent 主链与编排（runLoop/任务/恢复/压缩/预算）",
+      "count": 34
+    },
+    {
+      "id": "C2-exec-tools",
+      "title": "执行与工具面（workspace-exec/computer-use/ide-tools/审批）",
+      "count": 21
+    },
+    {
+      "id": "C3-transport-sse-ws",
+      "title": "传输面（routes/SSE/WS/终端流/背压）",
+      "count": 16
+    },
+    {
+      "id": "C4-result-project",
+      "title": "结果与项目域（result-studio/lineage/沙箱/导出）",
+      "count": 13
+    },
+    {
+      "id": "C5-db-migration",
+      "title": "DB 与迁移（单例/共享文件/迁移定序）",
+      "count": 4
+    },
+    {
+      "id": "C6-desktop-shell",
+      "title": "桌面壳与进程（窗口/SSH/supervisor/启动）",
+      "count": 10
+    },
+    {
+      "id": "C7-security-admission",
+      "title": "安全准入（token/凭据/ipc-trust/exec-token/schema）",
+      "count": 8
+    },
+    {
+      "id": "C8-model3d-svg",
+      "title": "3D/SVG 域（constraint/annotation/inkscape/governance）",
+      "count": 7
+    },
+    {
+      "id": "C9-g0-qualification",
+      "title": "G0 资格面（packaged/provider/visual 负测）",
+      "count": 3
+    },
+    {
+      "id": "C10-governance-misc",
+      "title": "治理与杂项契约（codemod/品牌/遥测/评测工具/GenUI）",
+      "count": 32
+    }
+  ],
+  "clusters": [
+    {
+      "id": "C1-agent-orchestration",
+      "title": "Agent 主链与编排（runLoop/任务/恢复/压缩/预算）",
+      "count": 34,
+      "files": [
+        "agent-concurrency.test.mjs",
+        "agent-doc-review-ipc.test.mjs",
+        "agent-runner-conversation-adapter.test.mjs",
+        "agent-runner-facade-compat.test.mjs",
+        "agent-runner-facade.test.mjs",
+        "agent-system-info.test.mjs",
+        "agent-task-cancellation.test.mjs",
+        "agent-task-store-busy-timeout.test.mjs",
+        "agent-task-subagent-recent.test.mjs",
+        "agent-workflow-configure.test.mjs",
+        "ai-settings-cache.test.mjs",
+        "block128-execution-unification.test.mjs",
+        "block130-queue.test.mjs",
+        "block163-orchestration.test.mjs",
+        "block172-cp5-compact.test.mjs",
+        "block38-agent-task-resume.test.mjs",
+        "block56-context-freshness.test.mjs",
+        "block57-session-target.test.mjs",
+        "context-breaker.test.mjs",
+        "continuation-text-contract.test.mjs",
+        "deepseek-retry.test.mjs",
+        "execution-context.test.mjs",
+        "feature-flags.test.mjs",
+        "harness-loop-production-acceptance.test.mjs",
+        "harness-weak-model.test.mjs",
+        "harness-workflow-recovery.test.mjs",
+        "harness-workflow-state.test.mjs",
+        "loop-api.test.mjs",
+        "loop-iterate-route.test.mjs",
+        "loop-orchestrator-subdomains.test.mjs",
+        "loop-sse-contract.test.mjs",
+        "loop-validator-diagnoser.test.mjs",
+        "model-preference-sync.test.mjs",
+        "thinking-budget-headroom.test.mjs"
+      ]
+    },
+    {
+      "id": "C2-exec-tools",
+      "title": "执行与工具面（workspace-exec/computer-use/ide-tools/审批）",
+      "count": 21,
+      "files": [
+        "accessmode-validation.test.mjs",
+        "agent-files-changed.test.mjs",
+        "agent-query-result.test.mjs",
+        "agent-workspace-exec-background.test.mjs",
+        "agent-workspace-exec-cwd-shell.test.mjs",
+        "agent-workspace-exec-streaming.test.mjs",
+        "agent-workspace-exec-yield.test.mjs",
+        "block171-tool-cancel.test.mjs",
+        "block34-background-processes-route.test.mjs",
+        "block346-ide-tool-contracts.test.mjs",
+        "block48-computer-tools.test.mjs",
+        "block48-sidecar-tools.test.mjs",
+        "block55-plan-mode.test.mjs",
+        "ide-tools-diff.test.mjs",
+        "ide-tools-file.test.mjs",
+        "ide-tools-path-allowlist.test.mjs",
+        "ide-tools-registry-resources.test.mjs",
+        "ide-tools-registry.test.mjs",
+        "ide-tools-resources.test.mjs",
+        "ide-tools-search.test.mjs",
+        "ide-tools-terminal.test.mjs"
+      ]
+    },
+    {
+      "id": "C3-transport-sse-ws",
+      "title": "传输面（routes/SSE/WS/终端流/背压）",
+      "count": 16,
+      "files": [
+        "block126-job-live-log.test.mjs",
+        "block126-job-terminal-events.test.mjs",
+        "block162-agent-ws-endpoint.test.mjs",
+        "block162-ws-server.test.mjs",
+        "block169-review-commit-edge.test.mjs",
+        "block183-data-ws.test.mjs",
+        "block37-llm-transcript-route.test.mjs",
+        "federation-terminal.test.mjs",
+        "ipc-backpressure-profile.test.mjs",
+        "pl6a-stale-running-reconciler.test.mjs",
+        "preload-branch-result-namespaces.test.mjs",
+        "routes-ai-agent-subdomains.test.cjs",
+        "routes-harness-index-500.test.mjs",
+        "routes-harness-subdomains.test.mjs",
+        "routes-result-studio-facade.test.mjs",
+        "routes-result-studio-subdomains.test.mjs"
+      ]
+    },
+    {
+      "id": "C4-result-project",
+      "title": "结果与项目域（result-studio/lineage/沙箱/导出）",
+      "count": 13,
+      "files": [
+        "block127-lineage.test.mjs",
+        "block135-export-layout.test.mjs",
+        "block246-message-ratings.test.mjs",
+        "block246-scratchpad.test.mjs",
+        "block40-conversation-changes.test.mjs",
+        "final-report.test.mjs",
+        "project-memory-isolation.test.mjs",
+        "project-memory-migration.test.mjs",
+        "project-result-sandbox.test.mjs",
+        "project-run-layout.test.mjs",
+        "project-sandbox-mcp-tools.test.mjs",
+        "result-archive.test.mjs",
+        "result-summary-tool.test.mjs"
+      ]
+    },
+    {
+      "id": "C5-db-migration",
+      "title": "DB 与迁移（单例/共享文件/迁移定序）",
+      "count": 4,
+      "files": [
+        "db-singleton-shared-file.test.mjs",
+        "db-singleton.test.mjs",
+        "migration-007-conversation-export.test.mjs",
+        "nso-w2-db-single-source.test.mjs"
+      ]
+    },
+    {
+      "id": "C6-desktop-shell",
+      "title": "桌面壳与进程（窗口/SSH/supervisor/启动）",
+      "count": 10,
+      "files": [
+        "_mapSkillRuntimeStatus.test.mjs",
+        "block154-startup-async.test.mjs",
+        "block154-terminal-ssh-keepalive.test.mjs",
+        "block67-p2c.test.mjs",
+        "block67-ssh-host.test.mjs",
+        "dev-electron-profile.test.mjs",
+        "main-window-compat.test.mjs",
+        "owned-backend-supervisor.test.mjs",
+        "script-entry-guard.test.mjs",
+        "window-controls.test.mjs"
+      ]
+    },
+    {
+      "id": "C7-security-admission",
+      "title": "安全准入（token/凭据/ipc-trust/exec-token/schema）",
+      "count": 8,
+      "files": [
+        "block132-no-token-in-url.test.mjs",
+        "block150-explicit-credentials.test.mjs",
+        "dsml-guard.test.mjs",
+        "mcp-calltool-input-schema.test.mjs",
+        "nso-w2-exec-token.test.mjs",
+        "nso-w2-ipc-trust.test.mjs",
+        "nso-w2-mcp-health.test.mjs",
+        "nso-w2-workspace-roots.test.mjs"
+      ]
+    },
+    {
+      "id": "C8-model3d-svg",
+      "title": "3D/SVG 域（constraint/annotation/inkscape/governance）",
+      "count": 7,
+      "files": [
+        "block322-p3-03-v2a-mate-rotation.test.mjs",
+        "block322-p3-03-v2b-constraint-ops.test.mjs",
+        "block322-p3-03-v2b-features.test.mjs",
+        "block342-inkscape.test.mjs",
+        "block344-edit-governance.test.mjs",
+        "rw06-p405b-dimension-annotations.test.mjs",
+        "rw06-p405b-dimension-lines.test.mjs"
+      ]
+    },
+    {
+      "id": "C9-g0-qualification",
+      "title": "G0 资格面（packaged/provider/visual 负测）",
+      "count": 3,
+      "files": [
+        "g0-qualification-packaged.test.mjs",
+        "g0-qualification-provider.test.mjs",
+        "g0-qualification-visual.test.mjs"
+      ]
+    },
+    {
+      "id": "C10-governance-misc",
+      "title": "治理与杂项契约（codemod/品牌/遥测/评测工具/GenUI）",
+      "count": 32,
+      "files": [
+        "block-10-phase2-policy.test.mjs",
+        "block115-test-suggest.test.mjs",
+        "block133-r-deparse.test.mjs",
+        "block135-retry-policy.test.mjs",
+        "block146-agent-domain-validation.test.mjs",
+        "block146-bundle-failfast-required-input.test.mjs",
+        "block163-anthropic-vision.test.mjs",
+        "block163-knowledge-skills.test.mjs",
+        "block163-pack-permissions.test.mjs",
+        "block165-codemod-idempotent.test.mjs",
+        "block173-w3-contracts.test.mjs",
+        "block181-genui-path-repair.test.mjs",
+        "block358-filetree-repro.test.mjs",
+        "block56-model-fallback.test.mjs",
+        "block63-sidecar-tools.test.mjs",
+        "block87-projection-data.test.mjs",
+        "brand-identity.test.mjs",
+        "chat-file-references-server.test.mjs",
+        "chat-file-references.test.mjs",
+        "ck10-telemetry-funnel.test.mjs",
+        "config-helper-centralized.test.mjs",
+        "gen-ui-full-html-priority.test.mjs",
+        "harness-workspace-tools.test.mjs",
+        "jspdf-removed.test.mjs",
+        "nso-w4-extension-single-source.test.mjs",
+        "nso-w7-governance-tooling.test.mjs",
+        "pipeline.test.js",
+        "report-theme.test.mjs",
+        "runtime-resource-probe.test.mjs",
+        "runtime-resource-snapshot.test.mjs",
+        "scripts-platform-contract.test.mjs",
+        "ui272-reasoning-persist.test.mjs"
+      ]
+    }
+  ]
+}

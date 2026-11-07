@@ -1,0 +1,7 @@
+# AUDIT-LOG 自动精简归档 · 2026-11-07（audit-log-compact.mjs）
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（用户裁决「AUDIT-LOG 的规范和精简
+> 应该是自动化的过程，仅保留必要的内容」）。内容=「最近处理记录」表窗口外淘汰行原文（搬移不改写）。
+> canonical 状态以 roadmap/plan/DOC-REGISTRY 为准，本档仅作广播历史追溯。
+
+| ✅ BLOCK-323-PROGRESSIVE-AUTONOMY（放权坡道 observe→allow 渐进放权，2026-11-01；用户裁决「行 规划好 开整吧」） | 2026-11-01 | **completed（当日立项当日收口）**：规则层 action 加 observe/allow + 工具层 MODE_VALUES 加 observe；观察证据=policy_observations UPSERT 合并表（(kind,rule_id,tool_name,fingerprint) 唯一，hits/首见脱敏样本/last_seen；task_events 30 天清扫不能承载复盘证据，decision_log 是 AI 决策台账不挪用）；拦截器最终 allow 决策上 fail-soft 落账 + auto-allow 行审计 + task_event `permission.auto_allowed` 尽力追加；复盘=GET/POST /api/ai/policy-observations + AgentRulesPanel 放权坡道区 + PolicyReviewBridge（≥3 未复盘推 review_available）；红线全守住=坡道终点复用既有 allow 不发明 auto 档/升级永远人工/判定序六层安全地板不变（规则 allow 跳层 4/5 但动态防护层 3 与循环防护层 6 照走，规则永不匹配 MCP 调用）。证据=契约 8/8 + 前端 6/6 + 邻域回归 29/29 + 后端实机 13/13 + UI 离屏实机 20/20（UI-655 verified；实机抓真②=flow 顶层固化 PETRI_B323_API 致 REST 误落 :3001 用户活后端——页内/REST 双通道对比定位，误建 3 任务均 failed 终态未执行 npm + 3 会话已删清偿）+ tsc 0 + lint 0 error + closeout 十三门 PASS（`1699ce6b`）；实机抓真①=探针缺 context.projectId（B 腿假绿被 A 腿暴露）已修；③=lint 7 个 unsafe-any（Array.isArray 收窄 ReadonlyArray）已修；决策工具面如实记录=本轮 doc:suggest/next:suggest/output:judge 均 jev_unavailable:no_key。非范围=不建第二执行器/不做模型或时间自动升档/不碰 MCP trust/dsh 其他借鉴点另立包。plan=docs/block-323-progressive-autonomy-plan.md | BLOCK-323 / P6-CLOSED |

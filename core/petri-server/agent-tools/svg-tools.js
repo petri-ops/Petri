@@ -344,7 +344,8 @@ function tool_svg_edit(args, ctx) {
  */
 function tool_svg_inkscape(args, ctx, onDone) {
   // 能力探针前置：缺席即 503 语义（路由层已做项目鉴权；工具层不因探针触 DB）
-  const status = inkscape.inkscapeStatus();
+  // ctx.inkscapeStatus 仅供测试/隔离栈注入（与下方 ctx.db 同风格）
+  const status = (ctx && ctx.inkscapeStatus) ? ctx.inkscapeStatus() : inkscape.inkscapeStatus();
   if (!status.available) {
     onDone({ error: 'inkscape_unavailable', message: status.hint || 'Inkscape 不可用', available: false });
     return null;

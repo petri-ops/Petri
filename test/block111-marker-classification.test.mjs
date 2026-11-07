@@ -12,6 +12,8 @@
  */
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import test from 'node:test';
@@ -19,6 +21,14 @@ import test from 'node:test';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const require = createRequire(import.meta.url);
+
+// BLOCK-375（S0）— decision config 文件层隔离：BLOCK-199 P4 起 resolvePointEnabled
+// 的 stored.enabled 优先于 env 种子（BLOCK-211 C-32 语义），本机 <cwd>/data/decision-config.json
+// 存有 marker-celltype.enabled=false 时整簇被压成 guard_disabled。
+// 与 test/block211-c32-env-seed.test.mjs 同款隔离：指到临时目录，env 种子语义恢复。
+const __isoDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'b111-marker-'));
+process.env.PETRI_LOCAL_DATA_DIR = __isoDataDir;
+process.env.PETRI_DECISION_CONFIG_PATH = path.join(__isoDataDir, 'decision-config.json');
 
 const {
   MARKER_DECISION_THRESHOLD,

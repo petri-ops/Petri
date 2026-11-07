@@ -8,7 +8,7 @@ import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const { computeRevisionChainHash, validateArtifactRevision } = require('../core/shared-backend/result-studio-contracts.js');
+const { computeRevisionChainHash } = require('../core/shared-backend/result-studio-contracts.js');
 
 const rev = (id, ordinal, outputHash, createdAt) => ({
   revisionId: id, revisionOrdinal: ordinal, artifactId: 'artifact-a',

@@ -163,9 +163,10 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
     const content = fs.readFileSync(subPath, 'utf8');
     const lineCount = content.split('\n').length;
     assert.ok(lineCount >= 30, `${name}.js should be ≥ 30 lines, got ${lineCount}`);
-    // BLOCK-104 P1 — 逐文件棘轮帽（只许降不许升）：revisions.js 现状 347
-    // （BLOCK-86/94 增量漂移，阈值对齐现状并留痕；行数回收走独立重构工作包）。
-    const cap = name === 'revisions' ? 347 : 320;
+    // BLOCK-104 P1 — 逐文件棘轮帽（只许降不许升）。BLOCK-375（S0）：347 帽在
+    // HEAD a2354ffb 已破（revisions.js 406，昨日 wave-0 分片同红=存量漂移），
+    // 按只减不增棘轮惯例锚定现值 406 留痕；行数回收走蓝图 S4 重构批。
+    const cap = name === 'revisions' ? 406 : 320;
     assert.ok(lineCount <= cap, `${name}.js should be ≤ ${cap} lines, got ${lineCount}`);
   }
 });

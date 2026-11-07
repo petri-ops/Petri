@@ -215,7 +215,29 @@ function ensureResultStudioSchema(db) {
     throw new Error('[result-studio-schema] db instance with exec() is required');
   }
   for (const statement of SCHEMA_STATEMENTS) db.exec(statement);
+  ensureArtifactChainHashColumns(db);
   return { schemaVersion: RESULT_STUDIO_SCHEMA_VERSION, tables: [...RESULT_STUDIO_TABLES] };
+}
+
+/**
+ * BLOCK-375（S0）——与迁移 022（artifact 链哈希列）幂等对齐。
+ *
+ * 背景：migration 001 的 SQL 与本模块 buildMigrationSql() 有逐字节一致契约
+ * （test/result-studio-migration.test.mjs），因此链哈希列**不能**进 fresh DDL
+ * （001 是已应用迁移的历史真相）；但写入路径（result-studio-repository
+ * insertRevision）读取 chain_hash——凡不经 migration-runner 建库的夹具
+ * （测试、agent-tools 运行时 ensure 路径）都会 `no such column`。
+ * 这里按 pragma 检查缺列再 ALTER：已有列（迁移 022 已应用）零操作。
+ */
+function ensureArtifactChainHashColumns(db) {
+  const present = new Set(
+    db.prepare('PRAGMA table_info(artifact_revisions)').all().map((r) => r.name)
+  );
+  for (const col of ['prev_chain_hash', 'chain_hash']) {
+    if (!present.has(col)) {
+      db.exec(`ALTER TABLE artifact_revisions ADD COLUMN ${col} TEXT`);
+    }
+  }
 }
 
 /**

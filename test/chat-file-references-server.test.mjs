@@ -88,6 +88,9 @@ test('agent prompt mirrors the internal URI contract without changing action car
   assert.match(hints, /CHAT_FILE_REF_URI_v1/);
   assert.match(hints, /petri:\/\/artifact\/job-1\/report\.html/);
   assert.match(hints, /petri:\/\/workspace\/<projectId>\/<relativePath>/);
-  assert.match(hints, /不要写真机绝对路径/);
+  // BLOCK-375（S0）契约追新：46bdd0c7（NSO-W1 在制批）把「不要写真机绝对路径」改为
+  // 「用户明确索要时可给真实绝对路径，但不得猜测、编造或拼凑路径」——测试锚随契约走。
+  assert.match(hints, /不得猜测、编造或拼凑路径/);
+  assert.match(hints, /真实绝对路径/);
   assert.match(hints, /Action Card/);
 });
