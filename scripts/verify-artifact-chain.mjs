@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dbPath = process.argv[2] || path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
-const projectFilter = process.argv[3] || null;
+// BLOCK-377（S2 / G-09）——旗标与位置参数分离（--strict 曾被误当 project filter）
+const strict = process.argv.includes('--strict');
+const positional = process.argv.slice(3).filter((a) => !a.startsWith('--'));
+const projectFilter = positional[0] || null;
 
 if (!fs.existsSync(dbPath)) {
   console.error(`[chain-verify] db not found: ${dbPath}`);
@@ -34,15 +37,23 @@ const rows = db.prepare(`
 
 let checked = 0;
 const breaks = [];
+// BLOCK-377（S2 / G-09）——分流：惰性回填前的存量缺链行（chain_hash/prev 均空）
+// =legacy_unhashed（登记不判红，--strict 时才失败）；真断链/篡改照旧 fail-closed。
+const legacyUnhashed = [];
 const seen = new Map(); // `${project_id}|${family}` -> prev chain hash
 for (const row of rows) {
   const key = `${row.project_id}|${row.artifact_family_id}`;
   const expectedPrev = seen.get(key) ?? null;
+  if (!row.chain_hash && row.prev_chain_hash == null) {
+    legacyUnhashed.push(row.revision_id);
+    seen.set(key, expectedPrev);
+    continue;
+  }
   if ((row.prev_chain_hash || null) !== expectedPrev) {
     breaks.push(`prev_mismatch: ${row.revision_id} (stored prev=${row.prev_chain_hash}, expected=${expectedPrev})`);
   }
   if (!row.chain_hash) {
-    breaks.push(`chain_hash_missing: ${row.revision_id}（惰性回填前的存量行——不算断链，登记）`);
+    breaks.push(`chain_hash_missing: ${row.revision_id}（有 prev 而无本环哈希=回填中断，可疑）`);
     seen.set(key, expectedPrev);
     continue;
   }
@@ -60,9 +71,16 @@ for (const row of rows) {
 }
 db.close();
 
+if (legacyUnhashed.length > 0) {
+  console.log(`[chain-verify] legacy_unhashed：${legacyUnhashed.length} 版（惰性回填前存量，${strict ? '--strict 判红' : '登记不判红'}）`);
+}
 if (breaks.length > 0) {
   console.error(`[chain-verify] FAIL（${breaks.length} 断点）：`);
   for (const b of breaks) console.error(`  ${b}`);
+  process.exit(1);
+}
+if (strict && legacyUnhashed.length > 0) {
+  console.error(`[chain-verify] FAIL（--strict）：${legacyUnhashed.length} 版 legacy_unhashed 未回填`);
   process.exit(1);
 }
 console.log(`[chain-verify] PASS：${checked} 版链哈希全部复算一致`);

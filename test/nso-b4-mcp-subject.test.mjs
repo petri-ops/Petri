@@ -22,9 +22,10 @@ test('B4 外部 MCP 调用不经 agent 拦截器（MCP registry 独立入口）'
   // registry callTool 不 require 拦截器（两轴分离的结构保证）
   assert.ok(!/require\(['"][^']*agent-tool-interceptor['"]\)/.test(registrySrc),
     'MCP registry 不得引入 agent 拦截器——外部 MCP 主体走 MCP trust 轴');
-  // 拦截器不产 MCP trust 语义
-  assert.ok(!/mcpServerId.*trust.*allow/.test(interceptorSrc) || true);
-  void interceptorSrc;
+  // BLOCK-377（S2）——|| true 恒真断言换行为负测（原断言永真=零约束）：
+  // 拦截器不得产 MCP trust 语义（trust/allow 决策只能由 MCP trust 轴给出）。
+  assert.ok(!/mcpServerId[^\n]{0,80}(trust|allow)/.test(interceptorSrc),
+    'agent 拦截器不得出现 mcpServerId×trust/allow 语义（两轴分离：MCP trust 归 MCP 轴）');
 });
 
 test('B4 capability token 只存在于 agent 拦截器（capabilityEvidence 签发点唯一）', () => {
@@ -32,12 +33,19 @@ test('B4 capability token 只存在于 agent 拦截器（capabilityEvidence 签�
   assert.match(interceptorSrc, /capabilityEvidence/, 'agent 拦截器是 capabilityEvidence 唯一签发点');
   const mcpDir = path.join(ROOT, 'core', 'petri-server', 'mcp');
   const offenders = [];
-  for (const f of fs.readdirSync(mcpDir)) {
-    if (!f.endsWith('.js')) continue;
-    const s = fs.readFileSync(path.join(mcpDir, f), 'utf8');
-    if (s.includes('capabilityEvidence')) offenders.push(f);
-  }
-  assert.deepEqual(offenders, [], 'mcp/ 下不得出现 capabilityEvidence——外部 MCP 主体不进 token 面');
+  // BLOCK-377（S2）——扫描覆盖 mcp/ 子目录（registry/run-plugin-script 等此前在扫描盲区）
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!e.name.endsWith('.js')) continue;
+      if (fs.readFileSync(full, 'utf8').includes('capabilityEvidence')) {
+        offenders.push(path.relative(mcpDir, full));
+      }
+    }
+  };
+  walk(mcpDir);
+  assert.deepEqual(offenders, [], 'mcp/ 全树不得出现 capabilityEvidence——外部 MCP 主体不进 token 面');
 });
 
 test('B4 MCP trust 语义作为外部主体治理轴（既有实现锚点在案）', () => {

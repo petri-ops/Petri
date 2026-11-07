@@ -12,14 +12,17 @@ const path = require('path');
 // migration-runner 同一实现）：PETRI_DB_PATH > PETRI_LOCAL_DATA_DIR/petri.db > 包内旧默认。
 // 基础集合=WAL + busy_timeout 10s（"admin panel frozen" 根因：高频写占 WAL writer 时读立刻
 // SQLITE_BUSY）+ mmap 64MB（CK-05 实测大扫描 −8.5%/点查 −15%）+ wal_autocheckpoint 1000。
-// BLOCK-372 Batch-2（用户裁决「直接搞完剩余未做的内容」）：后端 FK 开启。
-// 此前桌面 ON / 后端 OFF 分歧（策略模块头注）；开启后存量违约行会开始失败——
-// 全量回归（test:all:sharded）作为证据门：绿则保持，红则回退并登记违约清单。
+// BLOCK-372 Batch-2 → BLOCK-377（S2 / G-08）FK 裁决落地：后端 foreign_keys=OFF。
+// 事实链：Batch-2 先开 ON 跑全量回归=179 fail（测试 setup 大量不满足 FK 约束，
+// 证据 wave-3b/fk-regression-*），按预案裁决回退 OFF——但该回退提交（b4edf467）
+// 实际把 ON pragma 写进了本文件（裁决与代码反向，S0 分片勘察钉死）。本包按裁决
+// 落地：后端 OFF（与策略模块头注唯一真相一致）；桌面侧 ON 维持（_db-singleton +
+// A-007.8 断言）。全量切换（ON）需独立大包逐表清偿违约行 + 测试 setup 补关联。
 const { resolveDbPath, applyCanonicalPragmas } = require('../../shared-backend/db-connection-policy');
 const DB_PATH = resolveDbPath(process.env) || path.join(__dirname, '..', 'petri.db');
 const db = new Database(DB_PATH);
 applyCanonicalPragmas(db, { busyTimeoutMs: 10000 });
-db.pragma('foreign_keys = ON');
+db.pragma('foreign_keys = OFF');
 // Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {
   db.pragma('wal_checkpoint(TRUNCATE)');
@@ -55,6 +58,23 @@ function closeDatabase() {
     // already closed or never opened
   }
 }
+
+// BLOCK-377（S2 §8.7）——后端句柄退出收敛：进程退出前 checkpoint(TRUNCATE) 收敛
+// WAL 再 close（防「后端绿但 WAL 残留/句柄泄漏」家族）。与桌面 will-quit closeAll
+// 同语义；幂等（重复 close 安全）。真实进程回归=nso-s2-handle-convergence 测试。
+let exitHookInstalled = false;
+function installExitConvergence() {
+  if (exitHookInstalled) return;
+  exitHookInstalled = true;
+  const converge = () => {
+    try { db.pragma('wal_checkpoint(TRUNCATE)'); } catch { /* checkpoint 失败不阻断退出 */ }
+    try { db.close(); } catch { /* already closed */ }
+  };
+  process.once('exit', converge);
+  process.once('SIGINT', () => { converge(); process.exit(0); });
+  process.once('SIGTERM', () => { converge(); process.exit(0); });
+}
+installExitConvergence();
 
 /** Promise facade over better-sqlite3 for async route handlers. */
 function createAsyncDatabaseFacade(realDb) {

@@ -1,4 +1,5 @@
 const CHANNELS = require('./channels');
+const { createSenderGuard } = require('./_sender-guard');
 // ============================================================
 // IPC handlers: file:save-dialog, file:open-dialog,
 //               file:open-path, file:open-workspace-file
@@ -439,7 +440,12 @@ function setupFileDialogIpc({ mainWindow, listWorkspaceRoots = listRegisteredWor
    * @param {string} relativePath  必须相对路径（path.isAbsolute 校验）
    * @param {string} content       必须 string
    */
-  ipcMain.handle(CHANNELS.workspace.writeTextFile, async (_event, workspacePath, relativePath, content) => {
+  // BLOCK-377（S2 / G-07）——写面模块内 guard：全局门是网络边界，本 guard 是
+  // 「写通道只认主窗」的第二道（主窗引用经 setup 注入；模块内既有 guard 家族同款）。
+  const assertWriteSender = createSenderGuard(mainWindow);
+  ipcMain.handle(CHANNELS.workspace.writeTextFile, async (event, workspacePath, relativePath, content) => {
+    const guard = assertWriteSender(event);
+    if (guard) return guard;
     try {
       if (
         typeof workspacePath !== "string" ||

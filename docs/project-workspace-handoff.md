@@ -1,4 +1,6 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-07（🏁 **BLOCK-377 completed（S2）**：接手读 block-377 plan §6；ADMISSION 拨硬+FK 全量切换=S4/独立包
+最后更新：2026-11-07（▶ **BLOCK-377 active（S2）**：plan=docs/block-377-post-nso-s2-execution-admission-plan.md
 最后更新：2026-11-07（🏁 **BLOCK-376 completed（S1 主链）**：接手读 block-376 plan §6 收口；残红=P6/block93（S4）/UI-700 腿（S3）
 最后更新：2026-11-07（▶ **BLOCK-376 active（S1 主链）**：plan=docs/block-376-post-nso-s1-agent-mainline-plan.md；S0 残红补腿=C-46 兄弟仓/P6 会话档
 最后更新：2026-11-07（🏁 **BLOCK-375 completed（S0 可信起点）**：接手读 docs/block-375-post-nso-s0-trusted-baseline-plan.md §9 收口；残红=C-46×16/P6×1/S1×1（补腿路径在 shard-attribution.json）；工作树含并发写入者遗留（4M+10??，归属清单=acceptance/post-nso-2026-11-06/stage-0/wip-inventory.json，S0 零触碰 preserve 项）。用户预授权连续工作 S0→S7。G0 常态 · 不外推 packaged/Provider/GA。）

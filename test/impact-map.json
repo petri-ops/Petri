@@ -7659,6 +7659,39 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block377-post-nso-s2",
+      "note": "BLOCK-377 post-nso 蓝图 S2 执行准入与数据自证：FK 三面一致/链哈希 UPDATE 覆盖+legacy 分流/IPC file: 注册制/执行准入内核/manifest 字节自证+哈希链/execToken 删除裁决/句柄收敛/afterPack fail-closed/mcp degraded 汇入。",
+      "patterns": [
+        "docs/block-377-post-nso-s2-execution-admission-plan.md",
+        "acceptance/post-nso-2026-11-06/stage-2/**",
+        "core/shared-backend/execution-admission.js",
+        "core/shared-backend/delivery-manifest.js",
+        "src/ipc/_ipc-trust.js",
+        "core/petri-server/db/connection.js",
+        "src/ipc/file-dialog.js",
+        "core/shared-backend/result-studio-repository.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/agent-tools/workspace-tools/internals.js",
+        "build/afterPack.js",
+        "core/petri-server/mcp/registry.js"
+      ],
+      "tests": [
+        "test/nso-s2-fk-policy-consistency.test.mjs",
+        "test/nso-s2-chain-hash-update.test.mjs",
+        "test/nso-s2-execution-admission.test.mjs",
+        "test/nso-s2-delivery-manifest.test.mjs",
+        "test/nso-s2-handle-convergence.test.mjs",
+        "test/nso-w2-ipc-trust.test.mjs",
+        "test/nso-w2-workspace-roots.test.mjs",
+        "test/nso-b4-mcp-subject.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

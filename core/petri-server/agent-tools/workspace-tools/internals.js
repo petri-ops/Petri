@@ -39,16 +39,15 @@ function errorResult(error, message, extra = {}) {
   return { ok: false, error, message, ...extra };
 }
 
-// ── BLOCK-360（NSO-W2-3）命令判定单源 + 令牌收窄 + 风险可见 ──────────────────────────
-// 迁自 workspace-tools.js 的 commandVerdict（纯函数，集中一处便于负测）。三处收窄：
-//  ①特权令牌只认 per-call 出示（handlerOptions.execToken）；进程级
-//    PETRI_WORKSPACE_EXEC_TOKEN 一律忽略——全仓无签发者，且 env 会随 spawn 下沉子进程，
-//    `printenv` 即可读回再拼进命令绕过严格模式（2026-11-06 红测实证）。
-//  ②令牌命中时风险正则照算、风险照回传（privilegedBypass 审计可见），令牌文本剥离后不进 shell。
-//  ③默认放行裁决（2026-11-05 用户裁决）不变：命中风险放行，但 riskWarnings + 严格模式开关
-//    提示进入工具结果（此前只进后端日志，工具结果丢弃，与「回传、可见、不静默」不符）。
+// ── BLOCK-360（NSO-W2-3）→ BLOCK-377（S2 / G-06+§8.9）命令判定单源 + 风险可见 ─────────
+// 迁自 workspace-tools.js 的 commandVerdict（纯函数，集中一处便于负测）。
+// S2 裁决（蓝图 §8.9）：特权令牌通道**删除**——per-call execToken 全仓无签发者（不可达
+// 假安全面），进程级 env 令牌已被红测实证可被 `printenv` 读回绕过。删除后命令判定只剩
+// 「默认放行 + 风险可见 + 严格模式开关」，默认放行裁决（2026-11-05）不变。
+// 一次性执行凭据的正路 = execution-admission 内核（拦截器策略点签发、执行边界校验消耗，
+// 见 shared-backend/execution-admission.js），不再走「令牌文本嵌命令」形态。
 const MAX_COMMAND_BYTES = 64 * 1024;
-const EXEC_TOKEN_ENV = 'PETRI_WORKSPACE_EXEC_TOKEN';
+const EXEC_TOKEN_ENV = 'PETRI_WORKSPACE_EXEC_TOKEN'; // 已停用（检测到即告警，恒忽略）
 const STRICT_MODE_HINT = '严格模式可一键恢复硬拦：设环境变量 PETRI_EXEC_STRICT_DENYLIST=1';
 const NON_NEGOTIABLE_RISKS = Object.freeze([
   { pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i, reason: '禁止通过命令行发起交互式提权' },
@@ -58,7 +57,7 @@ const NON_NEGOTIABLE_RISKS = Object.freeze([
 ]);
 let envTokenDeprecationWarned = false;
 
-function commandVerdict(command, { execToken, env = process.env } = {}) {
+function commandVerdict(command, { env = process.env } = {}) {
   const normalized = String(command || '').trim();
   if (!normalized) return { ok: false, reason: 'command 不能为空' };
   if (Buffer.byteLength(normalized) > MAX_COMMAND_BYTES) return { ok: false, reason: 'command 过长' };
@@ -66,25 +65,10 @@ function commandVerdict(command, { execToken, env = process.env } = {}) {
   if (env[EXEC_TOKEN_ENV] && !envTokenDeprecationWarned) {
     envTokenDeprecationWarned = true;
     try {
-      console.warn(`[workspace-exec] ${EXEC_TOKEN_ENV} 已停用并被忽略（进程级令牌会下沉子进程）；特权放行只认 per-call handlerOptions.execToken`);
+      console.warn(`[workspace-exec] ${EXEC_TOKEN_ENV} 已停用并被忽略（进程级令牌会下沉子进程）；特权通道已删除（S2/§8.9），风险命令走默认放行+可见`);
     } catch { /* 日志失败不影响判定 */ }
   }
   const strictDenylist = env.PETRI_EXEC_STRICT_DENYLIST === '1';
-  const token = typeof execToken === 'string' && execToken.length >= 16 ? execToken : '';
-  if (token && normalized.includes(token)) {
-    const stripped = normalized.split(token).join('').trim();
-    if (!stripped) return { ok: false, reason: 'command 不能为空' };
-    const warnings = NON_NEGOTIABLE_RISKS.filter(({ pattern }) => pattern.test(stripped)).map((hit) => hit.reason);
-    if (warnings.length > 0) {
-      try {
-        console.warn(`[workspace-exec] 特权令牌放行（审计）：${warnings.join(' / ')}`);
-      } catch { /* 日志失败不影响执行 */ }
-    }
-    return {
-      ok: true, allowed: true, stripped, privilegedBypass: true,
-      ...(warnings.length > 0 ? { riskWarnings: warnings } : {}),
-    };
-  }
   const hits = NON_NEGOTIABLE_RISKS.filter(({ pattern }) => pattern.test(normalized));
   if (strictDenylist && hits[0]) return { ok: false, reason: hits[0].reason };
   if (hits.length > 0) {
@@ -103,7 +87,7 @@ function withRiskVisibility(result, verdict) {
   const extra = {};
   if (Array.isArray(verdict.riskWarnings) && verdict.riskWarnings.length > 0) extra.riskWarnings = verdict.riskWarnings;
   if (verdict.strictModeHint) extra.strictModeHint = verdict.strictModeHint;
-  if (verdict.privilegedBypass) extra.privilegedBypass = true;
+  // S2/§8.9：privilegedBypass 通道已删除（不再产生该字段；调用方为兼容旧审计日志保留读取无害）
   return Object.keys(extra).length ? { ...result, ...extra } : result;
 }
 

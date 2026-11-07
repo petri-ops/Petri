@@ -72,6 +72,12 @@ function createPipWindow() {
     },
   });
   pipWindow.loadFile(path.join(__dirname, '..', 'resources', 'computer-use-pip.html'));
+  // BLOCK-377（S2 / G-07）——file: sender 注册制：PiP 资源窗登记后方可发起 IPC
+  try {
+    require('../ipc/_ipc-trust').registerTrustedFileSenderHost(pipWindow.webContents);
+  } catch (e) {
+    console.warn('[computer-use-pip] file sender registration failed:', e && e.message);
+  }
   pipWindow.on('closed', () => { pipWindow = null; });
   return pipWindow;
 }

@@ -89,19 +89,18 @@ maybe('W2-3 负测：严格模式下 env 令牌不再构成绕过（拼进命令
   }
 });
 
-maybe('W2-3 per-call 令牌：严格模式放行，令牌文本不进 shell，风险仍回传审计', async () => {
+maybe('W2-3 per-call 令牌通道已删除（S2/§8.9）：严格模式下令牌不构成豁免，默认放行语义不变', async () => {
+  // BLOCK-377（S2 / §8.9 裁决修订）：per-call execToken 全仓无签发者=不可达假安全面 →
+  // 通道删除。严格模式下带「令牌」的风险命令照拦（不再有豁免形态）；env 令牌恒忽略不变。
   process.env.PETRI_EXEC_STRICT_DENYLIST = '1';
   try {
-    const result = await tools.executeCommand(
+    const blocked = await tools.executeCommand(
       { command: `echo marker-ok ${CALL_TOKEN}; rm -f does-not-exist.tmp` },
       ctx,
       { execToken: CALL_TOKEN },
     );
-    assert.equal(result.ok, true, JSON.stringify(result));
-    assert.match(String(result.stdout), /marker-ok/);
-    assert.ok(!String(result.stdout).includes(CALL_TOKEN), '令牌文本不得作为命令内容进入 shell');
-    assert.ok(Array.isArray(result.riskWarnings) && result.riskWarnings.length > 0, '特权放行仍须回传风险（审计可见）');
-    assert.equal(result.privilegedBypass, true);
+    assert.equal(blocked.ok, false, '删除豁免通道后，严格模式必须照拦');
+    assert.match(String(blocked.message || blocked.error), /不可恢复删除/);
   } finally {
     delete process.env.PETRI_EXEC_STRICT_DENYLIST;
   }

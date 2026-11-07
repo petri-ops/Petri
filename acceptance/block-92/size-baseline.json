@@ -124,8 +124,8 @@
       "path": "core/shared-backend/result-studio-repository.js",
       "wave": "C",
       "module": "W-04",
-      "lines": 1763,
-      "sha256": "887745e881ee8e0737cb9f29155b1ccfa89b8f85b52b40ea2bf1246d910f2ad3"
+      "lines": 1792,
+      "sha256": "d24a82cd71e817126ae71d91e30d27c3c0236028ef740a64a8facd9ecbd87f32"
     },
     {
       "path": "core/petri-server/agent-tools/workspace-tools.js",
@@ -138,8 +138,8 @@
       "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
-      "lines": 962,
-      "sha256": "08306d58747c0c92b1e90c8e88000bddfd133e79861ac93b3f8870cd930ee76b"
+      "lines": 967,
+      "sha256": "1f8bb632eb3c45a4b761e3c19964cf1ed5d7bfc31a2fcb6825bccb86e3f58a61"
     },
     {
       "path": "core/shared-backend/result-studio-lifecycle.js",
@@ -170,5 +170,5 @@
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
     }
   ],
-  "total": 23427
+  "total": 23461
 }

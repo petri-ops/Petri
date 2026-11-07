@@ -21,22 +21,36 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const {
   decideIpcSenderTrust,
   installGlobalIpcSenderGuard,
+  registerTrustedFileSenderHost,
+  resetRegisteredFileSenderHosts,
 } = require('../src/ipc/_ipc-trust.js');
 
 const TRUSTED = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
-function fakeSender({ url = 'http://localhost:3000/', type = 'window', destroyed = false } = {}) {
-  return { getURL: () => url, getType: () => type, isDestroyed: () => destroyed };
+function fakeSender({ url = 'http://localhost:3000/', type = 'window', destroyed = false, id } = {}) {
+  const sender = { getURL: () => url, getType: () => type, isDestroyed: () => destroyed };
+  if (id !== undefined) sender.id = id; // S2/G-07：file: 注册制按 webContents id 判定
+  return sender;
 }
 function fakeEvent(opts = {}, frameUrl) {
   const sender = fakeSender(opts);
   return frameUrl === undefined ? { sender } : { sender, senderFrame: { url: frameUrl } };
 }
 
-test('W2-1 受信 dev origin 两变体与自家 file: 窗放行', () => {
+test('W2-1 受信 dev origin 两变体与自家 file: 窗放行（S2/G-07 注册制追新）', () => {
   assert.equal(decideIpcSenderTrust({ event: fakeEvent(), trustedOrigins: TRUSTED }).ok, true);
   assert.equal(decideIpcSenderTrust({ event: fakeEvent({ url: 'http://127.0.0.1:3000/w' }), trustedOrigins: TRUSTED }).ok, true);
-  assert.equal(decideIpcSenderTrust({ event: fakeEvent({ url: 'file:///app/resources/computer-use-pip.html' }), trustedOrigins: TRUSTED }).ok, true);
+  // BLOCK-377（S2 / G-07）——file: 不再默认放行：未登记拒绝；登记放行；env 豁免同效。
+  const fileSender = fakeEvent({ url: 'file:///app/resources/computer-use-pip.html', id: 4242 });
+  const denied = decideIpcSenderTrust({ event: fileSender, trustedOrigins: TRUSTED });
+  assert.deepEqual([denied.ok, denied.reason], [false, 'ipc_sender_file_unregistered']);
+  registerTrustedFileSenderHost(4242);
+  assert.equal(decideIpcSenderTrust({ event: fileSender, trustedOrigins: TRUSTED }).ok, true);
+  resetRegisteredFileSenderHosts();
+  process.env.PETRI_IPC_FILE_SENDER_EXEMPT_IDS = '5151';
+  const exempt = decideIpcSenderTrust({ event: fakeEvent({ url: 'file:///x.html', id: 5151 }), trustedOrigins: TRUSTED });
+  assert.equal(exempt.ok, true, 'env 豁免 id 放行（登记制留痕）');
+  delete process.env.PETRI_IPC_FILE_SENDER_EXEMPT_IDS;
 });
 
 test('W2-1 负测：webview guest 一律拒（即便 URL 看似受信）', () => {

@@ -68,6 +68,28 @@ const {
 // BLOCK-92 Wave C-4：行映射/校验簇外迁 rows.js（纯搬运）；
 // createResultStudioRepository 工厂闭包保留本文件（同 tools-executor 先例）。
 
+/**
+ * BLOCK-377（S2 / G-09）——业务列 UPDATE 后重算单环链哈希。
+ * prev 取行内 prev_chain_hash（链拓扑不变），载荷按当前行值重建。
+ * 行完全无链字段（legacy_unhashed 存量）时跳过并返回 false（校验器按
+ * legacy 分流，不在此处伪造链环）。
+ */
+function recomputeRevisionChainHash(db, revisionId) {
+  const row = db.prepare(
+    'SELECT * FROM artifact_revisions WHERE revision_id = ?'
+  ).get(revisionId);
+  if (!row || (row.prev_chain_hash == null && row.chain_hash == null)) return false;
+  const chainHash = computeRevisionChainHash(row.prev_chain_hash, {
+    revisionId: row.revision_id, revisionOrdinal: row.revision_ordinal, artifactId: row.artifact_id,
+    outputHash: row.output_hash, validationStatus: row.validation_status,
+    reproducibilityStatus: row.reproducibility_status, createdAt: row.created_at,
+  });
+  db.prepare('UPDATE artifact_revisions SET chain_hash = ? WHERE revision_id = ?')
+    .run(chainHash, revisionId);
+  return true;
+}
+
+
 function createResultStudioRepository(db, options = {}) {
   if (!db || typeof db.prepare !== 'function') {
     throw new ResultStudioRepositoryError('db_required', 'A better-sqlite3 database instance is required.');
@@ -134,6 +156,7 @@ function createResultStudioRepository(db, options = {}) {
       db.prepare('SELECT * FROM result_workflow_graphs WHERE graph_id = ?').get(graph.graphId)
     );
   }
+
 
   function insertRevision(input) {
     const familyId = input && input.artifactFamilyId;
@@ -899,6 +922,10 @@ function createResultStudioRepository(db, options = {}) {
           db.prepare(`UPDATE artifact_revisions SET reproducibility_status = 'verified'
               WHERE revision_id = ? AND project_id = ? AND change_set_id = ?`)
             .run(revision.revisionId, projectId, changeSetId);
+          // BLOCK-377（S2 / G-09）——业务列 UPDATE 重算链哈希：reproducibility_status 在
+          // 链载荷内，改列不重算=无痕篡改窗口。prev 用行内 prev_chain_hash（链结构不变，
+          // 只重算本环）；is_current 指针位不在载荷内，无需重算。
+          recomputeRevisionChainHash(db, revision.revisionId);
         }
         const validationSummary = { ...(sourceChangeSet.validationSummary || {}), replayProof };
         db.prepare('UPDATE scientific_change_sets SET validation_summary_json = ?, updated_at = ? WHERE change_set_id = ? AND status = ?')
@@ -1760,4 +1787,6 @@ module.exports = {
   createResultStudioRepository,
   CHANGE_SET_CLOSED_STATUSES,
   CHANGE_SET_SETTLED_STATUSES,
+  // BLOCK-377（S2 / G-09）测试缝：链哈希重算钩子的单元面（与 _test 家族同模式）
+  _test: { recomputeRevisionChainHash },
 };

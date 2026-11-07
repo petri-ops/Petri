@@ -78,8 +78,17 @@ function resolveNativeSource(context) {
     traces.push(`${path.relative(projectDir, file)}=${ok === true ? 'OK' : ok === false ? 'ABI_MISMATCH' : 'PROBE_UNAVAILABLE'}`);
     if (ok === true) return file;
     if (ok === null) {
-      console.warn(`[afterPack] ABI 实测不可用（非 ABI 错误），采用首候选：${file}`);
-      return file;
+      // BLOCK-377（S2 §8.8）——PROBE_UNAVAILABLE 不再静默采用首候选：探针不可用=
+      // ABI 未实测，静默放行会把「没测过」伪装成「测过兼容」。显式 env 豁免口
+      // PETRI_PACK_PROBE_FALLBACK=1（登记制留痕）供探针基础设施缺失的受控场景。
+      if (process.env.PETRI_PACK_PROBE_FALLBACK === '1') {
+        console.warn(`[afterPack] ABI 实测不可用且 PETRI_PACK_PROBE_FALLBACK=1（显式豁免）：采用首候选 ${file}`);
+        return file;
+      }
+      throw new Error(
+        `ABI 实测探针不可用且未设 PETRI_PACK_PROBE_FALLBACK=1（fail-closed，不静默放行）：${file}\n`
+        + '先修探针基础设施（probeNativeLoad），或显式设置豁免并登记原因。',
+      );
     }
   }
   throw new Error(

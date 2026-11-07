@@ -9,6 +9,8 @@
 最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：第二真相清理（ERROR_I18N 13 死码/恒 null 桩/重试分类单源——首版空洞委托被 provider-protocol 抓真/token 账本死口径）+ runLoop 首切片（预算步骤 177 行外提，拆前拆后 54/54 同套绿，行数棘轮 1571 锚定）；更正 BLOCK-364「在用实现」误述。提交 402bf045。**下一包=W2b**（agent 主体 capability token / 链哈希 / 后端 FK 证据门）。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-365 NSO-W1 Agent 主链韧性 completed（带例外）**：在制批经授权落地（46bdd0c7）；F-01 流中断全链穿透到整轮重试（95c242ad，真服务器+真 provider+真网关实证）；F-02 预算每轮化+滞回 / F-15 trimmer 真实被丢集+活动轮兜底+无不实声明 / F-14 compaction_failed+增量摘要 / F-16 硬不可降级优先（73cdeb5e，context-breaker 存量红随修）；F-03 compaction 模式单源 + provider_retry 可观测（4ee6f4d7）。例外=task.failed 前端投影、真实 provider 长任务、P6 重算（待 UI-696）。**下一包=W5b 架构去补丁其余项**（在制批已落地，零阻塞）。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（▶ **NSO 收尾启动**：用户「行 … 把剩下没做的统一搞完」= 授权接收会话起始在制批 + 统一推完剩余。已先清偿被 closeout fail-fast 遮住的门禁债（83990965：lint 未用常量 + registry.js 尺寸棘轮拆 registry-health 工厂）；蓝图 §2a 写入执行进度与收尾顺序（W1→W5b→W2b→W3→W6b→W7b）。下一包=BLOCK-365 NSO-W1。G0 常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-07（🏁 **BLOCK-377 completed（S2 执行准入与数据自证）**：FK OFF 三面一致/链哈希 UPDATE/file: 注册制/准入内核/execToken 删除/manifest 自证
+最后更新：2026-11-07（▶ **BLOCK-377 active（S2 执行准入与数据自证）**：FK 裁决/链哈希 UPDATE/IPC 收紧/三入口 token/manifest 自证
 最后更新：2026-11-07（🏁 **BLOCK-376 completed（S1 主链，带例外）**：G-03/04/05/11 全交付+网关 status 缺陷抓真修复；spawn persona→S4；下一阶段 S2
 最后更新：2026-11-07（▶ **BLOCK-376 active（S1 Agent 主链最后一公里）**：流中断穿透/增量摘要/压缩失败可见/SSE task.failed/降级投影/轨迹事件注册；用户预授权 S0→S7 连续工作
 最后更新：2026-11-07（🏁 **BLOCK-375 completed（S0 可信起点）**：code-size/knip 红门归零、全量分片 387→38 残红全归因（16 C-46+1 P6+1 S1）、WIP 清单、canonical 对账收口：code-size/knip 红门归因重打、全量分片三段收口、WIP 归属清单、canonical 对账（旧蓝图翻 completed；G0-LF 为常驻 living-plan 不占串行槽位——「无 active 工作包」指串行槽位，两表述各指其层）。用户预授权 S0→S7 连续工作。G0 常态 · 不外推 packaged/Provider/GA。）

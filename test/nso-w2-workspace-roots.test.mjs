@@ -59,16 +59,24 @@ function loadFileDialogWithMock() {
 test('W2-1 负测：未登记 root 的写入被拒，受害文件字节不变', async () => {
   const { setupFileDialogIpc, handles } = loadFileDialogWithMock();
   const CHANNELS = require('../src/ipc/channels.js');
-  setupFileDialogIpc({ mainWindow: null, listWorkspaceRoots: () => [fs.realpathSync(registered)] });
+  // BLOCK-377（S2 / G-07）——写通道加模块内主窗 guard 后，测试事件必须是主窗形态
+  // （sender === mainWindow.webContents）；主窗语义=ipcEvent 卫边界，根登记=数据边界，两层都要过。
+  const fakeMainSender = { id: 9001 };
+  const mainWindowLike = { isDestroyed: () => false, webContents: fakeMainSender };
+  setupFileDialogIpc({ mainWindow: mainWindowLike, listWorkspaceRoots: () => [fs.realpathSync(registered)] });
   const write = handles.get(CHANNELS.workspace.writeTextFile);
-  const denied = await write({}, stranger, 'victim.txt', 'pwned\n');
+  const mainEvent = { sender: fakeMainSender };
+  const denied = await write(mainEvent, stranger, 'victim.txt', 'pwned\n');
   assert.deepEqual(denied, { ok: false, error: 'workspace_not_registered' });
   assert.equal(fs.readFileSync(path.join(stranger, 'victim.txt'), 'utf8'), 'keep\n');
-  const ok = await write({}, registered, 'note.md', 'edited\n');
+  const ok = await write(mainEvent, registered, 'note.md', 'edited\n');
   assert.equal(ok.ok, true);
   assert.equal(fs.readFileSync(path.join(registered, 'note.md'), 'utf8'), 'edited\n');
-  const escape = await write({}, registered, '../outside/victim.txt', 'pwned\n');
+  const escape = await write(mainEvent, registered, '../outside/victim.txt', 'pwned\n');
   assert.equal(escape.ok, false, '登记根内的路径穿越仍拒');
+  // S2/G-07 模块内 guard 负测：非主窗 sender 即便 root 已登记也拒
+  const outsider = await write({ sender: { id: 9002 } }, registered, 'note.md', 'pwned\n');
+  assert.deepEqual(outsider, { ok: false, error: 'unauthorized' });
 });
 
 test('W2-1 负测：open/showInFolder 共用同一登记根边界', async () => {
@@ -84,8 +92,12 @@ test('W2-1 负测：open/showInFolder 共用同一登记根边界', async () => 
 test('W2-1 登记根解析失败 fail-closed（不回落为放行）', async () => {
   const { setupFileDialogIpc, handles } = loadFileDialogWithMock();
   const CHANNELS = require('../src/ipc/channels.js');
-  setupFileDialogIpc({ mainWindow: null, listWorkspaceRoots: () => { throw new Error('db down'); } });
-  const r = await handles.get(CHANNELS.workspace.writeTextFile)({}, registered, 'note.md', 'x\n');
+  const fakeMainSender2 = { id: 9101 };
+  setupFileDialogIpc({
+    mainWindow: { isDestroyed: () => false, webContents: fakeMainSender2 },
+    listWorkspaceRoots: () => { throw new Error('db down'); },
+  });
+  const r = await handles.get(CHANNELS.workspace.writeTextFile)({ sender: fakeMainSender2 }, registered, 'note.md', 'x\n');
   assert.equal(r.ok, false);
   assert.match(String(r.error), /workspace_roots_unavailable/);
 });

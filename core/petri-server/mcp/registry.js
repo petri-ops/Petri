@@ -532,7 +532,10 @@ function _resolveMcpJobLayout({ toolJobId, projectId, userId }) {
 async function listTools() {
   try {
     refreshPluginSources();
+    clearRegistryIssue('refresh_plugin_sources');
   } catch (e) {
+    // BLOCK-377（S2 §8.10）——初始化失败汇入 degraded 账本（不得对外宣称完整可用）
+    noteRegistryIssue('refresh_plugin_sources', `refresh plugins before listTools failed: ${e.message}`);
     console.warn('[mcp-registry] refresh plugins before listTools failed:', e.message);
   }
 
@@ -822,7 +825,9 @@ function resolveResultStudioScriptOverride({ override, plugin, projectId, dbModu
 async function callTool(name, args, opts = {}) {
   try {
     refreshPluginSources();
+    clearRegistryIssue('refresh_plugin_sources');
   } catch (e) {
+    noteRegistryIssue('refresh_plugin_sources', `refresh plugins before callTool failed: ${e.message}`);
     console.warn('[mcp-registry] refresh plugins before callTool failed:', e.message);
   }
   // opts.userId：归属用户（agent 在登录态下跑，写进 tool_jobs.user_id，

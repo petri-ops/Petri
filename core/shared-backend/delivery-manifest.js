@@ -47,18 +47,38 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
   const scientificValidation = result.scientificValidation || null;
   const provenance = result.executionProvenance || null;
   const artifacts = Array.isArray(result.artifacts) ? result.artifacts : [];
-  const normalizedArtifacts = artifacts.map((artifact) => ({
-    id: artifact.id || null,
-    type: artifact.type || 'file',
-    label: artifact.label || artifact.title || artifact.filename || artifact.name,
-    relativePath: relativeInside(projectRoot, artifact.path) || artifact.canonicalPath || null,
-    sizeBytes: artifact.size ?? null,
-    sha256: provenance?.artifacts?.find((item) => (item.id && item.id === artifact.id) || item.filename === (artifact.filename || artifact.name))?.sha256 || null,
-    reproducibility: artifactReproducibility(artifact, provenance),
-  }));
+  // BLOCK-377（S2 / G-10）——产物 sha256 从 provenance 声明升级为**字节重算**：
+  // projectRoot 可达且产物文件在盘时按实际字节计算（declared 与 computed 并存，
+  // 二者不一致 = 交付完整性问题 → status 降级 degraded 并在 unresolved 登记）。
+  const normalizedArtifacts = artifacts.map((artifact) => {
+    const declared = provenance?.artifacts?.find((item) => (item.id && item.id === artifact.id) || item.filename === (artifact.filename || artifact.name))?.sha256 || null;
+    const absPath = artifact.path ? (path.isAbsolute(String(artifact.path)) ? String(artifact.path) : (projectRoot ? path.join(projectRoot, String(artifact.path)) : null)) : null;
+    let computed = null;
+    if (absPath && projectRoot) {
+      try {
+        if (fs.existsSync(absPath) && fs.statSync(absPath).isFile()) {
+          computed = crypto.createHash('sha256').update(fs.readFileSync(absPath)).digest('hex');
+        }
+      } catch { /* 读盘失败=不可计算，诚实留空 */ }
+    }
+    return {
+      id: artifact.id || null,
+      type: artifact.type || 'file',
+      label: artifact.label || artifact.title || artifact.filename || artifact.name,
+      relativePath: relativeInside(projectRoot, artifact.path) || artifact.canonicalPath || null,
+      sizeBytes: artifact.size ?? null,
+      sha256: computed || declared,
+      declaredSha256: declared,
+      computedSha256: computed,
+      sha256Source: computed ? 'computed_bytes' : (declared ? 'declared_provenance' : 'missing'),
+      reproducibility: artifactReproducibility(artifact, provenance),
+    };
+  });
   const coverage = requirementCoverage(taskRecord.spec.requestedDeliverables || [], normalizedArtifacts);
   const unresolved = coverage.filter((item) => item.status !== 'satisfied');
   const unavailable = normalizedArtifacts.filter((item) => item.reproducibility.status === 'unavailable');
+  // S2/G-10——声明与字节不一致=完整性缺口（不静默采信任何一侧）
+  const integrityDrift = normalizedArtifacts.filter((item) => item.declaredSha256 && item.computedSha256 && item.declaredSha256 !== item.computedSha256);
   let status = 'valid';
   if (
     job.status !== 'completed'
@@ -74,6 +94,7 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
     || ['degraded', 'needs_review'].includes(scientificValidation?.truthStatus || scientificValidation?.status)
     || unavailable.length
     || unresolved.length
+    || integrityDrift.length
   ) status = 'degraded';
   const manifest = {
     deliveryManifestVersion: DELIVERY_MANIFEST_VERSION,
@@ -106,9 +127,14 @@ function createDeliveryManifest({ taskRecord, job, projectRoot = null, findings 
         ...(scientificValidation?.findings || []).map((item) => `科学校验：${item.code}`),
         ...unresolved.map((item) => `未满足交付项：${item.requirement}`),
         ...unavailable.map((item) => `${item.label} 缺少复现入口`),
+        ...integrityDrift.map((item) => `${item.label} 产物字节与执行声明不一致（declared=${String(item.declaredSha256).slice(0,12)} computed=${String(item.computedSha256).slice(0,12)}）`),
       ],
     },
-    unresolved: [...unresolved.map((item) => ({ code: 'deliverable_unresolved', requirement: item.requirement })), ...(status === 'blocked' ? [{ code: 'delivery_blocked', reason: job.error || truth?.status || 'artifact_validation_failed' }] : [])],
+    unresolved: [
+      ...unresolved.map((item) => ({ code: 'deliverable_unresolved', requirement: item.requirement })),
+      ...integrityDrift.map((item) => ({ code: 'artifact_integrity_drift', artifactId: item.id, declared: item.declaredSha256, computed: item.computedSha256 })),
+      ...(status === 'blocked' ? [{ code: 'delivery_blocked', reason: job.error || truth?.status || 'artifact_validation_failed' }] : []),
+    ],
     generatedAt: new Date().toISOString(),
   };
   const manifestHash = crypto.createHash('sha256').update(stableStringify(manifest)).digest('hex');
@@ -127,9 +153,23 @@ function writeDeliveryManifest({ manifest, outputPath, projectRoot } = {}) {
   if (!manifest || !DELIVERY_STATUSES.includes(manifest.status)) throw new Error('delivery_manifest_invalid');
   const relative = relativeInside(projectRoot, outputPath);
   if (relative == null) throw new Error('delivery_manifest_path_outside_project');
+  // BLOCK-377（S2 / G-10）——manifest 链：写盘前读取同路径上一份 manifest 的
+  // manifestHash 作 prevManifestHash（首份为 null），重算本份 manifestHash 后落盘。
+  // 导出包哈希链可独立复算（篡改/乱序可见）。
+  let prevManifestHash = null;
+  try {
+    if (fs.existsSync(outputPath)) {
+      const previous = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+      if (previous && typeof previous.manifestHash === 'string') prevManifestHash = previous.manifestHash;
+    }
+  } catch { /* 上一份损坏=prev 取 null，链在本书新起（损坏事实已由读取方对账） */ }
+  const { manifestHash: _stale, ...manifestBody } = manifest;
+  const manifestWithPrev = { ...manifestBody, prevManifestHash };
+  const manifestHash = crypto.createHash('sha256').update(stableStringify(manifestWithPrev)).digest('hex');
+  const finalManifest = { ...manifestWithPrev, manifestHash };
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2));
-  return { outputPath: path.resolve(outputPath), relativePath: relative };
+  fs.writeFileSync(outputPath, JSON.stringify(finalManifest, null, 2));
+  return { outputPath: path.resolve(outputPath), relativePath: relative, manifestHash, prevManifestHash };
 }
 
 module.exports = { DELIVERY_MANIFEST_VERSION, DELIVERY_STATUSES, relativeInside, artifactReproducibility, requirementCoverage, createDeliveryManifest, writeDeliveryManifest };

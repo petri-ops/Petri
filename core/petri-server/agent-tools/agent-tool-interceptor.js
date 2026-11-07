@@ -383,7 +383,27 @@ function createAgentToolInterceptor(options = {}) {
     const capabilityEvidence = decision.fingerprintConsumable
       ? { fingerprintConsumed: true, source: 'once_fingerprint', guardKey: decision.guardKey || null }
       : (handlerOptions && handlerOptions.capabilityEvidence) || undefined;
-    const handlerOptionsWithAudit = { ...(handlerOptions || {}), ...(capabilityEvidence ? { capabilityEvidence } : {}) };
+    // BLOCK-377（S2 / G-06）——capabilityEvidence 升级为可校验凭据：策略放行点签发
+    // 一次性执行 token（taskId+fingerprint+ctxSnapshot+expiresAt），执行边界
+    // （tools-executor/ssh-direct-runner）校验并消耗。enforcement 由
+    // PETRI_EXEC_ADMISSION 控制（'1'=拒绝无凭据执行；缺省 observe=只审计不拒绝，
+    // 拨硬需先完成全调用面审计——S4 配套）。
+    let executionAdmission = null;
+    try {
+      const { issueExecutionToken } = require('../../shared-backend/execution-admission');
+      const issued = issueExecutionToken({
+        taskId: (ctx && ctx.taskId) || null,
+        fingerprint: decision.guardKey || (name ? `tool:${name}` : 'tool:unknown'),
+        ctxSnapshot: { tool: name || null, accessMode: (ctx && ctx.accessMode) || null },
+        ttlMs: 5 * 60 * 1000,
+      });
+      executionAdmission = { token: issued.token, enforcement: (process.env.PETRI_EXEC_ADMISSION === '1') ? 'enforce' : 'observe' };
+    } catch { /* 签发失败不阻断策略已放行的调用；执行边界 observe 模式会如实记录缺失 */ }
+    const handlerOptionsWithAudit = {
+      ...(handlerOptions || {}),
+      ...(capabilityEvidence ? { capabilityEvidence } : {}),
+      ...(executionAdmission ? { executionAdmission } : {}),
+    };
     // BLOCK-33 P3 — handlerOptions（可选 { onOutput }）透传给 handler；
     // 现有 handler 均为 (args, ctx) 签名，多余的实参会被安全忽略。
     return entry.handler(args, ctx, handlerOptionsWithAudit);
