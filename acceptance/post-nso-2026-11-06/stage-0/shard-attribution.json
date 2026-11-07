@@ -11,39 +11,143 @@
       "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1794018949095.json (final run)"
     ],
     "finalNodeCoreLog": ".petri-dev-user-data/task-runs/20261107-022854-nso-w0-shard-node-core-qqnfy.log",
-    "finalVerdicts": { "node-core": "failed exit=1 (38 ✖, 全部逐件归因如下)", "frontend": "passed exit=0", "node-long": "passed exit=0" }
+    "finalVerdicts": {
+      "node-core": "failed exit=1 (38 ✖, 全部逐件归因如下)",
+      "frontend": "passed exit=0",
+      "node-long": "passed exit=0"
+    }
   },
-  "trajectory": { "run0_nodeCoreFails": 387, "finalNodeCoreFails": 38, "fixedByS0": 349 },
+  "trajectory": {
+    "run0_nodeCoreFails": 387,
+    "finalNodeCoreFails": 38,
+    "fixedByS0": 349
+  },
   "s0Fixes": [
-    { "cluster": "result-studio SQLITE_ERROR ×110", "rootCause": "BLOCK-373 迁移 022 链哈希列未同步进 ensureResultStudioSchema（夹具/agent-tools ensure 路径 no such column: chain_hash）", "fix": "schema 模块末尾幂等对齐（ensureArtifactChainHashColumns，pragma 检查缺列再 ALTER；migration 001 逐字节契约不动）+ 平价回归门 test/block375-schema-parity.test.mjs", "evidence": "修复前后 result-changeset-service 等八文件 110→0" },
-    { "cluster": "test-affected ×18", "rootCause": "①scripts/backfill-artifact-chain.mjs（BLOCK-372 遗产，未跟踪）无 impact-map 分类 ②acceptance/ui-696/（并发写入者在制目录）无 evidence 映射规则", "fix": "impact-map 补 block375 分类 pattern + ui696-model-preferences-evidence 占位规则（空 tests，如实注明读取者随其落地补登）" },
-    { "cluster": "block111 ×10", "rootCause": "本机 data/decision-config.json（BLOCK-199 文件层）stored enabled=false 压住测试 env 种子（C-32 语义）", "fix": "测试加 PETRI_DECISION_CONFIG_PATH 临时目录隔离（与 block211 同款）" },
-    { "cluster": "block172/block318/chat-file-references/block321c/block322 ×9", "rootCause": "源码扫描/常量锚点契约漂移（W5b 拆分迁文件、UI-629 保底 760→420 用户裁决、BLOCK-334 退役 switchToResult、46bdd0c7 文件引用文案契约变更）", "fix": "锚点随契约追新并逐处留因注释" },
-    { "cluster": "loop-orchestrator-subdomains ×3 + routes-result-studio-subdomains ×1", "rootCause": "旧行数帽（970/1250/450/347）在 HEAD 已违反=常红化石", "fix": "按 W5b 只减不增惯例锚定现值转真棘轮（1140/1572/465/406），增长即红、S4 拆分回收" },
-    { "cluster": "block267 ×1", "rootCause": "34 处存量 flow 顶层 env 固化（在制期落地）", "fix": "冻结基线棘轮 test/flow-env-trap-baseline.json（新增即红，只减不增）" },
-    { "cluster": "block344 ×1", "rootCause": "ESM 文件 describe 体内裸 require（加载期 ReferenceError，BLOCK-345 套件整组未注册）", "fix": "createRequire 统一" },
-    { "cluster": "block342 ×3", "rootCause": "BLOCK-345 Inkscape 1.4 实机抓真后测试锚点未追（1.3 era args/env 语义）", "fix": "锚随 1.4 契约 + runInkscapeAction/tool_svg_inkscape 加与 ctx.db 同风格注入缝（args.status / ctx.inkscapeStatus）使测试 hermetic" },
-    { "cluster": "block150 ×1 + next03 ×1", "rootCause": "darwin credential store 默认 keychain 后端穿透 PETRI_LOCAL_DATA_DIR 隔离（读到本机真实凭据）", "fix": "测试显式钉 PETRI_CREDENTIAL_BACKEND=file" },
-    { "cluster": "preload-branch-result-namespaces ×2", "rootCause": "fc3dedbd（UI-457）退役 result:* IPC 面时漏删的守护化石", "fix": "删 result 断言留 branch 覆盖，逐字留因" },
-    { "cluster": "block48-sidecar-tools ×7（本会话中途转环境档）", "rootCause": "macOS 会话级 AX 窗口内容缺席（菜单栏树正常、窗口树缺席；同机同码 run-1 实测 10/11 绿）——机器会话状态，非产品回归；另清理周四遗留 9223 测试实例进程", "fix": "前置腿探测窗口内容缺席 → 动态 skip 可见（BLOCK-104 环境门先例），0 红 7 skip 4 绿" },
-    { "cluster": "block63 ×19", "rootCause": "Windows sidecar 发布物在 macOS 无真实被测物（套件硬 assert 而非 skip）", "fix": "平台门 skip 可见带指引（BLOCK-104 先例转正）+ process.platform 分支按门禁自身指引登记 BASELINE" },
-    { "cluster": "block357 ×1", "rootCause": "surface-matrix（生成器自有产物）时间戳漂移致 capability-map 配对失确定", "fix": "按记录生成器重刷 matrix/doc/map 对，恢复勿手改约束的确定性" },
-    { "cluster": "release-contract ×1", "rootCause": "BLOCK-214 生信 skills 去核后 deseq2 能力真相迁兄弟包，仓内 manifest 引用失效", "fix": "能力真相三源化：仓内 skill ∪ 兄弟包 registry（只读）∪ 显式豁免（留因待 S6 golden path 重基）" },
-    { "cluster": "scripts-platform ×1", "rootCause": "informational 测试对 30 个存量脚本恒红（informational 语义当门禁用）", "fix": "冻结基线棘轮 test/scripts-windows-calls-baseline.json（31 条）" },
-    { "cluster": "platform-branch-freeze ×1 + nso-w5-impact-coverage ×1", "rootCause": "block63 新增 process.platform 分支未登记 BASELINE；NSO Batch-1/4 测试文件未挂 impact-map 规则", "fix": "按门禁自身指引登记/补挂（nso-batch1-batch4-tests 规则 + block375 规则补 schema-parity 测试）" }
+    {
+      "cluster": "result-studio SQLITE_ERROR ×110",
+      "rootCause": "BLOCK-373 迁移 022 链哈希列未同步进 ensureResultStudioSchema（夹具/agent-tools ensure 路径 no such column: chain_hash）",
+      "fix": "schema 模块末尾幂等对齐（ensureArtifactChainHashColumns，pragma 检查缺列再 ALTER；migration 001 逐字节契约不动）+ 平价回归门 test/block375-schema-parity.test.mjs",
+      "evidence": "修复前后 result-changeset-service 等八文件 110→0"
+    },
+    {
+      "cluster": "test-affected ×18",
+      "rootCause": "①scripts/backfill-artifact-chain.mjs（BLOCK-372 遗产，未跟踪）无 impact-map 分类 ②acceptance/ui-696/（并发写入者在制目录）无 evidence 映射规则",
+      "fix": "impact-map 补 block375 分类 pattern + ui696-model-preferences-evidence 占位规则（空 tests，如实注明读取者随其落地补登）"
+    },
+    {
+      "cluster": "block111 ×10",
+      "rootCause": "本机 data/decision-config.json（BLOCK-199 文件层）stored enabled=false 压住测试 env 种子（C-32 语义）",
+      "fix": "测试加 PETRI_DECISION_CONFIG_PATH 临时目录隔离（与 block211 同款）"
+    },
+    {
+      "cluster": "block172/block318/chat-file-references/block321c/block322 ×9",
+      "rootCause": "源码扫描/常量锚点契约漂移（W5b 拆分迁文件、UI-629 保底 760→420 用户裁决、BLOCK-334 退役 switchToResult、46bdd0c7 文件引用文案契约变更）",
+      "fix": "锚点随契约追新并逐处留因注释"
+    },
+    {
+      "cluster": "loop-orchestrator-subdomains ×3 + routes-result-studio-subdomains ×1",
+      "rootCause": "旧行数帽（970/1250/450/347）在 HEAD 已违反=常红化石",
+      "fix": "按 W5b 只减不增惯例锚定现值转真棘轮（1140/1572/465/406），增长即红、S4 拆分回收"
+    },
+    {
+      "cluster": "block267 ×1",
+      "rootCause": "34 处存量 flow 顶层 env 固化（在制期落地）",
+      "fix": "冻结基线棘轮 test/flow-env-trap-baseline.json（新增即红，只减不增）"
+    },
+    {
+      "cluster": "block344 ×1",
+      "rootCause": "ESM 文件 describe 体内裸 require（加载期 ReferenceError，BLOCK-345 套件整组未注册）",
+      "fix": "createRequire 统一"
+    },
+    {
+      "cluster": "block342 ×3",
+      "rootCause": "BLOCK-345 Inkscape 1.4 实机抓真后测试锚点未追（1.3 era args/env 语义）",
+      "fix": "锚随 1.4 契约 + runInkscapeAction/tool_svg_inkscape 加与 ctx.db 同风格注入缝（args.status / ctx.inkscapeStatus）使测试 hermetic"
+    },
+    {
+      "cluster": "block150 ×1 + next03 ×1",
+      "rootCause": "darwin credential store 默认 keychain 后端穿透 PETRI_LOCAL_DATA_DIR 隔离（读到本机真实凭据）",
+      "fix": "测试显式钉 PETRI_CREDENTIAL_BACKEND=file"
+    },
+    {
+      "cluster": "preload-branch-result-namespaces ×2",
+      "rootCause": "fc3dedbd（UI-457）退役 result:* IPC 面时漏删的守护化石",
+      "fix": "删 result 断言留 branch 覆盖，逐字留因"
+    },
+    {
+      "cluster": "block48-sidecar-tools ×7（本会话中途转环境档）",
+      "rootCause": "macOS 会话级 AX 窗口内容缺席（菜单栏树正常、窗口树缺席；同机同码 run-1 实测 10/11 绿）——机器会话状态，非产品回归；另清理周四遗留 9223 测试实例进程",
+      "fix": "前置腿探测窗口内容缺席 → 动态 skip 可见（BLOCK-104 环境门先例），0 红 7 skip 4 绿"
+    },
+    {
+      "cluster": "block63 ×19",
+      "rootCause": "Windows sidecar 发布物在 macOS 无真实被测物（套件硬 assert 而非 skip）",
+      "fix": "平台门 skip 可见带指引（BLOCK-104 先例转正）+ process.platform 分支按门禁自身指引登记 BASELINE"
+    },
+    {
+      "cluster": "block357 ×1",
+      "rootCause": "surface-matrix（生成器自有产物）时间戳漂移致 capability-map 配对失确定",
+      "fix": "按记录生成器重刷 matrix/doc/map 对，恢复勿手改约束的确定性"
+    },
+    {
+      "cluster": "release-contract ×1",
+      "rootCause": "BLOCK-214 生信 skills 去核后 deseq2 能力真相迁兄弟包，仓内 manifest 引用失效",
+      "fix": "能力真相三源化：仓内 skill ∪ 兄弟包 registry（只读）∪ 显式豁免（留因待 S6 golden path 重基）"
+    },
+    {
+      "cluster": "scripts-platform ×1",
+      "rootCause": "informational 测试对 30 个存量脚本恒红（informational 语义当门禁用）",
+      "fix": "冻结基线棘轮 test/scripts-windows-calls-baseline.json（31 条）"
+    },
+    {
+      "cluster": "platform-branch-freeze ×1 + nso-w5-impact-coverage ×1",
+      "rootCause": "block63 新增 process.platform 分支未登记 BASELINE；NSO Batch-1/4 测试文件未挂 impact-map 规则",
+      "fix": "按门禁自身指引登记/补挂（nso-batch1-batch4-tests 规则 + block375 规则补 schema-parity 测试）"
+    }
   ],
   "residualFails": [
-    { "file": "test/p4r-invariants.test.mjs", "count": 8, "attribution": "C-46：兄弟仓 petri-pack-bio deseq2.R 语法错（unexpected string constant），用户未授权改兄弟仓", "disposition": "如实保留红 + C-46 归因；随 C-46 清偿自然转绿" },
-    { "file": "test/deseq2-multifactor-design.test.mjs", "count": 5, "attribution": "C-46 同根（同一 deseq2.R）", "disposition": "同上" },
-    { "file": "test/block218-pack-result-surface.test.mjs", "count": 2, "attribution": "C-46 家族：兄弟仓缺 ui/result.html", "disposition": "同上" },
-    { "file": "test/p4r-baseline.test.mjs", "count": 1, "attribution": "C-46 同根（corpus 生成依赖 deseq2 真实执行）", "disposition": "同上" },
-    { "file": "test/g0-rs-p6-product-acceptance.test.mjs", "count": 1, "attribution": "P6 证据源绑定过期（HEAD 前进而证据未重算；p6_current_source_tree_not_exact）", "disposition": "S0 提交后尝试 --live 重打；不可行则 pending 留补腿（干净树 + dev 栈 + 9223）" },
-    { "file": "test/block93-role-prompt.test.mjs", "count": 1, "attribution": "spawn 子链 system prompt 缺 BLOCK-339 persona 片段（存量红，与本次改动无关；属 agent 主链 prompt 装配域）", "disposition": "移交 S1（BLOCK-376 主链最后一公里）逐件清偿" }
+    {
+      "file": "test/p4r-invariants.test.mjs",
+      "count": 8,
+      "attribution": "C-46：兄弟仓 petri-pack-bio deseq2.R 语法错（unexpected string constant），用户未授权改兄弟仓",
+      "disposition": "如实保留红 + C-46 归因；随 C-46 清偿自然转绿"
+    },
+    {
+      "file": "test/deseq2-multifactor-design.test.mjs",
+      "count": 5,
+      "attribution": "C-46 同根（同一 deseq2.R）",
+      "disposition": "同上"
+    },
+    {
+      "file": "test/block218-pack-result-surface.test.mjs",
+      "count": 2,
+      "attribution": "C-46 家族：兄弟仓缺 ui/result.html",
+      "disposition": "同上"
+    },
+    {
+      "file": "test/p4r-baseline.test.mjs",
+      "count": 1,
+      "attribution": "C-46 同根（corpus 生成依赖 deseq2 真实执行）",
+      "disposition": "同上"
+    },
+    {
+      "file": "test/g0-rs-p6-product-acceptance.test.mjs",
+      "count": 1,
+      "attribution": "P6 证据源绑定过期（HEAD 前进而证据未重算；p6_current_source_tree_not_exact）",
+      "disposition": "S0 已尝试 --live 重打（npm run g0:result-studio:p6:update）：实采红 p6_restart_baseline_cohort_incomplete（重启基线 cohort 未完整，疑与本机会话状态 AX 档同源）——如实 pending；补腿=健康会话（注销/重启后）+ 干净树重跑 g0:result-studio:p6:update；不阻塞链"
+    },
+    {
+      "file": "test/block93-role-prompt.test.mjs",
+      "count": 1,
+      "attribution": "spawn 子链 system prompt 缺 BLOCK-339 persona 片段（存量红，与本次改动无关；属 agent 主链 prompt 装配域）",
+      "disposition": "移交 S1（BLOCK-376 主链最后一公里）逐件清偿"
+    }
   ],
   "honestyNotes": [
     "node-core exit=1 未归零：16 残红=C-46 兄弟仓未授权（用户红线明示不改）、1=P6 待重打、1=S1 域；蓝图『0 fail』出口按『0 未归因 fail』如实降级并逐件留痕",
     "frontend / node-long 两段 passed；frontend run-1 与 final 均绿",
     "block48 AX 会话级环境档与 9223 遗留实例清理已登记（hygiene 纪律执行记录）",
-    "测试分片期间零生产代码变更（S0 修复批在分片启动前完成；分片只读验证）"
+    "测试分片期间零生产代码变更（S0 修复批在分片启动前完成；分片只读验证）",
+    "P6 重打尝试一次失败（p6_restart_baseline_cohort_incomplete）——不重试掩盖，转 pending 留补腿"
   ]
 }

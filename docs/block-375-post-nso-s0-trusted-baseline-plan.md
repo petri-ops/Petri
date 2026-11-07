@@ -100,7 +100,7 @@ docs:check PASS（506 注册）· ui:audit:check PASS（630）· hygiene:check P
 ### 9.4 残留与补腿
 
 1. C-46（16 残红）：兄弟仓 deseq2.R 语法错，未授权不改——C-46 清偿后自然转绿。
-2. P6 源绑定（1 残红）：S0 提交后尝试 --live 重打（干净树 + dev 栈 + 9223）；不可行则 pending，补腿=干净树 + `npm run g0:result-studio:p6:update`。
+2. P6 源绑定（1 残红）：S0 提交后已尝试 `--live` 重打一次——实采红 `p6_restart_baseline_cohort_incomplete`（重启基线 cohort 未完整，疑与本机会话 AX 档同源）；如实 pending，不重试掩盖；补腿=健康会话（注销/重启后）+ 干净树重跑 `npm run g0:result-studio:p6:update`。
 3. block93 spawn persona 片段（1 残红）：移交 S1 主链批。
 4. WIP preserve 项：并发写入者 2 文件（block-370 plan 回写 / ui-ledger-triage）+ 用户资产/临时目录/backfill 脚本（S2 收编）——处置见 wip-inventory.json。
 
