@@ -80,7 +80,7 @@ export function GenUiMessageContent({
               padding: '10px 12px',
               border: '1px dashed var(--petri-border)',
               borderRadius: 10,
-              fontSize: 13,
+              fontSize: 'var(--petri-font-size-sm, 12px)',
               color: 'var(--petri-text-muted)',
             }}
           >

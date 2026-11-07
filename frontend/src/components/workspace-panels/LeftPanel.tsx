@@ -165,6 +165,9 @@ export function LeftPanel({ ctx, open = true }: LeftPanelProps): React.ReactElem
       className={`${styles.leftCol}${open ? '' : ` ${styles.leftColCollapsed}`}`}
       style={{ width: open ? `var(--petri-live-left-width, ${ctx.width}px)` : 0 }}
       aria-hidden={!open}
+      // BLOCK-378（S3 / G-13）——折叠态对称 a11y：aria-hidden 只挡读屏，折叠内容仍可
+      // Tab 聚焦（隐藏层可聚焦=幽灵焦点）。inert 使整棵子树不可聚焦不可交互。
+      {...(open ? {} : ({ inert: '' } as Record<string, string>))}
       data-petri-motion="functional"
     >
       {ctx.columnHeader}

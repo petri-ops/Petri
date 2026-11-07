@@ -97,7 +97,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
         borderRadius: 'var(--petri-radius-md)',
         background: 'var(--petri-bg-elevated)',
         color: 'var(--petri-text-secondary)',
-        fontSize: 12,
+        fontSize: 'var(--petri-font-size-sm, 12px)',
         boxShadow: '0 8px 24px color-mix(in srgb, var(--petri-bg-canvas) 50%, transparent)',
       }}
     >
@@ -111,7 +111,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
           type="button"
           data-testid="crash-notice-details-toggle"
           onClick={() => setDetailsOpen((open) => !open)}
-          style={{ background: 'transparent', border: 'none', color: 'var(--petri-accent)', cursor: 'pointer', fontSize: 12 }}
+          style={{ background: 'transparent', border: 'none', color: 'var(--petri-accent)', cursor: 'pointer', fontSize: 'var(--petri-font-size-sm, 12px)' }}
         >
           {detailsOpen ? '收起详情' : '详情'}
         </button>
@@ -127,7 +127,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
         <button
           type="button"
           onClick={() => { void getBridge('diagnostic')?.crashOpenDumps?.(); }}
-          style={{ background: 'transparent', border: 'none', color: 'var(--petri-accent)', cursor: 'pointer', fontSize: 12 }}
+          style={{ background: 'transparent', border: 'none', color: 'var(--petri-accent)', cursor: 'pointer', fontSize: 'var(--petri-font-size-sm, 12px)' }}
         >
           打开崩溃目录
         </button>
@@ -136,7 +136,7 @@ export function CrashNoticeBanner(): React.ReactElement | null {
         type="button"
         data-testid="crash-notice-dismiss"
         onClick={() => setDismissed(true)}
-        style={{ background: 'transparent', border: 'none', color: 'var(--petri-text-tertiary)', cursor: 'pointer', fontSize: 12 }}
+        style={{ background: 'transparent', border: 'none', color: 'var(--petri-text-tertiary)', cursor: 'pointer', fontSize: 'var(--petri-font-size-sm, 12px)' }}
       >
         知道了
       </button>

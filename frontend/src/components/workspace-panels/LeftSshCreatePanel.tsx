@@ -59,7 +59,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
     boxSizing: 'border-box',
     marginBottom: 6,
     padding: '4px 8px',
-    fontSize: 12,
+    fontSize: 'var(--petri-font-size-sm, 12px)',
   };
 
   const createDisabled = busy || !pathInput.trim().startsWith('/');
@@ -350,7 +350,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
           <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
             <input
               className={styles.treeRenameInput}
-              style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', marginBottom: 4, padding: '4px 8px', fontSize: 12, fontFamily: 'monospace' }}
+              style={{ flex: 1, minWidth: 0, boxSizing: 'border-box', marginBottom: 4, padding: '4px 8px', fontSize: 'var(--petri-font-size-sm, 12px)', fontFamily: 'monospace' }}
               type="text"
               value={pathInput}
               onChange={(e) => { setPathInput(e.target.value); scheduleCandidates(e.target.value); }}
@@ -376,9 +376,9 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
             data-testid="ssh-path-candidates"
           >
             {candidatesLoading ? (
-              <p style={{ padding: '6px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>读取目录…</p>
+              <p style={{ padding: '6px 10px', fontSize: 'var(--petri-font-size-sm, 12px)', opacity: 0.7, margin: 0 }}>读取目录…</p>
             ) : candidates.length === 0 ? (
-              <p style={{ padding: '6px 10px', fontSize: 12, opacity: 0.7, margin: 0 }}>无候选（继续输入或 Tab 刷新）</p>
+              <p style={{ padding: '6px 10px', fontSize: 'var(--petri-font-size-sm, 12px)', opacity: 0.7, margin: 0 }}>无候选（继续输入或 Tab 刷新）</p>
             ) : (
               candidates.map((cand, idx) => (
                 <button
@@ -388,7 +388,7 @@ export function SshCreateInlinePanel({ ctx, onClose }: { ctx: LeftPanelContext; 
                   onMouseEnter={() => setHighlight(idx)}
                   title={cand}
                   style={{
-                    display: 'block', width: '100%', textAlign: 'left', padding: '4px 10px', fontSize: 12,
+                    display: 'block', width: '100%', textAlign: 'left', padding: '4px 10px', fontSize: 'var(--petri-font-size-sm, 12px)',
                     background: idx === highlight ? 'var(--petri-accent-weak, rgba(128,0,255,0.12))' : 'none',
                     border: 'none', cursor: 'pointer', color: 'inherit', fontFamily: 'monospace',
                   }}

@@ -47,22 +47,22 @@
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
       "wave": "B",
       "module": "W-04",
-      "lines": 1332,
-      "sha256": "c31615f0b6032b22554303574f4b3f12ab5c649ee7ec456ad7608a65eaa332d0"
+      "lines": 1342,
+      "sha256": "2e08a1ff3e5253efad19e473eaf45969ee82e0986bf169ed9832a50845f4a123"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
       "wave": "B",
       "module": "W-04",
       "lines": 1429,
-      "sha256": "545fa6d3828ccb0ae9d3ec55fd83aedfab08a04d6c7b35bcee032fc52765bd70"
+      "sha256": "29adfa42eeea556db9b506ea44922b9e946503f97a0e67b762fa21399010b321"
     },
     {
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
       "lines": 675,
-      "sha256": "32dce476179e8166f9e249819f49942a2792ef702f0e747b054d0ea26ef54d3a"
+      "sha256": "fe61a5c106401d4a246f08eaf9f03533b86d8cf8db64d0c32bcd206a0b1d8f67"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -76,7 +76,7 @@
       "wave": "B",
       "module": "W-02",
       "lines": 754,
-      "sha256": "8c1032461f3645e6334e62dbc9b9caaf99c13fa52dec828b854ad132b572b18c"
+      "sha256": "504acb661eb73a8c5719ee53ac71cc2b89c25c2143680e5d6e4f468f07e95a06"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
@@ -170,5 +170,5 @@
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
     }
   ],
-  "total": 23461
+  "total": 23471
 }

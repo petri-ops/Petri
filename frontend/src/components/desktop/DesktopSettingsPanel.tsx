@@ -236,7 +236,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                 border: '1px solid var(--petri-border)', borderRadius: 6,
                 background: 'var(--petri-bg-surface)', color: 'var(--petri-text)' }}
             />
-            <span style={{ color: 'var(--petri-text-secondary)', fontSize: 13 }}>%</span>
+            <span style={{ color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>%</span>
           </div>
           <p className="petri-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
         </div>

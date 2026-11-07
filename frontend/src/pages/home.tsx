@@ -602,7 +602,7 @@ export default function Home(): React.ReactElement {
               >
                 取消
               </button>
-              {sshValidated && <span aria-live="polite" style={{ fontSize: 12, color: 'var(--petri-status-success)' }}>路径有效</span>}
+              {sshValidated && <span aria-live="polite" style={{ fontSize: 'var(--petri-font-size-sm, 12px)', color: 'var(--petri-status-success)' }}>路径有效</span>}
             </div>
           )}
           {/* UI-258 — 空白项目：只填名字创建，工作目录稍后在项目内设置/更换 */}
@@ -673,7 +673,7 @@ export default function Home(): React.ReactElement {
                         data-testid="ssh-host-badge"
                         title={`SSH 远程项目 · ${project.sshHost}`}
                         style={{
-                          marginLeft: 6, fontSize: 10, padding: '1px 6px', borderRadius: 8,
+                          marginLeft: 6, fontSize: 'var(--petri-font-size-xs, 11px)', padding: '1px 6px', borderRadius: 8,
                           border: '1px solid currentColor', opacity: 0.75, verticalAlign: 'middle',
                         }}
                       >

@@ -169,11 +169,11 @@ export function InstallDeepLinkDialog(): React.ReactElement | null {
           boxShadow: 'var(--petri-shadow-float)',
         }}
       >
-        <h2 style={{ margin: '0 0 10px', fontSize: 16 }}>从链接安装</h2>
+        <h2 style={{ margin: '0 0 10px', fontSize: 'var(--petri-font-size-lg, 16px)' }}>从链接安装</h2>
 
         {!preview && (
           <div style={{ display: 'grid', gap: 8 }}>
-            <label style={{ display: 'grid', gap: 4, fontSize: 12, color: 'var(--petri-text-tertiary)' }}>
+            <label style={{ display: 'grid', gap: 4, fontSize: 'var(--petri-font-size-sm, 12px)', color: 'var(--petri-text-tertiary)' }}>
               <span>安装链接（petri-install://）</span>
               <input
                 data-testid="install-deep-link-url"
@@ -201,7 +201,7 @@ export function InstallDeepLinkDialog(): React.ReactElement | null {
         )}
 
         {preview && (
-          <div style={{ display: 'grid', gap: 8, fontSize: 13 }} data-testid="install-deep-link-preview">
+          <div style={{ display: 'grid', gap: 8, fontSize: 'var(--petri-font-size-sm, 12px)' }} data-testid="install-deep-link-preview">
             <div><strong>{preview.kind === 'pack' ? '领域包' : 'MCP 配置'}</strong>
               {preview.kind === 'pack' && preview.pack ? ` · ${preview.pack.name}（${preview.pack.packId}）` : ''}
               {preview.kind === 'mcp' && preview.server ? ` · ${preview.server.name}（${preview.server.id}）` : ''}

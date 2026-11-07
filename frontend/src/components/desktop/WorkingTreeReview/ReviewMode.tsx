@@ -708,7 +708,7 @@ export function ReviewMode({ variant = 'mode', onClose }: ReviewModeProps) {
             </button>
           )}
           {checkpointNotice && (
-            <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 12 }} role="status" data-testid="checkpoint-notice">{checkpointNotice}</span>
+            <span style={{ color: 'var(--petri-text-tertiary)', fontSize: 'var(--petri-font-size-sm, 12px)' }} role="status" data-testid="checkpoint-notice">{checkpointNotice}</span>
           )}
           <button
             type="button"

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 508,
+    "documentCount": 509,
     "lastUpdated": "2026-11-07",
-    "managedMarkdown": 491
+    "managedMarkdown": 492
   },
   "documents": [
     {
@@ -88,6 +88,25 @@
         "chain-hash"
       ],
       "notes": "post-nso 蓝图 S2 承载包：FK 裁决落地（后端 OFF 三面一致）、链哈希 UPDATE 覆盖+legacy_unhashed 分流、IPC sender 收紧、三执行入口 capability token 单源、manifest 字节自证、execToken 保留补签发。两轴分离/workspace_exec 裁决不变。用户预授权连续工作模式。G0 开发期常态 · 不外推 packaged/Provider/GA。 | 2026-11-07 completed：FK 裁决落地（b4edf467 反向提交当场钉死）/链哈希 UPDATE+legacy 分流/file: 注册制/准入内核 6/6/execToken 删除裁决/manifest 双哈希+哈希链/degraded 汇入/句柄收敛进程回归；ADMISSION 拨硬归 S4。"
+    },
+    {
+      "id": "BLOCK-378",
+      "capability": "block-378-post-nso-s3-experience",
+      "path": "docs/block-378-post-nso-s3-experience-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-378-post-nso-s3-experience",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s3",
+        "ui",
+        "a11y"
+      ],
+      "notes": "post-nso 蓝图 S3 承载包：字号宪章 20 处收敛/prefs 重放队列/空 flags 可见/折叠 inert/钉住能力位；DOM 窗口化/布局单源/实机腿如实挂起待切片。G0 开发期常态。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10336,5 +10355,5 @@
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 508
+  "documentCount": 509
 }

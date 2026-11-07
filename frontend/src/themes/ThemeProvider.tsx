@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
 
 /**
@@ -118,18 +118,44 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   }, []);
 
   const [prefsSync, setPrefsSync] = useState<PrefsSyncState>({ state: 'ok', at: 0 });
+  // BLOCK-378（S3 / G-12）——push 失败重放队列（有界）：此前失败后文案宣称「恢复后自动
+  // 重试」但无重试实现（静默说谎）。现失败补重放（30s 退避、最多 3 次、新 patch 合并
+  // 旧 patch 尾字段），队列耗尽后文案如实标注「自动重试未成功」。
+  const retryQueueRef = useRef<{ patch: Record<string, unknown>; attempts: number; timer: ReturnType<typeof setTimeout> | null }>({ patch: {}, attempts: 0, timer: null });
+  // BLOCK-378（S3 / G-12）——重放经 ref 解引用（useCallback 自引用在声明前不可达）
+  const pushPrefsRef = useRef<(patch: Record<string, unknown>) => void>(() => {});
+  useEffect(() => () => {
+    if (retryQueueRef.current.timer) clearTimeout(retryQueueRef.current.timer);
+  }, []);
 
   const pushPrefs = useCallback((patch: Record<string, unknown>) => {
     setPrefsSync({ state: 'pending', at: Date.now() });
+    const scheduleRetry = (error: string) => {
+      const queue = retryQueueRef.current;
+      queue.patch = { ...queue.patch, ...patch };
+      if (queue.attempts >= 3) {
+        setPrefsSync({ state: 'failed', error: `${error}（自动重试未成功，改动已在本端生效；下次修改设置时将重试同步）`, at: Date.now() });
+        return;
+      }
+      queue.attempts += 1;
+      if (queue.timer) clearTimeout(queue.timer);
+      queue.timer = setTimeout(() => { queue.timer = null; pushPrefsRef.current(queue.patch); }, 30000);
+      setPrefsSync({ state: 'failed', error: `${error}（30 秒后自动重试，第 ${queue.attempts}/3 次）`, at: Date.now() });
+    };
     const fail = (error: string) => {
       setPrefsSync({ state: 'failed', error, at: Date.now() });
       // 失败不回滚本端（本地先生效是既有体验契约），但必须可见：状态入 context + 控制台留痕。
       console.warn(`[prefs] 服务端同步失败（本端已生效）：${error}`);
+      scheduleRetry(error);
     };
     try {
       void fetch(prefsApi(), { method: 'PUT', headers: prefsHeaders(), body: JSON.stringify(patch) })
         .then((response) => {
-          if (response?.ok) { setPrefsSync({ state: 'ok', at: Date.now() }); return; }
+          if (response?.ok) {
+            retryQueueRef.current = { patch: {}, attempts: 0, timer: retryQueueRef.current.timer };
+            setPrefsSync({ state: 'ok', at: Date.now() });
+            return;
+          }
           fail(`HTTP ${response?.status ?? '?'}`);
         })
         .catch((err: unknown) => fail(err instanceof Error ? err.message : String(err)));
@@ -137,6 +163,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
       fail(err instanceof Error ? err.message : String(err));
     }
   }, [prefsApi, prefsHeaders]);
+  useEffect(() => {
+    pushPrefsRef.current = pushPrefs;
+  }, [pushPrefs]);
 
   // 拉取服务端偏好：挂载时 + 每 15s + 回前台时（跨端应用）
   useEffect(() => {
@@ -273,9 +302,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
         <div role="status" data-testid="prefs-sync-failed-banner"
           style={{ position: 'fixed', right: 12, bottom: 12, zIndex: 1000, maxWidth: 320,
             padding: '8px 12px', borderRadius: 8, border: '1px solid var(--petri-border, #c33)',
-            background: 'var(--petri-surface, #fff)', color: 'var(--petri-text, #222)', fontSize: 12 }}>
+            background: 'var(--petri-surface, #fff)', color: 'var(--petri-text, #222)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>
           <strong>服务端同步失败（本端已生效）</strong>
-          <div style={{ marginTop: 2 }}>{prefsSync.error || '未知错误'}——跨端同步未完成，恢复后自动重试。</div>
+          <div style={{ marginTop: 2 }}>{prefsSync.error || '未知错误'}——跨端同步未完成，本端改动已生效。</div>
         </div>
       )}
       {children}

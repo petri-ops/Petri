@@ -126,6 +126,8 @@ type ServerFlagView = {
 
 function ServerFlagRows(): React.ReactElement {
   const [flags, setFlags] = useState<ServerFlagView[]>([]);
+  // BLOCK-378（S3 / G-12）——拉取完成标记：区分「尚未加载」与「已加载且为空」
+  const [loaded, setLoaded] = useState(false);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // BLOCK-369（NSO-W3 F-10）拉取失败可见：此前静默空段（后端未就绪时整段开关凭空消失）。
@@ -135,13 +137,16 @@ function ServerFlagRows(): React.ReactElement {
     try {
       const resp = await fetch(`${getApiPrefix()}/feature-flags`);
       const body = (await resp.json()) as { status?: unknown; error?: unknown; flags?: Record<string, Record<string, unknown>> };
+      setLoaded(true);
       if (body.status === 'ok') {
         setFlags(Object.entries(body.flags ?? {}).map(([key, view]) => ({ key, ...view } as ServerFlagView)));
         setLoadError(null);
       } else {
+        setLoaded(true);
         setLoadError(`HTTP ${resp.status}`);
       }
     } catch (e) {
+      setLoaded(true);
       setLoadError(e instanceof Error ? e.message : String(e));
     }
   }, []);
@@ -172,6 +177,16 @@ function ServerFlagRows(): React.ReactElement {
   };
 
   if (flags.length === 0) {
+    // BLOCK-378（S3 / G-12）——status=ok 且无开关：展示「当前无可配置实验开关」而非
+    // 整段消失（任何状态下用户都知道发生了什么、能用什么）。
+    if (!loadError && loaded) {
+      return (
+        <div className={styles.serverFlags} data-testid="experimental-flags-empty">
+          <strong>实验开关</strong>
+          <div>当前无可配置实验开关（服务端返回为空）。</div>
+        </div>
+      );
+    }
     if (!loadError) return <></>;
     // BLOCK-369（NSO-W3 F-10）失败可见：拉取失败给出原因与重试出口，不再凭空消失。
     return (

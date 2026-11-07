@@ -254,7 +254,7 @@ export function RemoteTargets(): React.ReactElement {
             {target.label ? <span>{target.label}</span> : null}
             <span
               style={{
-                fontSize: 12,
+                fontSize: 'var(--petri-font-size-sm, 12px)',
                 padding: '1px 8px',
                 borderRadius: 999,
                 background: target.status === 'ready' ? 'var(--petri-status-success-bg)' : target.status === 'unreachable' ? 'var(--petri-warning-bg)' : 'transparent',
@@ -335,7 +335,7 @@ export function RemoteTargets(): React.ReactElement {
               <span className="petri-field__hint">{peer.platform}/{peer.arch}</span>
               <span
                 style={{
-                  fontSize: 12,
+                  fontSize: 'var(--petri-font-size-sm, 12px)',
                   padding: '1px 8px',
                   borderRadius: 999,
                   background: peer.lastProbe?.ok ? 'var(--petri-status-success-bg)' : 'var(--petri-warning-bg)',

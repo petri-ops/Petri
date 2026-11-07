@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-07T03:27:06.497Z",
+  "generatedAt": "2026-11-07T04:13:04.879Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 495,
-  "uniqueIds": 486,
+  "sections": 496,
+  "uniqueIds": 487,
   "counts": {
+    "blocked": 26,
     "live-missing": 8,
-    "blocked": 25,
     "verified": 450,
     "closed": 12
   },
-  "debt": 33,
+  "debt": 34,
   "liveMissing": [
     {
       "id": "UI-700",
@@ -53,6 +53,12 @@
     }
   ],
   "blocked": [
+    {
+      "id": "UI-701",
+      "deps": [],
+      "external": true,
+      "title": "字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 **in_progress**）"
+    },
     {
       "id": "UI-697",
       "deps": [],

@@ -1,4 +1,12 @@
 # Petri Desktop UI 产品化审计台账
+## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 **in_progress**）
+
+- **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。
+- **失败可见收尾**：prefs push 失败补重放队列（30s×3 有界+合并尾字段+耗尽如实文案，替换「恢复后自动重试」的无实现宣称）；ExperimentalFeaturesSection 空 flags 显示「当前无可配置实验开关」（loaded 态区分未加载/已加载为空）。
+- **a11y 对称**：LeftPanel 折叠态补 inert（隐藏子树不可聚焦，aria-hidden 只挡读屏的幽灵焦点缺口）。
+- **能力位链**：钉住按钮接 viewerAdapter 能力位（无适配器给具体原因 title，previewLoading 保留）。
+- **待补**：实机腿（prefs 重放可见/空 flags 视觉/折叠 Tab 走查/钉住禁用态视觉）——CDP 可代行部分归 UI 台账终态化批；DOM 预算窗口化与布局单源=独立切片待发令。
+
 ## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 **in_progress**）
 
 - **改动**：`frontend/src/components/copilot/copilotClient/agentTaskStream.ts` 新增 `task.failed` 事件消费（结构化 reason/reasonCode，error 兼容载荷优先级不变）；`types.ts` 声明 `onTaskFailed`。tsc 0。

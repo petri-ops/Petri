@@ -1007,9 +1007,19 @@ export function ResultArtifactShell({
 
   const toolbarSecondaryActions = result ? (
     <>
-      {/* BLOCK-140 P0 — 「钉住」：把当前查看产物钉入副栏（视图级快照） */}
+      {/* BLOCK-140 P0 — 「钉住」：把当前查看产物钉入副栏（视图级快照）。
+          BLOCK-378（S3 / G-12）——能力位接线：钉住依赖 viewer 适配器（视图级快照的
+          数据源），不可钉时给具体原因（previewLoading/无适配器），不再静默可点。 */}
       {selectedArtifact && (
-        <button className="petri-btn petri-btn--ghost petri-btn--sm" type="button" disabled={previewLoading} onClick={handlePinArtifact}>钉住</button>
+        <button
+          className="petri-btn petri-btn--ghost petri-btn--sm"
+          type="button"
+          disabled={previewLoading || !viewerAdapter}
+          title={!viewerAdapter
+            ? '当前产物类型没有可快照的查看器适配器，无法钉住'
+            : (previewLoading ? '预览加载中，稍候可钉住' : undefined)}
+          onClick={handlePinArtifact}
+        >钉住</button>
       )}
       {selectedArtifactName && (
         <span className={styles.resultReportTechnicalName}>{selectedArtifactName}</span>
