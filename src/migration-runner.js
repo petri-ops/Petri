@@ -47,7 +47,7 @@ function requireDbConnectionPolicy() {
   }
   throw new Error(`db-connection-policy unavailable: ${candidates.join(' | ')}`);
 }
-const { applyCanonicalPragmas, orderMigrationFiles } = requireDbConnectionPolicy();
+const { applyCanonicalPragmas, orderMigrationFiles, openDatabase } = requireDbConnectionPolicy();
 
 const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
   version INTEGER PRIMARY KEY,
@@ -58,7 +58,7 @@ const SCHEMA_TABLE_SQL = `CREATE TABLE IF NOT EXISTS schema_migrations (
  * 查询已应用的最新 migration 版本。空库返回 0。
  */
 function getAppliedVersion(dbPath) {
-  const db = applyCanonicalPragmas(new Database(dbPath));
+  const db = openDatabase(dbPath, { ctor: Database }); // BLOCK-379（S4 / G-17）实例化单源
   try {
     db.exec(SCHEMA_TABLE_SQL);
     const row = db.prepare('SELECT MAX(version) AS v FROM schema_migrations').get();
@@ -75,7 +75,7 @@ function getAppliedVersion(dbPath) {
  * @returns {Promise<number>} 应用后的最新版本号
  */
 async function runMigrations(dbPath, migrationsDir) {
-  const db = applyCanonicalPragmas(new Database(dbPath));
+  const db = openDatabase(dbPath, { ctor: Database }); // BLOCK-379（S4 / G-17）实例化单源
   try {
     db.exec(SCHEMA_TABLE_SQL);
     const row = db.prepare('SELECT MAX(version) AS v FROM schema_migrations').get();

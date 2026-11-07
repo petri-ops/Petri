@@ -18,10 +18,10 @@ const path = require('path');
 // 实际把 ON pragma 写进了本文件（裁决与代码反向，S0 分片勘察钉死）。本包按裁决
 // 落地：后端 OFF（与策略模块头注唯一真相一致）；桌面侧 ON 维持（_db-singleton +
 // A-007.8 断言）。全量切换（ON）需独立大包逐表清偿违约行 + 测试 setup 补关联。
-const { resolveDbPath, applyCanonicalPragmas } = require('../../shared-backend/db-connection-policy');
+const { resolveDbPath, openDatabase } = require('../../shared-backend/db-connection-policy');
 const DB_PATH = resolveDbPath(process.env) || path.join(__dirname, '..', 'petri.db');
-const db = new Database(DB_PATH);
-applyCanonicalPragmas(db, { busyTimeoutMs: 10000 });
+// BLOCK-379（S4 / G-17）——实例化单源：openDatabase 工厂（pragma 套装与实例化同源）
+const db = openDatabase(DB_PATH, { busyTimeoutMs: 10000, ctor: Database });
 db.pragma('foreign_keys = OFF');
 // Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {

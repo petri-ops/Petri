@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-07（🏁 **BLOCK-379 completed（S4 分层）**：接手读 block-379 plan
 最后更新：2026-11-07（🏁 **BLOCK-378 completed（S3 机械面）**：接手读 block-378 plan；待补清单=UI-701
 最后更新：2026-11-07（🏁 **BLOCK-377 completed（S2）**：接手读 block-377 plan §6；ADMISSION 拨硬+FK 全量切换=S4/独立包
 最后更新：2026-11-07（▶ **BLOCK-377 active（S2）**：plan=docs/block-377-post-nso-s2-execution-admission-plan.md

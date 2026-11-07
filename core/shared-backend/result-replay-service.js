@@ -22,6 +22,7 @@ require('./project-run-layout');
 require('./execution-provenance');
 require('./result-workflow-graph');
 const { createResultChangeSet, sha256 } = require('./result-changeset-service');
+const { RESULT_EDIT_INTENT_VERSION } = require('./result-edit-intent');
 const {
   ResultRevisionSourceError,
   verifyRevisionSourceMaterial,
@@ -254,7 +255,10 @@ function replayFingerprint({ projectId, revision, sourceProjection, sourceJob, e
 function createReplayIntent({ token, revision, workflowGraph = null, affectedNodeIds = [] }) {
   const workflowSubgraph = workflowGraph && affectedNodeIds.length > 1;
   return {
-    contractVersion: '1',
+    // BLOCK-379（S4 / G-17）——contractVersion 单源：intent 版本归 intent 注册表
+    // （RESULT_EDIT_INTENT_VERSION；此前硬编码字符串 '1' 与 result-studio 域的
+    // contractVersion 是两个不同的版本域，S2 首版误并已纠正）
+    contractVersion: String(RESULT_EDIT_INTENT_VERSION),
     intentId: `rei_replay_${sha256(token).slice(0, 24)}`,
     artifactRef: { artifactId: revision.artifactId, revisionId: revision.revisionId },
     requestedOutcome: '受控重放该 ArtifactRevision',

@@ -78,10 +78,42 @@ function orderMigrationFiles(files) {
   return out.sort((a, b) => a.version - b.version);
 }
 
+// BLOCK-379（S4 / G-17）——实例化单源：三处 `new Database` 收编为一个工厂。
+// 策略（pragma/路径）与实例化同源；依赖注入 Database 构造器（桌面/后端各自的
+// better-sqlite3 副本由调用方传入，策略层不钉死副本）。
+let databaseCtor = null;
+
+/**
+ * 注册 Database 构造器（进程内一次；宿主入口调用）。
+ * @param {(path: string) => object} ctor
+ */
+function registerDatabaseConstructor(ctor) {
+  if (typeof ctor !== 'function') throw new Error('database_ctor_required');
+  databaseCtor = ctor;
+}
+
+/**
+ * 打开一个已应用 canonical pragma 的连接（单源工厂）。
+ * @param {string} dbPath
+ * @param {{ busyTimeoutMs?: number, ctor?: (path: string) => object }} [options]
+ * @returns {object} better-sqlite3 实例
+ */
+function openDatabase(dbPath, options = {}) {
+  const ctor = options.ctor || databaseCtor;
+  if (typeof ctor !== 'function') {
+    throw new Error('database_ctor_not_registered——宿主入口须先 registerDatabaseConstructor（或经 options.ctor 显式传入）');
+  }
+  const db = new ctor(dbPath);
+  applyCanonicalPragmas(db, { busyTimeoutMs: options.busyTimeoutMs });
+  return db;
+}
+
 module.exports = {
   CANONICAL_PRAGMAS,
   DEFAULT_BUSY_TIMEOUT_MS,
   applyCanonicalPragmas,
   orderMigrationFiles,
   resolveDbPath,
+  registerDatabaseConstructor,
+  openDatabase,
 };

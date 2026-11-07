@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 509,
+    "documentCount": 510,
     "lastUpdated": "2026-11-07",
-    "managedMarkdown": 492
+    "managedMarkdown": 493
   },
   "documents": [
     {
@@ -107,6 +107,24 @@
         "a11y"
       ],
       "notes": "post-nso 蓝图 S3 承载包：字号宪章 20 处收敛/prefs 重放队列/空 flags 可见/折叠 inert/钉住能力位；DOM 窗口化/布局单源/实机腿如实挂起待切片。G0 开发期常态。"
+    },
+    {
+      "id": "BLOCK-379",
+      "capability": "block-379-post-nso-s4-arch-tests",
+      "path": "docs/block-379-post-nso-s4-arch-tests-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-379-post-nso-s4-arch-tests",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s4",
+        "architecture"
+      ],
+      "notes": "post-nso 蓝图 S4 承载包：实例化单源工厂/contractVersion 收编（intent 与 studio 双版本域澄清）；大拆片按 W5b 纪律分层留档不硬闯。G0 开发期常态。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10355,5 +10373,5 @@
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 509
+  "documentCount": 510
 }

@@ -29,7 +29,7 @@ const {
   validateSelectionContext,
   validateWorkspaceCheckpoint,
   computeRevisionChainHash,
-} = require('./result-studio-contracts');
+  RESULT_STUDIO_CONTRACT_VERSION,} = require('./result-studio-contracts');
 const { ensureResultStudioSchema } = require('./result-studio-schema');
 const {
   ensureResultWorkflowGraphSchema,
@@ -1068,7 +1068,8 @@ function createResultStudioRepository(db, options = {}) {
       const timestamp = nowIso();
       const statusReason = input.statusReason == null ? null : String(input.statusReason);
       const immutableIntent = {
-        contractVersion: 1,
+        // BLOCK-379（S4 / G-17）——contractVersion 单源（原硬编码 1）
+        contractVersion: RESULT_STUDIO_CONTRACT_VERSION,
         operationId,
         projectId,
         changeSetId,

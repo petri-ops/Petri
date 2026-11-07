@@ -1,3 +1,5 @@
+375. [`block-379-post-nso-s4-arch-tests-plan.md`](./block-379-post-nso-s4-arch-tests-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S4 承载包，分层）**：实例化单源工厂（三处 new Database 收编）/contractVersion 收编（intent 与 studio 双版本域澄清）；runLoop 五段与 SimpleChat/workspace-tools 大拆片按 W5b 纪律分层留档不硬闯
+
 374. [`block-378-post-nso-s3-experience-plan.md`](./block-378-post-nso-s3-experience-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S3 承载包，机械面）**：字号宪章 9 文件 20 处收敛（XTerm 豁免留痕）/prefs 重放队列（30s×3 有界）+空 flags 可见/折叠 inert/钉住能力位；DOM 窗口化/布局单源/实机腿如实挂起待切片
 
 373. [`block-377-post-nso-s2-execution-admission-plan.md`](./block-377-post-nso-s2-execution-admission-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S2 承载包）**：FK 裁决落地（b4edf467 反向提交当场钉死→OFF 三面一致）/链哈希 UPDATE 覆盖+legacy 分流/file: 注册制+真实写通道负测/准入内核 6/6+拦截器签发（MCP trust 轴豁免，ADMISSION 拨硬归 S4）/execToken 删除裁决/manifest 双哈希+prevManifestHash 链/mcp degraded 汇入/句柄收敛进程回归：执行准入与数据自证——FK 裁决落地（后端 OFF 三面一致）/链哈希 UPDATE 覆盖+legacy_unhashed 分流/IPC sender 收紧/三执行入口 capability token 单源（四类拒绝负测）/manifest 字节自证/execToken 保留补签发；两轴分离与 workspace_exec 裁决不变；用户预授权连续工作模式（S0→S7）。G0 开发期常态 · 不外推 packaged/Provider/GA

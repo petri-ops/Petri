@@ -46,7 +46,7 @@ const { loadDatabaseConstructor } = require('../migration-runner');
 const { resolveCore } = require('../main/core-utils');
 const { getBusyTimeout } = require(resolveCore('shared-backend/config-helper'));
 // BLOCK-360（NSO-W2-4）路径 precedence 与基础 pragma 单源（与核心 connection.js / migration-runner 同一实现）
-const { resolveDbPath, applyCanonicalPragmas } = require(resolveCore('shared-backend/db-connection-policy'));
+const { resolveDbPath, applyCanonicalPragmas, openDatabase, registerDatabaseConstructor } = require(resolveCore('shared-backend/db-connection-policy'));
 
 const VALID_ROLES = new Set(['branch', 'result']);
 const _connections = new Map(); // resolved file path → better-sqlite3 Database
@@ -78,13 +78,12 @@ function openDb(role) {
   if (_connections.has(dbPath)) {
     return _connections.get(dbPath);
   }
+  // BLOCK-379（S4 / G-17）——实例化单源：走 db-connection-policy 的 openDatabase 工厂
+  // （pragma 套装与实例化同源）；本进程构造器注册一次（桌面副本），桌面特有
+  // foreign_keys=ON（A-007.8）在工厂返回后补声明。
   const Database = loadDatabaseConstructor();
-  const db = new Database(dbPath);
-  // Apply the canonical WAL + busy_timeout from config-helper (E-019 full).
-  // Setting busy_timeout on every open guarantees that even when called
-  // before any petri-server child process is spawned, the desktop handle is
-  // already consistent with petri-server's policy.
-  applyCanonicalPragmas(db, { busyTimeoutMs: getBusyTimeout() });
+  registerDatabaseConstructor(Database);
+  const db = openDatabase(dbPath, { busyTimeoutMs: getBusyTimeout() });
   // foreign_keys=ON matches shared-backend/db.js behavior and prevents
   // accidental ON DELETE CASCADE surprises across the two db modules.
   db.pragma(`foreign_keys = ON`);
