@@ -1494,6 +1494,14 @@ async function runLoop({
       assistantAcc = final.assistantMessage;
       _emit({ choices: [{ delta: { content: assistantAcc } }] });
       _emit({ error: providerFailureReason });
+      // BLOCK-376（S1 / G-04）——SSE 三态契约（done / error / task.failed）：失败分支
+      // 发显式结构化终态，客户端不再依赖 500ms 轮询判死；run_terminal（生命周期书挡）
+      // 与 error（兼容载荷）不变，本事件为 additive 结构化终态。
+      _emit({
+        event: 'task.failed',
+        reason: providerFailureReason,
+        reasonCode: 'agent_run_failed',
+      });
     } else if (cancellationObserved || loopAbortedByController) {
       const final = finalizeResultEditProgress(resultEditProgress, {
         outcome: 'cancelled', reason: 'user_cancelled',

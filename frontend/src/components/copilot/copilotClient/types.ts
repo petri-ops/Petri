@@ -229,6 +229,11 @@ export interface StreamChatOptions {
     newTaskId?: string | null;
     message?: string | null;
   }) => void;
+  /** BLOCK-376（S1 / G-04）——SSE 三态契约的结构化失败终态（task.failed；error 兼容载荷不变）。 */
+  onTaskFailed?: (info: {
+    reason: string;
+    reasonCode: string;
+  }) => void;
   /** BLOCK-39: 订阅断线进入第 attempt 次重连（afterSeq=lastSeq 续传），nextRetryMs 后重试。 */
   onStreamReconnecting?: (info: { taskId: string; attempt: number; lastSeq: number; nextRetryMs: number }) => void;
   /** Agent iteration started (1-indexed) */

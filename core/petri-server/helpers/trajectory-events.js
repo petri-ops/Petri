@@ -54,6 +54,11 @@ const GROUP_BY_EVENT = Object.freeze({
   iter: 'assistant',
   agent_progress: 'text',
   model_fallback: 'system',
+  // BLOCK-376（S1 / G-11）——四类失败/重试事件入轨迹面（此前前端 0 消费、轨迹 0 注册）
+  compaction_failed: 'error',
+  provider_retry: 'system',
+  trim_skipped: 'compaction',
+  stream_stall: 'system',
   token_budget: 'system',
   usage: 'system',
   knowledge_citations: 'system',
@@ -203,6 +208,17 @@ function summarizeEvent(eventType, payload) {
     }
     case 'agent_progress':
       return { summary: textOf(payload && (payload.text || payload.content)) || '阶段进展', detail: '' };
+    // BLOCK-376（S1 / G-11）——失败/重试事件的轨迹摘要（recordedOnly 纪律：只读已记录字段）
+    case 'compaction_failed':
+      return { summary: '后台压缩失败', detail: textOf(payload && (payload.reason || payload.message), MAX_DETAIL), status: 'error' };
+    case 'provider_retry': {
+      const attempt = tokenCount(payload && payload.attempt);
+      return { summary: `模型重试${payload && payload.reason ? `：${textOf(payload.reason, 60)}` : ''}${attempt ? `（第 ${attempt} 次）` : ''}`, detail: '' };
+    }
+    case 'trim_skipped':
+      return { summary: '上下文裁剪跳过', detail: textOf(payload && (payload.reason || payload.message), MAX_DETAIL), status: 'error' };
+    case 'stream_stall':
+      return { summary: `流停滞${payload && payload.phase === 'first_token' ? '（首 token）' : ''}`, detail: textOf(payload && (payload.reasonCode || payload.message), MAX_DETAIL) };
     case 'model_fallback': {
       const from = textOf(payload && (payload.fromProfileLabel || payload.from), 60);
       const to = textOf(payload && (payload.toProfileLabel || payload.to), 60);

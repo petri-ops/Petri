@@ -429,8 +429,18 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
     onLoopIteration,
     onChildFinished,
     onModelFallback,
+    onTaskFailed,
     kind,
   } = opts;
+  // BLOCK-376（S1 / G-04）——SSE 三态契约的结构化失败终态（additive：error 兼容载荷
+  // 优先级不变，task.failed 只在其未先命中时结算，避免双结算）。
+  if (obj.event === 'task.failed') {
+    onTaskFailed?.({
+      reason: typeof obj.reason === 'string' ? obj.reason : '',
+      reasonCode: typeof obj.reasonCode === 'string' ? obj.reasonCode : 'agent_run_failed',
+    });
+    return;
+  }
   if (obj.error) {
     // BLOCK-38 P2: 后端 error 事件携带 resumable/interruptedAt（服务中断清扫标记）
     // BLOCK-56 P1: 任务级降级时后端已自动新建续跑 task，error 附带 fallbackTaskId

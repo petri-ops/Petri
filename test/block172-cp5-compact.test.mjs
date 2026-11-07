@@ -27,7 +27,10 @@ test('CP-5：context_compacted 事件落 task_events（可审计压缩）', () =
 });
 
 test('CP-5：fail-open——摘要异常回退纯丢弃（不阻塞任务）', () => {
-  assert.match(source, /cp5-compact-summary] fail-open to plain trim/);
+  // BLOCK-376（S1 / G-11）契约追新：摘要异常的可见性已由 compaction_failed 事件
+  // （summaryFailure 承载）单源表达，console 重复通道删除——锚随实现走。
+  assert.match(source, /summary_call_failed/);
+  assert.match(source, /event: 'compaction_failed'/);
 });
 
 test('CP-5：丢弃过少不触发摘要模型调用（<4 条不值得一跳）', () => {

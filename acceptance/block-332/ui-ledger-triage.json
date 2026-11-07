@@ -1,16 +1,31 @@
 {
-  "generatedAt": "2026-11-06T01:07:41.485Z",
+  "generatedAt": "2026-11-07T03:27:06.497Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 490,
-  "uniqueIds": 481,
+  "sections": 495,
+  "uniqueIds": 486,
   "counts": {
-    "verified": 449,
-    "blocked": 24,
-    "closed": 12,
-    "live-missing": 5
+    "live-missing": 8,
+    "blocked": 25,
+    "verified": 450,
+    "closed": 12
   },
-  "debt": 29,
+  "debt": 33,
   "liveMissing": [
+    {
+      "id": "UI-700",
+      "deps": [],
+      "title": "SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 **in_progress**）"
+    },
+    {
+      "id": "UI-699",
+      "deps": [],
+      "title": "字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_p"
+    },
+    {
+      "id": "UI-698",
+      "deps": [],
+      "title": "隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **"
+    },
     {
       "id": "UI-595",
       "deps": [],
@@ -38,6 +53,12 @@
     }
   ],
   "blocked": [
+    {
+      "id": "UI-697",
+      "deps": [],
+      "external": true,
+      "title": "viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress"
+    },
     {
       "id": "UI-695",
       "deps": [],

@@ -97,9 +97,16 @@ function planCompaction(rows, countMessages, opts = {}) {
  */
 async function compactConversationNow({ userId, conversationId, sqlite, telemetryExtra, resilienceOpts }) {
   if (!userId || !conversationId || !sqlite) return { ok: false, reason: 'missing_args' };
-  const rows = sqlite.prepare(
-    'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC'
-  ).all(conversationId);
+  // BLOCK-376（S1 / G-05）——真增量摘要：已有 compaction 时只读 rowid > covers_rowid 的
+  // 未覆盖行（摘要输入有界，会话翻倍不再重读全前缀）；首次压缩保持全量语义（B2 契约不变）。
+  const existingBefore = getCompactionSync(sqlite, conversationId);
+  const rows = existingBefore
+    ? sqlite.prepare(
+        'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? AND rowid > ? ORDER BY rowid ASC'
+      ).all(conversationId, existingBefore.covers_rowid)
+    : sqlite.prepare(
+        'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC'
+      ).all(conversationId);
   // BLOCK-98 M2 — resilience 模式：阈值走公式（resilienceOpts.threshold），
   // 摘要走 9 章节模板 + maxTokens 1200；无 resilienceOpts 时 B2 legacy 逐字节不变。
   const resilience = resilienceOpts && resilienceOpts.enabled
@@ -125,11 +132,13 @@ async function compactConversationNow({ userId, conversationId, sqlite, telemetr
   const resilienceSystem = resilience
     ? require('./agent-resilience').SUMMARY_NINE_SECTION_PROMPT
     : null;
-  const userPrompt = resilience && existing
-    ? '已有摘要：\n' + existing.summary + '\n\n新增较早对话：\n' + joined + '\n\n请输出合并后的新摘要（仍保持 9 章节结构）。'
-    : (existing
-      ? '已有摘要：\n' + existing.summary + '\n\n新增较早对话：\n' + joined + '\n\n请输出合并后的新摘要。'
-      : '请总结以下较早的对话：\n' + joined);
+  // BLOCK-376（S1 / G-05）——合并提示泛化到两种模式：真增量下「已有摘要 + 未覆盖行」
+  // 是唯一正确形态（legacy 分支原文保留作首次压缩路径，existing 在增量下恒真值）。
+  const userPrompt = existing
+    ? (resilience
+      ? '已有摘要：\n' + existing.summary + '\n\n新增较早对话：\n' + joined + '\n\n请输出合并后的新摘要（仍保持 9 章节结构）。'
+      : '已有摘要：\n' + existing.summary + '\n\n新增较早对话：\n' + joined + '\n\n请输出合并后的新摘要。')
+    : '请总结以下较早的对话：\n' + joined;
   const result = await callModelTask({
     role: 'summary',
     messages: [
@@ -149,13 +158,18 @@ async function compactConversationNow({ userId, conversationId, sqlite, telemetr
 
   const covers = plan.coveredRows[plan.coveredRows.length - 1];
   const nowIso = new Date().toISOString();
+  // BLOCK-376（S1 / G-05）——covers_count 语义=累计已覆盖行数（视图与审计按
+  // covers_rowid 判界，count 供对账）；增量路径按 rowid 界重算，非本次增量长度。
+  const coversCount = existingBefore
+    ? sqlite.prepare('SELECT COUNT(*) AS n FROM copilot_messages WHERE conversation_id=? AND rowid <= ?').get(conversationId, covers.rowid).n
+    : plan.coveredRows.length;
   sqlite.prepare(`
     INSERT INTO conversation_compaction(conversation_id, user_id, summary, covers_rowid, covers_count, source_tokens, model, created_at, updated_at)
     VALUES (?,?,?,?,?,?,?,?,?)
     ON CONFLICT(conversation_id) DO UPDATE SET
       summary=excluded.summary, covers_rowid=excluded.covers_rowid, covers_count=excluded.covers_count,
       source_tokens=excluded.source_tokens, model=excluded.model, updated_at=excluded.updated_at
-  `).run(conversationId, userId, summary, covers.rowid, plan.coveredRows.length, plan.sourceTokens, result.model || null, nowIso, nowIso);
+  `).run(conversationId, userId, summary, covers.rowid, coversCount, plan.sourceTokens, result.model || null, nowIso, nowIso);
 
   return {
     ok: true,
@@ -204,17 +218,26 @@ function maybeCompactInBackground({ userId, conversationId, sqlite, presetId, ma
       threshold = planT ? planT.threshold : undefined;
       if (threshold == null) return; // 窗口未知 → 不猜测，维持原文（诚实降级）
     }
-    const rows = sqlite.prepare(
-      'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC'
-    ).all(conversationId);
+    // BLOCK-376（S1 / G-05）——后台触发同样真增量：已有 cover 时只读未覆盖行做
+    // 阈值判定与摘要（避免全表读 + O(n²) 重摘要）；plan 作用域=未覆盖行。
+    const existing = getCompactionSync(sqlite, conversationId);
+    const rows = existing
+      ? sqlite.prepare(
+          'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? AND rowid > ? ORDER BY rowid ASC'
+        ).all(conversationId, existing.covers_rowid)
+      : sqlite.prepare(
+          'SELECT rowid, role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC'
+        ).all(conversationId);
     const plan = threshold != null ? planCompaction(rows, null, { threshold }) : planCompaction(rows);
     if (!plan.should) return;
-    const existing = getCompactionSync(sqlite, conversationId);
     if (existing && existing.covers_rowid >= (plan.coveredRows[plan.coveredRows.length - 1] || {}).rowid) return;
     const resilienceOpts = resilienceOn
       ? { enabled: true, threshold, transcriptPath: resilience.transcriptPathFor(conversationId) }
       : null;
-    // 后台：await 由 setImmediate 链独立消化，失败静默（下次请求再试）
+    // 后台：await 由 setImmediate 链独立消化。BLOCK-376（S1 / G-04）——失败不再
+    // 静默：向会话当前主任务 task_events 追加 compaction_failed{reason}（seq=last+1，
+    // 拦截器同款），轨迹面经 trajectory-events 单源可见；无在跑任务时 console.error
+    // 兜底（诚实留痕，不假装有通道）。
     setImmediate(() => {
       compactConversationNow({ userId, conversationId, sqlite, resilienceOpts })
         .then((r) => {
@@ -222,7 +245,24 @@ function maybeCompactInBackground({ userId, conversationId, sqlite, presetId, ma
             try { console.log('[block95-b2] compaction updated conv=' + conversationId + ' covered=' + r.detail.covered); } catch {}
           }
         })
-        .catch(() => {});
+        .catch((e) => {
+          const reason = (e && e.message) || String(e || 'compaction_failed');
+          try {
+            const store = require('../agent-task-store');
+            const task = store.getLatestPrimaryTaskForConversation
+              ? store.getLatestPrimaryTaskForConversation(userId, conversationId)
+              : null;
+            if (task && task.taskId) {
+              const events = store.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+              const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+              store.appendAgentTaskEvent(task.taskId, seq, 'compaction_failed', {
+                event: 'compaction_failed', reason, conversationId,
+              });
+              return;
+            }
+          } catch { /* 事件通道不可用 → 落 error 日志兜底 */ }
+          console.error('[compaction] background compaction failed conv=' + conversationId + ':', reason);
+        });
     });
   } catch {}
 }

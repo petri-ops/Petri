@@ -314,7 +314,11 @@ class ModelGateway {
             result = gatewayError('aborted', error.message);
           } else if (errorsAsRejections) {
             rejection = error;
-            result = gatewayError(error.code || 'network_error', error.message);
+            // BLOCK-376（S1 / G-03）——转换必须保留 details（status 等）：
+            // 结构化状态是「可降级判定」的输入（401/403 鉴权类 ≠ 可重试），
+            // 丢弃 status 会让 http_error 落进 RETRYABLE_ERROR_CODES 被误降级
+            // （评估 F-16 硬不可降级优先的网关侧对应物）。
+            result = gatewayError(error.code || 'network_error', error.message, { ...(error.details || {}), ...(Number.isFinite(error.status) ? { status: error.status } : {}) });
           } else {
             throw error;
           }
@@ -388,6 +392,17 @@ class ModelGateway {
       // 把决定权交给上层（agent 路径据此重试一次）；idle 段 stall 已产出内容，不发重试，
       // 事件照发让前端诚实显示。二次仍 stall 时上层按 result.error 如实报。
       const retryableStall = result && result.error === 'stream_stalled' && result.phase === 'first_token';
+      // BLOCK-376（S1 / G-11）——首 token stall 此前被完全抑制（不发 error 等上层重试，
+      // 但上层不重试的调用方=完全不可见）。改发带 reasonCode 的可观测事件（非 error
+      // 终态，不破坏重试语义；轨迹面按 stream_stall 呈现）。
+      if (retryableStall && typeof onEvent === 'function') {
+        onEvent({
+          type: 'stream_stall',
+          phase: result.phase,
+          elapsedMs: result.elapsedMs || null,
+          reasonCode: 'stream_stalled_first_token',
+        });
+      }
       if (typeof onEvent === 'function' && result && result.error && !retryableStall) {
         onEvent({ type: 'error', error: errorCode(result), message: result.message });
       } else if (typeof onEvent === 'function' && result && !result.error && typeof provider.chatStream !== 'function') {

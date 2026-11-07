@@ -194,7 +194,25 @@ function maybeLaunchTaskLevelFallback(input, deps = {}) {
       parentLoopRunId: null,
       // 闸 3：降级续跑任务关闭请求级 fallback（gateway 只试主 profile）
       disableProviderFallback: true,
-      onEvent: () => {},
+      // BLOCK-376（S1 / G-04）——降级投影：此前空 onEvent 让降级续跑对原任务事件流
+      // 完全隐身（用户只看到失败，看不到「已切备用模型续跑」）。此处把里程碑事件
+      // （run_started/agent_status/run_terminal/agent_cancelled/model_fallback）投影回
+      // 父任务 task_events（带 fallbackTaskId + source 标记；正文增量仍由子任务自持
+      // 轨迹与会话落库承担，不重复灌流）。
+      onEvent: (evt) => {
+        try {
+          const RELAY = new Set(['run_started', 'agent_status', 'run_terminal', 'agent_cancelled', 'model_fallback']);
+          if (!evt || !RELAY.has(evt.event)) return;
+          const store = require('../agent-task-store');
+          const events = store.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+          const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
+          store.appendAgentTaskEvent(task.taskId, seq, evt.event, {
+            ...evt,
+            fallbackTaskId: newTaskId,
+            source: 'fallback_child',
+          });
+        } catch { /* 投影失败不影响降级续跑主链 */ }
+      },
       shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(newTaskId),
     }).catch((e) => {
       try { agentTaskStore.markAgentTaskFailed(newTaskId, e && e.message ? e.message : String(e)); } catch {}

@@ -138,7 +138,8 @@ async function runContextBudgetStep({
             } catch (e) {
               compactSummaryText = null;
               summaryFailure = `summary_call_failed: ${e && e.message}`;
-              console.log('[cp5-compact-summary] fail-open to plain trim:', e && e.message);
+              // BLOCK-376（S1 / G-11）——异常不再走 console 双通道：summaryFailure 已由
+              // 下方 compaction_failed 事件承载（W1-F14 可见性契约），console 重复通道删除。
             }
           }
           if (droppedCount >= 4 && !compactSummaryText) {
@@ -203,6 +204,11 @@ ${compactSummaryText}`,
         }
       }
     } catch (e) {
+      // BLOCK-376（S1 / G-11）——裁剪管线异常改发 trim_skipped{reason} 事件（轨迹面
+      // 可见），console 降为运维兜底通道。
+      try {
+        emit({ event: 'trim_skipped', reason: `context_breaker_error: ${e && e.message}`, at: new Date().toISOString() });
+      } catch { /* 观测面故障不阻塞主流程 */ }
       console.log('[context-breaker-error]', e && e.message);
     }
   }

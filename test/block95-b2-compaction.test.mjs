@@ -138,8 +138,13 @@ test('compactConversationNow：真实落库 + upsert 推进 + 原文红线不变
     const afterRows = sqlite.prepare('SELECT rowid, role, content FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC').all(CONV);
     assert.equal(JSON.stringify(afterRows), JSON.stringify(beforeRows)); // 红线：原文逐字节不变
 
-    // 追加新消息后再次压缩 → upsert 推进 covers_rowid
+    // BLOCK-376（S1 / G-05）契约追新——真增量语义：
+    // ①单行增量不越过阈值 → 诚实拒绝（旧行为=为 +1 行全量重摘要，正是 O(n²) 根因）；
+    // ②批量增量越过阈值 → upsert 推进 covers_rowid。
     seedMsg('user', 'B2消息-30（新）');
+    const rSingle = await compaction.compactConversationNow({ userId: USER_ID, conversationId: CONV, sqlite });
+    assert.equal(rSingle.ok, false, '单行未覆盖增量不得触发全量重摘要');
+    for (let i = 0; i < 20; i += 1) seedMsg('user', `B2增量-${i}：${'细节'.repeat(800)}`);
     const r2 = await compaction.compactConversationNow({ userId: USER_ID, conversationId: CONV, sqlite });
     assert.equal(r2.ok, true);
     assert.ok(r2.compaction.covers_rowid >= r1.compaction.covers_rowid);

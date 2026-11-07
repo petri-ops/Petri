@@ -1,4 +1,10 @@
 # Petri Desktop UI 产品化审计台账
+## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 **in_progress**）
+
+- **改动**：`frontend/src/components/copilot/copilotClient/agentTaskStream.ts` 新增 `task.failed` 事件消费（结构化 reason/reasonCode，error 兼容载荷优先级不变）；`types.ts` 声明 `onTaskFailed`。tsc 0。
+- **后端对偶**：`loop-orchestrator.js` 失败分支发显式 `task.failed{reason, reasonCode}`（additive；error/run_terminal 不变）。
+- **验收边界**：契约级（事件形状/单结算/优先级）由 nso-s1-stream-rejection 族+组件流测试守护；实机失败场景腿（真实 provider 失败→UI 呈现结构化终态）需实机走查，未达不翻 verified。
+
 ## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 cv live 在 p_mvtu0b52_9cbr 上过；结果库行 cv 在 p_mvtwf22y_9byo 上也未出现——结果面板 UI 态依赖，实机走查待人工）**）
 
 - **字号 token 收敛**：fontSize:11 → var(--petri-font-size-xs, 11px) 共 12 处 5 文件（ChatArtifactCard×8 / LeftSshCreatePanel×2 / LeftPanel / CrashNoticeBanner / TerminalWindowPage）；TerminalWindowPage XTerm 例豁免留痕（fontSize 为数值 canvas API，CSS token 不适用）。

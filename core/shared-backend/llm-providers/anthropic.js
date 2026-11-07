@@ -252,6 +252,14 @@ class AnthropicProvider {
       return result;
     } catch (error) {
       const code = error && error.name === 'AbortError' ? 'aborted' : 'network_error';
+      // BLOCK-376（S1 / G-03）——errorsAsRejections 契约补全（deepseek 侧 NSO-W1 已有，
+      // anthropic 漏齐）：网关在「可重试错误 + 本 attempt 非终局」时把 rejection 还原成
+      // 结果信封做降级判定；终局 attempt 由网关上抛给整轮重试。aborted（用户取消）
+      // 永远不 throw（取消语义优先于重试）。
+      if (options && options.errorsAsRejections && code !== 'aborted') {
+        aiUsageHelper.recordAiUsage(usageRecord(telemetry, body && body.model, startedAt, null, code));
+        throw error;
+      }
       emitSafely(onEvent, { type: 'error', error: code, message: error.message });
       aiUsageHelper.recordAiUsage(usageRecord(telemetry, body && body.model, startedAt, null, code));
       return { error: code, message: error.message };

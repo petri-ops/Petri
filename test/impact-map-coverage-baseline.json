@@ -1,7 +1,7 @@
 {
   "_about": "BLOCK-364（NSO-W5a）impact-map 测试覆盖棘轮：列出当前未被任何 impact-map 规则 tests 引用的测试文件（存量债，只许减少）。新增测试文件必须挂到规则，否则 test/nso-w5-impact-coverage.test.mjs 判红；清偿后同批删除对应条目。",
   "schemaVersion": 1,
-  "updatedAt": "2026-11-06",
+  "updatedAt": "2026-11-07",
   "unmappedTests": [
     "test/_mapSkillRuntimeStatus.test.mjs",
     "test/accessmode-validation.test.mjs",
@@ -47,7 +47,6 @@
     "test/block165-codemod-idempotent.test.mjs",
     "test/block169-review-commit-edge.test.mjs",
     "test/block171-tool-cancel.test.mjs",
-    "test/block172-cp5-compact.test.mjs",
     "test/block173-w3-contracts.test.mjs",
     "test/block181-genui-path-repair.test.mjs",
     "test/block183-data-ws.test.mjs",

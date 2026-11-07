@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 506,
+    "documentCount": 507,
     "lastUpdated": "2026-11-07",
-    "managedMarkdown": 489
+    "managedMarkdown": 490
   },
   "documents": [
     {
@@ -50,6 +50,25 @@
         "governance"
       ],
       "notes": "post-nso 蓝图 S0 承载包：completed。两红门归因重打（code-size 指纹/合法增长留因 + knip 动态入口定性）、全量分片 387→38（349 根修十六簇：schema 平价门/测试隔离/锚点追新/化石冻结棘轮/环境档 skip）、残红 16 C-46+1 P6+1 S1 逐件归因、WIP 清单、canonical 对账（旧蓝图 completed/G0-LF 语义钉死）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-376",
+      "capability": "block-376-post-nso-s1-agent-mainline",
+      "path": "docs/block-376-post-nso-s1-agent-mainline-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-376-post-nso-s1-agent-mainline",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s1",
+        "agent-mainline",
+        "sse"
+      ],
+      "notes": "post-nso 蓝图 S1 承载包：流中断穿透补全（anthropic/llm-client errorsAsRejections+启用绑定 RST）、真增量摘要、压缩失败可见、SSE task.failed 三态、降级投影、四事件轨迹面注册、S0 移交 spawn persona。用户预授权连续工作模式。G0 开发期常态 · 不外推 packaged/Provider/GA。 | 2026-11-07 completed（带例外）：G-03/04/05/11 全交付（网关 status 丢失缺陷当场抓真修复）；spawn persona 修正归因后移交 S4 专项；P6/UI-700 腿按队列。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10298,5 +10317,5 @@
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 506
+  "documentCount": 507
 }

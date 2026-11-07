@@ -48,8 +48,8 @@
       "classification": "generator-refresh",
       "owner": "check-ui-productization-audit.mjs（W3/W3b 台账刷新：UI-697/698/699 入账）",
       "content": "generatedAt + sections/uniqueIds/counts 与 UI 台账当前态一致（机械可再生）",
-      "disposition": "preserve-untouched",
-      "reason": "生成器时间戳/计数刷新，可重生成；不代提交"
+      "disposition": "adopt-into-BLOCK-375/376-commit",
+      "reason": "测量证据与台账同构门（block332）要求其与 ui-productization-audit.md 机械同步——生成器（ui:audit:triage）自有产物；S1 的 UI-700 入账后按门禁要求重刷（含并发写入者批的 UI-697/698/699 段，超集覆盖）"
     },
     {
       "path": "acceptance/functional-audit-2026-11-04/surface-matrix.json",

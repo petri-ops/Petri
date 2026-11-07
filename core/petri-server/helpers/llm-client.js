@@ -53,6 +53,10 @@ function callDeepSeekStream(apiKey, body, telemetry, onEvent, options) {
     signal: options && options.signal,
     apiKeyOverride: apiKey,
     fallbackWhen: options && options.fallbackWhen,
+    // BLOCK-376（S1 / G-03）——兼容入口透传 errorsAsRejections（callChatProvider 已有，
+    // callDeepSeekStream 漏齐：chat 轨生产调用方经此入口时开关被静默吞掉）。
+    // 缺省不注入键（零行为变化，与网关 options 组装同款条件展开）。
+    ...(options && options.errorsAsRejections ? { errorsAsRejections: true } : {}),
   });
 }
 

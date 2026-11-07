@@ -7640,6 +7640,25 @@
       ],
       "commands": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block376-post-nso-s1",
+      "note": "BLOCK-375 后 post-nso 蓝图 S1 Agent 主链最后一公里：流中断穿透/增量摘要/压缩失败可见/SSE task.failed/降级投影/轨迹事件注册。改主链事件面或压缩语义时跑本包行为测试族。",
+      "patterns": [
+        "docs/block-376-post-nso-s1-agent-mainline-plan.md",
+        "acceptance/post-nso-2026-11-06/stage-1/**"
+      ],
+      "tests": [
+        "test/nso-w1-context-budget.test.mjs",
+        "test/block172-cp5-compact.test.mjs",
+        "test/nso-s1-stream-rejection.test.mjs",
+        "test/nso-s1-compaction-incremental.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

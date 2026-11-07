@@ -1,4 +1,6 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-07（🏁 **BLOCK-376 completed（S1 主链）**：接手读 block-376 plan §6 收口；残红=P6/block93（S4）/UI-700 腿（S3）
+最后更新：2026-11-07（▶ **BLOCK-376 active（S1 主链）**：plan=docs/block-376-post-nso-s1-agent-mainline-plan.md；S0 残红补腿=C-46 兄弟仓/P6 会话档
 最后更新：2026-11-07（🏁 **BLOCK-375 completed（S0 可信起点）**：接手读 docs/block-375-post-nso-s0-trusted-baseline-plan.md §9 收口；残红=C-46×16/P6×1/S1×1（补腿路径在 shard-attribution.json）；工作树含并发写入者遗留（4M+10??，归属清单=acceptance/post-nso-2026-11-06/stage-0/wip-inventory.json，S0 零触碰 preserve 项）。用户预授权连续工作 S0→S7。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **NSO 全程序收尾 completed（359-374，40 笔提交）；无 active 工作包**。**接手顺序**：①读本行+§0.4 评分终评 ②工作树=用户资产+两件 surface-matrix 生成器刷新（可重生成）③剩余=全部需人工实机（verified 走查/布局单源/台账 52 条/FK 逐表）④无阻塞可开工项。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-372 completed；无 active 工作包**：四批全收口。**剩余**=①实机走查 UI-697/698/699 verified 腿（需实机+种子产物）②FK 逐表清偿（独立大包）③台账 52 条终态化（独立会话逐条）④外部 MCP 档位=已裁决不需要（两轴分离）⑤P6 重算自然消化。工作树=用户资产+两件生成器刷新。G0 常态 · 不外推 packaged/Provider/GA。）
