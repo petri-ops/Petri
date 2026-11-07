@@ -55,19 +55,42 @@ async function main() {
     process.exit(2);
   }
   const baseline = JSON.parse(fs.readFileSync(BASELINE, 'utf8'));
-  // 采当次样本（每场景 1 个）
-  const tmpOut = path.join(ROOT, 'node_modules', '.cache', `block350-gate-${Date.now()}.json`);
-  fs.mkdirSync(path.dirname(tmpOut), { recursive: true });
-  try {
-    execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'block350-perf-collect.mjs'), '--gate', `--out=${tmpOut}`], { stdio: 'inherit', timeout: 300000 });
-    const current = JSON.parse(fs.readFileSync(tmpOut, 'utf8'));
-    const { rows, ok } = comparePerf(current, baseline);
-    for (const r of rows) console.log(`[${r.status}] ${r.name} — ${r.detail}`);
-    console.log(`[quality:perf] ${ok ? 'PASS' : 'FAIL'}（${rows.filter((r) => r.status === 'green').length} 绿 / ${rows.filter((r) => r.status === 'red').length} 红 / ${rows.filter((r) => r.status === 'skipped').length} skip）`);
-    process.exitCode = ok ? 0 : 1;
-  } finally {
-    try { fs.rmSync(tmpOut, { force: true }); } catch { /* best-effort */ }
+  // BLOCK-380（S5 / G-19）——连续采样判据：默认连续 N 次 PASS 才出 PASS（棘轮防
+  // 「单次抖动假绿」）；PETRI_PERF_SAMPLES=1 保留旧单次语义（本地快速迭代用）。
+  const samples = Math.max(1, Number(process.env.PETRI_PERF_SAMPLES) || 5);
+  const allRows = [];
+  let allOk = true;
+  for (let i = 1; i <= samples; i += 1) {
+    const tmpOut = path.join(ROOT, 'node_modules', '.cache', `block350-gate-${Date.now()}-${i}.json`);
+    fs.mkdirSync(path.dirname(tmpOut), { recursive: true });
+    try {
+      execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'block350-perf-collect.mjs'), '--gate', `--out=${tmpOut}`], { stdio: samples > 1 ? 'pipe' : 'inherit', timeout: 300000 });
+      const current = JSON.parse(fs.readFileSync(tmpOut, 'utf8'));
+      const { rows, ok } = comparePerf(current, baseline);
+      allRows.push({ sample: i, rows, ok });
+      if (!ok) allOk = false;
+      if (samples > 1) {
+        const red = rows.filter((r) => r.status === 'red').length;
+        console.log(`[quality:perf] 采样 ${i}/${samples}: ${red === 0 ? '全绿' : red + ' 红'}`);
+        if (red > 0) for (const r of rows.filter((r) => r.status === 'red')) console.log(`  [${r.status}] ${r.name} — ${r.detail}`);
+      } else {
+        for (const r of rows) console.log(`[${r.status}] ${r.name} — ${r.detail}`);
+      }
+    } finally {
+      try { fs.rmSync(tmpOut, { force: true }); } catch { /* best-effort */ }
+    }
   }
+  if (samples > 1) {
+    // 汇总口径：以最差一轮为准（任一轮红=红）
+    const worst = allRows.reduce((acc, s) => (s.ok ? acc : s), allRows[0]);
+    const rows = worst ? worst.rows : [];
+    for (const r of rows) console.log(`[${r.status}] ${r.name} — ${r.detail}`);
+    console.log(`[quality:perf] ${allOk ? 'PASS' : 'FAIL'}（连续 ${samples} 次采样，${allOk ? '全部通过' : '存在红轮'}）`);
+  } else {
+    const rows = allRows[0] ? allRows[0].rows : [];
+    console.log(`[quality:perf] ${allOk ? 'PASS' : 'FAIL'}（${rows.filter((r) => r.status === 'green').length} 绿 / ${rows.filter((r) => r.status === 'red').length} 红 / ${rows.filter((r) => r.status === 'skipped').length} skip）`);
+  }
+  process.exitCode = allOk ? 0 : 1;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

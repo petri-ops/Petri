@@ -1,3 +1,5 @@
+376. [`block-380-post-nso-s5-perf-plan.md`](./block-380-post-nso-s5-perf-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S5 承载包，判据面）**：quality:perf 连续 5 次采样判据落地（最差轮口径+PETRI_PERF_SAMPLES 保留单次语义）；当次机器负载读数如实（第 5 轮 long_conversation 红不掩盖）；五段分解随实机切片
+
 375. [`block-379-post-nso-s4-arch-tests-plan.md`](./block-379-post-nso-s4-arch-tests-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S4 承载包，分层）**：实例化单源工厂（三处 new Database 收编）/contractVersion 收编（intent 与 studio 双版本域澄清）；runLoop 五段与 SimpleChat/workspace-tools 大拆片按 W5b 纪律分层留档不硬闯
 
 374. [`block-378-post-nso-s3-experience-plan.md`](./block-378-post-nso-s3-experience-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S3 承载包，机械面）**：字号宪章 9 文件 20 处收敛（XTerm 豁免留痕）/prefs 重放队列（30s×3 有界）+空 flags 可见/折叠 inert/钉住能力位；DOM 窗口化/布局单源/实机腿如实挂起待切片

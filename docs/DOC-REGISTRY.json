@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 510,
+    "documentCount": 511,
     "lastUpdated": "2026-11-07",
-    "managedMarkdown": 493
+    "managedMarkdown": 494
   },
   "documents": [
     {
@@ -125,6 +125,24 @@
         "architecture"
       ],
       "notes": "post-nso 蓝图 S4 承载包：实例化单源工厂/contractVersion 收编（intent 与 studio 双版本域澄清）；大拆片按 W5b 纪律分层留档不硬闯。G0 开发期常态。"
+    },
+    {
+      "id": "BLOCK-380",
+      "capability": "block-380-post-nso-s5-perf",
+      "path": "docs/block-380-post-nso-s5-perf-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-380-post-nso-s5-perf",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s5",
+        "perf"
+      ],
+      "notes": "S5：连续采样判据落地；当次机器负载读数如实（第5轮 long_conversation 红）。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10373,5 +10391,5 @@
     }
   ],
   "lastUpdated": "2026-11-06",
-  "documentCount": 510
+  "documentCount": 511
 }
