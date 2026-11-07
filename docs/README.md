@@ -1,3 +1,5 @@
+378. [`block-382-post-nso-s7-final-report.md`](./block-382-post-nso-s7-final-report.md) — 2026-11-07 **completed（post-nso 蓝图 S7 终验与总收口）**：十一维复评（七升四平零降，差值逐条归因）+ 真实任务腿如实挂起（8 任务套件/人眼判据/长任务=机器会话腿）+ 总收口报告（七包证据链/红门终态/分片结论/WIP 保留/待人工清单 11 项）
+
 377. [`block-381-post-nso-s6-governance-plan.md`](./block-381-post-nso-s6-governance-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S6 承载包）**：coverage 单写入器（顶层 documentCount 退役+契约测试追新+双写入器同字段）/active 槽位钉死/账本自稳/证据元数据增量面
 
 376. [`block-380-post-nso-s5-perf-plan.md`](./block-380-post-nso-s5-perf-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S5 承载包，判据面）**：quality:perf 连续 5 次采样判据落地（最差轮口径+PETRI_PERF_SAMPLES 保留单次语义）；当次机器负载读数如实（第 5 轮 long_conversation 红不掩盖）；五段分解随实机切片

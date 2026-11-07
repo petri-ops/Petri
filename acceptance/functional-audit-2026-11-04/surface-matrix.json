@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T02:28:39.307Z",
+  "generatedAt": "2026-11-07T04:40:45.109Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 2,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5854,9 +5854,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M core/petri-server/agent-tools/svg-tools.js",
-    "M core/petri-server/helpers/inkscape.js"
-  ],
+  "dirty": [],
   "defNotes": []
 }
