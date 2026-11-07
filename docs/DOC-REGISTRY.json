@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 511,
+    "documentCount": 512,
     "lastUpdated": "2026-11-07",
-    "managedMarkdown": 494
+    "managedMarkdown": 495
   },
   "documents": [
     {
@@ -143,6 +143,24 @@
         "perf"
       ],
       "notes": "S5：连续采样判据落地；当次机器负载读数如实（第5轮 long_conversation 红）。"
+    },
+    {
+      "id": "BLOCK-381",
+      "capability": "block-381-post-nso-s6-governance",
+      "path": "docs/block-381-post-nso-s6-governance-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-381-post-nso-s6-governance",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-nso",
+        "s6",
+        "governance"
+      ],
+      "notes": "S6：coverage 单写入器（顶层退役+契约测试）/active 槽位/账本自稳/证据元数据增量面。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10390,6 +10408,5 @@
       "notes": "2026-11-06 completed：外部 MCP 主体=MCP trust 语义治理（不进 capability token 面，两轴分离契约 3/3）；AUDIT-LOG 🟡 销号；协议层协商裁决为不需要。"
     }
   ],
-  "lastUpdated": "2026-11-06",
-  "documentCount": 511
+  "lastUpdated": "2026-11-06"
 }

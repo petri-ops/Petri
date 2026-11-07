@@ -57,9 +57,9 @@ function entrypointOf(dir, id) {
   return registry.documents.find((d) => d.id === id).entrypoint;
 }
 
-test('①②③ — 分桶迁出+嵌链改指+索引自注册', () => {
+test('①②③ — 分桶迁出+嵌链改指+索引自注册', async () => {
   const dir = makeFixture();
-  const report = rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
+  const report = await rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
 
   assert.equal(report.movedEntries, 2, '两个历史月宿主条目迁出');
   assert.deepEqual(report.movedMonths.sort(), ['2026-09', '2026-10']);
@@ -85,7 +85,9 @@ test('①②③ — 分桶迁出+嵌链改指+索引自注册', () => {
   assert.equal(entrypointOf(dir, 'F'), 'docs/doc-index-2026-09.md', '嵌链文档②同上');
 
   const registry = JSON.parse(fs.readFileSync(path.join(dir, 'docs', 'DOC-REGISTRY.json'), 'utf8'));
-  assert.equal(registry.documentCount, 8, 'documentCount 随索引注册增长');
+  // BLOCK-381（S6 / G-21）——顶层 documentCount 已退役（单写入器=coverage.*）
+  assert.equal(registry.documentCount, undefined, '顶层遗留字段不得再写');
+  assert.equal(registry.coverage?.documentCount, 8, 'documentCount 随索引注册增长（coverage.*）');
   for (const rel of ['docs/doc-index-2026-10.md', 'docs/doc-index-2026-09.md']) {
     const idxDoc = registry.documents.find((d) => d.path === rel);
     assert.ok(idxDoc && idxDoc.kind === 'governance' && idxDoc.canonical === false, `索引 ${rel} 以 governance/canonical=false 注册`);
@@ -93,15 +95,15 @@ test('①②③ — 分桶迁出+嵌链改指+索引自注册', () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('④ — 幂等：第二次运行零变化', () => {
+test('④ — 幂等：第二次运行零变化', async () => {
   const dir = makeFixture();
-  rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
+  await rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
   const snapshot = {
     readme: fs.readFileSync(path.join(dir, 'docs', 'README.md'), 'utf8'),
     idx10: fs.readFileSync(path.join(dir, 'docs', 'doc-index-2026-10.md'), 'utf8'),
     registry: fs.readFileSync(path.join(dir, 'docs', 'DOC-REGISTRY.json'), 'utf8'),
   };
-  const second = rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
+  const second = await rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: true });
   assert.equal(second.movedEntries, 0, '第二次运行无待迁移条目');
   assert.equal(second.entrypointsRemapped, 0, '第二次运行零改指');
   assert.equal(fs.readFileSync(path.join(dir, 'docs', 'README.md'), 'utf8'), snapshot.readme, 'README 逐字节不变');
@@ -109,10 +111,10 @@ test('④ — 幂等：第二次运行零变化', () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('⑤ — 预览模式（write=false）零写入', () => {
+test('⑤ — 预览模式（write=false）零写入', async () => {
   const dir = makeFixture();
   const before = fs.readFileSync(path.join(dir, 'docs', 'README.md'), 'utf8');
-  const report = rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: false });
+  const report = await rollDocsIndex({ rootDir: dir, keepMonth: '2026-11', write: false });
   assert.equal(report.movedEntries, 2, '预览仍报告将迁移的条目');
   assert.equal(fs.readFileSync(path.join(dir, 'docs', 'README.md'), 'utf8'), before, 'README 未被写入');
   assert.throws(() => fs.statSync(path.join(dir, 'docs', 'doc-index-2026-10.md')), '索引文件未落盘');

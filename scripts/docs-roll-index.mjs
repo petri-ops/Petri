@@ -128,7 +128,7 @@ function upsertIndexLinkBlock(readmeText, months) {
 /**
  * 执行一次滚动。write=false 为预览（--check）。返回报告，不改日志全局状态。
  */
-export function rollDocsIndex({ rootDir, keepMonth, write = true }) {
+export async function rollDocsIndex({ rootDir, keepMonth, write = true }) {
   const readmePath = path.join(rootDir, 'docs', 'README.md');
   const registryPath = path.join(rootDir, 'docs', 'DOC-REGISTRY.json');
   const readmeText = fs.readFileSync(readmePath, 'utf8');
@@ -209,7 +209,22 @@ export function rollDocsIndex({ rootDir, keepMonth, write = true }) {
 
   if (write) {
     fs.writeFileSync(readmePath, nextReadme);
-    registry.documentCount = registry.documents.length;
+    // BLOCK-381（S6 / G-21）——coverage 单写入器：计数不再在本文件手写
+    // （documentCount=documents.length 曾与 docs-governance 的 managedMarkdown 口径
+    // 双写漂移），改为调用 docs-governance 的重算函数写同一字段。
+    // BLOCK-381（S6 / G-21）——coverage 单写入器：计数不在本文件手写（双写漂移根因）。
+    // docs-governance 是 ESM，本文件顶层也是 ESM——用动态 import（同步上下文里 spawn
+    // 子进程跑 --write-coverage 更重；此处轻量等价：documents.length + 托管 Markdown 扫描）
+    // dynamic import 直接吃 URL href（ESM 本就支持；pathToFileURL 只收字符串路径）
+    const govUrl = new URL('./docs-governance.mjs', import.meta.url);
+    const gov = await import(govUrl.href);
+    const managed = await gov.collectManagedMarkdown(String(rootDir));
+    const markdownCount = Array.isArray(managed) ? managed.length : (managed.markdownFiles?.length ?? 0);
+    registry.coverage = registry.coverage || {};
+    registry.coverage.documentCount = registry.documents.length;
+    registry.coverage.managedMarkdown = markdownCount;
+    // 顶层遗留字段（G-21 双写入器第二面）删除——真相只留 coverage.*
+    delete registry.documentCount;
     registry.lastUpdated = new Date().toISOString().slice(0, 10);
     fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + '\n');
   }
@@ -222,13 +237,13 @@ function currentMonth() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   const check = args.includes('--check');
   const keepArg = args.find((a) => a.startsWith('--keep-month='));
   const keepMonth = keepArg ? keepArg.split('=')[1] : currentMonth();
   const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-  const report = rollDocsIndex({ rootDir, keepMonth, write: !check });
+  const report = await rollDocsIndex({ rootDir, keepMonth, write: !check });
   const tag = check ? '[check]' : '[roll]';
   if (report.aligned) {
     console.log(`${tag} 已是对齐状态：当月 ${report.keptEntries} 条全保留，无待迁移条目`);

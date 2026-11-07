@@ -1,3 +1,5 @@
+377. [`block-381-post-nso-s6-governance-plan.md`](./block-381-post-nso-s6-governance-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S6 承载包）**：coverage 单写入器（顶层 documentCount 退役+契约测试追新+双写入器同字段）/active 槽位钉死/账本自稳/证据元数据增量面
+
 376. [`block-380-post-nso-s5-perf-plan.md`](./block-380-post-nso-s5-perf-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S5 承载包，判据面）**：quality:perf 连续 5 次采样判据落地（最差轮口径+PETRI_PERF_SAMPLES 保留单次语义）；当次机器负载读数如实（第 5 轮 long_conversation 红不掩盖）；五段分解随实机切片
 
 375. [`block-379-post-nso-s4-arch-tests-plan.md`](./block-379-post-nso-s4-arch-tests-plan.md) — 2026-11-07 **completed（post-nso 蓝图 S4 承载包，分层）**：实例化单源工厂（三处 new Database 收编）/contractVersion 收编（intent 与 studio 双版本域澄清）；runLoop 五段与 SimpleChat/workspace-tools 大拆片按 W5b 纪律分层留档不硬闯
