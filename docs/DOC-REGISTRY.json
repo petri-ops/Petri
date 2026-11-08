@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 513,
-    "lastUpdated": "2026-11-07",
-    "managedMarkdown": 496
+    "documentCount": 514,
+    "lastUpdated": "2026-11-08",
+    "managedMarkdown": 497
   },
   "documents": [
     {
@@ -179,6 +179,24 @@
         "final-report"
       ],
       "notes": "S7 终验与总收口：十一维复评七升四平零降；真实任务腿如实挂起；待人工清单 11 项。"
+    },
+    {
+      "id": "BLOCK-383",
+      "capability": "block-383-post-nso-live-legs-batch",
+      "path": "docs/block-383-post-nso-live-legs-batch-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-383-post-nso-live-legs-batch",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "post-nso",
+        "live-legs",
+        "verification"
+      ],
+      "notes": "实机腿批：P6 重算/perf 连续全绿/UI-697~701 实机取证/8 任务套件（AX 会话健康前置已确认）。humanEye 不代答。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",

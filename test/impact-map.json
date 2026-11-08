@@ -7692,6 +7692,21 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block383-post-nso-live-legs",
+      "note": "BLOCK-383 实机腿批：P6 重算/perf 连续全绿/UI 实机取证证据目录分类（test-affected 契约要求 acceptance/<dir>/evidence.json 恰被一规则覆盖）。",
+      "patterns": [
+        "docs/block-383-post-nso-live-legs-batch-plan.md",
+        "acceptance/post-nso-2026-11-08/**"
+      ],
+      "tests": [
+        "test/g0-rs-p6-product-acceptance.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

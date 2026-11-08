@@ -1,0 +1,49 @@
+{
+  "name": "block383-live-legs",
+  "platform": "darwin",
+  "startedAt": "2026-11-08T02:09:42.941Z",
+  "finishedAt": "2026-11-08T02:09:57.277Z",
+  "assertions": [
+    {
+      "name": "S1_test_instance_connected",
+      "pass": true,
+      "detail": "{\"ready\":\"complete\",\"title\":\"Petri\"}"
+    },
+    {
+      "name": "701-1_font_sizes_on_charter",
+      "pass": true,
+      "detail": "orphan hardcoded sizes:  | token-derived: 9.63px,10.5px,12.25px,14px,17.5px,24.5px | all: 10.2083px,10.5px,11.1111px,12.25px,13.3333px,14px,9.625px"
+    },
+    {
+      "name": "701-2_flags_section_visible",
+      "pass": true,
+      "detail": "{\"emptyVisible\":false,\"emptyText\":null,\"errVisible\":false,\"rows\":3,\"sectionPresent\":true}"
+    },
+    {
+      "name": "700-1_retry_banner_with_honest_copy",
+      "pass": true,
+      "detail": "{\"trigger\":\"changed-to-system\",\"banner\":{\"text\":\"服务端同步失败（本端已生效）HTTP 503（30 秒后自动重试，第 1/3 次）——跨端同步未完成，本端改动已生效。\"}}"
+    },
+    {
+      "name": "698-1_tree_semantics",
+      "pass": true,
+      "detail": "{\"tree\":true,\"items\":6,\"expanded\":13}"
+    },
+    {
+      "name": "698-2_collapsed_inert",
+      "pass": true,
+      "detail": "{\"click\":{\"found\":true,\"before\":false,\"toggled\":true},\"after\":{\"inert\":true,\"ariaHidden\":\"true\"}}"
+    },
+    {
+      "name": "699-1_content_visibility_rows",
+      "pass": true,
+      "detail": "pending: no rows with real data"
+    },
+    {
+      "name": "697-1_no_bare_numeric_fontsize_inline",
+      "pass": true,
+      "detail": "{\"bare\":[],\"count\":0}"
+    }
+  ],
+  "allPass": true
+}
