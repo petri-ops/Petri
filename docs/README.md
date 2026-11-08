@@ -1,3 +1,4 @@
+379. [block-383-post-nso-live-legs-batch-plan.md](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **completed（实机腿批）**：UI-697~701 实机腿 8/8（UI-700/701→verified）/perf 连续 5×5 全绿/P6 挂起根因=新 C-49（兄弟仓 golden fixture 漂移）/任务套件 0/8 全为环境因如实挂起
 379. [`block-383-post-nso-live-legs-batch-plan.md`](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **active（实机腿批）**：block-382 待人工清单第一波——P6 重算/perf 连续 5 次全绿/UI-697~701 实机取证/8 任务套件×3+T7；AX 会话健康前置已确认（block48 10/11）；humanEye 不代答
 
 378. [`block-382-post-nso-s7-final-report.md`](./block-382-post-nso-s7-final-report.md) — 2026-11-07 **completed（post-nso 蓝图 S7 终验与总收口）**：十一维复评（七升四平零降，差值逐条归因）+ 真实任务腿如实挂起（8 任务套件/人眼判据/长任务=机器会话腿）+ 总收口报告（七包证据链/红门终态/分片结论/WIP 保留/待人工清单 11 项）

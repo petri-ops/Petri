@@ -1,0 +1,12 @@
+{"event":"run_started","taskId":"ca4c358f-26f6-4880-8910-6c02b4da3d60","kind":"primary","at":"2026-11-08T02:29:06.061Z","_seq":1,"_eventType":"run_started"}
+{"event":"conversation","conversationId":"conv_81c84b6b-513","title":"block348-t6-multi-agent","_seq":2,"_eventType":"conversation"}
+{"event":"token_budget","contextWindow":32000,"resolved":true,"messagesTokensUsed":9853,"systemPromptTokens":1617,"messagesTokens":44,"knowledgeTokens":0,"pct":31,"trimmed":false,"_seq":3,"_eventType":"token_budget"}
+{"event":"iter","n":1,"_seq":4,"_eventType":"iter"}
+{"event":"token_budget","contextWindow":32000,"messagesTokensUsed":34076,"systemPromptTokens":259,"messagesTokens":1415,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":44,"toolResults":0,"otherSystem":1371,"outputReserve":16384,"total":34076},"pct":69,"trimmed":false,"messagesDropped":0,"_seq":5,"_eventType":"token_budget"}
+{"event":"agent_status","phase":"network_retry","message":"[network-retry] transient model call failure (connect ETIMEDOUT 157.240.11.40:443), retry 1/2","_seq":6,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"模型连接瞬断，3s 后自动重试（1/2）","_seq":7,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"[network-retry] transient model call failure (connect ETIMEDOUT 157.240.11.40:443), retry 2/2","_seq":8,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"模型连接瞬断，6s 后自动重试（2/2）","_seq":9,"_eventType":"agent_status"}
+{"error":"read ECONNRESET","_seq":10,"_eventType":"delta"}
+{"event":"run_terminal","taskId":"ca4c358f-26f6-4880-8910-6c02b4da3d60","status":"failed","error":"read ECONNRESET","filesChangedCount":0,"at":"2026-11-08T02:31:45.207Z","_seq":11,"_eventType":"run_terminal"}
+{"event":"error","error":"read ECONNRESET","resumable":false,"interruptedAt":null}

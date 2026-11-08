@@ -185,18 +185,18 @@
       "capability": "block-383-post-nso-live-legs-batch",
       "path": "docs/block-383-post-nso-live-legs-batch-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-383-post-nso-live-legs-batch",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "post-nso",
         "live-legs",
         "verification"
       ],
-      "notes": "实机腿批：P6 重算/perf 连续全绿/UI-697~701 实机取证/8 任务套件（AX 会话健康前置已确认）。humanEye 不代答。"
+      "notes": "实机腿批：P6 重算/perf 连续全绿/UI-697~701 实机取证/8 任务套件（AX 会话健康前置已确认）。humanEye 不代答。 | 2026-11-08 completed：UI 腿 8/8（UI-700/701 verified）/perf 5×5 全绿/P6 挂起根因=C-49 兄弟仓 golden 漂移/任务套件挂起=凭据+网络环境因。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",

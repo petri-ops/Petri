@@ -23,3 +23,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-07T04:36:41.917Z -->
 最后更新：2026-11-06（🏁 **BLOCK-367 NSO-W2b completed**：F-06 实核修正 + capabilityEvidence 审计透传。G0 常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-06（🏁 **BLOCK-366 NSO-W5b completed**：第二真相清理+runLoop 首切片（402bf045，拆前拆后 54/54）；更正 BLOCK-364 误述。G0 常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-08T02:34:43.234Z -->
+最后更新：2026-11-06（🏁 **BLOCK-368 W6b completed**：并行挂起=调度规模形态（象限二分实证），处置=串行默认+多命令象限提速路径。G0 常态 · 不外推 packaged/Provider/GA。）

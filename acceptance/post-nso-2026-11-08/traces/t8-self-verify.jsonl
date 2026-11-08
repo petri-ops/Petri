@@ -1,0 +1,10 @@
+{"event":"run_started","taskId":"da2def91-2fb6-406a-9680-13bf66f2d8b8","kind":"primary","at":"2026-11-08T02:32:46.633Z","_seq":1,"_eventType":"run_started"}
+{"event":"conversation","conversationId":"conv_1b3a101d-c38","title":"block348-t8-self-verify","_seq":2,"_eventType":"conversation"}
+{"event":"token_budget","contextWindow":20000,"resolved":true,"messagesTokensUsed":9850,"systemPromptTokens":1617,"messagesTokens":41,"knowledgeTokens":0,"pct":49,"trimmed":false,"_seq":3,"_eventType":"token_budget"}
+{"event":"iter","n":1,"_seq":4,"_eventType":"iter"}
+{"event":"token_budget","contextWindow":20000,"messagesTokensUsed":34073,"systemPromptTokens":259,"messagesTokens":1412,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":41,"toolResults":0,"otherSystem":1371,"outputReserve":16384,"total":34073},"pct":100,"trimmed":false,"messagesDropped":0,"_seq":5,"_eventType":"token_budget"}
+{"event":"token_budget","contextWindow":20000,"messagesTokensUsed":32715,"systemPromptTokens":259,"messagesTokens":41,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":41,"toolResults":0,"otherSystem":13,"outputReserve":16384,"total":32715},"pct":100,"trimmed":true,"messagesDropped":1,"_seq":6,"_eventType":"token_budget"}
+{"event":"context_compacted","dropped":1,"summarized":false,"summaryHead":null,"at":"2026-11-08T02:32:46.639Z","_seq":7,"_eventType":"context_compacted"}
+{"error":"HTTP 550","_seq":8,"_eventType":"delta"}
+{"event":"run_terminal","taskId":"da2def91-2fb6-406a-9680-13bf66f2d8b8","status":"failed","error":"HTTP 550","filesChangedCount":0,"at":"2026-11-08T02:32:46.816Z","_seq":9,"_eventType":"run_terminal"}
+{"event":"error","error":"HTTP 550","resumable":false,"interruptedAt":null}

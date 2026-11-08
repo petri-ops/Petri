@@ -1,0 +1,17 @@
+[
+  {
+    "path": "package.json",
+    "bytes": 120,
+    "sha256": "414bfa57b57980f0e4e7ff1219b5b91325bd1a6c41b98a6ee93b717543a50d09"
+  },
+  {
+    "path": "src/calc.js",
+    "bytes": 310,
+    "sha256": "f03f5ddcd7875cb42600c9375f32aadc881856759c29c60753487a9e2d8813fe"
+  },
+  {
+    "path": "test/calc.test.mjs",
+    "bytes": 337,
+    "sha256": "d17cc25d158050e025de9c4f17d71b125249c67cee2e26f6ca2caf2bb4667a60"
+  }
+]

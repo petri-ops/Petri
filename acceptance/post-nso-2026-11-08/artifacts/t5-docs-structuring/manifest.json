@@ -1,0 +1,32 @@
+[
+  {
+    "path": "notes/decision-cache.md",
+    "bytes": 176,
+    "sha256": "61c2c9ea6d44b4c44d9f55dda925b0f06c0d23f20716c80dd234272e7a22f00b"
+  },
+  {
+    "path": "notes/interview-notes.md",
+    "bytes": 238,
+    "sha256": "93ebd05112505d4d1ea36c6f0251231bc4a0f4219a1454dad1819f4e0ad281ba"
+  },
+  {
+    "path": "notes/meeting-1014.md",
+    "bytes": 214,
+    "sha256": "ccecaa56197877ad569d679838f4534239cca6b3285febe4baa1ab98ad4cce6a"
+  },
+  {
+    "path": "notes/meeting-1021.md",
+    "bytes": 261,
+    "sha256": "cd68bc612408faf6a0758385874b6ed73527754e267e18738c419372270c3137"
+  },
+  {
+    "path": "notes/random-thoughts.md",
+    "bytes": 141,
+    "sha256": "92d69cfb9d94445290fe7f02690e27dffa6d07061f6b4e41edfd1a74e31cb023"
+  },
+  {
+    "path": "notes/scratch-todo.md",
+    "bytes": 157,
+    "sha256": "8405ad082c1da7e6b3a7bae6ce867e9d820471aded9e4e793730f42d2df6f880"
+  }
+]

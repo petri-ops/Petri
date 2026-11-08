@@ -1,0 +1,12 @@
+{"event":"run_started","taskId":"2828cb00-c7fa-4658-ac69-c307830046eb","kind":"primary","at":"2026-11-08T02:27:13.017Z","_seq":1,"_eventType":"run_started"}
+{"event":"conversation","conversationId":"conv_86e192c1-895","title":"block348-t2-data-cleaning","_seq":2,"_eventType":"conversation"}
+{"event":"token_budget","contextWindow":32000,"resolved":true,"messagesTokensUsed":9874,"systemPromptTokens":1618,"messagesTokens":64,"knowledgeTokens":0,"pct":31,"trimmed":false,"_seq":3,"_eventType":"token_budget"}
+{"event":"iter","n":1,"_seq":4,"_eventType":"iter"}
+{"event":"token_budget","contextWindow":32000,"messagesTokensUsed":34097,"systemPromptTokens":259,"messagesTokens":1436,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":64,"toolResults":0,"otherSystem":1372,"outputReserve":16384,"total":34097},"pct":69,"trimmed":false,"messagesDropped":0,"_seq":5,"_eventType":"token_budget"}
+{"event":"agent_status","phase":"network_retry","message":"[network-retry] transient model call failure (read ECONNRESET), retry 1/2","_seq":6,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"模型连接瞬断，3s 后自动重试（1/2）","_seq":7,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"[network-retry] transient model call failure (read ECONNRESET), retry 2/2","_seq":8,"_eventType":"agent_status"}
+{"event":"agent_status","phase":"network_retry","message":"模型连接瞬断，6s 后自动重试（2/2）","_seq":9,"_eventType":"agent_status"}
+{"error":"read ECONNRESET","_seq":10,"_eventType":"delta"}
+{"event":"run_terminal","taskId":"2828cb00-c7fa-4658-ac69-c307830046eb","status":"failed","error":"read ECONNRESET","filesChangedCount":0,"at":"2026-11-08T02:27:22.355Z","_seq":11,"_eventType":"run_terminal"}
+{"event":"error","error":"read ECONNRESET","resumable":false,"interruptedAt":null}

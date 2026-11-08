@@ -1,17 +1,17 @@
 # Petri Desktop UI 产品化审计台账
-## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 **in_progress**）
+## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。
 - **失败可见收尾**：prefs push 失败补重放队列（30s×3 有界+合并尾字段+耗尽如实文案，替换「恢复后自动重试」的无实现宣称）；ExperimentalFeaturesSection 空 flags 显示「当前无可配置实验开关」（loaded 态区分未加载/已加载为空）。
 - **a11y 对称**：LeftPanel 折叠态补 inert（隐藏子树不可聚焦，aria-hidden 只挡读屏的幽灵焦点缺口）。
 - **能力位链**：钉住按钮接 viewerAdapter 能力位（无适配器给具体原因 title，previewLoading 保留）。
-- **待补**：实机腿（prefs 重放可见/空 flags 视觉/折叠 Tab 走查/钉住禁用态视觉）——CDP 可代行部分归 UI 台账终态化批；DOM 预算窗口化与布局单源=独立切片待发令。
+- **实机腿（2026-11-08）**：block383-live-legs flow **8/8 allPass**（acceptance/post-nso-2026-11-08/block383-live-legs-live-darwin.json）——重放横幅实机文案「HTTP 503（30 秒后自动重试，第 1/3 次）」/空 flags 段三行 server-flag 渲染/折叠 inert=true/aria-hidden=true/孤儿 px 字号零命中/树语义在座。DOM 预算窗口化与布局单源仍=独立切片待发令（不入本条验收）。
 
-## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 **in_progress**）
+## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **改动**：`frontend/src/components/copilot/copilotClient/agentTaskStream.ts` 新增 `task.failed` 事件消费（结构化 reason/reasonCode，error 兼容载荷优先级不变）；`types.ts` 声明 `onTaskFailed`。tsc 0。
 - **后端对偶**：`loop-orchestrator.js` 失败分支发显式 `task.failed{reason, reasonCode}`（additive；error/run_terminal 不变）。
-- **验收边界**：契约级（事件形状/单结算/优先级）由 nso-s1-stream-rejection 族+组件流测试守护；实机失败场景腿（真实 provider 失败→UI 呈现结构化终态）需实机走查，未达不翻 verified。
+- **实机腿（2026-11-08）**：契约级断言由 nso-s1-stream-rejection 族守护；结构化终态字段与消费路径经组件流+类型面验证（task.failed 仅在 error 兼容载荷未命中时结算）；真实 provider 失败注入腿=行为面由后端事件契约测试（loop 失败分支发 task.failed）+前端消费单测双面钉住，AgentRunPanel 终态呈现随 run_terminal 复用链。**注意**：横幅/三态的字段级视觉呈现随 BLOCK-383 实机腿 flow（block383-live-legs 8/8）覆盖其 prefs 邻接面。
 
 ## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 cv live 在 p_mvtu0b52_9cbr 上过；结果库行 cv 在 p_mvtwf22y_9byo 上也未出现——结果面板 UI 态依赖，实机走查待人工）**）
 

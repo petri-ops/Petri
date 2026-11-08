@@ -1,0 +1,10 @@
+{"event":"run_started","taskId":"f5d6f4db-cb38-453e-b061-b53530f0739b","kind":"primary","at":"2026-11-08T02:32:46.046Z","_seq":1,"_eventType":"run_started"}
+{"event":"conversation","conversationId":"conv_8ac06dda-413","title":"block348-t7-long-haul","_seq":2,"_eventType":"conversation"}
+{"event":"token_budget","contextWindow":20000,"resolved":true,"messagesTokensUsed":9872,"systemPromptTokens":1616,"messagesTokens":64,"knowledgeTokens":0,"pct":49,"trimmed":false,"_seq":3,"_eventType":"token_budget"}
+{"event":"iter","n":1,"_seq":4,"_eventType":"iter"}
+{"event":"token_budget","contextWindow":20000,"messagesTokensUsed":34095,"systemPromptTokens":259,"messagesTokens":1434,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":64,"toolResults":0,"otherSystem":1370,"outputReserve":16384,"total":34095},"pct":100,"trimmed":false,"messagesDropped":0,"_seq":5,"_eventType":"token_budget"}
+{"event":"token_budget","contextWindow":20000,"messagesTokensUsed":32738,"systemPromptTokens":259,"messagesTokens":64,"breakdown":{"systemPrompt":259,"knowledge":0,"toolDefinitions":16018,"messages":64,"toolResults":0,"otherSystem":13,"outputReserve":16384,"total":32738},"pct":100,"trimmed":true,"messagesDropped":1,"_seq":6,"_eventType":"token_budget"}
+{"event":"context_compacted","dropped":1,"summarized":false,"summaryHead":null,"at":"2026-11-08T02:32:46.050Z","_seq":7,"_eventType":"context_compacted"}
+{"error":"Authentication Fails, Your api key: ****ck93 is invalid (request_id: 118e0717-a00d-41d6-9711-39bacaaa1761)","_seq":8,"_eventType":"delta"}
+{"event":"run_terminal","taskId":"f5d6f4db-cb38-453e-b061-b53530f0739b","status":"failed","error":"Authentication Fails, Your api key: ****ck93 is invalid (request_id: 118e0717-a00d-41d6-9711-39bacaaa1761)","filesChangedCount":0,"at":"2026-11-08T02:32:46.264Z","_seq":9,"_eventType":"run_terminal"}
+{"event":"error","error":"Authentication Fails, Your api key: ****ck93 is invalid (request_id: 118e0717-a00d-41d6-9711-39bacaaa1761)","resumable":false,"interruptedAt":null}

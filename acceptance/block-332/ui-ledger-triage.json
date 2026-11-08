@@ -1,21 +1,16 @@
 {
-  "generatedAt": "2026-11-07T04:13:04.879Z",
+  "generatedAt": "2026-11-08T02:25:54.728Z",
   "ledger": "docs/ui-productization-audit.md",
   "sections": 496,
   "uniqueIds": 487,
   "counts": {
-    "blocked": 26,
-    "live-missing": 8,
-    "verified": 450,
+    "verified": 452,
+    "live-missing": 7,
+    "blocked": 25,
     "closed": 12
   },
-  "debt": 34,
+  "debt": 32,
   "liveMissing": [
-    {
-      "id": "UI-700",
-      "deps": [],
-      "title": "SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 **in_progress**）"
-    },
     {
       "id": "UI-699",
       "deps": [],
@@ -53,12 +48,6 @@
     }
   ],
   "blocked": [
-    {
-      "id": "UI-701",
-      "deps": [],
-      "external": true,
-      "title": "字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 **in_progress**）"
-    },
     {
       "id": "UI-697",
       "deps": [],

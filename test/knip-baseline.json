@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-08",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -146,6 +146,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-p2-viewers-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block334-result-host-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block342-svg-editor-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block383-live-legs.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
