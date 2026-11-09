@@ -2010,6 +2010,24 @@
       ]
     },
     {
+      "id": "user-asset-index-guard",
+      "note": "BLOCK-393 在制用户资产零入库门：清单/脚本/契约测试任一改动即跑门与测试；防止 git add -A 把用户资产再次入库",
+      "patterns": [
+        "scripts/user-asset-guard.mjs",
+        "test/user-asset-guard-baseline.json",
+        "test/user-asset-guard.test.mjs",
+        "package.json"
+      ],
+      "tests": [
+        "test/user-asset-guard.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "gate"
+    },
+    {
       "id": "post-s7-acceptance",
       "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
       "patterns": [
