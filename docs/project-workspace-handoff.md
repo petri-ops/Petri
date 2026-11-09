@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-09（🏁 **BLOCK-385（post-S7 H0）completed；下一包 H1/BLOCK-386**：①分片 9 红→3 红（7 根修含脚本 main 守卫/假 sha 夹具/行数锚口径/矩阵产物链；2 外部归属=FK=OFF→H1、spawn persona 专项）②影响图同名双条合并 357→356 + 重复 id fail-closed + 未映射 145→138 ③state 两层语义 ④canonical 对账（POST-NSO→completed、post-S7→active、backlog 349–354、README 反引号）⑤closeout 16 门全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（▶ **post-S7 程序启动 · H0=BLOCK-385 active**：用户预授权连续工作「按 post-s7-optimization-blueprint-2026-11-09.md 从头到尾执行 H0→H7 全部推完为止」；蓝图由 planned 转 active(living-plan)，H0–H7 各自为 work-package（385–392）。**接手顺序**：①读 docs/block-385-…-plan.md ②§1.2 门禁当次读数=docs/ui/hygiene/secret/arch/surface/ear/code-size/knip/arch-cycles/css/lint/types/perf/skills 全 PASS（docs 517 注册、EAR 41.6%、code-size 24 文件 23476 行、perf 5×5 全绿）③BLOCK-384 已 completed。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-07（🏁 **post-nso 全程序 S0-S7 收口 completed（375~382）**：接手读 block-382 总收口报告 §3；待人工 11 项+待切片大拆片
 最后更新：2026-11-07（🏁 **BLOCK-379 completed（S4 分层）**：接手读 block-379 plan

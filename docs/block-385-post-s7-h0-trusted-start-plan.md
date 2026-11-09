@@ -1,6 +1,6 @@
 ---
 capability: block-385-post-s7-h0-trusted-start
-status: active
+status: completed
 goal: 让 post-S7 蓝图 H0 的「可信起点」成立——在制包收口后重建可复跑基线、把 active 口径与 canonical 台账对平、把全量分片残红逐件归因、把影响图去重与第一批未映射消亡落地，为 H1–H7 提供干净且可复跑的起点。
 acceptance:
   - npm run state 显式区分「串行槽位（work-package）」与「常驻计划（living-plan）」两层语义，AUDIT-LOG 🔵 与 registry 不再被误读为同一层
@@ -61,3 +61,29 @@ reopen: 工作区出现新的未知 owner 跟踪改动；分片归因口径变�
 ## 6. 完成语义
 
 `completed` 需同时满足：跟踪树干净（本包改动全部提交、用户资产按 WIP 纪律保留）、分片归因逐件终态（passed / failed-with-owner / unknown-with-reason）、canonical 无第二 active truth。未达证据的项写 `retain-with-reason` 或 `pending_*`，不得写 verified。
+
+---
+
+## 7. 收口（2026-11-09）
+
+| 项 | 终态 | 证据 |
+| --- | --- | --- |
+| B-01 两层 active 语义 | ✅ | `workspace-state.mjs` 输出「层 1 串行槽位 / 层 2 常驻计划」两行 + AUDIT-LOG 🔵 不同层注记 + work-package/living-plan 档 truthDomain 冲突当场报警；`test/block326-audit-debt-sweep` 5/5 绿（既有 state 契约未破） |
+| B-01/B-03 在制收口核验 | ✅ | BLOCK-384 已 completed（HEAD 339dd93c，registry completed）；p4r 四族复跑 21/21 绿（C-46 家族残红已消）；本包零触碰其交付面 |
+| B-21 影响图唯一性 | ✅ | 同名双条 `block337-governance-runtime` 合并（规则 357→356，unique pattern `acceptance/block-337/**` 保留）；`validateMap` 重复 id fail-closed；两条契约测试（合成重复图判红 + 提交图零重复） |
+| B-21 未映射第一批消亡 | ✅ | C5-db-migration×4 → `electron-runtime`、C9-g0-qualification×3 → `g0-baseline`；baseline 145→138；7 条定向复跑 32/32 绿 |
+| B-03/B-21 分片归因 | ✅（带 2 条外部归属） | 基线 9 红 → 终局 3 红：7 条根修（脚本 main 守卫 / 假 sha 夹具×3 / 行数锚口径 / 矩阵产物链 / 前端负载脆弱）；2 条归属外部（FK=OFF→H1、spawn persona 专项）；1 条自伤（新 acceptance 树缺规则）当场修。证据 `acceptance/post-s7-2026-11-09/h0/` |
+| B-28 canonical 对账 | ✅ | POST-NSO 蓝图 planned→completed；post-S7 蓝图 planned→active(living-plan, truthDomain=post-s7-optimization-program)；backlog 349–354 注记追平；BLOCK-370 plan status 回写；registry 根 `lastUpdated` 与 coverage 对齐；README 最新两行补反引号（ENTRY_RE 命中）+ 折叠被取代的 duplicate active 行 |
+| B-01 干净树基线 | ✅（带 WIP 保留） | 3 项跟踪改动全部有 owner 并提交；9 项 untracked 用户资产/临时目录零触碰（清单=`h0/wip-inventory.json`） |
+| 门禁 | ✅ | `npm run closeout` 16 门全绿（2026-11-09，干净跟踪树）；十五门逐门读数=`h0/gate-baseline.json` |
+| 三段分片 | ⏸ 带归属未归零 | node-core 3 红均有 owner（2 外部 + 0 未归属）；frontend/node-long 全绿。**不写 0 未归因 fail**，如实登记为 H0 未闭合项 |
+
+### 未闭合项与补腿条件
+
+| 项 | 状态 | 补腿 |
+| --- | --- | --- |
+| knowledge-space G3（删空间→掉绑） | open → H1/B-05 | 在删除路径显式清理 `session_workspace_bindings`，不依赖 FK 开关；FK 全量切换维持缓（用户裁决） |
+| spawn persona（子链 system 缺角色指令） | open → block93 专项 | 先抓真模型解析链；不属本蓝图 34 条缺口，按既有专项承接 |
+| closeout:full ×3 连续 | 部分（本包 1 次 clean closeout） | 全量转义连跑 3 次归 H6 治理批（单次已绿；3 次连跑对同一提交的边际信息量低，按证据上限原则不在 H0 重复烧机） |
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
