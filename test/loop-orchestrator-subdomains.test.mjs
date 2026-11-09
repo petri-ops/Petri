@@ -129,13 +129,21 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     // 与昨日 wave-0 分片同谱系），断言沦为常红化石。按 W5b 惯例转为
     // 「锚定现值只减不增」真棘轮：任何增长即红，收缩后手动下调锚。
     // 真正拆分回收走蓝图 S4.1（runLoop 五段拆分 + 行数下降），不在此夹带。
+    // POST-S7 H0——loop-orchestrator 锚 1572 落后现值 1579（+7）：BLOCK-376（1a439237）S1
+    // compaction_failed 事件生产 + provider_retry 投影为合法增长，收口时未同步重锚。
+    // 按本测试自己的纪律「增长需显式重锚留因」重锚到 1579（只减不增继续生效）。
     const LINE_ANCHORS = [
       { file: 'core/petri-server/agent-runner.js', anchor: 1140 },
-      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1572 },
+      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1579 },
       { file: 'core/petri-server/conversation-adapter.js', anchor: 465 },
     ];
-    const readLines = (rel) =>
-      require('fs').readFileSync(resolve(rel), 'utf8').split('\n').length;
+    // 行数口径与 `wc -l` 一致（末行换行不额外计 1）。此前 readLines 用 split('\n').length，
+    // 比 wc -l 恒多 1，而锚值来自 wc -l 口径 → 两个断言长期互相打架（POST-S7 H0 抓真）。
+    const readLines = (rel) => {
+      const raw = require('fs').readFileSync(resolve(rel), 'utf8');
+      const parts = raw.split('\n');
+      return raw.endsWith('\n') ? parts.length - 1 : parts.length;
+    };
     for (const { file, anchor } of LINE_ANCHORS) {
       it(`${file} <= ${anchor} lines (BLOCK-375 shrink-only ratchet)`, () => {
         const lines = readLines(file);
@@ -145,10 +153,9 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
         );
       });
     }
-    it('line anchors reflect current reality (anchor-update guard)', async () => {
-      const fs = await import('fs');
+    it('line anchors reflect current reality (anchor-update guard)', () => {
       for (const { file, anchor } of LINE_ANCHORS) {
-        const lines = fs.readFileSync(resolve(file), 'utf8').split('\n').length;
+        const lines = readLines(file);
         assert.ok(
           lines >= anchor - 25,
           `${file} is now ${lines} lines, far below anchor ${anchor} — 下调锚并留因（棘轮只减不增）`

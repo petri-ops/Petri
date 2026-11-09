@@ -7,6 +7,7 @@
 
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -78,7 +79,11 @@ test('artifact manifest carries a pack-extension artifact type without canonical
 test('delivery manifest carries a pack-extension artifact type for a general project', () => {
   const root = tempDir('petri-b235-delivery-');
   const artifactPath = path.join(root, 'custom.csv');
-  fs.writeFileSync(artifactPath, 'id,value\nA,1\n');
+  const artifactBody = 'id,value\nA,1\n';
+  fs.writeFileSync(artifactPath, artifactBody);
+  // POST-S7 H0：BLOCK-377 起 manifest 按字节重算 sha256，声明值与实际字节不一致即
+  // integrity drift → degraded。本夹具原声明假摘要（'e'*64）故长期红——改为真实字节摘要。
+  const artifactSha = crypto.createHash('sha256').update(artifactBody).digest('hex');
   const provenanceHash = 'h'.repeat(64);
   const job = {
     id: 'tj_general',
@@ -99,7 +104,7 @@ test('delivery manifest carries a pack-extension artifact type for a general pro
       executionProvenance: {
         provenanceHash,
         script: { snapshotPath: '/tmp/run.py', sha256: 's'.repeat(64) },
-        artifacts: [{ id: 'custom_table', filename: 'custom.csv', sha256: 'e'.repeat(64) }],
+        artifacts: [{ id: 'custom_table', filename: 'custom.csv', sha256: artifactSha }],
       },
     }),
   };

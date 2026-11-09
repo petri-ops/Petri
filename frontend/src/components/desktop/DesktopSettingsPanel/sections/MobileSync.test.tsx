@@ -30,10 +30,13 @@ describe('MobileSyncPanel 手机连接面板（BLOCK-70 / UI-354）', () => {
     });
     vi.stubGlobal('fetch', fetchMock);
     render(<MobileSyncPanel />);
+    // POST-S7 H0：整目录/单文件恒绿但全量 359 文件并行跑曾在此断言上红一次（358 passed / 1 failed）。
+    // 面板在 status 到达后才渲染按钮与提示，重负载下 settle 慢于同步断言——统一走 waitFor，
+    // 断言强度不变（超时仍红），只消除时序脆弱。
     await waitFor(() => expect(screen.getByText(/手机远程未开启/)).toBeTruthy());
     expect(screen.queryByTestId('mobile-pairing-qr')).toBeNull();
-    expect(screen.getByRole('button', { name: '开启' })).toBeTruthy();
-    expect(screen.getByText(/开启后需重启桌面端生效/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByRole('button', { name: '开启' })).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/开启后需重启桌面端生效/)).toBeTruthy());
   });
 
   it('已开启：自动出码（无需点击）、复制链接只显示主机不裸露 token', async () => {
