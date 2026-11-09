@@ -12,3 +12,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-09T11:50:21.612Z -->
 | ✅ BLOCK-334 P1 宿主迁移（2026-11-02 当日收口；UI-657 verified） | 2026-11-02 | **P1-COMPLETED**：ResultsSurface 右栏宿主 + 中央四态退役 + Inspector 退役 + openResultInRail/syncResultQuery + resultRightWidth 焦点宽（不触左栏）+ 标题栏收敛 + active 透传。门禁 tsc 0/lint 0/vitest 13 文件 51/51/十门 PASS/台账契约 4/4；实机 `acceptance/block-334/block334-result-host-live-darwin.json` 11/11+png。抓真：证据债棘轮判红→补腿；D2 左栏收起与 UI-341 加映二冲突→删。plan §8 | BLOCK-334 / P1-COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-09T11:53:58.342Z -->
+| ✅ C-48 打包 GUI 断链修复闭环（2026-11-05；用户错误框截图推翻 TCC/AMFI 判断 +「你能搞定吗」委托） | 2026-11-05 | 真因非框架 init：asar 内主图 core 相对 require → `resolveCore` 全量路由 + 双态兜底 + core 注入 asar；后端 better-sqlite3 ABI 137≠149 → supervisor 崩循环，afterPack 改实测 dlopen 选源 fail-closed（Electron-ABI 实落 `bin/darwin-arm64-149/`，非 `build/Release`）；repack await/unpack/重签 + core 侧 13 包补齐。证据=完整重建 exit=0、目录版与 DMG 内 app codesign valid、实机进程树全绿（主+3 helper+后端 :53575）+health ok+SPA 200+路由错误清零、tripwire 4/4 红→绿、DMG 15:40 重打。报告=`docs/block-353-regression-report.md`；backlog C-48 销号。 | C-48 / CLOSED |
