@@ -29,3 +29,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-09T08:01:44.295Z -->
 最后更新：2026-11-06（🏁 **NSO W7b 终评回写 completed**：评估报告 §0.4 十一维 NSO 后评分+依据；蓝图 §2a 终态；唯一剩余 W3 待 UI-696。G0 常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-09T11:19:21.975Z -->
+最后更新：2026-11-06（🏁 **BLOCK-369 NSO-W3 completed（带例外）**：F-09/F-10/F-18+字号首例（77b02e3c/f5dc6c1a，UI-697/698）；余项移交 W3b。G0 常态 · 不外推 packaged/Provider/GA。）

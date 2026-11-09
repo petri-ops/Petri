@@ -253,7 +253,7 @@
     "evals:catalog": "node scripts/evals-catalog.mjs",
     "evals:admission": "node scripts/evals-admission.mjs",
     "next:suggest": "node scripts/next-work-suggest.mjs",
-    "quality:surface": "node scripts/functional-surface-audit.mjs --worktree --check",
+    "quality:surface": "node scripts/functional-surface-audit.mjs --worktree --check && node scripts/block357-capability-map.mjs",
     "quality:perf": "node scripts/block350-perf-gate.mjs",
     "quality:ear": "node scripts/block351-ear.mjs --gate"
   },
