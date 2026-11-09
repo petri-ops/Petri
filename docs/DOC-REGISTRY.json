@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 524,
+    "documentCount": 526,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 507
+    "managedMarkdown": 509
   },
   "documents": [
     {
@@ -366,6 +366,43 @@
         "ledger"
       ],
       "notes": "post-S7 蓝图 H6 承载包 completed：AUDIT-LOG 10933B 超长行按搬移不改写迁档（迁后最长 2695B）/ 根级与 coverage lastUpdated 单写入者同批写 + 分叉校验与负测 / canonical 对账复核无回弹 / 交接协议六批执行。B-29 历史证据元数据回填与 roll-index 入 closeout 挂起（改写历史证据=伪造，只对新产出强制）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-392",
+      "capability": "block-392-post-s7-h7-final-report",
+      "path": "docs/block-392-post-s7-h7-final-report.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-392-post-s7-h7-final-report",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h7",
+        "final-report",
+        "evaluation"
+      ],
+      "notes": "post-S7 程序 H7 终验与总收口：八阶段总览 + 十一维五列复评（四升七平零降；达标 3/11）+ 34 条缺口终态（done 5 / done-partial 15 / retain 12 / pending_human_eye 1 / external-blocked 1）+ 未闭合项与补腿条件。真实任务=凭据缺失（B-02 external-blocked），人眼路线已成文不代答。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-S7-H7-HUMAN-EYE-ROUTE",
+      "capability": "post-s7-h7-human-eye-route",
+      "path": "docs/post-s7-h7-human-eye-route.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-392-post-s7-h7-final-report.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "REFERENCE",
+      "tags": [
+        "post-s7",
+        "h7",
+        "human-eye",
+        "acceptance-route"
+      ],
+      "notes": "H7 人眼验收路线：步骤/输入/每步预期/证据留存点 + 签名区。覆盖 UI-702（通知历史/降级语义）、分屏键盘与读屏、32 条 debt 人眼子集、长内容三态。Agent 不代答，签名区为空则保持 pending_human_eye。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10617,20 +10654,20 @@
       "capability": "post-s7-optimization-blueprint-2026-11-09",
       "path": "docs/post-s7-optimization-blueprint-2026-11-09.md",
       "kind": "living-plan",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "post-s7-optimization-program",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-11-09",
       "archivePolicy": "retain_stable_path",
-      "phase": "PROGRAM-RUNNING",
+      "phase": "COMPLETED",
       "tags": [
         "next-stage",
         "post-nso",
         "ui-ux",
         "workflow"
       ],
-      "notes": "承接 W0-W7 / S0-S7 之后的第三轮方向蓝图：十一维当次复核（三升八平零降）+ 34 条剩余缺口台账 + H0-H7 八阶段目标/改进点/优先级/依赖/出口判据。2026-11-09 用户预授权连续工作后转 active（kind=living-plan：多包程序文档，不占单包串行槽位；各 H 阶段各自单独注册 work-package 占槽）。事实基线=HEAD 23db1f15 当次门禁逐门读数与四路只读源码实证。不改写旧评估与旧蓝图的评分和收尾笔录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "第三轮方向蓝图。2026-11-09 用户预授权连续工作后转 active(living-plan) 并由 BLOCK-385~392 八包执行完毕：H0-H7 全部收口，34 条缺口逐件定终态（done 5/done-partial 15/retain 12/pending_human_eye 1/external-blocked 1），十一维终验四升七平零降（达标 3/11）。终验报告=docs/block-392-post-s7-h7-final-report.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-09"

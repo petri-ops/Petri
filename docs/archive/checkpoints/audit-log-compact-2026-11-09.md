@@ -19,3 +19,6 @@
 <!-- audit-log-compact.mjs 追加 @ 2026-11-09T12:00:12.054Z -->
 | ✅ AUDIT-LOG 旧票核销批 2/3：BLOCK-83 D7 deseq2 棘轮红（FederationJobs.tsx ×2）清偿——占位示例文案改中性「对端节点已注册的工具名」，测试 3/3 绿，基线未放宽（本记 0 自然对齐）（BLOCK-359 W0） | 2026-11-06 | 裁决=改 UI 文案非重扫基线（authority=蓝图 W0 §3.2-7）；证据=acceptance/nso-2026-11-06/wave-0/baseline-adjudications.json ADJ-2 | BLOCK-83 D7 / CLOSED |
 | ✅ AUDIT-LOG 旧票核销批 3/3：loop-fixtures 兄弟仓缺失 🟡 清偿——`../petri-pack-bio` 已在位（demo counts/coldata 齐），`test/loop-fixtures.test.mjs` 73/73 绿（BLOCK-359 W0 复测） | 2026-11-06 | p4r-invariants 剩余 7 cancels 已归因 C-46（pack deseq2.R 语法错，兄弟仓未授权不改）；另抓真并修本仓 parseCsv 引号缺陷（红绿 9/9，见 wave-0/baseline-adjudications.json DEF-1） | loop-fixtures 环境 / CLOSED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-09T12:05:05.681Z -->
+| ✅ AUDIT-LOG 旧票核销批 1/3：2026-11-04 功能面五条 P1/P2 🟡 逐件对 BLOCK-346 收口结论核销（goals 三工具=T2 ⋃domainModules；审批链=T1 browser_act 签发+worktree_remove R2；静默失效=T3；安全归类=T5；零消费端点=T4 接线 13 条+T6 死通道净删）——当次矩阵 P1=0/P2=0/P3=2 与机械基线互证（BLOCK-359 W0） | 2026-11-06 | 逐条按 BLOCK-346 T1-T6 交付注记核对，非按日期推定；矩阵=docs/functional-surface-matrix-2026-11-04.md | 功能面五条 / CLOSED-BY-BLOCK-346（**2026-11-06 更正**：安全口径条 IDE MCP 写面档位仍 reopen，已恢复为当前待处理 🟡） |

@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-gap-ledger-final",
+  "generatedAt": "2026-11-09",
+  "program": "post-S7 H0–H7 (BLOCK-385 … BLOCK-392)",
+  "owner": "BLOCK-392 (H7)",
+  "policy": "34 条逐件终态：done / retain-with-reason / pending_human_eye / external-blocked。禁止静默消失；retain 必须写补腿条件。",
+  "statusLegend": {
+    "done": "本次程序内交付并有当前证据（测试 / 门禁 / 证据文件）",
+    "done-partial": "主项交付，明确子项挂起（子项单列在 followUp）",
+    "retain-with-reason": "本次不做，理由与补腿条件在册",
+    "pending_human_eye": "需人眼确认，Agent 不代答",
+    "external-blocked": "环境因（凭据 / 出网 / 平台），非产品缺陷"
+  },
+  "gaps": [
+    {
+      "id": "B-01",
+      "level": "P0",
+      "title": "active 口径不一致 / 在制登记未提交 / 恢复者误判槽位",
+      "status": "done",
+      "stage": "H0",
+      "evidence": "workspace-state 两层语义（串行槽位 vs 常驻计划）+ AUDIT-LOG 不同层注记 + truthDomain 冲突报警；BLOCK-384 registry=completed 且 plan 已入库；README 入口行补反引号（ENTRY_RE 命中）；roadmap/handoff 恢复链刷新（H0–H6 每阶段各一次）"
+    },
+    {
+      "id": "B-02",
+      "level": "P0",
+      "title": "真实任务成功证据为空（8 任务套件 0/8）",
+      "status": "external-blocked",
+      "stage": "H7",
+      "evidence": "本机实测：出网可达（api.deepseek.com HTTP 401=可达未授权）；PETRI_*/DEEPSEEK/OPENAI/ARK 环境变量 0 个；.petri-dev-user-data/data/ai-settings.json presets=0（无模型凭据）。故 8 任务套件无法发起真实调用。",
+      "followUp": "补腿条件：用户提供有效模型凭据（设置面写入或 env）→ 按 acceptance/post-nso-2026-11-08/task-suite-round1.json 冻结判据复跑 ×3，要求 8/8 且 0 干预；本项不写成产品缺陷，也不写通过。"
+    },
+    {
+      "id": "B-03",
+      "level": "P0",
+      "title": "C-46/C-49 兄弟仓根因致全量分片 38 残红",
+      "status": "done-partial",
+      "stage": "H0",
+      "evidence": "BLOCK-384 已清偿（兄弟仓 a186d20+8b0e87f）；本程序复跑 p4r 四族 21/21 绿；三段分片 9 红→3 红（frontend/node-long 全绿）",
+      "followUp": "node-core 余 2 条外部归属：knowledge-space（H1 已修，50/50）与 block93 spawn persona（专项）。分片未达 0 红，如实登记。"
+    },
+    {
+      "id": "B-04",
+      "level": "P0",
+      "title": "执行准入内核齐备但三入口无生产消费点",
+      "status": "done-partial",
+      "stage": "H1",
+      "evidence": "consumeExecutionAdmission 落地；拦截器签发点写 expect；workspace_exec 执行边界真实消耗；生产路径四类拒绝（过期/重放/指纹改写/上下文改写）9/9 绿；签发失败显式降级",
+      "followUp": "MCP run-plugin-script 依 BLOCK-374 两轴分离用户裁决**不接**（不是缺口）；tools-executor / ssh-direct-runner 无 handlerOptions 通道，需先定凭据载体（跨 tool_jobs 行与 SSH 会话），retain-with-reason。ADMISSION 默认档=U 类待裁决（材料在册，推荐维持 observe）"
+    },
+    {
+      "id": "B-05",
+      "level": "P0",
+      "title": "FK OFF/ON 分裂，179 违约未清偿",
+      "status": "done-partial",
+      "stage": "H1",
+      "evidence": "消除「依赖 CASCADE 才正确」的代码：deleteSpaceCascade 显式删 knowledge_space_bindings（FK=ON/OFF 行为一致）；knowledge-space 50/50 绿（原 G3 用例红→绿）",
+      "followUp": "FK 全量切换=用户裁决维持缓（BLOCK-372/BLOCK-384）。补腿：先做「依赖 CASCADE 的 DELETE 语句清单」静态扫描，清单为空再谈切换（决策材料 §二推荐分阶段）"
+    },
+    {
+      "id": "B-06",
+      "level": "P0",
+      "title": "解压无条目级校验；prompt injection 防线未确认",
+      "status": "done-partial",
+      "stage": "H1",
+      "evidence": "zip 四道闸（条目数/累计字节/符号链接/路径形态）+ 真实 zip 负测 5/5（含压缩炸弹最小形态）；manifest 链三态 linked/started/broken + 2 新负测；链校验 legacy_unhashed 默认 strict + 存量清单（118 版·0 legacy）",
+      "followUp": "prompt-injection 面盘点（只读枚举 tool_result→messages 全部装配点）**未做**，retain-with-reason，不冒充已盘点"
+    },
+    {
+      "id": "B-07",
+      "level": "P0",
+      "title": "4s 提示消失无回看；四事件前端零消费",
+      "status": "done-partial",
+      "stage": "H2",
+      "evidence": "ToastProvider 有界历史（播报即入/去重/上限 50/可展开清空/role=log）4 新测；10/10 绿",
+      "followUp": "四事件（compaction_failed/trim_skipped/provider_retry/stream_stall）前端投影进轨迹面=需 UI 实机腿，retain（H3 量测批）；已保证事件码在册可渲染"
+    },
+    {
+      "id": "B-08",
+      "level": "P0",
+      "title": "空 catch / onEvent 空回调 / 签发失败静默",
+      "status": "done-partial",
+      "stage": "H2",
+      "evidence": "gate:silent-catch 新机械门（100 文件 403 处裸 catch 冻结，新增即红；带注释的忽略不计债务）+ 负测 2/2，入 closeout 第 6 门；三处 onEvent:()=>{} 改正具名 noStreamSubscriber（意图入码）；签发失败改显式降级态",
+      "followUp": "8 处生产空 catch 逐处三分法（修/删/豁免留痕）=持续动作，随 H4+1 大拆片一起做；门已把「新增」堵住"
+    },
+    {
+      "id": "B-09",
+      "level": "P1",
+      "title": "消息/会话/结果库三面全量 DOM，无节点上限",
+      "status": "retain-with-reason",
+      "stage": "H3",
+      "evidence": "未改。理由：消息列表有自绘滚动（useScrollGuard + ChatScrollbar + contain: layout style paint），盲加 content-visibility 会改变滚动高度估算与锚定；蓝图自身把「先用 CDP 量测 ≥400 条会话节点数与滚动帧率」写成重开条件，当前无 dev 栈。",
+      "followUp": "H3 plan §2 量测方案：造 400/800 条 → 节点数 + rAF P50/P95 → 加 cv + contain-intrinsic-size → 同条件复测 → 节点数不降或帧率不升即回滚"
+    },
+    {
+      "id": "B-10",
+      "level": "P1",
+      "title": "树 roving tabindex / slider 语义缺失",
+      "status": "done-partial",
+      "stage": "H3",
+      "evidence": "slider 语义已纠正：ArtifactPinPane role=separator+aria-value* → role=slider + aria-valuetext；ratio 测试 7/7（新增值域/valuetext/键盘改变/无 separator 断言）",
+      "followUp": "LeftPanel 树 roving tabindex + 方向键展开/折叠=需真焦点模型与读屏实机确认，retain（量测方案在 H3 plan §2）"
+    },
+    {
+      "id": "B-11",
+      "level": "P1",
+      "title": "CenterPanel 双层同名 layout + 两处 resize handle，布局非单源",
+      "status": "retain-with-reason",
+      "stage": "H3",
+      "evidence": "未改。理由：CSS 重构会改几何，前后必须几何量测对比 + 人眼过目（DOM 绿≠视觉绿），当前无 dev 栈。",
+      "followUp": "量四块 getBoundingClientRect → 拖到两倍/缩到一半 → 对比 DOM 几何 JSON → 人眼截图；H3 plan §2"
+    },
+    {
+      "id": "B-12",
+      "level": "P1",
+      "title": "32 条 debt 未终态；STATUS_RE 误计 verified",
+      "status": "done-partial",
+      "stage": "H3",
+      "evidence": "测量口径三修：①否定语境剥离（不标 verified 不再计 verified，UI-694/UI-663 回归未闭合）②外因关键词独立词匹配（裸 Provider 命中组件名 ToastProvider 的误判）③债棘轮改「分桶上限 + 总债上限 35」双守（搬桶不算清偿）；契约 5/5 绿",
+      "followUp": "32 条 debt 逐条终态化=需 32 条各自实机态或人眼，pending_human_eye（路线见 docs/post-s7-h7-human-eye-route.md）；当前 liveMissing 13 / blocked 22 / 总债 35（修正少算后）"
+    },
+    {
+      "id": "B-13",
+      "level": "P1",
+      "title": "viewer 降级/外部导入回执非 live region",
+      "status": "done-partial",
+      "stage": "H2",
+      "evidence": "ResultArtifactShell 降级原因 role=note → role=status + aria-live=polite；18/18 绿（4 文件）",
+      "followUp": "ExternalImportPanel 单条 message → 可回看列表：待回看区统一接线后复用，retain"
+    },
+    {
+      "id": "B-14",
+      "level": "P1",
+      "title": "SSE 重连/重放仅回调无独立横幅",
+      "status": "retain-with-reason",
+      "stage": "H2",
+      "evidence": "未改。理由：需 dev 栈断线注入才能取证（三态：断线/重放/耗尽），无实机腿的横幅等于未验证 UI。",
+      "followUp": "与 H3 实机腿同批：注入 RST → 观察横幅文案/三态 → CDP 断言 + 截图；不得只写组件测试就标 verified"
+    },
+    {
+      "id": "B-15",
+      "level": "P1",
+      "title": "封闭词表约 25 码，四事件与 agent_run_failed 未注册",
+      "status": "done",
+      "stage": "H2",
+      "evidence": "词表 25→42 码（新增 execution / input 两类）；覆盖门扩到生产面全部 reasonCode 字面量（core/+src/ 两种写法），未注册即红；block324 7/7"
+    },
+    {
+      "id": "B-16",
+      "level": "P1",
+      "title": "巨型文件大拆片未做；loop-orchestrator 未纳尺寸门",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未做拆分。理由：W5b 纪律要求「一切片=一会话 + 拆前拆后同套定向绿」，连续工作模式下多切片共享同一批基线证据会互相污染。本程序已修行数锚口径（split vs wc -l 不一致）并重锚 1579。",
+      "followUp": "每切片独立会话：拆前定向基线 → 抽段 → 同套绿 → gate:code-size 只减不增 + 锚随交付刷新；loop-orchestrator 纳管 MANIFEST"
+    },
+    {
+      "id": "B-17",
+      "level": "P1",
+      "title": "schema / contractVersion 多源（三份 =1 + 五处硬编码 + 前端 4 处）",
+      "status": "done-partial",
+      "stage": "H4",
+      "evidence": "新增 core/shared-backend/schema-versions.js（4 常量），六处独立字面量全部改为引用；契约 3/3（一致性 + 源码扫描无字面量 + intent 域双形态独立）",
+      "followUp": "前端 4 处 contractVersion:1 与插件 run-plugin-script 的 artifactSchemaVersion:1 仍为字面量（跨进程/跨语言，需单独对账门），retain"
+    },
+    {
+      "id": "B-18",
+      "level": "P1",
+      "title": "插件源装配三处",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：三处分别承载 MCP registry / server 启动 / 插件管理器，收敛要先定 sourcePlan 形状并改三个调用方，属结构性重构（非单点可验证）。",
+      "followUp": "先出三处装配差异表 + sourcePlan 契约，再单会话改；H4 plan §2"
+    },
+    {
+      "id": "B-19",
+      "level": "P1",
+      "title": "DB 路径解析第二入口 / PETRI_DB_PATH 不认",
+      "status": "done",
+      "stage": "H4",
+      "evidence": "branch-db.getDatabasePath 委托 resolveDbPath（认 PETRI_DB_PATH）；三态 + fail-fast + 与 core same-env-same-result 契约 4/4"
+    },
+    {
+      "id": "B-20",
+      "level": "P1",
+      "title": "源码扫描契约未换行为断言",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：每份扫描契约背后是一个行为面，替换必须逐个建立等价行为断言，是切片活。",
+      "followUp": "按文件列清单，一次一个：先加行为断言 → 再删 includes；H4 plan §2"
+    },
+    {
+      "id": "B-21",
+      "level": "P2",
+      "title": "未映射测试八簇消亡未推进；impact-map 重复 id",
+      "status": "done-partial",
+      "stage": "H0",
+      "evidence": "重复 id 合并（357→356）+ validateMap 重复即红 + 两条契约；第一批消亡 7 条（145→138）并定向 32/32 绿",
+      "followUp": "余 138 条按八簇继续：挂既有域规则 → 删基线 → 定向绿，禁一次性盲挂"
+    },
+    {
+      "id": "B-22",
+      "level": "P2",
+      "title": "冷启动五段分解与 DOM/帧率判据未入 closeout",
+      "status": "done-partial",
+      "stage": "H5",
+      "evidence": "quality:perf 支持 PETRI_PERF_EVIDENCE 机器可读证据（sourceCommit/platform/command/每轮 rows/verdict）；当次 5/5 全绿证据在册；负测 10/10",
+      "followUp": "五段分解（require/迁移/health/SPA 200/CDP）、DOM 节点上限门、滚动帧率=需活栈+CDP，retain（取数步骤在 H5 plan §2）"
+    },
+    {
+      "id": "B-23",
+      "level": "P2",
+      "title": "三矩阵非同源，人工改动不判红",
+      "status": "done-partial",
+      "stage": "H0 / H5",
+      "evidence": "quality:surface 串上 capability-map 生成器（单一出口），实测踩过两次的「矩阵刷新后产物比对必红」类缺陷关闭；block357 8/8",
+      "followUp": "shelf-audit 第三份矩阵仍独立生成；完全同源（合并到同一生成器）retain"
+    },
+    {
+      "id": "B-24",
+      "level": "P2",
+      "title": "三套依赖树 / 版本漂移 / native ABI 只对 better-sqlite3",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：改依赖版本/布局会动锁文件与运行时，需依赖升级评审 + 前后同套绿（DEPENDENCY-CHANGE-CHECKLIST 默认答案是 no）。",
+      "followUp": "先出「单一清单 + 机械对账」方案与漂移清单，再单批改"
+    },
+    {
+      "id": "B-25",
+      "level": "P2",
+      "title": "13 存量环无按簇消亡里程碑",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：环收敛改 module 边界，必须单独立项 + 全量回归；在本程序内做会把「单源收编」和「架构改道」混成一批。",
+      "followUp": "逐簇：记录当前环 → 改一处依赖方向 → quality:arch + gate:arch-cycles → --update 下调基线"
+    },
+    {
+      "id": "B-26",
+      "level": "P2",
+      "title": "knip 330 键保留面是上界（动态 require 盲区）",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：需把三处动态入口改静态注册，属结构改道，与 B-25 同族。",
+      "followUp": "agent-tools/plugin-loader、learning、mcp/registry 三处动态点改显式注册，再 --update 收缩"
+    },
+    {
+      "id": "B-27",
+      "level": "P2",
+      "title": "AUDIT-LOG 83KB / L88 10933B / README 反引号",
+      "status": "done",
+      "stage": "H6",
+      "evidence": "超长行按搬移不改写迁档（10933B→原位指针），迁后全台账最长 2695B（<3072）；README 最新两行补反引号并折叠被取代的 duplicate active 行；audit:compact 幂等入 closeout"
+    },
+    {
+      "id": "B-28",
+      "level": "P2",
+      "title": "registry/backlog 注记滞后；两份 lastUpdated 分叉",
+      "status": "done",
+      "stage": "H0 / H6",
+      "evidence": "POST-NSO 蓝图 planned→completed；post-S7 蓝图 planned→active(living-plan)；backlog 349–354 追平；BLOCK-370 plan status 回写；根级 lastUpdated 与 coverage 由 docs:coverage 单写入者同批写 + COVERAGE_LASTUPDATED_DRIFT 报警 + 负测"
+    },
+    {
+      "id": "B-29",
+      "level": "P2",
+      "title": "acceptance 证据元数据缺 platform/command；skills manifest sha256",
+      "status": "done-partial",
+      "stage": "H6",
+      "evidence": "新证据全部带元数据：h0/gate-baseline（sourceCommit/platform/capturedBy）、h0/shard-summary（脚本自带 id/exitCode/logPath）、h5/perf-evidence（sourceCommit/platform/command/generatedAt）",
+      "followUp": "历史 acceptance 不回填（改写历史证据=伪造）；skills manifest sha256:null 与 docs:roll-index 入 closeout 未做，retain"
+    },
+    {
+      "id": "B-30",
+      "level": "P2",
+      "title": "EAR 41.6% 未达 45%",
+      "status": "done-partial",
+      "stage": "H6",
+      "evidence": "本程序新增证据 6 件入册（gate-baseline / 两轮分片汇总 / shard-attribution / wip-inventory / perf-evidence）；EAR 门仍 PASS（阈值 40%）",
+      "followUp": "45% 只能靠分子继续增长（更多一次性笔录转可复跑探针）+ 负测守住；**不缩分母**（当前 881/2117）。不写达标"
+    },
+    {
+      "id": "B-31",
+      "level": "P2",
+      "title": "lint 2312 warnings / css 白名单 13 vs 11 无消亡棘轮",
+      "status": "retain-with-reason",
+      "stage": "H4",
+      "evidence": "未改。理由：warnings 抑制基线是安全网，收缩要分域（测试面/生产面）且每域都要负测守护。",
+      "followUp": "分域统计 → 设只减上限 → 每域清零后 --suppress-all 重扫入库；css 白名单 13→11 可 --write 收缩（WARN 已提示）"
+    },
+    {
+      "id": "B-32",
+      "level": "P2",
+      "title": "颜色字面量 4 族未走主题 token",
+      "status": "retain-with-reason",
+      "stage": "H3",
+      "evidence": "未改。理由：纯视觉变更，无实机=不可证（DOM 断言不冒充视觉绿）。",
+      "followUp": "截图 diff + 暗色态逐块对比；theme-token-contract 扩颜色字面量扫描"
+    },
+    {
+      "id": "B-33",
+      "level": "P2",
+      "title": "quality:surface P3=2 / ipcUnusedInRenderer=165 未逐件裁决",
+      "status": "retain-with-reason",
+      "stage": "H5",
+      "evidence": "本程序复核矩阵 P1=0/P2=0/P3=2/dirty=0，未新增；未逐件销号。",
+      "followUp": "按矩阵 P3 清单逐件：接线 / 删 / retain-with-reason（h5 台账）；165 通道按「有 preload 包装 + 有消费方」两条判据先筛"
+    },
+    {
+      "id": "B-34",
+      "level": "P2",
+      "title": "humanEyePending 8 + T7 windowOverride",
+      "status": "pending_human_eye",
+      "stage": "H7",
+      "evidence": "人眼路线已生成：docs/post-s7-h7-human-eye-route.md（步骤/输入/每步预期/证据留存点）",
+      "followUp": "人照路线实测并明确回复确认（日期 + 覆盖断言），Agent 不代答；T7 去 windowOverride 的自然长任务需先解 B-02 凭据"
+    }
+  ],
+  "summary": {
+    "total": 34,
+    "counts": {
+      "done": 5,
+      "external-blocked": 1,
+      "done-partial": 15,
+      "retain-with-reason": 12,
+      "pending_human_eye": 1
+    },
+    "byStatus": {
+      "done": 5,
+      "done-partial": 15,
+      "retain-with-reason": 12,
+      "pending_human_eye": 1,
+      "external-blocked": 1
+    },
+    "note": "计数由 gaps[].status 机械汇总，不手写。"
+  }
+}

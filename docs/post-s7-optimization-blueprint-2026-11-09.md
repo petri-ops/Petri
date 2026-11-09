@@ -1,6 +1,6 @@
 ---
 capability: post-s7-optimization-blueprint-2026-11-09
-status: active
+status: completed
 goal: 以 2026-11-09 当前 HEAD、当次机械门禁、四路只读源码实证与既有验收证据为唯一事实基线，对十一维度做全量评估，并把剩余缺口转成不设工作量上限、但设证据上限的分阶段优化计划；核心目标是优化项目、增强使用体验。
 acceptance:
   - 十一维度均有当前源码锚点、复核评分、剩余缺口与优化目标
