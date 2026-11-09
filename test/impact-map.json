@@ -3,24 +3,6 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
-      "id": "block337-governance-runtime",
-      "note": "BLOCK-337 治理运行时化：工作区规则引擎（零业务词）+ 规则包 JSON + 并行互斥契约 + 规则生命周期账本；改引擎/包/并行契约时跑本包契约测与文档门。",
-      "patterns": [
-        "core/shared-backend/governance/**",
-        "resources/governance-packs/**",
-        "core/petri-server/helpers/parallel-contract.js",
-        "acceptance/block-337/**"
-      ],
-      "tests": [
-        "test/block337-governance-runtime.test.mjs"
-      ],
-      "commands": [
-        "docs-check"
-      ],
-      "classifiesScripts": true,
-      "scriptRole": "acceptance-probe"
-    },
-    {
       "id": "block339-persona-debt",
       "note": "BLOCK-339 人设历史债清偿：核心 system prompt / chitchat / identity 零角色域词 + 退役词表补角色词 + 部署入口退役（interpret）。脚本=人设实机腿（抓上游实际收到的 system prompt），只随本包定向测试与文档门。",
       "patterns": [
@@ -1152,7 +1134,10 @@
         "test/g0-fourth-wave.test.mjs",
         "test/g0-fifth-wave.test.mjs",
         "test/g0-baseline-qualification.test.mjs",
-        "test/g0-qualification-gate.test.mjs"
+        "test/g0-qualification-gate.test.mjs",
+        "test/g0-qualification-packaged.test.mjs",
+        "test/g0-qualification-provider.test.mjs",
+        "test/g0-qualification-visual.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1319,7 +1304,11 @@
         "test/migration-runner.test.mjs",
         "test/backend-health.test.mjs",
         "test/credential-store.test.mjs",
-        "test/terminal-multisession-ipc.test.mjs"
+        "test/terminal-multisession-ipc.test.mjs",
+        "test/db-singleton.test.mjs",
+        "test/db-singleton-shared-file.test.mjs",
+        "test/nso-w2-db-single-source.test.mjs",
+        "test/migration-007-conversation-export.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -7126,10 +7115,11 @@
     },
     {
       "id": "block337-governance-runtime",
-      "note": "BLOCK-337 治理运行时化：引擎/规则包分离（workspace-rules + governance-packs）、P2 调用侧接线（session-workspace→ai-chat/agent-runner/system-prompt 动态段）、P7③ 观察桥（observation-bridge + policy-observation-store review_decision + rule-lifecycle）、P3 并行互斥（parallel-contract + docs-governance 门）、P4/P5 closeout 原语（workflow-runner + closeout-host + closeout-ledger）。改任一登记源即跑本包契约 + prompt 邻域 + 观察存储邻域 + workflow runner 契约。",
+      "note": "BLOCK-337 治理运行时化：引擎/规则包分离（workspace-rules + governance-packs）、P2 调用侧接线（session-workspace→ai-chat/agent-runner/system-prompt 动态段）、P7③ 观察桥（observation-bridge + policy-observation-store review_decision + rule-lifecycle）、P3 并行互斥（parallel-contract + docs-governance 门）、P4/P5 closeout 原语（workflow-runner + closeout-host + closeout-ledger）。改任一登记源即跑本包契约 + prompt 邻域 + 观察存储邻域 + workflow runner 契约。本规则为同名两条合并后的唯一登记（POST-S7 H0/B-21 去重，规则数 357→356）。",
       "patterns": [
         "core/shared-backend/governance/**",
         "resources/governance-packs/**",
+        "acceptance/block-337/**",
         "core/petri-server/helpers/session-workspace.js",
         "core/petri-server/helpers/closeout-host.js",
         "core/petri-server/helpers/parallel-contract.js",

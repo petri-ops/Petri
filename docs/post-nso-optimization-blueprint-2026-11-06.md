@@ -1,6 +1,6 @@
 ---
 capability: post-nso-optimization-blueprint-2026-11-06
-status: planned
+status: completed
 goal: 以 NSO 全程序收尾后的当前 HEAD 为唯一事实基线，对十一维度做独立证据复核，并把剩余缺口转成不设工作量上限、但设证据上限的分阶段优化计划；核心目标是优化项目与增强使用体验。
 acceptance:
   - 十一维度均有当前源码锚点、复核评分、剩余缺口与阶段目标

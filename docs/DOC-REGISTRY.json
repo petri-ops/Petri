@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 516,
+    "documentCount": 517,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 499
+    "managedMarkdown": 500
   },
   "documents": [
     {
@@ -19,18 +19,18 @@
       "capability": "post-nso-optimization-blueprint-2026-11-06",
       "path": "docs/post-nso-optimization-blueprint-2026-11-06.md",
       "kind": "work-package",
-      "status": "planned",
+      "status": "completed",
       "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "PLANNED",
+      "phase": "COMPLETED",
       "tags": [
         "next-stage",
         "post-nso",
         "ui-ux",
         "workflow"
       ],
-      "notes": "承接已完成 NSO 全程序（BLOCK-359~374）之后的下一阶段方向蓝图；十一维独立证据复核 + S0-S7 八阶段目标/改进点/优先级/出口判据。保持 planned，不占单包串行槽位；事实基线为 HEAD a2354ffb 当次门禁与四路只读源码实证。不改写旧评估与旧蓝图的评分和收尾笔录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "承接 NSO 全程序（BLOCK-359~374）之后的下一阶段方向蓝图；S0-S7 八阶段已由 BLOCK-375~382（含 BLOCK-383 实机腿批）全部收尾，故元数据由 planned 翻 completed（POST-S7 H0/B-28 canonical 对账；正文与历史评分保持原样不改写）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-375",
@@ -215,6 +215,25 @@
         "clearance"
       ],
       "notes": "C-46①+三插件 golden 重锚；FK=ON 与 ADMISSION 拨硬维持缓（理由在册）。 | 2026-11-09 completed：C-46①②/C-49 全销号（兄弟仓 a186d20+8b0e87f）；SDK 3/3+p4r 族 21/21；P6 前进两站后 recovery electron 腿竞态→专项。"
+    },
+    {
+      "id": "BLOCK-385",
+      "capability": "block-385-post-s7-h0-trusted-start",
+      "path": "docs/block-385-post-s7-h0-trusted-start-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-385-post-s7-h0-trusted-start",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "post-s7",
+        "h0",
+        "governance",
+        "trusted-baseline"
+      ],
+      "notes": "post-S7 蓝图 H0 承载包（用户 2026-11-09 预授权连续工作）：state 两层语义显式化 / 影响图重复 id fail-closed + 第一批未映射消亡（145→138）/ 三段分片逐件归因 / canonical 对账（POST-NSO→completed、backlog 349–354、roadmap+handoff）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -10465,21 +10484,22 @@
       "id": "POST-S7-OPTIMIZATION-BLUEPRINT-2026-11-09",
       "capability": "post-s7-optimization-blueprint-2026-11-09",
       "path": "docs/post-s7-optimization-blueprint-2026-11-09.md",
-      "kind": "work-package",
-      "status": "planned",
-      "canonical": false,
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "post-s7-optimization-program",
       "entrypoint": "docs/README.md",
       "registeredAt": "2026-11-09",
       "archivePolicy": "retain_stable_path",
-      "phase": "PLANNED",
+      "phase": "PROGRAM-RUNNING",
       "tags": [
         "next-stage",
         "post-nso",
         "ui-ux",
         "workflow"
       ],
-      "notes": "承接 W0-W7 / S0-S7 之后的第三轮方向蓝图：十一维当次复核（三升八平零降）+ 34 条剩余缺口台账 + H0-H7 八阶段目标/改进点/优先级/依赖/出口判据。保持 planned，不占单包串行槽位；当前 active=BLOCK-384（在制，零触碰）。事实基线=HEAD 23db1f15 当次门禁逐门读数与四路只读源码实证。不改写旧评估与旧蓝图的评分和收尾笔录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "承接 W0-W7 / S0-S7 之后的第三轮方向蓝图：十一维当次复核（三升八平零降）+ 34 条剩余缺口台账 + H0-H7 八阶段目标/改进点/优先级/依赖/出口判据。2026-11-09 用户预授权连续工作后转 active（kind=living-plan：多包程序文档，不占单包串行槽位；各 H 阶段各自单独注册 work-package 占槽）。事实基线=HEAD 23db1f15 当次门禁逐门读数与四路只读源码实证。不改写旧评估与旧蓝图的评分和收尾笔录。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-06"
+  "lastUpdated": "2026-11-09"
 }

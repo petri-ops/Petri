@@ -1,7 +1,7 @@
-380. [block-384-sibling-pack-clearance-plan.md](./block-384-sibling-pack-clearance-plan.md) — 2026-11-09 **completed（兄弟仓清偿批）**：C-46① deseq2.R paste0 + C-49 三插件 golden 重锚 + C-46② resultSurface 回流（SDK 3/3 + p4r 族 21/21）；P6 recovery electron 腿竞态→专项；FK=ON 与 ADMISSION 维持缓
-380. [block-384-sibling-pack-clearance-plan.md](./block-384-sibling-pack-clearance-plan.md) — 2026-11-09 **active（兄弟仓清偿批）**：deseq2.R paste0 语法修复 + deseq2/go-kegg/volcano-plot 三插件 golden fixture sourceScriptSha256 重锚（纯脚本漂移，契约摘要未动）；FK=ON 与 ADMISSION 拨硬维持缓（理由在册）；清偿后解锁 P6 重算与 p4r 域残红
-379. [block-383-post-nso-live-legs-batch-plan.md](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **completed（实机腿批）**：UI-697~701 实机腿 8/8（UI-700/701→verified）/perf 连续 5×5 全绿/P6 挂起根因=新 C-49（兄弟仓 golden fixture 漂移）/任务套件 0/8 全为环境因如实挂起
-379. [`block-383-post-nso-live-legs-batch-plan.md`](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **active（实机腿批）**：block-382 待人工清单第一波——P6 重算/perf 连续 5 次全绿/UI-697~701 实机取证/8 任务套件×3+T7；AX 会话健康前置已确认（block48 10/11）；humanEye 不代答
+382. [`post-s7-optimization-blueprint-2026-11-09.md`](./post-s7-optimization-blueprint-2026-11-09.md) — 2026-11-09 **active（第三轮方向蓝图 · living-plan）**：十一维当次复核（三升八平零降）+ 34 条剩余缺口台账（P0 8 / P1 12 / P2 14）+ H0–H7 八阶段目标/具体改进点/优先级/依赖/blocker 分类/出口判据；用户预授权连续工作后由 planned 转 active（多包程序文档，不占单包串行槽位）
+381. [`block-385-post-s7-h0-trusted-start-plan.md`](./block-385-post-s7-h0-trusted-start-plan.md) — 2026-11-09 **active（post-S7 蓝图 H0 承载包 · 可信起点）**：state 两层语义显式化 / 影响图重复 id fail-closed + 第一批未映射消亡（145→138）/三段分片逐件归因 / canonical 对账（POST-NSO→completed、backlog 349–354、roadmap+handoff 恢复链）
+380. [`block-384-sibling-pack-clearance-plan.md`](./block-384-sibling-pack-clearance-plan.md) — 2026-11-09 **completed（兄弟仓清偿批）**：C-46① deseq2.R paste0 + C-49 三插件 golden 重锚 + C-46② resultSurface 回流（SDK 3/3 + p4r 族 21/21）；P6 recovery electron 腿竞态→专项；FK=ON 与 ADMISSION 维持缓
+379. [`block-383-post-nso-live-legs-batch-plan.md`](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **completed（实机腿批）**：UI-697~701 实机腿 8/8（UI-700/701→verified）/perf 连续 5×5 全绿/P6 挂起根因=新 C-49（兄弟仓 golden fixture 漂移）/任务套件 0/8 全为环境因如实挂起
 
 378. [`block-382-post-nso-s7-final-report.md`](./block-382-post-nso-s7-final-report.md) — 2026-11-07 **completed（post-nso 蓝图 S7 终验与总收口）**：十一维复评（七升四平零降，差值逐条归因）+ 真实任务腿如实挂起（8 任务套件/人眼判据/长任务=机器会话腿）+ 总收口报告（七包证据链/红门终态/分片结论/WIP 保留/待人工清单 11 项）
 

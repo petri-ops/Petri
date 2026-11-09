@@ -283,3 +283,25 @@ test('impact-map 声明的每一条 vitest 文件都只能走前端通道（防�
   }
   assert.ok(checked > 0, 'expected at least one declared rule to be probe-able');
 });
+
+// POST-S7 H0/B-21：影响图规则 id 唯一性 fail-closed。
+// 背景：test/impact-map.json 曾同时存在两条 id=block337-governance-runtime 的规则
+// （L6 与 L7128），命中集合被静默合并、规则计数与归因不可复算。重复 id 必须判红，
+// 且规则里不得靠「后来的覆盖前一条」隐式生效。
+test('duplicate impact rule ids fail closed instead of silently merging', () => {
+  const base = {
+    schema: 'petri/test-impact-map.v1',
+    rules: [
+      { id: 'probe-dup', patterns: ['core/petri-server/helpers/system-prompt.js'], tests: [] },
+      { id: 'probe-dup', patterns: ['core/petri-server/helpers/system-prompt.js'], tests: [] },
+    ],
+  };
+  assert.throws(() => resolveImpact([], base), /duplicate impact rule id: probe-dup/);
+});
+
+test('the committed impact map has no duplicate rule ids', () => {
+  const map = JSON.parse(readFileSync(new URL('./impact-map.json', import.meta.url), 'utf8'));
+  const ids = map.rules.map((rule) => rule.id);
+  const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+  assert.deepEqual(dupes, [], `duplicate ids: ${dupes.join(', ')}`);
+});

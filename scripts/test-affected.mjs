@@ -93,8 +93,13 @@ function validateMap(map) {
   if (map.schema !== 'petri/test-impact-map.v1' || !Array.isArray(map.rules)) throw new Error('invalid test impact map schema');
   const commandIds = new Set(Object.keys(COMMANDS));
   const scriptRules = [];
+  const seenIds = new Set();
   for (const rule of map.rules) {
     if (!rule.id || !Array.isArray(rule.patterns) || !rule.patterns.length) throw new Error(`invalid impact rule: ${rule.id || '<missing>'}`);
+    // 重复 id 会让「命中该规则」的集合静默合并，规则计数与归因都不可复算（BLOCK-337 曾出现两条同名）。
+    // fail-closed：重复即红，不允许靠后来的规则覆盖前一条。
+    if (seenIds.has(rule.id)) throw new Error(`duplicate impact rule id: ${rule.id}`);
+    seenIds.add(rule.id);
     for (const command of rule.commands || []) if (!commandIds.has(command)) throw new Error(`${rule.id} references unknown command ${command}`);
     for (const test of rule.tests || []) if (!existsSync(resolve(ROOT, test))) throw new Error(`${rule.id} references missing test ${test}`);
     if (rule.classifiesScripts) scriptRules.push(rule);

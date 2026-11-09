@@ -111,7 +111,7 @@ function auditLogState() {
 }
 
 function registryState() {
-  section('Active 工作包（DOC-REGISTRY canonical 真相）');
+  section('Active 工作包（DOC-REGISTRY canonical 真相 · 两层语义）');
   const file = path.join(ROOT, 'docs', 'DOC-REGISTRY.json');
   let reg;
   try {
@@ -130,6 +130,12 @@ function registryState() {
   const standingPlans = active.filter((d) => d.kind === 'living-plan');
   const activeOthers = active.filter((d) => d.kind !== 'work-package' && d.kind !== 'living-plan');
   const planned = docs.filter((d) => d.status === 'planned');
+  // POST-S7 H0/B-01：两层语义显式标注。恢复者常见误判是「registry 说没占槽 ⇒ 可以随便开新包」，
+  // 或反之把 living-plan 当成占槽者而误以为串行被占。两层含义不同，任何一层都不得静默。
+  console.log('  层 1 串行槽位（kind=work-package + status=active）：' +
+    (activeWps.length ? activeWps.map((d) => d.id).join(', ') : '空——新开串行包需用户裁决'));
+  console.log('  层 2 常驻计划（kind=living-plan + status=active，不占串行槽位）：' +
+    (standingPlans.length ? standingPlans.map((d) => d.id).join(', ') : '无'));
   // BLOCK-326 不变量：存在 active living-plan 时不得报「无 active 工作包」（常驻计划不得被静默漏出）。
   if (!activeWps.length && !standingPlans.length) console.log('当前无 active 工作包（启动需用户裁决）。');
   else if (!activeWps.length) console.log('串行槽位空闲（新包启动需用户裁决）；常驻/能力纲计划在册，见下方 🔵 行。');
@@ -142,6 +148,19 @@ function registryState() {
   if (activeOthers.length) {
     console.log(`其他 active canonical 文档: ${activeOthers.map((d) => d.id).join(', ')}`);
   }
+  // 同一 truthDomain 出现两个 active 的「当前工作」canonical 文档 = 「两个当前状态真相」；必须当场可见。
+  // 只比 work-package / living-plan 两档：历史长尾（BLOCK-10 系列阶段档等 kind 未分类条目）共享
+  // truthDomain 属已知存量，不在本行制造噪声；它们的对账归 canonical 对账批次。
+  const domainCount = new Map();
+  for (const d of [...activeWps, ...standingPlans]) {
+    if (!d.truthDomain) continue;
+    domainCount.set(d.truthDomain, [...(domainCount.get(d.truthDomain) || []), d.id]);
+  }
+  const dupDomains = [...domainCount].filter(([, ids]) => ids.length > 1);
+  if (dupDomains.length) {
+    console.log(`⚠ truthDomain 冲突 ${dupDomains.length} 组（应只有一个 active canonical）: ${dupDomains.map(([t, ids]) => `${t}←${ids.join('/')}`).join(', ')}`);
+  }
+  console.log('  注：AUDIT-LOG 的 🔵 行是「阶段广播」，与本区块不是同一层——恢复者须两处都读，不得二选一。');
   if (planned.length) {
     console.log(`排队候选（planned）${planned.length} 项: ${planned.map((d) => d.id).join(', ')}`);
   }

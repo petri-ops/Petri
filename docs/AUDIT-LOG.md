@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-09（▶ **post-S7 程序启动 · H0=BLOCK-385 active**：用户预授权连续工作 H0→H7 全部推完；蓝图 planned→active(living-plan)。本批=state 两层语义 / 影响图去重+第一批未映射消亡 / 分片逐件归因 / canonical 对账。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-384 completed——兄弟仓清偿批**：C-46①②/C-49 全销号；FK=ON/ADMISSION 维持缓（理由在册）。
 最后更新：2026-11-08（🏁 **BLOCK-383 completed——实机腿批**：UI 腿 8/8+perf 5×5 全绿；P6 根因=C-49 兄弟仓 golden 漂移；任务套件挂起=凭据/网络环境因。：实机腿批——用户「按照你的建议来」授权 block-382 §3.6 第一波；AX 会话健康前置实测通过。
 最后更新：2026-11-07（🏁 **post-nso 全程序 S0-S7 收口 completed（BLOCK-375~382 八包）**：十一维七升四平零降；closeout 全绿；真实任务腿=待人工 11 项。：连续采样落地；当次负载读数如实。：实例化单源/contractVersion 收编；大拆片 W5b 纪律分层。：字号宪章 20 处/prefs 重放/空 flags/inert/能力位；重切片挂起。：FK 裁决落地（b4edf467 反向提交当场钉死）；链哈希 UPDATE/file: 注册制/准入内核/manifest 自证；execToken 删除裁决（修订原计划）。
@@ -69,6 +70,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-11-09 | **BLOCK-385-post-S7-H0-TRUSTED-START 启动登记（active；用户 2026-11-09 预授权连续工作「按 docs/post-s7-optimization-blueprint-2026-11-09.md 从头到尾执行 H0 → H1 → … → H7，全部推完为止」＝零参与、工程判断下放并逐项留痕）**：范围=H0 可信起点——①state 两层语义显式化（串行槽位 work-package vs 常驻 living-plan + AUDIT-LOG 🔵 不同层注记 + truthDomain 冲突当场报警）②影响图重复 id fail-closed（block337 同名双条合并，规则 357→356）+ 未映射第一批消亡（C5-db-migration×4→electron-runtime、C9-g0-qualification×3→g0-baseline；145→138）③三段分片当次跑 + 逐件归因 ④canonical 对账（POST-NSO 蓝图→completed、post-S7 蓝图→active/living-plan、backlog 349–354、roadmap/handoff 恢复链、README 入口行补反引号） | 红线=零新增依赖/不动 10 项 untracked 用户资产/不放宽任何基线/不撤销既有用户裁决/未达证据不写 verified。plan=docs/block-385-post-s7-h0-trusted-start-plan.md | BLOCK-385 / P0-LAUNCH |
 | 🟡 | 2026-11-06 | **BLOCK-365 W1 接收在制批的处置注记**：用户授权接收会话起始在制批（22M+3 新测试；用户资产与临时目录、并发写入者 UI-696 批不在授权内）。首切片流程=逐文件审读→在制批自带测试+影响面测试→lint/types→model-surface 基线重打留因（993→1083，归因 system-prompt 用户优先级条款）→显式路径提交→P6 源绑定重算（观测数据原样保留）。授权范围为「提交这批既有工作」，不改变其中任何行为 | W1 主项随后：F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 |
 | 🟡待环境 | 2026-10-20 | **本机 `bash` 解析到 WSL launcher（`C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\bash.exe`）⇒ block67/block89 fs 测试整类误红**：`bash C:\...\x.sh` 被 WSL bash 读成 `C:UsersAdmin...`（反斜杠被吃），报 `No such file or directory`；与本批改动无关，**在 HEAD 同样复现**。规避=跑 `test:changed` / `closeout` 前把 Git Bash 前置：`$env:PATH="D:\Program Files\Git\bin;"+$env:PATH`（BLOCK-219 收口即用此法，Node 744 项 0 红）。根治=修正系统 PATH 顺序或测试改为显式 Git Bash 路径 ；**同一台机器的第二个坑**：`tar` 解析到 Windows bsdtar（不支持 `--force-local`），`capability-bundles` 等 5 项因此红——收口时 PATH 须同时前置 `D:\Program Files\Git\usr\bin`（GNU tar）与 `D:\Program Files\Git\bin`（bash，两处都要，缺一仍红） | 环境；不阻塞产品判据，但**会误伤任何一次 closeout**——修复前每次收口须前置 PATH 并在笔录里写明 |
 | 🟡 | 2026-10-18 | **C-34（BLOCK-212 reopen）**：Claude 缓存断点方案成文——会话级固定工具集 + tools 末项断点 + ≥1024 才打点；验收需真实调用、风险=路由精度，**先决=G1+ 预算** | BLOCK-212 / reopen |
