@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h8-ui-live",
+  "sourceCommit": "3bbb59622b9acc2653024486980dc29474fb970e",
+  "platform": "darwin-arm64",
+  "command": "node scripts/post-s7-h8-ui-live.cjs",
+  "generatedAt": "2026-11-09T16:41:41.934Z",
+  "evidenceClass": "cdp-dom-assertion",
+  "humanEyeEquivalent": false,
+  "visualVerified": false,
+  "verdict": "measured",
+  "note": "几何基线供 CenterPanel 双层同名 layout 收敛做「拆前基线」；暗色观感 / VoiceOver 朗读 / 截图过目仍待人眼，本脚本不代答。",
+  "phases": {
+    "baseline": {
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "blocks": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 1000
+        },
+        "scMessages": {
+          "x": 267,
+          "y": 50,
+          "w": 418,
+          "h": 795.8
+        },
+        "firstConvItem": {
+          "x": 8,
+          "y": 254.3,
+          "w": 216.5,
+          "h": 30.2
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 1600,
+        "docClientWidth": 1600,
+        "bodyScrollWidth": 1600
+      },
+      "a11y": {
+        "contentVisibilityAutoNodes": 100,
+        "statusRoles": 1,
+        "sliderRoles": 0,
+        "separatorRoles": 0,
+        "inertNodes": 0,
+        "logRoles": 0,
+        "toastHistoryText": false
+      }
+    },
+    "doubled": {
+      "viewport": {
+        "width": 4000,
+        "height": 2500
+      },
+      "blocks": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "w": 4000,
+          "h": 2500
+        },
+        "scMessages": {
+          "x": 1246,
+          "y": 50,
+          "w": 860,
+          "h": 2295.8
+        },
+        "firstConvItem": {
+          "x": 8,
+          "y": 254.3,
+          "w": 216.5,
+          "h": 30.2
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 4000,
+        "docClientWidth": 4000,
+        "bodyScrollWidth": 4000
+      },
+      "a11y": {
+        "contentVisibilityAutoNodes": 100,
+        "statusRoles": 1,
+        "sliderRoles": 0,
+        "separatorRoles": 0,
+        "inertNodes": 0,
+        "logRoles": 0,
+        "toastHistoryText": false
+      }
+    },
+    "halved": {
+      "viewport": {
+        "width": 1000,
+        "height": 625
+      },
+      "blocks": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "w": 1000,
+          "h": 625
+        },
+        "scMessages": {
+          "x": 267,
+          "y": 50,
+          "w": 719,
+          "h": 420.8
+        },
+        "firstConvItem": {
+          "x": 8,
+          "y": 254.3,
+          "w": 216.5,
+          "h": 30.2
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 1000,
+        "docClientWidth": 1000,
+        "bodyScrollWidth": 1000
+      },
+      "a11y": {
+        "contentVisibilityAutoNodes": 100,
+        "statusRoles": 1,
+        "sliderRoles": 0,
+        "separatorRoles": 0,
+        "inertNodes": 0,
+        "logRoles": 0,
+        "toastHistoryText": false
+      }
+    },
+    "restored": {
+      "viewport": {
+        "width": 1600,
+        "height": 1000
+      },
+      "blocks": {
+        "root": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 1000
+        },
+        "scMessages": {
+          "x": 496.5,
+          "y": 50,
+          "w": 860,
+          "h": 795.8
+        },
+        "firstConvItem": {
+          "x": 8,
+          "y": 254.3,
+          "w": 216.5,
+          "h": 30.2
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 1600,
+        "docClientWidth": 1600,
+        "bodyScrollWidth": 1600
+      },
+      "a11y": {
+        "contentVisibilityAutoNodes": 100,
+        "statusRoles": 1,
+        "sliderRoles": 0,
+        "separatorRoles": 0,
+        "inertNodes": 0,
+        "logRoles": 0,
+        "toastHistoryText": false
+      }
+    }
+  },
+  "checks": {
+    "contentVisibilityInSessionRows": true,
+    "statusRegionPresent": true,
+    "noHorizontalOverflowAtBaseline": true,
+    "noHorizontalOverflowWhenHalved": true,
+    "geometryRestoredAfterOverride": true
+  },
+  "pendingHumanEye": [
+    "UI-702 通知历史：暗色态对比度与 4 秒后按钮在场（需触发一条 error toast，当前页面无触发通道）",
+    "UI-702 viewer 降级原因：VoiceOver 朗读 role=status（需语音确认，DOM 断言不可替代）",
+    "UI-698/699 观感：content-visibility 在场已由 DOM 断言，但「观感无异常」需人眼",
+    "B-10 分屏 slider：需打开分屏态后读屏确认（当前页面 sliderRoles=0 因分屏未打开，不判不通过）"
+  ]
+}

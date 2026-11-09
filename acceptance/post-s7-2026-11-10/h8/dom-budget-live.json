@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h8-dom-budget-live",
+  "sourceCommit": "3bbb59622b9acc2653024486980dc29474fb970e",
+  "platform": "darwin-arm64",
+  "command": "node scripts/post-s7-dom-budget-live.cjs",
+  "generatedAt": "2026-11-09T16:41:38.360Z",
+  "evidenceClass": "cdp-dom-measurement",
+  "humanEyeEquivalent": false,
+  "verdict": "measured",
+  "stack": {
+    "backend": ":3001 (isolated db)",
+    "vite": ":3000",
+    "cdp": ":9223 (offscreen)",
+    "isolation": "/tmp/petri-h8-isolated/data/petri.db"
+  },
+  "serverSideLimits": {
+    "conversationsApiLimit": 100,
+    "conversationsApiSource": "core/petri-server/routes/ai-conversations.js:71 (LIMIT 100, no pagination param)",
+    "messagesFrontendDefaultLimit": 100,
+    "messagesFrontendSource": "frontend/src/components/copilot/copilotConversationsClient.ts:129",
+    "messagesApiClamp": 500,
+    "finding": "400/800 会话档与 100 档 DOM 读数相同，根因是服务端已按 100 截断；「会话列表全量 DOM」前提不成立。这不是取数 bug，按原档保留并单列归因。"
+  },
+  "samples": [
+    {
+      "label": "convs-25",
+      "conversationCount": 25,
+      "messageCount": 20,
+      "allNodes": 1777,
+      "scMessagesNodes": 810,
+      "convRowMatches": 125,
+      "resultRows": 0,
+      "textLen": 2000,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "convs-50",
+      "conversationCount": 50,
+      "messageCount": 20,
+      "allNodes": 2202,
+      "scMessagesNodes": 810,
+      "convRowMatches": 250,
+      "resultRows": 0,
+      "textLen": 2700,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "convs-100",
+      "conversationCount": 100,
+      "messageCount": 20,
+      "allNodes": 3052,
+      "scMessagesNodes": 810,
+      "convRowMatches": 500,
+      "resultRows": 0,
+      "textLen": 3344,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "msgs-10",
+      "conversationCount": 20,
+      "messageCount": 10,
+      "allNodes": 1277,
+      "scMessagesNodes": 405,
+      "convRowMatches": 100,
+      "resultRows": 0,
+      "textLen": 1420,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "msgs-50",
+      "conversationCount": 20,
+      "messageCount": 50,
+      "allNodes": 2937,
+      "scMessagesNodes": 2025,
+      "convRowMatches": 100,
+      "resultRows": 0,
+      "textLen": 3180,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "msgs-100",
+      "conversationCount": 20,
+      "messageCount": 100,
+      "allNodes": 5012,
+      "scMessagesNodes": 4050,
+      "convRowMatches": 100,
+      "resultRows": 0,
+      "textLen": 5381,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "convs-400-over-limit",
+      "conversationCount": 400,
+      "messageCount": 120,
+      "allNodes": 7202,
+      "scMessagesNodes": 4860,
+      "convRowMatches": 500,
+      "resultRows": 0,
+      "textLen": 7765,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    },
+    {
+      "label": "convs-800-over-limit",
+      "conversationCount": 800,
+      "messageCount": 120,
+      "allNodes": 7202,
+      "scMessagesNodes": 4860,
+      "convRowMatches": 500,
+      "resultRows": 0,
+      "textLen": 7765,
+      "geometry": {
+        "viewport": {
+          "width": 1600,
+          "height": 1000
+        },
+        "scMessages": {
+          "x": 267.001953125,
+          "y": 49.990234375,
+          "width": 417.998046875,
+          "height": 795.791015625
+        },
+        "root": {
+          "width": 1600,
+          "height": 1000
+        },
+        "panels": [
+          {
+            "cls": "_leftPanelWrap_o9lly_606",
+            "w": 240,
+            "h": 962
+          },
+          {
+            "cls": "_leftPanelHeader_o9lly_845",
+            "w": 224,
+            "h": 42
+          },
+          {
+            "cls": "_leftPanelTitle_o9lly_853",
+            "w": 26,
+            "h": 20
+          },
+          {
+            "cls": "_leftPanelHeaderActions_o9lly_862",
+            "w": 76,
+            "h": 24
+          },
+          {
+            "cls": "_leftPanelFooter_o9lly_953",
+            "w": 224,
+            "h": 46
+          },
+          {
+            "cls": "_resultPanel_o9lly_2966",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_resultPanelBody_o9lly_2977",
+            "w": 900,
+            "h": 962
+          },
+          {
+            "cls": "_rightPanelTabContent_o9lly_3166 _rightPanelTabContentActive",
+            "w": 900,
+            "h": 962
+          }
+        ]
+      }
+    }
+  ],
+  "frameSamples": {
+    "count": 270,
+    "p50Ms": 8.4,
+    "p95Ms": 10.3,
+    "maxMs": 26.7,
+    "longFrameRatio": 0,
+    "samplingNote": "离屏 9223 窗口；CDP Page.bringToFront 后采样，Chromium 仍可能节流，读数仅为该环境下的可复跑基线，不是用户观感。"
+  },
+  "note": "本脚本只取「拆前基线」：DOM 节点数 / rAF 帧间隔 / 几何。是否加 content-visibility 由后续切片在基线落盘后决定；节点数不降或帧率不升即回滚。"
+}

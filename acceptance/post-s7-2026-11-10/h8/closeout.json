@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h8-closeout-summary",
+  "workPackage": "BLOCK-393",
+  "generatedAt": "2026-11-10",
+  "plan": "docs/block-393-post-s7-remaining-work-plan.md",
+  "verdict": "completed-with-declared-exceptions",
+  "evidence": [
+    {
+      "file": "dom-budget-live.json",
+      "class": "cdp-dom-measurement",
+      "content": "8 档 DOM 节点数 / rAF P50-P95 / 几何；400/800 档并列 7202 节点",
+      "humanEyeEquivalent": false
+    },
+    {
+      "file": "ui-live.json",
+      "class": "cdp-dom-assertion",
+      "content": "三态视口几何基线 + 5 项 A11Y 在场断言（content-visibility / status role / 无横向溢出 / override 可复原）",
+      "humanEyeEquivalent": false
+    },
+    {
+      "file": "startup-five-stage.json",
+      "class": "live-probe",
+      "content": "五段分解热栈连续 5 轮（非冷启动 5 次）；migrations 段仅日志指纹哨兵",
+      "humanEyeEquivalent": false
+    }
+  ],
+  "shapeContracts": [
+    "test/post-s7-h8-evidence-contract.test.mjs (2/2)",
+    "test/post-s7-h8-startup-five-stage.test.mjs (5/5)",
+    "test/post-s7-h8-version-parity.test.mjs (4/4)",
+    "test/user-asset-guard.test.mjs (4/4)",
+    "test/test-affected.test.mjs + nso-w5-impact-coverage (23/23)"
+  ],
+  "gates": {
+    "closeout": "19 门全绿",
+    "docs:check": "PASS (527 registered)",
+    "ui:audit:check": "PASS",
+    "gate:user-assets": "PASS 9 项保护路径零命中",
+    "gate:version-parity": "PASS 5 处跨语言字面量一致",
+    "gate:css-modules": "PASS 白名单 13→11"
+  },
+  "keyFinding": "/api/ai/conversations 硬编码 LIMIT 100 + 消息列表前端默认 limit=100 → B-09「会话/消息列表全量 DOM」前提不成立；400/800 档同读数是服务端截断，不是取数 bug。按原档保留并列归因，补 6 档上限内真实增长曲线。",
+  "selfCaughtIncident": "932b9136 二次误入库 docs/pelican-bicycle.html（同类第二次）→ git rm --cached 撤回 + gate:user-assets 机械门（教训落地不只写台账）",
+  "correction": "上一轮答复误给 start-test-instance.sh --onscreen；本轮全程默认离屏（用户 2026-10-17/10-23 裁决）",
+  "notVerifiableHere": [
+    "8 任务套件：有效模型凭据缺失（ai-settings presets=0 / env 0 key）",
+    "人眼观感与 VoiceOver 朗读：DOM 断言不可替代",
+    "ADMISSION 默认档 / FK=ON 全量切换：既有用户裁决维持缓",
+    "5 巨型文件大拆片：W5b 一切片一会话"
+  ],
+  "stageDiscipline": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

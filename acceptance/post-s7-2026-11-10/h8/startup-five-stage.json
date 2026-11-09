@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h8-startup-five-stage",
+  "sourceCommit": "3bbb59622b9acc2653024486980dc29474fb970e",
+  "platform": "darwin-arm64",
+  "command": "node scripts/post-s7-startup-five-stage.mjs",
+  "generatedAt": "2026-11-09T16:41:43.606Z",
+  "evidenceClass": "live-probe",
+  "verdict": "measured",
+  "sampling": "热栈连续 5 轮（非冷启动 5 次）；取最差轮为准",
+  "rounds": [
+    {
+      "require": 91,
+      "migrations": 1,
+      "backendHealth": 12,
+      "spa200": 27,
+      "cdpPageReady": 12,
+      "marksSource": "src/ipc/startup-timeline.js (startup:marks, read-only)"
+    },
+    {
+      "require": 91,
+      "migrations": 1,
+      "backendHealth": 13,
+      "spa200": 16,
+      "cdpPageReady": 12,
+      "marksSource": "src/ipc/startup-timeline.js (startup:marks, read-only)"
+    },
+    {
+      "require": 91,
+      "migrations": 1,
+      "backendHealth": 12,
+      "spa200": 16,
+      "cdpPageReady": 12,
+      "marksSource": "src/ipc/startup-timeline.js (startup:marks, read-only)"
+    },
+    {
+      "require": 91,
+      "migrations": 1,
+      "backendHealth": 12,
+      "spa200": 15,
+      "cdpPageReady": 12,
+      "marksSource": "src/ipc/startup-timeline.js (startup:marks, read-only)"
+    },
+    {
+      "require": 91,
+      "migrations": 1,
+      "backendHealth": 12,
+      "spa200": 15,
+      "cdpPageReady": 12,
+      "marksSource": "src/ipc/startup-timeline.js (startup:marks, read-only)"
+    }
+  ],
+  "evaluation": {
+    "ok": true,
+    "issues": [],
+    "permanentlyMissing": []
+  },
+  "note": "require 段复用既有主进程 startup:marks；migrations 段只能从日志指纹判断「有/无独立打点」，不是耗时读数。"
+}

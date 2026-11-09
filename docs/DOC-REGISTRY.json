@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 526,
+    "documentCount": 527,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 509
+    "managedMarkdown": 510
   },
   "documents": [
     {
@@ -385,6 +385,26 @@
         "evaluation"
       ],
       "notes": "post-S7 程序 H7 终验与总收口：八阶段总览 + 十一维五列复评（四升七平零降；达标 3/11）+ 34 条缺口终态（done 5 / done-partial 15 / retain 12 / pending_human_eye 1 / external-blocked 1）+ 未闭合项与补腿条件。真实任务=凭据缺失（B-02 external-blocked），人眼路线已成文不代答。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-393",
+      "capability": "block-393-post-s7-remaining-work",
+      "path": "docs/block-393-post-s7-remaining-work-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-393-post-s7-remaining-work",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "remaining-work",
+        "cdp",
+        "gate",
+        "user-assets"
+      ],
+      "notes": "post-S7 剩余工作一次性推进 completed：用户资产二次误入库撤回 + gate:user-assets 机械门（同类第二次转门）；无窗口 dev 栈 + 9223 默认离屏 CDP 腿批（DOM 8 档拆前基线含服务端 LIMIT 100 截断归因、几何三态、五段分解、UI 代行 DOM 断言，4 份证据 + 形状契约）；跨语言版本对账门 + css 白名单 13→11；closeout 16→19 门。客观边界（有效凭据/人眼/用户裁决/W5b 大拆片）逐件挂起并写补腿条件。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-S7-H7-HUMAN-EYE-ROUTE",

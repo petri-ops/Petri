@@ -22,3 +22,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-09T12:05:05.681Z -->
 | ✅ AUDIT-LOG 旧票核销批 1/3：2026-11-04 功能面五条 P1/P2 🟡 逐件对 BLOCK-346 收口结论核销（goals 三工具=T2 ⋃domainModules；审批链=T1 browser_act 签发+worktree_remove R2；静默失效=T3；安全归类=T5；零消费端点=T4 接线 13 条+T6 死通道净删）——当次矩阵 P1=0/P2=0/P3=2 与机械基线互证（BLOCK-359 W0） | 2026-11-06 | 逐条按 BLOCK-346 T1-T6 交付注记核对，非按日期推定；矩阵=docs/functional-surface-matrix-2026-11-04.md | 功能面五条 / CLOSED-BY-BLOCK-346（**2026-11-06 更正**：安全口径条 IDE MCP 写面档位仍 reopen，已恢复为当前待处理 🟡） |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-09T16:38:39.284Z -->
+| ✅ IDE MCP 写面档位裁决收口（用户「直接搞完剩余未做的内容」=授权工程判断）——外部 MCP 主体由 **MCP trust 语义**治理（既有独立轴，BLOCK-243），**不进** agent capability token 面（两轴分离结构契约钉住：registry 不引拦截器 / capabilityEvidence 签发点唯一在 agent 拦截器 / mcp/ 目录零出现）。协议层档位协商不再需要——外部主体无 accessMode 概念本就按 trust 轴治理（BLOCK-374 契约 3/3） | 2026-11-06 | AUDIT-LOG 🟡 销号；test/nso-b4-mcp-subject.test.mjs | IDE MCP 写面 / CLOSED |

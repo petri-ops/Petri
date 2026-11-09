@@ -2032,7 +2032,8 @@
       "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
       "patterns": [
         "acceptance/post-s7-2026-11-09/**",
-        "test/block385-h0-evidence.test.mjs"
+        "test/block385-h0-evidence.test.mjs",
+        "acceptance/post-s7-2026-11-10/**"
       ],
       "tests": [
         "test/block385-h0-evidence.test.mjs"
@@ -7804,6 +7805,28 @@
         "docs-check"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "post-s7-h8-live-probes",
+      "note": "BLOCK-393 H8 实机取数/门脚本：DOM 预算、UI 代行、种子、五段分解、跨语言版本对账。均只写隔离副本或只读现场；随本包契约测试与文档门。",
+      "patterns": [
+        "scripts/post-s7-dom-budget-live.cjs",
+        "scripts/post-s7-h8-ui-live.cjs",
+        "scripts/post-s7-seed-conversations.cjs",
+        "scripts/post-s7-startup-five-stage.mjs",
+        "scripts/post-s7-version-parity-gate.mjs"
+      ],
+      "tests": [
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h8-startup-five-stage.test.mjs",
+        "test/post-s7-h8-version-parity.test.mjs",
+        "test/user-asset-guard.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }
