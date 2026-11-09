@@ -17,6 +17,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SCAN_ROOTS = ['src', 'core', 'scripts', 'test'];
 const BASELINE = new Set([
+  // POST-S7 H5/B-22 登记：scripts/block350-perf-gate.mjs 内 process.platform 仅用于性能证据头的
+  // platform 字段（sourceCommit/platform/command 三元组），无平台分支逻辑；证据元数据必须能
+  // 区分平台，收敛到 platform-compat 无收益，登记即留痕。
+  'scripts/block350-perf-gate.mjs',
   // BLOCK-109 收口登记：scripts/block101-startup-timeline-live.cjs（BLOCK-106 P3 落地的
   // 实机 flow 采集脚本）内 process.platform 仅用于证据头 platform 字段与 darwin 采样
   // 门控——dev-only 一次性脚本，收敛到 platform-compat 收益为零，登记即留痕。

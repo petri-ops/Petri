@@ -15,3 +15,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-09T11:53:58.342Z -->
 | ✅ C-48 打包 GUI 断链修复闭环（2026-11-05；用户错误框截图推翻 TCC/AMFI 判断 +「你能搞定吗」委托） | 2026-11-05 | 真因非框架 init：asar 内主图 core 相对 require → `resolveCore` 全量路由 + 双态兜底 + core 注入 asar；后端 better-sqlite3 ABI 137≠149 → supervisor 崩循环，afterPack 改实测 dlopen 选源 fail-closed（Electron-ABI 实落 `bin/darwin-arm64-149/`，非 `build/Release`）；repack await/unpack/重签 + core 侧 13 包补齐。证据=完整重建 exit=0、目录版与 DMG 内 app codesign valid、实机进程树全绿（主+3 helper+后端 :53575）+health ok+SPA 200+路由错误清零、tripwire 4/4 红→绿、DMG 15:40 重打。报告=`docs/block-353-regression-report.md`；backlog C-48 销号。 | C-48 / CLOSED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-09T12:00:12.054Z -->
+| ✅ AUDIT-LOG 旧票核销批 2/3：BLOCK-83 D7 deseq2 棘轮红（FederationJobs.tsx ×2）清偿——占位示例文案改中性「对端节点已注册的工具名」，测试 3/3 绿，基线未放宽（本记 0 自然对齐）（BLOCK-359 W0） | 2026-11-06 | 裁决=改 UI 文案非重扫基线（authority=蓝图 W0 §3.2-7）；证据=acceptance/nso-2026-11-06/wave-0/baseline-adjudications.json ADJ-2 | BLOCK-83 D7 / CLOSED |
+| ✅ AUDIT-LOG 旧票核销批 3/3：loop-fixtures 兄弟仓缺失 🟡 清偿——`../petri-pack-bio` 已在位（demo counts/coldata 齐），`test/loop-fixtures.test.mjs` 73/73 绿（BLOCK-359 W0 复测） | 2026-11-06 | p4r-invariants 剩余 7 cancels 已归因 C-46（pack deseq2.R 语法错，兄弟仓未授权不改）；另抓真并修本仓 parseCsv 引号缺陷（红绿 9/9，见 wave-0/baseline-adjudications.json DEF-1） | loop-fixtures 环境 / CLOSED |
