@@ -320,7 +320,7 @@ async function waitForLifecycle(webContents, expectedState) {
   throw new Error(`timeout:lifecycle_${expectedState}:${JSON.stringify(last)}`);
 }
 
-async function readLifecycle(webContents, expectedState) {
+async function _readLifecycle(webContents, expectedState) { // BLOCK-384：调用面已由 waitForLifecycle 承载，保留作单读语义
   const raw = await waitFor(
     webContents,
     lifecycleExpression(expectedState),
@@ -364,7 +364,7 @@ async function activateCompareMode(webContents) {
 async function clickRecovery(webContents) {
   // BLOCK-384——点击前先激活 compare（nav 晚到竞态同源）
   await activateCompareMode(webContents);
-  const first = await webContents.executeJavaScript(`
+  return webContents.executeJavaScript(`
     (() => {
       const panel = document.querySelector('[aria-label="Result Studio 版本与变更"]');
       const lifecycle = panel && [...panel.children]

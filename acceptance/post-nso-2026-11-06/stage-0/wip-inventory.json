@@ -149,6 +149,15 @@
       "content": "未检查",
       "disposition": "preserve-untouched",
       "reason": "临时目录红线；处置由所有者/用户裁决"
+    },
+    {
+      "path": "docs/post-s7-optimization-blueprint-2026-11-09.md",
+      "state": "untracked（2026-11-09 出现；曾被 655da1eb 误卷入后按 WIP 纪律 git rm --cached 移出，磁盘文件保留）",
+      "classification": "concurrent-writer-charter",
+      "owner": "并发写入者会话（2026-11-09 新立 post-S7 蓝图，status=planned）",
+      "content": "post-S7 下一阶段蓝图（S0-S7 式分阶段计划）；非本会话产物",
+      "disposition": "preserve-untouched",
+      "reason": "并发写入者章程文件，归属其会话；BLOCK-384 不代提交不代登记"
     }
   ],
   "fileSurfaceDisjointness": "BLOCK-375 自身改动面 = §plan.5 touchSurface，与 preserve 项零交集；DOC-REGISTRY/README 的堆叠登记仅含 adopt 项（章程登记）+ 本包自身条目"
