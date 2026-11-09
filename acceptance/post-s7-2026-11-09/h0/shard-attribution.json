@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h0-shard-attribution",
+  "generatedAt": "2026-11-09",
+  "owner": "BLOCK-385 (H0)",
+  "command": "node scripts/test-all-shards.mjs --all --timeout-ms=5400000",
+  "platform": "darwin-arm64",
+  "sourceCommit": "e7b1efb4",
+  "baselineSummary": "shard-summary-baseline.json",
+  "finalSummary": "shard-summary.json",
+  "policy": "verdict=unknown 结论为未知，不得写 PASS；每条非绿记录必须有 class + owner + 处置；修复类必须给出当次定向复跑结果。",
+  "shards": [
+    {
+      "shard": "node-core",
+      "verdict": "failed",
+      "exitCode": 1,
+      "reason": "3 条残红：1 条本包根修（影响图规则缺 acceptance 新树）、2 条外部归属（FK=OFF / spawn persona 专项）"
+    },
+    { "shard": "frontend", "verdict": "passed", "exitCode": 0 },
+    { "shard": "node-long", "verdict": "passed", "exitCode": 0 }
+  ],
+  "progression": {
+    "baseline": "node-core 9 红 / frontend 1 红 / node-long 0 红（summary-1794221695063）",
+    "final": "node-core 3 红 / frontend 0 红 / node-long 0 红（summary-1794222600512）",
+    "rootFixed": 7,
+    "externalOwner": 2
+  },
+  "failures": [
+    {
+      "test": "test/test-session-cleanup.test.mjs",
+      "shard": "node-core",
+      "class": "product-defect:script-main-guard-missing",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "scripts/test-session-cleanup.mjs 顶层联网扫描无 main 守卫，被 import 即 fetch 127.0.0.1:3001（ECONNREFUSED）；抽 main() + import.meta.url 守卫。定向复跑 2/2 绿。"
+    },
+    {
+      "test": "test/delivery-manifest.test.mjs（HRT-5 valid 用例）",
+      "shard": "node-core",
+      "class": "stale-fixture:declared-sha-vs-computed-bytes",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "夹具声明假 sha256，BLOCK-377 起 manifest 按字节重算 → 恒判 integrity drift=degraded。夹具改真实字节摘要 + 新增 drift 负测。定向复跑 4/4 绿。"
+    },
+    {
+      "test": "test/block235-export-federation-baseline.test.mjs",
+      "shard": "node-core",
+      "class": "stale-fixture:declared-sha-vs-computed-bytes",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "同族夹具假摘要（'e'*64）→ 真实字节摘要。整文件绿。"
+    },
+    {
+      "test": "test/loop-orchestrator-subdomains.test.mjs（行数锚）",
+      "shard": "node-core",
+      "class": "stale-anchor:line-count-unit-mismatch",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "readLines 用 split('\\n').length（恒比 wc -l 多 1）而锚值来自 wc -l → 两断言互斥。统一 wc -l 口径；锚 1572→1579 按测试自身纪律显式重锚留因（BLOCK-376 S1 合法增长 +7）。定向复跑 16/16 绿。"
+    },
+    {
+      "test": "test/block357-shelf-and-map.test.mjs（磁盘产物与生成器输出一致）",
+      "shard": "node-core",
+      "class": "generation-chain:matrix-timestamp-drift",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "quality:surface 刷新矩阵 generatedAt 后未重跑能力地图生成器 → 产物比对红。重跑 scripts/block357-capability-map.mjs。定向复跑 8/8 绿。根因（三矩阵非同源、无联动）登记为 H5/B-23。"
+    },
+    {
+      "test": "frontend src/components/desktop/DesktopSettingsPanel/sections/MobileSync.test.tsx（未开启态）",
+      "shard": "frontend",
+      "class": "flaky-under-load:async-settle-vs-sync-assert",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "单文件 12/12、整目录 88/88 恒绿，仅 359 文件并行跑红一次（状态到达晚于同步断言）。断言统一 waitFor（强度不变）。复跑 frontend 分片 359 文件全绿。"
+    },
+    {
+      "test": "test/test-affected.test.mjs（stored acceptance evidence …）",
+      "shard": "node-core",
+      "class": "self-inflicted:new-acceptance-tree-without-impact-rule",
+      "owner": "BLOCK-385",
+      "disposition": "fixed",
+      "evidence": "本包新建 acceptance/post-s7-2026-11-09/ 未在 impact-map 建规则 → 该用例要求 acceptance 下每个目录都可解析。补 post-s7-acceptance 规则 + 证据完整性契约测试。"
+    },
+    {
+      "test": "test/knowledge-space.test.mjs（G3 注入：删空间→FK CASCADE 掉绑回落默认）",
+      "shard": "node-core",
+      "class": "product-defect:fk-off-leaves-dangling-binding",
+      "owner": "BLOCK-386 (H1 · B-05)",
+      "disposition": "attributed-open",
+      "followUp": "后端连接 foreign_keys=OFF（BLOCK-372/BLOCK-384 裁决维持缓），掉绑依赖 FK CASCADE 故不触发，删空间后 session_workspace_bindings 留悬挂绑定。H1 在删除路径显式清理绑定（不依赖 FK 开关），并以该用例作红→绿锚；FK 全量切换仍按用户裁决维持缓。"
+    },
+    {
+      "test": "test/block93-role-prompt.test.mjs（spawn role=search 子 loop system prompt 含角色片段）",
+      "shard": "node-core",
+      "class": "known-exception:spawn-persona",
+      "owner": "block93 实机跟踪专项（BLOCK-376 移交，BLOCK-379 S4 分层未硬闯）",
+      "disposition": "attributed-open",
+      "followUp": "子链主请求 system=纯静态模板（1029B），角色指令未注入。需先抓真模型解析链（是否走真实配置）再改 prompt 装配；矩阵修复后回归本用例。"
+    }
+  ],
+  "notRerun": [
+    {
+      "id": "test/g0-rs-p6-product-acceptance.test.mjs（P6 stored verification）",
+      "note": "基线跑红，属 P6 源绑定重算面（BLOCK-384 已前进两站后转 recovery electron 腿竞态专项）。本轮未改其触碰面，按未跑/未复跑如实登记，不写通过。"
+    },
+    {
+      "id": "test/block48-sidecar-tools.test.mjs（窗口截图 PNG）",
+      "note": "基线跑红=capture_failed（屏幕录制权限/窗口已关闭）；最终复跑该用例转绿（node-core 3 红不含它），但屏幕录制权限与窗口态条件未发生受控变化 → 按「环境相关、不稳定绿」登记，不作为稳定绿证据，也不写成产品缺陷。"
+    }
+  ]
+}

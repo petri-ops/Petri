@@ -1935,6 +1935,20 @@
       "classifiesScripts": false
     },
     {
+      "id": "post-s7-acceptance",
+      "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
+      "patterns": [
+        "acceptance/post-s7-2026-11-09/**",
+        "test/block385-h0-evidence.test.mjs"
+      ],
+      "tests": [
+        "test/block385-h0-evidence.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "acceptance-chf0",
       "patterns": [
         "acceptance/g0-critical-crosscut-hardening/**",

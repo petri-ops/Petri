@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "nso-wave0-full-test-shards",
+  "generatedAt": "2026-11-09T11:10:00.511Z",
+  "timeoutMsPerShard": 5400000,
+  "shards": [
+    {
+      "shard": "node-core",
+      "id": "20261109-110237-nso-w0-shard-node-core-vmab5",
+      "state": "ended",
+      "exitCode": 1,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261109-110237-nso-w0-shard-node-core-vmab5.log",
+      "timedOut": false,
+      "verdict": "failed"
+    },
+    {
+      "shard": "frontend",
+      "id": "20261109-110930-nso-w0-shard-frontend-7kc3t",
+      "state": "ended",
+      "exitCode": 0,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261109-110930-nso-w0-shard-frontend-7kc3t.log",
+      "timedOut": false,
+      "verdict": "passed"
+    },
+    {
+      "shard": "node-long",
+      "id": "20261109-110959-nso-w0-shard-node-long-bqhdm",
+      "state": "ended",
+      "exitCode": 0,
+      "signal": null,
+      "logPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/task-runs/20261109-110959-nso-w0-shard-node-long-bqhdm.log",
+      "timedOut": false,
+      "verdict": "passed"
+    }
+  ],
+  "allPassed": false,
+  "note": "verdict=unknown 表示超时或 runner 丢失——结论为未知，不得写 PASS（BLOCK-359 有界语义）。"
+}

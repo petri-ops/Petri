@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h0-gate-baseline",
+  "sourceCommit": "339dd93c",
+  "platform": "darwin-arm64",
+  "capturedBy": "BLOCK-385 (H0)",
+  "generatedAt": "2026-11-09",
+  "note": "逐门串行取样，不是 closeout 聚合结果；读数与 docs/post-s7-optimization-blueprint-2026-11-09.md §1.2 当次基线逐项对齐（docs 注册数由 515→516 因新蓝图登记）。",
+  "gates": [
+    { "id": "docs:check", "verdict": "PASS", "reading": "516 registered（本轮新增 post-s7 蓝图）；AUDIT-LOG 84KB > 50KB 建议级、L88 10933B 超长行（H6/B-27）" },
+    { "id": "ui:audit:check", "verdict": "PASS", "reading": "Git 历史 632 个带实现证据 UI 编号" },
+    { "id": "hygiene:check", "verdict": "PASS", "reading": "无死链 / CRLF / 控制字节 / 桥退化；untracked 仅列出" },
+    { "id": "quality:secret", "verdict": "PASS", "reading": "生产面 0，fixture 豁免在册" },
+    { "id": "quality:arch", "verdict": "PASS", "reading": "R1–R5 无违规，cruise 全新" },
+    { "id": "quality:surface", "verdict": "PASS", "reading": "tools 115/115、ipc 168、routes 285、storageKeys 20、P1=0/P2=0/P3=2/dirty=0" },
+    { "id": "quality:ear", "verdict": "PASS", "reading": "881/2117 = 41.6%（阈值 40%；manifest 43.3%；45% 目标未达）" },
+    { "id": "gate:code-size", "verdict": "PASS", "reading": "24 文件 23476 行 = 基线 23476；生效例外 16；预算 700 行" },
+    { "id": "quality:knip:check", "verdict": "PASS", "reading": "保留面 330 键冻结，无新增" },
+    { "id": "gate:arch-cycles", "verdict": "PASS", "reading": "13 存量环在册，无新环" },
+    { "id": "gate:css-modules", "verdict": "PASS", "reading": "plain CSS 11 个全在白名单 13 内；LoginModal.css / PageHeader.css 已移除可收缩（WARN×2）" },
+    { "id": "quality:lint", "verdict": "PASS", "reading": "0 errors / 2312 warnings（抑制基线内）" },
+    { "id": "quality:types", "verdict": "PASS", "reading": "tsc --noEmit 0 errors" },
+    { "id": "quality:perf", "verdict": "PASS", "reading": "连续 5 次采样全绿；cold_start 545ms / long_conversation 21ms / big_project_tree 12ms / packaged_start 463ms" },
+    { "id": "skills:check", "verdict": "PASS", "reading": "11 内置 + 3 领域包" }
+  ],
+  "notRun": [
+    {
+      "id": "closeout",
+      "reason": "取样时工作区含 3 项跟踪改动 + 10 项 untracked（用户资产/临时目录）；按定向纪律先归因后收口，收口结论见同目录 closeout 段。"
+    }
+  ]
+}

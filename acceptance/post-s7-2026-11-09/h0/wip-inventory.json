@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h0-wip-inventory",
+  "generatedAt": "2026-11-09",
+  "owner": "BLOCK-385 (H0)",
+  "policy": "只登记归属、不覆盖、不暂存、不清理、不代提交；未知 owner 的跟踪改动一律停手并上报。",
+  "trackedBefore": [
+    {
+      "path": "docs/block-370-nso-w3b-plan.md",
+      "owner": "canonical 对账（BLOCK-370 早于 2026-11-06 收口，plan status 未回写）",
+      "action": "由 BLOCK-385 提交（status active→completed + 交付/收口表），与 registry completed 对齐"
+    },
+    {
+      "path": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+      "owner": "生成器产物（quality:surface）",
+      "action": "由 BLOCK-385 干净树重生成后提交（仅 generatedAt/head/dirty 字段）"
+    },
+    {
+      "path": "docs/functional-surface-matrix-2026-11-04.md",
+      "owner": "生成器产物（quality:surface）",
+      "action": "同上"
+    }
+  ],
+  "untrackedPreserved": [
+    { "path": "assets/", "owner": "用户资产（品牌/素材）", "action": "零触碰" },
+    { "path": "petri-logo-concepts.miora", "owner": "用户资产", "action": "零触碰" },
+    { "path": "petri-logo-concepts_assets/", "owner": "用户资产", "action": "零触碰" },
+    { "path": "model3d/enclosure-120x80x30-wall3p0.scene3d.json", "owner": "用户资产（3D 场景）", "action": "零触碰" },
+    { "path": "docs/pelican-bicycle.html", "owner": "用户资产（样例页）", "action": "零触碰" },
+    { "path": "scripts/backfill-artifact-chain.mjs", "owner": "此前会话遗留脚本（未入库）", "action": "零触碰；归属与是否入库留待用户裁决" },
+    { "path": "tmp-block342-live/", "owner": "临时目录", "action": "零触碰" },
+    { "path": "tmp-review/", "owner": "临时目录", "action": "零触碰" },
+    { "path": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json", "owner": "他方会话分片汇总（未入库）", "action": "零触碰" }
+  ],
+  "newArtifactsThisPackage": [
+    {
+      "path": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-*.json",
+      "note": "test-all-shards 的固定落点（脚本契约）。BLOCK-385 两次运行的汇总复制为 acceptance/post-s7-2026-11-09/h0/shard-summary*.json 后，wave-0 侧由本包产生的副本删除，避免同一证据两处存在。"
+    }
+  ]
+}
