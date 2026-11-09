@@ -13,8 +13,19 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dbPath = process.argv[2] || path.join(ROOT, '.petri-dev-user-data', 'data', 'petri.db');
 // BLOCK-377（S2 / G-09）——旗标与位置参数分离（--strict 曾被误当 project filter）
-const strict = process.argv.includes('--strict');
-const positional = process.argv.slice(3).filter((a) => !a.startsWith('--'));
+// POST-S7 H1/B-06——默认 strict：legacy_unhashed 由「登记不判红」翻为默认判红。
+// 存量清单（--inventory）先行；确需容忍旧库时用 --allow-legacy 显式降级（留因于调用点），
+// --strict 保留为兼容别名（语义已等于默认）。
+const allowLegacy = process.argv.includes('--allow-legacy');
+const strict = process.argv.includes('--strict') || !allowLegacy;
+// POST-S7 H1/B-06——存量清单先行：--inventory <path> 把 legacy_unhashed 逐版落盘，
+// 作为「默认转 strict」的前置材料（翻转本身要动用户库=用户资产，须显式裁决）。
+const inventoryIdx = process.argv.indexOf('--inventory');
+const inventoryPath = inventoryIdx > -1 ? process.argv[inventoryIdx + 1] : null;
+// 旗标的取值也算旗标的一部分，不得漏进位置参数（否则 --inventory <path> 的 path 会被
+// 当成 project filter，查询直接返回 0 行——H1 首跑就踩到，靠本测试钉住）。
+const flagValues = new Set([inventoryPath].filter(Boolean));
+const positional = process.argv.slice(3).filter((a) => !a.startsWith('--') && !flagValues.has(a));
 const projectFilter = positional[0] || null;
 
 if (!fs.existsSync(dbPath)) {
@@ -71,8 +82,24 @@ for (const row of rows) {
 }
 db.close();
 
+if (inventoryPath) {
+  const inventory = {
+    schemaVersion: 1,
+    kind: 'artifact-chain-legacy-unhashed-inventory',
+    generatedAt: new Date().toISOString(),
+    dbPath: path.resolve(dbPath),
+    projectFilter,
+    totalRevisions: rows.length,
+    hashedRevisions: checked,
+    legacyUnhashedCount: legacyUnhashed.length,
+    legacyUnhashed,
+  };
+  fs.mkdirSync(path.dirname(path.resolve(inventoryPath)), { recursive: true });
+  fs.writeFileSync(path.resolve(inventoryPath), JSON.stringify(inventory, null, 2));
+  console.log(`[chain-verify] inventory -> ${path.resolve(inventoryPath)}`);
+}
 if (legacyUnhashed.length > 0) {
-  console.log(`[chain-verify] legacy_unhashed：${legacyUnhashed.length} 版（惰性回填前存量，${strict ? '--strict 判红' : '登记不判红'}）`);
+  console.log(`[chain-verify] legacy_unhashed：${legacyUnhashed.length} 版（惰性回填前存量，${allowLegacy ? '--allow-legacy 显式降级' : '默认判红'}）`);
 }
 if (breaks.length > 0) {
   console.error(`[chain-verify] FAIL（${breaks.length} 断点）：`);
@@ -80,7 +107,7 @@ if (breaks.length > 0) {
   process.exit(1);
 }
 if (strict && legacyUnhashed.length > 0) {
-  console.error(`[chain-verify] FAIL（--strict）：${legacyUnhashed.length} 版 legacy_unhashed 未回填`);
+  console.error(`[chain-verify] FAIL（默认 strict）：${legacyUnhashed.length} 版 legacy_unhashed 未回填；确需容忍旧库请显式 --allow-legacy 并在调用点留因`);
   process.exit(1);
 }
 console.log(`[chain-verify] PASS：${checked} 版链哈希全部复算一致`);

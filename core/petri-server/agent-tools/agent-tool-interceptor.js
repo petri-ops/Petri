@@ -391,14 +391,34 @@ function createAgentToolInterceptor(options = {}) {
     let executionAdmission = null;
     try {
       const { issueExecutionToken } = require('../../shared-backend/execution-admission');
+      const admissionTaskId = (ctx && ctx.taskId) || null;
+      const admissionFingerprint = decision.guardKey || (name ? `tool:${name}` : 'tool:unknown');
+      const admissionCtx = { tool: name || null, accessMode: (ctx && ctx.accessMode) || null };
       const issued = issueExecutionToken({
-        taskId: (ctx && ctx.taskId) || null,
-        fingerprint: decision.guardKey || (name ? `tool:${name}` : 'tool:unknown'),
-        ctxSnapshot: { tool: name || null, accessMode: (ctx && ctx.accessMode) || null },
+        taskId: admissionTaskId,
+        fingerprint: admissionFingerprint,
+        ctxSnapshot: admissionCtx,
         ttlMs: 5 * 60 * 1000,
       });
-      executionAdmission = { token: issued.token, enforcement: (process.env.PETRI_EXEC_ADMISSION === '1') ? 'enforce' : 'observe' };
-    } catch { /* 签发失败不阻断策略已放行的调用；执行边界 observe 模式会如实记录缺失 */ }
+      executionAdmission = {
+        token: issued.token,
+        enforcement: (process.env.PETRI_EXEC_ADMISSION === '1') ? 'enforce' : 'observe',
+        // POST-S7 H1/B-04——签发点把「期望绑定」一并写进凭据包裹，执行边界据此对账
+        // （task / 指纹 / 上下文快照三者任一被改写都必须在消费处暴露）。
+        expect: { taskId: admissionTaskId, fingerprint: admissionFingerprint, ctxSnapshot: admissionCtx },
+      };
+    } catch (error) {
+      // POST-S7 H1/B-04——签发失败不再静默：标成显式降级态，执行边界的消费结果会把
+      // reasonCode 透出到工具结果（executionAdmission.reason），审计面因此看得见「这次
+      // 执行没有凭据」而不是「看起来一切正常」。
+      executionAdmission = {
+        token: null,
+        enforcement: 'observe',
+        issuanceFailed: true,
+        reasonCode: 'execution_admission_issue_failed',
+        detail: error && error.message ? String(error.message).slice(0, 200) : 'unknown',
+      };
+    }
     const handlerOptionsWithAudit = {
       ...(handlerOptions || {}),
       ...(capabilityEvidence ? { capabilityEvidence } : {}),

@@ -60,22 +60,26 @@ function issueExecutionToken({ taskId, fingerprint, ctxSnapshot, ttlMs } = {}) {
  * @param {{ token: object, taskId?: string, fingerprint?: string, ctxSnapshot?: object, now?: number }} input
  * @returns {{ ok: true, tokenHash: string } | { ok: false, reason: string, detail?: object }}
  */
-function verifyAndConsumeExecutionToken({ token, taskId, fingerprint, ctxSnapshot, now } = {}) {
+function verifyAndConsumeExecutionToken({ token, taskId, fingerprint, ctxSnapshot, now, expect } = {}) {
   if (!token || typeof token !== 'object' || token.v !== TOKEN_VERSION) {
     return { ok: false, reason: 'execution_token_invalid' };
   }
+  // expect 是签发点写入凭据的「期望绑定」快捷形态（执行边界不必重建计算参数即可对账）。
+  const wantTask = taskId !== undefined ? taskId : (expect && expect.taskId);
+  const wantFingerprint = fingerprint !== undefined ? fingerprint : (expect && expect.fingerprint);
+  const wantCtx = ctxSnapshot !== undefined ? ctxSnapshot : (expect ? expect.ctxSnapshot : undefined);
   const at = Number.isFinite(now) ? now : Date.now();
   if (!Number.isFinite(token.expiresAt) || at > token.expiresAt) {
     return { ok: false, reason: 'execution_token_expired', detail: { expiresAt: token.expiresAt || null } };
   }
-  if (taskId && String(token.taskId) !== String(taskId)) {
-    return { ok: false, reason: 'execution_token_task_mismatch', detail: { tokenTaskId: token.taskId, expected: String(taskId) } };
+  if (wantTask && String(token.taskId) !== String(wantTask)) {
+    return { ok: false, reason: 'execution_token_task_mismatch', detail: { tokenTaskId: token.taskId, expected: String(wantTask) } };
   }
-  if (fingerprint && String(token.fingerprint) !== String(fingerprint)) {
+  if (wantFingerprint && String(token.fingerprint) !== String(wantFingerprint)) {
     return { ok: false, reason: 'execution_token_fingerprint_mismatch', detail: { tokenFingerprint: token.fingerprint } };
   }
-  if (ctxSnapshot !== undefined) {
-    const expected = sha256(stableStringify(ctxSnapshot ?? null));
+  if (wantCtx !== undefined) {
+    const expected = sha256(stableStringify(wantCtx ?? null));
     if (token.ctxSnapshotHash !== expected) {
       return { ok: false, reason: 'execution_token_ctx_rewritten' };
     }
@@ -85,6 +89,49 @@ function verifyAndConsumeExecutionToken({ token, taskId, fingerprint, ctxSnapsho
   }
   consumedNonces.add(token.nonce);
   return { ok: true, tokenHash: sha256(stableStringify(token)) };
+}
+
+/**
+ * 执行边界消费入口（POST-S7 H1/B-04）。
+ *
+ * 把「策略判定点签发的凭据」与「真正执行」焊成一条可审计闭环：执行边界出示
+ * handlerOptions.executionAdmission 并在此消耗。
+ *
+ * 三态：
+ *   enforce + 凭据有效   → { ok: true, mode: 'enforce', reason: 'execution_admission_consumed' }
+ *   enforce + 缺失/无效  → { ok: false, mode: 'enforce', reason }（调用方必须拒绝执行）
+ *   observe（默认）      → 永远 ok，但把判定结果原样回传（consumed / missing / 各类拒绝），
+ *                          由调用方落审计——observe 不等于「不看」，只等于「不拦」。
+ *
+ * 为什么 observe 也要消耗：单次语义只有真消耗才会暴露重放/参数改写，而且「消耗事实」
+ * 本身是审计证据；不消耗的 observe 会把两类事实都变成看不见。
+ *
+ * @param {object} handlerOptions 拦截器透传的选项（含 executionAdmission）
+ * @returns {{ ok: boolean, mode: 'enforce'|'observe', reason: string, detail?: object, tokenHash?: string }}
+ */
+function consumeExecutionAdmission(handlerOptions) {
+  const admission = handlerOptions && handlerOptions.executionAdmission;
+  const mode = admission && admission.enforcement === 'enforce' ? 'enforce' : 'observe';
+  if (admission && admission.issuanceFailed) {
+    // 签发点已如实标记「这次没有凭据」：不得退化成 missing 把原因抹平。
+    return {
+      ok: mode === 'observe',
+      mode,
+      reason: admission.reasonCode || 'execution_admission_issue_failed',
+      detail: admission.detail ? { detail: admission.detail } : undefined,
+    };
+  }
+  if (!admission || !admission.token) {
+    return { ok: mode === 'observe', mode, reason: 'execution_admission_missing' };
+  }
+  const decision = verifyAndConsumeExecutionToken({
+    token: admission.token,
+    expect: admission.expect,
+  });
+  if (decision.ok) {
+    return { ok: true, mode, reason: 'execution_admission_consumed', tokenHash: decision.tokenHash };
+  }
+  return { ok: mode === 'observe', mode, reason: decision.reason, detail: decision.detail };
 }
 
 /** observe 模式辅助：只判定不消耗（enforcement 关闭时的同构判定面）。 */
@@ -108,6 +155,7 @@ module.exports = {
   issueExecutionToken,
   verifyAndConsumeExecutionToken,
   inspectExecutionToken,
+  consumeExecutionAdmission,
   TOKEN_VERSION,
   DEFAULT_TTL_MS,
   _resetConsumedNonces,

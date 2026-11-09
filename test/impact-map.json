@@ -1935,6 +1935,34 @@
       "classifiesScripts": false
     },
     {
+      "id": "post-s7-execution-truth",
+      "note": "post-S7 H1 执行准入与数据真相：execution-admission 内核 + 拦截器签发点 + workspace_exec 执行边界消费 + zip 条目级校验 + delivery manifest 链三态 + 知识空间删空间显式掉绑。改任一处即跑两族负测（生产路径四类拒绝 / 解压四道闸）。",
+      "patterns": [
+        "core/shared-backend/execution-admission.js",
+        "core/shared-backend/delivery-manifest.js",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "core/petri-server/helpers/knowledge-space.js",
+        "src/plugin/zip.js",
+        "test/block386-execution-admission.test.mjs",
+        "test/block386-zip-guard.test.mjs",
+        "test/block386-chain-inventory.test.mjs",
+        "scripts/verify-artifact-chain.mjs"
+      ],
+      "tests": [
+        "test/block386-execution-admission.test.mjs",
+        "test/block386-zip-guard.test.mjs",
+        "test/block386-chain-inventory.test.mjs",
+        "test/nso-s2-execution-admission.test.mjs",
+        "test/nso-s2-delivery-manifest.test.mjs",
+        "test/delivery-manifest.test.mjs",
+        "test/knowledge-space.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "post-s7-acceptance",
       "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
       "patterns": [

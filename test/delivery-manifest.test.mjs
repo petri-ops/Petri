@@ -81,3 +81,28 @@ test('HRT-5 never presents blocked truth or failed Job as successful delivery', 
   assert.ok(blocked.unresolved.some((item) => item.code === 'delivery_blocked'));
   assert.throws(() => writeDeliveryManifest({ manifest: blocked, outputPath: join(tmpdir(), 'outside.json'), projectRoot: root }), /outside_project/);
 });
+
+// POST-S7 H1/B-06——上一份 manifest 损坏不得静默新起一条链。
+// 旧行为：空 catch 令 prev=null，调用方看不出断链；新行为：chainStatus=broken + reasonCode。
+test('HRT-5 前序 manifest 损坏 → chainStatus=broken，不静默新起', () => {
+  const manifest = createDeliveryManifest({ taskRecord, job: jobWith('valid'), projectRoot: root });
+  const outputPath = join(root, 'results/jobs/tj_1/output/delivery-manifest-broken.json');
+  const first = writeDeliveryManifest({ manifest, outputPath, projectRoot: root });
+  assert.equal(first.chainStatus, 'started');
+  assert.equal(first.prevManifestHash, null);
+
+  writeFileSync(outputPath, '{ not json');
+  const second = writeDeliveryManifest({ manifest: createDeliveryManifest({ taskRecord, job: jobWith('valid'), projectRoot: root }), outputPath, projectRoot: root });
+  assert.equal(second.chainStatus, 'broken');
+  assert.equal(second.reasonCode, 'manifest_chain_broken');
+  assert.equal(second.prevManifestHash, null);
+});
+
+test('HRT-5 前序 manifest 完好 → chainStatus=linked 且 prevManifestHash 接上', () => {
+  const outputPath = join(root, 'results/jobs/tj_1/output/delivery-manifest-linked.json');
+  const first = writeDeliveryManifest({ manifest: createDeliveryManifest({ taskRecord, job: jobWith('valid'), projectRoot: root }), outputPath, projectRoot: root });
+  const second = writeDeliveryManifest({ manifest: createDeliveryManifest({ taskRecord, job: jobWith('valid'), projectRoot: root }), outputPath, projectRoot: root });
+  assert.equal(second.chainStatus, 'linked');
+  assert.equal(second.prevManifestHash, first.manifestHash);
+  assert.equal(second.reasonCode, undefined);
+});

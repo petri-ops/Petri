@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "kind": "artifact-chain-legacy-unhashed-inventory",
+  "generatedAt": "2026-11-09T11:28:10.684Z",
+  "dbPath": "/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data/petri.db",
+  "projectFilter": null,
+  "totalRevisions": 118,
+  "hashedRevisions": 118,
+  "legacyUnhashedCount": 0,
+  "legacyUnhashed": []
+}

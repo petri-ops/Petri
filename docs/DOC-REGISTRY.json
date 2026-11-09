@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 517,
+    "documentCount": 519,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 500
+    "managedMarkdown": 502
   },
   "documents": [
     {
@@ -234,6 +234,43 @@
         "trusted-baseline"
       ],
       "notes": "post-S7 蓝图 H0 承载包（用户 2026-11-09 预授权连续工作）：state 两层语义显式化 / 影响图重复 id fail-closed + 第一批未映射消亡（145→138）/ 三段分片逐件归因 / canonical 对账（POST-NSO→completed、backlog 349–354、roadmap+handoff）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-386",
+      "capability": "block-386-post-s7-h1-execution-truth",
+      "path": "docs/block-386-post-s7-h1-execution-truth-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-386-post-s7-h1-execution-truth",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "post-s7",
+        "h1",
+        "security",
+        "data-truth"
+      ],
+      "notes": "post-S7 蓝图 H1 承载包：执行准入闭环（workspace_exec 出示并消耗一次性凭据，四类拒绝生产路径负测）/ 签发失败显式降级 / 删空间掉绑不依赖 FK / zip 条目级四道闸 / manifest 链三态 / 链校验默认 strict + 存量清单。ADMISSION 拨硬与 FK 全量切换维持缓（U 类材料在册）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-S7-H1-ADMISSION-FK-DECISION-MATERIAL",
+      "capability": "post-s7-h1-admission-fk-decision-material",
+      "path": "docs/post-s7-h1-admission-fk-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-386-post-s7-h1-execution-truth-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "REFERENCE",
+      "tags": [
+        "post-s7",
+        "h1",
+        "decision-material",
+        "user-ruling"
+      ],
+      "notes": "H1 两个 U 类裁决点的一页决策材料（执行准入默认档 / SQLite 外键全量切换）：现状、候选、风险、推荐、复跑证据。未裁决前维持 observe 与 FK=OFF。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",

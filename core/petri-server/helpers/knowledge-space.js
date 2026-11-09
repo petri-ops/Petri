@@ -743,6 +743,11 @@ function deleteSpaceCascade(spaceId) {
     }
     sqlite.prepare('DELETE FROM knowledge_chunks WHERE space_id = ?').run(spaceId);
     sqlite.prepare('DELETE FROM knowledge_documents WHERE space_id = ?').run(spaceId);
+    // POST-S7 H1/B-05——绑定行必须显式删除，不得依赖 FK CASCADE。
+    // 后端连接当前 foreign_keys=OFF（BLOCK-372/BLOCK-384 裁决维持缓），CASCADE 不生效 →
+    // 删空间后 knowledge_space_bindings 留悬挂绑定，会话仍「绑」一个不存在的空间。
+    // 显式删除在 FK=ON 与 FK=OFF 两种形态下行为一致（FK=ON 时 CASCADE 已成空操作）。
+    sqlite.prepare('DELETE FROM knowledge_space_bindings WHERE space_id = ?').run(spaceId);
     sqlite.prepare('DELETE FROM knowledge_spaces WHERE id = ?').run(spaceId);
   });
   tx();

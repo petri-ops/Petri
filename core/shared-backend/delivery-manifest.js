@@ -156,20 +156,41 @@ function writeDeliveryManifest({ manifest, outputPath, projectRoot } = {}) {
   // BLOCK-377（S2 / G-10）——manifest 链：写盘前读取同路径上一份 manifest 的
   // manifestHash 作 prevManifestHash（首份为 null），重算本份 manifestHash 后落盘。
   // 导出包哈希链可独立复算（篡改/乱序可见）。
+  // POST-S7 H1/B-06——上一份损坏**不得静默新起一条链**：空 catch 会让 prev=null 且调用方
+  // 看不出「链在这里断了」。改为显式三态：linked（前序哈希接上）/ started（首份，无前序）/
+  // broken（前序存在但不可解析或缺 manifestHash），并把原因码回传给调用方落审计。
   let prevManifestHash = null;
-  try {
-    if (fs.existsSync(outputPath)) {
+  let chainStatus = 'started';
+  let chainBrokenReason = null;
+  if (fs.existsSync(outputPath)) {
+    try {
       const previous = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-      if (previous && typeof previous.manifestHash === 'string') prevManifestHash = previous.manifestHash;
+      if (previous && typeof previous.manifestHash === 'string') {
+        prevManifestHash = previous.manifestHash;
+        chainStatus = 'linked';
+      } else {
+        chainStatus = 'broken';
+        chainBrokenReason = 'manifest_chain_broken';
+      }
+    } catch {
+      chainStatus = 'broken';
+      chainBrokenReason = 'manifest_chain_broken';
     }
-  } catch { /* 上一份损坏=prev 取 null，链在本书新起（损坏事实已由读取方对账） */ }
+  }
   const { manifestHash: _stale, ...manifestBody } = manifest;
   const manifestWithPrev = { ...manifestBody, prevManifestHash };
   const manifestHash = crypto.createHash('sha256').update(stableStringify(manifestWithPrev)).digest('hex');
   const finalManifest = { ...manifestWithPrev, manifestHash };
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(finalManifest, null, 2));
-  return { outputPath: path.resolve(outputPath), relativePath: relative, manifestHash, prevManifestHash };
+  return {
+    outputPath: path.resolve(outputPath),
+    relativePath: relative,
+    manifestHash,
+    prevManifestHash,
+    chainStatus,
+    ...(chainBrokenReason ? { reasonCode: chainBrokenReason } : {}),
+  };
 }
 
 module.exports = { DELIVERY_MANIFEST_VERSION, DELIVERY_STATUSES, relativeInside, artifactReproducibility, requirementCoverage, createDeliveryManifest, writeDeliveryManifest };

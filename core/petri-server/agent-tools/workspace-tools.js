@@ -89,6 +89,9 @@ const {
   withRiskVisibility,
 } = require('./workspace-tools/internals');
 
+// POST-S7 H1/B-04——执行边界消费一次性准入凭据（纯决策，不做 IO）。
+const { consumeExecutionAdmission } = require('../../shared-backend/execution-admission');
+
 function createWorkspaceTools(options = {}) {
   const dbProvider = options.dbProvider || (() => require('../db'));
   const targetLocks = new Map();
@@ -903,6 +906,25 @@ function createWorkspaceTools(options = {}) {
     if (ctx.accessMode !== 'full' && ctx.accessMode !== 'workspace-write') {
       return errorResult('access_mode_read_only', '聊天当前处于只读模式，禁止执行命令');
     }
+    // POST-S7 H1/B-04——执行边界出示并消耗一次性准入凭据（策略判定 → 真正执行的唯一焊点）。
+    // 缺省 observe：判定结果原样透出（consumed / missing / 各类拒绝）供审计，不改变既有
+    // 「workspace_exec 默认放行」用户裁决；PETRI_EXEC_ADMISSION=1 时缺失或无效即拒绝执行。
+    const admission = consumeExecutionAdmission(handlerOptions);
+    if (!admission.ok) {
+      return errorResult(
+        'execution_admission_denied',
+        `执行准入拒绝：${admission.reason}（PETRI_EXEC_ADMISSION=enforce）`,
+        { executionAdmission: { mode: admission.mode, reason: admission.reason } }
+      );
+    }
+    const result = await executeCommandInner(args, ctx, handlerOptions);
+    if (result && typeof result === 'object') {
+      result.executionAdmission = { mode: admission.mode, reason: admission.reason };
+    }
+    return result;
+  }
+
+  async function executeCommandInner(args = {}, ctx = {}, handlerOptions = {}) {
     const rawCommand = String(args.command || '').trim();
     const verdict = commandVerdict(rawCommand, { execToken: handlerOptions && handlerOptions.execToken });
     if (!verdict.ok) return errorResult('command_blocked', verdict.reason);

@@ -97,16 +97,22 @@ test('S2-G09 篡改负测：改 DB 行 output_hash → 校验器 exit 1', () => 
   }
 });
 
-test('S2-G09 legacy 分流：链字段全空存量行不判红；--strict 判红', () => {
+// POST-S7 H1/B-06——契约翻转：legacy_unhashed 由「登记不判红」改为**默认判红**，
+// 容忍旧库必须显式 --allow-legacy 并在调用点留因（存量清单先行走 --inventory）；--strict 为兼容别名。
+test('S2-G09 legacy 分流：默认判红；--allow-legacy 才登记不判红', () => {
   const fx = buildFixture();
   try {
     fx.insert('fam', 1, 'hash-A');
     fx.db.prepare("UPDATE artifact_revisions SET chain_hash=NULL, prev_chain_hash=NULL WHERE revision_id='rev_fam_1'").run();
-    const ok = spawnSync(process.execPath, [path.join(ROOT, 'scripts/verify-artifact-chain.mjs'), path.join(fx.dir, 't.db')], { encoding: 'utf8' });
-    assert.equal(ok.status, 0, 'legacy_unhashed 存量=登记不判红');
-    assert.match(ok.stdout, /legacy_unhashed：1/);
+    const byDefault = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'verify-artifact-chain.mjs'), path.join(fx.dir, 't.db')], { encoding: 'utf8' });
+    assert.equal(byDefault.status, 1, '默认即 strict：legacy 未回填判红');
+    assert.match(byDefault.stderr, /legacy_unhashed/);
+    const tolerated = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'verify-artifact-chain.mjs'), path.join(fx.dir, 't.db'), '--allow-legacy'], { encoding: 'utf8' });
+    assert.equal(tolerated.status, 0, '显式 --allow-legacy 才回退到登记不判红');
+    assert.match(tolerated.stdout, /legacy_unhashed：1/);
+    assert.match(tolerated.stdout, /allow-legacy 显式降级/);
     const strict = spawnSync(process.execPath, [path.join(ROOT, 'scripts/verify-artifact-chain.mjs'), path.join(fx.dir, 't.db'), '--strict'], { encoding: 'utf8' });
-    assert.equal(strict.status, 1, '--strict 时 legacy 未回填判红');
+    assert.equal(strict.status, 1, '--strict 兼容别名仍判红');
   } finally {
     fx.db.close();
     fs.rmSync(fx.dir, { recursive: true, force: true });
