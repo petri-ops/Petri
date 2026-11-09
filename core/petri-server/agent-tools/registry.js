@@ -131,7 +131,7 @@ const {
 } = require('./spawn-agent-tools');
 const { spawn_agent, list_agents, wait_agent, read_agent_journal } = require('./spawn-agent-tools');
 
-const CONTRACT_VERSION = '1.0.0';
+const { TOOL_CONTRACT_VERSION: CONTRACT_VERSION } = require('../../shared-backend/schema-versions');
 const RISK_TIERS = Object.freeze(['R0', 'R1', 'R2', 'R3']);
 const RISK_TIER_SET = new Set(RISK_TIERS);
 const CATEGORIES = new Set([

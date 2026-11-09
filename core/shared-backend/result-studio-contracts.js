@@ -30,7 +30,7 @@ const crypto = require('crypto');
 const path = require('path');
 const { stableStringify } = require('./canonical-json');
 
-const RESULT_STUDIO_CONTRACT_VERSION = 1;
+const { RESULT_STUDIO_CONTRACT_VERSION } = require('./schema-versions');
 
 /** ChangeSet 生命周期。与计划 §6.4 一致。 */
 const CHANGE_SET_STATUSES = Object.freeze([

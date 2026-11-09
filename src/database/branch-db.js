@@ -32,12 +32,16 @@ function getDatabase() {
  * @returns {string}
  */
 function getDatabasePath() {
-  const path = require('path');
-  const dataDir = process.env.PETRI_LOCAL_DATA_DIR;
-  if (!dataDir) {
+  // POST-S7 H4/B-19——路径解析单源：本函数先前自行拼 `PETRI_LOCAL_DATA_DIR/petri.db`
+  // 且**不认 `PETRI_DB_PATH`**，与 core/shared-backend/db-connection-policy.js 的
+  // resolveDbPath 形成两套入口（同一次运行里两个消费者可能指向不同文件）。
+  // 现直接委托单源；两者都未设置时保持原有 fail-fast 语义（抛错，不静默落盘到别处）。
+  const { resolveDbPath } = require('../../core/shared-backend/db-connection-policy');
+  const resolved = resolveDbPath(process.env);
+  if (!resolved) {
     throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');
   }
-  return path.join(dataDir, 'petri.db');
+  return resolved;
 }
 
 /**

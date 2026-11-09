@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ARTIFACT_TRUTH_VERSION = 1;
+const { ARTIFACT_TRUTH_VERSION } = require('../../shared-backend/schema-versions');
 const STAGED_INPUT_EXCLUSION_POLICY = 'server_staged_inputs_v1';
 const SHA256_BUFFER_BYTES = 1024 * 1024;
 const INTERNAL_FILES = new Set([

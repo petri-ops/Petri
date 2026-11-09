@@ -1986,6 +1986,30 @@
       "scriptRole": "gate"
     },
     {
+      "id": "post-s7-single-source",
+      "note": "post-S7 H4 单源收编：schema/契约版本统一登记处 + DB 路径解析单源（branch-db 委托 resolveDbPath）。改任一处即跑两族契约（版本一致/路径三态）。",
+      "patterns": [
+        "core/shared-backend/schema-versions.js",
+        "core/shared-backend/result-studio-contracts.js",
+        "core/shared-backend/delivery-manifest.js",
+        "core/petri-server/helpers/artifact-truth.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-execution.js",
+        "core/petri-server/agent-tools/plugin-loader.js",
+        "src/database/branch-db.js",
+        "core/shared-backend/db-connection-policy.js"
+      ],
+      "tests": [
+        "test/block389-version-single-source.test.mjs",
+        "test/block389-db-path-single-source.test.mjs",
+        "test/nso-w2-db-single-source.test.mjs",
+        "test/db-singleton.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "post-s7-acceptance",
       "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
       "patterns": [

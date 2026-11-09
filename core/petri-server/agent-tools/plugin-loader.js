@@ -19,7 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_PLUGIN_DIR = path.join(__dirname, 'plugins');
-const CONTRACT_VERSION = '1.0.0';
+const { TOOL_CONTRACT_VERSION: CONTRACT_VERSION } = require('../../shared-backend/schema-versions');
 const DEFAULT_CATEGORY = 'workspace';
 const DEFAULT_SIDE_EFFECT = 'none';
 const DEFAULT_RISK_TIER = 'R1';

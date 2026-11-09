@@ -6,7 +6,7 @@ const { interceptAgentToolCall } = require('./agent-tool-interceptor');
 const { getToolContract } = require('./registry');
 const { toolTraceStore } = require('./tool-trace-store');
 
-const TOOL_RESULT_CONTRACT_VERSION = '1.0.0';
+const { TOOL_CONTRACT_VERSION: TOOL_RESULT_CONTRACT_VERSION } = require('../../shared-backend/schema-versions');
 const MODEL_RESULT_LIMIT = 6000;
 const MODEL_LIST_LIMIT = 40;
 const MODEL_SEARCH_LIMIT = 12;

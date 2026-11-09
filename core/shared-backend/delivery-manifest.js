@@ -6,7 +6,7 @@ const path = require('path');
 const { stableStringify } = require('./canonical-json');
 const { buildTruthProjection } = require('./g0-truth-projection');
 
-const DELIVERY_MANIFEST_VERSION = 1;
+const { DELIVERY_MANIFEST_VERSION } = require('./schema-versions');
 const DELIVERY_STATUSES = Object.freeze(['valid', 'degraded', 'blocked']);
 
 function parseJson(value, fallback = {}) {

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 521,
+    "documentCount": 522,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 504
+    "managedMarkdown": 505
   },
   "documents": [
     {
@@ -309,6 +309,25 @@
         "ui-ledger"
       ],
       "notes": "post-S7 蓝图 H3 承载包 completed（可机械验证子集）：台账状态否定语境修正（不标 verified 不再计 verified）+ 债棘轮改分桶+总债双守 / 分屏 handle ARIA separator→slider（值域+valuetext+键盘断言）。DOM 预算 / 树 roving tabindex / 布局单源 / 颜色 token / 32 条 debt 终态化 = 实机量测后才能动，逐项挂起并带量测方案。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-389",
+      "capability": "block-389-post-s7-h4-single-source",
+      "path": "docs/block-389-post-s7-h4-single-source-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-389-post-s7-h4-single-source",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h4",
+        "single-source",
+        "maintainability"
+      ],
+      "notes": "post-S7 蓝图 H4 承载包 completed（可机械验证子集）：schema/契约版本单一登记处（六处字面量收编，intent 域保持独立）/ DB 路径解析单源（branch-db 委托 resolveDbPath 认 PETRI_DB_PATH）。大拆片（W5b 一切片一会话）/插件源三处/环与依赖/源码扫描契约=结构性重构，逐项挂起并写补腿条件。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
