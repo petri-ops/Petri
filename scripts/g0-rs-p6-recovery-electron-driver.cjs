@@ -202,6 +202,28 @@ function lifecycleExpression(expectedState = null) {
           rawInternalId: /\\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\\b/.test(publicText),
         },
       };
+        publicProjectionHits: (() => {
+          // BLOCK-384 诊断——与审计同一执行帧采集命中 id 及所在元素（转瞬即逝文本
+          // 事后 dump 会消失，run-2 实证）
+          const re = /\\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\\b/g;
+          const hits = [];
+          let match;
+          while ((match = re.exec(publicText)) !== null && hits.length < 8) {
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let node;
+            let where = 'NOT-IN-TEXT-NODE';
+            while ((node = walker.nextNode())) {
+              if (node.textContent.includes(match[0])) {
+                const el = node.parentElement;
+                where = (el.closest('[aria-label]') && el.closest('[aria-label]').getAttribute('aria-label'))
+                  || (el.tagName + '.' + String(el.className).slice(0, 44));
+                break;
+              }
+            }
+            hits.push(match[0].slice(0, 30) + ' @ ' + where);
+          }
+          return hits;
+        })(),
     })()
   `;
 }
@@ -267,6 +289,37 @@ function rendererStateExpression() {
   `;
 }
 
+// BLOCK-384——compare 激活+读 lifecycle 合一循环：BLOCK-334 后恢复控制住在
+// 结果画布 compare 模式（ResultArtifactShell mode==='compare'），且 surface 的
+// 模式切换 nav 随内容水合晚到——单次点击会竞态失败。此循环到点前反复
+// 「点审查修改 → 读 lifecycle」，等价于原 waitFor 语义（超时抛 timeout:label）。
+async function waitForLifecycle(webContents, expectedState) {
+  const deadline = Date.now() + WAIT_MS;
+  let last = null;
+  let lastClick = 0;
+  while (Date.now() < deadline) {
+    try {
+      const now = Date.now();
+      if (now - lastClick >= 600) {
+        lastClick = now;
+        const currentMode = await webContents.executeJavaScript(`(() => {
+          const canvas = document.querySelector('[aria-label="结果主画布"]');
+          return canvas ? (canvas.getAttribute('data-mode') || 'result') : null;
+        })()`, true);
+        if (currentMode !== 'compare') {
+          await activateCompareMode(webContents);
+        }
+      }
+      last = await webContents.executeJavaScript(lifecycleExpression(expectedState), true);
+      if (last) return last;
+    } catch (error) {
+      last = error?.message || String(error);
+    }
+    await pause(250);
+  }
+  throw new Error(`timeout:lifecycle_${expectedState}:${JSON.stringify(last)}`);
+}
+
 async function readLifecycle(webContents, expectedState) {
   const raw = await waitFor(
     webContents,
@@ -292,8 +345,26 @@ async function captureVisual(window, config, label) {
   };
 }
 
-async function clickRecovery(webContents) {
+// BLOCK-384 契约追新：BLOCK-334 结果宿主统一后，版本/变更面板（含恢复控制）
+// 在结果画布 compare 模式下挂载（ResultArtifactShell mode==='compare'）——
+// 中央常驻面板已退役。读 lifecycle / 点恢复前先激活审查修改模式。
+async function activateCompareMode(webContents) {
   return webContents.executeJavaScript(`
+    (() => {
+      const nav = document.querySelector('[aria-label="结果视图"]');
+      const button = nav && [...nav.querySelectorAll('button')]
+        .find((item) => (item.textContent || '').trim() === '审查修改');
+      if (!button) return false;
+      button.click();
+      return true;
+    })()
+  `, true);
+}
+
+async function clickRecovery(webContents) {
+  // BLOCK-384——点击前先激活 compare（nav 晚到竞态同源）
+  await activateCompareMode(webContents);
+  const first = await webContents.executeJavaScript(`
     (() => {
       const panel = document.querySelector('[aria-label="Result Studio 版本与变更"]');
       const lifecycle = panel && [...panel.children]
@@ -367,20 +438,25 @@ async function run() {
     stage = 'load_project';
     await window.loadURL(targetUrl(config));
     await waitFor(window.webContents,
-      `Boolean(document.querySelector('[aria-label="Result Studio 版本与变更"]'))`,
-      'result_studio_panel');
+      `Boolean((() => {
+        const canvas = document.querySelector('[aria-label="结果主画布"]');
+        return canvas
+          && canvas.getAttribute('data-mode') === 'result'
+          && ((canvas.querySelector('.canvasBody, [class*="canvasBody"]')?.children.length ?? 0) > 0);
+      })())`,
+      'result_canvas_rendered');
     await dismissOnboarding(window.webContents);
 
     let before = null;
     let after = null;
     if (config.phase === 'active-crash') {
       stage = 'inspect_active_operation_before_crash';
-      before = await readLifecycle(window.webContents, 'ready');
+      before = await waitForLifecycle(window.webContents, 'ready');
       before.visual = await captureVisual(window, config, 'active-before-crash');
       before.recoveryControlAbsent = before.recoveryControlPresent === false;
     } else if (config.phase === 'recover') {
       stage = 'inspect_interrupted_lifecycle';
-      before = await readLifecycle(window.webContents, 'recovery_available');
+      before = await waitForLifecycle(window.webContents, 'recovery_available');
       before.visual = await captureVisual(window, config, 'before-recovery');
 
       stage = 'click_recovery';
@@ -388,14 +464,14 @@ async function run() {
       if (!clicked) throw new Error('recovery_control_not_clickable');
 
       stage = 'wait_recovered_lifecycle';
-      after = await readLifecycle(window.webContents, 'ready');
+      after = await waitForLifecycle(window.webContents, 'ready');
       after.visual = await captureVisual(window, config, 'after-recovery');
       after.recoveryControlAbsent = after.recoveryControlPresent === false;
     } else {
       stage = 'inspect_reopened_lifecycle';
-      before = await readLifecycle(window.webContents, 'ready');
+      before = await waitForLifecycle(window.webContents, 'ready');
       await pause(750);
-      after = await readLifecycle(window.webContents, 'ready');
+      after = await waitForLifecycle(window.webContents, 'ready');
       after.visual = await captureVisual(window, config, 'reopened-ready');
       after.recoveryControlAbsent = after.recoveryControlPresent === false;
     }
@@ -403,6 +479,39 @@ async function run() {
     const publicProjectionClean = [before, after].filter(Boolean).every((snapshot) => (
       Object.values(snapshot.publicProjectionAudit).every((value) => value === false)
     ));
+    // BLOCK-384 诊断——语义失败时如实打印脏位+命中 id 及所在元素，加速归因
+    if (!publicProjectionClean) {
+      for (const [label, snapshot] of [['before', before], ['after', after]]) {
+        if (snapshot && Object.values(snapshot.publicProjectionAudit).some((value) => value !== false)) {
+          console.error(`projection-audit-dirty:${label}:${JSON.stringify(snapshot.publicProjectionAudit)}`);
+          if (snapshot.publicProjectionAudit.rawInternalId === true) {
+            const dump = await window.webContents.executeJavaScript(`
+              (() => {
+                const re = /\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\b/g;
+                const text = document.body.innerText || '';
+                const out = [];
+                let m;
+                while ((m = re.exec(text)) !== null && out.length < 10) {
+                  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+                  let node;
+                  let where = 'NOT-FOUND';
+                  while ((node = walker.nextNode())) {
+                    if (node.textContent.includes(m[0])) {
+                      const el = node.parentElement;
+                      where = (el.closest('[aria-label]')?.getAttribute('aria-label') || el.tagName + '.' + String(el.className).slice(0, 40));
+                      break;
+                    }
+                  }
+                  out.push(m[0].slice(0, 26) + ' @ ' + where);
+                }
+                return out;
+              })()
+            `, true);
+            console.error(`projection-audit-hits:${label}:${JSON.stringify(dump)}`);
+          }
+        }
+      }
+    }
     const phasePassed = config.phase === 'active-crash'
       ? before.lifecycleState === 'ready'
         && before.activeOperationExplained

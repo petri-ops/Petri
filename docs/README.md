@@ -1,3 +1,5 @@
+380. [block-384-sibling-pack-clearance-plan.md](./block-384-sibling-pack-clearance-plan.md) — 2026-11-09 **completed（兄弟仓清偿批）**：C-46① deseq2.R paste0 + C-49 三插件 golden 重锚 + C-46② resultSurface 回流（SDK 3/3 + p4r 族 21/21）；P6 recovery electron 腿竞态→专项；FK=ON 与 ADMISSION 维持缓
+380. [block-384-sibling-pack-clearance-plan.md](./block-384-sibling-pack-clearance-plan.md) — 2026-11-09 **active（兄弟仓清偿批）**：deseq2.R paste0 语法修复 + deseq2/go-kegg/volcano-plot 三插件 golden fixture sourceScriptSha256 重锚（纯脚本漂移，契约摘要未动）；FK=ON 与 ADMISSION 拨硬维持缓（理由在册）；清偿后解锁 P6 重算与 p4r 域残红
 379. [block-383-post-nso-live-legs-batch-plan.md](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **completed（实机腿批）**：UI-697~701 实机腿 8/8（UI-700/701→verified）/perf 连续 5×5 全绿/P6 挂起根因=新 C-49（兄弟仓 golden fixture 漂移）/任务套件 0/8 全为环境因如实挂起
 379. [`block-383-post-nso-live-legs-batch-plan.md`](./block-383-post-nso-live-legs-batch-plan.md) — 2026-11-08 **active（实机腿批）**：block-382 待人工清单第一波——P6 重算/perf 连续 5 次全绿/UI-697~701 实机取证/8 任务套件×3+T7；AX 会话健康前置已确认（block48 10/11）；humanEye 不代答
 
