@@ -1,6 +1,6 @@
 ---
 capability: block-386-post-s7-h1-execution-truth
-status: active
+status: completed
 goal: 把「策略判定」与「真正执行」焊成一条可审计闭环，并让产物链与不可信输入只有一份 fail-closed 真相——同时不撤销任何既有用户裁决（FK=ON 维持缓 / ADMISSION 拨硬维持缓 / MCP 两轴分离 / workspace_exec 默认放行）。
 acceptance:
   - workspace_exec 执行边界出示并消耗一次性准入凭据；四类拒绝（过期/重放/指纹改写/上下文改写）在生产路径有可复跑负测
@@ -59,3 +59,32 @@ reopen: 用户裁决 ADMISSION 拨硬或 FK 全量切换；ssh-direct-runner / t
 ## 6. 完成语义
 
 `completed` 需：生产路径四类拒绝负测绿、zip 四道闸真实负测绿、删空间掉绑绿、链三态绿、默认 strict 绿且有存量清单、U 类材料在册、门禁全绿且未放宽任何基线。
+
+---
+
+## 7. 收口（2026-11-09）
+
+| 项 | 终态 | 证据 |
+| --- | --- | --- |
+| B-04 准入闭环（workspace_exec） | ✅ | 签发点写 `expect`（task/指纹/上下文快照）→ 执行边界 `consumeExecutionAdmission` 真实消耗 → 结果透出 `executionAdmission{mode,reason}`；生产路径四类拒绝（过期/重放/指纹改写/上下文改写）+ observe 两态 + 签发失败显式降级 = 9/9 绿（`test/block386-execution-admission.test.mjs`） |
+| B-04 签发失败静默 | ✅ | 空 catch 改 `issuanceFailed + reasonCode`；消费端不得退化成 missing（同套 9/9 内覆盖） |
+| B-04 MCP / job / ssh 入口 | ⏸ 保留（附理由） | MCP=两轴分离用户裁决（不接）；`tools-executor`/`ssh-direct-runner` 无 handlerOptions 通道 → retain-with-reason + 补腿条件（§5） |
+| B-05 FK 分裂下的掉绑 | ✅ | `deleteSpaceCascade` 显式删 `knowledge_space_bindings`；`knowledge-space` 50/50 绿（原 G3 用例红→绿） |
+| B-05 FK 全量切换 | ⏸ 维持缓 | 用户裁决；决策材料 §二（推荐分阶段：先出依赖 CASCADE 语句清单） |
+| B-06 解压条目级校验 | ✅ | 四道闸（条目数/累计字节/符号链接/路径形态）+ 真实 zip 负测 4 条（含压缩炸弹最小形态）+ 正常包正向 1 条 = 5/5 绿（`test/block386-zip-guard.test.mjs`） |
+| B-06 manifest 断链 | ✅ | `chainStatus` 三态 + `reasonCode=manifest_chain_broken`；新增两条负测（broken/linked）= `delivery-manifest` 6/6 绿 |
+| B-06 链校验默认 strict | ✅ | 默认 strict；`--inventory` 存量清单（dev 库 118 版全哈希 / **0 legacy**）；`--allow-legacy` 显式降级；`nso-s2-chain-hash-update` 契约翻新 3/3 + `block386-chain-inventory` 3/3 |
+| 邻域回归 | ✅ | 拦截器/四种 exec/策略/链哈希/manifest 共 70/70 绿 |
+| 门禁 | ✅ | `npm run closeout` 16 门全绿（干净树，2026-11-09） |
+| 尺寸棘轮 | ✅（显式留因） | `workspace-tools.js` 1583→1605（+22 = 准入焊点 19 行 + require 3 行）；`--write` 重打至 23498 并同提交留因；既有例外（expires 2026-12-31）覆盖超预算态；回收归 H4 大拆片 |
+
+### 未闭合项
+
+| 项 | 状态 | 补腿 |
+| --- | --- | --- |
+| ADMISSION 默认档 | U 类待裁决 | 材料 §一推荐维持 observe；前置 ①②③ 未完成前 enforce 只会把工程债报成安全收益 |
+| FK 全量切换 | U 类待裁决（维持缓） | 材料 §二推荐先做「依赖 CASCADE 语句清单」静态扫描 |
+| job / 远端 job 凭据通道 | retain-with-reason | 需先定凭据载体（不新建表）+ enforce 下拒绝负测 |
+| prompt-injection 面盘点 | retain-with-reason | 只读枚举 tool_result→messages 全部装配点；**未做，不冒充已盘点** |
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

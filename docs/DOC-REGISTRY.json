@@ -240,19 +240,19 @@
       "capability": "block-386-post-s7-h1-execution-truth",
       "path": "docs/block-386-post-s7-h1-execution-truth-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-386-post-s7-h1-execution-truth",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "post-s7",
         "h1",
         "security",
         "data-truth"
       ],
-      "notes": "post-S7 蓝图 H1 承载包：执行准入闭环（workspace_exec 出示并消耗一次性凭据，四类拒绝生产路径负测）/ 签发失败显式降级 / 删空间掉绑不依赖 FK / zip 条目级四道闸 / manifest 链三态 / 链校验默认 strict + 存量清单。ADMISSION 拨硬与 FK 全量切换维持缓（U 类材料在册）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "post-S7 蓝图 H1 承载包 completed：执行准入闭环焊接（workspace_exec 出示并消耗凭据，四类拒绝生产路径负测 9/9）/ 签发失败显式降级 / 删空间掉绑不依赖 FK（knowledge-space 50/50）/ zip 四道闸 5/5 / manifest 链三态 6/6 / 链校验默认 strict + 存量清单（118 版·0 legacy）。ADMISSION 拨硬与 FK 全量切换维持缓（U 类材料=post-s7-h1-admission-fk-decision-material）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-S7-H1-ADMISSION-FK-DECISION-MATERIAL",
