@@ -34,7 +34,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const STATUS_RE = /\b(verified|in_progress|cancelled|superseded)\b/g;
 const DEP_RE = /(随|依赖|前提|待补|阻塞|blocked)\s*(UI-\d+[a-z]?)/g;
-const EXTERNAL_RE = /(需用户裁决|需裁决|G1\+|packaged|Provider|未装|无 key|真实 key|待发令|真实数据|真实环境|异常注入|IPv6|隧道)/;
+// POST-S7 H2——外因关键词必须按**独立词**匹配：此前裸 `Provider` 会命中组件名
+// `ToastProvider`，把纯前端 UI 条目误判成「外因受阻」（UI-702 首跑即踩到）。
+// 同一个启发式脆弱性家族见 B-12（STATUS_RE 把「按纪律不标 verified」计成 verified）。
+const EXTERNAL_RE = /(需用户裁决|需裁决|G1\+|packaged|(?<![A-Za-z])Provider(?![A-Za-z])|未装|无 key|真实 key|待发令|真实数据|真实环境|异常注入|IPv6|隧道)/;
 
 export function parseSections(text) {
   const entries = [];

@@ -24,6 +24,8 @@ const REASON_CATEGORIES = Object.freeze([
   'schema',     // 参数校验
   'autonomy',   // 放权坡道（BLOCK-323）：观察/自动放行
   'provider',   // 模型提供者/上游通信（BLOCK-338）：流式停滞等上游侧异常
+  'execution',  // 执行结果与执行准入（POST-S7 H1/H2）：run 失败、一次性凭据四类拒绝、降级态
+  'input',      // 不可信输入面（POST-S7 H1/H2）：压缩包条目级拒绝、交付链断链
 ]);
 
 const REASONS = Object.freeze({
@@ -63,6 +65,30 @@ const REASONS = Object.freeze({
     category: 'provider',
     template: '模型流式响应停滞（{phase}，{elapsedMs}ms 无有效输出），已中止本次调用。',
   },
+  // —— 执行结果与执行准入（POST-S7 H1/H2）——
+  agent_run_failed: { category: 'execution', template: '任务执行失败：{detail}' },
+  execution_admission_missing: { category: 'execution', template: '本次执行没有携带准入凭据（签发点未覆盖此调用路径）。' },
+  execution_admission_consumed: { category: 'execution', template: '准入凭据已出示并单次消耗。' },
+  execution_admission_denied: { category: 'execution', template: '执行准入拒绝：{reason}' },
+  execution_admission_issue_failed: { category: 'execution', template: '准入凭据签发失败（显式降级，不静默）：{detail}' },
+  execution_token_invalid: { category: 'execution', template: '准入凭据形态非法。' },
+  execution_token_expired: { category: 'execution', template: '准入凭据已过期（expiresAt={expiresAt}）。' },
+  execution_token_replayed: { category: 'execution', template: '准入凭据被重放（nonce={nonce}），单次语义已生效。' },
+  execution_token_task_mismatch: { category: 'execution', template: '准入凭据不属于本任务（token={tokenTaskId}，expected={expected}）。' },
+  execution_token_fingerprint_mismatch: { category: 'execution', template: '准入凭据与本次调用参数不一致（指纹被改写）。' },
+  execution_token_ctx_rewritten: { category: 'execution', template: '准入凭据与本次执行上下文不一致（上下文被改写）。' },
+  // —— 四类失败/重试事件（BLOCK-376 生产、H2 投影到 UI）——
+  compaction_failed: { category: 'data', template: '上下文压缩失败：{detail}' },
+  trim_skipped: { category: 'data', template: '上下文裁剪被跳过：{detail}' },
+  provider_retry: { category: 'provider', template: '上游调用失败正在重试（第 {attempt} 次）：{detail}' },
+  stream_stall: { category: 'provider', template: '模型流式响应停滞（{phase}）。' },
+  stream_stalled_first_token: { category: 'provider', template: '首 token 前流式停滞，已按首 token 段策略重试。' },
+  // —— 不可信输入面 ——
+  manifest_chain_broken: { category: 'input', template: '上一份交付清单损坏，链在此断开（不静默新起）。' },
+  zip_entry_limit_exceeded: { category: 'input', template: '压缩包条目数超上限（>{maxEntries}）。' },
+  zip_total_bytes_exceeded: { category: 'input', template: '压缩包累计解压体积超上限（>{maxTotalBytes} 字节）。' },
+  zip_symlink_entry_rejected: { category: 'input', template: '压缩包含符号链接条目，已拒绝（{entry}）。' },
+  zip_entry_path_invalid: { category: 'input', template: '压缩包条目路径非法（{problem}：{entry}）。' },
 });
 
 /** 渲染原因文本：{placeholder} 按 values 替换；未注册 code 走诚实的回退文本。 */

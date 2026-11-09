@@ -909,7 +909,9 @@ export function ResultArtifactShell({
         {/* BLOCK-369（F-09）降级原因上抛：不再静默。 */}
         <span>{selectedArtifact.name}</span>
         {viewerFallbackReasonCode && (
-          <span data-testid="viewer-fallback-reason" role="note">
+          // POST-S7 H2/B-13——降级原因是「用户当下必须知道为什么看不到」的状态变化，
+          // role=note 不进读屏播报队列；改 status + aria-live=polite（非错误，不抢话）。
+          <span data-testid="viewer-fallback-reason" role="status" aria-live="polite">
             {viewerFallbackReasonCode === 'preview_disabled'
               ? '该产物声明为不可预览（preview=false）'
               : '未识别的产物类型，未找到匹配的查看器'}

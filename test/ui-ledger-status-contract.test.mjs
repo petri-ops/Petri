@@ -31,7 +31,14 @@ const EVIDENCE = path.join(root, 'acceptance', 'block-332', 'ui-ledger-triage.js
 // binary 产物种子/scheduled 入口/读屏走查），上限随事实同步上调；下一步=补腿降回。
 // BLOCK-376（S1）— 新增 UI-700（SSE task.failed 结构化终态消费；pending 腿=实机失败场景
 // 走查，补腿队列归蓝图 S3 UI 台账终态化批），上限随事实同步上调 7→8。
-const DEBT_CEILING = { liveMissing: 8, blocked: 25 };
+// POST-S7 H2/B-07 — 新增 UI-702（通知历史回看 + viewer 降级 status 语义；pending 腿=历史面板
+// 层级/遮挡/暗色对比的实机取证，归 H3 实机腿批）。按 BLOCK-370/376 同一先例：上限随事实同步
+// 上调 8→9，并在 H3 补腿后降回。
+// POST-S7 H2——两件事同批：①新增 UI-702（通知历史 + viewer 降级语义；pending 腿=历史面板
+// 层级/遮挡/暗色对比实机取证，归 H3）②修外因关键词误判（裸 Provider 命中组件名 ToastProvider
+// → 4 条被误判为 blocked）。误判修复只搬桶不加债：总债 33 不变，故分桶上限按事实重贴
+// （liveMissing 8→11 / blocked 25→22），并新增**总债**上限 33 作为真正的棘轮。
+const DEBT_CEILING = { liveMissing: 11, blocked: 22, total: 33 };
 
 const report = triageLedger(fs.readFileSync(LEDGER, 'utf8'));
 
@@ -60,6 +67,9 @@ test('BLOCK-332 — 证据债只许下降（棘轮）', () => {
     report.blocked.length <= DEBT_CEILING.blocked,
     `受阻条目涨到 ${report.blocked.length}（上限 ${DEBT_CEILING.blocked}）`,
   );
+  // 分桶是启发式，真正要守的是**总债不增**（搬桶不算清偿，也不算新增）。
+  const total = report.liveMissing.length + report.blocked.length;
+  assert.ok(total <= DEBT_CEILING.total, `证据债总额涨到 ${total}（上限 ${DEBT_CEILING.total}）——新条目不得净增债`);
 });
 
 test('BLOCK-332 — 测量证据在册且与当前台账同构（不靠叙述）', () => {

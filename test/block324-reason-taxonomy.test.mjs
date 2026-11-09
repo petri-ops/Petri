@@ -90,3 +90,44 @@ test('BLOCK-324 BLOCK-323 接线：auto-allow 渲染文本含规则 id（reasonT
   const text = registry.renderReason('rule_auto_allow', { ruleId: 'r-npm' });
   assert.equal(text, '规则「r-npm」放行档自动执行，未经逐次确认。');
 });
+
+// POST-S7 H2/B-15——词表覆盖从「agent-tool-policy + 拦截器」扩到**生产面全部 reasonCode 字面量**。
+// 背景：四事件（compaction_failed / trim_skipped / provider_retry / stream_stall）、
+// agent_run_failed、stream_stalled_first_token、准入四类拒绝与输入面拒绝码此前都不在
+// 注册表里，走「未注册原因码」回退文本，用户看到的是一句「应在 reason-codes.js 注册后再用」。
+// 本测试扫 core/ 与 src/ 的 `reasonCode: 'x'` / `reasonCode = 'x'` 两种写法，未注册即红。
+function collectProductionReasonCodes(dir, out = new Set()) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === 'node_modules' || entry.name === 'dist') continue;
+    const full = resolve(dir, entry.name);
+    if (entry.isDirectory()) { collectProductionReasonCodes(full, out); continue; }
+    if (!/\.(js|mjs|cjs|ts|tsx)$/.test(entry.name)) continue;
+    const text = fs.readFileSync(full, 'utf8');
+    for (const match of text.matchAll(/reasonCode\s*[:=]\s*'([a-z0-9_]+)'/g)) out.add(match[1]);
+  }
+  return out;
+}
+
+test('POST-S7 H2：生产面每个 reasonCode 字面量都已在词表注册', () => {
+  const codes = new Set([
+    ...collectProductionReasonCodes(resolve(root, 'core')),
+    ...collectProductionReasonCodes(resolve(root, 'src')),
+  ]);
+  assert.ok(codes.size >= 5, `扫描面应覆盖生产字面量（当前 ${codes.size} 个）`);
+  const missing = [...codes].filter((code) => !registry.isRegisteredReason(code)).sort();
+  assert.deepEqual(missing, [], `未注册原因码（先注册再用）: ${missing.join(', ')}`);
+});
+
+test('POST-S7 H2：四类失败事件与执行准入拒绝码在册且可渲染', () => {
+  for (const code of [
+    'compaction_failed', 'trim_skipped', 'provider_retry', 'stream_stall',
+    'agent_run_failed', 'stream_stalled_first_token',
+    'execution_token_expired', 'execution_token_replayed',
+    'execution_token_fingerprint_mismatch', 'execution_token_ctx_rewritten',
+    'execution_admission_missing', 'execution_admission_issue_failed',
+    'manifest_chain_broken', 'zip_entry_limit_exceeded', 'zip_symlink_entry_rejected',
+  ]) {
+    assert.ok(registry.isRegisteredReason(code), `${code} 应已注册`);
+    assert.ok(!registry.renderReason(code, {}).startsWith('未注册'), `${code} 可渲染`);
+  }
+});

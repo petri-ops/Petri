@@ -18,6 +18,7 @@
  *   模型调用的「最后状态」，供前端确认弹层展示。
  */
 
+const { noStreamSubscriber } = require('../../helpers/no-stream-subscriber');
 const os = require('os');
 const path = require('path');
 const agentTaskStore = require('../../agent-task-store');
@@ -251,7 +252,7 @@ module.exports = {
           taskId: newTaskId,
           kind: 'primary',
           parentLoopRunId: null,
-          onEvent: () => {},
+          onEvent: noStreamSubscriber,
           shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(newTaskId),
         }).catch((e) => {
           try { agentTaskStore.markAgentTaskFailed(newTaskId, e && e.message ? e.message : String(e)); } catch {}

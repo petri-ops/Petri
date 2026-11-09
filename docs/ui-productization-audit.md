@@ -1,4 +1,12 @@
 # Petri Desktop UI 产品化审计台账
+
+## UI-702: 通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）
+
+- **变化面**：ToastProvider 增加有界通知历史（播报即入历史、同 (variant,message) 去重、上限 50、可展开/清空、面板 role=log）；viewport 内新增「通知历史（N）」入口，不新建第二套通知中心。ResultArtifactShell 的 viewer 降级原因由 role=note 升为 role=status + aria-live=polite（非错误不抢话，但进播报队列）。
+- **为什么这样设计**：4 秒提示对 error/warning 是「一闪而过的不可回看事实」；历史复用已播报内容，零新增投递通道。降级原因是用户当下必须知道的状态变化，role=note 不进读屏播报队列。
+- **验证（代码）**：ToastProvider 10/10（含 4 条历史：消失后仍可回看 / 去重合并 / 上限 50 / 清空）；ResultArtifactShell 4 文件 18/18；tsc 0。
+- **未做实机腿**：DOM 断言与组件测试不冒充视觉绿——历史面板的层级/遮挡、长消息换行、暗色态对比需在 H3 实机腿一并取证。
+- **边界（reopen）**：四事件前端投影（compaction_failed/trim_skipped/provider_retry/stream_stall 进轨迹面）、SSE 重连横幅、ExternalImportPanel 回看接入。
 ## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。

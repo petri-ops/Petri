@@ -13,6 +13,7 @@
  * llm-client 等拼装件）。
  */
 
+const { noStreamSubscriber } = require('../../helpers/no-stream-subscriber');
 const path = require('node:path');
 
 const express = require('express');
@@ -369,7 +370,7 @@ module.exports = {
               thinkingLevel,
               // BLOCK-155 — 真·单通道 vision：内联开关进 agent loop（loopConfig）
               visionInline,
-              onEvent: () => {},
+              onEvent: noStreamSubscriber,
               shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
             }).catch((e) => {
               try { agentTaskStore.markAgentTaskFailed(taskId, e && e.message ? e.message : String(e)); } catch {}

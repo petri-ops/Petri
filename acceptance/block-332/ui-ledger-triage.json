@@ -1,16 +1,21 @@
 {
-  "generatedAt": "2026-11-08T02:25:54.728Z",
+  "generatedAt": "2026-11-09T11:43:33.097Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 496,
-  "uniqueIds": 487,
+  "sections": 497,
+  "uniqueIds": 488,
   "counts": {
+    "live-missing": 11,
     "verified": 452,
-    "live-missing": 7,
-    "blocked": 25,
+    "blocked": 22,
     "closed": 12
   },
-  "debt": 32,
+  "debt": 33,
   "liveMissing": [
+    {
+      "id": "UI-702",
+      "deps": [],
+      "title": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）"
+    },
     {
       "id": "UI-699",
       "deps": [],
@@ -22,6 +27,11 @@
       "title": "隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **"
     },
     {
+      "id": "UI-697",
+      "deps": [],
+      "title": "viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress"
+    },
+    {
       "id": "UI-595",
       "deps": [],
       "title": "批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-"
@@ -30,6 +40,16 @@
       "id": "UI-475",
       "deps": [],
       "title": "识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；**RW-02 d"
+    },
+    {
+      "id": "UI-513",
+      "deps": [],
+      "title": "跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 "
+    },
+    {
+      "id": "UI-521",
+      "deps": [],
+      "title": "外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-"
     },
     {
       "id": "UI-522",
@@ -48,12 +68,6 @@
     }
   ],
   "blocked": [
-    {
-      "id": "UI-697",
-      "deps": [],
-      "external": true,
-      "title": "viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress"
-    },
     {
       "id": "UI-695",
       "deps": [],
@@ -175,18 +189,6 @@
       "deps": [],
       "external": true,
       "title": "隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 **cancelled（20"
-    },
-    {
-      "id": "UI-513",
-      "deps": [],
-      "external": true,
-      "title": "跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 "
-    },
-    {
-      "id": "UI-521",
-      "deps": [],
-      "external": true,
-      "title": "外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-"
     },
     {
       "id": "UI-532",

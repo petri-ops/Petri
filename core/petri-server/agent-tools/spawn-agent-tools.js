@@ -17,6 +17,7 @@
  * - 终态摘要受 token 预算截断（P2 回传协议），优先返回结构化关键字段。
  */
 
+const { noStreamSubscriber } = require('../helpers/no-stream-subscriber');
 const agentTaskStore = require('../agent-task-store');
 const agentRoles = require('./agent-roles');
 const subagentProfiles = require('../helpers/subagent-profile');
@@ -500,7 +501,7 @@ function launchSubAgent({ parentTaskId, userId, parentParams, parentContext, use
       parentLoopRunId,
       // BLOCK-93 P1 — 角色软约束注入（未传＝null＝零变化）
       roleDirective: roleDirective || null,
-      onEvent: () => {},
+      onEvent: noStreamSubscriber,
       shouldAbort: () => agentTaskStore.isAgentTaskCancellationRequested(taskId),
       // BLOCK-56 P1 单级不连环：子 agent 内禁用请求级 fallback
       disableProviderFallback: true,

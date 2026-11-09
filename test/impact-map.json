@@ -1963,6 +1963,29 @@
       ]
     },
     {
+      "id": "post-s7-failure-semantics",
+      "note": "post-S7 H2 失败态与错误语义：原因码词表扩充（四事件/执行准入/输入面）+ 静默 catch 棘轮门 + 通知历史回看 + viewer 降级 status 语义。改词表即跑 taxonomy 契约（生产面每个 reasonCode 字面量必须已注册）；改棘轮即跑其负测。",
+      "patterns": [
+        "core/petri-server/helpers/reason-codes.js",
+        "core/petri-server/helpers/no-stream-subscriber.js",
+        "scripts/silent-catch-ratchet.mjs",
+        "test/silent-catch-baseline.json",
+        "frontend/src/components/common/ToastProvider.tsx",
+        "frontend/src/components/common/ToastProvider.test.tsx",
+        "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
+        "test/block387-silent-catch-ratchet.test.mjs"
+      ],
+      "tests": [
+        "test/block324-reason-taxonomy.test.mjs",
+        "test/block387-silent-catch-ratchet.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "gate"
+    },
+    {
       "id": "post-s7-acceptance",
       "note": "post-S7 程序（H0-H7）证据树：acceptance/post-s7-2026-11-09/** 的每批证据由 test/block385-h0-evidence.test.mjs 做形状契约（门禁读数/残红归因/WIP owner 不得缺字段）。改证据形状即跑该契约，避免「未跑写成通过」类静默。",
       "patterns": [

@@ -60,3 +60,97 @@
 .dismiss:hover {
   color: var(--petri-text);
 }
+
+/* POST-S7 H2/B-07——通知历史回看区（不新建第二套通知中心：历史就是已播报 toast 的有界队列）。
+   位置在 viewport 内、toast 之上，pointer-events 只在自身开启，不挡住下方内容。 */
+.historyBar {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--petri-space-2);
+}
+
+.historyToggle {
+  border: 1px solid var(--petri-border-card);
+  background: var(--petri-bg-elevated);
+  color: var(--petri-text-secondary);
+  border-radius: var(--petri-radius-md);
+  padding: 4px 10px;
+  font-size: var(--petri-font-size-xs);
+  cursor: pointer;
+}
+
+.historyToggle:hover {
+  color: var(--petri-text);
+}
+
+.historyPanel {
+  width: min(360px, calc(100vw - 40px));
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-elevated);
+  box-shadow: var(--petri-shadow-sm);
+  padding: var(--petri-space-3);
+}
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary);
+  margin-bottom: var(--petri-space-2);
+}
+
+.historyClear {
+  border: none;
+  background: transparent;
+  color: var(--petri-info);
+  font-size: var(--petri-font-size-xs);
+  cursor: pointer;
+}
+
+.historyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historyItem {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text);
+  border-left: 3px solid var(--petri-info);
+  padding-left: 8px;
+}
+
+.historyItem[data-variant='success'] {
+  border-left-color: var(--petri-success);
+}
+.historyItem[data-variant='warning'] {
+  border-left-color: var(--petri-warning-text);
+}
+.historyItem[data-variant='error'] {
+  border-left-color: var(--petri-danger);
+}
+
+.historyVariant {
+  flex: 0 0 auto;
+  font-size: var(--petri-font-size-xs);
+  color: var(--petri-text-secondary);
+  text-transform: uppercase;
+}
+
+.historyMessage {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 519,
+    "documentCount": 520,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 502
+    "managedMarkdown": 503
   },
   "documents": [
     {
@@ -271,6 +271,25 @@
         "user-ruling"
       ],
       "notes": "H1 两个 U 类裁决点的一页决策材料（执行准入默认档 / SQLite 外键全量切换）：现状、候选、风险、推荐、复跑证据。未裁决前维持 observe 与 FK=OFF。"
+    },
+    {
+      "id": "BLOCK-387",
+      "capability": "block-387-post-s7-h2-failure-semantics",
+      "path": "docs/block-387-post-s7-h2-failure-semantics-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-387-post-s7-h2-failure-semantics",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h2",
+        "error-semantics",
+        "observability"
+      ],
+      "notes": "post-S7 蓝图 H2 承载包 completed：原因码 25→42（execution/input 两类新增）+ 生产面 reasonCode 全覆盖门 / 静默 catch 棘轮门（100 文件 403 处冻结 + 负测，入 closeout 第 6 门）/ onEvent 空回调改具名占位 / toast 有界历史回看（去重·上限 50·可清空）/ viewer 降级 status 语义。四事件前端投影与 SSE 横幅挂起归 H3。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
