@@ -11,6 +11,8 @@ import {
   buildReconciliationReport,
   checkAuditLedgerHealth,
   collectManagedMarkdown,
+  computeCoverageCounts,
+  validateCoverageCounts,
   loadDocumentRegistry,
   validateDocumentRegistry,
 } from '../scripts/docs-governance.mjs';
@@ -440,4 +442,26 @@ test('docs:check 台账健康：超保留阈/超长行 → 建议级提示不红
   await fs.rm(ledgerPath);
   const missing = await checkAuditLedgerHealth(tempRoot);
   assert.equal(missing.issues.some((item) => item.code === 'AUDIT_LOG_MISSING'), true);
+});
+
+// POST-S7 H6/B-28——根级 lastUpdated 不得与 coverage.lastUpdated 分叉。
+// 历史上根级停在 2026-11-06 而 coverage 已到 2026-11-09：两份「最后更新」互相打脸且无人报警，
+// 恢复者按根级读会把三天前的状态当现状。这里钉住校验；写入侧由 docs:coverage 单写入者同批写。
+test('POST-S7 H6 — 根级 lastUpdated 与 coverage 分叉即报警', async () => {
+  const registry = {
+    coverage: { documentCount: 1, managedMarkdown: 1, lastUpdated: '2026-11-09' },
+    lastUpdated: '2026-11-06',
+    documents: [{ path: 'docs/a.md' }],
+  };
+  const computed = computeCoverageCounts({ documents: [{}, {}] }, 2);
+  const issues = validateCoverageCounts(registry, computed);
+  const codes = issues.map((i) => i.code);
+  assert.ok(codes.includes('COVERAGE_LASTUPDATED_DRIFT'), `应报 lastUpdated 分叉，实际：${codes.join(',')}`);
+  assert.ok(codes.includes('COVERAGE_COUNT_DRIFT'));
+
+  const aligned = validateCoverageCounts(
+    { coverage: { documentCount: 2, managedMarkdown: 2, lastUpdated: '2026-11-09' }, lastUpdated: '2026-11-09' },
+    computed,
+  );
+  assert.deepEqual(aligned, []);
 });

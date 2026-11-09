@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-09（🏁 **BLOCK-390（H5 证据面）+ BLOCK-391（H6 治理台账）completed；下一包 H7/BLOCK-392**：perf 证据机器可读（5/5 全绿，带 sourceCommit/platform/command）+ AUDIT-LOG 超长行迁档（最长 10933B→2695B）+ 根级与 coverage lastUpdated 单写入者与分叉校验；五段分解/DOM 门/帧率/请求体/自然长任务=需实机取数挂起。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-389（post-S7 H4）completed（可机械验证子集）；下一包 H5/BLOCK-390**：版本单源（六处字面量收编，intent 域独立）+ DB 路径单源（认 PETRI_DB_PATH）；大拆片按 W5b 一切片一会话挂起，插件源/环/依赖/源码扫描按结构性重构挂起并写补腿条件。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-388（post-S7 H3）completed（可机械验证子集）；下一包 H4/BLOCK-389**：台账否定语境修正 + 债棘轮分桶/总债双守 + 分屏 ARIA slider；DOM 预算/树键盘/布局单源/颜色 token/32 条 debt=实机量测前置，逐项挂起并带量测方案与重开条件。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-387（post-S7 H2）completed；下一包 H3/BLOCK-388**：原因码 25→42 + 生产面 reasonCode 全覆盖门 + 静默 catch 棘轮门（100 文件 403 处冻结，入 closeout）+ onEvent 具名占位 + toast 有界历史回看 + viewer 降级 status 语义；四事件前端投影/SSE 横幅挂起归 H3。G0 开发期常态 · 不外推 packaged/Provider/GA。）

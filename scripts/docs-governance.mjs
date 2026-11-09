@@ -252,6 +252,15 @@ export function validateCoverageCounts(registry, computed) {
         `coverage.${key}=${coverage[key]} 与实际 ${computed[key]} 不一致——运行 npm run docs:coverage 重算写回。`));
     }
   }
+  // POST-S7 H6/B-28——根级 lastUpdated 与 coverage.lastUpdated 必须同源。
+  // 历史上根级留过 `2026-11-06` 而 coverage 已是 2026-11-09，两份「最后更新」互相打脸且无人报警；
+  // 恢复者按根级读会把三天前的状态当现状。docs:coverage 是唯一写入者，这里只校验不写。
+  const rootLastUpdated = registry && typeof registry.lastUpdated === 'string' ? registry.lastUpdated : null;
+  const coverageLastUpdated = coverage && typeof coverage.lastUpdated === 'string' ? coverage.lastUpdated : null;
+  if (rootLastUpdated && coverageLastUpdated && rootLastUpdated !== coverageLastUpdated) {
+    out.push(issue('COVERAGE_LASTUPDATED_DRIFT',
+      `根级 lastUpdated=${rootLastUpdated} 与 coverage.lastUpdated=${coverageLastUpdated} 不一致——运行 npm run docs:coverage 重算写回（不要手改其中一处）。`));
+  }
   return out;
 }
 
@@ -825,7 +834,11 @@ async function runCli() {
     const registry = JSON.parse(await fs.readFile(registryPath, 'utf8'));
     const managed = await collectManagedMarkdown(DEFAULT_ROOT, registry.coverage);
     const computed = computeCoverageCounts(registry, managed.length);
-    registry.coverage = { ...registry.coverage, ...computed, lastUpdated: new Date().toISOString().slice(0, 10) };
+    // POST-S7 H6/B-28——单一写入者：根级与 coverage 的 `lastUpdated` 同批写同一个值，
+    // 避免「两份最后更新互相打脸」（校验见 validateCoverageCounts 的 COVERAGE_LASTUPDATED_DRIFT）。
+    const today = new Date().toISOString().slice(0, 10);
+    registry.coverage = { ...registry.coverage, ...computed, lastUpdated: today };
+    registry.lastUpdated = today;
     if (Object.prototype.hasOwnProperty.call(registry, 'documentCount')) registry.documentCount = computed.documentCount;
     await fs.writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`, 'utf8');
     console.log(`[docs:coverage] documentCount=${computed.documentCount} managedMarkdown=${computed.managedMarkdown}`);

@@ -90,6 +90,32 @@ async function main() {
     const rows = allRows[0] ? allRows[0].rows : [];
     console.log(`[quality:perf] ${allOk ? 'PASS' : 'FAIL'}（${rows.filter((r) => r.status === 'green').length} 绿 / ${rows.filter((r) => r.status === 'red').length} 红 / ${rows.filter((r) => r.status === 'skipped').length} skip）`);
   }
+  // POST-S7 H5/B-22——perf 证据机器可读（opt-in：PETRI_PERF_EVIDENCE=<path>）。
+  // 默认不写盘：每次 closeout 都写会在干净树上制造无意义 diff；需要落证据时显式给路径，
+  // 产出带 sourceCommit / platform / command / generatedAt 的 JSON（五类证据不得互相冒充）。
+  if (process.env.PETRI_PERF_EVIDENCE) {
+    let sourceCommit = null;
+    try {
+      sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    } catch { /* 非 git 环境如实留空 */ }
+    const evidence = {
+      schemaVersion: 1,
+      kind: 'post-s7-h5-perf-evidence',
+      sourceCommit,
+      platform: process.platform + '-' + process.arch,
+      command: 'PETRI_PERF_EVIDENCE=<path> npm run quality:perf',
+      generatedAt: new Date().toISOString(),
+      samples,
+      samplesGreen: allRows.filter((row) => row.ok).length,
+      verdict: allOk ? 'pass' : 'fail',
+      rows: allRows,
+      note: '连续采样口径：任一轮红即整体红（最差轮为准）。毫秒读数不等于用户观感，DOM 节点数与帧率需 CDP 腿（H5 挂起项）。',
+    };
+    const target = path.resolve(process.env.PETRI_PERF_EVIDENCE);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, JSON.stringify(evidence, null, 2));
+    console.log(`[quality:perf] evidence -> ${target}`);
+  }
   process.exitCode = allOk ? 0 : 1;
 }
 

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 522,
+    "documentCount": 524,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 505
+    "managedMarkdown": 507
   },
   "documents": [
     {
@@ -328,6 +328,44 @@
         "maintainability"
       ],
       "notes": "post-S7 蓝图 H4 承载包 completed（可机械验证子集）：schema/契约版本单一登记处（六处字面量收编，intent 域保持独立）/ DB 路径解析单源（branch-db 委托 resolveDbPath 认 PETRI_DB_PATH）。大拆片（W5b 一切片一会话）/插件源三处/环与依赖/源码扫描契约=结构性重构，逐项挂起并写补腿条件。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-390",
+      "capability": "block-390-post-s7-h5-perf-scale",
+      "path": "docs/block-390-post-s7-h5-perf-scale-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-390-post-s7-h5-perf-scale",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h5",
+        "performance",
+        "evidence"
+      ],
+      "notes": "post-S7 蓝图 H5 承载包（证据面）completed：quality:perf 支持 PETRI_PERF_EVIDENCE 落机器可读证据（sourceCommit/platform/command/每轮 rows）；当次 5/5 全绿证据在册；负测 10/10 未削弱；三矩阵同源链复核。五段分解/DOM 门/帧率/请求体占比/自然长任务=需实机取数，逐项挂起并写取数步骤。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-391",
+      "capability": "block-391-post-s7-h6-governance-ledger",
+      "path": "docs/block-391-post-s7-h6-governance-ledger-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-391-post-s7-h6-governance-ledger",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h6",
+        "governance",
+        "ledger"
+      ],
+      "notes": "post-S7 蓝图 H6 承载包 completed：AUDIT-LOG 10933B 超长行按搬移不改写迁档（迁后最长 2695B）/ 根级与 coverage lastUpdated 单写入者同批写 + 分叉校验与负测 / canonical 对账复核无回弹 / 交接协议六批执行。B-29 历史证据元数据回填与 roll-index 入 closeout 挂起（改写历史证据=伪造，只对新产出强制）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",
