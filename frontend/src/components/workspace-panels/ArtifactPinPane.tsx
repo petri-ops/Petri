@@ -199,15 +199,19 @@ export function ArtifactPinPane({
           {children}
         </div>
       )}
+      {/* POST-S7 H3/B-10——语义纠正：这个 handle 调的是比例值（aria-valuenow/min/max
+          且方向键改数值），按 ARIA 该是 slider 而不是 separator（separator 不带值域）。
+          此前 role/aria 混搭，读屏把它读成「分隔条」却播报一个无意义的百分比。 */}
       {!expanded && (
         <div
           className={styles.artifactPinDivider}
-          role="separator"
+          role="slider"
           aria-orientation="vertical"
-          aria-label="拖拽调整分屏比例"
+          aria-label="分屏比例"
           aria-valuenow={mainRatio}
           aria-valuemin={20}
           aria-valuemax={80}
+          aria-valuetext={`主区 ${mainRatio}%`}
           tabIndex={0}
           data-dragging={dragging || undefined}
           onPointerDown={onDividerPointerDown}

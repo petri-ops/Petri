@@ -38,7 +38,9 @@ const EVIDENCE = path.join(root, 'acceptance', 'block-332', 'ui-ledger-triage.js
 // 层级/遮挡/暗色对比实机取证，归 H3）②修外因关键词误判（裸 Provider 命中组件名 ToastProvider
 // → 4 条被误判为 blocked）。误判修复只搬桶不加债：总债 33 不变，故分桶上限按事实重贴
 // （liveMissing 8→11 / blocked 25→22），并新增**总债**上限 33 作为真正的棘轮。
-const DEBT_CEILING = { liveMissing: 11, blocked: 22, total: 33 };
+// POST-S7 H3——测量口径修正：状态词匹配前剥离否定语境（「按纪律不标 verified」不再被
+// 计成 verified），UI-694 / UI-663 回归未闭合 → 债 33→35 是**修正少算**，不是新增债。
+const DEBT_CEILING = { liveMissing: 13, blocked: 22, total: 35 };
 
 const report = triageLedger(fs.readFileSync(LEDGER, 'utf8'));
 
@@ -78,4 +80,24 @@ test('BLOCK-332 — 测量证据在册且与当前台账同构（不靠叙述）
   assert.equal(evidence.sections, report.sections, '证据与当前台账段数不一致——请重跑 npm run ui:audit:triage');
   assert.equal(evidence.debt, report.debt);
   assert.deepEqual(evidence.counts, report.counts);
+});
+
+// POST-S7 H3/B-12——状态词匹配的否定语境剥离。
+// 台账真实写法：「in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）」。
+// 裸 matchAll 取最后一个命中 → 误判 verified（把未闭合条目的债凭空抹掉）。
+// 这里只钉解析器的语义，不代台账逐条判档。
+test('POST-S7 H3 — 否定语境不计入状态（不标 verified 仍是 in_progress）', async () => {
+  const { triageLedger } = await import('../scripts/ui-ledger-triage.mjs');
+  const fixture = [
+    '## UI-901: 甲（2026-11-04 **in_progress（待实机腿；按纪律不标 verified）**）',
+    '- 正文',
+    '## UI-902: 乙（2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）',
+    '- 正文',
+    '## UI-903: 丙（2026-11-03 **in_progress（实机链返回空，不冒 verified）**）',
+    '- 正文',
+  ].join('\n');
+  const report = triageLedger(fixture);
+  assert.equal(report.counts.verified, 1, '只有 UI-902 是真 verified');
+  const openIds = [...report.liveMissing, ...report.blocked].map((row) => row.id).sort();
+  assert.deepEqual(openIds, ['UI-901', 'UI-903']);
 });

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 520,
+    "documentCount": 521,
     "lastUpdated": "2026-11-09",
-    "managedMarkdown": 503
+    "managedMarkdown": 504
   },
   "documents": [
     {
@@ -290,6 +290,25 @@
         "observability"
       ],
       "notes": "post-S7 蓝图 H2 承载包 completed：原因码 25→42（execution/input 两类新增）+ 生产面 reasonCode 全覆盖门 / 静默 catch 棘轮门（100 文件 403 处冻结 + 负测，入 closeout 第 6 门）/ onEvent 空回调改具名占位 / toast 有界历史回看（去重·上限 50·可清空）/ viewer 降级 status 语义。四事件前端投影与 SSE 横幅挂起归 H3。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-388",
+      "capability": "block-388-post-s7-h3-experience-closeout",
+      "path": "docs/block-388-post-s7-h3-experience-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-388-post-s7-h3-experience-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "h3",
+        "a11y",
+        "ui-ledger"
+      ],
+      "notes": "post-S7 蓝图 H3 承载包 completed（可机械验证子集）：台账状态否定语境修正（不标 verified 不再计 verified）+ 债棘轮改分桶+总债双守 / 分屏 handle ARIA separator→slider（值域+valuetext+键盘断言）。DOM 预算 / 树 roving tabindex / 布局单源 / 颜色 token / 32 条 debt 终态化 = 实机量测后才能动，逐项挂起并带量测方案。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "NEXT-STAGE-OPTIMIZATION-BLUEPRINT-2026-11-06",

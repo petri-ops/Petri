@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-09T11:43:33.097Z",
+  "generatedAt": "2026-11-09T11:49:48.523Z",
   "ledger": "docs/ui-productization-audit.md",
   "sections": 497,
   "uniqueIds": 488,
   "counts": {
-    "live-missing": 11,
-    "verified": 452,
+    "live-missing": 13,
+    "verified": 450,
     "blocked": 22,
     "closed": 12
   },
-  "debt": 33,
+  "debt": 35,
   "liveMissing": [
     {
       "id": "UI-702",
@@ -30,6 +30,16 @@
       "id": "UI-697",
       "deps": [],
       "title": "viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress"
+    },
+    {
+      "id": "UI-694",
+      "deps": [],
+      "title": "功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实"
+    },
+    {
+      "id": "UI-663",
+      "deps": [],
+      "title": "SVG 编辑器「未保存改动」逐元素取舍（BLOCK-342 W4 reopen 第一刀；2026-11-03 **in_progress（代码面全绿；实机链列清单返回空，未定位，不"
     },
     {
       "id": "UI-595",

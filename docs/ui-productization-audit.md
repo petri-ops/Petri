@@ -7,6 +7,12 @@
 - **验证（代码）**：ToastProvider 10/10（含 4 条历史：消失后仍可回看 / 去重合并 / 上限 50 / 清空）；ResultArtifactShell 4 文件 18/18；tsc 0。
 - **未做实机腿**：DOM 断言与组件测试不冒充视觉绿——历史面板的层级/遮挡、长消息换行、暗色态对比需在 H3 实机腿一并取证。
 - **边界（reopen）**：四事件前端投影（compaction_failed/trim_skipped/provider_retry/stream_stall 进轨迹面）、SSE 重连横幅、ExternalImportPanel 回看接入。
+
+- **POST-S7 H3 追加（同一实机腿批）**：分屏 handle 语义纠正——`ArtifactPinPane` 分隔件由
+  `role="separator"` + aria-value* 改为 `role="slider"` + `aria-valuetext`（separator 不带值域，
+  此前读屏播报「分隔条 + 百分比」自相矛盾）；`ArtifactPinPane.ratio.test.tsx` 新增 slider 语义断言
+  1 条（值域 / valuetext / 键盘改变 valuenow / 无 separator）。仍是 in_progress：键盘与读屏路径的
+  实机确认归同批腿。
 ## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。

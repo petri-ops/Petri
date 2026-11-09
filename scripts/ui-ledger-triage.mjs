@@ -32,6 +32,11 @@ import path from 'node:path';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+// POST-S7 H3/B-12——状态词匹配前先剥掉**否定语境**：台账里存在
+// 「in_progress（…；按纪律不标 verified）」这类写法，裸 matchAll 取最后一个命中会把
+// 未闭合条目误计成 verified（UI-694 / UI-663 实测）。否定短语剥离后按「最后一个真状态」取。
+// 只剥紧邻的否定语气词，不猜语义；仍是启发式，权威处置在 plan 的分诊表。
+const NEGATED_STATUS_RE = /(?:不标|未标|不冒|不设|不作|非)\s*(verified|in_progress|cancelled|superseded)/g;
 const STATUS_RE = /\b(verified|in_progress|cancelled|superseded)\b/g;
 const DEP_RE = /(随|依赖|前提|待补|阻塞|blocked)\s*(UI-\d+[a-z]?)/g;
 // POST-S7 H2——外因关键词必须按**独立词**匹配：此前裸 `Provider` 会命中组件名
@@ -58,7 +63,7 @@ export function parseSections(text) {
 export function triageLedger(text) {
   const sections = parseSections(text);
   const rows = sections.map((entry) => {
-    const statuses = [...entry.title.matchAll(STATUS_RE)].map((m) => m[1]);
+    const statuses = [...entry.title.replace(NEGATED_STATUS_RE, "").matchAll(STATUS_RE)].map((m) => m[1]);
     const status = statuses.length ? statuses[statuses.length - 1] : 'unknown';
     const body = `${entry.title}\n${entry.body.join('\n')}`;
     const deps = [...body.matchAll(DEP_RE)].map((m) => m[2]);

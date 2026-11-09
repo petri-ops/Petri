@@ -1,4 +1,5 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-11-09（🏁 **BLOCK-388（post-S7 H3）completed（可机械验证子集）；下一包 H4/BLOCK-389**：台账否定语境修正 + 债棘轮分桶/总债双守 + 分屏 ARIA slider；DOM 预算/树键盘/布局单源/颜色 token/32 条 debt=实机量测前置，逐项挂起并带量测方案与重开条件。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-387（post-S7 H2）completed；下一包 H3/BLOCK-388**：原因码 25→42 + 生产面 reasonCode 全覆盖门 + 静默 catch 棘轮门（100 文件 403 处冻结，入 closeout）+ onEvent 具名占位 + toast 有界历史回看 + viewer 降级 status 语义；四事件前端投影/SSE 横幅挂起归 H3。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-386（post-S7 H1）completed；下一包 H2/BLOCK-387**：执行准入闭环焊接（workspace_exec 四类拒绝生产路径 9/9）+ 签发失败显式降级 + 删空间掉绑不依赖 FK（50/50）+ zip 四道闸 5/5 + manifest 链三态 6/6 + 链校验默认 strict（118 版·0 legacy）；ADMISSION/FK 维持缓（U 类材料在册）；尺寸 +22 行显式留因。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-385（post-S7 H0）completed；下一包 H1/BLOCK-386**：①分片 9 红→3 红（7 根修含脚本 main 守卫/假 sha 夹具/行数锚口径/矩阵产物链；2 外部归属=FK=OFF→H1、spawn persona 专项）②影响图同名双条合并 357→356 + 重复 id fail-closed + 未映射 145→138 ③state 两层语义 ④canonical 对账（POST-NSO→completed、post-S7→active、backlog 349–354、README 反引号）⑤closeout 16 门全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。）

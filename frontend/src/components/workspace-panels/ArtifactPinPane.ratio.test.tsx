@@ -122,3 +122,32 @@ describe('ArtifactPinPane 窗格最大化（BLOCK-253 F7）', () => {
     expect(ratioNow()).toBe(70);
   });
 });
+
+// POST-S7 H3/B-10——把本文件开头自注的残余①转成断言：分隔件按 ARIA 应是 slider，
+// 带完整值域且值随键盘变化（此前 role=separator + aria-value* 混搭，读屏播报「分隔条」+百分比）。
+describe('POST-S7 H3 — 分屏 handle 的 slider 语义', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('role=slider + 值域 + aria-valuetext，且键盘改变 aria-valuenow', () => {
+    renderSplit();
+    const handle = screen.getByRole('slider');
+    expect(handle).toBeTruthy();
+    expect(handle.getAttribute('aria-valuemin')).toBe('20');
+    expect(handle.getAttribute('aria-valuemax')).toBe('80');
+    const before = Number(handle.getAttribute('aria-valuenow'));
+    expect(Number.isFinite(before)).toBe(true);
+    expect(handle.getAttribute('aria-valuetext')).toContain(`${before}%`);
+
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+    const after = Number(screen.getByRole('slider').getAttribute('aria-valuenow'));
+    expect(after).not.toBe(before);
+    expect(after).toBeGreaterThanOrEqual(20);
+    expect(after).toBeLessThanOrEqual(80);
+    expect(screen.queryByRole('separator')).toBeNull();
+  });
+});
