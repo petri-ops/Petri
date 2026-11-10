@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k4-contract-tests",
+  "sourceCommit": "d9ba42d4a35f9c12e926347811a9f6c4f2ab8045",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:25:42.641Z",
+  "command": "node --test test/post-h9-k4-architecture.test.mjs",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "pass": 19,
+  "fail": 0,
+  "negativeTests": 13
+}

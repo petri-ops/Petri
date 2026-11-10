@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k4-source-scan-baseline",
+  "generatedAt": "2026-11-10T14:24:02.167Z",
+  "policy": "只减不增：新增源码扫描式断言（includes/源码正则/行数锚）即红；换成行为断言后重打下调。",
+  "perFile": {
+    "test/loop-orchestrator-subdomains.test.mjs": {
+      "includes": 0,
+      "srcMatch": 0,
+      "lineAnchor": 5
+    },
+    "test/block199-config-drift.test.mjs": {
+      "includes": 11,
+      "srcMatch": 1,
+      "lineAnchor": 0
+    },
+    "test/nso-w5b-second-truth.test.mjs": {
+      "includes": 2,
+      "srcMatch": 2,
+      "lineAnchor": 0
+    },
+    "test/release-contract.test.mjs": {
+      "includes": 0,
+      "srcMatch": 0,
+      "lineAnchor": 0
+    }
+  }
+}

@@ -9,11 +9,53 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 536,
+    "documentCount": 538,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 519
+    "managedMarkdown": 521
   },
   "documents": [
+    {
+      "id": "BLOCK-400",
+      "capability": "block-400-post-h9-k4-architecture",
+      "path": "docs/block-400-post-h9-k4-architecture-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-400",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-400-post-h9-k4-architecture-plan.md",
+        "acceptance/post-h9-2026-11-10/k4/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k4"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K4 架构去补丁与单源收编。源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-H9-K4-DECISION-MATERIAL",
+      "capability": "post-h9-k4-decision-material",
+      "path": "docs/post-h9-k4-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-400-post-h9-k4-architecture-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "decision-material",
+        "user-ruling",
+        "w5b"
+      ],
+      "notes": "K4 U 类版本策略裁决与 W5b 五刀结构性重构切片的现状/候选/风险/推荐/证据/补腿条件。未裁决未发令前不生效。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-399",
       "capability": "block-399-post-h9-k3-experience",

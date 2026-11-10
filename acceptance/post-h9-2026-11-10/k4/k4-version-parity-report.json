@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k4-version-parity-report",
+  "sourceCommit": "d9ba42d4a35f9c12e926347811a9f6c4f2ab8045",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:25:42.372Z",
+  "command": "node scripts/lib/post-h9-k4-architecture.mjs（三树版本只读对账）",
+  "verdict": "drift-reported-pending-ruling",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "versions": {
+    "root": {
+      "typescript": "^5.9.3",
+      "uuid": "^9.0.1",
+      "better-sqlite3": "^12.11.1"
+    },
+    "core": {
+      "uuid": "^9.0.1",
+      "better-sqlite3": "^12.11.1"
+    },
+    "frontend": {
+      "typescriptDev": "^5.5.4"
+    }
+  },
+  "drift": {
+    "typescript": {
+      "root": "^5.9.3 (dependencies)",
+      "frontend": "^5.5.4 (devDependencies)",
+      "detectedByExistingGate": false,
+      "reason": "post-s7-dependency-parity-gate.mjs:27-35 只比 dependencies"
+    }
+  },
+  "alreadyAligned": [
+    "uuid ^9.0.1 (root/core)",
+    "better-sqlite3 ^12.11.1 (root/core)"
+  ],
+  "versionParityPoints": 7,
+  "decisionRef": "docs/post-h9-k4-decision-material.md",
+  "disposition": "只读报告：不改任何 package.json / 锁文件，不撤销「devDependencies 允许各树独立」既有设计裁决；统一版本需用户裁决 + 依赖升级评审 + quality:types 0 + 前端构建"
+}

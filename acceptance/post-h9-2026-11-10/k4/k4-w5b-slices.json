@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k4-w5b-slices",
+  "sourceCommit": "d9ba42d4a35f9c12e926347811a9f6c4f2ab8045",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:25:42.389Z",
+  "command": "docs/block-400-post-h9-k4-architecture-plan.md §5 + docs/post-h9-k4-decision-material.md §6",
+  "verdict": "deferred",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "sliceRef": "docs/block-400-post-h9-k4-architecture-plan.md",
+  "decisionRef": "docs/post-h9-k4-decision-material.md",
+  "slices": [
+    {
+      "id": "W5b-1",
+      "name": "五巨型文件逐刀拆分",
+      "lines": {
+        "loopOrchestrator": 1579,
+        "SimpleChat": 2089,
+        "toolsExecutor": 2080,
+        "resultStudioRepository": 1793,
+        "workspaceTools": 1605
+      },
+      "condition": "一切片=一会话，拆前拆后同套定向测试绿；code-size 例外只减不增"
+    },
+    {
+      "id": "W5b-2",
+      "name": "12 环按簇消亡",
+      "cycles": 12,
+      "condition": "抽 runAgentLoop/依赖注入；每消一簇 --update 下调基线 + 全量回归"
+    },
+    {
+      "id": "W5b-3",
+      "name": "knip 330 键精确债",
+      "keys": 330,
+      "condition": "先处理 3 处动态 require 与全量 entry 语义"
+    },
+    {
+      "id": "W5b-4",
+      "name": "3 族源码扫描契约换行为断言",
+      "condition": "重写测试替身/能力真相，不能删 includes 字面凑数"
+    },
+    {
+      "id": "W5b-5",
+      "name": "剩余 90 条 unmapped 归规则",
+      "condition": "impact-map 归属裁决，禁一次性盲挂"
+    },
+    {
+      "id": "W5b-6",
+      "name": "插件源装配面两处合一",
+      "condition": "loadPlugins(sourcePlan) 单一装配入口 + 漂移负测"
+    }
+  ],
+  "disposition": "归簇≠消亡；棘轮冻结≠债清零；本包零改动基线"
+}

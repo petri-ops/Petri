@@ -1,4 +1,5 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-11-10（▶ **post-H9 程序 K4=BLOCK-400 启动**：源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-399（post-H9 K3）completed**：四事件反向契约 22/22 / 内联样式债棘轮门 5 文件 60 字面量冻结 / B-11 布局防回退 / debt 35 分诊 22 人眼保持 pending_human_eye / E·L 一页材料 / UI 台账同批回写棘轮零改动 / lint 红门删死导入根修（3db14806）后 closeout 19 门全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K3=BLOCK-399 启动**：四事件投影反向契约 22/22 / 内联样式债棘轮门（55 颜色+5 zIndex 冻结，新增即红）/ B-11 布局防回退 / debt 35 机械分诊人眼项不冒 verified / E·L 一页材料 / UI 台账同批回写且 debt 棘轮零改动 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-398（post-H9 K2）completed**：红绿先行 5 红→15 绿 / 拆前 HEAD 快照 18/18 + 拆后 18/18 同套绿 / >100 会话 HTTP 行为 3/3 / 具名上限常量 10 文件 15 行 / 复合索引查询计划命中+rowid 负测 / W5b 五刀挂起带补腿条件 / closeout PASS G0 开发期常态 · 不外推 packaged/Provider/GA。）

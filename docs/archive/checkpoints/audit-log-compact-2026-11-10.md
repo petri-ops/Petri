@@ -20,3 +20,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:10:12.126Z -->
 | ✅ BLOCK-389（post-S7 H4）completed（可机械验证子集）——①schema/契约版本单一登记处 core/shared-backend/schema-versions.js（artifactTruth/studio 契约/delivery manifest/tool 契约四常量），六处字面量全部改为引用；契约测 3/3（含源码扫描「不得再有独立字面量」+ intent 域双形态独立）②DB 路径解析单源：branch-db.getDatabasePath 委托 resolveDbPath（认 PETRI_DB_PATH），三态+fail-fast 契约 4/4③**按 W5b 挂起**：五巨型文件大拆片（一切片=一会话、拆前拆后同套绿，连续模式会污染基线证据）、插件源三处收敛、13 环按簇消亡、knip 动态入口、三套依赖树、源码扫描换行为断言、lint 分域棘轮 | 2026-11-09 | 证据=block389 两族 7/7 + 邻域 34/34 + closeout 17 门；plan=docs/block-389-post-s7-h4-single-source-plan.md | BLOCK-389 / COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:26:13.468Z -->
+| ✅ BLOCK-391（post-S7 H6）completed——①AUDIT-LOG 最长行 10933B（BLOCK-384 收口行）按「搬移不改写」原文迁 docs/archive/checkpoints/audit-log-long-row-block384-2026-11-09.md，原位留指针；迁后全台账最长 2695B，超长行告警消失②根级 lastUpdated 与 coverage.lastUpdated 改单写入者（docs:coverage 同批写）+ docs:check 新增 COVERAGE_LASTUPDATED_DRIFT 分叉报警 + 契约负测③canonical 对账复核无回弹（docs:check PASS 524 / docs:reconcile 0 issues）④交接协议六批执行⑤**挂起**：历史 acceptance 证据元数据不回填（改写历史证据=伪造，只对新产出强制）、skills manifest sha256、EAR 45%（41.6% 靠分子增长不缩分母）、roll-index 入 closeout | 2026-11-09 | 证据=docs-governance 19/19 + 迁档文件在册；plan=docs/block-391-post-s7-h6-governance-ledger-plan.md | BLOCK-391 / COMPLETED |

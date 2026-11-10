@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k4-architecture-truth",
+  "sourceCommit": "d9ba42d4a35f9c12e926347811a9f6c4f2ab8045",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:25:42.344Z",
+  "command": "node scripts/lib/post-h9-k4-architecture.mjs + node --test test/post-h9-k4-architecture.test.mjs",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "conclusions": {
+      "K-20": "ratchet-frozen",
+      "K-19": "resolution-single-source-assembly-still-split",
+      "K-31": "drift-reported-pending-ruling",
+      "K-22/K-18": "debt-unchanged-w5b-deferred",
+      "K-21": "h10-committed-90-remaining"
+    },
+    "verdict": "architecture-invariants-verified-w5b-deferred"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "scanContracts": {
+    "test/loop-orchestrator-subdomains.test.mjs": {
+      "includes": 0,
+      "srcMatch": 0,
+      "lineAnchor": 5
+    },
+    "test/block199-config-drift.test.mjs": {
+      "includes": 11,
+      "srcMatch": 1,
+      "lineAnchor": 0
+    },
+    "test/nso-w5b-second-truth.test.mjs": {
+      "includes": 2,
+      "srcMatch": 2,
+      "lineAnchor": 0
+    },
+    "test/release-contract.test.mjs": {
+      "includes": 0,
+      "srcMatch": 0,
+      "lineAnchor": 0
+    }
+  },
+  "pluginSources": {
+    "registryCallsResolver": true,
+    "serverCallsResolver": true,
+    "singleSourceProvider": true,
+    "assemblySites": [
+      {
+        "file": "core/petri-server/mcp/registry.js",
+        "ownArray": true
+      },
+      {
+        "file": "core/petri-server/server.js",
+        "ownArray": true
+      }
+    ]
+  },
+  "versions": {
+    "root": {
+      "typescript": "^5.9.3",
+      "uuid": "^9.0.1",
+      "better-sqlite3": "^12.11.1"
+    },
+    "core": {
+      "uuid": "^9.0.1",
+      "better-sqlite3": "^12.11.1"
+    },
+    "frontend": {
+      "typescriptDev": "^5.5.4"
+    }
+  },
+  "archDebt": {
+    "cycles": 12,
+    "knipKeys": 330,
+    "sizeFiles": 24,
+    "loopOrchestratorInManifest": false,
+    "loopOrchestratorLines": 1579,
+    "knipFullEntryInWorkspace": true,
+    "dynamicRequirePoints": [
+      true,
+      true,
+      true
+    ]
+  },
+  "h10": {
+    "trackedFiles": 8,
+    "expectedFiles": 8,
+    "allTracked": true,
+    "unmappedRemaining": 90,
+    "decayBatch": {
+      "before": 120,
+      "assigned": 30,
+      "remaining": 90
+    },
+    "cycleClusters": {
+      "totalCycles": 12,
+      "decision": "all-cycles-attributed-to-known-root-cause"
+    }
+  },
+  "negativeTests": 13,
+  "calibrations": [
+    "release-contract 已结构化（B-20）",
+    "uuid/better-sqlite3 根与 core 已同版",
+    "version-parity 现 7 登记点非 10",
+    "H10 8 份证据 tracked 已入仓，未映射 120→90",
+    "loop-orchestrator 不入 MANIFEST 属独立锚设计非盲区"
+  ]
+}
