@@ -330,7 +330,7 @@
         "ui-ux",
         "workflow"
       ],
-      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。planned 不占单包串行槽位，正式 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。planned 不占单包串行槽位，正式 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。 【程序状态同步】K0–K7 八阶段已由 BLOCK-396～403 全部收口，总报告见 docs/post-h9-2026-11-10-final-report.md；本条目 status 保持 planned（living-plan 不占串行槽位），蓝图原件为受保护未跟踪文件、全程零触碰。"
     },
     {
       "id": "POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06",
