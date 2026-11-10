@@ -41,7 +41,6 @@ export function evaluateDeferred(triage, admissionChannels) {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const triage = JSON.parse(fs.readFileSync(IPC_TRIAGE, 'utf8'));
-  const structural = fs.readFileSync(path.join(ROOT, 'scripts/post-s7-structural-gates.mjs'), 'utf8');
   const channels = [
     { id: 'workspace_exec', state: 'consumed', reason: '执行边界已闭环' },
     { id: 'tools_executor', state: 'deferred', reason: '需跨 tool_jobs 行设计凭据载体' },

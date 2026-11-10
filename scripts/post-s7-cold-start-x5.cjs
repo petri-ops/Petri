@@ -9,17 +9,12 @@
 'use strict';
 const path = require('node:path');
 const fs = require('node:fs');
-const { execFileSync, spawnSync } = require('node:child_process');
+const { spawnSync } = require('node:child_process');
 const lib = require(path.join(__dirname, '..', '.agents', 'skills', 'petri-dev-infra', 'dev-verify', 'lib.cjs'));
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'acceptance/post-s7-2026-11-10/h10/cold-start-x5.json');
 const ROUNDS = Number(process.env.H10_COLD_ROUNDS || 5);
-
-function listTargets() {
-  try { return JSON.parse(execFileSync('curl', ['-s', '-m', '3', 'http://127.0.0.1:9223/json/list'], { encoding: 'utf8' })); }
-  catch { return []; }
-}
 
 async function readMarks(client) {
   const raw = await lib.evalJs(client, `(async () => {
