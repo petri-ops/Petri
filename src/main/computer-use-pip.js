@@ -66,8 +66,13 @@ function createPipWindow() {
     autoHideMenuBar: true,
     webPreferences: {
       // 单一静态页 + IPC 拉帧；无 node 集成、无远程
+      // post-H9 K6 / K-27 — 补齐 Electron 四项安全基线：此前只声明前两项，
+      // PiP 又是唯一不在 WINDOW_FILES 断言名单里的创建点。preload 自包含
+      // （只 require('electron') 的 contextBridge/ipcRenderer），与 sandbox 兼容。
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true,
       preload: path.join(__dirname, 'computer-use-pip-preload.js'),
     },
   });

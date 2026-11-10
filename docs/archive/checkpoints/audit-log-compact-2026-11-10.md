@@ -26,3 +26,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:39:37.996Z -->
 | ✅ BLOCK-390（post-S7 H5）completed（证据面）——①quality:perf 支持 PETRI_PERF_EVIDENCE 落机器可读证据（sourceCommit/platform/command/generatedAt/每轮 rows/verdict），默认不写盘避免污染干净树②当次证据 acceptance/post-s7-2026-11-09/h5/perf-evidence.json：5/5 全绿 sourceCommit=e517c326 darwin-arm64③负测 10/10 未削弱④三矩阵同源链（quality:surface→capability-map）复核确定性一致⑤**挂起（需实机取数）**：冷启动五段分解入门禁、DOM 节点上限门、滚动帧率、请求体五类占比、T7 自然长任务、165 零消费通道逐件销号 | 2026-11-09 | 证据=h5/perf-evidence.json + block350 10/10 + block357 8/8；plan=docs/block-390-post-s7-h5-perf-scale-plan.md | BLOCK-390 / COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:46:15.088Z -->
+| ✅ BLOCK-392（post-S7 H7）completed——**post-S7 程序 H0→H7 八包全收口**：①八阶段总览（H0 385 可信起点 / H1 386 执行准入 / H2 387 失败语义 / H3 388 体验机械子集 / H4 389 单源收编 / H5 390 性能证据面 / H6 391 治理台账 / H7 392 终验）②十一维五列复评=**四升七平零降**（安全 4.2→4.3、错误处理 3.7→3.9、代码质量 3.8→3.9、可维护性 3.6→3.7、界面 3.9→4.0、测试 4.2→4.3、文档 4.6→4.7；性能/功能/可扩展/依赖持平），达标 3/11，差值逐条归因③34 条缺口终态：done 5 / done-partial 15 / retain-with-reason 12 / pending_human_eye 1 / external-blocked 1，**无一项静默消失**④真实任务 8 套件=凭据缺失环境因（出网可达 HTTP 401、env 0 key、ai-settings presets=0），不写缺陷也不写通过⑤人眼路线成文不代答⑥closeout 17 门全绿 | 2026-11-09 | 证据=acceptance/post-s7-2026-11-09/{h0,h1,h5,h7}/ + docs/post-s7-h7-human-eye-route.md；报告=docs/block-392-post-s7-h7-final-report.md | BLOCK-392 / COMPLETED |

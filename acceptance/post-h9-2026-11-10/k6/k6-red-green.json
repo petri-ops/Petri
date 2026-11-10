@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k6-pip-red-green",
+  "sourceCommit": "783bde29f6fa66c75ba64f96d0e384a03ab654b6",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:45:54.126Z",
+  "command": "node --test test/electron-security-assertions.test.mjs（红→绿）",
+  "verdict": "red-to-green",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "red": {
+    "tests": 3,
+    "pass": 2,
+    "fail": 1,
+    "error": "AssertionError [ERR_ASSERTION]: src/main/computer-use-pip.js 第 1 个 BrowserWindow 缺少 sandbox: true —— Electron 安全基线要求全部创建点显式达标"
+  },
+  "green": {
+    "tests": 3,
+    "pass": 3,
+    "fail": 0,
+    "error": null
+  },
+  "change": "WINDOW_FILES 增 src/main/computer-use-pip.js 且 totalWindows 3→4 → 红（缺 sandbox: true）；computer-use-pip.js webPreferences 补 sandbox:true/webSecurity:true → 3/3 绿",
+  "preloadCompatibility": "computer-use-pip-preload.js 自包含只 require electron，与 sandbox:true 兼容",
+  "negativeTests": 5
+}

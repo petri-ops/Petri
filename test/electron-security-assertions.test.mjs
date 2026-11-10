@@ -25,6 +25,10 @@ const ROOT = path.resolve(__dirname, '..');
 const WINDOW_FILES = [
   'src/main/_window-create.js', // 主窗口
   'src/ipc/window-manager.js', // rail 悬浮窗 + pop-out 次级窗口（两处创建点）
+  // post-H9 K6 / K-27 — PiP 画中画（第 4 个创建点）；此前不在名单，
+  // webPreferences 只有 contextIsolation/nodeIntegration/preload，
+  // 补入名单后强制四项基线（sandbox/webSecurity 必须显式达标）。
+  'src/main/computer-use-pip.js',
 ];
 
 const REQUIRED_SAFE_CONFIG = [
@@ -75,7 +79,7 @@ describe('Electron 安全配置断言（BLOCK-105 P3）', () => {
       }
       totalWindows += blocks.length;
     }
-    assert.ok(totalWindows >= 3, `预期至少 3 个窗口创建点（主/rail/pop-out），实得 ${totalWindows}`);
+    assert.ok(totalWindows >= 4, `预期至少 4 个窗口创建点（主/rail/pop-out/PiP），实得 ${totalWindows}`);
   });
 
   it('preload 是唯一 electron 暴露面（contextBridge.exposeInMainWorld），渲染进程源码零 require electron', () => {

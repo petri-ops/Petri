@@ -9,11 +9,53 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 540,
+    "documentCount": 542,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 523
+    "managedMarkdown": 525
   },
   "documents": [
+    {
+      "id": "BLOCK-402",
+      "capability": "block-402-post-h9-k6-security",
+      "path": "docs/block-402-post-h9-k6-security-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-402",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-402-post-h9-k6-security-plan.md",
+        "acceptance/post-h9-2026-11-10/k6/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k6"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K6 安全与边界纵深。PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-H9-K6-DECISION-MATERIAL",
+      "capability": "post-h9-k6-decision-material",
+      "path": "docs/post-h9-k6-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-402-post-h9-k6-security-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "decision-material",
+        "user-ruling",
+        "security"
+      ],
+      "notes": "K6 U 类：ADMISSION 默认档 / FK 全量切换 / 统一 IPC 参数 schema / 空 catch 扫描根 / dev 双后端归属的现状·候选·风险·推荐·证据·补腿条件。未裁决前不生效，既有裁决不回退。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-401",
       "capability": "block-401-post-h9-k5-perf-evidence",

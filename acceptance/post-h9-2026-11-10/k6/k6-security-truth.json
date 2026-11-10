@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k6-security-truth",
+  "sourceCommit": "783bde29f6fa66c75ba64f96d0e384a03ab654b6",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:45:54.140Z",
+  "command": "node scripts/lib/post-h9-k6-security.mjs + node --test test/post-h9-k6-security.test.mjs",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "conclusions": {
+      "K-27": "pip-four-baselines-verified",
+      "K-29": "pending_user_ruling",
+      "K-28": "boundaries-recorded-schema-deferred"
+    },
+    "verdict": "security-depth-verified-u-boundaries-open"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "windows": {
+    "listed": [
+      "src/main/_window-create.js",
+      "src/ipc/window-manager.js",
+      "src/main/computer-use-pip.js"
+    ],
+    "actual": [
+      "src/ipc/window-manager.js",
+      "src/main/_window-create.js",
+      "src/main/computer-use-pip.js"
+    ],
+    "pipInList": true,
+    "safety": "all-window-creations-safe",
+    "coverage": "window-list-complete",
+    "total": 4
+  },
+  "admission": {
+    "defaultObserve": true,
+    "backendForeignKeysOff": true,
+    "desktopForeignKeysOn": true,
+    "cascadeScanTracked": true,
+    "decisionMaterialExists": true
+  },
+  "ipc": {
+    "exemptEnvExists": true,
+    "exemptPinnedByContract": true,
+    "silentCatchScanRoots": "生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。",
+    "silentCatchTotal": 395,
+    "devDualBackendInAudit": true
+  },
+  "negativeTests": 12
+}

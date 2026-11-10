@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T14:39:18.434Z",
+  "generatedAt": "2026-11-10T14:46:06.487Z",
   "terminalCounts": {
-    "done": 9,
+    "done": 10,
     "retain-with-reason": 3,
-    "pending_user_ruling": 2,
+    "pending_user_ruling": 3,
     "done-partial": 9,
-    "deferred": 4,
+    "deferred": 5,
     "pending_human_eye": 1,
-    "in_progress": 4
+    "in_progress": 1
   },
   "gaps": [
     {
@@ -409,14 +409,14 @@
       "blocker": "A",
       "stage": "K6",
       "anchor": "computer-use-pip.js:67-72 / electron-security-assertions.test.mjs:25-28",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k6/k6-red-green.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "P0 真修：PiP 创建点纳入 WINDOW_FILES 名单并收紧计数 3→4 → 安全断言红（缺 sandbox）；computer-use-pip.js:67-77 补 sandbox:true/webSecurity:true → 3/3 绿；preload 自包含与 sandbox 兼容核实。新增名单覆盖门 + 漏配/漏登记 5 条负测，14 契约全绿。"
     },
     {
       "id": "K-28",
@@ -424,14 +424,14 @@
       "blocker": "A",
       "stage": "K6",
       "anchor": "W2 蓝图 :157-158 / _ipc-trust.js:29-37,88",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "deferred",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k6/k6-security-truth.json",
+      "decisionRef": "docs/post-h9-k6-decision-material.md",
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-402-post-h9-k6-security-plan.md",
+      "closureCondition": "独立切片：统一 ipcMain.handle 参数 schema（复用既有注册点不建第二包装器，覆盖全部 handle + 越界负测）；豁免口逐件复核留 reason 与到期复核（当前被 nso-w2-ipc-trust 契约钉住，擅删会破契约）；8 处生产空 catch 三分法逐处清零后扩 gate:silent-catch 扫描根到 frontend/src/scripts，基线重打须显式留因 + 负测且总数只减不增；dev 双后端按 dev-infra §76 attach :3001 方向另立包",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "现状与归属核实：PETRI_IPC_FILE_SENDER_EXEMPT_IDS 在册且被契约钉住、静默 catch 395 冻结基线零改动、dev 双后端 AUDIT-LOG 在册；不冒充已交付"
     },
     {
       "id": "K-29",
@@ -439,14 +439,14 @@
       "blocker": "U",
       "stage": "K6",
       "anchor": "execution-admission.js:112-120 / db/connection.js:24-25",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "pending_user_ruling",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k6/k6-u-boundaries.json",
+      "decisionRef": "docs/post-h9-k6-decision-material.md",
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "U：用户裁决 ADMISSION 默认档（observe/enforce/分面）与 FK 切换（维持/全量/分阶段）。裁决后按「三执行入口出示并消耗凭据 / 迁移连接同 pragma / 四腿一致性门」落地且全程带生产路径负测；179 违约与 16 CASCADE DDL / 11 显式 delete 清单逐件清偿",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "既有裁决（ADMISSION 拨硬维持缓、FK 维持缓、workspace_exec 默认放行）不回退；BLOCK-372 FK=ON 实测 179 fail 回退在册；H10 cascade-scan 已 tracked。Agent 不代答，裁决前零语义改动"
     },
     {
       "id": "K-30",
@@ -536,6 +536,13 @@
       "head": "094dbec5",
       "terminalsAssigned": 7,
       "at": "2026-11-10T14:39:18.435Z"
+    },
+    {
+      "stage": "K6",
+      "block": "BLOCK-402",
+      "head": "783bde29",
+      "terminalsAssigned": 3,
+      "at": "2026-11-10T14:46:06.487Z"
     }
   ],
   "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",

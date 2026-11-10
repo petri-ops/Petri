@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k6-contract-tests",
+  "sourceCommit": "783bde29f6fa66c75ba64f96d0e384a03ab654b6",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:45:54.169Z",
+  "command": "node --test test/post-h9-k6-security.test.mjs",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "pass": 14,
+  "fail": 0,
+  "negativeTests": 12
+}

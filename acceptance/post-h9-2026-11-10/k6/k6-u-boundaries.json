@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k6-u-boundaries",
+  "sourceCommit": "783bde29f6fa66c75ba64f96d0e384a03ab654b6",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:45:54.154Z",
+  "command": "docs/post-h9-k6-decision-material.md + docs/post-s7-h1-admission-fk-decision-material.md",
+  "verdict": "pending-ruling",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "decisionRef": "docs/post-h9-k6-decision-material.md",
+  "u": [
+    {
+      "item": "ADMISSION 默认档 observe→enforce",
+      "state": "pending_user_ruling",
+      "closureCondition": "三执行入口出示并消耗凭据 + 四类拒绝负测 + 审计回看 + 裁决留痕"
+    },
+    {
+      "item": "FK 全量切 ON",
+      "state": "pending_user_ruling",
+      "closureCondition": "逐表清偿 179 违约 + 三处 pragma 同源 + 四腿一致性门 + 生产路径负测"
+    },
+    {
+      "item": "统一 IPC 参数 schema / env 豁免口 / 空 catch 扫描根 / dev 双后端",
+      "state": "deferred",
+      "sliceRef": "docs/block-402-post-h9-k6-security-plan.md"
+    }
+  ],
+  "existingRulingsPreserved": [
+    "workspace_exec 默认放行",
+    "MCP trust 与 capability token 两轴分离",
+    "FK 维持缓",
+    "ADMISSION 拨硬维持缓",
+    "G0 阶段纪律"
+  ],
+  "note": "Agent 不代答；裁决前不改默认语义"
+}
