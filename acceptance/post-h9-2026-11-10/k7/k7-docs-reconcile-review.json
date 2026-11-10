@@ -1,0 +1,1119 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-docs-reconcile-review",
+  "sourceCommit": "602de4fd79f51721d8b268900cecb8258d56c500",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T15:05:29.212Z",
+  "command": "npm run docs:reconcile（136 条候选逐件复核）",
+  "verdict": "reviewed-no-archive",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "summary": {
+    "registered": 544,
+    "unregistered": 0,
+    "archiveCandidates": 136,
+    "retainedCompletedReferences": 266,
+    "manualReview": 0,
+    "validationIssues": 0
+  },
+  "perCandidate": [
+    {
+      "id": "BLOCK-65-SUBAGENT-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-64-COMMAND-CENTER-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-66-RUNTIME-DECUPLE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-67-SSH-REMOTE-PROJECT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-68-UI-DECLUTTER",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-69-KNOWLEDGE-SPACE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "UI-305-FRONTEND-LARGE-FILE-REFACTOR",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-40-CONV-CHANGES-HYDRATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-41-GIT-WRITE-OPS-PHASE3",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-39-AGENT-STREAM-RECONNECT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-38-AGENT-TASK-RESUME",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-37-LLM-IO-TRANSCRIPT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-36-TOOL-ACTIVITY-DOCK",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-14-LEFT-PANEL-QA-FIX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-15-ARCHITECTURE-PERF-PLAN",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-23-REVIEW-CODEMIRROR-UPGRADE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "UI-201-RESULT-STUDIO-P6-EVIDENCE-REPAIR",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-24-UI-LEDGER-BACKFILL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-25-CODEX-PARITY-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-26-REVIEW-UX-PARITY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-27-AI-REVIEW-REMOVAL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28-REVIEW-MODE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.1-REVIEW-MODE-POLISH",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.2-REVIEW-MODE-DOCK",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.3-REVIEW-MODE-CHROME-FIX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.4-REVIEW-EXIT-ENTRY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.5-REVIEW-EMBED-RIGHT-PANEL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.6-FONT-SIZE-TOKEN-UNIFICATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.7-CHAT-CHANGES-CARD",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.8-COMPOSER-CTA-TRIM",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-28.9-COMMIT-BAR-ON-DEMAND",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29-COMMIT-HISTORY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.1-ACCORDION-FILE-LIST",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-30-BACKEND-CONVERGENCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.2-GIT-TOOLS-PHASE2",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.3-COMMIT-DETAIL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.4-COMMIT-FILE-FULLTEXT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.5-REVIEW-READONLY-VISION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "LIGHT-THEME-PURITY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "TYPOGRAPHY-HIERARCHY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "FONT-FAMILY-UNIFICATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.6-REVIEW-CHROME-COMPACT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-29.7-REVIEW-CHANGES-TREE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-32-PROJECT-SCOPED-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-33-GENERAL-CODING-AGENT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-34-AGENT-TOOL-TRAIL-DOCK",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-35-DEV-ELECTRON-KILL-SCOPE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-42-PENDING-SCROLL-CONSUMER-MOUNT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-43-UI193-WIDGET-BUSINESS-PATH-CLOSEOUT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-44-UI-AUDIT-REPORT-CASE-DEBT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-45-DEV-ELECTRON-STOP-COLLATERAL-FIX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-46-IN-PROGRESS-BATCH-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-47-UI255-POPOVER-VERTICAL-CLAMP",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-50-REVIEW-FILE-NOT-FOUND",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-48-COMPUTER-USE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-49-MULTI-AGENT-SPAWN",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-51-AUDIT-FIXES",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-52-SELECT-TO-CHAT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-53-PROJECT-CREATION-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-54-TERMINAL-UPGRADE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-55-ENGINEERING-PLAN-MODE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-56-RELIABILITY-DEPTH",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-57-REMOTE-EXECUTION",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-58-R-DEPENDENCY-GOVERNANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-59-WINDOW-SYSTEM",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-60-COMPOSER-TOOLBAR",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-61-BRAND-RENAME-PETRI",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-62-TITLEBAR-COLUMNIZATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-63-WINDOWS-COMPUTER-USE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "UI-LEDGER-CLOSEOUT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-70-MOBILE-SYNC",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-72-WORKBENCH-GLOBAL-ENTRIES",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-73-HIDDEN-FILES-TOGGLE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-74-PREVIEW-HEADER-CLEANUP",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-75-OSLEVEL-ACCEPTANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-76-SSH-NATIVE-EXECUTION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-76-P0-DESIGN-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-77-RESIDENT-TASKS",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-77-P0-DESIGN-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-78-SUMMARY-CARD-RUNTIME-PROJECTION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-79-TOKEN-SPEED-OBSERVABILITY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-80-WELCOME-HOME",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-81-THINKING-LEVEL-ENDPOINT-GRID",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-82-THINKING-CHANNEL-COMPAT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-83-GENERAL-AGENT-BASE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-83-P0-DESIGN-REVIEW",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-84-DOMAIN-PACK-ONECLICK",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-86-DOMAIN-PACK-LIFECYCLE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-89-WORKSPACE-FILE-OPS",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-96-SSH-CHANNEL-PERF",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-95-SESSION-IO",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-94-KNOWLEDGE-SPACE-PRO",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-93-AGENT-OPTIMIZATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-92-CODE-MODULARIZATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-97-AGENT-TODO-CARD",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-98-AGENT-RESILIENCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-88-ENGINEER-COLLAB",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-99-KNOWLEDGE-MULTISPACE-CONSOLE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-100-CDP-TEST-INSTANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-101-STARTUP-PERFORMANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-102-STABILITY-HARDENING",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-103-KNOWLEDGE-SPACE-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-104-PLATFORM-TEST-GOVERNANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-105-CODE-QUALITY-GOVERNANCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-106-STARTUP-PERFORMANCE-RATCHET",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-107-CONVERSATION-STREAM-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-108-CONVERSATION-STREAM-QODER-FIDELITY",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-109-CORE-ARCH-CONVERGENCE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-109-AGENT-ORCHESTRATION-UX",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-110-JEV-DECISION-INTEGRATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-111-JEV-W1-MARKER-CLASSIFICATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-112-COPILOT-INTENT-ROUTING",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-113-TOOL-PREROUTING",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-114-TEST-FAILURE-TRIAGE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-115-TEST-SUGGEST",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-116-DECISION-PLATFORM",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-117-LAYA-SUPPLY-VALIDATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-118-DEV-DECISION-TOOLING",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-121-RESULT-LOOP-VERTICAL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-120-RECONCILIATION-LINKAGE",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-119-OUTPUT-JUDGE-HARNESS",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "UI-448-SIDE-CHAT-DOCK-ALIGNMENT",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-126-PLATFORM-PERCEPTION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-128-EXECUTION-UNIFICATION",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-138-ARTIFACT-PLANE-KERNEL",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-139-SELECTION-LOOP",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-140-ARTIFACT-PLANE-SPLIT",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-141-RIDERS-CLEARING",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-142-ARTIFACT-PLANE-RENDERERS",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-146-ANALYSIS-CHAIN-CORRECTNESS",
+      "refs": 1,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-147-REVIEW-CORRECTNESS",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-148-ANALYSIS-INPUT-REACHABILITY",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-149-TUNNEL-HONESTY-PLATFORM-PATCH",
+      "refs": 2,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-150-REVIEW-ABSORB-WAVE1",
+      "refs": 3,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-151-REVIEW-ABSORB-WAVE2",
+      "refs": 4,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    },
+    {
+      "id": "BLOCK-152-REFACTOR-CANDIDATES",
+      "refs": 4,
+      "explicitReview": false,
+      "disposition": "retain-with-reason",
+      "reason": "长期存量 completed/retain_stable_path 计划；仍有入向引用（refs>=1），归档会切断发现路径；本程序不批量移动文档（避免污染干净树与 WIP 纪律）；未标 manual review",
+      "owner": "docs-governance registry（非本程序产物）"
+    }
+  ],
+  "parsedCount": 136,
+  "refsDistribution": {
+    "1": 124,
+    "2": 9,
+    "3": 1,
+    "4": 2
+  },
+  "disposition": "本轮零归档：136 条全部逐件复核并标 retain-with-reason；治理纪律「至少清一条或如实声明零处理」采用后者，理由见每条 reason。零孤岛候选（unregistered=0）、零人工复核项（manualReview=0）、零校验问题",
+  "cleanTreeNote": "closeout:full 已刷新 3 份 generated 产物（仅 generatedAt），收口提交后工作树只余 10 项受保护用户资产"
+}

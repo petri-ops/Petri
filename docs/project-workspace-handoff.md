@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-10（🏁 **BLOCK-403（post-H9 K7）completed**：真实任务当次取数 external-blocked（凭据 keychain 在位/端点 ETIMEDOUT/两次有界超时 124=unknown，不冒充 8/8）/ 人眼签字缺席 pending_human_eye / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降达标 5/11 / 136 条 reconcile 候选逐件复核零归档 / 干净树 closeout:full 19 门全绿 0 SKIP / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K7=BLOCK-403 启动**：真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-402（post-H9 K6）completed**：PiP 四项基线红绿先行（红 1 fail→绿 3/3）/ 窗口名单覆盖门 + 5 漏配负测 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 / 32 条缺口仅 K-30 留 K7 / closeout 全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K6=BLOCK-402 启动**：PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）

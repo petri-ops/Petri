@@ -1,6 +1,6 @@
 ---
 capability: block-403-post-h9-k7-final-acceptance
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K7 完成真实任务终验与人眼验收的可核实部分，产出十一维六列终验复评、32 条缺口逐件终态、未跑/跳过/复用证据如实标注与总收口报告；凭据/人眼边界不代答不伪造。
 acceptance:
   - 8 任务套件当次真实取数（含环境因时间线），不冒充 8/8
@@ -14,7 +14,7 @@ reopen: 有效 provider 端点恢复 + 人眼签字后按 §6 补腿条件重开
 
 # BLOCK-403 · post-H9 K7 真实任务终验与总收口
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，直到总收口，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 

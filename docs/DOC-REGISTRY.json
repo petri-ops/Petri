@@ -36,12 +36,12 @@
       "capability": "block-403-post-h9-k7-final-acceptance",
       "path": "docs/block-403-post-h9-k7-final-acceptance-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-403",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-403-post-h9-k7-final-acceptance-plan.md",
         "acceptance/post-h9-2026-11-10/k7/**",
@@ -54,7 +54,7 @@
         "optimization",
         "k7"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K7 真实任务终验与总收口。真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K7 真实任务终验与总收口。真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】真实任务当次取数 external-blocked（凭据 keychain 在位/端点 ETIMEDOUT/两次有界超时 124=unknown，不冒充 8/8）/ 人眼签字缺席 pending_human_eye / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降达标 5/11 / 136 条 reconcile 候选逐件复核零归档 / 干净树 closeout:full 19 门全绿 0 SKIP / 14 契约全绿"
     },
     {
       "id": "BLOCK-402",
