@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-closeout-gates",
+  "sourceCommit": "6cf12458761e0960238414c53513ab270849d981",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:14:42.941Z",
+  "command": "npm run docs:check + npm run ui:audit:check + npm run test:changed + npm run closeout",
+  "verdict": "passed",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "gates": [
+    {
+      "status": "PASS",
+      "title": "AUDIT-LOG 自稳（audit:compact）（0.1s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "工作区卫生（hygiene:check）（3.0s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "文档治理（docs:check）（0.3s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "UI 台账（ui:audit:check）（0.5s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "影响范围测试（test:changed）（9.4s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run gate:user-assets（0.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run gate:version-parity（0.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run gate:silent-catch（0.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run gate:code-size（0.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "SKIPPED",
+      "title": "专项门禁 npm run gate:arch-cycles（0.0s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run gate:css-modules（0.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:secret（2.7s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "SKIPPED",
+      "title": "专项门禁 npm run quality:arch（0.0s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:lint（1.5s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:perf（73.2s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:types（1.8s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:knip:check（3.6s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:ear（2.1s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "专项门禁 npm run quality:surface（0.5s）",
+      "scope": "blocking"
+    },
+    {
+      "status": "PASS",
+      "title": "npm run skills:check — OK",
+      "scope": "report-only"
+    }
+  ],
+  "blockingPass": 17,
+  "blockingSkipped": [
+    "专项门禁 npm run gate:arch-cycles（0.0s）",
+    "专项门禁 npm run quality:arch（0.0s）"
+  ],
+  "testChanged": {
+    "pass": 27,
+    "fail": 0
+  },
+  "docsCheck": "PASS 536",
+  "uiAuditCheck": "PASS 633",
+  "debtRatchet": "ui-ledger-status-contract 5/5，DEBT_CEILING 35 零改动",
+  "inlineRatchet": "inline-debt-non-increasing",
+  "redGateHistory": [
+    {
+      "attempt": 1,
+      "gate": "quality:lint",
+      "error": "test/post-h9-k3-experience.test.mjs:9 'fs' is defined but never used (no-unused-vars)",
+      "rootCause": "K3 契约测试留有未使用 fs 导入",
+      "fixCommit": "3db14806",
+      "disposition": "删死导入，零放宽 eslint-suppressions.json 基线；回退红门后误写的 completed 状态词，绿门后重新收口"
+    },
+    {
+      "attempt": 2,
+      "result": "CLOSEOUT: PASS 19 阻塞门全绿"
+    }
+  ],
+  "skippedDisclosure": "定向 closeout 的域跳过门不算 PASS；K0 干净树 closeout:full ×3 已全量覆盖",
+  "reusedEvidenceDisclosure": "本阶段未跑 closeout:full；定向 closeout 为本次会话当次执行"
+}

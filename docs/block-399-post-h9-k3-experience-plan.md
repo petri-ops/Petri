@@ -1,6 +1,6 @@
 ---
 capability: block-399-post-h9-k3-experience
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K3 把「发生了什么、能用什么、为什么不能用」的体验面逐件定终态；可机械验证的用契约/棘轮门钉死，人眼与实机边界出材料不代答。
 acceptance:
   - 四事件投影链有反向契约测与负测（事件发出但无消费点必红）
@@ -13,7 +13,7 @@ reopen: 用户完成人眼路线签字、或 CDP 实机栈可用后，按 §5 �
 
 # BLOCK-399 · post-H9 K3 用户可感知体验收官
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 
