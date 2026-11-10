@@ -35,12 +35,12 @@
       "capability": "block-397-post-h9-k1-agent-mainline",
       "path": "docs/block-397-post-h9-k1-agent-mainline-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-397",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-397-post-h9-k1-agent-mainline-plan.md",
         "acceptance/post-h9-2026-11-10/k1/**",
@@ -53,7 +53,7 @@
         "optimization",
         "k1"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K1 通用 agent 主线兑现度。K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K1 通用 agent 主线兑现度。K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】K-08 实证误判校准（不接线/不撤销裁决，11 负测+真实 callTool 行为断言）/ K-09 U 类决策材料 pending_user_ruling / K-10 已交付防回退契约 6 负测 / 165 通道第一批机械分诊 10 负测 / 29 契约全绿 / closeout PASS（2 门域跳过如实标注）"
     },
     {
       "id": "BLOCK-396",

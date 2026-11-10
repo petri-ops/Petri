@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-10（🏁 **BLOCK-397（post-H9 K1）completed**：K-08 实证误判校准（不接线/不撤销裁决，11 负测+真实 callTool 行为断言）/ K-09 U 类决策材料 pending_user_ruling / K-10 已交付防回退契约 6 负测 / 165 通道第一批机械分诊 10 负测 / 29 契约全绿 / closeout PASS（2 门域跳过如实标注） G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K1=BLOCK-397 启动**：K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-396（post-H9 K0）completed**：判据三作废三重立（12 篡改负测 45/45）/ 九组读数单源 JSON / lint∩hygiene 联动门 / WIP owner 归属表 0 未知 / README status 对账 / 32 条缺口台账 K-01~07 逐件终态（done 5 / done-partial 2）/ closeout:full ×3 19 门全绿 0 SKIP / docs:reconcile 0 issues G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K0=BLOCK-396 启动**：判据三作废三重立（12 条篡改负测）/ 九组数字口径单源 JSON / lint∩hygiene 联动门 / WIP owner 归属 / README status 对账 / 32 条缺口终态台账基座 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）

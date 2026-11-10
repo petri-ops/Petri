@@ -1,6 +1,6 @@
 ---
 capability: block-397-post-h9-k1-agent-mainline
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K1 逐件核实「已定义但未生效」的四类能力。凡声明被实码推翻的按证据校准；凡涉及既有用户裁决的出一页决策材料并停线跳项；可机械验证的兑现度用红绿先行 + 负测钉死，不新增能力、不建第二账本。
 acceptance:
   - K-08/09/10 与 K-25 前置逐件有终态与证据/决策材料指针，无静默消失
@@ -13,7 +13,7 @@ reopen: 用户裁决 MCP 桌面计量语义或 tools_only/accessMode 档位后�
 
 # BLOCK-397 · post-H9 K1 通用 agent 主线兑现度
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 
