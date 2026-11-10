@@ -1,4 +1,5 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-10（▶ **post-H9 程序 K0=BLOCK-396 启动**：判据三作废三重立（12 条篡改负测）/ 九组数字口径单源 JSON / lint∩hygiene 联动门 / WIP owner 归属 / README status 对账 / 32 条缺口终态台账基座 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-395 completed**：二轮核实纠正 4 处过度归类、15 件不需人的余项逐件扫掉；根修截断数据洗人眼桶 / 五段假接线 / 冷启动自杀。真需人的 = B-02 凭据、B-34 判据、22 条 UI debt 观感读屏、B-05 FK 裁决、B-07/14 截图过目，Agent 不代答。**队列未变**（串行槽位空闲）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **post-S7 程序 H0→H7 八包全收口 completed**（BLOCK-385~392）：十一维四升七平零降（达标 3/11）+ 34 条缺口逐件终态（done 5/done-partial 15/retain 12/pending_human_eye 1/external-blocked 1）+ closeout 17 门全绿。未闭合=真实任务凭据缺失（external-blocked）+ 人眼路线待签字 + 需 CDP 实机的 DOM/布局/帧率项。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-390（H5 证据面）+ BLOCK-391（H6 治理台账）completed**：perf 证据机器可读（5/5 全绿带 sourceCommit/platform/command）+ AUDIT-LOG 超长行迁档（10933B→2695B 最长）+ 两份 lastUpdated 单写入者与分叉校验。下一包=H7/BLOCK-392（真实任务终验 + 十一维复评 + 总收口报告）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -6,7 +7,6 @@
 最后更新：2026-11-09（🏁 **BLOCK-388（post-S7 H3）completed（可机械验证子集）**：台账否定语境修正 + 债棘轮双守 + 分屏 slider 语义；DOM 预算/树键盘/布局单源/颜色/32 条 debt=实机量测前置，逐项挂起带方案。下一包=H4/BLOCK-389（大拆片与单源收编，按 W5b 一切片一会话）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-387（post-S7 H2）completed**：原因码 42 码 + 生产面全覆盖门 + 静默 catch 棘轮门（入 closeout）+ toast 历史回看；四事件前端投影/SSE 横幅挂起归 H3。下一包=H3/BLOCK-388（DOM 预算 / a11y / 布局单源 / UI 台账）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-09（🏁 **BLOCK-386（post-S7 H1）completed**：执行准入闭环焊接（四类拒绝生产路径 9/9）+ 删空间掉绑不依赖 FK + zip 四道闸 + manifest 链三态 + 链校验默认 strict；ADMISSION/FK 维持缓（U 类材料在册）。下一包=H2/BLOCK-387（失败可见性与错误语义）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
-最后更新：2026-11-09（🏁 **BLOCK-385（post-S7 H0）completed**：state 两层语义 + 影响图去重/未映射 145→138 + 分片 9 红→3 红（7 根修 2 外部归属）+ canonical 对账；closeout 16 门全绿。下一包=H1/BLOCK-386（ADMISSION 三入口闭环 + FK 真相）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 
 
@@ -69,6 +69,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-11-10 | **BLOCK-396（post-H9 K0 · 判据校准与可信起点）启动登记（active）**：用户 2026-11-10 预授权连续工作「按第四轮蓝图 K0→K7 全部推完，全程零参与」。范围=判据三作废三重立（12 条篡改负测）/ 九组数字口径单源 JSON / lint∩hygiene 联动门 / WIP owner 归属 / README status 对账 / 32 条缺口终态台账基座 红线=零新增依赖 / 不动 10 项用户资产与未跟踪 WIP / 不放宽任何基线 / 不撤销既有用户裁决 / 无证据不写 verified。 | U/E/V/W 出决策材料并跳项，不代答不伪造 | BLOCK-396 / P0-LAUNCH |
 | 🔵 | 2026-11-09 | **BLOCK-385-post-S7-H0-TRUSTED-START 启动登记（active；用户 2026-11-09 预授权连续工作「按 docs/post-s7-optimization-blueprint-2026-11-09.md 从头到尾执行 H0 → H1 → … → H7，全部推完为止」＝零参与、工程判断下放并逐项留痕）**：范围=H0 可信起点——①state 两层语义显式化（串行槽位 work-package vs 常驻 living-plan + AUDIT-LOG 🔵 不同层注记 + truthDomain 冲突当场报警）②影响图重复 id fail-closed（block337 同名双条合并，规则 357→356）+ 未映射第一批消亡（C5-db-migration×4→electron-runtime、C9-g0-qualification×3→g0-baseline；145→138）③三段分片当次跑 + 逐件归因 ④canonical 对账（POST-NSO 蓝图→completed、post-S7 蓝图→active/living-plan、backlog 349–354、roadmap/handoff 恢复链、README 入口行补反引号） | 红线=零新增依赖/不动 10 项 untracked 用户资产/不放宽任何基线/不撤销既有用户裁决/未达证据不写 verified。plan=docs/block-385-post-s7-h0-trusted-start-plan.md | BLOCK-385 / P0-LAUNCH |
 | 🟡 | 2026-11-06 | **BLOCK-365 W1 接收在制批的处置注记**：用户授权接收会话起始在制批（22M+3 新测试；用户资产与临时目录、并发写入者 UI-696 批不在授权内）。首切片流程=逐文件审读→在制批自带测试+影响面测试→lint/types→model-surface 基线重打留因（993→1083，归因 system-prompt 用户优先级条款）→显式路径提交→P6 源绑定重算（观测数据原样保留）。授权范围为「提交这批既有工作」，不改变其中任何行为 | W1 主项随后：F-01/F-02/F-03/F-14/F-15/F-16 + SSE 收尾 |
 | 🟡待环境 | 2026-10-20 | **本机 `bash` 解析到 WSL launcher（`C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\bash.exe`）⇒ block67/block89 fs 测试整类误红**：`bash C:\...\x.sh` 被 WSL bash 读成 `C:UsersAdmin...`（反斜杠被吃），报 `No such file or directory`；与本批改动无关，**在 HEAD 同样复现**。规避=跑 `test:changed` / `closeout` 前把 Git Bash 前置：`$env:PATH="D:\Program Files\Git\bin;"+$env:PATH`（BLOCK-219 收口即用此法，Node 744 项 0 红）。根治=修正系统 PATH 顺序或测试改为显式 Git Bash 路径 ；**同一台机器的第二个坑**：`tar` 解析到 Windows bsdtar（不支持 `--force-local`），`capability-bundles` 等 5 项因此红——收口时 PATH 须同时前置 `D:\Program Files\Git\usr\bin`（GNU tar）与 `D:\Program Files\Git\bin`（bash，两处都要，缺一仍红） | 环境；不阻塞产品判据，但**会误伤任何一次 closeout**——修复前每次收口须前置 PATH 并在笔录里写明 |

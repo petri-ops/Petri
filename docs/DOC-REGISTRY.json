@@ -9,11 +9,36 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 530,
+    "documentCount": 531,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 513
+    "managedMarkdown": 514
   },
   "documents": [
+    {
+      "id": "BLOCK-396",
+      "capability": "block-396-post-h9-k0-criteria-baseline",
+      "path": "docs/block-396-post-h9-k0-criteria-baseline-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-396",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-396-post-h9-k0-criteria-baseline-plan.md",
+        "acceptance/post-h9-2026-11-10/k0/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k0"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K0 判据校准与可信起点。判据三作废三重立（12 条篡改负测）/ 九组数字口径单源 JSON / lint∩hygiene 联动门 / WIP owner 归属 / README status 对账 / 32 条缺口终态台账基座 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10",
       "capability": "post-h9-optimization-blueprint-2026-11-10",

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-criteria-verdict",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:16:09.910Z",
+  "command": "node scripts/lib/post-h9-k0-criteria.mjs",
+  "verdict": "three-criteria-voided-and-restated",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "ok": true,
+  "voided": [
+    "K-01",
+    "K-02",
+    "K-03"
+  ],
+  "restated": [
+    "K-01",
+    "K-02",
+    "K-03"
+  ],
+  "issues": [],
+  "voidedCriteria": {
+    "K-01": "会话列表全量 DOM（前端渲染 O(n)）",
+    "K-02": "content-visibility 降低 DOM 节点数即优化",
+    "K-03": "热栈连续 5 轮可达性 = 冷启动 ×5"
+  },
+  "restatedCriteria": {
+    "K-01": "服务端会话列表 LIMIT 100 截断 → 先决定分页/游标/上限提示的产品语义，再谈渲染",
+    "K-02": "强制布局耗时中位数 B < A×0.9 才落 CSS；无收益回滚且不改产品源码",
+    "K-03": "冷启动 ×5 与热栈 5 轮分开命名分开取数；依赖活栈的门带「有栈才断言」显式条件"
+  },
+  "negativeTests": 12,
+  "contractTest": "test/post-h9-k0-criteria-void.test.mjs"
+}

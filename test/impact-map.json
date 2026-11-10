@@ -3,6 +3,36 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "post-h9-program",
+      "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。",
+      "patterns": [
+        "scripts/post-h9-*",
+        "scripts/lib/post-h9-*",
+        "test/post-h9-*",
+        "acceptance/post-h9-2026-11-10/**",
+        "docs/block-396-post-h9-*",
+        "docs/block-397-post-h9-*",
+        "docs/block-398-post-h9-*",
+        "docs/block-399-post-h9-*",
+        "docs/block-400-post-h9-*",
+        "docs/block-401-post-h9-*",
+        "docs/block-402-post-h9-*",
+        "docs/block-403-post-h9-*",
+        "docs/post-h9-k*-decision-material.md",
+        "docs/post-h9-2026-11-10-final-report.md"
+      ],
+      "tests": [
+        "test/post-h9-k0-criteria-void.test.mjs",
+        "test/post-h9-evidence-and-ledger.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "block339-persona-debt",
       "note": "BLOCK-339 人设历史债清偿：核心 system prompt / chitchat / identity 零角色域词 + 退役词表补角色词 + 部署入口退役（interpret）。脚本=人设实机腿（抓上游实际收到的 system prompt），只随本包定向测试与文档门。",
       "patterns": [

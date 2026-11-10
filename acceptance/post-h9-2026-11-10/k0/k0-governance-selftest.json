@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-governance-selftest",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:16:10.559Z",
+  "command": "node scripts/post-h9-governance.mjs selftest",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "results": {
+    "首次 launch 成功": true,
+    "重复 launch 必抛错（幂等）": true,
+    "证据目录缺席时 closeout 必抛错（证据先行）": true,
+    "closeout 成功": true,
+    "重复 closeout 必抛错": true,
+    "registry 翻 completed 与 plan frontmatter 同步": true,
+    "AUDIT 启动行移除、收口行在册": true,
+    "README 行 active→completed": true,
+    "9 项用户资产零触碰": true,
+    "锚点损坏必抛错（fail-closed）": true,
+    "锚点损坏时 plan 状态头未被误改": true,
+    "白名单外写入被拒": true
+  },
+  "passed": true
+}

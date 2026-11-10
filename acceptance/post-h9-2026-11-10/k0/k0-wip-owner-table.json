@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-wip-owner-table",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:16:09.897Z",
+  "command": "node scripts/lib/post-h9-k0-lint-hygiene.mjs + test/user-asset-guard-baseline.json",
+  "verdict": "measured",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "items": [
+    {
+      "path": "assets/",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "docs/pelican-bicycle.html",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "petri-logo-concepts.miora",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "petri-logo-concepts_assets/",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "scripts/backfill-artifact-chain.mjs",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "tmp-block342-live/",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "tmp-review/",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+      "owner": "user-asset (user-asset-guard baseline)",
+      "class": "protected-user-asset",
+      "action": "zero-touch: 不代改/不暂存/不代提交/不清理"
+    },
+    {
+      "path": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "owner": "post-H9 program input (user)",
+      "class": "untracked-program-document",
+      "action": "zero-touch: 只读发令依据，状态同步经 canonical 台账"
+    }
+  ],
+  "unknownOwnerCount": 0,
+  "policy": "本程序全程不 stage/commit/clean 上述条目；提交一律显式路径枚举"
+}

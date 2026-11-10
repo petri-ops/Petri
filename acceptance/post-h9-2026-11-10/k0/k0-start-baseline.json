@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-start-baseline",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:16:09.884Z",
+  "command": "npm run state + git status --short + git ls-files --others --exclude-standard",
+  "verdict": "measured",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "head": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "headShort": "a33a53cc",
+  "branch": "main",
+  "trackedModifiedAtLaunch": 6,
+  "untrackedTopLevel": [
+    "acceptance/",
+    "assets/",
+    "docs/",
+    "model3d/",
+    "petri-logo-concepts.miora",
+    "petri-logo-concepts_assets/",
+    "scripts/",
+    "test/",
+    "tmp-block342-live/",
+    "tmp-review/"
+  ],
+  "userAssetsProtected": [
+    "assets/",
+    "docs/pelican-bicycle.html",
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+    "petri-logo-concepts.miora",
+    "petri-logo-concepts_assets/",
+    "scripts/backfill-artifact-chain.mjs",
+    "tmp-block342-live/",
+    "tmp-review/",
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json"
+  ],
+  "blueprintFile": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+  "gatesAtLaunch": {
+    "docsCheck": "PASS 530 registered",
+    "uiAuditCheck": "PASS (633 UI ids)",
+    "versionParity": "PASS 10",
+    "userAssets": "PASS 9",
+    "silentCatch": "PASS 395"
+  }
+}

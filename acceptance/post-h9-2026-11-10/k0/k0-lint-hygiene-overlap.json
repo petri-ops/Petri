@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-lint-hygiene-overlap",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:16:09.981Z",
+  "command": "node scripts/lib/post-h9-k0-lint-hygiene.mjs",
+  "verdict": "no-overlap",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "ok": true,
+  "issues": [],
+  "offenders": [],
+  "untrackedCount": 60,
+  "protectedCount": 9,
+  "negativeTests": 3
+}

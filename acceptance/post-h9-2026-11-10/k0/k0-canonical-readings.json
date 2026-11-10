@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-canonical-readings",
+  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "platform": "darwin-arm64",
+  "command": "node scripts/lib/post-h9-k0-readings.mjs",
+  "generatedAt": "2026-11-10T13:16:10.071Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "policy": "文档引用一律指向本 JSON；不同轮次 perf/rAF 读数不得混用，历史读数不回填",
+  "readings": {
+    "closeoutGateCount": {
+      "value": {
+        "blockingGates": 19,
+        "extraGates": 14,
+        "reportOnlyGates": 1,
+        "fixedGates": 5
+      },
+      "source": "package.json:scripts.closeout + closeout-gates.mjs:112-127",
+      "command": "node -e \"const s=require('./package.json').scripts.closeout;console.log((s.match(/--gate\\s+/g)||[]).length+5)\"",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "perfBaseline": {
+      "value": {
+        "coldStartMedianMs": 546,
+        "longConversationMedianMs": 20,
+        "packagedStartMedianMs": 429,
+        "bigProjectTreeMedianMs": 12,
+        "generatedAt": "2026-11-04T21:27:37.098Z"
+      },
+      "source": "test/perf-baseline.json",
+      "command": "npm run quality:perf",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "rafFrameTime": {
+      "value": {
+        "p50Ms": 8.4,
+        "p95Ms": 10.3,
+        "maxMs": 26.7,
+        "count": 270
+      },
+      "source": "acceptance/post-s7-2026-11-10/h8/dom-budget-live.json:frameSamples",
+      "command": "node scripts/post-s7-dom-budget-live.cjs",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "reasonCodeCount": {
+      "value": {
+        "codes": 42,
+        "categories": 9
+      },
+      "source": "core/petri-server/helpers/reason-codes.js:31-92",
+      "command": "node -e \"const r=require('./core/petri-server/helpers/reason-codes.js');console.log(r.listReasonCodes().length)\"",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "silentCatchBaseline": {
+      "value": {
+        "total": 395,
+        "fileCount": 92,
+        "scanRoots": [
+          "core",
+          "src"
+        ]
+      },
+      "source": "test/silent-catch-baseline.json / scripts/silent-catch-ratchet.mjs:29",
+      "command": "npm run gate:silent-catch",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "unmappedTests": {
+      "value": {
+        "unmapped": 90,
+        "rules": 366,
+        "updatedAt": "2026-11-10"
+      },
+      "source": "test/impact-map-coverage-baseline.json / test/impact-map.json",
+      "command": "npm run test:changed:list",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "uiLedgerCounts": {
+      "value": {
+        "sections": 497,
+        "uniqueIds": 488,
+        "verified": 450,
+        "debt": 35,
+        "liveMissing": 13,
+        "blocked": 22,
+        "note": "另有标题计数口径 494/52/7 与分段解析口径，不混用"
+      },
+      "source": "acceptance/block-332/ui-ledger-triage.json（分段解析口径）",
+      "command": "npm run ui:audit:triage",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "earRatio": {
+      "value": {
+        "assetized": 871,
+        "denominator": 2013,
+        "frozenEarPct": 43.3,
+        "note": "冻结台账口径；当次门取样读数须另跑 npm run quality:ear，不复用冻结值"
+      },
+      "source": "acceptance/block-351/assetized-manifest.json:totals",
+      "command": "npm run quality:ear",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    },
+    "blueprintStatusParity": {
+      "value": {
+        "postS7Registry": "completed",
+        "postS7ReadmeActive": false,
+        "postH9Registry": "planned",
+        "postH9ReadmePlanned": true,
+        "conflict": false
+      },
+      "source": "docs/DOC-REGISTRY.json + docs/README.md:1-2",
+      "command": "npm run docs:check",
+      "capturedAt": "2026-11-10T13:16:10.057Z"
+    }
+  }
+}
