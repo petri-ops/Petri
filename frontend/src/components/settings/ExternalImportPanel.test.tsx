@@ -95,4 +95,43 @@ describe('ExternalImportPanel（BLOCK-264 · C-35）', () => {
     const rb = calls.find((c) => c.path === '/import/external-agent/rollback');
     expect(rb?.body.applyId).toBe('imp-abc');
   });
+
+
+// BLOCK-394 B-13 — 操作回执「消失后可回看」：有界、去重、可清空；不新建通知中心。
+describe('ExternalImportPanel 回执回看（B-13）', () => {
+  afterEach(() => { vi.unstubAllGlobals(); cleanup(); });
+
+  async function runRollback() {
+    const { impl } = mockFetchByRoute({
+      '/import/external-agent/preview': { body: { ok: true, patch: { 'runtime::approvalDefaultMode': 'read' }, credentialsDetected: [], unsupported: [] } },
+      '/import/external-agent/apply': { body: { status: 'ok', appliedKeys: ['runtime::approvalDefaultMode'], applyId: 'imp-rb', rollbackAvailable: true } },
+      '/import/external-agent/rollback': { body: { status: 'ok', applyId: 'imp-rb', restoredKeys: ['runtime::approvalDefaultMode'] } },
+    });
+    vi.stubGlobal('fetch', impl);
+    render(<ExternalImportPanel apiBase="http://mock/api" />);
+    fireEvent.change(screen.getByPlaceholderText(/粘贴配置内容/), { target: { value: 'approval_policy = "untrusted"' } });
+    fireEvent.click(screen.getByRole('button', { name: /预览/ }));
+    await waitFor(() => expect(document.querySelector('[data-external-import-preview]')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /应用所选/ }));
+    fireEvent.click(screen.getByRole('button', { name: /确认应用/ }));
+    await waitFor(() => expect(document.querySelector('[data-external-import-applied]')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /回滚这次导入/ }));
+    await waitFor(() => expect(document.querySelector('[data-external-import-message]')).toBeTruthy());
+  }
+
+  it('回滚回执可展开回看：role=log 在场且含回执文本，清空后按钮消失', async () => {
+    await runRollback();
+    const toggle = document.querySelector('[data-external-import-receipts-toggle]') as HTMLElement;
+    expect(toggle).toBeTruthy();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    const list = document.querySelector('[data-external-import-receipts-list]') as HTMLElement;
+    expect(list?.getAttribute('role')).toBe('log');
+    expect(list?.textContent).toContain('已回滚');
+    fireEvent.click(document.querySelector('[data-external-import-receipts-clear]') as HTMLElement);
+    expect(document.querySelector('[data-external-import-receipts-toggle]')).toBeNull();
+    // 原 live region 仍然在场（播报语义未被回看区替代）
+    expect(document.querySelector('[data-external-import-message]')?.getAttribute('aria-live')).toBe('polite');
+  });
+});
 });

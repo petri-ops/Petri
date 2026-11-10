@@ -1,0 +1,89 @@
+{
+  "admission": {
+    "ok": true,
+    "issues": [],
+    "rows": [
+      {
+        "id": "workspace_exec",
+        "state": "consumed",
+        "consumes": true,
+        "reason": "执行边界出示并真正消耗一次性凭据（BLOCK-386 H1 闭环）"
+      },
+      {
+        "id": "tools_executor",
+        "state": "deferred",
+        "consumes": false,
+        "reason": "无 handlerOptions 通道；凭据载体需跨 tool_jobs 行与 SSH 会话设计，显式 deferred 不冒充接线"
+      },
+      {
+        "id": "ssh_direct_runner",
+        "state": "deferred",
+        "consumes": false,
+        "reason": "无 handlerOptions 通道；凭据载体需跨 tool_jobs 行与 SSH 会话设计，显式 deferred 不冒充接线"
+      }
+    ],
+    "note": "静默缺失即红：新增入口必须显式判 consumed/deferred 并留因。"
+  },
+  "bigFiles": {
+    "ok": true,
+    "issues": [],
+    "rows": [
+      {
+        "file": "core/petri-server/loop-orchestrator.js",
+        "lines": 1579,
+        "anchored": true,
+        "anchorLines": 1579
+      },
+      {
+        "file": "frontend/src/components/copilot/SimpleChat.tsx",
+        "lines": 2079,
+        "anchored": true,
+        "anchorLines": 2079
+      },
+      {
+        "file": "frontend/src/pages/project-workspace.tsx",
+        "lines": 1221,
+        "anchored": true,
+        "anchorLines": 1221
+      },
+      {
+        "file": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+        "lines": 1429,
+        "anchored": true,
+        "anchorLines": 1429
+      }
+    ],
+    "note": "独立锚只减不增；巨型文件不在本包拆分（W5b 一切片一会话 + 拆前拆后同套绿）。"
+  },
+  "pluginSites": {
+    "ok": true,
+    "issues": [],
+    "rows": [
+      {
+        "id": "mcp_registry",
+        "role": "pack_aware",
+        "packAware": true,
+        "hasInstalledJson": true,
+        "usesSingleLoader": true,
+        "expectedPackAware": true
+      },
+      {
+        "id": "server_boot",
+        "role": "pack_aware",
+        "packAware": true,
+        "hasInstalledJson": true,
+        "usesSingleLoader": true,
+        "expectedPackAware": true
+      },
+      {
+        "id": "plugin_manager",
+        "role": "installer",
+        "packAware": false,
+        "hasInstalledJson": false,
+        "usesSingleLoader": true,
+        "expectedPackAware": false
+      }
+    ],
+    "note": "三处差异表：装配结构未改（不改运行时语义），供后续 sourcePlan 收敛。"
+  }
+}

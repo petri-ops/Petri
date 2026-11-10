@@ -7857,7 +7857,10 @@
         "acceptance/post-s7-2026-11-10/h9/**",
         "resources/skills/manifest.json",
         "knip.json",
-        "eslint-suppressions.json"
+        "eslint-suppressions.json",
+        "scripts/post-s7-structural-gates.mjs",
+        "scripts/post-s7-big-file-ratchet.mjs",
+        "scripts/post-s7-tool-declaration.mjs"
       ],
       "tests": [
         "test/post-s7-h9-dependency-parity.test.mjs",
@@ -7865,7 +7868,12 @@
         "test/post-s7-h9-matrix-parity.test.mjs",
         "test/post-s7-h9-skill-integrity.test.mjs",
         "test/post-s7-gap-blocker-classification.test.mjs",
-        "test/post-s7-h9-knip-dynamic-entry.test.mjs"
+        "test/post-s7-h9-knip-dynamic-entry.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-role-prefix.test.mjs",
+        "test/post-s7-h9-cycle-decay.test.mjs",
+        "test/post-s7-h9-tool-declaration.test.mjs"
       ],
       "commands": [
         "docs-check"

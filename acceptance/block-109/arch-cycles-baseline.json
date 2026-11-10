@@ -11,7 +11,6 @@
     "core/petri-server/agent-runner.js -> core/petri-server/loop-orchestrator.js -> core/petri-server/agent-tools/index.js -> core/petri-server/agent-tools/agent-tool-interceptor.js -> core/petri-server/agent-tools/registry.js -> core/petri-server/agent-tools/spawn-agent-tools.js",
     "core/petri-server/agent-tools/registry.js -> core/petri-server/agent-tools/tool-defs.js",
     "core/petri-server/helpers/guest-permissions.js -> core/petri-server/helpers/permissions.js",
-    "frontend/src/components/editor/CodeMirror/extensions/unifiedDiff.ts -> frontend/src/components/editor/CodeMirror/types.ts",
     "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",
     "frontend/src/components/workspace-panels/LeftPanel.tsx -> frontend/src/components/workspace-panels/LeftSshCreatePanel.tsx",
     "frontend/src/pages/project-workspace/FileTreeItem.tsx -> frontend/src/pages/project-workspace/FileTreeList.tsx"

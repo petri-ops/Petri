@@ -44,6 +44,15 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  // BLOCK-394 B-13 — 操作回执有界回看：单条 live region 仍负责播报，这里只做「消失后可回看」。
+  // 组件内局部状态，不新建全局通知中心 / 不改 ToastProvider 语义。
+  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const pushMessage = useCallback((text: string) => {
+    setMessage(text);
+    if (!text) return;
+    setMessageHistory((prev) => [text, ...prev.filter((x) => x !== text)].slice(0, 20));
+  }, []);
 
   const patchKeys = useMemo(() => (preview?.patch ? Object.keys(preview.patch) : []), [preview]);
 
@@ -117,14 +126,14 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
       const { status, data } = await callApi('/import/external-agent/rollback', { applyId: applyResult.applyId });
       if (status === 200) {
         const restored = Array.isArray(data.restoredKeys) ? (data.restoredKeys as string[]).join('、') : '';
-        setMessage(`已回滚（${restored || '无键'}）`);
+        pushMessage(`已回滚（${restored || '无键'}）`);
         setApplyResult(null);
       } else {
         const rbErr = typeof data.error === 'string' ? data.error : String(status);
-        setMessage(`回滚失败：${rbErr}`);
+        pushMessage(`回滚失败：${rbErr}`);
       }
     } catch {
-      setMessage('回滚失败：network_error');
+      pushMessage('回滚失败：network_error');
     } finally {
       setBusy(false);
     }
@@ -233,6 +242,27 @@ export function ExternalImportPanel({ apiBase }: { apiBase?: string } = {}) {
       )}
       {/* BLOCK-369（NSO-W3 F-18）回滚/操作回执 live region：读屏用户可听到结果。 */}
       {message && <p data-external-import-message role="status" aria-live="polite">{message}</p>}
+      {/* BLOCK-394 B-13 — 回执回看：有界 20 条、去重、可清空；role=log 供读屏按需查阅。 */}
+      {messageHistory.length > 0 && (
+        <div data-external-import-receipts>
+          <button
+            type="button"
+            data-external-import-receipts-toggle
+            aria-expanded={historyOpen}
+            onClick={() => setHistoryOpen((v) => !v)}
+          >
+            操作回执（{messageHistory.length}）
+          </button>
+          {historyOpen && (
+            <div role="log" data-external-import-receipts-list>
+              <ul>
+                {messageHistory.map((entry, i) => <li key={`${i}-${entry}`}>{entry}</li>)}
+              </ul>
+              <button type="button" data-external-import-receipts-clear onClick={() => { setMessageHistory([]); setHistoryOpen(false); }}>清空回执</button>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

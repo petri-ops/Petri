@@ -36,9 +36,10 @@ const DIFF_TIMEOUT_MS = 1000;
  * `collapseUnchanged`：折叠 hunk 间长段未变更上下文（merge view 原生
  * "⇕ 展开"控件），用于主区审阅模式的大空间 diff。
  */
-export interface DiffViewOptions {
-  collapseUnchanged?: { margin: number; minSize: number };
-}
+// BLOCK-394 B-25 — 单一真相源在 ../types.ts（公共类型 barrel）。
+// re-export 保持 useCodeMirrorEditor.ts 等既有消费方 import 路径不变，依赖方向变单向。
+export type { DiffViewOptions } from '../types';
+import type { DiffViewOptions } from '../types';
 
 /**
  * 创建 unified diff extension。

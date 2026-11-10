@@ -394,11 +394,11 @@ async function runAgentLoop({
     console.error('[agent-runner] gen-ui output root injection failed:', e && e.message ? e.message : e);
   }
 
-  // BLOCK-93 P1 — 子智能体角色专职约束（注册表指令片段，prompt 级软约束；
-  // 紧跟基础 system prompt 之后，后续增量块仍在其后追加）
-  if (roleDirective) {
-    systemPrompt += '\n\n=== 子智能体角色专职约束 ===\n' + roleDirective;
-  }
+  // BLOCK-93 P1 / BLOCK-394 B-03 根修——角色专职约束是**子 agent 整个 run 内恒定**的结构性身份，
+  // 必须属于静态前缀（首条 system）。此前拼在 systemPrompt 尾部 → 被 slice 进 dynamicContext
+  // → assembleMessages 放到末尾 system → context-budget-step 的裁剪器只保护首条 system，
+  // 末尾动态块被当普通历史裁掉（block93-role-prompt 实机测试因此判红）。
+  // 注入点下移到 staticPrefix 组装处；此处保留说明避免有人再加回来。
 
   // 「子智能体汇报收敛」汇报契约（呈现收敛的提示词面，2026-09-21 用户裁决
   // 「每个子智能体只要核对自己的那个部分……总结后交给主智能体最后统一汇总」）：
@@ -704,7 +704,10 @@ async function runAgentLoop({
   }
   // BLOCK-212 — **前缀稳定**：system 只放静态前缀；动态上下文（每轮可能变）挪到消息末尾。
   // 这样历史保持 append-only 的干净前缀，下一轮可整段复用缓存；动态段不落历史，不会污染下一轮。
-  const staticPrefix = systemPrompt.slice(0, staticPrefixChars);
+  // BLOCK-394 B-03：角色块并进静态前缀（前缀仍恒定：同一子任务的 role 不变）。
+  // 首条 system 受 trimMessagesToBudget 保护，不再被上下文裁剪挤出。
+  const rolePrefix = roleDirective ? '\n\n=== 子智能体角色专职约束 ===\n' + roleDirective : '';
+  const staticPrefix = systemPrompt.slice(0, staticPrefixChars) + rolePrefix;
   const dynamicContext = systemPrompt.slice(staticPrefixChars);
   const fullMessages = require('./helpers/prompt-assembly').assembleMessages({
     staticPrefix,

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-big-file-anchor",
+  "generatedAt": "2026-11-10",
+  "policy": "行数只减不增 + 内容指纹必须同批重打；与 code-size-ledger 集合互斥",
+  "files": [
+    {
+      "path": "core/petri-server/loop-orchestrator.js",
+      "lines": 1579,
+      "sha256": "ab0d48f49ff6676b10c43a93afb0f0f88fecc8b354a86eb15e585933214fbdac",
+      "missing": false
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "lines": 2079,
+      "sha256": "8839c12c6d9e3a4a77e11ae514c65ddd4419a10fed9b610bd8b34a438910b397",
+      "missing": false
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "lines": 1221,
+      "sha256": "2174440aa824f19100da82f68c1b55af58fdb89da16bef6dbb45faa95d88da55",
+      "missing": false
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",
+      "lines": 1429,
+      "sha256": "29adfa42eeea556db9b506ea44922b9e946503f97a0e67b762fa21399010b321",
+      "missing": false
+    }
+  ]
+}

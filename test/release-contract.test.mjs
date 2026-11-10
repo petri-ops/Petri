@@ -15,6 +15,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { findToolDeclarations } from '../scripts/post-s7-tool-declaration.mjs';
 
 // BLOCK-49 加映清债 —— 统一临时 DB 自举（存量：缺 projects 表）
 {
@@ -88,14 +89,9 @@ console.log(
 // ── 4. goldenPath.tool must appear in the in-repo capability manifests ──
 const toolId = contract?.goldenPath?.tool;
 assert.ok(toolId, 'goldenPath.tool missing in contract');
-const skillsDir = resolve(repoRoot, 'resources', 'skills');
-const manifestHits = [];
-for (const entry of existsSync(skillsDir) ? readdirSync(skillsDir, { withFileTypes: true }) : []) {
-  if (!entry.isDirectory()) continue;
-  const manifestPath = resolve(skillsDir, entry.name, 'manifest.json');
-  if (!existsSync(manifestPath)) continue;
-  if (readFileSync(manifestPath, 'utf8').includes(toolId)) manifestHits.push(entry.name);
-}
+// BLOCK-394 B-20 — 结构化能力声明（不再用 includes 扫描不存在的目录文件）。
+const topManifestPath = resolve(repoRoot, 'resources', 'skills', 'manifest.json');
+const skillsManifest = existsSync(topManifestPath) ? JSON.parse(readFileSync(topManifestPath, 'utf8')) : {};
 // BLOCK-375（S0）能力真相三源化：BLOCK-214（082707e5「生信 skills 去核」）把
 // deseq2 等领域能力迁入兄弟仓 petri-pack-bio（registry/tool-registry.json），
 // 仓内 skill 清单不再覆盖它们。golden path 能力真相=①仓内 skill manifest
@@ -105,8 +101,10 @@ const WAIVED_GOLDEN_TOOLS = new Map([
   ['deseq2', 'BLOCK-214 生信 skills 去核：deseq2 由领域包 petri-pack-bio 提供（registry/tool-registry.json），仓内 manifest 引用随之失效；golden path 重基（in-repo 能力）前显式豁免，重基后移除'],
 ]);
 const packRegistryPath = resolve(repoRoot, '..', 'petri-pack-bio', 'registry', 'tool-registry.json');
-const packDeclares = existsSync(packRegistryPath)
-  && readFileSync(packRegistryPath, 'utf8').includes(`"${toolId}"`);
+const packRegistry = existsSync(packRegistryPath) ? JSON.parse(readFileSync(packRegistryPath, 'utf8')) : {};
+const declared = findToolDeclarations(toolId, { skillsManifest, packRegistry });
+const manifestHits = declared.hits.filter((h) => h.startsWith('skills:'));
+const packDeclares = declared.hits.includes('pack:TOOLS');
 const waived = WAIVED_GOLDEN_TOOLS.get(toolId);
 assert.ok(
   manifestHits.length > 0 || packDeclares || waived,

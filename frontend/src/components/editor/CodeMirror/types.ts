@@ -16,9 +16,12 @@
 
 import type { Extension } from '@codemirror/state';
 
-import type { DiffViewOptions } from './extensions/unifiedDiff';
-
-export type { DiffViewOptions };
+// BLOCK-394 B-25 — 环消亡：DiffViewOptions 原定义在 extensions/unifiedDiff.ts，
+// types.ts 又反向 import 它（types ↔ unifiedDiff 双向类型环）。公共类型归位到本 barrel，
+// unifiedDiff 单向 import 并 re-export 保持既有消费方零改动。
+export interface DiffViewOptions {
+  collapseUnchanged?: { margin: number; minSize: number };
+}
 
 /**
  * 编辑器模式。
