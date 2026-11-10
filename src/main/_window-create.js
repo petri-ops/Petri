@@ -16,6 +16,7 @@ const path = require("path");
 const { BRAND } = require("./brand");
 const { zoomBy, zoomReset } = require("./_zoom.js");
 const { extractRestorableRoute, loadLastRoute, saveLastRoute, computeStartupLoadUrl } = require("./_main-window-state.js");
+const { openSanitizedExternal } = require("./external-url-policy");
 
 /**
  * Create the main BrowserWindow with all event handlers attached.
@@ -260,26 +261,27 @@ async function createWindow({
   // ── External Links → System Browser ───────────────────────────
   // All window.open calls are denied to avoid popup storms from failed
   // non-HTTP URLs. External http/https links go to system browser.
+  // L1-5（蓝图 L-60）：外开只走 sanitize 准入（http(s)+无 userinfo）
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      shell.openExternal(url);
-    }
+    openSanitizedExternal(url, shell);
     return { action: "deny" };
   });
 
   // ── Navigation Guard ──────────────────────────────────────────
   // Only allow navigation within the local server scope to prevent
   // accidental navigation to external URLs or file:// causing white screens.
+  // L1-5（蓝图 L-60）：导航门 origin 精确比较（URL 语 origin，非 startsWith 前缀——
+  // "http://localhost:3001.evil.com" 形态不再命中）；外开走 sanitizeExternalUrl。
   mainWindow.webContents.on("will-navigate", (event, url) => {
-    const allowed = [
-      spaServerUrl?.replace(/\/$/, ""),
-      rendererDevUrl.replace(/\/$/, ""),
-    ].filter(Boolean);
-    if (!allowed.some((a) => url.startsWith(a))) {
+    const allowedOrigins = [spaServerUrl, rendererDevUrl]
+      .filter(Boolean)
+      .map((a) => { try { return new URL(a).origin; } catch { return null; } })
+      .filter(Boolean);
+    let urlOrigin = null;
+    try { urlOrigin = new URL(url).origin; } catch { urlOrigin = null; }
+    if (!urlOrigin || !allowedOrigins.includes(urlOrigin)) {
       event.preventDefault();
-      if (url.startsWith("http://") || url.startsWith("https://")) {
-        shell.openExternal(url);
-      }
+      openSanitizedExternal(url, shell);
     }
   });
 

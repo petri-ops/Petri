@@ -30,7 +30,7 @@ const EVIDENCE = path.join(ROOT, 'acceptance', 'ui-696');
 const BACKEND_PORT = 3399;
 const API = `http://127.0.0.1:${BACKEND_PORT}/api`;
 const APP = 'http://localhost:3000';
-const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

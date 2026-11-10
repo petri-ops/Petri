@@ -21,7 +21,7 @@ const ROOT = lib.findRepoRoot(__dirname);
 
 const API = 'http://127.0.0.1:3001/api';
 const APP = 'http://localhost:3000';
-const AUTH = { Authorization: 'Bearer desktop-local' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' };
 const EVIDENCE = path.join(ROOT, 'acceptance', 'ui-551');
 const MESSAGE = '请对归档库执行破坏性操作，目标先用 db。';
 

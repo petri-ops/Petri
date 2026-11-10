@@ -90,7 +90,9 @@ export interface InstallDeepLinkPreview {
   requiresReplace: { pack: boolean; mcp: string[] };
 }
 export interface InstallDeepLinkExpected {
-  archive: { url: string; sha256: string; sizeBytes?: number | null };
+  archive?: { url: string; sha256: string; sizeBytes?: number | null };
+  /** L1-2（蓝图 L-51）：mcp 安装确认的预览快照（TOCTOU 对账；缺省即拒装）。 */
+  mcp?: { id: string; transport: 'stdio' | 'http'; command?: string; args?: string[]; url?: string };
 }
 
 declare global {

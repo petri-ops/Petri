@@ -200,7 +200,8 @@ async function waitChatRequest(afterN) {
 async function seedScratchpad() {
   const response = await fetch(`${API}/api/scratchpad`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    // L1-3（BLOCK-405）：无 Origin 变更请求须带本机随机 token（token 门激活时）
+    headers: { ...require('../local-token.cjs')(), 'content-type': 'application/json' },
     body: JSON.stringify({
       kind: 'text',
       title: 'UI-554 速记样本',

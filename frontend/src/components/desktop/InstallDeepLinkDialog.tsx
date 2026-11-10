@@ -111,7 +111,18 @@ export function InstallDeepLinkDialog(): React.ReactElement | null {
           sizeBytes: preview.pack.archive.sizeBytes,
         },
       }
-      : undefined;
+      : preview.kind === 'mcp' && preview.server
+        ? // L1-2（蓝图 L-51）：mcp 确认必须携带预览快照（id/command/args/url 对账）
+        {
+          mcp: {
+            id: preview.server.id,
+            transport: preview.server.transport,
+            ...(preview.server.transport === 'http'
+              ? { url: preview.server.url }
+              : { command: preview.server.command, args: preview.server.args }),
+          },
+        }
+        : undefined;
     setInstalling(true);
     setError('');
     try {

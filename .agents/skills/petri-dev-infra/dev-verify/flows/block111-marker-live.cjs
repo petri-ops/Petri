@@ -22,7 +22,7 @@ const path = require('node:path');
 const lib = require('../lib.cjs');
 
 const API = 'http://127.0.0.1:3001/api';
-const AUTH = { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'content-type': 'application/json' };
 const EVIDENCE_DIR = path.join(process.cwd(), 'acceptance', 'block-111');
 
 const TOP_MARKERS = {

@@ -1,0 +1,642 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l1-dependency-static-inventory",
+  "generatedAt": "2026-11-10T18:26:41.942Z",
+  "note": "L1-8（蓝图 L-61）：静态清单——native/预发布/range 标记；CVE 联网扫描 external-blocked（无凭据/出网）；钉扎评估归 L5-6（L-78 单一版本清单，依赖升级走评审 U 类）。",
+  "root": [
+    {
+      "name": "@electron/notarize",
+      "range": "^2.5.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/sdk",
+      "range": "^1.29.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "archiver",
+      "range": "^8.0.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "better-sqlite3",
+      "range": "^12.11.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "extract-zip",
+      "range": "^2.0.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "node-pty",
+      "range": "1.1.0-beta34",
+      "flags": [
+        "exact",
+        "prerelease"
+      ]
+    },
+    {
+      "name": "occt-import-js",
+      "range": "0.0.23",
+      "flags": [
+        "exact"
+      ]
+    },
+    {
+      "name": "occt-wasm",
+      "range": "5.11.0",
+      "flags": [
+        "exact"
+      ]
+    },
+    {
+      "name": "qrcode-generator",
+      "range": "^1.4.4",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "typescript",
+      "range": "^5.9.3",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "uuid",
+      "range": "^9.0.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@electron/rebuild",
+      "range": "^4.1.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@types/react",
+      "range": "^18.3.3",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@types/react-dom",
+      "range": "^18.3.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "ali-oss",
+      "range": "^6.23.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "dependency-cruiser",
+      "range": "^18.3.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "electron",
+      "range": "44.7.0",
+      "flags": [
+        "exact"
+      ],
+      "dev": true
+    },
+    {
+      "name": "electron-builder",
+      "range": "^26.15.3",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "eslint",
+      "range": "^9.39.5",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "eslint-plugin-react-hooks",
+      "range": "^7.1.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "eslint-plugin-security",
+      "range": "^4.0.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "globals",
+      "range": "^17.12.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "knip",
+      "range": "6.38.0",
+      "flags": [
+        "exact"
+      ],
+      "dev": true
+    },
+    {
+      "name": "react",
+      "range": "^18.3.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "react-dom",
+      "range": "^18.3.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "typescript-eslint",
+      "range": "^8.70.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    }
+  ],
+  "frontend": [
+    {
+      "name": "@codemirror/commands",
+      "range": "^6.5.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-cpp",
+      "range": "^6.0.3",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-css",
+      "range": "^6.3.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-go",
+      "range": "^6.0.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-html",
+      "range": "^6.4.12",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-java",
+      "range": "^6.0.2",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-javascript",
+      "range": "^6.2.2",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-json",
+      "range": "^6.0.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-markdown",
+      "range": "^6.2.5",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-python",
+      "range": "^6.1.6",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-rust",
+      "range": "^6.0.2",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-sql",
+      "range": "^6.10.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lang-yaml",
+      "range": "^6.1.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/language",
+      "range": "^6.10.2",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/legacy-modes",
+      "range": "^6.5.4",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/lint",
+      "range": "^6.8.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/merge",
+      "range": "^6.0.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/state",
+      "range": "^6.4.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@codemirror/view",
+      "range": "^6.28.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@lezer/highlight",
+      "range": "^1.2.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@mdx-js/react",
+      "range": "^3.1.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@mdx-js/rollup",
+      "range": "^3.1.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@xterm/addon-fit",
+      "range": "^0.11.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@xterm/xterm",
+      "range": "^6.0.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "@xyflow/react",
+      "range": "^12.12.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "exceljs",
+      "range": "^4.4.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "highlight.js",
+      "range": "^11.11.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "infima",
+      "range": "^0.2.0-alpha.45",
+      "flags": [
+        "range",
+        "prerelease"
+      ]
+    },
+    {
+      "name": "pdfjs-dist",
+      "range": "4.10.38",
+      "flags": [
+        "exact"
+      ]
+    },
+    {
+      "name": "react",
+      "range": "^18.3.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "react-dom",
+      "range": "^18.3.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "react-markdown",
+      "range": "^9.1.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "react-router-dom",
+      "range": "^7.18.4",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "rehype-highlight",
+      "range": "^7.0.2",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "rehype-sanitize",
+      "range": "^6.0.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "remark-admonitions",
+      "range": "^1.2.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "remark-gfm",
+      "range": "^4.0.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "three",
+      "range": "^0.186.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "unzipit",
+      "range": "2.0.3",
+      "flags": [
+        "exact"
+      ]
+    },
+    {
+      "name": "@docusaurus/tsconfig",
+      "range": "^3.10.2",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@testing-library/jest-dom",
+      "range": "^6.4.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@testing-library/react",
+      "range": "^16.0.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@types/react",
+      "range": "^18.3.3",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@types/react-dom",
+      "range": "^18.3.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@types/three",
+      "range": "^0.186.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "range": "^6.1.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "happy-dom",
+      "range": "^20.14.5",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "remark-frontmatter",
+      "range": "^5.0.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "tsx",
+      "range": "^4.23.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "typescript",
+      "range": "^5.5.4",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "vite",
+      "range": "^8.3.0",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    },
+    {
+      "name": "vitest",
+      "range": "^5.0.1",
+      "flags": [
+        "range"
+      ],
+      "dev": true
+    }
+  ],
+  "core": [
+    {
+      "name": "archiver",
+      "range": "^8.0.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "better-sqlite3",
+      "range": "^12.11.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "cors",
+      "range": "^2.8.5",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "express",
+      "range": "^4.18.0",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "multer",
+      "range": "^2.1.1",
+      "flags": [
+        "range"
+      ]
+    },
+    {
+      "name": "pdfjs-dist",
+      "range": "4.10.38",
+      "flags": [
+        "exact"
+      ]
+    },
+    {
+      "name": "uuid",
+      "range": "^9.0.1",
+      "flags": [
+        "range"
+      ]
+    }
+  ],
+  "nativeModules": [
+    "better-sqlite3",
+    "node-pty"
+  ],
+  "newDependencies": "无（红线：零新增依赖）"
+}

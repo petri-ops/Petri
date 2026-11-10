@@ -177,6 +177,12 @@ const rServerSupervisor = createOwnedBackendSupervisor({
   name: "petri-server",
   spawnProcess: () => {
     const rServerPath = resolveCore("petri-server", "server.js");
+    // L1-3（蓝图 L-52）：每 boot 随机本机请求 token——无 Origin 的变更动词请求必须携带
+    // （curl/脚本类本地调用方经 <dataDir>/local-request-token 0600 文件读取；浏览器请求
+    // 走回环 origin 门，不需要它）。
+    if (!process.env.PETRI_LOCAL_REQUEST_TOKEN) {
+      process.env.PETRI_LOCAL_REQUEST_TOKEN = require("crypto").randomBytes(32).toString("hex");
+    }
     const child = spawn(NODE_BIN, [rServerPath], {
       // BLOCK-16 PHASE 3: 把 Electron userData 路径显式注入给 petri-server subprocess，
       // 让 system-prompt 能读 working-tree-review/rejects/（30 天 TTL 拒绝清单）。

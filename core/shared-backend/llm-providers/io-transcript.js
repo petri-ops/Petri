@@ -14,6 +14,9 @@
  */
 
 const fs = require('fs');
+// L1-6（L-59）：脱敏单源复用（src/diagnostic-redaction.js 同一 shim 源）。
+let redactSensitiveValue = (x) => x;
+try { redactSensitiveValue = require('../redaction').redactSensitiveValue; } catch { /* 脱敏不可用时如实降级为不脱敏（不阻塞主链路） */ }
 const path = require('path');
 
 const MAX_RECORD_BYTES_DEFAULT = 8 * 1024 * 1024; // 8MB
@@ -238,13 +241,20 @@ function createIoTranscriptSink(options = {}) {
       };
 
       const sized = applyTruncation(record_, maxRecordBytes);
-      const line = safeStringify(sized);
+      // L1-6（蓝图 L-59）：落盘前过脱敏（token 形态/敏感键名替换为占位；无命中内容
+      // 逐字不变，审计读数与 block37 契约 fixture 兼容）。
+      let sanitized = sized;
+      try {
+        sanitized = redactSensitiveValue(sized);
+      } catch { sanitized = sized; }
+      const line = safeStringify(sanitized);
       if (!line || line === 'null') return;
 
       ensureDir();
       const file = targetFile(sized.conversationId);
       rotateIfNeeded(file);
-      fsMod.appendFileSync(file, `${line}\n`);
+      fsMod.appendFileSync(file, `${line}\n`, { mode: 0o600 });
+      try { fsMod.chmodSync(file, 0o600); } catch { /* 已 0600 时 no-op */ }
     } catch {
       // 落盘永不影响主链路
     }

@@ -51,7 +51,7 @@ async function poll(fn, { timeoutMs, intervalMs = 500, label }) {
 
 async function restGet(endpoint) {
   const response = await fetch(`${apiUrl()}/api${endpoint}`, {
-    headers: { Authorization: 'Bearer desktop-local' },
+    headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' },
     signal: AbortSignal.timeout(10_000),
   });
   return { status: response.status, data: await response.json().catch(() => null) };
@@ -60,7 +60,7 @@ async function restGet(endpoint) {
 async function restPost(endpoint) {
   const response = await fetch(`${apiUrl()}/api${endpoint}`, {
     method: 'POST',
-    headers: { Authorization: 'Bearer desktop-local', 'content-type': 'application/json' },
+    headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'content-type': 'application/json' },
     signal: AbortSignal.timeout(15_000),
   });
   return { status: response.status, data: await response.json().catch(() => null) };

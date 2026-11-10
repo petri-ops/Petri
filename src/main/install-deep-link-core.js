@@ -108,6 +108,35 @@ function readBoundedString(value, limit, what) {
   return { ok: true, value: text };
 }
 
+// L1-2（蓝图 L-51）：stdio command 白名单——深链/pack 声明只允许裸运行时名（无路径
+// 分隔符），args 禁止求值开关（-e/--eval/-p/--print/-c/--command/-x/--exec/-i）与
+// 相对逃逸（..）。原实现只做长度校验，`petri-install://mcp` 可写入「可执行文件+求值
+// 参数」的 stdio server（最终由 StdioClientTransport spawn）。
+const MCP_COMMAND_ALLOWLIST = new Set(['node', 'npm', 'npx', 'python', 'python3', 'uv', 'uvx', 'deno', 'bun', 'java']);
+const MCP_ARG_EVAL_BLOCKED = new Set(['-e', '--eval', '-p', '--print', '-c', '--command', '-x', '--exec', '-i', '--interactive']);
+const MCP_ARG_ESCAPE_RE = /(^|\/|\\)\.\.($|\/|\\)/;
+
+function validateStdioCommandShape(command, args) {
+  if (command.includes('/') || command.includes('\\') || command.includes('..')) {
+    return err('command_not_allowed', 'stdio command 只允许裸运行时名（node/npx/uvx/python3 等），不得携带路径。');
+  }
+  if (!MCP_COMMAND_ALLOWLIST.has(command)) {
+    return err('command_not_allowed', `stdio command 必须在运行时白名单内（${[...MCP_COMMAND_ALLOWLIST].join(' / ')}）。`);
+  }
+  if (!Array.isArray(args) || args.length === 0) {
+    return err('command_not_allowed', 'stdio command 必须携带启动参数（裸交互解释器不允许）。');
+  }
+  for (const a of args) {
+    if (MCP_ARG_EVAL_BLOCKED.has(a)) {
+      return err('args_eval_blocked', 'args 禁止求值开关（-e/--eval/-p/--print/-c/--command/-x/--exec/-i）。');
+    }
+    if (MCP_ARG_ESCAPE_RE.test(a)) {
+      return err('args_invalid', 'args 不得携带相对逃逸（..）。');
+    }
+  }
+  return { ok: true };
+}
+
 /** MCP 配置校验/归一化（深链专用：env 一律拒绝）。 */
 function validateMcpConfig(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
@@ -128,12 +157,14 @@ function validateMcpConfig(raw) {
   } else {
     const command = readBoundedString(raw.command, 512, 'command');
     if (!command.ok) return err('command_required', 'stdio MCP 配置必须带 command。');
-    server.command = command.value;
     const args = Array.isArray(raw.args) ? raw.args : [];
     if (args.length > 20) return err('args_too_many', 'args 最多 20 条。');
     if (args.some((item) => typeof item !== 'string' || item.length > 200)) {
       return err('args_invalid', 'args 只能是最长 200 的字符串。');
     }
+    const shape = validateStdioCommandShape(command.value, args);
+    if (!shape.ok) return shape;
+    server.command = command.value;
     server.args = args.map((item) => item);
   }
   return { ok: true, server };
@@ -458,6 +489,22 @@ async function confirmInstall(raw, options = {}) {
   );
 
   if (parsed.kind === 'mcp') {
+    // L1-2（L-51）：确认必须携带与预览一致的快照（pack 分支同款 TOCTOU 对账纪律）——
+    // 原实现无对账，预览与确认之间配置可被替换。
+    if (!expected || typeof expected !== 'object' || !expected.mcp || typeof expected.mcp !== 'object') {
+      return err('expected_required', '确认安装 MCP 必须带预览快照（expected.mcp）。');
+    }
+    const s = parsed.server;
+    const snap = expected.mcp;
+    const same = s.id === snap.id
+      && s.transport === snap.transport
+      && (s.transport === 'http'
+        ? s.url === snap.url
+        : (s.command === snap.command
+          && JSON.stringify(s.args || []) === JSON.stringify(snap.args || [])));
+    if (!same) {
+      return err('mcp_preview_mismatch', 'MCP 配置与预览时不一致（id/command/args/url 已变化），请重新预览。');
+    }
     const replaces = currentMcpIds.has(parsed.server.id);
     if (replaces && !allowReplaceMcp) {
       return err('mcp_replace_not_allowed', `已存在 MCP server ${parsed.server.id}；如需替换请显式勾选。`);

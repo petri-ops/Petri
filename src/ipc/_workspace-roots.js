@@ -43,7 +43,35 @@ function listRegisteredWorkspaceRoots() {
   return [...roots];
 }
 
+/**
+ * L1-1（蓝图 L-50）：open-shell 目标解析——候选路径（renderer 传入或 env 兜底）realpath
+ * 后必须精确命中登记工作区根（或显式给定的兜底 realpath）；未命中/列举失败一律拒绝。
+ * 这是 terminal:open-shell 的字符白名单之外的真白名单（登记根制）。
+ */
+function resolveOpenShellTarget(targetPath, { listRoots, fallbacks = [] } = {}) {
+  if (typeof listRoots !== 'function') return { ok: false, error: 'workspace_roots_unavailable' };
+  let registered;
+  try {
+    registered = listRoots();
+  } catch {
+    return { ok: false, error: 'workspace_roots_unavailable' };
+  }
+  if (!Array.isArray(registered)) return { ok: false, error: 'workspace_roots_unavailable' };
+  const candidates = [];
+  const raw = typeof targetPath === 'string' && targetPath.trim() ? targetPath.trim() : null;
+  if (raw) candidates.push(raw);
+  for (const f of fallbacks) {
+    if (typeof f === 'string' && f.trim()) candidates.push(f.trim());
+  }
+  for (const candidate of candidates) {
+    const real = realpathOrNull(candidate);
+    if (real && registered.includes(real)) return { ok: true, path: real };
+  }
+  return { ok: false, error: 'workspace_not_registered' };
+}
+
 module.exports = {
   isRegisteredWorkspaceRoot,
   listRegisteredWorkspaceRoots,
+  resolveOpenShellTarget,
 };

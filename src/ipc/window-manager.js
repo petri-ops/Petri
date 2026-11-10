@@ -371,16 +371,18 @@ function setupWindowManagerIpc({
 
     // Same guards as the main window: pop-outs load only the local
     // SPA origin, external links go to the system browser.
-    const allowedBase = spaBase.replace(/\/$/, "");
+    // L1-5（蓝图 L-60）：导航门 origin 精确比较（startsWith 前缀可被 host 尾巴绕过）
+    let allowedOrigin = null;
+    try { allowedOrigin = new URL(spaBase).origin; } catch { allowedOrigin = null; }
     win.webContents.on("will-navigate", (event, target) => {
-      if (!target.startsWith(allowedBase)) {
+      let targetOrigin = null;
+      try { targetOrigin = new URL(target).origin; } catch { targetOrigin = null; }
+      if (!targetOrigin || targetOrigin !== allowedOrigin) {
         event.preventDefault();
       }
     });
     win.webContents.setWindowOpenHandler(({ url: target }) => {
-      if (target.startsWith("http://") || target.startsWith("https://")) {
-        require("electron").shell.openExternal(target).catch(() => {});
-      }
+      require('../main/external-url-policy').openSanitizedExternal(target, require('electron').shell);
       return { action: "deny" };
     });
     win.webContents.on("did-fail-load", (_event, code, desc, validated) => {

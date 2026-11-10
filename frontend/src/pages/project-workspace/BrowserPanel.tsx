@@ -5,7 +5,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { petriEvents, subscribePetriEvent } from '@/lib/events';
-import { getBrowserViewportSize, isPetriLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
+import { getBrowserViewportSize, isNavigableWebUrl, isPetriLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useInvalidationStream } from '@/hooks/useInvalidationStream';
 import {
   performBrowserAction,
@@ -92,6 +92,14 @@ export function BrowserPanel({
   const navigate = useCallback(
     (value: string) => {
       const nextUrl = normalizeBrowserUrl(value);
+      // L1-4（蓝图 L-53）：每次 loadURL 前强制 http(s)+非回环主机白名单（本地面走 iframe 通道）
+      if (!isPetriLocalBrowserUrl(nextUrl) && !isNavigableWebUrl(nextUrl)) {
+        setFrameUrl('');
+        setBrowserError('blocked_scheme_or_host');
+        setLoading(false);
+        onNavigationStateChange?.({ canGoBack: false, canGoForward: false });
+        return;
+      }
       startUrlRef.current = nextUrl;
       setInputUrl(nextUrl);
       onUrlChange(nextUrl);
@@ -366,6 +374,9 @@ export function BrowserPanel({
           key={frameKey}
           className={styles.browserFrame}
           src={frameUrl}
+          // L1-4（蓝图 L-53）：本地报告 iframe 补 sandbox（不给 allow-same-origin——
+          // 同源沙箱可自逃逸；观感归 E 类走查，报告页需存储/同源时另立裁决）
+          sandbox="allow-scripts allow-forms allow-popups allow-modals"
           title="Petri HTML 报告"
           onLoad={() => {
             setLoading(false);

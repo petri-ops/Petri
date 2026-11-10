@@ -66,15 +66,15 @@ test('BLOCK-84 dev: non-default port is carried through, not hardcoded to 3000',
   assert.ok(!set.has('http://localhost:3000'), 'must not leak the default port');
 });
 
-test('BLOCK-84: existing PETRI_TRUSTED_DESKTOP_ORIGINS entries are preserved', () => {
+test('BLOCK-84（L1-3/L-52 修订）：existing 条目保留但非回环被滤——env 注入不再直达三道门', () => {
   const set = computeTrustedRendererOrigins({
     existing: 'http://localhost:9999 , http://10.0.0.5:8080',
     isDev: true,
     rendererDevUrl: 'http://localhost:3000',
     rendererPort: null,
   });
-  assert.ok(set.has('http://localhost:9999'), 'pre-existing entry must survive');
-  assert.ok(set.has('http://10.0.0.5:8080'), 'whitespace must be trimmed');
+  assert.ok(set.has('http://localhost:9999'), '回环条目保留（含空白裁剪）');
+  assert.equal(set.has('http://10.0.0.5:8080'), false, '非回环 env 注入必须被过滤（L-52）');
   assert.ok(set.has('http://127.0.0.1:3000'), 'dev variants still added');
 });
 

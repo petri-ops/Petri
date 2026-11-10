@@ -9,6 +9,7 @@
 // read_text 有界（20k，与后端截断对齐）；失败如实回传（不假装操作成功）。
 // ============================================================
 import { getApiPrefix, getToken } from '@/lib/authClient';
+import { isNavigableWebUrl } from '@/lib/browser-url';
 
 export interface BrowserActionParams {
   action: string;
@@ -42,6 +43,9 @@ export async function performBrowserAction(
   try {
     if (action === 'navigate') {
       if (!params.url) return { ok: false, error: 'url_required' };
+      // L1-4（蓝图 L-53）：bridge 与 navigate 面共用同一 http(s)+非回环校验（后端
+      // assertPublicUrl 之外的渲染层复检，防直连 webview 的任意 scheme 载入）。
+      if (!isNavigableWebUrl(params.url)) return { ok: false, error: 'url_not_allowed' };
       await bridge.navigate(params.url);
       return { ok: true, result: { url: params.url } };
     }

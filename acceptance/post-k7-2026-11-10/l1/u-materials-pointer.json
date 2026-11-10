@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l1-u-materials-pointer",
+  "generatedAt": "2026-11-10T18:26:59.852Z",
+  "materials": [
+    {
+      "id": "L-56",
+      "topic": "ADMISSION observe→enforce",
+      "path": "docs/post-s7-h1-admission-fk-decision-material.md",
+      "status": "pending_user_ruling",
+      "note": "第五轮复核注记已加；默认语义零改动"
+    },
+    {
+      "id": "L-79",
+      "topic": "FK OFF/ON（179 违约行清偿）",
+      "path": "docs/post-s7-h1-admission-fk-decision-material.md",
+      "status": "pending_user_ruling",
+      "note": "同上；独立大包待用户发令"
+    }
+  ]
+}

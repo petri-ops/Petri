@@ -62,11 +62,13 @@ function isDestroyed(contents) {
   return typeof contents.isDestroyed === 'function' ? contents.isDestroyed() : false;
 }
 
+// L1-3（蓝图 L-52）：env 源回环过滤（谓词单源经 env-coordinator re-export，守 R3）。
 function readTrustedOriginsFromEnv(env = process.env) {
+  const isLoopback = require('../main/env-coordinator').isLoopbackHttpOrigin;
   return String(env.PETRI_TRUSTED_DESKTOP_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
-    .filter(Boolean);
+    .filter((value) => value && isLoopback(value));
 }
 
 /**
@@ -145,6 +147,7 @@ function installGlobalIpcSenderGuard(ipcMain, { getTrustedOrigins = readTrustedO
 module.exports = {
   decideIpcSenderTrust,
   installGlobalIpcSenderGuard,
+  readTrustedOriginsFromEnv,
   registerTrustedFileSenderHost,
   resetRegisteredFileSenderHosts,
 };

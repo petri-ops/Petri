@@ -89,3 +89,7 @@ node scripts/verify-artifact-chain.mjs .petri-dev-user-data/data/petri.db --inve
 - 竞态与口径：本文件所有读数取自 2026-11-09 当次本机 dev 库；换机器 / 换库需重跑清单。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+> **第五轮复核（2026-11-11 · BLOCK-405 / L1-7）**：本材料承载的两个 U 类裁决点在第五轮审计（docs/post-k7-full-audit-and-blueprint-2026-11-10.md L-56/L-79）中维持原判——①ADMISSION observe→enforce：默认语义不改（execution-admission.js observe 分支 ok 与 verdict 分离已在 L3 排期，但 enforce 切换必须待用户裁决）；②FK OFF/ON（BLOCK-372 Batch-2 实测 179 违约行）：逐表清偿方案见上文，独立大包需用户发令。状态 **pending_user_ruling**（Agent 不代答、不改默认语义）。

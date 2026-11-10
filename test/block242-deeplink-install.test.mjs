@@ -159,7 +159,7 @@ const PACK_MANIFEST = {
     name: 'Demo Pack',
     version: '1.0.0',
     archive: { url: 'http://127.0.0.1:0/pack.zip', sha256: 'a'.repeat(64), sizeBytes: 4 },
-    mcpServers: [{ id: 'collide-mcp', command: 'node', args: [] }, { id: 'fresh-mcp', command: 'node', args: [] }],
+    mcpServers: [{ id: 'collide-mcp', command: 'node', args: ['s.js'] }, { id: 'fresh-mcp', command: 'node', args: ['s.js'] }],
   },
 };
 
@@ -199,7 +199,7 @@ test('BLOCK-242 — 预览：来源/下载地址/大小/SHA-256 与替换警告�
       assert.ok(preview.preview.risk.reasons.includes('installs_mcp_servers'));
 
       const mcpPreview = await core.previewFromLink(
-        mcpConfigLink({ id: 'collide-mcp', command: 'node' }),
+        mcpConfigLink({ id: 'collide-mcp', command: 'node', args: ['s.js'] }),
         { fetchImpl: globalThis.fetch, listMcpServers: async () => [{ id: 'collide-mcp' }] },
       );
       assert.equal(mcpPreview.ok, true);
@@ -219,7 +219,7 @@ test('BLOCK-242 — 确认：TOCTOU 变化拒绝；sha/size 双验；成功安�
       const shaHeader = req.headers['x-manifest-sha'];
       const manifest = manifestFor(base, {
         archive: { sha256: shaHeader === 'changed' ? 'b'.repeat(64) : coreSha('ZIP!'), sizeBytes: 4 },
-        mcpServers: [{ id: 'collide-mcp', command: 'node', args: [] }],
+        mcpServers: [{ id: 'collide-mcp', command: 'node', args: ['s.js'] }],
       });
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify(manifest));
@@ -300,13 +300,21 @@ test('BLOCK-242 — mcp kind 确认：替换门 + upsert', async () => {
     listMcpServers: async () => [{ id: 'demo-mcp' }],
     upsertMcpServer: async (server) => { calls.push(server.id); return {}; },
   };
-  const link = mcpConfigLink({ id: 'demo-mcp', command: 'node' });
-  const refused = await core.confirmInstall(link, { ...deps, allowReplaceMcp: false });
+  // L1-2（蓝图 L-51）：stdio command 白名单（须带启动参数）+ 确认必须带预览快照对账。
+  const link = mcpConfigLink({ id: 'demo-mcp', command: 'node', args: ['s.js'] });
+  const expectedMcp = { mcp: { id: 'demo-mcp', transport: 'stdio', command: 'node', args: ['s.js'] } };
+  const noExpected = await core.confirmInstall(link, { ...deps, allowReplaceMcp: true, expected: null });
+  assert.equal(noExpected.ok, false, '缺预览快照必须拒（TOCTOU 对账）');
+  assert.equal(noExpected.error, 'expected_required');
+  const mismatch = await core.confirmInstall(link, { ...deps, allowReplaceMcp: true, expected: { mcp: { id: 'demo-mcp', transport: 'stdio', command: 'node', args: ['other.js'] } } });
+  assert.equal(mismatch.ok, false);
+  assert.equal(mismatch.error, 'mcp_preview_mismatch');
+  const refused = await core.confirmInstall(link, { ...deps, allowReplaceMcp: false, expected: expectedMcp });
   assert.equal(refused.ok, false);
   assert.equal(refused.error, 'mcp_replace_not_allowed');
   assert.deepEqual(calls, []);
 
-  const ok = await core.confirmInstall(link, { ...deps, allowReplaceMcp: true });
+  const ok = await core.confirmInstall(link, { ...deps, allowReplaceMcp: true, expected: expectedMcp });
   assert.equal(ok.ok, true, JSON.stringify(ok));
   assert.equal(ok.replaced, true);
   assert.deepEqual(calls, ['demo-mcp']);

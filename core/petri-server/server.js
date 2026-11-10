@@ -374,6 +374,17 @@ const httpServer = app.listen(PORT, '127.0.0.1', () => {
   console.log(`🧬 Petri R Server running on port ${PORT}`);
   console.log(`   POST http://localhost:${PORT}/api/run`);
   console.log(`   GET  http://localhost:${PORT}/api/health`);
+  // L1-3（蓝图 L-52）：token 门激活时把每 boot 随机 token 落 0600 文件——
+  // 供无 Origin 的本地脚本/dev-verify 流读取（同用户可读，跨用户不可读）。
+  try {
+    if (process.env.PETRI_LOCAL_REQUEST_TOKEN) {
+      const { resolveDataDir } = require('../shared-backend/data-paths');
+      const tokenFile = path.join(resolveDataDir(), 'local-request-token');
+      fs.writeFileSync(tokenFile, `${process.env.PETRI_LOCAL_REQUEST_TOKEN}\n`, { mode: 0o600 });
+    }
+  } catch (e) {
+    console.warn('[local-request-token] token 文件落盘失败（0600 best-effort）:', e && e.message ? e.message : e);
+  }
   // BLOCK-186：后端就绪即本机 app_started 落本地漏斗台账（best-effort，永不阻塞监听）。
   recordFunnelEvent('app_started');
   // BLOCK-256 Q7 — 定时任务 runner（10s；复用 POST /api/ai/agent，不建第二执行器）

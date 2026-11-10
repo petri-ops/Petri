@@ -12,17 +12,22 @@ const { session, webContents } = require("electron");
 const { SCHEME: GEN_UI_SCHEME } = require("./gen-ui/scheme");
 const { SCHEME: PACK_UI_SCHEME } = require("./pack-ui/scheme");
 
+// L1-5（蓝图 L-55）：本机端口通配（localhost:* / 127.0.0.1:*）收敛到实际 dev 端口
+// {3000 vite, 3001 后端}——「任意本机端口可连/可嵌」的放大面移除。dev script-src 仍需
+// 'unsafe-inline'（vite react-refresh 前导是内联 module script，无 nonce 注入点；
+// nonce 化需动 vite 构建链，retain-with-reason 随 L5/L6 构建面批次处理）。
+const CSP_DEV_PORTS = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "ws://localhost:3000", "ws://127.0.0.1:3000"];
+const CSP_PROD_PORTS = ["http://localhost:3001", "ws://localhost:3001"];
+
 function buildCspHeader(isDevMode) {
   const scriptSrc = isDevMode
     ? "script-src 'self' 'unsafe-inline'; "
     : "script-src 'self'; ";
-  const localNet = isDevMode
-    ? "http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* "
-    : "http://localhost:* ws://localhost:* ";
+  const localNet = (isDevMode ? CSP_DEV_PORTS : CSP_PROD_PORTS).join(" ") + " ";
   return "default-src 'self'; " +
     scriptSrc +
     "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: blob: http://localhost:* ; " +
+    "img-src 'self' data: blob: http://localhost:3001 ; " +
     // NEXT-05 — Three.js 文件加载器（GLB/STL/OBJ）经 fetch(blob:) 读本地文件预览；
     // blob: 仅由渲染进程自建，connect-src 放行不回扩网络面。
     "connect-src 'self' blob: " + localNet + "; " +

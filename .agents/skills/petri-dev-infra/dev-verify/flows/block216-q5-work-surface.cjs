@@ -11,7 +11,7 @@ const lib = require('../lib.cjs');
 
 const OUT = path.join(process.cwd(), 'acceptance', 'block-216');
 const API = 'http://127.0.0.1:3001/api/data';
-const AUTH = { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
 const PACK_ID = 'q5fixture';
 
 async function waitFor(client, expression, timeoutMs = 20000) {

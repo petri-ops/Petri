@@ -63,10 +63,12 @@ function isHttpOrHttps(value) {
 
 /** 受信渲染 origin 集合（运行时载体：env-coordinator 写入的环境变量）。 */
 function trustedOriginsFromEnv(env = process.env) {
+  // L1-3（蓝图 L-52）：env 源回环过滤（谓词单源经 env-coordinator re-export，守 R3）。
+  const isLoopback = require('./env-coordinator').isLoopbackHttpOrigin;
   return String(env.PETRI_TRUSTED_DESKTOP_ORIGINS || '')
     .split(',')
     .map((value) => value.trim())
-    .filter(Boolean);
+    .filter((value) => value && isLoopback(value));
 }
 
 /**

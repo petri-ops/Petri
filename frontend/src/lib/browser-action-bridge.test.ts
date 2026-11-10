@@ -78,3 +78,13 @@ describe('performBrowserAction', () => {
     expect((await performBrowserAction({ action: 'evil' }, makeBridge())).error).toBe('action_not_allowed');
   });
 });
+
+it('L1-4 负测：navigate 任意 scheme / 回环主机 → url_not_allowed（渲染层复检）', async () => {
+  const navigateMock = vi.fn();
+  for (const bad of ['file:///etc/passwd', 'petri-genui://x/y', 'http://127.0.0.1:9223/x', 'javascript://x']) {
+    const r = await performBrowserAction({ action: 'navigate', url: bad }, { navigate: navigateMock, executeJavaScript: vi.fn() });
+    expect(r.ok).toBe(false);
+    expect((r as { error?: string }).error).toBe('url_not_allowed');
+  }
+  expect(navigateMock).not.toHaveBeenCalled();
+});

@@ -24,6 +24,8 @@ async function tool_run_workflow(args = {}) {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${AUTH_TOKEN}`,
+        // L1-3（BLOCK-405）：无 Origin 自调用在 token 门激活时须带本机随机 token
+        ...(process.env.PETRI_LOCAL_REQUEST_TOKEN ? { 'x-petri-local-request-token': process.env.PETRI_LOCAL_REQUEST_TOKEN } : {}),
         'content-type': 'application/json',
       },
       body: JSON.stringify({

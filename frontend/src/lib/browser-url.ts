@@ -8,6 +8,26 @@ export function normalizeBrowserUrl(value: string): string {
   return `https://${trimmed}`;
 }
 
+/**
+ * L1-4（蓝图 L-53）：webview navigate 的可导航判定——仅 http(s)、
+ * 主机不得为本机回环（本地报告走 iframe/petri-pack:// / petri-genui:// 独立通道）、
+ * 不得携带 userinfo（`http://user@evil` 形态）。每次 loadURL 前都必须过本判定
+ * （will-attach-webview 只查初始 src，guest 运行时导航不经过它）。
+ */
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
+
+export function isNavigableWebUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    if (LOOPBACK_HOSTS.has(url.hostname)) return false;
+    if (url.username || url.password) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function isPetriLocalBrowserUrl(value: string): boolean {
   try {
     const url = new URL(value);

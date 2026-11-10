@@ -143,7 +143,7 @@ function readTranscriptRecord(dataDir, conversationId, { id, traceId } = {}) {
 }
 
 module.exports = {
-  register(app) {
+  register(app, { assertConversationOwnership } = {}) {
     app.get('/api/ai/agent/llm-transcripts', (req, res) => {
       const userId = req.user && req.user.id;
       if (!userId) {
@@ -164,7 +164,7 @@ module.exports = {
       }
     });
 
-    app.get('/api/ai/agent/llm-transcripts/record', (req, res) => {
+    app.get('/api/ai/agent/llm-transcripts/record', async (req, res) => {
       const userId = req.user && req.user.id;
       if (!userId) {
         return res.status(401).json({ status: 'error', error: '未登录' });
@@ -174,6 +174,20 @@ module.exports = {
         return res.status(400).json({ status: 'error', error: 'conversationId 不能为空' });
       }
       try {
+        // L1-6（蓝图 L-59）：会话归属校验（生产接线在 routes/ai-agent/index.js 注入
+        // assertConversationOwnership；本地单用户态恒一致，堵会话 id 枚举/未来多用户越权读）。
+        if (typeof assertConversationOwnership === 'function') {
+          try {
+            const verdict = await assertConversationOwnership(conversationId, userId);
+            if (verdict && verdict.ok === false) {
+              const status = verdict.status || 403;
+              return res.status(status).json({ status: 'error', error: verdict.error || 'conversation_not_owned' });
+            }
+          } catch {
+            // 归属校验抛错 = fail-closed，不冒充可读
+            return res.status(503).json({ status: 'error', error: 'ownership_check_unavailable' });
+          }
+        }
         const result = readTranscriptRecord(resolveDataDir(), conversationId, {
           id: (req.query && req.query.id) || '',
           traceId: (req.query && req.query.traceId) || '',

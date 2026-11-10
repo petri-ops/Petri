@@ -65,9 +65,11 @@ function createCredentialStore(options = {}) {
     const value = String(secret || '').trim();
     if (!value) return false;
     if (backend === 'keychain') {
+      // L1-6（蓝图 L-58）：密钥值不再进 argv（ps/proc/崩溃转储可采集）——
+      // "-w" 末位无值时从 stdin 读；参数数组形态不变（无 shell 注入面）。
       execFileSync('/usr/bin/security', [
-        'add-generic-password', '-U', '-a', id, '-s', KEYCHAIN_SERVICE, '-w', value,
-      ], { stdio: 'ignore' });
+        'add-generic-password', '-U', '-a', id, '-s', KEYCHAIN_SERVICE, '-w',
+      ], { stdio: ['pipe', 'ignore', 'ignore'], input: value });
       return true;
     }
     const values = readFileStore();

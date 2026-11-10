@@ -40,6 +40,7 @@ async function rest(method, endpoint, body) {
   const response = await fetch(`${API}/api${endpoint}`, {
     method,
     headers: {
+      ...require('../local-token.cjs')(),
       Authorization: 'Bearer desktop-local',
       ...(body ? { 'Content-Type': 'application/json' } : {}),
     },
@@ -105,7 +106,7 @@ module.exports = {
       // 临时项目（隔离断言对象；结束删除）
       const project = await (await fetch(`${API}/api/data/projects`, {
         method: 'POST',
-        headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+        headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: `RW02-UIEVID-${Date.now()}` }),
         signal: AbortSignal.timeout(15_000),
       })).json();
@@ -184,7 +185,7 @@ module.exports = {
         // UI-331：临时项目建会话（REST）→ 左栏会话行 .convItemTime 短式相对时间（刚刚）
         const convCreate = await (await fetch(`${API}/api/ai/conversations`, {
           method: 'POST',
-          headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+          headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: 'RW02 相对时间探针', projectId: probeProjectId }),
           signal: AbortSignal.timeout(15_000),
         })).json();
@@ -410,7 +411,7 @@ module.exports = {
 
         // 清理临时项目
         await fetch(`${API}/api/data/projects/${encodeURIComponent(probeProjectId)}`, {
-          method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
+          method: 'DELETE', headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
         }).catch(() => null);
       } else {
         assert('ui596_last_used_badge', false, 'probe project unavailable');
@@ -470,7 +471,7 @@ module.exports = {
       // ===== Wave-5：UI-638 面板发现腿（模型3D 产物 → Result Studio 面板列出版）=====
       // 种子：临时项目（git 夹具）+ 真实 Blender 导出（经 RW-01 链注册 revision）
       const p638 = await (await fetch(`${API}/api/data/projects`, {
-        method: 'POST', headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+        method: 'POST', headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: `RW02-638-${Date.now()}` }), signal: AbortSignal.timeout(15_000),
       })).json();
       const pid638 = p638?.project?.id || null;
@@ -547,7 +548,7 @@ module.exports = {
         }
         // 清理
         await fetch(`${API}/api/data/projects/${encodeURIComponent(pid638)}`, {
-          method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
+          method: 'DELETE', headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
         }).catch(() => null);
       }
 

@@ -27,6 +27,8 @@ const CHANNELS = require('./channels');
 const fs = require("fs");
 const path = require("path");
 const { ipcMain, app, shell } = require("electron");
+// L1-1（蓝图 L-50）：open-shell 目标真白名单（登记工作区根 realpath 精确相等）
+const { resolveOpenShellTarget, listRegisteredWorkspaceRoots } = require("./_workspace-roots");
 const { getOpenShellPlan, getSessionShellSpec } =
   require("../platform-compat");
 // BLOCK-59 P2 — 终端独立窗（升格 Tab）：mainWindow 广播之外，把
@@ -140,11 +142,16 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
 
   ipcMain.handle(CHANNELS.terminal.openShell, async (_event, targetPath) => {
     try {
-      const cwd =
-        typeof targetPath === "string" && targetPath.trim()
-          ? targetPath.trim()
-          : process.env.PETRI_LOCAL_DATA_DIR || process.env.PETRI_PROJECT_ROOT;
+      // L1-1（蓝图 L-50）：目标必须 realpath 命中登记工作区根（或 env 兜底根）——
+      // 未登记/列举失败一律拒绝（fail-closed），注入 payload 不再有任何执行面。
+      const resolved = resolveOpenShellTarget(targetPath, {
+        listRoots: listRegisteredWorkspaceRoots,
+        fallbacks: [process.env.PETRI_LOCAL_DATA_DIR, process.env.PETRI_PROJECT_ROOT],
+      });
+      if (!resolved.ok) return { ok: false, error: resolved.error };
+      const cwd = resolved.path;
       const plan = getOpenShellPlan(cwd, process.platform);
+      if (plan.type === "invalid") return { ok: false, error: plan.error };
       // BLOCK-102 P1 — spawn 的 ENOENT 是异步 error 事件，同步 try/catch 拦不住、
       // 也不能立刻报 ok。等一小窗让 error 事件到达后再如实回执（错误不再静默、
       // 不再产生无监听 error 事件的主进程 uncaughtException）。
@@ -182,6 +189,7 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
           detached: plan.detached,
           stdio: plan.stdio,
           windowsHide: plan.windowsHide,
+          cwd: plan.cwd,
         });
         return r.ok ? { ok: true, path: cwd } : r;
       }

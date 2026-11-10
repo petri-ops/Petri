@@ -557,9 +557,15 @@ async function main() {
   try {
     applyPermissionPolicy({ session, app, log: console });
   } catch (error) {
-    // BLOCK-102 P1 — fail-open consequence must be LOUD: without the policy,
-    // permission requests default to auto-approve.
-    console.error("[security] 权限策略装配失败（继续启动，权限请求将被自动批准——安全策略未生效）:", error?.message || error);
+    // L1-5（蓝图 L-57）：装配失败不再静默回落「自动批准一切」——降级 deny-all
+    //（显式拒绝全部权限申请 + 显著错误态），应用保持可用但零权限放行。
+    console.error("[security] 权限策略装配失败——已降级 deny-all（全部权限申请拒绝）:", error?.message || error);
+    try {
+      session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
+      session.defaultSession.setPermissionCheckHandler(() => false);
+    } catch (denyAllError) {
+      console.error("[security] deny-all 兜底装配也失败——权限策略完全缺位:", denyAllError?.message || denyAllError);
+    }
   }
 
   // M1-4 (H3)：启动 petri-server 前跑 db migration，防升级 schema 错乱。

@@ -21,7 +21,7 @@ const ROOT = lib.findRepoRoot(__dirname);
 
 const API = 'http://127.0.0.1:3001/api';
 const APP = 'http://localhost:3000';
-const AUTH = { Authorization: 'Bearer desktop-local' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' };
 const EVIDENCE = path.join(ROOT, 'acceptance', 'ui-552');
 const MESSAGE = '请按审批链路执行回显，然后告诉我结果。';
 const PROBE_TEXT = 'checkpoint 探针轮：只回一句话。';

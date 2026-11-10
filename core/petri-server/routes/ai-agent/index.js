@@ -44,7 +44,16 @@ module.exports = {
     trajectory.register(app); // BLOCK-248（Q3）
     team.register(app); // BLOCK-249（Q4a）
     backgroundProcesses.register(app);
-    llmTranscripts.register(app);
+    // L1-6（蓝图 L-59）：会话归属校验（生产注入；会话须存在且 user_id 与请求者一致）
+    llmTranscripts.register(app, {
+      assertConversationOwnership: (conversationId, userId) => {
+        const { db } = require('../db');
+        const conv = db.prepare('SELECT user_id FROM copilot_conversations WHERE id = ?').get(String(conversationId));
+        if (!conv) return { ok: false, status: 404, error: 'not_found' };
+        if (conv.user_id && conv.user_id !== userId) return { ok: false, status: 403, error: 'conversation_not_owned' };
+        return { ok: true };
+      },
+    });
     conversationChanges.register(app);
     resume.register(app);
     taskActions.register(app);

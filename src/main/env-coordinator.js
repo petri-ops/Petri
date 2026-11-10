@@ -78,6 +78,29 @@ function _requireCore(rel) {
 }
 const { getPythonRuntimeExecutable } = _requireCore("runtime-paths");
 
+// L1-3（L-52）：回环 origin 谓词单源在 core/shared-backend/local-request-boundary.js；
+// 本模块 re-export 给 _ipc-trust / security-hardening 等不能直连 core 的 src 消费方。
+function getIsLoopbackHttpOrigin() {
+  try {
+    return _requireCore("local-request-boundary").isLoopbackHttpOrigin;
+  } catch {
+    // core 库不可达（理论形态）：fail-closed——只认显式回环双变体。
+    return (value) => {
+      try {
+        const parsed = new URL(String(value));
+        return parsed.protocol === 'http:' && Boolean(parsed.port)
+          && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1');
+      } catch {
+        return false;
+      }
+    };
+  }
+}
+/** @see core/shared-backend/local-request-boundary.js isLoopbackHttpOrigin */
+function isLoopbackHttpOrigin(value) {
+  return getIsLoopbackHttpOrigin()(value);
+}
+
 function _detectSystemRLocal() {
   const { execFileSync } = require("child_process");
   try {
@@ -241,16 +264,19 @@ function getBackendPorts() {
  * @returns {Set<string>}
  */
 function computeTrustedRendererOrigins({ existing, isDev, rendererDevUrl, rendererPort } = {}) {
+  // L1-3（蓝图 L-52）：env 注入源（existing）与 dev URL 一律过回环谓词——
+  // 能写启动 env 不再等价于「把任意外部 origin 加进三道门」。
+  const isLoopback = getIsLoopbackHttpOrigin();
   const trusted = new Set(
     String(existing || "")
       .split(",")
       .map((value) => value.trim())
-      .filter(Boolean),
+      .filter((value) => value && isLoopback(value)),
   );
   if (isDev) {
     try {
       const devOrigin = new URL(rendererDevUrl);
-      trusted.add(devOrigin.origin);
+      if (isLoopback(devOrigin.origin)) trusted.add(devOrigin.origin);
       const port = devOrigin.port || (devOrigin.protocol === 'https:' ? '443' : '80');
       for (const host of ['localhost', '127.0.0.1']) {
         trusted.add(`http://${host}:${port}`);
@@ -360,4 +386,5 @@ module.exports = {
   getBackendPort,
   getBackendPorts,
   computeTrustedRendererOrigins,
+  isLoopbackHttpOrigin,
 };

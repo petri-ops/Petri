@@ -12,7 +12,7 @@ const lib = require('../lib.cjs');
 
 const OUT = path.join(process.cwd(), 'acceptance', 'block-217');
 const API = 'http://127.0.0.1:3001/api/data';
-const AUTH = { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
+const AUTH = { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' };
 const PACK_ID = 'p217fixture';
 const ACTION_ID = `pack:${PACK_ID}:action:ping`;
 const SURFACE_ID = `pack:${PACK_ID}:lab`;

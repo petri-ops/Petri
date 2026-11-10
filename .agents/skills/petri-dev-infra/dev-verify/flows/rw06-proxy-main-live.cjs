@@ -30,6 +30,7 @@ async function rest(method, endpoint, body) {
   const response = await fetch(`${API}/api${endpoint}`, {
     method,
     headers: {
+      ...require('../local-token.cjs')(),
       Authorization: 'Bearer desktop-local',
       ...(body ? { 'Content-Type': 'application/json' } : {}),
     },
@@ -99,7 +100,7 @@ module.exports = {
       // 项目 B 建带唯一 token 标题的会话
       const conv = await fetch(`${API}/api/ai/conversations`, {
         method: 'POST',
-        headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+        headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: `跨项目探针 ${token}`, projectId: idB }),
         signal: AbortSignal.timeout(15_000),
       }).then((r) => r.json()).catch(() => null);
@@ -218,7 +219,7 @@ module.exports = {
       // 种子清理（临时项目连带会话/产物）
       for (const pid of seededProjects) {
         await fetch(`${API}/api/data/projects/${encodeURIComponent(pid)}`, {
-          method: 'DELETE', headers: { Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
+          method: 'DELETE', headers: { ...require('../local-token.cjs')(), Authorization: 'Bearer desktop-local' }, signal: AbortSignal.timeout(15_000),
         }).catch(() => null);
       }
     }
