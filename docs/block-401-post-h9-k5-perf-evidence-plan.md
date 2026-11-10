@@ -1,6 +1,6 @@
 ---
 capability: block-401-post-h9-k5-perf-evidence
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K5 把「毫秒门稳定绿」升级为「长会话、长列表、大项目、冷启动、证据资产都有持续预算与可复跑读数」；可机械验证的做成门与对账，V/L/E 边界逐件出材料不代答。
 acceptance:
   - 新证据元数据门（四字段 + 五类不冒充）带负测，历史证据不回填
@@ -14,7 +14,7 @@ reopen: 有效凭据到位 / 活 dev 栈 + 9223 离屏 CDP 可用后按 §5 补�
 
 # BLOCK-401 · post-H9 K5 性能与证据门禁化
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 

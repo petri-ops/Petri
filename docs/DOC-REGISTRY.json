@@ -19,12 +19,12 @@
       "capability": "block-401-post-h9-k5-perf-evidence",
       "path": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-401",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-401-post-h9-k5-perf-evidence-plan.md",
         "acceptance/post-h9-2026-11-10/k5/**",
@@ -37,7 +37,7 @@
         "optimization",
         "k5"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K5 性能与证据门禁化。严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K5 性能与证据门禁化。严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】严格证据元数据门 38 份零例外+11 负测 / DOM 阈值纯函数门植 2 万必红 / 三矩阵·165 通道·EAR 机械对账 / 显式 perf 5/5 证据 / EAR 44.1% 分子真实增长未达 45% 如实标注 / perf 默认写盘冲突 U 类材料不擅改 / 22 契约全绿"
     },
     {
       "id": "POST-H9-K5-DECISION-MATERIAL",

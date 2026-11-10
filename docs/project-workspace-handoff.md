@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-10（🏁 **BLOCK-401（post-H9 K5）completed**：严格证据元数据门 38 份零例外+11 负测 / DOM 阈值纯函数门植 2 万必红 / 三矩阵·165 通道·EAR 机械对账 / 显式 perf 5/5 证据 / EAR 44.1% 分子真实增长未达 45% 如实标注 / perf 默认写盘冲突 U 类材料不擅改 / 22 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K5=BLOCK-401 启动**：严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-400（post-H9 K4）completed**：源码扫描只减不增棘轮门（4 文件冻结+3 负测）/ 插件源解析面单源防回退装配面两处如实标注 / typescript 漂移只读检出 U 类材料 / H10 8 证据 tracked + 120→90 校准 / W5b 六刀补腿条件 / 19 契约全绿 / closeout 全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K4=BLOCK-400 启动**：源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
