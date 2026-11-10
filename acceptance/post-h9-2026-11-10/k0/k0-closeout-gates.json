@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k0-closeout-gates",
+  "sourceCommit": "0bc3ff6296801641d21152f677a691ee5478d0c5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:27:43.704Z",
+  "command": "npm run closeout + npm run closeout:full ×3 + npm run docs:reconcile + npm run docs:check",
+  "verdict": "passed",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "sourceCommits": {
+    "delivery": "a37ae97e",
+    "compact": "19997240 / 7ae4c3d7",
+    "generatedRebuilds": "7b0b25fd / 0bc3ff62"
+  },
+  "targeted": {
+    "pass": 18,
+    "skipped": 2,
+    "skippedNames": [
+      "专项门禁 npm run gate:arch-cycles（0.0s）",
+      "专项门禁 npm run quality:arch（0.0s）"
+    ],
+    "closeoutPass": true,
+    "gateScope": "定向 closeout：18 PASS（含 1 报告级）+ 2 SKIPPED 阻塞门；SKIPPED 不算 PASS。"
+  },
+  "fullRounds": [
+    {
+      "round": 1,
+      "pass": 20,
+      "skipped": 0,
+      "fail": 0,
+      "total": 20,
+      "closeoutPass": true,
+      "gates": [
+        {
+          "status": "PASS",
+          "title": "AUDIT-LOG 自稳（audit:compact）（0.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "工作区卫生（hygiene:check）（2.6s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "文档治理（docs:check）（0.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "UI 台账（ui:audit:check）（0.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "影响范围测试（test:changed）（7.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:user-assets（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:version-parity（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:silent-catch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:code-size（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:arch-cycles（1.9s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:css-modules（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:secret（2.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:arch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:lint（1.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:perf（72.7s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:types（1.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:knip:check（3.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:ear（2.0s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:surface（0.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "npm run skills:check — OK",
+          "scope": "report-only"
+        }
+      ],
+      "blockingGatesPass": 19,
+      "reportOnlyGatesPass": 1
+    },
+    {
+      "round": 2,
+      "pass": 20,
+      "skipped": 0,
+      "fail": 0,
+      "total": 20,
+      "closeoutPass": true,
+      "gates": [
+        {
+          "status": "PASS",
+          "title": "AUDIT-LOG 自稳（audit:compact）（0.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "工作区卫生（hygiene:check）（2.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "文档治理（docs:check）（0.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "UI 台账（ui:audit:check）（0.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "影响范围测试（test:changed）（7.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:user-assets（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:version-parity（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:silent-catch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:code-size（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:arch-cycles（1.8s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:css-modules（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:secret（2.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:arch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:lint（1.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:perf（72.7s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:types（1.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:knip:check（3.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:ear（2.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:surface（0.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "npm run skills:check — OK",
+          "scope": "report-only"
+        }
+      ],
+      "blockingGatesPass": 19,
+      "reportOnlyGatesPass": 1
+    },
+    {
+      "round": 3,
+      "pass": 20,
+      "skipped": 0,
+      "fail": 0,
+      "total": 20,
+      "closeoutPass": true,
+      "gates": [
+        {
+          "status": "PASS",
+          "title": "AUDIT-LOG 自稳（audit:compact）（0.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "工作区卫生（hygiene:check）（2.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "文档治理（docs:check）（0.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "UI 台账（ui:audit:check）（0.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "影响范围测试（test:changed）（7.3s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:user-assets（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:version-parity（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:silent-catch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:code-size（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:arch-cycles（1.8s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run gate:css-modules（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:secret（2.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:arch（0.2s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:lint（1.4s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:perf（72.8s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:types（1.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:knip:check（3.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:ear（2.1s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "专项门禁 npm run quality:surface（0.5s）",
+          "scope": "blocking"
+        },
+        {
+          "status": "PASS",
+          "title": "npm run skills:check — OK",
+          "scope": "report-only"
+        }
+      ],
+      "blockingGatesPass": 19,
+      "reportOnlyGatesPass": 1
+    }
+  ],
+  "allFullRoundsGreen": true,
+  "docsReconcile": {
+    "unregistered": 0,
+    "archiveCandidates": 136,
+    "retainedReferences": 259,
+    "manualReview": 0,
+    "validationIssues": 0,
+    "disposition": "逐件复核：136 条 archive candidates 为长期存量建议级候选，非本包引入；程序推进期不批量移动文档（避免污染干净树与 WIP 纪律），本轮零归档，留 K7 总收口按治理纪律至少清一条并登记 supersedes"
+  },
+  "skippedDisclosure": "定向 closeout 有 2 门域跳过（gate:arch-cycles / quality:arch），按 BLOCK-272 语义 SKIPPED 不算 PASS；clean tree closeout:full 三轮均为 19 门全量执行 0 SKIP。",
+  "reusedEvidenceDisclosure": "无复用：三轮 full 均为本次会话当次执行，日志留存 /tmp/h9-k0-full-{1,2,3}.log。",
+  "testChanged": {
+    "pass": 27,
+    "fail": 0,
+    "cancelled": 0,
+    "command": "npm run test:changed"
+  },
+  "gateCountPolicy": "摘要 ✅ 20 行 = 19 阻塞门（5 固定 + 14 --gate）+ 1 报告级 --report skills:check；报告级不改退出码，不计入阻塞门数。"
+}

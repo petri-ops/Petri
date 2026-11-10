@@ -1,6 +1,6 @@
 ---
 capability: block-396-post-h9-k0-criteria-baseline
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K0 校准被实测推翻的判据、统一九组数字口径、给并发 WIP 与两个红门归属、补 lint∩hygiene 联动门，产出可机械恢复、当次取数的干净起点；本阶段不做优化。
 acceptance:
   - 三条旧判据有作废记录 + 新判据负测（篡改证据必红）
@@ -13,7 +13,7 @@ reopen: 工作区出现新并发写入者或判据证据被改写时，重跑 K0
 
 # BLOCK-396 · post-H9 K0 判据校准与可信起点
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10「按 docs/post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完，直到总收口」，显式预授权连续工作、全程零参与；工程判断/切片/顺序微调全部下放。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 > 蓝图依据：§4 K0、§3 K-01～K-07、§6.2 最小 DoD、§5.3 停线条件。
