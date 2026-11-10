@@ -12,7 +12,7 @@
 async function startMcpServer() {
   const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
   await import('@modelcontextprotocol/sdk/server/stdio.js');
-  const { ListToolsRequestSchema, CallToolRequestSchema } =
+  const { ListToolsRequestSchema, CallToolRequestSchema, ListResourcesRequestSchema, ReadResourceRequestSchema } =
     await import('@modelcontextprotocol/sdk/types.js');
   // 去 submodule 后：core 内嵌在 desktop 仓根 core/ 下。
   // mcp-server 是 stdio 子进程（被 petri-mcp bin spawn），不经 Electron 主进程，
@@ -24,15 +24,32 @@ async function startMcpServer() {
   const coreRoot = fs.existsSync(devCorePath)
     ? devCorePath
     : path.join(process.resourcesPath || '', 'core');
-  const { listTools, callTool } = require(path.join(coreRoot, 'petri-server', 'mcp', 'registry'));
+  // L2-2（蓝图 L-02）：resources 单源 = registry（ide://projects / ide://git-status 等经
+  // listIdeMcpResources/readIdeMcpResource 暴露，与 legacy stdio server 同一实现）。
+  const { listTools, callTool, listIdeMcpResources, readIdeMcpResource } = require(path.join(coreRoot, 'petri-server', 'mcp', 'registry'));
 
   const server = new Server(
     { name: 'petri-mcp', version: '0.1.0' },
-    { capabilities: { tools: {} } }
+    // L2-2：声明 resources（handler 在下方注册）；不声明 prompts（prompts/list 恒空=假声明，已移除）。
+    { capabilities: { tools: {}, resources: {} } }
   );
 
   // tools/list：返回当前注册的插件工具
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: await listTools() }));
+
+  // resources/list + resources/read：IDE 资源面（registry 单源）
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({ resources: await listIdeMcpResources() }));
+  server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
+    const uri = req?.params?.uri ?? '';
+    try {
+      const resource = await readIdeMcpResource(uri);
+      return { contents: [{ uri, mimeType: resource?.mimeType || 'application/json', text: typeof resource?.text === 'string' ? resource.text : JSON.stringify(resource ?? null, null, 2) }] };
+    } catch (e) {
+      const log = require(path.join(coreRoot, 'shared-backend', 'logger'));
+      log.error('mcp_resource_error', { event: 'mcp_resource_error', uri, message: e?.message || String(e) });
+      throw e;
+    }
+  });
 
   // tools/call：进入统一 registry 执行通道
   server.setRequestHandler(CallToolRequestSchema, async (req) => {

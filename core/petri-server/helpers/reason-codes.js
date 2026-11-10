@@ -23,12 +23,23 @@ const REASON_CATEGORIES = Object.freeze([
   'data',       // 数据完整性：源数据不可变/sha 门
   'schema',     // 参数校验
   'autonomy',   // 放权坡道（BLOCK-323）：观察/自动放行
-  'provider',   // 模型提供者/上游通信（BLOCK-338）：流式停滞等上游侧异常
+  'provider',   // 模型提供者/上游通信（BLOCK-338）：流式停滞等上游侧异常；L2 扩=本地后端依赖可用性（超时/桥不可用）
   'execution',  // 执行结果与执行准入（POST-S7 H1/H2）：run 失败、一次性凭据四类拒绝、降级态
-  'input',      // 不可信输入面（POST-S7 H1/H2）：压缩包条目级拒绝、交付链断链
+  'input',      // 不可信输入面（POST-S7 H1/H2）：压缩包条目级拒绝、交付链断链；L2 扩=无 Origin 本地请求 token 门
 ]);
 
 const REASONS = Object.freeze({
+  // —— L2（BLOCK-406）功能断链与 IPC 失败形状域 ——
+  no_execution_backend: { category: 'execution', template: 'Skill {skillId} 在当前进程无可用执行后端（workflowRuntime.run / registry.runTool 均缺席），不冒充执行。' },
+  backend_timeout: { category: 'provider', template: '后端请求超时（{timeoutMs}ms）——可重试。' },
+  runtime_bridge_unavailable: { category: 'provider', template: '运行时检测暂不可用（{message}）——此状态不表示 R/Python 未安装，可重试。' },
+  packs_bridge_unavailable: { category: 'provider', template: '领域包清单暂不可用（{message}）——可重试。' },
+  plugin_list_failed: { category: 'provider', template: '插件清单读取失败（{message}）——可重试。' },
+  plugin_list_remote_failed: { category: 'provider', template: '远端插件清单读取失败（{message}）——可重试。' },
+  content_plugin_list_failed: { category: 'provider', template: 'content-plugin 清单读取失败（{message}）——可重试。' },
+  content_plugin_docs_failed: { category: 'provider', template: 'content-plugin 文档读取失败（{message}）——可重试。' },
+  local_request_token_required: { category: 'input', template: '无 Origin 的本地变更请求必须携带本机随机 token（x-petri-local-request-token）。' },
+
   // —— 判定序第一层：未知工具 ——
   unknown_tool: { category: 'governance', template: '未知工具 {tool}，拒绝执行。' },
   // —— 判定序第二层：用户规则（BLOCK-160 ORC-1）——

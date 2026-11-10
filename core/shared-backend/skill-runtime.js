@@ -85,6 +85,16 @@ class SkillRuntime {
    * @param {Object} [context.userContext] - 用户上下文
    * @returns {Promise<ExecutionResult>}
    */
+  /**
+   * L2-1（蓝图 L-01）：是否具备真实执行后端——workflowRuntime.run 或 registry.runTool。
+   * 只有 execute() 的 workflowRuntime（现状 workflow-engine 形态）不算（_runWorkflow 只认 .run）。
+   */
+  hasExecutionBackend() {
+    if (this.workflowRuntime && typeof this.workflowRuntime.run === 'function') return true;
+    if (this.registry && typeof this.registry.runTool === 'function') return true;
+    return false;
+  }
+
   async execute(params = {}, context = {}) {
     const startTime = Date.now();
     const executionId = context.executionId || this._generateExecutionId();

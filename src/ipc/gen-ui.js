@@ -22,10 +22,23 @@ const { getGenUiSession } = require('../main/gen-ui/scheme');
 
 const WIDGET_STATE_MAX_BYTES = 16 * 1024;
 
+
+// L2-3（蓝图 L-21）：后端 fetch 统一 10s 超时 + 可重试错误形状（ipcMain.handle 永不
+// settle = renderer invoke 永久 pending；同仓 web-fetch-policy.js 的 AbortSignal.timeout 范例）。
+const BACKEND_FETCH_TIMEOUT_MS = 10_000;
+function backendTimeoutSignal() {
+  return AbortSignal.timeout(BACKEND_FETCH_TIMEOUT_MS);
+}
+
 async function resolveWorkspacePath(projectId) {
   const port = process.env.R_SERVER_PORT || '3001';
   const url = `http://127.0.0.1:${port}/api/data/projects/${encodeURIComponent(projectId)}`;
-  const resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' } });
+  let resp;
+  try {
+    resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' }, signal: backendTimeoutSignal() });
+  } catch (e) {
+    throw Object.assign(new Error(e?.name === 'TimeoutError' ? `backend timeout after ${BACKEND_FETCH_TIMEOUT_MS}ms` : `backend unreachable: ${e?.message || e}`), { code: 'backend_timeout', retryable: true });
+  }
   if (resp.status === 404) return null;
   if (!resp.ok) throw Object.assign(new Error(`backend status ${resp.status}`), { code: 'read-failed' });
   const data = await resp.json();
@@ -37,7 +50,12 @@ async function resolveWorkspacePath(projectId) {
 async function resolveJobForData(jobId) {
   const port = process.env.R_SERVER_PORT || '3001';
   const url = `http://127.0.0.1:${port}/api/tools/status/${encodeURIComponent(jobId)}`;
-  const resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' } });
+  let resp;
+  try {
+    resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' }, signal: backendTimeoutSignal() });
+  } catch (e) {
+    throw Object.assign(new Error(e?.name === 'TimeoutError' ? `backend timeout after ${BACKEND_FETCH_TIMEOUT_MS}ms` : `backend unreachable: ${e?.message || e}`), { code: 'backend_timeout', retryable: true });
+  }
   if (resp.status === 404) return null;
   if (!resp.ok) throw new Error(`backend status ${resp.status}`);
   const data = await resp.json();
@@ -69,7 +87,12 @@ function backendBase() {
 async function loadPersistedWidgetState(scopeKey, filePath) {
   try {
     const url = `${backendBase()}/api/gen-ui/widget-state?scopeKey=${encodeURIComponent(scopeKey)}&filePath=${encodeURIComponent(filePath)}`;
-    const resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' } });
+    let resp;
+  try {
+    resp = await fetch(url, { headers: { Authorization: 'Bearer desktop-local' }, signal: backendTimeoutSignal() });
+  } catch (e) {
+    throw Object.assign(new Error(e?.name === 'TimeoutError' ? `backend timeout after ${BACKEND_FETCH_TIMEOUT_MS}ms` : `backend unreachable: ${e?.message || e}`), { code: 'backend_timeout', retryable: true });
+  }
     if (!resp.ok) return null;
     const data = await resp.json();
     return data && data.ok ? data.state : null;
@@ -80,11 +103,17 @@ async function loadPersistedWidgetState(scopeKey, filePath) {
 
 /** D4 持久化写入：宿主 ack 前置条件（规格 §8——持久化成功才 resolve）。 */
 async function persistWidgetState(scopeKey, filePath, state) {
-  const resp = await fetch(`${backendBase()}/api/gen-ui/widget-state`, {
-    method: 'PUT',
-    headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ scopeKey, filePath, state }),
-  });
+  let resp;
+  try {
+    resp = await fetch(`${backendBase()}/api/gen-ui/widget-state`, {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer desktop-local', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scopeKey, filePath, state }),
+      signal: backendTimeoutSignal(),
+    });
+  } catch (e) {
+    throw Object.assign(new Error(e?.name === 'TimeoutError' ? `backend timeout after ${BACKEND_FETCH_TIMEOUT_MS}ms` : `backend unreachable: ${e?.message || e}`), { code: 'backend_timeout', retryable: true });
+  }
   if (!resp.ok) {
     const detail = await resp.json().catch(() => ({}));
     throw Object.assign(new Error(detail.message || `backend status ${resp.status}`), { code: 'persist-failed' });

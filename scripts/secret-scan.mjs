@@ -39,6 +39,9 @@ export const SECRET_PATTERNS = {
 // 已知 fixture 白名单（P0 基线核实：测试桩假密钥/脱敏测试，非泄漏）。
 // 新增豁免必须在此登记 reason，禁止静默放宽模式。
 const FIXTURE_ALLOWLIST = new Set([
+  // L1-6（BLOCK-405）脱敏负测 fixture：sk-/ghp_ 形态假 token（redactSensitiveValue
+  // 必须命中的输入样例），非真实凭据。
+  'test/block405-l1-security.test.mjs',
   'test/agent-tool-result.test.mjs',
   'test/diagnostic-redaction.test.mjs',
   'test/git-adapter.test.mjs',

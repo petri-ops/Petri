@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const {safeJoinUnder} = require('../../shared-backend/path-safe');
-const {sendThemedHtmlFile} = require('./report-theme');
+// L2-5（L-06）：sendThemedHtmlFile 随 handlePublicFile 退役（唯一消费方）移除。
 const {loadPublicDemoAssets} = require('./pack-demo-assets');
 
 // Published demo assets are immutable local job output directories. They must
@@ -25,7 +25,6 @@ function filesForPublicJob(jobId, result) {
 }
 
 function createToolsAssetHandlers({
-  db,
   jobsDir,
   toolDemoResultsDir = '',
   toolDemoDataDir = '',
@@ -51,65 +50,7 @@ function createToolsAssetHandlers({
     return {jobId, result, files: filesForPublicJob(jobId, result)};
   }
 
-  async function handlePublicDemo(req, res) {
-    try {
-      const job = await db.prepare('SELECT * FROM tool_jobs WHERE tool_id = ? AND is_public = 1 AND status = ?').get(req.params.toolId, 'completed');
-      if (!job) {
-        const demoAsset = readPublicDemoAsset(req.params.toolId);
-        if (demoAsset) {
-          return res.json({
-            ok: true,
-            toolId: req.params.toolId,
-            jobId: demoAsset.jobId,
-            files: demoAsset.files,
-            summary: demoAsset.result.summary,
-            source: 'asset',
-          });
-        }
-        if (staticDemoEnabled) {
-          const dir = path.join(toolDemoResultsDir, req.params.toolId);
-          if (fs.existsSync(dir)) {
-            const files = fs.readdirSync(dir).map((f) => ({name: f, type: f.endsWith('.png') ? 'plot' : f.endsWith('.csv') ? 'table' : 'file', url: '/tools/demo/' + req.params.toolId + '/' + f}));
-            return res.json({ok: true, toolId: req.params.toolId, files, source: 'static'});
-          }
-        }
-        // 插件 demo 数据：从已装插件的 demo-data/ 目录读
-        try {
-          const { getDemoDataDir } = require('../plugin-loader');
-          const pluginDemoDir = getDemoDataDir(req.params.toolId);
-          if (pluginDemoDir && fs.existsSync(pluginDemoDir)) {
-            const files = fs.readdirSync(pluginDemoDir).map((f) => ({
-              name: f,
-              type: detectOutputType(f),
-              url: '/tools/demo/' + req.params.toolId + '/' + f,
-            }));
-            return res.json({ok: true, toolId: req.params.toolId, files, source: 'plugin'});
-          }
-        } catch {}
-        return res.json({ok: true, files: [], source: 'none'});
-      }
-      const result = job.result_json ? JSON.parse(job.result_json) : {files: []};
-      const files = filesForPublicJob(job.id, result);
-      res.json({ok: true, toolId: req.params.toolId, jobId: job.id, files, summary: result.summary, source: 'job'});
-    } catch (e) {
-      res.status(500).json({error: e.message});
-    }
-  }
-
-  async function handlePublicFile(req, res) {
-    try {
-      const job = await db.prepare('SELECT * FROM tool_jobs WHERE id = ? AND is_public = 1').get(req.params.jobId);
-      if (!job && !PUBLIC_DEMO_JOB_IDS.has(req.params.jobId)) return res.status(404).json({error: 'not_found'});
-      const filePath = safeJoinUnder(jobsDir, req.params.jobId, 'output', req.params.filename);
-      if (!filePath) return res.status(400).json({error: 'bad_path'});
-      if (!fs.existsSync(filePath)) return res.status(404).json({error: 'file_not_found'});
-      if (sendThemedHtmlFile(req, res, filePath)) return;
-      res.sendFile(filePath);
-    } catch (e) {
-      res.status(500).json({error: e.message});
-    }
-  }
-
+  // L2-5（蓝图 L-06）：handlePublicDemo/handlePublicFile 已随零消费端点退役
   function handleDemoData(req, res) {
     // 1. 静态 demo 目录（web 版 legacy）
     if (staticDemoEnabled) {
@@ -176,8 +117,6 @@ function createToolsAssetHandlers({
 
   return {
     readPublicDemoAsset,
-    handlePublicDemo,
-    handlePublicFile,
     handleDemoData,
     handleLegacyDemoFile,
     handleLegacyDemoList,

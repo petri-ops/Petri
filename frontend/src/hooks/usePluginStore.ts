@@ -40,6 +40,11 @@ export interface RemotePlugin {
 export interface RuntimeStatus {
   r: { installed: boolean; path: string | null };
   python: { installed: boolean; path: string | null };
+  /** L2-3（蓝图 L-19）：'unavailable' = 检测不可用（网络/后端故障），不得当「未安装」呈现。 */
+  availability?: 'ok' | 'unavailable';
+  code?: string;
+  message?: string;
+  retryable?: boolean;
 }
 
 interface PluginManifest {

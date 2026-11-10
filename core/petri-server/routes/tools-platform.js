@@ -5,7 +5,7 @@ const express = require('express');
  *
  * Authorize against local tool_jobs, then call execution/asset handlers directly.
  *
- * Routes: run, file GET/PUT, report, cancel, delete, public-demo, public-file,
+ * Routes: run, file GET/PUT, report, cancel, delete,
  * demo, demo-data.
  */
 function createToolsPlatformRoutes({
@@ -19,8 +19,6 @@ function createToolsPlatformRoutes({
   handleGenerateFinalReport,
   killLocalToolJob,
   cleanupLocalToolJobDir,
-  handlePublicDemo,
-  handlePublicFile,
   handleDemoData,
   handleLegacyDemoFile,
   handleLegacyDemoList,
@@ -309,14 +307,9 @@ function createToolsPlatformRoutes({
       return handleDemoData(req, res);
     });
 
-    app.get('/api/tools/public-demo/:toolId', async (req, res) => {
-      return handlePublicDemo(req, res);
-    });
-
-    app.get('/api/tools/public-file/:jobId/:filename', (req, res) => {
-      return handlePublicFile(req, res);
-    });
-
+    // L2-5（蓝图 L-06）：public-demo / public-file 两条公开端点退役——全仓
+    //（test/scripts/frontend/dev-verify）零消费，端到端消费断言不存在；
+    // handlePublicDemo/handlePublicFile 一并移除（helpers/tools-assets.js 同批）。
     // Replace a job output file (e.g., after user edits a plot in FigCode)
     app.put(
       '/api/tools/file/:jobId/:filename',

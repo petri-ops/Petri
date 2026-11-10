@@ -112,7 +112,8 @@ test('负测 K-31：把漂移写成「门已检出」→ 判红（不得冒充�
 // ---- K-22 / K-18 债现状（L0-1：读数型记录 + 只增即红棘轮） ----
 test('K-22/K-18：债读数在场（读数型；入册/收窄/拆分为改进方向不再判红——L0-1 解反向门禁）', () => {
   assert.equal(truth.archDebt.cycles, 12);
-  assert.equal(truth.archDebt.knipKeys, 330);
+  // L1 后 knip 基线 330→329（三 exports 转活消亡，BLOCK-405 批 --update）
+  assert.equal(truth.archDebt.knipKeys, 329);
   assert.equal(typeof truth.archDebt.sizeFiles, 'number');
   assert.equal(typeof truth.archDebt.loopOrchestratorInManifest, 'boolean');
   assert.equal(truth.archDebt.loopOrchestratorLines, 1579);

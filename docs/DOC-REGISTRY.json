@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 548,
+    "documentCount": 549,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 531
+    "managedMarkdown": 532
   },
   "documents": [
+    {
+      "id": "BLOCK-406",
+      "capability": "block-406-post-k7-l2-function-integrity",
+      "path": "docs/block-406-post-k7-l2-function-integrity-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-406-post-k7-l2-function-integrity",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "post-k7",
+        "l2",
+        "mcp",
+        "function-integrity"
+      ],
+      "notes": "第五轮 L2 功能断链与假成功（用户 2026-11-11 执行提示词预授权连续工作）：L-01 MCP skill_execute 假成功 fail-closed（最高优先）/ L-02 双 server 收敛 ide:// 可达 / L-19/20/21 数据桥与 IPC 失败形状统一 / L-03 canCompare / L-05 source enum 同源 / L-04~L-11 零消费销号 / L-09 testOnly。红绿先行。蓝图=docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L2。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-405",
       "capability": "block-405-post-k7-l1-security-hardening",

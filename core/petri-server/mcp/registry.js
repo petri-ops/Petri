@@ -273,6 +273,22 @@ async function _skillExecute(args = {}) {
       registry,
     });
 
+    // L2-1（蓝图 L-01）：无执行后端 → fail-closed。原实现走 _runFallbackWorkflow 返回
+    // 「complete + 空产物」假成功（11 个内置 Skill plugins.required 全空，且本进程无
+    // workflowRuntime.run / registry.runTool）——外部 MCP 客户端恒得「成功但零执行」。
+    // 现在明确报 no_execution_backend，不冒充执行。
+    if (typeof runtime.hasExecutionBackend !== 'function' || runtime.hasExecutionBackend() !== true) {
+      return {
+        content: [{ type: 'text', text: JSON.stringify({
+          error: 'no_execution_backend',
+          reasonCode: 'no_execution_backend',
+          skillId: args.id,
+          message: 'Skill ' + args.id + ' 在当前进程无可用执行后端（workflowRuntime.run / registry.runTool 均缺席）——不冒充执行。',
+        }, null, 2) }],
+        isError: true,
+      };
+    }
+
     // 执行
     const result = await runtime.execute(args.params || {}, {
       workflowName: args.context?.workflowName,

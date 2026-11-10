@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l2-gate-sweep",
+  "block": "BLOCK-406",
+  "stage": "L2",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-11T03:35:00+08:00",
+  "redGreen": [
+    { "item": "L2-1/L-01 skill_execute 假成功", "red": "红 1（空产物 + isError:false =「成功但零执行」）", "green": "11 内置 Skill 逐件 callTool isError:true + no_execution_backend；SkillRuntime.hasExecutionBackend 矩阵（workflowRuntime.run / registry.runTool 才算后端；execute-only 不算）；skill-not-found 原语义保留" },
+    { "item": "L2-2/L-02 双 server", "red": "红 1（产品入口无 resources / prompts 恒空声明）", "green": "src/mcp-server.js 声明 capabilities.resources + ListResources/ReadResource handler（registry 单源）；prompts 假声明移除" },
+    { "item": "L2-3/L-21 gen-ui fetch 超时", "red": "（零测试盲区）", "green": "四处 fetch 统一 AbortSignal.timeout(10s) + backend_timeout/retryable 错误形状；ipcMain.handle 不再永不 settle" },
+    { "item": "L2-3/L-19 runtime 假阴性", "red": "（桥测试钉旧降级语义）", "green": "runtimeBridge 三态 availability:'ok'|'unavailable' + code retryable；PluginStorePanel 区分「检测不可用」与「未安装」（role=status）；桥测试更新 14/14" },
+    { "item": "L2-3/L-20 IPC 失败形状", "red": "（plugin.js 裸形状零测试）", "green": "src/ipc/_ipc-failure.js ipcFailure() 单源（{ok:false,code,message,retryable,degraded}）；plugin.js 四 handler 应用（形状兼容 degraded + failure 可见）" },
+    { "item": "L2-4/L-03 canCompare", "red": "红 1（接线前调用不传 → compare 静默回退）", "green": "viewerProfileCanCompare 导出 + ResultsSurface 按当前产物 resolveResultViewer().canCompare 传值；tsc 净" },
+    { "item": "L2-4/L-05 source enum", "red": "红 1（enum 硬编码两值缺 pack）", "green": "tool-defs/skill.js enum 由 SOURCE_PRIORITY 同源派生（与 MCP 侧同一真相源）" },
+    { "item": "L2-5/L-06 public-demo/public-file", "red": "（零消费端点在产）", "green": "全仓零消费核查（test/scripts/frontend/dev-verify）后退役：两条路由 + handlePublicDemo/handlePublicFile 移除；tools-platform 相关测试 36/36" },
+    { "item": "L2-5/L-04/07/08 + L2-6/L-09 通道分类", "red": "（通道表无分类）", "green": "src/ipc/_channel-classification.js：testOnly 3（preview-quit/crash-simulate/startup:marks）+ platformScoped updater×8 + note 零消费 4（contentPlugin×3/telemetry）；注册表守卫测试扩展「注记键 ⊆ 注册表字面量」9/9" }
+  ],
+  "gates": [
+    { "gate": "test/block406-l2-function-integrity.test.mjs", "exit": 0, "reading": "5/5（协议级 callTool 断言在座）" },
+    { "gate": "gate:post-h9-contracts", "exit": 0, "reading": "186 项全绿（k4 事实测试 knip 329 同步翻转）" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error（frontend tsc 单独复核同净）" },
+    { "gate": "quality:arch", "exit": 0, "reading": "R1-R5 无违规" },
+    { "gate": "quality:secret", "exit": 0, "reading": "PASS（block405 脱敏负测假 token 走 fixture 豁免登记留痕）" },
+    { "gate": "mcp-server.test + mcp-tool-registry + nso-w4", "exit": 0, "reading": "stdio 握手/registry/enum 邻域绿" }
+  ],
+  "donePartial": [
+    { "item": "L-19 其余五处桥 catch 全量信封化", "reason": "runtime（假阴性根修）与 packs（code 注记）已交付；plugins 列表/aiSettings 的降级形状是 desktopBridge IPC 契约面，全量信封化触及全部消费方 UI 呈现——归 L6 显示面批次；上游 markProjectionBridgeFailure 标记已在座" },
+    { "item": "L-20 _ipc-trust/gen-ui 三形状全量归一", "reason": "ipcFailure() 单源 + plugin.js 应用已交付；gen-ui 已是 {ok:false,code,message} 形状、_ipc-trust 形状有既有消费方——剩余归一随 L6 消费面批次" },
+    { "item": "L-04 updater 前端入口按平台隐藏", "reason": "通道分类 platformScoped 已标注；UI 隐藏属 L6 体验面" }
+  ],
+  "notes": "L2 零新增依赖。L-01 修法=fail-closed no_execution_backend（未做 runTool 桥接：11 内置 Skill 零 plugins.required，桥接零现值收益；插件执行面接线属 BLOCK-157 语义域，retain-with-reason）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}

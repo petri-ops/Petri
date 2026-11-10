@@ -6,6 +6,10 @@
  * 不含 skill_execute（执行自动化产品语义另裁，见 BLOCK-157 plan §2）。
  */
 
+// L2-4（蓝图 L-05）：source enum 由 SOURCE_PRIORITY 同源派生（含 pack）——与 MCP 侧
+// skillSourceEnum()（mcp/registry.js）同一真相源，模型按真实来源传参不再被 schema 拒。
+const { SOURCE_PRIORITY } = require('../../../shared-backend/skill-registry');
+
 module.exports = [
   {
     type: 'function',
@@ -22,7 +26,7 @@ module.exports = [
           },
           source: {
             type: 'string',
-            enum: ['built-in', 'installed'],
+            enum: Object.keys(SOURCE_PRIORITY),
             description: '可选；按来源过滤（built-in=随包内置 / installed=用户安装）'
           },
           search: {

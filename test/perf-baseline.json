@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-11-10T17:03:29.773Z",
+  "generatedAt": "2026-11-10T19:36:11.747Z",
   "host": {
     "platform": "darwin-arm64",
     "cpus": 8,
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "7905637b142b534a",
+  "coreSha": "a1e1c5ba35dfca12",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
       "unit": "ms",
       "samples": [
-        372,
-        375,
-        374
+        797,
+        371,
+        372
       ],
-      "medianMs": 374,
+      "medianMs": 372,
       "tolerancePct": 30,
       "runs": 3,
       "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
@@ -28,8 +28,8 @@
       "samples": [
         22,
         20,
-        20,
         19,
+        20,
         20
       ],
       "medianMs": 20,
@@ -43,7 +43,7 @@
       "unit": "ms",
       "samples": [
         11,
-        12,
+        11,
         11,
         11,
         11
@@ -58,13 +58,13 @@
       "metric": "isolated backend spawn→health 200（含 migrations 自举；同机连跑=OS 页缓存热的 warm 口径，非整 Electron 冷启动）",
       "unit": "ms",
       "samples": [
-        545,
-        546,
-        541,
-        546,
-        542
+        543,
+        530,
+        543,
+        543,
+        534
       ],
-      "medianMs": 545,
+      "medianMs": 543,
       "tolerancePct": 25,
       "runs": 5,
       "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿",

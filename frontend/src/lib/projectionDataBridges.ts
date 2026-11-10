@@ -124,8 +124,9 @@ const packsBridge = {
         return { ok: true, packs: data.packs };
       }
       return { ok: false, packs: [] };
-    } catch {
-      return { ok: false, packs: [] };
+    } catch (error) {
+      // L2-3（L-19）：失败降级附带 code/message（形状兼容；消费方按 ok:false 分支可见）
+      return { ok: false, packs: [], code: 'packs_bridge_unavailable', message: error instanceof Error ? error.message : 'unavailable', retryable: true };
     }
   },
   async listAvailable() {
@@ -135,8 +136,9 @@ const packsBridge = {
         return { ok: true, packs: data.packs };
       }
       return { ok: false, packs: [] };
-    } catch {
-      return { ok: false, packs: [] };
+    } catch (error) {
+      // L2-3（L-19）：同上（listAvailable）
+      return { ok: false, packs: [], code: 'packs_bridge_unavailable', message: error instanceof Error ? error.message : 'unavailable', retryable: true };
     }
   },
   installRuntime(_pluginId: string) {
@@ -162,11 +164,28 @@ const runtimeBridge = {
         | { r: { installed: boolean; path: string | null }; python: { installed: boolean; path: string | null } }
         | undefined;
       if (data.ok && runtime?.r && runtime?.python) {
-        return runtime;
+        return { ...runtime, availability: 'ok' as const };
       }
-      return { r: { installed: false, path: null }, python: { installed: false, path: null } };
-    } catch {
-      return { r: { installed: false, path: null }, python: { installed: false, path: null } };
+      // ok:false / 形状缺失 = 后端未能给出确定读数 → 同假阴性根修（unavailable）
+      return {
+        r: { installed: false, path: null },
+        python: { installed: false, path: null },
+        availability: 'unavailable' as const,
+        code: 'runtime_bridge_unavailable',
+        message: 'runtime status not ok',
+        retryable: true,
+      };
+    } catch (error) {
+      // L2-3（蓝图 L-19）：网络故障不得伪造成「R/Python 未安装」确定性假阴性——
+      // 显式 unavailable 三态 + 可重试码（消费方据此显示「检测不可用」而非「未安装」）。
+      return {
+        r: { installed: false, path: null },
+        python: { installed: false, path: null },
+        availability: 'unavailable' as const,
+        code: 'runtime_bridge_unavailable',
+        message: error instanceof Error ? error.message : 'runtime status unavailable',
+        retryable: true,
+      };
     }
   },
 };

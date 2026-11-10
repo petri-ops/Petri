@@ -145,7 +145,9 @@ function listMainProcessSources() {
       const rel = `${dir}/${entry.name}`;
       if (entry.isDirectory()) { walk(rel); continue; }
       if (!rel.endsWith('.js')) continue;
-      if (/(^|\/)([a-z-]*preload)\.js$/.test(rel) || rel === 'src/ipc/channels.js') continue;
+      // L2-6：_channel-classification.js 是通道注记 DATA 表（合法引用字面量做键），
+      // 非 handler——与 channels.js 同列豁免。
+      if (/(^|\/)([a-z-]*preload)\.js$/.test(rel) || rel === 'src/ipc/channels.js' || rel === 'src/ipc/_channel-classification.js') continue;
       out.push(rel);
     }
   };
@@ -184,4 +186,17 @@ test('W2-2 全量 glob：src 下任何主进程模块不得手写已登记通道
   }
   assert.deepEqual(reflux, [], '主进程模块手写了已登记通道字面量（改用 CHANNELS 引用）');
   assert.deepEqual(unregistered, [], '主进程模块注册了未登记的 IPC 通道（先在 channels.js 登记）');
+});
+
+test('L2-6（BLOCK-406）：通道分类注记键 ⊆ 注册表字面量（testOnly/platformScoped 单源一致）', () => {
+  const { CHANNEL_CLASSIFICATION } = require('../src/ipc/_channel-classification.js');
+  const ids = new Set(flattenRegistry().map((entry) => entry.value));
+  for (const id of Object.keys(CHANNEL_CLASSIFICATION)) {
+    assert.ok(ids.has(id), `分类注记引用了未登记通道: ${id}`);
+  }
+  // testOnly 通道必须有 note（销号留痕），platformScoped 必须声明平台域
+  for (const [id, cls] of Object.entries(CHANNEL_CLASSIFICATION)) {
+    if (cls.testOnly) assert.ok(cls.note, `testOnly 缺销号注记: ${id}`);
+    if (cls.platformScoped) assert.ok(typeof cls.platformScoped === 'string' && cls.platformScoped.length > 0, `platformScoped 缺平台域: ${id}`);
+  }
 });

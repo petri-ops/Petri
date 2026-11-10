@@ -166,9 +166,12 @@ describe('projectionDataBridges', () => {
     mockFetchByPath({
       '/api/runtime/status': { ok: false },
     });
+    // L2-3（蓝图 L-19）：ok:false = 检测不可用（unavailable），不再冒充「未安装」确定性假阴性
     const degraded = await getProjectionRuntimeBridge().status();
     expect(degraded.r.installed).toBe(false);
-    expect(degraded.python.installed).toBe(false);
+    expect(degraded.python?.installed).toBe(false);
+    expect(degraded.availability).toBe('unavailable');
+    expect(degraded.code).toBe('runtime_bridge_unavailable');
   });
 
   it('aiSettings.get unwraps the { status, settings } envelope per ai-settings:get contract', async () => {

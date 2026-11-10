@@ -59,7 +59,8 @@ export interface ResolvedResultViewer {
  * BLOCK-142 三新档案按 plan §1.4 定值：markdown/pdf canExport=true（原文可导出），
  * spreadsheet 三位暂 false 占位——canSelect 接选择总线属后续包。
  * BLOCK-151 B 轨（审视吸收二波）：canExport 位经 viewerProfileCanExport 接线消费
- * （Shell 挂载面「打开原文件」出口）；canSelect/canCompare 仍为占位。
+ * （Shell 挂载面「打开原文件」出口）；canCompare 经 viewerProfileCanCompare 接线消费
+ * （L2-4/蓝图 L-03：ResultsSurface 挂载面按当前产物适配器传值）；canSelect 仍为占位。
  */
 // BLOCK-175 CP-14 — 能力位接线（切片 C）：只读文本族（table/json/text/markdown）
 // 的文本选择经选择总线→「继续分析」引用链（useArtifactTextSelection 消费）；
@@ -96,13 +97,25 @@ const VIEWER_PROFILES: Record<ResultViewerAdapter, Omit<ResolvedResultViewer, 'a
  * 取值唯一来源=上方档案表（不复制布尔）；canExport=true 的消费形态是
  * ResultArtifactShell/ViewerExportAction 的「打开原文件」出口。
  */
+// L2-4（蓝图 L-03）：三能力位取值收单点——对象注入 sink 单点豁免
+//（VIEWER_PROFILES 为封闭字面量表、adapter 是其键类型，无外部注入面）。
+function viewerProfile(adapter: ResultViewerAdapter): Omit<ResolvedResultViewer, 'adapter'> {
+  // eslint-disable-next-line security/detect-object-injection -- 封闭词表键取值，无注入面
+  return VIEWER_PROFILES[adapter];
+}
+
 export function viewerProfileCanExport(adapter: ResultViewerAdapter): boolean {
-  return VIEWER_PROFILES[adapter].canExport;
+  return viewerProfile(adapter).canExport;
+}
+
+/** adapter 是否声明「可分屏对照」能力（ResultsSurface 挂载面消费——L2-4 接线）。 */
+export function viewerProfileCanCompare(adapter: ResultViewerAdapter): boolean {
+  return viewerProfile(adapter).canCompare;
 }
 
 /** BLOCK-175 CP-14 — adapter 是否声明「文本选择→选择总线」能力。 */
 export function viewerProfileCanSelect(adapter: ResultViewerAdapter): boolean {
-  return VIEWER_PROFILES[adapter].canSelect;
+  return viewerProfile(adapter).canSelect;
 }
 
 export function resolveResultViewer(input: {

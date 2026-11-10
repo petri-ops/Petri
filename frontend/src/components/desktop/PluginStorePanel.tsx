@@ -74,7 +74,9 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
   // UI-374 — 缺失提示领域感知：只在「包已装而运行时缺」时出现（无包不提运行时），
   // 文案挂包名。runtimeStatus 为 null（检测未知）时维持既有语义：不提示。
   // packsRequiringRuntimes 已随 useDomainPacks 外迁。
-  const missingRuntimeNames = runtimeStatus
+  // L2-3（蓝图 L-19）：availability:'unavailable' = 检测不可用，不得渲染「未安装」假阴性。
+  const runtimeUnavailable = runtimeStatus?.availability === 'unavailable';
+  const missingRuntimeNames = runtimeStatus && !runtimeUnavailable
     ? [
         !runtimeStatus.r.installed ? 'R' : null,
         !runtimeStatus.python.installed ? 'Python' : null,
@@ -155,6 +157,13 @@ export function PluginStorePanel({ onClose, backLabel = '返回', embedded = fal
         {/* Content */}
         <div className="petri-plugin-store__content">
           {/* UI-374 — 有包缺运行时才提示，且文案挂包名；无包不提运行时 */}
+          {/* L2-3（蓝图 L-19）：检测不可用 ≠ 未安装——显式提示不冒充确定性结论 */}
+          {runtimeUnavailable && (
+            <div className="petri-plugin-store__hint" role="status">
+              ⚠️ 运行时检测暂不可用（{runtimeStatus?.message || '后端连接异常'}）——稍后重试；此状态不表示 R/Python 未安装。
+            </div>
+          )}
+
           {needRuntimeHint && (
             <div className="petri-plugin-store__hint">
               ⚠️ 已安装领域包 {packsRequiringRuntimes.map((n) => `「${n}」`).join('、')} 需要

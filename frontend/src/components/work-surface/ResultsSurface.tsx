@@ -11,6 +11,8 @@ import {
   ResultStudioCanvas,
   ResultStudioContextBar,
 } from '@/components/result-studio/ResultStudioSurface';
+import { resolveResultViewer } from '@/components/result-studio/viewerRegistry';
+import type { ResultArtifactKind } from '@/lib/result-manifest';
 import {
   ResultAgentComposer,
   type ResultAgentComposerContext,
@@ -155,11 +157,17 @@ export function ResultsSurface({
 
   const handleModeChange = React.useCallback((next: ResultSurfaceMode) => setMode(next), []);
   const packTakesOver = Boolean(ctx.activeJob && resultSurfaceHost.descriptor && !downgradeToCore);
+  // L2-4（蓝图 L-03）：canCompare 按当前产物的 viewer 能力位传值（原调用不传 →
+  // 默认 false → mode=compare 静默回退；table 族 true 才可进 compare）。
+  const canCompare = ctx.activeArtifact
+    ? resolveResultViewer({ kind: ctx.activeArtifact.type as ResultArtifactKind, fileName: ctx.activeArtifact.name }).canCompare
+    : false;
 
   return (
     <div className={styles.surface} data-result-mode={mode} data-result-active={active ? 'true' : 'false'}>
       <ResultStudioCanvas
         mode={mode}
+        canCompare={canCompare}
         canProjectSource={Boolean(ctx.activeArtifact?.revisionId)}
         composer={mode === 'result' && ctx.activeArtifact ? (
           <ResultAgentComposer

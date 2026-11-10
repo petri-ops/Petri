@@ -1,4 +1,7 @@
 const CHANNELS = require('./channels');
+// L2-3（蓝图 L-20）：IPC 失败形状单源（{ok:false,code,message,retryable,degraded}）——
+// 降级默认保留形状兼容，但附带 failure 字段使「失败降级」与「真空」可区分。
+const { ipcFailure } = require("./_ipc-failure");
 // ============================================================
 // IPC handlers: plugin:* (8 handlers), content-plugin:* (3 handlers)
 //
@@ -31,7 +34,7 @@ function setupPluginIpc(options = {}) {
       return getInstalledPlugins();
     } catch (e) {
       console.warn("[desktop] plugin:list-installed failed:", e.message);
-      return [];
+      return ipcFailure('plugin_list_failed', e.message, { retryable: true, degraded: [] });
     }
   });
 
@@ -42,7 +45,7 @@ function setupPluginIpc(options = {}) {
       return await getRemoteManifest();
     } catch (e) {
       console.warn("[desktop] plugin:list-remote failed:", e.message);
-      return { plugins: {} };
+      return ipcFailure('plugin_list_remote_failed', e.message, { retryable: true, degraded: { plugins: {} } });
     }
   });
 
@@ -55,7 +58,7 @@ function setupPluginIpc(options = {}) {
       return listAllContentPlugins();
     } catch (e) {
       console.warn("[desktop] content-plugin:list failed:", e.message);
-      return [];
+      return ipcFailure('content_plugin_list_failed', e.message, { retryable: true, degraded: [] });
     }
   });
 
@@ -66,7 +69,7 @@ function setupPluginIpc(options = {}) {
       return listContentPluginDocs(pluginId);
     } catch (e) {
       console.warn("[desktop] content-plugin:list-docs failed:", e.message);
-      return [];
+      return ipcFailure('content_plugin_docs_failed', e.message, { retryable: true, degraded: [] });
     }
   });
 

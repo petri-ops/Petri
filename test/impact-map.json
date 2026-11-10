@@ -7626,6 +7626,61 @@
       "scriptRole": "governance-gate"
     },
     {
+      "id": "block405-l1-security-hardening",
+      "note": "第五轮 L1 安全边界纵深（BLOCK-405）：terminal 注入面/深链 MCP/受信 origin/navigate 白名单/CSP/权限/Keychain/transcript 归属。改任一即跑 L1 契约与安全断言。",
+      "patterns": [
+        "src/platform-compat.js",
+        "src/ipc/terminal.js",
+        "src/ipc/_workspace-roots.js",
+        "src/main/install-deep-link-core.js",
+        "src/main/env-coordinator.js",
+        "src/main/security-hardening.js",
+        "src/main/csp-config.js",
+        "src/main/_window-create.js",
+        "src/main/external-url-policy.js",
+        "src/ipc/window-manager.js",
+        "src/ipc/_ipc-trust.js",
+        "src/main/backend-proc-manager.js",
+        "core/shared-backend/local-request-boundary.js",
+        "core/petri-server/helpers/credential-store.js",
+        "core/shared-backend/llm-providers/io-transcript.js",
+        "core/petri-server/routes/ai-agent/llm-transcripts.js",
+        "core/petri-server/routes/ai-agent/index.js",
+        "core/petri-server/server.js",
+        "src/main.js"
+      ],
+      "tests": [
+        "test/block405-l1-security.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block406-l2-function-integrity",
+      "note": "第五轮 L2 功能断链与假成功（BLOCK-406）：MCP skill_execute/双 server resources/IPC 失败形状/canCompare/source enum/零消费退役。改任一即跑 L2 契约。",
+      "patterns": [
+        "core/petri-server/mcp/registry.js",
+        "core/shared-backend/skill-runtime.js",
+        "core/petri-server/agent-tools/tool-defs/skill.js",
+        "src/mcp-server.js",
+        "core/petri-server/routes/tools-platform.js",
+        "core/petri-server/helpers/tools-assets.js",
+        "core/petri-server/helpers/reason-codes.js",
+        "frontend/src/lib/browser-url.ts",
+        "frontend/src/lib/projectionDataBridges.ts",
+        "frontend/src/components/result-studio/viewerRegistry.ts"
+      ],
+      "tests": [
+        "test/block406-l2-function-integrity.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
       "id": "block351-evidence-assetization",
       "note": "BLOCK-351 证据资产化：EAR 口径/manifest builder/ear 复算与门/完整性断言批。改口径或批次时跑本包测试与 ear 门。",
       "patterns": [
