@@ -2,11 +2,13 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T13:16:24.431Z",
+  "generatedAt": "2026-11-10T13:40:06.687Z",
   "terminalCounts": {
-    "done-partial": 2,
-    "done": 5,
-    "in_progress": 25
+    "done-partial": 3,
+    "done": 6,
+    "retain-with-reason": 1,
+    "pending_user_ruling": 1,
+    "in_progress": 21
   },
   "gaps": [
     {
@@ -120,14 +122,14 @@
       "blocker": "A",
       "stage": "K1",
       "anchor": "ai-usage-helper.js:6,25-30 / mcp/registry.js:333",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "retain-with-reason",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k1/k1-mcp-metering-truth.json",
+      "decisionRef": "docs/post-h9-k1-decision-material.md",
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
-      "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "reason": "实证为蓝图误判：MCP 目录 24 个 .js 的 require 图零 LLM/计量命中，stdio 壳无 userId/conversationId；ai_usage 是单表 token 计量，写零 token 行会污染 calls/unknownCostCalls 与会话·项目·供应商聚合；registry.js:333「桌面版不写库」是既有产品裁决，红线禁止 Agent 撤销。真实 callTool 行为断言 + 11 条篡改负测在册。",
+      "note": "若用户裁决改变桌面计量语义，按决策材料候选 A4 另立切片（四项前置未齐前不改默认）"
     },
     {
       "id": "K-09",
@@ -135,14 +137,14 @@
       "blocker": "A+U",
       "stage": "K1",
       "anchor": "permissions.js:21-23 / mcp/ide-tools/contracts.js:11",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "pending_user_ruling",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k1/k1-permission-tier-truth.json",
+      "decisionRef": "docs/post-h9-k1-decision-material.md",
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "U 类：用户裁决默认档语义 + 外部 IDE 实机可达（V 类） + 复用单一策略入口不建第三套权限系统；裁决前不改 permissions.js / contracts.js 默认放行档",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "tools_only 解析未强制属 granularity-2 预留；IDE accessMode 硬接会造「外部 IDE 永远被拒」假门"
     },
     {
       "id": "K-10",
@@ -150,14 +152,14 @@
       "blocker": "A",
       "stage": "K1",
       "anchor": "tool-defs/goals.js / viewerRegistry.ts:58-62,69-86",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k1/k1-definition-wiring.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "蓝图声明过时：goals 三定义经 agent-orchestration.js:208 已在 TOOL_DEFS；viewer 12 档能力位已接线 10 个 true 位。本包不重复开发，只加防回退契约与 6 条负测，零消费声明位未增加"
     },
     {
       "id": "K-11",
@@ -375,14 +377,14 @@
       "blocker": "A",
       "stage": "K5",
       "anchor": "h9/ipc-unused-triage.json 165 通道",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k1/k1-ipc-first-batch.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "K5 逐件裁决 124 条 needsWiring + 41 条 retain 的「接线/删/retain-with-reason」，并补用户入口、错误态、负测；三矩阵同源与动态挂载扫描归 K-24",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "K1 前置已交付：165 通道三桶计数机械一致、124/41/0 与 H9 证据相符、第一批 124 条全部在 channels.js 唯一注册、10 条可信度负测；不擅自接线"
     },
     {
       "id": "K-26",
@@ -497,6 +499,13 @@
       "head": "a33a53cc",
       "terminalsAssigned": 7,
       "at": "2026-11-10T13:16:24.431Z"
+    },
+    {
+      "stage": "K1",
+      "block": "BLOCK-397",
+      "head": "ea42dec1",
+      "terminalsAssigned": 4,
+      "at": "2026-11-10T13:40:06.688Z"
     }
   ]
 }

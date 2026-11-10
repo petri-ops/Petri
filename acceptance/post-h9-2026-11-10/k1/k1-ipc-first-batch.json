@@ -1,0 +1,1141 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k1-ipc-first-batch",
+  "sourceCommit": "ea42dec1864891e3c8c5e677870cf03e1b566651",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:39:54.968Z",
+  "command": "node scripts/lib/post-h9-k1-ipc-triage.mjs + node --test test/post-h9-k1-ipc-triage.test.mjs",
+  "verdict": "triage-credible-first-batch-scoped",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "ok": true,
+  "issues": [],
+  "counts": {
+    "needsWiring": 124,
+    "retainWithReason": 41,
+    "deletable": 0,
+    "total": 165
+  },
+  "firstBatchCount": 124,
+  "firstBatch": [
+    {
+      "channel": "agent:task-done",
+      "domain": "agent",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ai-settings:get",
+      "domain": "ai-settings",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ai-settings:get-credential",
+      "domain": "ai-settings",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ai-settings:list-models",
+      "domain": "ai-settings",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ai-settings:save",
+      "domain": "ai-settings",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ai-settings:test",
+      "domain": "ai-settings",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "backend:status",
+      "domain": "backend",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:active",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:create",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:delete",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:list",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:rename",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "branch:switch",
+      "domain": "branch",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "content-plugin:list",
+      "domain": "content-plugin",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "content-plugin:list-docs",
+      "domain": "content-plugin",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "content-plugin:read",
+      "domain": "content-plugin",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "data:info",
+      "domain": "data",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "data:open-dir",
+      "domain": "data",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "diagnostic:export",
+      "domain": "diagnostic",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "diagnostic:crash-status",
+      "domain": "diagnostic",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "diagnostic:crash-dump-summary",
+      "domain": "diagnostic",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "diagnostic:crash-open-dumps",
+      "domain": "diagnostic",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "diagnostic:crash-simulate",
+      "domain": "diagnostic",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:list-directory",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:open-dialog",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:open-path",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:open-workspace-file",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:show-in-folder",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:download-from-url",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:start-drag",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:save-dialog",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:save-text-file",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "file:validate-directory",
+      "domain": "file",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "petri:agent-workbench-flags",
+      "domain": "petri",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "startup:report",
+      "domain": "startup",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "startup:marks",
+      "domain": "startup",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:apply-inverse-hunk",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:blame",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:branch-list",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:checkout-branch",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:checkpoint-create",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:checkpoint-rollback",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:commit-diff",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:commit-file-content",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:commit-index",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:commit-log",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:commit-review",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:discard-file",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:file-head-content",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:hunk-apply",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:hunk-reject-inverse",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:init-repository",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:list-modified",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:pull",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:push",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:remote-list",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:remote-status",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:revert-file",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:working-tree-shortstat",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:split-side-diff",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:stage-paths",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:stash-list",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:tag-list",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:undo-last-commit",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:unstage-paths",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:working-tree-diff",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:working-tree-file-content",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:working-tree-revert",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "git:working-tree-status",
+      "domain": "git",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "harness-capabilities:list",
+      "domain": "harness-capabilities",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:install-from-dialog",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:install-path",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:install-progress",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:install-runtime",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:list-available",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:list-installed",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:set-enabled",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:uninstall",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "pack:uninstall-plan",
+      "domain": "pack",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "install:deep-link",
+      "domain": "install",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "install:preview-deep-link",
+      "domain": "install",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "install:confirm-deep-link",
+      "domain": "install",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "install:pending-deep-link",
+      "domain": "install",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "plugin:list-installed",
+      "domain": "plugin",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "plugin:list-remote",
+      "domain": "plugin",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "runtime:status",
+      "domain": "runtime",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:cancel",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:discover",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:execute",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:getExecution",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:set-disabled",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:uninstall",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:get-install-info",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:reinstall",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:import-directory",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "skills:import-path",
+      "domain": "skills",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "mcp-config:import-dialog",
+      "domain": "mcp-config",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "mcp-config:import-path",
+      "domain": "mcp-config",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "ssh:register-host",
+      "domain": "ssh",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "telemetry:report",
+      "domain": "telemetry",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:open-log-dir",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:open-shell",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:session-list",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:session-resize",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:session-start",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:session-stop",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:session-write",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "terminal:snapshot",
+      "domain": "terminal",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:check",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:download",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:download-progress",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:error",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:install",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:update-available",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:update-downloaded",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "updater:update-not-available",
+      "domain": "updater",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "workspace:write-text-file",
+      "domain": "workspace",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:prepare",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:set-state",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:open-external",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:copy-image",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:export",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:get-data",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    },
+    {
+      "channel": "gen-ui:sandbox-hijacked",
+      "domain": "gen-ui",
+      "hasPreloadWrapper": true,
+      "mainOnly": false,
+      "registered": true,
+      "decision": "retain-for-K5-adjudication",
+      "note": "K1 不擅自接线；K5 逐件裁「接线 / 删 / retain-with-reason」并补用户入口、错误态、负测"
+    }
+  ],
+  "negativeTests": 10,
+  "disposition": "K1 只做机械分诊与可信度负测；124 条逐件接线裁决归 K5，不擅自改通道"
+}

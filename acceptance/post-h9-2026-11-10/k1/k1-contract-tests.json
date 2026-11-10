@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k1-contract-tests",
+  "sourceCommit": "ea42dec1864891e3c8c5e677870cf03e1b566651",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:39:55.235Z",
+  "command": "node --test test/post-h9-k1-mainline.test.mjs test/post-h9-k1-ipc-triage.test.mjs",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "pass": 29,
+  "fail": 0,
+  "negativeTests": 21,
+  "tests": [
+    "K1 四条结论",
+    "MCP require 图零 LLM",
+    "ai_usage 单表 token",
+    "goals 运行时 TOOL_DEFS",
+    "viewer 12 档能力位",
+    "tools_only 现状",
+    "真实 callTool 行为",
+    "no-op 不抛错",
+    "165 分诊三桶",
+    "第一批注册一致性"
+  ]
+}

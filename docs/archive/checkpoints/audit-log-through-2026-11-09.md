@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T13:19:35.877Z -->
 最后更新：2026-11-09（🏁 **BLOCK-385（post-S7 H0）completed**：state 两层语义 + 影响图去重/未映射 145→138 + 分片 9 红→3 红（7 根修 2 外部归属）+ canonical 对账；closeout 16 门全绿。下一包=H1/BLOCK-386（ADMISSION 三入口闭环 + FK 真相）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T13:40:13.439Z -->
+最后更新：2026-11-09（🏁 **BLOCK-386（post-S7 H1）completed**：执行准入闭环焊接（四类拒绝生产路径 9/9）+ 删空间掉绑不依赖 FK + zip 四道闸 + manifest 链三态 + 链校验默认 strict；ADMISSION/FK 维持缓（U 类材料在册）。下一包=H2/BLOCK-387（失败可见性与错误语义）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

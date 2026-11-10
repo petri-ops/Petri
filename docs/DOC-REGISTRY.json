@@ -9,11 +9,52 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 531,
+    "documentCount": 533,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 514
+    "managedMarkdown": 516
   },
   "documents": [
+    {
+      "id": "POST-H9-K1-DECISION-MATERIAL",
+      "capability": "post-h9-k1-decision-material",
+      "path": "docs/post-h9-k1-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-397-post-h9-k1-agent-mainline-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "decision-material",
+        "user-ruling"
+      ],
+      "notes": "K1 U 类决策材料：MCP 桌面计量语义（K-08）与 tools_only/IDE accessMode 档位（K-09）的现状/候选/风险/推荐/证据/补腿条件。未裁决前不生效，Agent 不代答；证据类=decision-material，不得冒充行为测试或实机证据。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-397",
+      "capability": "block-397-post-h9-k1-agent-mainline",
+      "path": "docs/block-397-post-h9-k1-agent-mainline-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-397",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-397-post-h9-k1-agent-mainline-plan.md",
+        "acceptance/post-h9-2026-11-10/k1/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k1"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K1 通用 agent 主线兑现度。K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-396",
       "capability": "block-396-post-h9-k0-criteria-baseline",

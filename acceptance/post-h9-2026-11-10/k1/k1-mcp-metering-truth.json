@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k1-mcp-metering-truth",
+  "sourceCommit": "ea42dec1864891e3c8c5e677870cf03e1b566651",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:39:54.924Z",
+  "command": "node scripts/lib/post-h9-k1-mainline.mjs + node --test test/post-h9-k1-mainline.test.mjs",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "conclusions": {
+      "K-08": "retain-with-reason",
+      "K-10-goals": "already-delivered",
+      "K-10-viewer": "already-delivered",
+      "K-09": "pending_user_ruling"
+    },
+    "verdict": "mainline-truth-verified-no-default-semantics-changed"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "truth": {
+    "llmHits": [],
+    "mcpFileCount": 24,
+    "singleTable": true,
+    "tokenSemantics": true,
+    "conversationFiltered": true,
+    "goalsInToolDefs": [
+      "create_goal",
+      "get_goal",
+      "update_goal"
+    ],
+    "goalsFacadeDirect": false,
+    "goalsOrchestrationSpread": true,
+    "viewerTrueBits": 10,
+    "viewerProfileRows": 12,
+    "viewerExports": true,
+    "toolsOnlyParsedNotEnforced": true,
+    "accessModeReopen": true,
+    "confirmPolicySingleAxis": true,
+    "shellNoUserContext": true,
+    "registryDecisionComment": true
+  },
+  "behaviorAssertion": "真实 callTool(ide_file_exists) + ai-usage-helper spy → 零计量且工具结果正确",
+  "negativeTests": 11,
+  "decisionRef": "docs/post-h9-k1-decision-material.md"
+}

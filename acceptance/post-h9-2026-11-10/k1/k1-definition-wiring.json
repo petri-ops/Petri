@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k1-definition-wiring",
+  "sourceCommit": "ea42dec1864891e3c8c5e677870cf03e1b566651",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:39:54.955Z",
+  "command": "node --test test/post-h9-k1-mainline.test.mjs",
+  "verdict": "already-delivered",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "goalsInToolDefs": [
+    "create_goal",
+    "get_goal",
+    "update_goal"
+  ],
+  "goalsFacadeDirect": false,
+  "goalsOrchestrationSpread": true,
+  "viewerTrueBits": 10,
+  "viewerProfileRows": 12,
+  "viewerExports": true,
+  "negativeTests": 6,
+  "note": "蓝图「未接线/全 false」声明过时，本包不重复开发，只加防回退契约"
+}
