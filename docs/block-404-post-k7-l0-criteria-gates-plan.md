@@ -1,6 +1,6 @@
 ---
 capability: block-404-post-k7-l0-criteria-gates
-status: active
+status: completed
 goal: 执行第五轮优化程序 L0（判据校准与可信起点）：先解「会保护债务的反向门禁」「会假绿的判据」「会漏报 WIP 的状态聚合器」「并存的数字双真相」四类尺子问题，零产品行为变化。承载蓝图 docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L0 的 21 条发现（L-27/28/29/30/36/37/40/43/45/54/75/76/77/82/83/84/86/87/88/89/90）。
 acceptance:
   - L0-1 解反向门禁：k4-architecture「入册/固定行数/全量 entry 即判红」、K6「删除 IPC env 豁免口即判红」改读数型记录；植入三类模拟改动门禁不判红，篡改负测仍必红

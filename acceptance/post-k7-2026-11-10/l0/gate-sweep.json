@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l0-gate-sweep",
+  "block": "BLOCK-404",
+  "stage": "L0",
+  "sourceCommit": "ba9d9271",
+  "platform": "darwin-arm64",
+  "command": "逐门当次取样（npm run <gate>；非 closeout 聚合）",
+  "generatedAt": "2026-11-11T01:05:00+08:00",
+  "gates": [
+    { "gate": "gate:post-h9-contracts", "exit": 0, "reading": "11 契约文件 / 186 项全绿（185→186，只增）" },
+    { "gate": "quality:secret", "exit": 0, "reading": "生产面 0 命中" },
+    { "gate": "quality:arch", "exit": 0, "reading": "R1-R5 无违规" },
+    { "gate": "gate:user-assets", "exit": 0, "reading": "10 项受保护路径未入库/未暂存（tracked=6172 staged=0）" },
+    { "gate": "gate:version-parity", "exit": 0, "reading": "10 处跨语言字面量一致" },
+    { "gate": "gate:css-modules", "exit": 0, "reading": "plain CSS 11 全在白名单" },
+    { "gate": "gate:silent-catch", "exit": 0, "reading": "92 文件 / 395 处（基线 395 冻结不变）" },
+    { "gate": "gate:code-size", "exit": 0, "reading": "台账 75 文件 = MANIFEST 24 + L0 发现入册 51；总行数 86730" },
+    { "gate": "gate:arch-cycles", "exit": 0, "reading": "12 存量环在册，无新环" },
+    { "gate": "quality:knip:check", "exit": 0, "reading": "330 键冻结无新增" },
+    { "gate": "quality:ear", "exit": 0, "reading": "EAR 981/2198=44.6%，manifest 记录 43.3%（真棘轮在场）" },
+    { "gate": "quality:lint", "exit": 0, "reading": "0 errors（抑制后）；warnings 2445 = 分域基线（P1489/T417/S539）" },
+    { "gate": "quality:lint:ledger", "exit": 0, "reading": "实际违规 191 处 = 抑制台账 100 文件 120 条逐条相等（机械投影成立）" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc --noEmit 0 error" },
+    { "gate": "docs:check", "exit": 0, "reading": "547 registered；AUDIT-LOG 21.9KB（<50KB 保留阈）" },
+    { "gate": "hygiene:check", "exit": 0, "reading": "PASS" },
+    { "gate": "skills:check", "exit": 0, "reading": "PASS" },
+    { "gate": "test:changed", "exit": 1, "reading": "113 项 112 绿 / 1 红 = P6 stored verification（p6_current_source_tree_not_exact: frontend/src/pages/project-workspace.module.css——他方在制 WIP（BLOCK-395 B-11，11+/9-）在 P6 源绑定清单内；owner 收口提交后自愈。先于本会话存在，非本包回归）" },
+    { "gate": "ui:audit:check", "exit": 1, "reading": "WORKTREE_UI：同一 CSS WIP 未同步台账——W 类归属（零触碰、不代改、不代 stage）" }
+  ],
+  "negativeTestsPlantedRed": [
+    "L0-1 植入「loop-orchestrator 入册 / knip entry 收窄 / 环消亡」三类改动 → k4 门不判红（解除负测）；篡改（环/键增长、动态 require 改写）仍必红",
+    "L0-2 植入 +30% 慢样本（1040 vs 800×1.25）→ 必红；基线 skipped → 必红；host/coreSha 失配 → 必红",
+    "L0-3 植入 EAR 降至 41%（< manifest 43.3）→ 必红；分子真实增长 → 不判红",
+    "L0-4 未登记生产文件 + fake exec → 全量 Node/前端命令在场且 exit=2（绿）/1（红）",
+    "L0-5 stat 缓存陈旧构造场景 → npm run state 列出该 M（实机验证）；🔵 未注册 BLOCK active 无历史标注 → docs:check 报警",
+    "L0-6 手改 count（实际>账本）→ 红；实际<账本 → 红指向 prune；未入账违规 → 红；warnings 任一域上涨 → 红",
+    "L0-7 新增未登记 >700 行文件 → 发现器必红；L0 行数上涨 → 红；CSS 字节上涨 → 红；新增 src.includes( 断言 → 第二棘轮必红",
+    "L0-8 用户资产 10 项逐条对账一致；guard 真实树 exit 0"
+  ],
+  "wAttribution": "frontend/src/pages/project-workspace.module.css（BLOCK-395 B-11 composes 顺序修正，11+/9−）零触碰、不 stage、不提交；其引起的 ui:audit:check 与 P6 源绑定红均属 owner 收口范围。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+  "notes": "本表为逐门当次取样，非 closeout 聚合输出；closeout 聚合在 ui-audit 门 fail-fast（W 归属），后续门已在本次清扫逐门取证。"
+}

@@ -19,19 +19,19 @@
       "capability": "block-404-post-k7-l0-criteria-gates",
       "path": "docs/block-404-post-k7-l0-criteria-gates-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-404-post-k7-l0-criteria-gates",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "post-k7",
         "l0",
         "gates",
         "criteria"
       ],
-      "notes": "第五轮 L0 判据校准与可信起点（用户 2026-11-11 执行提示词预授权连续工作）：解反向门禁（k4/K6/knip-entry 改读数型+只减棘轮+篡改负测）/ perf 判据重立（冷热分离·中位最差轮·skipped 判红·基线绑定 host+热路径·慢样本负测）/ EAR 真棘轮 / test:changed fail-closed / state --no-optional-locks 兜底 + 🔵-registry 对账 / lint 台账 -f json 机械校验 + warnings 分域只减 / 尺寸门含 .module.css 全量入册 + 全库 includes 第二棘轮 / 数字口径单源 JSON + backlog 快照声明 + task-runs 归档 + 用户资产对账。零产品行为变化；零触碰在制 CSS WIP 与 10 项用户资产。蓝图=docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L0。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "第五轮 L0 判据校准与可信起点 completed（2026-11-11）：八改进点全部交付（解反向门禁读数型+只增即红棘轮 / perf 冷热分离·3轮中位·容差25-30%·基线绑定host+热路径·skipped判红 / EAR 真棘轮 / test:changed fail-closed / state 兜底+🔵对账 / lint 台账机械投影 191=120 逐条相等 + warnings 分域只减 2445 / 尺寸门 v3 全量发现入册 75 文件+includes 第二棘轮 129 处 / 数字口径单源 JSON+backlog 快照声明+AUDIT-LOG 压回 21.9KB+task-runs 归档+用户资产 10 项）。186 契约全绿；19 门当次清扫 17 绿+2 红均 W 归属（CSS WIP 引起 ui:audit:check 与 P6 源绑定，owner 收口自愈）；perf 连续 5/5 PASS 落证据。零产品行为变化、零新增依赖。证据=acceptance/post-k7-2026-11-10/l0/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-K7-FULL-AUDIT-AND-BLUEPRINT-2026-11-10",
