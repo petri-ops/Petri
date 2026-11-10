@@ -25,12 +25,15 @@ test('三处运行时动态 require 文件已登记为 knip entry（登记即留
   assert.equal(Object.prototype.hasOwnProperty.call(cfg, '_dynamicEntryNote'), false);
 });
 
-test('诚实登记：330 键与这三文件无关，不冒充收缩', () => {
+test('诚实登记：动态入口三文件不在保留基线，且基线数如实登记（L1 后 329 键=三 exports 转活消亡）', () => {
   const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'test/knip-baseline.json'), 'utf8'));
   for (const f of DYNAMIC_ENTRIES) {
     assert.equal(baseline.keys.filter((k) => k.includes(f)).length, 0);
   }
-  assert.equal(baseline.keys.length, 330);
+  // L1（BLOCK-405）：computeTrustedRendererOrigins/confirmInstall/validateMcpConfig
+  // 三处 exports 因 L1 代码静态消费而转活，经 knip-ratchet --update 下调（330→329，
+  // 同时新增 isLoopbackHttpOrigin 动态消费与 local-token.cjs dev 设施两条定性保留）。
+  assert.equal(baseline.keys.length, 329);
 });
 
 test('负测：登记被移除即红（防回退）', () => {

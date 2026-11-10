@@ -29,20 +29,18 @@
     "exports::src/main/core-utils.js::resolveCoreRoot",
     "exports::src/main/core-utils.js::resolveNodeBin",
     "exports::src/main/crash-guard.js::evaluateSessionHealth",
-    "exports::src/main/env-coordinator.js::computeTrustedRendererOrigins",
     "exports::src/main/env-coordinator.js::getBackendPorts",
+    "exports::src/main/env-coordinator.js::isLoopbackHttpOrigin",
     "exports::src/main/install-deep-link-core.js::MAX_ARCHIVE_BYTES",
     "exports::src/main/install-deep-link-core.js::MAX_MANIFEST_BYTES",
     "exports::src/main/install-deep-link-core.js::MAX_MCP_CONFIG_BYTES",
     "exports::src/main/install-deep-link-core.js::allowPrivate",
-    "exports::src/main/install-deep-link-core.js::confirmInstall",
     "exports::src/main/install-deep-link-core.js::downloadGuarded",
     "exports::src/main/install-deep-link-core.js::fetchJsonGuarded",
     "exports::src/main/install-deep-link-core.js::isLoopbackHostname",
     "exports::src/main/install-deep-link-core.js::isPrivateHostname",
     "exports::src/main/install-deep-link-core.js::parseInstallDeepLink",
     "exports::src/main/install-deep-link-core.js::previewFromLink",
-    "exports::src/main/install-deep-link-core.js::validateMcpConfig",
     "exports::src/main/install-deep-link-core.js::validatePackManifest",
     "exports::src/main/install-deep-link-core.js::validateRemoteUrl",
     "exports::src/platform-compat.js::getRuntimeBinName",
@@ -199,6 +197,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/local-token.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",
     "files::acceptance/block-139/block139-selection-walk.cjs",
     "files::acceptance/block-140/block140-split-walk.cjs",
@@ -338,6 +337,5 @@
     "types::frontend/src/themes/ThemeProvider.tsx::AccentId",
     "types::frontend/src/themes/ThemeProvider.tsx::ResolvedTheme",
     "types::frontend/src/types/branch.types.ts::Message"
-  ],
-  "note": " 【2026-11-10 BLOCK-394 重打留因】移除 types::.../CodeMirror/types.ts::DiffViewOptions = B-25 类型归位后不再是保留面死代码；新增 types::.../copilotClient/runHealthEvents.ts::RunHealthEventCode = B-07 四事件映射导出的类型（消费者为同目录 .test.ts 与 agentTaskStream，knip 静态入口未纳该调用面，定性为测试契约型保留，非放宽）。总数仍 330。"
+  ]
 }
