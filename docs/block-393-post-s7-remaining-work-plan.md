@@ -96,6 +96,33 @@ reopen: 有效模型凭据到位 → 8 任务套件；人眼路线签字 → UI-
 | ADMISSION 默认档 / FK=ON 全量切换（U 类） | 用户裁决维持缓 | 材料在 `docs/post-s7-h1-admission-fk-decision-material.md` |
 | EAR 45%（B-30） | 41.9%（892/2128） | 靠分子增长，不缩分母；本包新增证据已入册 |
 
+## 3.1 剩余项按「谁解锁」逐件分类（2026-11-10 复核）
+
+> 用户问「剩下的是不是都是人眼验收」——**不是**。机械分类写进
+> `acceptance/post-s7-2026-11-09/h7/gap-ledger.json` 的 `gaps[].blocker` / `alsoRequires`
+> （同一真相源，不另建台账），由 `test/post-s7-gap-blocker-classification.test.mjs` 6 条契约守护。
+
+| 主解锁条件 | 条数 | 缺口编号 | 谁来做 |
+| --- | ---: | --- | --- |
+| `human_eye` | 4 | B-10 / B-12 / B-32 / B-34 | 真人观感 / 读屏 / 签字，Agent 不代答 |
+| `credential` | 1 | B-02 | 用户提供有效模型凭据 |
+| `user_decision` | 1 | B-05 | 用户显式裁决（FK 全量切换） |
+| `dev_stack` | 4 | B-07 / B-09 / B-14 / B-22 | 无窗口 dev 栈 + CDP，Agent 可代行（非人眼） |
+| `engineering` | 19 | B-03/04/06/08/11/13/16/17/18/20/21/23/24/25/26/29/30/31/33 | Agent 可开工，按单工作包串行纪律需发令 |
+| `none` | 5 | B-01 / B-15 / B-19 / B-27 / B-28 | 已完成 |
+
+**附加条件（不重复计入主类）**：B-07 / B-11 / B-14 的**末步**需人眼过目（主项仍是 Agent 可做的工程 / 实机栈活），
+合计「需人参与」7 条；B-34 另需凭据（T7 自然长任务）。
+
+**两个容易混的点**：
+1. 8 项 `humanEyePending` 在 `acceptance/block-356/results-v2final.json` 里是 `pendingHumanJudgment`
+   的 `toolSelectJudge` / `artifactJudge` —— **任务产物质量判据**，不是 UI 观感验收；且需先解 B-02 凭据才有真实产物可判。
+2. UI-702 等人眼路线里的**暗色观感 / VoiceOver 朗读 / 32 条 debt 过目**是另一批（B-12/B-32/B-34），
+   CDP 可代行的 DOM 断言部分已在 `h8/ui-live.json`，未翻 `verified`。
+
+**结论**：34 条里 5 条已完成、29 条有余项；其中只有 4 条主解锁条件是纯人眼，
+19 条是 Agent 可开工的工程项、4 条是 Agent 可代行的实机栈项。
+Agent 侧并非「只剩等人」——但按单工作包串行纪律，这 23 条需用户发令才开工。
 ## 4. 保护边界自查
 
 - 8 项 untracked 用户资产 + 撤回的 `docs/pelican-bicycle.html` 零触碰（门禁现场零命中）；主库只做 readonly 快照，种子只写 `/tmp` 副本。
