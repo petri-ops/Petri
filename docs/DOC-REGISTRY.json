@@ -10,7 +10,7 @@
     ],
     "requireRegistration": true,
     "documentCount": 527,
-    "lastUpdated": "2026-11-09",
+    "lastUpdated": "2026-11-10",
     "managedMarkdown": 510
   },
   "documents": [
@@ -10690,5 +10690,5 @@
       "notes": "第三轮方向蓝图。2026-11-09 用户预授权连续工作后转 active(living-plan) 并由 BLOCK-385~392 八包执行完毕：H0-H7 全部收口，34 条缺口逐件定终态（done 5/done-partial 15/retain 12/pending_human_eye 1/external-blocked 1），十一维终验四升七平零降（达标 3/11）。终验报告=docs/block-392-post-s7-h7-final-report.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-09"
+  "lastUpdated": "2026-11-10"
 }
