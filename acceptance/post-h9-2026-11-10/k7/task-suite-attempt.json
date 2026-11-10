@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-real-task-attempt",
+  "sourceCommit": "98e2a54eca7dd711c79fe667b7d57cd448a93fbf",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:57:46.994Z",
+  "command": "node scripts/evals-run.mjs --suite=real --provider=real (90s bounded) + node scripts/block348-task-runner.mjs --report=... (240s bounded) + curl outbound probes",
+  "verdict": "external-blocked",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "capturedAt": "2026-11-10T14:57:46.979Z",
+  "credentialFacts": {
+    "credentialBackend": "keychain",
+    "deepseekConfigured": true,
+    "chatModelPresets": 4,
+    "credentialStatusDeepseek": true,
+    "envCredentialLikeKeys": 0,
+    "blueprintClaim": "env 0 key / presets=0",
+    "calibration": "凭据实际在本机 keychain 凭据库，不在 env；蓝图写作时口径不成立，本次按运行时读数纠正"
+  },
+  "outboundFacts": {
+    "deepseekApiHttpCode": 401,
+    "genericOutboundHttpCode": 200,
+    "providerEndpointConnect": "199.59.148.247:443 connect ETIMEDOUT",
+    "interpretation": "服务 HTTP 可达（401 是未带鉴权的预期响应）、通用出网 200；真实模型端点 TCP 超时，属特定 provider 端点阻断而非全局断网"
+  },
+  "evalsRealAttempt": {
+    "command": "node scripts/evals-run.mjs --suite=real --provider=real",
+    "timeoutSec": 90,
+    "exitCode": 124,
+    "tasks": 3,
+    "backend": "up @54896",
+    "provider": "local-store model=deepseek-flash",
+    "task": "real-coding-fix",
+    "durationMs": 84837,
+    "criteria": {
+      "task_completed": "FAIL (read ECONNRESET)",
+      "outbound_contains": "PASS (sumLast ×3)",
+      "file_contains": "FAIL (src/calc.js 不含目标内容)",
+      "no_policy_denial": "PASS"
+    },
+    "conclusion": "timeout 124 = unknown（有界超时，非通过非失败结论）"
+  },
+  "eightTaskAttempt": {
+    "command": "node scripts/block348-task-runner.mjs --report=acceptance/post-h9-2026-11-10/k7/task-suite-attempt-1.json",
+    "timeoutSec": 240,
+    "exitCode": 124,
+    "backend": "up @54995 provider=local-store model=deepseek-flash",
+    "t1": {
+      "task": "t1-code-bugfix",
+      "durationSec": 234,
+      "status": "failed",
+      "toolCalls": 0,
+      "criteria": {
+        "task_completed": "FAIL (connect ETIMEDOUT 199.59.148.247:443)",
+        "tool_used": "FAIL ×0",
+        "tool_output_contains": "FAIL ×0",
+        "file_unmodified": "PASS ×2"
+      },
+      "artifacts": 3
+    },
+    "t2": {
+      "task": "t2-data-cleaning",
+      "status": "started-then-timed-out"
+    },
+    "conclusion": "exit 124 = unknown；t2 起跑后整体有界超时，未产出 results.json；半成品 artifacts/traces 已清理（本包自产，非用户资产）"
+  },
+  "tasksClaimed8of8": false,
+  "realTaskSuccess": false,
+  "humanEyeSignaturePresent": false,
+  "humanEyePending": 8,
+  "externalBlockedReason": "真实模型端点 TCP ETIMEDOUT + 90s/240s 有界超时；连续 3 次 8/8、attempt 级证据、T7 自然长任务均客观拿不到",
+  "closureCondition": "provider 端点恢复 → 按冻结判据表复跑 ×3（0 干预）+ T6 波动归因 + 环境因逐条时间线；人眼路线需用户签字",
+  "disclosure": "本证据是环境因记录（decision-material），不冒充行为测试/机械门禁/CDP 实机/人眼观感/真实任务成功"
+}

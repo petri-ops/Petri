@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-eleven-dim-review",
+  "sourceCommit": "98e2a54eca7dd711c79fe667b7d57cd448a93fbf",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:58:57.182Z",
+  "command": "docs/post-h9-2026-11-10-final-report.md §2（六列复评）",
+  "verdict": "measured",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "policy": "前五列逐字沿用蓝图 §0.3 与 H7/H9 终验，不回溯改写历史评分；第六列由本程序当次提交与读数归因",
+  "summary": {
+    "up": 4,
+    "flat": 7,
+    "down": 0,
+    "qualifiedAt44": 5,
+    "total": 11
+  },
+  "table": [
+    {
+      "dim": "功能完整性",
+      "atEval": 4.2,
+      "nso": 4.3,
+      "s7": 4.4,
+      "h7": 4.4,
+      "h9": 4.4,
+      "final": 4.4,
+      "target": 4.7,
+      "attribution": "平。16 域 facade / 168 通道 / MCP 单入口未动；K1 实证 goals 已汇编、viewer 能力位已接线（蓝图缺口声明校准，非新增能力）；K2 additive hasMore/nextCursor 信封不改变默认 100 上限；8 任务套件当次 ETIMEDOUT 未完成，不给分"
+    },
+    {
+      "dim": "性能表现",
+      "atEval": 3.5,
+      "nso": 3.8,
+      "s7": 3.8,
+      "h7": 3.9,
+      "h9": 3.9,
+      "final": 3.9,
+      "target": 4.5,
+      "attribution": "平。K0 作废三条失真判据并重立（12 负测）、K5 perf 显式证据 5/5 与 DOM 阈值纯函数门；但 K2 会话真分页、K5 DOM/帧率判据入门禁、T7 自然长任务均属 L/V 未闭合，证据增量不足以升分"
+    },
+    {
+      "dim": "代码质量",
+      "atEval": 3.3,
+      "nso": 3.6,
+      "s7": 3.7,
+      "h7": 3.9,
+      "h9": 4,
+      "final": 4.1,
+      "target": 4.5,
+      "attribution": "+0.1。K0 lint∩hygiene 联动门 / K3 内联样式债棘轮门 / K4 源码扫描契约只减不增棘轮门 / K5 严格证据元数据门 / K6 PiP 四项基线红绿先行，共 5 个新机械门各带负测；K3 lint 红门删死导入根修（3db14806）零放宽基线"
+    },
+    {
+      "dim": "可维护性",
+      "atEval": 3.2,
+      "nso": 3.5,
+      "s7": 3.6,
+      "h7": 3.7,
+      "h9": 3.7,
+      "final": 3.7,
+      "target": 4.4,
+      "attribution": "平。K2 具名上限常量收编 10 文件 15 行（纯重构，拆前拆后各 18/18）、K4 插件源解析面单源防回退；但五巨型文件未拆、装配面仍两处拼数组、3 族源码扫描契约未换行为断言，按 W5b 逐刀纪律挂起，不升分"
+    },
+    {
+      "dim": "可扩展性",
+      "atEval": 4.2,
+      "nso": 4.5,
+      "s7": 4.5,
+      "h7": 4.5,
+      "h9": 4.5,
+      "final": 4.5,
+      "target": 4.8,
+      "attribution": "平。16 域 facade / listTools+callTool 单入口 / 168 通道注册制零改动；K1 未新增零消费声明位、K6 未建第二 IPC 包装器，三矩阵同源改造仍挂 W5b"
+    },
+    {
+      "dim": "安全性",
+      "atEval": 3.4,
+      "nso": 4,
+      "s7": 4.2,
+      "h7": 4.3,
+      "h9": 4.3,
+      "final": 4.4,
+      "target": 4.6,
+      "attribution": "+0.1。K6 补上最后一个未覆盖创建点：PiP sandbox/webSecurity 显式达标并纳入 WINDOW_FILES（红 1→绿 3/3），4 个 BrowserWindow 创建点四项基线全覆盖 + 漏配/漏登记负测；ADMISSION/FK 维持既有裁决未变"
+    },
+    {
+      "dim": "用户界面与交互体验",
+      "atEval": 3.7,
+      "nso": 3.7,
+      "s7": 3.8,
+      "h7": 4,
+      "h9": 4.1,
+      "final": 4.1,
+      "target": 4.6,
+      "attribution": "平。K3 四事件反向契约 22/22、布局单源防回退、debt 35 机械分诊；但暗色对比/读屏/长内容三态人眼未签字（签名区全空）、颜色值未 token 化、focus trap 未做，不冒 verified"
+    },
+    {
+      "dim": "错误处理与边界情况",
+      "atEval": 3.1,
+      "nso": 3.5,
+      "s7": 3.7,
+      "h7": 3.9,
+      "h9": 3.9,
+      "final": 4,
+      "target": 4.6,
+      "attribution": "+0.1。K0 判据作废重立的 fail-closed 裁决器、K1 MCP 计量误判校准（不污染账本）、K5 证据元数据五类不冒充门、K6 四个创建点安全断言；但 8 处生产空 catch 未清零、四事件 Toast 历史未接、64MB 单入口未收编，升幅受未闭合项限制"
+    },
+    {
+      "dim": "测试覆盖",
+      "atEval": 3.7,
+      "nso": 4.1,
+      "s7": 4.2,
+      "h7": 4.3,
+      "h9": 4.4,
+      "final": 4.5,
+      "target": 4.7,
+      "attribution": "+0.1。K0–K6 新增契约测试 45+29+15+3(HTTP)+22+19+22+14=169 项（含 100+ 条篡改负测），每阶段定向 test:changed 全绿、K0 干净树 closeout:full ×3 19 门全绿；但 test:all:sharded 全量三段本程序未跑（如实标注），升幅受限"
+    },
+    {
+      "dim": "文档完善度",
+      "atEval": 4.3,
+      "nso": 4.5,
+      "s7": 4.6,
+      "h7": 4.7,
+      "h9": 4.7,
+      "final": 4.7,
+      "target": 4.8,
+      "attribution": "平。八阶段独立 plan + 5 份 U/E/V/L 决策材料全部登记 registry/README，每阶段六件套同批回写；AUDIT-LOG 仍 >50KB 建议阈（audit:compact 自稳）、docs:reconcile 136 归档候选本轮零归档，不升分"
+    },
+    {
+      "dim": "依赖与架构合理性",
+      "atEval": 3.7,
+      "nso": 3.9,
+      "s7": 4,
+      "h7": 4,
+      "h9": 4,
+      "final": 4,
+      "target": 4.6,
+      "attribution": "平。全程零新增依赖、三套 lock 未动、typescript 双版本漂移只读检出（U 类待裁决）、12 环/330 键/五巨型文件基线零放宽；W5b 结构性重构仍挂起，不升分"
+    }
+  ],
+  "note": "4 升 7 平 0 降；达标（≥4.4）5/11（蓝图 H9 复核为 4/11）"
+}

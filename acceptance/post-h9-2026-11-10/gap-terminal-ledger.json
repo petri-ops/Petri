@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T14:46:06.487Z",
+  "generatedAt": "2026-11-10T14:58:05.396Z",
   "terminalCounts": {
     "done": 10,
     "retain-with-reason": 3,
@@ -10,7 +10,7 @@
     "done-partial": 9,
     "deferred": 5,
     "pending_human_eye": 1,
-    "in_progress": 1
+    "external-blocked": 1
   },
   "gaps": [
     {
@@ -454,14 +454,14 @@
       "blocker": "V+E",
       "stage": "K7",
       "anchor": "task-suite-round1.json 0/8 / 8 项 humanEyePending",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
-      "routeRef": null,
+      "terminal": "external-blocked",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k7/task-suite-attempt.json",
+      "decisionRef": "docs/block-403-post-h9-k7-final-acceptance-plan.md",
+      "routeRef": "docs/post-s7-h7-human-eye-route.md",
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "V：provider 端点 199.59.148.247:443 恢复可达后按冻结判据表复跑 8 任务 ×3（连续 8/8、0 干预）+ T6 波动归因到稳定根因 + attempt 级 token/cache/duration/模型归因/重试原因 + 环境因逐条时间线；E：用户按 H7 路线六组实测并填签名区，8 项 humanEyePending（toolSelectJudge/artifactJudge）在真实产物到位后由人补判据；L：T7 去 windowOverride 的自然长任务",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "当次真实取数（2026-11-10）：凭据实际在位（keychain/deepseek_configured=true/4 chat presets，纠正蓝图「0 key」口径）；api.deepseek.com HTTP 401 可达、通用出网 200，但模型端点 TCP connect ETIMEDOUT；evals real 3 任务 84.8s FAIL（ECONNRESET）、8 任务套件 t1 判据 3 红 + t2 起跑后 240s 有界超时 exit 124=unknown。真实任务连续 8/8 客观拿不到，不冒充成功；人眼路线签名区仍全空，pending_human_eye 未闭合，Agent 不代答。半成品 artifacts/traces 已清理。"
     },
     {
       "id": "K-31",
@@ -543,6 +543,13 @@
       "head": "783bde29",
       "terminalsAssigned": 3,
       "at": "2026-11-10T14:46:06.487Z"
+    },
+    {
+      "stage": "K7",
+      "block": "BLOCK-403",
+      "head": "98e2a54e",
+      "terminalsAssigned": 1,
+      "at": "2026-11-10T14:58:05.397Z"
     }
   ],
   "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",

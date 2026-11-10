@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-final-verdict",
+  "sourceCommit": "98e2a54eca7dd711c79fe667b7d57cd448a93fbf",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:58:57.167Z",
+  "command": "node scripts/lib/post-h9-k7-final.mjs + node --test test/post-h9-k7-final.test.mjs + node scripts/lib/post-h9-gap-ledger.mjs --require-all-closed",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "terminalCounts": {
+      "done": 10,
+      "retain-with-reason": 3,
+      "pending_user_ruling": 3,
+      "done-partial": 9,
+      "deferred": 5,
+      "pending_human_eye": 1,
+      "external-blocked": 1
+    },
+    "reviewSummary": {
+      "up": 4,
+      "flat": 7,
+      "down": 0,
+      "qualifiedAt44": 5,
+      "total": 11
+    },
+    "verdict": "post-h9-program-final-closeout-verified-with-open-boundaries"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "head": "98e2a54eca7dd711c79fe667b7d57cd448a93fbf",
+  "stageHistory": [
+    {
+      "stage": "K0",
+      "block": "BLOCK-396",
+      "head": "a33a53cc",
+      "terminalsAssigned": 7,
+      "at": "2026-11-10T13:16:24.431Z"
+    },
+    {
+      "stage": "K1",
+      "block": "BLOCK-397",
+      "head": "ea42dec1",
+      "terminalsAssigned": 4,
+      "at": "2026-11-10T13:40:06.688Z"
+    },
+    {
+      "stage": "K2",
+      "block": "BLOCK-398",
+      "head": "e2fb77a4",
+      "terminalsAssigned": 5,
+      "at": "2026-11-10T13:54:37.107Z"
+    },
+    {
+      "stage": "K3",
+      "block": "BLOCK-399",
+      "head": "0e473144",
+      "terminalsAssigned": 4,
+      "at": "2026-11-10T14:10:04.427Z"
+    },
+    {
+      "stage": "K4",
+      "block": "BLOCK-400",
+      "head": "d9ba42d4",
+      "terminalsAssigned": 6,
+      "at": "2026-11-10T14:26:06.122Z"
+    },
+    {
+      "stage": "K5",
+      "block": "BLOCK-401",
+      "head": "094dbec5",
+      "terminalsAssigned": 7,
+      "at": "2026-11-10T14:39:18.435Z"
+    },
+    {
+      "stage": "K6",
+      "block": "BLOCK-402",
+      "head": "783bde29",
+      "terminalsAssigned": 3,
+      "at": "2026-11-10T14:46:06.487Z"
+    },
+    {
+      "stage": "K7",
+      "block": "BLOCK-403",
+      "head": "98e2a54e",
+      "terminalsAssigned": 1,
+      "at": "2026-11-10T14:58:05.397Z"
+    }
+  ],
+  "negativeTests": 6
+}

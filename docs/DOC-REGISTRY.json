@@ -9,11 +9,53 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 542,
+    "documentCount": 544,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 525
+    "managedMarkdown": 527
   },
   "documents": [
+    {
+      "id": "POST-H9-2026-11-10-FINAL-REPORT",
+      "capability": "post-h9-2026-11-10-final-report",
+      "path": "docs/post-h9-2026-11-10-final-report.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-403-post-h9-k7-final-acceptance-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "final-report",
+        "eleven-dim-review",
+        "gap-terminal-states"
+      ],
+      "notes": "第四轮 K0–K7 总收口报告：十一维六列终验复评（四升七平零降、达标 5/11）、32 条缺口逐件终态、未跑/跳过/复用证据披露、WIP 保留状态与外部依赖。U/E/V/W 边界不代答、无证据不写 verified/completed。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-403",
+      "capability": "block-403-post-h9-k7-final-acceptance",
+      "path": "docs/block-403-post-h9-k7-final-acceptance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-403",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-403-post-h9-k7-final-acceptance-plan.md",
+        "acceptance/post-h9-2026-11-10/k7/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k7"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K7 真实任务终验与总收口。真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-402",
       "capability": "block-402-post-h9-k6-security",

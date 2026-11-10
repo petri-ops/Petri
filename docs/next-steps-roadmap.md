@@ -1,4 +1,5 @@
 # Petri Desktop — Current Next Steps
+最后更新：2026-11-10（▶ **post-H9 程序 K7=BLOCK-403 启动**：真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-402（post-H9 K6）completed**：PiP 四项基线红绿先行（红 1 fail→绿 3/3）/ 窗口名单覆盖门 + 5 漏配负测 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 / 32 条缺口仅 K-30 留 K7 / closeout 全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K6=BLOCK-402 启动**：PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-401（post-H9 K5）completed**：严格证据元数据门 38 份零例外+11 负测 / DOM 阈值纯函数门植 2 万必红 / 三矩阵·165 通道·EAR 机械对账 / 显式 perf 5/5 证据 / EAR 44.1% 分子真实增长未达 45% 如实标注 / perf 默认写盘冲突 U 类材料不擅改 / 22 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）

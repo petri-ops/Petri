@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-evidence-disclosure",
+  "sourceCommit": "98e2a54eca7dd711c79fe667b7d57cd448a93fbf",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:58:57.214Z",
+  "command": "各阶段 *-closeout-gates.json + git log + git status",
+  "verdict": "disclosed",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "evidenceClasses": {
+    "behaviorTest": "169 项新增契约测试（K0 45 / K1 29 / K2 15+3 HTTP / K3 22 / K4 19 / K5 22 / K6 14 / K7 14，含 100+ 篡改负测）",
+    "mechanicalGate": "每阶段 docs:check / ui:audit:check / 定向 test:changed / closeout；K0 干净树 closeout:full ×3 19 门全绿 0 SKIP",
+    "cdpLive": "本程序未跑 CDP 实机取证；H8/H10 既有离屏读数只作校准依据，未冒充新证据",
+    "humanEye": "零人眼证据（路线签名区全空）",
+    "realTask": "零真实任务成功（external-blocked，含两次有界超时时间线）"
+  },
+  "notRun": [
+    "test:all:sharded 全量三段（仅 K0 closeout:full 的定向 test:changed；全量分片未跑，不写通过）",
+    "CDP 实机 DOM/几何/帧率/冷启动真 ×5",
+    "真实 provider 8 任务连续 3 次 8/8 与 attempt 级证据",
+    "人眼路线签字与 8 项 humanEyePending"
+  ],
+  "skipped": [
+    "定向 closeout 中 gate:arch-cycles / quality:arch 按 BLOCK-272 域跳过语义 SKIPPED（每阶段如实标注，不算 PASS；K0 干净树 closeout:full ×3 已全量覆盖）"
+  ],
+  "reused": [
+    "前五列评分沿用 canonical 评估链（不回溯调参，属引用而非复用门禁证据）",
+    "H8/H10 既有证据只用于判据校准，未当作本程序当次实机证据"
+  ],
+  "skippedNoReplay": [
+    "T7 自然长任务脚本未跑",
+    "SSE 断线注入三态 flow 未跑"
+  ],
+  "wipPreserved": [
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+    "assets/",
+    "docs/pelican-bicycle.html",
+    "docs/post-h9-optimization-blueprint-2026-11-10.md",
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+    "petri-logo-concepts.miora",
+    "petri-logo-concepts_assets/",
+    "scripts/backfill-artifact-chain.mjs",
+    "tmp-block342-live/",
+    "tmp-review/"
+  ],
+  "externalDependencies": [
+    "provider 端点 199.59.148.247:443 可达性",
+    "用户人眼签字",
+    "U 类裁决：ADMISSION 默认档 / FK 全量切换 / 165 通道逐件 / typescript 双版本 / perf 默认写盘"
+  ],
+  "commits": [
+    "d9ba42d4 chore(block-399): K3 收口（六件套同批回写 + 门禁证据含红门修因链）",
+    "6cf12458 chore(block-399): 干净树重生成产物（仅 generatedAt）",
+    "3db14806 fix(block-399): K3 closeout 红门根修——删除契约测试未使用的 fs 导入（lint no-unused-vars），零放宽抑制基线",
+    "64c47db7 feat(block-399): post-H9 K3 体验面（四事件反向契约 22/22/内联样式债棘轮门/布局防回退/debt 35 分诊/E·L 一页材料；UI 台账同批回写不增债）",
+    "0e473144 chore(block-398): K2 收口（六件套同批回写 + 门禁证据）",
+    "e0607743 chore(block-398): 干净树重生成产物（仅 generatedAt）",
+    "89568433 feat(block-398): post-H9 K2 服务端数据面（具名上限常量 15 处/additive hasMore 信封+真实 HTTP 断言/复合索引查询计划/拆前拆后同套绿）",
+    "e2fb77a4 chore(block-397): K1 收口（六件套同批回写 + 门禁证据）",
+    "c1787d82 chore(block-397): 干净树重生成产物（仅 generatedAt）",
+    "3074c710 feat(block-397): post-H9 K1 主线兑现度核实（K-08 误判校准不接线/K-09 U 类材料/K-10 防回退/165 通道机械分诊 29 契约全绿）",
+    "ea42dec1 chore(block-396): post-H9 K0 收口（plan/registry/README/roadmap/handoff/AUDIT-LOG 同批回写 + closeout:full ×3 证据）",
+    "0bc3ff62 chore(block-396): K0 收口尾重生成产物（仅 generatedAt）",
+    "7ae4c3d7 chore(block-396): closeout:full 轮间重生成产物（仅 generatedAt）",
+    "19997240 chore(block-396): closeout:full 轮间重生成产物（仅 generatedAt）",
+    "7b0b25fd chore(block-396): 干净树重生成功能面矩阵/能力地图（仅 generatedAt）",
+    "a37ae97e chore(block-396): audit:compact 归档搬移（搬移不改写）",
+    "a8e31bde feat(block-396): post-H9 K0 判据校准与可信起点（三条作废重立+12 篡改负测/九组读数单源/lint∩hygiene 门/WIP owner 归属/32 条终态台账）"
+  ],
+  "workspace": {
+    "trackedChanges": [
+      "M acceptance/post-h9-2026-11-10/gap-terminal-ledger.json",
+      " M docs/AUDIT-LOG.md",
+      " M docs/DOC-REGISTRY.json",
+      " M docs/README.md",
+      " M docs/next-steps-roadmap.md",
+      " M docs/project-workspace-handoff.md",
+      " M test/impact-map.json"
+    ],
+    "untracked": [
+      "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+      "acceptance/post-h9-2026-11-10/k7/",
+      "assets/",
+      "docs/block-403-post-h9-k7-final-acceptance-plan.md",
+      "docs/pelican-bicycle.html",
+      "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+      "petri-logo-concepts.miora",
+      "petri-logo-concepts_assets/",
+      "scripts/backfill-artifact-chain.mjs",
+      "scripts/lib/post-h9-k7-final.mjs",
+      "test/post-h9-k7-final.test.mjs",
+      "tmp-block342-live/",
+      "tmp-review/"
+    ]
+  }
+}
