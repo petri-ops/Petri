@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h5-perf-evidence",
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "command": "PETRI_PERF_EVIDENCE=<path> npm run quality:perf",
+  "generatedAt": "2026-11-10T14:38:20.342Z",
+  "samples": 5,
+  "samplesGreen": 5,
+  "verdict": "pass",
+  "rows": [
+    {
+      "sample": 1,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=477ms vs median=429ms × (1+80%) → 773ms，地板 429ms → 阈值 773ms"
+        },
+        {
+          "name": "cold_start",
+          "status": "green",
+          "detail": "sample=539ms vs median=546ms × (1+60%) → 874ms，地板 546ms → 阈值 874ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=22ms vs median=20ms × (1+60%) → 32ms，地板 40ms → 阈值 40ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=13ms vs median=12ms × (1+60%) → 20ms，地板 27ms → 阈值 27ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 2,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=473ms vs median=429ms × (1+80%) → 773ms，地板 429ms → 阈值 773ms"
+        },
+        {
+          "name": "cold_start",
+          "status": "green",
+          "detail": "sample=535ms vs median=546ms × (1+60%) → 874ms，地板 546ms → 阈值 874ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=22ms vs median=20ms × (1+60%) → 32ms，地板 40ms → 阈值 40ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=13ms vs median=12ms × (1+60%) → 20ms，地板 27ms → 阈值 27ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 3,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=468ms vs median=429ms × (1+80%) → 773ms，地板 429ms → 阈值 773ms"
+        },
+        {
+          "name": "cold_start",
+          "status": "green",
+          "detail": "sample=537ms vs median=546ms × (1+60%) → 874ms，地板 546ms → 阈值 874ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=21ms vs median=20ms × (1+60%) → 32ms，地板 40ms → 阈值 40ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=13ms vs median=12ms × (1+60%) → 20ms，地板 27ms → 阈值 27ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 4,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=470ms vs median=429ms × (1+80%) → 773ms，地板 429ms → 阈值 773ms"
+        },
+        {
+          "name": "cold_start",
+          "status": "green",
+          "detail": "sample=537ms vs median=546ms × (1+60%) → 874ms，地板 546ms → 阈值 874ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=21ms vs median=20ms × (1+60%) → 32ms，地板 40ms → 阈值 40ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=13ms vs median=12ms × (1+60%) → 20ms，地板 27ms → 阈值 27ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 5,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=476ms vs median=429ms × (1+80%) → 773ms，地板 429ms → 阈值 773ms"
+        },
+        {
+          "name": "cold_start",
+          "status": "green",
+          "detail": "sample=535ms vs median=546ms × (1+60%) → 874ms，地板 546ms → 阈值 874ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=21ms vs median=20ms × (1+60%) → 32ms，地板 40ms → 阈值 40ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=13ms vs median=12ms × (1+60%) → 20ms，地板 27ms → 阈值 27ms"
+        }
+      ],
+      "ok": true
+    }
+  ],
+  "note": "连续采样口径：任一轮红即整体红（最差轮为准）。毫秒读数不等于用户观感，DOM 节点数与帧率需 CDP 腿（H5 挂起项）。",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none (isolated backend spawn; mock provider)",
+  "metadataNote": "block350-perf-gate.mjs 原生只产出四字段；本程序按 K5 证据元数据门补齐五类不冒充声明，不回填历史证据、不改 perf 生成器默认 opt-in 语义"
+}

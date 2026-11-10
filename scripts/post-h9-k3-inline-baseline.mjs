@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { INLINE_DEBT_FILES, countInlineLiterals, adjudicateInlineDebt } from './lib/post-h9-k3-experience.mjs';
+import { evidenceMeta } from './lib/post-h9-evidence.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = 'acceptance/post-h9-2026-11-10/k3/k3-inline-style-baseline.json';
@@ -22,7 +23,12 @@ function main(argv) {
     fs.writeFileSync(abs, `${JSON.stringify({
       schemaVersion: 1,
       kind: 'post-h9-k3-inline-style-baseline',
-      generatedAt: new Date().toISOString(),
+      ...evidenceMeta(ROOT),
+      command: 'node scripts/post-h9-k3-inline-baseline.mjs --freeze',
+      evidenceClass: 'mechanical-gate',
+      verdict: 'frozen',
+      humanEyeEquivalent: false,
+      stack: 'none',
       policy: '只减不增棘轮：新增内联颜色/z-index 字面量即红；清零后重打。颜色值替换仍需人眼暗色 diff。',
       perFile: now,
     }, null, 2)}\n`);

@@ -23,3 +23,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:26:13.452Z -->
 最后更新：2026-11-09（🏁 **BLOCK-389（post-S7 H4）completed（可机械验证子集）**：版本单源 + DB 路径单源；大拆片按 W5b 挂起。下一包=H5/BLOCK-390（性能规模化：五段分解/DOM 判据/三矩阵同源/自然长任务）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:39:37.974Z -->
+最后更新：2026-11-09（🏁 **BLOCK-390（H5 证据面）+ BLOCK-391（H6 治理台账）completed**：perf 证据机器可读（5/5 全绿带 sourceCommit/platform/command）+ AUDIT-LOG 超长行迁档（10933B→2695B 最长）+ 两份 lastUpdated 单写入者与分叉校验。下一包=H7/BLOCK-392（真实任务终验 + 十一维复评 + 总收口报告）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

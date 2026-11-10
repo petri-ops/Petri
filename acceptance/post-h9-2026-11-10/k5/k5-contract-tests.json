@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k5-contract-tests",
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:39:01.173Z",
+  "command": "node --test test/post-h9-k5-perf-evidence.test.mjs",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "pass": 22,
+  "fail": 0,
+  "negativeTests": 19,
+  "evidenceGateFinal": {
+    "ok": true,
+    "issues": [],
+    "fileCount": 37,
+    "classes": {
+      "mechanical-gate": 20,
+      "behavior-test": 11,
+      "decision-material": 6
+    },
+    "verdict": "program-evidence-metadata-complete",
+    "scope": "只校验 acceptance/post-h9-2026-11-10/** 新产出；历史 post-s7/* 不回填"
+  }
+}

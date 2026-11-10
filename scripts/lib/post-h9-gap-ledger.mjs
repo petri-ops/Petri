@@ -18,6 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { evidenceMeta } from './post-h9-evidence.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const LEDGER_REL = 'acceptance/post-h9-2026-11-10/gap-terminal-ledger.json';
@@ -152,10 +153,18 @@ function main(argv) {
     return i >= 0 ? argv[i + 1] : fallback;
   };
   const abs = path.resolve(ROOT, LEDGER_REL);
+  const provenance = () => ({
+    ...evidenceMeta(ROOT),
+    command: 'node scripts/lib/post-h9-gap-ledger.mjs --init',
+    evidenceClass: 'mechanical-gate',
+    verdict: 'measured',
+    humanEyeEquivalent: false,
+    stack: 'none',
+  });
   if (argv.includes('--init')) {
     fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, `${JSON.stringify(emptyLedger(), null, 2)}\n`);
-    console.log(`[post-h9:ledger] 已初始化 ${LEDGER_REL}（32 条 in_progress）`);
+    fs.writeFileSync(abs, `${JSON.stringify({ ...emptyLedger(), ...provenance() }, null, 2)}\n`);
+    console.log(`[post-h9:ledger] 已初始化 ${LEDGER_REL}（32 条 in_progress，带证据元数据）`);
     return;
   }
   if (argv.includes('--set')) {
@@ -163,7 +172,7 @@ function main(argv) {
     const patch = JSON.parse(arg('--patch', '{}'));
     const ledger = JSON.parse(fs.readFileSync(abs, 'utf8'));
     setTerminal(ledger, id, patch);
-    ledger.generatedAt = new Date().toISOString();
+    Object.assign(ledger, provenance());
     fs.writeFileSync(abs, `${JSON.stringify(ledger, null, 2)}\n`);
     console.log(`[post-h9:ledger] ${id} → ${patch.terminal}`);
     return;

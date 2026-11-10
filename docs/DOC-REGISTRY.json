@@ -9,11 +9,53 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 538,
+    "documentCount": 540,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 521
+    "managedMarkdown": 523
   },
   "documents": [
+    {
+      "id": "BLOCK-401",
+      "capability": "block-401-post-h9-k5-perf-evidence",
+      "path": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-401",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+        "acceptance/post-h9-2026-11-10/k5/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k5"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K5 性能与证据门禁化。严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-H9-K5-DECISION-MATERIAL",
+      "capability": "post-h9-k5-decision-material",
+      "path": "docs/post-h9-k5-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "decision-material",
+        "perf",
+        "external-blocked"
+      ],
+      "notes": "K5 U 类（perf 默认写盘与干净树纪律冲突）与 V/L 边界（T7 自然长任务/DOM 真量测/冷启动 ×5/请求体占比）的现状/候选/风险/推荐/证据/补腿条件。未裁决前不生效。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-400",
       "capability": "block-400-post-h9-k4-architecture",

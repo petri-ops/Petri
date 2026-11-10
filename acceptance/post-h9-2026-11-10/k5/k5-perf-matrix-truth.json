@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k5-perf-matrix-truth",
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:39:01.143Z",
+  "command": "node scripts/lib/post-h9-k5-perf-matrix.mjs + PETRI_PERF_EVIDENCE=<path> npm run quality:perf",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "conclusions": {
+      "K-03/23": "threshold-gate-mechanical-live-deferred",
+      "K-24": "non-homogeneous-truth-recorded",
+      "K-25": "ledger-intact-adjudication-pending",
+      "K-26": "ratio-reported-target-pending",
+      "K-32/K-04": "metadata-enforced-optin-preserved"
+    },
+    "verdict": "perf-evidence-invariants-verified-v-l-deferred"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "frames": {
+    "count": 270,
+    "p50Ms": 8.4,
+    "p95Ms": 10.3,
+    "maxMs": 26.7,
+    "longFrameRatio": 0,
+    "samplingNote": "离屏 9223 窗口；CDP Page.bringToFront 后采样，Chromium 仍可能节流，读数仅为该环境下的可复跑基线，不是用户观感。"
+  },
+  "matrices": {
+    "surfaceWired": true,
+    "capabilityWired": true,
+    "shelfWired": false,
+    "capabilityDerivedFromMatrix": true,
+    "capabilityMentionsGenerator": true,
+    "shelfIndependent": true,
+    "summary": {
+      "tools": 115,
+      "ipcChannels": 168,
+      "routes": 285
+    },
+    "shelfKeys": [
+      "at",
+      "shelves",
+      "totals"
+    ]
+  },
+  "channels": {
+    "total": 165,
+    "surfaceIpcUnused": 165,
+    "needsWiring": 124,
+    "retainWithReason": 41,
+    "deletable": 0
+  },
+  "ear": {
+    "assetized": 871,
+    "denominator": 2013,
+    "frozenRatio": 43.3,
+    "snapshotRatio": 43.3,
+    "threshold": 40,
+    "formulaUnchanged": true,
+    "targetPct": 45
+  },
+  "perfEvidence": {
+    "optIn": true,
+    "defaultNoWrite": true,
+    "fourFields": true,
+    "explicitRun": "k5-perf-evidence-explicit.json：连续 5 次采样 5/5 全绿，packaged 477/cold 539/long 22/tree 13 ms"
+  },
+  "domThresholdGate": {
+    "ceiling": 20000,
+    "at20000": false,
+    "note": "纯函数阈值门，非 CDP 实机量测"
+  },
+  "rollIndex": {
+    "checkSupported": true,
+    "inCloseout": false
+  },
+  "negativeTests": 11
+}

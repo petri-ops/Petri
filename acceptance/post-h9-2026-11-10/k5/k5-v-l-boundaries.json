@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k5-v-l-boundaries",
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:39:01.158Z",
+  "command": "docs/post-h9-k5-decision-material.md §6 + docs/block-401-post-h9-k5-perf-evidence-plan.md §5",
+  "verdict": "pending-ruling",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "decisionRef": "docs/post-h9-k5-decision-material.md",
+  "sliceRef": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+  "u": [
+    {
+      "item": "PETRI_PERF_EVIDENCE 默认写盘",
+      "state": "pending_user_ruling",
+      "reason": "与干净树/P6 源绑定纪律冲突，需裁决内容哈希稳定方案"
+    },
+    {
+      "item": "165 通道逐件接线/删除裁决",
+      "state": "pending_user_ruling",
+      "reason": "改 IPC 契约需产品语义"
+    }
+  ],
+  "v": [
+    {
+      "item": "T7 自然长任务（去 windowOverride）",
+      "state": "external-blocked",
+      "reason": "有效凭据缺失，runner 无 key 全 skip"
+    },
+    {
+      "item": "8 任务连续 3 次 8/8 与 attempt 级证据",
+      "state": "external-blocked",
+      "reason": "凭据/出网不可得"
+    },
+    {
+      "item": "请求体五类占比",
+      "state": "external-blocked",
+      "reason": "需真实 provider 逐轮"
+    }
+  ],
+  "l": [
+    {
+      "item": "DOM/帧率判据入门禁",
+      "state": "deferred",
+      "reason": "需活 dev 栈 + 9223 离屏 CDP + 人眼过目"
+    },
+    {
+      "item": "冷启动真 ×5 与五段",
+      "state": "deferred",
+      "reason": "需独立重起矩阵"
+    }
+  ],
+  "ear": {
+    "current": "962/2179=44.1%",
+    "frozen": "871/2013=43.3%",
+    "target": "45%",
+    "disposition": "分子真实增长、分母未缩、阈值 40 未改；45% 目标未达，不写达标"
+  }
+}

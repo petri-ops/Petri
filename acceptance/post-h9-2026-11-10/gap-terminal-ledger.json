@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T14:26:06.121Z",
+  "generatedAt": "2026-11-10T14:39:18.434Z",
   "terminalCounts": {
-    "done": 8,
-    "done-partial": 8,
-    "retain-with-reason": 2,
+    "done": 9,
+    "retain-with-reason": 3,
     "pending_user_ruling": 2,
+    "done-partial": 9,
     "deferred": 4,
     "pending_human_eye": 1,
-    "in_progress": 7
+    "in_progress": 4
   },
   "gaps": [
     {
@@ -49,14 +49,14 @@
       "blocker": "A+L",
       "stage": "K0/K5",
       "anchor": "h8/startup-five-stage.json:10 / post-s7-startup-five-stage.mjs:17",
-      "terminal": "done-partial",
-      "evidenceRef": "acceptance/post-h9-2026-11-10/k0/k0-criteria-verdict.json",
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": "L 类：冷启动 ×5 与热栈 5 轮分别在「有活栈才断言」条件下入门禁并各带负测（归 K5）",
+      "closureCondition": null,
       "reason": null,
-      "note": "热栈 5 轮≠冷启动 ×5 已机械钉死；cdpPageReady=0 诚实缺口保留；专项脚本仍刻意不进常驻链。"
+      "note": "K0 已作废旧判据并重立（12 篡改负测）；K5 补冷热分离命名/取数的机械核实与「专项脚本挂常驻链必红」防回退。冷启动真 ×5 与五段「有栈才断言」入门禁仍属 L 独立切片，当前不冒充已入门禁"
     },
     {
       "id": "K-04",
@@ -64,14 +64,14 @@
       "blocker": "A",
       "stage": "K0",
       "anchor": "§1.5 九组数字冲突",
-      "terminal": "done",
-      "evidenceRef": "acceptance/post-h9-2026-11-10/k0/k0-canonical-readings.json",
-      "decisionRef": null,
+      "terminal": "retain-with-reason",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
+      "decisionRef": "docs/post-h9-k5-decision-material.md",
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
-      "reason": null,
-      "note": "九组冲突读数由脚本从权威源机械复算，文档引用统一指向该 JSON；门数 19、reasonCode 42、catch 395、rAF 8.4/10.3 等均为当次读数。"
+      "reason": "perf 证据保持 opt-in 默认不写盘：block350-perf-gate.mjs:93-96 明确每次 closeout 写会在干净树制造无意义 diff，且会破坏 P6 sourceCommitMatchesSourceHashes 与 closeout:full 干净树判据；改默认写盘需用户裁决（E1/E3 候选）",
+      "note": "K0 已把九组读数单源化；K5 用显式 PETRI_PERF_EVIDENCE 路径产出当次 5/5 全绿证据（四字段齐备），并把四字段升级为严格证据元数据门覆盖本程序 38 份 JSON"
     },
     {
       "id": "K-05",
@@ -349,14 +349,14 @@
       "blocker": "A+L",
       "stage": "K5",
       "anchor": "block95-a2-frame-live.cjs:84 / post-s7-dom-budget-live.cjs",
-      "terminal": "deferred",
-      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-w5b-deferred-slices.json",
-      "decisionRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
+      "decisionRef": "docs/post-h9-k5-decision-material.md",
       "routeRef": null,
-      "sliceRef": "docs/block-398-post-h9-k2-data-plane-plan.md",
-      "closureCondition": "W5b-K2-5 请求体五类占比需真实 provider 任务逐轮与 token_budget/ai_usage/ContextBudgetBar 对账（V 类凭据）；DOM/帧率判据入门禁归 K5",
+      "sliceRef": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+      "closureCondition": "L+E：活 dev 栈 + 9223 离屏 CDP 植入 2 万节点必红 + P50/P95 同批落盘 + 「有栈才断言」显式条件 + 人眼观感；V：T7 去 windowOverride 自然长任务、请求体五类占比、attempt 级证据需有效凭据",
       "reason": null,
-      "note": "K2 只做服务端数据面预算 groundwork；自然长任务/请求体占比需凭据"
+      "note": "新增 DOM 阈值纯函数门（<20000，植 2 万必红）与帧时判定器（270 帧 P50 8.4/P95 10.3/长帧 0）；明确标 mechanical-gate 非 CDP 实机、非视觉绿。真实量测与长任务客观未跑"
     },
     {
       "id": "K-24",
@@ -364,14 +364,14 @@
       "blocker": "A",
       "stage": "K5",
       "anchor": "三矩阵生成器 / quality:surface 启发式",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
       "decisionRef": null,
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+      "closureCondition": "W5b：单一生成器重建三份产物 + 人工改动判红；quality:surface 补接 block352 shelf + 路由正则升级 router.*/动态挂载 + 消费方检测可信度真实负测（当前 K1 门该字段为硬编码自证，不冒充真探测器）",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "机械核实并钉住三矩阵非同源现状（matrix→capability 下游派生、shelf 独立隔离后端源、quality:surface 只接前两者），零静默消失；不冒充已同源"
     },
     {
       "id": "K-25",
@@ -379,14 +379,14 @@
       "blocker": "A",
       "stage": "K5",
       "anchor": "h9/ipc-unused-triage.json 165 通道",
-      "terminal": "done-partial",
-      "evidenceRef": "acceptance/post-h9-2026-11-10/k1/k1-ipc-first-batch.json",
-      "decisionRef": null,
+      "terminal": "deferred",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
+      "decisionRef": "docs/post-h9-k5-decision-material.md",
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": "K5 逐件裁决 124 条 needsWiring + 41 条 retain 的「接线/删/retain-with-reason」，并补用户入口、错误态、负测；三矩阵同源与动态挂载扫描归 K-24",
+      "sliceRef": "docs/block-401-post-h9-k5-perf-evidence-plan.md",
+      "closureCondition": "U：用户逐件裁决 124 needsWiring + 41 retain 的「接线/删/retain-with-reason」；接线项补用户入口、错误态、负测；post-s7-hygiene-gates.mjs:139 既有「不删通道、不改 preload」边界不得擅破",
       "reason": null,
-      "note": "K1 前置已交付：165 通道三桶计数机械一致、124/41/0 与 H9 证据相符、第一批 124 条全部在 channels.js 唯一注册、10 条可信度负测；不擅自接线"
+      "note": "165 = 124+41+0 与 surface-matrix 165 一致，零静默消失由机械账本守护；K1 第一批机械分诊已交付，逐件销号需产品语义裁决"
     },
     {
       "id": "K-26",
@@ -394,14 +394,14 @@
       "blocker": "A",
       "stage": "K5",
       "anchor": "quality:ear 43.2% / manifest 43.3%",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "A+L：分子真实增长（新增被 test 引用的 acceptance 证据）到 45%，负测守住；不缩分母、不改阈值 40、不放宽棘轮",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "当次 npm run quality:ear 真实读数 962/2179=44.1%（门槛 40 PASS，冻结 manifest 871/2013=43.3%）；分子分母同时报，45% 目标未达如实标注，未缩分母"
     },
     {
       "id": "K-27",
@@ -484,14 +484,14 @@
       "blocker": "A",
       "stage": "K5",
       "anchor": "docs/README.md / acceptance 元数据 / docs:roll-index --check",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k5/k5-evidence-metadata-gate.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "新证据元数据门严格无例外覆盖本程序 38 份 JSON（四字段 + 五类不冒充声明），含 11 条负测；三个生成器同步保证 --init/--set/--freeze 复跑不丢字段；历史 post-s7/* 明确排除不回填。docs:roll-index --check 预览支持存在但未入 closeout，如实登记为待评估（不冒充已入链）"
     }
   ],
   "stageHistory": [
@@ -529,6 +529,20 @@
       "head": "d9ba42d4",
       "terminalsAssigned": 6,
       "at": "2026-11-10T14:26:06.122Z"
+    },
+    {
+      "stage": "K5",
+      "block": "BLOCK-401",
+      "head": "094dbec5",
+      "terminalsAssigned": 7,
+      "at": "2026-11-10T14:39:18.435Z"
     }
-  ]
+  ],
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "command": "node scripts/lib/post-h9-gap-ledger.mjs --init",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "stack": "none"
 }

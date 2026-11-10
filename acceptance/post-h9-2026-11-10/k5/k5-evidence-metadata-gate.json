@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k5-evidence-metadata-gate",
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:39:01.124Z",
+  "command": "node scripts/lib/post-h9-k5-evidence-gate.mjs + node --test test/post-h9-k5-perf-evidence.test.mjs",
+  "verdict": "program-evidence-metadata-complete",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "ok": true,
+  "issues": [],
+  "fileCount": 34,
+  "classes": {
+    "mechanical-gate": 19,
+    "behavior-test": 10,
+    "decision-material": 5
+  },
+  "scope": "只校验 acceptance/post-h9-2026-11-10/** 新产出；历史 post-s7/* 不回填",
+  "negativeTests": 11,
+  "historicalNonBackfill": "acceptance/post-s7-** 全部排除；改写历史=伪造（既有裁决）",
+  "generatorsSynced": [
+    "post-h9-gap-ledger --init/--set",
+    "post-h9-k3-inline-baseline --freeze",
+    "post-h9-k4-source-scan-ratchet --freeze"
+  ]
+}

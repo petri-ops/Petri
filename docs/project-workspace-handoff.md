@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-10（▶ **post-H9 程序 K5=BLOCK-401 启动**：严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-400（post-H9 K4）completed**：源码扫描只减不增棘轮门（4 文件冻结+3 负测）/ 插件源解析面单源防回退装配面两处如实标注 / typescript 漂移只读检出 U 类材料 / H10 8 证据 tracked + 120→90 校准 / W5b 六刀补腿条件 / 19 契约全绿 / closeout 全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K4=BLOCK-400 启动**：源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-399（post-H9 K3）completed**：四事件反向契约 22/22 / 内联样式债棘轮门 5 文件 60 字面量冻结 / B-11 布局防回退 / debt 35 分诊 22 人眼保持 pending_human_eye / E·L 一页材料 / UI 台账同批回写棘轮零改动 / lint 红门删死导入根修（3db14806）后 closeout 19 门全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）

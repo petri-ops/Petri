@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { SCAN_CONTRACT_FILES, countSourceScanAsserts, adjudicateSourceScan } from './lib/post-h9-k4-architecture.mjs';
+import { evidenceMeta } from './lib/post-h9-evidence.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = 'acceptance/post-h9-2026-11-10/k4/k4-source-scan-baseline.json';
@@ -20,7 +21,10 @@ function main(argv) {
   if (argv.includes('--freeze')) {
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, `${JSON.stringify({
-      schemaVersion: 1, kind: 'post-h9-k4-source-scan-baseline', generatedAt: new Date().toISOString(),
+      schemaVersion: 1, kind: 'post-h9-k4-source-scan-baseline',
+      ...evidenceMeta(ROOT),
+      command: 'node scripts/post-h9-k4-source-scan-ratchet.mjs --freeze',
+      evidenceClass: 'mechanical-gate', verdict: 'frozen', humanEyeEquivalent: false, stack: 'none',
       policy: '只减不增：新增源码扫描式断言（includes/源码正则/行数锚）即红；换成行为断言后重打下调。',
       perFile: now,
     }, null, 2)}\n`);

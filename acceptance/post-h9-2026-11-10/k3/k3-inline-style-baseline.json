@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "post-h9-k3-inline-style-baseline",
-  "generatedAt": "2026-11-10T14:07:18.010Z",
+  "generatedAt": "2026-11-10T14:33:52.738Z",
   "policy": "只减不增棘轮：新增内联颜色/z-index 字面量即红；清零后重打。颜色值替换仍需人眼暗色 diff。",
   "perFile": {
     "frontend/src/components/copilot/ContextBudgetBar.tsx": {
@@ -24,5 +24,12 @@
       "color": 1,
       "zIndex": 2
     }
-  }
+  },
+  "sourceCommit": "094dbec5c1603c194b695d581a814ddef2084fed",
+  "platform": "darwin-arm64",
+  "command": "node scripts/post-h9-k3-inline-baseline.mjs --freeze",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "frozen",
+  "humanEyeEquivalent": false,
+  "stack": "none"
 }

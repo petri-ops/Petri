@@ -23,3 +23,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:26:13.468Z -->
 | ✅ BLOCK-391（post-S7 H6）completed——①AUDIT-LOG 最长行 10933B（BLOCK-384 收口行）按「搬移不改写」原文迁 docs/archive/checkpoints/audit-log-long-row-block384-2026-11-09.md，原位留指针；迁后全台账最长 2695B，超长行告警消失②根级 lastUpdated 与 coverage.lastUpdated 改单写入者（docs:coverage 同批写）+ docs:check 新增 COVERAGE_LASTUPDATED_DRIFT 分叉报警 + 契约负测③canonical 对账复核无回弹（docs:check PASS 524 / docs:reconcile 0 issues）④交接协议六批执行⑤**挂起**：历史 acceptance 证据元数据不回填（改写历史证据=伪造，只对新产出强制）、skills manifest sha256、EAR 45%（41.6% 靠分子增长不缩分母）、roll-index 入 closeout | 2026-11-09 | 证据=docs-governance 19/19 + 迁档文件在册；plan=docs/block-391-post-s7-h6-governance-ledger-plan.md | BLOCK-391 / COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:39:37.996Z -->
+| ✅ BLOCK-390（post-S7 H5）completed（证据面）——①quality:perf 支持 PETRI_PERF_EVIDENCE 落机器可读证据（sourceCommit/platform/command/generatedAt/每轮 rows/verdict），默认不写盘避免污染干净树②当次证据 acceptance/post-s7-2026-11-09/h5/perf-evidence.json：5/5 全绿 sourceCommit=e517c326 darwin-arm64③负测 10/10 未削弱④三矩阵同源链（quality:surface→capability-map）复核确定性一致⑤**挂起（需实机取数）**：冷启动五段分解入门禁、DOM 节点上限门、滚动帧率、请求体五类占比、T7 自然长任务、165 零消费通道逐件销号 | 2026-11-09 | 证据=h5/perf-evidence.json + block350 10/10 + block357 8/8；plan=docs/block-390-post-s7-h5-perf-scale-plan.md | BLOCK-390 / COMPLETED |
