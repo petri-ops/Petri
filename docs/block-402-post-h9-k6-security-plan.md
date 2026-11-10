@@ -1,6 +1,6 @@
 ---
 capability: block-402-post-h9-k6-security
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K6 把已有安全防线延伸到最后一个未覆盖的 BrowserWindow 创建点，并让策略判定与执行边界逐件有终态；U 类 ADMISSION/FK 出决策材料，裁决前不改默认语义。
 acceptance:
   - PiP 四项 webPreferences 基线补齐并纳入安全断言名单，红绿先行 + 漏配负测
@@ -13,7 +13,7 @@ reopen: 用户裁决 ADMISSION 默认档 / FK 全量切换后按材料候选另�
 
 # BLOCK-402 · post-H9 K6 安全与边界纵深
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 

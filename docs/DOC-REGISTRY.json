@@ -19,12 +19,12 @@
       "capability": "block-402-post-h9-k6-security",
       "path": "docs/block-402-post-h9-k6-security-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-402",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-402-post-h9-k6-security-plan.md",
         "acceptance/post-h9-2026-11-10/k6/**",
@@ -37,7 +37,7 @@
         "optimization",
         "k6"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K6 安全与边界纵深。PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K6 安全与边界纵深。PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】PiP 四项基线红绿先行（红 1 fail→绿 3/3）/ 窗口名单覆盖门 + 5 漏配负测 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 / 32 条缺口仅 K-30 留 K7 / closeout 全绿"
     },
     {
       "id": "POST-H9-K6-DECISION-MATERIAL",
