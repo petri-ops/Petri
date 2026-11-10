@@ -6,29 +6,105 @@
   "platform": "darwin-arm64",
   "generatedAt": "2026-11-11T02:55:00+08:00",
   "redGreen": [
-    { "item": "L1-1/L-50 terminal 注入", "red": "4/4 红（payload 内插进 AppleScript 源码层 + win 零转义 + 无 cwd 校验）", "green": "12 组 payload 全部被拒或参数化；邻域 21/21（platform-compat/workspace-roots/terminal-multisession）" },
-    { "item": "L1-2/L-51 深链 MCP stdio", "red": "3/3 红（8 组恶意深链放行 + confirm 无对账）", "green": "8 组全拒（command_not_allowed/args_eval_blocked）；合法四形态放行；expected 对账 403/404；block242 邻域 8/8" },
-    { "item": "L1-3/L-52 受信 origin", "red": "3/3 红（env 注入 10.0.0.5 直达三道门 + 空 Origin POST 放行）", "green": "非回环全滤（4 读取点）；回环双变体全通；空 Origin 变更动词 token 门 403/放行矩阵；邻域 17/17" },
-    { "item": "L1-4/L-53 navigate 白名单", "red": "（BrowserPanel 零测试覆盖=盲区）", "green": "isNavigableWebUrl 矩阵（scheme/回环/userinfo）+ bridge 复检 + iframe sandbox；vitest 14/14；BrowserPanel warning 2→1" }
+    {
+      "item": "L1-1/L-50 terminal 注入",
+      "red": "4/4 红（payload 内插进 AppleScript 源码层 + win 零转义 + 无 cwd 校验）",
+      "green": "12 组 payload 全部被拒或参数化；邻域 21/21（platform-compat/workspace-roots/terminal-multisession）"
+    },
+    {
+      "item": "L1-2/L-51 深链 MCP stdio",
+      "red": "3/3 红（8 组恶意深链放行 + confirm 无对账）",
+      "green": "8 组全拒（command_not_allowed/args_eval_blocked）；合法四形态放行；expected 对账 403/404；block242 邻域 8/8"
+    },
+    {
+      "item": "L1-3/L-52 受信 origin",
+      "red": "3/3 红（env 注入 10.0.0.5 直达三道门 + 空 Origin POST 放行）",
+      "green": "非回环全滤（4 读取点）；回环双变体全通；空 Origin 变更动词 token 门 403/放行矩阵；邻域 17/17"
+    },
+    {
+      "item": "L1-4/L-53 navigate 白名单",
+      "red": "（BrowserPanel 零测试覆盖=盲区）",
+      "green": "isNavigableWebUrl 矩阵（scheme/回环/userinfo）+ bridge 复检 + iframe sandbox；vitest 14/14；BrowserPanel warning 2→1"
+    }
   ],
   "gates": [
-    { "gate": "test/block405-l1-security.test.mjs", "exit": 0, "reading": "14/14（注入负测 + token 矩阵 + CSP 无通配 + openExternal 矩阵 + transcript 0600/脱敏 + 归属 403/404）" },
-    { "gate": "electron-security-assertions", "exit": 0, "reading": "3/3（webPreferences 四项基线零回归）" },
-    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error" },
-    { "gate": "quality:arch", "exit": 0, "reading": "R1-R5 无违规（src→core 单源谓词经 env-coordinator pathNot 在册）" },
-    { "gate": "quality:secret", "exit": 0, "reading": "生产面 0" },
-    { "gate": "quality:lint", "exit": 0, "reading": "0 errors（L0-6 门抓出本批 4 处新违规并全部根修：unused×2/no-control-regex/多余断言/object-injection +1 warning 消除）" },
-    { "gate": "quality:lint:ledger", "exit": 0, "reading": "191=120 逐条相等；warnings P1489/T417/S539 与基线持平" },
-    { "gate": "docs:check", "exit": 0, "reading": "548 registered" },
-    { "gate": "credential-store", "exit": 0, "reading": "6/6（-w stdin 形态，args.slice(0,6) 断言兼容）" },
-    { "gate": "block37 双套", "exit": 0, "reading": "12/12 + 10/10（脱敏后 fixture 逐字不变；归属校验注入形态）" },
-    { "gate": "block242", "exit": 0, "reading": "8/8（expected 对账新语义 + pack TOCTOU 零回归）" },
-    { "gate": "邻域组 A（9 文件）", "exit": 0, "reading": "58/58" }
+    {
+      "gate": "test/block405-l1-security.test.mjs",
+      "exit": 0,
+      "reading": "14/14（注入负测 + token 矩阵 + CSP 无通配 + openExternal 矩阵 + transcript 0600/脱敏 + 归属 403/404）"
+    },
+    {
+      "gate": "electron-security-assertions",
+      "exit": 0,
+      "reading": "3/3（webPreferences 四项基线零回归）"
+    },
+    {
+      "gate": "quality:types",
+      "exit": 0,
+      "reading": "tsc 0 error"
+    },
+    {
+      "gate": "quality:arch",
+      "exit": 0,
+      "reading": "R1-R5 无违规（src→core 单源谓词经 env-coordinator pathNot 在册）"
+    },
+    {
+      "gate": "quality:secret",
+      "exit": 0,
+      "reading": "生产面 0"
+    },
+    {
+      "gate": "quality:lint",
+      "exit": 0,
+      "reading": "0 errors（L0-6 门抓出本批 4 处新违规并全部根修：unused×2/no-control-regex/多余断言/object-injection +1 warning 消除）"
+    },
+    {
+      "gate": "quality:lint:ledger",
+      "exit": 0,
+      "reading": "191=120 逐条相等；warnings P1489/T417/S539 与基线持平"
+    },
+    {
+      "gate": "docs:check",
+      "exit": 0,
+      "reading": "548 registered"
+    },
+    {
+      "gate": "credential-store",
+      "exit": 0,
+      "reading": "6/6（-w stdin 形态，args.slice(0,6) 断言兼容）"
+    },
+    {
+      "gate": "block37 双套",
+      "exit": 0,
+      "reading": "12/12 + 10/10（脱敏后 fixture 逐字不变；归属校验注入形态）"
+    },
+    {
+      "gate": "block242",
+      "exit": 0,
+      "reading": "8/8（expected 对账新语义 + pack TOCTOU 零回归）"
+    },
+    {
+      "gate": "邻域组 A（9 文件）",
+      "exit": 0,
+      "reading": "58/58"
+    },
+    {
+      "gate": "邻域组 B 慢三件（chf0/gen-ui×2，--test-force-exit）",
+      "exit": 0,
+      "reading": "33/33（泄漏句柄挂起非红——首轮无 force-exit 挂起，force-exit 重跑全绿）"
+    }
   ],
   "wAttribution": "ui:audit:check 与 P6 源绑定红延续 W 归属（CSS WIP，owner 收口自愈）。",
   "donePartial": [
-    { "item": "L-55 dev script-src 'unsafe-inline'", "reason": "vite react-refresh 前导为内联 module script、无 nonce 注入点；nonce 化需动 vite 构建链——retain-with-reason 随 L5/L6 构建面批次；端口通配（主要放大面）已全数移除" },
-    { "item": "L-52 'desktop-local' 常量头全量移除", "reason": "后端从不校验该头（零安全价值）；安全实质=回环过滤+空 Origin 随机 token（已交付）；前端常量头涉及 15 组件 + 30 dev 流 + mobile pairing 的纯装饰性移除，retain-with-reason 待 L5 批处理" }
+    {
+      "item": "L-55 dev script-src 'unsafe-inline'",
+      "reason": "vite react-refresh 前导为内联 module script、无 nonce 注入点；nonce 化需动 vite 构建链——retain-with-reason 随 L5/L6 构建面批次；端口通配（主要放大面）已全数移除"
+    },
+    {
+      "item": "L-52 'desktop-local' 常量头全量移除",
+      "reason": "后端从不校验该头（零安全价值）；安全实质=回环过滤+空 Origin 随机 token（已交付）；前端常量头涉及 15 组件 + 30 dev 流 + mobile pairing 的纯装饰性移除，retain-with-reason 待 L5 批处理"
+    }
   ],
-  "notes": "深链 mcp 修法采用「command 裸名白名单 + args 禁求值开关 + expected 对账」而非「默认禁用」——同等拒面（8 组恶意全拒）且保留合法安装通道；选择已登记 plan §6。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+  "notes": "深链 mcp 修法采用「command 裸名白名单 + args 禁求值开关 + expected 对账」而非「默认禁用」——同等拒面（8 组恶意全拒）且保留合法安装通道；选择已登记 plan §6。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+  "sourceCommit": "7e0abe40"
 }

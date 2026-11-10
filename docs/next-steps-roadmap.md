@@ -1,3 +1,4 @@
+最后更新：2026-11-11（🏁 **BLOCK-405（第五轮 L1 · 安全边界纵深）completed**：四 P1 红绿先行全数转绿+六项 P2 清偿+U 材料维持；knip 330→329；零新增依赖。串行槽位转空；下一阶段=L2 功能断链与假成功（蓝图 §4-L2，14 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-404（第五轮 L0 · 判据校准与可信起点）completed**：八改进点全部交付（解反向门禁读数型 / perf 判据重立 / EAR 真棘轮 / fail-closed / state 兜底+🔵对账 / lint 台账机械投影 / 尺寸门 v3 / 数字口径单源）；186 契约全绿、perf 5/5 PASS、2 红均 W 归属（CSS WIP）。串行槽位转空；下一阶段=L1 安全边界纵深（蓝图 §4-L1，12 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 # Petri Desktop — Current Next Steps
 最后更新：2026-11-10（🏁 **BLOCK-403（post-H9 K7）completed**：真实任务当次取数 external-blocked（凭据 keychain 在位/端点 ETIMEDOUT/两次有界超时 124=unknown，不冒充 8/8）/ 人眼签字缺席 pending_human_eye / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降达标 5/11 / 136 条 reconcile 候选逐件复核零归档 / 干净树 closeout:full 19 门全绿 0 SKIP / 14 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。）

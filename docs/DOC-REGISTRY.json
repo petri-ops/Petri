@@ -19,19 +19,19 @@
       "capability": "block-405-post-k7-l1-security-hardening",
       "path": "docs/block-405-post-k7-l1-security-hardening-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-405-post-k7-l1-security-hardening",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "post-k7",
         "l1",
         "security",
         "hardening"
       ],
-      "notes": "第五轮 L1 安全边界纵深（用户 2026-11-11 执行提示词预授权连续工作）：四个 P1 红绿先行——L-50 terminal:open-shell 命令注入（realpath+字符白名单+AppleScript 参数化+Windows spawn cwd）/ L-51 深链 MCP stdio command 白名单+禁求值开关+mcp 分支 expected 对账 / L-52 受信 origin 回环过滤+空 Origin 本机随机 token+共享 bearer 移除 / L-53 每次 loadURL http(s)+主机白名单+iframe sandbox；再清 dev CSP/权限装配 fail-open/Keychain argv/transcript 0600+脱敏+归属/URL origin 精确比较/依赖静态清单；L-56/L-79 出 U 类一页材料不改默认语义。零新增依赖。蓝图=docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L1。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "第五轮 L1 安全边界纵深 completed（2026-11-11）：四 P1 红绿先行（terminal 注入参数化 12 组全拒 / 深链 MCP command 白名单+args 禁求值+expected 对账 8 组全拒 / 受信 origin 回环过滤四读取点+空 Origin 变更动词随机 token 门 / navigate 白名单+iframe sandbox）+ dev CSP 端口收敛 / 权限 deny-all 兜底 / Keychain stdin / transcript 0600+脱敏+归属 / URL origin 精确比较+openExternal 准入 / 依赖静态清单；L-56/79 U 材料第五轮复核维持 pending_user_ruling。邻域 58+33+22+8+22+6+14+3 全绿；types/secret/arch/lint/ledger 绿（台账门抓出本批 4 新违规全根修）；knip 330→329（三 exports 转活消亡）。零新增依赖。证据=acceptance/post-k7-2026-11-10/l1/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-404",

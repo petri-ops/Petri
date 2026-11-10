@@ -1,6 +1,6 @@
 ---
 capability: block-405-post-k7-l1-security-hardening
-status: active
+status: completed
 goal: 执行第五轮优化程序 L1（安全边界纵深）：四个 P1 安全断链红绿先行（terminal:open-shell 命令注入 / 深链 MCP stdio command 白名单 / 受信 origin 回环过滤 / 每次 loadURL http(s)+主机白名单+iframe sandbox），再清 dev CSP、权限装配 fail-open、Keychain argv、transcript 0600/脱敏/归属、URL origin 精确比较、依赖静态清单；L-56/L-79 出 U 类一页材料不改默认语义。承载蓝图 docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L1 的 12 条发现。
 acceptance:
   - L1-1 L-50：cwd realpath 精确校验 + 字符白名单 + AppleScript 参数化 + Windows spawn cwd；注入 payload（$(...)、反引号、&、|、userinfo 等 ≥12 组）全部被拒且无命令执行；合法 workspace 路径计划仍逐字可用；红绿先行负测落盘
