@@ -9,11 +9,28 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 528,
+    "documentCount": 530,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 511
+    "managedMarkdown": 513
   },
   "documents": [
+    {
+      "id": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10",
+      "capability": "post-h9-optimization-blueprint-2026-11-10",
+      "path": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "kind": "living-plan",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "post-h9-optimization-program",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "ui-ux",
+        "workflow"
+      ],
+      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。planned 不占单包串行槽位，正式 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06",
       "capability": "post-nso-optimization-blueprint-2026-11-06",
@@ -424,6 +441,25 @@
         "cdp"
       ],
       "notes": "用户 2026-11-10 发令「23 条 Agent 可开工项自主搞完、不需参与」→ completed：12 项出口判据全达成 + 11 项 Agent 侧做完并如实声明末步边界（人眼/读屏/独立 W5b 切片/结构性重构）。B-03 角色块裁剪根修、B-24 uuid 漂移根修、B-25 环 13→12、B-09/B-11 CDP A/B 判据、B-22 五段统一时间轴、B-29 skill 摘要转正等逐件证据在 h9/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-395",
+      "capability": "block-395-self-contained-sweep",
+      "path": "docs/block-395-self-contained-sweep-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-395-self-contained-sweep",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-s7",
+        "self-contained",
+        "reclassification",
+        "sweep"
+      ],
+      "notes": "用户 2026-11-10「核实哪些可以自己完成、不要人，再扫掉完成」→ completed：34 条按是否真需人重判（yes 2 / no 27 / split 5），纠正 4 处过度归类（B-10/11/12/32），15 件不需人的余项逐件交付（3 completed / 12 完成并声明边界）。根修 3 处：B-12 截断数据洗人眼桶 → 回 canonical 完整标题得 22 条人眼；B-22 假接线 → spa200 同源派生与 accessor null 保留真修，cdpPageReady 测试实例路径差异如实记 0；冷启动脚本误杀自身 → 改用启动器 LISTEN 清场。保护边界全程守住。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-S7-H7-HUMAN-EYE-ROUTE",

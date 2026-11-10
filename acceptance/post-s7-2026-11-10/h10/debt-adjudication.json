@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "kind": "b12-debt-adjudication",
+  "generatedAt": "2026-11-10T11:16:04.309Z",
+  "totalDebt": 35,
+  "buckets": {
+    "pending_human_eye": 22,
+    "retain-external-condition": 1,
+    "agent-adjudicable": 12
+  },
+  "humanEyeIds": [
+    "UI-699",
+    "UI-698",
+    "UI-697",
+    "UI-694",
+    "UI-595",
+    "UI-521",
+    "UI-526",
+    "UI-534",
+    "UI-695",
+    "UI-200",
+    "UI-391",
+    "UI-390",
+    "UI-388",
+    "UI-389",
+    "UI-387",
+    "UI-386",
+    "UI-384",
+    "UI-383",
+    "UI-382",
+    "UI-471",
+    "UI-532",
+    "UI-535"
+  ],
+  "externalIds": [
+    "UI-656"
+  ],
+  "agentAdjudicableIds": [
+    "UI-702",
+    "UI-663",
+    "UI-475",
+    "UI-513",
+    "UI-522",
+    "UI-639",
+    "UI-304",
+    "UI-326",
+    "UI-331",
+    "UI-456",
+    "UI-458",
+    "UI-459"
+  ],
+  "detail": {
+    "pending_human_eye": [
+      {
+        "id": "UI-699",
+        "reason": "字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 cv live 在 p_mvtu0b52_9cbr 上过；结果库行 cv 在 p_mvtwf22y_9byo 上也未出现——结果面板 UI 态依赖，实机走查待人工）**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-698",
+        "reason": "隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-697",
+        "reason": "viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（live 腿 6/6 过含 prefs 告警条+截图；binary 降级原因腿需特定 UI 态+binary 产物——结果库行在 9223 上不可靠复现，实机走查待人工）**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-694",
+        "reason": "功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**；2026-11-06 BLOCK-359 W0 维护注记）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-595",
+        "reason": "批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-02 A 线处置：降档 b——批注面需图像 artifact 在结果面打开（UI-638 点开腿同前提），组件级 62/62 已锚**；BLOCK-288；UI-587 reopen 两项清偿；",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-521",
+        "reason": "外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift 单测即证据，移出 UI 实机腿验收域**（2026-10-18 in_progress，BLOCK-203 W4a P7）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-526",
+        "reason": "Result Studio 真值徽标语义诚实化（2026-10-18 **verified（2026-11-05 探针 C：R 运行时已装〔重开条件成立〕→ 真 R artifact 结果页 live 徽标「已核验（未篡改）」×1 在场；detail 双重诚实声明=组件测 18/18 钉死，live 壳层未透出 title 如实记录）**，BLOCK-211 / W8；证据=acceptance/block-349/（BLOCK-349",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-534",
+        "reason": "MCP 服务货架治理状态（**RW-02 d 档改判 2026-10-30：契约/类型完成、UI 控件未交付——改判为待交付登记，非已交付未验证**（2026-10-20 **in_progress（契约/类型完成，未做实机腿）**，BLOCK-221 / Q8 垂直切片）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-695",
+        "reason": "聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**；2026-11-06 BLOCK-359 W0 注记：modelConfigAndCollapse.test.tsx 断言双断言形态修复（lint/tsc 互斥，先例 RuntimePolicyPanel），vitest 6/6）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-200",
+        "reason": "BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **in_progress（代码+组件 8/8 已锚、production 已接线 ReviewMode，缺实机过目；2026-11-02 BLOCK-332 分诊补登）**",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-391",
+        "reason": "BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内；**RW-02 d 档改判 2026-10-30：纯重构非可见 UI 面——code-size 棘轮（acceptance/block-92/size-baseline.json 现行基线）即证据载体，移出 UI 实机腿验收域**)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-390",
+        "reason": "子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 **verified（2026-11-05 探针 A：内联卡+摘要卡 chip+团队列表三处 role/状态贯通，状态色 chip ×9）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-388",
+        "reason": "远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账 2026-10-30：触发条件=需 IPv6 黑洞/WSL 网络故障环境——如实保留 in_progress 不算失败，触发即补实机腿**",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-389",
+        "reason": "文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 **verified（2026-11-05 探针 B：520 夹具 200 行截断+「加载更多（剩余 320 项）」+ 游标 200→400；复击惰性=观察区）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-1",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-387",
+        "reason": "子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16 **verified（2026-11-05 探针 A：data-category 全落 AGENT_CATEGORIES 键集）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30：触发条件=需真",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-386",
+        "reason": "聊天区子智能体聚合条退役——项目历史智能体图标化集中到摘要卡（用户提案确认「确定 开干」）(2026-09-16 **verified（2026-11-05 探针 A：摘要卡智能体节 3 chips organize/read/read）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30：触发条",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-384",
+        "reason": "工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（用户裁决「行 都修」）(2026-09-16 **verified（2026-11-05 探针 A：展开已读取行回显真实文件内容 QED-11）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30：",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-383",
+        "reason": "工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-09-15 **verified（2026-11-05 探针 A：真实工具行 ×12 单行折叠、默认 0 展开）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30：触发条件=需真实任务工具流水（≥",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-382",
+        "reason": "子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 **verified（2026-11-05 探针 A：真实 spawn ×3、内联卡 ×3 done/running/done）**，dev Electron 边界内；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05）)；**RW-02 b 档对账 2026-10-30：触发条件=需真实 spa",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-471",
+        "reason": "隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（BLOCK-152 T 轨）(2026-10-15 **cancelled（2026-11-05：真隧道/真公网门环境不可得——装第三方服务违反 BLOCK-349 计划 §3。何时可补=真隧道环境就位时观察断反代降级；徽标本体与 mock 三态已在案〔UI-468 verified〕）**（BLOCK-184 代行批：徽标 live 在",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-532",
+        "reason": "生信主结果面 pack resultSurface（2026-10-20 **cancelled（2026-11-05：环境不可得——最新可得 pack〔兄弟仓 origin/main=c58d328，fetch 0 落后〕无 views.resultSurfaces 声明，pack 正面渲染结构性缺席；host 侧真 job 诚实降级已实机证=core-transitional + no_matching_surface。何时可补=p",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-535",
+        "reason": "段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入：段卡 workspace-preview data-segment-crashed 在场+骨架存活+重试钮在场；补丁即抛即还原 git 干净）**，BLOCK-222 / Q9 垂直切片；证据=acceptance/block-349/（BLOCK-349 实机清偿 2026-11-05））；**RW-02 b 档对账 2026-10-",
+        "source": "canonical-full-title"
+      }
+    ],
+    "retain-external-condition": [
+      {
+        "id": "UI-656",
+        "reason": "长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **in_progress（测试面守卫，零渲染变更，无实机面可验）**）",
+        "source": "canonical-full-title"
+      }
+    ],
+    "agent-adjudicable": [
+      {
+        "id": "UI-702",
+        "reason": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-663",
+        "reason": "SVG 编辑器「未保存改动」逐元素取舍（BLOCK-342 W4 reopen 第一刀；2026-11-03 **in_progress（代码面全绿；实机链列清单返回空，未定位，不冒 verified）**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-475",
+        "reason": "识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-09 in_progress，契约级全绿；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补实机产物后再翻，人测腿保留**)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-513",
+        "reason": "跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——改判为待交付登记，非已交付未验证**（2026-10-17 in_progress，BLOCK-199）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-522",
+        "reason": "模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻**（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-639",
+        "reason": "pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；iframe 端到端腿随 UI-532 同前提）**）",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-304",
+        "reason": "增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻，不冒进**)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-326",
+        "reason": "创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补证据后再翻**)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-331",
+        "reason": "左栏会话行短式相对时间（用户参考图裁决）(2026-09-10 in_progress)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-456",
+        "reason": "结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 in_progress → 2026-10-08 **verified**〔由 UI-460 走查覆盖核销：2026-10-03 R2 复走 /lineage chain=3 真实跨 Job 链（wfg_d05e23f4）+ LineageStrip 默认条带形态实机证据 + 用户真窗过目三环齐〕; 原状态 2026-09-28 in_pr",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-458",
+        "reason": "双轨结果 UI 收敛——独立结果页退役（G0-PLATFORM PL-4c 首刀） (2026-09-29 verified，dev Electron 实机 LIVE_PASS)",
+        "source": "canonical-full-title"
+      },
+      {
+        "id": "UI-459",
+        "reason": "result 卫生批——数据层 result:* IPC 面全退役 + 生产 DOM debug 剥离（G0-PLATFORM PL-5） (2026-09-29 verified，dev Electron；dist 复验零命中)",
+        "source": "canonical-full-title"
+      }
+    ]
+  },
+  "decision": "机械分诊，不改台账状态；agent-adjudicable 桶是后续批次可逐件销号的起点，不是已 verified。",
+  "note": "DOM 断言 / 机械门不冒充人眼观感；人眼桶保持 pending_human_eye，Agent 不代答。"
+}

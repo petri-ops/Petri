@@ -16,7 +16,6 @@
 const express = require('express');
 
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 
 // Scientific analysis runs through the tools routes and tool_job persistence.
@@ -75,10 +74,10 @@ try {
 // 相同的 built-in / installed / development 三源发现，确保 HTTP 执行路径
 // 也能拿到 requiresBundle 等完整插件契约。
 try {
-  const developmentDirs = String(process.env.PETRI_DEVELOPMENT_PLUGIN_DIRS || '')
-    .split(path.delimiter)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  // BLOCK-395 B-18 — 三源路径解析收敛到唯一加载器（与 mcp/registry.js 同源）。
+  // 注意：pack 的 enabled===false 整包启停（BLOCK-157 用户裁决）仍由下方 packSourcesFromPacks
+  // 独立处理，不随 registry 的 computePluginSources 合并——两者职责不同，强行合并会破坏裁决。
+  const { builtInDir, installedDir, developmentDirs } = require('./plugin-loader').resolveDefaultPluginSources();
   const packSourcesFromPacks = [];
   // BLOCK-84：已装领域包接线——packs 记录的每个包追加为 installed 插件源 + 工具注册文件（零包=零行为 additive）。
   try {
@@ -107,14 +106,8 @@ try {
 
   // BLOCK-84：三源 + 已装领域包源 = 单次多源装载（避免多次调用互相清除）
   require('./plugin-loader').loadFromSourcesArray([
-    { type: 'builtin', root:
-      process.env.PETRI_BUILT_IN_PLUGINS_DIR ||
-      path.resolve(__dirname, '..', '..', 'resources', 'built-in-plugins') },
-    { type: 'installed', root:
-      process.env.PETRI_PLUGINS_DIR ||
-      (process.env.PETRI_LOCAL_DATA_DIR
-        ? path.join(process.env.PETRI_LOCAL_DATA_DIR, 'plugins')
-        : path.join(os.homedir(), 'Documents', 'Petri-Local', 'plugins')) },
+    { type: 'builtin', root: builtInDir },
+    { type: 'installed', root: installedDir },
     ...developmentDirs.map((root) => ({ type: 'development', root })),
     ...packSourcesFromPacks,
   ]);

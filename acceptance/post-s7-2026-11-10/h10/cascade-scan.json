@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "b05-cascade-dependency-scan",
+  "generatedAt": "2026-11-10T10:56:11.868Z",
+  "scannedFiles": 121,
+  "cascadeDdlCount": 16,
+  "explicitDeleteCount": 11,
+  "cascades": [
+    {
+      "file": "src/database/_db-singleton.js",
+      "line": 88,
+      "ddl": "// accidental ON DELETE CASCADE surprises across the two db modules."
+    },
+    {
+      "file": "src/migrations/005_branch_conversation.sql",
+      "line": 30,
+      "ddl": "FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,"
+    },
+    {
+      "file": "src/migrations/005_branch_conversation.sql",
+      "line": 42,
+      "ddl": "FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/006_result_studio.sql",
+      "line": 24,
+      "ddl": "FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/006_result_studio.sql",
+      "line": 32,
+      "ddl": "FOREIGN KEY (result_id) REFERENCES results(id) ON DELETE CASCADE,"
+    },
+    {
+      "file": "src/migrations/006_result_studio.sql",
+      "line": 45,
+      "ddl": "FOREIGN KEY (result_id) REFERENCES results(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/007_result_conversation_export_type.sql",
+      "line": 25,
+      "ddl": "FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/009_knowledge_space.sql",
+      "line": 47,
+      "ddl": "FOREIGN KEY (space_id) REFERENCES knowledge_spaces(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/009_knowledge_space.sql",
+      "line": 63,
+      "ddl": "FOREIGN KEY (doc_id) REFERENCES knowledge_documents(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "src/migrations/010_knowledge_space_bindings.sql",
+      "line": 2,
+      "ddl": "-- additive：新表；space_id FK ON DELETE CASCADE —— 绑定的空间被删时绑定行"
+    },
+    {
+      "file": "src/migrations/010_knowledge_space_bindings.sql",
+      "line": 10,
+      "ddl": "FOREIGN KEY (space_id) REFERENCES knowledge_spaces(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "core/petri-server/db/schema.js",
+      "line": 216,
+      "ddl": "FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "core/petri-server/db/schema.js",
+      "line": 232,
+      "ddl": "FOREIGN KEY (dataset_id) REFERENCES datasets(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "core/petri-server/db/schema.js",
+      "line": 259,
+      "ddl": "FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "core/petri-server/db/schema.js",
+      "line": 431,
+      "ddl": "FOREIGN KEY (dataset_id) REFERENCES datasets(id) ON DELETE CASCADE"
+    },
+    {
+      "file": "core/petri-server/db/schema.js",
+      "line": 446,
+      "ddl": "FOREIGN KEY (dataset_id) REFERENCES datasets(id) ON DELETE CASCADE"
+    }
+  ],
+  "deletes": [
+    {
+      "file": "core/petri-server/db/subsets-labels.js",
+      "line": 36,
+      "sql": "db.prepare('DELETE FROM subsets WHERE id = ?').run(id);"
+    },
+    {
+      "file": "core/petri-server/db/subsets-labels.js",
+      "line": 83,
+      "sql": "db.prepare('DELETE FROM cell_labels WHERE id = ?').run(id);"
+    },
+    {
+      "file": "core/petri-server/db/users.js",
+      "line": 97,
+      "sql": "db.prepare('DELETE FROM users WHERE id = ?').run(id);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-conversations.js",
+      "line": 115,
+      "sql": "await adb.prepare('DELETE FROM copilot_messages WHERE conversation_id=?').run(req.params.id);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-conversations.js",
+      "line": 116,
+      "sql": "await adb.prepare('DELETE FROM copilot_conversations WHERE id=? AND user_id=?').run(req.params.id, userId);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-memory.js",
+      "line": 143,
+      "sql": "await adb.prepare(`DELETE FROM user_facts WHERE user_id=? AND ${scope.clause}`).run(userId, ...scope.values);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-memory.js",
+      "line": 176,
+      "sql": "await adb.prepare('DELETE FROM project_chat_summaries WHERE user_id=? AND project_id=?').run(userId, _scope(projectId).key);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-memory.js",
+      "line": 234,
+      "sql": "await adb.prepare(`DELETE FROM memory_vectors WHERE user_id=? AND ${scope.clause}`).run(userId, ...scope.values);"
+    },
+    {
+      "file": "core/petri-server/routes/ai-plans.js",
+      "line": 124,
+      "sql": "await adb.prepare('DELETE FROM copilot_plan_steps WHERE plan_id NOT IN (SELECT id FROM copilot_plans)').run();"
+    },
+    {
+      "file": "core/petri-server/routes/tools-platform.js",
+      "line": 153,
+      "sql": "await db.prepare('DELETE FROM tool_jobs WHERE id = ?').run(req.params.id);"
+    },
+    {
+      "file": "core/petri-server/routes/tools-platform.js",
+      "line": 182,
+      "sql": "await db.prepare('DELETE FROM tool_jobs WHERE id = ?').run(id);"
+    }
+  ],
+  "note": "只读清单。FK=ON 全量切换仍需用户显式裁决（BLOCK-372/384）；本清单是决策材料，不是切换授权。"
+}

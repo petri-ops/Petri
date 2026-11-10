@@ -632,6 +632,9 @@ async function main() {
     const backendPort = backendPorts.r;
     const { markBackendAttached } = require("./main/backend-proc-manager");
     markBackendAttached(backendPort);
+    // BLOCK-395 B-22 — 测试实例不跑迁移子进程，该段「零耗时已结算」也应打点，
+    // 否则冷启动 ×5 里 migrations 恒为 not_instrumented（缺段而非无耗时）。
+    require("./ipc/startup-timeline").markStartup("migrations");
     const backendHealthy = await waitForBackendHealthy(backendPort, 90_000);
     // BLOCK-394 B-22：health 首次 200 的主进程权威打点（与其余段同一时间轴）。
     if (backendHealthy) require("./ipc/startup-timeline").markStartup("backendHealth");

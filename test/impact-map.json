@@ -268,7 +268,8 @@
         "test/block322-p2-04-turntable.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts",
-        "test/block344-edit-governance.test.mjs"
+        "test/block344-edit-governance.test.mjs",
+        "test/block322-p3-03-v2b-constraint-ops.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -616,7 +617,8 @@
         "test/block201-settings-baseline.test.mjs",
         "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx",
-        "test/window-controls.test.mjs"
+        "test/window-controls.test.mjs",
+        "test/agent-task-store-busy-timeout.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -828,7 +830,10 @@
         "test/block67-ssh-surface.test.mjs",
         "test/project-storage.test.mjs",
         "test/project-notices.test.mjs",
-        "test/block34-background-processes-route.test.mjs"
+        "test/block34-background-processes-route.test.mjs",
+        "test/block56-context-freshness.test.mjs",
+        "test/nso-w2-exec-token.test.mjs",
+        "test/routes-harness-index-500.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -851,7 +856,8 @@
         "acceptance/block-186/**"
       ],
       "tests": [
-        "test/block186-funnel-ledger.test.mjs"
+        "test/block186-funnel-ledger.test.mjs",
+        "test/ck10-telemetry-funnel.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -903,7 +909,8 @@
         "test/working-tree-review-file-content.test.mjs",
         "test/working-tree-review-init.test.mjs",
         "test/git-adapter-block20-per-hunk.test.mjs",
-        "test/block176-checkpoint.test.mjs"
+        "test/block176-checkpoint.test.mjs",
+        "test/block169-review-commit-edge.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -970,7 +977,10 @@
         "test/ai-settings-credential.test.mjs",
         "test/result-studio-agent-binding.test.mjs",
         "test/system-prompt-result-context.test.mjs",
-        "test/block199-config-compat.test.mjs"
+        "test/block199-config-compat.test.mjs",
+        "test/agent-runner-facade.test.mjs",
+        "test/ai-settings-cache.test.mjs",
+        "test/chat-file-references-server.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1069,7 +1079,8 @@
         "test/agent-run-tool.test.mjs",
         "test/result-selection-tools.test.mjs",
         "test/result-replay-service.test.mjs",
-        "test/project-result-sandbox.test.mjs"
+        "test/project-result-sandbox.test.mjs",
+        "test/block165-codemod-idempotent.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1218,7 +1229,8 @@
       ],
       "tests": [
         "test/g0-chf0-http.test.mjs",
-        "test/g0-chf0-lifecycle.test.mjs"
+        "test/g0-chf0-lifecycle.test.mjs",
+        "test/block135-retry-policy.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1288,7 +1300,8 @@
         "test/mcp-tool-registry.test.mjs",
         "test/harness-manifest.test.mjs",
         "test/harness-tool-template.test.mjs",
-        "test/platform-id-single-source-anchor.test.mjs"
+        "test/platform-id-single-source-anchor.test.mjs",
+        "test/mcp-calltool-input-schema.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -1473,7 +1486,8 @@
       "tests": [
         "test/docs-governance.test.mjs",
         "test/test-affected.test.mjs",
-        "test/docs-roll-index.test.mjs"
+        "test/docs-roll-index.test.mjs",
+        "test/nso-w7-governance-tooling.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "governance"
@@ -1505,7 +1519,8 @@
         "scripts/validate-ipc-catalog.mjs"
       ],
       "tests": [
-        "test/backend-health.test.mjs"
+        "test/backend-health.test.mjs",
+        "test/ipc-backpressure-profile.test.mjs"
       ],
       "classifiesScripts": true,
       "scriptRole": "ipc-profiling"
@@ -2363,7 +2378,9 @@
         "scripts/block79-*"
       ],
       "tests": [
-        "test/ai-usage-provider.test.mjs"
+        "test/ai-usage-provider.test.mjs",
+        "test/deepseek-retry.test.mjs",
+        "test/dsml-guard.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -2379,7 +2396,8 @@
       ],
       "tests": [
         "test/thinking-level.test.mjs",
-        "test/thinking-level-injection.test.mjs"
+        "test/thinking-level-injection.test.mjs",
+        "test/block163-anthropic-vision.test.mjs"
       ]
     },
     {
@@ -2422,7 +2440,9 @@
       "tests": [
         "test/block82-reasoning-field-compat.test.mjs",
         "test/provider-streaming.test.mjs",
-        "test/block37-llm-io-transcript.test.mjs"
+        "test/block37-llm-io-transcript.test.mjs",
+        "test/block37-llm-transcript-route.test.mjs",
+        "test/block38-agent-task-resume.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -2550,7 +2570,8 @@
         "test/plugin-sdk.test.mjs",
         "test/plugin-manifest-schema.test.mjs",
         "test/g0-chf0-http.test.mjs",
-        "test/domain-neutrality.test.mjs"
+        "test/domain-neutrality.test.mjs",
+        "test/block163-pack-permissions.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -2698,7 +2719,8 @@
         "test/block97-agent-todo.test.mjs",
         "test/block95-b2-compaction.test.mjs",
         "test/block95-b1-history-assembly.test.mjs",
-        "test/ipc-channels-registry.test.mjs"
+        "test/ipc-channels-registry.test.mjs",
+        "test/agent-concurrency.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -2757,7 +2779,8 @@
       ],
       "tests": [
         "test/knowledge-space.test.mjs",
-        "test/agent-tool-registry.test.mjs"
+        "test/agent-tool-registry.test.mjs",
+        "test/block163-knowledge-skills.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -3396,7 +3419,8 @@
         "test/block109-orchestration.test.mjs",
         "test/agent-runner-facade-compat.test.mjs",
         "test/loop-orchestrator-subdomains.test.mjs",
-        "test/ui272-reasoning-persist.test.mjs"
+        "test/ui272-reasoning-persist.test.mjs",
+        "test/agent-runner-conversation-adapter.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
@@ -4476,7 +4500,10 @@
         "test/mcp-client-settings.test.mjs",
         "test/mcp-client-manager.test.mjs",
         "test/ipc-channels-registry.test.mjs",
-        "test/nso-w2b-capability-audit.test.mjs"
+        "test/nso-w2b-capability-audit.test.mjs",
+        "test/accessmode-validation.test.mjs",
+        "test/block-10-phase2-policy.test.mjs",
+        "test/model-preference-sync.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -4662,7 +4689,8 @@
         "test/block199-write-guard.test.mjs",
         "test/block199-report-guard-point.test.mjs",
         "frontend/src/themes/ThemeProvider.sync.test.tsx",
-        "test/block199-config-drift.test.mjs"
+        "test/block199-config-drift.test.mjs",
+        "test/feature-flags.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -5268,7 +5296,8 @@
         "test/block233-tool-metadata-single-source.test.mjs",
         "test/tools-input-validation.test.mjs",
         "test/tool-registry-script-links.test.mjs",
-        "test/block131-domain-validation.test.mjs"
+        "test/block131-domain-validation.test.mjs",
+        "test/block135-export-layout.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -7388,7 +7417,8 @@
         "frontend/src/components/svg-editor/SvgEditorViewer.test.tsx",
         "frontend/src/components/result-studio/viewerRegistry.block342.test.ts",
         "frontend/src/components/result-studio/viewerRegistry.test.ts",
-        "frontend/src/components/result-studio/viewerRegistry.block142.test.ts"
+        "frontend/src/components/result-studio/viewerRegistry.block142.test.ts",
+        "test/block342-inkscape.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -7907,6 +7937,43 @@
         "docs-check"
       ],
       "classifiesScripts": false
+    },
+    {
+      "id": "block395-self-contained-gates",
+      "note": "BLOCK-395 自主扫尾门：B-05 CASCADE 清单 / B-32 颜色字面量棘轮 / B-25 余环归簇 / B-29 roll-index 只读门 / B-10 树 roving / B-11 零几何收敛 / B-18 插件源收敛。",
+      "patterns": [
+        "scripts/post-s7-b05-cascade-scan.mjs",
+        "scripts/post-s7-color-ratchet.mjs",
+        "scripts/post-s7-cycle-cluster.mjs",
+        "frontend/src/components/workspace-panels/treeRoving.ts",
+        "frontend/src/components/workspace-panels/LeftPanel.tsx",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/components/workspace-panels/CenterPanel.tsx",
+        "core/petri-server/server.js",
+        "acceptance/post-s7-2026-11-10/h10/**",
+        "scripts/post-s7-debt-adjudicate.mjs",
+        "scripts/post-s7-deferred-triage.mjs",
+        "scripts/post-s7-cold-start-x5.cjs",
+        "scripts/post-s7-cdp-event-projection.cjs",
+        "src/ipc/startup-timeline.js"
+      ],
+      "tests": [
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-roll-index.test.mjs",
+        "test/post-s7-h10-b11-convergence.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
     }
   ]
 }

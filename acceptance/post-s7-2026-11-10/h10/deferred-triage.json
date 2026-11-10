@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "b04-b33-deferred-triage",
+  "generatedAt": "2026-11-10T11:09:15.849Z",
+  "evaluation": {
+    "ok": true,
+    "issues": []
+  },
+  "b04": {
+    "channels": [
+      {
+        "id": "workspace_exec",
+        "state": "consumed",
+        "reason": "执行边界已闭环"
+      },
+      {
+        "id": "tools_executor",
+        "state": "deferred",
+        "reason": "需跨 tool_jobs 行设计凭据载体"
+      },
+      {
+        "id": "ssh_direct_runner",
+        "state": "deferred",
+        "reason": "需跨 SSH 会话设计凭据载体"
+      }
+    ],
+    "decision": "保守默认：不擅自改执行准入语义；两轴分离用户裁决维持。"
+  },
+  "b33": {
+    "total": 165,
+    "needsWiring": 124,
+    "retainWithReason": 41,
+    "deletable": 0,
+    "classification": {
+      "reserved": 0,
+      "needsProductDecision": 124,
+      "mainOnly": 0,
+      "sampleProductDecision": [
+        "agent:task-done",
+        "ai-settings:get",
+        "ai-settings:get-credential",
+        "ai-settings:list-models",
+        "ai-settings:save",
+        "ai-settings:test",
+        "backend:status",
+        "branch:active"
+      ]
+    },
+    "decision": "逐件分诊在册；接线到哪个 UI 入口属产品决策，不盲接、不删 preload。"
+  },
+  "note": "本门只固化判据，不冒充接线完成。"
+}

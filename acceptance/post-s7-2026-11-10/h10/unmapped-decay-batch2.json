@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "kind": "b21-unmapped-decay-batch2",
+  "generatedAt": "2026-11-10T11:05:34.101Z",
+  "before": 120,
+  "assigned": 30,
+  "remaining": 90,
+  "assignments": [
+    {
+      "test": "test/accessmode-validation.test.mjs",
+      "ruleIds": [
+        "block160-maturity-wave2"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/agent-concurrency.test.mjs",
+      "ruleIds": [
+        "block98-agent-resilience"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/agent-runner-conversation-adapter.test.mjs",
+      "ruleIds": [
+        "block109-core-arch-convergence"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/agent-runner-facade.test.mjs",
+      "ruleIds": [
+        "result-studio-agent-runtime"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/agent-task-store-busy-timeout.test.mjs",
+      "ruleIds": [
+        "block223-desktop-shell"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/ai-settings-cache.test.mjs",
+      "ruleIds": [
+        "result-studio-agent-runtime"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block-10-phase2-policy.test.mjs",
+      "ruleIds": [
+        "block160-maturity-wave2"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block135-export-layout.test.mjs",
+      "ruleIds": [
+        "block233-qdomain-p4c-tool-metadata"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block135-retry-policy.test.mjs",
+      "ruleIds": [
+        "chf0-critical"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block163-anthropic-vision.test.mjs",
+      "ruleIds": [
+        "block81-thinking-level"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block163-knowledge-skills.test.mjs",
+      "ruleIds": [
+        "block94-knowledge-space-pro"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block163-pack-permissions.test.mjs",
+      "ruleIds": [
+        "block84-domain-pack-oneclick"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block165-codemod-idempotent.test.mjs",
+      "ruleIds": [
+        "ux1g1-tool-job-conversation"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block169-review-commit-edge.test.mjs",
+      "ruleIds": [
+        "working-tree-review-ipc"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block322-p3-03-v2b-constraint-ops.test.mjs",
+      "ruleIds": [
+        "next04a-3d-foundation"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block342-inkscape.test.mjs",
+      "ruleIds": [
+        "block342-svg-editor"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block37-llm-transcript-route.test.mjs",
+      "ruleIds": [
+        "block82-reasoning-field-compat"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block38-agent-task-resume.test.mjs",
+      "ruleIds": [
+        "block82-reasoning-field-compat"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/block56-context-freshness.test.mjs",
+      "ruleIds": [
+        "block78-runtime-projection"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/chat-file-references-server.test.mjs",
+      "ruleIds": [
+        "result-studio-agent-runtime"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/ck10-telemetry-funnel.test.mjs",
+      "ruleIds": [
+        "block186-funnel-ledger"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/deepseek-retry.test.mjs",
+      "ruleIds": [
+        "block79-token-speed"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/dsml-guard.test.mjs",
+      "ruleIds": [
+        "block79-token-speed"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/feature-flags.test.mjs",
+      "ruleIds": [
+        "block199-config-schema-service"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/ipc-backpressure-profile.test.mjs",
+      "ruleIds": [
+        "script-ipc-profiling"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/mcp-calltool-input-schema.test.mjs",
+      "ruleIds": [
+        "plugin-runtime"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/model-preference-sync.test.mjs",
+      "ruleIds": [
+        "block160-maturity-wave2"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/nso-w2-exec-token.test.mjs",
+      "ruleIds": [
+        "block78-runtime-projection"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/nso-w7-governance-tooling.test.mjs",
+      "ruleIds": [
+        "script-governance"
+      ],
+      "refCount": 1
+    },
+    {
+      "test": "test/routes-harness-index-500.test.mjs",
+      "ruleIds": [
+        "block78-runtime-projection"
+      ],
+      "refCount": 1
+    }
+  ],
+  "skippedSample": [
+    {
+      "test": "test/_mapSkillRuntimeStatus.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-doc-review-ipc.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-files-changed.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-query-result.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-task-cancellation.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-task-subagent-recent.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/agent-workflow-configure.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block126-job-live-log.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block150-explicit-credentials.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block154-startup-async.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block154-terminal-ssh-keepalive.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block162-agent-ws-endpoint.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block162-ws-server.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block181-genui-path-repair.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block183-data-ws.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block246-message-ratings.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block246-scratchpad.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block322-p3-03-v2a-mate-rotation.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block322-p3-03-v2b-features.test.mjs",
+      "why": "no_resolvable_production_refs"
+    },
+    {
+      "test": "test/block346-ide-tool-contracts.test.mjs",
+      "why": "no_resolvable_production_refs"
+    }
+  ],
+  "criterion": "测试源码必须引用 >=1 个已登记生产路径，且归属恰好一条既有规则；多规则冲突不盲挂。",
+  "note": "只减不增；不新建兜底全域规则（上一轮 81 条错挂已回滚）。"
+}

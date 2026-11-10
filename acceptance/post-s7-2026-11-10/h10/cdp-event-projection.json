@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "b07-b14-cdp-event-projection",
+  "generatedAt": "2026-11-10T11:10:00.024Z",
+  "platform": "darwin-arm64",
+  "evidenceClass": "cdp-dom-assertion",
+  "humanEyeEquivalent": false,
+  "visualVerified": false,
+  "verdict": "measured",
+  "allMapped": true,
+  "bannersOk": true,
+  "detail": {
+    "mapped": {
+      "compaction_failed": {
+        "moduleServed": true,
+        "containsTemplate": true
+      },
+      "trim_skipped": {
+        "moduleServed": true,
+        "containsTemplate": true
+      },
+      "provider_retry": {
+        "moduleServed": true,
+        "containsTemplate": true
+      },
+      "stream_stall": {
+        "moduleServed": true,
+        "containsTemplate": true
+      }
+    },
+    "bannerResults": {
+      "reconnecting": {
+        "role": "status",
+        "live": "polite",
+        "phaseAttr": "reconnecting"
+      },
+      "replaying": {
+        "role": "status",
+        "live": "polite",
+        "phaseAttr": "replaying"
+      },
+      "exhausted": {
+        "role": "status",
+        "live": "polite",
+        "phaseAttr": "exhausted"
+      }
+    },
+    "href": "http://localhost:3000/?test=1"
+  },
+  "note": "合成事件 / 注入 DOM = 投影链在场性断言，不是真实断线 RST 注入，也不是截图观感。VoiceOver 与暗色对比度仍 pending_human_eye。"
+}

@@ -30,14 +30,21 @@ test('人眼主类 4 / 凭据 1 / 用户裁决 1 / 已完成 5 不在本包范�
   assert.equal(outside.filter((g) => g.blocker === 'none').length, 5);
 });
 
-test('completed-with-declared-exception 必须明说挂起原因，不冒 verified', () => {
-  const partial = AGENT.filter((g) => g.agentSideOutcome === 'completed-with-declared-exception');
-  assert.equal(partial.length, 11);
-  for (const g of partial) {
-    assert.ok(/挂起|需|仍|不代答|另立|独立|如实|未/.test(g.agentSideDelivery), `${g.id} 未写明挂起边界`);
-    assert.equal(g.status, 'done-partial', `${g.id} 不得标 done`);
+test('挂起项必须明说原因、不冒 verified；status 以最新一轮交付为准', () => {
+  // 两轮字段：agentSideOutcome（一轮）→ round2Outcome（二轮）后者优先。
+  // 二轮把 B-11/B-18 推到 completed，status 随之变 done，不能让一轮的 except 标签僵化。
+  const latest = (g) => g.round2Outcome || g.agentSideOutcome;
+  for (const g of AGENT) {
+    assert.ok(['completed', 'completed-with-declared-exception'].includes(latest(g)), g.id);
+    if (latest(g) === 'completed') assert.equal(g.status, 'done', g.id + ' 完成应为 done');
+    else {
+      assert.equal(g.status, 'done-partial', g.id + ' 挂起项不得标 done');
+      const text = g.agentSideDelivery + ' ' + (g.round2Delivery || '');
+      assert.ok(/挂起|需|仍|不代答|另立|独立|如实|未|待人眼|待裁决|路径差异/.test(text), g.id + ' 未写明挂起边界');
+    }
   }
-  for (const g of AGENT.filter((x) => x.agentSideOutcome === 'completed')) assert.equal(g.status, 'done');
+  assert.ok(AGENT.some((g) => latest(g) === 'completed'), '必须有真完成项');
+  assert.ok(AGENT.some((g) => latest(g) === 'completed-with-declared-exception'), '必须有如实挂起项');
 });
 
 test('计数机械汇总，负测：删一条即红', () => {

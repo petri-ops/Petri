@@ -206,7 +206,8 @@ function SessionFrameView({
       }`}
       ref={sessionFrameRef}
     >
-      <div className={styles.workspaceSessionLayout}>
+      {/* BLOCK-395 B-11 — 内层独立语义名（composes 同一规则），与外层 frame 不再同名。 */}
+      <div className={styles.workspaceSessionInner}>
         <div className={styles.workspaceSessionInset}>
           <div className={styles.workspaceSessionSurface}>
             <div className={styles.workspaceSessionContent}>

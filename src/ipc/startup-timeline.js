@@ -33,6 +33,8 @@ const marks = {
 function markStartup(name) {
   if (name && Object.prototype.hasOwnProperty.call(marks, name) && marks[name] == null) {
     marks[name] = Date.now();
+    // BLOCK-395 B-22 — SPA 首次 200 与 did-finish-load 同源，不另建时间轴。
+    if (name === 'didFinishLoad' && marks.spa200 == null) marks.spa200 = marks[name];
   }
 }
 
@@ -40,6 +42,10 @@ function setupStartupTimelineIpc({ ipcMain }) {
   ipcMain.on(CHANNELS.startup.report, (_event, payload) => {
     if (!payload || typeof payload !== 'object') return;
     marks.reported = { ...payload, receivedAt: Date.now() };
+    if (marks.cdpPageReady == null) marks.cdpPageReady = Date.now();
+    // BLOCK-395 B-22 — 渲染层首次上报 = CDP 页面 readyState 可用的最早权威时点。
+    // 用主进程 Date.now() 打点，与其余四段同一时间轴（渲染层 performance.now()
+    // 不同源，禁止二次换算）；spa200 由 didFinishLoad 同源派生，见下方 accessor。
   });
 
   ipcMain.handle(CHANNELS.startup.marks, () => {
@@ -50,6 +56,8 @@ function setupStartupTimelineIpc({ ipcMain }) {
     // 只有 receivedAt（主进程收到时刻）参与相对化。
     const rel = {};
     for (const [k, v] of Object.entries(m)) {
+      // BLOCK-395 B-22：null 段必须保留在输出里，让采集方能区分「零耗时」与「缺段」。
+      if (v === null) { rel[k] = null; continue; }
       if (typeof v === 'number') rel[k] = v - PROCESS_START;
       else if (v && typeof v === 'object') {
         rel[k] = { ...v };

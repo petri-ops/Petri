@@ -1543,6 +1543,15 @@
   padding: 0 14px 0 var(--petri-space-3);
 }
 
+/* BLOCK-395 B-11 — 零几何收敛：CenterPanel 内层此前与外层同挂
+   .workspaceSessionLayout，读码时无法区分「frame」与「layout」职责，
+   且误以为改任一层都要同步两层。这里给内层独立语义名，composes 同一份
+   规则保证 computed style 逐字不变（不用改 gap/flex/padding），
+   几何 A/B 的「改语义会窄 74px」问题因此不再存在。 */
+.workspaceSessionInner {
+  composes: workspaceSessionLayout;
+}
+
 .workspaceSessionLayout {
   flex: 1;
   min-width: 0;

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "b22-cold-start-x5",
+  "generatedAt": "2026-11-10T11:14:04.350Z",
+  "platform": "darwin-arm64",
+  "evidenceClass": "live-probe",
+  "rounds": 5,
+  "readyCount": 5,
+  "worstRound": {
+    "round": 5,
+    "coldStartWallMs": 5640,
+    "ready": true,
+    "require": 53,
+    "migrations": 501,
+    "backendHealth": 518,
+    "spa200": 793,
+    "cdpPageReady": null,
+    "reportedPresent": false,
+    "bootLog": "start dispatched (darwin nohup pid 2404) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+  },
+  "stageCoverage": {
+    "require": 5,
+    "migrations": 5,
+    "backendHealth": 5,
+    "spa200": 5,
+    "cdpPageReady": 0
+  },
+  "roundsDetail": [
+    {
+      "round": 1,
+      "coldStartWallMs": 5155,
+      "ready": true,
+      "require": 54,
+      "migrations": 506,
+      "backendHealth": 524,
+      "spa200": 801,
+      "cdpPageReady": null,
+      "reportedPresent": false,
+      "bootLog": "start dispatched (darwin nohup pid 1228) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+    },
+    {
+      "round": 2,
+      "coldStartWallMs": 5634,
+      "ready": true,
+      "require": 51,
+      "migrations": 500,
+      "backendHealth": 517,
+      "spa200": 799,
+      "cdpPageReady": null,
+      "reportedPresent": false,
+      "bootLog": "start dispatched (darwin nohup pid 1486) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+    },
+    {
+      "round": 3,
+      "coldStartWallMs": 5614,
+      "ready": true,
+      "require": 51,
+      "migrations": 524,
+      "backendHealth": 542,
+      "spa200": 818,
+      "cdpPageReady": null,
+      "reportedPresent": false,
+      "bootLog": "start dispatched (darwin nohup pid 1796) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+    },
+    {
+      "round": 4,
+      "coldStartWallMs": 5628,
+      "ready": true,
+      "require": 54,
+      "migrations": 516,
+      "backendHealth": 533,
+      "spa200": 813,
+      "cdpPageReady": null,
+      "reportedPresent": false,
+      "bootLog": "start dispatched (darwin nohup pid 2127) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+    },
+    {
+      "round": 5,
+      "coldStartWallMs": 5640,
+      "ready": true,
+      "require": 53,
+      "migrations": 501,
+      "backendHealth": 518,
+      "spa200": 793,
+      "cdpPageReady": null,
+      "reportedPresent": false,
+      "bootLog": "start dispatched (darwin nohup pid 2404) | t+3s test=1 targets: 1 | TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
+    }
+  ],
+  "verdict": "measured-with-declared-path-limit",
+  "note": "冷启动 5 次非热栈轮询。4/5 段有主进程权威读数；cdpPageReady 因测试实例页面不挂载主窗 App 而不可得，属路径差异非产品缺陷。主窗验证需人眼/主栈，另列。",
+  "stageCoverageInterpretation": {
+    "require": "5/5 主进程 app.whenReady",
+    "migrations": "5/5 测试实例跳过迁移 → 零耗时已结算打点",
+    "backendHealth": "5/5 :3001 /api/health 首次 200",
+    "spa200": "5/5 did-finish-load 同源派生（SPA 首次 200）",
+    "cdpPageReady": "0/5 — 测试实例页面是 ?test=1 宿主，不挂载 AppRailContext，渲染层永不调 startup:report；该段只在主窗路径可得。按纪律记 null，不编数字、不改 verdict 凑满 5/5。"
+  },
+  "humanEyeEquivalent": false,
+  "visualVerified": false
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { treeRovingIntent, rovingTabIndex } from './treeRoving';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
 import { SshStatusDot } from './SshStatusDot';
@@ -437,15 +438,39 @@ function ProjectTreeHeader({ ctx, sshCreateOpen, onToggleSshCreate, convSearchOp
 }
 
 function ProjectTree({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
+  // BLOCK-395 B-10 — roving tabindex：整棵树只保留一个 tab stop，树内方向键移动。
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const count = ctx.visibleProjects.length;
+  const rowRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  const onTreeKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const intent = treeRovingIntent(event.key, activeIndex, count);
+    if (intent.kind === 'none') return;
+    event.preventDefault();
+    setActiveIndex(intent.index);
+    rowRefs.current[intent.index]?.focus();
+    if (intent.kind === 'toggle') {
+      const target = ctx.visibleProjects[intent.index];
+      if (target) ctx.toggleProjectExpand(target.id);
+    }
+  };
   return (
     // BLOCK-369（NSO-W3 F-18）树语义：role=tree + 节点 treeitem/aria-expanded。
-    <div className={styles.projectTreeScroll} role="tree" aria-label="项目树">
-      {ctx.visibleProjects.map((p) => (
+    // BLOCK-395 B-10：方向键/Home/End 由纯映射驱动，左右键 = 展开折叠意图。
+    <div
+      className={styles.projectTreeScroll}
+      role="tree"
+      aria-label="项目树"
+      onKeyDown={onTreeKeyDown}
+    >
+      {ctx.visibleProjects.map((p, index) => (
         <ProjectNode
           key={p.id}
           project={p}
           ctx={ctx}
           isCurrent={p.id === ctx.projectId}
+          treeTabIndex={rovingTabIndex(index, activeIndex)}
+          onTreeFocus={() => setActiveIndex(index)}
+          rowRef={(el: HTMLDivElement | null) => { rowRefs.current[index] = el; }}
           isExpanded={ctx.expandedProjects.has(p.id)}
           conversations={
             p.id === ctx.projectId
@@ -514,12 +539,18 @@ function ProjectNode({
   isCurrent,
   isExpanded,
   conversations: convs,
+  treeTabIndex,
+  onTreeFocus,
+  rowRef,
 }: {
   project: Project;
   ctx: LeftPanelContext;
   isCurrent: boolean;
   isExpanded: boolean;
   conversations: ConversationSummary[];
+  treeTabIndex: 0 | -1;
+  onTreeFocus: () => void;
+  rowRef: (el: HTMLDivElement | null) => void;
 }): React.ReactElement {
   const [editingProject, setEditingProject] = React.useState(false);
   const [projectName, setProjectName] = React.useState(p.name);
@@ -559,6 +590,10 @@ function ProjectNode({
     <div className={styles.projectTreeNode} role="treeitem" aria-expanded={isExpanded}>
       <div
         className={`${styles.projectTreeRow} ${isCurrent ? styles.projectTreeRowActive : ''}`}
+        tabIndex={treeTabIndex}
+        ref={rowRef}
+        onFocus={onTreeFocus}
+        data-tree-row-index={treeTabIndex}
         onClick={() => {
           if (!isCurrent) ctx.switchToProject(p.id);
           ctx.toggleProjectExpand(p.id);
