@@ -1,11 +1,11 @@
 {
   "_about": "第五轮 L0-8 数字口径单源（蓝图 L-45/L-76/L-81/L-84）：文档引用读数一律以本 JSON 为准；由 scripts/post-k7-readings-generate.mjs 当场实测生成，禁止手抄/手改。",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-10T19:35:34.131Z",
-  "sourceCommit": "f429112fa41d3a98dfe55afa1072ab8958167f91",
+  "generatedAt": "2026-11-10T19:38:29.462Z",
+  "sourceCommit": "e9ed5358991b255e5de0c0390625e30c9447c85e",
   "generator": "node scripts/post-k7-readings-generate.mjs",
   "impactMap": {
-    "rules": 367,
+    "rules": 369,
     "unmappedTests": 90,
     "coverageBaselineUpdatedAt": "2026-11-10",
     "source": [
@@ -48,8 +48,8 @@
     ]
   },
   "perfBaseline": {
-    "generatedAt": "2026-11-10T17:03:29.773Z",
-    "coreSha": "7905637b142b534a",
+    "generatedAt": "2026-11-10T19:36:11.747Z",
+    "coreSha": "a1e1c5ba35dfca12",
     "host": {
       "platform": "darwin-arm64",
       "cpus": 8,
@@ -58,7 +58,7 @@
     },
     "scenarios": {
       "packaged_start": {
-        "medianMs": 374,
+        "medianMs": 372,
         "tolerancePct": 30,
         "skipped": false
       },
@@ -73,7 +73,7 @@
         "skipped": false
       },
       "warm_backend_spawn": {
-        "medianMs": 545,
+        "medianMs": 543,
         "tolerancePct": 25,
         "skipped": false
       }

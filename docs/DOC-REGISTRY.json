@@ -19,19 +19,19 @@
       "capability": "block-406-post-k7-l2-function-integrity",
       "path": "docs/block-406-post-k7-l2-function-integrity-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-406-post-k7-l2-function-integrity",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "tags": [
         "post-k7",
         "l2",
         "mcp",
         "function-integrity"
       ],
-      "notes": "第五轮 L2 功能断链与假成功（用户 2026-11-11 执行提示词预授权连续工作）：L-01 MCP skill_execute 假成功 fail-closed（最高优先）/ L-02 双 server 收敛 ide:// 可达 / L-19/20/21 数据桥与 IPC 失败形状统一 / L-03 canCompare / L-05 source enum 同源 / L-04~L-11 零消费销号 / L-09 testOnly。红绿先行。蓝图=docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L2。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "第五轮 L2 功能断链与假成功 completed（2026-11-11）：L-01 skill_execute 假成功 fail-closed（11 Skill 逐件 isError:true+no_execution_backend，协议级 callTool 断言）/ L-02 resources 可达+prompts 假声明移除 / L-19 runtime 三态 / L-20 ipcFailure 单源 / L-21 fetch 超时 / L-03 canCompare 接线 / L-05 enum 同源 / L-06 端点退役 / L-04/07/08/09 通道分类 / 9 新原因码入封闭类别。定向 208/209（P6=W 归属）；预存红 4 件如实归属（agent-runner/block353/BLOCK-93×2）。零新增依赖。证据=acceptance/post-k7-2026-11-10/l2/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-405",

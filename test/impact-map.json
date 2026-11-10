@@ -4,7 +4,7 @@
   "rules": [
     {
       "id": "post-h9-program",
-      "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。 K1：主线兑现度事实采集/裁决、165 通道机械分诊、U 类决策材料契约。 K2：具名上限常量/会话列表 additive 信封/复合索引 与拆后同套绿基线。 K3：四事件反向契约/布局防回退/内联样式债棘轮门/debt 分诊。 K4：架构债事实采集/源码扫描棘轮门/版本只读对账/W5b 边界。 K5：证据元数据门/DOM 阈值纯函数/三矩阵与 EAR 对账/U·V·L 材料。 K6：PiP 四项基线红绿先行/窗口名单覆盖/ADMISSION·FK U 类材料。 K7：总收口复评/32 条终态/真实任务环境因/人眼边界。 总收口评审抓真：新增 gate:post-h9-contracts 全量契约门（防定向覆盖盲区）。",
+      "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。 K1：主线兑现度事实采集/裁决、165 通道机械分诊、U 类决策材料契约。 K2：具名上限常量/会话列表 additive 信封/复合索引 与拆后同套绿基线。 K3：四事件反向契约/布局防回退/内联样式债棘轮门/debt 分诊。 K4：架构债事实采集/源码扫描棘轮门/版本只读对账/W5b 边界。 K5：证据元数据门/DOM 阈值纯函数/三矩阵与 EAR 对账/U·V·L 材料。 K6：PiP 四项基线红绿先行/窗口名单覆盖/ADMISSION·FK U 类材料。 K7：总收口复评/32 条终态/真实任务环境因/人眼边界。 总收口评审抓真：新增 gate:post-h9-contracts 全量契约门（防定向覆盖盲区）。 L 程序（第五轮）证据目录同挂本规则。",
       "patterns": [
         "scripts/post-h9-*",
         "scripts/lib/post-h9-*",
@@ -40,7 +40,8 @@
         "src/main/computer-use-pip.js",
         "acceptance/post-h9-2026-11-10/k6/**",
         "scripts/post-h9-contract-suite.mjs",
-        "scripts/lib/post-h9-k0-criteria.mjs"
+        "scripts/lib/post-h9-k0-criteria.mjs",
+        "acceptance/post-k7-2026-11-10/**"
       ],
       "tests": [
         "test/post-h9-k0-criteria-void.test.mjs",

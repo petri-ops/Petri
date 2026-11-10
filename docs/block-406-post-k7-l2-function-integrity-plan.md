@@ -1,6 +1,6 @@
 ---
 capability: block-406-post-k7-l2-function-integrity
-status: active
+status: completed
 goal: 执行第五轮优化程序 L2（功能断链与假成功）：消灭「成功但零执行」「声明有但入口不可达」「声明可比较但产品无入口」三类假兑现，并统一 IPC 失败形状。承载蓝图 docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L2 的 14 条发现（L-01~L-11、L-19/20/21）。
 acceptance:
   - L2-1 L-01：MCP skill_execute 同源注入执行体或 fail-closed no_execution_backend；红绿先行——当前空产物用例必红；11 个内置 Skill 逐件执行有真实产物或明确 isError:true；协议级 callTool 断言
