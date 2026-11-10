@@ -19,12 +19,12 @@
       "capability": "block-400-post-h9-k4-architecture",
       "path": "docs/block-400-post-h9-k4-architecture-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-400",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-400-post-h9-k4-architecture-plan.md",
         "acceptance/post-h9-2026-11-10/k4/**",
@@ -37,7 +37,7 @@
         "optimization",
         "k4"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K4 架构去补丁与单源收编。源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K4 架构去补丁与单源收编。源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】源码扫描只减不增棘轮门（4 文件冻结+3 负测）/ 插件源解析面单源防回退装配面两处如实标注 / typescript 漂移只读检出 U 类材料 / H10 8 证据 tracked + 120→90 校准 / W5b 六刀补腿条件 / 19 契约全绿 / closeout 全绿"
     },
     {
       "id": "POST-H9-K4-DECISION-MATERIAL",

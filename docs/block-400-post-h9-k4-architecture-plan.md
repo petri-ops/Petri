@@ -1,6 +1,6 @@
 ---
 capability: block-400-post-h9-k4-architecture
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K4 降低读者需要持有的概念数；可机械验证的防回退/对账做成棘轮门与行为断言，结构性重构按 W5b 逐刀纪律如实挂起带补腿条件。
 acceptance:
   - 源码扫描契约数量只减不增门（新增即红）+ 负测，release-contract 已结构化校准入证据
@@ -14,7 +14,7 @@ reopen: W5b 独立切片发令后按 §5 逐刀推进；每刀拆前拆后同套
 
 # BLOCK-400 · post-H9 K4 架构去补丁与单源收编
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 
