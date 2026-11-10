@@ -130,6 +130,22 @@ reopen: 有效 provider 端点恢复 / 用户人眼签字 / U 类裁决下达后
 | L 实机 | 活 dev 栈 + 9223 离屏 CDP：DOM 植 2 万必红、P50/P95 同批落盘、四块几何量测 + 拖到两倍/缩到一半、冷启动真 ×5、SSE 断线注入三态；离屏读数不冒充视觉绿 | 下一工作包 |
 | W5b | 一切片=一会话，拆前拆后同套定向测试绿；每刀 code-size 例外只减不增、行数锚刷新 | 下一工作包 |
 
+## §6.1 总收口六维评审（P1 抓真并修根因）
+
+按 `$petri-code-review` 在总收口前跑全量 `test/post-h9-*.test.mjs`（183 项）自查，发现 **2 红**——定向 `test:changed` 只跑改动命中的规则，多个阶段收口时未同时命中全部契约，契约漂移滞后到总收口才暴露。三处 P1 全部修根因，无遗留：
+
+| ID | 维度 | 现象（file:line） | 修法 |
+| --- | --- | --- | --- |
+| P1-1 | 契约一致性 / 测试有效性 | `post-h9-k0-criteria.mjs:49` 用字面 `LIMIT 100` 钉 K-01；K2 合法演进为 additive 信封 `LIMIT 101 + rows.slice(0,100)`（默认仍 100 条）→ 判据假红 | 改钉语义不变量「默认上限 100 + 无分页参数」，兼容两种形态；补 `conversationsDefaultPageSize` 篡改负测与正向校准断言 |
+| P1-2 | 测试有效性 | `post-h9-evidence-and-ledger.test.mjs:139` 的 in_progress 负测依赖当前台账状态；K7 全部定终态后失效 | 改用 `emptyLedger()` 干净基线 + 正向断言防双向失效 |
+| P1-3 | 契约一致性 | 同文件 `:168` 把 closeout 门数写死 19；新增契约门后 19→20 假红 | 改机械断言「固定 5 + `--gate` 数」并要求新门在链内 |
+
+**回归→门禁转化**：同类「契约随实现/状态演进漂移而定向测试未拦」重复 ≥2 次 + 后果隐性滞后 + 可机械化，三条全中 → 新增 `gate:post-h9-contracts`（`scripts/post-h9-contract-suite.mjs` 无条件跑全部 11 个 post-h9 契约文件、清单为空 fail-closed），挂进 `closeout` 链。全量复跑 **185 项 0 红**，K0 九组读数（当次重新采集）的门数口径同步机械更新为 **20（固定 5 + 15 `--gate`）**。
+
+**门数口径披露**：K0 阶段各 `*-closeout-gates.json` 记录的 19 门是当时的历史快照，按「不回填历史证据」纪律原样保留；K1–K6 定向 closeout 同为 19 门（2 门域跳过）；K7 总收口评审新增契约门后为 **20 门**。本文与 `k7-closeout-gates.json` 采用当前读数，历史证据不改写，二者差异仅来自新门接线，不是口径不一致。
+
+本次为 Agent 六维自评；AI 跑查 `ocr` 本轮未跑（可选工具，按评审 skill 降级纪律如实声明，不阻塞收口）。证据 `acceptance/post-h9-2026-11-10/k7/k7-final-review-p1-fixes.json`。
+
 ## §7 红线自检
 
 零新增依赖；10 项用户资产与蓝图原件零触碰；既有用户裁决（workspace_exec 默认放行、MCP trust 两轴分离、FK 维持缓、ADMISSION 维持缓、G0 阶段纪律）零回退；未新建第二 executor/Job/Artifact/Workflow/项目状态/UI truth/计量账本/事件通道/台账；五类证据（行为测试 / 机械门禁 / CDP 实机 / 人眼观感 / 真实任务成功）严格分级、零互相冒充；无证据处一律不写 verified/completed/qualified；通用 agent 主线（编排/知识/工具/模型计量/可靠性）未收缩，K1 把「模型计量」边界钉准；本地主权/全链可审计/证据自证体现在 8 份 plan、5 份决策材料、50 份带 `sourceCommit/platform/command/generatedAt` 的证据与每阶段 canonical 同批回写。

@@ -47,6 +47,18 @@ test('负测 K-01：服务端 LIMIT 100 被改成 200 → 判红', () => {
   mustRed(tamper({ conversationsApiLimit: 200 }), 'K-01');
 });
 
+test('负测 K-01：默认页大小被改成 200（K2 additive 信封语义被破坏）→ 判红', () => {
+  mustRed(tamper({ conversationsDefaultPageSize: 200 }), 'K-01');
+});
+
+test('K-01 语义校准：K2 additive 信封 LIMIT 101+slice(0,100) 仍满足「默认上限 100」', () => {
+  const e = readCriteriaEvidence();
+  assert.equal(e.conversationsSourceHasLimit, true);
+  assert.equal(e.conversationsDefaultPageSize, 100);
+  assert.equal(e.conversationsNoPaginationParam, true);
+  assert.equal(adjudicateCriteria(e).ok, true);
+});
+
 test('负测 K-01：会话列表新增分页参数但读数未重采 → 判红（防止假接线）', () => {
   mustRed(tamper({ conversationsNoPaginationParam: false }), 'K-01');
 });

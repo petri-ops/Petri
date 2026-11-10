@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "kind": "post-h9-k0-canonical-readings",
-  "sourceCommit": "a33a53ccb65665ad34ba8a9d41e0a58647948161",
+  "sourceCommit": "2e12af0269af60bb669fbaeb5d9be30b86cea693",
   "platform": "darwin-arm64",
   "command": "node scripts/lib/post-h9-k0-readings.mjs",
-  "generatedAt": "2026-11-10T13:16:10.071Z",
+  "generatedAt": "2026-11-10T15:12:16.570Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -13,14 +13,14 @@
   "readings": {
     "closeoutGateCount": {
       "value": {
-        "blockingGates": 19,
-        "extraGates": 14,
+        "blockingGates": 20,
+        "extraGates": 15,
         "reportOnlyGates": 1,
         "fixedGates": 5
       },
       "source": "package.json:scripts.closeout + closeout-gates.mjs:112-127",
       "command": "node -e \"const s=require('./package.json').scripts.closeout;console.log((s.match(/--gate\\s+/g)||[]).length+5)\"",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "perfBaseline": {
       "value": {
@@ -32,7 +32,7 @@
       },
       "source": "test/perf-baseline.json",
       "command": "npm run quality:perf",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "rafFrameTime": {
       "value": {
@@ -43,7 +43,7 @@
       },
       "source": "acceptance/post-s7-2026-11-10/h8/dom-budget-live.json:frameSamples",
       "command": "node scripts/post-s7-dom-budget-live.cjs",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "reasonCodeCount": {
       "value": {
@@ -52,7 +52,7 @@
       },
       "source": "core/petri-server/helpers/reason-codes.js:31-92",
       "command": "node -e \"const r=require('./core/petri-server/helpers/reason-codes.js');console.log(r.listReasonCodes().length)\"",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "silentCatchBaseline": {
       "value": {
@@ -65,7 +65,7 @@
       },
       "source": "test/silent-catch-baseline.json / scripts/silent-catch-ratchet.mjs:29",
       "command": "npm run gate:silent-catch",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "unmappedTests": {
       "value": {
@@ -75,7 +75,7 @@
       },
       "source": "test/impact-map-coverage-baseline.json / test/impact-map.json",
       "command": "npm run test:changed:list",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "uiLedgerCounts": {
       "value": {
@@ -89,7 +89,7 @@
       },
       "source": "acceptance/block-332/ui-ledger-triage.json（分段解析口径）",
       "command": "npm run ui:audit:triage",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "earRatio": {
       "value": {
@@ -100,7 +100,7 @@
       },
       "source": "acceptance/block-351/assetized-manifest.json:totals",
       "command": "npm run quality:ear",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     },
     "blueprintStatusParity": {
       "value": {
@@ -112,7 +112,7 @@
       },
       "source": "docs/DOC-REGISTRY.json + docs/README.md:1-2",
       "command": "npm run docs:check",
-      "capturedAt": "2026-11-10T13:16:10.057Z"
+      "capturedAt": "2026-11-10T15:12:16.553Z"
     }
   }
 }

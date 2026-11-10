@@ -136,10 +136,15 @@ test('负测：terminalCounts 手写但与 gaps 不符必红', () => {
   assert.ok(validateLedger(bad, { root: ROOT }).issues.some((i) => i.includes('机械汇总')));
 });
 
-test('负测：总收口时残留 in_progress 必红', () => {
-  const v = validateLedger(ledger, { root: ROOT, requireAllClosed: true });
+test('负测：requireAllClosed 对含 in_progress 的台账必红（用干净基线，与各阶段推进解耦）', () => {
+  // 不依赖当前台账状态：K7 总收口后 32 条已全部定终态，直接用真实台账会让负测失效。
+  const dirty = emptyLedger(); // 32 条全 in_progress
+  const v = validateLedger(dirty, { root: ROOT, requireAllClosed: true });
   assert.equal(v.ok, false);
   assert.ok(v.issues.some((i) => i.includes('in_progress')));
+  const clean = structuredClone(ledger); // 当前零 in_progress
+  const v2 = validateLedger(clean, { root: ROOT, requireAllClosed: true });
+  assert.equal(v2.ok, true, `总收口后应放行: ${v2.issues.join(' / ')}`);
 });
 
 test('emptyLedger/setTerminal 机械性：改动后计数自动重算', () => {
@@ -160,7 +165,13 @@ test('九组读数从权威源机械复算且无 null 子字段', () => {
   assert.equal(READING_IDS.length, 9);
   assert.equal(Object.keys(readings).length, 9);
   assert.equal(readings.reasonCodeCount.value.codes, 42);
-  assert.equal(readings.closeoutGateCount.value.blockingGates, 19);
+  // 门数不得写死：新增专项门（如 K7 评审抓真的 gate:post-h9-contracts）会让
+  // 19 → 20，手写数字会随治理演进而假红。改为机械断言「固定 5 + --gate 数」。
+  const closeoutScript = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).scripts.closeout;
+  const gateCount = (closeoutScript.match(/--gate\s+/g) || []).length;
+  assert.equal(readings.closeoutGateCount.value.blockingGates, 5 + gateCount);
+  assert.equal(readings.closeoutGateCount.value.extraGates, gateCount);
+  assert.ok(closeoutScript.includes('gate:post-h9-contracts'), '全量契约门必须挂进 closeout 链');
   assert.equal(readings.rafFrameTime.value.p50Ms, 8.4);
   assert.equal(readings.rafFrameTime.value.p95Ms, 10.3);
 });

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k7-final-review-p1-fixes",
+  "sourceCommit": "2e12af0269af60bb669fbaeb5d9be30b86cea693",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T15:12:47.243Z",
+  "command": "npm run gate:post-h9-contracts（全量 11 文件）+ 六维自查",
+  "verdict": "p1-resolved",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "trigger": "总收口前按 $petri-code-review 六维自查，跑全量 test/post-h9-*.test.mjs（183 项）发现 2 红，定向 test:changed 因只跑改动命中的规则未拦到",
+  "p1Findings": [
+    {
+      "id": "P1-1",
+      "dim": "契约一致性/测试有效性",
+      "file": "scripts/lib/post-h9-k0-criteria.mjs:49",
+      "issue": "K-01 判据用字面 LIMIT 100 钉住；K2 合法演进为 additive 信封 LIMIT 101 + rows.slice(0,100)（默认仍 100 条），判据随实现演进假红",
+      "fix": "改为钉语义不变量「默认上限 100 + 无分页参数」，兼容两种实现形态；新增 conversationsDefaultPageSize 篡改负测与正向校准断言",
+      "category": "契约漂移"
+    },
+    {
+      "id": "P1-2",
+      "dim": "测试有效性",
+      "file": "test/post-h9-evidence-and-ledger.test.mjs:139",
+      "issue": "「总收口时残留 in_progress 必红」负测依赖当前台账有 in_progress；K7 全部定终态后失效",
+      "fix": "改用 emptyLedger() 干净基线构造脏台账，并补正向断言（收口后应放行）防双向失效",
+      "category": "状态耦合"
+    },
+    {
+      "id": "P1-3",
+      "dim": "契约一致性",
+      "file": "test/post-h9-evidence-and-ledger.test.mjs:168",
+      "issue": "closeout 门数断言写死 19；新增全量契约门后 19→20 假红",
+      "fix": "改为机械断言「固定 5 + --gate 数」并要求 gate:post-h9-contracts 在链内（防回退）",
+      "category": "手写读数"
+    }
+  ],
+  "gateConversion": {
+    "name": "gate:post-h9-contracts",
+    "reason": "回归→门禁转化：同类「契约随实现/状态演进漂移而定向测试未拦」在 K0 两处同时出现（重复≥2）+ 后果隐性滞后 + 可机械化，三条全中",
+    "implementation": "scripts/post-h9-contract-suite.mjs 无条件跑全部 test/post-h9-*.test.mjs，挂进 closeout；清单为空 fail-closed",
+    "negativeTests": "各契约文件内 100+ 篡改负测；新门自身校验清单非空"
+  },
+  "contractSuite": {
+    "files": 11,
+    "pass": 185,
+    "fail": 0,
+    "verdict": "PASS"
+  },
+  "scopeDisclosure": "本次为 Agent 自评（六维自查），未跑 AI 跑查 ocr（可选工具，本轮未配置/未跑，按 skill 降级纪律如实声明，不阻塞收口）",
+  "noP1Remaining": true
+}

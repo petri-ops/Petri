@@ -43,16 +43,25 @@ export function readCriteriaEvidence(root = ROOT) {
   const conversationsSource = fs.readFileSync(path.join(root, 'core/petri-server/routes/ai-conversations.js'), 'utf8');
   const closeoutScript = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).scripts.closeout;
   const byLabel = Object.fromEntries(dom.samples.map((s) => [s.label, s]));
-  // 会话列表 handler 段（到 LIMIT 100 那一行为止）内没有 limit/offset/cursor 参数；
+  // 会话列表 handler 段内没有 limit/offset/cursor 参数；
   // 消息路由 :127 的 req.query.limit 是另一条路由，不能用来判定会话列表。
+  // K-01 判据语义 = 「服务端会话列表默认截断 100 条」，允许两种实现形态：
+  //   ① 原形态 ORDER BY ... LIMIT 100（H8 取证时）；
+  //   ② K2 additive 信封 ORDER BY ... LIMIT 101 + rows.slice(0,100)（多查 1 条判
+  //      hasMore，默认仍返回 100 条）。字面钉 LIMIT 100 会随合法实现演进误判红，
+  //      故改为钉「默认上限 100 + 无分页参数」这一真实不变量。
   const lines = conversationsSource.split('\n');
-  const limitLine = lines.findIndex((l) => /ORDER BY updated_at DESC LIMIT 100/.test(l));
+  const limitLine = lines.findIndex((l) => /ORDER BY updated_at DESC LIMIT (100|101)\b/.test(l));
   const listRouteSegment = lines.slice(0, limitLine + 1).join('\n');
   const lastGet = listRouteSegment.lastIndexOf('router.get(');
   const listHandler = lastGet >= 0 ? listRouteSegment.slice(lastGet) : listRouteSegment;
+  const plainLimit = /ORDER BY updated_at DESC LIMIT 100\b/.test(listRouteSegment);
+  const envelopeLimit = /ORDER BY updated_at DESC LIMIT 101\b/.test(listRouteSegment) &&
+    /rows\.slice\(0, 100\)|page = hasMore \? rows\.slice\(0, 100\)/.test(conversationsSource);
   return {
     conversationsApiLimit: dom.serverSideLimits.conversationsApiLimit,
-    conversationsSourceHasLimit: limitLine >= 0,
+    conversationsSourceHasLimit: plainLimit || envelopeLimit,
+    conversationsDefaultPageSize: envelopeLimit ? 100 : (plainLimit ? 100 : null),
     conversationsNoPaginationParam: !/req\.query\.(limit|offset|cursor)/.test(listHandler),
     plateau: {
       c100: byLabel['convs-100']?.convRowMatches,
@@ -82,6 +91,7 @@ export function adjudicateCriteria(input) {
   const e = {
     conversationsApiLimit: null,
     conversationsSourceHasLimit: false,
+    conversationsDefaultPageSize: null,
     conversationsNoPaginationParam: false,
     plateau: {},
     nodes100: null, nodes400: null, nodes800: null,
@@ -96,9 +106,11 @@ export function adjudicateCriteria(input) {
   e.cv = e.cv && typeof e.cv === 'object' ? e.cv : {};
   e.hotStack = e.hotStack && typeof e.hotStack === 'object' ? e.hotStack : {};
 
-  // K-01 作废：LIMIT 100 在场、无分页参数、100/400/800 的 convRowMatches plateau
-  if (!(e.conversationsApiLimit === 100 && e.conversationsSourceHasLimit && e.conversationsNoPaginationParam)) {
-    issues.push('K-01: 服务端 LIMIT 100 / 无分页参数 的作废依据被改写');
+  // K-01 作废：默认上限 100 在场（原 LIMIT 100 或 K2 additive 信封 LIMIT 101+slice）、
+  // 无分页参数、100/400/800 的 convRowMatches plateau
+  if (!(e.conversationsApiLimit === 100 && e.conversationsSourceHasLimit &&
+        e.conversationsDefaultPageSize === 100 && e.conversationsNoPaginationParam)) {
+    issues.push('K-01: 服务端默认上限 100 / 无分页参数 的作废依据被改写');
   }
   if (!(e.plateau.c100 === 500 && e.plateau.c400 === 500 && e.plateau.c800 === 500)) {
     issues.push('K-01: convRowMatches 平台期（100/400/800 同为 500）被改写');
