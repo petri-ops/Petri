@@ -40,6 +40,14 @@ sqlite.exec(`
     ts TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_msg_conv_ts ON copilot_messages(conversation_id, ts ASC);
+  -- post-H9 K2 / K-12：会话消息复合索引 (conversation_id, ts, id)。
+  -- 原只有 (conversation_id, ts ASC)：同 ts 的 fork 场景（全部消息同一时间戳）
+  -- 需回表排序，补 id 作稳定 tiebreaker，与游标分页顺序一致。
+  -- 注意：SQLite 不允许把伪列 rowid 写进 CREATE INDEX（实测 "no such column: rowid"），
+  -- 故用真实主键 id。幂等 IF NOT EXISTS；本文件仍是 copilot_* 唯一 DDL 通道。
+  -- 注：task_events(task_id, seq) 复合索引已由 BLOCK-106 P2 在 agent-task-store.js:302 建立，
+  -- 不在此重复创建（该文件不建 task_events 表，越通道 CREATE INDEX 会在表缺席时抛错）。
+  CREATE INDEX IF NOT EXISTS idx_msg_conv_ts_id ON copilot_messages(conversation_id, ts ASC, id);
 `);
 try { sqlite.exec('ALTER TABLE copilot_messages ADD COLUMN task_id TEXT'); } catch {}
 try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN conversation_id TEXT'); } catch {}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k2-named-limit-refactor",
+  "sourceCommit": "e2fb77a46e33abc08c652d1a4ae7e3444ad021d5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:54:03.407Z",
+  "command": "node /tmp/petri-h9-k2-replace.cjs + node --check ×10 + grep 裸字面量清零",
+  "verdict": "measured",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "files": 10,
+  "replacedLines": 15,
+  "constant": "AGENT_TASK_EVENTS_ALL_LIMIT=1000000",
+  "defaultLimit500Unchanged": true,
+  "sqlLimitBindingUnchanged": true,
+  "rawLiteralHitsAfter": 0,
+  "syntaxCheck": "10/10 OK",
+  "behaviorChange": "none (pure refactor)"
+}

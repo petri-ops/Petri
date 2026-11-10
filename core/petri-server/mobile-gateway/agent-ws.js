@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * BLOCK-162 P2 — /m/api/ws 端点：agent 任务流单连接 WebSocket。
@@ -90,7 +91,7 @@ function attachAgentWs(server, {
 
   const findFallbackChild = (taskId) => {
     try {
-      const events = store.getAgentTaskEventsSince(taskId, 0, 1000000);
+      const events = store.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
       for (let i = events.length - 1; i >= 0; i -= 1) {
         const ev = events[i];
         if (ev.eventType === 'model_fallback' && ev.payload && ev.payload.newTaskId) return ev.payload;

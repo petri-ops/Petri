@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('./agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * helpers/agent-fallback.js — BLOCK-56 P1 任务级模型降级启动器。
@@ -204,7 +205,7 @@ function maybeLaunchTaskLevelFallback(input, deps = {}) {
           const RELAY = new Set(['run_started', 'agent_status', 'run_terminal', 'agent_cancelled', 'model_fallback']);
           if (!evt || !RELAY.has(evt.event)) return;
           const store = require('../agent-task-store');
-          const events = store.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+          const events = store.getAgentTaskEventsSince(task.taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
           const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
           store.appendAgentTaskEvent(task.taskId, seq, evt.event, {
             ...evt,

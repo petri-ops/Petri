@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * routes/ai-agent/resume.js — BLOCK-38 P1：Agent 任务中断续跑。
@@ -119,7 +120,7 @@ module.exports = {
       const conversationId = originalParams.conversationId || null;
       let digest = '';
       try {
-        digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000));
+        digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT));
       } catch {}
       return res.json({
         resumable: true,
@@ -158,7 +159,7 @@ module.exports = {
       // 中断前执行进度（task_events）→ 合成恢复指令（不落 conversation 消息，transcript 可见即取证）
       let digest = '';
       try {
-        digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000));
+        digest = buildProgressDigest(agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT));
       } catch {}
       const resumeInstruction = [
         '=== 任务恢复（系统注入，非用户输入） ===',
@@ -206,7 +207,7 @@ module.exports = {
 
       // 原 task 追加续跑溯源事件（只追加，不改终态）
       try {
-        const priorEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+        const priorEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
         const nextSeq = priorEvents.length > 0 ? priorEvents[priorEvents.length - 1].seq + 1 : 1;
         agentTaskStore.appendAgentTaskEvent(taskId, nextSeq, 'task_resumed', {
           newTaskId,

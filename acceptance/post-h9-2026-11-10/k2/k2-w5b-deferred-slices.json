@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k2-w5b-deferred-slices",
+  "sourceCommit": "e2fb77a46e33abc08c652d1a4ae7e3444ad021d5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:54:03.431Z",
+  "command": "docs/block-398-post-h9-k2-data-plane-plan.md §5",
+  "verdict": "deferred",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "slices": [
+    {
+      "id": "W5b-K2-1",
+      "name": "fork 原子化事务（含未 await 修复）",
+      "condition": "同步句柄 transaction + 中途失败全回滚负测 + 拆前拆后同套绿"
+    },
+    {
+      "id": "W5b-K2-2",
+      "name": "SSE 复用 taskEventBus",
+      "condition": "独立 SSE 长连接时间轴夹具 + 2s DB 兜底水位"
+    },
+    {
+      "id": "W5b-K2-3",
+      "name": "服务端真分页 + 前端更多入口",
+      "condition": "产品语义裁决 + CDP 实机 >100 档 DOM 8 档重测"
+    },
+    {
+      "id": "W5b-K2-4",
+      "name": "COUNT/meta_json/export 读路径减负",
+      "condition": "读路径契约 + 分页一致性负测"
+    },
+    {
+      "id": "W5b-K2-5",
+      "name": "请求体五类占比",
+      "condition": "真实 provider 任务（V 类凭据）逐轮与 ai_usage/ContextBudgetBar 对账"
+    }
+  ],
+  "sliceRef": "docs/block-398-post-h9-k2-data-plane-plan.md"
+}

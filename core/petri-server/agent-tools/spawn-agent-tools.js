@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * BLOCK-49 — 多 Agent 派生工具面（spawn_agent / list_agents / wait_agent）
@@ -184,7 +185,7 @@ function normalizeTodoRefs(raw) {
  */
 function latestTodoIds(parentTaskId) {
   try {
-    const events = agentTaskStore.getAgentTaskEventsSince(parentTaskId, 0, 1000000);
+    const events = agentTaskStore.getAgentTaskEventsSince(parentTaskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
     // 整单幂等替换（todo-tools 契约）：最后一次 todo_write 即最新快照，正向扫到末尾
     let latestItems = null;
     for (const e of events) {
@@ -719,7 +720,7 @@ async function followup_task(args, ctx) {
  * 回执 refs 已引用的条目：运行中已实时看到的消息续派时不再重复注入。
  */
 function collectUndeliveredParentMessages(taskId) {
-  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+  const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
   const delivered = new Set();
   for (const e of events) {
     if (e.eventType !== 'parent_message_delivered') continue;

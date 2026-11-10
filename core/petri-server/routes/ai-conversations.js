@@ -68,8 +68,16 @@ module.exports = function mountConversations(app) {
       // 联邦委托会话——它们 project_id 非空，会被下方空项目子句挡掉）。
       else if (!includeFederated) where.push("COALESCE(project_id, '')=''");
       if (!includeFederated) where.push("(origin IS NULL OR origin != 'federation-delegation')");
-      const rows = await adb.prepare(`SELECT ${cols} FROM copilot_conversations WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT 100`).all(...values);
-      res.json({status:'ok', conversations: rows});
+      // post-H9 K2 / K-01/K-11：additive hasMore/nextCursor 信封。默认仍取前 100 条，
+      // 多查 1 条用于判断是否存在下一页（不额外 COUNT(*)，避免每页全表计数）。
+      // `conversations` 数组形状与顺序不变，前端既有消费方忽略新增字段（向后兼容）。
+      // nextCursor = 本页最后一条的 updated_at，供后续游标分页使用；服务端真分页
+      // 与前端「更多」入口属 W5b 独立切片，本阶段不改默认视图语义。
+      const rows = await adb.prepare(`SELECT ${cols} FROM copilot_conversations WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT 101`).all(...values);
+      const hasMore = rows.length > 100;
+      const page = hasMore ? rows.slice(0, 100) : rows;
+      const nextCursor = hasMore && page.length ? (page[page.length - 1].updated_at || null) : null;
+      res.json({status:'ok', conversations: page, hasMore, nextCursor});
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 

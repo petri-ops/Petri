@@ -27,6 +27,9 @@ interface ConversationsEnvelope {
   messages?: ConversationMessage[];
   hasMore?: unknown;
   nextBefore?: unknown;
+  // post-H9 K2 / K-01：会话列表信封 additive 字段（仅类型登记，消费方仍返回数组）；
+  // 服务端多查 1 条判 hasMore，默认 100 上限不变。前端「更多」入口属 W5b 独立切片。
+  nextCursor?: unknown;
   windowOffset?: unknown;
   compaction?: ConversationCompactionInfo | null;
 }

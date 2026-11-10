@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * BLOCK-85 P3 — 格物联邦 Agent 委托（D4）。
@@ -117,7 +118,7 @@ async function mirrorPeerTaskEvents(peer, token, peerTaskId, timeoutMs) {
             const payload = JSON.parse(line.slice(5).trim());
             const eventType = String(payload.event || '');
             if (!eventType || eventType === 'delta') continue; // 流式增量不镜像（量大）
-            const events = agentTaskStore.getAgentTaskEventsSince(peerTaskId, 0, 1_000_000);
+            const events = agentTaskStore.getAgentTaskEventsSince(peerTaskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
             const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
             agentTaskStore.appendAgentTaskEvent(peerTaskId, seq, eventType, {
               ...payload,

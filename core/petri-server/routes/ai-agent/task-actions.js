@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 const resilienceMod = require('../../helpers/agent-resilience');
 
@@ -49,7 +50,7 @@ function writeMcpTrustAllow(serverId) {
 
 function appendTaskEvent(taskKey, eventType, payload) {
   try {
-    const events = agentTaskStore.getAgentTaskEventsSince(taskKey, 0, 1000000);
+    const events = agentTaskStore.getAgentTaskEventsSince(taskKey, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
     const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
     agentTaskStore.appendAgentTaskEvent(taskKey, seq, eventType, payload);
   } catch { /* SSE 可见性失败不阻塞决策 */ }
@@ -84,7 +85,7 @@ module.exports = {
     const enq = resilienceMod.enqueueUserInput(task.taskId, text);
     if (!enq.ok) return res.status(400).json({ ok: false, ...enq });
     try {
-      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
       const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
       agentTaskStore.appendAgentTaskEvent(
         task.taskId, seq,
@@ -110,7 +111,7 @@ module.exports = {
     }
     const result = registry.cancel(callId ? { callId } : {});
     try {
-      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId || req.params.taskId, 0, 1000000);
+      const events = agentTaskStore.getAgentTaskEventsSince(task.taskId || req.params.taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
       const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
       agentTaskStore.appendAgentTaskEvent(
         task.taskId || req.params.taskId, seq,

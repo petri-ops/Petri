@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k2-red-green",
+  "sourceCommit": "e2fb77a46e33abc08c652d1a4ae7e3444ad021d5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:54:03.394Z",
+  "command": "node --test test/post-h9-k2-data-plane.test.mjs（红→绿）+ test/post-h9-k2-conversations-envelope.test.mjs + git archive HEAD 快照拆前同套复跑",
+  "verdict": "red-to-green",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "redPhase": {
+    "tests": 12,
+    "pass": 7,
+    "fail": 5,
+    "cancelled": 0
+  },
+  "greenPhase": {
+    "tests": 15,
+    "pass": 15,
+    "fail": 0,
+    "cancelled": 0
+  },
+  "behaviorHttp": {
+    "tests": 3,
+    "pass": 3,
+    "fail": 0,
+    "cancelled": 0
+  },
+  "afterOnlyLegacySuites": {
+    "tests": 18,
+    "pass": 18,
+    "fail": 0,
+    "cancelled": 0
+  },
+  "legacyDisclosure": "拆前 18/18（HEAD 快照真实复跑）+ 拆后 18/18（工作区真实复跑），同套四套定向测试，纯重构行为基线成立",
+  "tamperNegatives": 15,
+  "beforeSnapshot": {
+    "command": "git archive --format=tar HEAD | tar -x -C /tmp/... && node --test <四套既有测试>",
+    "exit": 0,
+    "tests": 18,
+    "pass": 18,
+    "fail": 0,
+    "note": "改前的已提交 HEAD 快照（含 symlink node_modules）真实复跑，不是推断"
+  }
+}

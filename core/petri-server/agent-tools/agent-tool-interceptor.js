@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 const { decideAgentToolCall } = require('./agent-tool-policy');
 const { getToolEntry } = require('./registry');
@@ -223,7 +224,7 @@ function recordAutoAllow(ctx, autoAllowed, { name, args }) {
     const taskId = (ctx && ctx.taskId) || null;
     if (!taskId) return;
     const agentTaskStore = require('../agent-task-store');
-    const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+    const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
     const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
     agentTaskStore.appendAgentTaskEvent(
       taskId,

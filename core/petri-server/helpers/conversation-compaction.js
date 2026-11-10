@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('./agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * helpers/conversation-compaction.js — BLOCK-95 B2 会话级 rolling compaction。
@@ -253,7 +254,7 @@ function maybeCompactInBackground({ userId, conversationId, sqlite, presetId, ma
               ? store.getLatestPrimaryTaskForConversation(userId, conversationId)
               : null;
             if (task && task.taskId) {
-              const events = store.getAgentTaskEventsSince(task.taskId, 0, 1000000);
+              const events = store.getAgentTaskEventsSince(task.taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
               const seq = (events.length ? events[events.length - 1].seq : 0) + 1;
               store.appendAgentTaskEvent(task.taskId, seq, 'compaction_failed', {
                 event: 'compaction_failed', reason, conversationId,

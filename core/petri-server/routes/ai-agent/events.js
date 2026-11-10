@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * routes/ai-agent/events.js — events 子域（PHASE 2.2b）
@@ -76,7 +77,7 @@ module.exports = {
       // 携带 newTaskId），error 载荷附带 fallbackTaskId 供前端自动切换订阅。
       const findFallbackChild = () => {
         try {
-          const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+          const events = agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
           for (let i = events.length - 1; i >= 0; i -= 1) {
             const ev = events[i];
             if (ev.eventType === 'model_fallback' && ev.payload && ev.payload.newTaskId) return ev.payload;

@@ -2,13 +2,14 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T13:40:06.687Z",
+  "generatedAt": "2026-11-10T13:54:37.107Z",
   "terminalCounts": {
+    "done": 8,
     "done-partial": 3,
-    "done": 6,
     "retain-with-reason": 1,
     "pending_user_ruling": 1,
-    "in_progress": 21
+    "deferred": 2,
+    "in_progress": 17
   },
   "gaps": [
     {
@@ -17,14 +18,14 @@
       "blocker": "A+L",
       "stage": "K0",
       "anchor": "ai-conversations.js:71 / h8/dom-budget-live.json:438-508",
-      "terminal": "done-partial",
-      "evidenceRef": "acceptance/post-h9-2026-11-10/k0/k0-criteria-verdict.json",
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-envelope-and-index.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
-      "closureCondition": "L 类：>100 条会话夹具的 DOM 8 档重测需 9223 离屏 CDP 实机 + 分页实现后取数（归 K2 数据面 / K5 判据入门禁）",
+      "closureCondition": null,
       "reason": null,
-      "note": "旧「全量 DOM」判据已作废并重立为服务端 LIMIT 100 截断；12 条篡改负测在册。前端分页归 K2。"
+      "note": "K0 已作废旧「全量 DOM」判据；K2 重立为「服务端 LIMIT 100 截断被明确告知」：additive hasMore/nextCursor 信封 + >100 条真实 HTTP 行为断言 3/3（默认 100/数组形状/越权隔离不变）。服务端真分页与前端更多入口属 W5b-K2-3。"
     },
     {
       "id": "K-02",
@@ -167,14 +168,14 @@
       "blocker": "A",
       "stage": "K2",
       "anchor": "ai-conversations.js:127,145,150,178,244-251",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-envelope-and-index.json",
       "decisionRef": null,
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-398-post-h9-k2-data-plane-plan.md",
+      "closureCondition": "W5b-K2-1 fork 事务化（含未 await 修复）/ W5b-K2-4 每页 COUNT·meta_json 投影·export 分批 / W5b-K2-3 前端更多入口；逐刀拆前拆后同套绿",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "列表读路径已加 hasMore/nextCursor 且不额外 COUNT；复合索引落地。fork/export 全量与逐条 INSERT 无事务如实挂起。"
     },
     {
       "id": "K-12",
@@ -182,14 +183,14 @@
       "blocker": "A",
       "stage": "K2",
       "anchor": "agent-task-store.js:596-607 等 ≥15 生产点",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "done",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-named-limit-refactor.json",
       "decisionRef": null,
       "routeRef": null,
       "sliceRef": null,
       "closureCondition": null,
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "具名上限常量收编 10 文件 15 行（纯重构，拆前拆后各 18/18）；复合索引 idx_msg_conv_ts_id 查询计划命中 + rowid 负测；校准 task_events(task_id,seq) 已由 BLOCK-106 P2 存在，不重复建、不越 DDL 通道。"
     },
     {
       "id": "K-13",
@@ -197,14 +198,14 @@
       "blocker": "A",
       "stage": "K2",
       "anchor": "routes/ai-agent/events.js:130-156 / mobile-gateway/agent-ws.js",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "deferred",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-w5b-deferred-slices.json",
       "decisionRef": null,
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-398-post-h9-k2-data-plane-plan.md",
+      "closureCondition": "W5b-K2-2：独立 SSE 长连接时间轴夹具（15s 心跳/500ms 轮询/afterSeq 回放水位/[DONE] 哨兵/close 清理）+ 复用 taskEventBus 保留 2s DB 兜底 + 前后同套绿",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "单端点五套时序耦合，无长连接夹具，按 W5b 逐刀纪律挂起；不新建第二事件通道"
     },
     {
       "id": "K-14",
@@ -347,14 +348,14 @@
       "blocker": "A+L",
       "stage": "K5",
       "anchor": "block95-a2-frame-live.cjs:84 / post-s7-dom-budget-live.cjs",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "deferred",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k2/k2-w5b-deferred-slices.json",
       "decisionRef": null,
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-398-post-h9-k2-data-plane-plan.md",
+      "closureCondition": "W5b-K2-5 请求体五类占比需真实 provider 任务逐轮与 token_budget/ai_usage/ContextBudgetBar 对账（V 类凭据）；DOM/帧率判据入门禁归 K5",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "K2 只做服务端数据面预算 groundwork；自然长任务/请求体占比需凭据"
     },
     {
       "id": "K-24",
@@ -506,6 +507,13 @@
       "head": "ea42dec1",
       "terminalsAssigned": 4,
       "at": "2026-11-10T13:40:06.688Z"
+    },
+    {
+      "stage": "K2",
+      "block": "BLOCK-398",
+      "head": "e2fb77a4",
+      "terminalsAssigned": 5,
+      "at": "2026-11-10T13:54:37.107Z"
     }
   ]
 }

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k2-envelope-and-index",
+  "sourceCommit": "e2fb77a46e33abc08c652d1a4ae7e3444ad021d5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T13:54:03.419Z",
+  "command": "node --test test/post-h9-k2-conversations-envelope.test.mjs + EXPLAIN QUERY PLAN",
+  "verdict": "measured",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "envelope": {
+    "defaultLimit": 100,
+    "probeQuery": "LIMIT 101",
+    "hasMoreField": true,
+    "nextCursorField": true,
+    "arrayShapeUnchanged": true,
+    "userIsolationNegative": true
+  },
+  "index": {
+    "name": "idx_msg_conv_ts_id",
+    "columns": [
+      "conversation_id",
+      "ts ASC",
+      "id"
+    ],
+    "ddlChannel": "helpers/conversations.js (copilot_* 唯一)",
+    "queryPlan": "SEARCH ... USING INDEX idx_msg_conv_ts_id",
+    "rowidNegative": "no such column: rowid"
+  },
+  "calibration": "task_events(task_id, seq) 索引已由 BLOCK-106 P2 在 agent-task-store.js:302 建立，不重复创建"
+}

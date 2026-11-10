@@ -1,4 +1,5 @@
 'use strict';
+const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('./helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 /**
  * agent-runner.js — agent loop 执行器（PHASE 3.1 thin facade）
@@ -1079,7 +1080,7 @@ async function runAgentLoop({
     // 粗粒度 kind（向后兼容）。口径见 helpers/agent-reconciliation.js 头注。
     if (kind !== 'subagent') {
       try {
-        const allEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, 1000000);
+        const allEvents = agentTaskStore.getAgentTaskEventsSince(taskId, 0, AGENT_TASK_EVENTS_ALL_LIMIT);
         const lastTodo = [...allEvents].reverse()
           .find((e) => e.eventType === 'tool_call' && e.payload && e.payload.name === 'todo_write');
         const todoItems = lastTodo && lastTodo.payload && lastTodo.payload.args
