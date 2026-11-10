@@ -1,76 +1,86 @@
 {
-  "generatedAt": "2026-11-04T21:27:37.098Z",
+  "generatedAt": "2026-11-10T17:03:29.773Z",
   "host": {
     "platform": "darwin-arm64",
     "cpus": 8,
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "18965b62901c",
+  "coreSha": "7905637b142b534a",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
       "unit": "ms",
       "samples": [
-        431,
-        429,
-        417
+        372,
+        375,
+        374
       ],
-      "medianMs": 429,
-      "tolerancePct": 80,
+      "medianMs": 374,
+      "tolerancePct": 30,
       "runs": 3,
       "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
       "env": "unsigned local mount：Petri.app（ELECTRON_RUN_AS_NODE 后端口径；数据面=临时空目录；BLOCK-353 修复链）"
-    },
-    "cold_start": {
-      "metric": "isolated backend spawn→health 200（含 migrations 自举）",
-      "unit": "ms",
-      "samples": [
-        646,
-        546,
-        549,
-        537,
-        544
-      ],
-      "medianMs": 546,
-      "tolerancePct": 60,
-      "runs": 5,
-      "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 磁盘缓存冷热；多次采样取中位",
-      "env": "mode=mock（无 provider 出站；测的是进程与 DB 自举，不是模型）"
     },
     "long_conversation": {
       "metric": "1000 条消息会话：首页 + 全量滚动 20 页（分页 API 串行）",
       "unit": "ms",
       "samples": [
-        24,
+        22,
         20,
         20,
-        20,
+        19,
         20
       ],
       "medianMs": 20,
       "tolerancePct": 60,
       "runs": 5,
-      "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；BLOCK-359 实测噪声带 32-36ms（中位 20），地板=中位+20",
-      "env": "mode=mock；纯读路径（product 分页 API）",
-      "absoluteSlackMs": 20
+      "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；低中位场景由 absoluteSlackMs 地板主导",
+      "env": "mode=mock；纯读路径（product 分页 API）"
     },
     "big_project_tree": {
       "metric": "520 文件工作区：tree 分页读全 3 页（200/页）",
       "unit": "ms",
       "samples": [
+        11,
         12,
-        12,
-        15,
+        11,
         11,
         11
       ],
-      "medianMs": 12,
+      "medianMs": 11,
       "tolerancePct": 60,
       "runs": 5,
-      "noiseSources": "目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）；BLOCK-359 地板=中位+15",
-      "env": "mode=mock；API 层（无渲染）",
-      "absoluteSlackMs": 15
+      "noiseSources": "目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）；低中位场景由 absoluteSlackMs 地板主导",
+      "env": "mode=mock；API 层（无渲染）"
+    },
+    "warm_backend_spawn": {
+      "metric": "isolated backend spawn→health 200（含 migrations 自举；同机连跑=OS 页缓存热的 warm 口径，非整 Electron 冷启动）",
+      "unit": "ms",
+      "samples": [
+        545,
+        546,
+        541,
+        546,
+        542
+      ],
+      "medianMs": 545,
+      "tolerancePct": 25,
+      "runs": 5,
+      "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿",
+      "env": "mode=mock（无 provider 出站；测的是进程与 DB 自举，不是模型）"
     }
+  },
+  "coldStartTrueLeg": {
+    "script": "scripts/post-s7-cold-start-x5.cjs",
+    "stages": [
+      "require",
+      "migrations",
+      "backendHealth",
+      "spa200",
+      "cdpPageReady"
+    ],
+    "evidence": "acceptance/post-s7-2026-11-10/h10/cold-start-x5.json",
+    "note": "真冷启动五段腿（stageCoverage 口径）独立于本门四场景；本门不冒充冷启动读数"
   }
 }

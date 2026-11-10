@@ -62,7 +62,7 @@ export function collectReadings(root = ROOT) {
     ),
     perfBaseline: mk(
       {
-        coldStartMedianMs: perfScenario('cold_start'), longConversationMedianMs: perfScenario('long_conversation'),
+        coldStartMedianMs: perfScenario('warm_backend_spawn'), longConversationMedianMs: perfScenario('long_conversation'),
         packagedStartMedianMs: perfScenario('packaged_start'), bigProjectTreeMedianMs: perfScenario('big_project_tree'),
         generatedAt: perf.generatedAt,
       },

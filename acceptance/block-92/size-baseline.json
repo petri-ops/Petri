@@ -6,6 +6,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 817,
+      "bytes": 32574,
       "sha256": "f93439342d6b85c8ec3f9e611e9c5be551ad3ff26e41050e8980a113d92ee6ff"
     },
     {
@@ -13,6 +14,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 133,
+      "bytes": 5786,
       "sha256": "dfbb61c1f0e33bbd4bffb01fca5e63ac32f06cc148020987926b0fe3c57423f7"
     },
     {
@@ -20,6 +22,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 2089,
+      "bytes": 104065,
       "sha256": "95fc219fad9e2294d838cd58519b183a79389507011849a53b6688b2a7fd80c6"
     },
     {
@@ -27,6 +30,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 30,
+      "bytes": 1652,
       "sha256": "05ba5a33fd9268aa8e3b7269fa6e6d6b978a9ff97581ef4ead1058342d5d5deb"
     },
     {
@@ -34,6 +38,7 @@
       "wave": "A",
       "module": "W-03",
       "lines": 87,
+      "bytes": 3669,
       "sha256": "fa19737be32bafcfd7ca2b5e676f52699bf41627befbf71e4f0786671ae2b70a"
     },
     {
@@ -41,6 +46,7 @@
       "wave": "B",
       "module": "W-02",
       "lines": 1221,
+      "bytes": 60702,
       "sha256": "2174440aa824f19100da82f68c1b55af58fdb89da16bef6dbb45faa95d88da55"
     },
     {
@@ -48,6 +54,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 1344,
+      "bytes": 60586,
       "sha256": "bbd114ed49359ea631049ba17e7a484b758e8ad769a7ecc5a4a45c2467cadc43"
     },
     {
@@ -55,6 +62,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 1429,
+      "bytes": 68142,
       "sha256": "29adfa42eeea556db9b506ea44922b9e946503f97a0e67b762fa21399010b321"
     },
     {
@@ -62,6 +70,7 @@
       "wave": "B",
       "module": "W-01",
       "lines": 675,
+      "bytes": 33719,
       "sha256": "fe61a5c106401d4a246f08eaf9f03533b86d8cf8db64d0c32bcd206a0b1d8f67"
     },
     {
@@ -69,6 +78,7 @@
       "wave": "B",
       "module": "W-01",
       "lines": 526,
+      "bytes": 27556,
       "sha256": "4722412742f79c9d9599e791fa7883a9a0239b72c2c648f039d4afd45c57e411"
     },
     {
@@ -76,6 +86,7 @@
       "wave": "B",
       "module": "W-02",
       "lines": 754,
+      "bytes": 33496,
       "sha256": "504acb661eb73a8c5719ee53ac71cc2b89c25c2143680e5d6e4f468f07e95a06"
     },
     {
@@ -83,6 +94,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 661,
+      "bytes": 25724,
       "sha256": "7353280e02a577cc05c96e636bd335b3ee5e605346d5868ba0ecda1ff5c1b69e"
     },
     {
@@ -90,6 +102,7 @@
       "wave": "B",
       "module": "W-02",
       "lines": 623,
+      "bytes": 22059,
       "sha256": "5583098b47462a1853dc94f606284e17ba7b0d0d96a8174bd3350a9b3085dffc"
     },
     {
@@ -97,6 +110,7 @@
       "wave": "B",
       "module": "W-04",
       "lines": 561,
+      "bytes": 27888,
       "sha256": "0abc71f5c0adf116edcf0353c4fc0893de0b770439ed8e5ac43f884547f7e985"
     },
     {
@@ -104,6 +118,7 @@
       "wave": "C",
       "module": "W-04",
       "lines": 769,
+      "bytes": 37644,
       "sha256": "da25d586118b5fb6168b4d8f5eda3151aa72c20a9f304a3b401a66380af8bd3f"
     },
     {
@@ -111,6 +126,7 @@
       "wave": "C",
       "module": "P-03",
       "lines": 2080,
+      "bytes": 87758,
       "sha256": "fa22bfafbf1ab7aa45d19b9c64a23d555877ca59f16058b61fb1bdc543beabcb"
     },
     {
@@ -118,6 +134,7 @@
       "wave": "C",
       "module": "P-01",
       "lines": 1526,
+      "bytes": 53673,
       "sha256": "23bab5d6dd4ab0a627c2ff750d64cf5db63e3981f864b93d3b70f6055c723e86"
     },
     {
@@ -125,6 +142,7 @@
       "wave": "C",
       "module": "W-04",
       "lines": 1793,
+      "bytes": 85687,
       "sha256": "ef344a765d5a14899b5bd6d08002d5015fb6b959464a57d738e5dd6d35061201"
     },
     {
@@ -132,6 +150,7 @@
       "wave": "C",
       "module": "P-03",
       "lines": 1605,
+      "bytes": 67044,
       "sha256": "9dcd8304c6b1178d667d7579fa57290f40dcb89b93141557bbe90a80f200b9cb"
     },
     {
@@ -139,6 +158,7 @@
       "wave": "C",
       "module": "P-02",
       "lines": 967,
+      "bytes": 36626,
       "sha256": "1f8bb632eb3c45a4b761e3c19964cf1ed5d7bfc31a2fcb6825bccb86e3f58a61"
     },
     {
@@ -146,6 +166,7 @@
       "wave": "C",
       "module": "W-04",
       "lines": 936,
+      "bytes": 43622,
       "sha256": "4f267fd825c91db336df7284f0079888ef14eba7c8c733bc24e3a47e8b34316a"
     },
     {
@@ -153,6 +174,7 @@
       "wave": "C",
       "module": "W-04",
       "lines": 712,
+      "bytes": 30710,
       "sha256": "999488871d51b9233095b4bc2b12ae09d8881e2d4b20cf7996915557ecd52741"
     },
     {
@@ -160,6 +182,7 @@
       "wave": "C",
       "module": "P-01",
       "lines": 1396,
+      "bytes": 66091,
       "sha256": "ce84f61f37ca15d45b20417b97ed9d6cd3c845585b369180fbbe969abc3c1571"
     },
     {
@@ -167,8 +190,417 @@
       "wave": "D",
       "module": "P-01",
       "lines": 777,
+      "bytes": 37807,
       "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.module.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 7764,
+      "bytes": 176965,
+      "sha256": "4b66b6e38b3296f345d2fdda8da6d0ba31e8c978167306678eea2b3c18907af4"
+    },
+    {
+      "path": "frontend/src/components/copilot/simple-chat.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 5432,
+      "bytes": 131575,
+      "sha256": "3b2543f79318efcec2ae242c5c3cfd1178e5b138662d50c2fa3950769d80a2f2"
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 2192,
+      "bytes": 43939,
+      "sha256": "bfe1e4c7f8a2a7f5e7a5ecacfff7665a3b531546cce00e85d0e0785808969a17"
+    },
+    {
+      "path": "frontend/src/components/desktop/desktop.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 2113,
+      "bytes": 51404,
+      "sha256": "e873c731def2fe53b841573a6c8e8e4c7af56bc10abcf6cdcd5dcc05f9e8f201"
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1641,
+      "bytes": 82220,
+      "sha256": "78717662596787d07e9ddcf9775f1e054bb88104e1f0f0a4a809459bf6af3c61"
+    },
+    {
+      "path": "core/petri-server/loop-orchestrator.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1579,
+      "bytes": 71991,
+      "sha256": "ab0d48f49ff6676b10c43a93afb0f0f88fecc8b354a86eb15e585933214fbdac"
+    },
+    {
+      "path": "core/shared-backend/skill-schema.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1345,
+      "bytes": 38573,
+      "sha256": "f5bf446554629a50c5f3fdf162483b46b2264bb20fdec12b447d98690cc2b4df"
+    },
+    {
+      "path": "frontend/src/styles/custom.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1301,
+      "bytes": 39730,
+      "sha256": "2a7b48ad6085679ec81278ff04e5a73da776b06b6aa6bca40830ea47729d7ec7"
+    },
+    {
+      "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1299,
+      "bytes": 30500,
+      "sha256": "4946029612446e072001ee1b9b9aed313c6c88bb6325cc8c53bfc93ecd26560f"
+    },
+    {
+      "path": "core/petri-server/agent-tools/learning.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1256,
+      "bytes": 50636,
+      "sha256": "1eca3b47669afacc89acd4a46b572682f522f81fbc42a410c8f7cf25ef22b5e9"
+    },
+    {
+      "path": "core/petri-server/agent-task-store.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1210,
+      "bytes": 46063,
+      "sha256": "2169ec1771c0278dc02d5384bc91364176ff95b437a8cd4f5fb8b90cd2063f40"
+    },
+    {
+      "path": "core/petri-server/agent-runner.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1143,
+      "bytes": 59612,
+      "sha256": "16afa2664ade6bc71a49acb74935314c0db0fade74d3163f810b1d2f8b2145e3"
+    },
+    {
+      "path": "core/shared-backend/skill-runtime.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1126,
+      "bytes": 31605,
+      "sha256": "75e3bfce7da8a6844a5047198e9efee8ee2b2d4b593f83df35d174c3278d9216"
+    },
+    {
+      "path": "core/shared-backend/result-changeset-service/baseline-cohort.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1110,
+      "bytes": 46469,
+      "sha256": "9b4943ebb626532b5025b882b9a94e77d67f4f2b33173899db144c0c4f4d9106"
+    },
+    {
+      "path": "core/petri-server/helpers/scene3d.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1087,
+      "bytes": 53527,
+      "sha256": "d66de73723bd188065674e10ae4cccdb2ec85d3fad48fe65a2054398a938c75a"
+    },
+    {
+      "path": "core/packages/shared-config/config-schema.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1086,
+      "bytes": 57440,
+      "sha256": "b8d56489c9361f19eb79947eefe046585dc1f1268495ac3e95bd613ffa8377da"
+    },
+    {
+      "path": "core/petri-server/agent-tools/spawn-agent-tools.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1086,
+      "bytes": 53195,
+      "sha256": "2997e80561a366baca8fc2f3990f9d43854c9550c4d36cd5ebd83c74f29205c7"
+    },
+    {
+      "path": "core/shared-backend/result-compare-service.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1072,
+      "bytes": 49068,
+      "sha256": "42362ac4c1ab53d25a7856608f9479d93b6eca9189f0e902d6b43bbba3cc42df"
+    },
+    {
+      "path": "frontend/src/pages/project-workspace/RightFileTree.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1061,
+      "bytes": 48369,
+      "sha256": "b40bd6bbef270ceb7c493ad66f165fa98ccfc70dbf2e2297eba219fa5c23f9e2"
+    },
+    {
+      "path": "core/shared-backend/result-replay-service/cohort-package.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1019,
+      "bytes": 43520,
+      "sha256": "c1a69dfa6592d5b1cfaf78d1bae7fbdc019a821b5db5629423f211f4c387615d"
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1017,
+      "bytes": 47532,
+      "sha256": "9db0d1250bed12a5dae8253c23dbacfa0a92ab76bb787e4395ee0cc429de1f68"
+    },
+    {
+      "path": "frontend/src/lib/electron.d.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1015,
+      "bytes": 46895,
+      "sha256": "085f88d2a3d8f6dd2c25262c745c000207c054cb3b410dedb30ab395bd8521f0"
+    },
+    {
+      "path": "frontend/src/components/copilot/ToolActivityList.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1010,
+      "bytes": 46754,
+      "sha256": "5da748be055b11d5d9295f3bf309734b7b41c3ca7d8e8d0dc3f0275e7281f413"
+    },
+    {
+      "path": "frontend/src/components/desktop/TitleBar.module.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 995,
+      "bytes": 22607,
+      "sha256": "4a22d35b6a53e6c44d4c3453383b77dc6a1999fce6eb8da9b5edc96b921f39e5"
+    },
+    {
+      "path": "core/shared-backend/loop-repair-strategy.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 972,
+      "bytes": 36708,
+      "sha256": "c81a0a06b01eaa87ac1dcc9fbee98db946783738c1ab6f36edb1a6cd175cc000"
+    },
+    {
+      "path": "core/shared-backend/scientific-replay-package.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 942,
+      "bytes": 43190,
+      "sha256": "1b162d4c2cbc75f2a19cdcac316ac7d94776bcafe45bb4e8783f8a4c35438f6e"
+    },
+    {
+      "path": "frontend/src/components/work-surface/Model3DSurface.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 921,
+      "bytes": 45118,
+      "sha256": "29be358e264635fabe08d3939b033c31c8f8a7a06bcebbe8614db033a4a8d8a0"
+    },
+    {
+      "path": "frontend/src/pages/extensions/styles.module.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 915,
+      "bytes": 19092,
+      "sha256": "92f9701632d3508686a1de33271c74bca1ce6680f5f69e04ab0b6bb0046cf898"
+    },
+    {
+      "path": "core/petri-server/mcp/registry/run-plugin-script.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 911,
+      "bytes": 41525,
+      "sha256": "c7c053d789ff29e8dbe8ea0749eb09680c324da79067c70ef132df29aa743c1e"
+    },
+    {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 908,
+      "bytes": 38382,
+      "sha256": "eab4a00673b98ddb980789502ffd937653f5a96d1a2e1ed7152001cf1dbf4818"
+    },
+    {
+      "path": "core/petri-server/plugin-loader.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 906,
+      "bytes": 34041,
+      "sha256": "bad9c1de2fc27ea936e9617d628cd5674d1a349e2171387880391c5d5e9bb3a6"
+    },
+    {
+      "path": "core/packages/shared-copilot/copilotMarkdown.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 896,
+      "bytes": 28762,
+      "sha256": "c8ae6e0ed078fdfadc5d11bd38a6b66ee73e2a76cf4c4fa8b5485550316268fa"
+    },
+    {
+      "path": "core/shared-backend/result-workflow-graph.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 889,
+      "bytes": 37866,
+      "sha256": "2a4500eb0e6129e20359c99aaaf91836c2317c258abdbf03bafc94e58421e40f"
+    },
+    {
+      "path": "core/shared-backend/skill-registry.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 882,
+      "bytes": 31602,
+      "sha256": "da47c13575d39b4307d58517d769b659f1ec72b2a5bef710e536b90aad8e739a"
+    },
+    {
+      "path": "src/main.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 880,
+      "bytes": 44441,
+      "sha256": "e3eeb17936dfbe4f48d2acbdb169318c1ed3bd7eb0aed1939f439d2d3182f823"
+    },
+    {
+      "path": "core/petri-server/helpers/knowledge-space.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 880,
+      "bytes": 32296,
+      "sha256": "7e0046a2783c1cc54bcc2d71d9e338806b68e748b3b8beda329df2a6025c39db"
+    },
+    {
+      "path": "core/shared-backend/loop-checkpoint.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 861,
+      "bytes": 28943,
+      "sha256": "53024a0bbd1ef37a08159905f14b118510926570b2c0d9491c8345623906a46a"
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 842,
+      "bytes": 33934,
+      "sha256": "e451534aa74bb09d80e9366d81afdc9950aec3ad4b31706c1798646e5b274862"
+    },
+    {
+      "path": "core/petri-server/helpers/svg-ops.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 800,
+      "bytes": 34305,
+      "sha256": "56216492f9d75c56cd575d307aef2f285bd3ab1fc05a9c2aa5873c5ba2b1c995"
+    },
+    {
+      "path": "core/shared-backend/loop-controller.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 799,
+      "bytes": 28726,
+      "sha256": "0b5bb0053bd6cc65405c89f2347638e08babdda4693965e32829a57f7885bc1f"
+    },
+    {
+      "path": "core/petri-server/agent-tools/tool-events.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 798,
+      "bytes": 35633,
+      "sha256": "e5f15110fe72c0d3a57d2901e8ebaf054245d9f88d3f392e33d725973cf4441b"
+    },
+    {
+      "path": "frontend/src/components/annotations/AnnotationOverlay.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 786,
+      "bytes": 32898,
+      "sha256": "1282d1ce146060b24f87bf63ad8a4356981359d6b799eebd2d07bac73de4de58"
+    },
+    {
+      "path": "frontend/src/components/svg-editor/SvgEditorCanvas.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 747,
+      "bytes": 31682,
+      "sha256": "8b4f78e5eedbd0448eba86316cdc5822ecf75d2a8c33f1e7875e981208197fae"
+    },
+    {
+      "path": "frontend/src/components/icons/Icon.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 744,
+      "bytes": 21683,
+      "sha256": "57292cbf16049d9b8c3d1d002fc96f3c8ae634c879f6e76b175b10b0a14e4af6"
+    },
+    {
+      "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 727,
+      "bytes": 34624,
+      "sha256": "3f3ef623137f57b0d76170a5766419d49b4258ea06e6bd5152befab5b1da7023"
+    },
+    {
+      "path": "core/shared-backend/result-studio-contracts.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 721,
+      "bytes": 31566,
+      "sha256": "826b30721b6c052f934fd26534ae66c3196f68d816ac79f9c11846ab546649eb"
+    },
+    {
+      "path": "core/petri-server/agent-tools/agent-loop-control.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 708,
+      "bytes": 31278,
+      "sha256": "14c09166e91af2c08bdbcd864119f7f2c07368b5569ab80921499eb4247bbe87"
+    },
+    {
+      "path": "core/petri-server/routes/files.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 708,
+      "bytes": 33708,
+      "sha256": "dc196b202471151fda1a037d51c8ea15f5dba6ec7a3c8d567825b1a8929e090d"
+    },
+    {
+      "path": "core/shared-backend/artifact-profiles.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 707,
+      "bytes": 27986,
+      "sha256": "5c02d801453c7bb063eb77588cf684b20dba1c7fff3b8afa37e16a1953a47532"
+    },
+    {
+      "path": "core/petri-server/agent-tools/result-selection-tools.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 706,
+      "bytes": 32876,
+      "sha256": "af38950f5e8338f0f7825bf7b0bf1e6b74d7bccf7219b44dd88bb8e4b2760807"
+    },
+    {
+      "path": "core/petri-server/helpers/methods-export.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 704,
+      "bytes": 26418,
+      "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 23511
+  "total": 86730
 }

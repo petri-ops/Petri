@@ -5,14 +5,14 @@
  * 提供 `npm run test:changed:list`（--json）和 `npm run test:changed`（--run）两个
  * 入口；前者只输出计划，后者按计划执行影响范围内的测试与门禁。
  *
- * 退出码契约（GATES-1 文档化，2026-08-16）：
+ * 退出码契约（GATES-1 文档化，2026-08-16；L0-4 修订 2026-11-11）：
  *   0   PASS — 计划可执行 / 全部测试 / 门禁通过
  *   1   FAIL — 实际执行失败（某 node test / 门禁子命令非 0 退出）
- *   2   分类冲突 — 改动文件无法被 `test/impact-map.json` 任一规则匹配
- *       （即 `plan.unknown.length > 0`），或 impact-map 自身解析/校验失败、
- *       或运行期 catch 异常。**2 不是 fail-closed**：仅说明当前改动没有
- *       impact-map 规则覆盖，需补 rule 或添加"未分类但可忽略"声明；
- *       绝不代表业务代码 / 工作包"未通过"测试。
+ *   2   FAIL_CLOSED（分类冲突）— 改动文件无法被 `test/impact-map.json` 任一规则匹配
+ *       （即 `plan.unknown.length > 0`）时，**先升级执行全量 Node + 前端测试**（不得
+ *       静默零测试），再返回 2 = 覆盖缺口信号（须补 rule 后重跑；closeout 消费层把
+ *       非 0 判 FAIL，故未登记生产路径无法静默过收口）。impact-map 自身解析/校验失败、
+ *       或运行期 catch 异常同样返回 2。
  *
  * `--report` JSON 输出模式（GATES-2 文档化，2026-08-16）：
  *   与 `--json` / `--run` 并行的可选模式；通过 `--report <path>` 触发，输出
@@ -166,7 +166,7 @@ function printPlan(plan, json) {
   if (json) {
     console.log(JSON.stringify(plan, null, 2));
     if (plan.unknown.length) {
-      console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 表示需要补 rule，**不是** fail-closed。`);
+      console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 = FAIL_CLOSED（--run 已升级全量 Node/前端检查，覆盖缺口须补 rule）。`);
       console.error(`[test:changed] 未映射文件：${plan.unknown.join(', ')}`);
     }
     return;
@@ -178,7 +178,7 @@ function printPlan(plan, json) {
   if (plan.commands.length) console.log(`  gates ${plan.commands.join(', ')}`);
   if (plan.unknown.length) {
     console.error(`  unmapped ${plan.unknown.join(', ')}`);
-    console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 表示需要补 rule，**不是** fail-closed。`);
+    console.error(`[test:changed] 分类冲突：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖；exit 2 = FAIL_CLOSED（--run 已升级全量 Node/前端检查，覆盖缺口须补 rule）。`);
     console.error('[test:changed] 处理方式：补 rule / 在 impact-map.json 添加 patterns / 把文件加入已忽略前缀（dist/、release/）。');
   }
 }
@@ -194,8 +194,24 @@ function runProcess(command, args) {
   return spawnSync(command, args, options).status ?? 1;
 }
 
-export function runPlan(plan) {
-  if (plan.unknown.length) return 2;
+/**
+ * L0-4（蓝图 L-75）：unknown = 未登记生产路径 → **fail-closed**（AGENTS.md 测试范围纪律：
+ * 「未知生产路径 fail-closed，直接升级为全量 Node/前端检查，不得静默漏测」）。
+ * 旧行为「零测试执行即返回 2」已废：先跑全量 Node（npm run test:all）+ 前端全量
+ * （frontend test:all），至少 1 项测试必执行；全量有红 → 1（真实 FAIL）；
+ * 全绿 → 2（FAIL_CLOSED 覆盖缺口信号：须补 impact-map rule 后重跑，closeout 不得放行）。
+ */
+function runUnknownFailClosed(plan, { exec = runProcess } = {}) {
+  console.error(`[test:changed] FAIL_CLOSED：${plan.unknown.length} 个改动文件未被 test/impact-map.json 任一规则覆盖：${plan.unknown.join(', ')}`);
+  console.error('[test:changed] 按治理纪律升级为全量 Node/前端检查（不得静默漏测）；exit 2 = 覆盖缺口，补 rule 后重跑。');
+  for (const file of plan.syntax) { const status = exec(process.execPath, ['--check', file]); if (status !== 0) return status; }
+  const nodeStatus = exec('npm', ['run', 'test:all']);
+  const frontendStatus = nodeStatus === 0 ? exec('npm', ['--prefix', 'frontend', 'run', 'test:all']) : 0;
+  return (nodeStatus !== 0 || frontendStatus !== 0) ? 1 : 2;
+}
+
+export function runPlan(plan, { exec = runProcess } = {}) {
+  if (plan.unknown.length) return runUnknownFailClosed(plan, { exec });
   for (const file of plan.syntax) { const status = runProcess(process.execPath, ['--check', file]); if (status !== 0) return status; }
   // BLOCK-97 收口沉淀（2026-09-17）：node --test 批里只要有一个套件泄漏
   // keep-alive 句柄（例：block93-role-prompt 的 mock 上游 server 不 close），

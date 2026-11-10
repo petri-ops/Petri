@@ -227,13 +227,14 @@ JSON 输出模式，与既有 `--status` / `--check` / `--reconcile` / `--json` 
 | --- | --- | --- | --- |
 | `0` | PASS | 校验通过 / 状态报告正常输出 / 全部测试通过 | 视作收口 |
 | `1` | FAIL | 校验发现问题（注册缺失、路径失效、入口断链、canonical 冲突）；UI 实现未同步台账；node test / 门禁子命令非 0 退出 | 必须修复后才能宣称收口 |
-| `2` | 分类冲突 | CLI 调用冲突（同时传入多个互斥模式）；`test:changed` 改动文件未被 `test/impact-map.json` 任一规则匹配；`test-affected.mjs` 解析 / 校验异常；UI 门禁 GATES-3 触发 `hasUnmappedSurface`（commit subject 引用未在 `docs/ui-productization-audit.md` 注册的 UI-### 编号且不在 `LEGACY_EXEMPTIONS`）；`--print-mode=development` 模式下未命中 `LEGACY_*_EXEMPTIONS` 的 UI_AUDIT_SYNC / UI_ID_MISSING 降级为 2；UI `--report` 模式写盘失败 / schema 校验失败 | **不是 fail-closed**：补 rule / 加 patterns / 修 CLI 调用 / 把未登记 UI-### 写入 `docs/ui-productization-audit.md` 后重跑，绝不代表业务代码或工作包"未通过" |
+| `2` | 分类冲突 / FAIL_CLOSED | CLI 调用冲突（同时传入多个互斥模式）；`test:changed --run` 改动文件未被 `test/impact-map.json` 任一规则匹配（**L0-4 起 fail-closed：先升级执行全量 Node + 前端测试再返回 2，不得静默零测试**，见 `scripts/test-affected.mjs` `runUnknownFailClosed`）；`test-affected.mjs` 解析 / 校验异常；UI 门禁 GATES-3 触发 `hasUnmappedSurface`（commit subject 引用未在 `docs/ui-productization-audit.md` 注册的 UI-### 编号且不在 `LEGACY_EXEMPTIONS`）；`--print-mode=development` 模式下未命中 `LEGACY_*_EXEMPTIONS` 的 UI_AUDIT_SYNC / UI_ID_MISSING 降级为 2；UI `--report` 模式写盘失败 / schema 校验失败 | `test:changed` 路径 = **FAIL_CLOSED**：全量检查已升级执行、覆盖缺口必须补 rule 后重跑，closeout 不得放行；其余 2 路径仍按分类冲突处理：补 rule / 加 patterns / 修 CLI 调用 / 把未登记 UI-### 写入 `docs/ui-productization-audit.md` 后重跑 |
 
-`2` 的语义在过去常被误解为 fail-closed。本契约明确把"分类冲突"与
-"实际 FAIL"拆开：`2` 只描述工具调用 / 分类层的歧义，与 `docs/` 治理栈
-是否在当前工作包内"未通过契约"无关。所有 `2` 路径必须输出明确"分类冲突"
-诊断消息，并在 stderr 提示处理方式（见 `scripts/test-affected.mjs`
-`printPlan` 与底部 `catch` 分支）。
+`2` 的语义分域（2026-11-11 L0-4 修订）：`test:changed --run` 遇
+未映射生产路径时**是 fail-closed**（升级全量检查 + 覆盖缺口信号，closeout 消费层把
+非 0 判 FAIL）；其余路径（CLI 互斥、UI 门禁降级、报告写盘失败等）仍是分类冲突，
+与 `docs/` 治理栈是否"未通过契约"无关。所有 `2` 路径必须输出明确诊断
+消息，并在 stderr 提示处理方式（见 `scripts/test-affected.mjs` `printPlan`
+/ `runUnknownFailClosed` 与底部 `catch` 分支）。
 
 收口前后，所有 `npm run docs:check` / `npm run ui:audit:check` / `npm run
 test:changed:list` 调用方必须按上述契约解释退出码；任何把 `2` 视作"工作包

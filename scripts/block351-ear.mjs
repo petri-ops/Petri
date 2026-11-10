@@ -36,6 +36,12 @@ export function validateManifest(manifest, current) {
   }
   const earNow = Number(((current.entries.length / Math.max(1, current.totalFiles)) * 100).toFixed(1));
   if (earNow < EAR_THRESHOLD) issues.push(`EAR ${earNow}% < ${EAR_THRESHOLD}%（棘轮下限）`);
+  // L0-3（蓝图 L-29）：真棘轮——EAR 低于 manifest 记录值即红（此前记录值只打印不参与判定）。
+  // 再生 manifest（build-manifest）会重置记录值，故受 frozenAt 与 K-26 静态矩阵双锚约束。
+  const recorded = Number(manifest?.totals?.earPct);
+  if (Number.isFinite(recorded) && earNow < recorded) {
+    issues.push(`EAR ${earNow}% < manifest 记录 ${recorded}%（棘轮只进不退，分子真实增长才提升）`);
+  }
   return { issues, earNow, ok: issues.length === 0 };
 }
 
@@ -96,7 +102,7 @@ async function main() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
   const { issues, earNow, ok } = validateManifest(manifest, current);
   for (const issue of issues.slice(0, 20)) console.error(`[quality:ear] ✖ ${issue}`);
-  console.log(`[quality:ear] EAR 现在=${earNow}% / manifest 记录=${manifest.totals.earPct}% → ${ok ? 'PASS' : 'FAIL'}`);
+  console.log(`[quality:ear] EAR 现在=${earNow}%（分子 ${current.entries.length} / 分母 ${current.totalFiles}）/ manifest 记录=${manifest.totals.earPct}% → ${ok ? 'PASS' : 'FAIL'}`);
   process.exitCode = ok ? 0 : 1;
 }
 

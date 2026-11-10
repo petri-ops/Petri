@@ -209,12 +209,14 @@ test('治理回写工具 selftest 12 项全绿', () => {
 });
 
 // ---------- ⑤ lint∩hygiene 联动门 ----------
-test('联动门在干净树无 overlap；受保护资产精确豁免', () => {
+test('联动门在干净树无 overlap；受保护资产精确豁免（L0-8/L-83：9→10 项对账补第四轮蓝图原件）', () => {
   const protectedList = JSON.parse(fs.readFileSync(path.join(ROOT, 'test/user-asset-guard-baseline.json'), 'utf8')).paths;
-  assert.equal(protectedList.length, 9);
+  assert.equal(protectedList.length, 10);
+  assert.ok(protectedList.includes('docs/post-h9-optimization-blueprint-2026-11-10.md'), '第四轮蓝图原件已在保护清单');
   assert.equal(evaluateOverlap({ untracked: ['assets/logo.png', 'tmp-review/demo.svg'], protectedList }).ok, true);
   assert.equal(isProtected('assets/logo.png', protectedList), true);
   assert.equal(isProtected('docs/pelican-bicycle.html', protectedList), true);
+  assert.equal(isProtected('docs/post-h9-optimization-blueprint-2026-11-10.md', protectedList), true);
   assert.equal(isProtected('scripts/tmp-evil.mjs', protectedList), false);
 });
 

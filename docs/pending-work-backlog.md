@@ -1,4 +1,7 @@
 # 全局未完成项计划表（Pending Work Backlog）
+
+> ⚠️ **历史快照声明（L0-8 / 蓝图 L-76，2026-11-11）**：本表最后实质更新停在 **2026-10-31**，是那一时点的队列快照；post-S7 / post-H9（K0–K7）与第五轮 L 程序的未完成项**不在本表**。当前终态以 [`post-h9-2026-11-10-final-report.md`](./post-h9-2026-11-10-final-report.md) + [`DOC-REGISTRY.json`](./DOC-REGISTRY.json) + `npm run state` 为准；本表 canonical 定位降级为「历史队列快照」（truthDomain: `pending-work-queue` 保留）。恢复者不得把本表当成当前在制工作包证据。
+> 本台账原自述「所有已知未完成项」的唯一登记与推进序 canonical（truthDomain: `pending-work-queue`）——该声明仅对 2026-10-31 前的队列有效；职责分工与纪律两行原文保留如下。
 最后更新：2026-10-31（**BLOCK-322 RULING-04 特征级引用 v2 材料出（`docs/block-322-ruling-04-feature-reference-v2.md`，未启动实现）**：`mate` 任意面/边/旋转贴合 + P4-05 GD&T 尺寸链的数据模型选型；实测=特征抽取零新依赖（真 CAD 侧 9 面解析描述可取、体积 413663.71 与解析值吻合），分面件不可承载（同一几何 124 面全 plane）；推荐 B 主干 + D（GD&T 特征锚）第一刀 + 拒绝 C 内核求解；待用户裁 D1–D5 后开票。余下未决项=P3-03 v2、P4-04b、P4-05 GD&T、RULING-03 切片 CLI（本机实装为 Orca agent CLI 非 OrcaSlicer，条件不成立）、P5-02 真实 key〔用户已裁暂停〕）
 最后更新：2026-10-31（**BLOCK-322 P3-03 mate 第一切片 completed（轴对齐平面贴合；契约 7/7 + 实机 7/7 + UI 7/7）**：box 六面/cylinder、plane 端面，法向相接+面心对齐+offset；任意边/曲面/旋转待 v2。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-10-31（**BLOCK-322 P5-02 外部文生 3D 接线（provider 契约 + Tripo v3 适配器 + UI；UI-650 verified mock 9/9）**：默认 none 零出站，缺 key 如实不可用；真实 Tripo 未验证，图片生 3D 未接。G0 开发期常态 · 不外推 packaged/Provider/GA。）

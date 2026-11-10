@@ -72,12 +72,16 @@ export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = R
     }
   }
 
-  // 处理记录表：✅ 行按表序（新→旧）只留前 rowsKeep 条；窗口外即使是其包唯一行也淘汰
-  //（包状态真相在 roadmap/plan，台账只承载「最近处理记录」）。表结构行/段内说明不受窗口约束。
+  // 处理记录表：数据行（✅/🔵/🟡 均算）按表序（新→旧）只留前 rowsKeep 条；窗口外即使是
+  // 其包唯一行也淘汰（包状态真相在 roadmap/plan/registry，台账只承载「最近处理记录」）。
+  // L0-8（蓝图 L-77 / K-07 残留）：旧逻辑只数 ✅ 行，历史 🔵 启动登记行在表内永久堆积
+  //（实测 45+ 行 / ~55KB），台账长期压不回保留阈——改为数据行统一入窗。表结构行/段内
+  // 说明（含「本区段纪律」blockquote）不受窗口约束。
   const rowsCutIdx = new Set();
   let rowSeen = 0;
   for (let i = idxRecords + 1; i < idxRules; i += 1) {
-    if (lines[i].startsWith('| ✅')) {
+    const isDataRow = /^\| (?:✅|🔵|🟡|🔴|🟢)/.test(lines[i]);
+    if (isDataRow) {
       rowSeen += 1;
       if (rowSeen > rowsKeep) rowsCutIdx.add(i);
     }

@@ -11,14 +11,21 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifestSrc = fs.readFileSync(path.join(ROOT, 'scripts/code-size-ledger.mjs'), 'utf8');
 const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'acceptance/block-92/size-baseline.json'), 'utf8'));
 
-test('loop-orchestrator.js 已纳管 MANIFEST，且基线有对应行', () => {
-  // 判定修正：不塞进 700 行预算门（会必红且需新增例外，违反「只出不进」裁决），
-  // 另立独立行数锚棘轮守护（见 scripts/post-s7-big-file-ratchet.mjs）。
+test('loop-orchestrator.js 双层守护：独立行数锚 + L0 发现入册冻结棘轮', () => {
+  // 判定沿革：BLOCK-394 时不塞 700 行预算门（需新增例外，违反「只出不进」裁决），另立
+  // 独立行数锚棘轮（scripts/post-s7-big-file-ratchet.mjs）；L0-7（L-36）起生产树 >700 行
+  // 全量发现入册（wave='L0'，行数/sha/CSS 字节棘轮、预算 enforcement 随拆分转正），
+  // 与行数锚双层并存——脚本源码仍不点名该文件（发现器通用，防清单漂移）。
   assert.equal(manifestSrc.includes('loop-orchestrator.js'), false);
   assert.ok(fs.existsSync(path.join(ROOT, 'scripts/post-s7-big-file-ratchet.mjs')));
   const anchor = JSON.parse(fs.readFileSync(path.join(ROOT, 'acceptance/post-s7-2026-11-10/h9/big-file-anchor.json'), 'utf8'));
   const row = anchor.files.find((f) => f.path === 'core/petri-server/loop-orchestrator.js');
   assert.ok(row && row.lines > 1500 && row.lines < 1700, `行数锚异常: ${JSON.stringify(row)}`);
+  // L0-7：尺寸台账已覆盖该文件（行数冻结棘轮）
+  const ledgerRow = baseline.files.find((f) => f.path === 'core/petri-server/loop-orchestrator.js');
+  assert.ok(ledgerRow, 'loop-orchestrator.js 应已入尺寸台账（L0 发现入册）');
+  assert.equal(ledgerRow.wave, 'L0');
+  assert.equal(ledgerRow.lines, row.lines, '尺寸台账与行数锚读数一致');
 });
 
 test('tools-executor.js 基线 +1 行有据可查：确为 B-17 单源引用', () => {

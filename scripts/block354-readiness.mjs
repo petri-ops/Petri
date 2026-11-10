@@ -55,7 +55,7 @@ export function judgeCriteria({ files = null } = {}) {
     const b = f('test/perf-baseline.json');
     let scenariosOk = false;
     if (b && b.scenarios) {
-      const names = ['cold_start', 'long_conversation', 'big_project_tree', 'packaged_start'];
+      const names = ['warm_backend_spawn', 'long_conversation', 'big_project_tree', 'packaged_start'];
       scenariosOk = names.every((n) => b.scenarios[n] && (b.scenarios[n].skipped ? Boolean(b.scenarios[n].reason) : Number.isFinite(b.scenarios[n].medianMs)));
     }
     const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));

@@ -25,7 +25,7 @@ test('K4 五类不变量在真实源码下成立，W5b/U 边界如实标注', ()
     'K-20': 'ratchet-frozen',
     'K-19': 'resolution-single-source-assembly-still-split',
     'K-31': 'drift-reported-pending-ruling',
-    'K-22/K-18': 'debt-unchanged-w5b-deferred',
+    'K-22/K-18': 'debt-readings-recorded-improvement-allowed',
     'K-21': 'h10-committed-90-remaining',
   });
 });
@@ -109,25 +109,33 @@ test('负测 K-31：把漂移写成「门已检出」→ 判红（不得冒充�
   mustRed(tamper({ tsDriftDetectedByGate: true }), 'K-31');
 });
 
-// ---- K-22 / K-18 债现状 ----
-test('K-22/K-18：12 环 / 330 键 / 五巨型文件 / 独立锚现状', () => {
+// ---- K-22 / K-18 债现状（L0-1：读数型记录 + 只增即红棘轮） ----
+test('K-22/K-18：债读数在场（读数型；入册/收窄/拆分为改进方向不再判红——L0-1 解反向门禁）', () => {
   assert.equal(truth.archDebt.cycles, 12);
   assert.equal(truth.archDebt.knipKeys, 330);
-  assert.equal(truth.archDebt.sizeFiles, 24);
-  assert.equal(truth.archDebt.loopOrchestratorInManifest, false);
+  assert.equal(typeof truth.archDebt.sizeFiles, 'number');
+  assert.equal(typeof truth.archDebt.loopOrchestratorInManifest, 'boolean');
   assert.equal(truth.archDebt.loopOrchestratorLines, 1579);
-  assert.equal(truth.archDebt.knipFullEntryInWorkspace, true);
+  assert.equal(typeof truth.archDebt.knipFullEntryInWorkspace, 'boolean');
   assert.deepEqual(truth.archDebt.dynamicRequirePoints, [true, true, true]);
 });
 
-test('负测 K-22：把 12 环洗成 0 或把 knip 键洗小 → 判红', () => {
-  mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 0 } }), 'K-22');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 0 } }), 'K-22');
+test('负测 K-22：存量环 / knip 保留键 / 动态 require 现状增长或被改写 → 判红（只增即红棘轮）', () => {
+  mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 13 } }), 'K-22');
+  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 331 } }), 'K-22');
+  mustRed(tamper({ archDebt: { ...truth.archDebt, dynamicRequirePoints: [true, true, false] } }), 'K-22');
 });
 
-test('负测 K-18：把 loop-orchestrator 塞进 MANIFEST 或改行数 → 判红', () => {
-  mustRed(tamper({ archDebt: { ...truth.archDebt, loopOrchestratorInManifest: true } }), 'K-18');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, loopOrchestratorLines: 1000 } }), 'K-18');
+test('L0-1 解除负测：入册 / knip entry 收窄 / 环消亡三类「改进」不再判红（原反向门禁已废）', () => {
+  // ① 巨型文件入册（L0-7 实际执行：size 台账扩面）
+  const registered = tamper({ archDebt: { ...truth.archDebt, loopOrchestratorInManifest: true, sizeFiles: truth.archDebt.sizeFiles + 43 } });
+  assert.equal(registered.ok, true, registered.issues.join(' / '));
+  // ② knip entry 收窄 + 保留面下降（L5-4 实际执行）
+  const narrowed = tamper({ archDebt: { ...truth.archDebt, knipFullEntryInWorkspace: false, knipKeys: 300 } });
+  assert.equal(narrowed.ok, true, narrowed.issues.join(' / '));
+  // ③ 存量环消亡（L5-6 目标）
+  const decayed = tamper({ archDebt: { ...truth.archDebt, cycles: 11 } });
+  assert.equal(decayed.ok, true, decayed.issues.join(' / '));
 });
 
 // ---- K-21 H10 tracked 校准 ----

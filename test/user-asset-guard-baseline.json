@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "user-asset-index-guard-baseline",
-  "note": "在制用户资产 / 临时目录保护清单：这些路径不得进入 git 索引（含暂存）。路径按「精确文件或目录前缀」匹配。上一轮保护边界为「10 项 untracked 用户资产零触碰」，此处按 2026-11-10 实测的 9 项可见条目登记；新增条目由所有者收口后自行移出。",
+  "note": "用户资产索引保护基线（gate:user-assets 消费）：10 项 untracked 用户资产/临时目录零触碰、零 stage、零提交。在制用户资产 / 临时目录保护清单：这些路径不得进入 git 索引（含暂存）。路径按「精确文件或目录前缀」匹配。上一轮保护边界为「10 项 untracked 用户资产零触碰」，此处按 2026-11-10 实测的 9 项可见条目登记；新增条目由所有者收口后自行移出。",
   "paths": [
     "assets/",
     "docs/pelican-bicycle.html",
@@ -11,7 +11,8 @@
     "scripts/backfill-artifact-chain.mjs",
     "tmp-block342-live/",
     "tmp-review/",
-    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json"
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+    "docs/post-h9-optimization-blueprint-2026-11-10.md"
   ],
   "incidents": [
     {
@@ -26,5 +27,6 @@
       "what": "最终收口再次 git add -A docs，同一文件二次入库",
       "remedy": "BLOCK-393 撤回 + 本门禁机械化（同类第二次转门禁）"
     }
-  ]
+  ],
+  "reconcileNote": "L-83 对账（2026-11-11）：2026-11-10 审计按 9 项可见条目登记，差额 1 项=第四轮蓝图 docs/post-h9-optimization-blueprint-2026-11-10.md（registry 已 planned 的用户资产原件），本批补入保护清单至 10 项；guard 语义不变（只查 tracked/staged 命中）。"
 }

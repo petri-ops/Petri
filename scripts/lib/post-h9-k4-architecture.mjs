@@ -179,15 +179,17 @@ export function adjudicateArchitecture(input) {
   if (t.tsDriftDetectedByGate !== false) issues.push('K-31: typescript 漂移检出状态被改写');
   conclusions['K-31'] = issues.length === n ? 'drift-reported-pending-ruling' : 'drift';
 
-  // K-22 / K-18：环与键与巨型文件现状
+  // K-22 / K-18：环与键与巨型文件现状。
+  // L0-1（蓝图 L-37/L-44）：原「入册/固定行数/全量 entry 即判红」反向门禁已废——
+  // 改为读数型记录 + 只增即红棘轮：存量环/保留键**增长**才判红，
+  // 入册（size 台账扩面）、knip entry 收窄、环消亡、W5b 拆分降行数均属改进方向，
+  // 由各自真实棘轮（arch-cycles-gate / knip-ratchet / code-size-ledger / big-file-anchor）守护。
   n = issues.length;
   const a = t.archDebt;
-  if (!(a.cycles === 12 && a.knipKeys === 330)) issues.push('K-22: 12 环 / 330 键基线被改写');
-  if (a.loopOrchestratorInManifest !== false) issues.push('K-18: loop-orchestrator 入册状态被改写（独立锚设计被破坏）');
-  if (!(a.loopOrchestratorLines === 1579 && a.sizeFiles === 24)) issues.push('K-18: 巨型文件行数/尺寸台账被改写');
+  if (!(typeof a.cycles === 'number' && a.cycles <= 12)) issues.push('K-22: 存量环只增不退被破坏（新增环即红；消亡走 arch-cycles-gate --write 下调）');
+  if (!(typeof a.knipKeys === 'number' && a.knipKeys <= 330)) issues.push('K-22: knip 保留面只增不退被破坏（新增保留键即红；收窄走 knip-ratchet --update 下调）');
   if (!(Array.isArray(a.dynamicRequirePoints) && a.dynamicRequirePoints.every(Boolean))) issues.push('K-22: 三处动态 require 现状被改写');
-  if (a.knipFullEntryInWorkspace !== true) issues.push('K-22: knip 全量 entry 现状被改写（精确债仍为上界）');
-  conclusions['K-22/K-18'] = issues.length === n ? 'debt-unchanged-w5b-deferred' : 'drift';
+  conclusions['K-22/K-18'] = issues.length === n ? 'debt-readings-recorded-improvement-allowed' : 'drift';
 
   // K-21：H10 已入仓校准
   n = issues.length;

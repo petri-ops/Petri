@@ -82,6 +82,7 @@ export function collectPerfMatrixTruth(root = ROOT) {
     snapshotRatio: earSnapshot.earPct ?? earSnapshot.ratio,
     threshold: Number((earScript.match(/EAR_THRESHOLD\s*=\s*(\d+)/) || [])[1]),
     formulaUnchanged: /entries\.length\s*\/\s*Math\.max\(1,\s*current\.totalFiles\)/.test(earScript),
+    ratchetManifest: /manifest 记录[^%]*%（棘轮只进不退|earNow < recorded/.test(earScript) || /earNow\s*<\s*recorded/.test(earScript),
     targetPct: 45,
   };
 
@@ -144,6 +145,7 @@ export function adjudicatePerfMatrix(input) {
   const e = t.ear;
   if (!(e.assetized === 871 && e.denominator === 2013 && e.frozenRatio === 43.3)) issues.push('K-26: EAR 冻结分子/分母被改写（不得缩分母）');
   if (!(e.threshold === 40 && e.formulaUnchanged)) issues.push('K-26: 阈值或公式被改写（不得改数字凑达标）');
+  if (e.ratchetManifest !== true) issues.push('K-26: EAR 对 manifest 记录值的真棘轮被移除（L0-3）');
   if (e.targetPct !== 45) issues.push('K-26: 45% 目标被改写');
   conclusions['K-26'] = issues.length === n ? 'ratio-reported-target-pending' : 'drift';
 

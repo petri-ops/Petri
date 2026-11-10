@@ -148,7 +148,12 @@ export function adjudicateSecurity(input) {
 
   n = issues.length;
   const i = t.ipc;
-  if (!(i.exemptEnvExists && i.exemptPinnedByContract)) issues.push('K-28: IPC 豁免口现状被改写（契约已钉住，删除会破契约）');
+  // L0-1（蓝图 L-54）：原「删除 IPC env 豁免口即判红」反向门禁已废——改为读数型记录。
+  // 豁免口的存在/契约钉住状态只记录不裁决；其安全收敛（启动期登记/channel 白名单）
+  // 属 L1 行为面，届时随行为变更同步修订 test/nso-w2-ipc-trust.test.mjs 契约。
+  if (typeof i.exemptEnvExists !== 'boolean' || typeof i.exemptPinnedByContract !== 'boolean') {
+    issues.push('K-28: IPC 豁免口读数缺席（fail-closed）');
+  }
   if (!(i.silentCatchTotal === 395)) issues.push('K-28: 静默 catch 冻结基线被改写');
   if (i.silentCatchRootsExtended === true) issues.push('K-28: 扫描根扩展未经独立留因+负测，不得冒充已交付');
   if (!i.devDualBackendInAudit) issues.push('K-28: dev 双后端归属登记被移除');

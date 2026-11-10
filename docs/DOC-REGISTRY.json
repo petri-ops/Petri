@@ -9,11 +9,64 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 544,
+    "documentCount": 547,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 527
+    "managedMarkdown": 530
   },
   "documents": [
+    {
+      "id": "BLOCK-404",
+      "capability": "block-404-post-k7-l0-criteria-gates",
+      "path": "docs/block-404-post-k7-l0-criteria-gates-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-404-post-k7-l0-criteria-gates",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "tags": [
+        "post-k7",
+        "l0",
+        "gates",
+        "criteria"
+      ],
+      "notes": "第五轮 L0 判据校准与可信起点（用户 2026-11-11 执行提示词预授权连续工作）：解反向门禁（k4/K6/knip-entry 改读数型+只减棘轮+篡改负测）/ perf 判据重立（冷热分离·中位最差轮·skipped 判红·基线绑定 host+热路径·慢样本负测）/ EAR 真棘轮 / test:changed fail-closed / state --no-optional-locks 兜底 + 🔵-registry 对账 / lint 台账 -f json 机械校验 + warnings 分域只减 / 尺寸门含 .module.css 全量入册 + 全库 includes 第二棘轮 / 数字口径单源 JSON + backlog 快照声明 + task-runs 归档 + 用户资产对账。零产品行为变化；零触碰在制 CSS WIP 与 10 项用户资产。蓝图=docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L0。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-K7-FULL-AUDIT-AND-BLUEPRINT-2026-11-10",
+      "capability": "post-k7-full-audit-and-blueprint-2026-11-10",
+      "path": "docs/post-k7-full-audit-and-blueprint-2026-11-10.md",
+      "kind": "living-plan",
+      "status": "planned",
+      "canonical": true,
+      "truthDomain": "post-k7-optimization-program",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "full-audit",
+        "eleven-dim-review",
+        "optimization-blueprint"
+      ],
+      "notes": "第五轮全量深度审计与 L0–L7 优化蓝图（HEAD f9873243）：七路只读源码实证 + 十九门当次取样，90 条逐项发现（P1 24 / P2 51 / Minor 15），十一维复核，阶段目标/优先级/验收标准，U/E/V/W 边界与证据协议。planned 多包程序文档，不占单包串行槽位；各 L 阶段发令时各自注册 work-package。零产品代码改动、零触碰用户资产与在制 WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-K7-EXECUTION-PROMPT-2026-11-10",
+      "capability": "post-k7-execution-prompt-2026-11-10",
+      "path": "docs/post-k7-execution-prompt-2026-11-10.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/post-k7-full-audit-and-blueprint-2026-11-10.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "execution-prompt",
+        "preauthorized-work"
+      ],
+      "notes": "第五轮 L0–L7 自包含执行提示词：输入与恢复顺序、预授权边界、十条硬红线、八步固定循环、逐阶段任务与出口判据、U/E/V/W 合规解法、委派规则、完成定义与禁止事项。与蓝图发现 ID 逐字对应；不新建第二套规范。"
+    },
     {
       "id": "POST-H9-2026-11-10-FINAL-REPORT",
       "capability": "post-h9-2026-11-10-final-report",
@@ -1454,7 +1507,7 @@
         "governance",
         "docs"
       ],
-      "notes": "全量已知未完成项的唯一登记与推进序台账；当前立即任务仍由 ROADMAP-NEXT 决定。"
+      "notes": "历史队列快照（2026-10-31 时点；L0-8/L-76 降级声明在文档头部）：post-S7/H9/K 与第五轮 L 程序的未完成项不在本表，当前终态以 post-h9-final-report + DOC-REGISTRY + npm run state 为准。当前立即任务仍由 ROADMAP-NEXT 决定。"
     },
     {
       "id": "AUDIT-LOG",

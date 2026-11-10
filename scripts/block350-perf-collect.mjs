@@ -2,26 +2,29 @@
 /**
  * scripts/block350-perf-collect.mjs — BLOCK-350 性能基线采集器（四场景，headless 本机 dev 口径）。
  *
- * 场景（冻结于计划 §2，容差依据=只防数量级退化）：
- *   cold_start        隔离后端 spawn → /api/health 200（含 migrations 自举），采样 5
+ * 场景（L0-2 判据重立，蓝图 L-27/L-30）：
+ *   warm_backend_spawn 同机连跑的隔离后端 spawn → /api/health 200（含 migrations 自举）——
+ *                     OS 页缓存热的 warm 自举口径，**不冒充冷启动**；真冷启动五段腿
+ *                     独立见 coldStartTrueLeg 指针（stageCoverage 口径），采样 5
  *   long_conversation 隔离库直插 1 会话 + 1000 条 copilot_messages（真实 DDL）→
  *                     /messages 首页 + 全量滚动（20 页 × 50），采样 5
- *   big_project_tree  520 文件工作区 → tree(limit=200) + workspace_search，采样 5
- *   packaged_start    unsigned mac-arm64 dir 产物启动（CDP 就绪 + 自 spawn 后端 health），采样 3
+ *   big_project_tree  520 文件工作区 → tree(limit=200) 三页读全，采样 5
+ *   packaged_start    unsigned mac-arm64 dir 产物启动（ELECTRON_RUN_AS_NODE 后端 health），采样 3
  *
- * 输出 test/perf-baseline.json：generatedAt / sha / 场景 → { metric, medianMs, samples, tolerance,
- * env }。gate（quality:perf）以「本次中位 > 基线中位 ×(1+容差)」判红。
+ * 基线绑定（L-30）：host 与 HOT_PATH_FILES 组合 sha **每次采集都重算**；gate 校验，
+ * 任一热路径文件/host 变化 → 基线失效须重采。gate 采样 = 3 轮取中位（不再是 min-of-2）。
  *
- * 用法：node scripts/block350-perf-collect.mjs [--only=cold_start,long_conversation,big_project_tree,packaged_start]
+ * 输出 test/perf-baseline.json：generatedAt / host / coreSha / coldStartTrueLeg / 场景。
+ * 用法：node scripts/block350-perf-collect.mjs [--only=warm_backend_spawn,long_conversation,big_project_tree,packaged_start]
  * 打包态场景需先 `npm run build:mac-arm64`（产物 dist/mac-arm64/*.app）。
  */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { computeHotPathSha, describeHost } from './lib/block350-hot-paths.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -29,10 +32,12 @@ const OUT = path.join(ROOT, 'test', 'perf-baseline.json');
 const args = process.argv.slice(2);
 const onlyArg = (args.find((a) => a.startsWith('--only=')) || '').split('=')[1] || '';
 const ONLY = onlyArg ? new Set(onlyArg.split(',')) : null;
-// --gate：quality:perf 用——每场景 1 样本、输出 {scenarios:{name:{sampleMs}}} 到 --out（不写基线）
+// --gate：quality:perf 用——输出 {scenarios:{name:{sampleMs}}} 到 --out（不写基线）
 const GATE = args.includes('--gate');
 const OUT_ARG = (args.find((a) => a.startsWith('--out=')) || '').split('=')[1] || '';
-const RUNS = GATE ? 2 : null; // gate=min-of-2：单次冷跑抖动（35/45 vs 中位 20）会假红；min-of-2 仍抓数量级退化
+// L0-2（L-27）：gate 采样 3 轮取中位（原 min-of-2 会把慢轮藏进较快样本）；
+// 非 gate 5 轮（packaged 3）。
+const RUNS = GATE ? 3 : null;
 const Database = require('better-sqlite3');
 const harness = await import('./lib/evals-harness.mjs');
 
@@ -41,15 +46,24 @@ const median = (arr) => {
   const mid = Math.floor(s.length / 2);
   return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2);
 };
-const sha = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex').slice(0, 12);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const existing = (!GATE && fs.existsSync(OUT)) ? JSON.parse(fs.readFileSync(OUT, "utf8")) : null;
 const baseline = (existing && existing.scenarios) ? existing : {
   generatedAt: new Date().toISOString(),
-  host: { platform: `${os.platform()}-${os.arch()}`, cpus: os.cpus().length, memoryGB: Math.round(os.totalmem() / 1073741824), node: process.version },
-  coreSha: sha(path.join(ROOT, 'core', 'petri-server', 'server.js')),
+  host: describeHost(),
+  coreSha: computeHotPathSha(ROOT),
   scenarios: {},
+};
+// L-30：host 与热路径 sha 每次采集都刷新（gate 端校验漂移即要求重采，见 block350-hot-paths.mjs）
+baseline.host = describeHost();
+baseline.coreSha = computeHotPathSha(ROOT);
+// L-27 冷热分离：本门四场景均为 warm 自举口径；真冷启动五段腿单列（指针 + 存在性由 gate 校验）
+baseline.coldStartTrueLeg = {
+  script: 'scripts/post-s7-cold-start-x5.cjs',
+  stages: ['require', 'migrations', 'backendHealth', 'spa200', 'cdpPageReady'],
+  evidence: 'acceptance/post-s7-2026-11-10/h10/cold-start-x5.json',
+  note: '真冷启动五段腿（stageCoverage 口径）独立于本门四场景；本门不冒充冷启动读数',
 };
 
 async function timed(fn) {
@@ -58,11 +72,11 @@ async function timed(fn) {
   return Math.round(performance.now() - t0);
 }
 
-// ---------- ① 冷启动 ----------
-async function scenarioColdStart() {
+// ---------- ① warm 后端自举（原 cold_start——L-27 冷热分离改名，不冒充冷启动） ----------
+async function scenarioWarmBackendSpawn() {
   const samples = [];
   for (let i = 0; i < (RUNS || 5); i += 1) {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'block350-cold-'));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'block350-warm-'));
     const t0 = performance.now();
     const backend = await harness.spawnIsolatedBackend({ root: ROOT, tmpDir: tmp, mode: 'mock' });
     const readyMs = Math.round(performance.now() - t0);
@@ -71,11 +85,11 @@ async function scenarioColdStart() {
     fs.rmSync(tmp, { recursive: true, force: true });
     await sleep(800);
   }
-  baseline.scenarios.cold_start = {
-    metric: 'isolated backend spawn→health 200（含 migrations 自举）',
-    unit: 'ms', samples, medianMs: median(samples), tolerancePct: 60,
-    runs: 5,
-    noiseSources: 'SQLite WAL 首建 / migrations 全量执行 / 磁盘缓存冷热；多次采样取中位',
+  baseline.scenarios.warm_backend_spawn = {
+    metric: 'isolated backend spawn→health 200（含 migrations 自举；同机连跑=OS 页缓存热的 warm 口径，非整 Electron 冷启动）',
+    unit: 'ms', samples, medianMs: median(samples), tolerancePct: 25,
+    runs: RUNS || 5,
+    noiseSources: 'SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿',
     env: 'mode=mock（无 provider 出站；测的是进程与 DB 自举，不是模型）',
   };
 }
@@ -122,8 +136,8 @@ async function scenarioLongConversation() {
   baseline.scenarios.long_conversation = {
     metric: `1000 条消息会话：首页 + 全量滚动 ${MESSAGES / PAGE} 页（分页 API 串行）`,
     unit: 'ms', samples, medianMs: median(samples), tolerancePct: 60,
-    runs: 5,
-    noiseSources: 'SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）',
+    runs: RUNS || 5,
+    noiseSources: 'SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；低中位场景由 absoluteSlackMs 地板主导',
     env: 'mode=mock；纯读路径（product 分页 API）',
   };
 }
@@ -160,8 +174,8 @@ async function scenarioBigProjectTree() {
   baseline.scenarios.big_project_tree = {
     metric: '520 文件工作区：tree 分页读全 3 页（200/页）',
     unit: 'ms', samples, medianMs: median(samples), tolerancePct: 60,
-    runs: 5,
-    noiseSources: '目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）',
+    runs: RUNS || 5,
+    noiseSources: '目录 FS 缓存冷热 / 分页重复扫描前缀；夹具内容均匀（真实用户分布差异记入容差余量）；低中位场景由 absoluteSlackMs 地板主导',
     env: 'mode=mock；API 层（无渲染）',
   };
 }
@@ -254,18 +268,18 @@ async function scenarioPackagedStart() {
   }
   baseline.scenarios.packaged_start = {
     metric: '打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪',
-    unit: 'ms', samples, medianMs: samples.length ? median(samples) : null, tolerancePct: 80,
-    runs: 3,
+    unit: 'ms', samples, medianMs: samples.length ? median(samples) : null, tolerancePct: 30,
+    runs: RUNS || 3,
     noiseSources: '打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms',
     env: `unsigned local mount：${apps[0]}（ELECTRON_RUN_AS_NODE 后端口径；数据面=临时空目录；BLOCK-353 修复链）`,
   };
 }
 
-const ALL = ['cold_start', 'long_conversation', 'big_project_tree', 'packaged_start'];
+const ALL = ['warm_backend_spawn', 'long_conversation', 'big_project_tree', 'packaged_start'];
 for (const name of ALL) {
   if (ONLY && !ONLY.has(name)) continue;
   console.log(`[block350] 采集 ${name} …`);
-  if (name === 'cold_start') await scenarioColdStart();
+  if (name === 'warm_backend_spawn') await scenarioWarmBackendSpawn();
   if (name === 'long_conversation') await scenarioLongConversation();
   if (name === 'big_project_tree') await scenarioBigProjectTree();
   if (name === 'packaged_start') await scenarioPackagedStart();
@@ -274,13 +288,21 @@ for (const name of ALL) {
 if (GATE) {
   const gateOut = { at: new Date().toISOString(), scenarios: {} };
   for (const [name, s] of Object.entries(baseline.scenarios)) {
-    gateOut.scenarios[name] = s.skipped ? { skipped: true, reason: s.reason } : { sampleMs: Math.min(...s.samples) };
+    // L0-2（L-27）：gate 每场景 3 轮取中位（原 min-of-2 会把慢轮藏进较快样本）；
+    // skipped 场景透传（是否判红由 gate 依 PETRI_ALLOW_SKIP 裁决——L-28 skipped 默认判红）。
+    gateOut.scenarios[name] = s.skipped ? { skipped: true, reason: s.reason } : { sampleMs: median(s.samples) };
   }
   const outPath = OUT_ARG || OUT;
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, JSON.stringify(gateOut, null, 2) + '\n');
   console.log(`[block350] gate 样本落盘 ${outPath}`);
 } else {
+  // L0-2：清除不在当前场景集（ALL）内的陈旧键（如已改名的 cold_start——残键会让
+  // gate 遍历到旧口径读数）；--only 只影响本轮采集，ALL 内未采场景保留既有读数。
+  for (const key of Object.keys(baseline.scenarios)) {
+    if (!ALL.includes(key)) { delete baseline.scenarios[key]; console.log(`[block350] 移除陈旧场景键 ${key}（不在当前场景集）`); }
+  }
+  baseline.generatedAt = new Date().toISOString();
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(baseline, null, 2) + '\n');
   console.log(`[block350] 基线落盘 ${path.relative(ROOT, OUT)}`);

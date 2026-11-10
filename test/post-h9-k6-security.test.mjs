@@ -111,16 +111,22 @@ test('负测 K-29：伪造用户裁决记录 → 判红（Agent 不代答）', (
   mustRed(tamper({ admission: { ...truth.admission, userRulingRecorded: true } }), 'K-29');
 });
 
-// ---- K-28 IPC 边界 ----
-test('K-28：豁免口被契约钉住、静默 catch 395 冻结、dev 双后端归属在册', () => {
-  assert.equal(truth.ipc.exemptEnvExists, true);
-  assert.equal(truth.ipc.exemptPinnedByContract, true);
+// ---- K-28 IPC 边界（L0-1：豁免口改读数型记录，删除不再判红） ----
+test('K-28：豁免口读数在场（布尔读数不裁决）、静默 catch 395 冻结、dev 双后端归属在册', () => {
+  assert.equal(typeof truth.ipc.exemptEnvExists, 'boolean');
+  assert.equal(typeof truth.ipc.exemptPinnedByContract, 'boolean');
   assert.equal(truth.ipc.silentCatchTotal, 395);
   assert.equal(truth.ipc.devDualBackendInAudit, true);
 });
 
-test('负测 K-28：删除豁免口 / 重打静默 catch 基线 / 冒充扫描根已扩 → 判红', () => {
-  mustRed(tamper({ ipc: { ...truth.ipc, exemptPinnedByContract: false } }), 'K-28');
+test('L0-1 解除负测：从契约测试移除豁免口字样（L1 行为收敛前置）不再判红', () => {
+  const v = adjudicateSecurity({ ...truth, ipc: { ...truth.ipc, exemptEnvExists: false, exemptPinnedByContract: false } });
+  assert.equal(v.ok, true, v.issues.join(' / '));
+  assert.equal(v.conclusions['K-28'], 'boundaries-recorded-schema-deferred');
+});
+
+test('负测 K-28：豁免口读数缺席（非布尔）/ 重打静默 catch 基线 / 冒充扫描根已扩 → 判红', () => {
+  mustRed(tamper({ ipc: { ...truth.ipc, exemptEnvExists: undefined } }), 'K-28');
   mustRed(tamper({ ipc: { ...truth.ipc, silentCatchTotal: 0 } }), 'K-28');
   mustRed(tamper({ ipc: { ...truth.ipc, silentCatchRootsExtended: true } }), 'K-28');
 });

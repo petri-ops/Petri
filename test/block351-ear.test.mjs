@@ -66,6 +66,24 @@ test('block351 负测：EAR 跌破 40% → 棘轮下限判红（缩分母不行�
   assert.ok(issues.some((i) => i.includes('棘轮下限')));
 });
 
+test('block351 负测 L0-3：EAR 降至 41%（低于 manifest 记录 43.3）→ 真棘轮判红', () => {
+  const current = baseCurrent();
+  current.entries = current.entries.slice(0, 825); // 825/2013 = 41.0%
+  const { ok, issues } = validateManifest(manifest, current);
+  assert.equal(ok, false);
+  assert.ok(issues.some((i) => i.includes('棘轮只进不退') && i.includes('41') ), issues.join(' / '));
+});
+
+test('block351 L0-3：分子真实增长（EAR 高于记录值）→ 不判红（棘轮只进不退的反向允许）', () => {
+  const current = baseCurrent();
+  for (let i = 0; i < 10; i++) {
+    current.entries.push({ file: `acceptance/post-k7-2026-11-10/l0/new-asset-${i}.json`, assertedBy: ['test/block351-ear.test.mjs'], impactRule: ['test-infrastructure'] });
+  }
+  const { ok, earNow, issues } = validateManifest(manifest, current);
+  assert.equal(ok, true, issues.join(' / '));
+  assert.ok(earNow > manifest.totals.earPct, `earNow=${earNow} 应高于记录 ${manifest.totals.earPct}`);
+});
+
 test('block351 假探针拦截：manifest 无「零 test 引用」条目（builder 机械扫描的结果性质）', () => {
   // 口径机制：assertedBy 由 *.test.mjs 源码扫描机械生成——手工/脚本冒称的「探针」
   //（无 test 断言引用）不可能出现在 manifest。固化该结果性质：

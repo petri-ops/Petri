@@ -46,12 +46,24 @@ function section(title) {
 
 function gitState() {
   section('Git');
-  const branchLine = runGit(['status', '--short', '--branch']).split('\n')[0] || '(unknown)';
+  const branchLine = runGit(['--no-optional-locks', 'status', '--short', '--branch']).split('\n')[0] || '(unknown)';
   console.log(branchLine);
   const log = runGit(['log', '--oneline', '-5']).trim();
   if (log) console.log(log.split('\n').map((l) => `  ${l}`).join('\n'));
 
-  const rows = runGit(['status', '--porcelain']).split('\n').filter(Boolean);
+  // L0-5（蓝图 L-86）：--no-optional-locks 读态 + diff 兜底——实测案例（2026-11-10）：
+  // 普通 `git status` 因 index stat 缓存陈旧漏报真实 M（project-workspace.module.css
+  // 11+/9−），`git diff --name-only HEAD` 却能检出；漏报会让恢复者误判「树干净」后跑
+  // 聚合门/提交/取证，比红门本身更危险。两路并集 + 不一致时显式标注。
+  const statusRows = runGit(['--no-optional-locks', 'status', '--porcelain']).split('\n').filter(Boolean);
+  const statusFiles = new Set(statusRows.map((r) => r.slice(3).trim()));
+  const diffHead = runGit(['--no-optional-locks', 'diff', '--name-only', 'HEAD']).split('\n').map((s) => s.trim()).filter(Boolean);
+  const ghostFiles = diffHead.filter((f) => !statusFiles.has(f));
+  const rows = [...statusRows];
+  for (const f of ghostFiles) rows.push(` M ${f}   ⚠ stat 缓存陈旧（仅 diff 检出）`);
+  if (ghostFiles.length) {
+    console.log(`⚠ stat 缓存可能陈旧：${ghostFiles.length} 个文件被 git diff --name-only HEAD 检出而 status 未列出（已并入下方清单）`);
+  }
   const modified = rows.filter((r) => r.startsWith(' M') || r.startsWith('M ') || r.startsWith('MM'));
   const untracked = rows.filter((r) => r.startsWith('??')).map((r) => r.slice(3));
   if (modified.length) {
@@ -182,15 +194,28 @@ function main() {
       .filter(Boolean)
       .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)));
     const open = rows.filter((row) => row.state !== 'ended' || row.exitCode !== 0);
+    // L0-8（蓝图 L-82）：区分「当前 running」与「历史残响」——state==="running" 但
+    // startedAt 超 24h 的记录是陈旧状态文件（非活进程），单独分档不得混入运行数。
+    const STALE_MS = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    const isStale = (row) => row.state !== 'ended' && (() => { const t = Date.parse(row.startedAt || ''); return Number.isFinite(t) && now - t > STALE_MS; })();
+    const active = open.filter((row) => !isStale(row));
+    const stale = open.filter(isStale);
     if (rows.length === 0) {
       console.log('无任务记录。');
     } else {
-      console.log(`运行/失败 ${open.length} 条（共 ${rows.length}）——用 npm run task:wait -- --latest 或 --id <id> 收口`);
-      for (const row of open.slice(0, 8)) {
+      const parts = [];
+      if (active.length) parts.push(`运行/失败 ${active.length} 条`);
+      if (stale.length) parts.push(`历史残响 ${stale.length} 条（running 但 startedAt 超 24h，非活进程——按 L-82 归档或 acknowledgedAt 后消亡）`);
+      console.log(`${parts.join('；') || '全部已收口'}（共 ${rows.length} 条）——用 npm run task:wait -- --latest 或 --id <id> 收口`);
+      for (const row of active.slice(0, 8)) {
         const detail = row.state === 'ended'
           ? `exit=${row.exitCode}${row.signal ? ` signal=${row.signal}` : ''}`
           : `running pid=${row.pid}`;
         console.log(`  ${row.label}  ${row.id}  ${detail}  ${row.logPath || ''}`);
+      }
+      for (const row of stale.slice(0, 4)) {
+        console.log(`  [stale] ${row.label}  ${row.id}  startedAt=${row.startedAt}（非活进程）`);
       }
     }
   } catch {

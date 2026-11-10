@@ -753,6 +753,45 @@ export async function checkAuditLedgerHealth(rootDir = DEFAULT_ROOT) {
   return { issues, advisories };
 }
 
+// ── AUDIT-LOG 🔵 阶段广播 × registry active 对账（L0-5 / 蓝图 L-90）──
+// 「当前待处理项」里含「启动登记（active」的 🔵 行引用的 BLOCK 必须二选一：
+//   a) 在 DOC-REGISTRY 中是 status=active 的 work-package（当前真实串行槽位）；或
+//   b) 行内自带「不占串行槽位」历史广播标注（L-90 修正形态：历史阶段广播不占串行槽位）。
+// 两者都不满足 = 「台账声称 active 而 registry 说没有」的两层语义冲突——L-90 登记过的
+// 误导源（恢复者会把历史 🔵 行当成当前 active 包）。
+export async function checkAuditLedgerBlueActiveSync(rootDir, registry) {
+  const issues = [];
+  const ledgerPath = path.join(rootDir, AUDIT_LEDGER_REL_PATH);
+  let raw;
+  try {
+    raw = await fs.readFile(ledgerPath, 'utf8');
+  } catch {
+    return issues; // 台账缺席由 AUDIT_LOG_MISSING 负责，此处不重复报
+  }
+  const lines = raw.split('\n');
+  const headingIdx = lines.findIndex((l) => /^#{1,6}\s.*当前待处理项/.test(l));
+  if (headingIdx === -1) return issues;
+  const activeWpIds = new Set((registry.documents || [])
+    .filter((d) => d.kind === 'work-package' && d.status === 'active')
+    .map((d) => d.id));
+  for (const line of lines.slice(headingIdx + 1)) {
+    if (line.startsWith('## ')) break;
+    if (!line.includes('🔵')) continue;
+    if (!line.includes('启动登记（active')) continue;
+    const blockId = (line.match(/\bBLOCK-\d+\b/) || [])[0];
+    if (!blockId) continue;
+    if (activeWpIds.has(blockId)) continue;
+    if (line.includes('不占串行槽位')) continue;
+    issues.push(issue(
+      'AUDIT_LOG_BLUE_ACTIVE_MISMATCH',
+      `「当前待处理项」🔵 行声称 ${blockId} active，但 DOC-REGISTRY 无对应 active work-package，且行内无「不占串行槽位」历史广播标注——两层语义冲突（L-90）：迁入「最近处理记录」或补历史广播标注。`,
+      'AUDIT-LOG',
+      AUDIT_LEDGER_REL_PATH,
+    ));
+  }
+  return issues;
+}
+
 async function runReportMode(reportPathRaw) {
   const reportPath = path.resolve(reportPathRaw);
   let registry;
@@ -876,9 +915,10 @@ async function runCli() {
   const registry = await loadDocumentRegistry(DEFAULT_ROOT);
   const issues = await validateDocumentRegistry(registry, { rootDir: DEFAULT_ROOT });
   const ledgerHealth = await checkAuditLedgerHealth(DEFAULT_ROOT);
+  const blueSyncIssues = await checkAuditLedgerBlueActiveSync(DEFAULT_ROOT, registry);
 
   if (mode === '--check') {
-    const allIssues = issues.concat(ledgerHealth.issues);
+    const allIssues = issues.concat(ledgerHealth.issues, blueSyncIssues);
     if (allIssues.length > 0) {
       console.error(`[docs:check] FAIL (${allIssues.length} issue(s))`);
       printIssueList(allIssues);

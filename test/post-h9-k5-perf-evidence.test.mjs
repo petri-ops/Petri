@@ -153,18 +153,20 @@ test('负测 K-25：删一条通道 / 缩总数 → 判红', () => {
 });
 
 // ---- K-26 EAR ----
-test('K-26：EAR 分子 871 / 分母 2013 / 43.3%，阈值 40 与公式零改动', () => {
+test('K-26：EAR 分子 871 / 分母 2013 / 43.3%，阈值 40 与公式零改动，manifest 真棘轮在场（L0-3）', () => {
   assert.equal(truth.ear.assetized, 871);
   assert.equal(truth.ear.denominator, 2013);
   assert.equal(truth.ear.frozenRatio, 43.3);
   assert.equal(truth.ear.threshold, 40);
   assert.equal(truth.ear.formulaUnchanged, true);
+  assert.equal(truth.ear.ratchetManifest, true);
   assert.equal(truth.ear.targetPct, 45);
 });
 
-test('负测 K-26：缩分母凑 45% / 改阈值凑达标 → 判红', () => {
+test('负测 K-26：缩分母凑 45% / 改阈值凑达标 / 移除真棘轮 → 判红', () => {
   mustRed(tamper({ ear: { ...truth.ear, denominator: 1900 } }), 'K-26');
   mustRed(tamper({ ear: { ...truth.ear, threshold: 43 } }), 'K-26');
+  mustRed(tamper({ ear: { ...truth.ear, ratchetManifest: false } }), 'K-26');
 });
 
 test('K5 五类不变量在真实源码下成立', () => {

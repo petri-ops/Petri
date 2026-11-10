@@ -20,6 +20,14 @@
  *     白名单条目随文件拆分降至预算内后从 exceptions 数组移除（出），但不得向白名单
  *     追加新路径（不进）。续期=更新 expires+理由，仍受白名单约束。
  *
+ * v3 新增（L0-7，蓝图 L-36：尺寸门盲区收编）：
+ *   - discoverOversizedFiles：扫描 src/core/frontend/src 生产树（排除测试面），>700 行
+ *     文件（含 *.module.css/*.css）全部入册（wave='L0'）——基线 = MANIFEST ∪ 发现集。
+ *   - 未登记超预算文件 fail-closed：发现器检出而基线无条目 → 红（新巨型文件必须显式
+ *     --write 入册=行数冻结棘轮，diff 可审计）。
+ *   - L0 入册文件受行数+sha256+CSS 字节棘轮约束；700 预算例外 enforcement 不适用
+ *     （「只出不进」白名单不得新增路径，预算 enforcement 随 W5b 逐件拆分转正）。
+ *
  * 用法：
  *   node scripts/code-size-ledger.mjs                 # 打印当前度量 JSON（可复现）
  *   node scripts/code-size-ledger.mjs --write         # 重打 v2 基线（含 sha256）
@@ -80,14 +88,48 @@ function sha256(abs) {
   return crypto.createHash('sha256').update(fs.readFileSync(abs)).digest('hex');
 }
 
-function buildLedger(manifest = MANIFEST) {
-  const files = manifest.map((entry) => {
-    const abs = path.join(ROOT, entry.path);
-    if (!fs.existsSync(abs)) {
-      throw new Error(`manifest 文件不存在且未更新台账清单: ${entry.path}`);
+// ---- L0-7（L-36）：生产树 >700 行发现器 ----
+const DISCOVERY_ROOTS = ['src', 'core', 'frontend/src'];
+const DISCOVERY_SKIP_DIRS = new Set(['node_modules', 'dist', 'build', '.git', 'coverage', '__pycache__']);
+const DISCOVERY_EXTS = /\.(js|mjs|cjs|ts|tsx|jsx|css)$/;
+const DISCOVERY_TEST_RE = /\.test\.(mjs|cjs|js|ts|tsx|jsx)$|(^|\/)__tests__(\/|$)/;
+
+/** 扫描生产树，返回 >budget 行的生产文件（含 css），按行数降序。 */
+export function discoverOversizedFiles(root = ROOT, budget = BUDGET_LINES) {
+  const out = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.isDirectory()) {
+        if (DISCOVERY_SKIP_DIRS.has(e.name)) continue;
+        walk(path.join(dir, e.name));
+        continue;
+      }
+      if (!DISCOVERY_EXTS.test(e.name) || DISCOVERY_TEST_RE.test(e.name)) continue;
+      const abs = path.join(dir, e.name);
+      const lines = countLines(abs);
+      if (lines > budget) {
+        out.push({ path: path.relative(root, abs).replaceAll('\\', '/'), lines, bytes: fs.statSync(abs).size, sha256: sha256(abs) });
+      }
     }
-    return { ...entry, lines: countLines(abs), sha256: sha256(abs) };
-  });
+  };
+  for (const rel of DISCOVERY_ROOTS) {
+    const abs = path.join(root, rel);
+    if (fs.existsSync(abs)) walk(abs);
+  }
+  return out.sort((a, b) => b.lines - a.lines);
+}
+
+function buildLedger(manifest = MANIFEST, extra = []) {
+  const files = [
+    ...manifest.map((entry) => {
+      const abs = path.join(ROOT, entry.path);
+      if (!fs.existsSync(abs)) {
+        throw new Error(`manifest 文件不存在且未更新台账清单: ${entry.path}`);
+      }
+      return { ...entry, lines: countLines(abs), bytes: fs.statSync(abs).size, sha256: sha256(abs) };
+    }),
+    ...extra.map((e) => ({ path: e.path, wave: 'L0', module: 'auto-discovered', lines: e.lines, bytes: e.bytes, sha256: e.sha256 })),
+  ];
   const total = files.reduce((sum, f) => sum + f.lines, 0);
   return { schema: SCHEMA_V2, files, total };
 }
@@ -125,7 +167,12 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
   for (const file of current.files) {
     const base = baseMap.get(file.path);
     if (base === undefined) {
-      violations.push(`${file.path}: 新入册文件未刷新基线——请 --write 并同提交`);
+      if (file.wave === 'L0') {
+        // L0-7（L-36）发现器：>700 行生产文件不在基线 = 台账盲区，fail-closed。
+        violations.push(`${file.path}: ${file.lines} 行超预算 ${BUDGET_LINES} 未入台账（L0-7 发现器 fail-closed）——node scripts/code-size-ledger.mjs --write 入册（行数冻结棘轮，diff 可审计）`);
+      } else {
+        violations.push(`${file.path}: 新入册文件未刷新基线——请 --write 并同提交`);
+      }
       continue;
     }
     // 1) 行数棘轮（v1 语义保留）
@@ -136,8 +183,15 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
     if (file.sha256 !== base.sha256) {
       violations.push(`${file.path}: 内容指纹漂移（sha256 变更未随提交重打基线）——node scripts/code-size-ledger.mjs --write`);
     }
-    // 3) 预算 + 例外 expires（P3-1）：超预算必须有未过期例外
-    if (file.lines > BUDGET_LINES) {
+    // 4) CSS 字节棘轮（L0-7/L-36：css 入册后字节只减不增——防行数不变而体积膨胀）
+    if (Number.isFinite(base.bytes) && Number.isFinite(file.bytes) && /\.css$/.test(file.path) && file.bytes > base.bytes) {
+      violations.push(`${file.path}: CSS 字节 ${file.bytes} > 基线 ${base.bytes}（字节棘轮只减不增）`);
+    }
+    // 3) 预算 + 例外 expires（P3-1）：超预算必须有未过期例外。
+    //    L0 发现入册文件（wave='L0'）不适用：预算例外受「只出不进」白名单约束不得新增，
+    //    这些文件的冻结棘轮（行数/sha/字节只减）即覆盖面；预算 enforcement 随 W5b 逐件
+    //    拆分降至预算内转正（届时 wave 翻正或移出 L0 集合）。
+    if (file.lines > BUDGET_LINES && file.wave !== 'L0') {
       const exc = exceptionMap.get(file.path);
       if (!exc) {
         const inAllowed = allowedSet ? allowedSet.has(file.path) : true;
@@ -183,7 +237,11 @@ async function main() {
     ? JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
     : MANIFEST;
 
-  const ledger = buildLedger(manifest);
+  // L0-7：台账 = MANIFEST ∪ 生产树发现集（>700 行含 css）；发现集缺席基线即红（发现器 fail-closed）。
+  const discovered = discoverOversizedFiles(ROOT);
+  const manifestPaths = new Set(manifest.map((m) => m.path));
+  const extra = discovered.filter((d) => !manifestPaths.has(d.path));
+  const ledger = buildLedger(manifest, extra);
 
   if (args.includes('--check')) {
     let baseline;
@@ -212,7 +270,8 @@ async function main() {
       process.exit(1);
     }
     const activeExceptions = (exceptions.exceptions || []).length;
-    console.log(`[code-size-ledger] PASS v2 门禁（${ledger.files.length} 文件，总行数 ${ledger.total}，基线 ${baseline.total}，生效例外 ${activeExceptions}，预算 ${BUDGET_LINES} 行）`);
+    const unregisteredCount = ledger.files.filter((f) => f.wave === 'L0').length;
+    console.log(`[code-size-ledger] PASS v2 门禁（台账 ${ledger.files.length} 文件 = MANIFEST ${manifest.length} + L0 发现入册 ${unregisteredCount}，总行数 ${ledger.total}，基线 ${baseline.total}，生效例外 ${activeExceptions}，预算 ${BUDGET_LINES} 行）`);
     process.exit(0);
   }
 

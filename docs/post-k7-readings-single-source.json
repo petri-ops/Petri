@@ -1,0 +1,128 @@
+{
+  "_about": "第五轮 L0-8 数字口径单源（蓝图 L-45/L-76/L-81/L-84）：文档引用读数一律以本 JSON 为准；由 scripts/post-k7-readings-generate.mjs 当场实测生成，禁止手抄/手改。",
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-10T17:18:50.694Z",
+  "sourceCommit": "f9873243ecaf686fb70c49848a49c97e15b945c3",
+  "generator": "node scripts/post-k7-readings-generate.mjs",
+  "impactMap": {
+    "rules": 367,
+    "unmappedTests": 90,
+    "coverageBaselineUpdatedAt": "2026-11-10",
+    "source": [
+      "test/impact-map.json",
+      "test/impact-map-coverage-baseline.json"
+    ]
+  },
+  "docRegistry": {
+    "documentCount": 547,
+    "managedMarkdown": 530,
+    "registryLastUpdated": "2026-11-10",
+    "source": "docs/DOC-REGISTRY.json"
+  },
+  "tests": {
+    "nodePhysicalTestFiles": 710,
+    "frontendTestFiles": 362,
+    "unmappedTests": 90,
+    "denominatorNote": "628 是三段分片清单读数（test:all:sharded 的清单长度口径），700 是物理 test/*.test.mjs 文件数——两个分母不得混用（L-84）。",
+    "source": [
+      "test/",
+      "frontend/src/"
+    ]
+  },
+  "evidenceMetadataGate": {
+    "fileCount": 34,
+    "negativeTests": 11,
+    "generatedAt": "2026-11-10T14:39:01.124Z",
+    "authority": "k5-evidence-metadata-gate.json（机械门读数）",
+    "supersededReadings": [
+      {
+        "claim": "33 份 + 8 负测",
+        "source": "docs/README.md 口径行（L-81）",
+        "status": "voided-by-this-json"
+      },
+      {
+        "claim": "38 份 + 11 负测",
+        "source": "docs/DOC-REGISTRY.json notes（L-81）",
+        "status": "voided-by-this-json"
+      }
+    ]
+  },
+  "perfBaseline": {
+    "generatedAt": "2026-11-10T17:03:29.773Z",
+    "coreSha": "7905637b142b534a",
+    "host": {
+      "platform": "darwin-arm64",
+      "cpus": 8,
+      "memoryGB": 16,
+      "node": "v24.16.0"
+    },
+    "scenarios": {
+      "packaged_start": {
+        "medianMs": 374,
+        "tolerancePct": 30,
+        "skipped": false
+      },
+      "long_conversation": {
+        "medianMs": 20,
+        "tolerancePct": 60,
+        "skipped": false
+      },
+      "big_project_tree": {
+        "medianMs": 11,
+        "tolerancePct": 60,
+        "skipped": false
+      },
+      "warm_backend_spawn": {
+        "medianMs": 545,
+        "tolerancePct": 25,
+        "skipped": false
+      }
+    },
+    "coldStartTrueLeg": "scripts/post-s7-cold-start-x5.cjs",
+    "source": "test/perf-baseline.json"
+  },
+  "userAssets": {
+    "protectedPaths": 10,
+    "paths": [
+      "assets/",
+      "docs/pelican-bicycle.html",
+      "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+      "petri-logo-concepts.miora",
+      "petri-logo-concepts_assets/",
+      "scripts/backfill-artifact-chain.mjs",
+      "tmp-block342-live/",
+      "tmp-review/",
+      "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+      "docs/post-h9-optimization-blueprint-2026-11-10.md"
+    ],
+    "incidents": 2,
+    "source": "test/user-asset-guard-baseline.json",
+    "reconcileNote": "L-83 对账：2026-11-10 审计登记 9 项可见条目，缺第四轮蓝图 docs/post-h9-optimization-blueprint-2026-11-10.md（registry 已 planned 的用户资产原件）；2026-11-11 补入保护清单至 10 项。"
+  },
+  "staleReadings": [
+    {
+      "claim": "impact-map 365 规则 / 120 未映射",
+      "source": "docs/post-h9-optimization-blueprint-2026-11-10.md（第四轮蓝图，未跟踪用户资产，不改原件）",
+      "status": "voided-by-this-json",
+      "note": "以 impactMap.rules/unmappedTests 当次读数为准（L-45）"
+    },
+    {
+      "claim": "DOC-REGISTRY 528/511",
+      "source": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "status": "voided-by-this-json",
+      "note": "以 docRegistry 当次读数为准（L-45）"
+    },
+    {
+      "claim": "「约 700 个 .mjs（628 文件 / 5081 测试）」分母混用",
+      "source": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "status": "voided-by-this-json",
+      "note": "628=分片清单、700=物理文件数，见 tests.denominatorNote（L-84）"
+    },
+    {
+      "claim": "K-07「audit:compact 压回 50KB」",
+      "source": "docs/post-h9-2026-11-10-final-report.md",
+      "status": "recorded-as-partial",
+      "note": "L-77：如未压回阈内，K-07 终态如实标注未完成（不抬阈值不改历史）"
+    }
+  ]
+}

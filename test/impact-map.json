@@ -7603,6 +7603,29 @@
       "scriptRole": "acceptance-probe"
     },
     {
+      "id": "block404-l0-criteria-gates",
+      "note": "第五轮 L0 判据校准（BLOCK-404）：perf 基线绑定单源 / lint 台账机械校验与 warnings 分域棘轮（含计数 formatter）/ 源码扫描第二棘轮 / 数字口径单源生成器 / fail-closed runner 契约。脚本=判据与门禁设施，改任一即跑本包契约。",
+      "patterns": [
+        "scripts/lib/block350-hot-paths.mjs",
+        "scripts/lib/eslint-counts-formatter.cjs",
+        "scripts/lint-ledger-verify.mjs",
+        "scripts/post-k7-readings-generate.mjs",
+        "scripts/post-k7-source-scan-ratchet.mjs",
+        "test/block404-*.test.mjs",
+        "test/lint-warnings-baseline.json",
+        "test/knip-asserts-baseline.json",
+        "docs/post-k7-readings-single-source.json"
+      ],
+      "tests": [
+        "test/block404-l0-criteria-gates.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "governance-gate"
+    },
+    {
       "id": "block351-evidence-assetization",
       "note": "BLOCK-351 证据资产化：EAR 口径/manifest builder/ear 复算与门/完整性断言批。改口径或批次时跑本包测试与 ear 门。",
       "patterns": [

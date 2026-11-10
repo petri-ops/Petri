@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { resolveImpact } from '../scripts/test-affected.mjs';
+import { resolveImpact, runPlan } from '../scripts/test-affected.mjs';
 
 test('impact map validates and classifies the current script inventory', () => {
   const plan = resolveImpact(['scripts/test-affected.mjs']);
@@ -304,4 +304,20 @@ test('the committed impact map has no duplicate rule ids', () => {
   const ids = map.rules.map((rule) => rule.id);
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   assert.deepEqual(dupes, [], `duplicate ids: ${dupes.join(', ')}`);
+});
+
+test('L0-4 fail-closed：未登记生产路径 → 升级全量 Node/前端检查（≥1 项测试执行）且 exit≠0（蓝图 L-75）', () => {
+  const plan = resolveImpact(['new-production-area/engine.js']);
+  assert.deepEqual(plan.unknown, ['new-production-area/engine.js']);
+  const calls = [];
+  const fakeExec = (cmd, args) => { calls.push([cmd, args]); return 0; };
+  const status = runPlan(plan, { exec: fakeExec });
+  assert.equal(status, 2, '全绿时返回 2 = FAIL_CLOSED 覆盖缺口信号');
+  const nodeFull = calls.find(([c, a]) => c === 'npm' && a.includes('run') && a.includes('test:all') && !a.includes('--prefix'));
+  const feFull = calls.find(([c, a]) => c === 'npm' && a.includes('--prefix') && a.includes('frontend') && a.includes('test:all'));
+  assert.ok(nodeFull, '必须升级执行全量 Node 测试（npm run test:all）');
+  assert.ok(feFull, '必须升级执行前端全量测试（frontend test:all）');
+  // 全量测试有红 → 1（真实 FAIL，不得写成 2）
+  const redExec = (cmd, args) => (args.includes('test:all') && !args.includes('--prefix') ? 1 : 0);
+  assert.equal(runPlan(plan, { exec: redExec }), 1);
 });
