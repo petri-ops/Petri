@@ -60,5 +60,6 @@ test('负测：B-14 挂载被移除后不得仍宣称 +10 行有据', () => {
   const src = fs.readFileSync(path.join(ROOT, 'frontend/src/components/copilot/SimpleChat.tsx'), 'utf8');
   assert.ok(src.includes('<StreamReconnectBanner'));
   const removed = src.replace("import { StreamReconnectBanner, deriveReconnectPhase } from './StreamReconnectBanner';", '');
-  assert.equal(removed.includes('StreamReconnectBanner'), false || removed.includes('<StreamReconnectBanner'));
+  assert.equal(removed.includes("import { StreamReconnectBanner"), false, 'import 行应被移除');
+  assert.ok(removed.includes('<StreamReconnectBanner'), '渲染引用仍在（只删 import 的局部形态）');
 });

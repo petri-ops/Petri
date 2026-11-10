@@ -12,7 +12,7 @@
 // 失败即退出非零。
 
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { findToolDeclarations } from '../scripts/post-s7-tool-declaration.mjs';

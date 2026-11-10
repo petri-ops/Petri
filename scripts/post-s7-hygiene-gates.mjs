@@ -93,7 +93,6 @@ export function evaluateLintRatchet(suppressions, baseline) {
   const current = lintDomains(suppressions);
   const issues = [];
   const totalCurrent = Object.values(current).reduce((a, b) => a + b, 0);
-  const totalBaseline = Object.values(baseline?.domains || {}).reduce((a, b) => a + b, 0);
   for (const d of Object.keys(current)) {
     if (baseline?.domains && typeof baseline.domains[d] === 'number' && current[d] > baseline.domains[d]) {
       issues.push(`${d} 域 ${current[d]} > 基线 ${baseline.domains[d]}（新增违规即红）`);

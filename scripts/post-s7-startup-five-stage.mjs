@@ -74,7 +74,7 @@ function readAuthoritativeStages() {
   return { migrations: num(m.migrations), backendHealth: num(m.backendHealth), spa200: num(m.spa200), cdpPageReady: num(m.cdpPageReady) };
 }
 
-export function collectRound(logPath = '/tmp/petri-h8-backend-iso.log') {
+export function collectRound(_logPath = '/tmp/petri-h8-backend-iso.log') {
   const marks = readMainMarks();
   const m = marks.marks || marks;
   const mainReady = typeof m.mainReady === 'number' ? m.mainReady : 'not_instrumented';
