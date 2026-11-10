@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h9-layout-ab",
+  "generatedAt": "2026-11-10T06:42:23.939Z",
+  "platform": "darwin-arm64",
+  "evidenceClass": "cdp-dom-measurement",
+  "humanEyeEquivalent": false,
+  "visualVerified": false,
+  "finding": "CenterPanel 外层挂 workspaceSessionLayout 但配 workspaceSessionFrameChat 变体；CSS 另有 workspaceSessionFrame（column + padding）——双层同名 layout 是真实结构歧义。",
+  "a": [
+    {
+      "label": "1600x1000",
+      "viewport": {
+        "w": 2000,
+        "h": 1250
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 858,
+          "h": 1212,
+          "display": "flex",
+          "flexDirection": "row",
+          "gap": "20px"
+        },
+        "sessionInset": {
+          "x": 249,
+          "y": 38,
+          "w": 836,
+          "h": 1212
+        },
+        "scMessages": {
+          "x": 267,
+          "y": 50,
+          "w": 818,
+          "h": 1045.8
+        },
+        "root": {
+          "w": 2000,
+          "h": 1250
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 2000,
+        "docClientWidth": 2000
+      },
+      "sameClassLayers": 2
+    },
+    {
+      "label": "4000x2500",
+      "viewport": {
+        "w": 5000,
+        "h": 3125
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 3858,
+          "h": 3087,
+          "display": "flex",
+          "flexDirection": "row",
+          "gap": "20px"
+        },
+        "sessionInset": {
+          "x": 249,
+          "y": 38,
+          "w": 3836,
+          "h": 3087
+        },
+        "scMessages": {
+          "x": 1746,
+          "y": 50,
+          "w": 860,
+          "h": 2920.8
+        },
+        "root": {
+          "w": 5000,
+          "h": 3125
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 5000,
+        "docClientWidth": 5000
+      },
+      "sameClassLayers": 2
+    },
+    {
+      "label": "1000x625",
+      "viewport": {
+        "w": 1250,
+        "h": 781
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 1009,
+          "h": 743.3,
+          "display": "flex",
+          "flexDirection": "row",
+          "gap": "20px"
+        },
+        "sessionInset": {
+          "x": 249,
+          "y": 38,
+          "w": 987,
+          "h": 743.3
+        },
+        "scMessages": {
+          "x": 321.5,
+          "y": 50,
+          "w": 860,
+          "h": 577
+        },
+        "root": {
+          "w": 1250,
+          "h": 781.3
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 1250,
+        "docClientWidth": 1250
+      },
+      "sameClassLayers": 2
+    }
+  ],
+  "b": [
+    {
+      "label": "1600x1000",
+      "viewport": {
+        "w": 2000,
+        "h": 1250
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 858,
+          "h": 1212,
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "0px"
+        },
+        "sessionInset": {
+          "x": 289,
+          "y": 38,
+          "w": 762,
+          "h": 1212
+        },
+        "scMessages": {
+          "x": 307,
+          "y": 50,
+          "w": 744,
+          "h": 1045.8
+        },
+        "root": {
+          "w": 2000,
+          "h": 1250
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 2000,
+        "docClientWidth": 2000
+      },
+      "sameClassLayers": 2
+    },
+    {
+      "label": "4000x2500",
+      "viewport": {
+        "w": 5000,
+        "h": 3125
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 3858,
+          "h": 3087,
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "0px"
+        },
+        "sessionInset": {
+          "x": 289,
+          "y": 38,
+          "w": 3762,
+          "h": 3087
+        },
+        "scMessages": {
+          "x": 1749,
+          "y": 50,
+          "w": 860,
+          "h": 2920.8
+        },
+        "root": {
+          "w": 5000,
+          "h": 3125
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 5000,
+        "docClientWidth": 5000
+      },
+      "sameClassLayers": 2
+    },
+    {
+      "label": "1000x625",
+      "viewport": {
+        "w": 1250,
+        "h": 781
+      },
+      "blocks": {
+        "sessionLayoutFirst": {
+          "x": 241,
+          "y": 38,
+          "w": 1009,
+          "h": 743.3,
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "0px"
+        },
+        "sessionInset": {
+          "x": 289,
+          "y": 38,
+          "w": 913,
+          "h": 743.3
+        },
+        "scMessages": {
+          "x": 324.5,
+          "y": 50,
+          "w": 860,
+          "h": 577
+        },
+        "root": {
+          "w": 1250,
+          "h": 781.3
+        }
+      },
+      "overflow": {
+        "docScrollWidth": 1250,
+        "docClientWidth": 1250
+      },
+      "sameClassLayers": 2
+    }
+  ],
+  "deltas": [
+    {
+      "label": "1600x1000",
+      "sessionLayoutFirst": {
+        "dw": 0,
+        "dh": 0,
+        "dx": 0,
+        "dy": 0
+      },
+      "sessionInset": {
+        "dw": -74,
+        "dh": 0,
+        "dx": 40,
+        "dy": 0
+      },
+      "scMessages": {
+        "dw": -74,
+        "dh": 0,
+        "dx": 40,
+        "dy": 0
+      },
+      "root": {
+        "dw": 0,
+        "dh": 0,
+        "dx": null,
+        "dy": null
+      }
+    },
+    {
+      "label": "4000x2500",
+      "sessionLayoutFirst": {
+        "dw": 0,
+        "dh": 0,
+        "dx": 0,
+        "dy": 0
+      },
+      "sessionInset": {
+        "dw": -74,
+        "dh": 0,
+        "dx": 40,
+        "dy": 0
+      },
+      "scMessages": {
+        "dw": 0,
+        "dh": 0,
+        "dx": 3,
+        "dy": 0
+      },
+      "root": {
+        "dw": 0,
+        "dh": 0,
+        "dx": null,
+        "dy": null
+      }
+    },
+    {
+      "label": "1000x625",
+      "sessionLayoutFirst": {
+        "dw": 0,
+        "dh": 0,
+        "dx": 0,
+        "dy": 0
+      },
+      "sessionInset": {
+        "dw": -74,
+        "dh": 0,
+        "dx": 40,
+        "dy": 0
+      },
+      "scMessages": {
+        "dw": 0,
+        "dh": 0,
+        "dx": 3,
+        "dy": 0
+      },
+      "root": {
+        "dw": 0,
+        "dh": 0,
+        "dx": null,
+        "dy": null
+      }
+    }
+  ],
+  "materialDifference": true,
+  "decision": "no-code-change-needs-independent-slice-and-human-eye",
+  "pendingHumanEye": "布局观感（悬浮摘要定位 / 阴影裁切 / 缩窗三态）需人眼过目；DOM 几何断言不替代。"
+}

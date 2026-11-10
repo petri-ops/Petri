@@ -76,6 +76,7 @@ import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
 import { CompactionNotice } from './SimpleChat/CompactionNotice';
 import { TurnBoundary } from './TimelineBoundaries';
+import { StreamReconnectBanner, deriveReconnectPhase } from './StreamReconnectBanner';
 import { GuardAckCard } from './SimpleChat/GuardAckCard';
 import { ApprovalSurfaces } from './SimpleChat/ApprovalSurfaces';
 import { useApprovalSurfaces } from './SimpleChat/hooks/useApprovalSurfaces';
@@ -393,6 +394,12 @@ export function SimpleChat({
   // 输入框 ↑/↓ 历史回溯的导航态（null = 未进入导航，输入框即实时草稿）。
   const historyNavRef = useRef<typeof INITIAL_NAV_STATE>(INITIAL_NAV_STATE);
   const activeRun = useConversationRun(conversationId);
+  // BLOCK-394 B-14 — 重连次数从既有 statusMessage 文案派生（与 store 同源，不建第二真相）。
+  const reconnectAttempt = useMemo(() => {
+    const m = /正在重连（第 (\d+) 次）/.exec(String(activeRun?.statusMessage || ''));
+    return m ? Number(m[1]) : undefined;
+  }, [activeRun?.statusMessage]);
+  const reconnectPhase = deriveReconnectPhase(activeRun?.statusMessage);
   // BLOCK-255 C4 — 本轮实时 usage 合计（run 开始即归零；落库后以消息 meta 为准）。
   const liveUsage = useRunUsageTotals(conversationId, activeRun?.startedAt ?? null);
   // AGENT-CONCURRENCY A-5: 会话挂载/切换时恢复崩溃或刷新前仍在跑的后台任务
@@ -1512,6 +1519,9 @@ export function SimpleChat({
       <div className={`sc-root${composerOnly ? ' sc-root-composer-only' : ''}`}>
         <div className="sc-body">
           <div className="sc-messages" ref={scrollRef} onScroll={handleMessagesScroll}>
+            {reconnectPhase !== 'hidden' && (
+              <StreamReconnectBanner statusMessage={activeRun?.statusMessage} attempt={reconnectAttempt} />
+            )}
           {older.loadingMore && <div className="sc-loading-older">加载更早消息…</div>}
           {/* BLOCK-95 B2/A5 — 压缩诚实可见（抽件：CompactionNotice） */}
           {compaction && !composerOnly && displayMessages.length > 0 && (

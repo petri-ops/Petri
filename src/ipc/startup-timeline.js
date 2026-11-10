@@ -20,6 +20,13 @@ const marks = {
   preload: null, // webContents did-start-loading（preload 执行窗口）
   windowShown: null, // 首次 ready-to-show → show()
   didFinishLoad: null,
+  // BLOCK-394 B-22 — 五段分解统一时间轴：此前 migrations / backendHealth 两段
+  // 只能靠外部日志指纹或 curl 往返时间「猜」，与其余段不同轴、不可比。
+  // 现由主进程在完成时点直接打点，和 mainReady/preload/... 同一 Date.now() 轴。
+  migrations: null, // DB 迁移子进程完成（测试实例跳过迁移时也打点，语义=该段零耗时）
+  backendHealth: null, // :3001 /api/health 首次 200
+  spa200: null, // SPA 首次 200（渲染层经 startup:report 上报；未上报则 null）
+  cdpPageReady: null, // CDP 页面 readyState=complete（渲染层上报）
   reported: null, // 渲染层汇总（含 firstPaint/dataReadyMs）
 };
 

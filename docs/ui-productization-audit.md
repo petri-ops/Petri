@@ -6,6 +6,9 @@
 - **为什么这样设计**：4 秒提示对 error/warning 是「一闪而过的不可回看事实」；历史复用已播报内容，零新增投递通道。降级原因是用户当下必须知道的状态变化，role=note 不进读屏播报队列。
 - **验证（代码）**：ToastProvider 10/10（含 4 条历史：消失后仍可回看 / 去重合并 / 上限 50 / 清空）；ResultArtifactShell 4 文件 18/18；tsc 0。
 - **未做实机腿**：DOM 断言与组件测试不冒充视觉绿——历史面板的层级/遮挡、长消息换行、暗色态对比需在 H3 实机腿一并取证。
+- **BLOCK-394 C 批追加（同一 in_progress 条目，不新增债）**：①`copilotClient/runHealthEvents.ts` 把四事件码（compaction_failed/trim_skipped/provider_retry/stream_stall）映射为可见文案 + 严重度，SSE 分派走既有 `onAgentStatus` 通道（零新建 UI truth/通知中心）；②`settings/ExternalImportPanel.tsx` 操作回执单条 message → 组件内局部有界 20 条可回看列表（去重、可清空、`role=log`，原 live region 保留）；③`copilot/StreamReconnectBanner.tsx` 从既有 `statusMessage` 派生断线/重放/耗尽三态独立横幅（`role=status` + `aria-live=polite`），零新状态源。
+- **证据等级（行为测试/机械门禁，不冒充视觉绿）**：`runHealthEvents.test.ts` 4/4、`ExternalImportPanel.test.tsx` 5/5、`StreamReconnectBanner.test.tsx` 3/3、`tsc --noEmit` 0 error、`conversationRunStore` 邻域 59/59；B-09/B-11 另有 CDP DOM/几何 A/B 证据在 `acceptance/post-s7-2026-11-10/h9/`。
+- **仍 pending_human_eye**：四事件真实 SSE 到轨迹面的观感、断线注入三态截图过目、VoiceOver 朗读、暗色对比度——Agent 不代答，路线见 `docs/post-s7-h7-human-eye-route.md`。B-09 cv A/B 无收益（布局耗时 A=B=0.7ms）按判据回滚不改 CSS；B-11 几何 A/B 显示改类名会让消息区窄 74px/移 40px → 不改产品 CSS，收敛需独立切片 + 人眼过目。
 - **边界（reopen）**：四事件前端投影（compaction_failed/trim_skipped/provider_retry/stream_stall 进轨迹面）、SSE 重连横幅、ExternalImportPanel 回看接入。
 
 - **POST-S7 H3 追加（同一实机腿批）**：分屏 handle 语义纠正——`ArtifactPinPane` 分隔件由

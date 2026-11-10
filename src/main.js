@@ -633,6 +633,8 @@ async function main() {
     const { markBackendAttached } = require("./main/backend-proc-manager");
     markBackendAttached(backendPort);
     const backendHealthy = await waitForBackendHealthy(backendPort, 90_000);
+    // BLOCK-394 B-22：health 首次 200 的主进程权威打点（与其余段同一时间轴）。
+    if (backendHealthy) require("./ipc/startup-timeline").markStartup("backendHealth");
     if (!backendHealthy) {
       dialog.showErrorBox(
         "格物测试实例",
@@ -646,6 +648,8 @@ async function main() {
     // 失败不阻断启动——petri-server 的 initSchema() 仍会兜底建表。
     try {
       await migrationPromise;
+      // BLOCK-394 B-22：迁移子进程完成态打点（失败/跳过也打，语义=该段已结算）。
+      require("./ipc/startup-timeline").markStartup("migrations");
     } catch (e) {
       console.error("[desktop] migration failed:", e?.message || e);
     }

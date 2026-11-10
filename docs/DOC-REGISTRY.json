@@ -411,19 +411,19 @@
       "capability": "block-394-agent-side-remaining-work",
       "path": "docs/block-394-agent-side-remaining-work-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-394-agent-side-remaining-work",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "ACTIVE",
+      "phase": "COMPLETED",
       "tags": [
         "post-s7",
         "agent-autonomy",
         "engineering-debt",
         "cdp"
       ],
-      "notes": "用户 2026-11-10 发令「把 23 条 Agent 开工 自主性搞完 不需要我参与」：承接 gap-ledger 分类中 dev_stack 4 条 + engineering 19 条，逐件实质交付。不含 human_eye 4 / credential 1 / user_decision 1 / none 5。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 发令「23 条 Agent 可开工项自主搞完、不需参与」→ completed：12 项出口判据全达成 + 11 项 Agent 侧做完并如实声明末步边界（人眼/读屏/独立 W5b 切片/结构性重构）。B-03 角色块裁剪根修、B-24 uuid 漂移根修、B-25 环 13→12、B-09/B-11 CDP A/B 判据、B-22 五段统一时间轴、B-29 skill 摘要转正等逐件证据在 h9/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-S7-H7-HUMAN-EYE-ROUTE",

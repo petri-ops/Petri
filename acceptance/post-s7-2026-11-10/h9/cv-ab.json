@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h9-cv-ab",
+  "generatedAt": "2026-11-10T06:40:15.404Z",
+  "platform": "darwin-arm64",
+  "evidenceClass": "cdp-dom-measurement",
+  "humanEyeEquivalent": false,
+  "visualVerified": false,
+  "criterion": "B 态强制布局耗时中位数 < A 态 ×0.9 才落 CSS；否则回滚（不改产品源码）",
+  "a": {
+    "label": "A-without-cv",
+    "runs": 3,
+    "medianLayoutMs": 0.7,
+    "nodes": 4050,
+    "cvComputedOnRows": 0,
+    "all": [
+      0.7,
+      0.7,
+      1.1
+    ]
+  },
+  "b": {
+    "label": "B-with-cv",
+    "runs": 3,
+    "medianLayoutMs": 0.7,
+    "nodes": 4050,
+    "cvComputedOnRows": 100,
+    "all": [
+      0.7,
+      0.7,
+      0.8
+    ]
+  },
+  "improved": false,
+  "decision": "rollback-no-measurable-gain",
+  "note": "content-visibility 不改 DOM 节点数；原「节点数不降即回滚」判据已修正为渲染耗时。离屏窗口读数不是人眼观感。"
+}

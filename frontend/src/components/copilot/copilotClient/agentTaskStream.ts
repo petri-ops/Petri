@@ -14,6 +14,7 @@ import {
   parseToolResultEvent,
 } from './parse';
 import type { AgentTaskTodoItem, KnowledgeCitation, StreamChatOptions, ToolResultEvent } from './types';
+import { mapRunHealthEvent, RUN_HEALTH_EVENT_CODES } from './runHealthEvents';
 
 /**
  * BLOCK-39: 订阅断线信号（typed）。仅三类来源：fetch 网络 reject（后端不可达）、
@@ -432,6 +433,21 @@ function _dispatchSseEvent(obj: AgentSseEvent, opts: StreamChatOptions): void {
     onTaskFailed,
     kind,
   } = opts;
+  // BLOCK-394 B-07 — 运行健康四事件投影：后端按 reasonCode 发事件，
+  // 前端过去零消费。这里统一走既有 onAgentStatus（statusMessage）通道，
+  // 不新建 UI truth / 通知中心；未知码由 mapRunHealthEvent 返回 null 天然 no-op。
+  const healthCode = typeof (obj as { reasonCode?: unknown }).reasonCode === 'string'
+    ? (obj as { reasonCode?: string }).reasonCode
+    : (obj.event && (RUN_HEALTH_EVENT_CODES as readonly string[]).includes(obj.event as string) ? obj.event as string : null);
+  const health = healthCode ? mapRunHealthEvent(healthCode, {
+    detail: typeof (obj as { detail?: unknown }).detail === 'string' ? (obj as { detail?: string }).detail : undefined,
+    attempt: typeof (obj as { attempt?: unknown }).attempt === 'number' ? (obj as { attempt?: number }).attempt : undefined,
+    phase: typeof (obj as { phase?: unknown }).phase === 'string' ? (obj as { phase?: string }).phase : undefined,
+  }) : null;
+  if (health) {
+    onAgentStatus?.({ phase: health.code, message: health.message });
+  }
+
   // BLOCK-376（S1 / G-04）——SSE 三态契约的结构化失败终态（additive：error 兼容载荷
   // 优先级不变，task.failed 只在其未先命中时结算，避免双结算）。
   if (obj.event === 'task.failed') {

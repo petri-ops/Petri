@@ -38,12 +38,15 @@
       "id": "B-03",
       "level": "P0",
       "title": "C-46/C-49 兄弟仓根因致全量分片 38 残红",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H0",
       "evidence": "BLOCK-384 已清偿（兄弟仓 a186d20+8b0e87f）；本程序复跑 p4r 四族 21/21 绿；三段分片 9 红→3 红（frontend/node-long 全绿）",
       "followUp": "node-core 余 2 条外部归属：knowledge-space（H1 已修，50/50）与 block93 spawn persona（专项）。分片未达 0 红，如实登记。",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "block93 spawn role=search 根修：角色约束并进静态前缀（原被 trimMessagesToBudget 裁掉）；knowledge-space 早前已修。拆前 51/52 → 拆后 52/52 + 回归钉 3/3",
+      "agentSideEvidence": "test/post-s7-h9-role-prefix.test.mjs；test/block93-role-prompt.test.mjs"
     },
     {
       "id": "B-04",
@@ -55,7 +58,10 @@
       "followUp": "MCP run-plugin-script 依 BLOCK-374 两轴分离用户裁决**不接**（不是缺口）；tools-executor / ssh-direct-runner 无 handlerOptions 通道，需先定凭据载体（跨 tool_jobs 行与 SSH 会话），retain-with-reason。ADMISSION 默认档=U 类待裁决（材料在册，推荐维持 observe）",
       "blocker": "engineering",
       "alsoRequires": [],
-      "blockerNote": "2026-11-10 分类修正：两轴分离为既有用户裁决（范围定义，非 blocker），不计入待裁决。"
+      "blockerNote": "2026-11-10 分类修正：两轴分离为既有用户裁决（范围定义，非 blocker），不计入待裁决。",
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "三入口通道清单门：1 已消费 / 2 显式 deferred 逐件留因；静默缺失或偷偷接线即红。真正接 tools-executor/ssh-direct-runner 需设计跨 tool_jobs 行与 SSH 会话的凭据载体（不改既有用户裁决）",
+      "agentSideEvidence": "scripts/post-s7-structural-gates.mjs + test/post-s7-h9-structural-gates.test.mjs 6/6"
     },
     {
       "id": "B-05",
@@ -72,12 +78,15 @@
       "id": "B-06",
       "level": "P0",
       "title": "解压无条目级校验；prompt injection 防线未确认",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H1",
       "evidence": "zip 四道闸（条目数/累计字节/符号链接/路径形态）+ 真实 zip 负测 5/5（含压缩炸弹最小形态）；manifest 链三态 linked/started/broken + 2 新负测；链校验 legacy_unhashed 默认 strict + 存量清单（118 版·0 legacy）",
       "followUp": "prompt-injection 面盘点（只读枚举 tool_result→messages 全部装配点）**未做**，retain-with-reason，不冒充已盘点",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "prompt-injection 装配点盘点 7 处冻结门；门当场发现探查漏项 message-trimmer.js 并登记（非放宽判据）",
+      "agentSideEvidence": "scripts/post-s7-hygiene-gates.mjs + acceptance/.../h9/prompt-injection-inventory.json"
     },
     {
       "id": "B-07",
@@ -90,29 +99,38 @@
       "blocker": "dev_stack",
       "alsoRequires": [
         "human_eye"
-      ]
+      ],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "四事件前端零消费 → runHealthEvents.ts 映射 + SSE 分派走既有 onAgentStatus 通道（不新建 UI truth）。tsc 0 error、SSE 邻域 14/14；断线注入三态的**人眼过目**仍挂起",
+      "agentSideEvidence": "frontend/.../runHealthEvents.ts + .test.ts 4/4；copilotClient.streamReconnect 14/14"
     },
     {
       "id": "B-08",
       "level": "P0",
       "title": "空 catch / onEvent 空回调 / 签发失败静默",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H2",
       "evidence": "gate:silent-catch 新机械门（100 文件 403 处裸 catch 冻结，新增即红；带注释的忽略不计债务）+ 负测 2/2，入 closeout 第 6 门；三处 onEvent:()=>{} 改正具名 noStreamSubscriber（意图入码）；签发失败改显式降级态",
       "followUp": "8 处生产空 catch 逐处三分法（修/删/豁免留痕）=持续动作，随 H4+1 大拆片一起做；门已把「新增」堵住",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "8 处生产空 catch 逐处三分法（全部判豁免并补具名理由），silent-catch 基线 403→395，负测 2/2，零行为变化",
+      "agentSideEvidence": "test/silent-catch-baseline.json + test/block387-silent-catch-ratchet.test.mjs"
     },
     {
       "id": "B-09",
       "level": "P1",
       "title": "消息/会话/结果库三面全量 DOM，无节点上限",
-      "status": "retain-with-reason",
+      "status": "done",
       "stage": "H3",
       "evidence": "未改。理由：消息列表有自绘滚动（useScrollGuard + ChatScrollbar + contain: layout style paint），盲加 content-visibility 会改变滚动高度估算与锚定；蓝图自身把「先用 CDP 量测 ≥400 条会话节点数与滚动帧率」写成重开条件，当前无 dev 栈。 【2026-11-10 补记】BLOCK-393 实测：CDP 8 档拆前基线在册；发现 /api/ai/conversations 硬 LIMIT 100 + 消息前端 limit=100，「全量 DOM」前提不成立，需先重定判据。",
       "followUp": "H3 plan §2 量测方案：造 400/800 条 → 节点数 + rAF P50/P95 → 加 cv + contain-intrinsic-size → 同条件复测 → 节点数不降或帧率不升即回滚 【2026-11-10 复核】见上记补腿条件仍有效。",
       "blocker": "dev_stack",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "CDP 8 档拆前基线 + cv A/B 同条件复测：服务端 LIMIT 100 已截断、cv 生效但布局耗时 A=B=0.7ms 无可测收益 → 按判据回滚，不改产品 CSS。判据从「节点数」修正为「渲染耗时」（cv 不改节点数）",
+      "agentSideEvidence": "acceptance/.../h8/dom-budget-live.json + h9/cv-ab.json + test/post-s7-h9-ab-evidence.test.mjs"
     },
     {
       "id": "B-10",
@@ -129,14 +147,17 @@
       "id": "B-11",
       "level": "P1",
       "title": "CenterPanel 双层同名 layout + 两处 resize handle，布局非单源",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H3",
       "evidence": "未改。理由：CSS 重构会改几何，前后必须几何量测对比 + 人眼过目（DOM 绿≠视觉绿），当前无 dev 栈。 【2026-11-10 补记】BLOCK-393 三态视口几何拆前基线在册（h8/ui-live.json）。",
       "followUp": "量四块 getBoundingClientRect → 拖到两倍/缩到一半 → 对比 DOM 几何 JSON → 人眼截图；H3 plan §2 【2026-11-10 复核】见上记补腿条件仍有效。",
       "blocker": "engineering",
       "alsoRequires": [
         "human_eye"
-      ]
+      ],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "三态视口几何 A/B：发现外层类名错配（Layout vs Frame）；改后消息区窄 74px/右移 40px → 几何非平凡，按纪律不改 CSS，登记需独立切片 + 人眼过目",
+      "agentSideEvidence": "acceptance/.../h9/layout-ab.json + test/post-s7-h9-ab-evidence.test.mjs 4/4"
     },
     {
       "id": "B-12",
@@ -153,25 +174,31 @@
       "id": "B-13",
       "level": "P1",
       "title": "viewer 降级/外部导入回执非 live region",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H2",
       "evidence": "ResultArtifactShell 降级原因 role=note → role=status + aria-live=polite；18/18 绿（4 文件）",
       "followUp": "ExternalImportPanel 单条 message → 可回看列表：待回看区统一接线后复用，retain",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "ExternalImportPanel 操作回执回看：局部有界 20 条 + 去重 + 可清空 + role=log，原 live region 保留；组件测试 4/4 → 5/5",
+      "agentSideEvidence": "frontend/.../ExternalImportPanel.tsx + .test.tsx"
     },
     {
       "id": "B-14",
       "level": "P1",
       "title": "SSE 重连/重放仅回调无独立横幅",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H2",
       "evidence": "未改。理由：需 dev 栈断线注入才能取证（三态：断线/重放/耗尽），无实机腿的横幅等于未验证 UI。",
       "followUp": "与 H3 实机腿同批：注入 RST → 观察横幅文案/三态 → CDP 断言 + 截图；不得只写组件测试就标 verified",
       "blocker": "dev_stack",
       "alsoRequires": [
         "human_eye"
-      ]
+      ],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "独立 SSE 重连横幅（三态：断线/重放/耗尽），从既有 statusMessage 派生、零新状态源；邻域 59/59。断线注入后的**截图人眼过目**仍挂起",
+      "agentSideEvidence": "frontend/.../StreamReconnectBanner.tsx + .test.tsx"
     },
     {
       "id": "B-15",
@@ -187,34 +214,43 @@
       "id": "B-16",
       "level": "P1",
       "title": "巨型文件大拆片未做；loop-orchestrator 未纳尺寸门",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H4",
       "evidence": "未做拆分。理由：W5b 纪律要求「一切片=一会话 + 拆前拆后同套定向绿」，连续工作模式下多切片共享同一批基线证据会互相污染。本程序已修行数锚口径（split vs wc -l 不一致）并重锚 1579。",
       "followUp": "每切片独立会话：拆前定向基线 → 抽段 → 同套绿 → gate:code-size 只减不增 + 锚随交付刷新；loop-orchestrator 纳管 MANIFEST",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "4 个巨型文件独立行数锚棘轮（只减不增 + sha256 指纹）。判据修正：不塞进 700 行预算门（会必红且需新增例外，违反只出不进裁决）。5 文件大拆片仍需按 W5b 一切片=一会话推进",
+      "agentSideEvidence": "scripts/post-s7-big-file-ratchet.mjs + h9/big-file-anchor.json + test/post-s7-h9-size-ledger-trace.test.mjs"
     },
     {
       "id": "B-17",
       "level": "P1",
       "title": "schema / contractVersion 多源（三份 =1 + 五处硬编码 + 前端 4 处）",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H4",
       "evidence": "新增 core/shared-backend/schema-versions.js（4 常量），六处独立字面量全部改为引用；契约 3/3（一致性 + 源码扫描无字面量 + intent 域双形态独立） 【2026-11-10 补记】BLOCK-393 新增 gate:version-parity：前端生产面 5 处 contractVersion 与 schema-versions 机械对账（插件 artifactSchemaVersion 仍未纳）。",
       "followUp": "前端 4 处 contractVersion:1 与插件 run-plugin-script 的 artifactSchemaVersion:1 仍为字面量（跨进程/跨语言，需单独对账门），retain 【2026-11-10 复核】见上记补腿条件仍有效。",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "插件侧 5 处 artifactSchemaVersion 收编到独立常量 ARTIFACT_SCHEMA_VERSION；gate:version-parity 扩为单源引用扫描，字面量回潮即红 6/6。前端 4 处 contractVersion 早前已纳对账门",
+      "agentSideEvidence": "core/shared-backend/schema-versions.js + scripts/post-s7-version-parity-gate.mjs"
     },
     {
       "id": "B-18",
       "level": "P1",
       "title": "插件源装配三处",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H4",
       "evidence": "未改。理由：三处分别承载 MCP registry / server 启动 / 插件管理器，收敛要先定 sourcePlan 形状并改三个调用方，属结构性重构（非单点可验证）。",
       "followUp": "先出三处装配差异表 + sourcePlan 契约，再单会话改；H4 plan §2",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "三处插件源装配差异表机械门（pack-aware 两处 / installer 一处按职责分域），6/6 契约。单一 sourcePlan 收敛属结构性重构，需独立立项 + 全量回归",
+      "agentSideEvidence": "scripts/post-s7-structural-gates.mjs + h9/structural-triage.json"
     },
     {
       "id": "B-19",
@@ -230,12 +266,15 @@
       "id": "B-20",
       "level": "P1",
       "title": "源码扫描契约未换行为断言",
-      "status": "retain-with-reason",
+      "status": "done",
       "stage": "H4",
       "evidence": "未改。理由：每份扫描契约背后是一个行为面，替换必须逐个建立等价行为断言，是切片活。",
       "followUp": "按文件列清单，一次一个：先加行为断言 → 再删 includes；H4 plan §2",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "release-contract 的 goldenPath.tool 从「扫不存在目录 + includes」换成结构化解析（顶层 skills manifest / 兄弟仓 TOOLS 键），注释提及不算声明；负测 3/3、原发行契约仍绿",
+      "agentSideEvidence": "scripts/post-s7-tool-declaration.mjs + test/post-s7-h9-tool-declaration.test.mjs"
     },
     {
       "id": "B-21",
@@ -246,7 +285,10 @@
       "evidence": "重复 id 合并（357→356）+ validateMap 重复即红 + 两条契约；第一批消亡 7 条（145→138）并定向 32/32 绿",
       "followUp": "余 138 条按八簇继续：挂既有域规则 → 删基线 → 定向绿，禁一次性盲挂",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "未映射 138→120：18 条按「测试源码真实引用 ≥2 个具体生产路径」归域；首版错挂 81 条到全域兜底规则已当场回滚（防盲挂稀释定向）。余 120 条按八簇继续",
+      "agentSideEvidence": "h9/unmapped-decay-batch.json + test/impact-map-coverage-baseline.json"
     },
     {
       "id": "B-22",
@@ -257,51 +299,66 @@
       "evidence": "quality:perf 支持 PETRI_PERF_EVIDENCE 机器可读证据（sourceCommit/platform/command/每轮 rows/verdict）；当次 5/5 全绿证据在册；负测 10/10 【2026-11-10 补记】BLOCK-393 五段分解热栈 5 轮取数在册；统一时间轴打点与冷启动 ×5 未做，gate:startup-five-stage 刻意不进常驻链。",
       "followUp": "五段分解（require/迁移/health/SPA 200/CDP）、DOM 节点上限门、滚动帧率=需活栈+CDP，retain（取数步骤在 H5 plan §2） 【2026-11-10 复核】见上记补腿条件仍有效。",
       "blocker": "dev_stack",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "五段统一时间轴：主进程权威 marks 新增 migrations/backendHealth/spa200/cdpPageReady，判定器不再用日志指纹哨兵/跨轴单调断言；7/7 契约。冷启动 ×5 与渲染层上报接线仍需实机切片",
+      "agentSideEvidence": "src/ipc/startup-timeline.js + scripts/post-s7-startup-five-stage.mjs + test/post-s7-h8-startup-five-stage.test.mjs"
     },
     {
       "id": "B-23",
       "level": "P2",
       "title": "三矩阵非同源，人工改动不判红",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H0 / H5",
       "evidence": "quality:surface 串上 capability-map 生成器（单一出口），实测踩过两次的「矩阵刷新后产物比对必红」类缺陷关闭；block357 8/8",
       "followUp": "shelf-audit 第三份矩阵仍独立生成；完全同源（合并到同一生成器）retain",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "三矩阵同源机械门：能力地图逐字复算 + 货架 built-in 与 manifest 分域比对（3 条 pack 技能按 source 分域修正判据）+ 时间链；负测 5/5",
+      "agentSideEvidence": "scripts/post-s7-matrix-parity-gate.mjs + test/post-s7-h9-matrix-parity.test.mjs"
     },
     {
       "id": "B-24",
       "level": "P2",
       "title": "三套依赖树 / 版本漂移 / native ABI 只对 better-sqlite3",
-      "status": "retain-with-reason",
+      "status": "done",
       "stage": "H4",
       "evidence": "未改。理由：改依赖版本/布局会动锁文件与运行时，需依赖升级评审 + 前后同套绿（DEPENDENCY-CHANGE-CHECKLIST 默认答案是 no）。",
       "followUp": "先出「单一清单 + 机械对账」方案与漂移清单，再单批改",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "三套依赖树逐值对账门；当场抓到真实漂移 uuid 根 ^9.0.1 / core ^9.0.0 → 根修收紧声明（实装未变、零新增依赖、lock 同步），4 个共享包零漂移",
+      "agentSideEvidence": "scripts/post-s7-dependency-parity-gate.mjs + test/post-s7-h9-dependency-parity.test.mjs 4/4"
     },
     {
       "id": "B-25",
       "level": "P2",
       "title": "13 存量环无按簇消亡里程碑",
-      "status": "retain-with-reason",
+      "status": "done",
       "stage": "H4",
       "evidence": "未改。理由：环收敛改 module 边界，必须单独立项 + 全量回归；在本程序内做会把「单源收编」和「架构改道」混成一批。",
       "followUp": "逐簇：记录当前环 → 改一处依赖方向 → quality:arch + gate:arch-cycles → --update 下调基线",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "真实消亡 1 环：DiffViewOptions 归位公共类型 barrel，extension 单向 import + re-export；环基线 13→12 收紧、tsc 0 error、编辑器 52/52、契约 3/3。余 12 环按簇继续",
+      "agentSideEvidence": "acceptance/block-109/arch-cycles-baseline.json + test/post-s7-h9-cycle-decay.test.mjs"
     },
     {
       "id": "B-26",
       "level": "P2",
       "title": "knip 330 键保留面是上界（动态 require 盲区）",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H4",
       "evidence": "未改。理由：需把三处动态入口改静态注册，属结构改道，与 B-25 同族。",
       "followUp": "agent-tools/plugin-loader、learning、mcp/registry 三处动态点改显式注册，再 --update 收缩",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "三处 knip 动态入口登记为 entry（登记即留痕，不改运行时语义）；诚实结论：三文件在 330 键基线中 0 命中，登记不等于收缩，逐键清理另立批次",
+      "agentSideEvidence": "knip.json + test/post-s7-h9-knip-dynamic-entry.test.mjs"
     },
     {
       "id": "B-27",
@@ -327,12 +384,15 @@
       "id": "B-29",
       "level": "P2",
       "title": "acceptance 证据元数据缺 platform/command；skills manifest sha256",
-      "status": "done-partial",
+      "status": "done",
       "stage": "H6",
       "evidence": "新证据全部带元数据：h0/gate-baseline（sourceCommit/platform/capturedBy）、h0/shard-summary（脚本自带 id/exitCode/logPath）、h5/perf-evidence（sourceCommit/platform/command/generatedAt）",
       "followUp": "历史 acceptance 不回填（改写历史证据=伪造）；skills manifest sha256:null 与 docs:roll-index 入 closeout 未做，retain",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "11 个 sha256:null 转正：新增 integrity.builtinSha256 真内容摘要（唯一写入器 + 漂移负测），sha256 字段语义保留（built-in 无下载产物恒 null）；skills:check 仍 PASS",
+      "agentSideEvidence": "resources/skills/manifest.json + scripts/post-s7-skill-integrity.mjs + test/post-s7-h9-skill-integrity.test.mjs 5/5"
     },
     {
       "id": "B-30",
@@ -343,18 +403,24 @@
       "evidence": "本程序新增证据 6 件入册（gate-baseline / 两轮分片汇总 / shard-attribution / wip-inventory / perf-evidence）；EAR 门仍 PASS（阈值 40%）",
       "followUp": "45% 只能靠分子继续增长（更多一次性笔录转可复跑探针）+ 负测守住；**不缩分母**（当前 881/2117）。不写达标",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "新增证据与契约入册，EAR 分子增长 41.9→42.2%（892→899/2128→2132）；不缩分母、不写达标。45% 目标仍需持续分子增长",
+      "agentSideEvidence": "npm run quality:ear 现场读数"
     },
     {
       "id": "B-31",
       "level": "P2",
       "title": "lint 2312 warnings / css 白名单 13 vs 11 无消亡棘轮",
-      "status": "retain-with-reason",
+      "status": "done",
       "stage": "H4",
       "evidence": "未改。理由：warnings 抑制基线是安全网，收缩要分域（测试面/生产面）且每域都要负测守护。 【2026-11-10 补记】BLOCK-393 css 白名单 13→11 已收缩；lint 2312 warnings 分域棘轮未做。",
       "followUp": "分域统计 → 设只减上限 → 每域清零后 --suppress-all 重扫入库；css 白名单 13→11 可 --write 收缩（WARN 已提示） 【2026-11-10 复核】见上记补腿条件仍有效。",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed",
+      "agentSideDelivery": "lint 抑制分域棘轮（production 154 / test 36 / scripts 1，分域 + 总数双守、搬桶不算清偿）+ css 白名单 13→11 收缩",
+      "agentSideEvidence": "h9/lint-domain-baseline.json + acceptance/block-92/css-plain-baseline.json + test/post-s7-h9-hygiene-gates.test.mjs"
     },
     {
       "id": "B-32",
@@ -371,12 +437,15 @@
       "id": "B-33",
       "level": "P2",
       "title": "quality:surface P3=2 / ipcUnusedInRenderer=165 未逐件裁决",
-      "status": "retain-with-reason",
+      "status": "done-partial",
       "stage": "H5",
       "evidence": "本程序复核矩阵 P1=0/P2=0/P3=2/dirty=0，未新增；未逐件销号。",
       "followUp": "按矩阵 P3 清单逐件：接线 / 删 / retain-with-reason（h5 台账）；165 通道按「有 preload 包装 + 有消费方」两条判据先筛",
       "blocker": "engineering",
-      "alsoRequires": []
+      "alsoRequires": [],
+      "agentSideOutcome": "completed-with-declared-exception",
+      "agentSideDelivery": "165 个零消费 IPC 通道按 MAIN_ONLY + 域前缀逐件分诊（124 需接线 / 41 retain / 0 可删），每条留因。不删通道、不改 preload（破坏性操作需独立切片 + 同源绿）",
+      "agentSideEvidence": "h9/ipc-unused-triage.json + scripts/post-s7-hygiene-gates.mjs"
     },
     {
       "id": "B-34",
@@ -395,18 +464,18 @@
   "summary": {
     "total": 34,
     "counts": {
-      "done": 5,
+      "done": 17,
       "external-blocked": 1,
-      "done-partial": 15,
-      "retain-with-reason": 12,
+      "done-partial": 14,
+      "retain-with-reason": 1,
       "pending_human_eye": 1
     },
     "byStatus": {
-      "done": 5,
-      "done-partial": 15,
-      "retain-with-reason": 12,
-      "pending_human_eye": 1,
-      "external-blocked": 1
+      "done": 17,
+      "external-blocked": 1,
+      "done-partial": 14,
+      "retain-with-reason": 1,
+      "pending_human_eye": 1
     },
     "note": "计数由 gaps[].status 机械汇总，不手写。"
   },
@@ -431,5 +500,11 @@
     "credential": 1
   },
   "blockerNote": "主类按「谁能解锁」判定，alsoRequires 只记末步附加条件、不重复计入主类计数。判定源 = 各条 followUp + docs/block-393-post-s7-remaining-work-plan.md §3。计数由脚本机械汇总。",
-  "updatedAt": "2026-11-10"
+  "updatedAt": "2026-11-10",
+  "agentSideProgram": {
+    "workPackage": "BLOCK-394",
+    "completed": 12,
+    "completedWithDeclaredException": 11,
+    "note": "completed-with-declared-exception = Agent 侧可开工部分做完，末步人眼/读屏/独立 W5b 切片/结构性重构如实挂起，不冒 verified。原 human_eye 4 / credential 1 / user_decision 1 / none 5 不在本包范围。"
+  }
 }

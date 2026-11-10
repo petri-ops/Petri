@@ -7,8 +7,8 @@
  *
  * 五段口径（缺一段就如实标 not_instrumented，不编数字）：
  *   ① require      ← 既有 marks.mainReady（主进程模块加载完成）
- *   ② migrations   ← 后端启动日志的 migrations 指纹；无指纹则 not_instrumented
- *   ③ backendHealth← :3001 /api/health 首次 200
+ *   ② migrations   ← 主进程 marks.migrations（BLOCK-394 B-22 新增，同源时间轴）
+ *   ③ backendHealth← 主进程 marks.backendHealth（health 首次 200，同源时间轴）
  *   ④ spa200       ← :3000 首次 200
  *   ⑤ cdpPageReady ← 9223 页面 document.readyState=complete
  *
@@ -67,11 +67,11 @@ function readMainMarks() {
   } catch { return {}; }
 }
 
-function readMigrationMark(logPath) {
-  try {
-    const text = fs.readFileSync(logPath, 'utf8');
-    return /migrations? applied|migration-runner|schema step/i.test(text) ? 1 : 'not_instrumented';
-  } catch { return 'not_instrumented'; }
+// 主进程权威 marks（startup:marks）是唯一时间轴；五段都从这里读，不再跨轴混算。
+function readAuthoritativeStages() {
+  const m = readMainMarks().marks || {};
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'not_instrumented');
+  return { migrations: num(m.migrations), backendHealth: num(m.backendHealth), spa200: num(m.spa200), cdpPageReady: num(m.cdpPageReady) };
 }
 
 export function collectRound(logPath = '/tmp/petri-h8-backend-iso.log') {
@@ -87,13 +87,16 @@ export function collectRound(logPath = '/tmp/petri-h8-backend-iso.log') {
     const pages = JSON.parse(raw).filter((t) => t.type === 'page' && t.url.includes('localhost:3000'));
     if (pages.length) cdp = Date.now() - start;
   } catch { /* 如实留标 */ }
+  const authoritative = readAuthoritativeStages();
+  // 主进程 marks 优先；未上报的段用外部探针兜底并显式标注 axis=external（不冒充同源）。
   return {
     require: mainReady,
-    migrations: readMigrationMark(logPath),
-    backendHealth: health ?? 'not_instrumented',
-    spa200: spa ?? 'not_instrumented',
-    cdpPageReady: cdp,
-    marksSource: 'src/ipc/startup-timeline.js (startup:marks, read-only)',
+    migrations: authoritative.migrations,
+    backendHealth: authoritative.backendHealth !== 'not_instrumented' ? authoritative.backendHealth : (health ?? 'not_instrumented'),
+    spa200: authoritative.spa200 !== 'not_instrumented' ? authoritative.spa200 : (spa ?? 'not_instrumented'),
+    cdpPageReady: authoritative.cdpPageReady !== 'not_instrumented' ? authoritative.cdpPageReady : cdp,
+    marksSource: 'src/ipc/startup-timeline.js (startup:marks, 主进程权威单一时间轴)',
+    axisNote: '五段均取主进程 Date.now() 轴；外部 curl 探针仅作未上报时的兜底并单独标注。',
   };
 }
 
@@ -114,7 +117,7 @@ if (isMain) {
     sampling: '热栈连续 5 轮（非冷启动 5 次）；取最差轮为准',
     rounds,
     evaluation: result,
-    note: 'require 段复用既有主进程 startup:marks；migrations 段只能从日志指纹判断「有/无独立打点」，不是耗时读数。',
+    note: 'BLOCK-394 B-22：migrations/backendHealth/spa200/cdpPageReady 四段已由主进程权威 marks 覆盖（同一 Date.now() 轴）；渲染层未上报时外部探针兜底并如实标注。',
   };
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(evidence, null, 2) + '\n');

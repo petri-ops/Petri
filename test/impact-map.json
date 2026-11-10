@@ -7860,7 +7860,12 @@
         "eslint-suppressions.json",
         "scripts/post-s7-structural-gates.mjs",
         "scripts/post-s7-big-file-ratchet.mjs",
-        "scripts/post-s7-tool-declaration.mjs"
+        "scripts/post-s7-tool-declaration.mjs",
+        "scripts/post-s7-cv-ab.cjs",
+        "scripts/post-s7-layout-ab.cjs",
+        "frontend/src/components/copilot/copilotClient/runHealthEvents.ts",
+        "frontend/src/components/copilot/StreamReconnectBanner.tsx",
+        "acceptance/post-s7-2026-11-09/h7/gap-ledger.json"
       ],
       "tests": [
         "test/post-s7-h9-dependency-parity.test.mjs",
@@ -7873,13 +7878,35 @@
         "test/post-s7-h9-size-ledger-trace.test.mjs",
         "test/post-s7-h9-role-prefix.test.mjs",
         "test/post-s7-h9-cycle-decay.test.mjs",
-        "test/post-s7-h9-tool-declaration.test.mjs"
+        "test/post-s7-h9-tool-declaration.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "frontend/src/components/copilot/copilotClient/runHealthEvents.test.ts",
+        "frontend/src/components/copilot/StreamReconnectBanner.test.tsx",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
       ],
       "commands": [
         "docs-check"
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-gate"
+    },
+    {
+      "id": "block394-startup-marks",
+      "note": "BLOCK-394 B-22 五段统一时间轴：主进程权威 marks（migrations/backendHealth/spa200/cdpPageReady）+ 五段判定器同源读取。",
+      "patterns": [
+        "src/ipc/startup-timeline.js",
+        "src/main.js",
+        "scripts/post-s7-startup-five-stage.mjs",
+        "test/post-s7-h8-startup-five-stage.test.mjs",
+        "acceptance/post-s7-2026-11-10/h8/startup-five-stage.json"
+      ],
+      "tests": [
+        "test/post-s7-h8-startup-five-stage.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
     }
   ]
 }

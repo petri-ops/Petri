@@ -3,7 +3,11 @@
  * 只测纯函数判据，不冒充实机读数；慢样本 / 缺段 / 倒序 / 非法值都要红。
  */
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 import { evaluateFiveStages, FIVE_STAGES, SLOW_SAMPLE_MS } from '../scripts/post-s7-startup-five-stage.mjs';
 
 const good = () => ({ require: 35, migrations: 40, backendHealth: 55, spa200: 70, cdpPageReady: 95 });
@@ -49,4 +53,23 @@ test('not_instrumented 单段如实标注但不冒充通过', () => {
   const allPartial = evaluateFiveStages([partial, partial]);
   assert.equal(allPartial.ok, false, '该段全程无打点则不可宣布五段齐全');
   assert.deepEqual(allPartial.permanentlyMissing, ['migrations']);
+});
+
+// BLOCK-394 B-22：五段统一时间轴（主进程权威 marks，不再跨轴混算）
+test('B-22 主进程 marks 新增四段，单一真相源', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'src/ipc/startup-timeline.js'), 'utf8');
+  for (const key of ['migrations', 'backendHealth', 'spa200', 'cdpPageReady']) {
+    assert.ok(new RegExp(`\\b${key}: null`).test(src), `${key} 未登记`);
+  }
+  const main = fs.readFileSync(path.join(ROOT, 'src/main.js'), 'utf8');
+  assert.ok(main.includes('markStartup("backendHealth")'));
+  assert.ok(main.includes('markStartup("migrations")'));
+});
+
+test('B-22 判定器不再用日志指纹哨兵 / 不做跨轴单调断言', () => {
+  const script = fs.readFileSync(path.join(ROOT, 'scripts/post-s7-startup-five-stage.mjs'), 'utf8');
+  assert.ok(script.includes('readAuthoritativeStages'));
+  assert.equal(script.includes('readMigrationMark'), false, '旧日志指纹哨兵应已移除');
+  assert.ok(script.includes('主进程权威单一时间轴'));
+  assert.equal(/non_monotonic/.test(script), false);
 });
