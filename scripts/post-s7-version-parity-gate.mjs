@@ -19,6 +19,19 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const versions = require(path.join(ROOT, 'core/shared-backend/schema-versions.js'));
 
 /** 生产面字面量点（测试 fixture 不算：它们是冻结契约的输入，不是第二定义）。 */
+/**
+ * BLOCK-394 B-17：插件 / 产物侧 artifactSchemaVersion 已从 5 处字面量收编为
+ * 对 schema-versions.js 的引用。这里钉「引用在册」而不是字面量值——
+ * 防止有人把引用改回硬编码（那会重新制造单边升版漏改）。
+ */
+export const SCHEMA_REFERENCE_POINTS = [
+  'core/petri-server/mcp/registry/run-plugin-script.js',
+  'core/petri-server/plugin-loader.js',
+  'core/petri-server/helpers/tools-executor.js',
+  'core/petri-server/helpers/artifact-truth.js',
+  'core/shared-backend/scientific-replay-package.js',
+];
+
 export const PRODUCTION_LITERAL_POINTS = [
   { file: 'frontend/src/lib/artifact-selection.ts', pattern: /contractVersion:\s*(\d+)/g, field: 'RESULT_STUDIO_CONTRACT_VERSION' },
   { file: 'frontend/src/components/workspace-panels/Model3DResultViewer.tsx', pattern: /contractVersion:\s*(\d+)/g, field: 'RESULT_STUDIO_CONTRACT_VERSION' },
@@ -38,6 +51,17 @@ export function evaluateParity(readFile = (p) => fs.readFileSync(path.join(ROOT,
         issues.push(`${point.file}: ${point.field} 字面量 ${value} ≠ 登记处 ${versions[point.field]}`);
       }
     }
+  }
+  for (const file of SCHEMA_REFERENCE_POINTS) {
+    let text;
+    try { text = readFile(file); } catch { issues.push(`${file}: unreadable`); continue; }
+    if (!text.includes('ARTIFACT_SCHEMA_VERSION')) {
+      issues.push(`${file}: 插件侧版本未引用 schema-versions 单源（字面量回潮）`);
+    }
+    if (/artifactSchemaVersion\s*[:=]\s*\d+|artifactSchemaVersion\s*\|\|\s*\d+/.test(text)) {
+      issues.push(`${file}: 仍有 artifactSchemaVersion 数字字面量`);
+    }
+    checked.push({ file, field: 'ARTIFACT_SCHEMA_VERSION', value: 'single-source-ref' });
   }
   return { ok: issues.length === 0, issues, checked, registry: versions };
 }

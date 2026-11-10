@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const { ARTIFACT_TRUTH_VERSION } = require('../../shared-backend/schema-versions');
+const { ARTIFACT_SCHEMA_VERSION } = require('../../shared-backend/schema-versions');
 const STAGED_INPUT_EXCLUSION_POLICY = 'server_staged_inputs_v1';
 const SHA256_BUFFER_BYTES = 1024 * 1024;
 const INTERNAL_FILES = new Set([
@@ -428,7 +429,7 @@ function reconcileArtifactTruth({
   };
   const cleanResult = {
     ...result,
-    artifactSchemaVersion: result.artifactSchemaVersion || 1,
+    artifactSchemaVersion: result.artifactSchemaVersion || ARTIFACT_SCHEMA_VERSION,
     artifactTruth,
     artifactDiagnostics: uniqueIssues,
     artifacts: validArtifacts,

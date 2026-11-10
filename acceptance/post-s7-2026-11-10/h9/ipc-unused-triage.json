@@ -1,0 +1,1333 @@
+{
+  "ok": true,
+  "issues": [],
+  "total": 165,
+  "buckets": {
+    "deletable": [],
+    "needsWiring": [
+      {
+        "channel": "agent:task-done",
+        "domain": "agent",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "agent 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ai-settings:get",
+        "domain": "ai-settings",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ai-settings 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ai-settings:get-credential",
+        "domain": "ai-settings",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ai-settings 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ai-settings:list-models",
+        "domain": "ai-settings",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ai-settings 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ai-settings:save",
+        "domain": "ai-settings",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ai-settings 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ai-settings:test",
+        "domain": "ai-settings",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ai-settings 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "backend:status",
+        "domain": "backend",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "backend 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:active",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:create",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:delete",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:list",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:rename",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "branch:switch",
+        "domain": "branch",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "branch 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "content-plugin:list",
+        "domain": "content-plugin",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "content-plugin 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "content-plugin:list-docs",
+        "domain": "content-plugin",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "content-plugin 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "content-plugin:read",
+        "domain": "content-plugin",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "content-plugin 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "data:info",
+        "domain": "data",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "data 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "data:open-dir",
+        "domain": "data",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "data 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "diagnostic:export",
+        "domain": "diagnostic",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "diagnostic 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "diagnostic:crash-status",
+        "domain": "diagnostic",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "diagnostic 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "diagnostic:crash-dump-summary",
+        "domain": "diagnostic",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "diagnostic 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "diagnostic:crash-open-dumps",
+        "domain": "diagnostic",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "diagnostic 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "diagnostic:crash-simulate",
+        "domain": "diagnostic",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "diagnostic 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:list-directory",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:open-dialog",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:open-path",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:open-workspace-file",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:show-in-folder",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:download-from-url",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:start-drag",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:save-dialog",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:save-text-file",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "file:validate-directory",
+        "domain": "file",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "file 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "petri:agent-workbench-flags",
+        "domain": "petri",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "petri 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "startup:report",
+        "domain": "startup",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "startup 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "startup:marks",
+        "domain": "startup",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "startup 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:apply-inverse-hunk",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:blame",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:branch-list",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:checkout-branch",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:checkpoint-create",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:checkpoint-rollback",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:commit-diff",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:commit-file-content",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:commit-index",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:commit-log",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:commit-review",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:discard-file",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:file-head-content",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:hunk-apply",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:hunk-reject-inverse",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:init-repository",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:list-modified",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:pull",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:push",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:remote-list",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:remote-status",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:revert-file",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:working-tree-shortstat",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:split-side-diff",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:stage-paths",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:stash-list",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:tag-list",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:undo-last-commit",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:unstage-paths",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:working-tree-diff",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:working-tree-file-content",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:working-tree-revert",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "git:working-tree-status",
+        "domain": "git",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "git 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "harness-capabilities:list",
+        "domain": "harness-capabilities",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "harness-capabilities 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:install-from-dialog",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:install-path",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:install-progress",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:install-runtime",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:list-available",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:list-installed",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:set-enabled",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:uninstall",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "pack:uninstall-plan",
+        "domain": "pack",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "pack 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "install:deep-link",
+        "domain": "install",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "install 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "install:preview-deep-link",
+        "domain": "install",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "install 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "install:confirm-deep-link",
+        "domain": "install",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "install 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "install:pending-deep-link",
+        "domain": "install",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "install 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "plugin:list-installed",
+        "domain": "plugin",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "plugin 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "plugin:list-remote",
+        "domain": "plugin",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "plugin 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "runtime:status",
+        "domain": "runtime",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "runtime 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:cancel",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:discover",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:execute",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:getExecution",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:set-disabled",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:uninstall",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:get-install-info",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:reinstall",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:import-directory",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "skills:import-path",
+        "domain": "skills",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "skills 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "mcp-config:import-dialog",
+        "domain": "mcp-config",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "mcp-config 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "mcp-config:import-path",
+        "domain": "mcp-config",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "mcp-config 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "ssh:register-host",
+        "domain": "ssh",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "ssh 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "telemetry:report",
+        "domain": "telemetry",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "telemetry 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:open-log-dir",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:open-shell",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:session-list",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:session-resize",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:session-start",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:session-stop",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:session-write",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "terminal:snapshot",
+        "domain": "terminal",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "terminal 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:check",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:download",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:download-progress",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:error",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:install",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:update-available",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:update-downloaded",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "updater:update-not-available",
+        "domain": "updater",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "updater 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "workspace:write-text-file",
+        "domain": "workspace",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "workspace 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:prepare",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:set-state",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:open-external",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:copy-image",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:export",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:get-data",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      },
+      {
+        "channel": "gen-ui:sandbox-hijacked",
+        "domain": "gen-ui",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "gen-ui 面有 preload 包装但渲染层零消费：接线到真实入口或明确标预留（逐件裁决）"
+      }
+    ],
+    "retainWithReason": [
+      {
+        "channel": "computer-use:pip-open",
+        "domain": "computer-use",
+        "mainOnly": true,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "MAIN_ONLY 独立 preload 通道（主窗不暴露，设计如此）；保留，逐件在册不计缺陷"
+      },
+      {
+        "channel": "computer-use:pip-close",
+        "domain": "computer-use",
+        "mainOnly": true,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "MAIN_ONLY 独立 preload 通道（主窗不暴露，设计如此）；保留，逐件在册不计缺陷"
+      },
+      {
+        "channel": "computer-use:pip-frame",
+        "domain": "computer-use",
+        "mainOnly": true,
+        "inPreload": false,
+        "usedInRenderer": false,
+        "reason": "MAIN_ONLY 独立 preload 通道（主窗不暴露，设计如此）；保留，逐件在册不计缺陷"
+      },
+      {
+        "channel": "computer-use:pip-status",
+        "domain": "computer-use",
+        "mainOnly": true,
+        "inPreload": false,
+        "usedInRenderer": false,
+        "reason": "MAIN_ONLY 独立 preload 通道（主窗不暴露，设计如此）；保留，逐件在册不计缺陷"
+      },
+      {
+        "channel": "app:get-activity-summary",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:get-shell-status",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:hide-to-tray",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:notification-clicked",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:notify",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:preview-quit-summary",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:quit-decision",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:quit-requested",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:relaunch",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:set-shell-prefs",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:show-main",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "app:soft-refresh",
+        "domain": "app",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "app 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:close",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:fullscreen-changed",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:get-zoom",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:isFullScreen",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:isMaximized",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:maximize",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:maximize-changed",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:minimize",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:open-result-in-main",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:pop-out",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:rail-mouse",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:relay-to-main",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:remove",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:restore",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:return",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:self",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:set-always-on-top",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:set-ignore-mouse-events",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:test-manage-mode-changed",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:snapshot",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:state-changed",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:thumbnail",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:toggleFullScreen",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:zoom-by",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      },
+      {
+        "channel": "window:zoom-reset",
+        "domain": "window",
+        "mainOnly": false,
+        "inPreload": true,
+        "usedInRenderer": false,
+        "reason": "window 面主进程自驱 / 平台条件通道：保留并逐件留因，待该面实机腿核对"
+      }
+    ]
+  },
+  "note": "本包只做逐件分诊与留因，不删通道、不改 preload（破坏性操作需独立切片与同源绿）。"
+}

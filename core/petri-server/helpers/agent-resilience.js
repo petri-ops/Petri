@@ -133,7 +133,7 @@ function maybeMicrocompactBody(body, ctx = {}) {
       `[block98-microcompact] folded=${result.folded} groups=${result.groups} ` +
       `clearedChars=${result.clearedChars} window=${window}`
     );
-  } catch {}
+  } catch { /* BLOCK-394 B-08 豁免：诊断日志写入失败不影响清理结果返回值 */ }
   return {
     ...body,
     messages: result.messages,

@@ -61,7 +61,7 @@ async function logDecision(entry) {
   } catch (e) {
     // 记账失败静默跳过——决策结果永不因台账受影响；BLOCK116_DEBUG=1 时出口诊断
     if (process.env.BLOCK116_DEBUG) {
-      try { console.error('[block116] logDecision failed:', e && e.message); } catch {}
+      try { console.error('[block116] logDecision failed:', e && e.message); } catch { /* BLOCK-394 B-08 豁免：诊断输出自身失败不得二次抛错 */ }
     }
   }
 }

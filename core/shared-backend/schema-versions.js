@@ -31,6 +31,11 @@ const RESULT_STUDIO_CONTRACT_VERSION = 1;
 /** 交付清单结构版本（delivery-manifest.json 形状）。 */
 const DELIVERY_MANIFEST_VERSION = 1;
 
+/** 插件 / 结果产物 artifactSchemaVersion（BLOCK-394 B-17 收编）。
+ * 与 RESULT_STUDIO_CONTRACT_VERSION **不并**：后者是 Result Studio 行形状契约，
+ * 本值是产物清单形状；两者恰好同为 1 但升版互不影响，误并会造成单边升版漏改。 */
+const ARTIFACT_SCHEMA_VERSION = 1;
+
 /** Agent 工具调用/结果契约版本（字符串形态，面向插件作者）。 */
 const TOOL_CONTRACT_VERSION = '1.0.0';
 
@@ -39,4 +44,5 @@ module.exports = {
   RESULT_STUDIO_CONTRACT_VERSION,
   DELIVERY_MANIFEST_VERSION,
   TOOL_CONTRACT_VERSION,
+  ARTIFACT_SCHEMA_VERSION,
 };

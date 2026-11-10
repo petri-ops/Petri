@@ -83,7 +83,7 @@ async function openVerifiedRevisionArtifact(workspaceRoot, revision, deps = {}) 
     };
   } catch (error) {
     if (fd !== null) {
-      try { fs.closeSync(fd); } catch {}
+      try { fs.closeSync(fd); } catch { /* BLOCK-394 B-08 豁免：fd 已关闭/无效时忽略，主错误照常上抛 */ }
     }
     if (error?.code === 'verified_snapshot_hash_mismatch') throw new Error('artifact_hash_mismatch');
     throw error;

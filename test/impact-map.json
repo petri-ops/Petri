@@ -267,7 +267,8 @@
         "test/block322-p2-03-material.test.mjs",
         "test/block322-p2-04-turntable.test.mjs",
         "frontend/src/lib/workspaceFileUpload.test.ts",
-        "frontend/src/lib/model3dAssetImport.test.ts"
+        "frontend/src/lib/model3dAssetImport.test.ts",
+        "test/block344-edit-governance.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -461,7 +462,9 @@
         "test/block228-crash-guard.test.mjs",
         "test/block201-settings-baseline.test.mjs",
         "test/ipc-channels-registry.test.mjs",
-        "frontend/src/components/desktop/CrashNoticeBanner.test.tsx"
+        "frontend/src/components/desktop/CrashNoticeBanner.test.tsx",
+        "test/dev-electron-profile.test.mjs",
+        "test/preload-branch-result-namespaces.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -612,7 +615,8 @@
         "test/ipc-channels-registry.test.mjs",
         "test/block201-settings-baseline.test.mjs",
         "frontend/src/components/shell/QuitSummaryDialog.test.tsx",
-        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx"
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx",
+        "test/window-controls.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -823,7 +827,8 @@
         "test/ai-usage-project.test.mjs",
         "test/block67-ssh-surface.test.mjs",
         "test/project-storage.test.mjs",
-        "test/project-notices.test.mjs"
+        "test/project-notices.test.mjs",
+        "test/block34-background-processes-route.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -1063,7 +1068,8 @@
         "test/agent-approval.test.mjs",
         "test/agent-run-tool.test.mjs",
         "test/result-selection-tools.test.mjs",
-        "test/result-replay-service.test.mjs"
+        "test/result-replay-service.test.mjs",
+        "test/project-result-sandbox.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -2003,7 +2009,8 @@
         "test/block389-version-single-source.test.mjs",
         "test/block389-db-path-single-source.test.mjs",
         "test/nso-w2-db-single-source.test.mjs",
-        "test/db-singleton.test.mjs"
+        "test/db-singleton.test.mjs",
+        "test/agent-system-info.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -2505,7 +2512,8 @@
         "test/block83-script-host-languages.test.mjs",
         "test/loop-failure-diagnoser.test.cjs",
         "test/loop-fixtures.test.mjs",
-        "test/hle-c5r-regression.test.mjs"
+        "test/hle-c5r-regression.test.mjs",
+        "test/block127-lineage.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -3044,7 +3052,9 @@
       ],
       "tests": [
         "test/block88-engineer-identity.test.mjs",
-        "test/block88-task-attribution.test.mjs"
+        "test/block88-task-attribution.test.mjs",
+        "test/block87-projection-data.test.mjs",
+        "test/federation-terminal.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -3191,7 +3201,8 @@
         "test/tool-activity-labels.test.mjs",
         "test/block109-p2-tool-metadata.test.mjs",
         "test/block113-tool-prerouting.test.mjs",
-        "test/block116-decision-platform.test.mjs"
+        "test/block116-decision-platform.test.mjs",
+        "test/block171-tool-cancel.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
@@ -3382,7 +3393,10 @@
         "test/block109-stream-retry.test.mjs",
         "test/block109-p3-gates.test.mjs",
         "test/agent-runner-loop-orchestrator.test.mjs",
-        "test/block109-orchestration.test.mjs"
+        "test/block109-orchestration.test.mjs",
+        "test/agent-runner-facade-compat.test.mjs",
+        "test/loop-orchestrator-subdomains.test.mjs",
+        "test/ui272-reasoning-persist.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": true,
@@ -4052,7 +4066,8 @@
       ],
       "tests": [
         "test/block144-c22-log-layout-convergence.test.mjs",
-        "test/block144-tool-jobs-behavior.test.mjs"
+        "test/block144-tool-jobs-behavior.test.mjs",
+        "test/block126-job-terminal-events.test.mjs"
       ],
       "frontendRelated": false,
       "classifiesScripts": false
@@ -5191,7 +5206,8 @@
         "frontend/src/components/copilot/copilotClient.test.ts",
         "frontend/src/components/work-surface/PackSurfaceFrame.test.ts",
         "frontend/src/lib/workSurface/registry.test.ts",
-        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx"
+        "frontend/src/hooks/useWorkSurfaceTabs.test.tsx",
+        "test/block55-plan-mode.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -5435,7 +5451,8 @@
         "frontend/src/components/copilot/toolActivity.test.ts",
         "frontend/src/pages/extensions/McpShelfPane.test.tsx",
         "frontend/src/styles/theme-token-contract.test.ts",
-        "test/nso-w2b-capability-audit.test.mjs"
+        "test/nso-w2b-capability-audit.test.mjs",
+        "test/agent-workspace-exec-streaming.test.mjs"
       ],
       "classifiesScripts": true
     },
@@ -5705,7 +5722,8 @@
         "test/tool-activity-labels.test.mjs",
         "frontend/src/components/workspace-panels/AgentTeamRoster.test.tsx",
         "frontend/src/components/workspace-panels/AgentRunPanel.test.tsx",
-        "frontend/src/lib/agentCategories.test.ts"
+        "frontend/src/lib/agentCategories.test.ts",
+        "test/block163-orchestration.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true
@@ -7827,6 +7845,33 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block394-mechanical-gates",
+      "note": "BLOCK-394 批次 A 机械门：依赖树对账 / 三矩阵同源 / 三合一卫生门 / 内置 skill 完整性 / 五段判定 / 缺口分类契约。改任一门即跑全部 H9 契约 + 文档门。",
+      "patterns": [
+        "scripts/post-s7-dependency-parity-gate.mjs",
+        "scripts/post-s7-hygiene-gates.mjs",
+        "scripts/post-s7-matrix-parity-gate.mjs",
+        "scripts/post-s7-skill-integrity.mjs",
+        "acceptance/post-s7-2026-11-10/h9/**",
+        "resources/skills/manifest.json",
+        "knip.json",
+        "eslint-suppressions.json"
+      ],
+      "tests": [
+        "test/post-s7-h9-dependency-parity.test.mjs",
+        "test/post-s7-h9-hygiene-gates.test.mjs",
+        "test/post-s7-h9-matrix-parity.test.mjs",
+        "test/post-s7-h9-skill-integrity.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h9-knip-dynamic-entry.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-gate"
     }
   ]
 }

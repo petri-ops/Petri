@@ -1,0 +1,62 @@
+{
+  "ok": true,
+  "issues": [],
+  "registered": [
+    {
+      "file": "core/petri-server/loop-orchestrator.js",
+      "symbol": "messages.push({role:'tool', ...})",
+      "guard": "serializeToolResultForModel"
+    },
+    {
+      "file": "core/petri-server/agent-tools/tool-execution.js",
+      "symbol": "serializeToolResultForModel",
+      "guard": "interceptAgentToolCall 统一收口"
+    },
+    {
+      "file": "core/petri-server/helpers/prompt-assembly.js",
+      "symbol": "assembleMessages",
+      "guard": "history→Provider messages"
+    },
+    {
+      "file": "core/petri-server/helpers/history-assembly.js",
+      "symbol": "assembleServerHistory",
+      "guard": "只取 user/assistant，不含 tool"
+    },
+    {
+      "file": "core/petri-server/helpers/trajectory-events.js",
+      "symbol": "toTrajectoryEvent / summarizeEvent",
+      "guard": "tool_result→轨迹投影"
+    },
+    {
+      "file": "core/petri-server/routes/ai-agent/resume.js",
+      "symbol": "buildProgressDigest",
+      "guard": "恢复摘要投影"
+    },
+    {
+      "file": "core/petri-server/helpers/message-trimmer.js",
+      "symbol": "scoreMessages / trimMessages",
+      "guard": "TIER_TOOL_RESULT 分层保留 + tool_call 链完整性"
+    }
+  ],
+  "found": [
+    {
+      "file": "core/petri-server/loop-orchestrator.js",
+      "markers": [
+        "/role:\\s*['\"]tool['\"]/",
+        "/serializeToolResultForModel\\s*\\(/"
+      ]
+    },
+    {
+      "file": "core/petri-server/helpers/message-trimmer.js",
+      "markers": [
+        "/role:\\s*['\"]tool['\"]/"
+      ]
+    },
+    {
+      "file": "core/petri-server/agent-tools/tool-execution.js",
+      "markers": [
+        "/serializeToolResultForModel\\s*\\(/"
+      ]
+    }
+  ]
+}

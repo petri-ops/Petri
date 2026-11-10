@@ -26,7 +26,7 @@ db.pragma('foreign_keys = OFF');
 // Run a manual checkpoint on startup to close any stale WAL from a previous unclean shutdown.
 try {
   db.pragma('wal_checkpoint(TRUNCATE)');
-} catch {}
+} catch { /* BLOCK-394 B-08 豁免：关闭期 WAL checkpoint 失败不影响已提交数据，SQLite 自行恢复 */ }
 
 function uid(prefix) {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;

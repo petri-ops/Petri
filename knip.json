@@ -7,7 +7,10 @@
     "frontend/src/App.tsx",
     "test/**/*.test.{mjs,cjs}",
     "scripts/**/*.mjs",
-    "scripts/*.cjs"
+    "scripts/*.cjs",
+    "core/petri-server/agent-tools/plugin-loader.js",
+    "core/petri-server/agent-tools/learning.js",
+    "core/petri-server/mcp/registry/run-plugin-script.js"
   ],
   "project": [
     "src/**/*.js",

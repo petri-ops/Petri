@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { redactSensitiveValue } = require('./redaction');
+const { ARTIFACT_SCHEMA_VERSION } = require('./schema-versions');
 const {
   stableStringify,
   validateContextCheckpoint,
@@ -718,7 +719,7 @@ function buildScientificReplayPackage({
     artifactDiagnostics: result.artifactDiagnostics || [],
   }));
   writeJson(path.join(packageDir, 'artifact-manifest.json'), stripSensitiveKeys({
-    artifactSchemaVersion: result.artifactSchemaVersion || 1,
+    artifactSchemaVersion: result.artifactSchemaVersion || ARTIFACT_SCHEMA_VERSION,
     artifacts: replayArtifacts.map((artifact) => ({
       id: artifact.id,
       type: artifact.type,

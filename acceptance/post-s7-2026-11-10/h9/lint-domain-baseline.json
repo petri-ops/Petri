@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "domains": {
+    "production": 154,
+    "test": 36,
+    "scripts": 1
+  },
+  "total": 191,
+  "generatedAt": "2026-11-10"
+}

@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { ARTIFACT_SCHEMA_VERSION } = require('../shared-backend/schema-versions');
 const crypto = require('crypto');
 const os = require('os');
 const logger = require('../shared-backend/logger');
@@ -370,7 +371,7 @@ function normalizePluginManifest(plugin, def) {
     platform: plugin.platform || plugin.supportedPlatforms || [],
     inputs: Array.isArray(toolDef.inputs) ? toolDef.inputs : [],
     outputs,
-    artifactSchemaVersion: 1,
+    artifactSchemaVersion: ARTIFACT_SCHEMA_VERSION,
     artifacts: outputs.map(_normalizeArtifactHint).filter(Boolean),
     examples: Array.isArray(toolDef.examples)
       ? toolDef.examples

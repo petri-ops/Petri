@@ -40,7 +40,7 @@ async function _ensureTable() {
         INSERT OR IGNORE INTO project_chat_summaries(user_id, project_id, summary, msg_count, updated_at)
         SELECT user_id, '', summary, msg_count, updated_at FROM chat_summaries
       `);
-    } catch {}
+    } catch { /* BLOCK-394 B-08 豁免：旧表 chat_summaries 不存在时回退新表，缺表是预期态 */ }
   } catch {
     /* ignore */
   }

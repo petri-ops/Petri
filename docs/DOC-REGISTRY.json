@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 527,
+    "documentCount": 528,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 510
+    "managedMarkdown": 511
   },
   "documents": [
     {
@@ -405,6 +405,25 @@
         "user-assets"
       ],
       "notes": "post-S7 剩余工作一次性推进 completed：用户资产二次误入库撤回 + gate:user-assets 机械门（同类第二次转门）；无窗口 dev 栈 + 9223 默认离屏 CDP 腿批（DOM 8 档拆前基线含服务端 LIMIT 100 截断归因、几何三态、五段分解、UI 代行 DOM 断言，4 份证据 + 形状契约）；跨语言版本对账门 + css 白名单 13→11；closeout 16→19 门。客观边界（有效凭据/人眼/用户裁决/W5b 大拆片）逐件挂起并写补腿条件。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-394",
+      "capability": "block-394-agent-side-remaining-work",
+      "path": "docs/block-394-agent-side-remaining-work-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-394-agent-side-remaining-work",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "ACTIVE",
+      "tags": [
+        "post-s7",
+        "agent-autonomy",
+        "engineering-debt",
+        "cdp"
+      ],
+      "notes": "用户 2026-11-10 发令「把 23 条 Agent 开工 自主性搞完 不需要我参与」：承接 gap-ledger 分类中 dev_stack 4 条 + engineering 19 条，逐件实质交付。不含 human_eye 4 / credential 1 / user_decision 1 / none 5。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "POST-S7-H7-HUMAN-EYE-ROUTE",

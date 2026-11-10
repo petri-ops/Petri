@@ -6,6 +6,7 @@
 
 const { execFile } = require('child_process');
 const { publishJobTerminalState } = require('../../helpers/job-events');
+const { ARTIFACT_SCHEMA_VERSION } = require('../../../shared-backend/schema-versions');
 const { decodeRDeparseManifest } = require('../../../shared-backend/r-deparse-decode');
 const {
   armActiveToolJobLifecycle,
@@ -686,7 +687,7 @@ async function _runPluginScript(
             version: plugin.version || null,
             language: plugin.language || null,
           },
-          artifactSchemaVersion: 1,
+          artifactSchemaVersion: ARTIFACT_SCHEMA_VERSION,
           artifacts,
           outputs: manifestItems.map((o) => ({
             ...o,

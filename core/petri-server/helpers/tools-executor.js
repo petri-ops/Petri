@@ -1,5 +1,6 @@
 'use strict';
 
+const { ARTIFACT_SCHEMA_VERSION } = require('../../shared-backend/schema-versions');
 const fs = require('fs');
 const path = require('path');
 const { createResultArchive } = require('./result-archive');
@@ -1268,7 +1269,7 @@ function createToolsExecutor({
           // Process/system samples remain valid when final output accounting is unavailable.
         }
         result.resourceUsage = resourceUsage;
-        result.artifactSchemaVersion = result.artifactSchemaVersion || 1;
+        result.artifactSchemaVersion = result.artifactSchemaVersion || ARTIFACT_SCHEMA_VERSION;
         if (Array.isArray(result.outputs)) {
           result.outputs = result.outputs.map((item) => {
             const name = item && (item.filename || item.name || item.path);

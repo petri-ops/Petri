@@ -45,3 +45,20 @@ test('登记点清单自洽：路径存在、字段在登记处', () => {
   }
   assert.equal(typeof r.registry[FIELD], 'number');
 });
+
+test('B-17：插件侧 5 处 artifactSchemaVersion 全部单源引用，字面量回潮必红', () => {
+  const r = evaluateParity();
+  assert.equal(r.ok, true, JSON.stringify(r.issues));
+  assert.equal(typeof r.registry.ARTIFACT_SCHEMA_VERSION, 'number');
+  assert.equal(r.registry.ARTIFACT_SCHEMA_VERSION, 1);
+  assert.ok(r.checked.some((c) => c.value === 'single-source-ref'));
+  assert.ok(r.checked.filter((c) => c.value === 'single-source-ref').length >= 5);
+});
+
+test('B-17 负测：把某插件文件改回硬编码即红', () => {
+  const r = evaluateParity(fakeRead({
+    'core/petri-server/plugin-loader.js': 'artifactSchemaVersion: 1,',
+  }));
+  assert.equal(r.ok, false);
+  assert.ok(r.issues.some((i) => i.includes('schema-versions 单源') || i.includes('字面量')));
+});

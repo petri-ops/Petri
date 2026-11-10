@@ -29,7 +29,7 @@ function resolveDiffBinary() {
         // <git>/libexec/git-core → <git>/../usr/bin/diff.exe
         candidates.push(path.resolve(gitRoot.stdout.trim(), '..', '..', 'usr', 'bin', 'diff.exe'));
       }
-    } catch {}
+    } catch { /* BLOCK-394 B-08 豁免：git rev-parse 不可用（非 git 仓库/未安装）时走下方固定路径候选 */ }
     for (const base of ['C:\\Program Files\\Git', 'C:\\Program Files (x86)\\Git']) {
       candidates.push(path.join(base, 'usr', 'bin', 'diff.exe'));
     }

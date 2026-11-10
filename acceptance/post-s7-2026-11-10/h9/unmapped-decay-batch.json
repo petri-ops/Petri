@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h9-unmapped-decay",
+  "policy": "排除全域兜底规则；只认具体文件 pattern；测试源码需引用该规则 ≥2 个生产路径才挂（防盲挂稀释定向语义）",
+  "before": 138,
+  "assigned": 18,
+  "remaining": 120,
+  "assignments": [
+    {
+      "test": "test/agent-runner-facade-compat.test.mjs",
+      "rule": "block109-core-arch-convergence",
+      "score": 3
+    },
+    {
+      "test": "test/agent-system-info.test.mjs",
+      "rule": "post-s7-single-source",
+      "score": 2
+    },
+    {
+      "test": "test/agent-workspace-exec-streaming.test.mjs",
+      "rule": "block243-q1-approval-contract",
+      "score": 3
+    },
+    {
+      "test": "test/block126-job-terminal-events.test.mjs",
+      "rule": "block144-tech-debt",
+      "score": 2
+    },
+    {
+      "test": "test/block127-lineage.test.mjs",
+      "rule": "block83-general-agent-base",
+      "score": 2
+    },
+    {
+      "test": "test/block163-orchestration.test.mjs",
+      "rule": "block249-q4a-agent-team",
+      "score": 2
+    },
+    {
+      "test": "test/block171-tool-cancel.test.mjs",
+      "rule": "block124-codegraph-tools",
+      "score": 2
+    },
+    {
+      "test": "test/block34-background-processes-route.test.mjs",
+      "rule": "block78-runtime-projection",
+      "score": 2
+    },
+    {
+      "test": "test/block344-edit-governance.test.mjs",
+      "rule": "next04a-3d-foundation",
+      "score": 3
+    },
+    {
+      "test": "test/block55-plan-mode.test.mjs",
+      "rule": "block217-qdomain-p2ui-actions",
+      "score": 2
+    },
+    {
+      "test": "test/block87-projection-data.test.mjs",
+      "rule": "block88-engineer-collab",
+      "score": 2
+    },
+    {
+      "test": "test/dev-electron-profile.test.mjs",
+      "rule": "block228-crash-notice",
+      "score": 2
+    },
+    {
+      "test": "test/federation-terminal.test.mjs",
+      "rule": "block88-engineer-collab",
+      "score": 2
+    },
+    {
+      "test": "test/loop-orchestrator-subdomains.test.mjs",
+      "rule": "block109-core-arch-convergence",
+      "score": 3
+    },
+    {
+      "test": "test/preload-branch-result-namespaces.test.mjs",
+      "rule": "block228-crash-notice",
+      "score": 2
+    },
+    {
+      "test": "test/project-result-sandbox.test.mjs",
+      "rule": "ux1g1-tool-job-conversation",
+      "score": 3
+    },
+    {
+      "test": "test/ui272-reasoning-persist.test.mjs",
+      "rule": "block109-core-arch-convergence",
+      "score": 3
+    },
+    {
+      "test": "test/window-controls.test.mjs",
+      "rule": "block223-desktop-shell",
+      "score": 2
+    }
+  ],
+  "skippedSample": [
+    "test/_mapSkillRuntimeStatus.test.mjs",
+    "test/accessmode-validation.test.mjs",
+    "test/agent-concurrency.test.mjs",
+    "test/agent-doc-review-ipc.test.mjs",
+    "test/agent-files-changed.test.mjs",
+    "test/agent-query-result.test.mjs",
+    "test/agent-runner-conversation-adapter.test.mjs",
+    "test/agent-runner-facade.test.mjs",
+    "test/agent-task-cancellation.test.mjs",
+    "test/agent-task-store-busy-timeout.test.mjs",
+    "test/agent-task-subagent-recent.test.mjs",
+    "test/agent-workflow-configure.test.mjs",
+    "test/agent-workspace-exec-background.test.mjs",
+    "test/agent-workspace-exec-cwd-shell.test.mjs",
+    "test/agent-workspace-exec-yield.test.mjs"
+  ]
+}

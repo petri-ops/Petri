@@ -58,7 +58,7 @@ const DEFAULT_CHAT_MODEL_PRESETS = [
 function _ensureDir() {
   try {
     fs.mkdirSync(SETTINGS_DIR, { recursive: true });
-  } catch {}
+  } catch { /* BLOCK-394 B-08 豁免：目录已存在或只读时由后续写入处显式报错，预建失败不阻断 */ }
 }
 
 /**

@@ -56,7 +56,7 @@ async function assembleServerHistory({ conversationId, incomingMessages, adb }) 
     }
     return assembled;
   } catch (e) {
-    try { console.warn('[block95-b1] server history assembly failed, fallback to client messages:', e && e.message); } catch {}
+    try { console.warn('[block95-b1] server history assembly failed, fallback to client messages:', e && e.message); } catch { /* BLOCK-394 B-08 豁免：降级告警输出失败仍走 fallback 返回值 */ }
     return incomingMessages;
   }
 }

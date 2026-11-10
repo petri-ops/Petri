@@ -23,6 +23,9 @@
           "url": "built-in://skills/coding-playbook",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "93dc9b02825b1008176575fda5d2f63cbff9e44bcf07ddb68f8f1db5ae571d82"
       }
     },
     "visualize": {
@@ -44,6 +47,9 @@
           "url": "built-in://skills/visualize",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "35bae1170f7301757ff1a2196c3c6c57d8fb6fab6e639e71bdcc0884d968ea86"
       }
     },
     "obsidian-markdown": {
@@ -59,6 +65,9 @@
           "url": "built-in://skills/obsidian-markdown",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "a6680df0a4398b5c67dba104572a2081c38477672eb076eecd36d09957871c7f"
       }
     },
     "mermaid-visualizer": {
@@ -74,6 +83,9 @@
           "url": "built-in://skills/mermaid-visualizer",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "e9a45c68af3302728b3383f85dcf9fd065c0c796a3f1bc1358107d3ec1d79282"
       }
     },
     "excalidraw-diagram": {
@@ -89,6 +101,9 @@
           "url": "built-in://skills/excalidraw-diagram",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "678db664508162caf31a41b26d1cabcf0ec56ba25b69d0b001b9188f97c64aa5"
       }
     },
     "json-canvas": {
@@ -104,6 +119,9 @@
           "url": "built-in://skills/json-canvas",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "248f3c8f45064190d99d9a62479c5253f163782b7c6425d334bceda1e84fd820"
       }
     },
     "obsidian-bases": {
@@ -119,6 +137,9 @@
           "url": "built-in://skills/obsidian-bases",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "40cb23b7e013a80a6dd9b023cd615565a281234e0b03b446236757249c87bf31"
       }
     },
     "obsidian-cli": {
@@ -134,6 +155,9 @@
           "url": "built-in://skills/obsidian-cli",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "c0c73e0897e6e6b1b70ed880da3552d138c5c56bd4c441dc96c11c4d6e7450fe"
       }
     },
     "defuddle": {
@@ -149,6 +173,9 @@
           "url": "built-in://skills/defuddle",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "4770216e9f9a955a32333cdb88260f3fe702a5037b9727cce74577741b3cd1f1"
       }
     },
     "knap": {
@@ -164,6 +191,9 @@
           "url": "built-in://skills/knap",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "84d0c5bbe3826374b1c253c80b784ebabe259005f6802c33533b259ad60523e3"
       }
     },
     "obsidian-setup": {
@@ -179,7 +209,11 @@
           "url": "built-in://skills/obsidian-setup",
           "sha256": null
         }
+      },
+      "integrity": {
+        "builtinSha256": "94beb2a901929fcb27a0381c7659c3af0afdae045db57977224ad20a695a598e"
       }
     }
-  }
+  },
+  "integrityNote": "builtinSha256 = 目录内容稳定摘要（scripts/post-s7-skill-integrity.mjs --write 唯一写入）；sha256 字段仍表示下载产物摘要，built-in 恒为 null。"
 }
