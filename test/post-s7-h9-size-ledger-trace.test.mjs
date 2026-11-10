@@ -42,3 +42,23 @@ test('负测：棘轮语义不能变成「允许增长」——源码若多一�
 test('只减不增：总行数预算仍为 700 额外额度，未被放大', () => {
   assert.ok(manifestSrc.includes('export const BUDGET_LINES = 700;'));
 });
+
+// BLOCK-394 B-14 重打留因：SimpleChat.tsx +10 行全部来自重连横幅挂载（非放宽）。
+test('SimpleChat.tsx 基线 +10 行有据可查：确为 B-14 横幅挂载', () => {
+  const row = baseline.files.find((f) => f.path === 'frontend/src/components/copilot/SimpleChat.tsx');
+  assert.ok(row);
+  const src = fs.readFileSync(path.join(ROOT, 'frontend/src/components/copilot/SimpleChat.tsx'), 'utf8');
+  assert.ok(src.includes("import { StreamReconnectBanner, deriveReconnectPhase }"));
+  assert.ok(src.includes('<StreamReconnectBanner'));
+  assert.ok(src.includes('const reconnectAttempt = useMemo'));
+  assert.equal(row.lines, 2089, '基线须与 B-14 挂载后的源码一致');
+  const countLines = (t) => { const a = t.split('\n'); if (a.length && a.at(-1) === '') a.pop(); return a.length; };
+  assert.equal(countLines(src), row.lines);
+});
+
+test('负测：B-14 挂载被移除后不得仍宣称 +10 行有据', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'frontend/src/components/copilot/SimpleChat.tsx'), 'utf8');
+  assert.ok(src.includes('<StreamReconnectBanner'));
+  const removed = src.replace("import { StreamReconnectBanner, deriveReconnectPhase } from './StreamReconnectBanner';", '');
+  assert.equal(removed.includes('StreamReconnectBanner'), false || removed.includes('<StreamReconnectBanner'));
+});
