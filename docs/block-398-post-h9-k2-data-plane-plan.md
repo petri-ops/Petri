@@ -1,6 +1,6 @@
 ---
 capability: block-398-post-h9-k2-data-plane
-status: active
+status: completed
 goal: 按第四轮蓝图 §4 K2 把性能瓶颈从猜测性前端优化转到可量测的服务端数据面；交付红绿先行的可机械验证子集，结构性大改按 W5b 逐刀纪律如实挂起带补腿条件。
 acceptance:
   - 具名上限常量收编 15 处生产调用点，拆前拆后同套定向测试绿
@@ -13,7 +13,7 @@ reopen: 独立 W5b 切片发令后按本 plan §5 逐刀推进；每刀拆前拆
 
 # BLOCK-398 · post-H9 K2 服务端数据面与规模化
 
-> 状态：active · P0-LAUNCH
+> 状态：completed · COMPLETED
 > 发令：用户 2026-11-10 预授权连续工作「K0→K7 全部推完，全程零参与」。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
 

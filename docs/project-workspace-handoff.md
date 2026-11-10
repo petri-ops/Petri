@@ -1,4 +1,5 @@
 # Petri Desktop Current Handoff
+最后更新：2026-11-10（🏁 **BLOCK-398（post-H9 K2）completed**：红绿先行 5 红→15 绿 / 拆前 HEAD 快照 18/18 + 拆后 18/18 同套绿 / >100 会话 HTTP 行为 3/3 / 具名上限常量 10 文件 15 行 / 复合索引查询计划命中+rowid 负测 / W5b 五刀挂起带补腿条件 / closeout PASS G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K2=BLOCK-398 启动**：红绿先行 12 项 5 红→15/15 绿 / 具名上限常量收编 10 文件 15 行 / 会话列表 additive hasMore+nextCursor（>100 条 HTTP 行为 3/3）/ 复合索引查询计划命中+rowid 负测 / 拆后既有四套 18/18 / W5b 五刀挂起带补腿条件 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（🏁 **BLOCK-397（post-H9 K1）completed**：K-08 实证误判校准（不接线/不撤销裁决，11 负测+真实 callTool 行为断言）/ K-09 U 类决策材料 pending_user_ruling / K-10 已交付防回退契约 6 负测 / 165 通道第一批机械分诊 10 负测 / 29 契约全绿 / closeout PASS（2 门域跳过如实标注） G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-10（▶ **post-H9 程序 K1=BLOCK-397 启动**：K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）

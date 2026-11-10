@@ -19,12 +19,12 @@
       "capability": "block-398-post-h9-k2-data-plane",
       "path": "docs/block-398-post-h9-k2-data-plane-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-398",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "docs/block-398-post-h9-k2-data-plane-plan.md",
         "acceptance/post-h9-2026-11-10/k2/**",
@@ -37,7 +37,7 @@
         "optimization",
         "k2"
       ],
-      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K2 服务端数据面与规模化。红绿先行 12 项 5 红→15/15 绿 / 具名上限常量收编 10 文件 15 行 / 会话列表 additive hasMore+nextCursor（>100 条 HTTP 行为 3/3）/ 复合索引查询计划命中+rowid 负测 / 拆后既有四套 18/18 / W5b 五刀挂起带补腿条件 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K2 服务端数据面与规模化。红绿先行 12 项 5 红→15/15 绿 / 具名上限常量收编 10 文件 15 行 / 会话列表 additive hasMore+nextCursor（>100 条 HTTP 行为 3/3）/ 复合索引查询计划命中+rowid 负测 / 拆后既有四套 18/18 / W5b 五刀挂起带补腿条件 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】红绿先行 5 红→15 绿 / 拆前 HEAD 快照 18/18 + 拆后 18/18 同套绿 / >100 会话 HTTP 行为 3/3 / 具名上限常量 10 文件 15 行 / 复合索引查询计划命中+rowid 负测 / W5b 五刀挂起带补腿条件 / closeout PASS"
     },
     {
       "id": "POST-H9-K1-DECISION-MATERIAL",
