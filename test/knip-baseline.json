@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-10",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -236,6 +236,7 @@
     "types::frontend/src/components/copilot/copilotClient.ts::AgentTaskMeta",
     "types::frontend/src/components/copilot/copilotClient.ts::StructuredToolResult",
     "types::frontend/src/components/copilot/copilotClient/agentTaskStream.ts::AgentSseEvent",
+    "types::frontend/src/components/copilot/copilotClient/runHealthEvents.ts::RunHealthEventCode",
     "types::frontend/src/components/copilot/integration/ChatCardLinkBridge.tsx::ChatCardLinkVariant",
     "types::frontend/src/components/copilot/toolActivity.ts::ToolActivityChangeDiff",
     "types::frontend/src/components/copilot/toolActivity.ts::ToolActivityOutput",
@@ -253,7 +254,6 @@
     "types::frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview/types.ts::HunkLine",
     "types::frontend/src/components/editor/CodeMirror/types.ts::DiffHunk",
     "types::frontend/src/components/editor/CodeMirror/types.ts::DiffHunkKind",
-    "types::frontend/src/components/editor/CodeMirror/types.ts::DiffViewOptions",
     "types::frontend/src/components/editor/index.ts::CodeMirrorEditorProps",
     "types::frontend/src/components/editor/index.ts::DiffHunk",
     "types::frontend/src/components/editor/index.ts::DiffRevision",
@@ -338,5 +338,6 @@
     "types::frontend/src/themes/ThemeProvider.tsx::AccentId",
     "types::frontend/src/themes/ThemeProvider.tsx::ResolvedTheme",
     "types::frontend/src/types/branch.types.ts::Message"
-  ]
+  ],
+  "note": " 【2026-11-10 BLOCK-394 重打留因】移除 types::.../CodeMirror/types.ts::DiffViewOptions = B-25 类型归位后不再是保留面死代码；新增 types::.../copilotClient/runHealthEvents.ts::RunHealthEventCode = B-07 四事件映射导出的类型（消费者为同目录 .test.ts 与 agentTaskStream，knip 静态入口未纳该调用面，定性为测试契约型保留，非放宽）。总数仍 330。"
 }
