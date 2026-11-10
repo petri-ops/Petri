@@ -17,3 +17,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-10T13:54:51.075Z -->
 | ✅ BLOCK-388（post-S7 H3）completed（可机械验证子集；用户 2026-11-09 预授权连续工作）——①台账测量口径修正：状态词匹配前剥离否定语境（UI-694/UI-663「按纪律不标 verified」不再被计成 verified）②债棘轮改「分桶上限 + 总债上限 35」双守，搬桶不算清偿（33→35 是修正少算并留因）③分屏 handle ARIA 角色 separator→slider（separator 不带值域）+ aria-valuetext + 键盘 valuenow 断言 ④**如实挂起（不猜不改）**：消息/会话/结果库 DOM 预算（需 CDP ≥400 条量测节点数与帧率；盲加 content-visibility 会破坏自绘滚动锚定）、树 roving tabindex、布局单源、颜色 token、32 条 debt 终态化、视觉四件套——每项带量测方案与重开条件 | 2026-11-09 | 证据=ui-ledger 契约 5/5 + ArtifactPinPane 15/15 + tsc 0 + closeout 17 门；plan=docs/block-388-post-s7-h3-experience-closeout-plan.md | BLOCK-388 / COMPLETED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-10T14:10:12.126Z -->
+| ✅ BLOCK-389（post-S7 H4）completed（可机械验证子集）——①schema/契约版本单一登记处 core/shared-backend/schema-versions.js（artifactTruth/studio 契约/delivery manifest/tool 契约四常量），六处字面量全部改为引用；契约测 3/3（含源码扫描「不得再有独立字面量」+ intent 域双形态独立）②DB 路径解析单源：branch-db.getDatabasePath 委托 resolveDbPath（认 PETRI_DB_PATH），三态+fail-fast 契约 4/4③**按 W5b 挂起**：五巨型文件大拆片（一切片=一会话、拆前拆后同套绿，连续模式会污染基线证据）、插件源三处收敛、13 环按簇消亡、knip 动态入口、三套依赖树、源码扫描换行为断言、lint 分域棘轮 | 2026-11-09 | 证据=block389 两族 7/7 + 邻域 34/34 + closeout 17 门；plan=docs/block-389-post-s7-h4-single-source-plan.md | BLOCK-389 / COMPLETED |

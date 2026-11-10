@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-inline-style-gate",
+  "sourceCommit": "0e473144dd49b1fc9d2759011e95a17905ab32a0",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:09:51.800Z",
+  "command": "node scripts/post-h9-k3-inline-baseline.mjs",
+  "verdict": "inline-debt-non-increasing",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "ok": true,
+  "issues": [],
+  "current": {
+    "frontend/src/components/copilot/ContextBudgetBar.tsx": {
+      "color": 18,
+      "zIndex": 1
+    },
+    "frontend/src/components/workspace-panels/OrchestrationGraph.tsx": {
+      "color": 13,
+      "zIndex": 0
+    },
+    "frontend/src/components/copilot/ChatArtifactCard.tsx": {
+      "color": 14,
+      "zIndex": 1
+    },
+    "frontend/src/components/desktop/PluginStorePanel.tsx": {
+      "color": 9,
+      "zIndex": 1
+    },
+    "frontend/src/App.tsx": {
+      "color": 1,
+      "zIndex": 2
+    }
+  },
+  "frozen": {
+    "frontend/src/components/copilot/ContextBudgetBar.tsx": {
+      "color": 18,
+      "zIndex": 1
+    },
+    "frontend/src/components/workspace-panels/OrchestrationGraph.tsx": {
+      "color": 13,
+      "zIndex": 0
+    },
+    "frontend/src/components/copilot/ChatArtifactCard.tsx": {
+      "color": 14,
+      "zIndex": 1
+    },
+    "frontend/src/components/desktop/PluginStorePanel.tsx": {
+      "color": 9,
+      "zIndex": 1
+    },
+    "frontend/src/App.tsx": {
+      "color": 1,
+      "zIndex": 2
+    }
+  },
+  "debtTotal": 60,
+  "negativeTests": 4,
+  "policy": "按文件只减不增；颜色值替换需人眼暗色 diff，本阶段不改产品 CSS"
+}

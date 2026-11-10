@@ -2,14 +2,15 @@
   "schemaVersion": 1,
   "program": "post-h9-2026-11-10",
   "blueprint": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-  "generatedAt": "2026-11-10T13:54:37.107Z",
+  "generatedAt": "2026-11-10T14:10:04.427Z",
   "terminalCounts": {
     "done": 8,
-    "done-partial": 3,
-    "retain-with-reason": 1,
+    "done-partial": 5,
+    "retain-with-reason": 2,
     "pending_user_ruling": 1,
     "deferred": 2,
-    "in_progress": 17
+    "pending_human_eye": 1,
+    "in_progress": 13
   },
   "gaps": [
     {
@@ -213,14 +214,14 @@
       "blocker": "A+L",
       "stage": "K3",
       "anchor": "helpers/trajectory-events.js → frontend/src",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k3/k3-experience-truth.json",
+      "decisionRef": "docs/post-h9-k3-decision-material.md",
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-399-post-h9-k3-experience-plan.md",
+      "closureCondition": "L+E：Toast 历史接四事件（复用 ToastProvider.history，每条带 reasonCode 与重试/复核入口）+ 真实 SSE 断线注入三态 flow + 人眼过目；H10 合成 DOM 断言不得冒充 RST 注入",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "代码投影链已交付（BLOCK-394 B-07）：四码映射→agentTaskStream→onAgentStatus→statusMessage→StreamReconnectBanner，4/4 既有契约；K3 加反向契约 22/22（任一环断开必红）。Toast 历史未接四事件、trajectory-events 只分类不 emit，如实挂起。"
     },
     {
       "id": "K-15",
@@ -228,14 +229,14 @@
       "blocker": "E+L",
       "stage": "K3",
       "anchor": "h7-human-eye-route.md / debt 35",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
-      "routeRef": null,
+      "terminal": "pending_human_eye",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k3/k3-debt-triage.json",
+      "decisionRef": "docs/post-h9-k3-decision-material.md",
+      "routeRef": "docs/post-s7-h7-human-eye-route.md",
       "sliceRef": null,
-      "closureCondition": null,
+      "closureCondition": "E：用户按路线六组实测并填签名区（确认人/日期/覆盖勾选/结论）+ 截图落 acceptance/post-s7-2026-11-09/h7/human-eye/；Agent 不代签",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "debt 35 = 13 live-missing + 22 blocked，机械分诊 22 人眼 / 1 外部 / 12 可机械判档；签名区全空；DEBT_CEILING 与台账状态词零改动，21 条 external:true 属 V/U 类如实记环境不可得"
     },
     {
       "id": "K-16",
@@ -243,13 +244,13 @@
       "blocker": "A+L",
       "stage": "K3",
       "anchor": "CenterPanel.tsx:203-213 / project-workspace.module.css:1546,2836",
-      "terminal": "in_progress",
-      "evidenceRef": null,
+      "terminal": "retain-with-reason",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k3/k3-experience-truth.json",
       "decisionRef": null,
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
-      "reason": null,
+      "sliceRef": "docs/block-399-post-h9-k3-experience-plan.md",
+      "closureCondition": "L+E：四块几何量测（无重叠/同行同宽/不溢出）+ 拖到两倍/缩到一半 + 人眼过目；DOM 几何不等于视觉绿",
+      "reason": "BLOCK-395 B-11 零几何收敛已交付：内层 workspaceSessionInner composes 同一规则、外层基础定义唯一、FloatCardResizeHandle 单定义双挂载；K3 加防回退契约。按 $petri-css-theme 布局层纪律与既有裁决不改产品 CSS（几何 A/B 实测改类名会窄 74px/移 40px）",
       "note": "待对应 K 阶段逐件定终态"
     },
     {
@@ -258,14 +259,14 @@
       "blocker": "A",
       "stage": "K3",
       "anchor": "4 族颜色字面量 / App.tsx:158,162",
-      "terminal": "in_progress",
-      "evidenceRef": null,
-      "decisionRef": null,
+      "terminal": "done-partial",
+      "evidenceRef": "acceptance/post-h9-2026-11-10/k3/k3-inline-style-gate.json",
+      "decisionRef": "docs/post-h9-k3-decision-material.md",
       "routeRef": null,
-      "sliceRef": null,
-      "closureCondition": null,
+      "sliceRef": "docs/block-399-post-h9-k3-experience-plan.md",
+      "closureCondition": "A+E：人眼暗色 diff 通过后按海军蓝 token 阶梯逐族替换 4 族 .tsx 内联颜色与 App.tsx zIndex 78/79，内联棘轮只减不增每族一负测；CommandPalette focus trap 独立 UI 切片 + 读屏",
       "reason": null,
-      "note": "待对应 K 阶段逐件定终态"
+      "note": "新增内联样式债棘轮门：冻结 5 个 .tsx 的 55 处内联颜色 + 5 处内联 zIndex（新增即红、注释不计、4 条负测），补齐 theme-token-contract 只扫 .css 的盲区；CSS 面 354/30 基线零改动，debt 35 棘轮零放宽"
     },
     {
       "id": "K-18",
@@ -514,6 +515,13 @@
       "head": "e2fb77a4",
       "terminalsAssigned": 5,
       "at": "2026-11-10T13:54:37.107Z"
+    },
+    {
+      "stage": "K3",
+      "block": "BLOCK-399",
+      "head": "0e473144",
+      "terminalsAssigned": 4,
+      "at": "2026-11-10T14:10:04.427Z"
     }
   ]
 }

@@ -4,7 +4,7 @@
   "rules": [
     {
       "id": "post-h9-program",
-      "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。 K1：主线兑现度事实采集/裁决、165 通道机械分诊、U 类决策材料契约。 K2：具名上限常量/会话列表 additive 信封/复合索引 与拆后同套绿基线。",
+      "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。 K1：主线兑现度事实采集/裁决、165 通道机械分诊、U 类决策材料契约。 K2：具名上限常量/会话列表 additive 信封/复合索引 与拆后同套绿基线。 K3：四事件反向契约/布局防回退/内联样式债棘轮门/debt 分诊。",
       "patterns": [
         "scripts/post-h9-*",
         "scripts/lib/post-h9-*",
@@ -26,7 +26,10 @@
         "core/petri-server/routes/ai-conversations.js",
         "core/petri-server/helpers/conversations.js",
         "core/petri-server/agent-task-store.js",
-        "frontend/src/components/copilot/copilotConversationsClient.ts"
+        "frontend/src/components/copilot/copilotConversationsClient.ts",
+        "docs/post-h9-k3-decision-material.md",
+        "scripts/post-h9-k3-inline-baseline.mjs",
+        "acceptance/post-h9-2026-11-10/k3/**"
       ],
       "tests": [
         "test/post-h9-k0-criteria-void.test.mjs",
@@ -34,7 +37,8 @@
         "test/post-h9-k1-mainline.test.mjs",
         "test/post-h9-k1-ipc-triage.test.mjs",
         "test/post-h9-k2-data-plane.test.mjs",
-        "test/post-h9-k2-conversations-envelope.test.mjs"
+        "test/post-h9-k2-conversations-envelope.test.mjs",
+        "test/post-h9-k3-experience.test.mjs"
       ],
       "commands": [
         "docs-check",

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-inline-style-baseline",
+  "generatedAt": "2026-11-10T14:07:18.010Z",
+  "policy": "只减不增棘轮：新增内联颜色/z-index 字面量即红；清零后重打。颜色值替换仍需人眼暗色 diff。",
+  "perFile": {
+    "frontend/src/components/copilot/ContextBudgetBar.tsx": {
+      "color": 18,
+      "zIndex": 1
+    },
+    "frontend/src/components/workspace-panels/OrchestrationGraph.tsx": {
+      "color": 13,
+      "zIndex": 0
+    },
+    "frontend/src/components/copilot/ChatArtifactCard.tsx": {
+      "color": 14,
+      "zIndex": 1
+    },
+    "frontend/src/components/desktop/PluginStorePanel.tsx": {
+      "color": 9,
+      "zIndex": 1
+    },
+    "frontend/src/App.tsx": {
+      "color": 1,
+      "zIndex": 2
+    }
+  }
+}

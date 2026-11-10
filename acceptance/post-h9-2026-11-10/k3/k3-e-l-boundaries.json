@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-e-l-boundaries",
+  "sourceCommit": "0e473144dd49b1fc9d2759011e95a17905ab32a0",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:09:51.827Z",
+  "command": "docs/post-h9-k3-decision-material.md §6 + docs/block-399-post-h9-k3-experience-plan.md §5",
+  "verdict": "pending-ruling",
+  "evidenceClass": "decision-material",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "decisionRef": "docs/post-h9-k3-decision-material.md",
+  "sliceRef": "docs/block-399-post-h9-k3-experience-plan.md",
+  "e": [
+    {
+      "item": "人眼路线签字",
+      "state": "pending_human_eye",
+      "owner": "user"
+    },
+    {
+      "item": "暗色对比/层级/长消息换行/Toast 历史层级",
+      "state": "pending_human_eye",
+      "owner": "user"
+    },
+    {
+      "item": "VoiceOver 读屏（viewer/slider/treeRoving）",
+      "state": "pending_human_eye",
+      "owner": "user"
+    },
+    {
+      "item": "32 条 debt 人眼子集",
+      "state": "pending_human_eye",
+      "owner": "user"
+    }
+  ],
+  "l": [
+    {
+      "item": "SSE 真实 RST 断线注入三态 flow",
+      "state": "deferred",
+      "reason": "全仓 0 命中；合成 DOM 断言自证非 RST"
+    },
+    {
+      "item": "四块几何量测 + 拖到两倍/缩到一半",
+      "state": "deferred",
+      "reason": "需 CDP 实机 + 人眼过目"
+    },
+    {
+      "item": "CommandPalette focus trap",
+      "state": "deferred",
+      "reason": "需 UI-### 同步 + 读屏，属独立 UI 切片"
+    },
+    {
+      "item": "颜色值 token 化",
+      "state": "deferred",
+      "reason": "需人眼暗色 diff"
+    }
+  ],
+  "note": "Agent 不代答、不伪造；未跑/跳过如实标注"
+}

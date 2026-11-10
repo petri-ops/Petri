@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-debt-triage",
+  "sourceCommit": "0e473144dd49b1fc9d2759011e95a17905ab32a0",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:09:51.812Z",
+  "command": "npm run ui:audit:triage + node --test test/ui-ledger-status-contract.test.mjs",
+  "verdict": "triage-mechanical",
+  "evidenceClass": "mechanical-gate",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "sections": 497,
+  "uniqueIds": 488,
+  "counts": {
+    "live-missing": 13,
+    "verified": 450,
+    "blocked": 22,
+    "closed": 12
+  },
+  "debt": 35,
+  "humanEyeRouteSigned": false,
+  "classification": {
+    "human_eye": 22,
+    "external_condition": 1,
+    "mechanically_adjudicable": 12
+  },
+  "disposition": "22 条人眼项保持 pending_human_eye；21 条 external:true 属 V/U 类，如实记环境不可得不判通过；12 条机械判档不改状态词；DEBT_CEILING 35 零改动",
+  "negativeTests": 3,
+  "decisionRef": "docs/post-h9-k3-decision-material.md"
+}

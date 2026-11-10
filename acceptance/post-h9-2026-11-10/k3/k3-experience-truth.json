@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-experience-truth",
+  "sourceCommit": "0e473144dd49b1fc9d2759011e95a17905ab32a0",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:09:51.784Z",
+  "command": "node scripts/lib/post-h9-k3-experience.mjs + node --test test/post-h9-k3-experience.test.mjs",
+  "verdict": {
+    "ok": true,
+    "issues": [],
+    "conclusions": {
+      "K-14": "projection-chain-intact",
+      "K-16": "single-source-intact",
+      "K-17": "debt-frozen",
+      "K-15": "pending_human_eye"
+    },
+    "verdict": "experience-invariants-verified-with-e-l-boundaries"
+  },
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "truth": {
+    "events": {
+      "codesDeclared": [
+        "compaction_failed",
+        "trim_skipped",
+        "provider_retry",
+        "stream_stall"
+      ],
+      "mapperCases": 4,
+      "streamImportsMapper": true,
+      "streamCallsOnAgentStatus": true,
+      "storeWritesStatusMessage": true,
+      "bannerConsumesStatus": true,
+      "toastHistoryExists": true,
+      "toastHistoryHasFourEvents": false
+    },
+    "layout": {
+      "innerComposes": true,
+      "baseDefinitionCount": 1,
+      "innerOwnName": true,
+      "floatHandleDefinitions": 1,
+      "floatHandleMounts": 2
+    },
+    "cssBaselineTotal": 354,
+    "cssBaselineFiles": 30,
+    "humanEyeRouteSigned": false,
+    "triage": {
+      "counts": {
+        "live-missing": 13,
+        "verified": 450,
+        "blocked": 22,
+        "closed": 12
+      },
+      "debt": 35,
+      "sections": 497,
+      "uniqueIds": 488
+    }
+  },
+  "negativeTests": 22,
+  "boundary": "DOM/源码断言不等于视觉绿；人眼未签字、SSE RST 注入缺席如实登记"
+}

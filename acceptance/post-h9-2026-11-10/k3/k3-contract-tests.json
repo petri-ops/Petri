@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-h9-k3-contract-tests",
+  "sourceCommit": "0e473144dd49b1fc9d2759011e95a17905ab32a0",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-10T14:09:52.006Z",
+  "command": "node --test test/post-h9-k3-experience.test.mjs",
+  "verdict": "passed",
+  "evidenceClass": "behavior-test",
+  "humanEyeEquivalent": false,
+  "stack": "none",
+  "pass": 22,
+  "fail": 0,
+  "negativeTests": 17,
+  "reverseContract": "事件发出但 UI 消费链断开必红",
+  "eClassNegative": "伪造人眼签字必红"
+}

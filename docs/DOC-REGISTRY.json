@@ -9,11 +9,53 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 534,
+    "documentCount": 536,
     "lastUpdated": "2026-11-10",
-    "managedMarkdown": 517
+    "managedMarkdown": 519
   },
   "documents": [
+    {
+      "id": "BLOCK-399",
+      "capability": "block-399-post-h9-k3-experience",
+      "path": "docs/block-399-post-h9-k3-experience-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-399",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-399-post-h9-k3-experience-plan.md",
+        "acceptance/post-h9-2026-11-10/k3/**",
+        "scripts/post-h9-*",
+        "test/post-h9-*"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "post-h9",
+        "optimization",
+        "k3"
+      ],
+      "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K3 用户可感知体验收官。四事件投影反向契约 22/22 / 内联样式债棘轮门（55 颜色+5 zIndex 冻结，新增即红）/ B-11 布局防回退 / debt 35 机械分诊人眼项不冒 verified / E·L 一页材料 / UI 台账同批回写且 debt 棘轮零改动 G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "POST-H9-K3-DECISION-MATERIAL",
+      "capability": "post-h9-k3-decision-material",
+      "path": "docs/post-h9-k3-decision-material.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "entrypoint": "docs/block-399-post-h9-k3-experience-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "post-h9",
+        "decision-material",
+        "human-eye",
+        "live-probe"
+      ],
+      "notes": "K3 E/L 边界材料：人眼路线未签字、SSE 断线注入三态 flow 缺席、颜色/布局/focus trap 独立切片补腿条件。未签字前不生效，Agent 不代答。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-398",
       "capability": "block-398-post-h9-k2-data-plane",
