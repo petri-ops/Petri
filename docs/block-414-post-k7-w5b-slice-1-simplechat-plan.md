@@ -35,3 +35,13 @@ reopen: 拆分引入行为差异或测试红时回滚重刀
 - BLOCK-93 ×2 = deepseek key 缺失（V 类，用户 export 后重跑）
 - P6 = CSS WIP（W 归属）
 - block350 = ai-conversations/branch-db 热路径变化（BLOCK-412/补腿）→ 重采后绿
+
+## 事故披露（2026-11-11 · 本刀附带修复链发现）
+
+**L1 stdin 表单缺陷（本会话 BLOCK-405 L1-6 引入，事故级）**：`security add-generic-password -w` 从 stdin 读密码时会提示**两次**（password + retype）——单行 input 触发 "passwords don't match" 后仍**静默存入空密码**（实测存储=1 字节换行）。后果：用户 deepseek keychain 条目被覆写为空 → `deepseek_configured: false` → 应用「deepseek 断开连接」。
+
+**修复**：stdin 双行同值（value+\n+value+\n）+ 探针账户端到端往返 PASS + 事故转机械门禁（test/block414-backend-port-reuse.test.mjs 事故门禁用例，探针账户用后即清）。
+
+**影响与补救**：deepseek key 被覆写为空，**原值不可恢复**（keychain 无历史）——需用户在设置面重新粘贴 deepseek API key（仅用户持有，V 类不代办）。其他凭据（4 个 model/openai-compatible 账户 36-52 字节）完好未受损。profile-1 账户同为 1 字节空密码（与 deepseek 同期被同形态覆写）。
+
+**门禁**：keychain SET/GET 往返逐字一致 → test/block414-backend-port-reuse.test.mjs 事故门禁用例永久承载（探针账户往返 + 空白污染断言）。

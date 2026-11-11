@@ -9,11 +9,84 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 557,
+    "documentCount": 561,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 540
+    "managedMarkdown": 544
   },
   "documents": [
+    {
+      "id": "BLOCK-416",
+      "capability": "block-416-ui-design-d1-ia",
+      "path": "docs/block-416-ui-design-d1-ia-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-416-ui-design-d1-ia",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "information-architecture",
+        "gates"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI-D1 信息架构收敛（用户 2026-11-11 预授权连续工作）：单一入口表 + 入口↔路由双向对账门 + 页头残留清理；U/E 不代答。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "UI-DESIGN-IA-DECISION-MATERIAL",
+      "capability": "ui-design-ia-decision-material",
+      "path": "docs/ui-design-ia-decision-material.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-design",
+        "pending-user-ruling",
+        "human-eye"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI 程序 U 类决策材料（U-01～U-06，pending_user_ruling）与 E 类人测路线 + 签字槽（pending_human_eye）；V 类补腿条件；D5 逐件终态化。Agent 不代答。"
+    },
+    {
+      "id": "BLOCK-415",
+      "capability": "block-415-ui-design-d0-baseline",
+      "path": "docs/block-415-ui-design-d0-baseline-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-415-ui-design-d0-baseline",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "baseline",
+        "criteria"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI 设计优化程序 D0（用户 2026-11-11 预授权连续工作）：冻结量化基线并立判据尺子；零 UI 代码改动。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "UI-DESIGN-ACCEPTANCE-CHECKLIST-V1",
+      "capability": "ui-design-acceptance-checklist-v1",
+      "path": "docs/ui-design-acceptance-checklist-v1.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "ui-design-acceptance-criteria",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-design",
+        "acceptance",
+        "criteria"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI 验收清单 v1：八态矩阵/几何四块/长内容三态/断点表/评分卡口径/五类证据定义；D0–D5 唯一尺子，D5 用同套口径复评。"
+    },
     {
       "id": "BLOCK-414",
       "capability": "block-414-post-k7-w5b-slice-1-simplechat",
@@ -31,7 +104,7 @@
         "split",
         "simplechat"
       ],
-      "notes": "W5b 拆分第一刀 completed（2026-11-11）：SimpleChat.tsx 2089→1963（−126 行只减锚）；guard-ack 簇抽为 SimpleChat/hooks/useGuardAck.ts（状态簇+pendingGuardAck 抽模块级纯函数 findPendingGuardAck 可单测+handleGuardAck/Dismiss useCallback 语义保持）；拆前拆后同套绿（104/763 双向一致）；红绿先行（首跑 purity/memoization 红→纯函数抽取全清）；双基线重打+perf 重采（ai-conversations 热路径变化被基线绑定门抓真）；arch-cycles 12 环无新环。零行为变化、零新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "W5b 拆分第一刀 completed（2026-11-11）：SimpleChat.tsx 2089→1963（−126 行只减锚）；guard-ack 簇抽为 SimpleChat/hooks/useGuardAck.ts（状态簇+pendingGuardAck 抽模块级纯函数 findPendingGuardAck 可单测+handleGuardAck/Dismiss useCallback 语义保持）；拆前拆后同套绿（104/763 双向一致）；红绿先行（首跑 purity/memoization 红→纯函数抽取全清）；双基线重打+perf 重采（ai-conversations 热路径变化被基线绑定门抓真）；arch-cycles 12 环无新环。附带修复：①dev 启动 3001 被自家后端占用时复用（selectBackendPorts 健康探针，修 CSP 全拦渲染请求）；②keychain stdin 双行事故修复（L1 单行 input 双提示失配静默存空 → deepseek key 被覆写为空的原值不可恢复，用户需设置面重填；roundtrip 事故门禁永久化）。零行为变化、零新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-413",

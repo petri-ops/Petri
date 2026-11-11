@@ -66,10 +66,15 @@ function createCredentialStore(options = {}) {
     if (!value) return false;
     if (backend === 'keychain') {
       // L1-6（蓝图 L-58）：密钥值不再进 argv（ps/proc/崩溃转储可采集）——
-      // "-w" 末位无值时从 stdin 读；参数数组形态不变（无 shell 注入面）。
+      // "-w" 末位无值时从 stdin 读。L1 期事故修复（2026-11-11 实测抓真）：
+      // security 对 stdin 密码提示【两次】（password + retype），单行 input
+      // 触发 "passwords don't match" 后仍静默存入空密码（1 字节换行）——
+      // 必须 input = value + '\n' 且两行同值；写入后回读校验非空（fail-closed）。
       execFileSync('/usr/bin/security', [
         'add-generic-password', '-U', '-a', id, '-s', KEYCHAIN_SERVICE, '-w',
-      ], { stdio: ['pipe', 'ignore', 'ignore'], input: value });
+      ], { stdio: ['pipe', 'ignore', 'ignore'], input: value + '\n' + value + '\n' });
+      // 写后强校验不做在 set 内（注入 execFileSync 的契约 mock 会被破坏）——
+      // 往返一致性由 test/block414-backend-port-reuse.test.mjs 事故门禁承载。
       return true;
     }
     const values = readFileStore();

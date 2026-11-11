@@ -3,6 +3,32 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "ui-design-program",
+      "note": "界面设计优化程序 UI-D0–D5（BLOCK-415~）：对账基线机械门 / UI 验收清单 v1 / 入口↔路由对账 / 断点与布局单源 / token 与状态收敛 / 无障碍与评分卡复测。新增 scripts 必须恰好命中本规则（classifiesScripts=true），证据目录不落入 fail-closed 全量升级。",
+      "patterns": [
+        "scripts/ui-design-*",
+        "test/ui-design-*",
+        "docs/ui-design-*",
+        "docs/block-415-ui-design-*",
+        "docs/block-416-ui-design-*",
+        "docs/block-417-ui-design-*",
+        "docs/block-418-ui-design-*",
+        "docs/block-419-ui-design-*",
+        "docs/block-420-ui-design-*",
+        "acceptance/ui-design-assessment-2026-11-11/**"
+      ],
+      "tests": [
+        "test/ui-design-baseline.test.mjs",
+        "test/ui-design-entries.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "block413-theme-gate",
       "note": "补腿批第二刀（BLOCK-413）主题门扩面：z-index 全源棘轮+内联颜色全量只减。改 theme-token-contract 或主题文件即跑本契约。",
       "patterns": [
@@ -23,10 +49,12 @@
       "patterns": [
         "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.ts",
         "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.test.ts",
-        "frontend/src/components/copilot/SimpleChat.tsx"
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "src/main/_backend-ports.js"
       ],
       "tests": [
-        "test/block414-w5b-slice-1.test.mjs"
+        "test/block414-w5b-slice-1.test.mjs",
+        "test/block414-backend-port-reuse.test.mjs"
       ],
       "commands": [],
       "classifiesScripts": false
