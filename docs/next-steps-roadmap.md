@@ -1,3 +1,4 @@
+最后更新：2026-11-11（🏁 **BLOCK-409（第五轮 L5 · 结构与单源）completed**：resolveCore 单源+静态门/跨表锚/engines/@docusaurus 退役/R2 兑现；五门全绿；五项 done-partial 带补腿。串行槽位转空；下一阶段=L6 体验可达性与人设（蓝图 §4-L6，11 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-408（第五轮 L4 · 性能与数据面）completed**：fork 事务化红绿先行+回放 DESC+tick 分档+L-34 销号；四项 done-partial 带补腿；perf 5/5 PASS。串行槽位转空；下一阶段=L5 结构与单源（蓝图 §4-L5，13 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-407（第五轮 L3 · 错误语义与边界）completed**：SSE/桥/静默扩面/边界三处/verdict/64MB/断线横幅全数交付；词表 42→55；定向 2261/2263（3 红预存归属）。串行槽位转空；下一阶段=L4 性能与数据面（蓝图 §4-L4，8 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-406（第五轮 L2 · 功能断链与假成功）completed**：L-01 假成功 fail-closed+四类断链修复+通道分类+9 新原因码；定向 208/209；预存红 4 件归属。串行槽位转空；下一阶段=L3 错误语义与边界（蓝图 §4-L3，11 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -10,23 +10,10 @@ const CHANNELS = require('./channels');
 // degrade gracefully.
 // ============================================================
 
-const path = require("path");
 const { ipcMain } = require("electron");
 
-// resolveCore is duplicated here (rather than imported) so this
-// module stays self-contained and doesn't drag in the rest of
-// main.js's module-level state. The logic is identical to the
-// IS_DEV/dev/pack resource-path resolution at src/main.js:231-249.
-function resolveCoreRoot() {
-  const IS_DEV = !require("electron").app.isPackaged;
-  if (IS_DEV) {
-    return path.join(__dirname, "..", "..", "core");
-  }
-  return path.join(process.resourcesPath, "core");
-}
-function resolveCore(...parts) {
-  return path.join(resolveCoreRoot(), ...parts);
-}
+// L5-1（蓝图 L-38/BLOCK-409）：resolveCore 统一单源（core-utils）——mirror 退役。
+const { resolveCore } = require("../main/core-utils");
 
 function setupHarnessCapabilitiesIpc() {
   ipcMain.handle(CHANNELS.harnessCapabilities.list, async () => {

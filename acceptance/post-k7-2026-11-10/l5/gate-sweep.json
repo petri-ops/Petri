@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l5-gate-sweep",
+  "block": "BLOCK-409",
+  "stage": "L5",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-11T05:40:00+08:00",
+  "redGreen": [
+    { "item": "L5-1/L-38 resolveCore 四镜像统一", "green": "ai-settings/harness-capabilities/terminal/backend-proc-manager 四 mirror 退役（require core-utils 单源）；terminal 丢参 bug 附带修复（mirror (..._parts) 丢参 → snapshot command 此前只显示 core 根目录，单源后正确拼接 petri-server/server.js）；静态门：四文件零 mirror 定义 + 植入即红；arch R1-R5 绿（ipc→main 单源消费=既有先例）" },
+    { "item": "L5-2/L-39 双表跨表锚", "green": "CONTRACTS⊆TOOL_METADATA 源码键扫描锚（登记制缺口：12 个 model3d 契约缺 TOOL_METADATA=真实债登记留痕只减棘轮；未登记新缺口必红；skill_execute 孤儿=BLOCK-157 retain-with-reason）；backlog 2c 行第五轮复核注记（职责分离+锚为准，「合一」列候选补腿）；提取口径 bug 实测锚定：[a-z_]+ 在 model3d 的 '3' 断开——历史 103/104 两口径同源失真" },
+    { "item": "L5-3/L-41 注释时态", "green": "branch-db.js 注释改「曾两套入口/现已委托单源」闭合时态" },
+    { "item": "L5-6/L-78 engines 三树对齐", "green": "frontend + core/petri-server 补 engines.node>=24（root 既有）——机械锚断言三树一致" },
+    { "item": "L5-6/L-85 @docusaurus/tsconfig 退役", "green": "探查实证零 extends 零消费 → devDependencies 删除 + package-lock 刷新（grep 0 残余）+ tsconfig 无 extends 断言；同套绿 tsc+vitest 155/155" },
+    { "item": "L5-6/L-80 R2 注释修正", "green": "虚假「config 文件除外」承诺退役（规则本体无 pathNot）；现状=frontend 生产面零 node: 导入、规则空转绿=真实约束在位；未来豁免走 pathNot 登记制注记" },
+    { "item": "L5-5/L-46 例外台账", "green": "16 例外 grant→当前行数差值登记测试（下降/反涨/无读数三档；拆分=独立切片纪律补腿）" },
+    { "item": "行数锚/尺寸指纹", "green": "big-file-anchor 重打（project-workspace 1224 锚回写）+ code-size --write（src/main.js 指纹随 L5-1 改动重打）" }
+  ],
+  "gates": [
+    { "gate": "test/block409-l5-structure.test.mjs", "exit": 0, "reading": "9/9（静态门/跨表锚/engines/@docusaurus/R2/例外台账/注释时态）" },
+    { "gate": "gate:post-h9-contracts", "exit": 0, "reading": "186 项全绿" },
+    { "gate": "五门", "exit": 0, "reading": "version-parity PASS / arch R1-R5 PASS / arch-cycles 12 环无新环 / knip:check 330 冻结 / code-size 75 文件 PASS" },
+    { "gate": "quality:lint:ledger", "exit": 0, "reading": "191=120；warnings P1487/T417/S539 分域未上涨（本批 4 处新违规全根修：mirror 残留 unused×4 + object-injection 豁免留因×1）" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error" },
+    { "gate": "test:changed", "exit": 1, "reading": "469/470——唯一红=P6（CSS WIP，W 归属延续）" },
+    { "gate": "邻域", "exit": 0, "reading": "ai-settings/harness/backend 邻域 23/23；frontend tsc+vitest 155/155（@docusaurus 退役同套绿）" }
+  ],
+  "donePartial": [
+    { "item": "L5-2 单一 schema 生成两视图", "reason": "跨表锚已落+定性统一；两视图生成器触及 CONTRACTS 生成语义（registry 侧效应），须独立切片+K2 同族行为钉测先行（补腿 plan §7）" },
+    { "item": "L5-3/L-42 loadPlugins(sourcePlan) 收敛", "reason": "解析面单源已交付（K-19 三处同源）+装配面登记制棘轮在档（ownArrays!==2 即红）；装配顺序语义收敛须独立切片（补腿）" },
+    { "item": "L5-4/L-44 knip entry 收窄", "reason": "三处动态 require 静态注册表+330 键 --update 下调=两步独立切片（L0-1 已解锁反向门禁；补腿含 run-plugin-script 的 R_SERVER 运行时路径形态处置）" },
+    { "item": "L5-5/L-46 W5b 拆分", "reason": "一切片=一会话纪律（16 例外续期至 2026-12-31；本批交付=grant→当前差值台账登记测试）；至少 3 刀的拆分批次须独立会话（补腿）" },
+    { "item": "L5-6/L-80 环消亡里程碑", "reason": "12 环中 4 环为 agent-tools 族语义环（registry↔tool-defs↔interceptor 互调=架构现状非缺陷）、前端环 10=dev-only 桥自环、环 11/12=树组件递归互调（渲染语义面）——消亡须逐环独立切片；本批交付=R2 注释兑现修正+消亡判据登记（plan §7）" }
+  ],
+  "uAttribution": "typescript ^5.9.3 vs ^5.5.4 漂移=K-31 既有 U 类裁决域（不擅自升级，dependency-parity 门只读检出在档）。",
+  "wAttribution": "P6 源绑定红=CSS WIP 延续。",
+  "notes": "零新增依赖（@docusaurus 为净删除）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}

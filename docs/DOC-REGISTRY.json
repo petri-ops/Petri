@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 551,
+    "documentCount": 552,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 534
+    "managedMarkdown": 535
   },
   "documents": [
+    {
+      "id": "BLOCK-409",
+      "capability": "block-409-post-k7-l5-structure-single-source",
+      "path": "docs/block-409-post-k7-l5-structure-single-source-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-409-post-k7-l5-structure-single-source",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "l5",
+        "structure",
+        "single-source"
+      ],
+      "notes": "第五轮 L5 结构与单源 completed（2026-11-11）：L5-1 resolveCore 四 mirror 退役+静态门（terminal 丢参 bug 附带修复）/L5-2 跨表锚（CONTRACTS⊆TOOL_METADATA；12 model3d 缺口登记制只减；提取口径 bug 实测锚定 [a-z_]+ 断于 3）+backlog 定性统一/L5-3 注释时态/L5-4 L-49 销号（L0-6 交付）/L5-5 例外差值台账/L5-6 engines 三树+@docusaurus 退役（lock 零残余+同套绿）+R2 注释兑现。五门全绿；五项 done-partial 带补腿。typescript=U 类不擅自升。零新增依赖（@docusaurus 净删除）。证据=acceptance/post-k7-2026-11-10/l5/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-408",
       "capability": "block-408-post-k7-l4-performance-dataplane",

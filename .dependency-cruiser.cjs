@@ -23,7 +23,10 @@ module.exports = {
     },
     {
       name: 'R2-renderer-no-node-builtins',
-      comment: 'sandbox 渲染器无 Node 上下文，禁止 node: 内建（config 文件除外）',
+      // L5-6/L-80（BLOCK-409）：注释修正——「config 文件除外」此前无 pathNot 兑现（虚假承诺退役）。
+  // 现状：frontend/src 生产面零 node: 导入（唯一命中为 *.test.ts，已被 cruiser 测试排除面覆盖），
+  // 规则空转绿=真实约束在位。未来确需豁免走 pathNot 登记制（逐条留因，不批量开洞）。
+  comment: 'sandbox 渲染器无 Node 上下文，禁止 node: 内建（豁免走 pathNot 登记制，逐条留因）',
       severity: 'error',
       from: { path: '^frontend/src' },
       to: { path: '^node:' },

@@ -7,24 +7,12 @@ const CHANNELS = require('./channels');
 // Extracted from src/main.js by BLOCK-9.1 PHASE 1.
 // Original location: src/main.js ~line 1215 (setupAiSettingsIpc).
 //
-// resolveCore is duplicated here (rather than imported) so this
-// module stays self-contained and doesn't drag in main.js's
-// module-level state. Logic mirrors src/main.js:231-249.
+// L5-1（蓝图 L-38/BLOCK-409）：resolveCore 统一单源（core-utils）——mirror 退役。
 // ============================================================
 
-const path = require("path");
-const { ipcMain, app } = require("electron");
+const { ipcMain } = require("electron");
 
-function resolveCoreRoot() {
-  const IS_DEV = !app.isPackaged;
-  if (IS_DEV) {
-    return path.join(__dirname, "..", "..", "core");
-  }
-  return path.join(process.resourcesPath, "core");
-}
-function resolveCore(...parts) {
-  return path.join(resolveCoreRoot(), ...parts);
-}
+const { resolveCore } = require("../main/core-utils");
 
 function setupAiSettingsIpc(options = {}) {
   // BLOCK-10 S-004: assertTrustedSender helper, additive alongside BLOCK-3.

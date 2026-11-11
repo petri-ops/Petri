@@ -36,14 +36,10 @@ const { getOpenShellPlan, getSessionShellSpec } =
 // 弹出窗是同一 pty 会话的第二活视图，主窗 tab 保活零丢失。
 const { forwardToContentWindow } = require("./window-manager");
 
-// resolveCore mirror (self-contained, identical to main.js logic)
-function resolveCore(..._parts) {
-  const IS_DEV = !app.isPackaged;
-  if (IS_DEV) {
-    return path.join(__dirname, "..", "..", "core");
-  }
-  return path.join(process.resourcesPath, "core");
-}
+// L5-1（蓝图 L-38/BLOCK-409）：resolveCore 统一单源——mirror 退役。
+// 附带修复：旧 mirror 签名 (..._parts) 丢弃参数，snapshot 的 command 字段
+// 此前只显示 core 根目录；单源后正确拼接 petri-server/server.js 子路径。
+const { resolveCore } = require("../main/core-utils");
 
 const MAX_TERMINAL_TABS = 4;
 const DEFAULT_SESSION_ID = "default";

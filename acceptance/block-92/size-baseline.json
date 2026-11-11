@@ -45,9 +45,9 @@
       "path": "frontend/src/pages/project-workspace.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 1221,
-      "bytes": 60702,
-      "sha256": "2174440aa824f19100da82f68c1b55af58fdb89da16bef6dbb45faa95d88da55"
+      "lines": 1224,
+      "bytes": 60970,
+      "sha256": "6df8c5d36945b7b374654e85bd482780ebb3e889449c6c7a03a71cba6928540b"
     },
     {
       "path": "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
@@ -77,17 +77,17 @@
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 526,
-      "bytes": 27556,
-      "sha256": "4722412742f79c9d9599e791fa7883a9a0239b72c2c648f039d4afd45c57e411"
+      "lines": 535,
+      "bytes": 28186,
+      "sha256": "ca7f2984e5f152a4ecbcd4504472aec0c62b39dc3406c58de1c14c0e23e80308"
     },
     {
       "path": "frontend/src/pages/home.tsx",
       "wave": "B",
       "module": "W-02",
-      "lines": 754,
-      "bytes": 33496,
-      "sha256": "504acb661eb73a8c5719ee53ac71cc2b89c25c2143680e5d6e4f468f07e95a06"
+      "lines": 758,
+      "bytes": 33716,
+      "sha256": "324a282467c40ff6ea0572364141b269efbce1ab2a80d1b5b6f136541e4dc498"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/useWorkingTreeReview.ts",
@@ -157,9 +157,9 @@
       "path": "core/petri-server/mcp/registry.js",
       "wave": "C",
       "module": "P-02",
-      "lines": 967,
-      "bytes": 36626,
-      "sha256": "1f8bb632eb3c45a4b761e3c19964cf1ed5d7bfc31a2fcb6825bccb86e3f58a61"
+      "lines": 983,
+      "bytes": 37523,
+      "sha256": "41799cd9134683f3f44d7782f539c2851a5f455b4682b03cdb7fda58343ae0b5"
     },
     {
       "path": "core/shared-backend/result-studio-lifecycle.js",
@@ -293,9 +293,9 @@
       "path": "core/shared-backend/skill-runtime.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1126,
-      "bytes": 31605,
-      "sha256": "75e3bfce7da8a6844a5047198e9efee8ee2b2d4b593f83df35d174c3278d9216"
+      "lines": 1136,
+      "bytes": 32067,
+      "sha256": "ab8dafe1cdfa0a55130dd4da86abf5b551ab4dd133059e6ff11c7523db0f74c2"
     },
     {
       "path": "core/shared-backend/result-changeset-service/baseline-cohort.js",
@@ -346,6 +346,14 @@
       "sha256": "b40bd6bbef270ceb7c493ad66f165fa98ccfc70dbf2e2297eba219fa5c23f9e2"
     },
     {
+      "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1026,
+      "bytes": 48067,
+      "sha256": "fedba9cb19f00be9f0a0e1177965073c4bc0ee79984ccbe4c7e5a661319437a6"
+    },
+    {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -354,20 +362,12 @@
       "sha256": "c1a69dfa6592d5b1cfaf78d1bae7fbdc019a821b5db5629423f211f4c387615d"
     },
     {
-      "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1017,
-      "bytes": 47532,
-      "sha256": "9db0d1250bed12a5dae8253c23dbacfa0a92ab76bb787e4395ee0cc429de1f68"
-    },
-    {
       "path": "frontend/src/lib/electron.d.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1015,
-      "bytes": 46895,
-      "sha256": "085f88d2a3d8f6dd2c25262c745c000207c054cb3b410dedb30ab395bd8521f0"
+      "lines": 1017,
+      "bytes": 47103,
+      "sha256": "5aba7b82272e07bd340d863c312a4d1c72f9681a46d53a3f28bf2c5fc656838d"
     },
     {
       "path": "frontend/src/components/copilot/ToolActivityList.tsx",
@@ -458,20 +458,20 @@
       "sha256": "2a4500eb0e6129e20359c99aaaf91836c2317c258abdbf03bafc94e58421e40f"
     },
     {
+      "path": "src/main.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 886,
+      "bytes": 44852,
+      "sha256": "76593f9a4b9607b96e6b9a9f8924edba340f34db4e94d7d161c51746fc93e7fb"
+    },
+    {
       "path": "core/shared-backend/skill-registry.js",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 882,
       "bytes": 31602,
       "sha256": "da47c13575d39b4307d58517d769b659f1ec72b2a5bef710e536b90aad8e739a"
-    },
-    {
-      "path": "src/main.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 880,
-      "bytes": 44441,
-      "sha256": "e3eeb17936dfbe4f48d2acbdb169318c1ed3bd7eb0aed1939f439d2d3182f823"
     },
     {
       "path": "core/petri-server/helpers/knowledge-space.js",
@@ -602,5 +602,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86730
+  "total": 86789
 }

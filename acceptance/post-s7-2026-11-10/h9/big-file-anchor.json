@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "post-s7-big-file-anchor",
-  "generatedAt": "2026-11-10",
+  "generatedAt": "2026-11-11",
   "policy": "行数只减不增 + 内容指纹必须同批重打；与 code-size-ledger 集合互斥",
   "files": [
     {
@@ -18,8 +18,8 @@
     },
     {
       "path": "frontend/src/pages/project-workspace.tsx",
-      "lines": 1223,
-      "sha256": "12b1439dac6ddbb8eaaae6419b028862bb66ad71dbda80333156c58519141ab9",
+      "lines": 1224,
+      "sha256": "6df8c5d36945b7b374654e85bd482780ebb3e889449c6c7a03a71cba6928540b",
       "missing": false
     },
     {

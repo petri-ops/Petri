@@ -45,20 +45,10 @@ const { spawn } = require("child_process");
 const { app } = require("electron");
 const { createOwnedBackendSupervisor } = require("../owned-backend-supervisor");
 
-// ── Path resolution (mirror of main.js:147-169) ─────────────────
+// ── Path resolution（L5-1/L-38：resolveCore 统一单源 core-utils，mirror 退役）──
 const IS_DEV = !app.isPackaged;
-const PROJECT_ROOT = IS_DEV ? path.join(__dirname, "..", "..") : process.resourcesPath;
 
-function resolveCoreRoot() {
-  if (IS_DEV) {
-    return path.join(PROJECT_ROOT, "core");
-  }
-  return path.join(process.resourcesPath, "core");
-}
-
-function resolveCore(...parts) {
-  return path.join(resolveCoreRoot(), ...parts);
-}
+const { resolveCore } = require("./core-utils");
 
 // ── Node bin resolution (mirror of main.js:178-220) ────────────
 // Used by all 4 spawn() calls below.
