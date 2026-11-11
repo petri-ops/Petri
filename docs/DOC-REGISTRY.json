@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 550,
+    "documentCount": 551,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 533
+    "managedMarkdown": 534
   },
   "documents": [
+    {
+      "id": "BLOCK-408",
+      "capability": "block-408-post-k7-l4-performance-dataplane",
+      "path": "docs/block-408-post-k7-l4-performance-dataplane-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-408-post-k7-l4-performance-dataplane",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "l4",
+        "performance",
+        "data-plane"
+      ],
+      "notes": "第五轮 L4 性能与数据面 completed（2026-11-11）：L4-1 fork 事务化（父行+消息+计数单事务+INSERT...SELECT+LIMIT 下推，红 2→6/6，K2 反向钉测翻新）/L4-3 回放 DESC 小窗 200/L4-5 tickBucket 分档（30s×2/60s×1 桶值，复杂表达式×3 根修）/L-34 销号（L0-7 已交付）；四项 done-partial 带补腿条件（worker_threads 超 scoped/messages 读契约/窗口化 UI 面定时器 L6）。perf 重采+连续 5/5 PASS（基线绑定门实战抓热路径变化）。定向零回归；零新增依赖。证据=acceptance/post-k7-2026-11-10/l4/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-407",
       "capability": "block-407-post-k7-l3-error-semantics",

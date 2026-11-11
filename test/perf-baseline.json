@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-11-10T19:36:11.747Z",
+  "generatedAt": "2026-11-11T00:31:56.378Z",
   "host": {
     "platform": "darwin-arm64",
     "cpus": 8,
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "a1e1c5ba35dfca12",
+  "coreSha": "f0c325d2d6f620d8",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
       "unit": "ms",
       "samples": [
-        797,
-        371,
+        785,
+        370,
         372
       ],
       "medianMs": 372,
@@ -28,8 +28,8 @@
       "samples": [
         22,
         20,
-        19,
         20,
+        19,
         20
       ],
       "medianMs": 20,
@@ -59,12 +59,12 @@
       "unit": "ms",
       "samples": [
         543,
-        530,
-        543,
-        543,
-        534
+        546,
+        531,
+        544,
+        544
       ],
-      "medianMs": 543,
+      "medianMs": 544,
       "tolerancePct": 25,
       "runs": 5,
       "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿",

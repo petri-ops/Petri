@@ -243,23 +243,24 @@ module.exports = function mountConversations(app) {
       const projectId = source.project_id || null;
       const parentId = source.id;
 
-      await adb.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, parent_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
-        .run(forkId, userId, title, 'active', lastPage, projectId, parentId, now, now);
-
       // Copy messages — optionally limited by untilIndex (0-based, inclusive).
       // When not specified, all messages are copied (existing behaviour).
+      // L4-1（蓝图 L-24/BLOCK-408）：事务化 + INSERT...SELECT + LIMIT 下推——
+      // 原实现全量 SELECT 进内存 + 逐条 INSERT（1000 条 = 1000 次 WAL commit/fsync
+      // + 1000 次 uuid），中途失败留半截会话；现父行+消息+计数单事务，失败零残留。
+      // id 形态契约保持 msg_ 前缀 12 hex（randomblob(6)）；ts 同批 now 语义保持。
       const untilIndex = (req.body && typeof req.body.untilIndex === 'number') ? Math.max(0, Math.floor(req.body.untilIndex)) : null;
-      const messages = await adb.prepare('SELECT role, content, meta_json FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC').all(req.params.id);
-      const messagesToCopy = (untilIndex !== null && untilIndex < messages.length) ? messages.slice(0, untilIndex + 1) : messages;
-      if (messagesToCopy.length > 0) {
-        const stmt = adb.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, ts) VALUES (?,?,?,?,?,?)');
-        for (const msg of messagesToCopy) {
-          const msgId = 'msg_' + require('uuid').v4().slice(0, 12);
-          stmt.run(msgId, forkId, msg.role, msg.content, msg.meta_json, now);
+      const copyLimit = untilIndex === null ? -1 : untilIndex + 1;
+      let copiedCount = 0;
+      await adb.transaction((tx) => {
+        tx.prepare('INSERT INTO copilot_conversations(id, user_id, title, status, last_page, project_id, parent_id, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
+          .run(forkId, userId, title, 'active', lastPage, projectId, parentId, now, now);
+        if (copyLimit !== 0) {
+          const ins = tx.prepare('INSERT INTO copilot_messages(id, conversation_id, role, content, meta_json, ts) SELECT \'msg_\' || lower(hex(randomblob(6))), ?, role, content, meta_json, ? FROM copilot_messages WHERE conversation_id=? ORDER BY ts ASC LIMIT ?');
+          copiedCount = Number(ins.run(forkId, now, req.params.id, copyLimit).changes) || 0;
         }
-      }
-
-      await adb.prepare('UPDATE copilot_conversations SET message_count=? WHERE id=?').run(messagesToCopy.length, forkId);
+        tx.prepare('UPDATE copilot_conversations SET message_count=? WHERE id=?').run(copiedCount, forkId);
+      });
 
       res.json({
         status: 'ok',
@@ -269,7 +270,7 @@ module.exports = function mountConversations(app) {
           status: 'active',
           last_page: lastPage,
           project_id: projectId,
-          message_count: messagesToCopy.length,
+          message_count: copiedCount,
           created_at: now,
           updated_at: now,
           parent_id: parentId,

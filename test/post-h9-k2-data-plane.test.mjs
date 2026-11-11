@@ -140,14 +140,17 @@ test('K-12：索引不新建第二 DDL 通道（db/schema.js 不建 copilot_* �
   assert.ok(migrations.length > 0);
 });
 
-// ④ 结构性挂起项：现状裁决（不冒充已修）
-test('W5b 挂起项：fork 多步写仍非原子、SSE 仍 500ms 轮询、服务端仍 LIMIT 101 单页', () => {
+// ④ 结构性挂起项 → L4 兑现翻新（BLOCK-408）：fork 事务化已交付（其余两项挂起如实保留）
+test('W5b 挂起项处置：fork 已事务化（L4-1 交付）；SSE 500ms 轮询与 LIMIT 101 单页仍挂起（不冒充已修）', () => {
   const conv = read('core/petri-server/routes/ai-conversations.js');
-  assert.match(conv, /stmt\.run\(msgId/, 'fork 逐条 INSERT 现状保留');
+  // L4-1（BLOCK-408）：fork 父行+消息+计数单事务（adb.transaction）+ INSERT...SELECT LIMIT 下推
+  assert.match(conv, /adb\.transaction\(\(tx\) =>/, 'fork 事务化已交付（L4-1）');
+  assert.match(conv, /INSERT INTO copilot_messages[\s\S]*?SELECT[\s\S]*?LIMIT \?/, 'INSERT...SELECT+LIMIT 下推已交付');
+  assert.doesNotMatch(conv, /stmt\.run\(msgId/, '逐条 INSERT 已退役');
+  // 挂起项如实保留（不冒充已修）
   const events = read('core/petri-server/routes/ai-agent/events.js');
-  assert.match(events, /setInterval\([^,]+,\s*500\)|500\)/);
-  assert.match(events, /15_000|15000/);
-  assert.equal(conv.includes('db.transaction(') || conv.includes('BEGIN TRANSACTION'), false, 'K2 不改数据访问契约');
+  assert.match(events, /setInterval\([^,]+,\s*500\)|500\)/, 'SSE 500ms 轮询仍挂起（W5b）');
+  assert.match(conv, /LIMIT\s+101/, '服务端 LIMIT 101 单页仍挂起（W5b）');
 });
 
 test('负测：证据整体缺席 → fail-closed 判红', () => {

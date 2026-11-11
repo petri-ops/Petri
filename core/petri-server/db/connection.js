@@ -82,6 +82,20 @@ function createAsyncDatabaseFacade(realDb) {
     async exec(ddl) {
       return realDb.exec(ddl);
     },
+    /**
+     * L4-1（蓝图 L-24/BLOCK-408）：事务透传（显式同步契约，L-25 同族）——
+     * fn 收【同步 facade】（prepare 直接返回 better-sqlite3 句柄），在
+     * realDb.transaction 的同步边界内执行：任何语句抛错 → 整体回滚。
+     * async facade 不可入事务（better-sqlite3 拒绝 promise 返回：首个 await
+     * 挂起点之后的语句会落到 COMMIT 之外——实测锚定，勿改回 async fn）。
+     */
+    transaction(fn) {
+      const syncFacade = {
+        prepare: (sql) => realDb.prepare(sql),
+        exec: (ddl) => realDb.exec(ddl),
+      };
+      return realDb.transaction(() => fn(syncFacade))();
+    },
     prepare(sql) {
       const stmt = realDb.prepare(sql);
       return {

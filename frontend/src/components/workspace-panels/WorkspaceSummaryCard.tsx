@@ -695,6 +695,12 @@ function useSummaryHeartbeat(enabled: boolean, tickMs = 5000): number {
   return tick;
 }
 
+/** L4-5（蓝图 L-32/BLOCK-408）：分档桶——floor(tick/N) 仅在跨档时变化，
+ *  慢档 hook 依赖桶值即得「每 N 拍触发一次」；纯函数供契约测试。 */
+export function tickBucket(tick: number, everyTicks: number): number {
+  return Math.floor(tick / Math.max(1, everyTicks));
+}
+
 /** BLOCK-78 P1⑤：项目内子 agent 俯瞰（复用 listAgentTasks + projectId 过滤，
  *  同 BLOCK-65 语义；无内容返回空数组 → 卡片整节不渲染）。 */
 function useProjectAgentOverview(projectId: string | null, enabled: boolean, tick: number): AgentTaskOverviewItem[] {
@@ -736,6 +742,7 @@ interface ProjectUsageSummary {
 
 function useProjectUsage(projectId: string | null, enabled: boolean, tick: number): ProjectUsageSummary | null {
   const [usage, setUsage] = useState<ProjectUsageSummary | null>(null);
+  const tick6 = tickBucket(tick, 6); // L4-5（L-32）：30s 档
   useEffect(() => {
     if (!enabled || !projectId) return;
     let alive = true;
@@ -757,7 +764,7 @@ function useProjectUsage(projectId: string | null, enabled: boolean, tick: numbe
     return () => {
       alive = false;
     };
-  }, [enabled, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（30s 档每 6 拍）
+  }, [enabled, projectId, tick6]); // L4-5（L-32）：30s 档每 6 拍（桶值依赖，原 tick 直入=每 5s 误触发）
   return usage;
 }
 
@@ -772,6 +779,7 @@ interface ProjectStorageSummary {
 
 function useProjectStorage(projectId: string | null, enabled: boolean, tick: number): ProjectStorageSummary | null {
   const [storage, setStorage] = useState<ProjectStorageSummary | null>(null);
+  const tick12 = tickBucket(tick, 12); // L4-5（L-32）：60s 档
   useEffect(() => {
     if (!enabled || !projectId) return;
     let alive = true;
@@ -793,7 +801,7 @@ function useProjectStorage(projectId: string | null, enabled: boolean, tick: num
     return () => {
       alive = false;
     };
-  }, [enabled, projectId, tick]); // BLOCK-161 W4-1：节拍驱动（60s 档每 12 拍）
+  }, [enabled, projectId, tick12]); // L4-5（L-32）：60s 档每 12 拍（桶值依赖）
   return storage;
 }
 
@@ -802,6 +810,7 @@ function useProjectStorage(projectId: string | null, enabled: boolean, tick: num
  *  标记已读后立刷。 */
 function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refreshKey: number, tick: number): number {
   const [unread, setUnread] = useState(0);
+  const tick6 = tickBucket(tick, 6); // L4-5（L-32）：30s 档
   useEffect(() => {
     if (!enabled || !projectId) return;
     let alive = true;
@@ -822,7 +831,7 @@ function useProjectNoticeUnread(projectId: string | null, enabled: boolean, refr
     return () => {
       alive = false;
     };
-  }, [enabled, projectId, refreshKey, tick]); // BLOCK-161 W4-1：节拍驱动（30s 档每 6 拍；refreshKey 立刷保留）
+  }, [enabled, projectId, refreshKey, tick6]); // L4-5（L-32）：30s 档每 6 拍（refreshKey 立刷保留）
   return unread;
 }
 

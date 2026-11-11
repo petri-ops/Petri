@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l4-gate-sweep",
+  "block": "BLOCK-408",
+  "stage": "L4",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-11T05:00:00+08:00",
+  "redGreen": [
+    { "item": "L4-1/L-24 fork 无事务", "red": "红 2（facade.transaction 缺席 + 原子性注入 3≠2 半截会话）", "green": "父行+消息+计数单事务（同步 facade 契约——better-sqlite3 拒 promise 实测锚定）+ INSERT...SELECT + LIMIT 下推（untilIndex inclusive 逐字保持：消息-0~消息-4 对齐）+ 中途注入失败回滚零残留" },
+    { "item": "L4-3/L-26 全量回放", "green": "events.js findFallbackChild 改 getRecentAgentTaskEvents DESC 小窗 200（终态只需最近一条；原 1e6 全量反序列化退役）；block407/159/K2 28/28" },
+    { "item": "L4-5/L-32 tick 分档", "green": "tickBucket 纯函数（floor 桶）+三慢档（30s×2/60s×1）依赖桶值——注释声称的取模分档首次真实现；快档 5s 保持；页面回归 162/162" },
+    { "item": "K2 反向钉测翻新", "green": "「fork 非事务」现状钉测 → 「事务化已交付+逐条 INSERT 退役+其余挂起如实保留」新契约（K2 15/15）" }
+  ],
+  "gates": [
+    { "gate": "test/block408-l4-performance.test.mjs", "exit": 0, "reading": "6/6（真 better-sqlite3 隔离库驱动：事务透传/全量复制/untilIndex LIMIT/原子性回滚/幂等收尾/tick 桶契约）" },
+    { "gate": "quality:perf", "exit": 0, "reading": "重采基线（热路径 sha 正确抓到 ai-conversations 变化）+ 连续 5/5 PASS：packaged 372/483、warm 547/680、long 20/32、tree 11/18（读数落 acceptance/post-k7-2026-11-10/l4/perf-evidence.json）" },
+    { "gate": "gate:post-h9-contracts", "exit": 0, "reading": "186 项全绿（K2 钉测翻新后）" },
+    { "gate": "quality:lint:ledger", "exit": 0, "reading": "191=120 逐条相等；warnings P1487（复杂表达式×3 经桶值提取根修清零）" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error" },
+    { "gate": "邻域回归", "exit": 0, "reading": "block95-messages-cursor + block95-b2-compaction + block88 + K2 + block350-gate 43/44→44/44（唯一红=基线绑定正确抓热路径变化，重采后绿）" }
+  ],
+  "donePartial": [
+    { "item": "L4-2/L-25 worker_threads", "reason": "探查实证：436 处 prepare/50 文件、1103 调用面、getAsyncDatabase 29 文件——迁移面超 scoped 判据；本批交付=transaction 显式同步契约注释（含 promise 拒绝实测锚定）；迁移须独立大包+拆前拆后同套绿（补腿条件 plan §7.1）" },
+    { "item": "L4-4/L-31 messages 三路径", "reason": "读数登记在档；(ts,id) 索引化 COUNT 与 export 流式须 K2 同族行为钉测先行（补腿条件 plan §7.2）" },
+    { "item": "L4-6/L-33 窗口化", "reason": "SimpleChat/LeftPanel 渲染语义面——须 UI 台账条目+9223 双证+独立切片（补腿条件 plan §7.3）；L-34 CSS 字节棘轮=L0-7 已交付销号（8 CSS 在册实测核对）" },
+    { "item": "L4-7/L-35 定时器", "reason": "清单实测登记：ToolActivity 1s×2 纯本地计时零请求、useMcpServers 仅 pending 启用、Knowledge 自适应、ThemeProvider 15s 有立刷=现状无害 retain-with-reason；visibilityState 统一门归 L6（补腿条件 plan §7.4）" }
+  ],
+  "wAttribution": "P6 源绑定红=CSS WIP（owner 收口自愈）延续。",
+  "notes": "零新增依赖（randomblob 替代 uuid 为 SQLite 内建）。perf 基线绑定门在 L4 首次实战发挥——热路径文件变化被机械抓到并强制重采。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}
