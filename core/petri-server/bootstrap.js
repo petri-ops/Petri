@@ -63,7 +63,10 @@ function setupBootstrap(app, { db }) {
   } catch (error) {
     // BLOCK-102 P1 — fail-open must be LOUD: without the gate, module
     // permission requests are auto-approved with zero enforcement.
-    console.error('[modules] permission gate FAILED TO LOAD — running WITHOUT permission enforcement:', error && error.message);
+    // L3-5（蓝图 L-22）：仅 LOUD 不够——进程级 degraded 标记 + 健康面可见
+    //（不静默回落「自动批准一切」；恢复须重启后重载成功）。
+    process.env.PETRI_PERMISSION_GATE_DEGRADED = '1';
+    console.error('[modules] permission gate FAILED TO LOAD — DEGRADED（权限门未生效，健康面可见）:', error && error.message);
   }
 }
 

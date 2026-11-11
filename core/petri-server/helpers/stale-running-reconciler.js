@@ -24,6 +24,8 @@ const { notifyScheduler } = require('./tool-job-lifecycle-registry');
 const DEFAULT_STALE_AFTER_MS = 10 * 60 * 1000; // 心跳停更阈值：10min（30s 心跳间隔的 20 倍余量）
 const DEFAULT_INTERVAL_MS = 60 * 1000; // 对账周期 60s
 const DEFAULT_STARTUP_GRACE_MS = 5 * 60 * 1000; // 无心跳行的启动宽限（claim 后首个心跳窗）
+// L3-5（L-22）：sweep 连续失败计数（模块级——跨轮保留，成功清零）
+let consecutiveSweepFailures = 0;
 
 function reconcileStaleRunningToolJobs({
   db,
@@ -31,7 +33,10 @@ function reconcileStaleRunningToolJobs({
   staleAfterMs = DEFAULT_STALE_AFTER_MS,
   startupGraceMs = DEFAULT_STARTUP_GRACE_MS,
 } = {}) {
-  if (!db) return { reconciled: [] };
+  if (!db) {
+    // L3-5（蓝图 L-22）：db 缺席=「本轮无滞留」误判源——显式 degraded 让调用方可见。
+    return { reconciled: [], degraded: true, reason: 'db_unavailable' };
+  }
   const observedAt = now();
   const rows = db
     .prepare("SELECT id, heartbeat_at, created_at FROM tool_jobs WHERE status='running'")
@@ -71,8 +76,16 @@ function scheduleStaleRunningReconciler({
         console.warn(`[stale-running-reconciler] ${reconciled.length} job(s) reconciled to failed:`, reconciled.join(','));
       }
     } catch (error) {
-      // 对账器自身故障不致命（下一轮再扫），但必须可观测——不重蹈「泵静默吞」
-      console.warn('[stale-running-reconciler] sweep failed:', error?.message || String(error));
+      // L3-5（蓝图 L-22）：连续失败计数——≥3 次升级 error + 发健康事件
+      //（对账器自身故障不致命，但连续失败必须从 warn 升级为可观测健康事件）。
+      consecutiveSweepFailures += 1;
+      const message = error?.message || String(error);
+      if (consecutiveSweepFailures >= 3) {
+        console.error('[stale-running-reconciler] sweep failed', consecutiveSweepFailures, 'consecutive times:', message);
+        try { process.emit('reconciler_unhealthy', { consecutiveSweepFailures, message }); } catch { /* 事件面不可用不阻塞 */ }
+      } else {
+        console.warn('[stale-running-reconciler] sweep failed:', message);
+      }
     }
   }, intervalMs);
   timer.unref?.();

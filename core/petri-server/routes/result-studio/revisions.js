@@ -20,6 +20,7 @@
  */
 
 const fs = require('fs');
+const { MAX_ASSET_BYTES } = require('../../../shared-backend/budget-constants');
 const db = require('../../db');
 const pluginLoader = require('../../plugin-loader');
 const mcpRegistry = require('../../mcp/registry');
@@ -38,7 +39,7 @@ function sshRevisionReadContext(project, revision) {
   if (resolved.error || !resolved.backend || resolved.backend.kind !== 'ssh') return null;
   const artifactPath = safeRemoteJoin(resolved.root, revision.outputPath);
   if (!artifactPath) return null;
-  return { backend: resolved.backend, artifactPath, maxBytes: 64 * 1024 * 1024 };
+  return { backend: resolved.backend, artifactPath, maxBytes: MAX_ASSET_BYTES };
 }
 const {
   createVerifiedSnapshotReadStream,
@@ -289,7 +290,7 @@ module.exports = {
         try {
           const st = await sshCtx.backend.stat(sshCtx.artifactPath).catch(() => null);
           if (!st) return res.status(404).json({ error: 'revision_artifact_unavailable' });
-          if (Number(st.size || 0) > 64 * 1024 * 1024) {
+          if (Number(st.size || 0) > MAX_ASSET_BYTES) {
             return res.status(409).json({ error: 'revision_artifact_unavailable', message: 'artifact exceeds remote read budget' });
           }
           const buf = await sshCtx.backend.read(sshCtx.artifactPath);

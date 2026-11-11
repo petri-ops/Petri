@@ -99,7 +99,11 @@ export default function Home(): React.ReactElement {
         if (cancelled) return;
         setProjects(projects);
         const jobsByProject = await Promise.all(
-          projects.map((project) => listProjectJobs(project.id).catch(() => []))
+          projects.map((project) => listProjectJobs(project.id).catch(() => {
+            // L3-4（L-18）：作业清单降级为空 + 具名（首页不阻塞，失败可见）
+            console.warn(`[home] job list unavailable for ${project.id}`);
+            return [] as never;
+          }))
         );
         if (cancelled) return;
         const jobs = jobsByProject.flat();

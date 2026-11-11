@@ -21,7 +21,8 @@ const path = require('path');
 
 const MAX_RECORD_BYTES_DEFAULT = 8 * 1024 * 1024; // 8MB
 const MAX_FRAMES_DEFAULT = 2000;
-const MAX_FILE_BYTES_DEFAULT = 64 * 1024 * 1024; // 64MB
+const { MAX_ASSET_BYTES } = require("../budget-constants");
+const MAX_FILE_BYTES_DEFAULT = MAX_ASSET_BYTES; // L3-6（L-23）：单源收编
 const UNATTRIBUTED = 'unattributed';
 const MESSAGE_KEEP_HEAD = 4;
 const MESSAGE_KEEP_TAIL = 16;

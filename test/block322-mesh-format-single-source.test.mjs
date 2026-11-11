@@ -74,8 +74,12 @@ test('BLOCK-322 — 字节上限只有一个数值', () => {
     assert.ok(match, `未找到常量 ${name}`);
     return match[1].trim().replace(/\s+/g, ' ');
   };
-  assert.equal(limit(backend, 'MAX_MESH_BYTES'), '64 * 1024 * 1024');
+  // L3-6（L-23/BLOCK-407）：后端 MAX_MESH_BYTES 收编 budget-constants 单源
+  //（值不变、形态变派生）——跨语言值对等语义保持：后端派生常量 == 前端字面量 == Python 换算值。
+  assert.equal(limit(backend, 'MAX_MESH_BYTES'), 'MAX_ASSET_BYTES');
   assert.equal(limit(frontend, 'MAX_MESH_BYTES'), '64 * 1024 * 1024');
+  const budget = read('../core/shared-backend/budget-constants.js');
+  assert.equal(limit(budget, 'MAX_ASSET_BYTES'), '64 * 1024 * 1024', 'budget-constants 单源值必须仍是 64MB');
   // Python 侧写的是同值不同形（1MB 粒度），换算后必须等于 64MB。
   const py = blender.match(/MAX_MESH_BYTES\s*=\s*(\d+)\s*\*\s*1024\s*\*\s*1024/);
   assert.ok(py, `未识别的 Python 上限写法：${blender.match(/MAX_MESH_BYTES.*/)?.[0]}`);

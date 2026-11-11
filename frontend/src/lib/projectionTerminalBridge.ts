@@ -23,7 +23,10 @@ interface ProjectionTerminalBridge {
 const sessionByTab = new Map<string, string>(); // tabId -> gateway sessionId
 const sourceByTab = new Map<string, EventSource>();
 const dataHandlers = new Set<(payload: { sessionId: string; data: string }) => void>();
-const exitHandlers = new Set<(payload: { sessionId: string; exitCode?: number | null }) => void>();
+const exitHandlers = new Set<(payload: { sessionId: string; exitCode?: number | null; bridgeUnavailable?: boolean }) => void>();
+// L3-3（蓝图 L-17）：每 tab 重连失败计数（onerror 有界重连）
+const reconnectFailures = new Map<string, number>();
+const TERMINAL_RECONNECT_LIMIT = 5;
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -56,12 +59,24 @@ function attachStream(tabId: string, sessionId: string) {
     } catch { /* 忽略坏帧 */ }
     source.close();
     sourceByTab.delete(tabId);
+    // L3-3（蓝图 L-17）：exit 必须同时清 sessionByTab——残留会让后续 write/resize 对死会话 POST。
+    sessionByTab.delete(tabId);
+    reconnectFailures.delete(tabId);
   });
-  source.onerror = () => {
-    // EventSource 自动重连；环形缓冲会在重连时重放。
-    // BLOCK-159 P1-9 — 断线如实上报（断连横幅），不再纯静默。
-    markProjectionBridgeFailure('terminal stream error');
-  };
+  // L3-3（蓝图 L-17）：onerror 有界重连——EventSource 原生无限重连改为计数上限
+  //（5 次达限 close + 显式失败上报），避免永久盲重连。
+  const failures = (reconnectFailures.get(tabId) || 0) + 1;
+  reconnectFailures.set(tabId, failures);
+  if (failures >= TERMINAL_RECONNECT_LIMIT) {
+    source.close();
+    sourceByTab.delete(tabId);
+    sessionByTab.delete(tabId);
+    reconnectFailures.delete(tabId);
+    markProjectionBridgeFailure('terminal stream reconnect limit reached');
+    for (const handler of exitHandlers) handler({ sessionId: tabId, exitCode: null, bridgeUnavailable: true });
+    return;
+  }
+  markProjectionBridgeFailure('terminal stream error');
   sourceByTab.set(tabId, source);
 }
 
@@ -126,7 +141,10 @@ const bridge: ProjectionTerminalBridge = {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ cols, rows }),
-    }).catch(() => {});
+    }).catch(() => {
+      // L3-4（L-18）：resize 失败具名降级（终端列宽暂不生效，不阻塞会话）
+      markProjectionBridgeFailure('terminal resize failed');
+    });
   },
 
   stopSession(tabId) {
@@ -135,10 +153,21 @@ const bridge: ProjectionTerminalBridge = {
     sourceByTab.delete(tabId);
     sessionByTab.delete(tabId);
     if (!sessionId) return;
-    void fetch(`/m/api/terminal/${encodeURIComponent(sessionId)}/kill`, {
-      method: 'POST',
-      headers: authHeaders(),
-    }).catch(() => {});
+    // L3-3（蓝图 L-17）：kill 失败重试 2 次——原裸吞会让 core 侧 node-pty 会话常驻
+    // 而本地映射已删、无法补偿；重试耗尽显式上报。
+    const kill = (attempt: number): void => {
+      void fetch(`/m/api/terminal/${encodeURIComponent(sessionId)}/kill`, {
+        method: 'POST',
+        headers: authHeaders(),
+      }).catch(() => {
+        if (attempt < 2) {
+          setTimeout(() => kill(attempt + 1), 500 * (attempt + 1));
+          return;
+        }
+        markProjectionBridgeFailure('terminal kill failed after retries');
+      });
+    };
+    kill(0);
   },
 
   onData(handler) {

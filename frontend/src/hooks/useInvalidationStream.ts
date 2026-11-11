@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 // ============================================================
 // useInvalidationStream — CK-03（C-02 轮询→SSE 第一批）全局失效通知订阅。
 //
@@ -10,18 +11,24 @@
 // 断线自动重连（指数退避 1s→8s 封顶）；卸载即中止。
 // 诚实边界：重连窗口内的变更靠消费方的低频兜底轮询兜住。
 // ============================================================
-import { useEffect, useRef } from 'react';
 import { getApiPrefix, getToken } from '@/lib/authClient';
 
 export type InvalidationHandler = (info: { domain: string; at: string; payload?: Record<string, unknown> }) => void;
 
-export function useInvalidationStream(enabled: boolean, handler: InvalidationHandler): void {
+/** L3-7（蓝图 L-68）：流连接相位——failed/connected 暴露给消费方做 role=status 呈现。 */
+export type InvalidationStreamPhase = 'connected' | 'retrying' | 'failed';
+
+export function useInvalidationStream(enabled: boolean, handler: InvalidationHandler): { phase: InvalidationStreamPhase } {
   // latest-ref：回调每渲染都换新（多为消费方 useCallback 的 refresh），流层用
   // ref 读取避免「回调变 → 重连」风暴。
   const handlerRef = useRef(handler);
   useEffect(() => {
     handlerRef.current = handler;
   }, [handler]);
+  const [phase, setPhase] = useState<InvalidationStreamPhase>('connected');
+  const setPhaseSafe = useCallback((next: InvalidationStreamPhase) => {
+    setPhase((prev: InvalidationStreamPhase) => (prev === next ? prev : next));
+  }, []);
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -54,7 +61,8 @@ export function useInvalidationStream(enabled: boolean, handler: InvalidationHan
             while ((idx = buf.indexOf('\n\n')) !== -1) {
               const raw = buf.slice(0, idx);
               buf = buf.slice(idx + 2);
-              for (const line of raw.split('\n')) {
+              setPhaseSafe('connected');
+          for (const line of raw.split('\n')) {
                 const m = line.match(/^data:\s?(.*)$/);
                 if (!m || m[1] === '[DONE]') continue;
                 try {
@@ -67,8 +75,10 @@ export function useInvalidationStream(enabled: boolean, handler: InvalidationHan
             }
           }
           // 服务端关闭（部署重启等）→ 走重连
+          setPhaseSafe('retrying');
         } catch {
           if (controller.signal.aborted || stopped) return;
+          setPhaseSafe('retrying');
         }
         // 指数退避重连：1s → 2s → 4s → 8s 封顶
         attempt = Math.min(attempt + 1, 4);
@@ -85,5 +95,6 @@ export function useInvalidationStream(enabled: boolean, handler: InvalidationHan
       if (retryTimer) window.clearTimeout(retryTimer);
       controller.abort();
     };
-  }, [enabled]);
+  }, [enabled, setPhaseSafe]);
+  return { phase };
 }

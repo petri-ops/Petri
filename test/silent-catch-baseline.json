@@ -1,8 +1,8 @@
 {
-  "_about": "生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。",
+  "_about": "生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。L3-18/BLOCK-407 扩面留因：SCAN_ROOTS 纳入 frontend/src（扩面负测见 test/block407-l3-error-semantics.test.mjs；k6 门要求扩面必须伴随本留因）。",
   "schemaVersion": 1,
   "updatedAt": "2026-11-10",
-  "total": 395,
+  "total": 412,
   "files": {
     "core/petri-server/agent-runner.js": 14,
     "core/petri-server/agent-task-store.js": 3,
@@ -39,7 +39,7 @@
     "core/petri-server/helpers/plans.js": 3,
     "core/petri-server/helpers/remote-execution/ssh-multiplexer.js": 1,
     "core/petri-server/helpers/site-snapshot.js": 2,
-    "core/petri-server/helpers/tools-assets.js": 5,
+    "core/petri-server/helpers/tools-assets.js": 4,
     "core/petri-server/helpers/tools-executor/result-files.js": 1,
     "core/petri-server/helpers/tools-executor.js": 14,
     "core/petri-server/helpers/user-facts.js": 4,
@@ -51,7 +51,6 @@
     "core/petri-server/notify-feishu.js": 2,
     "core/petri-server/routes/ai-admin.js": 1,
     "core/petri-server/routes/ai-agent/chat.js": 8,
-    "core/petri-server/routes/ai-agent/events.js": 4,
     "core/petri-server/routes/ai-agent/resume.js": 7,
     "core/petri-server/routes/ai-chat.js": 7,
     "core/petri-server/routes/ai-conversations.js": 4,
@@ -95,6 +94,17 @@
     "src/plugin/io.js": 3,
     "src/plugin-manager.js": 9,
     "src/preload.js": 1,
-    "src/telemetry.js": 1
+    "src/telemetry.js": 1,
+    "frontend/src/components/copilot/conversationChangesStore.ts": 1,
+    "frontend/src/components/copilot/copilotClient/agentTaskApi.ts": 4,
+    "frontend/src/components/copilot/copilotClient/agentTaskStream.ts": 1,
+    "frontend/src/components/copilot/copilotClient.ts": 1,
+    "frontend/src/components/desktop/DesktopSettingsPanel/sections/DataManagement.tsx": 1,
+    "frontend/src/components/knowledge/useKnowledgeConsole.ts": 3,
+    "frontend/src/components/shell/DesktopShellProvider.tsx": 3,
+    "frontend/src/components/window/WindowShell.tsx": 1,
+    "frontend/src/hooks/useResizableColumns.ts": 2,
+    "frontend/src/lib/notification-center.ts": 1,
+    "frontend/src/pages/project-workspace/BrowserPanel.tsx": 4
   }
 }

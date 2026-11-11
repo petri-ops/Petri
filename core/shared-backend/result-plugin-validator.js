@@ -13,7 +13,8 @@ const { isPathContained } = require('./project-run-layout');
 const { resolveExecutionInputPath } = require('./execution-provenance');
 
 const RESULT_PLUGIN_VALIDATOR_VERSION = 1;
-const MAX_SEMANTIC_BYTES = 64 * 1024 * 1024;
+const { MAX_ASSET_BYTES } = require("./budget-constants");
+const MAX_SEMANTIC_BYTES = MAX_ASSET_BYTES; // L3-6（L-23）：单源收编
 const MAX_SEMANTIC_ROWS = 500_000;
 const SHA256 = /^[a-f0-9]{64}$/;
 const SUPPORTED_CHECKS = new Set([

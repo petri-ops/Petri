@@ -112,10 +112,13 @@ test('负测 K-29：伪造用户裁决记录 → 判红（Agent 不代答）', (
 });
 
 // ---- K-28 IPC 边界（L0-1：豁免口改读数型记录，删除不再判红） ----
-test('K-28：豁免口读数在场（布尔读数不裁决）、静默 catch 395 冻结、dev 双后端归属在册', () => {
+test('K-28：豁免口读数在场（布尔读数不裁决）、静默 catch 412 冻结（L3-18 扩面留因在档）、dev 双后端归属在册', () => {
   assert.equal(typeof truth.ipc.exemptEnvExists, 'boolean');
   assert.equal(typeof truth.ipc.exemptPinnedByContract, 'boolean');
-  assert.equal(truth.ipc.silentCatchTotal, 395);
+  // L3-4（L-18/BLOCK-407）：SCAN_ROOTS 纳入 frontend/src，基线 395→412（_about 带扩面留因）
+  assert.equal(truth.ipc.silentCatchTotal, 412);
+  assert.equal(truth.ipc.silentCatchRootsExtended, true);
+  assert.equal(truth.ipc.silentCatchRootsDocumented, true);
   assert.equal(truth.ipc.devDualBackendInAudit, true);
 });
 
@@ -125,10 +128,10 @@ test('L0-1 解除负测：从契约测试移除豁免口字样（L1 行为收敛
   assert.equal(v.conclusions['K-28'], 'boundaries-recorded-schema-deferred');
 });
 
-test('负测 K-28：豁免口读数缺席（非布尔）/ 重打静默 catch 基线 / 冒充扫描根已扩 → 判红', () => {
+test('负测 K-28：豁免口读数缺席（非布尔）/ 重打静默 catch 基线 / 扩面无留因 → 判红（L3-4 新语义：扩面+留因=绿）', () => {
   mustRed(tamper({ ipc: { ...truth.ipc, exemptEnvExists: undefined } }), 'K-28');
   mustRed(tamper({ ipc: { ...truth.ipc, silentCatchTotal: 0 } }), 'K-28');
-  mustRed(tamper({ ipc: { ...truth.ipc, silentCatchRootsExtended: true } }), 'K-28');
+  mustRed(tamper({ ipc: { ...truth.ipc, silentCatchRootsExtended: true, silentCatchRootsDocumented: false } }), 'K-28');
 });
 
 test('负测：事实整体缺席 → fail-closed 判红', () => {

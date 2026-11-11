@@ -400,7 +400,11 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^word\/media\/(?:image\d+\.(?:png|jpe?g|gif|svg|emf|wmf))$/i],
-      ).catch(() => []);
+      ).catch(() => {
+        // L3-4（L-18）：文档资产加载失败具名降级（正文仍可读，嵌入资源留空可见）
+        console.warn('[office-preview] asset load failed, degraded to empty assets');
+        return [] as never;
+      });
       return { kind, title: req.name, text, byteLength: resource.byteLength, assets };
     }
     case 'xlsx':
@@ -426,7 +430,11 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^ppt\/media\/(?:image\d+\.(?:png|jpe?g|gif|svg|emf|wmf))$/i],
-      ).catch(() => []);
+      ).catch(() => {
+        // L3-4（L-18）：文档资产加载失败具名降级（正文仍可读，嵌入资源留空可见）
+        console.warn('[office-preview] asset load failed, degraded to empty assets');
+        return [] as never;
+      });
       return {
         kind,
         title: req.name,
@@ -441,7 +449,11 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^media\/.+\.(?:png|jpe?g|gif|svg)$/i],
-      ).catch(() => []);
+      ).catch(() => {
+        // L3-4（L-18）：文档资产加载失败具名降级（正文仍可读，嵌入资源留空可见）
+        console.warn('[office-preview] asset load failed, degraded to empty assets');
+        return [] as never;
+      });
       return { kind, title: req.name, text, assets, byteLength: resource.byteLength };
     }
     case 'ods': {
@@ -455,7 +467,11 @@ export async function loadOfficePreview(req: OfficePreviewRequest): Promise<Offi
       const assets = await loadAssets(
         entries,
         [/^media\/.+\.(?:png|jpe?g|gif|svg)$/i],
-      ).catch(() => []);
+      ).catch(() => {
+        // L3-4（L-18）：文档资产加载失败具名降级（正文仍可读，嵌入资源留空可见）
+        console.warn('[office-preview] asset load failed, degraded to empty assets');
+        return [] as never;
+      });
       return { kind, title: req.name, text, assets, byteLength: resource.byteLength };
     }
     case 'pages':

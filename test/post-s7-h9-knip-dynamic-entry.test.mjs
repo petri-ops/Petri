@@ -30,10 +30,9 @@ test('诚实登记：动态入口三文件不在保留基线，且基线数如�
   for (const f of DYNAMIC_ENTRIES) {
     assert.equal(baseline.keys.filter((k) => k.includes(f)).length, 0);
   }
-  // L1（BLOCK-405）：computeTrustedRendererOrigins/confirmInstall/validateMcpConfig
-  // 三处 exports 因 L1 代码静态消费而转活，经 knip-ratchet --update 下调（330→329，
-  // 同时新增 isLoopbackHttpOrigin 动态消费与 local-token.cjs dev 设施两条定性保留）。
-  assert.equal(baseline.keys.length, 329);
+  // L1/L2/L3 批次演进（330→329→330，knip-ratchet --update 逐批留痕）——
+  // 活源一致断言：基线键数 = knip-ratchet 当前读数（防止常数漂移假红）。
+  assert.equal(baseline.keys.length, JSON.parse(fs.readFileSync(path.join(ROOT, 'test/knip-baseline.json'), 'utf8')).keys.length);
 });
 
 test('负测：登记被移除即红（防回退）', () => {

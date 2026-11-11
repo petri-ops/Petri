@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 549,
+    "documentCount": 550,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 532
+    "managedMarkdown": 533
   },
   "documents": [
+    {
+      "id": "BLOCK-407",
+      "capability": "block-407-post-k7-l3-error-semantics",
+      "path": "docs/block-407-post-k7-l3-error-semantics-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-407-post-k7-l3-error-semantics",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "l3",
+        "error-semantics",
+        "boundaries"
+      ],
+      "notes": "第五轮 L3 错误语义与边界 completed（2026-11-11）：SSE 终态 try/catch+finish 单点+3 次熔断/两空 catch 具名/terminal 桥 kill 重试+有界重连/SCAN_ROOTS 扩 frontend（412 留因）+真静默 8 处终态/权限门 DEGRADED+健康面/reconciler 健康事件/uncaughtException 退出/nonces Map 回收/verdict 分离/64MB 单入口 9 文件/断线 phase+横幅 4 消费方。词表 42→55 活源棘轮。定向 2261/2263（3 红预存归属）。零新增依赖。证据=acceptance/post-k7-2026-11-10/l3/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-406",
       "capability": "block-406-post-k7-l2-function-integrity",

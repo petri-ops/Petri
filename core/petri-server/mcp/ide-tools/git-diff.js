@@ -18,6 +18,7 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const { MAX_CHILD_STDOUT_BYTES } = require('../../../shared-backend/budget-constants');
 const { resolveAllowlisted } = require('./path-allowlist');
 require('../../../shared-backend/path-safe');
 const { parseUnifiedHunks, summarize } = require('./diff-helpers');
@@ -83,7 +84,7 @@ function gitDiff({ path: inputPath, staged = false, maxLines } = {}) {
   try {
     proc = spawnSync('git', args, {
       encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
+      maxBuffer: MAX_CHILD_STDOUT_BYTES,
       timeout: GIT_TIMEOUT_MS,
     });
   } catch (e) {

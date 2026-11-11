@@ -3,7 +3,8 @@
 const crypto = require('crypto');
 const fs = require('fs');
 
-const MAX_QUERY_BYTES = 64 * 1024 * 1024;
+const { MAX_ASSET_BYTES } = require("./budget-constants");
+const MAX_QUERY_BYTES = MAX_ASSET_BYTES; // L3-6（L-23）：单源收编
 const MAX_QUERY_ROWS = 250_000;
 const MAX_QUERY_PAGE_ROWS = 250;
 const MAX_FILTER_CLAUSES = 8;

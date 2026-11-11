@@ -28,6 +28,7 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const { MAX_CHILD_STDOUT_BYTES } = require('../../../shared-backend/budget-constants');
 const { resolveAllowlisted } = require('./path-allowlist');
 
 const HARD_MAX_LINES = 10000;
@@ -143,7 +144,7 @@ function gitBlame({ path: inputPath, file, startLine, endLine } = {}) {
   try {
     proc = spawnSync('git', args, {
       encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
+      maxBuffer: MAX_CHILD_STDOUT_BYTES,
       timeout: GIT_TIMEOUT_MS,
     });
   } catch (e) {

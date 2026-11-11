@@ -1,0 +1,10 @@
+/* L3-7（蓝图 L-68）：失效通知流断线相位横幅——token 合规（既有海军蓝 token 阶梯） */
+.banner {
+  margin: 4px 0;
+  padding: 4px 10px;
+  border-left: 2px solid var(--petri-border-strong, var(--petri-border));
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+}

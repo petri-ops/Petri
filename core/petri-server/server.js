@@ -137,7 +137,9 @@ process.on('unhandledRejection', (reason, _promise) => {
 });
 process.on('uncaughtException', (err) => {
   logError('uncaughtException', err);
-  // Don't exit — let pm2 decide
+  // L3-5（蓝图 L-22）：记录后主动退出（exit 1）——带不一致状态继续服务比受控重启
+  // 更危险；dev supervisor / pm2 均按退出信号拉起（受控重启语义）。
+  process.exit(1);
 });
 
 // A desktop server restart interrupts any in-process analysis still marked active.
@@ -326,7 +328,8 @@ try {
 }
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  // L3-5（L-22）：权限门 degraded 标记上健康面（运维/探针可见，不再只有 console）
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), permissionGateDegraded: process.env.PETRI_PERMISSION_GATE_DEGRADED === '1' });
 });
 
 // Start cache cleanup scheduler (runs daily at 03:00)

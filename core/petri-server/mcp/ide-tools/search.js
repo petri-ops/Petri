@@ -17,6 +17,7 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const { MAX_CHILD_STDOUT_BYTES } = require('../../../shared-backend/budget-constants');
 const { resolveAllowlisted } = require('./path-allowlist');
 
 const HARD_MAX_RESULTS = 1000;
@@ -225,7 +226,7 @@ function fileSearchText({
   try {
     proc = spawnSync(rgBin, args, {
       encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024, // 64MB 上限，避免 json 输出爆内存
+      maxBuffer: MAX_CHILD_STDOUT_BYTES, // 64MB 上限，避免 json 输出爆内存
       timeout: RG_TIMEOUT_MS,
     });
   } catch (e) {

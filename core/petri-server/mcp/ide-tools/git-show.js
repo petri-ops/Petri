@@ -13,6 +13,7 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const { MAX_CHILD_STDOUT_BYTES } = require('../../../shared-backend/budget-constants');
 const { resolveAllowlisted } = require('./path-allowlist');
 const { parseUnifiedHunks, summarize } = require('./diff-helpers');
 
@@ -82,7 +83,7 @@ function gitShow({ path: inputPath, commit, maxLines } = {}) {
   try {
     proc = spawnSync('git', ['-C', abs, 'show', '--no-color', '--no-ext-diff', fullSha], {
       encoding: 'utf8',
-      maxBuffer: 64 * 1024 * 1024,
+      maxBuffer: MAX_CHILD_STDOUT_BYTES,
       timeout: GIT_TIMEOUT_MS,
     });
   } catch (e) {

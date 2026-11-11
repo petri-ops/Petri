@@ -35,11 +35,16 @@ test('BLOCK-159 ① agent SSE 心跳：15s 注释帧 + close/终态双路径清�
     'events.js 必须有 15s ": ping" 注释帧心跳（与终端 SSE 同款）');
   assert.ok(source.includes('const stopHeartbeat = () => clearInterval(heartbeat);'),
     '必须提供 stopHeartbeat 清理句柄');
-  const closeBlock = source.match(/req\.on\('close', \(\) => \{[\s\S]*?\}\);/);
-  assert.ok(closeBlock && closeBlock[0].includes('stopHeartbeat()'), 'req.close 必须清理心跳');
-  // 终态路径（回放终态 + 轮询终态）都要在 sseDone() 前停心跳
-  const doneCalls = source.split('stopHeartbeat();').length - 1;
-  assert.ok(doneCalls >= 2, `终态两处（回放/轮询）都必须 stopHeartbeat（实际 ${doneCalls}）`);
+  // L3（BLOCK-407 / L-12）：清理收单点 finish()——close 提前注册 + 终态/熔断路径
+  // 全部经 finish()（内含 stopHeartbeat + clearInterval(poll) + res.end），不再散落。
+  assert.ok(source.includes("req.on('close', () => finish(false));"),
+    'close listener 必须提前注册并走 finish 单点');
+  const closeBlock = source.match(/req\.on\('close', [\s\S]*?\);/);
+  assert.ok(closeBlock && closeBlock[0].includes('finish('), 'req.close 必须走 finish 清理');
+  assert.ok(source.includes('const finish = (withDone) => {') && source.includes('stopHeartbeat();') && source.includes('if (poll) clearInterval(poll);'),
+    'finish 单点必须同时清理 heartbeat 与 poll');
+  const finishCalls = source.split('finish(').length - 1;
+  assert.ok(finishCalls >= 4, `终态/熔断/close 各路径都必须走 finish（实际 ${finishCalls}）`);
 });
 
 test('BLOCK-159 ① 终端 SSE 心跳基线保持（回归锚：15s ping 不因本包漂移）', () => {

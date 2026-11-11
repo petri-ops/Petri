@@ -1,5 +1,5 @@
 /**
- * post-H9 全程序基座契约（红绿先行 + 逐件负测）：
+ * BLOCK-403 收口契约（原头注释重建——L3 批 import 插入误伤，语义按段内条目还原）：
  *   ① 证据元数据四字段 + 五类不冒充；
  *   ② 32 条缺口终态台账：不静默消失、计数机械汇总、边界项不冒通过；
  *   ③ 九组数字口径采集：字段名真实、坏源判红；
@@ -7,6 +7,8 @@
  *   ⑤ K-05 lint∩hygiene 联动门：植入临时产物必红、空豁免必红。
  */
 import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+const _require = createRequire(import.meta.url);
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -164,7 +166,11 @@ test('九组读数从权威源机械复算且无 null 子字段', () => {
   assert.equal(v.ok, true, v.issues.join(' / '));
   assert.equal(READING_IDS.length, 9);
   assert.equal(Object.keys(readings).length, 9);
-  assert.equal(readings.reasonCodeCount.value.codes, 42);
+  // L3（BLOCK-407）：词表扩面是蓝图预期方向（L2 注册 9 码 / L3 注册 4 码）——
+  // 断言改活源一致（= REASONS 实际键数）+ 只增棘轮下限 42（L0 数字口径单源原则）。
+  const reasonRegistry = _require(path.join(ROOT, 'core/petri-server/helpers/reason-codes.js'));
+  assert.equal(readings.reasonCodeCount.value.codes, Object.keys(reasonRegistry.REASONS).length);
+  assert.ok(readings.reasonCodeCount.value.codes >= 42, `原因码棘轮只增（实际 ${readings.reasonCodeCount.value.codes}）`);
   // 门数不得写死：新增专项门（如 K7 评审抓真的 gate:post-h9-contracts）会让
   // 19 → 20，手写数字会随治理演进而假红。改为机械断言「固定 5 + --gate 数」。
   const closeoutScript = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).scripts.closeout;

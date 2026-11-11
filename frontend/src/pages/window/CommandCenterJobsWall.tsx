@@ -12,6 +12,7 @@
 // 两步确认取消；done/failed 瓦片点击下钻 = L1 结果窗弹出（桌面桥缺失时诚实提示）。
 // ============================================================
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ProjectionStreamBanner } from '@/components/_ProjectionStreamBanner';
 import { getBridge } from '@/lib/desktopBridge';
 import { listAllJobs, listProjects } from '@/lib/project-store';
 import type { ToolJob } from '@/lib/project-types';
@@ -198,10 +199,11 @@ export function CommandCenterJobsWall({
   // invalidate(jobs) 即时 refresh，轮询降为兜底（与 useConversationJobs 同款姿势）。
   // 墙零本地任务状态缓存（BLOCK-59 plan §10 红线），refresh 全量重投影即
   // 「刷新对应瓦片」的正确形态——不按 toolJobId 单瓦片补丁（那会造第二真相）。
-  useInvalidationStream(true, useCallback(
+  const onInvalidate = useCallback<Parameters<typeof useInvalidationStream>[1]>(
     (info) => { if (info.domain === 'jobs') void refresh(); },
     [refresh],
-  ));
+  );
+  const invalidationPhase = useInvalidationStream(true, onInvalidate)?.phase ?? 'connected';
 
   // P1-a：项目归属标注（job.project_id → 项目名；失败静默降级为裸 id）。
   // 仅全局俯瞰需要（项目绑定视图单项目，无标注意义）。
@@ -214,7 +216,10 @@ export function CommandCenterJobsWall({
         if (!alive) return;
         setProjectNames(Object.fromEntries(projects.map((p) => [p.id, p.name])));
       })
-      .catch(() => {});
+      .catch(() => {
+        // L3-4（L-18）：项目名映射失败具名降级（列表仍可用，名称留空可见）
+        console.warn('[jobs-wall] project name lookup failed');
+      });
     return () => {
       alive = false;
     };
@@ -349,6 +354,7 @@ export function CommandCenterJobsWall({
 
   return (
     <div className={styles.gridWrap}>
+      <ProjectionStreamBanner phase={invalidationPhase} />
       {loadError && <div className={styles.loadError} role="alert">{loadError}</div>}
       {drillNote && <div className={styles.drillNote} role="status">{drillNote}</div>}
       {govNote && <div className={styles.drillNote} role="status" data-testid="cc-gov-note">{govNote}</div>}

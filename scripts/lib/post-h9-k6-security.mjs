@@ -112,6 +112,10 @@ export function collectSecurityTruth(root = ROOT) {
     exemptEnvExists: /PETRI_IPC_FILE_SENDER_EXEMPT_IDS/.test(read('src/ipc/_ipc-trust.js')),
     exemptPinnedByContract: /PETRI_IPC_FILE_SENDER_EXEMPT_IDS/.test(read('test/nso-w2-ipc-trust.test.mjs')),
     silentCatchScanRoots: JSON.parse(read('test/silent-catch-baseline.json'))._about || null,
+    // L3-4（L-18）：扫描根扩面与留因双读数——扩面必须伴随 _about 留因（负测在
+    // test/block407-l3-error-semantics.test.mjs）。
+    silentCatchRootsExtended: /frontend\/src/.test(read('scripts/silent-catch-ratchet.mjs')),
+    silentCatchRootsDocumented: /L3-18|BLOCK-407/.test(String(JSON.parse(read('test/silent-catch-baseline.json'))._about || '')),
     silentCatchTotal: json('test/silent-catch-baseline.json').total,
     devDualBackendInAudit: /双后端|脑裂/.test(read('docs/AUDIT-LOG.md')),
   };
@@ -154,8 +158,12 @@ export function adjudicateSecurity(input) {
   if (typeof i.exemptEnvExists !== 'boolean' || typeof i.exemptPinnedByContract !== 'boolean') {
     issues.push('K-28: IPC 豁免口读数缺席（fail-closed）');
   }
-  if (!(i.silentCatchTotal === 395)) issues.push('K-28: 静默 catch 冻结基线被改写');
-  if (i.silentCatchRootsExtended === true) issues.push('K-28: 扫描根扩展未经独立留因+负测，不得冒充已交付');
+  // L3-4（L-18/BLOCK-407）：SCAN_ROOTS 纳入 frontend/src 后基线 395→412（11 个 frontend 文件/17 处入库，_about 带扩面留因）。
+  if (!(i.silentCatchTotal === 412)) issues.push('K-28: 静默 catch 冻结基线被改写');
+  // L3-4（L-18）：扩面本身是改进方向——只有「扩了但没留因」才判红（同 L0-1 读数型家族）。
+  if (i.silentCatchRootsExtended === true && i.silentCatchRootsDocumented !== true) {
+    issues.push('K-28: 扫描根扩展缺独立留因（_about 须记 L3-18/BLOCK-407 扩面依据）');
+  }
   if (!i.devDualBackendInAudit) issues.push('K-28: dev 双后端归属登记被移除');
   conclusions['K-28'] = issues.length === n ? 'boundaries-recorded-schema-deferred' : 'drift';
 

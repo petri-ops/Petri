@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE = path.join(ROOT, 'test', 'silent-catch-baseline.json');
-const SCAN_ROOTS = ['core', 'src'];
+const SCAN_ROOTS = ['core', 'src', 'frontend/src']; // L3-4（L-18/BLOCK-407）：纳入 frontend/src（独立留因+负测见 test/block407-l3-error-semantics.test.mjs）
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', '.git']);
 const BARE_CATCH_RE = /catch\s*\{\s*\}/g;
 
@@ -76,7 +76,7 @@ function main() {
 
   if (args.has('--write')) {
     const baseline = {
-      _about: '生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。',
+      _about: '生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。L3-18/BLOCK-407 扩面留因：SCAN_ROOTS 纳入 frontend/src（扩面负测见 test/block407-l3-error-semantics.test.mjs；k6 门要求扩面必须伴随本留因）。',
       schemaVersion: 1,
       updatedAt: new Date().toISOString().slice(0, 10),
       total: sum,

@@ -30,6 +30,11 @@ const REASON_CATEGORIES = Object.freeze([
 
 const REASONS = Object.freeze({
   // —— L2（BLOCK-406）功能断链与 IPC 失败形状域 ——
+  // —— L3（BLOCK-407）SSE 错误语义域 ——
+  sse_task_read_failed: { category: 'provider', template: '任务状态读取失败（{message}）——SSE 已关流，可重连重试。' },
+  sse_poll_failed: { category: 'provider', template: 'SSE 事件轮询连续 {consecutiveFails} 次失败——已熔断关流，可重连重试。' },
+  event_replay_failed: { category: 'provider', template: '事件回放失败——lastSeq 已重置 {lastSeqResetTo}，重连后重放。' },
+  fallback_lookup_failed: { category: 'provider', template: '降级续跑子任务查询失败——前端走人工续跑路径。' },
   no_execution_backend: { category: 'execution', template: 'Skill {skillId} 在当前进程无可用执行后端（workflowRuntime.run / registry.runTool 均缺席），不冒充执行。' },
   backend_timeout: { category: 'provider', template: '后端请求超时（{timeoutMs}ms）——可重试。' },
   runtime_bridge_unavailable: { category: 'provider', template: '运行时检测暂不可用（{message}）——此状态不表示 R/Python 未安装，可重试。' },

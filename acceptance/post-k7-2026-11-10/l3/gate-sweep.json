@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l3-gate-sweep",
+  "block": "BLOCK-407",
+  "stage": "L3",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-11T04:20:00+08:00",
+  "redGreen": [
+    { "item": "L3-1/L-12 SSE 终态判定裸奔", "red": "红 1（getAgentTask 抛错 → async reject + heartbeat/poll 泄漏 + SSE 悬挂）", "green": "终态判定包 try/catch（sse_task_read_failed 帧）+ finish 单点（heartbeat/poll 清理 + res.end）+ close listener 提前注册；注入证据：error 帧+[DONE]+ended" },
+    { "item": "L3-2/L-13 轮询无界静默", "red": "红 1（catch 空吞无限重试）", "green": "连续失败计数 3 次熔断（sse_poll_failed+retryable 帧 + finish）；负测：单次瞬断自愈不熔断" },
+    { "item": "L3-2/L-14 两处空 catch", "red": "红 2（findFallbackChild/回放空吞）", "green": "fallback_lookup_failed（failedPayload 显式标注）/ event_replay_failed（lastSeq 重置+标注帧）" },
+    { "item": "L3-3/L-17 terminal 桥", "red": "（桥自身零测试=盲区）", "green": "kill 重试 2 次+重试耗尽显式上报；terminal:exit 同时清 sessionByTab+reconnectFailures；onerror 有界重连 5 次达限 close+bridgeUnavailable 帧直发 exitHandlers" },
+    { "item": "L3-4/L-18 SCAN_ROOTS 扩面", "red": "红 2（frontend 零覆盖）", "green": "SCAN_ROOTS+'frontend/src'（102 文件/412 处，_about 带扩面留因）；k6 门升级「扩面+留因=绿/扩面无留因=红」；真静默 8 处逐件终态（JobsWall 裸吞具名/home 作业清单具名/office×4 具名/terminal 桥 resize+kill 上报/dataBridges 已由 L2-3 根修）；events.js 4→0" },
+    { "item": "L3-5/L-22 三处边界", "red": "（结构级零钉测）", "green": "权限门失败→PETRI_PERMISSION_GATE_DEGRADED + /api/health 暴露 permissionGateDegraded；reconciler !db→degraded 标记+连败≥3 升 error+reconciler_unhealthy 事件；uncaughtException 记录后 process.exit(1)" },
+    { "item": "L3-5/L-16 nonces 无界", "red": "（行为面钉测未覆盖淘汰）", "green": "Set→Map(nonce→expiresAt)+登记时惰性清扫；TTL 语义不变（准入 15/15 回归）" },
+    { "item": "L3-6/L-15 observe ok/verdict", "red": "（observe 恒 ok 语义钉测）", "green": "additive verdict 字段（observe 下四类拒绝 ok:true+verdict:false 可审计）；准入 15/15 零回归" },
+    { "item": "L3-6/L-23 64MB 字面量", "red": "（分散无发现器）", "green": "core/shared-backend/budget-constants.js 单入口（MAX_ASSET_BYTES/MAX_CHILD_STDOUT_BYTES）；9 文件收编；负测：9 文件零字面量残留+须引用单源；BLOCK-322 跨语言值对等断言对齐新形态（budget 单源==前端字面量==Python 换算）" },
+    { "item": "L3-7/L-68 断线相位", "red": "（hook 返回 void）", "green": "useInvalidationStream 返回 {phase: connected|retrying|failed}；ProjectionStreamBanner 组件（role=status+aria-live，token 合规）；4 消费方接线（workspace/BrowserPanel/JobsWall/useConversationJobs 转发）；页面回归 158/158" },
+    { "item": "L3-7/L-74 轻提示", "red": "（home:87/extensions:166 已带注释=观察型；JobsWall:217 裸吞）", "green": "JobsWall:217 由 L3-4 具名降级覆盖；home/extensions 既有注释降级语义保留（非裸吞，蓝图 L-74 口径=三处轻提示，其一已实质修复、两处既有具名）" }
+  ],
+  "gates": [
+    { "gate": "test/block407-l3-error-semantics.test.mjs", "exit": 0, "reading": "8/8（注入驱动 events.js 行为断言）" },
+    { "gate": "gate:post-h9-contracts", "exit": 0, "reading": "186 项全绿（42→55 原因码活源棘轮断言+词表扩面）" },
+    { "gate": "gate:silent-catch", "exit": 0, "reading": "102 文件/412 处冻结（扩面留因在档）；k6 门新语义绿" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error" },
+    { "gate": "quality:lint:ledger", "exit": 0, "reading": "191=120 逐条相等；warnings P1487/T417/S539 与基线持平（本批 4 处新违规全根修：unused×2/object-injection 夹具豁免留因/memo 形态）" },
+    { "gate": "test:changed 终验", "exit": 1, "reading": "2261/2263——3 红全预存归属：P6（CSS WIP，W）/ agent-runner 1143>1140 + 行数锚（BLOCK-398 增长，L5-5 W5b 范围）" },
+    { "gate": "准入/对账器/事件总线邻域", "exit": 0, "reading": "block386+nso-s2 15/15、pl6a 4/4、ck03+block159 5/5、routes-ai-agent 结构绿" }
+  ],
+  "selfCaught": "L2 批 git add -u 漏 stage 两个新文件（src/ipc/_ipc-failure.js、src/ipc/_channel-classification.js——plugin.js/channels.js 的 require 目标在已提交树缺席）；L3 批显式补入并留痕。教训重申：新增文件必须显式路径枚举。",
+  "wAttribution": "P6 源绑定红=CSS WIP（owner 收口自愈）；agent-runner 1143 行=BLOCK-398 增长（L5-5 W5b 拆分范围）。",
+  "notes": "零新增依赖。reasonCode 词表 42→55（L2 九码+L3 四码，封闭类别内扩展——九组读数门改活源一致+只增棘轮下限 42）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}

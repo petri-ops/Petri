@@ -7,6 +7,7 @@ import { Icon } from '@/components/icons/Icon';
 import { petriEvents, subscribePetriEvent } from '@/lib/events';
 import { getBrowserViewportSize, isNavigableWebUrl, isPetriLocalBrowserUrl, normalizeBrowserUrl } from '@/lib/browser-url';
 import { useInvalidationStream } from '@/hooks/useInvalidationStream';
+import { ProjectionStreamBanner } from '@/components/_ProjectionStreamBanner';
 import {
   performBrowserAction,
   postActionResult,
@@ -318,7 +319,7 @@ export function BrowserPanel({
     };
   }, []);
 
-  useInvalidationStream(true, (info) => {
+  const invalidationPhase = useInvalidationStream(true, (info) => {
     if (info.domain !== 'browser-connector') return;
     const payload = info.payload as { kind?: string; actionId?: string; params?: BrowserActionParams } | undefined;
     if (!payload || payload.kind !== 'browser-action' || !payload.actionId || !payload.params) return;
@@ -329,7 +330,7 @@ export function BrowserPanel({
     }
     void performBrowserAction(payload.params, bridge)
       .then((outcome) => postActionResult(payload.actionId as string, outcome));
-  });
+  })?.phase ?? 'connected';
 
   const submitUrl = useCallback(
     (event: React.FormEvent) => {
@@ -341,6 +342,7 @@ export function BrowserPanel({
 
   return (
     <div className={`${styles.browserPanel} ${obscured ? styles.browserPanelObscured : ''}`}>
+      <ProjectionStreamBanner phase={invalidationPhase} />
       <div className={styles.browserPanelHead}>
         <div className={styles.browserPanelControls}>
           <button type="button" className={styles.browserControlBtn} onClick={goBack} title="后退">

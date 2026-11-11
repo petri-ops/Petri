@@ -21,7 +21,8 @@ const crypto = require('crypto');
 const TOKEN_VERSION = 1;
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
 
-const consumedNonces = new Set();
+// L3-5（蓝图 L-16）：nonce → expiresAt Map——惰性回收过期项（原 Set 无淘汰=无界增长）。
+const consumedNonces = new Map();
 
 function sha256(text) {
   return crypto.createHash('sha256').update(String(text)).digest('hex');
@@ -87,7 +88,14 @@ function verifyAndConsumeExecutionToken({ token, taskId, fingerprint, ctxSnapsho
   if (consumedNonces.has(token.nonce)) {
     return { ok: false, reason: 'execution_token_replayed', detail: { nonce: token.nonce } };
   }
-  consumedNonces.add(token.nonce);
+  // L3-5（L-16）：登记时惰性清扫过期项（nonce 有 TTL——过期项回收后 Set 语义不变）
+  const nowMs = Date.now();
+  if (consumedNonces.size > 0) {
+    for (const [nonce, expiresAt] of consumedNonces) {
+      if (expiresAt <= nowMs) consumedNonces.delete(nonce);
+    }
+  }
+  consumedNonces.set(token.nonce, nowMs + DEFAULT_TTL_MS);
   return { ok: true, tokenHash: sha256(stableStringify(token)) };
 }
 
@@ -112,26 +120,30 @@ function verifyAndConsumeExecutionToken({ token, taskId, fingerprint, ctxSnapsho
 function consumeExecutionAdmission(handlerOptions) {
   const admission = handlerOptions && handlerOptions.executionAdmission;
   const mode = admission && admission.enforcement === 'enforce' ? 'enforce' : 'observe';
+  // L3-6（蓝图 L-15）：ok 与 verdict 分离——ok=放行与否（observe 恒 true，兼容语义），
+  // verdict=准入判定真实结论（observe 下重放/过期/缺凭据四类 ok:true 但 verdict:false，
+  // 可审计）。缺 verdict 字段的旧消费方零影响（additive）。
   if (admission && admission.issuanceFailed) {
     // 签发点已如实标记「这次没有凭据」：不得退化成 missing 把原因抹平。
     return {
       ok: mode === 'observe',
       mode,
+      verdict: false,
       reason: admission.reasonCode || 'execution_admission_issue_failed',
       detail: admission.detail ? { detail: admission.detail } : undefined,
     };
   }
   if (!admission || !admission.token) {
-    return { ok: mode === 'observe', mode, reason: 'execution_admission_missing' };
+    return { ok: mode === 'observe', mode, verdict: false, reason: 'execution_admission_missing' };
   }
   const decision = verifyAndConsumeExecutionToken({
     token: admission.token,
     expect: admission.expect,
   });
   if (decision.ok) {
-    return { ok: true, mode, reason: 'execution_admission_consumed', tokenHash: decision.tokenHash };
+    return { ok: true, mode, verdict: true, reason: 'execution_admission_consumed', tokenHash: decision.tokenHash };
   }
-  return { ok: mode === 'observe', mode, reason: decision.reason, detail: decision.detail };
+  return { ok: mode === 'observe', mode, verdict: false, reason: decision.reason, detail: decision.detail };
 }
 
 /** observe 模式辅助：只判定不消耗（enforcement 关闭时的同构判定面）。 */

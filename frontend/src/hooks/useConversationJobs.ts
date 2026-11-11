@@ -32,6 +32,8 @@ export function useConversationJobs(
   loading: boolean;
   error: string | null;
   refresh: () => Promise<ToolJob[]>;
+  /** L3-7（蓝图 L-68）：失效通知流相位（供消费方 role=status 呈现断线态）。 */
+  invalidationPhase: 'connected' | 'retrying' | 'failed';
 } {
   const [jobs, setJobs] = useState<ToolJob[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,10 +88,10 @@ export function useConversationJobs(
     };
   }, [conversationId, pollMs, projectId, refresh]);
 
-  useInvalidationStream(Boolean(projectId && conversationId), useCallback(
+  const { phase: invalidationPhase } = useInvalidationStream(Boolean(projectId && conversationId), useCallback(
     (info) => { if (info.domain === 'jobs') void refresh(); },
     [refresh],
   ));
 
-  return { jobs, loading, error, refresh };
+  return { jobs, loading, error, refresh, invalidationPhase };
 }

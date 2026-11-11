@@ -19,7 +19,8 @@ const { CAD_INPUT_FORMATS, CAD_INPUT_EXTENSIONS, MAX_CAD_BYTES } = require('./ca
 
 const MESH_INPUT_FORMATS = Object.freeze(['glb', 'gltf', 'stl', 'obj']);
 const MESH_INPUT_EXTENSIONS = Object.freeze(MESH_INPUT_FORMATS.map((format) => `.${format}`));
-const MAX_MESH_BYTES = 64 * 1024 * 1024;
+const { MAX_ASSET_BYTES } = require("../../shared-backend/budget-constants");
+const MAX_MESH_BYTES = MAX_ASSET_BYTES; // L3-6（L-23）：单源收编
 
 // BLOCK-322 P2-03 — 基础色贴图：只收工作区内的位图，svg/tiff 等不进（Blender 与 Three 两侧
 // 都要能直接消费，且 SVG 需要光栅化器=新依赖）。

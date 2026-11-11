@@ -65,6 +65,7 @@ import { useRuntimeDemandBanner } from './project-workspace/useRuntimeDemandBann
 import { useWorkspaceTitleBar } from './project-workspace/useWorkspaceTitleBar';
 import { useResultStudioEditContext } from './project-workspace/useResultStudioEditContext';
 import { useInvalidationStream } from '@/hooks/useInvalidationStream';
+import { ProjectionStreamBanner } from '@/components/_ProjectionStreamBanner';
 import { useWorkspaceOpenEffects } from './project-workspace/useWorkspaceOpenEffects';
 export function ProjectWorkspace(): React.ReactElement {
   const shell = useWorkspacePanelsContext();
@@ -593,10 +594,11 @@ export function ProjectWorkspace(): React.ReactElement {
     }
   }, [projectId]);
   // CK-03 — jobs 域失效通知驱动刷新（SSE 秒级感知 + 60s 兜底轮询）
-  useInvalidationStream(Boolean(projectId), useCallback(
+  const onInvalidate = useCallback<Parameters<typeof useInvalidationStream>[1]>(
     (info) => { if (info.domain === 'jobs') void fetchData(); },
     [fetchData],
-  ));
+  );
+  const invalidationPhase = useInvalidationStream(Boolean(projectId), onInvalidate)?.phase ?? 'connected';
   useEffect(() => {
     if (!projectId) {
       setCopilotHarnessIndex(null);
@@ -1052,6 +1054,7 @@ export function ProjectWorkspace(): React.ReactElement {
   };
   return (
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
+      <ProjectionStreamBanner phase={invalidationPhase} />
       {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
           回归（ctx 注入的列内 header 已同步禁用）；regular 顶栏由三个列内
           ColumnHeader 承载（AppShell 在本路由不渲染全局条）。

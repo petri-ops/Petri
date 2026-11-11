@@ -10,7 +10,14 @@ const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../../helpers/agent-task-event-
  * 共享依赖：
  *   - agentTaskStore（agent-task-store.js）
  *
- * 行为 100% 兼容：try/catch 顺序、status code、response shape 保持不变。
+ * L3（BLOCK-407 / 蓝图 L-12/13/14）行为修订：
+ *   - 终态判定（原 :113 裸奔）包进 try/catch：store 抛错 → 结构化 error 帧
+ *     （reasonCode=sse_task_read_failed）+ [DONE] + res.end（SSE 不再悬挂/不再 reject）。
+ *   - close listener 提前到 flushHeaders 之后（finish 单点清理 heartbeat+poll）。
+ *   - 500ms 轮询 catch 计数熔断：连续 3 次失败 → error 帧（sse_poll_failed, retryable）
+ *     + 清理 + res.end（原「下轮继续」无界静默移除）；瞬时单次失败自愈不熔断。
+ *   - findFallbackChild / 回放两处空 catch 改具名降级（fallback_lookup_failed /
+ *     event_replay_failed），不再空吞。
  */
 
 const agentTaskStore = require('../../agent-task-store');
@@ -51,7 +58,7 @@ module.exports = {
       const sseSend = (obj) => {
         try {
           res.write('data: ' + JSON.stringify(obj) + '\n\n');
-        } catch {}
+        } catch { /* 客户端已断开——写失败忽略（L-14 具名：sse_write_after_close） */ }
       };
       // [DONE] 是 SSE 协议哨兵而非 JSON 事件——必须写裸字符串。
       // 曾用 sseSend('[DONE]') 经 JSON.stringify 序列化成带引号的 "[DONE]"，
@@ -60,7 +67,7 @@ module.exports = {
       const sseDone = () => {
         try {
           res.write('data: [DONE]\n\n');
-        } catch {}
+        } catch { /* 客户端已断开——写失败忽略（L-14 具名：sse_write_after_close） */ }
       };
       // BLOCK-159 P0-3 — 15s SSE 注释帧心跳（与终端流 mobile-gateway/index.js
       // 同款）：空闲期（模型思考中）零字节流动，中转 nginx 默认 60s 读超时会
@@ -71,6 +78,22 @@ module.exports = {
       const stopHeartbeat = () => clearInterval(heartbeat);
 
       let lastSeq = afterSeq;
+      let finished = false;
+      let poll = null;
+      // L3-1（L-12）：finish 单点——heartbeat/poll 清理 + res.end 只走这里，
+      // close listener（下方提前注册）与终态/熔断路径共用，任何路径不再泄漏 interval。
+      const finish = (withDone) => {
+        if (finished) return;
+        finished = true;
+        stopHeartbeat();
+        if (poll) clearInterval(poll);
+        if (withDone) sseDone();
+        try { res.end(); } catch { /* 已关闭 */ }
+      };
+      // L3-1（L-12）：close listener 提前注册（原实现在 handler 尾部——若中途 return
+      // 路径抛错则永不注册，heartbeat/interval 泄漏）。
+      req.on('close', () => finish(false));
+
       const isTerminal = (t) => t && ['done', 'failed', 'cancelled'].includes(t.agent_status);
 
       // BLOCK-56 P1 — 失败终态时查找任务级降级续跑子任务（model_fallback 事件
@@ -82,7 +105,12 @@ module.exports = {
             const ev = events[i];
             if (ev.eventType === 'model_fallback' && ev.payload && ev.payload.newTaskId) return ev.payload;
           }
-        } catch {}
+        } catch (e) {
+          // L3-2（L-14）：空吞改具名降级——查询失败时 failedPayload 显式标注，
+          // 前端投影读不到 fallbackTaskId 即走人工续跑，不再静默缺字段。
+          console.warn(`[events] fallback lookup failed (task=${taskId}):`, e && e.message);
+          return { lookupFailed: 'fallback_lookup_failed' };
+        }
         return null;
       };
       const failedPayload = (t) => {
@@ -92,11 +120,12 @@ module.exports = {
           error: t.error || 'agent task 失败',
           resumable: Boolean(t.interruptedAt),
           interruptedAt: t.interruptedAt || null,
-          ...(fb ? {
+          ...(fb && !fb.lookupFailed ? {
             fallbackTaskId: fb.newTaskId,
             fallbackLabel: fb.toProfileLabel || null,
             fallbackCategory: fb.category || null,
           } : {}),
+          ...(fb && fb.lookupFailed ? { lookupFailed: fb.lookupFailed } : {}),
         };
       };
 
@@ -107,10 +136,24 @@ module.exports = {
           sseSend({ seq: ev.seq, eventType: ev.eventType, payload: ev.payload });
           lastSeq = ev.seq;
         }
-      } catch {}
+      } catch (e) {
+        // L3-2（L-14）：回放失败显式重置 lastSeq=afterSeq 并发结构化标注帧
+        //（原空吞会让重连客户端以为回放成功、静默丢事件）。
+        lastSeq = afterSeq;
+        console.warn(`[events] replay failed (task=${taskId}):`, e && e.message);
+        sseSend({ event: 'error', reasonCode: 'event_replay_failed', retryable: true, lastSeqResetTo: afterSeq });
+      }
 
-      // 2. 若 task 已终态，发 done/error 后结束
-      const freshTask = agentTaskStore.getAgentTask(taskId);
+      // 2. 若 task 已终态，发 done/error 后结束（L3-1：判定包进 try/catch）
+      let freshTask;
+      try {
+        freshTask = agentTaskStore.getAgentTask(taskId);
+      } catch (e) {
+        console.warn(`[events] terminal read failed (task=${taskId}):`, e && e.message);
+        sseSend({ event: 'error', reasonCode: 'sse_task_read_failed', retryable: true, message: e && e.message });
+        finish(true);
+        return;
+      }
       if (isTerminal(freshTask)) {
         if (freshTask.agent_status === 'failed') {
           // BLOCK-38 P1: 中断任务（服务重启清扫标记）附带 resumable 标记，前端据此显示「继续执行」
@@ -122,13 +165,14 @@ module.exports = {
           // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
           sseSend({ event: 'done', filesChanged: freshTask.filesChanged || [] });
         }
-        stopHeartbeat();
-        sseDone();
-        return res.end();
+        finish(true);
+        return;
       }
 
-      // 3. 轮询增量事件到终态（500ms 间隔）
-      const poll = setInterval(() => {
+      // 3. 轮询增量事件到终态（500ms 间隔；L3-2（L-13）：失败计数熔断）
+      let consecutiveFails = 0;
+      const POLL_MAX_CONSECUTIVE_FAILS = 3;
+      poll = setInterval(() => {
         try {
           const events = agentTaskStore.getAgentTaskEventsSince(taskId, lastSeq);
           for (const ev of events) {
@@ -137,7 +181,6 @@ module.exports = {
           }
           const t = agentTaskStore.getAgentTask(taskId);
           if (isTerminal(t)) {
-            clearInterval(poll);
             if (t.agent_status === 'failed') {
               // BLOCK-38 P1: 轮询路径同样携带 resumable 标记；BLOCK-56 P1: 附带 fallbackTaskId
               sseSend(failedPayload(t));
@@ -147,21 +190,21 @@ module.exports = {
               // BLOCK-31 P1: done 事件携带权威 filesChanged 清单
               sseSend({ event: 'done', filesChanged: t.filesChanged || [] });
             }
-            stopHeartbeat();
-            sseDone();
-            res.end();
+            finish(true);
+            return;
           }
-        } catch {
-          // 轮询出错不终止，下轮继续
+          consecutiveFails = 0;
+        } catch (e) {
+          consecutiveFails += 1;
+          console.warn(`[events] poll failed (task=${taskId}) ${consecutiveFails}/${POLL_MAX_CONSECUTIVE_FAILS}:`, e && e.message);
+          if (consecutiveFails >= POLL_MAX_CONSECUTIVE_FAILS) {
+            // L3-2（L-13）：连续 3 次失败熔断——结构化 error 帧 + 清理 + 关流
+            //（原「下轮继续」在 DB 持续故障时每 500ms 无限静默重试）。
+            sseSend({ event: 'error', reasonCode: 'sse_poll_failed', retryable: true, consecutiveFails });
+            finish(true);
+          }
         }
       }, 500);
-
-      // 用户关闭订阅：只清 interval 与心跳，不影响后台 loop（loop 继续跑，
-      // 事件写 task_events 待重连后按 afterSeq 补齐——BLOCK-159 P1-6 水位续传）。
-      req.on('close', () => {
-        stopHeartbeat();
-        clearInterval(poll);
-      });
     });
     },
 };
