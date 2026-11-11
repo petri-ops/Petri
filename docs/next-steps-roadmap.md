@@ -1,3 +1,4 @@
+最后更新：2026-11-11（🏁 **BLOCK-411（第五轮 L7）completed——第五轮 L0–L7 全程序收口**：90 条逐件终态/十一维第六列 11 升 0 平 0 降/closeout 20/21 门 PASS 0 SKIP（W=CSS WIP owner 收口）。串行槽位转空。下一候选=第六轮优化蓝图（待用户审计发令）或 L 程序补腿批（W5b 拆分/主题门扩面/knip entry/环消亡/抽屉 dialog）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-410（第五轮 L6 · 体验可达性与人设）completed**：焦点管理/读侧状态/台账降级（ui:audit:check 转绿）/RouteFallback/主权说明/historic 索引；四项 done-partial 带补腿。串行槽位转空；下一阶段=L7 总收口与证据（蓝图 §4-L7，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-409（第五轮 L5 · 结构与单源）completed**：resolveCore 单源+静态门/跨表锚/engines/@docusaurus 退役/R2 兑现；五门全绿；五项 done-partial 带补腿。串行槽位转空；下一阶段=L6 体验可达性与人设（蓝图 §4-L6，11 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-408（第五轮 L4 · 性能与数据面）completed**：fork 事务化红绿先行+回放 DESC+tick 分档+L-34 销号；四项 done-partial 带补腿；perf 5/5 PASS。串行槽位转空；下一阶段=L5 结构与单源（蓝图 §4-L5，13 项，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

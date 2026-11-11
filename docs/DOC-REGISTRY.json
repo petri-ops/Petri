@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 553,
+    "documentCount": 554,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 536
+    "managedMarkdown": 537
   },
   "documents": [
+    {
+      "id": "BLOCK-411",
+      "capability": "block-411-post-k7-l7-final-closeout",
+      "path": "docs/block-411-post-k7-l7-final-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-411-post-k7-l7-final-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "l7",
+        "closeout",
+        "evidence"
+      ],
+      "notes": "第五轮 L7 总收口 completed（2026-11-11）：L7-1 90 条逐件终态 gap-ledger（93 条目含 3 边界批，零 in_progress：done 64/done-partial 19/pending_user_ruling 2/retain-with-reason 5/pending_human_eye 1/external-blocked 2）/L7-3 closeout:full fail-fast 三连（20/21 门 PASS 0 SKIP，唯一未绿 ui:audit:check=CSS WIP W 归属；逐门权威取样 20 门全 PASS 含 EAR 45% 达标、perf 5/5、契约 186）/L7-4 十一维第六列复评 11 升 0 平 0 降（逐维归因+锚点）/L7-5 真实任务与人眼如实终态带补腿。卫生门抓真控制字节修复（d8339818）。零新增依赖。证据=acceptance/post-k7-2026-11-10/l7/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-410",
       "capability": "block-410-post-k7-l6-experience-accessibility",

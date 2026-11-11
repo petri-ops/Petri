@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-s7-h5-perf-evidence",
+  "sourceCommit": "d8339818710c8afc3b4ced9135f9d4d638fbdb2f",
+  "platform": "darwin-arm64",
+  "command": "PETRI_PERF_EVIDENCE=<path> npm run quality:perf",
+  "generatedAt": "2026-11-11T01:47:45.818Z",
+  "samples": 5,
+  "samplesGreen": 5,
+  "verdict": "pass",
+  "coverageGaps": [],
+  "baselineBinding": {
+    "host": {
+      "platform": "darwin-arm64",
+      "cpus": 8,
+      "memoryGB": 16,
+      "node": "v24.16.0"
+    },
+    "coreSha": "f0c325d2d6f620d8",
+    "coldStartTrueLeg": "scripts/post-s7-cold-start-x5.cjs"
+  },
+  "rows": [
+    {
+      "sample": 1,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=430ms vs median=372ms × (1+30%) → 484ms，地板 372ms → 阈值 484ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=24ms vs median=20ms × (1+60%) → 32ms，地板 20ms → 阈值 32ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=14ms vs median=11ms × (1+60%) → 18ms，地板 11ms → 阈值 18ms"
+        },
+        {
+          "name": "warm_backend_spawn",
+          "status": "green",
+          "detail": "sample=538ms vs median=544ms × (1+25%) → 680ms，地板 544ms → 阈值 680ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 2,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=421ms vs median=372ms × (1+30%) → 484ms，地板 372ms → 阈值 484ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=24ms vs median=20ms × (1+60%) → 32ms，地板 20ms → 阈值 32ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=16ms vs median=11ms × (1+60%) → 18ms，地板 11ms → 阈值 18ms"
+        },
+        {
+          "name": "warm_backend_spawn",
+          "status": "green",
+          "detail": "sample=538ms vs median=544ms × (1+25%) → 680ms，地板 544ms → 阈值 680ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 3,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=414ms vs median=372ms × (1+30%) → 484ms，地板 372ms → 阈值 484ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=25ms vs median=20ms × (1+60%) → 32ms，地板 20ms → 阈值 32ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=15ms vs median=11ms × (1+60%) → 18ms，地板 11ms → 阈值 18ms"
+        },
+        {
+          "name": "warm_backend_spawn",
+          "status": "green",
+          "detail": "sample=550ms vs median=544ms × (1+25%) → 680ms，地板 544ms → 阈值 680ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 4,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=440ms vs median=372ms × (1+30%) → 484ms，地板 372ms → 阈值 484ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=25ms vs median=20ms × (1+60%) → 32ms，地板 20ms → 阈值 32ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=15ms vs median=11ms × (1+60%) → 18ms，地板 11ms → 阈值 18ms"
+        },
+        {
+          "name": "warm_backend_spawn",
+          "status": "green",
+          "detail": "sample=538ms vs median=544ms × (1+25%) → 680ms，地板 544ms → 阈值 680ms"
+        }
+      ],
+      "ok": true
+    },
+    {
+      "sample": 5,
+      "rows": [
+        {
+          "name": "packaged_start",
+          "status": "green",
+          "detail": "sample=419ms vs median=372ms × (1+30%) → 484ms，地板 372ms → 阈值 484ms"
+        },
+        {
+          "name": "long_conversation",
+          "status": "green",
+          "detail": "sample=25ms vs median=20ms × (1+60%) → 32ms，地板 20ms → 阈值 32ms"
+        },
+        {
+          "name": "big_project_tree",
+          "status": "green",
+          "detail": "sample=15ms vs median=11ms × (1+60%) → 18ms，地板 11ms → 阈值 18ms"
+        },
+        {
+          "name": "warm_backend_spawn",
+          "status": "green",
+          "detail": "sample=540ms vs median=544ms × (1+25%) → 680ms，地板 544ms → 阈值 680ms"
+        }
+      ],
+      "ok": true
+    }
+  ],
+  "note": "连续采样口径：任一轮红即整体红（最差轮为准）。毫秒读数不等于用户观感，DOM 节点数与帧率需 CDP 腿（H5 挂起项）。"
+}

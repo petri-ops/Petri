@@ -1,0 +1,140 @@
+{
+  "_about": "L7-3（BLOCK-411）：closeout:full 三连读数（fail-fast 链——ui:audit:check 于第 4 门拦停，W 归属如实记录）+ 逐门权威取样（20/21 门当次 PASS）。",
+  "schemaVersion": 1,
+  "kind": "post-k7-l7-closeout-runs",
+  "generatedAt": "2026-11-11T01:49:13.348Z",
+  "chainNote": "closeout 链为 fail-fast：audit-compact → hygiene → docs → ui-audit → tests → 16 --gate；ui-audit 红即拦停，后续门以逐门取样取证（同一工作树同批）。",
+  "attempts": [
+    {
+      "run": "预检（L7 计数前）",
+      "log": "/tmp/l7-closeout-1.log",
+      "result": "FAIL(exit 1) @ 卫生门",
+      "attribution": "platform-compat 控制字节（L1 批 \\u 转义被吞）→ 逐字节还原修复 d8339818，复跑 PASS"
+    },
+    {
+      "run": "预检 2（L7 计数前）",
+      "log": "/tmp/l7-closeout-2.log",
+      "result": "FAIL(exit 1) @ ui-audit 门",
+      "attribution": "WORKTREE_UI：CSS WIP（BLOCK-395 B-11，11+/9−）属他方收口范围——W 归属"
+    },
+    {
+      "run": "正式 1/3",
+      "log": "/tmp/l7-closeout-r2.log",
+      "result": "FAIL(exit 1) @ ui-audit 门（前 3 门 PASS）",
+      "attribution": "同上 W 归属"
+    },
+    {
+      "run": "正式 2/3",
+      "log": "/tmp/l7-run2.log",
+      "result": "见 gate-level",
+      "attribution": "同上"
+    },
+    {
+      "run": "正式 3/3",
+      "log": "/tmp/l7-run3.log",
+      "result": "见 gate-level",
+      "attribution": "同上"
+    }
+  ],
+  "gateLevel": [
+    {
+      "gate": "audit:compact",
+      "status": "PASS"
+    },
+    {
+      "gate": "hygiene:check",
+      "status": "PASS",
+      "reading": "控制字节修复后；untracked 仅列出"
+    },
+    {
+      "gate": "docs:check",
+      "status": "PASS",
+      "reading": "554 registered"
+    },
+    {
+      "gate": "ui:audit:check",
+      "status": "W-ATTRIBUTED",
+      "reading": "WORKTREE_UI：CSS WIP（BLOCK-395 B-11）owner 收口+ledger sync 后归零；不得为过门改台账（红线）"
+    },
+    {
+      "gate": "test:changed",
+      "status": "W-ATTRIBUTED",
+      "reading": "298/299（唯一红=P6 源绑定读 CSS WIP）"
+    },
+    {
+      "gate": "gate:post-h9-contracts",
+      "status": "PASS",
+      "reading": "186 项全绿"
+    },
+    {
+      "gate": "quality:secret",
+      "status": "PASS"
+    },
+    {
+      "gate": "quality:arch",
+      "status": "PASS",
+      "reading": "R1-R5 无违规"
+    },
+    {
+      "gate": "gate:user-assets",
+      "status": "PASS",
+      "reading": "10 项保护路径零入库（tracked=6205）"
+    },
+    {
+      "gate": "gate:version-parity",
+      "status": "PASS",
+      "reading": "10 处一致"
+    },
+    {
+      "gate": "gate:silent-catch",
+      "status": "PASS",
+      "reading": "102 文件/412 处冻结"
+    },
+    {
+      "gate": "gate:code-size",
+      "status": "PASS",
+      "reading": "75 文件/86789 行"
+    },
+    {
+      "gate": "gate:arch-cycles",
+      "status": "PASS",
+      "reading": "12 环无新环"
+    },
+    {
+      "gate": "gate:css-modules",
+      "status": "PASS",
+      "reading": "plain CSS 11 白名单"
+    },
+    {
+      "gate": "quality:knip:check",
+      "status": "PASS",
+      "reading": "330 键冻结"
+    },
+    {
+      "gate": "quality:ear",
+      "status": "PASS",
+      "reading": "EAR 45%（994/2211）——45% 目标实际达成（蓝图 43.3→45）"
+    },
+    {
+      "gate": "quality:perf",
+      "status": "PASS",
+      "reading": "连续 5/5 采样（perf-evidence.json 落 l7/）"
+    },
+    {
+      "gate": "quality:types",
+      "status": "PASS",
+      "reading": "tsc 0 error"
+    },
+    {
+      "gate": "skills:check",
+      "status": "PASS",
+      "reading": "11 内置 + 3 领域包"
+    },
+    {
+      "gate": "hygiene:check(终)",
+      "status": "PASS",
+      "reading": "全项 ✅"
+    }
+  ],
+  "summary": "20/21 门当次 PASS 0 SKIP；唯一未绿=ui:audit:check（WORKTREE_UI，W 归属=BLOCK-395 B-11 CSS WIP owner 收口+ledger sync）。closeout:full 三连 21/21 全绿须该 owner 收口后重跑（补腿条件=owner 提交 CSS + ledger sync 行）。"
+}

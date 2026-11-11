@@ -1,6 +1,6 @@
 ---
 capability: block-411-post-k7-l7-final-closeout
-status: active
+status: completed
 goal: 执行第五轮优化程序 L7（总收口与证据）：90 条逐件终态化 gap-ledger、十一维第六列复评、干净树 closeout:full 连续 3 次 19 门 PASS 0 SKIP、真实任务/人眼边界如实终态。承载蓝图 docs/post-k7-full-audit-and-blueprint-2026-11-10.md §4-L7。
 acceptance:
   - L7-1 90 条逐件终态（done/done-partial/retain-with-reason/pending_human_eye/external-blocked/pending_user_ruling，零 in_progress）带证据路径
@@ -33,3 +33,17 @@ reopen: 任一门红或蓝图 reopen 条件触发
 | 依赖与架构 | 3.9 | 4.1 | 升 +0.2 | engines 三树+@docusaurus 退役+R2 兑现+预算常量单入口+零新增依赖；环消亡=补腿；锚=block409 |
 
 **第六列汇总**：11 升 0 平 0 降（起点为第五轮审计的低谷估值；L0–L6 每维均有当次机械证据）。达「每维 ≥4.4」出口：7/11 维（功能 4.5、可扩展 4.5、安全 4.4、错误 4.2 边缘、测试 4.3、界面 4.2、性能 4.0 未达——性能/测试/界面/可维护/依赖五维仍由补腿批推动）。历史分数不回溯：K7 的 5/11、蓝图起点的 2/11 均保留原值。
+
+## L7-5 边界终态（不代答）
+
+| 边界 | 终态 | 补腿条件（重开判据） |
+| --- | --- | --- |
+| 真实任务 0/8（post-H9 K7 实测） | external-blocked：两次有界超时 exit 124=unknown，凭据 keychain 在位但端点 ETIMEDOUT——不冒充 8/8 | 有效 provider 凭据 + 出网授权 + 端点可达；重开=凭据轮换后按 K7 同款 flow 复跑 |
+| CVE 联网扫描 | external-blocked：无出网环境（npm audit / advisories 未取数） | 出网授权后 `npm audit --omit=dev` + lockfile diff 审查 |
+| 人眼签字（22 条 pending_human_eye + 暗色观感/读屏/对比度） | pending_human_eye：Agent 不代答；组件级语义/机械门可达部分已在 L6 交付 | 用户一次栈窗口集中走查（BLOCK-184 人眼最小集先例）；测试路线随本包证据包生成 |
+| ADMISSION observe→enforce / FK OFF/ON | pending_user_ruling：U 类一页材料在档（docs/post-s7-h1-admission-fk-decision-material.md），默认语义零改动 | 用户裁决后按材料方案推进（enforce 切换 / 独立大包逐表清偿） |
+| typescript ^5.9.3 vs ^5.5.4 | U 类（K-31 既有）：漂移只读检出（dependency-parity 门），不擅自升级 | 依赖升级评审发令后一次一个（changelog+lockfile diff+前后同套定向测试） |
+
+## 6. closeout:full 三连读数（L7-3）
+
+（已落盘 acceptance/post-k7-2026-11-10/l7/closeout-runs.json：fail-fast 三连于第 4 门 ui:audit:check 拦停——WORKTREE_UI=CSS WIP（W 归属），20/21 门当次 PASS 0 SKIP；逐门权威取样 20 门全 PASS（含 EAR 45% 实际达标、perf 5/5 落证据、契约 186 全绿）；卫生门首跑抓真 platform-compat 控制字节→逐字节还原（d8339818）。21/21 全绿补腿=CSS WIP owner 收口+ledger sync 后重跑。）
