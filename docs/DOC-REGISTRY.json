@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 554,
+    "documentCount": 555,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 537
+    "managedMarkdown": 538
   },
   "documents": [
+    {
+      "id": "BLOCK-412",
+      "capability": "block-412-post-k7-l4-followup-messages-contract",
+      "path": "docs/block-412-post-k7-l4-followup-messages-contract-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-412-post-k7-l4-followup-messages-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "followup",
+        "messages",
+        "index"
+      ],
+      "notes": "补腿批第一刀 completed（2026-11-11）：L-31 续——独立 COUNT 退役（窗口列 COUNT(*) OVER 在页查询内算绝对偏移，rowid 语义保持=fork 同 ts 安全；20 页滚动 COUNT 调用数 1→0 蓝图口径）+ export 流式分块（keyset rowid> 500 行/块增量写，组合原语抽取单源保持）。红 2→4/4；同套绿 35/35；批跑 422/424（P6=W、BLOCK-87 flake 单跑绿）。零新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-411",
       "capability": "block-411-post-k7-l7-final-closeout",

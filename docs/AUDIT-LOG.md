@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-11（🏁 **补腿批第一刀=BLOCK-412 completed**：L-31 续 COUNT 索引化（独立 COUNT 退役→窗口列，rowid 语义保持）+ export 流式分块（keyset 500 行/块+原语抽取）；红 2→4/4、同套绿 35/35、批跑 422/424（P6=W、BLOCK-87 flake 单跑绿）。串行槽位转空；下一刀候选=主题门扩面/W5b 拆分/knip entry。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（▶ **补腿批第一刀=BLOCK-412 启动**：L-31 续 COUNT 索引化 (ts,id)+export 流式分块；K2 同族行为钉测先行（Jev no_key 未恢复——V 类补腿=用户 export TYPESAFE_API_KEY） 零新增依赖 串行槽位=BLOCK-412 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **第五轮 L7=BLOCK-411 completed——L0–L7 全程序收口**：90 条逐件终态（done 64/done-partial 19/retain 5/U 2/人眼 1/外部 2，零 in_progress）/十一维第六列 11 升 0 平 0 降/closeout:full fail-fast 三连 20/21 门 PASS 0 SKIP（唯一 W=CSS WIP owner 收口）/EAR 45% 达标/perf 5/5/契约 186；卫生门抓真控制字节修复。程序完成：八阶段各有证据与 canonical 回写。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（▶ **第五轮 L7=BLOCK-411 启动**：90 条逐件终态 gap-ledger/十一维第六列/closeout:full 连续 3 次/真实任务与人眼如实终态 串行槽位=BLOCK-411 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **第五轮 L6=BLOCK-410 completed**：CommandPalette 焦点管理/ThemeProvider 读侧状态/台账四条降级（ui:audit:check exit 1→0）/RouteFallback/本地主权说明/historic 索引；四项 done-partial 带补腿（观感归 E 不代答）；copilot 763/763。串行槽位转空，下一阶段 L7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -70,6 +72,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-11-11 | **BLOCK-412-POST-K7-L4-FOLLOWUP-MESSAGES-CONTRACT 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；预授权连续工作延续）**：范围=L-31 续（COUNT 索引化+export 流式）；红线=分页行为逐字对齐 K2 基线/零新增依赖 | plan=docs/block-412-post-k7-l4-followup-messages-contract-plan.md | BLOCK-412 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-411-POST-K7-L7-FINAL-CLOSEOUT 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；用户 2026-11-11 执行提示词预授权连续工作）**：范围=蓝图 §4-L7 五项终态化 | plan=docs/block-411-post-k7-l7-final-closeout-plan.md | BLOCK-411 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-410-POST-K7-L6-EXPERIENCE-ACCESSIBILITY 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；用户 2026-11-11 执行提示词预授权连续工作）**：范围=蓝图 §4-L6 十一条（L-62/70 焦点 → L-63 → L-64/65 台账 → L-66/67 主题门 → L-69/73 → L-72 人设 → L-81 索引）；观感归 E 不代答；ui:audit:check 的 CSS WIP 红延续 W 归属 | plan=docs/block-410-post-k7-l6-experience-accessibility-plan.md | BLOCK-410 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-409-POST-K7-L5-STRUCTURE-SINGLE-SOURCE 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；用户 2026-11-11 执行提示词预授权连续工作）**：范围=蓝图 §4-L5 十三条（L-38 → L-39/41/42 → L-44/49 → L-46 W5b → L-78/85/80）；红线=typescript 统一 U 类不擅自升/依赖升级走 checklist/拆前拆后同套绿 | plan=docs/block-409-post-k7-l5-structure-single-source-plan.md | BLOCK-409 / COMPLETED |
@@ -95,6 +98,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ **BLOCK-412（补腿批第一刀 · messages 读契约）completed**：L-31 续——独立 COUNT 退役（窗口列 COUNT(*) OVER (PARTITION BY conversation_id ORDER BY rowid) 页查询内算绝对偏移；rowid 语义保持=fork 同 ts 安全；20 页滚动 COUNT 调用数 1→0 蓝图口径）+ export 流式分块（keyset rowid> 500 行/块增量 res.write；组合原语抽取单源保持逐字节等价）；红 2→4/4、同套绿 block95 双套+block408+K2+block412=35/35、批跑 422/424（P6=W、BLOCK-87 并发 flake 单跑 6/6 绿如实归属）；Jev no_key 未恢复（V 类补腿=用户 export TYPESAFE_API_KEY） 零新增依赖 | 2026-11-11 | BLOCK-412 / COMPLETED |
 | ✅ **BLOCK-411（第五轮 L7 · 总收口与证据）completed——第五轮 L0–L7 全程序收口**：L7-1 gap-ledger 93 条目零 in_progress（done 64/done-partial 19/retain 5/U 2/人眼 1/外部 2）/L7-3 closeout:full fail-fast 三连 20/21 门 PASS 0 SKIP（唯一 W=CSS WIP owner 收口后归零，补腿在案；逐门权威取样 20 门全 PASS：契约 186、EAR 45% 达标、perf 连续 5/5、knip 330、尺寸 75 文件）/L7-4 十一维第六列 11 升 0 平 0 降（逐维归因+锚点，不回溯历史）/L7-5 真实任务 0/8 external-blocked+人眼 pending_human_eye 如实终态带补腿；卫生门抓真 platform-compat 控制字节→逐字节还原（d8339818）；程序八阶段各有 closeout 证据与 canonical 回写 证据=acceptance/post-k7-2026-11-10/l7/ | 2026-11-11 | BLOCK-411 / COMPLETED |
 | ✅ **BLOCK-410（第五轮 L6 · 体验可达性与人设）completed**：L6-1 CommandPalette（nextSelectable 跳 header/Tab 循环/焦点还原/listbox+activedescendant；aria 位 sink 桥变量提取）/L6-2 ThemeProvider 读侧失败入 prefsSync+重放期抑制回正/L6-3 四条 verified 冒认降回 in_progress（ui:audit:check exit 1→0 转绿）/L6-5 RouteFallback 可见文本+错误详情折叠/L6-6 本地主权说明/L6-7 historic-unverifiable 索引；四项 done-partial 带补腿（观感归 E）；copilot 763/763、types 净、台账 PASS 证据=acceptance/post-k7-2026-11-10/l6/ | 2026-11-11 | BLOCK-410 / COMPLETED |
 | ✅ **BLOCK-409（第五轮 L5 · 结构与单源）completed**：resolveCore 四 mirror 退役+静态门（terminal 丢参 bug 附带修复：snapshot command 曾只显示 core 根）/跨表锚 CONTRACTS⊆TOOL_METADATA（12 model3d 缺口登记制只减棘轮；[a-z_]+ 在 model3d 的 3 断开=历史 103/104 两口径同源失真实测锚定；backlog 2c 第五轮复核注记）/注释时态/L-49 销号/例外差值台账/engines 三树 >=24/@docusaurus-tsconfig 退役（lock 零残余）/R2 注释兑现；五门全绿（version-parity/arch/cycles/knip/code-size）；五项 done-partial 带补腿；typescript 漂移=U 类 证据=acceptance/post-k7-2026-11-10/l5/ | 2026-11-11 | BLOCK-409 / COMPLETED |

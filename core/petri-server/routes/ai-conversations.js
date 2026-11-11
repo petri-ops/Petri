@@ -137,7 +137,12 @@ module.exports = function mountConversations(app) {
       // 导致长会话看不到最近消息）；?before=<rowid> 向上取更旧一页。
       // 游标用 rowid 而非 ts：fork 会话全部消息同 ts（同 now 批量插入），ts 游标会丢页。
       const before = req.query.before ? Math.max(1, parseInt(req.query.before, 10) || 0) : 0;
-      const pageSql = 'SELECT id, role, content, meta_json, ts, rowid AS _rid FROM copilot_messages WHERE conversation_id=?'
+      // L-31 补腿（BLOCK-412）：独立 COUNT 退役——窗口列在页查询内同步计算绝对偏移
+      //（_offset1 = rowid 升序 1-based 序号；rowid 语义保持 = fork 同 ts 批次安全）。
+      // 20 页滚动 COUNT(*) 调用数 1→0（蓝图 L-31 验收口径），且无 rowid< 回表递增扫描。
+      const pageSql = 'SELECT id, role, content, meta_json, ts, rowid AS _rid,'
+        + ' COUNT(*) OVER (PARTITION BY conversation_id ORDER BY rowid ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS _offset1'
+        + ' FROM copilot_messages WHERE conversation_id=?'
         + (before ? ' AND rowid < ?' : '')
         + ' ORDER BY rowid DESC LIMIT ?';
       const pageArgs = before ? [req.params.id, before, limit + 1] : [req.params.id, limit + 1];
@@ -150,11 +155,10 @@ module.exports = function mountConversations(app) {
       if (page.length > 0) {
         const minRid = page[0]._rid;
         if (hasMore) nextBefore = minRid;
-        const cnt = await adb.prepare('SELECT COUNT(*) AS c FROM copilot_messages WHERE conversation_id=? AND rowid < ?').get(req.params.id, minRid);
-        windowOffset = cnt.c;
+        windowOffset = page[0]._offset1 - 1;
       }
       const items = page.map(r => {
-        const { _rid, ...rest } = r;
+        const { _rid, _offset1, ...rest } = r;
         return {...rest, meta: r.meta_json ? (() => { try { return JSON.parse(r.meta_json); } catch { return null; } })() : null};
       });
       // BLOCK-95 B2/A5 — 压缩留痕诚实可见：会话存在 compaction 记录时随信封下发，
@@ -183,12 +187,35 @@ module.exports = function mountConversations(app) {
     try {
       const conv = await adb.prepare('SELECT id, title, project_id, created_at FROM copilot_conversations WHERE id=? AND user_id=?').get(req.params.id, userId);
       if (!conv) return res.status(404).json({status:'error', error:'not_found'});
-      const rows = await adb.prepare('SELECT role, content, ts FROM copilot_messages WHERE conversation_id=? ORDER BY rowid ASC').all(req.params.id);
-      const { composeConversationMarkdown } = require('../helpers/conversation-export');
-      const markdown = composeConversationMarkdown({ conversation: conv, messages: rows });
+      // L-31 补腿（BLOCK-412）：流式分块导出——keyset（rowid>）500 行/块增量写响应，
+      // 内存有界（块大小恒定，不再全量 .all 装载）；组合原语单源在 conversation-export.js。
+      const { composeExportHeader, formatMessageBlock, MAX_EXPORT_MESSAGES } = require('../helpers/conversation-export');
+      const cnt = await adb.prepare("SELECT COUNT(*) AS c FROM copilot_messages WHERE conversation_id=? AND content IS NOT NULL AND trim(content) <> ''").get(req.params.id);
+      const usableCount = cnt.c;
+      const truncated = usableCount > MAX_EXPORT_MESSAGES;
+      const truncatedExtra = truncated ? usableCount - MAX_EXPORT_MESSAGES : 0;
       res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename="conversation-export.md"');
-      res.status(200).send(markdown);
+      res.status(200);
+      res.write(composeExportHeader(conv, { keptCount: Math.min(usableCount, MAX_EXPORT_MESSAGES), truncatedExtra }));
+      let lastRid = 0;
+      let written = 0;
+      const CHUNK = 500;
+      for (;;) {
+        const chunk = await adb.prepare('SELECT role, content, ts, rowid AS _rid FROM copilot_messages WHERE conversation_id=? AND rowid > ? ORDER BY rowid ASC LIMIT ?')
+          .all(req.params.id, lastRid, CHUNK);
+        if (chunk.length === 0) break;
+        for (const m of chunk) {
+          lastRid = m._rid;
+          if (written >= MAX_EXPORT_MESSAGES) break;
+          if (!(m.content && String(m.content).trim().length > 0)) continue;
+          res.write(formatMessageBlock(m));
+          written += 1;
+        }
+        if (chunk.length < CHUNK) break;
+      }
+      if (written === 0) res.write('\n（该会话没有可导出的消息内容。）');
+      res.end();
     } catch (e) { res.status(500).json({status:'error', error: e.message}); }
   });
 

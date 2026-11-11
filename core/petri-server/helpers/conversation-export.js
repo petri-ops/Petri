@@ -34,41 +34,55 @@ function formatTs(ts) {
  *          exportedAt?: string}} input
  * @returns {string} markdown 文本
  */
+// L-31 补腿（BLOCK-412）：流式导出原语——头部块与单消息块抽为纯函数，
+// composeConversationMarkdown 由其重建（逐字节等价），路由按 500 行分块流式写响应。
+
+/** 单消息块（原 for 循环体逐字保持）。 */
+function formatMessageBlock(m) {
+  const label = ROLE_LABELS[m.role] || '未知';
+  const ts = formatTs(m.ts);
+  const lines = [];
+  lines.push('');
+  lines.push(`## ${label}${ts ? ` · ${ts}` : ''}`);
+  lines.push('');
+  lines.push(m.content);
+  lines.push('');
+  lines.push('---');
+  return lines.join('\n');
+}
+
+/** 头部块（keptCount=过滤后保留数；truncatedExtra=截断条数或 0）。 */
+function composeExportHeader(conv, { keptCount, truncatedExtra = 0, exportedAt } = {}) {
+  const c = conv || {};
+  const title = (typeof c.title === 'string' && c.title.trim()) || c.id || '未命名会话';
+  const exportTs = typeof exportedAt === 'string' && exportedAt ? exportedAt : new Date().toISOString();
+  const lines = [];
+  lines.push(`# 会话导出：${title}`);
+  lines.push('');
+  lines.push(`- 导出时间：${formatTs(exportTs)}`);
+  if (c.created_at) lines.push(`- 会话开始：${formatTs(c.created_at)}`);
+  if (c.project_id) lines.push(`- 项目：${c.project_id}`);
+  lines.push(`- 消息数：${keptCount}${truncatedExtra > 0 ? `（超出 ${MAX_EXPORT_MESSAGES} 上限，已截断 ${truncatedExtra} 条）` : ''}`);
+  lines.push('');
+  lines.push('---');
+  return lines.join('\n');
+}
+
 function composeConversationMarkdown(input) {
   const { conversation, messages, exportedAt } = input || {};
   const conv = conversation || {};
   const list = Array.isArray(messages) ? messages : [];
-  const title = (typeof conv.title === 'string' && conv.title.trim()) || conv.id || '未命名会话';
-  const exportTs = typeof exportedAt === 'string' && exportedAt ? exportedAt : new Date().toISOString();
 
   const usable = list.filter((m) => m && typeof m.content === 'string' && m.content.trim().length > 0);
   const truncated = usable.length > MAX_EXPORT_MESSAGES;
   const kept = truncated ? usable.slice(0, MAX_EXPORT_MESSAGES) : usable;
 
-  const lines = [];
-  lines.push(`# 会话导出：${title}`);
-  lines.push('');
-  lines.push(`- 导出时间：${formatTs(exportTs)}`);
-  if (conv.created_at) lines.push(`- 会话开始：${formatTs(conv.created_at)}`);
-  if (conv.project_id) lines.push(`- 项目：${conv.project_id}`);
-  lines.push(`- 消息数：${kept.length}${truncated ? `（超出 ${MAX_EXPORT_MESSAGES} 上限，已截断 ${usable.length - MAX_EXPORT_MESSAGES} 条）` : ''}`);
-  lines.push('');
-  lines.push('---');
-  for (const m of kept) {
-    const label = ROLE_LABELS[m.role] || '未知';
-    const ts = formatTs(m.ts);
-    lines.push('');
-    lines.push(`## ${label}${ts ? ` · ${ts}` : ''}`);
-    lines.push('');
-    lines.push(m.content);
-    lines.push('');
-    lines.push('---');
-  }
+  const parts = [composeExportHeader(conv, { keptCount: kept.length, truncatedExtra: truncated ? usable.length - MAX_EXPORT_MESSAGES : 0, exportedAt })];
+  for (const m of kept) parts.push(formatMessageBlock(m));
   if (kept.length === 0) {
-    lines.push('');
-    lines.push('（该会话没有可导出的消息内容。）');
+    parts.push('\n（该会话没有可导出的消息内容。）');
   }
-  return lines.join('\n');
+  return parts.join('\n');
 }
 
-module.exports = { composeConversationMarkdown, MAX_EXPORT_MESSAGES, ROLE_LABELS, formatTs };
+module.exports = { composeConversationMarkdown, composeExportHeader, formatMessageBlock, MAX_EXPORT_MESSAGES, ROLE_LABELS, formatTs };
