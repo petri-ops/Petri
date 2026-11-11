@@ -5,6 +5,6 @@
   border-left: 2px solid var(--petri-border-strong, var(--petri-border));
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
-  font-size: 12px;
+  font-size: var(--petri-font-size-sm);
   line-height: 1.4;
 }

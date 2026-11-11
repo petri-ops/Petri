@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 555,
+    "documentCount": 556,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 538
+    "managedMarkdown": 539
   },
   "documents": [
+    {
+      "id": "BLOCK-413",
+      "capability": "block-413-post-k7-l6-followup-theme-gate-expansion",
+      "path": "docs/block-413-post-k7-l6-followup-theme-gate-expansion-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-413-post-k7-l6-followup-theme-gate-expansion",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "followup",
+        "theme-gate",
+        "ratchet"
+      ],
+      "notes": "补腿批第二刀 completed（2026-11-11）：主题门扩面——数字 z-index 全源棘轮（38 文件/111 处冻结）+ 内联颜色全量 .tsx 只减棘轮（16 文件/62 处；.ts 定义域排除=诚实 scoping）+ 红证据（既有 font-size 棘轮对新增 CSS 基线缺条目即红实战自证）+ banner token 化/ToastProvider sm 域登记修复；新棘轮豁免按 306-309 先例三行形态。主题域 54/54、k3 28/28、契约 186、tsc 净、台账 PASS。零新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-412",
       "capability": "block-412-post-k7-l4-followup-messages-contract",

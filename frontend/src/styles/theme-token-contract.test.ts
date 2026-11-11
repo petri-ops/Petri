@@ -227,7 +227,10 @@ describe('theme token contract', () => {
     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);
     const problems: string[] = [];
     for (const key of allKeys) {
+      // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。
+      // eslint-disable-next-line security/detect-object-injection
       const allowed = RATCHET[key] || 0;
+      // eslint-disable-next-line security/detect-object-injection
       const found = actual[key] || 0;
       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);
     }
@@ -273,7 +276,10 @@ describe('theme token contract', () => {
     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);
     const problems: string[] = [];
     for (const key of allKeys) {
+      // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。
+      // eslint-disable-next-line security/detect-object-injection
       const allowed = RATCHET[key] || 0;
+      // eslint-disable-next-line security/detect-object-injection
       const found = actual[key] || 0;
       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);
     }
@@ -349,6 +355,9 @@ describe('theme token contract', () => {
     // xs(11px)+sm(12px) 引用——W1 已重分类 519 处正文性小字→inherit(14)；
     // 剩余应为徽标/元信息语境（宪章 §1）。W2/W4 逐域审计后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
+      'components/common/ToastProvider.module.css': 5,
+      // L3-7 断线相位横幅（BLOCK-412 期接入）：元信息读数 sm 域（对标 UI-523 RunStatsBar 先例）
+      'components/projection-stream-banner.module.css': 1,
       'components/annotations/AnnotationOverlay.module.css': 1, // BLOCK-254 文字批注正文（图内注释；框内需小于页面正文，非正文性小字）
       'components/ui/controls/status.module.css': 3, // W4 三件套元信息（ErrorNotice/LoadingLabel）合法 sm 域
       // UI-593 空态重排：+2 = 工作区描述文案 + 入口卡说明行（次级元信息合法 sm 域，对标 status.module.css 先例）
@@ -574,4 +583,126 @@ describe('theme token contract', () => {
     expect(bareHit).toBe(1);
     expect(semanticHit).toBe(0);
   });
+
+  // ============================================================
+  // BLOCK-413（L-66/L-67 补腿）——全源 .tsx/.css 数字 z-index 棘轮
+  // 与内联颜色字面量全量 .tsx 只减棘轮（蓝图 §4-L6；存量冻结、新增即红）。
+  // 计数器口径自检见 'charter counters catch synthetic violations'。
+  // ============================================================
+
+  it('holds no digital z-index beyond the frozen ratchet across tsx/ts/css (BLOCK-413 L-66/L-71 棘轮)', () => {
+    const offenders: string[] = [];
+    for (const file of walk(srcRoot)) {
+      const text = stripComments(fs.readFileSync(file, 'utf8'));
+      const count = (text.match(/z-?[Ii]ndex\s*:\s*(?!["'`]?\s*var\()\d/g) || []).length;
+      if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
+    }
+    const RATCHET: Record<string, number> = {
+      'App.tsx': 2,
+      'components/annotations/AnnotationBar.module.css': 1,
+      'components/annotations/AnnotationOverlay.module.css': 2,
+      'components/copilot/ChatArtifactCard.tsx': 1,
+      'components/copilot/ChatScrollbar.module.css': 1,
+      'components/copilot/ContextBudgetBar.tsx': 1,
+      'components/copilot/MessageRail.module.css': 2,
+      'components/copilot/SimpleChat/PromptEnhanceDialog.module.css': 1,
+      'components/copilot/SimpleChat/ScheduleDialog.module.css': 1,
+      'components/copilot/ToolActivityDock.module.css': 1,
+      'components/copilot/integration/integration.module.css': 1,
+      'components/copilot/simple-chat.css': 20,
+      'components/desktop/CrashNoticeBanner.tsx': 1,
+      'components/desktop/FirstRunRoleReveal.module.css': 1,
+      'components/desktop/InstallDeepLinkDialog.tsx': 1,
+      'components/desktop/PluginStorePanel.tsx': 1,
+      'components/desktop/TitleBar.module.css': 3,
+      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 1,
+      'components/desktop/WorkingTreeReview/ReviewMode.css': 5,
+      'components/desktop/desktop.css': 3,
+      'components/desktop/theme-control.css': 1,
+      'components/desktop/titlebar/ColumnizedTitleBar.module.css': 1,
+      'components/desktop/titlebar/TitleBarRightZone.tsx': 1,
+      'components/knowledge/KnowledgeConsoleDock.module.css': 2,
+      'components/result-studio/CompactResultNavigator.module.css': 2,
+      'components/result-studio/ContinueAnalysisMenu.module.css': 1,
+      'components/result-studio/RevisionCodeView.module.css': 1,
+      'components/shell/QuitSummaryDialog.module.css': 1,
+      'components/svg-editor/SvgEditorViewer.module.css': 16,
+      'components/ui/Lightbox.css': 1,
+      'components/workspace-panels/FloatCardResizer.module.css': 1,
+      'pages/extensions/styles.module.css': 1,
+      'pages/home.module.css': 1,
+      'pages/project-workspace.module.css': 26,
+      'pages/welcome.module.css': 2,
+      'pages/window/CommandCenterJobsWall.tsx': 1,
+      'pages/window/SideChatWindowPage.module.css': 1,
+      'themes/ThemeProvider.tsx': 1,
+    }
+    const actual: Record<string, number> = {};
+    for (const entry of offenders) {
+      const [rel, count] = entry.split(':');
+      const key = rel.replaceAll('\\', '/');
+      // 误报豁免：key 来自 offenders 自建清单与冻结基线（同 306-309 先例），非外部输入。
+      // eslint-disable-next-line security/detect-object-injection
+      actual[key] = (actual[key] || 0) + Number(count);
+    }
+    const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);
+    const problems: string[] = [];
+    for (const key of allKeys) {
+      // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。
+      // eslint-disable-next-line security/detect-object-injection
+      const allowed = RATCHET[key] || 0;
+      // eslint-disable-next-line security/detect-object-injection
+      const found = actual[key] || 0;
+      if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('holds inline color literals across all tsx to the frozen ratchet (BLOCK-413 L-67 全量扫描)', () => {
+    const offenders: string[] = [];
+    for (const file of walk(srcRoot)) {
+      if (!file.endsWith('.tsx')) continue;
+      const text = stripComments(fs.readFileSync(file, 'utf8'));
+      const count = (text.match(/#[0-9a-fA-F]{6}\b|rgba?\(\s*\d{1,3}/g) || []).length;
+      if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
+    }
+    const RATCHET: Record<string, number> = {
+      'App.tsx': 1,
+      'components/copilot/ChatArtifactCard.tsx': 9,
+      'components/copilot/ContextBudgetBar.tsx': 18,
+      'components/copilot/SimpleChat/SlashCommandPanel.tsx': 1,
+      'components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx': 2,
+      'components/desktop/DesktopSettingsPanel/sections/MemoryPanel.tsx': 1,
+      'components/desktop/DesktopSettingsPanel/sections/ToolApprovalPanel.tsx': 1,
+      'components/desktop/InstallDeepLinkDialog.tsx': 1,
+      'components/desktop/PluginStorePanel.tsx': 8,
+      'components/result-studio/ResultEditPanel.tsx': 1,
+      'components/svg-editor/SvgEditorViewer.tsx': 5,
+      'components/work-surface/Model3DScene.tsx': 1,
+      'components/workspace-panels/AnalysisLaunchPanel.tsx': 1,
+      'components/workspace-panels/LeftSshCreatePanel.tsx': 3,
+      'components/workspace-panels/OrchestrationGraph.tsx': 8,
+      'pages/project-workspace/WorkspaceFilePreview.tsx': 1,
+    }
+    const actual: Record<string, number> = {};
+    for (const entry of offenders) {
+      const [rel, count] = entry.split(':');
+      const key = rel.replaceAll('\\', '/');
+      // 误报豁免：key 来自 offenders 自建清单与冻结基线（同 306-309 先例），非外部输入。
+      // eslint-disable-next-line security/detect-object-injection
+      actual[key] = (actual[key] || 0) + Number(count);
+    }
+    const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);
+    const problems: string[] = [];
+    for (const key of allKeys) {
+      // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。
+      // eslint-disable-next-line security/detect-object-injection
+      const allowed = RATCHET[key] || 0;
+      // eslint-disable-next-line security/detect-object-injection
+      const found = actual[key] || 0;
+      if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);
+    }
+    expect(problems).toEqual([]);
+  });
+
 });

@@ -1,3 +1,4 @@
+最后更新：2026-11-11（🏁 **BLOCK-413（补腿批第二刀 · 主题门扩面）completed**：z-index 全源棘轮+内联颜色全量只减+红证据自证+token 化修复；主题域 54/54。串行槽位转空；下一刀候选=W5b 拆分/knip entry/环消亡（按队列序）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-412（补腿批第一刀 · messages 读契约）completed**：COUNT 索引化窗口列+export 流式；红 2→4/4、同套绿 35/35。串行槽位转空；下一刀候选=主题门扩面/W5b 拆分/knip entry（按队列序）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-411（第五轮 L7）completed——第五轮 L0–L7 全程序收口**：90 条逐件终态/十一维第六列 11 升 0 平 0 降/closeout 20/21 门 PASS 0 SKIP（W=CSS WIP owner 收口）。串行槽位转空。下一候选=第六轮优化蓝图（待用户审计发令）或 L 程序补腿批（W5b 拆分/主题门扩面/knip entry/环消亡/抽屉 dialog）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **BLOCK-410（第五轮 L6 · 体验可达性与人设）completed**：焦点管理/读侧状态/台账降级（ui:audit:check 转绿）/RouteFallback/主权说明/historic 索引；四项 done-partial 带补腿。串行槽位转空；下一阶段=L7 总收口与证据（蓝图 §4-L7，待发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
