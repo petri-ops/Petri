@@ -1,3 +1,4 @@
+最后更新：2026-11-11（**BLOCK-414 W5b 第一刀 completed**：SimpleChat 2089→1963，useGuardAck.ts 抽取；双基线重打；串行槽位空闲；下一刀候选=W5b 第二刀；Jev 已持久恢复；W 归属残余=CSS WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（**BLOCK-413 补腿第二刀 completed**：主题门扩面两棘轮交付；串行槽位空闲；下一刀候选=W5b 拆分/knip entry/环消亡；Jev 已持久恢复（Merge.yaml+zshrc 双层）；W 归属残余=CSS WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（**BLOCK-412 补腿第一刀 completed**：L-31 续 COUNT 窗口列+export 流式；串行槽位空闲；下一刀候选=主题门扩面/W5b 拆分/knip entry；Jev=V 类补腿（用户 export TYPESAFE_API_KEY 后恢复）；W 归属残余=CSS WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（**BLOCK-411 第五轮 L7 completed——L0–L7 全程序收口**：证据=acceptance/post-k7-2026-11-10/l7/（gap-ledger+closeout-runs+perf-evidence）；串行槽位空闲；唯一残余=CSS WIP（W 归属，owner 收口后 ui:audit:check 归零）；补腿批=W5b 拆分/主题门扩面/knip entry/环消亡/抽屉 dialog/messages 读契约（各 plan §7 有判据）。G0 开发期常态 · 不外推 packaged/Provider/GA。）

@@ -37,7 +37,8 @@ function getDatabasePath() {
   // 与 db-connection-policy.resolveDbPath 形成两套入口；【现已委托单源】
   // （require resolveDbPath，下方代码即单源消费），缺陷已闭合。
   // 两者都未设置时保持 fail-fast 语义（抛错，不静默落盘到别处）。
-  const { resolveDbPath } = require('../../core/shared-backend/db-connection-policy');
+  const { resolveCore } = require('../main/core-utils');
+  const { resolveDbPath } = require(resolveCore('shared-backend', 'db-connection-policy'));
   const resolved = resolveDbPath(process.env);
   if (!resolved) {
     throw new Error('PETRI_LOCAL_DATA_DIR environment variable is not set');

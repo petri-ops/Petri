@@ -3,6 +3,74 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block413-theme-gate",
+      "note": "补腿批第二刀（BLOCK-413）主题门扩面：z-index 全源棘轮+内联颜色全量只减。改 theme-token-contract 或主题文件即跑本契约。",
+      "patterns": [
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "frontend/src/components/projection-stream-banner.module.css"
+      ],
+      "tests": [
+        "test/block413-post-k7-l6-followup.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": false
+    },
+    {
+      "id": "block414-w5b-simplechat",
+      "note": "W5b 第一刀（BLOCK-414）SimpleChat guard-ack 簇抽取：useGuardAck hook + 行数只减锚。改 SimpleChat/hooks 或主文件即跑本契约。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.ts",
+        "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.test.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx"
+      ],
+      "tests": [
+        "test/block414-w5b-slice-1.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
+    },
+    {
+      "id": "post-k7-followup-slices",
+      "note": "第五轮 L 程序补腿批各刀契约（BLOCK-407~414）：错误语义/性能数据面/结构单源/体验可达性/messages 读契约/主题门扩面/W5b 拆分。改对应切片文件即跑对应契约。",
+      "patterns": [
+        "core/petri-server/routes/ai-agent/events.js",
+        "core/petri-server/bootstrap.js",
+        "core/petri-server/server.js",
+        "core/petri-server/helpers/stale-running-reconciler.js",
+        "core/shared-backend/execution-admission.js",
+        "core/shared-backend/budget-constants.js",
+        "core/shared-backend/llm-providers/io-transcript.js",
+        "core/petri-server/routes/result-studio/revisions.js",
+        "core/shared-backend/result-studio-table-query.js",
+        "core/shared-backend/result-plugin-validator.js",
+        "core/petri-server/helpers/mesh-assets.js",
+        "core/petri-server/mcp/ide-tools/git-blame.js",
+        "core/petri-server/mcp/ide-tools/git-diff.js",
+        "core/petri-server/mcp/ide-tools/git-show.js",
+        "core/petri-server/mcp/ide-tools/search.js",
+        "frontend/src/hooks/useInvalidationStream.ts",
+        "frontend/src/hooks/useConversationJobs.ts",
+        "frontend/src/lib/projectionTerminalBridge.ts",
+        "frontend/src/lib/office-file-preview.ts",
+        "frontend/src/pages/home.tsx",
+        "frontend/src/pages/window/CommandCenterJobsWall.tsx",
+        "frontend/src/pages/project-workspace/BrowserPanel.tsx",
+        "frontend/src/themes/ThemeProvider.tsx",
+        "src/database/branch-db.js"
+      ],
+      "tests": [
+        "test/block407-l3-error-semantics.test.mjs",
+        "test/block408-l4-performance.test.mjs",
+        "test/block409-l5-structure.test.mjs",
+        "test/block410-l6-experience.test.mjs",
+        "test/block412-messages-contract.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "post-h9-program",
       "note": "第四轮 post-H9 K0–K7 全程序：治理回写工具 / 证据写入器 / 32 条缺口终态台账 / 判据裁决 / 九组读数 / lint∩hygiene 联动门与各阶段契约测试。脚本=程序治理与验收探针，只随本程序定向测试与 docs/ui 门。 K1：主线兑现度事实采集/裁决、165 通道机械分诊、U 类决策材料契约。 K2：具名上限常量/会话列表 additive 信封/复合索引 与拆后同套绿基线。 K3：四事件反向契约/布局防回退/内联样式债棘轮门/debt 分诊。 K4：架构债事实采集/源码扫描棘轮门/版本只读对账/W5b 边界。 K5：证据元数据门/DOM 阈值纯函数/三矩阵与 EAR 对账/U·V·L 材料。 K6：PiP 四项基线红绿先行/窗口名单覆盖/ADMISSION·FK U 类材料。 K7：总收口复评/32 条终态/真实任务环境因/人眼边界。 总收口评审抓真：新增 gate:post-h9-contracts 全量契约门（防定向覆盖盲区）。 L 程序（第五轮）证据目录同挂本规则。",
       "patterns": [

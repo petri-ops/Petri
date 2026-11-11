@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-11-11T00:31:56.378Z",
+  "generatedAt": "2026-11-11T04:01:53.763Z",
   "host": {
     "platform": "darwin-arm64",
     "cpus": 8,
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "f0c325d2d6f620d8",
+  "coreSha": "7493447930e3f558",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
       "unit": "ms",
       "samples": [
-        785,
-        370,
-        372
+        796,
+        375,
+        379
       ],
-      "medianMs": 372,
+      "medianMs": 379,
       "tolerancePct": 30,
       "runs": 3,
       "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
@@ -26,13 +26,13 @@
       "metric": "1000 条消息会话：首页 + 全量滚动 20 页（分页 API 串行）",
       "unit": "ms",
       "samples": [
-        22,
-        20,
-        20,
-        19,
-        20
+        29,
+        25,
+        25,
+        26,
+        25
       ],
-      "medianMs": 20,
+      "medianMs": 25,
       "tolerancePct": 60,
       "runs": 5,
       "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；低中位场景由 absoluteSlackMs 地板主导",
@@ -43,7 +43,7 @@
       "unit": "ms",
       "samples": [
         11,
-        11,
+        10,
         11,
         11,
         11
@@ -58,13 +58,13 @@
       "metric": "isolated backend spawn→health 200（含 migrations 自举；同机连跑=OS 页缓存热的 warm 口径，非整 Electron 冷启动）",
       "unit": "ms",
       "samples": [
-        543,
         546,
-        531,
-        544,
+        545,
+        546,
+        534,
         544
       ],
-      "medianMs": 544,
+      "medianMs": 545,
       "tolerancePct": 25,
       "runs": 5,
       "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿",

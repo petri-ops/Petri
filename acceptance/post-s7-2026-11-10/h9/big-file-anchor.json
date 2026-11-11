@@ -12,8 +12,8 @@
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
-      "lines": 2089,
-      "sha256": "95fc219fad9e2294d838cd58519b183a79389507011849a53b6688b2a7fd80c6",
+      "lines": 1963,
+      "sha256": "1c8121c6101b1e2ff1e635d451d79406ef0ac159c8dec7b69242b68097d142c3",
       "missing": false
     },
     {

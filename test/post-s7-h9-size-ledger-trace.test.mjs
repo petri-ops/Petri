@@ -58,7 +58,9 @@ test('SimpleChat.tsx 基线 +10 行有据可查：确为 B-14 横幅挂载', () 
   assert.ok(src.includes("import { StreamReconnectBanner, deriveReconnectPhase }"));
   assert.ok(src.includes('<StreamReconnectBanner'));
   assert.ok(src.includes('const reconnectAttempt = useMemo'));
-  assert.equal(row.lines, 2089, '基线须与 B-14 挂载后的源码一致');
+  // W5b 第一刀（BLOCK-414）后行数随抽取演进——断言改活源一致（gate 口径 countLines）
+  const liveCount = (src) => { const l = src.split('\n'); if (l.length && l.at(-1) === '') l.pop(); return l.length; };
+  assert.equal(row.lines, liveCount(src), '基线须与源码一致（活源口径）');
   const countLines = (t) => { const a = t.split('\n'); if (a.length && a.at(-1) === '') a.pop(); return a.length; };
   assert.equal(countLines(src), row.lines);
 });

@@ -16,7 +16,7 @@ test('L5-3 注释更正：branch-db 路径解析注释改为「曾两套入口/�
   const src = read('src/database/branch-db.js');
   assert.match(src, /【现已委托单源】/, '闭合时态注记在场');
   assert.doesNotMatch(src, /与 core\/shared-backend\/db-connection-policy\.js 的\s*\n\s*\/\/ resolveDbPath 形成两套入口（同一次运行里两个消费者可能指向不同文件）。\s*\n\s*\/\/ 现直接委托单源;/, '旧误导表述已退役');
-  assert.match(src, /require\('\.\.\/\.\.\/core\/shared-backend\/db-connection-policy'\)/, '单源消费仍在');
+  assert.match(src, /resolveCore\('shared-backend', 'db-connection-policy'\)/, '单源消费仍在（BLOCK-412 起 resolveCore 路由=与 L5-1 单源同族）');
 });
 
 // ---- L5-4 / L-49：warnings 棘轮销号确认（L0-6 已交付） ----

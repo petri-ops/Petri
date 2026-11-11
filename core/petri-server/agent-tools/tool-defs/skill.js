@@ -27,7 +27,7 @@ module.exports = [
           source: {
             type: 'string',
             enum: Object.keys(SOURCE_PRIORITY),
-            description: '可选；按来源过滤（built-in=随包内置 / installed=用户安装）'
+            description: '按来源过滤（built-in/pack/installed）'
           },
           search: {
             type: 'string',

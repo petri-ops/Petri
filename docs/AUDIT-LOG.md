@@ -1,4 +1,6 @@
 # 审计广播台 (AUDIT-LOG)
+最后更新：2026-11-11（🏁 **W5b 第一刀=BLOCK-414 completed**：SimpleChat.tsx 2089→1963（−126 行只减锚）；guard-ack 簇抽 useGuardAck.ts（纯函数 findPendingGuardAck 可单测）；拆前拆后同套绿 104/763；红绿先行（purity/memoization 红→纯函数抽取全清）；双基线重打+perf 重采。串行槽位转空；下一刀候选=W5b 第二刀（tools-executor 或 loop-orchestrator）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（▶ **W5b 拆分第一刀=BLOCK-414 启动**：SimpleChat.tsx 2089 行内聚抽取子模块，行数只减锚生效；拆前拆后同套绿；零行为变化 零新增依赖 串行槽位=BLOCK-414 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **补腿批第二刀=BLOCK-413 completed**：主题门扩面——数字 z-index 全源棘轮 38 文件 111 处+内联颜色全量 .tsx 16 文件 62 处只减棘轮+红证据（既有棘轮对新增 CSS 基线缺条目即红实战自证）+banner token 化；主题域 54/54；观感归 E。串行槽位转空；下一刀候选=W5b 拆分/knip entry/环消亡。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（▶ **补腿批第二刀=BLOCK-413 启动**：主题门扫 .tsx 全量+数字 z-index 棘轮+内联债全量只减棘轮（L-66/67 续，观感归 E） 零新增依赖 串行槽位=BLOCK-413 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-11（🏁 **补腿批第一刀=BLOCK-412 completed**：L-31 续 COUNT 索引化（独立 COUNT 退役→窗口列，rowid 语义保持）+ export 流式分块（keyset 500 行/块+原语抽取）；红 2→4/4、同套绿 35/35、批跑 422/424（P6=W、BLOCK-87 flake 单跑绿）。串行槽位转空；下一刀候选=主题门扩面/W5b 拆分/knip entry。G0 开发期常态 · 不外推 packaged/Provider/GA。）
@@ -74,6 +76,7 @@
 ## 当前待处理项
 
 | 状态 | 日期 | 事项 | 处置边界 |
+| 🔵 | 2026-11-11 | **BLOCK-414-POST-K7-W5B-SLICE-1-SIMPLECHAT 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；预授权连续工作延续）**：范围=SimpleChat.tsx 第一刀内聚抽取；红线=零行为变化/拆前拆后同套绿/零新增依赖 | plan=docs/block-414-post-k7-w5b-slice-1-simplechat-plan.md | BLOCK-414 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-413-POST-K7-L6-FOLLOWUP-THEME-GATE-EXPANSION 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；预授权连续工作延续）**：范围=L-66/67 续（theme 门 .tsx 扩面+z-index 棘轮+内联债全量基线）；红线=观感归 E 不代答/零新增依赖 | plan=docs/block-413-post-k7-l6-followup-theme-gate-expansion-plan.md | BLOCK-413 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-412-POST-K7-L4-FOLLOWUP-MESSAGES-CONTRACT 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；预授权连续工作延续）**：范围=L-31 续（COUNT 索引化+export 流式）；红线=分页行为逐字对齐 K2 基线/零新增依赖 | plan=docs/block-412-post-k7-l4-followup-messages-contract-plan.md | BLOCK-412 / COMPLETED |
 | 🔵 | 2026-11-11 | **BLOCK-411-POST-K7-L7-FINAL-CLOSEOUT 启动登记（已完成→见最近处理记录；历史阶段广播·不占串行槽位；用户 2026-11-11 执行提示词预授权连续工作）**：范围=蓝图 §4-L7 五项终态化 | plan=docs/block-411-post-k7-l7-final-closeout-plan.md | BLOCK-411 / COMPLETED |
@@ -101,6 +104,7 @@
 > 已收口条目（✅）**一律移入「最近处理记录」**，不得在本区段堆积——本次清理将 23 条已收口项迁出，
 > 待处理项由 28 行降为 8 行（活跃项占比 100%）。新增 ✅ 项请直接追加到「最近处理记录」。
 ## 最近处理记录
+| ✅ **BLOCK-414（W5b 第一刀 · SimpleChat）completed**：guard-ack 簇抽 SimpleChat/hooks/useGuardAck.ts——SimpleChat.tsx 2089→1963（−126 行只减锚）；pendingGuardAck memo 主体抽模块级纯函数 findPendingGuardAck（React Compiler 可保留+可单测）；handleGuardAck/Dismiss useCallback 语义保持；拆前拆后同套绿 104/763 双向一致；红绿先行（首跑 purity/preserve-manual-memoization 红→useCallback 恢复+纯函数抽取全清）；双基线重打（big-file-anchor 1963+code-size sha 随抽取）；perf 重采（ai-conversations 热路径变化被 L0-2 基线绑定门实战抓真）；arch-cycles 12 环无新环 零行为变化 零新增依赖 | 2026-11-11 | BLOCK-414 / COMPLETED |
 | ✅ **BLOCK-413（补腿批第二刀 · 主题门扩面）completed**：theme-token-contract 新增两棘轮——数字 z-index 全源（.tsx/.ts/.css 38 文件 111 处冻结，var token 形态不计入=正确激励）+内联颜色全量 .tsx 只减（16 文件 62 处；.ts 定义域 terminal-themes/accents/scene3d 排除=诚实 scoping）；红证据=既有 font-size 棘轮对新增 CSS 文件基线缺条目即红实战自证；banner font-size token 化+ToastProvider sm 域登记；豁免按 306-309 先例；主题域 54/54、k3 28/28、契约 186、tsc 净、台账 PASS 证据=plan §6+vitest 输出 | 2026-11-11 | BLOCK-413 / COMPLETED |
 | ✅ **BLOCK-412（补腿批第一刀 · messages 读契约）completed**：L-31 续——独立 COUNT 退役（窗口列 COUNT(*) OVER (PARTITION BY conversation_id ORDER BY rowid) 页查询内算绝对偏移；rowid 语义保持=fork 同 ts 安全；20 页滚动 COUNT 调用数 1→0 蓝图口径）+ export 流式分块（keyset rowid> 500 行/块增量 res.write；组合原语抽取单源保持逐字节等价）；红 2→4/4、同套绿 block95 双套+block408+K2+block412=35/35、批跑 422/424（P6=W、BLOCK-87 并发 flake 单跑 6/6 绿如实归属）；Jev no_key 未恢复（V 类补腿=用户 export TYPESAFE_API_KEY） 零新增依赖 | 2026-11-11 | BLOCK-412 / COMPLETED |
 | ✅ **BLOCK-411（第五轮 L7 · 总收口与证据）completed——第五轮 L0–L7 全程序收口**：L7-1 gap-ledger 93 条目零 in_progress（done 64/done-partial 19/retain 5/U 2/人眼 1/外部 2）/L7-3 closeout:full fail-fast 三连 20/21 门 PASS 0 SKIP（唯一 W=CSS WIP owner 收口后归零，补腿在案；逐门权威取样 20 门全 PASS：契约 186、EAR 45% 达标、perf 连续 5/5、knip 330、尺寸 75 文件）/L7-4 十一维第六列 11 升 0 平 0 降（逐维归因+锚点，不回溯历史）/L7-5 真实任务 0/8 external-blocked+人眼 pending_human_eye 如实终态带补腿；卫生门抓真 platform-compat 控制字节→逐字节还原（d8339818）；程序八阶段各有 closeout 证据与 canonical 回写 证据=acceptance/post-k7-2026-11-10/l7/ | 2026-11-11 | BLOCK-411 / COMPLETED |

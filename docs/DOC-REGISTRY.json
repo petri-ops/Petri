@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 556,
+    "documentCount": 557,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 539
+    "managedMarkdown": 540
   },
   "documents": [
+    {
+      "id": "BLOCK-414",
+      "capability": "block-414-post-k7-w5b-slice-1-simplechat",
+      "path": "docs/block-414-post-k7-w5b-slice-1-simplechat-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-414-post-k7-w5b-slice-1-simplechat",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "w5b",
+        "split",
+        "simplechat"
+      ],
+      "notes": "W5b 拆分第一刀 completed（2026-11-11）：SimpleChat.tsx 2089→1963（−126 行只减锚）；guard-ack 簇抽为 SimpleChat/hooks/useGuardAck.ts（状态簇+pendingGuardAck 抽模块级纯函数 findPendingGuardAck 可单测+handleGuardAck/Dismiss useCallback 语义保持）；拆前拆后同套绿（104/763 双向一致）；红绿先行（首跑 purity/memoization 红→纯函数抽取全清）；双基线重打+perf 重采（ai-conversations 热路径变化被基线绑定门抓真）；arch-cycles 12 环无新环。零行为变化、零新增依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-413",
       "capability": "block-413-post-k7-l6-followup-theme-gate-expansion",
