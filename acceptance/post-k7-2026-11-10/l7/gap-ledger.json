@@ -1,0 +1,667 @@
+{
+  "_about": "L7-1（BLOCK-411）：第五轮 90 条发现逐件终态台账。终态枚举=done/done-partial/retain-with-reason/pending_human_eye/external-blocked/pending_user_ruling；零 in_progress。证据=各 stage gate-sweep + plan §6。",
+  "schemaVersion": 1,
+  "kind": "post-k7-gap-ledger",
+  "generatedAt": "2026-11-11T01:37:33.886Z",
+  "statuses": {
+    "done": 64,
+    "done-partial": 19,
+    "pending_user_ruling": 2,
+    "retain-with-reason": 5,
+    "pending_human_eye": 1,
+    "external-blocked": 2
+  },
+  "items": [
+    {
+      "id": "L-27",
+      "stage": "L0",
+      "status": "done",
+      "note": "warm_backend_spawn 冷热分离+3 轮中位+容差收紧",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-28",
+      "stage": "L0",
+      "status": "done",
+      "note": "skipped 默认判红（PETRI_ALLOW_SKIP 显式豁免）",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-29",
+      "stage": "L0",
+      "status": "done",
+      "note": "EAR 对 manifest 记录值真棘轮",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-30",
+      "stage": "L0",
+      "status": "done",
+      "note": "基线绑定 host+热路径 sha（L4 实战抓热路径变化）",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-36",
+      "stage": "L0",
+      "status": "done",
+      "note": "尺寸门 v3 全量发现入册 75 文件",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-37",
+      "stage": "L0",
+      "status": "done",
+      "note": "k4 反向门禁读数型+只增即红",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-40",
+      "stage": "L0",
+      "status": "done",
+      "note": "lint 台账机械投影 191=120",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-43",
+      "stage": "L0",
+      "status": "done",
+      "note": "全库源码扫描第二棘轮 129 处",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-45",
+      "stage": "L0",
+      "status": "done",
+      "note": "数字口径单源 JSON",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-54",
+      "stage": "L0",
+      "status": "done",
+      "note": "k6 豁免口读数型（安全行为面归 L1）",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-75",
+      "stage": "L0",
+      "status": "done",
+      "note": "test:changed unknown fail-closed 全量升级",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-76",
+      "stage": "L0",
+      "status": "done",
+      "note": "backlog 历史快照声明+canonical 降级",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-77",
+      "stage": "L0",
+      "status": "done",
+      "note": "AUDIT-LOG 压回 21.9KB（K-07 闭环）",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-82",
+      "stage": "L0",
+      "status": "done",
+      "note": "task-runs 历史残响分档",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-83",
+      "stage": "L0",
+      "status": "done",
+      "note": "用户资产 10 项逐件对账",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-84",
+      "stage": "L0",
+      "status": "done",
+      "note": "700/362/628 分母注记",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-86",
+      "stage": "L0",
+      "status": "done",
+      "note": "state 兜底+diff 幽灵并集",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-87",
+      "stage": "L0",
+      "status": "done",
+      "note": "贴阈值假绿→收紧容差+5 连采样",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-88",
+      "stage": "L0",
+      "status": "done",
+      "note": "warnings 分域只减棘轮",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-89",
+      "stage": "L0",
+      "status": "done",
+      "note": "EAR 分子分母同报",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-90",
+      "stage": "L0",
+      "status": "done",
+      "note": "🔵×registry 机械对账 AUDIT_LOG_BLUE_ACTIVE_MISMATCH",
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-50",
+      "stage": "L1",
+      "status": "done",
+      "note": "terminal 注入参数化+登记根白名单（12 组全拒）",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-51",
+      "stage": "L1",
+      "status": "done",
+      "note": "深链 MCP command 白名单+args 禁求值+expected 对账（8 组全拒）",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-52",
+      "stage": "L1",
+      "status": "done",
+      "note": "受信 origin 回环过滤四读取点+空 Origin 随机 token 门",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-53",
+      "stage": "L1",
+      "status": "done",
+      "note": "navigate 白名单+iframe sandbox",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-55",
+      "stage": "L1",
+      "status": "done-partial",
+      "note": "CSP 端口通配全移除；script-src unsafe-inline=vite 前导 retain-with-reason",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-56",
+      "stage": "L1",
+      "status": "pending_user_ruling",
+      "note": "ADMISSION observe→enforce U 类材料",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-57",
+      "stage": "L1",
+      "status": "done",
+      "note": "权限装配失败 deny-all 兜底",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-58",
+      "stage": "L1",
+      "status": "done",
+      "note": "Keychain stdin 传值",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-59",
+      "stage": "L1",
+      "status": "done",
+      "note": "transcript 0600+脱敏+归属校验",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-60",
+      "stage": "L1",
+      "status": "done",
+      "note": "导航门 origin 精确比较+openExternal 准入",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-61",
+      "stage": "L1",
+      "status": "done-partial",
+      "note": "依赖静态清单交付；CVE 联网=external-blocked",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-79",
+      "stage": "L1",
+      "status": "pending_user_ruling",
+      "note": "FK OFF/ON U 类材料（179 违约行清偿方案）",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-01",
+      "stage": "L2",
+      "status": "done",
+      "note": "skill_execute fail-closed no_execution_backend（11 Skill 逐件）",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-02",
+      "stage": "L2",
+      "status": "done",
+      "note": "产品 MCP 入口 resources 可达+prompts 假声明移除",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-03",
+      "stage": "L2",
+      "status": "done",
+      "note": "canCompare 经 viewerProfileCanCompare 接线",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-04",
+      "stage": "L2",
+      "status": "retain-with-reason",
+      "note": "updater 跨平台=平台域实现（通道 platformScoped 已标注）",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-05",
+      "stage": "L2",
+      "status": "done",
+      "note": "source enum 由 SOURCE_PRIORITY 同源派生含 pack",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-06",
+      "stage": "L2",
+      "status": "done",
+      "note": "public-demo/public-file 零消费退役",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-07",
+      "stage": "L2",
+      "status": "done",
+      "note": "startup:marks 标验收专用（通道分类）",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-08",
+      "stage": "L2",
+      "status": "retain-with-reason",
+      "note": "contentPlugin×3/telemetry 预留通道注记",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-09",
+      "stage": "L2",
+      "status": "done",
+      "note": "通道表 testOnly/platformScoped 分类+守卫扩展",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-10",
+      "stage": "L2",
+      "status": "done",
+      "note": "prompts 恒空声明移除",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-11",
+      "stage": "L2",
+      "status": "done",
+      "note": "tool-defs 头注 16 域更正",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-19",
+      "stage": "L2",
+      "status": "done-partial",
+      "note": "runtime 三态根修+packs code 注记；其余桥信封化随显示面批",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-20",
+      "stage": "L2",
+      "status": "done-partial",
+      "note": "ipcFailure 单源+plugin.js 应用；三形状全量归一随消费面批",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-21",
+      "stage": "L2",
+      "status": "done",
+      "note": "gen-ui 四处 fetch 10s 超时",
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-12",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "SSE 终态 try/catch+finish 单点+close 提前",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-13",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "轮询 3 次熔断+结构化 error",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-14",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "两空 catch 具名降级",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-15",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "observe ok/verdict 分离（additive）",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-16",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "consumedNonces Map 惰性回收",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-17",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "terminal 桥 kill 重试+sessionByTab 清理+有界重连",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-18",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "SCAN_ROOTS 扩 frontend/src（412 留因）+真静默 8 处终态",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-22",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "权限门 DEGRADED+健康面/reconciler 健康事件/uncaughtException exit",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-23",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "budget-constants 单入口 9 文件收编",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-68",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "useInvalidationStream phase+ProjectionStreamBanner 4 消费方",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-74",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "JobsWall 裸吞具名降级",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-24",
+      "stage": "L3/L4",
+      "status": "done",
+      "note": "fork 事务化（L4-1 红绿先行）",
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-25",
+      "stage": "L4",
+      "status": "done-partial",
+      "note": "facade 同步契约注释交付；worker_threads 29 文件面=独立大包补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-26",
+      "stage": "L4",
+      "status": "done",
+      "note": "findFallbackChild DESC 小窗 200",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-31",
+      "stage": "L4",
+      "status": "done-partial",
+      "note": "三路径读数登记；(ts,id) COUNT/export 流式补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-32",
+      "stage": "L4",
+      "status": "done",
+      "note": "tickBucket 分档 30s×2/60s×1",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-33",
+      "stage": "L4",
+      "status": "done-partial",
+      "note": "窗口化=UI 台账+9223 双证独立切片补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-34",
+      "stage": "L4",
+      "status": "done",
+      "note": "CSS 字节棘轮=L0-7 已交付销号",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-35",
+      "stage": "L4",
+      "status": "retain-with-reason",
+      "note": "定时器实测：本地计时零请求无害；visibilityState 统一门归 L6 批",
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-38",
+      "stage": "L5",
+      "status": "done",
+      "note": "resolveCore 四 mirror 退役+静态门（terminal 丢参 bug 附带修复）",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-39",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "跨表锚+定性统一；两视图生成器=独立切片补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-41",
+      "stage": "L5",
+      "status": "done",
+      "note": "branch-db 注释闭合时态",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-42",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "解析面单源（K-19）+装配面登记制棘轮；loadPlugins 收敛补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-44",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "L0-1 解锁；entry 收窄两步=独立切片补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-46",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "例外差值台账测试；W5b 至少 3 刀=独立会话补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-47",
+      "stage": "L5",
+      "status": "retain-with-reason",
+      "note": "IPC 四表扩展点=治理面现状（分类已交付），统一声明生成器列候选",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-48",
+      "stage": "L5",
+      "status": "retain-with-reason",
+      "note": "三矩阵生成器共用=候选池（K-24 现状校准在档）",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-49",
+      "stage": "L5",
+      "status": "done",
+      "note": "warnings 入棘轮=L0-6 交付销号",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-78",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "engines 三树+version-parity 锚；typescript 统一=U 类不擅自升",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-80",
+      "stage": "L5",
+      "status": "done-partial",
+      "note": "R2 注释兑现修正；环消亡逐环独立切片补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-85",
+      "stage": "L5",
+      "status": "done",
+      "note": "@docusaurus/tsconfig 退役（lock 零残余+同套绿）",
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-62",
+      "stage": "L6",
+      "status": "done",
+      "note": "CommandPalette 焦点管理全套",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-63",
+      "stage": "L6",
+      "status": "done",
+      "note": "ThemeProvider 读侧状态+抑制回正",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-64",
+      "stage": "L6",
+      "status": "done",
+      "note": "四条降回 in_progress+ui:audit:check 转绿",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-65",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "标题口径回落；triageLedger 唯一真源=归 L7 批",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-66",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "主题门扩面=独立切片补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-67",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "内联债全量扫描=主题门切片同批补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-69",
+      "stage": "L6",
+      "status": "done",
+      "note": "RouteFallback 可见文本+详情折叠",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-70",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "抽屉 dialog=UI 台账+9223 双证补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-71",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "重复类名检测器/虚拟列表=主题门切片+用户裁决域",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-72",
+      "stage": "L6",
+      "status": "done-partial",
+      "note": "本地主权说明交付；chip/审批文案=观感归 E 补腿",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-73",
+      "stage": "L6",
+      "status": "done",
+      "note": "禁用原因如实降级形态在档+reason 单源列候选",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-81",
+      "stage": "L6",
+      "status": "done",
+      "note": "historic-unverifiable 索引",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "E-batch",
+      "stage": "L6/L7",
+      "status": "pending_human_eye",
+      "note": "22 条人眼项（k3 分诊在档）+暗色观感/读屏/对比度观感——测试路线随证据包生成，不代答",
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "V-batch",
+      "stage": "L1/L7",
+      "status": "external-blocked",
+      "note": "真实任务 0/8（凭据/出网环境因）+CVE 联网扫描——补腿条件=有效凭据+出网授权重开",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "V-mac",
+      "stage": "L1",
+      "status": "external-blocked",
+      "note": "macOS 权限/打包 TCC 形态（G0 不外推 packaged）——补腿=发布期",
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    }
+  ]
+}
