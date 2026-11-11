@@ -43,6 +43,11 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
           用于改进工具稳定性。可随时关闭。
         </p>
       </div>
+      {/* L6-6（蓝图 L-72/BLOCK-410）：本地主权说明——产品人设「跑在你机器上」的设置面可见形态 */}
+      <div className="petri-field__hint" role="note" data-testid="local-sovereignty-note" style={{ marginBottom: 12 }}>
+        本机优先：你的数据、模型凭据与分析产物均保存在本机，核心链路本地运行、全程可审计——
+        详见「诊断日志」导出的本地诊断信息。
+      </div>
       <div className="petri-maintenance-actions">
         <div className="petri-maintenance-row">
           <div>

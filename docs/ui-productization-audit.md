@@ -101,7 +101,7 @@
 **处置**：A 类等数据/环境到位后补腿即转 verified；B 类属可立即开工的 UI 增量；C 类需先定位根因；
 D 类逐条裁决；E 类归治理台账。
 
-## UI-693: Inkscape 1.4.4 协处理器四项实机打通——布尔/文字转路径/PDF 导出 + 1.4 CLI 三处抓真（2026-11-04；**verified（dev Electron 边界内；REST 实机 ✓ + flow 待入腿）**）
+## UI-693: Inkscape 1.4.4 协处理器四项实机打通——布尔/文字转路径/PDF 导出 + 1.4 CLI 三处抓真（2026-11-04；**in_progress（L6-3/BLOCK-410 降级：verified 冒认——flow 待入腿即非全链实机；flow 补腿后升回）**）
 
 - **环境**：Inkscape 1.4.4 arm64（brew cask 安装，/Applications/Inkscape.app）——探针实时扫盘 `available=True`（source=path），SVG 编辑器「Inkscape 协处理」区块自动解锁（无需重启后端）。
 - **实机抓真三处（1.4 CLI 与旧文档差异）**：①布尔 action 名是 **path-union/path-difference/path-intersection**（旧名 union/difference/intersection 在 1.4 actions 表不存在，链遇未知 action 静默中断 → 导出原文件「假 changed」）；②`select-all` 裸用无效，参数枚举只有 all/layers/no-layers/groups/no-groups（用 no-groups=所有非组对象）；③**text 转路径是导出参数 `--export-text-to-path`**（非 action——1.4 无 text 专用 action）。
@@ -410,7 +410,7 @@ D 类逐条裁决；E 类归治理台账。
 - **实机证据**：`acceptance/block-322-p3/block322-p3-mate-live.json` + `block322-p3-03-mate-ui-live-live.json`；截图不计入通过。
 - **边界（reopen）**：只支持轴对齐平面、无旋转、面心对齐；不支持任意边/曲面/B-rep、旋转贴合、横向 offset；参数化尺寸支持；G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-650: 3D 工作面外部文生 3D 生成入口（BLOCK-322 P5-02；2026-10-31 **verified（dev Electron 边界内；mock provider + UI 9/9；真实 Tripo 未验证）**）
+## UI-650: 3D 工作面外部文生 3D 生成入口（BLOCK-322 P5-02；2026-10-31 **in_progress（L6-3/BLOCK-410 降级：verified 冒认——mock provider 非真实 Tripo；真实 provider 补腿后升回）**）
 
 - **变化面**：3D 工作面新增「AI 生成」：对话框显示生成服务/模型与隐私/费用提示，输入 3–1024 字提示词，生成成功后由服务端下载 GLB、走 `model3d/assets/<sha>` 资产链并自动 `add_node`；CAD 徽标旁新增 AI 生成能力徽标（未配置时如实标不可用）。默认 provider=none，不出站；mock 只用于本地验证；Tripo v3 适配器支持请求/轮询/下载与可信域名/大小/GLB 头校验。
 - **为什么这样设计**：生成服务是外部成本与外发隐私面，必须默认关、显式配置；生成结果只是外部资产，最终仍进 SceneSpec 的 `mesh-reference`，不建第二场景真值。浏览器不做几何处理，资产 sha/provenance 由服务端落盘。
@@ -889,7 +889,7 @@ D 类逐条裁决；E 类归治理台账。
 - **实机证据**：9223 dev Electron 工作区图像面实断（acceptance/block-298/live-pending.json + pending-preview.png，10/10 PASS）：D0 不点 toggle 自动打开；D1 箭头工具；D2b 松手后 `annotation-pending-rect` 立即可见（left=15.02%/width=40%）；D3 composer 激活；D4 保存转正 annotation-box kind=arrow；D5 REST rect 归一化；D6 取消退场且条目数不增。探针揭示并修复真 bug：begin* 残留旧语义 `setDrawing(false)`（画完即退出绘制模式，第二笔被拒识）——已删除，连续批注动线由组件级测试+实机 D6 双证。
 - **边界（reopen）**：toggle 语义反转（画笔常开时 toggle=退出）如体感不佳随时回退；anchor（文本选区）待填无 overlay 预览（选区本身即预览）。
 
-## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **verified（BLOCK-277 轻量包；组件级 21/21 + 实机待 9223 走查落 acceptance/）**）
+## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **in_progress（L6-3/BLOCK-410 降级：verified 冒认——组件级 21/21 但 9223 实机走查未做；实机补腿后升回）**）
 
 - **变化面**：EmptyResult 从「底部 6 枚图标+文字小卡 + 上方全空」重排为 Qoder 式空态——顶部「工作区」标题章/标题/描述块（内容合同=Qoder 0.4.8 ui-i18n #3788255/#3788272「工作区就是 Agent 动手的地方…」）+ 六入口升级富卡片（图标章 30px + 标题 + 一句说明，2 列网格，margin:auto 垂直居中）；审阅徽章/±行数保留；卡片悬停 accent 描边+底色（BLOCK-273 悬停规范同源）。
 - **为什么这样设计**：用户裁决「过于简约老土，看 Qoder CN 布局，大幅提升布局合理性与美观」——Qoder 范式=空态有内容合同（标题+描述引导）+ 入口带说明；旧态六枚小字按钮沉底、大片空白无引导。
@@ -5890,7 +5890,7 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 ### UI-481 加映（2026-10-10·BLOCK-157 加映·用户过目抓真）：领域包卡片整包启停开关——用户在货架看到的插件面是「包交付插件行」（领域包体系，OSS 商店清单不可达时商店卡片为零），P4 主件的商店安装卡片开关在用户可见面上缺席；本加映把启停接到**包卡片**（与卸载并列的「停用/启用」按钮，tooltip 说明整包语义）。后端链=packs/installed.json 记录级 enabled（缺省启用零破坏）+pack:set-enabled IPC+server.js 装配循环跳过停用包（插件源与 tool-registry 注册整体不生效→run_tool/MCP/catalog 天然不出现；启用免重装）。证据=block157-pack-enabled 契约 4/4（缺省归一/翻转持久化+未知包诚实拒/server 接线源码扫描钉/IPC 双侧登记钉）+面板 9/9+tsc 0+**CDP 实机在场断言**（pack-toggle-petri-pack-bio 按钮在场标签「停用」，acceptance/ui-481/pack-toggle-visible.png）；功能生效（catalog 消失/复现）待用户重启过目。商店卡片开关（installed.json 通道）与包卡片开关（packs 通道）双面并存，分别治理各自安装来源。
 - **P0 台账核查（2026-10-21）**：证据在库：`acceptance/ui-481/pack-toggle-visible.png`（截图在库）。据此翻 `verified`（证据为历史实机产物，非本轮重跑）。
 
-## UI-482: 投影断连横幅 + 回前台重同步（2026-10-15 verified（代行评估·BLOCK-184；断连横幅段需中断传输链实测，按 plan §6 分档：连接态 live 已证——配对→/m 页加载+无断开/重连横幅，acceptance/block-184/ui482-projection-connected.png）)
+## UI-482: 投影断连横幅 + 回前台重同步（2026-10-15 in_progress（L6-3/BLOCK-410 降级：verified 冒认——断连横幅段需中断传输链实测未做，仅连接态 live 已证；原 verified 降回，实机补腿后升回））
 
 手机投影的「易断」此前在 UI 上不可见：数据桥失败静默返空（页面数据变空/停旧值）、终端 EventSource 断线盲重试（黑终端），用户无法区分「慢」与「断了」。本条目交付两个可见面：①断连横幅——数据桥（getJson 网络错/429/5xx）与终端流（onerror）如实上报链路状态（projectionLink 总线），离线时固定顶横幅「与桌面连接中断，正在自动重试…（恢复后数据自动刷新）」，恢复自动隐藏，仅投影环境渲染（桌面零行为，`_ProjectionLinkBanner` 挂 App.tsx）；②回前台重同步——锁屏/切后台回来 visibilitychange 派发 resync，终端桥对存活会话立即重挂 EventSource（服务端环形缓冲重放，会话驻留 core 进程不丢）。证据=projectionLink 契约 5/5（状态转移通知/同态不重发/单方异常不阻断/回前台派发/install 幂等）+agentTaskStream 重连语义 4/4（断线恢复收口/无限重试 30s 封顶抖动/HTTP 5xx 不重试/abort 上抛）+tsc 0；实机（真机过隧道断连→横幅出现→恢复自动消失）待用户走查翻 verified。
 

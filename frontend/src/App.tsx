@@ -72,7 +72,13 @@ configureApi({ getApiPrefix: () => getApiPrefix(), getToken });
 /** BLOCK-106 P1 — chunk 加载期间的占位：撑满 main 高度，避免页面切换时布局跳动。
  *  刻意不画 spinner（本地 file/http 加载通常 <1 帧，闪一下比空白更扰人）。 */
 function RouteFallback(): React.ReactElement {
-  return <div style={{ height: '100%', minHeight: 240 }} aria-busy="true" data-testid="route-suspense-fallback" />;
+  // L6-5（蓝图 L-69/BLOCK-410）：aria-busy 不播报——加可见文本 + role=status
+  //（无 spinner 判决保持：轻文本不闪；读屏有「正在加载」播报）
+  return (
+    <div style={{ height: '100%', minHeight: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-busy="true" data-testid="route-suspense-fallback" role="status">
+      <span style={{ color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm)' }}>正在加载页面…</span>
+    </div>
+  );
 }
 
 /** Lives inside WorkspacePanelsProvider. */

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "kind": "post-k7-l6-gate-sweep",
+  "block": "BLOCK-410",
+  "stage": "L6",
+  "platform": "darwin-arm64",
+  "generatedAt": "2026-11-11T06:00:00+08:00",
+  "delivered": [
+    { "item": "L6-1/L-62 CommandPalette 焦点管理", "green": "方向键 nextSelectable 跳 header / Tab 循环 输入↔列表 / open 保存 prevFocus 关闭归还 / role=listbox + combobox aria-activedescendant + option id；活动项 id 提取为简单标识符（object-injection 桥变量消 sink）" },
+    { "item": "L6-2/L-63 ThemeProvider 读侧", "green": "pull 读侧失败入 prefsSync（role=status 失败条既有呈现面）+ push 重放期抑制读侧回正（retryPending 早退）+ 恢复清条（readFailNoted）；push 侧 30s×3 重放零回归（ThemeProvider 5/5）" },
+    { "item": "L6-3/L-64 台账四条降级", "green": "UI-482/593/693/650 verified 冒认降回 in_progress（L6-3/BLOCK-410 降级注记 + 升回补腿各行内写明）；ui:audit:check 由 exit=1 转 exit=0（台账-实机不一致消亡）" },
+    { "item": "L6-5/L-69 RouteFallback/错误边界", "green": "fallback 可见文本「正在加载页面…」+role=status（aria-busy 不播报修复）；错误详情 details 默认折叠+复制诊断文案" },
+    { "item": "L6-6/L-72 本地主权说明", "green": "MaintenanceSection 顶 role=note 本机优先说明（人设可见化最小件）；证据等级 chip/审批 reasonCode 文案=观感归 E 补腿" },
+    { "item": "L6-7/L-81 历史证据索引", "green": "acceptance/post-k7-2026-11-10/l6/historic-evidence-index.json（historic-unverifiable；与 k5 严格元数据门分界在案）；22 人眼项保持 pending_human_eye 未动" }
+  ],
+  "gates": [
+    { "gate": "test/block410-l6-experience.test.mjs", "exit": 0, "reading": "6/6 源码锚与台账断言" },
+    { "gate": "ui:audit:check", "exit": 0, "reading": "由本会话起点 exit=1 转 PASS（633 带证据编号；四条降级后台账-实机不一致消亡；CSS WIP 不再触红）" },
+    { "gate": "quality:types", "exit": 0, "reading": "tsc 0 error" },
+    { "gate": "quality:lint:ledger", "exit": 0, "reading": "PASS（本批新增 sink 经桥变量提取/豁免留因全根修；warnings 分域未上涨）" },
+    { "gate": "邻域回归", "exit": 0, "reading": "copilot 763/763（palette 邻域）、ThemeProvider 5/5、设置面 3/3、App/边界 5/5" }
+  ],
+  "donePartial": [
+    { "item": "L6-1/L-70 窄屏抽屉 dialog 语义", "reason": "App.tsx:152-169 抽屉为渲染树内联面板——dialog 语义+inert 背景须 UI 台账条目+9223 双证（补腿 plan §7）" },
+    { "item": "L6-3/L-65 triageLedger 计数统一", "reason": "四条降级已使标题口径回落；「计数唯一真源=triageLedger JSON」需对全部消费方（README/gate 文案）改造——归 L7 总收口批" },
+    { "item": "L6-4/L-66 theme 门扩 .tsx + z-index 棘轮 + WCAG", "reason": "theme-token-contract.test.ts 扩面涉 14 族断言改造与 26 处数字 z-index 基线重打——独立切片（补腿 plan §7）；L-67 内联债全量扫描同批" },
+    { "item": "L6-6/L-72 证据等级 chip/审批 reasonCode 文案", "reason": "本地主权说明已交付（最小件）；chip/文案涉结果面与审批卡视觉设计——观感归 E（测试路线随 L7 生成）" }
+  ],
+  "wAttribution": "无新增 W 项；CSS WIP 已因 L6-3 台账降级使 ui:audit:check 转 PASS（WIP 文件本体零触碰仍 11+/9− 未暂存）。",
+  "notes": "零新增依赖。CommandPalette aria 位 object-injection 桥变量提取消 sink（JSX 属性位无法行内豁免——形态锚定）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+}

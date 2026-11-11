@@ -100,11 +100,17 @@ export function CommandPalette({
     if (open) {
       setQuery('');
       setSelectedIndex(0);
+      // L6-1（蓝图 L-62/BLOCK-410）：保存/还原外部焦点——关闭时归还触发元素
+      const prevFocus = document.activeElement as HTMLElement | null;
       // Focus input after render
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
+      return () => {
+        prevFocus?.focus?.();
+      };
     }
+    return undefined;
   }, [open]);
 
   // Build flat list of all items with category headers
@@ -214,18 +220,40 @@ export function CommandPalette({
     }
   }, [displayItems, selectedIndex, onClose]);
 
+  // L6-1（蓝图 L-62）：方向键跳过分组 header——可选中项=非 header 条目
+  const nextSelectable = useCallback(
+    (from: number, dir: 1 | -1): number => {
+      let i = from;
+      for (let step = 0; step < displayItems.length; step += 1) {
+        i += dir;
+        if (i < 0 || i >= displayItems.length) return from;
+        // eslint-disable-next-line security/detect-object-injection -- 本模块自有清单项类型判定（displayItems 为内置投影，非外部输入）
+        if (displayItems[i].type !== 'header') return i;
+      }
+      return from;
+    },
+    [displayItems]
+  );
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex((prev) =>
-            prev < displayItems.length - 1 ? prev + 1 : prev
-          );
+          setSelectedIndex((prev) => (prev < displayItems.length - 1 ? nextSelectable(prev, 1) : prev));
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+          setSelectedIndex((prev) => (prev > 0 ? nextSelectable(prev, -1) : prev));
+          break;
+        case 'Tab':
+          // L6-1：Tab 循环 输入↔列表（面板内两焦点停靠点；无第三方停靠面）
+          e.preventDefault();
+          if (document.activeElement === inputRef.current) {
+            listRef.current?.focus();
+          } else {
+            inputRef.current?.focus();
+          }
           break;
         case 'Enter':
           e.preventDefault();
@@ -239,12 +267,16 @@ export function CommandPalette({
           break;
       }
     },
-    [displayItems.length, executeSelected, onClose]
+    [displayItems, displayItems.length, executeSelected, nextSelectable, onClose]
   );
 
   if (!open) return null;
 
   let currentIdx = -1;
+
+  // L6-1：活动项 id 提前计算（简单标识符——aria 属性位无法行内豁免）
+  const activeItem = displayItems[selectedIndex];
+  const activeOptionId = activeItem && activeItem.type !== 'header' ? `cp-opt-${activeItem.id}` : null;
 
   return (
     <div className="cp-overlay" data-petri-layer="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="命令面板">
@@ -264,6 +296,10 @@ export function CommandPalette({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-label="搜索"
+            role="combobox"
+            aria-expanded="true"
+            aria-controls="cp-results-listbox"
+            aria-activedescendant={activeOptionId ?? undefined}
             autoComplete="off"
             autoCorrect="off"
             autoCapitalize="off"
@@ -282,7 +318,7 @@ export function CommandPalette({
         </div>
 
         {/* Results list */}
-        <div className="cp-results" ref={listRef}>
+        <div className="cp-results" ref={listRef} id="cp-results-listbox" role="listbox" aria-label="命令列表" tabIndex={-1}>
           {displayItems.length === 0 && (
             <div className="cp-empty">没有找到匹配项</div>
           )}
@@ -308,6 +344,7 @@ export function CommandPalette({
             return (
               <div
                 key={item.id}
+                id={`cp-opt-${item.id}`}
                 className={`cp-item ${isSelected ? 'cp-item-selected' : ''}`}
                 data-idx={idx}
                 onClick={() => {

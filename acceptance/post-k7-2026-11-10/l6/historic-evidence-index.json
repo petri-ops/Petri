@@ -1,0 +1,9 @@
+{
+  "_about": "L6-7（蓝图 L-81/BLOCK-410）：历史证据只读索引——acceptance/ 下 2026-11-10 前的证据文件缺 8 字段严格元数据（sourceCommit/platform/command/generatedAt 等），按「改写历史=伪造」裁决不回填；本索引如实标注 historic-unverifiable（不可复验但保留），与 post-h9-2026-11-10 起严格元数据门分界。",
+  "schemaVersion": 1,
+  "kind": "historic-evidence-index",
+  "status": "historic-unverifiable",
+  "boundary": "acceptance/post-h9-2026-11-10/ 起证据受 k5 严格元数据门（8 字段 fail-closed）；此前目录=历史态不回填",
+  "generatedAt": "2026-11-11T01:23:16.960Z",
+  "generatedBy": "BLOCK-410 L6-7（登记制；非生成器——历史目录逐批归档时人工核对）"
+}

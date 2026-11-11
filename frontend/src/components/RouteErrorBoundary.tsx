@@ -68,7 +68,10 @@ export class RouteErrorBoundary extends React.Component<Props, State> {
             {copy.message}
           </div>
           {error.message ? (
-            <pre className={styles.detail}>{error.message}</pre>
+            <details className={styles.detail}>
+              <summary style={{ cursor: 'pointer', color: 'var(--petri-text-secondary, #666)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>错误详情（点开复制诊断）</summary>
+              <pre style={{ whiteSpace: 'pre-wrap', userSelect: 'all' }}>{error.message}</pre>
+            </details>
           ) : null}
           <div className={styles.actions}>
             <button type="button" className={button.primary} onClick={this.handleReload}>

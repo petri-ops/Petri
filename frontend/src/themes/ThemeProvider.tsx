@@ -170,7 +170,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
   // 拉取服务端偏好：挂载时 + 每 15s + 回前台时（跨端应用）
   useEffect(() => {
     let last = '';
+    let readFailNoted = false;
     const pull = async () => {
+      // L6-2（蓝图 L-63/BLOCK-410）：push 重放队列未清空时抑制读侧回正——
+      // 服务端旧值会在本端新改动重试成功前被 15s pull 静默写回（原缺陷：用户改主题
+      // 本端生效后 15s 被旧值覆盖且无任何提示）。
+      const retryPending = retryQueueRef.current.attempts > 0 || Object.keys(retryQueueRef.current.patch).length > 0;
+      if (retryPending) return;
       try {
         const response = await fetch(prefsApi(), { headers: prefsHeaders() });
         const data = (await response.json()) as { ok?: unknown; prefs?: { theme?: string; fontScale?: number; accent?: string } };
@@ -180,8 +186,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
             last = signature;
             applyRemotePrefs(data.prefs);
           }
+          // L6-2：读侧恢复——清「服务端不可达（读侧）」失败条（不覆盖 push 侧 pending/failed）
+          if (readFailNoted) {
+            readFailNoted = false;
+            setPrefsSync((prev) => (prev.state === 'failed' && prev.error?.startsWith('主题偏好服务端不可达') ? { state: 'ok', at: Date.now() } : prev));
+          }
         }
-      } catch { /* 服务端不可达时保持本地 */ }
+      } catch (err) {
+        // L6-2（L-63）：读侧失败不再空吞——入 prefsSync 失败条（role=status 已有呈现面），
+        // 本端主题保持；push 侧 pending/failed 优先（不被读侧覆盖）。
+        readFailNoted = true;
+        const message = err instanceof Error ? err.message : String(err);
+        setPrefsSync((prev) => (prev.state === 'pending' || (prev.state === 'failed' && !prev.error?.startsWith('主题偏好服务端不可达'))
+          ? prev
+          : { state: 'failed', error: `主题偏好服务端不可达（读侧）：${message}——本端主题保持`, at: Date.now() }));
+      }
     };
     void pull();
     const timer = window.setInterval(() => { void pull(); }, 15_000);

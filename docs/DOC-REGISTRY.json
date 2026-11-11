@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 552,
+    "documentCount": 553,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 535
+    "managedMarkdown": 536
   },
   "documents": [
+    {
+      "id": "BLOCK-410",
+      "capability": "block-410-post-k7-l6-experience-accessibility",
+      "path": "docs/block-410-post-k7-l6-experience-accessibility-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-410-post-k7-l6-experience-accessibility",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "post-k7",
+        "l6",
+        "a11y",
+        "experience"
+      ],
+      "notes": "第五轮 L6 体验可达性与人设 completed（2026-11-11）：L6-1 CommandPalette 焦点管理（跳 header/Tab 循环/焦点还原/listbox+activedescendant，桥变量消 sink）/L6-2 ThemeProvider 读侧状态+抑制回正/L6-3 台账四条 verified 冒认降级（ui:audit:check exit 1→0）/L6-5 RouteFallback+错误详情折叠/L6-6 本地主权说明/L6-7 historic 索引。四项 done-partial 带补腿（抽屉 dialog/triageLedger/主题门扩面/观感归 E）。ui:audit:check PASS；copilot 763/763。零新增依赖。证据=acceptance/post-k7-2026-11-10/l6/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-409",
       "capability": "block-409-post-k7-l5-structure-single-source",
