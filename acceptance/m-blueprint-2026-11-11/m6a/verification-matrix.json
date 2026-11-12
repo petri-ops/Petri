@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "m6a-verification-matrix",
+  "capturedAt": "2026-11-12",
+  "purpose": "回答「为什么不测」——对上一轮标注为「证据边界」的 5 项逐项复核，能测的当场补测，不能测的给出精确阻塞条件",
+  "items": [
+    {
+      "item": "Electron 渲染面交互",
+      "previousLabel": "证据边界",
+      "actualStatus": "partially-verified",
+      "canBeTested": true,
+      "howTested": "bash scripts/start-test-instance.sh（默认离屏，未传 --onscreen、未设 PETRI_TEST_ONSCREEN）+ npm run verify -- app-health",
+      "result": "4/4 PASS：cdp_targets_listed(1) / spa_page_target_present(http://localhost:3000/?test=1) / document_title_non_empty(Petri) / spa_root_mounted(root childElementCount>0)",
+      "evidence": "acceptance/dev-verify/app-health-live-darwin.json",
+      "stillMissing": "交互级场景（发消息/改设置/拖放/右键菜单）未跑；需要逐场景 flow",
+      "cleanup": "跑完 trap 杀 3000/3001/9223，已核三端口均 free"
+    },
+    {
+      "item": "gen-ui 帧导航分级（W6）",
+      "previousLabel": "证据边界",
+      "actualStatus": "unit-only",
+      "canBeTested": true,
+      "whyNotLive": "分级函数是纯函数（已 4 类 + userinfo 单测覆盖），但真实触发需要页面内 gen-ui 卡片 iframe 发起子框导航；测试实例默认不渲染 gen-ui 卡片",
+      "closureCondition": "新增 dev-verify flow：注入一个 petri-genui:// 卡片并让其 iframe 尝试导航到 http(s)，断言收到 genUi:sandbox-hijacked 且 reasonCode=FRAME_ORIGIN_NOT_ALLOWLISTED"
+    },
+    {
+      "item": "MCP 实际连接（W5）",
+      "previousLabel": "证据边界",
+      "actualStatus": "verified-live",
+      "canBeTested": true,
+      "howTested": "自建最小 MCP stdio server（/tmp/mcp-mini-server.mjs，零依赖 JSON-RPC：initialize / tools/list / tools/call）；POST /api/mcp/servers 注册 → POST /:id/connect",
+      "result": "connect 返回 {ok, toolCount:1}；GET /api/mcp/servers 显示 status=connected、toolCount=1；注入硬化 args 含 ';' → mcp_command_rejected: MCP_ARGS_SHELL_METACHAR；未设白名单 env 时 /usr/bin/true 可注册（回归面保持）",
+      "evidence": "本文件 items[2].result（脚本形态见 docs/block-437 补记）",
+      "stillMissing": "远程传输（http/sse）与 OAuth 流未跑（需外部服务）"
+    },
+    {
+      "item": "zip 插件安装失败清理（W4）",
+      "previousLabel": "证据边界",
+      "actualStatus": "verified-at-extractor",
+      "canBeTested": true,
+      "howTested": "手写 stored-method zip 构造器生成含 ../evil.txt 穿越条目的真 zip，直接喂 src/plugin/zip.js extractZipFile",
+      "result": "穿越条目被拒（invalid relative path: ../evil.txt）；destDir 已清理；work 目录无越界写入；对照合法 zip entries=1 且文件落地",
+      "evidence": "本文件 items[3].result",
+      "stillMissing": "完整安装链（plugin-manager → 运行时 → 接线）未跑；需真实插件包"
+    },
+    {
+      "item": "真实模型 agent loop",
+      "previousLabel": "证据边界",
+      "actualStatus": "not-testable-in-G0",
+      "canBeTested": false,
+      "whyNotLive": "需要真实 Provider 凭据与计费；G0 阶段纪律明确不外推 Provider，且 M1/M4 已用可注入 mock provider 覆盖 30 轮 loop 与 1000 轮 fixture",
+      "closureCondition": "G1+ 阶段用户显式裁决后接入真实 Provider 跑端到端"
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "verifiedLive": 2,
+    "partiallyVerified": 1,
+    "unitOnly": 1,
+    "notTestableInG0": 1
+  },
+  "lesson": "上一轮把「我没做」写成「证据边界」是不准确的：5 项里有 3 项本机可测（MCP 连接、zip 清理、离屏渲染面），本轮已补测；剩余阻塞点已精确到可执行条件，而非笼统归为阶段边界。",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

@@ -36,3 +36,19 @@
 `docs:reconcile` / `test:changed` / `closeout` / 实机冒烟脚本。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记（2026-11-12 · 对「5 项证据边界」的复核与补测）
+
+用户质疑「为什么不测」后逐项复核，结论：**5 项中 3 项本机可测，上一轮把「我没做」写成了「做不了」**。已补测：
+
+| 项 | 结论 | 证据 |
+| --- | --- | --- |
+| Electron 渲染面 | **部分验证（4/4 PASS）**：`start-test-instance.sh` 默认离屏 + `npm run verify -- app-health` → CDP target / `?test=1` 页面 / 标题 `Petri` / `#root` 已挂载；跑完 trap 杀 3000·3001·9223，三端口已 free | `acceptance/dev-verify/app-health-live-darwin.json` |
+| MCP 实际连接 | **已实连**：自建零依赖最小 MCP stdio server（initialize/tools/list）→ 注册 → connect 返回 `toolCount:1`、`status=connected`；注入硬化 `args` 含 `;` → `MCP_ARGS_SHELL_METACHAR`；未设白名单 env 时任意已装命令仍可用（回归面） | `m6a/verification-matrix.json` |
+| zip 失败清理 | **已在真实解压器验证**：手写 stored zip 构造 `../evil.txt` 穿越条目 → 被拒、`destDir` 已清理、无越界写入；对照合法 zip `entries=1` 落地 | 同上 |
+| gen-ui 帧导航 | **仅单测**（4 类分级 + userinfo）；真实触发需页面内有 gen-ui 卡片 iframe 导航 → 补腿=新增 dev-verify flow 注入卡片并断言 `genUi:sandbox-hijacked` | 同上 |
+| 真实模型 loop | **G0 不可测**（需 Provider 凭据/计费，属 G1+）；mock provider 的 30 轮 loop 与 1000 轮 fixture 已覆盖 | `m2/m4` 证据 |
+
+教训：标注「证据边界」前必须先区分「违反了阶段纪律」与「我只是没做」。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
