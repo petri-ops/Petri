@@ -387,6 +387,10 @@ async function backgroundExtractFacts(userId, messages, projectId = null) {
 }
 
 module.exports = {
+  // BLOCK-436（实测发现）：读路径（/api/ai/facts、/api/ai/memory-stats）在全新库上会 500
+  //（no such table: user_facts），因为建表此前只在写路径的惰性 _ensureTable 里发生。
+  // 暴露幂等建表入口，供路由在查询前保证表存在。
+  ensureUserFactsTable: () => _ensureTable(),
   listUserFactsAsync,
   getUserFactAsync,
   upsertUserFactAsync,

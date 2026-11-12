@@ -26,6 +26,10 @@ function isExpectedAlreadyApplied(error) {
   return (
     message.includes('duplicate column name')
     || message.includes('already exists')
+    // BLOCK-436（实测发现）：表由各自的 owner 模块惰性创建（user-facts / memory-vectors /
+    // conversations），且建表语句**已含** project_id；本模块在路由加载期先跑 ALTER 时表可能还不存在。
+    // 这不是故障——表稍后创建即带该列。按「预期内」处理，避免每次启动喷 3 条假 error。
+    || message.includes('no such table')
   );
 }
 
@@ -57,7 +61,7 @@ function applyDdlStatements({ exec, statements = [], quiet = false } = {}) {
       issues.push({ operation, code: verdict.code, severity: 'info' });
     } catch (error) {
       const expected = isExpectedAlreadyApplied(error);
-      // suppressed=true 表示「失败但属预期已迁移」
+      // suppressed=true 表示「失败但属预期」（列/表已存在，或表尚未由 owner 模块创建）
       const verdict = ddlOutcome({ succeeded: false, suppressed: expected });
       if (expected) {
         suppressed += 1;

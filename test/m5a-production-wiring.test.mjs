@@ -209,3 +209,29 @@ test('W6 侦测路已消费判据（不再只依赖登记表命中）', () => {
   // 不假装能拦：必须保留「preventDefault 对子框导航无效」的事实说明
   assert.match(judge, /preventDefault`?\s*对子框导航无效/);
 });
+
+test('W3 实测补充：表尚未创建（no such table）属预期，不记 error（避免启动假告警）', () => {
+  const { applyDdlStatements } = require(path.join(ROOT, 'core/petri-server/helpers/ddl-migrate.js'));
+  const exec = (sql) => {
+    if (sql.includes('MISSING')) {
+      const err = new Error('no such table: user_facts');
+      throw err;
+    }
+    if (sql.includes('BOOM')) throw new Error('disk I/O error');
+  };
+  const result = applyDdlStatements({
+    quiet: true,
+    exec,
+    statements: [
+      { sql: 'ALTER TABLE MISSING ADD COLUMN project_id TEXT', operation: 'table_not_yet_created' },
+      { sql: 'ALTER TABLE BOOM ADD COLUMN x TEXT', operation: 'real_io_failure' },
+    ],
+  });
+  const pending = result.issues.find((i) => i.operation === 'table_not_yet_created');
+  assert.equal(pending.code, 'DDL_FAILED_SILENTLY');
+  assert.equal(pending.severity, 'info', '表未创建不得记 error');
+  assert.equal(result.suppressed, 1);
+  assert.equal(result.failed, 1);
+  const real = result.issues.find((i) => i.operation === 'real_io_failure');
+  assert.equal(real.severity, 'error', '真实 IO 故障仍须 error');
+});

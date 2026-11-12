@@ -58,6 +58,24 @@ const migration = applyDdlStatements({
   ],
 });
 
+// BLOCK-436（实测发现）：全新库上 facts / memory-stats 会 500（no such table: user_facts）。
+// user_facts 建表是惰性的（user-facts._ensureTable），memory_vectors 由模块加载建表；
+// 这里在读路径前一次性保证两表存在（幂等、失败不阻塞读，仍走既有错误信封）。
+let _memorySchemaReady = null;
+function ensureMemorySchema() {
+  if (!_memorySchemaReady) {
+    _memorySchemaReady = (async () => {
+      try {
+        await require('../helpers/user-facts').ensureUserFactsTable();
+      } catch { /* owner 模块建表失败不阻塞读路径，由下游查询返回既有错误信封 */ }
+      try {
+        require('../helpers/memory-vectors'); // 模块加载即幂等建 memory_vectors 表
+      } catch { /* 同上 */ }
+    })();
+  }
+  return _memorySchemaReady;
+}
+
 function _projectIdFromReq(req) {
   const raw = (req.query && (req.query.project_id || req.query.projectId))
     || (req.body && (req.body.project_id || req.body.projectId));
@@ -77,6 +95,7 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      await ensureMemorySchema();
       // BLOCK-182 — 惰性衰减顺带触发（读路径顺手扫，同 BLOCK-180 TTL 模式）。
       try { require('../helpers/memory-lifecycle').lazyDecayFacts(sqlite, userId); } catch { /* 衰减失败不阻塞 */ }
       const projectId = _projectIdFromReq(req);
@@ -109,6 +128,7 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      await ensureMemorySchema();
       const lifecycle = require('../helpers/memory-lifecycle');
       const projectId = _projectIdFromReq(req);
       const scope = _scope(projectId);
@@ -258,6 +278,7 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      await ensureMemorySchema();
       const projectId = _projectIdFromReq(req);
       const scope = _scope(projectId);
       const factsRow = await adb.prepare(`SELECT COUNT(*) AS c FROM user_facts WHERE user_id=? AND ${scope.clause}`).get(userId, ...scope.values);
