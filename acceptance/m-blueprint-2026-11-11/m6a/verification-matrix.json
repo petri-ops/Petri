@@ -50,10 +50,22 @@
       "canBeTested": false,
       "whyNotLive": "需要真实 Provider 凭据与计费；G0 阶段纪律明确不外推 Provider，且 M1/M4 已用可注入 mock provider 覆盖 30 轮 loop 与 1000 轮 fixture",
       "closureCondition": "G1+ 阶段用户显式裁决后接入真实 Provider 跑端到端"
+    },
+    {
+      "item": "packaged_start（V 类 perf 红）",
+      "previousLabel": "陈旧产物（dist/mac-arm64 停留 Nov 5）",
+      "actualStatus": "upgraded-to-packaging-defect",
+      "canBeTested": true,
+      "howTested": "npm run build:mac-arm64 重打包 + quality:perf 两轮复测",
+      "result": "两次均在采样 1/5 后采集子进程 ETIMEDOUT：新产物启动卡住，无法给出有效数值",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6a/packaged-start-attribution.json",
+      "sideEffect": "打包把开发依赖 better-sqlite3 rebuild 成 Electron ABI 149 → 本地 Node 24 报 ERR_DLOPEN_FAILED；已 npm rebuild 两处恢复，后端/block350 复验通过",
+      "stillMissing": "打包链路三问题：IDE shim 下无法清旧产物 / 打包前后 ABI 未隔离 / 新产物在采集窗口内启动不可完成",
+      "closureCondition": "独立包：ABI 隔离策略 + 未签名 app 启动策略 + 采集超时诊断；完成后再重采 packaged_start 基线（阈值不抬）"
     }
   ],
   "summary": {
-    "total": 5,
+    "total": 6,
     "verifiedLive": 2,
     "partiallyVerified": 1,
     "unitOnly": 1,

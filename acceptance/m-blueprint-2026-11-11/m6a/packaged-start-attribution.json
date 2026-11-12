@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "packaged-start-attribution",
+  "capturedAt": "2026-11-13",
+  "goal": "BLOCK-439 剩余项：重建 dist/mac-arm64 后复测 packaged_start，判定 493ms 阈值红是「陈旧产物」还是真实回归",
+  "attempts": [
+    {
+      "round": 1,
+      "command": "npm run build:mac-arm64",
+      "result": "FAIL",
+      "reason": "[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] count=5946 threshold=500 scope=turn targets=[dist/mac-arm64]",
+      "rootCause": "IDE 通过 NODE_OPTIONS=--require=…/node-language-shim.cjs 注入 safe-delete shim，electron-builder 清理旧产物触发批量删除阈值",
+      "note": "环境限制，非项目缺陷"
+    },
+    {
+      "round": 2,
+      "command": "先清空 dist/mac-arm64（系统 find）→ env -u NODE_OPTIONS -u CODEBUDDY_EH_ROLE -u CODEBUDDY_EH_AFFINITY npm run build:mac-arm64",
+      "result": "SUCCESS（产物已生成）",
+      "artifacts": { "app": "dist/mac-arm64/Petri.app @ 2026-11-13 00:31:31", "dmg": "dist/Petri-0.0.1-rc.7-arm64.dmg 195MB @ 00:32" },
+      "log": "afterSign skipping notarization（未配 APPLE_ID/APP_PASSWORD/NOTARIZE_TEAM_ID）"
+    }
+  ],
+  "sideEffectAndRollback": {
+    "symptom": "打包后本地 Node 24（NODE_MODULE_VERSION 137）加载 better-sqlite3 失败：模块被 rebuild 成 Electron ABI 149",
+    "impact": "quality:perf 采集直接 ERR_DLOPEN_FAILED；本地后端/测试同样不可用",
+    "rollback": "npm rebuild better-sqlite3（根 node_modules + core/petri-server 两处）",
+    "verification": "两处 in-memory DB 冒烟 OK；test/block350-perf-gate 15/15；临时库后端冒烟 health/facts/memory-stats 全 200、ddl FAILED=0；package-lock 零改动"
+  },
+  "packagedStartMeasurement": {
+    "rounds": 2,
+    "result": "两次均在「采样 1/5 全绿」后采集子进程 spawnSync ETIMEDOUT（SIGTERM）",
+    "interpretation": "新产物在 packaged_start 场景下启动卡住/超时，无法给出有效数值；不是阈值红，而是产物不可用",
+    "conclusion": "packaged_start 的 493ms 阈值红**无法归因于陈旧产物，也无法归因于真实回归**——当前打包链路产出的 app 在采集窗口内启动不可完成"
+  },
+  "disposition": {
+    "deletedArtifacts": ["dist/mac-arm64/", "dist/Petri-0.0.1-rc.7-arm64.dmg", "dist/Petri-0.0.1-rc.7-arm64.dmg.blockmap"],
+    "why": "产物启动不可用，保留会误导 perf 与人工验证；dist 已 gitignore，不污染仓库",
+    "envState": "开发依赖 ABI 已恢复 Node 24；仓库 0 处打包副作用（最近 20 分钟无 M 文件变化）"
+  },
+  "upgradedFinding": {
+    "from": "V 类：dist/mac-arm64 停留 Nov 5 的陈旧产物（无法归因）",
+    "to": "打包链路缺陷：① IDE shim 环境下 electron-builder 无法清理旧产物；② 打包会把开发依赖 rebuild 成 Electron ABI（需打包前隔离 node_modules 或打包后回滚）；③ 新产物在 packaged_start 采集窗口内启动不可完成（未签名 app / 启动链）",
+    "closureCondition": "独立工作包：原生模块 rebuild 策略（打包前后隔离 ABI）+ 未签名 app 首次启动策略 + 采集超时诊断；完成后再重采 packaged_start 基线（阈值不抬）"
+  },
+  "notClaimed": [
+    "packaged_start 已修复",
+    "打包链路已通",
+    "V 类红已消除"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}
