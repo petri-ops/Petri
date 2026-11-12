@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "kind": "m6a-structural-single-source-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-435",
+  "scope": "M6-A 结构单源中不需要裁决、不触碰在制 WIP 的部分",
+  "notClaimed": [
+    "M6-A 全部完成",
+    "12 环全消亡",
+    "28 文件已完成迁移",
+    "resolveDataDir 已单源"
+  ],
+  "deliverables": [
+    {
+      "id": "S1",
+      "what": "三面共用 schema 生成器 + 漂移/缺陷只减不增棘轮",
+      "terminal": "done",
+      "artifacts": [
+        "scripts/m-blueprint-m6a-surface-schema.mjs",
+        "test/m6a-surface-schema.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m6a/surface-schema.json"
+      ],
+      "shape": "entry = {kind:id 唯一, scope, exposed, consumed, riskTier?}；kinds = ipc/tool/route",
+      "counts": {
+        "entries": 566,
+        "ipc": 168,
+        "tool": 115,
+        "route": 283,
+        "truthChannels": 168,
+        "truthTools": 115
+      },
+      "realFindings": [
+        {
+          "defect": "DUPLICATE_ENTRY: route::POST /api/ai/interpret",
+          "detail": "routes/ai-legacy.js 注册两次（25 行 410 退役桩先命中，34 行旧实现不可达保留待迁移）",
+          "status": "frozen-known（不计新增）"
+        },
+        {
+          "defect": "SUMMARY_DRIFT: metadata matrix=116 actual(hasMetadata rows)=115",
+          "detail": "摘要口径与行计数不一致，成因未核（不在本包范围）",
+          "status": "frozen-known（不计新增）"
+        }
+      ],
+      "gates": "结构必填/唯一性/空面恒红；摘要数字 vs 实际行数不一致即红；新漂移/新缺陷即红；基线缺失即红",
+      "negativeProof": "7/7（新缺陷必红 / 漂移上升必红 / 基线缺失必红 / 必填缺失必红 / 空面必红 / 收敛后不锁死）"
+    },
+    {
+      "id": "S2",
+      "what": "静默 catch 基线真收紧 412 → 406",
+      "terminal": "done",
+      "detail": "M5-A 把 ai-memory 迁移 DDL 接单源后该文件静默 catch 9→3；本包执行 ratchet --write 收紧基线，并重生成 M6 分域视图与 M0 读数单源保持一致",
+      "gates": "gate:silent-catch PASS（102 文件 / 406 处，基线 406，无阈值余量）；gate:m6-debt 0 issues；m0-criteria 0 issues"
+    },
+    {
+      "id": "S3",
+      "what": "架构环消亡（guest-permissions ↔ permissions）",
+      "terminal": "attempted-rolled-back",
+      "attempt": "抽 helpers/permission-keys.js（MODULE_KEYS/DATA_MODULE_KEYS/DEFAULT_PERMS/resolveModulePermission/normalizePermissionsForStore）→ 环 12→11、权限回归 block232 11/11 通过、纯模块行为冒烟一致",
+      "blocker": "BLOCK-83 D7 域中立棘轮：MODULE_KEYS/DEFAULT_PERMS 含 legacy 别名 single-cell/spatial，搬迁到新文件即计「核心生产代码新增领域词残留」，门判红",
+      "decision": "不改基线洗白、不用字符串拼接规避；原样回退（permissions.js / guest-permissions.js 恢复 HEAD 版、删除新模块、环基线恢复 12）",
+      "closureCondition": "① 改注入式（permissions 持键表，guest-permissions 经参数接收，需改 4 处调用面）；或 ② 用户批准把 permission-keys.js 登记进 domain-neutrality compat 白名单"
+    }
+  ],
+  "blockedNotDone": [
+    {
+      "item": "28 文件绕 desktopBridge 迁移",
+      "reason": "触碰渲染层在制 WIP 且改 IPC 契约面"
+    },
+    {
+      "item": "resolveDataDir 单源",
+      "reason": "mobile-admin/federation-admin 兜底为 cwd/data，canonical 为 ~/Documents/Petri-Local——统一即改变数据落盘位置，属 U 类；且 user-prefs 已委托单源"
+    },
+    {
+      "item": "readConfig 单源",
+      "reason": "仅 1 处实现，无重复"
+    },
+    {
+      "item": "88 个未挂 impact-map 测试",
+      "reason": "按文件名自动挂载会制造假覆盖（M-56 教训），需逐测试判断归属"
+    }
+  ],
+  "preExistingRedFound": {
+    "test": "core/petri-server/agent-runner.js <= 1140 lines (BLOCK-375 shrink-only ratchet)",
+    "fact": "HEAD 的 agent-runner.js 为 1143 行（最后改动 BLOCK-398 89568433），锚点 1140 —— 该红在本次工作前即存在，非本包引入",
+    "disposition": "W 类：不重锚（重锚=放宽 shrink-only 棘轮，需显式留因与用户复核）；补腿=缩回 ≤1140 或经复核重锚"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "gates": {
+    "lint": "改动 3 文件 0 warning 0 error（全量仍为基线 2 errors / 2445 warnings）",
+    "lintFull": {
+      "problems": 2447,
+      "errors": 2,
+      "warnings": 2445,
+      "note": "与基线一致，两 error 均在既有测试/React 规则"
+    },
+    "types": "PASS",
+    "arch": "PASS（R1-R5）",
+    "secret": "PASS",
+    "knip": "PASS（330 键冻结）",
+    "ear": "PASS",
+    "codeSize": "PASS",
+    "archCycles": "PASS（12 环，S3 回退后保持原基线）",
+    "silentCatch": {
+      "exit": 0,
+      "readout": "PASS（102 文件 / 406 处，基线 406）",
+      "note": "本包真收紧 412→406"
+    },
+    "m6aSurface": {
+      "exit": 0,
+      "readout": "PASS 0 issues（entries 566，defects 2 冻结）"
+    },
+    "specialtyGates": "M0–M7 八门 + m6a 门全部 PASS 0 issues",
+    "docsCheck": "PASS 580",
+    "docsReconcile": "0 validation issues / 0 manual review",
+    "uiAudit": "PASS 633",
+    "testChanged": {
+      "tests": 1482,
+      "pass": 1473,
+      "fail": 2,
+      "skipped": 7,
+      "failures": [
+        "UI-629（W 类在制 WIP）",
+        "P6 源绑定（W 类在制 WIP）"
+      ],
+      "note": "本包未引入新红；pre-existing 的 agent-runner 1143 vs 锚点 1140 未进入本次影响面（见 preExistingRedFound）"
+    },
+    "closeout": {
+      "exit": 1,
+      "firstFailedGate": "test:changed",
+      "passed": [
+        "audit:compact",
+        "hygiene:check",
+        "docs:check(580)",
+        "ui:audit:check"
+      ],
+      "verdict": "NOT_PASSED"
+    }
+  },
+  "selfCorrections": [
+    {
+      "incident": "S3 抽出 permission-keys.js 后被 BLOCK-83 D7 域中立棘轮判红（single-cell 新残留）",
+      "action": "不洗基线、不拼接规避，原样回退（恢复两文件 + 删新模块 + 环基线回 12），并把尝试与阻塞点写进 plan/evidence",
+      "evidence": "gate:arch-cycles 12 PASS；domain-neutrality 复绿"
+    },
+    {
+      "incident": "S2 收紧基线后 M6 自身测试硬编码 412 误红",
+      "action": "断言改为「与 silent-catch-baseline.json 复算一致」，只减不增交给棘轮",
+      "evidence": "test/m6-engineering-debt.test.mjs 9/9"
+    },
+    {
+      "incident": "新增 src 文件后 ui:audit 判「UI 改动未同步台账」",
+      "action": "按既有惯例补零增量登记（零 .tsx/CSS/token 改动）",
+      "evidence": "ui:audit PASS 633"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m6-read-only-views",
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "surface": {
     "schema": "functional-surface-matrix.v1",
@@ -49,10 +49,10 @@
     }
   ],
   "silentCatch": {
-    "baselineTotal": 412,
-    "computedTotal": 412,
+    "baselineTotal": 406,
+    "computedTotal": 406,
     "byDomain": {
-      "core": 329,
+      "core": 323,
       "src": 61,
       "frontend": 22,
       "scripts": 0,

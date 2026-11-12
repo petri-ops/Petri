@@ -26,7 +26,7 @@
   "terminal": "done-partial",
   "closureCondition": "M6-A 续：三矩阵共用 schema 生成器 / 28 文件绕桥迁移 / 12 环逐环消亡，均带拆前拆后同套绿基线",
   "schemaVersion": 1,
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
 }

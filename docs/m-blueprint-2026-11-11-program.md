@@ -35,7 +35,8 @@ reopen: 用户裁决或阶段终态变化后先复核本台账与 registry 再�
 | M5 安全与正确性纵深 | BLOCK-431 | P0/P1 | completed（8 类判据 + 15/15 负测；生产接线 done-partial 归 M6-A/M6-C） |
 | M6 工程债务与体验 A–F | BLOCK-432 | P2 | completed（六组只读视图 + 9/9 负测；终态均 done-partial / W / U / E，零改写基线） |
 | M7 总收口与证据 | BLOCK-433 | P2 | completed（82 件逐件终态 + 十一维第八列 + 自证包；程序终态 done-partial） |
-| M5-A 判据→生产接线收尾 | BLOCK-434 | P0/P1 | completed（4 项 done：secret-scan fail-closed / 全局 Origin 门 / DDL 单一入口 / zip 失败清理；3 项仍 done-partial） |
+| M5-A 判据→生产接线收尾 | BLOCK-434 | P0/P1 | completed（5 项判据接线：4 done + MCP 白名单默认待裁决；drag/帧导航后续） |
+| M6-A 结构单源第一刀 | BLOCK-435 | P1 | completed（S1 三面 schema 门 + S2 基线 412→406 done；S3 环消亡实现后被 D7 棘轮拦下→回退） |
 
 同一时间只有一个 active work-package 与一个进行中阶段；阶段收口后才发令下一阶段。
 常驻 living-plan `G0-LF` 属层 2，不占串行槽位；本台账同为层 2。

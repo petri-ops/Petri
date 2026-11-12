@@ -43,7 +43,7 @@
   "terminal": "W + pending_human_eye",
   "reason": "CSS/设置面板属在制 WIP 零触碰；人眼路线已自动生成，签字槽全空",
   "schemaVersion": 1,
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
 }

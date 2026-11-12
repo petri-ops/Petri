@@ -35,9 +35,13 @@ test('M6-B 巨型文件只读清单：不改文件、不抬 code-size 锚点', (
   assert.ok(v.bigFiles.every((f) => f.rewritten === false));
 });
 
-test('M6-C 静默 catch 分域下降表：基线 412 只读，总数可复算', () => {
+test('M6-C 静默 catch 分域下降表：基线只读，总数可复算且与基线一致', () => {
   const v = collectM6Views(ROOT);
-  assert.equal(v.silentCatch.baselineTotal, 412);
+  // BLOCK-435：基线随收紧而下降（412→406），断言改为「与基线文件一致」而非硬编码值，
+  // 否则每次合法收紧都会误红；只减不增由 gate:silent-catch 的棘轮负责。
+  const baselineFile = JSON.parse(fs.readFileSync(path.join(ROOT, 'test/silent-catch-baseline.json'), 'utf8'));
+  const baselineSum = Object.values(baselineFile.files || {}).reduce((a, b) => a + Number(b || 0), 0);
+  assert.equal(v.silentCatch.baselineTotal, baselineSum);
   assert.equal(v.silentCatch.computedTotal, v.silentCatch.baselineTotal);
   assert.equal(v.silentCatch.rewritten, false);
   assert.ok(v.silentCatch.byDomain.core > 0);

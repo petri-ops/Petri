@@ -27,7 +27,7 @@
   "terminal": "pending_user_ruling + done-partial",
   "reason": "typescript 双版本等 U 类不代答；README 分类导航与 Skill 清单统一需用户裁决范围",
   "schemaVersion": 1,
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
 }

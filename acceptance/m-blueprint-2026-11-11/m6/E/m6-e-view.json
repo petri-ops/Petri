@@ -1359,7 +1359,7 @@
   "terminal": "done-partial",
   "closureCondition": "真消费接线 / browser_act / worktree_remove / P3 存储键 / evidence-tier 需逐件接线，本包只出只读分诊",
   "schemaVersion": 1,
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
 }

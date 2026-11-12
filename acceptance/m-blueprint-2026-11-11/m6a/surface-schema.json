@@ -1,0 +1,4127 @@
+{
+  "schemaVersion": 1,
+  "kind": "m6a-surface-schema",
+  "capturedAt": "2026-11-12T11:29:47.803Z",
+  "policy": "三面身份 schema 单一形状；漂移按「只减不增」棘轮冻结；本文件只读生成，不改矩阵数据",
+  "shape": {
+    "entry": [
+      "kind",
+      "id",
+      "scope"
+    ],
+    "kinds": [
+      "ipc",
+      "tool",
+      "route"
+    ]
+  },
+  "counts": {
+    "entries": 566,
+    "ipc": 168,
+    "tool": 115,
+    "route": 283,
+    "truthChannels": 168,
+    "truthTools": 115
+  },
+  "drift": {
+    "ipcMissingInRegistry": 0,
+    "ipcMissingInMatrix": 0,
+    "toolMissingInDefs": 0,
+    "toolMissingInMatrix": 0,
+    "routeModuleMissing": 0,
+    "samples": {
+      "ipcMissingInRegistry": [],
+      "ipcMissingInMatrix": [],
+      "toolMissingInDefs": [],
+      "toolMissingInMatrix": [],
+      "routeModuleMissing": []
+    }
+  },
+  "summaryMismatches": [
+    "metadata: matrix=116 actual=115"
+  ],
+  "defects": [
+    "DUPLICATE_ENTRY: route::POST /api/ai/interpret",
+    "SUMMARY_DRIFT: metadata: matrix=116 actual=115"
+  ],
+  "entries": [
+    {
+      "kind": "ipc",
+      "id": "agent:task-done",
+      "scope": "agent",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "computer-use:pip-open",
+      "scope": "computer-use",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "computer-use:pip-close",
+      "scope": "computer-use",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "computer-use:pip-frame",
+      "scope": "computer-use",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "computer-use:pip-status",
+      "scope": "computer-use",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ai-settings:get",
+      "scope": "ai-settings",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ai-settings:get-credential",
+      "scope": "ai-settings",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ai-settings:list-models",
+      "scope": "ai-settings",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ai-settings:save",
+      "scope": "ai-settings",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ai-settings:test",
+      "scope": "ai-settings",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:get-activity-summary",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:get-shell-status",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:hide-to-tray",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:notification-clicked",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:notify",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:preview-quit-summary",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:quit-decision",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:quit-requested",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:relaunch",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:set-shell-prefs",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:show-main",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "app:soft-refresh",
+      "scope": "app",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "backend:status",
+      "scope": "backend",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:active",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:create",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:delete",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:list",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:rename",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "branch:switch",
+      "scope": "branch",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "content-plugin:list",
+      "scope": "content-plugin",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "content-plugin:list-docs",
+      "scope": "content-plugin",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "content-plugin:read",
+      "scope": "content-plugin",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "data:info",
+      "scope": "data",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "data:open-dir",
+      "scope": "data",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "diagnostic:export",
+      "scope": "diagnostic",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "diagnostic:crash-status",
+      "scope": "diagnostic",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "diagnostic:crash-dump-summary",
+      "scope": "diagnostic",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "diagnostic:crash-open-dumps",
+      "scope": "diagnostic",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "diagnostic:crash-simulate",
+      "scope": "diagnostic",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:list-directory",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:open-dialog",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:open-path",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:open-workspace-file",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:show-in-folder",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:download-from-url",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:start-drag",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:save-dialog",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:save-text-file",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "file:validate-directory",
+      "scope": "file",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "petri:agent-workbench-flags",
+      "scope": "petri",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "startup:report",
+      "scope": "startup",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "startup:marks",
+      "scope": "startup",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:apply-inverse-hunk",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:blame",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:branch-list",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:checkout-branch",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:checkpoint-create",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:checkpoint-rollback",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:commit-diff",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:commit-file-content",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:commit-index",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:commit-log",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:commit-review",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:discard-file",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:file-head-content",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:hunk-apply",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:hunk-reject-inverse",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:init-repository",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:list-modified",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:pull",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:push",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:remote-list",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:remote-status",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:revert-file",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:working-tree-shortstat",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:split-side-diff",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:stage-paths",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:stash-list",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:tag-list",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:undo-last-commit",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:unstage-paths",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:working-tree-diff",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:working-tree-file-content",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:working-tree-revert",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "git:working-tree-status",
+      "scope": "git",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "harness-capabilities:list",
+      "scope": "harness-capabilities",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:install-from-dialog",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:install-path",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:install-progress",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:install-runtime",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:list-available",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:list-installed",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:set-enabled",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:uninstall",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "pack:uninstall-plan",
+      "scope": "pack",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "install:deep-link",
+      "scope": "install",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "install:preview-deep-link",
+      "scope": "install",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "install:confirm-deep-link",
+      "scope": "install",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "install:pending-deep-link",
+      "scope": "install",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "plugin:list-installed",
+      "scope": "plugin",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "plugin:list-remote",
+      "scope": "plugin",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "runtime:status",
+      "scope": "runtime",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:cancel",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:discover",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:execute",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:getExecution",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:progress",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:set-disabled",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:uninstall",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:get-install-info",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:reinstall",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:import-directory",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "skills:import-path",
+      "scope": "skills",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "mcp-config:import-dialog",
+      "scope": "mcp-config",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "mcp-config:import-path",
+      "scope": "mcp-config",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "ssh:register-host",
+      "scope": "ssh",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "telemetry:report",
+      "scope": "telemetry",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:data",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:exit",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:open-log-dir",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:open-shell",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:session-list",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:session-resize",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:session-start",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:session-stop",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:session-write",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "terminal:snapshot",
+      "scope": "terminal",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:check",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:download",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:download-progress",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:error",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:install",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:update-available",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:update-downloaded",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "updater:update-not-available",
+      "scope": "updater",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:close",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:fullscreen-changed",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:get-zoom",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:isFullScreen",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:isMaximized",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:maximize",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:maximize-changed",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:minimize",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:open-result-in-main",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:pop-out",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:rail-mouse",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:relay-to-main",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:remove",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:restore",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:return",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:self",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:set-always-on-top",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:set-ignore-mouse-events",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:test-manage-mode-changed",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:snapshot",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:state-changed",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:thumbnail",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:toggleFullScreen",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:zoom-by",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:zoom-reset",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "workspace:write-text-file",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:prepare",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:set-state",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:open-external",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:copy-image",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:export",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:get-data",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:sandbox-hijacked",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "tool",
+      "id": "interrupt_agent",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "send_message",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "followup_task",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "spawn_agent",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "read_agent_journal",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "list_agents",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "wait_agent",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "create_goal",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "get_goal",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "update_goal",
+      "scope": "agent-orchestration",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "query",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "read_page",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "search",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "act",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "read_image",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "read_video",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "browser_connect",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "browser_act",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "browser_status",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "browser_disconnect",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "godot_run",
+      "scope": "godot",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "godot_scene_apply",
+      "scope": "godot",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_snapshot",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_click",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_type",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_press",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_scroll",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_screenshot",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_wait",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_close",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "computer_authorize",
+      "scope": "computer",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_search",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_status",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_read",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_list",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_impact",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_create",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_rename",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_enable",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_bind",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_delete",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_space_clear",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_doc_list",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_doc_move",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_doc_delete",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "knowledge_doc_reindex",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_inspect",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_validate",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_propose",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_apply",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_render",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_visual_qa",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_export",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_share",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_asset",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_bom",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_recipe",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "model3d_blend_ops",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "delegate_to_petri_node",
+      "scope": "remote",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "federation_list_peers",
+      "scope": "remote",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "resident_task_create",
+      "scope": "resident",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "resident_task_list",
+      "scope": "resident",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "resident_task_read",
+      "scope": "resident",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "generate_methods",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "result_edit_plan",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_create",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_status",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_compare",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_adopt",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_revert",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "artifact_revision_list",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "artifact_revision_restore",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_selection_run",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_studio_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_edit_plan_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_create_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_enrichment_from_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_status_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_compare_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_adopt_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_changeset_revert_in_context",
+      "scope": "result-studio",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "process_status",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "process_stop",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "system_info",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "plan",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "todo_write",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "verify_state",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "decision_summary",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "decision_recent",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "run_tool",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "result_summary",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "codegraph_who_imports",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "codegraph_classify_edges",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "ask_user_question",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "result_annotations_list",
+      "scope": "session",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "skill_discover",
+      "scope": "skill",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "skill_get",
+      "scope": "skill",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "skill_preflight",
+      "scope": "skill",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "svg_inspect",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "svg_edit",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "web_search",
+      "scope": "web",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "web_fetch",
+      "scope": "web",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "run_workflow",
+      "scope": "workflow",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_list",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_find",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_search",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_read",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_write",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_replace",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_exec",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_exec_background",
+      "scope": "workspace",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_worktree_create",
+      "scope": "worktree",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_worktree_list",
+      "scope": "worktree",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R0"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_worktree_remove",
+      "scope": "worktree",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "workspace_worktree_merge_request",
+      "scope": "worktree",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/admin/users-overview",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/admin/audit",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/admin/pause-user",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/admin/global-pause",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/admin/global-pause",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/admin/usage-stats",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/admin/memory-stats",
+      "scope": "ai-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/tool-summary/retry",
+      "scope": "ai-chat",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/chat",
+      "scope": "ai-chat",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/conversations",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/conversations",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/conversations/:id",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/conversations/:id/update",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PATCH /api/ai/conversations/:id",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/conversations/:id",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/conversations/:id/messages",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/conversations/:id/export.md",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/conversations/:id/compact",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/conversations/:id/dismiss-topic-shift",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/conversations/:id/fork",
+      "scope": "ai-conversations",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/interpret",
+      "scope": "ai-legacy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/interpret",
+      "scope": "ai-legacy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/act-ack/:token",
+      "scope": "ai-legacy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/run-tool-ack/:token",
+      "scope": "ai-legacy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/facts",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/facts",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/facts/:id",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/facts/:id",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/facts",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/memory-audit",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/summary",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/summary",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/memories",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/memories/search",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/memories/:id",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/memories",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/memory-stats",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/memory-wipe",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/memory-policy",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/memory-policy",
+      "scope": "ai-memory",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/health",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/agent-audit",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/agent-undo/:token",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/agent-settings",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/agent-settings",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/usage-mine",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/usage-project",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/usage-conversation",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/site-snapshot",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/docs-index",
+      "scope": "ai-misc",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/plans",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/plans/:id",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/plans/:id/approve",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/plans/:id/revisions",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/plans/:id/revisions/:revNo/approve",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PATCH /api/ai/plans/:id",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/plans/:id",
+      "scope": "ai-plans",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/progress",
+      "scope": "ai-progress",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/progress/mine",
+      "scope": "ai-progress",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/progress/summary",
+      "scope": "ai-progress",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/pricing",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/model-access",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/model-access",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/settings",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/settings",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/generation-defaults",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/generation-defaults",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/reasoning-defaults",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/reasoning-defaults",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/settings/test",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/agent-rules",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/agent-rules",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/ai/agent-rules/:id",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/tool-approval-policy",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ai/tool-approval-policy",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/reason-codes",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ai/policy-observations",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ai/policy-observations/review",
+      "scope": "ai-settings-api",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/app/activity-summary",
+      "scope": "app-activity",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/app/onboarding-status",
+      "scope": "app-activity",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/automation",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/schedules",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/schedules/:id/toggle",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/schedules/:id/run",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/schedules/:id",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/goals/:id/status",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/schedules/reminders",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/schedules/reminders/:id/ack",
+      "scope": "automation",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/browser-connector/connect",
+      "scope": "browser-connector",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/browser-connector/act",
+      "scope": "browser-connector",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/browser-connector/status",
+      "scope": "browser-connector",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/browser-connector/disconnect",
+      "scope": "browser-connector",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/browser-connector/action-result",
+      "scope": "browser-connector",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/computer-use/status",
+      "scope": "computer-use",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/computer-use/pip-frame",
+      "scope": "computer-use",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/computer-use/probe",
+      "scope": "computer-use",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/config/export",
+      "scope": "config-transfer",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/config/import",
+      "scope": "config-transfer",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/config/reset",
+      "scope": "config-transfer",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/data/retention",
+      "scope": "data-retention",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/data/retention",
+      "scope": "data-retention",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/data/migration/plan",
+      "scope": "data-retention",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/events",
+      "scope": "events-bus",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/import/external-agent/preview",
+      "scope": "external-import",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/import/external-agent/apply",
+      "scope": "external-import",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/import/external-agent/rollback",
+      "scope": "external-import",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/feature-flags",
+      "scope": "feature-flags",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/feature-flags",
+      "scope": "feature-flags",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/peers",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/federation/peers/pair",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/members",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/federation/peers/:id/probe",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/federation/peers/:id",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/grants",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/federation/grants",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/federation/grants",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/delegations",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/federation/peers/:id/projection-url",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/federation/peers/:id/jobs",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/peers/:id/jobs/:jobId",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/federation/peers/:id/jobs/:jobId/file/:filename",
+      "scope": "federation-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/feedback",
+      "scope": "feedback",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/feedback/admin",
+      "scope": "feedback",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/feedback/admin/:id",
+      "scope": "feedback",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/workspaces/:projectId/tree",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/workspaces/:projectId/file",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/workspaces/:projectId/ssh-ping",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/workspaces/:projectId/file",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/move",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/copy",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/delete",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/mkdir",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/upload",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/workspaces/:projectId/fs/import-from",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/upload",
+      "scope": "files",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/gen-ui/widget-state",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/gen-ui/widget-state",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/keymap",
+      "scope": "keymap",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/keymap",
+      "scope": "keymap",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/space",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/space",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/documents",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/documents/paste",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/documents",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/documents/retry-failed",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/knowledge/documents/:id",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/documents/:id/reindex",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/documents/:id/preview",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/documents/batch-delete",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/space/clear",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/search",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/spaces",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/spaces",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/spaces/:id/rename",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/spaces/:id/enable",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/spaces/:id/impact",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/knowledge/spaces/:id",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/knowledge/binding",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/knowledge/binding",
+      "scope": "knowledge",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mcp/servers",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mcp/servers/:id/policy",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/mcp/servers/:id/policy",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/authenticate",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mcp/oauth/callback/:serverId",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/oauth/revoke",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/mcp/servers/:id",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/connect",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/disconnect",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mcp/tool-policy",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/mcp/tool-policy",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mcp/servers/:id/tools",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/message-ratings",
+      "scope": "message-ratings",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/message-ratings/:key",
+      "scope": "message-ratings",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mobile/status",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mobile/tunnel",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mobile/tunnel/config",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mobile/config",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mobile/pairing/token",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mobile/pairing/qr.svg",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/mobile/devices",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mobile/devices/:id/revoke",
+      "scope": "mobile-admin",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/model3d/capability",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/read",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/apply",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/model3d/scene/revisions",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/model3d/scene/revision",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/restore",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/diff",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/resolve",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/export",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/asset/inspect",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/texture/inspect",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/asset/import-cad",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/asset/generate",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/cad/drawing",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/scene/compare-geometry",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/sketch-spec",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/model3d/review",
+      "scope": "model3d",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/__perf/event-loop",
+      "scope": "perf-probe",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/__perf/reset",
+      "scope": "perf-probe",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/skills/registry",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/skills/preflight",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/plugins/installed",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/plugins/catalog",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/runtime/status",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/packs/installed",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/packs/contributions",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/packs/available",
+      "scope": "projection-data",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/remote-targets",
+      "scope": "remote-targets",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/remote-targets",
+      "scope": "remote-targets",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/remote-targets/:id/probe",
+      "scope": "remote-targets",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/remote-targets/:id",
+      "scope": "remote-targets",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/network",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/network",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/runtime-policy",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/runtime-policy",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/web-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/web-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/scratchpad",
+      "scope": "scratchpad",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/scratchpad",
+      "scope": "scratchpad",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/scratchpad/:entryId",
+      "scope": "scratchpad",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ssh-projects/targets",
+      "scope": "ssh-projects",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ssh-projects/connect",
+      "scope": "ssh-projects",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ssh-projects/list",
+      "scope": "ssh-projects",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/ssh-projects/validate",
+      "scope": "ssh-projects",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/storage/capabilities",
+      "scope": "storage-capabilities",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/subagent/profiles",
+      "scope": "subagent-profiles",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/subagent/profiles",
+      "scope": "subagent-profiles",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/svg/inspect",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/svg/revisions",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/svg/revision",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/svg/inkscape-status",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/svg/inkscape",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/svg/edit",
+      "scope": "svg",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/catalog",
+      "scope": "tools-catalog",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/workflow-templates",
+      "scope": "tools-catalog",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/status/:id",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/log/:id",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/stream/:id",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/history",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/manifest",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/tools/job/:id/name",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/tools/job/:id/public",
+      "scope": "tools-metadata",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/tools/run",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/file/:jobId/:filename",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/tools/report/:jobId",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/tools/cancel/:id",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/demo/:toolId/:filename",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/demo/:toolId",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "DELETE /api/tools/job/:id",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/tools/jobs/batch-delete",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/storage-summary",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/tools/jobs/export",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/tools/demo-data/:toolId/:filename",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/tools/file/:jobId/:filename",
+      "scope": "tools-platform",
+      "exposed": false,
+      "consumed": false
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/trust/policy",
+      "scope": "trust-policy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/trust/policy",
+      "scope": "trust-policy",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/user/prefs",
+      "scope": "user-prefs",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/user/prefs",
+      "scope": "user-prefs",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/context-checkpoint",
+      "scope": "harness/context",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/file-references/resolve",
+      "scope": "harness/file-references",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/loop/iterate",
+      "scope": "harness/loop",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/loop/:loopRunId",
+      "scope": "harness/loop",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/loop/snapshot",
+      "scope": "harness/loop",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/notices",
+      "scope": "harness/notices",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/notices/seen",
+      "scope": "harness/notices",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/project-storage",
+      "scope": "harness/project-storage",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/repair",
+      "scope": "harness/repair",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/resource-snapshot",
+      "scope": "harness/resources",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/index",
+      "scope": "harness/resources",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task/plan",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task/confirmation-preview",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task/confirm",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/scientific-task/:taskId",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/scientific-task-by-job/:toolJobId",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/scientific-task-by-job/:toolJobId/script",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task/:taskId/bind-job",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task/:taskId/delivery-manifest",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/scientific-task-by-job/:toolJobId/replay-package",
+      "scope": "harness/scientific-task",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/workflow/action/:jobId",
+      "scope": "harness/workflow",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/harness/workflow/status/:jobId",
+      "scope": "harness/workflow",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/harness/workflow/plan",
+      "scope": "harness/workflow",
+      "exposed": true,
+      "consumed": true
+    }
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

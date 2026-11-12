@@ -1,8 +1,8 @@
 {
   "_about": "生产路径静默 catch（裸 catch {}，无语句无注释）按文件冻结的存量棘轮；新增即红，修复后 --write 下调（只减不增）。L3-18/BLOCK-407 扩面留因：SCAN_ROOTS 纳入 frontend/src（扩面负测见 test/block407-l3-error-semantics.test.mjs；k6 门要求扩面必须伴随本留因）。",
   "schemaVersion": 1,
-  "updatedAt": "2026-11-10",
-  "total": 412,
+  "updatedAt": "2026-11-12",
+  "total": 406,
   "files": {
     "core/petri-server/agent-runner.js": 14,
     "core/petri-server/agent-task-store.js": 3,
@@ -55,7 +55,7 @@
     "core/petri-server/routes/ai-chat.js": 7,
     "core/petri-server/routes/ai-conversations.js": 4,
     "core/petri-server/routes/ai-loop.js": 3,
-    "core/petri-server/routes/ai-memory.js": 9,
+    "core/petri-server/routes/ai-memory.js": 3,
     "core/petri-server/routes/feedback.js": 1,
     "core/petri-server/routes/files.js": 2,
     "core/petri-server/routes/index.js": 1,

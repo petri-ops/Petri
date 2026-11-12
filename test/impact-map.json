@@ -8262,7 +8262,10 @@
         "core/petri-server/bootstrap.js",
         "core/petri-server/agent-tools/transcript.js",
         "core/petri-server/agent-tools/task-graph.js",
-        "core/petri-server/agent-tools/tool-capability.js"
+        "core/petri-server/agent-tools/tool-capability.js",
+        "test/m6a-*",
+        "docs/block-434-*",
+        "docs/block-435-*"
       ],
       "tests": [
         "test/m0-criteria-calibration.test.mjs",
@@ -8279,7 +8282,9 @@
         "test/m5-security-gate.test.mjs",
         "test/m6-engineering-debt.test.mjs",
         "test/m7-final-closeout.test.mjs",
-        "test/m5a-production-wiring.test.mjs"
+        "test/m5a-production-wiring.test.mjs",
+        "test/m6a-surface-schema.test.mjs",
+        "test/block232-permissions-generalization.test.mjs"
       ],
       "commands": [
         "docs-check"

@@ -1,10 +1,10 @@
 {
   "group": "C-静默与日志",
   "silentCatch": {
-    "baselineTotal": 412,
-    "computedTotal": 412,
+    "baselineTotal": 406,
+    "computedTotal": 406,
     "byDomain": {
-      "core": 329,
+      "core": 323,
       "src": 61,
       "frontend": 22,
       "scripts": 0,
@@ -18,7 +18,7 @@
   "terminal": "done-partial",
   "closureCondition": "扩口径与分域下降需逐批修根因后再 --write 下调基线（只减），本包零改写",
   "schemaVersion": 1,
-  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "capturedAt": "2026-11-12T11:30:35.773Z",
   "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
   "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
 }
