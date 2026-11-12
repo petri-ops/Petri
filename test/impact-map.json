@@ -15,11 +15,28 @@
         "docs/block-418-ui-design-*",
         "docs/block-419-ui-design-*",
         "docs/block-420-ui-design-*",
-        "acceptance/ui-design-assessment-2026-11-11/**"
+        "acceptance/ui-design-assessment-2026-11-11/**",
+        "frontend/src/lib/uiBreakpoints.ts",
+        "frontend/src/hooks/useWorkspaceLayout.ts",
+        "frontend/src/hooks/useWorkspacePanels.ts",
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "frontend/src/styles/custom.css",
+        "frontend/src/styles/global.css",
+        "frontend/src/pages/window/command-center.module.css",
+        "docs/ui-design-human-eye-route.md",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
+        "acceptance/ui-design-assessment-2026-11-11/d5/**",
+        "scripts/ui-design-scorecard.mjs"
       ],
       "tests": [
         "test/ui-design-baseline.test.mjs",
-        "test/ui-design-entries.test.mjs"
+        "test/ui-design-entries.test.mjs",
+        "test/ui-design-breakpoints.test.mjs",
+        "test/ui-design-layout-gate.test.mjs",
+        "test/ui-design-visual.test.mjs",
+        "test/ui-design-a11y.test.mjs",
+        "test/ui-design-program.test.mjs",
+        "test/ui-design-gap-ledger.test.mjs"
       ],
       "commands": [
         "docs-check",
@@ -8203,6 +8220,66 @@
         "test/post-s7-h10-debt-adjudicate.test.mjs",
         "test/post-s7-h10-cold-start.test.mjs",
         "test/post-s7-h10-round2-ledger.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "m-blueprint-program",
+      "note": "第六轮 M0–M7 优化程序（BLOCK-426 起单包串行）：判据校准 / 长任务状态机与边界族 / 崩溃续跑与任务图 / 上下文与工具能力面 / 评测与可观测 / 安全纵深 / 工程债 / 总收口。acceptance/m-blueprint-2026-11-11/ 是本轮唯一审计输入与证据目录，必须命中本规则，避免 test:changed:list fail-closed 全量升级；新增 scripts 由本规则单独分类（classifiesScripts=true）。",
+      "patterns": [
+        "scripts/m-blueprint-*",
+        "test/m-blueprint-*",
+        "test/m0-*",
+        "test/m1-*",
+        "test/m2-*",
+        "test/m3-*",
+        "test/m4-*",
+        "test/m5-*",
+        "test/m6-*",
+        "test/m7-*",
+        "docs/m-blueprint-2026-11-11*",
+        "docs/block-426-*",
+        "docs/block-427-*",
+        "docs/block-428-*",
+        "docs/block-429-*",
+        "docs/block-430-*",
+        "docs/block-431-*",
+        "docs/block-432-*",
+        "docs/block-433-*",
+        "acceptance/m-blueprint-2026-11-11/**",
+        "core/petri-server/agent-tools/turn-machine.js",
+        "core/petri-server/agent-tools/loop-boundaries.js",
+        "core/petri-server/agent-tools/goal-verifier.js",
+        "core/petri-server/agent-tools/long-task-resume.js",
+        "core/petri-server/agent-tools/tool-capability.js",
+        "core/petri-server/agent-tools/long-task-observability.js",
+        "core/petri-server/agent-tools/security-boundaries.js",
+        "core/petri-server/helpers/ddl-migrate.js",
+        "core/petri-server/bootstrap.js",
+        "core/petri-server/agent-tools/transcript.js",
+        "core/petri-server/agent-tools/task-graph.js",
+        "core/petri-server/agent-tools/tool-capability.js"
+      ],
+      "tests": [
+        "test/m0-criteria-calibration.test.mjs",
+        "test/m0-criteria-boundaries.test.mjs",
+        "test/m1-long-task-kernel.test.mjs",
+        "test/m1-kernel-gate.test.mjs",
+        "test/m2-long-task-resume.test.mjs",
+        "test/m2-resume-gate.test.mjs",
+        "test/m3-tool-capability.test.mjs",
+        "test/m3-capability-gate.test.mjs",
+        "test/m4-long-task-observability.test.mjs",
+        "test/m4-observability-gate.test.mjs",
+        "test/m5-security-boundaries.test.mjs",
+        "test/m5-security-gate.test.mjs",
+        "test/m6-engineering-debt.test.mjs",
+        "test/m7-final-closeout.test.mjs",
+        "test/m5a-production-wiring.test.mjs"
       ],
       "commands": [
         "docs-check"

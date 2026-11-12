@@ -54,7 +54,10 @@ async function extractZipFile(zipPath, destDir, options = {}) {
   let entries = 0;
   let totalBytes = 0;
 
-  await extractZip(zipPath, {
+  // BLOCK-434 W4（M5 接线）：解压中途失败（条目越界/软链/超限）会留下半成品目录，
+  // 下次安装读到脏 dest。失败即清理本函数创建的目录，再原样抛出（不掩盖原始错误）。
+  try {
+    await extractZip(zipPath, {
     dir: destDir,
     onEntry(entry) {
       entries += 1;
@@ -86,8 +89,16 @@ async function extractZipFile(zipPath, destDir, options = {}) {
         throw error;
       }
     },
-  });
-  return { destDir, entries, totalBytes };
+    });
+    return { destDir, entries, totalBytes };
+  } catch (error) {
+    try {
+      fs.rmSync(destDir, { recursive: true, force: true });
+    } catch {
+      // 清理本身失败不掩盖原始错误（原始错误信息更可诊断）。
+    }
+    throw error;
+  }
 }
 
 module.exports = {

@@ -138,6 +138,9 @@ function verifyWebviewAttach({ webPreferences, params = {}, allowedPartitions = 
  * 注册 `web-contents-created`（**必须在任何 webContents 创建之前调用**，即模块加载期）。
  * 覆盖主窗口与所有 `<webview>` guest。
  */
+
+const { classifySubframeNavigation } = require('./subframe-navigation');
+
 function applyWebContentsHardening({ app, shell, log = console } = {}) {
   if (!app || typeof app.on !== 'function') {
     throw new TypeError('applyWebContentsHardening requires the Electron app object');
@@ -165,12 +168,26 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
     };
     const handleSubframeNavigate = (url, frameProcessId) => {
       const urlText = String(url || '');
-      if (urlText.startsWith('petri-genui://')) {
+      const verdict = classifySubframeNavigation(urlText);
+      if (verdict.kind === 'genui') {
         rememberGenUiProcess(frameProcessId, urlText);
         return;
       }
       const hit = genUiProcessRegistry.get(frameProcessId);
-      if (!hit) return; // 非 gen-ui 进程的普通子框导航
+      if (verdict.kind === 'hijack' && !hit) {
+        // BLOCK-435：未登记进程的可疑子框来源也不再静默——按劫持信号推送（frameUrl 留空）。
+        log.warn?.('[gen-ui] 不可信子框来源（未登记进程），已推送即时恢复信号:', `${urlText.slice(0, 80)}（${verdict.reasonCode}）`);
+        try {
+          contents.send(CHANNELS.genUi.sandboxHijacked, {
+            frameUrl: '',
+            targetUrl: urlText.slice(0, 500),
+            reasonCode: verdict.reasonCode,
+            at: new Date().toISOString(),
+          });
+        } catch { /* 渲染层不可达时由心跳宽限兜底 */ }
+        return;
+      }
+      if (!hit) return; // 非 gen-ui 进程的可信/其它子框导航
       genUiProcessRegistry.delete(frameProcessId);
       log.warn?.('[gen-ui] 沙箱帧劫持侦测，已推送即时恢复信号:', `${urlText.slice(0, 80)}（原帧 ${hit.url.slice(0, 60)}）`);
       try {

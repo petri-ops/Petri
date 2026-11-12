@@ -9,11 +9,168 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 561,
+    "documentCount": 579,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 544
+    "managedMarkdown": 562
   },
   "documents": [
+    {
+      "id": "BLOCK-423",
+      "capability": "block-423-settings-redesign",
+      "path": "docs/block-423-settings-redesign-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-423-settings-redesign",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "settings",
+        "visual-language",
+        "reference-port"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "设置页视觉改版：参照 reference/ZCode 规范移植布局与层级（独立工作区/264px 分组侧栏/760px 阅读列/卡片化/控件 token 化）。观感 pending_human_eye。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-422",
+      "capability": "block-422-ui-readability",
+      "path": "docs/block-422-ui-readability-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-422-ui-readability",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "readability",
+        "a11y",
+        "visible"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "可读性修正（可见排版改善）：消息区 860px 居中阅读宽度 + tertiary 对比度 4.40→4.81 达标。观感 pending_human_eye。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-421",
+      "capability": "block-421-workspace-layout-refactor",
+      "path": "docs/block-421-workspace-layout-refactor-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-421-workspace-layout-refactor",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "layout",
+        "single-source",
+        "wip-takeover"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "工作区布局单源重构（用户授权接管 WIP CSS 布局层）：断点差异走 --ws-* 变量、同名布局类各归 1 处、computed style 逐字等价（零视觉变化）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-420",
+      "capability": "block-420-ui-design-d5-final",
+      "path": "docs/block-420-ui-design-d5-final-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-420-ui-design-d5-final",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "final",
+        "scorecard",
+        "gates"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI-D5 门禁化与复测（全程序收口）：汇总门 / Before-After 同套评分卡 / gap-ledger 逐件终态 / closeout:full 三连。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-419",
+      "capability": "block-419-ui-design-d4-a11y",
+      "path": "docs/block-419-ui-design-d4-a11y-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-419-ui-design-d4-a11y",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "accessibility",
+        "human-eye",
+        "gates"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI-D4 交互状态与无障碍闭环：八态矩阵 / focus-visible 只减棘轮 / WCAG AA 对比度纯函数 / 9223 离屏实机 / 人眼路线集中签字槽。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "UI-DESIGN-HUMAN-EYE-ROUTE",
+      "capability": "ui-design-human-eye-route",
+      "path": "docs/ui-design-human-eye-route.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "ui-design",
+        "human-eye",
+        "pending"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI 程序 E 类人眼路线与集中签字槽：22 条 pending_human_eye 索引 + H-01~H-08 增量项；签字槽全空，Agent 不代答。"
+    },
+    {
+      "id": "BLOCK-418",
+      "capability": "block-418-ui-design-d3-visual",
+      "path": "docs/block-418-ui-design-d3-visual-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-418-ui-design-d3-visual",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "visual",
+        "tokens",
+        "gates"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI-D3 视觉语义统一：hover/selected 单源、surface-dim 跨文件收敛、裸 z 只减迁移、fallback 快照下调、非 WIP ;; 清零；WIP CSS 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-417",
+      "capability": "block-417-ui-design-d2-layout",
+      "path": "docs/block-417-ui-design-d2-layout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-417-ui-design-d2-layout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "tags": [
+        "ui-design",
+        "layout",
+        "responsive",
+        "gates"
+      ],
+      "registeredAt": "2026-11-11",
+      "notes": "UI-D2 布局单源与响应式统一（大包按文件切片）：断点常量单源+767/768 对齐 / 布局定义唯一性门 / 9223 离屏几何腿；WIP CSS 零触碰登记 owner，U-04 档位收敛待裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
     {
       "id": "BLOCK-416",
       "capability": "block-416-ui-design-d1-ia",
@@ -301,7 +458,7 @@
       "capability": "post-k7-full-audit-and-blueprint-2026-11-10",
       "path": "docs/post-k7-full-audit-and-blueprint-2026-11-10.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "post-k7-optimization-program",
       "entrypoint": "docs/README.md",
@@ -11360,6 +11517,241 @@
         "workflow"
       ],
       "notes": "第三轮方向蓝图。2026-11-09 用户预授权连续工作后转 active(living-plan) 并由 BLOCK-385~392 八包执行完毕：H0-H7 全部收口，34 条缺口逐件定终态（done 5/done-partial 15/retain 12/pending_human_eye 1/external-blocked 1），十一维终验四升七平零降（达标 3/11）。终验报告=docs/block-392-post-s7-h7-final-report.md。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "M-BLUEPRINT-2026-11-11-PROGRAM",
+      "path": "docs/m-blueprint-2026-11-11-program.md",
+      "kind": "living-plan",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "m-blueprint-2026-11-11-program",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "next-stage",
+        "m-blueprint",
+        "long-task"
+      ],
+      "notes": "第六轮 M0-M7 程序状态台账（living-plan，层 2 常驻不占串行槽位）。唯一审计输入=acceptance/m-blueprint-2026-11-11/FULL-AUDIT-AND-BLUEPRINT.md + EXECUTION-PROMPT.md（acceptance 非 managedRoot，按 PATH_INVALID 契约由本台账指向，原件零触碰）。用户 2026-11-11 预授权连续工作裁决留痕。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-426-M0-CRITERIA-CALIBRATION",
+      "capability": "block-426-m0-criteria-calibration",
+      "path": "docs/block-426-m0-criteria-calibration-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-426-m0-criteria-calibration",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "scripts/m-blueprint-m0-criteria.mjs",
+        "test/m0-criteria-calibration.test.mjs",
+        "docs/m-blueprint-2026-11-11-program.md",
+        "docs/block-426-m0-criteria-calibration-plan.md",
+        "acceptance/m-blueprint-2026-11-11/m0/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m0",
+        "criteria"
+      ],
+      "notes": "M0 判据校准与可信起点（零产品行为变化）：14 门当次复取样 / 状态对账门 / gap-ledger 只读视图 / 数字口径单源 / WIP owner 归属。HK-01 红→绿负测 7/7。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-427-M1-LONG-TASK-KERNEL",
+      "path": "docs/block-427-m1-long-task-kernel-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/turn-machine.js",
+        "core/petri-server/agent-tools/loop-boundaries.js",
+        "core/petri-server/agent-tools/goal-verifier.js",
+        "scripts/m-blueprint-m1-kernel-gate.mjs",
+        "test/m1-long-task-kernel.test.mjs",
+        "test/m1-kernel-gate.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m1/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m1",
+        "long-task"
+      ],
+      "notes": "M1 长任务内核：10 态显式 TurnMachine（转移表 fail-closed / append-only 可重放 / turn_cancelled 一等结果）、统一资源边界族（provider usage 权威 / compact 双熔断 / 成本默认软提示 / 工具超时与输出预算单源）、独立 no-tool goal verifier；纯新增模块 + 依赖注入，MAX_AGENT_ITERS=Infinity 产品契约与主循环控制流零改动。HK-01 红→绿 18/18、专项门 0 issues。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-428-M2-LONG-TASK-RESUME",
+      "path": "docs/block-428-m2-long-task-resume-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/long-task-resume.js",
+        "scripts/m-blueprint-m2-resume-gate.mjs",
+        "test/m2-long-task-resume.test.mjs",
+        "test/m2-resume-gate.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m2/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m2",
+        "long-task"
+      ],
+      "notes": "M2 长任务可靠性：单一纯模块收敛 append-only transcript + hydrate 中断 tool result 合成 / checkpoint 写读校验（损坏 fail-closed）/ 8 阶段任务图（maxConsecutiveErrors 暂停 + 失败重派 + kill/resume 不回退）/ commandId CAS + ACK duplicate-stale-noop / 单一 owner 持久化租约。HK-01 14/14、gate:long-task-resume 连续 3 轮 PASS。DB 层 UNIQUE(task_id,seq) 因触及 perf 基线 HOT_PATH_FILES 登记 external-blocked；9223 实机腿 external-blocked；schema/server/agent-task-store 零改动。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-429-M3-TOOL-CAPABILITY",
+      "path": "docs/block-429-m3-tool-capability-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/tool-capability.js",
+        "scripts/m-blueprint-m3-capability-gate.mjs",
+        "test/m3-tool-capability.test.mjs",
+        "test/m3-capability-gate.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m3/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m3",
+        "tool-capability"
+      ],
+      "notes": "M3 上下文与工具能力面：compact 五字段恢复契约 + 有界重读 / 跨表只读对账门（CONTRACTS ⊆ TOOL_METADATA）/ 声明驱动拓扑并行调度与合成取消结果 / 结果预算落 artifact 与错误结构化投影 / 权限 fail-closed + 竞速 settled 闩 + 可恢复拒绝（needsApproval 真实生产消费者）/ untrusted 包装与来源标注。HK-01 18/18、gate:tool-capability 0 issues、lint 0。不改四表与 workspace_exec 默认放行裁决；生成器改造（新增 1 工具 7→1）done-partial 归 M6-A。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-430-M4-EVAL-OBSERVABILITY",
+      "path": "docs/block-430-m4-eval-observability-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/long-task-observability.js",
+        "scripts/m-blueprint-m4-fixture.mjs",
+        "scripts/m-blueprint-m4-observability-gate.mjs",
+        "test/m4-long-task-observability.test.mjs",
+        "test/m4-observability-gate.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m4/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m4",
+        "observability"
+      ],
+      "notes": "M4 评测与可观测：1000 轮本地 fixture（生成/校验/删除三命令 + manifest，零出网零真实 Provider）/ 成功率·完成度·跨恢复一致性基线（claimStableLongTask 恒 false）/ traceId 五类节点持久化投影 / usage 三层事实表 + 失败请求记账 / 用户可感性能常驻门（400+ 节点必红）+ 零依赖窗口化。HK-01 14/14、gate:long-task-observability 0 issues、lint 0。evals:run 当次 1/9 PASS（ECONNRESET，external-blocked）；evals:gate 恢复既有证据后 exit 0 明确标注复用、不冒充当次通过；evals-run 覆写 smoke-latest.json 已自纠恢复 HEAD 版。closeout 接线/perf 扩面/real 档 external-blocked 或 W 类。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-431-M5-SECURITY-HARDENING",
+      "path": "docs/block-431-m5-security-hardening-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/security-boundaries.js",
+        "scripts/m-blueprint-m5-security-gate.mjs",
+        "test/m5-security-boundaries.test.mjs",
+        "test/m5-security-gate.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m5/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m5",
+        "security"
+      ],
+      "notes": "M5 安全与正确性纵深（不委派）：8 类判据收敛单一纯模块——per-boot token + 全局 Origin / MCP command 白名单 / drag 登记根+realpath+basename+长度 / 帧导航 allowlist + 权限 session 全覆盖 / tar 条目 + zip 失败清理 / 假成功治理统一失败信封 + DDL 静默判红 / git grep fail-closed + 日志脱敏 / limit-offset + 原子写。HK-01 15/15、gate:m5-security 0 issues、lint 0、quality:secret/arch PASS。不改 workspace_exec 默认放行裁决；生产接线 done-partial 归 M6-A（带 BLOCK-92 拆前拆后同套绿基线）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-432-M6-ENGINEERING-DEBT",
+      "path": "docs/block-432-m6-engineering-debt-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "scripts/m-blueprint-m6-debt-gate.mjs",
+        "test/m6-engineering-debt.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m6/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m6",
+        "engineering-debt"
+      ],
+      "notes": "M6 工程债务与体验 A–F 六组组内串行：全部为只读视图/判据/决策材料，零改写基线（silent-catch 412 / knip 330 / code-size 86605 / arch-cycles 12 / UI debt 35 / surface-matrix 在制 WIP 零触碰）。三矩阵共用 schema 只读对账 + IPC 三真相视图 / 巨型文件只读清单 / 静默 catch 分域下降表 / 165 通道逐件分诊（结构·行为双列）/ W 类零触碰 + E 类人眼路线（pending_human_eye 签字槽全空）/ U 类材料（pending_user_ruling 不改默认）。HK-01 9/9、gate:m6-debt 0 issues、lint 0。六组终态均 done-partial / W / U / E，无一组冒充 done 或 verified；补腿条件逐组在册，M7 gap-ledger 终态化。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-433-M7-FINAL-CLOSEOUT",
+      "path": "docs/block-433-m7-final-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "scripts/m-blueprint-m7-final.mjs",
+        "test/m7-final-closeout.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m7/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m7",
+        "closeout"
+      ],
+      "notes": "M7 总收口与证据：70 条发现 + 12 差距逐件终态（机械解析、零 in_progress、零编造计数）/ 十一维第八列复评（不回溯改第七列）/ 长任务自证包 / 六件套回写 / 蓝图由 candidate 转 completed（正式注册流程）。HK-01 7/7、逐件终态门 0 issues、lint 0；gate:post-h9-contracts 186/186 全绿。干净树 closeout:full 三连受 W 类在制 WIP 拦停，按 G0 纪律与零触碰红线如实登记并给补腿条件，不冒充通过。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-434-M5-WIRING-CLOSEOUT",
+      "path": "docs/block-434-m5-wiring-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "scripts/secret-scan.mjs",
+        "core/petri-server/bootstrap.js",
+        "core/petri-server/helpers/ddl-migrate.js",
+        "core/petri-server/routes/ai-memory.js",
+        "src/plugin/zip.js",
+        "test/m5a-production-wiring.test.mjs",
+        "core/petri-server/mcp/client-manager.js"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "m5",
+        "wiring"
+      ],
+      "notes": "M5 判据层→生产路径接线（5 项判据接线：4 done + 1 done-partial 带 U 类待裁决）：W1 secret-scan git grep 故障 fail-closed / W2 全局 Origin 门挂载（只拦真实 http(s) 不可信来源，Origin:null+token 语义零破坏）/ W3 ai-memory 迁移期 DDL 收敛单一入口 ddl-migrate / W4 zip 解压失败清理半成品目录 / W5 MCP stdio spawn 前接入 adjudicateStdioConfig（注入硬化恒生效；命令白名单按 PETRI_MCP_COMMAND_ALLOWLIST 显式生效，默认不收窄=U 类待裁决）。HK-01 10/10（含 7 项边界负测与 spawn 顺序断言）；改动 6 文件 lint 0、quality:arch/secret PASS、docs:check 579、reconcile 0 issues、silent-catch PASS；test:changed 1778 项 2 fail 仍为同一 W 类两红。仍 done-partial：drag 登记根（需新 IPC 通道）、帧导航 allowlist（需主进程装配+9223 实机腿）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-11"

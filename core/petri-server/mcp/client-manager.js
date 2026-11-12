@@ -115,6 +115,18 @@ async function connectServer(id) {
         useAuth ? oauthProvider.createOAuthProvider(id) : null,
       );
     } else {
+      // BLOCK-434（M5-2 接线）：stdio 启动前过判据单源，见 adjudicateStdioConfig。
+      const verdict = adjudicateStdioConfig({
+        command: cfg.command,
+        args: cfg.args,
+        allowlistEnv: process.env.PETRI_MCP_COMMAND_ALLOWLIST,
+      });
+      if (!verdict.ok) {
+        const error = new Error(`mcp_command_rejected: ${verdict.reasonCode}`);
+        error.reasonCode = verdict.reasonCode;
+        error.status = verdict.status;
+        throw error;
+      }
       transport = new StdioClientTransport({
         command: cfg.command,
         args: cfg.args || [],
@@ -422,7 +434,24 @@ function _resetForTests() {
   _sdkPromise = null;
 }
 
+/**
+ * BLOCK-434（M5-2 接线）— stdio 启动配置判据：把 M5 的 adjudicateMcpCommand 接到真实 spawn 点。
+ *   ① 注入硬化（恒生效）：command/args 不得含 shell 元字符；
+ *   ② 命令白名单（显式生效）：allowlistEnv 设置时按该清单 fail-closed；未设置时保持既有语义
+ *      （默认拒绝会改变产品能力面，属 U 类待裁决项，不在本包静默收窄）。
+ */
+function adjudicateStdioConfig({ command, args, allowlistEnv } = {}) {
+  const { adjudicateMcpCommand } = require('../agent-tools/security-boundaries');
+  const explicit = String(allowlistEnv || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const commandText = String(command || '');
+  const allowlisted = explicit.length > 0
+    ? explicit
+    : [commandText.split(/[\\/]/).pop()];
+  return adjudicateMcpCommand({ command: commandText, args: Array.isArray(args) ? args : [], allowlisted });
+}
+
 module.exports = {
+  adjudicateStdioConfig,
   connectServer,
   beginAuthorization,
   completeAuthorization,

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "m6-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-432",
+  "status": "completed-with-terminalized-groups",
+  "groups": [
+    { "group": "A-结构单源", "terminal": "done-partial", "deliverable": "三矩阵共用 schema 只读对账 + IPC 三真相只读视图（168 通道现取、catalog 滞后登记）", "closureCondition": "共用 schema 生成器 / 28 文件绕桥迁移 / resolveDataDir·readConfig 单源 / 12 环逐环消亡，均须带 BLOCK-92 拆前拆后同套绿基线" },
+    { "group": "B-巨型文件", "terminal": "W + done-partial", "deliverable": "4 个 >1000 行巨型文件只读清单（SimpleChat 1963 / tools-executor / project-workspace 1224 / scene3d 1087），零拆分零改 code-size 锚点", "closureCondition": "逐会话逐刀拆（每刀 ≤−100 行、拆前拆后同套绿、锚点下降后重打）" },
+    { "group": "C-静默与日志", "terminal": "done-partial", "deliverable": "静默 catch 分域下降表（412 处 / 102 文件，按 core·src·frontend·scripts·test·other 现取可复算），零改写基线", "closureCondition": "扩口径 + 逐批修根因后 --write 下调基线（只减）；console 分级与渲染层脱敏归 M5 判据接线" },
+    { "group": "D-体验", "terminal": "W + pending_human_eye", "deliverable": "focus-visible CSS 与设置面板属在制 WIP 零触碰、登记 owner；自动生成 4 步人眼测试路线（含每步预期与证据留存点），签字槽全空", "closureCondition": "owner 收口 CSS WIP 后补 focus 规则；人眼签字须出自人，Agent 不代答" },
+    { "group": "E-功能可用", "terminal": "done-partial", "deliverable": "168 通道逐件只读分诊（165 未消费 / 2 缺 preload，逐件保留 owner 与终态）+ 结构·行为双列判据（禁止互冒充）", "closureCondition": "真消费接线 / browser_act / worktree_remove / 默认执行目标 / P3 存储键 / capability-map evidence-tier 逐件接线" },
+    { "group": "F-文档与依赖", "terminal": "pending_user_ruling + done-partial", "deliverable": "typescript 双版本等 U 类一页决策材料（候选/风险/推荐，status=pending_user_ruling、defaultChanged=false）+ Skill 清单只读对账 + 4 套 ledger 只读视图（M0 已建）", "closureCondition": "用户显式裁决后按 DEPENDENCY-CHANGE-CHECKLIST 升级；README 分类导航与 Skill 清单统一需裁决范围" }
+  ],
+  "hk01": { "first": "ERR_MODULE_NOT_FOUND 1 failed", "second": "新增文件 2 处动态下标 lint warning（已改 Map + defineProperty）", "final": "9/9 pass 0 fail", "gateSelfTest": "test/m6-engineering-debt.test.mjs 含 2 项篡改必红（基线削减 / W 项写 verified）" },
+  "gates": {
+    "specialty": "gate:m6-debt 六组判据 PASS 0 issues",
+    "lint": "新增 2 文件 lint 0",
+    "w5a": "PASS",
+    "docs": "PASS 577 registered",
+    "uiAudit": "PASS",
+    "codeSize": "PASS 86605 行 / 75 文件 / 例外 16（零改写）",
+    "archCycles": "PASS 12 存量环在册（零改写）",
+    "silentCatch": "PASS 102 文件 / 412 处（零改写）",
+    "knip": "PASS 330 键冻结（零改写）",
+    "skills": "PASS",
+    "testChanged": { "tests": 1497, "pass": 1488, "fail": 2, "skipped": 7, "failures": ["UI-629 布局 gap 锚（W 类）", "P6 源绑定（W 类）"], "exit": 1 },
+    "closeout": { "exit": 1, "passed": ["audit:compact", "hygiene:check", "docs:check", "ui:audit:check"], "firstFailed": "test:changed", "unreachedAfterFailFast": 13 }
+  },
+  "zeroRewrite": {
+    "baselines": ["test/silent-catch-baseline.json", "test/knip-baseline.json", "eslint-suppressions.json", "test/perf-baseline.json"],
+    "wip": "起始 89 M + 68 ?? 在制 WIP 逐件登记 owner、零触碰；surface-matrix.json 起始即 M，本包只读",
+    "bigFiles": "4 个巨型文件 git diff 0 行",
+    "stage": "零 stage 零提交"
+  },
+  "uEVW": {
+    "U": ["typescript 双版本统一", "ADMISSION observe→enforce", "FK OFF-ON", "虚拟列表是否引入依赖"],
+    "E": ["22 条 pending_human_eye + H-01～H-08", "暗色观感", "读屏", "对比度观感"],
+    "V": ["CVE 联网扫描", "真实 Provider / real 档", "9223 实机腿"],
+    "W": ["89 M + 68 ?? 在制 WIP", "quality:lint 2 errors", "perf packaged_start 红轮", "P6 源绑定"],
+    "note": "四类均不计入完成数，M7 gap-ledger 逐件终态化；Agent 不代答"
+  },
+  "sixDimensionReview": { "verdict": "批准收口（六组终态均 done-partial / W / U / E，无冒充）", "p1": 0, "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明" },
+  "zeroScope": ["零新增依赖", "零放宽基线", "零触碰在制 WIP", "零 stage 零提交", "零撤销既有裁决", "零 G1+ 外推"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

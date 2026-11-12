@@ -1,5 +1,26 @@
 # Petri Desktop UI 产品化审计台账
 
+> BLOCK-434 六件套同批登记（2026-11-11）：本包为后端/脚本/主进程接线，**零 UI 增量**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m5a/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M7 / BLOCK-433 六件套同批登记（2026-11-11）：总收口为治理/证据批，**零 UI 增量**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m7/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M6 / BLOCK-432 六件套同批登记（2026-11-11）：本阶段为只读视图/判据/决策材料，**零 UI 增量**；focus-visible 与设置面板 CSS 属在制 WIP 零触碰，人眼路线保持 pending_human_eye；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m6/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M5 / BLOCK-431 六件套同批登记（2026-11-11）：本阶段为 core 判据纯新增模块，**零 UI 增量**；权限 session 与帧导航判据属纯函数门，未改渲染层；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m5/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M4 / BLOCK-430 六件套同批登记（2026-11-11）：本阶段为 core 内核与评测纯新增模块，**零 UI 增量**；DOM 节点/帧率判据属纯函数门，未改渲染层；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m4/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M3 / BLOCK-429 六件套同批登记（2026-11-11）：本阶段为 core 内核纯新增模块，**零 UI 增量、零产品行为变化**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m3/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M2 / BLOCK-428 六件套同批登记（2026-11-11）：本阶段为 core 内核纯新增模块，**零 UI 增量、零产品行为变化**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m2/`。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M1 / BLOCK-427 六件套同批登记（2026-11-11）：本阶段为 core 内核纯新增模块，**零 UI 增量、零产品行为变化**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=。G0 开发期常态 · 不外推 packaged/Provider/GA.
+
+> M0 / BLOCK-426 六件套同批登记（2026-11-11）：本阶段为判据校准与可信起点，**零 UI 增量、零产品行为变化**；
+> 故本台账不新增 `UI-###` 编号、不改任何条目状态词、不重打 debt 35 / canonical sections 497 棘轮。
+> 相关门禁读数（docs:check 571 / ui:audit:check PASS / M0 专项门 0 issues / closeout exit 1 两红 W 归属）
+> 见 `acceptance/m-blueprint-2026-11-11/m0/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-702: 通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）
 
 - **变化面**：ToastProvider 增加有界通知历史（播报即入历史、同 (variant,message) 去重、上限 50、可展开/清空、面板 role=log）；viewport 内新增「通知历史（N）」入口，不新建第二套通知中心。ResultArtifactShell 的 viewer 降级原因由 role=note 升为 role=status + aria-live=polite（非错误不抢话，但进播报队列）。
@@ -19,6 +40,33 @@
   此前读屏播报「分隔条 + 百分比」自相矛盾）；`ArtifactPinPane.ratio.test.tsx` 新增 slider 语义断言
   1 条（值域 / valuetext / 键盘改变 valuenow / 无 separator）。仍是 in_progress：键盘与读屏路径的
   实机确认归同批腿。
+
+- **UI-D1 / BLOCK-416 追加（同一 in_progress 条目，按 BLOCK-394/395 先例不新增段、不新增债；UI-### 编号沿用 UI-702）**：① 新增 `scripts/ui-design-entry-registry.mjs` 单一入口表（每功能恰好 1 canonical 路径 + alias / surfaceAlias / cancelled 留因）与 `scripts/ui-design-entry-gate.mjs`（`npm run gate:ui-entries`）四向机械对账门（表→路由 / 路由→表 / 源码→表 / 页头清单），5 类植入必红负测；② `frontend/src/components/desktop/titlebar/shared.tsx` 的 `isStandalonePagePath` 清已退役 `/backend` 与已重定向 `/skills /plugins` 残留，改列 canonical `/extensions`（`STANDALONE_PATHS` 唯一真源，门双向对账防第二真相）。**零新增依赖、零新增台账段、debt 棘轮零改动**。
+- **验证（代码）**：`gate:ui-entries` PASS（16 路由 / 25 入口字面量 / 4 独立页，canonical 唯一、无孤儿路由）；`test/ui-design-entries.test.mjs` 11/11（HK-01 红→绿留痕：门自身 `/*` 被当块注释、重定向未计入已登记集合两处口径 bug 已修）；页头相邻前端测试 `titlebar/*` + `TitleBar.test.tsx` + `theme-token-contract` 共 69/69；`docs:check` 561 PASS；`test:changed:list` unknown=0；证据=`acceptance/ui-design-assessment-2026-11-11/d1/`。
+- **证据等级（行为测试 / 机械门禁，不冒充视觉绿或实机绿）**：`/projects`、`/review` 是否新增左栏可见入口（U-01）与是否纳入页头 bare 形态（U-06）均 `pending_user_ruling`，本期以显式 `cancelled` 留因达成「孤儿页 = 0 或有留因」，未擅自改产品形态；树测试寻路成功率 ≥80% / 首击正确率 ≥70% / 核心任务 ≤3 次点击的真人复验 `pending_human_eye`，路线与签字槽见 `docs/ui-design-ia-decision-material.md` §6 E-01，Agent 不代答。
+- **W 归属声明**：本包按 `AGENTS.md` 台账纪律同步本条追加行。`ui:audit:check` 转绿仅代表**本包 UI 增量已同步台账**；他方在制 `frontend/src/pages/project-workspace.module.css`（11+/9−）与开局后并发写入者文件仍零触碰、owner 归属不变，不表述为「他方 WIP 已收口」。**自纠记录**：首版曾新建 `## UI-703` 段，导致段数 497→498、未闭合债 13→14 触发 BLOCK-332 只减棘轮判红；已按既有先例改为同段追加，未放宽任何基线。
+
+- **UI-D2 / BLOCK-417 追加（同一 in_progress 条目，按 BLOCK-394/395 与 UI-D1 先例不新增段、不新增债；UI-### 编号沿用 UI-702）**：① 新增 `frontend/src/lib/uiBreakpoints.ts` 断点单一真源（MOBILE=768 / COMPACT=960），`useWorkspacePanels.ts` / `useWorkspaceLayout.ts` / `titlebar/shared.tsx` 三处裸 `matchMedia` 改引用常量，767→768 与 CSS 对齐；`gate:ui-breakpoints` 对账 104 CSS 文件 / 18 档非 WIP 阈值 / JS 裸阈值 0。② `gate:ui-layout` 可视区布局类单源门：非 WIP 植入第二定义必红、WIP 内既存 2 组重复显式登记 owner 与补腿条件、全仓容器热点 708 只减棘轮。③ `ui-d2-geometry-live` 9223 离屏实机腿（跑完立即 kill，未设 `PETRI_TEST_ONSCREEN`）。**零新增依赖、零新增台账段、debt 棘轮零改动、WIP CSS 零触碰**。
+- **验证（代码）**：两门 PASS + 负测 13/13；拆前拆后同套绿 78/78（6 文件，含 titlebar / useWorkspaceLayout / theme-token-contract 19）；Jev 追加建议 `test/window-manager.test.mjs` 路径不存在（幻觉路径，如实登记未执行），同域等价 `test/block59-window-manager.test.mjs` 43/43；`quality:types` 0、`quality:arch` PASS、`live-window-policy` 1/1。证据=`acceptance/ui-design-assessment-2026-11-11/d2/`。
+- **证据等级与诚实降级（DOM 几何 ≠ 视觉绿）**：实机腿 9/9 allPass，但探针在欢迎页 `body` fallback 上量测（chain=1，未命中真实 `.workspaceSessionLayout`），G1/G2 只证非零几何；≤900px 未做 CDP Emulation 真缩放（当前视口 1600，不冒充窄视口通过）；截图为全页 PNG 非元素级裁剪；9223 未启时首跑 0/1 已落 `external-blocked`，不复用为通过。**四块几何 / 长内容三态 / 元素级截图过目仍 `pending_human_eye`**，路线与签字槽见 `docs/ui-design-ia-decision-material.md` §6。
+- **W / U 归属**：`project-workspace.module.css` 内 `CenterPanel` 双层 layout 抽独立文件、同名 class 合并、@media/@container 双判据统一均零触碰，待 owner 收口；17 档→≤4 档收敛属 U-04 `pending_user_ruling`，本期不改产品响应式语义。Agent 不代答、不冒 verified。
+
+- **UI-D3 / BLOCK-418 追加（同一 in_progress 条目，按 BLOCK-394/395、UI-D1/D2 先例不新增段、不新增债；UI-### 编号沿用 UI-702）**：① `custom.css` hover 别名收敛到唯一真源 `--petri-hover`（明暗各 1 物理定义）、新增 `--petri-selected-{bg,border,text}` 专用 token 明暗成对并落到 `.tileSelected` 真实消费点；`global.css` 两处 `--petri-surface-dim` 重复定义删除（与真源逐字等值，零视觉变化），跨文件重复定义 = 0。② 7 处精确等价裸 z（100/1000/10000）迁移到 `var(--petri-z-*)`，不等价档位不硬映射；另 3 处（10/10000）因 code-size 入册文件字节棘轮只减不增，保留裸值并登记 `gate:ui-visual` 的 `Z_TIER_FROZEN` 冻结清单（清单外新增即红、只减不增，有负测）；③ 非 WIP 57 个 CSS 文件 424 处 `;;` 清零（纯语法空语句）；selected 专用 token 落 `global.css`（明暗成对）使 `custom.css` 零新增行/字节；④ `theme-token-contract.test.ts` 两处棘轮按当次现值**下调**（fallback 19 文件/235 处 → 17/190；z 38 文件/111 处 → 34/104），归零键删除=更严，注释留因，**未放宽任何阈值或分母**；`code-size` 按脚本 `--write` 合法重打（6 个文件 bytes 锚点全部下降 3–39 字节、行数持平、WIP 条目零变化，非放宽）。⑤ 新增 `gate:ui-visual` 视觉语义门 + 9 项植入必红负测（含只减棘轮清单）。**零新增依赖、零新增台账段、debt 棘轮零改动、WIP CSS 零触碰**。
+- **验证（代码）**：`gate:ui-visual` PASS（104 CSS 文件 / hover 单源 / selected 成对有消费 / surface-dim 跨文件重复 0 / 精确档位裸 z 0 / 非 WIP `;;` 0 / fallback 17 文件 190 处）；`theme-token-contract` **19/19** 且两棘轮数值下调；负测 8/8；**植入必红实战**：临时在 `FolderPicker.module.css` 追加 1 处颜色 fallback → 门报 `2 > ratchet 1` 判红，还原后 19/19（探针零残留）；`docs:check` 563 PASS；`test:changed:list` unknown=0。证据=`acceptance/ui-design-assessment-2026-11-11/d3/`。
+- **证据等级与边界（行为/机械门，不冒充视觉绿）**：暗色 `--petri-surface-hover` 由独立 0.09 alpha 收敛到真源 0.07、selected 边框改用 `--petri-accent-border` 属视觉语义收敛，**观感 `pending_human_eye`**（暗色 diff / 选中态截图过目 / 读屏），路线与签字槽见 `docs/ui-design-ia-decision-material.md` §6；DOM/静态断言不冒充视觉验收。WIP 文件内 26 处裸 z / 128 处 `;;` / 39 处 fallback 零触碰；10 个组件 CSS 外溢 token 定义回 `styles/` 需明暗成对 + 观感签字，本期 `done-partial` 带补腿条件。Agent 不代答、不冒 verified。
+- **UI-D4 / BLOCK-419 追加（同一 in_progress 条目，不新增段、不新增债；UI-### 编号沿用 UI-702）**：① 新增 `gate:ui-a11y` 机械门（八态矩阵 4 类元件 × 8 态 = 32 格逐格判据登记，空格必红）、`focus-visible` 只减棘轮（当次 39 处 `outline:none`，其中 12 文件 / 16 声明无 `:focus-visible` 替代，冻结登记、新增即红）、WCAG 2.1 对比度纯函数（亮暗两套文字四级 × 表面四级 = 32 对，正文 4.5:1 / 大字 3:1 阈值不得放宽）、状态机 `aria-busy`/`role=alert`/`role=status`/`aria-live` 存在性覆盖；负测 7/7（含亮度公式边界、八态空格、缺口新增、token 表篡改、阈值放宽、WIP 只读登记）。② `docs/ui-design-human-eye-route.md` 集中 22 条 `pending_human_eye` 路线索引 + H-01~H-08 增量项，签字槽全空。③ `ui-d4-a11y-live` 9223 离屏实机（跑完立即 kill、未设 `PETRI_TEST_ONSCREEN`）。**零新增依赖、零新增台账段、debt 棘轮零改动、WIP CSS 零触碰**。
+- **D4 实机证据与诚实降级**：`ui-d4-a11y-live` 最终 **8/9 allPass=false**。通过项：CDP 链路 / SPA 在场 / `aria-live` 1 处 / 56 按钮 + 1 输入 / 55 可聚焦 / 焦点可达 / token 运行时解析（亮色）/ 全页截图。**判红项**：`focus_ring_observable` 读到 `outlineStyle:"none"`（仅 `outlineWidth:2.5px`）⇒ 焦点环实际不可见，登记为 H-06 人眼与独立切片补腿，**不以 width 非零冒充通过、不写 verified**。首跑 9/9 假绿作废，不复用。截图为全页 PNG 非元素级裁剪。
+- **D4 未闭合（D5 终态化）**：`light tertiary on subtle` 对比度实测 **4.40:1 < 4.5:1**（大字 3:1 可适用），按红线不擅自改色值、观感归 `pending_human_eye`；12 文件 / 16 声明 focus 缺口需独立切片补规则 + code-size 联动重打 + 人眼签字；八态矩阵 hover/active/focus-visible 三态观感 `pending_human_eye`；22 条 debt 与 SUS/树测试真人样本保持 `pending_human_eye` / `external-blocked`。证据=`acceptance/ui-design-assessment-2026-11-11/d4/`。
+
+- **UI-D5 / BLOCK-420 追加（同一 in_progress 条目，不新增段、不新增债；UI-### 编号沿用 UI-702）**：① `gate:ui-program` 汇总 D0–D4 六个专项门（6/6 PASS）+ 5 项植入必红负测；`ui-d2-geometry-live` / `ui-d4-a11y-live` 两个离屏 flow 复用登记，不另立第二份路线。② `gate:ui-gaps` 逐件终态校验：`d5/gap-ledger.json` **32 条零 in_progress**（done 6 / done-partial 8 / retain 5 / pending_human_eye 2 / external-blocked 4 / pending_user_ruling 7），计数脚本复算 + 负测 4/4。③ `d5/before-after-scorecard.json` 同套专家静态口径 Before 3.0/3.5/3.5/4.5 → After 3.8/3.5/4.0/4.7（综合 3.6→4.0），机械读数表单列不折算；**静态分不写 verified，观感分待人测签字**。④ `closeout:full` 连续 3 次均 exit 1（P6 源绑定因本包 D3 收敛 + 他方 WIP 叠加致源码树不精确），如实记 `d5/closeout-runs.json`，**不推给 W 类、不冒充通过**；定向收口 25/25 门 PASS，4 门排除未通过。**程序终态 `done-partial`，未宣布 completed**（§8 第 3 条未达，补腿条件在册）。
+- **D5 未闭合（补腿条件）**：他方 WIP 与并发写入者收口形成干净树 → Result Studio 证据 owner 重采 P6 源绑定 → 复跑 `closeout:full` 三连；22 条人眼签字、U-01~U-06 裁决、V 类凭据/平台/perf 环境、`light tertiary on subtle` 4.40:1 观感、12 文件 focus 缺口逐件见 `d5/gap-ledger.json`。Agent 不代答、不冒 verified。
+
+- **BLOCK-421 追加（同一 in_progress 条目，不新增段、不新增债；UI-### 沿用 UI-702）**：工作区布局层单源收敛——`workspaceSessionLayout` 2→1、`workspaceSessionFrame` 3→1，960/700 断点差异改走 `--ws-frame-padding` / `--ws-chat-frame-padding` / `--ws-layout-gap`（默认值真源 `global.css:root`，媒体查询 `html:root` 抬高特异性）。`gate:ui-layout` PASS 且 WIP 既存重复 0 组，负测 7/7（含归零后旧重复也必红）。**computed style 六视口逐字等价 ⇒ 零视觉变化**，不冒充观感改善。`code-size` 7764→7761 行 / −80 字节合法下调重打。用户 2026-11-11 授权接管该 WIP 文件布局层；未撤销 2026-10-30 中栏 420 保底裁决、未改视觉 token、未改断点档位数。
+
+- **BLOCK-422 追加（同段，不新增债）**：① `.sc-messages` 宽屏 860px 居中阅读宽度（`max(18px, calc((100% - 860px)/2))`），窄屏 18px 保底，实测中栏 1018 / 消息 860；② `--petri-text-tertiary` `#71717a→#6b6b73`，subtle 表面 4.40→**4.81:1** 达标，`gate:ui-a11y` 对比度 **32 对 0 违规**，token 对账表同步。`code-size` 两文件锚点下降后重打。**观感 `pending_human_eye`**，等用户验收，不写 verified。
+
+- **BLOCK-423 追加（同段，不新增债）**：设置页视觉改版——独立工作区 + 264px 分组侧栏（四组 + 当前分区说明，≤960→208px、≤700→60px 图标栏）+ 右栏 760px 中等阅读列 + section 卡片化 + field 分隔线 + 控件统一 token（`border-input`/32px 高/checkbox accent）。参照 `reference/ZCode/docs/ui/settings-*.md`，只移植布局与层级语言，配色与字号档位仍用本仓 token。**门禁抓真 4 类后修正**（plain CSS→module.css、新增断点→复用既有档、token 契约 5 类、未使用变量与动态下标）。`theme-token-contract` 19/19、设置面板 88/88。**观感 `pending_human_eye`**，等用户验收，不写 verified。
+
 ## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "m2-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-428",
+  "status": "completed-with-external-blocked",
+  "deliverables": [
+    { "id": "M2-1", "what": "append-only transcript + hydrate + 半截 tool call 合成 interrupted result（消除 dangling tool call）", "terminal": "done", "evidence": "test/m2-long-task-resume.test.mjs 7/7" },
+    { "id": "M2-2", "what": "运行时 checkpoint 结构化投影：写/读/校验三段，损坏 CHECKPOINT_DAMAGED fail-closed；hydrate 保留作降级", "terminal": "done", "evidence": "test/m2-long-task-resume.test.mjs + gate 负测" },
+    { "id": "M2-3", "what": "8 阶段 durable 任务图：每节点转移落盘 / maxConsecutiveErrors 暂停 / 失败节点重派 / kill-resume 不回退", "terminal": "done", "evidence": "test/m2-long-task-resume.test.mjs" },
+    { "id": "M2-4", "what": "commandId CAS + ACK duplicate/stale/noop 幂等投影（单一 owner admission）", "terminal": "done", "evidence": "test/m2-long-task-resume.test.mjs + gate 负测" },
+    { "id": "M2-5", "what": "取消单一 owner + 后台进程持久化租约（重启后孤儿进程可识别）", "terminal": "done", "evidence": "test/m2-long-task-resume.test.mjs" },
+    { "id": "M2-4-db", "what": "DB 层 UNIQUE(task_id, seq) 唯一约束", "terminal": "external-blocked", "reason": "db/schema.js 与 agent-task-store.js 在 perf 基线 HOT_PATH_FILES 内，改动令 coreSha 绑定失效；红线禁止直接重采基线/抬阈值", "closureCondition": "干净树 + owner 按全量证据流程重采 perf 基线后，按 migrations 流程加约束并复跑 gate:long-task-resume" },
+    { "id": "M2-live", "what": "9223 离屏崩溃注入 flow + 「重启 resume 工具调用数/消息序列逐字对齐」实机证据", "terminal": "external-blocked", "reason": "本包零 GUI/后端运行时改动，无窗栈未启动；不冒充实机证据", "closureCondition": "M4 建 fixture 后在 9223 离屏实例跑 dev-verify flow（禁 PETRI_TEST_ONSCREEN、跑完立即 kill）" }
+  ],
+  "hk01": {
+    "first": "ERR_MODULE_NOT_FOUND 1 failed",
+    "second": "M2-4 测试夹具缺 payload 1 failed",
+    "third": "门自身租约 API 残缺抛 TypeError 1 failed（已修门 fail-closed）",
+    "final": "14/14 pass 0 fail",
+    "gateSelfTest": "test/m2-resume-gate.test.mjs 7 项篡改必红全绿"
+  },
+  "gates": {
+    "specialty": "gate:long-task-resume 连续 3 轮 PASS 0 issues（m2-run-1/2/3.json）",
+    "lint": "新增 5 文件 lint 0",
+    "w5a": "PASS（新测试挂 rule）",
+    "docs": "PASS 573 registered",
+    "uiAudit": "PASS",
+    "testChangedList": "exit 0",
+    "testChanged": { "tests": 1441, "pass": 1432, "fail": 2, "skipped": 7, "failures": ["UI-629 布局 gap 锚（W 类在制 WIP CSS）", "P6 源绑定（W 类在制 WIP 9 文件）"], "exit": 1 },
+    "closeout": { "exit": 1, "passed": ["audit:compact", "hygiene:check", "docs:check", "ui:audit:check"], "firstFailed": "test:changed", "unreachedAfterFailFast": 13 }
+  },
+  "zeroChanges": {
+    "schema": "db/schema.js 0 行",
+    "server": "core/petri-server/server.js 0 行",
+    "taskStore": "agent-task-store.js 0 行",
+    "coreSha": "7493447930e3f558 绑定未动",
+    "MAX_AGENT_ITERS": "Infinity 未改",
+    "workspaceExec": "默认放行未改"
+  },
+  "zeroScope": ["零新增依赖", "零放宽基线", "零触碰他方在制 WIP", "零 stage 零提交", "零撤销既有裁决", "零 G1+ 外推"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

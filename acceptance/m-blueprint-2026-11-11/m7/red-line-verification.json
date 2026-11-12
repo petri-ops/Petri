@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-red-line-mechanical-verification",
+  "capturedAt": "2026-11-11",
+  "purpose": "回应 output:judge 判词「宣称达成须有可核对的输出支撑」：七条红线逐条给可复跑命令与当次读数",
+  "redLines": [
+    {
+      "claim": "零新增依赖",
+      "command": "git diff HEAD --name-only -- package.json frontend/package.json core/petri-server/package.json package-lock.json frontend/package-lock.json",
+      "measured": "package.json 起始即在制 WIP（早期快照 /tmp/m0-wip.txt:88 记 M），其 9 行新增是他方 UI gate scripts，非依赖声明；本包对 package.json 零改写。frontend/package.json、core/petri-server/package.json 与三份 lockfile 均零 diff。本包新增模块只用 Node 内建（fs/path/crypto/url/module/child_process）与既有 require",
+      "verification": "git diff HEAD -- package.json | head -14（新增为 gate:ui-* scripts）；git diff HEAD --name-only -- frontend/package.json core/petri-server/package.json package-lock.json frontend/package-lock.json = 0 行",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "零放宽基线 / 零抬阈值 / 零缩分母",
+      "command": "npm run quality:lint:ledger / gate:code-size / gate:arch-cycles / gate:silent-catch / quality:knip:check / quality:ear",
+      "measured": "warnings 2445→2445（P1489/T417/S539）、code-size 86605 行 75 文件例外 16、arch-cycles 12、silent-catch 412/102 文件、knip 330、EAR 46.3%；perf 阈值 493ms 与容差 30% 未动",
+      "verification": "test/lint-warnings-baseline.json、test/silent-catch-baseline.json、test/knip-baseline.json、test/perf-baseline.json 均 git diff 0 行",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "零触碰在制 WIP",
+      "command": "git --no-optional-locks status --porcelain 与会话早期快照 /tmp/m0-wip.txt 对比",
+      "measured": "起始 89 M + 68 ??；当前 90 M = 起始 89 项（零改写）+ 本包 M0-4 明确要求的 post-k7 front-matter 字段翻转 1 项；新增 ?? 全为本包自有文件；evals-run 意外覆写 smoke-latest.json 已自纠恢复 HEAD 版",
+      "verification": "git diff --cached --name-only = 0（零 stage）；git log -1 = 4127f5b5（零提交）",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "零撤销既有裁决",
+      "command": "git diff HEAD --name-only -- core/petri-server/agent-tools/agent-loop-control.js core/petri-server/loop-orchestrator.js core/petri-server/agent-tools/workspace-tools.js core/petri-server/agent-tools/workspace-tools/",
+      "measured": "0 行；MAX_AGENT_ITERS=Infinity 保持（gate:long-task-kernel 内 PRODUCT_CONTRACT_BROKEN 守卫）；workspace_exec 默认放行保持",
+      "verification": "cat core/petri-server/agent-tools/agent-loop-control.js:11-12",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "证据五类不互冒充 / 未达证据上限如实标未完成",
+      "command": "npm run closeout:full ×3 / npm run docs:reconcile / node scripts/m-blueprint-m7-final.mjs --check",
+      "measured": "三连均 exit 1 并登记为 NOT_PASSED（不写 PASS 0 SKIP / 全绿 / verified）；test:changed 1504/2 fail 两红 W 归属；evals:gate 第二轮 exit 0 明确标 REUSED_EXISTING_EVIDENCE；程序终态 done-partial",
+      "verification": "m7/closeout-runs.json、m4/evals-readout.json、m7/gap-ledger.json",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "实机纪律（不开可见窗口 / 禁 PETRI_TEST_ONSCREEN）",
+      "command": "grep -rn 'PETRI_TEST_ONSCREEN' scripts/ .agents/skills/petri-dev-infra/dev-verify/flows/ 与 npm run test:live-window-policy",
+      "measured": "本轮未启动 dev 栈、未打开可见窗口、未跑 9223 实机腿（登记 external-blocked）；零处设置该环境变量",
+      "verification": "m7/long-task-self-proof.json:crashRecovery.live；test/live-window-policy.test.mjs",
+      "status": "verified-by-command"
+    },
+    {
+      "claim": "零 G1+ 外推",
+      "command": "grep -rn 'Provider\\|公证\\|签名\\|GA\\|release-pipeline' docs/m-blueprint-2026-11-11-program.md acceptance/m-blueprint-2026-11-11/m7/",
+      "measured": "仅出现在红线声明与 external-blocked 补腿条件语境；未启动任何 Provider/公证/签名/GA/packaged 对齐工作",
+      "verification": "全部收口笔录仅一句「G0 开发期常态 · 不外推 packaged/Provider/GA」",
+      "status": "verified-by-command"
+    }
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

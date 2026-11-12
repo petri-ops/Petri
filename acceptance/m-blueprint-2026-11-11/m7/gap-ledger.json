@@ -1,0 +1,1287 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-gap-ledger",
+  "capturedAt": "2026-11-11T14:19:40.679Z",
+  "policy": "逐件终态：零 in_progress、零编造计数；U/E/V/W 四类不计入完成数但逐个终态化并给补腿条件",
+  "totals": {
+    "findings": 70,
+    "gaps": 12,
+    "items": 82,
+    "expected": 82
+  },
+  "counts": {
+    "done": 21,
+    "done-partial": 47,
+    "retain-with-reason": 0,
+    "pending_human_eye": 2,
+    "external-blocked": 3,
+    "pending_user_ruling": 3,
+    "W": 6
+  },
+  "countedAsCompleted": 68,
+  "notCounted": 14,
+  "findings": [
+    {
+      "id": "M-01",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-02",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-03",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-04",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-05",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-06",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "独立 no-tool goal verifier（产物/todo/后台三判据）+ 10 态状态机"
+    },
+    {
+      "id": "M-07",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "append-only transcript + checkpoint 任务状态段（todo/plan/permission 投影）"
+    },
+    {
+      "id": "M-08",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "perf 红轮 V 类裁决（coreSha 绑定有效、不重采不抬阈值）；重锚需干净树+owner 全量证据"
+    },
+    {
+      "id": "M-09",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "用户可感性能纯判据门已建；quality:perf 场景扩面需重锚基线（external-blocked）"
+    },
+    {
+      "id": "M-10",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "零新依赖长列表窗口化纯函数（可见窗口有界）"
+    },
+    {
+      "id": "M-11",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "相对退化判据与植入慢样本必红负测（M0-2）"
+    },
+    {
+      "id": "M-12",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-13",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-14",
+      "terminal": "W",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "lint 2 errors 属在制 WIP，owner 收口；warnings 分域只减棘轮已核对并回落 2445 基线"
+    },
+    {
+      "id": "M-15",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "巨型文件拆刀属在制 WIP 邻近面与基线动作，零触碰、逐会话拆刀补腿"
+    },
+    {
+      "id": "M-16",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "静默 catch 分域下降表只读；扩口径修根因后按只减下调基线"
+    },
+    {
+      "id": "M-17",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "12 环逐环消亡归 M6-A 结构单源组（带拆前拆后同套绿）"
+    },
+    {
+      "id": "M-18",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-19",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-20",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-21",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "IPC 三真相只读视图已建；channels 生成 catalog 归 M6-A"
+    },
+    {
+      "id": "M-22",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "28 文件绕桥迁移涉及在制 WIP，零触碰"
+    },
+    {
+      "id": "M-23",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "resolveDataDir/readConfig 单源归 M6-A"
+    },
+    {
+      "id": "M-24",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-25",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "README 分类导航材料已出；范围需用户裁决"
+    },
+    {
+      "id": "M-26",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "数字口径单源 m0-canonical-readings.json；门数现取对账"
+    },
+    {
+      "id": "M-27",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-28",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "needsApproval 首次有真实生产消费点 adjudicatePermission"
+    },
+    {
+      "id": "M-29",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "Skill 清单只读对账已出；统一结构化清单需用户裁决"
+    },
+    {
+      "id": "M-30",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "plugin-manager 21 public exports 逐导出消费方盘点归 M6-A"
+    },
+    {
+      "id": "M-31",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "动态 require 静态注册表归 M6-A"
+    },
+    {
+      "id": "M-32",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-33",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-34",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-35",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-36",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-37",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-38",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-39",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "untrusted 包装 + 系统条款判据已建；CSP/帧导航生产接线归 M6-A"
+    },
+    {
+      "id": "M-40",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-41",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "focus-visible 12 文件/16 声明属在制 CSS WIP，零触碰"
+    },
+    {
+      "id": "M-42",
+      "terminal": "pending_human_eye",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "E 类人眼路线已自动生成，签字槽全空"
+    },
+    {
+      "id": "M-43",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "U-04 档位收敛 pending_user_ruling，不改默认"
+    },
+    {
+      "id": "M-44",
+      "terminal": "pending_human_eye",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "对比度数值达标、观感仍待人眼签字"
+    },
+    {
+      "id": "M-45",
+      "terminal": "done",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "canonical 唯一分诊口径明确，机械读数仅作诊断不混用"
+    },
+    {
+      "id": "M-46",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "D5 closeout:full 三连 exit 1（P6 源绑定）属在制 WIP，登记 owner"
+    },
+    {
+      "id": "M-47",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "统一失败信封/静默 DDL 判红判据已建；ai-memory/pack 接线归 M6-A"
+    },
+    {
+      "id": "M-48",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "MCP uncaughtException 退出语义判据已建；生产 handler 接线归 M6-A"
+    },
+    {
+      "id": "M-49",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-50",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-51",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-52",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "取消单一 owner + 后台进程持久化租约（重启后孤儿进程可识别）"
+    },
+    {
+      "id": "M-53",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-54",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "可注入 provider 的 30 轮 mock loop 行为测试基座（非源码字符串扫描）"
+    },
+    {
+      "id": "M-55",
+      "terminal": "external-blocked",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "SSE 真实端点行为测试需 :3001 无窗栈实机；本包零后端改动"
+    },
+    {
+      "id": "M-56",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "本包 2 个新测试已挂 rule；约 90 存量未引用测试分批挂载归 M6-C"
+    },
+    {
+      "id": "M-57",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "1000 轮本地 fixture + 成功率/完成度/跨恢复一致性基线（claimStableLongTask 恒 false）"
+    },
+    {
+      "id": "M-58",
+      "terminal": "W",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "evals 接 closeout 需改 package.json（在制 WIP），owner 收口后由用户裁决"
+    },
+    {
+      "id": "M-59",
+      "terminal": "external-blocked",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "test:changed 长耗时拆片需用户裁决范围；本轮保持定向优先"
+    },
+    {
+      "id": "M-60",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "第五轮蓝图 status 三处翻转完成；post-h9 因受保护未跟踪 WIP 与既有契约断言保留 planned"
+    },
+    {
+      "id": "M-61",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "front-matter 状态对账门（植入必红负测 7/7）"
+    },
+    {
+      "id": "M-62",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-63",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "4 套 gap-ledger 只读剩余视图 191 件零 in_progress，L7 90↔93 矛盾显式暴露"
+    },
+    {
+      "id": "M-64",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "perf 矛盾结论降级、AUDIT-LOG 自稳、数字口径单源"
+    },
+    {
+      "id": "M-65",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "typescript 双版本 U 类决策材料在册，不改默认"
+    },
+    {
+      "id": "M-66",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "workspaces 迁移评估需用户裁决"
+    },
+    {
+      "id": "M-67",
+      "terminal": "external-blocked",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "CVE 联网扫描 external-blocked，G0 不外推"
+    },
+    {
+      "id": "M-68",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "登记制 pathNot + 动态入口静态注册归 M6-A"
+    },
+    {
+      "id": "M-69",
+      "terminal": "done-partial",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "状态机依赖注入地基已建；12 环逐环消亡归 M6-A 结构单源组"
+    },
+    {
+      "id": "M-70",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "三矩阵共用 schema 只读对账已建；生成器落地归 M6-A"
+    }
+  ],
+  "gaps": [
+    {
+      "id": "G-01",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "10 态显式 TurnMachine + 转移表 fail-closed；主循环接线 done-partial 归 M6-A"
+    },
+    {
+      "id": "G-02",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "统一边界族：provider usage 权威 / compact 双熔断 / 成本默认软提示 / 工具超时与输出预算单源"
+    },
+    {
+      "id": "G-03",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "append-only transcript + hydrate 中断合成 + 结构化 checkpoint（超越 ZCode hydrate）"
+    },
+    {
+      "id": "G-04",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "8 阶段 durable 任务图：落盘 / 暂停 / 重派 / 恢复不回退"
+    },
+    {
+      "id": "G-05",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "compact 五字段恢复契约 + 有界重读（5 文件 / 50k token）"
+    },
+    {
+      "id": "G-06",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "跨表只读对账门 + 拓扑并行调度 + 结果预算；生成器（1 工具 7→1）归 M6-A"
+    },
+    {
+      "id": "G-07",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "权限 fail-closed + 竞速 settled 闩 + 可恢复拒绝；needsApproval 真实消费"
+    },
+    {
+      "id": "G-08",
+      "terminal": "done-partial",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "commandId CAS + ACK duplicate/stale/noop 投影；DB UNIQUE 约束 external-blocked（perf 基线热路径）"
+    },
+    {
+      "id": "G-09",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "独立 no-tool goal verifier，闭合「以目标为输入」人设"
+    },
+    {
+      "id": "G-10",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "traceId 五类节点持久化投影 + usage 三层事实表 + 失败请求记账"
+    },
+    {
+      "id": "G-11",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "1000 轮 fixture + 基线；9223 实机崩溃恢复与真实 Provider external-blocked"
+    },
+    {
+      "id": "G-12",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "untrusted 包装 + 系统条款 + 来源标注；生产接线归 M6-A"
+    }
+  ],
+  "items": [
+    {
+      "id": "M-01",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-02",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-03",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-04",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-05",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-06",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "独立 no-tool goal verifier（产物/todo/后台三判据）+ 10 态状态机"
+    },
+    {
+      "id": "M-07",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "append-only transcript + checkpoint 任务状态段（todo/plan/permission 投影）"
+    },
+    {
+      "id": "M-08",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "perf 红轮 V 类裁决（coreSha 绑定有效、不重采不抬阈值）；重锚需干净树+owner 全量证据"
+    },
+    {
+      "id": "M-09",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "用户可感性能纯判据门已建；quality:perf 场景扩面需重锚基线（external-blocked）"
+    },
+    {
+      "id": "M-10",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "零新依赖长列表窗口化纯函数（可见窗口有界）"
+    },
+    {
+      "id": "M-11",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "相对退化判据与植入慢样本必红负测（M0-2）"
+    },
+    {
+      "id": "M-12",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-13",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-14",
+      "terminal": "W",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "lint 2 errors 属在制 WIP，owner 收口；warnings 分域只减棘轮已核对并回落 2445 基线"
+    },
+    {
+      "id": "M-15",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "巨型文件拆刀属在制 WIP 邻近面与基线动作，零触碰、逐会话拆刀补腿"
+    },
+    {
+      "id": "M-16",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "静默 catch 分域下降表只读；扩口径修根因后按只减下调基线"
+    },
+    {
+      "id": "M-17",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "12 环逐环消亡归 M6-A 结构单源组（带拆前拆后同套绿）"
+    },
+    {
+      "id": "M-18",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-19",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-20",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-21",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "IPC 三真相只读视图已建；channels 生成 catalog 归 M6-A"
+    },
+    {
+      "id": "M-22",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "28 文件绕桥迁移涉及在制 WIP，零触碰"
+    },
+    {
+      "id": "M-23",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "resolveDataDir/readConfig 单源归 M6-A"
+    },
+    {
+      "id": "M-24",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-25",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "README 分类导航材料已出；范围需用户裁决"
+    },
+    {
+      "id": "M-26",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "数字口径单源 m0-canonical-readings.json；门数现取对账"
+    },
+    {
+      "id": "M-27",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-28",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "needsApproval 首次有真实生产消费点 adjudicatePermission"
+    },
+    {
+      "id": "M-29",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "Skill 清单只读对账已出；统一结构化清单需用户裁决"
+    },
+    {
+      "id": "M-30",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "plugin-manager 21 public exports 逐导出消费方盘点归 M6-A"
+    },
+    {
+      "id": "M-31",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "动态 require 静态注册表归 M6-A"
+    },
+    {
+      "id": "M-32",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-33",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-34",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-35",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-36",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-37",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-38",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-39",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "untrusted 包装 + 系统条款判据已建；CSP/帧导航生产接线归 M6-A"
+    },
+    {
+      "id": "M-40",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-41",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "focus-visible 12 文件/16 声明属在制 CSS WIP，零触碰"
+    },
+    {
+      "id": "M-42",
+      "terminal": "pending_human_eye",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "E 类人眼路线已自动生成，签字槽全空"
+    },
+    {
+      "id": "M-43",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "U-04 档位收敛 pending_user_ruling，不改默认"
+    },
+    {
+      "id": "M-44",
+      "terminal": "pending_human_eye",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "对比度数值达标、观感仍待人眼签字"
+    },
+    {
+      "id": "M-45",
+      "terminal": "done",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "canonical 唯一分诊口径明确，机械读数仅作诊断不混用"
+    },
+    {
+      "id": "M-46",
+      "terminal": "W",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "D5 closeout:full 三连 exit 1（P6 源绑定）属在制 WIP，登记 owner"
+    },
+    {
+      "id": "M-47",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "统一失败信封/静默 DDL 判红判据已建；ai-memory/pack 接线归 M6-A"
+    },
+    {
+      "id": "M-48",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "MCP uncaughtException 退出语义判据已建；生产 handler 接线归 M6-A"
+    },
+    {
+      "id": "M-49",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-50",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-51",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-52",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "取消单一 owner + 后台进程持久化租约（重启后孤儿进程可识别）"
+    },
+    {
+      "id": "M-53",
+      "terminal": "done-partial",
+      "stage": "m5",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-54",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "可注入 provider 的 30 轮 mock loop 行为测试基座（非源码字符串扫描）"
+    },
+    {
+      "id": "M-55",
+      "terminal": "external-blocked",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "SSE 真实端点行为测试需 :3001 无窗栈实机；本包零后端改动"
+    },
+    {
+      "id": "M-56",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "本包 2 个新测试已挂 rule；约 90 存量未引用测试分批挂载归 M6-C"
+    },
+    {
+      "id": "M-57",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "1000 轮本地 fixture + 成功率/完成度/跨恢复一致性基线（claimStableLongTask 恒 false）"
+    },
+    {
+      "id": "M-58",
+      "terminal": "W",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "evals 接 closeout 需改 package.json（在制 WIP），owner 收口后由用户裁决"
+    },
+    {
+      "id": "M-59",
+      "terminal": "external-blocked",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "test:changed 长耗时拆片需用户裁决范围；本轮保持定向优先"
+    },
+    {
+      "id": "M-60",
+      "terminal": "done-partial",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "第五轮蓝图 status 三处翻转完成；post-h9 因受保护未跟踪 WIP 与既有契约断言保留 planned"
+    },
+    {
+      "id": "M-61",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "front-matter 状态对账门（植入必红负测 7/7）"
+    },
+    {
+      "id": "M-62",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "判据/只读视图已落地或在册；生产逐件接线与实机证据按蓝图归 M6-A/M6-C 或 U/E/V/W 类，不给未完成项写 done"
+    },
+    {
+      "id": "M-63",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "4 套 gap-ledger 只读剩余视图 191 件零 in_progress，L7 90↔93 矛盾显式暴露"
+    },
+    {
+      "id": "M-64",
+      "terminal": "done",
+      "stage": "m0",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m0/m0-evidence.json",
+      "note": "perf 矛盾结论降级、AUDIT-LOG 自稳、数字口径单源"
+    },
+    {
+      "id": "M-65",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "typescript 双版本 U 类决策材料在册，不改默认"
+    },
+    {
+      "id": "M-66",
+      "terminal": "pending_user_ruling",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "workspaces 迁移评估需用户裁决"
+    },
+    {
+      "id": "M-67",
+      "terminal": "external-blocked",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "CVE 联网扫描 external-blocked，G0 不外推"
+    },
+    {
+      "id": "M-68",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "登记制 pathNot + 动态入口静态注册归 M6-A"
+    },
+    {
+      "id": "M-69",
+      "terminal": "done-partial",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "状态机依赖注入地基已建；12 环逐环消亡归 M6-A 结构单源组"
+    },
+    {
+      "id": "M-70",
+      "terminal": "done-partial",
+      "stage": "m6",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "note": "三矩阵共用 schema 只读对账已建；生成器落地归 M6-A"
+    },
+    {
+      "id": "G-01",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "10 态显式 TurnMachine + 转移表 fail-closed；主循环接线 done-partial 归 M6-A"
+    },
+    {
+      "id": "G-02",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "统一边界族：provider usage 权威 / compact 双熔断 / 成本默认软提示 / 工具超时与输出预算单源"
+    },
+    {
+      "id": "G-03",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "append-only transcript + hydrate 中断合成 + 结构化 checkpoint（超越 ZCode hydrate）"
+    },
+    {
+      "id": "G-04",
+      "terminal": "done",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "8 阶段 durable 任务图：落盘 / 暂停 / 重派 / 恢复不回退"
+    },
+    {
+      "id": "G-05",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "compact 五字段恢复契约 + 有界重读（5 文件 / 50k token）"
+    },
+    {
+      "id": "G-06",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "跨表只读对账门 + 拓扑并行调度 + 结果预算；生成器（1 工具 7→1）归 M6-A"
+    },
+    {
+      "id": "G-07",
+      "terminal": "done",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "权限 fail-closed + 竞速 settled 闩 + 可恢复拒绝；needsApproval 真实消费"
+    },
+    {
+      "id": "G-08",
+      "terminal": "done-partial",
+      "stage": "m2",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "note": "commandId CAS + ACK duplicate/stale/noop 投影；DB UNIQUE 约束 external-blocked（perf 基线热路径）"
+    },
+    {
+      "id": "G-09",
+      "terminal": "done",
+      "stage": "m1",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "note": "独立 no-tool goal verifier，闭合「以目标为输入」人设"
+    },
+    {
+      "id": "G-10",
+      "terminal": "done",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "traceId 五类节点持久化投影 + usage 三层事实表 + 失败请求记账"
+    },
+    {
+      "id": "G-11",
+      "terminal": "done-partial",
+      "stage": "m4",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "note": "1000 轮 fixture + 基线；9223 实机崩溃恢复与真实 Provider external-blocked"
+    },
+    {
+      "id": "G-12",
+      "terminal": "done-partial",
+      "stage": "m3",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "note": "untrusted 包装 + 系统条款 + 来源标注；生产接线归 M6-A"
+    }
+  ],
+  "dimensions": [
+    {
+      "name": "功能完整性",
+      "col6": 4.5,
+      "col7": 4.5,
+      "col8": 4.5,
+      "delta": "平",
+      "why": "长任务内核三件套落地但主循环未接线；165 通道逐件分诊仍 done-partial",
+      "anchor": "core/petri-server/agent-tools/turn-machine.js + m6/E/m6-e-view.json"
+    },
+    {
+      "name": "性能表现",
+      "col6": 4,
+      "col7": 3.8,
+      "col8": 3.9,
+      "delta": "升 0.1",
+      "why": "用户可感性能纯判据门 + 零依赖窗口化落地；perf 红轮 V 类如实挂账未消",
+      "anchor": "core/petri-server/agent-tools/long-task-observability.js:adjudicateUserPerceivedPerf"
+    },
+    {
+      "name": "代码质量",
+      "col6": 4.2,
+      "col7": 4.1,
+      "col8": 4.2,
+      "delta": "升 0.1",
+      "why": "新增模块 lint 0 + 门自身篡改必红负测；W 类 lint 2 errors 与 412 静默 catch 仍在",
+      "anchor": "test/m1-kernel-gate.test.mjs … test/m6-engineering-debt.test.mjs"
+    },
+    {
+      "name": "可维护性",
+      "col6": 3.9,
+      "col7": 3.8,
+      "col8": 3.9,
+      "delta": "升 0.1",
+      "why": "数字口径单源 + 4 套 ledger 只读视图；IPC 三真相与巨型文件拆刀仍未收敛",
+      "anchor": "acceptance/m-blueprint-2026-11-11/m0/m0-gap-ledger-view.json"
+    },
+    {
+      "name": "可扩展性",
+      "col6": 4.5,
+      "col7": 4.4,
+      "col8": 4.5,
+      "delta": "升 0.1",
+      "why": "跨表对账门暴露 115/114/71 漂移并给出声明投影方向；生成器归 M6-A",
+      "anchor": "core/petri-server/agent-tools/tool-capability.js:adjudicateToolSurface"
+    },
+    {
+      "name": "安全性",
+      "col6": 4.4,
+      "col7": 4.2,
+      "col8": 4.3,
+      "delta": "升 0.1",
+      "why": "8 类安全判据 + 15/15 负测 + secret/arch 绿；生产接线 8 项 done-partial，不冒充已加固",
+      "anchor": "core/petri-server/agent-tools/security-boundaries.js"
+    },
+    {
+      "name": "界面与交互体验",
+      "col6": 4.2,
+      "col7": 4.2,
+      "col8": 4.2,
+      "delta": "平",
+      "why": "本轮零 UI 增量，W 类 focus/设置面零触碰，人眼签字仍全空",
+      "anchor": "acceptance/m-blueprint-2026-11-11/m6/D/m6-d-view.json"
+    },
+    {
+      "name": "错误处理与边界",
+      "col6": 4.2,
+      "col7": 4.1,
+      "col8": 4.2,
+      "delta": "升 0.1",
+      "why": "统一失败信封 / 静默 DDL 判红 / checkpoint 损坏 fail-closed 判据已建；生产接线归 M6-A",
+      "anchor": "core/petri-server/agent-tools/security-boundaries.js:failureEnvelope"
+    },
+    {
+      "name": "测试覆盖",
+      "col6": 4.3,
+      "col7": 4,
+      "col8": 4.3,
+      "delta": "升 0.3",
+      "why": "M0–M7 共 11+18+14+18+14+15+9 项行为/负测 + 4 个专项门；SSE 实机腿 external-blocked",
+      "anchor": "test/m0-*.test.mjs … test/m7-*.test.mjs"
+    },
+    {
+      "name": "文档完善度",
+      "col6": 4.7,
+      "col7": 4.5,
+      "col8": 4.6,
+      "delta": "升 0.1",
+      "why": "六件套逐阶段回写、docs:check 577、4 套 ledger 只读视图；README 分类导航材料待裁决",
+      "anchor": "docs/m-blueprint-2026-11-11-program.md + docs/README.md 428–435"
+    },
+    {
+      "name": "依赖与架构",
+      "col6": 4.1,
+      "col7": 4,
+      "col8": 4,
+      "delta": "平",
+      "why": "零新增依赖；12 环与双版本 U 类维持，M6-A 结构单源未接线",
+      "anchor": "scripts/m-blueprint-m6-debt-gate.mjs:collectM6Views"
+    }
+  ],
+  "dimensionSummary": {
+    "col7Sum": 45.6,
+    "col8Sum": 46.6,
+    "rises": 8,
+    "flats": 3,
+    "drops": 0,
+    "note": "第八列为本轮证据口径下的独立估值，不回溯改第七列，不等于 verified"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

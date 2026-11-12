@@ -1,0 +1,33 @@
+{
+  "group": "F-文档与依赖",
+  "uMaterial": {
+    "status": "pending_user_ruling",
+    "defaultChanged": false,
+    "topic": "typescript 双版本统一 / ADMISSION observe→enforce / FK OFF-ON / 虚拟列表依赖",
+    "candidates": [
+      {
+        "option": "维持双版本与既有默认",
+        "risk": "类型面漂移持续",
+        "recommendation": "当前 G0 默认"
+      },
+      {
+        "option": "统一版本并跑前后同套定向测试",
+        "risk": "需 changelog + lockfile diff 审查",
+        "recommendation": "需用户显式裁决"
+      }
+    ],
+    "note": "Agent 不代答，不改默认语义"
+  },
+  "skills": {
+    "count": 0,
+    "rewritten": false,
+    "source": "resources/skills/manifest.json",
+    "note": "Skill 清单一致性只读对账；skills:check 当次读数另取"
+  },
+  "terminal": "pending_user_ruling + done-partial",
+  "reason": "typescript 双版本等 U 类不代答；README 分类导航与 Skill 清单统一需用户裁决范围",
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

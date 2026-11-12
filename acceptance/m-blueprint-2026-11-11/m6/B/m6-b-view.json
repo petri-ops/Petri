@@ -1,0 +1,31 @@
+{
+  "group": "B-巨型文件",
+  "bigFiles": [
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "lines": 1964,
+      "rewritten": false
+    },
+    {
+      "path": "core/petri-server/helpers/tools-executor.js",
+      "lines": 2081,
+      "rewritten": false
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "lines": 1225,
+      "rewritten": false
+    },
+    {
+      "path": "core/petri-server/helpers/scene3d.js",
+      "lines": 1088,
+      "rewritten": false
+    }
+  ],
+  "terminal": "W + done-partial",
+  "reason": "每刀须 ≤−100 行且拆前拆后同套绿，属逐会话拆刀；本包零拆分",
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

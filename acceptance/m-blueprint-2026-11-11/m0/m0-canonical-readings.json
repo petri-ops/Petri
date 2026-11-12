@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-canonical-readings",
+  "generatedAt": "2026-11-12T11:08:52.905Z",
+  "policy": "数值口径单源：本 JSON 为 M 波次读数的唯一引用点；数字由当次命令现取，不手抄历史全绿；未取数项如实标注",
+  "baselineCommit": "4127f5b5",
+  "wip": {
+    "modified": 89,
+    "untracked": 68,
+    "note": "当次 git --no-optional-locks status --porcelain 读数；任务书记 67 untracked，差 1 已留痕；零触碰/零 stage/零提交"
+  },
+  "closeout": {
+    "blockingGates": 16,
+    "reportOnlyGates": 1
+  },
+  "registry": {
+    "total": 579,
+    "activeWorkPackages": 0
+  },
+  "impactMap": {
+    "rules": 374
+  },
+  "gates": [
+    {
+      "name": "docs:check",
+      "exit": 0,
+      "readout": "PASS 569 registered documents"
+    },
+    {
+      "name": "ui:audit:check",
+      "exit": 0,
+      "readout": "PASS 633 个带实现证据的 UI 编号"
+    },
+    {
+      "name": "hygiene:check",
+      "exit": 0,
+      "readout": "PASS 列出 129+ untracked，仅报告"
+    },
+    {
+      "name": "quality:secret",
+      "exit": 0,
+      "readout": "PASS 3 类 fixture 豁免在册"
+    },
+    {
+      "name": "gate:code-size",
+      "exit": 0,
+      "readout": "PASS 75 文件 / 86605 行 / 生效例外 16"
+    },
+    {
+      "name": "gate:arch-cycles",
+      "exit": 0,
+      "readout": "PASS 12 存量环在册，无新环"
+    },
+    {
+      "name": "quality:knip:check",
+      "exit": 0,
+      "readout": "PASS 保留面 330 键冻结"
+    },
+    {
+      "name": "skills:check",
+      "exit": 0,
+      "readout": "PASS 11 内置 + 3 领域包"
+    },
+    {
+      "name": "quality:types",
+      "exit": 0,
+      "readout": "PASS tsc --noEmit 0 error（incremental）"
+    },
+    {
+      "name": "quality:arch",
+      "exit": 0,
+      "readout": "PASS R1–R5 无违规"
+    },
+    {
+      "name": "quality:ear",
+      "exit": 0,
+      "readout": "PASS 1052/2271 = 46.3%（阈值 40%；manifest 43.3%）"
+    },
+    {
+      "name": "test:changed:list",
+      "exit": 2,
+      "readout": "FAIL_CLOSED：2 个 acceptance/m-blueprint-2026-11-11 文件未挂 impact-map rule（本轮引入，M0 补 rule 消解）"
+    },
+    {
+      "name": "quality:lint",
+      "exit": 1,
+      "readout": "FAIL 2 errors / 2445 warnings；SettingsNav.tsx:39 与 block414-backend-port-reuse.test.mjs:12 均属在制 WIP（W 类）"
+    },
+    {
+      "name": "quality:perf",
+      "exit": 1,
+      "readout": "FAIL 连续 5/5 采样 packaged_start 496/501/504/512/516ms vs 阈值 493ms；coreSha 7493447930e3f558 绑定有效、host 匹配；不重采基线、不抬阈值、不放宽容差"
+    }
+  ],
+  "remediation": [
+    {
+      "gate": "test:changed:list",
+      "before": "exit 2 FAIL_CLOSED：2 个 acceptance/m-blueprint-2026-11-11 文件未挂 impact-map rule",
+      "action": "精确增量追加 1 条 m-blueprint-program rule（既有 373 条 rule 零改写）",
+      "after": "exit 0（当次复跑）；不改写上面的原始读数，历史读数与修复后读数并列留痕"
+    },
+    {
+      "gate": "test:changed --run",
+      "before": "1348 tests / 3 fail：W5a 新测试未挂 rule tests（本包引入）+ UI-629 布局 gap 锚 + P6 源绑定",
+      "action": "W5a：把 test/m0-criteria-boundaries.test.mjs 挂进 rule tests（隔离复跑 14/14 绿）；UI-629 与 P6 属在制 WIP（相关 CSS 全为 M 状态），按 W 类零触碰登记，不代改",
+      "after": "W5a 修复已验证；另两条属 W 归属，复跑不为零，不冒充通过"
+    },
+    {
+      "gate": "quality:lint:ledger",
+      "before": "4 项：2 条本包新增 lint（动态下标 warning ×2 / 未使用变量 ×1）+ 2 条 W 类在制 WIP errors",
+      "action": "本包 3 处根因全修（Map 查表 / 删除未使用变量）；warnings 回落 2445 = 基线",
+      "after": "仅剩 2 条 W 类 errors（SettingsNav.tsx:39 / block414-backend-port-reuse.test.mjs:12），owner 收口"
+    }
+  ],
+  "notMeasured": [
+    {
+      "name": "closeout",
+      "reason": "M0 收口阶段前台跑，读数另落 m0-closeout-gates.json；未跑前不写通过"
+    },
+    {
+      "name": "closeout:full",
+      "reason": "全程序收口（M7）才跑；当前树含 89 M + 68 ?? 在制 WIP，不可能满足「干净树」前提，如实标注"
+    },
+    {
+      "name": "test:changed --run",
+      "reason": "M0 收口阶段跑；未跑前不写通过"
+    },
+    {
+      "name": "test:all:workspace",
+      "reason": "定向优先纪律：默认不跑全量；未跑前不写通过"
+    },
+    {
+      "name": "gate:post-h9-contracts",
+      "reason": "M7 总收口才跑；未跑前不写通过"
+    },
+    {
+      "name": "quality:surface",
+      "reason": "M3 工具能力面重生成后再跑；未跑前不写通过"
+    }
+  ],
+  "perfContradiction": {
+    "sources": [
+      "docs/Petri-Desktop-Evaluation-Report-2026-11-05.md:94（稳定红）",
+      "docs/Petri-Desktop-Evaluation-Report-2026-11-05.md:197（并非稳定红）",
+      "docs/AUDIT-LOG.md:127（perf=V 稳定红不重采不放宽）"
+    ],
+    "verdict": "当次 5/5 全红且 coreSha 绑定有效 ⇒ 矛盾声明降级为「当次读数为准，历史措辞不复用」；按红线不重采基线、不抬阈值、不放宽容差，红轮如实挂账并给补腿条件"
+  }
+}

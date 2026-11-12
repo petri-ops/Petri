@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-eleven-dimension-col8",
+  "col7Sum": 45.6,
+  "col8Sum": 46.6,
+  "rises": 8,
+  "flats": 3,
+  "drops": 0,
+  "note": "不回溯改第七列；第八列非 verified 声明",
+  "dimensions": [
+    {
+      "name": "功能完整性",
+      "col6": 4.5,
+      "col7": 4.5,
+      "col8": 4.5,
+      "delta": "平",
+      "why": "长任务内核三件套落地但主循环未接线；165 通道逐件分诊仍 done-partial",
+      "anchor": "core/petri-server/agent-tools/turn-machine.js + m6/E/m6-e-view.json"
+    },
+    {
+      "name": "性能表现",
+      "col6": 4,
+      "col7": 3.8,
+      "col8": 3.9,
+      "delta": "升 0.1",
+      "why": "用户可感性能纯判据门 + 零依赖窗口化落地；perf 红轮 V 类如实挂账未消",
+      "anchor": "core/petri-server/agent-tools/long-task-observability.js:adjudicateUserPerceivedPerf"
+    },
+    {
+      "name": "代码质量",
+      "col6": 4.2,
+      "col7": 4.1,
+      "col8": 4.2,
+      "delta": "升 0.1",
+      "why": "新增模块 lint 0 + 门自身篡改必红负测；W 类 lint 2 errors 与 412 静默 catch 仍在",
+      "anchor": "test/m1-kernel-gate.test.mjs … test/m6-engineering-debt.test.mjs"
+    },
+    {
+      "name": "可维护性",
+      "col6": 3.9,
+      "col7": 3.8,
+      "col8": 3.9,
+      "delta": "升 0.1",
+      "why": "数字口径单源 + 4 套 ledger 只读视图；IPC 三真相与巨型文件拆刀仍未收敛",
+      "anchor": "acceptance/m-blueprint-2026-11-11/m0/m0-gap-ledger-view.json"
+    },
+    {
+      "name": "可扩展性",
+      "col6": 4.5,
+      "col7": 4.4,
+      "col8": 4.5,
+      "delta": "升 0.1",
+      "why": "跨表对账门暴露 115/114/71 漂移并给出声明投影方向；生成器归 M6-A",
+      "anchor": "core/petri-server/agent-tools/tool-capability.js:adjudicateToolSurface"
+    },
+    {
+      "name": "安全性",
+      "col6": 4.4,
+      "col7": 4.2,
+      "col8": 4.3,
+      "delta": "升 0.1",
+      "why": "8 类安全判据 + 15/15 负测 + secret/arch 绿；生产接线 8 项 done-partial，不冒充已加固",
+      "anchor": "core/petri-server/agent-tools/security-boundaries.js"
+    },
+    {
+      "name": "界面与交互体验",
+      "col6": 4.2,
+      "col7": 4.2,
+      "col8": 4.2,
+      "delta": "平",
+      "why": "本轮零 UI 增量，W 类 focus/设置面零触碰，人眼签字仍全空",
+      "anchor": "acceptance/m-blueprint-2026-11-11/m6/D/m6-d-view.json"
+    },
+    {
+      "name": "错误处理与边界",
+      "col6": 4.2,
+      "col7": 4.1,
+      "col8": 4.2,
+      "delta": "升 0.1",
+      "why": "统一失败信封 / 静默 DDL 判红 / checkpoint 损坏 fail-closed 判据已建；生产接线归 M6-A",
+      "anchor": "core/petri-server/agent-tools/security-boundaries.js:failureEnvelope"
+    },
+    {
+      "name": "测试覆盖",
+      "col6": 4.3,
+      "col7": 4,
+      "col8": 4.3,
+      "delta": "升 0.3",
+      "why": "M0–M7 共 11+18+14+18+14+15+9 项行为/负测 + 4 个专项门；SSE 实机腿 external-blocked",
+      "anchor": "test/m0-*.test.mjs … test/m7-*.test.mjs"
+    },
+    {
+      "name": "文档完善度",
+      "col6": 4.7,
+      "col7": 4.5,
+      "col8": 4.6,
+      "delta": "升 0.1",
+      "why": "六件套逐阶段回写、docs:check 577、4 套 ledger 只读视图；README 分类导航材料待裁决",
+      "anchor": "docs/m-blueprint-2026-11-11-program.md + docs/README.md 428–435"
+    },
+    {
+      "name": "依赖与架构",
+      "col6": 4.1,
+      "col7": 4,
+      "col8": 4,
+      "delta": "平",
+      "why": "零新增依赖；12 环与双版本 U 类维持，M6-A 结构单源未接线",
+      "anchor": "scripts/m-blueprint-m6-debt-gate.mjs:collectM6Views"
+    }
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

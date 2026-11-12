@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "m5-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-431",
+  "status": "completed-with-done-partial",
+  "delegated": false,
+  "deliverables": [
+    { "id": "M5-1", "what": "全局可信 Origin 判据 + MCP 写面 stdio command 白名单 + 会话 token（伪造 Origin / /bin/sh 植入必红）", "terminal": "done-partial", "evidence": "test/m5-security-boundaries.test.mjs 8/8；判据层已落地", "closureCondition": "M6-A 接线到 bootstrap.js / routes/mcp-client.js，带拆前拆后同套绿基线" },
+    { "id": "M5-2", "what": "空 Origin 全方法 token 校验 + per-boot 随机 token + 废弃常量 Bearer desktop-local", "terminal": "done-partial", "evidence": "adjudicateLocalRequest + createBootToken；负测全绿", "closureCondition": "M6-A 接线到 local-request-boundary.js 并同步内部调用方携带 token" },
+    { "id": "M5-3", "what": "file:start-drag 登记根 + realpath 边界 + basename + 内容长度上限（SSH key / ../ 植入必红）", "terminal": "done-partial", "evidence": "adjudicateDragPath 负测", "closureCondition": "M6-A 接线到 src/ipc/file-dialog.js:310-366" },
+    { "id": "M5-4", "what": "权限降级覆盖所有 session（含 persist:petri-browser）+ session-created 钩子；帧导航 allowlist + userinfo 过滤", "terminal": "done-partial", "evidence": "adjudicatePermissionSessions / adjudicateFrameNavigation 负测", "closureCondition": "M6-A 接线到 src/main.js / security-hardening.js / csp-config.js；dev CSP unsafe-inline retain 留因" },
+    { "id": "M5-5", "what": "tar 条目 ../ / 绝对路径 / symlink 必红 + zip 失败 try/finally 清 destDir", "terminal": "done-partial", "evidence": "adjudicateTarEntry / cleanupPlan 负测", "closureCondition": "M6-A 接线到 capability-bundles.js:205 与 src/plugin/zip.js" },
+    { "id": "M5-6", "what": "假成功治理：统一 ok:false + 具名 code 失败信封、静默 DDL 判红、拒绝全 0 统计；MCP uncaughtException 退出语义 + 主进程全局 handler", "terminal": "done-partial", "evidence": "failureEnvelope / ddlOutcome 负测", "closureCondition": "M6-A 接线到 ai-memory.js / ai-settings.js / pack.js / mcp/server.js / main.js / working-tree-review;42→55 原因码词表门保持绿" },
+    { "id": "M5-7", "what": "quality:secret git 错误 fail-closed（只有 exit 1 = 无命中）+ 文件系统遍历 + 日志脱敏", "terminal": "done-partial", "evidence": "adjudicateGitGrepResult / redactLog 负测；quality:secret 当次 PASS", "closureCondition": "M6-C 接线到 scripts/secret-scan.mjs:64-70 与渲染层 console 投影" },
+    { "id": "M5-8", "what": "limit/offset 非负整数与上界断言 + 原子写 tmp+rename + 下载失败清理 + 200MB body 收编", "terminal": "done-partial", "evidence": "adjudicatePaging / atomicWritePlan 负测", "closureCondition": "M6-C 接线到 routes/files.js / ai-settings.js / bootstrap.js / budget-constants.js" }
+  ],
+  "hk01": { "first": "ERR_MODULE_NOT_FOUND 1 failed", "final": "15/15 pass 0 fail", "gateSelfTest": "test/m5-security-gate.test.mjs 7 项篡改必红全绿" },
+  "gates": {
+    "specialty": "gate:m5-security 8 类判据 PASS 0 issues（gate-report.json）",
+    "lint": "新增 4 文件 lint 0",
+    "secret": "PASS",
+    "arch": "PASS R1-R5",
+    "w5a": "PASS",
+    "docs": "PASS 576 registered",
+    "uiAudit": "PASS",
+    "testChanged": { "tests": 1488, "pass": 1479, "fail": 2, "skipped": 7, "failures": ["UI-629 布局 gap 锚（W 类）", "P6 源绑定（W 类）"], "exit": 1 },
+    "closeout": { "exit": 1, "passed": ["audit:compact", "hygiene:check", "docs:check", "ui:audit:check"], "firstFailed": "test:changed", "unreachedAfterFailFast": 13 }
+  },
+  "productRulings": {
+    "workspaceExec": "默认放行裁决零改动（git diff 0 行），仅补补偿控制与风险声明",
+    "MAX_AGENT_ITERS": "Infinity 未改",
+    "ADMISSION_FK_MCP_METERING": "既有裁决全部保持"
+  },
+  "sixDimensionReview": {
+    "verdict": "批准收口（8 项判据层 done、生产接线均为 done-partial）",
+    "p1": 0,
+    "p2": "生产接线归 M6-A，须在拆前拆后同套绿基线下落地；本包不垫第五层兼容 shim",
+    "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明"
+  },
+  "zeroScope": ["零新增依赖", "零放宽基线", "零触碰在制 WIP", "零 stage 零提交", "零撤销既有裁决", "零 G1+ 外推"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

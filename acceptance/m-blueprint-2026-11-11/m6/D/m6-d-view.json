@@ -1,0 +1,49 @@
+{
+  "group": "D-体验",
+  "focus": {
+    "terminal": "W",
+    "reason": "focus-visible 12 文件/16 声明涉及在制 CSS WIP，零触碰；观感归 E 类",
+    "rewritten": false,
+    "owner": "ui-design-program-wip",
+    "humanEyeRoute": {
+      "status": "pending_human_eye",
+      "signature": "",
+      "steps": [
+        {
+          "step": 1,
+          "action": "键盘 Tab 遍历设置页各分区控件",
+          "input": "Tab ×N",
+          "expected": "每控件有可见 :focus-visible 轮廓且不被遮挡",
+          "evidencePoint": "截图 + outlineStyle/outlineWidth DOM 读数"
+        },
+        {
+          "step": 2,
+          "action": "暗色模式下重复 Tab 遍历",
+          "input": "主题切暗 + Tab",
+          "expected": "焦点轮廓在暗底可见（对比度 ≥3:1）",
+          "evidencePoint": "暗色截图 + 对比度计算"
+        },
+        {
+          "step": 3,
+          "action": "读屏 VoiceOver 遍历并核对朗读",
+          "input": "VO + 方向键",
+          "expected": "焦点顺序与视觉顺序一致、无重复朗读",
+          "evidencePoint": "读屏记录 + 人签字"
+        },
+        {
+          "step": 4,
+          "action": "对比度观感复核 32 对",
+          "input": "亮/暗两套",
+          "expected": "人眼确认文字层级与边界可辨",
+          "evidencePoint": "人眼签字槽"
+        }
+      ]
+    }
+  },
+  "terminal": "W + pending_human_eye",
+  "reason": "CSS/设置面板属在制 WIP 零触碰；人眼路线已自动生成，签字槽全空",
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

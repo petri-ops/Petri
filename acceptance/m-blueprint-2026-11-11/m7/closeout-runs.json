@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-closeout-runs",
+  "capturedAt": "2026-11-11",
+  "command": "npm run closeout:full",
+  "rounds": [
+    { "round": 1, "exit": 1, "log": "m7-full-1（/tmp）", "firstFailedGate": "test:changed（第 5 门）" },
+    { "round": 2, "exit": 1, "log": "m7-full-2（/tmp）", "firstFailedGate": "test:changed（第 5 门）" },
+    { "round": 3, "exit": 1, "log": "m7-full-3（/tmp）", "firstFailedGate": "test:changed（第 5 门）" }
+  ],
+  "verdict": "NOT_PASSED",
+  "notWrittenAs": ["全绿", "verified", "通过", "PASS 0 SKIP"],
+  "passedBeforeFailFast": ["audit:compact", "hygiene:check", "docs:check(578)", "ui:audit:check"],
+  "unreachedAfterFailFast": 13,
+  "failures": [
+    { "name": "UI-629 布局 gap 锚：CSS gap 20px 与 CENTER_GAP_TOTAL=40 同源语义", "terminal": "W", "attribution": "HEAD 版 frontend/src/pages/project-workspace.module.css 为 gap: 20px；在制 WIP 变量化为 var(--ws-layout-gap)，owner 收口后同步测试锚" },
+    { "name": "P6 stored verification and write gate target an injected evidence path", "code": "p6_current_source_tree_not_exact", "terminal": "W", "attribution": "detail 9 文件全为 M 状态在制 WIP；P6 要求仓库完全静默，与 89M+68?? WIP 及零触碰红线互斥" }
+  ],
+  "round1Preliminary": {
+    "exit": 1,
+    "reason": "M7 plan 未注册 + coverage 漂移（本包引入）",
+    "action": "已修：registry 精确 +1、注册 BLOCK-433、README 入口行、impact-map 挂 rule；修复后 docs:check PASS(578) 且 docs:reconcile 0 issues，再跑三连",
+    "note": "首轮与后三轮读数并列留痕，不改写历史读数"
+  },
+  "otherGates": {
+    "gate:post-h9-contracts": { "exit": 0, "readout": "11 个契约文件 / 186 项全绿" },
+    "docs:reconcile": { "exit": 0, "validationIssues": 0, "manualReview": 0 },
+    "docs:check": { "exit": 0, "readout": "PASS 578 registered documents" },
+    "ui:audit:check": { "exit": 0, "readout": "PASS 633 个带实现证据的 UI 编号" },
+    "test:changed --run": { "exit": 1, "tests": 1504, "pass": 1495, "fail": 2, "skipped": 7 }
+  },
+  "cleanTreePrerequisite": {
+    "satisfied": false,
+    "reason": "硬红线要求 89 M + 68 ?? 在制 WIP 零触碰 / 零 stage / 零提交，故「干净树」在本轮不可达；P6 源绑定必然拦停",
+    "closureCondition": "owner 收口在制 WIP → 干净树 → 重采 P6 源绑定 → 三连复跑 → 全门 PASS 0 SKIP；本轮不代改、不冒充"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

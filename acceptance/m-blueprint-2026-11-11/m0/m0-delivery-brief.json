@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-next-step-brief",
+  "capturedAt": "2026-11-11",
+  "stage": "M0",
+  "block": "BLOCK-426",
+  "status": "completed-with-attributed-reds",
+  "jevSuggestion": {
+    "command": "npm run next:suggest -- --supply=cloud --context \"...\" --candidates \"M1|M2|M3|M4|M5|M6|M7\"",
+    "suggestion": "M1",
+    "confidence": 0.43,
+    "scope": "长任务内核：显式 TurnMachine 状态机与转移表 / 统一资源边界族 / 独立 goal verifier / 取消一等结果 / 可注入 provider 的 loop 行为测试基座",
+    "size": "大（内核包）",
+    "note": "用户已预授权连续工作，本建议按发令执行，不再等二次裁决；建议本身 advice-only 不改变纪律"
+  },
+  "masterPlan": {
+    "waveOrder": "Q7 → Q4b → Q8-REM → Q9-REM → P4-REM（P4-REM 最后；Q4b 单列）",
+    "qMatrix": { "done": 69, "partial": 25, "missing": 1, "forbidden": 7, "total": 102, "source": "docs/qoder-essence-absorption-plan.md:318（2026-10-25 BLOCK-260 回写，机械计数）" },
+    "section65Remaining": "Q7、Q4b、Q8-REM、Q9-REM、P4-REM（+ Q2-REM / Q5-REM / Q6-REM reopen）",
+    "competitivenessProgram": "CP-1–CP-22 已收口；本轮 M 波次是独立第六轮审计，不改母纲计数",
+    "maturityBlueprint": "G0 五维成熟度蓝图：本轮主线=编排/工具/模型计量/可靠性四维（M1–M4），M5 补治理与安全",
+    "resultStudio": "implemented_unverified / experimental；RS-P7 deferred（G0 常态，不列待办）",
+    "uiLedger": "canonical sections 497 / uniqueIds 488 / debt 35；机械 grep 口径 verified 1176 / in_progress 296 仅作诊断，不混用",
+    "activeWorkPackage": "无（M0 收口后串行槽位转空；层 2 常驻 G0-LF + M 波次 living-plan）"
+  },
+  "skillsUsed": [
+    "petri-project-governance(SKILL, references/WORK-PACKAGE-LAUNCH-CHECKLIST, references/NEXT-STEP-BRIEF, references/TASK-FORM-TAXONOMY, references/AUDIT-LOG-ENTRY-TEMPLATE)",
+    "petri-dev-infra(SKILL, templates/delegation-contract 委派只读探查)",
+    "petri-code-review(SKILL, 六维度评审)"
+  ],
+  "jevCount": {
+    "source": "npm run decision:session 当次分段读数（2026-11-11T12:58:38.600Z 起）",
+    "increment": 2,
+    "cumulative": 326,
+    "note": "禁止复用上一轮数字；下次交付须重跑取数"
+  },
+  "noG1Plus": true,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

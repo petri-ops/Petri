@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "m3-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-429",
+  "status": "completed-with-done-partial",
+  "deliverables": [
+    { "id": "M3-1", "what": "compact 恢复契约：summary 强制五字段（当前进度/下一步/未完成 todo/已发生错误与修复/环境权限模式）+ 压缩后有界重读（5 文件 / 50k token）", "terminal": "done", "evidence": "test/m3-tool-capability.test.mjs 11/11" },
+    { "id": "M3-2", "what": "跨表只读对账门 adjudicateToolSurface：CONTRACTS ⊆ TOOL_METADATA、metadata 三字段完备、计数漂移显式暴露", "terminal": "done", "evidence": "test/m3-tool-capability.test.mjs + gate 负测" },
+    { "id": "M3-3", "what": "声明驱动拓扑并行调度（readOnly+concurrentSafe 分组 / 环检测 / stopTurnAfterResult 合成取消结果，无 dangling tool call）", "terminal": "done", "evidence": "test/m3-tool-capability.test.mjs" },
+    { "id": "M3-4", "what": "结果预算统一（超预算落本地 artifact 只回预览、保头尾）+ 错误结构化投影（模型可见原文 vs UI 摘要分离）", "terminal": "done", "evidence": "test/m3-tool-capability.test.mjs" },
+    { "id": "M3-5", "what": "权限 fail-closed（无 broker 即 deny）+ 竞速单一 settled 闩 + 可恢复拒绝（steer）+ guard-ack 可追溯；needsApproval 首次有真实生产消费点", "terminal": "done", "evidence": "adjudicatePermission 读取 metadata.needsApproval；test/m3-tool-capability.test.mjs" },
+    { "id": "M3-6", "what": "不可信内容边界：系统提示条款 + untrusted 包装与来源标注（注入文本 instructionLike=false）", "terminal": "done", "evidence": "test/m3-tool-capability.test.mjs" },
+    { "id": "M3-2-gen", "what": "工具能力元数据生成器（一份声明产出 TOOL_DEFS/CONTRACTS/TOOL_METADATA/调度元数据四视图，新增 1 工具改动处 7→1）", "terminal": "done-partial", "reason": "既有四表 115/114/71 计数由契约测试钉住；本包先建只读对账门暴露漂移，生成器改造归 M6-A 结构单源组，不提前实现后续阶段", "closureCondition": "M6-A 发令后在拆前拆后同套绿基线落生成器，复跑 quality:surface 且 P1/P2=0、计数单源" }
+  ],
+  "hk01": {
+    "first": "ERR_MODULE_NOT_FOUND 1 failed",
+    "second": "M3-2 测试夹具 metadata 缺字段 1 failed",
+    "third": "新增文件 3 处动态下标 lint warning（已改 Map + 自有属性描述符）",
+    "final": "18/18 pass 0 fail",
+    "gateSelfTest": "test/m3-capability-gate.test.mjs 7 项篡改必红全绿"
+  },
+  "gates": {
+    "specialty": "gate:tool-capability PASS 0 issues（gate-report.json）",
+    "lint": "新增 4 文件 lint 0",
+    "w5a": "PASS（新测试挂 rule）",
+    "docs": "PASS 574 registered",
+    "uiAudit": "PASS",
+    "testChanged": { "tests": 1459, "pass": 1450, "fail": 2, "skipped": 7, "failures": ["UI-629 布局 gap 锚（W 类在制 WIP CSS）", "P6 源绑定（W 类在制 WIP 9 文件）"], "exit": 1 },
+    "closeout": { "exit": 1, "passed": ["audit:compact", "hygiene:check", "docs:check", "ui:audit:check"], "firstFailed": "test:changed", "unreachedAfterFailFast": 13 }
+  },
+  "zeroChanges": {
+    "toolDefs": "tool-defs.js 0 行",
+    "toolMetadata": "tool-metadata.js 0 行",
+    "registry": "registry.js 0 行",
+    "workspaceExec": "workspace-tools.js / internals.js 0 行（默认放行裁决保持）",
+    "MAX_AGENT_ITERS": "Infinity 未改"
+  },
+  "sixDimensionReview": {
+    "verdict": "批准收口（带 1 项 done-partial）",
+    "p1": 0,
+    "p2": ["生成器改造归 M6-A，跨表门已能机械暴露漂移"],
+    "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明"
+  },
+  "zeroScope": ["零新增依赖", "零放宽基线", "零触碰他方在制 WIP", "零 stage 零提交", "零撤销既有裁决", "零 G1+ 外推"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

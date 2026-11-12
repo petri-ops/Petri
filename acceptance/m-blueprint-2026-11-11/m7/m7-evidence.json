@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-433",
+  "programTerminal": "done-partial",
+  "notClaimed": [
+    "全绿",
+    "verified",
+    "completed（验收）",
+    "PASS 0 SKIP",
+    "稳定完成长任务"
+  ],
+  "fiveItems": [
+    {
+      "id": "M7-1",
+      "what": "70 条发现 + G-01…G-12 共 82 件逐件终态（机械解析、零 in_progress、零编造计数）",
+      "terminal": "done",
+      "evidence": "m7/gap-ledger.json；counts done 21 / done-partial 47 / pending_human_eye 2 / external-blocked 3 / pending_user_ruling 3 / W 6，合计 82"
+    },
+    {
+      "id": "M7-2",
+      "what": "十一维第八列复评：逐维升/平/降 + 归因 + 源码锚点，不回溯改第七列",
+      "terminal": "done",
+      "evidence": "m7/eleven-dimension-col8.json；8 升 3 平 0 降；声明为独立估值非 verified"
+    },
+    {
+      "id": "M7-3",
+      "what": "长任务能力自证包：fixture manifest + 成功率基线 + 崩溃恢复 flow + trace/usage 对账 + 13 条负面边界",
+      "terminal": "done-partial",
+      "evidence": "m7/long-task-self-proof.json；gate:long-task-resume 三连 PASS；9223 离屏实机腿 external-blocked",
+      "closureCondition": "干净树 + 9223 离屏实例跑崩溃注入→重启 resume 逐字对齐；截图失败标 screenshot_unavailable"
+    },
+    {
+      "id": "M7-4",
+      "what": "六件套 canonical 同批回写 + AUDIT-LOG 登记 + DOC-REGISTRY 状态与 README 入口一致；蓝图 candidate→completed 走正式注册流程",
+      "terminal": "done-partial",
+      "evidence": "六件套回写完成、registry 578/reconcile 0 issues；蓝图原件属起始 untracked WIP 零触碰，由已注册 living-plan 台账承载终态",
+      "closureCondition": "owner 收口后由用户裁决是否把 acceptance 原件状态头回写为 completed"
+    },
+    {
+      "id": "M7-5",
+      "what": "干净树 closeout:full 三连全门 PASS 0 SKIP + gate:post-h9-contracts 全绿 + docs:reconcile 0 issues",
+      "terminal": "done-partial",
+      "evidence": "m7/closeout-runs.json；post-h9 186/186 全绿、reconcile 0 issues；closeout:full 三连均 exit 1（第 5 门 W 类红拦停）",
+      "closureCondition": "owner 收口 89M+68?? 在制 WIP → 干净树 → 重采 P6 源绑定 → 三连复跑"
+    }
+  ],
+  "hk01": {
+    "final": "test/m7-final-closeout.test.mjs 7/7 + 逐件终态门 0 issues + lint 0",
+    "gateSelfTest": "植入 in_progress / 少一条 / U-E-V-W 写 verified / 十一维缺维 均必红"
+  },
+  "gates": {
+    "specialty": "m7-final 逐件终态门 PASS 0 issues",
+    "postH9Contracts": {
+      "exit": 0,
+      "readout": "11 个契约文件 / 186 项全绿"
+    },
+    "docsReconcile": {
+      "exit": 0,
+      "validationIssues": 0,
+      "manualReview": 0
+    },
+    "docsCheck": {
+      "exit": 0,
+      "readout": "PASS 578 registered"
+    },
+    "uiAudit": {
+      "exit": 0
+    },
+    "testChanged": {
+      "exit": 1,
+      "tests": 1504,
+      "pass": 1495,
+      "fail": 2,
+      "skipped": 7,
+      "failures": [
+        "UI-629（W）",
+        "P6 源绑定（W）"
+      ]
+    },
+    "closeoutFull": {
+      "rounds": 3,
+      "exits": [
+        1,
+        1,
+        1
+      ],
+      "firstFailedGate": "test:changed",
+      "verdict": "NOT_PASSED",
+      "notWrittenAs": "PASS 0 SKIP"
+    },
+    "hk01Mechanical": {
+      "command": "逐文件 node --test 计数复算（2026-11-11 当次）",
+      "total": 106,
+      "files": 14,
+      "specialtyGates": 6,
+      "gateScripts": [
+        "m1-kernel-gate",
+        "m2-resume-gate",
+        "m3-capability-gate",
+        "m4-observability-gate",
+        "m5-security-gate",
+        "m6-debt-gate"
+      ],
+      "note": "原笔录写「5 个专项门」有误，机械复算为 6 个，已按当次输出优先修正"
+    },
+    "m0CriteriaFinal": {
+      "exit": 0,
+      "readout": "PASS 0 issues（时点语义自纠后）",
+      "before": "exit 1 READING_DRIFT"
+    }
+  },
+  "completionDefinition8": {
+    "met": [
+      1,
+      2,
+      4,
+      6,
+      7,
+      8
+    ],
+    "notMet": [
+      3,
+      5
+    ],
+    "note": "第 3 条（干净树三连全门 PASS 0 SKIP）与第 5 条（长任务自证包 9223 实机腿）未达证据上限；按用户 §8 末句如实标未完成并给补腿条件，不用文档措辞升级运行时结果 ⇒ 程序终态 done-partial"
+  },
+  "zeroScope": [
+    "零新增依赖",
+    "零放宽基线",
+    "零触碰在制 WIP",
+    "零 stage 零提交",
+    "零撤销既有裁决",
+    "零 G1+ 外推"
+  ],
+  "sixDimensionReview": {
+    "verdict": "批准八阶段收口（程序终态 done-partial）",
+    "p1": 0,
+    "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明",
+    "dims": {
+      "contract": "PASS：82 件逐件终态与注册表/台账一致，registry 578 与 docs:check 对齐",
+      "singleSource": "PASS：蓝图原件零触碰，living-plan 台账单一承载程序状态",
+      "failure": "PASS：三连 exit 1 如实登记、未冒充通过；exit 124/125 未出现",
+      "testing": "PASS：M0–M7 共 106 项行为/负测（14 文件机械复算）+ 6 个专项门",
+      "boundary": "PASS：U/E/V/W 四类不代答、签字槽全空、默认语义未改",
+      "deadCode": "PASS：无空壳包装；未达项均带补腿条件",
+      "yagni": "PASS：零新增依赖，六件套回写脚本幂等复用"
+    }
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "selfCorrections": [
+    {
+      "incident": "M7 最终复验时 m0-criteria 专项门 exit 1（READING_DRIFT：registry.total 手抄 571 ≠ 现取 578）",
+      "rootCause": "M0 时点快照把 registry 总数写入单源；程序推进 7 个 plan 文档后必然漂移，属门的时点语义而非产品缺陷",
+      "action": "① M0 时点原档一字不改复制为 m0-historical-readings.json（14 门读数逐字相同）；② 重跑生成器 --write 按当次现取刷新 m0-canonical-readings.json（registry 578、rules 374、门数 16）；③ 两份职责分离并在历史档写明指向；④ 门复验 PASS 0 issues",
+      "evidence": "m0/m0-historical-readings.json + m0/m0-canonical-readings.json；14 门历史读数 identical=true"
+    }
+  ],
+  "finalSweep": {
+    "capturedAt": "2026-11-11",
+    "wipParity": {
+      "earlyM": 90,
+      "nowM": 90,
+      "addedM": [],
+      "removedM": [],
+      "selfOwnedUntrackedFiles": 41,
+      "note": "起始快照 /tmp/m0-wip.txt 与最终 status 逐项一致；起始 WIP 零改写"
+    },
+    "staged": 0,
+    "head": "4127f5b5",
+    "gates": {
+      "docsCheck": "PASS 578",
+      "docsReconcile": "0 validation issues / 0 manual review",
+      "uiAudit": "PASS 633",
+      "postH9": "186/186 全绿",
+      "specialtyGates": "8/8 exit 0",
+      "liveWindowPolicy": "1/1 PASS"
+    },
+    "stillRed": {
+      "qualityLint": "2 errors（W 类在制 WIP）",
+      "qualityPerf": "5/5 红轮（V 类 external-blocked）",
+      "closeoutFull": "三连 exit 1（第 5 门 W 类红拦停）"
+    },
+    "note": "红线门禁红与 W/V 类红如实并列登记，不写全绿"
+  }
+}

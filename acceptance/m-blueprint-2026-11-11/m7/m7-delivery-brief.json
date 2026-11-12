@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-next-step-brief",
+  "capturedAt": "2026-11-11",
+  "program": "第六轮优化程序 M0–M7",
+  "programTerminal": "done-partial",
+  "jevSuggestion": {
+    "command": "npm run next:suggest -- --supply=cloud --context \"...\" --candidates \"M6-A|M5-生产接线|M7-补腿|P4-REM|Q4b|Q7\"",
+    "suggestion": "M6-A",
+    "confidence": 0.4,
+    "scope": "结构单源续包：三矩阵共用 schema 生成器 / 28 文件绕桥迁移 / resolveDataDir·readConfig 单源 / 12 环逐环消亡，带 BLOCK-92 拆前拆后同套绿基线；并承接 M5 判据层到生产路径的接线（按单包串行，一次只开一个包）",
+    "size": "大（跨模块结构包）",
+    "adviceOnly": true,
+    "preauthorizedContinuousWork": false,
+    "note": "用户本轮预授权在本程序内已用尽；M6-A 是新包，未获发令不得开工"
+  },
+  "masterPlan": {
+    "waveOrder": "Q7 → Q4b → Q8-REM → Q9-REM → P4-REM（P4-REM 最后；Q4b 单列）",
+    "qMatrix": { "done": 69, "partial": 25, "missing": 1, "forbidden": 7, "total": 102, "source": "docs/qoder-essence-absorption-plan.md:318（2026-10-25 BLOCK-260 机械计数）" },
+    "section65Remaining": "Q7、Q4b、Q8-REM、Q9-REM、P4-REM（+ Q2-REM / Q5-REM / Q6-REM reopen）",
+    "competitivenessProgram": "CP-1–CP-22 已收口；M 波次为独立第六轮审计，母纲计数不变",
+    "maturityBlueprint": "G0 五维成熟度：本轮主线=编排/工具/模型计量/可靠性（M1–M4），M5 补治理与安全；M6-A 续包待发令",
+    "resultStudio": "implemented_unverified / experimental；RS-P7 deferred（G0 常态，不列待办）",
+    "uiLedger": "canonical sections 497 / uniqueIds 488 / debt 35；机械 grep 口径 verified 1176 / in_progress 296 仅作诊断，不混用",
+    "activeWorkPackage": "无（层 1 空）；层 2 常驻 G0-LF；M 波次 living-plan 已 completed"
+  },
+  "skillsUsed": [
+    "petri-project-governance(SKILL, references/WORK-PACKAGE-LAUNCH-CHECKLIST, references/NEXT-STEP-BRIEF, references/TASK-FORM-TAXONOMY, references/AUDIT-LOG-ENTRY-TEMPLATE)",
+    "petri-dev-infra(SKILL, templates/delegation-contract 委派 2 次只读探查)",
+    "petri-code-review(SKILL, 六/七维度评审)"
+  ],
+  "jevCount": {
+    "source": "npm run decision:session 当次分段读数（2026-11-11T13:28:48.356Z 起）",
+    "increment": 4,
+    "cumulative": 330,
+    "note": "本轮最终交付重跑取数；未复用 M0 阶段读数（jev×2/累计326）"
+  },
+  "outputJudge": {
+    "round1": { "fit": 1.92, "verdict": "ESCALATE", "hints": ["契合度不足", "目标未达成：宣称达成须有可核对的输出支撑"] },
+    "round2WithEvidence": { "fit": 2.47, "verdict": "ESCALATE", "goalStatus": "pass", "hint": "契合度不足（需 ≥3）" },
+    "disposition": "按评判门三态如实登记两次 fail；降级=fail-open 放行，不冒充 PASS。判词已用 m7/red-line-verification.json 七条可复跑命令补实质支撑"
+  },
+  "noG1Plus": true,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

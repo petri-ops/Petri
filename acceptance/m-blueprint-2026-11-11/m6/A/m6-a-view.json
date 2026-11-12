@@ -1,0 +1,32 @@
+{
+  "group": "A-结构单源",
+  "surface": {
+    "schema": "functional-surface-matrix.v1",
+    "tools": 115,
+    "ipcChannels": 168,
+    "routes": 283,
+    "rewritten": false,
+    "source": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+    "threeMatrices": [
+      "scripts/functional-surface-audit.mjs",
+      "scripts/block357-capability-map.mjs",
+      "scripts/validate-ipc-catalog.mjs"
+    ]
+  },
+  "ipc": {
+    "channelCount": 168,
+    "rewritten": false,
+    "sources": [
+      "src/ipc/channels.js",
+      "src/preload.js",
+      "docs/ipc-catalog.md"
+    ],
+    "note": "IPC 三真相只读对账，catalog 滞后登记 done-partial"
+  },
+  "terminal": "done-partial",
+  "closureCondition": "M6-A 续：三矩阵共用 schema 生成器 / 28 文件绕桥迁移 / 12 环逐环消亡，均带拆前拆后同套绿基线",
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

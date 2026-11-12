@@ -1,0 +1,14 @@
+{
+  "kind": "m4-long-task-fixture",
+  "turns": 1000,
+  "turnCount": 1000,
+  "messageCount": 2000,
+  "partCount": 2014,
+  "todoCount": 60,
+  "compactionCount": 10,
+  "retryCount": 4,
+  "seed": 42,
+  "provider": "mock",
+  "network": false,
+  "generatedAt": "2026-11-11T00:00:00.000Z"
+}

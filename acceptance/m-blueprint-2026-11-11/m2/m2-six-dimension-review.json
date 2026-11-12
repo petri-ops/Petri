@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "m2-six-dimension-review",
+  "verdict": "批准收口（带 2 项 external-blocked）",
+  "p1": 0,
+  "dimensions": {
+    "contract": "PASS：hydrate 的 interrupted result 语义与既有 resume.js:159-170「读摘要继续」并列，未改其默认值",
+    "singleSource": "PASS：5 项能力收敛单一模块，无第二份 transcript/checkpoint/owner 真相",
+    "failure": "PASS：CHECKPOINT_DAMAGED fail-closed；门对租约 API 残缺/抛错转具名 issue（HK-01 抓真后修）",
+    "testing": "PASS：14 项行为测试 + 门三连 + 7 项篡改必红；非源码字符串扫描",
+    "boundary": "PASS：零 spawn/零 DB 写入/零网络；纯内存投影由调用方决定落盘",
+    "deadCode": "PASS：无空壳 pass-through；DB 约束与实机腿按 external-blocked 如实登记",
+    "yagni": "PASS：单一模块收敛 5 项能力，零新增依赖"
+  },
+  "findings": [
+    { "level": "P2", "what": "DB 层 UNIQUE 约束未落地", "terminal": "external-blocked", "closure": "干净树 + owner 按全量证据流程重采 perf 基线后，按 migrations 流程加约束" },
+    { "level": "P2", "what": "9223 实机崩溃恢复腿未跑", "terminal": "external-blocked", "closure": "M4 fixture 后在 9223 离屏实例跑 dev-verify flow，跑完立即 kill" }
+  ],
+  "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

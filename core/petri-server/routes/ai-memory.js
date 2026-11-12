@@ -10,12 +10,25 @@ const dbMod = require('../db');
 const adb = dbMod.getAsyncDatabase();
 const sqlite = dbMod.getDatabase();
 
-try { sqlite.exec('ALTER TABLE user_facts ADD COLUMN project_id TEXT'); } catch {}
-try { sqlite.exec('ALTER TABLE memory_vectors ADD COLUMN project_id TEXT'); } catch {}
-try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_user_facts_project ON user_facts(user_id, project_id, pinned DESC, updated_at DESC)'); } catch {}
-try { sqlite.exec('CREATE INDEX IF NOT EXISTS idx_memvec_project ON memory_vectors(user_id, project_id, ts DESC)'); } catch {}
-try {
-  sqlite.exec(`
+// BLOCK-434 W3（M5 接线）：迁移期 DDL 经单一入口执行——按 ddlOutcome 分类，
+// 「列已存在」记 suppressed，「磁盘/权限/语法故障」结构化可见（不静默吞、也不阻断启动）。
+const { applyDdlStatements } = require('../helpers/ddl-migrate');
+
+const migration = applyDdlStatements({
+  exec: (sql) => sqlite.exec(sql),
+  statements: [
+    { sql: 'ALTER TABLE user_facts ADD COLUMN project_id TEXT', operation: 'add_user_facts_project_id' },
+    { sql: 'ALTER TABLE memory_vectors ADD COLUMN project_id TEXT', operation: 'add_memory_vectors_project_id' },
+    {
+      sql: 'CREATE INDEX IF NOT EXISTS idx_user_facts_project ON user_facts(user_id, project_id, pinned DESC, updated_at DESC)',
+      operation: 'index_user_facts_project',
+    },
+    {
+      sql: 'CREATE INDEX IF NOT EXISTS idx_memvec_project ON memory_vectors(user_id, project_id, ts DESC)',
+      operation: 'index_memory_vectors_project',
+    },
+    {
+      sql: `
     UPDATE memory_vectors
     SET project_id = (
       SELECT c.project_id FROM copilot_conversations c
@@ -28,18 +41,22 @@ try {
         WHERE c.id = memory_vectors.conversation_id
           AND c.project_id IS NOT NULL
       )
-  `);
-} catch {}
-try {
-  sqlite.exec(`CREATE TABLE IF NOT EXISTS project_chat_summaries (
+  `,
+      operation: 'backfill_memory_vectors_project_id',
+    },
+    {
+      sql: `CREATE TABLE IF NOT EXISTS project_chat_summaries (
     user_id TEXT NOT NULL,
     project_id TEXT NOT NULL DEFAULT '',
     summary TEXT NOT NULL,
     msg_count INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL,
     PRIMARY KEY (user_id, project_id)
-  )`);
-} catch {}
+  )`,
+      operation: 'create_project_chat_summaries',
+    },
+  ],
+});
 
 function _projectIdFromReq(req) {
   const raw = (req.query && (req.query.project_id || req.query.projectId))
@@ -284,3 +301,6 @@ module.exports = function mountMemory(app) {
     return res.json({ status: 'ok', values: snapshot.values, sources: snapshot.sources });
   });
 };
+
+// BLOCK-434 W3：迁移结果对外只读暴露（健康面/测试可读；不参与路由语义）。
+module.exports.ddlMigration = migration;

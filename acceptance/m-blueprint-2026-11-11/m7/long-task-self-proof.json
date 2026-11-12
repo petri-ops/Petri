@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "m7-long-task-capability-self-proof",
+  "capturedAt": "2026-11-11",
+  "verdict": "partial-evidence",
+  "notClaimed": ["稳定完成长任务", "全绿", "verified", "真实任务成功"],
+  "fixture": {
+    "manifest": "acceptance/m-blueprint-2026-11-11/m4/fixture/manifest.json",
+    "data": "acceptance/m-blueprint-2026-11-11/m4/fixture/fixture.json",
+    "turnCount": 1000,
+    "messageCount": 2000,
+    "partCount": 2014,
+    "todoCount": 60,
+    "seed": 42,
+    "provider": "mock",
+    "network": false,
+    "commands": ["--generate", "--verify", "--delete"],
+    "verify": "PASS 0 issues（manifest 计数对账，篡改必红）"
+  },
+  "baseline": {
+    "source": "core/petri-server/agent-tools/long-task-observability.js:adjudicateLongTaskBaseline",
+    "metrics": ["successRate", "avgCompletion", "resumeConsistency"],
+    "evidenceClass": "synthetic-mock-baseline",
+    "claimStableLongTask": false,
+    "reason": "合成 mock 基线不构成真实长任务稳定性产品证据"
+  },
+  "crashRecovery": {
+    "mechanical": {
+      "gate": "gate:long-task-resume",
+      "rounds": 3,
+      "result": "连续 3 轮 PASS 0 issues",
+      "reports": ["m2-run-1.json", "m2-run-2.json", "m2-run-3.json"],
+      "covered": ["消息序列逐字对齐", "interruptedToolCount", "checkpoint 损坏 fail-closed", "任务图恢复不回退", "CAS 幂等", "单一 owner 租约"]
+    },
+    "live": {
+      "terminal": "external-blocked",
+      "reason": "9223 离屏崩溃注入 flow 需本地无窗栈与实机实例；本轮零 GUI/后端运行时改动，未起栈",
+      "closureCondition": "M7 补腿：:3000 vite + :3001 后端无窗栈 + 9223 离屏实例（禁 PETRI_TEST_ONSCREEN、跑完立即 kill）跑崩溃注入→重启 resume，断言工具调用数/消息序列逐字对齐；截图失败标 screenshot_unavailable"
+    }
+  },
+  "traceUsageReconciliation": {
+    "trace": "traceId 贯穿 main_loop/subagent/background/retry/tool 五类节点，persist() 跨重启可查（test/m4-long-task-observability.test.mjs）",
+    "usage": "model/turn/tool 三层事实表 + 价格表配置 + model_request_failed 失败请求记账（同测试）",
+    "cost": "成本可计量、事件可重放；未改既有 SSE 事件形状",
+    "status": "mechanical-contract-done"
+  },
+  "negativeBoundaries": [
+    { "case": "非法状态转移", "gate": "gate:long-task-kernel", "result": "INVALID_TURN_TRANSITION 必红" },
+    { "case": "给主循环加步数上限", "gate": "PRODUCT_CONTRACT_BROKEN", "result": "必红；MAX_AGENT_ITERS=Infinity 保持" },
+    { "case": "成本默认改硬停", "gate": "COST_CAP_DEFAULT_CHANGED_TO_HARD", "result": "必红；默认软提示保持" },
+    { "case": "模型自报完成但无产物", "gate": "FALSE_COMPLETION_NOT_RED", "result": "必红；goal verifier no-tool 独立验收" },
+    { "case": "损坏 checkpoint 静默吞错", "gate": "CHECKPOINT_SILENT_CORRUPTION", "result": "必红" },
+    { "case": "重复投递被应用", "gate": "IDEMPOTENCY_ACK_DRIFT", "result": "必红" },
+    { "case": "非 owner 取消", "gate": "NON_OWNER_CANCEL_ALLOWED", "result": "必红" },
+    { "case": "无 broker 放行", "gate": "PERMISSION_NOT_FAIL_CLOSED", "result": "必红" },
+    { "case": "fixture 出网/真实 Provider", "gate": "FIXTURE_NOT_LOCAL_MOCK", "result": "必红" },
+    { "case": "合成基线宣称稳定完成", "gate": "BASELINE_OVERCLAIM", "result": "必红" },
+    { "case": "400+ DOM 节点放过", "gate": "DOM_BUDGET_NOT_RED", "result": "必红" },
+    { "case": "git grep 错误静默 PASS", "gate": "GIT_ERROR_SILENT_PASS", "result": "必红" },
+    { "case": "W 项写 verified / 留 in_progress", "gate": "m7-final", "result": "EXTERNAL_ANSWERED_BY_AGENT / IN_PROGRESS 必红" }
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

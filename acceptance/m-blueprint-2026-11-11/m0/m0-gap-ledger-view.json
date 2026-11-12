@@ -1,0 +1,2069 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-read-only-remaining-work-view",
+  "generatedAt": "2026-11-12T11:08:52.906Z",
+  "policy": "只读汇总：4 套原文零搬移、零改写；逐件保留 owner/terminal/evidence；声明计数与机械复算计数并列暴露",
+  "sources": [
+    "acceptance/post-k7-2026-11-10/l7/gap-ledger.json",
+    "acceptance/post-s7-2026-11-09/h7/gap-ledger.json",
+    "acceptance/post-h9-2026-11-10/k7/k7-gap-terminal-states.json",
+    "acceptance/ui-design-assessment-2026-11-11/d5/gap-ledger.json"
+  ],
+  "statusParity": {
+    "ok": true,
+    "issues": [],
+    "checked": [
+      {
+        "tag": "post-k7",
+        "blueprintId": "POST-K7-FULL-AUDIT-AND-BLUEPRINT-2026-11-10",
+        "blueprintStatus": "completed",
+        "stageCount": 11,
+        "allCompleted": true,
+        "inFlight": 0
+      },
+      {
+        "tag": "post-h9",
+        "blueprintId": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10",
+        "blueprintStatus": "planned",
+        "stageCount": 8,
+        "allCompleted": true,
+        "inFlight": 0
+      },
+      {
+        "tag": "m-blueprint",
+        "blueprintId": "M-BLUEPRINT-2026-11-11-PROGRAM",
+        "blueprintStatus": "completed",
+        "stageCount": 9,
+        "allCompleted": true,
+        "inFlight": 0
+      }
+    ],
+    "excluded": [
+      {
+        "blueprintId": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10",
+        "reason": "本体为受保护未跟踪 WIP，零触碰；registry 状态翻转会触发既有 FRONTMATTER_STATUS_MISMATCH 门，故不代改"
+      }
+    ]
+  },
+  "summary": {
+    "totalItems": 191,
+    "inProgress": 0,
+    "bySource": {
+      "L7": 93,
+      "H7": 34,
+      "K7": 32,
+      "UI-D5": 32
+    },
+    "byTerminal": {
+      "done": 100,
+      "done-partial": 48,
+      "pending_user_ruling": 12,
+      "retain-with-reason": 13,
+      "pending_human_eye": 5,
+      "external-blocked": 8,
+      "deferred": 5
+    },
+    "perSource": {
+      "l7": {
+        "declaredTotal": 90,
+        "computedTotal": 93,
+        "statusesSum": 93,
+        "countDiscrepancy": 3
+      },
+      "h7": {
+        "declaredTotal": 34,
+        "computedTotal": 34
+      },
+      "k7": {
+        "declaredTotal": 32,
+        "computedTotal": 32
+      },
+      "d5": {
+        "declaredTotal": 32,
+        "computedTotal": 32
+      }
+    },
+    "l7DeclaredVsComputed": {
+      "declared": 90,
+      "computed": 93,
+      "discrepancy": 3
+    }
+  },
+  "issues": [],
+  "items": [
+    {
+      "id": "L-27",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-28",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-29",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-30",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-36",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-37",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-40",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-43",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-45",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-54",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-75",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-76",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-77",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-82",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-83",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-84",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-86",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-87",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-88",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-89",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-90",
+      "source": "L7",
+      "stage": "L0",
+      "terminal": "done",
+      "owner": "BLOCK-404",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l0/"
+    },
+    {
+      "id": "L-50",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-51",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-52",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-53",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-55",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done-partial",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-56",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-57",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-58",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-59",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-60",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-61",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "done-partial",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-79",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "L-01",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-02",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-03",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-04",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-05",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-06",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-07",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-08",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-09",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-10",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-11",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-19",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done-partial",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-20",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done-partial",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-21",
+      "source": "L7",
+      "stage": "L2",
+      "terminal": "done",
+      "owner": "BLOCK-406",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l2/"
+    },
+    {
+      "id": "L-12",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-13",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-14",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-15",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-16",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-17",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-18",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-22",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-23",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-68",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-74",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-24",
+      "source": "L7",
+      "stage": "L3/L4",
+      "terminal": "done",
+      "owner": "BLOCK-407 + BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l3/"
+    },
+    {
+      "id": "L-25",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-26",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-31",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-32",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-33",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-34",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "done",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-35",
+      "source": "L7",
+      "stage": "L4",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-408",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l4/"
+    },
+    {
+      "id": "L-38",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-39",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-41",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-42",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-44",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-46",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-47",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-48",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-49",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-78",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-80",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-85",
+      "source": "L7",
+      "stage": "L5",
+      "terminal": "done",
+      "owner": "BLOCK-409",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l5/"
+    },
+    {
+      "id": "L-62",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-63",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-64",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-65",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-66",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-67",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-69",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-70",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-71",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-72",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-73",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "L-81",
+      "source": "L7",
+      "stage": "L6",
+      "terminal": "done",
+      "owner": "BLOCK-410",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "E-batch",
+      "source": "L7",
+      "stage": "L6/L7",
+      "terminal": "pending_human_eye",
+      "owner": "BLOCK-410 + BLOCK-411",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l6/"
+    },
+    {
+      "id": "V-batch",
+      "source": "L7",
+      "stage": "L1/L7",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-405 + BLOCK-411",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "V-mac",
+      "source": "L7",
+      "stage": "L1",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-405",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-k7-2026-11-10/l1/"
+    },
+    {
+      "id": "B-01",
+      "source": "H7",
+      "stage": "H0",
+      "terminal": "done",
+      "owner": "BLOCK-385",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "workspace-state 两层语义（串行槽位 vs 常驻计划）+ AUDIT-LOG 不同层注记 + truthDomain 冲突报警；BLOCK-384 registry=completed 且 plan 已入库；README 入口行补反引号（ENTRY_RE 命中）；roadmap/handoff 恢复链刷新（H0–H6 每阶段各一次）"
+    },
+    {
+      "id": "B-02",
+      "source": "H7",
+      "stage": "H7",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-392",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "本机实测：出网可达（api.deepseek.com HTTP 401=可达未授权）；PETRI_*/DEEPSEEK/OPENAI/ARK 环境变量 0 个；.petri-dev-user-data/data/ai-settings.json presets=0（无模型凭据）。故 8 任务套件无法发起真实调用。"
+    },
+    {
+      "id": "B-03",
+      "source": "H7",
+      "stage": "H0",
+      "terminal": "done",
+      "owner": "BLOCK-385",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "BLOCK-384 已清偿（兄弟仓 a186d20+8b0e87f）；本程序复跑 p4r 四族 21/21 绿；三段分片 9 红→3 红（frontend/node-long 全绿）"
+    },
+    {
+      "id": "B-04",
+      "source": "H7",
+      "stage": "H1",
+      "terminal": "done-partial",
+      "owner": "BLOCK-386",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "consumeExecutionAdmission 落地；拦截器签发点写 expect；workspace_exec 执行边界真实消耗；生产路径四类拒绝（过期/重放/指纹改写/上下文改写）9/9 绿；签发失败显式降级"
+    },
+    {
+      "id": "B-05",
+      "source": "H7",
+      "stage": "H1",
+      "terminal": "done",
+      "owner": "BLOCK-386",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "消除「依赖 CASCADE 才正确」的代码：deleteSpaceCascade 显式删 knowledge_space_bindings（FK=ON/OFF 行为一致）；knowledge-space 50/50 绿（原 G3 用例红→绿）"
+    },
+    {
+      "id": "B-06",
+      "source": "H7",
+      "stage": "H1",
+      "terminal": "done",
+      "owner": "BLOCK-386",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "zip 四道闸（条目数/累计字节/符号链接/路径形态）+ 真实 zip 负测 5/5（含压缩炸弹最小形态）；manifest 链三态 linked/started/broken + 2 新负测；链校验 legacy_unhashed 默认 strict + 存量清单（118 版·0 legacy）"
+    },
+    {
+      "id": "B-07",
+      "source": "H7",
+      "stage": "H2",
+      "terminal": "done-partial",
+      "owner": "BLOCK-387",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "ToastProvider 有界历史（播报即入/去重/上限 50/可展开清空/role=log）4 新测；10/10 绿"
+    },
+    {
+      "id": "B-08",
+      "source": "H7",
+      "stage": "H2",
+      "terminal": "done",
+      "owner": "BLOCK-387",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "gate:silent-catch 新机械门（100 文件 403 处裸 catch 冻结，新增即红；带注释的忽略不计债务）+ 负测 2/2，入 closeout 第 6 门；三处 onEvent:()=>{} 改正具名 noStreamSubscriber（意图入码）；签发失败改显式降级态"
+    },
+    {
+      "id": "B-09",
+      "source": "H7",
+      "stage": "H3",
+      "terminal": "done",
+      "owner": "BLOCK-388",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：消息列表有自绘滚动（useScrollGuard + ChatScrollbar + contain: layout style paint），盲加 content-visibility 会改变滚动高度估算与锚定；蓝图自身把「先用 CDP 量测 ≥400 条会话节点数与滚动帧率」写成重开条件，当前无 dev 栈。 【2026-11-10 补记】BLOCK-393 实测：CDP 8 档拆前基线在册；发现 /api/ai/conversations 硬 LIMIT 100 + 消息前端 limit=100，「全量 DOM」前提不成立，需先重定判据。"
+    },
+    {
+      "id": "B-10",
+      "source": "H7",
+      "stage": "H3",
+      "terminal": "done-partial",
+      "owner": "BLOCK-388",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "slider 语义已纠正：ArtifactPinPane role=separator+aria-value* → role=slider + aria-valuetext；ratio 测试 7/7（新增值域/valuetext/键盘改变/无 separator 断言）"
+    },
+    {
+      "id": "B-11",
+      "source": "H7",
+      "stage": "H3",
+      "terminal": "done",
+      "owner": "BLOCK-388",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：CSS 重构会改几何，前后必须几何量测对比 + 人眼过目（DOM 绿≠视觉绿），当前无 dev 栈。 【2026-11-10 补记】BLOCK-393 三态视口几何拆前基线在册（h8/ui-live.json）。"
+    },
+    {
+      "id": "B-12",
+      "source": "H7",
+      "stage": "H3",
+      "terminal": "done-partial",
+      "owner": "BLOCK-388",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "测量口径三修：①否定语境剥离（不标 verified 不再计 verified，UI-694/UI-663 回归未闭合）②外因关键词独立词匹配（裸 Provider 命中组件名 ToastProvider 的误判）③债棘轮改「分桶上限 + 总债上限 35」双守（搬桶不算清偿）；契约 5/5 绿"
+    },
+    {
+      "id": "B-13",
+      "source": "H7",
+      "stage": "H2",
+      "terminal": "done",
+      "owner": "BLOCK-387",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "ResultArtifactShell 降级原因 role=note → role=status + aria-live=polite；18/18 绿（4 文件）"
+    },
+    {
+      "id": "B-14",
+      "source": "H7",
+      "stage": "H2",
+      "terminal": "done-partial",
+      "owner": "BLOCK-387",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：需 dev 栈断线注入才能取证（三态：断线/重放/耗尽），无实机腿的横幅等于未验证 UI。"
+    },
+    {
+      "id": "B-15",
+      "source": "H7",
+      "stage": "H2",
+      "terminal": "done",
+      "owner": "BLOCK-387",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "词表 25→42 码（新增 execution / input 两类）；覆盖门扩到生产面全部 reasonCode 字面量（core/+src/ 两种写法），未注册即红；block324 7/7"
+    },
+    {
+      "id": "B-16",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未做拆分。理由：W5b 纪律要求「一切片=一会话 + 拆前拆后同套定向绿」，连续工作模式下多切片共享同一批基线证据会互相污染。本程序已修行数锚口径（split vs wc -l 不一致）并重锚 1579。"
+    },
+    {
+      "id": "B-17",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "新增 core/shared-backend/schema-versions.js（4 常量），六处独立字面量全部改为引用；契约 3/3（一致性 + 源码扫描无字面量 + intent 域双形态独立） 【2026-11-10 补记】BLOCK-393 新增 gate:version-parity：前端生产面 5 处 contractVersion 与 schema-versions 机械对账（插件 artifactSchemaVersion 仍未纳）。"
+    },
+    {
+      "id": "B-18",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：三处分别承载 MCP registry / server 启动 / 插件管理器，收敛要先定 sourcePlan 形状并改三个调用方，属结构性重构（非单点可验证）。"
+    },
+    {
+      "id": "B-19",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "branch-db.getDatabasePath 委托 resolveDbPath（认 PETRI_DB_PATH）；三态 + fail-fast + 与 core same-env-same-result 契约 4/4"
+    },
+    {
+      "id": "B-20",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：每份扫描契约背后是一个行为面，替换必须逐个建立等价行为断言，是切片活。"
+    },
+    {
+      "id": "B-21",
+      "source": "H7",
+      "stage": "H0",
+      "terminal": "done-partial",
+      "owner": "BLOCK-385",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "重复 id 合并（357→356）+ validateMap 重复即红 + 两条契约；第一批消亡 7 条（145→138）并定向 32/32 绿"
+    },
+    {
+      "id": "B-22",
+      "source": "H7",
+      "stage": "H5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-390",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "quality:perf 支持 PETRI_PERF_EVIDENCE 机器可读证据（sourceCommit/platform/command/每轮 rows/verdict）；当次 5/5 全绿证据在册；负测 10/10 【2026-11-10 补记】BLOCK-393 五段分解热栈 5 轮取数在册；统一时间轴打点与冷启动 ×5 未做，gate:startup-five-stage 刻意不进常驻链。"
+    },
+    {
+      "id": "B-23",
+      "source": "H7",
+      "stage": "H0 / H5",
+      "terminal": "done",
+      "owner": "BLOCK-385 + BLOCK-390",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "quality:surface 串上 capability-map 生成器（单一出口），实测踩过两次的「矩阵刷新后产物比对必红」类缺陷关闭；block357 8/8"
+    },
+    {
+      "id": "B-24",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：改依赖版本/布局会动锁文件与运行时，需依赖升级评审 + 前后同套绿（DEPENDENCY-CHANGE-CHECKLIST 默认答案是 no）。"
+    },
+    {
+      "id": "B-25",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：环收敛改 module 边界，必须单独立项 + 全量回归；在本程序内做会把「单源收编」和「架构改道」混成一批。"
+    },
+    {
+      "id": "B-26",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：需把三处动态入口改静态注册，属结构改道，与 B-25 同族。"
+    },
+    {
+      "id": "B-27",
+      "source": "H7",
+      "stage": "H6",
+      "terminal": "done",
+      "owner": "BLOCK-391",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "超长行按搬移不改写迁档（10933B→原位指针），迁后全台账最长 2695B（<3072）；README 最新两行补反引号并折叠被取代的 duplicate active 行；audit:compact 幂等入 closeout"
+    },
+    {
+      "id": "B-28",
+      "source": "H7",
+      "stage": "H0 / H6",
+      "terminal": "done",
+      "owner": "BLOCK-385 + BLOCK-391",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "POST-NSO 蓝图 planned→completed；post-S7 蓝图 planned→active(living-plan)；backlog 349–354 追平；BLOCK-370 plan status 回写；根级 lastUpdated 与 coverage 由 docs:coverage 单写入者同批写 + COVERAGE_LASTUPDATED_DRIFT 报警 + 负测"
+    },
+    {
+      "id": "B-29",
+      "source": "H7",
+      "stage": "H6",
+      "terminal": "done",
+      "owner": "BLOCK-391",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "新证据全部带元数据：h0/gate-baseline（sourceCommit/platform/capturedBy）、h0/shard-summary（脚本自带 id/exitCode/logPath）、h5/perf-evidence（sourceCommit/platform/command/generatedAt）"
+    },
+    {
+      "id": "B-30",
+      "source": "H7",
+      "stage": "H6",
+      "terminal": "done-partial",
+      "owner": "BLOCK-391",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "本程序新增证据 6 件入册（gate-baseline / 两轮分片汇总 / shard-attribution / wip-inventory / perf-evidence）；EAR 门仍 PASS（阈值 40%）"
+    },
+    {
+      "id": "B-31",
+      "source": "H7",
+      "stage": "H4",
+      "terminal": "done",
+      "owner": "BLOCK-389",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：warnings 抑制基线是安全网，收缩要分域（测试面/生产面）且每域都要负测守护。 【2026-11-10 补记】BLOCK-393 css 白名单 13→11 已收缩；lint 2312 warnings 分域棘轮未做。"
+    },
+    {
+      "id": "B-32",
+      "source": "H7",
+      "stage": "H3",
+      "terminal": "done-partial",
+      "owner": "BLOCK-388",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "未改。理由：纯视觉变更，无实机=不可证（DOM 断言不冒充视觉绿）。"
+    },
+    {
+      "id": "B-33",
+      "source": "H7",
+      "stage": "H5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-390",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "本程序复核矩阵 P1=0/P2=0/P3=2/dirty=0，未新增；未逐件销号。"
+    },
+    {
+      "id": "B-34",
+      "source": "H7",
+      "stage": "H7",
+      "terminal": "pending_human_eye",
+      "owner": "BLOCK-392",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "人眼路线已生成：docs/post-s7-h7-human-eye-route.md（步骤/输入/每步预期/证据留存点）"
+    },
+    {
+      "id": "K-01",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "done",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k2/k2-envelope-and-index.json"
+    },
+    {
+      "id": "K-02",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "done",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k0/k0-criteria-verdict.json"
+    },
+    {
+      "id": "K-03",
+      "source": "K7",
+      "stage": "K0/K5",
+      "terminal": "done",
+      "owner": "BLOCK-396 + BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-04",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-05",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "done",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k0/k0-lint-hygiene-overlap.json"
+    },
+    {
+      "id": "K-06",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "done",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k0/k0-wip-owner-table.json"
+    },
+    {
+      "id": "K-07",
+      "source": "K7",
+      "stage": "K0",
+      "terminal": "done",
+      "owner": "BLOCK-396",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k0/k0-canonical-readings.json"
+    },
+    {
+      "id": "K-08",
+      "source": "K7",
+      "stage": "K1",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-397",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k1/k1-mcp-metering-truth.json"
+    },
+    {
+      "id": "K-09",
+      "source": "K7",
+      "stage": "K1",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-397",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k1/k1-permission-tier-truth.json"
+    },
+    {
+      "id": "K-10",
+      "source": "K7",
+      "stage": "K1",
+      "terminal": "done",
+      "owner": "BLOCK-397",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k1/k1-definition-wiring.json"
+    },
+    {
+      "id": "K-11",
+      "source": "K7",
+      "stage": "K2",
+      "terminal": "done-partial",
+      "owner": "BLOCK-398",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k2/k2-envelope-and-index.json"
+    },
+    {
+      "id": "K-12",
+      "source": "K7",
+      "stage": "K2",
+      "terminal": "done",
+      "owner": "BLOCK-398",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k2/k2-named-limit-refactor.json"
+    },
+    {
+      "id": "K-13",
+      "source": "K7",
+      "stage": "K2",
+      "terminal": "deferred",
+      "owner": "BLOCK-398",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k2/k2-w5b-deferred-slices.json"
+    },
+    {
+      "id": "K-14",
+      "source": "K7",
+      "stage": "K3",
+      "terminal": "done-partial",
+      "owner": "BLOCK-399",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k3/k3-experience-truth.json"
+    },
+    {
+      "id": "K-15",
+      "source": "K7",
+      "stage": "K3",
+      "terminal": "pending_human_eye",
+      "owner": "BLOCK-399",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k3/k3-debt-triage.json"
+    },
+    {
+      "id": "K-16",
+      "source": "K7",
+      "stage": "K3",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-399",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k3/k3-experience-truth.json"
+    },
+    {
+      "id": "K-17",
+      "source": "K7",
+      "stage": "K3",
+      "terminal": "done-partial",
+      "owner": "BLOCK-399",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k3/k3-inline-style-gate.json"
+    },
+    {
+      "id": "K-18",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "deferred",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-w5b-slices.json"
+    },
+    {
+      "id": "K-19",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-architecture-truth.json"
+    },
+    {
+      "id": "K-20",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-source-scan-ratchet.json"
+    },
+    {
+      "id": "K-21",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "done-partial",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-architecture-truth.json"
+    },
+    {
+      "id": "K-22",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "deferred",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-w5b-slices.json"
+    },
+    {
+      "id": "K-23",
+      "source": "K7",
+      "stage": "K5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-24",
+      "source": "K7",
+      "stage": "K5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-25",
+      "source": "K7",
+      "stage": "K5",
+      "terminal": "deferred",
+      "owner": "BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-26",
+      "source": "K7",
+      "stage": "K5",
+      "terminal": "done-partial",
+      "owner": "BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json"
+    },
+    {
+      "id": "K-27",
+      "source": "K7",
+      "stage": "K6",
+      "terminal": "done",
+      "owner": "BLOCK-402",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k6/k6-red-green.json"
+    },
+    {
+      "id": "K-28",
+      "source": "K7",
+      "stage": "K6",
+      "terminal": "deferred",
+      "owner": "BLOCK-402",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k6/k6-security-truth.json"
+    },
+    {
+      "id": "K-29",
+      "source": "K7",
+      "stage": "K6",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-402",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k6/k6-u-boundaries.json"
+    },
+    {
+      "id": "K-30",
+      "source": "K7",
+      "stage": "K7",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-403",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k7/task-suite-attempt.json"
+    },
+    {
+      "id": "K-31",
+      "source": "K7",
+      "stage": "K4",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-400",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k4/k4-version-parity-report.json"
+    },
+    {
+      "id": "K-32",
+      "source": "K7",
+      "stage": "K5",
+      "terminal": "done",
+      "owner": "BLOCK-401",
+      "ownerSource": "derived-from-stage",
+      "unmatchedStages": [],
+      "evidence": "acceptance/post-h9-2026-11-10/k5/k5-evidence-metadata-gate.json"
+    },
+    {
+      "id": "IA-P1-a",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "done",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "scripts/ui-design-entry-registry.mjs + gate:ui-entries（16 路由 / 25 字面量 / 0 重复 canonical）"
+    },
+    {
+      "id": "IA-P1-b",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "done-partial",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "scripts/ui-design-entry-registry.mjs CANCELLED_ENTRIES 3 条显式留因"
+    },
+    {
+      "id": "IA-P2-a",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "done",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "frontend/src/components/desktop/titlebar/shared.tsx + gate:ui-entries 方向 D"
+    },
+    {
+      "id": "IA-P1-c",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "done-partial",
+      "owner": "BLOCK-417",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "scripts/ui-design-layout-gate.mjs WIP_KNOWN_DUPLICATES 2 组 + d2/gate-readout.json"
+    },
+    {
+      "id": "IA-P2-b",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-417",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "d2/gate-readout.json（全仓容器热点 708 只减棘轮冻结）"
+    },
+    {
+      "id": "IA-P2-c",
+      "source": "UI-D5",
+      "stage": "A",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "A"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md U-01；docs/ui-design-acceptance-checklist-v1.md §5 B4"
+    },
+    {
+      "id": "UX-P0",
+      "source": "UI-D5",
+      "stage": "B",
+      "terminal": "pending_human_eye",
+      "owner": "BLOCK-419",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "B"
+      ],
+      "evidence": "docs/ui-design-human-eye-route.md（签字槽全空）+ acceptance/block-332/ui-ledger-triage.json"
+    },
+    {
+      "id": "UX-P1-a",
+      "source": "UI-D5",
+      "stage": "B",
+      "terminal": "done",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "B"
+      ],
+      "evidence": "docs/ui-productization-audit.md UI-702 同段追加；npm run ui:audit:check PASS（633 个 UI 编号）"
+    },
+    {
+      "id": "UX-P1-b",
+      "source": "UI-D5",
+      "stage": "B",
+      "terminal": "done",
+      "owner": "BLOCK-418/419",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "B"
+      ],
+      "evidence": "gate:ui-visual（hover 单源 + selected 三 token）+ gate:ui-a11y（八态 32/32 有判据）"
+    },
+    {
+      "id": "UX-P2-a",
+      "source": "UI-D5",
+      "stage": "B",
+      "terminal": "done-partial",
+      "owner": "BLOCK-417",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "B"
+      ],
+      "evidence": "ui-d2-geometry-live flow + d2/ui-d2-geometry-live-darwin.json（9/9）"
+    },
+    {
+      "id": "UX-P2-b",
+      "source": "UI-D5",
+      "stage": "B",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-419",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "B"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md E-01/E-03 + docs/ui-design-human-eye-route.md"
+    },
+    {
+      "id": "VI-P1-a",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done-partial",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "theme-token-contract.test.ts z 棘轮 38/111 → 34/104；gate:ui-visual Z_TIER_FROZEN 只减清单"
+    },
+    {
+      "id": "VI-P1-b",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "frontend/src/styles/custom.css + global.css；gate:ui-visual PASS（跨文件重复 0）"
+    },
+    {
+      "id": "VI-P1-c",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done-partial",
+      "owner": "BLOCK-417",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "frontend/src/lib/uiBreakpoints.ts + gate:ui-breakpoints（21 档只减登记表 / JS 裸阈值 0 / 767→768 对齐）"
+    },
+    {
+      "id": "VI-P2-a",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done-partial",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "d3/gate-readout.json exitCriteria.componentCssTokenOverflow"
+    },
+    {
+      "id": "VI-P2-b",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "theme-token-contract.test.ts fallback RATCHET 19/235 → 17/190（按当次读数）+ 植入必红实战"
+    },
+    {
+      "id": "VI-P2-c",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "retain-with-reason",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "theme-token-contract.test.ts 内联颜色棘轮（BLOCK-413 冻结）+ d3/gate-readout.json"
+    },
+    {
+      "id": "VI-P3",
+      "source": "UI-D5",
+      "stage": "C",
+      "terminal": "done-partial",
+      "owner": "BLOCK-418",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "C"
+      ],
+      "evidence": "d3/convergence.json（非 WIP 57 文件 424 处清零）+ gate:ui-visual（非 WIP ;; = 0）"
+    },
+    {
+      "id": "D-GAP",
+      "source": "UI-D5",
+      "stage": "D",
+      "terminal": "done-partial",
+      "owner": "BLOCK-415/420",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "D"
+      ],
+      "evidence": "gate:ui-program 6/6 + 每门植入必红负测 + d0-d4/gate-readout.json"
+    },
+    {
+      "id": "U-01",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §1"
+    },
+    {
+      "id": "U-02",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-415/420",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §2 + d5/before-after-scorecard.json"
+    },
+    {
+      "id": "U-03",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-419",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §3"
+    },
+    {
+      "id": "U-04",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-417",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §4"
+    },
+    {
+      "id": "U-05",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/AUDIT-LOG.md 2026-08-10 🟡"
+    },
+    {
+      "id": "U-06",
+      "source": "UI-D5",
+      "stage": "U",
+      "terminal": "pending_user_ruling",
+      "owner": "BLOCK-416",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "U"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §4b"
+    },
+    {
+      "id": "E-01~03",
+      "source": "UI-D5",
+      "stage": "E",
+      "terminal": "pending_human_eye",
+      "owner": "BLOCK-419",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "E"
+      ],
+      "evidence": "docs/ui-design-human-eye-route.md（签字槽全空）"
+    },
+    {
+      "id": "V-01",
+      "source": "UI-D5",
+      "stage": "V",
+      "terminal": "external-blocked",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "V"
+      ],
+      "evidence": "docs/ui-design-ia-decision-material.md §7"
+    },
+    {
+      "id": "W-01",
+      "source": "UI-D5",
+      "stage": "W",
+      "terminal": "retain-with-reason",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "W"
+      ],
+      "evidence": "git status --porcelain；各期 plan §W 归属表"
+    },
+    {
+      "id": "W-02",
+      "source": "UI-D5",
+      "stage": "W",
+      "terminal": "retain-with-reason",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "W"
+      ],
+      "evidence": "git status --porcelain；d1/gate-readout.json closeoutAttribution"
+    },
+    {
+      "id": "W-03",
+      "source": "UI-D5",
+      "stage": "W",
+      "terminal": "retain-with-reason",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "W"
+      ],
+      "evidence": "git status --porcelain；gate:user-assets PASS"
+    },
+    {
+      "id": "V-02",
+      "source": "UI-D5",
+      "stage": "V",
+      "terminal": "external-blocked",
+      "owner": "-",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "V"
+      ],
+      "evidence": "d0/gate-readout.json + d0/gate-readout.txt"
+    },
+    {
+      "id": "V-03",
+      "source": "UI-D5",
+      "stage": "V",
+      "terminal": "external-blocked",
+      "owner": "BLOCK-420",
+      "ownerSource": "explicit",
+      "unmatchedStages": [
+        "V"
+      ],
+      "evidence": "acceptance/ui-design-assessment-2026-11-11/d5/closeout-runs.json（三次 exit 1，detail 与归因在册）"
+    }
+  ]
+}

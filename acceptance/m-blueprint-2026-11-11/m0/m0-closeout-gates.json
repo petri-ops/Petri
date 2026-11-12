@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-closeout-gates-readout",
+  "capturedAt": "2026-11-11",
+  "command": "npm run closeout",
+  "exit": 1,
+  "verdict": "FAIL",
+  "notWrittenAs": ["全绿", "verified", "通过"],
+  "gates": [
+    { "name": "audit:compact", "exit": 0, "status": "PASS", "seconds": 0.1, "note": "审计自稳，搬移不改写；本包前插的启动行仍在档首" },
+    { "name": "hygiene:check", "exit": 0, "status": "PASS", "seconds": 3.5 },
+    { "name": "docs:check", "exit": 0, "status": "PASS", "seconds": 0.4, "readout": "571 registered documents" },
+    { "name": "ui:audit:check", "exit": 0, "status": "PASS", "seconds": 0.5, "readout": "633 个带实现证据的 UI 编号" },
+    { "name": "test:changed", "exit": 1, "status": "FAIL", "seconds": 48.8, "tests": 1348, "passed": 1338, "failed": 3, "skipped": 7, "firstFailedGate": true }
+  ],
+  "unreachedByFailFast": [
+    "gate:code-size", "gate:arch-cycles", "gate:css-modules", "quality:secret", "quality:arch",
+    "quality:lint", "quality:lint:ledger", "quality:perf", "quality:types", "quality:knip:check",
+    "gate:post-h9-contracts", "quality:ear", "quality:surface"
+  ],
+  "unreachedNote": "fail-fast 于第 5 门拦停，后续 13 门本轮 closeout 未执行；其独立当次读数见 m0-canonical-readings.json 与 m0-independent-gates.json，不把独立读数冒充 closeout 通过",
+  "testChangedFailures": [
+    {
+      "test": "UI-629 布局 gap 锚：CSS gap 20px 与 CENTER_GAP_TOTAL=40 同源语义",
+      "file": "test/block321c-center-priority.test.mjs:49",
+      "terminal": "W",
+      "attribution": "HEAD 版 frontend/src/pages/project-workspace.module.css 的 .workspaceSessionLayout 为 gap: 20px；在制 WIP（BLOCK-421 布局变量化）改为 gap: var(--ws-layout-gap)。该 CSS 为 M 状态在制文件，本包零触碰。",
+      "closureCondition": "owner 收口 WIP 后，由布局单源包同步测试锚到 --ws-layout-gap 语义；本包不代改"
+    },
+    {
+      "test": "P6 stored verification and write gate target an injected evidence path",
+      "file": "test/g0-rs-p6-product-acceptance.test.mjs:682",
+      "code": "p6_current_source_tree_not_exact",
+      "terminal": "W",
+      "attribution": "detail 9 文件全部为 M 状态在制 WIP（6 个 result-studio CSS + project-workspace.module.css + package.json + test/impact-map.json）。P6 要求仓库完全静默，与 89M+68?? 在制 WIP 存在互斥，非产品缺陷。",
+      "closureCondition": "干净树 + owner 重采 P6 源绑定；按红线不擅自重打、不推给 W 类冒充通过"
+    },
+    {
+      "test": "W5a 每个测试文件都被 impact-map 引用或在存量基线",
+      "file": "test/nso-w5-impact-coverage.test.mjs:28",
+      "terminal": "done",
+      "attribution": "本包引入：新测试 test/m0-criteria-boundaries.test.mjs 未挂 rule tests",
+      "action": "已把该测试挂进 m-blueprint-program rule 的 tests",
+      "after": "隔离复跑 14/14 全绿（test/nso-w5-impact-coverage + 两个 M0 测试文件）"
+    }
+  ],
+  "independentGates": [
+    { "name": "M0 专项门 gate:m0-criteria", "command": "node scripts/m-blueprint-m0-criteria.mjs --check", "exit": 0, "status": "PASS", "issues": 0 },
+    { "name": "M0 红绿负测", "command": "node --test test/m0-criteria-calibration.test.mjs test/m0-criteria-boundaries.test.mjs", "exit": 0, "status": "PASS", "tests": 11 },
+    { "name": "W5a 隔离复跑", "command": "node --test test/nso-w5-impact-coverage.test.mjs test/m0-*.test.mjs", "exit": 0, "status": "PASS", "tests": 14 },
+    { "name": "docs:check", "exit": 0, "status": "PASS" },
+    { "name": "ui:audit:check", "exit": 0, "status": "PASS" },
+    { "name": "test:changed:list", "exit": 0, "status": "PASS", "note": "修复前 exit 2 FAIL_CLOSED，补 rule 后 exit 0；两次读数并列留痕" },
+    { "name": "quality:lint:ledger", "exit": 1, "status": "FAIL", "note": "2 项均 W 类在制 WIP errors；本包 3 处新增 lint 已根修，warnings 2445 = 基线" },
+    { "name": "quality:lint", "exit": 1, "status": "FAIL", "note": "2 errors / 2445 warnings，均 W 类在制 WIP" },
+    { "name": "quality:perf", "exit": 1, "status": "FAIL", "note": "5/5 红轮 V 类 external-blocked；不重采、不抬阈值、不放宽容差" },
+    { "name": "gate:code-size", "exit": 0, "status": "PASS" },
+    { "name": "gate:arch-cycles", "exit": 0, "status": "PASS" },
+    { "name": "quality:knip:check", "exit": 0, "status": "PASS" },
+    { "name": "gate:silent-catch", "exit": 0, "status": "PASS" },
+    { "name": "quality:types", "exit": 0, "status": "PASS" },
+    { "name": "quality:arch", "exit": 0, "status": "PASS" },
+    { "name": "quality:secret", "exit": 0, "status": "PASS" },
+    { "name": "quality:ear", "exit": 0, "status": "PASS", "readout": "1052/2271 = 46.3%" },
+    { "name": "hygiene:check", "exit": 0, "status": "PASS" },
+    { "name": "skills:check", "exit": 0, "status": "PASS" }
+  ],
+  "zeroBaselineLoosening": {
+    "lintWarnings": { "before": 2445, "after": 2445, "domains": { "production": 1489, "test": 417, "scripts": 539 } },
+    "perf": { "medianMs": 379, "tolerancePct": 30, "coreSha": "7493447930e3f558", "action": "none" },
+    "knip": 330, "archCycles": 12, "silentCatch": 412, "codeSize": "86605 行 / 75 文件 / 例外 16",
+    "note": "零放宽、零抬阈值、零缩分母、零新增依赖、零产品行为变化"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

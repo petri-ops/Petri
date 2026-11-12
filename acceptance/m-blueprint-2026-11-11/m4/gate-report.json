@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "script": "scripts/m-blueprint-m4-observability-gate.mjs",
+  "mode": "report",
+  "exitCode": 0,
+  "summary": {
+    "status": "PASS",
+    "issues": []
+  }
+}

@@ -1,0 +1,869 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-wip-owner-table",
+  "capturedAt": "2026-11-11T13:21:11.940Z",
+  "policy": "只登记归属、零触碰/零 stage/零提交；路径域机械分类，unclassified 显式列出不编造 owner；lint 2 errors 归 W 类在制 WIP，由 owner 收口，本包不代改",
+  "baselineDeclared": {
+    "modified": 89,
+    "untracked": 67
+  },
+  "currentMeasured": {
+    "total": 164,
+    "modified": 90,
+    "untracked": 74,
+    "note": "当次 git --no-optional-locks status --porcelain 现取；含本包自有新增与精确增量文件，故与任务书声明的 89M+67?? 不同，差数可复算"
+  },
+  "byDomain": {
+    "acceptance-evidence-wip": 4,
+    "governance-canonical-wip": 8,
+    "config-wip": 6,
+    "frontend-shell-wip": 17,
+    "ui-design-program-wip": 84,
+    "node-test-wip": 1,
+    "dev-infra-flow-wip": 2,
+    "user-asset": 7,
+    "audit-log-archive-wip": 18,
+    "docs-wip": 10,
+    "BLOCK-426-own": 6,
+    "scripts-wip": 1
+  },
+  "lintErrors": [
+    {
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx",
+      "line": 39,
+      "rule": "react-hooks/set-state-in-effect",
+      "terminal": "W",
+      "reason": "在制 WIP（BLOCK-423 设置页改版），owner 收口，本包零触碰"
+    },
+    {
+      "file": "test/block414-backend-port-reuse.test.mjs",
+      "line": 12,
+      "rule": "no-unused-vars",
+      "terminal": "W",
+      "reason": "在制 WIP（BLOCK-414 附带事故修复），owner 收口，本包零触碰"
+    }
+  ],
+  "unclassifiedFiles": [],
+  "entries": [
+    {
+      "status": "M",
+      "file": "acceptance/block-332/ui-ledger-triage.json",
+      "domain": "acceptance-evidence-wip"
+    },
+    {
+      "status": "M",
+      "file": "acceptance/block-92/size-baseline.json",
+      "domain": "acceptance-evidence-wip"
+    },
+    {
+      "status": "M",
+      "file": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+      "domain": "acceptance-evidence-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/AUDIT-LOG.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/DOC-REGISTRY.json",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/README.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/capability-map.md",
+      "domain": "config-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/functional-surface-matrix-2026-11-04.md",
+      "domain": "config-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/next-steps-roadmap.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/post-k7-full-audit-and-blueprint-2026-11-10.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/project-workspace-handoff.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "docs/ui-productization-audit.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "M",
+      "file": "eslint.config.mjs",
+      "domain": "config-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/App.tsx",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/RouteErrorBoundary.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/branch/BranchTabs.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/common/ToastProvider.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/ChatScrollbar.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/LlmTranscriptViewer.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/MessageRail.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/ResultCard.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/ToolActivityDock.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/gen-ui/GenUiCard.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/integration/integration.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/renderers/ChartRenderer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/renderers/ImageRenderer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/renderers/TableRenderer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/copilot/simple-chat.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/MotionControl.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/FirstRunRoleReveal.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/FolderPicker.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/TestInstanceBadge.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/TitleBar.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/TitleBar.test.tsx",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/desktop.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/theme-control.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/desktop/titlebar/shared.tsx",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/knowledge/KnowledgeConsoleChat.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/knowledge/KnowledgeConsoleDock.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/CompactResultNavigator.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ContinueAnalysisMenu.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/LineageGraph.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/LineageStrip.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/LineageViewSwitch.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ResultAgentComposer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ResultEditPanel.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ResultStudioSurface.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/RevisionCodeView.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/result-studio/ScientificInteractionViewer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/settings/ExperimentalFeaturesSection.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/ui/Lightbox.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/viewers/MarkdownViewer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/viewers/SpreadsheetViewer.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/window/rail-page.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/window/window-shell.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/ArtifactPinPane.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/SshStatusDot.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/WorkspaceCitationsSection.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/components/workspace-panels/WorkspaceFileIcon.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/hooks/useWorkspaceLayout.ts",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/hooks/useWorkspacePanels.ts",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/lib/settingsSearch.ts",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/extensions/extensions.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/extensions/styles.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/global-page.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/home.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/project-workspace.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/settings/settings.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/welcome.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/pages/window/command-center.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/styles/custom.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/styles/global.css",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "frontend/src/styles/theme-token-contract.test.ts",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "M",
+      "file": "knip.json",
+      "domain": "config-wip"
+    },
+    {
+      "status": "M",
+      "file": "package.json",
+      "domain": "config-wip"
+    },
+    {
+      "status": "M",
+      "file": "test/block201-settings-baseline.test.mjs",
+      "domain": "node-test-wip"
+    },
+    {
+      "status": "M",
+      "file": "test/impact-map.json",
+      "domain": "config-wip"
+    },
+    {
+      "status": "??",
+      "file": ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
+      "domain": "dev-infra-flow-wip"
+    },
+    {
+      "status": "??",
+      "file": ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
+      "domain": "dev-infra-flow-wip"
+    },
+    {
+      "status": "??",
+      "file": "acceptance/m-blueprint-2026-11-11/",
+      "domain": "acceptance-evidence-wip"
+    },
+    {
+      "status": "??",
+      "file": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "acceptance/ui-design-assessment-2026-11-11/",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "assets/",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T055028Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T062531Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T071341Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T074513Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T075600Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T085406Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T085636Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-compact-2026-11-11.r20261111T091407Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T055028Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T062531Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T071341Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T074513Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T075600Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T085406Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T085636Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/archive/checkpoints/audit-log-through-2026-11-11.r20261111T091407Z.md",
+      "domain": "audit-log-archive-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-415-ui-design-d0-baseline-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-416-ui-design-d1-ia-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-417-ui-design-d2-layout-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-418-ui-design-d3-visual-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-419-ui-design-d4-a11y-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-420-ui-design-d5-final-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-421-workspace-layout-refactor-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-422-ui-readability-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-423-settings-redesign-plan.md",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/block-426-m0-criteria-calibration-plan.md",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "docs/m-blueprint-2026-11-11-program.md",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "docs/pelican-bicycle.html",
+      "domain": "docs-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/post-h9-optimization-blueprint-2026-11-10.md",
+      "domain": "governance-canonical-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/ui-design-acceptance-checklist-v1.md",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/ui-design-human-eye-route.md",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "docs/ui-design-ia-decision-material.md",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/SettingsField.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopSection.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkSection.tsx",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/components/desktop/settings-redesign.module.css",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "frontend/src/lib/uiBreakpoints.ts",
+      "domain": "frontend-shell-wip"
+    },
+    {
+      "status": "??",
+      "file": "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "petri-logo-concepts.miora",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "petri-logo-concepts_assets/",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "scripts/backfill-artifact-chain.mjs",
+      "domain": "scripts-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/m-blueprint-m0-criteria.mjs",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "scripts/m-blueprint-m0-wip-owner.mjs",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-a11y.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-baseline.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-breakpoints.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-entry-gate.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-entry-registry.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-gap-ledger-check.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-layout-gate.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-program.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-scorecard.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "scripts/ui-design-visual.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/m0-criteria-boundaries.test.mjs",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "test/m0-criteria-calibration.test.mjs",
+      "domain": "BLOCK-426-own"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-a11y.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-baseline.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-breakpoints.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-entries.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-gap-ledger.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-layout-gate.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-program.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "test/ui-design-visual.test.mjs",
+      "domain": "ui-design-program-wip"
+    },
+    {
+      "status": "??",
+      "file": "tmp-block342-live/",
+      "domain": "user-asset"
+    },
+    {
+      "status": "??",
+      "file": "tmp-review/",
+      "domain": "user-asset"
+    }
+  ]
+}

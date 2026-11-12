@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "kind": "m5a-wiring-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-434",
+  "scope": "M5 判据层 → 生产路径接线（4 项真缺口）",
+  "notClaimed": [
+    "M5 八项全部接线",
+    "全绿",
+    "verified"
+  ],
+  "deliverables": [
+    {
+      "id": "W1",
+      "gap": "scripts/secret-scan.mjs:67 catch { continue } 把 git grep 故障当作无命中",
+      "terminal": "done",
+      "wiring": "消费 core 侧 adjudicateGitGrepResult：仅 exit 1 且 stderr 空 = no-match，其余（ENOENT/128/-1/null）fail-closed；main() 消费 scanFailed 打印 FAIL 并 exit 1",
+      "negativeProof": "5 种故障码全部 fail-closed；stderr 非空即使 exit 1 也 fail-closed；源码断言不含裸 catch{continue}",
+      "regression": "npm run quality:secret 实跑 PASS（生产面 0 命中，fixture 计数照常）"
+    },
+    {
+      "id": "W2",
+      "gap": "全局 Origin 门未挂载（requireTrustedDesktopOrigin 仅在 routes/files.js 若干路由）",
+      "terminal": "done",
+      "wiring": "bootstrap.setupBootstrap 在 requestId 之后、业务路由之前挂 rejectUntrustedOrigin",
+      "rule": "只拦「真实 http(s) 且不可信」来源；无 Origin 放行；Origin:'null'/file:// 交各路由 token 门裁决",
+      "negativeProof": "外部 https 站 403 / 回环非白名单端口 403 / 无 Origin 放行 / localhost:3000 放行 / Origin:null 放行交路由",
+      "regression": "test/block67-routes.test.mjs 9/9（Origin:null + token → 200 的拖出下载语义零破坏）",
+      "selfCorrection": "初版拦所有非可信 Origin（含 'null'），跑既有测试前已识别会破坏 BLOCK-67 语义，收窄为真实 http(s) 判定后才提交"
+    },
+    {
+      "id": "W3",
+      "gap": "routes/ai-memory.js:13-42 四处 try/catch{} 吞掉 DDL 失败，「已存在」与真实故障不可区分",
+      "terminal": "done",
+      "wiring": "新增 helpers/ddl-migrate.js（applyDdlStatements）单一执行入口，ai-memory 六条迁移统一接入并暴露 module.exports.ddlMigration",
+      "rule": "ddlOutcome 分类：applied / suppressed(已存在) / failed；failed 用 redactLog 脱敏后 console.error 且不抛（不阻断启动）",
+      "negativeProof": "duplicate column → DDL_FAILED_SILENTLY(severity=info)；磁盘故障 → DDL_FAILED(severity=error)；空语句 → DDL_EMPTY_STATEMENT；调用不抛",
+      "grepProof": "ai-memory 内 `try { sqlite.exec('…'); } catch {}` 形态计数=0"
+    },
+    {
+      "id": "W4",
+      "gap": "src/plugin/zip.js 解压中途失败留下半成品 destDir，下次安装读到脏目录",
+      "terminal": "done",
+      "wiring": "extractZip 包 try/catch；失败先 fs.rmSync(destDir,{recursive,force}) 再原样 throw",
+      "negativeProof": "非 zip 文件 → 抛错且 destDir 不存在；清理自身失败不掩盖原始错误；成功路径不误删",
+      "regression": "既有条目校验（越界/软链/超限）分支保持"
+    },
+    {
+      "id": "W5",
+      "gap": "MCP stdio 启动命令无判据校验（M5-2 判据未接生产路径）；真实 spawn 点在 core/petri-server/mcp/client-manager.js:new StdioClientTransport（非 routes/mcp-client.js）",
+      "terminal": "done-partial",
+      "wiring": "新增纯函数 adjudicateStdioConfig 并在 spawn 之前调用：① 注入硬化（command/args 含 shell 元字符恒拒）；② 命令白名单按 PETRI_MCP_COMMAND_ALLOWLIST 显式生效",
+      "negativeProof": "args 含 ; / 反引号 → MCP_ARGS_SHELL_METACHAR；显式白名单下 uvx → MCP_COMMAND_NOT_ALLOWLISTED；node/npx 放行；未设 env 时 uvx 等仍可用（回归面保持）",
+      "pendingUserRuling": "把 node/npx/python3 白名单设为默认拒绝会收窄产品能力面（生态常见 uvx/bun/docker），属 U 类——本包不静默启用，需用户裁决后再翻默认",
+      "regression": "判据在 spawn 之前（源码锚点测试断言顺序）"
+    },
+    {
+      "id": "W6",
+      "gap": "M5-4 帧导航 allowlist 判据未接侦测路（仅登记表命中才告警，未登记进程不可信 http(s) 来源静默通过）",
+      "terminal": "done",
+      "wiring": "src/main/security-hardening.js 新增模块级 classifySubframeNavigation（genui/trusted/hijack/other），will-frame-navigate 与 did-frame-navigate 消费；hijack 且无登记 → 推 genUi:sandboxHijacked（frameUrl 留空）",
+      "factConstraint": "BLOCK-168 P1-A 实测 preventDefault 对子框导航无效 —— 不实现假装阻塞，只做分级与告警（源码断言保留该事实说明）",
+      "negativeProof": "evil https → hijack(FRAME_ORIGIN_NOT_ALLOWLISTED)；userinfo → USERINFO_FORBIDDEN；localhost:3000 → trusted；petri-genui:// → genui；about:blank/null → other"
+    }
+  ],
+  "stillDonePartial": [
+    {
+      "item": "M5-3 drag 登记根校验接线",
+      "reason": "需新增 IPC 通道 + preload 包装，触碰 channels.js/preload.js 契约面与 UI 拖放链路",
+      "closureCondition": "独立包内先 channels.js 登记再 preload 包装，带通道双向守护测试"
+    },
+    {
+      "item": "M5-3 drag 登记根接线",
+      "terminal": "pending_user_ruling",
+      "reason": "判据要求 registeredRoots 命中，而 fs/import-from 与拖目录建项目的源路径按设计在已登记根之外；判据 20MB 上限与 import-from 无上限设计冲突——套用即功能破坏",
+      "closureCondition": "用户裁决拖入源范围（如主目录+已登记根）后新增 adjudicateDragSource 并在 import-from / 拖目录建项目两处接线，带目录/软链/体积负测"
+    }
+  ],
+  "hk01": {
+    "red": "10/10 fail（W1–W4 未落盘时）",
+    "green": "12/12 pass（W1–W6，含 9 项边界/顺序负测）",
+    "files": [
+      "test/m5a-production-wiring.test.mjs"
+    ]
+  },
+  "gates": {
+    "lint": "改动 6 文件 0 warning 0 error",
+    "qualityArch": "PASS（R1-R5 无违规；cruise 全新）",
+    "qualitySecret": "PASS",
+    "docsCheck": "PASS 579 registered",
+    "docsReconcile": "0 validation issues / 0 manual review",
+    "testChanged": {
+      "tests": 1811,
+      "pass": 1798,
+      "fail": 2,
+      "skipped": 11,
+      "failures": [
+        "UI-629 布局 gap 锚（W 类，在制 WIP）",
+        "P6 源绑定（W 类，在制 WIP）"
+      ],
+      "note": "帧导航接线后影响面 1778→1811，新增用例全绿，两红不变"
+    },
+    "closeout": {
+      "exit": 1,
+      "firstFailedGate": "test:changed",
+      "passed": [
+        "audit:compact",
+        "hygiene:check",
+        "docs:check(579)",
+        "ui:audit:check"
+      ],
+      "verdict": "NOT_PASSED"
+    },
+    "silentCatch": {
+      "exit": 0,
+      "readout": "PASS（102 文件 / 406 处；基线 412 未改写）",
+      "note": "ai-memory 静默 catch 9→3，门提示可下调 1 处；本包不下调以免与 M6 分域视图（412）失同步，留待 M6 刷新批次"
+    },
+    "lintFull": {
+      "problems": 2447,
+      "errors": 2,
+      "warnings": 2445,
+      "note": "与基线一致（2 errors 为在制 WIP 的 W 类）；本包改动文件单独 lint 0"
+    },
+    "types": "PASS",
+    "ear": "PASS",
+    "codeSize": "PASS",
+    "archCycles": "PASS",
+    "knip": {
+      "exit": 0,
+      "readout": "PASS（保留面 330 键冻结，无新增）",
+      "note": "W6 分级函数抽为 src/main/subframe-navigation.js 独立模块被生产消费；未放宽基线"
+    },
+    "arch": {
+      "exit": 0,
+      "readout": "PASS（R1-R5 无违规）",
+      "note": "src→core 经既有 resolveCore 约定，符合既有先例"
+    }
+  },
+  "zeroScope": [
+    "零新增依赖",
+    "零放宽基线",
+    "零触碰在制 WIP",
+    "零 stage 零提交",
+    "零撤销既有裁决（MAX_AGENT_ITERS / workspace_exec 默认放行 / Origin:null+token / 主题 / 中栏）",
+    "零 G1+ 外推"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "selfCorrections": [
+    {
+      "incident": "W2 初版拦所有非可信 Origin（含字符串 null）",
+      "rootCause": "未先核既有 BLOCK-67 拖出下载语义（Origin:null + token → 200）",
+      "action": "判据收窄为「真实 http(s) 且不可信」；Origin:null 交路由 token 门；补 3 条边界负测",
+      "evidence": "test/block67-routes.test.mjs 9/9 回归"
+    },
+    {
+      "incident": "README 入口行首次用 shell 双引号写入，反引号被 shell 当命令执行，文本退化",
+      "rootCause": "命令里用了双引号包裹含反引号的 markdown",
+      "action": "改用 replace_in_file 工具写回；删除退化行、恢复反引号、编号校正为 437",
+      "evidence": "docs/README.md:1 形态正确；docs:check PASS 579"
+    },
+    {
+      "incident": "回写脚本 m5a 配置首次用 \\` 转义，文档与源码双双出现多余反斜杠；随后按行截断修复时误删脚本尾部 helpers/写盘逻辑",
+      "rootCause": "模板字符串内反引号转义层级错误 + 用行号截断而非结构定位",
+      "action": "从备份按「m5a 块起止」结构定位重建，保留尾部；lint 0、node --check 通过；文档反斜杠计数 0",
+      "evidence": "scripts/m-blueprint-stage-writeback.mjs lint 0 / 287 行 / 幂等复跑「无新增」"
+    },
+    {
+      "incident": "重跑回写令 AUDIT-LOG/roadmap 头部出现陈旧变体（无代码格式）与干净变体并存",
+      "rootCause": "首次污染行与修复行文本不同，once() 判定为新内容而前置插入",
+      "action": "按「同前缀、陈旧无代码格式、新版有」规则用干净版替换陈旧版，各 1 处；链式顺序核验（M5-A 在上、M0–M7 在下）",
+      "evidence": "docs:check PASS 579 / docs:reconcile 0 issues"
+    }
+  ],
+  "wipParity": {
+    "originalWipM": 90,
+    "currentM": 94,
+    "thisPackageModified": [
+      "core/petri-server/bootstrap.js",
+      "core/petri-server/routes/ai-memory.js",
+      "src/plugin/zip.js",
+      "scripts/secret-scan.mjs"
+    ],
+    "nonPackageM": 90,
+    "untracked": 131,
+    "note": "94 = 起始 90 项在制 WIP（零改写）+ 本包 4 项接线目标文件（均起始干净）；/tmp 起始快照已被系统清理，故以「非本包 M 数量=90」与逐文件 diff 归属核对"
+  },
+  "finalSweep": {
+    "staged": 0,
+    "head": "4127f5b5",
+    "closeout": {
+      "exit": 1,
+      "firstFailedGate": "test:changed",
+      "passed": [
+        "audit:compact",
+        "hygiene:check",
+        "docs:check(579)",
+        "ui:audit:check"
+      ],
+      "note": "两红仍为 UI-629 与 P6（W 类在制 WIP），接线未引入新红"
+    }
+  }
+}

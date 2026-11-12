@@ -1,0 +1,1495 @@
+{
+  "schemaVersion": 1,
+  "kind": "m6-read-only-views",
+  "capturedAt": "2026-11-11T14:14:24.221Z",
+  "policy": "只读视图：零改写基线、零触碰在制 WIP、零 stage 零提交；U/E/V/W 不代答",
+  "surface": {
+    "schema": "functional-surface-matrix.v1",
+    "tools": 115,
+    "ipcChannels": 168,
+    "routes": 283,
+    "rewritten": false,
+    "source": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+    "threeMatrices": [
+      "scripts/functional-surface-audit.mjs",
+      "scripts/block357-capability-map.mjs",
+      "scripts/validate-ipc-catalog.mjs"
+    ]
+  },
+  "ipc": {
+    "channelCount": 168,
+    "rewritten": false,
+    "sources": [
+      "src/ipc/channels.js",
+      "src/preload.js",
+      "docs/ipc-catalog.md"
+    ],
+    "note": "IPC 三真相只读对账，catalog 滞后登记 done-partial"
+  },
+  "bigFiles": [
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "lines": 1964,
+      "rewritten": false
+    },
+    {
+      "path": "core/petri-server/helpers/tools-executor.js",
+      "lines": 2081,
+      "rewritten": false
+    },
+    {
+      "path": "frontend/src/pages/project-workspace.tsx",
+      "lines": 1225,
+      "rewritten": false
+    },
+    {
+      "path": "core/petri-server/helpers/scene3d.js",
+      "lines": 1088,
+      "rewritten": false
+    }
+  ],
+  "silentCatch": {
+    "baselineTotal": 412,
+    "computedTotal": 412,
+    "byDomain": {
+      "core": 329,
+      "src": 61,
+      "frontend": 22,
+      "scripts": 0,
+      "test": 0,
+      "other": 0
+    },
+    "fileCount": 102,
+    "rewritten": false,
+    "note": "按域下降表只读；不放宽/不上调 412 基线"
+  },
+  "focus": {
+    "terminal": "W",
+    "reason": "focus-visible 12 文件/16 声明涉及在制 CSS WIP，零触碰；观感归 E 类",
+    "rewritten": false,
+    "owner": "ui-design-program-wip",
+    "humanEyeRoute": {
+      "status": "pending_human_eye",
+      "signature": "",
+      "steps": [
+        {
+          "step": 1,
+          "action": "键盘 Tab 遍历设置页各分区控件",
+          "input": "Tab ×N",
+          "expected": "每控件有可见 :focus-visible 轮廓且不被遮挡",
+          "evidencePoint": "截图 + outlineStyle/outlineWidth DOM 读数"
+        },
+        {
+          "step": 2,
+          "action": "暗色模式下重复 Tab 遍历",
+          "input": "主题切暗 + Tab",
+          "expected": "焦点轮廓在暗底可见（对比度 ≥3:1）",
+          "evidencePoint": "暗色截图 + 对比度计算"
+        },
+        {
+          "step": 3,
+          "action": "读屏 VoiceOver 遍历并核对朗读",
+          "input": "VO + 方向键",
+          "expected": "焦点顺序与视觉顺序一致、无重复朗读",
+          "evidencePoint": "读屏记录 + 人签字"
+        },
+        {
+          "step": 4,
+          "action": "对比度观感复核 32 对",
+          "input": "亮/暗两套",
+          "expected": "人眼确认文字层级与边界可辨",
+          "evidencePoint": "人眼签字槽"
+        }
+      ]
+    }
+  },
+  "channels": {
+    "items": [
+      {
+        "channel": "agent:task-done",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "computer-use:pip-open",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "computer-use:pip-close",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "computer-use:pip-frame",
+        "inPreload": false,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "computer-use:pip-status",
+        "inPreload": false,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ai-settings:get",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ai-settings:get-credential",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ai-settings:list-models",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ai-settings:save",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ai-settings:test",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:get-activity-summary",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:get-shell-status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:hide-to-tray",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:notification-clicked",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:notify",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:preview-quit-summary",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:quit-decision",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:quit-requested",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:relaunch",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:set-shell-prefs",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:show-main",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "app:soft-refresh",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "backend:status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:active",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:create",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:delete",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:rename",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "branch:switch",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "content-plugin:list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "content-plugin:list-docs",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "content-plugin:read",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "data:info",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "data:open-dir",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "diagnostic:export",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "diagnostic:crash-status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "diagnostic:crash-dump-summary",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "diagnostic:crash-open-dumps",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "diagnostic:crash-simulate",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:list-directory",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:open-dialog",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:open-path",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:open-workspace-file",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:show-in-folder",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:download-from-url",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:start-drag",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:save-dialog",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:save-text-file",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "file:validate-directory",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "petri:agent-workbench-flags",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "startup:report",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "startup:marks",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:apply-inverse-hunk",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:blame",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:branch-list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:checkout-branch",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:checkpoint-create",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:checkpoint-rollback",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:commit-diff",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:commit-file-content",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:commit-index",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:commit-log",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:commit-review",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:discard-file",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:file-head-content",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:hunk-apply",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:hunk-reject-inverse",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:init-repository",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:list-modified",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:pull",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:push",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:remote-list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:remote-status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:revert-file",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:working-tree-shortstat",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:split-side-diff",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:stage-paths",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:stash-list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:tag-list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:undo-last-commit",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:unstage-paths",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:working-tree-diff",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:working-tree-file-content",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:working-tree-revert",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "git:working-tree-status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "harness-capabilities:list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:install-from-dialog",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:install-path",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:install-progress",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:install-runtime",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:list-available",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:list-installed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:set-enabled",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:uninstall",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "pack:uninstall-plan",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "install:deep-link",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "install:preview-deep-link",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "install:confirm-deep-link",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "install:pending-deep-link",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "plugin:list-installed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "plugin:list-remote",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "runtime:status",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:cancel",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:discover",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:execute",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:getExecution",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:progress",
+        "inPreload": true,
+        "usedInRenderer": true,
+        "owner": "renderer-existing",
+        "terminal": "retain-with-reason",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:set-disabled",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:uninstall",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:get-install-info",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:reinstall",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:import-directory",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "skills:import-path",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "mcp-config:import-dialog",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "mcp-config:import-path",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "ssh:register-host",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "telemetry:report",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:data",
+        "inPreload": true,
+        "usedInRenderer": true,
+        "owner": "renderer-existing",
+        "terminal": "retain-with-reason",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:exit",
+        "inPreload": true,
+        "usedInRenderer": true,
+        "owner": "renderer-existing",
+        "terminal": "retain-with-reason",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:open-log-dir",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:open-shell",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:session-list",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:session-resize",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:session-start",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:session-stop",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:session-write",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "terminal:snapshot",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:check",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:download",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:download-progress",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:error",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:install",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:update-available",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:update-downloaded",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "updater:update-not-available",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:close",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:fullscreen-changed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:get-zoom",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:isFullScreen",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:isMaximized",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:maximize",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:maximize-changed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:minimize",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:open-result-in-main",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:pop-out",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:rail-mouse",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:relay-to-main",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:remove",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:restore",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:return",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:self",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:set-always-on-top",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:set-ignore-mouse-events",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:test-manage-mode-changed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:snapshot",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:state-changed",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:thumbnail",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:toggleFullScreen",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:zoom-by",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "window:zoom-reset",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "workspace:write-text-file",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:prepare",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:set-state",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:open-external",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:copy-image",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:export",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:get-data",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      },
+      {
+        "channel": "gen-ui:sandbox-hijacked",
+        "inPreload": true,
+        "usedInRenderer": false,
+        "owner": "functional-surface-audit",
+        "terminal": "pending-triage",
+        "evidence": "acceptance/functional-audit-2026-11-04/surface-matrix.json:ipcRows"
+      }
+    ],
+    "total": 168,
+    "unusedInRenderer": 165,
+    "dualColumn": [
+      "structure",
+      "behavior"
+    ],
+    "rewritten": false,
+    "note": "结构判定与专项行为判定双列，禁止互相冒充；真消费接线 done-partial"
+  },
+  "uMaterial": {
+    "status": "pending_user_ruling",
+    "defaultChanged": false,
+    "topic": "typescript 双版本统一 / ADMISSION observe→enforce / FK OFF-ON / 虚拟列表依赖",
+    "candidates": [
+      {
+        "option": "维持双版本与既有默认",
+        "risk": "类型面漂移持续",
+        "recommendation": "当前 G0 默认"
+      },
+      {
+        "option": "统一版本并跑前后同套定向测试",
+        "risk": "需 changelog + lockfile diff 审查",
+        "recommendation": "需用户显式裁决"
+      }
+    ],
+    "note": "Agent 不代答，不改默认语义"
+  },
+  "skills": {
+    "count": 0,
+    "rewritten": false,
+    "source": "resources/skills/manifest.json",
+    "note": "Skill 清单一致性只读对账；skills:check 当次读数另取"
+  },
+  "groups": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

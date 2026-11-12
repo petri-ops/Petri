@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "kind": "m1-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-427",
+  "deliverables": [
+    {
+      "id": "M1-1",
+      "file": "core/petri-server/agent-tools/turn-machine.js",
+      "what": "10 态显式状态机 + 转移表 fail-closed + append-only 可重放 + traceId + turn_cancelled 一等结果",
+      "terminal": "done",
+      "evidence": "test/m1-long-task-kernel.test.mjs 12/12"
+    },
+    {
+      "id": "M1-2",
+      "file": "core/petri-server/agent-tools/loop-boundaries.js",
+      "what": "provider usage 权威 / compact 双熔断 / 成本默认软提示（hard 显式可选）/ 工具超时与输出预算单源 / 结构化事件链",
+      "terminal": "done",
+      "evidence": "test/m1-long-task-kernel.test.mjs + gate 负测"
+    },
+    {
+      "id": "M1-3",
+      "file": "core/petri-server/agent-tools/goal-verifier.js",
+      "what": "独立 no-tool 校验：产物存在性 + todo 全终态 + 后台全 settle + 具名 reasonCode",
+      "terminal": "done",
+      "evidence": "test/m1-long-task-kernel.test.mjs"
+    },
+    {
+      "id": "M1-4",
+      "file": "turn-machine.js:TURN_CANCELLED",
+      "what": "turn_cancelled 稳定结果类型",
+      "terminal": "done",
+      "evidence": "门 CANCEL_NOT_FIRST_CLASS 负测"
+    },
+    {
+      "id": "M1-5",
+      "file": "test/m1-long-task-kernel.test.mjs",
+      "what": "可注入 provider 的 30 轮 mock loop 行为测试（非源码字符串扫描）",
+      "terminal": "done",
+      "evidence": "真实跑满 30 轮并断言状态轨迹"
+    },
+    {
+      "id": "M1-1-dep",
+      "what": "主循环接线与 12 存量环消亡（借依赖注入打断）",
+      "terminal": "done-partial",
+      "closureCondition": "归 M6-A 结构单源组，按蓝图不提前实现；本包只建可注入纯模块与门，不提前修改 loop-orchestrator.js 控制流"
+    }
+  ],
+  "hk01": {
+    "first": "ERR_MODULE_NOT_FOUND 1 failed",
+    "second": "转移表反查 4 failed",
+    "third": "测试轨迹缺 Streaming 1 failed",
+    "final": "18/18 pass 0 fail",
+    "gateSelfTest": "test/m1-kernel-gate.test.mjs 6 项篡改必红全绿"
+  },
+  "gates": {
+    "specialty": "gate:long-task-kernel PASS 0 issues",
+    "lint": "新增 6 文件 lint 0",
+    "arch": "PASS R1-R5",
+    "knip": "PASS 330 键",
+    "w5a": "PASS（新测试已挂 rule）",
+    "docs": "PASS 572 registered",
+    "uiAudit": "PASS",
+    "testChanged": {
+      "tests": 1427,
+      "pass": 1418,
+      "fail": 2,
+      "skipped": 7,
+      "failures": [
+        "UI-629 布局 gap 锚（W 类在制 WIP CSS）",
+        "P6 源绑定（W 类在制 WIP 9 文件）"
+      ],
+      "exit": 1
+    },
+    "closeout": {
+      "exit": 1,
+      "passed": [
+        "audit:compact",
+        "hygiene:check",
+        "docs:check",
+        "ui:audit:check"
+      ],
+      "firstFailed": "test:changed",
+      "unreachedAfterFailFast": 13
+    }
+  },
+  "productContract": {
+    "MAX_AGENT_ITERS": "Infinity 未改",
+    "MAX_AGENT_TOOL_CALLS": "Infinity 未改",
+    "loopOrchestratorDiff": "0 行",
+    "workspaceExec": "默认放行裁决未改",
+    "gateReason": "门内 PRODUCT_CONTRACT_BROKEN 守卫 + git diff 零改动断言"
+  },
+  "testSuggest": {
+    "command": "npm run test:suggest -- --supply=cloud",
+    "suggestion": "test/window-manager.test.mjs",
+    "confidence": 0.85,
+    "adopted": false,
+    "reason": "与 M1 改动面（core 状态机）无交集；建议器语义为增量附加，不改 impact-map 下限，如实登记不纳入定向范围"
+  },
+  "zeroScope": [
+    "零新增依赖",
+    "零放宽基线",
+    "零触碰他方在制 WIP",
+    "零 stage 零提交",
+    "零产品契约撤销",
+    "零 G1+ 外推"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

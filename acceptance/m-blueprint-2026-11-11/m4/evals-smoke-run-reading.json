@@ -1,0 +1,292 @@
+{
+  "suite": "smoke",
+  "provider": "mock",
+  "artifact": "smoke",
+  "measures": "harness",
+  "at": "2026-11-11T14:00:10.335Z",
+  "tasks": [
+    {
+      "id": "smoke-approval-chain",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "policy_denied",
+          "guardKeyPrefix": "cmd:",
+          "requireRequestId": true,
+          "passed": false,
+          "detail": "无 dynamic_guard 拦截"
+        },
+        {
+          "kind": "event_present",
+          "event": "guard_ack",
+          "requestIdPrefix": "apr_",
+          "passed": false,
+          "detail": "事件缺席"
+        },
+        {
+          "kind": "tool_succeeded",
+          "tool": "workspace_exec",
+          "minTimes": 1,
+          "passed": false,
+          "detail": "tool 真实成功执行 workspace_exec × 0"
+        },
+        {
+          "kind": "deny_after_success",
+          "tool": "workspace_exec",
+          "passed": false,
+          "detail": "无成功执行在前，消耗语义无从谈起"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "指纹消耗",
+          "passed": false,
+          "detail": "最终答复不含「指纹消耗」"
+        }
+      ],
+      "durationMs": 10137
+    },
+    {
+      "id": "smoke-continuation",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "event_present",
+          "event": "agent_status",
+          "phase": "continuation",
+          "passed": false,
+          "detail": "事件缺席"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "第二段",
+          "passed": false,
+          "detail": "最终答复不含「第二段」"
+        }
+      ],
+      "durationMs": 9555
+    },
+    {
+      "id": "smoke-genui-fragment-path",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_write",
+          "passed": false,
+          "detail": "tool_call workspace_write × 0"
+        },
+        {
+          "kind": "file_contains",
+          "path": ".petri/gen-ui/conv_3c15-3c1/chart.html",
+          "value": "销售柱状图",
+          "passed": false,
+          "detail": "文件不存在：.petri/gen-ui/conv_3c15-3c1/chart.html"
+        },
+        {
+          "kind": "genui_fragment_resolves",
+          "conversationId": "conv_7f268d84-full-sim",
+          "basename": "chart.html",
+          "expectRepaired": true,
+          "contains": "销售柱状图",
+          "passed": false,
+          "detail": "resolveFragmentPath 无候选"
+        }
+      ],
+      "durationMs": 9574
+    },
+    {
+      "id": "smoke-orchestration-spawn",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "tool_used",
+          "name": "spawn_agent",
+          "passed": false,
+          "detail": "tool_call spawn_agent × 0"
+        },
+        {
+          "kind": "subagent_completed",
+          "minTimes": 1,
+          "passed": false,
+          "detail": "done 子任务 × 0"
+        },
+        {
+          "kind": "file_contains",
+          "path": "answer.txt",
+          "value": "42",
+          "passed": false,
+          "detail": "文件不存在：answer.txt"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "42",
+          "passed": false,
+          "detail": "最终答复不含「42」"
+        }
+      ],
+      "durationMs": 39774
+    },
+    {
+      "id": "smoke-policy-guard",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "policy_denied",
+          "guardKeyPrefix": "cmd:",
+          "passed": false,
+          "detail": "无 dynamic_guard 拦截"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "拦截",
+          "passed": false,
+          "detail": "最终答复不含「拦截」"
+        }
+      ],
+      "durationMs": 10066
+    },
+    {
+      "id": "smoke-readonly-denial",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "tool_error",
+          "tool": "workspace_exec",
+          "error": "execution_not_allowed",
+          "passed": false,
+          "detail": "无该工具错误"
+        }
+      ],
+      "durationMs": 9573
+    },
+    {
+      "id": "smoke-stop-chain",
+      "passed": true,
+      "status": "timeout",
+      "criteriaResults": [
+        {
+          "kind": "event_present",
+          "event": "agent_cancelled",
+          "passed": true,
+          "detail": "事件在场（agent_cancelled）"
+        },
+        {
+          "kind": "task_terminal_status",
+          "status": "cancelled",
+          "passed": true,
+          "detail": "任务终态=cancelled（期望 cancelled）"
+        },
+        {
+          "kind": "tool_not_used",
+          "name": "workspace_exec",
+          "passed": true,
+          "detail": "tool_call workspace_exec 应缺席"
+        }
+      ],
+      "durationMs": 3538
+    },
+    {
+      "id": "smoke-text-repair",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "event_present",
+          "event": "agent_status",
+          "phase": "tool_call_repair",
+          "passed": false,
+          "detail": "事件缺席"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_read",
+          "passed": false,
+          "detail": "tool_call workspace_read × 0"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "intro",
+          "passed": false,
+          "detail": "最终答复不含「intro」"
+        }
+      ],
+      "durationMs": 10066
+    },
+    {
+      "id": "smoke-tool-chain-write",
+      "passed": false,
+      "status": "failed",
+      "criteriaResults": [
+        {
+          "kind": "task_completed",
+          "passed": false,
+          "detail": "未收口（failed=read ECONNRESET）"
+        },
+        {
+          "kind": "tool_used",
+          "name": "workspace_write",
+          "passed": false,
+          "detail": "tool_call workspace_write × 0"
+        },
+        {
+          "kind": "file_contains",
+          "path": "derived/note.md",
+          "value": "评测写档内容",
+          "passed": false,
+          "detail": "文件不存在：derived/note.md"
+        },
+        {
+          "kind": "final_answer_contains",
+          "value": "note.md",
+          "passed": false,
+          "detail": "最终答复不含「note.md」"
+        }
+      ],
+      "durationMs": 9566
+    }
+  ],
+  "pass": 1,
+  "total": 9,
+  "skipped": 0
+}

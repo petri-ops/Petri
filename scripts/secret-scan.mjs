@@ -14,6 +14,12 @@
  * 用法：node scripts/secret-scan.mjs   （npm run quality:secret）
  */
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+
+// BLOCK-434 W1：git grep 的「无命中(exit 1)」与「真实故障(ENOENT/128/…)」必须区分。
+// 判据单一源在 core 侧（M5 已落地）；scripts 经 createRequire 复用，不复制第二份语义。
+const require = createRequire(import.meta.url);
+const { adjudicateGitGrepResult } = require('../core/petri-server/agent-tools/security-boundaries.js');
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -66,8 +72,19 @@ function scan() {
         ['grep', '-lIE', pattern, '--', ':!*.lock', ':!package-lock.json', ':!frontend/package-lock.json'],
         { encoding: 'utf8', cwd: ROOT },
       );
-    } catch {
-      continue; // git grep 无命中时退出码 1
+    } catch (error) {
+      // BLOCK-434 W1：只有 exit 1 且无 stderr 才是「无命中」；其余一律 fail-closed。
+      const verdict = adjudicateGitGrepResult({
+        exitCode: error && (error.status === undefined ? error.code : error.status),
+        stderr: (error && error.stderr) || '',
+      });
+      if (verdict.status === 'no-match') continue;
+      console.error(
+        `[secret-scan] FAIL-CLOSED — git grep 执行失败（${verdict.reasonCode}），不能把故障当作「无命中」：`
+        + `${String(verdict.stderr || '').slice(0, 200)}`,
+      );
+      process.exitCode = 1;
+      return { production, fixture, scanFailed: true };
     }
     for (const line of out.split('\n')) {
       if (!line) continue;
@@ -97,7 +114,11 @@ export function scanTextForSecrets(text) {
 }
 
 function main() {
-  const { production, fixture } = scan();
+  const { production, fixture, scanFailed } = scan();
+  if (scanFailed) {
+    console.error('[secret-scan] FAIL — git grep 通道故障，扫描未完成（fail-closed），不得视为通过。');
+    process.exit(1);
+  }
   console.log(`[secret-scan] 生产面命中: ${production.length} | fixture 豁免命中: ${fixture.length}（白名单 ${FIXTURE_ALLOWLIST.size} 文件）`);
   for (const { file, pattern } of production) {
     console.error(`  [LEAK?] ${file} — 模式 ${pattern}（内容已隐去，人工核验）`);

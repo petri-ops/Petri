@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "m4-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-430",
+  "status": "completed-with-external-blocked",
+  "deliverables": [
+    { "id": "M4-1", "what": "1000 轮本地长任务 fixture：生成/校验/删除三命令 + manifest 计数对账（2000 messages / 2014 parts / 60 todos），零出网零真实 Provider", "terminal": "done", "evidence": "scripts/m-blueprint-m4-fixture.mjs；fixture/manifest.json + fixture/fixture.json；test 7/7" },
+    { "id": "M4-2", "what": "长任务成功率 / 完成度 / 跨恢复一致性基线；claimStableLongTask 恒 false（无当次真实任务证据不宣称稳定完成）", "terminal": "done", "evidence": "test/m4-long-task-observability.test.mjs + gate BASELINE_OVERCLAIM 负测" },
+    { "id": "M4-3", "what": "traceId 贯穿 main_loop/subagent/background/retry/tool 五类节点 + 可持久化投影（跨重启可查），不改 SSE 事件形状", "terminal": "done", "evidence": "test/m4-long-task-observability.test.mjs" },
+    { "id": "M4-4", "what": "usage 三层事实表（model/turn/tool）+ 价格表落配置 + model_request_failed 失败请求也记账", "terminal": "done", "evidence": "test/m4-long-task-observability.test.mjs + gate 负测" },
+    { "id": "M4-5", "what": "用户可感性能常驻判据（DOM 节点 400 / 滚动 P50·P95 / 首屏 paint / 导出耗时；植入 400+ 节点必红）+ 零依赖长列表窗口化", "terminal": "done", "evidence": "test/m4-long-task-observability.test.mjs + gate DOM_BUDGET_NOT_RED 负测" },
+    { "id": "M4-6a", "what": "约 90 个未引用测试第一批挂载", "terminal": "done-partial", "reason": "本包新增 2 个测试已挂 m-blueprint-program rule；90 个存量未引用测试分批挂载属 coverage 专项，归 M6-C", "closureCondition": "M6-C 按覆盖率只减棘轮分批挂载并复跑 test:changed" },
+    { "id": "M4-6b", "what": "SSE 真实端点行为测试 + 挂 impact-map rule", "terminal": "external-blocked", "reason": "需本地 :3001 后端无窗栈实机；本包零后端运行时改动，未起栈，不冒充实机证据", "closureCondition": "M7 实机腿在 :3001 无窗栈跑真实 SSE 端点断言，挂 rule 使改生产 SSE 触发 test:changed" },
+    { "id": "M4-evals-closeout", "what": "evals mock/replay 档接入 closeout", "terminal": "W", "reason": "需改 package.json（会话起始即在制 WIP M 状态），零触碰红线", "closureCondition": "owner 收口后由用户裁决接线；本包照常前台跑 evals:run/evals:gate 并如实留读数" },
+    { "id": "M4-perf-scenarios", "what": "quality:perf 场景 4→≥7", "terminal": "external-blocked", "reason": "需重采基线，红线禁止直接重采/抬阈值；coreSha 绑定有效", "closureCondition": "干净树 + owner 按全量证据流程重锚基线后扩场景" },
+    { "id": "M4-real-provider", "what": "真实 Provider / real 档评测", "terminal": "external-blocked", "reason": "G0 长期开发期不外推 Provider", "closureCondition": "G1+ 阶段由用户显式裁决启动" }
+  ],
+  "hk01": {
+    "first": "ERR_MODULE_NOT_FOUND 1 failed",
+    "second": "新增文件 3 处动态下标 lint warning（已改 Map + 自有属性描述符）",
+    "final": "14/14 pass 0 fail",
+    "gateSelfTest": "test/m4-observability-gate.test.mjs 7 项篡改必红全绿"
+  },
+  "selfCorrection": {
+    "incident": "evals:run 按既有实现（scripts/evals-run.mjs:240）覆写了 tracked 证据 acceptance/evals/smoke-latest.json",
+    "evidence": "会话早期快照 /tmp/m0-wip.txt 确认该文件起始非在制 WIP（HEAD 干净）",
+    "action": "当次红读数另存本包目录；该文件恢复为 HEAD 版（git show 重定向），M 计数 91→90；零 stage 零提交",
+    "lesson": "任何会写盘的复跑命令，跑前须核其既有写盘路径是否属于起始 WIP；读数另存本包证据目录"
+  },
+  "gates": {
+    "specialty": "gate:long-task-observability PASS 0 issues（gate-report.json）",
+    "fixture": "--generate/--verify 均 PASS；manifest 1000 轮 / 2000 messages / 2014 parts",
+    "lint": "新增 5 文件 lint 0",
+    "w5a": "PASS（新测试挂 rule）",
+    "docs": "PASS 575 registered",
+    "uiAudit": "PASS",
+    "evalsRun": { "exit": 1, "result": "1/9 PASS", "terminal": "external-blocked" },
+    "evalsGateRound1": { "exit": 1, "result": "回归 31", "terminal": "external-blocked" },
+    "evalsGateRound2": { "exit": 0, "result": "回归 0", "evidenceStatus": "REUSED_EXISTING_EVIDENCE", "note": "复用 HEAD 版 2026-10-17 既有证据，非当次成功，不计入完成数" },
+    "testChanged": { "tests": 1473, "pass": 1464, "fail": 2, "skipped": 7, "failures": ["UI-629 布局 gap 锚（W 类）", "P6 源绑定（W 类）"], "exit": 1, "note": "当次 npm run test:changed -- --run 实读；初稿预填 1477/1468 已按当次输出优先修正，不沿用估值" },
+    "closeout": { "exit": 1, "passed": ["audit:compact", "hygiene:check", "docs:check", "ui:audit:check"], "firstFailed": "test:changed", "unreachedAfterFailFast": 13 }
+  },
+  "sixDimensionReview": { "verdict": "批准收口（带 external-blocked / W / done-partial）", "p1": 0, "ocr": "本轮未做（可选外部工具、未装/未配置），按 skill 降级如实声明" },
+  "zeroScope": ["零新增依赖", "零放宽基线", "零触碰他方在制 WIP", "零 stage 零提交", "零撤销既有裁决", "零 G1+ 外推"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

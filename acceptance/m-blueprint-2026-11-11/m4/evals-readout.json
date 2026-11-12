@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "m4-evals-readout",
+  "capturedAt": "2026-11-11",
+  "run": {
+    "command": "npm run evals:run -- --suite smoke --provider=mock",
+    "exit": 1,
+    "result": "1/9 PASS",
+    "failureFingerprint": "ECONNRESET ×8（本机 :3001 后端无窗栈未起）",
+    "evidenceClass": "mechanical-run",
+    "terminal": "external-blocked",
+    "reason": "mock 套件仍需本地后端；本包无后端运行时改动、未起无窗栈，不冒充通过也不复用历史全绿",
+    "reportCopy": "evals-smoke-run-reading.json"
+  },
+  "gate": [
+    {
+      "round": 1,
+      "command": "npm run evals:gate",
+      "exit": 1,
+      "result": "回归 31 · 改善 0 · 新任务 0 · skip 0",
+      "terminal": "external-blocked",
+      "reason": "gate 读取被本次红 run 覆写的 smoke-latest.json；如实登记红，不写成通过"
+    },
+    {
+      "round": 2,
+      "command": "npm run evals:gate（恢复既有证据后）",
+      "exit": 0,
+      "result": "回归 0 · 改善 0 · 新任务 0 · skip 0",
+      "evidenceStatus": "REUSED_EXISTING_EVIDENCE",
+      "terminal": "external-blocked",
+      "reason": "对比的是 HEAD 版 2026-10-17 既有证据，不是当次 run 成功；按红线明确标注为「复用」，不冒充当次通过，不计入完成数"
+    }
+  ],
+  "sideEffect": {
+    "file": "acceptance/evals/smoke-latest.json",
+    "finding": "evals-run.mjs:240 按既有实现覆写该 tracked 证据文件；会话早期快照确认其起始非在制 WIP（HEAD 干净）",
+    "action": "本包已把当次红读数另存本包目录，并把该文件恢复为 HEAD 版（git show 重定向），撤销本包意外写盘；不覆盖任何他方 WIP、不 stage、不 commit",
+    "verification": "git diff HEAD --name-only -- acceptance/evals/smoke-latest.json = 0 行；M 计数 91→90"
+  },
+  "notClaimed": ["全绿", "verified", "当次 evals 通过", "稳定完成长任务"],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

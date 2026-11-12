@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "m0-perf-red-adjudication",
+  "capturedAt": "2026-11-11T13:21:11.942Z",
+  "verdict": "external-blocked",
+  "reason": "packaged_start 场景属打包产物启动口径；G0 长期开发期不外推 packaged。coreSha 绑定有效、host 匹配 ⇒ 红轮不是基线失效，而是当次真实读数（5/5 稳定超阈值）。按红线禁止直接重采基线、抬阈值、放宽容差，故登记为 V 类并给补腿条件，不冒充修复。",
+  "baseline": {
+    "generatedAt": "2026-11-11T04:01:53.763Z",
+    "coreSha": "7493447930e3f558",
+    "host": {
+      "platform": "darwin-arm64",
+      "cpus": 8,
+      "memoryGB": 16,
+      "node": "v24.16.0"
+    },
+    "packagedStart": {
+      "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
+      "unit": "ms",
+      "samples": [
+        796,
+        375,
+        379
+      ],
+      "medianMs": 379,
+      "tolerancePct": 30,
+      "runs": 3,
+      "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
+      "env": "unsigned local mount：Petri.app（ELECTRON_RUN_AS_NODE 后端口径；数据面=临时空目录；BLOCK-353 修复链）"
+    }
+  },
+  "measured": {
+    "coreSha": "7493447930e3f558",
+    "bindingOk": true,
+    "bindingIssues": [],
+    "samplesMs": [
+      512,
+      504,
+      501,
+      516,
+      496
+    ],
+    "thresholdMs": 493,
+    "continuousRedRounds": 5,
+    "otherScenarios": [
+      {
+        "name": "long_conversation",
+        "sampleMs": 28,
+        "thresholdMs": 40,
+        "status": "green"
+      },
+      {
+        "name": "big_project_tree",
+        "sampleMs": 13,
+        "thresholdMs": 18,
+        "status": "green"
+      },
+      {
+        "name": "warm_backend_spawn",
+        "sampleMs": 543,
+        "thresholdMs": 682,
+        "status": "green"
+      }
+    ]
+  },
+  "contradictionResolution": {
+    "sources": [
+      "docs/Petri-Desktop-Evaluation-Report-2026-11-05.md:94（稳定红）",
+      "docs/Petri-Desktop-Evaluation-Report-2026-11-05.md:197（并非稳定红）",
+      "docs/AUDIT-LOG.md:127（perf=V 稳定红不重采不放宽）"
+    ],
+    "verdict": "当次 5/5 全红读数为准；历史矛盾措辞降级为「口径不一致，不再引用」，不改写历史原文"
+  },
+  "negativeTests": [
+    "test/m0-criteria-boundaries.test.mjs：当次 5 个慢样本逐一回灌 comparePerf 必红",
+    "test/m0-criteria-boundaries.test.mjs：植入 60% 容差会把 516ms 判绿 ⇒ 证明放行只能来自抬阈值（红线禁止）",
+    "test/m0-criteria-boundaries.test.mjs：coreSha 漂移 fail-closed 必要求重采"
+  ],
+  "closureConditions": [
+    "owner 在干净树上按证据流程重采 packaged_start 基线（须附 host/coreSha/采样口径全量证据），或修打包启动实现使真实读数回落",
+    "重采/修复后连续 5 次采样 PASS 且读数落 acceptance/，再由 M4 场景扩面门复核",
+    "期间 quality:perf 保持红轮如实挂账；不得把 skipped/复用/在制红写成通过"
+  ],
+  "terminal": "external-blocked",
+  "evidenceClass": "mechanical-gate + real-readout"
+}
