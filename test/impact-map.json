@@ -8265,7 +8265,11 @@
         "core/petri-server/agent-tools/tool-capability.js",
         "test/m6a-*",
         "docs/block-434-*",
-        "docs/block-435-*"
+        "docs/block-435-*",
+        "core/petri-server/helpers/drag-source-roots.js",
+        "core/petri-server/helpers/content-type.js",
+        "src/main/subframe-navigation.js",
+        "src/main/security-hardening.js"
       ],
       "tests": [
         "test/m0-criteria-calibration.test.mjs",

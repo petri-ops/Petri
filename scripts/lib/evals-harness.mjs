@@ -174,6 +174,9 @@ export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
       ...process.env,
       PETRI_DB_PATH: path.join(tmpDir, 'petri.db'),
       PETRI_LOCAL_DATA_DIR: tmpDir,
+      // BLOCK-439：凭据迁移同样隔离到临时文件，避免 mock/real 种子写进用户 login Keychain
+      //（此前 evals-mock-key 会覆盖 openai-compatible 账号）。
+      PETRI_CREDENTIAL_BACKEND: 'file',
       R_SERVER_PORT: String(port),
     },
     stdio: ['ignore', 'pipe', 'pipe'],

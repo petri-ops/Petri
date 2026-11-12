@@ -10,6 +10,10 @@ const require = createRequire(import.meta.url);
 
 const tempDir = require('node:fs').mkdtempSync(require('node:path').join(require('node:os').tmpdir(), 'b264-sugg-'));
 process.env.PETRI_LOCAL_DATA_DIR = tempDir;
+// BLOCK-439 端到端核对：macOS 上 credentialStore 默认走 login Keychain，与本进程 tempDir 无关。
+// 用户在本机配置了真实 key 后，「无凭据 503」断言会假红（实得 200）。此处强制用 file backend
+// 指向本进程临时目录，使测试自带隔离的「空凭据」环境，判定不再依赖开发者机器状态。
+process.env.PETRI_CREDENTIAL_BACKEND = 'file';
 
 const suggestions = require('../core/petri-server/helpers/assistant-suggestions.js');
 

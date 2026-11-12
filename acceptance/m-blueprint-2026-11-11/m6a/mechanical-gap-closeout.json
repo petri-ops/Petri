@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "mechanical-gap-closeout",
+  "capturedAt": "2026-11-12",
+  "authorization": "用户：剩余机械项全权处理，不必中途确认",
+  "scope": "BLOCK-439 端到端核对发现的 B2–B6 机械遗漏 + 核对中复现的凭据回退根因根治",
+  "items": [
+    {
+      "id": "B2",
+      "gap": "22a4d2dd 改了热路径清单内的 scripts/lib/evals-harness.mjs 却未重打 perf coreSha → quality:perf exit 2（绑定失效）、block350 测试红",
+      "fix": "只重打 test/perf-baseline.json 的 coreSha（两次：先补偿 evals-harness 的 baseUrl 改动，再补偿本轮凭据隔离改动）；阈值 493ms、容差 30/60/25%、4 场景与中位数全部零改动",
+      "verification": "block350 15/15 PASS；quality:perf 由 exit 2 回到 exit 1（packaged_start 497–509ms vs 493ms 的 V 类阈值红，归因正确）"
+    },
+    {
+      "id": "B3",
+      "gap": "test/block264-assistant-suggestions.test.mjs 断言「无凭据 503」，但 macOS 上 credentialStore 走 login Keychain；用户配置真实 key 后实得 200 假红",
+      "fix": "测试顶部（require 之前）设置 PETRI_CREDENTIAL_BACKEND=file，凭据读指向本进程临时目录，与开发者机器状态解耦",
+      "verification": "单测 6/6 PASS；本机真实 key 未受影响（len 35 / tail 45a9）"
+    },
+    {
+      "id": "B4",
+      "gap": "impact-map 漏挂 4 个生产文件：helpers/drag-source-roots.js、helpers/content-type.js、src/main/subframe-navigation.js、src/main/security-hardening.js",
+      "fix": "加入 m-blueprint-program rule 的 patterns（其余 rule 无冲突）",
+      "verification": "nso-w5-impact-coverage 3/3 PASS；test:changed:list EXIT 0"
+    },
+    {
+      "id": "B5",
+      "gap": "BLOCK-436（aeda9abc）无发令文档/registry/README/AUDIT/roadmap/handoff 条目；f155dc22 / ca86d4ac / 22a4d2dd / e1282ed5 四次后续提交未在六件套头部登记",
+      "fix": "补建 docs/block-436-real-stack-fix-plan.md 并注册（coverage 581→582）；README 440 号入口；AUDIT-LOG 头部 + 记录行；roadmap / handoff 头部；program 阶段表 2 行；连锁刷新 post-k7 单源与 m0 读数",
+      "verification": "docs:check PASS 582；docs:reconcile 0 issues；block404 L0-8 单源一致性 PASS"
+    },
+    {
+      "id": "B6",
+      "gap": "scripts/m-blueprint-m0-wip-owner.mjs（M0 阶段生成、登记在 WIP owner 表）从未入库",
+      "fix": "本轮纳入提交；已核只做只读登记、规则由既有 scripts/m-blueprint-* 覆盖、knip 无新增死代码",
+      "verification": "node --check OK；quality:knip:check PASS（330 键冻结）"
+    }
+  ],
+  "rootCauseFound": {
+    "symptom": "用户真实 deepseek key 被反复回退为 16 字符旧 key（尾缀 ck93），模型 auth fail、agent 任务 failed；上一轮核对恢复后本轮再次复现",
+    "diagnosis": "归档审计 docs/archive/checkpoints/audit-log-compact-2026-11-05.md 记录 2026-10-13 事故：ck93 = mock-key-block93。test/block93-role-prompt.test.mjs 的 before() 调 saveAiSettings({credential_updates:{deepseek:'mock-key-block93'}})；当年只加了 PETRI_LOCAL_DATA_DIR 隔离，但 macOS 下 credentialStore 使用 login Keychain，SETTINGS_DIR 隔离对 Keychain 无效 → 每次跑该测试都把假 key 写进用户真实 deepseek 账号",
+    "evidence": "keychain 项 mdat=20261112154146Z（本轮命令时刻）；全仓仅该测试出现 mock-key-block93 字面；恢复 key 后单跑该测试即复现回退",
+    "fix": [
+      "test/block93-role-prompt.test.mjs 顶部加 PETRI_CREDENTIAL_BACKEND=file（require ai-settings 之前）",
+      "scripts/block337-governance-live.mjs 的隔离后端 env 加 PETRI_CREDENTIAL_BACKEND=file（同类种子 sk-block337-live）",
+      "scripts/lib/evals-harness.mjs 的隔离后端 env 加 PETRI_CREDENTIAL_BACKEND=file（防 evals-mock-key 污染 openai-compatible 账号）"
+    ],
+    "decisiveVerification": "恢复用户 key（len 35 / tail 45a9）→ 单跑 block93 2/2 PASS 后仍为新值 → 跑完整 Node 全量（5811 项）后仍为新值 → evals mock 8/9 未退化 → 模型连接测试 OK、SSE errors NONE、agent 主链 completed/errors NONE",
+    "note": "scripts/block335-self-optimize-live.mjs 早在子进程 env 中设了 file backend，无需改"
+  },
+  "finalReadings": {
+    "docsCheck": "PASS 582",
+    "docsReconcile": "0 validation issues / 0 manual review",
+    "specialtyGates": "9/9 PASS（M0–M7 + m6a-surface）",
+    "governanceGates": "17 门中 14 PASS；3 红均为他方 WIP 环境性（ui:audit / quality:lint 1 error / quality:lint:ledger）",
+    "nodeFull": "5811 项 / 5769 pass / 6 fail（含 block350 一次性绑定红，重打后 15/15；最终稳态 5 fail：BLOCK-48 TCC、P6、UI-629、block404 lint、healthProbe 需 3001）",
+    "frontendFull": "362 files / 362 passed",
+    "testChanged": "1523 项 / 1513 pass / 3 fail（UI-629、P6、block404 lint-ledger 子进程；影响面因 B5 单源刷新扩大）",
+    "evalsMock": "8/9 PASS（approval-chain 2 判据仍为 Windows-only vssadmin + 历史 golden 漂移）",
+    "realStack": "临时库后端冒烟：health/facts/memory-stats/memory-audit/mcp-servers 200、evil origin 403、import 源门 5 情形符合、ddl FAILED=0、uncaught=0",
+    "modelAgent": "连接正常 + SSE [DONE] errors NONE；agent 21 事件 tool_call→tool_output→tool_result(success)→completed"
+  },
+  "notClosed": [
+    "packaged_start 阈值红（dist/mac-arm64 停留 Nov 5，需重打包；按红线未抬阈值）",
+    "79 个他方 UI 面 WIP → ui:audit / lint 1 error / closeout:full fail-fast / 干净树三连",
+    "macOS 屏幕录制权限 → BLOCK-48 screenshot",
+    "evals smoke-approval-chain 2 判据（Windows-only 命令 + 2026-10-17 golden）",
+    "gen-ui 帧导航真实 iframe 触发、MCP 远程传输/OAuth、zip 完整安装链、G1+ Provider 端到端",
+    "U/E/V/W 四类裁决（drag 源范围、MCP 白名单默认、S3 环消亡、approval-chain golden 重录）"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

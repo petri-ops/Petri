@@ -40,6 +40,11 @@ const require = createRequire(import.meta.url);
   // credential_updates，SETTINGS_DIR 必须随 DB 一起隔离到临时目录——
   // 否则 mock 凭据会覆盖用户真实 ai-credentials.json（2026-10-13 事故根因）。
   process.env.PETRI_LOCAL_DATA_DIR = tempDbDir;
+  // BLOCK-439 根因根治：macOS 上 credentialStore 用 login Keychain，**不受 SETTINGS_DIR 影响**——
+  // 只设 PETRI_LOCAL_DATA_DIR 时，before() 的 credential_updates 仍会把 mock-key-block93
+  // 写进用户真实 deepseek 账号（2026-11-12 端到端核对实测复现：模型随即 auth fail ****ck93）。
+  // 强制 file backend 后，mock 凭据只落在上面这个临时目录里。
+  process.env.PETRI_CREDENTIAL_BACKEND = 'file';
 }
 
 // ── mock OpenAI 兼容上游：捕获请求体 + 回最小 SSE 收敛 ──────────

@@ -213,7 +213,7 @@ try {
   const port = await findFreePort();
   apiBase = `http://127.0.0.1:${port}/api`;
   backend = spawn(process.execPath, [path.join(ROOT, 'core', 'petri-server', 'server.js')], {
-    env: { ...process.env, PETRI_DB_PATH: dbPath, PETRI_LOCAL_DATA_DIR: dataDir, R_SERVER_PORT: String(port) },
+    env: { ...process.env, PETRI_DB_PATH: dbPath, PETRI_LOCAL_DATA_DIR: dataDir, R_SERVER_PORT: String(port), PETRI_CREDENTIAL_BACKEND: 'file' },
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd: ROOT,
   });
