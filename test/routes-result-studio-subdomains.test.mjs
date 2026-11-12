@@ -166,7 +166,10 @@ test('each subdomain file has reasonable line count (≥ 30, ≤ 320)', () => {
     // BLOCK-104 P1 — 逐文件棘轮帽（只许降不许升）。BLOCK-375（S0）：347 帽在
     // HEAD a2354ffb 已破（revisions.js 406，昨日 wave-0 分片同红=存量漂移），
     // 按只减不增棘轮惯例锚定现值 406 留痕；行数回收走蓝图 S4 重构批。
-    const cap = name === 'revisions' ? 406 : 320;
+    // BLOCK-437 锚点修正：406 是按 `wc -l`（换行数）测的，而本断言用 split('\n') 计数；
+    // revisions.js 末行无换行，两种口径差 1（406 vs 407）。按本断言的度量基准校正为 407 留因，
+    // 语义仍是「只减不增」；真正的行数回收走蓝图 S4 重构批（不通过压缩空行冒充）。
+    const cap = name === 'revisions' ? 407 : 320;
     assert.ok(lineCount <= cap, `${name}.js should be ≤ ${cap} lines, got ${lineCount}`);
   }
 });

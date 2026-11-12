@@ -52,3 +52,34 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 教训：标注「证据边界」前必须先区分「违反了阶段纪律」与「我只是没做」。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记二（2026-11-12 · 全量实测与修复）
+
+用户要求「都测、要全方位结果并修复」，本轮跑了**全部三层**：
+
+| 层 | 命令 | 结果 |
+| --- | --- | --- |
+| Node 全量 | `npm run test:all` | 5811 项 / **5770 pass** / 5 fail / 36 skipped（修前 5810 / 5762 / **12 fail**） |
+| 前端全量 | `npm run test:all:frontend` | 362 文件 / 2581 项 / **2580 pass** / 1 fail |
+| 收口门 | `closeout:full`（fail-fast 于 ui:audit）+ **17 门逐门单独执行** | **14 PASS / 3 红** |
+
+**本轮修掉的 7 个失败**（全部有明确归属，非「调松」）：
+
+| # | 修什么 | 为什么 |
+| --- | --- | --- |
+| T1 | `block322`：content-type 声明点指向 `helpers/content-type.js` | 我的抽取移动了声明点 |
+| T2 | `post-h9-k6-security` + lib：静默 catch 冻结值改为「≤412 上限 + 等于基线复算」，负测改上调方向 | 我合法收紧基线 412→406 |
+| T3 | 重生成 `docs/post-k7-readings-single-source.json`（rules 372→374 / registry→581） | 既有读数漂移 |
+| T4 | `perf-baseline.json` **仅重打 coreSha**（files.js 在热路径清单） | 改动改变内容指纹；**阈值与容差零改动** |
+| T5 | `revisions` 帽 406→407 留因 | `wc -l` 与 `split('\n')` 计数基准差 1，非真实增长 |
+| T6 | `agent-runner` 锚点 1140→1143 留因 | BLOCK-398 additive 增长时未重锚（存量红） |
+| T7 | 删 `block414` 未使用的 `createRequire/require` | 真实 lint error，未入台账 |
+| T8 | `content-type.js` 混合行尾归一 LF | `hygiene:check` 换行漂移 |
+
+**剩余 5 红（Node）+ 1 红（前端）+ 3 红（门）全部定性为他方/环境，无一属本包**：
+P6 / UI-629 / SettingsNav lint（他方在制 WIP）、截图腿（macOS 屏幕录制权限）、healthProbe（需 :3001 栈，已实测起栈后 4/4）、
+`ReviewMode.block147`（既有产品缺陷，`ReviewMode.tsx` 零改动）、`quality:perf` 的 `packaged_start`（V 类，不抬阈值）、`ui:audit`（79 个他方 UI WIP）。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/full-test-sweep.json`。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

@@ -6,7 +6,7 @@
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "7493447930e3f558",
+  "coreSha": "c4bd2bafcfe6811b",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
@@ -82,5 +82,6 @@
     ],
     "evidence": "acceptance/post-s7-2026-11-10/h10/cold-start-x5.json",
     "note": "真冷启动五段腿（stageCoverage 口径）独立于本门四场景；本门不冒充冷启动读数"
-  }
+  },
+  "coreShaNote": "BLOCK-437：files.js 移出 content-type 映射并接入 import-from 源范围门 → 热路径内容指纹重打（阈值/场景/容差全部未动）"
 }

@@ -116,7 +116,15 @@ test('K-28：豁免口读数在场（布尔读数不裁决）、静默 catch 412
   assert.equal(typeof truth.ipc.exemptEnvExists, 'boolean');
   assert.equal(typeof truth.ipc.exemptPinnedByContract, 'boolean');
   // L3-4（L-18/BLOCK-407）：SCAN_ROOTS 纳入 frontend/src，基线 395→412（_about 带扩面留因）
-  assert.equal(truth.ipc.silentCatchTotal, 412);
+  // BLOCK-437：基线由 412 收紧到 406（ai-memory 迁移 DDL 接单源后该文件静默 catch 9→3）。
+  // 断言改为「不超过历史冻结上限」+「等于当前基线文件复算值」——只减不增，避免每次合法收紧误红。
+  assert.ok(Number(truth.ipc.silentCatchTotal) <= 412, `静默 catch 总数不得反弹（now ${truth.ipc.silentCatchTotal}）`);
+  const silentCatchBaseline = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'test', 'silent-catch-baseline.json'), 'utf8'),
+  );
+  const silentCatchBaselineSum = Object.values(silentCatchBaseline.files || {})
+    .reduce((acc, n) => acc + Number(n || 0), 0);
+  assert.equal(truth.ipc.silentCatchTotal, silentCatchBaselineSum, '读数须与基线文件一致');
   assert.equal(truth.ipc.silentCatchRootsExtended, true);
   assert.equal(truth.ipc.silentCatchRootsDocumented, true);
   assert.equal(truth.ipc.devDualBackendInAudit, true);
@@ -130,7 +138,10 @@ test('L0-1 解除负测：从契约测试移除豁免口字样（L1 行为收敛
 
 test('负测 K-28：豁免口读数缺席（非布尔）/ 重打静默 catch 基线 / 扩面无留因 → 判红（L3-4 新语义：扩面+留因=绿）', () => {
   mustRed(tamper({ ipc: { ...truth.ipc, exemptEnvExists: undefined } }), 'K-28');
-  mustRed(tamper({ ipc: { ...truth.ipc, silentCatchTotal: 0 } }), 'K-28');
+  // BLOCK-437 语义调整：基线只减不增 —— 判红方向是「上调/非数值」，下调（合法收紧）不再判红，
+  // 因此这里注入一个高于冻结上限的值，而不是 0。
+  mustRed(tamper({ ipc: { ...truth.ipc, silentCatchTotal: 999 } }), 'K-28');
+  mustRed(tamper({ ipc: { ...truth.ipc, silentCatchTotal: undefined } }), 'K-28');
   mustRed(tamper({ ipc: { ...truth.ipc, silentCatchRootsExtended: true, silentCatchRootsDocumented: false } }), 'K-28');
 });
 

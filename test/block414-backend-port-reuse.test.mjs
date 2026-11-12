@@ -6,10 +6,8 @@
 import test from 'node:test';
 import { strict as assert } from 'node:assert';
 import { selectBackendPorts } from '../src/main/_backend-ports.js';
-import { createRequire } from 'node:module';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
-const require = createRequire(import.meta.url);
 
 const reserve = async (preferred) => (preferred === 3001 ? 58741 : preferred + 1);
 

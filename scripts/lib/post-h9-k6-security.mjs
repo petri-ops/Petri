@@ -159,7 +159,10 @@ export function adjudicateSecurity(input) {
     issues.push('K-28: IPC 豁免口读数缺席（fail-closed）');
   }
   // L3-4（L-18/BLOCK-407）：SCAN_ROOTS 纳入 frontend/src 后基线 395→412（11 个 frontend 文件/17 处入库，_about 带扩面留因）。
-  if (!(i.silentCatchTotal === 412)) issues.push('K-28: 静默 catch 冻结基线被改写');
+  // BLOCK-437：基线由 412 **收紧**到 406（ai-memory 迁移 DDL 接单源后该文件静默 catch 9→3）。
+  // 判据改为「不超过历史冻结上限 412」——具体值由 test/silent-catch-baseline.json 复算，
+  // 只减不增由 gate:silent-catch 棘轮负责；这里只防反弹与口径漂移。
+  if (!(Number.isFinite(i.silentCatchTotal) && i.silentCatchTotal <= 412)) issues.push('K-28: 静默 catch 冻结基线被改写');
   // L3-4（L-18）：扩面本身是改进方向——只有「扩了但没留因」才判红（同 L0-1 读数型家族）。
   if (i.silentCatchRootsExtended === true && i.silentCatchRootsDocumented !== true) {
     issues.push('K-28: 扫描根扩展缺独立留因（_about 须记 L3-18/BLOCK-407 扩面依据）');

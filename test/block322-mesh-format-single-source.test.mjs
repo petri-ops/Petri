@@ -87,9 +87,13 @@ test('BLOCK-322 — 字节上限只有一个数值', () => {
 });
 
 test('BLOCK-322 — 工作区文件路由为每个受支持格式声明 content type', () => {
+  // BLOCK-437：content-type 映射从 routes/files.js 抽到 helpers/content-type.js
+  //（体积棘轮要求净减），声明点随之迁移；files.js 只保留消费（require）。
+  const contentTypeSource = read('../core/petri-server/helpers/content-type.js');
   for (const format of canonical) {
-    assert.match(filesRoute, new RegExp(`'\\.${format}':\\s*'model/`), `.${format} 缺 content type`);
+    assert.match(contentTypeSource, new RegExp(`'\\.${format}':\\s*'model/`), `.${format} 缺 content type`);
   }
+  assert.match(filesRoute, /require\('\.\.\/helpers\/content-type'\)/, 'files.js 必须消费单源映射');
 });
 
 test('BLOCK-322 — 消费面不再各自复制格式清单', () => {

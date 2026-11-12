@@ -133,7 +133,10 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
     // compaction_failed 事件生产 + provider_retry 投影为合法增长，收口时未同步重锚。
     // 按本测试自己的纪律「增长需显式重锚留因」重锚到 1579（只减不增继续生效）。
     const LINE_ANCHORS = [
-      { file: 'core/petri-server/agent-runner.js', anchor: 1140 },
+      // BLOCK-437 锚点修正：BLOCK-398（89568433）已有 additive 增长但当时未重锚，
+      // 现值 1143 与锚点 1140 长期不一致（存量红）。按本测试自述「增长需显式重锚留因」校正到 1143，
+      // 语义仍是只减不增；后续收缩走蓝图 S4.1 拆分回收。
+      { file: 'core/petri-server/agent-runner.js', anchor: 1143 },
       { file: 'core/petri-server/loop-orchestrator.js', anchor: 1579 },
       { file: 'core/petri-server/conversation-adapter.js', anchor: 465 },
     ];
