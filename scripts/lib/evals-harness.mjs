@@ -161,6 +161,11 @@ export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
       id: 'evals-provider',
       provider: 'openai-compatible',
       model: resolved.model || 'evals-model',
+      // BLOCK-438（实测抓真）：agent-runner 从 model_profiles 解析 provider/baseUrl，
+      // 此前这层漏写 baseUrl → mock/replay 评测的 LLM 请求打到 provider 默认远端而非本地
+      // mock server → 8/9 任务 `read ECONNRESET` 未收口（smoke-stop-chain 因提前取消幸存）。
+      // 与 chat_model_presets 保持同源值，零产品代码改动。
+      baseUrl: resolved.baseUrl || `http://127.0.0.1:${port}/placeholder`,
       contextWindow: evalContextWindow,
     }],
   }, null, 2));

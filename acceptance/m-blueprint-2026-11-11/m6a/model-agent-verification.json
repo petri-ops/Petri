@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "model-agent-verification",
+  "capturedAt": "2026-11-12",
+  "purpose": "回答「模型通吗 / agent 能力是否正常」：真实凭据 + 真实模型 + 真实 agent 主链端到端验证",
+  "credential": {
+    "action": "用户提供新凭据，写入应用自己的凭据库",
+    "backend": "keychain",
+    "service": "com.petri.desktop.ai",
+    "account": "deepseek",
+    "whyAccount": "active_chat_model_id=deepseek-chat → model_profiles[deepseek-chat].credentialRef=provider:deepseek",
+    "method": "core/petri-server/helpers/credential-store.js 的 set()（-w 从 stdin 读入，密钥不进 argv）",
+    "previousState": "该账号下原有一把失效 key；上层 credential_status 缓存显示 deepseek=false（缓存漂移）",
+    "afterState": "往返读回一致；credential_status.deepseek=true、deepseek_configured=true",
+    "safetyChecks": {
+      "valuePrinted": false,
+      "tempKeyFileRemoved": true,
+      "plaintextKeyFilesInDevData": 0,
+      "trackedFilesContainingKey": 0,
+      "devDataGitignored": true
+    },
+    "rotation": "macOS「钥匙串访问」删除服务 com.petri.desktop.ai 账号 deepseek；或在应用设置页重新填入新 key 覆盖"
+  },
+  "model": {
+    "settings": { "activeChatModel": "deepseek-chat", "provider": "openai-compatible", "model": "deepseek-flash", "endpointHost": "api.deepseek.com" },
+    "before": "POST /api/ai/chat → SSE 返回 Authentication Fails, Your api key: ****… is invalid（HTTP 200 但流里是错误）",
+    "connectionTest": "POST /api/ai/settings/test → {\"ok\":true,\"message\":\"连接正常\"}",
+    "realGeneration": {
+      "endpoint": "POST /api/ai/chat（SSE，1 次极短提示）",
+      "http": 200,
+      "events": ["token_budget", "{\"choices\":[{\"delta\":{\"content\":\"OK\"}}]}", "[DONE]"],
+      "errors": "NONE",
+      "authenticationFailuresInLog": 0
+    },
+    "verdict": "通"
+  },
+  "agent": {
+    "realModelRun": {
+      "steps": ["POST /api/data/projects", "POST /api/ai/conversations", "POST /api/ai/agent", "GET /api/ai/agent/task/:id (SSE)"],
+      "prompt": "请用 workspace_exec 工具执行 echo PETRI_AGENT_OK，然后只回复 PETRI_AGENT_OK",
+      "taskId": "db96eada-5925-452a-9dc7-b75f6cd7ef9a",
+      "events": 21,
+      "eventKinds": { "run_started": 1, "conversation": 1, "token_budget": 3, "iter": 2, "usage": 2, "tool_call": 1, "tool_output": 1, "tool_result": 1, "delta": 6, "done": 1, "run_terminal": 1 },
+      "modelUsed": "deepseek-flash",
+      "toolCall": { "name": "workspace_exec", "args": { "command": "echo PETRI_AGENT_OK" } },
+      "toolOutput": "PETRI_AGENT_OK\\n",
+      "finalAnswerContains": "PETRI_AGENT_OK",
+      "terminal": { "status": "completed", "agentStatus": "done" },
+      "errors": "NONE"
+    },
+    "harnessEvals": {
+      "command": "npm run evals:run -- --suite smoke --provider=mock",
+      "before": "1/9 PASS（8 个任务 read ECONNRESET 未收口）",
+      "rootCause": "scripts/lib/evals-harness.mjs 的 spawnIsolatedBackend 给 chat_model_presets 写了 baseUrl，却漏给 model_profiles 写；agent-runner 从 model_profiles 解析 provider → LLM 请求打到 provider 默认远端而非本地 mock server",
+      "fix": "model_profiles 补 baseUrl（与 chat_model_presets 同源），零产品代码改动",
+      "after": "8/9 PASS（其余 8 任务从 120s 超时降到 0.5–6s）",
+      "remaining": {
+        "task": "smoke-approval-chain",
+        "criteria": "4/6 通过；tool_succeeded（workspace_exec 真实成功 ×0）与 deny_after_success 未过",
+        "passed": ["task_completed", "policy_denied(cmd:vssadmin)", "event_present(guard_ack)", "final_answer_contains(指纹消耗)"],
+        "assessment": "仅剩审批/指纹链中「放行后真实执行」一步；其余 8 个含工具调用的任务全部通过，且真实模型 agent 任务的 workspace_exec 已成功执行并回显 → 不是模型通路或 agent 主链问题。该任务用 Windows 专属命令 vssadmin，golden 录于 2026-10-17，属平台/历史 golden 漂移，未改判据、未伪造通过"
+      }
+    },
+    "verdict": "正常"
+  },
+  "unchanged": [
+    "acceptance/evals/smoke-latest.json 已用备份恢复（evals:run 的写盘副作用已消除，git 无改动）",
+    "未改任何产品判据/阈值/基线；未把密钥写进仓库或日志"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

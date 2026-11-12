@@ -83,3 +83,32 @@ P6 / UI-629 / SettingsNav lint（他方在制 WIP）、截图腿（macOS 屏幕�
 证据：`acceptance/m-blueprint-2026-11-11/m6a/full-test-sweep.json`。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记三（2026-11-12 · 模型通路与 agent 能力）
+
+用户问「模型通吗 / agent 能力是否正常」并随后提供新凭据。
+
+**凭据**：写入应用自身凭据库（macOS Keychain，service `com.petri.desktop.ai` / account `deepseek`），
+用 `credential-store.js` 的 `set()` 从 stdin 写入（密钥不进 argv）；临时文件即删。
+自检：值未打印、dev-data 目录内 0 个明文文件、tracked 文件 0 命中、该目录已 gitignore。
+
+**模型（通）**：
+- 修前 `/api/ai/chat` 流里是 `Authentication Fails, Your api key: ****… is invalid`（旧 key 失效）；
+- 修后 `/api/ai/settings/test` → `{"ok":true,"message":"连接正常"}`；
+- 真实生成 → `delta.content="OK"` + `[DONE]`，无 error。
+
+**agent（正常）**：真实模型驱动 `POST /api/ai/agent` 完成一次带工具的任务，21 个事件：
+`run_started → iter → usage(deepseek-flash) → tool_call(workspace_exec echo PETRI_AGENT_OK) →
+tool_output("PETRI_AGENT_OK\n") → tool_result → delta×6 → done → run_terminal(status=completed)`。
+
+**顺手修掉一个真 bug**：`evals:run --provider=mock` 原 **1/9**（8 个任务 ECONNRESET）。
+根因 = `spawnIsolatedBackend` 给 `chat_model_presets` 写了 `baseUrl`，漏给 `model_profiles`；
+agent-runner 从 `model_profiles` 取 provider → LLM 打到默认远端而不是本地 mock。
+补上同源 `baseUrl` 后 **8/9 PASS**，任务耗时从 120s 超时降到 0.5–6s。
+剩 `smoke-approval-chain` 的 2 个判据（放行后 `workspace_exec` 真实成功）未过——该任务用 Windows
+专属 `vssadmin`、golden 录于 2026-10-17，其余 8 个含工具任务与真实模型 agent 任务均成功执行工具，
+故判定为平台/历史 golden 漂移，**未改判据、未伪造通过**。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/model-agent-verification.json`。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
