@@ -123,6 +123,54 @@ function redactLog(line = '') {
     .replace(/Bearer\s+[A-Za-z0-9._-]+/g, 'Bearer [REDACTED]');
 }
 
+/**
+ * BLOCK-437（M5-3 生产接线，按最佳实践默认）— 拖入/导入源范围判定。
+ *
+ * 与 `adjudicateDragPath` 的区别：那个针对「已登记根内的拖出/拖放」，要求 roots 命中；
+ * `fs/import-from` 的源路径按设计在项目根之外（用户从桌面任意位置拖文件进来），
+ * 因此不能用 roots 命中，改用「允许根 + 设备路径拒绝 + realpath 归一」三件套：
+ *   1. 绝对路径 / 无 NUL / basename 长度上限；
+ *   2. 拒绝伪文件系统（/dev /proc /sys）—— 这些不是用户文件，读了也没有意义；
+ *   3. 归一后的 realpath 必须落在允许根内（默认 家目录 / 临时目录 / /Volumes），
+ *      防符号链接逃逸；`PETRI_DRAG_SOURCE_ROOTS='*'` 可显式放开（自担风险，写入证据时记录）。
+ */
+const DRAG_SOURCE_MAX_NAME = 255;
+const DRAG_SOURCE_DEVICE_PREFIXES = ['/dev', '/proc', '/sys'];
+
+function adjudicateDragSource({ localPath = '', realpath = '', allowedRoots = [], exists = true } = {}) {
+  const raw = String(localPath || '');
+  if (!raw) return { ok: false, reasonCode: 'DRAG_SOURCE_EMPTY', status: 400 };
+  if (raw.includes('\u0000')) return { ok: false, reasonCode: 'DRAG_SOURCE_NUL_BYTE', status: 400 };
+  if (!path.isAbsolute(raw)) return { ok: false, reasonCode: 'DRAG_SOURCE_NOT_ABSOLUTE', status: 400 };
+
+  const resolved = String(realpath || raw);
+  const base = path.basename(resolved);
+  if (!base || base.length > DRAG_SOURCE_MAX_NAME) {
+    return { ok: false, reasonCode: 'DRAG_SOURCE_NAME_INVALID', status: 400 };
+  }
+  if (base === '..' || base === '.') {
+    return { ok: false, reasonCode: 'DRAG_SOURCE_NAME_INVALID', status: 400 };
+  }
+  for (const prefix of DRAG_SOURCE_DEVICE_PREFIXES) {
+    if (resolved === prefix || resolved.startsWith(`${prefix}${path.sep}`)) {
+      return { ok: false, reasonCode: 'DRAG_SOURCE_DEVICE_PATH', status: 403 };
+    }
+  }
+  if (exists === false) return { ok: false, reasonCode: 'DRAG_SOURCE_MISSING', status: 404 };
+
+  const roots = (Array.isArray(allowedRoots) ? allowedRoots : [])
+    .map((r) => String(r || ''))
+    .filter(Boolean);
+  if (roots.length > 0 && !roots.includes('*')) {
+    const hit = roots.some((root) => {
+      const normalized = root.endsWith(path.sep) ? root.slice(0, -1) : root;
+      return resolved === normalized || resolved.startsWith(`${normalized}${path.sep}`);
+    });
+    if (!hit) return { ok: false, reasonCode: 'DRAG_SOURCE_OUTSIDE_ALLOWED_ROOTS', status: 403 };
+  }
+  return { ok: true, reasonCode: 'OK', resolved };
+}
+
 /** M5-8 limit/offset 断言 + 原子写 tmp+rename 计划。 */
 function adjudicatePaging({ limit, offset = 0 } = {}) {
   const l = Number(limit);
@@ -152,6 +200,8 @@ module.exports = {
   failureEnvelope,
   ddlOutcome,
   adjudicateGitGrepResult,
+  adjudicateDragSource,
+  DRAG_SOURCE_MAX_NAME,
   redactLog,
   adjudicatePaging,
   atomicWritePlan,

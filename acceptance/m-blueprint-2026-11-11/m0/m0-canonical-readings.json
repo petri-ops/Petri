@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m0-canonical-readings",
-  "generatedAt": "2026-11-12T12:04:22.197Z",
+  "generatedAt": "2026-11-12T12:40:55.208Z",
   "policy": "数值口径单源：本 JSON 为 M 波次读数的唯一引用点；数字由当次命令现取，不手抄历史全绿；未取数项如实标注",
   "baselineCommit": "4127f5b5",
   "wip": {
@@ -14,7 +14,7 @@
     "reportOnlyGates": 1
   },
   "registry": {
-    "total": 580,
+    "total": 581,
     "activeWorkPackages": 0
   },
   "impactMap": {

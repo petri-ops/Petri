@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "kind": "block437-drag-source-evidence",
+  "capturedAt": "2026-11-11",
+  "block": "BLOCK-437",
+  "goal": "关闭 fs/import-from 任意路径拷贝面，并以可用默认策略落地（不需要产品裁决的版本）",
+  "deliverables": [
+    {
+      "id": "G1",
+      "what": "adjudicateDragSource 判据 + fs/import-from 真实接线",
+      "terminal": "done",
+      "judge": "绝对路径 / 无 NUL / basename 合法 / 非设备路径(/dev,/proc,/sys) / 存在 / realpath 落在允许根内（防符号链接逃逸）",
+      "wiring": "core/petri-server/routes/files.js:fs/import-from 在 fs.promises.cp 之前判定，失败回 status+reasonCode+hint",
+      "unitProof": "8 种情形全部按预期：命中 / 越界 / 符号链接逃逸 / 设备路径 / NUL / 相对 / 缺失 / 星号放开"
+    },
+    {
+      "id": "G2",
+      "what": "可用的默认允许根（不破坏正常拖入）",
+      "terminal": "done",
+      "defaults": [
+        "os.homedir()",
+        "os.tmpdir()",
+        "/tmp",
+        "/Volumes",
+        "<project.workspace_path>（绝对路径时）"
+      ],
+      "override": "PETRI_DRAG_SOURCE_ROOTS（逗号分隔；'*' 放开限制，响应 hint 明示）",
+      "noByteCap": "刻意不套 MAX_DRAG_BYTES=20MB —— import-from 的既有设计是「无 1MB 上限、目录递归」"
+    },
+    {
+      "id": "G3",
+      "what": "真实栈实测（无窗后端 + 临时库 + 本机 HTTP）",
+      "terminal": "done",
+      "evidence": "acceptance/m-blueprint-2026-11-11/m6a/real-stack-smoke.txt",
+      "results": {
+        "health": 200,
+        "aiFacts": 200,
+        "aiMemoryStats": 200,
+        "aiMemoryAudit": 200,
+        "mcpServers": 200,
+        "originTrusted": 200,
+        "originEvil": 403,
+        "originNull": 200,
+        "importAllowed": 200,
+        "importOutsideRoots": 403,
+        "importDevicePath": 403,
+        "importMissing": 404,
+        "importRelative": 400,
+        "ddlFailedCount": 0,
+        "uncaughtCount": 0
+      }
+    },
+    {
+      "id": "G4",
+      "what": "体积棘轮合规：routes/files.js 触发 code-size 只减不增（764 > 基线 708）",
+      "terminal": "done",
+      "action": "按最佳实践抽模块而非改基线：新增 helpers/content-type.js（纯映射，50 行迁出）与 helpers/drag-source-roots.js（允许根 + 组合判据）；files.js 764 → 682（基线 708，净减 82）",
+      "gates": "gate:code-size PASS（总行数 85897，基线 86605）；knip PASS（330 键冻结）；lint 0 error"
+    }
+  ],
+  "liveFindings": [
+    {
+      "finding": "第一版允许根未做 realpath 归一 → macOS 上 /tmp 与 os.tmpdir() 分属两棵树，合法源被误拒 403",
+      "caught": "真实 HTTP 实测（smoke6：允许源返回 403 DRAG_SOURCE_OUTSIDE_ALLOWED_ROOTS）",
+      "fix": "允许根逐项 fs.realpathSync 归一 + 默认根显式加入 /tmp",
+      "after": "允许源 200 且 entry.size=26 落地"
+    },
+    {
+      "finding": "上一轮修复（BLOCK-436）确认有效：全新库 ai/facts 与 memory-stats 由 500 → 200；启动期 ddl-migrate FAILED 由 3 → 0",
+      "caught": "本轮独立复跑",
+      "fix": "已知（BLOCK-436）",
+      "after": "见 real-stack-smoke.txt A/D 段"
+    }
+  ],
+  "notVerified": [
+    "Electron 渲染面交互（需可见窗口或 9223 离屏腿）",
+    "gen-ui 帧导航分级（需渲染进程真实 iframe）",
+    "MCP 实际连接（需真实 server 配置；本轮只验 /api/mcp/servers 列表 200）",
+    "zip 插件安装失败清理（需真实包）",
+    "真实模型 agent loop（属 G1+ Provider，不外推）"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "gates": {
+    "hk01": "test/m5a-production-wiring.test.mjs 15/15",
+    "lintFull": "2447 problems（2 errors / 2445 warnings）= 基线，改动文件 0 error",
+    "arch": "PASS（R1-R5）",
+    "secret": "PASS",
+    "knip": "PASS（330 冻结）",
+    "ear": "PASS",
+    "codeSize": "PASS（85897 / 基线 86605；files.js 682 ≤ 708）",
+    "archCycles": "PASS（12）",
+    "silentCatch": "PASS（406）",
+    "docsCheck": "PASS 581",
+    "docsReconcile": "0 issues",
+    "uiAudit": "PASS",
+    "specialtyGates": "M0–M7 + m6a 门 PASS 0 issues",
+    "testChanged": {
+      "tests": 1616,
+      "pass": 1606,
+      "fail": 2,
+      "skipped": 8,
+      "failures": [
+        "UI-629（W 类在制 WIP）",
+        "P6 源绑定（W 类在制 WIP）"
+      ]
+    }
+  },
+  "liveSmokeRerunAfterExtraction": {
+    "capturedAt": "2026-11-12T12:43:54Z",
+    "result": "与抽模块前一致：import 允许 200（entry.size=26 与源一致）、/etc/hosts 403、/dev 403、缺失 404、相对 400、Origin evil 403 / trusted 200 / null 200、memory 端点 200、ddl FAILED=0",
+    "evidence": "m6a/real-stack-smoke.txt"
+  }
+}

@@ -37,6 +37,7 @@ reopen: 用户裁决或阶段终态变化后先复核本台账与 registry 再�
 | M7 总收口与证据 | BLOCK-433 | P2 | completed（82 件逐件终态 + 十一维第八列 + 自证包；程序终态 done-partial） |
 | M5-A 判据→生产接线收尾 | BLOCK-434 | P0/P1 | completed（5 项判据接线：4 done + MCP 白名单默认待裁决；drag/帧导航后续） |
 | M6-A 结构单源第一刀 | BLOCK-435 | P1 | completed（S1 三面 schema 门 + S2 基线 412→406 done；S3 环消亡实现后被 D7 棘轮拦下→回退） |
+| 拖入源范围门 + 实机实测 | BLOCK-437 | P0 | completed（import-from 源范围门 + 默认允许根 + 实测修正 realpath bug；files.js 抽模块 764→682） |
 
 同一时间只有一个 active work-package 与一个进行中阶段；阶段收口后才发令下一阶段。
 常驻 living-plan `G0-LF` 属层 2，不占串行槽位；本台账同为层 2。

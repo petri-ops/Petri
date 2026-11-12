@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 580,
+    "documentCount": 581,
     "lastUpdated": "2026-11-11",
-    "managedMarkdown": 563
+    "managedMarkdown": 564
   },
   "documents": [
     {
@@ -11779,6 +11779,30 @@
         "single-source"
       ],
       "notes": "M6-A 结构单源第一刀（不需裁决部分）：S1 三面共用 schema 生成器 + 漂移/缺陷只减不增棘轮（entries 566 = ipc168/tool115/route283；首次运行即抓到并冻结 2 个真实缺陷：ai-legacy 双注册 POST /api/ai/interpret、summary.metadata 116 vs 行计数 115）；S2 静默 catch 基线 412→406 并同步 M6 视图与 M0 读数；S3 环消亡已实现并验证（12→11、权限回归 11/11）但被 BLOCK-83 D7 域中立棘轮拦下（键表含 legacy 别名 single-cell/spatial，搬迁即计新残留）→ 原样回退、环基线恢复 12，不改基线洗白；补腿=注入式重构或用户批准 compat 条目。HK-01 7/7、lint 0。另发现 pre-existing 红：agent-runner.js 1143 行 vs BLOCK-375 锚点 1140（HEAD 既有，W 类不重锚）。不做：28 文件绕桥（在制 WIP）、resolveDataDir 单源（U 类）、88 未挂测试自动挂载（假覆盖）。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-437-DRAG-SOURCE-GATE",
+      "path": "docs/block-437-drag-source-and-real-stack-verification-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/security-boundaries.js",
+        "core/petri-server/routes/files.js",
+        "test/m5a-production-wiring.test.mjs",
+        "acceptance/m-blueprint-2026-11-11/m6a/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "drag",
+        "security",
+        "real-stack"
+      ],
+      "notes": "拖入源范围门（M5-3 的生产可用版本，替代“需裁决”的悬置）：新增 adjudicateDragSource（绝对/NUL/basename/设备路径/存在/realpath 允许根）+ fs/import-from 在 cp 前接线；默认允许根=家目录+os.tmpdir()+/tmp+/Volumes+项目工作区，PETRI_DRAG_SOURCE_ROOTS 可覆盖（* 放开）；刻意不套 20MB 上限以保住“无上限+目录递归”既有设计。实测抓到自己第一版的真 bug：允许根未 realpath 归一导致 /tmp 源被误拒 → 已修（允许根 realpathSync + 显式纳 /tmp），复测 200 落地。真实栈冒烟（无窗/临时库/本机 HTTP）：health/facts/memory-stats/memory-audit/mcp-servers 全 200，evil origin 403、可信 200、Origin:null 200，import 越界/设备/缺失/相对分别 403/403/404/400，ddl FAILED=0、uncaught=0。HK-01 15/15、改动文件 lint 0 error、arch PASS。未实测：Electron 渲染面、gen-ui 帧导航、MCP 实连、zip 安装、真实模型 loop。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-11"

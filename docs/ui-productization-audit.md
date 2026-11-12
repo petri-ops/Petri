@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> BLOCK-437 拖入源范围门 + 真实栈实测（2026-11-11）：本包为后端路由/判据与体积抽模块，**零 UI 增量**；未改任何 .tsx/CSS/token；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m6a/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 > BLOCK-435 / M6-A 结构单源第一刀（2026-11-11）：本包为脚本与台账收紧 + 主进程安全判定模块，**零 UI 增量**；未改任何 .tsx/CSS/token；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m6a/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > BLOCK-434 六件套同批登记（2026-11-11）：本包为后端/脚本/主进程接线，**零 UI 增量**；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m5a/`。G0 开发期常态 · 不外推 packaged/Provider/GA.

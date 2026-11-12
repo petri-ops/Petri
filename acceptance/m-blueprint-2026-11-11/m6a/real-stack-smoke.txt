@@ -1,0 +1,30 @@
+# Petri 实机冒烟（无窗后端 / 临时库 / 本机 HTTP）
+capturedAt: 2026-11-12T12:43:54Z
+server: core/petri-server/server.js  port=3107  READY=1
+db: 临时库（应用 src/migrations 全量）   data: 临时目录
+
+## A. 基础面
+health(no origin)             : 200
+GET /api/ai/facts             : 200   # 修复前 500
+GET /api/ai/memory-stats      : 200   # 修复前 500
+GET /api/ai/memory-audit      : 200
+GET /api/mcp/servers          : 200
+facts body                    : {"status":"ok","facts":[]}
+
+## B. 全局 Origin 门（W2）
+Origin: http://localhost:3000 : 200
+Origin: https://evil.example  : 403
+evil body                     : {"status":"error","error":"untrusted_origin","message":"该本地接口不接受来自非 Petri 页面来源的请求。"}
+Origin: null                  : 200
+
+## C. fs/import-from 源范围门（W7，BLOCK-437）
+允许（临时目录源）            : 200  {"ok":true,"entry":{"type":"file","size":26,"mtimeMs":1794487434903.2046}}
+拒绝（/etc/hosts 越界）       : 403  {"ok":false,"error":"导入源不在允许范围","code":"DRAG_SOURCE_OUTSIDE_ALLOWED_ROOTS","hint":"默认允许 家目录 / 临时目录 / /Volumes 
+拒绝（/dev 设备路径）         : 403  {"ok":false,"error":"导入源不在允许范围","code":"DRAG_SOURCE_DEVICE_PATH","hint":"默认允许 家目录 / 临时目录 / /Volumes 与项目�
+拒绝（源不存在）              : 404  {"ok":false,"error":"源路径不存在"}
+拒绝（相对路径）              : 400  {"ok":false,"error":"缺少 sourceAbsolutePath/toPath"}
+落地校验                      : 
+
+## D. 启动期 DDL（W3）
+[ddl-migrate] FAILED 计数     : 0
+uncaught/FATAL 计数           : 0

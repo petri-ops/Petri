@@ -235,3 +235,34 @@ test('W3 实测补充：表尚未创建（no such table）属预期，不记 err
   const real = result.issues.find((i) => i.operation === 'real_io_failure');
   assert.equal(real.severity, 'error', '真实 IO 故障仍须 error');
 });
+
+test('W7 导入源范围判据：允许根命中/越界/设备路径/NUL/相对/缺失/星号放开', () => {
+  const S = require(path.join(ROOT, 'core/petri-server/agent-tools/security-boundaries.js'));
+  const A = S.adjudicateDragSource;
+  const roots = ['/Users/me', '/tmp'];
+  assert.equal(A({ localPath: '/Users/me/a.png', realpath: '/Users/me/a.png', allowedRoots: roots }).ok, true);
+  assert.equal(A({ localPath: '/etc/hosts', realpath: '/etc/hosts', allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_OUTSIDE_ALLOWED_ROOTS');
+  // 符号链接逃逸：入参看似在根内，realpath 落在根外 → 必红
+  assert.equal(A({ localPath: '/Users/me/link', realpath: '/etc/passwd', allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_OUTSIDE_ALLOWED_ROOTS');
+  assert.equal(A({ localPath: '/dev/disk0', realpath: '/dev/disk0', allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_DEVICE_PATH');
+  assert.equal(A({ localPath: `/tmp/a${String.fromCharCode(0)}b`, allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_NUL_BYTE');
+  assert.equal(A({ localPath: 'rel/a', allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_NOT_ABSOLUTE');
+  assert.equal(A({ localPath: '/tmp/x', exists: false, allowedRoots: roots }).reasonCode, 'DRAG_SOURCE_MISSING');
+  assert.equal(A({ localPath: '/etc/hosts', realpath: '/etc/hosts', allowedRoots: ['*'] }).ok, true);
+});
+
+test('W7 fs/import-from 已消费源范围判据（含允许根 realpath 归一与 /tmp 纳入）', () => {
+  const route = fs.readFileSync(path.join(ROOT, 'core/petri-server/routes/files.js'), 'utf8');
+  const roots = fs.readFileSync(path.join(ROOT, 'core/petri-server/helpers/drag-source-roots.js'), 'utf8');
+  // 路由侧：调用组合判据，且在 cp 之前
+  assert.match(route, /adjudicateImportSource/);
+  assert.match(route, /fs\.promises\.realpath\(sourceAbsolutePath\)/);
+  const gateIdx = route.indexOf('adjudicateImportSource({');
+  const cpIdx = route.indexOf('fs.promises.cp(sourceAbsolutePath');
+  assert.ok(gateIdx > 0 && cpIdx > 0 && gateIdx < cpIdx, '源范围判定必须在拷贝之前');
+  // 策略侧：realpath 归一 + /tmp 纳入 + 判据单源
+  assert.match(roots, /adjudicateDragSource/);
+  assert.match(roots, /realpathSync\(root\)/);
+  assert.match(roots, /'\/tmp'/);
+  assert.match(roots, /PETRI_DRAG_SOURCE_ROOTS/);
+});
