@@ -112,3 +112,22 @@ agent-runner 从 `model_profiles` 取 provider → LLM 打到默认远端而不�
 证据：`acceptance/m-blueprint-2026-11-11/m6a/model-agent-verification.json`。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记四（2026-11-12 · 完整启动验证）
+
+用户「启动 没问题就可以 push」：起完整 dev 栈（后端 :3001 + vite :3000 + 离屏测试实例 CDP :9223，
+不传 `--onscreen`、不设 `PETRI_TEST_ONSCREEN`），跑完 trap 清三端口。
+
+| 检查 | 结果 |
+| --- | --- |
+| `npm run verify -- app-health` | **4/4 PASS**（CDP target / `?test=1` 页面 / 标题 `Petri` / `#root` 已挂载） |
+| `POST /api/ai/settings/test`（启动时） | `{"ok":true,"message":"连接正常"}` |
+| 真页面选择项目 | 路由跳到 `/project/p_mwdlwpvw_fxyo`，会话加载出此前 agent 任务的消息与工具执行记录 |
+| 真页面发消息 → 模型回复 | 唯一标记词发送前出现 **0** 次 → 发送后 **2** 次（用户消息 + 模型回复），`errors=[]` |
+
+自纠三轮：① 只注入 composer 时欢迎页提示「先选择一个项目」→ 未发出；② 点项目名文本节点未真正选中；
+③ `/ok/i` 判据会被 `tok` 误命中 → 改用唯一标记词次数（0→2）排除假绿。最终只采信该无歧义证据。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/launch-verification.json` 与 `acceptance/dev-verify/app-health-live-darwin.json`。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

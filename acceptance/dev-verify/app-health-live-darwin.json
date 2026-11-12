@@ -1,8 +1,8 @@
 {
   "name": "app-health",
   "platform": "darwin",
-  "startedAt": "2026-11-12T12:49:34.896Z",
-  "finishedAt": "2026-11-12T12:49:34.921Z",
+  "startedAt": "2026-11-12T14:02:32.923Z",
+  "finishedAt": "2026-11-12T14:02:32.951Z",
   "assertions": [
     {
       "name": "cdp_targets_listed",
