@@ -133,6 +133,10 @@ function normalizeServerEntry(entry) {
   // `{...entry}` 会把显式的 undefined 键带进注册表校验（headers 在旧调用方常为 undefined）。
   if (source.headers === undefined) delete source.headers;
   if (source.env === undefined) delete source.env;
+  // BLOCK-443（P3 实机发现）：远程条目（http/sse）没有 command，而 /api/mcp/servers 路由
+  // 会显式传 command: undefined；sanitizeItem 把「显式 undefined」判成 type-mismatch，
+  // 于是远程 MCP 注册被 missing_command 100% 拒绝。与 headers/env 同款清理。
+  if (source.command === undefined) delete source.command;
   const { item, diagnostics } = schema.sanitizeItem(FAMILY, source);
   if (!item) return { error: 'server_entry_not_object' };
   if (diagnostics.length > 0) return { error: legacyErrorFor(diagnostics), diagnostics };  // BLOCK-258 — 远程传输判定与关系校验（command 仅 stdio 必需；url 仅远程必需）。

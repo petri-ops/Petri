@@ -201,3 +201,28 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 证据：`acceptance/m-blueprint-2026-11-11/m6a/packaged-start-diagnosis.json:secondPass`。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记六（2026-11-13 · P1–P4 七项未验证项全部实测）
+
+用户「安排 搞完」授权后，把核对清单里的 7 项可本机验的缺口一次跑完（临时库/临时 data dir，跑完即清）。
+
+| 项 | 实测结果 |
+| --- | --- |
+| P1-a0 迁移后表存在性 | `src/migrations` 建 22 张核心表；`user_facts` 迁移后**不存在**（惰性建表属设计），`memory_vectors` 因模块加载已建 |
+| P1-a 迁移幂等重放 | 22 文件重放：7 个 `duplicate column name` 属预期、**0 个非预期错误**、表数 72 不变、`project_id` 列保留 → **idempotent** |
+| P1-b 配置导出/导入 | export 200 → import 200 → 再 export families 等价；坏 envelope **400 `config_import_rejected`** → ok |
+| P1-c 多项目记忆隔离 | 写 A/B 各 200，A 只见 A、B 只见 B，DB 行 `project_id=projA/projB` → **isolated** |
+| P2-a 插件安装链 | 真实 zip 解压落地、content-plugin 注册（1 篇文档）、installed 记录往返、SHA 一致、`http:` 下载被拒（只允许 https）、localhost URL 被白名单拒、github 通过、缺平台 `ARTIFACT_MISSING`；`uninstallPlugin` 已按 BLOCK-158 退役（余 `uninstallRuntime`/`removePackage`）→ ok |
+| P2-b 故障注入 | `secret-scan` 在 git 不可用时 **exit 1 + FAIL-CLOSED**（正常 PATH exit 0 PASS）；DDL 真实 IO → `error`，`no such table` → `info` |
+| P3 MCP StreamableHTTP | 本地 mock server：注册 200（transport=http/url 保留）→ connect 200（toolCount=1）→ `status=connected, error=null`；回归 9/9 |
+| P4 真实 gen-ui 卡片 | `window.petri.genUi.prepare` 返回 `petri-genui://gen-…/index.html`；卡片页内导航外部 → 主进程 `[gen-ui] 沙箱帧劫持侦测（did-fail-load CSP 拦截路）` → **verified-live** |
+
+**本轮实测发现并修掉 2 个真实缺陷**：
+1. 全新库 `POST /api/ai/facts` **500 no such table: user_facts** —— 上一包只修了读路径，写路径（POST / DELETE×2）漏了 `ensureMemorySchema()`；已补三处。
+2. 远程 MCP（http/sse）注册 **100% 失败 400 missing_command** —— `/api/mcp/servers` 对远程条目显式传 `command: undefined`，`normalizeServerEntry` 未清理该键，`sanitizeItem` 判 type-mismatch；已在 helper 层清理（stdio 缺 command 仍报错）。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/p1-p4-verification.json`。
+
+未覆盖（精确原因）：P2-a 的远程商店下载分支（host 白名单只允许 github 等 + downloadFile 只允许 https，本机无 CDN 包）、MCP OAuth 授权流（需真实 OAuth 服务）、OOPIF `frameRoutingId` 跨导航变化下的登记可靠性。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

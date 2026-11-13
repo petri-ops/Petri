@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "p1-p4-verification",
+  "capturedAt": "2026-11-13",
+  "scope": "用户「安排 搞完」授权的 P1–P4 七项未验证项，全部本机实测（临时库/临时 data dir，跑完即清）",
+  "results": {
+    "P1a0": {
+      "fact": "src/migrations 建 22 张核心表；user_facts 由 user-facts 惰性建表，迁移后不存在（memory_vectors 因模块加载已建）",
+      "measured": { "afterMigrations": { "user_facts": false, "memory_vectors": true, "copilot_conversations": true } },
+      "status": "documented"
+    },
+    "P1a": {
+      "question": "已建库再重放 22 个 SQL 是否破坏数据/报非预期错误",
+      "measured": { "replayedFiles": 22, "errors": 7, "unexpectedErrors": 0, "countsStable": true, "projectIdColumnKept": true },
+      "errorKinds": ["duplicate column name: description", "duplicate column name: input_tokens", "duplicate column name: anchor_json", "duplicate column name: entry_id", "duplicate column name: path_json", "duplicate column name: worktree_of", "duplicate column name: prev_chain_hash"],
+      "verdict": "idempotent"
+    },
+    "P1b": {
+      "question": "配置导出→导入→再导出 是否等价；坏 envelope 是否拒绝",
+      "measured": { "exportStatus": 200, "importStatus": 200, "roundtripFamiliesEqual": true, "badEnvelopeStatus": 400, "badEnvelopeError": "config_import_rejected" },
+      "verdict": "ok"
+    },
+    "P1c": {
+      "question": "两个项目的 facts 是否互相隔离",
+      "beforeFix": "POST /api/ai/facts 在全新库上 500 no such table: user_facts（写路径缺 ensure）",
+      "fix": "routes/ai-memory.js：POST facts、DELETE facts/:id、DELETE facts 三处补 await ensureMemorySchema()（PUT 已有）",
+      "measured": { "writeA": 200, "writeB": 200, "aSeesOwn": true, "aSeesOther": false, "bSeesOwn": true, "bSeesOther": false, "dbRowsProjectIds": ["projA", "projB"] },
+      "verdict": "isolated"
+    },
+    "P2a": {
+      "question": "插件安装链（解压/清单/注册/记录/SHA/白名单）是否可用",
+      "measured": {
+        "extract": { "landed": true, "files": ["docs", "plugin.json"] },
+        "register": { "typeOk": true, "docCount": 1 },
+        "installedRecord": { "presentAfterAdd": true, "absentAfterRemove": true },
+        "sha": { "match": true },
+        "downloadFile": { "httpRejected": "Protocol \"http:\" not supported. Expected \"https:\"" },
+        "gates": { "localhostUrlRejected": true, "githubAccepted": true, "missingPlatform": "ARTIFACT_MISSING" },
+        "uninstall": { "uninstallPluginRetired": true, "available": ["uninstallRuntime", "removePackage"] }
+      },
+      "notCovered": "完整 installPlugin 的远程下载分支：assertAllowedUrl 只允许 github.com 等白名单 + downloadFile 只允许 https，本机无对应 CDN 包",
+      "verdict": "ok"
+    },
+    "P2b": {
+      "secretScan": { "gitUnavailableExit": 1, "log": "FAIL-CLOSED — git grep 执行失败（GIT_GREP_FAILED）", "normalExit": 0, "verdict": "fail-closed 生效" },
+      "ddlFaultInjection": { "realIo": "severity=error code=DDL_FAILED", "noSuchTable": "severity=info code=DDL_FAILED_SILENTLY", "verdict": "ok" }
+    },
+    "P3": {
+      "question": "MCP StreamableHTTP 传输能否注册并真连",
+      "beforeFix": "POST /api/mcp/servers（transport=http）400 missing_command —— 路由显式传 command:undefined，normalizeServerEntry 未清理该键，sanitizeItem 判 type-mismatch；远程 MCP 注册 100% 失败",
+      "fix": "helpers/mcp-settings.js：source.command === undefined 时删除该键（与 headers/env 同款清理）；stdio 缺 command 仍报 missing_command",
+      "measured": { "register": 200, "transport": "http", "connect": 200, "toolCount": 1, "afterStatus": "connected", "afterError": null },
+      "regression": "test/block163-mcp-http-transport + block203-mcp-servers 9/9",
+      "verdict": "ok"
+    },
+    "P4": {
+      "question": "真实 petri-genui:// 卡片沙箱页内导航外部是否触发劫持侦测",
+      "precondition": "scope root = <workspace>/.petri/gen-ui/<conversationId>（需存在）；conversationId 形如 conv_genui_probe",
+      "measured": {
+        "prepare": { "ok": true, "url": "petri-genui://gen-3a6e3245d19f52c1ecf21bb9/index.html" },
+        "frames": 1,
+        "mainLog": "[gen-ui] 沙箱帧劫持侦测（did-fail-load CSP 拦截路），已推送即时恢复信号: https://evil.example.com/genui-probe"
+      },
+      "verdict": "verified-live（已登记 gen-ui 进程 + 卡片内导航 + CSP 拦截路）"
+    }
+  },
+  "realDefectsFound": [
+    { "id": "D1", "what": "全新库 POST /api/ai/facts 500（写路径缺 ensure）", "fixed": true },
+    { "id": "D2", "what": "远程 MCP（http/sse）注册 100% 失败（command:undefined 未清理）", "fixed": true },
+    { "id": "D3", "what": "迁移后 user_facts 不存在属设计（惰性建表）；已确认读/写路径均已 ensure", "fixed": false, "note": "read + write 双路径 ensure 已闭合，无需改迁移" }
+  ],
+  "notCovered": [
+    "P2a 的远程商店下载分支（host 白名单 + https-only，本机无 CDN 包）",
+    "P4 的跨进程 frameRoutingId 变化下的登记可靠性（注释已记 OOPIF 帧 id 跨导航会变，改用进程级登记）",
+    "MCP OAuth 授权流（需真实 OAuth 服务）"
+  ],
+  "cleanup": {
+    "ports": "3000/3001/3107/9223 已核为空",
+    "tempDirs": "临时库与临时 data dir 已删",
+    "probeFile": "P4 的 .petri/gen-ui/conv_genui_probe 已清理"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

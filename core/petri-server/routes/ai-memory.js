@@ -109,6 +109,9 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      // BLOCK-443（P1 实机）：全新库上写路径同样需要先建表——此前只有读路径 ensure，
+      // 首次 POST 会 500 no such table: user_facts（实测复现）。
+      await ensureMemorySchema();
       const {v4: uuidv4} = require('uuid');
       const {category, content, pinned, source} = req.body || {};
       const projectId = _projectIdFromReq(req);
@@ -165,6 +168,7 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      await ensureMemorySchema();
       const scope = _scope(_projectIdFromReq(req));
       const r = await adb.prepare(`DELETE FROM user_facts WHERE id=? AND user_id=? AND ${scope.clause}`).run(req.params.id, userId, ...scope.values);
       if (r.changes === 0) return res.status(404).json({status:'error', error:'not_found'});
@@ -176,6 +180,7 @@ module.exports = function mountMemory(app) {
     const userId = req.user && req.user.id;
     if (!userId) return res.status(401).json({status:'error', error:'未授权'});
     try {
+      await ensureMemorySchema();
       const scope = _scope(_projectIdFromReq(req));
       await adb.prepare(`DELETE FROM user_facts WHERE user_id=? AND ${scope.clause}`).run(userId, ...scope.values);
       res.json({status:'ok'});
