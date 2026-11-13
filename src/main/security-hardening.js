@@ -218,7 +218,23 @@ function applyWebContentsHardening({ app, shell, log = console } = {}) {
       const urlText = String(validatedURL || '');
       if (urlText.startsWith('petri-genui://')) return;
       const hit = errorCode === -30 ? genUiProcessRegistry.get(frameProcessId) : undefined; // -30=ERR_BLOCKED_BY_CSP（guest 外域加载主形态）
-      if (!hit) return;
+      if (!hit) {
+        // BLOCK-440（实机实测发现的缺口）：CSP 拦截的外域子框在「未登记进程」上此前直接 return，
+        // 只有已登记 gen-ui 进程才告警 —— 普通页面被注入外域 iframe 时静默通过。
+        // 这里对未登记路径同样分级：hijack 才告警，trusted/other 保持安静（不制造噪声）。
+        const verdict = classifySubframeNavigation(urlText);
+        if (verdict.kind !== 'hijack') return;
+        log.warn?.('[gen-ui] 不可信子框来源（CSP 拦截、未登记进程），已推送即时恢复信号:', `${urlText.slice(0, 80)}（${verdict.reasonCode}）`);
+        try {
+          contents.send(CHANNELS.genUi.sandboxHijacked, {
+            frameUrl: '',
+            targetUrl: urlText.slice(0, 500),
+            reasonCode: verdict.reasonCode,
+            at: new Date().toISOString(),
+          });
+        } catch { /* 渲染层不可达时由心跳宽限兜底 */ }
+        return;
+      }
       genUiProcessRegistry.delete(frameProcessId);
       log.warn?.('[gen-ui] 沙箱帧劫持侦测（did-fail-load CSP 拦截路），已推送即时恢复信号:', urlText.slice(0, 80));
       try {

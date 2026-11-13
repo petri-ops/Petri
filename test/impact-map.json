@@ -8269,7 +8269,8 @@
         "core/petri-server/helpers/drag-source-roots.js",
         "core/petri-server/helpers/content-type.js",
         "src/main/subframe-navigation.js",
-        "src/main/security-hardening.js"
+        "src/main/security-hardening.js",
+        "scripts/build-packaged-isolated.sh"
       ],
       "tests": [
         "test/m0-criteria-calibration.test.mjs",

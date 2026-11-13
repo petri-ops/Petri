@@ -155,3 +155,25 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 证据：`acceptance/m-blueprint-2026-11-11/m6a/packaged-start-diagnosis.json`。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记四（2026-11-13 · gen-ui 帧导航实机闭环）
+
+把 W6 从 unit-only 升级为 verified-live。做法：起完整栈（后端 :3001 + vite :3000 + 离屏实例 :9223）→ CDP 注入
+可信对照 `http://localhost:3000/?probe=trusted` 与不可信 `https://evil.example.com/probe` → 读主进程日志。
+
+**修复前：静默（0 条记录）**。根因：`did-fail-load` 分支只对**已登记 gen-ui 进程**告警，未登记进程直接 `return`。
+而应用 CSP 只允许 `'self'/本地网/gen-ui/pack`，外域 iframe 走 CSP 拦截的 `did-fail-load(-30)` 路，
+所以「未登记进程 + 外域」既不进 `will-frame-navigate` 告警分支，也被 `did-fail-load` 跳过。
+
+**修复**：`did-fail-load` 未登记分支接入 `classifySubframeNavigation` —— 仅 `hijack` 告警并推
+`genUi:sandboxHijacked`（`frameUrl` 留空 + `reasonCode`），`trusted`/`other` 保持安静。
+负测 `test/m5a-production-wiring.test.mjs` **16/16**（新增锚点：分级在推送之前）。
+
+**修复后实机日志**（`.petri-test-instance.err.log`）：
+`[gen-ui] 不可信子框来源（CSP 拦截、未登记进程），已推送即时恢复信号: https://evil.example.com/probe（FRAME_ORIGIN_NOT_ALLOWLISTED）`
+可信对照无告警（噪声控制有效）。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/genui-frame-live.json`。
+仍未覆盖：真实 `petri-genui://` 卡片进程内导航（需构造卡片 + OOPIF 登记路）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

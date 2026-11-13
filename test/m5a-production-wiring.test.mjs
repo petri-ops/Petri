@@ -266,3 +266,17 @@ test('W7 fs/import-from 已消费源范围判据（含允许根 realpath 归一�
   assert.match(roots, /'\/tmp'/);
   assert.match(roots, /PETRI_DRAG_SOURCE_ROOTS/);
 });
+
+test('W6 CSP 拦截路：未登记进程也不再静默（did-fail-load 消费分级）', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'src/main/security-hardening.js'), 'utf8');
+  assert.match(src, /did-fail-load/);
+  // 未登记分支必须做分级判定，且 hijack 才告警（trusted/other 保持安静）
+  const idx = src.indexOf('CSP 拦截、未登记进程');
+  assert.ok(idx > 0, '必须保留未登记路径的告警文案');
+  const before = src.slice(Math.max(0, idx - 900), idx);
+  assert.match(before, /classifySubframeNavigation\(urlText\)/);
+  assert.match(before, /verdict\.kind !== 'hijack'/);
+  // 告警必须在分级之后（不允许先推送后判定）
+  const sendIdx = src.indexOf('sandboxHijacked', idx);
+  assert.ok(sendIdx > idx, '推送必须在判定之后');
+});

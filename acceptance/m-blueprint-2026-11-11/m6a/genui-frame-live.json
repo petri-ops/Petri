@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "genui-frame-live-verification",
+  "capturedAt": "2026-11-13",
+  "goal": "把 W6（子框导航分级）从 unit-only 升级为实机触发：验证 CSP 拦截的外部子框在「未登记进程」上也能产生 hijack 告警",
+  "stack": {
+    "backend": "core/petri-server/server.js @ :3001（dev 库）",
+    "frontend": "vite @ :3000",
+    "electron": "bash scripts/start-test-instance.sh（默认离屏，未传 --onscreen、未设 PETRI_TEST_ONSCREEN）",
+    "cdp": ":9223",
+    "cleanup": "trap 杀 3000/3001/9223，三端口已核为空"
+  },
+  "probe": {
+    "method": "CDP 在页面注入两个 iframe：可信对照 http://localhost:3000/?probe=trusted，不可信 https://evil.example.com/probe",
+    "observed": "window.frames 0 → 2；两个 iframe 元素均在 DOM",
+    "csp": "应用 CSP frame-src 仅允许 'self'/本地网/gen-ui/pack，外域加载由 CSP 拦截（errorCode -30 路）"
+  },
+  "beforeFix": {
+    "log": "无任何 gen-ui 记录（静默）",
+    "rootCause": "did-fail-load 分支只对已登记 gen-ui 进程（genUiProcessRegistry 命中）告警；未登记进程直接 return",
+    "impact": "普通页面被注入外域 iframe 时，CSP 拦截不产生任何劫持信号——W6 想修的「未登记进程不可信来源静默通过」在 CSP 路径上仍存在"
+  },
+  "fix": {
+    "file": "src/main/security-hardening.js",
+    "what": "did-fail-load 未登记分支接入 classifySubframeNavigation：仅 hijack 告警并推送 genUi:sandboxHijacked（frameUrl 留空 + reasonCode），trusted/other 保持安静",
+    "negativeTest": "test/m5a-production-wiring.test.mjs 16/16（新增「CSP 拦截路未登记进程不再静默」锚点断言：分级在推送之前）"
+  },
+  "afterFix": {
+    "log": "[gen-ui] 不可信子框来源（CSP 拦截、未登记进程），已推送即时恢复信号: https://evil.example.com/probe（FRAME_ORIGIN_NOT_ALLOWLISTED）",
+    "trustedControl": "可信 iframe 未产生任何告警（噪声控制有效）",
+    "verdict": "verified-live（CSP 拦截路 + 未登记进程）"
+  },
+  "reproduce": {
+    "commands": [
+      "PETRI_DB_PATH=... PETRI_LOCAL_DATA_DIR=... R_SERVER_PORT=3001 node core/petri-server/server.js",
+      "cd frontend && npx vite --port 3000 --strictPort",
+      "bash scripts/start-test-instance.sh",
+      "CDP 注入 trusted/evil iframe（见本文件 probe 段）",
+      "grep -E '不可信子框来源|FRAME_ORIGIN_NOT_ALLOWLISTED' .petri-test-instance.err.log"
+    ],
+    "note": "测试实例日志双通道 .petri-test-instance.log / .err.log 均已被 gitignore"
+  },
+  "stillNotCovered": [
+    "真实 gen-ui 卡片（petri-genui://）进程内的外域导航（需构造卡片 iframe 并走 OOPIF 登记路）",
+    "跨进程 frameRoutingId 变化下的登记可靠性（注释已记 OOPIF 帧 ID 跨导航会变，改用进程级登记）"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}
