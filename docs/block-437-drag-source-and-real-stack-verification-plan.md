@@ -177,3 +177,27 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 仍未覆盖：真实 `petri-genui://` 卡片进程内导航（需构造卡片 + OOPIF 登记路）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记五（2026-11-13 · perf 剖析：`packaged_start` 从未回归，是计时窗口被 shim 污染）
+
+用 `--cpu-prof` + 四段插桩拆开 500ms，结论**推翻补记三的 perf 判断**：
+
+| 段 | 耗时 | 说明 |
+| --- | --- | --- |
+| Electron 空启动 | 50ms ×3 | 环境正常 |
+| 迁移脚本 wall | 60ms ×3 | 22 个 SQL |
+| spawn → health | 316 / 315 / 320ms | 后端真实启动 |
+| **`fs.unlinkSync(临时迁移脚本)`** | **120 / 133 / 120ms** | 不在启动链上，却被计入 sample |
+| 采集 total | 496 / 507 / 513ms | = 62+316+**125** |
+
+**决定性对照**：`env -u NODE_OPTIONS` 跑采集器 → `[381,393,389]` median **389ms**；默认环境（IDE 注入 safe-delete shim）→ `[510,511,522]` median **511ms**。差值 122ms ≈ unlink 段。
+
+**修复**：把 `fs.unlinkSync(migScriptPath)` 移出计时窗口（sample 记录之后）。删临时文件本来就不属于启动成本；**阈值 493ms、容差 30/60/25%、基线 median 379ms、采样轮次全部未动**。
+
+**修后**：默认环境 `[382,389,384]` median **384ms**；`quality:perf` **PASS**（packaged_start 390 / long_conversation 28 / big_project_tree 13 / warm_backend_spawn 546）；`block350` 单测 15/15。
+
+教训：perf 读数必须与「测量进程所在环境」一起解释——IDE 注入的 shim 会污染任何计时窗口内的文件操作。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/packaged-start-diagnosis.json:secondPass`。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

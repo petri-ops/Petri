@@ -25,8 +25,24 @@
     {
       "step": "③ 采集器真实采样（gate 模式，只采样不写基线）",
       "runs": [
-        { "samples": [508, 512, 506], "medianMs": 508, "at": "2026-11-13T00:43:57Z" },
-        { "samples": [498, 513, 502], "medianMs": 502, "at": "2026-11-13T00:44:24Z" }
+        {
+          "samples": [
+            508,
+            512,
+            506
+          ],
+          "medianMs": 508,
+          "at": "2026-11-13T00:43:57Z"
+        },
+        {
+          "samples": [
+            498,
+            513,
+            502
+          ],
+          "medianMs": 502,
+          "at": "2026-11-13T00:44:24Z"
+        }
       ],
       "meaning": "产物可启动、数值稳定（波动 ±10ms）；上一轮 ETIMEDOUT 不可复现"
     }
@@ -45,13 +61,19 @@
     "artifact": "scripts/build-packaged-isolated.sh",
     "what": "① 清空旧产物（绕开批量删除阈值）② 强制 electron-rebuild -f ③ 打包 ④ trap 保证恢复 Node ABI（根 + core 两处）并冒烟校验",
     "verification": "bash -n 通过；等价步骤已手工端到端跑通（重建→打包成功→恢复后两处 ABI OK→采集两次稳定）；上一轮 install-app-deps 路线已被证伪",
-    "notClaimed": ["脚本本身未再触发一次完整重打包（避免重复覆盖已验证产物）", "未抬 perf 阈值、未重采基线"]
+    "notClaimed": [
+      "脚本本身未再触发一次完整重打包（避免重复覆盖已验证产物）",
+      "未抬 perf 阈值、未重采基线"
+    ]
   },
   "perfVerdict": {
     "thresholdMs": 493,
     "baselineMedianMs": 379,
     "tolerancePct": 30,
-    "observedMedianMs": [508, 502],
+    "observedMedianMs": [
+      508,
+      502
+    ],
     "overThresholdPct": "1.8%–3.0%（相对阈值）；相对基线 median 为 +32%–+34%",
     "verdict": "RED（稳定临界超标）",
     "attribution": {
@@ -66,5 +88,83 @@
     "dist": "保留可用产物（dist/ 已 gitignore，不进仓库）",
     "ports": "3000/3001/9223/3106/3107 无残留"
   },
-  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "secondPass": {
+    "capturedAt": "2026-11-13",
+    "goal": "BLOCK-442：用 --cpu-prof + 分段计时定位「+120ms」来源",
+    "segments_ms": {
+      "electronEmptyStartup": [
+        50,
+        50,
+        50
+      ],
+      "migrateScriptWall": [
+        60,
+        60,
+        60
+      ],
+      "migrateCpu": [
+        62,
+        70,
+        72
+      ],
+      "unlinkTempMigScript": [
+        120,
+        133,
+        120
+      ],
+      "spawnToHealth": [
+        316,
+        315,
+        320
+      ],
+      "totals": [
+        496,
+        507,
+        513
+      ]
+    },
+    "decisiveComparison": {
+      "withShim": {
+        "samples": [
+          510,
+          511,
+          522
+        ],
+        "medianMs": 511
+      },
+      "withoutShim_env_u_NODE_OPTIONS": {
+        "samples": [
+          381,
+          393,
+          389
+        ],
+        "medianMs": 389
+      },
+      "delta": "122ms ≈ unlink 段 120–133ms"
+    },
+    "rootCauseCorrected": "上一轮「稳定临界超标 1.8%–3.0%」结论作废：真实启动 = 迁移 62–72ms + spawn→health 313–343ms ≈ 378–415ms，与基线 median 379ms 一致，从未超标。500ms 里有 ~120ms 是 IDE safe-delete shim 在「删除 app bundle 内临时迁移脚本」时的首次付费，落在计时窗口内。",
+    "fix": "scripts/block350-perf-collect.mjs：把 fs.unlinkSync(migScriptPath) 移出计时窗口（sample 记录之后、kill 之前）。删临时文件不属于启动成本。",
+    "verification": {
+      "withShimAfterFix": {
+        "samples": [
+          382,
+          389,
+          384
+        ],
+        "medianMs": 384,
+        "thresholdMs": 493,
+        "verdict": "green"
+      },
+      "qualityPerf": "PASS（连续 5 次采样全部通过；packaged_start 390 / long_conversation 28 / big_project_tree 13 / warm_backend_spawn 546）",
+      "block350Unit": "15/15"
+    },
+    "notChanged": [
+      "阈值 493ms",
+      "容差 30/60/25%",
+      "基线 median 379ms",
+      "采样轮次与场景定义",
+      "coreSha"
+    ]
+  }
 }

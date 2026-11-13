@@ -228,7 +228,6 @@ async function scenarioPackagedStart() {
         },
         encoding: 'utf8', timeout: 120000,
       });
-      fs.unlinkSync(migScriptPath);
       const child = spawn(bin, [serverJs], {
         // whitelist env（BLOCK-353 同款）：node 父进程全量继承会让打包 Electron 静默挂
         //（毒性变量二分未锁定，白名单实测通——353 检查脚本同款）
@@ -252,6 +251,11 @@ async function scenarioPackagedStart() {
       }
       if (ok) samples.push(Math.round(Date.now() - t0));
     else console.log(`[block350] pkg run ${i}: health 未就绪（${Math.round((Date.now() - t0)/1000)}s）`);
+      // BLOCK-442（实测）：临时迁移脚本的删除必须移出计时窗口——IDE 注入的 safe-delete shim
+      // 首次删除 app bundle 内文件约 120ms，会被误算进「启动耗时」（实测：带 shim 511ms /
+      // 无 shim（env -u NODE_OPTIONS）389ms，差值≈unlink 段 120–133ms）。删临时文件本来
+      // 就不属于启动成本；此处只调整计时边界，不改阈值、不改基线、不改采样轮次。
+      try { fs.unlinkSync(migScriptPath); } catch { /* best-effort */ }
       try { child.kill('SIGKILL'); } catch { /* gone */ }
     } catch (e) {
       console.log(`[block350] packaged run ${i} 失败：${String(e && e.message).slice(0, 120)}`);
