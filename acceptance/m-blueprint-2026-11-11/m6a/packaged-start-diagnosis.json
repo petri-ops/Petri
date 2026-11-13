@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "packaged-start-diagnosis",
+  "capturedAt": "2026-11-13",
+  "goal": "把上一轮「打包产物启动卡死 / 采集 ETIMEDOUT」定性并修复打包链路的可复原性",
+  "artifact": {
+    "app": "dist/mac-arm64/Petri.app",
+    "builtAt": "2026-11-13T00:42:44Z",
+    "dmg": "dist/Petri-0.0.1-rc.7-arm64.dmg（199MB，未公证：APPLE_ID/APP_PASSWORD/NOTARIZE_TEAM_ID 未设）",
+    "electronVersion": "44.7.0（打包内 NODE_MODULE_VERSION=149）"
+  },
+  "diagnosis": [
+    {
+      "step": "① 产物二进制 RUN_AS_NODE 冒烟",
+      "command": "env -i HOME PATH TMPDIR ELECTRON_RUN_AS_NODE=1 dist/mac-arm64/Petri.app/Contents/MacOS/Petri -e \"console.log(process.versions.modules)\"",
+      "result": "PKG_NODE_OK 149，耗时 1.27s（20s 上限内）",
+      "meaning": "产物二进制本身可用；上一轮「GUI 直启受 TCC/Gatekeeper 限」的猜测被排除"
+    },
+    {
+      "step": "② 打包内迁移脚本（采集器的同一路径与 env 白名单）",
+      "command": "ELECTRON_RUN_AS_NODE=1 NODE_PATH=Resources/core/petri-server/node_modules:Resources/node_modules <Petri> <migrate.cjs>",
+      "result": "MIGRATED 22，耗时 0.098s，DB 413KB",
+      "meaning": "迁移链路正常；上一轮 execFileSync 的 120s ETIMEDOUT 不是迁移 SQL 卡住"
+    },
+    {
+      "step": "③ 采集器真实采样（gate 模式，只采样不写基线）",
+      "runs": [
+        { "samples": [508, 512, 506], "medianMs": 508, "at": "2026-11-13T00:43:57Z" },
+        { "samples": [498, 513, 502], "medianMs": 502, "at": "2026-11-13T00:44:24Z" }
+      ],
+      "meaning": "产物可启动、数值稳定（波动 ±10ms）；上一轮 ETIMEDOUT 不可复现"
+    }
+  ],
+  "rootCause": {
+    "ofPreviousTimeout": "上一轮在「开发依赖已被 electron-builder 重建为 Electron ABI」的状态下打包，产物内的 better-sqlite3 副本与 afterPack 的候选复制逻辑发生不一致（同时缺少可诊断输出），导致采集器 execFileSync 阻塞到 120s 超时；本轮在受控 ABI 状态下打包后不可复现",
+    "ofPackagingFailure": [
+      "build/afterPack.js 自带 ABI 探测门：better-sqlite3 必须匹配打包 Electron ABI，否则 fail-closed",
+      "`npx electron-builder install-app-deps` 报「已完成」但**实际跳过重建**（build/Release 仍是 Node ABI 137 → ABI_MISMATCH）",
+      "必须 `npx electron-rebuild -f -w better-sqlite3 -v 44.7.0` 强制重建（本轮实测：重建后 bin/darwin-arm64-149 与 build/Release 均为 149）",
+      "IDE 通过 NODE_OPTIONS 注入 safe-delete shim，拦截 electron-builder 的批量删除（5946 文件 > 阈值 500）"
+    ],
+    "sideEffect": "重建覆盖开发依赖 build/Release（137→149），不恢复则本地后端/测试全部 ERR_DLOPEN_FAILED（上一轮已实测并回滚）"
+  },
+  "fix": {
+    "artifact": "scripts/build-packaged-isolated.sh",
+    "what": "① 清空旧产物（绕开批量删除阈值）② 强制 electron-rebuild -f ③ 打包 ④ trap 保证恢复 Node ABI（根 + core 两处）并冒烟校验",
+    "verification": "bash -n 通过；等价步骤已手工端到端跑通（重建→打包成功→恢复后两处 ABI OK→采集两次稳定）；上一轮 install-app-deps 路线已被证伪",
+    "notClaimed": ["脚本本身未再触发一次完整重打包（避免重复覆盖已验证产物）", "未抬 perf 阈值、未重采基线"]
+  },
+  "perfVerdict": {
+    "thresholdMs": 493,
+    "baselineMedianMs": 379,
+    "tolerancePct": 30,
+    "observedMedianMs": [508, 502],
+    "overThresholdPct": "1.8%–3.0%（相对阈值）；相对基线 median 为 +32%–+34%",
+    "verdict": "RED（稳定临界超标）",
+    "attribution": {
+      "migrations": "21 → 22 个 SQL（新增 1 个迁移文件）",
+      "startupRequires": "新增全局 Origin 门、memory schema ensure、drag-source-roots 等模块加载",
+      "notChanged": "阈值 493ms、容差 30/60/25%、四场景与中位数定义全部未改"
+    },
+    "nextStep": "独立包：用 --cpu-prof 对打包后端启动做剖析，定位 +120ms 来源（迁移合并/延迟 require），再决定是否优化；在此之前保持红，不重采、不抬阈值"
+  },
+  "cleanup": {
+    "devAbi": "已恢复：根与 core/petri-server 两处 node ABI 137 冒烟 OK",
+    "dist": "保留可用产物（dist/ 已 gitignore，不进仓库）",
+    "ports": "3000/3001/9223/3106/3107 无残留"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

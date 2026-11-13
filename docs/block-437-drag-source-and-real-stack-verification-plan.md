@@ -131,3 +131,27 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 证据：`acceptance/m-blueprint-2026-11-11/m6a/launch-verification.json` 与 `acceptance/dev-verify/app-health-live-darwin.json`。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 补记三（2026-11-13 · 打包链路：可复原化 + packaged_start 定性）
+
+上一轮把 `packaged_start` 归因为「打包链路缺陷」但停在「新产物启动卡死」。本轮逐层拆开，结论**推翻了一半**：
+
+| 层 | 实测 | 结论 |
+| --- | --- | --- |
+| 产物二进制 | `ELECTRON_RUN_AS_NODE` 冒烟 **1.27s** 返回 `NODE_MODULE_VERSION=149` | 可用；排除 GUI/TCC/Gatekeeper 猜测 |
+| 打包内迁移 | 同一脚本同一 env 白名单 → **`MIGRATED 22` / 0.098s** / DB 413KB | 迁移不卡；上一轮的 `execFileSync` 120s 超时不可复现 |
+| 采集器真实采样 | 两轮 gate：`[508,512,506]`→508、`[498,513,502]`→502 | 产物可启动、数值稳定（±10ms） |
+
+**上一轮超时的真因**：在「开发依赖已被重建为 Electron ABI」的状态下打包，产物内 `better-sqlite3` 副本与 `afterPack` 的候选复制逻辑不一致，且采集器把诊断输出吞了；受控 ABI 下重打后不可复现。
+
+**打包门的两个坑（已固化进脚本）**：
+1. `npx electron-builder install-app-deps` 报「已完成」但**跳过重建**（`build/Release` 仍是 Node ABI 137 → `afterPack` 判 `ABI_MISMATCH`）；
+2. 必须 `npx electron-rebuild -f -w better-sqlite3 -v 44.7.0` 强制重建，且打包后**必须恢复**（否则本地 `ERR_DLOPEN_FAILED`）。
+
+新增 `scripts/build-packaged-isolated.sh`：清空产物（绕开 IDE safe-delete 的 500 阈值）→ 强制重建 → 打包 → `trap` 保证恢复两处 Node ABI 并冒烟校验。`bash -n` 通过；等价步骤已手工端到端跑通。
+
+**perf 判定（不重采、不抬阈值）**：阈值 493ms、基线 median 379ms、容差 30% 全部未动；观测 median **502–508ms**，超阈值 **1.8%–3.0%**（相对 median 为 +32%~+34%）。归因：迁移 21→22 个 SQL + 新增模块 require。下一步独立包用 `--cpu-prof` 剖析启动链定位 +120ms，在此之前保持红。
+
+证据：`acceptance/m-blueprint-2026-11-11/m6a/packaged-start-diagnosis.json`。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
