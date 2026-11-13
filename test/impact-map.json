@@ -8270,7 +8270,11 @@
         "core/petri-server/helpers/content-type.js",
         "src/main/subframe-navigation.js",
         "src/main/security-hardening.js",
-        "scripts/build-packaged-isolated.sh"
+        "scripts/build-packaged-isolated.sh",
+        "scripts/import-external-plugin.mjs",
+        "test/block444-external-plugin-import.test.mjs",
+        "test/fixtures/external-plugins/**",
+        "scripts/lib/agent-plugin-sources.mjs"
       ],
       "tests": [
         "test/m0-criteria-calibration.test.mjs",
@@ -8289,7 +8293,9 @@
         "test/m7-final-closeout.test.mjs",
         "test/m5a-production-wiring.test.mjs",
         "test/m6a-surface-schema.test.mjs",
-        "test/block232-permissions-generalization.test.mjs"
+        "test/block232-permissions-generalization.test.mjs",
+        "test/block444-external-plugin-import.test.mjs",
+        "test/block445-agent-plugin-sources.test.mjs"
       ],
       "commands": [
         "docs-check"

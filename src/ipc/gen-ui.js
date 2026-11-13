@@ -18,7 +18,9 @@
 const CHANNELS = require('./channels');
 const fsSync = require('node:fs');
 const path = require('node:path');
-const { getGenUiSession } = require('../main/gen-ui/scheme');
+const { createGenUiSession, getGenUiSession, HTML_MAX_BYTES, SCHEME } = require('../main/gen-ui/scheme');
+const crypto = require('node:crypto');
+const os = require('node:os');
 
 const WIDGET_STATE_MAX_BYTES = 16 * 1024;
 
@@ -277,9 +279,54 @@ async function copyGenUiImage(event, payload) {
   }
 }
 
+/**
+ * BLOCK-445 — MCP App 页面准备（Phase 1 宿主链路）。
+ * 外部 MCP server 的 resources/read → HTML 文本 → 临时文件 → gen-ui 沙箱会话。
+ * 与主通道 gen-ui:prepare 的差异：内容来自 MCP 资源而非工作区文件，
+ * 因此不做 workspace/scope 归属校验；HTML 体积仍受 HTML_MAX_BYTES 硬约束。
+ */
+async function prepareMcpAppGenUi(event, payload) {
+  try {
+    const serverId = String((payload && payload.serverId) || '');
+    const uri = String((payload && payload.uri) || '');
+    if (!serverId || !uri) return { ok: false, code: 'invalid-args', message: 'serverId / uri 必填' };
+    const port = process.env.R_SERVER_PORT || '3001';
+    const url = `http://127.0.0.1:${port}/api/mcp/servers/${encodeURIComponent(serverId)}/resource`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ uri }),
+      signal: backendTimeoutSignal(),
+    });
+    let data = null;
+    try { data = await resp.json(); } catch { data = null; }
+    if (!resp.ok || !data || typeof data.text !== 'string') {
+      return { ok: false, code: 'resource-read-failed', message: (data && data.error) || `backend status ${resp.status}` };
+    }
+    if (Buffer.byteLength(data.text, 'utf8') > HTML_MAX_BYTES) {
+      return { ok: false, code: 'too-large', message: 'MCP App HTML 超过 1MB 上限' };
+    }
+    const dir = path.join(os.tmpdir(), 'petri-mcp-apps');
+    fsSync.mkdirSync(dir, { recursive: true });
+    const filePath = path.join(dir, `${crypto.randomBytes(12).toString('hex')}.html`);
+    fsSync.writeFileSync(filePath, data.text, 'utf8');
+    const session = createGenUiSession({
+      filePath,
+      title: String((payload && payload.title) || 'MCP App'),
+      hostOrigin: '',
+      ownerWebContentsId: event.sender.id,
+      scopeKey: `mcp-app:${serverId}`,
+    });
+    return { ok: true, url: `${SCHEME}://${session.id}/index.html` };
+  } catch (error) {
+    return { ok: false, code: 'failed', message: error.message || String(error) };
+  }
+}
+
 function setupGenUiIpc() {
   const { ipcMain } = require('electron');
   ipcMain.handle(CHANNELS.genUi.prepare, async (event, payload) => prepareGenUi(event, payload));
+  ipcMain.handle(CHANNELS.genUi.prepareMcpApp, async (event, payload) => prepareMcpAppGenUi(event, payload));
   ipcMain.handle(CHANNELS.genUi.setState, (event, payload) => setGenUiState(event, payload));
   ipcMain.handle(CHANNELS.genUi.openExternal, (event, payload) => openGenUiExternal(event, payload));
     ipcMain.handle(CHANNELS.genUi.copyImage, (event, payload) => copyGenUiImage(event, payload));

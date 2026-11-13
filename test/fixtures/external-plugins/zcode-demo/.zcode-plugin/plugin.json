@@ -1,0 +1,16 @@
+{
+  "name": "zcode-demo",
+  "version": "1.2.0",
+  "description": "BLOCK-444 夹具：ZCode 扩展形态插件（含 extension/ui/hooks 等不可迁移能力）",
+  "extension": {
+    "engines": { "zcode": "^1.0.0" },
+    "main": "./dist/extension.js",
+    "activationEvents": ["onAvailable"],
+    "contributes": {
+      "commands": [{ "id": "open-context", "title": "查看上下文" }],
+      "views": [{ "id": "context", "title": "上下文组成" }]
+    }
+  },
+  "ui": { "surfaces": ["sidebar"] },
+  "mcpServers": { "demo-http-inline": { "url": "https://example.com/mcp" } }
+}

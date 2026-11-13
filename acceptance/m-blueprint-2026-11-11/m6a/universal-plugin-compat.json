@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "universal-agent-plugin-compatibility",
+  "capturedAt": "2026-11-14",
+  "block": "BLOCK-445",
+  "goal": "任何 Agent 的插件与技能尽量「拿来即用」",
+  "deliverables": [
+    {
+      "id": "S0",
+      "what": "BLOCK-444 单插件转换器收口为基座（skills/MCP/命令模板投影 + 显式诊断）",
+      "tests": "test/block444-external-plugin-import.test.mjs 6/6"
+    },
+    {
+      "id": "S1",
+      "what": "scripts/lib/agent-plugin-sources.mjs：13 种清单候选、14 个用户级插件根、7 个工作区级根、无清单单技能目录、marketplace 根",
+      "agents": ["zcode", "claude-code", "codex", "codebuddy", "opencode", "openclaw", "augment", "continue", "goose", "qwen-code", "qoder", "windsurf", "trae", "kiro", "roo-code", "any"],
+      "tests": "test/block445-agent-plugin-sources.test.mjs 5/5；单技能目录 apply 安装成功"
+    },
+    {
+      "id": "S2",
+      "what": "commands/*.md → 合成技能（默认开启，--no-command-skills 关闭）",
+      "verification": "apply 后技能列表含合成项且落 skill.json；关闭投影后只装原技能"
+    },
+    {
+      "id": "S3",
+      "what": "MCP App 页面宿主链路（Phase 1 只读渲染）：后端 readResource + REST / 主进程 gen-ui:prepare-mcp-app / preload prepareMcpApp",
+      "readings": {
+        "backend": { "register": 200, "connect": 200, "resourceRead": 200, "htmlProbe": true, "emptyUri": 400 },
+        "electron": { "hasApi": true, "sandboxUrl": "petri-genui://gen-<id>/index.html", "framesAfterIframe": 1, "protocolErrors": 0 }
+      }
+    }
+  ],
+  "realPluginDryRun": [
+    { "plugin": "documents-plugin", "version": "0.2.2", "skills": 2, "mcp": 1, "unsupported": ["mcp-apps-ui", "subagents"] },
+    { "plugin": "pdf-plugin", "version": "0.2.3", "skills": 2, "mcp": 1, "unsupported": ["mcp-apps-ui", "subagents"] },
+    { "plugin": "design-plugin", "version": "0.7.2", "skills": 1, "mcp": 0, "unsupported": ["hooks"] },
+    { "plugin": "visualize-plugin", "version": "0.1.2", "skills": 1, "mcp": 0, "unsupported": [] },
+    { "plugin": "browser-use-plugin", "version": "0.5.1", "skills": 2, "mcp": 0, "unsupported": [] }
+  ],
+  "findings": [
+    { "id": "F1", "fact": "manifest 缺 mcpServers 时曾把整个 manifest 当服务器表 → 假诊断；已修", "status": "fixed" },
+    { "id": "F2", "fact": "真实 MCP 配置含 ${ZCODE_PLUGIN_ROOT}/dist/server.mjs，只导入 skills 会让路径失效；apply 时复制插件目录并替换 ROOT 变量", "status": "fixed" },
+    { "id": "F3", "fact": "ZCode 插件多为 TS 源码，dist/ 未入库 → MCP server 需先 npm install && npm run build；已落 mcp_entry_script_missing 诊断 + requiresInstall", "status": "documented" }
+  ],
+  "notCovered": [
+    "ZCode JS 扩展宿主（extension.main + 能力表 RPC + contributes.views/slots）",
+    "hooks/ 运行时",
+    "MCP App 前端自动渲染分支（宿主链路已通，需对齐工具结果结构后接 GenUiCard）",
+    "扩展视图插槽与逐插件信任模型",
+    "插件 MCP server 的构建/依赖安装（需用户在该目录执行）"
+  ],
+  "safety": [
+    "从不执行插件代码，不 require 插件 JS",
+    "不跟随软链；技能 ≤10MB / 500 文件；HTML ≤1MB",
+    "zip 走既有解压器（穿越拒绝 + 失败清理）",
+    "默认 dry-run；--apply 才写入；用户 MCP 配置不自动改写"
+  ],
+  "cleanup": {
+    "ports": "3000/3001/3111/9223 全空",
+    "userMcpConfig": "离屏验证用的 mcp-app-demo 已删除并恢复备份"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

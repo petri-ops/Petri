@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "demo-stdio": {
+      "command": "node",
+      "args": [
+        "-v"
+      ],
+      "env": {
+        "DEMO": "1"
+      }
+    },
+    "demo-http": {
+      "url": "https://example.com/mcp",
+      "headers": {
+        "X-Demo": "1"
+      }
+    },
+    "demo-missing": {
+      "command": "node",
+      "args": [
+        "${ZCODE_PLUGIN_ROOT}/dist/missing.mjs"
+      ]
+    }
+  }
+}

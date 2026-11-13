@@ -367,6 +367,29 @@ async function callServerTool(id, toolName, args = {}, options = {}) {
   }
 }
 
+/** BLOCK-445 — MCP App 资源读取：把 tools/call 结果里的 _meta.ui.resourceUri 拉成 HTML。 */
+async function readResource(id, uri) {
+  const sess = _sessions.get(id);
+  if (!sess || sess.status !== 'connected' || !sess.client) {
+    return { ok: false, error: 'server_not_connected' };
+  }
+  const text = String(uri || '');
+  if (!text || text.length > 2048) return { ok: false, error: 'invalid_resource_uri' };
+  try {
+    const result = await _withTimeout(
+      sess.client.readResource({ uri: text }),
+      LIST_TOOLS_TIMEOUT_MS,
+      'read_resource',
+    );
+    const contents = Array.isArray(result && result.contents) ? result.contents : [];
+    const first = contents.find((c) => typeof c.text === 'string');
+    if (!first) return { ok: false, error: 'resource_has_no_text_content' };
+    return { ok: true, uri: text, mimeType: first.mimeType || 'text/html', text: first.text };
+  } catch (e) {
+    return { ok: false, error: e && e.message ? String(e.message) : String(e) };
+  }
+}
+
 /** 已连接 server 的工具清单。 */
 function listServerTools(id) {
   const sess = _sessions.get(id);
@@ -458,6 +481,7 @@ module.exports = {
   revokeAuthorization,
   disconnectServer,
   callServerTool,
+  readResource,
   listServerTools,
   getStatuses,
   autoConnectConfigured,

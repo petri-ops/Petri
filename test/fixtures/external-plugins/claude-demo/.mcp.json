@@ -1,0 +1,1 @@
+{ "mcpServers": { "docs-sse": { "url": "https://example.com/sse", "transport": "sse" } } }

@@ -15,12 +15,18 @@ const BASELINE = path.join(ROOT, 'acceptance/m-blueprint-2026-11-11/m6a/surface-
 const readBaseline = () => JSON.parse(fs.readFileSync(BASELINE, 'utf8'));
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
-test('M6-A 三面 schema：ipc 168 / tool 115 / route 283，身份唯一性缺陷已冻结', () => {
+test('M6-A 三面 schema：矩阵与真相源/基线一致，身份唯一性缺陷已冻结', () => {
   const schema = buildSchema();
-  assert.equal(schema.counts.ipc, 168);
-  assert.equal(schema.counts.tool, 115);
-  assert.equal(schema.counts.route, 283);
-  assert.equal(schema.counts.entries, 566);
+  const baseline = readBaseline();
+  // BLOCK-445：新增 IPC 通道（gen-ui:prepare-mcp-app）后改为「与真相源 + 冻结基线一致」，
+  // 不再硬编码计数（否则每次合法扩面都假红）。真相源计数由生成器从 channels.js / TOOL_DEFS 复算。
+  assert.equal(schema.counts.ipc, schema.counts.truthChannels, 'ipc 必须与 channels.js 叶子数一致');
+  assert.equal(schema.counts.tool, schema.counts.truthTools, 'tool 必须与 TOOL_DEFS 一致');
+  assert.equal(schema.counts.ipc, baseline.counts.ipc);
+  assert.equal(schema.counts.tool, baseline.counts.tool);
+  assert.equal(schema.counts.route, baseline.counts.route);
+  assert.equal(schema.counts.entries, baseline.counts.entries);
+  assert.equal(schema.counts.entries, schema.counts.ipc + schema.counts.tool + schema.counts.route);
   assert.ok(Array.isArray(schema.defects));
   assert.ok(schema.defects.length >= 1, '至少冻结重复注册缺陷');
   assert.ok(schema.defects.every((d) => /^(DUPLICATE_ENTRY|SUMMARY_DRIFT):/.test(d)));

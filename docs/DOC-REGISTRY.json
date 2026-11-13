@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 582,
-    "lastUpdated": "2026-11-11",
-    "managedMarkdown": 565
+    "documentCount": 583,
+    "lastUpdated": "2026-11-13",
+    "managedMarkdown": 566
   },
   "documents": [
     {
@@ -11826,7 +11826,38 @@
         "hotfix"
       ],
       "notes": "BLOCK-439 端到端核对补建本册：原提交 aeda9abc 只有代码与测试、无发令文档与台账条目。两处实测修复：F1 全新库 ai/facts 与 memory-stats 500 → 读路径前置 ensureMemorySchema；F2 启动期 3 条 ddl-migrate 假 error → no such table 归类为预期（真实 IO 故障仍 error）。HK-01 13/13；实机冒烟 A/D 段 200 / FAILED=0。零新增依赖、零放宽阈值、零触碰在制 WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-445-UNIVERSAL-AGENT-PLUGIN-COMPAT",
+      "path": "docs/block-445-universal-agent-plugin-compat-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "scripts/import-external-plugin.mjs",
+        "scripts/lib/agent-plugin-sources.mjs",
+        "core/petri-server/mcp/client-manager.js",
+        "core/petri-server/routes/mcp-client.js",
+        "src/ipc/gen-ui.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "test/block444-external-plugin-import.test.mjs",
+        "test/block445-agent-plugin-sources.test.mjs",
+        "test/fixtures/external-plugins/**",
+        "test/impact-map.json"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "agent-plugins",
+        "skills",
+        "mcp-apps"
+      ],
+      "notes": "BLOCK-445 通用 Agent 插件/技能兼容层：13 种清单候选 + 14 个用户级/7 个工作区级插件根 + .agents/skills 直读 + 单技能目录；commands 投影合成技能；MCP App 页面宿主链路（后端 readResource / 主进程 gen-ui:prepare-mcp-app / preload）。真实 ZCode 插件（documents/pdf/design/visualize/browser-use）试跑通过，444 6/6 + 445 5/5，离屏 Electron prepareMcpApp 返回沙箱 URL。未覆盖：JS 扩展宿主、hooks、前端自动渲染分支、插件构建依赖。见 m6a/universal-plugin-compat.json。"
     }
   ],
-  "lastUpdated": "2026-11-11"
+  "lastUpdated": "2026-11-13"
 }

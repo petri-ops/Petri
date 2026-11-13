@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m6a-surface-schema",
-  "capturedAt": "2026-11-12T11:29:47.803Z",
+  "capturedAt": "2026-11-13T23:42:07.783Z",
   "policy": "三面身份 schema 单一形状；漂移按「只减不增」棘轮冻结；本文件只读生成，不改矩阵数据",
   "shape": {
     "entry": [
@@ -16,11 +16,11 @@
     ]
   },
   "counts": {
-    "entries": 566,
-    "ipc": 168,
+    "entries": 567,
+    "ipc": 169,
     "tool": 115,
     "route": 283,
-    "truthChannels": 168,
+    "truthChannels": 169,
     "truthTools": 115
   },
   "drift": {
@@ -1177,6 +1177,13 @@
       "id": "gen-ui:prepare",
       "scope": "gen-ui",
       "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:prepare-mcp-app",
+      "scope": "gen-ui",
+      "exposed": false,
       "consumed": false
     },
     {

@@ -2,7 +2,7 @@
 
 > **自动生成，勿手改**。生成器 `scripts/block357-capability-map.mjs`；
 > 数据源 `acceptance/functional-audit-2026-11-04/surface-matrix.json`（`scripts/functional-surface-audit.mjs` 产出）。
-> 矩阵生成时间：2026-11-10T15:15:19.269Z；覆盖 115 个工具、168 个 IPC 通道、285 个路由端点。
+> 矩阵生成时间：2026-11-13T23:39:03.429Z；覆盖 115 个工具、169 个 IPC 通道、283 个路由端点。
 
 ## 边界（先读这一段）
 
@@ -43,7 +43,8 @@
 
 ## 当前已知限制（来自矩阵）
 
-- 功能面矩阵判定：**P1=0 / P2=0 / P3=2**（P1/P2 为阻断级，归零后才可宣称能力面自洽）。
+- 功能面矩阵判定：**P1=0 / P2=0 / P3=3**（P1/P2 为阻断级，归零后才可宣称能力面自洽）。
+- P3 `ipc_dead_channels` · 1 个通道：登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：gen-ui:prepare-mcp-app
 - P3 `storage_read_never_written` · petri_token：3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotCo
 - P3 `storage_read_never_written` · petri.simplechat.extraRenderers：1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx
 

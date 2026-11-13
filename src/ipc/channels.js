@@ -240,6 +240,8 @@ const CHANNELS = {
   },
   genUi: {
     prepare: 'gen-ui:prepare',
+    // BLOCK-445 — MCP App 页面准备（外部 MCP server 的 ui 资源 → gen-ui 沙箱）
+    prepareMcpApp: 'gen-ui:prepare-mcp-app',
     // BLOCK-166 P1 — guest 桥 RPC 中继（GenUiCard 经 desktopBridge 转发）：
     // set-state = widgetState 内存落主进程；open-external = 绝对 http(s) 白名单裁决。
     setState: 'gen-ui:set-state',

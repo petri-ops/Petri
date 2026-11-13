@@ -1,0 +1,13 @@
+{
+  "skillManifestVersion": 1,
+  "id": "json-form",
+  "name": "JSON 表单",
+  "version": "0.1.0",
+  "description": "把结构化数据渲染成可编辑表单",
+  "category": "imported",
+  "tags": ["form"],
+  "plugins": { "required": [], "optional": [] },
+  "workflows": { "default": "default" },
+  "prompts": { "system": "prompts/system.md", "user_templates": ["按 JSON 表单技能处理：{task}"] },
+  "parameters": { "required": [], "optional": {} }
+}

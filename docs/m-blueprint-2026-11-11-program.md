@@ -38,6 +38,7 @@ reopen: 用户裁决或阶段终态变化后先复核本台账与 registry 再�
 | M5-A 判据→生产接线收尾 | BLOCK-434 | P0/P1 | completed（5 项判据接线：4 done + MCP 白名单默认待裁决；drag/帧导航后续） |
 | M6-A 结构单源第一刀 | BLOCK-435 | P1 | completed（S1 三面 schema 门 + S2 基线 412→406 done；S3 环消亡实现后被 D7 棘轮拦下→回退） |
 | 拖入源范围门 + 实机实测 | BLOCK-437 | P0 | completed（import-from 源范围门 + 默认允许根 + 实测修正 realpath bug；files.js 抽模块 764→682） |
+| 通用 Agent 插件/技能兼容层 | BLOCK-445 | P1 | completed（任意 Agent 清单/插件根/技能目录 + commands 合成技能 + MCP App 宿主链路；JS 扩展宿主与前端自动渲染列为后续包） |
 | 真实栈修复（补建册） | BLOCK-436 | P0 | completed（F1 读路径幂等建表 / F2 DDL 假 error 归类；HK-01 13/13） |
 | 端到端核对补漏 | BLOCK-439 | P1 | completed（BLOCK-436 建册 + 4 次后续提交台账补登记 + B2–B6 机械遗漏 + block93 凭据污染根因根治） |
 

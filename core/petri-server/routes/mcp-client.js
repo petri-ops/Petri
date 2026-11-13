@@ -171,6 +171,19 @@ function registerMcpClientRoutes(app) {
     });
   });
 
+  // BLOCK-445 — MCP App 页面资源（只读）：{ uri } → HTML 文本（供 gen-ui 沙箱渲染）
+  app.post('/api/mcp/servers/:id/resource', express.json({ limit: '8kb' }), async (req, res) => {
+    const id = String(req.params.id || '');
+    const uri = String((req.body && req.body.uri) || '');
+    const result = await manager.readResource(id, uri);
+    if (!result.ok) {
+      const status = result.error === 'server_not_connected' ? 409
+        : result.error === 'invalid_resource_uri' ? 400 : 502;
+      return res.status(status).json({ status: 'error', error: result.error });
+    }
+    return res.json({ status: 'ok', uri: result.uri, mimeType: result.mimeType, text: result.text });
+  });
+
   app.post('/api/mcp/servers', express.json(), (req, res) => {
     const body = req.body || {};
     // BLOCK-258 — 三传输：stdio / http(StreamableHTTP) / sse；远程可带自定义 headers

@@ -1,27 +1,33 @@
 {
-  "generatedAt": "2026-11-10T15:15:19.269Z",
+  "generatedAt": "2026-11-13T23:39:03.429Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
     "toolDomains": 16,
     "contracts": 115,
     "metadata": 116,
-    "ipcChannels": 168,
-    "ipcMissingPreload": 2,
-    "ipcUnusedInRenderer": 165,
-    "routes": 285,
+    "ipcChannels": 169,
+    "ipcMissingPreload": 3,
+    "ipcUnusedInRenderer": 166,
+    "routes": 283,
     "routeModules": 47,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
     "findingsBySeverity": {
       "P1": 0,
       "P2": 0,
-      "P3": 2
+      "P3": 3
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 84,
     "defsFallbacks": 0
   },
   "findings": [
+    {
+      "sev": "P3",
+      "kind": "ipc_dead_channels",
+      "subject": "1 个通道",
+      "detail": "登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：gen-ui:prepare-mcp-app"
+    },
     {
       "sev": "P3",
       "kind": "storage_read_never_written",
@@ -3264,6 +3270,11 @@
       "usedInRenderer": false
     },
     {
+      "channel": "gen-ui:prepare-mcp-app",
+      "inPreload": false,
+      "usedInRenderer": false
+    },
+    {
       "channel": "gen-ui:set-state",
       "inPreload": true,
       "usedInRenderer": false
@@ -4088,6 +4099,11 @@
     {
       "channel": "gen-ui:prepare",
       "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:prepare-mcp-app",
+      "inPreload": false,
       "usedInRenderer": false
     },
     {
@@ -5654,18 +5670,6 @@
     },
     {
       "module": "tools-platform",
-      "method": "GET",
-      "route": "/api/tools/public-demo/:toolId",
-      "mounted": false
-    },
-    {
-      "module": "tools-platform",
-      "method": "GET",
-      "route": "/api/tools/public-file/:jobId/:filename",
-      "mounted": false
-    },
-    {
-      "module": "tools-platform",
       "method": "PUT",
       "route": "/api/tools/file/:jobId/:filename",
       "mounted": false
@@ -5854,6 +5858,91 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/mcp/client-manager.js",
+    "M core/petri-server/routes/mcp-client.js",
+    "M frontend/src/App.tsx",
+    "M frontend/src/components/RouteErrorBoundary.module.css",
+    "M frontend/src/components/branch/BranchTabs.module.css",
+    "M frontend/src/components/common/ToastProvider.module.css",
+    "M frontend/src/components/copilot/ChatScrollbar.module.css",
+    "M frontend/src/components/copilot/LlmTranscriptViewer.css",
+    "M frontend/src/components/copilot/MessageRail.module.css",
+    "M frontend/src/components/copilot/ResultCard.module.css",
+    "M frontend/src/components/copilot/ToolActivityDock.module.css",
+    "M frontend/src/components/copilot/gen-ui/GenUiCard.module.css",
+    "M frontend/src/components/copilot/integration/integration.module.css",
+    "M frontend/src/components/copilot/renderers/ChartRenderer.module.css",
+    "M frontend/src/components/copilot/renderers/ImageRenderer.module.css",
+    "M frontend/src/components/copilot/renderers/TableRenderer.module.css",
+    "M frontend/src/components/copilot/simple-chat.css",
+    "M frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.module.css",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/sections/MotionControl.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+    "M frontend/src/components/desktop/FirstRunRoleReveal.module.css",
+    "M frontend/src/components/desktop/FolderPicker.module.css",
+    "M frontend/src/components/desktop/TestInstanceBadge.module.css",
+    "M frontend/src/components/desktop/TitleBar.module.css",
+    "M frontend/src/components/desktop/TitleBar.test.tsx",
+    "M frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css",
+    "M frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
+    "M frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css",
+    "M frontend/src/components/desktop/desktop.css",
+    "M frontend/src/components/desktop/theme-control.css",
+    "M frontend/src/components/desktop/titlebar/shared.tsx",
+    "M frontend/src/components/knowledge/KnowledgeConsoleChat.module.css",
+    "M frontend/src/components/knowledge/KnowledgeConsoleDock.module.css",
+    "M frontend/src/components/result-studio/CompactResultNavigator.module.css",
+    "M frontend/src/components/result-studio/ContinueAnalysisMenu.module.css",
+    "M frontend/src/components/result-studio/LineageGraph.module.css",
+    "M frontend/src/components/result-studio/LineageStrip.module.css",
+    "M frontend/src/components/result-studio/LineageViewSwitch.module.css",
+    "M frontend/src/components/result-studio/ResultAgentComposer.module.css",
+    "M frontend/src/components/result-studio/ResultEditPanel.module.css",
+    "M frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css",
+    "M frontend/src/components/result-studio/ResultStudioSurface.module.css",
+    "M frontend/src/components/result-studio/RevisionCodeView.module.css",
+    "M frontend/src/components/result-studio/ScientificInteractionViewer.module.css",
+    "M frontend/src/components/settings/ExperimentalFeaturesSection.module.css",
+    "M frontend/src/components/ui/Lightbox.css",
+    "M frontend/src/components/viewers/MarkdownViewer.module.css",
+    "M frontend/src/components/viewers/SpreadsheetViewer.module.css",
+    "M frontend/src/components/window/rail-page.module.css",
+    "M frontend/src/components/window/window-shell.module.css",
+    "M frontend/src/components/workspace-panels/ArtifactPinPane.module.css",
+    "M frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css",
+    "M frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.module.css",
+    "M frontend/src/components/workspace-panels/SshStatusDot.module.css",
+    "M frontend/src/components/workspace-panels/WorkspaceCitationsSection.module.css",
+    "M frontend/src/components/workspace-panels/WorkspaceFileIcon.module.css",
+    "M frontend/src/hooks/useWorkspaceLayout.ts",
+    "M frontend/src/hooks/useWorkspacePanels.ts",
+    "M frontend/src/lib/settingsSearch.ts",
+    "M frontend/src/pages/extensions/extensions.module.css",
+    "M frontend/src/pages/extensions/styles.module.css",
+    "M frontend/src/pages/global-page.module.css",
+    "M frontend/src/pages/home.module.css",
+    "M frontend/src/pages/project-workspace.module.css",
+    "M frontend/src/pages/settings/settings.module.css",
+    "M frontend/src/pages/welcome.module.css",
+    "M frontend/src/pages/window/command-center.module.css",
+    "M frontend/src/styles/custom.css",
+    "M frontend/src/styles/global.css",
+    "M frontend/src/styles/theme-token-contract.test.ts",
+    "?? frontend/src/components/desktop/DesktopSettingsPanel/SettingsField.tsx",
+    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx",
+    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopSection.tsx",
+    "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkSection.tsx",
+    "?? frontend/src/components/desktop/settings-redesign.module.css",
+    "?? frontend/src/lib/uiBreakpoints.ts",
+    "M src/ipc/channels.js",
+    "M src/ipc/gen-ui.js",
+    "M src/preload.js"
+  ],
   "defNotes": []
 }
