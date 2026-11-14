@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "s3-task-record",
+  "taskId": "T4",
+  "requirement": "R4, R5, R6",
+  "capturedAt": "2026-11-14T21:06:00+08:00",
+  "changedPaths": [
+    "docs/block-449-m7-tails-clean-closeout-plan.md",
+    "docs/DOC-REGISTRY.json",
+    "docs/AUDIT-LOG.md",
+    "docs/next-steps-roadmap.md",
+    "docs/project-workspace-handoff.md",
+    "docs/m-blueprint-2026-11-11-program.md",
+    "docs/README.md",
+    "acceptance/block-449/s4-verification-report.json",
+    "acceptance/block-449/s5-decision-log.json",
+    "acceptance/block-449/CLOSEOUT.md",
+    "acceptance/block-449/DELIVERABLES.md",
+    "acceptance/block-449/evidence/verify-deliverables.mjs"
+  ],
+  "planConformance": "改动路径 = s2-plan T4 outputs（六件套 + 交付包 + 决策留痕）；M7 原档与受保护原件零触碰；无越界文件",
+  "redGreen": { "applicable": false, "note": "治理/文档面；负测=docs:check + docs:reconcile + verify-deliverables 自核" },
+  "gates": [
+    { "gate": "docs:check", "result": "PASS（587 注册，当次）" },
+    { "gate": "docs:reconcile", "result": "0 validation issues / 0 manual review（当次）" },
+    { "gate": "ui:audit:check", "result": "PASS（633 编号，当次）" },
+    { "gate": "verify-deliverables 自核", "result": "当次输出在 evidence/（0 missing 预期）" },
+    { "gate": "decision:session", "result": "jev×0 本轮增量 · 累计 344（当次取数，未复用上一轮）" }
+  ],
+  "failureSemantics": "无红",
+  "decisions": [
+    {
+      "time": "2026-11-14T21:00",
+      "trigger": "收口单一建议（Jev 不可用）",
+      "candidates": ["候选首项兜底", "不给建议（违反交付契约）"],
+      "selected": "候选首项兜底（治理 skill 规则）",
+      "reason": "jev_unavailable:http_error:cloud → 按队列序默认，仍然只给一个；建议=advice",
+      "impact": "交付说明",
+      "reversibility": "advice-only",
+      "evidence": "next:suggest 输出（jev_unavailable:http_error:cloud）"
+    }
+  ],
+  "canonicalWriteback": "本任务即回写批（六件套与代码提交同批收口；提交=收口提交）",
+  "closeoutSummary": "T4 完成：六件套回写 + 交付包齐备 + 决策留痕（jev×0 如实）+ docs:check/reconcile 双绿"
+}

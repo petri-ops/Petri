@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "s5-decision-log",
+  "task": "BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口",
+  "span": "2026-11-14T10:02 → 2026-11-14T21:05 (+08:00)",
+  "jevSessionCounts": { "delta": 0, "cumulative": 344, "anchor": "自 2026-10-17T08:16:39.576Z", "note": "Jev 云端全程不可达（jev_unavailable:http_error:cloud），零调用如实登记；确定性规则优先" },
+  "decisions": [
+    { "time": "2026-11-14T10:50", "phase": "S0/S1 选型", "trigger": "主控提示词 v1.0 无显式需求文本 + 串行槽位空闲", "candidates": ["POST-H9 K0", "竞争力纲 CP 剩余", "母纲剩余 🟡", "BLOCK-448 P6 补腿", "M7 §8 第 3/5 条补腿"], "selected": "M7 §8 第 3/5 条补腿", "reason": "队列对账：K0-K7 已由 BLOCK-396~403 收口（registry notes）；竞争力纲剩余与母纲剩余均 U 类待裁决；P6 补腿 external 404（当次 probe）；M7 尾巴是唯一非 U 非 external 可执行未达项且 closureCondition 前置已满足", "impact": "本包范围", "reversibility": "canonical 计划与登记可 revert", "evidence": "s0-fact-baseline.json selectionEvidence" },
+    { "time": "2026-11-14T11:00", "phase": "S0", "trigger": "主控交付包 acceptance/<任务ID> 与蓝图/M 程序证据目录契约并存", "candidates": ["全部塞 post-h9 目录", "全部塞 block-449 目录 + 指针", "双写"], "selected": "block-449 主包 + M 程序侧新文件（m7 原档零触碰）", "reason": "单源：新证据走新文件，M7 fiveItems 历史档不改写", "impact": "目录布局", "reversibility": "可移动", "evidence": "s0/交付包结构" },
+    { "time": "2026-11-14T11:05", "phase": "T1", "trigger": "block414 复跑红（无栈）", "candidates": ["改测试加跳过标注", "起无窗栈补足条件复跑"], "selected": "起栈复跑", "reason": "测试语义要求真实 petri-server :3001；起栈最小且栈为 T2 复用", "impact": "两个后台进程（已 kill）", "reversibility": "kill 即回退", "evidence": "s3/task-T1.json decisions" },
+    { "time": "2026-11-14T12:30", "phase": "T2", "trigger": "run1 同库二次 spawn duplicate column", "candidates": ["flow 自建第二套 boot", "harness 增库存在跳过 bootstrap"], "selected": "harness 单源最小修", "reason": "隔离后端唯一单源；首 spawn 行为零变化", "impact": "evals-harness.mjs +1 条件 + 契约测试", "reversibility": "revert 单文件", "evidence": "2a40bf7f" },
+    { "time": "2026-11-14T12:50", "phase": "T2", "trigger": "run3 409 not_paused → resume 路由冲突 P1", "candidates": ["改 team.js 路径", "改 resume.js 路径", "next() 让位", "登记 U 类不动"], "selected": "next() 让位", "reason": "任务态互斥（paused=running / interrupted=failed），零前端改动，复活被遮蔽语义；回归锚先行红后绿", "impact": "team.js 单 handler + 新回归测试；防御性 409 错误体形状变化（HTTP 码不变）", "reversibility": "revert 即回旧语义", "evidence": "14353c78 + run6 实机绿" },
+    { "time": "2026-11-14T20:10", "phase": "T2", "trigger": "run4/5 消息对齐三红", "candidates": ["改端点投影", "修断言前提"], "selected": "修断言前提", "reason": "端点剥 _offset1 是 BLOCK-95 既有公共契约；指令取证面=llm-transcripts 是 resume.js 注释语义——测试追上真实契约", "impact": "flow 断言面", "reversibility": "revert flow", "evidence": "run5/run6" },
+    { "time": "2026-11-14T20:30", "phase": "T3", "trigger": "knip CK-11 棘轮红（新 flow 判死代码）", "candidates": ["--update 洗基线", "entry 注册", "删 flow"], "selected": "entry 注册", "reason": "run.cjs 动态 require 属真实动态入口；ui-d2/ui-d4 先例；--update 洗白违反零放宽", "impact": "knip.json 4 行", "reversibility": "revert", "evidence": "29cbf478" },
+    { "time": "2026-11-14T20:40", "phase": "T3", "trigger": "perf 基线绑定失效（evals-harness 在 HOT_PATH_FILES）", "candidates": ["ALLOW_SKIP 放行", "重采重绑", "回滚 D1"], "selected": "重采重绑（B2 先例）", "reason": "门禁自身指引；阈值/容差零改动；采样当次", "impact": "perf-baseline.json 采样+coreSha", "reversibility": "revert", "evidence": "block350 15/15 + 5 连 PASS" },
+    { "time": "2026-11-14T21:00", "phase": "T4", "trigger": "收口单一建议（Jev 不可用）", "candidates": ["候选首项 P6-pressure 补腿", "其余候选"], "selected": "候选首项（治理 skill 兜底规则）", "reason": "jev_unavailable:http_error:cloud → 按队列序默认，仍然只给一个", "impact": "交付说明", "reversibility": "advice-only", "evidence": "next:suggest 输出" }
+  ],
+  "degradations": [
+    { "item": "P6 pressure 补腿", "terminal": "external-blocked", "closureCondition": "r-enrichment bundle 分发恢复后重跑 g0:result-studio:p6:update → closeout:full", "evidence": "s0 probeTimeline（2026-11-14T10:47:48Z 404）" },
+    { "item": "UI 会话自动打开逐字断言", "terminal": "scope-limited（如实登记非产品缺陷）", "closureCondition": "如需 UI 渲染逐字证据，后续包可扩展 flow 以 UI 显式打开会话（产品行为面另行裁决）", "evidence": "t2-live-resume.json honestBoundaries" }
+  ],
+  "closed": true
+}

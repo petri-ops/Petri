@@ -11941,12 +11941,12 @@
       "id": "BLOCK-449",
       "path": "docs/block-449-m7-tails-clean-closeout-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-449-m7-tails-clean-closeout",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
         "test/m7-longtask-resume-live-flow.test.mjs",
@@ -11960,7 +11960,7 @@
         "closeout",
         "dev-verify"
       ],
-      "notes": "M7 §8 第 3/5 条补腿收口包（M 程序唯一非 U 类非外部阻塞的可执行未达项）：T1 干净树 test:changed 三历史红重归因 → T2 新建 9223 离屏 dev-verify flow（崩溃注入→重启→resume 逐字对齐，禁 PETRI_TEST_ONSCREEN）→ T3 closeout:full 三连逐门读数 → T4 canonical 回写。发令链=用户主控提示词 v1.0 预授权连续工作 + Jev 不可用确定性兜底（选型证据 acceptance/block-449/s0-fact-baseline.json）。P6 pressure 腿 external 404 维持原册不承接；M2-4-db 约束另案。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "M7 §8 第 3/5 条补腿收口包 completed（终态 done）：T1 三历史红清账（UI-629/P6/center 净树绿 + block414 活栈绿）→ T2 m7-longtask-resume-live flow 实机腿 31/31（崩溃注入→同库重启→resume 逐字对齐+截图），抓真修 2 缺陷=evals-harness 同库二次 spawn 重放迁移（2a40bf7f）+ resume 路由冲突 P1（team.js not_paused 遮蔽 BLOCK-38 中断续跑→next() 让位 14353c78，回归锚 4/4）→ T3 closeout:full 三连全绿 0 门禁级 SKIP（knip 动态入口 29cbf478 + perf B2 重绑）→ T4 回写。发令链=主控提示词 v1.0 预授权 + Jev 不可用确定性兜底。P6 pressure 腿 external 404 维持原册。证据=acceptance/block-449/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-14"

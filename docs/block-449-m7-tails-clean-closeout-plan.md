@@ -1,4 +1,4 @@
-# BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口（plan）
+# BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口（plan · completed）
 
 > 发令链：用户主控提示词 v1.0（一次性完整发令与预授权裁决，全程自主推进）+ AGENTS.md「预授权连续工作除外」+ Jev 不可用（`jev_unavailable:http_error:cloud`，2026-11-14 当次）确定性兜底。
 > 队列对账：POST-H9 K0–K7 已由 BLOCK-396～403 收口（registry notes 明载）；竞争力纲剩余 CP 项与母纲剩余 🟡 均 U 类待裁决；BLOCK-448 P6 补腿 external-blocked（`r-enrichment` bundle HTTP 404，2026-11-14T10:47:48Z probe 复证）。
@@ -50,3 +50,12 @@
 ## 7. 节奏
 
 一次会话收口（T1→T2→T3→T4 串行）；每任务收口过 S3.1–S3.7 自检。
+
+## 8. 收口（2026-11-14）
+
+- T1：test:changed 43/43 当次绿 + 三历史红重归因清账（UI-629 17/17 / P6 13/13 / block414 4/4 活栈条件绿）——0 未解释红。
+- T2：`m7-longtask-resume-live` flow 实机腿 **31/31**（崩溃注入→同库重启→resume 逐字对齐 + 截图在册）；抓真并修复两缺陷：①evals-harness 同库二次 spawn 重放非幂等迁移（2a40bf7f）②**resume 路由冲突 P1**（team.js not_paused 全量遮蔽 BLOCK-38 中断续跑 → next() 让位，14353c78，回归锚 4/4）。
+- T3：`closeout:full` 三连全绿（run1/run2/run3，零代码改动间隔，门禁级 SKIP=0）；过程红闭环=knip 动态入口注册（29cbf478）+ perf 基线 B2 重绑（阈值/容差零改动）。
+- T4：六件套回写 + 主控交付包（本节）；决策留痕见 acceptance/block-449/s5-decision-log.json。
+- 终态：registry `completed`；M7-3/M7-5 上限当次达成（M 台账增量行指向新证据，M7 原档零触碰）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

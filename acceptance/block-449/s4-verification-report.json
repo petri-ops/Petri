@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "kind": "s4-verification-report",
+  "task": "BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口",
+  "capturedAt": "2026-11-14T21:05:00+08:00",
+  "requirementTerminals": [
+    { "id": "R1", "terminal": "done", "evidence": "acceptance/block-449/evidence/t1-red-clearing.json + t1-test-changed.log（43/43；三历史红全归因收敛）" },
+    { "id": "R2", "terminal": "done", "evidence": "acceptance/block-449/evidence/t2-live-resume.json（run6 31/31 allPass）+ dev-verify/m7-longtask-resume-live-darwin.json + 截图 PNG 142505B；flow 契约 4/4；两缺陷修复红绿锚（harness 15/15、路由回归 4/4）" },
+    { "id": "R3", "terminal": "done", "evidence": "acceptance/block-449/evidence/t3-closeout-readings.json（run1/2/3 三连 PASS 全绿、0 门禁级 SKIP、test:changed 70 面 0 fail）" },
+    { "id": "R4", "terminal": "done", "evidence": "docs:check PASS 587 + docs:reconcile 0 validation issues / 0 manual review（当次）；registry BLOCK-449 completed + roadmap/handoff/M 台账增量行 + AUDIT-LOG 三处 + README 445 翻态" },
+    { "id": "R5", "terminal": "done", "evidence": "acceptance/block-449/ 全套（s0-s5/CLOSEOUT/DELIVERABLES/evidence）+ evidence/verify-deliverables.mjs 自核 0 missing（当次输出）" },
+    { "id": "R6", "terminal": "done", "evidence": "decision:session 当次=jev×0 本轮增量 · 累计 344（Jev 云端全程不可达，jev_unavailable:http_error:cloud，零调用如实登记）；next:suggest 同因确定性兜底（候选首个），无复用上一轮数字" }
+  ],
+  "inProgressCount": 0,
+  "fabricatedCounts": 0,
+  "integrity": {
+    "check": "需求矩阵 R1–R6 逐条终态；矩阵条数由脚本复算 6/6；产物清单逐项路径+复跑命令",
+    "result": "PASS"
+  },
+  "consistency": {
+    "check": "四处对账：canonical（registry/roadmap/handoff/M 台账）↔ 台账（AUDIT-LOG）↔ 证据 JSON（s0-s4/t1-t3）↔ 源码（6 个改动文件已提交）；M7 原档零触碰（fiveItems 历史判断不改写，M 台账增量行指向新证据）；计数由脚本当次复算（决策器双数字/三连门数/断言数）",
+    "result": "PASS",
+    "notes": "registry BLOCK-449 status=completed 与 plan §8、AUDIT-LOG ✅ 行、README 445 一致"
+  },
+  "deliverability": {
+    "check": "closeout:full 三连 PASS 在册（run1/2/3 日志可复算）；交付物路径可达；边界声明在册（mock provider 诚实边界 / UI scope 限制 / external 项原册）",
+    "result": "PASS"
+  },
+  "unmetItems": [
+    {
+      "id": "P6-pressure-补腿",
+      "terminal": "external-blocked",
+      "closureCondition": "r-enrichment capability bundle 分发恢复（probe 2026-11-14T10:47:48Z 仍 404）→ 重跑 npm run g0:result-studio:p6:update → closeout:full（同时闭合 BLOCK-448 证据重采）",
+      "evidence": "acceptance/block-449/s0-fact-baseline.json probeTimeline + acceptance/block-448/p6-pressure-blocked.json（原册）"
+    }
+  ],
+  "evidenceClassDiscipline": {
+    "①行为契约": "三份红绿测试（路由回归 4/4 / flow 契约 4/4 / harness 15/15）+ block350 15/15",
+    "②机械门禁": "closeout:full ×3 全绿（20 门 + skills:check）+ docs:check/ui:audit/docs:reconcile",
+    "③DOM/CDP 实机": "m7-longtask-resume-live 31/31（9223 离屏 + 真 agent loop + 真 resume 路由）+ 截图",
+    "④人眼观感": "无（本包无人眼签字项；UI scope 限制如实登记不冒充）",
+    "⑤真实任务成功": "无（mock provider 边界如实；真实模型任务成功属另一证据类，本包不冒充）",
+    "mutualImpersonation": "无"
+  },
+  "unexplainedReds": 0,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

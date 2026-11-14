@@ -42,6 +42,7 @@ reopen: 用户裁决或阶段终态变化后先复核本台账与 registry 再�
 | MCP App 自动渲染 + 双向 RPC | BLOCK-447 | P1 | completed（工具结果 _meta.ui 透传 + 自动挂卡片 + session 绑定工具调用；ext-apps 协议 shim 列为后续） |
 | 真实栈修复（补建册） | BLOCK-436 | P0 | completed（F1 读路径幂等建表 / F2 DDL 假 error 归类；HK-01 13/13） |
 | 端到端核对补漏 | BLOCK-439 | P1 | completed（BLOCK-436 建册 + 4 次后续提交台账补登记 + B2–B6 机械遗漏 + block93 凭据污染根因根治） |
+| M7 §8 第 3/5 条补腿（9223 实机腿 + 干净树三连） | BLOCK-449 | P0 补腿 | completed（M7-3 实机腿 31/31 + M7-5 closeout:full 三连全绿 0 门禁级 SKIP；抓真修 resume 路由冲突 P1 与 harness 重启 bootstrap；证据 acceptance/block-449/，M7 原档零触碰） |
 
 同一时间只有一个 active work-package 与一个进行中阶段；阶段收口后才发令下一阶段。
 常驻 living-plan `G0-LF` 属层 2，不占串行槽位；本台账同为层 2。
