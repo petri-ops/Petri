@@ -1,0 +1,164 @@
+{
+  "name": "m7-longtask-resume-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-14T12:19:27.462Z",
+  "finishedAt": "2026-11-14T12:19:37.904Z",
+  "assertions": [
+    {
+      "name": "mock_provider_up",
+      "pass": true,
+      "detail": "mock provider :52661（本地 SSE，零外网）"
+    },
+    {
+      "name": "isolated_backend_health",
+      "pass": true,
+      "detail": "隔离后端 :52662（临时 DB + migrations 自举 + PETRI_CREDENTIAL_BACKEND=file）"
+    },
+    {
+      "name": "no_onscreen_env",
+      "pass": true,
+      "detail": "PETRI_TEST_ONSCREEN 必须不设（无窗实机纪律）"
+    },
+    {
+      "name": "test_instance_cdp_9223",
+      "pass": true,
+      "detail": "9223 离屏实例 ?test=1 页面目标在场（附着隔离后端）"
+    },
+    {
+      "name": "test_instance_spa_mounted",
+      "pass": true,
+      "detail": "#root children=2"
+    },
+    {
+      "name": "test_instance_marks_test_page",
+      "pass": true,
+      "detail": "http://localhost:3000/?test=1"
+    },
+    {
+      "name": "project_created",
+      "pass": true,
+      "detail": "projectId=p_mwgdhsu4_uxpn"
+    },
+    {
+      "name": "workspace_resolved",
+      "pass": true,
+      "detail": "/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/m7-longtask-resume-live-nFE1rQ/projects/m7-live-resume-mwgdhsu4"
+    },
+    {
+      "name": "conversation_created",
+      "pass": true,
+      "detail": "conversationId=conv_65404ccf-d9f"
+    },
+    {
+      "name": "live_task_started",
+      "pass": true,
+      "detail": "taskId=946f4845-aa7e-4af4-9048-8407dbda8fe4"
+    },
+    {
+      "name": "crash_sse_terminated_expected",
+      "pass": true,
+      "detail": "SSE 终止（terminated）——后端被 SIGKILL 属预期路径"
+    },
+    {
+      "name": "live_tool_call_recorded",
+      "pass": true,
+      "detail": "pre-crash 事件=14，workspace_read tool_call 在场"
+    },
+    {
+      "name": "crash_injected_sigkill",
+      "pass": true,
+      "detail": "SIGKILL 已注入；后端监听 pid=null（null=进程已死）"
+    },
+    {
+      "name": "mock_provider_restarted",
+      "pass": true,
+      "detail": "mock provider 重启 :52690（崩溃窗回合随旧 provider 丢弃）"
+    },
+    {
+      "name": "backend_restarted_same_datadir",
+      "pass": true,
+      "detail": "重启后端 :52691（同一 tmpDir/petri.db）"
+    },
+    {
+      "name": "pre_resume_messages_snapshot",
+      "pass": true,
+      "detail": "预续跑消息=1 行（windowOffset=0，全窗）"
+    },
+    {
+      "name": "original_task_meta_readable",
+      "pass": true,
+      "detail": "原任务 meta status=200 agentStatus=failed"
+    },
+    {
+      "name": "resume_preview_200",
+      "pass": true,
+      "detail": "preview status=200"
+    },
+    {
+      "name": "resume_digest_contains_tool_verbatim",
+      "pass": true,
+      "detail": "进度摘要逐字含工具名 workspace_read（buildProgressDigest）"
+    },
+    {
+      "name": "resume_started_new_task",
+      "pass": true,
+      "detail": "resume status=200 error=(none) prePostAgentStatus=failed previewResumable=true"
+    },
+    {
+      "name": "task_resumed_linkage",
+      "pass": true,
+      "detail": "task_resumed.newTaskId=6f5eccda-46c3-4e3c-bb6b-eaf81fcfa86d vs 续跑任务=6f5eccda-46c3-4e3c-bb6b-eaf81fcfa86d"
+    },
+    {
+      "name": "resumed_run_completed",
+      "pass": true,
+      "detail": "续跑事件=12，done=true"
+    },
+    {
+      "name": "no_duplicate_tool_call_after_resume",
+      "pass": true,
+      "detail": "续跑任务 tool_call=0（已完成步骤不重复执行；mock 续跑回合无工具回合）"
+    },
+    {
+      "name": "resumed_final_answer_verbatim",
+      "pass": true,
+      "detail": "finalText=续跑收口：resume-note.txt 内容已确认，任务完成。"
+    },
+    {
+      "name": "messages_window_full",
+      "pass": true,
+      "detail": "post=2 行 ≥ pre=1 行（windowOffset=0，hasMore=false）"
+    },
+    {
+      "name": "messages_prefix_verbatim_aligned",
+      "pass": true,
+      "detail": "前缀逐字对齐 1/2 行（role/content 除 in-place 续写 0 行外逐字相等；新增行=续跑记录）"
+    },
+    {
+      "name": "resume_instruction_not_in_conversation_messages",
+      "pass": true,
+      "detail": "恢复指令不入会话消息（新增 user 行=0；取证面=llm-transcripts，resume.js 注释语义）"
+    },
+    {
+      "name": "ui_leg_spa_mounted",
+      "pass": true,
+      "detail": "?project=p_mwgdhsu4_uxpn 页 #root children=4"
+    },
+    {
+      "name": "ui_leg_scope_honest",
+      "pass": true,
+      "detail": "会话未由 UI 自动打开——UI 逐字断言不执行（scope 限制，如实登记）"
+    },
+    {
+      "name": "screenshot_policy_honest",
+      "pass": true,
+      "detail": "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live.png"
+    },
+    {
+      "name": "test_instance_killed_after_run",
+      "pass": true,
+      "detail": "9223 实例已终止（残留 pid=null）"
+    }
+  ],
+  "allPass": true
+}

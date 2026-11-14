@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "t1-red-clearing",
+  "task": "T1 红清账（R1）",
+  "capturedAt": "2026-11-14T11:20:00+08:00",
+  "head": "a123dc4e（启动批次）+ f0c30598（基线）",
+  "currentTestChanged": {
+    "result": "PASS",
+    "reading": "43 tests / 43 pass / 0 fail / 0 cancelled / 0 skipped",
+    "surface": "untracked 面映射 9 测试文件（block322-p3/block322-p4/block375-schema-parity/block93-role-prompt/evals-harness/knip-ratchet/next04a-scene3d/next05-scene-store/platform-branch-freeze）",
+    "unknown": 0,
+    "log": "acceptance/block-449/evidence/t1-test-changed.log",
+    "command": "npm run test:changed"
+  },
+  "historicalReds": [
+    {
+      "id": "UI-629",
+      "oldAttribution": "W 类他方 WIP（BLOCK-446 时代 89M 在制面）",
+      "test": "frontend/src/hooks/useResponsivePanelCollapse.test.tsx",
+      "now": "17/17 PASS（owner 批次 BLOCK-415~423 已于 2026-11-11 入库，干净树上绿）",
+      "command": "cd frontend && npx vitest run src/hooks/useResponsivePanelCollapse.test.tsx",
+      "evidenceClass": "①行为测试"
+    },
+    {
+      "id": "P6-fingerprint",
+      "oldAttribution": "W 类他方 WIP（指纹含 package.json + result-studio CSS）",
+      "test": "test/g0-rs-p6-product-acceptance.test.mjs",
+      "now": "13/13 PASS（净树）",
+      "command": "node --test test/g0-rs-p6-product-acceptance.test.mjs",
+      "evidenceClass": "①行为测试"
+    },
+    {
+      "id": "block414-port-reuse",
+      "oldAttribution": "环境条件红（需 dev 栈 :3001；HEAD 复现证明先于本包）",
+      "test": "test/block414-backend-port-reuse.test.mjs",
+      "now": "4/4 PASS（无窗 dev 栈在位：:3001 health ok db_ok=true + :3000 vite 200；无栈时按设计 fallback 58741 判红）",
+      "command": "node --test test/block414-backend-port-reuse.test.mjs",
+      "stackEvidence": "curl http://127.0.0.1:3001/api/health → 200 {status:ok, db_ok:true}（11:08:19Z）；vite :3000 → 200",
+      "evidenceClass": "①行为测试（环境条件满足态）"
+    },
+    {
+      "id": "center-layout-anchor（加测）",
+      "oldAttribution": "（中心布局锚随 BLOCK-421 契约演进）",
+      "test": "test/block321c-center-priority.test.mjs",
+      "now": "3/3 PASS（净树）",
+      "command": "node --test test/block321c-center-priority.test.mjs",
+      "evidenceClass": "①行为测试"
+    }
+  ],
+  "conclusion": "test:changed 当次 0 未解释 fail；三历史红全部重归因收敛（两绿于净树、一绿于活栈条件满足态）；零新缺陷、零修复提交需求",
+  "stackProcs": {
+    "backend3001": "nohup node core/petri-server/server.js（PETRI_DB_PATH/PETRI_LOCAL_DATA_DIR=.petri-dev-user-data/data，R_SERVER_PORT=3001）",
+    "vite3000": "cd frontend && nohup npm run dev",
+    "killPlan": "T2 实机腿完成后立即 kill（跑完立即 kill 纪律）"
+  }
+}

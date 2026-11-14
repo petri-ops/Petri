@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "kind": "t2-live-resume-evidence",
+  "task": "T2 9223 实机腿（R2）——M7-3 closureCondition",
+  "finalVerdict": "PASS（31/31 assertions，run6）",
+  "capturedAt": "2026-11-14T20:19:00+08:00",
+  "flow": {
+    "id": "m7-longtask-resume-live",
+    "file": ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    "invocation": "npm run verify -- m7-longtask-resume-live",
+    "contractTest": "test/m7-longtask-resume-live-flow.test.mjs 4/4（含防假绿负测 + PETRI_TEST_ONSCREEN 禁设负测）",
+    "evidenceDir": "acceptance/block-449/evidence/dev-verify/"
+  },
+  "finalRun": {
+    "run": 6,
+    "log": "acceptance/block-449/evidence/t2-flow-run6.log",
+    "assertions": "31/31 allPass=true",
+    "chain": [
+      "mock provider :本地 SSE（零外网）→ 隔离后端（临时 DB + migrations + 凭据 file 隔离）",
+      "9223 离屏测试实例 ?test=1 附着隔离后端（PETRI_TEST_ONSCREEN 未设；跑完立即 kill 残留 pid=null）",
+      "真 agent loop 任务启动（workspace_read 真实执行，pre-crash 事件 14 条）",
+      "SIGKILL 崩溃注入（第二回合 LLM 挂起窗内；监听 pid=null 确认死亡）",
+      "同 tmpDir/petri.db 重启后端 + mock provider 重启（崩溃窗回合随旧 provider 丢弃）",
+      "resume 预览 200 + 进度摘要逐字含 workspace_read（buildProgressDigest）",
+      "POST resume 200 → 新任务 + task_resumed.newTaskId 链接一致",
+      "续跑任务 done=true、tool_call=0（已完成步骤不重复执行）、finalText 逐字=「续跑收口：resume-note.txt 内容已确认，任务完成。」",
+      "消息前缀逐字对齐 1/2 行（role/content 逐字相等；新增行=续跑记录；恢复指令不入会话消息，取证面=llm-transcripts）",
+      "9223 UI 在场（?project 挂载）+ 截图 142505B 落盘"
+    ],
+    "screenshot": "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live.png",
+    "devVerifyJson": "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live-darwin.json"
+  },
+  "runHistory": [
+    { "run": 1, "log": "t2-flow-run1.log", "assertions": "15/16", "outcome": "红：同库二次 spawn 重放 migrations → duplicate column name（harness 缺陷）" },
+    { "run": 2, "log": "t2-flow-run2.log", "assertions": "20/21", "outcome": "红：POST resume 409（诊断不足，prePost 状态与 409 body 未取）" },
+    { "run": 3, "log": "t2-flow-run3.log", "assertions": "20/21", "outcome": "红：409 error=not_paused 取证 → 路由冲突根因定位" },
+    { "run": 4, "log": "t2-flow-run4.log", "assertions": "28/31", "outcome": "路由修复后全链绿至消息对齐；三条消息断言与端点投影/取证面事实不符（测试侧前提错）" },
+    { "run": 5, "log": "t2-flow-run5.log", "assertions": "30/31", "outcome": "对齐断言按信封事实重写后仅剩恢复指令取证面前提错" },
+    { "run": 6, "log": "t2-flow-run6.log", "assertions": "31/31", "outcome": "PASS（终态证据）" }
+  ],
+  "defectsFoundAndFixed": [
+    {
+      "id": "D1-harness-restart-bootstrap",
+      "severity": "test-infra",
+      "symptom": "run1：spawnIsolatedBackend 同 tmpDir 二次 spawn 抛 duplicate column name: description（非幂等 ALTER ADD COLUMN 对已迁移库重放）",
+      "rootCause": "scripts/lib/evals-harness.mjs bootstrapDb 每次无条件重放全部 migrations SQL",
+      "fix": "库已存在则跳过 bootstrap（首 spawn 行为逐字节不变）；契约测试 test/evals-harness.test.mjs「同库二次 spawn」15/15（红=run1 异常）",
+      "changedPaths": ["scripts/lib/evals-harness.mjs", "test/evals-harness.test.mjs"]
+    },
+    {
+      "id": "D2-resume-route-collision",
+      "severity": "P1（产品缺陷：BLOCK-38 P1 中断续跑在生产面被全量遮蔽）",
+      "symptom": "run2/3：POST /api/ai/agent/task/:id/resume 对 interrupted 任务恒 409 error=not_paused",
+      "rootCause": "team.js（BLOCK-249 Q4a 暂停/恢复控制面，index.js line 45 先注册）与 resume.js（BLOCK-38 P1 中断续跑，line 58 后注册）对 POST /api/ai/agent/task/:taskId/resume 同路径注册；Express 先注册先赢 → 非暂停任务被 team.js not_paused 409 拦截，中断续跑语义全量不可达（机械门未覆盖路由次序面）",
+      "fix": "team.js resume 处理器非 paused 态 next() 让位（paused 是该语义独占态；任务态互斥：paused=running+paused / interrupted=failed+interrupted_at）——resume.js 按态分流，零前端改动；回归锚 test/agent-task-resume-route-disambiguation.test.mjs 4/4（契约 A paused 语义零变化 / B interrupted 续跑复活 + task_resumed 链接 + loop 装配指令断言 / C 非中断 failed 409 / D running 409；红证据=B/C/D 三红 not_paused）",
+      "changedPaths": ["core/petri-server/routes/ai-agent/team.js", "test/agent-task-resume-route-disambiguation.test.mjs"],
+      "responseShapeNote": "running 非 paused 任务的 409 错误体从 {ok:false,error:'not_paused'} 变为 resume.js 的 {status:'error',error:'任务仍在运行，无需续跑'}（HTTP 码不变、防御性分支、前端非 ok 通吃）"
+    }
+  ],
+  "evidenceClass": "③DOM/CDP 实机（9223 离屏 Electron + 真 agent loop + 真 resume 路由）+ ①回归契约测试",
+  "honestBoundaries": [
+    "provider=mock（本地 SSE 脚本）：测的是崩溃→重启→resume 机制链与路由语义，不是模型质量（与 evals harness 诚实边界同款）",
+    "UI 逐字断言 scope 限制：会话未由 UI 自动打开，渲染面在场（SPA 挂载 + ?project 页）+ 截图在册；逐字对齐由持久化事实（task_events/消息行/task_resumed 事件）承载，①③不互冒充",
+    "M2-4-db UNIQUE 约束不在本腿范围（perf 基线重采另案）"
+  ],
+  "stackKillDiscipline": "flow 自清（9223 残留 pid=null 断言）+ 手动栈（:3001/:3000）已 kill（backend3001=down / vite3000=down）"
+}

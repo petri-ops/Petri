@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "kind": "s3-task-record",
+  "taskId": "T2",
+  "requirement": "R2",
+  "capturedAt": "2026-11-14T20:22:00+08:00",
+  "changedPaths": [
+    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    "test/m7-longtask-resume-live-flow.test.mjs",
+    "scripts/lib/evals-harness.mjs",
+    "test/evals-harness.test.mjs",
+    "core/petri-server/routes/ai-agent/team.js",
+    "test/agent-task-resume-route-disambiguation.test.mjs",
+    "test/impact-map.json",
+    "acceptance/block-449/evidence/t2-flow-run1.log",
+    "acceptance/block-449/evidence/t2-flow-run2.log",
+    "acceptance/block-449/evidence/t2-flow-run3.log",
+    "acceptance/block-449/evidence/t2-flow-run4.log",
+    "acceptance/block-449/evidence/t2-flow-run5.log",
+    "acceptance/block-449/evidence/t2-flow-run6.log",
+    "acceptance/block-449/evidence/t2-live-resume.json",
+    "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live-darwin.json",
+    "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live.png"
+  ],
+  "planConformance": "改动路径 = s2-plan T2 outputs（flow+契约测试+实机证据）∪ 两个确定性红修根因面（harness bootstrap / resume 路由冲突）及其回归锚——修根因属 §3 确定性红标准修法，未越出失败面；无越界文件",
+  "redGreen": {
+    "applicable": "partial（计划 S2.4：flow 注册契约走红绿；实机面豁免）+ 两个确定性红走全红绿",
+    "redEvidence": [
+      "run1 异常 duplicate column name（evidence/t2-flow-run1.log）",
+      "路由回归测试红：契约 B/C/D 三红 not_paused（修复前跑输出在 run3 log + 测试红在册）",
+      "run4/5 消息断言三红（测试侧前提与端点投影/取证面事实不符）"
+    ],
+    "greenEvidence": [
+      "契约测试 4/4 + 路由回归 4/4 + harness 15/15",
+      "run6 = 31/31 allPass（终态）"
+    ]
+  },
+  "gates": [
+    { "gate": "flow 契约测试", "result": "PASS 4/4" },
+    { "gate": "路由回归测试（新）", "result": "PASS 4/4" },
+    { "gate": "evals-harness 测试（+1 restart 契约）", "result": "PASS 15/15" },
+    { "gate": "dev-verify 实机 flow", "result": "PASS 31/31（run6）" }
+  ],
+  "failureSemantics": "三个红全部四类归因并闭环：D1=契约漂移类（harness 机制缺口，补契约+修根因）；D2=确定性红（产品路由缺陷，修根因+回归锚）；run4/5 三红=测试侧契约前提错（让测试追上真实契约面，不改产品）",
+  "decisions": [
+    {
+      "time": "2026-11-14T12:30+08:00",
+      "trigger": "run1 同库二次 spawn 抛 duplicate column",
+      "candidates": ["flow 内自己建第二套 boot 逻辑（第二真相源）", "harness spawnIsolatedBackend 增库存在跳过 bootstrap（单源最小修）"],
+      "selected": "后者",
+      "reason": "evals-harness 是隔离后端唯一单源；修它让崩溃→重启场景全域受益；首 spawn 行为零变化",
+      "impact": "scripts/lib/evals-harness.mjs +1 条件；+契约测试 1 例",
+      "reversibility": " revert 单文件",
+      "evidence": "evidence/t2-live-resume.json defects[0]"
+    },
+    {
+      "time": "2026-11-14T12:50+08:00",
+      "trigger": "run3 409 not_paused → 路由冲突根因确认（产品 P1：BLOCK-38 中断续跑全瘫）",
+      "candidates": ["改 team.js 路径（破前端）", "改 resume.js 路径（破前端）", "team.js 非 paused 态 next() 让位（任务态互斥，零前端改动）", "登记 U 类不动（中断续跑维持不可用）"],
+      "selected": "next() 让位",
+      "reason": "两语义按任务态天然互斥（paused=running 态 / interrupted=failed 态）；让位保留双方既有可达语义、复活被遮蔽语义；独立回归锚先行红后绿",
+      "impact": "core/petri-server/routes/ai-agent/team.js 单 handler；新增回归测试文件；running 非 paused 的防御性 409 错误体形状变化（HTTP 码不变，前端非 ok 通吃）",
+      "reversibility": "revert 单文件即回旧语义",
+      "evidence": "evidence/t2-live-resume.json defects[1] + run6 实机链绿"
+    },
+    {
+      "time": "2026-11-14T20:10+08:00",
+      "trigger": "run4/5 消息对齐三红",
+      "candidates": ["改端点投影（扩产品面）", "修测试断言前提（envelope windowOffset + 指令取证面=llm-transcripts）"],
+      "selected": "修断言前提",
+      "reason": "端点投影剥 _offset1 是既有公共契约（BLOCK-95）；恢复指令落 llm-transcripts 是 resume.js 注释明载语义——测试侧追上真实契约，不改产品",
+      "impact": "仅 flow 文件断言面",
+      "reversibility": "revert flow",
+      "evidence": "run5/run6 日志"
+    }
+  ],
+  "canonicalWriteback": "随 T4 同批（本任务无 canonical 文档改动；AUDIT-LOG 台账收口行在 T4 登记）",
+  "closeoutSummary": "T2 完成：M7-3 实机腿 31/31 全绿 + 抓真并修复两个真实缺陷（harness 重启 bootstrap / resume 路由冲突 P1）+ 三份红绿闭环测试在册；跑完立即 kill 纪律履行（flow 自清断言 + 手动栈 down）"
+}

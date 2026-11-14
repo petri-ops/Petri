@@ -8339,6 +8339,18 @@
       ],
       "commands": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block-449-evidence",
+      "note": "BLOCK-449 主控交付包证据（s0-s5/CLOSEOUT/evidence JSON+PNG）——非生产面，映射本包专项契约测试；来源=M7 §8 第 3/5 条补腿收口包（test:changed unknown fail-closed 处置，BLOCK-439 B4 同款）",
+      "patterns": [
+        "acceptance/block-449/**"
+      ],
+      "tests": [
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
     }
   ]
 }

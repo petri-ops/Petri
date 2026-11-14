@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "s3-task-record",
+  "taskId": "T1",
+  "requirement": "R1",
+  "capturedAt": "2026-11-14T11:20:00+08:00",
+  "changedPaths": [
+    "acceptance/block-449/evidence/t1-test-changed.log",
+    "acceptance/block-449/evidence/t1-red-clearing.json"
+  ],
+  "planConformance": "改动路径与 s2-plan T1 outputs 一致（仅证据落盘，零生产代码改动；无越界文件）",
+  "redGreen": {
+    "applicable": true,
+    "note": "历史红即为红证据（BLOCK-446 gate-evidence.json gates[3] 与 red-run.txt 在册）；当次定向复跑全部转绿，无需新修复提交",
+    "redEvidence": "acceptance/block-446/gate-evidence.json（1425/1435 三红）+ 当次无栈复跑 block414 actual=58741≠3001",
+    "greenEvidence": "见 evidence/t1-red-clearing.json historicalReds[].now"
+  },
+  "gates": [
+    { "gate": "test:changed", "result": "PASS 43/43", "skipped": 0 },
+    { "gate": "docs:check", "result": "PASS（587 注册）" }
+  ],
+  "failureSemantics": "无确定性红；block414 属环境条件红，处置=补足环境条件（无窗 dev 栈）后转绿，未改任何断言/基线",
+  "decisions": [
+    {
+      "time": "2026-11-14T11:05+08:00",
+      "trigger": "block414 复跑红（58741≠3001）",
+      "candidates": ["改测试加 env 跳过标注（放宽面）", "起无窗 dev 栈补足条件后复跑"],
+      "selected": "起栈复跑",
+      "reason": "测试语义要求真实 petri-server 在 :3001（默认探针）；起栈是最小、不改基线的路径，且栈为 T2 实机腿复用",
+      "impact": "新增两个后台进程（T2 后 kill）",
+      "reversibility": "kill 即回退",
+      "evidence": "evidence/t1-red-clearing.json stackProcs"
+    },
+    {
+      "time": "2026-11-14T11:00+08:00",
+      "trigger": "test:changed 影响面=untracked 面（9 测试）而非三历史红所在面",
+      "candidates": ["仅跑 test:changed 记 SKIP", "加跑三历史红定向复跑清账"],
+      "selected": "加跑定向复跑",
+      "reason": "R1 判据要求三历史红重归因；定向复跑是唯一能给出当次证据的路径",
+      "impact": "只读复跑",
+      "reversibility": "无副作用",
+      "evidence": "evidence/t1-red-clearing.json"
+    }
+  ],
+  "closeoutSummary": "T1 完成：0 未解释红；零生产代码改动；栈进程登记待 T2 后回收"
+}
