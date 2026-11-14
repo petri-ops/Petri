@@ -30,8 +30,9 @@ function extractFunction(source, name) {
   let index = source.indexOf('{', start);
   assert.ok(index > start, `${name} 必须有函数体`);
   for (; index < source.length; index += 1) {
-    if (source[index] === '{') depth += 1;
-    else if (source[index] === '}') {
+    const char = source.charAt(index);
+    if (char === '{') depth += 1;
+    else if (char === '}') {
       depth -= 1;
       if (depth === 0) break;
     }
