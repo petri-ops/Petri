@@ -301,9 +301,15 @@ async function _callServerToolResult(serverId, toolName, args, timeoutMs) {
     .map((block) => block.text)
     .join('\n');
   const isError = !!(called.result && called.result.isError);
+  // BLOCK-447 — MCP App 页面：工具结果里的 _meta.ui.resourceUri 此前被丢弃（只取 content 文本），
+  // 前端因此无法自动渲染交互页面。这里把 ui 描述保真透传到工具结果，供渲染层自动挂卡片。
+  const metaUi = called.result && called.result._meta && called.result._meta.ui;
+  const ui = metaUi && typeof metaUi.resourceUri === 'string' && metaUi.resourceUri.length <= 2048
+    ? { serverId, uri: metaUi.resourceUri }
+    : undefined;
   return isError
     ? { ok: false, error: 'mcp_tool_error', message: text || 'MCP server returned isError' }
-    : { ok: true, server: serverId, tool: toolName, text };
+    : { ok: true, server: serverId, tool: toolName, text, ...(ui ? { ui } : {}) };
 }
 
 /** catalog：只读 list/describe；每次调用重新读策略，不泄露 blocked/disabled。 */

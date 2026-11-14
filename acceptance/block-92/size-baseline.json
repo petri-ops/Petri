@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 675,
-      "bytes": 33719,
-      "sha256": "fe61a5c106401d4a246f08eaf9f03533b86d8cf8db64d0c32bcd206a0b1d8f67"
+      "lines": 621,
+      "bytes": 31221,
+      "sha256": "7ef5711a17aef81da76ce2d1d6492cc3a1d46d72af393189677fe78fd25be2bc"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -197,17 +197,17 @@
       "path": "frontend/src/pages/project-workspace.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 7764,
-      "bytes": 176965,
-      "sha256": "4b66b6e38b3296f345d2fdda8da6d0ba31e8c978167306678eea2b3c18907af4"
+      "lines": 7761,
+      "bytes": 176885,
+      "sha256": "d021a9a6f907aa2c5d64cd48ff2bcf7544c902f721969c070ce47fb197cfa6ce"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5432,
-      "bytes": 131575,
-      "sha256": "3b2543f79318efcec2ae242c5c3cfd1178e5b138662d50c2fa3950769d80a2f2"
+      "lines": 5431,
+      "bytes": 131528,
+      "sha256": "37512a552b64a9137c6abc378d456c1cbe146521bc45831e705a3ff9cc748bed"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
@@ -222,8 +222,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 2113,
-      "bytes": 51404,
-      "sha256": "e873c731def2fe53b841573a6c8e8e4c7af56bc10abcf6cdcd5dcc05f9e8f201"
+      "bytes": 51365,
+      "sha256": "8429cf53a34709720017d14c5424781a9c12831c66f84306939917ff67d3417d"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
@@ -254,16 +254,16 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1301,
-      "bytes": 39730,
-      "sha256": "2a7b48ad6085679ec81278ff04e5a73da776b06b6aa6bca40830ea47729d7ec7"
+      "bytes": 39709,
+      "sha256": "3e96c41ce875fdb471b57cafc9cc4f63c2c860ebbaf0eec11aa38bee32fce447"
     },
     {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1299,
-      "bytes": 30500,
-      "sha256": "4946029612446e072001ee1b9b9aed313c6c88bb6325cc8c53bfc93ecd26560f"
+      "bytes": 30480,
+      "sha256": "d4d5a0475a72e033343cf43f3323e8a11d3b9ac0765ac6df91ecb4498ac3f9fa"
     },
     {
       "path": "core/petri-server/agent-tools/learning.js",
@@ -354,6 +354,14 @@
       "sha256": "fedba9cb19f00be9f0a0e1177965073c4bc0ee79984ccbe4c7e5a661319437a6"
     },
     {
+      "path": "frontend/src/lib/electron.d.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1026,
+      "bytes": 47651,
+      "sha256": "abb6e70cdee4a3ac6fc48a191214c06147333ba30181e9ec364a1c5571fc28f6"
+    },
+    {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -362,28 +370,20 @@
       "sha256": "c1a69dfa6592d5b1cfaf78d1bae7fbdc019a821b5db5629423f211f4c387615d"
     },
     {
-      "path": "frontend/src/lib/electron.d.ts",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1017,
-      "bytes": 47103,
-      "sha256": "5aba7b82272e07bd340d863c312a4d1c72f9681a46d53a3f28bf2c5fc656838d"
-    },
-    {
       "path": "frontend/src/components/copilot/ToolActivityList.tsx",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1010,
-      "bytes": 46754,
-      "sha256": "5da748be055b11d5d9295f3bf309734b7b41c3ca7d8e8d0dc3f0275e7281f413"
+      "lines": 1014,
+      "bytes": 46966,
+      "sha256": "8131f45808ef0e2a694f5b3b61ec878e4eaafb15a406fde518332f2f4af2fc06"
     },
     {
       "path": "frontend/src/components/desktop/TitleBar.module.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 995,
-      "bytes": 22607,
-      "sha256": "4a22d35b6a53e6c44d4c3453383b77dc6a1999fce6eb8da9b5edc96b921f39e5"
+      "bytes": 22596,
+      "sha256": "40501b60c2fa17e56d60316d084038911093103335523bc9cf3e6183811545fb"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -402,6 +402,14 @@
       "sha256": "1b162d4c2cbc75f2a19cdcac316ac7d94776bcafe45bb4e8783f8a4c35438f6e"
     },
     {
+      "path": "frontend/src/components/copilot/toolActivity.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 929,
+      "bytes": 39358,
+      "sha256": "f7e862f8cfa1afa4476d13aa1320db9f57684e4109f2025f5758d35d259e7d8c"
+    },
+    {
       "path": "frontend/src/components/work-surface/Model3DSurface.tsx",
       "wave": "L0",
       "module": "auto-discovered",
@@ -414,8 +422,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 915,
-      "bytes": 19092,
-      "sha256": "92f9701632d3508686a1de33271c74bca1ce6680f5f69e04ab0b6bb0046cf898"
+      "bytes": 19089,
+      "sha256": "e3a028e29747714680ef58d910c18ae46a9d5937c0ac3d2f745ba3afb7e4bc0b"
     },
     {
       "path": "core/petri-server/mcp/registry/run-plugin-script.js",
@@ -424,14 +432,6 @@
       "lines": 911,
       "bytes": 41525,
       "sha256": "c7c053d789ff29e8dbe8ea0749eb09680c324da79067c70ef132df29aa743c1e"
-    },
-    {
-      "path": "frontend/src/components/copilot/toolActivity.ts",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 908,
-      "bytes": 38382,
-      "sha256": "eab4a00673b98ddb980789502ffd937653f5a96d1a2e1ed7152001cf1dbf4818"
     },
     {
       "path": "core/petri-server/plugin-loader.js",
@@ -570,14 +570,6 @@
       "sha256": "14c09166e91af2c08bdbcd864119f7f2c07368b5569ab80921499eb4247bbe87"
     },
     {
-      "path": "core/petri-server/routes/files.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 708,
-      "bytes": 33708,
-      "sha256": "dc196b202471151fda1a037d51c8ea15f5dba6ec7a3c8d567825b1a8929e090d"
-    },
-    {
       "path": "core/shared-backend/artifact-profiles.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -602,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86663
+  "total": 85931
 }

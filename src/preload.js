@@ -562,6 +562,7 @@ const desktopBridgeSurface = {
     prepare: (payload) => ipcRenderer.invoke('gen-ui:prepare', payload || {}),
     // BLOCK-445 — MCP App 页面：{ serverId, uri, title? } → 沙箱页 URL
     prepareMcpApp: (payload) => ipcRenderer.invoke('gen-ui:prepare-mcp-app', payload || {}),
+    callMcpAppTool: (payload) => ipcRenderer.invoke('gen-ui:mcp-app-call', payload || {}),
     // BLOCK-166 P1 — guest 桥 RPC 中继（GenUiCard 把沙箱页 postMessage 转成这两路）：
     // set-state = widgetState 内存落主进程（≤16KiB）；open-external = 绝对 http(s) 白名单。
     setState: (payload) => ipcRenderer.invoke('gen-ui:set-state', payload || {}),

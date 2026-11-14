@@ -962,6 +962,15 @@ declare global {
       // 否则 code ∈ no-workspace/project-not-found/outside-scope/file-not-found/
       // too-large/read-failed/failed。真值源：src/ipc/gen-ui.js）。
       genUi: {
+        // BLOCK-445/446 — MCP App 页面：读外部 MCP 资源生成 gen-ui 沙箱页 + 页面内工具调用。
+        prepareMcpApp: (payload: { serverId: string; uri: string; title?: string }) => Promise<
+          | { ok: true; url: string }
+          | { ok: false; code: string; message: string }
+        >;
+        callMcpAppTool: (payload: { sessionId: string; toolName: string; args?: Record<string, unknown> }) => Promise<
+          | { ok: true; result: unknown }
+          | { ok: false; code: string; message: string }
+        >;
         prepare: (payload: { projectId: string; conversationId: string; path: string; title?: string }) => Promise<
           | { ok: true; url: string }
           | { ok: false; code: string; message: string }

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 584,
+    "documentCount": 585,
     "lastUpdated": "2026-11-14",
-    "managedMarkdown": 567
+    "managedMarkdown": 568
   },
   "documents": [
     {
@@ -11881,6 +11881,37 @@
         "zcode-reference"
       ],
       "notes": "BLOCK-446 凭据 file 后端加密化+错误语义分离（ZCode v3.18.2 systemCredentialCipher 范式借鉴落地；用户裁决 2026-11-14「好的 按照你的建议来」）：file 后端 set() 经 mcp-env-crypto 单源 AES-256-GCM 加密落盘（enc:v1，零明文）+ 读取明文透传与整组急切迁移（fail-open 不丢值）+ 损坏/不可读文件 fail-closed 拒覆写（防单条目覆盖毁他 provider 密文）+ status() 三态健康面（clean-missing/storage-error/value-undecryptable）。非范围：keychain 后端零改动、原生 OS 凭据库 G1+、IPC 明文回传最小化另立。 收口：红绿先行 9/9（红跑 8/9 存档）；test:changed 1425/1435 三红先于本包归因（UI-629 W/block414 环境条件/P6 W）；治理门 docs 584·secret·arch·code-size·arch-cycles·types·knip 全 PASS；lint 改动文件 0 error 警告净收缩；closeout 第 4 门 ui-audit 被他方 WIP 拦停如实登记；coverage 棘轮 90→89。证据=acceptance/block-446/gate-evidence.json。"
+    },
+    {
+      "id": "BLOCK-447-MCP-APP-AUTO-RENDER",
+      "path": "docs/block-447-mcp-app-auto-render-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/agent-tools/mcp-projection.js",
+        "core/petri-server/routes/mcp-client.js",
+        "src/ipc/gen-ui.js",
+        "src/ipc/channels.js",
+        "src/preload.js",
+        "src/main/gen-ui/guest-bridge.js",
+        "frontend/src/components/copilot/gen-ui/McpAppCard.tsx",
+        "frontend/src/components/copilot/ToolActivityList.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "frontend/src/lib/electron.d.ts",
+        "test/block446-mcp-app-wiring.test.mjs"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "mcp-apps",
+        "gen-ui",
+        "agent-plugins"
+      ],
+      "notes": "BLOCK-447 把 MCP App 页面从宿主链路升级为自动渲染 + 双向 RPC：后端保留 _meta.ui.resourceUri、前端 ToolActivityList 自动挂 McpAppCard、沙箱页 window.petri.mcpApp.callTool 经 session 绑定代理到 MCP 客户端。前端 6/6、源码契约 5/5、离屏 Electron prepare/callTool/伪造拒绝实测。未覆盖 ext-apps 原生 SDK 协议 shim 与完整 agent→卡片实机腿。见 m6a/mcp-app-auto-render.json。"
     }
   ],
   "lastUpdated": "2026-11-14"

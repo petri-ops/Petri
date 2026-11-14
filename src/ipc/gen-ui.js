@@ -323,10 +323,45 @@ async function prepareMcpAppGenUi(event, payload) {
   }
 }
 
+/** BLOCK-447 — MCP App 页面内工具调用：session 归属校验后代理到后端 MCP 客户端。 */
+async function callMcpAppToolGenUi(event, payload) {
+  try {
+    const sessionId = String((payload && payload.sessionId) || '');
+    const toolName = String((payload && payload.toolName) || '');
+    const args = payload && payload.args && typeof payload.args === 'object' ? payload.args : {};
+    if (!sessionId || !toolName) return { ok: false, code: 'invalid-args' };
+    const session = getGenUiSession(sessionId);
+    if (!session || !String(session.scopeKey || '').startsWith('mcp-app:')) {
+      return { ok: false, code: 'session_not_found', message: 'MCP App 会话不存在' };
+    }
+    if (session.ownerWebContentsId !== null && session.ownerWebContentsId !== event.sender.id) {
+      return { ok: false, code: 'sender_mismatch', message: '会话不属于当前窗口' };
+    }
+    // 服务端 id 只从会话绑定取，绝不信任渲染层传参（防跨 server 越权）。
+    const serverId = String(session.scopeKey).slice('mcp-app:'.length);
+    const port = process.env.R_SERVER_PORT || '3001';
+    const url = `http://127.0.0.1:${port}/api/mcp/servers/${encodeURIComponent(serverId)}/tools/call`;
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ toolName, args }),
+      signal: backendTimeoutSignal(),
+    });
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok || !data || data.status !== 'ok') {
+      return { ok: false, code: 'mcp_call_failed', message: (data && data.error) || `backend status ${resp.status}` };
+    }
+    return { ok: true, result: data.result };
+  } catch (error) {
+    return { ok: false, code: 'failed', message: error.message || String(error) };
+  }
+}
+
 function setupGenUiIpc() {
   const { ipcMain } = require('electron');
   ipcMain.handle(CHANNELS.genUi.prepare, async (event, payload) => prepareGenUi(event, payload));
   ipcMain.handle(CHANNELS.genUi.prepareMcpApp, async (event, payload) => prepareMcpAppGenUi(event, payload));
+  ipcMain.handle(CHANNELS.genUi.callMcpAppTool, async (event, payload) => callMcpAppToolGenUi(event, payload));
   ipcMain.handle(CHANNELS.genUi.setState, (event, payload) => setGenUiState(event, payload));
   ipcMain.handle(CHANNELS.genUi.openExternal, (event, payload) => openGenUiExternal(event, payload));
     ipcMain.handle(CHANNELS.genUi.copyImage, (event, payload) => copyGenUiImage(event, payload));

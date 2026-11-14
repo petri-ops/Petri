@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-13T23:39:03.429Z",
+  "generatedAt": "2026-11-14T00:33:41.547Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
     "toolDomains": 16,
     "contracts": 115,
     "metadata": 116,
-    "ipcChannels": 169,
+    "ipcChannels": 170,
     "ipcMissingPreload": 3,
-    "ipcUnusedInRenderer": 166,
-    "routes": 283,
+    "ipcUnusedInRenderer": 167,
+    "routes": 284,
     "routeModules": 47,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 3
     },
-    "dirtyFiles": 84,
+    "dirtyFiles": 91,
     "defsFallbacks": 0
   },
   "findings": [
@@ -26,7 +26,7 @@
       "sev": "P3",
       "kind": "ipc_dead_channels",
       "subject": "1 个通道",
-      "detail": "登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：gen-ui:prepare-mcp-app"
+      "detail": "登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：gen-ui:mcp-app-call"
     },
     {
       "sev": "P3",
@@ -3271,6 +3271,11 @@
     },
     {
       "channel": "gen-ui:prepare-mcp-app",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:mcp-app-call",
       "inPreload": false,
       "usedInRenderer": false
     },
@@ -4103,6 +4108,11 @@
     },
     {
       "channel": "gen-ui:prepare-mcp-app",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "gen-ui:mcp-app-call",
       "inPreload": false,
       "usedInRenderer": false
     },
@@ -5131,6 +5141,12 @@
     {
       "module": "mcp-client",
       "method": "POST",
+      "route": "/api/mcp/servers/:id/resource",
+      "mounted": true
+    },
+    {
+      "module": "mcp-client",
+      "method": "POST",
       "route": "/api/mcp/servers",
       "mounted": true
     },
@@ -5859,7 +5875,7 @@
     "brandMismatch": []
   },
   "dirty": [
-    "M core/petri-server/mcp/client-manager.js",
+    "M core/petri-server/agent-tools/mcp-projection.js",
     "M core/petri-server/routes/mcp-client.js",
     "M frontend/src/App.tsx",
     "M frontend/src/components/RouteErrorBoundary.module.css",
@@ -5870,12 +5886,14 @@
     "M frontend/src/components/copilot/MessageRail.module.css",
     "M frontend/src/components/copilot/ResultCard.module.css",
     "M frontend/src/components/copilot/ToolActivityDock.module.css",
+    "M frontend/src/components/copilot/ToolActivityList.tsx",
     "M frontend/src/components/copilot/gen-ui/GenUiCard.module.css",
     "M frontend/src/components/copilot/integration/integration.module.css",
     "M frontend/src/components/copilot/renderers/ChartRenderer.module.css",
     "M frontend/src/components/copilot/renderers/ImageRenderer.module.css",
     "M frontend/src/components/copilot/renderers/TableRenderer.module.css",
     "M frontend/src/components/copilot/simple-chat.css",
+    "M frontend/src/components/copilot/toolActivity.ts",
     "M frontend/src/components/desktop/DesktopSettingsPanel.tsx",
     "M frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx",
     "M frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx",
@@ -5922,6 +5940,7 @@
     "M frontend/src/components/workspace-panels/WorkspaceFileIcon.module.css",
     "M frontend/src/hooks/useWorkspaceLayout.ts",
     "M frontend/src/hooks/useWorkspacePanels.ts",
+    "M frontend/src/lib/electron.d.ts",
     "M frontend/src/lib/settingsSearch.ts",
     "M frontend/src/pages/extensions/extensions.module.css",
     "M frontend/src/pages/extensions/styles.module.css",
@@ -5934,6 +5953,9 @@
     "M frontend/src/styles/custom.css",
     "M frontend/src/styles/global.css",
     "M frontend/src/styles/theme-token-contract.test.ts",
+    "?? frontend/src/components/copilot/gen-ui/McpAppCard.test.tsx",
+    "?? frontend/src/components/copilot/gen-ui/McpAppCard.tsx",
+    "?? frontend/src/components/copilot/toolActivity.mcpApp.test.ts",
     "?? frontend/src/components/desktop/DesktopSettingsPanel/SettingsField.tsx",
     "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx",
     "?? frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopSection.tsx",
@@ -5942,6 +5964,7 @@
     "?? frontend/src/lib/uiBreakpoints.ts",
     "M src/ipc/channels.js",
     "M src/ipc/gen-ui.js",
+    "M src/main/gen-ui/guest-bridge.js",
     "M src/preload.js"
   ],
   "defNotes": []

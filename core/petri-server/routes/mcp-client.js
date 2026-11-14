@@ -184,6 +184,21 @@ function registerMcpClientRoutes(app) {
     return res.json({ status: 'ok', uri: result.uri, mimeType: result.mimeType, text: result.text });
   });
 
+  // BLOCK-447 — MCP App 页面内工具调用（双向 RPC 落点）：session 归属校验在主进程侧，
+  // 这里只做同进程 MCP 客户端调用；逐工具策略仍由 mcp-projection 的既有判据约束。
+  app.post('/api/mcp/servers/:id/tools/call', express.json({ limit: '64kb' }), async (req, res) => {
+    const id = String(req.params.id || '');
+    const toolName = String((req.body && req.body.toolName) || '');
+    const args = req.body && req.body.args && typeof req.body.args === 'object' ? req.body.args : {};
+    if (!toolName) return res.status(400).json({ status: 'error', error: 'tool_name_required' });
+    const result = await manager.callServerTool(id, toolName, args);
+    if (!result.ok) {
+      const status = result.error === 'server_not_connected' ? 409 : 502;
+      return res.status(status).json({ status: 'error', error: result.error });
+    }
+    return res.json({ status: 'ok', result: result.result });
+  });
+
   app.post('/api/mcp/servers', express.json(), (req, res) => {
     const body = req.body || {};
     // BLOCK-258 — 三传输：stdio / http(StreamableHTTP) / sse；远程可带自定义 headers

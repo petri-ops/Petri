@@ -20,6 +20,7 @@ import {
 import { reasoningPreview } from './conversationSegments';
 import { ChatArtifactCard } from './ChatArtifactCard';
 import { ToolRowBoundary } from './TimelineBoundaries';
+import { McpAppCard } from './gen-ui/McpAppCard';
 import { projectExecutionAxis } from '@/lib/statusProjection';
 
 // ANSI CSI 序列（ESC=0x1b 开头）——预编译供输出尾逐行剥离
@@ -844,6 +845,9 @@ export function ToolActivityList({
               {(byIteration.get(iterationKey) || []).map((activity) => (
                 <ToolRowBoundary key={activity.key} resetKey={activity.key}>
                   <QoderRow activity={activity} />
+                  {activity.mcpApp ? (
+                    <McpAppCard app={activity.mcpApp} title={`${activity.name} · MCP App`} />
+                  ) : null}
                 </ToolRowBoundary>
               ))}
             </div>

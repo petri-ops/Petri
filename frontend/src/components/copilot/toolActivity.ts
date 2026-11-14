@@ -97,6 +97,8 @@ export interface ToolActivityItem {
   /** UI-437 v5.6 — 工具返回数据本体（后端 publicData 已界定的 bounded 版本）；
    *  活动行展开时渲染「返回」详情。 */
   resultData?: unknown;
+  /** BLOCK-447 — MCP 工具结果携带 _meta.ui.resourceUri 时自动渲染交互页面。 */
+  mcpApp?: { serverId: string; uri: string };
   /** BLOCK-243 — 审批卡载荷（toolResult 顶层，独立于 data 截断）。 */
   approval?: ToolApproval;
   /** BLOCK-244 — 结构化提问载荷（toolResult 顶层）。 */
@@ -104,6 +106,24 @@ export interface ToolActivityItem {
   /** BLOCK-247（Q2b）— 联网结果的来源标签（域名/来源主机名）。
    *  治理透明：结论从哪个网来的必须一眼可见，不能只留一句「已检索」。 */
   sourceLabel?: string;
+}
+
+/** BLOCK-447 — 从工具结果（顶层 ui 或 data.ui）提取 MCP App 描述。 */
+function parseMcpAppFromResult(result: unknown): ToolActivityItem['mcpApp'] {
+  if (!result || typeof result !== 'object') return undefined;
+  const row = result as Record<string, unknown>;
+  const data = row.data && typeof row.data === 'object'
+    ? (row.data as Record<string, unknown>).ui
+    : undefined;
+  for (const candidate of [row.ui, data]) {
+    if (!candidate || typeof candidate !== 'object') continue;
+    const item = candidate as Record<string, unknown>;
+    if (typeof item.serverId === 'string' && item.serverId
+      && typeof item.uri === 'string' && item.uri && item.uri.length <= 2048) {
+      return { serverId: item.serverId, uri: item.uri };
+    }
+  }
+  return undefined;
 }
 
 const ACTIVITY_STATUSES: ToolActivityStatus[] = [
@@ -834,6 +854,7 @@ export function mergeToolResultActivity(
     // UI-437 v5.6 — 结果数据本体（后端 publicData 已界定的 bounded 版本），供展开详情
     // UI-437 v5.6 修复 — resultData 是本次结果新到的数据，不能走「保留旧值」分支
     resultData: result?.data,
+    mcpApp: parseMcpAppFromResult(result),
     // BLOCK-243 — 审批卡载荷（顶层，独立于 data 截断）；旧事件无该字段时保留既有值
     approval: parseToolApproval(result?.approval) ?? (index >= 0 ? current[index].approval : undefined),
     // BLOCK-244 — 结构化提问载荷（回答事件会用同一 callId 覆盖）

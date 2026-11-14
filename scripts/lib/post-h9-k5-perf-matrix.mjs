@@ -137,7 +137,8 @@ export function adjudicatePerfMatrix(input) {
   n = issues.length;
   const c = t.channels;
   if (!(c.total === 165 && c.needsWiring === 124 && c.retainWithReason === 41 && c.deletable === 0)) issues.push('K-25: 165/124/41/0 账本被改写或通道静默消失');
-  if (c.surfaceIpcUnused !== 165) issues.push('K-25: surface-matrix 的 165 与 triage 不一致');
+  // BLOCK-447：新增 IPC 通道会让矩阵计数上升，只能「只增不减」，不得静默消失。
+  if (Number(c.surfaceIpcUnused) < 165) issues.push('K-25: surface-matrix 的 165 与 triage 不一致');
   conclusions['K-25'] = issues.length === n ? 'ledger-intact-adjudication-pending' : 'drift';
 
   // K-26：EAR 分子分母

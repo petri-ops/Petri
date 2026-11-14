@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m0-read-only-remaining-work-view",
-  "generatedAt": "2026-11-13T23:42:21.973Z",
+  "generatedAt": "2026-11-14T00:33:42.353Z",
   "policy": "只读汇总：4 套原文零搬移、零改写；逐件保留 owner/terminal/evidence；声明计数与机械复算计数并列暴露",
   "sources": [
     "acceptance/post-k7-2026-11-10/l7/gap-ledger.json",
@@ -33,7 +33,7 @@
         "tag": "m-blueprint",
         "blueprintId": "M-BLUEPRINT-2026-11-11-PROGRAM",
         "blueprintStatus": "completed",
-        "stageCount": 13,
+        "stageCount": 14,
         "allCompleted": true,
         "inFlight": 0
       }

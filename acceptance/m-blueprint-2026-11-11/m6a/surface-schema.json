@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m6a-surface-schema",
-  "capturedAt": "2026-11-13T23:42:07.783Z",
+  "capturedAt": "2026-11-14T00:33:41.802Z",
   "policy": "三面身份 schema 单一形状；漂移按「只减不增」棘轮冻结；本文件只读生成，不改矩阵数据",
   "shape": {
     "entry": [
@@ -16,11 +16,11 @@
     ]
   },
   "counts": {
-    "entries": 567,
-    "ipc": 169,
+    "entries": 569,
+    "ipc": 170,
     "tool": 115,
-    "route": 283,
-    "truthChannels": 169,
+    "route": 284,
+    "truthChannels": 170,
     "truthTools": 115
   },
   "drift": {
@@ -1182,6 +1182,13 @@
     {
       "kind": "ipc",
       "id": "gen-ui:prepare-mcp-app",
+      "scope": "gen-ui",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "gen-ui:mcp-app-call",
       "scope": "gen-ui",
       "exposed": false,
       "consumed": false
@@ -3299,6 +3306,13 @@
     {
       "kind": "route",
       "id": "POST /api/mcp/servers/:id/oauth/revoke",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/resource",
       "scope": "mcp-client",
       "exposed": true,
       "consumed": true

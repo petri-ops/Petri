@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "mcp-app-auto-render",
+  "capturedAt": "2026-11-14",
+  "block": "BLOCK-447",
+  "goal": "把 MCP App 页面从「宿主链路可用」升级为「工具结果自动渲染 + 页面可调工具」",
+  "chain": [
+    "mcp-projection.js 保真透传 _meta.ui.resourceUri → ui={serverId,uri}",
+    "frontend parseToolResultEvent → toolActivity.parseMcpAppFromResult → ToolActivityList 自动挂 McpAppCard",
+    "McpAppCard.prepareMcpApp → gen-ui:prepare-mcp-app → /api/mcp/servers/:id/resource → createGenUiSession",
+    "沙箱页 window.petri.mcpApp.callTool → petri-gen-ui-rpc → McpAppCard origin/source 校验",
+    "gen-ui:mcp-app-call → session 绑定 serverId → /api/mcp/servers/:id/tools/call"
+  ],
+  "security": [
+    "serverId 只从 session.scopeKey 取，不信任渲染层",
+    "event.source === iframe.contentWindow 且 event.origin === 沙箱 origin",
+    "ownerWebContentsId === event.sender.id；伪造 session → session_not_found",
+    "iframe sandbox=allow-scripts allow-same-origin + gen-ui CSP + 既有劫持侦测"
+  ],
+  "verification": {
+    "frontendComponent": "McpAppCard.test.tsx 4/4",
+    "toolActivityParsing": "toolActivity.mcpApp.test.ts 2/2",
+    "sourceContracts": "test/block446-mcp-app-wiring.test.mjs 5/5",
+    "backendRoute": "mock MCP server tools/call 返回 _meta.ui.resourceUri；POST /api/mcp/servers/:id/tools/call 200",
+    "electronLive": {
+      "prepare": "ok=true, url=petri-genui://gen-<id>/index.html",
+      "callTool": "ok=true, result.content[0].text=PONG, result._meta.ui.resourceUri=ui://demo/panel.html",
+      "forgedSession": "ok=false, code=session_not_found"
+    }
+  },
+  "notCovered": [
+    "@modelcontextprotocol/ext-apps 原生 SDK 协议 shim（Petri 用 window.petri.mcpApp 自有桥 API）",
+    "完整 agent→卡片链路实机（需把 mock MCP 工具投影进 agent 工具面并让真实任务命中）",
+    "updateModelContext 独立语义（当前复用 sendFollowUpMessage）",
+    "ext-apps 资源订阅与 widgetState 持久化语义对齐"
+  ],
+  "cleanup": {
+    "mcpConfig": "mcp-app-demo 已删除并从备份恢复",
+    "ports": "3000/3001/3111/9223 全空"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

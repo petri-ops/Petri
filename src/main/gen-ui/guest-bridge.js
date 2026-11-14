@@ -190,6 +190,20 @@ const GUEST_BRIDGE_FN = function petriGenUiGuestBridge(config) {
         return postRpc('petri/gen-ui/open-external', { href: value.href });
       },
     },
+    // BLOCK-447 — MCP App 页面双向 RPC：页面调用其所属 MCP server 的工具。
+    // serverId 不由此处传入，宿主侧从 gen-ui session 绑定取（防跨 server 越权）。
+    mcpApp: {
+      enumerable: true,
+      value: {
+        callTool: function (name, args) {
+          if (typeof name !== 'string' || !name.trim() || name.length > 200) {
+            return Promise.reject(new TypeError('callTool expects a tool name'));
+          }
+          var payload = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
+          return postRpc('petri/mcp-app/call-tool', { toolName: name, args: payload });
+        },
+      },
+    },
     sendFollowUpMessage: {
       enumerable: true,
       value: function (value) {

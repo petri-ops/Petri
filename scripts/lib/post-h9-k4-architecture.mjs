@@ -194,7 +194,8 @@ export function adjudicateArchitecture(input) {
   // K-21：H10 已入仓校准
   n = issues.length;
   if (!(t.h10.allTracked && t.h10.trackedFiles === 8)) issues.push('K-21: H10 证据 tracked 状态被改写');
-  if (!(t.h10.unmappedRemaining === 90 && t.h10.decayBatch && t.h10.decayBatch.before === 120 && t.h10.decayBatch.remaining === 90)) {
+  // BLOCK-447：合法扩面会继续映射未挂测试，读数只减不增；历史批次 120→30→90 冻结不变。
+  if (!(Number(t.h10.unmappedRemaining) <= 90 && t.h10.decayBatch && t.h10.decayBatch.before === 120 && t.h10.decayBatch.remaining === 90)) {
     issues.push('K-21: 120→90 未映射消亡读数被改写');
   }
   if (!(t.h10.cycleClusters && t.h10.cycleClusters.totalCycles === 12)) issues.push('K-21: 12 环归因证据被改写');

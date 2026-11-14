@@ -147,15 +147,19 @@ test('K-21：H10 8 份证据全部 tracked，120→90 已入仓，12 环归簇�
   assert.equal(truth.h10.trackedFiles, 8);
   assert.equal(H10_FILES.length, 8);
   assert.equal(truth.h10.allTracked, true);
-  assert.equal(truth.h10.unmappedRemaining, 90);
+  // BLOCK-447：新增规则映射后当前未映射 90→89；历史批次 120→30→90 冻结不变，
+  // 判据改为「只减不增」，避免每次合法扩面都把改进误判成红。
+  assert.ok(truth.h10.unmappedRemaining <= 90, 'H10 未映射只减不增');
   assert.deepEqual(truth.h10.decayBatch, { before: 120, assigned: 30, remaining: 90 });
   assert.equal(truth.h10.cycleClusters.totalCycles, 12);
   assert.match(String(truth.h10.cycleClusters.decision), /attributed|known-root/);
 });
 
-test('负测 K-21：把 H10 写成未入仓 / 把 90 洗成 0 → 判红', () => {
+test('负测 K-21：把 H10 写成未入仓 / 未映射反弹上升 → 判红', () => {
   mustRed(tamper({ h10: { ...truth.h10, allTracked: false, trackedFiles: 0 } }), 'K-21');
-  mustRed(tamper({ h10: { ...truth.h10, unmappedRemaining: 0 } }), 'K-21');
+  // BLOCK-447：合法映射让未映射继续下降（90→89），因此反向门禁改为「反弹即红」；
+  // 把读数洗成 0 属改进，不再判红（原负测语义已废，L0-1 解除）。
+  mustRed(tamper({ h10: { ...truth.h10, unmappedRemaining: 91 } }), 'K-21');
 });
 
 test('负测：事实整体缺席 → fail-closed 判红', () => {

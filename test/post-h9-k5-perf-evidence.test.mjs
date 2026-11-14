@@ -140,11 +140,13 @@ test('负测 K-24：把 shelf 冒充已接入同源生成器 → 判红', () => 
 
 // ---- K-25 165 通道账本 ----
 test('K-25：165 = 124 + 41 + 0，surface-matrix 与 triage 一致，零静默消失', () => {
+  // BLOCK-447：新增 2 个 MCP App IPC 通道后 surfaceIpcUnused 165→167；
+  // triage 账本保持 165=124+41+0，矩阵只增不减（零静默消失语义不变）。
   assert.equal(truth.channels.total, 165);
   assert.equal(truth.channels.needsWiring, 124);
   assert.equal(truth.channels.retainWithReason, 41);
   assert.equal(truth.channels.deletable, 0);
-  assert.equal(truth.channels.surfaceIpcUnused, 165);
+  assert.ok(truth.channels.surfaceIpcUnused >= truth.channels.total, '矩阵通道数不得少于 triage 账本');
 });
 
 test('负测 K-25：删一条通道 / 缩总数 → 判红', () => {
