@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-11-11T04:01:53.763Z",
+  "generatedAt": "2026-11-14T12:34:28.484Z",
   "host": {
     "platform": "darwin-arm64",
     "cpus": 8,
     "memoryGB": 16,
     "node": "v24.16.0"
   },
-  "coreSha": "8df59f6cb9c579c2",
+  "coreSha": "cf15c27f1e8c77cf",
   "scenarios": {
     "packaged_start": {
       "metric": "打包后端启动（ELECTRON_RUN_AS_NODE 跑 Resources/core，空数据目录+打包迁移 21 SQL）→ health 就绪",
       "unit": "ms",
       "samples": [
-        796,
-        375,
-        379
+        863,
+        382,
+        372
       ],
-      "medianMs": 379,
+      "medianMs": 382,
       "tolerancePct": 30,
       "runs": 3,
       "noiseSources": "打包迁移 21 SQL 全量执行 / SQLite WAL 首建 / Electron 运行时冷启动 / 轮询粒度 300ms",
@@ -26,13 +26,13 @@
       "metric": "1000 条消息会话：首页 + 全量滚动 20 页（分页 API 串行）",
       "unit": "ms",
       "samples": [
-        29,
-        25,
-        25,
+        31,
+        30,
         26,
+        29,
         25
       ],
-      "medianMs": 25,
+      "medianMs": 29,
       "tolerancePct": 60,
       "runs": 5,
       "noiseSources": "SQLite 页缓存冷热 / better-sqlite3 async 桥；种子=真实 DDL 直插（每条 ~240 字内容负载）；低中位场景由 absoluteSlackMs 地板主导",
@@ -42,11 +42,11 @@
       "metric": "520 文件工作区：tree 分页读全 3 页（200/页）",
       "unit": "ms",
       "samples": [
+        12,
         11,
-        10,
         11,
         11,
-        11
+        12
       ],
       "medianMs": 11,
       "tolerancePct": 60,
@@ -59,12 +59,12 @@
       "unit": "ms",
       "samples": [
         546,
-        545,
-        546,
-        534,
-        544
+        542,
+        542,
+        544,
+        550
       ],
-      "medianMs": 545,
+      "medianMs": 544,
       "tolerancePct": 25,
       "runs": 5,
       "noiseSources": "SQLite WAL 首建 / migrations 全量执行 / 同机负载抖动；3-5 次采样取中位；真冷启动归 coldStartTrueLeg 腿",
