@@ -71,12 +71,18 @@ module.exports = {
       return res.json({ ok: true, agentStatus: 'paused', effective: 'iteration_boundary' });
     });
 
-    app.post('/api/ai/agent/task/:taskId/resume', async (req, res) => {
+    app.post('/api/ai/agent/task/:taskId/resume', async (req, res, next) => {
       const taskId = String(req.params.taskId || '').trim();
       const found = taskFor(req, taskId);
       if (!found.ok) return res.status(found.status).json({ ok: false, error: found.error });
       if (found.task.agentStatus !== 'paused') {
-        return res.status(409).json({ ok: false, error: 'not_paused', agentStatus: found.task.agentStatus });
+        // BLOCK-449 路由冲突修复：本路径同时被 BLOCK-38 P1 中断续跑（resume.js，
+        // 后注册）共用——paused 是本语义的独占态；非 paused 一律 next() 让位，
+        // 由 resume.js 按任务态分流（interrupted→续跑 / running→409 / 非中断
+        // failed→409）。修复前本分支 409 not_paused 把中断续跑语义全量遮蔽
+        // （实机腿 m7-longtask-resume-live run3 抓真；回归锚=
+        // test/agent-task-resume-route-disambiguation.test.mjs）。
+        return next();
       }
       agentPause.resumeTask(taskId);
       const stored = agentTaskStore.setAgentTaskPaused(taskId, false);
