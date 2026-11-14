@@ -71,6 +71,8 @@
 
 - **BLOCK-423 追加（同段，不新增债）**：设置页视觉改版——独立工作区 + 264px 分组侧栏（四组 + 当前分区说明，≤960→208px、≤700→60px 图标栏）+ 右栏 760px 中等阅读列 + section 卡片化 + field 分隔线 + 控件统一 token（`border-input`/32px 高/checkbox accent）。参照 `reference/ZCode/docs/ui/settings-*.md`，只移植布局与层级语言，配色与字号档位仍用本仓 token。**门禁抓真 4 类后修正**（plain CSS→module.css、新增断点→复用既有档、token 契约 5 类、未使用变量与动态下标）。`theme-token-contract` 19/19、设置面板 88/88。**观感 `pending_human_eye`**，等用户验收，不写 verified。
 
+- **2026-11-14 公开投影脱敏（同段，不改状态词）**：`ResultStudioChangeSetPanel/display.tsx` 的 `publicDisplayText` 补内部标识脱敏（与后端 `redactInternalIds`、P6 验收 `rawInternalId` 同源规则：前缀 p/job/tj/rev/cs/conv/sel/wfg + ≥6 字符），覆盖「参数与结构变化」的 `<code>` 与 `title` 属性面——事故面是 `jsonDiffs` 里 `toolJobId` 一类字段原文回显到版本面板（P6 `publicProjectionClean` 实测命中 3 次，`CODE. @Result Studio 版本与变更`）。新增 `display.test.tsx` 4/4（ID 族 / 路径回归 / 不误伤 / 对象 JSON 面）。源码契约与后端脱敏同源，双端规则一致性由 P6 断言兜底。
+
 - **2026-11-14 lint 根修（同段，不改状态词）**：`SettingsNav.tsx` 的高级分组展开态由 effect 内同步 `setState`（React Compiler 硬红 `Calling setState synchronously within an effect can trigger cascading renders`，`quality:lint` 全仓唯一 error）改为**渲染期派生 + `advancedOpenOverride` 覆盖态**——默认跟随当前分区（深链/搜索命中高级分区自动可见的既有语义不变），用户手动展开/收起进入 override，再次点选分区回到「跟随当前分区」。**行为等价**（设置面板 23 文件 / 88 测试全绿），零放宽抑制基线、零 `eslint-disable`。
 
 - **2026-11-14 代码入库（本批提交，登记事实不改状态词）**：D0–D5 与 BLOCK-421/422/423 的**代码/门禁/证据/文档本体首次整批入库**。此前状态是「台账与 DOC-REGISTRY 已登记、文档与代码本体未提交」，`ui:audit:check` 因此长期报「当前工作区包含 UI 改动，但没有同步台账」。入库前当次验证：`gate:ui-program` 6/6 门、8 个 `test/ui-design-*.test.mjs` **58/58**、`theme-token-contract` **19/19**、设置面板 **88/88**、`block201-settings-baseline` 4/4、`quality:types` 0 红。**观感仍 `pending_human_eye`；本行不构成 `verified`，也不改变 D5 的 `done-partial` 终态与 22 条签字槽全空的事实**。

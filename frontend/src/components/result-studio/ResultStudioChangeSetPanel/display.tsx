@@ -71,10 +71,19 @@ function redactWindowsCoordinates(value: string): string {
   return output;
 }
 
+// BLOCK-448 — 公开投影脱敏的第二个面：内部主键/任务标识。
+// 「参数与结构变化」把 jsonDiffs 的字段 diff 原样交给 displayValue（含 title 属性），
+// 当被改字段是 toolJobId 一类时，job_… 会直接出现在版本面板上（P6
+// `publicProjectionClean` 断言实测命中 3 次）。规则与后端 `redactInternalIds`
+// 及 P6 验收断言同源：前缀 p/job/tj/rev/cs/conv/sel/wfg + ≥6 字符。
+const INTERNAL_ID_PATTERN = /\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\b/g;
+export const INTERNAL_ID_LABEL = '[内部标识]';
+
 export function publicDisplayText(value: string): string {
   return redactWindowsCoordinates(value
     .replace(/(["'])(?:\/Users\/|\/home\/)[^"'\r\n]*\1/g, '$1[project file]$1')
-    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]'));
+    .replace(/(?:\/Users\/|\/home\/)[^\s"'`<>]*/g, '[project file]')
+    .replace(INTERNAL_ID_PATTERN, INTERNAL_ID_LABEL));
 }
 
 export function displayValue(value: unknown): string {

@@ -222,8 +222,13 @@ function lifecycleExpression(expectedState = null) {
             while ((node = walker.nextNode())) {
               if (node.textContent.includes(match[0])) {
                 const el = node.parentElement;
-                where = (el.closest('[aria-label]') && el.closest('[aria-label]').getAttribute('aria-label'))
-                  || (el.tagName + '.' + String(el.className).slice(0, 44));
+                const label = (el.closest('[aria-label]') || {}).getAttribute
+                  ? el.closest('[aria-label]').getAttribute('aria-label') : '';
+                // BLOCK-448：定位精度从「最近 aria-label」升级为 class + 文本片段——
+                // 只报 aria-label 时无法区分面板内具体是哪一行（intentSummary / 资源表 / 生命周期行）。
+                where = el.tagName + '.' + String(el.className || '').slice(0, 30)
+                  + (label ? ' @' + label : '')
+                  + ' :: ' + String(node.textContent || '').trim().slice(0, 60);
                 break;
               }
             }
