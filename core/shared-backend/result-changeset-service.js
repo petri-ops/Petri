@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { stableStringify } = require('./canonical-json');
 const { validateResultEditIntent } = require('./result-edit-intent');
+const { redactInternalIds } = require('./redaction');
 const { createRuntimeResourceSnapshot } = require('./runtime-resource-snapshot');
 const { evaluatePreviewResourceBudget } = require('./result-studio-lifecycle');
 const { verifyRevisionSourceMaterial } = require('./result-revision-source');
@@ -657,10 +658,9 @@ async function createResultChangeSet(input = {}, dependencies = {}) {
             artifactId: entry.sourceRevision.artifactId,
             status: entry.result.artifactTruth.status,
           })),
-          // P4R-4 review projection: bounded user-facing intent and impact come
-          // from the validated, server-trusted ResultEditIntent. The UI must not
-          // guess them from an opaque intentRef or a Git message.
-          intentSummary: input.intent.requestedOutcome.slice(0, 500),
+          // P4R-4 review projection: bounded user-facing intent and impact come from
+          // the validated ResultEditIntent（UI 不得从 intentRef 猜）。BLOCK-448，脱敏内部 ID。
+          intentSummary: redactInternalIds(input.intent.requestedOutcome).slice(0, 500),
           impactLevel: input.intent.editClass,
           affectedScope: input.intent.affectedScope || 'unknown',
           requiresJob: input.intent.requiresJob,

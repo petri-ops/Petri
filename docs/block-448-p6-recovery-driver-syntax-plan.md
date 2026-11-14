@@ -70,6 +70,27 @@ lifecycle 恒为 null → data-state="ready" 永远读不到 → waitForLifecycl
 
 **红绿先行（HK-01）**：红 = 修复前 `new Function` 抛 `SyntaxError: Unexpected token 'return'`（已留痕）；绿 = 修复后三例 `[OK]` + 门禁 3/3。
 
+## 6. 范围扩展（2026-11-14 二次诊断，同批交付）
+
+语法修复后 P6 driver 走完全流程，语义断言暴露出**第二个、独立的产品缺陷**，属「搞定 P6」的必经路径，并入本包：
+
+| 观测 | 值 |
+| --- | --- |
+| 失败形态 | `p6_recovery_active_electron_persisted_semantic_failure`（driver 正常结束、无 failedStage，但 `passed=false`） |
+| driver 通过项 | `before.lifecycleState="ready"`、`activeOperationExplained=true`、`recoveryControlPresent=false`、`activeStageExplained=true`、`backendStatus.everyCheckReady=true` |
+| 失败项 | `publicProjectionClean=false`；`publicProjectionAudit.rawInternalId=true` |
+| 命中明细 | `job_6d1a0db688474fb9 @ Result Studio 版本与变更` ×3（`publicProjectionHits` 定位） |
+
+**泄漏链**：`ContinueAnalysisMenu.tsx:20-22` 生成的指令文本含 `jobId`（发给 Agent 是**必需**的定位依据）→ 作为 `intent.requestedOutcome` 存进 change set → `result-changeset-service.js` 直接 `slice(0,500)` 投影为 `validationSummary.intentSummary` → `ResultStudioChangeSetPanel` 回显到版本面板 → 内部 ID 出现在用户可见文本。
+
+**修法（单源，不动存储与 Agent 指令）**：
+
+1. `core/shared-backend/redaction.js` 新增 `redactInternalIds()`，规则与 P6 验收断言（driver `rawInternalId`）同源：`\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\b` → `[内部标识]`。
+2. `result-changeset-service.js` 的 `intentSummary` 投影改为 `redactInternalIds(input.intent.requestedOutcome).slice(0, 500)`。
+3. 门禁：`test/block448-intent-summary-redaction.test.mjs` 4/4（内部 ID 族覆盖 / 不误伤普通文本 / 幂等 / 源码契约防裸 slice 回退）。
+
+**边界**：只脱敏**用户可见投影**；`intentRef`、存储原文、Agent 指令一律不改；不新增依赖；不放开断言强度（`rawInternalId` 仍是硬断言，测试数据里的真实泄漏被修掉而非绕过）。
+
 ## 5. 边界与非范围
 
 - 不改 Result Studio 产品语义（不改 `result-studio-lifecycle.js` 的状态判定）；不改 `activeOperations` 语义。

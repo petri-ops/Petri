@@ -118,8 +118,8 @@
       "wave": "C",
       "module": "W-04",
       "lines": 769,
-      "bytes": 37644,
-      "sha256": "da25d586118b5fb6168b4d8f5eda3151aa72c20a9f304a3b401a66380af8bd3f"
+      "bytes": 37682,
+      "sha256": "815ab76889eadbc2edad8627c72759272702e1eda925cfa1c4b53ce5159ab702"
     },
     {
       "path": "core/petri-server/helpers/tools-executor.js",

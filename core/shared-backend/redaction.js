@@ -51,4 +51,22 @@ function redactSensitiveValue(value, ancestors = new WeakSet()) {
   }
 }
 
-module.exports = { redactSensitiveText, redactSensitiveValue, SENSITIVE_VALUE };
+// BLOCK-448：内部主键/任务标识的公开投影脱敏。
+// 与 P6 验收断言（`g0-rs-p6-recovery-electron-driver.cjs` 的 `rawInternalId`）同源规则：
+// 用户可见文本里出现 `job_…` / `p_…` / `rev_…` 等内部 ID 即视为公开投影不干净。
+// 典型来源：`ContinueAnalysisMenu` 生成的指令文本带 jobId（发给 Agent 是必需的），
+// 该文本再作为 `intent.requestedOutcome` 存进 change set 并被回显到版本面板。
+const INTERNAL_ID = /\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\b/g;
+const INTERNAL_ID_VALUE = '[内部标识]';
+
+function redactInternalIds(input) {
+  return String(input || '').replace(INTERNAL_ID, INTERNAL_ID_VALUE);
+}
+
+module.exports = {
+  redactSensitiveText,
+  redactSensitiveValue,
+  redactInternalIds,
+  SENSITIVE_VALUE,
+  INTERNAL_ID_VALUE,
+};
