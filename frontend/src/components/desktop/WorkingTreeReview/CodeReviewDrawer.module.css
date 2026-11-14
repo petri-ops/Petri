@@ -241,7 +241,7 @@
 .drawerBtn {
   padding: var(--petri-space-2) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-bg-button, #3a3a3a);
   color: inherit;
   cursor: pointer;

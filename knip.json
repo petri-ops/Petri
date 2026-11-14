@@ -10,7 +10,9 @@
     "scripts/*.cjs",
     "core/petri-server/agent-tools/plugin-loader.js",
     "core/petri-server/agent-tools/learning.js",
-    "core/petri-server/mcp/registry/run-plugin-script.js"
+    "core/petri-server/mcp/registry/run-plugin-script.js",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs"
   ],
   "project": [
     "src/**/*.js",
@@ -41,7 +43,9 @@
         "core/**/*.js",
         "scripts/**/*.{js,mjs,cjs}",
         "test/**/*.{mjs,cjs,js}",
-        "build/**/*.js"
+        "build/**/*.js",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs"
       ]
     },
     "frontend": {

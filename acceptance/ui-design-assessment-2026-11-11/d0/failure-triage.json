@@ -1,0 +1,30 @@
+{
+  "kind": "block114-triage-report",
+  "version": "1.0.0",
+  "generatedAt": "2026-11-11T05:53:15.777Z",
+  "sourceCommit": "25d8a7a9e0d2a0a56f26b8ce3a6bc64d8f885f0a",
+  "input": "/tmp/ui-d0-failures.json",
+  "registerSize": 6,
+  "total": 2,
+  "summary": {
+    "needs_human": 2
+  },
+  "results": [
+    {
+      "testFile": "test/g0-rs-p6-product-acceptance.test.mjs",
+      "testName": "P6 stored verification and write gate target an injected evidence path",
+      "classifiedAs": "needs_human",
+      "layer": "L3",
+      "reason": "no_key",
+      "confidence": null
+    },
+    {
+      "testFile": "test/nso-w5-impact-coverage.test.mjs",
+      "testName": "W5a 每个测试文件都被 impact-map 引用或在存量基线（新增测试必须挂规则）",
+      "classifiedAs": "needs_human",
+      "layer": "L3",
+      "reason": "no_key",
+      "confidence": null
+    }
+  ]
+}

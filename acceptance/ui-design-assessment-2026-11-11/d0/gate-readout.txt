@@ -1,0 +1,31 @@
+=== D0 门禁读数 2026-11-11T05:44:13Z ===
+--- gate:ui-baseline ---
+> node scripts/ui-design-baseline.mjs --check
+
+[ui-baseline] PASS — 24 行锚 / 38 字段逐项相等（schema=petri.ui-design.baseline.v1）
+exit=
+--- theme-token-contract ---
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m19 passed[39m[22m[90m (19)[39m
+--- docs:check ---
+
+[docs:check] PASS (559 registered documents)
+--- hygiene:check ---
+
+== 卫生检查结果: PASS ==
+--- ui:audit:check ---
+
+[ui-audit] UI 实现与审计台账不同步：
+- 当前工作区包含 UI 改动，但没有同步 docs/ui-productization-audit.md
+[ui-audit] UI 状态只能在实机验证后标记 verified；代码完成请先记录为 in_progress。
+--- quality:lint ---
+  137:21  warning  Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+✖ 2446 problems (0 errors, 2446 warnings)
+  0 errors and 8 warnings potentially fixable with the `--fix` option.
+
+--- quality:types ---
+
+> petri-desktop@0.0.1-rc.7 quality:types
+> tsc --noEmit -p frontend/tsconfig.json --incremental --tsBuildInfoFile node_modules/.cache/petri-tsc/tsbuildinfo
+

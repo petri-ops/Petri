@@ -37,7 +37,7 @@
   width: 20px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -86,7 +86,7 @@
   max-height: calc(100vh - 24px);
   overflow: auto;
   padding: var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
@@ -95,7 +95,7 @@
 .thumbWrap {
   margin-bottom: 10px;
   padding: var(--petri-space-2);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-subtle);
   display: flex;
@@ -114,7 +114,7 @@
 .thumbFallback {
   margin-bottom: 10px;
   padding: 18px var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   border: 1px dashed var(--petri-border);
   background: var(--petri-bg-subtle);
   text-align: center;
@@ -145,7 +145,7 @@
 .cardBtn {
   flex: 1;
   height: 28px;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   border: 1px solid var(--petri-border-card);
   background: transparent;
   color: var(--petri-text);

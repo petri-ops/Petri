@@ -1,0 +1,53 @@
+{
+  "schema": "petri.ui-design.d4.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-419 / UI-D4",
+  "evidenceLevel": "mechanical-gates + contract-tests + DOM/CDP live (honest failure) + human-eye-routes (unsigned)",
+  "notIncluded": ["人眼签字", "VoiceOver 朗读确认", "SUS/树测试真人样本", "元素级裁剪截图过目"],
+  "gates": {
+    "gate:ui-a11y": { "result": "PASS", "matrixCells": 32, "focusGapFiles": 12, "focusGapDeclarations": 16, "contrastPairs": 32, "belowBody": 1, "stateMachine": { "ariaBusy": 3, "roleAlert": 94, "roleStatus": 56, "ariaLive": 19 } },
+    "contractTests": { "result": "PASS", "tests": 7, "file": "test/ui-design-a11y.test.mjs" },
+    "theme-token-contract": { "result": "PASS", "tests": 19 },
+    "d0d3Gates": { "result": "PASS", "note": "gate:ui-baseline / ui-entries / ui-breakpoints / ui-layout / ui-visual 零回退" },
+    "docs:check": { "result": "PASS", "registeredDocuments": 565 },
+    "ui-ledger-status-contract": { "result": "PASS", "tests": 5, "note": "497 段 / debt 35 零改动" }
+  },
+  "liveLeg": {
+    "flow": "ui-d4-a11y-live",
+    "instance": "9223 离屏（t+3s READY；两次跑完立即 kill，REMAIN=0；未设 PETRI_TEST_ONSCREEN）",
+    "firstRun": "9/9 假绿 —— focus_outline_readable 用 outlineWidth 非零冒充焦点可见，已作废不复用",
+    "finalRun": "8/9 allPass=false（修正断言后诚实判红）",
+    "passes": ["cdp_9223_available", "spa_page_target_present", "aria_live_regions_present", "interactive_elements_present", "tabbables_present", "focus_target_reachable", "tokens_resolved_at_runtime", "element_screenshot"],
+    "failure": {
+      "assertion": "focus_ring_observable",
+      "detail": "focus_ring_not_observable: outlineStyle=\"none\", outlineWidth=\"2.5px\" — 登记为 H-06 人眼/独立切片补腿，不冒充通过"
+    },
+    "evidence": ["acceptance/ui-design-assessment-2026-11-11/d4/ui-d4-a11y-live-darwin.json", "acceptance/ui-design-assessment-2026-11-11/d4/ui-d4-a11y-live.png"],
+    "honestDegradation": ["截图为全页 PNG 非元素级裁剪", "aria live region 当次仅 1 处（欢迎页面，非工作区全量）", "DOM/ARIA 读数通过 ≠ 人眼验收通过"]
+  },
+  "stateMatrix": {
+    "cells": 32,
+    "blankCells": 0,
+    "note": "每格有判据/证据位/终态登记；hover/active/focus-visible 三态标 done-partial（观感 pending_human_eye），未冒充全覆盖"
+  },
+  "contrast": {
+    "pairsComputed": 32,
+    "belowBody45": [{ "theme": "light", "text": "tertiary", "surface": "subtle", "ratio": 4.40 }],
+    "disposition": "done-partial — 不擅自改色值；大字 3:1 可适用但需人眼判定该处是否大字（H-05）"
+  },
+  "humanEye": {
+    "route": "docs/ui-design-human-eye-route.md",
+    "items": ["E-01 树测试", "E-02 22 条 debt", "E-03 SUS/UMUX-Lite", "H-01~H-08 增量项"],
+    "signatureSlots": "全部空白",
+    "status": "pending_human_eye"
+  },
+  "exitCriteria": {
+    "eightStateMatrixNoBlank": "done — 32/32 有判据；三态 done-partial 观感归 E",
+    "focusVisibleCoverage": "done-partial — 只减棘轮冻结 12 文件/16 声明；实机判红焦点环不可见，补腿在册",
+    "wcagAaMechanical": "done-partial — 32 对计算，1 对 4.40:1 如实登记；零依赖纯函数 + 阈值负测",
+    "liveEvidence": "done — 8/9 诚实判红 + PNG，9223 已终止",
+    "humanEyeSigned": "pending_human_eye — 签字槽全空，Agent 不代答"
+  },
+  "selfCorrection": "首跑用 outlineWidth 非零把焦点不可见判成 PASS（假绿），复核后改断言为 outlineStyle !== none 并复跑取 8/9 诚实红；未复用首跑 9/9。",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

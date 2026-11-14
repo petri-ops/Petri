@@ -43,6 +43,6 @@
   flex: none;
   color: var(--petri-text-tertiary);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   padding: 0 var(--petri-space-1);
 }

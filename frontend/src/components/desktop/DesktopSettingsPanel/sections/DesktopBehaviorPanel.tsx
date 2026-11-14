@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import styles from './DesktopBehaviorPanel.module.css';
+import { SettingsField } from '../SettingsField';
 import { useDesktopShellContext, type ShellPrefs } from '@/components/shell/DesktopShellProvider';
 import { validateQuietHoursInput } from '@/lib/quiet-hours';
 
@@ -33,50 +34,50 @@ export function DesktopBehaviorPanelView({ prefs, syncError, onChange }: Desktop
     if (!error) onChange({ quietHours: value.trim() });
   };
   return (
-    <div className="petri-field" data-testid="desktop-behavior-panel">
-      <label className="petri-field__label">桌面行为</label>
-      <div className={styles.rows}>
-        <label className={styles.row}>
-          <input
-            type="checkbox"
-            checked={prefs.notifyOnTurnEnd}
-            onChange={(event) => onChange({ notifyOnTurnEnd: event.target.checked })}
-          />
-          <span>
-            <span className={styles.rowTitle}>回合结束时发送系统通知</span>
-            <span className={styles.rowHint}>仅当窗口不在前台时出现；通知不包含对话正文。</span>
-          </span>
-        </label>
-        <label className={styles.row}>
-          <input
-            type="checkbox"
-            checked={prefs.closeToTray}
-            onChange={(event) => onChange({ closeToTray: event.target.checked })}
-          />
-          <span>
-            <span className={styles.rowTitle}>关闭窗口时最小化到托盘</span>
-            <span className={styles.rowHint}>关闭后后端与正在运行的工具继续执行；从托盘菜单可以真正退出。</span>
-          </span>
-        </label>
-      </div>
-      <div className={styles.quietRow}>
-        <label className={styles.rowTitle} htmlFor="quiet-hours-input">免打扰时段</label>
+    <div data-testid="desktop-behavior-panel">
+      <SettingsField
+        icon="bell"
+        label="回合结束通知"
+        trailing
+        hint="仅窗口不在前台时提醒，不含对话正文"
+      >
+        <input
+          type="checkbox"
+          checked={prefs.notifyOnTurnEnd}
+          aria-label="回合结束时发送系统通知"
+          onChange={(event) => onChange({ notifyOnTurnEnd: event.target.checked })}
+        />
+      </SettingsField>
+      <SettingsField
+        icon="panel-bottom"
+        label="关闭窗口时最小化到托盘"
+        trailing
+        hint="后台继续运行，从托盘菜单可真正退出"
+      >
+        <input
+          type="checkbox"
+          checked={prefs.closeToTray}
+          aria-label="关闭窗口时最小化到托盘"
+          onChange={(event) => onChange({ closeToTray: event.target.checked })}
+        />
+      </SettingsField>
+      <SettingsField
+        icon="moon"
+        label="免打扰时段"
+        htmlFor="quiet-hours-input"
+        hint="此时段不弹通知；跨午夜写成 22:00-08:00，留空关闭"
+      >
         <input
           id="quiet-hours-input"
           type="text"
           className="petri-input petri-input--sm"
           value={quietDraft}
           onChange={(event) => handleQuietChange(event.target.value)}
-          placeholder="22:00-08:00（留空关闭）"
-          aria-label="免打扰时段"
+          placeholder="22:00-08:00"
           aria-invalid={quietError ? 'true' : 'false'}
         />
-        <span className={styles.rowHint}>该时段内不弹系统通知，但应用内通知中心仍会记录。跨午夜请写成 22:00-08:00。</span>
         {quietError && <span className={styles.error} role="alert">{quietError}</span>}
-      </div>
-      <p className="petri-field__hint">
-        两项默认：通知开启、关闭即退出。退出时若仍有运行中的任务，会先显示活动摘要。
-      </p>
+      </SettingsField>
       {syncError && (
         <p className={styles.error} role="alert" data-testid="desktop-behavior-sync-error">
           {syncError}

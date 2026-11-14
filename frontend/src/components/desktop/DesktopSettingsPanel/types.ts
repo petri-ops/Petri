@@ -1,3 +1,5 @@
+import type { IconName } from '@/components/icons/Icon';
+
 // ============================================================
 // DesktopSettingsPanel — shared types
 //
@@ -15,39 +17,54 @@ export interface Props {
 }
 
 export type SettingsSection =
+  // BLOCK-424 信息架构拆分：外观 / 通知与桌面 / 联网与代理 从 general、compute 抽出
+  | 'appearance'
+  | 'desktop'
   | 'general'
   | 'models'
+  | 'network'
   | 'compute'
   | 'usage'
-  // BLOCK-116 P4 — 决策原语配置节（配置+观测相邻）
   | 'decisions'
-  // BLOCK-200 阶段 A 速赢 I — 键位面与推理档位面
   | 'keymap'
   | 'reasoning'
   | 'diagnostics'
   | 'experimental'
   | 'maintenance';
 
+/**
+ * 分区层级（BLOCK-424）：`core` = 日常会用、常驻左栏；`advanced` = 开发者/高频调参向，
+ * 收进左栏「高级」折叠组，默认不展开。判据来自 2026-11-11 实机盘点：
+ * 决策原语 29 输入 / 118 下拉 / 9152 字符、运行时与诊断 8846 字符，均属绝大多数用户
+ * 不需要关注与点击的面。
+ */
+export type SettingsTier = 'core' | 'advanced';
+
 export const SETTINGS_SECTIONS: Array<{
   id: SettingsSection;
   label: string;
   description: string;
-  icon: 'settings' | 'brain' | 'cpu' | 'wrench' | 'flag';
+  /**
+   * 图标改用 `IconName` 全域：原先只允许 5 个字面量，13 个分区被迫循环复用，
+   * 左栏出现「外观/通知与桌面/快捷键都是齿轮」「计算/联网/用量都是方块」的重复。
+   * BLOCK-424：每个分区配一个语义贴切的图标，13 项互不重复。
+   */
+  icon: IconName;
+  tier: SettingsTier;
 }> = [
-  { id: 'general', label: '常规', description: '外观与应用偏好', icon: 'settings' },
-  { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'brain' },
-  { id: 'compute', label: '计算与数据', description: '执行位置与存储', icon: 'cpu' },
-  { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'cpu' },
-  // BLOCK-116 P4 — 决策原语配置（紧邻观测节：配置+观测同位）
-  { id: 'decisions', label: '决策原语', description: '各智能决策接点的启用与阈值', icon: 'brain' },
-  // BLOCK-200 阶段 A 速赢 I — 键位面与推理档位面（两者都落 shared-config 注册表族）
-  { id: 'keymap', label: '快捷键', description: '应用级命令的键位、冲突与恢复默认', icon: 'settings' },
-  { id: 'reasoning', label: '推理档位', description: '思考档位的默认值与逐协议参数映射', icon: 'brain' },
-  // UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区：
-  // 进程快照 / R·Python 运行时状态 / 日志，设备级诊断不绑项目。
-  { id: 'diagnostics', label: '运行时与诊断', description: '本地服务、R/Python 运行时与日志', icon: 'cpu' },
-  { id: 'experimental', label: '实验特性', description: 'Agent 工作台等实验开关', icon: 'flag' },
-  { id: 'maintenance', label: '隐私与维护', description: '反馈、诊断与更新', icon: 'wrench' },
+  { id: 'appearance', label: '外观', description: '主题、字号与动效', icon: 'sun', tier: 'core' },
+  { id: 'desktop', label: '通知与桌面', description: '通知、托盘与免打扰', icon: 'bell', tier: 'core' },
+  { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'bot', tier: 'core' },
+  { id: 'network', label: '联网与代理', description: '代理、证书与检索', icon: 'globe', tier: 'core' },
+  { id: 'compute', label: '计算与数据', description: '存储、远程目标与回收站', icon: 'database', tier: 'core' },
+  { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'bar-chart', tier: 'core' },
+  { id: 'keymap', label: '快捷键', description: '命令键位与冲突', icon: 'key', tier: 'core' },
+  { id: 'general', label: '配置迁移', description: '从外部 Agent 导入', icon: 'download', tier: 'core' },
+  { id: 'maintenance', label: '隐私与维护', description: '反馈、更新与备份', icon: 'shield', tier: 'core' },
+  { id: 'decisions', label: '决策原语', description: '决策接点、审批与编排', icon: 'zap', tier: 'advanced' },
+  { id: 'reasoning', label: '推理档位', description: '思考档位与协议映射', icon: 'brain', tier: 'advanced' },
+  { id: 'experimental', label: '实验特性', description: '尚未定型的开关', icon: 'sparkles', tier: 'advanced' },
+  { id: 'diagnostics', label: '运行时与诊断', description: '服务、运行时与日志', icon: 'terminal', tier: 'advanced' },
 ];
 
 export interface UsageSummary {

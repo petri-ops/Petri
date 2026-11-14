@@ -11,7 +11,7 @@
   gap: var(--petri-space-3);
   padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid transparent;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -38,7 +38,7 @@
   width: 168px;
   padding: 5px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-elevated);
   box-shadow: var(--petri-shadow-menu);
 }
@@ -56,7 +56,7 @@
   gap: var(--petri-space-3);
   padding: 0 var(--petri-space-3);
   border: 0;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;

@@ -87,7 +87,7 @@
   --petri-text: #18181b;
   --petri-text-primary: var(--petri-text);
   --petri-text-secondary: #3f3f46;
-  --petri-text-tertiary: #71717a;
+  --petri-text-tertiary: #6b6b73;
   --petri-text-muted: #6a6a73; /* BLOCK-161 W1 对比度修复：#a1a1aa 2.56:1 → 白底 5.3/subtle 底 4.8 双达标（subtle 底为 muted 高频宿主，仅对白底达标不足） */
   --petri-accent: #0d9488;
   /* BLOCK-76 清债补契约定义：派生 token（跟随各主题 accent/bg 级联取值） */
@@ -231,7 +231,7 @@ html[data-theme='dark'],
   --petri-surface: var(--petri-bg-surface);
   --petri-surface-alt: var(--petri-bg-subtle);
   --petri-surface-translucent: color-mix(in srgb, var(--petri-bg-surface) 84%, transparent);
-  --petri-surface-hover: rgba(230, 237, 243, 0.09);
+  --petri-surface-hover: var(--petri-hover);
   --petri-border-subtle: color-mix(in srgb, var(--petri-border) 68%, transparent);
   --petri-input-bg: var(--petri-bg-surface);
   --petri-overlay: rgba(2, 6, 23, 0.6);
@@ -416,7 +416,7 @@ html[data-theme='dark'],
 
 .theme-doc-markdown .theme-code-block {
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .theme-doc-markdown pre,
@@ -508,14 +508,14 @@ html[data-theme='dark'],
   margin: 1rem 0.5rem 0;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
 }
 
 .petri-sidebar-wechat img {
   width: 56px;
   height: 56px;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   object-fit: cover;
 }
 
@@ -553,7 +553,7 @@ html[data-theme='dark'],
   height: auto;
   display: block;
   margin: 0.9rem auto 1.05rem;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   box-shadow: var(--petri-shadow-menu);
 }
 
@@ -572,7 +572,7 @@ html[data-theme='dark'],
   margin: 0.58rem 0;
   padding: 0.62rem 0.72rem;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
 }
 
@@ -594,7 +594,7 @@ html[data-theme='dark'],
   align-items: center;
   gap: 0.34rem;
   border: 1px solid var(--petri-border-input);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--ifm-color-primary);
   cursor: pointer;
@@ -639,7 +639,7 @@ html[data-theme='dark'],
   margin: 1.6rem 0 1rem;
   padding: 1rem;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
 }
 
@@ -651,7 +651,7 @@ html[data-theme='dark'],
   width: fit-content;
   margin-bottom: 0.28rem;
   padding: 0.12rem 0.42rem;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-accent-bg);
   color: var(--ifm-color-primary-dark);
   font-size: var(--petri-font-size-sm);
@@ -686,7 +686,7 @@ html[data-theme='dark'],
   justify-content: center;
   min-height: 1.9rem;
   border: 1px solid var(--petri-border-input);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -765,7 +765,7 @@ html[data-theme='dark'],
 }
 
 .petri-comments .wl-panel {
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
 }
 
 /* Compact mode for FigCode right panel */
@@ -931,7 +931,7 @@ html[data-theme='dark'],
   margin: 18px 0;
   background: linear-gradient(135deg, rgba(15, 118, 110, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
   border: 1px solid color-mix(in srgb, var(--petri-accent) 22%, transparent);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   text-decoration: none !important;
   color: inherit !important;
   transition: all var(--petri-duration-fast);
@@ -951,7 +951,7 @@ html[data-theme='dark'],
 .try-online-icon {
   width: 40px;
   height: 40px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1102,7 +1102,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   font-weight: 600;
   color: var(--petri-status-warning-fg);
   background: var(--petri-status-warning-bg);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   vertical-align: middle;
 }
 
@@ -1160,7 +1160,7 @@ html.petri-desktop .theme-doc-sidebar-container {
   width: 280px;
 }
 html.petri-desktop .theme-doc-sidebar-container .menu__link {
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
 }
 
 

@@ -1,0 +1,13 @@
+{
+  "total": 32,
+  "byTerminal": {
+    "done": 6,
+    "done-partial": 8,
+    "retain-with-reason": 5,
+    "pending_human_eye": 2,
+    "external-blocked": 4,
+    "pending_user_ruling": 7
+  },
+  "inProgress": 0,
+  "note": "计数由 scripts/ui-design-gap-ledger-check.mjs 复算写入，不手写编造"
+}

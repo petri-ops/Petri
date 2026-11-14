@@ -11,16 +11,19 @@
  */
 
 export type SettingsSectionId =
-  | 'general'
+  | 'appearance'
+  | 'desktop'
   | 'models'
+  | 'network'
   | 'compute'
   | 'usage'
-  | 'decisions'
   | 'keymap'
+  | 'general'
+  | 'maintenance'
+  | 'decisions'
   | 'reasoning'
-  | 'diagnostics'
   | 'experimental'
-  | 'maintenance';
+  | 'diagnostics';
 
 export interface SettingsSearchEntry {
   id: SettingsSectionId;
@@ -32,10 +35,16 @@ export interface SettingsSearchEntry {
 
 export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.freeze([
   {
-    id: 'general',
-    label: '常规',
-    description: '外观与应用偏好',
-    keywords: ['主题', '外观', '字号', '界面', 'theme', 'appearance', 'font', '缩放'],
+    id: 'appearance',
+    label: '外观',
+    description: '主题、字号与动效',
+    keywords: ['主题', '外观', '字号', '界面', '主题色', '动效', '缩放', 'theme', 'appearance', 'font', 'accent', 'motion'],
+  },
+  {
+    id: 'desktop',
+    label: '通知与桌面',
+    description: '通知、托盘与免打扰',
+    keywords: ['通知', '托盘', '免打扰', '桌面', '关闭窗口', 'notification', 'tray', 'dock', 'dnd'],
   },
   {
     id: 'models',
@@ -44,10 +53,16 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.free
     keywords: ['模型', '接口', '渠道', 'api', 'key', 'endpoint', 'provider', 'vision', '视觉'],
   },
   {
+    id: 'network',
+    label: '联网与代理',
+    description: '代理、证书与检索',
+    keywords: ['联网', '网络', '代理', '证书', '检索', '抓取', '白名单', 'proxy', 'ca', 'web', 'search', 'http'],
+  },
+  {
     id: 'compute',
     label: '计算与数据',
-    description: '执行位置与存储',
-    keywords: ['计算', '数据', '存储', '目录', 'runtime', 'python', 'r', '工具包'],
+    description: '存储、远程目标与回收站',
+    keywords: ['计算', '数据', '存储', '目录', '远程', 'ssh', '联邦', '回收站', 'runtime', 'python', 'r', '工具包'],
   },
   {
     id: 'usage',
@@ -56,40 +71,46 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.free
     keywords: ['用量', '成本', '费用', '缓存', '资源', 'token', 'cost', 'usage', '上限'],
   },
   {
-    id: 'decisions',
-    label: '决策原语',
-    description: '各智能决策接点的启用与阈值',
-    keywords: ['决策', '阈值', '接点', 'judge', 'decision', 'threshold', '路由', '校准'],
-  },
-  {
     id: 'keymap',
     label: '快捷键',
-    description: '应用级命令的键位、冲突与恢复默认',
+    description: '命令键位与冲突',
     keywords: ['快捷键', '键位', '键盘', '冲突', 'keymap', 'shortcut', 'hotkey', '命令'],
   },
   {
-    id: 'reasoning',
-    label: '推理档位',
-    description: '思考档位的默认值与逐协议参数映射',
-    keywords: ['推理', '档位', '思考', 'reasoning', 'effort', 'thinking', '预算', 'budget'],
-  },
-  {
-    id: 'diagnostics',
-    label: '运行时与诊断',
-    description: '本地服务、R/Python 运行时与日志',
-    keywords: ['诊断', '日志', '运行时', '服务', '后端', 'backend', 'runtime', '进程'],
-  },
-  {
-    id: 'experimental',
-    label: '实验特性',
-    description: 'Agent 工作台等实验开关',
-    keywords: ['实验', '开关', '特性', 'flag', 'feature', '工作台', 'agent'],
+    id: 'general',
+    label: '配置迁移',
+    description: '从外部 Agent 导入',
+    keywords: ['导入', '迁移', '配置', '外部', 'codex', 'zcode', 'toml', 'json', 'import', 'config'],
   },
   {
     id: 'maintenance',
     label: '隐私与维护',
-    description: '反馈、诊断与更新',
+    description: '反馈、更新与备份',
     keywords: ['隐私', '维护', '反馈', '更新', '备份', '导出', '导入', 'config', 'feedback', 'update'],
+  },
+  {
+    id: 'decisions',
+    label: '决策原语',
+    description: '决策接点、审批与编排',
+    keywords: ['决策', '阈值', '接点', '审批', '编排', 'judge', 'decision', 'threshold', '路由', '校准'],
+  },
+  {
+    id: 'reasoning',
+    label: '推理档位',
+    description: '思考档位与协议映射',
+    keywords: ['推理', '档位', '思考', 'reasoning', 'effort', 'thinking', '预算', 'budget'],
+  },
+  {
+    id: 'experimental',
+    label: '实验特性',
+    description: '尚未定型的开关',
+    keywords: ['实验', '开关', '特性', 'flag', 'feature', '工作台', 'agent'],
+  },
+  {
+    id: 'diagnostics',
+    label: '运行时与诊断',
+    description: '服务、运行时与日志',
+    keywords: ['诊断', '日志', '运行时', '服务', '后端', 'backend', 'runtime', '进程'],
   },
 ]);
 

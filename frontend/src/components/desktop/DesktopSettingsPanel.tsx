@@ -5,17 +5,14 @@
  */
 import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
-import { ThemeControl } from './ThemeControl';
-import { useTheme, FONT_SCALE_MIN, FONT_SCALE_MAX } from '@/themes/ThemeProvider';
-import { AccentControl } from './AccentControl';
 import { SettingsNav } from './DesktopSettingsPanel/SettingsNav';
-import { MotionControl } from './DesktopSettingsPanel/sections/MotionControl';
+// BLOCK-424 — 信息架构拆分：外观 / 通知与桌面 / 联网与代理 各自独立分区
+import { AppearanceSection } from './DesktopSettingsPanel/sections/AppearanceSection';
+import { DesktopSection } from './DesktopSettingsPanel/sections/DesktopSection';
+import { NetworkSection } from './DesktopSettingsPanel/sections/NetworkSection';
 import { ExternalImportPanel } from '@/components/settings/ExternalImportPanel'; // BLOCK-264（C-35）
-import { DesktopBehaviorPanel } from './DesktopSettingsPanel/sections/DesktopBehaviorPanel';
 import { ModelSelectorControls } from './DesktopSettingsPanel/sections/ModelSelectorControls';
-import { NetworkProxyPanel } from './DesktopSettingsPanel/sections/NetworkProxyPanel';
 // BLOCK-247（Q2b）— 联网检索与抓取的授权面（默认关；即时生效）
-import { WebAccessPanel } from './DesktopSettingsPanel/sections/WebAccessPanel';
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
 import { UsageSection } from './DesktopSettingsPanel/UsageSection';
@@ -65,7 +62,7 @@ import { TerminalPanel } from '@/pages/project-workspace';
 import { credentialId } from './DesktopSettingsPanel/model-types';
 export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
   // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
-  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'general');
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'appearance');
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
   // BLOCK-201 W2 — 搜索/分区过滤/按区重置（状态机外置：面板已贴 code-size 预算，见钩子注释）
   const {
@@ -80,7 +77,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
     resetActiveSection,
   } = useSettingsTransferState({ activeSection, activeLabel: activeSectionMeta.label });
   const backendStatus = useBackendStatus();
-  const { preference: themePreference, fontScale, setFontScale } = useTheme();
   // UI-696 — 图 2 形态：默认（全局）/ 自定义（逐模型）双页签
   const [modelPrefTab, setModelPrefTab] = useState<'default' | 'custom'>('custom');
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
@@ -179,82 +175,40 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         </div>
       </div>
 
-      <SettingsToolbar
-        query={settingsQuery}
-        onQueryChange={setSettingsQuery}
-        resultCount={visibleSectionIds.size}
-        totalCount={SETTINGS_SECTIONS.length}
-        resetLabel={resetFamilies.length > 0 ? `恢复「${activeSectionMeta.label}」默认` : undefined}
-        onReset={resetFamilies.length > 0 ? () => void resetActiveSection() : undefined}
-        busy={resetBusy}
-      />
-      {settingsNotice && (
-        <p className="petri-field__hint" data-testid="settings-reset-notice" role="status">{settingsNotice}</p>
-      )}
-
       <div className="petri-settings-layout">
-        <SettingsNav
-          visibleSectionIds={visibleSectionIds}
-          activeSection={activeSection}
-          onSelect={setActiveSection}
-        />
+        <div className="petri-settings-sidebar">
+          <SettingsToolbar
+            query={settingsQuery}
+            onQueryChange={setSettingsQuery}
+            resultCount={visibleSectionIds.size}
+            totalCount={SETTINGS_SECTIONS.length}
+            resetLabel={resetFamilies.length > 0 ? `恢复「${activeSectionMeta.label}」默认` : undefined}
+            onReset={resetFamilies.length > 0 ? () => void resetActiveSection() : undefined}
+            busy={resetBusy}
+          />
+          {settingsNotice && (<p className="petri-field__hint" data-testid="settings-reset-notice" role="status">{settingsNotice}</p>)}
+          <SettingsNav
+            visibleSectionIds={visibleSectionIds}
+            activeSection={activeSection}
+            onSelect={setActiveSection}
+          />
+        </div>
         <div className="petri-desktop-panel__body petri-settings-content">
+        {activeSection === 'appearance' && <AppearanceSection />}
+        {activeSection === 'desktop' && <DesktopSection />}
+        {activeSection === 'network' && <NetworkSection />}
         {activeSection === 'general' && (
           <section className="petri-settings-section">
             <div className="petri-settings-section__heading">
-              <h3>常规</h3>
-              <p>调整应用外观与基础使用偏好。</p>
+              <h3>配置迁移</h3>
+              <p>从其他 Agent 工具导入配置：只读预览 → 勾选确认 → 应用（可回滚），凭据永不导入。</p>
             </div>
-        <div className="petri-field">
-          <label className="petri-field__label">外观主题</label>
-          <ThemeControl menuPlacement="bottom" />
-          <span className="petri-badge">
-            当前：
-            {themePreference === 'system'
-              ? '跟随系统'
-              : themePreference === 'light'
-                ? '日间'
-                : '夜间'}
-          </span>
-          <p className="petri-field__hint">可跟随 macOS 外观，或固定使用日间/夜间模式。</p>
-        </div>
-        <div className="petri-field">
-          <label className="petri-field__label" htmlFor="font-scale-input">界面字号</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              id="font-scale-input"
-              type="number"
-              min={Math.round(FONT_SCALE_MIN * 100)}
-              max={Math.round(FONT_SCALE_MAX * 100)}
-              step={5}
-              value={Math.round(fontScale * 100)}
-              onChange={(e) => {
-                const pct = Number(e.target.value);
-                if (Number.isFinite(pct)) setFontScale(pct / 100);
-              }}
-              style={{ width: 90, height: 32, textAlign: 'right',
-                border: '1px solid var(--petri-border)', borderRadius: 6,
-                background: 'var(--petri-bg-surface)', color: 'var(--petri-text)' }}
-            />
-            <span style={{ color: 'var(--petri-text-secondary)', fontSize: 'var(--petri-font-size-sm, 12px)' }}>%</span>
-          </div>
-          <p className="petri-field__hint">调整应用界面的文字大小（100% = 默认；80%–140%），图标和布局尺寸不受影响。</p>
-        </div>
-        <div className="petri-field">
-          <label className="petri-field__label">主题色</label>
-          <AccentControl />
-          <p className="petri-field__hint">更换应用的强调配色（按钮、链接、高亮等），明暗主题与布局不受影响。</p>
-        </div>
-        <MotionControl />
-        <DesktopBehaviorPanel />
-        {/* BLOCK-264（C-35）— 外部配置导入应用面 */}
-        <ExternalImportPanel />
+            <ExternalImportPanel />
           </section>
         )}
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
-            {/* UI-696 — 图 2 形态：默认 / 自定义 双页签（组件见 ./DesktopSettingsPanel/ModelPreferenceTabs） */}
             <ModelPreferenceTabs value={modelPrefTab} onChange={setModelPrefTab} />
             {modelPrefTab === 'default' ? (
               <div className={prefStyles.defaultPane}>
@@ -572,14 +526,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
         <HarnessEnvironment />
 
-        <hr className="petri-section-divider" />
-
-        {/* BLOCK-202 W3 — 网络代理与自签 CA（保存后需重启后端生效） */}
-        <NetworkProxyPanel />
-        <hr className="petri-section-divider" />
-
-        {/* BLOCK-247（Q2b）— 联网检索与抓取授权（默认关；即时生效） */}
-        <WebAccessPanel />
         <hr className="petri-section-divider" />
 
         <TrashManagement />

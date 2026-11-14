@@ -1,0 +1,72 @@
+{
+  "schema": "petri.ui-design.d1.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-416 / UI-D1",
+  "evidenceLevel": "mechanical-gates-and-contract-tests",
+  "notIncluded": ["实机观感", "人眼签字", "树测试真人样本", "读屏"],
+  "treeState": "dirty — 他方 CSS WIP + 并发写入者 src/main/_backend-ports.js / test/block414-backend-port-reuse.test.mjs + 用户 untracked 资产，本程序零触碰其文件",
+  "redGreen": {
+    "contract": "HK-01 红绿先行（新机械门 = 新行为契约）",
+    "red": {
+      "gate": "[ui-entries] FAIL 11 项：页头清单漂移（/backend /skills /plugins 残留）+ 门自身 2 处口径 bug（/* 在路由字符串里被当块注释吞掉、重定向路由未计入已登记集合）",
+      "tests": "test/ui-design-entries.test.mjs 3 failed / 8 passed"
+    },
+    "fix": "① 门改字符串感知的注释剥离状态机；② 方向 B 已登记集合纳入重定向别名；③ shared.tsx 清单清残留并补 canonical /extensions；④ 新增表内 standalone 字段↔唯一真源对账防第二真相",
+    "green": {
+      "gate": "[ui-entries] PASS — 16 路由 / 25 入口字面量 / 4 独立页；canonical 唯一、无孤儿页",
+      "tests": "11/11 pass, 0 fail"
+    }
+  },
+  "gates": {
+    "gate:ui-entries": { "result": "PASS", "routes": 16, "entryLiterals": 25, "standalonePages": 4 },
+    "gate:ui-baseline": { "result": "PASS", "anchors": 24, "fields": 38 },
+    "theme-token-contract": { "result": "PASS", "tests": 19 },
+    "frontend-scoped-vitest": { "result": "PASS", "files": 5, "tests": 69, "scope": "titlebar/* + TitleBar.test.tsx + theme-token-contract" },
+    "docs:check": { "result": "PASS", "registeredDocuments": 561 },
+    "ui:audit:check": { "result": "PASS", "note": "本包真实 UI 增量按 AGENTS.md 同步 UI-703 in_progress 条目后转绿；他方 WIP 仍零触碰、owner 归属不变" },
+    "test:changed:list": { "result": "PASS", "unknown": 0 },
+    "hygiene:check": { "result": "PASS" }
+  },
+  "closeoutRun": {
+    "command": "npm run closeout -- --skip=tests,quality:perf,quality:lint,quality:lint:ledger --gate gate:ui-entries --gate gate:ui-baseline",
+    "result": "19/19 门 PASS（audit:compact / hygiene / docs / ui-audit / user-assets / version-parity / silent-catch / code-size / arch-cycles / css-modules / secret / arch / types / knip / post-h9-contracts / ear / surface / gate:ui-entries / gate:ui-baseline）",
+    "excluded": [
+      { "gate": "tests (test:changed)", "reason": "6 红，四类归因见 closeoutAttribution；本包引入的 2 条 BLOCK-332 已根修转绿" },
+      { "gate": "quality:perf", "reason": "V/环境稳定红，不重采不放宽" },
+      { "gate": "quality:lint", "reason": "1 error 来自并发写入者 W 文件 no-unused-vars，零触碰" },
+      { "gate": "quality:lint:ledger", "reason": "同一 W 文件 1 项未入账，不入抑制台账、不放宽基线" }
+    ],
+    "note": "被 --skip 排除的 4 门均未通过，不算 PASS、不表述为全绿；门禁全绿是必要非充分条件"
+  },
+  "closeoutAttribution": {
+    "defaultCloseout": "FAIL — 首个失败门 = test:changed（6 红）；前 4 门 audit:compact / hygiene / docs / ui-audit 全 PASS",
+    "selfIntroducedFixed": [
+      "首版新增 ## UI-703 台账段 → BLOCK-332 段数 497→498、未闭合债 13→14 判红；按 BLOCK-394/395 既有先例改为 UI-702 同段追加，段数回 497 / 债回 35，契约 5/5 绿，**未放宽任何基线**"
+    ],
+    "remainingReds": [
+      { "test": "test/g0-rs-p6-product-acceptance.test.mjs", "reason": "p6_current_source_tree_not_exact", "class": "W/V", "note": "detail 含他方 CSS WIP + 本包 package.json / impact-map.json；需干净树重算 P6 源绑定" },
+      { "test": "test/nso-w5-impact-coverage.test.mjs", "reason": "test/block414-backend-port-reuse.test.mjs 未挂规则", "class": "W", "note": "开局后并发写入者 untracked 在制文件，零触碰；本包两个新测试已挂 ui-design-program 规则" },
+      { "test": "test/credential-store.test.mjs", "reason": "keychain write verify failed: stored != written", "class": "V", "note": "隔离单跑复现，本机 keychain 环境；D0 同轮无此红，本包零触碰 credential-store 及其测试" },
+      { "test": "test/block414-backend-port-reuse.test.mjs", "reason": "批量跑 'test failed'，隔离单跑 4/4 绿", "class": "W", "note": "并发写入者在制测试与 keychain 探针账户并发互踩；零触碰、不代改" },
+      { "gate": "quality:perf", "reason": "packaged_start 稳定 5 连红（495–587ms > 阈值 493ms）", "class": "V", "note": "沿用 D0 判定：不重采、不放宽阈值" }
+    ],
+    "triage": "block114-failure-triage 对 5 条给 needs_human×5；经源码/隔离复跑逐条定性如上，证据=d1/failure-triage.json"
+  },
+  "deliverables": [
+    "scripts/ui-design-entry-registry.mjs（单一入口表：14 canonical / 6 alias / 1 surfaceAlias / 3 cancelled）",
+    "scripts/ui-design-entry-gate.mjs + npm run gate:ui-entries（四向对账 + 5 类植入必红负测）",
+    "test/ui-design-entries.test.mjs（11/11）",
+    "frontend/src/components/desktop/titlebar/shared.tsx（isStandalonePagePath 残留清理）",
+    "docs/ui-design-ia-decision-material.md（U-01~U-06 / E-01~E-03 / V 补腿条件 / 签字槽）",
+    "docs/ui-productization-audit.md UI-703 in_progress",
+    "DOC-REGISTRY / README / impact-map / package.json 接线"
+  ],
+  "exitCriteria": {
+    "duplicateCanonicalPaths": 0,
+    "orphanPages": "0 或显式 cancelled 留因（U-01；/window/rail internal 留因；/backend 退役留因）",
+    "coreTaskClicks": "≤3 由表内 clicks 字段机械守护（门断言）",
+    "treeTestSuccessRate": "pending_human_eye — 真人样本，Agent 不代答",
+    "reviewDualHost": "done-partial — 登记为同一 canonical 的第二宿主（SURFACE_ALIASES）；是否物理收敛归 U-06 / 产品裁决，未删任一承载"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

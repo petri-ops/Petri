@@ -3,7 +3,7 @@
 .card {
   margin: 10px 0;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   overflow: hidden;
   background: var(--petri-bg-subtle);
 }
@@ -34,7 +34,7 @@
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   padding: 0 var(--petri-space-3);
 }
 
@@ -87,7 +87,7 @@
   color: var(--petri-text-secondary);
   background: transparent;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   padding: 1px var(--petri-space-3);
   cursor: pointer;
 }
@@ -108,7 +108,7 @@
   justify-content: center;
   color: var(--petri-text-muted);
   border: 1px dashed var(--petri-border);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   margin: 0 5px;
 }
 

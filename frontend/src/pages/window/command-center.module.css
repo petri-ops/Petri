@@ -7,7 +7,7 @@
 .drillNote {
   margin-bottom: 10px;
   padding: var(--petri-space-3) var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
 }
 
 .loadError {
@@ -38,7 +38,7 @@
   flex-direction: column;
   gap: var(--petri-space-3);
   padding: var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   color: var(--petri-text-primary, #e6e9f2);
@@ -108,7 +108,7 @@
 
 .remoteBadge {
   padding: 2px 7px;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-accent-soft, rgba(90, 156, 255, 0.16));
   color: var(--petri-accent, #5a9cff);
   max-width: 160px;
@@ -145,7 +145,7 @@
 
 .projectTag {
   padding: 2px 7px;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-bg-surface, rgba(154, 163, 184, 0.12));
   border: 1px solid var(--petri-border-card);
   color: var(--petri-text-secondary, #9aa3b8);
@@ -172,7 +172,7 @@
 .cancelArmBtn {
   flex: 1;
   padding: var(--petri-space-1) var(--petri-space-3);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   border: 1px solid var(--petri-border-card);
   background: transparent;
   color: var(--petri-text-secondary, #9aa3b8);
@@ -219,7 +219,7 @@
   resize: vertical;
   min-height: 44px;
   padding: var(--petri-space-3) 10px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   border: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
   color: var(--petri-text-primary, #e6e9f2);
@@ -235,7 +235,7 @@
 .tileLog {
   margin: 0;
   padding: var(--petri-space-3);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
   line-height: 1.5;
@@ -296,7 +296,7 @@
   align-items: center;
   gap: var(--petri-space-3);
   padding: var(--petri-space-1) var(--petri-space-3);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
 }
 
@@ -334,7 +334,7 @@
 .agentSummary {
   margin: 0;
   padding: var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   line-height: 1.6;
   white-space: pre-wrap;
@@ -351,7 +351,7 @@
   padding: var(--petri-space-1) var(--petri-space-2);
   margin: -2px -6px 0;
   border: none;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: none;
   cursor: pointer;
   text-align: left;
@@ -395,7 +395,7 @@
 .govBtn,
 .govBtnDanger {
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   padding: 3px 10px;
@@ -419,7 +419,9 @@
   background: var(--petri-hover);
 }
 
+/* UI-D3 / BLOCK-418 — selected 语义改走专用 token（明暗由 custom.css 成对派生），
+   不再直接依赖 accent 裸引用；值与原 var(--petri-accent) 等价，零视觉变化。 */
 .tileSelected {
-  outline: 2px solid var(--petri-accent);
+  outline: 2px solid var(--petri-selected-border);
   outline-offset: -2px;
 }

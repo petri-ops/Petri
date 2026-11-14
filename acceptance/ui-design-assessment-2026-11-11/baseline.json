@@ -1,0 +1,106 @@
+{
+  "schema": "petri.ui-design.baseline.v1",
+  "capturedAt": "2026-11-11",
+  "evidenceLevel": "static-readonly-plus-mechanical-gates",
+  "notIncluded": ["实机观感", "用户测试", "读屏签字", "pending_human_eye 代答"],
+  "scope": {
+    "repo": "Petri",
+    "root": "frontend/src",
+    "activeWorkPackage": "BLOCK-413（会话开始）→ BLOCK-414（会话结束，并发写入者推进）",
+    "concurrentWriter": true,
+    "workPackageTouched": false,
+    "canonicalDocsTouched": false
+  },
+  "scale": {
+    "tsx": 454,
+    "ts": 431,
+    "cssTotal": 104,
+    "cssModules": 93,
+    "globalCss": 11,
+    "pageTsx": 50,
+    "componentTsx": 385,
+    "hooks": 48,
+    "frontendTestFiles": 362,
+    "mainWindowRoutes": 11,
+    "detachedWindowRoutes": 4,
+    "top10FileLines": [1430, 1345, 1225, 1062, 1027, 759, 728, 677, 676, 614]
+  },
+  "visualDebt": {
+    "petriTokenRefs": 7970,
+    "petriTokenDefinitions": 280,
+    "petriTokenDefinitionFiles": 4,
+    "legacyColorRefs": 0,
+    "slateLiteralsRaw": 9,
+    "slateViolationsAfterExemptions": 0,
+    "hexInCss": 421,
+    "legitHexInCustomCss": 185,
+    "colorFallbackFiles": 17,
+    "colorFallbackOccurrences": 189,
+    "colorFallbackSnapshotFiles": 19,
+    "colorFallbackSnapshotOccurrences": 235,
+    "inlineStyleOccurrences": 331,
+    "inlineStyleFiles": 73,
+    "importantOccurrences": 48,
+    "importantFiles": 7,
+    "numericZIndexOccurrences": 111,
+    "numericZIndexFiles": 38,
+    "tokenZIndexOccurrences": 13,
+    "mediaQueryOccurrences": 32,
+    "mediaQueryFiles": 15,
+    "containerQueryRules": 10,
+    "breakpointThresholds": 17,
+    "cssFilesWithoutResponsive": ">=89",
+    "ariaAttributes": 687,
+    "tabIndex": 26,
+    "doubleSemicolonFiles": 58
+  },
+  "gates": {
+    "themeTokenContract": { "result": "PASS", "tests": 19, "durationMs": 311, "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts" },
+    "docsCheck": { "result": "PASS", "registeredDocuments": 556, "finalRecheck": 557, "deltaAttribution": "并发写入者注册 block-414 计划，非本交付" },
+    "hygieneCheck": { "result": "PASS" },
+    "uiAuditCheck": { "result": "FAIL", "reason": "工作区含 UI 改动但未同步 docs/ui-productization-audit.md", "attribution": "BLOCK-413 CSS WIP（非本次引入）" }
+  },
+  "uiLedger": {
+    "grepWordFrequency": { "verified": 1176, "in_progress": 296, "deferred": 16, "planned": 2, "note": "词频口径含正文，非 canonical" },
+    "canonicalTriageJson": { "source": "acceptance/block-332/ui-ledger-triage.json", "sections": 497, "uniqueIds": 488, "verified": 450, "debt": 35, "liveMissing": 13, "blocked": 22, "note": "22 条 pending_human_eye 不代答" },
+    "warning": "三种口径不可混用"
+  },
+  "toolchain": {
+    "present": ["vitest", "@testing-library/react", "@testing-library/jest-dom", "happy-dom", "theme-token-contract.test.ts", "docs:check", "ui:audit:check", "hygiene:check", "closeout"],
+    "absent": ["storybook", "style-dictionary", "tokens-studio", "chromatic", "percy", "pa11y", "lighthouse", "figma-integration"],
+    "axeCore": "仅 3 份 docs 提及，不在 package deps；等价自研门未确认"
+  },
+  "staticScores": {
+    "scale": "0-5 / 静态评估分，非实机观感分；不得写 verified",
+    "layoutAndIA": 3.0,
+    "uxAndInteraction": 3.5,
+    "visualConsistency": 3.5,
+    "engineeringStandards": 4.5,
+    "composite": 3.6,
+    "targetPerDimension": 4.4
+  },
+  "installedSkills": {
+    "succeeded": ["web-design-guidelines", "ui-ux-pro-max", "ux-heuristics", "ui-ux-design-review", "impeccable", "figma-generate-library", "penpot-uiux-design", "tailwind-design-system", "accessibility", "accessibility-review", "product-ui-taste"],
+    "failed": [
+      { "name": "ui-taste", "ref": "uizze.sh@ui-taste", "reason": "SKILLS_GIT_CLONE_FAILED: repository does not exist", "coveredBy": "product-ui-taste（同类替代已装）+ impeccable" },
+      { "name": "extract", "ref": "pbakaus/impeccable@extract", "reason": "SKILLS_NO_MATCHING_SKILLS: available = impeccable", "coveredBy": "impeccable" }
+    ],
+    "location": "~/.agents/skills/ + symlink ~/.codebuddy/skills/",
+    "repoSkillsTouched": false
+  },
+  "decisionAdvisors": {
+    "testSuggest": { "suggested": false, "confidence": 0.73, "threshold": 0.8, "reason": "below_threshold", "area": "ui-shell-frontend" },
+    "docSuggest": { "suggested": false },
+    "nextSuggest": { "suggestion": "POST-K7-FULL-AUDIT-AND-BLUEPRINT-2026-11-10", "confidence": 0.37 }
+  },
+  "plan": {
+    "status": "advisory",
+    "waves": ["UI-D0 基线冻结与判据立标", "UI-D1 信息架构收敛", "UI-D2 布局单源与响应式统一", "UI-D3 视觉语义统一", "UI-D4 交互状态与无障碍闭环", "UI-D5 门禁化与复测"],
+    "seq": "D0 → D1 → D2 → D3 → D4 → D5；单包串行，每期需用户显式发令",
+    "started": true,
+    "startedAt": "2026-11-11",
+    "startedBy": "UI-D0 / BLOCK-415",
+    "ruling": "用户 2026-11-11 预授权连续工作：『依据评估基线独立完成全部六期优化，无需用户额外参与，工程判断全部下放并逐项留痕』；按 $petri-dev-infra 预授权连续工作模式视为有效裁决。不豁免治理红线，不等于替用户签字（U/E/V/W 另册）。",
+    "startedFieldNote": "报告 §3 D0 出口写作 planStarted；本 JSON 实际字段路径为 plan.started，当次以源码为准，二者同义。"
+  }
+}

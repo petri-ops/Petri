@@ -1,0 +1,83 @@
+{
+  "schema": "petri.ui-design.closeout-runs.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-420 / UI-D5",
+  "treeState": "dirty — 他方 WIP CSS（11+/9−）+ （开局后并发写入者 2 文件已于会话末自行收口，HEAD 前进）用户 untracked 资产 + 本程序 D0–D5 全部改动（未提交）；非干净树",
+  "fullRuns": [
+    {
+      "run": 1,
+      "command": "npm run closeout:full",
+      "exit": 1,
+      "firstFailure": "影响范围测试（test:changed）",
+      "passedBeforeFailure": 4,
+      "detail": "p6_current_source_tree_not_exact",
+      "log": "/tmp/ui-d5-full1.txt"
+    },
+    {
+      "run": 2,
+      "command": "npm run closeout:full",
+      "exit": 1,
+      "firstFailure": "影响范围测试（test:changed）",
+      "passedBeforeFailure": 4,
+      "detail": "p6_current_source_tree_not_exact",
+      "log": "/tmp/ui-d5-full2.txt"
+    },
+    {
+      "run": 3,
+      "command": "npm run closeout:full",
+      "exit": 1,
+      "firstFailure": "影响范围测试（test:changed）",
+      "passedBeforeFailure": 4,
+      "detail": "p6_current_source_tree_not_exact",
+      "log": "/tmp/ui-d5-full3.txt"
+    }
+  ],
+  "fullRunConclusion": "§8 完成定义第 3 条「干净树 closeout:full 连续 3 次全门 PASS 0 SKIP」**未达成**：三次均 exit 1，第 5 门 fail-fast，0 SKIP 但非全门 PASS。如实标未完成，不写成通过。",
+  "rootCause": {
+    "code": "p6_current_source_tree_not_exact",
+    "detail": [
+      "6 个 result-studio CSS（本包 D3 的 ;; 收敛波及）",
+      "frontend/src/pages/project-workspace.module.css（他方 WIP）",
+      "package.json",
+      "test/impact-map.json"
+    ],
+    "attribution": "**本包真实改动引起的证据源绑定不精确 + 他方 WIP 叠加**，不是产品缺陷；按 §8 不得推给 W 类了事",
+    "whyNotFixed": "P6 产品验收证据重打要求仓库完全静默（实采开始到写盘之间 HEAD 不得前进、工作区不得有在制改动）；当前树含他方 WIP、并发写入者与用户资产，红线禁止触碰/暂存/提交，且本程序不得擅自重打 Result Studio 产品验收证据",
+    "supplement": "补腿条件：他方 WIP 与并发写入者收口 → 干净树 → 由 Result Studio 证据 owner 按既有流程重采 P6 → 复跑 closeout:full 三连；重开判据=干净树且 P6 源绑定与 HEAD 一致"
+  },
+  "scopedRun": {
+    "command": "npm run closeout -- --skip=tests,quality:perf,quality:lint,quality:lint:ledger --gate <8 个 UI 专项门>",
+    "exit": 0,
+    "result": "25/25 门 PASS",
+    "excluded": [
+      {
+        "gate": "tests (test:changed)",
+        "reason": "P6 源绑定红（本包 + W 叠加）；本轮单条 P6 红，非产品缺陷"
+      },
+      {
+        "gate": "quality:perf",
+        "reason": "V/环境 packaged_start 稳定 5 连红（495–587ms > 493ms），隔离单跑复现；不重采不放宽"
+      },
+      {
+        "gate": "quality:lint",
+        "reason": "并发写入者 W 文件 1 项 no-unused-vars"
+      },
+      {
+        "gate": "quality:lint:ledger",
+        "reason": "同一 W 文件 1 项未入抑制台账"
+      }
+    ],
+    "note": "被 --skip 排除的 4 门均未通过，不算 PASS、不表述为全绿；门禁全绿只是必要条件"
+  },
+  "docsReconcile": {
+    "unregistered": 0,
+    "manualReview": 0,
+    "validationIssues": 0
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "postSessionRecheck": {
+    "observed": "会话末复核：并发写入者已自行收口，HEAD 前进至 4127f5b5；其两个在制文件不再出现在 git status",
+    "p6SingleRun": "node --test test/g0-rs-p6-product-acceptance.test.mjs → 12 pass / 1 fail，仍为 p6_current_source_tree_not_exact，detail 与三连一致",
+    "conclusion": "三连 FAIL 结论不变；P6 红的主因仍是本包 D3 收敛波及的 6 个 result-studio CSS + 他方 WIP CSS + 治理文件，需干净树重采"
+  }
+}

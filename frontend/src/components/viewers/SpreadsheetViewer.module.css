@@ -17,7 +17,7 @@
 
 .sheetTab {
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   padding: 3px 10px;
@@ -43,7 +43,7 @@
 .sheetGridScroll {
   overflow: auto;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   min-height: 0;
 }
 
@@ -81,7 +81,7 @@
 
 .sheetGridScroll::-webkit-scrollbar-thumb {
   background: var(--petri-border-strong);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .sheetLoading {
@@ -95,7 +95,7 @@
   gap: var(--petri-space-1);
   padding: 10px var(--petri-space-4);
   border: 1px solid var(--petri-status-error-border);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-status-error-bg);
   color: var(--petri-status-error-fg);
   font-size: var(--petri-font-size-body);

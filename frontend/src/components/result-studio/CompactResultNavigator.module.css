@@ -41,7 +41,7 @@
   height: 24px;
   padding: 0 var(--petri-space-6) 0 0;
   border: 0;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: transparent;
   color: var(--petri-text);
   font: inherit;
@@ -77,7 +77,7 @@
   height: 30px;
   padding: 0;
   border: 0;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-secondary);
   cursor: pointer;
@@ -114,7 +114,7 @@ button.iconAction {
   overflow: auto;
   padding: 10px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   box-shadow: var(--petri-shadow-float);
 }
@@ -145,7 +145,7 @@ button.iconAction {
   min-height: 19px;
   padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
   font-weight: 650;
@@ -173,7 +173,7 @@ button.iconAction {
   min-height: 28px;
   padding: 0 var(--petri-space-3);
   border: 0;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -211,7 +211,7 @@ button.iconAction {
   min-height: 26px;
   padding: 3px 7px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: transparent;
   color: var(--petri-text-secondary);
   font: inherit;
@@ -239,7 +239,7 @@ button.iconAction {
   min-height: 28px;
   padding: var(--petri-space-1) var(--petri-space-2);
   border: 0;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: transparent;
   color: var(--petri-text-secondary);
   text-align: left;

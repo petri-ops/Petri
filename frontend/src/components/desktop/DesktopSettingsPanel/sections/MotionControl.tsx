@@ -5,9 +5,12 @@
  * `full`=显式要求完整动效（可覆盖系统设置）；`reduced`=精简。
  * 真值走既有 `useTheme().setMotion` → `/api/user/prefs`（与其它外观偏好同一条链，
  * 不新开 API），localStorage 只是启动缓存（`prefCache` 的 `petri-motion`）。
+ *
+ * BLOCK-425 — 排版统一到 `SettingsField`：说明由两行长句压成一句，图标与其它外观项同族。
  */
 import { useTheme } from '@/themes/ThemeProvider';
 import type { MotionMode } from '@/themes/prefCache';
+import { SettingsField } from '../SettingsField';
 
 const OPTIONS: ReadonlyArray<{ value: MotionMode; label: string }> = [
   { value: 'system', label: '跟随系统' },
@@ -18,8 +21,12 @@ const OPTIONS: ReadonlyArray<{ value: MotionMode; label: string }> = [
 export function MotionControl(): React.ReactElement {
   const { motion, setMotion } = useTheme();
   return (
-    <div className="petri-field">
-      <label className="petri-field__label" htmlFor="motion-mode-select">动效</label>
+    <SettingsField
+      icon="zap"
+      label="动效"
+      htmlFor="motion-mode-select"
+      hint="跟随系统「减弱动态」，或固定完整 / 精简"
+    >
       <select
         id="motion-mode-select"
         value={motion}
@@ -38,9 +45,6 @@ export function MotionControl(): React.ReactElement {
           <option key={option.value} value={option.value}>{option.label}</option>
         ))}
       </select>
-      <p className="petri-field__hint">
-        跟随系统时读取 macOS 的「减弱动态效果」；选「精简」会关闭本应用界面的过渡与动画（不影响模型输出内容）。
-      </p>
-    </div>
+    </SettingsField>
   );
 }

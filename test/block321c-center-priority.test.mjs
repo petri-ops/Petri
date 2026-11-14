@@ -46,9 +46,16 @@ test('UI-629 拖宽把手钳制：左右把手调用点都传 clamp.max（sideba
   );
 });
 
-test('UI-629 布局 gap 锚：CSS gap 20px 与 CENTER_GAP_TOTAL=40 同源语义', () => {
+test('UI-629 布局 gap 锚：CSS gap 走 --ws-layout-gap 单源，默认 20px 与 CENTER_GAP_TOTAL=40 同源语义', () => {
+  // BLOCK-421（2026-11-11）布局层单源收敛：20px 字面量改为消费 --ws-layout-gap，
+  // 默认值真源在 global.css:root（20px = 两侧 40 ），≤960px 断点覆盖为 space-4（12px）。
+  // 契约演进而非放宽：默认档仍必须与 CENTER_GAP_TOTAL 同源，断点覆盖只允许引用既有 space 档位。
   const css = read('frontend/src/pages/project-workspace.module.css');
   const layout = css.match(/\.workspaceSessionLayout \{[^}]*\}/s);
   assert.ok(layout, 'workspaceSessionLayout 规则存在');
-  assert.match(layout[0], /gap: 20px/, '两侧 gap 20px（40 的来源）');
+  assert.match(layout[0], /gap: var\(--ws-layout-gap\)/, 'gap 只消费单源变量，不写裸字面量');
+  const globalCss = read('frontend/src/styles/global.css');
+  assert.match(globalCss, /--ws-layout-gap:\s*20px/, '默认 20px（两侧 40 的来源）与 CENTER_GAP_TOTAL 同源');
+  const narrow = css.match(/@media \(max-width: 960px\) \{[\s\S]*?--ws-layout-gap: var\(--petri-space-4\);/);
+  assert.ok(narrow, '窄屏断点差异走既有 space 档位，不引入新阈值');
 });

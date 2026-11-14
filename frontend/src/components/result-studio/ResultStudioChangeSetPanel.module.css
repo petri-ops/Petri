@@ -36,7 +36,7 @@
 
 .status {
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   color: var(--petri-text-secondary);
   flex: 0 0 auto;
   font-size: var(--petri-font-size-xs);
@@ -97,7 +97,7 @@
 .changeSetPicker select {
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   color: var(--petri-text-secondary);
   font: inherit;
   min-width: 0;
@@ -109,7 +109,7 @@
 .toggle {
   background: transparent;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   color: var(--petri-text-secondary);
   cursor: pointer;
   font: inherit;
@@ -149,7 +149,7 @@
 .visualFigure img { border: 1px solid var(--petri-border-card); display: block; max-height: 280px; object-fit: contain; width: 100%; }
 .visualFigureUnavailable {
   border: 1px dashed var(--petri-border);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   color: var(--petri-text-tertiary);
   padding: var(--petri-space-4);
   text-align: center;

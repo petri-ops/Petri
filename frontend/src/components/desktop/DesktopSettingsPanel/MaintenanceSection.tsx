@@ -1,3 +1,4 @@
+import { SettingsField } from './SettingsField';
 import { UpdateChecker } from './sections/UpdateChecker';
 import { ExportDiagnostic } from './sections/ExportDiagnostic';
 import { ConfigTransferPanel } from './sections/ConfigTransferPanel';
@@ -24,46 +25,32 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
         <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
       </div>
       {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
-      <div className="petri-field">
-        <label className="petri-field__label">开启错误反馈</label>
-        <div className="petri-toggle-row">
-          <input
-            type="checkbox"
-            id="petri-telemetry-toggle"
-            className="petri-toggle"
-            checked={telemetryEnabled}
-            onChange={(event) => onToggleTelemetry(event.target.checked)}
-          />
-          <label htmlFor="petri-telemetry-toggle" className="petri-toggle-label">
-            {telemetryEnabled ? '已开启' : '已关闭'}
-          </label>
-        </div>
-        <p className="petri-field__hint">
-          开启后，分析出错时仅上报错误分类与应用版本（不含任何用户数据、文件路径或文件名），
-          用于改进工具稳定性。可随时关闭。
-        </p>
-      </div>
+      <SettingsField
+        icon="shield"
+        label="错误反馈"
+        htmlFor="petri-telemetry-toggle"
+        trailing
+        meta={telemetryEnabled ? '已开启' : '已关闭'}
+        hint="仅上报错误分类与应用版本，不含用户数据、文件路径或文件名"
+      >
+        <input
+          type="checkbox"
+          id="petri-telemetry-toggle"
+          className="petri-toggle"
+          checked={telemetryEnabled}
+          onChange={(event) => onToggleTelemetry(event.target.checked)}
+        />
+      </SettingsField>
       {/* L6-6（蓝图 L-72/BLOCK-410）：本地主权说明——产品人设「跑在你机器上」的设置面可见形态 */}
-      <div className="petri-field__hint" role="note" data-testid="local-sovereignty-note" style={{ marginBottom: 12 }}>
-        本机优先：你的数据、模型凭据与分析产物均保存在本机，核心链路本地运行、全程可审计——
-        详见「诊断日志」导出的本地诊断信息。
-      </div>
-      <div className="petri-maintenance-actions">
-        <div className="petri-maintenance-row">
-          <div>
-            <strong>应用更新</strong>
-            <p>检查并下载适用于当前 Mac 的安装包。</p>
-          </div>
-          <UpdateChecker />
-        </div>
-        <div className="petri-maintenance-row">
-          <div>
-            <strong>诊断日志</strong>
-            <p>导出用于排查问题的本地诊断信息。</p>
-          </div>
-          <ExportDiagnostic />
-        </div>
-      </div>
+      <p className="petri-field__hint" role="note" data-testid="local-sovereignty-note">
+        本机优先：数据、模型凭据与产物均保存在本机，核心链路本地运行、全程可审计。
+      </p>
+      <SettingsField icon="refresh" label="应用更新" trailing hint="检查并下载当前系统的安装包">
+        <UpdateChecker />
+      </SettingsField>
+      <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">
+        <ExportDiagnostic />
+      </SettingsField>
       {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}
       <ConfigTransferPanel onChanged={onConfigChanged} />
     </section>

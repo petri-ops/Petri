@@ -27,6 +27,10 @@ export default tseslint.config(
       // openclaw/ = OpenClaw 外部参考镜像（研究对标用，~6.7GB，经 .git/info/exclude 本地排除不入仓，
       // 生成抑制基线的 Windows 侧无此目录）——不属本项目代码面，与 codex//_external-ref/ 同类。
       'openclaw/**',
+      // reference/ = 本地第三方源码镜像（ZCode / dsh-superagent-prototype，只读参考对标；
+      // .gitignore:118 已排除，不入仓）。与 codex//_external-ref//openclaw/ 同类：
+      // 不属本项目代码面，其 lint 违规不得落进本仓抑制台账。
+      'reference/**',
       'tmp/**',
       // .zcode/ = ZCode 工作流引擎运行时目录（gitignore；workflow-runs/*.mjs 为引擎自动生成的
       // 瞬态运行日志脚本，非本项目代码面，且每次运行 ID 变化重新生成——不进抑制基线，同 tmp/ 先例）

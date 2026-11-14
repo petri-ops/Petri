@@ -1532,24 +1532,13 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 0 var(--petri-space-6);
+  padding: var(--ws-frame-padding);
   position: relative;
 }
 
 .workspaceSessionFrameChat {
   justify-content: flex-end;
-  /* 左 32→8px：UI-262 刻度 rail 尽可能贴近工作区左缘；
-     右 32→14px（UI-269）：ChatScrollbar thumb 贴聊天侧边栏最右缘 */
-  padding: 0 14px 0 var(--petri-space-3);
-}
-
-/* BLOCK-395 B-11 — 零几何收敛：CenterPanel 内层此前与外层同挂
-   .workspaceSessionLayout，读码时无法区分「frame」与「layout」职责，
-   且误以为改任一层都要同步两层。这里给内层独立语义名，composes 同一份
-   规则保证 computed style 逐字不变（不用改 gap/flex/padding），
-   几何 A/B 的「改语义会窄 74px」问题因此不再存在。 */
-.workspaceSessionInner {
-  composes: workspaceSessionLayout;
+  padding: var(--ws-chat-frame-padding);
 }
 
 .workspaceSessionLayout {
@@ -1558,10 +1547,21 @@
   min-height: 0;
   display: flex;
   align-items: stretch;
-  gap: 20px;
+  gap: var(--ws-layout-gap);
   overflow: hidden;
   /* UI-351 — 悬浮摘要的定位基准 */
   position: relative;
+}
+
+/* BLOCK-395 B-11 — 零几何收敛：CenterPanel 内层此前与外层同挂
+   .workspaceSessionLayout，读码时无法区分「frame」与「layout」职责，
+   且误以为改任一层都要同步两层。这里给内层独立语义名，composes 同一份
+   规则保证 computed style 逐字不变（不用改 gap/flex/padding），
+   几何 A/B 的「改语义会窄 74px」问题因此不再存在。
+   注意：composes 必须写在被引用类定义之后——postcss-modules 按文档
+   顺序解析，前向引用会报 referenced class name not found（dev 页面整页报错）。 */
+.workspaceSessionInner {
+  composes: workspaceSessionLayout;
 }
 
 /* UI-351 — 中栏过窄时摘要卡转悬浮层：不占列宽、盖在会话右上方 */
@@ -2838,12 +2838,10 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
     gap: var(--petri-space-2);
   }
 
-  .workspaceSessionFrame {
-    padding: var(--petri-space-4);
-  }
-
-  .workspaceSessionLayout {
-    gap: var(--petri-space-4);
+  html:root {
+    --ws-frame-padding: var(--petri-space-4);
+    --ws-chat-frame-padding: var(--petri-space-4);
+    --ws-layout-gap: var(--petri-space-4);
   }
 
   .workspaceSummaryColumn {
@@ -2936,8 +2934,9 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
     display: none;
   }
 
-  .workspaceSessionFrame {
-    padding: 10px;
+  html:root {
+    --ws-frame-padding: 10px;
+    --ws-chat-frame-padding: 10px;
   }
 
   .workspaceSummaryColumn {

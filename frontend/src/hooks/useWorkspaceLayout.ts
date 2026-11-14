@@ -15,6 +15,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWorkspacePanelsContext } from '@/components/desktop/WorkspacePanelsContext';
+import { COMPACT_MAX_WIDTH_QUERY } from '@/lib/uiBreakpoints';
 
 /** UI-351 — 中栏宽裕阈值（≥ 才钉住展开摘要/侧聊列区；会话框一旦被挤即转悬浮）。 */
 // UI-448 清偿（AUDIT-LOG 🔴 销号）：仅模块内使用，按 knip 棘轮去导出（行为不变）
@@ -73,7 +74,7 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
   const [leftOpenLocal, setLeftOpenLocal] = useState(true);
   const [rightOpenLocal, setRightOpenLocal] = useState(true);
   const [compactLayout, setCompactLayout] = useState(
-    () => window.matchMedia('(max-width: 960px)').matches,
+    () => window.matchMedia(COMPACT_MAX_WIDTH_QUERY).matches,
   );
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
 
@@ -105,7 +106,7 @@ export function useWorkspaceLayout(): UseWorkspaceLayoutResult {
 
   // Responsive: 仅记录是否 compact（驱动浮层渲染），不动侧栏开合状态。
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 960px)');
+    const media = window.matchMedia(COMPACT_MAX_WIDTH_QUERY);
     const syncLayout = (compact: boolean) => setCompactLayout(compact);
     syncLayout(media.matches);
     const onChange = (event: MediaQueryListEvent) => syncLayout(event.matches);

@@ -1,0 +1,47 @@
+{
+  "schema": "petri.ui-design.d2.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-417 / UI-D2",
+  "evidenceLevel": "mechanical-gates + contract-tests + DOM/CDP live (partial)",
+  "notIncluded": ["人眼观感", "元素级裁剪截图过目", "≤900px 真缩放", "真实工作区可视列四块几何"],
+  "redGreen": {
+    "contract": "HK-01 豁免四类之「纯重构 + 无法单测的实机面」；红证据由 13 项植入必红负测承载；拆前拆后同套绿",
+    "red": "两门首跑 FAIL：断点门 85 项（正则把普通 max-width: 320px 属性当断点）、布局门 1000+ 项（把状态变体/响应式覆盖/注释里的类名算重复定义）—— 均为新门自身口径 bug，非产品缺陷",
+    "fix": "① 断点门只认 @media/@container 条件、21 档只减登记表；② 布局门改「可视区布局类单源 + 全仓容器热点 708 只减棘轮」，剥 CSS 注释、只认单一类选择器，同口径重算基线 804→708（不缩分母、不放宽判据）；③ WIP 既存 2 组重复按真实行数显式登记 owner",
+    "green": "gate:ui-breakpoints PASS / gate:ui-layout PASS / 负测 13/13"
+  },
+  "gates": {
+    "gate:ui-breakpoints": { "result": "PASS", "cssFiles": 104, "nonWipThresholds": 18, "registeredThresholds": 21, "jsBareThresholds": 0, "alignment": "767→768", "wipThresholds": 5 },
+    "gate:ui-layout": { "result": "PASS", "classDefinitions": 3135, "cssFiles": 104, "wipKnownDuplicates": 2, "containerHotspotBaseline": 708, "hotspotsNow": 708 },
+    "contractTests": { "result": "PASS", "tests": 13, "files": ["test/ui-design-breakpoints.test.mjs", "test/ui-design-layout-gate.test.mjs"] },
+    "frontendScopedVitest": { "result": "PASS", "files": 6, "tests": 78, "note": "拆前拆后同套绿（D1 同套 69 项 + useWorkspaceLayout 9 项）" },
+    "theme-token-contract": { "result": "PASS", "tests": 19 },
+    "quality:types": { "result": "PASS", "exit": 0 },
+    "quality:arch": { "result": "PASS" },
+    "live-window-policy": { "result": "PASS", "tests": 1, "note": "flow 仅注释提及 ONSCREEN，无赋值" }
+  },
+  "liveLeg": {
+    "flow": "ui-d2-geometry-live",
+    "instance": "9223 离屏（scripts/start-test-instance.sh 默认，t+3s READY；跑完立即 kill，REMAIN=0）",
+    "result": "9/9 assertions allPass=true",
+    "evidence": ["acceptance/ui-design-assessment-2026-11-11/d2/ui-d2-geometry-live-darwin.json", "acceptance/ui-design-assessment-2026-11-11/d2/ui-d2-geometry-element.png"],
+    "honestDegradation": [
+      "探针在欢迎页 body fallback 上量测（chain=1，未命中真实 .workspaceSessionLayout），G1/G2 只证明非零几何，**不构成四块几何全绿**",
+      "G3/G4/L2/L3 在 fallback host 上成立（right=1600 viewport=1600），不等于工作区可视列断言",
+      "≤900px 未做 CDP Emulation 真缩放，仅记录当前视口 1600，**不冒充窄视口通过**",
+      "截图为全页 PNG（119399B），**非元素级裁剪截图**；人眼过目仍 pending_human_eye",
+      "9223 未启时的首跑 0/1 已落 external-blocked 证据，不复用为通过"
+    ],
+    "status": "done-partial — DOM/CDP 链路与探针自证通过；四块几何 / 窄视口 / 元素级观感未闭合"
+  },
+  "exitCriteria": {
+    "sameVisualAreaLayoutDefinitionEquals1": "done-partial — 非 WIP 可视区布局类唯一（门守护）；WIP 内 2 组既存重复显式登记 owner、零触碰，待 owner 收口后按 $petri-css-theme §5 抽独立 Layout 文件",
+    "fourBlockGeometry": "done-partial — 见 liveLeg.honestDegradation",
+    "narrowViewport900": "external-blocked — 需 CDP Emulation 真缩放 + 真实工作区种子",
+    "longContentThreeStates": "done-partial — L2/L3 机械读数通过；L1 完整容纳、滚动条观感、暗色态归 E",
+    "breakpointsToFourTiers": "pending_user_ruling — U-04 档位数收敛不改产品语义；本期只做单源与 767/768 对齐",
+    "mediaContainerDualCriteria": "W — 双判据主要在 WIP CSS 内，零触碰，待 owner 收口",
+    "beforeAfterSameSuiteGreen": "done — 78/78"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

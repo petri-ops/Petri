@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import { BRAND } from '@/lib/brand';
+import { MOBILE_MAX_WIDTH_QUERY } from '@/lib/uiBreakpoints';
 import { Icon } from '@/components/icons/Icon';
 import { segmentToMode, type WorkspaceMode } from '@/hooks/useWorkspaceRouting';
 import styles from '../TitleBar.module.css';
@@ -36,13 +37,15 @@ export function getIsProjection(): boolean {
 }
 
 /**
- * BLOCK-87 L3 — 投影 + 窄屏（≤767px 手机浏览器）：壳层 AppRail 转抽屉浮层，
+ * BLOCK-87 L3 — 投影 + 窄屏（≤768px 手机浏览器）：壳层 AppRail 转抽屉浮层，
  * 标题栏左上「展开/收起左侧栏」按钮直接开合（L3-2 用户裁决：撤掉独立 ☰，
  * 左上唯一入口）。jsdom 无 matchMedia 时 fail-closed 回 false（桌面语义）。
+ * UI-D2 / BLOCK-417 — 阈值改引用 `@/lib/uiBreakpoints` 单一真源，并与 CSS
+ * `@media (max-width: 768px)` 对齐（原 JS 767 与 CSS 768 差 1px）；档位数不变。
  */
 export function isProjectionMobile(): boolean {
   try {
-    return getIsProjection() && window.matchMedia('(max-width: 767px)').matches;
+    return getIsProjection() && window.matchMedia(MOBILE_MAX_WIDTH_QUERY).matches;
   } catch {
     return false;
   }
@@ -75,17 +78,19 @@ export function modeUsesSummaryCard(mode: WorkspaceMode): boolean {
 }
 
 /**
- * UI-348 — 全局独立页判定（/skills /knowledge /backend）：这些页面自带
- * 「返回 + 图标 + 标题」页头，fixed 顶栏不再渲染品牌 chip 与分区分隔线
- * （此前顶栏左区分隔线与壳层左栏宽度错位 24px，叠出「多一条线」的布局冲突）。
+ * UI-348 — 全局独立页判定：这些页面自带「返回 + 图标 + 标题」页头，fixed 顶栏
+ * 不再渲染品牌 chip 与分区分隔线（此前左区分隔线与壳层左栏宽度错位 24px）。
  * UI-364 — /plugins 插件商店独立页并入同形态。
  * UI-365 — /settings 设置独立页并入同形态。
- * UI-376 — / 欢迎页并入同形态：页面自带「返回 + 问候」页头，顶栏的品牌回退
- * 标题（「Petri」）与左区分隔线（与左栏边缘错位 ~13px 的悬空线）均无意义
- * （用户截图指认「Petri 和旁边的灰色分隔线没有实际意义」）。
+ * UI-376 — / 欢迎页并入同形态（用户截图指认品牌 chip 与灰色分隔线无意义）。
+ * UI-D1 / BLOCK-416 — 清单与路由表对齐（唯一真源=scripts/ui-design-entry-registry.mjs
+ * 的 STANDALONE_PATHS，由 gate:ui-entries 双向对账）：移除已退役的 /backend
+ * （UI-366 诊断并入设置）与已重定向的 /skills /plugins（BLOCK-156 合并为
+ * 扩展中心）；改列其 canonical /extensions。/projects 与 /review 是否纳入
+ * bare 形态会改变顶栏视觉，属 U-06 待用户裁决，默认不纳入、不改既有形态。
  */
 export function isStandalonePagePath(pathname: string): boolean {
-  return pathname === '/' || /^\/(skills|knowledge|backend|plugins|settings)\/?$/.test(pathname);
+  return pathname === '/' || /^\/(extensions|knowledge|settings)\/?$/.test(pathname);
 }
 
 export function getFallbackTitle(pathname: string): string {

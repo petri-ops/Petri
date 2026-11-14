@@ -102,7 +102,7 @@
   flex-direction: column;
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   box-shadow: var(--petri-shadow-menu);
   overflow: hidden;
 }
@@ -146,7 +146,7 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   color: var(--petri-text-tertiary);
   cursor: help;
 }
@@ -184,7 +184,7 @@
 
 .rvw-review-progress {
   padding: 1px var(--petri-space-3);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-soft);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs);
@@ -345,7 +345,7 @@
 .rvw-inline-edit-btn {
   height: 22px;
   padding: 0 var(--petri-space-3);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-accent-soft);
   border-color: color-mix(in srgb, var(--petri-accent) 45%, transparent);
   color: var(--petri-accent);
@@ -416,7 +416,7 @@
   min-height: 6px;
   padding: 0;
   border: 0;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-accent);
   opacity: 0.75;
   cursor: pointer;
@@ -446,14 +446,14 @@
   padding: 3px var(--petri-space-2);
   background: var(--petri-bg-elevated);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   box-shadow: var(--petri-shadow-menu);
 }
 
 .wt-hunk-btn {
   padding: 2px 10px;
   line-height: 1.5;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
 }
@@ -516,7 +516,7 @@
   background: var(--petri-input-bg);
   color: var(--petri-text);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   padding: var(--petri-space-2) 10px;
   font-family: inherit;
 }
@@ -574,7 +574,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   color: var(--petri-text-muted);
 }
@@ -597,7 +597,7 @@
 .rvw-view-switch {
   display: inline-flex;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -672,7 +672,7 @@
   color: var(--petri-accent);
   font-family: inherit;
   padding: var(--petri-space-1) var(--petri-space-3);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -826,7 +826,7 @@
   justify-content: center;
   width: 20px;
   height: 20px;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   color: var(--petri-text-muted);
   opacity: 0;
   transition: opacity var(--petri-duration-fast) ease, background var(--petri-duration-fast) ease;
@@ -879,7 +879,7 @@
   padding: var(--petri-space-1);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   box-shadow: var(--petri-shadow-menu);
 }
 
@@ -888,7 +888,7 @@
   width: 100%;
   padding: var(--petri-space-2) 10px;
   border: none;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text);
   font-family: inherit;
@@ -914,7 +914,7 @@
   align-items: center;
   gap: 5px;
   padding: 2px var(--petri-space-3);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-accent-soft);
   color: var(--petri-text-muted);
   max-width: 60%;
@@ -943,7 +943,7 @@
   margin: var(--petri-space-1) 10px var(--petri-space-3);
   padding: 5px 0;
   border: 1px dashed var(--petri-border);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-secondary);
   font-family: inherit;
@@ -984,7 +984,7 @@
   gap: 0;
   margin-top: var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   overflow: hidden;
   background: var(--petri-bg-canvas);
 }
@@ -1109,7 +1109,7 @@
 .rvw-viewmode-btn {
   padding: 2px var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-secondary);
   font-family: inherit;
@@ -1137,7 +1137,7 @@
   max-height: 60vh;
   overflow: auto;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-canvas);
 }
 
@@ -1147,7 +1147,7 @@
   height: 28px;
   padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   font-family: inherit;

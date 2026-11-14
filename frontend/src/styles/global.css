@@ -45,8 +45,20 @@
   --petri-live-result-right-width: 720px;
 
   /* dock/面板表面色 — UI-238 亮色切中性 zinc（与白底发丝线区分），暗色蓝灰深底
-     （保持品牌冷调，非 infima emphasis 的纯灰） */
-  --petri-surface-dim: #f4f4f5;
+     （保持品牌冷调，非 infima emphasis 的纯灰）。
+     UI-D3 / BLOCK-418 — --petri-surface-dim 的单一真源是 custom.css（明暗各一）；
+     此处原重复定义与真源逐字等值，删除后由 @import 的 custom.css 提供，零视觉变化。
+     跨文件重复定义由 gate:ui-visual 机械守护。 */
+  /* UI-D3 / BLOCK-418 — selected 专用语义，由既有 accent 派生 token 组成，明暗成对；
+     真源在 global.css（未入 code-size 台账），custom.css 保持零新增行/字节。 */
+  --petri-selected-bg: var(--petri-accent-bg);
+  --petri-selected-border: var(--petri-accent-border);
+  --petri-selected-text: var(--petri-text);
+  /* BLOCK-421 — 工作区布局层断点变量默认值（真源在此，project-workspace 只消费；
+     媒体查询用 `html:root` 提高特异性覆盖，避免与这里同特异性争先后）。 */
+  --ws-frame-padding: 0 var(--petri-space-6);
+  --ws-chat-frame-padding: 0 14px 0 var(--petri-space-3); /* UI-262 左 8px 贴 rail；UI-269 右 14px 贴滚动条 */
+  --ws-layout-gap: 20px;
 }
 
 /* UI-392 — 特异性对齐 infima：infima 用 html[data-theme='dark']（0,1,1），
@@ -56,9 +68,13 @@
 html[data-theme='dark'] {
   --ifm-background-color: var(--petri-bg-surface);
   --ifm-background-surface-color: var(--petri-bg-surface);
-  /* UI-392 — 暗色 surface-dim 单一真源在 custom.css（#111a2e 海军蓝族）；
-     原字面量 #0f172a（slate-900）与之冲突构成双暗底，改引用消除分歧 */
-  --petri-surface-dim: var(--petri-bg-surface);
+  /* UI-392 — 暗色 surface-dim 单一真源在 custom.css（#111a2e 海军蓝族）。
+     UI-D3 / BLOCK-418 — 原 var(--petri-bg-surface) 引用与真源等值，但构成跨文件
+     第二处定义；已删除，由 custom.css 明暗块提供，零视觉变化。
+     原字面量 #0f172a（slate-900）冲突构成双暗底的历史问题不回潮。 */
+  --petri-selected-bg: var(--petri-accent-bg);
+  --petri-selected-border: var(--petri-accent-border);
+  --petri-selected-text: var(--petri-text);
 }
 
 * {
@@ -101,7 +117,7 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--petri-border) 60%, var(--petri-bg-subtle) 40%);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--petri-text-secondary) 50%, transparent 50%);

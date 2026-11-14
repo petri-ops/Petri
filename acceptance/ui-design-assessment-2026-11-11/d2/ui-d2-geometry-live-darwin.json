@@ -1,0 +1,54 @@
+{
+  "name": "ui-d2-geometry-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-11T06:46:27.989Z",
+  "finishedAt": "2026-11-11T06:46:28.074Z",
+  "assertions": [
+    {
+      "name": "cdp_9223_available",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/?test=1"
+    },
+    {
+      "name": "G3_no_parent_overflow",
+      "pass": true,
+      "detail": "right=1600 viewport=1600"
+    },
+    {
+      "name": "G4_ancestors_within_visual_column",
+      "pass": true,
+      "detail": "chain=1 viewport=1600"
+    },
+    {
+      "name": "G1_G2_nonzero_geometry",
+      "pass": true,
+      "detail": "w=1600 h=1000"
+    },
+    {
+      "name": "L2_frame_scroll_active",
+      "pass": true,
+      "detail": "scrollWidth>clientWidth=true"
+    },
+    {
+      "name": "L3_no_escape_from_host",
+      "pass": true,
+      "detail": "probe=1600 host=1600"
+    },
+    {
+      "name": "narrow_probe_readable",
+      "pass": true,
+      "detail": "clientWidth=1600（≤900px 真缩放需 CDP Emulation，本腿只记录当前视口，不冒充）"
+    },
+    {
+      "name": "element_screenshot",
+      "pass": true,
+      "detail": "captured"
+    }
+  ],
+  "allPass": true
+}

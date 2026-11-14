@@ -16,7 +16,7 @@
 .homeState button,
 .emptyHomeCreate button {
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   color: var(--petri-text);
   cursor: pointer;
@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
 }
@@ -175,7 +175,7 @@
   padding: 11px 14px;
   text-align: left;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   cursor: pointer;
@@ -195,7 +195,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
 }
@@ -239,7 +239,7 @@
   gap: var(--petri-space-2);
   padding: 14px var(--petri-space-5) var(--petri-space-5);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
 }
 
@@ -269,7 +269,7 @@
   padding: 0 9px;
   font-family: var(--petri-font-mono);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
 }
@@ -301,7 +301,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   font-family: var(--petri-font-mono);
   color: var(--petri-text);
@@ -354,7 +354,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
   border: 1px solid var(--petri-border-card);
@@ -390,7 +390,7 @@
   gap: 10px;
   padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
   color: var(--petri-text-secondary);
   transition: border-color var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
@@ -439,7 +439,7 @@
   gap: 7px;
   height: 36px;
   padding: 0 var(--petri-space-5);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   cursor: pointer;
   transition: transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
@@ -519,7 +519,7 @@
   height: 30px;
   padding: 0 14px;
   border: 1px solid var(--petri-accent);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent);
   color: #fff;
   cursor: pointer;
@@ -545,7 +545,7 @@
   padding: 10px 14px;
   border: 1px solid var(--petri-border-card);
   border-left: 3px solid var(--petri-accent);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -564,7 +564,7 @@
 .setupStoreShellOverlay {
   position: fixed;
   inset: var(--petri-titlebar-height) 0 0 0;
-  z-index: 1000;
+  z-index: var(--petri-z-dropdown);
   height: auto;
   background: var(--petri-bg-base);
 }

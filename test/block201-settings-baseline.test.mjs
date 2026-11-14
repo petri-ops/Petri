@@ -26,14 +26,22 @@ const schema = require(path.join(ROOT, 'core/packages/shared-config/config-schem
 
 const SETTINGS_TYPES = 'frontend/src/components/desktop/DesktopSettingsPanel/types.ts';
 
-test('设置分区清单冻结：10 个分区 id（搜索索引必须逐项覆盖）', () => {
+test('设置分区清单冻结：13 个分区 id（搜索索引必须逐项覆盖）', () => {
+  // BLOCK-424 信息架构拆分（2026-11-11 显式重打 10 → 13）：
+  //  · 原「常规」把 外观 4 项 + 桌面行为 3 项 + 外部导入 挤在一个分区 → 拆出
+  //    `appearance`（外观）与 `desktop`（通知与桌面），general 收窄为「配置迁移」；
+  //  · 原「计算与数据」把 SSH / 数据目录 / 环境包 / 代理 / 联网检索 / 回收站 六件事
+  //    压在一起 → 拆出 `network`（联网与代理）。
+  //  重打理由：不是放宽，而是分区粒度变更后搜索索引与导航必须逐项相等（下方断言与
+  //  settingsSearch.test.ts 双向钉住）；`tier` 字段另由 SettingsNav 消费。
   const src = read(SETTINGS_TYPES);
   const ids = [...src.matchAll(/\{ id: '([a-z-]+)', label:/g)].map((m) => m[1]);
   assert.deepEqual(ids, [
-    'general', 'models', 'compute', 'usage', 'decisions',
-    'keymap', 'reasoning', 'diagnostics', 'experimental', 'maintenance',
+    'appearance', 'desktop', 'models', 'network', 'compute', 'usage',
+    'keymap', 'general', 'maintenance',
+    'decisions', 'reasoning', 'experimental', 'diagnostics',
   ]);
-  assert.equal(ids.length, 10, `分区数应为 10（实得 ${ids.length}）：${ids.join(', ')}`);
+  assert.equal(ids.length, 13, `分区数应为 13（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
 test('配置注册表冻结：19 族 / 108 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键）', () => {

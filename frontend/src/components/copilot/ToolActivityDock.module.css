@@ -10,7 +10,7 @@
   width: min(520px, calc(100vw - 32px));
   max-height: min(460px, calc(100vh - 32px));
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   box-shadow: var(--petri-shadow-float);
   overflow: hidden;
@@ -49,7 +49,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   border: 1px solid transparent;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body);
@@ -161,7 +161,7 @@
 
 .footerBtn {
   border: 1px solid transparent;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body);

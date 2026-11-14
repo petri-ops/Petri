@@ -1,0 +1,54 @@
+{
+  "name": "ui-d4-a11y-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-11T07:43:07.378Z",
+  "finishedAt": "2026-11-11T07:43:07.455Z",
+  "assertions": [
+    {
+      "name": "cdp_9223_available",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/?test=1"
+    },
+    {
+      "name": "aria_live_regions_present",
+      "pass": true,
+      "detail": "{\"ariaBusy\":0,\"roleAlert\":0,\"roleStatus\":0,\"ariaLive\":1,\"buttons\":56,\"inputs\":1,\"tabbables\":55,\"labelledButtons\":56}"
+    },
+    {
+      "name": "interactive_elements_present",
+      "pass": true,
+      "detail": "buttons=56 inputs=1"
+    },
+    {
+      "name": "tabbables_present",
+      "pass": true,
+      "detail": "tabbables=55"
+    },
+    {
+      "name": "focus_target_reachable",
+      "pass": true,
+      "detail": "{\"focusable\":true,\"outlineStyle\":\"none\",\"outlineWidth\":\"2.5px\"}"
+    },
+    {
+      "name": "focus_ring_observable",
+      "pass": false,
+      "detail": "focus_ring_not_observable: {\"focusable\":true,\"outlineStyle\":\"none\",\"outlineWidth\":\"2.5px\"} — 登记为 H-06 人眼/独立切片补腿，不冒充通过"
+    },
+    {
+      "name": "tokens_resolved_at_runtime",
+      "pass": true,
+      "detail": "{\"text\":\"#18181b\",\"secondary\":\"#3f3f46\",\"tertiary\":\"#71717a\",\"surface\":\"#ffffff\",\"subtle\":\"#f4f4f5\",\"theme\":\"light\"}"
+    },
+    {
+      "name": "element_screenshot",
+      "pass": true,
+      "detail": "captured (全页，非元素级裁剪；人眼过目仍 pending_human_eye)"
+    }
+  ],
+  "allPass": false
+}

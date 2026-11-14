@@ -1,1 +1,1 @@
-最后更新：2026-11-14（🏁 **BLOCK-446 completed**：MCP App 页面自动渲染 + 双向 RPC；剩余=ext-apps 原生 SDK 协议 shim、完整 agent→卡片实机腿、JS 扩展宿主无 UI 子集、hooks、他方 UI WIP 干净树、U/E/V/W 裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-14（🏁 **UI 设计专项 D0–D5 = BLOCK-415~423 整批入库**：代码/门禁/证据/文档本体首次提交，`ui:audit:check` 由红转绿（633 个 UI 编号）；`gate:ui-program` 6/6、ui-design 测试 58/58、`theme-token-contract` 19/19、设置面板 88/88、`quality:types` 0 红。程序终态仍 `done-partial`——22 条人眼签字槽全空、观感不代答，P6 源绑定待本批提交后重采。G0 开发期常态 · 不外推 packaged/Provider/GA.）

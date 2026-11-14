@@ -31,7 +31,7 @@
 .tickBar {
   width: 10px;
   height: 2px;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-text-tertiary, var(--petri-text-secondary));
   opacity: 0.45;
   transition: width var(--petri-duration-fast), background var(--petri-duration-fast), opacity var(--petri-duration-fast);
@@ -59,7 +59,7 @@
   overflow-y: auto;
   padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-elevated, var(--petri-bg-surface));
   box-shadow: var(--petri-shadow-menu);
   animation: railCardIn 0.16s ease-out;

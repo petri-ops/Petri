@@ -65,7 +65,7 @@
   max-width: 260px;
   padding: var(--petri-space-1) var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -80,7 +80,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   padding: 3px var(--petri-space-3);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -114,7 +114,7 @@
 .chip {
   padding: var(--petri-space-2) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -140,7 +140,7 @@
   gap: var(--petri-space-2);
   padding: 5px 10px;
   border: 1px solid transparent;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-hover);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -167,7 +167,7 @@
   left: 0;
   width: 340px;
   max-width: 80vw;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
   box-shadow: var(--petri-shadow-float);
@@ -201,7 +201,7 @@
   width: 100%;
   padding: var(--petri-space-3) 10px;
   border: none;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -228,7 +228,7 @@
 .projectRowTag {
   font-size: var(--petri-font-size-xs);
   padding: 1px 5px;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-hover);
   color: var(--petri-text-secondary);
 }
@@ -251,7 +251,7 @@
   gap: var(--petri-space-3);
   padding: 9px 10px;
   border: none;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: transparent;
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -273,7 +273,7 @@
 .actionInput {
   padding: 7px 9px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg);
   color: var(--petri-text);
   font: inherit;
@@ -304,7 +304,7 @@
 .actionPrimary {
   padding: var(--petri-space-2) 14px;
   border: none;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent);
   color: #fff;
   font-weight: 600;
@@ -350,7 +350,7 @@
   color: var(--petri-text-secondary);
   text-align: left;
   padding: 5px var(--petri-space-3);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;

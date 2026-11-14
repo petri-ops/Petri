@@ -26,7 +26,7 @@
   height: 30px;
   padding: 0 10px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-surface);
   color: var(--petri-text-secondary);
   font-weight: 500;
@@ -46,7 +46,7 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-surface);
   color: var(--petri-text-secondary);
   flex-shrink: 0;

@@ -30,7 +30,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
   flex-shrink: 0;
@@ -98,7 +98,7 @@
   height: 36px;
   padding: 0 36px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-input-bg);
   color: var(--petri-text);
   font-size: var(--petri-font-size-body);
@@ -126,7 +126,7 @@
   width: 24px;
   height: 24px;
   border: none;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -150,7 +150,7 @@
   height: 32px;
   padding: 0 var(--petri-space-4);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -176,7 +176,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
@@ -204,7 +204,7 @@
   height: 30px;
   padding: 0 var(--petri-space-4);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-sm);
@@ -251,7 +251,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   margin-bottom: var(--petri-space-4);
 }
@@ -276,7 +276,7 @@
   flex-direction: column;
   padding: var(--petri-space-5);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   transition: border-color var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
               transform var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
@@ -322,7 +322,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-surface);
   padding: 2px var(--petri-space-2);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .sourceBadge {
@@ -330,7 +330,7 @@
   font-size: var(--petri-font-size-xs);
   font-weight: 600;
   padding: 3px var(--petri-space-3);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -368,7 +368,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-surface);
   padding: 3px var(--petri-space-3);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .tagMore {
@@ -409,7 +409,7 @@
   gap: var(--petri-space-2);
   height: 32px;
   padding: 0 14px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--petri-duration-base) cubic-bezier(0.16, 1, 0.3, 1);
@@ -456,7 +456,7 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: var(--petri-z-dropdown);
   animation: backdropFadeIn 0.2s ease;
 }
 
@@ -473,7 +473,7 @@
   flex-direction: column;
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   box-shadow: var(--petri-shadow-float);
   animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -517,7 +517,7 @@
   color: var(--petri-text-tertiary);
   background: var(--petri-bg-canvas);
   padding: 2px var(--petri-space-3);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .closeButton {
@@ -527,7 +527,7 @@
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: transparent;
   color: var(--petri-text-tertiary);
   cursor: pointer;
@@ -578,7 +578,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--petri-space-1) 10px;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-accent-bg);
   color: var(--petri-accent);
   font-size: var(--petri-font-size-sm);
@@ -603,7 +603,7 @@
   align-items: center;
   gap: var(--petri-space-1);
   padding: var(--petri-space-1) 10px;
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   background: var(--petri-bg-canvas);
   border: 1px solid var(--petri-border-card);
   font-size: var(--petri-font-size-sm);
@@ -666,7 +666,7 @@
   height: 34px;
   padding: 0 var(--petri-space-4);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
   color: var(--petri-text);
   outline: none;
@@ -706,7 +706,7 @@
 .toggleSlider {
   width: 40px;
   height: 22px;
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-border);
   transition: background var(--petri-duration-base) ease;
 }
@@ -752,7 +752,7 @@
   align-items: flex-start;
   gap: var(--petri-space-3);
   padding: 10px var(--petri-space-4);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-canvas);
 }
 
@@ -790,7 +790,7 @@
   height: 36px;
   padding: 0 var(--petri-space-5);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-surface);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body);
@@ -863,7 +863,7 @@
   color: var(--petri-text);
   background: var(--petri-bg-surface);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
   cursor: pointer;
   transition:
     background var(--petri-duration-fast) ease,

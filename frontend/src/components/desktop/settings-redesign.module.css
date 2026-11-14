@@ -1,0 +1,611 @@
+/**
+ * settings-redesign.module.css — 设置页视觉语言（BLOCK-423 第二版·2026-11-11）
+ *
+ * 参照 reference/ZCode 的三条硬规则（DESIGN.md §Color Usage Rules）：
+ *  1. "Prefer text hierarchy to create information density before adding more
+ *     borders or colors." —— 分层靠**字号/间距/留白**，不靠画线；
+ *  2. "Never mix bg-background, bg-card and bg-surface without a clear layering
+ *     reason." —— 全页只留**两层**：页面底 canvas、侧栏 subtle；内容区不再叠卡片底色；
+ *  3. "Keep brand color usage sparse and intentional." —— accent 只用两处：
+ *     选中态淡底 + 复选框/焦点环，不做图标章、不做左侧色条。
+ *
+ * 因此本版：全页只有 1 条线（顶栏底边）；分组靠间距与字号，字段靠 12px 行距；
+ * 卡片概念取消（内容直接铺在中性底上），避免三层色阶造成的割裂感。
+ */
+
+[role='dialog'][aria-label='设置'] {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--petri-bg-canvas);
+  overflow: hidden;
+}
+
+/* ── 顶部：全页唯一的一条线 ── */
+/* 返回 / 设置标题收进左栏上方：与 ZCode `aside` 顶部放返回按钮同构，
+   右侧内容卡片因此能从面板顶开始，分区标题与「设置」齐平。 */
+[role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__header) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 264px;
+  height: 56px;
+  padding: 0 12px;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: var(--petri-z-sticky);
+  background: var(--petri-bg-canvas);
+  border-bottom: none;
+}
+
+/* 已在设置页内 + 左侧分区名即当前位置 → 「齿轮 + 设置」标题冗余（ZCode aside 顶部只留返回）。
+   dialog 自带 aria-label="设置"，页面语义不丢。 */
+[role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__icon),
+[role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__titles) {
+  display: none;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__title) {
+  font-size: var(--petri-font-size-lg);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__subtitle) {
+  margin-top: 1px;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.45;
+  color: var(--petri-text-tertiary);
+}
+
+/* ── 搜索条：无底线，只留呼吸空间 ── */
+[role='dialog'][aria-label='设置'] [data-testid='settings-toolbar'] {
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 12px 12px 6px;
+  background: transparent;
+  border-bottom: none;
+  align-items: center;
+}
+
+/* 分区计数在窄栏内挤占输入宽度，收起（当前分区说明已由脚注承担） */
+[role='dialog'][aria-label='设置'] [data-testid='settings-toolbar'] > :global([class*='toolbarMeta']) {
+  display: none;
+}
+
+/* 搜索框：铺满左栏宽度，圆角 + 放大镜图标 + 焦点反馈 */
+[role='dialog'][aria-label='设置'] [data-testid='settings-search-input'] {
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px 0 34px;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text);
+  background-color: var(--petri-bg-surface);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%238b98ad' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-md);
+  outline: none;
+  transition: background-color var(--petri-duration-fast) ease, border-color var(--petri-duration-fast) ease;
+}
+
+[role='dialog'][aria-label='设置'] [data-testid='settings-search-input']:hover {
+  border-color: var(--petri-border);
+}
+
+[role='dialog'][aria-label='设置'] [data-testid='settings-search-input']:focus {
+  background-color: var(--petri-bg-surface);
+  border-color: var(--petri-accent);
+}
+
+/* ── 主体 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-layout) {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ── 左栏：搜索 + 分组导航同处一列（ZCode 规范），整块浅底、不画竖线 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-sidebar) {
+  flex: 0 0 264px;
+  width: 264px;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--petri-bg-canvas);
+  padding-top: 56px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav) {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  /* desktop.css 原写死 width:176px，flex 覆盖不了显式宽度，这里显式归位到整列 */
+  width: 100%;
+  flex-shrink: 1;
+  padding: 4px 12px 18px;
+  background: transparent;
+  border-right: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group) {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+/* 分组之间靠留白，不画线 */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group) + :global(.petri-settings-nav__group) {
+  margin-top: 12px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group-label) {
+  margin: 0 0 6px;
+  padding: 0 10px;
+  font-size: var(--petri-font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--petri-text-tertiary);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__footnote) {
+  margin: auto 0 0;
+  padding: 14px 10px 0;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.5;
+  color: var(--petri-text-tertiary);
+}
+
+/* ── 导航项：只靠淡底与字重，不画边框、不加色条 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item):hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item.active) {
+  background: var(--petri-accent-bg);
+  border-color: transparent;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--petri-text-tertiary);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item.active) svg {
+  color: var(--petri-text-secondary);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) span {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) strong {
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  line-height: 1.3;
+  color: inherit;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) small {
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.3;
+  color: var(--petri-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── 右栏：中性底 + 中等阅读列；不叠卡片 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-content) {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 28px 64px;
+  background: var(--petri-bg-canvas);
+  /* 边框只包内容区（参考 reference/ZCode SettingsPage.tsx:1697 —— 左栏 aside 无边框，
+     内容区才是 border + rounded 卡片）。 */
+  /* 内容卡片边框：divider 是 border 55% 透明（白底等效 #f2f2f3，肉眼不可见），
+     改用同属门禁白名单的 border-input（=border-strong），卡片边界才立得住。 */
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-lg);
+  margin: 8px 14px 14px 0;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-content) > * {
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* ── 分组：无卡片、无边框，用间距 + 标题字号分层 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section) {
+  display: block;
+  padding: 0;
+  margin: 0 auto 32px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section) + :global(.petri-settings-section) {
+  margin-top: 34px;
+}
+
+/* 分区标题不吸顶：sticky 会作为浮层压住下方字段（「外观主题」被盖住的实拍）。
+   分区信息已由卡片顶部位置与左栏脚注承担，标题随内容滚动即可。 */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section__heading) {
+  position: static;
+  padding: 0;
+  margin: 0 0 4px;
+  background: transparent;
+  border-bottom: none;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section__heading) h3 {
+  margin: 0;
+  font-size: var(--petri-font-size-lg);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section__heading) p {
+  margin: 3px 0 0;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.55;
+  color: var(--petri-text-tertiary);
+}
+
+/* ── 字段：不画分隔线，只留行距（ZCode「先靠层级再靠线」） ── */
+[role='dialog'][aria-label='设置'] :global(.petri-field) {
+  padding: 16px 0 2px;
+  border-bottom: none;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__label) {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__hint) {
+  margin-top: 8px;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.6;
+  color: var(--petri-text-tertiary);
+}
+
+/* ── 控件：统一高度与圆角，边框只出现在控件本体 ── */
+[role='dialog'][aria-label='设置'] input[type='text'],
+[role='dialog'][aria-label='设置'] input[type='number'],
+[role='dialog'][aria-label='设置'] input[type='password'],
+[role='dialog'][aria-label='设置'] input[type='url'],
+[role='dialog'][aria-label='设置'] input[type='search'],
+[role='dialog'][aria-label='设置'] select,
+[role='dialog'][aria-label='设置'] textarea {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text);
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-md);
+  outline: none;
+  transition: border-color var(--petri-duration-fast) ease;
+}
+
+[role='dialog'][aria-label='设置'] input[type='checkbox'],
+[role='dialog'][aria-label='设置'] input[type='radio'] {
+  accent-color: var(--petri-accent);
+}
+
+[role='dialog'][aria-label='设置'] input:focus-visible,
+[role='dialog'][aria-label='设置'] select:focus-visible,
+[role='dialog'][aria-label='设置'] textarea:focus-visible {
+  border-color: var(--petri-accent);
+}
+
+/* ── 窄窗口 ── */
+@media (max-width: 960px) {
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-sidebar) {
+    flex-basis: 200px;
+    width: 200px;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-content) {
+    padding: 18px 20px 36px;
+  }
+}
+
+@media (max-width: 700px) {
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-sidebar) {
+    flex-basis: 56px;
+    width: 56px;
+  }
+
+  [role='dialog'][aria-label='设置'] [data-testid='settings-toolbar'] {
+    padding: 10px 6px 4px;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) {
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item) span {
+    display: none;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group-label),
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__footnote) {
+    display: none;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group) + :global(.petri-settings-nav__group) {
+    margin-top: 8px;
+  }
+
+  [role='dialog'][aria-label='设置'] :global(.petri-settings-content) > * {
+    max-width: none;
+  }
+}
+
+/* ── 从外部 Agent 导入配置 ────────────────────────────────────────────
+   该面板此前**没有任何 CSS**（README 里 `petr-hint` 类也未定义），textarea 走
+   浏览器默认尺寸（约 180×100）、fieldset 带原生边框、radio 是裸控件。
+   这里补齐：配置来源做成可点选卡片，内容区给足高度并走等宽字体。 */
+[role='dialog'][aria-label='设置'] [data-external-import-panel] {
+  margin-top: 6px;
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] h4 {
+  margin: 0;
+  font-size: var(--petri-font-size-body);
+  font-weight: 600;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] > p {
+  margin: 4px 0 0;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.55;
+  color: var(--petri-text-tertiary);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] label:has(input[type='radio']) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--petri-border-input);
+  border-radius: var(--petri-radius-md);
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text);
+  cursor: pointer;
+  transition: border-color var(--petri-duration-fast) ease, background-color var(--petri-duration-fast) ease;
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] label:has(input[type='radio']):hover {
+  border-color: var(--petri-border);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] label:has(input[type='radio']:checked) {
+  border-color: var(--petri-accent);
+  background: var(--petri-accent-bg);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] label[for='external-import-content'] {
+  display: block;
+  margin: 18px 0 8px;
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] [data-external-import-panel] textarea {
+  width: 100%;
+  min-height: 132px;
+  font-family: var(--petri-font-mono);
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* 返回按钮与左栏导航同列对齐：同起点内边距、同图标尺寸、按钮主体做宽 */
+[role='dialog'][aria-label='设置'] [class*='backBtn'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  /* 与下方搜索框同宽：都占满左栏内容宽（264 - 两侧 12） */
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--petri-radius-md);
+  font-size: var(--petri-font-size-body);
+  color: var(--petri-text-secondary);
+}
+
+[role='dialog'][aria-label='设置'] [class*='backBtn']:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] [class*='backBtn'] svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ── 「高级」折叠组：低频/开发者向分区不占主导航 ── */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group--advanced) {
+  margin-top: 10px;
+  padding-top: 4px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group-toggle) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group-toggle):hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-settings-nav__group-toggle) small {
+  color: var(--petri-text-tertiary);
+  font-weight: 500;
+}
+
+/* ── 设置项统一行（BLOCK-425）：图标 + 名称/说明 + 控件 ──────────────────
+   参照 ZCode settings-form-layout：说明压到一行内，图标帮助扫读定位，
+   控件紧跟说明而不是隔着一整行空白。 */
+[role='dialog'][aria-label='设置'] :global(.petri-field--iconed) {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: none;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--petri-text-tertiary);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__main) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__head) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field--iconed) :global(.petri-field__label) {
+  margin: 0;
+  font-size: var(--petri-font-size-body);
+  font-weight: 500;
+  color: var(--petri-text);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__meta) {
+  flex-shrink: 0;
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-tertiary);
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__control) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field--iconed) :global(.petri-field__hint) {
+  margin: 0;
+  font-size: var(--petri-font-size-sm);
+  line-height: 1.5;
+  color: var(--petri-text-tertiary);
+}
+
+/* 开关类设置：控件贴右侧与标题同行 */
+[role='dialog'][aria-label='设置'] :global(.petri-field__head--trailing) {
+  align-items: flex-start;
+  gap: 16px;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__text) {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+[role='dialog'][aria-label='设置'] :global(.petri-field__head--trailing) :global(.petri-field__control) {
+  flex-shrink: 0;
+  margin-top: -2px;
+}

@@ -1,8 +1,10 @@
 /* UI-365 — 设置独立页（与 /skills /plugins 同形态：设备级能力不绑项目） */
 .settingsPage {
   height: calc(100vh - var(--petri-titlebar-height));
-  padding: var(--petri-space-5) 20px 20px;
-  background: var(--petri-bg-surface);
+  /* BLOCK-423 — 独立设置工作区：外层留 12px 让边框与圆角可见，内部由
+     settings-redesign.css 承担分层（panel 灰底 + 卡片浮起）。 */
+  padding: 0;
+  background: var(--petri-bg-canvas);
   display: flex;
   box-sizing: border-box;
   overflow: hidden;

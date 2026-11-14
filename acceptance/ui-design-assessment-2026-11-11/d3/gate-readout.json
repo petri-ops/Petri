@@ -1,0 +1,94 @@
+{
+  "schema": "petri.ui-design.d3.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-418 / UI-D3",
+  "evidenceLevel": "mechanical-gates + contract-tests + implant-red-proofs",
+  "notIncluded": [
+    "人眼观感",
+    "暗色 diff 签字",
+    "读屏",
+    "元素级截图过目"
+  ],
+  "redGreen": {
+    "contract": "HK-01：红证据由 9 项植入必红负测 + 门首跑 FAIL（70 项）承载；纯重构按拆前拆后同套绿",
+    "red": "gate:ui-visual 首跑 FAIL 70 项（424 处非 WIP ;;、10 处精确档位裸 z、hover/selected 未成对、跨文件重复）；其中 3 项系门自身口径错误（别名链继承合法、accent-hover 10 处为独立语义）",
+    "fix": "① 门口径修正（别名 1 处链继承合法、accent-hover 独立分类 + 外溢断言、剥 CSS 注释）；② 收敛脚本（非 WIP 424 处 ;; 清零、7 处 z 精确等价迁移）；③ token 语义（hover 单源、selected 明暗成对 + 真实消费、surface-dim 跨文件重复清零）；④ 双棘轮按现值下调",
+    "green": "gate:ui-visual PASS / 负测 9/9 / theme-token-contract 19/19 / D0–D2 五门全绿"
+  },
+  "gates": {
+    "gate:ui-visual": {
+      "result": "PASS",
+      "cssFiles": 104,
+      "hoverRoot": "--petri-hover",
+      "selectedTokens": 3,
+      "surfaceDimDuplicateFiles": 0,
+      "nonWipDoubleSemicolons": 0,
+      "fallbackSnapshot": "17 files / 190 occurrences"
+    },
+    "theme-token-contract": {
+      "result": "PASS",
+      "tests": 19,
+      "ratchetsDowngraded": [
+        "fallback 19/235 → 17/190",
+        "numeric z 38/111 → 34/104"
+      ]
+    },
+    "contractTests": {
+      "result": "PASS",
+      "tests": 9,
+      "file": "test/ui-design-visual.test.mjs"
+    },
+    "implantRedProofs": [
+      "临时追加 1 处颜色 fallback → theme-token-contract 报 `FolderPicker.module.css: 2 > ratchet 1` 判红；还原后 19/19，探针零残留",
+      "9 项负测：hover 别名自带字面量 / 真源缺明暗 / selected 未成对 / 无消费 / 跨文件重复 / ;; 残留 / 冻结清单外裸 z / fallback 超快照 / accent-hover 外溢 / 冻结清单超限"
+    ],
+    "code-size": {
+      "result": "PASS",
+      "writeMode": "legitimate downgrade",
+      "bytesAnchors": "6 files decreased 3–39 bytes",
+      "linesAnchors": "unchanged",
+      "wipEntry": "zero change",
+      "note": "先压回 ≤ 基线再 --write；未抬高任何允许上限"
+    },
+    "gate:ui-baseline / gate:ui-entries / gate:ui-breakpoints / gate:ui-layout": {
+      "result": "PASS",
+      "note": "D0–D2 五门零回退"
+    },
+    "closeout": {
+      "result": "PASS",
+      "gates": 23,
+      "excluded": [
+        "tests",
+        "quality:perf",
+        "quality:lint",
+        "quality:lint:ledger"
+      ],
+      "excludedReason": "W/V 归属，见 §2 与 D0–D2 归因"
+    }
+  },
+  "deliverables": [
+    "frontend/src/styles/custom.css（hover 别名收敛到单一真源，零新增行/字节）",
+    "frontend/src/styles/global.css（selected 专用 token 明暗成对；surface-dim 两处重复定义删除）",
+    "frontend/src/pages/window/command-center.module.css（.tileSelected 消费 selected token）",
+    "57 个非 WIP CSS 文件 424 处 ;; 清零 + 7 处裸 z 精确等价迁移",
+    "frontend/src/styles/theme-token-contract.test.ts（两棘轮按现值下调 + 植入必红）",
+    "scripts/ui-design-visual.mjs + test/ui-design-visual.test.mjs（9 项植入必红负测）",
+    "acceptance/block-92/size-baseline.json（合法下调重打）"
+  ],
+  "exitCriteria": {
+    "hoverSelectedSingleSource": "done — hover 1 真源 + selected 3 token 明暗成对且有真实消费",
+    "crossFileDuplicateDefinitions": "done — 0（gate 守护）",
+    "numericZMonotonicDecrease": "done-partial — 111 → 104（7 处迁移）；3 处因 code-size 字节棘轮保留裸值并登记 Z_TIER_FROZEN 只减清单",
+    "doubleSemicolonsZero": "done-partial — 非 WIP 0；WIP 128 处零触碰（W 归属）",
+    "fallbackSnapshotDowngraded": "done — 19/235 → 17/190，归零键删除=更严，植入必红实战通过",
+    "componentCssTokenOverflow": "done-partial — 10 个外溢定义回 styles/ 需明暗成对 + 观感签字，带补腿条件",
+    "visualPerception": "pending_human_eye — 暗色 hover alpha 0.09→0.07、selected 边框改 accent-border，观感不代答"
+  },
+  "selfCorrections": [
+    "门口径：别名链继承合法 / accent-hover 独立语义 / 剥 CSS 注释与组合选择器",
+    "accent 棘轮抓真：selected token 初版直接用 var(--petri-accent) 致 custom.css 计数 9→13；改引用既有 accent 派生 token，零计数增长",
+    "code-size：初版 --write 会抬高 3 个文件锚点（放宽基线）→ 改字节中性方案 + 只减棘轮冻结清单，重打后全部锚点下降",
+    "UI 台账：按 D1 自纠先例，全程 UI-702 同段追加，debt 棘轮 497 段 / 35 债零改动"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

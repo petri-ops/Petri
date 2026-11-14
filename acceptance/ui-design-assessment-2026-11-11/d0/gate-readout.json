@@ -1,0 +1,41 @@
+{
+  "schema": "petri.ui-design.d0.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-415 / UI-D0",
+  "evidenceLevel": "mechanical-gates-and-contract-tests",
+  "notIncluded": ["实机观感", "人眼签字", "用户测试", "读屏"],
+  "treeState": "dirty — 他方在制 WIP（frontend/src/pages/project-workspace.module.css 11+/9−；src/main/_backend-ports.js 与 test/block414-backend-port-reuse.test.mjs 为开局后出现的并发写入）+ 用户 untracked 资产；本程序零触碰、零 stage、零提交其文件",
+  "redGreen": {
+    "contract": "HK-01 红绿先行（新机械门 = 新行为契约）",
+    "red": {
+      "gate": "[ui-baseline] FAIL 4 problems：plan.started/startedAt/ruling 缺失 + staticScores.layoutAndIA=3 not found in **3.0**（门自身口径 bug）",
+      "tests": "test/ui-design-baseline.test.mjs 2 failed（real baseline matches / plan.started frozen）"
+    },
+    "fix": "① 门改用数值语义比对替代 String() 字面量比对；② baseline.plan.started→true + startedAt/startedBy/ruling/startedFieldNote 留痕；③ 新脚本动态下标改自有属性描述符读取（消除 lint warning，基线未放宽）",
+    "green": {
+      "gate": "[ui-baseline] PASS — 24 行锚 / 38 字段逐项相等",
+      "tests": "9/9 pass, 0 fail"
+    }
+  },
+  "gates": {
+    "gate:ui-baseline": { "result": "PASS", "anchors": 24, "fields": 38 },
+    "theme-token-contract": { "result": "PASS", "tests": 19, "durationMs": 308, "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts" },
+    "docs:check": { "result": "PASS", "registeredDocuments": 559 },
+    "hygiene:check": { "result": "PASS" },
+    "ui:audit:check": { "result": "FAIL", "reason": "工作区含 UI 改动但未同步 docs/ui-productization-audit.md", "attribution": "W — 他方 CSS WIP；D0 零 UI 代码改动，按红线不为过门改台账" },
+    "quality:lint": { "result": "PASS", "errors": 0, "warnings": 2445 },
+    "quality:lint:ledger": { "result": "PASS", "violations": 191, "ledgerEntries": 120, "warningsByDomain": { "production": 1489, "test": 417, "scripts": 539 } },
+    "quality:types": { "result": "PASS", "exit": 0 },
+    "test:changed:list": { "result": "PASS", "unknown": 0 }
+  },
+  "deliverables": [
+    "acceptance/ui-design-assessment-2026-11-11/baseline.json（plan.started=true + 留痕）",
+    "docs/ui-design-acceptance-checklist-v1.md（八态/几何四块/长内容三态/断点表/评分卡口径/五类证据）",
+    "scripts/ui-design-baseline.mjs + npm run gate:ui-baseline",
+    "test/ui-design-baseline.test.mjs（4 类植入必红负测 + 留痕不可回退）",
+    "test/impact-map.json → ui-design-program 规则",
+    "docs/DOC-REGISTRY.json / docs/README.md 注册与入口"
+  ],
+  "scorecardRecomputable": true,
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

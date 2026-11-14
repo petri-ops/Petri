@@ -1,0 +1,517 @@
+{
+  "schema": "petri.ui-design.settings-redesign.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-423 设置页视觉改版",
+  "authorization": "用户 2026-11-11「可以的 开整吧」+「设置页没有质感，参照 reference/ZCode 尽量模仿，适当调整内容」",
+  "reference": "reference/ZCode/docs/ui/settings-sidebar-layout.md, settings-form-layout.md, settings-secondary-navigation.md",
+  "ported": {
+    "layout": "独立工作区（border-card + radius-lg + bg-subtle）+ 264px 分组侧栏 + 760px 中等阅读列",
+    "nav": "四组展示分组（应用 / 能力与模型 / 智能决策 / 系统）+ 当前分区说明；≤960→208px，≤700→60px 图标栏（title 暴露标题）",
+    "cards": "section = bg-elevated + border-card + radius-lg + shadow-sm；field 用 padding + divider 分隔，不叠第二层卡片",
+    "controls": "input/select/textarea 统一 32px 高 + border-input + radius-md；focus-visible accent 环；checkbox accent-color",
+    "notPorted": [
+      "ZCode tailwind 类名与色板",
+      "ZCode 的设置项内容与分区命名",
+      "ZCode 的搜索对话框（本仓沿用既有分区级过滤）"
+    ]
+  },
+  "gateCorrections": [
+    {
+      "gate": "gate:css-modules",
+      "violation": "新增 plain CSS 不允许",
+      "fix": "落 settings-redesign.module.css + :global() 指向既有 petri-* 类名"
+    },
+    {
+      "gate": "gate:ui-breakpoints",
+      "violation": "未登记阈值 1100/880",
+      "fix": "改复用既有 960/700，零新增档位"
+    },
+    {
+      "gate": "theme-token-contract",
+      "violation": "5 类（11 裸 px 字号 / 2 字面量时长 / 2 结构 1px 边框 / 未定义 token / 6 小字 + 3 accent 未登记）",
+      "fix": "字号→font-size token、时长→duration token、边框→border-card|border-input|divider、未定义 token 改 petri-text、小字与 accent 按宪章语义域逐文件登记"
+    },
+    {
+      "gate": "quality:lint:ledger",
+      "violation": "SettingsNav 未使用变量 1 处 + scripts 域 warning +4",
+      "fix": "删未使用变量；ui-design-a11y.mjs 4 处动态下标改自有属性描述符；scripts 域回落 539"
+    }
+  ],
+  "sideFix": {
+    "issue": "reference/ 第三方源码镜像被 ESLint 扫描，产生 560+ 项本仓不该承担的违规",
+    "fix": "eslint.config.mjs ignores 补 reference/**（同 codex/、_external-ref/、openclaw/ 先例；.gitignore:118 已排除该目录）",
+    "nature": "扫描范围修正，非放宽基线"
+  },
+  "gates": {
+    "theme-token-contract": "19/19 PASS",
+    "DesktopSettingsPanel 全量测试": "88/88 PASS (23 files)",
+    "gate:ui-program": "6/6 PASS",
+    "gate:css-modules": "PASS（plain CSS 11 全在白名单）",
+    "gate:ui-breakpoints": "PASS（20 档在册，零新增）",
+    "gate:code-size": "PASS（DesktopSettingsPanel.tsx 675 行 / 33719 字节 = 基线；新 module.css 不入册）",
+    "gate:ui-a11y": "PASS（对比度 32 对 0 违规）",
+    "docs:check": "PASS 568",
+    "ui:audit:check": "PASS",
+    "quality:types": "exit 0",
+    "quality:lint:ledger": "FAIL 1 项 —— test/block414-backend-port-reuse.test.mjs（并发写入者 W 文件，零触碰、不代改）"
+  },
+  "liveMeasurement": {
+    "viewport": "1600x1000",
+    "nav": "264px",
+    "contentColumn": "760px 居中",
+    "instance": "9223 离屏，跑完立即 kill，未设 PETRI_TEST_ONSCREEN"
+  },
+  "humanEye": "pending_human_eye — 质感属观感维度，需用户验收签字；静态门禁只能保证体系一致性（token/断点/对比度/结构）",
+  "evidenceFiles": [
+    "settings-before.png",
+    "settings-after4.png",
+    "settings-v2.png",
+    "settings-v3.png",
+    "settings-v6.png",
+    "settings-v7.png",
+    "settings-v8.png",
+    "settings-v9.png",
+    "settings-v10.png",
+    "settings-v11.png",
+    "settings-v12.png",
+    "settings-import.png",
+    "settings-v13.png",
+    "settings-v14.png",
+    "settings-v15.png",
+    "settings-v16.png",
+    "settings-v17.png",
+    "settings-v18.png",
+    "settings-ia1.png",
+    "settings-ia2.png",
+    "settings-v20.png",
+    "settings-v21.png",
+    "settings-v22.png",
+    "settings-desktop.png",
+    "settings-maintenance.png",
+    "gate-readout.json"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "v2Feedback": {
+    "userFeedback": "我看了 很割裂 主题色保持一致 布局风格模仿 zcode 不要那么多的线条",
+    "rootCause": "第一版违反 ZCode DESIGN.md 三条硬规则：①靠画线分层而非文字层级；②同时混用 background/card/surface 三层色阶；③accent 用在图标章/左色条/checkbox/焦点共 4 类位置，品牌色不稀疏。",
+    "reinforcement": [
+      "全页只保留 1 条线（顶栏底边）；取消 section 卡片边框、field 分隔线、nav 右边框",
+      "色阶从 3 层降到 2 层：页面底 canvas + 侧栏 subtle；section 无背景无边框直接铺底",
+      "accent 从 4 类位置收到 2 类：选中态淡底（--petri-accent-bg）+ checkbox/focus（--petri-accent）；取消图标彩底与左侧色条",
+      "分组靠 34px 间距 + 16px 标题；字段靠 16px 行距；阅读列 720px"
+    ],
+    "measuredAfter": {
+      "solidBorders": 3,
+      "borderBottom": 4,
+      "barePxFont": 0,
+      "accentBare": 2,
+      "smCount": 6
+    },
+    "screenshots": [
+      "settings-v2.png",
+      "settings-v3.png"
+    ]
+  },
+  "v3Feedback": {
+    "userFeedback": "设置搜索框 要优化 内容区要上下边界显示吧 内容居中显示",
+    "measuredRootCause": {
+      "contentNotCentered": "sectionCenter=652 vs contentInnerCenter=924（偏左 272px）——上一版把 desktop.css 的 `margin: 0 auto` 覆盖成 `margin: 0 0 32px`，auto 丢失",
+      "searchBarMisplaced": "搜索条原在 layout 之外的全宽工具条，与 ZCode 规范「设置导航顶部提供搜索设置」不符，且把顶栏撑高、左栏上方留空"
+    },
+    "fixes": [
+      "结构：把 SettingsToolbar 移入新增的 .petri-settings-sidebar（搜索 + 分组导航同列），右栏因此拿到完整上下边界",
+      "居中：section 恢复 `margin: 0 auto 32px`，实测 sectionCenter=920 vs contentInnerCenter=924（差值来自滚动条）",
+      "搜索框：铺满左栏、34px 高、圆角、内联放大镜 SVG、hover 淡底、focus 主题色描边；左栏加宽到 264px（ZCode 规范值）以容纳完整占位文案",
+      "「N 个分区」计数在窄栏内挤占输入宽度，收起（当前分区说明已由左栏脚注承担）",
+      "内容区上下边界：上=顶栏分隔线 + 24px 顶部留白；下=64px 收口留白；水平 720px 列居中"
+    ],
+    "measuredAfter": {
+      "navWidth": 264,
+      "sectionCenter": 920,
+      "contentInnerCenter": 924,
+      "searchHeight": 34,
+      "contentPadding": "24px 30px 64px"
+    },
+    "layoutInvariant": "code-size 675→672 行 / 33719→33616 字节（锚点下降后重打，非放宽）",
+    "screenshots": [
+      "settings-v6.png",
+      "settings-v7.png"
+    ]
+  },
+  "v4Feedback": {
+    "userFeedback": "你看这里显得不和谐 像是多了一层吗？？？ 优化",
+    "diagnosis": "左栏整块 subtle 底色从顶栏下方单独起一层：上边与白底顶栏形成硬切边、右边与白底内容区形成色差，构成 L 形灰带，视觉上「多了一层」。",
+    "fix": [
+      "左栏背景由 subtle 改为 canvas —— 与顶栏、内容区同底，L 形灰带消失",
+      "搜索框由「浅灰无边框色块」改为「白底 + border-input 描边」，成为唯一的控件级边界，不再靠色块分区",
+      "分区感改为靠分组标题、间距与选中项淡底（--petri-accent-bg）表达"
+    ],
+    "layersAfter": {
+      "pageBackground": "canvas",
+      "sidebar": "canvas（透明同底）",
+      "content": "canvas",
+      "lines": "顶栏底边 1 条 + 控件边框（搜索框/输入框）"
+    },
+    "screenshots": [
+      "settings-v8.png"
+    ]
+  },
+  "v5Feedback": {
+    "userFeedback": "好多了 你看看 zcode ... 这个边框是不是不应该包住导航呢",
+    "zcodeEvidence": "reference/ZCode/packages/ui/src/SettingsPage.tsx:1493 最外层 grid 无边框；1514 `<aside>`（左栏）无边框无圆角；1697-1699 只有右侧内容区是 `border border-border bg-background` + `rounded-xl` 卡片",
+    "diagnosis": "面板级 border-radius + overflow 把左栏和内容区一起包住，与 ZCode 结构不符；另 desktop.css:277 的 `.petri-settings-nav{width:176px}` 是显式宽度，flex 覆盖不了，导致左栏只占 176 而非 264",
+    "fix": [
+      "面板去掉圆角/边框；边框只给内容区卡片（`1px solid var(--petri-divider)` + radius-lg + 右/下 14px 留白）",
+      "header 去掉底边（边框交给内容卡片）",
+      "左栏 `.petri-settings-nav` 显式 `width:100%` 归位到 264（desktop.css 写死 176 的遗留）",
+      "内容区边框色由 `--petri-border-card`（64% 透明几乎不可见）改为 `--petri-divider`"
+    ],
+    "measuredAfter": {
+      "panel": "0..1600 无边框",
+      "sidebar": "0..264 无边框",
+      "content": "264..1586 卡片（1px divider + radius 8px + 右下 14px 留白）",
+      "navWidth": 264
+    },
+    "screenshots": [
+      "settings-v9.png",
+      "settings-v10.png",
+      "settings-v11.png"
+    ]
+  },
+  "v6Feedback": {
+    "userFeedback": "右侧内容区没有置顶呀 不好看 另外 从外部 Agent 导入配置这个部分优化一下 默认的输入框太小了 应该整体风格统一",
+    "diagnosis": {
+      "noSticky": "内容滚动时分区标题随内容滚走，顶部直接露出半截正文（user 截图同款观感）",
+      "importPanelUnstyled": "`data-external-import-panel` 在全仓**没有任何 CSS**（`petr-hint` 类名更是未定义，疑为 `petri-hint` 笔误）：textarea 走浏览器默认 ~180×100、fieldset 带原生边框、radio 是裸控件"
+    },
+    "fix": [
+      "分区标题 `position: sticky; top: -1px`（z 走 `--petri-z-sticky`，背景 canvas），滚动时标题与描述吸顶",
+      "导入面板补齐样式：选择来源两个单选做成可点选卡片（选中项 accent 描边 + accent-bg 底），配置内容 textarea `width:100%` + `min-height:132px` + 等宽字体 + 可纵向拉伸，标题/说明按设置页层级"
+    ],
+    "measuredAfter": {
+      "textarea": "720×132（原约 180×100）",
+      "radioCard": "154×37，选中项边框 rgb(13,148,136)",
+      "stickyZ": "var(--petri-z-sticky)"
+    },
+    "ratchetUpdates": {
+      "smallFont": "6 → 8（导入面板说明 + 等宽内容属元信息 sm 域）",
+      "accent": "3 → 4（导入来源选中卡片描边）",
+      "zIndex": "裸 `z-index: 2` → `var(--petri-z-sticky)`"
+    },
+    "screenshots": [
+      "settings-v12.png",
+      "settings-import.png"
+    ]
+  },
+  "v7Feedback": {
+    "userFeedback": "核对一下 右侧内容区 边框 并没有指定呀",
+    "diagnosis": "边框确实在 DOM 里（`1px` + `radius 8px` + 位置 264–1586），但颜色取 `--petri-divider`，其定义为 `color-mix(in srgb, var(--petri-border) 55%, transparent)` —— 白底上等效 `#f2f2f3`，肉眼等于没有。选错了 token 层级。",
+    "tokenFacts": {
+      "--petri-border": "#e4e4e7（实色，但不在 1px 门禁白名单）",
+      "--petri-border-input": "= --petri-border-strong = #d4d4d8（最实，且在白名单）",
+      "--petri-border-card": "= --petri-border-subtle = border 64% 透明（更淡）",
+      "--petri-divider": "= border 55% 透明（最淡，误用）"
+    },
+    "fix": [
+      "内容卡片边框改 `1px solid var(--petri-border-input)`（#d4d4d8，白名单内且可见）",
+      "卡片四周留白对齐：`margin: 14px 14px 14px 0`（原来顶部 0、左右 14px，不对称）"
+    ],
+    "measuredAfter": {
+      "contentRect": "x=264 y=110 w=1322 h=876",
+      "border": "1px rgb(212,212,216)",
+      "radius": "8px",
+      "margin": "14px 14px 14px 0"
+    },
+    "screenshots": [
+      "settings-v13.png",
+      "settings-v14.png"
+    ]
+  },
+  "v8Feedback": {
+    "userFeedback": "右侧内容区 这一类的标题信息是不是应该和顶层设置齐平呢",
+    "structureChange": "顶栏从「全宽占位」改为「绝对定位收进左栏上方 264×60」，与 ZCode `aside` 顶部放返回按钮同构；右侧内容卡片因此从面板顶部开始，分区标题与「设置」同带。",
+    "cssOnly": true,
+    "hiddenInHeader": [
+      "petri-desktop-panel__icon",
+      "petri-desktop-panel__subtitle（副标题改由分区标题承担；264px 内放不下）"
+    ],
+    "measuredAfter": {
+      "settingsTitleY": 59,
+      "sectionHeadingY": 62,
+      "deltaPx": 3,
+      "contentTop": 46,
+      "aligned": true
+    },
+    "screenshots": [
+      "settings-v15.png"
+    ]
+  },
+  "v9Feedback": {
+    "userFeedback": "如图 这个设置就没必要了是吧（← 返回 + 齿轮 + 「设置」）",
+    "rationale": "已在设置页内、左侧分区名即当前位置、右侧卡片已有分区标题 —— 顶部「齿轮 + 设置」属冗余身份块。ZCode `SettingsPage.tsx:1514` 的 aside 顶部同样只放返回按钮。",
+    "fix": [
+      "渐变式隐藏 `.petri-desktop-panel__icon` 与 `.petri-desktop-panel__titles`（dialog 自带 aria-label=\"设置\"，页面语义不丢）",
+      "顶栏高度 60→56、padding 14→12、返回按钮改为 flex-start",
+      "删除同文件后段残留的 `.petri-desktop-panel__icon { display: inline-flex }` —— 同特异性后出现规则把 `display:none` 覆盖，是「改了没生效」的真实原因"
+    ],
+    "measuredAfter": {
+      "headerChildren": [
+        {
+          "cls": "backBtn",
+          "display": "flex"
+        },
+        {
+          "cls": "petri-desktop-panel__icon",
+          "display": "none"
+        },
+        {
+          "cls": "petri-desktop-panel__titles",
+          "display": "none"
+        }
+      ],
+      "headerHeight": 56
+    },
+    "screenshots": [
+      "settings-v16.png",
+      "settings-v17.png"
+    ]
+  },
+  "v10Feedback": {
+    "userFeedback": "返回按钮图标做宽 保持统一 / 页面内的标题好像都是悬浮的 不合理",
+    "rootCause": "上一版给 `.petri-settings-section__heading` 加了 `position: sticky`（为解决「标题不吸顶」），但 sticky 是浮层——滚动位置一到就压住下方字段，「外观主题」label 被标题盖住，就是用户看到的「标题悬浮」。",
+    "fix": [
+      "分区标题改回 `position: static`（回文档流，不遮挡）；分区信息由卡片顶部位置与左栏脚注承担",
+      "返回按钮：`min-width:104px` / `height:36px` / `padding 0 14px 0 12px` / `gap:10px`，图标 18×18 并与左栏导航项同列起点；补 hover 反馈"
+    ],
+    "measuredAfter": {
+      "headingPosition": "static",
+      "headingBottom": 100,
+      "firstFieldLabelTop": 120,
+      "overlap": false,
+      "backBtnWidth": 104,
+      "backIconWidth": 18
+    },
+    "tradeoff": "标题不再吸顶（滚动会随内容滚走）——这是为了消除遮挡。若需要固定标题条，应在卡片内做独立的非滚动头（需 DOM 改动），而不是给 section 标题上 sticky。",
+    "screenshots": [
+      "settings-v18.png"
+    ]
+  },
+  "iaAudit": {
+    "date": "2026-11-11",
+    "userFeedback": "左侧设置内容显得不够紧凑 一方面内容有些少了 另一方面 有大量的内容 用户不需要关注和点击 需要整体核对剔除或者隐藏",
+    "inventory": {
+      "method": "CDP 逐分区点击 + DOM 读取（点击导航项而非改 URL，因为 useSearchParams 不响应 pushState）",
+      "findings": [
+        {
+          "section": "决策原语",
+          "inputs": 29,
+          "selects": 118,
+          "chars": 9152,
+          "verdict": "advanced"
+        },
+        {
+          "section": "运行时与诊断",
+          "chars": 8846,
+          "verdict": "advanced"
+        },
+        {
+          "section": "计算与数据",
+          "inputs": 12,
+          "chars": 1430,
+          "verdict": "混住 6 件事，拆分"
+        },
+        {
+          "section": "常规",
+          "labels": 12,
+          "chars": 505,
+          "verdict": "外观 4 + 桌面行为 3 + 外部导入 混住，拆分"
+        },
+        {
+          "section": "实验特性",
+          "checkboxes": 5,
+          "verdict": "advanced"
+        },
+        {
+          "section": "快捷键",
+          "buttons": 20,
+          "chars": 463,
+          "verdict": "core（低频但保留）"
+        }
+      ]
+    },
+    "changes": {
+      "split": [
+        "appearance（外观）",
+        "desktop（通知与桌面）",
+        "network（联网与代理）"
+      ],
+      "renamed": [
+        {
+          "from": "general/常规",
+          "to": "general/配置迁移",
+          "why": "外观与桌面行为迁出后只剩外部导入"
+        }
+      ],
+      "tiered": {
+        "core": 9,
+        "advanced": 4
+      },
+      "advancedHidden": [
+        "决策原语",
+        "推理档位",
+        "实验特性",
+        "运行时与诊断"
+      ],
+      "defaultSection": "general → appearance",
+      "codeSplit": [
+        "sections/AppearanceSection.tsx",
+        "sections/DesktopSection.tsx",
+        "sections/NetworkSection.tsx"
+      ],
+      "panelSize": "672→621 行 / 33616→31221 字节（DOM 外迁使入册文件净减，非放宽）"
+    },
+    "measuredAfter": {
+      "navCollapsed": 9,
+      "navExpanded": 13,
+      "toggleLabel": "▸ 高级 4",
+      "coreLabels": [
+        "外观",
+        "通知与桌面",
+        "模型接口",
+        "联网与代理",
+        "计算与数据",
+        "用量与资源",
+        "快捷键",
+        "配置迁移",
+        "隐私与维护"
+      ]
+    },
+    "invariants": [
+      "零新增依赖",
+      "零新增设置状态",
+      "settingsSearch 索引与 SETTINGS_SECTIONS 逐项相等（测试双向钉）",
+      "分区清单冻结测试按有意变更重打 10→13 并写明理由"
+    ],
+    "screenshots": [
+      "settings-ia1.png",
+      "settings-ia2.png",
+      "settings-ia-expanded.png"
+    ]
+  },
+  "v11Feedback": {
+    "userFeedback": "返回这个是不是应该宽一点 和下面的保持一致",
+    "fix": "返回按钮由 `min-width:104px`（内容撑开）改为 `width:100%` + `justify-content:flex-start` + `padding:0 12px`，与下方搜索框同宽同起点",
+    "measuredAfter": {
+      "backBtn": {
+        "x": 12,
+        "w": 240
+      },
+      "search": {
+        "x": 12,
+        "w": 240
+      },
+      "aligned": true
+    },
+    "note": "底色与描边沿用 `global-page.module.css` 的 `.backBtn` 原生 `background: var(--petri-surface)` + `border-card`，与本页控件同族，未新增颜色",
+    "screenshots": [
+      "settings-v20.png"
+    ]
+  },
+  "iconRemap": {
+    "userFeedback": "左侧的这些图标是不是应该优化一下 和每个内容适配 目前有明显的重复",
+    "rootCause": "`types.ts` 把 icon 类型限死为 5 个字面量 `settings|brain|cpu|wrench|flag`，13 个分区被迫循环：外观/通知与桌面/快捷键 都是齿轮，联网/计算/用量 都是方块，配置迁移/隐私与维护 都是扳手。",
+    "fix": "类型改为已导出的 `IconName`（Icon 组件支持 58+ 图标），13 个分区各配一个语义图标，全部不重复",
+    "mapping": {
+      "外观": "sun",
+      "通知与桌面": "bell",
+      "模型接口": "bot",
+      "联网与代理": "globe",
+      "计算与数据": "database",
+      "用量与资源": "bar-chart",
+      "快捷键": "key",
+      "配置迁移": "download",
+      "隐私与维护": "shield",
+      "决策原语": "zap",
+      "推理档位": "brain",
+      "实验特性": "sparkles",
+      "运行时与诊断": "terminal"
+    },
+    "uniqueness": "13 个 icon 名互不相同",
+    "screenshots": [
+      "settings-v21.png"
+    ]
+  },
+  "layoutRefactor": {
+    "workPackage": "BLOCK-425 设置项排版重构（第一批）",
+    "userRequirement": "每个设置项重新设计排版：减少大段文字、说明精简、明确功能名与用途、图标与文字并存、参考 ZCode 简洁不冗余",
+    "newPattern": {
+      "component": "DesktopSettingsPanel/SettingsField.tsx",
+      "structure": "左侧语义图标 + 名称（右侧可挂当前值读数）+ 控件 + 一句说明",
+      "modes": [
+        "默认（控件在名称下方，适合选择/输入）",
+        "trailing（控件贴右侧与名称同行，适合开关/按钮）"
+      ],
+      "reference": "reference/ZCode/docs/ui/settings-form-layout.md（信息密度优先于边框与说明长度）"
+    },
+    "batch1": {
+      "appearance": {
+        "items": 4,
+        "icons": [
+          "sun",
+          "list-details",
+          "sparkles",
+          "zap"
+        ]
+      },
+      "desktop": {
+        "items": 3,
+        "icons": [
+          "bell",
+          "panel-bottom",
+          "moon"
+        ]
+      },
+      "maintenance": {
+        "items": 4,
+        "icons": [
+          "shield",
+          "refresh",
+          "download"
+        ]
+      }
+    },
+    "measuredAfter": {
+      "itemsRefactored": 11,
+      "longestHintChars": "约 30（原最长 56）",
+      "tests": "115/115",
+      "block201": "4/4"
+    },
+    "remaining": [
+      {
+        "section": "模型接口",
+        "why": "298 行 DOM + 19 输入 / 8 下拉，改动会碰渠道与凭据编辑流程"
+      },
+      {
+        "section": "联网与代理",
+        "why": "NetworkProxyPanel / WebAccessPanel 使用自有 CSS Module styles.field"
+      },
+      {
+        "section": "计算与数据",
+        "why": "RemoteTargets / DataManagement / HarnessEnvironment / TrashManagement 四组件各自样式"
+      },
+      {
+        "section": "用量与资源 / 快捷键",
+        "why": "统计卡与键位表，行式字段不适用，需各自信息设计"
+      },
+      {
+        "section": "高级 4 项",
+        "why": "决策原语 29 输入 / 118 下拉，建议独立成开发者选项二级页"
+      }
+    ],
+    "screenshots": [
+      "settings-v22.png",
+      "settings-desktop.png",
+      "settings-maintenance.png"
+    ]
+  }
+}

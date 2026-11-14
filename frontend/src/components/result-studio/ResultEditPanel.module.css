@@ -32,7 +32,7 @@
   margin: 0;
   padding: var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-md);;
+  border-radius: var(--petri-radius-md);
 }
 
 .group legend {
@@ -79,7 +79,7 @@
   width: 100%;
   padding: 0 var(--petri-space-2);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
 }
@@ -106,7 +106,7 @@
   min-height: 28px;
   padding: 0 var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-bg-elevated);
   color: var(--petri-text-primary);
 }
@@ -114,7 +114,7 @@
 .impact {
   margin: 0;
   padding: 7px var(--petri-space-3);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: color-mix(in srgb, var(--petri-accent) 8%, transparent);
   color: var(--petri-text-secondary);
   line-height: 1.5;
@@ -146,7 +146,7 @@
   gap: 5px;
   padding: 0 10px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   background: var(--petri-bg-elevated);
   color: var(--petri-accent);
   cursor: pointer;

@@ -1,0 +1,352 @@
+{
+  "schema": "petri.ui-design.gap-ledger.v1",
+  "capturedAt": "2026-11-11",
+  "source": "acceptance/ui-design-assessment-2026-11-11/ASSESSMENT-AND-PLAN.md §2（四维度诊断）+ §0 评分卡 + D0–D5 增量",
+  "terminalVocabulary": [
+    "done",
+    "done-partial",
+    "retain-with-reason",
+    "pending_human_eye",
+    "external-blocked",
+    "pending_user_ruling"
+  ],
+  "rule": "零 in_progress；每条带证据路径；U/E/V/W 四类不计入 Agent 可开工完成数；pending_human_eye / external-blocked / pending_user_ruling 不得写成 verified 或 done",
+  "findings": [
+    {
+      "id": "IA-P1-a",
+      "dim": "A",
+      "level": "P1",
+      "finding": "同一功能多路径（欢迎页 5 / 扩展 6 / 设置 4 / 知识 3）",
+      "terminal": "done",
+      "package": "BLOCK-416",
+      "evidence": "scripts/ui-design-entry-registry.mjs + gate:ui-entries（16 路由 / 25 字面量 / 0 重复 canonical）",
+      "note": "口径并列：报告的「路径数」是静态探查口径，与「每功能 1 canonical」不混用"
+    },
+    {
+      "id": "IA-P1-b",
+      "dim": "A",
+      "level": "P1",
+      "finding": "/projects 与 /review 左栏无入口；/window/rail internal 无生产 popOut",
+      "terminal": "done-partial",
+      "package": "BLOCK-416",
+      "evidence": "scripts/ui-design-entry-registry.mjs CANCELLED_ENTRIES 3 条显式留因",
+      "supplement": "是否新增左栏可见入口属 U-01 pending_user_ruling；/window/rail 由 ensureRailWindow 直载，留因不删路由"
+    },
+    {
+      "id": "IA-P2-a",
+      "dim": "A",
+      "level": "P2",
+      "finding": "isStandalonePagePath 清单残留 /backend /skills /plugins，缺 /extensions /review /projects",
+      "terminal": "done",
+      "package": "BLOCK-416",
+      "evidence": "frontend/src/components/desktop/titlebar/shared.tsx + gate:ui-entries 方向 D",
+      "note": "残留清零、补 canonical /extensions；/projects /review 是否纳入 bare 形态归 U-06 不擅改"
+    },
+    {
+      "id": "IA-P1-c",
+      "dim": "A",
+      "level": "P1",
+      "finding": "布局非单源：CenterPanel 双层 layout + 同名 class 两处定义（K-16 未闭环）",
+      "terminal": "done-partial",
+      "package": "BLOCK-417",
+      "evidence": "scripts/ui-design-layout-gate.mjs WIP_KNOWN_DUPLICATES 2 组 + d2/gate-readout.json",
+      "supplement": "W：核心定义在他人 WIP CSS 内，零触碰；非 WIP 可视区布局类定义唯一且门守护（植入第二定义必红）。owner 收口后按 $petri-css-theme §5 抽独立 Layout 文件"
+    },
+    {
+      "id": "IA-P2-b",
+      "dim": "A",
+      "level": "P2",
+      "finding": "巨型文件集中（Top5 均 1000+ 行）",
+      "terminal": "retain-with-reason",
+      "package": "BLOCK-417",
+      "evidence": "d2/gate-readout.json（全仓容器热点 708 只减棘轮冻结）",
+      "note": "属 W5b 逐刀拆分主线（BLOCK-414 已开第一刀），不在 UI 程序内重复立项；门防新增堆积",
+      "supplement": "补腿条件/重开判据：W5b 逐刀拆分主线继续按「一切片一会话 + 拆前拆后同套绿」推进；当前 708 容器热点只减棘轮冻结，新增堆积即红。UI 程序不重复立项。"
+    },
+    {
+      "id": "IA-P2-c",
+      "dim": "A",
+      "level": "P2",
+      "finding": "命令面板是唯一全局入口但无可见 UI 按钮",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-416",
+      "evidence": "docs/ui-design-ia-decision-material.md U-01；docs/ui-design-acceptance-checklist-v1.md §5 B4",
+      "supplement": "新增可见入口会改变默认导航密度；需用户裁决后由独立切片实现 + 实机人眼签字"
+    },
+    {
+      "id": "UX-P0",
+      "dim": "B",
+      "level": "P0",
+      "finding": "人眼验收未闭合：debt 35（13 live-missing + 22 blocked），22 条 pending_human_eye 无签字",
+      "terminal": "pending_human_eye",
+      "package": "BLOCK-419",
+      "evidence": "docs/ui-design-human-eye-route.md（签字槽全空）+ acceptance/block-332/ui-ledger-triage.json",
+      "supplement": "补腿=人按 E-02/H-08 路线逐条实测并签字（日期+覆盖断言），台账同批回写；Agent 不代答、不写 verified"
+    },
+    {
+      "id": "UX-P1-a",
+      "dim": "B",
+      "level": "P1",
+      "finding": "ui:audit:check 当期红（UI 改动未同步台账）",
+      "terminal": "done",
+      "package": "BLOCK-416",
+      "evidence": "docs/ui-productization-audit.md UI-702 同段追加；npm run ui:audit:check PASS（633 个 UI 编号）",
+      "note": "按 AGENTS.md 台账纪律同步本程序自身 UI 增量；他方 WIP 引起的红归 owner，未为过门改状态词"
+    },
+    {
+      "id": "UX-P1-b",
+      "dim": "B",
+      "level": "P1",
+      "finding": "状态矩阵未经统一盘点：hover 5 token、selected 无 token、八态无机械覆盖",
+      "terminal": "done",
+      "package": "BLOCK-418/419",
+      "evidence": "gate:ui-visual（hover 单源 + selected 三 token）+ gate:ui-a11y（八态 32/32 有判据）",
+      "note": "三态观感另记 pending_human_eye，不冒充全覆盖"
+    },
+    {
+      "id": "UX-P2-a",
+      "dim": "B",
+      "level": "P2",
+      "finding": "长内容三态 / ≤900px 实机几何证据分散，未形成统一回归 flow",
+      "terminal": "done-partial",
+      "package": "BLOCK-417",
+      "evidence": "ui-d2-geometry-live flow + d2/ui-d2-geometry-live-darwin.json（9/9）",
+      "supplement": "flow 已统一在册；但探针在 body fallback、≤900px 未真缩放、截图全页非元素级 → 几何与观感 pending_human_eye"
+    },
+    {
+      "id": "UX-P2-b",
+      "dim": "B",
+      "level": "P2",
+      "finding": "无用户侧量化基线（SUS / UMUX-Lite / 任务成功率 / 树测试寻路率）",
+      "terminal": "external-blocked",
+      "package": "BLOCK-419",
+      "evidence": "docs/ui-design-ia-decision-material.md E-01/E-03 + docs/ui-design-human-eye-route.md",
+      "supplement": "补腿=真人样本 + 外部量表平台凭据/可达性；重开判据=样本与平台就绪后按路线执行并签字"
+    },
+    {
+      "id": "VI-P1-a",
+      "dim": "C",
+      "level": "P1",
+      "finding": "层级档位空转：z 8 档仅 13 引用 vs 111 裸数字，门禁只冻结不迁移",
+      "terminal": "done-partial",
+      "package": "BLOCK-418",
+      "evidence": "theme-token-contract.test.ts z 棘轮 38/111 → 34/104；gate:ui-visual Z_TIER_FROZEN 只减清单",
+      "supplement": "7 处精确等价迁移；3 处因 code-size 字节棘轮保留裸值并登记（新增即红）；WIP 内 26 处零触碰；不等价档位不硬映射"
+    },
+    {
+      "id": "VI-P1-b",
+      "dim": "C",
+      "level": "P1",
+      "finding": "交互语义分裂：hover 5 token / selected 无 token / --petri-surface-dim 跨文件 4 处",
+      "terminal": "done",
+      "package": "BLOCK-418",
+      "evidence": "frontend/src/styles/custom.css + global.css；gate:ui-visual PASS（跨文件重复 0）",
+      "note": "selected 观感 pending_human_eye，语义单源已机械守护"
+    },
+    {
+      "id": "VI-P1-c",
+      "dim": "C",
+      "level": "P1",
+      "finding": "响应式碎片化：17 阈值 / ≥89 CSS 零响应式 / JS 767 vs CSS 768 / media 与 container 双判据",
+      "terminal": "done-partial",
+      "package": "BLOCK-417",
+      "evidence": "frontend/src/lib/uiBreakpoints.ts + gate:ui-breakpoints（21 档只减登记表 / JS 裸阈值 0 / 767→768 对齐）",
+      "supplement": "档位数收敛属 U-04 pending_user_ruling；@media/@container 双判据统一主要在 WIP CSS 内，零触碰待 owner"
+    },
+    {
+      "id": "VI-P2-a",
+      "dim": "C",
+      "level": "P2",
+      "finding": "10 个 --petri-* 定义外溢到组件 CSS（明暗成对断言覆盖不到）",
+      "terminal": "done-partial",
+      "package": "BLOCK-418",
+      "evidence": "d3/gate-readout.json exitCriteria.componentCssTokenOverflow",
+      "supplement": "回 styles/ 需明暗成对 + 观感签字；本期未擅自迁移，带补腿条件"
+    },
+    {
+      "id": "VI-P2-b",
+      "dim": "C",
+      "level": "P2",
+      "finding": "门禁快照滞后（fallback 现值 17/189 vs 快照 19/235）、slate FORBIDDEN 仅 4 条",
+      "terminal": "done",
+      "package": "BLOCK-418",
+      "evidence": "theme-token-contract.test.ts fallback RATCHET 19/235 → 17/190（按当次读数）+ 植入必红实战",
+      "note": "报告记 189，当次实测 190，按事实优先级取当次读数并留痕"
+    },
+    {
+      "id": "VI-P2-c",
+      "dim": "C",
+      "level": "P2",
+      "finding": "组件 CSS 裸色值 Top / 内联样式 Top",
+      "terminal": "retain-with-reason",
+      "package": "BLOCK-418",
+      "evidence": "theme-token-contract.test.ts 内联颜色棘轮（BLOCK-413 冻结）+ d3/gate-readout.json",
+      "note": "只减棘轮在册；逐值替换需暗色 diff 人眼签字，不在本期擅自改色值",
+      "supplement": "补腿条件/重开判据：暗色 diff 元素级截图 + 人眼签字（H-03/E-02）就位后，按逐值替换 + 主题门棘轮下调的独立切片清偿；当前只减棘轮在册，不擅自改色值。"
+    },
+    {
+      "id": "VI-P3",
+      "dim": "C",
+      "level": "P3",
+      "finding": ";; 双分号 58 文件；custom.css:919-920 注释与实现不符",
+      "terminal": "done-partial",
+      "package": "BLOCK-418",
+      "evidence": "d3/convergence.json（非 WIP 57 文件 424 处清零）+ gate:ui-visual（非 WIP ;; = 0）",
+      "supplement": "WIP 文件 128 处零触碰；注释与实现不符项未单独立项（Minor，留痕）"
+    },
+    {
+      "id": "D-GAP",
+      "dim": "D",
+      "level": "P2",
+      "finding": "门禁多为冻结而非收敛迁移；跨文件重复定义/反向明暗成对盲区；无障碍自动化与视觉回归未接线",
+      "terminal": "done-partial",
+      "package": "BLOCK-415/420",
+      "evidence": "gate:ui-program 6/6 + 每门植入必红负测 + d0-d4/gate-readout.json",
+      "supplement": "跨文件重复/明暗成对/裸 z 已有机械门；axe-core 与视觉回归依赖属 U-03 pending_user_ruling（零新增依赖）；像素级视觉回归需 V 类平台"
+    },
+    {
+      "id": "U-01",
+      "dim": "U",
+      "level": "-",
+      "finding": "/projects /review 左栏可见入口取舍",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-416",
+      "evidence": "docs/ui-design-ia-decision-material.md §1",
+      "supplement": "推荐候选 B（显式 cancelled 留因，本程序采用但不等于裁决）；未获裁决前默认语义不变"
+    },
+    {
+      "id": "U-02",
+      "dim": "U",
+      "level": "-",
+      "finding": "评分卡出口阈值（A/B/C/D ≥4.4）",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-415/420",
+      "evidence": "docs/ui-design-ia-decision-material.md §2 + d5/before-after-scorecard.json",
+      "supplement": "本程序只出 Before/After 对照与归因，不做达标宣称"
+    },
+    {
+      "id": "U-03",
+      "dim": "U",
+      "level": "-",
+      "finding": "是否引入 axe / Storybook / 视觉回归依赖",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-419",
+      "evidence": "docs/ui-design-ia-decision-material.md §3",
+      "supplement": "零新增依赖；机械可算部分已用纯函数 + vitest 自研覆盖"
+    },
+    {
+      "id": "U-04",
+      "dim": "U",
+      "level": "-",
+      "finding": "断点档位数（17 → ≤4）具体取值",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-417",
+      "evidence": "docs/ui-design-ia-decision-material.md §4",
+      "supplement": "档位收敛会改产品响应式语义，需裁决 + 实机几何 + 人眼签字"
+    },
+    {
+      "id": "U-05",
+      "dim": "U",
+      "level": "-",
+      "finding": "i18n 范围（既有 2026-08-10 裁决 deferred）",
+      "terminal": "pending_user_ruling",
+      "package": "-",
+      "evidence": "docs/AUDIT-LOG.md 2026-08-10 🟡",
+      "supplement": "本程序不触及、不撤销、不重启"
+    },
+    {
+      "id": "U-06",
+      "dim": "U",
+      "level": "-",
+      "finding": "/projects /review 是否纳入页头 bare 形态",
+      "terminal": "pending_user_ruling",
+      "package": "BLOCK-416",
+      "evidence": "docs/ui-design-ia-decision-material.md §4b",
+      "supplement": "纳入会改变顶栏视觉，需元素级截图 + 人眼签字"
+    },
+    {
+      "id": "E-01~03",
+      "dim": "E",
+      "level": "-",
+      "finding": "22 条人眼 / 暗色观感 / 读屏 / SUS / 树测试真人样本",
+      "terminal": "pending_human_eye",
+      "package": "BLOCK-419",
+      "evidence": "docs/ui-design-human-eye-route.md（签字槽全空）",
+      "supplement": "补腿见 §2 路线；Agent 不代答"
+    },
+    {
+      "id": "V-01",
+      "dim": "V",
+      "level": "-",
+      "finding": "真实任务 / 外部量表平台 / 凭据与出网",
+      "terminal": "external-blocked",
+      "package": "-",
+      "evidence": "docs/ui-design-ia-decision-material.md §7",
+      "supplement": "重开判据=凭据在 keychain 且端点可达后按既有 flow 重跑；exit 124/125 = unknown 不冒充成功"
+    },
+    {
+      "id": "W-01",
+      "dim": "W",
+      "level": "-",
+      "finding": "frontend/src/pages/project-workspace.module.css（他方 WIP 11+/9−）",
+      "terminal": "retain-with-reason",
+      "package": "-",
+      "evidence": "git status --porcelain；各期 plan §W 归属表",
+      "supplement": "零触碰、零 stage、零提交；其引起的 ui:audit:check / P6 / test:changed 红归 owner 收口范围"
+    },
+    {
+      "id": "W-02",
+      "dim": "W",
+      "level": "-",
+      "finding": "开局后并发写入者 src/main/_backend-ports.js + test/block414-backend-port-reuse.test.mjs",
+      "terminal": "retain-with-reason",
+      "package": "-",
+      "evidence": "git status --porcelain；d1/gate-readout.json closeoutAttribution",
+      "supplement": "零触碰；其 no-unused-vars 引起 quality:lint / lint:ledger 红，不入抑制台账、不放宽基线"
+    },
+    {
+      "id": "W-03",
+      "dim": "W",
+      "level": "-",
+      "finding": "用户 untracked 资产 10 项 + 归档自稳产物",
+      "terminal": "retain-with-reason",
+      "package": "-",
+      "evidence": "git status --porcelain；gate:user-assets PASS",
+      "supplement": "零触碰、零 stage、零提交；收口一律显式路径枚举"
+    },
+    {
+      "id": "V-02",
+      "dim": "V",
+      "level": "-",
+      "finding": "quality:perf packaged_start 稳定 5 连红（495–587ms > 阈值 493ms）",
+      "terminal": "external-blocked",
+      "package": "-",
+      "evidence": "d0/gate-readout.json + d0/gate-readout.txt",
+      "supplement": "隔离单跑复现（564ms），本机环境/打包产物读数；按红线不重采、不放宽阈值；补腿=干净树重采基线后复跑"
+    },
+    {
+      "id": "V-03",
+      "dim": "V",
+      "level": "-",
+      "finding": "closeout:full 三连未达全门 PASS：P6 源绑定因本包 D3 收敛 + 他方 WIP 叠加致源码树不精确",
+      "terminal": "external-blocked",
+      "package": "BLOCK-420",
+      "evidence": "acceptance/ui-design-assessment-2026-11-11/d5/closeout-runs.json（三次 exit 1，detail 与归因在册）",
+      "supplement": "补腿条件：他方 WIP 与并发写入者收口形成干净树 → Result Studio 证据 owner 按既有流程重采 P6 源绑定 → 复跑 closeout:full 三连；重开判据=干净树且 P6 与 HEAD 一致。不擅自重打产品验收证据、不把 W 类当挡箭牌。"
+    }
+  ],
+  "summary": {
+    "total": 32,
+    "byTerminal": {
+      "done": 6,
+      "done-partial": 8,
+      "retain-with-reason": 5,
+      "pending_human_eye": 2,
+      "external-blocked": 4,
+      "pending_user_ruling": 7
+    },
+    "inProgress": 0,
+    "note": "计数由 scripts/ui-design-gap-ledger-check.mjs 复算写入，不手写编造"
+  },
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

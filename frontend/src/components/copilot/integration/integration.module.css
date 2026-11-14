@@ -30,7 +30,7 @@
 .chatCardLink:focus {
   outline: 2px solid var(--petri-accent);
   outline-offset: 2px;
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
 }
 
 .chatCardLinkFloating {
@@ -42,14 +42,14 @@
   gap: var(--petri-space-1);
   background-color: var(--petri-bg-elevated, rgba(255, 255, 255, 0.95));
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-sm);;
+  border-radius: var(--petri-radius-sm);
   padding: var(--petri-space-1) var(--petri-space-3);
   color: var(--petri-accent);
   cursor: pointer;
   text-decoration: none;
   font: inherit;
   box-shadow: var(--petri-shadow-sm);
-  z-index: 10;
+  z-index: var(--petri-z-base);
   transition: background-color var(--petri-duration-fast) ease;
 }
 

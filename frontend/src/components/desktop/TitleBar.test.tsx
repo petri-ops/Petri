@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TitleBarResultItem } from '@/hooks/useWorkspacePanels';
+import { MOBILE_BREAKPOINT_PX } from '@/lib/uiBreakpoints';
 import { WorkspacePanelsProvider, useWorkspacePanelsContext } from './WorkspacePanelsContext';
 import { TitleBar } from './TitleBar';
 
@@ -229,7 +230,7 @@ describe('TitleBar desktop window controls', () => {
     document.documentElement.setAttribute('data-projection', '1');
     try {
       const original = window.matchMedia;
-      window.matchMedia = (query: string) => ({ matches: query.includes('767'), media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() });
+      window.matchMedia = (query: string) => ({ matches: query.includes(String(MOBILE_BREAKPOINT_PX)), media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() });
       expect(isProjectionMobile()).toBe(true);
       window.matchMedia = (query: string) => ({ matches: false, media: query, onchange: null, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn(), dispatchEvent: vi.fn() });
       expect(isProjectionMobile()).toBe(false);

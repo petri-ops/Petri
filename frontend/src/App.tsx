@@ -64,6 +64,8 @@ const CommandCenterPage = lazy(() => import('@/pages/window/CommandCenterPage').
 const SideChatWindowPage = lazy(() => import('@/pages/window/SideChatWindowPage').then((m) => ({ default: m.SideChatWindowPage })));
 // BLOCK-59 P4 — agent 详情窗（BLOCK-49 spawn 链路只读投影）
 import '@/components/desktop/desktop.css';
+// BLOCK-423 — 设置页视觉语言（参照 reference/ZCode 规范，作用域挂 .petri-settings-panel）
+import '@/components/desktop/settings-redesign.module.css';
 // 断点6：注入平台 API 给 @petri/shared 渲染层组件（如 ActResultCard）
 import { configureApi } from '../../core/packages/shared-copilot/api-inject';
 import { getApiPrefix, getToken } from '@/lib/authClient';

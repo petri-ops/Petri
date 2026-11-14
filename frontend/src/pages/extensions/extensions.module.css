@@ -81,7 +81,7 @@
   height: 28px;
   padding: 0 10px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   color: var(--petri-text);
   font-size: var(--petri-font-size-sm);
@@ -105,7 +105,7 @@
   gap: var(--petri-space-3);
   padding: var(--petri-space-4);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
   flex-shrink: 0;
 }
@@ -134,7 +134,7 @@
   height: 30px;
   padding: 0 var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-input-bg, var(--petri-bg-surface));
   color: var(--petri-text);
   font-size: var(--petri-font-size-sm);
@@ -146,7 +146,7 @@
   min-height: 52px;
   padding: var(--petri-space-2) var(--petri-space-3);
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-input-bg, var(--petri-bg-surface));
   color: var(--petri-text);
   font-family: var(--petri-font-mono);
@@ -192,7 +192,7 @@
   gap: var(--petri-space-2);
   padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: var(--petri-bg-subtle);
 }
 
@@ -217,7 +217,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0 var(--petri-space-3);
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   border: 1px solid var(--petri-border-card);
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs, 12px);
@@ -272,7 +272,7 @@
   height: 26px;
   padding: 0 10px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);;
+  border-radius: var(--petri-radius-lg);
   background: transparent;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-xs, 12px);

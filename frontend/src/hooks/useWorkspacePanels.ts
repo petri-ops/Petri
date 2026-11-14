@@ -4,6 +4,7 @@
 
 import { useCallback, useState } from 'react';
 import type { IconName } from '@/components/icons/Icon';
+import { MOBILE_MAX_WIDTH_QUERY } from '@/lib/uiBreakpoints';
 
 export interface TitleBarTab {
   id: string;
@@ -127,7 +128,7 @@ export function useWorkspacePanels(): WorkspacePanels {
   const projectionNarrow = (() => {
     try {
       return document.documentElement.getAttribute('data-projection') === '1'
-        && window.matchMedia('(max-width: 767px)').matches;
+        && window.matchMedia(MOBILE_MAX_WIDTH_QUERY).matches;
     } catch {
       return false;
     }

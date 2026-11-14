@@ -1,0 +1,38 @@
+{
+  "mode": "DRY-RUN",
+  "zFiles": 7,
+  "zTotal": 10,
+  "zChanges": [
+    {
+      "file": "frontend/src/components/copilot/integration/integration.module.css",
+      "count": 1
+    },
+    {
+      "file": "frontend/src/components/copilot/simple-chat.css",
+      "count": 3
+    },
+    {
+      "file": "frontend/src/components/desktop/FirstRunRoleReveal.module.css",
+      "count": 1
+    },
+    {
+      "file": "frontend/src/components/desktop/TitleBar.module.css",
+      "count": 1
+    },
+    {
+      "file": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
+      "count": 2
+    },
+    {
+      "file": "frontend/src/pages/extensions/styles.module.css",
+      "count": 1
+    },
+    {
+      "file": "frontend/src/pages/home.module.css",
+      "count": 1
+    }
+  ],
+  "semicolonFiles": 57,
+  "semicolonTotal": 424,
+  "wipSkipped": true
+}

@@ -14,7 +14,7 @@
   position: absolute;
   right: 1px;
   width: 5px;
-  border-radius: var(--petri-radius-pill);;
+  border-radius: var(--petri-radius-pill);
   /* 深色中性灰常态（用户裁决：不用主题青绿），hover/拖拽加深 */
   background: color-mix(in srgb, var(--petri-text-secondary) 55%, transparent);
   transition: background var(--petri-duration-fast), width var(--petri-duration-fast), right var(--petri-duration-fast);

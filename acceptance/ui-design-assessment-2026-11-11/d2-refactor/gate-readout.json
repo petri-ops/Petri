@@ -1,0 +1,192 @@
+{
+  "schema": "petri.ui-design.d2-refactor.gate-readout.v1",
+  "capturedAt": "2026-11-11",
+  "workPackage": "BLOCK-421 / 工作区布局单源重构（WIP 接管版）",
+  "authorization": {
+    "grantedBy": "用户 2026-11-11 明确选择「做布局重构（工作区四块几何）」",
+    "scope": "授权接管 frontend/src/pages/project-workspace.module.css 布局层编辑",
+    "priorState": "该文件此前为他方在制 WIP，按 W 类零触碰；本包起由本 Agent 接管布局层，仍不做整体格式化/无关重排",
+    "notGranted": [
+      "撤销 2026-10-30「中间栏手机宽度更合适」用户裁决",
+      "改断点档位数（U-04）",
+      "改视觉 token / 配色"
+    ]
+  },
+  "deliverables": {
+    "layoutSingleSource": {
+      "mechanism": "断点差异改由 --ws-* 变量承载（真源 global.css :root；媒体查询用 html:root 提高特异性覆盖），主定义各归 1 处",
+      "converged": [
+        {
+          "className": "workspaceSessionLayout",
+          "before": 2,
+          "after": 1,
+          "how": "960 断点 gap: 20px → var(--petri-space-4) 改为 --ws-layout-gap 变量赋值"
+        },
+        {
+          "className": "workspaceSessionFrame",
+          "before": 3,
+          "after": 1,
+          "how": "960/700 两处 padding 改为 --ws-frame-padding / --ws-chat-frame-padding 变量赋值"
+        }
+      ],
+      "wipKnownDuplicates": "2 组 → 0 组（真实收敛后清单归零，非放宽：新重复仍落「未登记」分支判红，负测在册）"
+    },
+    "codeSize": {
+      "lines": "7764 → 7761",
+      "bytes": "176965 → 176885",
+      "mode": "legitimate downgrade",
+      "note": "先压到 ≤ 基线再 --write；锚点全部下降，未抬高任何允许上限"
+    }
+  },
+  "computedStyleEquivalence": {
+    "method": "CDP Emulation 设 4 个视口宽度，逐断点读 .workspaceSessionFrame padding 与 .workspaceSessionLayout gap",
+    "results": [
+      {
+        "viewport": 2000,
+        "framePadding": "0px 14px 0px 8px",
+        "layoutGap": "20px",
+        "matchesOriginal": true
+      },
+      {
+        "viewport": 1600,
+        "framePadding": "0px 14px 0px 8px",
+        "layoutGap": "20px",
+        "matchesOriginal": true
+      },
+      {
+        "viewport": 1125,
+        "framePadding": "0px 14px 0px 8px",
+        "layoutGap": "20px",
+        "matchesOriginal": true
+      },
+      {
+        "viewport": 850,
+        "framePadding": "12px",
+        "layoutGap": "12px",
+        "matchesOriginal": true
+      },
+      {
+        "viewport": 700,
+        "framePadding": "10px",
+        "layoutGap": "12px",
+        "matchesOriginal": true
+      },
+      {
+        "viewport": 500,
+        "framePadding": "10px",
+        "layoutGap": "12px",
+        "matchesOriginal": true
+      }
+    ],
+    "conclusion": "computed style 逐字等价 ⇒ 本包**零视觉变化**（布局重构的定义如此，不是缺陷）"
+  },
+  "gates": {
+    "gate:ui-layout": {
+      "result": "PASS",
+      "msg": "3132 类名 / 104 CSS 文件；可视区布局类非 WIP 定义唯一；WIP 既存重复 0 组；热点 708 ≤ 冻结 708"
+    },
+    "ui-design-layout-gate.test.mjs": {
+      "result": "PASS",
+      "tests": 7,
+      "note": "含「归零后既有重复也必红」的棘轮收紧断言"
+    },
+    "gate:ui-breakpoints": {
+      "result": "PASS",
+      "note": "18 档在册 / JS 裸阈值 0 / 767→768 对齐 / WIP 5 档登记"
+    },
+    "gate:ui-program": {
+      "result": "PASS",
+      "gates": "6/6"
+    },
+    "gate:ui-gaps": {
+      "result": "PASS",
+      "note": "32 条逐件终态零 in_progress"
+    },
+    "gate:code-size": {
+      "result": "PASS",
+      "note": "合法下调重打"
+    },
+    "theme-token-contract": {
+      "result": "PASS",
+      "tests": 19
+    },
+    "ui:audit:check": {
+      "result": "PASS"
+    },
+    "post-s7-h10-b11-convergence + h9-structural-gates": {
+      "result": "PASS",
+      "tests": 10
+    },
+    "frontend CenterPanel + WorkspaceSummaryCard + token": {
+      "result": "PASS",
+      "tests": 45
+    },
+    "docs:check": {
+      "result": "PASS",
+      "registeredDocuments": 566
+    }
+  },
+  "defectsInvestigated": [
+    {
+      "hypothesis": "右栏持久化 900px 压穿中栏 420 保底",
+      "verdict": "不成立",
+      "evidence": "CDP 实测 vw=1125/700 时右栏自动收 0；且 CENTER_SPACE_COLLAPSE_BELOW=420 是 2026-10-30 用户裁决，458px 中栏属其合法结果"
+    },
+    {
+      "hypothesis": "≤960 侧栏浮层 top:0 被 38px 顶栏遮挡",
+      "verdict": "不成立（探测选择器误报）",
+      "evidence": "[class*=leftCol] 命中的是 AppRail 的另一套 CSS Module（hash 前缀 fhgp6）；project-workspace 的 leftCol 自 UI-341 起已上提壳层，右栏实测 y=38 未被遮挡"
+    }
+  ],
+  "honestBoundary": [
+    "本包只做「布局定义单源」的工程收敛，computed style 逐字等价 ⇒ 用户肉眼看不到变化",
+    "真正会改变观感的动作（改视觉 token/配色/间距节奏/信息密度、撤销 2026-10-30 中栏裁决）不在本包授权内，需单独裁决",
+    "截图为全页 PNG，非元素级裁剪；右栏在 emulation 过程中被响应式收起，故 After 截图未含右栏"
+  ],
+  "evidenceFiles": [
+    "workspace-before.png",
+    "workspace-after.png",
+    "gate-readout.json"
+  ],
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA",
+  "readability": {
+    "workPackage": "BLOCK-422",
+    "changes": [
+      {
+        "file": "frontend/src/components/copilot/simple-chat.css",
+        "rule": ".sc-messages",
+        "before": "padding: 2px 18px 0 18px",
+        "after": "padding: 2px max(18px, calc((100% - 860px) / 2)) 0",
+        "effect": "宽屏内容 860px 居中，窄屏回落 18px 保底"
+      },
+      {
+        "file": "frontend/src/styles/custom.css",
+        "token": "--petri-text-tertiary",
+        "before": "#71717a",
+        "after": "#6b6b73",
+        "contrast": {
+          "onSubtleBefore": 4.4,
+          "onSubtleAfter": 4.81,
+          "onWhiteAfter": 5.28
+        }
+      }
+    ],
+    "liveMeasurement": {
+      "viewport": 1600,
+      "centerColWidth": 1018,
+      "messagesWidth": 860,
+      "messagesLeftOffsetFromCenter": 85,
+      "paddingLeft": "18px",
+      "paddingRight": "18px",
+      "scrollWidth": 860
+    },
+    "gateA11y": {
+      "result": "PASS",
+      "belowBody45": 0,
+      "note": "32 对全部 ≥4.5:1（原 1 对 4.40:1）"
+    },
+    "baseline": "code-size 7764→7761 行、176965→176885 字节；simple-chat 5432→5431 行、131575→131528 字节 —— 全部下降后重打，非放宽",
+    "testInstanceDataNote": "测试实例 localStorage 的 rightWidth 由历史脏值 900 恢复为默认 340（只动测试实例数据，不碰用户数据）",
+    "humanEye": "pending_human_eye — 观感需用户验收签字，Agent 不写 verified"
+  }
+}

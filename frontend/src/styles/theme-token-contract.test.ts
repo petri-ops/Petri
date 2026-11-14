@@ -246,26 +246,27 @@ describe('theme token contract', () => {
       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
     }
     const RATCHET: Record<string, number> = {
-      // W2 盘点快照（2026-10-11 实测 235 处/19 文件；逐批归并后收缩）
-      'components/copilot/integration/integration.module.css': 3,
+      // W2 盘点快照（2026-10-11 实测 235 处/19 文件；逐批归并后收缩）。
+      // UI-D3 / BLOCK-418 — 按当次现值重打：17 文件 / 190 处（原 19/235），
+      // 归零的 MobileSync.module.css 与 styles/custom.css 两键删除（更严，非放宽），
+      // 其余逐键下调到现值；新增 fallback 即红。WIP 文件 39 处零触碰、保持现值。
+      'components/copilot/integration/integration.module.css': 2,
       'components/copilot/renderers/ChartRenderer.module.css': 1,
       'components/copilot/ResultCard.module.css': 16,
-      'components/copilot/simple-chat.css': 52,
-      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 8,
-      'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 7,
+      'components/copilot/simple-chat.css': 45,
+      'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 1,
       'components/desktop/FolderPicker.module.css': 1,
       'components/desktop/TestInstanceBadge.module.css': 1,
-      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 20,
+      'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 14,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 1,
-      'components/settings/ExperimentalFeaturesSection.module.css': 7,
+      'components/settings/ExperimentalFeaturesSection.module.css': 6,
       'components/ui/code-highlight.css': 6,
-      'components/window/window-shell.module.css': 20,
+      'components/window/window-shell.module.css': 15,
       'components/workspace-panels/SshStatusDot.module.css': 3,
       'pages/home.module.css': 1,
-      'pages/project-workspace.module.css': 43,
+      'pages/project-workspace.module.css': 39,
       'pages/welcome.module.css': 1,
-      'pages/window/command-center.module.css': 43,
-      'styles/custom.css': 1,
+      'pages/window/command-center.module.css': 37,
     };
     const actual: Record<string, number> = {};
     for (const entry of offenders) {
@@ -365,6 +366,9 @@ describe('theme token contract', () => {
       'pages/project-workspace.module.css': 55,
       'components/copilot/simple-chat.css': 24,
       'components/workspace-panels/OrchestrationGraph.module.css': 1, // BLOCK-178 定性：节点状态徽标 pill（合法徽标域）
+      // BLOCK-423/424/425 设置页：+11 = 导航描述 / 分组标签 / 字段提示 / 导入面板元信息 / 高级折叠标签与计数 / 字段右侧读数
+      // （次级元信息合法 sm 域，对标 status.module.css 与 UI-593 空态描述先例；正文性文字一律 body）。
+      'components/desktop/settings-redesign.module.css': 11,
       'components/desktop/desktop.css': 16,
       'components/result-studio/ScientificInteractionViewer.module.css': 15,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,
@@ -424,6 +428,9 @@ describe('theme token contract', () => {
       // UI-596 最近使用徽章：+2 = pill 底色+文字色（交互态入口卡语义延续）
       'pages/project-workspace.module.css': 103,
       'components/copilot/simple-chat.css': 31,
+      // BLOCK-423 设置页视觉改版：+4 = checkbox / 搜索框 focus 描边 / 导入来源选中卡片描边 / 输入 focus 描边
+      // （宪章五类「交互态」合法语义，对标 button.module.css .primary 与 AnnotationOverlay 选中态先例）。
+      'components/desktop/settings-redesign.module.css': 4,
       'components/desktop/desktop.css': 24,
       'pages/extensions/styles.module.css': 20,
       'components/workspace-panels/KnowledgeSpacePanel.module.css': 18,
@@ -598,6 +605,14 @@ describe('theme token contract', () => {
       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);
     }
     const RATCHET: Record<string, number> = {
+      // BLOCK-413 冻结 38 文件 / 111 处。
+      // UI-D3 / BLOCK-418 — 7 处精确等价裸值（100/1000/10000）迁移到
+      // var(--petri-z-*)，按当次现值下调为 34 文件 / 104 处（只减不放宽）：
+      // 归零 4 键删除（更严），3 个文件数值下调；不等价档位（9998/10001/100000 等）
+      // 不硬映射、保留现值。WIP 文件 26 处零触碰、保持现值。
+      // 注：SvgEditorViewer ×2 与 TitleBar ×1 的 10/10000 因 code-size 入册文件
+      // 字节棘轮「只减不增」不能替换为更长字符串，保留裸值并登记在
+      // gate:ui-visual 的 Z_TIER_FROZEN 冻结清单（新增即红、只减不增）。
       'App.tsx': 2,
       'components/annotations/AnnotationBar.module.css': 1,
       'components/annotations/AnnotationOverlay.module.css': 2,
@@ -608,10 +623,8 @@ describe('theme token contract', () => {
       'components/copilot/SimpleChat/PromptEnhanceDialog.module.css': 1,
       'components/copilot/SimpleChat/ScheduleDialog.module.css': 1,
       'components/copilot/ToolActivityDock.module.css': 1,
-      'components/copilot/integration/integration.module.css': 1,
-      'components/copilot/simple-chat.css': 20,
+      'components/copilot/simple-chat.css': 17,
       'components/desktop/CrashNoticeBanner.tsx': 1,
-      'components/desktop/FirstRunRoleReveal.module.css': 1,
       'components/desktop/InstallDeepLinkDialog.tsx': 1,
       'components/desktop/PluginStorePanel.tsx': 1,
       'components/desktop/TitleBar.module.css': 3,
@@ -629,8 +642,6 @@ describe('theme token contract', () => {
       'components/svg-editor/SvgEditorViewer.module.css': 16,
       'components/ui/Lightbox.css': 1,
       'components/workspace-panels/FloatCardResizer.module.css': 1,
-      'pages/extensions/styles.module.css': 1,
-      'pages/home.module.css': 1,
       'pages/project-workspace.module.css': 26,
       'pages/welcome.module.css': 2,
       'pages/window/CommandCenterJobsWall.tsx': 1,

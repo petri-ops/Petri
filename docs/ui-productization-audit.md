@@ -71,6 +71,8 @@
 
 - **BLOCK-423 追加（同段，不新增债）**：设置页视觉改版——独立工作区 + 264px 分组侧栏（四组 + 当前分区说明，≤960→208px、≤700→60px 图标栏）+ 右栏 760px 中等阅读列 + section 卡片化 + field 分隔线 + 控件统一 token（`border-input`/32px 高/checkbox accent）。参照 `reference/ZCode/docs/ui/settings-*.md`，只移植布局与层级语言，配色与字号档位仍用本仓 token。**门禁抓真 4 类后修正**（plain CSS→module.css、新增断点→复用既有档、token 契约 5 类、未使用变量与动态下标）。`theme-token-contract` 19/19、设置面板 88/88。**观感 `pending_human_eye`**，等用户验收，不写 verified。
 
+- **2026-11-14 代码入库（本批提交，登记事实不改状态词）**：D0–D5 与 BLOCK-421/422/423 的**代码/门禁/证据/文档本体首次整批入库**。此前状态是「台账与 DOC-REGISTRY 已登记、文档与代码本体未提交」，`ui:audit:check` 因此长期报「当前工作区包含 UI 改动，但没有同步台账」。入库前当次验证：`gate:ui-program` 6/6 门、8 个 `test/ui-design-*.test.mjs` **58/58**、`theme-token-contract` **19/19**、设置面板 **88/88**、`block201-settings-baseline` 4/4、`quality:types` 0 红。**观感仍 `pending_human_eye`；本行不构成 `verified`，也不改变 D5 的 `done-partial` 终态与 22 条签字槽全空的事实**。
+
 ## UI-701: 字号宪章收官 + 失败可见收尾 + 折叠 inert + 钉住能力位（BLOCK-378 S3；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **字号宪章**：豁免外数值 fontSize 全收敛（10→xs/11→xs/12→sm/13→sm/16→lg，9 文件 20 处；XTerm 数值 API 两处豁免留痕=TerminalWindowPage/useTerminalTabs）；theme-token-contract 17/17；tsc 0。
