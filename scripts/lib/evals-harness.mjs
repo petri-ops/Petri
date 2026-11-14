@@ -126,7 +126,11 @@ function bootstrapDb(root, dbPath) {
 
 export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
   const port = await freePort();
-  bootstrapDb(root, path.join(tmpDir, 'petri.db'));
+  // BLOCK-449（M7 补腿实机腿抓真）：同 tmpDir 二次 spawn（崩溃→重启 resume 场景）时
+  // 不能重放 migrations——若干迁移含非幂等 ALTER TABLE ADD COLUMN，对已迁移库
+  // 必抛 duplicate column name。首次（库不存在）才 bootstrap；重启 spawn 交给既有库。
+  const dbPath = path.join(tmpDir, 'petri.db');
+  if (!fs.existsSync(dbPath)) bootstrapDb(root, dbPath);
   // provider 种子（credential_updates 文件路径——credential-store 迁移后的正道，
   // 根治 block93 类 env 占位失活债）。
   // BLOCK-192：real 模式且 env 未给 key 时回落本机凭据库（单源读取器）；

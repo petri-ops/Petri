@@ -216,3 +216,27 @@ test('compareRunVsBaseline：回归红/改善绿/新任务不判红/缺任务判
   const verdictSkip = compareRunVsBaseline(withSkip, baseline);
   assert.deepEqual(verdictSkip.skipped, ['a']);
 });
+
+// ── BLOCK-449（M7 补腿实机腿抓真）：同 tmpDir 二次 spawn 不重放 migrations ──
+// 红证据：run1 异常「duplicate column name: description」（非幂等 ALTER ADD COLUMN
+// 对已迁移库重放必抛）。契约：库已存在 → 跳过 bootstrap；新库 → 正常自举。
+import { spawnIsolatedBackend, defaultTmpDir } from '../scripts/lib/evals-harness.mjs';
+const ROOT_DIR = path.resolve(process.cwd());
+
+test('spawnIsolatedBackend 同库二次 spawn：跳过 bootstrap，health ok（BLOCK-449）', async () => {
+  const tmpDir = defaultTmpDir('evals-restart-contract-');
+  fs.mkdirSync(tmpDir, { recursive: true });
+  let first = null;
+  let second = null;
+  try {
+    first = await spawnIsolatedBackend({ root: ROOT_DIR, tmpDir, mode: 'mock' });
+    assert.equal(first.ok, true, '首 spawn health ok');
+    second = await spawnIsolatedBackend({ root: ROOT_DIR, tmpDir, mode: 'mock' });
+    assert.equal(second.ok, true, `二次 spawn（同库）health ok，端口=${second.port}`);
+    assert.notEqual(first.port, second.port, '二次 spawn 取新端口（崩溃→重启语义）');
+  } finally {
+    try { if (first) await first.cleanup(); } catch { /* already */ }
+    try { if (second) await second.cleanup(); } catch { /* already */ }
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* tmp */ }
+  }
+});
