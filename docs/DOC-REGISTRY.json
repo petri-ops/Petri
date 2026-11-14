@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 585,
+    "documentCount": 586,
     "lastUpdated": "2026-11-14",
-    "managedMarkdown": 568
+    "managedMarkdown": 569
   },
   "documents": [
     {
@@ -11912,6 +11912,30 @@
         "agent-plugins"
       ],
       "notes": "BLOCK-447 把 MCP App 页面从宿主链路升级为自动渲染 + 双向 RPC：后端保留 _meta.ui.resourceUri、前端 ToolActivityList 自动挂 McpAppCard、沙箱页 window.petri.mcpApp.callTool 经 session 绑定代理到 MCP 客户端。前端 6/6、源码契约 5/5、离屏 Electron prepare/callTool/伪造拒绝实测。未覆盖 ext-apps 原生 SDK 协议 shim 与完整 agent→卡片实机腿。见 m6a/mcp-app-auto-render.json。"
+    },
+    {
+      "id": "BLOCK-448-P6-RECOVERY-DRIVER-SYNTAX",
+      "path": "docs/block-448-p6-recovery-driver-syntax-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-448-p6-recovery-driver-syntax",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "IN_PROGRESS",
+      "touchSurface": [
+        "scripts/g0-rs-p6-recovery-electron-driver.cjs",
+        "test/g0-rs-p6-recovery-driver-expression-syntax.test.mjs",
+        "acceptance/g0-result-studio/rs-p6-durability-recovery-performance.json"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "g0-rs-p6",
+        "evidence-chain",
+        "driver-syntax",
+        "silent-catch"
+      ],
+      "notes": "P6 恢复腿司机表达式语法缺陷修复：lifecycleExpression 的 publicProjectionHits 曾误插在 return 对象闭合之后，整段脚本成非法 label 序列，executeJavaScript 恒抛 SyntaxError 被 catch 静默吞成 lifecycle=null，waitForLifecycle('ready') 必然 120s 超时。修复=属性归位 + 事故留痕 + new Function 语法门禁 3/3 + driver diagnostics 保留。目标=解除 M7 §8 第 3 条干净树 closeout:full 三连阻塞。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-14"

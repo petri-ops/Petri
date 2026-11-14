@@ -162,6 +162,12 @@ async function dismissOnboarding(webContents) {
   `, 'onboarding');
 }
 
+// BLOCK-448 事故留痕（勿重犯）：本函数返回的脚本字符串由 executeJavaScript 直接执行，
+// 任何语法错误都不会报错——调用点用 try/catch 兜底，SyntaxError 被静默吞成 null，
+// 表现为 waitForLifecycle 恒定 120s 超时（P6 恢复腿全链红，2026-09-25 起潜伏）。
+// 历史事故：`publicProjectionHits` 曾被误插在 return 对象闭合之后，形成非法 label 序列。
+// 纪律：① 模板串内不得出现反引号（会截断模板）；② 新增属性必须落在 return 对象内；
+// ③ 改动后跑 test/g0-rs-p6-recovery-driver-expression-syntax.test.mjs 的语法门禁。
 function lifecycleExpression(expectedState = null) {
   const state = expectedState ? JSON.stringify(expectedState) : 'null';
   return `
@@ -201,7 +207,8 @@ function lifecycleExpression(expectedState = null) {
           providerMaterial: /(?:sk-[A-Za-z0-9]{12,}|api[_ -]?key\\s*[:=])/i.test(publicText),
           rawInternalId: /\\b(?:p|job|tj|rev|cs|conv|sel|wfg)_[A-Za-z0-9._-]{6,}\\b/.test(publicText),
         },
-      };
+        // BLOCK-384 诊断——与审计同一执行帧采集命中 id 及所在元素（转瞬即逝文本
+        // 事后 dump 会消失，run-2 实证）。
         publicProjectionHits: (() => {
           // BLOCK-384 诊断——与审计同一执行帧采集命中 id 及所在元素（转瞬即逝文本
           // 事后 dump 会消失，run-2 实证）
@@ -224,6 +231,7 @@ function lifecycleExpression(expectedState = null) {
           }
           return hits;
         })(),
+      };
     })()
   `;
 }
@@ -585,11 +593,29 @@ async function run() {
     try {
       rendererState = await window.webContents.executeJavaScript(rendererStateExpression(), true);
     } catch {}
+    let diagnostics = null;
+    try {
+      diagnostics = await window.webContents.executeJavaScript(`(() => {
+        const panel = document.querySelector('[aria-label="Result Studio 版本与变更"]');
+        return {
+          panelPresent: Boolean(panel),
+          panelChildCount: panel ? panel.children.length : 0,
+          panelChildTags: panel ? [...panel.children].map((el) => el.tagName + '.' + String(el.className || '').slice(0, 40)) : null,
+          panelChildStates: panel ? [...panel.children].map((el) => el.getAttribute('data-state')) : null,
+          panelOuterHead: panel ? panel.outerHTML.slice(0, 400) : null,
+          allDataStates: [...document.querySelectorAll('[data-state]')].slice(0, 12).map((el) => ({
+            tag: el.tagName, cls: String(el.className || '').slice(0, 40), state: el.getAttribute('data-state'),
+          })),
+          url: location.pathname + location.search,
+        };
+      })()`, true);
+    } catch (diagError) { diagnostics = { error: String(diagError?.message || diagError) }; }
     writeFileSync(config.resultPath, `${JSON.stringify({
       schemaVersion: 1,
       phase: config.phase,
       failedStage: stage,
       errorCode: String(error?.message || 'unknown').split(':', 1)[0],
+      diagnostics,
       lifecycle,
       rendererState,
       interactionRequests,
