@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "kind": "s2-plan",
+  "task": "BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口",
+  "frozenAt": "2026-11-14T11:10:00+08:00",
+  "executionMode": "单工作包串行：任意时点 active 任务数 = 1；阶段收口后才进入下一任务",
+  "taskDag": [
+    {
+      "id": "T1",
+      "title": "红清账：test:changed 当次跑 + 历史三红重归因",
+      "requirement": "R1",
+      "inputs": ["当前 HEAD f0c30598 干净 tracked 树", "test/impact-map.json"],
+      "outputs": ["acceptance/block-449/evidence/t1-test-changed.log", "acceptance/block-449/s3/task-T1.json", "（若确定性红）修复提交 + 回归断言"],
+      "dependsOn": [],
+      "acceptance": "npm run test:changed 输出落盘；fail=0 或每 fail 带四类归因+处置+证据指针；确定性红修根因+回归断言转绿",
+      "rollback": "修复走独立提交可 revert；不改既有测试基线",
+      "evidencePath": "acceptance/block-449/s3/task-T1.json"
+    },
+    {
+      "id": "T2",
+      "title": "9223 实机腿：新建 dev-verify flow（崩溃注入→重启→resume 逐字对齐）",
+      "requirement": "R2",
+      "inputs": ["M7-3 closureCondition 原文", "M2-live closureCondition（dev-verify flow 形态要求）", "既有 flow 样板（app-health / block100-test-instance）", "M1 内核 + M2 resume 能力面"],
+      "outputs": ["新 dev-verify flow 脚本 + 注册登记", "flow 注册契约测试（红绿）", "acceptance/block-449/evidence/t2-live-resume.json"],
+      "dependsOn": ["T1"],
+      "acceptance": "npm run verify -- --list 可见新 flow；契约测试绿；flow 当次执行逐字对齐断言 PASS；禁 PETRI_TEST_ONSCREEN；跑完立即 kill；截图失败如实标 screenshot_unavailable",
+      "rollback": "纯新增文件 + 注册精确增量，可整段 revert",
+      "evidencePath": "acceptance/block-449/s3/task-T2.json"
+    },
+    {
+      "id": "T3",
+      "title": "干净树 closeout:full 三连复跑",
+      "requirement": "R3",
+      "inputs": ["T1 红清账后树", "T2 新增文件（纳入扫描面）"],
+      "outputs": ["acceptance/block-449/evidence/t3-closeout-full-run1.log / run2 / run3", "acceptance/block-449/s3/task-T3.json（逐门读数表）"],
+      "dependsOn": ["T2"],
+      "acceptance": "3 次 npm run closeout:full，逐门读数落盘；exit 0 且每门 PASS 或域跳过（SKIP 附域不相交证据）；red → 四类归因+处置后重跑该门；三连之间零代码改动",
+      "rollback": "只读复跑，无回退面",
+      "evidencePath": "acceptance/block-449/s3/task-T3.json"
+    },
+    {
+      "id": "T4",
+      "title": "canonical 回写 + 交付包 + 决策留痕 + 收口",
+      "requirement": "R4, R5, R6",
+      "inputs": ["T1–T3 全部证据", "治理模板（AUDIT-LOG-ENTRY-TEMPLATE / STAGE-CLOSEOUT-CHECKLIST / NEXT-STEP-BRIEF）"],
+      "outputs": ["docs/block-449-m7-tails-clean-closeout-plan.md（启动即建，本任务收口翻态）", "DOC-REGISTRY 注册与状态翻转", "AUDIT-LOG 启动行+收口行", "roadmap/handoff 单行更新", "M 程序台账精确增量行", "README 入口行", "acceptance/block-449/ s4/s5/CLOSEOUT/DELIVERABLES + evidence/verify-deliverables.mjs", "显式路径提交"],
+      "dependsOn": ["T3"],
+      "acceptance": "npm run docs:check PASS + npm run docs:reconcile 0 issues；交付包自核脚本 0 missing；decision:session 当次双数字",
+      "rollback": "全部为文档/证据增量，可逐文件 revert",
+      "evidencePath": "acceptance/block-449/s3/task-T4.json"
+    }
+  ],
+  "serialOrder": ["T1", "T2", "T3", "T4"],
+  "gateList": [
+    "npm run test:changed（T1/T3 内含）",
+    "npm run docs:check + npm run ui:audit:check（每次收口）",
+    "flow 注册契约测试 node --test test/m7-longtask-resume-live-flow.test.mjs（T2 专项）",
+    "npm run closeout:full ×3（T3 专项）",
+    "npm run docs:reconcile（T4）",
+    "匹配的 quality 门（T3 的 closeout:full 自含 quality:lint/types/arch/secret/knip）"
+  ],
+  "patchVsRefactor": {
+    "judgment": "全增量（新增 flow/测试/证据/文档精确增量），无「同处第二次叠加修复」信号，无第二变体需求，无绕过既有抽象需求",
+    "conclusion": "patch 级（新增面），无 scoped refactor；若 T1 修复中出现第二层叠加信号则按治理 skill 升级判定并留痕",
+    "recordedAt": "2026-11-14T11:10:00+08:00"
+  },
+  "redGreenApplicability": [
+    { "task": "T1", "applicable": true, "note": "历史红即为红证据；修复后复跑转绿；新回归断言先红后绿" },
+    { "task": "T2", "applicable": "partial", "note": "flow 注册契约测试走红绿；9223 实机面属「无法单测的实机面」豁免类，实机证据=当次 flow 执行输出" },
+    { "task": "T3", "applicable": false, "note": "纯门禁复跑取证，无新契约" },
+    { "task": "T4", "applicable": false, "note": "治理/文档面（负测=docs:check/reconcile 机械门）" }
+  ],
+  "testScope": {
+    "strategy": "定向影响面（test:changed 按影响图）+ 本包专项门（flow 契约测试 + closeout:full 三连）",
+    "unknownProductionPathPolicy": "fail-closed：若改动触及 impact-map 未映射生产路径，升级全量 Node/前端检查并在 s3 记录",
+    "fullRunPolicy": "npm run check / test:all:workspace 不跑（留发布/CI）；closeout:full 为本包 canonical 专项门（M7-5 closureCondition 原文要求）"
+  },
+  "hardRedLineCheck": {
+    "zeroNewDeps": true,
+    "noBaselineLoosening": true,
+    "noRulingReversal": true,
+    "wipZeroTouch": "12 项 untracked 零触碰（s0 基线 owner 表）；受保护原件（post-h9 蓝图 / M 程序 FULL-AUDIT+EXECUTION-PROMPT）不提交不改写",
+    "g0Discipline": true,
+    "noVisibleWindow": true,
+    "staged": "收口时逐路径显式枚举，禁 git add -A"
+  },
+  "fallbackPlan": {
+    "ifT2EnvironmentBlocked": "probe 时间线 + 补腿条件入册，终态 external-blocked，不阻塞 T3/T4",
+    "ifT3PersistentRed": "逐门归因四分类；W 类归属登记 + 证据指针；终态如实（不冒充三连全绿）",
+    "stallRule": "同一自检项连续 2 轮无进展 → 切降级路径并写明已尝试轮次与输出摘要"
+  }
+}

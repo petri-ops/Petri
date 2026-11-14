@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "kind": "s1-requirement-matrix",
+  "task": "BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口",
+  "frozenAt": "2026-11-14T11:00:00+08:00",
+  "requirementSource": {
+    "primary": "acceptance/m-blueprint-2026-11-11/m7/m7-evidence.json fiveItems M7-3 / M7-5 的 closureCondition（M 程序唯一显式未达证据上限项）",
+    "ruling": "主控提示词 v1.0 预授权连续工作 + AGENTS.md 预授权连续工作除外条款 + Jev 不可用确定性兜底（见 s0-fact-baseline.json selectionEvidence）",
+    "freezeRule": "矩阵冻结后变更须写变更记录（changes 数组）；零 TBD、零待确认、零「或」式多选"
+  },
+  "requirements": [
+    {
+      "id": "R1",
+      "original": "M7-5 closureCondition 前置：干净树上 test:changed 当次红清账——历史三红（UI-629 W / block414 环境 / P6 W）重归因",
+      "criteria": "当次执行 npm run test:changed；输出 JSON 落盘；fail 项数 = 0，或每个 fail 项带四类归因之一（确定性红/并发互踩/环境平台缺失/契约漂移）+ 处置记录 + 证据指针；确定性红必须修根因并设回归断言后复跑转绿",
+      "evidenceType": "①行为/契约测试",
+      "verifyCommand": "npm run test:changed 2>&1 | tee acceptance/block-449/evidence/t1-test-changed.log; node --test test/<新增回归测试>.mjs",
+      "boundary": "只处置 test:changed 影响面内的红；不跑全量 test:all:workspace（三连 closeout:full 自含定向口径）",
+      "exclusions": ["P6 pressure 腿（external 404，probe 在册）", "test:all:sharded 全量分片（M7-5 未要求，本包不扩）"]
+    },
+    {
+      "id": "R2",
+      "original": "M7-3 closureCondition：9223 离屏实例跑崩溃注入→重启 resume 逐字对齐（长任务自证包实机腿）",
+      "criteria": "① 新 dev-verify flow 注册成功且 npm run verify -- --list 可见、flow 配置契约测试绿；② flow 当次执行：离屏 Electron :9223 + dev 栈（:3000 vite / :3001 后端）、禁 PETRI_TEST_ONSCREEN、崩溃注入→重启→resume，消息序列与工具调用数逐字对齐断言 PASS；③ 跑完立即 kill 进程；④ 截图失败如实标 screenshot_unavailable",
+      "evidenceType": "③DOM/CDP 实机",
+      "verifyCommand": "npm run verify -- <flow-id>；cat acceptance/block-449/evidence/t2-live-resume.json",
+      "boundary": "零产品运行时行为改动（纯新增 flow 脚本 + 注册登记）；实机面无法单测的部分按豁免登记，flow 注册契约走红绿",
+      "exclusions": ["P6 Electron driver（BLOCK-448 已有）", "可见窗口（禁）", "M2-4-db UNIQUE 约束（需 perf 基线全量重采流程，另案）"]
+    },
+    {
+      "id": "R3",
+      "original": "M7-5 本体：干净树 closeout:full 三连复跑，逐门读数落盘",
+      "criteria": "npm run closeout:full 连续执行 3 次（R1 红清账之后）；每次逐门读数 JSON 落盘；判据=3 连 exit 0 且每门 PASS 或属 closeout 既有域跳过语义（SKIP 须附当次域不相交证据）；任何 red → 四类归因 + 处置后重跑该门；SKIP 不得写成 PASS，unknown（exit 124/125）不得写成通过",
+      "evidenceType": "②机械门禁",
+      "verifyCommand": "npm run closeout:full 2>&1 | tee acceptance/block-449/evidence/t3-closeout-full-run<N>.log",
+      "boundary": "三连之间零代码改动（纯复跑取证）；与 M7-5「0 SKIP」上限的差距如实入册（域跳过属 closeout 既有设计，不删语义、不造域相交）",
+      "exclusions": ["修改 closeout 门集 / 基线 / 阈值（禁）", "为消 SKIP 而制造域相交改动（禁）"]
+    },
+    {
+      "id": "R4",
+      "original": "canonical 回写与登记三件套（治理契约）",
+      "criteria": "① docs/block-449-m7-tails-clean-closeout-plan.md 创建并注册 DOC-REGISTRY（kind=work-package，status 生命周期 active→completed，truthDomain 唯一，entrypoint 指向 docs/README.md 新行）；② AUDIT-LOG 启动登记行 + 收口行（模板合规）；③ roadmap/handoff 单行状态更新；④ M 程序台账（docs/m-blueprint-2026-11-11-program.md）阶段表精确增量追加本包行；⑤ npm run docs:check PASS + npm run docs:reconcile 0 issues",
+      "evidenceType": "②机械门禁（docs:check / docs:reconcile）",
+      "verifyCommand": "npm run docs:check && npm run docs:reconcile",
+      "boundary": "精确增量追加/状态翻转，不改写既有行；受保护未跟踪原件零触碰",
+      "exclusions": ["post-h9 蓝图原件提交（其 registry notes 明载零触碰）", "acceptance/m-blueprint-2026-11-11/ 原件改写（零触碰，新证据走新文件）"]
+    },
+    {
+      "id": "R5",
+      "original": "主控提示词交付包契约（§7）",
+      "criteria": "acceptance/block-449/ 下 s0…s5、CLOSEOUT.md、DELIVERABLES.md、evidence/ 全部落盘；交付索引中每个产物路径存在且复跑命令可达（脚本核验 0 missing）",
+      "evidenceType": "②机械门禁（自核脚本）",
+      "verifyCommand": "node acceptance/block-449/evidence/verify-deliverables.mjs",
+      "boundary": "证据与说明文档分离；数字一律当次读数",
+      "exclusions": []
+    },
+    {
+      "id": "R6",
+      "original": "决策建议器留痕（AGENTS.md 强制）",
+      "criteria": "本包关键决策点（选型兜底、收口建议）的 Jev/Laya 调用以 decision_log 在册；收尾 npm run decision:session 当次重跑取「本轮增量 + 会话累计」双数字，禁止复用上一轮数字",
+      "evidenceType": "账本（decision_log）",
+      "verifyCommand": "npm run decision:session",
+      "boundary": "零建议/不可用如实登记，不算故障",
+      "exclusions": []
+    }
+  ],
+  "nonScope": [
+    "P6 pressure 腿 / g0:result-studio:p6:update 重采（r-enrichment bundle HTTP 404，2026-11-14T10:47:48Z probe 复证；补腿条件维持原册）",
+    "M2-4-db UNIQUE(task_id,seq) 约束（需 owner 按全量证据流程重采 perf 基线，另案）",
+    "G1+ 阶段一切事项（Provider/公证/GA/packaged 三轴/远程发布）——G0 开发期常态 · 不外推",
+    "任何产品行为语义变更 / 新增能力 / 新增依赖",
+    "12 项 untracked 用户资产与受保护原件的触碰、清理、提交",
+    "tmp-block342-live/ 与 tmp-review/ 临时残留清理（hygiene 报告项，非本包资产）"
+  ],
+  "hardRedLines": [
+    "§1.1 单包串行：本包为唯一 active；不并行开新包",
+    "§1.2 未知 WIP / 用户资产零触碰、零暂存、零提交；收口逐路径显式枚举",
+    "§1.3 零新增依赖、零放宽基线、零抬阈值、零缩分母、零全局关规则、零 any/@ts-expect-error 规避",
+    "§1.4 不撤销既有裁决、不改默认语义、不重写大文件",
+    "§1.5 证据诚实：未跑/跳过/复用/超时/在制红如实标注；exit 124/125=unknown",
+    "§1.6 事实优先级：当次命令输出 > Git/源码 > 证据 JSON > canonical 文档",
+    "§1.7 阶段禁区：G0 纪律，收口笔录只写一句「G0 开发期常态 · 不外推 packaged/Provider/GA」",
+    "§1.8 实机纪律：禁可见窗口；UI/实机腿只在 9223 离屏跑，禁 PETRI_TEST_ONSCREEN，跑完立即 kill",
+    "§1.9 定向优先；§1.10 五类证据互不冒充"
+  ],
+  "requirementCount": 6,
+  "countRecompute": "node -e \"console.log(JSON.parse(require('fs').readFileSync('acceptance/block-449/s1-requirement-matrix.json','utf8')).requirements.length)\"",
+  "changes": []
+}

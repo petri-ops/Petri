@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 586,
+    "documentCount": 587,
     "lastUpdated": "2026-11-14",
-    "managedMarkdown": 569
+    "managedMarkdown": 570
   },
   "documents": [
     {
@@ -11936,6 +11936,31 @@
         "silent-catch"
       ],
       "notes": "P6 恢复腿司机表达式语法缺陷修复：lifecycleExpression 的 publicProjectionHits 曾误插在 return 对象闭合之后，整段脚本成非法 label 序列，executeJavaScript 恒抛 SyntaxError 被 catch 静默吞成 lifecycle=null，waitForLifecycle('ready') 必然 120s 超时。修复=属性归位 + 事故留痕 + new Function 语法门禁 3/3 + driver diagnostics 保留 + 诊断定位精度升级。同批修掉两处公开投影泄漏（后端 intentSummary / 前端参数 diff，job-… 回显）。结果：恢复腿 PASS（active-crash 与 recover 两段走通、publicProjectionClean 转绿）；pressure 腿 external-blocked（r-enrichment capability bundle 分发 HTTP 404），P6 证据未能重采、closeout:full 三连仍待补腿。终态 done-partial。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-449",
+      "path": "docs/block-449-m7-tails-clean-closeout-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-449-m7-tails-clean-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+        "test/m7-longtask-resume-live-flow.test.mjs",
+        "acceptance/block-449/",
+        "acceptance/m-blueprint-2026-11-11/m7/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "long-task",
+        "closeout",
+        "dev-verify"
+      ],
+      "notes": "M7 §8 第 3/5 条补腿收口包（M 程序唯一非 U 类非外部阻塞的可执行未达项）：T1 干净树 test:changed 三历史红重归因 → T2 新建 9223 离屏 dev-verify flow（崩溃注入→重启→resume 逐字对齐，禁 PETRI_TEST_ONSCREEN）→ T3 closeout:full 三连逐门读数 → T4 canonical 回写。发令链=用户主控提示词 v1.0 预授权连续工作 + Jev 不可用确定性兜底（选型证据 acceptance/block-449/s0-fact-baseline.json）。P6 pressure 腿 external 404 维持原册不承接；M2-4-db 约束另案。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-14"

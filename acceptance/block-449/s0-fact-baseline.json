@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "s0-fact-baseline",
+  "task": "BLOCK-449 · M 程序 9223 实机补腿 + 干净树三连收口",
+  "capturedAt": "2026-11-14T10:30:00+08:00",
+  "host": "darwin-arm64 (macOS)",
+  "git": {
+    "branch": "main",
+    "head": "f0c305987658a78c18962e6f5169634d6b24f811",
+    "headTime": "2026-11-14T15:55:05+08:00",
+    "command": "git log -1 --format=\"%H %cI\"",
+    "trackedDirty": 0,
+    "untrackedCount": 12,
+    "untrackedCommand": "git --no-optional-locks status --porcelain=v1",
+    "trackedDirtyCommand": "git --no-optional-locks status --porcelain=v1 | grep -c '^ M\\|^M ' || true"
+  },
+  "auditBroadcast": {
+    "source": "docs/AUDIT-LOG.md",
+    "redBlocked": 0,
+    "greenMerge": 0,
+    "note": "当前待处理项无未解决（🔴/🟢）条目；🟡 延期/待评估/建议项不阻塞本包",
+    "recentContext": "BLOCK-448 completed（done-partial）：P6 恢复腿 PASS、pressure 腿 external-blocked（r-enrichment bundle HTTP 404）"
+  },
+  "activeWorkPackage": {
+    "layer1SerialSlot": "空（新开串行包需用户裁决）",
+    "layer2LivingPlans": ["G0-LF (docs/g0-living-foundation-plan.md)", "M 程序台账 docs/m-blueprint-2026-11-11-program.md (completed · done-partial)"],
+    "conflictWithThisTask": "无",
+    "command": "npm run state"
+  },
+  "wipEnumeration": {
+    "touchPolicy": "零触碰（本包自有路径除外，收口时逐路径显式枚举）",
+    "items": [
+      { "path": "acceptance/evals/smoke-2026-11-12T13-41-48-255Z.json", "owner": "prior agent session (evals smoke 证据 2026-11-12)", "class": "agent-artifact", "disposition": "零触碰" },
+      { "path": "acceptance/evals/smoke-2026-11-12T13-53-09-768Z.json", "owner": "prior agent session (evals smoke 证据 2026-11-12)", "class": "agent-artifact", "disposition": "零触碰" },
+      { "path": "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json", "owner": "NSO 程序 (BLOCK-359~374 时代证据)", "class": "agent-artifact", "disposition": "零触碰" },
+      { "path": "assets/", "owner": "用户（logo.png 1x1 + pelican-from-petri.html，2026-11-04/05 mtime）", "class": "user-asset", "disposition": "零触碰" },
+      { "path": "docs/pelican-bicycle.html", "owner": "用户（pelican 实验族）", "class": "user-asset", "disposition": "零触碰" },
+      { "path": "docs/post-h9-optimization-blueprint-2026-11-10.md", "owner": "post-h9 程序（registry notes 明载：蓝图原件为受保护未跟踪文件、全程零触碰）", "class": "protected-untracked-canonical", "disposition": "零触碰、不提交" },
+      { "path": "model3d/enclosure-120x80x30-wall3p0.scene3d.json", "owner": "用户（3D 场景资产）", "class": "user-asset", "disposition": "零触碰" },
+      { "path": "petri-logo-concepts.miora", "owner": "用户（logo 设计源文件）", "class": "user-asset", "disposition": "零触碰" },
+      { "path": "petri-logo-concepts_assets/", "owner": "用户（logo 设计资产）", "class": "user-asset", "disposition": "零触碰" },
+      { "path": "scripts/backfill-artifact-chain.mjs", "owner": "BLOCK-372 Batch-1 血统（文件头自述：artifact_revisions 链哈希惰性回填）", "class": "agent-artifact", "disposition": "零触碰（prior session 未随包提交，归属已登记）" },
+      { "path": "tmp-block342-live/", "owner": "BLOCK-342 时代会话临时残留（SVG 测试产物）", "class": "temp-residue", "disposition": "零触碰（hygiene:check 报告项）" },
+      { "path": "tmp-review/", "owner": "prior session 临时残留（demo.svg）", "class": "temp-residue", "disposition": "零触碰（hygiene:check 报告项）" }
+    ]
+  },
+  "gateSnapshot": [
+    { "gate": "docs:check", "result": "PASS", "reading": "586 registered documents", "command": "npm run docs:check", "capturedAt": "2026-11-14T10:36:00+08:00" },
+    { "gate": "ui:audit:check", "result": "PASS", "reading": "633 个带实现证据的 UI 问题编号", "command": "npm run ui:audit:check", "capturedAt": "2026-11-14T10:36:00+08:00" },
+    { "gate": "AUDIT-LOG size", "result": "PASS(建议阈内)", "reading": "36974 bytes < 50KB 建议阈", "command": "wc -c docs/AUDIT-LOG.md", "capturedAt": "2026-11-14T10:36:00+08:00" }
+  ],
+  "probeTimeline": [
+    {
+      "probe": "r-enrichment capability bundle 分发端可用性",
+      "url": "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/bundles/r-enrichment-1.0.0-macos-arm64.tar.gz",
+      "result": "HTTP 404 Not Found (Server: AliyunOSS)",
+      "command": "curl -sI --max-time 20 <url>",
+      "capturedAt": "2026-11-14T10:47:48Z",
+      "conclusion": "BLOCK-448 补腿（重跑 g0:result-studio:p6:update pressure 腿）维持 external-blocked；本包不承接该腿，probe 时间线入册"
+    }
+  ],
+  "selectionEvidence": {
+    "jev": { "result": "jev_unavailable:http_error:cloud", "command": "npm run next:suggest -- --context \"...\" --candidates \"...\"", "fallbackRule": "治理 skill：Jev 不可用时按候选首个兜底，如实标注" },
+    "candidatesEvaluated": [
+      { "candidate": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10 K0", "verdict": "excluded", "reason": "registry notes 明载 K0–K7 已由 BLOCK-396～403 全部收口（总报告 docs/post-h9-2026-11-10-final-report.md）；重复实现项剔除（S1.2）" },
+      { "candidate": "AGENT-COMPETITIVENESS-PROGRAM", "verdict": "excluded", "reason": "kind=vision 方向母纲；剩余 CP 项（联邦委托 v2 等）登记为需用户裁决单独立项（U 类），不可自主开工" },
+      { "candidate": "QODER-ESSENCE-ABSORPTION", "verdict": "excluded", "reason": "母纲 §6.5 串行队列已清零（Q0–Q9+Q4b+P4-REM completed）；剩余 🟡 经 BLOCK-261 逐条裁决为 G1+ 出籍/平台外部条件/产品包候选（U 类），不可自主开工" },
+      { "candidate": "BLOCK-448-P6-补腿", "verdict": "excluded", "reason": "external-blocked：r-enrichment bundle HTTP 404（当次 probe 复证）" },
+      { "candidate": "M7 §8 第 3/5 条补腿（选定）", "verdict": "selected", "reason": "唯一既无 U 类裁决依赖、又非外部阻塞的可执行未达项；其 closureCondition 前置（在制 WIP 收口→干净树）已由 2026-11-11 BLOCK-415~423 入库批满足；当次 tracked 树 0 脏" }
+    ],
+    "rulingChain": "① 用户主控提示词 v1.0 全文（一次性完整发令与预授权裁决，禁止中途请示/停滞）；② AGENTS.md「建议是 advice，未获发令不得开工（预授权连续工作除外）」；③ 治理 skill Jev 不可用→确定性兜底。三层叠加构成发令链，逐项留痕"
+  },
+  "m7TailsFacts": {
+    "item3": { "what": "干净树 closeout:full 三连全门 PASS 0 SKIP", "blockedThen": "第 5 门 test:changed W 类红拦停（89M+68?? 在制 WIP 时代）", "now": "在制批已入库（2026-11-11）；tracked 树 0 脏；剩余 12 untracked 零触碰不挡门" },
+    "item5": { "what": "长任务自证包 9223 离屏实机腿（崩溃注入→重启→resume 逐字对齐）", "blockedThen": "无窗栈未启动；89M 在制 WIP 面上不冒充实机", "now": "树净可跑；需新建 dev-verify flow（M2-live closureCondition 原文即要求 dev-verify flow 形态）" },
+    "evidenceSource": "acceptance/m-blueprint-2026-11-11/m7/m7-evidence.json fiveItems M7-3/M7-5"
+  },
+  "selfCheck": {
+    "S0.1_auditBroadcastHandled": true,
+    "S0.2_wipEnumeratedZeroTouch": true,
+    "S0.3_activeSlotUniqueNoConflict": true,
+    "S0.4_numbersHaveCommandsAndTimestamps": true,
+    "S0.5_noBatchStageDeleteOverwrite": true
+  }
+}
