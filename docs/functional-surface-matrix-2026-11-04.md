@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 1 个不计入判定）。生成时间：2026-11-14T01:46:49.908Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-14T07:54:46.292Z
 
 ## 0. 覆盖汇总
 
@@ -157,4 +157,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx`
+（无）

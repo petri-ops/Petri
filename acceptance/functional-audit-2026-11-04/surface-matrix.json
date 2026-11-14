@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T01:46:49.908Z",
+  "generatedAt": "2026-11-14T07:54:46.292Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 1,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5874,8 +5874,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx"
-  ],
+  "dirty": [],
   "defNotes": []
 }
