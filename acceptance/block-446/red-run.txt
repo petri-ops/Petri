@@ -1,0 +1,161 @@
+✖ file 后端 set() 落盘零明文：raw 文件无明文子串、值形态 enc:v1、get() 往返明文 (2.643041ms)
+✖ 存量明文透传可读，get 命中后整组急切迁移（迁移后 raw 零明文且值不变） (0.493916ms)
+✖ 多 provider 并存：各自加密、互不覆盖、整组保留 (0.618792ms)
+✖ 损坏文件 fail-closed：set() 抛错拒覆写、文件字节不变；get() 诚实空串不崩；status()=corrupt (0.562291ms)
+✖ 不可读文件 fail-closed：set() 抛错、get() 空串、status()=unreadable（Unix 权限语义） (0.574792ms)
+✖ status() 三态：缺失=ok/fileExists:false；正常=ok；损坏=corrupt (0.11975ms)
+✖ 值不可解：密文坏值诚实空串且保留在盘；他条目写时原样保留、明文邻居同时迁移 (0.322042ms)
+✔ remove() 在损坏文件上零触碰、不崩；正常路径 remove 后条目消失且他条目保留 (0.818ms)
+✖ keychain 后端不受影响：往返语义不变、status() 结构字段齐全 (0.095417ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 1
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.41825
+
+✖ failing tests:
+
+test at test/block446-credential-file-encryption.test.mjs:36:1
+✖ file 后端 set() 落盘零明文：raw 文件无明文子串、值形态 enc:v1、get() 往返明文 (2.643041ms)
+  AssertionError [ERR_ASSERTION]: 落盘明文即红（BLOCK-446 G1）
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:43:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:49:1
+✖ 存量明文透传可读，get 命中后整组急切迁移（迁移后 raw 零明文且值不变） (0.493916ms)
+  AssertionError [ERR_ASSERTION]: 迁移后落盘仍残留明文即红
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:59:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:64:1
+✖ 多 provider 并存：各自加密、互不覆盖、整组保留 (0.618792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:72:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:79:1
+✖ 损坏文件 fail-closed：set() 抛错拒覆写、文件字节不变；get() 诚实空串不崩；status()=corrupt (0.562291ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception: 损坏文件上写入必须 fail-closed（防单条目覆盖毁掉他 provider 密文）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:86:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /损坏|corrupt|fail-closed|拒绝写入/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:98:3
+✖ 不可读文件 fail-closed：set() 抛错、get() 空串、status()=unreadable（Unix 权限语义） (0.574792ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:106:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /不可读|unreadable|拒绝写入/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:119:1
+✖ status() 三态：缺失=ok/fileExists:false；正常=ok；损坏=corrupt (0.11975ms)
+  TypeError: store.status is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:123:25)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block446-credential-file-encryption.test.mjs:141:1
+✖ 值不可解：密文坏值诚实空串且保留在盘；他条目写时原样保留、明文邻居同时迁移 (0.322042ms)
+  AssertionError [ERR_ASSERTION]: 不可解密文诚实空串（密钥丢失/密文损坏）
+  + actual - expected
+  
+  + 'enc:v1:00.00.00deadbeef'
+  - ''
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:150:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'enc:v1:00.00.00deadbeef',
+    expected: '',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block446-credential-file-encryption.test.mjs:177:1
+✖ keychain 后端不受影响：往返语义不变、status() 结构字段齐全 (0.095417ms)
+  TypeError: store.status is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block446-credential-file-encryption.test.mjs:189:20)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)

@@ -7764,7 +7764,8 @@
         "src/main.js"
       ],
       "tests": [
-        "test/block405-l1-security.test.mjs"
+        "test/block405-l1-security.test.mjs",
+        "test/block446-credential-file-encryption.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -8302,6 +8303,26 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "acceptance-probe"
+    },
+    {
+      "id": "block446-credential-file-encryption",
+      "note": "BLOCK-446 凭据 file 后端加密化+错误语义分离：credential-store 落盘零明文（mcp-env-crypto 单源 AES-256-GCM）/整组迁移/损坏 fail-closed/status() 三态。改任一即跑凭据加密契约与既有凭据/安全契约。",
+      "patterns": [
+        "core/petri-server/helpers/credential-store.js",
+        "docs/block-446-credential-file-encryption-plan.md",
+        "acceptance/block-446/**"
+      ],
+      "tests": [
+        "test/block446-credential-file-encryption.test.mjs",
+        "test/credential-store.test.mjs",
+        "test/block150-explicit-credentials.test.mjs",
+        "test/block405-l1-security.test.mjs",
+        "test/block414-backend-port-reuse.test.mjs",
+        "test/platform-branch-freeze.test.mjs",
+        "test/block160-mcp-env-crypto.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
     }
   ]
 }

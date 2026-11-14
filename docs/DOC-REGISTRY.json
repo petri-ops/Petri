@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 583,
-    "lastUpdated": "2026-11-13",
-    "managedMarkdown": 566
+    "documentCount": 584,
+    "lastUpdated": "2026-11-14",
+    "managedMarkdown": 567
   },
   "documents": [
     {
@@ -11857,7 +11857,31 @@
         "mcp-apps"
       ],
       "notes": "BLOCK-445 通用 Agent 插件/技能兼容层：13 种清单候选 + 14 个用户级/7 个工作区级插件根 + .agents/skills 直读 + 单技能目录；commands 投影合成技能；MCP App 页面宿主链路（后端 readResource / 主进程 gen-ui:prepare-mcp-app / preload）。真实 ZCode 插件（documents/pdf/design/visualize/browser-use）试跑通过，444 6/6 + 445 5/5，离屏 Electron prepareMcpApp 返回沙箱 URL。未覆盖：JS 扩展宿主、hooks、前端自动渲染分支、插件构建依赖。见 m6a/universal-plugin-compat.json。"
+    },
+    {
+      "id": "BLOCK-446-CREDENTIAL-FILE-ENCRYPTION",
+      "path": "docs/block-446-credential-file-encryption-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "core/petri-server/helpers/credential-store.js",
+        "test/block446-credential-file-encryption.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block-446/**"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "credentials",
+        "security",
+        "encryption",
+        "zcode-reference"
+      ],
+      "notes": "BLOCK-446 凭据 file 后端加密化+错误语义分离（ZCode v3.18.2 systemCredentialCipher 范式借鉴落地；用户裁决 2026-11-14「好的 按照你的建议来」）：file 后端 set() 经 mcp-env-crypto 单源 AES-256-GCM 加密落盘（enc:v1，零明文）+ 读取明文透传与整组急切迁移（fail-open 不丢值）+ 损坏/不可读文件 fail-closed 拒覆写（防单条目覆盖毁他 provider 密文）+ status() 三态健康面（clean-missing/storage-error/value-undecryptable）。非范围：keychain 后端零改动、原生 OS 凭据库 G1+、IPC 明文回传最小化另立。 收口：红绿先行 9/9（红跑 8/9 存档）；test:changed 1425/1435 三红先于本包归因（UI-629 W/block414 环境条件/P6 W）；治理门 docs 584·secret·arch·code-size·arch-cycles·types·knip 全 PASS；lint 改动文件 0 error 警告净收缩；closeout 第 4 门 ui-audit 被他方 WIP 拦停如实登记；coverage 棘轮 90→89。证据=acceptance/block-446/gate-evidence.json。"
     }
   ],
-  "lastUpdated": "2026-11-13"
+  "lastUpdated": "2026-11-14"
 }

@@ -21,7 +21,6 @@
     "test/block133-r-deparse.test.mjs",
     "test/block146-agent-domain-validation.test.mjs",
     "test/block146-bundle-failfast-required-input.test.mjs",
-    "test/block150-explicit-credentials.test.mjs",
     "test/block154-startup-async.test.mjs",
     "test/block154-terminal-ssh-keepalive.test.mjs",
     "test/block162-agent-ws-endpoint.test.mjs",

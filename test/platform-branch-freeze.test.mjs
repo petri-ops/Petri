@@ -158,6 +158,10 @@ const BASELINE = new Set([
   'test/block88-task-attribution.test.mjs',
   'test/chat-file-references.test.mjs',
   'test/credential-store.test.mjs',
+  // BLOCK-446 — 新测试内 process.platform 仅用于 win32 跳过 chmod 000 不可读文件用例
+  //（Windows 无 Unix 权限语义，与 credential-store.test.mjs 同模式）；纯测试侧平台护栏，
+  // 收敛到 platform-compat 无收益，登记留痕。
+  'test/block446-credential-file-encryption.test.mjs',
   'test/federation.test.mjs',
   'test/g0-rs-p6-product-acceptance.test.mjs',
   'test/harness-workspace-tools.test.mjs',

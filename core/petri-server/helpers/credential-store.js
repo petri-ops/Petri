@@ -3,13 +3,28 @@
  *
  * macOS uses the login Keychain. Other platforms use a separate 0600 file so
  * secrets never enter ai-settings.json, renderer snapshots, or diagnostics.
+ *
+ * BLOCK-446（ZCode v3.18.2 systemCredentialCipher 范式借鉴落地，
+ * plan=docs/block-446-credential-file-encryption-plan.md）：
+ * - file 后端落盘零明文：值一律 `enc:v1:` AES-256-GCM 密文，加密单源复用
+ *   mcp-env-crypto（密钥 `$PETRI_LOCAL_DATA_DIR/keys/mcp-env.key`，与
+ *   SETTINGS_DIR 同根——一个数据根一把密钥）。
+ * - 存量迁移：明文值读取透传（与 mcp-env-crypto 同语义）；读取/写入命中含明文
+ *   的文件时整组急切迁移重加密（fail-open：迁移失败仅 warn，值仍可用）。
+ * - 错误语义分离：文件缺失=干净空态；损坏/不可读=存储错误态——get 诚实空串
+ *   （fail-open 读取），set fail-closed 拒覆写（防「损坏文件 + set(new) → 整文件
+ *   被单条目覆盖 → 他 provider 密文全毁」的破坏路径），remove 零触碰；密钥丢失
+ *   导致的值不可解 → 该值诚实 ''，密文保留在盘，他条目写时原样保留。
+ * - status() 只读健康面暴露三态，供诊断与测试断言。
  */
 
 const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
+const { encryptSecret, decryptSecret } = require('./mcp-env-crypto');
 
 const KEYCHAIN_SERVICE = 'com.petri.desktop.ai';
+const ENC_PREFIX = 'enc:v1:';
 
 function normalizeProvider(provider) {
   const value = String(provider || '').trim().toLowerCase();
@@ -17,6 +32,10 @@ function normalizeProvider(provider) {
     throw new Error(`无效的凭据 Provider: ${provider || '(empty)'}`);
   }
   return value.replace(/-vision$/, '');
+}
+
+function isPlaintext(value) {
+  return typeof value === 'string' && value !== '' && !value.startsWith(ENC_PREFIX);
 }
 
 function createCredentialStore(options = {}) {
@@ -28,12 +47,22 @@ function createCredentialStore(options = {}) {
     (platform === 'darwin' ? 'keychain' : 'file');
   const filePath = path.join(settingsDir, 'ai-credentials.json');
 
-  function readFileStore() {
+  // BLOCK-446：读取不再把一切错误压平成「未配置」。三态：
+  // error=null（干净空态或可读）/ 'corrupt'（JSON 损坏）/ 'unreadable'（权限等 IO 故障）。
+  function readStoreState() {
+    let raw;
     try {
-      const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-      return parsed && typeof parsed === 'object' ? parsed : {};
+      raw = fs.readFileSync(filePath, 'utf8');
+    } catch (e) {
+      if (e && e.code === 'ENOENT') return { values: {}, fileExists: false, error: null };
+      return { values: null, fileExists: true, error: 'unreadable' };
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      const values = parsed && typeof parsed === 'object' ? parsed : {};
+      return { values, fileExists: true, error: null };
     } catch {
-      return {};
+      return { values: null, fileExists: true, error: 'corrupt' };
     }
   }
 
@@ -44,6 +73,28 @@ function createCredentialStore(options = {}) {
     fs.chmodSync(tempPath, 0o600);
     fs.renameSync(tempPath, filePath);
     fs.chmodSync(filePath, 0o600);
+  }
+
+  // 整组重加密：任一明文值随写入迁移为密文（落盘零明文对一切写路径成立）。
+  function encryptAll(values) {
+    const out = {};
+    for (const [k, v] of Object.entries(values)) {
+      out[k] = isPlaintext(v) ? encryptSecret(v) : v;
+    }
+    return out;
+  }
+
+  // 急切迁移（读取路径）：文件含明文值时整组重加密；fail-open——失败仅 warn，
+  // 本次调用的值仍可用，绝不因迁移失败丢凭据。
+  function migrateLegacyValues(state) {
+    if (!state || state.error || !state.values) return;
+    const hasLegacy = Object.values(state.values).some(isPlaintext);
+    if (!hasLegacy) return;
+    try {
+      writeFileStore(encryptAll(state.values));
+    } catch (e) {
+      console.warn('[credential-store] legacy credential migration failed (fail-open, values remain usable):', e.message);
+    }
   }
 
   function get(provider) {
@@ -57,7 +108,17 @@ function createCredentialStore(options = {}) {
         return '';
       }
     }
-    return String(readFileStore()[id] || '');
+    const state = readStoreState();
+    if (state.error) {
+      console.warn(`[credential-store] 凭据文件${state.error === 'corrupt' ? '损坏' : '不可读'}，按未配置处理（fail-open 读取 / fail-closed 写入）: ${filePath}`);
+      return '';
+    }
+    const raw = state.values[id];
+    const value = raw === undefined || raw === null || raw === ''
+      ? ''
+      : decryptSecret(String(raw));
+    migrateLegacyValues(state);
+    return String(value || '');
   }
 
   function set(provider, secret) {
@@ -77,9 +138,14 @@ function createCredentialStore(options = {}) {
       // 往返一致性由 test/block414-backend-port-reuse.test.mjs 事故门禁承载。
       return true;
     }
-    const values = readFileStore();
-    values[id] = value;
-    writeFileStore(values);
+    const state = readStoreState();
+    if (state.error) {
+      // fail-closed：损坏/不可读文件上覆写 = 用单条目替换整文件，静默毁掉
+      // 他 provider 密文。拒绝写入并如实报错（存储错误 ≠ 未配置）。
+      throw new Error(`凭据文件${state.error === 'corrupt' ? '损坏' : '不可读'}，拒绝写入以保护既有凭据（fail-closed）: ${filePath}`);
+    }
+    const values = { ...state.values, [id]: encryptSecret(value) };
+    writeFileStore(encryptAll(values));
     return true;
   }
 
@@ -93,10 +159,30 @@ function createCredentialStore(options = {}) {
       } catch {}
       return;
     }
-    const values = readFileStore();
-    if (!Object.prototype.hasOwnProperty.call(values, id)) return;
+    const state = readStoreState();
+    if (state.error) {
+      console.warn(`[credential-store] 凭据文件${state.error === 'corrupt' ? '损坏' : '不可读'}，跳过删除（文件零触碰）: ${filePath}`);
+      return;
+    }
+    if (!Object.prototype.hasOwnProperty.call(state.values, id)) return;
+    const values = { ...state.values };
     delete values[id];
-    writeFileStore(values);
+    writeFileStore(encryptAll(values));
+  }
+
+  // BLOCK-446：只读健康面。fileExists/error 仅 file 后端有意义（keychain 恒 ok）。
+  function status() {
+    if (backend === 'keychain') {
+      return { backend, filePath, fileExists: null, ok: true, error: null };
+    }
+    const state = readStoreState();
+    return {
+      backend,
+      filePath,
+      fileExists: state.fileExists,
+      ok: !state.error,
+      error: state.error,
+    };
   }
 
   return {
@@ -105,6 +191,7 @@ function createCredentialStore(options = {}) {
     get,
     set,
     remove,
+    status,
     isConfigured(provider) {
       return !!get(provider);
     },

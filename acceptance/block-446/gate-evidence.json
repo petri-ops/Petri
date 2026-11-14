@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "block-closeout-evidence",
+  "block": "BLOCK-446",
+  "title": "凭据 file 后端加密化 + 错误语义分离",
+  "capturedAt": "2026-11-14",
+  "source": "ZCode v3.18.2 systemCredentialCipher 范式借鉴落地（用户裁决 2026-11-14「好的 按照你的建议来」= Jev 单一建议发令）",
+  "deliverables": [
+    "file 后端 set()/remove() 全写路径 encryptAll 落盘零明文（enc:v1 AES-256-GCM，加密单源复用 mcp-env-crypto，密钥与 SETTINGS_DIR 同根）",
+    "读取明文透传 + 整组急切迁移（fail-open：迁移失败仅 warn 值仍可用）",
+    "错误语义三态分离：missing=干净空态 / corrupt+unreadable=存储错误态（get→''+warn；set→fail-closed 抛错拒覆写防毁他 provider 密文；remove→零触碰）/ 值不可解→诚实''+密文保留",
+    "status() 只读健康面（backend/filePath/fileExists/ok/error）",
+    "test/block446-credential-file-encryption.test.mjs 9 项契约 + impact-map 专属 rule + platform-freeze BASELINE 登记"
+  ],
+  "redGreen": {
+    "red": "acceptance/block-446/red-run.txt（实现前 8/9 红，exit 1）",
+    "green": "实现后 9/9 pass（含 keychain 后端不受影响护栏）"
+  },
+  "gates": [
+    { "gate": "node --test block446 契约", "result": "PASS 9/9" },
+    { "gate": "G3 邻域回归（credential-store/block150/block405/block160-mcp-env-crypto/platform-branch-freeze/nso-w5-impact-coverage）", "result": "PASS（block414 环境条件红单列：需 dev 栈 3001，HEAD 版复现同红=先于本包）" },
+    { "gate": "test:changed:list", "result": "PASS exit 0（block446 rule 375 条覆盖复现）" },
+    { "gate": "test:changed", "result": "1425/1435，3 红均先于本包：UI-629（W 类他方 WIP）/ block414 port-reuse（环境条件红，HEAD 复现证明）/ P6（W 类他方 WIP 指纹含 package.json+result-studio CSS）" },
+    { "gate": "docs:check", "result": "PASS 584（docs:coverage 重算后）" },
+    { "gate": "quality:secret", "result": "PASS" },
+    { "gate": "quality:arch", "result": "PASS（R1-R5 无违规）" },
+    { "gate": "gate:code-size", "result": "PASS（85897/基线 86605）" },
+    { "gate": "gate:arch-cycles", "result": "PASS（12 存量环在册无新环）" },
+    { "gate": "quality:types", "result": "PASS exit 0" },
+    { "gate": "quality:knip:check", "result": "PASS（330 键冻结无新增）" },
+    { "gate": "quality:lint", "result": "改动文件 0 error（警告 HEAD 4→新 3 净收缩）；gate exit 1 = SettingsNav.tsx 他方 WIP 文件 error，非本包" },
+    { "gate": "closeout 聚合", "result": "exit 1（第 4 门 ui:audit:check 拦停：他方 172 文件 UI WIP 未同步台账，先于本包；前 3 门 PASS，后续 9 门未执行——types/knip/code-size/arch-cycles 已单独补跑 PASS）" }
+  ],
+  "attribution": {
+    "他方 WIP 零触碰": "172 文件（含 mcp-settings.js / ai-memory.js / SettingsNav.tsx / UI 面）未改动、未 stage",
+    "棘轮改善": "impact-map-coverage-baseline unmappedTests 90→89（block150 由新 rule 覆盖后按棘轮移出）"
+  },
+  "nonClaims": ["未宣称全量通过", "未宣称 UI 台账同步（本包零 UI 文件）", "G0 开发期常态 · 不外推 packaged/Provider/GA"]
+}
