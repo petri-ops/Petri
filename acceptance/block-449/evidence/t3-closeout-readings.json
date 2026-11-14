@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "t3-closeout-full-three-runs",
+  "task": "T3 干净树 closeout:full 三连（R3）——M7-5 closureCondition",
+  "capturedAt": "2026-11-14T20:55:00+08:00",
+  "headDuringRuns": "29cbf478（knip entry 注册后；三连之间零代码改动）",
+  "verdict": "3/3 PASS（门禁全绿 · 门禁级 SKIP=0）",
+  "runs": [
+    { "run": 1, "log": "acceptance/block-449/evidence/t3-closeout-full-run1.log", "verdict": "CLOSEOUT: PASS — 门禁全绿", "gates": 20, "skillsCheck": "OK" },
+    { "run": 2, "log": "acceptance/block-449/evidence/t3-closeout-full-run2.log", "verdict": "CLOSEOUT: PASS — 门禁全绿", "gates": 20, "skillsCheck": "OK" },
+    { "run": 3, "log": "acceptance/block-449/evidence/t3-closeout-full-run3.log", "verdict": "CLOSEOUT: PASS — 门禁全绿", "gates": 20, "skillsCheck": "OK" }
+  ],
+  "gateReadingsRun1": [
+    { "gate": "audit:compact", "result": "PASS" },
+    { "gate": "hygiene:check", "result": "PASS" },
+    { "gate": "docs:check", "result": "PASS" },
+    { "gate": "ui:audit:check", "result": "PASS" },
+    { "gate": "test:changed", "result": "PASS", "note": "70 测试面（含本包 3 个新测试文件）" },
+    { "gate": "gate:user-assets", "result": "PASS" },
+    { "gate": "gate:version-parity", "result": "PASS" },
+    { "gate": "gate:silent-catch", "result": "PASS" },
+    { "gate": "gate:code-size", "result": "PASS" },
+    { "gate": "gate:arch-cycles", "result": "PASS" },
+    { "gate": "gate:css-modules", "result": "PASS" },
+    { "gate": "quality:secret", "result": "PASS" },
+    { "gate": "quality:arch", "result": "PASS" },
+    { "gate": "quality:lint", "result": "PASS" },
+    { "gate": "quality:lint:ledger", "result": "PASS" },
+    { "gate": "quality:perf", "result": "PASS", "note": "5 连采样（基线重绑后）" },
+    { "gate": "quality:types", "result": "PASS" },
+    { "gate": "quality:knip:check", "result": "PASS" },
+    { "gate": "gate:post-h9-contracts", "result": "PASS" },
+    { "gate": "quality:ear", "result": "PASS" },
+    { "gate": "quality:surface", "result": "PASS" },
+    { "gate": "skills:check", "result": "OK（非阻塞报告）" }
+  ],
+  "skipHonesty": {
+    "gateLevelSkip": 0,
+    "logNoiseNote": "三连日志中 10 处 'skipped' 字样均为 quality:perf 采集时隔离后端 agent-task-store 幂等 schema step 日志（duplicate column 即既有列跳过=正常 bootstrap 路径），非门禁级 SKIP"
+  },
+  "fixChainDuringT3": [
+    { "issue": "knip CK-11 棘轮新增（新 flow 判死代码）", "attribution": "确定性红（动态入口未注册）", "fix": "knip.json 两处 entry 注册（ui-d2/ui-d4 先例；非基线放宽）", "commit": "29cbf478" },
+    { "issue": "quality:perf 基线绑定失效（HOT_PATH_FILES 含 evals-harness.mjs）", "attribution": "确定性红（D1 修复触碰热路径）", "fix": "block350-perf-collect 重采重绑（阈值/容差零改动；B2 先例）；block350 15/15 + perf 5 连 PASS", "commit": "perf-baseline commit" }
+  ],
+  "m7_5CriterionComparison": {
+    "criterion": "干净树 closeout:full 三连全门 PASS 0 SKIP + gate:post-h9-contracts 全绿 + docs:reconcile 0 issues",
+    "metNow": "三连 PASS + 0 门禁级 SKIP + post-h9-contracts PASS；docs:reconcile 在 T4 收口时当次复跑",
+    "delta": "M7 时点的拦停红（test:changed W 类在制红）经 T1 重归因清账后消失；本包修复链（knip/perf）属当次新增面的确定性红闭环"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "s3-task-record",
+  "taskId": "T3",
+  "requirement": "R3",
+  "capturedAt": "2026-11-14T20:56:00+08:00",
+  "changedPaths": [
+    "knip.json",
+    "test/perf-baseline.json",
+    "acceptance/block-449/evidence/t3-closeout-full-run1.log",
+    "acceptance/block-449/evidence/t3-closeout-full-run2.log",
+    "acceptance/block-449/evidence/t3-closeout-full-run3.log",
+    "acceptance/block-449/evidence/t3-closeout-readings.json"
+  ],
+  "planConformance": "改动面 = T3 过程中两个确定性红的根因修复（knip 动态入口注册 / perf 基线重绑）+ 三连日志证据；与 s2-plan T3 outputs（三连日志 + 逐门读数）一致；无越界文件",
+  "redGreen": {
+    "applicable": false,
+    "note": "纯门禁复跑取证；过程中两个确定性红按 §3 标准修法闭环（knip 29cbf478 / perf B2 重采），各有专属回归面（knip-ratchet 1/1、block350 15/15）"
+  },
+  "gates": [
+    { "gate": "closeout:full ×3", "result": "PASS 全绿 ×3（run1/run2/run3，零代码改动间隔）" },
+    { "gate": "门禁级 SKIP", "result": "0（perf 采集幂等 DDL 日志噪声不计）" },
+    { "gate": "test:changed（三连内含）", "result": "PASS 70 面 0 fail" }
+  ],
+  "failureSemantics": "run1(v1) knip 棘轮红 → 动态入口注册；run1(v2) perf 基线失效 → 重采重绑（阈值零改动）；两红均有归因+修复+回归面，之后三连零红",
+  "decisions": [
+    {
+      "time": "2026-11-14T20:30+08:00",
+      "trigger": "closeout:full v1 knip CK-11 棘轮红",
+      "candidates": ["--update 洗入基线", "knip.json entry 注册（动态入口显式化）", "删 flow"],
+      "selected": "entry 注册",
+      "reason": "flow 由 run.cjs 动态 require，属真实动态入口；ui-d2/ui-d4 同款先例；--update 洗白违反零放宽红线",
+      "impact": "knip.json 4 行",
+      "reversibility": "revert 单文件",
+      "evidence": "29cbf478"
+    },
+    {
+      "time": "2026-11-14T20:40+08:00",
+      "trigger": "closeout:full v2 perf 基线绑定失效（evals-harness.mjs 在 HOT_PATH_FILES）",
+      "candidates": ["PETRI_ALLOW_SKIP=1 放行", "重采重绑（B2 先例）", "回滚 D1 修复"],
+      "selected": "重采重绑",
+      "reason": "门禁自身的指引路径；阈值/容差零改动；采样当次落盘",
+      "impact": "test/perf-baseline.json 采样值+coreSha",
+      "reversibility": "revert 单文件",
+      "evidence": "block350 15/15 + quality:perf 5 连 PASS"
+    }
+  ],
+  "closeoutSummary": "T3 完成：closeout:full 三连全绿（20 门 + skills:check，0 门禁级 SKIP）；M7-5 上限当次达成；两过程红闭环留痕"
+}
