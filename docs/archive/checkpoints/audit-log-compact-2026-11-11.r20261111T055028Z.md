@@ -1,0 +1,11 @@
+# AUDIT-LOG 自动精简归档 · 2026-11-11（audit-log-compact.mjs）
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（用户裁决「AUDIT-LOG 的规范和精简
+> 应该是自动化的过程，仅保留必要的内容」）。内容=「最近处理记录」表窗口外淘汰行原文（搬移不改写）。
+> canonical 状态以 roadmap/plan/DOC-REGISTRY 为准，本档仅作广播历史追溯。
+
+| ✅ **BLOCK-405（第五轮 L1 · 安全边界纵深）completed**：四 P1 红绿先行（terminal:open-shell 参数化+登记根白名单 12 组注入全拒 / 深链 MCP command 裸名白名单+args 禁求值+expected 对账 8 组全拒 / 受信 origin 回环过滤四读取点+空 Origin 变更动词本机随机 token 门 / navigate http(s)+非回环白名单+iframe sandbox）；dev CSP 端口通配全移除 / 权限 deny-all 兜底 / Keychain stdin / transcript 0600+脱敏+归属 / origin 精确比较+openExternal 准入 / 依赖静态清单；L-56/79 U 材料维持 pending_user_ruling 不代答；knip 330→329（三 exports 转活）；零新增依赖；台账门抓出本批 4 新违规全根修 证据=acceptance/post-k7-2026-11-10/l1/ | 2026-11-11 | BLOCK-405 / COMPLETED |
+| ✅ **BLOCK-404（第五轮 L0 · 判据校准与可信起点）completed**：八改进点全部交付（解反向门禁读数型+只增即红棘轮 / perf 冷热分离·3 轮中位·容差 25-30%·基线绑定 host+热路径·skipped 判红 / EAR 真棘轮 / test:changed fail-closed / state --no-optional-locks+diff 幽灵并集+🔵×registry 对账门 / lint 台账机械投影 191=120 逐条相等+warnings 分域只减 2445 / 尺寸门 v3 全量发现入册 75 文件+全库 includes 第二棘轮 129 处 / 数字口径单源 JSON+backlog 快照声明+audit:compact 修只数✅行缺陷 47 行归档 80.7→21.9KB=K-07 闭环+task-runs 29 条归档+用户资产 9→10 项对账）；186 契约全绿、perf 5/5 PASS、零产品行为变化、零新增依赖；2 红均 W 归属如实标注（CSS WIP） 证据=acceptance/post-k7-2026-11-10/l0/ | 2026-11-11 | BLOCK-404 / COMPLETED |
+| ✅ **BLOCK-403（post-H9 K7 · 真实任务终验与总收口）completed**：真实任务当次取数 external-blocked（凭据 keychain 在位/端点 ETIMEDOUT/两次有界超时 124=unknown，不冒充 8/8）/ 人眼签字缺席 pending_human_eye / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降达标 5/11 / 136 条 reconcile 候选逐件复核零归档 / 干净树 closeout:full 19 门全绿 0 SKIP / 14 契约全绿 证据=`acceptance/post-h9-2026-11-10/k7/`。G0 开发期常态 · 不外推 packaged/Provider/GA。 | 2026-11-10 | BLOCK-403 / COMPLETED |
+| ✅ **BLOCK-402（post-H9 K6 · 安全与边界纵深）completed**：PiP 四项基线红绿先行（红 1 fail→绿 3/3）/ 窗口名单覆盖门 + 5 漏配负测 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 / 32 条缺口仅 K-30 留 K7 / closeout 全绿 证据=`acceptance/post-h9-2026-11-10/k6/`。G0 开发期常态 · 不外推 packaged/Provider/GA。 | 2026-11-10 | BLOCK-402 / COMPLETED |
+| ✅ **BLOCK-401（post-H9 K5 · 性能与证据门禁化）completed**：严格证据元数据门 38 份零例外+11 负测 / DOM 阈值纯函数门植 2 万必红 / 三矩阵·165 通道·EAR 机械对账 / 显式 perf 5/5 证据 / EAR 44.1% 分子真实增长未达 45% 如实标注 / perf 默认写盘冲突 U 类材料不擅改 / 22 契约全绿 证据=`acceptance/post-h9-2026-11-10/k5/`。G0 开发期常态 · 不外推 packaged/Provider/GA。 | 2026-11-10 | BLOCK-401 / COMPLETED |

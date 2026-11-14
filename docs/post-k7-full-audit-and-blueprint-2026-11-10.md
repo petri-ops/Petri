@@ -1,6 +1,6 @@
 ---
 capability: post-k7-full-audit-and-blueprint-2026-11-10
-status: planned
+status: completed
 goal: 以 2026-11-10 HEAD f9873243（post-H9 K0–K7 全收口后）为唯一事实基线，用七路只读源码实证 + 十九门当次机械取样，对十一维度做第五轮独立深度审计；逐项登记新发现与 K 项残留，转成分阶段 L0–L7 优化蓝图，每项带优先级、blocker 分类与可机械核验的验收标准；产出可独立执行的执行提示词。
 acceptance:
   - 十一维度均有当前源码 file:line 锚点、逐项发现、严重度、修法与阶段归属，不重复 W/S/H/K 已闭合发现为"新发现"

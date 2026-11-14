@@ -1,0 +1,19 @@
+# 审计广播台历史归档 · through 2026-11-11
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（BLOCK-170 自稳设计；
+> 活跃台只留「最后更新」链最近 8 条，本档=被淘汰链行原文追加，搬移不改写）。
+> 状态与完成语义以 canonical 文档（roadmap/plan/DOC-REGISTRY）为准，本档仅作广播历史追溯。
+
+最后更新：2026-11-11（▶ **第五轮 L3=BLOCK-407 启动**：SSE 终态 try/finally+熔断 / terminal 桥 / SCAN_ROOTS 扩面+真静默清零 / 权限门硬失败 / nonces 回收 / observe 分离 / 64MB 单入口 / 断线横幅 零新增依赖 串行槽位=BLOCK-407 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（🏁 **第五轮 L2=BLOCK-406 completed**：L-01 MCP skill_execute 假成功 fail-closed（11 Skill 逐件 isError:true）/ L-02 resources 可达 / runtime 三态假阴性根修 / ipcFailure 单源 / gen-ui 超时 / canCompare 接线 / enum 同源 / 端点退役 / 通道分类 / 9 新原因码；定向 208/209（P6=W 归属）；预存红 4 件如实归属；自纠一次 add -u 误暂存 CSS 并同周期修正。串行槽位转空，下一阶段 L3 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（▶ **第五轮 L2=BLOCK-406 启动**：L-01 MCP skill_execute 假成功 fail-closed（红绿先行，最高优先）/ L-02 双 server 收敛 / IPC 失败形状统一 / canCompare / source enum / 零消费销号 零新增依赖 串行槽位=BLOCK-406 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（🏁 **第五轮 L1=BLOCK-405 completed**：四 P1 安全断链红绿先行全数转绿（terminal 注入参数化 / 深链 MCP 白名单+对账 / 受信 origin 回环过滤+token 门 / navigate 白名单+sandbox）+ dev CSP 端口收敛 / 权限 deny-all / Keychain stdin / transcript 0600+脱敏+归属 / origin 精确比较 / 依赖清单；L-56/79 U 材料维持 pending_user_ruling；knip 330→329；零新增依赖。串行槽位转空，下一阶段 L2 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（▶ **第五轮 L1=BLOCK-405 启动**：四个 P1 安全断链红绿先行（terminal:open-shell 注入 / 深链 MCP stdio / 受信 origin / loadURL 白名单+iframe sandbox）+ dev CSP/权限 fail-open/Keychain/transcript/URL origin/依赖清单；L-56/L-79 出 U 类材料不代答 零新增依赖 串行槽位=BLOCK-405 active。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-11（🏁 **第五轮 L0=BLOCK-404 completed**：八改进点全部交付（解反向门禁读数型 / perf 判据重立 / EAR 真棘轮 / fail-closed / state 兜底+🔵对账 / lint 台账机械投影 191=120 / 尺寸门 v3 入册 75 文件+includes 第二棘轮 129 / 数字口径单源+backlog 快照+AUDIT-LOG 压回 21.9KB=K-07 闭环+task-runs 归档+用户资产 10 项对账）；186 契约全绿、perf 5/5 PASS；2 红均 W 归属（CSS WIP→ui:audit:check 与 P6 源绑定，owner 收口自愈）。串行槽位转空，下一阶段 L1 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K7=BLOCK-403 启动**：真实任务当次取数（凭据 keychain 在位/端点 ETIMEDOUT/两次套件 exit 124=unknown，不冒充 8/8）/ 人眼签字缺席 / 32 条缺口全终态零 in_progress / 十一维六列复评四升七平零降 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K6=BLOCK-402 启动**：PiP 四项安全基线红绿先行（加名单必红→补 sandbox/webSecurity 转绿 3/3）/ 窗口名单覆盖门 / ADMISSION·FK·IPC U 类一页材料不代答 / 14 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K5=BLOCK-401 启动**：严格证据元数据门（本程序 33 份 JSON 全合规+8 字段负测）/ DOM 阈值纯函数门植 2 万必红 / 三矩阵同源与 165 通道账本 / EAR 分子分母如实报 / perf 默认写盘冲突出 U 类材料不擅改 / 22 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K4=BLOCK-400 启动**：源码扫描契约只减不增棘轮门（4 文件冻结+负测）/ 插件源解析面单源防回退（装配面两处如实标注）/ 三树版本只读对账检出 typescript 漂移 / H10 8 证据 tracked 校准 120→90 / W5b 五刀 U 类材料 / 19 契约全绿 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K3=BLOCK-399 启动**：四事件投影反向契约 22/22 / 内联样式债棘轮门（55 颜色+5 zIndex 冻结，新增即红）/ B-11 布局防回退 / debt 35 机械分诊人眼项不冒 verified / E·L 一页材料 / UI 台账同批回写且 debt 棘轮零改动 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K2=BLOCK-398 启动**：红绿先行 12 项 5 红→15/15 绿 / 具名上限常量收编 10 文件 15 行 / 会话列表 additive hasMore+nextCursor（>100 条 HTTP 行为 3/3）/ 复合索引查询计划命中+rowid 负测 / 拆后既有四套 18/18 / W5b 五刀挂起带补腿条件 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-10（▶ **post-H9 程序 K1=BLOCK-397 启动**：K-08 实证为蓝图误判（MCP 链零 LLM，接线会污染单表计量并推翻既有裁决）→ retain-with-reason + U 类材料；K-09 权限档位 pending_user_ruling；K-10 goals/viewer 已交付加防回退契约；165 通道第一批机械分诊+可信度负测 29/29 串行槽位=单包 active；蓝图 planned living-plan 不占槽位。G0 开发期常态 · 不外推 packaged/Provider/GA。）

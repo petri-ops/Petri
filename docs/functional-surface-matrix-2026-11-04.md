@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 91 个不计入判定）。生成时间：2026-11-14T00:33:41.547Z
+> 基线：`HEAD`（工作区在制文件 1 个不计入判定）。生成时间：2026-11-14T01:46:49.908Z
 
 ## 0. 覆盖汇总
 
@@ -10,10 +10,10 @@
 | 工具定义 | 115（16 域；文本降级 0 域） |
 | 工具契约 | 115 |
 | 调度元数据 | 116 |
-| IPC 通道 | 170（preload 缺包装 3；前端零消费 167） |
-| 路由端点 | 284（47 模块；未挂载 0） |
+| IPC 通道 | 170（preload 缺包装 2；前端零消费 167） |
+| 路由端点 | 285（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
-| 判定 P1 / P2 / P3 | **0 / 0 / 3** |
+| 判定 P1 / P2 / P3 | **0 / 0 / 2** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -27,7 +27,6 @@
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
-| ipc_dead_channels | `1 个通道` | 登记有主进程 handler 但 preload 无包装且前端零消费（死通道：删或接线待裁决）：gen-ui:mcp-app-call |
 | storage_read_never_written | `petri_token` | 3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
 | storage_read_never_written | `petri.simplechat.extraRenderers` | 1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx |
 
@@ -158,94 +157,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M core/petri-server/agent-tools/mcp-projection.js`
-- `M core/petri-server/routes/mcp-client.js`
-- `M frontend/src/App.tsx`
-- `M frontend/src/components/RouteErrorBoundary.module.css`
-- `M frontend/src/components/branch/BranchTabs.module.css`
-- `M frontend/src/components/common/ToastProvider.module.css`
-- `M frontend/src/components/copilot/ChatScrollbar.module.css`
-- `M frontend/src/components/copilot/LlmTranscriptViewer.css`
-- `M frontend/src/components/copilot/MessageRail.module.css`
-- `M frontend/src/components/copilot/ResultCard.module.css`
-- `M frontend/src/components/copilot/ToolActivityDock.module.css`
-- `M frontend/src/components/copilot/ToolActivityList.tsx`
-- `M frontend/src/components/copilot/gen-ui/GenUiCard.module.css`
-- `M frontend/src/components/copilot/integration/integration.module.css`
-- `M frontend/src/components/copilot/renderers/ChartRenderer.module.css`
-- `M frontend/src/components/copilot/renderers/ImageRenderer.module.css`
-- `M frontend/src/components/copilot/renderers/TableRenderer.module.css`
-- `M frontend/src/components/copilot/simple-chat.css`
-- `M frontend/src/components/copilot/toolActivity.ts`
-- `M frontend/src/components/desktop/DesktopSettingsPanel.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx`
 - `M frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.module.css`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/sections/MotionControl.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/types.ts`
-- `M frontend/src/components/desktop/FirstRunRoleReveal.module.css`
-- `M frontend/src/components/desktop/FolderPicker.module.css`
-- `M frontend/src/components/desktop/TestInstanceBadge.module.css`
-- `M frontend/src/components/desktop/TitleBar.module.css`
-- `M frontend/src/components/desktop/TitleBar.test.tsx`
-- `M frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css`
-- `M frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css`
-- `M frontend/src/components/desktop/WorkingTreeReview/WorkingTreeReview.css`
-- `M frontend/src/components/desktop/desktop.css`
-- `M frontend/src/components/desktop/theme-control.css`
-- `M frontend/src/components/desktop/titlebar/shared.tsx`
-- `M frontend/src/components/knowledge/KnowledgeConsoleChat.module.css`
-- `M frontend/src/components/knowledge/KnowledgeConsoleDock.module.css`
-- `M frontend/src/components/result-studio/CompactResultNavigator.module.css`
-- `M frontend/src/components/result-studio/ContinueAnalysisMenu.module.css`
-- `M frontend/src/components/result-studio/LineageGraph.module.css`
-- `M frontend/src/components/result-studio/LineageStrip.module.css`
-- `M frontend/src/components/result-studio/LineageViewSwitch.module.css`
-- `M frontend/src/components/result-studio/ResultAgentComposer.module.css`
-- `M frontend/src/components/result-studio/ResultEditPanel.module.css`
-- `M frontend/src/components/result-studio/ResultStudioChangeSetPanel.module.css`
-- `M frontend/src/components/result-studio/ResultStudioSurface.module.css`
-- `M frontend/src/components/result-studio/RevisionCodeView.module.css`
-- `M frontend/src/components/result-studio/ScientificInteractionViewer.module.css`
-- `M frontend/src/components/settings/ExperimentalFeaturesSection.module.css`
-- `M frontend/src/components/ui/Lightbox.css`
-- `M frontend/src/components/viewers/MarkdownViewer.module.css`
-- `M frontend/src/components/viewers/SpreadsheetViewer.module.css`
-- `M frontend/src/components/window/rail-page.module.css`
-- `M frontend/src/components/window/window-shell.module.css`
-- `M frontend/src/components/workspace-panels/ArtifactPinPane.module.css`
-- `M frontend/src/components/workspace-panels/KnowledgeSpacePanel.module.css`
-- `M frontend/src/components/workspace-panels/KnowledgeSpaceSwitcher.module.css`
-- `M frontend/src/components/workspace-panels/SshStatusDot.module.css`
-- `M frontend/src/components/workspace-panels/WorkspaceCitationsSection.module.css`
-- `M frontend/src/components/workspace-panels/WorkspaceFileIcon.module.css`
-- `M frontend/src/hooks/useWorkspaceLayout.ts`
-- `M frontend/src/hooks/useWorkspacePanels.ts`
-- `M frontend/src/lib/electron.d.ts`
-- `M frontend/src/lib/settingsSearch.ts`
-- `M frontend/src/pages/extensions/extensions.module.css`
-- `M frontend/src/pages/extensions/styles.module.css`
-- `M frontend/src/pages/global-page.module.css`
-- `M frontend/src/pages/home.module.css`
-- `M frontend/src/pages/project-workspace.module.css`
-- `M frontend/src/pages/settings/settings.module.css`
-- `M frontend/src/pages/welcome.module.css`
-- `M frontend/src/pages/window/command-center.module.css`
-- `M frontend/src/styles/custom.css`
-- `M frontend/src/styles/global.css`
-- `M frontend/src/styles/theme-token-contract.test.ts`
-- `?? frontend/src/components/copilot/gen-ui/McpAppCard.test.tsx`
-- `?? frontend/src/components/copilot/gen-ui/McpAppCard.tsx`
-- `?? frontend/src/components/copilot/toolActivity.mcpApp.test.ts`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/SettingsField.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/AppearanceSection.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopSection.tsx`
-- `?? frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkSection.tsx`
-- `?? frontend/src/components/desktop/settings-redesign.module.css`
-- `?? frontend/src/lib/uiBreakpoints.ts`
-- `M src/ipc/channels.js`
-- `M src/ipc/gen-ui.js`
-- `M src/main/gen-ui/guest-bridge.js`
-- `M src/preload.js`

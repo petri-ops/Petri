@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@/components/icons/Icon';
 import { SETTINGS_SECTIONS, type SettingsSection } from './types';
 
@@ -32,19 +32,23 @@ export function SettingsNav({ visibleSectionIds, activeSection, onSelect }: Prop
   const advancedSections = visibleSections.filter((item) => item.tier === 'advanced');
   const activeMeta = visibleSections.find((item) => item.id === activeSection);
   const activeIsAdvanced = advancedSections.some((item) => item.id === activeSection);
-  const [advancedOpen, setAdvancedOpen] = useState(activeIsAdvanced);
-
   // 深链/搜索命中的高级分区必须可见，否则用户会以为跳转失败。
-  useEffect(() => {
-    if (activeIsAdvanced) setAdvancedOpen(true);
-  }, [activeIsAdvanced]);
+  // 派生而非 effect 内同步 setState（后者会级联重渲染，lint 硬红）：默认跟随当前分区，
+  // 用户手动展开/收起后进入 override 态，再次点选分区即回到「跟随当前分区」。
+  const [advancedOpenOverride, setAdvancedOpenOverride] = useState<boolean | null>(null);
+  const advancedOpen = advancedOpenOverride ?? activeIsAdvanced;
+
+  const handleSelect = (id: SettingsSection): void => {
+    setAdvancedOpenOverride(null);
+    onSelect(id);
+  };
 
   const renderItem = (item: (typeof SETTINGS_SECTIONS)[number]): React.ReactElement => (
     <button
       key={item.id}
       type="button"
       className={`petri-settings-nav__item${activeSection === item.id ? ' active' : ''}`}
-      onClick={() => onSelect(item.id)}
+      onClick={() => handleSelect(item.id)}
       title={`${item.label} — ${item.description}`}
       aria-current={activeSection === item.id ? 'page' : undefined}
     >
@@ -77,7 +81,7 @@ export function SettingsNav({ visibleSectionIds, activeSection, onSelect }: Prop
           <button
             type="button"
             className="petri-settings-nav__group-toggle"
-            onClick={() => setAdvancedOpen((open) => !open)}
+            onClick={() => setAdvancedOpenOverride(!advancedOpen)}
             aria-expanded={advancedOpen}
             title={advancedOpen ? '收起高级设置' : '展开高级设置'}
           >
