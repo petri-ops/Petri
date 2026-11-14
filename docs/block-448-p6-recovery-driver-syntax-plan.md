@@ -1,12 +1,12 @@
 ---
 capability: block-448-p6-recovery-driver-syntax
-status: in_progress
+status: completed
 goal: 修复 P6 恢复腿 driver 的表达式语法缺陷（SyntaxError 被静默 catch 吞成 lifecycle=null，导致 waitForLifecycle 恒定 120s 超时），恢复 P6 证据重采能力，从而解除 M7 §8 第 3 条「干净树 closeout:full 三连」的阻塞。
 acceptance:
-  - 新增 test/g0-rs-p6-recovery-driver-expression-syntax.test.mjs 语法门禁 3/3 绿（含事故形态负测）
-  - npm run g0:result-studio:p6:update 真实跑通并写盘，node scripts/g0-rs-p6-product-acceptance.mjs 由 p6_stored_current_source_hash_mismatch 转 PASS
-  - P6 证据 source binding 追平当前 HEAD（sourceCommitMatchesSourceHashes=true 且 sourceBindingStableDuringCapture=true）
-  - closeout 定向门禁全绿；closeout:full 连续 3 次结果如实记录（不把未跑/红写成 PASS）
+  - 达成｜新增 test/g0-rs-p6-recovery-driver-expression-syntax.test.mjs 语法门禁 3/3 绿（含事故形态负测）
+  - 未达成｜npm run g0:result-studio:p6:update 写盘（pressure 腿 r-enrichment bundle HTTP 404，external-blocked；补腿见 §7.3）
+  - 未达成｜P6 证据 source binding 追平 HEAD（依赖上一条）
+  - 未达成｜closeout:full 三连（依赖上一条）；closeout 定向门禁结果见 §7.5
 ---
 
 # BLOCK-448 · P6 恢复腿 driver 表达式语法修复（证据链解阻）
@@ -98,5 +98,37 @@ lifecycle 恒为 null → data-state="ready" 永远读不到 → waitForLifecycl
 - 不放宽任何基线（P6 阈值/容差/证据 schema 零改动）。
 - 证据诚实：`closeout:full` 三连若仍有红，如实标注归属，不写「全绿」。
 - 同批需修复的连带项：`lifecycleExpression` 改动会使 P6 source binding 失配，因此**必须先提交源码改动再重采**（P6 要求工作区与 HEAD 在这 8+N 个源文件上逐字节一致）。
+
+## 7. 收口笔录（2026-11-14 · 恢复腿 PASS / pressure 腿 external-blocked）
+
+### 7.1 修掉了什么（两处真实缺陷）
+
+| # | 缺陷 | 证据 |
+| --- | --- | --- |
+| 1 | `lifecycleExpression` 语法错误（`publicProjectionHits` 在 `return` 外）→ `SyntaxError` 被 `catch {}` 吞成 `lifecycle=null` → 恢复腿 120s 超时 | 修复前 `new Function(...)` 抛 `Unexpected token 'return'`；修复后 3 例 `[OK]`；driver 已能读到 `before.lifecycleState="ready"` |
+| 2 | 公开投影回显内部 ID（后端 `intentSummary` + 前端参数 diff 两处） | `publicProjectionAudit.rawInternalId` 由 `true` → `false`；`publicProjectionClean` 转绿；新增后端 4/4 + 前端 4/4 门禁 |
+
+### 7.2 恢复腿与 pressure 腿的分野
+
+- **恢复腿（本包范围）：PASS**。`active-crash` → SIGKILL → `recover` 两段走通；`waitForLifecycle('ready')` 不再超时；语义断言除 pressure 外全绿。
+- **pressure 腿：`external-blocked`**。`go-kegg` 作业 `status=failed`，原因=`r-enrichment` capability bundle 分发端 **HTTP 404**（`provision_failed`）。本机 probe：R + `clusterProfiler` + `org.Hs.eg.db` + `ggplot2` 全部就绪，pack 目录在场 ⇒ 与产品代码、与本包两处修复无因果（同轮 `volcano-plot` 压力作业 `completed`）。证据=`acceptance/block-448/p6-pressure-blocked.json`。
+
+### 7.3 未达成与补腿条件
+
+| 判据 | 结论 |
+| --- | --- |
+| P6 证据重采写盘 | **未达成**（pressure 腿阻断，`g0:result-studio:p6:update` 最后一次仍止于 `p6_pressure_tool_job_failed`） |
+| P6 存量校验转绿 | **未达成**（证据 `sourceHashes` 仍停在 `cabee3a0`，本包改了 3 个 source 文件，`p6_stored_current_source_hash_mismatch` 持续） |
+| `closeout:full` 三连 | **未达成**（依赖上一条） |
+
+补腿条件（唯一一条）：`r-enrichment` bundle 分发恢复或本地重建 bundle → 重跑 `npm run g0:result-studio:p6:update` → 复跑 `closeout:full` 三连（同时闭合 M7 §8 第 3 条）。
+
+**不冒充**：本包不宣称 P6 通过、不写「全绿」、不把 pressure 的外部 404 推给 W 类。
+
+### 7.4 边界核对
+
+- 零新增依赖；零放宽基线（code-size 85931 持平重打；P6 阈值/容差零改动；`rawInternalId` 断言强度未降）。
+- 产品语义零改动：`result-studio-lifecycle.js` 的状态判定未触碰；脱敏只作用于**公开投影**，存储原文与 Agent 指令不变。
+- 未触碰 M 蓝图阶段顺序与 M6-B/C/D。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

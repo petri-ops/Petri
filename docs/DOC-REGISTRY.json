@@ -11917,12 +11917,12 @@
       "id": "BLOCK-448-P6-RECOVERY-DRIVER-SYNTAX",
       "path": "docs/block-448-p6-recovery-driver-syntax-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-448-p6-recovery-driver-syntax",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "IN_PROGRESS",
+      "phase": "COMPLETED",
       "touchSurface": [
         "scripts/g0-rs-p6-recovery-electron-driver.cjs",
         "test/g0-rs-p6-recovery-driver-expression-syntax.test.mjs",
@@ -11935,7 +11935,7 @@
         "driver-syntax",
         "silent-catch"
       ],
-      "notes": "P6 恢复腿司机表达式语法缺陷修复：lifecycleExpression 的 publicProjectionHits 曾误插在 return 对象闭合之后，整段脚本成非法 label 序列，executeJavaScript 恒抛 SyntaxError 被 catch 静默吞成 lifecycle=null，waitForLifecycle('ready') 必然 120s 超时。修复=属性归位 + 事故留痕 + new Function 语法门禁 3/3 + driver diagnostics 保留。目标=解除 M7 §8 第 3 条干净树 closeout:full 三连阻塞。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "P6 恢复腿司机表达式语法缺陷修复：lifecycleExpression 的 publicProjectionHits 曾误插在 return 对象闭合之后，整段脚本成非法 label 序列，executeJavaScript 恒抛 SyntaxError 被 catch 静默吞成 lifecycle=null，waitForLifecycle('ready') 必然 120s 超时。修复=属性归位 + 事故留痕 + new Function 语法门禁 3/3 + driver diagnostics 保留 + 诊断定位精度升级。同批修掉两处公开投影泄漏（后端 intentSummary / 前端参数 diff，job-… 回显）。结果：恢复腿 PASS（active-crash 与 recover 两段走通、publicProjectionClean 转绿）；pressure 腿 external-blocked（r-enrichment capability bundle 分发 HTTP 404），P6 证据未能重采、closeout:full 三连仍待补腿。终态 done-partial。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-14"

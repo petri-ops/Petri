@@ -312,7 +312,31 @@ async function runHttpTool(runtime, { toolId, params, files }) {
      
     await new Promise((resolve) => setTimeout(resolve, 400));
   }
-  assert(job && job.status === 'completed', 'p6_pressure_tool_job_failed');
+  // BLOCK-448：失败面可观测化——原 assert 只抛 code，跑不出来是「提交失败 / R 运行时缺失 /
+  // 参数不合法 / 科学结果被拒」中的哪一种。detail 由 CLI catch 原样打印。
+  if (!job || job.status !== 'completed') {
+    console.error('[p6-pressure] job-failed:', JSON.stringify({
+      toolId,
+      status: job?.status || null,
+      error: job?.error || null,
+      message: job?.message || null,
+      failureReason: job?.failureReason || null,
+      resultError: job?.result?.error || null,
+    }));
+    throw Object.assign(new Error('p6_pressure_tool_job_failed'), {
+      code: 'p6_pressure_tool_job_failed',
+      detail: {
+        toolId,
+        jobId: submitted?.jobId || null,
+        status: job?.status || null,
+        error: job?.error || null,
+        message: job?.message || null,
+        failureReason: job?.failureReason || null,
+        resultOk: job?.result ? job.result.ok !== false : null,
+        resultError: job?.result?.error || null,
+      },
+    });
+  }
   assert(job.result?.artifactTruth?.status === 'valid'
     && job.result.artifactTruth.blocking !== true, 'p6_pressure_artifact_truth_invalid');
   const boundJob = { ...job, id: job.id || submitted.jobId };

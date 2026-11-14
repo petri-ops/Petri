@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "block": "BLOCK-448",
+  "capturedAt": "2026-11-14T07:42:00Z",
+  "platform": "darwin-arm64",
+  "component": "p6-electron-pressure",
+  "failureCode": "p6_pressure_tool_job_failed",
+  "rootCause": "capability_bundle_provision_failed",
+  "job": {
+    "toolId": "go-kegg",
+    "status": "failed",
+    "error": "执行失败: 插件 go-kegg 必需的 capability bundle 未就绪，已停止执行：\n- r-enrichment：该 bundle 下载/校验/安装失败（status=provision_failed / error=provisioning_failed / message=download failed: HTTP 404）\n指引：平台不符时请在受支持的平台（如 macOS Apple Silicon）运行该分析——本机不会下载与当前平台不符的预编译二进制；下载/校验/安装失败请检查网络与磁盘后重试。"
+  },
+  "environmentProbe": {
+    "bioPackRoot": "sibling ../petri-pack-bio（存在）",
+    "Rscript": "/usr/local/bin/Rscript",
+    "rPackages": {
+      "clusterProfiler": true,
+      "org.Hs.eg.db": true,
+      "ggplot2": true
+    },
+    "note": "本机 R 与注释包齐备；阻塞点是插件要求的预编译 capability bundle 分发端返回 404，非本机 R 环境缺失。"
+  },
+  "classification": "external-blocked",
+  "whyNotProductDefect": "失败发生在工具执行前的 bundle 就绪前置检查（provision_failed），命令链条未进入 R 脚本；与 BLOCK-448 的两处修复（driver 表达式语法、公开投影脱敏）无因果关系：volcano-plot 同源压力作业正常 completed。",
+  "recoveryLegStatus": "pass（BLOCK-448 修复后 active-crash 与 recover 两段均走通，语义断言 publicProjectionClean 已随脱敏转绿；pressure 腿独立失败）",
+  "blockedFollowUp": "r-enrichment bundle 分发恢复或本地重新构建 bundle 后，重跑 npm run g0:result-studio:p6:update 并复跑 closeout:full 三连（M7 §8 第 3 条）。",
+  "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA."
+}
