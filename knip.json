@@ -12,7 +12,8 @@
     "core/petri-server/agent-tools/learning.js",
     "core/petri-server/mcp/registry/run-plugin-script.js",
     ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
-    ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs"
+    ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs"
   ],
   "project": [
     "src/**/*.js",
@@ -45,7 +46,8 @@
         "test/**/*.{mjs,cjs,js}",
         "build/**/*.js",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
-        ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs"
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs"
       ]
     },
     "frontend": {
