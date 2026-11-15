@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 587,
-    "lastUpdated": "2026-11-14",
-    "managedMarkdown": 570
+    "documentCount": 588,
+    "lastUpdated": "2026-11-15",
+    "managedMarkdown": 571
   },
   "documents": [
     {
@@ -11938,6 +11938,31 @@
       "notes": "P6 恢复腿司机表达式语法缺陷修复：lifecycleExpression 的 publicProjectionHits 曾误插在 return 对象闭合之后，整段脚本成非法 label 序列，executeJavaScript 恒抛 SyntaxError 被 catch 静默吞成 lifecycle=null，waitForLifecycle('ready') 必然 120s 超时。修复=属性归位 + 事故留痕 + new Function 语法门禁 3/3 + driver diagnostics 保留 + 诊断定位精度升级。同批修掉两处公开投影泄漏（后端 intentSummary / 前端参数 diff，job-… 回显）。结果：恢复腿 PASS（active-crash 与 recover 两段走通、publicProjectionClean 转绿）；pressure 腿 external-blocked（r-enrichment capability bundle 分发 HTTP 404），P6 证据未能重采、closeout:full 三连仍待补腿。终态 done-partial。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
+      "id": "BLOCK-450",
+      "path": "docs/block-450-m2-tails-unique-constraint-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-450-m2-tails-unique-constraint",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "core/petri-server/agent-task-store.js",
+        "test/m2-db-task-events-unique.test.mjs",
+        "test/perf-baseline.json",
+        "acceptance/block-450/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "m-blueprint",
+        "long-task",
+        "db-constraint",
+        "data-integrity"
+      ],
+      "notes": "M2-4-db 正式清偿（closureCondition 前置已由 BLOCK-449 满足：干净树 + perf 基线全量重采）：task_events (task_id,seq) UNIQUE 约束——dev 库当次实测 4 组跨事件类型 seq 碰撞（appendAgentTaskEvent 读-算-写竞态）→ 修=碰撞时原子 max+1 重分配重试 + 行数守恒事务内存量碰撞重排（零删除）+ 唯一索引；M2-live 登记为 BLOCK-449 m7-longtask-resume-live 31/31 交付闭环。发令链=主控提示词 v1.0 + 用户「继续 不要停」(2026-11-15) + Jev 不可用兜底。P6 补腿 external 404 维持原册。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
       "id": "BLOCK-449",
       "path": "docs/block-449-m7-tails-clean-closeout-plan.md",
       "kind": "work-package",
@@ -11963,5 +11988,5 @@
       "notes": "M7 §8 第 3/5 条补腿收口包 completed（终态 done）：T1 三历史红清账（UI-629/P6/center 净树绿 + block414 活栈绿）→ T2 m7-longtask-resume-live flow 实机腿 31/31（崩溃注入→同库重启→resume 逐字对齐+截图），抓真修 2 缺陷=evals-harness 同库二次 spawn 重放迁移（2a40bf7f）+ resume 路由冲突 P1（team.js not_paused 遮蔽 BLOCK-38 中断续跑→next() 让位 14353c78，回归锚 4/4）→ T3 closeout:full 三连全绿 0 门禁级 SKIP（knip 动态入口 29cbf478 + perf B2 重绑）→ T4 回写。发令链=主控提示词 v1.0 预授权 + Jev 不可用确定性兜底。P6 pressure 腿 external 404 维持原册。证据=acceptance/block-449/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-14"
+  "lastUpdated": "2026-11-15"
 }
