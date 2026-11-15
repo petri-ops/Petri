@@ -13,7 +13,8 @@
     "core/petri-server/mcp/registry/run-plugin-script.js",
     ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
     ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
-    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs"
+    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    "acceptance/block-449/evidence/verify-deliverables.mjs"
   ],
   "project": [
     "src/**/*.js",
@@ -47,7 +48,8 @@
         "build/**/*.js",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
-    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs"
+    ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    "acceptance/block-449/evidence/verify-deliverables.mjs"
       ]
     },
     "frontend": {
