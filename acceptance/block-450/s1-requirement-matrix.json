@@ -1,0 +1,60 @@
+{
+ "schemaVersion": 1,
+ "kind": "s1-requirement-matrix",
+ "task": "BLOCK-450 · M2 尾巴清偿",
+ "frozenAt": "2026-11-15T07:45:00+08:00",
+ "note": "矩阵随立项批次 83000151 冻结（canonical plan=docs/block-450-m2-tails-unique-constraint-plan.md）；本 JSON 为主控交付包形态化载体，内容与 plan 一致",
+ "requirements": [
+  {
+   "id": "R1",
+   "original": "M2-4-db closureCondition：按既有 schema 通道加 UNIQUE(task_id,seq) 约束并复跑 gate:long-task-resume",
+   "criteria": "唯一索引在册；同 seq 双写必分离；存量碰撞启动自愈（行数守恒零删除）；gate:long-task-resume 三连 PASS",
+   "evidenceType": "①行为/契约测试+②机械门禁",
+   "verifyCommand": "node --test --test-force-exit test/m2-db-task-events-unique.test.mjs && for i in 1 2 3; do node scripts/m-blueprint-m2-resume-gate.mjs --check; done",
+   "boundary": "调用方 API 零变化；数据零删除",
+   "exclusions": [
+    "migrations 文件通道（task_events 表体不经该通道）"
+   ]
+  },
+  {
+   "id": "R2",
+   "original": "M2-live 闭环登记",
+   "criteria": "M 台账增量行指向 BLOCK-449 m7-longtask-resume-live 31/31 证据，不重做",
+   "evidenceType": "治理文档",
+   "verifyCommand": "grep BLOCK-449 docs/m-blueprint-2026-11-11-program.md",
+   "boundary": "零代码改动",
+   "exclusions": []
+  },
+  {
+   "id": "R3",
+   "original": "本包收口门禁",
+   "criteria": "closeout:full 全绿（含 perf B2 重绑后 5 连采样）+ 邻域回归绿（m2-long-task-resume/busy-timeout/block106-retention）",
+   "evidenceType": "②机械门禁",
+   "verifyCommand": "npm run closeout:full",
+   "boundary": "阈值/容差零改动",
+   "exclusions": [
+    "test:all:workspace（留发布/CI）"
+   ]
+  },
+  {
+   "id": "R4",
+   "original": "canonical 回写 + 决策留痕",
+   "criteria": "registry completed + M 台账翻态 + AUDIT-LOG/README/roadmap/handoff + decision:session 当次双数字",
+   "evidenceType": "②机械门禁（docs:check/reconcile）",
+   "verifyCommand": "npm run docs:check && npm run docs:reconcile && npm run decision:session",
+   "boundary": "M7/M2 原档零触碰（增量行）",
+   "exclusions": []
+  }
+ ],
+ "nonScope": [
+  "P6 pressure 补腿（external 404）",
+  "G1+ 全部",
+  "12 项 untracked 用户资产",
+  "migrations 文件通道改造"
+ ],
+ "hardRedLines": [
+  "同 BLOCK-449 §1 全十条"
+ ],
+ "requirementCount": 4,
+ "changes": []
+}

@@ -1,0 +1,56 @@
+{
+ "schemaVersion": 1,
+ "kind": "s3-task-record",
+ "taskId": "T4",
+ "requirement": "R2, R4",
+ "capturedAt": "2026-11-15T09:35:00+08:00",
+ "changedPaths": [
+  "docs/block-450-m2-tails-unique-constraint-plan.md",
+  "docs/DOC-REGISTRY.json",
+  "docs/AUDIT-LOG.md",
+  "docs/next-steps-roadmap.md",
+  "docs/project-workspace-handoff.md",
+  "docs/m-blueprint-2026-11-11-program.md",
+  "docs/README.md",
+  "acceptance/block-450/s4-verification-report.json",
+  "acceptance/block-450/s5-decision-log.json",
+  "acceptance/block-450/CLOSEOUT.md",
+  "acceptance/block-450/DELIVERABLES.md"
+ ],
+ "planConformance": "改动路径=计划 T4（回写+交付包）；M2/M7 原档零触碰（增量行）",
+ "redGreen": {
+  "applicable": false,
+  "note": "治理文档面；负测=docs:check/reconcile"
+ },
+ "gates": [
+  {
+   "gate": "docs:check",
+   "result": "PASS 588（当次）"
+  },
+  {
+   "gate": "docs:reconcile",
+   "result": "0 issues / 0 manual review（当次）"
+  },
+  {
+   "gate": "decision:session",
+   "result": "jev×0 本轮 · 累计 344（当次取数）"
+  }
+ ],
+ "failureSemantics": "无红",
+ "decisions": [
+  {
+   "time": "2026-11-15T09:30",
+   "trigger": "收口单一建议（Jev 不可用）",
+   "candidates": [
+    "候选首项 P6-pressure 补腿（external）",
+    "不给建议"
+   ],
+   "selected": "候选首项兜底",
+   "reason": "治理 skill 规则：不可用时按队列序默认，仍只给一个",
+   "impact": "交付说明",
+   "reversibility": "advice-only",
+   "evidence": "next:suggest 输出"
+  }
+ ],
+ "closeoutSummary": "T4 完成：六件套回写 + 交付包 + 决策留痕"
+}

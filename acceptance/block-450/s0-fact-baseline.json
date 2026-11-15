@@ -1,0 +1,49 @@
+{
+ "schemaVersion": 1,
+ "kind": "s0-fact-baseline",
+ "task": "BLOCK-450 · M2 尾巴清偿",
+ "capturedAt": "2026-11-15T07:45:00+08:00",
+ "git": {
+  "branch": "main",
+  "head": "959e23ef（BLOCK-449 收口）+ 83000151（本包启动）",
+  "trackedDirty": 0
+ },
+ "auditBroadcast": {
+  "redBlocked": 0,
+  "greenMerge": 0
+ },
+ "activeWorkPackage": {
+  "layer1": "BLOCK-450（本包）",
+  "layer2": "G0-LF + M 程序台账"
+ },
+ "wipEnumeration": {
+  "untracked": 12,
+  "policy": "零触碰（同 BLOCK-449 s0 owner 表，无新增未知项）"
+ },
+ "probeTimeline": [
+  {
+   "probe": "r-enrichment bundle",
+   "result": "HTTP 404 (AliyunOSS)",
+   "capturedAt": "2026-11-15T07:37:08Z",
+   "conclusion": "P6 补腿维持 external-blocked，本包不承接"
+  }
+ ],
+ "m2Facts": {
+  "devDbRows": 4863,
+  "collisionGroups": 4,
+  "collisionNature": "跨事件类型 seq 碰撞（读-算-写竞态）",
+  "schemaChannel": "agent-task-store.js 模块加载通道（tasks/task_events 表 DDL 单源）",
+  "m2_4dbPreconditions": "干净树 ✓ + perf 基线全量重采 ✓（BLOCK-449 b06d8c19）"
+ },
+ "selectionEvidence": {
+  "jev": "jev_unavailable:http_error:cloud（当次）",
+  "fallback": "候选首个 P6 补腿 external → 按队列取 M2-4-db（唯一非 U 非 external 可执行项）"
+ },
+ "selfCheck": {
+  "S0.1": true,
+  "S0.2": true,
+  "S0.3": true,
+  "S0.4": true,
+  "S0.5": true
+ }
+}

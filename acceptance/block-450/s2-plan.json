@@ -1,0 +1,70 @@
+{
+ "schemaVersion": 1,
+ "kind": "s2-plan",
+ "task": "BLOCK-450 · M2 尾巴清偿",
+ "frozenAt": "2026-11-15T07:45:00+08:00",
+ "serialOrder": [
+  "T1",
+  "T2",
+  "T3",
+  "T4"
+ ],
+ "taskDag": [
+  {
+   "id": "T1",
+   "title": "案头核查（只读）",
+   "requirement": "R1",
+   "dependsOn": [],
+   "acceptance": "schema 通道/调用方语义/碰撞规模三项落盘（plan §1）",
+   "evidencePath": "docs/block-450-m2-tails-unique-constraint-plan.md §1"
+  },
+  {
+   "id": "T2",
+   "title": "约束落地（红绿先行）",
+   "requirement": "R1",
+   "dependsOn": [
+    "T1"
+   ],
+   "acceptance": "契约测试 3/3（红→绿）+ 邻域 16/16",
+   "evidencePath": "acceptance/block-450/s3/task-T2.json"
+  },
+  {
+   "id": "T3",
+   "title": "门禁复跑",
+   "requirement": "R3",
+   "dependsOn": [
+    "T2"
+   ],
+   "acceptance": "gate:long-task-resume 三连 + perf B2 重绑 + closeout:full ×2 全绿",
+   "evidencePath": "acceptance/block-450/s3/task-T3.json"
+  },
+  {
+   "id": "T4",
+   "title": "canonical 回写 + 交付包",
+   "requirement": "R2, R4",
+   "dependsOn": [
+    "T3"
+   ],
+   "acceptance": "docs:check/reconcile 绿 + decision:session 双数字",
+   "evidencePath": "acceptance/block-450/s3/task-T4.json"
+  }
+ ],
+ "patchVsRefactor": {
+  "judgment": "单点增量修复（store 单文件三层实现），无第二变体/无绕过抽象",
+  "conclusion": "patch 级",
+  "recordedAt": "2026-11-15T07:45:00+08:00"
+ },
+ "redGreenApplicability": [
+  {
+   "task": "T2",
+   "applicable": true,
+   "note": "3 契约先行红（3/3 红实测）后绿"
+  }
+ ],
+ "hardRedLineCheck": {
+  "zeroNewDeps": true,
+  "noBaselineLoosening": true,
+  "wipZeroTouch": true,
+  "g0Discipline": true
+ }
+}

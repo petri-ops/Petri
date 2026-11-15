@@ -1,0 +1,54 @@
+{
+ "schemaVersion": 1,
+ "kind": "s3-task-record",
+ "taskId": "T3",
+ "requirement": "R3",
+ "capturedAt": "2026-11-15T09:20:00+08:00",
+ "changedPaths": [
+  "scripts/m-blueprint-m2-resume-gate.mjs 报告×3（evidence/）",
+  "test/perf-baseline.json",
+  "knip.json",
+  "acceptance/block-92/size-baseline.json",
+  "acceptance/block-450/evidence/t3-closeout-full-run{1,2}.log"
+ ],
+ "planConformance": "门禁复跑 + 三个过程红按协议闭环（knip 动态入口 / code-size --write 台账 / lint 分域只减）",
+ "redGreen": {
+  "applicable": false,
+  "note": "门禁复跑；过程红全为当次新增面的机械门闭环，各有协议路径"
+ },
+ "gates": [
+  {
+   "gate": "gate:long-task-resume ×3",
+   "result": "PASS 0 issues（closureCondition 指定）"
+  },
+  {
+   "gate": "closeout:full ×2",
+   "result": "PASS 全绿"
+  },
+  {
+   "gate": "perf B2 重绑",
+   "result": "block350 15/15 + quality:perf 5 连 PASS"
+  },
+  {
+   "gate": "lint:ledger",
+   "result": "PASS（P1489=基线，重排循环常量键清 2 新告警）"
+  }
+ ],
+ "failureSemantics": "过程红四起四落：knip（449 自核脚本未注册入口→entry 注册 04ac52c0）、code-size（+78 行→--write 台账重打）、lint:ledger（+2 warning→常量属性键重写清零）、perf（热路径→B2 重绑）",
+ "decisions": [
+  {
+   "time": "2026-11-15T08:45",
+   "trigger": "knip 棘轮红（449 verify-deliverables.mjs）",
+   "candidates": [
+    "--update 洗基线",
+    "entry 注册"
+   ],
+   "selected": "entry 注册",
+   "reason": "独立命令行入口显式化，同 flow 先例",
+   "impact": "knip.json",
+   "reversibility": "revert",
+   "evidence": "04ac52c0"
+  }
+ ],
+ "closeoutSummary": "T3 完成：gate 三连 + closeout:full ×2 全绿 + 四过程红协议闭环"
+}

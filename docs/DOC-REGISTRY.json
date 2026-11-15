@@ -11941,12 +11941,12 @@
       "id": "BLOCK-450",
       "path": "docs/block-450-m2-tails-unique-constraint-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-450-m2-tails-unique-constraint",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "COMPLETED",
       "touchSurface": [
         "core/petri-server/agent-task-store.js",
         "test/m2-db-task-events-unique.test.mjs",
@@ -11960,7 +11960,7 @@
         "db-constraint",
         "data-integrity"
       ],
-      "notes": "M2-4-db 正式清偿（closureCondition 前置已由 BLOCK-449 满足：干净树 + perf 基线全量重采）：task_events (task_id,seq) UNIQUE 约束——dev 库当次实测 4 组跨事件类型 seq 碰撞（appendAgentTaskEvent 读-算-写竞态）→ 修=碰撞时原子 max+1 重分配重试 + 行数守恒事务内存量碰撞重排（零删除）+ 唯一索引；M2-live 登记为 BLOCK-449 m7-longtask-resume-live 31/31 交付闭环。发令链=主控提示词 v1.0 + 用户「继续 不要停」(2026-11-15) + Jev 不可用兜底。P6 补腿 external 404 维持原册。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "M2-4-db 正式清偿 completed（终态 done，closureCondition 全满足）：三层落地=启动行数守恒碰撞重排（id 为 rowid 别名显式 AS rowid——首版缺陷被红测试当场抓真；changes≠1 fail-closed）+ uq_task_events_task_seq 唯一索引 + 运行时原子 max+1 重分配重试（调用方 API 零变化）；红绿 3/3（58498ae7）+ dev 库副本实测 4 组/4 行重排零删除 4,863 行守恒 + gate:long-task-resume 三连 + closeout:full ×2 全绿；M2-live 登记 BLOCK-449 31/31 闭环。M2（BLOCK-428）证据链闭合。发令链=主控提示词 v1.0 + 用户「继续 不要停」+ Jev 不可用兜底。P6 补腿 external 404 维持原册。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-449",

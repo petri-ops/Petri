@@ -1,0 +1,60 @@
+{
+ "schemaVersion": 1,
+ "kind": "s4-verification-report",
+ "task": "BLOCK-450 · M2 尾巴清偿",
+ "capturedAt": "2026-11-15T09:36:00+08:00",
+ "requirementTerminals": [
+  {
+   "id": "R1",
+   "terminal": "done",
+   "evidence": "契约 3/3（test/m2-db-task-events-unique.test.mjs）+ gate:long-task-resume 三连 0 issues + dev 库副本 4 组/4 行重排零删除 4,863 行守恒 + 唯一索引在册（58498ae7）"
+  },
+  {
+   "id": "R2",
+   "terminal": "done",
+   "evidence": "M 台账增量行（BLOCK-450）指向 BLOCK-449 m7-longtask-resume-live 31/31；M2 原档零触碰"
+  },
+  {
+   "id": "R3",
+   "terminal": "done",
+   "evidence": "closeout:full ×2 全绿 + 邻域 16/16 + perf B2 重绑（block350 15/15 + 5 连采样）+ lint:ledger P1489=基线"
+  },
+  {
+   "id": "R4",
+   "terminal": "done",
+   "evidence": "docs:check 588 PASS + docs:reconcile 0 issues（当次）+ registry completed + decision:session jev×0/累计 344（当次）"
+  }
+ ],
+ "inProgressCount": 0,
+ "fabricatedCounts": 0,
+ "integrity": {
+  "check": "R1–R4 终态齐备；产物路径+复跑命令在册",
+  "result": "PASS"
+ },
+ "consistency": {
+  "check": "registry/roadmap/handoff/M 台账/AUDIT-LOG/README/证据 JSON/已提交源码七处一致；M2/M7 原档零改写；计数当次复算",
+  "result": "PASS"
+ },
+ "deliverability": {
+  "check": "closeout:full ×2 全绿在册；边界声明在册；交付物可达",
+  "result": "PASS"
+ },
+ "unmetItems": [
+  {
+   "id": "P6-pressure-补腿",
+   "terminal": "external-blocked",
+   "closureCondition": "r-enrichment bundle 分发恢复（probe 2026-11-15T07:37:08Z 仍 404）→ g0:result-studio:p6:update → closeout:full",
+   "evidence": "s0 probeTimeline + block-448 原册"
+  }
+ ],
+ "evidenceClassDiscipline": {
+  "①行为契约": "契约 3/3 + 邻域 16/16 + block350 15/15",
+  "②机械门禁": "closeout:full ×2 + gate 三连 + docs:check/reconcile",
+  "③DOM/CDP 实机": "无（本包无 UI 面）",
+  "④人眼": "无",
+  "⑤真实任务": "无（DB 层不变量，非模型任务）",
+  "mutualImpersonation": "无"
+ },
+ "unexplainedReds": 0,
+ "g0Note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

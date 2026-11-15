@@ -1,4 +1,4 @@
-# BLOCK-450 · M2 尾巴清偿：task_events 唯一约束 + M2-live 闭环登记（plan）
+# BLOCK-450 · M2 尾巴清偿：task_events 唯一约束 + M2-live 闭环登记（plan · completed）
 
 > 发令链：用户主控提示词 v1.0（预授权连续工作）+ 用户「继续 不要停」（2026-11-15 当次显式续令）+ Jev 不可用（`jev_unavailable:http_error:cloud`，2026-11-15 当次 probe 顺带复证）确定性兜底。
 > 队列对账：P6 pressure 补腿 external-blocked（bundle 404，2026-11-15T07:37:08Z probe 复证）；M2-4-db 的 closureCondition 前置已由 BLOCK-449 满足（干净树 + perf 基线全量重采 b06d8c19）；M2-live（9223 崩溃注入实机腿）已由 BLOCK-449 `m7-longtask-resume-live` 31/31 交付——本包登记闭环，不重做。
@@ -47,3 +47,11 @@
 ## 7. 完成语义
 
 全门禁达成 → registry `completed`；M2-4-db 终态 external-blocked → done（M 台账增量行）；M2-live 登记为 BLOCK-449 交付闭环。
+
+## 8. 收口（2026-11-15）
+
+- T2：约束三层落地（`58498ae7`）——启动行数守恒碰撞重排（`id` 为 rowid 别名，显式 `AS rowid`；changes≠1 fail-closed）+ `uq_task_events_task_seq` 唯一索引 + 运行时原子 max+1 重分配重试（调用方 API 零变化）。红绿 3/3（红=索引缺席/重复行在册/碰撞留存）；**首版 rowid 缺陷被红测试当场抓真**。dev 库副本实测：4 组/4 行重排、4,863 行守恒、碰撞清零、索引在册。
+- T3：`gate:long-task-resume` 三连 PASS 0 issues（closureCondition 指定）+ 邻域 16/16 + perf B2 重绑（block350 15/15 + 5 连采样）+ `closeout:full` ×2 全绿；过程红四起四落按协议闭环（knip 动态入口 04ac52c0 / code-size --write 台账 / lint 分域只减 P1489 / perf）。
+- T4：M2-4-db 翻态 `external-blocked → done`、M2-live 登记 BLOCK-449 31/31 闭环（M 台账增量行）；registry `completed`。
+- M2（BLOCK-428）五项交付 + 两条尾巴全部清偿，M2 证据链闭合。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

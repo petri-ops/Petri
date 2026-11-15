@@ -1,0 +1,61 @@
+{
+ "schemaVersion": 1,
+ "kind": "s3-task-record",
+ "taskId": "T2",
+ "requirement": "R1",
+ "capturedAt": "2026-11-15T08:30:00+08:00",
+ "changedPaths": [
+  "core/petri-server/agent-task-store.js",
+  "test/m2-db-task-events-unique.test.mjs"
+ ],
+ "planConformance": "改动路径=计划 T2（store 单文件三层 + 契约测试）；无越界",
+ "redGreen": {
+  "applicable": true,
+  "redEvidence": "契约 3/3 红（索引缺席/重复行在册/碰撞留存，实现前实测）",
+  "greenEvidence": "契约 3/3 绿（58498ae7 后）"
+ },
+ "gates": [
+  {
+   "gate": "契约测试",
+   "result": "3/3"
+  },
+  {
+   "gate": "邻域回归",
+   "result": "16/16（m2-long-task-resume/busy-timeout/block106-retention）"
+  },
+  {
+   "gate": "dev 库副本",
+   "result": "4 组/4 行重排、4863 行守恒、碰撞清零、索引在册"
+  }
+ ],
+ "failureSemantics": "首版两缺陷被红测试当场抓真并修复：①SELECT rowid 返回列名为 id（rowid 别名）→ 显式 AS rowid ②计数虚报→changes≠1 fail-closed；均为确定性红修根因",
+ "decisions": [
+  {
+   "time": "2026-11-15T08:10",
+   "trigger": "契约 3 红：重排未生效",
+   "candidates": [
+    "改 SQL 语句",
+    "抓 stderr 逐层定位"
+   ],
+   "selected": "独立复刻逐语句验证",
+   "reason": "定位到 rowid 别名列名 + changes 校验缺失双缺陷",
+   "impact": "实现修正",
+   "reversibility": "已收敛",
+   "evidence": "契约 3 绿"
+  },
+  {
+   "time": "2026-11-15T08:20",
+   "trigger": "子进程 stdout 被 logger 污染 + WAL 快照陷阱",
+   "candidates": [
+    "stdout 解析",
+    "文件通道 + 句柄延后打开"
+   ],
+   "selected": "文件通道 + 句柄延后",
+   "reason": "logger warn 行混入 stdout；裸句柄先于 WAL 切换打开停留旧快照",
+   "impact": "仅测试形态",
+   "reversibility": "无关产品",
+   "evidence": "契约测试最终形态"
+  }
+ ],
+ "closeoutSummary": "T2 完成：约束三层落地 + 红绿 3/3 + dev 库副本真数据验证"
+}

@@ -1,0 +1,31 @@
+{
+ "schemaVersion": 1,
+ "kind": "s3-task-record",
+ "taskId": "T1",
+ "requirement": "R1",
+ "capturedAt": "2026-11-15T07:50:00+08:00",
+ "changedPaths": [
+  "docs/block-450-m2-tails-unique-constraint-plan.md §1"
+ ],
+ "planConformance": "只读核查，零代码改动",
+ "redGreen": {
+  "applicable": false
+ },
+ "gates": [],
+ "decisions": [
+  {
+   "time": "2026-11-15T07:40",
+   "trigger": "dev 库实测 4 组跨事件类型碰撞",
+   "candidates": [
+    "直接加 UNIQUE 索引（存量库必炸）",
+    "去重+重排+索引三层"
+   ],
+   "selected": "三层",
+   "reason": "碰撞为不同事件类型（非重复写），必须重排保数据；行数守恒防丢",
+   "impact": "实现设计",
+   "reversibility": "设计可逆",
+   "evidence": "plan §1"
+  }
+ ],
+ "closeoutSummary": "T1 完成：三项事实落盘（plan §1），零代码改动"
+}

@@ -1,0 +1,107 @@
+{
+ "schemaVersion": 1,
+ "kind": "s5-decision-log",
+ "task": "BLOCK-450 · M2 尾巴清偿",
+ "span": "2026-11-15T07:30 → 09:36 (+08:00)",
+ "jevSessionCounts": {
+  "delta": 0,
+  "cumulative": 344,
+  "note": "Jev 云端不可达（jev_unavailable:http_error:cloud），零调用如实登记"
+ },
+ "decisions": [
+  {
+   "time": "2026-11-15T07:40",
+   "phase": "选型",
+   "trigger": "用户「继续 不要停」+ P6 probe 404",
+   "candidates": [
+    "P6 补腿（external）",
+    "M2-4-db",
+    "竞争力纲 CP（U）"
+   ],
+   "selected": "M2-4-db",
+   "reason": "唯一非 U 非 external 可执行项；closureCondition 前置已满足",
+   "impact": "本包",
+   "reversibility": "可 revert",
+   "evidence": "s0 probeTimeline"
+  },
+  {
+   "time": "2026-11-15T07:42",
+   "phase": "T1",
+   "trigger": "碰撞为不同事件类型（非重复写）",
+   "candidates": [
+    "删除后写者",
+    "重排保数据+索引"
+   ],
+   "selected": "重排保数据",
+   "reason": "零删除红线；事件本体有效",
+   "impact": "三层设计",
+   "reversibility": "可逆",
+   "evidence": "plan §1"
+  },
+  {
+   "time": "2026-11-15T08:10",
+   "phase": "T2",
+   "trigger": "契约 3 红（重排未生效）",
+   "candidates": [
+    "盲改",
+    "独立复刻逐语句定位"
+   ],
+   "selected": "后者",
+   "reason": "定位 rowid 别名 + changes 校验双缺陷",
+   "impact": "实现修正",
+   "reversibility": "收敛",
+   "evidence": "契约 3 绿"
+  },
+  {
+   "time": "2026-11-15T08:45",
+   "phase": "T3",
+   "trigger": "knip 红（449 自核脚本）",
+   "candidates": [
+    "--update",
+    "entry 注册"
+   ],
+   "selected": "entry 注册",
+   "reason": "独立命令行入口显式化",
+   "impact": "knip.json",
+   "reversibility": "revert",
+   "evidence": "04ac52c0"
+  },
+  {
+   "time": "2026-11-15T09:00",
+   "phase": "T3",
+   "trigger": "code-size 棘轮红（+78 行）",
+   "candidates": [
+    "抽 helpers 缩行",
+    "--write 台账重打"
+   ],
+   "selected": "--write（协议路径）",
+   "reason": "实现为内聚三层不宜硬拆；台账即登记本体，diff 可审计",
+   "impact": "size-baseline.json",
+   "reversibility": "revert",
+   "evidence": "93927db3 前身提交"
+  },
+  {
+   "time": "2026-11-15T09:10",
+   "phase": "T3",
+   "trigger": "lint 分域 +2 warning",
+   "candidates": [
+    "豁免登记",
+    "常量属性键重写"
+   ],
+   "selected": "重写清零",
+   "reason": "分域只减纪律；豁免是放宽",
+   "impact": "重排循环形态",
+   "reversibility": "已收敛",
+   "evidence": "93927db3"
+  }
+ ],
+ "degradations": [
+  {
+   "item": "P6 pressure 补腿",
+   "terminal": "external-blocked",
+   "closureCondition": "bundle 恢复后重采+三连",
+   "evidence": "probe 2026-11-15T07:37:08Z 404"
+  }
+ ],
+ "closed": true
+}
