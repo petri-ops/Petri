@@ -338,13 +338,14 @@ function renumberTaskEventSeqCollisions() {
     'SELECT id AS rowid, created_at FROM task_events WHERE task_id = ? AND seq = ? ORDER BY created_at, rowid'
   );
   const tx = db.transaction(() => {
-    for (const g of groups) {
-      const members = membersStmt.all(g.task_id, g.seq);
-      for (let i = 1; i < members.length; i += 1) {
-        const r = updStmt.run(nextSeqStmt.get(g.task_id).n, members[i].rowid);
+    // 全程常量属性键（无计算成员访问）——分域 lint 棘轮只减不增（L-88）。
+    for (const { task_id, seq } of groups) {
+      const members = membersStmt.all(task_id, seq);
+      for (const { rowid } of members.slice(1)) {
+        const r = updStmt.run(nextSeqStmt.get(task_id).n, rowid);
         if (r.changes !== 1) {
           // 实际未命中行=重排失真风险，fail-closed 回滚，不让计数虚报「已移动」。
-          throw new Error(`TASK_EVENTS_RENUMBER_UPDATE_MISSED task=${g.task_id} seq=${g.seq} rowid=${members[i].rowid}`);
+          throw new Error(`TASK_EVENTS_RENUMBER_UPDATE_MISSED task=${task_id} seq=${seq} rowid=${rowid}`);
         }
         moved += 1;
       }
