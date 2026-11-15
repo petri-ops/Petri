@@ -266,20 +266,20 @@
       "sha256": "d4d5a0475a72e033343cf43f3323e8a11d3b9ac0765ac6df91ecb4498ac3f9fa"
     },
     {
+      "path": "core/petri-server/agent-task-store.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1288,
+      "bytes": 50818,
+      "sha256": "d602c1f00eaf5973c1454483f69bb02d6579a8216831a8d7b9999bce2a52d5f3"
+    },
+    {
       "path": "core/petri-server/agent-tools/learning.js",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1256,
       "bytes": 50636,
       "sha256": "1eca3b47669afacc89acd4a46b572682f522f81fbc42a410c8f7cf25ef22b5e9"
-    },
-    {
-      "path": "core/petri-server/agent-task-store.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1210,
-      "bytes": 46063,
-      "sha256": "2169ec1771c0278dc02d5384bc91364176ff95b437a8cd4f5fb8b90cd2063f40"
     },
     {
       "path": "core/petri-server/agent-runner.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 85931
+  "total": 86009
 }
