@@ -315,6 +315,67 @@ for (const statement of [
   }
 }
 
+// BLOCK-450（M2-4-db 清偿）：存量 (task_id, seq) 碰撞自愈 + 唯一不变量落位。
+// 当次事实（2026-11-15 dev 库实测）：4 组跨事件类型碰撞——根因=appendAgentTaskEvent
+// 的 seq 由调用方读-算-写，双写者竞态。策略：
+//   ① 启动时行数守恒事务内重排（零删除：碰撞成员按 created_at,rowid 序保留首个，
+//      其余逐行让位到当时 max+1；计数不守恒即回滚 fail-closed）——幂等，无碰撞 0 变更；
+//   ② uq_task_events_task_seq(task_id, seq) 唯一索引落位（新库直接成立，存量库重排后成立）；
+//   ③ 运行时碰撞（竞态窗口）由 appendAgentTaskEvent 原子 max+1 重分配兜底（见下）。
+function renumberTaskEventSeqCollisions() {
+  const countRows = db.prepare('SELECT COUNT(*) AS c FROM task_events');
+  const before = countRows.get().c;
+  const groups = db.prepare(
+    'SELECT task_id, seq FROM task_events GROUP BY task_id, seq HAVING COUNT(*) > 1'
+  ).all();
+  if (groups.length === 0) return { groups: 0, moved: 0 };
+  let moved = 0;
+  const nextSeqStmt = db.prepare('SELECT COALESCE(MAX(seq),0)+1 AS n FROM task_events WHERE task_id = ?');
+  const updStmt = db.prepare('UPDATE task_events SET seq = ? WHERE rowid = ?');
+  const membersStmt = db.prepare(
+    // 注意：task_events.id 是 rowid 别名（INTEGER PRIMARY KEY）——SELECT rowid 返回的
+    // 列名为 id，必须显式 AS rowid 否则取到 undefined（BLOCK-450 首版实测抓真）。
+    'SELECT id AS rowid, created_at FROM task_events WHERE task_id = ? AND seq = ? ORDER BY created_at, rowid'
+  );
+  const tx = db.transaction(() => {
+    for (const g of groups) {
+      const members = membersStmt.all(g.task_id, g.seq);
+      for (let i = 1; i < members.length; i += 1) {
+        const r = updStmt.run(nextSeqStmt.get(g.task_id).n, members[i].rowid);
+        if (r.changes !== 1) {
+          // 实际未命中行=重排失真风险，fail-closed 回滚，不让计数虚报「已移动」。
+          throw new Error(`TASK_EVENTS_RENUMBER_UPDATE_MISSED task=${g.task_id} seq=${g.seq} rowid=${members[i].rowid}`);
+        }
+        moved += 1;
+      }
+    }
+    const after = countRows.get().c;
+    if (after !== before) {
+      throw new Error(`TASK_EVENTS_RENUMBER_COUNT_DRIFT before=${before} after=${after}`);
+    }
+  });
+  tx();
+  return { groups: groups.length, moved };
+}
+
+let renumberOutcome = { groups: 0, moved: 0 };
+try {
+  renumberOutcome = renumberTaskEventSeqCollisions();
+  if (renumberOutcome.moved > 0) {
+    logger.warn(`[agent-task-store] task_events seq 碰撞重排：${renumberOutcome.groups} 组 / 移动 ${renumberOutcome.moved} 行（零删除，行数守恒）`);
+  }
+} catch (err) {
+  // 数据自愈失败=数据完整性风险，fail-closed 阻断启动（事务已回滚），不静默带伤运行。
+  logger.error(`[agent-task-store] task_events seq 碰撞重排失败（fail-closed）：${err && err.message}`);
+  throw err;
+}
+try {
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_task_events_task_seq ON task_events(task_id, seq)');
+} catch (err) {
+  // 索引缺席不阻断启动（历史通道语义），但契约测试与 gate 会暴露——诚实可见。
+  logger.warn(`[agent-task-store] uq_task_events_task_seq 创建失败：${err && err.message}`);
+}
+
 // BLOCK-102 P4 — task_events 保留清扫：该表此前无界增长（sweeper PR-001 明确
 // 排除，归属本模块）。30 天窗口保守值；递归 setTimeout + unref（不绊关闭），
 // 失败 warn 不毒化后续轮次。
@@ -402,6 +463,12 @@ const stmts = {
   insertEvent: db.prepare(`
     INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
     VALUES (?, ?, ?, ?, ?)
+  `),
+  // BLOCK-450：原子 seq 分配——分配内嵌同一条写入语句（同一 SQLite 写事务），
+  // 供 appendAgentTaskEvent 的唯一约束碰撞兜底重试使用。
+  insertEventAtomic: db.prepare(`
+    INSERT INTO task_events (task_id, seq, event_type, payload, created_at)
+    VALUES (?, (SELECT COALESCE(MAX(seq),0)+1 FROM task_events WHERE task_id = ?), ?, ?, ?)
   `),
   listEvents: db.prepare(
     `SELECT seq, event_type, payload, created_at FROM task_events
@@ -574,14 +641,25 @@ const taskEventBus = new (require('node:events').EventEmitter)();
 taskEventBus.setMaxListeners(50);
 
 function appendAgentTaskEvent(taskId, seq, eventType, payload) {
-  stmts.insertEvent.run(
-    taskId,
-    seq,
-    eventType,
-    typeof payload === 'string' ? payload : JSON.stringify(payload),
-    new Date().toISOString()
-  );
-  taskEventBus.emit('event', { taskId, seq, eventType, payload });
+  const payloadStr = typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const createdAt = new Date().toISOString();
+  let writtenSeq = seq;
+  try {
+    stmts.insertEvent.run(taskId, seq, eventType, payloadStr, createdAt);
+  } catch (err) {
+    // BLOCK-450：seq 读-算-写竞态兜底——uq_task_events_task_seq 唯一约束拒绝碰撞写时，
+    // 原子 max+1 重分配重试一次（better-sqlite3 同步单连接，重试窗口内无并发插入）。
+    // 调用方 API 零变化；重分配为 warn 留痕（事件仍以实际落库 seq 为准）。
+    const isUniqueViolation = err && (
+      err.code === 'SQLITE_CONSTRAINT_UNIQUE'
+      || (String(err.message || '').includes('UNIQUE constraint failed') && String(err.message || '').includes('task_events'))
+    );
+    if (!isUniqueViolation) throw err;
+    stmts.insertEventAtomic.run(taskId, taskId, eventType, payloadStr, createdAt);
+    writtenSeq = db.prepare('SELECT MAX(seq) AS s FROM task_events WHERE task_id = ?').get(taskId).s;
+    logger.warn(`[agent-task-store] task_events seq 碰撞（task=${taskId} 请求 seq=${seq}）→ 原子重分配为 ${writtenSeq}（event=${eventType}）`);
+  }
+  taskEventBus.emit('event', { taskId, seq: writtenSeq, eventType, payload });
 }
 
 function mapEventRow(row) {
