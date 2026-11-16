@@ -29,7 +29,7 @@
         "design-material",
         "block-454-alignment"
       ],
-      "notes": "设置页 IA 精简设计（2026-11-16）：规划产物不含代码实现。现状 13 组(9 core+4 advanced) → 建议 11 组(7 core+4 advanced)，合并一般配置迁移到维护节、繁杂节内部折叠、高频上浮，为 BLOCK-454 adapter 设置在 models 预留「能力渠道」折叠槽位。待用户裁决后另立 UI 包实施。",
+      "notes": "设置页 IA 精简设计 v2 激进版（2026-11-16）：规划产物不含代码实现。对标 codex 极简/orca 全局搜索+页面内 UpdateCard/ZCode 自动保存后重做——左栏 core 13→5 组 + 1 高级折叠组(搜索可达)；联网代理降级、快捷键移出核心、更新改页面内通知卡；BLOCK-454 adapter 统一进 models「能力渠道」槽位。用户三条裁决(联网默认开/快捷键无用/更新页面内)高于对标。待用户裁决后另立 UI 包实施。",
       "registeredAt": "2026-11-16"
     },
     {
