@@ -1,5 +1,5 @@
 /**
- * UI-699 — API Endpoint 编辑器信息密度契约（红绿先行）。
+ * UI-703 — API Endpoint 编辑器信息密度契约（红绿先行）。
  *
  * 用户实测（2026-11-16 截图）：表头 11 列里「上下文窗口」4 字在固定 96px 列内换行成
  * 两行；API Endpoint 区顶部两段说明 + 识图/向量两行说明 + 底部容错小字叠加，重点信息
@@ -33,7 +33,7 @@ const cssSrc = readFileSync(
   'utf8',
 );
 
-describe('UI-699 API Endpoint 编辑器信息密度', () => {
+describe('UI-703 API Endpoint 编辑器信息密度', () => {
   it('表头用短标签「上下文」，不再出现会换行的「上下文窗口」span', () => {
     expect(panelSrc).toContain('<span>上下文</span>');
     expect(panelSrc).not.toContain('<span>上下文窗口</span>');

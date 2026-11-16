@@ -1,1 +1,4 @@
-最后更新：2026-11-15（🏁 **BLOCK-450 completed（终态 done · M2 尾巴清偿）**：M2-4-db task_events (task_id,seq) UNIQUE 约束三层落地（启动行数守恒碰撞重排——id 为 rowid 别名显式 AS rowid 首版缺陷被红测试抓真 + 唯一索引 + 运行时原子重分配重试），红绿 3/3、dev 库副本 4 组/4 行重排零删除 4,863 行守恒、gate:long-task-resume 三连、closeout:full ×2 全绿；M2-live 登记 BLOCK-449 闭环——M2 证据链闭合。串行槽位空闲。证据=acceptance/block-450/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-16（**统一工作蓝图已立**：`docs/next-work-blueprint-2026-11-16.md` 为当前唯一 active 执行蓝图（living-plan），把接下来所有事串成 W1-W10 串行波次——W1 BLOCK-454 P1 vision（可开工）→W2 搜索 adapter→W3 OCR→W4 文件链→W5 Responses(可选)→W6 ASR/TTS(暂缓)；W7 设置页 IA v2 实施（待裁决插队）；W8 UI-703 信息密度收口（待用户过目宽表头）；W9 遗留治理清账；W10 排队规划大纲。7 个用户决策点见蓝图 §3。串行 active 工作包仍=BLOCK-454（P0 完成，下一步 P1）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+> **当前下一步指针**：完整执行序列、每项的边界/依赖/验收/产物与决策点，见 [`docs/next-work-blueprint-2026-11-16.md`](./next-work-blueprint-2026-11-16.md)。本文件只承载指针，不复制队列（避免第二真相源）。
+> 恢复顺序：`docs/AUDIT-LOG.md` → `npm run state` → 本指针 → 蓝图 → 对应工作包 plan。

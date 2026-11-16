@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 595,
+    "documentCount": 596,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 577
+    "managedMarkdown": 578
   },
   "documents": [
+    {
+      "id": "NEXT-WORK-BLUEPRINT-2026-11-16",
+      "path": "docs/next-work-blueprint-2026-11-16.md",
+      "kind": "living-plan",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "next-work-blueprint-2026-11-16",
+      "entrypoint": "docs/next-steps-roadmap.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "blueprint",
+        "living-plan",
+        "execution-runlist",
+        "block-454",
+        "settings-ia"
+      ],
+      "notes": "下一阶段统一工作蓝图（2026-11-16，用户「重整蓝图覆盖接下来所有事」）：当前唯一 active 执行蓝图（living-plan，不占单包槽位）。W1-W6=BLOCK-454 P1-P6 串行（P6 暂缓）；W7=设置页 IA v2 实施（待裁决插队）；W8=UI-703 信息密度收口（已纠正撞号）；W9=遗留治理清账（post-h9 换机红+失败后台任务）；W10=排队规划大纲。含每 item 边界/依赖/验收/产物 + 7 个用户决策点。next-steps-roadmap 为其指针。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "SETTINGS-IA-DESIGN",
       "path": "docs/settings-ia-simplification-design.md",

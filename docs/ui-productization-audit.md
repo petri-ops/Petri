@@ -85,7 +85,7 @@
 - **能力位链**：钉住按钮接 viewerAdapter 能力位（无适配器给具体原因 title，previewLoading 保留）。
 - **实机腿（2026-11-08）**：block383-live-legs flow **8/8 allPass**（acceptance/post-nso-2026-11-08/block383-live-legs-live-darwin.json）——重放横幅实机文案「HTTP 503（30 秒后自动重试，第 1/3 次）」/空 flags 段三行 server-flag 渲染/折叠 inert=true/aria-hidden=true/孤儿 px 字号零命中/树语义在座。DOM 预算窗口化与布局单源仍=独立切片待发令（不入本条验收）。
 
-## UI-701: API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 **in_progress（代码+契约测试+主题门禁绿；实机截图过目窄容器路径，宽表头观感归人眼）**）
+## UI-703: API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 **in_progress（代码+契约测试+主题门禁绿；实机截图过目窄容器路径，宽表头观感归人眼）**）
 
 - **改动**：`DesktopSettingsPanel.tsx` 表头及窄容器字段标签「上下文窗口」→「上下文」（4 字→2 字，96px 固定列内不再换行）；顶部两段说明合并为一段，Key 显示/导出细节下沉到 `title` 悬停。`VisionRoleBinding.tsx` / `EmbeddingRoleBinding.tsx` 删除正常态长说明段，仅保留无渠道/未绑定异常态提示（`title` 悬停已承载关键约束）。`desktop.css` 在 `.petri-endpoint-list-header` 主定义块直接加 `white-space:nowrap`（非追加覆盖，符合布局纪律）。
 - **证据**：EndpointEditorDensity 契约 5/5（列名/文案/nowrap）+ VisionRoleBinding 3/3 + EmbeddingRoleBinding 4/4 + theme-token-contract 19/19 + tsc 0。
