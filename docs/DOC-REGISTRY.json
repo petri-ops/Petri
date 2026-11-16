@@ -9,11 +9,29 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 594,
+    "documentCount": 595,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 576
+    "managedMarkdown": 577
   },
   "documents": [
+    {
+      "id": "SETTINGS-IA-DESIGN",
+      "path": "docs/settings-ia-simplification-design.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "settings-ia-simplification-design",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "settings",
+        "information-architecture",
+        "design-material",
+        "block-454-alignment"
+      ],
+      "notes": "设置页 IA 精简设计（2026-11-16）：规划产物不含代码实现。现状 13 组(9 core+4 advanced) → 建议 11 组(7 core+4 advanced)，合并一般配置迁移到维护节、繁杂节内部折叠、高频上浮，为 BLOCK-454 adapter 设置在 models 预留「能力渠道」折叠槽位。待用户裁决后另立 UI 包实施。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "BLOCK-454-P0-FINDINGS",
       "path": "docs/block-454-endpoint-contract-findings.md",
