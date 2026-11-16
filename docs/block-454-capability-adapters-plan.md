@@ -27,9 +27,10 @@
 - 产物：`docs/block-454-endpoint-contract-findings.md`，逐能力 VERIFIED + 官方深链 + Petri 落点判断。
 - 遗留 UNVERIFIED：Fetch 独立端点细节、Responses 完整请求形态——对应阶段开写前补抓。
 
-### P1 — vision 修通（零厂商绑定，小）
-- 定位并修复 `vision_failed: no_api_key`（安装版 dataDir 绑定与 dev 不同）；架构已有 family 归一（`model-gateway.js` 的 `OPENAI_FAMILY_PROVIDERS` + `convertVisionBodyForProvider` / `normalizeVisionResultForProvider`），不新造管道。
-- 验收：有 key 的 deepseek profile 上识图不再 no_api_key；`image_url` 契约测试绿。
+### P1 — vision 修通（零厂商绑定，小）——**已完成 2026-11-17（e2e 波次 W1）**
+- 定位并修复 `vision_failed: no_api_key`：根因=UI-638 迁移盲区（旧安装版档案 capabilities 缺 vision 声明 → 迁移跳过 → vision 永绑无 key 的 dashscope-vision）。修复=迁移补第二判据（chat ∈ OPENAI_FAMILY ∧ deepseek 模型）+ capability 同批落盘；复用 `model-gateway.js` 的 `OPENAI_FAMILY_PROVIDERS` 归一，不新造管道。
+- HK-01 红→绿：ui638-vision-default 4/4；邻域回归 57 项 0 红。证据：`acceptance/block-454/p1/`（绑定探针 + 红绿记录 + 修复记录）。external-blocked：Windows 安装版文件腿（跨机不可达）。
+- 验收：有 key 的 deepseek profile 上识图不再 no_api_key（迁移后 vision 绑定可解析 + capability 门通过）；`image_url` 契约测试绿（block150 既有覆盖 + 本卡迁移契约）。
 
 ### P2 — 搜索 adapter（中）
 - 在 `web-search-provider.js` 窄口加 `deepseek-search` adapter（独立 Search API `/v1/tools/search`：query/count/need_content，响应 results[] 含 rerank_score/authority/snippet/summary）；SearXNG 保持默认/本地主权首选。

@@ -1,0 +1,7 @@
+✔ 零配置：视觉得到的是声明 vision 的 DeepSeek 档案（开箱可用，不依赖 DashScope） (1.029875ms)
+✔ 旧配置迁移：vision 绑未配置的 dashscope-vision → 改绑 chat 档案并落盘 (70.87725ms)
+✔ BLOCK-454 P1 — 旧安装版档案缺 vision 声明：deepseek 多模态形态仍迁移并补声明（运行时 + 落盘） (70.143916ms)
+✔ chat 是真文本模型（非 deepseek 形态）时不迁移（显式配置真相优先） (69.98275ms)
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0

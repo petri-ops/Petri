@@ -19,6 +19,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
+// BLOCK-454 P1 — 迁移判据复用 model-gateway 的 OPENAI_FAMILY 归一（image_url 转换
+// 同款白名单），不新造第二份 provider 家族清单。
+const { OPENAI_FAMILY_PROVIDERS } = require('../../shared-backend/llm-providers/model-gateway');
 const { createCredentialStore, normalizeProvider } = require('./credential-store');
 // BLOCK-199 P2 — 生成参数形状（类型/区间/取整）取配置 schema 单源，数值语义不在这里复制。
 const {
@@ -36,6 +39,10 @@ const credentialStore = createCredentialStore({ settingsDir: SETTINGS_DIR });
 
 let _cache = null;
 let _cacheSignature = null;
+// BLOCK-454 P1 — 最近一次 normalize 中「补 vision 能力声明」的档案 id（供 getAiSettings
+// 读时落盘块原子写入磁盘档案；binding 与 capability 必须同批落盘，否则下次读入后
+// vision=dashscope-vision 条件不再命中、能力声明永不补齐 → resolve capability mismatch）。
+let _visionCapabilityMigration = null;
 
 function _settingsFileSignature() {
   try {
@@ -89,12 +96,23 @@ function getAiSettings() {
   }
   _cache = normalizeAiSettings(_cache);
   // UI-638 加映 — 迁移落盘（仅当磁盘上原本显式写了不同的 vision 绑定；缺省不写）。
+  // BLOCK-454 P1 — capability 补声明与 binding 同批落盘（单次写入，原子一致）。
   try {
     const disk = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
     const diskVision = disk && disk.model_role_bindings && disk.model_role_bindings.vision;
     const runtimeVision = _cache && _cache.model_role_bindings && _cache.model_role_bindings.vision;
     if (diskVision && runtimeVision && diskVision !== runtimeVision) {
       disk.model_role_bindings = { ...(disk.model_role_bindings || {}), vision: runtimeVision };
+      if (_visionCapabilityMigration && Array.isArray(disk.model_profiles)) {
+        disk.model_profiles = disk.model_profiles.map((profile) => (profile && profile.id === _visionCapabilityMigration
+          ? {
+            ...profile,
+            capabilities: Array.isArray(profile.capabilities) && !profile.capabilities.includes('vision')
+              ? [...profile.capabilities, 'vision']
+              : (Array.isArray(profile.capabilities) ? profile.capabilities : ['vision']),
+          }
+          : profile));
+      }
       _ensureDir();
       fs.writeFileSync(SETTINGS_FILE, JSON.stringify(disk, null, 2));
       fs.chmodSync(SETTINGS_FILE, 0o600);
@@ -146,13 +164,32 @@ function normalizeAiSettings(settings) {
   // 旧配置把 vision 显式绑到「未配置凭据的 dashscope-vision」时，若 chat 档案
   // 已声明 vision 能力，自动改绑到 chat 档案；chat 无 vision 能力则保持显式
   // 配置真相（resolve 会诚实报 model_capability_mismatch）。落盘见 getAiSettings。
+  // BLOCK-454 P1 加映 — 旧安装版的档案由 UI-638 之前的版本写盘，capabilities 缺
+  // vision 声明，上述条件漏迁移 → vision 永远 no_api_key（安装版实测成因，尽管
+  // DeepSeek key 在位且 deepseek-flash 原生多模态）。补第二判据：chat 档案是
+  // OPENAI_FAMILY 通道上的 deepseek 模型（V4.1 起原生多模态，BLOCK-454 findings §0）
+  // 视为识图可用；改绑时把 vision 能力补进档案（软件写定，与默认档案声明一致），
+  // 否则改绑后 resolve 会报 model_capability_mismatch。
+  _visionCapabilityMigration = null;
   const visionBinding = next.model_role_bindings && next.model_role_bindings.vision;
   if (visionBinding === 'dashscope-vision' && next.credential_status.dashscope !== true) {
     const chatProfile = next.model_profiles.find(
       (profile) => profile.id === (next.model_role_bindings && next.model_role_bindings.chat),
     );
-    if (chatProfile && Array.isArray(chatProfile.capabilities) && chatProfile.capabilities.includes('vision')) {
+    const chatVisionCapable = !!chatProfile && Array.isArray(chatProfile.capabilities) && (
+      chatProfile.capabilities.includes('vision')
+      || (OPENAI_FAMILY_PROVIDERS.has(chatProfile.provider)
+        && typeof chatProfile.model === 'string' && /^deepseek/i.test(chatProfile.model))
+    );
+    if (chatProfile && chatVisionCapable) {
       next.model_role_bindings = { ...next.model_role_bindings, vision: chatProfile.id };
+      if (!chatProfile.capabilities.includes('vision')) {
+        const migratedProfileId = chatProfile.id;
+        next.model_profiles = next.model_profiles.map((profile) => (profile && profile.id === migratedProfileId
+          ? { ...profile, capabilities: [...(profile.capabilities || []), 'vision'] }
+          : profile));
+        _visionCapabilityMigration = migratedProfileId;
+      }
     }
   }
   return next;

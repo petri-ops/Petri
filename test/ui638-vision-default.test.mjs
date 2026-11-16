@@ -6,7 +6,12 @@
  * 1) 零配置归一化后 vision 角色绑定到声明 vision 的 DeepSeek 档案（开箱可用）；
  * 2) 旧配置把 vision 显式绑到「未配置凭据的 dashscope-vision」时，若 chat 档案
  *    已声明 vision → 自动改绑并落盘（一次性迁移，之后以落盘值为准）；
- * 3) chat 档案不含 vision 能力时不迁移（显式配置真相优先，resolve 会诚实报错）。
+ * 3) BLOCK-454 P1 加映：旧安装版档案由 UI-638 之前的版本写盘，capabilities 缺
+ *    vision 声明——chat 档案是 OPENAI_FAMILY 通道上的 deepseek 模型（V4.1 起原生
+ *    多模态，findings §0）时同样迁移，且补声明 capability（运行时 + 落盘），
+ *    否则改绑后 resolve 报 model_capability_mismatch；
+ * 4) chat 是真文本模型（非 deepseek 形态）时不迁移（显式配置真相优先，resolve
+ *    会诚实报错）。
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -25,11 +30,19 @@ function runSettingsProbe(dir) {
   const script = `
     const fs = require('fs');
     const settings = require(${JSON.stringify(SETTINGS_MODULE)});
+    const { resolveModelProfile } = require(${JSON.stringify(path.resolve('core/shared-backend/llm-providers/model-profile.js'))});
     const current = settings.getAiSettings();
     const onDisk = JSON.parse(fs.readFileSync(settings.SETTINGS_FILE, 'utf8'));
+    const resolveVision = resolveModelProfile({ profiles: current.model_profiles, roleBindings: current.model_role_bindings }, 'vision');
+    const deepseekProfile = (current.model_profiles || []).find((p) => p.id === 'deepseek-chat');
+    const onDiskDeepseek = (onDisk.model_profiles || []).find((p) => p.id === 'deepseek-chat');
     process.stdout.write(JSON.stringify({
       vision: current.model_role_bindings && current.model_role_bindings.vision,
       onDiskVision: onDisk.model_role_bindings && onDisk.model_role_bindings.vision,
+      deepseekCaps: deepseekProfile ? deepseekProfile.capabilities : null,
+      onDiskDeepseekCaps: onDiskDeepseek ? onDiskDeepseek.capabilities : null,
+      visionResolveError: resolveVision.error || null,
+      visionResolvedProfile: resolveVision.profile ? resolveVision.profile.id : null,
     }));
   `;
   const child = spawnSync(process.execPath, ['-e', script], {
@@ -90,14 +103,40 @@ test('旧配置迁移：vision 绑未配置的 dashscope-vision → 改绑 chat 
   assert.equal(result.onDiskVision, 'deepseek-chat', `迁移必须落盘，磁盘=${result.onDiskVision}`);
 });
 
-test('chat 档案不含 vision 时不迁移（显式配置真相优先）', () => {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-vision-nodefault-'));
+test('BLOCK-454 P1 — 旧安装版档案缺 vision 声明：deepseek 多模态形态仍迁移并补声明（运行时 + 落盘）', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-vision-legacy-caps-'));
   writeSettings(dir, [
     { ...DEEPSEEK_VISION, capabilities: ['chat', 'streaming', 'tools'] },
     DASHSCOPE_VISION,
   ], {
     chat: 'deepseek-chat',
     agent: 'deepseek-chat',
+    vision: 'dashscope-vision',
+    embedding: 'dashscope-embedding',
+  });
+  const result = runSettingsProbe(dir);
+  assert.equal(result.vision, 'deepseek-chat', `运行时绑定=${result.vision}`);
+  assert.equal(result.onDiskVision, 'deepseek-chat', `迁移必须落盘，磁盘=${result.onDiskVision}`);
+  assert.ok(result.deepseekCaps.includes('vision'), `运行时档案必须补 vision 能力: ${JSON.stringify(result.deepseekCaps)}`);
+  assert.ok(result.onDiskDeepseekCaps.includes('vision'), `落盘档案必须补 vision 能力: ${JSON.stringify(result.onDiskDeepseekCaps)}`);
+  assert.equal(result.visionResolveError, null, `改绑后 vision 角色必须可解析（不报 capability mismatch）: ${JSON.stringify(result)}`);
+  assert.equal(result.visionResolvedProfile, 'deepseek-chat');
+});
+
+test('chat 是真文本模型（非 deepseek 形态）时不迁移（显式配置真相优先）', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-vision-nodefault-'));
+  writeSettings(dir, [
+    {
+      id: 'text-only-chat',
+      provider: 'openai-compatible',
+      model: 'my-text-llm',
+      credentialRef: 'provider:deepseek',
+      capabilities: ['chat', 'streaming', 'tools'],
+    },
+    DASHSCOPE_VISION,
+  ], {
+    chat: 'text-only-chat',
+    agent: 'text-only-chat',
     vision: 'dashscope-vision',
     embedding: 'dashscope-embedding',
   });

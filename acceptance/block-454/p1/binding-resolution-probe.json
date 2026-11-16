@@ -1,0 +1,18 @@
+
+===== 安装版 (/Users/zhangdiandian/Documents/Petri-Local) =====
+roleBindings: {"chat":"deepseek-chat","agent":"deepseek-chat","planner":"deepseek-chat","vision":"deepseek-chat","embedding":"dashscope-embedding","summary":"deepseek-chat","report":"deepseek-chat","explanation":"deepseek-chat"}
+diagnostics: []
+vision: binding=deepseek-chat -> profile.id=deepseek-chat provider=openai-compatible model=deepseek-flash capabilities=[chat,streaming,tools,vision] credentialRef=provider:<name> credProvider=deepseek keyResolvable=true
+embedding: binding=dashscope-embedding -> profile.id=dashscope-embedding provider=dashscope model=text-embedding-v3 capabilities=[embedding] credentialRef=provider:<name> credProvider=dashscope keyResolvable=false
+chat: binding=deepseek-chat -> profile.id=deepseek-chat provider=openai-compatible model=deepseek-flash capabilities=[chat,streaming,tools,vision] credentialRef=provider:<name> credProvider=deepseek keyResolvable=true
+UI-638 迁移判定: visionBinding=deepseek-chat visionKeyResolvable=true chatProfile.capabilities 含 vision=true chatProvider ∈ OPENAI_FAMILY=true
+fileMutated=false（只读断言）
+
+===== dev 版 (/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/data) =====
+roleBindings: {"chat":"deepseek-chat","agent":"deepseek-chat","planner":"deepseek-chat","vision":"deepseek-chat","embedding":"ollama-embedding","summary":"deepseek-chat","report":"deepseek-chat","explanation":"deepseek-chat"}
+diagnostics: []
+vision: binding=deepseek-chat -> profile.id=deepseek-chat provider=openai-compatible model=deepseek-flash capabilities=[chat,streaming,tools,vision,embedding] credentialRef=provider:<name> credProvider=deepseek keyResolvable=true
+embedding: binding=ollama-embedding -> profile.id=ollama-embedding provider=ollama model=bge-m3 capabilities=[embedding] credentialRef=provider:<name> credProvider=ollama keyResolvable=false
+chat: binding=deepseek-chat -> profile.id=deepseek-chat provider=openai-compatible model=deepseek-flash capabilities=[chat,streaming,tools,vision,embedding] credentialRef=provider:<name> credProvider=deepseek keyResolvable=true
+UI-638 迁移判定: visionBinding=deepseek-chat visionKeyResolvable=true chatProfile.capabilities 含 vision=true chatProvider ∈ OPENAI_FAMILY=true
+fileMutated=false（只读断言）
