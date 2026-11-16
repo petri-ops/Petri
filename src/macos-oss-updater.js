@@ -4,8 +4,10 @@ const path = require("path");
 const { pipeline } = require("stream/promises");
 const { Readable, Transform } = require("stream");
 
-const DEFAULT_FEED_URL =
-  "https://petri-uploads.oss-cn-hangzhou.aliyuncs.com/desktop/updates/macos/";
+// 更新源（2026-11-16 起）：阿里云 ECS 静态源，复用 biof3.com 的 ZeroSSL 正规证书。
+// 旧 OSS 源 petri-uploads.oss-cn-hangzhou 的 latest-mac.yml 已 404，链断。
+// env PETRI_UPDATE_FEED_URL 仍可覆盖（测试/回滚用）。
+const DEFAULT_FEED_URL = "https://www.biof3.com/updates/macos/";
 
 function parseScalar(value) {
   const trimmed = String(value || "").trim();

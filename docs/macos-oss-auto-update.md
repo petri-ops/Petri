@@ -1,8 +1,22 @@
-# macOS OSS 自动更新
+# macOS 自动更新（2026-11-16 起：阿里云 ECS 静态源）
 
-最后更新：2026-08-16（GATES-4 单行修订：rc.6 历史标注 + 当前基线 rc.7 指针）
+最后更新：2026-11-16（**更新源切换 OSS → ECS**：用户裁决启动远程发布 + 不用 OSS；现行源=`https://www.biof3.com/updates/macos/`（ECS 47.110.228.168 静态目录 `/var/www/petri-updates/macos/`，复用 acme.sh 的 biof3.com ZeroSSL 正规证书）；发布脚本=`scripts/publish-macos-ecs.sh`（SSH/scp，无 OSS 凭据）；客户端 `DEFAULT_FEED_URL` 已改指 ECS，`PETRI_UPDATE_FEED_URL` env 仍可覆盖。下方 OSS 章节为历史方案，保留供追溯，更新源 404 已失效。）
 
-## 固定配置
+## 现行配置（ECS · 2026-11-16）
+
+- **Feed URL**：`https://www.biof3.com/updates/macos/`（客户端 `DEFAULT_FEED_URL`，env `PETRI_UPDATE_FEED_URL` 可覆盖）
+- **ECS**：`47.110.228.168`，SSH 别名 `aliyun`，docroot `/var/www/petri-updates/macos/`
+- **证书**：`/root/.acme.sh/biof3.com_ecc/fullchain.cer`（ZeroSSL 正规签，SAN=biof3.com/www.biof3.com），nginx server_name `biof3.com www.biof3.com`
+- **nginx**：`/etc/nginx/sites-available/petri-updates` → `/updates/macos/` alias 静态目录；DMG immutable 长缓存、`latest-mac.yml` no-cache
+- **发布**：`bash scripts/publish-macos-ecs.sh [--dry-run]`（scp；原子顺序 DMG → SHA256SUMS → latest-mac.yml.tmp → mv 原子改名）
+- **客户端**：自动检查（挂载时 `useAutoUpdate`）+ 设置页手动检查；下载后 SHA-512 校验 → 打开 DMG 由用户拖入 Applications（无 Developer ID 签名，无法静默覆盖）
+- **验证**：`curl -sI https://www.biof3.com/updates/macos/latest-mac.yml` 与 DMG 均 200；客户端 `createMacOssUpdater.check()` 实测 hasUpdate/URL/sha 正确
+
+## 历史方案（OSS · 2026-08～11，链已断）
+
+> 以下 OSS 配置截至 2026-11-16 更新清单返回 404，已由上方 ECS 方案取代；保留供追溯，不再使用。
+
+## 历史固定配置
 
 - Bucket：`petri-uploads`
 - Region：`cn-hangzhou`
