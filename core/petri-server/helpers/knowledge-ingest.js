@@ -20,6 +20,8 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const ks = require('./knowledge-space');
 const { parseDocument, checkSupported } = require('./knowledge-parsers');
+// BLOCK-454 P3 — 扫描件（无文本层）PDF 的 OCR 补解析（云 adapter，默认关；见 ocr-config）。
+const ocrProvider = require('./ocr-provider');
 
 const sqlite = require('../db').getDatabase();
 
@@ -46,6 +48,65 @@ function enqueueIngest(docId, { embed } = {}) {
 
 function ingestQueueDepth() {
   return _queueDepth;
+}
+
+// ---- BLOCK-454 P3 — 扫描件（无文本层）PDF 的 OCR 补解析 ----
+
+/**
+ * 对「文本提取为空的 PDF」尝试 OCR（云 adapter，默认关）。
+ * 开关/渠道来自 ocr-config（enabled 默认 false——云调用=付费副作用，P5-a 知情权）；
+ * key 走凭据族（'deepseek'，与对话共用）。可注入 ocrFn/ocrConfig 供测试。
+ *
+ * 成功：产物落 `ocr.json` artifact（provider/pages/cost 可审计，X1 全链留痕），
+ * 返回 { attempted:true, ok:true, text, note }；失败（含未启用）：
+ * { attempted:true, ok:false, error }——调用方诚实 failed，绝不静默空索引。
+ */
+async function attemptOcrParse(buffer, filename, docId, { ocrFn, ocrConfig } = {}) {
+  const invoke = ocrFn || ocrProvider.ocrDocument;
+  const config = ocrConfig
+    || (() => {
+      try {
+        // eslint-disable-next-line global-require
+        const { getEffectiveConfig } = require('./ocr-config');
+        return getEffectiveConfig();
+      } catch {
+        return { enabled: false, provider: 'none', purpose: 'rich_layout_recognition', timeoutMs: 60000 };
+      }
+    })();
+  const result = await invoke({ buffer, filename, config });
+  if (!result || !result.ok) {
+    const code = result && result.code ? result.code : 'ocr_failed';
+    const detail = result && result.message ? result.message : 'OCR 调用失败';
+    return {
+      attempted: true,
+      ok: false,
+      error: `knowledge_ocr_${code}（扫描件 OCR 未能完成：${detail}）`,
+    };
+  }
+  // artifact 留痕：docDir/ocr.json——OCR 是外部云调用，产物与成本必须可追溯（X1）。
+  try {
+    const artifact = {
+      createdAt: new Date().toISOString(),
+      kind: 'knowledge_ocr',
+      docId,
+      filename,
+      provider: result.provider,
+      purpose: result.purpose,
+      layoutMarkers: result.layoutMarkers === true,
+      pageCount: Array.isArray(result.pages) ? result.pages.length : 0,
+      pages: result.pages || [],
+      cost: result.cost || null,
+    };
+    fs.writeFileSync(path.join(ks.docDir(docId), 'ocr.json'), JSON.stringify(artifact, null, 2));
+  } catch (e) {
+    console.log('[knowledge-ingest] ocr artifact write failed (non-fatal):', docId, e && e.message);
+  }
+  return {
+    attempted: true,
+    ok: true,
+    text: result.text || '',
+    note: `ocr:${result.provider}:pages=${Array.isArray(result.pages) ? result.pages.length : 0}`,
+  };
 }
 
 function safeDocFilename(originalName) {
@@ -87,9 +148,9 @@ async function createDocument({ name, buffer, mime, autoIngest = true, spaceId }
 }
 
 /**
- * 摄取状态机全程。embed 可注入（测试）。任何一步失败 → failed(+error)，不落半索引。
+ * 摄取状态机全程。embed / ocrFn / ocrConfig 可注入（测试）。任何一步失败 → failed(+error)，不落半索引。
  */
-async function ingestDocument(docId, { embed } = {}) {
+async function ingestDocument(docId, { embed, ocrFn, ocrConfig } = {}) {
   const doc = ks.getDocument(docId);
   if (!doc) throw new Error('knowledge_document_not_found');
 
@@ -99,6 +160,18 @@ async function ingestDocument(docId, { embed } = {}) {
     const rawPath = doc.raw_path || path.join(ks.docDir(docId), doc.name);
     const buffer = fs.readFileSync(rawPath);
     const parsed = await parseDocument(buffer, doc.name);
+    // BLOCK-454 P3 — PDF 无文本层（扫描件）：文本提取为空时尝试 OCR（默认关；产物 artifact 留痕）。
+    if (parsed.kind === 'pdf' && !String(parsed.text || '').trim()) {
+      const ocr = await attemptOcrParse(buffer, doc.name, docId, { ocrFn, ocrConfig });
+      if (!ocr.ok) {
+        throw new Error(
+          `knowledge_chunk_empty（PDF 无文本层——扫描件）。${ocr.error} `
+          + '可在 ocr-config（ocr.json）置 {enabled:true, provider:"deepseek"}（需 DeepSeek API key，云渠道按量计费）后重建索引。'
+        );
+      }
+      parsed.text = ocr.text;
+      parsed.note = ocr.note;
+    }
     if (parsed.kind && parsed.kind !== doc.kind) {
       sqlite.prepare('UPDATE knowledge_documents SET kind = ? WHERE id = ?').run(parsed.kind, docId);
     }

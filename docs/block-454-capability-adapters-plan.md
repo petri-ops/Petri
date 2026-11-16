@@ -37,10 +37,10 @@
 - HK-01 红→绿：block454-p2 契约 10/10（钳位/来源标签/未配置诚实报/成本计量/query 128 上限/401 不可重试）；邻域 53/53。secret/arch PASS，零新依赖。
 - external-blocked（D2 预置）：真端点实机腿不做（无独立授权 key + 付费副作用），契约级证据覆盖。证据：`acceptance/block-454/p2/`。
 
-### P3 — OCR 通用窄口 + adapter（大）
-- 新建独立 `ocr(file,options)` 窄口 subsystem（**不塞进 registerProvider 的 chat/embedding/both capabilities**——OCR 是工具语义）。DeepSeek OCR adapter（`/v1/tools/ocr`，multipart file+purpose，响应 `pages[].text` + `<｜ref｜>/<｜box｜>` 版面标记）+ 本地 OCR 路（离线优先，引擎须用户裁决——新依赖默认 no）。
-- 补 knowledge 文档解析里扫描件 PDF「无文本层」的既有空白；产物走 artifact 留痕。
-- 验收：窄口契约测试 + 扫描件 PDF knowledge 集成测试；成本按页走非 token 计量。
+### P3 — OCR 通用窄口 + adapter（大）——**已完成 2026-11-17（e2e 波次 W3）**
+- 通用窄口 `ocr-provider.js`（工具语义，未进 registerProvider capabilities）：DeepSeek OCR adapter（POST `/v1/tools/ocr` multipart file+purpose，pages[].text 归一 + 版面标记探针 + cost.requests/pages/bytes 计量）；**local 槽位留接口**（D1 预置：不引依赖，选择即诚实报 not_implemented）。授权面=config family 'ocr'（默认关，P5-a 付费知情）+ `/api/ocr-access` REST 写面 + config-transfer 族登记；冻结基线 20 族/112 键。
+- knowledge 扫描件接入：无文本层 PDF → attemptOcrParse（默认关）→ OCR 文本进分块/嵌入 + `ocr.json` artifact 全量留痕（provider/pages/cost）；未启用诚实 failed 指路，绝不静默空索引。
+- HK-01 红→绿 13/13；邻域 86/86；secret/arch/types PASS，零新依赖。external-blocked：真端点腿（同 W2/D2 诚实原则）。证据：`acceptance/block-454/p3/`。
 
 ### P4 — 文件输入链增强（中，可并入 P3 收尾）
 - Files API（`POST /files` + `file_id` 引用）与 knowledge 解析对接：支持 PDF/Office/图片经 file_id 进入对话；对话内联文件块按协议归一（Chat `file` / Responses `input_file` / Messages `document`）。

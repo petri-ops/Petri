@@ -1,0 +1,16 @@
+✔ P3-A0 — OCR_PROVIDERS 窄口清单：deepseek 在册，local 留接口（D1 不引依赖） (0.689166ms)
+✔ P3-A1 — enabled=false → ocr_access_disabled（联网/云渠道默认关，P3-c 本地主权） (0.206166ms)
+✔ P3-A2 — provider=none → ocr_not_configured；provider=local → ocr_provider_not_implemented（诚实不硬造） (0.074042ms)
+✔ P3-A3 — 已选 deepseek 但无 key → ocr_not_configured（P3-b 失败诚实） (0.064959ms)
+✔ P3-A4 — 请求形态：POST 官方端点 + Bearer + multipart(file+purpose 必填) (19.917708ms)
+✔ P3-A5 — 响应归一：pages[].text → text 拼接 + pages 明细 + cost.requests/pages 计量 + 版面标记探针 (0.168166ms)
+✔ P3-A6 — purpose 白名单外 → ocr_purpose_invalid（契约面诚实拒绝） (0.656125ms)
+✔ P3-A7 — 上传体超 100MiB 上限 → ocr_too_large（不发请求） (0.07025ms)
+✔ P3-A8 — HTTP 401 → ocr_http_error 不可重试（key 配置面） (0.118333ms)
+✔ P3-A9 — 响应非 JSON → ocr_bad_response（不静默吞） (0.148584ms)
+✔ P3-B1 — 扫描件 PDF + OCR 未启用 → 诚实 failed 且指路（不静默空索引） (132.513209ms)
+✔ P3-B2 — 扫描件 PDF + OCR 启用（mock adapter）→ ready；OCR 文本入块；ocr.json artifact + note 留痕 (2.199833ms)
+✔ P3-B3 — OCR adapter 失败 → 文档诚实 failed 且错误带 ocr 码（不静默吞） (1.068875ms)
+ℹ tests 13
+ℹ pass 13
+ℹ fail 0

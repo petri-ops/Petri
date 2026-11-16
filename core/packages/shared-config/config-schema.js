@@ -93,6 +93,12 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-454 P3 —— ocr：扫描件 OCR 云渠道授权面（默认关；key 走凭据族不进本文件）。
+  'ocr': {
+    store: 'file:ocr-config.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
   // runtime：全局审批默认档位 + 派生并发/深度 + 工具曝光黑名单。
   // 并发/深度保留 env 覆盖（PETRI_SPAWN_* 是既有部署面，env 优先），审批默认为纯文件。
   'runtime': {
@@ -369,6 +375,30 @@ const CONFIG_KEYS = Object.freeze([
     key: 'webSearch.fetchMaxBytes', family: 'web-search', path: 'fetchMaxBytes',
     type: 'number', domain: { min: 65536, max: 4194304, integer: 'floor' }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
+  },
+  {
+    // BLOCK-454 P3 — OCR 渠道开关（默认关：云调用=付费副作用，P5-a 知情权）。
+    key: 'ocr.enabled', family: 'ocr', path: 'enabled',
+    type: 'boolean', envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // OCR 渠道：deepseek（云 adapter，key 与对话共用）| local（D1 留接口，诚实报未实现）| none 未选。
+    key: 'ocr.provider', family: 'ocr', path: 'provider',
+    type: 'string', domain: { pattern: '^(?:deepseek|local|none)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // DeepSeek OCR purpose（findings §2 契约白名单）：文本识别 | 版面识别。
+    key: 'ocr.purpose', family: 'ocr', path: 'purpose',
+    type: 'string', domain: { pattern: '^(?:text_recognition|rich_layout_recognition)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 单次 OCR 请求超时（大文件/多页文档耗时更长，默认 60s）。
+    key: 'ocr.timeoutMs', family: 'ocr', path: 'timeoutMs',
+    type: 'number', domain: { min: 1000, max: 300000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
   },
   {
     // 可选白名单（逗号分隔域名，含子域）。非空时只允许这些域的抓取/检索结果落地。

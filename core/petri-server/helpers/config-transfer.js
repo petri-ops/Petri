@@ -66,6 +66,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'mcp-tool-policy',
   // BLOCK-205（W6）记忆与压缩策略：只导出用户真正写过的键（覆盖层语义，不含默认值）
   'memory-policy',
+  // BLOCK-454（P3）扫描件 OCR 云渠道授权面（默认关；key 走凭据族，本族只导出授权开关）
+  'ocr',
   'subagent-profile',
   'trust-policy',
   'data-retention',

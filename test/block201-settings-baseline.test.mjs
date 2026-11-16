@@ -44,7 +44,7 @@ test('设置分区清单冻结：13 个分区 id（搜索索引必须逐项覆�
   assert.equal(ids.length, 13, `分区数应为 13（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
-test('配置注册表冻结：19 族 / 108 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键）', () => {
+test('配置注册表冻结：20 族 / 112 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键）', () => {
   // 2026-10-17 两次显式上调（BLOCK-203 W4a）：
   //  P1+P2：8 族/35 键 → 9 族/38 键（user-prefs：theme/fontScale/accent）；
   //  P3   ：9 族/38 键 → 10 族/43 键（skills-prefs：version + disabled.<id>.{at,reason}
@@ -58,9 +58,12 @@ test('配置注册表冻结：19 族 / 108 键（BLOCK-210 data-retention；BLOC
   //   BLOCK-204（W5）：12 族/60 键 → 13 族/65 键（mcp-tool-policy：projectionLimit
   //   + 逐工具 tool/enabled/timeoutMs/contractMode）。
   //   BLOCK-205（W6）：13 族/65 键 → 14 族/75 键（memory-policy：9 可写标量 + 嵌入模型只读）。
+  //   BLOCK-454（P3）：+1 族/4 键（ocr：enabled/provider/purpose/timeoutMs；key 走凭据族）。
+  //   理由：扫描件 OCR 授权面独立成族（与 web-search 同构：能力授权、默认关、即时生效），
+  //   不与联网授权混（渠道语义不同：检索 vs 文档识别）。写面 /api/ocr-access，NO_UI 登记。
   //   BLOCK-206（W7a）：14 族/75 键 → 15 族/81 键（subagent-profile：default + 5 条目字段）。
   //   BLOCK-207（W7b）：15 族/81 键 → 16 族/84 键（trust-policy：defaultLevel + project/level）。
-  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 19);
+  assert.equal(Object.keys(schema.CONFIG_FAMILIES).length, 20);
   //   BLOCK-264（C-37）：18 族/106 键 → 19 族/108 键（model-access：allowedModels 白名单 +
   //     reasonNotes 理由账本；模型选择器权限来源，GET/PUT /api/ai/model-access）。
   //   BLOCK-208（W7c）：84 → 86 键（user-prefs + motion 接线 / density 仅登记）。
@@ -76,7 +79,7 @@ test('配置注册表冻结：19 族 / 108 键（BLOCK-210 data-retention；BLOC
   //     独立成族不塞 network——network 是"往 env 写代理"的源头（有"需重启"语义），两者混族会造出第二套真相）。
   //   BLOCK-249（Q4a）：103 → 105 键（subagent-profile + tools.allow/tools.deny：子代理工具约束只收紧）。
   //   BLOCK-258（Q8-REM）：105 → 106 键（mcp-servers + headers：远程传输自定义凭据头，落盘密文/导出剥离）。
-  assert.equal(schema.CONFIG_KEYS.length, 108);
+  assert.equal(schema.CONFIG_KEYS.length, 112);
 });
 
 test('导出/导入的族集合 == 注册表族集合（漏族/未注册族都算红）', () => {
