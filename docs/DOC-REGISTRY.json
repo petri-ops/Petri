@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 593,
+    "documentCount": 594,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 575
+    "managedMarkdown": 576
   },
   "documents": [
+    {
+      "id": "BLOCK-454-P0-FINDINGS",
+      "path": "docs/block-454-endpoint-contract-findings.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "block-454-endpoint-contract-findings",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "block-454",
+        "p0",
+        "deepseek",
+        "api-contract",
+        "verified"
+      ],
+      "notes": "BLOCK-454 P0 端点契约核实产物（2026-11-16）：基于 DeepSeek 官方 8 页文档逐项核实——3 对话协议 + 7 对话内联能力 + 5 独立工具接口（Search/Fetch/OCR/ASR/TTS），每项 VERIFIED + 官方深链 + Petri 落点判断。Fetch 独立端点细节与 Responses 完整形态标 UNVERIFIED。是后续 P1-P6 开写的硬门依据。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "BLOCK-454",
       "path": "docs/block-454-capability-adapters-plan.md",
