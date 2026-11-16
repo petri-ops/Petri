@@ -8371,6 +8371,25 @@
       ],
       "commands": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "block454-ui704-evidence",
+      "note": "BLOCK-454（e2e W1-W5 五波 acceptance/block-454/p1..p5）与 UI-704（acceptance/ui-704 实机腿+契约测试证据）的存储证据目录：证据变更选本包波次测试重跑（HK-01 契约面）；block-450 为历史存证目录（其收口早已完成、无读取测试），登记避免 unknown fail-closed 误升级——目录存在即被 test-affected 的 evidence.json 虚拟路径扫描覆盖。",
+      "patterns": [
+        "acceptance/block-450/**",
+        "acceptance/block-454/**",
+        "acceptance/ui-704/**"
+      ],
+      "tests": [
+        "test/ui638-vision-default.test.mjs",
+        "test/block454-p2-deepseek-search.test.mjs",
+        "test/block454-p3-ocr.test.mjs",
+        "test/block454-p4-files.test.mjs",
+        "test/block454-p5-responses.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }
