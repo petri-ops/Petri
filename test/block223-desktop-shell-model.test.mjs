@@ -27,16 +27,21 @@ const {
 const { createDesktopShell } = require(path.join(ROOT, 'src/main/desktop-shell.js'));
 
 test('偏好默认值：closeToTray=false / notifyOnTurnEnd=true / quietHours 空；布尔校验拒绝字符串', () => {
-  assert.deepEqual(parseShellPrefs(undefined), { closeToTray: false, notifyOnTurnEnd: true, quietHours: '' });
+  assert.deepEqual(parseShellPrefs(undefined), { closeToTray: false, notifyOnTurnEnd: true, notifyOnUpdates: true, quietHours: '' });
   assert.deepEqual(
     parseShellPrefs({ closeToTray: 'yes', notifyOnTurnEnd: 0 }),
-    { closeToTray: false, notifyOnTurnEnd: true, quietHours: '' },
+    { closeToTray: false, notifyOnTurnEnd: true, notifyOnUpdates: true, quietHours: '' },
     '非布尔不得被真值化',
   );
   assert.deepEqual(
     parseShellPrefs({ closeToTray: true, notifyOnTurnEnd: false, extra: 1 }),
-    { closeToTray: true, notifyOnTurnEnd: false, quietHours: '' },
+    { closeToTray: true, notifyOnTurnEnd: false, notifyOnUpdates: true, quietHours: '' },
     '未知键忽略',
+  );
+  assert.deepEqual(
+    parseShellPrefs({ notifyOnUpdates: false }),
+    { closeToTray: false, notifyOnTurnEnd: true, notifyOnUpdates: false, quietHours: '' },
+    '更新通知可独立关闭',
   );
 });
 
@@ -72,6 +77,35 @@ test('通知门：偏好关 > 未知类型 > 不支持 > 聚焦抑制 > 去重',
     true,
     '超过 3s 去重窗',
   );
+});
+
+// BLOCK-452：更新通知（update_available）复用通知门
+test('更新通知：白名单/前台可见例外/去重/文案', () => {
+  const base = {
+    kind: 'update_available',
+    enabled: true,
+    supported: true,
+    focused: true,   // 前台可见（普通通知会被抑制）
+    visible: true,
+    minimized: false,
+    key: '9.9.9',
+    lastKey: null,
+    lastAt: 0,
+    now: 1_000,
+  };
+  assert.equal(notificationDecision({ ...base, kind: 'random' }).reason, 'unsupported_kind');
+  assert.equal(notificationDecision({ ...base, allowWhenFocused: false }).reason, 'window_focused');
+  assert.equal(notificationDecision({ ...base, allowWhenFocused: true }).show, true, '更新通知前台也弹');
+  assert.equal(notificationDecision({ ...base, allowWhenFocused: true, enabled: false }).reason, 'pref_off');
+  assert.equal(
+    notificationDecision({ ...base, allowWhenFocused: true, lastKey: 'update_available:9.9.9', lastAt: 0, now: 2_000 }).reason,
+    'duplicate',
+    '按版本去重',
+  );
+  const payload = buildNotificationPayload({ kind: 'update_available', label: '9.9.9' });
+  assert.equal(payload.title, 'Petri · 发现新版本');
+  assert.ok(payload.body.includes('9.9.9'));
+  assert.ok(buildNotificationPayload({ kind: 'update_available' }).body.length > 0);
 });
 
 test('通知文案：不含正文，标签与工具名按控制字符/长度清洗', () => {
@@ -140,6 +174,7 @@ test('控制器（无 Electron）：默认状态、偏好更新、通知降级�
     ok: true,
     closeToTray: false,
     notifyOnTurnEnd: true,
+    notifyOnUpdates: true,
     trayActive: false,
     notificationsSupported: false,
     testInstance: true,
@@ -147,9 +182,13 @@ test('控制器（无 Electron）：默认状态、偏好更新、通知降级�
   const updated = shell.updatePrefs({ closeToTray: true, notifyOnTurnEnd: false });
   assert.equal(updated.ok, true);
   assert.equal(updated.changed, true);
-  assert.deepEqual(updated.prefs, { closeToTray: true, notifyOnTurnEnd: false, quietHours: '' });
+  assert.deepEqual(updated.prefs, { closeToTray: true, notifyOnTurnEnd: false, notifyOnUpdates: true, quietHours: '' });
   assert.equal(shell.notify({ kind: 'turn_completed' }).reason, 'pref_off');
-  shell.updatePrefs({ notifyOnTurnEnd: true });
+  // BLOCK-452：turn 通知关但 update 通知独立开 → update 不应因 pref_off 被吞（测试实例下降到 unsupported）
+  assert.equal(shell.notify({ kind: 'update_available' }).reason, 'unsupported');
+  shell.updatePrefs({ notifyOnTurnEnd: true, notifyOnUpdates: false });
+  assert.equal(shell.notify({ kind: 'update_available' }).reason, 'pref_off');
+  shell.updatePrefs({ notifyOnUpdates: true });
   assert.equal(shell.notify({ kind: 'turn_completed' }).reason, 'unsupported');
   assert.equal(shell.respondQuit('cancel').reason, 'no_pending_quit');
   assert.equal(shell.previewQuitSummary().ok, true);

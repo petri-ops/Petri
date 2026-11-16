@@ -66,12 +66,21 @@ function createDesktopShell({
   }
 
   function trayIconPath() {
+    // 换标批（v4 定稿）：主版 icon.png 带宣纸底，直接缩到 16px 会在菜单栏
+    // 糊成米色方块。托盘改用透明底紧凑版；缺失时仍回退主图标，保证不空托盘。
+    const candidates = ['icon-tray.png', 'icon.png'];
     try {
       if (typeof resolveResource === 'function') {
-        const resolved = resolveResource('icons', 'icon.png');
-        if (resolved) return resolved;
+        for (const name of candidates) {
+          const resolved = resolveResource('icons', name);
+          if (resolved && require('node:fs').existsSync(resolved)) return resolved;
+        }
       }
     } catch {}
+    for (const name of candidates) {
+      const candidate = path.join(__dirname, '..', '..', 'icons', name);
+      if (require('node:fs').existsSync(candidate)) return candidate;
+    }
     return path.join(__dirname, '..', '..', 'icons', 'icon.png');
   }
 
@@ -81,6 +90,10 @@ function createDesktopShell({
       const { Tray, Menu, nativeImage } = require('electron');
       const image = nativeImage.createFromPath(trayIconPath());
       const icon = image.isEmpty() ? nativeImage.createEmpty() : image.resize({ width: 16, height: 16 });
+      // macOS 菜单栏按系统明暗反转：透明底墨色弧在深色菜单栏下会消失，
+      // 设为 template 后由系统按 alpha 渲染，浅/深底都可见（朱印随之单色，
+      // 16px 下色彩本就无辨识价值）。非 macOS 上该 API 为 no-op。
+      if (!icon.isEmpty() && typeof icon.setTemplateImage === 'function') icon.setTemplateImage(true);
       tray = new Tray(icon);
       tray.setToolTip('Petri 格物');
       tray.setContextMenu(Menu.buildFromTemplate([
@@ -160,9 +173,12 @@ function createDesktopShell({
   function notify(payload) {
     const win = getMainWindow();
     const alive = Boolean(win && !win.isDestroyed());
+    const kind = payload && payload.kind;
+    const isUpdate = kind === 'update_available';
     const decision = notificationDecision({
-      kind: payload && payload.kind,
-      enabled: prefs.notifyOnTurnEnd,
+      kind,
+      // BLOCK-452：更新通知走独立偏好；其余三类仍受 notifyOnTurnEnd 控制
+      enabled: isUpdate ? prefs.notifyOnUpdates : prefs.notifyOnTurnEnd,
       supported: notificationStatus(),
       focused: alive ? win.isFocused() : false,
       visible: alive ? win.isVisible() : false,
@@ -173,6 +189,7 @@ function createDesktopShell({
       lastKey: lastNotification.key,
       lastAt: lastNotification.at,
       now: Date.now(),
+      allowWhenFocused: isUpdate, // 更新通知前台可见也弹（低频重要）
     });
     if (!decision.show) return { shown: false, reason: decision.reason };
     const built = buildNotificationPayload(payload || {});
@@ -358,6 +375,7 @@ function createDesktopShell({
       ok: true,
       closeToTray: prefs.closeToTray,
       notifyOnTurnEnd: prefs.notifyOnTurnEnd,
+      notifyOnUpdates: prefs.notifyOnUpdates,
       trayActive: Boolean(tray),
       notificationsSupported: notificationStatus(),
       testInstance: isTestInstance,

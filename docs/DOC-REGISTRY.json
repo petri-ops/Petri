@@ -9,11 +9,34 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 591,
+    "documentCount": 592,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 574
+    "managedMarkdown": 575
   },
   "documents": [
+    {
+      "id": "BLOCK-452",
+      "path": "docs/block-452-update-ux-push-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path",
+      "phase": "COMPLETED",
+      "touchSurface": [
+        "frontend/src/hooks/useAutoUpdate.ts",
+        "frontend/src/hooks/useAutoUpdate.test.ts",
+        "frontend/src/lib/electron.d.ts",
+        "src/main/desktop-shell-model.js"
+      ],
+      "tags": [
+        "update-ux",
+        "notification",
+        "polling",
+        "reference-benchmark"
+      ],
+      "notes": "更新 UX 自动推送：定时轮询+前台恢复 check+复用 Q9 app:notify 发系统通知（update_available 白名单扩展）。用户「按建议来 要测试 并且push」。复用通道零新 IPC，换标批 WIP 零触碰。G0 开发期常态。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "E-EYE-GUIDE-2026-11-16",
       "capability": "e-class-human-eye-guide-2026-11-16",

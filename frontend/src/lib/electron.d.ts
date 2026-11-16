@@ -201,6 +201,7 @@ declare global {
           ok: boolean;
           closeToTray: boolean;
           notifyOnTurnEnd: boolean;
+          notifyOnUpdates?: boolean;
           trayActive: boolean;
           notificationsSupported: boolean;
           testInstance: boolean;
@@ -208,13 +209,14 @@ declare global {
         setShellPrefs: (prefs: {
           closeToTray?: boolean;
           notifyOnTurnEnd?: boolean;
+          notifyOnUpdates?: boolean;
         }) => Promise<{
           ok: boolean;
           changed?: boolean;
-          prefs?: { closeToTray: boolean; notifyOnTurnEnd: boolean };
+          prefs?: { closeToTray: boolean; notifyOnTurnEnd: boolean; notifyOnUpdates?: boolean };
         }>;
         notify: (payload: {
-          kind: 'turn_completed' | 'turn_failed' | 'approval_required';
+          kind: 'turn_completed' | 'turn_failed' | 'approval_required' | 'update_available';
           conversationId?: string;
           label?: string;
           toolName?: string;

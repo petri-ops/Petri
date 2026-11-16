@@ -12,6 +12,7 @@
 const DEFAULT_PREFS = Object.freeze({
   closeToTray: false,
   notifyOnTurnEnd: true,
+  notifyOnUpdates: true, // BLOCK-452：更新通知独立偏好，默认开（低频重要，不受 turn 总开关牵连）
   quietHours: '',
 });
 
@@ -22,6 +23,7 @@ const NOTIFY_KINDS = Object.freeze({
   turn_completed: 'Petri · 本轮完成',
   turn_failed: 'Petri · 本轮失败',
   approval_required: 'Petri · 需要你的确认',
+  update_available: 'Petri · 发现新版本', // BLOCK-452：更新通知（复用 app:notify 通道）
 });
 
 const COUNT_LABELS = Object.freeze({
@@ -57,6 +59,7 @@ function parseShellPrefs(input) {
   if (input && typeof input === 'object') {
     if (typeof input.closeToTray === 'boolean') out.closeToTray = input.closeToTray;
     if (typeof input.notifyOnTurnEnd === 'boolean') out.notifyOnTurnEnd = input.notifyOnTurnEnd;
+    if (typeof input.notifyOnUpdates === 'boolean') out.notifyOnUpdates = input.notifyOnUpdates;
     if (typeof input.quietHours === 'string' && QUIET_PATTERN.test(input.quietHours.trim())) {
       out.quietHours = input.quietHours.trim();
     }
@@ -153,6 +156,7 @@ function notificationDecision({
   lastAt,
   now,
   dedupeMs = NOTIFY_DEDUPE_MS,
+  allowWhenFocused = false, // BLOCK-452：update_available 前台也弹（低频重要通知）
 } = {}) {
   if (!enabled) return { show: false, reason: 'pref_off', key: null };
   if (!Object.prototype.hasOwnProperty.call(NOTIFY_KINDS, kind)) {
@@ -162,7 +166,7 @@ function notificationDecision({
     return { show: false, reason: 'quiet_hours', key: null };
   }
   if (!supported) return { show: false, reason: 'unsupported', key: null };
-  if (focused && visible && !minimized) return { show: false, reason: 'window_focused', key: null };
+  if (!allowWhenFocused && focused && visible && !minimized) return { show: false, reason: 'window_focused', key: null };
   const dedupeKey = `${kind}:${sanitizeText(key, 120)}`;
   const at = Number(now) || Date.now();
   if (lastKey && lastKey === dedupeKey && at - Number(lastAt || 0) < dedupeMs) {
@@ -177,7 +181,9 @@ function buildNotificationPayload(input = {}) {
   if (!title) return null;
   const label = sanitizeText(input.label, 60);
   let body = '';
-  if (input.kind === 'approval_required') {
+  if (input.kind === 'update_available') {
+    body = label ? `新版本 ${label} 已就绪，可在设置页下载` : '有新版本可用，可在设置页下载';
+  } else if (input.kind === 'approval_required') {
     const toolName = sanitizeText(input.toolName, 40);
     body = toolName ? `工具 ${toolName} 正在等待你的授权` : '有工具调用正在等待你的授权';
   } else if (input.kind === 'turn_failed') {
