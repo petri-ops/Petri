@@ -9,9 +9,9 @@ import { SETTINGS_SECTIONS, type SettingsSection } from './types';
  * 分组标题 + 当前分组说明；窄窗口收成图标栏时靠 `title` 暴露标题。
  *
  * BLOCK-424 — 信息架构分层：`core` 分区常驻，`advanced` 分区（决策原语 /
- * 推理档位 / 实验特性 / 运行时与诊断）收进「高级」折叠组，默认不展开。
- * 实机盘点依据：决策原语 29 输入 / 118 下拉 / 9152 字符、运行时与诊断 8846 字符，
- * 属绝大多数用户不关注、也不该被诱导点击的面。深链进入高级分区时自动展开。
+ * 推理档位 / 实验特性 / 运行时与诊断）收进「高级」分组，默认展开（用户裁决
+ * 2026-11-16「高级不折叠，直接展开」）：低频分区仍按语义归组，但不再默认收起，
+ * 用户仍可手动折叠。深链进入高级分区时同样展开。
  */
 interface Props {
   visibleSectionIds: Set<string>;
@@ -31,12 +31,11 @@ export function SettingsNav({ visibleSectionIds, activeSection, onSelect }: Prop
   const coreSections = visibleSections.filter((item) => item.tier === 'core');
   const advancedSections = visibleSections.filter((item) => item.tier === 'advanced');
   const activeMeta = visibleSections.find((item) => item.id === activeSection);
-  const activeIsAdvanced = advancedSections.some((item) => item.id === activeSection);
-  // 深链/搜索命中的高级分区必须可见，否则用户会以为跳转失败。
-  // 派生而非 effect 内同步 setState（后者会级联重渲染，lint 硬红）：默认跟随当前分区，
-  // 用户手动展开/收起后进入 override 态，再次点选分区即回到「跟随当前分区」。
+  // 用户裁决 2026-11-16「高级不折叠，直接展开」：默认展开，不再跟随当前分区折叠。
+  // 派生而非 effect 内同步 setState（后者会级联重渲染，lint 硬红）：默认展开，
+  // 用户手动收起后进入 override 态，再次点选分区即回到「默认展开」。
   const [advancedOpenOverride, setAdvancedOpenOverride] = useState<boolean | null>(null);
-  const advancedOpen = advancedOpenOverride ?? activeIsAdvanced;
+  const advancedOpen = advancedOpenOverride ?? true;
 
   const handleSelect = (id: SettingsSection): void => {
     setAdvancedOpenOverride(null);
