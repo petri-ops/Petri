@@ -342,9 +342,10 @@ const CONFIG_KEYS = Object.freeze([
     mutable: true, ui: 'settings',
   },
   {
-    // 检索后端。目前只有 searxng（自建实例）；'none' 表示未选（检索工具会诚实报未配置）。
+    // 检索后端。searxng（自建实例，默认推荐）| deepseek（BLOCK-454 P2 云端可选渠道，
+    // key 走凭据族）| 'none' 未选（检索工具会诚实报未配置）。
     key: 'webSearch.provider', family: 'web-search', path: 'provider',
-    type: 'string', domain: { pattern: '^(?:searxng|none)?$' }, envKeys: [], aliases: [],
+    type: 'string', domain: { pattern: '^(?:searxng|deepseek|none)?$' }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
   {

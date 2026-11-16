@@ -138,6 +138,26 @@ function getSnapshot() {
       message: '已选 SearXNG 检索后端但未填实例地址：检索会返回「未配置」而不是空结果。',
     });
   }
+  // BLOCK-454 P2 — deepseek 渠道的可用性判定走凭据族（key 在不在由 credential store
+  // 现读；本文件仍不存凭据，与文件头「若将来要 key，走凭据族」边界一致）。
+  let deepseekKeyPresent = false;
+  if (effective.enabled && effective.provider === 'deepseek') {
+    try {
+      // eslint-disable-next-line global-require
+      const { getApiKey } = require('./ai-settings');
+      deepseekKeyPresent = Boolean(getApiKey('deepseek'));
+    } catch {
+      deepseekKeyPresent = false;
+    }
+    if (!deepseekKeyPresent) {
+      diagnostics.push({
+        code: 'deepseek-search-key-missing',
+        family: FAMILY,
+        path: 'provider',
+        message: '已选 DeepSeek 搜索后端但未配置 DeepSeek API key：检索会返回「未配置」而不是空结果。可在 设置 → AI 设置 填 key，或改选 SearXNG。',
+      });
+    }
+  }
   return {
     effective,
     stored: readStore(),
@@ -145,7 +165,10 @@ function getSnapshot() {
     blockedHosts: blocked,
     /** 能力可用性（前端直接照此显示，不自行推导） */
     capabilities: {
-      search: effective.enabled && effective.provider === 'searxng' && Boolean(effective.searxngBaseUrl),
+      search: effective.enabled && (
+        (effective.provider === 'searxng' && Boolean(effective.searxngBaseUrl))
+        || (effective.provider === 'deepseek' && deepseekKeyPresent)
+      ),
       fetch: effective.enabled,
     },
     diagnostics,

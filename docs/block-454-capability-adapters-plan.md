@@ -32,10 +32,10 @@
 - HK-01 红→绿：ui638-vision-default 4/4；邻域回归 57 项 0 红。证据：`acceptance/block-454/p1/`（绑定探针 + 红绿记录 + 修复记录）。external-blocked：Windows 安装版文件腿（跨机不可达）。
 - 验收：有 key 的 deepseek profile 上识图不再 no_api_key（迁移后 vision 绑定可解析 + capability 门通过）；`image_url` 契约测试绿（block150 既有覆盖 + 本卡迁移契约）。
 
-### P2 — 搜索 adapter（中）
-- 在 `web-search-provider.js` 窄口加 `deepseek-search` adapter（独立 Search API `/v1/tools/search`：query/count/need_content，响应 results[] 含 rerank_score/authority/snippet/summary）；SearXNG 保持默认/本地主权首选。
-- 对话内联 `deepseek_web_search`（服务端搜索 + citations）属 Responses/协议层，见 P5，不在本阶段硬塞进 web_search 工具。
-- 验收：adapter 契约测试（钳位/来源标签/未配置诚实报 `web_search_not_configured`/`cost.requests`+`cost.bytes`）；有 key 则补真端点证据，无 key 标 external-blocked。
+### P2 — 搜索 adapter（中）——**已完成 2026-11-17（e2e 波次 W2）**
+- `web-search-provider.js` 窄口加 `deepseek-search` adapter（POST `/v1/tools/search` + Bearer，body `{query,count,need_content:false}`；响应归一到既有形状，rerank_score/authority 保留）；SearXNG 保持默认/本地主权首选（契约 9 钉住）。key 走凭据族（credential store 'deepseek'，与对话共用），web-search-config 不存凭据边界不变；schema provider 枚举扩 `deepseek`，snapshot capabilities.search 支持双渠道 + key-missing 诊断。
+- HK-01 红→绿：block454-p2 契约 10/10（钳位/来源标签/未配置诚实报/成本计量/query 128 上限/401 不可重试）；邻域 53/53。secret/arch PASS，零新依赖。
+- external-blocked（D2 预置）：真端点实机腿不做（无独立授权 key + 付费副作用），契约级证据覆盖。证据：`acceptance/block-454/p2/`。
 
 ### P3 — OCR 通用窄口 + adapter（大）
 - 新建独立 `ocr(file,options)` 窄口 subsystem（**不塞进 registerProvider 的 chat/embedding/both capabilities**——OCR 是工具语义）。DeepSeek OCR adapter（`/v1/tools/ocr`，multipart file+purpose，响应 `pages[].text` + `<｜ref｜>/<｜box｜>` 版面标记）+ 本地 OCR 路（离线优先，引擎须用户裁决——新依赖默认 no）。

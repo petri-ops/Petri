@@ -1,0 +1,13 @@
+✔ P2 契约 0 — deepseek 进入 SEARCH_PROVIDERS 窄口清单 (0.699875ms)
+✔ P2 契约 1 — 未配置 key 诚实报 web_search_not_configured（不空数组冒充） (0.266541ms)
+✔ P2 契约 2 — 请求形态：POST 官方端点 + Bearer + {query,count,need_content:false} (0.395208ms)
+✔ P2 契约 3 — 结果归一：source=主机名、snippet 钳位 400、坏行丢弃、deepseek 特有字段保留 (0.225208ms)
+✔ P2 契约 4 — 有界：count 钳位进窄口上限（>20 → 20）、truncated 标记、域名黑名单过滤 (0.225792ms)
+✔ P2 契约 5 — 成本计量：cost.requests=1、cost.bytes>0、cost.results=条数 (0.4575ms)
+✔ P2 契约 6 — query 超 deepseek 渠道上限 128 字符 → 诚实 web_query_too_long (0.114334ms)
+✔ P2 契约 7 — HTTP 401 → web_search_http_error 且不可重试（key 无效属配置面） (0.098333ms)
+✔ P2 契约 8 — 0 结果仍 ok=true，note 诚实说明（不冒充「没有这个主题」） (0.104333ms)
+✔ P2 契约 9 — SearXNG 默认不变：provider=searxng 走既有 GET 形态（P3-c 本地主权） (0.470208ms)
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
