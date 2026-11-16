@@ -233,11 +233,13 @@ test('BLOCK-338 P2：首 token stall 自动重试一次（idle 不重试，二�
     calls.length = 0;
     modelGateway.chat = async () => {
       calls.push(1);
-      return { error: 'stream_stalled', phase: 'idle', elapsedMs: 1300 };
+      // STALL-ROOT：idle 段「已有可见交付输出」才不重试；用 emittedOutput 显式表达
+      // （旧 mock 仅靠 phase:'idle' 当代理，新契约以是否产出 content/tool_call 为准）。
+      return { error: 'stream_stalled', phase: 'idle', emittedOutput: true, elapsedMs: 1300 };
     };
     const idle = await callChatProvider('deepseek', 'sk', { messages: [] }, {}, () => {});
     assert.equal(idle.phase, 'idle');
-    assert.equal(calls.length, 1, 'idle 段已有输出，不得重试（避免重复内容）');
+    assert.equal(calls.length, 1, 'idle 段已有可见输出，不得重试（避免重复内容）');
 
     calls.length = 0;
     modelGateway.chat = async () => {
@@ -259,7 +261,8 @@ test('BLOCK-338 P2：首 token stall 不发 error 事件（留给重试），idl
   await firstTokenGateway.chat({ role: 'chat', body: { messages: [] }, onEvent: (event) => events.push(event) });
   assert.equal(events.filter((event) => event.type === 'error').length, 0, '可重试的 stall 不应先给前端报错');
 
-  const idleGateway = makeGateway(() => Promise.resolve({ error: 'stream_stalled', phase: 'idle', elapsedMs: 1300 }));
+  // STALL-ROOT：带 emittedOutput:true 表示 idle 段已有可见输出——不可重试→照发 error。
+  const idleGateway = makeGateway(() => Promise.resolve({ error: 'stream_stalled', phase: 'idle', emittedOutput: true, elapsedMs: 1300 }));
   await idleGateway.chat({ role: 'chat', body: { messages: [] }, onEvent: (event) => events.push(event) });
   assert.equal(events.filter((event) => event.type === 'error').length, 1, 'idle stall 应发诚实 error 事件');
 });

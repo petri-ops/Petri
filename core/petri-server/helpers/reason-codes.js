@@ -99,6 +99,7 @@ const REASONS = Object.freeze({
   provider_retry: { category: 'provider', template: '上游调用失败正在重试（第 {attempt} 次）：{detail}' },
   stream_stall: { category: 'provider', template: '模型流式响应停滞（{phase}）。' },
   stream_stalled_first_token: { category: 'provider', template: '首 token 前流式停滞，已按首 token 段策略重试。' },
+  stream_stalled_no_output: { category: 'provider', template: '流式停滞但本轮无可见输出（仅思考段），已按零输出策略安全重试。' },
   // —— 不可信输入面 ——
   manifest_chain_broken: { category: 'input', template: '上一份交付清单损坏，链在此断开（不静默新起）。' },
   zip_entry_limit_exceeded: { category: 'input', template: '压缩包条目数超上限（>{maxEntries}）。' },

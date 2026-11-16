@@ -79,14 +79,21 @@ function callChatProvider(providerName, apiKey, body, telemetry, onEvent, option
     errorsAsRejections: !!(options && options.errorsAsRejections),
   });
   return invoke().then((result) => {
-    // BLOCK-338 P2 — 首 token 段 stall 是零输出的瞬态（上游在发心跳但没吐 token），
-    // 自动重试一次救回「一次上游抽风毁掉整轮」；idle 段 stall 已有部分输出，
-    // 重放会重复内容 → 不重试，原样返回由上层如实报。第二次仍 stall 直接返回。
-    if (result && result.error === 'stream_stalled' && result.phase === 'first_token') {
+    // BLOCK-338 P2 / STALL-ROOT — stall 可重试判据是「本轮零可见交付输出」而非 phase。
+    // reasoning_delta 会把看门狗 phase 推到 idle，但 reasoning 不是交付内容：模型只吐
+    // reasoning 后卡死（idle + emittedOutput=false）同样是零输出瞬态，重放安全，应重试。
+    // 真正吐了 content/tool_call（emittedOutput=true）才不重试，防重复交付。
+    // emittedOutput 未显式为 true（兼容旧 mock/调用方）时按零输出处理。第二次仍 stall 直接返回。
+    if (result && result.error === 'stream_stalled' && result.emittedOutput !== true) {
       // BLOCK-365（W1）重试可观测：不把重试当错误，也不把重试藏起来。
       if (typeof onEvent === 'function') {
         try {
-          onEvent({ type: 'provider_retry', reason: 'stream_stalled_first_token', elapsedMs: result.elapsedMs || null, attempt: 2 });
+          onEvent({
+            type: 'provider_retry',
+            reason: result.phase === 'first_token' ? 'stream_stalled_first_token' : 'stream_stalled_no_output',
+            elapsedMs: result.elapsedMs || null,
+            attempt: 2,
+          });
         } catch { /* 观测回调失败不影响重试 */ }
       }
       return invoke();

@@ -328,7 +328,15 @@ class ModelGateway {
           result = gatewayError(
             'stream_stalled',
             `模型流式响应停滞（${stallInfo.phase === 'first_token' ? '首 token' : '连续无 token'} ${stallInfo.elapsedMs}ms），已中止本次调用`,
-            { phase: stallInfo.phase, elapsedMs: stallInfo.elapsedMs, profileId: profile.id }
+            {
+              phase: stallInfo.phase,
+              elapsedMs: stallInfo.elapsedMs,
+              profileId: profile.id,
+              // STALL-ROOT：是否已有可见交付输出（content/tool_call）。reasoning_delta
+              // 会把看门狗 phase 推到 idle，但不算交付内容——上层据此判「重放是否重复」，
+              // 比用 phase 代理更精确（idle 无输出时重放安全，应重试）。
+              emittedOutput,
+            }
           );
         }
       } else {
@@ -388,11 +396,14 @@ class ModelGateway {
       }
       // 终局 attempt 的流中断：不向前端发 error 事件（上层整轮重试还会再来），直接异常穿透。
       if (rejection) throw rejection;
-      // BLOCK-338 P2 — 首 token 段 stall 属「零输出、可安全重试」：不发 error 事件，
-      // 把决定权交给上层（agent 路径据此重试一次）；idle 段 stall 已产出内容，不发重试，
-      // 事件照发让前端诚实显示。二次仍 stall 时上层按 result.error 如实报。
-      const retryableStall = result && result.error === 'stream_stalled' && result.phase === 'first_token';
-      // BLOCK-376（S1 / G-11）——首 token stall 此前被完全抑制（不发 error 等上层重试，
+      // BLOCK-338 P2 / STALL-ROOT — stall 是否可安全重试，判据为「本轮是否已产出可见
+      // 交付输出（content/tool_call）」而非 phase。reasoning_delta 会把看门狗 phase 从
+      // first_token 推到 idle，但 reasoning 不是交付内容——「只吐 reasoning 后卡死」的
+      // idle stall 同样零可见输出、重放不重复，应等同首 token stall 重试一次。
+      // emittedOutput 未显式为 true（兼容旧 mock/调用方）时按零输出处理。
+      const stallNoVisibleOutput = result && result.error === 'stream_stalled' && result.emittedOutput !== true;
+      const retryableStall = stallNoVisibleOutput;
+      // BLOCK-376（S1 / G-11）——可重试 stall 此前被完全抑制（不发 error 等上层重试，
       // 但上层不重试的调用方=完全不可见）。改发带 reasonCode 的可观测事件（非 error
       // 终态，不破坏重试语义；轨迹面按 stream_stall 呈现）。
       if (retryableStall && typeof onEvent === 'function') {
@@ -400,7 +411,7 @@ class ModelGateway {
           type: 'stream_stall',
           phase: result.phase,
           elapsedMs: result.elapsedMs || null,
-          reasonCode: 'stream_stalled_first_token',
+          reasonCode: result.phase === 'first_token' ? 'stream_stalled_first_token' : 'stream_stalled_no_output',
         });
       }
       if (typeof onEvent === 'function' && result && result.error && !retryableStall) {
