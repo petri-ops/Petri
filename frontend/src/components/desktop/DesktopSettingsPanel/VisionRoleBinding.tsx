@@ -43,12 +43,10 @@ export function VisionRoleBinding({ profiles, value, onChange }: VisionRoleBindi
           ))}
         </select>
       </label>
-      {visionProfiles.length === 0 ? (
+      {visionProfiles.length === 0 && (
         <p className="petri-field__hint" role="note">
           暂无可选渠道：先在下方渠道行勾选「视觉」能力（渠道网关需支持图片输入）。
         </p>
-      ) : (
-        <p className="petri-field__hint">换绑后贴图即走所选渠道；其网关须真正支持图片输入，否则调用会诚实报错。</p>
       )}
     </div>
   );

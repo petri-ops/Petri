@@ -39,13 +39,9 @@ export function EmbeddingRoleBinding({ profiles, value, onChange }: EmbeddingRol
           ))}
         </select>
       </label>
-      {embeddingProfiles.length === 0 ? (
+      {embeddingProfiles.length === 0 && (
         <p className="petri-field__hint" role="note">
-          暂无向量渠道：在下方渠道行勾选「向量」能力（该端点需支持 /embeddings 且输出 1024 维，如 bge-m3）。
-        </p>
-      ) : (
-        <p className="petri-field__hint">
-          用于知识空间语义检索与对话记忆召回；模型输出必须为 1024 维，否则整批拒收并降级（不影响聊天）。
+          暂无向量渠道：在下方渠道行勾选「向量」能力（端点需支持 /embeddings 且输出 1024 维，如 bge-m3）。
         </p>
       )}
     </div>

@@ -226,11 +226,12 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <>
             <div className="petri-settings-section__heading">
               <h3>API Endpoint</h3>
-              <p>
-                为每个渠道选择接口协议，再配置供应商、Base URL、Key 和默认模型；模型能力由后端统一适配。Key
-                {credentialBackend === 'keychain' ? ' 保存在 macOS Keychain。' : ' 保存在独立本地凭据存储。'}
+              <p
+                title="Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。"
+              >
+                配置渠道的协议、供应商、Base URL、Key 和默认模型；模型能力由后端适配。Key 保存在
+                {credentialBackend === 'keychain' ? ' macOS Keychain' : ' 本地凭据存储'}，默认隐藏。
               </p>
-              <p className="petri-field__hint">Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。</p>
             </div>
             <VisionRoleBinding
               profiles={userModelProfiles}
@@ -250,7 +251,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                   <span>Base URL</span>
                   <span>Key</span>
                   <span>默认模型</span>
-                  <span>上下文窗口</span>
+                  <span>上下文</span>
                   <span>思考</span>
                   <span>视觉</span>
                   <span>向量</span>
@@ -367,7 +368,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
-                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文窗口</span>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文</span>
                     <ContextWindowScale
                       compact
                       value={profile.contextWindow}

@@ -601,6 +601,8 @@
   font-weight: 620;
   text-transform: none;
   letter-spacing: 0.02em;
+  /* UI-699 — 列名不换行（「上下文」等短标签在窄列内保持单行；截图此前 4 字换行成两行） */
+  white-space: nowrap;
 }
 
 .petri-endpoint-card__delete,
