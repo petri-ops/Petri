@@ -1,4 +1,4 @@
-最后更新：2026-11-16（**交接执行队列①~④全部走完**：①probe 仍 404→②BLOCK-451 M-55 completed（acceptance/block-451/）→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，2 项已有材料指针 / 5 项补六段决策材料 / E 类路线核对，全批终态 pending 不变）→④next:suggest。待办分类清单现为 外部 1 / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起 / G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
+最后更新：2026-11-16（**用户裁决 P6 销号 + 交接队列①~④全部走完**：用户显式裁决「生信层面垂直领域非当下需求，清理掉」→ P6 pressure 腿从活跃待办销号、移入 §五已裁决延期/挂起（历史 404 事实与 BLOCK-448 原补腿条件原样保留，不冒充通过）；外部条件 **1→0**。①probe 仍 404→②BLOCK-451 M-55 completed→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，全批终态 pending 不变）→④next:suggest。待办现为 外部 **0** / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起（含 P6 销号）/ G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
 
 ---
 
@@ -21,13 +21,14 @@
 
 > 事实来源：`acceptance/m-blueprint-2026-11-11/m7/gap-ledger.json` + `m4/m5a` 原档 + AUDIT-LOG 🟡 区当次核对。本节是交接快照，不是第二真相源：各项终态以各自 evidence 原档为准；清偿时在对应工作包收口并增量更新本节。
 
-### 一、等外部条件（1 项）
+### 一、等外部条件（0 项）
 
-| 项 | 卡点 | 解锁动作 |
-| --- | --- | --- |
-| P6 pressure 腿重采（BLOCK-448/449 唯一 external 原册） | `r-enrichment` capability bundle HTTP 404（probe 2026-11-15T07:37Z；**2026-11-16T08:12Z 接手复探仍 404**：`NoSuchBucket` / `x-oss-ec=0015-00000101` / `x-oss-request-id=6AFABB051F68273335CA2338`） | bundle 恢复 → `npm run g0:result-studio:p6:update` → `closeout:full` 复跑 |
+> **2026-11-16 用户裁决销号**：P6 pressure 腿重采（原 BLOCK-448/449 唯一 external 原册，依赖 `r-enrichment` 生信 capability bundle）经用户显式裁决「生信层面的垂直领域不是当下的需求，清理掉」→ **从活跃待办销号**，不再作为解锁动作追踪。
+> - **销号依据 = 用户裁决，不是 bundle 恢复**。`r-enrichment` bundle HTTP 404 是历史事实（probe 2026-11-15T07:37Z / 2026-11-16T08:12Z 均 404，`NoSuchBucket` / `x-oss-ec=0015-00000101`），原样保留、不改写。
+> - `docs/block-448-p6-recovery-driver-syntax-plan.md` §7.3 的原补腿条件（bundle 恢复 → `npm run g0:result-studio:p6:update` → `closeout:full` 三连）作为历史证据原样保留，**不冒充已执行、不冒充 P6 通过**。
+> - 下游影响：P6 pressure 腿不再纳入当前验收范围；P6 恢复腿（BLOCK-448 active-crash PASS + BLOCK-449 崩溃注入 31/31）与 Result Studio 状态（implemented_unverified / experimental、RS-P7 deferred）均不变。
 
-附注：dev 库本体 4 组 seq 碰撞行将在下次后端启动时由 BLOCK-450 重排逻辑自愈（副本已验证），无需人工动作。probe 未恢复 ⇒ 执行队列走 ②（M-55）。
+附注：dev 库本体 4 组 seq 碰撞行将在下次后端启动时由 BLOCK-450 重排逻辑自愈（副本已验证），无需人工动作。
 
 ### 二、等用户裁决（U 类，Agent 不可代答）
 
@@ -56,7 +57,7 @@
 
 ### 五、已裁决延期/挂起（条件触发，非欠账）
 
-Windows 代码签名（待证书）· i18n 抽离（待国际化决策）· C-34 Claude 缓存断点（待 G1+ 预算）· CP-19 数据桥 WS 化（宜整段设计）· **G0 `macos-arm64: qualified` 视觉证据唯一性问题**（2026-07-27 裁决暂不发布故挂起；**重开条件=任何对外发布前必须先处理**）· G0-RS-P7 重资格（G1+）。
+**P6 pressure 腿重采（2026-11-16 用户裁决「生信垂直领域非当下需求，清理掉」→ 活跃待办销号；历史 external 404 事实与 BLOCK-448 §7.3 原补腿条件原样保留，不冒充通过；重开条件=用户重新裁决需求 + bundle 恢复）** · Windows 代码签名（待证书）· i18n 抽离（待国际化决策）· C-34 Claude 缓存断点（待 G1+ 预算）· CP-19 数据桥 WS 化（宜整段设计）· **G0 `macos-arm64: qualified` 视觉证据唯一性问题**（2026-07-27 裁决暂不发布故挂起；**重开条件=任何对外发布前必须先处理**）· G0-RS-P7 重资格（G1+）。
 
 ### 六、G1+ 出籍（阶段禁区，不算待办）
 
