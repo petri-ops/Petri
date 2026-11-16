@@ -21,8 +21,8 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
   return (
     <section className="petri-settings-section">
       <div className="petri-settings-section__heading">
-        <h3>隐私与维护</h3>
-        <p>控制匿名错误反馈，并处理诊断和应用更新。</p>
+        <h3>数据与维护</h3>
+        <p>数据目录、备份、诊断与反馈；更新会在界面上主动提示，不用进这里找。</p>
       </div>
       {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}
       <SettingsField
@@ -45,14 +45,19 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
       <p className="petri-field__hint" role="note" data-testid="local-sovereignty-note">
         本机优先：数据、模型凭据与产物均保存在本机，核心链路本地运行、全程可审计。
       </p>
-      <SettingsField icon="refresh" label="应用更新" trailing hint="检查并下载当前系统的安装包">
-        <UpdateChecker />
-      </SettingsField>
       <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">
         <ExportDiagnostic />
       </SettingsField>
       {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}
       <ConfigTransferPanel onChanged={onConfigChanged} />
+      {/* UI-704 — 更新检查移出主位（用户裁决「设置内部不实用」）：页面内 UpdateCard
+          主动呈现；此处保留折叠的手动检查入口（功能不删，搜索可达）。 */}
+      <details className="petri-settings-advanced-details">
+        <summary>手动检查更新（通常不需要——新版本会自动在页面上出现）</summary>
+        <SettingsField icon="refresh" label="应用更新" trailing hint="检查并下载当前系统的安装包">
+          <UpdateChecker />
+        </SettingsField>
+      </details>
     </section>
   );
 }

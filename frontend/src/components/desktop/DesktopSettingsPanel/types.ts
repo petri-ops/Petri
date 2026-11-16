@@ -33,10 +33,12 @@ export type SettingsSection =
   | 'maintenance';
 
 /**
- * 分区层级（BLOCK-424）：`core` = 日常会用、常驻左栏；`advanced` = 开发者/高频调参向，
- * 收进左栏「高级」折叠组，默认不展开。判据来自 2026-11-11 实机盘点：
- * 决策原语 29 输入 / 118 下拉 / 9152 字符、运行时与诊断 8846 字符，均属绝大多数用户
- * 不需要关注与点击的面。
+ * 分区层级（BLOCK-424）：`core` = 日常会用、常驻左栏；`advanced` = 低频调参向，
+ * 收进左栏「高级」折叠组。
+ * UI-704（设置页 IA v2，设计源 docs/settings-ia-simplification-design.md）：core
+ * 收敛到 5 组（models/appearance/desktop/usage/maintenance），network/compute/keymap/
+ * general 等降为高级折叠组子项（功能不删、搜索可达）；`general`（配置迁移）并入
+ * maintenance，深链经 normalizeInitialSection 映射，不产生死链。
  */
 export type SettingsTier = 'core' | 'advanced';
 
@@ -52,20 +54,31 @@ export const SETTINGS_SECTIONS: Array<{
   icon: IconName;
   tier: SettingsTier;
 }> = [
-  { id: 'appearance', label: '外观', description: '主题、字号与动效', icon: 'sun', tier: 'core' },
-  { id: 'desktop', label: '通知与桌面', description: '通知、托盘与免打扰', icon: 'bell', tier: 'core' },
-  { id: 'models', label: '模型接口', description: 'URL、模型与 Key', icon: 'bot', tier: 'core' },
-  { id: 'network', label: '联网与代理', description: '代理、证书与检索', icon: 'globe', tier: 'core' },
-  { id: 'compute', label: '计算与数据', description: '存储、远程目标与回收站', icon: 'database', tier: 'core' },
-  { id: 'usage', label: '用量与资源', description: '成本、缓存与机器状态', icon: 'bar-chart', tier: 'core' },
-  { id: 'keymap', label: '快捷键', description: '命令键位与冲突', icon: 'key', tier: 'core' },
-  { id: 'general', label: '配置迁移', description: '从外部 Agent 导入', icon: 'download', tier: 'core' },
-  { id: 'maintenance', label: '隐私与维护', description: '反馈、更新与备份', icon: 'shield', tier: 'core' },
-  { id: 'decisions', label: '决策原语', description: '决策接点、审批与编排', icon: 'zap', tier: 'advanced' },
+  { id: 'models', label: '模型接口', description: '模型、API Key 与能力渠道', icon: 'bot', tier: 'core' },
+  { id: 'appearance', label: '外观', description: '主题、字号与强调色', icon: 'sun', tier: 'core' },
+  { id: 'desktop', label: '通知与桌面', description: '提醒、托盘与免打扰', icon: 'bell', tier: 'core' },
+  { id: 'usage', label: '用量与资源', description: '成本、缓存与本机状态', icon: 'bar-chart', tier: 'core' },
+  { id: 'maintenance', label: '数据与维护', description: '数据、备份与反馈', icon: 'shield', tier: 'core' },
+  { id: 'decisions', label: '治理与决策', description: 'Agent 规则、审批与审计', icon: 'zap', tier: 'advanced' },
   { id: 'reasoning', label: '推理档位', description: '思考档位与协议映射', icon: 'brain', tier: 'advanced' },
-  { id: 'experimental', label: '实验特性', description: '尚未定型的开关', icon: 'sparkles', tier: 'advanced' },
+  { id: 'network', label: '联网与代理', description: '代理、证书与检索', icon: 'globe', tier: 'advanced' },
+  { id: 'compute', label: '远程与计算', description: '远程目标与 Harness 环境', icon: 'database', tier: 'advanced' },
+  { id: 'keymap', label: '快捷键', description: '命令键位与冲突', icon: 'key', tier: 'advanced' },
   { id: 'diagnostics', label: '运行时与诊断', description: '服务、运行时与日志', icon: 'terminal', tier: 'advanced' },
+  { id: 'experimental', label: '实验特性', description: '尚未定型的开关', icon: 'sparkles', tier: 'advanced' },
 ];
+
+/**
+ * UI-704 — 深链归一（?section= 旧值映射，不失效）：
+ *  · `general`（原「配置迁移」独立分区）→ `maintenance`（两功能已并入同一分区）；
+ *  · 其余合法 id 原样返回；非法/未知 id → undefined（调用方落默认分区）。
+ * 参数收 string（URL 原始值），校验在本函数内完成——调用方无需先行断言。
+ */
+export function normalizeInitialSection(section?: string): SettingsSection | undefined {
+  if (!section) return undefined;
+  if (section === 'general') return 'maintenance';
+  return SETTINGS_SECTIONS.some((item) => item.id === section) ? (section as SettingsSection) : undefined;
+}
 
 export interface UsageSummary {
   calls: number;

@@ -91,6 +91,15 @@
 - **证据**：EndpointEditorDensity 契约 5/5（列名/文案/nowrap）+ VisionRoleBinding 3/3 + EmbeddingRoleBinding 4/4 + theme-token-contract 19/19 + tsc 0。
 - **实机边界（如实）**：9223 离屏截图曾过目——本机视口命中**窄容器堆叠路径**（表头隐藏、字段标签显形），可见的「上下文」字段标签单行、说明已压为一段；**宽表头 11 列路径本机视口未复现**，其 nowrap 由契约测试与 CSS 主定义锁定，未做宽视口几何量测。按「DOM 断言≠视觉验收 / 观感不代签」纪律不标 verified，宽表头观感留人眼过目。CDP 深探因投入产出比过低放弃，临时 flow/证据未入库。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## UI-704: 设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 **in_progress（代码+契约测试+主题门禁绿；实机截图/观感项 pending_human_eye 不代签）**）
+
+- **设计源**：`docs/settings-ia-simplification-design.md`（v2 激进版）+ 用户三条裁决（联网代理/快捷键不占显眼位置；更新页面内主动呈现）+ 设计宪法 R2 三层信息架构。**蓝图书号取号**：UI-703 已用，本包取 UI-704（台账核对未占用）。
+- **W 归属声明**：本包按 AGENTS.md 台账纪律同步本条追加行；本轮改动域=DesktopSettingsPanel（types/SettingsNav/主组件/MaintenanceSection）+ 新文件 UpdateCard/ChannelPreferencePanel + settingsSearch 索引 + desktop.css/SettingsQuickwins 增量；他方 WIP 零触碰。
+- **交付**：① 左栏 core 5 组（模型接口/外观/通知与桌面/用量与资源/数据与维护），network/compute/keymap/decisions/reasoning/diagnostics/experimental 降为「高级」折叠组**默认收起**（深链进入自动展开；功能零删除、搜索可达）；② `?section=` 深链归一 `general→maintenance`（配置迁移并入数据与维护；ExternalImportPanel 随迁）；③ 全局设置快捷键随平台（macOS Cmd+, / Win Ctrl+,，App.tsx keydown）；④ 页面内 UpdateCard（复用 useAutoUpdate BLOCK-452/453 主进程轮询推送，available 即主界面右下呈现，版本号/下载/稍后/关闭/下载完成→安装；设置内手动检查降为折叠 details 主位移除）；⑤ models「能力渠道」折叠块（BLOCK-454 槽位显化：检索后端 searxng 默认/deepseek 可选 + OCR 渠道 none 默认/deepseek/local 留接口，REST /api/web-access + /api/ocr-access 直连）；⑥ settingsSearch 索引随 retier 同步（general 关键词并入 maintenance，搜索可达不回退）。
+- **验证（代码）**：HK-01 红→绿——SettingsNav 契约 6/6（core 5 组在场/高级默认收起/深链自动展开/深链归一/general 并入）+ UpdateCard 3/3（呈现/关闭/推送到达/下载完成→安装）+ ChannelPreferencePanel 3/3（默认标注/PUT 写面/默认折叠）；设置域邻域 126/126（29 文件）；theme-token-contract 19/19（新增 CSS 棘轮 4 处按合规改写 + small 棘轮 3 文件登记带理由）；settingsSearch 8/8；quality:types PASS。证据=`acceptance/ui-704/`。
+- **实机腿（9223 离屏，2026-11-17）**：`ui704-live` flow **11/11 allPass**（core 5 组逐项/高级默认收起/快捷键不在首屏/展开后 7 子项可见/`?section=general` 归一 maintenance 同屏/`?section=diagnostics` 自动展开+激活/能力渠道折叠块默认收起+展开后双选择器在场且 SearXNG 默认/UpdateCard 无推送缺席/Cmd+, 快捷键进设置）；截图 5 张在册（全页 PNG 非元素级裁剪，诚实标注）；instance=9223 离屏跑完立即 kill、未设 PETRI_TEST_ONSCREEN；证据=`acceptance/ui-704/live-flow.json` + `shots/`。
+- **证据等级与诚实边界**：机械断言+实机腿已过；**宽窄视口观感/卡片与折叠块视觉过目 = pending_human_eye，需用户裁决**（D8 预置裁决同款「待外部确认」：观感归用户，Agent 不代签、不冒 verified；截图为全页非元素级裁剪，如实标注）。
+
 ## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **改动**：`frontend/src/components/copilot/copilotClient/agentTaskStream.ts` 新增 `task.failed` 事件消费（结构化 reason/reasonCode，error 兼容载荷优先级不变）；`types.ts` 声明 `onTaskFailed`。tsc 0。

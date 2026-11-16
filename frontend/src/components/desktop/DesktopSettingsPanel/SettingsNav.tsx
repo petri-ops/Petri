@@ -8,10 +8,11 @@ import { SETTINGS_SECTIONS, type SettingsSection } from './types';
  * BLOCK-423 — 视觉改版（参照 reference/ZCode）：分区按语义分组，左栏承载
  * 分组标题 + 当前分组说明；窄窗口收成图标栏时靠 `title` 暴露标题。
  *
- * BLOCK-424 — 信息架构分层：`core` 分区常驻，`advanced` 分区（决策原语 /
- * 推理档位 / 实验特性 / 运行时与诊断）收进「高级」分组，默认展开（用户裁决
- * 2026-11-16「高级不折叠，直接展开」）：低频分区仍按语义归组，但不再默认收起，
- * 用户仍可手动折叠。深链进入高级分区时同样展开。
+ * UI-704 — 设置页 IA v2（设计源 docs/settings-ia-simplification-design.md）：
+ * core 收敛 5 组（导航极少），低频分区收进「高级」折叠组并**默认收起**
+ * （对标 orca「pane 多但靠搜索」的反面：导航极少 + 搜索兜底——用户三条裁决
+ * 「联网/快捷键不占显眼位置」直接执行）。深链进入高级分区时自动展开；
+ * 功能零删除，全部子项搜索可达。
  */
 interface Props {
   visibleSectionIds: Set<string>;
@@ -19,11 +20,11 @@ interface Props {
   onSelect: (section: SettingsSection) => void;
 }
 
-/** 常驻分区的展示分组：只影响阅读顺序，不改 id 与深链语义。 */
+/** 常驻分区（core 5 组）的展示分组：只影响阅读顺序，不改 id 与深链语义。 */
 const NAV_GROUPS: Array<{ label: string; ids: SettingsSection[] }> = [
+  { label: '能力', ids: ['models'] },
   { label: '应用', ids: ['appearance', 'desktop'] },
-  { label: '能力', ids: ['models', 'network', 'compute', 'usage'] },
-  { label: '系统', ids: ['keymap', 'general', 'maintenance'] },
+  { label: '系统', ids: ['usage', 'maintenance'] },
 ];
 
 export function SettingsNav({ visibleSectionIds, activeSection, onSelect }: Props): React.ReactElement {
@@ -31,11 +32,12 @@ export function SettingsNav({ visibleSectionIds, activeSection, onSelect }: Prop
   const coreSections = visibleSections.filter((item) => item.tier === 'core');
   const advancedSections = visibleSections.filter((item) => item.tier === 'advanced');
   const activeMeta = visibleSections.find((item) => item.id === activeSection);
-  // 用户裁决 2026-11-16「高级不折叠，直接展开」：默认展开，不再跟随当前分区折叠。
-  // 派生而非 effect 内同步 setState（后者会级联重渲染，lint 硬红）：默认展开，
-  // 用户手动收起后进入 override 态，再次点选分区即回到「默认展开」。
+  // UI-704 — 高级折叠组默认收起；派生默认值跟随「当前分区是否属高级」：
+  // 深链进入高级分区（?section=diagnostics 等）时自动展开，核心分区时收起。
+  // 用户手动开合进入 override 态，再次点选分区即回到派生默认。
   const [advancedOpenOverride, setAdvancedOpenOverride] = useState<boolean | null>(null);
-  const advancedOpen = advancedOpenOverride ?? true;
+  const activeIsAdvanced = (SETTINGS_SECTIONS.find((item) => item.id === activeSection)?.tier ?? 'core') === 'advanced';
+  const advancedOpen = advancedOpenOverride ?? activeIsAdvanced;
 
   const handleSelect = (id: SettingsSection): void => {
     setAdvancedOpenOverride(null);

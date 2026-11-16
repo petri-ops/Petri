@@ -23,6 +23,8 @@ import { BackendStatusProvider } from '@/components/backend/BackendStatusProvide
 import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
+// UI-704 — 页面内更新卡片（检测到新版本主动呈现，不再让用户进设置找）
+import { UpdateCard } from '@/components/desktop/UpdateCard';
 // BLOCK-200 P1 — 键位注册表运行时面（Provider + App 级派发器）
 import { KeymapProvider, useAppKeymapDispatcher } from '@/lib/appKeymapContext';
 import { useAppCommands } from '@/components/copilot/useAppCommands';
@@ -98,6 +100,19 @@ function AppShell(): React.ReactElement {
   const navigateForPalette = (to: string): void => {
     void navigate(to);
   };
+  // UI-704 / D6 — 全局设置快捷键随平台（macOS Cmd+, / Windows·Linux Ctrl+,）：
+  // 任意页面一键进设置（orca 的 Cmd-, 范式借形；设置内搜索是设置页自带搜索框）。
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key === ',' && !event.altKey && !event.shiftKey) {
+        event.preventDefault();
+        void navigate('/settings');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [navigate]);
   const { commands, recentConversations, selectConversation } = useAppCommands({
     enabled: isOpen,
     navigate: navigateForPalette,
@@ -228,6 +243,8 @@ function AppShell(): React.ReactElement {
         </main>
         </div>
         <TestInstanceBadge />
+        {/* UI-704 — 页面内更新卡片：主进程轮询发现新版本即在此呈现（可关闭） */}
+        <UpdateCard />
         <CommandPalette
           open={isOpen}
           onClose={close}

@@ -1,0 +1,68 @@
+{
+  "capturedAt": "2026-11-16T17:16:48.766Z",
+  "surface": "settings IA v2 (UI-704)",
+  "instance": "9223 offscreen test instance（跑完立即 kill，未设 PETRI_TEST_ONSCREEN）",
+  "viewport": "1600x1000",
+  "results": [
+    {
+      "name": "core 5 组在场",
+      "ok": true,
+      "detail": "[\"模型接口\",\"外观\",\"通知与桌面\",\"用量与资源\",\"数据与维护\"]"
+    },
+    {
+      "name": "core 组为 模型接口/外观/通知与桌面/用量与资源/数据与维护",
+      "ok": true,
+      "detail": "[\"模型接口\",\"外观\",\"通知与桌面\",\"用量与资源\",\"数据与维护\"]"
+    },
+    {
+      "name": "高级分组默认收起",
+      "ok": true,
+      "detail": "aria-expanded=false"
+    },
+    {
+      "name": "快捷键不在 core 首屏",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "高级展开后快捷键/联网与代理可见（搜索可达兜底在场）",
+      "ok": true,
+      "detail": "[\"模型接口\",\"外观\",\"通知与桌面\",\"用量与资源\",\"数据与维护\",\"治理与决策\",\"推理档位\",\"联网与代理\",\"远程与计算\",\"快捷键\",\"运行时与诊断\",\"实验特性\"]"
+    },
+    {
+      "name": "深链 ?section=general 归一到 maintenance（配置迁移+数据与维护同屏）",
+      "ok": true,
+      "detail": "{\"hasImportPanel\":true,\"hasMaintenance\":true}"
+    },
+    {
+      "name": "深链 ?section=diagnostics 高级组自动展开 + 分区激活",
+      "ok": true,
+      "detail": "{\"expanded\":\"true\",\"active\":\"运行时与诊断\"}"
+    },
+    {
+      "name": "能力渠道折叠块在场且默认折叠",
+      "ok": true,
+      "detail": "{\"present\":true,\"expanded\":\"false\",\"selectVisible\":false}"
+    },
+    {
+      "name": "渠道选择器在场：检索=SearXNG 默认 + OCR 渠道选择",
+      "ok": true,
+      "detail": "{\"search\":\"none\",\"searchHasSearxng\":true,\"ocr\":\"none\"}"
+    },
+    {
+      "name": "UpdateCard 无更新推送时缺席",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cmd+, 全局快捷键进入设置页",
+      "ok": true,
+      "detail": "path=/settings"
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "pass": 11,
+    "fail": 0
+  }
+}

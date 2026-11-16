@@ -334,6 +334,28 @@
   padding: 20px 22px 28px;
 }
 
+/* UI-704 — 维护分区「手动检查更新」折叠块：功能保留但不占主位（更新由页面内 UpdateCard 主动呈现）。 */
+.petri-settings-advanced-details {
+  margin-top: var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  padding: var(--petri-space-2) var(--petri-space-3);
+}
+
+.petri-settings-advanced-details > summary {
+  cursor: pointer;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
+}
+
+.petri-settings-advanced-details > summary:hover {
+  color: var(--petri-text);
+}
+
+.petri-settings-advanced-details[open] > summary {
+  margin-bottom: 6px;
+}
+
 .petri-settings-section {
   width: min(100%, 720px);
   margin: 0 auto;

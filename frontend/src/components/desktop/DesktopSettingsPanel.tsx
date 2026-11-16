@@ -34,11 +34,13 @@ import { getBridge } from '@/lib/desktopBridge';
 import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
 import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
 import { EndpointCapabilityToggle } from './DesktopSettingsPanel/EndpointCapabilityToggle';
+// UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位：检索后端/OCR 渠道）
+import { ChannelPreferencePanel } from './DesktopSettingsPanel/sections/ChannelPreferencePanel';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
 // UI-393 — 返回按钮样式单一真源（与 Skills/知识空间页头同款 backBtn）
 import backStyles from '@/pages/global-page.module.css';
 // ── BLOCK-9.2 PHASE 1: types + helpers + section subcomponents ──
-import { Props, SettingsSection, SETTINGS_SECTIONS } from './DesktopSettingsPanel/types';
+import { Props, SettingsSection, SETTINGS_SECTIONS, normalizeInitialSection } from './DesktopSettingsPanel/types';
 // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁（渠道/角色/凭据/连通性/导入导出）。
 import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointProfilesEditor';
 // BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合）
@@ -61,8 +63,11 @@ import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { TerminalPanel } from '@/pages/project-workspace';
 import { credentialId } from './DesktopSettingsPanel/model-types';
 export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
-  // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传；非法值由类型域外校验兜底 general）
-  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? 'appearance');
+  // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传）。
+  // UI-704 — 深链归一：general（配置迁移并入 maintenance）→ maintenance；非法值落默认。
+  const [activeSection, setActiveSection] = useState<SettingsSection>(
+    normalizeInitialSection(initialSection) ?? 'appearance',
+  );
   const activeSectionMeta = SETTINGS_SECTIONS.find((item) => item.id === activeSection) || SETTINGS_SECTIONS[0];
   // BLOCK-201 W2 — 搜索/分区过滤/按区重置（状态机外置：面板已贴 code-size 预算，见钩子注释）
   const {
@@ -197,15 +202,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         {activeSection === 'appearance' && <AppearanceSection />}
         {activeSection === 'desktop' && <DesktopSection />}
         {activeSection === 'network' && <NetworkSection />}
-        {activeSection === 'general' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>配置迁移</h3>
-              <p>从其他 Agent 工具导入配置：只读预览 → 勾选确认 → 应用（可回滚），凭据永不导入。</p>
-            </div>
-            <ExternalImportPanel />
-          </section>
-        )}
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
@@ -243,6 +239,10 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               value={roleBindings.embedding}
               onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, embedding: profileId }))}
             />
+            {/* UI-704 — 能力渠道折叠块（BLOCK-454 槽位显化）：识图/向量绑定在上方主位，
+                检索后端与 OCR 渠道按设计（settings-ia-simplification-design.md §六）
+                统一收进本折叠块，不新增左栏分组。 */}
+            <ChannelPreferencePanel />
             <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="petri-endpoint-list-header" aria-hidden="true">
@@ -581,11 +581,21 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         )}
 
         {activeSection === 'maintenance' && (
-          <MaintenanceSection
-            telemetryEnabled={telemetryEnabled}
-            onToggleTelemetry={(next) => void handleToggleTelemetry(next)}
-            onConfigChanged={bumpVersion}
-          />
+          <>
+            <MaintenanceSection
+              telemetryEnabled={telemetryEnabled}
+              onToggleTelemetry={(next) => void handleToggleTelemetry(next)}
+              onConfigChanged={bumpVersion}
+            />
+            {/* UI-704 — 原 general「配置迁移」并入数据与维护（深链 ?section=general 归一到这里） */}
+            <section className="petri-settings-section">
+              <div className="petri-settings-section__heading">
+                <h3>配置迁移</h3>
+                <p>从其他 Agent 工具导入配置：只读预览 → 勾选确认 → 应用（可回滚），凭据永不导入。</p>
+              </div>
+              <ExternalImportPanel />
+            </section>
+          </>
         )}
 
         {activeSection === 'experimental' && (

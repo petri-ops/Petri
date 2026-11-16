@@ -187,3 +187,38 @@
   display: none;
 }
 
+/* UI-704 — 能力渠道折叠块（ChannelPreferencePanel）：折叠开关行 + 展开体。
+   内容级样式；容器几何简单（无 grid/flex 链路），token 全走 --petri-*。 */
+.collapsibleToggle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+  width: 100%;
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text);
+  cursor: pointer;
+  font-size: var(--petri-font-size-body);
+}
+
+.collapsibleToggle:hover {
+  border-color: var(--petri-border-strong);
+}
+
+.collapsibleToggle small {
+  color: var(--petri-text-tertiary);
+  font-size: var(--petri-font-size-sm);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  margin-top: var(--petri-space-2);
+  padding: var(--petri-space-3);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+}

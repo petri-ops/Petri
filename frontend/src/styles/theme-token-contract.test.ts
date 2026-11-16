@@ -369,7 +369,12 @@ describe('theme token contract', () => {
       // BLOCK-423/424/425 设置页：+11 = 导航描述 / 分组标签 / 字段提示 / 导入面板元信息 / 高级折叠标签与计数 / 字段右侧读数
       // （次级元信息合法 sm 域，对标 status.module.css 与 UI-593 空态描述先例；正文性文字一律 body）。
       'components/desktop/settings-redesign.module.css': 11,
-      'components/desktop/desktop.css': 16,
+      // UI-704 — 维护分区「手动检查更新」折叠摘要行：+1（次级元信息合法 sm 域，对标 BLOCK-424 高级折叠标签先例）
+      'components/desktop/desktop.css': 17,
+      // UI-704 — models「能力渠道」折叠开关元信息：+1（次级元信息合法 sm 域）
+      'components/desktop/DesktopSettingsPanel/sections/SettingsQuickwins.module.css': 1,
+      // UI-704 — 页面内 UpdateCard：说明行 + 错误行两处次级元信息（合法 sm 域，对标 status.module.css 先例）
+      'components/desktop/UpdateCard.module.css': 2,
       'components/result-studio/ScientificInteractionViewer.module.css': 15,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,
       'pages/extensions/styles.module.css': 12,

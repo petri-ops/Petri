@@ -1,0 +1,77 @@
+/* UpdateCard.module.css — 页面内更新卡片（UI-704）。
+   主题 token 全走 --petri-*（theme-token-contract 门禁）；卡片层级=surface 页面上的
+   浮层卡（elevated），不引入新层级色。 */
+
+.card {
+  position: fixed;
+  right: var(--petri-space-4);
+  bottom: var(--petri-space-4);
+  z-index: var(--petri-z-raised); /* 通知族同档（BLOCK-413 层级 token） */
+  max-width: min(380px, calc(100vw - 32px));
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  box-shadow: var(--petri-shadow-menu);
+  padding: var(--petri-space-3) var(--petri-space-4);
+  color: var(--petri-text);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-md, 8px);
+  background: var(--petri-bg-subtle);
+  color: var(--petri-text-secondary);
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.titles strong {
+  font-size: var(--petri-font-size-body);
+}
+
+.titles small {
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.close {
+  display: inline-flex;
+  padding: var(--petri-space-2);
+  border-radius: var(--petri-radius-sm, 6px);
+  border: none;
+  background: transparent;
+  color: var(--petri-text-tertiary);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}
+
+.error {
+  margin: var(--petri-space-2) 0 0;
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
+}

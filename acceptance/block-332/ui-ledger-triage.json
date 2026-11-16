@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-11T08:04:41.605Z",
+  "generatedAt": "2026-11-16T17:17:58.417Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 497,
-  "uniqueIds": 488,
+  "sections": 499,
+  "uniqueIds": 490,
   "counts": {
     "live-missing": 13,
-    "verified": 450,
+    "verified": 452,
     "blocked": 22,
     "closed": 12
   },
@@ -79,10 +79,16 @@
   ],
   "blocked": [
     {
-      "id": "UI-695",
+      "id": "UI-703",
       "deps": [],
       "external": true,
-      "title": "聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**；2026-11-06 BLOCK-359 W"
+      "title": "API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 **in_progress（代码+契约测试+主题门禁绿；实机截图过目窄容器路径，"
+    },
+    {
+      "id": "UI-704",
+      "deps": [],
+      "external": true,
+      "title": "设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 *"
     },
     {
       "id": "UI-656",
@@ -97,12 +103,6 @@
       ],
       "external": false,
       "title": "pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；ifra"
-    },
-    {
-      "id": "UI-200",
-      "deps": [],
-      "external": true,
-      "title": "BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **in_progress（代码+组件"
     },
     {
       "id": "UI-304",
@@ -120,7 +120,7 @@
       "id": "UI-331",
       "deps": [],
       "external": true,
-      "title": "左栏会话行短式相对时间（用户参考图裁决）(2026-09-10 in_progress)"
+      "title": "左栏会话行短式相对时间（用户参考图裁决）(**verified**：10-30 RW-02 实机 + 2026-11-16 当次 flow 复核，标题 in_progress 漂移"
     },
     {
       "id": "UI-391",

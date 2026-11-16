@@ -2,7 +2,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SettingsNav } from './SettingsNav';
-import { SETTINGS_SECTIONS, type SettingsSection } from './types';
+import { normalizeInitialSection, SETTINGS_SECTIONS, type SettingsSection } from './types';
 
 afterEach(cleanup);
 
@@ -20,26 +20,53 @@ function renderNav(activeSection: SettingsSection = 'appearance') {
   return { onSelect };
 }
 
-describe('SettingsNav 高级分组默认态', () => {
-  it('当前在核心分区时，高级分组默认展开（advanced 项直接可见）', () => {
+describe('UI-704 设置页 IA v2 — 左栏 core 5 组 + 高级折叠', () => {
+  it('core 5 组：模型接口/外观/通知与桌面/用量与资源/数据与维护 常驻左栏', () => {
+    const coreIds = SETTINGS_SECTIONS.filter((item) => item.tier === 'core').map((item) => item.id);
+    expect(coreIds).toEqual(['models', 'appearance', 'desktop', 'usage', 'maintenance']);
+  });
+
+  it('快捷键与联网与代理不在 core（高级折叠组内，搜索可达）', () => {
+    renderNav('appearance');
+    // 左栏直接可见的项数 = core 5 + 1 个高级折叠开关
+    const navButtons = screen.getAllByRole('button').filter((b) => b.className.includes('petri-settings-nav__item'));
+    expect(navButtons.length).toBe(5);
+    expect(screen.queryByText('快捷键')).toBeNull();
+    expect(screen.queryByText('联网与代理')).toBeNull();
+    // 搜索可达：visibleSectionIds 含全部分区时，展开高级即可见
+    fireEvent.click(screen.getByRole('button', { name: /高级/ }));
+    expect(screen.getByText('快捷键')).toBeTruthy();
+    expect(screen.getByText('联网与代理')).toBeTruthy();
+  });
+
+  it('高级分组默认收起（UI-704：导航极少 + 搜索兜底），手动展开后可见', () => {
     renderNav('appearance');
     const toggle = screen.getByRole('button', { name: /高级/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByText('运行时与诊断')).toBeNull();
+    fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    // 高级分区「运行时与诊断」的 label 应直接可见（默认未折叠）
     expect(screen.getByText('运行时与诊断')).toBeTruthy();
   });
 
-  it('用户可手动收起高级分组，收起后 advanced 项隐藏', () => {
-    renderNav('appearance');
-    const toggle = screen.getByRole('button', { name: /高级/ });
-    fireEvent.click(toggle);
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByText('运行时与诊断')).toBeNull();
-  });
-
-  it('选中高级分区本身时同样展开，不因深链进入而折叠', () => {
+  it('深链进入高级分区时自动展开（?section=diagnostics 不折叠）', () => {
     renderNav('diagnostics');
     const toggle = screen.getByRole('button', { name: /高级/ });
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByText('运行时与诊断')).toBeTruthy();
+  });
+
+  it('深链归一：?section=general → maintenance（旧深链不失效）；其余 id 原样；非法值不产生未知分区', () => {
+    expect(normalizeInitialSection('general')).toBe('maintenance');
+    expect(normalizeInitialSection('network')).toBe('network');
+    expect(normalizeInitialSection('keymap')).toBe('keymap');
+    expect(normalizeInitialSection('models')).toBe('models');
+    expect(normalizeInitialSection('made-up-section' as SettingsSection)).toBeUndefined();
+    expect(normalizeInitialSection(undefined)).toBeUndefined();
+  });
+
+  it('配置迁移（原 general 分区）并入 maintenance：其 id 不再出现在导航列表', () => {
+    expect(SETTINGS_SECTIONS.some((item) => item.id === 'general')).toBe(false);
+    expect(SETTINGS_SECTIONS.some((item) => item.id === 'maintenance')).toBe(true);
   });
 });
