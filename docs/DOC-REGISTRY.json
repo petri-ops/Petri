@@ -9,11 +9,28 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 590,
+    "documentCount": 591,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 573
+    "managedMarkdown": 574
   },
   "documents": [
+    {
+      "id": "E-EYE-GUIDE-2026-11-16",
+      "capability": "e-class-human-eye-guide-2026-11-16",
+      "path": "docs/e-class-human-eye-guide-2026-11-16.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "human-eye",
+        "e-class",
+        "guide",
+        "ui-ledger"
+      ],
+      "notes": "交接 E 类 22 条人眼项诚实分层（11 verified/2 cancelled/9 in_progress，其中 3 条可过目）+ 可操作过目指引；Agent 给判断建议不代签，签字槽保持 pending_human_eye。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "U-E-RECON-2026-11-16",
       "capability": "u-e-decision-materials-reconciliation-2026-11-16",

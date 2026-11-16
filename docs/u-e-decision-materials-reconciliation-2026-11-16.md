@@ -11,7 +11,7 @@ reopen: 用户裁决后按候选另立切片；人眼签字后按路线回写台
 
 # U 类 7 项 + E 类人眼：决策材料 / 测试路线对账清单（2026-11-16）
 
-> **状态**：本文是**决策输入与对账清单**，不是验收证据，`evidenceClass: decision-material`。U 类各项 `pending_user_ruling`、E 类各项 `pending_human_eye`；`verdict` 禁用 PASS/verified/completed。Agent 不代答、不替签、不改默认语义。
+> **状态**：本文是**决策输入与对账清单**，不是验收证据，`evidenceClass: decision-material`。U 类裁决结果见 **§9（2026-11-16 用户裁决采纳推荐、全部维持现状、逐项销号）**；原档历史终态（`pending_user_ruling` 等）在 gap-ledger 中原样保留不改写；E 类各项 `pending_human_eye`。`verdict` 禁用 PASS/verified/completed。Agent 不代答、不替签、不改默认语义。
 > 发令：主控提示词 2026-11-16 执行队列③「U 类 7+ 项、E 类人眼项：出决策材料/测试路线，标终态」。
 > 事实来源：`acceptance/m-blueprint-2026-11-11/m7/gap-ledger.json`（原档终态）+ `m5a` 证据 + 各工作包 plan + 当次只读核对（2026-11-16）。
 > 阶段纪律：G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -193,5 +193,26 @@ A2 会把"未设 env 任意命令可用"改为 fail-closed，改变既有用户�
 - U 类 7 项终态维持 `pending_user_ruling`（第 4 项原档另带 external-blocked、第 5 项另带 W，均不改）；E 类维持 `pending_human_eye`。
 - 用户裁决任一项后，按各材料"补腿条件"另立切片；裁决前不得据本材料开工。
 - 换标批 WIP（19 图标 + `desktop-shell.js` + `icon-tray.png`）与 12+ untracked 用户资产零触碰。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 9. 用户裁决结果（2026-11-16）
+
+> **裁决原话**：「U 类 7 项 都行 按你的建议自主搞完 尽可能不要我参与进来」。即用户采纳 Agent 在 §0 / §2~§7 逐项给出的推荐——**七项推荐均为"维持现状"候选（A1/B1/D1）**，故裁决语义 = **7 项全部维持现状、无需另立切片、从活跃待办销号**。
+> **销号 ≠ 实现完成**：本批零产品代码、零配置改动、零默认语义改动；gap-ledger 与各 plan 证据原档的历史终态（`pending_user_ruling` / `external-blocked` / `W` / `done-partial`）原样保留，不改写、不冒充 PASS/verified/completed。
+
+| # | U 类项 | 采纳推荐 | 裁决结果 |
+| --- | --- | --- | --- |
+| 1 | U-04 档位收敛（M-43） | B1 维持现状（`post-h9-k1` 决策 B） | 保持 `accessMode` 现状、不改 `permissions.js`/`contracts.js` 默认语义 → 销号 |
+| 2 | TypeScript 双版本（M-65） | D1 保持（`post-h9-k4`） | 不升不降、不改门、不动 `package.json` 版本/锁文件 → 销号 |
+| 3 | npm workspaces 迁移（M-66） | A1 维持两独立包 | 不引入 workspaces、不改包结构 → 销号 |
+| 4 | test:changed 拆片范围（M-59） | A1 维持定向优先、拆片交 CI | 不改 `test-affected.mjs`、不加门级超时 → 销号（原档 external-blocked 事实保留） |
+| 5 | evals 接 closeout（M-58） | A1 不接阻塞链、保留独立 `--report` | 不改 closeout 链、evals 读数仍可选跑 → 销号（原档 W 事实保留） |
+| 6 | MCP 白名单默认（M5-A W5） | A1 维持仅显式 env 生效、默认不收窄 | 不翻默认白名单、注入硬字符恒拒已生效 → 销号（原档 done-partial 事实保留） |
+| 7 | CP-16/17/18 注记冲突对账 | A1 只登记冲突、不改两处原档 | 竞争力纲视作 reference 母纲、不自行改注记 → 销号 |
+
+**重开条件**：用户重新裁决某项的 A2/A3 候选时，按各材料"补腿条件"另立切片；否则本节即终态。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

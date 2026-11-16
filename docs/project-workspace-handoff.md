@@ -1,4 +1,4 @@
-最后更新：2026-11-16（**用户裁决 P6 销号 + 交接队列①~④全部走完**：用户显式裁决「生信层面垂直领域非当下需求，清理掉」→ P6 pressure 腿从活跃待办销号、移入 §五已裁决延期/挂起（历史 404 事实与 BLOCK-448 原补腿条件原样保留，不冒充通过）；外部条件 **1→0**。①probe 仍 404→②BLOCK-451 M-55 completed→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，全批终态 pending 不变）→④next:suggest。待办现为 外部 **0** / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起（含 P6 销号）/ G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
+最后更新：2026-11-16（**用户裁决 P6 销号 + 交接队列①~④全部走完**：用户显式裁决「生信层面垂直领域非当下需求，清理掉」→ P6 pressure 腿从活跃待办销号、移入 §五已裁决延期/挂起（历史 404 事实与 BLOCK-448 原补腿条件原样保留，不冒充通过）；外部条件 **1→0**。①probe 仍 404→②BLOCK-451 M-55 completed→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，全批终态 pending 不变）→④next:suggest。**用户裁决 U 类 7 项全部销号**（「都行 按你的建议自主搞完」→ 7 项均采纳维持现状推荐、销号≠实现完成，原档终态不改写，见对账文档 §9）。待办现为 外部 **0** / U 类裁决 **0（7 项已销号）** / 可执行候选 **0** / E 类人眼 22 条（用户逐个过目中）/ 延期挂起（含 P6 销号）/ G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
 
 ---
 
@@ -30,17 +30,19 @@
 
 附注：dev 库本体 4 组 seq 碰撞行将在下次后端启动时由 BLOCK-450 重排逻辑自愈（副本已验证），无需人工动作。
 
-### 二、等用户裁决（U 类，Agent 不可代答）
+### 二、等用户裁决（U 类，Agent 不可代答）——**2026-11-16 已全部裁决销号（0 项待裁决）**
 
-| 项 | 来源 |
-| --- | --- |
-| U-04 档位收敛（IDE `accessMode` / `tools_only` 强制） | gap-ledger M-43 |
-| TypeScript 双版本决策（`^5.9.3` vs `^5.5.4`） | M-65 |
-| npm workspaces 迁移评估 | M-66 |
-| test:changed 长耗时拆片范围 | M-59 |
-| evals 接入 closeout（改 `package.json` + 裁决） | M-58 |
-| MCP 白名单默认（BLOCK-434 M5-A 唯一 done-partial） | m5a 原档 |
-| 竞争力纲 CP-16/17/18：vision 注记 vs BLOCK-176 work-package 注记冲突对账 | BLOCK-449 S0 登记 |
+> **用户裁决**：「U 类 7 项 都行 按你的建议自主搞完 尽可能不要我参与进来」→ 逐项采纳推荐，7 项推荐均为"维持现状"，故全部**维持现状、无需另立切片、销号**。销号≠实现完成：零产品代码/配置/默认语义改动，gap-ledger 与 plan 证据原档历史终态原样保留不改写。逐项裁决表与重开条件见 `docs/u-e-decision-materials-reconciliation-2026-11-16.md` §9。
+
+| 项 | 来源 | 裁决 |
+| --- | --- | --- |
+| ~~U-04 档位收敛（IDE `accessMode` / `tools_only` 强制）~~ | gap-ledger M-43 | 采纳 B1 维持现状 → 销号 |
+| ~~TypeScript 双版本决策（`^5.9.3` vs `^5.5.4`）~~ | M-65 | 采纳 D1 保持 → 销号 |
+| ~~npm workspaces 迁移评估~~ | M-66 | 采纳 A1 维持两独立包 → 销号 |
+| ~~test:changed 长耗时拆片范围~~ | M-59 | 采纳 A1 维持定向优先 → 销号 |
+| ~~evals 接入 closeout~~ | M-58 | 采纳 A1 不接阻塞链 → 销号 |
+| ~~MCP 白名单默认~~ | m5a 原档 | 采纳 A1 维持仅显式 env → 销号 |
+| ~~竞争力纲 CP-16/17/18 注记冲突对账~~ | BLOCK-449 S0 | 采纳 A1 只登记不改原档 → 销号 |
 
 ### 三、可执行候选（有实现路径，需用户发令）
 
