@@ -14,6 +14,7 @@
     ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
     ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
     ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/ui695-331-modelcfg-time-live.cjs",
     "acceptance/block-449/evidence/verify-deliverables.mjs"
   ],
   "project": [
@@ -49,6 +50,7 @@
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d2-geometry-live.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui-d4-a11y-live.cjs",
     ".agents/skills/petri-dev-infra/dev-verify/flows/m7-longtask-resume-live.cjs",
+    ".agents/skills/petri-dev-infra/dev-verify/flows/ui695-331-modelcfg-time-live.cjs",
     "acceptance/block-449/evidence/verify-deliverables.mjs"
       ]
     },

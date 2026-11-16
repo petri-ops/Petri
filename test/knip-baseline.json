@@ -195,7 +195,6 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-ui.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
-    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui695-331-modelcfg-time-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
