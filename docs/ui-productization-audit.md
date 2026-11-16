@@ -136,12 +136,12 @@
 - **待补**：dev Electron 实机腿（面板真连后端、pdf 真渲染），通过后转 verified。
 - **BLOCK-359 W0 维护注记（领域中性清偿，不新增交互面）**：FederationJobs 两处占位示例文案「如 deseq2」改「对端节点已注册的工具名」（错误提示 + input placeholder；领域中性棘轮基线本记 0，文件归 0 自然对齐，未放宽棘轮）；computer_close 活动词表双侧补齐（后端 TOOL_ACTIVITY_VERBS+fixture、前端 toolActivity 动词/图标 eye，5/5+26/26）。
 
-## UI-695: 聊天输入框模型快捷配置 + 折叠时机改为任务级（2026-11-05 **in_progress（代码+组件测试完成，待实机观感）**；2026-11-06 BLOCK-359 W0 注记：modelConfigAndCollapse.test.tsx 断言双断言形态修复（lint/tsc 互斥，先例 RuntimePolicyPanel），vitest 6/6）
+## UI-695: 聊天输入框模型快捷配置 + 折叠时机改为任务级（**verified（2026-11-16）**：9223 离屏 flow `ui695-331-modelcfg-time-live` 8/8 断言 allPass——模型菜单快捷区在场 + 上下文窗口控件在场(value=1000000) + 思考强度控件在场(level=standard)；证据=`acceptance/ui-695-331-modelcfg-time/`；组件侧 6/6 早已绿）
 
 - **模型配置下沉到输入框**（UI-MODELCFG-1）：模型菜单新增「上下文窗口 / 思考强度」两项就地切换——上下文窗口选档（32K/64K/128K/200K）后写回当前模型档案（`POST /api/ai/settings` 部分更新，设置页 SWR 同源刷新）；思考强度与 composer 既有按钮同源（`applyThinkingLevel`，会话级）。原先改这两项要进设置页逐模型操作。
 - **折叠时机改为任务级**（UI-COLLAPSE-2）：折叠判断从「单条消息 pending 结束即折叠」改为「本轮 run 内统一展开、run 结束统一折叠」。边界计算抽为纯函数 `SimpleChat/activeRunWindow.ts`（`resolveActiveRunStartIndex`），历史轮次不因本轮 run 而炸开。
 - **证据**：`modelConfigAndCollapse.test.tsx` 6/6（快捷区渲染/切换回调/无选项不渲染、run 中统一展开/结束后统一折叠/历史不炸开）+ 相邻回归 20/20；`types` 0、`lint` 0 error；`SimpleChat.tsx` 2051→2080（逻辑抽入 `useContextWindowQuickPick` 后净增 29，尺寸基线已重打并说明）。
-- **待补**：dev Electron 实机确认（切换后下一请求生效、长任务过程不再逐轮折叠、观感稳定）。
+- **实机确认（2026-11-16，用户授权按 BLOCK-349 口径自动化）**：9223 离屏 flow `ui695-331-modelcfg-time-live` **8/8 allPass**——建临时项目→导航→点 `[data-testid="model-chip-model"]` 打开模型菜单→断言 `[data-testid="model-menu"]` / `model-menu-quick` / `model-menu-context-window`(value=1000000) / `model-menu-thinking-level`(level=standard) 全在场 + 截图 `ui695-model-menu-quick.png`；证据=`acceptance/ui-695-331-modelcfg-time/ui695-331-modelcfg-time-live-darwin.json`。口径=dev Electron 边界内 verified（客观 DOM 在场；"下一请求生效"由组件测 6/6 承载，观感不代答）。原"待补"项已由本 flow 清偿。
 
 ### in_progress 三分类对账（BLOCK-346 T8，2026-11-04）
 
@@ -2556,7 +2556,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 2026-09-30 勘正：状态字样滞后同步（复核证据=f57089cb）——功能已被 BLOCK-43 整链退休、由 UI-206 承担，标题与状态行按 UI-193 同型先例标 superseded。
 
-## UI-200: BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **in_progress（代码+组件 8/8 已锚、production 已接线 ReviewMode，缺实机过目；2026-11-02 BLOCK-332 分诊补登）**
+## UI-200: BLOCK-23 — Working Tree Review 面板渲染层 CodeMirror 升级 (2026-08-28 active) **verified（2026-11-16 用户本人人眼过目：CodeMirror 渲染「好看 / 观感 OK、读屏顺、体感流畅」；接手时标题 in_progress 与正文状态行 verified 的漂移一并校正）**
 
 **目标**：用 BLOCK-22 已交付的 CodeMirrorEditor inline-diff（语法高亮 + 字符级 diff）替换 Working Tree Review 面板的纯文本 DiffHunkView/DiffFileView 渲染层，同时清理 BLOCK-17 agent-doc-review 死代码全链路。
 
@@ -2571,7 +2571,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **验证**：focused frontend 59/59 PASS（CodeMirrorDiffView 3 + CodeMirrorEditor 32 + events-bus 4 + DiffActionBar 11 + desktopBridge 9）；`cd frontend && npx tsc --noEmit` 0 错；`node --check` 覆盖 `working-tree-review.js` / `main.js` / `preload.js`；`docs:reconcile` 0 validation issues；`docs:check` 143 PASS；`ui:audit:check` PASS。实现 commit 为 `71d4f78`；canonical P6 refresh 因既有 Result Studio issue fail-closed，未写入 evidence。
 
-**状态**: verified (dev Electron 边界内实机过目)。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**人眼过目（2026-11-16 · 用户本人）**：用户在可见 dev 主窗过目 Working Tree Review / CodeMirror diff 渲染后明确回复「UI-200（CodeMirror 渲染）没有问题 好看 过了 观感 OK、读屏顺、体感流畅」——按无人化验收阶梯第 4 级，人测体感确认成立；证据=本段用户确认原文 + 日期 + 覆盖断言（高亮/行号/暗色可读/评审操作可用）。Agent 未代签，观感结论出自用户本人。
+
+**状态**: verified (dev Electron 边界内实机过目 + 2026-11-16 用户人眼确认)。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 ## UI-201: Result Studio P6 evidence diagnostics repair (2026-08-28 verified)
 
@@ -4240,7 +4242,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **加映七（同日，BLOCK-78 P2-③ 结果库占用落地）**：①后端：新子路由 `routes/harness/project-storage.js` 端点 `GET /api/harness/project-storage?projectId=`——jobs=done 作业数（DB 真值）；local 逐 job 读 result_json.outputPath 递归求 size（walkSize 限深 8/限 5000 文件，超限 truncated 诚实省略；缺失/非法路径跳过计入 skipped）；ssh 单次 `du -sb <remotePath>/results/jobs`（BLOCK-76 R1 布局，safeRemoteJoin+单引号转义，目录缺失=0）；60s TTL 合并缓存 + 失败回 stale 标观测时间/无历史 500（与资源快照同三态纪律）；纯逻辑抽 `helpers/project-storage.js`（walkSize/parseDuOutput/createStorageCache）；②前端：摘要卡 expanded「项目」节增「结果库」行——`X MB · N 作业`（stale 显观测时间；无产物不渲染；60s 慢刷新，失败 null 不伪造）。**门禁**：新增纯逻辑零网络测试 4/4（递归求和/限文件截断/缺失降级/du 解析/TTL 三态）+ 卡片 15/15（结果库行渲染与零产物不渲染，fetch stub）+ tsc 0 + 三 node 语法 0 + test:changed 全覆盖。
 - **P0 台账核查（2026-10-21）**：证据在库：`acceptance/block-78/ui330-live.json`（13 断言 allPass）、`acceptance/block-78/resource-live.json`（10 断言 allPass）。据此翻 `verified`（证据为历史实机产物，非本轮重跑）。
 
-## UI-331: 左栏会话行短式相对时间（用户参考图裁决）(2026-09-10 in_progress)
+## UI-331: 左栏会话行短式相对时间（用户参考图裁决）(**verified**：10-30 RW-02 实机 + 2026-11-16 当次 flow 复核，标题 in_progress 漂移校正)
 
 **来源**：用户参考图（ZCode 形态）裁决「左侧项目列表或者会话默认没有时间显示……我觉得挺好的，你看看是否可以优化」——会话行右侧常显短式相对时间（刚刚/N分/N小时/N天/M-D）。
 
@@ -4248,7 +4250,9 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **门禁**：LeftPanel 定向 14/14（新增 2 用例：刚刚+7小时同屏渲染与 title 计数、3天降级）+ tsc 0。**实机（2026-10-30 RW-02 清偿）**：`acceptance/rw02-ui-evidence-live-live.json`（9223）：REST 建临时项目会话 → 左栏 `.convItemTime`「刚刚」在场（1/1 有效）。**verified。**
 
-**状态**: in_progress。G0 开发期常态 · 不外推 packaged / Provider / GA。
+**当次复核（2026-11-16）**：9223 离屏 flow `ui695-331-modelcfg-time-live` REST 建会话 → reload → 断言左栏 `[class*="convItemTime"]`「刚刚」在场且格式合法（count=1/valid=1），纳入同一 8/8 allPass；证据=`acceptance/ui-695-331-modelcfg-time/ui695-331-modelcfg-time-live-darwin.json`。与 10-30 RW-02 实机证据双证，标题 in_progress 漂移一并校正为 verified。
+
+**状态**: verified（dev Electron 边界内实机）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 **加映八（同日，BLOCK-78 P2-⑤ 跨会话持久通知落地——用户裁决「两个都搞」）**：①存储：新表 `project_notices`（project_id/kind/title/detail/created_at/read_at，项目+时间索引；**事件留痕 + 项目级已读确认**，非第二套作业/agent 状态；read 通知修剪保留 200 条，unread 不修剪）——写点收敛 `markJobFailed` 失败终态（best-effort，绝不阻断作业链；test_run 不产生通知）；②读面：`/api/harness/notices?projectId=&unread=1`（含 unread 计数）+ POST `/seen`（项目级全部已读）；③前端：注意节标题右侧「N 条未读」徽标（accent 色，点击全部标记已读并立刷；仅注意节有未读时出现）。**与投影型信号的本质区别**：失败 job 行随作业状态存在，未读通知跨重启/跨会话存活——重开后知道离开期间发生了什么。**门禁**：新增零网络 2/2（插入/未读计数/项目隔离/全部已读/防御）+ 卡片 16/16（徽标渲染+POST seen）+ tsc 0 + node 语法 0。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。

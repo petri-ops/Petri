@@ -1,0 +1,49 @@
+{
+  "name": "ui695-331-modelcfg-time-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-16T09:25:02.997Z",
+  "finishedAt": "2026-11-16T09:25:14.127Z",
+  "assertions": [
+    {
+      "name": "project_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwj256eh_6mcj\",\"name\":\"UI695-331-1794821103014\",\"created_at\":\"2026-11-16T09:25:03.017Z\",\"updated_at\":\"2026-11-16T09:25:03.017Z"
+    },
+    {
+      "name": "spa_loaded",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mwj256eh_6mcj\",\"title\":\"Petri\",\"composer\":1,\"convItemTime\":0,\"convItemTimeSample\":[],\"modelMenu\":false,\"menuQuick\":false,\"ctxWindow\":false,\"ctxValue\":null,\"thin"
+    },
+    {
+      "name": "model_menu_open",
+      "pass": true,
+      "detail": "opened=clicked:[data-testid=\"model-chip-model\"] state={\"url\":\"http://localhost:3000/project/p_mwj256eh_6mcj\",\"title\":\"Petri\",\"composer\":1,\"convItemTime\":0,\"convItemTimeSample\":[],\"modelMenu\":true,\"menuQuick\":true,\"ctxWindow\":true,\"ctxValue\":\"1000000\",\"th"
+    },
+    {
+      "name": "model_menu_quick_present",
+      "pass": true,
+      "detail": "{\"url\":\"http://localhost:3000/project/p_mwj256eh_6mcj\",\"title\":\"Petri\",\"composer\":1,\"convItemTime\":0,\"convItemTimeSample\":[],\"modelMenu\":true,\"menuQuick\":true,\""
+    },
+    {
+      "name": "context_window_control",
+      "pass": true,
+      "detail": "ctx=true label=true value=1000000"
+    },
+    {
+      "name": "thinking_level_control",
+      "pass": true,
+      "detail": "think=true label=true level=standard"
+    },
+    {
+      "name": "ui331_conversation_created",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"conversation\":{\"id\":\"conv_feee309f-62b\",\"title\":\"UI331 相对时间探针\",\"status\":\"active\",\"last_page\":null,\"project_id\":\"p_mwj256eh_6mcj\",\"message_count\""
+    },
+    {
+      "name": "ui331_conversation_relative_time",
+      "pass": true,
+      "detail": "{\"count\":1,\"samples\":[\"刚刚\"],\"valid\":1}"
+    }
+  ],
+  "allPass": true
+}

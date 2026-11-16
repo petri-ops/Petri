@@ -1,4 +1,4 @@
-最后更新：2026-11-16（**用户裁决 P6 销号 + 交接队列①~④全部走完**：用户显式裁决「生信层面垂直领域非当下需求，清理掉」→ P6 pressure 腿从活跃待办销号、移入 §五已裁决延期/挂起（历史 404 事实与 BLOCK-448 原补腿条件原样保留，不冒充通过）；外部条件 **1→0**。①probe 仍 404→②BLOCK-451 M-55 completed→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，全批终态 pending 不变）→④next:suggest。**用户裁决 U 类 7 项全部销号**（「都行 按你的建议自主搞完」→ 7 项均采纳维持现状推荐、销号≠实现完成，原档终态不改写，见对账文档 §9）。待办现为 外部 **0** / U 类裁决 **0（7 项已销号）** / 可执行候选 **0** / E 类人眼 22 条（用户逐个过目中）/ 延期挂起（含 P6 销号）/ G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
+最后更新：2026-11-16（**用户裁决 P6 销号 + 交接队列①~④全部走完**：用户显式裁决「生信层面垂直领域非当下需求，清理掉」→ P6 pressure 腿从活跃待办销号、移入 §五已裁决延期/挂起（历史 404 事实与 BLOCK-448 原补腿条件原样保留，不冒充通过）；外部条件 **1→0**。①probe 仍 404→②BLOCK-451 M-55 completed→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，全批终态 pending 不变）→④next:suggest。**用户裁决 U 类 7 项全部销号**（「都行 按你的建议自主搞完」→ 7 项均采纳维持现状推荐、销号≠实现完成，原档终态不改写，见对账文档 §9）。**E 类 3 条可过目项已终态化**：UI-200 用户本人确认 verified；UI-695/331 用户授权自动化 flow 8/8 allPass verified（`acceptance/ui-695-331-modelcfg-time/`），其余 19 条前序已 verified/cancelled 或无需过目。待办现为 外部 **0** / U 类裁决 **0（7 项已销号）** / 可执行候选 **0** / E 类人眼 **0（22 条已核销，3 条本次终态化）** / 延期挂起（含 P6 销号）/ G1+ 出籍。**全清单清零**。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
 
 ---
 
@@ -52,10 +52,11 @@
 
 > **执行队列③已完成（2026-11-16，交接流程动作非工作包）**：U 类 7 项 + E 类人眼的决策材料/测试路线逐项核对与补齐，落 `docs/u-e-decision-materials-reconciliation-2026-11-16.md`（registry `U-E-RECON-2026-11-16`）。结论=2 项已有合格材料（U-04→post-h9-k1 决策 B、TS 双版本→post-h9-k4，指针引用不重造）+ 5 项补六段一页决策材料（workspaces / test:changed 拆片 / evals closeout / MCP 白名单默认 / CP 冲突对账）+ E 类 canonical 路线核对（签字槽全空、无材料缺口）。**全批终态不变**：U 类 `pending_user_ruling`、E 类 `pending_human_eye`，Agent 不代答、不替签、不改默认语义、零产品代码改动。batch 收口后交接执行队列①~④全部走完。
 
-### 四、等人眼签字（E 类，不代答）
+### 四、等人眼签字（E 类，不代答）——**2026-11-16 交接 22 条已核销（0 待过）**
 
-- UI 设计专项 **22 条签字槽全空**（BLOCK-415~423 收口口径；路线材料在册，如 `docs/post-s7-h7-human-eye-route.md`）。
-- M-42 / M-44（M6 期自动人眼路线 + 对比度观感确认）；M7 gap-ledger 口径 `pending_human_eye=2` 同源。
+> 核对结论（`docs/e-class-human-eye-guide-2026-11-16.md`）：22 条中 11 条前序已 verified、2 条 cancelled、6 条无实机面/等环境（保持 in_progress 非债）、**3 条本次终态化**——UI-200 用户本人确认 verified；UI-695/331 用户授权按 BLOCK-349 口径自动化 flow 8/8 verified。Agent 未代签，UI-200 结论出自用户本人。
+- UI 设计专项签字槽（BLOCK-415~423）：路线材料在册（`docs/post-s7-h7-human-eye-route.md`、`docs/ui-design-human-eye-route.md`）；本交接未对其余签字槽代签。
+- M-42 / M-44（M6 期自动人眼路线 + 对比度观感确认）：保持 `pending_human_eye`（不在本次 22 条内核销，属设计专项签字槽）。
 
 ### 五、已裁决延期/挂起（条件触发，非欠账）
 

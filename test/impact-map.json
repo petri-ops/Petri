@@ -3,6 +3,23 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "ui695-331-modelcfg-time",
+      "note": "UI-695 模型菜单就地切换快捷区（上下文窗口/思考强度）+ UI-331 会话行短式相对时间代行验收：9223 离屏 DOM 断言 flow，建临时项目→打开模型菜单断言三 testid→建会话断言 convItemTime 刚刚；2026-11-16 用户授权按 BLOCK-349 口径自动化，8/8 allPass。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui695-331-modelcfg-time-live.cjs",
+        "acceptance/ui-695-331-modelcfg-time/**"
+      ],
+      "tests": [
+        "test/dev-verify.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "frontendRelated": true,
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "ui-design-program",
       "note": "界面设计优化程序 UI-D0–D5（BLOCK-415~）：对账基线机械门 / UI 验收清单 v1 / 入口↔路由对账 / 断点与布局单源 / token 与状态收敛 / 无障碍与评分卡复测。新增 scripts 必须恰好命中本规则（classifiesScripts=true），证据目录不落入 fail-closed 全量升级。",
       "patterns": [
