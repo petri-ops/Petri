@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T08:29:14.320Z",
+  "generatedAt": "2026-11-16T17:55:27.534Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 115,
@@ -9,7 +9,7 @@
     "ipcChannels": 170,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 167,
-    "routes": 285,
+    "routes": 287,
     "routeModules": 47,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
@@ -5466,6 +5466,18 @@
       "module": "runtime-config",
       "method": "PUT",
       "route": "/api/web-access",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "GET",
+      "route": "/api/ocr-access",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "PUT",
+      "route": "/api/ocr-access",
       "mounted": true
     },
     {
