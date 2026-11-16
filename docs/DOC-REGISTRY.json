@@ -9,11 +9,29 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 597,
+    "documentCount": 598,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 579
+    "managedMarkdown": 580
   },
   "documents": [
+    {
+      "id": "PRODUCT-FRONTIER-MINIMAL-DESIGN",
+      "path": "docs/product-function-frontier-and-minimal-design.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "product-function-frontier-and-minimal-design",
+      "entrypoint": "docs/next-work-blueprint-2026-11-16.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "product-design",
+        "function-frontier",
+        "minimalism",
+        "evaluation"
+      ],
+      "notes": "产品功能全景与极简设计评估（2026-11-16，用户「功能齐全但表现简约」）：基于 AGENTS.md 人设+五层成熟度+竞争力纲静态梳理出 8 功能域（对话推理/模型计量/工具执行/知识记忆/编排协作/治理信任/呈现产物/本地生命周期）+ 模块边界 + 极简策略(表现层5杠杆+能力层单源自动化+护栏)。核心判断=简约是表现层克制不是能力层缩水，治「机制一流可感二流」病根。含 5 条融入蓝图建议 S1-S5，待用户认可后另笔回写。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "AGENT-EXPERIENCE-PRINCIPLES",
       "path": "docs/agent-experience-design-principles.md",
