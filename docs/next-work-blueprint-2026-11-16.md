@@ -10,7 +10,8 @@ lastUpdated: 2026-11-16
 ---
 
 > 性质：**当前唯一 active 的执行蓝图**（living-plan，不占单包串行槽位）——把「接下来所有要做的事」按串行波次串成一张可恢复的清单。
-> 发令：用户 2026-11-16「重整一下蓝图，覆盖接下来所有要做的事情」。
+> 发令：用户 2026-11-16「重整一下蓝图，覆盖接下来所有要做的事情」；2026-11-17「把已确认全部建议整合进蓝图、逐项细化拆解、给出可端到端自动推完的提示词」。
+> **执行入口（2026-11-17 新增）**：本蓝图是战略层；可直接执行的任务卡见 [`docs/e2e-execution-plan-2026-11-17.md`](./e2e-execution-plan-2026-11-17.md)，可独立驱动全流程的提示词见 [`docs/E2E-PROMPT.md`](./E2E-PROMPT.md)。已确认建议整合清单（C1-C9）在执行方案 §0。
 > 与既有 canonical 的关系：
 > - `next-steps-roadmap.md` = 本蓝图的**当前下一步指针**（保持极简，指向本文件）。
 > - `docs/g0-living-foundation-plan.md`（G0-LF）= 永久基础层常驻计划，与本蓝图正交，不重复登记。
@@ -37,7 +38,7 @@ lastUpdated: 2026-11-16
 - **P5 人工介入最小化**：仅信息不足/高风险/用户偏好时确认；**P5-a 护栏=ask/deny 调用、full 档破坏性操作、付费操作必须确认**；P5-b 偏好一次记住、P5-c 随时可接管。
 - **横向约束 X1-X5**：全链可审计 / 失败诚实 / 幂等可回滚 / G0 不外推 / 差别形态自检（对标只借形不改魂）。
 - **一句话**：体验到"少步骤、自动办、给最优解"，但**自主的边界由用户档位定、过程全链可审计、关键确认不省**——这是 Petri 对标 ZCode/Codex 时的差别形态。
-- **延伸评估（待认可融入）**：[`docs/product-function-frontier-and-minimal-design.md`](./product-function-frontier-and-minimal-design.md)——8 功能域全景 + 极简策略 + 5 条融入建议 S1-S5（用户认可后另笔回写本蓝图，当前不改变波次）。
+- **延伸评估（已整合 2026-11-17）**：[`docs/product-function-frontier-and-minimal-design.md`](./product-function-frontier-and-minimal-design.md) 深度版——三层能力全景 + 四类现状诊断 + 三层信息架构。其 R1（机制显化率入宪法）已纳入本 §0.5 全局纪律；R2/R3 已纳入 W7 验收与范围；R1-R3 整合明细见 [`docs/e2e-execution-plan-2026-11-17.md`](./e2e-execution-plan-2026-11-17.md) §0。
 
 ## 1. 波次总览（串行，一包收口才开下一包）
 

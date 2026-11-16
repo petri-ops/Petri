@@ -9,11 +9,48 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 598,
+    "documentCount": 600,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 580
+    "managedMarkdown": 582
   },
   "documents": [
+    {
+      "id": "E2E-PROMPT",
+      "path": "docs/E2E-PROMPT.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": false,
+      "truthDomain": "e2e-prompt",
+      "entrypoint": "docs/next-steps-roadmap.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "prompt",
+        "e2e",
+        "automation",
+        "self-contained"
+      ],
+      "notes": "可独立驱动全流程的端到端自动执行提示词（2026-11-17）：自包含、预置 D1-D8 裁决免人工介入、W1-W9 逐步指令、全局纪律、收尾与结束条件。复制给新 Agent 即可端到端推完全部工作。",
+      "registeredAt": "2026-11-17"
+    },
+    {
+      "id": "E2E-EXECUTION-PLAN-2026-11-17",
+      "path": "docs/e2e-execution-plan-2026-11-17.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "e2e-execution-plan-2026-11-17",
+      "entrypoint": "docs/next-steps-roadmap.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "execution-plan",
+        "e2e",
+        "automation",
+        "block-454",
+        "settings-ia"
+      ],
+      "notes": "端到端自动执行方案（2026-11-17）：把统一蓝图 W1-W10 细化为可执行任务卡。已确认建议整合清单 C1-C9 + 自动化前置硬门 + D1-D8 预置裁决（无人值守关键）+ W1-W9 逐项步骤/交付物/依赖/门禁/验收 + 异常失败处理统一契约 + 整体完成语义 + 完整交付成果清单。配套 E2E-PROMPT.md 为可直接复制驱动全流程的自包含提示词。",
+      "registeredAt": "2026-11-17"
+    },
     {
       "id": "PRODUCT-FRONTIER-MINIMAL-DESIGN",
       "path": "docs/product-function-frontier-and-minimal-design.md",
