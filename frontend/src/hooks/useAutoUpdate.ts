@@ -7,8 +7,7 @@
  * State is session-only (lives in React state, resets on page refresh —
  * which is correct for update UX).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getBridge } from '@/lib/desktopBridge';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface AutoUpdateState {
   /** True after mount check finds a newer version. */
@@ -48,54 +47,49 @@ export function useAutoUpdate(): AutoUpdateState & AutoUpdateActions {
   const [upToDate, setUpToDate] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  // 后台轮询/前台恢复时已通知过的版本（按版本去重，避免同一版本反复弹系统通知）
-  const notifiedVersionRef = useRef<string>('');
-
-  // 后台 check（不带手动 checking 状态）：挂载/轮询/前台恢复共用。
-  // 查到新版本时复用 Q9 app:notify 通道发一次系统通知（dedupeKey=版本）。
-  const silentCheck = useCallback(async () => {
+  // BLOCK-453 架构修正：轮询与系统通知由主进程持有（主进程常驻，不依赖本 hook 挂载）。
+  // 本 hook 只做两件事：①打开设置页时拉一次当前状态；②订阅主进程推送的检查结果。
+  useEffect(() => {
     const updater = window.petriDesktop?.updater;
     if (!updater) return;
-    try {
-      const r = await updater.check();
-      if (!r?.ok) return;
-      if (!r.hasUpdate) {
-        setUpToDate(true);
-        return;
-      }
-      const version = r.info?.version ?? r.version ?? '';
+
+    let cancelled = false;
+
+    // ① 初次状态：打开面板时问一次主进程（主进程 IPC handler 内部会 check 并推事件）
+    void Promise.resolve()
+      .then(() => updater.check())
+      .then((r) => {
+        if (cancelled || !r?.ok) return;
+        if (!r.hasUpdate) {
+          setUpToDate(true);
+          return;
+        }
+        setUpToDate(false);
+        setAvailable(true);
+        setAvailableVersion(r.info?.version ?? r.version ?? '');
+      })
+      .catch(() => {
+        // 初次探测失败静默（手动 check 才展示错误）
+      });
+
+    // ② 订阅主进程后台轮询的结果推送（preload 已包装，此前从未被消费）
+    const offAvailable = updater.onUpdateAvailable?.((info?: { version?: string }) => {
+      if (cancelled) return;
       setUpToDate(false);
       setAvailable(true);
-      setAvailableVersion(version);
-      if (version && notifiedVersionRef.current !== version) {
-        notifiedVersionRef.current = version;
-        try {
-          await getBridge('app')?.notify?.({ kind: 'update_available', dedupeKey: version });
-        } catch {
-          // 通知失败不影响更新状态本身
-        }
-      }
-    } catch {
-      // 后台 check 失败静默（手动 check 才展示错误）
-    }
-  }, []);
+      setAvailableVersion(info?.version ?? '');
+    });
+    const offNotAvailable = updater.onUpdateNotAvailable?.(() => {
+      if (cancelled) return;
+      setUpToDate(true);
+    });
 
-  // 挂载：立即 check 一次 + 15 分钟轮询 + 前台恢复（visibilitychange→visible）再 check。
-  // 模式参考 ThemeProvider.tsx 的「interval + visibilitychange」组合。
-  useEffect(() => {
-    if (!window.petriDesktop?.updater) return;
-    // 推迟到 effect 栈外（react-hooks/set-state-in-effect）：microtask 里 silentCheck 才 setState
-    void Promise.resolve().then(() => { void silentCheck(); });
-    const timer = window.setInterval(() => { void silentCheck(); }, 15 * 60 * 1000);
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void silentCheck();
-    };
-    document.addEventListener('visibilitychange', onVisible);
     return () => {
-      window.clearInterval(timer);
-      document.removeEventListener('visibilitychange', onVisible);
+      cancelled = true;
+      offAvailable?.();
+      offNotAvailable?.();
     };
-  }, [silentCheck]);
+  }, []);
 
   // Subscribe to live events
   useEffect(() => {

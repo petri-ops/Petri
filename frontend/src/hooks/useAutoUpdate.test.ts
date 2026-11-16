@@ -9,6 +9,8 @@ type MockUpdater = {
   onDownloadProgress?: (fn: (p: { ratio: number }) => void) => () => void;
   onUpdateDownloaded?: (fn: () => void) => () => void;
   onError?: (fn: (msg: string) => void) => () => void;
+  onUpdateAvailable?: (fn: (info?: { version?: string }) => void) => () => void;
+  onUpdateNotAvailable?: (fn: () => void) => () => void;
 };
 
 function installMock(mock: MockUpdater) {
@@ -186,56 +188,46 @@ describe('useAutoUpdate', () => {
     act(() => { void result.current.install(); });
   });
 
-  // ---- BLOCK-452: 轮询 + 前台恢复 + 系统通知 ----
-  it('polls for updates every 15 minutes while mounted', async () => {
-    const check = vi.fn(() => Promise.resolve({ ok: true, hasUpdate: false }));
-    installMock({ check, download: () => Promise.resolve(), install: () => Promise.resolve() });
-    const { unmount } = renderHook(() => useAutoUpdate());
-    await act(async () => { await Promise.resolve(); }); // flush mount microtask only
-    expect(check).toHaveBeenCalledTimes(1); // mount
-    await act(async () => { await vi.advanceTimersByTimeAsync(15 * 60 * 1000); });
-    expect(check).toHaveBeenCalledTimes(2); // + poll
-    unmount();
-  });
-
-  it('re-checks when window becomes visible again (foreground restore)', async () => {
-    const check = vi.fn(() => Promise.resolve({ ok: true, hasUpdate: false }));
-    installMock({ check, download: () => Promise.resolve(), install: () => Promise.resolve() });
-    const { unmount } = renderHook(() => useAutoUpdate());
+  // ---- BLOCK-453: 轮询/通知归属主进程；hook 只订阅推送 + 拉初始状态 ----
+  it('subscribes to main-process updateAvailable and flips state', async () => {
+    let fireAvailable: ((info?: { version?: string }) => void) | null = null;
+    installMock({
+      check: () => Promise.resolve({ ok: true, hasUpdate: false }),
+      download: () => Promise.resolve(),
+      install: () => Promise.resolve(),
+      onUpdateAvailable: (fn) => { fireAvailable = fn; return () => { fireAvailable = null; }; },
+    });
+    const { result } = renderHook(() => useAutoUpdate());
     await act(async () => { await Promise.resolve(); });
-    expect(check).toHaveBeenCalledTimes(1);
-    const spy = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
-    await act(async () => { document.dispatchEvent(new Event('visibilitychange')); await Promise.resolve(); });
-    expect(check).toHaveBeenCalledTimes(2);
-    spy.mockRestore();
-    unmount();
+    expect(result.current.available).toBe(false);
+    await act(async () => { fireAvailable?.({ version: '9.9.9' }); await Promise.resolve(); });
+    expect(result.current.available).toBe(true);
+    expect(result.current.availableVersion).toBe('9.9.9');
+    expect(result.current.upToDate).toBe(false);
   });
 
-  it('sends a system notification (app:notify) once when an update is found', async () => {
-    const notify = vi.fn(() => Promise.resolve({ shown: true }));
-    (window as unknown as Record<string, unknown>).petriDesktop = {
-      updater: { check: () => Promise.resolve({ ok: true, hasUpdate: true, info: { version: '9.9.9' } }), download: () => Promise.resolve(), install: () => Promise.resolve() },
-      app: { notify },
-    };
+  it('subscribes to updateNotAvailable and marks up-to-date', async () => {
+    let fireNotAvailable: (() => void) | null = null;
+    installMock({
+      check: () => Promise.resolve({ ok: true, hasUpdate: true, info: { version: '9.9.9' } }),
+      download: () => Promise.resolve(),
+      install: () => Promise.resolve(),
+      onUpdateNotAvailable: (fn) => { fireNotAvailable = fn; return () => { fireNotAvailable = null; }; },
+    });
     const { result } = renderHook(() => useAutoUpdate());
     await act(async () => { await Promise.resolve(); });
     expect(result.current.available).toBe(true);
-    expect(notify).toHaveBeenCalledTimes(1);
-    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ kind: 'update_available', dedupeKey: '9.9.9' }));
+    await act(async () => { fireNotAvailable?.(); await Promise.resolve(); });
+    expect(result.current.upToDate).toBe(true);
   });
 
-  it('does not notify again on subsequent polls for the same version', async () => {
-    const notify = vi.fn(() => Promise.resolve({ shown: true }));
-    const check = vi.fn(() => Promise.resolve({ ok: true, hasUpdate: true, info: { version: '9.9.9' } }));
-    (window as unknown as Record<string, unknown>).petriDesktop = {
-      updater: { check, download: () => Promise.resolve(), install: () => Promise.resolve() },
-      app: { notify },
-    };
+  it('does not poll on its own (main process owns polling)', async () => {
+    const check = vi.fn(() => Promise.resolve({ ok: true, hasUpdate: false }));
+    installMock({ check, download: () => Promise.resolve(), install: () => Promise.resolve() });
     renderHook(() => useAutoUpdate());
     await act(async () => { await Promise.resolve(); });
-    expect(notify).toHaveBeenCalledTimes(1);
-    await act(async () => { await vi.advanceTimersByTimeAsync(15 * 60 * 1000); });
-    expect(check).toHaveBeenCalledTimes(2);
-    expect(notify).toHaveBeenCalledTimes(1); // dedupe by version
+    expect(check).toHaveBeenCalledTimes(1); // initial state only
+    await act(async () => { await vi.advanceTimersByTimeAsync(60 * 60 * 1000); });
+    expect(check).toHaveBeenCalledTimes(1); // no renderer-side interval
   });
 });

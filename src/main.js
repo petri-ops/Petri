@@ -741,7 +741,8 @@ async function main() {
     getLogDir,
     readLogTail,
   });
-  setupAutoUpdateIpc({ mainWindow });
+  // BLOCK-453：传入 desktopShell 供主进程后台轮询复用 app:notify 发系统通知
+  setupAutoUpdateIpc({ mainWindow, desktopShell });
   setupDiagnosticIpc({ mainWindow, getLogDir, flushLogs, crashGuard });
   // BLOCK-67 加映（UI-326）— IP+密码 引导连接（装公钥 + 写 ssh config 别名）
   const { setupSshHostIpc } = require("./ipc/ssh-host");
