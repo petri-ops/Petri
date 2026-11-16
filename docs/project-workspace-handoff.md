@@ -1,4 +1,4 @@
-最后更新：2026-11-16（**BLOCK-451 completed（M-55 SSE 真实端点行为测试腿）**：交接提示词执行队列①probe 仍 404→走②；唯一可执行候选 M-55 已收口；待办分类清单现为 外部 1 / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起 / G1+ 出籍。串行槽位空闲。证据=acceptance/block-451/。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
+最后更新：2026-11-16（**交接执行队列①~④全部走完**：①probe 仍 404→②BLOCK-451 M-55 completed（acceptance/block-451/）→③U 类 7+E 类人眼材料核对补齐（`docs/u-e-decision-materials-reconciliation-2026-11-16.md`，2 项已有材料指针 / 5 项补六段决策材料 / E 类路线核对，全批终态 pending 不变）→④next:suggest。待办分类清单现为 外部 1 / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起 / G1+ 出籍。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
 
 ---
 
@@ -46,6 +46,8 @@
 > **候选层级校正（2026-11-16 接手并集）**：`npm run state` 报的 3 项「排队候选」（POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收）——其中后两者 `status: planned`，是**规划大纲**不是可立即开工的单项；QODER §6.5 串行队列已清零、竞争力纲 CP-1~22 全闭环，二者需用户显式裁决另立子包，不构成「可执行候选」。本节唯一可执行候选 = M-55。
 
 | ~~M-55 SSE 真实端点行为测试腿 + 挂 impact-map rule~~ | **2026-11-16 已由 BLOCK-451 收口 completed**（解锁=:3001 无头栈可起；7 契约测试 HK-01 红绿 + 真实回放证据 allPass + impact-map 单一归属；证据=acceptance/block-451/）。本节已无可执行候选，串行槽位空闲。 |
+
+> **执行队列③已完成（2026-11-16，交接流程动作非工作包）**：U 类 7 项 + E 类人眼的决策材料/测试路线逐项核对与补齐，落 `docs/u-e-decision-materials-reconciliation-2026-11-16.md`（registry `U-E-RECON-2026-11-16`）。结论=2 项已有合格材料（U-04→post-h9-k1 决策 B、TS 双版本→post-h9-k4，指针引用不重造）+ 5 项补六段一页决策材料（workspaces / test:changed 拆片 / evals closeout / MCP 白名单默认 / CP 冲突对账）+ E 类 canonical 路线核对（签字槽全空、无材料缺口）。**全批终态不变**：U 类 `pending_user_ruling`、E 类 `pending_human_eye`，Agent 不代答、不替签、不改默认语义、零产品代码改动。batch 收口后交接执行队列①~④全部走完。
 
 ### 四、等人眼签字（E 类，不代答）
 

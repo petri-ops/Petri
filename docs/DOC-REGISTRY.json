@@ -9,11 +9,29 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 589,
+    "documentCount": 590,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 572
+    "managedMarkdown": 573
   },
   "documents": [
+    {
+      "id": "U-E-RECON-2026-11-16",
+      "capability": "u-e-decision-materials-reconciliation-2026-11-16",
+      "path": "docs/u-e-decision-materials-reconciliation-2026-11-16.md",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": false,
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "decision-material",
+        "u-class",
+        "e-class",
+        "governance",
+        "handoff-queue-3"
+      ],
+      "notes": "交接执行队列③：U 类 7 项逐项核对（2 项已有材料指针 / 5 项补六段决策材料）+ E 类人眼路线核对；全批 pending_user_ruling / pending_human_eye、不代答不改默认、零产品代码。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "BLOCK-451",
       "path": "docs/block-451-m55-sse-real-endpoint-plan.md",
