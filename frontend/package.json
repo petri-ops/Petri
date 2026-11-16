@@ -1,6 +1,6 @@
 {
   "name": "petri-desktop-frontend",
-  "version": "0.0.1-rc.7",
+  "version": "0.0.1",
   "private": true,
   "description": "Petri 桌面版原生前端 — Vite SPA（脱离 Docusaurus）",
   "type": "module",
