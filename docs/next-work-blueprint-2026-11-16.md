@@ -20,11 +20,23 @@ lastUpdated: 2026-11-16
 
 ## 0. 当前状态锚点（恢复必读）
 
-- `main` @ `daaafd78`（工作区干净；HEAD 与 origin/main 一致）。
+- `main` @ 当次 `git log -1`（蓝图创建于 `daaafd78`，体验原则确认后已前进；工作区干净，HEAD 与 origin/main 一致）。
 - **串行 active 工作包**：BLOCK-454（通用能力窄口 + DeepSeek adapter，P0 契约核实已完成，下一步 P1）。
 - **未决 🔴/🟢**：无。
 - **已知遗留红**：`docs:check` 1 红 = `post-h9-optimization-blueprint-2026-11-10.md` 换机缺失（Mac 是 untracked 原件，Win 未同步）——处置权在用户，非任何工作包引入。
 - 排队候选（planned 规划大纲，非可执行）：POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收。
+
+## 0.5 设计宪法（Agent 能力体验设计原则 · 全波次适用）
+
+> 用户 2026-11-16 裁决 5 条体验原则，确认版 + 补充约束见 [`docs/agent-experience-design-principles.md`](./agent-experience-design-principles.md)。**所有波次的设计与验收须过此宪法**。
+
+- **P1 体验优先**：总步骤最少、真实产物交付；但省下的每步仍须留痕（P1-a 证据不可省）。
+- **P2 自主范围**：在用户选定 accessMode（read/workspace-write/full/plan）内自主；**P2-a 红线=权限只认 UI 显式档位、禁止从消息文本推断**；P2-b 工具审批 allow/ask/deny/observe 与动态 guard 不放宽。
+- **P3 自动化信息获取**：外部信息自动检索+API 调用，无需逐步指示；P3-a 来源可审计 / P3-b 失败诚实（不返回空数组冒充）/ P3-c 本地主权优先（SearXNG 默认，云 adapter 可选）。
+- **P4 方案择优**：给一个最合理方案+依据，不罗列选项甩回用户；P4-a 判断可追溯 / P4-b 可覆盖、重大取舍显式点出。
+- **P5 人工介入最小化**：仅信息不足/高风险/用户偏好时确认；**P5-a 护栏=ask/deny 调用、full 档破坏性操作、付费操作必须确认**；P5-b 偏好一次记住、P5-c 随时可接管。
+- **横向约束 X1-X5**：全链可审计 / 失败诚实 / 幂等可回滚 / G0 不外推 / 差别形态自检（对标只借形不改魂）。
+- **一句话**：体验到"少步骤、自动办、给最优解"，但**自主的边界由用户档位定、过程全链可审计、关键确认不省**——这是 Petri 对标 ZCode/Codex 时的差别形态。
 
 ## 1. 波次总览（串行，一包收口才开下一包）
 
@@ -53,12 +65,14 @@ lastUpdated: 2026-11-16
 
 ### W2 · BLOCK-454 P2 搜索 adapter
 - **做什么**：在 `web-search-provider.js` 窄口加 `deepseek-search` adapter（独立 `/v1/tools/search`：query/count/need_content，results[] 含 rerank_score/authority）；SearXNG 保持默认（本地主权）。
+- **原则落实**：P3 自动化信息获取（Agent 自动检索无需逐步指示）+ P3-a 来源标签 + P3-b 失败诚实 + P3-c 本地主权（SearXNG 默认、DeepSeek 可选）。
 - **依赖**：用户是否有 DeepSeek 搜索 key——无则只交契约级证据 + external-blocked 标注。
 - **验收**：钳位/来源标签/未配置诚实报 `web_search_not_configured`/`cost.requests`+`cost.bytes`。
 - **产物**：`acceptance/block-454/p2/`。
 
 ### W3 · BLOCK-454 P3 OCR 窄口 + adapter
 - **做什么**：新建独立 `ocr(file,options)` 工具窄口（不塞进 registerProvider capabilities）；DeepSeek OCR adapter（`/v1/tools/ocr` multipart，响应 `pages[].text` + 版面标记）；本地 OCR 路保留离线优先。
+- **原则落实**：P1 体验优先（扫描件自动解析、用户零手工转录）+ P1-a 产物留 artifact + P3-c 本地主权（离线 OCR 优先）；X3 幂等可回滚（批量识别）。
 - **决策点**：本地 OCR 引擎（tesseract/PaddleOCR）须用户裁决（新依赖，默认 no）；扫描件样本。
 - **验收**：窄口契约测试 + 扫描件 PDF knowledge 集成测试；按页成本走 `cost.requests`；artifact 留痕。
 - **产物**：`acceptance/block-454/p3/`。
@@ -78,9 +92,10 @@ lastUpdated: 2026-11-16
 - **状态**：官方契约已核实（`/v1/tools/asr`、`/v1/tools/tts` + 流式 WS），但 Petri 无消费方。缺的是需求不是实现。
 - **触发**：用户给出明确场景（语音输入 / 朗读回复）才启动；不因"全家桶齐全"为接而接。P6 暂缓不阻塞 BLOCK-454 整体收口。
 
-### W7 · 设置页 IA v2 实施（建议 UI-704）
-- **设计源**：`docs/settings-ia-simplification-design.md`（v2 激进版，已产出）。
+### W7 · 设置页 IA v2 实施（建议 UI-704 —— 实施时先核对台账未占用号）
+- **设计源**：`docs/settings-ia-simplification-design.md`（v2 激进版）+ `docs/agent-experience-design-principles.md`（设计宪法）。
 - **做什么**：左栏 core 13→5 组 + 1「高级」折叠组（治理/推理/联网/远程/快捷键/诊断/实验搜索可达）；**全局设置搜索**（借鉴 orca `Cmd-,`）；**页面内 UpdateCard**（复用 `useAutoUpdate` + `app:notify`，仿 orca `UpdateCard.tsx`）；联网代理降级、快捷键移出核心；BLOCK-454 adapter 统一进 models「能力渠道」折叠。
+- **原则落实**：P1 体验优先（core 精简、少找少点）+ P4 方案择优（更新主动呈现而非罗列设置项让用户找）+ P5-b 偏好记忆（一次告知后续不扰）+ P2 护栏不破（治理项仍在高级组可达，不放宽审批）。
 - **深链兼容**：`?section=network|keymap|general|...` 旧值映射有效，不失效。
 - **验收**：core 5 组契约测试；快捷键/联网不在 core 首屏但搜索可达；UpdateCard 页面内出现且可关闭；theme-token-contract + ui:audit:check 绿；实机截图过目（观感不代签）。
 - **串行**：需等 BLOCK-454 收口或用户裁决插队。

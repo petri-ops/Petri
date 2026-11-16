@@ -9,11 +9,30 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 596,
+    "documentCount": 597,
     "lastUpdated": "2026-11-16",
-    "managedMarkdown": 578
+    "managedMarkdown": 579
   },
   "documents": [
+    {
+      "id": "AGENT-EXPERIENCE-PRINCIPLES",
+      "path": "docs/agent-experience-design-principles.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "agent-experience-design-principles",
+      "entrypoint": "docs/next-work-blueprint-2026-11-16.md",
+      "archivePolicy": "retain_stable_path",
+      "tags": [
+        "design-principles",
+        "agent-experience",
+        "autonomy",
+        "governance",
+        "G0"
+      ],
+      "notes": "Agent 能力体验设计原则确认版（2026-11-16，用户 5 条+补充约束）：P1 体验优先/P2 自主范围/accessMode 四档/P3 自动化信息获取/P4 方案择优/P5 人工介入最小化——逐条确认+细化，加 P1-a 证据不可省/P2-a 权限只认 UI 档位禁文本推断/P3-a-b-c 来源诚实本地主权/P4-a-b 可追溯可覆盖/P5-a-b-c 护栏偏好记忆可接管 + 横向 X1-X5。核心裁决：对标借形不改魂，人工介入最小化不得吃掉治理透明/动态审批/全链可审计。指导 W2/W3/W7。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "NEXT-WORK-BLUEPRINT-2026-11-16",
       "path": "docs/next-work-blueprint-2026-11-16.md",
