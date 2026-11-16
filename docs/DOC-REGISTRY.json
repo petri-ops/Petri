@@ -148,7 +148,7 @@
       "id": "BLOCK-454",
       "path": "docs/block-454-capability-adapters-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-454-capability-adapters",
       "entrypoint": "docs/README.md",
@@ -166,7 +166,7 @@
         "local-sovereignty",
         "G0"
       ],
-      "notes": "2026-11-16 立项（用户「按照你的建议来」+ 疑虑「只用 deepseek 全家桶是否太依赖」）：不做单一厂商全家桶，做通用能力窄口 + DeepSeek 作为第一个 adapter——P0 契约核实→P1 vision 修通→P2 搜索 adapter（SearXNG 默认不变）→P3 OCR 通用窄口+adapter（本地优先，artifact 留痕）。非范围=ASR/TTS/Responses/改 capabilities 语义/token 预算/G1+。本地主权差别形态=可插拔可审计可本地替换。",
+      "notes": "2026-11-17 整包 completed（e2e 自动序列 W1-W5 五波连续收口，用户预置 D1-D8 裁决无人值守）：P1 vision 修通（UI-638 迁移盲区——旧安装版档案缺 vision 声明致迁移静默跳过永绑无 key dashscope-vision；修复=迁移补 OPENAI_FAMILY∧deepseek 模型第二判据 + capability 改绑同批落盘，红→绿 4/4）；P2 deepseek-search adapter（web-search 窄口第二 adapter，POST /v1/tools/search，结果归一+来源标签+诚实失败全链，SearXNG 默认不变，10/10）；P3 OCR 通用窄口+adapter+knowledge 接入（local 槽位留接口不引依赖 D1；config family ocr 默认关 P5-a；/api/ocr-access 写面；无文本层 PDF→OCR→分块+ocr.json artifact 留痕；治理契约 5 处落位、冻结基线 20 族/112 键，13/13）；P4 Files API+协议归一+file_id 归属 fail-closed 三态（BLOCK-196 教训落点：校验不空转；官方 purpose 三值/顺序 400 强约束补抓 VERIFIED；anthropic.js 自动带 files beta header；显式动作不自动上传，12/12）；P5 Responses 协议 adapter（UNVERIFIED 补抓 VERIFIED；openAIToResponsesRequest/responsesToOpenAIResponse 四投影不丢thinking/tool_use/citations/refusal；max_output_tokens 参数名逐字；safety_check/title 仅透传不替换本地治理；SSE 终帧 flush 收尾（测试抓真）；thinking 映射 responses 协议 off→none/high→max，冻结面复验绿，9/9）；P6 ASR/TTS 暂缓不阻塞（缺需求非缺实现，plan P6 原文登记）。全部实机云调用腿 external-blocked（无独立验证授权+付费副作用 P5-a），契约级证据覆盖；门禁：每波 HK-01 红→绿 + 邻域回归 + types/secret/arch/docs 全绿，零新依赖。证据=acceptance/block-454/p1..p5/。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-11-16"
     },
     {

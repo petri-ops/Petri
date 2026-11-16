@@ -22,6 +22,7 @@ const { DeepSeekProvider } = require('./deepseek');
 const { DashScopeEmbedProvider } = require('./dashscope');
 const { DashScopeVisionProvider } = require('./dashscope-vision');
 const { AnthropicProvider } = require('./anthropic');
+const { ResponsesProvider } = require('./responses');
 
 const _providers = new Map();
 
@@ -109,6 +110,10 @@ function registerBuiltInProviders() {
     }));
   }
   if (!_providers.has('anthropic')) registerProvider(new AnthropicProvider());
+  if (!_providers.has('deepseek-responses')) {
+    // BLOCK-454 P5 — Responses 协议 adapter（POST /responses 原生协议）。
+    registerProvider(new ResponsesProvider());
+  }
   if (!_providers.has('dashscope')) registerProvider(new DashScopeEmbedProvider());
   if (!_providers.has('dashscope-vision')) registerProvider(new DashScopeVisionProvider());
 }

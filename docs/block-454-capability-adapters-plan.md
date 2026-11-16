@@ -1,4 +1,4 @@
-# BLOCK-454 · 通用能力窄口 + DeepSeek adapter（plan · active / P0 已完成）
+# BLOCK-454 · 通用能力窄口 + DeepSeek adapter（plan · **completed** 2026-11-17 / P1-P5 全收口，P6 暂缓不阻塞）
 
 > 发令：用户 2026-11-16「按照你的建议来」「计划还是要详细些」「deepseek 全家桶支持的功能是不是比较齐全，能全方位列举吗，我想都融入到 petri 中来」；立项动机=用户疑虑「只用 deepseek 全家桶是不是太依赖了」。
 > 形态：BLOCK 完整工作包（多工作面 / 跨会话 / 有架构裁决：窄口定义、adapter 边界、非 token 计量口径）。
@@ -47,10 +47,9 @@
 - file_id 归属注册表 `files-registry.js`（fail-closed 三态：未知 id/注册表损坏/归属不匹配——BLOCK-196 教训：校验不空转）。
 - HK-01 红→绿 12/12；邻域 74/74；types/secret/arch PASS 零新依赖。external-blocked：真实文档问答实机腿（同 D2 诚实原则）。证据：`acceptance/block-454/p4/`。
 
-### P5 — Responses / Anthropic 协议 adapter（中，可选）
-- Responses API 官方已原生支持（`/responses`）；Petri 当前 0 命中。若做，按现有 provider 注册形态加 Responses adapter（窄口现成）。Anthropic Messages adapter（`anthropic.js`）已支持 baseUrl 指向 `/anthropic`，属配置态，零代码。
-- 内联 `deepseek_web_search` / `deepseek_read_url` / `safety_check` / `title` 若走 Responses 协议，在此阶段统一映射；**safety_check 不替换 Petri 本地治理**（否则丢魂）。
-- 验收：协议 adapter 契约测试；响应内容块（thinking/tool_use/citations/refusal）投影不丢。
+### P5 — Responses / Anthropic 协议 adapter（中，可选）——**已完成 2026-11-17（e2e 波次 W5，D3 预置=做）**
+- UNVERIFIED「Responses 完整请求形态」先补抓官方 create-response 页 VERIFIED（findings 文首补记）再实现：`responses.js` adapter（provider 'deepseek-responses'/protocol 'responses'，OpenAI-compat 面零改动）；max_output_tokens 参数名逐字；tools function 展平 + 内联工具透传；**safety_check/title 仅参数级透传不替换本地治理**。四投影不丢（thinking/tool_use/citations/refusal）；SSE 无 [DONE] 流式 + 终帧 flush（测试抓真缺陷当场修）。Anthropic Messages 属配置态零代码（W4 已补 files beta header）。
+- thinking 映射扩 'responses'（off→reasoning.effort=none / high→max；standard 不发参），BLOCK-200 冻结面复验绿；HK-01 红→绿 9/9；邻域 61/61；external-blocked 实机腿（同前）。证据：`acceptance/block-454/p5/`。
 
 ### P6 — ASR / TTS（暂缓，缺需求）
 - 官方契约已核实（ASR `/v1/tools/asr`、TTS `/v1/tools/tts` 含流式 WS），但 Petri 无明确消费方。**缺的是需求不是实现**：登记备查，需用户显式裁决场景（如语音输入/朗读回复）才启动。不因「全家桶齐全」就为接而接。

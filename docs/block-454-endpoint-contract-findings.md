@@ -2,6 +2,7 @@
 
 > 核实日期：2026-11-16。来源：DeepSeek API 官方文档（api-docs.deepseek.com，中文站），逐页抓取。
 > 性质：P0 只读产物——**结论不是功能实现**；每项标注 VERIFIED（官方文档明确给出）并附深链。
+> **P5 补抓（2026-11-17，e2e 波次 W5）**：原 UNVERIFIED 的「Responses 完整请求形态」已抓官方 `POST /responses` 参考页核实（VERIFIED，深链 [create-response](https://api-docs.deepseek.com/zh-cn/api/create-response)）：请求 model / input(string|item[]，item 类型 message/function_call/function_call_output/custom_tool_call(_output)/reasoning/web_search_call) / instructions / reasoning{effort:none|low|high|max（minimal→low，medium|xhigh→high）} / **max_output_tokens**（非 max_tokens）/ tools[]（function 扁平 {type,name,description,parameters}、custom 仅 apply_patch、web_search 仅 v4-pro、deepseek_web_search 与 deepseek_read_url 不与 web_search 同声明）/ safety_check{level:"high"} / title{enabled:true}；content 块 input_text|input_image(image_url 与 file_id 互斥均缺均多 400)|input_file(file-api-*，仅 user)|reasoning_text；响应 id/object:"response"/status(in_progress|completed|incomplete|failed)/error{code,message}/incomplete_details.reason(max_output_tokens|content_filter)/output[]（message.content=[output_text]；reasoning 前置；web_search_call 带 kind/action.sources{title,snippet,site_name,site_icon,published_at}）/title/usage（含 server_tool_use 计费字段）；流式 event+sequence_number **无 [DONE]**，终事件 completed/incomplete/failed。
 > 关键背景：2026-11-13 DeepSeek 发布「全家桶应用 API」，在 Messages / Responses / Chat Completions 三个对话接口内开启参数即可获得 App 同款能力；Search/Fetch/OCR/ASR/TTS 另可作为**独立接口**调用。这解释了用户近期看到的能力面。
 
 ## 0. 模型与协议基线（VERIFIED）
@@ -61,5 +62,5 @@
 
 - 「全家桶」= 3 个对话协议 × 7 项对话内联能力 + 5 个独立工具接口（Search/Fetch/OCR/ASR/TTS），共约 12 类能力面；Petri 已覆盖其中约 6 类（chat/思考/vision架构/Anthropic adapter/搜索窄口/标题）。
 - 真正缺口按价值排序：OCR（P3，有 knowledge 场景）> Responses 协议（可选）> 文件输入链（归 P3）> ASR/TTS（无消费方，暂缓）。
-- **P0 硬门达成项**：上表标 VERIFIED + 深链的能力，允许进入对应实现阶段；Fetch 独立端点细节与 Responses 完整请求形态标 UNVERIFIED，开写前需补抓。
+- **P0 硬门达成项**：上表标 VERIFIED + 深链的能力，允许进入对应实现阶段；Responses 完整请求形态已补抓 VERIFIED（2026-11-17，见文首 P5 补抓注）；Fetch 独立端点细节仍标 UNVERIFIED（对应能力未进入实现范围，如需接入先补抓）。
 - 全部融入不等于全部立刻做——按"通用窄口 + adapter"形态分批，DeepSeek 只作第一个 adapter，SearXNG/本地 OCR 等本地主权路径保持可选。

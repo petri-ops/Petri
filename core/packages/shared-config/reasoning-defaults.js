@@ -27,6 +27,9 @@ const DEFAULT_MAPPING = Object.freeze({
   'openai-compatible': Object.freeze({ off: 'reasoning_effort:minimal', standard: 'none', high: 'reasoning_effort:high' }),
   'anthropic-messages': Object.freeze({ off: 'thinking:disabled', standard: 'none', high: 'thinking:enabled' }),
   'dashscope-native': Object.freeze({ off: 'enable_thinking:false', standard: 'none', high: 'enable_thinking:true' }),
+  // BLOCK-454 P5 — Responses 协议（POST /responses）：effort ∈ none|low|high|max（官方 VERIFIED）。
+  // off=显式关闭（reasoning.effort=none）；high=最强调参数（max）。standard=不发参（默认档零行为变化）。
+  'responses': Object.freeze({ off: 'reasoning:none', standard: 'none', high: 'reasoning:max' }),
 });
 
 /** 每个协议允许的令牌集合（写侧据此拒"给 openai 配 thinking:enabled"这类跨协议错配）。 */
@@ -34,6 +37,7 @@ const KNOWN_PARAMS = Object.freeze({
   'openai-compatible': Object.freeze(['none', 'reasoning_effort:minimal', 'reasoning_effort:low', 'reasoning_effort:medium', 'reasoning_effort:high']),
   'anthropic-messages': Object.freeze(['none', 'thinking:disabled', 'thinking:enabled']),
   'dashscope-native': Object.freeze(['none', 'enable_thinking:true', 'enable_thinking:false']),
+  'responses': Object.freeze(['none', 'reasoning:none', 'reasoning:low', 'reasoning:high', 'reasoning:max']),
 });
 
 function isKnownProtocol(protocol) {
@@ -60,6 +64,8 @@ function expandToken(token, options = {}) {
   const param = separator >= 0 ? token.slice(0, separator) : token;
   const rawValue = separator >= 0 ? token.slice(separator + 1) : '';
   if (param === 'reasoning_effort') return { reasoning_effort: rawValue };
+  // BLOCK-454 P5 — Responses 协议：reasoning:{effort} 形状。
+  if (param === 'reasoning') return { reasoning: { effort: rawValue } };
   if (param === 'enable_thinking') return { enable_thinking: rawValue === 'true' };
   if (param === 'thinking') {
     if (rawValue === 'disabled') return { thinking: { type: 'disabled' } };

@@ -106,6 +106,8 @@ function _uniqueKnown(values, known) {
 function inferProtocol(provider) {
   if (provider === 'dashscope' || provider === 'dashscope-vision') return 'dashscope-native';
   if (provider === 'anthropic') return 'anthropic-messages';
+  // BLOCK-454 P5 — Responses 原生协议（POST /responses）。
+  if (provider === 'deepseek-responses') return 'responses';
   return 'openai-compatible';
 }
 

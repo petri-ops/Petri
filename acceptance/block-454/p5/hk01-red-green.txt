@@ -1,0 +1,12 @@
+✔ P5-0 — provider 注册：deepseek-responses 在册；inferProtocol→responses；thinking 映射 (1.375375ms)
+✔ P5-1 — 请求形态：messages→input items（input_text）+ max_tokens→max_output_tokens (0.212083ms)
+✔ P5-2 — 工具历史：assistant tool_calls→function_call items、tool 角色→function_call_output (0.079833ms)
+✔ P5-3 — tools 展平（OpenAI 嵌套 function→Responses 扁平）+ 内联工具/safety_check/title 透传不替换本地治理 (0.086208ms)
+✔ P5-4 — 响应归一：thinking/tool_use/citations 三投影不丢 + usage 映射 + details 保留 (0.20325ms)
+✔ P5-5 — refusal 投影：incomplete+content_filter → finish_reason=content_filter（不丢） (0.07025ms)
+✔ P5-6 — status=failed → 诚实 error 信封（code/message 上抛） (0.053542ms)
+✔ P5-7 — adapter chat：POST {baseUrl}/responses + Bearer + 归一信封；HTTP 401 诚实映射 (0.331667ms)
+✔ P5-8 — 流式：SSE 事件（无 [DONE]）→ content_delta 聚合 + completed usage；未知事件不猜不炸 (0.425958ms)
+ℹ tests 9
+ℹ pass 9
+ℹ fail 0
