@@ -1,0 +1,15 @@
+✔ P4-A0 — 常量契约：端点/purpose 白名单/协议清单/beta header (1.257125ms)
+✔ P4-A1 — 请求形态：multipart 且 purpose 字段在 file 之前（官方 400 强约束）+ Bearer (23.938125ms)
+✔ P4-A2 — purpose 白名单外 → files_purpose_invalid；无 key → files_not_configured（均不发请求） (0.094541ms)
+✔ P4-A3 — 100MiB 上限 → files_too_large（不发请求）；413/429/401 → 诚实错误映射 (0.255666ms)
+✔ P4-A4 — 响应缺 id → files_bad_response（不静默成功）；非 JSON → 同码 (0.201375ms)
+✔ P4-B1 — 三协议引用块形状（官方逐字契约）+ 未知协议诚实拒 (0.21075ms)
+✔ P4-B2 — bodyHasFileReference 探针：chat file 块命中；纯文本/空体不命中 (0.07925ms)
+✔ P4-C1 — 记录 + 归属校验：自有 id 放行；未知 id fail-closed（file_id_unowned 不空转） (1.283625ms)
+✔ P4-C2 — 注册表损坏 → fail-closed files_registry_unreadable（BLOCK-196：校验不空转） (0.221167ms)
+✔ P4-C3 — docId 归属：按知识文档登记后可按 docId 校验 (0.14875ms)
+✔ P4-D1 — uploadKnowledgeDocumentForChat：读取 doc 原件 → 上传 → 注册表留痕（docId 归属） (30.278458ms)
+✔ P4-D2 — anthropic.js：body 含 file 块 → 请求带 anthropic-beta files header + document 块转换 (1.21375ms)
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0

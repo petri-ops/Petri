@@ -38,8 +38,25 @@ function openAIContentToAnthropic(content) {
         blocks.push({ type: 'image', source: { type: 'url', url: String(url) } });
       }
     }
+    // BLOCK-454 P4 — Files API file_id 引用块：Chat 形 {type:"file",file_id} →
+    // Messages 形 {type:"document",source:{type:"file",file_id}}（官方契约；
+    // 需 anthropic-beta files header，由 anthropic.js 按 bodyHasFileReference 注入）。
+    if (part.type === 'file' && part.file_id) {
+      blocks.push({ type: 'document', source: { type: 'file', file_id: String(part.file_id) } });
+    }
   }
   return blocks;
+}
+
+/**
+ * BLOCK-454 P4 — 探测 OpenAI 形请求体是否含 Files API file 引用块（{type:"file",file_id}）。
+ * 命中时 Anthropic Messages 协议必须带 `anthropic-beta: files-api-2025-04-14`
+ * （官方契约），由 anthropic.js requestHeaders 注入。
+ */
+function bodyHasFileReference(body) {
+  if (!body || !Array.isArray(body.messages)) return false;
+  return body.messages.some((message) => Array.isArray(message && message.content)
+    && message.content.some((part) => part && part.type === 'file' && part.file_id));
 }
 
 function openAIMessageToAnthropic(message) {
@@ -276,4 +293,5 @@ module.exports = {
   anthropicToOpenAIRequest,
   openAIToAnthropicResponse,
   anthropicToOpenAIResponse,
+  bodyHasFileReference,
 };

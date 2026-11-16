@@ -17,11 +17,15 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const ks = require('./knowledge-space');
 const { parseDocument, checkSupported } = require('./knowledge-parsers');
 // BLOCK-454 P3 — 扫描件（无文本层）PDF 的 OCR 补解析（云 adapter，默认关；见 ocr-config）。
 const ocrProvider = require('./ocr-provider');
+// BLOCK-454 P4 — Files API 窄口 + file_id 归属注册表（显式动作，不自动触发）。
+const filesProvider = require('./files-provider');
+const filesRegistry = require('./files-registry');
 
 const sqlite = require('../db').getDatabase();
 
@@ -260,6 +264,66 @@ async function reindexDocument(docId) {
   return ks.getDocument(docId);
 }
 
+/**
+ * BLOCK-454 P4 — knowledge 文档 → Files API 上传（对话 file_id 引用链的第一步）。
+ *
+ * **显式动作**（P5-a 付费知情）：解析类 purpose 按页一次性计费；知识摄取管道
+ * **不**自动上传云端，只有调用方（路由/工具）显式请求才发生。file_id 归属登记进
+ * files-registry（docId 维度），引用时 assertFileUsable fail-closed 校验（BLOCK-196
+ * 教训：归属校验不空转）。uploadFn 可注入（测试）。
+ * @param {{purpose?:string, registryPath?:string, uploadFn?:Function}} opts
+ */
+async function uploadKnowledgeDocumentForChat(docId, opts = {}) {
+  const doc = ks.getDocument(docId);
+  if (!doc) {
+    return { ok: false, code: 'knowledge_document_not_found', message: `知识文档不存在: ${docId}` };
+  }
+  const rawPath = doc.raw_path || path.join(ks.docDir(docId), doc.name);
+  if (!fs.existsSync(rawPath)) {
+    return { ok: false, code: 'knowledge_raw_file_missing', message: '原始文件已不在，无法上传。' };
+  }
+  const buffer = fs.readFileSync(rawPath);
+  const upload = opts.uploadFn || filesProvider.uploadFile;
+  const result = await upload({
+    buffer,
+    filename: doc.name,
+    purpose: opts.purpose || 'text_recognition',
+    ...(opts.config ? { config: opts.config } : {}),
+    ...(opts.fetchImpl ? { fetchImpl: opts.fetchImpl } : {}),
+  });
+  if (!result || !result.ok) {
+    return {
+      ok: false,
+      code: result && result.code ? `files_${result.code}`.replace('files_files_', 'files_') : 'files_failed',
+      message: result && result.message ? result.message : 'Files API 上传失败',
+      ...(result && Number.isFinite(result.status) ? { status: result.status } : {}),
+    };
+  }
+  const recorded = filesRegistry.recordUploadedFile({
+    storePath: opts.registryPath,
+    entry: {
+      fileId: result.fileId,
+      docId,
+      purpose: result.purpose,
+      filename: doc.name,
+      bytes: result.bytes,
+      sha256: crypto.createHash('sha256').update(buffer).digest('hex'),
+    },
+  });
+  if (!recorded.ok) {
+    return { ok: false, code: recorded.code, message: recorded.message || 'file_id 归属登记失败' };
+  }
+  return {
+    ok: true,
+    fileId: result.fileId,
+    docId,
+    filename: doc.name,
+    purpose: result.purpose,
+    // 下游按协议取引用块：Chat {type:'file'}/Responses {type:'input_file'}/Messages document
+    contentBlock: filesProvider.fileContentBlockForProtocol(result.fileId, opts.protocol || 'chat'),
+  };
+}
+
 // ---- BLOCK-94 F1 可靠底盘：启动恢复 + 失败批量重试 ----
 
 // 队列为进程内 promise 链：重启后 uploaded/parsing/chunking/embedding 中间态文档会永久卡住。
@@ -313,4 +377,5 @@ module.exports = {
   recoverInterruptedIngest,
   retryFailedDocuments,
   safeDocFilename,
+  uploadKnowledgeDocumentForChat,
 };

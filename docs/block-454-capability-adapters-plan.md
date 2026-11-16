@@ -42,9 +42,10 @@
 - knowledge 扫描件接入：无文本层 PDF → attemptOcrParse（默认关）→ OCR 文本进分块/嵌入 + `ocr.json` artifact 全量留痕（provider/pages/cost）；未启用诚实 failed 指路，绝不静默空索引。
 - HK-01 红→绿 13/13；邻域 86/86；secret/arch/types PASS，零新依赖。external-blocked：真端点腿（同 W2/D2 诚实原则）。证据：`acceptance/block-454/p3/`。
 
-### P4 — 文件输入链增强（中，可并入 P3 收尾）
-- Files API（`POST /files` + `file_id` 引用）与 knowledge 解析对接：支持 PDF/Office/图片经 file_id 进入对话；对话内联文件块按协议归一（Chat `file` / Responses `input_file` / Messages `document`）。
-- 验收：file_id 引用链契约测试 + 一轮真实文档问答证据（无样本则契约级 + 诚实标注）。
+### P4 — 文件输入链增强（中，可并入 P3 收尾）——**已完成 2026-11-17（e2e 波次 W4）**
+- Files API 窄口 `files-provider.js`（POST `/files`，purpose 三值 VERIFIED 补抓官方文档 + purpose 先于 file 400 强约束落实）；协议归一 `fileContentBlockForProtocol`（Chat file / Responses input_file / Messages document）+ `anthropic.js` 自动带 `anthropic-beta: files-api-2025-04-14`（含 file 块才带，对照钉住）；knowledge 对接 `uploadKnowledgeDocumentForChat`（显式动作不自动上传，P5-a）。
+- file_id 归属注册表 `files-registry.js`（fail-closed 三态：未知 id/注册表损坏/归属不匹配——BLOCK-196 教训：校验不空转）。
+- HK-01 红→绿 12/12；邻域 74/74；types/secret/arch PASS 零新依赖。external-blocked：真实文档问答实机腿（同 D2 诚实原则）。证据：`acceptance/block-454/p4/`。
 
 ### P5 — Responses / Anthropic 协议 adapter（中，可选）
 - Responses API 官方已原生支持（`/responses`）；Petri 当前 0 命中。若做，按现有 provider 注册形态加 Responses adapter（窄口现成）。Anthropic Messages adapter（`anthropic.js`）已支持 baseUrl 指向 `/anthropic`，属配置态，零代码。

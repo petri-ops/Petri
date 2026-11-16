@@ -4,7 +4,10 @@ const aiUsageHelper = require('../ai-usage-helper');
 const {
   openAIToAnthropicRequest,
   anthropicToOpenAIResponse,
+  bodyHasFileReference,
 } = require('./protocol-conversion');
+// BLOCK-454 P4 — Files API file_id 引用（Messages 协议）所需 beta 功能头（官方契约）。
+const FILES_BETA_HEADER = 'files-api-2025-04-14';
 const { AnthropicStreamAggregator, extractSseFrames } = require('./stream-aggregate');
 
 const DEFAULT_BASE_URL = 'https://api.anthropic.com/v1';
@@ -19,12 +22,18 @@ function endpointUrl(baseUrl, pathname) {
 }
 
 function requestHeaders(apiKey, options = {}) {
-  return {
+  const headers = {
     'content-type': 'application/json',
     accept: options.accept || 'application/json',
     'x-api-key': apiKey,
     'anthropic-version': options.anthropicVersion || DEFAULT_VERSION,
   };
+  // BLOCK-454 P4 — body 含 Files API file 引用块时带 beta 功能头（显式传入的
+  // anthropic-beta 优先，不覆盖既有值）。
+  if (options.filesBeta && !headers['anthropic-beta']) {
+    headers['anthropic-beta'] = options.filesBeta === true ? FILES_BETA_HEADER : String(options.filesBeta);
+  }
+  return headers;
 }
 
 async function readBoundedResponseText(response) {
@@ -148,10 +157,12 @@ class AnthropicProvider {
     if (!apiKey) return { error: 'no_api_key', message: 'Anthropic API key 未配置' };
     const startedAt = Date.now();
     const requestBody = openAIToAnthropicRequest({ ...(body || {}), stream: false });
+    // BLOCK-454 P4 — 请求体含 file 引用块（OpenAI Chat 形）→ Messages 协议须带 beta 头。
+    const filesBeta = bodyHasFileReference(body);
     try {
       const response = await fetch(endpointUrl(options.baseUrl, '/messages'), {
         method: 'POST',
-        headers: requestHeaders(apiKey, options),
+        headers: requestHeaders(apiKey, filesBeta ? { ...options, filesBeta } : options),
         body: JSON.stringify(requestBody),
         signal: options.signal,
       });
@@ -175,10 +186,12 @@ class AnthropicProvider {
     if (!apiKey) return { error: 'no_api_key', message: 'Anthropic API key 未配置' };
     const startedAt = Date.now();
     const requestBody = openAIToAnthropicRequest({ ...(body || {}), stream: true });
+    // BLOCK-454 P4 — 流式同款：file 引用块 → beta 头。
+    const filesBeta = bodyHasFileReference(body);
     try {
       const response = await fetch(endpointUrl(options.baseUrl, '/messages'), {
         method: 'POST',
-        headers: requestHeaders(apiKey, { ...options, accept: 'text/event-stream' }),
+        headers: requestHeaders(apiKey, filesBeta ? { ...options, filesBeta, accept: 'text/event-stream' } : { ...options, accept: 'text/event-stream' }),
         body: JSON.stringify(requestBody),
         signal: options.signal,
       });
