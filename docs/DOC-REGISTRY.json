@@ -9,11 +9,36 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 592,
+    "documentCount": 593,
     "lastUpdated": "2026-11-16",
     "managedMarkdown": 575
   },
   "documents": [
+    {
+      "id": "BLOCK-454",
+      "path": "docs/block-454-capability-adapters-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-454-capability-adapters",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-454-capability-adapters-plan.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "capability-adapter",
+        "deepseek",
+        "web-search",
+        "ocr",
+        "local-sovereignty",
+        "G0"
+      ],
+      "notes": "2026-11-16 立项（用户「按照你的建议来」+ 疑虑「只用 deepseek 全家桶是否太依赖」）：不做单一厂商全家桶，做通用能力窄口 + DeepSeek 作为第一个 adapter——P0 契约核实→P1 vision 修通→P2 搜索 adapter（SearXNG 默认不变）→P3 OCR 通用窄口+adapter（本地优先，artifact 留痕）。非范围=ASR/TTS/Responses/改 capabilities 语义/token 预算/G1+。本地主权差别形态=可插拔可审计可本地替换。",
+      "registeredAt": "2026-11-16"
+    },
     {
       "id": "BLOCK-452",
       "path": "docs/block-452-update-ux-push-plan.md",
