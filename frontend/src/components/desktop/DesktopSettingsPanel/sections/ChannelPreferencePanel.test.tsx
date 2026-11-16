@@ -30,6 +30,9 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
       if (url.includes('/ocr-access')) {
         return { status: 'ok', ocrAccess: { effective: { enabled: false, provider: 'none', purpose: 'rich_layout_recognition' } } };
       }
+      if (url.includes('/speech-access')) {
+        return { status: 'ok', speechAccess: { effective: { enabled: false, provider: 'none', ttsVoice: 'stella', ttsFormat: 'wav', filterMarkdown: true, timeoutMs: 60000 } } };
+      }
       return {};
     });
     render(<ChannelPreferencePanel />);
@@ -39,6 +42,7 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
     const searchSelect = screen.getByTestId('channel-search-provider');
     expect((searchSelect as HTMLSelectElement).value).toBe('searxng');
     expect(screen.getByTestId('channel-ocr-provider')).toBeTruthy();
+    expect(screen.getByTestId('channel-speech-provider')).toBeTruthy();
     expect(screen.getByTestId('channel-panel').textContent).toContain('SearXNG');
   });
 
@@ -46,6 +50,9 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
     const fetchMock = mockFetchRoute((url) => {
       if (url.includes('/web-access')) {
         return { status: 'ok', webAccess: { effective: { enabled: true, provider: 'searxng', searxngBaseUrl: '' }, capabilities: { search: true, fetch: true } } };
+      }
+      if (url.includes('/speech-access')) {
+        return { status: 'ok', speechAccess: { effective: { enabled: false, provider: 'none', ttsVoice: 'stella', ttsFormat: 'wav', filterMarkdown: true, timeoutMs: 60000 } } };
       }
       return { status: 'ok', ocrAccess: { effective: { enabled: false, provider: 'none', purpose: 'rich_layout_recognition' } } };
     });
@@ -66,10 +73,23 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
       const ocrBody = putOcr?.[1]?.body as string | undefined;
       expect(typeof ocrBody === 'string' && (JSON.parse(ocrBody) as { provider?: string }).provider).toBe('deepseek');
     });
+    // 语音渠道开关 → PUT /api/speech-access
+    fireEvent.change(screen.getByTestId('channel-speech-provider'), { target: { value: 'deepseek' } });
+    await waitFor(() => {
+      const putSpeech = fetchMock.mock.calls.find(([u, init]) => String(u).includes('/speech-access') && init?.method === 'PUT');
+      expect(putSpeech).toBeTruthy();
+      const speechBody = putSpeech?.[1]?.body as string | undefined;
+      expect(typeof speechBody === 'string' && (JSON.parse(speechBody) as { enabled?: boolean }).enabled).toBe(true);
+    });
   });
 
   it('渠道面板默认折叠，可展开（不占 models 主屏焦点）', async () => {
-    mockFetchRoute(() => ({ status: 'ok', ocrAccess: { effective: { enabled: false, provider: 'none' } } }));
+    mockFetchRoute((url) => {
+      if (url.includes('/speech-access')) {
+        return { status: 'ok', speechAccess: { effective: { enabled: false, provider: 'none', ttsVoice: 'stella', ttsFormat: 'wav', filterMarkdown: true, timeoutMs: 60000 } } };
+      }
+      return { status: 'ok', ocrAccess: { effective: { enabled: false, provider: 'none', purpose: 'rich_layout_recognition' } } };
+    });
     render(<ChannelPreferencePanel />);
     const toggle = screen.getByTestId('channel-panel-toggle');
     expect(screen.queryByTestId('channel-search-provider')).toBeNull();

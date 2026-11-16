@@ -99,6 +99,12 @@ const CONFIG_FAMILIES = Object.freeze({
     precedence: ['file', 'default'],
     envTruth: null,
   },
+  // —— BLOCK-454 P6 —— speech：语音（ASR/TTS）云渠道授权面（默认关；key 走凭据族不进本文件）。
+  'speech': {
+    store: 'file:speech-config.json',
+    precedence: ['file', 'default'],
+    envTruth: null,
+  },
   // runtime：全局审批默认档位 + 派生并发/深度 + 工具曝光黑名单。
   // 并发/深度保留 env 覆盖（PETRI_SPAWN_* 是既有部署面，env 优先），审批默认为纯文件。
   'runtime': {
@@ -397,6 +403,36 @@ const CONFIG_KEYS = Object.freeze([
   {
     // 单次 OCR 请求超时（大文件/多页文档耗时更长，默认 60s）。
     key: 'ocr.timeoutMs', family: 'ocr', path: 'timeoutMs',
+    type: 'number', domain: { min: 1000, max: 300000, integer: 'floor' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // BLOCK-454 P6 — 语音（ASR/TTS）渠道开关（默认关：云调用=付费副作用，P5-a 知情权）。
+    key: 'speech.enabled', family: 'speech', path: 'enabled',
+    type: 'boolean', envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 语音渠道：deepseek（云 adapter，key 与对话共用）| none 未选。WS 流式留接口不实现。
+    key: 'speech.provider', family: 'speech', path: 'provider',
+    type: 'string', domain: { pattern: '^(?:deepseek|none)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // TTS 声音（findings §2 官方白名单）：stella 女 | tide 男。
+    key: 'speech.ttsVoice', family: 'speech', path: 'ttsVoice',
+    type: 'string', domain: { pattern: '^(?:stella|tide)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // TTS 音频格式（整段 REST 白名单）：wav | pcm（opus 仅流式 WS，本期不接）。
+    key: 'speech.ttsFormat', family: 'speech', path: 'ttsFormat',
+    type: 'string', domain: { pattern: '^(?:wav|pcm)?$' }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // 单次语音请求超时（ASR 上传 120s / TTS 长文本耗时，默认 60s）。
+    key: 'speech.timeoutMs', family: 'speech', path: 'timeoutMs',
     type: 'number', domain: { min: 1000, max: 300000, integer: 'floor' }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
   },

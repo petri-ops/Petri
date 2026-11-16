@@ -11,6 +11,8 @@
  *  PUT  /api/web-access    → 写联网授权（**即时生效**，无 restartRequired 语义）
  *  GET  /api/ocr-access    → 扫描件 OCR 授权快照（BLOCK-454 P3；默认关）
  *  PUT  /api/ocr-access    → 写 OCR 授权（**即时生效**；key 走凭据族不在本面）
+ *  GET  /api/speech-access → 语音（ASR/TTS）授权快照（BLOCK-454 P6；默认关）
+ *  PUT  /api/speech-access → 写语音授权（**即时生效**；key 走凭据族不在本面）
  *
  * 拒绝形状与 keymap/generation/config-transfer 同构：400 + 结构化 diagnostics。
  * 代理与 CA 只在进程启动时被 Node 读取，因此 PUT 只做持久化与「需重启」标记，不谎称已生效。
@@ -23,6 +25,8 @@ const runtime = require('../helpers/runtime-policy');
 const webSearch = require('../helpers/web-search-config');
 // BLOCK-454（P3）— 扫描件 OCR 授权面（默认关；即时生效；key 走凭据族）
 const ocrConfig = require('../helpers/ocr-config');
+// BLOCK-454（P6）— 语音（ASR/TTS）授权面（默认关；即时生效；key 走凭据族）
+const speechConfig = require('../helpers/speech-config');
 
 function sendRejection(res, error) {
   if (error && error.message === 'config_value_rejected') {
@@ -100,6 +104,25 @@ module.exports = function mountRuntimeConfig(app) {
     try {
       const snapshot = ocrConfig.saveOcrConfig(req.body || {});
       return res.json({ status: 'ok', ocrAccess: snapshot });
+    } catch (error) {
+      return sendRejection(res, error);
+    }
+  });
+
+  // —— BLOCK-454（P6）语音（ASR/TTS）授权与参数 ——
+  // 与 /api/ocr-access 同构：即时生效、400 + diagnostics、默认关（云调用=付费副作用）。
+  app.get('/api/speech-access', (req, res) => {
+    try {
+      return res.json({ status: 'ok', speechAccess: speechConfig.getSnapshot() });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.put('/api/speech-access', express.json({ limit: '16kb' }), (req, res) => {
+    try {
+      const snapshot = speechConfig.saveSpeechConfig(req.body || {});
+      return res.json({ status: 'ok', speechAccess: snapshot });
     } catch (error) {
       return sendRejection(res, error);
     }

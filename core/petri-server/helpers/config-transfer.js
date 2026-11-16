@@ -68,6 +68,8 @@ const CONFIG_TRANSFER_FAMILIES = Object.freeze([
   'memory-policy',
   // BLOCK-454（P3）扫描件 OCR 云渠道授权面（默认关；key 走凭据族，本族只导出授权开关）
   'ocr',
+  // BLOCK-454（P6）语音（ASR/TTS）云渠道授权面（默认关；key 走凭据族）
+  'speech',
   'subagent-profile',
   'trust-policy',
   'data-retention',

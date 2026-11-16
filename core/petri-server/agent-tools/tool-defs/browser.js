@@ -210,6 +210,50 @@ module.exports = [
   {
     "type": "function",
     "function": {
+      "name": "transcribe_audio",
+      "description": "读取项目工作区内的音频文件（16bit PCM WAV 或 Ogg Opus）并转写为文本（语音识别）。适用于：用户把录音/会议/口述放进工作区让你听内容时。\n音频按云渠道转写（key 与对话共用），成本逐次入账；支持 19 种语言自动识别；单文件 ≤8MiB/120 秒，超出请先本地转码切片。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "workspace 相对路径（wav/ogg），如 \"recordings/meeting.wav\""
+          }
+        },
+        "required": ["filePath"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "speak_text",
+      "description": "把一段文本合成为语音音频（语音合成），产物落工作区 .petri/audio/ 供播放或下载。适用于：用户要听一段内容的朗读版、或要求生成播报音频时。\n同文本同声音幂等复用同一文件（不重复计费）；声音 stella（女）/tide（男）二选一；单次 ≤10000 计费字符，超出请分段。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "要朗读的文本（≤10000 计费字符，超出会诚实拒绝）"
+          },
+          "voiceId": {
+            "type": "string",
+            "enum": ["stella", "tide"],
+            "description": "可选：声音。stella=女声（默认）；tide=男声"
+          },
+          "format": {
+            "type": "string",
+            "enum": ["wav", "pcm"],
+            "description": "可选：音频格式。wav（默认）或 pcm"
+          }
+        },
+        "required": ["text"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "browser_connect",
       "description": "连接浏览器操作会话（BLOCK-264 C-40 垂直切片；opt-in；TTL 30 分钟）。连接后才能执行 browser_act。可选限定 allowedOrigins。私网/环回/云元数据地址一律拒绝。",
       "parameters": {

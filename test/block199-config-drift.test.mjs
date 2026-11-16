@@ -65,6 +65,7 @@ const NO_UI_FAMILIES = {
   'trust-policy': 'W7b v1 只做信任级与 accessMode 天花板（API 写面 + 审计）；项目信任 UI 属后续批次',
   'data-retention': 'W7e v1 只做留存配置与迁移计划预览（API 写面）；留存 UI 与迁移执行属后续批次/reopen',
   'ocr': 'BLOCK-454 P3 v1 只做窄口+knowledge 接线（API 写面 /api/ocr-access）；OCR 授权 UI 属后续设置面批次（W7 评估）',
+  'speech': 'BLOCK-454 P6 v1 只做窄口+agent 工具消费面（API 写面 /api/speech-access）；语音授权经能力渠道折叠块槽位在场（无独立面板，键 ui=none）',
 };
 
 /** 族 → 后端写路由（必须能把拒绝翻译成 4xx，而不是冒 500 或静默）。 */
@@ -91,6 +92,8 @@ const WRITE_ROUTES = {
   'web-search': 'core/petri-server/routes/runtime-config.js',
   // BLOCK-454（P3）：OCR 授权写面与 web-access 同文件（同一路由装配单元），拒绝码同构（400 + diagnostics）。
   'ocr': 'core/petri-server/routes/runtime-config.js',
+  // BLOCK-454（P6）：语音授权写面与 ocr/web-access 同文件（同一路由装配单元），拒绝码同构（400 + diagnostics）。
+  'speech': 'core/petri-server/routes/runtime-config.js',
 };
 
 /**

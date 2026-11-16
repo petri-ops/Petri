@@ -1,0 +1,14 @@
+✔ P6-A0 — 常量契约：端点/8MiB 上限/TTS 声音与格式白名单/10000 计费字符 (1.426833ms)
+✔ P6-A1 — 默认关/未选渠道/无 key 诚实报且不发请求（P5-a 付费知情 + P3-b 失败诚实） (0.411875ms)
+✔ P6-A2 — 格式守卫：仅 16bit PCM WAV 与 Ogg Opus（魔数判定），其他 → asr_format_unsupported (22.826959ms)
+✔ P6-A3 — 请求形态：POST 官方端点 + Bearer + multipart(file)；响应归一 text/durationMs + 成本计量 (0.207958ms)
+✔ P6-A4 — 8MiB 上限 → asr_too_large；401 → 不可重试 http_error；非 JSON → asr_bad_response (0.2275ms)
+✔ P6-B1 — 请求形态：JSON {text,voice_id,format,filter_markdown} + 响应二进制归一 + 成本计量 (0.270542ms)
+✔ P6-B2 — 诚实拒绝：voice/format 白名单外、text 空缺、超 10000 计费字符（均不发请求） (0.112875ms)
+✔ P6-C1 — config 族 speech 注册：默认关 + 五键 + 守卫拒绝非法 voice/format/provider (0.924166ms)
+✔ P6-D0 — 工具注册：transcribe_audio / speak_text 在 registry 与 tool-defs 双面在场 (242.927083ms)
+✔ P6-D1 — tool_transcribe_audio：工作区 wav → ASR（mock）→ text 返回 + 成本入账 (3.400625ms)
+✔ P6-D2 — tool_speak_text：TTS（mock）→ 音频落盘 .petri/audio/<sha256>.wav + 幂等同路径 (1.968042ms)
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0

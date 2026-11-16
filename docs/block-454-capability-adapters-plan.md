@@ -51,8 +51,11 @@
 - UNVERIFIED「Responses 完整请求形态」先补抓官方 create-response 页 VERIFIED（findings 文首补记）再实现：`responses.js` adapter（provider 'deepseek-responses'/protocol 'responses'，OpenAI-compat 面零改动）；max_output_tokens 参数名逐字；tools function 展平 + 内联工具透传；**safety_check/title 仅参数级透传不替换本地治理**。四投影不丢（thinking/tool_use/citations/refusal）；SSE 无 [DONE] 流式 + 终帧 flush（测试抓真缺陷当场修）。Anthropic Messages 属配置态零代码（W4 已补 files beta header）。
 - thinking 映射扩 'responses'（off→reasoning.effort=none / high→max；standard 不发参），BLOCK-200 冻结面复验绿；HK-01 红→绿 9/9；邻域 61/61；external-blocked 实机腿（同前）。证据：`acceptance/block-454/p5/`。
 
-### P6 — ASR / TTS（暂缓，缺需求）
-- 官方契约已核实（ASR `/v1/tools/asr`、TTS `/v1/tools/tts` 含流式 WS），但 Petri 无明确消费方。**缺的是需求不是实现**：登记备查，需用户显式裁决场景（如语音输入/朗读回复）才启动。不因「全家桶齐全」就为接而接。
+### P6 — ASR / TTS——**已完成 2026-11-17（e2e 补充波次；用户裁决「剩下没做的一次性搞完」= 需求场景到位，覆盖原 D7 暂缓）**
+- 语音窄口 `asr-provider.js`（POST /v1/tools/asr multipart，**魔数格式守卫**仅 16bit PCM WAV/Ogg Opus，≤8MiB/120s）+ `tts-provider.js`（POST /v1/tools/tts JSON，voice stella|tide/format wav|pcm 白名单，text ≤10000 计费字符）；WS 流式留接口不实现不冒充。诚实失败全链 + 成本计量（requests/bytes/chars）。
+- config 族 'speech'（默认关 P5-a）+ `/api/speech-access` REST 写面 + config-transfer 登记；冻结基线 21 族/117 键。
+- agent 消费面：`transcribe_audio`（工作区音频→文本，语音输入）/ `speak_text`（文本→音频落 .petri/audio/ 幂等，朗读）——registry 契约 + tool-metadata + tool-defs 三面在场；UI 能力渠道第三槽位（R1 显化）。
+- HK-01 红→绿 11/11；邻域 56/56；types/secret/arch PASS 零新依赖。external-blocked：真机云调用腿（同 D2）。证据：`acceptance/block-454/p6/`。
 
 ## 非范围（exclusions）
 
