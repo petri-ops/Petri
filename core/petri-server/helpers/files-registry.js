@@ -69,15 +69,19 @@ function recordUploadedFile({ storePath, entry }) {
   const fileId = String(e.fileId || '');
   if (!fileId) return { ok: false, code: 'file_id_required', message: 'fileId 必填。' };
   store.version = 1;
-  store.files[fileId] = {
-    docId: e.docId || null,
-    conversationId: e.conversationId || null,
-    purpose: e.purpose || null,
-    filename: e.filename || null,
-    bytes: Number.isFinite(Number(e.bytes)) ? Number(e.bytes) : null,
-    sha256: e.sha256 ? String(e.sha256).slice(0, 16) : null,
-    createdAt: e.createdAt || new Date().toISOString(),
-  };
+  // 无计算键赋值（security/detect-object-injection）：fromEntries 重建而非 store.files[fileId] 直写。
+  store.files = Object.fromEntries([
+    ...Object.entries(store.files),
+    [fileId, {
+      docId: e.docId || null,
+      conversationId: e.conversationId || null,
+      purpose: e.purpose || null,
+      filename: e.filename || null,
+      bytes: Number.isFinite(Number(e.bytes)) ? Number(e.bytes) : null,
+      sha256: e.sha256 ? String(e.sha256).slice(0, 16) : null,
+      createdAt: e.createdAt || new Date().toISOString(),
+    }],
+  ]);
   writeStore(file, store);
   return { ok: true, fileId };
 }

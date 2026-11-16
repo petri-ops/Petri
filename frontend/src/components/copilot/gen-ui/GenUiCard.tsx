@@ -254,7 +254,7 @@ export const GenUiCard = React.memo(function GenUiCard({
       if (Date.now() - lastHeartbeatRef.current > HIJACK_GRACE_MS) {
         hijackRef.current = true;
         setResetSeq((value) => value + 1);
-        // eslint-disable-next-line no-console -- 劫持自愈遥测（安全事件面）
+         
         console.warn('[gen-ui] 沙箱帧心跳丢失，判定劫持/失联，已重置恢复', {
           conversationId,
         });
@@ -278,17 +278,17 @@ export const GenUiCard = React.memo(function GenUiCard({
         ...hijackTimesRef.current.filter((t) => now - t < HIJACK_RATE_WINDOW_MS),
         now,
       ];
-      // eslint-disable-next-line no-console
+       
       if (hijackTimesRef.current.length >= HIJACK_SUSPEND_THRESHOLD) {
         suspendedRef.current = true;
         setSuspended(true);
-        // eslint-disable-next-line no-console -- 劫持循环限幅遥测（安全事件面）
+         
         console.warn('[gen-ui] 沙箱帧反复被劫持，已挂起等待手动恢复', { conversationId });
         return;
       }
       hijackRef.current = true;
       setResetSeq((value) => value + 1);
-      // eslint-disable-next-line no-console -- 劫持即时恢复遥测（安全事件面）
+       
       console.warn('[gen-ui] 沙箱帧劫持信号命中本卡，已即时重置', { conversationId });
     });
     return () => {

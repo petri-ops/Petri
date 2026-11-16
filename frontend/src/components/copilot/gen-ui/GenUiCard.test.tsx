@@ -92,11 +92,11 @@ describe('GenUiCard NAV-GUARD（劫持即时恢复+循环限幅）', () => {
   async function waitForSubscription() {
     // act 外 setState 的 passive effects 由调度器延迟提交——act 冲刷 + 轮询兜底
     for (let i = 0; i < 20; i += 1) {
-      // eslint-disable-next-line no-await-in-loop -- 逐轮冲刷等待订阅生效
+       
       await act(async () => {});
       if (hijackSink) { console.log('[poll] sink ready at iter', i); return; }
       console.log('[poll] iter', i, 'sink null');
-      // eslint-disable-next-line no-await-in-loop -- 给调度器让渡
+       
       await new Promise((r) => setTimeout(r, 50));
     }
     expect(hijackSink).not.toBeNull();

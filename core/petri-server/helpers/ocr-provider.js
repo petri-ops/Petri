@@ -27,7 +27,7 @@ const OCR_BODY_LIMIT = 32 * 1024 * 1024;
 // DeepSeek OCR 端点（findings §2 VERIFIED）。
 const OCR_ENDPOINT = 'https://api.deepseek.com/v1/tools/ocr';
 
-const MIME_BY_EXT = Object.freeze({
+const MIME_BY_EXT = new Map(Object.entries({
   '.pdf': 'application/pdf',
   '.doc': 'application/msword',
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -39,7 +39,7 @@ const MIME_BY_EXT = Object.freeze({
   '.webp': 'image/webp',
   '.bmp': 'image/bmp',
   '.tiff': 'image/tiff',
-});
+}));
 
 function extOf(name) {
   const dot = String(name || '').lastIndexOf('.');
@@ -54,7 +54,7 @@ function hasLayoutMarkers(text) {
 /** 默认 key 查询：凭据族唯一来源（懒 require，避免轻量测试环境拖起 ai-settings）。 */
 function defaultDeepseekKeyLookup() {
   try {
-    // eslint-disable-next-line global-require
+     
     const { getApiKey } = require('./ai-settings');
     return getApiKey('deepseek') || '';
   } catch {
@@ -131,7 +131,7 @@ async function ocrDocument(input = {}) {
   // multipart 组装：purpose 必填 + file（blob 类型按扩展名提示）。
   const form = new FormData();
   form.set('purpose', purpose);
-  const blob = new Blob([buffer], { type: MIME_BY_EXT[extOf(filename)] || 'application/octet-stream' });
+  const blob = new Blob([buffer], { type: MIME_BY_EXT.get(extOf(filename)) || 'application/octet-stream' });
   form.set('file', blob, path.basename(filename));
 
   let response;
@@ -181,11 +181,10 @@ async function ocrDocument(input = {}) {
 
   const rows = Array.isArray(payload && payload.pages) ? payload.pages : [];
   const pages = [];
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i];
+  rows.forEach((row, i) => {
     const text = row && typeof row.text === 'string' ? row.text : '';
     pages.push({ index: i + 1, text });
-  }
+  });
   const text = pages.map((p) => p.text.trim()).filter(Boolean).join('\n\n');
   return {
     ok: true,

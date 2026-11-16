@@ -46,7 +46,7 @@ function computeVisionConfigured(settings, getCredentialFn) {
   try {
     if (typeof getCredentialFn !== 'function') {
       // 延迟 require：避免测试环境拉起完整 gateway 装配
-      // eslint-disable-next-line global-require
+       
       getCredentialFn = require('../helpers/model-gateway').getCredential;
     }
     const bindings = settings.model_role_bindings || {};

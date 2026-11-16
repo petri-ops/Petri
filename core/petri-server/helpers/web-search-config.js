@@ -143,7 +143,6 @@ function getSnapshot() {
   let deepseekKeyPresent = false;
   if (effective.enabled && effective.provider === 'deepseek') {
     try {
-      // eslint-disable-next-line global-require
       const { getApiKey } = require('./ai-settings');
       deepseekKeyPresent = Boolean(getApiKey('deepseek'));
     } catch {

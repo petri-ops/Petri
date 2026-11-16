@@ -83,7 +83,7 @@ function findPendingGuardAck(
         || data?.error === 'mcp_trust_required' || data?.reason === 'mcp_trust_required';
       if (!isGuardDeny) continue;
       if (ackedGuardKeys.includes(guardKey)) continue;
-      // eslint-disable-next-line react-hooks/purity -- expiresAt 过期判定必须取当前时刻（原 SimpleChat 实现同款语义平移）
+       
       if (approval?.expiresAt && Date.parse(approval.expiresAt) <= nowMs) continue;
       const isMcpTrust = Boolean(approval?.mcpServerId)
         || data?.error === 'mcp_trust_required' || data?.reason === 'mcp_trust_required';

@@ -121,7 +121,7 @@ function normalizeDeepseekResults(payload, { count, allowedHosts = [], blockedHo
 /** 默认 key 查询：凭据族唯一来源（懒 require，避免本模块被轻量测试环境拖起 ai-settings）。 */
 function defaultDeepseekKeyLookup() {
   try {
-    // eslint-disable-next-line global-require
+     
     const { getApiKey } = require('./ai-settings');
     return getApiKey('deepseek') || '';
   } catch {

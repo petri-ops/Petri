@@ -35,7 +35,7 @@ function extOf(name) {
   return dot >= 0 ? String(name).slice(dot).toLowerCase() : '';
 }
 
-const MIME_BY_EXT = Object.freeze({
+const MIME_BY_EXT = new Map(Object.entries({
   '.pdf': 'application/pdf',
   '.doc': 'application/msword',
   '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -52,12 +52,12 @@ const MIME_BY_EXT = Object.freeze({
   '.md': 'text/markdown',
   '.csv': 'text/csv',
   '.json': 'application/json',
-});
+}));
 
 /** 默认 key 查询：凭据族唯一来源（懒 require，避免轻量测试环境拖起 ai-settings）。 */
 function defaultDeepseekKeyLookup() {
   try {
-    // eslint-disable-next-line global-require
+     
     const { getApiKey } = require('./ai-settings');
     return getApiKey('deepseek') || '';
   } catch {
@@ -110,7 +110,7 @@ async function uploadFile(input = {}) {
   // 官方 400 强约束：purpose 字段必须放在 file 字段之前（FormData 保序）。
   const form = new FormData();
   form.set('purpose', purpose);
-  const blob = new Blob([buffer], { type: MIME_BY_EXT[extOf(filename)] || 'application/octet-stream' });
+  const blob = new Blob([buffer], { type: MIME_BY_EXT.get(extOf(filename)) || 'application/octet-stream' });
   form.set('file', blob, path.basename(filename));
 
   let response;

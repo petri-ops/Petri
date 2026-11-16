@@ -70,7 +70,7 @@ async function attemptOcrParse(buffer, filename, docId, { ocrFn, ocrConfig } = {
   const config = ocrConfig
     || (() => {
       try {
-        // eslint-disable-next-line global-require
+         
         const { getEffectiveConfig } = require('./ocr-config');
         return getEffectiveConfig();
       } catch {

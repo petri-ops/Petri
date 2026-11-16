@@ -33,8 +33,6 @@ const DEFAULTS = Object.freeze({
   timeoutMs: 60000,
 });
 
-const FIELD_ORDER = Object.keys(DEFAULTS);
-
 function storePath() {
   const root = process.env.PETRI_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'Petri-Local');
   return path.join(root, STORE_FILENAME);
@@ -48,17 +46,12 @@ function readStore() {
   try {
     const parsed = JSON.parse(fs.readFileSync(storePath(), 'utf8'));
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    // 显式键构建（security/detect-object-injection 零计算访问；键序=DEFAULTS 同序）。
     const out = {};
-    for (const key of FIELD_ORDER) {
-      const value = parsed[key];
-      if (typeof DEFAULTS[key] === 'boolean') {
-        if (typeof value === 'boolean') out[key] = value;
-      } else if (typeof DEFAULTS[key] === 'number') {
-        if (typeof value === 'number' && Number.isFinite(value)) out[key] = value;
-      } else if (typeof value === 'string') {
-        out[key] = value;
-      }
-    }
+    if (typeof parsed.enabled === 'boolean') out.enabled = parsed.enabled;
+    if (typeof parsed.provider === 'string') out.provider = parsed.provider;
+    if (typeof parsed.purpose === 'string') out.purpose = parsed.purpose;
+    if (typeof parsed.timeoutMs === 'number' && Number.isFinite(parsed.timeoutMs)) out.timeoutMs = parsed.timeoutMs;
     return out;
   } catch {
     return {};
