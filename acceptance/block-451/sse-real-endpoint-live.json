@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-11-16T08:19:38.996Z",
+  "endpoint": "GET /api/ai/agent/task/:taskId?afterSeq=0",
+  "httpStatus": 200,
+  "contentType": "text/event-stream; charset=utf-8",
+  "taskId": "ecd059a8-5466-4701-b1fa-a8913053b68a",
+  "totalFrames": 22,
+  "seqRange": [
+    1,
+    20
+  ],
+  "hasDoneSentinel": true,
+  "terminalStatus": "completed",
+  "terminalOrder": [
+    "run_terminal",
+    "done_summary",
+    "DONE"
+  ],
+  "filesChanged": [],
+  "issues": [],
+  "allPass": true
+}

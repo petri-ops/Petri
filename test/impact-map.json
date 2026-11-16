@@ -8242,9 +8242,10 @@
     },
     {
       "id": "m-blueprint-program",
-      "note": "第六轮 M0–M7 优化程序（BLOCK-426 起单包串行）：判据校准 / 长任务状态机与边界族 / 崩溃续跑与任务图 / 上下文与工具能力面 / 评测与可观测 / 安全纵深 / 工程债 / 总收口。acceptance/m-blueprint-2026-11-11/ 是本轮唯一审计输入与证据目录，必须命中本规则，避免 test:changed:list fail-closed 全量升级；新增 scripts 由本规则单独分类（classifiesScripts=true）。",
+      "note": "第六轮 M0–M7 优化程序（BLOCK-426 起单包串行）：判据校准 / 长任务状态机与边界族 / 崩溃续跑与任务图 / 上下文与工具能力面 / 评测与可观测 / 安全纵深 / 工程债 / 总收口。acceptance/m-blueprint-2026-11-11/ 是本轮唯一审计输入与证据目录，必须命中本规则，避免 test:changed:list fail-closed 全量升级；新增 scripts 由本规则单独分类（classifiesScripts=true）。BLOCK-451/M-55 补腿：lib-sse-frames.mjs（SSE 帧解析纯函数）+ m4-sse-real-endpoint.test.mjs（真实端点行为契约，原 BLOCK-430 M4-6 external-blocked 解锁）归本规则。",
       "patterns": [
         "scripts/m-blueprint-*",
+        "scripts/lib-sse-frames.mjs",
         "test/m-blueprint-*",
         "test/m0-*",
         "test/m1-*",
@@ -8264,6 +8265,7 @@
         "docs/block-432-*",
         "docs/block-433-*",
         "acceptance/m-blueprint-2026-11-11/**",
+        "acceptance/block-451/**",
         "core/petri-server/agent-tools/turn-machine.js",
         "core/petri-server/agent-tools/loop-boundaries.js",
         "core/petri-server/agent-tools/goal-verifier.js",
@@ -8303,6 +8305,7 @@
         "test/m3-capability-gate.test.mjs",
         "test/m4-long-task-observability.test.mjs",
         "test/m4-observability-gate.test.mjs",
+        "test/m4-sse-real-endpoint.test.mjs",
         "test/m5-security-boundaries.test.mjs",
         "test/m5-security-gate.test.mjs",
         "test/m6-engineering-debt.test.mjs",

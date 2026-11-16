@@ -1,4 +1,4 @@
-最后更新：2026-11-16（**交接落册 · BLOCK-450 completed 后待办分类清单入册**：见下方 §当前待办分类清单——外部 1 / U 类裁决 7+ / 可执行候选 1（M-55）/ E 类人眼 / 延期挂起 / G1+ 出籍；BLOCK-449/450 已收口，M 程序 M7 §8 与 M2 尾巴全清。串行槽位空闲。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-16（**BLOCK-451 completed（M-55 SSE 真实端点行为测试腿）**：交接提示词执行队列①probe 仍 404→走②；唯一可执行候选 M-55 已收口；待办分类清单现为 外部 1 / U 类裁决 7+ / 可执行候选 **0** / E 类人眼 / 延期挂起 / G1+ 出籍。串行槽位空闲。证据=acceptance/block-451/。G0 开发期常态 · 不外推 packaged/Provider/GA.）｜**并集校正 2026-11-16（接手当次读数）**：HEAD 已前进至 `4d3ef9c1`（交接落册提交）；工作区存在「换标批 v4 定稿」tracked WIP（19 图标 + `src/main/desktop-shell.js`）+ `icons/icon-tray.png`，零触碰；`r-enrichment` bundle 11-16T08:12Z 复探仍 404（NoSuchBucket, ec=0015-00000101）⇒ probe 分支走 ②；候选层级校正=QODER/竞争力纲等 3 项为规划大纲（非可执行候选），M-55 为唯一可执行候选。
 
 ---
 
@@ -13,7 +13,7 @@
 
 ## 当前事实快照（2026-11-16 交接时点）
 
-- `main` @ `398b6dc4`，tracked 树干净；**12 项 untracked 用户资产/前会话产物零触碰零提交**（`assets/`、`petri-logo-concepts*`、`tmp-block342-live/`、`tmp-review/`、`model3d/`、`scripts/backfill-artifact-chain.mjs`、evals smoke JSON×2、NSO shard summary、`docs/post-h9-optimization-blueprint-2026-11-10.md` 受保护原件）。
+- `main` @ `4d3ef9c1`（交接落册提交；原快照 `398b6dc4` 已被其覆盖）；**tracked 树非干净**：19 个 `icons/*` 图标 + `src/main/desktop-shell.js`（「换标批 v4 定稿」tray 图标 template 适配）为在制 WIP，零触碰零提交；**13 项 untracked 用户资产/前会话产物零触碰零提交**（在 12 项基础上新增 `icons/icon-tray.png`：委托子层透明底托盘图标，属换标批 WIP 的一部分，零触碰）。原 12 项=`assets/`、`petri-logo-concepts*`、`tmp-block342-live/`、`tmp-review/`、`model3d/`、`scripts/backfill-artifact-chain.mjs`、evals smoke JSON×2、NSO shard summary、`docs/post-h9-optimization-blueprint-2026-11-10.md` 受保护原件。
 - 串行槽位空闲；BLOCK-449（M7 §8 第 3/5 条补腿收口）与 BLOCK-450（M2 尾巴清偿）已收口，M 程序可自主执行项清零。
 - 无窗栈可无头启动：`PETRI_DB_PATH`/`PETRI_LOCAL_DATA_DIR` 指向 `.petri-dev-user-data/data` + `R_SERVER_PORT=3001` 起 `node core/petri-server/server.js`；vite `:3000`；9223 离屏实例走 `scripts/start-test-instance.sh`（禁 `PETRI_TEST_ONSCREEN`，跑完立即 kill）。
 
@@ -25,9 +25,9 @@
 
 | 项 | 卡点 | 解锁动作 |
 | --- | --- | --- |
-| P6 pressure 腿重采（BLOCK-448/449 唯一 external 原册） | `r-enrichment` capability bundle HTTP 404（probe 2026-11-15T07:37Z） | bundle 恢复 → `npm run g0:result-studio:p6:update` → `closeout:full` 复跑 |
+| P6 pressure 腿重采（BLOCK-448/449 唯一 external 原册） | `r-enrichment` capability bundle HTTP 404（probe 2026-11-15T07:37Z；**2026-11-16T08:12Z 接手复探仍 404**：`NoSuchBucket` / `x-oss-ec=0015-00000101` / `x-oss-request-id=6AFABB051F68273335CA2338`） | bundle 恢复 → `npm run g0:result-studio:p6:update` → `closeout:full` 复跑 |
 
-附注：dev 库本体 4 组 seq 碰撞行将在下次后端启动时由 BLOCK-450 重排逻辑自愈（副本已验证），无需人工动作。
+附注：dev 库本体 4 组 seq 碰撞行将在下次后端启动时由 BLOCK-450 重排逻辑自愈（副本已验证），无需人工动作。probe 未恢复 ⇒ 执行队列走 ②（M-55）。
 
 ### 二、等用户裁决（U 类，Agent 不可代答）
 
@@ -43,9 +43,9 @@
 
 ### 三、可执行候选（有实现路径，需用户发令）
 
-| 项 | 说明 |
-| --- | --- |
-| M-55 SSE 真实端点行为测试腿 + 挂 impact-map rule | 当时 external-blocked=无窗栈未起；现栈可无头启动，属测试基建小包 |
+> **候选层级校正（2026-11-16 接手并集）**：`npm run state` 报的 3 项「排队候选」（POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收）——其中后两者 `status: planned`，是**规划大纲**不是可立即开工的单项；QODER §6.5 串行队列已清零、竞争力纲 CP-1~22 全闭环，二者需用户显式裁决另立子包，不构成「可执行候选」。本节唯一可执行候选 = M-55。
+
+| ~~M-55 SSE 真实端点行为测试腿 + 挂 impact-map rule~~ | **2026-11-16 已由 BLOCK-451 收口 completed**（解锁=:3001 无头栈可起；7 契约测试 HK-01 红绿 + 真实回放证据 allPass + impact-map 单一归属；证据=acceptance/block-451/）。本节已无可执行候选，串行槽位空闲。 |
 
 ### 四、等人眼签字（E 类，不代答）
 
