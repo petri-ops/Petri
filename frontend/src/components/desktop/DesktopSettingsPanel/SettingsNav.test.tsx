@@ -61,7 +61,7 @@ describe('UI-704 设置页 IA v2 — 左栏 core 5 组 + 高级折叠', () => {
     expect(normalizeInitialSection('network')).toBe('network');
     expect(normalizeInitialSection('keymap')).toBe('keymap');
     expect(normalizeInitialSection('models')).toBe('models');
-    expect(normalizeInitialSection('made-up-section' as SettingsSection)).toBeUndefined();
+    expect(normalizeInitialSection('made-up-section')).toBeUndefined();
     expect(normalizeInitialSection(undefined)).toBeUndefined();
   });
 

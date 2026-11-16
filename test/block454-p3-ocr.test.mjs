@@ -231,7 +231,7 @@ async function ingestScannedPdf({ ocrFn, ocrConfig }) {
 }
 
 test('P3-B1 — 扫描件 PDF + OCR 未启用 → 诚实 failed 且指路（不静默空索引）', async () => {
-  const { doc, result } = await ingestScannedPdf({});
+  const { result } = await ingestScannedPdf({});
   assert.equal(result.status, 'failed', JSON.stringify(result));
   assert.ok(result.error.includes('扫描件') || result.error.includes('无文本层'), `错误须说明扫描件成因: ${result.error}`);
   assert.ok(result.error.includes('ocr') || result.error.includes('OCR'), `错误须给 OCR 指路: ${result.error}`);

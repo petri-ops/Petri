@@ -9,13 +9,13 @@ afterEach(() => {
 });
 
 function mockFetchRoute(handler: (url: string, init?: RequestInit) => unknown) {
-  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+  const fetchMock = vi.fn((url: string, init?: RequestInit) => {
     const body = handler(url, init);
-    return {
+    return Promise.resolve({
       ok: true,
       status: 200,
-      json: async () => body,
-    } as Response;
+      json: () => Promise.resolve(body),
+    } as Response);
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
@@ -36,8 +36,8 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
     // 默认折叠：先展开再断言（与真实交互一致）
     fireEvent.click(screen.getByTestId('channel-panel-toggle'));
     await waitFor(() => expect(screen.getByTestId('channel-search-provider')).toBeTruthy());
-    const searchSelect = screen.getByTestId('channel-search-provider') as HTMLSelectElement;
-    expect(searchSelect.value).toBe('searxng');
+    const searchSelect = screen.getByTestId('channel-search-provider');
+    expect((searchSelect as HTMLSelectElement).value).toBe('searxng');
     expect(screen.getByTestId('channel-ocr-provider')).toBeTruthy();
     expect(screen.getByTestId('channel-panel').textContent).toContain('SearXNG');
   });
@@ -56,13 +56,15 @@ describe('UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位�
     await waitFor(() => {
       const put = fetchMock.mock.calls.find(([u, init]) => String(u).includes('/web-access') && init?.method === 'PUT');
       expect(put).toBeTruthy();
-      expect(JSON.parse(String(put?.[1]?.body)).provider).toBe('deepseek');
+      const webBody = put?.[1]?.body as string | undefined;
+      expect(typeof webBody === 'string' && (JSON.parse(webBody) as { provider?: string }).provider).toBe('deepseek');
     });
     fireEvent.change(screen.getByTestId('channel-ocr-provider'), { target: { value: 'deepseek' } });
     await waitFor(() => {
       const putOcr = fetchMock.mock.calls.find(([u, init]) => String(u).includes('/ocr-access') && init?.method === 'PUT');
       expect(putOcr).toBeTruthy();
-      expect(JSON.parse(String(putOcr?.[1]?.body)).provider).toBe('deepseek');
+      const ocrBody = putOcr?.[1]?.body as string | undefined;
+      expect(typeof ocrBody === 'string' && (JSON.parse(ocrBody) as { provider?: string }).provider).toBe('deepseek');
     });
   });
 

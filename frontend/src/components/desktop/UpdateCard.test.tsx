@@ -9,10 +9,11 @@ afterEach(() => {
   delete (window as { petriDesktop?: unknown }).petriDesktop;
 });
 
+type CheckResult = { ok: boolean; hasUpdate: boolean; version?: string; info?: { version?: string } };
 type UpdaterStub = {
-  check: () => Promise<{ ok: boolean; hasUpdate: boolean; version?: string; info?: { version?: string } }>;
-  download: () => Promise<{ ok: boolean; error?: string }>;
-  install: () => Promise<{ ok: boolean; error?: string }>;
+  check: () => CheckResult | Promise<CheckResult>;
+  download: () => { ok: boolean; error?: string } | Promise<{ ok: boolean; error?: string }>;
+  install: () => { ok: boolean; error?: string } | Promise<{ ok: boolean; error?: string }>;
   onUpdateAvailable?: (cb: (info?: { version?: string }) => void) => () => void;
   onUpdateNotAvailable?: (cb: () => void) => () => void;
   onDownloadProgress?: (cb: (p: { ratio: number }) => void) => () => void;
@@ -22,9 +23,9 @@ type UpdaterStub = {
 
 function stubUpdater(overrides: Partial<UpdaterStub> = {}): UpdaterStub {
   return {
-    check: async () => ({ ok: true, hasUpdate: true, version: '0.0.5' }),
-    download: async () => ({ ok: true }),
-    install: async () => ({ ok: true }),
+    check: () => ({ ok: true, hasUpdate: true, version: '0.0.5' }),
+    download: () => ({ ok: true }),
+    install: () => ({ ok: true }),
     ...overrides,
   };
 }
@@ -50,7 +51,7 @@ describe('UI-704 — 页面内 UpdateCard（更新主动呈现，不再让用户
     let push: ((info?: { version?: string }) => void) | null = null;
     (window as { petriDesktop?: unknown }).petriDesktop = {
       updater: stubUpdater({
-        check: async () => ({ ok: true, hasUpdate: false }),
+        check: () => ({ ok: true, hasUpdate: false }),
         onUpdateAvailable: (cb) => { push = cb; return () => { push = null; }; },
       }),
     };
@@ -67,8 +68,8 @@ describe('UI-704 — 页面内 UpdateCard（更新主动呈现，不再让用户
     let fireDownloaded: (() => void) | null = null;
     (window as { petriDesktop?: unknown }).petriDesktop = {
       updater: stubUpdater({
-        check: async () => ({ ok: true, hasUpdate: true, version: '0.0.5' }),
-        download: async () => {
+        check: () => ({ ok: true, hasUpdate: true, version: '0.0.5' }),
+        download: () => {
           // 真实链路：下载完成由主进程 onUpdateDownloaded 推送（useAutoUpdate 订阅）
           fireDownloaded?.();
           return { ok: true };

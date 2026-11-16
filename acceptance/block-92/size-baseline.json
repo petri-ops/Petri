@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 621,
-      "bytes": 31221,
-      "sha256": "7ef5711a17aef81da76ce2d1d6492cc3a1d46d72af393189677fe78fd25be2bc"
+      "lines": 632,
+      "bytes": 31948,
+      "sha256": "1a4a4d18b4a14bdf288495d61e349a78b86d74a481391d76bb3978dc5642f341"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -221,9 +221,9 @@
       "path": "frontend/src/components/desktop/desktop.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 2113,
-      "bytes": 51365,
-      "sha256": "8429cf53a34709720017d14c5424781a9c12831c66f84306939917ff67d3417d"
+      "lines": 2137,
+      "bytes": 52178,
+      "sha256": "59bb6d1a8688efada8190d84908f96a8ce5ba134532cd73ca94c49e5c4407b54"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
@@ -298,6 +298,14 @@
       "sha256": "ab8dafe1cdfa0a55130dd4da86abf5b551ab4dd133059e6ff11c7523db0f74c2"
     },
     {
+      "path": "core/packages/shared-config/config-schema.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1117,
+      "bytes": 58917,
+      "sha256": "5b4b7070d3f452c5da6a09e8a3b8d80fa4faa1ad4c92b71c7024627328260b61"
+    },
+    {
       "path": "core/shared-backend/result-changeset-service/baseline-cohort.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -312,14 +320,6 @@
       "lines": 1087,
       "bytes": 53527,
       "sha256": "d66de73723bd188065674e10ae4cccdb2ec85d3fad48fe65a2054398a938c75a"
-    },
-    {
-      "path": "core/packages/shared-config/config-schema.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1086,
-      "bytes": 57440,
-      "sha256": "b8d56489c9361f19eb79947eefe046585dc1f1268495ac3e95bd613ffa8377da"
     },
     {
       "path": "core/petri-server/agent-tools/spawn-agent-tools.js",
@@ -346,20 +346,20 @@
       "sha256": "b40bd6bbef270ceb7c493ad66f165fa98ccfc70dbf2e2297eba219fa5c23f9e2"
     },
     {
+      "path": "frontend/src/lib/electron.d.ts",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1028,
+      "bytes": 47773,
+      "sha256": "28153c994998e3d1a2171da50d8e0e0649902f1de3c590bfecf93c1410a74299"
+    },
+    {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1026,
       "bytes": 48067,
       "sha256": "fedba9cb19f00be9f0a0e1177965073c4bc0ee79984ccbe4c7e5a661319437a6"
-    },
-    {
-      "path": "frontend/src/lib/electron.d.ts",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1026,
-      "bytes": 47651,
-      "sha256": "abb6e70cdee4a3ac6fc48a191214c06147333ba30181e9ec364a1c5571fc28f6"
     },
     {
       "path": "core/shared-backend/result-replay-service/cohort-package.js",
@@ -461,9 +461,9 @@
       "path": "src/main.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 886,
-      "bytes": 44852,
-      "sha256": "76593f9a4b9607b96e6b9a9f8924edba340f34db4e94d7d161c51746fc93e7fb"
+      "lines": 887,
+      "bytes": 44961,
+      "sha256": "73d378a11fb5a81281d5c46da65a847e4f5e38f8a94fcf47ecf4406037a829fd"
     },
     {
       "path": "core/shared-backend/skill-registry.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86010
+  "total": 86079
 }

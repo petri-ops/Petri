@@ -100,7 +100,7 @@ test('P4-A2 — purpose 白名单外 → files_purpose_invalid；无 key → fil
 });
 
 test('P4-A3 — 100MiB 上限 → files_too_large（不发请求）；413/429/401 → 诚实错误映射', async () => {
-  const fetchImpl = mockFetch((_n, { }) => ({
+  const fetchImpl = mockFetch(() => ({
     ok: false, status: 413, text: async () => JSON.stringify({ error: { message: 'too large' } }),
   }));
   const tooBig = await uploadFile({
@@ -214,7 +214,6 @@ test('P4-D1 — uploadKnowledgeDocumentForChat：读取 doc 原件 → 上传 �
   process.env.PETRI_BETTER_SQLITE3_ROOT = resolve(__dirname, '..', 'core', 'petri-server');
   const { runMigrations } = require('../src/migration-runner.js');
   await runMigrations(process.env.PETRI_DB_PATH, resolve(__dirname, '..', 'src', 'migrations'));
-  const ks = require('../core/petri-server/helpers/knowledge-space.js');
   const ingest = require('../core/petri-server/helpers/knowledge-ingest.js');
   const doc = await ingest.createDocument({ name: 'report.txt', buffer: Buffer.from('知识库文档正文'), autoIngest: false });
   const regPath = path.join(tempRoot, 'files-registry-knowledge.json');
