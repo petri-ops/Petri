@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { KEYMAP_COMMANDS, comboFromEvent, formatCombo } from '@/lib/appKeymap';
 import { useKeymapSafe } from '@/lib/appKeymapContext';
 import styles from './SettingsQuickwins.module.css';
@@ -15,6 +15,8 @@ export function KeymapPanel(): React.ReactElement {
   const { bindings, overrides, conflicts, sync, save } = useKeymapSafe();
   const [recording, setRecording] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [filter, setFilter] = useState('');
 
   useEffect(() => {
     if (!recording) return undefined;
@@ -41,6 +43,16 @@ export function KeymapPanel(): React.ReactElement {
 
   const resetOne = useCallback((id: string) => { void save({ [id]: null }); }, [save]);
 
+  const visibleCommands = useMemo(() => {
+    const keyword = filter.trim().toLowerCase();
+    return KEYMAP_COMMANDS.filter((command) => {
+      if (keyword) {
+        return `${command.label} ${command.description} ${command.id}`.toLowerCase().includes(keyword);
+      }
+      return showAll || overrides[command.id] !== undefined;
+    });
+  }, [filter, overrides, showAll]);
+
   return (
     <section className="petri-settings-section" data-testid="keymap-section">
       <div className="petri-settings-section__heading">
@@ -50,8 +62,22 @@ export function KeymapPanel(): React.ReactElement {
       <div className={styles.panel} data-testid="keymap-panel">
       <p className={styles.hint}>
         应用级命令的快捷键。`Mod` 在 macOS 是 ⌘、其余平台是 Ctrl。这里显示的组合串与真正派发的组合串
-        是同一个值；未列出的就近快捷键（保存、提交、关闭标签、Esc 类）仍由各自界面固定处理，不在本面改。
+        是同一个值。默认只列已改键；搜索或「显示全部」可到达出厂键位。未列出的就近快捷键仍由各自界面固定处理。
       </p>
+
+      <div className={styles.field}>
+        <input
+          className="petri-input"
+          data-testid="keymap-filter"
+          value={filter}
+          placeholder="搜索命令名或描述"
+          aria-label="搜索快捷键命令"
+          onChange={(event) => setFilter(event.target.value)}
+        />
+        <button type="button" data-testid="keymap-show-all" onClick={() => setShowAll((value) => !value)}>
+          {showAll ? '仅看已改键' : '显示全部命令'}
+        </button>
+      </div>
 
       {conflicts.length > 0 && (
         <div className={styles.banner} data-tone="conflict" data-testid="keymap-conflicts">
@@ -69,7 +95,12 @@ export function KeymapPanel(): React.ReactElement {
       {hint && <div className={styles.banner} data-tone="failed" data-testid="keymap-hint">{hint}</div>}
 
       <div className={styles.rows}>
-        {KEYMAP_COMMANDS.map((command) => {
+        {visibleCommands.length === 0 && (
+          <p className={styles.hint} data-testid="keymap-empty">
+            没有已改键的命令。点「显示全部命令」查看出厂键位，或用上方搜索直接定位。
+          </p>
+        )}
+        {visibleCommands.map((command) => {
           const combo = bindings[command.id];
           const isRecording = recording === command.id;
           return (

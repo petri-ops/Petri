@@ -501,25 +501,13 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         {activeSection === 'compute' && (
           <section className="petri-settings-section">
             <div className="petri-settings-section__heading">
-              <h3>计算与数据</h3>
-              <p>管理远程执行目标，并查看本地数据占用。</p>
+              <h3>远程与计算</h3>
+              <p>只管执行目标：本机、SSH 或联邦节点。数据目录、运行时与回收站已归位到「数据与维护」。</p>
             </div>
         {/* UI-355 — 「计算执行」遗留卡移除（PETRI_COMPUTE_MODE 零读者，BLOCK-30 解耦后即死面）；
             远程执行目标（SSH）为 BLOCK-57/67 活功能，保留 */}
 
         <RemoteTargets />
-
-        <hr className="petri-section-divider" />
-
-        <DataManagement />
-
-        <hr className="petri-section-divider" />
-
-        <HarnessEnvironment />
-
-        <hr className="petri-section-divider" />
-
-        <TrashManagement />
 
           </section>
         )}
@@ -534,13 +522,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           </section>
         )}
 
-        {/* BLOCK-163 W3 P10（KNW-5）— 记忆治理节（同区相邻：治理面集中） */}
-        {activeSection === 'decisions' && (
-          <section className="petri-settings-section">
-            <MemoryPanel />
-          </section>
-        )}
-
         {/* BLOCK-116 P4 — 决策原语配置节（与观测节相邻：配置+观测同位） */}
         {activeSection === 'decisions' && (
           <section className="petri-settings-section">
@@ -551,8 +532,18 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
             <DecisionConfigPanel key={`decision-config-${settingsVersion}`} />
             {/* BLOCK-202 W3 — 全局审批默认档位 + 并发/深度 + 工具曝光黑名单 */}
             <RuntimePolicyPanel key={`runtime-policy-${settingsVersion}`} />
-            {/* BLOCK-171 CP-2 — 审批记录（guard_ack 事件复审；治理可见化） */}
-            <GuardAckHistoryPanel />
+          </section>
+        )}
+
+        {/* UI-708 — 审批记录 + 记忆治理折叠为审计区（功能零删，默认不占主屏） */}
+        {activeSection === 'decisions' && (
+          <section className="petri-settings-section">
+            <details className="petri-settings-advanced-details" data-testid="governance-audit-fold">
+              <summary>治理审计：审批记录 / 记忆变更（按需展开）</summary>
+              <GuardAckHistoryPanel />
+              <hr className="petri-section-divider" />
+              <MemoryPanel />
+            </details>
           </section>
         )}
 
@@ -577,6 +568,18 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               onToggleTelemetry={(next) => void handleToggleTelemetry(next)}
               onConfigChanged={bumpVersion}
             />
+            {/* UI-708 — 数据目录 / 运行环境 / 回收站从「远程与计算」归位到这里（功能零删） */}
+            <section className="petri-settings-section">
+              <div className="petri-settings-section__heading">
+                <h3>本地数据与回收站</h3>
+                <p>查看数据占用与已安装运行时；恢复或永久清理项目与会话记录。</p>
+              </div>
+              <DataManagement />
+              <hr className="petri-section-divider" />
+              <HarnessEnvironment />
+              <hr className="petri-section-divider" />
+              <TrashManagement />
+            </section>
             {/* UI-704 — 原 general「配置迁移」并入数据与维护（深链 ?section=general 归一到这里） */}
             <section className="petri-settings-section">
               <div className="petri-settings-section__heading">

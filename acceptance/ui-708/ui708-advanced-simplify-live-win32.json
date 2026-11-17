@@ -1,0 +1,59 @@
+{
+  "name": "ui708-advanced-simplify",
+  "platform": "win32",
+  "startedAt": "2026-11-17T06:55:05.618Z",
+  "finishedAt": "2026-11-17T06:55:08.869Z",
+  "assertions": [
+    {
+      "name": "L1_network_section_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=network"
+    },
+    {
+      "name": "L2_network_dedup_and_folds",
+      "pass": true,
+      "detail": "{\"proxyFoldClosed\":true,\"proxyInsideFold\":true,\"providerSelectAbsent\":true,\"providerPointer\":true,\"boundaryFoldClosed\":true,\"webPresent\":true}"
+    },
+    {
+      "name": "L3_keymap_section_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=keymap"
+    },
+    {
+      "name": "L4_keymap_default_only_changed",
+      "pass": true,
+      "detail": "{\"rows\":0,\"hasShowAll\":true,\"hasFilter\":true}"
+    },
+    {
+      "name": "L5_keymap_show_all_restores_10_rows",
+      "pass": true,
+      "detail": "rows=10"
+    },
+    {
+      "name": "L6_data_panels_in_maintenance",
+      "pass": true,
+      "detail": "maintenance 应有数据目录/回收站"
+    },
+    {
+      "name": "L7_compute_keeps_remote_targets",
+      "pass": true,
+      "detail": "compute 应保留执行目标"
+    },
+    {
+      "name": "L8_compute_no_data_panels",
+      "pass": true,
+      "detail": "{\"remote\":true,\"harness\":false,\"trash\":false}"
+    },
+    {
+      "name": "L9_decisions_reachable_with_audit_fold",
+      "pass": true,
+      "detail": "decisions 应有治理审计折叠块"
+    },
+    {
+      "name": "L10_governance_audit_closed_by_default",
+      "pass": true,
+      "detail": "open=false"
+    }
+  ],
+  "allPass": true
+}

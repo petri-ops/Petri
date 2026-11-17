@@ -94,11 +94,14 @@ module.exports = {
     const client = await lib.connectTestTarget({ timeoutMs: 60_000 });
     const shots = [];
     try {
-      const okCompute = await navigate(client, `${APP}/settings?section=compute`, {
-        urlIncludes: ['section=compute'],
+      const okCompute = await navigate(client, `${APP}/settings?section=network`, {
+        urlIncludes: ['section=network'],
         selector: '[data-testid="network-proxy-panel"]',
       });
-      assert('D1_network_panel_in_compute', okCompute, 'compute 节应有代理面板');
+      assert('D1_network_panel_in_network', okCompute, 'network 节应有代理面板');
+      // UI-708：代理整卡默认折叠为「企业代理与证书」；取证前展开，字段与写面不变。
+      await lib.evalJs(client, `(function(){const d=document.querySelector('[data-testid="network-proxy-fold"]'); if(d && !d.open) d.open = true; return 'ok';})()`);
+      await new Promise((r) => setTimeout(r, 200));
 
       const netDom = await lib.evalJs(client, `(function(){
         const p = document.querySelector('[data-testid="network-proxy-panel"]');

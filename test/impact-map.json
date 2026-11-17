@@ -8428,6 +8428,28 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "ui708-advanced-settings-simplification",
+      "note": "UI-704 加映三（工作标签 UI-708）高级设置减负第一刀（去重/归位/折叠）：检索后端 UI 双写去重（唯一入口=models 能力渠道）、企业代理与联网访问边界折叠、快捷键默认只列已改键+搜索、数据目录/运行环境/回收站归位维护、治理审计折叠。证据 acceptance/ui-708/**；呈现重组零默认值/零写面变更。",
+      "patterns": [
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkSection.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/KeymapPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/KeymapPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsSimplification.test.tsx",
+        "acceptance/ui-708/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsSimplification.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/KeymapPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/ChannelPreferencePanel.test.tsx"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

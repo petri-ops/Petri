@@ -16,7 +16,10 @@ export function NetworkSection(): React.ReactElement {
         <h3>联网与代理</h3>
         <p>出网代理、自签证书与联网检索授权（默认关闭，开启前请确认范围）。</p>
       </div>
-      <NetworkProxyPanel />
+      <details className="petri-settings-advanced-details" data-testid="network-proxy-fold">
+        <summary>企业代理与证书（按需展开，保存后需重启后端生效）</summary>
+        <NetworkProxyPanel />
+      </details>
       <hr className="petri-section-divider" />
       <WebAccessPanel />
     </section>

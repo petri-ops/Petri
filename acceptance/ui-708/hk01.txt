@@ -1,0 +1,54 @@
+UI-708 高级设置减负第一刀 — HK-01 红绿证据
+
+红（实现前，2026-11-17）：
+  cmd: npm run test:files --prefix frontend -- src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsSimplification.test.tsx
+  result: 3 tests / 3 failed
+    × 检索后端只有 models 能力渠道一个入口，联网页不再重复渲染选择器
+      （web-access-provider select 仍在场）
+    × 网络代理与自签 CA 收进默认折叠的企业代理块
+      （无「企业代理与证书」summary）
+    × 快捷键默认只显示已改键；可展开全部并按关键词过滤
+      （无 keymap-show-all / keymap-filter，默认全表渲染）
+
+绿（实现后，2026-11-17）：
+  cmd: npm run test:files --prefix frontend -- \
+       src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsSimplification.test.tsx \
+       src/components/desktop/DesktopSettingsPanel/sections/KeymapPanel.test.tsx \
+       src/components/desktop/DesktopSettingsPanel/sections/ChannelPreferencePanel.test.tsx
+  result: 3 files / 12 tests passed
+    AdvancedSettingsSimplification 3/3
+    KeymapPanel 6/6（既有契约先展开全部命令后保持原语义）
+    ChannelPreferencePanel 3/3（唯一检索后端入口仍可写 /web-access）
+
+修正记录：折叠契约最初断言 details 子节点 queryByTestId === null；jsdom 保留 details 子节点，
+改为断言"字段归属折叠块且 details.open === false"，未放宽产品行为。
+
+Jev 决策建议（如实记录）：
+  test:suggest --supply=cloud → 建议追加 ui-shell-frontend 域测试 test/window-manager.test.mjs（conf=0.98）
+    → 该文件名已漂移（实际在册为 test/block59-window-manager.test.mjs），改跑后者 43/43 绿。
+  doc:suggest --supply=cloud    → 建议回写 uiAudit（source=deterministic）
+
+实机腿（9223 离屏，2026-11-17）：
+  npm run verify -- ui708-advanced-simplify → 10/10 allPass
+    L1/L2 联网页去重 + 企业代理折叠 + 访问边界折叠
+    L3/L4/L5 快捷键默认 0 行、展开 10 行、搜索控件在场
+    L6/L7/L8 数据/回收站归位维护，compute 仅留远程目标
+    L9/L10 治理审计折叠默认收起
+  证据=acceptance/ui-708/ui708-advanced-simplify-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+  首跑 L6 选择器误用 remote-targets-panel（维护页证据应为回收站），修正后全绿；非产品缺陷。
+
+邻域实机腿（如实登记既有红，不冒充本包通过）：
+  block200-settings-live 15/18：D2/D3/D4 键位同源与派发跟随 PASS；R8/D5 为 Responses 协议入表后
+    期望协议数 3→4 / 表行 4→5 的既有契约漂移；screenshot 30s 超时为隐藏窗合成帧降级。
+  block202-network-runtime-live 11/12：R1-R9 + D1/D2 全 PASS；screenshot 30s 超时同上。
+  两轮跑完均立即 kill 9223。
+
+收口门禁（2026-11-17）：
+  closeout 21 门 fail-fast 在 [3/21] docs:check 停住：唯一红=post-h9 文档 D5 换机漂移
+  （D:\1.WorkDir\petri 本机缺 docs/post-h9-optimization-blueprint-2026-11-10.md，用户资产待处置），
+  非本加映引入；不把未跑的后续门表述为通过。
+  已单独复跑：quality:types PASS / quality:lint 0 error（2456 存量 warning）/ ui:audit:check PASS
+  / theme-token-contract 19/19 / ui-ledger-status-contract 5/5（债回基线 36，未虚增）
+  / test:changed 519 tests 508 pass 8 fail，8 红均为既有债（工具数 117 vs 115、W5a 5 个存量
+  测试未挂规则、ui-421/ui-703-wide-header 证据未映射），非本加映引入。
+  形态归属：本工作按 UI-704 加映三登记，UI-708 仅作工作标签，不新增台账段（BLOCK-332 棘轮）。

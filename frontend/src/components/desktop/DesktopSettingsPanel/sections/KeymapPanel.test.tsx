@@ -34,6 +34,8 @@ function mount(getBindings: Record<string, string | null> = {}, onPut?: (body: u
     return jsonResponse({ status: 'ok', bindings: getBindings });
   }));
   render(<KeymapProvider><KeymapPanel /></KeymapProvider>);
+  // UI-708：默认只列已改键；这些历史契约测的是键位行为，先展开全部命令。
+  fireEvent.click(screen.getByTestId('keymap-show-all'));
 }
 
 describe('KeymapPanel（UI-514）', () => {
@@ -69,6 +71,7 @@ describe('KeymapPanel（UI-514）', () => {
       return jsonResponse({ status: 'ok', bindings: {} });
     }));
     render(<KeymapProvider><KeymapPanel /></KeymapProvider>);
+    fireEvent.click(screen.getByTestId('keymap-show-all'));
     await waitFor(() => expect(screen.getByTestId('keymap-combo-nav-home').textContent).toBe('Ctrl+N'));
     fireEvent.click(within(screen.getByTestId('keymap-row-palette.toggle')).getByText('改键'));
     fireEvent.keyDown(window, { key: 'x' });

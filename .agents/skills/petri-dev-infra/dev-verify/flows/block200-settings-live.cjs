@@ -108,6 +108,9 @@ module.exports = {
     try {
       const okKeymap = await navigate(client, `${APP}/settings?section=keymap`, { urlIncludes: ['section=keymap'], selector: '[data-testid="keymap-panel"]' });
       assert('D1_keymap_section_reachable', okKeymap, 'nav /settings?section=keymap');
+      // UI-708：键位表默认只列已改键；本 flow 的 D2/D3 是"注册表值=界面显示值"契约，先展开全部命令。
+      await lib.evalJs(client, `(function(){const b=document.querySelector('[data-testid="keymap-show-all"]'); if(b) b.click(); return 'ok';})()`);
+      await new Promise((r) => setTimeout(r, 200));
 
       const panel = await lib.evalJs(client, `(function(){
         const p = document.querySelector('[data-testid="keymap-panel"]');
@@ -127,6 +130,8 @@ module.exports = {
       // 同源证明：改盘上的值 → 界面文本必须跟着变（不是另抄一份显示清单）
       await rest('PUT', '/keymap', { bindings: { 'nav-home': 'Mod+Shift+7' } });
       await navigate(client, `${APP}/settings?section=keymap`, { urlIncludes: ['section=keymap'], selector: '[data-testid="keymap-combo-nav-home"]' });
+      await lib.evalJs(client, `(function(){const b=document.querySelector('[data-testid="keymap-show-all"]'); if(!document.querySelector('[data-testid="keymap-combo-nav-home"]') && b) b.click(); return 'ok';})()`);
+      await new Promise((r) => setTimeout(r, 200));
       const afterEdit = await lib.evalJs(client, `(document.querySelector('[data-testid="keymap-combo-nav-home"]')||{}).textContent`);
       assert('D3_badge_follows_stored_binding', /Ctrl\+Shift\+7/.test(String(afterEdit)), `badge=${afterEdit}`);
 

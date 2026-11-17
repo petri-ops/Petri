@@ -132,18 +132,9 @@ export function WebAccessPanel(): React.ReactElement {
         </span>
       </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-provider">检索后端</label>
-        <select
-          id="web-access-provider"
-          data-testid="web-access-provider"
-          value={form.provider}
-          onChange={(event) => setForm((prev) => ({ ...prev, provider: event.target.value }))}
-        >
-          <option value="none">不使用（仅允许抓取）</option>
-          <option value="searxng">SearXNG（自建实例，无需密钥）</option>
-        </select>
-      </div>
+      <p className={styles.hint} data-testid="web-access-provider-pointer">
+        检索后端统一在「模型与接口 → 能力渠道」选择（SearXNG 自建 / DeepSeek 云）；这里只管出网授权与实例地址。
+      </p>
 
       <div className={styles.field}>
         <label htmlFor="web-access-base-url">SearXNG 实例地址</label>
@@ -157,68 +148,71 @@ export function WebAccessPanel(): React.ReactElement {
         <span className={styles.hint}>实例需开启 JSON 输出（search.formats 含 json），否则检索会返回可读错误而不是空结果。</span>
       </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-max-results">检索条数上限（1–20）</label>
-        <input
-          id="web-access-max-results"
-          data-testid="web-access-max-results"
-          type="number"
-          min={1}
-          max={20}
-          value={form.maxResults}
-          onChange={(event) => setForm((prev) => ({ ...prev, maxResults: Number(event.target.value) }))}
-        />
-      </div>
+      <details className="petri-settings-advanced-details" data-testid="web-access-advanced-boundary">
+        <summary>访问边界（高级）：条数、超时、字节与域名黑白名单</summary>
+        <div className={styles.field}>
+          <label htmlFor="web-access-max-results">检索条数上限（1–20）</label>
+          <input
+            id="web-access-max-results"
+            data-testid="web-access-max-results"
+            type="number"
+            min={1}
+            max={20}
+            value={form.maxResults}
+            onChange={(event) => setForm((prev) => ({ ...prev, maxResults: Number(event.target.value) }))}
+          />
+        </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-timeout">单次请求超时（毫秒，1000–30000）</label>
-        <input
-          id="web-access-timeout"
-          data-testid="web-access-timeout"
-          type="number"
-          min={1000}
-          max={30000}
-          step={500}
-          value={form.timeoutMs}
-          onChange={(event) => setForm((prev) => ({ ...prev, timeoutMs: Number(event.target.value) }))}
-        />
-      </div>
+        <div className={styles.field}>
+          <label htmlFor="web-access-timeout">单次请求超时（毫秒，1000–30000）</label>
+          <input
+            id="web-access-timeout"
+            data-testid="web-access-timeout"
+            type="number"
+            min={1000}
+            max={30000}
+            step={500}
+            value={form.timeoutMs}
+            onChange={(event) => setForm((prev) => ({ ...prev, timeoutMs: Number(event.target.value) }))}
+          />
+        </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-max-bytes">单页抓取字节上限（64KB–4MB）</label>
-        <input
-          id="web-access-max-bytes"
-          data-testid="web-access-max-bytes"
-          type="number"
-          min={65536}
-          max={4194304}
-          step={65536}
-          value={form.fetchMaxBytes}
-          onChange={(event) => setForm((prev) => ({ ...prev, fetchMaxBytes: Number(event.target.value) }))}
-        />
-      </div>
+        <div className={styles.field}>
+          <label htmlFor="web-access-max-bytes">单页抓取字节上限（64KB–4MB）</label>
+          <input
+            id="web-access-max-bytes"
+            data-testid="web-access-max-bytes"
+            type="number"
+            min={65536}
+            max={4194304}
+            step={65536}
+            value={form.fetchMaxBytes}
+            onChange={(event) => setForm((prev) => ({ ...prev, fetchMaxBytes: Number(event.target.value) }))}
+          />
+        </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-allowed">访问白名单（逗号分隔域名，留空=不限制）</label>
-        <input
-          id="web-access-allowed"
-          data-testid="web-access-allowed"
-          value={form.allowedHosts}
-          placeholder="example.org,docs.example.org"
-          onChange={(event) => setForm((prev) => ({ ...prev, allowedHosts: event.target.value }))}
-        />
-      </div>
+        <div className={styles.field}>
+          <label htmlFor="web-access-allowed">访问白名单（逗号分隔域名，留空=不限制）</label>
+          <input
+            id="web-access-allowed"
+            data-testid="web-access-allowed"
+            value={form.allowedHosts}
+            placeholder="example.org,docs.example.org"
+            onChange={(event) => setForm((prev) => ({ ...prev, allowedHosts: event.target.value }))}
+          />
+        </div>
 
-      <div className={styles.field}>
-        <label htmlFor="web-access-blocked">访问黑名单（优先于白名单）</label>
-        <input
-          id="web-access-blocked"
-          data-testid="web-access-blocked"
-          value={form.blockedHosts}
-          placeholder="tracker.example.net"
-          onChange={(event) => setForm((prev) => ({ ...prev, blockedHosts: event.target.value }))}
-        />
-      </div>
+        <div className={styles.field}>
+          <label htmlFor="web-access-blocked">访问黑名单（优先于白名单）</label>
+          <input
+            id="web-access-blocked"
+            data-testid="web-access-blocked"
+            value={form.blockedHosts}
+            placeholder="tracker.example.net"
+            onChange={(event) => setForm((prev) => ({ ...prev, blockedHosts: event.target.value }))}
+          />
+        </div>
+      </details>
 
       <div className={styles.actions}>
         <button type="button" className="petri-btn petri-btn--primary petri-btn--sm" disabled={busy} onClick={() => void save()}>
