@@ -1,0 +1,38 @@
+{
+  "skillManifestVersion": 1,
+  "id": "design-brief",
+  "name": "设计说明生成器",
+  "version": "1.0.0",
+  "description": "把用户的界面/产品设计请求转成结构化设计说明：目标与非目标、信息层级、八态矩阵、布局与响应式、token/组件映射、键盘与交互、反例、参考来源许可、验证计划；可选再用 Gen UI 出原型。",
+  "category": "design/brief",
+  "tags": ["design", "ux", "brief", "design-md", "gen-ui"],
+  "source": "built-in",
+  "capabilities": ["design-brief", "ui-design", "state-matrix", "visual-reference-analysis"],
+  "plugins": {
+    "required": [],
+    "optional": []
+  },
+  "workflows": {
+    "default": "default"
+  },
+  "prompts": {
+    "system_file": "prompts/system.md",
+    "user_templates": [
+      "为 {feature} 生成一份设计说明，先不要写实现代码",
+      "根据这张参考图提炼可借鉴的设计原则，产出 DESIGN.md",
+      "把 {module} 的输入、加载、空、错误、成功与键盘交互整理成状态矩阵"
+    ]
+  },
+  "parameters": {
+    "required": [],
+    "optional": {
+      "target": { "type": "string", "description": "目标模块或页面名" },
+      "reference": { "type": "string", "description": "参考图/站点/描述（可选）" },
+      "prototype": { "type": "boolean", "description": "是否在说明后追加 Gen UI 原型" }
+    }
+  },
+  "outputs": {
+    "primary": [{ "id": "design-brief", "type": "markdown", "description": "结构化设计说明" }],
+    "secondary": [{ "id": "summary", "type": "text", "description": "简短决策与裁决摘要" }]
+  }
+}

@@ -8664,6 +8664,25 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "design-brief-product-skill",
+      "note": "C-52 第二包：产品内置 design-brief Skill，经 skill_discover/skill_get 提供十节设计说明手册；零依赖、零 UI 写面变化。证据 acceptance/design-brief-skill/**。",
+      "patterns": [
+        "resources/skills/design-brief/**",
+        "resources/skills/manifest.json",
+        "test/design-brief-skill.test.mjs",
+        "test/post-s7-h9-skill-integrity.test.mjs",
+        "acceptance/design-brief-skill/**"
+      ],
+      "tests": [
+        "test/design-brief-skill.test.mjs",
+        "test/post-s7-h9-skill-integrity.test.mjs",
+        "test/block176-w7-contracts.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

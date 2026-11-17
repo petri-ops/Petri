@@ -1,0 +1,25 @@
+C-52 第二包 — design-brief 产品内置 Skill HK-01 证据
+
+用户裁决（2026-11-17）：「都做 都做 这俩都做」；第一包收口后串行启动第二包。
+
+形态：轻量包 / 产品内置 Skill；plan=AUDIT-LOG 条目；不新建 docs/ 受控文档，避开他方 4 项 WIP。
+
+实现：
+  resources/skills/design-brief/skill.json — id/capabilities/parameters/outputs/schema 合规
+  resources/skills/design-brief/README.md — 触发场景与产物边界
+  resources/skills/design-brief/prompts/system.md — 十节设计说明手册 + 参考分析纪律 + U-ruling/pending_human_eye + 可选 Gen UI
+  resources/skills/manifest.json — 新增 built-in 条目；摘要由 scripts/post-s7-skill-integrity.mjs --write 唯一写入
+
+HK-01：
+  红：test/post-s7-h9-skill-integrity.test.mjs 从 11 条改 12 条 → 新增 Skill 前失败。
+  绿：
+    - node --test test/post-s7-h9-skill-integrity.test.mjs → 5/5 PASS（12 条摘要一致）
+    - npm run skills:check → PASS（12 内置：3 skill.json + 9 SKILL.md + 3 领域包 Skill）
+    - node --test test/design-brief-skill.test.mjs → 3/3 PASS（发现/读取、十节手册、零依赖边界）
+  首轮失败：skill.json 使用 prompts.system 路径字段，agent 工具只加载 prompts.system_file；改为 system_file 后绿，摘要重算。
+
+边界：
+  - 零新增运行时依赖、零 UI 写面变化、零默认行为变化；
+  - 不替换 SimpleChat；不复制品牌/Logo/文案/插画/整页布局；
+  - 原型仅在用户明确要求时复用 visualize Gen UI 规则；
+  - 设计说明不是实现证明；观感 pending_human_eye 不代签。

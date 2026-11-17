@@ -1,8 +1,30 @@
 {
   "manifestVersion": 1,
   "source": "built-in",
-  "updated": "2026-09-26",
+  "updated": "2026-11-17",
   "skills": {
+    "design-brief": {
+      "id": "design-brief",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "design/brief",
+      "capabilities": [
+        "design-brief",
+        "ui-design",
+        "state-matrix",
+        "visual-reference-analysis"
+      ],
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/design-brief",
+          "sha256": null
+        }
+      },
+      "integrity": {
+        "builtinSha256": "01fcfa434596c9580de5f7ca19250d9a0f485e7814f73ae00ec23f3046ca6fd6"
+      }
+    },
     "coding-playbook": {
       "id": "coding-playbook",
       "version": "0.1.0",
