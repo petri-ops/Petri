@@ -26,7 +26,7 @@ const schema = require(path.join(ROOT, 'core/packages/shared-config/config-schem
 
 const SETTINGS_TYPES = 'frontend/src/components/desktop/DesktopSettingsPanel/types.ts';
 
-test('设置分区清单冻结：12 个分区 id（搜索索引必须逐项覆盖）', () => {
+test('设置分区清单冻结：11 个分区 id（搜索索引必须逐项覆盖）', () => {
   // BLOCK-424 信息架构拆分（2026-11-11 显式重打 10 → 13）：
   //  · 原「常规」把 外观 4 项 + 桌面行为 3 项 + 外部导入 挤在一个分区 → 拆出
   //    `appearance`（外观）与 `desktop`（通知与桌面），general 收窄为「配置迁移」；
@@ -37,13 +37,16 @@ test('设置分区清单冻结：12 个分区 id（搜索索引必须逐项覆�
   //  （数据与维护）；network/compute/keymap/decisions/reasoning/diagnostics/experimental
   //  降为 tier=advanced（高级折叠组，功能零删除、搜索可达）。深链经
   //  normalizeInitialSection 归一（general→maintenance），不产生死链。
+  // UI-704 加映五（2026-11-17）：12 → 11 分区——`diagnostics` 不再占高级导航，
+  //  TerminalPanel 归位到 maintenance 的 DiagnosticsFold（默认折叠、功能零删）；
+  //  旧深链 diagnostics→maintenance 并自动展开折叠块，搜索关键词并入 maintenance。
   const src = read(SETTINGS_TYPES);
   const ids = [...src.matchAll(/\{ id: '([a-z-]+)', label:/g)].map((m) => m[1]);
   assert.deepEqual(ids, [
     'models', 'appearance', 'desktop', 'usage', 'maintenance',
-    'decisions', 'reasoning', 'network', 'compute', 'keymap', 'diagnostics', 'experimental',
+    'decisions', 'reasoning', 'network', 'compute', 'keymap', 'experimental',
   ]);
-  assert.equal(ids.length, 12, `分区数应为 12（实得 ${ids.length}）：${ids.join(', ')}`);
+  assert.equal(ids.length, 11, `分区数应为 11（实得 ${ids.length}）：${ids.join(', ')}`);
 });
 
 test('配置注册表冻结：21 族 / 117 键（BLOCK-210 data-retention；BLOCK-223 user-prefs 2 键；BLOCK-225 autoModel；BLOCK-226 quietHours；BLOCK-227 roleRevealSeen；BLOCK-228 crashNotice；BLOCK-247 web-search 8 键；BLOCK-249 subagent-profile tools 2 键；BLOCK-258 mcp-servers headers；BLOCK-264 C-37 model-access 2 键）', () => {

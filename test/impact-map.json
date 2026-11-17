@@ -8473,6 +8473,33 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "ui704-diagnostics-relocation",
+      "note": "UI-704 加映五：diagnostics 从高级导航移除，TerminalPanel 归位 maintenance 的 DiagnosticsFold；旧深链 diagnostics→maintenance 并自动展开，搜索关键词并入 maintenance。证据 acceptance/ui-704-diagnostics/**；功能零删。",
+      "patterns": [
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/types.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DiagnosticsFold.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DiagnosticsRelocation.test.tsx",
+        "frontend/src/lib/settingsSearch.ts",
+        "frontend/src/pages/settings/index.tsx",
+        "frontend/src/pages/global-pages.test.tsx",
+        "test/block201-settings-baseline.test.mjs",
+        "acceptance/ui-704-diagnostics/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DiagnosticsRelocation.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/SettingsNav.test.tsx",
+        "frontend/src/lib/settingsSearch.test.ts",
+        "frontend/src/pages/global-pages.test.tsx",
+        "test/block201-settings-baseline.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

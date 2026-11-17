@@ -20,9 +20,10 @@ export default function SettingsPage(): React.ReactElement {
   // UI-704 — 归一单点 normalizeInitialSection：general→maintenance（并入），
   // 合法 id 原样，未知值诚实回落缺省（不再按旧清单校验）。
   const [searchParams] = useSearchParams();
+  const rawSection = searchParams.get('section') ?? undefined;
   const initialSection = useMemo<SettingsSection | undefined>(
-    () => normalizeInitialSection(searchParams.get('section') ?? undefined),
-    [searchParams],
+    () => normalizeInitialSection(rawSection),
+    [rawSection],
   );
 
   const handleReturnHome = useCallback(() => {
@@ -36,7 +37,11 @@ export default function SettingsPage(): React.ReactElement {
 
   return (
     <div className={styles.settingsPage}>
-      <DesktopSettingsPanel onClose={handleReturnHome} initialSection={initialSection} />
+      <DesktopSettingsPanel
+        onClose={handleReturnHome}
+        initialSection={initialSection}
+        initialDiagnosticsOpen={rawSection === 'diagnostics'}
+      />
     </div>
   );
 }

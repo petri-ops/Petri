@@ -1,0 +1,41 @@
+UI-704 加映五 — 诊断归位维护（功能零删）HK-01 证据
+
+红（实现前，2026-11-17）：
+  cmd: npm run test:files --prefix frontend -- src/components/desktop/DesktopSettingsPanel/sections/DiagnosticsRelocation.test.tsx
+  result: suite 导入失败（DiagnosticsFold 不存在），4 项契约未进入测试体：
+    × normalizeInitialSection('diagnostics') → maintenance
+    × 搜索索引无独立 diagnostics，关键词并入 maintenance
+    × 高级导航展开后无「运行时与诊断」
+    × DiagnosticsFold 默认收起 / 深链可展开 / 子内容不删
+
+绿（实现后，2026-11-17）：
+  cmd: npm run test:files --prefix frontend -- \
+       DiagnosticsRelocation.test.tsx SettingsNav.test.tsx settingsSearch.test.ts global-pages.test.tsx
+       + node --test test/block201-settings-baseline.test.mjs
+  result: 前端 4 files / 19 tests passed；Node 4/4 passed（分区基线 12→11）。
+
+功能零删判据：
+  - TerminalPanel 组件与 backendStatus 接线原样，仅从独立分区移到 maintenance 内 DiagnosticsFold；
+  - 旧深链 ?section=diagnostics 归一到 maintenance 并自动展开折叠块；
+  - 设置搜索的 诊断/日志/运行时/服务/后端/进程/backend/runtime 关键词并入 maintenance；
+  - SETTINGS_SEARCH_INDEX 与 SETTINGS_SECTIONS 仍逐项相等（漂移门绿），分区数 12→11。
+
+Jev 决策建议（如实记录）：
+  test:suggest --supply=cloud → ui-shell-frontend 域，建议 test/window-manager.test.mjs（conf=0.99）
+    → 文件名漂移，改跑在册 test/block59-window-manager.test.mjs 43/43 绿。
+  doc:suggest --supply=cloud → uiAudit（deterministic），回写落在 UI-704 加映五同一段。
+
+边界：零新依赖 / 零功能删除 / 深链不失效 / 搜索不回退；其他 agent WIP（docs/DOC-REGISTRY.json、
+docs/README.md、docs/gen-ui-data-plane-evaluation-2026-11-17.md、
+docs/next-work-blueprint-2026-11-16.md）零触碰、提交时按具体文件排除。
+
+实机腿（9223 离屏，2026-11-17）：
+  npm run verify -- ui704-diagnostics → 6/6 allPass
+    D1/D2 维护页可达、诊断默认折叠但服务状态在场；
+    D3/D4 旧深链 ?section=diagnostics 归一维护并自动展开折叠块；
+    D5 高级导航无独立诊断项；D6 搜索「日志」仍定位到维护页。
+  证据=acceptance/ui-704-diagnostics/ui704-diagnostics-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+门禁读数：quality:types（首轮 TS2367：旧 id 不存在于新 SettingsSectionId，改字符串比较后 PASS）/
+  ui:audit:check PASS / ui-ledger 5/5 / theme-token-contract 19/19；
+  test:changed 489 tests / 472 pass / 8 fail（与前轮既有债同清单，无本加映新红）。

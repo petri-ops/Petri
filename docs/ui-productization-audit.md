@@ -109,6 +109,8 @@
 
 - **UI-704 加映四（2026-11-17，用户裁决「同意 按照你的建议推进」；工作标签 UI-708-W2）——零行为变更的呈现合并**：①运行时「工具曝光白名单/黑名单」合为一张「工具可见范围」卡（两个后端键与保存 payload 逐字不变）；②决策供给 URL/Key/Model + Jev/Laya 预设收进默认折叠「决策供给」卡（所有回调不变）；③网络 HTTP/HTTPS 代理合为一张「代理地址」卡（两输入与保存键不变）；④治理审计折叠块内审批记录/记忆治理改为客户端页签（两组件与 fetch 原样保留）。零依赖 / 零默认值 / 零写面语义；其他 agent 在制文档零触碰。HK-01 红（suite 导入失败）→ 绿 4/4（`acceptance/ui-708-wave2/hk01.txt`），Jev test:suggest 漂移文件改跑在册 block59 window-manager 43/43；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui708-wave2` **6/6 allPass**（9223 离屏、跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-708-wave2/ui708-wave2-live-win32.json`）。观感 `pending_human_eye` 不代签。
 
+- **UI-704 加映五（2026-11-17，用户裁决「好 按照你的建议来」）——诊断归位维护，导航去项但功能零删**：从高级导航移除独立「运行时与诊断」；`TerminalPanel` 原样收进「数据与维护 → 诊断」`DiagnosticsFold`（默认折叠），全仓唯一的服务状态/打开日志/系统终端入口不删。旧深链 `?section=diagnostics` 经 `normalizeInitialSection` 归一到 `maintenance` 并自动展开折叠块；设置搜索的「诊断/日志/运行时/服务/后端/进程/backend/runtime」关键词并入 maintenance，搜索可达不回退。分区数 12→11，`SETTINGS_SEARCH_INDEX` 与 `SETTINGS_SECTIONS` 漂移门仍逐项相等。HK-01 红（suite 导入失败）→ 绿 4/4，加 SettingsNav 6/6 + settingsSearch 8/8 + global-pages 1/1 + block201 基线 4/4；Jev test:suggest 建议文件漂移改跑在册 block59 window-manager 43/43；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui704-diagnostics` **6/6 allPass**（9223 离屏、跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-704-diagnostics/ui704-diagnostics-live-win32.json`）。零新依赖/零功能删除；其他 agent 在制文档零触碰。观感 `pending_human_eye` 不代签。
+
 ## UI-707: 上下文窗口与思考默认档模型级化——模型行悬停配置 + 设置页上下文退役（BLOCK-456；2026-11-17 **in_progress（P1-P4 收口，实机腿 19/19；观感 pending_human_eye 不代签）**）
 
 - **设计源**：`docs/block-456-model-level-context-thinking-plan.md` + 用户裁决（2026-11-17「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」，附 composer 模型菜单截图）。

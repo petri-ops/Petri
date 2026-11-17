@@ -22,8 +22,7 @@ export type SettingsSectionId =
   | 'maintenance'
   | 'decisions'
   | 'reasoning'
-  | 'experimental'
-  | 'diagnostics';
+  | 'experimental';
 
 export interface SettingsSearchEntry {
   id: SettingsSectionId;
@@ -59,7 +58,7 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.free
     id: 'maintenance',
     label: '数据与维护',
     description: '数据、备份与反馈',
-    keywords: ['隐私', '维护', '反馈', '更新', '备份', '导出', '导入', '迁移', '配置', '外部', 'codex', 'zcode', 'toml', 'json', 'config', 'feedback', 'update', '诊断', '数据'],
+    keywords: ['隐私', '维护', '反馈', '更新', '备份', '导出', '导入', '迁移', '配置', '外部', 'codex', 'zcode', 'toml', 'json', 'config', 'feedback', 'update', '诊断', '日志', '运行时', '服务', '后端', '进程', 'backend', 'runtime', '数据'],
   },  {
     id: 'decisions',
     label: '治理与决策',
@@ -85,11 +84,6 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.free
     label: '快捷键',
     description: '命令键位与冲突',
     keywords: ['快捷键', '键位', '键盘', '冲突', 'keymap', 'shortcut', 'hotkey', '命令'],
-  },  {
-    id: 'diagnostics',
-    label: '运行时与诊断',
-    description: '服务、运行时与日志',
-    keywords: ['诊断', '日志', '运行时', '服务', '后端', 'backend', 'runtime', '进程'],
   },  {
     id: 'experimental',
     label: '实验特性',

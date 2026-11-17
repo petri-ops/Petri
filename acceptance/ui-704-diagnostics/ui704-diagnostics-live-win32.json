@@ -1,0 +1,39 @@
+{
+  "name": "ui704-diagnostics",
+  "platform": "win32",
+  "startedAt": "2026-11-17T08:33:30.261Z",
+  "finishedAt": "2026-11-17T08:33:31.883Z",
+  "assertions": [
+    {
+      "name": "D1_maintenance_reachable_with_diagnostics",
+      "pass": true,
+      "detail": "nav /settings?section=maintenance"
+    },
+    {
+      "name": "D2_diagnostics_folded_by_default",
+      "pass": true,
+      "detail": "{\"closed\":true,\"hasServiceText\":true}"
+    },
+    {
+      "name": "D3_old_deeplink_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=diagnostics"
+    },
+    {
+      "name": "D4_deeplink_normalizes_to_maintenance_and_opens_fold",
+      "pass": true,
+      "detail": "{\"activeLabel\":\"数据与维护\\n数据、备份与反馈\",\"foldOpen\":true,\"hasServiceText\":true}"
+    },
+    {
+      "name": "D5_diagnostics_absent_from_advanced_nav",
+      "pass": true,
+      "detail": "nav text"
+    },
+    {
+      "name": "D6_search_keyword_reaches_maintenance",
+      "pass": true,
+      "detail": "{\"active\":\"数据与维护\\n数据、备份与反馈\"}"
+    }
+  ],
+  "allPass": true
+}

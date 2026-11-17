@@ -1,5 +1,5 @@
 // BLOCK-72 / UI-320 — 全局工作台页冒烟：/knowledge 渲染知识面板壳。
-// UI-366 — /backend 页退役（诊断并入设置「运行时与诊断」分区），后端冒烟一并移除。
+// UI-366 / UI-704 加映五 — /backend 页退役（诊断并入设置「数据与维护」的 DiagnosticsFold），后端冒烟一并移除。
 // IPC 全 mock（不发真实调用）。
 
 import React from 'react';

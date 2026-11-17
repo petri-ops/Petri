@@ -14,6 +14,8 @@ export interface Props {
   onClose: () => void;
   /** BLOCK-171 CP-3 — 设置深链（?section=）初始节；缺省 general。 */
   initialSection?: SettingsSection;
+  /** UI-704 加映五 — 旧深链 ?section=diagnostics 直达维护页时自动展开诊断折叠块。 */
+  initialDiagnosticsOpen?: boolean;
 }
 
 export type SettingsSection =
@@ -64,19 +66,19 @@ export const SETTINGS_SECTIONS: Array<{
   { id: 'network', label: '联网与代理', description: '代理、证书与检索', icon: 'globe', tier: 'advanced' },
   { id: 'compute', label: '远程与计算', description: '远程目标与 Harness 环境', icon: 'database', tier: 'advanced' },
   { id: 'keymap', label: '快捷键', description: '命令键位与冲突', icon: 'key', tier: 'advanced' },
-  { id: 'diagnostics', label: '运行时与诊断', description: '服务、运行时与日志', icon: 'terminal', tier: 'advanced' },
   { id: 'experimental', label: '实验特性', description: '尚未定型的开关', icon: 'sparkles', tier: 'advanced' },
 ];
 
 /**
  * UI-704 — 深链归一（?section= 旧值映射，不失效）：
  *  · `general`（原「配置迁移」独立分区）→ `maintenance`（两功能已并入同一分区）；
+ *  · `diagnostics`（原「运行时与诊断」独立分区）→ `maintenance`（诊断面板并入维护页折叠块）；
  *  · 其余合法 id 原样返回；非法/未知 id → undefined（调用方落默认分区）。
  * 参数收 string（URL 原始值），校验在本函数内完成——调用方无需先行断言。
  */
 export function normalizeInitialSection(section?: string): SettingsSection | undefined {
   if (!section) return undefined;
-  if (section === 'general') return 'maintenance';
+  if (section === 'general' || section === 'diagnostics') return 'maintenance';
   return SETTINGS_SECTIONS.some((item) => item.id === section) ? (section as SettingsSection) : undefined;
 }
 

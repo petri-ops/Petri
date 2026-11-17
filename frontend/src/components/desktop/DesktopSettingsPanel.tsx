@@ -47,6 +47,8 @@ import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointPro
 import { MemoryPanel } from './DesktopSettingsPanel/sections/MemoryPanel';
 // UI-704 加映四 — 治理审计两块面板的纯呈现页签
 import { AuditTabs } from './DesktopSettingsPanel/sections/AuditTabs';
+// UI-704 加映五 — 诊断面板归位维护页折叠块
+import { DiagnosticsFold } from './DesktopSettingsPanel/sections/DiagnosticsFold';
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { ToolApprovalPanel } from './DesktopSettingsPanel/sections/ToolApprovalPanel';
@@ -63,7 +65,7 @@ import { HarnessEnvironment } from './DesktopSettingsPanel/sections/HarnessEnvir
 import { useBackendStatus } from '@/components/backend/BackendStatusProvider';
 import { TerminalPanel } from '@/pages/project-workspace';
 import { credentialId } from './DesktopSettingsPanel/model-types';
-export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.ReactElement {
+export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosticsOpen = false }: Props): React.ReactElement {
   // BLOCK-171 CP-3 — 深链初始节（?section= 经设置页透传）。
   // UI-704 — 深链归一：general（配置迁移并入 maintenance）→ maintenance；非法值落默认。
   const [activeSection, setActiveSection] = useState<SettingsSection>(
@@ -553,17 +555,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
         {activeSection === 'keymap' && <KeymapPanel key={`keymap-${settingsVersion}`} />}
         {activeSection === 'reasoning' && <ReasoningDefaultsPanel key={`reasoning-${settingsVersion}`} />}
 
-        {/* UI-366 — 原全局「后端」页（/backend，BLOCK-72/UI-320）并入本分区 */}
-        {activeSection === 'diagnostics' && (
-          <section className="petri-settings-section">
-            <div className="petri-settings-section__heading">
-              <h3>运行时与诊断</h3>
-              <p>本地服务进程、R / Python 运行时状态与日志（设备级，不关联项目）。</p>
-            </div>
-            <TerminalPanel backendStatus={backendStatus} />
-          </section>
-        )}
-
         {activeSection === 'maintenance' && (
           <>
             <MaintenanceSection
@@ -582,6 +573,12 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <HarnessEnvironment />
               <hr className="petri-section-divider" />
               <TrashManagement />
+            </section>
+            {/* UI-704 加映五 — 原独立「运行时与诊断」归位到这里（功能零删，默认折叠） */}
+            <section className="petri-settings-section">
+              <DiagnosticsFold open={initialDiagnosticsOpen}>
+                <TerminalPanel backendStatus={backendStatus} />
+              </DiagnosticsFold>
             </section>
             {/* UI-704 — 原 general「配置迁移」并入数据与维护（深链 ?section=general 归一到这里） */}
             <section className="petri-settings-section">

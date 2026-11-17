@@ -39,21 +39,21 @@ describe('UI-704 设置页 IA v2 — 左栏 core 5 组 + 高级折叠', () => {
     expect(screen.getByText('联网与代理')).toBeTruthy();
   });
 
-  it('高级分组默认收起（UI-704：导航极少 + 搜索兜底），手动展开后可见', () => {
+  it('高级分组默认收起（UI-704：导航极少 + 搜索兜底），手动展开后可见；诊断不再占导航', () => {
     renderNav('appearance');
     const toggle = screen.getByRole('button', { name: /高级/ });
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByText('运行时与诊断')).toBeNull();
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('运行时与诊断')).toBeTruthy();
+    expect(screen.getByText('实验特性')).toBeTruthy();
+    expect(screen.queryByText('运行时与诊断')).toBeNull();
   });
 
-  it('深链进入高级分区时自动展开（?section=diagnostics 不折叠）', () => {
-    renderNav('diagnostics');
-    const toggle = screen.getByRole('button', { name: /高级/ });
-    expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByText('运行时与诊断')).toBeTruthy();
+  it('旧深链 diagnostics 归一到 maintenance（诊断折叠块由面板自动展开）', () => {
+    expect(normalizeInitialSection('diagnostics')).toBe('maintenance');
+    renderNav('maintenance');
+    expect(screen.getByText('数据与维护')).toBeTruthy();
+    expect(screen.queryByText('运行时与诊断')).toBeNull();
   });
 
   it('深链归一：?section=general → maintenance（旧深链不失效）；其余 id 原样；非法值不产生未知分区', () => {
