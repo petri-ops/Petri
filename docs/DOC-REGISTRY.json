@@ -12485,12 +12485,12 @@
       "id": "BLOCK-461",
       "path": "docs/block461-gen-ui-compose-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block461-gen-ui-compose",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block461-gen-ui-compose-plan.md",
         "frontend/src/components/copilot/gen-ui/compose/",
@@ -12507,7 +12507,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户端到端预授权 B-8 发令 + B-6 路径 A 零依赖自实现 + B-7 首包 P0-P2）：::compose JSON spec 受控渲染 MVP——扁平树 spec + 手写校验器 fail-closed + catalog 4 组件经既有 ResultNode 插座（ResultCardRenderer）渲染 + directive parser 接线 + $state 绑定复用 gen-ui:get-data + widgetState 复用既有通道。零新依赖；::visualize 沙箱链零改动双形态并存；P3/P4 可选拆包不在本包。plan=docs/block461-gen-ui-compose-plan.md。"
+      "notes": "2026-11-18 立项（用户端到端预授权 B-8 发令 + B-6 路径 A 零依赖自实现 + B-7 首包 P0-P2）：::compose JSON spec 受控渲染 MVP——扁平树 spec + 手写校验器 fail-closed + catalog 4 组件经既有 ResultNode 插座（ResultCardRenderer）渲染 + directive parser 接线 + $state 绑定复用 gen-ui:get-data + widgetState 复用既有通道。零新依赖；::visualize 沙箱链零改动双形态并存；P3/P4 可选拆包不在本包。plan=docs/block461-gen-ui-compose-plan.md。【收口 2026-11-18】P0-P2 全交付：::compose 投影（双指令管线）+ 扁平树 spec fail-closed 校验器 + catalog 4 组件经 ResultNode 插座 + $state/get-data 复用 + visible + widgetState REST 复用（≤16KiB）；HK-01 红→绿 30/30；copilot 邻域 813/813 零回归；types 0 error；lint 7 处 FP 根因修（own-enumerable 先例）0/0；parser findClosingBrace 嵌套深度（::visualize 平 JSON 不变）。台账 UI-709 in_progress（实机观感 pending_human_eye 不代签；ceiling 36→37 沿 UI-706/707 先例）。P3 流式/P4 扩展点=可选拆包后续。证据=acceptance/block461/。"
     }
   ],
   "lastUpdated": "2026-11-17"
