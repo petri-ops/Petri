@@ -4,7 +4,7 @@
 // 完全未声明的 legacy 档案按隐式默认 chat/streaming/tools，保持旧宽松语义）。
 
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
-import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { modelCapabilityOverride, resolveModelCapabilities } from '@/lib/model-capabilities';
 
 const IMPLICIT_BASE = ['chat', 'streaming', 'tools'];
 
@@ -22,7 +22,7 @@ export interface EndpointCapabilityToggleProps {
 export function EndpointCapabilityToggle(props: EndpointCapabilityToggleProps) {
   const { profile, capability, label, title, ariaLabel, onUpdate, model } = props;
   const declared = Array.isArray(profile.capabilities)
-    || (model ? Array.isArray(profile.modelCapabilities?.[model]) : false);
+    || (model ? modelCapabilityOverride(profile, model) !== undefined : false);
   const resolved = model ? resolveModelCapabilities(profile, model) : (profile.capabilities || []);
   const base = declared ? resolved : IMPLICIT_BASE;
   const checked = base.includes(capability);

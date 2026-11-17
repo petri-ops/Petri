@@ -1,4 +1,4 @@
-import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { modelCapabilityOverride, resolveModelCapabilities } from '@/lib/model-capabilities';
 
 export const USER_MODEL_PROVIDER_OPTIONS = [
   { value: 'openai-compatible', label: 'OpenAI' },
@@ -120,7 +120,7 @@ export function isChatSelectableProfile(profile: UserModelProfileLike): boolean 
   // 完全未声明能力的 legacy 档案保持旧语义（默认可选）。
   const model = profile.model || '';
   const declared = Array.isArray(profile.capabilities)
-    || Array.isArray(profile.modelCapabilities?.[model]);
+    || modelCapabilityOverride(profile, model) !== undefined;
   return Boolean(
     profile.id?.trim() &&
       model.trim() &&

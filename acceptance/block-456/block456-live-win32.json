@@ -1,8 +1,8 @@
 {
   "name": "block456-live",
   "platform": "win32",
-  "startedAt": "2026-11-17T06:29:46.142Z",
-  "finishedAt": "2026-11-17T06:30:51.774Z",
+  "startedAt": "2026-11-17T07:26:23.674Z",
+  "finishedAt": "2026-11-17T07:27:30.101Z",
   "assertions": [
     {
       "name": "S0_9223_free_before_start",
@@ -42,12 +42,12 @@
     {
       "name": "C0_project_available",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwkbc1m9_iisl\",\"name\":\"B456-live-1794897006125\",\"created_at\":\"2026-11-17T06:30:06.129Z\",\"updated_at\":\"2026-11-17T06:30:06.129Z"
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwkdcv78_w73f\",\"name\":\"B456-live-1794900403693\",\"created_at\":\"2026-11-17T07:26:43.700Z\",\"updated_at\":\"2026-11-17T07:26:43.700Z"
     },
     {
       "name": "C1_composer_ready",
       "pass": true,
-      "detail": "project=p_mwkbc1m9_iisl"
+      "detail": "project=p_mwkdcv78_w73f"
     },
     {
       "name": "M1_quick_retired_row_configs_present",

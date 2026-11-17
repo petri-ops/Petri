@@ -10,7 +10,7 @@
 
 import React from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
-import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { modelCapabilityOverride, resolveModelCapabilities } from '@/lib/model-capabilities';
 
 interface ModelSelectorControlsProps {
   profile: ChatModelPreset;
@@ -21,7 +21,7 @@ export function ModelSelectorControls({ profile, onUpdate }: ModelSelectorContro
   const visible = profile.visible !== false;
   const defaultModel = profile.defaultModel || profile.model || '';
   const declared = Array.isArray(profile.capabilities)
-    || Array.isArray(profile.modelCapabilities?.[defaultModel]);
+    || modelCapabilityOverride(profile, defaultModel) !== undefined;
   const caps = declared ? resolveModelCapabilities(profile, defaultModel) : ['chat', 'streaming', 'tools'];
   // 完全未声明的 legacy 档案保持旧宽松语义（thinking 门放行），不误判「不支持」。
   const supports = !declared || caps.includes('reasoning');

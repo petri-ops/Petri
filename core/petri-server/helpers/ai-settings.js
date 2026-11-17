@@ -127,11 +127,14 @@ function withVisionDeclared(profile) {
     : (Array.isArray(profile.capabilities) ? profile.capabilities : ['vision']);
   const next = { ...profile, capabilities };
   const model = typeof profile.model === 'string' ? profile.model : '';
-  if (model && profile.modelCapabilities && Array.isArray(profile.modelCapabilities[model])
-    && !profile.modelCapabilities[model].includes('vision')) {
+  // own-enumerable 查找（模型名来自远端 /models，动态下标不得命中原型键）。
+  const modelCaps = model && profile.modelCapabilities && typeof profile.modelCapabilities === 'object'
+    ? Object.entries(profile.modelCapabilities).find(([k]) => k === model)?.[1]
+    : undefined;
+  if (model && Array.isArray(modelCaps) && !modelCaps.includes('vision')) {
     next.modelCapabilities = {
       ...profile.modelCapabilities,
-      [model]: [...profile.modelCapabilities[model], 'vision'],
+      [model]: [...modelCaps, 'vision'],
     };
   }
   return next;

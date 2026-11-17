@@ -25,7 +25,10 @@ function prefFor(
 ): { contextWindow?: number; thinkingLevel?: string } | undefined {
   if (!profile || typeof profile !== 'object') return undefined;
   const key = typeof model === 'string' ? model.trim() : '';
-  const pref = key ? profile.modelPreferences?.[key] : undefined;
+  // own-enumerable 查找：模型名来自远端 /models，动态下标不得命中原型键（constructor 等）。
+  const pref = key
+    ? Object.entries(profile.modelPreferences ?? {}).find(([k]) => k === key)?.[1]
+    : undefined;
   return pref && typeof pref === 'object' ? pref : undefined;
 }
 

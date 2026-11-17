@@ -1,0 +1,70 @@
+BLOCK-456 收口后 lint 棘轮清偿 — warnings 归因与处置（2026-11-17）
+================================================================
+
+读数链（test/lint-warnings-baseline.json 基线 2026-11-10 ba9d9271 打基线 production=1489）：
+  e2e 终局收口（234ce6274）实测 production=1483（−6 清偿，未下调基线，门绿）
+  + ui-421（75dc8c156，origin 批）：TestInstanceBadge.tsx react-hooks/exhaustive-deps +1
+  + BLOCK-455（a7abd3c8f，本代理前包）：security/detect-object-injection +14（8 文件）
+  + BLOCK-456（51b2ad7d，本包）：security/detect-object-injection +3（2 文件）
+  = 1501（p4-remaining-gates.txt 与清偿前复跑读数一致，精确对账）
+
+归因方法：acceptance/block-456/p4-lint-attribution.mjs（eslint --stdin 新旧版本对跑，
+零盘上写入；added-line 范围交集定位新增 warning 行）。ui-705/ui-703 批 delta=0。
+并发会话 UI-708 WIP 四文件 worktree vs HEAD warnings 全等（+0），不涉本债。
+
+处置（三分类之「修根因」）：
+  18 处 security/detect-object-injection 全部改为 own-enumerable 查找
+  （Object.entries(...).find(([k]) => k === key)），语义等价且更正确——
+  模型名来自远端 /models，旧动态下标可命中原型键（constructor 等）。
+  前后端镜像同改（model-profile.js ↔ model-capabilities.ts / model-preferences.ts），
+  跨源矩阵契约锁定。declared 判定统一走 modelCapabilityOverride（trim 语义与解析器对齐）。
+  文件清单：
+    core/petri-server/helpers/ai-settings.js（withVisionDeclared 3 读并 1 查）
+    core/shared-backend/llm-providers/model-profile.js（_ownRecordValue：3 解析器 + 2 roleBindings）
+    frontend/src/lib/model-capabilities.ts（ownRecordValue + modelCapabilityOverride 导出；prefill 改 entries 数组）
+    frontend/src/lib/model-preferences.ts（prefFor）
+    frontend/src/lib/model-provider-options.ts / frontend/src/hooks/useAiSettings.ts /
+    EndpointCapabilityToggle.tsx / sections/ModelSelectorControls.tsx（declared 判定换 helper）
+
+留账（不修，如实登记）：
+  - DesktopSettingsPanel.tsx:159 同型 warning 1 处（BLOCK-455 引入）——该文件为并发会话
+    UI-708 活跃编辑面，本轮零触碰；留作存量债（清偿后 production=1483 ≤ 1489 门已绿）。
+  - ui-421 TestInstanceBadge.tsx exhaustive-deps 1 处（origin 批，行为敏感不代修）。
+
+清偿后读数：
+  quality:lint:ledger PASS — production 1501→1483 / test 417→416 / scripts 539。
+  基线保持 1489/417/539 不动（脚本 --update 仅支持缺席首打、无既有基线下调路径；
+  e2e 终局先例=实测 1483 低于基线 1489 即绿、基线不上调亦不裸改）。
+  定向测试：Node 45/45（block455×2 + block456 + ai-settings×3）；
+  前端 58/58（model-capabilities 6 / model-preferences 3 / model-provider-options 9 /
+  useAiSettings 19 / modelConfigAndCollapse 11 / EndpointMainTable 5 / EndpointEditorDensity 5）。
+  quality:types PASS；gate:code-size PASS；big-file-ratchet PASS。
+
+尺寸锚重打（留因）：
+  - SimpleChat.tsx 1958→1957：BLOCK-456 收口时基线重打早于末次 unused-import  removal，
+    本轮 --write 补正（双台账：size-baseline + big-file-anchor，只减方向）。
+  - DesktopSettingsPanel.tsx 622→625：UI-708（0b39ffba，并发会话）合法功能增量未随提交重打，
+    本轮 --write 代为重锚（归因 UI-708；先例=POST-S7 H0 loop-orchestrator 重锚留因）。
+
+knip 登记（双 entry 列表）：
+  - acceptance/block-456/p4-lint-attribution.mjs（归因工具，8f1aeb1e 补落入库）
+  - flows/ui708-advanced-simplify.cjs（UI-708 新 flow 未登记——ui695 前会话遗漏同型代登记）
+  quality:knip:check PASS（330 键冻结无新增）。
+
+实机腿瞬态波动与八文件 bisect（清偿编辑自身疑似回归的排除记录）：
+  清偿 8 文件全量 apply 后 block456-live 两连 17/19（M5/M7 发送档 thinkingLevel
+  standard≠high；M4/M4b 写盘回环与保存通知均绿）——p4-live-rerun-settlement.txt /
+  p4-live-rerun-settlement2.txt。处置=全量 patch 备份后三段 bisect（每段跑完即杀 9223）：
+    ① 8 文件全 revert（HEAD 态）        → 19/19（p4-live-bisect-head.txt）
+    ② 仅前端数据面 4 文件 apply         → 19/19（p4-live-bisect-fe.txt）
+       + renderHook 探针（refresh 后 activePreset.defaultThinkingLevel=high）1/1 绿
+    ③ +后端 2 文件 apply（6/8）         → 19/19（p4-live-bisect-be.txt）
+    ④ 全量恢复（8/8，终态 digest）      → 19/19（p4-live-full-restore.txt）
+    ⑤ 终态确认复跑                      → 19/19（p4-live-confirm.txt）
+  判定：8 文件逐一/分组全部无罪，语义等价改写不成立回归；两连红为瞬态环境波动
+  （批量 apply 紧贴 dev 栈 HMR/依赖优化窗口 + 并发会话负载；非确定复现，终态两连绿）。
+  探针临时测试（__b456-settlement-probe.test.ts）契约已被 useAiSettings.test.ts
+  既有用例覆盖（refresh re-fetches after a sibling write + choice 模型级解析值），删除。
+  patch 备份（p4-settlement-wip.patch）经 git apply --check --reverse 确认全量在场后删除。
+  终态定向测试复跑：Node 45/45 + 前端 58/58（与清偿时读数一致）。
+  block456-live-win32.json 终态=⑤确认跑 19/19 allPass。

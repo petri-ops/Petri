@@ -117,6 +117,14 @@ function inferCapabilities(provider) {
   return ['chat', 'streaming', 'tools'];
 }
 
+// own-enumerable 查找：模型名来自远端 /models，动态下标不得命中原型键（constructor 等）。
+// 与前端镜像 model-capabilities.ts 的 ownRecordValue 同语义（跨源契约锁定）。
+function _ownRecordValue(record, key) {
+  if (!record || typeof record !== 'object' || !key) return undefined;
+  const entry = Object.entries(record).find(([k]) => k === key);
+  return entry ? entry[1] : undefined;
+}
+
 /**
  * BLOCK-455 — 模型级能力解析单源：显式覆写 > 渠道默认。
  * 无 modelCapabilities 覆写的旧档案行为逐字不变（零迁移）。
@@ -124,11 +132,9 @@ function inferCapabilities(provider) {
  */
 function resolveModelCapabilities(profile, model) {
   if (!profile || typeof profile !== 'object') return [];
-  const overrides = profile.modelCapabilities;
   const key = typeof model === 'string' ? model.trim() : '';
-  if (key && overrides && typeof overrides === 'object' && Array.isArray(overrides[key])) {
-    return overrides[key];
-  }
+  const override = _ownRecordValue(profile.modelCapabilities, key);
+  if (Array.isArray(override)) return override;
   return Array.isArray(profile.capabilities) ? profile.capabilities : [];
 }
 
@@ -139,9 +145,7 @@ function resolveModelCapabilities(profile, model) {
 function resolveModelContextWindow(profile, model) {
   if (!profile || typeof profile !== 'object') return undefined;
   const key = typeof model === 'string' ? model.trim() : '';
-  const pref = key && profile.modelPreferences && typeof profile.modelPreferences === 'object'
-    ? profile.modelPreferences[key]
-    : undefined;
+  const pref = _ownRecordValue(profile.modelPreferences, key);
   const override = pref && typeof pref === 'object' ? pref.contextWindow : undefined;
   if (typeof override === 'number' && Number.isFinite(override) && override > 0) return Math.round(override);
   const fallback = profile.contextWindow;
@@ -155,9 +159,7 @@ function resolveModelContextWindow(profile, model) {
 function resolveModelThinkingDefault(profile, model) {
   if (!profile || typeof profile !== 'object') return undefined;
   const key = typeof model === 'string' ? model.trim() : '';
-  const pref = key && profile.modelPreferences && typeof profile.modelPreferences === 'object'
-    ? profile.modelPreferences[key]
-    : undefined;
+  const pref = _ownRecordValue(profile.modelPreferences, key);
   const override = pref && typeof pref === 'object' ? pref.thinkingLevel : undefined;
   if (THINKING_LEVELS.includes(override)) return override;
   return THINKING_LEVELS.includes(profile.defaultThinkingLevel) ? profile.defaultThinkingLevel : undefined;
@@ -372,7 +374,7 @@ function validateModelConfig(config) {
 
   for (const role of MODEL_ROLES) {
     // BLOCK-455 — 绑定值支持 渠道::模型 对；能力校验按解析出的模型能力。
-    const binding = parseModelBinding(roleBindings[role]);
+    const binding = parseModelBinding(_ownRecordValue(roleBindings, role));
     const profileId = binding.profileId;
     if (!profileId) {
       diagnostics.push({
@@ -442,7 +444,7 @@ function resolveModelProfile(config, role, requestedId) {
   }
   const profiles = config && Array.isArray(config.profiles) ? config.profiles : [];
   // BLOCK-455 — 绑定/请求 id 支持 渠道::模型 对；裸 id = 渠道默认模型。
-  const binding = parseModelBinding(_cleanString(requestedId) || (config && config.roleBindings && config.roleBindings[role]));
+  const binding = parseModelBinding(_cleanString(requestedId) || _ownRecordValue(config && config.roleBindings, role));
   const profile = profiles.find((candidate) => candidate.id === binding.profileId);
   if (!profile) {
     return { error: 'model_profile_not_found', message: `模型配置不存在: ${binding.profileId || role}` };

@@ -35,7 +35,7 @@ import {
   normalizeLegacyUserModelProfile,
 } from '@/lib/model-provider-options';
 import { EMPTY_MODEL_CATALOG, type ModelCatalogState } from '@/lib/model-catalog';
-import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { modelCapabilityOverride, resolveModelCapabilities } from '@/lib/model-capabilities';
 import { resolveModelContextWindow, resolveModelThinkingDefault } from '@/lib/model-preferences';
 
 // ChatModelPreset type — extracted here so SimpleChat and
@@ -178,7 +178,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
             // 未声明能力的 legacy 档案保持旧语义（全部展开）。
             const chatModels = models.filter((model) => {
               const declared = Array.isArray(profile.capabilities)
-                || Array.isArray(profile.modelCapabilities?.[model]);
+                || modelCapabilityOverride(profile, model) !== undefined;
               return !declared || resolveModelCapabilities(profile, model).includes('chat');
             });
             return (chatModels.length > 0 ? chatModels : [profile.model]).map((model) => ({

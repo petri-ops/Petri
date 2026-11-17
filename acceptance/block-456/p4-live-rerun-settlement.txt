@@ -1,0 +1,28 @@
+
+> petri-desktop@0.0.4 verify
+> node .agents/skills/petri-dev-infra/dev-verify/run.cjs block456-live
+
+[dev-verify] PASS S0_9223_free_before_start :: free
+[dev-verify] PASS R1_isolated_backend_healthy :: port 3399
+[dev-verify] PASS R2_seed_accepted :: status=200 {"status":"ok"}
+[dev-verify] PASS R3_model_preferences_persisted :: {"prefs":{"gpt-4o-mini":{"contextWindow":64000}},"ctx":128000,"think":"standard"}
+[dev-verify] PASS T1_test_instance_ready :: test=1 target on 9223
+[dev-verify] warn: 9223 页面目标均无 ?test=1 标记（SPA 导航丢失查询串），按端口专属回退: http://localhost:3000/settings?section=models
+[dev-verify] PASS W1_settings_header_no_context_column :: {"headerTexts":["","协议","供应商","Base URL","Key","默认模型","连通性",""],"headerTracks":[32,138,120,310,189,189,120,40],"gridTracks":[32,138,120,310,
+[dev-verify] PASS W2_settings_grid_eight_tracks :: header=[32,138,120,310,189,189,120,40] grid=[32,138,120,310,189,189,120,40] min=1000/1000
+[dev-verify] PASS C0_project_available :: {"status":"ok","project":{"id":"p_mwkcrldq_94oz","name":"B456-live-1794899411190","created_at":"2026-11-17T07:10:11.198Z","updated_at":"2026
+[dev-verify] warn: 9223 页面目标均无 ?test=1 标记（SPA 导航丢失查询串），按端口专属回退: http://localhost:3000/project/p_mwkcrldq_94oz
+[dev-verify] PASS C1_composer_ready :: project=p_mwkcrldq_94oz
+[dev-verify] PASS M1_quick_retired_row_configs_present :: {"menu":true,"quick":false,"panel":true,"configs":2,"main":{"display":"none","ctxValue":"128000","thinkLevel":"standard","thinkDisabled":fal
+[dev-verify] PASS M2_drawer_expands_on_focus :: focus-within display=flex（合成 mouseMoved 不触发 :hover，键盘等价路径）
+[dev-verify] PASS M3_values_follow_model :: {"main":{"display":"flex","ctxValue":"128000","thinkLevel":"standard","thinkDisabled":false,"reason":false},"mini":{"display":"none","ctxVal
+[dev-verify] PASS M4_model_level_write_roundtrip :: {"written":"written","prefs":{"gpt-4o-mini":{"contextWindow":64000},"gpt-4o":{"contextWindow":200000,"thinkingLevel":"high"}},"ctx":128000,"
+[dev-verify] PASS M4b_save_notice_visible :: notice=已保存 · 下一轮生效
+[dev-verify] PASS M4c_screenshots_or_honest_degrade :: {"settingsShot":"screenshot_unavailable: cdp_command_failed:-32000","drawerShot":"screenshot_unavailable: cdp_command_failed:-32000"}
+[dev-verify] FAIL M5_send_tier_follows_model_default :: {"pickMain":"picked","levelMain":"standard","sent":"sent","body":{"modelPresetId":"b456-main","modelName":"gpt-4o","thinkingLevel":"standard
+[dev-verify] PASS M5b_send_tier_channel_fallback :: {"pickMini":"picked","sent":"sent","body":{"modelPresetId":"b456-main","modelName":"gpt-4o-mini","thinkingLevel":"standard"}}
+[dev-verify] PASS M6_explicit_session_override_wins :: {"levelAfterSwitch":"off","sent":"sent","body":{"modelPresetId":"b456-main","modelName":"gpt-4o","thinkingLevel":"off"}}
+[dev-verify] FAIL M7_auto_send_tier_follows_model :: {"autoToggled":"toggled_on","sent":"sent","body":{"modelPresetId":"b456-main","modelName":"gpt-4o","thinkingLevel":"standard"}}
+[dev-verify] evidence: D:\1.WorkDir\petri\acceptance\block-456\block456-live-win32.json
+[dev-verify] run "block456-live": 17/19 assertions, allPass=false
+exit=1

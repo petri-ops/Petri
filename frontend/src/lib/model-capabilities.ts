@@ -14,14 +14,30 @@ export interface ModelCapabilityProfileLike {
   modelCapabilities?: Record<string, string[]>;
 }
 
+// own-enumerable 查找：模型名来自远端 /models，动态下标不得命中原型键（constructor 等）。
+function ownRecordValue<T>(record: Record<string, T> | undefined, key: string): T | undefined {
+  if (!record || !key) return undefined;
+  return Object.entries(record).find(([k]) => k === key)?.[1];
+}
+
+/** 显式模型级覆写（无覆写/非法值 = undefined）；declared 判定与解析共用同一查找语义。 */
+export function modelCapabilityOverride(
+  profile: ModelCapabilityProfileLike | null | undefined,
+  model: string | undefined,
+): string[] | undefined {
+  if (!profile || typeof profile !== 'object') return undefined;
+  const key = typeof model === 'string' ? model.trim() : '';
+  const override = ownRecordValue(profile.modelCapabilities, key);
+  return Array.isArray(override) ? override : undefined;
+}
+
 export function resolveModelCapabilities(
   profile: ModelCapabilityProfileLike | null | undefined,
   model: string | undefined,
 ): string[] {
   if (!profile || typeof profile !== 'object') return [];
-  const key = typeof model === 'string' ? model.trim() : '';
-  const override = key ? profile.modelCapabilities?.[key] : undefined;
-  if (Array.isArray(override)) return override;
+  const override = modelCapabilityOverride(profile, model);
+  if (override) return override;
   return Array.isArray(profile.capabilities) ? profile.capabilities : [];
 }
 
@@ -64,16 +80,16 @@ export function prefillModelCapabilities(
 ): Record<string, string[]> | undefined {
   const existing = profile.modelCapabilities || {};
   const channelCaps = Array.isArray(profile.capabilities) ? profile.capabilities : [];
-  const additions: Record<string, string[]> = {};
+  const additions: Array<[string, string[]]> = [];
   for (const model of models) {
-    if (Array.isArray(existing[model])) continue;
+    if (Array.isArray(ownRecordValue(existing, model))) continue;
     const inferred = inferModelCapabilities(model);
     if (inferred.length === 1 && inferred[0] === 'embedding') {
-      additions[model] = ['embedding'];
+      additions.push([model, ['embedding']]);
       continue;
     }
     const gains = inferred.filter((cap) => !channelCaps.includes(cap));
-    if (gains.length > 0) additions[model] = [...new Set([...channelCaps, ...inferred])];
+    if (gains.length > 0) additions.push([model, [...new Set([...channelCaps, ...inferred])]]);
   }
-  return Object.keys(additions).length > 0 ? { ...existing, ...additions } : undefined;
+  return additions.length > 0 ? { ...existing, ...Object.fromEntries(additions) } : undefined;
 }
