@@ -128,7 +128,7 @@
 - **实机腿复跑**：收口清偿后源码 digest 变化，block455-live 18/18 与 ui342 7/7 均按终局 digest 复跑绿
   （证据文件为复跑产物）；跑完 9223/3399/3398 全清，用户主栈零触碰。
 - **取号对账**：UI-705 已被 origin/main UpdatePill 形态迭代 verified 条目占用 → 本包未推送侧让号改 UI-706；
-  origin/main 领先 2 提交（UpdatePill 批）未合并，同步合并待用户裁决。
+  origin/main 领先 2 提交（UpdatePill 批）；2026-11-17 用户裁决 rebase 同步——零冲突重放，台账 UI-705/706 双条目共存，triage 契约 5/5 复核绿，随后 push。
 - **诚实边界**：UI-706 观感 pending_human_eye 不代签，台账 in_progress；离屏截图诚实降级不冒充视觉绿。
   G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **串行槽位**：空出。

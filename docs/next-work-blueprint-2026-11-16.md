@@ -21,7 +21,7 @@ lastUpdated: 2026-11-16
 
 ## 0. 当前状态锚点（恢复必读）
 
-- `main` @ 当次 `git log -1`（蓝图创建于 `daaafd78`，体验原则确认后已前进；2026-11-17 对账：origin/main 领先 2 提交=UpdatePill 批，未合并，同步=用户裁决）。
+- `main` @ 当次 `git log -1`（蓝图创建于 `daaafd78`，体验原则确认后已前进；2026-11-17 origin UpdatePill 批已按用户裁决 rebase 同步并 push，HEAD 与 origin/main 一致）。
 - **串行 active 工作包**：无（BLOCK-454 P1-P6 与插队包 BLOCK-455 P1-P5 均 completed；BLOCK-455=模型级能力声明 + Endpoint 能力面简化，UI-706 in_progress 待观感）。
 - **未决 🔴/🟢**：无。
 - **已知遗留红**：`docs:check` 1 红 = `post-h9-optimization-blueprint-2026-11-10.md` 换机缺失（Mac 是 untracked 原件，Win 未同步）——处置权在用户，非任何工作包引入。
