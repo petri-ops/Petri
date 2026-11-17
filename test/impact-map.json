@@ -8557,6 +8557,24 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "ui303-add1-access-mode-menu",
+      "note": "UI-303 加映一：访问模式菜单从四档收敛为完全访问 + 计划模式两档；后端类型与策略不动，历史档位值仍诚实执行。证据 acceptance/ui-303-add1/**。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "test/ui-access-mode-menu.test.mjs",
+        "acceptance/ui-303-add1/**"
+      ],
+      "tests": [
+        "test/ui-access-mode-menu.test.mjs",
+        "test/block95-b1-history-assembly.test.mjs",
+        "frontend/src/components/copilot/conversationRunStore.test.ts"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

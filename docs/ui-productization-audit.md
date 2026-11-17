@@ -3502,6 +3502,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 - **代行验收（2026-10-30，`npm run verify -- ui301-385-spawn-live` 8/8）**：9223 离屏 + 真实模型 spawn 2 子代理 → 时间线展开后「已派发」折叠行 ×2（状态 ✓ + 任务首行）；旧清单「dock 列表」表述作废（dock 无列表，已按代码事实更正）。同轮修复纯 spawn 流 dock 空壳（自动弹出即渲染编排图）。
 
+- **UI-303 加映一（2026-11-17，用户实机裁决「选择访问模式，这里内容太多了。实际上只保留计划模式和完全访问即可。实际工作中大部分情况下都是完全访问」）**：composer 档位菜单从四档收敛为「完全访问 / 计划模式」两按钮；后端 `AccessMode` 类型与 `agent-tool-policy` 完全不动，历史会话中 `workspace-write/read` 仍诚实显示与执行，只是不再作为新可选档。零新依赖 / 零写面语义变化 / 他 agent 4 文档 WIP 零触碰。HK-01 红 1/1→绿 1/1（`test/ui-access-mode-menu.test.mjs`）；Jev test:suggest 邻域 block95 history 6/6 + conversationRunStore 50/50；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui303-add1` **3/3 allPass**（两档在场、按钮数=2、旧档文案缺席；9223 离屏、跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-303-add1/ui303-add1-live-win32.json`）。观感 `pending_human_eye` 不代签，条目保持原 verified + 加映 in_progress。
+
 ## UI-301: 多智能体活动面板——子 agent 活动条（2026-10-31 **verified（用户确认「确认」·RW-06 代行评估批·spawn 链 live 实证：mock tool_calls→spawn 真执行→子代理真跑→汇报入聊天）**）
 
 **背景**：二期协作三工具与 proactive 投递均为模型/协议面，用户侧缺少子 agent 的实时可见与操作面（BLOCK-49/52 各自登记的 §2.4 遗留）。

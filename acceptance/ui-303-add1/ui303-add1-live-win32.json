@@ -1,0 +1,24 @@
+{
+  "name": "ui303-add1",
+  "platform": "win32",
+  "startedAt": "2026-11-17T11:19:08.680Z",
+  "finishedAt": "2026-11-17T11:19:09.438Z",
+  "assertions": [
+    {
+      "name": "A1_composer_ready",
+      "pass": true,
+      "detail": "access-mode-trigger"
+    },
+    {
+      "name": "A2_two_modes_present",
+      "pass": true,
+      "detail": "{\"text\":\"完全访问\\n允许命令行、文件修改与工具调用\\n计划模式\\n只读探索并起草计划，获批后再执行\",\"full\":true,\"plan\":true,\"buttons\":2}"
+    },
+    {
+      "name": "A3_legacy_modes_absent",
+      "pass": true,
+      "detail": "{\"text\":\"完全访问\\n允许命令行、文件修改与工具调用\\n计划模式\\n只读探索并起草计划，获批后再执行\",\"full\":true,\"plan\":true,\"buttons\":2}"
+    }
+  ],
+  "allPass": true
+}

@@ -1,0 +1,24 @@
+UI-303 加映一 — 访问模式菜单收敛为两档 HK-01 证据
+
+用户裁决（2026-11-17）：「选择访问模式，这里内容太多了。实际上只保留计划模式和完全访问即可。实际工作中大部分情况下都是完全访问。」
+
+红（实现前）：
+  node --test test/ui-access-mode-menu.test.mjs → 1 failed
+  当前菜单含“项目写 / 只读模式”两个按钮，共四档。
+
+绿（实现后）：
+  node --test test/ui-access-mode-menu.test.mjs → 1/1 passed
+  静态契约：菜单块仅含“完全访问 / 计划模式”，按钮数=2，无 setAccessMode('workspace-write'|'read')。
+
+邻域（Jev test:suggest）：
+  conversation-copilot 域 conf=0.94；suggestions 中
+    test/conversation-compaction.test.mjs 不存在（漂移）；
+    test/block95-b1-history-assembly.test.mjs 6/6；
+    frontend/src/components/copilot/conversationRunStore.test.ts 50/50。
+
+实机腿：
+  npm run verify -- ui303-add1 → 3/3 allPass
+    A1 composer 触发钮在场；A2 两档按钮在场且按钮数=2；A3 项目写/只读模式文案不在场。
+  证据=acceptance/ui-303-add1/ui303-add1-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+边界：仅 UI 选项收敛；AccessMode 类型、后端 agent-tool-policy、既有会话中的历史档位值仍照旧诚实显示/执行，零写面语义变化；观感 pending_human_eye 不代签。
