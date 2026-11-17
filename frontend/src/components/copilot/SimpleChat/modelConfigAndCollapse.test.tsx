@@ -63,21 +63,29 @@ function renderMenu(overrides: Partial<React.ComponentProps<typeof ModelMenu>> =
   );
 }
 
-describe('UI-707 模型行悬停配置（跟具体模型走）', () => {
-  it('每个就绪模型行带行内配置抽屉，值来自该模型自身', () => {
+describe('UI-707 加映一 模型行右侧配置小页（跟具体模型走）', () => {
+  function openConfig(id: string) {
+    fireEvent.mouseEnter(screen.getByTestId(`model-row-${id}`));
+  }
+
+  it('悬停就绪模型行才开右侧小页，值来自该模型自身，且一次只开一个', () => {
     renderMenu({ onModelConfigChange: noop });
     expect(screen.queryByTestId('model-menu-quick')).toBeNull();
-    const configA = screen.getByTestId('model-row-config-p1::model-a');
-    expect(configA.querySelector('[data-testid="model-row-context-p1::model-a"]')?.getAttribute('data-value')).toBe('64000');
-    expect(configA.querySelector('[data-testid="model-row-thinking-p1::model-a"]')?.getAttribute('data-level')).toBe('standard');
-    expect(screen.getByTestId('model-row-context-p1::model-b').getAttribute('data-value')).toBe('128000');
-    expect(screen.getAllByText('上下文窗口').length).toBe(2);
-    expect(screen.getAllByText('思考强度').length).toBe(2);
+    expect(screen.queryByTestId('model-config-flyout-p1::model-a')).toBeNull();
+    openConfig('p1::model-a');
+    const flyoutA = screen.getByTestId('model-config-flyout-p1::model-a');
+    expect(flyoutA.getAttribute('data-placement')).toBeTruthy();
+    expect(flyoutA.querySelector('[data-testid="model-row-context-p1::model-a"]')?.getAttribute('data-value')).toBe('64000');
+    expect(flyoutA.querySelector('[data-testid="model-row-thinking-p1::model-a"]')?.getAttribute('data-level')).toBe('standard');
+    openConfig('p1::model-b');
+    expect(screen.getByTestId('model-config-flyout-p1::model-b').querySelector('[data-testid="model-row-context-p1::model-b"]')?.getAttribute('data-value')).toBe('128000');
+    expect(screen.queryByTestId('model-config-flyout-p1::model-a')).toBeNull();
   });
 
   it('拖动滑条按 presetId 定向回调（写模型级偏好，不再需要进设置页）', () => {
     const onConfig = vi.fn();
     renderMenu({ onModelConfigChange: onConfig });
+    openConfig('p1::model-a');
     fireEvent.change(screen.getByTestId('model-row-context-p1::model-a'), { target: { value: '2' } });
     expect(onConfig).toHaveBeenCalledWith('p1::model-a', { contextWindow: 128000 });
     fireEvent.change(screen.getByTestId('model-row-thinking-p1::model-a'), { target: { value: '2' } });
@@ -87,32 +95,37 @@ describe('UI-707 模型行悬停配置（跟具体模型走）', () => {
   it('点击档位刻度也能切换该模型的默认思考档', () => {
     const onConfig = vi.fn();
     renderMenu({ onModelConfigChange: onConfig });
-    const configA = screen.getByTestId('model-row-config-p1::model-a');
-    const highTick = configA.querySelector('button[aria-label="思考强度：高"]') as HTMLButtonElement;
+    openConfig('p1::model-a');
+    const highTick = screen.getByTestId('model-config-flyout-p1::model-a').querySelector('button[aria-label="思考强度：高"]') as HTMLButtonElement;
     fireEvent.click(highTick);
     expect(onConfig).toHaveBeenCalledWith('p1::model-a', { defaultThinkingLevel: 'high' });
   });
 
   it('模型未声明思考能力时滑条灰显并给出原因（能力位跟模型走）', () => {
     renderMenu({ onModelConfigChange: noop });
+    openConfig('p1::model-a');
     expect(screen.getByTestId('model-row-thinking-p1::model-a').hasAttribute('disabled')).toBe(false);
+    openConfig('p1::model-b');
     expect(screen.getByTestId('model-row-thinking-p1::model-b').hasAttribute('disabled')).toBe(true);
     expect(screen.getByText(/未声明思考能力/)).toBeTruthy();
   });
 
-  it('禁行（缺密钥）不展开配置抽屉', () => {
+  it('禁行（缺密钥）不展开配置小页', () => {
     const locked = buildModelGroups(presets, {
       ...EMPTY_MODEL_CATALOG,
       credentialStatus: { anthropic: false },
     });
     renderMenu({ groups: locked, selectedGroup: locked[0], onModelConfigChange: noop });
-    expect(screen.queryByTestId('model-row-config-p1::model-a')).toBeNull();
-    expect(screen.queryByTestId('model-row-config-p1::model-b')).toBeNull();
+    openConfig('p1::model-a');
+    openConfig('p1::model-b');
+    expect(screen.queryByTestId('model-config-flyout-p1::model-a')).toBeNull();
+    expect(screen.queryByTestId('model-config-flyout-p1::model-b')).toBeNull();
   });
 
-  it('未提供写回回调时不渲染抽屉（零打扰）', () => {
+  it('未提供写回回调时不渲染小页（零打扰）', () => {
     renderMenu();
-    expect(screen.queryByTestId('model-row-config-p1::model-a')).toBeNull();
+    openConfig('p1::model-a');
+    expect(screen.queryByTestId('model-config-flyout-p1::model-a')).toBeNull();
   });
 
   it('快捷写回结果可见（失败不静默）', () => {

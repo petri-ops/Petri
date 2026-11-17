@@ -120,6 +120,8 @@
 - **邻域结算（P4）**：`block455-live` 断言随 8 轨道/1000px 形态升级并复跑 **18/18 allPass**（`acceptance/block-456/p4-block455-live-rerun.txt`）；`ui695-331-modelcfg-time-live`/`ui696-model-preferences` 两 flow 断言升级为抽屉形态/上下文退役契约（attach 调用方 9223/dev 栈，本轮未跑，如实标注）。
 - **证据等级与诚实边界**：机械断言+隔离实机腿全绿；**悬停抽屉观感/滑杆手感/整体观感 = pending_human_eye，需用户实机过目**，Agent 不代签、不冒 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+- **UI-707 加映一（2026-11-17，用户裁决「上下文窗口这个问题，已经登记没有动手是吗？如果是现在可以开整了」；候选 C-51 转正）**：形态=同一模型级配置能力的呈现升级，按「加映 N」入本条，不新增未闭合段。模型行下方 inline drawer 退役，改为**锚定该行的右侧 portal 小页**（`ModelMenu.tsx` + `simple-chat.css`）：hover/focus 打开，放不下向左回退，一次只开一个，禁行/无回调不开，Escape 可关；仍承载上下文窗口 + 思考强度 + 能力灰显原因 + 写回提示，复用 `ModelPreferenceControls` + `useModelQuickConfig`。零新 API / 零默认值 / 零写面语义变化 / 他 agent 4 文档 WIP 零触碰。HK-01 红 2/2→绿 11/11；Jev test:suggest 邻域 block95 history 6/6 + conversationRunStore 50/50（建议文件 `conversation-compaction.test.mjs` 漂移如实记录）；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui707-add1` **4/4 allPass**（placement=right、小页 left=933.6 > row.right=925.6、宽≈320；9223 离屏跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-707-add1/ui707-add1-live-win32.json`）。观感 `pending_human_eye` 不代签，条目保持原 in_progress。
+
 ## UI-706: API Endpoint 能力面简化——主表 11→8 列 + 行详情折叠 + 能力声明模型级化 + 角色绑定模型对（BLOCK-455 P4/P5；2026-11-17 **in_progress（实机腿 18/18 + UI-703 回归 7/7 过；观感 pending_human_eye 不代签）**）
 
 - **取号对账（2026-11-17）**：BLOCK-455 立项时取号 UI-705，但 origin/main 已有 UI-705 被 UpdatePill 形态迭代占用（2026-11-17 verified，用户原话「很棒」）；本包台账当时未推送，按对账纪律让号改 **UI-706**（plan/台账/impact-map/代码注释同步）。origin/main 领先 2 提交（UpdatePill 批）于 2026-11-17 经用户裁决 rebase 同步并 push（零冲突，UI-705/706 双条目共存，triage 契约 5/5 复核绿）。

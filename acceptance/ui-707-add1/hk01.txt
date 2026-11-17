@@ -1,0 +1,24 @@
+UI-707 加映一 — 模型行右侧独立配置小页 HK-01 证据
+
+用户裁决（2026-11-17）：「上下文窗口这个问题，已经登记没有动手是吗？如果是现在可以开整了。」（C-51 转正）
+
+红（实现前）：
+  npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx
+  2 failed：旧实现是行内下方抽屉，无 model-config-flyout；两行配置同时常驻。
+绿（实现后）：
+  same command → 11/11 passed
+    悬停才开右侧小页；一次只开一个；逐行取值；滑条/刻度定向回调；禁行/无回调不开；能力灰显提示。
+
+邻域（Jev test:suggest conf=0.94）：
+  test/conversation-compaction.test.mjs 不存在（漂移）；
+  test/block95-b1-history-assembly.test.mjs 6/6；
+  frontend/src/components/copilot/conversationRunStore.test.ts 50/50。
+
+实机腿：
+  npm run verify -- ui707-add1 → 4/4 allPass
+    F1 composer 模型钮在场；F2 模型行可见；
+    F3 悬停后右侧小页在场且含上下文/思考控件；
+    F4 placement=right，left=933.6 > row.right=925.6，width≈320。
+  证据=acceptance/ui-707-add1/ui707-add1-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+边界：零新 API / 零默认值 / 零写面语义变化；模型级覆写仍走 useModelQuickConfig；观感 pending_human_eye 不代签。

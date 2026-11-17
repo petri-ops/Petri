@@ -8576,6 +8576,26 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "ui707-add1-model-config-flyout",
+      "note": "UI-707 加映一（C-51 转正）：模型行右侧 portal 配置小页（上下文窗口 + 思考强度），替代行内抽屉；零新 API/零默认值/零写面语义变化。证据 acceptance/ui-707-add1/**。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
+        "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
+        "frontend/src/components/copilot/simple-chat.css",
+        "acceptance/ui-707-add1/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx",
+        "test/block95-b1-history-assembly.test.mjs",
+        "frontend/src/components/copilot/conversationRunStore.test.ts"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

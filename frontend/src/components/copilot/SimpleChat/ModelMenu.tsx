@@ -93,16 +93,16 @@ function ModelRow({
   accessDenied,
   pricing,
   onPickModel,
-  contextWindowOptions,
-  onModelConfigChange,
+  onOpenConfig,
+  onCloseConfig,
 }: {
   row: ModelCatalogGroup['rows'][number];
   activeModelId: string;
   accessDenied: (model: string) => string | null;
   pricing: PricingTable;
   onPickModel: (preset: ChatModelPreset) => void;
-  contextWindowOptions: readonly number[];
-  onModelConfigChange?: (presetId: string, patch: { contextWindow?: number; defaultThinkingLevel?: string }) => void;
+  onOpenConfig: (id: string, anchor: HTMLElement) => void;
+  onCloseConfig: () => void;
 }): React.ReactElement {
   const active = row.preset.id === activeModelId;
   const accessReason = accessDenied(row.preset.model);
@@ -112,43 +112,26 @@ function ModelRow({
   const meta = effectiveReason
     ? effectiveReason + (price ? ` · ${price}` : '')
     : presetMeta(row.preset, active, pricing);
-  const modelReasoning = Array.isArray(row.preset.capabilities)
-    && row.preset.capabilities.includes('reasoning');
   return (
-    <div className="sc-model-row" data-testid={`model-row-${row.preset.id}`}>
+    <div
+      className="sc-model-row"
+      data-testid={`model-row-${row.preset.id}`}
+      onMouseEnter={(event) => { if (!disabled) onOpenConfig(row.preset.id, event.currentTarget); }}
+      onMouseLeave={onCloseConfig}
+      onFocus={(event) => { if (!disabled) onOpenConfig(row.preset.id, event.currentTarget); }}
+    >
       <button
         type="button"
         className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
         disabled={disabled}
         title={effectiveReason || row.preset.model}
-        onClick={() => onPickModel(row.preset)}
+        onClick={() => { onPickModel(row.preset); onCloseConfig(); }}
       >
         <span className="sc-model-option-title">{row.preset.model}</span>
         <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
           {meta}
         </span>
       </button>
-      {!disabled && onModelConfigChange && (
-        <div className="sc-model-row-config" data-testid={`model-row-config-${row.preset.id}`}>
-          <ContextWindowScale
-            compact
-            value={row.preset.contextWindow}
-            options={contextWindowOptions}
-            testId={`model-row-context-${row.preset.id}`}
-            onChange={(next) => onModelConfigChange(row.preset.id, { contextWindow: next })}
-          />
-          <ThinkingEffortSlider
-            compact
-            value={row.preset.defaultThinkingLevel ?? 'standard'}
-            options={THINKING_LEVELS}
-            disabled={!modelReasoning}
-            disabledReason="该模型未声明思考能力，档位不会发送上游"
-            testId={`model-row-thinking-${row.preset.id}`}
-            onChange={(next) => onModelConfigChange(row.preset.id, { defaultThinkingLevel: next })}
-          />
-          <div className={styles.quickHint}>上下文窗口用于本机预算与裁剪，不扩展上游模型能力</div>
-        </div>
-      )}
     </div>
   );
 }
@@ -159,8 +142,8 @@ function renderGroupModelRows(opts: {
   accessDenied: (model: string) => string | null;
   pricing: Record<string, { input: number; output: number }>;
   onPickModel: (preset: ChatModelPreset) => void;
-  contextWindowOptions: readonly number[];
-  onModelConfigChange?: (presetId: string, patch: { contextWindow?: number; defaultThinkingLevel?: string }) => void;
+  onOpenConfig: (id: string, anchor: HTMLElement) => void;
+  onCloseConfig: () => void;
 }): React.ReactElement[] {
   const { group, ...rest } = opts;
   // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
@@ -274,6 +257,8 @@ export function ModelMenu({
   // 两卡始终同时在场；模型卡 portal 到 body，默认贴主卡右侧、右侧放不下向左开。
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [modelPanelPos, setModelPanelPos] = useState<ReturnType<typeof modelPanelPosition> | null>(null);
+  // UI-707 加映一 — 每个就绪模型行的右侧配置小页，一次只开一个。
+  const [configTarget, setConfigTarget] = useState<{ id: string; pos: ReturnType<typeof modelPanelPosition> } | null>(null);
   const setMenuRef = useCallback((node: HTMLDivElement | null) => {
     menuRef.current = node;
     if (node) {
@@ -308,6 +293,33 @@ export function ModelMenu({
     const note = access.reasonNotes[model];
     return note ? `未列入本机允许清单（${note}）` : '未列入本机允许清单';
   };
+
+  const closeConfig = useCallback(() => setConfigTarget(null), []);
+  const openConfig = useCallback((id: string, anchor: HTMLElement) => {
+    if (!onModelConfigChange) return;
+    const rect = anchor.getBoundingClientRect();
+    const pos = modelPanelPosition(
+      { left: rect.left, top: rect.top, right: rect.right },
+      { width: window.innerWidth, height: window.innerHeight },
+    );
+    setConfigTarget({ id, pos });
+  }, [onModelConfigChange]);
+
+  useEffect(() => {
+    if (!configTarget) return undefined;
+    const dismiss = () => setConfigTarget(null);
+    window.addEventListener('scroll', dismiss, true);
+    window.addEventListener('resize', dismiss);
+    return () => {
+      window.removeEventListener('scroll', dismiss, true);
+      window.removeEventListener('resize', dismiss);
+    };
+  }, [configTarget]);
+
+  const configRow = configTarget
+    ? groups.flatMap((group) => group.rows).find((row) => row.preset.id === configTarget.id)
+    : undefined;
+  const configAllowed = !!configRow && isSelectableRow(configRow) && !accessDenied(configRow.preset.model);
   return (
     <>
       <div className="sc-model-overlay" onClick={onClose} />
@@ -400,8 +412,8 @@ export function ModelMenu({
               accessDenied,
               pricing,
               onPickModel,
-              contextWindowOptions,
-              onModelConfigChange,
+              onOpenConfig: openConfig,
+              onCloseConfig: closeConfig,
             })}
             {quickNotice && <QuickNotice notice={quickNotice} />}
           </>
@@ -431,8 +443,8 @@ export function ModelMenu({
                 accessDenied,
                 pricing,
                 onPickModel,
-                contextWindowOptions,
-                onModelConfigChange,
+                onOpenConfig: openConfig,
+                onCloseConfig: closeConfig,
               })}
               {quickNotice && <QuickNotice notice={quickNotice} />}
             </>
@@ -441,6 +453,42 @@ export function ModelMenu({
               <span className="sc-model-option-meta">选择供应商查看模型</span>
             </div>
           )}
+        </div>,
+        document.body,
+      )}
+      {configTarget && configRow && configAllowed && onModelConfigChange && createPortal(
+        <div
+          className="sc-model-models-panel sc-model-config-flyout"
+          role="dialog"
+          aria-label={`${configRow.preset.model} 模型级配置`}
+          data-testid={`model-config-flyout-${configTarget.id}`}
+          data-placement={configTarget.pos.placement}
+          style={{ left: configTarget.pos.left, top: configTarget.pos.top, width: configTarget.pos.width }}
+          onKeyDown={(event) => { if (event.key === 'Escape') closeConfig(); }}
+        >
+          <div className="sc-model-models-head">
+            <span className="sc-model-option-title">{configRow.preset.model}</span>
+            <button type="button" className="sc-model-option-meta" onClick={closeConfig}>关闭</button>
+          </div>
+          <div className="sc-model-row-config" data-testid={`model-row-config-${configTarget.id}`}>
+            <ContextWindowScale
+              compact
+              value={configRow.preset.contextWindow}
+              options={contextWindowOptions}
+              testId={`model-row-context-${configTarget.id}`}
+              onChange={(next) => onModelConfigChange(configTarget.id, { contextWindow: next })}
+            />
+            <ThinkingEffortSlider
+              compact
+              value={configRow.preset.defaultThinkingLevel ?? 'standard'}
+              options={THINKING_LEVELS}
+              disabled={!Array.isArray(configRow.preset.capabilities) || !configRow.preset.capabilities.includes('reasoning')}
+              disabledReason="该模型未声明思考能力，档位不会发送上游"
+              testId={`model-row-thinking-${configTarget.id}`}
+              onChange={(next) => onModelConfigChange(configTarget.id, { defaultThinkingLevel: next })}
+            />
+            <div className={styles.quickHint}>上下文窗口用于本机预算与裁剪，不扩展上游模型能力</div>
+          </div>
         </div>,
         document.body,
       )}
