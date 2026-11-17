@@ -293,7 +293,7 @@ export function ContextBudgetButton({ budget, activeContextWindow }: ContextBudg
 
           {contextWindow === 0 && (
             <div style={{ fontSize: 'var(--petri-font-size-xs)', color: 'var(--petri-text-tertiary)', marginTop: '4px' }}>
-              模型上下文窗口未知，可在设置中配置
+              模型上下文窗口未知，可在模型菜单悬停模型行配置
             </div>
           )}
         </div>

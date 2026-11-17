@@ -298,12 +298,14 @@ module.exports = function registerAiChatRoute(app) {
         toolDefinitionsTokens: 0,
         maxTokens: 8192,
       });
+      // BLOCK-456 — 模型级覆写 > 渠道 fallback（旧档案零行为变化）
+      const { resolveModelContextWindow } = require('../../shared-backend/llm-providers/model-profile');
       const ctxWindow = await getContextWindow(
         activeModel,
         activeProvider,
         identityProfile && identityProfile.baseUrl,
         null,
-        identityProfile && identityProfile.contextWindow,
+        resolveModelContextWindow(identityProfile, activeModel),
       ).catch((e) => {
         // BLOCK-102 P1 — silent 64k fallback disabled the context fuse without a trace
         console.error('[ai-chat] context window probe failed:',

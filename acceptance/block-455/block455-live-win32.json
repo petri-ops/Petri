@@ -1,8 +1,8 @@
 {
   "name": "block455-live",
   "platform": "win32",
-  "startedAt": "2026-11-17T04:16:46.369Z",
-  "finishedAt": "2026-11-17T04:17:25.621Z",
+  "startedAt": "2026-11-17T06:31:04.994Z",
+  "finishedAt": "2026-11-17T06:31:44.359Z",
   "assertions": [
     {
       "name": "S0_9223_free_before_start",
@@ -37,12 +37,12 @@
     {
       "name": "W1_header_no_capability_columns",
       "pass": true,
-      "detail": "[\"\",\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"上下文\",\"连通性\",\"\"]"
+      "detail": "[\"\",\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"连通性\",\"\"]"
     },
     {
-      "name": "W2_grid_nine_tracks_aligned_single_row",
+      "name": "W2_grid_eight_tracks_aligned_single_row",
       "pass": true,
-      "detail": "header=[32,122,110,274,170,168,96,120,40] grid=[32,122,110,274,170,168,96,120,40] spread=13px minWidth=1100/1100"
+      "detail": "header=[32,138,120,310,189,189,120,40] grid=[32,138,120,310,189,189,120,40] spread=3px minWidth=1000/1000"
     },
     {
       "name": "W3_no_overflow",
@@ -62,7 +62,7 @@
     {
       "name": "W6_detail_geometry",
       "pass": true,
-      "detail": "withinCard=true noOverlap=true detail={\"x\":1014.6578979492188,\"y\":356.9821472167969,\"w\":1179.993896484375,\"h\":234.00125122070312,\"right\":2194.6517944335938,\"bottom\":590.9833984375} card={\"x\":1014.6578979492188,\"y\":302.58941650390625,\"w\":1179.993896484375,\"h\":288.39398193359375,\"right\":2194.6517944335938,\"bottom\":590.9833984375}"
+      "detail": "withinCard=true noOverlap=true detail={\"x\":1014.6578979492188,\"y\":336.5752258300781,\"w\":1179.993896484375,\"h\":234.00125122070312,\"right\":2194.6517944335938,\"bottom\":570.5764770507812} card={\"x\":1014.6578979492188,\"y\":302.58941650390625,\"w\":1179.993896484375,\"h\":267.987060546875,\"right\":2194.6517944335938,\"bottom\":570.5764770507812}"
     },
     {
       "name": "W7_role_binding_pairs",
@@ -82,7 +82,7 @@
     {
       "name": "N1_narrow_two_line_form",
       "pass": true,
-      "detail": "{\"display\":\"none\",\"tracks\":[84,549],\"labels\":\"9/9\",\"pairs\":true,\"scroll\":\"643/643\"}"
+      "detail": "{\"display\":\"none\",\"tracks\":[84,557],\"labels\":\"8/8\",\"pairs\":true,\"scroll\":\"650/650\"}"
     },
     {
       "name": "N2_narrow_detail_still_rendered",

@@ -13,11 +13,12 @@
  *
  * 断言链：
  *   R1 隔离后端健康 / R2 每模型偏好 seed 成功
- *   R3 快捷面只送 chat_model_presets 时窗口同步进权威 model_profiles
+ *   R3 快捷面只送 chat_model_presets 时窗口同步进权威 model_profiles（裸 id=legacy 渠道级写）
  *   R4 visible/defaultThinkingLevel/capabilities 不被归一化裁掉
  *   R5 兼容快照未被替换（id 与字段仍在）
- *   D1 默认/自定义页签在场 / D2 上下文刻度条是 range / D3 生效边界文案
- *   D4 默认页切换 / D5 模型菜单两个滑条 / D6 无横向溢出 / D7 截图（有界）
+ *   D1 默认/自定义页签在场 / D2 设置页上下文滑杆退役（BLOCK-456）/ D3 生效边界文案
+ *   D4 默认页切换 / D5 模型菜单行内配置抽屉（BLOCK-456 悬停/聚焦形态）/ D6 无横向溢出 / D7 截图（有界）
+ *   模型级写回全链（choice id → modelPreferences）的隔离实机证据见 block456-live。
  */
 const fs = require('node:fs');
 const os = require('node:os');
@@ -155,7 +156,8 @@ module.exports = {
       const tabTexts = (settingsDom.tabs || []).map((t) => t.text);
       assert('D1_default_custom_tabs', tabTexts.includes('默认') && tabTexts.includes('自定义'), JSON.stringify(tabTexts));
       const scale = (settingsDom.scales || []).find((s) => s.type === 'range');
-      assert('D2_context_scale_is_range', !!scale && !!scale.value, JSON.stringify(settingsDom.scales || []).slice(0, 240));
+      assert('D2_context_scale_retired_from_settings', !scale,
+        `BLOCK-456 设置页上下文列退役（跟模型走）：scales=${JSON.stringify(settingsDom.scales || []).slice(0, 200)}`);
       assert('D3_effective_boundary_hint', settingsDom.hint === true, `hint=${settingsDom.hint}`);
       assert('D4_no_horizontal_overflow_settings', settingsDom.overflow === false, `overflow=${settingsDom.overflow}`);
 
@@ -182,17 +184,22 @@ module.exports = {
       })()`).catch(() => 'no_button');
       await sleep(1200);
       const menu = JSON.parse(await lib.evalJs(client, `(function(){
-        var q = document.querySelector('[data-testid="model-menu-quick"]');
-        if (!q) return JSON.stringify({ present: false });
-        var ranges = [].slice.call(q.querySelectorAll('input[type="range"]'));
+        var quick = document.querySelector('[data-testid="model-menu-quick"]');
+        var configs = [].slice.call(document.querySelectorAll('[data-testid^="model-row-config-"]'));
+        var first = configs[0] || null;
+        var rowBtn = first && first.parentElement.querySelector('.sc-model-option');
+        if (rowBtn) rowBtn.focus();
+        var ranges = first ? [].slice.call(first.querySelectorAll('input[type="range"]')) : [];
         return JSON.stringify({
-          present: true,
+          quickPresent: !!quick,
+          configs: configs.length,
+          display: first ? getComputedStyle(first).display : null,
           ranges: ranges.map(function(r){ return { label: r.getAttribute('aria-label'), testId: r.getAttribute('data-testid'), disabled: r.disabled }; }),
-          text: (q.innerText||'').slice(0, 220),
         });
       })()`).catch((e) => JSON.stringify({ error: e.message })));
       const labels = (menu.ranges || []).map((r) => r.label);
-      assert('D6_model_menu_two_sliders', menu.present === true
+      assert('D6_model_row_config_drawer', menu.quickPresent === false && menu.configs >= 1
+        && menu.display === 'flex'
         && labels.includes('上下文窗口') && labels.includes('思考强度'),
         JSON.stringify(menu).slice(0, 300));
 

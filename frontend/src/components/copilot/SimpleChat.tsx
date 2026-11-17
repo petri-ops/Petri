@@ -12,7 +12,6 @@
 // re-exported from main file to keep `import { ... } from '@/components/copilot/SimpleChat'` working.
 // ============================================================
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { CONTEXT_WINDOW_OPTIONS } from '@/lib/context-window-options';
 // ── BLOCK-9.2 PHASE 4: types + helpers + attachments re-exports for backward compat ──
 import {
   SLASH_COMMANDS,
@@ -60,7 +59,7 @@ import { useScheduleComposer } from './SimpleChat/hooks/useScheduleComposer';
 import { runCompactSlash } from './SimpleChat/compactSlash';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
 import { useThinkingLevel } from './SimpleChat/hooks/useThinkingLevel';
-import { useContextWindowQuickPick } from './SimpleChat/hooks/useContextWindowQuickPick';
+import { useModelQuickConfig } from './SimpleChat/hooks/useModelQuickConfig';
 import { useScrollGuard } from './SimpleChat/hooks/useScrollGuard';
 // UI-268: 「后台进程」浮窗（持久输出独立小窗口）；工具活动记录改为内联手风琴
 import { ToolActivityDock } from './ToolActivityDock';
@@ -128,10 +127,11 @@ import { useAiSettings } from '@/hooks/useAiSettings';
 import {
   THINKING_LEVEL_LABELS,
   THINKING_LEVELS,
+  hasExplicitThinkingLevel,
   nextThinkingLevel,
+  resolveEffectiveThinkingLevel,
   saveThinkingLevel,
 } from './thinkingLevel';
-import type { ThinkingLevel } from './thinkingLevel';
 
 // UI-696 — 上下文档位单源见 @/lib/context-window-options（菜单与设置页刻度条共用）。
 import { buildConversationSegments } from './conversationSegments';
@@ -464,10 +464,8 @@ export function SimpleChat({
     refresh: refreshAiSettings,
   } = useAiSettings();
 
-  // UI-MODELCFG-1 / UI-696 — 输入框内快捷切换上下文窗口（逻辑见 useContextWindowQuickPick）。
-  const { updateContextWindow, notice: quickSaveNotice } = useContextWindowQuickPick({
-    activePreset: activeModel,
-    presets: modelPresets,
+  // BLOCK-456 — 模型行悬停配置写回（模型级 modelPreferences，逻辑见 useModelQuickConfig）。
+  const { updateModelConfig, notice: quickSaveNotice } = useModelQuickConfig({
     refresh: refreshAiSettings,
   });
   // BLOCK-225 — D4 Auto：开关持久化；解析预览跟随当前附件。
@@ -510,9 +508,6 @@ export function SimpleChat({
     activeModelId,
     setActiveModelId,
     catalog: modelCatalog,
-    onModelSelected: (preset) => {
-      if (preset.defaultThinkingLevel) applyThinkingLevel(preset.defaultThinkingLevel);
-    },
     lockedAccessMode,
   });
 
@@ -534,6 +529,12 @@ export function SimpleChat({
   // 避免对不支持的渠道出现「假开关」。后端仍会二次门控。
   const reasoningSupported = Array.isArray(activeModel?.capabilities)
     && activeModel.capabilities.includes('reasoning');
+  // BLOCK-456 — 生效档显示与发送档同源：会话显式覆写 > 模型级默认 > 会话值。
+  const effectiveThinkingLevel = resolveEffectiveThinkingLevel(
+    hasExplicitThinkingLevel(projectId, conversationId),
+    activeModel?.defaultThinkingLevel,
+    thinkingLevel,
+  );
   // BLOCK-155 真·单通道 vision — 聊天渠道自身视觉能力位（同源读 activeModel.capabilities，
   // 对齐上方 reasoning 能力位读取先例）：渠道声明 vision 时当前轮图片直接内联进聊天请求体，
   // 识图角色未配置（vision_configured=false）也不必前置阻断贴图/拖图。合并放行判据
@@ -550,15 +551,14 @@ export function SimpleChat({
       if (e.repeat) return;
       if (!matchesCombo(thinkingCycleCombo, e)) return;
       e.preventDefault();
-      setThinkingLevel((current) => {
-        const next = nextThinkingLevel(current);
-        saveThinkingLevel(projectId, conversationId, next);
-        return next;
-      });
+      // BLOCK-456 — 从生效档起循环，落盘=会话显式覆写（此后不再跟模型默认走）。
+      const next = nextThinkingLevel(effectiveThinkingLevel);
+      setThinkingLevel(next);
+      saveThinkingLevel(projectId, conversationId, next);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [reasoningSupported, projectId, conversationId, thinkingCycleCombo]);
+  }, [reasoningSupported, projectId, conversationId, thinkingCycleCombo, effectiveThinkingLevel]);
 
   // UI-305 P0.2 — summary retry 状态簇（原 297-303 的 5 个 useState +
   // retrySummary useCallback + UX1H 冷却 tick effect）整簇抽入 useSummaryRetry，
@@ -1815,14 +1815,14 @@ export function SimpleChat({
                         type="button"
                         className="sc-model-btn sc-thinking-btn"
                         onClick={() => setThinkingMenuOpen((current) => !current)}
-                        title={`思考档位：${THINKING_LEVEL_LABELS[thinkingLevel]}（Ctrl+T 循环切换）`}
-                        aria-label={`思考档位：${THINKING_LEVEL_LABELS[thinkingLevel]}`}
+                        title={`思考档位：${THINKING_LEVEL_LABELS[effectiveThinkingLevel]}（Ctrl+T 循环切换）`}
+                        aria-label={`思考档位：${THINKING_LEVEL_LABELS[effectiveThinkingLevel]}`}
                         aria-expanded={thinkingMenuOpen}
                         data-testid="thinking-level-trigger"
-                        data-level={thinkingLevel}
+                        data-level={effectiveThinkingLevel}
                       >
                         <Icon name="brain" size={14} />
-                        {!composerNarrow && <span>{THINKING_LEVEL_LABELS[thinkingLevel]}</span>}
+                        {!composerNarrow && <span>{THINKING_LEVEL_LABELS[effectiveThinkingLevel]}</span>}
                         <Icon name="chevron-down" size={12} />
                       </button>
                     </div>
@@ -1837,14 +1837,14 @@ export function SimpleChat({
                             key={level}
                             className="sc-model-option"
                             role="menuitemradio"
-                            aria-checked={level === thinkingLevel}
+                            aria-checked={level === effectiveThinkingLevel}
                             data-testid={`thinking-level-option-${level}`}
                             onClick={() => applyThinkingLevel(level)}
                             title={level === 'standard' ? '不发任何思考参数（默认）' : undefined}
                           >
                             <span className="sc-model-option-title">{THINKING_LEVEL_LABELS[level]}</span>
                             <span className="sc-model-option-meta">
-                              {level === thinkingLevel ? '当前使用' : level === 'standard' ? '默认·不发参数' : '点击切换'}
+                              {level === effectiveThinkingLevel ? '当前使用' : level === 'standard' ? '默认·不发参数' : '点击切换'}
                             </span>
                           </button>
                         ))}
@@ -1869,14 +1869,8 @@ export function SimpleChat({
                         if (preferred) void selectModel(preferred);
                       }}
                       onPickModel={(preset) => void selectModel(preset)}
-                      contextWindow={activeModel?.contextWindow}
-                      contextWindowOptions={[...CONTEXT_WINDOW_OPTIONS]}
-                      onChangeContextWindow={(next) => void updateContextWindow(next)}
-                      thinkingLevel={thinkingLevel}
-                      thinkingLevelOptions={[...THINKING_LEVELS]}
-                      reasoningSupported={reasoningSupported}
+                      onModelConfigChange={updateModelConfig}
                       quickNotice={quickSaveNotice}
-                      onChangeThinkingLevel={(next) => applyThinkingLevel(next as ThinkingLevel)}
                     />
                   )}
                 </div>

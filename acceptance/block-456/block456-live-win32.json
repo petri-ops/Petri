@@ -1,0 +1,104 @@
+{
+  "name": "block456-live",
+  "platform": "win32",
+  "startedAt": "2026-11-17T06:29:46.142Z",
+  "finishedAt": "2026-11-17T06:30:51.774Z",
+  "assertions": [
+    {
+      "name": "S0_9223_free_before_start",
+      "pass": true,
+      "detail": "free"
+    },
+    {
+      "name": "R1_isolated_backend_healthy",
+      "pass": true,
+      "detail": "port 3399"
+    },
+    {
+      "name": "R2_seed_accepted",
+      "pass": true,
+      "detail": "status=200 {\"status\":\"ok\"}"
+    },
+    {
+      "name": "R3_model_preferences_persisted",
+      "pass": true,
+      "detail": "{\"prefs\":{\"gpt-4o-mini\":{\"contextWindow\":64000}},\"ctx\":128000,\"think\":\"standard\"}"
+    },
+    {
+      "name": "T1_test_instance_ready",
+      "pass": true,
+      "detail": "test=1 target on 9223"
+    },
+    {
+      "name": "W1_settings_header_no_context_column",
+      "pass": true,
+      "detail": "{\"headerTexts\":[\"\",\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"连通性\",\"\"],\"headerTracks\":[32,138,120,310,189,189,120,40],\"gridTracks\":[32,138,120,310,189,189,120,40],\"headerMin\":1000,\"gridMin\":1000,\"scales\":0}"
+    },
+    {
+      "name": "W2_settings_grid_eight_tracks",
+      "pass": true,
+      "detail": "header=[32,138,120,310,189,189,120,40] grid=[32,138,120,310,189,189,120,40] min=1000/1000"
+    },
+    {
+      "name": "C0_project_available",
+      "pass": true,
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwkbc1m9_iisl\",\"name\":\"B456-live-1794897006125\",\"created_at\":\"2026-11-17T06:30:06.129Z\",\"updated_at\":\"2026-11-17T06:30:06.129Z"
+    },
+    {
+      "name": "C1_composer_ready",
+      "pass": true,
+      "detail": "project=p_mwkbc1m9_iisl"
+    },
+    {
+      "name": "M1_quick_retired_row_configs_present",
+      "pass": true,
+      "detail": "{\"menu\":true,\"quick\":false,\"panel\":true,\"configs\":2,\"main\":{\"display\":\"none\",\"ctxValue\":\"128000\",\"thinkLevel\":\"standard\",\"thinkDisabled\":false,\"reason\":false},\"mini\":{\"display\":\"none\",\"ctxValue\":\"64000\",\"thinkLevel\":\"standard\",\"thinkDisabled\":true,\"reason\":true}}"
+    },
+    {
+      "name": "M2_drawer_expands_on_focus",
+      "pass": true,
+      "detail": "focus-within display=flex（合成 mouseMoved 不触发 :hover，键盘等价路径）"
+    },
+    {
+      "name": "M3_values_follow_model",
+      "pass": true,
+      "detail": "{\"main\":{\"display\":\"flex\",\"ctxValue\":\"128000\",\"thinkLevel\":\"standard\",\"thinkDisabled\":false,\"reason\":false},\"mini\":{\"display\":\"none\",\"ctxValue\":\"64000\",\"thinkLevel\":\"standard\",\"thinkDisabled\":true,\"reason\":true}}"
+    },
+    {
+      "name": "M4_model_level_write_roundtrip",
+      "pass": true,
+      "detail": "{\"written\":\"written\",\"prefs\":{\"gpt-4o-mini\":{\"contextWindow\":64000},\"gpt-4o\":{\"contextWindow\":200000,\"thinkingLevel\":\"high\"}},\"ctx\":128000,\"think\":\"standard\"}"
+    },
+    {
+      "name": "M4b_save_notice_visible",
+      "pass": true,
+      "detail": "notice=已保存 · 下一轮生效"
+    },
+    {
+      "name": "M4c_screenshots_or_honest_degrade",
+      "pass": true,
+      "detail": "{\"settingsShot\":\"screenshot_unavailable: cdp_command_failed:-32000\",\"drawerShot\":\"screenshot_unavailable: cdp_command_failed:-32000\"}"
+    },
+    {
+      "name": "M5_send_tier_follows_model_default",
+      "pass": true,
+      "detail": "{\"pickMain\":\"picked\",\"levelMain\":\"high\",\"sent\":\"sent\",\"body\":{\"modelPresetId\":\"b456-main\",\"modelName\":\"gpt-4o\",\"thinkingLevel\":\"high\"}}"
+    },
+    {
+      "name": "M5b_send_tier_channel_fallback",
+      "pass": true,
+      "detail": "{\"pickMini\":\"picked\",\"sent\":\"sent\",\"body\":{\"modelPresetId\":\"b456-main\",\"modelName\":\"gpt-4o-mini\",\"thinkingLevel\":\"standard\"}}"
+    },
+    {
+      "name": "M6_explicit_session_override_wins",
+      "pass": true,
+      "detail": "{\"levelAfterSwitch\":\"off\",\"sent\":\"sent\",\"body\":{\"modelPresetId\":\"b456-main\",\"modelName\":\"gpt-4o\",\"thinkingLevel\":\"off\"}}"
+    },
+    {
+      "name": "M7_auto_send_tier_follows_model",
+      "pass": true,
+      "detail": "{\"autoToggled\":\"toggled_on\",\"sent\":\"sent\",\"body\":{\"modelPresetId\":\"b456-main\",\"modelName\":\"gpt-4o\",\"thinkingLevel\":\"high\"}}"
+    }
+  ],
+  "allPass": true
+}

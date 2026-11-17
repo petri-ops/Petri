@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "post-s7-big-file-anchor",
-  "generatedAt": "2026-11-11",
+  "generatedAt": "2026-11-17",
   "policy": "行数只减不增 + 内容指纹必须同批重打；与 code-size-ledger 集合互斥",
   "files": [
     {
@@ -12,8 +12,8 @@
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
-      "lines": 1963,
-      "sha256": "1c8121c6101b1e2ff1e635d451d79406ef0ac159c8dec7b69242b68097d142c3",
+      "lines": 1958,
+      "sha256": "1e44ff0f5c7eb110e3f6d6d6bb9c3126f1e547c7cbdd45b11ed267332e5f4f99",
       "missing": false
     },
     {

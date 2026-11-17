@@ -247,6 +247,27 @@
   color: var(--petri-text-tertiary);
 }
 
+/* BLOCK-456 — 模型行 = 选择按钮 + 悬停/聚焦展开的模型级配置抽屉。
+   抽屉透明底 + divider 分隔线，与菜单同一 token 语言（不铺第二层灰底）。 */
+.sc-model-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sc-model-row-config {
+  display: none;
+  flex-direction: column;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2) var(--petri-space-3);
+  border-top: 1px solid var(--petri-divider);
+}
+
+.sc-model-row:hover .sc-model-row-config,
+.sc-model-row:focus-within .sc-model-row-config {
+  display: flex;
+}
+
 /* BLOCK-224 — 模型目录状态：缺密钥禁用、发现失败标黄、加载/空态可读。 */
 .sc-model-option-disabled {
   opacity: 0.55;

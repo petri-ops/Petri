@@ -40,7 +40,11 @@ const EVIDENCE = path.join(root, 'acceptance', 'block-332', 'ui-ledger-triage.js
 // （liveMissing 8→11 / blocked 25→22），并新增**总债**上限 33 作为真正的棘轮。
 // POST-S7 H3——测量口径修正：状态词匹配前剥离否定语境（「按纪律不标 verified」不再被
 // 计成 verified），UI-694 / UI-663 回归未闭合 → 债 33→35 是**修正少算**，不是新增债。
-const DEBT_CEILING = { liveMissing: 13, blocked: 22, total: 35 };
+// BLOCK-456（UI-707）——模型级上下文/思考档 + 模型行悬停配置：机械断言+隔离实机腿
+// 19/19 全绿，观感 pending_human_eye 不代签（同 UI-706/D8 口径判 blocked）。
+// 按 BLOCK-370/376/455 先例上限随事实上调 blocked 22→23 / total 35→36；
+// 用户实机过目翻 verified 后降回。
+const DEBT_CEILING = { liveMissing: 13, blocked: 23, total: 36 };
 
 const report = triageLedger(fs.readFileSync(LEDGER, 'utf8'));
 

@@ -8405,6 +8405,29 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block456-model-preferences",
+      "note": "BLOCK-456（模型级上下文/思考默认档 + ModelMenu 悬停配置 + 设置页上下文列退役，UI-707）：后端单源 model-profile.js 的 resolveModelContextWindow/resolveModelThinkingDefault + normalize 清洗 + ai-settings-api 的 sync 桥（choice id → 模型级写）；前端薄镜像 model-preferences.ts 由跨源矩阵锁定。改任一登记源即跑本包 HK-01 契约 + 跨源矩阵 + block455 邻域（同文件能力解析不回归）。实机腿 flow 本体由 script-dev-infra 分类，不重复登记。",
+      "patterns": [
+        "core/shared-backend/llm-providers/model-profile.js",
+        "core/petri-server/routes/ai-settings-api.js",
+        "frontend/src/lib/model-preferences.ts",
+        "frontend/src/lib/model-preferences.test.ts",
+        "test/block456-*.test.mjs",
+        "acceptance/block-456/**"
+      ],
+      "tests": [
+        "test/block456-model-preferences.test.mjs",
+        "test/block455-model-capabilities.test.mjs",
+        "test/block455-gateway-model-binding.test.mjs",
+        "frontend/src/lib/model-preferences.test.ts",
+        "frontend/src/lib/model-capabilities.test.ts",
+        "frontend/src/hooks/useAiSettings.test.ts"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

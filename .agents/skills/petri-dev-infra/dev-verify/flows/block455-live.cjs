@@ -16,7 +16,7 @@
  * 断言链：
  *   S0 9223 空闲 / R1 隔离后端健康 / R2 seed 接受 / R3 读回 modelCapabilities+对值绑定
  *   T1 测试实例就绪
- *   W1 表头 9 列无能力列 / W2 网格对齐单行 / W3 无溢出
+ *   W1 表头 8 列无能力列（BLOCK-456 起上下文列亦退役）/ W2 网格对齐单行 / W3 无溢出
  *   W4 展开详情控件（选择器显示+思考合并下拉+视觉/向量）
  *   W5 逐模型表（渠道默认行 + 发现模型，默认模型不入表，预填生效）
  *   W6 详情几何（卡片内、控件与表不重叠）/ W7 角色绑定对值
@@ -322,10 +322,11 @@ module.exports = {
       }
 
       // ── 宽态断言 ─────────────────────────────────────────────
+      // BLOCK-456（UI-707）后继：上下文列退役（8→7 列，8 轨道，min-width 1000）。
       const headerTexts = probe.header?.texts || [];
       assert('W1_header_no_capability_columns',
-        headerTexts.length === 9 && ['协议', '供应商', 'Base URL', 'Key', '默认模型', '上下文', '连通性'].every((t) => headerTexts.includes(t))
-        && !headerTexts.some((t) => ['思考', '视觉', '向量'].includes(t)),
+        headerTexts.length === 8 && ['协议', '供应商', 'Base URL', 'Key', '默认模型', '连通性'].every((t) => headerTexts.includes(t))
+        && !headerTexts.some((t) => ['思考', '视觉', '向量', '上下文'].includes(t)),
         JSON.stringify(headerTexts));
 
       const hTracks = probe.header?.tracks || [];
@@ -333,9 +334,9 @@ module.exports = {
       const offTops = (probe.grid?.kids || []).map((k) => k.offTop);
       const spread = offTops.length ? Math.max(...offTops) - Math.min(...offTops) : 999;
       const aligned = hTracks.length === gTracks.length && hTracks.every((w, i) => Math.abs(w - gTracks[i]) <= 2);
-      assert('W2_grid_nine_tracks_aligned_single_row',
-        hTracks.length === 9 && aligned && spread <= 16
-        && probe.header?.minWidth === 1100 && probe.grid?.minWidth === 1100,
+      assert('W2_grid_eight_tracks_aligned_single_row',
+        hTracks.length === 8 && aligned && spread <= 16
+        && probe.header?.minWidth === 1000 && probe.grid?.minWidth === 1000,
         `header=[${hTracks}] grid=[${gTracks}] spread=${spread}px minWidth=${probe.header?.minWidth}/${probe.grid?.minWidth}`);
 
       const overflowing = (probe.grid?.kids || []).filter((k) => k.scrollW > k.clientW + 1);
@@ -441,7 +442,7 @@ module.exports = {
       const narrow = JSON.parse(await lib.evalJs(client, PROBE));
       assert('N1_narrow_two_line_form',
         narrow.header?.display === 'none' && narrow.grid?.tracks.length === 2
-        && narrow.grid?.labelsVisible === narrow.grid?.labelsTotal && narrow.grid?.labelsTotal >= 9
+        && narrow.grid?.labelsVisible === narrow.grid?.labelsTotal && narrow.grid?.labelsTotal >= 8
         && narrow.grid?.pairs === true && narrow.list.scrollW <= narrow.list.clientW + 1,
         JSON.stringify({ display: narrow.header?.display, tracks: narrow.grid?.tracks, labels: `${narrow.grid?.labelsVisible}/${narrow.grid?.labelsTotal}`, pairs: narrow.grid?.pairs, scroll: `${narrow.list?.scrollW}/${narrow.list?.clientW}` }).slice(0, 300));
       assert('N2_narrow_detail_still_rendered', !!narrow.detail && narrow.detail.modelNames.length >= 4,

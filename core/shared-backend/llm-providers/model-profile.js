@@ -133,6 +133,37 @@ function resolveModelCapabilities(profile, model) {
 }
 
 /**
+ * BLOCK-456 — 模型级上下文窗口解析单源：显式覆写 > 渠道 fallback。
+ * 覆写非法值（非正数）回落 fallback，不静默用坏值；旧档案零行为变化。
+ */
+function resolveModelContextWindow(profile, model) {
+  if (!profile || typeof profile !== 'object') return undefined;
+  const key = typeof model === 'string' ? model.trim() : '';
+  const pref = key && profile.modelPreferences && typeof profile.modelPreferences === 'object'
+    ? profile.modelPreferences[key]
+    : undefined;
+  const override = pref && typeof pref === 'object' ? pref.contextWindow : undefined;
+  if (typeof override === 'number' && Number.isFinite(override) && override > 0) return Math.round(override);
+  const fallback = profile.contextWindow;
+  return typeof fallback === 'number' && Number.isFinite(fallback) && fallback > 0 ? Math.round(fallback) : undefined;
+}
+
+/**
+ * BLOCK-456 — 模型级思考默认档解析单源：显式覆写 > 渠道 defaultThinkingLevel。
+ * 只认已知三档；非法覆写回落 fallback。
+ */
+function resolveModelThinkingDefault(profile, model) {
+  if (!profile || typeof profile !== 'object') return undefined;
+  const key = typeof model === 'string' ? model.trim() : '';
+  const pref = key && profile.modelPreferences && typeof profile.modelPreferences === 'object'
+    ? profile.modelPreferences[key]
+    : undefined;
+  const override = pref && typeof pref === 'object' ? pref.thinkingLevel : undefined;
+  if (THINKING_LEVELS.includes(override)) return override;
+  return THINKING_LEVELS.includes(profile.defaultThinkingLevel) ? profile.defaultThinkingLevel : undefined;
+}
+
+/**
  * BLOCK-455 — 模型名启发式推断（连接测试发现模型时预填 modelCapabilities 用）。
  * 宁缺勿滥：推断结果在 UI 可见可纠；向量系不是聊天模型，只返回 embedding。
  */
@@ -213,6 +244,23 @@ function normalizeModelProfile(input, index = 0) {
         entries.map(([model, caps]) => [model, _uniqueKnown(caps, MODEL_CAPABILITIES)])
       );
     }
+  }
+  // BLOCK-456 — 模型级偏好覆写：contextWindow 正整数 round / thinkingLevel 已知三档；
+  // 消毒后空条目丢弃；未知键丢弃。渠道级 fallback 字段照旧保留（零迁移）。
+  if (input.modelPreferences && typeof input.modelPreferences === 'object' && !Array.isArray(input.modelPreferences)) {
+    const entries = Object.entries(input.modelPreferences)
+      .map(([model, pref]) => [_cleanString(model), pref && typeof pref === 'object' && !Array.isArray(pref) ? pref : null])
+      .filter(([model, pref]) => model && pref)
+      .map(([model, pref]) => {
+        const clean = {};
+        if (typeof pref.contextWindow === 'number' && Number.isFinite(pref.contextWindow) && pref.contextWindow > 0) {
+          clean.contextWindow = Math.round(pref.contextWindow);
+        }
+        if (THINKING_LEVELS.includes(pref.thinkingLevel)) clean.thinkingLevel = pref.thinkingLevel;
+        return [model, clean];
+      })
+      .filter(([, clean]) => Object.keys(clean).length > 0);
+    if (entries.length) normalized.modelPreferences = Object.fromEntries(entries);
   }
   return normalized;
 }
@@ -420,11 +468,14 @@ module.exports = {
   MODEL_CAPABILITIES,
   MODEL_ROLES,
   ROLE_CAPABILITY,
+  THINKING_LEVELS,
   DEFAULT_MODEL_PROFILES,
   DEFAULT_MODEL_ROLE_BINDINGS,
   inferProtocol,
   inferCapabilities,
   resolveModelCapabilities,
+  resolveModelContextWindow,
+  resolveModelThinkingDefault,
   inferModelCapabilities,
   parseModelBinding,
   normalizeModelProfile,

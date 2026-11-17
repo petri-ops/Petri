@@ -1,0 +1,85 @@
+=== gate:user-assets ===
+exit=0
+> node scripts/user-asset-guard.mjs --check
+
+[user-asset-guard] PASS — 10 项受保护路径未入库/未暂存（tracked=6637 staged=0）
+=== gate:version-parity ===
+exit=0
+> node scripts/post-s7-version-parity-gate.mjs
+
+[version-parity] PASS — 10 处跨语言字面量与 schema-versions 一致
+=== gate:silent-catch ===
+exit=0
+> node scripts/silent-catch-ratchet.mjs --check
+
+[silent-catch] PASS（102 文件 / 406 处；基线 406）
+=== gate:code-size ===
+exit=0
+> node scripts/code-size-ledger.mjs --check
+
+[code-size-ledger] PASS v2 门禁（台账 74 文件 = MANIFEST 24 + L0 发现入册 50，总行数 86200，基线 86200，生效例外 16，预算 700 行）
+=== gate:arch-cycles ===
+exit=0
+> node scripts/arch-cycles-gate.mjs --check
+
+[arch-cycles] PASS（12 存量环在册，无新环）
+=== gate:css-modules ===
+exit=0
+> node scripts/css-modules-ratchet.mjs --check
+
+[css-modules-ratchet] PASS（plain CSS 11 个，全在白名单内；白名单 11 个）
+=== quality:secret ===
+exit=0
+  [fixture] test/agent-tool-result.test.mjs — 模式 github_pat_classic
+  [fixture] test/block405-l1-security.test.mjs — 模式 github_pat_classic
+[secret-scan] PASS
+=== quality:arch ===
+exit=0
+> node scripts/quality-arch.mjs
+
+[quality:arch] PASS（R1-R5 无违规；cruise 全新）
+=== quality:lint ===
+exit=1
+
+✖ 2461 problems (5 errors, 2456 warnings)
+
+=== quality:lint:ledger ===
+exit=1
+  ✖ frontend/src/components/desktop/titlebar/UpdatePill.test.tsx :: @typescript-eslint/require-await 实际 3 处违规未入抑制台账（修根因，或 npx eslint . --suppress-all 入账留痕）
+  ✖ frontend/src/components/desktop/titlebar/UpdatePill.test.tsx :: @typescript-eslint/no-unsafe-assignment 实际 1 处违规未入抑制台账（修根因，或 npx eslint . --suppress-all 入账留痕）
+  ✖ warnings production 域 1501 > 基线 1489（新增 warning 即红——L-88 分域只减）
+=== quality:perf ===
+exit=2
+  ✖ host.platform 漂移（基线 "darwin-arm64" ≠ 当前 "win32-x64"）——基线失效，重采：node scripts/block350-perf-collect.mjs
+  ✖ host.cpus 漂移（基线 8 ≠ 当前 28）——基线失效，重采：node scripts/block350-perf-collect.mjs
+  ✖ host.node 漂移（基线 "v24.16.0" ≠ 当前 "v24.20.0"）——基线失效，重采：node scripts/block350-perf-collect.mjs
+=== quality:types ===
+exit=0
+> petri-desktop@0.0.4 quality:types
+> tsc --noEmit -p frontend/tsconfig.json --incremental --tsBuildInfoFile node_modules/.cache/petri-tsc/tsbuildinfo
+
+=== quality:knip:check ===
+exit=0
+[knip-ratchet] 保留面已减少 1 处——请运行 node scripts/knip-ratchet.mjs --update 下调基线以保持真相：
+  files::.agents/skills/petri-dev-infra/dev-verify/local-token.cjs
+[knip-ratchet] PASS（保留面 330 键冻结，无新增）
+=== gate:post-h9-contracts ===
+exit=1
+    diff: 'simple'
+  }
+[post-h9:contracts] FAIL — 契约 179 通过 / 7 红（文件数 11）
+=== quality:ear ===
+exit=1
+[quality:ear] ✖ test 引用丢失：acceptance/block-105/p0-baseline/jscpd/jscpd-report.json ← test/block351-assetization.test.mjs
+[quality:ear] ✖ test 引用丢失：acceptance/block-105/p0-baseline/knip-stderr.txt ← test/block351-assetization.test.mjs
+[quality:ear] EAR 现在=46%（分子 1098 / 分母 2388）/ manifest 记录=43.3% → FAIL
+=== quality:surface ===
+exit=0
+[surface-audit] PASS：无新增（存量 P1=0，可收敛 0 条后 --write-baseline）
+[surface-audit] out=acceptance\functional-audit-2026-11-04\surface-matrix.json , docs\functional-surface-matrix-2026-11-04.md
+[block357] capability-map written -> docs\capability-map.md (1992 chars)
+=== skills:check ===
+exit=0
+> node scripts/skill-scaffold.mjs --check
+
+== 产品 Skill 校验: PASS（11 个内置 Skill：2 skill.json + 9 SKILL.md + 3 个领域包 Skill）==

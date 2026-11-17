@@ -1,0 +1,203 @@
+✖ resolveModelContextWindow：模型级覆写优先于渠道 fallback (0.5358ms)
+✖ resolveModelContextWindow：无覆写读渠道 fallback；都无返回 undefined；存储键写时清洗（normalize 链） (0.0921ms)
+✖ resolveModelContextWindow：覆写非法值回落渠道 fallback（不静默用坏值） (0.0577ms)
+✖ resolveModelThinkingDefault：模型级覆写 > 渠道 defaultThinkingLevel > undefined (0.0648ms)
+✖ normalizeModelProfile：modelPreferences 消毒（round 正整数 / 已知三档 / 丢非法条目） (0.9755ms)
+✔ normalizeModelProfile：无 modelPreferences 的旧档案零行为变化 (0.1539ms)
+✖ sync 桥：choice id 快捷写盘落模型级覆写（修 UI-696 展开态静默丢写） (0.1483ms)
+✖ sync 桥：choice id 的 model 段解码（encodeURIComponent 形态） (0.0868ms)
+✔ sync 桥：裸 id（legacy 快照调用方）仍写渠道级 fallback，行为不变 (0.0868ms)
+✔ sync 桥：同时送 model_profiles 时原样返回（设置页全量路径不变） (0.3429ms)
+✖ sync 桥：模型级写盘保留档案其它偏好与既有覆写条目 (0.219ms)
+✔ sync 桥：与当前解析值相同的写入是 no-op（全量 presets POST 不物化 fallback） (0.0998ms)
+✖ sync 桥：no-op 判定按模型级解析值（已有覆写时送 fallback 值=显式改回，须写） (0.1482ms)
+✖ sync 桥：choice id 思考档写模型级 thinkingLevel（渠道 defaultThinkingLevel 不污染） (0.069ms)
+✖ sync 桥：裸 id 思考档仍写渠道级；非法档位忽略 (0.0913ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 4
+ℹ fail 11
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.1679
+
+✖ failing tests:
+
+test at test\block456-model-preferences.test.mjs:21:1
+✖ resolveModelContextWindow：模型级覆写优先于渠道 fallback (0.5358ms)
+  TypeError: resolveModelContextWindow is not a function
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:23:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.start (node:internal/test_runner/test:1257:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at test\block456-model-preferences.test.mjs:27:1
+✖ resolveModelContextWindow：无覆写读渠道 fallback；都无返回 undefined；存储键写时清洗（normalize 链） (0.0921ms)
+  TypeError: resolveModelContextWindow is not a function
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:28:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at test\block456-model-preferences.test.mjs:36:1
+✖ resolveModelContextWindow：覆写非法值回落渠道 fallback（不静默用坏值） (0.0577ms)
+  TypeError: resolveModelContextWindow is not a function
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:38:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test\block456-model-preferences.test.mjs:41:1
+✖ resolveModelThinkingDefault：模型级覆写 > 渠道 defaultThinkingLevel > undefined (0.0648ms)
+  TypeError: resolveModelThinkingDefault is not a function
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:43:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test\block456-model-preferences.test.mjs:49:1
+✖ normalizeModelProfile：modelPreferences 消毒（round 正整数 / 已知三档 / 丢非法条目） (0.9755ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + undefined
+  - {
+  -   'deepseek-flash': {
+  -     contextWindow: 400000,
+  -     thinkingLevel: 'high'
+  -   },
+  -   mixed: {
+  -     contextWindow: 64000,
+  -     thinkingLevel: 'off'
+  -   }
+  - }
+  
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:60:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { 'deepseek-flash': { contextWindow: 400000, thinkingLevel: 'high' }, mixed: { contextWindow: 64000, thinkingLevel: 'off' } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test\block456-model-preferences.test.mjs:73:1
+✖ sync 桥：choice id 快捷写盘落模型级覆写（修 UI-696 展开态静默丢写） (0.1483ms)
+  TypeError: Cannot read properties of undefined (reading 'deepseek-v4-pro')
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:83:56)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test\block456-model-preferences.test.mjs:89:1
+✖ sync 桥：choice id 的 model 段解码（encodeURIComponent 形态） (0.0868ms)
+  TypeError: Cannot read properties of undefined (reading 'm default')
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:93:56)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test\block456-model-preferences.test.mjs:112:1
+✖ sync 桥：模型级写盘保留档案其它偏好与既有覆写条目 (0.219ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      'deepseek-flash': {
+  -     contextWindow: 400000,
+        thinkingLevel: 'high'
+      },
+      other: {
+        contextWindow: 64000
+      }
+  
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:122:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { 'deepseek-flash': { thinkingLevel: 'high' }, other: { contextWindow: 64000 } },
+    expected: { 'deepseek-flash': { thinkingLevel: 'high', contextWindow: 400000 }, other: { contextWindow: 64000 } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test\block456-model-preferences.test.mjs:142:1
+✖ sync 桥：no-op 判定按模型级解析值（已有覆写时送 fallback 值=显式改回，须写） (0.1482ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  400000 !== 128000
+  
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:148:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 400000,
+    expected: 128000,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test\block456-model-preferences.test.mjs:151:1
+✖ sync 桥：choice id 思考档写模型级 thinkingLevel（渠道 defaultThinkingLevel 不污染） (0.069ms)
+  TypeError: Cannot read properties of undefined (reading 'deepseek-flash')
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:157:56)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7)
+
+test at test\block456-model-preferences.test.mjs:162:1
+✖ sync 桥：裸 id 思考档仍写渠道级；非法档位忽略 (0.0913ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'off' !== 'high'
+  
+      at TestContext.<anonymous> (file:///D:/1.WorkDir/petri/.tmp-hk01-red/test/block456-model-preferences.test.mjs:168:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'off',
+    expected: 'high',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

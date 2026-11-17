@@ -21,9 +21,9 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1963,
-      "bytes": 97291,
-      "sha256": "1c8121c6101b1e2ff1e635d451d79406ef0ac159c8dec7b69242b68097d142c3"
+      "lines": 1958,
+      "bytes": 97083,
+      "sha256": "1e44ff0f5c7eb110e3f6d6d6bb9c3126f1e547c7cbdd45b11ed267332e5f4f99"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 633,
-      "bytes": 32046,
-      "sha256": "1db5481a24caa73d0f8bb75dacd4817d71676f5f11cf81d84866b285fd9932be"
+      "lines": 622,
+      "bytes": 31374,
+      "sha256": "5367b3fa1468c6f87aeefaba1f043b62ce3f97b76942203e25f4a713e931ad12"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -205,17 +205,17 @@
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5431,
-      "bytes": 131528,
-      "sha256": "37512a552b64a9137c6abc378d456c1cbe146521bc45831e705a3ff9cc748bed"
+      "lines": 5452,
+      "bytes": 132110,
+      "sha256": "997b1926a16ab0abd57f98c00a6fe3c551dbe362a8fdad11c0aa596009531599"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 2213,
-      "bytes": 53911,
-      "sha256": "dec7eed676a9dc01be0f318fdab967023033fcba833db336ff6a9d2d14840259"
+      "lines": 2212,
+      "bytes": 53857,
+      "sha256": "e8e556a9efd42e66574b0b474b538efe258c10ce6b31a38b918a541e907589ec"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
@@ -294,8 +294,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1143,
-      "bytes": 59612,
-      "sha256": "16afa2664ade6bc71a49acb74935314c0db0fade74d3163f810b1d2f8b2145e3"
+      "bytes": 59682,
+      "sha256": "b155c866eabba76ff75107bbe47404c0a344a67efa0c770d2b47d7d728f4ff98"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86196
+  "total": 86200
 }

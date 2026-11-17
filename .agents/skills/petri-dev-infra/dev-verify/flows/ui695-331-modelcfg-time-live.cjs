@@ -3,7 +3,9 @@
 
 /**
  * UI-695 / UI-331 代行验收（2026-11-16，用户授权按 BLOCK-349 口径自动化）。
- * UI-695：模型菜单「上下文窗口 / 思考强度」就地切换快捷区在场（data-testid 断言）。
+ * UI-695：模型菜单「上下文窗口 / 思考强度」就地面——BLOCK-456（UI-707）起形态改为
+ *   模型行悬停/聚焦展开的行内配置抽屉（左面板 quick 块退役），本 flow 断言随之升级；
+ *   隔离实机全链证据见 block456-live。
  * UI-331：左栏会话行短式相对时间 .convItemTime 在场。
  * 9223 离屏测试实例，建临时项目后导航；跑完由调用方终止，项目清理。
  * 纪律：不设 PETRI_TEST_ONSCREEN；断言用 lib 原语；证据 createRun 自动落盘。
@@ -50,10 +52,12 @@ const STATE = `(() => {
   const q = (s) => document.querySelectorAll(s);
   const menu = document.querySelector('[data-testid="model-menu"]');
   const quick = document.querySelector('[data-testid="model-menu-quick"]');
-  const ctx = document.querySelector('[data-testid="model-menu-context-window"]');
-  const think = document.querySelector('[data-testid="model-menu-thinking-level"]');
+  const configs = q('[data-testid^="model-row-config-"]');
+  const ctx = document.querySelector('[data-testid^="model-row-context-"]');
+  const think = document.querySelector('[data-testid^="model-row-thinking-"]');
   const txt = (e) => e ? (e.textContent || '').replace(/\\s+/g,' ').trim() : '';
   const body = document.body.innerText || '';
+  const first = configs[0] || null;
   return JSON.stringify({
     url: location.href,
     title: document.title,
@@ -62,6 +66,8 @@ const STATE = `(() => {
     convItemTimeSample: Array.from(q('.convItemTime')).slice(0,3).map((e)=>txt(e)),
     modelMenu: !!menu,
     menuQuick: !!quick,
+    rowConfigs: configs.length,
+    drawerDisplay: first ? getComputedStyle(first).display : null,
     ctxWindow: !!ctx,
     ctxValue: ctx ? ctx.getAttribute('data-value') : null,
     thinking: !!think,
@@ -69,6 +75,15 @@ const STATE = `(() => {
     hasContextLabel: body.includes('上下文窗口'),
     hasThinkingLabel: body.includes('思考强度')
   });
+})()`;
+
+// BLOCK-456：抽屉默认收起（display:none），行按钮聚焦（focus-within）后展开。
+const FOCUS_FIRST_ROW = `(() => {
+  const row = document.querySelector('[data-testid^="model-row-"] .sc-model-option:not(:disabled)');
+  if (!row) return 'no_row';
+  row.focus();
+  const config = row.parentElement.querySelector('[data-testid^="model-row-config-"]');
+  return config ? getComputedStyle(config).display : 'no_config';
 })()`;
 
 module.exports = {
@@ -108,13 +123,16 @@ module.exports = {
       s = JSON.parse(await lib.evalJs(client, STATE, 20_000));
       detail.menuState = s;
       assert('model_menu_open', s.modelMenu === true, `opened=${opened} state=${JSON.stringify(s).slice(0,200)}`);
-      assert('model_menu_quick_present', s.menuQuick === true, JSON.stringify(s).slice(0, 160));
-      assert('context_window_control', s.ctxWindow === true && s.hasContextLabel,
-        `ctx=${s.ctxWindow} label=${s.hasContextLabel} value=${s.ctxValue}`);
-      assert('thinking_level_control', s.thinking === true && s.hasThinkingLabel,
-        `think=${s.thinking} label=${s.hasThinkingLabel} level=${s.thinkLevel}`);
+      assert('model_menu_quick_retired', s.menuQuick === false, `BLOCK-456 左面板 quick 块退役：menuQuick=${s.menuQuick}`);
+      assert('model_row_config_present', s.rowConfigs >= 1 && s.ctxWindow === true && s.thinking === true
+        && s.hasContextLabel && s.hasThinkingLabel,
+        `rows=${s.rowConfigs} ctx=${s.ctxWindow}(${s.ctxValue}) think=${s.thinking}(${s.thinkLevel}) labels=${s.hasContextLabel}/${s.hasThinkingLabel}`);
+      assert('drawer_collapsed_before_focus', s.drawerDisplay === 'none', `display=${s.drawerDisplay}`);
+      const focusedDisplay = await lib.evalJs(client, FOCUS_FIRST_ROW, 15_000);
+      detail.focusedDisplay = focusedDisplay;
+      assert('drawer_expands_on_focus', focusedDisplay === 'flex', `focus-within display=${focusedDisplay}`);
 
-      await lib.screenshotPng(client, EVDIR, 'ui695-model-menu-quick.png');
+      await lib.screenshotPng(client, EVDIR, 'ui695-model-row-config.png');
 
       // UI-331：REST 建会话 → reload → 左栏 .convItemTime 短式相对时间（复用 RW02 配方）
       const convCreate = await rest('POST', '/ai/conversations', { title: 'UI331 相对时间探针', projectId });

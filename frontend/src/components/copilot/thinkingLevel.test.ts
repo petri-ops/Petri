@@ -6,10 +6,12 @@ import {
   DEFAULT_THINKING_LEVEL,
   THINKING_LEVEL_LABELS,
   THINKING_LEVELS,
+  hasExplicitThinkingLevel,
   loadThinkingLevel,
   migrateThinkingLevel,
   nextThinkingLevel,
   normalizeThinkingLevel,
+  resolveEffectiveThinkingLevel,
   saveThinkingLevel,
 } from './thinkingLevel';
 
@@ -69,5 +71,40 @@ describe('thinkingLevel（BLOCK-81 P2）', () => {
     });
     expect(loadThinkingLevel('p1', 'c1')).toBe('standard');
     expect(() => saveThinkingLevel('p1', 'c1', 'high')).not.toThrow();
+  });
+});
+
+describe('thinkingLevel（BLOCK-456 发送档生效序）', () => {
+  it('hasExplicitThinkingLevel：键在场且合法才算显式覆写', () => {
+    expect(hasExplicitThinkingLevel('p1', 'c1')).toBe(false);
+    saveThinkingLevel('p1', 'c1', 'high');
+    expect(hasExplicitThinkingLevel('p1', 'c1')).toBe(true);
+    expect(hasExplicitThinkingLevel('p1', 'c2')).toBe(false);
+    window.localStorage.setItem('petri:thinking-level:p1:c3', 'ultra');
+    expect(hasExplicitThinkingLevel('p1', 'c3')).toBe(false);
+  });
+
+  it('resolveEffectiveThinkingLevel：显式覆写 > 模型级默认 > 会话值', () => {
+    expect(resolveEffectiveThinkingLevel(true, 'off', 'high')).toBe('high');
+    expect(resolveEffectiveThinkingLevel(false, 'off', 'high')).toBe('off');
+    expect(resolveEffectiveThinkingLevel(false, undefined, 'high')).toBe('high');
+    expect(resolveEffectiveThinkingLevel(false, undefined, undefined)).toBe(DEFAULT_THINKING_LEVEL);
+    expect(resolveEffectiveThinkingLevel(true, 'off', undefined)).toBe(DEFAULT_THINKING_LEVEL);
+  });
+
+  it('新建会话迁移：仅迁移显式覆写（无覆写不物化模型默认）', () => {
+    migrateThinkingLevel('p1', null, 'cNew');
+    expect(hasExplicitThinkingLevel('p1', 'cNew')).toBe(false);
+    saveThinkingLevel('p1', null, 'off');
+    migrateThinkingLevel('p1', null, 'cNew2');
+    expect(loadThinkingLevel('p1', 'cNew2')).toBe('off');
+    expect(hasExplicitThinkingLevel('p1', 'cNew2')).toBe(true);
+  });
+
+  it('存储不可用时 hasExplicit=false（发送链回落模型默认，不抛）', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('storage disabled');
+    });
+    expect(hasExplicitThinkingLevel('p1', 'c1')).toBe(false);
   });
 });

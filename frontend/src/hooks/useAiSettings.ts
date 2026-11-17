@@ -36,6 +36,7 @@ import {
 } from '@/lib/model-provider-options';
 import { EMPTY_MODEL_CATALOG, type ModelCatalogState } from '@/lib/model-catalog';
 import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { resolveModelContextWindow, resolveModelThinkingDefault } from '@/lib/model-preferences';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -57,6 +58,8 @@ export interface ChatModelPreset {
   capabilities?: string[];
   /** BLOCK-455 — 模型级能力覆写（显式条目优先于渠道 capabilities；发现时推断预填）。 */
   modelCapabilities?: Record<string, string[]>;
+  /** BLOCK-456 — 模型级上下文/思考默认档覆写（显式条目优先于渠道 fallback）。 */
+  modelPreferences?: Record<string, { contextWindow?: number; thinkingLevel?: 'off' | 'standard' | 'high' }>;
   roles?: string[];
   parameters?: Record<string, unknown>;
   /**
@@ -186,6 +189,9 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               model,
               // BLOCK-455 — choice 携带模型级能力（覆写优先，渠道兜底）。
               capabilities: resolveModelCapabilities(profile, model),
+              // BLOCK-456 — choice 携带模型级上下文/思考默认档（覆写优先，渠道兜底）。
+              contextWindow: resolveModelContextWindow(profile, model),
+              defaultThinkingLevel: resolveModelThinkingDefault(profile, model),
               defaultModel: profile.defaultModel || profile.model,
               lastSelectedModel: profile.model,
             }));
@@ -197,6 +203,8 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
               capabilities: resolveModelCapabilities(profile, profile.model),
+              contextWindow: resolveModelContextWindow(profile, profile.model),
+              defaultThinkingLevel: resolveModelThinkingDefault(profile, profile.model),
               defaultModel: profile.defaultModel || profile.model,
               lastSelectedModel: profile.model,
             }];

@@ -49,6 +49,32 @@ export function loadThinkingLevel(
   }
 }
 
+/**
+ * BLOCK-456 — 会话是否存在显式档位覆写（键在场且合法）。
+ * 发送档生效序的第一判据：显式覆写 > 发送模型的模型级默认 > 会话当前值。
+ * 切模型不再写会话档（BLOCK-224 旧语义由用户裁决「跟模型走」取代）。
+ */
+export function hasExplicitThinkingLevel(
+  projectId: string | null | undefined,
+  conversationId: string | null | undefined
+): boolean {
+  try {
+    return isThinkingLevel(window.localStorage.getItem(storageKey(projectId, conversationId)));
+  } catch {
+    return false;
+  }
+}
+
+/** BLOCK-456 — 发送档生效序（纯函数，useChatStream 与 composer 显示同源）。 */
+export function resolveEffectiveThinkingLevel(
+  hasExplicitOverride: boolean,
+  modelDefault: ThinkingLevel | undefined,
+  sessionLevel: ThinkingLevel | undefined
+): ThinkingLevel {
+  if (hasExplicitOverride) return sessionLevel ?? DEFAULT_THINKING_LEVEL;
+  return modelDefault ?? sessionLevel ?? DEFAULT_THINKING_LEVEL;
+}
+
 export function saveThinkingLevel(
   projectId: string | null | undefined,
   conversationId: string | null | undefined,
@@ -64,12 +90,15 @@ export function saveThinkingLevel(
 /**
  * 把档位迁到新建会话键下（沿用 composer 草稿迁移同款语义）：
  * 空会话发送时先建会话，档位应随会话一起落到新键，否则新会话首轮之后丢档。
+ * BLOCK-456 — 仅迁移显式覆写：无覆写时不写新键，否则会把模型级默认
+ * 物化成会话显式档（此后切模型不再跟模型走）。
  */
 export function migrateThinkingLevel(
   projectId: string | null | undefined,
   sourceConversationId: string | null | undefined,
   targetConversationId: string | null | undefined
 ): void {
+  if (!hasExplicitThinkingLevel(projectId, sourceConversationId)) return;
   const level = loadThinkingLevel(projectId, sourceConversationId);
   saveThinkingLevel(projectId, targetConversationId, level);
 }

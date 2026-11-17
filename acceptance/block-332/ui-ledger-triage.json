@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-17T04:14:10.488Z",
+  "generatedAt": "2026-11-17T06:38:43.175Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 500,
-  "uniqueIds": 491,
+  "sections": 501,
+  "uniqueIds": 492,
   "counts": {
     "live-missing": 13,
     "verified": 453,
-    "blocked": 22,
+    "blocked": 23,
     "closed": 12
   },
-  "debt": 35,
+  "debt": 36,
   "liveMissing": [
     {
       "id": "UI-702",
@@ -83,6 +83,12 @@
       "deps": [],
       "external": true,
       "title": "设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 *"
+    },
+    {
+      "id": "UI-707",
+      "deps": [],
+      "external": true,
+      "title": "上下文窗口与思考默认档模型级化——模型行悬停配置 + 设置页上下文退役（BLOCK-456；2026-11-17 **in_progress（P1-P4 收口，实机腿 19/19；"
     },
     {
       "id": "UI-706",

@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 601,
+    "documentCount": 602,
     "lastUpdated": "2026-11-17",
-    "managedMarkdown": 583
+    "managedMarkdown": 584
   },
   "documents": [
     {
@@ -12246,6 +12246,30 @@
         "dev-verify"
       ],
       "notes": "M7 §8 第 3/5 条补腿收口包 completed（终态 done）：T1 三历史红清账（UI-629/P6/center 净树绿 + block414 活栈绿）→ T2 m7-longtask-resume-live flow 实机腿 31/31（崩溃注入→同库重启→resume 逐字对齐+截图），抓真修 2 缺陷=evals-harness 同库二次 spawn 重放迁移（2a40bf7f）+ resume 路由冲突 P1（team.js not_paused 遮蔽 BLOCK-38 中断续跑→next() 让位 14353c78，回归锚 4/4）→ T3 closeout:full 三连全绿 0 门禁级 SKIP（knip 动态入口 29cbf478 + perf B2 重绑）→ T4 回写。发令链=主控提示词 v1.0 预授权 + Jev 不可用确定性兜底。P6 pressure 腿 external 404 维持原册。证据=acceptance/block-449/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-456",
+      "path": "docs/block-456-model-level-context-thinking-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-456-model-preferences-context-thinking",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P4",
+      "touchSurface": [
+        "docs/block-456-model-level-context-thinking-plan.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "model-preferences",
+        "context-window",
+        "thinking-level",
+        "endpoint-ui",
+        "G0"
+      ],
+      "notes": "2026-11-17 立项（用户裁决「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」）：modelPreferences 模型级覆写（contextWindow/thinkingLevel）单源+渠道级零迁移 fallback；syncPresetContextWindow choice-id 静默丢写修复；发送档=会话显式覆写>模型级默认；ModelMenu 左 quick 块退役改模型行悬停/focus 内联滑杆；设置页上下文列退役（8→7）。UI-707。P1 契约→P2 消费面→P3 UI→P4 收口。【2026-11-17 completed】P1-P4 全收口：HK-01 红 11/15→绿 15/15 + 后端邻域 57/57 + 前端契约 72/72 + UI 117/117 + theme-token 19/19 + types 0；P4 block456-live 19/19（隔离 :3399/:3398，悬停抽屉/模型级写盘回环/发送档四连证/设置页退役）+ block455-live 复跑 18/18；证据 acceptance/block-456/。UI-707 in_progress 观感 pending_human_eye 不代签。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "registeredAt": "2026-11-17"
     }
   ],
   "lastUpdated": "2026-11-17"

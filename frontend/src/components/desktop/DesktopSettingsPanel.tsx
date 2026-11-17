@@ -28,9 +28,7 @@ import {
   type UserModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
-import { ContextWindowScale } from '@/components/copilot/SimpleChat/ModelPreferenceControls';
 import { ModelPreferenceTabs } from './DesktopSettingsPanel/ModelPreferenceTabs';
-import { CONTEXT_WINDOW_OPTIONS } from '@/lib/context-window-options';
 import prefStyles from '@/components/copilot/SimpleChat/ModelPreferenceControls.module.css';
 import { getBridge } from '@/lib/desktopBridge';
 import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
@@ -262,7 +260,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                   <span>Base URL</span>
                   <span>Key</span>
                   <span>默认模型</span>
-                  <span>上下文</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -387,14 +384,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       )}
                       {modelOptions.map((model) => <option key={model} value={model}>{model}</option>)}
                     </select>
-                    <span className="petri-endpoint-field-label" aria-hidden="true">上下文</span>
-                    <ContextWindowScale
-                      compact
-                      value={profile.contextWindow}
-                      options={CONTEXT_WINDOW_OPTIONS}
-                      onChange={(next) => updateProfile(profile.id, { contextWindow: next })}
-                      testId={`settings-context-window-${profile.id}`}
-                    />
                     <span className="petri-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"

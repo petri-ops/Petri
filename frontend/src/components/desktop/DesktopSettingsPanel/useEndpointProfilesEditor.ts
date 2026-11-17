@@ -54,8 +54,6 @@ export function useEndpointProfilesEditor(): {
   profileErrors: Record<string, string>;
   credentialBackend: string;
   endpointTransferMessage: string | null;
-  contextWindowDrafts: Record<string, string>;
-  setContextWindowDrafts: Dispatch<SetStateAction<Record<string, string>>>;
   endpointImportRef: MutableRefObject<HTMLInputElement | null>;
   userModelProfiles: ChatModelPreset[];
   telemetryEnabled: boolean;
@@ -94,7 +92,6 @@ export function useEndpointProfilesEditor(): {
   const [profileErrors, setProfileErrors] = useState<Record<string, string>>({});
   const [credentialBackend, setCredentialBackend] = useState('local');
   const [endpointTransferMessage, setEndpointTransferMessage] = useState<string | null>(null);
-  const [contextWindowDrafts, setContextWindowDrafts] = useState<Record<string, string>>({});
   const endpointImportRef = useRef<HTMLInputElement | null>(null);
   const modelDiscoveryGeneration = useRef<Record<string, number>>({});
   const modelProfilesRef = useRef<ChatModelPreset[]>([]);
@@ -497,8 +494,6 @@ export function useEndpointProfilesEditor(): {
     profileErrors,
     credentialBackend,
     endpointTransferMessage,
-    contextWindowDrafts,
-    setContextWindowDrafts,
     endpointImportRef,
     userModelProfiles,
     telemetryEnabled,

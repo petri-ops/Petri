@@ -1,0 +1,23 @@
+✔ resolveModelContextWindow：模型级覆写优先于渠道 fallback (0.5903ms)
+✔ resolveModelContextWindow：无覆写读渠道 fallback；都无返回 undefined；存储键写时清洗（normalize 链） (0.171ms)
+✔ resolveModelContextWindow：覆写非法值回落渠道 fallback（不静默用坏值） (0.0717ms)
+✔ resolveModelThinkingDefault：模型级覆写 > 渠道 defaultThinkingLevel > undefined (0.0839ms)
+✔ normalizeModelProfile：modelPreferences 消毒（round 正整数 / 已知三档 / 丢非法条目） (0.4691ms)
+✔ normalizeModelProfile：无 modelPreferences 的旧档案零行为变化 (0.0854ms)
+✔ sync 桥：choice id 快捷写盘落模型级覆写（修 UI-696 展开态静默丢写） (0.3545ms)
+✔ sync 桥：choice id 的 model 段解码（encodeURIComponent 形态） (0.1305ms)
+✔ sync 桥：裸 id（legacy 快照调用方）仍写渠道级 fallback，行为不变 (0.0902ms)
+✔ sync 桥：同时送 model_profiles 时原样返回（设置页全量路径不变） (0.1227ms)
+✔ sync 桥：模型级写盘保留档案其它偏好与既有覆写条目 (0.2122ms)
+✔ sync 桥：与当前解析值相同的写入是 no-op（全量 presets POST 不物化 fallback） (0.11ms)
+✔ sync 桥：no-op 判定按模型级解析值（已有覆写时送 fallback 值=显式改回，须写） (0.0953ms)
+✔ sync 桥：choice id 思考档写模型级 thinkingLevel（渠道 defaultThinkingLevel 不污染） (0.0726ms)
+✔ sync 桥：裸 id 思考档仍写渠道级；非法档位忽略 (0.0817ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 162.502

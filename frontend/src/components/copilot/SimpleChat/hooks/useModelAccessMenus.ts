@@ -52,7 +52,6 @@ export function useModelAccessMenus({
   activeModelId,
   setActiveModelId,
   catalog,
-  onModelSelected,
   lockedAccessMode,
 }: {
   modelPresets: ChatModelPreset[];
@@ -60,8 +59,6 @@ export function useModelAccessMenus({
   setActiveModelId: (id: string) => Promise<unknown>;
   /** BLOCK-224 — 目录状态（加载/发现失败/凭据）；缺省空态=全部 ready。 */
   catalog?: ModelCatalogState;
-  /** BLOCK-224 — 选中模型后的旁路回调（如应用该模型默认思考档）。 */
-  onModelSelected?: (preset: ChatModelPreset) => void;
   /**
    * UI-448 加映 v2 — 档位锁定（悬挂聊天面仅聊天）：初始档位即锁定值，
    * setAccessMode 失效（选择器改不动）。锁定档的工具放行口径由后端
@@ -110,9 +107,10 @@ export function useModelAccessMenus({
     setModelSupplierKey(null);
     // Hook persists the new active id + llm_provider via electron
     // bridge (Plan 1.6 §4.5 — replaces the local get-then-save).
+    // BLOCK-456 — 切模型不再写会话思考档：发送档生效序在 useChatStream
+    // 按「显式覆写 > 模型级默认 > 会话值」解析（用户裁决「跟模型走」）。
     await setActiveModelId(preset.id);
-    if (preset.defaultThinkingLevel && onModelSelected) onModelSelected(preset);
-  }, [onModelSelected, setActiveModelId]);
+  }, [setActiveModelId]);
 
   return {
     modelMenuOpen,

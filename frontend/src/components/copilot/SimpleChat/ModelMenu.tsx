@@ -4,6 +4,8 @@
  * 两段：供应商 → 模型。每行带可用性（缺密钥禁用 / 发现失败标黄 / 就绪）、
  * 上下文窗口与默认思考档；隐藏模型已由 `buildModelGroups` 过滤，不会出现。
  * 加载中/零可用模型给出可读空态，而不是一张空菜单。
+ * BLOCK-456 — 上下文/思考强度跟模型走：左面板快捷块退役，模型行悬停/聚焦
+ * 展开行内模型级配置抽屉（写 modelPreferences，渠道 fallback 不污染）。
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,7 +13,8 @@ import { createPortal } from 'react-dom';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { Icon } from '@/components/icons/Icon';
 import { ContextWindowScale, ThinkingEffortSlider } from './ModelPreferenceControls';
-import { THINKING_LEVEL_LABELS } from '@/components/copilot/thinkingLevel';
+import { THINKING_LEVEL_LABELS, THINKING_LEVELS } from '@/components/copilot/thinkingLevel';
+import { CONTEXT_WINDOW_OPTIONS } from '@/lib/context-window-options';
 import styles from './ModelPreferenceControls.module.css';
 import { getApiPrefix } from '@/lib/env';
 import {
@@ -36,17 +39,12 @@ interface ModelMenuProps {
   onPickSupplier: (group: ModelCatalogGroup) => void;
   onPickModel: (preset: ChatModelPreset) => void;
   /**
-   * UI-MODELCFG-1 — 聊天输入框内直接切换模型的两项配置，减少「进设置页→找模型→改」
-   * 的操作层级：上下文窗口（写回当前模型档案）与思考强度（会话级，与 composer 按钮同源）。
+   * BLOCK-456 — 模型行悬停/聚焦展开的行内配置（上下文窗口 + 思考默认档），
+   * 写回该模型的 modelPreferences（模型级覆写，渠道 fallback 不污染）。
+   * 取代 UI-696 左面板快捷块（用户裁决「跟具体模型走，悬停才出现」）。
    */
-  contextWindow?: number;
-  contextWindowOptions?: number[];
-  onChangeContextWindow?: (next: number) => void;
-  thinkingLevel?: string;
-  thinkingLevelOptions?: string[];
-  onChangeThinkingLevel?: (next: string) => void;
-  /** 渠道是否声明 reasoning 能力；未声明时档位常驻灰显并给出原因，不再整块消失。 */
-  reasoningSupported?: boolean;
+  contextWindowOptions?: readonly number[];
+  onModelConfigChange?: (presetId: string, patch: { contextWindow?: number; defaultThinkingLevel?: string }) => void;
   /** 快捷写回结果提示，替代静默失败。 */
   quickNotice?: { text: string; tone: 'ok' | 'error' } | null;
 }
@@ -86,29 +84,40 @@ type PricingTable = Record<string, ModelPrice>;
  * 模型页（返回行 + 标题/数量）；不再左右两列混排，也不铺灰底容器。
  * 纯投影：模型行点击=选该模型（selectModel 连带切渠道默认，供应商级联隐式成立）；
  * 白名单禁行与价格元信息与 model 分支同源。
+ * BLOCK-456 — 行渲染统一为 ModelRow（portal 模型卡与 model 分支共用）：
+ * 行体=选择按钮；悬停/聚焦展开行内模型级配置抽屉（禁行不展开）。
  */
-function renderGroupModelRows(opts: {
-  group: ModelCatalogGroup;
+function ModelRow({
+  row,
+  activeModelId,
+  accessDenied,
+  pricing,
+  onPickModel,
+  contextWindowOptions,
+  onModelConfigChange,
+}: {
+  row: ModelCatalogGroup['rows'][number];
   activeModelId: string;
   accessDenied: (model: string) => string | null;
-  pricing: Record<string, { input: number; output: number }>;
+  pricing: PricingTable;
   onPickModel: (preset: ChatModelPreset) => void;
-}): React.ReactElement[] {
-  const { group, activeModelId, accessDenied, pricing, onPickModel } = opts;
-  // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
-  return group.rows.map((row) => {
-    const active = row.preset.id === activeModelId;
-    const accessReason = accessDenied(row.preset.model);
-    const effectiveReason = row.reason || accessReason;
-    const disabled = !isSelectableRow(row) || accessReason !== null;
-    const price = formatPrice(pricing[row.preset.model]);
-    const meta = effectiveReason
-      ? effectiveReason + (price ? ` · ${price}` : '')
-      : presetMeta(row.preset, active, pricing);
-    return (
+  contextWindowOptions: readonly number[];
+  onModelConfigChange?: (presetId: string, patch: { contextWindow?: number; defaultThinkingLevel?: string }) => void;
+}): React.ReactElement {
+  const active = row.preset.id === activeModelId;
+  const accessReason = accessDenied(row.preset.model);
+  const effectiveReason = row.reason || accessReason;
+  const disabled = !isSelectableRow(row) || accessReason !== null;
+  const price = formatPrice(pricing[row.preset.model]);
+  const meta = effectiveReason
+    ? effectiveReason + (price ? ` · ${price}` : '')
+    : presetMeta(row.preset, active, pricing);
+  const modelReasoning = Array.isArray(row.preset.capabilities)
+    && row.preset.capabilities.includes('reasoning');
+  return (
+    <div className="sc-model-row" data-testid={`model-row-${row.preset.id}`}>
       <button
         type="button"
-        key={row.preset.id}
         className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
         disabled={disabled}
         title={effectiveReason || row.preset.model}
@@ -119,8 +128,45 @@ function renderGroupModelRows(opts: {
           {meta}
         </span>
       </button>
-    );
-  });
+      {!disabled && onModelConfigChange && (
+        <div className="sc-model-row-config" data-testid={`model-row-config-${row.preset.id}`}>
+          <ContextWindowScale
+            compact
+            value={row.preset.contextWindow}
+            options={contextWindowOptions}
+            testId={`model-row-context-${row.preset.id}`}
+            onChange={(next) => onModelConfigChange(row.preset.id, { contextWindow: next })}
+          />
+          <ThinkingEffortSlider
+            compact
+            value={row.preset.defaultThinkingLevel ?? 'standard'}
+            options={THINKING_LEVELS}
+            disabled={!modelReasoning}
+            disabledReason="该模型未声明思考能力，档位不会发送上游"
+            testId={`model-row-thinking-${row.preset.id}`}
+            onChange={(next) => onModelConfigChange(row.preset.id, { defaultThinkingLevel: next })}
+          />
+          <div className={styles.quickHint}>上下文窗口用于本机预算与裁剪，不扩展上游模型能力</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function renderGroupModelRows(opts: {
+  group: ModelCatalogGroup;
+  activeModelId: string;
+  accessDenied: (model: string) => string | null;
+  pricing: Record<string, { input: number; output: number }>;
+  onPickModel: (preset: ChatModelPreset) => void;
+  contextWindowOptions: readonly number[];
+  onModelConfigChange?: (presetId: string, patch: { contextWindow?: number; defaultThinkingLevel?: string }) => void;
+}): React.ReactElement[] {
+  const { group, ...rest } = opts;
+  // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
+  return group.rows.map((row) => (
+    <ModelRow key={row.preset.id} row={row} {...rest} />
+  ));
 }
 
 /** BLOCK-259 D1 — 价格来自后端单一源 /api/ai/pricing；取不到就不显示，不猜价。 */
@@ -192,6 +238,19 @@ function useModelAccess(): ModelAccessState {
   return access;
 }
 
+function QuickNotice({ notice }: { notice: { text: string; tone: 'ok' | 'error' } }): React.ReactElement {
+  return (
+    <div
+      className={styles.quickNotice}
+      data-tone={notice.tone === 'error' ? 'error' : undefined}
+      role="status"
+      data-testid="model-menu-quick-notice"
+    >
+      {notice.text}
+    </div>
+  );
+}
+
 export function ModelMenu({
   mode,
   groups,
@@ -205,13 +264,8 @@ export function ModelMenu({
   onClose,
   onPickSupplier,
   onPickModel,
-  contextWindow,
-  contextWindowOptions,
-  onChangeContextWindow,
-  thinkingLevel,
-  thinkingLevelOptions,
-  onChangeThinkingLevel,
-  reasoningSupported,
+  contextWindowOptions = CONTEXT_WINDOW_OPTIONS,
+  onModelConfigChange,
   quickNotice,
 }: ModelMenuProps): React.ReactElement {
   const pricing = useModelPricing();
@@ -286,38 +340,6 @@ export function ModelMenu({
             {autoError}
           </div>
         )}
-        {/* UI-MODELCFG-1 / UI-696 — 模型级快捷配置：分段滑条就地调，不进设置页 */}
-        {(contextWindowOptions?.length || thinkingLevelOptions?.length) && (
-          <div className={styles.quick} data-testid="model-menu-quick">
-            {contextWindowOptions && contextWindowOptions.length > 0 && (
-              <ContextWindowScale
-                value={contextWindow ?? contextWindowOptions[0]}
-                options={contextWindowOptions}
-                onChange={(next) => onChangeContextWindow?.(next)}
-              />
-            )}
-            {thinkingLevelOptions && thinkingLevelOptions.length > 0 && (
-              <ThinkingEffortSlider
-                value={thinkingLevel ?? 'standard'}
-                options={thinkingLevelOptions}
-                disabled={!(reasoningSupported ?? Boolean(thinkingLevelOptions.length))}
-                disabledReason="该渠道未声明思考能力，档位不会发送给上游"
-                onChange={(next) => onChangeThinkingLevel?.(next)}
-              />
-            )}
-            <div className={styles.quickHint}>上下文窗口用于本机预算与裁剪，不扩展上游模型能力</div>
-            {quickNotice && (
-              <div
-                className={styles.quickNotice}
-                data-tone={quickNotice.tone === 'error' ? 'error' : undefined}
-                role="status"
-                data-testid="model-menu-quick-notice"
-              >
-                {quickNotice.text}
-              </div>
-            )}
-          </div>
-        )}
         {summary.level === 'empty' && groups.length === 0 ? null : mode === 'all' ? (
           /* UI-619（用户「左侧主卡片是供应商 右侧是模型」）——左主卡列供应商，
              右侧独立卡（portal）列该供应商模型；两卡始终同时在场。 */
@@ -371,31 +393,18 @@ export function ModelMenu({
             );
           })
         ) : (
-          (selectedGroup?.rows || []).map((row) => {
-            const active = row.preset.id === activeModelId;
-            const accessReason = accessDenied(row.preset.model);
-            const effectiveReason = row.reason || accessReason;
-            const disabled = !isSelectableRow(row) || accessReason !== null;
-            const price = formatPrice(pricing[row.preset.model]);
-            const meta = effectiveReason
-              ? `${effectiveReason}${price ? ` · ${price}` : ''}`
-              : presetMeta(row.preset, active, pricing);
-            return (
-              <button
-                type="button"
-                key={row.preset.id}
-                className={`sc-model-option ${active ? 'sc-model-option-active' : ''} ${disabled ? 'sc-model-option-disabled' : ''}`}
-                disabled={disabled}
-                title={effectiveReason || row.preset.model}
-                onClick={() => onPickModel(row.preset)}
-              >
-                <span className="sc-model-option-title">{row.preset.model}</span>
-                <span className={`sc-model-option-meta ${effectiveReason ? 'sc-model-option-warning' : ''}`}>
-                  {meta}
-                </span>
-              </button>
-            );
-          })
+          <>
+            {selectedGroup && renderGroupModelRows({
+              group: selectedGroup,
+              activeModelId,
+              accessDenied,
+              pricing,
+              onPickModel,
+              contextWindowOptions,
+              onModelConfigChange,
+            })}
+            {quickNotice && <QuickNotice notice={quickNotice} />}
+          </>
         )}
       </div>
       {mode === 'all' && groups.length > 0 && modelPanelPos && createPortal(
@@ -422,7 +431,10 @@ export function ModelMenu({
                 accessDenied,
                 pricing,
                 onPickModel,
+                contextWindowOptions,
+                onModelConfigChange,
               })}
+              {quickNotice && <QuickNotice notice={quickNotice} />}
             </>
           ) : (
             <div className="sc-model-two-pane-empty">

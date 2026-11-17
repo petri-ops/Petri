@@ -25,9 +25,11 @@ describe('推理档位词表跨端对账', () => {
     expect(FRONTEND_DEFAULT).toBe(DEFAULT_THINKING_LEVEL);
   });
 
-  it('出厂映射表三协议三档齐备且默认档=none（不发参数=零行为变化）', () => {
+  it('出厂映射表四协议三档齐备且默认档=none（不发参数=零行为变化）', () => {
     const protocols = Object.keys(DEFAULT_MAPPING);
-    expect(protocols).toEqual(['openai-compatible', 'anthropic-messages', 'dashscope-native']);
+    // BLOCK-456 邻域清偿：responses 协议由 BLOCK-454 P5（f1923ca1）加入单源表，
+    // 本对账期望当时未同步（既有 HEAD 债）；映射本体三档齐备，仅清单机械补齐。
+    expect(protocols).toEqual(['openai-compatible', 'anthropic-messages', 'dashscope-native', 'responses']);
     for (const protocol of protocols) {
       expect(Object.keys(DEFAULT_MAPPING[protocol]).sort()).toEqual([...THINKING_LEVELS].sort());
       expect(DEFAULT_MAPPING[protocol].standard).toBe('none');

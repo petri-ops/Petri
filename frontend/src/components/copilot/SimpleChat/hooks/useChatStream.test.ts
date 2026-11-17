@@ -147,6 +147,70 @@ describe('useChatStream 思考档位透传（BLOCK-81 P3）', () => {
   });
 });
 
+describe('useChatStream 发送档生效序（BLOCK-456 三态契约）', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  it('无显式覆写：发送档=发送模型的模型级默认（会话值被覆盖）', async () => {
+    const base = makeArgs({
+      activeModel: { id: 'deepseek-chat::deepseek-flash', label: 'DeepSeek', provider: 'deepseek', endpointProfileId: 'deepseek-chat', model: 'deepseek-flash', defaultThinkingLevel: 'high' },
+      thinkingLevel: 'standard',
+    });
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), { initialProps: base });
+    await act(async () => {
+      await result.current.send('跟模型走');
+    });
+    expect(lastRunOptions()?.thinkingLevel).toBe('high');
+  });
+
+  it('显式覆写在场：发送档=会话值（模型默认让位）', async () => {
+    window.localStorage.setItem('petri:thinking-level:p_test:conv_test', 'off');
+    const base = makeArgs({
+      activeModel: { id: 'deepseek-chat::deepseek-flash', label: 'DeepSeek', provider: 'deepseek', endpointProfileId: 'deepseek-chat', model: 'deepseek-flash', defaultThinkingLevel: 'high' },
+      thinkingLevel: 'off',
+    });
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), { initialProps: base });
+    await act(async () => {
+      await result.current.send('显式覆写');
+    });
+    expect(lastRunOptions()?.thinkingLevel).toBe('off');
+  });
+
+  it('无显式覆写且模型无默认：发送档=会话当前值（legacy 零行为变化）', async () => {
+    const base = makeArgs({ thinkingLevel: 'high' });
+    const { result } = renderHook((props: UseChatStreamArgs) => useChatStream(props), { initialProps: base });
+    await act(async () => {
+      await result.current.send('legacy');
+    });
+    expect(lastRunOptions()?.thinkingLevel).toBe('high');
+  });
+
+  it('切模型即换档：无覆写时发送档随新模型默认（不写会话键）', async () => {
+    const base = makeArgs({
+      activeModel: { id: 'deepseek-chat::deepseek-flash', label: 'DeepSeek', provider: 'deepseek', endpointProfileId: 'deepseek-chat', model: 'deepseek-flash', defaultThinkingLevel: 'high' },
+      thinkingLevel: 'standard',
+    });
+    const { result, rerender } = renderHook((props: UseChatStreamArgs) => useChatStream(props), { initialProps: base });
+    await act(async () => {
+      await result.current.send('模型A');
+    });
+    expect(lastRunOptions()?.thinkingLevel).toBe('high');
+    rerender({
+      ...base,
+      activeModel: { id: 'deepseek-chat::deepseek-v4-pro', label: 'DeepSeek', provider: 'deepseek', endpointProfileId: 'deepseek-chat', model: 'deepseek-v4-pro', defaultThinkingLevel: 'off' },
+    });
+    await act(async () => {
+      await result.current.send('模型B');
+    });
+    expect(lastRunOptions()?.thinkingLevel).toBe('off');
+    expect(window.localStorage.getItem('petri:thinking-level:p_test:conv_test')).toBeNull();
+  });
+});
+
 describe('useChatStream 发送守卫（UI-373 欢迎页未选项目拦截）', () => {
   it('sendGuard 返回非空时拦截：不建会话不启动 run，文本退回输入框保留', async () => {
     const guard = vi.fn(() => 'no-project');

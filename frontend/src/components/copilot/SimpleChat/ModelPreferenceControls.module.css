@@ -106,12 +106,8 @@
   color: var(--petri-warning);
 }
 
-.quick {
-  display: flex;
-  flex-direction: column;
-  gap: var(--petri-space-2);
-  padding: var(--petri-space-2) var(--petri-space-3);
-  border-bottom: 1px solid var(--petri-divider);
+.compact {
+  gap: var(--petri-space-1);
 }
 
 .quickNotice {

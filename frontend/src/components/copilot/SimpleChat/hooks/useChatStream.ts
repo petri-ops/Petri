@@ -29,7 +29,9 @@
 // ============================================================
 
 import {
+  hasExplicitThinkingLevel,
   migrateThinkingLevel,
+  resolveEffectiveThinkingLevel,
   type ThinkingLevel,
 } from '../../thinkingLevel';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -343,6 +345,12 @@ export function useChatStream({
         : [...history, { role: 'user', content: trimmed }];
 
       const sendModel = resolveModelForSend(hasImages ? hasImages() : false);
+      // BLOCK-456 — 发送档生效序：会话显式覆写 > 发送模型的模型级默认 > 会话当前值
+      const effectiveThinkingLevel = resolveEffectiveThinkingLevel(
+        hasExplicitThinkingLevel(projectId, targetConversationId),
+        sendModel?.defaultThinkingLevel,
+        thinkingLevel,
+      );
       const started = startConversationRun({
         conversationId: targetConversationId,
         projectId,
@@ -352,7 +360,7 @@ export function useChatStream({
         modelPresetId: sendModel?.endpointProfileId || sendModel?.id || activeModelId,
         modelName: sendModel?.model,
         // BLOCK-81 P2 — 思考档位随本轮下发（后端按 profile 能力位门控后映射上游参数）
-        thinkingLevel,
+        thinkingLevel: effectiveThinkingLevel,
         context: {
           ...copilotCtxRef.current,
           ...(contextOverride || {}),

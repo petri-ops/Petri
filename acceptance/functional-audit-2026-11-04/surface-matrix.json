@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-11-17T00:08:03.179Z",
+  "generatedAt": "2026-11-17T06:42:36.731Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 117,
     "toolDomains": 16,
     "contracts": 117,
     "metadata": 118,
-    "ipcChannels": 170,
+    "ipcChannels": 172,
     "ipcMissingPreload": 2,
-    "ipcUnusedInRenderer": 167,
+    "ipcUnusedInRenderer": 169,
     "routes": 289,
     "routeModules": 47,
     "routeModulesUnmounted": 0,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 27,
     "defsFallbacks": 0
   },
   "findings": [
@@ -3266,6 +3266,16 @@
       "usedInRenderer": false
     },
     {
+      "channel": "window:test-manage-toggle",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:test-manage-hover",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
       "channel": "window:snapshot",
       "inPreload": true,
       "usedInRenderer": false
@@ -4099,6 +4109,16 @@
     },
     {
       "channel": "window:test-manage-mode-changed",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:test-manage-toggle",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "window:test-manage-hover",
       "inPreload": true,
       "usedInRenderer": false
     },
@@ -5940,6 +5960,34 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/agent-runner.js",
+    "M core/petri-server/routes/ai-chat.js",
+    "M core/petri-server/routes/ai-settings-api.js",
+    "M frontend/src/components/copilot/ContextBudgetBar.test.tsx",
+    "M frontend/src/components/copilot/ContextBudgetBar.tsx",
+    "M frontend/src/components/copilot/SimpleChat.tsx",
+    "M frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
+    "M frontend/src/components/copilot/SimpleChat/ModelPreferenceControls.module.css",
+    "M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
+    "M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
+    "D frontend/src/components/copilot/SimpleChat/hooks/useContextWindowQuickPick.ts",
+    "M frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts",
+    "M frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
+    "M frontend/src/components/copilot/simple-chat.css",
+    "M frontend/src/components/copilot/thinkingLevel.drift.test.ts",
+    "M frontend/src/components/copilot/thinkingLevel.test.ts",
+    "M frontend/src/components/copilot/thinkingLevel.ts",
+    "M frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/EndpointEditorDensity.test.ts",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/EndpointMainTable.test.ts",
+    "M frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts",
+    "M frontend/src/components/desktop/desktop.css",
+    "M frontend/src/hooks/useAiSettings.test.ts",
+    "M frontend/src/hooks/useAiSettings.ts",
+    "?? frontend/src/components/copilot/SimpleChat/hooks/useModelQuickConfig.ts",
+    "?? frontend/src/lib/model-preferences.test.ts",
+    "?? frontend/src/lib/model-preferences.ts"
+  ],
   "defNotes": []
 }

@@ -9,9 +9,10 @@ import { UpdatePill } from './UpdatePill';
  * 稍后 = 本会话隐藏；新推送复现。
  */
 const updaterStubs = {
-  check: vi.fn(async () => ({ ok: false, error: 'disabled' })),
-  download: vi.fn(async () => ({ ok: true })),
-  install: vi.fn(async () => ({ ok: true })),
+  // BLOCK-456 邻域结算（UI-705 origin 批 lint 债）：async 无 await → Promise.resolve 同语义
+  check: vi.fn(() => Promise.resolve({ ok: false, error: 'disabled' })),
+  download: vi.fn(() => Promise.resolve({ ok: true })),
+  install: vi.fn(() => Promise.resolve({ ok: true })),
   onUpdateAvailable: vi.fn(),
   onUpdateNotAvailable: vi.fn(),
   onDownloadProgress: vi.fn(),
@@ -32,9 +33,9 @@ afterEach(() => {
 /** 取主进程推送回调并触发（useAutoUpdate 订阅面）。 */
 function pushEvent(name: keyof typeof updaterStubs, payload?: unknown): void {
   const mock = updaterStubs[name] as ReturnType<typeof vi.fn>;
-  const cb = mock.mock.calls.at(-1)?.[0];
+  const cb = mock.mock.calls.at(-1)?.[0] as ((...args: unknown[]) => void) | undefined;
   act(() => {
-    (cb as ((...args: unknown[]) => void) | undefined)?.(payload);
+    cb?.(payload);
   });
 }
 

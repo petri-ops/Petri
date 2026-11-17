@@ -1,0 +1,46 @@
+
+> petri-desktop@0.0.4 ui:audit:triage
+> node scripts/ui-ledger-triage.mjs --json acceptance/block-332/ui-ledger-triage.json
+
+证据：D:\1.WorkDir\petri\acceptance\block-332\ui-ledger-triage.json
+台账段 501（唯一 id 492）· live-missing=13 · verified=453 · blocked=23 · closed=12 · 债=36
+
+[可补实机腿 13]
+  UI-702 · 通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-
+  UI-699 · 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK
+  UI-698 · 隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK
+  UI-697 · viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09
+  UI-694 · 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11
+  UI-663 · SVG 编辑器「未保存改动」逐元素取舍（BLOCK-342 W4 reopen 第一刀；2026-11-03 **in_
+  UI-595 · 批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 
+  UI-475 · 识图未配置时图片输入前置阻断——贴图/拖图即提示配置去向（BLOCK-150 加映·主代理跨会话协作）(2026-10-
+  UI-513 · 跨端偏好同步失败可见化（**RW-02 d 档改判 2026-10-30：UI 面尚未交付（设置面消费属下一批待办）——
+  UI-521 · 外观偏好缓存单源（**RW-02 d 档改判 2026-10-30：非可见 UI 面（台账自认零交互变化）——drift
+  UI-522 · 模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻
+  UI-526 · Result Studio 真值徽标语义诚实化（2026-10-18 **verified（2026-11-05 探针 
+  UI-534 · MCP 服务货架治理状态（**RW-02 d 档改判 2026-10-30：契约/类型完成、UI 控件未交付——改判为待
+
+[仍受阻 23]
+  UI-704 · deps=- · 外部=true · 设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 Upd
+  UI-707 · deps=- · 外部=true · 上下文窗口与思考默认档模型级化——模型行悬停配置 + 设置页上下文退役（BLOCK-456；2026
+  UI-706 · deps=- · 外部=true · API Endpoint 能力面简化——主表 11→8 列 + 行详情折叠 + 能力声明模型级化 +
+  UI-656 · deps=- · 外部=true · 长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 *
+  UI-639 · deps=UI-532 · 外部=false · pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **i
+  UI-304 · deps=- · 外部=true · 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路
+  UI-326 · deps=- · 外部=true · 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progr
+  UI-331 · deps=- · 外部=true · 左栏会话行短式相对时间（用户参考图裁决）(**verified**：10-30 RW-02 实机 +
+  UI-391 · deps=- · 外部=true · BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-
+  UI-390 · deps=- · 外部=true · 子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09
+  UI-388 · deps=- · 外部=true · 远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Pytho
+  UI-389 · deps=- · 外部=true · 文件树大目录游标加载——截断显式「加载更多」（BLOCK-96 F2）(2026-09-16 **v
+  UI-387 · deps=- · 外部=true · 子智能体职能图标区分——形状=职能、颜色=状态（用户复看提案 + 裁决「1」）(2026-09-16
+  UI-386 · deps=- · 外部=true · 聊天区子智能体聚合条退役——项目历史智能体图标化集中到摘要卡（用户提案确认「确定 开干」）(2026
+  UI-384 · deps=- · 外部=true · 工具行详情显示只读结果内容——读取/查找/列目录/搜索输出块点亮 + UI-382 两处持久化修复（
+  UI-383 · deps=- · 外部=true · 工具时间线常规只读操作折叠——低信息量平铺改为可展开汇总（用户反馈「呈现这些没啥意义」）(2026-
+  UI-382 · deps=- · 外部=true · 子智能体实况卡内联到工具调用时间线（spawn 点即归宿，不再沉底）(2026-09-15 **ve
+  UI-456 · deps=- · 外部=true · 结果血缘条——lineage 投影端点 + 前端祖先链（BIO-3 P1）(2026-09-28 i
+  UI-458 · deps=- · 外部=true · 继续分析显式入口 + tool_jobs retention 机制（BIO-3 P2 + PL-4；
+  UI-459 · deps=- · 外部=true · 解读入口统一 result_summary 锚定（BIO-6/BIO-D4=(b)）+ UI-457
+  UI-471 · deps=- · 外部=true · 隧道徽标端到端自探活——probe 三态消费，probe 失败即使 ≥15min 也不宣称公网可用（
+  UI-532 · deps=- · 外部=true · 生信主结果面 pack resultSurface（2026-10-20 **cancelled（2
+  UI-535 · deps=- · 外部=true · 段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入

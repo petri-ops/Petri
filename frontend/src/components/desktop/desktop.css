@@ -538,11 +538,11 @@
 .petri-endpoint-list-header,
 .petri-endpoint-card__grid {
   display: grid;
-  /* BLOCK-455（UI-706）—— 主表 11 列 → 8 列 + 行首展开钮（9 轨道）：
-     思考/视觉/向量能力位与选择器/默认思考移入行详情（.petri-endpoint-card__detail），
-     能力声明模型级化。列宽沿用 UI-342/UI-703 终值（协议/供应商略窄、Base URL 1.8fr、
-     连通性 120px），仅去掉三个能力列与选择器两列、前置 32px 展开钮。
-     最小宽 1100px ≤ 容器查询阈值 1146px：宽表头分支在 1180px 豁免内可达（UI-703 成果不回归）。 */
+  /* BLOCK-456（UI-707）—— 主表 8 列 → 7 列 + 行首展开钮（8 轨道）：
+     上下文列退役——上下文窗口跟具体模型走，在聊天模型菜单行悬停抽屉里调
+     （写模型级 modelPreferences）；渠道级滑杆不再有消费面。
+     其余列宽沿用 BLOCK-455/UI-703 终值（Base URL 1.8fr、连通性 120px）。
+     最小宽 1000px ≤ 容器查询阈值 1146px：宽表头分支在 1180px 豁免内可达（UI-703 成果不回归）。 */
   grid-template-columns:
     32px
     minmax(120px, 0.8fr)
@@ -550,14 +550,13 @@
     minmax(200px, 1.8fr)
     minmax(170px, 1.1fr)
     minmax(160px, 1.1fr)
-    96px
     120px
     40px;
   align-items: center;
   gap: var(--petri-space-2);
-  /* 表头与渠道行共用同一最小宽度（9 列合计 1048 + 8×6 gap = 1096，取 1100 留余量）：
+  /* 表头与渠道行共用同一最小宽度（8 列合计 952 + 7×6 gap = 994，取 1000 留余量）：
      容器变窄时两者一起横向滚动（.petri-model-list overflow-x:auto），避免表头行错位 */
-  min-width: 1100px;
+  min-width: 1000px;
 }
 
 /* BLOCK-455 — 行首展开钮（能力与选择器详情） */

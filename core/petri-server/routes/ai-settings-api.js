@@ -13,26 +13,66 @@ const { getAiSettings, saveAiSettings, testApiKey, getChatProviderName, getEmbed
  * 权威的 model_profiles（token 预算/裁剪实际读它），同时把同一窗口写回兼容快照，
  * 避免读 presets 的消费者看到旧值（第二真相漂移）。不整坨替换快照，
  * 每模型其它偏好一律沿用 current。设置页同时送两份时原样返回，行为不变。
+ * BLOCK-456 — 快捷面送的是 choice id（profileId::model）：解绑定后写模型级
+ * modelPreferences[model]（contextWindow / thinkingLevel），渠道 fallback 不被
+ * 污染；裸 id 的 legacy 调用方仍写渠道级字段。修展开态裸 id 恒 miss 的静默丢写。
+ * 与当前解析值相同的写入是 no-op：不物化 fallback 为显式覆写（否则渠道级
+ * 后续调整被旧值钉死），也避免全量 presets POST 把每个模型的兜底值批量落盘。
  */
 function syncPresetContextWindow(current, incoming) {
   const patch = { ...incoming };
   if (!Array.isArray(incoming.chat_model_presets) || Array.isArray(incoming.model_profiles)) return patch;
-  const windowById = new Map(
-    incoming.chat_model_presets
-      .filter((preset) => preset && typeof preset === 'object' && preset.id)
-      .map((preset) => [String(preset.id), preset.contextWindow]),
-  );
+  const {
+    parseModelBinding, resolveModelContextWindow, resolveModelThinkingDefault, THINKING_LEVELS,
+  } = require('../../shared-backend/llm-providers/model-profile');
+  const writes = incoming.chat_model_presets
+    .filter((preset) => preset && typeof preset === 'object' && preset.id)
+    .map((preset) => ({
+      rawId: String(preset.id),
+      binding: parseModelBinding(String(preset.id)),
+      window: typeof preset.contextWindow === 'number' && preset.contextWindow > 0
+        ? Math.round(preset.contextWindow) : undefined,
+      thinking: THINKING_LEVELS.includes(preset.defaultThinkingLevel) ? preset.defaultThinkingLevel : undefined,
+    }))
+    .filter((write) => write.window !== undefined || write.thinking !== undefined);
   patch.model_profiles = (current.model_profiles || []).map((profile) => {
-    const next = windowById.get(profile.id);
-    return typeof next === 'number' && next > 0
-      ? { ...profile, contextWindow: Math.round(next) }
-      : profile;
+    let next = profile;
+    for (const write of writes) {
+      if (write.binding.profileId !== profile.id) continue;
+      if (write.binding.model) {
+        const prefs = { ...(next.modelPreferences || {}) };
+        const entry = { ...(prefs[write.binding.model] || {}) };
+        let changed = false;
+        if (write.window !== undefined && resolveModelContextWindow(next, write.binding.model) !== write.window) {
+          entry.contextWindow = write.window;
+          changed = true;
+        }
+        if (write.thinking !== undefined && resolveModelThinkingDefault(next, write.binding.model) !== write.thinking) {
+          entry.thinkingLevel = write.thinking;
+          changed = true;
+        }
+        if (!changed) continue;
+        prefs[write.binding.model] = entry;
+        next = { ...next, modelPreferences: prefs };
+      } else {
+        if (write.window !== undefined && resolveModelContextWindow(next) !== write.window) {
+          next = { ...next, contextWindow: write.window };
+        }
+        if (write.thinking !== undefined && resolveModelThinkingDefault(next) !== write.thinking) {
+          next = { ...next, defaultThinkingLevel: write.thinking };
+        }
+      }
+    }
+    return next;
   });
   patch.chat_model_presets = (current.chat_model_presets || []).map((preset) => {
-    const next = windowById.get(preset.id);
-    return typeof next === 'number' && next > 0
-      ? { ...preset, contextWindow: Math.round(next) }
-      : preset;
+    const write = writes.find((entry) => entry.rawId === String(preset.id));
+    if (!write) return preset;
+    return {
+      ...preset,
+      ...(write.window !== undefined ? { contextWindow: write.window } : {}),
+      ...(write.thinking !== undefined ? { defaultThinkingLevel: write.thinking } : {}),
+    };
   });
   return patch;
 }

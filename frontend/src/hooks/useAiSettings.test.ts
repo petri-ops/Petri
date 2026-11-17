@@ -384,3 +384,56 @@ describe('BLOCK-455 模型级能力展开', () => {
     expect(byModel['bge-m3']).toBeUndefined();
   });
 });
+
+describe('BLOCK-456 模型级上下文/思考默认档展开', () => {
+  it('choice 携带模型级解析值（覆写优先/渠道兜底），与后端单源同序', async () => {
+    installBridge({
+      initial: {
+        model_profiles: [{
+          id: 'ep', label: 'EP', provider: 'openai-compatible', model: 'm-a',
+          baseUrl: 'https://example.com/v1',
+          capabilities: ['chat', 'streaming', 'tools'],
+          contextWindow: 128000,
+          defaultThinkingLevel: 'off',
+          modelPreferences: {
+            'm-a': { contextWindow: 400000, thinkingLevel: 'high' },
+            'm-b': { contextWindow: 0, thinkingLevel: 'ultra' },
+          },
+        }],
+        model_role_bindings: { chat: 'ep' },
+      },
+      listModels: () => Promise.resolve({ ok: true, models: ['m-a', 'm-b', 'm-c'], message: '' }),
+    });
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => expect(result.current.presets.length).toBe(3));
+    const byModel = Object.fromEntries(result.current.presets.map((p) => [p.model, p]));
+    expect(byModel['m-a'].contextWindow).toBe(400000);
+    expect(byModel['m-a'].defaultThinkingLevel).toBe('high');
+    expect(byModel['m-b'].contextWindow).toBe(128000);
+    expect(byModel['m-b'].defaultThinkingLevel).toBe('off');
+    expect(byModel['m-c'].contextWindow).toBe(128000);
+    expect(byModel['m-c'].defaultThinkingLevel).toBe('off');
+  });
+
+  it('旧档案（无 modelPreferences）choice 沿用渠道级值，零行为变化', async () => {
+    installBridge({
+      initial: {
+        model_profiles: [{
+          id: 'ep', label: 'EP', provider: 'openai-compatible', model: 'm-a',
+          baseUrl: 'https://example.com/v1',
+          capabilities: ['chat', 'streaming', 'tools'],
+          contextWindow: 64000,
+          defaultThinkingLevel: 'standard',
+        }],
+        model_role_bindings: { chat: 'ep' },
+      },
+      listModels: () => Promise.resolve({ ok: true, models: ['m-a'], message: '' }),
+    });
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => expect(result.current.presets.length).toBe(1));
+    expect(result.current.presets[0].contextWindow).toBe(64000);
+    expect(result.current.presets[0].defaultThinkingLevel).toBe('standard');
+  });
+});

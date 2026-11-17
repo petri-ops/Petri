@@ -1,0 +1,62 @@
+{
+  "menuInitial": {
+    "menu": true,
+    "quick": false,
+    "panel": true,
+    "configs": 2,
+    "main": {
+      "display": "none",
+      "ctxValue": "128000",
+      "thinkLevel": "standard",
+      "thinkDisabled": false,
+      "reason": false
+    },
+    "mini": {
+      "display": "none",
+      "ctxValue": "64000",
+      "thinkLevel": "standard",
+      "thinkDisabled": true,
+      "reason": true
+    }
+  },
+  "afterWrite": {
+    "prefs": {
+      "gpt-4o-mini": {
+        "contextWindow": 64000
+      },
+      "gpt-4o": {
+        "contextWindow": 200000,
+        "thinkingLevel": "high"
+      }
+    },
+    "ctx": 128000,
+    "think": "standard"
+  },
+  "autoBody": {
+    "modelPresetId": "b456-main",
+    "modelName": "gpt-4o",
+    "thinkingLevel": "high"
+  },
+  "sentBodies": [
+    {
+      "modelPresetId": "b456-main",
+      "modelName": "gpt-4o",
+      "thinkingLevel": "high"
+    },
+    {
+      "modelPresetId": "b456-main",
+      "modelName": "gpt-4o-mini",
+      "thinkingLevel": "standard"
+    },
+    {
+      "modelPresetId": "b456-main",
+      "modelName": "gpt-4o",
+      "thinkingLevel": "off"
+    },
+    {
+      "modelPresetId": "b456-main",
+      "modelName": "gpt-4o",
+      "thinkingLevel": "high"
+    }
+  ]
+}

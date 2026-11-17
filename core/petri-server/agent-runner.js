@@ -651,7 +651,7 @@ async function runAgentLoop({
       try {
         const settings = getAiSettings();
         const profile = (settings.model_profiles || []).find((p) => p.id === profileId);
-        return profile && profile.contextWindow;
+        return require('../shared-backend/llm-providers/model-profile').resolveModelContextWindow(profile, modelName);
       } catch { return undefined; }
     })();
     const { getContextWindowForBudget } = require('./helpers/token-estimator');

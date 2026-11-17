@@ -1,0 +1,1 @@
+用法：node scripts/block114-failure-triage.mjs <failures.json> [-o report.json]

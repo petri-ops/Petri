@@ -96,7 +96,7 @@ describe('ContextBudgetButton（UI-622 真实构成）', () => {
   it('窗口未知时诚实提示配置入口，而不是显示假分母', () => {
     const { container } = render(<ContextBudgetButton budget={null} activeContextWindow={0} />);
     openPanel();
-    expect(container.textContent).toContain('模型上下文窗口未知，可在设置中配置');
+    expect(container.textContent).toContain('模型上下文窗口未知，可在模型菜单悬停模型行配置');
   });
 
   it('知识空间仅在存在时单列（零注入不刷噪声）', () => {
