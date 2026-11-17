@@ -1,17 +1,17 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-16T17:55:27.534Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-17T00:08:03.179Z
 
 ## 0. 覆盖汇总
 
 | 面 | 数量 |
 | --- | --- |
-| 工具定义 | 115（16 域；文本降级 0 域） |
-| 工具契约 | 115 |
-| 调度元数据 | 116 |
+| 工具定义 | 117（16 域；文本降级 0 域） |
+| 工具契约 | 117 |
+| 调度元数据 | 118 |
 | IPC 通道 | 170（preload 缺包装 2；前端零消费 167） |
-| 路由端点 | 287（47 模块；未挂载 0） |
+| 路由端点 | 289（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
 | 判定 P1 / P2 / P3 | **0 / 0 / 2** |
 
@@ -50,6 +50,8 @@
 | `act` | browser | ✓ | ✓ | ✓ | R2 | execution | yes | yes | - |
 | `read_image` | browser | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
 | `read_video` | browser | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
+| `transcribe_audio` | browser | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
+| `speak_text` | browser | ✓ | ✓ | ✓ | R2 | workspace-write | no | yes | - |
 | `browser_connect` | browser | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `browser_act` | browser | ✓ | ✓ | ✓ | R2 | external-request | yes | yes | - |
 | `browser_status` | browser | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
