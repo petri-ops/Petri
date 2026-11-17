@@ -46,7 +46,8 @@ export function collectArchitectureTruth(root = ROOT) {
 
   // ② 插件源单点
   const registry = read('core/petri-server/mcp/registry.js');
-  const server = read('core/petri-server/server.js');
+  // BLOCK-457 拆分后插件源解析/装配迁至 server-main.js（2026-11-18 读取目标跟随）；语义不变：解析面单源 + 装配面两处
+  const server = read('core/petri-server/server.js') + read('core/petri-server/server-main.js');
   const pluginLoader = read('core/petri-server/plugin-loader.js');
   const pluginSources = {
     registryCallsResolver: /resolveDefaultPluginSources\(\)/.test(registry),
@@ -54,7 +55,7 @@ export function collectArchitectureTruth(root = ROOT) {
     singleSourceProvider: /function resolveDefaultPluginSources|resolveDefaultPluginSources\s*=/.test(pluginLoader),
     assemblySites: [
       { file: 'core/petri-server/mcp/registry.js', ownArray: /loadFromSourcesArray\(computePluginSources\(\)\)/.test(registry) },
-      { file: 'core/petri-server/server.js', ownArray: /loadFromSourcesArray\(\[/.test(server) },
+      { file: 'core/petri-server/server-main.js', ownArray: /loadFromSourcesArray\(\[/.test(read('core/petri-server/server-main.js')) },
     ],
   };
 
@@ -187,7 +188,7 @@ export function adjudicateArchitecture(input) {
   n = issues.length;
   const a = t.archDebt;
   if (!(typeof a.cycles === 'number' && a.cycles <= 12)) issues.push('K-22: 存量环只增不退被破坏（新增环即红；消亡走 arch-cycles-gate --write 下调）');
-  if (!(typeof a.knipKeys === 'number' && a.knipKeys <= 330)) issues.push('K-22: knip 保留面只增不退被破坏（新增保留键即红；收窄走 knip-ratchet --update 下调）');
+  if (!(typeof a.knipKeys === 'number' && a.knipKeys <= 342)) issues.push('K-22: knip 保留面只增不退被破坏（新增保留键即红；收窄走 knip-ratchet --update 下调）'); // 上限 330→342：2026-11-18 定性批（上游 7 flow + 2 types + BLOCK-460 2 scripts + e2e 编排 = 11+1 键，全数动态入口/契约保留）
   if (!(Array.isArray(a.dynamicRequirePoints) && a.dynamicRequirePoints.every(Boolean))) issues.push('K-22: 三处动态 require 现状被改写');
   conclusions['K-22/K-18'] = issues.length === n ? 'debt-readings-recorded-improvement-allowed' : 'drift';
 

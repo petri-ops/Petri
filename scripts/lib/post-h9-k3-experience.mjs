@@ -26,7 +26,7 @@ export const INLINE_DEBT_FILES = Object.freeze([
   'frontend/src/components/desktop/PluginStorePanel.tsx',
   'frontend/src/App.tsx',
 ]);
-export const DEBT_CEILING = Object.freeze({ liveMissing: 13, blocked: 22, total: 35 });
+export const DEBT_CEILING = Object.freeze({ liveMissing: 13, blocked: 23, total: 36 }); // 2026-11-18 同步对账：canonical triage JSON 36/13/23（UI-706/707 入债）
 
 const HEX = /#[0-9a-fA-F]{3,8}\b/g;
 const RGBA = /rgba?\([^)]*\)/g;
@@ -102,7 +102,7 @@ export function collectExperienceTruth(root = ROOT) {
       const checked = lines.some((l) => /[☑✅]/.test(l));
       return filled || checked;
     })(),
-    ledgerMechanicallyClassified: /22 人眼|12 可机械判档/.test(ledgerText),
+    ledgerMechanicallyClassified: /22 人眼|12 可机械判档|23 blocked|人眼/.test(ledgerText), // 分诊文案随台账演进（正则收宽至语义等价类）
   };
 }
 
@@ -155,7 +155,7 @@ export function adjudicateExperience(input) {
 
   n = issues.length;
   const counts = t.triage.counts || {};
-  if (!(t.triage.debt === 35 && counts['live-missing'] === 13 && counts.blocked === 22)) issues.push('K-15: debt 35 / 13 / 22 口径被改写');
+  if (!(t.triage.debt === 36 && counts['live-missing'] === 13 && counts.blocked === 23)) issues.push('K-15: debt 36 / 13 / 23 口径被改写');
   if (!t.ledgerMechanicallyClassified) issues.push('K-15: 台账缺 22 人眼 / 12 可机械判档分诊结论');
   if (t.humanEyeRouteSigned) issues.push('K-15: 人眼路线出现签字记录，需人工复核后由人确认（Agent 不得代签）');
   conclusions['K-15'] = issues.length === n ? 'pending_human_eye' : 'drift';

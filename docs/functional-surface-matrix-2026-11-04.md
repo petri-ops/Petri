@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 27 个不计入判定）。生成时间：2026-11-17T06:42:36.731Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-17T18:41:43.712Z
 
 ## 0. 覆盖汇总
 
@@ -159,30 +159,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M core/petri-server/agent-runner.js`
-- `M core/petri-server/routes/ai-chat.js`
-- `M core/petri-server/routes/ai-settings-api.js`
-- `M frontend/src/components/copilot/ContextBudgetBar.test.tsx`
-- `M frontend/src/components/copilot/ContextBudgetBar.tsx`
-- `M frontend/src/components/copilot/SimpleChat.tsx`
-- `M frontend/src/components/copilot/SimpleChat/ModelMenu.tsx`
-- `M frontend/src/components/copilot/SimpleChat/ModelPreferenceControls.module.css`
-- `M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts`
-- `M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts`
-- `D frontend/src/components/copilot/SimpleChat/hooks/useContextWindowQuickPick.ts`
-- `M frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts`
-- `M frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx`
-- `M frontend/src/components/copilot/simple-chat.css`
-- `M frontend/src/components/copilot/thinkingLevel.drift.test.ts`
-- `M frontend/src/components/copilot/thinkingLevel.test.ts`
-- `M frontend/src/components/copilot/thinkingLevel.ts`
-- `M frontend/src/components/desktop/DesktopSettingsPanel.tsx`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/EndpointEditorDensity.test.ts`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/EndpointMainTable.test.ts`
-- `M frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts`
-- `M frontend/src/components/desktop/desktop.css`
-- `M frontend/src/hooks/useAiSettings.test.ts`
-- `M frontend/src/hooks/useAiSettings.ts`
-- `?? frontend/src/components/copilot/SimpleChat/hooks/useModelQuickConfig.ts`
-- `?? frontend/src/lib/model-preferences.test.ts`
-- `?? frontend/src/lib/model-preferences.ts`
+（无）

@@ -285,9 +285,9 @@
       "path": "core/petri-server/helpers/scene3d.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1166,
-      "bytes": 58153,
-      "sha256": "deeed14c5924186d78b18ce2ad597367cc7e755ab2f9375e2a8572eaf7f79f76"
+      "lines": 1165,
+      "bytes": 58091,
+      "sha256": "281bb2bdcb1325c77afbdcea64922743d8a24e888f33478d6effbbaa67736a99"
     },
     {
       "path": "core/packages/shared-config/config-schema.js",
@@ -498,6 +498,14 @@
       "sha256": "e451534aa74bb09d80e9366d81afdc9950aec3ad4b31706c1798646e5b274862"
     },
     {
+      "path": "core/petri-server/agent-tools/tool-events.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 800,
+      "bytes": 35697,
+      "sha256": "3267dce34d4bba919ff294e9d4099c2deaf64af15e70e159bcaa93a92e169d0d"
+    },
+    {
       "path": "core/petri-server/helpers/svg-ops.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -512,14 +520,6 @@
       "lines": 799,
       "bytes": 28726,
       "sha256": "0b5bb0053bd6cc65405c89f2347638e08babdda4693965e32829a57f7885bc1f"
-    },
-    {
-      "path": "core/petri-server/agent-tools/tool-events.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 798,
-      "bytes": 35633,
-      "sha256": "e5f15110fe72c0d3a57d2901e8ebaf054245d9f88d3f392e33d725973cf4441b"
     },
     {
       "path": "frontend/src/components/annotations/AnnotationOverlay.tsx",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86295
+  "total": 86296
 }

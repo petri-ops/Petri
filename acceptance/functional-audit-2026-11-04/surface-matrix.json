@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T06:42:36.731Z",
+  "generatedAt": "2026-11-17T18:41:43.712Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 117,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 27,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5960,34 +5960,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M core/petri-server/agent-runner.js",
-    "M core/petri-server/routes/ai-chat.js",
-    "M core/petri-server/routes/ai-settings-api.js",
-    "M frontend/src/components/copilot/ContextBudgetBar.test.tsx",
-    "M frontend/src/components/copilot/ContextBudgetBar.tsx",
-    "M frontend/src/components/copilot/SimpleChat.tsx",
-    "M frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
-    "M frontend/src/components/copilot/SimpleChat/ModelPreferenceControls.module.css",
-    "M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.test.ts",
-    "M frontend/src/components/copilot/SimpleChat/hooks/useChatStream.ts",
-    "D frontend/src/components/copilot/SimpleChat/hooks/useContextWindowQuickPick.ts",
-    "M frontend/src/components/copilot/SimpleChat/hooks/useModelAccessMenus.ts",
-    "M frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
-    "M frontend/src/components/copilot/simple-chat.css",
-    "M frontend/src/components/copilot/thinkingLevel.drift.test.ts",
-    "M frontend/src/components/copilot/thinkingLevel.test.ts",
-    "M frontend/src/components/copilot/thinkingLevel.ts",
-    "M frontend/src/components/desktop/DesktopSettingsPanel.tsx",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/EndpointEditorDensity.test.ts",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/EndpointMainTable.test.ts",
-    "M frontend/src/components/desktop/DesktopSettingsPanel/useEndpointProfilesEditor.ts",
-    "M frontend/src/components/desktop/desktop.css",
-    "M frontend/src/hooks/useAiSettings.test.ts",
-    "M frontend/src/hooks/useAiSettings.ts",
-    "?? frontend/src/components/copilot/SimpleChat/hooks/useModelQuickConfig.ts",
-    "?? frontend/src/lib/model-preferences.test.ts",
-    "?? frontend/src/lib/model-preferences.ts"
-  ],
+  "dirty": [],
   "defNotes": []
 }
