@@ -8374,7 +8374,7 @@
     },
     {
       "id": "block454-ui704-evidence",
-      "note": "BLOCK-454（e2e W1-W5 五波 acceptance/block-454/p1..p5）与 UI-704（acceptance/ui-704 实机腿+契约测试证据）的存储证据目录：证据变更选本包波次测试重跑（HK-01 契约面）；block-450 为历史存证目录（其收口早已完成、无读取测试），登记避免 unknown fail-closed 误升级——目录存在即被 test-affected 的 evidence.json 虚拟路径扫描覆盖。",
+      "note": "BLOCK-454（e2e W1-W5 五波 acceptance/block-454/p1..p5）与 UI-704（acceptance/ui-704 实机腿+契约测试证据）的存储证据目录：证据变更选本包波次测试重跑（HK-01 契约面）；block-450 为历史存证目录（其收口早已完成、无读取测试），登记避免 unknown fail-closed 误升级——目录存在即被 test-affected 的 evidence.json 虚拟路径扫描覆盖。（2026-11-18 补挂上游同步带入的 block454-p6-speech 契约测试）",
       "patterns": [
         "acceptance/block-450/**",
         "acceptance/block-454/**",
@@ -8385,7 +8385,8 @@
         "test/block454-p2-deepseek-search.test.mjs",
         "test/block454-p3-ocr.test.mjs",
         "test/block454-p4-files.test.mjs",
-        "test/block454-p5-responses.test.mjs"
+        "test/block454-p5-responses.test.mjs",
+        "test/block454-p6-speech.test.mjs"
       ],
       "commands": [
         "docs-check"
@@ -8697,6 +8698,81 @@
       ],
       "tests": [
         "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "block460-scene-joints",
+      "note": "BLOCK-460 3D P1 首包：SceneSpec v1 additive joints 校验 + sand3d GLB 归一器 + sand3d-runner sidecar + model3d-authoring 产品 Skill；改这些面必跑两条契约测试与 skills:check。 证据目录 acceptance/block460/** 同规则认领。",
+      "patterns": [
+        "core/petri-server/helpers/scene3d.js",
+        "core/petri-server/helpers/scene3d-import.js",
+        "sidecars/sand3d-runner/**",
+        "resources/skills/model3d-authoring/**",
+        "acceptance/block460/**"
+      ],
+      "tests": [
+        "test/block460-scene-joints.test.mjs",
+        "test/block460-glb-import.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "block459-3d-p0-probe",
+      "note": "BLOCK-459 3D P0 可行性探针证据（探针判据=可行）。改这些证据面必跑 block460 契约测试（IR 归一语义源于探针）。",
+      "patterns": [
+        "acceptance/block-459/**"
+      ],
+      "tests": [
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "e2e-batch-s1-clearing",
+      "note": "e2e 预授权批 S1 清账证据（治理对账，无产品门禁）。",
+      "patterns": [
+        "acceptance/e2e-batch-s1-clearing-2026-11-18/**"
+      ],
+      "tests": [],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "upstream-sync-acceptance-coverage",
+      "note": "上游同步遗留证据目录的机械覆盖（block-457/ui-421/ui-703-wide-header/video-north-star 无 evidence.json，2026-11-17/18 同步入库；仅登记读取映射，不代写他人证据内容）。",
+      "patterns": [
+        "acceptance/block-457/**",
+        "acceptance/ui-421/**",
+        "acceptance/ui-703-wide-header/**",
+        "acceptance/video-north-star-2026-11-18/**"
+      ],
+      "tests": [],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
+      "id": "upstream-sync-test-registration",
+      "note": "上游同步（2026-11-17/18）带入的测试文件机械补挂（W5a 契约：每个测试文件必须被 impact-map 引用）：agent-task-resume 路由消歧 / BLOCK-450 M2 task_events 唯一约束 / UI-421 一键解锁 / UI-705 UpdatePill。",
+      "patterns": [
+        "src/ipc/agent-tasks.js",
+        "core/petri-server/db/migrations/*task_events*",
+        "frontend/src/components/desktop/titlebar/UpdatePill*",
+        "frontend/src/components/desktop/WorkingTreeReview/**"
+      ],
+      "tests": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m2-db-task-events-unique.test.mjs",
+        "test/ui421-manage-unlock-button.test.mjs",
+        "test/ui705-update-pill.test.mjs"
       ],
       "commands": [
         "docs-check"

@@ -1,0 +1,32 @@
+{
+  "package": "BLOCK-459-3D-P0-PROBE",
+  "recordedAt": "2026-11-18",
+  "environment": "macOS arm64 · 临时隔离 venv /tmp/block459-sand3d-venv（python3.11 + bpy 4.5.16 + sand3d 1.6.3，pip-freeze.txt）· 零全局安装 · 零产品 manifest 改动",
+  "summary": "3D P0 可行性探针收口=可行：GLB extras 实测 schema（s3d_joint{name,type,value,axis,lower,upper,mimic?}）、kind 值域实测 revolute|prismatic|continuous|floating、六行映射 4 direct+2 convert 零不可行项、双进程 sha256 确定性一致。",
+  "files": [
+    "PROBE-REPORT.md",
+    "scene-ir-v0-draft.md",
+    "SHA256SUMS.txt",
+    "probe-rest.glb",
+    "probe-rest-run1.glb",
+    "probe-posed45.glb",
+    "probe-kinds.glb",
+    "probe-rest.urdf",
+    "rest-nodes-dump.json",
+    "mapping-verdicts.json",
+    "probe_assembly.py",
+    "probe_kinds.py",
+    "parse_glb.py",
+    "verify_mapping.py",
+    "sand3d-api-official.md",
+    "pip-freeze.txt",
+    "run2.log"
+  ],
+  "keyEvidence": {
+    "determinism": "probe-rest.glb 与 probe-rest-run1.glb sha256 一致（2e803be3…）",
+    "schema": "rest-nodes-dump.json（逐节点 extras 原文）",
+    "mappingVerdicts": "mapping-verdicts.json（机械三态输出）",
+    "planSection": "docs/block-459-3d-p0-probe-plan.md §6"
+  },
+  "result": "PASS（探针判据=可行，S3=BLOCK-460 据此启动）"
+}

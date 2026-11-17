@@ -1,12 +1,12 @@
 ---
 capability: block460-scene-joints
 status: active
-goal: 3D 造物域 P1 首包（BLOCK-460）——SceneSpec v1 additive 关节扩展（scene3d.js 零破坏）+ sand3d GLB→SceneSpec 归一器（fail-closed）+ sand3d runner sidecar（run_cmd guard-ack 链内）+ 3d-authoring 产品 Skill + 一个可动装配端到端（程序→GLB→IR→校验绿→digest 锚定）
+goal: 3D 造物域 P1 首包（BLOCK-460）——SceneSpec v1 additive 关节扩展（scene3d.js 零破坏）+ sand3d GLB→SceneSpec 归一器（fail-closed）+ sand3d runner sidecar（run_cmd guard-ack 链内）+ model3d-authoring 产品 Skill + 一个可动装配端到端（程序→GLB→IR→校验绿→digest 锚定）
 acceptance:
   - joints[] additive 扩展契约测试红→绿（HK-01），既有 scene3d 契约测试零回归
   - GLB 归一器契约测试红→绿：真实探针 GLB fixture → SceneSpec(+joints) 文档，轴向四元数变换/单位归一/rest 校验/floating 映射/mimic 映射逐项断言
   - runner sidecar 零新 IPC：agent 经 run_cmd 调用（guard-ack 审批链内），venv 幂等 bootstrap（pin sand3d==1.6.3）
-  - 3d-authoring 产品 Skill 过 skills:check + manifest 登记
+  - model3d-authoring 产品 Skill 过 skills:check + manifest 登记
   - 端到端证据落 acceptance/block460/（digest 双锚：program fingerprint + GLB sha256）
 ---
 
@@ -49,9 +49,9 @@ acceptance:
   - **零新 IPC/零新 agent 工具**：agent 经既有 `run_cmd`（guard-ack 审批链）调用本脚本——不建第二执行通道（charter §3.4）。
   - runner 自身不联网（bootstrap 除外）不读任意路径（program 路径限 workspace 相对）。
 
-### D · 3d-authoring 产品 Skill（L0）
+### D · model3d-authoring 产品 Skill（L0）
 
-- `resources/skills/3d-authoring/`（沿 design-brief 包形态：`skill.json` + `prompts/system.md` + `README.md`）：plan-first 工作流（部件计划→程序→runner→归一→验证）；sand3d API 摘要（探针实测口径）；SceneSpec joints 契约摘要；明确「执行走 run_cmd 审批」「capability 默认关」「观感不代签」。
+- `resources/skills/model3d-authoring/`（沿 design-brief 包形态：`skill.json` + `prompts/system.md` + `README.md`）：plan-first 工作流（部件计划→程序→runner→归一→验证）；sand3d API 摘要（探针实测口径）；SceneSpec joints 契约摘要；明确「执行走 run_cmd 审批」「capability 默认关」「观感不代签」。
 - `resources/skills/manifest.json` 登记 + `npm run skills:check` 绿。
 
 ### E · 可动装配端到端（判据：M1 子集）

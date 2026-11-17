@@ -21,9 +21,9 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1957,
-      "bytes": 97029,
-      "sha256": "f8399c7fd6de29b48f43a855359d84cd664054b455ecbedf2ecc66b356aefa81"
+      "lines": 1940,
+      "bytes": 95820,
+      "sha256": "686211b2d00aa553e7fb468814d83b04625ab4279a916d5552798e4f706dfea2"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -205,17 +205,17 @@
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5452,
-      "bytes": 132110,
-      "sha256": "997b1926a16ab0abd57f98c00a6fe3c551dbe362a8fdad11c0aa596009531599"
+      "lines": 5450,
+      "bytes": 131944,
+      "sha256": "247ad2552e1b332e8c8ab08d22becf5bb153525ae90a3f536db811474d96dc0f"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 2212,
-      "bytes": 53857,
-      "sha256": "e8e556a9efd42e66574b0b474b538efe258c10ce6b31a38b918a541e907589ec"
+      "bytes": 53862,
+      "sha256": "a6d73aefc6c49158e953113ad8c0afc05613cc1c784bb69942ace4aeb0abbecf"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
@@ -282,6 +282,14 @@
       "sha256": "1eca3b47669afacc89acd4a46b572682f522f81fbc42a410c8f7cf25ef22b5e9"
     },
     {
+      "path": "core/petri-server/helpers/scene3d.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1166,
+      "bytes": 58153,
+      "sha256": "deeed14c5924186d78b18ce2ad597367cc7e755ab2f9375e2a8572eaf7f79f76"
+    },
+    {
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -312,14 +320,6 @@
       "lines": 1110,
       "bytes": 46469,
       "sha256": "9b4943ebb626532b5025b882b9a94e77d67f4f2b33173899db144c0c4f4d9106"
-    },
-    {
-      "path": "core/petri-server/helpers/scene3d.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1087,
-      "bytes": 53527,
-      "sha256": "d66de73723bd188065674e10ae4cccdb2ec85d3fad48fe65a2054398a938c75a"
     },
     {
       "path": "core/petri-server/agent-tools/spawn-agent-tools.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86235
+  "total": 86295
 }

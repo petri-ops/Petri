@@ -1,0 +1,67 @@
+{
+  "skillManifestVersion": 1,
+  "id": "model3d-authoring",
+  "name": "3D 造物工作流",
+  "version": "1.0.0",
+  "description": "把 3D 创造请求转成可审计的确定性流水线：部件计划 → sand3d 程序 → runner 执行（run_cmd 审批链内）→ GLB → SceneSpec v1(+joints) 归一校验 → 证据登记；rest 导出、fail-closed、观感不代签。",
+  "category": "3d/authoring",
+  "tags": [
+    "3d",
+    "sand3d",
+    "scene3d",
+    "assembly",
+    "joints",
+    "evidence"
+  ],
+  "source": "built-in",
+  "capabilities": [
+    "3d-authoring",
+    "procedural-modeling",
+    "scene-joints",
+    "run-guard-ack"
+  ],
+  "plugins": {
+    "required": [],
+    "optional": []
+  },
+  "workflows": {
+    "default": "default"
+  },
+  "prompts": {
+    "system_file": "prompts/system.md",
+    "user_templates": [
+      "用 sand3d 建一个 {object}，带可动关节，走完 3D 造物流水线并登记证据",
+      "为 {assembly} 写部件计划，先给我审阅再执行",
+      "把这个 sand3d 程序跑一遍并归一成 SceneSpec，指出关节域与 rest 校验结果"
+    ]
+  },
+  "parameters": {
+    "required": [],
+    "optional": {
+      "object": {
+        "type": "string",
+        "description": "要造的对象/装配描述"
+      },
+      "planFirst": {
+        "type": "boolean",
+        "description": "是否先出部件计划等审阅（默认 true）"
+      }
+    }
+  },
+  "outputs": {
+    "primary": [
+      {
+        "id": "scene-spec",
+        "type": "json",
+        "description": "SceneSpec v1(+joints) 场景文档与 GLB 产物（scene3d.json 形态）"
+      }
+    ],
+    "secondary": [
+      {
+        "id": "evidence",
+        "type": "json",
+        "description": "digest 双锚 + 校验结论证据"
+      }
+    ]
+  }
+}

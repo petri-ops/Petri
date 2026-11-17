@@ -21,7 +21,7 @@ const sampleManifest = (digest) => ({
   },
 });
 
-test('现场：12 条内置 skill 摘要在册且无漂移', () => {
+test('现场：内置 skill 摘要在册且无漂移（BLOCK-460 起 13 条）', () => {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
   const digests = {};
   for (const id of Object.keys(manifest.skills)) {
@@ -29,7 +29,7 @@ test('现场：12 条内置 skill 摘要在册且无漂移', () => {
   }
   const r = evaluateSkillIntegrity(manifest, digests);
   assert.equal(r.ok, true, JSON.stringify(r.issues));
-  assert.equal(r.checked.length, 12);
+  assert.equal(r.checked.length, 13); // BLOCK-460 新增 model3d-authoring（机械计数随内置 Skill 演进）
 });
 
 test('摘要确定性：同目录两次计算结果一致', () => {

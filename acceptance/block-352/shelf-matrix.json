@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-04T22:00:57.397Z",
+  "at": "2026-11-17T17:56:29.671Z",
   "shelves": {
     "skills": [
       {
@@ -15,6 +15,13 @@
         "source": "built-in",
         "verdict": "available",
         "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "design-brief",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=design-brief，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
       },
       {
         "shelf": "skills",
@@ -43,6 +50,13 @@
         "source": "built-in",
         "verdict": "available",
         "basis": "SKILL.md front-matter 合规；契约校验=npm run skills:check；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
+        "name": "model3d-authoring",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=model3d-authoring，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
       },
       {
         "shelf": "skills",
@@ -106,8 +120,8 @@
         "shelf": "plugins",
         "name": "expression-qc",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_a294c6937f874932（demo 输入 → 10 产物）；catalog 在架",
-        "jobId": "job_a294c6937f874932"
+        "basis": "真实动作=真跑完成 job=job_1934c41fa0884082（demo 输入 → 10 产物）；catalog 在架",
+        "jobId": "job_1934c41fa0884082"
       },
       {
         "shelf": "plugins",
@@ -120,8 +134,8 @@
         "shelf": "plugins",
         "name": "deg-standardizer",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_3672056504ad4364（demo 输入 → 7 产物）；catalog 在架",
-        "jobId": "job_3672056504ad4364"
+        "basis": "真实动作=真跑完成 job=job_5cdfc15e62d44dff（demo 输入 → 7 产物）；catalog 在架",
+        "jobId": "job_5cdfc15e62d44dff"
       },
       {
         "shelf": "plugins",
@@ -141,8 +155,8 @@
         "shelf": "plugins",
         "name": "volcano-plot",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_974a631ea61b469a（demo 输入 → 5 产物）；catalog 在架",
-        "jobId": "job_974a631ea61b469a"
+        "basis": "真实动作=真跑完成 job=job_603eadef78b04daf（demo 输入 → 5 产物）；catalog 在架",
+        "jobId": "job_603eadef78b04daf"
       },
       {
         "shelf": "plugins",
@@ -165,10 +179,10 @@
     }
   },
   "totals": {
-    "skills": 14,
+    "skills": 16,
     "plugins": 7,
     "verdicts": {
-      "available": 17,
+      "available": 19,
       "detour": 4
     },
     "allJudged": true

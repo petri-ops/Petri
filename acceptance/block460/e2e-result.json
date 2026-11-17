@@ -1,0 +1,146 @@
+{
+  "at": "2026-11-17T17:47:39.849Z",
+  "checks": [
+    {
+      "name": "runner-ok",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "out": "acceptance/block460/e2e-out",
+        "artifacts": [
+          {
+            "name": "cabinet.glb",
+            "bytes": 4272,
+            "sha256": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef"
+          }
+        ],
+        "fingerprint": "fee4e403d8206135",
+        "programSha256": "71b85527781d6825aa480355684d391751415854c627a4d3020673c5c077a347",
+        "stdout": "fingerprint: fee4e403d8206135\nINFO Draco mesh compression is available, use library at /Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/sand3d-venv/lib/python3.11/site-packages/bpy/4.5/scripts/addons_core/io_scene_gltf2/libextern_draco.dylib\n01:47:39 | INFO: Starting glTF 2.0 export\n01:47:39 | INFO: Extracting primitive: body\n01:47:39 | INFO: Primitives created: 1\n01:47:39 | INFO: Extracting primitive: door\n01:47:39 | INFO: Primitives created: 1\n01:47:39 | INFO: Extracting primitive: drawer\n01:47:39 | INFO: Primitives created: 1\n01:47:39 | INFO: Finished glTF 2.0 export in 0.0025708675384521484 s\n\ne2e assembly exported ok\n"
+      }
+    },
+    {
+      "name": "runner-fingerprint-present",
+      "pass": true,
+      "detail": "fee4e403d8206135"
+    },
+    {
+      "name": "glb-artifact-present",
+      "pass": true,
+      "detail": [
+        {
+          "name": "cabinet.glb",
+          "bytes": 4272,
+          "sha256": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef"
+        }
+      ]
+    },
+    {
+      "name": "import-ok",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "import-rest-pose",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "digest-cross-match",
+      "pass": true,
+      "detail": {
+        "imported": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef",
+        "runner": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef"
+      }
+    },
+    {
+      "name": "scene-valid",
+      "pass": true,
+      "detail": null
+    },
+    {
+      "name": "joints-extracted",
+      "pass": true,
+      "detail": [
+        "door_hinge",
+        "drawer_slide"
+      ]
+    },
+    {
+      "name": "hinge-revolute-z-range-deg",
+      "pass": true,
+      "detail": {
+        "id": "door_hinge",
+        "child": "leaf",
+        "parent": "body",
+        "kind": "revolute",
+        "axis": [
+          0,
+          -1.3435883843274954e-7,
+          0.9999999999999911
+        ],
+        "range": {
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "name": "slide-prismatic-y-range-mm",
+      "pass": true,
+      "detail": {
+        "id": "drawer_slide",
+        "child": "drawer",
+        "parent": "body",
+        "kind": "prismatic",
+        "axis": [
+          0,
+          -0.9999999999999911,
+          -1.3435883843274954e-7
+        ],
+        "range": {
+          "min": 0,
+          "max": 80
+        }
+      }
+    },
+    {
+      "name": "provenance-digest",
+      "pass": true,
+      "detail": {
+        "producer": "sand3d",
+        "producerVersion": "1.6.3",
+        "programDigest": "fee4e403d8206135",
+        "glbSha256": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef",
+        "exportedFrom": "sand3d GLB extras.s3d_joint（BLOCK-459 实测 schema）",
+        "schemaNote": "SceneSpec v1 additive joints；角度=deg、长度=mm（导出层 rad/m 已换算）"
+      }
+    }
+  ],
+  "allPass": true,
+  "runner": {
+    "out": "acceptance/block460/e2e-out",
+    "fingerprint": "fee4e403d8206135",
+    "programSha256": "71b85527781d6825aa480355684d391751415854c627a4d3020673c5c077a347",
+    "artifacts": [
+      {
+        "name": "cabinet.glb",
+        "bytes": 4272,
+        "sha256": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef"
+      }
+    ]
+  },
+  "import": {
+    "ok": true,
+    "restPose": true,
+    "glbSha256": "11832f3bc5dd891dee80cd07274808624bde201bc66f4efd79c9851d6e33abef",
+    "joints": 2
+  },
+  "sceneStats": {
+    "nodes": 4,
+    "parameters": 0,
+    "constraints": 0,
+    "joints": 2,
+    "primitiveEstimate": 0
+  }
+}

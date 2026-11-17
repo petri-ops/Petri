@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "source": "built-in",
-  "updated": "2026-11-17",
+  "updated": "2026-11-18",
   "skills": {
     "design-brief": {
       "id": "design-brief",
@@ -22,7 +22,7 @@
         }
       },
       "integrity": {
-        "builtinSha256": "01fcfa434596c9580de5f7ca19250d9a0f485e7814f73ae00ec23f3046ca6fd6"
+        "builtinSha256": "72aa582007d242a2a88b1c38dd2d308d3971a10dcff805eef8e22e13367e799b"
       }
     },
     "coding-playbook": {
@@ -234,6 +234,51 @@
       },
       "integrity": {
         "builtinSha256": "94beb2a901929fcb27a0381c7659c3af0afdae045db57977224ad20a695a598e"
+      }
+    },
+    "model3d-authoring": {
+      "id": "model3d-authoring",
+      "version": "1.0.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "3d/authoring",
+      "capabilities": [
+        "3d-authoring",
+        "procedural-modeling",
+        "scene-joints",
+        "run-guard-ack"
+      ],
+      "plugins": {
+        "required": [],
+        "optional": []
+      },
+      "artifacts": {
+        "built-in": {
+          "url": "built-in://skills/3d-authoring",
+          "sha256": null
+        }
+      },
+      "integrity": {
+        "builtinSha256": "c7197151d0ef10db1248da02464740bbabb74236006375ba9e083096d7c8f5ef"
+      },
+      "workflows": {
+        "default": "default"
+      },
+      "outputs": {
+        "primary": [
+          {
+            "id": "scene-spec",
+            "type": "scene3d.json",
+            "description": "SceneSpec v1(+joints) 场景文档与 GLB 产物"
+          }
+        ],
+        "secondary": [
+          {
+            "id": "evidence",
+            "type": "json",
+            "description": "digest 双锚 + 校验结论证据"
+          }
+        ]
       }
     }
   },

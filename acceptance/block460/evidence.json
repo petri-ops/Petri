@@ -1,0 +1,23 @@
+{
+  "package": "BLOCK-460-3D-P1-SCENE-JOINTS",
+  "recordedAt": "2026-11-18",
+  "environment": "macOS arm64 · sidecar venv .petri-dev-user-data/sand3d-venv（bootstrap 幂等，pin sand3d==1.6.3）· 零新 IPC · run_cmd guard-ack 链内调用形态",
+  "summary": "3D P1 首包（L0/L1/L2）：SceneSpec v1 additive joints 校验（红 17+3→绿 15/15，既有邻域 123/123 零回归）+ GLB 归一器 fail-closed + sand3d runner sidecar + model3d-authoring 产品 Skill（skills:check PASS 13 内置）+ 可动装配端到端 11/11（digest 双锚交叉核对）。",
+  "files": [
+    "evidence.json",
+    "red-run.txt",
+    "green-run.txt",
+    "e2e-gate-assembly.py",
+    "e2e-run.mjs",
+    "e2e-result.json",
+    "e2e-cabinet.scene3d.json",
+    "e2e-out/"
+  ],
+  "keyEvidence": {
+    "redGreen": "red-run.txt（20 红）→ green-run.txt（15/15 绿）",
+    "e2e": "e2e-result.json（allPass 11 检查：runner/fingerprint/import/rest/digest 交叉/scene-valid/joints 抽取/provenance）",
+    "sceneDoc": "e2e-cabinet.scene3d.json（door_hinge revolute +Z 0..100°、drawer_slide prismatic -Y 0..80mm、provenance 双锚）",
+    "planSection": "docs/block460-scene-joints-plan.md"
+  },
+  "result": "PASS"
+}
