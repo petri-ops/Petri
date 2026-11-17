@@ -1,0 +1,47 @@
+C-54 — Petri 下一阶段超级总蓝图落档证据
+
+用户裁决（2026-11-17）：「需要做个超级总蓝图」。
+
+定位：
+  acceptance/next-stage-super-blueprint-2026-11-17/SUPER-BLUEPRINT.md
+  是跨计划 projection / index，非 second canonical truth、不启动工作包、不改产品行为。
+  冲突规则：canonical 真源胜出，本文件同批修正。
+
+非第二真相可核验证据：
+  - 文件 §0.1 权威边界矩阵逐项列明 truth：W1-W11=next-work-blueprint、3D=3D blueprint、
+    W11=Gen UI eval、工作包状态=DOC-REGISTRY、广播=AUDIT-LOG、候选=pending-work-backlog、
+    只有里程碑/依赖图/风险视图由本文件维护；
+  - 文件 §0.2 自检明确：无 living-plan/work-package frontmatter、无新 canonical 注册、
+    无 Plan ID、不进入 active/planned 工作包集合、不授权启动。
+  - 冲突规则：canonical 胜出，本文件同批修正。
+
+权威真源：
+  - docs/next-work-blueprint-2026-11-16.md（active living-plan）
+  - docs/3d-authoring-domain-blueprint-2026-11-17.md（planned，当前他方 WIP）
+  - docs/gen-ui-data-plane-evaluation-2026-11-17.md（W11 决策材料，当前他方 WIP）
+  - docs/AUDIT-LOG.md
+  - docs/pending-work-backlog.md
+  - docs/DOC-REGISTRY.json（当前他方 WIP）
+
+汇总内容：
+  - 六档执行序列：用户清账 → 3D 裁决 → W11 → 3D P0/P1 → W10 → C-53 UI 设计质量 → 候选池；
+  - 依赖图、相对里程碑、风险表、角色分工、验收策略、维护规则；
+  - 明确单工作包串行、用户动作不占槽、Jev 仅 advice；
+  - 明确 WIP owner 收口后回写 next-work-blueprint，本文件保留为历史投影。
+
+红线：
+  - 不新建 docs/ 受控文档；
+  - 不碰 DOC-REGISTRY / README / next-work-blueprint / 3D blueprint / Gen UI eval / block-332 triage WIP；
+  - 不装依赖、不开工作包、不伪造人眼签字。
+
+门禁：
+  node --test test/next-stage-super-blueprint.test.mjs → 4/4 PASS
+  npm run test:changed:list → unknown=[]，新目录与测试已被 next-stage-super-blueprint 规则覆盖
+  npm run docs:check → 唯一红=既有 post-h9 D5 文档缺失，非本落档引入
+
+output:judge 如实记录：
+  首轮 fit=3.42，但「非第二真相」目标未过；
+  补权威矩阵与 §0.2 自检后 fit=3.15，仍因同一判词未过；
+  补机械测试后 fit=2.44，整体判词 ESCALATE。三次判词摇摆，最终以可复跑文本/测试事实为准，不把 judge PASS 写成已完成。
+
+当前 Jev 单一建议：3D 依赖/立项裁决材料，最新 confidence=0.92；advice-only，未启动。

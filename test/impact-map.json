@@ -8684,6 +8684,23 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "next-stage-super-blueprint",
+      "note": "C-54 下一阶段超级总蓝图：跨计划 projection/index，统一六档排序、依赖、裁决门、里程碑、风险与验收入口；非 second canonical，不启动工作包。证据 acceptance/next-stage-super-blueprint-2026-11-17/**。",
+      "patterns": [
+        "acceptance/next-stage-super-blueprint-2026-11-17/**",
+        "docs/AUDIT-LOG.md",
+        "docs/pending-work-backlog.md",
+        "docs/DOC-REGISTRY.json",
+        "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "tests": [
+        "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }
