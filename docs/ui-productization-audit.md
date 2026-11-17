@@ -85,7 +85,7 @@
 - **能力位链**：钉住按钮接 viewerAdapter 能力位（无适配器给具体原因 title，previewLoading 保留）。
 - **实机腿（2026-11-08）**：block383-live-legs flow **8/8 allPass**（acceptance/post-nso-2026-11-08/block383-live-legs-live-darwin.json）——重放横幅实机文案「HTTP 503（30 秒后自动重试，第 1/3 次）」/空 flags 段三行 server-flag 渲染/折叠 inert=true/aria-hidden=true/孤儿 px 字号零命中/树语义在座。DOM 预算窗口化与布局单源仍=独立切片待发令（不入本条验收）。
 
-## UI-703: API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 **in_progress（代码+契约测试+主题门禁绿；实机截图过目窄容器路径，宽表头观感归人眼）**）
+## UI-703: API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 in_progress → **2026-11-17 verified（宽表头不可达根因修复 + 实机读数 + 用户过目确认「顺了」）**）
 
 - **改动**：`DesktopSettingsPanel.tsx` 表头及窄容器字段标签「上下文窗口」→「上下文」（4 字→2 字，96px 固定列内不再换行）；顶部两段说明合并为一段，Key 显示/导出细节下沉到 `title` 悬停。`VisionRoleBinding.tsx` / `EmbeddingRoleBinding.tsx` 删除正常态长说明段，仅保留无渠道/未绑定异常态提示（`title` 悬停已承载关键约束）。`desktop.css` 在 `.petri-endpoint-list-header` 主定义块直接加 `white-space:nowrap`（非追加覆盖，符合布局纪律）。
 - **证据**：EndpointEditorDensity 契约 5/5（列名/文案/nowrap）+ VisionRoleBinding 3/3 + EmbeddingRoleBinding 4/4 + theme-token-contract 19/19 + tsc 0。
@@ -100,7 +100,7 @@
 - **实机腿（9223 离屏，2026-11-17）**：`ui704-live` flow **11/11 allPass**（core 5 组逐项/高级默认收起/快捷键不在首屏/展开后 7 子项可见/`?section=general` 归一 maintenance 同屏/`?section=diagnostics` 自动展开+激活/能力渠道折叠块默认收起+展开后双选择器在场且 SearXNG 默认/UpdateCard 无推送缺席/Cmd+, 快捷键进设置）；截图 5 张在册（全页 PNG 非元素级裁剪，诚实标注）；instance=9223 离屏跑完立即 kill、未设 PETRI_TEST_ONSCREEN；证据=`acceptance/ui-704/live-flow.json` + `shots/`。
 - **证据等级与诚实边界**：机械断言+实机腿已过；**宽窄视口观感/卡片与折叠块视觉过目 = pending_human_eye，需用户裁决**（D8 预置裁决同款「待外部确认」：观感归用户，Agent 不代签、不冒 verified；截图为全页非元素级裁剪，如实标注）。
 
-- **W8 追加（2026-11-17，e2e 补充波次「一次性搞完」）——宽表头不可达根因发现并修复**：W8 实机腿（9223 离屏）取证发现**宽表头分支在任何窗口宽度都不可达**——BLOCK-423（UI-702）的 `settings-redesign.module.css` 兜底帽 `> * { max-width: 720px }`（特异性 0,2,1）把 UI-038 的 `.petri-settings-section--models { width: min(100%, 1180px) }` 压死，容器查询 `petri-model-list (max-width:1146px)` 恒命中 → 表头恒 display:none。**修复**=兜底帽之后登记 models 豁免（`> :global(.petri-settings-section--models) { max-width: 1180px }`，特异性 (0,3,1) 更晚出现），其余分区仍吃 720 帽。HK-01：豁免契约测试 2/2（先红后绿）；theme-token-contract 19/19 复绿。**宽表头实机读数**：2400px 视口容器过阈 → 表头 11 列在 DOM 且**单行（每格 20px ≤30 阈）**、元素级裁剪 1298×34 在册（全页+裁剪截图 shots/）；工具=9223 离屏跑完立即 kill 未设 PETRI_TEST_ONSCREEN；证据=acceptance/ui-703-wide-header/live-flow.json。**宽表头观感仍 pending_human_eye（需用户过目后翻 verified），不代签**。
+- **W8 追加（2026-11-17，e2e 补充波次「一次性搞完」）——宽表头不可达根因发现并修复**：W8 实机腿（9223 离屏）取证发现**宽表头分支在任何窗口宽度都不可达**——BLOCK-423（UI-702）的 `settings-redesign.module.css` 兜底帽 `> * { max-width: 720px }`（特异性 0,2,1）把 UI-038 的 `.petri-settings-section--models { width: min(100%, 1180px) }` 压死，容器查询 `petri-model-list (max-width:1146px)` 恒命中 → 表头恒 display:none。**修复**=兜底帽之后登记 models 豁免（`> :global(.petri-settings-section--models) { max-width: 1180px }`，特异性 (0,3,1) 更晚出现），其余分区仍吃 720 帽。HK-01：豁免契约测试 2/2（先红后绿）；theme-token-contract 19/19 复绿。**宽表头实机读数**：2400px 视口容器过阈 → 表头 11 列在 DOM 且**单行（每格 20px ≤30 阈）**、元素级裁剪 1298×34 在册（全页+裁剪截图 shots/）；工具=9223 离屏跑完立即 kill 未设 PETRI_TEST_ONSCREEN；证据=acceptance/ui-703-wide-header/live-flow.json。**观感确认（2026-11-17）**：修复后 9223 --onscreen 窗口停在 settings?section=models，用户与 UI-421 解锁按钮同屏过目宽表头实机形态（11 列单行）并确认「顺了」（对我上轮「两项一起确认即翻 verified」约定的直接回应）；**verified 翻转，确认记录=本行（日期+语境+用户原话）**；若后续观感异议可按本行语境回溯。原「pending_human_eye」终结。
 
 ## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
@@ -5101,14 +5101,14 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **存量红归属（非本包引入，基线对照证实）**：block67-node-agent-fs 4 红（macOS bash verb 面，stash 基线同红）+ node-agent sys_resource 1 红（用例自注 Linux/WSL 语义面）+ P6 源绑定 2 红（已 🟡 在册）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-421: 测试实例管理模式快捷键换键+注册失败显式告警（UI-413 修复批）(2026-09-19 verified，dev Electron 边界内实机全链)
+## UI-421: 测试实例管理模式快捷键换键+注册失败显式告警（UI-413 修复批）(2026-09-19 verified，dev Electron 边界内实机全链；2026-11-17 加映一键解锁按钮 verified——用户实机体感确认)
 
 - **来源**：用户实机反馈「Ctrl+Alt+M 我点了这个 发现没有解锁」——诊断实锤：本机第三方程序（嫌疑=ToDesk 等常驻工具）已用 RegisterHotKey 占住 Ctrl+Alt+M，Electron `globalShortcut.register()` 静默返回 false，UI-413 的按键链路在这类机器上从注册那一刻就不存在；原代码未检查返回值=静默失败无任何线索。
 - **改动**：①默认键换 **Ctrl+Alt+Shift+M**（PowerShell RegisterHotKey 探针实测空闲；env `PETRI_TEST_MANAGE_SHORTCUT` 可覆盖），注册与注入共用同一解析式（`_window-ipc.js` + `_window-create.js`）；②注册结果显式落日志（成功=注册信息，失败=告警+换键指引）；③快捷键经 `--petri-test-manage-shortcut=` 启动参数透传（preload 暴露 `__testManageShortcut`），管理条文案显示真实生效组合键（`TestInstanceBadge.tsx` 四处文案参数化），跨端/覆盖后不再文案漂移。
 - **证据**：实机全链（dev Electron 测试实例）：注册日志 `管理快捷键已注册: Control+Alt+Shift+M`；OS 级按键注入触发 → 主进程 handler → testManageModeChanged 事件 → CDP 探针读徽标「内容已穿透 · Control+Alt+Shift+M 解锁窗口管理」→「管理模式 · 拖本条移动 / 拖边缘调整大小 · Control+Alt+Shift+M 锁回」双向切换确认；旧键对照实验=Ctrl+Alt+M 注册返回 false（占用实锤）。tsc 0 + docs:check/ui:audit:check 双绿。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-- **UI-421 加映（2026-11-17，用户裁决「--onscreen 控制要按 Ctrl+Alt+Shift+M 太麻烦，换成一个可以解锁的按钮，点击即可」）——一键解锁按钮 + 锁定态 hover 窥视**：①徽标条锁定态渲染「🔓 解锁」按钮（点击调 `window:test-manage-toggle` 切换管理模式），解锁态渲染「🔒 锁定」按钮回锁；快捷键保留（双入口并存）。②穿透窗口里按钮本点不到（`setIgnoreMouseEvents(true)` 全穿透）——锁定态改带 `forward:true`（悬停事件达页），徽标条 `onMouseEnter` 触发**窥视**（`window:test-manage-hover` → 主进程临时全交互，点击可落；`onMouseLeave` 且未解锁即回锁 forward 穿透），窥视不改 manageMode 稳态（守卫在先），原双稳态模型零放宽。③主进程 toggle/hover 双 IPC handler（`_window-ipc.js`，与快捷键共用 toggle 闭包）；channels/preload/electron.d.ts 三面同步。**HK-01**：`test/ui421-manage-unlock-button.test.mjs` 4/4（通道/preload 包装/主进程 forward+双 handler+窥视守卫/徽标源契约）+ 组件测试 3/3（锁定点击/解锁回锁/主窗不渲染）+ channels 双向守护 + block59 56/56 + TitleBar 32/32；types/lint/docs 绿。**实机腿**：9223 离屏窗口由用户本人在场过目（--onscreen 打开即为此目的）；按钮点击→解锁→拖动→锁回全链待用户体感确认后随原条目 verified 语义延续（原条目已 verified，本加映为增量，实证=acceptance/ui-421/）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **UI-421 加映（2026-11-17，用户裁决「--onscreen 控制要按 Ctrl+Alt+Shift+M 太麻烦，换成一个可以解锁的按钮，点击即可」）——一键解锁按钮 + 锁定态 hover 窥视**：①徽标条锁定态渲染「🔓 解锁」按钮（点击调 `window:test-manage-toggle` 切换管理模式），解锁态渲染「🔒 锁定」按钮回锁；快捷键保留（双入口并存）。②穿透窗口里按钮本点不到（`setIgnoreMouseEvents(true)` 全穿透）——锁定态改带 `forward:true`（悬停事件达页），徽标条 `onMouseEnter` 触发**窥视**（`window:test-manage-hover` → 主进程临时全交互，点击可落；`onMouseLeave` 且未解锁即回锁 forward 穿透），窥视不改 manageMode 稳态（守卫在先），原双稳态模型零放宽。③主进程 toggle/hover 双 IPC handler（`_window-ipc.js`，与快捷键共用 toggle 闭包）；channels/preload/electron.d.ts 三面同步。**HK-01**：`test/ui421-manage-unlock-button.test.mjs` 4/4（通道/preload 包装/主进程 forward+双 handler+窥视守卫/徽标源契约）+ 组件测试 3/3（锁定点击/解锁回锁/主窗不渲染）+ channels 双向守护 + block59 56/56 + TitleBar 32/32；types/lint/docs 绿。**实机腿+人测确认（第 4 级证据）**：9223 --onscreen 窗口由用户本人在场操作；首测「点了解锁无效」根因=旧进程（改动前启动，主进程 handler 与 forward:true 缺席、渲染层按钮经 HMR 先行出现）——重启实例进程后用户复测原话「顺了」（2026-11-17），覆盖解锁点击/悬停窥视/拖动/锁回全链体感；确认记录=本行（日期+覆盖断言+用户原话）；教训沉淀=**改主进程/preload 代码必须重启实例进程（vite HMR 只覆盖渲染层）**。verified 翻转随原条目语义延续。实证=acceptance/ui-421/。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-420: 联邦面板「项目授权」卡（BLOCK-88 P3 授权边界 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 16/16)
 
