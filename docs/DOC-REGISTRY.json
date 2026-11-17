@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 612,
+    "documentCount": 613,
     "lastUpdated": "2026-11-17",
-    "managedMarkdown": 595
+    "managedMarkdown": 596
   },
   "documents": [
     {
@@ -12480,6 +12480,34 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户端到端预授权 S3=P1 首包；前置 BLOCK-459 探针=可行已收口）：SceneSpec v1 additive 关节扩展（charter §3.2 禁止第二套中间表示仲裁——蓝图 §4.1「新建独立 IR」假设与既有 scene3d.js/model3d 链重叠，落点改为既有链 additive joints[]，version 不变向后兼容）+ GLB→SceneSpec 归一器（探针 N1-N8 规则，fail-closed）+ sand3d runner sidecar（run_cmd guard-ack 链内，零新 IPC）+ model3d-authoring 产品 Skill + 可动装配端到端（digest 双锚）。零内核改动（agent-runner/registry/IPC 零触碰）；渲染/three-live/Polyfork/img2threejs 均非本包。plan=docs/block460-scene-joints-plan.md。【收口 2026-11-18】L0/L1/L2 全交付：scene3d.js additive joints 校验（HK-01 红 20→绿 15/15，既有邻域 123/123 零回归）+ scene3d-import.js 归一器（N1-N8，fail-closed rest 校验）+ sand3d-runner sidecar（bootstrap 幂等 pin 1.6.3 + run JSON 契约）+ model3d-authoring 产品 Skill（skills:check PASS 13 内置）+ 可动装配端到端 11/11 allPass（digest 双锚：fingerprint + glbSha256 交叉核对）。附带完成上游同步缺口机械清偿（工具 pin/model-surface/tool-activity-labels/BLOCK-203 落点/config-transfer 四面接线/silent-catch 豁免/lint 基线/L0-8 单源重生成/陈旧 dist 可逆移出）。证据=acceptance/block460/。"
+    },
+    {
+      "id": "BLOCK-461",
+      "path": "docs/block461-gen-ui-compose-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block461-gen-ui-compose",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block461-gen-ui-compose-plan.md",
+        "frontend/src/components/copilot/gen-ui/compose/",
+        "frontend/src/components/copilot/gen-ui/assistantDirectiveParser.ts",
+        "frontend/src/components/copilot/gen-ui/references.ts",
+        "frontend/src/components/copilot/gen-ui/GenUiMessageContent.tsx"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "gen-ui",
+        "w11",
+        "compose-spec",
+        "path-a",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户端到端预授权 B-8 发令 + B-6 路径 A 零依赖自实现 + B-7 首包 P0-P2）：::compose JSON spec 受控渲染 MVP——扁平树 spec + 手写校验器 fail-closed + catalog 4 组件经既有 ResultNode 插座（ResultCardRenderer）渲染 + directive parser 接线 + $state 绑定复用 gen-ui:get-data + widgetState 复用既有通道。零新依赖；::visualize 沙箱链零改动双形态并存；P3/P4 可选拆包不在本包。plan=docs/block461-gen-ui-compose-plan.md。"
     }
   ],
   "lastUpdated": "2026-11-17"
