@@ -67,6 +67,8 @@ L0  意图编排层：3d-authoring 领域 Skill（plan-first → 几何 → 验�
 
 ## §4 数据模型设计
 
+> **§4.1 修正（2026-11-18 · BLOCK-460 立项批）**：本节假设的「新建独立 SceneIR v0」经 BLOCK-459/460 实探修正——仓库已有 SceneSpec v1 单一真相链（`core/petri-server/helpers/scene3d.js` + model3d-scene-store + agent tools/routes/viewer，BLOCK-322/NEXT-04A 遗产），按 charter §3.2「禁止第二套中间表示」（冻结），IR 落点改为 **SceneSpec v1 additive `joints[]` 扩展**（version `scene3d/v1` 不变、向后兼容）；本节 SceneIR JSON 结构降级为字段映射参照（实测依据见 `acceptance/block-459/PROBE-REPORT.md` 与 `scene-ir-v0-draft.md` 的 N1–N8 归一规则），不再是独立契约。§4.3 映射表与 §5.1 流程不变。
+
 ### 4.1 Scene IR v0（领域无关中间表示，L2 核心契约）
 
 ```

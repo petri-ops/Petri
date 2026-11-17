@@ -1,3 +1,4 @@
+> **落点变更（2026-11-18 · BLOCK-460 立项批）**：实探发现既有 SceneSpec v1 链后，按 charter §3.2「禁止第二套中间表示」，canonical 落点改为 SceneSpec v1 additive `joints[]` 扩展（见 docs/block460-scene-joints-plan.md §0）；本文件的 N1–N8 归一规则原样作为归一器实现输入，JSON 形态仅作字段参照。
 # Scene IR v0 契约草案（BLOCK-459 探针产物 · P1 canonical 化底稿）
 
 > 性质：**草案**（acceptance 证据，非 canonical）。P1 立项时在其 plan 内 canonical 化并登记 DOC-REGISTRY；本文件不登记第二真相。
