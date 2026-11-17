@@ -16,6 +16,24 @@ const MAX_ITEM_CHARS = 400;
 const MAX_SUMMARY_ITEMS = 8;
 const TIMEOUT_MS = 45000;
 const TASK_TYPES = new Set(['general', 'coding', 'analysis', 'result', 'workflow', 'modeling']);
+const QUICK_TIMEOUT_MS = 15000;
+const QUICK_PROMPT_SYSTEM_PROMPT = [
+  '你是提示词编辑器。只输出优化后的提示词全文，不要解释、不要标题、不要 JSON。',
+  '保留用户原意、目标、对象、数字与专有名词；只修正歧义、补齐必要上下文、整理步骤与验收口径。',
+  '不得加入未提供的能力或事实，不得把任务规格字段名塞进提示词。输出控制在必要长度内。',
+].join('');
+
+function quickOutputBudget(chars) {
+  const n = Math.max(0, Math.min(MAX_PROMPT_CHARS, Number(chars) || 0));
+  return Math.max(240, Math.min(1500, Math.ceil(n * 2.4)));
+}
+
+/** GLM 在 OpenAI 兼容端点默认先吐 reasoning_content，正文常被 max_tokens 吃空；快路径显式关思考。 */
+function quickThinkingParams(profile) {
+  const hint = `${profile?.baseUrl || ''} ${profile?.provider || ''} ${profile?.model || ''}`;
+  return /bigmodel\.cn|zhipuai|glm/i.test(hint) ? { thinking: { type: 'disabled' } } : {};
+}
+
 const TASK_SPEC_SYSTEM_PROMPT = [
   '你是提示词优化器兼结构化任务规格生成器。只输出一个 JSON 对象，不要 markdown 围栏或解释。',
   'optimizedPrompt 必须是一段可直接发送给 agent 的自然语言提示词：保留用户原话的目标、对象、约束、数字与专有名词；只修正歧义、补齐必要上下文、整理步骤与验收口径；不得改写成 TaskSpec 清单、元说明或空泛套话，不得加入未提供的能力或事实。',
@@ -152,6 +170,64 @@ function buildCapabilitySnapshot({ workflowEnabled = false, visionAvailable = fa
   ];
 }
 
+async function optimizePromptQuick({ prompt, userId, context } = {}) {
+  const text = String(prompt || '').trim();
+  if (!text) return { ok: false, error: 'prompt_required' };
+  const bounded = text.slice(0, MAX_PROMPT_CHARS);
+  const settings = getAiSettings();
+  const providerName = getChatProviderName();
+  const profiles = Array.isArray(settings.model_profiles) ? settings.model_profiles : [];
+  const activeProfile = profiles.find((profile) => profile.id === settings.active_chat_model_id)
+    || profiles.find((profile) => Array.isArray(profile.roles) && profile.roles.includes('chat'))
+    || null;
+  let apiKey = null;
+  try {
+    apiKey = activeProfile
+      ? getCredential(activeProfile.credentialRef, activeProfile)
+      : (providerName ? getCredential(providerName) : null);
+  } catch {
+    apiKey = null;
+  }
+  if (!apiKey) return { ok: false, error: 'no_credential' };
+
+  const input = context && typeof context === 'object' ? context : {};
+  const scope = cleanText(input.workspaceLabel, 120) || '当前会话';
+  const userContent = `当前范围：${scope}\n原提示词：\n${bounded}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), QUICK_TIMEOUT_MS);
+  try {
+    const result = await modelGateway.chat({
+      role: 'chat',
+      body: {
+        ...quickThinkingParams(activeProfile),
+        messages: [
+          { role: 'system', content: QUICK_PROMPT_SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+        temperature: 0.1,
+        max_tokens: quickOutputBudget(bounded.length),
+      },
+      telemetry: { userId: userId || null, kind: 'prompt-enhance-quick' },
+      signal: controller.signal,
+      thinkingLevel: 'standard',
+      disableFallback: true,
+    });
+    const raw = result && result.choices && result.choices[0] && result.choices[0].message
+      ? result.choices[0].message.content
+      : (result && result.content) || '';
+    const optimizedPrompt = cleanText(raw, MAX_PROMPT_CHARS);
+    if (!optimizedPrompt) return { ok: false, error: 'model_output_empty' };
+    return { ok: true, optimizedPrompt, model: providerName, mode: 'quick' };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error && error.name === 'AbortError' ? 'timeout' : (error && error.message) || 'model_call_failed',
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function generateTaskSpecDraft({ prompt, userId, context, capabilitySnapshot } = {}) {
   const text = String(prompt || '').trim();
   if (!text) return { ok: false, error: 'prompt_required' };
@@ -221,6 +297,10 @@ async function generateTaskSpecDraft({ prompt, userId, context, capabilitySnapsh
 
 module.exports = {
   MAX_PROMPT_CHARS,
+  QUICK_PROMPT_SYSTEM_PROMPT,
+  quickOutputBudget,
+  quickThinkingParams,
+  optimizePromptQuick,
   TASK_SPEC_SYSTEM_PROMPT,
   parseRawTaskSpec,
   parseTaskSpecResponse,

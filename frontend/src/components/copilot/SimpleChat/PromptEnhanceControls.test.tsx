@@ -38,6 +38,9 @@ describe('UI-709 提示词优化点击即覆盖', () => {
     await waitFor(() => expect(onApplyText).toHaveBeenCalledWith(RESULT.optimizedPrompt));
 
     expect((fetchMock.mock.calls[0] as unknown[])[0]).toContain('/ai/agent/prompt-enhance');
+    const init = (fetchMock.mock.calls[0] as unknown[])[1] as { body?: string };
+    const sent = JSON.parse(String(init.body)) as { mode?: string };
+    expect(sent.mode).toBe('quick');
     expect(screen.queryByTestId('prompt-enhance-dialog')).toBeNull();
   });
 

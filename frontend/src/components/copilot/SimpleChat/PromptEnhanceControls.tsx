@@ -35,7 +35,7 @@ export function PromptEnhanceControls({
     setBusy(true);
     setNotice('正在优化提示词…');
     try {
-      const result = await enhancePrompt({ prompt: original, context });
+      const result = await enhancePrompt({ prompt: original, context, mode: 'quick' });
       if (requestId !== requestRef.current) return;
       const optimized = String(result.optimizedPrompt || '').trim();
       if (!optimized) throw new Error('model_output_empty');

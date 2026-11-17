@@ -8543,6 +8543,7 @@
         "frontend/src/components/copilot/SimpleChat/PromptEnhanceControls.test.tsx",
         "frontend/src/lib/promptEnhanceClient.ts",
         "core/petri-server/helpers/task-spec.js",
+        "core/petri-server/routes/ai-agent/suggestions.js",
         "test/next03-task-spec.test.mjs",
         "acceptance/ui-633-add1/**"
       ],

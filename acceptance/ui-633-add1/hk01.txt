@@ -39,4 +39,19 @@ Jev 建议：
   test:changed 644 tests / 620 pass / 8 fail（与前轮既有债同量级；工具注册表/W5a/stored evidence 家族，
   UI-633 加映一文件面无交集）。
 
+UI-633 加映二（速度根因与快路径，2026-11-17）：
+  用户反馈「可以了，但速度非常慢，应该几秒内搞定」。
+  复现：POST /api/ai/agent/prompt-enhance（旧 full/TaskSpec JSON，max_tokens=5000，GLM 默认先出 reasoning_content）
+        端到端 24.7s；后端一次模型响应把推理与正文共享预算，正文常被吃空。
+  直连测量：纯文本 + max_tokens=240 + thinking:{type:'disabled'} → 3.8s；关闭思考前 240 预算 content 为空。
+  修复：
+    - 新增 mode=quick：纯文本优化，不生成 TaskSpec JSON；前端 composer 默认走 quick；
+    - quickOutputBudget：按输入长度 240–1500 token 动态预算，temperature 0.1；
+    - GLM/BigModel OpenAI 兼容端点显式 thinking:{type:'disabled'}；其他 provider 零变化；
+    - disableFallback:true + thinkingLevel:'standard'，避免多档 fallback/思考参数往返；
+    - 保留原 full/TaskSpec 路径给旧预览组件与 API 兼容。
+  实测：POST quick 三轮 = 2.29s / 2.01s / 3.08s；
+        dev-verify ui633-add1 4/4 allPass，P4_quick_latency_under_8s elapsed=2066ms。
+  证据=acceptance/ui-633-add1/ui633-add1-live-win32.json（已覆盖为快路径读数）。
+
 边界：零新依赖 / 零自动发送 / 零写面语义变化；观感 pending_human_eye 不代签。

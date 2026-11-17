@@ -42,13 +42,15 @@ export interface PromptEnhanceResult {
 export async function enhancePrompt(input: {
   prompt: string;
   context: PromptEnhanceContext;
+  mode?: 'quick' | 'full';
   signal?: AbortSignal;
 }): Promise<PromptEnhanceResult> {
+  const mode = input.mode || 'full';
   const response = await fetch(`${getApiPrefix()}/ai/agent/prompt-enhance`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ prompt: input.prompt, context: input.context }),
-    signal: input.signal || AbortSignal.timeout(50_000),
+    body: JSON.stringify({ prompt: input.prompt, context: input.context, mode }),
+    signal: input.signal || AbortSignal.timeout(mode === 'quick' ? 20_000 : 50_000),
   });
   const data = await response.json().catch(() => null) as (PromptEnhanceResult & { ok?: boolean; error?: string }) | null;
   if (!response.ok || !data || data.ok === false) {

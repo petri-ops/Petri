@@ -18,6 +18,7 @@ const {
   MAX_PROMPT_CHARS,
   buildCapabilitySnapshot,
   generateTaskSpecDraft,
+  optimizePromptQuick,
 } = require('../../helpers/task-spec');
 
 function capabilityInputs() {
@@ -88,6 +89,20 @@ module.exports = {
       const prompt = typeof body.prompt === 'string' ? body.prompt : '';
       if (!prompt.trim()) return res.status(400).json({ ok: false, error: 'prompt_required' });
       if (prompt.length > MAX_PROMPT_CHARS * 2) return res.status(400).json({ ok: false, error: 'prompt_too_large' });
+      if (body.mode === 'quick') {
+        const quick = await optimizePromptQuick({ prompt, userId, context: body.context });
+        if (!quick.ok) {
+          const status = quick.error === 'no_credential'
+            ? 503
+            : quick.error === 'prompt_too_large'
+              ? 400
+              : quick.error === 'timeout'
+                ? 504
+                : 502;
+          return res.status(status).json({ ok: false, error: quick.error });
+        }
+        return res.json({ ok: true, optimizedPrompt: quick.optimizedPrompt, model: quick.model, mode: 'quick' });
+      }
       const capabilitySnapshot = buildCapabilitySnapshot(capabilityInputs());
       const result = await generateTaskSpecDraft({
         prompt,

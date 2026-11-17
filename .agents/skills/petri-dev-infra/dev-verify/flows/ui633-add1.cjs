@@ -38,6 +38,7 @@ module.exports = {
         return 'ok';
       })()`);
       await new Promise((r) => setTimeout(r, 200));
+      const startedAt = Date.now();
       await lib.evalJs(client, `(function(){document.querySelector('[data-testid="prompt-enhance"]').click(); return 'ok';})()`);
 
       let observed = null;
@@ -54,11 +55,12 @@ module.exports = {
         })()`) || '{}'));
         if (observed.value !== original || /失败/.test(observed.status || '')) break;
       }
+      const elapsedMs = Date.now() - startedAt;
       assert('P2_no_preview_dialog', !observed.dialog, JSON.stringify(observed));
-      assert('P3_direct_apply_or_honest_failure',
-        (observed.value && observed.value !== original && /已优化/.test(observed.status || ''))
-        || /优化失败/.test(observed.status || ''),
+      assert('P3_direct_apply_success',
+        !!observed.value && observed.value !== original && /已优化/.test(observed.status || ''),
         JSON.stringify(observed));
+      assert('P4_quick_latency_under_8s', elapsedMs < 8000, `elapsed=${elapsedMs}ms`);
     } finally {
       try { client.close(); } catch { /* 会话销毁即可 */ }
     }
