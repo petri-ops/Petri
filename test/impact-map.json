@@ -8579,7 +8579,7 @@
     },
     {
       "id": "ui707-add1-model-config-flyout",
-      "note": "UI-707 加映一（C-51 转正）：模型行右侧 portal 配置小页；加映二：GLM-4.5+ 思考能力声明与 thinking 参数形状修正；加映三：小页悬停桥接可交互。证据 acceptance/ui-707-add1/**、acceptance/ui-707-interaction/**。",
+      "note": "UI-707 加映一（C-51 转正）：模型行右侧 portal 配置小页；加映二：GLM-4.5+ 思考能力声明；加映三：悬停桥接；加映四：按实际高度紧贴行右侧并避让视口。证据 acceptance/ui-707-add1/**、acceptance/ui-707-interaction/**、acceptance/ui-707-positioning/**。",
       "patterns": [
         "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
         "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
@@ -8592,7 +8592,8 @@
         "core/shared-backend/llm-providers/model-gateway.js",
         "test/thinking-level.test.mjs",
         "acceptance/ui-707-add1/**",
-        "acceptance/ui-707-interaction/**"
+        "acceptance/ui-707-interaction/**",
+        "acceptance/ui-707-positioning/**"
       ],
       "tests": [
         "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",

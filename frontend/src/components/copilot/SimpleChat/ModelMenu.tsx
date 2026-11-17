@@ -8,7 +8,7 @@
  * 展开行内模型级配置抽屉（写 modelPreferences，渠道 fallback 不污染）。
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { Icon } from '@/components/icons/Icon';
@@ -54,10 +54,12 @@ const MODEL_PANEL_WIDTH = 320;
 const MODEL_PANEL_GAP = 8;
 const MODEL_PANEL_MARGIN = 12;
 const MODEL_PANEL_MAX_HEIGHT = 420;
+const MODEL_CONFIG_FALLBACK_HEIGHT = 220;
 
 export function modelPanelPosition(
   anchor: { left: number; top: number; right: number },
   viewport: { width: number; height: number },
+  contentHeight: number = MODEL_PANEL_MAX_HEIGHT,
 ): { left: number; top: number; width: number; placement: 'right' | 'left' } {
   const width = Math.min(MODEL_PANEL_WIDTH, Math.max(0, viewport.width - MODEL_PANEL_MARGIN * 2));
   const openRight = anchor.right + MODEL_PANEL_GAP + width <= viewport.width - MODEL_PANEL_MARGIN;
@@ -67,10 +69,14 @@ export function modelPanelPosition(
         MODEL_PANEL_MARGIN,
         Math.min(anchor.left - MODEL_PANEL_GAP - width, viewport.width - width - MODEL_PANEL_MARGIN),
       );
-  const maxHeight = Math.min(MODEL_PANEL_MAX_HEIGHT, Math.max(160, viewport.height - MODEL_PANEL_MARGIN * 2));
+  const height = Math.min(
+    Math.max(80, Number(contentHeight) || MODEL_PANEL_MAX_HEIGHT),
+    Math.max(80, viewport.height - MODEL_PANEL_MARGIN * 2),
+  );
+  // 先贴行顶，只做避免视口裁切所需的最小上移；不再按固定 420px 估算把下方行大幅上提。
   const top = Math.min(
     Math.max(MODEL_PANEL_MARGIN, anchor.top),
-    Math.max(MODEL_PANEL_MARGIN, viewport.height - maxHeight - MODEL_PANEL_MARGIN),
+    Math.max(MODEL_PANEL_MARGIN, viewport.height - height - MODEL_PANEL_MARGIN),
   );
   return { left, top, width, placement: openRight ? 'right' : 'left' };
 }
@@ -261,7 +267,12 @@ export function ModelMenu({
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [modelPanelPos, setModelPanelPos] = useState<ReturnType<typeof modelPanelPosition> | null>(null);
   // UI-707 加映一 — 每个就绪模型行的右侧配置小页，一次只开一个。
-  const [configTarget, setConfigTarget] = useState<{ id: string; pos: ReturnType<typeof modelPanelPosition> } | null>(null);
+  const [configTarget, setConfigTarget] = useState<{
+    id: string;
+    anchor: { left: number; top: number; right: number };
+    pos: ReturnType<typeof modelPanelPosition>;
+  } | null>(null);
+  const configFlyoutRef = useRef<HTMLDivElement | null>(null);
   // UI-707 加映三 — 状态化延迟关闭：鼠标可从模型行移到 portal 小页，不触碰 ref。
   const [configCloseTimer, setConfigCloseTimer] = useState<number | null>(null);
   const setMenuRef = useCallback((node: HTMLDivElement | null) => {
@@ -322,12 +333,35 @@ export function ModelMenu({
     if (!onModelConfigChange) return;
     cancelConfigClose();
     const rect = anchor.getBoundingClientRect();
+    const rowAnchor = { left: rect.left, top: rect.top, right: rect.right };
     const pos = modelPanelPosition(
-      { left: rect.left, top: rect.top, right: rect.right },
+      rowAnchor,
       { width: window.innerWidth, height: window.innerHeight },
+      MODEL_CONFIG_FALLBACK_HEIGHT,
     );
-    setConfigTarget({ id, pos });
+    setConfigTarget({ id, anchor: rowAnchor, pos });
   }, [cancelConfigClose, onModelConfigChange]);
+
+  const activeConfigId = configTarget?.id;
+  const configAnchor = configTarget?.anchor;
+  useLayoutEffect(() => {
+    const el = configFlyoutRef.current;
+    if (!activeConfigId || !configAnchor || !el) return;
+    const height = el.getBoundingClientRect().height;
+    const next = modelPanelPosition(
+      configAnchor,
+      { width: window.innerWidth, height: window.innerHeight },
+      height,
+    );
+    setConfigTarget((current) => {
+      if (!current || current.id !== activeConfigId) return current;
+      const prev = current.pos;
+      if (prev.left === next.left && prev.top === next.top && prev.width === next.width && prev.placement === next.placement) {
+        return current;
+      }
+      return { ...current, pos: next };
+    });
+  }, [activeConfigId, configAnchor]);
 
   useEffect(() => {
     if (!configTarget) return undefined;
@@ -488,6 +522,7 @@ export function ModelMenu({
       )}
       {configTarget && configRow && configAllowed && onModelConfigChange && createPortal(
         <div
+          ref={configFlyoutRef}
           className="sc-model-models-panel sc-model-config-flyout"
           role="dialog"
           aria-label={`${configRow.preset.model} 模型级配置`}

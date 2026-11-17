@@ -1,0 +1,25 @@
+UI-707 加映四 — 配置小页按模型行动态定位 HK-01 证据
+
+用户要求：配置面板动态显示在鼠标悬停/选中模型的正右侧；靠下模型自动避让视口边缘，保证列表下方模型也能打开并设置。
+
+红（实现前，1280×600 小视口）：
+  npm run verify -- ui707-positioning → 5/6
+    P5_vertically_tight FAIL：row.top=455.9，flyout.top=308.0（被固定 420px 估算上提约 148px）。
+绿（实现后）：
+  npm run verify -- ui707-positioning → 6/6 allPass
+    row.top=455.9，flyout.top=455.9（完全贴行），bottom=644.1 且 P6 within_viewport PASS（视口实测读数见 json）。
+    P4 right_adjacent PASS；P5 vertically_tight PASS；P6 within_viewport PASS。
+  证据=acceptance/ui-707-positioning/ui707-positioning-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+实现：
+  modelPanelPosition 接受 contentHeight；先贴行顶，仅按实际高度做最小上移避免视口裁切；
+  ModelMenu 保存行 anchor，渲染后用 useLayoutEffect 测量小页实际高度并重算；
+  右侧优先/左侧回退、一次只开一个、悬停桥接与写回语义不变。
+
+回归：
+  ui707-add1 7/7 allPass；ui707-config-interaction 6/6 allPass；modelConfigAndCollapse 11/11。
+  Jev test:suggest 零建议（confidence 0.74 < θ=0.80）如实记录；doc:suggest 建议 uiAudit（deterministic）。
+
+收口门禁：ui:audit:check PASS / ui-ledger 5/5 / quality:types PASS / quality:lint 0 error；
+  test:changed 178 tests / 170 pass / 6 fail，均为既有债，无本加映新红。
+边界：零新依赖 / 零默认值 / 零写面语义变化；观感 pending_human_eye 不代签。
