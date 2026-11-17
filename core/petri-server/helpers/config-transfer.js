@@ -38,6 +38,8 @@ const trustPolicy = require('./trust-policy');
 const retention = require('./data-retention');
 const webSearch = require('./web-search-config');
 const modelAccess = require('./model-access'); // BLOCK-264（C-37）
+const ocrConfig = require('./ocr-config'); // BLOCK-454-P3（2026-11-18 同步补接线：族登记已在上游，导出/导入/重置三面缺失）
+const speechConfig = require('./speech-config'); // BLOCK-454-P6（同上）
 
 const CONFIG_TRANSFER_FORMAT = 'petri-config';
 const CONFIG_TRANSFER_VERSION = 1;
@@ -156,6 +158,9 @@ function readFamilyOverrides() {
     'web-search': { ...webSearch.readStore() },
     // BLOCK-264（C-37）— 模型白名单覆盖层（含理由账本；无凭据面）
     'model-access': { ...modelAccess.readStore() },
+    // BLOCK-454-P3/P6 — 云渠道授权面（默认关；无凭据，key 走凭据族不进导出）
+    'ocr': { ...ocrConfig.readStore() },
+    'speech': { ...speechConfig.readStore() },
   };
 }
 
@@ -246,7 +251,8 @@ function validateFamily(family, body) {
   if (family === 'reasoning') {
     return reasoningConfig.validateReasoningPatch(body);
   }
-  if (family === 'network' || family === 'runtime' || family === 'web-search') {
+  if (family === 'network' || family === 'runtime' || family === 'web-search' || family === 'ocr' || family === 'speech') {
+    // BLOCK-454-P3/P6：云渠道授权面同走 schema commitGuard（默认关；键集由 config-schema 注册表钉住）
     return schema.commitGuard(family, body, lookup).diagnostics;
   }
   if (family === 'data-retention') {
@@ -500,6 +506,13 @@ const WRITERS = {
     // 合并覆盖（导入不删文件里未出现的键）；拒绝走共享注册表守卫（saveWebSearchConfig 抛带 diagnostics 的错）
     webSearch.saveWebSearchConfig(body);
   },
+  // BLOCK-454-P3/P6 — 云渠道授权面导入（saveOcrConfig/saveSpeechConfig 自带形状校验）
+  'ocr'(body) {
+    ocrConfig.saveOcrConfig(body);
+  },
+  'speech'(body) {
+    speechConfig.saveSpeechConfig(body);
+  },
   // BLOCK-264（C-37）— 模型白名单导入（saveModelAccess 自带元素级校验，非法整批拒）
   'model-access'(body) {
     const saved = modelAccess.saveModelAccess(body);
@@ -559,6 +572,9 @@ const RESETTERS = {
   // 重置 = 清空覆盖层 → 回落代码默认（默认关、不用检索后端、无黑白名单）
   'web-search'() { webSearch.writeStore({}); },
   'model-access'() { modelAccess.writeStore({ allowedModels: [], reasonNotes: {} }); },
+  // 重置 = 清覆盖层 → 回落代码默认（默认关）
+  'ocr'() { ocrConfig.writeStore({}); },
+  'speech'() { speechConfig.writeStore({}); },
 };
 
 /**

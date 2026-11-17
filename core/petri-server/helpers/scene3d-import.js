@@ -253,10 +253,6 @@ function importSand3dGlb({ workspaceRoot, glbRelativePath, programDigest, produc
   return { ok: true, scene, glbSha256, restPose, joints: sceneJoints.length };
 }
 
-function PRODUCDENT_LABEL(assemblyName) {
-  return `sand3d 装配 ${assemblyName}`;
-}
-
 module.exports = {
   importSand3dGlb,
   parseGlbJson,

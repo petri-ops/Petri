@@ -494,7 +494,6 @@ function validateMetadataTolerances(metadata, ids, errors) {
 // 角度=度、长度=mm（场景单位制，与 constraints/transform 同制）；换算在归一器（scene3d-import）。
 const JOINT_KINDS = new Set(['revolute', 'prismatic', 'continuous', 'floating']);
 const JOINT_FIELD_WHITELIST = ['id', 'child', 'parent', 'kind', 'axis', 'range', 'follows', 'ratio', 'label'];
-const JOINT_RANGE_KINDS = new Set(['revolute', 'prismatic']);
 
 /**
  * BLOCK-460 — 运动关节段校验（additive：constraints/lights 同款，无 joints 时零行为变化）。

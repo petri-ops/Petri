@@ -422,6 +422,8 @@ function emitReadOnlyResultOutput({ name, result, callId, traceId, iteration, em
  *  逐工具钉住）。行头动词 = 「已×」规范态，宾语由 actionDetail 承载；
  *  未登记（MCP/插件动态工具）回退「已调用」。 */
 const TOOL_ACTIVITY_VERBS = Object.freeze({
+  "transcribe_audio": "已转录",
+  "speak_text": "已朗读",
   "act": "已变更",
   "decision_summary": "已统计",
   "decision_recent": "已回放",

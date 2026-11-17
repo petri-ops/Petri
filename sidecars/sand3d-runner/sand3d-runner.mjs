@@ -22,6 +22,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { URL } from 'node:url';
 
 const SAND3D_PIN = '1.6.3';
 

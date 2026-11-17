@@ -456,5 +456,13 @@
   "computer_close": {
     "label": "已关闭",
     "icon": "eye"
+  },
+  "transcribe_audio": {
+    "label": "已转录",
+    "icon": "mic"
+  },
+  "speak_text": {
+    "label": "已朗读",
+    "icon": "volume-2"
   }
 }

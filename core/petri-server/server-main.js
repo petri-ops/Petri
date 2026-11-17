@@ -289,19 +289,19 @@ function installBackendExitLifecycle({ db, log = console.log, logWarn = console.
   const beforeExitHandler = () => {
     try {
       if (db && typeof db.close === 'function') {
-        try { db.close(); } catch {}
+        try { db.close(); } catch { /* 退出路径 best-effort 收尾：失败无处置意义（silent-catch 豁免留痕） */ }
       }
     } finally {
-      try { process.removeListener('beforeExit', beforeExitHandler); } catch {}
+      try { process.removeListener('beforeExit', beforeExitHandler); } catch { /* 退出路径 best-effort 收尾：失败无处置意义（silent-catch 豁免留痕） */ }
     }
   };
   const exitHandler = () => {
     try {
       if (db && typeof db.close === 'function') {
-        try { db.close(); } catch {}
+        try { db.close(); } catch { /* 退出路径 best-effort 收尾：失败无处置意义（silent-catch 豁免留痕） */ }
       }
     } finally {
-      try { process.removeListener('exit', exitHandler); } catch {}
+      try { process.removeListener('exit', exitHandler); } catch { /* 退出路径 best-effort 收尾：失败无处置意义（silent-catch 豁免留痕） */ }
     }
   };
   process.on('beforeExit', beforeExitHandler);

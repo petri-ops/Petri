@@ -12468,7 +12468,7 @@
         "core/petri-server/helpers/scene3d.js",
         "core/petri-server/helpers/scene3d-import.js",
         "sidecars/sand3d-runner/",
-        "resources/skills/3d-authoring/"
+        "resources/skills/model3d-authoring/"
       ],
       "sharedBaselines": [],
       "tags": [
@@ -12479,7 +12479,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户端到端预授权 S3=P1 首包；前置 BLOCK-459 探针=可行已收口）：SceneSpec v1 additive 关节扩展（charter §3.2 禁止第二套中间表示仲裁——蓝图 §4.1「新建独立 IR」假设与既有 scene3d.js/model3d 链重叠，落点改为既有链 additive joints[]，version 不变向后兼容）+ GLB→SceneSpec 归一器（探针 N1-N8 规则，fail-closed）+ sand3d runner sidecar（run_cmd guard-ack 链内，零新 IPC）+ 3d-authoring 产品 Skill + 可动装配端到端（digest 双锚）。零内核改动（agent-runner/registry/IPC 零触碰）；渲染/three-live/Polyfork/img2threejs 均非本包。plan=docs/block460-scene-joints-plan.md。"
+      "notes": "2026-11-18 立项（用户端到端预授权 S3=P1 首包；前置 BLOCK-459 探针=可行已收口）：SceneSpec v1 additive 关节扩展（charter §3.2 禁止第二套中间表示仲裁——蓝图 §4.1「新建独立 IR」假设与既有 scene3d.js/model3d 链重叠，落点改为既有链 additive joints[]，version 不变向后兼容）+ GLB→SceneSpec 归一器（探针 N1-N8 规则，fail-closed）+ sand3d runner sidecar（run_cmd guard-ack 链内，零新 IPC）+ model3d-authoring 产品 Skill + 可动装配端到端（digest 双锚）。零内核改动（agent-runner/registry/IPC 零触碰）；渲染/three-live/Polyfork/img2threejs 均非本包。plan=docs/block460-scene-joints-plan.md。"
     }
   ],
   "lastUpdated": "2026-11-17"
