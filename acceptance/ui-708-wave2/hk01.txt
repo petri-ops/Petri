@@ -1,0 +1,42 @@
+UI-704 加映四（工作标签 UI-708-W2）— 零行为变更的呈现合并 HK-01 证据
+
+红（实现前，2026-11-17）：
+  cmd: npm run test:files --prefix frontend -- src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsWave2.test.tsx
+  result: suite 导入失败（AuditTabs 不存在），4 项契约均未进入测试体：
+    × runtime-tool-scope-group 包住白/黑名单
+    × network-proxy-address-group 包住 HTTP/HTTPS
+    × decision-supply-fold 默认折叠且含 URL/Key/Model/预设
+    × AuditTabs 默认只渲染第一块、切换后渲染第二块
+
+绿（实现后，2026-11-17）：
+  cmd: 同上
+  result: 1 file / 4 tests passed
+
+零行为变更判据：
+  - RuntimePolicyPanel：toolAllow / toolDeny 两个 state 与 PUT payload 字段名逐字不变，仅加分组 testid 与标题。
+  - NetworkProxyPanel：httpProxy / httpsProxy 两个 state 与 PUT payload 字段名逐字不变，仅加分组。
+  - DecisionConfigPanel：applyPreset / saveProvider / patch 回调零改；URL/Key/Model 三个输入值不变，仅收进默认折叠 details 并加 testid。
+  - DesktopSettingsPanel：GuardAckHistoryPanel 与 MemoryPanel 组件原样保留，仅由 AuditTabs 控制客户端渲染；fetch 与写面不变。
+
+Jev 决策建议（如实记录）：
+  test:suggest --supply=cloud → ui-shell-frontend 域，建议文件 test/window-manager.test.mjs（conf=0.85）
+    → 文件名漂移，改跑在册 test/block59-window-manager.test.mjs 43/43 绿。
+  doc:suggest --supply=cloud → uiAudit（deterministic），回写落在 UI-704 加映四同一段。
+
+边界：仅改呈现，零新依赖 / 零默认值 / 零写面语义；其他 agent WIP（docs/DOC-REGISTRY.json、
+docs/README.md、docs/gen-ui-data-plane-evaluation-2026-11-17.md）零触碰。
+
+实机腿（9223 离屏，2026-11-17）：
+  npm run verify -- ui708-wave2 → 6/6 allPass
+    W1 decisions 可达；W2 工具可见范围卡 + 决策供给折叠 + 三字段在场；
+    W3 审计页签默认审批记录；W4 切到记忆变更；W5 network 可达；W6 代理地址卡含 HTTP/HTTPS。
+  证据=acceptance/ui-708-wave2/ui708-wave2-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+门禁与红归属（2026-11-17）：
+  quality:types PASS / ui:audit:check PASS（639 编号）/ theme-token-contract 19/19 / ui-ledger-status-contract 5/5；
+  quality:lint 0 error（2438 存量 warning，较上一轮 2456 只减）。
+  test:changed 444 tests / 429 pass / 12 fail：8 项为上一轮已登记的既有债（工具数、W5a 存量、
+  ui-421/ui-703 证据映射），另 4 项为本轮新计入的 Windows computer-host/sidecar 环境红
+  （block48-computer-tools / block63-computer-host，单跑稳定复现，与设置页呈现零交集），非本加映引入。
+  其他 agent WIP（docs/DOC-REGISTRY.json、docs/README.md、docs/gen-ui-data-plane-evaluation-2026-11-17.md）
+  在提交时按具体文件排除，未暂存、未改写。

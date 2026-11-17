@@ -135,51 +135,56 @@ export function DecisionConfigPanel(): React.ReactElement {
       </p>
       {error && <p className="petri-field__hint" role="alert">{error}</p>}
       {!points && !error ? <p className="petri-field__hint">读取中…</p> : null}
-      {/* P5 — 模型接口（端点/Key/模型名；本地 Laya 等供给改此三项；换模型须重校准） */}
-      <div className="petri-resource-heading">
-        <div>
-          <strong>决策模型接口 · 当前供给：{supplyLabelOf(provider?.baseUrl)}</strong>
-          <p>端点与 Key 支持云 Jev 或本地同类供给（如 Laya）；修改模型后必须重校准对应接点阈值。</p>
+      {/* UI-704 加映四 — P5 决策供给合入默认折叠卡；端点/Key/Model 与预设写面逐字不变 */}
+      <details className="petri-settings-advanced-details" data-testid="decision-supply-fold">
+        <summary>决策供给 · 当前：{supplyLabelOf(provider?.baseUrl)}（端点 / Key / 模型，按需展开）</summary>
+        <div className="petri-resource-heading">
+          <div>
+            <strong>决策模型接口 · 当前供给：{supplyLabelOf(provider?.baseUrl)}</strong>
+            <p>端点与 Key 支持云 Jev 或本地同类供给（如 Laya）；修改模型后必须重校准对应接点阈值。</p>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              type="button"
+              data-testid="decision-provider-preset-jev"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              title="一键切回云 Jev（保留已配置的 Key）"
+              onClick={() => { void applyPreset('jev').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
+            >
+              用 Jev（云）
+            </button>
+            <button
+              type="button"
+              data-testid="decision-provider-preset-laya"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              title="一键切换到本机 laya_decide serve（需已启动：laya_decide.py serve --port 8765）"
+              onClick={() => { void applyPreset('laya').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
+            >
+              用 Laya（本地）
+            </button>
+            <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button
-            type="button"
-            className="petri-btn petri-btn--ghost petri-btn--sm"
-            title="一键切回云 Jev（保留已配置的 Key）"
-            onClick={() => { void applyPreset('jev').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
-          >
-            用 Jev（云）
-          </button>
-          <button
-            type="button"
-            className="petri-btn petri-btn--ghost petri-btn--sm"
-            title="一键切换到本机 laya_decide serve（需已启动：laya_decide.py serve --port 8765）"
-            onClick={() => { void applyPreset('laya').catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}
-          >
-            用 Laya（本地）
-          </button>
-          <button type="button" className="petri-btn petri-btn--ghost petri-btn--sm" onClick={() => { void saveProvider().catch((reason) => setError(reason instanceof Error ? reason.message : String(reason))); }}>保存模型接口</button>
+        <div className="petri-metric-grid">
+          <div>
+            <small>端点 URL</small>
+            <input data-testid="decision-provider-url" value={provUrl} onChange={(e) => setProvUrl(e.target.value)} placeholder="https://api.typesafe.ai" style={{ width: '100%' }} />
+          </div>
+          <div>
+            <small>API Key {provider?.hasKey ? '（已配置，留空保持不变）' : '（未配置）'}</small>
+            <input data-testid="decision-provider-key" type="password" value={provKey} onChange={(e) => setProvKey(e.target.value)} placeholder={provider?.hasKey ? '••••••••' : '粘贴 Key'} style={{ width: '100%' }} />
+          </div>
+          <div>
+            <small>模型名（pin）</small>
+            <input data-testid="decision-provider-model" value={provModel} onChange={(e) => setProvModel(e.target.value)} placeholder="jev-1.13.0" style={{ width: '100%' }} />
+          </div>
         </div>
-      </div>
-      <div className="petri-metric-grid">
-        <div>
-          <small>端点 URL</small>
-          <input value={provUrl} onChange={(e) => setProvUrl(e.target.value)} placeholder="https://api.typesafe.ai" style={{ width: '100%' }} />
-        </div>
-        <div>
-          <small>API Key {provider?.hasKey ? '（已配置，留空保持不变）' : '（未配置）'}</small>
-          <input type="password" value={provKey} onChange={(e) => setProvKey(e.target.value)} placeholder={provider?.hasKey ? '••••••••' : '粘贴 Key'} style={{ width: '100%' }} />
-        </div>
-        <div>
-          <small>模型名（pin）</small>
-          <input value={provModel} onChange={(e) => setProvModel(e.target.value)} placeholder="jev-1.13.0" style={{ width: '100%' }} />
-        </div>
-      </div>
-      {provSaved ? <p className="petri-field__hint">模型接口已保存（Key 不回显）。更换模型后请重校准对应接点阈值。</p> : null}
-      <p className="petri-field__hint">
-        「用 Laya（本地）」指向本机 laya_decide serve（127.0.0.1:8765，需先启动：laya_decide.py serve --port 8765）。
-        BLOCK-117 校准：本地 Laya 在现有 confidence 阈值下大概率回退——决策照常记账，不采纳不执行；切换随时可逆。
-      </p>
+        {provSaved ? <p className="petri-field__hint">模型接口已保存（Key 不回显）。更换模型后请重校准对应接点阈值。</p> : null}
+        <p className="petri-field__hint">
+          「用 Laya（本地）」指向本机 laya_decide serve（127.0.0.1:8765，需先启动：laya_decide.py serve --port 8765）。
+          BLOCK-117 校准：本地 Laya 在现有 confidence 阈值下大概率回退——决策照常记账，不采纳不执行；切换随时可逆。
+        </p>
+      </details>
       {points?.map((p) => {
         const drifted = p.threshold != null && p.defaultThreshold != null && p.threshold !== p.defaultThreshold;
         return (

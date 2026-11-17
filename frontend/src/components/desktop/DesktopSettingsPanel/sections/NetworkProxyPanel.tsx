@@ -97,25 +97,28 @@ export function NetworkProxyPanel(): React.ReactElement {
         </div>
       )}
 
-      <div className={styles.field}>
-        <label htmlFor="network-http-proxy">HTTP 代理</label>
-        <input
-          id="network-http-proxy"
-          data-testid="network-http-proxy"
-          value={form.httpProxy}
-          placeholder="http://127.0.0.1:7890"
-          onChange={(event) => setForm((prev) => ({ ...prev, httpProxy: event.target.value }))}
-        />
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="network-https-proxy">HTTPS 代理</label>
-        <input
-          id="network-https-proxy"
-          data-testid="network-https-proxy"
-          value={form.httpsProxy}
-          placeholder="http://127.0.0.1:7890"
-          onChange={(event) => setForm((prev) => ({ ...prev, httpsProxy: event.target.value }))}
-        />
+      <div className={styles.field} data-testid="network-proxy-address-group">
+        <label>代理地址（HTTP / HTTPS 分别保存，语义不变）</label>
+        <div className={styles.field}>
+          <label htmlFor="network-http-proxy">HTTP 代理</label>
+          <input
+            id="network-http-proxy"
+            data-testid="network-http-proxy"
+            value={form.httpProxy}
+            placeholder="http://127.0.0.1:7890"
+            onChange={(event) => setForm((prev) => ({ ...prev, httpProxy: event.target.value }))}
+          />
+        </div>
+        <div className={styles.field}>
+          <label htmlFor="network-https-proxy">HTTPS 代理</label>
+          <input
+            id="network-https-proxy"
+            data-testid="network-https-proxy"
+            value={form.httpsProxy}
+            placeholder="http://127.0.0.1:7890"
+            onChange={(event) => setForm((prev) => ({ ...prev, httpsProxy: event.target.value }))}
+          />
+        </div>
       </div>
       <div className={styles.field}>
         <label htmlFor="network-no-proxy">NO_PROXY 追加项</label>

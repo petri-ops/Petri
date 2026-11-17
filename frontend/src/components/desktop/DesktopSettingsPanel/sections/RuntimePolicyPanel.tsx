@@ -175,27 +175,30 @@ export function RuntimePolicyPanel(): React.ReactElement {
         />
         <span className={styles.hint}>1-3（沿用既有硬上限）；1 = 子不可再生子。env PETRI_SPAWN_MAX_DEPTH 优先。</span>
       </div>
-      <div className={styles.field}>
-        <label htmlFor="runtime-tool-allow">工具曝光白名单</label>
-        <input
-          id="runtime-tool-allow"
-          data-testid="runtime-tool-allow"
-          value={toolAllow}
-          placeholder="留空=全部（除黑名单）"
-          onChange={(event) => setToolAllow(event.target.value)}
-        />
-        <span className={styles.hint}>非空时模型只看到这些工具；仍受黑名单二次收窄，且不改变执行策略。</span>
-      </div>
-      <div className={styles.field}>
-        <label htmlFor="runtime-tool-deny">工具曝光黑名单</label>
-        <input
-          id="runtime-tool-deny"
-          data-testid="runtime-tool-deny"
-          value={toolDeny}
-          placeholder="workspace_exec,computer_click"
-          onChange={(event) => setToolDeny(event.target.value)}
-        />
-        <span className={styles.hint}>逗号分隔的工具名；只从模型可见列表摘除，不改变执行策略。</span>
+      <div className={styles.field} data-testid="runtime-tool-scope-group">
+        <label>工具可见范围（曝光层，非安全边界）</label>
+        <div className={styles.field}>
+          <label htmlFor="runtime-tool-allow">白名单</label>
+          <input
+            id="runtime-tool-allow"
+            data-testid="runtime-tool-allow"
+            value={toolAllow}
+            placeholder="留空=全部（除黑名单）"
+            onChange={(event) => setToolAllow(event.target.value)}
+          />
+          <span className={styles.hint}>非空时模型只看到这些工具；仍受黑名单二次收窄。</span>
+        </div>
+        <div className={styles.field}>
+          <label htmlFor="runtime-tool-deny">黑名单</label>
+          <input
+            id="runtime-tool-deny"
+            data-testid="runtime-tool-deny"
+            value={toolDeny}
+            placeholder="workspace_exec,computer_click"
+            onChange={(event) => setToolDeny(event.target.value)}
+          />
+          <span className={styles.hint}>逗号分隔的工具名；只从模型可见列表摘除，不改变执行策略。</span>
+        </div>
       </div>
 
       <div className={styles.actions}>

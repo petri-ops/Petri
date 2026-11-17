@@ -1,0 +1,39 @@
+{
+  "name": "ui708-wave2",
+  "platform": "win32",
+  "startedAt": "2026-11-17T07:58:37.659Z",
+  "finishedAt": "2026-11-17T07:58:38.918Z",
+  "assertions": [
+    {
+      "name": "W1_decisions_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=decisions"
+    },
+    {
+      "name": "W2_tool_scope_and_supply_fold",
+      "pass": true,
+      "detail": "{\"scope\":true,\"supplyClosed\":true,\"supplyFields\":true,\"auditTabs\":true,\"ackShown\":true,\"memoryHidden\":true}"
+    },
+    {
+      "name": "W3_audit_tabs_default_ack",
+      "pass": true,
+      "detail": "{\"scope\":true,\"supplyClosed\":true,\"supplyFields\":true,\"auditTabs\":true,\"ackShown\":true,\"memoryHidden\":true}"
+    },
+    {
+      "name": "W4_audit_tab_switch",
+      "pass": true,
+      "detail": "{\"memory\":true,\"ack\":false}"
+    },
+    {
+      "name": "W5_network_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=network"
+    },
+    {
+      "name": "W6_proxy_address_group",
+      "pass": true,
+      "detail": "{\"group\":true,\"http\":true,\"https\":true}"
+    }
+  ],
+  "allPass": true
+}

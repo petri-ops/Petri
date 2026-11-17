@@ -45,6 +45,8 @@ import { useEndpointProfilesEditor } from './DesktopSettingsPanel/useEndpointPro
 // BLOCK-163 W3 P9（MDL-4）— 按模型成本/用量面板（usage-mine models 聚合）
 // BLOCK-163 W3 P10（KNW-5）— 记忆治理面板（facts 单条遗忘+摘要清除）
 import { MemoryPanel } from './DesktopSettingsPanel/sections/MemoryPanel';
+// UI-704 加映四 — 治理审计两块面板的纯呈现页签
+import { AuditTabs } from './DesktopSettingsPanel/sections/AuditTabs';
 // BLOCK-160 W2 P2（ORC-1）— Agent 用户规则面板（rules.json CRUD 读面）
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { ToolApprovalPanel } from './DesktopSettingsPanel/sections/ToolApprovalPanel';
@@ -540,9 +542,10 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
           <section className="petri-settings-section">
             <details className="petri-settings-advanced-details" data-testid="governance-audit-fold">
               <summary>治理审计：审批记录 / 记忆变更（按需展开）</summary>
-              <GuardAckHistoryPanel />
-              <hr className="petri-section-divider" />
-              <MemoryPanel />
+              <AuditTabs tabs={[
+                { id: 'ack', label: '审批记录', content: <GuardAckHistoryPanel /> },
+                { id: 'memory', label: '记忆变更', content: <MemoryPanel /> },
+              ]} />
             </details>
           </section>
         )}

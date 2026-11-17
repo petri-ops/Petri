@@ -8450,6 +8450,29 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "ui708-wave2-presentation-merge",
+      "note": "UI-704 加映四（工作标签 UI-708-W2）零行为变更的呈现合并：工具白/黑名单合卡、决策供给默认折叠、HTTP/HTTPS 代理合卡、治理审计页签。证据 acceptance/ui-708-wave2/**；后端键/默认/payload 逐字不变。",
+      "patterns": [
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AuditTabs.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsWave2.test.tsx",
+        "acceptance/ui-708-wave2/**"
+      ],
+      "tests": [
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/AdvancedSettingsWave2.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/RuntimePolicyPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/DecisionConfigPanel.test.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/NetworkProxyPanel.test.tsx"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }
