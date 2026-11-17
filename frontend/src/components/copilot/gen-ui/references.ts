@@ -13,15 +13,19 @@ import {
   findUnclosedAssistantDirectiveStart,
 } from './assistantDirectiveParser';
 import { GenUiReference, normalizeGenUiPath, parseGenUiReference } from './schema';
+import { parseComposeSpec, type ComposeSpec } from './compose/spec';
 
 export type GenUiPart =
   | { kind: 'text'; text: string }
   | { kind: 'ui'; reference: GenUiReference; offset: number }
+  | { kind: 'compose'; spec: ComposeSpec | null; offset: number }
   | { kind: 'pending' | 'invalid' };
 
 interface ReferenceCandidate {
   start: number;
   end: number;
+  /** 指令名（visualize | compose）：分派到各自严格 schema 的判别字段。 */
+  name: string;
   decode(): unknown;
 }
 
@@ -35,25 +39,40 @@ const jsonParameterPrefix = new RegExp(
 export function projectGenUiReferences(text: string, completed: boolean): GenUiPart[] {
   const ranges = findMarkdownCodeRanges(text);
   const parts: GenUiPart[] = [];
-  const candidates: ReferenceCandidate[] = extractAssistantDirectives(text, 'visualize').map((directive) => ({
-    start: directive.start,
-    end: directive.end,
-    // 通用 directive 只解析 key=value；JSON 参数形态在此解码后统一走严格 schema。
-    // 坏 JSON（模型截断/嵌套超出提取器形态）→ null → invalid 占位，不炸穿消息投影。
-    decode: () => {
-      if (directive.parameters !== null && directive.parameters !== undefined) return directive.parameters;
-      try {
-        return JSON.parse(directive.raw.slice(directive.raw.indexOf('{'))) as unknown;
-      } catch {
-        return null;
-      }
-    },
-  }));
+  // BLOCK-461（W11 双形态并存）：::visualize（HTML 沙箱）+ ::compose（JSON spec 受控渲染）
+  // 两条指令同投影管线；compose 的 spec 校验走 compose/spec.ts（fail-closed）。
+  const makeDecode = (directive: { parameters: Readonly<Record<string, string>> | null; raw: string }) => () => {
+    if (directive.parameters !== null && directive.parameters !== undefined) return directive.parameters;
+    try {
+      return JSON.parse(directive.raw.slice(directive.raw.indexOf('{'))) as unknown;
+    } catch {
+      return null;
+    }
+  };
+  const candidates: ReferenceCandidate[] = [
+    ...extractAssistantDirectives(text, 'visualize').map((directive) => ({
+      start: directive.start,
+      end: directive.end,
+      name: 'visualize',
+      // 通用 directive 只解析 key=value；JSON 参数形态在此解码后统一走严格 schema。
+      // 坏 JSON（模型截断/嵌套超出提取器形态）→ null → invalid 占位，不炸穿消息投影。
+      decode: makeDecode(directive),
+    })),
+    ...extractAssistantDirectives(text, 'compose').map((directive) => ({
+      start: directive.start,
+      end: directive.end,
+      name: 'compose',
+      decode: makeDecode(directive),
+    })),
+  ];
 
-  const unclosed = findUnclosedAssistantDirectiveStart(text, 'visualize', ranges, {
-    isParameterPrefix: (source) => jsonParameterPrefix.test(source),
-  });
-  if (unclosed !== null) candidates.push({ start: unclosed, end: text.length, decode: () => null });
+  const unclosedCandidates = (['visualize', 'compose'] as const)
+    .map((name) => findUnclosedAssistantDirectiveStart(text, name, ranges, {
+      isParameterPrefix: (source) => jsonParameterPrefix.test(source),
+    }))
+    .filter((start): start is number => start !== null);
+  const unclosed = unclosedCandidates.length > 0 ? Math.min(...unclosedCandidates) : null;
+  if (unclosed !== null) candidates.push({ start: unclosed, end: text.length, name: 'unclosed', decode: () => null });
 
   let cursor = 0;
   for (const candidate of candidates.sort((left, right) => left.start - right.start)) {
@@ -65,14 +84,22 @@ export function projectGenUiReferences(text: string, completed: boolean): GenUiP
       parts.push({ kind: 'pending' });
       continue;
     }
-    const reference = parseGenUiReference(candidate.decode());
+    if (candidate.name === 'compose') {
+      // compose：走 ComposeSpec 严格 schema；校验失败 → invalid 占位（与 visualize 降级语义一致）
+      const composeSpec = parseComposeSpec(candidate.decode());
+      if (composeSpec) parts.push({ kind: 'compose', spec: composeSpec, offset: start });
+      else parts.push({ kind: 'invalid' });
+      continue;
+    }
+    const decoded = candidate.decode();
+    const reference = parseGenUiReference(decoded);
     if (reference) parts.push({ kind: 'ui', reference, offset: start });
     else parts.push({ kind: 'invalid' });
   }
 
   let tailEnd = text.length;
   if (!completed) {
-    const prefix = findAssistantDirectivePrefixStart(text, ['visualize'], ranges);
+    const prefix = findAssistantDirectivePrefixStart(text, ['visualize', 'compose'], ranges);
     if (prefix !== null && prefix >= cursor) tailEnd = prefix;
   }
   const tail = text.slice(cursor, tailEnd);

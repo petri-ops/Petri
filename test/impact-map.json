@@ -8777,6 +8777,27 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block461-gen-ui-compose",
+      "note": "BLOCK-461 W11 ::compose 首包（P0-P2）：扁平树 spec 校验器 + catalog（ResultNode 插座）+ references 投影 + ComposeCard（$state/widgetState）；改这些面必跑 compose 三测 + gen-ui 邻域 + 前端类型门。证据目录同规则认领。",
+      "patterns": [
+        "frontend/src/components/copilot/gen-ui/compose/**",
+        "frontend/src/components/copilot/gen-ui/assistantDirectiveParser.ts",
+        "frontend/src/components/copilot/gen-ui/references.ts",
+        "frontend/src/components/copilot/gen-ui/GenUiMessageContent.tsx",
+        "frontend/src/components/copilot/toolActivity.ts",
+        "acceptance/block461/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/gen-ui/compose/spec.test.ts",
+        "frontend/src/components/copilot/gen-ui/compose/catalog.test.tsx",
+        "frontend/src/components/copilot/gen-ui/compose/references-compose.test.ts",
+        "frontend/src/components/copilot/gen-ui/compose/state.test.tsx"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

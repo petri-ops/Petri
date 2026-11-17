@@ -13,6 +13,7 @@ import { CopilotMarkdown } from '../copilotMarkdown';
 import type { FileReferenceClickDetail, ExtractContext } from '@/lib/chat-file-references';
 import { dedupeGenUiParts, projectGenUiReferences } from './references';
 import { GenUiCard } from './GenUiCard';
+import { ComposeCard } from './compose/ComposeCard';
 import type { GenUiFollowUpRequest, GenUiFollowUpResult } from './followUp';
 
 interface GenUiMessageContentProps {
@@ -68,6 +69,16 @@ export function GenUiMessageContent({
               projectId={projectId}
               conversationId={conversationId}
               onFollowUp={onFollowUp}
+            />
+          );
+        }
+        if (part.kind === 'compose') {
+          // BLOCK-461（W11 双形态并存）：::compose spec 受控渲染；spec=null → ComposeCard 内降级占位
+          return (
+            <ComposeCard
+              key={`compose-${index}`}
+              spec={part.spec}
+              conversationId={conversationId}
             />
           );
         }

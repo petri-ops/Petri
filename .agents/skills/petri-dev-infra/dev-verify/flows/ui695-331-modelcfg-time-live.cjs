@@ -15,13 +15,13 @@ const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
-const API = process.env.UI695_API || 'http://127.0.0.1:3001';
+const apiBase = () => process.env.UI695_API || 'http://127.0.0.1:3001'; // BLOCK-375：env 函数化调用时读取
 const EVDIR = path.join(ROOT, 'acceptance', 'ui-695-331-modelcfg-time');
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 async function rest(method, endpoint, body) {
-  const resp = await fetch(`${API}/api${endpoint}`, {
+  const resp = await fetch(`${apiBase()}/api${endpoint}`, {
     method,
     headers: { Authorization: 'Bearer desktop-local', ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,

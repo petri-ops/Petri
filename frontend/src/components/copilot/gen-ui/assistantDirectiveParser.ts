@@ -35,6 +35,10 @@ function directiveStartPattern(directiveName: string): RegExp {
 function findClosingBrace(content: string, openBraceIndex: number): number {
   let quote: QuoteState | null = null;
   let escaped = false;
+  // BLOCK-461（W11 ::compose 嵌套 JSON）：跟踪花括号深度——::visualize 的扁平 JSON
+  // 行为不变（首个深度归零的 `}` 即匹配闭括号）；嵌套形态（spec.nodes 内层 {}）不再被
+  // 内层 `}` 提前截断。引号/转义跟踪原样。
+  let depth = 0;
   for (let index = openBraceIndex + 1; index < content.length; index += 1) {
     const character = content[index];
     if (quote !== null) {
@@ -44,7 +48,11 @@ function findClosingBrace(content: string, openBraceIndex: number): number {
       continue;
     }
     if (character === '"' || character === "'") quote = { open: character, close: character };
-    else if (character === '}') return index;
+    else if (character === '{') depth += 1;
+    else if (character === '}') {
+      if (depth === 0) return index;
+      depth -= 1;
+    }
   }
   return -1;
 }

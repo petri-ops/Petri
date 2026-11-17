@@ -338,6 +338,9 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "godot_scene_apply": "已应用",
   "model3d_blend_ops": "已操作",
   "svg_inspect": "已检视",
+  // BLOCK-454-P6（2026-11-18 同步补登记：上游加了工具漏挂前端动词表）
+  "transcribe_audio": "已转录",
+  "speak_text": "已朗读",
   "svg_edit": "已编辑",
   "process_status": "已查询",
   "process_stop": "已停止",
@@ -452,6 +455,8 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "model3d_asset": "layers",
   "model3d_share": "download",
   "read_video": "play",
+  "transcribe_audio": "list-details",
+  "speak_text": "play",
   "godot_run": "play",
   "godot_scene_apply": "pencil",
   "model3d_blend_ops": "layers",

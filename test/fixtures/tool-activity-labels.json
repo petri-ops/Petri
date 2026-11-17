@@ -459,10 +459,10 @@
   },
   "transcribe_audio": {
     "label": "已转录",
-    "icon": "mic"
+    "icon": "list-details"
   },
   "speak_text": {
     "label": "已朗读",
-    "icon": "volume-2"
+    "icon": "play"
   }
 }

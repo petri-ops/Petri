@@ -1,11 +1,11 @@
 {
   "_about": "第五轮 L0-8 数字口径单源（蓝图 L-45/L-76/L-81/L-84）：文档引用读数一律以本 JSON 为准；由 scripts/post-k7-readings-generate.mjs 当场实测生成，禁止手抄/手改。",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-17T18:22:29.555Z",
-  "sourceCommit": "08d5c8196d82f6e1b5226f205b98edf5052ed6d0",
+  "generatedAt": "2026-11-17T19:01:26.035Z",
+  "sourceCommit": "faa091aee0ee26e2f38bca68c8c3e86e86bd193b",
   "generator": "node scripts/post-k7-readings-generate.mjs",
   "impactMap": {
-    "rules": 398,
+    "rules": 399,
     "unmappedTests": 89,
     "coverageBaselineUpdatedAt": "2026-11-10",
     "source": [
@@ -14,14 +14,14 @@
     ]
   },
   "docRegistry": {
-    "documentCount": 612,
-    "managedMarkdown": 595,
+    "documentCount": 613,
+    "managedMarkdown": 596,
     "registryLastUpdated": "2026-11-17",
     "source": "docs/DOC-REGISTRY.json"
   },
   "tests": {
     "nodePhysicalTestFiles": 774,
-    "frontendTestFiles": 380,
+    "frontendTestFiles": 384,
     "unmappedTests": 89,
     "denominatorNote": "628 是三段分片清单读数（test:all:sharded 的清单长度口径），700 是物理 test/*.test.mjs 文件数——两个分母不得混用（L-84）。",
     "source": [
@@ -48,8 +48,8 @@
     ]
   },
   "perfBaseline": {
-    "generatedAt": "2026-11-15T07:53:31.505Z",
-    "coreSha": "cf15c27f1e8c77cf",
+    "generatedAt": "2026-11-17T18:31:04.739Z",
+    "coreSha": "adda0403adea15ed",
     "host": {
       "platform": "darwin-arm64",
       "cpus": 8,
@@ -58,22 +58,22 @@
     },
     "scenarios": {
       "packaged_start": {
-        "medianMs": 375,
+        "medianMs": 373,
         "tolerancePct": 30,
         "skipped": false
       },
       "long_conversation": {
-        "medianMs": 27,
+        "medianMs": 26,
         "tolerancePct": 60,
         "skipped": false
       },
       "big_project_tree": {
-        "medianMs": 12,
+        "medianMs": 11,
         "tolerancePct": 60,
         "skipped": false
       },
       "warm_backend_spawn": {
-        "medianMs": 545,
+        "medianMs": 539,
         "tolerancePct": 25,
         "skipped": false
       }

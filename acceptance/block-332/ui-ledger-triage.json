@@ -1,20 +1,25 @@
 {
-  "generatedAt": "2026-11-17T06:59:53.574Z",
+  "generatedAt": "2026-11-17T19:13:33.608Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 501,
-  "uniqueIds": 492,
+  "sections": 502,
+  "uniqueIds": 493,
   "counts": {
-    "live-missing": 13,
+    "live-missing": 14,
     "verified": 453,
     "blocked": 23,
     "closed": 12
   },
-  "debt": 36,
+  "debt": 37,
   "liveMissing": [
     {
       "id": "UI-702",
       "deps": [],
       "title": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）"
+    },
+    {
+      "id": "UI-709",
+      "deps": [],
+      "title": "Gen UI ::compose 受控渲染插座（W11 数据面首包 BLOCK-461；2026-11-18 **in_progress（代码完成+契约绿；实机观感 pending"
     },
     {
       "id": "UI-699",

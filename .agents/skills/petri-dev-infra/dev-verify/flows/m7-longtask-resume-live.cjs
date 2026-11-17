@@ -33,7 +33,7 @@ const { execFileSync, spawn } = require('node:child_process');
 const lib = require('../lib.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
-const APP_ORIGIN = process.env.PETRI_DEV_ORIGIN || 'http://localhost:3000';
+const appOrigin = () => process.env.PETRI_DEV_ORIGIN || 'http://localhost:3000'; // BLOCK-375：env 函数化调用时读取（顶层固化棘轮豁免形态）
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
@@ -309,7 +309,7 @@ module.exports = {
         `恢复指令不入会话消息（新增 user 行=${newUserRows}；取证面=llm-transcripts，resume.js 注释语义）`);
 
       // ── Phase 5：9223 UI 腿（渲染面在场 + 截图）──
-      try { await lib.evalJs(client, `location.href = '${APP_ORIGIN}/?project=${projectId}'; 'go'`, 8000); } catch { /* 导航会重建会话 */ }
+      try { await lib.evalJs(client, `location.href = '${appOrigin()}/?project=${projectId}'; 'go'`, 8000); } catch { /* 导航会重建会话 */ }
       await sleep(3000);
       try { client.socket.close(); } catch { /* already */ }
       client = null;

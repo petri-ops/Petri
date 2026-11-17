@@ -53,7 +53,7 @@ describe('BLOCK-357 detour 逐件裁决', () => {
 
   test('零空壳保持：矩阵 verdicts 中 shell = 0', () => {
     assert.equal(shelf.totals.verdicts.detour, 4);
-    assert.equal(shelf.totals.verdicts.available, 17);
+    assert.equal(shelf.totals.verdicts.available, 19); // 2026-11-18：model3d-authoring（BLOCK-460）+ BLOCK-454-P6 能力入册后的机械计数演进
     assert.equal(shelf.totals.verdicts.shell || 0, 0);
     assert.equal(shelf.totals.allJudged, true);
   });

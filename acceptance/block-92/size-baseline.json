@@ -405,9 +405,9 @@
       "path": "frontend/src/components/copilot/toolActivity.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 929,
-      "bytes": 39358,
-      "sha256": "f7e862f8cfa1afa4476d13aa1320db9f57684e4109f2025f5758d35d259e7d8c"
+      "lines": 934,
+      "bytes": 39576,
+      "sha256": "edda460de821a846cd685615caa704fb80aefde6846e4a132b7bc1b0b1b992d9"
     },
     {
       "path": "frontend/src/components/work-surface/Model3DSurface.tsx",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86296
+  "total": 86301
 }

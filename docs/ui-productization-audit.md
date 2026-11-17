@@ -111,6 +111,12 @@
 
 - **UI-704 加映五（2026-11-17，用户裁决「好 按照你的建议来」）——诊断归位维护，导航去项但功能零删**：从高级导航移除独立「运行时与诊断」；`TerminalPanel` 原样收进「数据与维护 → 诊断」`DiagnosticsFold`（默认折叠），全仓唯一的服务状态/打开日志/系统终端入口不删。旧深链 `?section=diagnostics` 经 `normalizeInitialSection` 归一到 `maintenance` 并自动展开折叠块；设置搜索的「诊断/日志/运行时/服务/后端/进程/backend/runtime」关键词并入 maintenance，搜索可达不回退。分区数 12→11，`SETTINGS_SEARCH_INDEX` 与 `SETTINGS_SECTIONS` 漂移门仍逐项相等。HK-01 红（suite 导入失败）→ 绿 4/4，加 SettingsNav 6/6 + settingsSearch 8/8 + global-pages 1/1 + block201 基线 4/4；Jev test:suggest 建议文件漂移改跑在册 block59 window-manager 43/43；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui704-diagnostics` **6/6 allPass**（9223 离屏、跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-704-diagnostics/ui704-diagnostics-live-win32.json`）。零新依赖/零功能删除；其他 agent 在制文档零触碰。观感 `pending_human_eye` 不代签。
 
+## UI-709: Gen UI ::compose 受控渲染插座（W11 数据面首包 BLOCK-461；2026-11-18 **in_progress（代码完成+契约绿；实机观感 pending_human_eye 不代签）**）
+
+- **变化面**：① `::compose` JSON 指令投影（references.ts 双指令管线，compose 片段独立 kind）；② 扁平树 spec 手写校验器 fail-closed（compose/spec.ts：未知 kind/悬空引用/环/深度/props 白名单/$state 格式全拒）；③ catalog 最小集（Card/Metric/Table/Chart）叶子经既有 ResultCardRenderer 渲染=ResultNode 插座通电零第二渲染真相；④ ComposeCard 降级占位（spec 无效→compose-invalid 占位+console 留痕）；⑤ $state 绑定复用 gen-ui:get-data 通道 + visible 条件 + widgetState 复用既有 REST（≤16KiB）；⑥ parser findClosingBrace 嵌套花括号深度跟踪（::visualize 平 JSON 行为不变，既有 60/60 零回归）。
+- **契约证据**：compose 四测 30/30（spec 12/catalog 3/projection 6/state 9，HK-01 红→绿）；copilot 全邻域 813/813；quality:types 0 error；lint 根因修（own-enumerable 查找沿 BLOCK-456 先例）0 error 0 warning。
+- **pending_human_eye**：::compose 卡实机渲染观感（dev Electron 9223 离屏实机腿未跑——P2 实机判据=真实 job 数据驱动的 spec 卡，CP-11 同款；stack 就绪后补跑）。签字槽留空，Agent 不代签。
+
 ## UI-707: 上下文窗口与思考默认档模型级化——模型行悬停配置 + 设置页上下文退役（BLOCK-456；2026-11-17 **in_progress（P1-P4 收口，实机腿 19/19；观感 pending_human_eye 不代签）**）
 
 - **设计源**：`docs/block-456-model-level-context-thinking-plan.md` + 用户裁决（2026-11-17「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」，附 composer 模型菜单截图）。
