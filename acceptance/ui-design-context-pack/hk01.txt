@@ -19,6 +19,12 @@ HK-01：
   quick_validate.py（PYTHONUTF8=1）→ Skill is valid!
   首轮 CRLF 导致正则红，已修为 \r?\n 后绿；如实记录。
 
+落点修正（用户反馈「不应局限于 CodeBuddy」）：
+  - 原实现：`.codebuddy/skills/petri-ui-design` 为实体目录（与既有 Petri Skill 链接约定不一致）；
+  - 修正：真源迁至 `.agents/skills/petri-ui-design`；
+    `.codebuddy/skills/petri-ui-design` 改为相对符号链接 `..\..\.agents\skills\petri-ui-design`；
+  - HK-01 新增 symlink 断言：真源是目录、CodeBuddy 入口是 symlink、目标指向 `.agents/skills/petri-ui-design`。
+
 边界：
   - 零产品依赖、零 UI 写面变化、零默认行为变化；
   - 不新建受控文档、不改 DOC-REGISTRY / README / next-work-blueprint / gen-ui 评估 WIP；

@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync, statSync } from 'node:fs';
+import { lstatSync, readFileSync, readlinkSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const SKILL = resolve(ROOT, '.codebuddy/skills/petri-ui-design');
+const SKILL = resolve(ROOT, '.agents/skills/petri-ui-design');
+const CODEBUDDY_ENTRY = resolve(ROOT, '.codebuddy/skills/petri-ui-design');
 
 function read(rel) {
   return readFileSync(resolve(SKILL, rel), 'utf8');
@@ -71,4 +72,10 @@ test('UI design skill — tool matrix preserves article tools and license stance
   }
   assert.match(matrix, /MIT \+ Commons Clause/);
   assert.match(matrix, /Zero new dependencies/);
+});
+
+test('UI design skill — lives in .agents and CodeBuddy entry is a symlink', () => {
+  assert.ok(statSync(SKILL).isDirectory(), '.agents/skills/petri-ui-design must be the source of truth');
+  assert.ok(lstatSync(CODEBUDDY_ENTRY).isSymbolicLink(), '.codebuddy/skills/petri-ui-design must be a symlink');
+  assert.match(readlinkSync(CODEBUDDY_ENTRY).replace(/\\/g, '/'), /\.agents\/skills\/petri-ui-design$/);
 });
