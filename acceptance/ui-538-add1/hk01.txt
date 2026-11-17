@@ -1,0 +1,24 @@
+UI-538 加映一 — composer 模型按钮显示当前模型名 HK-01 证据
+
+用户反馈（2026-11-17）：「这个为啥没变呢……我记得需求是显示已选择模型的名字。」
+澄清：此前只做过“是否应该显示”的判断，未实施；C-51 实现的是模型行右侧配置小页，不是模型按钮名。
+
+红（实现前）：
+  npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/ModelChip.test.tsx
+  2 failed：模型中文字 span 不存在，title-only 不满足可见性契约。
+绿（实现后）：
+  same command → 3/3 passed
+    手选模式显示模型短名；自动模式显示“自动 · 解析预览”；点击只打开菜单。
+
+邻域（Jev test:suggest conf=0.88）：
+  test/conversation-compaction.test.mjs 不存在（漂移）；
+  test/block95-b1-history-assembly.test.mjs 6/6；
+  frontend/src/components/copilot/conversationRunStore.test.ts 50/50。
+
+实机腿：
+  npm run verify -- ui538-add1 → 4/4 allPass
+    N1 label=glm-4.7；N2 width=93.4 > 80；N3 title 完整；N4 点击仍开 model-menu。
+  证据=acceptance/ui-538-add1/ui538-add1-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+  开发版 Vite HMR 实时生效；安装版需重新构建安装才会带上该改动。
+
+边界：零新依赖 / 零默认值 / 零写面语义变化；窄容器仍按既有 container query 收为图标态；观感 pending_human_eye 不代签。

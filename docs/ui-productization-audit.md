@@ -6345,6 +6345,8 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **实机腿（9223 离屏，8/8）**：`acceptance/block-225/`——默认关闭 → 开启显示「deepseek-flash（Agent 角色绑定）」+ composer「自动」→ 偏好 true → 关闭恢复具体模型、偏好 false；亮/暗截图。
 - **未做（reopen）**：复杂度分级/成本权重、学习型 Auto、解析审计落盘、自动档下的显式覆盖确认。
 
+- **UI-538 加映一（2026-11-17，用户实机反馈「这个为啥没变呢……需求是显示已选择模型的名字」）**：澄清=此前只做过“是否应该显示”的判断，未实施；C-51 实现的是模型行右侧配置小页，不是 composer 模型钮。本加映把 `ModelChip` 从「闪电 + 箭头」图标态改为「闪电 + 当前模型短名 + 箭头」，自动档显示「自动 · 解析预览」；长名省略号、窄容器仍按既有 container query 收为图标态，title/aria-label 保留完整信息，点击仍只打开菜单。零新依赖 / 零默认值 / 零写面语义 / 其他 agent 4 文档 WIP 零触碰。HK-01 红 2/2→绿 3/3；Jev test:suggest 邻域 block95 history 6/6 + conversationRunStore 50/50（建议文件 `conversation-compaction.test.mjs` 漂移如实记录）；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui538-add1` **4/4 allPass**（label=glm-4.7、width=93.4、点击仍开 model-menu；9223 离屏跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-538-add1/ui538-add1-live-win32.json`）。开发版 Vite HMR 生效，安装版需重新构建；观感 `pending_human_eye` 不代签。
+
 ## UI-539: 通知中心 + 免打扰（2026-10-21 **verified（dev Electron 边界内；9223 离屏 live 11/11）**，BLOCK-226 / Q9）
 
 - **变化面**：标题栏新增铃铛（未读徽章）+ 通知弹层（类型/标题/正文/时间/未读点、全部已读、清空、空态）；回合完成/失败/待审批都写入本地通知中心（≤50 条，localStorage），不受系统通知偏好/聚焦/免打扰影响；设置页常规节新增免打扰时段（`HH:MM-HH:MM`，支持跨午夜，非法值就地报错），命中时只压系统 toast 并在主进程返回 `quiet_hours`。
