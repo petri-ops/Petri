@@ -1,0 +1,32 @@
+{
+  "capturedAt": "2026-11-17T00:04:24.435Z",
+  "surface": "UI-703 API Endpoint 编辑器宽表头（宽视口 2400×1200 @2x）",
+  "instance": "9223 offscreen test instance（跑完立即 kill，未设 PETRI_TEST_ONSCREEN）",
+  "results": [
+    {
+      "name": "API Endpoint 编辑器表头在场（宽视口 2400px）",
+      "ok": true,
+      "detail": "[\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"上下文\",\"思考\",\"视觉\",\"向量\",\"连通性\",\"\"]"
+    },
+    {
+      "name": "表头 11 列标签齐全",
+      "ok": true,
+      "detail": "[\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"上下文\",\"思考\",\"视觉\",\"向量\",\"连通性\",\"\"]"
+    },
+    {
+      "name": "表头无换行（每格高度 ≤ 30px = 单行）",
+      "ok": true,
+      "detail": "heights=[20,20,20,20,20,20,20,20,20,20,0]"
+    },
+    {
+      "name": "表头元素级裁剪截图在册",
+      "ok": true,
+      "detail": "clip={\"x\":1031,\"y\":271,\"width\":1298,\"height\":34}"
+    }
+  ],
+  "note": "观感判定归用户（D8：不代签）——机械读数（11 列/单行高度/裁剪截图在册）之外，宽表头观感待用户过目后翻 verified。",
+  "summary": {
+    "total": 4,
+    "pass": 4
+  }
+}

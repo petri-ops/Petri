@@ -251,6 +251,15 @@
   margin-inline: auto;
 }
 
+/* UI-703 宽表头可达性豁免（W8 实机腿发现，2026-11-17）：兜底帽（上方 720px）把
+   .petri-settings-section--models 的 min(100%, 1180px)（UI-038 引入，容器 ≥1146px
+   才显示 11 列表头）压死——宽表头分支在一切窗口宽度都不可达。本豁免恢复
+   UI-038/UI-703 意图：模型分区（含 11 列 endpoint 编辑器）放行到 1180px，
+   其余分区仍吃 720 兜底帽。特异性 (0,3,1) > 兜底帽 (0,2,1)，且同文件更晚出现。 */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-content) > :global(.petri-settings-section--models) {
+  max-width: 1180px;
+}
+
 /* ── 分组：无卡片、无边框，用间距 + 标题字号分层 ── */
 [role='dialog'][aria-label='设置'] :global(.petri-settings-section) {
   display: block;

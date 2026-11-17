@@ -100,6 +100,8 @@
 - **实机腿（9223 离屏，2026-11-17）**：`ui704-live` flow **11/11 allPass**（core 5 组逐项/高级默认收起/快捷键不在首屏/展开后 7 子项可见/`?section=general` 归一 maintenance 同屏/`?section=diagnostics` 自动展开+激活/能力渠道折叠块默认收起+展开后双选择器在场且 SearXNG 默认/UpdateCard 无推送缺席/Cmd+, 快捷键进设置）；截图 5 张在册（全页 PNG 非元素级裁剪，诚实标注）；instance=9223 离屏跑完立即 kill、未设 PETRI_TEST_ONSCREEN；证据=`acceptance/ui-704/live-flow.json` + `shots/`。
 - **证据等级与诚实边界**：机械断言+实机腿已过；**宽窄视口观感/卡片与折叠块视觉过目 = pending_human_eye，需用户裁决**（D8 预置裁决同款「待外部确认」：观感归用户，Agent 不代签、不冒 verified；截图为全页非元素级裁剪，如实标注）。
 
+- **W8 追加（2026-11-17，e2e 补充波次「一次性搞完」）——宽表头不可达根因发现并修复**：W8 实机腿（9223 离屏）取证发现**宽表头分支在任何窗口宽度都不可达**——BLOCK-423（UI-702）的 `settings-redesign.module.css` 兜底帽 `> * { max-width: 720px }`（特异性 0,2,1）把 UI-038 的 `.petri-settings-section--models { width: min(100%, 1180px) }` 压死，容器查询 `petri-model-list (max-width:1146px)` 恒命中 → 表头恒 display:none。**修复**=兜底帽之后登记 models 豁免（`> :global(.petri-settings-section--models) { max-width: 1180px }`，特异性 (0,3,1) 更晚出现），其余分区仍吃 720 帽。HK-01：豁免契约测试 2/2（先红后绿）；theme-token-contract 19/19 复绿。**宽表头实机读数**：2400px 视口容器过阈 → 表头 11 列在 DOM 且**单行（每格 20px ≤30 阈）**、元素级裁剪 1298×34 在册（全页+裁剪截图 shots/）；工具=9223 离屏跑完立即 kill 未设 PETRI_TEST_ONSCREEN；证据=acceptance/ui-703-wide-header/live-flow.json。**宽表头观感仍 pending_human_eye（需用户过目后翻 verified），不代签**。
+
 ## UI-700: SSE 三态契约前端消费——task.failed 结构化失败终态（BLOCK-376 S1；2026-11-07 in_progress → **2026-11-08 verified（实机腿过）**）
 
 - **改动**：`frontend/src/components/copilot/copilotClient/agentTaskStream.ts` 新增 `task.failed` 事件消费（结构化 reason/reasonCode，error 兼容载荷优先级不变）；`types.ts` 声明 `onTaskFailed`。tsc 0。
