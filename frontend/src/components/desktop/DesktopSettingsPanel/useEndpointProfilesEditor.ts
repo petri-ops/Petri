@@ -22,6 +22,7 @@ import {
 } from '@/lib/model-endpoint-transfer';
 import { credentialId } from './model-types';
 import { MODEL_ROLES, providerDefaults, type ModelRole } from './model-types';
+import { parseModelBinding, prefillModelCapabilities, resolveModelCapabilities } from '@/lib/model-capabilities';
 import { getBridge } from '@/lib/desktopBridge';
 
 /**
@@ -174,7 +175,12 @@ export function useEndpointProfilesEditor(): {
       credential_updates: Object.fromEntries(Object.entries(credentialInputs).filter(([, value]) => value.trim())),
       // Compatibility snapshot for older renderer builds. The Gateway only
       // reads ModelProfiles and role bindings.
-      chat_model_presets: profiles.filter((profile) => profile.capabilities?.includes('chat')).map(({ id, label, provider, model, defaultModel, baseUrl, contextWindow }) => ({ id, label, provider, model, defaultModel, baseUrl, contextWindow })),
+      // BLOCK-455 — 按实际请求模型的解析能力判定；未声明 legacy 保持旧宽松语义。
+      chat_model_presets: profiles.filter((profile) => {
+        const declared = Array.isArray(profile.capabilities)
+          || Array.isArray(profile.modelCapabilities?.[profile.model]);
+        return !declared || resolveModelCapabilities(profile, profile.model).includes('chat');
+      }).map(({ id, label, provider, model, defaultModel, baseUrl, contextWindow }) => ({ id, label, provider, model, defaultModel, baseUrl, contextWindow })),
       active_chat_model_id: roleBindings.chat,
       llm_provider: chatProfile?.provider,
       embed_provider: embedProfile?.provider,
@@ -201,17 +207,19 @@ export function useEndpointProfilesEditor(): {
       if (modelDiscoveryGeneration.current[profile.id] !== generation) return;
       if (result.ok && result.models.length > 0) {
         setAvailableModels((current) => ({ ...current, [profile.id]: result.models }));
-        setModelProfiles((profiles) => profiles.map((candidate) =>
-          candidate.id === profile.id
-                ? {
-                ...candidate,
-                model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
-                defaultModel: result.models.includes(candidate.defaultModel || candidate.model)
-                  ? (candidate.defaultModel || candidate.model)
-                  : result.models[0],
-              }
-            : candidate
-        ));
+        setModelProfiles((profiles) => profiles.map((candidate) => {
+          if (candidate.id !== profile.id) return candidate;
+          // BLOCK-455 — 发现时推断预填模型级能力（零回归规则见 prefillModelCapabilities）。
+          const prefilled = prefillModelCapabilities(candidate, result.models);
+          return {
+            ...candidate,
+            model: result.models.includes(candidate.model) ? candidate.model : result.models[0],
+            defaultModel: result.models.includes(candidate.defaultModel || candidate.model)
+              ? (candidate.defaultModel || candidate.model)
+              : result.models[0],
+            ...(prefilled ? { modelCapabilities: prefilled } : {}),
+          };
+        }));
       }
       if (!silent || result.ok) {
         setTestResult((prev) => ({
@@ -329,7 +337,10 @@ export function useEndpointProfilesEditor(): {
 
   function removeProfile(id: string) {
     setModelProfiles((profiles) => profiles.filter((profile) => profile.id !== id));
-    setRoleBindings((bindings) => Object.fromEntries(Object.entries(bindings).filter(([, value]) => value !== id)));
+    // BLOCK-455 — 绑定值可能是 渠道::模型 对，按解析出的渠道 id 清理（裸 id 同规则命中）。
+    setRoleBindings((bindings) => Object.fromEntries(
+      Object.entries(bindings).filter(([, value]) => parseModelBinding(value).profileId !== id),
+    ));
     setFallbackBindings((bindings) => Object.fromEntries(Object.entries(bindings).map(([role, ids]) => [role, (ids || []).filter((value) => value !== id)])));
   }
 

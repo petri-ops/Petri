@@ -132,3 +132,32 @@ describe('imageVisionCapable（UI-614 图片入口门禁）', () => {
     })).toBe(true);
   });
 });
+
+describe('BLOCK-455 渠道::模型 对绑定', () => {
+  it('vision 绑定精确命中绑定模型（不再拿渠道默认模型顶替）', () => {
+    const candidates = [
+      preset({ id: 'ep::a', endpointProfileId: 'ep', model: 'a', defaultModel: 'a', capabilities: ['chat', 'vision'] }),
+      preset({ id: 'ep::b', endpointProfileId: 'ep', model: 'b', defaultModel: 'a', capabilities: ['chat', 'vision'] }),
+    ];
+    const decision = resolveAutoPreset({
+      presets: candidates,
+      catalog,
+      roleBindings: { vision: 'ep::b' },
+      hasImages: true,
+    });
+    expect(decision?.preset.model).toBe('b');
+    expect(decision?.role).toBe('vision');
+  });
+
+  it('补能力位优先同 endpoint 同模型（能力跟模型走）', () => {
+    const legacy = { id: 'ep::b', label: 'EP', provider: 'openai-compatible', model: 'b', endpointProfileId: 'ep' };
+    expect(imageVisionCapable({
+      autoModel: false,
+      activeModel: legacy,
+      presets: [
+        preset({ id: 'ep::a', endpointProfileId: 'ep', model: 'a', capabilities: ['chat', 'vision'] }),
+        preset({ id: 'ep::b', endpointProfileId: 'ep', model: 'b', capabilities: ['chat'] }),
+      ],
+    })).toBe(false);
+  });
+});

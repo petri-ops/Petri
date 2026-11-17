@@ -51,7 +51,10 @@ function computeVisionConfigured(settings, getCredentialFn) {
     }
     const bindings = settings.model_role_bindings || {};
     const profiles = settings.model_profiles || [];
-    const profile = profiles.find((p) => p.id === bindings.vision)
+    // BLOCK-455 — vision 绑定支持 渠道::模型 对，按 profileId 查档案。
+    const { parseModelBinding } = require('../../shared-backend/llm-providers/model-profile');
+    const visionBinding = parseModelBinding(bindings.vision);
+    const profile = profiles.find((p) => p.id === visionBinding.profileId)
       || profiles.find((p) => (p.roles || []).includes('vision'));
     if (!profile) return false;
     return !!getCredentialFn(profile.credentialRef, profile);

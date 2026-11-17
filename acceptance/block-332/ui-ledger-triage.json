@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-17T01:36:09.141Z",
+  "generatedAt": "2026-11-17T04:14:10.488Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 499,
-  "uniqueIds": 490,
+  "sections": 500,
+  "uniqueIds": 491,
   "counts": {
     "live-missing": 13,
     "verified": 453,
-    "blocked": 21,
+    "blocked": 22,
     "closed": 12
   },
-  "debt": 34,
+  "debt": 35,
   "liveMissing": [
     {
       "id": "UI-702",
@@ -83,6 +83,12 @@
       "deps": [],
       "external": true,
       "title": "设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 *"
+    },
+    {
+      "id": "UI-706",
+      "deps": [],
+      "external": true,
+      "title": "API Endpoint 能力面简化——主表 11→8 列 + 行详情折叠 + 能力声明模型级化 + 角色绑定模型对（BLOCK-455 P4/P5；2026-11-17 **in"
     },
     {
       "id": "UI-656",

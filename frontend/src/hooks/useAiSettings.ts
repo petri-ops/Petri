@@ -35,6 +35,7 @@ import {
   normalizeLegacyUserModelProfile,
 } from '@/lib/model-provider-options';
 import { EMPTY_MODEL_CATALOG, type ModelCatalogState } from '@/lib/model-catalog';
+import { resolveModelCapabilities } from '@/lib/model-capabilities';
 
 // ChatModelPreset type — extracted here so SimpleChat and
 // DesktopSettingsPanel no longer each carry their own copy.
@@ -54,6 +55,8 @@ export interface ChatModelPreset {
   credentialRef?: string;
   protocol?: string;
   capabilities?: string[];
+  /** BLOCK-455 — 模型级能力覆写（显式条目优先于渠道 capabilities；发现时推断预填）。 */
+  modelCapabilities?: Record<string, string[]>;
   roles?: string[];
   parameters?: Record<string, unknown>;
   /**
@@ -168,12 +171,21 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
             const models = result.ok && Array.isArray(result.models) && result.models.length > 0
               ? result.models
               : [profile.model];
-            return models.map((model) => ({
+            // BLOCK-455 — 显式声明非 chat 的模型（如 embedding 模型）不进聊天选择器；
+            // 未声明能力的 legacy 档案保持旧语义（全部展开）。
+            const chatModels = models.filter((model) => {
+              const declared = Array.isArray(profile.capabilities)
+                || Array.isArray(profile.modelCapabilities?.[model]);
+              return !declared || resolveModelCapabilities(profile, model).includes('chat');
+            });
+            return (chatModels.length > 0 ? chatModels : [profile.model]).map((model) => ({
               ...profile,
               id: modelChoiceId(profile.id, model),
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
               model,
+              // BLOCK-455 — choice 携带模型级能力（覆写优先，渠道兜底）。
+              capabilities: resolveModelCapabilities(profile, model),
               defaultModel: profile.defaultModel || profile.model,
               lastSelectedModel: profile.model,
             }));
@@ -184,6 +196,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               id: modelChoiceId(profile.id, profile.model),
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
+              capabilities: resolveModelCapabilities(profile, profile.model),
               defaultModel: profile.defaultModel || profile.model,
               lastSelectedModel: profile.model,
             }];

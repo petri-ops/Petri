@@ -1,0 +1,37 @@
+✔ thinking 门跟实际 attempt 模型：覆写无 reasoning 的模型不发参 (1.1605ms)
+✔ 渠道无 reasoning 但模型覆写有 → 按模型发参（模型级优先双向） (0.1693ms)
+✔ vision 绑定 渠道::模型 对 → 请求用绑定模型 (0.3352ms)
+✔ vision 绑定模型无 vision 能力 → 诚实 mismatch（渠道有也不放行） (0.1376ms)
+✔ embed 绑定 渠道::模型 对 → embed 用绑定模型 (0.224ms)
+✔ embeddingRoleAvailable：对绑定 + 模型级能力判定 (0.1143ms)
+✔ computeVisionConfigured：对绑定按 profileId 查凭据 (0.1876ms)
+▶ BLOCK-455 resolveModelCapabilities 单源
+  ✔ 无覆写 → 渠道 capabilities 兜底（旧数据零行为变化） (0.671ms)
+  ✔ 显式覆写优先（含显式空数组=该模型无任何能力） (0.0823ms)
+  ✔ 缺省模型名 → 渠道兜底；非法输入不抛错 (0.0714ms)
+✔ BLOCK-455 resolveModelCapabilities 单源 (1.359ms)
+▶ BLOCK-455 inferModelCapabilities 名称启发式
+  ✔ 视觉系模型名 → 含 vision 的聊天能力集 (0.3248ms)
+  ✔ 思考系模型名 → 含 reasoning (0.0914ms)
+  ✔ 向量系模型名 → 仅 embedding（不是聊天模型） (0.0989ms)
+  ✔ 普通聊天模型名 → 基础集，不滥猜 (0.0727ms)
+✔ BLOCK-455 inferModelCapabilities 名称启发式 (0.7487ms)
+▶ BLOCK-455 normalizeModelProfile 清洗 modelCapabilities
+  ✔ 保留合法覆写、丢弃未知能力位与非对象输入 (0.3182ms)
+  ✔ 无 modelCapabilities 的旧档案归一后不长出该字段（零迁移） (0.0889ms)
+✔ BLOCK-455 normalizeModelProfile 清洗 modelCapabilities (0.5215ms)
+▶ BLOCK-455 角色绑定 渠道::模型 对
+  ✔ parseModelBinding：裸 id / 对 / 编码模型名 (0.2094ms)
+  ✔ resolveModelProfile 解析对 → 返回解析模型与模型级能力 (0.4121ms)
+  ✔ 能力校验按绑定模型：渠道有 vision 但绑定模型无 → 诚实 mismatch (0.5663ms)
+  ✔ requestedId 显式传对同样生效（覆盖绑定） (0.0988ms)
+  ✔ 默认绑定回退按渠道默认模型的解析能力挑选 (0.087ms)
+✔ BLOCK-455 角色绑定 渠道::模型 对 (1.4819ms)
+ℹ tests 21
+ℹ suites 4
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.7712

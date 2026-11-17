@@ -1,0 +1,99 @@
+{
+  "name": "block455-live",
+  "platform": "win32",
+  "startedAt": "2026-11-17T04:16:46.369Z",
+  "finishedAt": "2026-11-17T04:17:25.621Z",
+  "assertions": [
+    {
+      "name": "S0_9223_free_before_start",
+      "pass": true,
+      "detail": "free"
+    },
+    {
+      "name": "R1_isolated_backend_healthy",
+      "pass": true,
+      "detail": "port 3399"
+    },
+    {
+      "name": "R2_seed_accepted",
+      "pass": true,
+      "detail": "status=200 {\"status\":\"ok\"}"
+    },
+    {
+      "name": "R3_model_capabilities_and_pairs_persisted",
+      "pass": true,
+      "detail": "{\"caps\":{\"gpt-4o\":[\"chat\",\"streaming\",\"tools\",\"vision\",\"reasoning\"],\"gpt-4o-mini\":[\"chat\",\"streaming\",\"tools\",\"vision\"],\"deepseek-r1\":[\"chat\",\"streaming\",\"tools\",\"reasoning\"]},\"bindings\":{\"chat\":\"b455-main\",\"agent\":\"b455-main\",\"planner\":\"b455-main\",\"vision\":\"b455-main::gpt-4o\",\"embedding\":\"b455-embe"
+    },
+    {
+      "name": "T1_test_instance_ready",
+      "pass": true,
+      "detail": "test=1 target on 9223"
+    },
+    {
+      "name": "W4a_expand_button_present",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "W1_header_no_capability_columns",
+      "pass": true,
+      "detail": "[\"\",\"协议\",\"供应商\",\"Base URL\",\"Key\",\"默认模型\",\"上下文\",\"连通性\",\"\"]"
+    },
+    {
+      "name": "W2_grid_nine_tracks_aligned_single_row",
+      "pass": true,
+      "detail": "header=[32,122,110,274,170,168,96,120,40] grid=[32,122,110,274,170,168,96,120,40] spread=13px minWidth=1100/1100"
+    },
+    {
+      "name": "W3_no_overflow",
+      "pass": true,
+      "detail": "溢出单元格=0 header越界=false docOverflow=false"
+    },
+    {
+      "name": "W4_detail_controls",
+      "pass": true,
+      "detail": "{\"selectorShown\":true,\"thinking\":{\"value\":\"high\",\"options\":[\"unsupported\",\"auto\",\"off\",\"standard\",\"high\"]},\"defaultVision\":true}"
+    },
+    {
+      "name": "W5_per_model_table",
+      "pass": true,
+      "detail": "{\"names\":[\"渠道默认（兜底）\",\"bge-m3\",\"deepseek-r1\",\"gpt-4o-mini\"],\"caps\":{\"defaultVision\":true,\"channelVision\":false,\"miniVision\":true,\"miniReasoning\":false,\"r1Reasoning\":true,\"bgeEmbedding\":true}}"
+    },
+    {
+      "name": "W6_detail_geometry",
+      "pass": true,
+      "detail": "withinCard=true noOverlap=true detail={\"x\":1014.6578979492188,\"y\":356.9821472167969,\"w\":1179.993896484375,\"h\":234.00125122070312,\"right\":2194.6517944335938,\"bottom\":590.9833984375} card={\"x\":1014.6578979492188,\"y\":302.58941650390625,\"w\":1179.993896484375,\"h\":288.39398193359375,\"right\":2194.6517944335938,\"bottom\":590.9833984375}"
+    },
+    {
+      "name": "W7_role_binding_pairs",
+      "pass": true,
+      "detail": "{\"vision\":{\"value\":\"b455-main::gpt-4o\",\"options\":[\"\",\"b455-main::gpt-4o\",\"b455-main::gpt-4o-mini\",\"b455-embed::gpt-4o\",\"b455-embed::gpt-4o-mini\"]},\"embedding\":{\"value\":\"b455-embed::bge-m3\",\"options\":[\"\",\"b455-main::bge-m3\",\"b455-embed::bge-m3\",\"b455-embed::deepseek-r1\",\"b455-embed::gpt-4o\",\"b455-embed::gpt-4o-mini\"]}}"
+    },
+    {
+      "name": "W8_screenshots_or_honest_degrade",
+      "pass": true,
+      "detail": "{\"error\":\"screenshot_unavailable: cdp_command_failed:-32000\"}"
+    },
+    {
+      "name": "W9_save_roundtrip",
+      "pass": true,
+      "detail": "{\"saveClicked\":\"clicked\",\"caps\":{\"gpt-4o\":[\"chat\",\"streaming\",\"tools\",\"vision\",\"reasoning\"],\"gpt-4o-mini\":[\"chat\",\"streaming\",\"tools\"],\"deepseek-r1\":[\"chat\",\"streaming\",\"tools\",\"reasoning\"],\"bge-m3\":[\"embedding\"]},\"bindings\":{\"chat\":\"b455-main\",\"agent\":\"b455-main\",\"planner\":\"b455-main\",\"vision\":\"b455-main::gpt-4o\",\"embedding\":\"b455-embed::bge-m3\",\"summary\":\"b455-main\",\"report\":"
+    },
+    {
+      "name": "N1_narrow_two_line_form",
+      "pass": true,
+      "detail": "{\"display\":\"none\",\"tracks\":[84,549],\"labels\":\"9/9\",\"pairs\":true,\"scroll\":\"643/643\"}"
+    },
+    {
+      "name": "N2_narrow_detail_still_rendered",
+      "pass": true,
+      "detail": "[\"渠道默认（兜底）\",\"bge-m3\",\"deepseek-r1\",\"gpt-4o-mini\"]"
+    },
+    {
+      "name": "N3_narrow_screenshot_or_honest_degrade",
+      "pass": true,
+      "detail": "screenshot_unavailable: cdp_command_failed:-32000"
+    }
+  ],
+  "allPass": true
+}

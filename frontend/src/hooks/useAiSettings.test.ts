@@ -357,3 +357,30 @@ describe('useAiSettings', () => {
     expect(result.current.activeId).toBe('x');
   });
 });
+
+describe('BLOCK-455 模型级能力展开', () => {
+  it('发现的 choice 携带模型级能力（覆写优先/渠道兜底），非 chat 模型不进选择器', async () => {
+    installBridge({
+      initial: {
+        model_profiles: [{
+          id: 'ep', label: 'EP', provider: 'openai-compatible', model: 'gpt-4o',
+          baseUrl: 'https://example.com/v1',
+          capabilities: ['chat', 'streaming', 'tools', 'vision'],
+          modelCapabilities: {
+            'text-only': ['chat', 'streaming', 'tools'],
+            'bge-m3': ['embedding'],
+          },
+        }],
+        model_role_bindings: { chat: 'ep' },
+      },
+      listModels: () => Promise.resolve({ ok: true, models: ['gpt-4o', 'text-only', 'bge-m3'], message: '' }),
+    });
+    const { result } = renderHook(() => useAiSettings());
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await waitFor(() => expect(result.current.presets.length).toBe(2));
+    const byModel = Object.fromEntries(result.current.presets.map((p) => [p.model, p.capabilities]));
+    expect(byModel['gpt-4o']).toEqual(['chat', 'streaming', 'tools', 'vision']);
+    expect(byModel['text-only']).toEqual(['chat', 'streaming', 'tools']);
+    expect(byModel['bge-m3']).toBeUndefined();
+  });
+});

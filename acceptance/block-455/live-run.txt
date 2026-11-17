@@ -1,0 +1,25 @@
+
+> petri-desktop@0.0.4 verify
+> node .agents/skills/petri-dev-infra/dev-verify/run.cjs block455-live
+
+[dev-verify] PASS S0_9223_free_before_start :: free
+[dev-verify] PASS R1_isolated_backend_healthy :: port 3399
+[dev-verify] PASS R2_seed_accepted :: status=200 {"status":"ok"}
+[dev-verify] PASS R3_model_capabilities_and_pairs_persisted :: {"caps":{"gpt-4o":["chat","streaming","tools","vision","reasoning"],"gpt-4o-mini":["chat","streaming","tools","vision"],"deepseek-r1":["chat
+[dev-verify] PASS T1_test_instance_ready :: test=1 target on 9223
+[dev-verify] warn: 9223 页面目标均无 ?test=1 标记（SPA 导航丢失查询串），按端口专属回退: http://localhost:3000/settings?section=models
+[dev-verify] PASS W4a_expand_button_present :: clicked
+[dev-verify] PASS W1_header_no_capability_columns :: ["","协议","供应商","Base URL","Key","默认模型","上下文","连通性",""]
+[dev-verify] PASS W2_grid_nine_tracks_aligned_single_row :: header=[32,122,110,274,170,168,96,120,40] grid=[32,122,110,274,170,168,96,120,40] spread=13px minWidth=1100/1100
+[dev-verify] PASS W3_no_overflow :: 溢出单元格=0 header越界=false docOverflow=false
+[dev-verify] PASS W4_detail_controls :: {"selectorShown":true,"thinking":{"value":"high","options":["unsupported","auto","off","standard","high"]},"defaultVision":true}
+[dev-verify] PASS W5_per_model_table :: {"names":["渠道默认（兜底）","bge-m3","deepseek-r1","gpt-4o-mini"],"caps":{"defaultVision":true,"channelVision":false,"miniVision":true,"miniReasoni
+[dev-verify] PASS W6_detail_geometry :: withinCard=true noOverlap=true detail={"x":1014.6578979492188,"y":356.9821472167969,"w":1179.993896484375,"h":234.00125122070312,"right":219
+[dev-verify] PASS W7_role_binding_pairs :: {"vision":{"value":"b455-main::gpt-4o","options":["","b455-main::gpt-4o","b455-main::gpt-4o-mini","b455-embed::gpt-4o","b455-embed::gpt-4o-m
+[dev-verify] PASS W8_screenshots_or_honest_degrade :: {"error":"screenshot_unavailable: cdp_command_failed:-32000"}
+[dev-verify] PASS W9_save_roundtrip :: {"saveClicked":"clicked","caps":{"gpt-4o":["chat","streaming","tools","vision","reasoning"],"gpt-4o-mini":["chat","streaming","tools"],"deep
+[dev-verify] PASS N1_narrow_two_line_form :: {"display":"none","tracks":[84,549],"labels":"9/9","pairs":true,"scroll":"643/643"}
+[dev-verify] PASS N2_narrow_detail_still_rendered :: ["渠道默认（兜底）","bge-m3","deepseek-r1","gpt-4o-mini"]
+[dev-verify] PASS N3_narrow_screenshot_or_honest_degrade :: screenshot_unavailable: cdp_command_failed:-32000
+[dev-verify] evidence: D:\1.WorkDir\petri\acceptance\block-455\block455-live-win32.json
+[dev-verify] run "block455-live": 18/18 assertions, allPass=true

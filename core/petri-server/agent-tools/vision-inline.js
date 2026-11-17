@@ -130,7 +130,8 @@ function chatVisionInlineCapableForProfile(presetId) {
     const { modelGateway } = require('../helpers/llm-client');
     const resolved = modelGateway.resolve('agent', presetId);
     if (resolved && !resolved.error && resolved.profile) {
-      return { ok: true, capable: chatVisionInlineCapable(resolved.profile) };
+      // BLOCK-455 — 能力按解析出的实际模型（模型级覆写优先于渠道默认）。
+      return { ok: true, capable: chatVisionInlineCapable({ ...resolved.profile, capabilities: resolved.capabilities }) };
     }
   } catch { /* fail-closed 回旧 read_image 路径 */ }
   return { ok: false, capable: false };

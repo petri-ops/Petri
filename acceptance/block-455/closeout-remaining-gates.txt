@@ -1,0 +1,65 @@
+===== GATE ui:audit:check =====
+> petri-desktop@0.0.4 ui:audit:check
+> node scripts/check-ui-productization-audit.mjs
+
+[ui-audit] 同步检查通过；Git 历史已有 635 个带实现证据的 UI 问题编号
+----- exit=0 -----
+===== GATE test:changed =====
+    expected: 500,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+----- exit=1 -----
+===== GATE gate:code-size =====
+> petri-desktop@0.0.4 gate:code-size
+> node scripts/code-size-ledger.mjs --check
+
+[code-size-ledger] PASS v2 门禁（台账 74 文件 = MANIFEST 24 + L0 发现入册 50，总行数 86196，基线 86196，生效例外 16，预算 700 行）
+----- exit=0 -----
+===== GATE gate:arch-cycles =====
+> petri-desktop@0.0.4 gate:arch-cycles
+> node scripts/arch-cycles-gate.mjs --check
+
+[arch-cycles] PASS（12 存量环在册，无新环）
+----- exit=0 -----
+===== GATE quality:secret =====
+  [fixture] acceptance/block-105/p1-eslint-report.json — 模式 github_pat_classic
+  [fixture] test/agent-tool-result.test.mjs — 模式 github_pat_classic
+  [fixture] test/block405-l1-security.test.mjs — 模式 github_pat_classic
+[secret-scan] PASS
+----- exit=0 -----
+===== GATE quality:arch =====
+> petri-desktop@0.0.4 quality:arch
+> node scripts/quality-arch.mjs
+
+[quality:arch] PASS（R1-R5 无违规；cruise 全新）
+----- exit=0 -----
+===== GATE quality:lint =====
+  137:21  warning  Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+✖ 2452 problems (0 errors, 2452 warnings)
+
+----- exit=0 -----
+===== GATE quality:types =====
+
+> petri-desktop@0.0.4 quality:types
+> tsc --noEmit -p frontend/tsconfig.json --incremental --tsBuildInfoFile node_modules/.cache/petri-tsc/tsbuildinfo
+
+----- exit=0 -----
+===== GATE quality:knip:check =====
+
+[knip-ratchet] 保留面已减少 1 处——请运行 node scripts/knip-ratchet.mjs --update 下调基线以保持真相：
+  files::.agents/skills/petri-dev-infra/dev-verify/local-token.cjs
+[knip-ratchet] PASS（保留面 330 键冻结，无新增）
+----- exit=0 -----
+===== GATE test:changed (final, post-triage) =====
+    expected: 115,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+----- exit=1 (11 pre-existing failures, attribution in plan §7) -----
+===== GATE ui:audit:check =====
+> node scripts/check-ui-productization-audit.mjs
+
+[ui-audit] 同步检查通过；Git 历史已有 635 个带实现证据的 UI 问题编号
+----- exit=0 -----

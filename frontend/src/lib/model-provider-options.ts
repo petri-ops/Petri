@@ -1,3 +1,5 @@
+import { resolveModelCapabilities } from '@/lib/model-capabilities';
+
 export const USER_MODEL_PROVIDER_OPTIONS = [
   { value: 'openai-compatible', label: 'OpenAI' },
   { value: 'anthropic', label: 'Anthropic' },
@@ -110,15 +112,21 @@ export interface UserModelProfileLike {
   defaultModel?: string;
   baseUrl?: string;
   capabilities?: string[];
+  modelCapabilities?: Record<string, string[]>;
 }
 
 export function isChatSelectableProfile(profile: UserModelProfileLike): boolean {
+  // BLOCK-455 — 按渠道默认模型的解析能力判定（模型级覆写优先）；
+  // 完全未声明能力的 legacy 档案保持旧语义（默认可选）。
+  const model = profile.model || '';
+  const declared = Array.isArray(profile.capabilities)
+    || Array.isArray(profile.modelCapabilities?.[model]);
   return Boolean(
     profile.id?.trim() &&
-      profile.model?.trim() &&
+      model.trim() &&
       profile.provider &&
       isUserConfigurableModelProvider(profile.provider) &&
-      (!Array.isArray(profile.capabilities) || profile.capabilities.includes('chat'))
+      (!declared || resolveModelCapabilities(profile, model).includes('chat'))
   );
 }
 

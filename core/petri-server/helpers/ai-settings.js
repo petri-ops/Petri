@@ -18,7 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { normalizeModelConfig } = require('../../shared-backend/llm-providers/model-profile');
+const { normalizeModelConfig, resolveModelCapabilities } = require('../../shared-backend/llm-providers/model-profile');
 // BLOCK-454 P1 — 迁移判据复用 model-gateway 的 OPENAI_FAMILY 归一（image_url 转换
 // 同款白名单），不新造第二份 provider 家族清单。
 const { OPENAI_FAMILY_PROVIDERS } = require('../../shared-backend/llm-providers/model-gateway');
@@ -105,12 +105,7 @@ function getAiSettings() {
       disk.model_role_bindings = { ...(disk.model_role_bindings || {}), vision: runtimeVision };
       if (_visionCapabilityMigration && Array.isArray(disk.model_profiles)) {
         disk.model_profiles = disk.model_profiles.map((profile) => (profile && profile.id === _visionCapabilityMigration
-          ? {
-            ...profile,
-            capabilities: Array.isArray(profile.capabilities) && !profile.capabilities.includes('vision')
-              ? [...profile.capabilities, 'vision']
-              : (Array.isArray(profile.capabilities) ? profile.capabilities : ['vision']),
-          }
+          ? withVisionDeclared(profile)
           : profile));
       }
       _ensureDir();
@@ -122,6 +117,24 @@ function getAiSettings() {
   }
   _cacheSignature = _settingsFileSignature();
   return _cache;
+}
+
+// BLOCK-455 — vision 补声明必须同时落在渠道默认与默认模型的显式覆写两层，
+// 否则模型级覆写会压住渠道补声明，迁移静默失效（BLOCK-454 P1 教训的同型防线）。
+function withVisionDeclared(profile) {
+  const capabilities = Array.isArray(profile.capabilities) && !profile.capabilities.includes('vision')
+    ? [...profile.capabilities, 'vision']
+    : (Array.isArray(profile.capabilities) ? profile.capabilities : ['vision']);
+  const next = { ...profile, capabilities };
+  const model = typeof profile.model === 'string' ? profile.model : '';
+  if (model && profile.modelCapabilities && Array.isArray(profile.modelCapabilities[model])
+    && !profile.modelCapabilities[model].includes('vision')) {
+    next.modelCapabilities = {
+      ...profile.modelCapabilities,
+      [model]: [...profile.modelCapabilities[model], 'vision'],
+    };
+  }
+  return next;
 }
 
 function normalizeAiSettings(settings) {
@@ -176,17 +189,17 @@ function normalizeAiSettings(settings) {
     const chatProfile = next.model_profiles.find(
       (profile) => profile.id === (next.model_role_bindings && next.model_role_bindings.chat),
     );
-    const chatVisionCapable = !!chatProfile && Array.isArray(chatProfile.capabilities) && (
-      chatProfile.capabilities.includes('vision')
+    const chatVisionCapable = !!chatProfile && (
+      resolveModelCapabilities(chatProfile, chatProfile.model).includes('vision')
       || (OPENAI_FAMILY_PROVIDERS.has(chatProfile.provider)
         && typeof chatProfile.model === 'string' && /^deepseek/i.test(chatProfile.model))
     );
     if (chatProfile && chatVisionCapable) {
       next.model_role_bindings = { ...next.model_role_bindings, vision: chatProfile.id };
-      if (!chatProfile.capabilities.includes('vision')) {
+      if (!resolveModelCapabilities(chatProfile, chatProfile.model).includes('vision')) {
         const migratedProfileId = chatProfile.id;
         next.model_profiles = next.model_profiles.map((profile) => (profile && profile.id === migratedProfileId
-          ? { ...profile, capabilities: [...(profile.capabilities || []), 'vision'] }
+          ? withVisionDeclared(profile)
           : profile));
         _visionCapabilityMigration = migratedProfileId;
       }

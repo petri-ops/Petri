@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 632,
-      "bytes": 31948,
-      "sha256": "1a4a4d18b4a14bdf288495d61e349a78b86d74a481391d76bb3978dc5642f341"
+      "lines": 633,
+      "bytes": 32046,
+      "sha256": "1db5481a24caa73d0f8bb75dacd4817d71676f5f11cf81d84866b285fd9932be"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -210,20 +210,20 @@
       "sha256": "37512a552b64a9137c6abc378d456c1cbe146521bc45831e705a3ff9cc748bed"
     },
     {
+      "path": "frontend/src/components/desktop/desktop.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 2213,
+      "bytes": 53911,
+      "sha256": "dec7eed676a9dc01be0f318fdab967023033fcba833db336ff6a9d2d14840259"
+    },
+    {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 2192,
       "bytes": 43939,
       "sha256": "bfe1e4c7f8a2a7f5e7a5ecacfff7665a3b531546cce00e85d0e0785808969a17"
-    },
-    {
-      "path": "frontend/src/components/desktop/desktop.css",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 2137,
-      "bytes": 52178,
-      "sha256": "59bb6d1a8688efada8190d84908f96a8ce5ba134532cd73ca94c49e5c4407b54"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
@@ -349,9 +349,9 @@
       "path": "frontend/src/lib/electron.d.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1028,
-      "bytes": 47773,
-      "sha256": "28153c994998e3d1a2171da50d8e0e0649902f1de3c590bfecf93c1410a74299"
+      "lines": 1032,
+      "bytes": 48094,
+      "sha256": "06adb9e4d50798102eab312c1e6cc0e16d8e8324c1c6ec6e1c5fab0aef6c7adb"
     },
     {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86115
+  "total": 86196
 }

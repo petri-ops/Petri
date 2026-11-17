@@ -1,0 +1,44 @@
+{
+  "name": "ui342-endpoint-grid",
+  "platform": "win32",
+  "startedAt": "2026-11-17T04:17:41.785Z",
+  "finishedAt": "2026-11-17T04:17:50.050Z",
+  "assertions": [
+    {
+      "name": "G0_settings_mounted",
+      "pass": true,
+      "detail": "header=true card=true"
+    },
+    {
+      "name": "G1_columns_explicit",
+      "pass": true,
+      "detail": "header=9 card=9（期望相等且 ≥8）"
+    },
+    {
+      "name": "G2_single_row",
+      "pass": true,
+      "detail": "单元格 offsetTop 极差=13px（期望 ≤16 = 同一行；独占新行会差 ≥32px）"
+    },
+    {
+      "name": "G3_no_inner_overflow",
+      "pass": true,
+      "detail": "溢出单元格=0（期望 0 = 文字不重合）"
+    },
+    {
+      "name": "G4_columns_aligned",
+      "pass": true,
+      "detail": "header=[32,122,110,274,170,168,96,120,40] card=[32,122,110,274,170,168,96,120,40]"
+    },
+    {
+      "name": "G5_min_width_shared",
+      "pass": true,
+      "detail": "header minWidth=1100 card minWidth=1100"
+    },
+    {
+      "name": "G6_screenshot_or_honest_degrade",
+      "pass": true,
+      "detail": "captured"
+    }
+  ],
+  "allPass": true
+}

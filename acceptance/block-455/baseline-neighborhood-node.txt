@@ -1,0 +1,166 @@
+✅ [2026-11-17T03:32:03.008Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-17T03:32:03.009Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-17T03:32:03.028Z] [executors] registered: r
+✅ [2026-11-17T03:32:03.029Z] [executors] registered: python
+✅ [2026-11-17T03:32:03.029Z] [storage] registered: local
+✅ [2026-11-17T03:32:03.029Z] [storage] capabilities declared: local
+✅ [2026-11-17T03:32:03.029Z] [storage] active: local
+﹣ 跑 sample-metrics 拿 toolJobId（live 前置） (0.4413ms) # SKIP
+﹣ read_image 用 qwen-vl-max 解读火山图（live） (0.0644ms) # SKIP
+✔ read_image job 不存在返回 job_not_found (0.2381ms)
+✔ resolveWorkspaceImagePath: 正常路径解析到 workspace 内真实文件 (1.1188ms)
+✔ resolveWorkspaceImagePath: 路径穿越 / 符号链接逃逸 / 非图片 / 缺文件逐项拦截 (4.5458ms)
+✔ read_image filePath 模式无 toolJobId 也可走通错误分支（边界不触网） (0.7425ms)
+✔ BLOCK-150 ⑦: 三插件 R 主脚本首个 library() 前有缺包守卫（覆盖顶层包 + 中文可操作消息） (3.263ms)
+✔ BLOCK-150 ⑦: 条件包（org db / msigdbr）在使用点有 requireNamespace 守卫 + 中文缺包消息 (0.4714ms)
+✔ BLOCK-150 ⑧: 三插件 plugin.json / environment.json / manifest.json 三源 packages.r 声明一致 (2.666ms)
+✔ env 兜底已移除：env 有 DASHSCOPE_API_KEY 而存储无该键 → 空串（显式配置唯一来源） (124.208ms)
+✔ 存储路径保持：store 有 dashscope → 返回存储值（与 env 无关） (115.4861ms)
+✔ BLOCK-150 加映 — vision_configured 能力位三态（注入 getCredential 判据） (0.5842ms)
+✔ BLOCK-150 加映 — vision 绑到 openai 系通道：图片部件转 image_url（协议缺口补齐） (1.9118ms)
+✔ dashscope-vision 通道不转换（原生格式直传） (0.2907ms)
+✔ 能力门保留：渠道未声明 vision 能力 → 诚实拒绝 model_capability_mismatch（不静默发图） (0.1399ms)
+✔ BLOCK-150 加映三 — openai 系响应归一化：vision 结果从原始信封取 content（修「消耗 token 却空描述」） (0.2352ms)
+[migration] applied 001_result_studio.sql → v1
+[migration] applied 002_result_workflow_graph.sql → v2
+[migration] applied 003_result_ref_transactions.sql → v3
+[migration] applied 004_git_repository_consent.sql → v4
+[migration] applied 005_branch_conversation.sql → v5
+[migration] applied 006_result_studio.sql → v6
+[migration] applied 007_result_conversation_export_type.sql → v7
+[migration] applied 008_add_projects_description.sql → v8
+[migration] applied 009_knowledge_space.sql → v9
+[migration] applied 010_knowledge_space_bindings.sql → v10
+[migration] applied 011_decision_log.sql → v11
+[migration] applied 012_decision_log_tokens.sql → v12
+[migration] applied 013_memory_lifecycle.sql → v13
+[migration] applied 014_funnel_events.sql → v14
+[migration] applied 015_result_annotations.sql → v15
+[migration] applied 016_scratchpad.sql → v16
+[migration] applied 017_message_ratings.sql → v17
+[migration] applied 018_annotation_text_anchor.sql → v18
+[migration] applied 019_annotation_entry_owner.sql → v19
+[migration] applied 020_annotation_path.sql → v20
+[migration] applied 021_project_worktree_of.sql → v21
+[migration] applied 022_artifact_chain_hash.sql → v22
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-17T03:32:02.684Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-17T03:32:02.768Z] [executors] registered: r
+✅ [2026-11-17T03:32:02.769Z] [executors] registered: python
+✅ [2026-11-17T03:32:02.769Z] [storage] registered: local
+✅ [2026-11-17T03:32:02.769Z] [storage] capabilities declared: local
+✅ [2026-11-17T03:32:02.769Z] [storage] active: local
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-17T03:32:02.816Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ BLOCK-155 ① 恒等：无图片行 / content 非字符串 / 无 user 消息 → 原数组引用 (0.7392ms)
+✔ BLOCK-155 ② 最后一条 user 消息带图片行 → text 保留原文 + image_url 部件，其余消息原引用不动 (0.517ms)
+✔ BLOCK-155 ④ 某图读取失败 → fail-soft 跳过不炸（文本行保留）；全部失败/抛错 → 恒等回旧路径 (0.1876ms)
+✔ BLOCK-155 ⑤ 更早的 user 消息带图不内联（只处理最后一条 user 消息） (0.0796ms)
+✔ BLOCK-155 ⑥ 扩展过滤：png/jpg/jpeg 在列；svg/txt 不在（svg 属 chat 端点拒收面） (0.1219ms)
+✔ BLOCK-155 ⑦ chatVisionInlineCapable 真值表（openai-family+vision=true；dashscope 系=false；无 vision=false；anthropic=true） (0.1064ms)
+✔ BLOCK-155 ⑧ visionInline 开启：reqBody 侧内联出 image_url，messages 本体跑完一轮仍是字符串 content (8.6033ms)
+✔ BLOCK-155 ⑧ 反例：visionInline 未开启 → reqBody 原样字符串 content（恒等回旧路径） (2.8309ms)
+✔ BLOCK-155 ⑨ 工具门：filePath 命中内联集合→短路重定向（不触解析链/不花视觉调用）；未命中→照常走解析 (0.3132ms)
+✔ BLOCK-155 ⑩ lastUserAttachmentImagePaths：最后一条 user 的图片附件路径（顺序保留），无则空 (0.1998ms)
+✔ BLOCK-163 MDL-3 data URL → base64 image source（BLOCK-155 内联链直通） (1.1403ms)
+✔ BLOCK-163 MDL-3 http(s) URL → source:{type:"url"}（原生 URL source，不再静默丢弃） (0.2355ms)
+✔ BLOCK-163 MDL-3 非 http(s)/data 的坏 URL 不产出 image 块（fail-soft） (0.1108ms)
+✔ BLOCK-163 MDL-3 纯文本消息保持字符串内容（零扰动回归） (0.0811ms)
+✔ 档位词表与默认档（默认=不发参数，零行为变化） (0.8847ms)
+✔ Anthropic high 档预算数值（迁移后不得漂移，除非设置页显式改了） (0.083ms)
+✔ 三协议 × 两非默认档的出站参数形状逐字冻结 (0.2015ms)
+✔ 能力门与未知协议：一律不发参（宁可不支持，也不猜参数名） (0.0988ms)
+✔ 归一化只认三档，其余一律 null (0.0684ms)
+✔ visible 缺省不写键（默认可见）；false 保留 (0.6882ms)
+✔ defaultThinkingLevel 只保留已知三档，非法值丢弃 (0.1266ms)
+✔ 既有字段与上下文窗口不受影响 (0.5122ms)
+✅ [2026-11-17T03:32:02.540Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-17T03:32:02.541Z] [llm-providers] registered: dashscope-vision (vision)
+✔ gateway resolves a role, injects profile model, and streams through one adapter (1.8697ms)
+✔ gateway applies a discovered model override to the selected primary endpoint (0.2688ms)
+✔ gateway routes embedding with profile model and credential reference (0.2131ms)
+✔ gateway blocks capability mismatch before provider dispatch (0.1293ms)
+✔ gateway reports an unregistered provider without exposing credentials (0.1535ms)
+✔ model task helpers normalize text and fenced JSON-like output (0.6613ms)
+✔ gateway only falls back when explicitly enabled and records the switch (0.5911ms)
+✔ BLOCK-56: disableFallback keeps the request on the primary profile only (0.8282ms)
+✔ gateway can switch profiles when a caller rejects a non-streamed protocol result (0.3195ms)
+✔ gateway does not switch on auth errors or after streamed output begins (0.552ms)
+✔ retryable provider errors are classified without retrying configuration failures (0.1117ms)
+✔ vision and embedding use the same explicit fallback policy and audit callback (0.4946ms)
+✔ ModelProfile v1 normalizes an OpenAI-compatible custom model (1.1569ms)
+✔ ModelProfile v1 infers the native Anthropic Messages protocol (0.2334ms)
+✔ legacy chat presets migrate without persisting their inline apiKey (0.4939ms)
+✔ role resolution rejects a profile without the required capability (0.2158ms)
+✔ invalid role is diagnosed before a provider call (0.1429ms)
+✔ explicit profiles are authoritative and do not inject cloud defaults (0.1474ms)
+✔ invalid explicit role bindings remain visible instead of silently switching models (0.1169ms)
+✔ duplicate profile ids resolve deterministically to the first profile (0.0946ms)
+✔ fallback policy is disabled by default and diagnoses invalid candidates (0.1792ms)
+▶ armAbortTimeout
+  ✔ 到点只触发一次 abort + 报错（重复触发幂等） (1.1252ms)
+  ✔ clear() 释放定时器并返回 id (0.1065ms)
+  ✔ 非法/非正时长不 arm（0、负数、NaN、undefined） (0.1136ms)
+  ✔ abort 抛错不阻断 onTimeout (0.1058ms)
+✔ armAbortTimeout (2.0889ms)
+▶ embeddingRoleAvailable
+  ✔ 本地 provider 无需 key 即可用 (0.4298ms)
+  ✔ 云端 provider 需要对应凭据 (0.1067ms)
+  ✔ 未绑定 / 档案缺 embedding 能力 / 档案不存在 → 不可用 (0.0846ms)
+✔ embeddingRoleAvailable (1.2251ms)
+[embedding-dim-guard] embedding dim mismatch: got 768, expected 1024; batch rejected (fail-open)
+[embedding-dim-guard] embedding dim mismatch: got 1536, expected 1024; batch rejected (fail-open)
+[embedding-dim-guard] embedding dim mismatch: got 0, expected 1024; batch rejected (fail-open)
+▶ acceptedEmbeddingVectors（1024 维闸门）
+  ✔ 1024 维批次原样通过 (0.5871ms)
+  ✔ 非 1024 维整批拒收（不返回半批） (0.4898ms)
+  ✔ 空批次 / 非数组拒收 (0.0653ms)
+  ✔ 常量锚定 1024（换维度必须改常量并重索引） (0.0677ms)
+✔ acceptedEmbeddingVectors（1024 维闸门） (1.8555ms)
+▶ UI-638 model3d artifact url projection
+  ✔ 工作区相对路径 → /api/workspaces/<projectId>/file?path=<encoded> (0.4984ms)
+  ✔ 绝对路径 / 盘符 / 越界段 / 空路径 fail-closed（不给 url） (0.1382ms)
+  ✔ 缺 projectId → 全量无 url（旧行为保持） (0.0816ms)
+  ✔ 反斜杠路径归一后仍可投影；非数组输入返回空数组 (0.3885ms)
+  ✔ projectId 编码：特殊字符不得注入查询串 (0.1027ms)
+✔ UI-638 model3d artifact url projection (1.8747ms)
+✔ 零配置：视觉得到的是声明 vision 的 DeepSeek 档案（开箱可用，不依赖 DashScope） (0.889ms)
+✔ 旧配置迁移：vision 绑未配置的 dashscope-vision → 改绑 chat 档案并落盘 (95.4512ms)
+✔ BLOCK-454 P1 — 旧安装版档案缺 vision 声明：deepseek 多模态形态仍迁移并补声明（运行时 + 落盘） (84.0004ms)
+✔ chat 是真文本模型（非 deepseek 形态）时不迁移（显式配置真相优先） (80.1577ms)
+ℹ tests 79
+ℹ suites 4
+ℹ pass 77
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 2
+ℹ todo 0
+ℹ duration_ms 897.2216

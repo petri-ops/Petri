@@ -9,8 +9,8 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 600,
-    "lastUpdated": "2026-11-16",
+    "documentCount": 601,
+    "lastUpdated": "2026-11-17",
     "managedMarkdown": 583
   },
   "documents": [
@@ -143,6 +143,29 @@
       ],
       "notes": "BLOCK-454 P0 端点契约核实产物（2026-11-16）：基于 DeepSeek 官方 8 页文档逐项核实——3 对话协议 + 7 对话内联能力 + 5 独立工具接口（Search/Fetch/OCR/ASR/TTS），每项 VERIFIED + 官方深链 + Petri 落点判断。Fetch 独立端点细节与 Responses 完整形态标 UNVERIFIED。是后续 P1-P6 开写的硬门依据。",
       "registeredAt": "2026-11-16"
+    },
+    {
+      "id": "BLOCK-455",
+      "path": "docs/block-455-model-level-capabilities-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-455-model-level-capabilities",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P5-CLOSED",
+      "touchSurface": [
+        "docs/block-455-model-level-capabilities-plan.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "model-capabilities",
+        "endpoint-ui",
+        "refactor",
+        "G0"
+      ],
+      "notes": "2026-11-17 立项（用户裁决「按照你的建议安排……要彻底修 安排上，工作量大也修」）：能力声明从渠道级彻底改为模型级（resolveModelCapabilities 单源=modelCapabilities 显式覆写>渠道 capabilities 兜底，旧数据零行为变化）+ 名称推断发现时预填 + 角色绑定 渠道::模型 对 + thinking 门跟实际 attempt 模型 + UI 主表 11→8 列行详情折叠/思考合并单下拉/选择器显示移详情（UI-706）。P1 内核→P2 后端消费面→P3 前端数据面→P4 UI→P5 收口；HK-01 红绿先行+拆前拆后基线对账。",
+      "registeredAt": "2026-11-17"
     },
     {
       "id": "BLOCK-454",
@@ -12225,5 +12248,5 @@
       "notes": "M7 §8 第 3/5 条补腿收口包 completed（终态 done）：T1 三历史红清账（UI-629/P6/center 净树绿 + block414 活栈绿）→ T2 m7-longtask-resume-live flow 实机腿 31/31（崩溃注入→同库重启→resume 逐字对齐+截图），抓真修 2 缺陷=evals-harness 同库二次 spawn 重放迁移（2a40bf7f）+ resume 路由冲突 P1（team.js not_paused 遮蔽 BLOCK-38 中断续跑→next() 让位 14353c78，回归锚 4/4）→ T3 closeout:full 三连全绿 0 门禁级 SKIP（knip 动态入口 29cbf478 + perf B2 重绑）→ T4 回写。发令链=主控提示词 v1.0 预授权 + Jev 不可用确定性兜底。P6 pressure 腿 external 404 维持原册。证据=acceptance/block-449/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-16"
+  "lastUpdated": "2026-11-17"
 }

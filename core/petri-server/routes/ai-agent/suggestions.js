@@ -24,8 +24,10 @@ function capabilityInputs() {
   let visionAvailable = false;
   try {
     const settings = require('../../helpers/ai-settings').getAiSettings();
+    // BLOCK-455 — 视觉可用性按各渠道默认模型的解析能力（模型级覆写优先）。
+    const { resolveModelCapabilities } = require('../../../shared-backend/llm-providers/model-profile');
     visionAvailable = Array.isArray(settings.model_profiles)
-      && settings.model_profiles.some((profile) => Array.isArray(profile.capabilities) && profile.capabilities.includes('vision'));
+      && settings.model_profiles.some((profile) => resolveModelCapabilities(profile, profile.model).includes('vision'));
   } catch { /* missing settings = vision unavailable */ }
   let mcpConnected = 0;
   try {

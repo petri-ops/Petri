@@ -7,7 +7,7 @@
  * tool-job, or artifact state.
  */
 
-const { normalizeModelConfig, resolveModelProfile } = require('./model-profile');
+const { normalizeModelConfig, resolveModelProfile, resolveModelCapabilities } = require('./model-profile');
 // BLOCK-81 P1 — 思考档位：中性档位→上游参数的单一映射点 + 去参重试判据
 const { thinkingParamsFor, isUnknownParameterError } = require('./thinking-level');
 // BLOCK-338 — 流式 stall 看门狗（心跳/空 chunk 不续命，只认有效 token）
@@ -187,7 +187,8 @@ class ModelGateway {
       );
     }
     const apiKey = apiKeyOverride || this._getCredential(profile.credentialRef, profile) || '';
-    return { profile, provider, apiKey };
+    // BLOCK-455 — 绑定可能是 渠道::模型 对；resolved.model = 实际请求模型。
+    return { profile, provider, apiKey, model: resolved.model || profile.model };
   }
 
   _fallbackProfileIds(role, primaryId) {
@@ -256,21 +257,23 @@ class ModelGateway {
       } else if (index > 0) {
         this._recordFallback(role, previousProfileId, profile.id, previousReason);
       }
-      // BLOCK-81 P1 / D3 双保险①：仅当 profile 声明 capabilities.reasoning 且档位
+      // BLOCK-81 P1 / D3 双保险①：仅当模型声明 capabilities.reasoning 且档位
       // 非 standard 时才发思考参数（thinkingParamsFor 内部门控）→ 未启用渠道零行为变化。
+      // BLOCK-455 — 能力门跟实际 attempt 模型（模型级覆写优先于渠道默认）。
       // __dropThinking：去参重试时置真，跳过注入。
+      const attemptModel = index === 0 && modelOverride ? modelOverride : prepared.model;
       const thinkingParams = __dropThinking
         ? {}
         : thinkingParamsFor({
           level: thinkingLevel,
           protocol: profile.protocol,
-          capabilities: profile.capabilities,
+          capabilities: resolveModelCapabilities(profile, attemptModel),
         });
       const requestBody = clampThinkingBudgetForOutput({
         ...(profile.parameters || {}),
         ...thinkingParams,
         ...(body || {}),
-        model: index === 0 && modelOverride ? modelOverride : profile.model,
+        model: attemptModel,
       });
       // BLOCK-365（NSO-W1 / F-01）流中断穿透：此前网关重建 provider options 时丢掉 errorsAsRejections，
       // provider 永远 resolve-with-error，上层网络重试包装（只 catch throw）对流中 ECONNRESET 零重试。
@@ -452,7 +455,7 @@ class ModelGateway {
         const fallback = this._recordFallback('vision', previousProfileId, profile.id, previousReason);
         if (typeof onEvent === 'function') onEvent({ type: 'model_fallback', ...fallback });
       }
-      const visionBody = convertVisionBodyForProvider({ ...(body || {}), model: profile.model }, profile.provider);
+      const visionBody = convertVisionBodyForProvider({ ...(body || {}), model: prepared.model }, profile.provider);
       const startedAt = Date.now();
       const result = await provider.chat(
         apiKey,
@@ -506,7 +509,7 @@ class ModelGateway {
       }
       const result = await provider.embed(apiKey, texts, telemetry || {}, {
         baseUrl: profile.baseUrl,
-        model: profile.model,
+        model: prepared.model,
         parameters: profile.parameters,
         profile,
       });

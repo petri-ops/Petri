@@ -10,13 +10,16 @@
 
 const CREDENTIAL_REQUIRED_PROVIDERS = new Set(['deepseek', 'openai', 'anthropic', 'dashscope', 'dashscope-vision']);
 
+const { parseModelBinding, resolveModelCapabilities } = require('../../shared-backend/llm-providers/model-profile');
+
 function embeddingRoleAvailable(settings) {
   if (!settings || typeof settings !== 'object') return false;
-  const binding = settings.model_role_bindings && settings.model_role_bindings.embedding;
+  // BLOCK-455 — 绑定支持 渠道::模型 对；能力按绑定模型解析（模型级覆写优先）。
+  const binding = parseModelBinding(settings.model_role_bindings && settings.model_role_bindings.embedding);
   const profiles = Array.isArray(settings.model_profiles) ? settings.model_profiles : [];
-  const profile = profiles.find((item) => item && item.id === binding);
+  const profile = profiles.find((item) => item && item.id === binding.profileId);
   if (!profile) return false;
-  if (!Array.isArray(profile.capabilities) || !profile.capabilities.includes('embedding')) return false;
+  if (!resolveModelCapabilities(profile, binding.model || profile.model).includes('embedding')) return false;
   const provider = String(profile.provider || '');
   if (!CREDENTIAL_REQUIRED_PROVIDERS.has(provider)) return true;
   return !!(settings.credential_status && settings.credential_status[provider]);

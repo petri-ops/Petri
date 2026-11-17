@@ -8390,6 +8390,21 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block455-ui706-evidence",
+      "note": "BLOCK-455（模型级能力声明 + Endpoint 能力面简化）与 UI-706 的存储证据目录 acceptance/block-455：证据变更选本包 HK-01 契约重跑 + dev-verify 注册表测试；实机腿 flow 本体已由 script-dev-infra 分类（.agents/skills/petri-dev-infra/**），此处不重复登记以免脚本双分类。",
+      "patterns": [
+        "acceptance/block-455/**"
+      ],
+      "tests": [
+        "test/block455-model-capabilities.test.mjs",
+        "test/block455-gateway-model-binding.test.mjs",
+        "test/dev-verify.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

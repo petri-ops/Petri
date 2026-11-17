@@ -21,8 +21,8 @@ lastUpdated: 2026-11-16
 
 ## 0. 当前状态锚点（恢复必读）
 
-- `main` @ 当次 `git log -1`（蓝图创建于 `daaafd78`，体验原则确认后已前进；工作区干净，HEAD 与 origin/main 一致）。
-- **串行 active 工作包**：BLOCK-454（通用能力窄口 + DeepSeek adapter，P0 契约核实已完成，下一步 P1）。
+- `main` @ 当次 `git log -1`（蓝图创建于 `daaafd78`，体验原则确认后已前进；2026-11-17 对账：origin/main 领先 2 提交=UpdatePill 批，未合并，同步=用户裁决）。
+- **串行 active 工作包**：无（BLOCK-454 P1-P6 与插队包 BLOCK-455 P1-P5 均 completed；BLOCK-455=模型级能力声明 + Endpoint 能力面简化，UI-706 in_progress 待观感）。
 - **未决 🔴/🟢**：无。
 - **已知遗留红**：`docs:check` 1 红 = `post-h9-optimization-blueprint-2026-11-10.md` 换机缺失（Mac 是 untracked 原件，Win 未同步）——处置权在用户，非任何工作包引入。
 - 排队候选（planned 规划大纲，非可执行）：POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收。
@@ -51,7 +51,7 @@ lastUpdated: 2026-11-16
 | W5 | **BLOCK-454 P5** Responses/Anthropic 协议 | 包内阶段（可选） | ✅ 已完成 2026-11-17（D3 预置=做；BLOCK-454 整包 completed，P6 暂缓不阻塞） | 中 |
 | W6 | **BLOCK-454 P6** ASR/TTS | 包内阶段 | ✅ 已完成 2026-11-17（用户裁决「一次性搞完」启动；窄口+agent 工具+能力渠道槽位） | — |
 | W7 | **设置页 IA v2 实施**（UI-704） | 新 UI 包 | ✅ 已完成 2026-11-17（实机腿 11/11；观感项需用户裁决不代签） | 中-大（1-2 会话） |
-| W8 | **UI-703 收口**（API Endpoint 信息密度，实机观感） | 已提交 UI 包 | in_progress，待用户过目宽表头 | 小 |
+| W8 | **UI-703 收口**（API Endpoint 信息密度，实机观感） | 已提交 UI 包 | ✅ verified 2026-11-17（用户实机过目确认「顺了」；BLOCK-455 后表头已演进为 8 列+行详情，UI-706 承接） | 小 |
 | W9 | **遗留治理清账**：post-h9 红（用户处置）+ 4 条失败后台任务 | 治理批 | 部分需用户裁决 | 小 |
 | W10 | 排队规划大纲（POST-H9 / 竞争力纲 / QODER） | 候选池 | 需用户显式裁决另立子包 | 未定 |
 
@@ -103,8 +103,7 @@ lastUpdated: 2026-11-16
 - **串行**：需等 BLOCK-454 收口或用户裁决插队。
 
 ### W8 · UI-703 收口（API Endpoint 信息密度）
-- **状态**：代码已提交（`fa278719`），契约 5/5 + 主题 19/19 + tsc 绿，台账 in_progress（本轮已纠正撞号 UI-699/701→UI-703）。
-- **待**：用户在宽视口过目表头 11 列单行观感（窄容器路径已截图过目）。通过后翻 verified。
+- **状态**：✅ verified（2026-11-17 用户实机过目确认「顺了」，台账已翻 verified 并出籍）。后续 BLOCK-455 把主表演进为 8 列+行详情折叠，观感由 UI-706 承接（in_progress 待用户过目）。
 - **边界**：观感归用户，Agent 不代签。
 
 ### W9 · 遗留治理清账

@@ -117,6 +117,55 @@ function inferCapabilities(provider) {
   return ['chat', 'streaming', 'tools'];
 }
 
+/**
+ * BLOCK-455 — 模型级能力解析单源：显式覆写 > 渠道默认。
+ * 无 modelCapabilities 覆写的旧档案行为逐字不变（零迁移）。
+ * 运行时只读显式存储；名称推断（inferModelCapabilities）只在发现时预填，不是隐式运行时行为。
+ */
+function resolveModelCapabilities(profile, model) {
+  if (!profile || typeof profile !== 'object') return [];
+  const overrides = profile.modelCapabilities;
+  const key = typeof model === 'string' ? model.trim() : '';
+  if (key && overrides && typeof overrides === 'object' && Array.isArray(overrides[key])) {
+    return overrides[key];
+  }
+  return Array.isArray(profile.capabilities) ? profile.capabilities : [];
+}
+
+/**
+ * BLOCK-455 — 模型名启发式推断（连接测试发现模型时预填 modelCapabilities 用）。
+ * 宁缺勿滥：推断结果在 UI 可见可纠；向量系不是聊天模型，只返回 embedding。
+ */
+function inferModelCapabilities(modelName) {
+  const name = typeof modelName === 'string' ? modelName.trim().toLowerCase() : '';
+  if (!name) return ['chat', 'streaming', 'tools'];
+  if (/embed|bge|gte-|(?:^|[-_])m3(?:$|[-_])/.test(name)) return ['embedding'];
+  const capabilities = ['chat', 'streaming', 'tools'];
+  if (/vl|vision|4o|claude|gemini|qvq|omni/.test(name)) capabilities.push('vision');
+  if (/reasoner|reasoning|thinking|qwq|magistral|(?:^|[^a-z0-9])(?:o1|o3|o4|r1)(?:[^a-z0-9]|$)/.test(name)) {
+    capabilities.push('reasoning');
+  }
+  return capabilities;
+}
+
+/**
+ * BLOCK-455 — 角色绑定值解析：`profileId::encodeURIComponent(model)` 对；
+ * 裸 profileId = 渠道默认模型（向后兼容）。与前端 modelChoiceId 同形。
+ */
+function parseModelBinding(value) {
+  const raw = typeof value === 'string' ? value.trim() : '';
+  const separator = raw.indexOf('::');
+  if (separator < 0) return { profileId: raw, model: undefined };
+  const encoded = raw.slice(separator + 2);
+  let model;
+  try {
+    model = decodeURIComponent(encoded);
+  } catch {
+    model = encoded;
+  }
+  return { profileId: raw.slice(0, separator).trim(), model: model || undefined };
+}
+
 function normalizeModelProfile(input, index = 0) {
   if (!input || typeof input !== 'object') return null;
   const provider = _cleanString(input.provider) || 'deepseek';
@@ -153,6 +202,17 @@ function normalizeModelProfile(input, index = 0) {
   if (input.visible === false) normalized.visible = false;
   if (THINKING_LEVELS.includes(input.defaultThinkingLevel)) {
     normalized.defaultThinkingLevel = input.defaultThinkingLevel;
+  }
+  // BLOCK-455 — 模型级能力覆写：只存显式条目；未知能力位丢弃；显式空数组有意义（该模型无任何能力）。
+  if (input.modelCapabilities && typeof input.modelCapabilities === 'object' && !Array.isArray(input.modelCapabilities)) {
+    const entries = Object.entries(input.modelCapabilities)
+      .map(([model, caps]) => [_cleanString(model), caps])
+      .filter(([model, caps]) => model && Array.isArray(caps));
+    if (entries.length) {
+      normalized.modelCapabilities = Object.fromEntries(
+        entries.map(([model, caps]) => [model, _uniqueKnown(caps, MODEL_CAPABILITIES)])
+      );
+    }
   }
   return normalized;
 }
@@ -216,9 +276,10 @@ function normalizeRoleBindings(settings, profiles) {
     }
     const defaultId = DEFAULT_MODEL_ROLE_BINDINGS[role];
     const defaultProfile = byId.get(defaultId);
-    const fallback = defaultProfile && defaultProfile.capabilities.includes(capability)
+    // BLOCK-455 — 回退挑选按渠道默认模型的解析能力（模型级覆写优先）。
+    const fallback = defaultProfile && resolveModelCapabilities(defaultProfile, defaultProfile.model).includes(capability)
       ? defaultProfile
-      : profiles.find((profile) => profile.capabilities.includes(capability));
+      : profiles.find((profile) => resolveModelCapabilities(profile, profile.model).includes(capability));
     if (fallback) bindings[role] = fallback.id;
   }
   return bindings;
@@ -262,7 +323,9 @@ function validateModelConfig(config) {
   const byId = new Map(profiles.map((profile) => [profile.id, profile]));
 
   for (const role of MODEL_ROLES) {
-    const profileId = _cleanString(roleBindings[role]);
+    // BLOCK-455 — 绑定值支持 渠道::模型 对；能力校验按解析出的模型能力。
+    const binding = parseModelBinding(roleBindings[role]);
+    const profileId = binding.profileId;
     if (!profileId) {
       diagnostics.push({
         code: 'model_role_unbound',
@@ -282,19 +345,22 @@ function validateModelConfig(config) {
       continue;
     }
     const capability = ROLE_CAPABILITY[role];
-    if (!profile.capabilities.includes(capability)) {
+    const boundModel = binding.model || profile.model;
+    if (!resolveModelCapabilities(profile, boundModel).includes(capability)) {
       diagnostics.push({
         code: 'model_capability_mismatch',
         role,
         profileId,
+        model: boundModel,
         requiredCapability: capability,
-        message: `模型 ${profile.label} 不支持 ${capability} 能力（任务角色: ${role}）`,
+        message: `模型 ${profile.label}（${boundModel}）不支持 ${capability} 能力（任务角色: ${role}）`,
       });
     }
 
     for (const fallbackId of fallbackBindings[role] || []) {
-      const fallback = byId.get(fallbackId);
-      if (fallbackId === profileId) {
+      const fallbackBinding = parseModelBinding(fallbackId);
+      const fallback = byId.get(fallbackBinding.profileId);
+      if (fallbackBinding.profileId === profileId && (fallbackBinding.model || undefined) === (binding.model || undefined)) {
         diagnostics.push({
           code: 'model_fallback_matches_primary',
           role,
@@ -308,7 +374,7 @@ function validateModelConfig(config) {
           profileId: fallbackId,
           message: `模型角色 ${role} 的 fallback 不存在: ${fallbackId}`,
         });
-      } else if (!fallback.capabilities.includes(capability)) {
+      } else if (!resolveModelCapabilities(fallback, fallbackBinding.model || fallback.model).includes(capability)) {
         diagnostics.push({
           code: 'model_fallback_capability_mismatch',
           role,
@@ -327,21 +393,26 @@ function resolveModelProfile(config, role, requestedId) {
     return { error: 'unknown_model_role', message: `未知模型角色: ${role}` };
   }
   const profiles = config && Array.isArray(config.profiles) ? config.profiles : [];
-  const id = _cleanString(requestedId) || (config && config.roleBindings && config.roleBindings[role]);
-  const profile = profiles.find((candidate) => candidate.id === id);
+  // BLOCK-455 — 绑定/请求 id 支持 渠道::模型 对；裸 id = 渠道默认模型。
+  const binding = parseModelBinding(_cleanString(requestedId) || (config && config.roleBindings && config.roleBindings[role]));
+  const profile = profiles.find((candidate) => candidate.id === binding.profileId);
   if (!profile) {
-    return { error: 'model_profile_not_found', message: `模型配置不存在: ${id || role}` };
+    return { error: 'model_profile_not_found', message: `模型配置不存在: ${binding.profileId || role}` };
   }
+  const model = binding.model || profile.model;
+  const capabilities = resolveModelCapabilities(profile, model);
   const required = ROLE_CAPABILITY[role];
-  if (!profile.capabilities.includes(required)) {
+  if (!capabilities.includes(required)) {
     return {
       error: 'model_capability_mismatch',
-      message: `模型 ${profile.label} 不支持 ${required} 能力（任务角色: ${role}）`,
+      message: `模型 ${profile.label}（${model}）不支持 ${required} 能力（任务角色: ${role}）`,
       profile,
+      model,
+      capabilities,
       requiredCapability: required,
     };
   }
-  return { profile, requiredCapability: required };
+  return { profile, model, capabilities, requiredCapability: required };
 }
 
 module.exports = {
@@ -353,6 +424,9 @@ module.exports = {
   DEFAULT_MODEL_ROLE_BINDINGS,
   inferProtocol,
   inferCapabilities,
+  resolveModelCapabilities,
+  inferModelCapabilities,
+  parseModelBinding,
   normalizeModelProfile,
   legacyPresetToProfile,
   normalizeFallbackBindings,

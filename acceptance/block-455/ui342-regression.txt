@@ -1,0 +1,14 @@
+
+> petri-desktop@0.0.4 verify
+> node .agents/skills/petri-dev-infra/dev-verify/run.cjs ui342-endpoint-grid
+
+[dev-verify] PASS G0_settings_mounted :: header=true card=true
+[dev-verify] container width=1180, tracks=9 → 多列表格（宽）
+[dev-verify] PASS G1_columns_explicit :: header=9 card=9（期望相等且 ≥8）
+[dev-verify] PASS G2_single_row :: 单元格 offsetTop 极差=13px（期望 ≤16 = 同一行；独占新行会差 ≥32px）
+[dev-verify] PASS G3_no_inner_overflow :: 溢出单元格=0（期望 0 = 文字不重合）
+[dev-verify] PASS G4_columns_aligned :: header=[32,122,110,274,170,168,96,120,40] card=[32,122,110,274,170,168,96,120,40]
+[dev-verify] PASS G5_min_width_shared :: header minWidth=1100 card minWidth=1100
+[dev-verify] PASS G6_screenshot_or_honest_degrade :: captured
+[dev-verify] evidence: D:\1.WorkDir\petri\acceptance\block-81\ui342-endpoint-grid-live-win32.json
+[dev-verify] run "ui342-endpoint-grid": 7/7 assertions, allPass=true

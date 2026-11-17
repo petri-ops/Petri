@@ -11,7 +11,9 @@ import { AppearanceSection } from './DesktopSettingsPanel/sections/AppearanceSec
 import { DesktopSection } from './DesktopSettingsPanel/sections/DesktopSection';
 import { NetworkSection } from './DesktopSettingsPanel/sections/NetworkSection';
 import { ExternalImportPanel } from '@/components/settings/ExternalImportPanel'; // BLOCK-264（C-35）
-import { ModelSelectorControls } from './DesktopSettingsPanel/sections/ModelSelectorControls';
+// BLOCK-455 D6 — 能力位/选择器控件移入行详情（主表 8 列）
+import { EndpointRowDetail } from './DesktopSettingsPanel/EndpointRowDetail';
+import { resolveModelCapabilities } from '@/lib/model-capabilities';
 // BLOCK-247（Q2b）— 联网检索与抓取的授权面（默认关；即时生效）
 import { RuntimePolicyPanel } from './DesktopSettingsPanel/sections/RuntimePolicyPanel';
 import { MaintenanceSection } from './DesktopSettingsPanel/MaintenanceSection';
@@ -33,7 +35,6 @@ import prefStyles from '@/components/copilot/SimpleChat/ModelPreferenceControls.
 import { getBridge } from '@/lib/desktopBridge';
 import { VisionRoleBinding } from './DesktopSettingsPanel/VisionRoleBinding';
 import { EmbeddingRoleBinding } from './DesktopSettingsPanel/EmbeddingRoleBinding';
-import { EndpointCapabilityToggle } from './DesktopSettingsPanel/EndpointCapabilityToggle';
 // UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位：检索后端/OCR 渠道）
 import { ChannelPreferencePanel } from './DesktopSettingsPanel/sections/ChannelPreferencePanel';
 import { ExperimentalFeaturesSection } from '@/components/settings/ExperimentalFeaturesSection';
@@ -84,6 +85,8 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
   const backendStatus = useBackendStatus();
   // UI-696 — 图 2 形态：默认（全局）/ 自定义（逐模型）双页签
   const [modelPrefTab, setModelPrefTab] = useState<'default' | 'custom'>('custom');
+  // BLOCK-455 D6 — 渠道行详情展开态（能力位/选择器控件在详情里）
+  const [expandedEndpoints, setExpandedEndpoints] = useState<Record<string, boolean>>({});
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
   // （./useEndpointProfilesEditor.ts：渠道/角色绑定/凭据/连通性/导入导出，纯搬运零行为变化）。
   const {
@@ -150,11 +153,15 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
 
   const agentPrimaryProfileId = roleBindings.agent || roleBindings.chat;
   const agentFallbackProfileIds = fallbackBindings.agent || [];
-  const agentFallbackCandidates = modelProfiles.filter((profile) =>
-    profile.id !== agentPrimaryProfileId &&
-    profile.capabilities?.includes('chat') &&
-    profile.capabilities?.includes('tools')
-  );
+  const agentFallbackCandidates = modelProfiles.filter((profile) => {
+    if (profile.id === agentPrimaryProfileId) return false;
+    // BLOCK-455 — 按实际请求模型（profile.model）的解析能力判定；未声明 legacy 保持旧宽松语义。
+    const model = profile.model || '';
+    const declared = Array.isArray(profile.capabilities)
+      || Array.isArray(profile.modelCapabilities?.[model]);
+    const caps = declared ? resolveModelCapabilities(profile, model) : ['chat', 'streaming', 'tools'];
+    return caps.includes('chat') && caps.includes('tools');
+  });
 
   return (
     <div className="petri-desktop-panel" role="dialog" aria-label="设置">
@@ -225,19 +232,22 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
               <p
                 title="Key 默认隐藏，可点击眼睛显示或复制；导出前会确认是否把 Key 写入文件，请仅保存到安全位置。"
               >
-                配置渠道的协议、供应商、Base URL、Key 和默认模型；模型能力由后端适配。Key 保存在
+                配置渠道的协议、供应商、Base URL、Key 和默认模型；能力按模型声明——展开行详情编辑，
+                测试连通性发现模型时按名称自动预填（可纠正）。Key 保存在
                 {credentialBackend === 'keychain' ? ' macOS Keychain' : ' 本地凭据存储'}，默认隐藏。
               </p>
             </div>
             <VisionRoleBinding
               profiles={userModelProfiles}
+              availableModels={availableModels}
               value={roleBindings.vision}
-              onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, vision: profileId }))}
+              onChange={(binding) => setRoleBindings((prev) => ({ ...prev, vision: binding }))}
             />
             <EmbeddingRoleBinding
               profiles={modelProfiles}
+              availableModels={availableModels}
               value={roleBindings.embedding}
-              onChange={(profileId) => setRoleBindings((prev) => ({ ...prev, embedding: profileId }))}
+              onChange={(binding) => setRoleBindings((prev) => ({ ...prev, embedding: binding }))}
             />
             {/* UI-704 — 能力渠道折叠块（BLOCK-454 槽位显化）：识图/向量绑定在上方主位，
                 检索后端与 OCR 渠道按设计（settings-ia-simplification-design.md §六）
@@ -246,15 +256,13 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
             <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="petri-endpoint-list-header" aria-hidden="true">
+                  <span />
                   <span>协议</span>
                   <span>供应商</span>
                   <span>Base URL</span>
                   <span>Key</span>
                   <span>默认模型</span>
                   <span>上下文</span>
-                  <span>思考</span>
-                  <span>视觉</span>
-                  <span>向量</span>
                   <span>连通性</span>
                   <span />
                 </div>
@@ -289,6 +297,17 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                 return (
                 <div key={profile.id} className="petri-model-preset petri-endpoint-card">
                   <div className="petri-endpoint-card__grid" role="group" aria-label={`${profile.label || '自定义'} 模型渠道`}>
+                    <span className="petri-endpoint-field-label" aria-hidden="true">详情</span>
+                    <button
+                      type="button"
+                      className="petri-endpoint-card__expand"
+                      onClick={() => setExpandedEndpoints((current) => ({ ...current, [profile.id]: !current[profile.id] }))}
+                      aria-expanded={!!expandedEndpoints[profile.id]}
+                      aria-label={`${profile.label || '自定义渠道'} 能力与选择器详情`}
+                      title="展开/收起：模型能力声明（视觉/思考/向量）、选择器显示与默认思考档"
+                    >
+                      <Icon name={expandedEndpoints[profile.id] ? 'chevron-down' : 'chevron-right'} size={14} />
+                    </button>
                     <span className="petri-endpoint-field-label" aria-hidden="true">协议</span>
                     <select
                       className="petri-select"
@@ -358,7 +377,7 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                     <select
                       className="petri-select"
                       value={configuredDefault}
-                      onChange={(e) => updateProfile(profile.id, { defaultModel: e.target.value, model: profile.model || e.target.value })}
+                      onChange={(e) => updateProfile(profile.id, { defaultModel: e.target.value, model: e.target.value })}
                       disabled={discovering || modelOptions.length === 0}
                       aria-label="默认模型"
                       title={configuredDefault || '测试连接后选择模型'}
@@ -376,31 +395,6 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       onChange={(next) => updateProfile(profile.id, { contextWindow: next })}
                       testId={`settings-context-window-${profile.id}`}
                     />
-                    <EndpointCapabilityToggle
-                      profile={profile}
-                      capability="reasoning"
-                      label="思考"
-                      title="声明该渠道支持思考档位：勾选后 composer 的档位控件才会出现，并按协议映射上游参数"
-                      ariaLabel={`${profile.label || '自定义渠道'} 支持思考档位`}
-                      onUpdate={updateProfile}
-                    />
-                    <EndpointCapabilityToggle
-                      profile={profile}
-                      capability="vision"
-                      label="视觉"
-                      title="声明该渠道支持图片输入（识图）：勾选后可在上方「识图模型」换绑；网关须真正支持 image_url 多模态，否则识图调用诚实报错"
-                      ariaLabel={`${profile.label || '自定义渠道'} 支持识图（视觉输入）`}
-                      onUpdate={updateProfile}
-                    />
-                    <EndpointCapabilityToggle
-                      profile={profile}
-                      capability="embedding"
-                      label="向量"
-                      title="声明该渠道可用于向量化（embedding）：勾选后可在上方「向量模型」换绑；端点需支持 /embeddings 且输出 1024 维（如 bge-m3），否则整批拒收并降级"
-                      ariaLabel={`${profile.label || '自定义渠道'} 支持向量化（embedding）`}
-                      onUpdate={updateProfile}
-                    />
-                    <ModelSelectorControls profile={profile} onUpdate={updateProfile} />
                     <span className="petri-endpoint-field-label" aria-hidden="true">连通性</span>
                     <button
                       type="button"
@@ -431,6 +425,13 @@ export function DesktopSettingsPanel({ onClose, initialSection }: Props): React.
                       <Icon name="trash" size={14} />
                     </button>
                   </div>
+                  {expandedEndpoints[profile.id] && (
+                    <EndpointRowDetail
+                      profile={profile}
+                      models={discoveredModels}
+                      onUpdate={updateProfile}
+                    />
+                  )}
                 </div>
               );
               })}

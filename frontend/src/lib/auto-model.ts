@@ -10,6 +10,7 @@
 
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 import { isSelectableRow, modelAvailability, type ModelCatalogState } from './model-catalog';
+import { parseModelBinding } from './model-capabilities';
 
 export interface AutoModelInput {
   presets: ChatModelPreset[];
@@ -35,8 +36,11 @@ function byBinding(
   bindingId: string | undefined
 ): ChatModelPreset | undefined {
   if (!bindingId) return undefined;
-  const matches = candidates.filter((preset) => (preset.endpointProfileId || preset.id) === bindingId);
+  // BLOCK-455 — 绑定支持 渠道::模型 对：精确到模型；裸 id = 渠道默认模型优先。
+  const binding = parseModelBinding(bindingId);
+  const matches = candidates.filter((preset) => (preset.endpointProfileId || preset.id) === binding.profileId);
   if (matches.length === 0) return undefined;
+  if (binding.model) return matches.find((preset) => preset.model === binding.model);
   return matches.find((preset) => preset.model === preset.defaultModel) || matches[0];
 }
 
@@ -88,11 +92,12 @@ function resolveImageVisionPreset(input: {
   if (!active) return undefined;
   if (Array.isArray(active.capabilities)) return active;
   const presets = input.presets || [];
+  // BLOCK-455 — 补能力位优先同 endpoint 同模型（能力跟模型走），再退同 endpoint。
   const match = presets.find((preset) => preset.id === active.id)
-    || presets.find((preset) => preset.endpointProfileId && preset.endpointProfileId === active.id)
     || presets.find((preset) => preset.endpointProfileId
       && preset.endpointProfileId === active.endpointProfileId
-      && preset.model === active.model);
+      && preset.model === active.model)
+    || presets.find((preset) => preset.endpointProfileId && preset.endpointProfileId === active.id);
   return match ? { ...active, capabilities: match.capabilities } : active;
 }
 

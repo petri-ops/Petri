@@ -134,10 +134,13 @@ async function evalJs(client, expr, timeoutMs = 30_000) {
   return r.result?.value;
 }
 
-/** capture 原语：整页 PNG 截图写入证据目录。 */
-async function screenshotPng(client, evidenceDir, filename) {
+/** capture 原语：整页 PNG 截图写入证据目录。
+ *  带默认超时：CdpClient.send 默认无限等，离屏窗合成器不出帧时 capture 会永久挂起
+ *  （BLOCK-455 P5 第二现抓真：block455-live 与 ui342 同族挂起）——超时抛错由调用方
+ *  诚实降级（screenshot_unavailable），不允许探针假死。 */
+async function screenshotPng(client, evidenceDir, filename, { timeoutMs = 30_000 } = {}) {
   fs.mkdirSync(evidenceDir, { recursive: true });
-  const shot = await client.send('Page.captureScreenshot', { format: 'png' });
+  const shot = await client.send('Page.captureScreenshot', { format: 'png' }, { timeoutMs });
   const file = path.join(evidenceDir, filename);
   fs.writeFileSync(file, Buffer.from(shot.data, 'base64'));
   return file;
