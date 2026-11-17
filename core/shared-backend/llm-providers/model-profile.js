@@ -175,7 +175,11 @@ function inferModelCapabilities(modelName) {
   if (/embed|bge|gte-|(?:^|[-_])m3(?:$|[-_])/.test(name)) return ['embedding'];
   const capabilities = ['chat', 'streaming', 'tools'];
   if (/vl|vision|4o|claude|gemini|qvq|omni/.test(name)) capabilities.push('vision');
-  if (/reasoner|reasoning|thinking|qwq|magistral|(?:^|[^a-z0-9])(?:o1|o3|o4|r1)(?:[^a-z0-9]|$)/.test(name)) {
+  // BLOCK-455 加映 — BigModel 官方：GLM-4.5 及以上支持 thinking；4.6/4.7/5.x 均按 reasoning 处理。
+  if (
+    /reasoner|reasoning|thinking|qwq|magistral|(?:^|[^a-z0-9])(?:o1|o3|o4|r1)(?:[^a-z0-9]|$)/.test(name)
+    || /^glm-(?:4\.[5-9]|5(?:\.\d+)?)(?:[-_]|$)/.test(name)
+  ) {
     capabilities.push('reasoning');
   }
   return capabilities;

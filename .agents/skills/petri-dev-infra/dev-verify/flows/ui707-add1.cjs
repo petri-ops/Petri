@@ -31,15 +31,23 @@ module.exports = {
       for (let i = 0; i < 40; i += 1) {
         await new Promise((r) => setTimeout(r, 300));
         rowRect = JSON.parse(String(await lib.evalJs(client, `(function(){
-          const row = document.querySelector('[data-testid^="model-row-"]');
+          const rows = [...document.querySelectorAll('[data-testid^="model-row-"]')];
+          const row = rows.find((r) => /glm-(?:4\\.[5-9]|5(?:\\.\\d+)?)/i.test(
+            r.querySelector('.sc-model-option-title')?.textContent || ''
+          )) || rows[0];
           if (!row) return 'null';
+          row.setAttribute('data-live-probe', '1');
           const r = row.getBoundingClientRect();
-          return JSON.stringify({ x: r.x, y: r.y, width: r.width, height: r.height, right: r.right });
+          return JSON.stringify({
+            x: r.x, y: r.y, width: r.width, height: r.height, right: r.right,
+            model: row.querySelector('.sc-model-option-title')?.textContent || '',
+          });
         })()`) || 'null'));
         if (rowRect) break;
       }
       assert('F2_model_rows_visible', !!rowRect, JSON.stringify(rowRect));
       if (!rowRect) return false;
+      assert('F2a_glm_probe_selected', /glm-(?:4\.[5-9]|5(?:\.\d+)?)/i.test(rowRect.model || ''), JSON.stringify(rowRect));
 
       await client.send('Input.dispatchMouseEvent', {
         type: 'mouseMoved',
@@ -56,19 +64,24 @@ module.exports = {
           const el = document.querySelector('[data-testid^="model-config-flyout-"]');
           if (!el) return 'null';
           const r = el.getBoundingClientRect();
+          const think = el.querySelector('[data-testid^="model-row-thinking-"]');
           return JSON.stringify({
             placement: el.getAttribute('data-placement'),
             left: r.left,
             top: r.top,
             width: r.width,
             context: !!el.querySelector('[data-testid^="model-row-context-"]'),
-            thinking: !!el.querySelector('[data-testid^="model-row-thinking-"]'),
+            thinking: !!think,
+            thinkingDisabled: think ? think.hasAttribute('disabled') : null,
+            missingReason: (el.innerText || '').includes('未声明思考能力'),
           });
         })()`) || 'null'));
         if (flyout) break;
       }
       assert('F3_config_flyout_opened', !!flyout && flyout.context && flyout.thinking, JSON.stringify(flyout));
       assert('F4_flyout_anchored_right', !!flyout && (flyout.placement === 'right' || flyout.placement === 'left') && flyout.width > 200, JSON.stringify(flyout));
+      assert('F5_glm_thinking_enabled', !!flyout && flyout.thinkingDisabled === false, JSON.stringify(flyout));
+      assert('F6_no_missing_reason_warning', !!flyout && flyout.missingReason === false, JSON.stringify(flyout));
     } finally {
       try { client.close(); } catch { /* 会话销毁即可 */ }
     }

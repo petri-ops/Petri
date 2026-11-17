@@ -65,6 +65,27 @@ test('openai-compatible：high→reasoning_effort=high；off→minimal（协议�
   );
 });
 
+test('GLM OpenAI 兼容端点：high→thinking.enabled；off→thinking.disabled；standard 仍不发参', () => {
+  const caps = ['chat', 'reasoning'];
+  assert.deepEqual(
+    thinkingParamsFor({ level: 'high', protocol: 'openai-compatible', capabilities: caps, model: 'glm-4.6' }),
+    { thinking: { type: 'enabled' } }
+  );
+  assert.deepEqual(
+    thinkingParamsFor({ level: 'off', protocol: 'openai-compatible', capabilities: caps, model: 'glm-4.6' }),
+    { thinking: { type: 'disabled' } }
+  );
+  assert.deepEqual(
+    thinkingParamsFor({ level: 'standard', protocol: 'openai-compatible', capabilities: caps, model: 'glm-4.6' }),
+    {}
+  );
+  // 非 GLM 仍走协议默认，零行为变化
+  assert.deepEqual(
+    thinkingParamsFor({ level: 'high', protocol: 'openai-compatible', capabilities: caps, model: 'gpt-4o' }),
+    { reasoning_effort: 'high' }
+  );
+});
+
 test('anthropic-messages：high→enabled+budget_tokens；off→disabled', () => {
   const caps = ['chat', 'reasoning'];
   assert.deepEqual(

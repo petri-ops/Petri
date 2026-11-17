@@ -8579,16 +8579,25 @@
     },
     {
       "id": "ui707-add1-model-config-flyout",
-      "note": "UI-707 加映一（C-51 转正）：模型行右侧 portal 配置小页（上下文窗口 + 思考强度），替代行内抽屉；零新 API/零默认值/零写面语义变化。证据 acceptance/ui-707-add1/**。",
+      "note": "UI-707 加映一（C-51 转正）：模型行右侧 portal 配置小页；加映二：GLM-4.5+ 思考能力声明与 thinking 参数形状修正。证据 acceptance/ui-707-add1/**。",
       "patterns": [
         "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
         "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
         "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/hooks/useAiSettings.ts",
+        "frontend/src/lib/model-capabilities.ts",
+        "frontend/src/lib/model-capabilities.test.ts",
+        "core/shared-backend/llm-providers/model-profile.js",
+        "core/shared-backend/llm-providers/thinking-level.js",
+        "core/shared-backend/llm-providers/model-gateway.js",
+        "test/thinking-level.test.mjs",
         "acceptance/ui-707-add1/**"
       ],
       "tests": [
         "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
         "frontend/src/components/copilot/SimpleChat/ModelMenu.test.tsx",
+        "frontend/src/lib/model-capabilities.test.ts",
+        "test/thinking-level.test.mjs",
         "test/block95-b1-history-assembly.test.mjs",
         "frontend/src/components/copilot/conversationRunStore.test.ts"
       ],

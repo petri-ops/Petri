@@ -35,7 +35,11 @@ import {
   normalizeLegacyUserModelProfile,
 } from '@/lib/model-provider-options';
 import { EMPTY_MODEL_CATALOG, type ModelCatalogState } from '@/lib/model-catalog';
-import { modelCapabilityOverride, resolveModelCapabilities } from '@/lib/model-capabilities';
+import {
+  modelCapabilityOverride,
+  prefillModelCapabilities,
+  resolveModelCapabilities,
+} from '@/lib/model-capabilities';
 import { resolveModelContextWindow, resolveModelThinkingDefault } from '@/lib/model-preferences';
 
 // ChatModelPreset type — extracted here so SimpleChat and
@@ -174,12 +178,18 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
             const models = result.ok && Array.isArray(result.models) && result.models.length > 0
               ? result.models
               : [profile.model];
+            // UI-707 加映二 — 发现列表回来即按已知模型规则预填能力覆写（不写盘）：
+            // 既有 GLM 档案无需用户重测连接，下次刷新即可拿到 reasoning 位。
+            const capabilityOverrides = prefillModelCapabilities(profile, models);
+            const capabilityProfile = capabilityOverrides
+              ? { ...profile, modelCapabilities: capabilityOverrides }
+              : profile;
             // BLOCK-455 — 显式声明非 chat 的模型（如 embedding 模型）不进聊天选择器；
             // 未声明能力的 legacy 档案保持旧语义（全部展开）。
             const chatModels = models.filter((model) => {
               const declared = Array.isArray(profile.capabilities)
-                || modelCapabilityOverride(profile, model) !== undefined;
-              return !declared || resolveModelCapabilities(profile, model).includes('chat');
+                || modelCapabilityOverride(capabilityProfile, model) !== undefined;
+              return !declared || resolveModelCapabilities(capabilityProfile, model).includes('chat');
             });
             return (chatModels.length > 0 ? chatModels : [profile.model]).map((model) => ({
               ...profile,
@@ -188,7 +198,7 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
               label: modelSupplierName(profile),
               model,
               // BLOCK-455 — choice 携带模型级能力（覆写优先，渠道兜底）。
-              capabilities: resolveModelCapabilities(profile, model),
+              capabilities: resolveModelCapabilities(capabilityProfile, model),
               // BLOCK-456 — choice 携带模型级上下文/思考默认档（覆写优先，渠道兜底）。
               contextWindow: resolveModelContextWindow(profile, model),
               defaultThinkingLevel: resolveModelThinkingDefault(profile, model),
@@ -197,12 +207,16 @@ function refreshFromBridge(): Promise<AiSettingsSnapshot> {
             }));
           } catch (error) {
             discoveryErrors[profile.id] = unknownText(error) || '模型列表加载失败';
+            const capabilityOverrides = prefillModelCapabilities(profile, [profile.model]);
+            const capabilityProfile = capabilityOverrides
+              ? { ...profile, modelCapabilities: capabilityOverrides }
+              : profile;
             return [{
               ...profile,
               id: modelChoiceId(profile.id, profile.model),
               endpointProfileId: profile.id,
               label: modelSupplierName(profile),
-              capabilities: resolveModelCapabilities(profile, profile.model),
+              capabilities: resolveModelCapabilities(capabilityProfile, profile.model),
               contextWindow: resolveModelContextWindow(profile, profile.model),
               defaultThinkingLevel: resolveModelThinkingDefault(profile, profile.model),
               defaultModel: profile.defaultModel || profile.model,

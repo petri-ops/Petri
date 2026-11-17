@@ -26,6 +26,7 @@ const MODEL_NAMES = [
   'deepseek-reasoner', 'deepseek-chat', 'o1-preview', 'o3-mini', 'qwq-32b', 'kimi-k2-thinking',
   'magistral-medium', 'deepseek-r1', 'bge-m3', 'text-embedding-v3', 'text-embedding-3-small',
   'gte-large', 'llama-3-70b', 'qwen2.5-72b-instruct', 'model/a', '', 'GLM-4-Plus',
+  'glm-4.6', 'glm-4.6v', 'glm-4.7', 'glm-5.3-flash', 'glm-5.3-flashx',
 ];
 
 describe('BLOCK-455 前后端能力解析一致性', () => {
@@ -73,6 +74,18 @@ describe('BLOCK-455 prefillModelCapabilities 零回归预填', () => {
       ['bge-m3', 'deepseek-chat'],
     );
     expect(next).toEqual({ 'bge-m3': ['embedding'] });
+  });
+
+  it('GLM-4.5+ 发现时补 reasoning 覆写（既有档案无需重测连接）', () => {
+    const next = prefillModelCapabilities(
+      { capabilities: ['chat', 'streaming', 'tools'] },
+      ['glm-4.6', 'glm-5.3-flash', 'glm-4.5-air'],
+    );
+    expect(next).toEqual({
+      'glm-4.6': ['chat', 'streaming', 'tools', 'reasoning'],
+      'glm-5.3-flash': ['chat', 'streaming', 'tools', 'reasoning'],
+      'glm-4.5-air': ['chat', 'streaming', 'tools', 'reasoning'],
+    });
   });
 
   it('推断增益超出渠道声明 → 写并集；无增益不物化（渠道声明不被静默移除）', () => {

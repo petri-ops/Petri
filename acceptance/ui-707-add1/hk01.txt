@@ -22,3 +22,15 @@ UI-707 加映一 — 模型行右侧独立配置小页 HK-01 证据
   证据=acceptance/ui-707-add1/ui707-add1-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
 
 边界：零新 API / 零默认值 / 零写面语义变化；模型级覆写仍走 useModelQuickConfig；观感 pending_human_eye 不代签。
+
+UI-707 加映二（GLM 思考能力声明与参数形状）：
+  用户反馈「该模型未声明思考能力」仍在（截图 glm-4.6）。官方文档确认 GLM-4.5+ 支持 thinking。
+  红：model-capabilities.test GLM 预填 1 failed；thinking-level.test GLM 参数形状 1 failed。
+  绿：
+    - 前后端 inferModelCapabilities 将 glm-4.5/4.6/4.7/5.x 标记 reasoning（跨源矩阵 7/7）；
+    - useAiSettings 在模型发现时以 prefillModelCapabilities 生成临时覆写，既有档案不写盘即时生效；
+    - GLM OpenAI 兼容端点思考参数改 thinking:{type:'enabled'|'disabled'}，standard 仍不发；
+    - thinking-level.test 10/10；model-capabilities.test 7/7；types PASS。
+  实机 ui707-add1 复跑 → 7/7 allPass（新增 F2a GLM 探针、F5 思考档未禁用、F6 无“未声明”提示）。
+  证据=acceptance/ui-707-add1/ui707-add1-live-win32.json（已覆盖为加映二读数）；跑完即 kill 9223。
+  后端 thinking-level.js 改动需重启 dev 后端生效；开发前端 Vite HMR，安装版需重新构建。

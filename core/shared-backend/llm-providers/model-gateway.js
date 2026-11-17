@@ -268,6 +268,7 @@ class ModelGateway {
           level: thinkingLevel,
           protocol: profile.protocol,
           capabilities: resolveModelCapabilities(profile, attemptModel),
+          model: attemptModel,
         });
       const requestBody = clampThinkingBudgetForOutput({
         ...(profile.parameters || {}),

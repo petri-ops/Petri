@@ -1,8 +1,8 @@
 {
   "name": "ui707-add1",
   "platform": "win32",
-  "startedAt": "2026-11-17T11:50:13.981Z",
-  "finishedAt": "2026-11-17T11:50:15.416Z",
+  "startedAt": "2026-11-17T12:06:23.686Z",
+  "finishedAt": "2026-11-17T12:06:25.123Z",
   "assertions": [
     {
       "name": "F1_composer_ready",
@@ -12,17 +12,32 @@
     {
       "name": "F2_model_rows_visible",
       "pass": true,
-      "detail": "{\"x\":627.4815063476562,\"y\":286.6676940917969,\"width\":298.1350402832031,\"height\":49.55302429199219,\"right\":925.6165466308594}"
+      "detail": "{\"x\":627.4815063476562,\"y\":286.6676940917969,\"width\":298.1350402832031,\"height\":49.55302429199219,\"right\":925.6165466308594,\"model\":\"glm-4.5\"}"
+    },
+    {
+      "name": "F2a_glm_probe_selected",
+      "pass": true,
+      "detail": "{\"x\":627.4815063476562,\"y\":286.6676940917969,\"width\":298.1350402832031,\"height\":49.55302429199219,\"right\":925.6165466308594,\"model\":\"glm-4.5\"}"
     },
     {
       "name": "F3_config_flyout_opened",
       "pass": true,
-      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true}"
+      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true,\"thinkingDisabled\":false,\"missingReason\":false}"
     },
     {
       "name": "F4_flyout_anchored_right",
       "pass": true,
-      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true}"
+      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true,\"thinkingDisabled\":false,\"missingReason\":false}"
+    },
+    {
+      "name": "F5_glm_thinking_enabled",
+      "pass": true,
+      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true,\"thinkingDisabled\":false,\"missingReason\":false}"
+    },
+    {
+      "name": "F6_no_missing_reason_warning",
+      "pass": true,
+      "detail": "{\"placement\":\"right\",\"left\":933.615966796875,\"top\":286.6676940917969,\"width\":319.9907531738281,\"context\":true,\"thinking\":true,\"thinkingDisabled\":false,\"missingReason\":false}"
     }
   ],
   "allPass": true

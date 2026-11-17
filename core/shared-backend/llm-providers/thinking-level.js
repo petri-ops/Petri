@@ -86,6 +86,12 @@ function normalizeThinkingLevel(value) {
   return THINKING_LEVELS.includes(v) ? v : null;
 }
 
+/** GLM-4.5+ 在 OpenAI 兼容端点用 thinking:{type} 形状，不是 reasoning_effort。 */
+function isGlmThinkingModel(model) {
+  return typeof model === 'string'
+    && /^glm-(?:4\.[5-9]|5(?:\.\d+)?)(?:[-_]|$)/i.test(model.trim());
+}
+
 /**
  * 中性档位 → 上游请求参数（单一映射点）。
  *
@@ -93,13 +99,18 @@ function normalizeThinkingLevel(value) {
  * @param {unknown} [input.level]        中性档位（off/standard/high）；缺省时取配置的默认档
  * @param {string} [input.protocol]      profile.protocol（openai-compatible | anthropic-messages | dashscope-native）
  * @param {string[]} [input.capabilities] profile.capabilities（须含 'reasoning' 才发参）
+ * @param {string} [input.model]          实际请求模型（GLM 已知模型走 thinking:{type} 形状）
  * @returns {Record<string, unknown>}  待合并进请求体的参数；{} = 不发任何参数
  */
-function thinkingParamsFor({ level, protocol, capabilities } = {}) {
+function thinkingParamsFor({ level, protocol, capabilities, model } = {}) {
   // 未指定档位 → 用设置面配置的默认档（出厂=standard=什么都不发，零行为变化）
   const normalized = normalizeThinkingLevel(level) || _overrides.defaultLevel;
   // 标准档 → 不发参数（默认行为零变化，BLOCK-81 D1 裁决）
   if (!normalized || normalized === 'standard') return {};
+  // GLM 已知模型：官方 thinking:{type} 形状，先于通用协议映射与能力门控（旧档案无需重测即可生效）。
+  if (protocol === 'openai-compatible' && isGlmThinkingModel(model)) {
+    return { thinking: { type: normalized === 'high' ? 'enabled' : 'disabled' } };
+  }
   // 能力门控：未声明 reasoning 的渠道一律不发（避免给不支持的上游发未知参数）
   if (!Array.isArray(capabilities) || !capabilities.includes('reasoning')) return {};
   const tiers = _overrides.mapping[protocol];
