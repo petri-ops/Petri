@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getBridge } from '@/lib/desktopBridge';
 import styles from './TestInstanceBadge.module.css';
 
@@ -17,31 +17,49 @@ import styles from './TestInstanceBadge.module.css';
  *   再按一次锁回穿透。主进程经 testManageModeChanged 事件广播状态。
  * - 📌置顶默认开，管理模式下可点切换。
  */
-const isTestInstance =
-  typeof window !== 'undefined' &&
-  (window as { petriDesktop?: { __testInstance?: unknown } }).petriDesktop
-    ?.__testInstance === true;
-
-// UI-421 — 快捷键由主进程经启动参数透传（默认 Ctrl+Alt+Shift+M：
-// Ctrl+Alt+M 在部分机器被第三方程序 RegisterHotKey 占用导致静默失败）。
-const manageShortcut =
-  (window as { petriDesktop?: { __testManageShortcut?: string } }).petriDesktop
-    ?.__testManageShortcut || 'Ctrl+Alt+M';
+// UI-421 加映 — 身份判定移入组件体逐渲染读取（值在单次应用运行内恒定；
+// 移出模块常量仅为可测性：测试可在 import 后装 window mock）。
+function readTestInstance(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    (window as { petriDesktop?: { __testInstance?: unknown } }).petriDesktop
+      ?.__testInstance === true
+  );
+}
 
 export function TestInstanceBadge(): React.ReactElement | null {
+  const isTestInstance = readTestInstance();
   const [manageMode, setManageMode] = useState(false);
   const [alwaysOnTop, setAlwaysOnTop] = useState(true);
 
   useEffect(() => {
     if (!isTestInstance) return undefined;
     const bridge = getBridge('window') as
-      | { onTestManageModeChanged?: (cb: (manageMode: boolean) => void) => () => void }
+      | {
+          onTestManageModeChanged?: (cb: (manageMode: boolean) => void) => () => void;
+          testManageToggle?: () => void;
+          testManageHover?: (active: boolean) => void;
+        }
       | null;
     const unsub = bridge?.onTestManageModeChanged?.((manage: boolean) => setManageMode(manage));
     return () => unsub?.();
   }, []);
 
+  // UI-421 加映 — 一键解锁按钮（用户裁决「组合键太麻烦」）：点击切换管理模式；
+  // 锁定态下整窗穿透，按钮靠 hover 窥视（主进程 forward:true + 临时转交互）才能点到。
+  const toggleManage = useCallback(() => {
+    getBridge('window')?.testManageToggle?.();
+  }, []);
+  const peekHover = useCallback((active: boolean) => {
+    getBridge('window')?.testManageHover?.(active);
+  }, []);
+
   if (!isTestInstance) return null;
+  // UI-421 — 快捷键由主进程经启动参数透传（默认 Ctrl+Alt+Shift+M：
+  // Ctrl+Alt+M 在部分机器被第三方程序 RegisterHotKey 占用导致静默失败）。
+  const manageShortcut =
+    (window as { petriDesktop?: { __testManageShortcut?: string } }).petriDesktop
+      ?.__testManageShortcut || 'Ctrl+Alt+M';
 
   const toggleOnTop = () => {
     const next = !alwaysOnTop;
@@ -53,10 +71,12 @@ export function TestInstanceBadge(): React.ReactElement | null {
   return (
     <div
       className={`${styles.bar}${manageMode ? ` ${styles.barUnlocked}` : ''}`}
+      onMouseEnter={manageMode ? undefined : () => void peekHover(true)}
+      onMouseLeave={manageMode ? undefined : () => void peekHover(false)}
       title={
         manageMode
-          ? `管理模式：拖本条移动窗口 / 拖边缘调整大小 / 点按钮操作；${manageShortcut} 锁回穿透`
-          : `已穿透（内容碰不到）。按 ${manageShortcut} 解锁窗口管理（拖动移动/边缘调整大小）`
+          ? `管理模式：拖本条移动窗口 / 拖边缘调整大小 / 点按钮操作；点「锁定」或按 ${manageShortcut} 锁回穿透`
+          : `已穿透（内容碰不到）。点「解锁」按钮或按 ${manageShortcut} 解锁窗口管理（拖动移动/边缘调整大小）`
       }
     >
       <span className={styles.badge}>测试实例 · TEST</span>
@@ -71,10 +91,18 @@ export function TestInstanceBadge(): React.ReactElement | null {
           >
             📌 置顶{alwaysOnTop ? '开' : '关'}
           </button>
-          <span className={styles.hint}>管理模式 · 拖本条移动 / 拖边缘调整大小 · {manageShortcut} 锁回</span>
+          <button type="button" className={styles.btn} onClick={toggleManage} title="锁回鼠标穿透（内容碰不到）">
+            🔒 锁定
+          </button>
+          <span className={styles.hint}>管理模式 · 拖本条移动 / 拖边缘调整大小 · 点「锁定」或按 {manageShortcut} 锁回</span>
         </>
       ) : (
-        <span className={styles.hint}>内容已穿透 · {manageShortcut} 解锁窗口管理</span>
+        <>
+          <button type="button" className={`${styles.btn} ${styles.btnOn}`} onClick={toggleManage} title="解锁窗口管理：拖本条移动 / 边缘调整大小 / 点按钮">
+            🔓 解锁
+          </button>
+          <span className={styles.hint}>内容已穿透 · 点「解锁」或按 {manageShortcut} 解锁窗口管理</span>
+        </>
       )}
     </div>
   );

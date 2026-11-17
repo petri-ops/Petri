@@ -120,6 +120,10 @@ declare global {
         setIgnoreMouseEvents: (flag: boolean) => Promise<{ ok: boolean }>;
         /** UI-413 — 管理模式（Ctrl+Alt+M）切换事件；manageMode=true=已解锁 */
         onTestManageModeChanged: (callback: (manageMode: boolean) => void) => () => void;
+        /** UI-421 加映 — 一键解锁按钮：点击切换管理模式（与快捷键并存） */
+        testManageToggle: () => void;
+        /** UI-421 加映 — 锁定态徽标条 hover 窥视：active=true 临时转交互（点击可落），false 回锁 */
+        testManageHover: (active: boolean) => void;
       };
       /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */
       windowManager: {

@@ -24,21 +24,42 @@ const { zoomBy, zoomReset } = require("./_zoom.js");
 const MANAGE_SHORTCUT =
   process.env.PETRI_TEST_MANAGE_SHORTCUT || "Control+Alt+Shift+M";
 
-function registerTestManageModeToggle({ globalShortcut, getMainWindow }) {
+function registerTestManageModeToggle({ globalShortcut, getMainWindow, ipcMain }) {
   if (process.env.PETRI_TEST_INSTANCE !== "1") return;
   let manageMode = false;
   const apply = () => {
     const win = getMainWindow();
     if (!win || win.isDestroyed()) return;
-    win.setIgnoreMouseEvents(!manageMode);
+    // UI-421 加映 — 锁定态带 forward:true：悬停事件仍达页面（徽标条 mouseenter
+    // 才能触发窥视，否则穿透窗口里「解锁」按钮永远点不到）；解锁稳态不带
+    // forward（全窗交互）。
+    win.setIgnoreMouseEvents(!manageMode, { forward: true });
     // 切换后按 Electron 状态重申置顶——screen-saver 层（默认层创建期不生效，
     // 实机二分结论）
     win.setAlwaysOnTop(win.isAlwaysOnTop(), "screen-saver");
     win.webContents.send(CHANNELS.window.testManageModeChanged, manageMode);
   };
-  const ok = globalShortcut.register(MANAGE_SHORTCUT, () => {
+  const toggle = () => {
     manageMode = !manageMode;
     apply();
+  };
+  // 徽标条 hover 窥视：锁定态下指针进条 → 临时全交互（点击可落「解锁」按钮）；
+  // 离开且仍未解锁 → 回锁（forward:true 穿透）。不改 manageMode 稳态。
+  const setPeek = (active) => {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
+    if (manageMode) return; // 已解锁=全交互，窥视无意义
+    win.setIgnoreMouseEvents(active !== true, { forward: !active });
+  };
+  const ok = globalShortcut.register(MANAGE_SHORTCUT, () => {
+    toggle();
+  });
+  // UI-421 加映 — 一键解锁按钮双通道（与快捷键并存，双入口）
+  ipcMain.on(CHANNELS.window.testManageToggle, () => {
+    toggle();
+  });
+  ipcMain.on(CHANNELS.window.testManageHover, (_event, active) => {
+    setPeek(active === true);
   });
   if (ok) {
     console.log(`[test-manage] 管理模式快捷键已注册: ${MANAGE_SHORTCUT}`);
@@ -73,7 +94,7 @@ function setupWindowIpc({ ipcMain, process, app, getMainWindow, globalShortcut }
     return win && !win.isDestroyed() ? win : null;
   };
 
-  registerTestManageModeToggle({ globalShortcut, getMainWindow });
+  registerTestManageModeToggle({ globalShortcut, getMainWindow, ipcMain });
 
   // ── Window chrome controls ─────────────────────────────────
   ipcMain.on(CHANNELS.window.minimize, (event) => {

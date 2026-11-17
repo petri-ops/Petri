@@ -26,6 +26,8 @@ function makeBridge(overrides: Partial<DesktopWindow> = {}): DesktopBridge {
     setAlwaysOnTop: vi.fn().mockResolvedValue({ ok: true }),
     setIgnoreMouseEvents: vi.fn().mockResolvedValue({ ok: true }),
     onTestManageModeChanged: vi.fn(() => vi.fn()),
+    testManageToggle: vi.fn(),
+    testManageHover: vi.fn(),
     ...overrides,
   };
   return {

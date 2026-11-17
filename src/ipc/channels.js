@@ -228,6 +228,10 @@ const CHANNELS = {
     setAlwaysOnTop: 'window:set-always-on-top',
     setIgnoreMouseEvents: 'window:set-ignore-mouse-events',
     testManageModeChanged: 'window:test-manage-mode-changed',
+    // UI-421 加映（用户裁决 2026-11-17「组合键太麻烦，换成可解锁按钮」）：
+    // 徽标条「解锁」按钮点击切换管理模式；锁定态徽标条 hover 窥视（见 _window-ipc）。
+    testManageToggle: 'window:test-manage-toggle',
+    testManageHover: 'window:test-manage-hover',
     snapshot: 'window:snapshot',
     stateChanged: 'window:state-changed',
     thumbnail: 'window:thumbnail',

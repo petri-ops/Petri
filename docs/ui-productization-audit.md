@@ -5108,6 +5108,8 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：实机全链（dev Electron 测试实例）：注册日志 `管理快捷键已注册: Control+Alt+Shift+M`；OS 级按键注入触发 → 主进程 handler → testManageModeChanged 事件 → CDP 探针读徽标「内容已穿透 · Control+Alt+Shift+M 解锁窗口管理」→「管理模式 · 拖本条移动 / 拖边缘调整大小 · Control+Alt+Shift+M 锁回」双向切换确认；旧键对照实验=Ctrl+Alt+M 注册返回 false（占用实锤）。tsc 0 + docs:check/ui:audit:check 双绿。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+- **UI-421 加映（2026-11-17，用户裁决「--onscreen 控制要按 Ctrl+Alt+Shift+M 太麻烦，换成一个可以解锁的按钮，点击即可」）——一键解锁按钮 + 锁定态 hover 窥视**：①徽标条锁定态渲染「🔓 解锁」按钮（点击调 `window:test-manage-toggle` 切换管理模式），解锁态渲染「🔒 锁定」按钮回锁；快捷键保留（双入口并存）。②穿透窗口里按钮本点不到（`setIgnoreMouseEvents(true)` 全穿透）——锁定态改带 `forward:true`（悬停事件达页），徽标条 `onMouseEnter` 触发**窥视**（`window:test-manage-hover` → 主进程临时全交互，点击可落；`onMouseLeave` 且未解锁即回锁 forward 穿透），窥视不改 manageMode 稳态（守卫在先），原双稳态模型零放宽。③主进程 toggle/hover 双 IPC handler（`_window-ipc.js`，与快捷键共用 toggle 闭包）；channels/preload/electron.d.ts 三面同步。**HK-01**：`test/ui421-manage-unlock-button.test.mjs` 4/4（通道/preload 包装/主进程 forward+双 handler+窥视守卫/徽标源契约）+ 组件测试 3/3（锁定点击/解锁回锁/主窗不渲染）+ channels 双向守护 + block59 56/56 + TitleBar 32/32；types/lint/docs 绿。**实机腿**：9223 离屏窗口由用户本人在场过目（--onscreen 打开即为此目的）；按钮点击→解锁→拖动→锁回全链待用户体感确认后随原条目 verified 语义延续（原条目已 verified，本加映为增量，实证=acceptance/ui-421/）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-420: 联邦面板「项目授权」卡（BLOCK-88 P3 授权边界 UI 面）(2026-09-19 verified，dev Electron 边界内 CDP 测试实例 16/16)
 
 - **来源**：BLOCK-88 P3（D4 默认零授权+逐项目 grants；用户裁决「开P3」）。

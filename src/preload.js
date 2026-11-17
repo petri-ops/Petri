@@ -155,6 +155,10 @@ const desktopBridgeSurface = {
       ipcRenderer.on('window:test-manage-mode-changed', listener);
       return () => ipcRenderer.removeListener('window:test-manage-mode-changed', listener);
     },
+    // UI-421 加映 — 一键解锁按钮：点击切换管理模式；锁定态徽标条 hover 窥视
+    // （点击穿透窗口里按钮要能被点到，hover 时主进程临时转交互，离开回锁）。
+    testManageToggle: () => ipcRenderer.send('window:test-manage-toggle'),
+    testManageHover: (active) => ipcRenderer.send('window:test-manage-hover', active === true),
 
     // 页面缩放（无边框窗口：菜单 Zoom 角色不可达，故显式暴露）。
     // delta 为 zoomLevel 步长，可为小数（滚轮平滑缩放用），正数放大。

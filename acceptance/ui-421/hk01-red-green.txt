@@ -1,0 +1,7 @@
+✔ 通道注册：window.testManageToggle/testManageHover 在 channels 唯一注册表 (1.885791ms)
+✔ preload 暴露 testManageToggle/testManageHover 两个 send 包装（与 channels 同源） (0.450916ms)
+✔ 主进程：锁定态 forward:true（悬停达页）+ toggle/hover 双 handler + hover 窥视不改稳态 (0.208833ms)
+✔ 徽标组件：锁定态渲染「解锁」按钮、解锁态渲染「锁定」按钮、快捷键文案保留 (0.13375ms)
+ℹ tests 4
+ℹ pass 4
+ℹ fail 0
