@@ -1,6 +1,6 @@
 ---
 capability: 3d-authoring-domain
-status: planned
+status: reference
 goal: 为 3D 造物域五方外部工具/素材源（sand3d、three-live、Polyfork、img2threejs、立项本身）产出可逐项裁决的依赖与授权决策材料，供用户裁决 U-3D-D1~D5；未裁决前不安装、不引包、不改产品行为
 acceptance:
   - 每项 U 含现状/候选/风险/推荐/状态五段，按 DEPENDENCY-CHANGE-CHECKLIST 四问答全
@@ -26,7 +26,7 @@ acceptance:
   4. 退出成本：L1 以一层 runner wrapper 隔离，不散落直引；移除只需摘除 wrapper。
 - **风险**：环境前置重（bpy 版本/平台）；GLB extras schema 未公开需先探针；golden digest 跨平台漂移。
 - **推荐**：③ 隔离探针先行——P0 用临时隔离环境实测 extras schema 与 Scene IR 映射，成功且用户认可后再议正式引入；默认不装全局。
-- **状态**：`pending_user_ruling`（用户裁决原话待填，日期待填）。
+- **状态**：**ruled（2026-11-18 用户预授权批量裁决）**——用户裁决原话「B-1 sand3d = 隔离探针（临时 venv，不全局装、不引产品依赖）」（=推荐 ③）。执行边界：临时隔离 venv，不污染全局、不引产品依赖、不改 manifest。
 
 ## U-3D-D2 · three-live（呈现 + 验证运行时）
 
@@ -39,7 +39,7 @@ acceptance:
   4. 退出成本：L3 viewer 包 + L4 verification adapter 两层 wrapper 隔离；移除不触内核。
 - **风险**：Beta 上游漂移；外部工具链引入需裁决；capability 声明须与 Petri 治理对齐。
 - **推荐**：① 引入但限定为"外部 MCP + adapter 隔离"——只在用户认可后接入 MCP 货架，capability 默认关；核心验证范式（脚本 enforce + validate/render/sim）先自研抽象。
-- **状态**：`pending_user_ruling`。
+- **状态**：**ruled（2026-11-18 用户预授权批量裁决）**——用户裁决原话「B-2 three-live = 引入但仅外部 MCP + adapter 隔离，capability 默认关」（=推荐 ①）。执行边界：外部 MCP server + adapter 两层隔离，capability 声明默认全关、显式开启；P2 阶段才接入。
 
 ## U-3D-D3 · 3D 蓝图立项与首包范围
 
@@ -52,7 +52,7 @@ acceptance:
   4. 退出成本：按领域入驻配方组织，领域可整体下线不动内核。
 - **风险**：依赖未裁决先开工（触 §4 依赖纪律）；范围蔓延成通用引擎。
 - **推荐**：② 先只立 P0 探针包（S 体量）——验证 GLB extras 映射与三源可替换判据，再据结果决定 P1；立项需在 D1/D2/D4/D5 裁决后。
-- **状态**：`pending_user_ruling`。
+- **状态**：**ruled（2026-11-18 用户预授权批量裁决）**——用户裁决原话「B-3 立项 = 仅 P0 探针包」（=推荐 ②）。P1 是否启动由 P0 探针结果决定（S3 前置条件=S2 收口且探针可行）；D1/D2/D4/D5 已同批裁决。
 
 ## U-3D-D4 · Polyfork 素材源（来源 B）
 
@@ -66,7 +66,7 @@ acceptance:
 - **授权红线（单列核对）**：⛔ 禁转售/再分发 `.mjs` 源与 HD 版；⛔ 禁用其资产构建"商业资产生成器"（向他人提供生产 3D 资产的服务/流水线）；把大量资产托管给用户使用需 Platform licence。裁决须确认：Petri 本地 agent 帮用户装配其**自有场景**落在"commercial use"允许侧；**不得**打包分发、**不得**做成对外生成服务。
 - **风险**：授权边界误判导致合规问题；检索退化为"内置素材包"触 §2.2 排除项。
 - **推荐**：① 引入但限定 CDN hotlink / 用户工作区按需下载 + `asset_search` 工具；授权未核清前不接入。
-- **状态**：`pending_user_ruling`。
+- **状态**：**ruled（2026-11-18 用户预授权批量裁决）**——用户裁决原话「B-4 Polyfork = 授权核清后 hotlink/按需，不打包分发、不做对外生成服务」（=推荐 ① 授权收紧版）。授权红线单列核对不变：⛔ 禁转售/再分发 `.mjs` 源与 HD 版；⛔ 禁对外生成服务；Petri 本地 agent 帮用户装配其自有场景落在 commercial use 允许侧。授权核清完成前不接入。
 
 ## U-3D-D5 · img2threejs（来源 C 图像重建）
 
@@ -79,7 +79,7 @@ acceptance:
   4. 退出成本：抽取概念 + wrapper 隔离，不整包引入；移除不触内核。
 - **风险**：本地主权（hosted TRELLIS/Context7）需默认关；`doctor` 只审计安装不能作质量证据；单图 fidelity 上限须产品文案诚实标注。
 - **推荐**：① 引入——借形 + 受治理封装，不整包安装；门禁范式反哺 L4 验证与 W11 spec fail-closed；外部服务默认关 + P5-a 确认。
-- **状态**：`pending_user_ruling`。
+- **状态**：**ruled（2026-11-18 用户预授权批量裁决）**——用户裁决原话「B-5 img2threejs = 借形封装，不整包、外部服务默认关」（=推荐 ①）。执行边界：借形 + 受治理封装，不整包安装宿主目录；hosted 外部服务默认关。
 
 ---
 
@@ -87,12 +87,12 @@ acceptance:
 
 | U 项 | 对象 | 推荐形态 | 状态 |
 |---|---|---|---|
-| U-3D-D1 | sand3d | 隔离探针先行 | pending_user_ruling |
-| U-3D-D2 | three-live | 引入（外部 MCP + adapter 隔离） | pending_user_ruling |
-| U-3D-D3 | 立项/首包 | 先立 P0 探针包 | pending_user_ruling |
-| U-3D-D4 | Polyfork | 引入（hotlink/按需 + asset_search，授权核清后） | pending_user_ruling |
-| U-3D-D5 | img2threejs | 引入（借形封装，不整包） | pending_user_ruling |
+| U-3D-D1 | sand3d | 隔离探针先行 | ruled（2026-11-18 预置=B-1） |
+| U-3D-D2 | three-live | 引入（外部 MCP + adapter 隔离） | ruled（2026-11-18 预置=B-2） |
+| U-3D-D3 | 立项/首包 | 先立 P0 探针包 | ruled（2026-11-18 预置=B-3） |
+| U-3D-D4 | Polyfork | 引入（hotlink/按需 + asset_search，授权核清后） | ruled（2026-11-18 预置=B-4） |
+| U-3D-D5 | img2threejs | 引入（借形封装，不整包） | ruled（2026-11-18 预置=B-5） |
 
-> 用户逐项裁决后：把裁决原话与日期填入各 U 项"状态"行；回写 charter 修订记录（若触及冻结项）、超级总蓝图 C-54 第 1 档投影、AUDIT-LOG 一行。**裁决前一律不安装、不引包、不改 manifest、不开工程包。**
+> 裁决登记（2026-11-18）：用户以端到端预授权形式一次性批复 B-1..B-9（原话与逐项预置见 AUDIT-LOG 本日行与 `acceptance/e2e-batch-s1-clearing-2026-11-18/RECONCILIATION.md`）；各 U 项"状态"行已按裁决原话+日期回填。B-10（UI-706/707 观感）不适用本预置——观感 pending_human_eye 永不代签（红线 1）。P0 探针包（BLOCK-459）按 B-3 发令启动；P1 是否开工由 P0 探针结果决定。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

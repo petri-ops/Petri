@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 610,
+    "documentCount": 611,
     "lastUpdated": "2026-11-17",
-    "managedMarkdown": 592
+    "managedMarkdown": 594
   },
   "documents": [
     {
@@ -12357,7 +12357,7 @@
       "capability": "3d-authoring-domain",
       "path": "docs/3d-authoring-dependency-ruling-2026-11-17.md",
       "kind": "reference",
-      "status": "planned",
+      "status": "reference",
       "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
@@ -12365,11 +12365,11 @@
         "3d-authoring",
         "dependency-ruling",
         "decision-material",
-        "pending-user-ruling",
-        "G0"
+        "G0",
+        "ruled-2026-11-18"
       ],
       "registeredAt": "2026-11-17",
-      "notes": "2026-11-17 3D 造物域五方依赖与授权裁决材料（从属于 3D-AUTHORING-DOMAIN-CHARTER）：U-3D-D1 sand3d（推荐隔离探针）/D2 three-live（引入但 MCP+adapter 隔离）/D3 立项首包（先立 P0 探针包）/D4 Polyfork（引入，授权核清后，含禁再分发.mjs/HD+禁商业资产生成器红线）/D5 img2threejs（借形封装不整包，外部服务默认关）。每项按 DEPENDENCY-CHANGE-CHECKLIST 四问（替代/许可证维护度/影响面/退出成本）答全，五段式（现状/候选/四问/风险/推荐/状态）；全 pending_user_ruling，Agent 不代答、verdict 禁用 PASS/verified/completed；未裁决不装包不引依赖不改 manifest。不启动工作包、不改运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-17 3D 造物域五方依赖与授权裁决材料（从属于 3D-AUTHORING-DOMAIN-CHARTER）：U-3D-D1 sand3d（推荐隔离探针）/D2 three-live（引入但 MCP+adapter 隔离）/D3 立项首包（先立 P0 探针包）/D4 Polyfork（引入，授权核清后，含禁再分发.mjs/HD+禁商业资产生成器红线）/D5 img2threejs（借形封装不整包，外部服务默认关）。每项按 DEPENDENCY-CHANGE-CHECKLIST 四问（替代/许可证维护度/影响面/退出成本）答全，五段式（现状/候选/四问/风险/推荐/状态）；2026-11-18 用户端到端预授权批量裁决 B-1..B-5 已逐项回填 ruled（原话+日期在各 U 状态行；B-10 观感不适用预置）。P0 探针包=BLOCK-459。不启动工作包、不改运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "PETRI-MASTER-CHARTER",
@@ -12428,6 +12428,30 @@
       ],
       "registeredAt": "2026-11-17",
       "notes": "2026-11-17 下一阶段端到端执行计划（批量裁决优化版，配套 NEXT-PHASE-E2E-PROMPT）：§0 相对旧 E2E 优化点表；§1 自动化前置硬门；§2 三分类判定表（A 全满足自动/B 命中任一裁决/C 立即停）；§3 A 类任务卡 W-1 后台任务对账/W-2 状态与 canonical 复核/W-3 只读探针（七字段）；§4 B 类批次 B-1..B-10（U-3D-D1~D5/U-G2/G3/D8/post-h9 D5/UI-706/707 观感签字，观感不提供代签选项）+ 一次性批复模板；§5 集中裁决触发时机（A 全收口/无其它自动项/C 例外立即停）；§6 依赖图与风险；§7 验收与回退；§8 完成语义（自动段完成≠整体完成）。kind=reference status=planned，不启动工作包。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-459",
+      "path": "docs/block-459-3d-p0-probe-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block-459-3d-p0-probe",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block-459-3d-p0-probe-plan.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "3d-authoring",
+        "p0-probe",
+        "sand3d",
+        "scene-ir",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户端到端预授权批量裁决 B-3「立项 = 仅 P0 探针包」+ B-1「sand3d = 隔离探针（临时 venv，不全局装、不引产品依赖）」+「不需要人参与，尽可能一路推进下去」）：3D 造物域 P0 可行性探针——仓库外临时 venv 装 sand3d 导出带 revolute/prismatic 关节 GLB，实测 nodes[i].extras 真实 schema，逐项验证到 Scene IR v0 的 §4.3 六行映射，产出探针报告 + IR v0 契约草案 + S3 开工判据。零产品 manifest 改动、零全局安装；装包受阻 external-blocked 如实降级。plan=docs/block-459-3d-p0-probe-plan.md；从属 3D-AUTHORING-DOMAIN-CHARTER。"
     }
   ],
   "lastUpdated": "2026-11-17"
