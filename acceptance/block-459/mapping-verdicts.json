@@ -1,0 +1,49 @@
+{
+  "jointExtrasNodes": 0,
+  "verdicts": {
+    "R1 name": {
+      "fields": [
+        "name"
+      ],
+      "found": {},
+      "verdict": "gap"
+    },
+    "R2 kind": {
+      "fields": [
+        "kind"
+      ],
+      "found": {},
+      "verdict": "gap"
+    },
+    "R3 axis+range": {
+      "fields": [
+        "axis",
+        "range"
+      ],
+      "found": {},
+      "verdict": "gap"
+    },
+    "R4 follows+ratio": {
+      "fields": [
+        "follows",
+        "ratio"
+      ],
+      "found": {},
+      "verdict": "gap"
+    },
+    "R5 assembly tree": {
+      "fields": [
+        "children/parent"
+      ],
+      "found": {},
+      "verdict": "gap"
+    },
+    "R6 units mm→m": {
+      "fields": [
+        "translation scale"
+      ],
+      "found": {},
+      "verdict": "gap"
+    }
+  }
+}

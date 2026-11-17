@@ -12433,12 +12433,12 @@
       "id": "BLOCK-459",
       "path": "docs/block-459-3d-p0-probe-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block-459-3d-p0-probe",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block-459-3d-p0-probe-plan.md"
       ],
@@ -12451,7 +12451,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户端到端预授权批量裁决 B-3「立项 = 仅 P0 探针包」+ B-1「sand3d = 隔离探针（临时 venv，不全局装、不引产品依赖）」+「不需要人参与，尽可能一路推进下去」）：3D 造物域 P0 可行性探针——仓库外临时 venv 装 sand3d 导出带 revolute/prismatic 关节 GLB，实测 nodes[i].extras 真实 schema，逐项验证到 Scene IR v0 的 §4.3 六行映射，产出探针报告 + IR v0 契约草案 + S3 开工判据。零产品 manifest 改动、零全局安装；装包受阻 external-blocked 如实降级。plan=docs/block-459-3d-p0-probe-plan.md；从属 3D-AUTHORING-DOMAIN-CHARTER。"
+      "notes": "2026-11-18 立项（用户端到端预授权批量裁决 B-3「立项 = 仅 P0 探针包」+ B-1「sand3d = 隔离探针（临时 venv，不全局装、不引产品依赖）」+「不需要人参与，尽可能一路推进下去」）：3D 造物域 P0 可行性探针——仓库外临时 venv 装 sand3d 导出带 revolute/prismatic 关节 GLB，实测 nodes[i].extras 真实 schema，逐项验证到 Scene IR v0 的 §4.3 六行映射，产出探针报告 + IR v0 契约草案 + S3 开工判据。零产品 manifest 改动、零全局安装；装包受阻 external-blocked 如实降级。plan=docs/block-459-3d-p0-probe-plan.md；从属 3D-AUTHORING-DOMAIN-CHARTER。【收口 2026-11-18】探针判据=可行（4 direct + 2 convert，零不可行项）：extras 实测 schema=s3d_joint{name,type,value,axis,lower,upper,mimic?}，kind 值域实测 revolute|prismatic|continuous|floating（free→floating 命名 gap）；混合单位实锤（transform=程序单位 mm、joint range/value=米/弧度、URDF 全米）；双进程 GLB sha256 一致 + fingerprint 稳定。证据=acceptance/block-459/（PROBE-REPORT + scene-ir-v0-draft + GLB/URDF/解析 dump/SHA256SUMS）。S3=P1 首包按预授权启动=BLOCK-460。"
     }
   ],
   "lastUpdated": "2026-11-17"

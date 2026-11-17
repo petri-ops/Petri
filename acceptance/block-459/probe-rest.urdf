@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<!-- written by sand3d: probe_machine at rest, metres and radians -->
+<robot name="probe_machine">
+  <link name="probe_machine">
+    <visual name="base">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="probe-rest_meshes/base.obj" />
+      </geometry>
+    </visual>
+    <visual name="post">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="probe-rest_meshes/post.obj" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="arm">
+    <visual name="arm">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="probe-rest_meshes/arm.obj" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="cap">
+    <visual name="cap">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="probe-rest_meshes/cap.obj" />
+      </geometry>
+    </visual>
+  </link>
+  <link name="slider">
+    <visual name="slider">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="probe-rest_meshes/slider.obj" />
+      </geometry>
+    </visual>
+  </link>
+  <joint name="hinge_arm" type="revolute">
+    <origin xyz="0.04 0 0.09" rpy="0 0 0" />
+    <parent link="probe_machine" />
+    <child link="arm" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="1.57079633" effort="0" velocity="0" />
+  </joint>
+  <joint name="cap_follow" type="prismatic">
+    <origin xyz="0 0.008 0.004" rpy="1.57079633 0 1.57079633" />
+    <parent link="arm" />
+    <child link="cap" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="0.02" effort="0" velocity="0" />
+    <mimic joint="rail_slider" multiplier="0.5" offset="0" />
+  </joint>
+  <joint name="rail_slider" type="prismatic">
+    <origin xyz="0 0 0.004" rpy="1.57079633 0 1.57079633" />
+    <parent link="arm" />
+    <child link="slider" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="0.04" effort="0" velocity="0" />
+  </joint>
+</robot>

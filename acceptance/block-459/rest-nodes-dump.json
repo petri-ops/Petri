@@ -1,0 +1,204 @@
+{
+  "file": "probe-rest.glb",
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.5.51",
+    "version": "2.0"
+  },
+  "sceneCount": 1,
+  "rootNodes": [
+    8
+  ],
+  "nodes": [
+    {
+      "index": 0,
+      "name": "base",
+      "mesh": 0,
+      "children": null,
+      "translation": null,
+      "rotation": null,
+      "scale": null,
+      "extras": null
+    },
+    {
+      "index": 1,
+      "name": "cap",
+      "mesh": 1,
+      "children": null,
+      "translation": null,
+      "rotation": null,
+      "scale": null,
+      "extras": null
+    },
+    {
+      "index": 2,
+      "name": "cap_follow",
+      "mesh": null,
+      "children": [
+        1
+      ],
+      "translation": [
+        35,
+        4,
+        -8
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        -0.5,
+        0.5
+      ],
+      "scale": null,
+      "extras": {
+        "s3d_joint": {
+          "name": "cap_follow",
+          "type": "prismatic",
+          "value": 0.0,
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "lower": 0.0,
+          "upper": 0.02,
+          "mimic": {
+            "joint": "rail_slider",
+            "multiplier": 0.5
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "name": "slider",
+      "mesh": 2,
+      "children": null,
+      "translation": null,
+      "rotation": null,
+      "scale": null,
+      "extras": null
+    },
+    {
+      "index": 4,
+      "name": "rail_slider",
+      "mesh": null,
+      "children": [
+        3
+      ],
+      "translation": [
+        35,
+        4,
+        0
+      ],
+      "rotation": [
+        0.5,
+        0.5,
+        -0.5,
+        0.5
+      ],
+      "scale": null,
+      "extras": {
+        "s3d_joint": {
+          "name": "rail_slider",
+          "type": "prismatic",
+          "value": 0.0,
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "lower": 0.0,
+          "upper": 0.04
+        }
+      }
+    },
+    {
+      "index": 5,
+      "name": "arm",
+      "mesh": 3,
+      "children": [
+        2,
+        4
+      ],
+      "translation": [
+        -34.999996185302734,
+        0,
+        0
+      ],
+      "rotation": null,
+      "scale": null,
+      "extras": null
+    },
+    {
+      "index": 6,
+      "name": "hinge_arm",
+      "mesh": null,
+      "children": [
+        5
+      ],
+      "translation": [
+        0,
+        80,
+        0
+      ],
+      "rotation": null,
+      "scale": null,
+      "extras": {
+        "s3d_joint": {
+          "name": "hinge_arm",
+          "type": "revolute",
+          "value": 0.0,
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "lower": 0.0,
+          "upper": 1.5707963267948966
+        }
+      }
+    },
+    {
+      "index": 7,
+      "name": "post",
+      "mesh": 4,
+      "children": [
+        6
+      ],
+      "translation": [
+        40,
+        10,
+        0
+      ],
+      "rotation": null,
+      "scale": null,
+      "extras": null
+    },
+    {
+      "index": 8,
+      "name": "probe_machine",
+      "mesh": null,
+      "children": [
+        0,
+        7
+      ],
+      "translation": null,
+      "rotation": null,
+      "scale": [
+        0.0010000000474974513,
+        0.0010000000474974513,
+        0.0010000000474974513
+      ],
+      "extras": null
+    }
+  ],
+  "topLevelExtrasKeys": [
+    "accessors",
+    "asset",
+    "bufferViews",
+    "buffers",
+    "meshes",
+    "nodes",
+    "scene",
+    "scenes"
+  ]
+}

@@ -58,4 +58,15 @@ acceptance:
 - **S3 开工判据**：探针判「可行 / 有条件可行」→ 按用户预授权启动 P1 首包（BLOCK-460，红绿先行）；判「不可行」→ 触发 charter §5.2 技术证伪变更评估流程，如实登记，不硬开 S3。
 - 观感项：本包无观感面（零 UI 改动），无 pending_human_eye 条目。
 
+## 6. 收口笔录（2026-11-18 · 一次会话收口）
+
+- **G1 ✓**：venv（/tmp/block459-sand3d-venv，python3.11 + bpy 4.5.16 + sand3d 1.6.3，`pip-freeze.txt`）装成功；导出 revolute+prismatic+follows+continuous+free 全 kind 组合 GLB（`probe-rest.glb` sha256 `2e803be3…`、`SHA256SUMS.txt`）。
+- **G2 ✓**：extras schema 实测原文在册（`rest-nodes-dump.json` + PROBE-REPORT §2）：`s3d_joint{name,type,value,axis,lower,upper,mimic?}`；kind 值域实测 = revolute|prismatic|continuous|**floating**（程序层 free→导出层 floating 的命名 gap 实锤）。
+- **G3 ✓**：六行映射逐项三态（PROBE-REPORT §3 + `mapping-verdicts.json`）：4 direct（name/kind/follows+ratio/assembly 树）+ 2 convert（axis 局部系需四元数变换；混合单位 transform=程序单位 vs joint range=米/弧度）——**零不可行项**。
+- **G4 ✓**：`scene-ir-v0-draft.md`（N1–N8 归一规则 + fail-closed 校验器要点）+ PROBE-REPORT + S3 判据=**可行**。
+- **G5 ✓**：`git diff -- src/ frontend/ core/ package.json` 零 diff（零产品改动证明）。
+- **确定性 ✓**：双进程 GLB sha256 一致 + `s3d.fingerprint()` 跨进程稳定（L1 判据探针尺度成立）。
+- **门禁**：docs:check PASS（611）/ ui:audit:check PASS / hygiene:check PASS；test:changed 零命中（无产品代码改动，如实记录）。
+- **后续**：S3（P1 首包）按用户预授权启动=BLOCK-460；三个实测差异（floating/混合单位/局部轴向）进 P1 plan 红绿契约。URDF 交叉对照确认平行输入可用（P2 仿真链）。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。
