@@ -1,0 +1,14 @@
+✔ BLOCK-462 前置：sidecar verify.mjs 在册（HK-01 红转绿的实现物） (0.732041ms)
+✔ BLOCK-462: 真实探针 GLB 全步验证 → verdict=pass + 渲染证据 sha256（需 three-live 已装，否则 skip） (379.260042ms)
+✔ BLOCK-462: sha256 复现用例——同一 GLB 双跑 digest 一致 (710.806666ms)
+✔ BLOCK-462: 损坏 GLB → verdict=fail + 诚实退出（不伪造通过） (542.636ms)
+✔ BLOCK-462: --append-truth 把 verifierResults 追加进 SceneSpec（单一真相，不建第二份） (735.896541ms)
+✔ BLOCK-462: 越界路径拒绝（adapter 不读工作区外文件） (71.427ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2526.57275

@@ -8798,6 +8798,21 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block462-3d-p2-verification",
+      "note": "BLOCK-462 3D P2 验证闭环（L4）：three-live-runner sidecar verify.mjs + 契约测试；改这些面必跑 block462 契约测试（需 three-live 隔离安装，缺席 skip）。证据目录同规则认领。",
+      "patterns": [
+        "sidecars/three-live-runner/**",
+        "test/block462-verify-adapter.test.mjs",
+        "acceptance/block462/**"
+      ],
+      "tests": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

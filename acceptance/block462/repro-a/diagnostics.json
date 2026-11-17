@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "verdict": "pass",
+  "tool": "three-live@1.4.0",
+  "glb": "test/fixtures/sand3d-probe-rest.glb",
+  "glbSha256": "2e803be355e92866d276357311fba73d60f7092b5533764771b6e4d3bbf4434e",
+  "steps": {
+    "info": {
+      "ok": true,
+      "exitCode": 0,
+      "summary": "GLB Container Info (\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/test/fixtures/sand3d-probe-rest.glb\"): |   Version: 2 |   Header Length: 6168 bytes |   Actual File Size: 6168 bytes |   Chunk [0]: Type=JSON, Length=3188 bytes"
+    },
+    "render": {
+      "ok": true,
+      "exitCode": 0,
+      "path": "acceptance/block462/repro-a/sand3d-probe-rest-render.png",
+      "sha256": "67c9b6b3c3e7a0e0b08873fc72b44db12774a7f3265f5ace6cf14accb7b29fc1",
+      "bytes": 4195716
+    },
+    "sim": {
+      "ok": true,
+      "exitCode": 0,
+      "nodes": 9
+    }
+  },
+  "digest": "8a7500d484ce8e6487ade72dea5b473ff3f1490d5a77d51d3646e6fe7e98f07a",
+  "at": "2026-11-17T23:57:19.463Z"
+}

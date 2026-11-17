@@ -1,0 +1,128 @@
+✖ BLOCK-462 前置：sidecar verify.mjs 在册（HK-01 红转绿的实现物） (1.263792ms)
+✖ BLOCK-462: 真实探针 GLB 全步验证 → verdict=pass + 渲染证据 sha256（需 three-live 已装，否则 skip） (60.7525ms)
+✖ BLOCK-462: sha256 复现用例——同一 GLB 双跑 digest 一致 (118.339583ms)
+✖ BLOCK-462: 损坏 GLB → verdict=fail + 诚实退出（不伪造通过） (61.006375ms)
+✖ BLOCK-462: --append-truth 把 verifierResults 追加进 SceneSpec（单一真相，不建第二份） (61.227208ms)
+✖ BLOCK-462: 越界路径拒绝（adapter 不读工作区外文件） (60.450625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 0
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 451.15125
+
+✖ failing tests:
+
+test at test/block462-verify-adapter.test.mjs:30:1
+✖ BLOCK-462 前置：sidecar verify.mjs 在册（HK-01 红转绿的实现物） (1.263792ms)
+  AssertionError [ERR_ASSERTION]: sidecars/three-live-runner/verify.mjs 必须在册
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:31:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block462-verify-adapter.test.mjs:34:1
+✖ BLOCK-462: 真实探针 GLB 全步验证 → verdict=pass + 渲染证据 sha256（需 three-live 已装，否则 skip） (60.7525ms)
+  AssertionError [ERR_ASSERTION]: stdout 必须含 JSON 契约行: 
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:39:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block462-verify-adapter.test.mjs:52:1
+✖ BLOCK-462: sha256 复现用例——同一 GLB 双跑 digest 一致 (118.339583ms)
+  TypeError: Cannot read properties of null (reading 'digest')
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:58:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block462-verify-adapter.test.mjs:62:1
+✖ BLOCK-462: 损坏 GLB → verdict=fail + 诚实退出（不伪造通过） (61.006375ms)
+  AssertionError [ERR_ASSERTION]: 失败也必须输出 JSON 契约
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:72:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block462-verify-adapter.test.mjs:83:1
+✖ BLOCK-462: --append-truth 把 verifierResults 追加进 SceneSpec（单一真相，不建第二份） (61.227208ms)
+  AssertionError [ERR_ASSERTION]: null
+  + actual - expected
+  
+  + undefined
+  - true
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:100:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block462-verify-adapter.test.mjs:119:1
+✖ BLOCK-462: 越界路径拒绝（adapter 不读工作区外文件） (60.450625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + undefined
+  - false
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block462-verify-adapter.test.mjs:122:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

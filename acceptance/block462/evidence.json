@@ -1,0 +1,23 @@
+{
+  "package": "BLOCK-462-3D-P2-VERIFICATION",
+  "recordedAt": "2026-11-18",
+  "environment": "macOS arm64 · three-live@1.4.0 隔离安装 .petri-dev-user-data/three-live（npm --prefix --no-save，零产品依赖）· B-2 裁决边界（外部工具+adapter 隔离、capability 默认关）",
+  "summary": "3D P2 验证闭环（L4）：three-live npm VERIFIED + 隔离安装 + CLI 10 子命令/MCP 10 工具只读实测对账（裁决材料记九工具，实测十——差异如实登记；validate 仅 .js/.html 对 GLB 路径不适用如实登记）+ verification adapter（info/render/sim 编排，HK-01 红→绿 6/6）+ 渲染证据双跑 sha256 一致（headless 确定性实测）+ truth 链 verifierResults 以 digest 去重追加进 SceneSpec metadata.provenance（单一真相）+ sim 实测全 9 节点状态 exit=0。",
+  "files": [
+    "evidence.json",
+    "red-run.txt",
+    "green-run.txt",
+    "probe-render.png",
+    "adapter-out/",
+    "repro-a/",
+    "repro-b/"
+  ],
+  "keyEvidence": {
+    "toolSurface": "CLI=convert/validate/info/render/sim/mcp/link/gym/textures/from-image；MCP=three_live_validate/render/convert/sim/link/gym_reset/gym_step/gym_close/from_image/bake_textures",
+    "redGreen": "red-run.txt（模块缺失 13 ✖）→ green-run.txt（6/6 绿）",
+    "reproducibility": "同 GLB 双跑 digest 一致（8a7500d4…）+ 渲染 PNG sha256 双跑一致（67c9b6b3…）",
+    "truthChain": "verifierResults{tool,verdict,diagnosticsRef,digest,at} 追加幂等（同 digest 不重复入账）",
+    "planSection": "docs/block462-3d-p2-verification-plan.md"
+  },
+  "result": "PASS"
+}
