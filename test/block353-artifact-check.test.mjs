@@ -22,7 +22,7 @@ test('block353 产物结构：App/Helper/asar/native 模块/extraResources 必�
     // 有的构建在 Resources 顶层另有副本，此处的 core 内副本为后端 require 的真实解算点）
     'Contents/Resources/core/petri-server/node_modules/better-sqlite3/build/Release/better_sqlite3.node',
     // extraResources（BLOCK-353 修复后必须包含 src/——打包后端 ../../src/main 相对 require 的解算点）
-    'Contents/Resources/core/petri-server/server.js',
+    'Contents/Resources/core/petri-server/server-main.js',
     'Contents/Resources/core/petri-server/node_modules/better-sqlite3',
     'Contents/Resources/core/shared-backend',
     'Contents/Resources/frontend/dist/index.html',

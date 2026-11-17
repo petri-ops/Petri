@@ -165,6 +165,10 @@ function markBackendAttached(port) {
 // ── startRServer (with supervisor) ─────────────────────────────
 const rServerSupervisor = createOwnedBackendSupervisor({
   name: "petri-server",
+  // BLOCK-457 P2 — 77 = port-guard 的 PORT_IN_USE_EXIT_CODE（core/petri-server/
+  // port-guard.js 契约值；不在 src 引 core——R5 主进程禁引后端，以数字+注释对账，
+  // test/block457-bind-first.test.mjs C1 双向钉住该值）。
+  noRetryExitCodes: [77],
   spawnProcess: () => {
     const rServerPath = resolveCore("petri-server", "server.js");
     // L1-3（蓝图 L-52）：每 boot 随机本机请求 token——无 Origin 的变更动词请求必须携带

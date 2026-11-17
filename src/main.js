@@ -543,9 +543,16 @@ async function main() {
   try { require("./telemetry").reportEvent("app_started").catch(() => {}); } catch { /* 遥测永不阻塞启动 */ }
   // BLOCK-100 P1 — 测试实例直连既有后端，不做端口抢占：主实例已占 3001，
   // reserveAvailablePort(3001) 会误选 3002 指错后端。端口以 R_SERVER_PORT 为准。
+  // BLOCK-457 P3 — 主实例传入身份探活与数据根：selectBackendPorts 判定 3001 在场
+  // 者是否同源后端（attachExisting），main.js 据此 attach 而非 spawn。
+  const { resolveLocalDataDir } = require("./main/env-coordinator");
   const backendPorts = IS_TEST_INSTANCE
     ? { r: Number(process.env.R_SERVER_PORT) || 3001, renderer: null }
-    : await selectBackendPorts({ reserveAvailablePort, isDevMode });
+    : await selectBackendPorts({
+        reserveAvailablePort,
+        isDevMode,
+        ownDataDir: resolveLocalDataDir(app),
+      });
   // BLOCK-9.1 PHASE 3: setupDesktopEnv moved to src/main/env-coordinator.js
   const { setupDesktopEnv } = require("./main/env-coordinator");
   setupDesktopEnv(backendPorts);
@@ -662,7 +669,33 @@ async function main() {
     } catch (e) {
       console.error("[desktop] migration failed:", e?.message || e);
     }
-    await startRServer();
+    // BLOCK-457 P3 — 单一所有权：3001 在场者若与本实例同源（selectBackendPorts
+    // 已按 dataDir 判定 attachExisting）→ 复用 attach 桩不 spawn；否则正常 spawn
+    // （子进程 bind-first 兜底：万一竞态输掉，秒级 exit 77 零副作用，supervisor
+    // 对 77 不重试）。
+    const { markBackendAttached } = require("./main/backend-proc-manager");
+    if (backendPorts.attachExisting) {
+      markBackendAttached(backendPorts.r);
+      console.log(
+        `[desktop] petri-server already healthy at :${backendPorts.r} (same dataDir) — attaching, no spawn`,
+      );
+    } else {
+      await startRServer();
+    }
+    // 后端就绪兜底：spawn/attach 后必须真实健康才开窗——旧形态渲染层会在后端缺席时
+    // 撞「Failed to fetch」黑洞（BLOCK-414 红证据的同族症状面）。
+    const backendHealthy = await waitForBackendHealthy(backendPorts.r, 20_000);
+    if (backendHealthy) require("./ipc/startup-timeline").markStartup("backendHealth");
+    if (!backendHealthy) {
+      dialog.showErrorBox(
+        "格物后端未就绪",
+        `petri-server :${backendPorts.r} 20 秒内未就绪。\n` +
+          `可能原因：端口被非格物进程占用，或后端启动即崩。\n` +
+          `日志目录：${getLogDir()}`,
+      );
+      app.quit();
+      return;
+    }
   }
 
   // 2. 加载已安装插件

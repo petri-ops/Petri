@@ -290,14 +290,21 @@ function computeTrustedRendererOrigins({ existing, isDev, rendererDevUrl, render
   return trusted;
 }
 
+// BLOCK-457 P3 — 本实例数据根单源（attach 身份判据）。setupDesktopEnv 与
+// main.js 的 selectBackendPorts 探活共用同一表达式，防两处漂移。
+function resolveLocalDataDir(appLike) {
+  return (
+    process.env.PETRI_LOCAL_DATA_DIR ||
+    path.join(appLike.getPath("documents"), resolveLocalDirName(appLike))
+  );
+}
+
 function setupDesktopEnv(backendPorts) {
   process.env.PETRI_DESKTOP = "1";
   process.env.PETRI_SITE_DIR = resolveResource("build");
 
   // 用户数据目录（先确定，resolveRuntime 要用）
-  const userDataDir =
-    process.env.PETRI_LOCAL_DATA_DIR ||
-    path.join(app.getPath("documents"), resolveLocalDirName(app));
+  const userDataDir = resolveLocalDataDir(app);
   process.env.PETRI_LOCAL_DATA_DIR = userDataDir;
   process.env.PETRI_LOCAL_RESULTS_DIR = path.join(userDataDir, "results");
   process.env.PETRI_LOCAL_UPLOADS_DIR = path.join(userDataDir, "uploads");
@@ -387,4 +394,5 @@ module.exports = {
   getBackendPorts,
   computeTrustedRendererOrigins,
   isLoopbackHttpOrigin,
+  resolveLocalDataDir,
 };

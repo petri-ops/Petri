@@ -422,27 +422,13 @@ async function main() {
   fs.mkdirSync(electronUserDataDir, { recursive: true });
   fs.mkdirSync(electronLocalDataDir, { recursive: true });
 
-  // Run pending DB migrations against the shared DB before petri-server starts.
-  // Uses the same PETRI_BETTER_SQLITE3_ROOT root as main.js:367 so the
-  // better-sqlite3 native addon ABI matches.
-  const migrationEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', PETRI_BETTER_SQLITE3_ROOT: path.join(projectRoot, 'core/petri-server') };
-  const migrationResult = spawnSync(
-    process.execPath,
-    [path.join(projectRoot, 'src', 'migration-runner.js'), process.env.PETRI_DB_PATH, path.join(projectRoot, 'src', 'migrations')],
-    { cwd: projectRoot, encoding: 'utf8', env: migrationEnv },
-  );
-  if (migrationResult.error) throw migrationResult.error;
-  if (migrationResult.status !== 0) {
-    throw new Error((migrationResult.stderr || migrationResult.stdout || 'migration child failed').trim());
-  }
-  const migrationOutput = String(migrationResult.stdout || '').trim();
-  if (migrationOutput) console.log('[dev-electron] ' + migrationOutput.replace(/\n/g, '\n[dev-electron] '));
-
-  // Start petri-server on :3001 so /api/ai/chat (and other /api/* routes used by
-  // the renderer) are reachable from the dev shell. Without this the copilot
-  // context-budget ring (UI-190) and other live SSE features stay empty.
-  spawnChild(npmCmd, ['--prefix', 'core/petri-server', 'start'], { env: { ...process.env } });
-  await waitForUrl('http://127.0.0.1:3001/api/health');
+  // BLOCK-457 P4 — 单一所有权：wrapper 不再自起 petri-server，也不再跑迁移子进程。
+  // 两者都由 Electron main 拥有（migrationPromise → startRServer，packaged 同链）：
+  // 旧形态 wrapper 先起后端 A 占 :3001，main.js 又 spawn 后端 B → EADDRINUSE
+  // 30s 崩溃循环，且每个僵尸 boot 的启动清扫误杀 A 的 in-flight 任务
+  // （2026-11-17 实机 749 boot / 4 任务误杀）。详见
+  // docs/block-457-dev-single-backend-ownership-plan.md。
+  // env（PETRI_DB_PATH / PETRI_LOCAL_DATA_DIR）已导出，Electron 继承同根。
 
   // Optional extra Electron CLI args for local debugging, e.g.
   //   PETRI_DEV_ELECTRON_ARGS="--remote-debugging-port=9222" npm run dev

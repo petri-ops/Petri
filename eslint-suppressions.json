@@ -136,6 +136,11 @@
       "count": 1
     }
   },
+  "frontend/src/components/desktop/DesktopSettingsPanel/sections/DiagnosticsRelocation.test.tsx": {
+    "@typescript-eslint/no-unnecessary-type-assertion": {
+      "count": 2
+    }
+  },
   "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx": {
     "react-hooks/purity": {
       "count": 1

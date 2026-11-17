@@ -71,7 +71,7 @@ test('B-18 负测：pack-aware 处丢通道 / 丢单源加载器 / 文件不可�
 
 // BLOCK-395 B-18：三源路径解析真收敛（pack 启停语义保留）
 test('B-18 server.js 不再自写三源路径，且整包启停裁决未被合并掉', () => {
-  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/server.js'), 'utf8');
+  const src = fs.readFileSync(path.join(ROOT, 'core/petri-server/server-main.js'), 'utf8');
   assert.ok(src.includes('resolveDefaultPluginSources()'), '必须走唯一加载器');
   assert.equal(src.includes('PETRI_BUILT_IN_PLUGINS_DIR'), false, 'built-in 路径字面量应已收敛');
   assert.equal(src.includes("'Petri-Local', 'plugins'"), false, 'installed 路径字面量应已收敛');

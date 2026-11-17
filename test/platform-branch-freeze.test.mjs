@@ -184,6 +184,9 @@ const BASELINE = new Set([
   'test/dev-verify.test.mjs',
   'test/block63-sidecar-contract.test.mjs', // BLOCK-375 S0：win32 sidecar 套件平台门（skip 可见带指引）
   'test/block63-sidecar-tools.test.mjs', // BLOCK-375 S0：同上
+  // BLOCK-457 — keychain 事故门（BLOCK-414 沿袭）的平台护栏：process.platform 仅用于
+  // macOS 专用探针（/usr/bin/security）缺席时的显式 skip 理由，非产品面平台分支。
+  'test/block414-backend-port-reuse.test.mjs',
 ]);
 
 function scan() {

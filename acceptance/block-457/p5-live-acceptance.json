@@ -1,0 +1,69 @@
+{
+  "package": "BLOCK-457",
+  "title": "dev 后端单一所有权根治 · 实机验收（Windows dev 机）",
+  "date": "2026-11-17",
+  "platform": "win32 (Git Bash + fnm Node v24.20.0 + Electron 44 dev)",
+  "contract": "docs/block-457-dev-single-backend-ownership-plan.md §4",
+  "assertions": [
+    {
+      "id": "A1-single-listener",
+      "assert": "新代码起栈后 :3001 恰一个 petri-server 监听者",
+      "result": "pass",
+      "evidence": "两次独立 boot：boot1 pid=30572 / boot2 pid=30116（netstat LISTENING 单行，pid 与 /api/health pid 一致）"
+    },
+    {
+      "id": "A2-health-identity",
+      "assert": "/api/health 带 instanceId/pid/dataDir 身份字段（attach 判据）",
+      "result": "pass",
+      "evidence": "{\"status\":\"ok\",\"db_ok\":true,\"instanceId\":\"386fd19d-8b68-43d7-b01e-9fdbbafe9bdf\",\"pid\":30572,\"dataDir\":\"D:\\\\1.WorkDir\\\\petri\\\\.petri-dev-user-data\\\\data\"}"
+    },
+    {
+      "id": "A3-single-session-start",
+      "assert": "每次 boot 恰一条 session start（无 30s 崩溃循环）",
+      "result": "pass",
+      "evidence": "boot1=2026-11-17T09:35:34.726Z 恰 1 条；boot2=2026-11-17T09:41:36.554Z 恰 1 条"
+    },
+    {
+      "id": "A4-zero-eaddrinuse",
+      "assert": "新 boot 后日志零 EADDRINUSE",
+      "result": "pass",
+      "evidence": "日志行号锚：最后一条 EADDRINUSE=L27596（09:35 前旧循环残留），新 boot session start=L27598，其后 EADDRINUSE 计数=0"
+    },
+    {
+      "id": "A5-duplicate-spawn-fail-fast",
+      "assert": "对活后端 :3001 再 spawn 第二个 server.js → 秒级 exit 77 + 单行守卫日志 + 零副作用",
+      "result": "pass",
+      "evidence": "输出=[port-guard] :3001 already in use — single-instance guard, exit 77 (no module loaded, zero DB side effects)；exit=77（实机单发，自动化覆盖=test/block457-bind-first.test.mjs C2）"
+    },
+    {
+      "id": "A6-test-instance-unique-entry",
+      "assert": "唯一测试入口 start-test-instance.sh attach 回归（零 fork，直连 :3001）",
+      "result": "pass",
+      "evidence": "脚本自带 READY 断言 exit 0；CDP 9223 /json/list 含 ?test=1 页面 target=1；验收后按 runbook kill 9223（PID 32384）"
+    },
+    {
+      "id": "A7-dev-verify-app-health",
+      "assert": "dev-verify 在册 flow 回归",
+      "result": "pass",
+      "evidence": "app-health 4/4 allPass（cdp_targets_listed / spa_page_target_present / document_title_non_empty / spa_root_mounted），证据=acceptance/dev-verify/app-health-live-win32.json"
+    }
+  ],
+  "hk01_red_green": {
+    "red": [
+      "block457-ownership 6/6 红（selectBackendPorts 无 probeIdentity/attachExisting）",
+      "block457-supervisor 1/4 红（exit 77 仍排程重启；3 对照用例绿）",
+      "block457-bind-first C2 红（被占端口 code=1 + dataDir 出现 petri.db 副作用）、C3 红（health 无身份字段）"
+    ],
+    "green": "实现后 17 pass / 1 honest skip（keychain 平台护栏）/ 0 fail"
+  },
+  "existing_reds_attributed": {
+    "note": "test:changed 全量 1316 项中 16 红逐项归因：14 既有（BLOCK-454 工具数 115→117 基线漂移家族 ×6〔tool-activity-labels / agent-tool-registry ×2 / block157-skill-visibility / codegraph BK-04 / 导出信封 / fixture 宇宙〕+ canonical 人眼门 ×1 + W5a ×1 + stored-acceptance(ui-421/ui-703-wide-header 未登记) ×1 + L1-6 Windows 权限位 666×600 ×1 + 瞬态环境波动 ×2〔block48/63 复跑绿，与 BLOCK-456 八文件 bisect 先例同型〕）；2 项本包相关均已处置（keychain 平台护栏=诚实 skip；platform-branch-freeze 登记本包 test 文件入 BASELINE 即留痕）",
+    "disposition": "既有红归属原包（BLOCK-454 计数基线等），不在本包清偿范围；如实留账不洗桶"
+  },
+  "scope_notes": [
+    "wrapper 路径（npm run dev）与直启路径（restart-dev-stack.sh 形态）均单后端",
+    "旧僵尸循环即时缓解随本包自然生效：3001 唯一 spawner 后无第二进程可循环",
+    "Mac 侧对称冒烟（dev-electron.js 跨端同形改动）按 §76.8 留待 Mac 会话首次使用前执行"
+  ],
+  "g0_note": "G0 开发期常态 · 不外推 packaged/Provider/GA"
+}

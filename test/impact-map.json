@@ -8500,6 +8500,40 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "block457-single-backend-ownership",
+      "note": "BLOCK-457 dev 后端单一所有权根治：server.js 拆薄 bootstrap 端口绑定前置（exit 77 零 DB 副作用）+ supervisor noRetryExitCodes + BLOCK-414 端口号复用升级为身份探活 attach（health 增 instanceId/pid/dataDir）+ wrapper 删自起后端与迁移子进程。改下列任一文件即跑本包契约与受影响的源码扫描门。",
+      "patterns": [
+        "core/petri-server/server.js",
+        "core/petri-server/server-main.js",
+        "core/petri-server/port-guard.js",
+        "core/petri-server/routes/index.js",
+        "src/owned-backend-supervisor.js",
+        "src/main/_backend-ports.js",
+        "src/main/backend-ownership.js",
+        "src/main/backend-proc-manager.js",
+        "src/main/env-coordinator.js",
+        "src/main.js",
+        "scripts/dev-electron.js",
+        "test/block457-bind-first.test.mjs",
+        "test/block457-ownership.test.mjs",
+        "test/block457-supervisor-no-retry.test.mjs"
+      ],
+      "tests": [
+        "test/block457-bind-first.test.mjs",
+        "test/block457-ownership.test.mjs",
+        "test/block457-supervisor-no-retry.test.mjs",
+        "test/block414-backend-port-reuse.test.mjs",
+        "test/block157-pack-enabled.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs",
+        "test/block328-early-loop-guard.test.mjs",
+        "test/env-coordinator-port.test.mjs",
+        "test/block145-tunnel-async.test.mjs",
+        "test/block353-artifact-check.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false
     }
   ]
 }

@@ -1,0 +1,29 @@
+{
+  "name": "app-health",
+  "platform": "win32",
+  "startedAt": "2026-11-17T09:43:05.068Z",
+  "finishedAt": "2026-11-17T09:43:05.090Z",
+  "assertions": [
+    {
+      "name": "cdp_targets_listed",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mv34l38a_0sr0"
+    },
+    {
+      "name": "document_title_non_empty",
+      "pass": true,
+      "detail": "Petri"
+    },
+    {
+      "name": "spa_root_mounted",
+      "pass": true,
+      "detail": "root childElementCount>0=true"
+    }
+  ],
+  "allPass": true
+}

@@ -82,7 +82,7 @@ export function evaluateBigFileLedger(files, anchor) {
 // ── B-18 ──────────────────────────────────────────────────────────────
 export const PLUGIN_SOURCE_SITES = [
   { id: 'mcp_registry', file: 'core/petri-server/mcp/registry.js', role: 'pack_aware' },
-  { id: 'server_boot', file: 'core/petri-server/server.js', role: 'pack_aware' },
+  { id: 'server_boot', file: 'core/petri-server/server-main.js', role: 'pack_aware' },
   // 桌面侧插件安装/校验器：职责是开发态源检查与注册，不消费领域包 pack 通道。
   // 按职责分域（2026-11-10 判据修正），不要求 packAware。
   { id: 'plugin_manager', file: 'src/plugin-manager.js', role: 'installer' },

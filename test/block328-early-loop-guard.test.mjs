@@ -46,7 +46,7 @@ test('BLOCK-328 防线①：early-loop-guard 阈值/告警/测试注入语义', 
 });
 
 test('BLOCK-328 防线①：server.js 源码契约（守卫先于 db require，报告随后）', () => {
-  const source = fs.readFileSync(resolve(root, 'core/petri-server/server.js'), 'utf8');
+  const source = fs.readFileSync(resolve(root, 'core/petri-server/server-main.js'), 'utf8');
   const codeLines = source.split('\n').map((l, i) => ({ l, i })).filter(({ l }) => !l.trim().startsWith('//'));
   const guardFirst = codeLines.find(({ l }) => l.includes("require('./helpers/early-loop-guard')"))?.i ?? -1;
   const dbRequire = codeLines.find(({ l }) => l.includes("require('./db')"))?.i ?? -1;

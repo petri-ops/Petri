@@ -9,11 +9,34 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 602,
+    "documentCount": 603,
     "lastUpdated": "2026-11-17",
-    "managedMarkdown": 584
+    "managedMarkdown": 585
   },
   "documents": [
+    {
+      "id": "BLOCK-457",
+      "path": "docs/block-457-dev-single-backend-ownership-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block-457-dev-single-backend-ownership",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P5-CLOSED",
+      "touchSurface": [
+        "docs/block-457-dev-single-backend-ownership-plan.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "dev-infra",
+        "backend-ownership",
+        "split-brain",
+        "BLOCK-128-family",
+        "G0"
+      ],
+      "notes": "2026-11-17 立项（用户裁决「我希望根治 应该避免多重启动 后续测试有一个唯一入口即可」）：dev 后端单一所有权根治——server.js 拆薄 bootstrap 端口绑定前置（绑不上 exit 77 零 DB 副作用，僵尸 boot 不再触达启动清扫）+ supervisor noRetryExitCodes + BLOCK-414 端口号复用升级为身份探活 attach（health 增 instanceId/pid/dataDir，同源 attach / 异源 fallback spawn）+ wrapper（npm run dev）删自起后端与迁移子进程（main.js 唯一 spawner，packaged 同链）。唯一测试入口=start-test-instance.sh 不变。回归定位=BLOCK-414（2026-11-11）把 §76.1 随机端口脑裂升级为确定性 EADDRINUSE 30s 循环（实机当日 749 boot/734 崩溃/4 任务误杀）。sweep 实例归属判据登记 backlog 不在本包。"
+    },
     {
       "id": "E2E-PROMPT",
       "path": "docs/E2E-PROMPT.md",

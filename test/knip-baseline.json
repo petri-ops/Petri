@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-16",
+  "updatedAt": "2026-11-17",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -196,9 +196,10 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-ui.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui704-diagnostics.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui708-wave2.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
-    "files::.agents/skills/petri-dev-infra/dev-verify/local-token.cjs",
     "files::.agents/skills/petri-dev-infra/scripts/normalize-eol.mjs",
     "files::acceptance/block-139/block139-selection-walk.cjs",
     "files::acceptance/block-140/block140-split-walk.cjs",

@@ -29,7 +29,7 @@ import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TUNNEL_PATH = path.join(ROOT, 'core/petri-server/mobile-gateway/tunnel.js');
-const SERVER_PATH = path.join(ROOT, 'core/petri-server/server.js');
+const SERVER_PATH = path.join(ROOT, 'core/petri-server/server-main.js');
 
 const SYNC_SPAWN_RE = /spawnSync|execSync|execFileSync/gi;
 

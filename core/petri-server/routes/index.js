@@ -16,7 +16,18 @@ module.exports = async function registerRoutes(app) {
         try {
           dbOk = Boolean(db.prepare('SELECT 1').get());
         } catch {}
-        res.json({ status: 'ok', timestamp: new Date().toISOString(), version, db_ok: dbOk });
+        // BLOCK-457 P3 — 实例身份三字段：Electron main 探活据此判定 attach（同
+        // dataDir）/spawn（异源或旧版缺字段）。旧版后端无这三字段 → 身份无法核实
+        // → 一律不 attach（宁 spawn 不误认领）。
+        res.json({
+          status: 'ok',
+          timestamp: new Date().toISOString(),
+          version,
+          db_ok: dbOk,
+          instanceId: process.env.PETRI_INSTANCE_ID || null,
+          pid: process.pid,
+          dataDir: process.env.PETRI_LOCAL_DATA_DIR || null,
+        });
       });
     }],
     // Web-only 路由已移除（desktop 前端/copilot 不调用）：ai-report、ai-review、

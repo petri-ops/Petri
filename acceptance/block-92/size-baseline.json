@@ -70,8 +70,8 @@
       "wave": "B",
       "module": "W-01",
       "lines": 625,
-      "bytes": 32063,
-      "sha256": "806d49f4323b2ce0327d4f8d423842becd9ec29fc3f512bc3f3139a43dac8123"
+      "bytes": 32310,
+      "sha256": "028b8e294122a212f93bf66c2cfbd03b21dcb1434fe231e5713c6606e5c6e5f1"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -418,6 +418,14 @@
       "sha256": "29be358e264635fabe08d3939b033c31c8f8a7a06bcebbe8614db033a4a8d8a0"
     },
     {
+      "path": "src/main.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 920,
+      "bytes": 46638,
+      "sha256": "89251eb595275195b7c72e1451b25bdeb20bf365c7e67c42e1e63d320192bc9e"
+    },
+    {
       "path": "frontend/src/pages/extensions/styles.module.css",
       "wave": "L0",
       "module": "auto-discovered",
@@ -456,14 +464,6 @@
       "lines": 889,
       "bytes": 37866,
       "sha256": "2a4500eb0e6129e20359c99aaaf91836c2317c258abdbf03bafc94e58421e40f"
-    },
-    {
-      "path": "src/main.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 887,
-      "bytes": 44961,
-      "sha256": "73d378a11fb5a81281d5c46da65a847e4f5e38f8a94fcf47ecf4406037a829fd"
     },
     {
       "path": "core/shared-backend/skill-registry.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86202
+  "total": 86235
 }
