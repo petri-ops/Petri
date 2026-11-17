@@ -1,0 +1,3 @@
+[2m   Start at [22m 03:09:48
+[2m   Duration [22m 334ms[2m (environment 65%, transform 15%, import 14%, tests 6%, worker 1%)[22m
+

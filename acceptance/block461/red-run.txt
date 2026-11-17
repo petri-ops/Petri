@@ -1,0 +1,4 @@
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 02:46:27
+[2m   Duration [22m 325ms[2m (environment 80%, transform 16%, tests 2%, import 1%, worker 1%)[22m
+

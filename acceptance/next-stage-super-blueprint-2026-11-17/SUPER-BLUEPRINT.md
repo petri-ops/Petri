@@ -66,6 +66,20 @@
 
 ---
 
+## 1.5 执行状态快照（2026-11-18 · 端到端预授权批执行后，投影随 canonical 更新）
+
+| 档位 | 执行结果 | 证据/canonical |
+|---|---|---|
+| 第 0 档 清账 | Agent 侧完成（5 条失败后台任务对账、docs:check 计数修复、audit:compact）；**UI-706/707/709 观感签字与 post-h9 D5 处置仍待用户（Agent 不代签）** | acceptance/e2e-batch-s1-clearing-2026-11-18/ |
+| 第 1 档 3D 裁决 | **ruled（B-1..B-5 预授权批量裁决 2026-11-18）** | docs/3d-authoring-dependency-ruling-2026-11-17.md（各 U 状态行已回填） |
+| 第 2 档 W11 | **completed（BLOCK-461，路径 A + P0-P2）**；UI-709 in_progress（观感待签 + 实机腿待补） | docs/block461-gen-ui-compose-plan.md · acceptance/block461/ |
+| 第 3 档 3D P0/P1 | **completed（BLOCK-459 探针=可行 + BLOCK-460 P1 首包）**；P2 three-live 接入（B-2 已裁决）/P3 呈现/P4 收口=后续拆包 | docs/block-459-3d-p0-probe-plan.md · docs/block460-scene-joints-plan.md |
+| 第 4 档 W10 对账 | **完成（2026-11-18 本次会话复核）**：三纲在库且内容闭环（planned），无实际待办；另立子包需用户就具体范围发令 | docs/post-h9-2026-11-10-final-report.md 等 |
+| 第 5 档 C-53 | planned/queued 不变 | backlog C-53 |
+| 第 6 档 候选池 | C-50/C-52 余项/C-55 登记现状不变，不开工 | backlog C-50/C-55 |
+
+冲突时以各 canonical 为准（本投影随 canonical 同批修正）。
+
 ## 2. 总览：六档工作序列
 
 | 档位 | 工作 | 形态 | 是否占串行槽位 | 前置 | 当前动作 |
