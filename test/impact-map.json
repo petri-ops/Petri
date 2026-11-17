@@ -8649,6 +8649,21 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "ui-design-context-pack",
+      "note": "C-52 第一包：Petri 内部 UI 设计上下文 Skill，结构化设计宪章、八态矩阵、模块设计模板、参考分析与工具采纳矩阵；零产品依赖、零 UI 写面变化。证据 acceptance/ui-design-context-pack/**。",
+      "patterns": [
+        ".codebuddy/skills/petri-ui-design/**",
+        "test/ui-design-skill-contract.test.mjs",
+        "acceptance/ui-design-context-pack/**"
+      ],
+      "tests": [
+        "test/ui-design-skill-contract.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

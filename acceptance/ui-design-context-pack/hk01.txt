@@ -1,0 +1,25 @@
+C-52 第一包 — Petri UI Design Context Pack HK-01 证据
+
+用户裁决（2026-11-17）：「都做 都做 这俩都做」——同时规划并执行内部设计上下文包与产品化设计能力包。按单工作包串行纪律，先第一包，收口后再第二包。
+
+形态：轻量包 / 制度化沉淀（agent-side project Skill）；plan=AUDIT-LOG 条目；不新建 docs/ 受控文档，避开他方 4 项 WIP。
+
+实现：
+  .codebuddy/skills/petri-ui-design/SKILL.md
+    - 双模式：Internal mode（Petri 自身 UI/UX）+ Product mode（用户设计任务）
+    - 治理源顺序、四步工作流、七条硬规则
+  references/design-brief-template.md — 十节设计说明模板
+  references/module-state-matrix.md — 八态矩阵 + 模块清单
+  references/reference-analysis.md — 参考图/站点的观察-借鉴分离法、来源许可记录
+  references/tool-adoption-matrix.md — 文章 7 工具的采纳/禁止借鉴边界
+  references/review-checklist.md — 交付前评审清单
+
+HK-01：
+  node --test test/ui-design-skill-contract.test.mjs → 5/5 PASS
+  quick_validate.py（PYTHONUTF8=1）→ Skill is valid!
+  首轮 CRLF 导致正则红，已修为 \r?\n 后绿；如实记录。
+
+边界：
+  - 零产品依赖、零 UI 写面变化、零默认行为变化；
+  - 不新建受控文档、不改 DOC-REGISTRY / README / next-work-blueprint / gen-ui 评估 WIP；
+  - 设计产物必须区分静态证据与 pending_human_eye；观感不代签。
