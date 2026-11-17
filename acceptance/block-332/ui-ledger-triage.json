@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-16T17:17:58.417Z",
+  "generatedAt": "2026-11-17T01:36:09.141Z",
   "ledger": "docs/ui-productization-audit.md",
   "sections": 499,
   "uniqueIds": 490,
   "counts": {
     "live-missing": 13,
-    "verified": 452,
-    "blocked": 22,
+    "verified": 453,
+    "blocked": 21,
     "closed": 12
   },
-  "debt": 35,
+  "debt": 34,
   "liveMissing": [
     {
       "id": "UI-702",
@@ -78,12 +78,6 @@
     }
   ],
   "blocked": [
-    {
-      "id": "UI-703",
-      "deps": [],
-      "external": true,
-      "title": "API Endpoint 编辑器信息密度——表头列名不换行 + 说明文案精简（2026-11-16 **in_progress（代码+契约测试+主题门禁绿；实机截图过目窄容器路径，"
-    },
     {
       "id": "UI-704",
       "deps": [],
