@@ -5,9 +5,13 @@
 本文件是**跨计划投影与执行索引**，不是第二份 canonical 计划，不启动工作包，不改变产品行为。
 
 - **权威真源**：
+  - `docs/petri-master-charter.md`：全局稳定总蓝图（canonical 导航/稳定性锚，非第二真相）——本投影的全局层面以其为准；
   - `docs/next-work-blueprint-2026-11-16.md`：active living-plan，W1–W11 总纲；
-  - `docs/3d-authoring-domain-blueprint-2026-11-17.md`：3D 专项规划材料（当前他方 WIP / planned）；
+  - `docs/3d-authoring-domain-charter.md`：3D 造物域**稳定顶层设计（canonical charter）**——3D 域核心目标/范围/原则/约束/稳定性契约的唯一顶层依据，所有 3D 派生文档冲突时以其为准；
+  - `docs/3d-authoring-domain-blueprint-2026-11-17.md`：3D 分阶段实施方案（派生层，从属于 charter；planned）；
+  - `docs/3d-authoring-dependency-ruling-2026-11-17.md`：3D 五方依赖与授权裁决材料（派生层，pending_user_ruling）；
   - `docs/gen-ui-data-plane-evaluation-2026-11-17.md`：W11 Gen UI 决策材料（当前他方 WIP / active reference）；
+  - `acceptance/next-stage-super-blueprint-2026-11-17/IMG2THREEJS-EVALUATION.md`：img2threejs 技术评估 + 整合方案（本目录非 canonical 投影，来源于仓库调研）；
   - `docs/AUDIT-LOG.md`：阶段广播与工作包 plan 锚点；
   - `docs/pending-work-backlog.md`：候选池与队列投影；
   - `docs/DOC-REGISTRY.json`：active / planned / completed 状态真相。
@@ -20,7 +24,8 @@
 | 事实 | 唯一权威 | 本文件权限 | 冲突处理 |
 |---|---|---|---|
 | W1–W11 波次、living-plan 状态 | `docs/next-work-blueprint-2026-11-16.md` | 只读投影排序 | 以 living-plan 为准，修正本文件 |
-| 3D 蓝图内容、U-3D 裁决状态 | `docs/3d-authoring-domain-blueprint-2026-11-17.md` | 只读引用 | 以 3D 专项蓝图为准 |
+| 3D 域顶层设计（目标/范围/原则/约束/稳定性） | `docs/3d-authoring-domain-charter.md` | 只读投影，不改写 | 以 charter 为最终依据 |
+| 3D 阶段方案、U-3D 裁决状态 | `docs/3d-authoring-domain-blueprint-2026-11-17.md` / `docs/3d-authoring-dependency-ruling-2026-11-17.md` | 只读引用 | 派生层以 charter 为准；阶段细节以其自身为准 |
 | W11 路径、差距、推荐 | `docs/gen-ui-data-plane-evaluation-2026-11-17.md` | 只读引用 | 以 Gen UI 评估为准 |
 | 工作包启动 / completed / closed | `docs/DOC-REGISTRY.json` + 对应 plan | 不登记、不改状态 | 以 registry 为准 |
 | 阶段广播、裁决留痕 | `docs/AUDIT-LOG.md` | 只在同提交追加本文件落档记录 | 不覆盖既有广播 |
@@ -66,7 +71,7 @@
 | 档位 | 工作 | 形态 | 是否占串行槽位 | 前置 | 当前动作 |
 |---|---|---|---|---|---|
 | 第 0 档 | UI-706/707 观感签字、E/H 类签字槽、post-h9 D5 处置、4 条失败后台任务 | 用户清账 + Agent 对账 | 否 | 用户/owner | 可随时做；Agent 不代签 |
-| 第 1 档 | 3D 依赖与立项裁决 `U-3D-D1/D2/D3` | 小决策材料 | 否 | 依赖检查单 | 当前 Jev 首选，建议先写材料 |
+| 第 1 档 | 3D 依赖与立项裁决 `U-3D-D1/D2/D3` + 素材源 `U-3D-D4`（Polyfork）+ 图像重建 `U-3D-D5`（img2threejs） | 小决策材料 | 否 | 依赖检查单 | 当前 Jev 首选，建议先写材料 |
 | 第 2 档 | W11 Gen UI 数据面首包 P0–P2 | 工程包 | 是 | U-G2/G3/D8 发令 | 准备度最高，首个工程包候选 |
 | 第 3 档 | 3D 造物域 P0–P1 | 工程包 | 是 | 第 1 档 + GLB extras 探针 | 高价值、高前置，接续 W11 |
 | 第 4 档 | W10 规划大纲 | 规划/对账 | 视子项 | 用户显式裁决 | 先做闭环对账，不自动开工 |
@@ -108,7 +113,9 @@
 
 - `U-3D-D1`：是否引入 sand3d（`bpy` 重依赖）；
 - `U-3D-D2`：是否引入 three-live 外部 MCP；
-- `U-3D-D3`：3D 蓝图是否立项、首包范围与波次归属。
+- `U-3D-D3`：3D 蓝图是否立项、首包范围与波次归属；
+- `U-3D-D4`（补充）：Polyfork 素材源是否引入、以何种形态（CDN hotlink / 本地按需下载 / API+MCP 检索）；
+- `U-3D-D5`（补充）：img2threejs 是否引入、以何种形态（脚本抽取 + 受治理封装 / 整包 skill / 不引）——技术评估见 `IMG2THREEJS-EVALUATION.md`。核心 stdlib-only 脚本 + "脚本 enforce/模型 judge + fail-closed"门禁与 Petri 证据自证魂契合；外部服务（hosted TRELLIS/Context7）默认关。
 
 每项按依赖检查单回答：
 
@@ -118,12 +125,14 @@
 4. 退出成本；
 5. 引 / 不引 / 隔离探针 / 自研替代建议。
 
+**U-3D-D4 授权红线核对（不可省略）**：Polyfork 免费 low-poly 为 CC BY 4.0、商用免署名、提供 API+MCP 与 CDN hotlink；但禁止转售/再分发 `.mjs` 源与 HD 版，禁止用其资产构建"商业资产生成器"（向他人提供生产 3D 资产的服务/流水线），把大量资产托管给用户使用需 Platform licence。裁决须明确：Petri 作为本地 agent 帮用户装配其自有场景落在"commercial use"允许侧；**不得**把素材打包进产品分发、**不得**做成对外生成服务。授权边界未清前不接入素材源。
+
 ### 4.2 为什么先做
 
 - 这是 3D 整条线硬前置；
 - 零产品行为变化；
 - 小体量，可解除第 3 档不确定性；
-- 当前 Jev 单一建议：3D 依赖裁决，confidence 约 0.85。
+- 当前 Jev 单一建议：3D 依赖裁决（含 Polyfork 素材源授权），confidence 约 0.94（2026-11-17 现读）。
 
 ### 4.3 完成判据
 
@@ -196,12 +205,58 @@
 - Scene IR 归一器 + 校验器；
 - 一个可动装配端到端跑通。
 
+### 6.4a 五层架构（本档必须投影的骨架，细节以 3D 专项蓝图为准）
+
+```
+L5 治理与扩展（横切）：capability 默认关 / 审批分层 / catalog 领域扩展点
+L4 验证与证据：validate → render → sim → gym → artifact truth 链（sha256）
+L3 呈现：viewer 包入驻 registry / Gen UI + three-live 双形态 / 选择回路
+L2 中间表示（Scene IR · 枢纽）：GLB extras → 关节/装配/材质/单位统一契约
+L1 几何生产：sand3d 本地 runner（确定性 digest）→ 带关节 GLB
+L0 意图编排：3d-authoring Skill（plan-first → 几何 → 验证，渐进披露）
+```
+
+**L2 Scene IR 是解耦枢纽**：L1 生产、L3/L4 消费同一 IR；上游换几何来源、下游换渲染引擎都不动其它层。这是"系统性方案"区别于"技巧堆砌"的关键，验收时须证明三个可替换判据（换 producer / 换 renderer / 加领域均不动内核）。
+
+**三条协同回路（1+1>2）**：证据回流（验证结果入 truth 链→回 agent 上下文）、双形态互补（沙箱管轻交互 / three-live 管多端重渲染）、领域放大（catalog 扩展点让领域包零内核改动放大能力）。
+
+**结合枢纽**：sand3d 导出 GLB 的 joints 写入 `extras`，three-live 消费 `extras.xr`/`userData.xr.joint` 驱动 60Hz 物理与 KHR_interactivity——两者在 GLB extras 层天然咬合，这是 P0 探针要实测的核心前提（schema 未公开、导出为当前 pose 非 rest、`follows/ratio` 与 `free/continuous` 超简单关节映射）。
+
+### 6.4b 几何双源与素材自动检索（补充 · 逻辑与范围）
+
+**三源几何来源**（P1 范围须容纳三条来源，归一到同一 Scene IR）：
+
+- **来源 A · 程序化建模**（sand3d）：从零造工程件/CAD，可参数化、确定性；
+- **来源 B · 现成素材库**（Polyfork，受 U-3D-D4 裁决约束）：道具/角色/建筑/动物/载具等 low-poly 现成件，走"搭积木式装配"；
+- **来源 C · 图像重建**（img2threejs，受 U-3D-D5 裁决约束）：单图→程序化 `THREE.Group` factory，质量门禁 + 逐 pass + 动画就绪；输出与 three-live/Polyfork 同构。技术评估与整合步骤见 `IMG2THREEJS-EVALUATION.md`。
+
+**素材自动检索机制**——模型不会凭记忆知道库里有什么，而是"agent 主动调检索工具按需取"，与 Skill 渐进披露同构，三步：
+
+1. **建 catalog 索引**（一次性、离线）：抽元数据（id/名称/分类/面数/IK 标签/关键词 + CDN 链接），只存元数据不存模型本体；
+2. **`asset_search` MCP 工具**：agent 按语义需求调工具（如 `asset_search(query="market stall", category=Props, maxTris=3000)`）取回候选，不把 3392 个素材塞进上下文；
+3. **选用装配**：选定后用 `createAsset()` 返回 `THREE.Group` 或加载 GLB → 放进 Scene IR nodes → three-live 呈现验证。
+
+**三个边界**：① 自动检索前提是接入 Polyfork API/MCP（Free 计划含，但需 U-3D-D4 裁决确认）；② 授权红线决定用 CDN hotlink 还是本地按需下载，禁止打包分发/对外生成服务；③ 首版用关键词+分类检索，语义相似度检索需额外依赖、暂不做。
+
+**"自动"的准确含义**：agent 在任务中自主决定何时检索、检索什么、选哪个，全程工具调用留痕可审计——可见、可追、可纠正，不是隐式后台魔法。这落在 Petri"治理透明 + 证据自证"的魂上。
+
+**来源 C（img2threejs）整合要点**——借形 + 受治理封装，不整包引入：
+
+- 复用：质量门禁体系（strict/visual/material gate + fail-closed routing，→ L4 验证框架）、`ObjectSculptSpec` 字段思想（sockets/runtimeHierarchy/confidence → L2 Scene IR）、pass-gated 分阶段工作流（→ L0 Skill 骨架）、factory 代码形态（→ Scene IR 装配）。
+- 冲突与适配：agent 宿主耦合（改造成 Petri built-in Skill + MCP，不装宿主目录）、Python 3.10+ 工具链（核心 stdlib-only 是加分，可选 CV 默认关）、外部服务 hosted TRELLIS/Context7（本地主权红线，默认关 + P5-a 确认）、doctor 只审计安装（不采信，验收走真机渲染 + 视觉对照）、单图 fidelity 上限（产品文案标"风格化重建"）。
+- 集成步骤：S0 纳 U-3D-D5 裁决 → S1 spec→IR 映射探针 → S2 来源 C runner + guard-ack → S3 门禁框架抽取（strict + visual 两 gate）→ S4 A/B/C 三源归一回归。
+
+**能力定位**：本档提升 dim5 呈现交互 / dim6 表达面（产物从 2D 扩到可交互 3D），放大"证据自证 + 场景锚"两个魂的锚点；**不动 dim1 推理 / dim2 记忆 / dim3 编排通用主线**——是场景锚放大器 + 工具链扩展，不是通用内核升级。
+
 ### 6.5 完成判据
 
 - Scene IR v0 契约测试；
 - 可执行样例与 digest 证据；
 - 失败降级诚实；
-- 不动通用内核。
+- 不动通用内核（三个可替换判据逐条验证）；
+- 若含来源 B：`asset_search` 检索→选用→装配端到端可追，授权红线（禁打包分发/禁对外生成服务）有明确遵守证据；
+- 若含来源 C：参考图→factory→Scene IR 端到端可追，门禁 fail-closed 有效，不采信 doctor、外部服务默认关；
+- 七方面考量在 3D 专项蓝图 §7 有落点（可扩展/安全/性能/运维/成本/体验/合规），本投影不重复展开但引用其契约。
 
 ---
 
@@ -228,7 +283,8 @@
 - 已落档为 `planned / queued`；
 - plan 锚：AUDIT-LOG C-53 条目；
 - 队列锚：pending-work-backlog C-53；
-- 不 active，不启动。
+- 不 active，不启动；
+- **标识澄清**：用户问及的 `UI-DESIGN-QUALITY-P0P1` 并非仓库内精确 ID；对应的是 `capability: ui-design-quality`（挂在 `BLOCK-167-PRODUCT-QUALITY-PROGRAM`（completed）与 `DESIGN-CHARTER`（reference）），属 dim5 产品质感存量资产，C-53 是其后续设计质量线候选。BLOCK-167 阶段名为 W0–W4（非 P0/P1）。
 
 ### 8.2 计划
 
@@ -265,12 +321,15 @@
 ```text
 用户清账（第0档）
         ↓
-3D 依赖/立项裁决 U-3D-D1/D2/D3（第1档）
+3D 依赖/立项裁决 U-3D-D1/D2/D3 + U-3D-D4 素材源授权（第1档）
         ├──────────────→ W11 前置 U-G2/G3/D8 ──→ W11 P0-P2（第2档）
         ↓
-3D P0 探针（第3档）
+3D P0 探针（第3档；GLB extras schema + Scene IR 映射）
         ↓
 3D P1 领域首包（第3档）
+        ├─ 来源 A：sand3d 程序化几何 ──┐
+        ├─ 来源 B：Polyfork 素材检索 ──┼→ Scene IR → 呈现/验证
+        └─ 来源 C：img2threejs 图像重建 ┘
         ↓
 W10 规划对账（第4档）
         ↓
@@ -318,6 +377,11 @@ C-53 UI 设计质量 P0-P1（第5档，可用户裁决提前）
 | 超级蓝图被当第二真相 | 治理冲突 | 冲突时 canonical 胜出，本文件同批修正 |
 | 多包并行导致文件冲突 | 返工 | 单工作包串行；机械例外才放行 |
 | 未来 3D/Gen UI 外部成本 | 成本失控 | 本地执行优先，外部 Key 与调用需 P5-a 确认 |
+| Polyfork 授权红线被触 | 法律风险 / 产品分发受制 | U-3D-D4 裁决先行；禁打包分发 `.mjs`/HD、禁对外生成服务；CDN hotlink 或本地按需下载二选一留痕 |
+| 素材检索退化为"内置素材包" | 违反零内核改动 + 授权 | catalog 只存元数据与链接；`asset_search` 按需取，不塞全库、不随产品分发 |
+| 3D 双源归一失衡（只做素材不做程序化） | 场景锚放大器退化为素材浏览器 | 来源 A/B/C 均纳入 P1 范围，可动装配端到端判据覆盖三者 |
+| img2threejs 外部服务/宿主耦合 | 本地主权与零依赖红线 | U-3D-D5 裁决；抽取脚本+封装为 built-in Skill/MCP，hosted TRELLIS/Context7 默认关 |
+| img2threejs doctor 假完成 | 质量误判 | 不采信安装审计，验收走真机渲染 + 视觉对照 + fail-closed 门禁 |
 
 ---
 
@@ -383,7 +447,25 @@ C-53 UI 设计质量 P0-P1（第5档，可用户裁决提前）
 - 本文件=超级总蓝图投影，状态 `planned / index / non-canonical`；
 - 不启动工作包；
 - 他方 WIP 零触碰；
-- 当前 Jev 单一建议：3D 依赖/立项裁决材料；
+- 当前 Jev 单一建议：3D 依赖/立项裁决材料（含 Polyfork 素材源授权）；
 - 下一步若用户发令，先写第 1 档决策材料，不直接装依赖、不开工程包。
+
+### 16.1 审阅补充记录（2026-11-17）
+
+用户发令「审阅超级总蓝图并逐项核对先前讨论要点、补充未覆盖内容」。本轮核对后按"non-canonical 投影"定位补充以下缺口，**未改权威边界、未启动工作包、未触碰他方 WIP**：
+
+1. §4 第 1 档加 `U-3D-D4` Polyfork 素材源授权裁决（含四条授权红线核对）；Jev 读数 0.85→0.94；
+2. §6 补五层架构 / Scene IR 枢纽 / 三条协同回路 / GLB extras 结合枢纽与障碍；
+3. §6.4b 补几何双源（sand3d 程序化 + Polyfork 素材）+ 素材自动检索三步机制（catalog→asset_search→装配）+ 三边界 + 能力定位（dim5/6 + 两魂锚、不动主线）；
+4. §6.5 完成判据加素材源与三可替换判据；§8.1 加 `ui-design-quality` capability 标识澄清（回应 `UI-DESIGN-QUALITY-P0P1` 查询）；
+5. §10 依赖图加素材源节点；§12 风险登记加三条（授权红线 / 素材包退化 / 双源失衡）。
+
+**16.1.1 img2threejs 技术评估与整合（2026-11-17，后续补充）**：深入分析 github.com/img2threejs/img2threejs（v2.0.1，Apache-2.0，~90 Python 模块），完整评估核心功能/架构/依赖/API/IO/场景/局限，落独立评估文档 `IMG2THREEJS-EVALUATION.md`（non-canonical 投影）。结论：输出 `THREE.Group` factory 与 three-live/Polyfork 同构，是 3D 造物域"来源 C：图像重建"候选；门禁体系（脚本 enforce/模型 judge/fail-closed）契合证据自证魂。按"借形 + 受治理封装、不整包引入"整合：新增 `U-3D-D5` 裁决；几何双源升级为三源（A sand3d / B Polyfork / C img2threejs）；§6.4b 补模块映射/冲突适配/S0-S4 集成步骤；§6.5 完成判据、§10 依赖图、§12 风险（外部服务耦合/doctor 假完成）同步。外部服务与宿主耦合为主要适配面，默认关。
+
+**16.1.3 全局总蓝图锚定（2026-11-17）**：用户裁决「能否详细稳定下来……不仅仅是3D的内容 全局总蓝图」。新增 `docs/petri-master-charter.md`（PETRI-MASTER-CHARTER，canonical 全局导航/稳定性锚，非第二真相）——明示既有 canonical 权威链、穷尽索引全局工作面（registry 现读 607 文档）、全局冻结项与冲突仲裁。本 C-54 投影在全局层面以其为准；3D 域 charter 亦声明从属于它。全局 charter 不替代任何 canonical，冲突时以对应 canonical 为准并同批修正。
+
+**16.1.2 稳定顶层设计确立（2026-11-17）**：用户裁决「必须包含一份总体蓝图……保持稳定，作为长期不变的顶层设计依据……分阶段方案须与总体蓝图保持一致，冲突以总体蓝图为准」。新增 `docs/3d-authoring-domain-charter.md`（canonical 稳定顶层设计，冻结 §1–§4 核心目标/范围/原则/约束 + §5 稳定性契约：冻结项清单 + 六步变更评估 + 用户显式裁决）；新增 `docs/3d-authoring-dependency-ruling-2026-11-17.md`（U-3D-D1~D5 五方裁决材料，含 Polyfork/img2threejs 授权红线，全 pending_user_ruling）；`3d-authoring-domain-blueprint` 加从属声明。本文件 §0 权威矩阵与真源列表同步：3D 域顶层以 charter 为准，C-54 第 1/3 档投影为执行视图非第二真相。
+
+来源事实：three-live / sand3d / Polyfork / img2threejs 调研 + `docs/3d-authoring-domain-charter.md` + `docs/3d-authoring-domain-blueprint-2026-11-17.md` + `docs/3d-authoring-dependency-ruling-2026-11-17.md` + `docs/gen-ui-data-plane-evaluation-2026-11-17.md`。核验：`node --test test/next-stage-super-blueprint.test.mjs`（4 契约）+ `test:changed:list` unknown=[]。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
