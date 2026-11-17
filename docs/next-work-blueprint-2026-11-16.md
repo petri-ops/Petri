@@ -5,7 +5,7 @@ status: active
 kind: living-plan
 truthDomain: next-work-blueprint-2026-11-16
 entrypoint: docs/next-steps-roadmap.md
-lastUpdated: 2026-11-16
+lastUpdated: 2026-11-17
 
 ---
 
@@ -25,7 +25,7 @@ lastUpdated: 2026-11-16
 - **串行 active 工作包**：无（BLOCK-454 P1-P6 与插队包 BLOCK-455 P1-P5 均 completed；BLOCK-455=模型级能力声明 + Endpoint 能力面简化，UI-706 in_progress 待观感）。
 - **未决 🔴/🟢**：无。
 - **已知遗留红**：`docs:check` 1 红 = `post-h9-optimization-blueprint-2026-11-10.md` 换机缺失（Mac 是 untracked 原件，Win 未同步）——处置权在用户，非任何工作包引入。
-- 排队候选（planned 规划大纲，非可执行）：POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收。
+- 排队候选（planned 规划大纲，非可执行）：POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收；2026-11-17 新增 **W11 Gen UI 数据面形态演进**（评估材料已备，见 §2-W11）。
 
 ## 0.5 设计宪法（Agent 能力体验设计原则 · 全波次适用）
 
@@ -54,6 +54,7 @@ lastUpdated: 2026-11-16
 | W8 | **UI-703 收口**（API Endpoint 信息密度，实机观感） | 已提交 UI 包 | ✅ verified 2026-11-17（用户实机过目确认「顺了」；BLOCK-455 后表头已演进为 8 列+行详情，UI-706 承接） | 小 |
 | W9 | **遗留治理清账**：post-h9 红（用户处置）+ 4 条失败后台任务 | 治理批 | 部分需用户裁决 | 小 |
 | W10 | 排队规划大纲（POST-H9 / 竞争力纲 / QODER） | 候选池 | 需用户显式裁决另立子包 | 未定 |
+| W11 | **Gen UI 数据面形态演进**（json-render 评估后候选；评估= [`docs/gen-ui-data-plane-evaluation-2026-11-17.md`](./gen-ui-data-plane-evaluation-2026-11-17.md)） | 候选池 | 🔵 排队（2026-11-17 用户裁决入队；开工需 D8 发令） | 首包 P0 探针 S |
 
 > **串行纪律**：W1-W6 同属 BLOCK-454，严格 P1→P5 顺序，P6 暂缓不阻塞收口；W7/W9 要与 W1-W6 并行须用户显式裁决插队（当前默认 W1 先走）。W8 是观感过目，可在任意波次间隙由用户完成。
 
@@ -113,6 +114,12 @@ lastUpdated: 2026-11-16
 ### W10 · 排队规划大纲
 - POST-H9 优化蓝图 / 竞争力纲 / QODER 吸收——均为 `planned` 规划大纲，需用户显式裁决另立子包才可执行；不在当前波次自动推进。
 
+### W11 · Gen UI 数据面形态演进（排队候选 · 2026-11-17 用户裁决入队）
+- **是什么**：把表达面从「`::visualize` → HTML fragment 沙箱」演进到「catalog 契约 + JSON spec 受控渲染」——非从零立项（BLOCK-166/174/196 链已在，dim6 满锚），是满锚点位上的形态演进。
+- **评估材料（canonical 决策材料）**：[`docs/gen-ui-data-plane-evaluation-2026-11-17.md`](./gen-ui-data-plane-evaluation-2026-11-17.md)——四点结构性差距（审计单元/治理契约/流式/领域扩展）、差别形态四锚、路径 A 借形自实现 mini spec 引擎（零新依赖，推荐）/B 引包/C 维持现状、分阶段路线 P0-P5。
+- **裁决点**：U-G1 立项=已裁决入队（本行）；U-G2 路径与 U-G3 首包范围保持 pending 到开工前（评估推荐：路径 A + 首包 P0-P2）。开工=D8 发令，按立项检查单开包、占串行槽位。
+- **边界（沿评估 §8）**：双形态并存非替代（HTML 沙箱不退役，QODER 窄桥继续依赖它）；不重写 artifact-plane-direction（新切片语义登记）；不动 Result Studio 资格线；路径 A 零新依赖假设。
+
 ## 3. 依赖与决策点清单（需用户裁决）
 
 | # | 决策点 | 关联波次 | 默认 |
@@ -124,6 +131,7 @@ lastUpdated: 2026-11-16
 | D5 | post-h9 原件取回 vs registry 摘除 | W9 | 用户处置，Agent 不擅改 |
 | D6 | W7 全局设置搜索的快捷键绑定（`Cmd-,` 还是 `Ctrl+,` 或自定义） | W7 | 随平台默认，实施时定 |
 | D7 | ASR/TTS 需求场景 | W6 | 暂缓 |
+| D8 | Gen UI 开工发令：立项+路径+首包范围（评估裁决点 U-G2/U-G3） | W11 | 排队待发令（评估推荐=路径 A + 首包 P0-P2） |
 
 ## 4. 完成语义
 
