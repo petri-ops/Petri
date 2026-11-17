@@ -7,8 +7,10 @@
  * 默认模型不进逐模型表——其能力位由控件行编辑，避免同一位两处视图。
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
+import { resolveModelCapabilities } from '@/lib/model-capabilities';
+import { probeReasoningCapability } from '@/lib/modelCapabilityProbeClient';
 import { EndpointCapabilityToggle } from './EndpointCapabilityToggle';
 import { ModelSelectorControls } from './sections/ModelSelectorControls';
 
@@ -44,6 +46,37 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
   const label = profile.label || '自定义渠道';
   const defaultModel = profile.defaultModel || profile.model || '';
   const otherModels = Array.from(new Set(models.filter((model) => model && model !== defaultModel)));
+  const [probing, setProbing] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const runProbe = async (model: string) => {
+    if (!model || probing) return;
+    setProbing(model);
+    setNotice(`正在探测 ${model} 的思考能力（极小请求，可能消耗少量积分）…`);
+    try {
+      const result = await probeReasoningCapability({ profileId: profile.id, model });
+      if (result.verdict === 'supported') {
+        const base = resolveModelCapabilities(profile, model);
+        const next = Array.from(new Set([...base, 'reasoning']));
+        onUpdate(profile.id, { modelCapabilities: { ...(profile.modelCapabilities || {}), [model]: next } });
+        const requestId = result.evidence?.requestId;
+        const responseModel = result.evidence?.responseModel;
+        const aliasNote = responseModel && responseModel !== model ? `；上游响应模型=${responseModel}` : '';
+        setNotice(`探测到思考证据${requestId ? `（request_id=${requestId}）` : ''}${aliasNote}，已启用该模型思考。`);
+      } else if (result.verdict === 'unsupported') {
+        const next = resolveModelCapabilities(profile, model).filter((cap) => cap !== 'reasoning');
+        onUpdate(profile.id, { modelCapabilities: { ...(profile.modelCapabilities || {}), [model]: next } });
+        setNotice('上游明确拒绝思考参数，已将该模型思考能力关闭。');
+      } else {
+        setNotice('未找到明确思考证据，未改动能力位；可在上方手动声明。');
+      }
+    } catch (error) {
+      setNotice(`探测失败：${error instanceof Error ? error.message : String(error)}。能力位未改动。`);
+    } finally {
+      setProbing(null);
+    }
+  };
+
   return (
     <div className="petri-endpoint-card__detail">
       <div className="petri-endpoint-detail__controls">
@@ -66,12 +99,24 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
           ariaLabel={`${label} ${defaultModel} ${CAPABILITY_META[2].aria}`}
           onUpdate={onUpdate}
         />
+        <button
+          type="button"
+          className="petri-btn petri-btn--ghost petri-btn--sm"
+          data-testid="capability-probe-default"
+          aria-label={`${label} 探测 ${defaultModel} 思考能力`}
+          title="点击后发送极小请求探测该模型是否产生思考证据（可能消耗少量积分）"
+          disabled={!defaultModel || probing !== null}
+          onClick={() => void runProbe(defaultModel)}
+        >
+          {probing === defaultModel ? '探测中…' : '探测默认模型思考'}
+        </button>
       </div>
       <div className="petri-endpoint-detail__models" aria-label={`${label} 逐模型能力声明`}>
         <span className="petri-endpoint-detail__models-header">模型</span>
         <span className="petri-endpoint-detail__models-header">视觉</span>
         <span className="petri-endpoint-detail__models-header">思考</span>
         <span className="petri-endpoint-detail__models-header">向量</span>
+        <span className="petri-endpoint-detail__models-header">探测</span>
         <span
           className="petri-endpoint-detail__model-name"
           title="渠道默认能力：未单列声明的模型按此兜底（旧数据语义不变）"
@@ -89,6 +134,7 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
             onUpdate={onUpdate}
           />
         ))}
+        <span aria-hidden="true" />
         {otherModels.map((model) => (
           <React.Fragment key={model}>
             <span className="petri-endpoint-detail__model-name" title={model}>{model}</span>
@@ -104,6 +150,17 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
                 onUpdate={onUpdate}
               />
             ))}
+            <button
+              type="button"
+              className="petri-btn petri-btn--ghost petri-btn--sm"
+              data-testid={`capability-probe-${model}`}
+              aria-label={`${label} 探测 ${model} 思考能力`}
+              title="点击后发送极小请求探测该模型是否产生思考证据（可能消耗少量积分）"
+              disabled={probing !== null}
+              onClick={() => void runProbe(model)}
+            >
+              {probing === model ? '探测中…' : '探测'}
+            </button>
           </React.Fragment>
         ))}
       </div>
@@ -112,6 +169,7 @@ export function EndpointRowDetail({ profile, models, onUpdate }: EndpointRowDeta
           暂无其他已发现模型：测试连通性成功后，这里会列出该渠道的模型供逐个声明能力（发现时按模型名自动预填，可纠正）。
         </p>
       )}
+      {notice && <p className="petri-field__hint" role="status">{notice}</p>}
     </div>
   );
 }

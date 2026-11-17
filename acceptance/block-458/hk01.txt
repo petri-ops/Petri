@@ -1,0 +1,33 @@
+BLOCK-458 — 模型思考能力一键探测 HK-01 证据
+
+用户裁决（2026-11-17）：「行 按照建议来」——为目标模型新增用户确认后的轻量能力探测，避免只靠模型名推断。
+
+红（实现前）：
+  node --test test/model-capability-probe.test.mjs → 模块不存在
+  EndpointRowDetail 2 个探测用例失败（无探测按钮）。
+绿（实现后）：
+  test/model-capability-probe.test.mjs 3/3；EndpointRowDetail 7/7。
+
+实现边界：
+  - 后端 POST /api/ai/agent/probe-model-capability：按 profileId + model 发极小 chat 请求
+    （thinkingLevel=high、max_tokens=256、disableFallback、15s 超时）；
+  - 证据=reasoning_content / usage.completion_tokens_details.reasoning_tokens；
+  - 三态：supported / unsupported / unknown；无证据=unknown，不冒充 false；
+  - 同时返回 requestedModel 与 responseModel，避免上游别名映射造成归因含混；
+  - 不写盘探测日志，只返回 request_id / observed_at 等观测字段；
+  - 前端设置 → 模型接口 → 渠道详情增加「探测默认模型思考」和逐模型「探测」按钮；
+    supported 写 modelCapabilities.reasoning 开；unsupported 写显式关；unknown 不写。
+  按钮点击即构成 P5-a 付费操作确认，提示中明确“可能消耗少量积分”。
+
+真实探测（当前 Key，用户已确认）：
+  POST /api/ai/agent/probe-model-capability
+    profileId=model-1794894455884, requestedModel=glm-4.6
+    verdict=supported, reasoningContent=true, reasoningTokens=31/44,
+    request_id=2026111720371699bf78e79f79403e / 202611172035540c2a9a8ca27d4f37,
+    responseModel=glm-5.3-flash（上游别名映射已如实保留）。
+  实机 UI 腿 npm run verify -- block458-capability-probe → 5/5 allPass
+    状态=探测到思考证据（request_id=...），已启用该模型思考。
+  证据=acceptance/block-458/block458-capability-probe-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+Jev test:suggest 零建议（confidence 0.77 < θ=0.80）如实记录；doc:suggest 建议 uiAudit（deterministic）。
+边界：零新依赖 / 零默认自动探测 / 失败诚实 / 他 agent 4 文档 WIP 未暂存未改写；观感 pending_human_eye 不代签。

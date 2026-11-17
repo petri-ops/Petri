@@ -1,10 +1,13 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EndpointRowDetail } from './EndpointRowDetail';
 import type { ChatModelPreset } from '@/hooks/useAiSettings';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 const profile: ChatModelPreset = {
   id: 'p1',
@@ -69,5 +72,37 @@ describe('EndpointRowDetail（BLOCK-455 D6 行详情：默认模型控件 + 逐�
   it('未发现其他模型时给出诚实提示', () => {
     render(<EndpointRowDetail profile={profile} models={[]} onUpdate={() => {}} />);
     expect(screen.getByRole('note').textContent).toContain('测试连通性');
+  });
+
+  it('探测到思考证据后写 modelCapabilities.reasoning 显式开启', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      ok: true,
+      verdict: 'supported',
+      evidence: { requestId: 'req-1', reasoningTokens: 4, observedAt: '2026-11-17T00:00:00.000Z' },
+    }), { status: 200 })));
+    vi.stubGlobal('fetch', fetchMock);
+    const onUpdate = vi.fn();
+    render(<EndpointRowDetail profile={profile} models={['deepseek-chat', 'model-x']} onUpdate={onUpdate} />);
+
+    fireEvent.click(screen.getByLabelText('DeepSeek 探测 model-x 思考能力'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledTimes(1));
+    expect(fetchMock).toHaveBeenCalled();
+    const patch = onUpdate.mock.calls[0][1] as { modelCapabilities?: Record<string, string[]> };
+    expect(patch.modelCapabilities?.['model-x']).toContain('reasoning');
+    expect(screen.getByRole('status').textContent).toContain('探测到思考证据');
+  });
+
+  it('探测无证据时不写能力位，提示未知', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      ok: true,
+      verdict: 'unknown',
+      evidence: { requestId: 'req-2', reasoningTokens: 0, observedAt: '2026-11-17T00:00:00.000Z' },
+    }), { status: 200 }))));
+    const onUpdate = vi.fn();
+    render(<EndpointRowDetail profile={profile} models={['deepseek-chat', 'model-y']} onUpdate={onUpdate} />);
+
+    fireEvent.click(screen.getByLabelText('DeepSeek 探测 model-y 思考能力'));
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('未找到明确思考证据'));
+    expect(onUpdate).not.toHaveBeenCalled();
   });
 });

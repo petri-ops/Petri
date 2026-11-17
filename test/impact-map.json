@@ -8626,6 +8626,29 @@
         "docs-check",
         "ui-audit"
       ]
+    },
+    {
+      "id": "block458-model-capability-probe",
+      "note": "BLOCK-458 模型思考能力一键探测：后端轻量 chat 请求+三态判定，设置页按钮写入显式能力位；无证据不写 false。证据 acceptance/block-458/**。",
+      "patterns": [
+        "core/petri-server/helpers/model-capability-probe.js",
+        "core/petri-server/routes/ai-agent/capabilities.js",
+        "core/petri-server/routes/ai-agent/index.js",
+        "frontend/src/lib/modelCapabilityProbeClient.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EndpointRowDetail.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EndpointRowDetail.test.tsx",
+        "frontend/src/components/desktop/desktop.css",
+        "test/model-capability-probe.test.mjs",
+        "acceptance/block-458/**"
+      ],
+      "tests": [
+        "test/model-capability-probe.test.mjs",
+        "frontend/src/components/desktop/DesktopSettingsPanel/EndpointRowDetail.test.tsx"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

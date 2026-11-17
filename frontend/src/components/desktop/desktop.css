@@ -602,7 +602,7 @@
 
 .petri-endpoint-detail__models {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 56px 56px 56px;
+  grid-template-columns: minmax(0, 1fr) 56px 56px 56px 64px;
   gap: var(--petri-space-1) var(--petri-space-2);
   align-items: center;
   max-width: 640px;
