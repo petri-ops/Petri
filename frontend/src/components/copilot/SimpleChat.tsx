@@ -1668,6 +1668,7 @@ export function SimpleChat({
               <textarea
                 ref={taRef}
                 className="sc-input"
+                data-testid="composer-input"
                 rows={1}
                 value={input}
                 placeholder={composerPlaceholder(compact)}

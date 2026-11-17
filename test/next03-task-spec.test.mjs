@@ -41,6 +41,13 @@ test('NEXT-03 task-spec — 解析围栏 JSON 并归一 task-spec/v1', () => {
   assert.deepEqual(parsed.value.contextUsed, [], 'contextUsed 只由服务端事实生成');
 });
 
+test('UI-709 — optimizedPrompt 目标是“可直接发送的自然语言提示词”，TaskSpec 仅摘要', () => {
+  const prompt = spec.TASK_SPEC_SYSTEM_PROMPT;
+  assert.match(prompt, /可直接发送给 agent 的自然语言提示词/);
+  assert.match(prompt, /不得改写成 TaskSpec 清单/);
+  assert.match(prompt, /不得把字段名或清单内容塞进 optimizedPrompt/);
+});
+
 test('NEXT-03 task-spec — 非法/缺字段 fail-closed，数组有界', () => {
   assert.equal(spec.parseTaskSpecResponse('not json').ok, false);
   assert.equal(spec.parseTaskSpecResponse('{"taskSpec":{}}').error, 'task_spec_invalid');

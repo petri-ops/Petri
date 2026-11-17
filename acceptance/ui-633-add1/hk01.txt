@@ -1,0 +1,42 @@
+UI-633 加映一 — 提示词优化点击即覆盖 HK-01 证据
+
+用户原话（2026-11-17）：「提示词优化，目前的效果不咋地。我希望点击后，直接覆盖原有的提示词。目前好像不是，而且没生效。」
+
+红（实现前）：
+  npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/PromptEnhanceControls.test.tsx
+  2 failed：点击 sparkles 只打开 PreviewDialog，onApplyText 调用数 0；失败态在弹窗内，不在 composer 就地可见。
+
+绿（实现后）：
+  npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/PromptEnhanceControls.test.tsx
+  2 passed：
+    × 点击调用 /ai/agent/prompt-enhance 并直接以 optimizedPrompt 覆盖原稿，不弹预览对话框
+    × 失败不改原稿且 role=status 可见
+
+后端质量契约：
+  node --test test/next03-task-spec.test.mjs → 5/5
+  新增断言：TASK_SPEC_SYSTEM_PROMPT 明确“可直接发送给 agent 的自然语言提示词”，禁止改写成 TaskSpec 清单，禁止把字段名塞进 optimizedPrompt。
+
+邻域：
+  PromptEnhanceDialog.test.tsx 3/3（保留弹窗组件自身契约，默认路径不再经过它）
+  conversationRunStore.test.ts 50/50
+  test/block95-b1-history-assembly.test.mjs 6/6
+  quality:knip:check PASS（331 键冻结，无新增）
+
+Jev 建议：
+  test:suggest → conversation-copilot 域 conf=0.80；suggestions 中
+    test/conversation-compaction.test.mjs 不存在；test/history-assembly.test.mjs 漂移为
+    test/block95-b1-history-assembly.test.mjs（6/6）；frontend conversationRunStore.test.ts 50/50。
+  doc:suggest → uiAudit（deterministic），回写落在 UI-633 加映一同一段。
+
+实机腿（9223 离屏，2026-11-17）：
+  npm run verify -- ui633-add1 → 3/3 allPass（成功覆盖路径）
+    首跑 3/3 但走“优化失败：signal timed out”诚实分支；据此把后端预算 20s→45s、
+    前端 50s、实机轮询 60s，再跑真实模型成功覆盖 composer 原稿且无预览弹窗。
+  证据=acceptance/ui-633-add1/ui633-add1-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+门禁补充：quality:types（首轮 TS2493 已修后 PASS）/ ui:audit:check PASS /
+  ui-ledger-status-contract 5/5 / theme-token-contract 19/19 / lint 0 error（2440 存量 warning）；
+  test:changed 644 tests / 620 pass / 8 fail（与前轮既有债同量级；工具注册表/W5a/stored evidence 家族，
+  UI-633 加映一文件面无交集）。
+
+边界：零新依赖 / 零自动发送 / 零写面语义变化；观感 pending_human_eye 不代签。

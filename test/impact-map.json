@@ -8534,6 +8534,29 @@
       ],
       "commands": [],
       "classifiesScripts": false
+    },
+    {
+      "id": "ui633-add1-prompt-enhance-direct-apply",
+      "note": "UI-633 加映一（工作标签 UI-709）：提示词优化点击即生成并覆盖 composer 原稿；后端 optimizedPrompt 目标改为可直接发送的自然语言提示词，TaskSpec 仅摘要。证据 acceptance/ui-633-add1/**；零自动发送/零写面语义变化。",
+      "patterns": [
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceControls.tsx",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceControls.test.tsx",
+        "frontend/src/lib/promptEnhanceClient.ts",
+        "core/petri-server/helpers/task-spec.js",
+        "test/next03-task-spec.test.mjs",
+        "acceptance/ui-633-add1/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceControls.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/PromptEnhanceDialog.test.tsx",
+        "frontend/src/components/copilot/conversationRunStore.test.ts",
+        "test/next03-task-spec.test.mjs",
+        "test/block95-b1-history-assembly.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
     }
   ]
 }

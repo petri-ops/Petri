@@ -14,8 +14,19 @@ const MAX_PROMPT_CHARS = 6000;
 const MAX_ITEMS = 12;
 const MAX_ITEM_CHARS = 400;
 const MAX_SUMMARY_ITEMS = 8;
-const TIMEOUT_MS = 20000;
+const TIMEOUT_MS = 45000;
 const TASK_TYPES = new Set(['general', 'coding', 'analysis', 'result', 'workflow', 'modeling']);
+const TASK_SPEC_SYSTEM_PROMPT = [
+  '你是提示词优化器兼结构化任务规格生成器。只输出一个 JSON 对象，不要 markdown 围栏或解释。',
+  'optimizedPrompt 必须是一段可直接发送给 agent 的自然语言提示词：保留用户原话的目标、对象、约束、数字与专有名词；只修正歧义、补齐必要上下文、整理步骤与验收口径；不得改写成 TaskSpec 清单、元说明或空泛套话，不得加入未提供的能力或事实。',
+  '字段：optimizedPrompt（字符串）、taskSpec（对象：',
+  'goal 字符串；taskType 枚举 general/coding/analysis/result/workflow/modeling；',
+  'deliverables/constraints/assumptions/acceptance/missingInfo 均为字符串数组）、',
+  'changeSummary（字符串数组）。taskSpec 只是结构化摘要，不得把字段名或清单内容塞进 optimizedPrompt。',
+  '不得声称环境具备未列出的能力；capabilities 中非 ready 的能力必须进入 assumptions 或 missingInfo。',
+  '每个数组最多 6 项，每项不超过 200 字；输出必须完整可解析。',
+  '不得自动执行、自动发送、自动替换；不得读取未提供的文件或凭据。',
+].join('');
 
 function cleanText(value, max) {
   return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, max) : '';
@@ -163,16 +174,7 @@ async function generateTaskSpecDraft({ prompt, userId, context, capabilitySnapsh
   if (!apiKey) return { ok: false, error: 'no_credential' };
 
   const boundedContext = normalizeContext(context);
-  const system = [
-    '你是结构化任务规格生成器。只输出一个 JSON 对象，不要 markdown 围栏或解释。',
-    '字段：optimizedPrompt（字符串，保留用户原意并补足可执行性）、taskSpec（对象：',
-    'goal 字符串；taskType 枚举 general/coding/analysis/result/workflow/modeling；',
-    'deliverables/constraints/assumptions/acceptance/missingInfo 均为字符串数组）、',
-    'changeSummary（字符串数组）。',
-    '不得声称环境具备未列出的能力；capabilities 中非 ready 的能力必须进入 assumptions 或 missingInfo。',
-    '每个数组最多 6 项，每项不超过 200 字；输出必须完整可解析。',
-    '不得自动执行、自动发送、自动替换；不得读取未提供的文件或凭据。',
-  ].join('');
+  const system = TASK_SPEC_SYSTEM_PROMPT;
   const userPayload = {
     prompt: text.slice(0, MAX_PROMPT_CHARS),
     context: boundedContext,
@@ -219,6 +221,7 @@ async function generateTaskSpecDraft({ prompt, userId, context, capabilitySnapsh
 
 module.exports = {
   MAX_PROMPT_CHARS,
+  TASK_SPEC_SYSTEM_PROMPT,
   parseRawTaskSpec,
   parseTaskSpecResponse,
   buildCapabilitySnapshot,

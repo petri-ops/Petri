@@ -48,7 +48,7 @@ export async function enhancePrompt(input: {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ prompt: input.prompt, context: input.context }),
-    signal: input.signal || AbortSignal.timeout(25_000),
+    signal: input.signal || AbortSignal.timeout(50_000),
   });
   const data = await response.json().catch(() => null) as (PromptEnhanceResult & { ok?: boolean; error?: string }) | null;
   if (!response.ok || !data || data.ok === false) {
