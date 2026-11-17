@@ -95,6 +95,7 @@ function ModelRow({
   onPickModel,
   onOpenConfig,
   onCloseConfig,
+  onScheduleConfigClose,
 }: {
   row: ModelCatalogGroup['rows'][number];
   activeModelId: string;
@@ -103,6 +104,7 @@ function ModelRow({
   onPickModel: (preset: ChatModelPreset) => void;
   onOpenConfig: (id: string, anchor: HTMLElement) => void;
   onCloseConfig: () => void;
+  onScheduleConfigClose: () => void;
 }): React.ReactElement {
   const active = row.preset.id === activeModelId;
   const accessReason = accessDenied(row.preset.model);
@@ -117,7 +119,7 @@ function ModelRow({
       className="sc-model-row"
       data-testid={`model-row-${row.preset.id}`}
       onMouseEnter={(event) => { if (!disabled) onOpenConfig(row.preset.id, event.currentTarget); }}
-      onMouseLeave={onCloseConfig}
+      onMouseLeave={onScheduleConfigClose}
       onFocus={(event) => { if (!disabled) onOpenConfig(row.preset.id, event.currentTarget); }}
     >
       <button
@@ -144,6 +146,7 @@ function renderGroupModelRows(opts: {
   onPickModel: (preset: ChatModelPreset) => void;
   onOpenConfig: (id: string, anchor: HTMLElement) => void;
   onCloseConfig: () => void;
+  onScheduleConfigClose: () => void;
 }): React.ReactElement[] {
   const { group, ...rest } = opts;
   // 与 model 分支同源：全部行都渲染（缺密钥/白名单禁行带理由），不只渲染可选行
@@ -259,6 +262,8 @@ export function ModelMenu({
   const [modelPanelPos, setModelPanelPos] = useState<ReturnType<typeof modelPanelPosition> | null>(null);
   // UI-707 加映一 — 每个就绪模型行的右侧配置小页，一次只开一个。
   const [configTarget, setConfigTarget] = useState<{ id: string; pos: ReturnType<typeof modelPanelPosition> } | null>(null);
+  // UI-707 加映三 — 状态化延迟关闭：鼠标可从模型行移到 portal 小页，不触碰 ref。
+  const [configCloseTimer, setConfigCloseTimer] = useState<number | null>(null);
   const setMenuRef = useCallback((node: HTMLDivElement | null) => {
     menuRef.current = node;
     if (node) {
@@ -294,16 +299,35 @@ export function ModelMenu({
     return note ? `未列入本机允许清单（${note}）` : '未列入本机允许清单';
   };
 
-  const closeConfig = useCallback(() => setConfigTarget(null), []);
+  const cancelConfigClose = useCallback(() => {
+    setConfigCloseTimer((current) => {
+      if (current !== null) window.clearTimeout(current);
+      return null;
+    });
+  }, []);
+  const closeConfig = useCallback(() => {
+    cancelConfigClose();
+    setConfigTarget(null);
+  }, [cancelConfigClose]);
+  const scheduleConfigClose = useCallback(() => {
+    setConfigCloseTimer((current) => {
+      if (current !== null) window.clearTimeout(current);
+      return window.setTimeout(() => {
+        setConfigTarget(null);
+        setConfigCloseTimer(null);
+      }, 180);
+    });
+  }, []);
   const openConfig = useCallback((id: string, anchor: HTMLElement) => {
     if (!onModelConfigChange) return;
+    cancelConfigClose();
     const rect = anchor.getBoundingClientRect();
     const pos = modelPanelPosition(
       { left: rect.left, top: rect.top, right: rect.right },
       { width: window.innerWidth, height: window.innerHeight },
     );
     setConfigTarget({ id, pos });
-  }, [onModelConfigChange]);
+  }, [cancelConfigClose, onModelConfigChange]);
 
   useEffect(() => {
     if (!configTarget) return undefined;
@@ -315,6 +339,10 @@ export function ModelMenu({
       window.removeEventListener('resize', dismiss);
     };
   }, [configTarget]);
+
+  useEffect(() => () => {
+    if (configCloseTimer !== null) window.clearTimeout(configCloseTimer);
+  }, [configCloseTimer]);
 
   const configRow = configTarget
     ? groups.flatMap((group) => group.rows).find((row) => row.preset.id === configTarget.id)
@@ -414,6 +442,7 @@ export function ModelMenu({
               onPickModel,
               onOpenConfig: openConfig,
               onCloseConfig: closeConfig,
+              onScheduleConfigClose: scheduleConfigClose,
             })}
             {quickNotice && <QuickNotice notice={quickNotice} />}
           </>
@@ -445,6 +474,7 @@ export function ModelMenu({
                 onPickModel,
                 onOpenConfig: openConfig,
                 onCloseConfig: closeConfig,
+              onScheduleConfigClose: scheduleConfigClose,
               })}
               {quickNotice && <QuickNotice notice={quickNotice} />}
             </>
@@ -464,6 +494,8 @@ export function ModelMenu({
           data-testid={`model-config-flyout-${configTarget.id}`}
           data-placement={configTarget.pos.placement}
           style={{ left: configTarget.pos.left, top: configTarget.pos.top, width: configTarget.pos.width }}
+          onMouseEnter={cancelConfigClose}
+          onMouseLeave={scheduleConfigClose}
           onKeyDown={(event) => { if (event.key === 'Escape') closeConfig(); }}
         >
           <div className="sc-model-models-head">

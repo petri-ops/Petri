@@ -1,0 +1,20 @@
+UI-707 加映三 — 配置小页悬停桥接 HK-01 证据
+
+用户反馈（2026-11-17）：「上下文和思考标准这里，鼠标放在模型名字上有出现，但是无法选择设置。这不合理。」
+根因：上一轮为规避 React ref lint，把模型行 onMouseLeave 从延迟关闭简化为立即关闭；鼠标从行移到 portal 小页的瞬间小页消失，滑杆点不到。
+
+红（实现前）：
+  npm run verify -- ui707-config-interaction → 3/4
+    C4_flyout_survives_mouse_transfer FAIL：指针移入小页后小页已关闭。
+绿（实现后）：
+  npm run verify -- ui707-config-interaction → 6/6 allPass
+    C1 composer 就绪；C2 GLM 行可见；C3 小页打开；
+    C4 指针移入小页后 400ms 仍在；C5 高思考档可点击；C6 level=high 生效。
+  证据=acceptance/ui-707-interaction/ui707-config-interaction-live-win32.json；跑完立即 kill 9223，未设 PETRI_TEST_ONSCREEN。
+
+实现：state 化关闭定时器（不读 ref）；行 onMouseLeave=延迟 180ms；小页 onMouseEnter=取消关闭、onMouseLeave=延迟关闭；选模型/关闭钮/Escape/滚动/窗口 resize 仍即时关闭。
+门禁：quality:types PASS / quality:lint 0 error / modelConfigAndCollapse 11/11；Jev test:suggest 零建议（confidence 0.65 < θ=0.80）如实记录；doc:suggest 建议 uiAudit（deterministic，台账同段回写）。
+收口门禁：quality:types PASS / quality:lint 0 error / ui:audit:check PASS / ui-ledger 5/5；
+  test:changed 178 tests / 170 pass / 6 fail，均为既有债（schema-first、Provider schema、注册表、
+  W5a 存量、stored evidence、fixture），无本加映新红。
+边界：零新依赖 / 零默认值 / 零写面语义变化；观感 pending_human_eye 不代签。

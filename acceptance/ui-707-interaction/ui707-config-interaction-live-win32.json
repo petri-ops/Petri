@@ -1,0 +1,39 @@
+{
+  "name": "ui707-config-interaction",
+  "platform": "win32",
+  "startedAt": "2026-11-17T12:12:12.401Z",
+  "finishedAt": "2026-11-17T12:12:15.777Z",
+  "assertions": [
+    {
+      "name": "C1_composer_ready",
+      "pass": true,
+      "detail": "model-chip-model"
+    },
+    {
+      "name": "C2_model_rows_visible",
+      "pass": true,
+      "detail": "{\"x\":627.4815063476562,\"y\":286.6676940917969,\"width\":298.1350402832031,\"height\":49.55302429199219}"
+    },
+    {
+      "name": "C3_flyout_opened",
+      "pass": true,
+      "detail": "{\"x\":933.615966796875,\"y\":286.6676940917969,\"width\":319.9907531738281,\"height\":188.193603515625}"
+    },
+    {
+      "name": "C4_flyout_survives_mouse_transfer",
+      "pass": true,
+      "detail": "flyout still open after moving pointer into panel"
+    },
+    {
+      "name": "C5_thinking_tick_clickable",
+      "pass": true,
+      "detail": "high thinking tick clicked"
+    },
+    {
+      "name": "C6_setting_applied",
+      "pass": true,
+      "detail": "{\"open\":true,\"level\":\"high\"}"
+    }
+  ],
+  "allPass": true
+}
