@@ -25,6 +25,28 @@ function setupAutoUpdateIpc({ mainWindow, desktopShell } = {}) {
   const isDevMode = !app.isPackaged;
 
   if (process.platform !== "darwin" || isDevMode || !app.isPackaged) {
+    // UI-705 — demo 档（PETRI_UPDATE_DEMO=1，仅此未打包 dev 分支内）：测试实例
+    // 演示更新 pill 全流转（出现→下载进度→安装就绪）。packaged 链路零触碰——
+    // 演示档在 disabled stub 分支内、真实 createMacOssUpdater 不受影响。
+    if (process.env.PETRI_UPDATE_DEMO === "1") {
+      let demoDownloaded = false;
+      ipcMain.handle(CHANNELS.updater.check, async () => {
+        const info = { version: "9.9.9-demo" };
+        if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.updateAvailable, info);
+        return { ok: true, hasUpdate: true, info };
+      });
+      ipcMain.handle(CHANNELS.updater.download, async () => {
+        for (const ratio of [0.2, 0.5, 0.8, 1]) {
+          if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.downloadProgress, { ratio, percent: ratio * 100 });
+          await new Promise((r) => setTimeout(r, 400));
+        }
+        demoDownloaded = true;
+        if (mainWindow) mainWindow.webContents.send(CHANNELS.updater.updateDownloaded);
+        return { ok: true };
+      });
+      ipcMain.handle(CHANNELS.updater.install, async () => ({ ok: demoDownloaded, error: demoDownloaded ? undefined : "nothing downloaded" }));
+      return;
+    }
     ipcMain.handle(CHANNELS.updater.check, async () => ({
       ok: false,
       error: "auto-update is available in packaged macOS builds only",

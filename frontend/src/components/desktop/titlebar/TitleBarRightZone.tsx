@@ -7,6 +7,8 @@ import { useWorkspacePanelsContext } from '../WorkspacePanelsContext';
 import styles from '../TitleBar.module.css';
 import { getIsMac, getIsProjection, parseWorkspaceRoute, WindowControls } from './shared';
 import { NotificationCenterBell } from './NotificationCenterBell';
+// UI-705 — 标题栏更新 pill（对标 Qoder「⬇ 更新」形态；推送制，有新版本才出现）
+import { UpdatePill } from './UpdatePill';
 
 /**
  * BLOCK-62 P1a — TitleBar 右区片段（右栏标签 pills +「+」工具菜单 + 底部终端 /
@@ -268,6 +270,8 @@ export function TitleBarRightZone(): React.ReactElement {
       )}
 
       <div className={styles.windowTools}>
+        {/* UI-705 — 更新 pill：检测到新版本（主进程推送）才出现，点击就地面板 */}
+        <UpdatePill />
         <NotificationCenterBell />
         {/* UI-361 — 指挥中心入口迁入壳层左栏底部（LeftSidebarFooter）：
             它是全局单例窗（跨项目/会话的全部作业俯瞰），不属于列级 chrome，

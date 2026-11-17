@@ -373,8 +373,10 @@ describe('theme token contract', () => {
       'components/desktop/desktop.css': 17,
       // UI-704 — models「能力渠道」折叠开关元信息：+1（次级元信息合法 sm 域）
       'components/desktop/DesktopSettingsPanel/sections/SettingsQuickwins.module.css': 1,
-      // UI-704 — 页面内 UpdateCard：说明行 + 错误行两处次级元信息（合法 sm 域，对标 status.module.css 先例）
-      'components/desktop/UpdateCard.module.css': 2,
+      // UI-705 — 标题栏 UpdatePill：pill 文本/面板说明/错误行三处次级元信息
+      // （合法 sm 域，对标 status.module.css 先例；UI-704 UpdateCard 形态迭代退役，
+      // 其旧键 2 随文件删除出籍=更严）。
+      'components/desktop/titlebar/UpdatePill.module.css': 3,
       'components/result-studio/ScientificInteractionViewer.module.css': 15,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,
       'pages/extensions/styles.module.css': 12,
@@ -418,7 +420,8 @@ describe('theme token contract', () => {
     // 链接/状态点/badge=合法五类语义。预算的机械守护随 W2 控件收敛加 grep 守卫
     // （装饰性新增即红）；W2 后继续收缩并下调快照。
     const RATCHET: Record<string, number> = {
-      'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）
+      // UI-705 — 标题栏 UpdatePill pill 主按钮底+hover 深化+就绪态 fallback 三处（发现新版本=需要行动的主按钮语义，五类合法；同 .primary 先例）：
+      'components/desktop/titlebar/UpdatePill.module.css': 3,'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）
       // UI-612 选择态：+2 = 选中批注 accent 外环（box）+ SVG 光晕（箭头/画笔）——「选中态」合法语义
       'components/annotations/AnnotationOverlay.module.css': 2,
       // BLOCK-178 存量清偿定性：W3/W5 两件的交互态焦点环/拖拽把手态（宪章五类合法；

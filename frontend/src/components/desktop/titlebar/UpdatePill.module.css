@@ -1,0 +1,93 @@
+/* UpdatePill.module.css — UI-705 标题栏更新 pill（对标 Qoder「⬇ 更新」形态）。
+   token 全走 --petri-*（theme-token-contract）；蓝底=主按钮语义（--petri-accent，
+   同 button.module.css .primary 先例，accent 棘轮按此登记）。 */
+
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* pill：主按钮语义（发现新版本=需要行动的入口），accent 底白字。 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  padding: 3px 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--petri-accent);
+  color: #ffffff;
+  font-size: var(--petri-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pill:hover {
+  background: color-mix(in srgb, var(--petri-accent) 85%, #000);
+}
+
+/* 下载完成 → 安装就绪态：转成功语义（保持醒目但不与新下载混淆）。 */
+.pillReady {
+  background: var(--petri-status-success, var(--petri-accent));
+}
+
+/* 就地下拉面板：浮层（elevated），右对齐防溢出标题栏。 */
+.panel {
+  position: absolute;
+  top: calc(100% + var(--petri-space-2));
+  right: 0;
+  z-index: var(--petri-z-dropdown);
+  width: 260px;
+  padding: var(--petri-space-3);
+  background: var(--petri-bg-elevated);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  box-shadow: var(--petri-shadow-menu);
+  color: var(--petri-text);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--petri-space-2);
+}
+
+.panelHead strong {
+  font-size: var(--petri-font-size-body);
+}
+
+.note {
+  margin: var(--petri-space-2) 0;
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
+  line-height: 1.5;
+}
+
+.error {
+  margin: 0 0 var(--petri-space-2);
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+}
+
+.close {
+  display: inline-flex;
+  padding: var(--petri-space-1);
+  border: none;
+  border-radius: var(--petri-radius-sm, 6px);
+  background: transparent;
+  color: var(--petri-text-tertiary);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--petri-hover);
+  color: var(--petri-text);
+}

@@ -24,7 +24,6 @@ import { CopilotContextProvider } from '@/lib/copilotContextProvider';
 import { getBridge } from '@/lib/desktopBridge';
 import { CommandPalette, useCommandPalette } from '@/components/copilot/CommandPalette';
 // UI-704 — 页面内更新卡片（检测到新版本主动呈现，不再让用户进设置找）
-import { UpdateCard } from '@/components/desktop/UpdateCard';
 // BLOCK-200 P1 — 键位注册表运行时面（Provider + App 级派发器）
 import { KeymapProvider, useAppKeymapDispatcher } from '@/lib/appKeymapContext';
 import { useAppCommands } from '@/components/copilot/useAppCommands';
@@ -243,8 +242,6 @@ function AppShell(): React.ReactElement {
         </main>
         </div>
         <TestInstanceBadge />
-        {/* UI-704 — 页面内更新卡片：主进程轮询发现新版本即在此呈现（可关闭） */}
-        <UpdateCard />
         <CommandPalette
           open={isOpen}
           onClose={close}
