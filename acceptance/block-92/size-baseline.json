@@ -282,6 +282,14 @@
       "sha256": "1eca3b47669afacc89acd4a46b572682f522f81fbc42a410c8f7cf25ef22b5e9"
     },
     {
+      "path": "core/packages/shared-config/config-schema.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1153,
+      "bytes": 60605,
+      "sha256": "ff112dd6b374f990b2b48009f632a9d35a6d5be66aab0a95c4945dbf8757adfc"
+    },
+    {
       "path": "core/petri-server/agent-runner.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -296,14 +304,6 @@
       "lines": 1136,
       "bytes": 32067,
       "sha256": "ab8dafe1cdfa0a55130dd4da86abf5b551ab4dd133059e6ff11c7523db0f74c2"
-    },
-    {
-      "path": "core/packages/shared-config/config-schema.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1117,
-      "bytes": 58917,
-      "sha256": "5b4b7070d3f452c5da6a09e8a3b8d80fa4faa1ad4c92b71c7024627328260b61"
     },
     {
       "path": "core/shared-backend/result-changeset-service/baseline-cohort.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86079
+  "total": 86115
 }

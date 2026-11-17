@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-16T17:55:27.534Z",
+  "generatedAt": "2026-11-17T00:08:03.179Z",
   "summary": {
     "baseline": "HEAD",
-    "tools": 115,
+    "tools": 117,
     "toolDomains": 16,
-    "contracts": 115,
-    "metadata": 116,
+    "contracts": 117,
+    "metadata": 118,
     "ipcChannels": 170,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 167,
-    "routes": 287,
+    "routes": 289,
     "routeModules": 47,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
@@ -368,6 +368,48 @@
         "workspace-write": "allow",
         "full": "allow",
         "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 3
+    },
+    {
+      "name": "transcribe_audio",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R1",
+      "sideEffect": "external-request",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "transcribe_audio",
+        "read": "allow",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "allow"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 1
+    },
+    {
+      "name": "speak_text",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "speak_text",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
       },
       "undeclaredArgs": [],
       "schemaProps": 3
@@ -5478,6 +5520,18 @@
       "module": "runtime-config",
       "method": "PUT",
       "route": "/api/ocr-access",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "GET",
+      "route": "/api/speech-access",
+      "mounted": true
+    },
+    {
+      "module": "runtime-config",
+      "method": "PUT",
+      "route": "/api/speech-access",
       "mounted": true
     },
     {
