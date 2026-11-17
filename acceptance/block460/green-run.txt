@@ -1,0 +1,23 @@
+✔ BLOCK-460: rest GLB 归一为合法 SceneSpec(+joints)，产出 mesh-reference 节点与 provenance (3.349ms)
+✔ BLOCK-460: posed 导出（value≠0）fail-closed 拒绝——首版只消费 rest (0.44575ms)
+✔ BLOCK-460: continuous/floating 归一——free 的导出层命名映射、无 range (0.640958ms)
+✔ BLOCK-460: 损坏 GLB（非 glTF 魔数）fail-closed 拒绝 (0.336667ms)
+✔ BLOCK-460: 越界路径拒绝（归一器不读工作区外文件） (0.154292ms)
+✔ BLOCK-460: validateJoints 导出且 additive——无 joints 的既有文档不受影响 (1.113792ms)
+✔ BLOCK-460: 合法 revolute+prismatic 关节组合通过 (0.217667ms)
+✔ BLOCK-460: kind 越界拒绝（只收导出层四值） (0.14375ms)
+✔ BLOCK-460: 悬空 child/parent 引用拒绝 (0.087ms)
+✔ BLOCK-460: 重复关节 id 拒绝 (0.076875ms)
+✔ BLOCK-460: revolute/prismatic 必须带 range；range 必须包含 0 (0.098083ms)
+✔ BLOCK-460: continuous/floating 无 range 合法；floating 无 axis 合法 (0.0775ms)
+✔ BLOCK-460: follows 指向必须存在且禁止自环 (0.098041ms)
+✔ BLOCK-460: axis 必须是三维有限向量 (0.075667ms)
+✔ BLOCK-460: joints 非数组拒绝；joints 为空数组合法（additive 语义） (0.1005ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 86.5605

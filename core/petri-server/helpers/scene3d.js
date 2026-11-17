@@ -488,6 +488,81 @@ function validateMetadataTolerances(metadata, ids, errors) {
   });
 }
 
+// BLOCK-460 — 运动关节白名单（charter §3.2：SceneSpec v1 是唯一场景真相，joints 是它的
+// additive 段而非第二套 IR）。kind 值域取 BLOCK-459 探针实测的**导出层**四值
+//（acceptance/block-459/PROBE-REPORT.md §2）：程序层叫 free，导出层写 floating，IR 取导出层。
+// 角度=度、长度=mm（场景单位制，与 constraints/transform 同制）；换算在归一器（scene3d-import）。
+const JOINT_KINDS = new Set(['revolute', 'prismatic', 'continuous', 'floating']);
+const JOINT_FIELD_WHITELIST = ['id', 'child', 'parent', 'kind', 'axis', 'range', 'follows', 'ratio', 'label'];
+const JOINT_RANGE_KINDS = new Set(['revolute', 'prismatic']);
+
+/**
+ * BLOCK-460 — 运动关节段校验（additive：constraints/lights 同款，无 joints 时零行为变化）。
+ * fail-closed：引用必须在场、follows 禁自环/悬空、range 仅 revolute/prismatic 且必须含 0。
+ */
+function validateJoints(joints, nodesById, errors) {
+  if (!Array.isArray(joints)) {
+    errors.push('joints 必须是数组');
+    return;
+  }
+  if (joints.length > LIMITS.maxNodes) errors.push('关节数量超限');
+  // 第一遍先收集 id：follows 允许前向引用（mimic 可指向后声明的关节）
+  const jointIds = new Set();
+  for (const joint of joints) {
+    if (isPlainObject(joint) && isSafeId(joint.id) && !jointIds.has(joint.id)) jointIds.add(joint.id);
+  }
+  const seenJointIds = new Set();
+  joints.forEach((joint, index) => {
+    const where = `joints[${index}]`;
+    if (!isPlainObject(joint)) {
+      errors.push(`${where} 必须是对象`);
+      return;
+    }
+    for (const key of Object.keys(joint)) {
+      if (!JOINT_FIELD_WHITELIST.includes(key)) errors.push(`${where}.${key} 不在关节白名单`);
+    }
+    if (!isSafeId(joint.id)) errors.push(`${where}.id 非法`);
+    else if (seenJointIds.has(joint.id)) errors.push(`${where}.id 重复 ${joint.id}`);
+    else seenJointIds.add(joint.id);
+    if (typeof joint.child !== 'string' || !nodesById.has(joint.child)) errors.push(`${where}.child 不存在 ${joint.child ?? ''}`);
+    if (typeof joint.parent !== 'string' || !nodesById.has(joint.parent)) errors.push(`${where}.parent 不存在 ${joint.parent ?? ''}`);
+    if (!JOINT_KINDS.has(joint.kind)) errors.push(`${where}.kind 必须是 revolute|prismatic|continuous|floating`);
+    if (joint.kind === 'floating') {
+      if (joint.axis !== undefined) errors.push(`${where}.axis 在 floating 上不允许`);
+      if (joint.range !== undefined) errors.push(`${where}.range 在 floating 上不允许`);
+    } else if (joint.kind === 'continuous') {
+      if (joint.range !== undefined) errors.push(`${where}.range 在 continuous 上不允许`);
+      if (joint.axis !== undefined && !validateVector(joint.axis)) errors.push(`${where}.axis 必须是三维有限向量`);
+    } else if (JOINT_KINDS.has(joint.kind)) {
+      if (!validateVector(joint.axis)) errors.push(`${where}.axis 必须是三维有限向量`);
+      if (isPlainObject(joint.range)) {
+        const { min, max } = joint.range;
+        if (!finiteNumber(min) || !finiteNumber(max)) errors.push(`${where}.range.min/max 必须是有限数值`);
+        else {
+          if (min > max) errors.push(`${where}.range.min 不能大于 max`);
+          if (min > 0 || max < 0) errors.push(`${where}.range 必须包含 0（rest 位姿）`);
+        }
+      } else if (joint.follows === undefined) {
+        // follows 关节的 range 可省（传动域跟随被跟随关节；探针实测导出层会带派生 range，在场则照校验）
+        errors.push(`${where}.range 缺失（${joint.kind} 必须声明可动域）`);
+      }
+    }
+    if (joint.follows !== undefined) {
+      if (typeof joint.follows !== 'string' || !jointIds.has(joint.follows) || joint.follows === joint.id) {
+        // 自环（follows 自己）或悬空（指向未声明关节）都拒绝
+        errors.push(`${where}.follows 必须指向在场关节且不能自环`);
+      } else if (joint.ratio === undefined || !finiteNumber(joint.ratio)) {
+        errors.push(`${where}.ratio 缺失（follows 关节必须声明传动比）`);
+      }
+    } else if (joint.ratio !== undefined) {
+      errors.push(`${where}.ratio 只允许与 follows 同现`);
+    }
+    if (joint.label !== undefined && (typeof joint.label !== 'string' || joint.label.length > 120)) {
+      errors.push(`${where}.label 非法`);
+    }
+  });
+}
+
 function validateSceneSpec(input) {
   const errors = [];
   if (!isPlainObject(input)) return { ok: false, error: 'scene_invalid', errors: ['SceneSpec 必须是对象'] };
@@ -508,6 +583,7 @@ function validateSceneSpec(input) {
   const nodesById = new Map();
   if (Array.isArray(input.nodes)) input.nodes.forEach((node) => { if (isPlainObject(node) && isSafeId(node.id) && !nodesById.has(node.id)) nodesById.set(node.id, node); });
   if (input.constraints !== undefined) validateConstraints(input.constraints, nodesById, errors);
+  if (input.joints !== undefined) validateJoints(input.joints, nodesById, errors);
   validateMetadataTolerances(input.metadata, ids, errors);
   if (Array.isArray(input.nodes)) validateModifierReferences(input.nodes, errors);
   if (input.camera !== undefined) validateCamera(input.camera, errors);
@@ -535,6 +611,7 @@ function validateSceneSpec(input) {
       nodes: input.nodes.length,
       parameters: Object.keys(parameters).length,
       constraints: Array.isArray(input.constraints) ? input.constraints.length : 0,
+      joints: Array.isArray(input.joints) ? input.joints.length : 0,
       primitiveEstimate:
         input.nodes.filter((node) => ['box', 'cylinder', 'sphere', 'plane'].includes(node.type)).length,
     },
@@ -1078,7 +1155,9 @@ function buildExportManifest(input = {}) {
 module.exports = {
   SCENE_VERSION,
   LIMITS,
+  JOINT_KINDS,
   stableStringify,
+  validateJoints,
   validateSceneSpec,
   resolveSceneSpec,
   hashSceneSpec,
