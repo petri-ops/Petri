@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 625,
+    "documentCount": 626,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 608
+    "managedMarkdown": 609
   },
   "documents": [
     {
@@ -12311,7 +12311,13 @@
         "acceptance/block469-img2threejs-shim/"
       ],
       "sharedBaselines": [],
-      "tags": ["img2threejs", "borrow-shape", "quality-gate", "source-c", "G0"],
+      "tags": [
+        "img2threejs",
+        "borrow-shape",
+        "quality-gate",
+        "source-c",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户预授权 R4=img2threejs 借形封装首片；五步串行 S5 最后一步，B-5 延续）。范围=只读核实 IMG2THREEJS-EVALUATION.md（不联网/不装包/不进宿主目录）+ 抽质量门禁范式（script-enforce/fail-closed/pass-gated/per-region confidence）成 sidecars/img2threejs-shim/spec-gate.mjs 纯 JS 受治理骨架 + HK-01 契约测试。外部服务默认关（hosted TRELLIS/Context7 等默认 deny、无 transport）；零整包安装证明；零产品依赖；不碰 agent 内核/SceneSpec/capability 开合/观感。非范围=整包安装/Python 脚本复制/doctor/宿主目录写入/来源 C 真重建/G1+。plan=docs/block469-img2threejs-shim-plan.md。【收口 2026-11-18】只读核实 IMG2THREEJS-EVALUATION.md（零联网/零安装/零宿主目录）+ 抽门禁范式（fail-closed 不写 factory / pass-gated 逐阶 / per-region confidence / 外部服务默认关）成 sidecars/img2threejs-shim/spec-gate.mjs 纯 JS 受治理骨架；HK-01 红 1→绿 7/7 + 零整包安装证明 + 零依赖面断言；knip 346 键冻结无新增 + lint ledger 2441 PASS；零产品代码/UI/观感，外部服务默认 deny 无 transport。证据=acceptance/block469-img2threejs-shim/。"
     },
@@ -12333,7 +12339,13 @@
         "acceptance/block468-infra-debt/"
       ],
       "sharedBaselines": [],
-      "tags": ["infra-debt", "lint-ledger", "q-matrix", "knip", "G0"],
+      "tags": [
+        "infra-debt",
+        "lint-ledger",
+        "q-matrix",
+        "knip",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户预授权 R5=基础设施清偿批；五步串行 S4，治理批无产品代码）。范围=① 修 lint-ledger --update 死代码路径（抽 planWarnBaselineUpdate 纯函数：基线在场可下调、任一域上涨拒绝、缺席首打；棘轮语义不放宽）+ 工具负测红绿（BLOCK-426 判据侧证据先例）；② Q-MATRIX §5 统计行（qoder-essence-absorption-plan.md:318）收拢到 BLOCK-263 changelog 口径 74/21/0/7=102（来源 §12 :769）；③ knip 346 键逐类定性旁挂报告落 acceptance（不放宽守卫）。非范围=产品代码/UI/观感/任何基线放宽/C-53 P2-P7/G1+。plan=docs/block468-infra-debt-settlement-plan.md。【收口 2026-11-18】① lint-ledger --update 死代码修复（planWarnBaselineUpdate 纯函数：缺席 create / 上涨 reject / 下降下调，棘轮不放宽）+ 工具负测红 4→绿 4/4，既有 lint 负测 34/34、quality:lint:ledger PASS（2441 基线不动）；② Q-MATRIX §5 统计行（qoder-essence-absorption-plan.md:318）收拢到 BLOCK-263 口径 ✅74/🟡21/🔴0/⛔7=102（与 §12 :769 两处一致）；③ knip 346 键逐类定性报告 acceptance/block468-infra-debt/knip-qualification-report.md（exports71/files146/types129，守卫不放宽）；单源 JSON 重生成 406 规则/621 文档（L0-8 15/15）。零产品代码/UI/观感/基线放宽。证据=acceptance/block468-infra-debt/。"
     },
@@ -12354,7 +12366,13 @@
         "acceptance/block467-3d-p4/"
       ],
       "sharedBaselines": [],
-      "tags": ["3d-p4", "agent-gym", "three-live", "reconciliation", "G0"],
+      "tags": [
+        "3d-p4",
+        "agent-gym",
+        "three-live",
+        "reconciliation",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户预授权 R3=3D Agent Gym 编排首片；五步串行 S3）。范围=3D 蓝图 §9 里程碑对账（M0=459/M1=460/M2=462 部分/M3=463/M4=本次；461 属 W11 非 3D，明确排除）+ three-live-runner 新增 gym.mjs 编排（reset→step×N→close 语义，CLI reset/step+session finalize，MCP gym_close CLI-only 缺口如实登记；消费 BLOCK-459 探针 GLB；JSON 证据 sha256 在册）。HK-01 红绿+digest 双跑一致+失败诚实；只做编排与证据、不引训练框架（R3 边界）；零新增产品依赖（three-live 隔离 sidecar）。非范围=训练框架/R L/策略网络/agent 内核/three-live 包/capability 开合/G1+。plan=docs/block467-3d-p4-reconciliation-gym-plan.md。【收口 2026-11-18】§9 里程碑对账表落 acceptance/block467-3d-p4/MILESTONES-RECONCILIATION.md（M0=459/M1=460/M3=463 闭环、M2=462 部分闭环、M4=本次；461 属 W11 非 3D 排除）；gym.mjs 编排 reset→step×N→finalize（CLI gym_close 缺席、MCP-only 如实登记），真跑 BLOCK-459 探针 GLB verdict=pass、digest=4015235a…、证据 sha256=b7e4fbbb… 在册；HK-01 红 6→绿 6/6 + digest 双跑一致 + 失败诚实；零新增依赖/零训练框架/零观感面；knip files::gym.mjs 动态入口定性。证据=acceptance/block467-3d-p4/。"
     },
@@ -12376,7 +12394,13 @@
         "acceptance/block466-w11-p3-streaming/"
       ],
       "sharedBaselines": [],
-      "tags": ["w11-p3", "gen-ui", "streaming", "compose", "G0"],
+      "tags": [
+        "w11-p3",
+        "gen-ui",
+        "streaming",
+        "compose",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户预授权 R2=W11 P3 流式首切片；五步串行 S2）。范围=::compose 流式投影：partial spec 出稳定占位（不泄漏原始 JSON/不闪烁），完整合法后升级受控渲染；复用 agentTaskStream 事件契约（seq/afterSeq/reconnect 完整不改）与 projectGenUiReferences pending 语义。HK-01 红绿+断线续传兼容断言（投影为 content 纯函数）+ BLOCK-154 行 memo 边界守约；零新增依赖；观感 pending_human_eye 不代签（UI-709 保持 in_progress）。非范围=SSE 契约改动/半截 spec 局部卡渲染/::visualize 沙箱/后端产出/G1+。plan=docs/block466-w11-p3-streaming-first-slice-plan.md。【收口 2026-11-18】::compose 流式投影（referencesStreaming + isComposeJsonPrefix 嵌套 JSON 半截前缀识别，visualize 口径零改）+ GenUiMessageContent.streaming + 消息行流式接线；复用 agentTaskStream 事件契约零改动。HK-01 红 1→绿 8/8 + 组件 4/4 + 邻域 115/115 + BLOCK-154 memo 3/3 + 断线续传兼容断言；零新增依赖/观感 pending_human_eye 不代签（UI-709 in_progress）。实机腿 external-blocked（无确定性 ::compose 流发生器 + backend 未运行），按 R2 如实判档。证据=acceptance/block466-w11-p3-streaming/。"
     },
@@ -12398,7 +12422,13 @@
         "acceptance/block465-c53-p0p1/"
       ],
       "sharedBaselines": [],
-      "tags": ["c-53", "ui-design-quality", "design-baseline", "context-pack", "G0"],
+      "tags": [
+        "c-53",
+        "ui-design-quality",
+        "design-baseline",
+        "context-pack",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户预授权 2026-11-18「梳理剩余工作+不用人参与的提示词」R1=C-53 仅 P0+P1；五步串行 S1）。C-53 母规划=AUDIT-LOG 条目/候选池；本包为独立可收口验收边界（快照+包+测试）立 BLOCK-465。范围=P0 设计基线冻结（collectDesignBaseline 纯函数机械复算 design-charter/theme token 契约/UI 债 38/组件规则/registry+AUDIT-LOG 状态面，快照可复算）+ P1 设计上下文包硬化（同真源派生 resources/design-context/ 模型可读输入，沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿先行+篡改负测；零新增产品依赖/零 UI 写面/零观感代签。非范围=C-53 P2-P7（停下等下批授权）/新产品 Skill（C-52 design-brief 已在）/档位预算变更/G1+。plan=docs/block465-c53-design-baseline-context-pack-plan.md。【收口 2026-11-18】P0=collector 9 冻结读数快照可复算（--check exit 0，readings 9 + captureContext 2）；P1=resources/design-context/ 模型可读输入（design-context.json+manifest.json，sha256 一致）被消费测试 8/8 锚定（含篡改负测）；HK-01 红 1→绿 8/8；theme-token 19/19 + docs/ui-audit 绿；零新增依赖/零 UI 写面/零观感代签。证据=acceptance/block465-c53-p0p1/。C-53 P2-P7 按 R1 停下等下批授权。"
     },
@@ -12697,6 +12727,35 @@
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
     },
     {
+      "id": "BLOCK-472",
+      "path": "docs/block472-c53-p3-visual-consistency-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block472-c53-p3-visual-consistency",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block472-c53-p3-visual-consistency-plan.md",
+        "scripts/c53-visual-consistency.mjs",
+        "resources/design-context/visual-consistency.json",
+        "test/c53-visual-consistency.test.mjs",
+        "acceptance/block472-c53-p3-visual-consistency/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c53",
+        "visual-consistency",
+        "design-token",
+        "slate-ratchet",
+        "design-context",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「开始 C-53 P3」；批2提示词 S2/R10）。范围=沿 P1/P2 先例新增独立静态扫描器 scripts/c53-visual-consistency.mjs（纯函数 collectVisualConsistency 从 custom.css 暗色块/全源机械复算四组读数）+ 模型可读 visual-consistency.json（生成器自身维护 manifest sha）+ 消费测试锚定（海军蓝阶梯单调性/广谱 slate ratchet/颜色预算现读对账/禁零定义/篡改负测）。零 CSS/组件写面/观感代签/新依赖。非范围=改 theme-token-contract.test.ts（19 断言数被 P0 快照锚定）/design-charter 冻结项/C-53 P4-P7/用户资产/G1+。plan=docs/block472-c53-p3-visual-consistency-plan.md。【收口 2026-11-18】HK-01 红→绿 9/9（模块缺席→9/9）；--check PASS（readingIds=4/accentTotal=356/slateRatchetFiles=5）；visual-consistency.json 四组读数（海军蓝暗色阶梯四档明度严格递增且对齐规范/广谱 slate 11 家族存量冻结 5 文件 overRatchet=0/颜色预算现读 356 终态≤130 未达如实标 false/token 完整性零残留）；P1 8/8+P2 7/7+theme-token 19/19 零回归；docs:check(626)/ui:audit/hygiene 绿；单源重生成 626 文档。零 UI 写面/观感代签/新依赖。closeout perf SKIPPED（G0 噪声）；test-affected block464/470 gap + g0-rs-p6 源绑定=既有红（impact-map 未提交进入 diff 才拉入，按 P2 先例先 commit 再 closeout）。证据=acceptance/block472-c53-p3-visual-consistency/。C-53 P4-P7 待后续发令。"
+    },
+    {
       "id": "BLOCK-471",
       "path": "docs/block471-c53-p2-ia-highfreq-plan.md",
       "kind": "work-package",
@@ -12714,7 +12773,13 @@
         "acceptance/block471-c53-p2-ia/"
       ],
       "sharedBaselines": [],
-      "tags": ["c53", "ia", "high-frequency-path", "design-context", "G0"],
+      "tags": [
+        "c53",
+        "ia",
+        "high-frequency-path",
+        "design-context",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户复制可复制启动提示词发令「开始 C-53 P2」；批2提示词 S1/R9）。范围=从 App.tsx/pages 机械盘点 IA（主窗+窗口面路由+重定向）+ 3-5 条高频路径（现读拓扑推导不臆造），产 resources/design-context/ia-map.json（沿 P1 design-context 先例）+ 消费测试锚定（路由一致/无死链/高频可达/篡改负测）；manifest 追加 sha256。零 UI 运行时写面/观感代签/新依赖。非范围=C-53 P3-P7/design-charter 冻结项/产品 Skill/用户资产/G1+。plan=docs/block471-c53-p2-ia-highfreq-plan.md。【收口 2026-11-18】从 App.tsx 机械盘点 IA（routes=12：main8+window4；redirects=4）+ 5 条高频路径（现读拓扑推导不臆造），产 resources/design-context/ia-map.json（生成器自动同步 manifest sha）+ 消费测试 HK-01 红→绿 7/7（路由一致/无死链/高频可达/篡改负测/manifest sha/P1 零回归）；--check PASS、P1 包 c53-design-context-pack 8/8 零回归、lint ledger 2441 不动、单源重生成 625 文档。零 UI 运行时写面/观感代签/新依赖；证据=acceptance/block471-c53-p2-ia/。C-53 P3-P7 待后续发令。"
     },
@@ -12737,7 +12802,12 @@
         "acceptance/block470/"
       ],
       "sharedBaselines": [],
-      "tags": ["prompt-mechanization", "handoff-compact", "governance", "G0"],
+      "tags": [
+        "prompt-mechanization",
+        "handoff-compact",
+        "governance",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「补强方案 B + handoff 太大优化为只读最近一次」）。治理批无产品代码。T1=把方案 A 自动落档提示词从 skill 纪律勾选项升机械档：生成器脚本（读 state/AUDIT-LOG/上一批提示词/next:suggest 现读派生草案，仅 advice 不发令，继承 R 项、观感零代签、幂等）+ package.json next:prompt + closeout --report next:prompt + HK-01 负测。T2=handoff 结构优化：handoff-compact.mjs（import chooseArchiveTarget，自写 ｜ 拆分纯函数，头部 30 条收敛最近 1 条，历史原文搬移 project-workspace-handoff-through-<日期>.md，幂等），正文快照刷新现读；引用面已核（g0 正则文本已不存在、历史脚本锚点已失效、README 直链/registry 不变）。非范围=产品代码/UI/观感/发令/C-53 P2 起/G1+/改 audit-log-compact 本体。plan=docs/block470-prompt-mechanization-handoff-compact-plan.md。【收口 2026-11-18】T1=next:prompt 生成器（core 纯函数+CLI+next:prompt/next:prompt:report 接线+closeout --report 报告级非阻塞不落盘），HK-01 6/6，报告实跑继承 7 条 R 项仅 advice 未发令；T2=handoff-compact（头部链 35→1 条、34 条原文搬移 project-workspace-handoff-through-2026-11-18.md、活跃 27KB→9.9KB、快照刷新 11-18），HK-01 7/7 幂等；干跑抓真链区多行 bug 已修。两测试 13/13 + docs:check(624) + hygiene 绿。零产品代码/UI/观感/依赖/自动发令，未改 audit-log-compact 本体。证据=acceptance/block470/。"
     },
@@ -12754,7 +12824,13 @@
         "docs/next-phase-e2e-prompt-2026-11-18-b2.md"
       ],
       "sharedBaselines": [],
-      "tags": ["e2e-prompt", "staged-autonomy", "c53-p2-p7", "polyfork-readonly", "G0"],
+      "tags": [
+        "e2e-prompt",
+        "staged-autonomy",
+        "c53-p2-p7",
+        "polyfork-readonly",
+        "G0"
+      ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项登记（用户发令「为下一阶段的工作设计无人值守全自动执行提示词」）：上一批 S1-S5 全收口后的后继批。承接 Jev 单一建议 C-53-P2（0.58），按单工作包串行推进 C-53 P2 IA/高频路径→P3 视觉一致性→P4 响应式/a11y→P5 性能/可信态→P6 产品 Skill v1.1→P7 非观感准备（人眼签字留用户）+ Polyfork 授权材料只读收集附线（材料齐即停、接入决策归用户）。预置裁决 R8-R15；红线=观感不代签+C 类保护停止；§2 自包含正文复制整块给新 Agent 即可无人值守。覆盖用户要求七要素（目标/任务清单/触发依赖/完成标准/降级/输出汇报/边界）。用户动作清单=C-53 P7 人眼签字+UI-706/707/709/710+E 类 22 条+Polyfork 授权结论+D5。"
     },

@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-visual-consistency",
+  "capability": "block472-c53-p3-visual-consistency",
+  "sourceCommit": "2a212ee02cd8baa8e31eba318c7724a21a199b89",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-visual-consistency.mjs",
+  "generatedAt": "2026-11-18T08:01:37.721Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=设计不变量（冻结，消费测试逐读数深等）；观感项 pending_human_eye 不代签，本包只读不改任何 token 定义/CSS。",
+  "readings": {
+    "navyLadder": {
+      "value": {
+        "tiers": [
+          {
+            "token": "--petri-bg-canvas",
+            "hex": "#0b1220",
+            "luminance": 0.61,
+            "expected": "#0b1220"
+          },
+          {
+            "token": "--petri-bg-surface",
+            "hex": "#111a2e",
+            "luminance": 1.06,
+            "expected": "#111a2e"
+          },
+          {
+            "token": "--petri-bg-subtle",
+            "hex": "#182339",
+            "luminance": 1.69,
+            "expected": "#182339"
+          },
+          {
+            "token": "--petri-bg-elevated",
+            "hex": "#1d2945",
+            "luminance": 2.28,
+            "expected": "#1d2945"
+          }
+        ],
+        "specAligned": true,
+        "ascending": true
+      },
+      "source": "frontend/src/styles/custom.css dark 块",
+      "command": "node scripts/c53-visual-consistency.mjs",
+      "capturedAt": "2026-11-18T08:01:37.530Z"
+    },
+    "slateFamily": {
+      "value": {
+        "hits": {
+          "components/copilot/ContextBudgetBar.tsx": {
+            "slate-400": 1
+          },
+          "components/desktop/PluginStorePanel.tsx": {
+            "slate900-rgba": 1
+          },
+          "components/desktop/desktop.css": {
+            "slate-200": 1
+          },
+          "styles/custom.css": {
+            "slate-500": 1,
+            "slate-400": 1,
+            "slate-300": 1,
+            "slate900-rgba": 1
+          },
+          "themes/terminal-themes.ts": {
+            "slate-900": 3,
+            "slate-600": 1,
+            "slate-500": 1
+          }
+        },
+        "overRatchet": [],
+        "patterns": [
+          "slate-950",
+          "slate-900",
+          "slate-800",
+          "slate-700",
+          "slate-600",
+          "slate-500",
+          "slate-400",
+          "slate-300",
+          "slate-200",
+          "slate900-rgba",
+          "slate500-rgba"
+        ],
+        "ratchetFiles": 5
+      },
+      "source": "frontend/src 全源（广谱 slate ratchet）",
+      "command": "node scripts/c53-visual-consistency.mjs",
+      "capturedAt": "2026-11-18T08:01:37.530Z"
+    },
+    "colorBudget": {
+      "value": {
+        "total": 356,
+        "perFile": {
+          "components/annotations/AnnotationOverlay.module.css": 2,
+          "components/branch/BranchTabs.module.css": 6,
+          "components/copilot/LlmTranscriptViewer.css": 1,
+          "components/copilot/MessageRail.module.css": 2,
+          "components/copilot/ResultCard.module.css": 1,
+          "components/copilot/ToolActivityDock.module.css": 7,
+          "components/copilot/integration/integration.module.css": 4,
+          "components/copilot/renderers/TableRenderer.module.css": 1,
+          "components/copilot/simple-chat.css": 31,
+          "components/desktop/TitleBar.module.css": 10,
+          "components/desktop/WorkingTreeReview/ReviewMode.css": 17,
+          "components/desktop/WorkingTreeReview/WorkingTreeReview.css": 4,
+          "components/desktop/desktop.css": 24,
+          "components/desktop/settings-redesign.module.css": 4,
+          "components/desktop/titlebar/UpdatePill.module.css": 3,
+          "components/knowledge/KnowledgeConsoleChat.module.css": 3,
+          "components/knowledge/KnowledgeConsoleDock.module.css": 2,
+          "components/result-studio/CompactResultNavigator.module.css": 4,
+          "components/result-studio/LineageGraph.module.css": 3,
+          "components/result-studio/LineageStrip.module.css": 5,
+          "components/result-studio/LineageViewSwitch.module.css": 2,
+          "components/result-studio/ResultAgentComposer.module.css": 3,
+          "components/result-studio/ResultEditPanel.module.css": 4,
+          "components/result-studio/ResultStudioChangeSetPanel.module.css": 8,
+          "components/result-studio/ResultStudioSurface.module.css": 4,
+          "components/result-studio/RevisionCodeView.module.css": 1,
+          "components/result-studio/ScientificInteractionViewer.module.css": 7,
+          "components/svg-editor/SvgEditorViewer.module.css": 6,
+          "components/ui/controls/button.module.css": 1,
+          "components/viewers/MarkdownViewer.module.css": 2,
+          "components/viewers/SpreadsheetViewer.module.css": 2,
+          "components/window/rail-page.module.css": 3,
+          "components/workspace-panels/ArtifactPinPane.module.css": 2,
+          "components/workspace-panels/FloatCardResizer.module.css": 1,
+          "components/workspace-panels/KnowledgeSpacePanel.module.css": 18,
+          "components/workspace-panels/WorkspaceTodoSection.module.css": 3,
+          "pages/extensions/extensions.module.css": 6,
+          "pages/extensions/styles.module.css": 18,
+          "pages/home.module.css": 14,
+          "pages/project-workspace.module.css": 102,
+          "pages/welcome.module.css": 5,
+          "styles/custom.css": 9,
+          "styles/global.css": 1
+        },
+        "declaredCeiling": 130,
+        "targetMet": false
+      },
+      "source": "frontend/src CSS 全源 + docs/design-charter.md §2",
+      "command": "node scripts/c53-visual-consistency.mjs",
+      "capturedAt": "2026-11-18T08:01:37.530Z"
+    },
+    "undefinedTokens": {
+      "value": {
+        "undefinedColorRefs": [],
+        "missingPetriRefs": [],
+        "definitionCount": 144,
+        "referenceCount": 133
+      },
+      "source": "frontend/src 全源（token 定义/引用扫描）",
+      "command": "node scripts/c53-visual-consistency.mjs",
+      "capturedAt": "2026-11-18T08:01:37.530Z"
+    }
+  }
+}
