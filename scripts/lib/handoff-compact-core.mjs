@@ -29,9 +29,10 @@ export function collectChainRegion(lines = []) {
   const arr = Array.isArray(lines) ? [...lines] : [];
   const chainLines = [];
   let i = 0;
-  for (; i < arr.length; i++) {
-    if (!isChainLine(arr[i])) break;
-    chainLines.push(arr[i]);
+  for (const line of arr) {
+    if (!isChainLine(line)) break;
+    chainLines.push(line);
+    i += 1;
   }
   const allParts = chainLines.flatMap(splitHandoffChain);
   return { chainLines, rest: arr.slice(i), allParts };

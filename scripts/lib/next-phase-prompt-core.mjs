@@ -37,7 +37,7 @@ export function classifyRulings({ previousBody = '', completedPhases = [] } = {}
 
 /** 幂等判据：目标草案已存在则不写。 */
 export function shouldWriteDraft(targetExists) {
-  return !Boolean(targetExists);
+  return !targetExists;
 }
 
 /**
