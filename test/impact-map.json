@@ -8813,6 +8813,23 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block463-3d-p3-presentation",
+      "note": "BLOCK-463 3D P3 呈现层：SceneSpec 证据面板 + ::compose 跳转 + scenePolicy + workbench-live flow。证据目录同规则认领。",
+      "patterns": [
+        "frontend/src/components/workspace-panels/Model3DResultViewer.tsx",
+        "frontend/src/components/copilot/gen-ui/compose/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs",
+        "acceptance/block463/**"
+      ],
+      "tests": [
+        "frontend/src/components/workspace-panels/Model3DResultViewer.scenespec.test.tsx",
+        "frontend/src/components/copilot/gen-ui/compose/compose-card-jump.test.tsx"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

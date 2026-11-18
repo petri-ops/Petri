@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-17",
+  "updatedAt": "2026-11-18",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -147,6 +147,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block342-svg-editor-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block383-live-legs.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block458-capability-probe.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
@@ -248,6 +249,7 @@
     "types::frontend/src/components/copilot/copilotClient.ts::StructuredToolResult",
     "types::frontend/src/components/copilot/copilotClient/agentTaskStream.ts::AgentSseEvent",
     "types::frontend/src/components/copilot/copilotClient/runHealthEvents.ts::RunHealthEventCode",
+    "types::frontend/src/components/copilot/gen-ui/compose/spec.ts::ComposeMeshReferenceNode",
     "types::frontend/src/components/copilot/integration/ChatCardLinkBridge.tsx::ChatCardLinkVariant",
     "types::frontend/src/components/copilot/toolActivity.ts::ToolActivityChangeDiff",
     "types::frontend/src/components/copilot/toolActivity.ts::ToolActivityOutput",
