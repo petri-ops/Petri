@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-human-eye-closeout",
+  "capability": "block476-c53-p7-human-eye-closeout",
+  "sourceCommit": "901587d4b6bf868e8c4bf1e238f71327544621f7",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-human-eye-closeout.mjs",
+  "generatedAt": "2026-11-18T09:01:54.608Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；人眼收口=非观感准备，签字槽 pending_human_eye 不代签，本包不改任何 UI 运行时代码或观感状态。",
+  "readings": {
+    "uiLedgerSlots": {
+      "value": {
+        "slots": {
+          "UI-706": {
+            "inProgress": true,
+            "pendingHumanEye": true,
+            "verified": false
+          },
+          "UI-707": {
+            "inProgress": true,
+            "pendingHumanEye": true,
+            "verified": false
+          },
+          "UI-709": {
+            "inProgress": true,
+            "pendingHumanEye": true,
+            "verified": false
+          },
+          "UI-710": {
+            "inProgress": true,
+            "pendingHumanEye": true,
+            "verified": false
+          }
+        },
+        "allInProgress": true,
+        "allPendingHumanEye": true,
+        "noneVerified": true
+      },
+      "source": "docs/ui-productization-audit.md（UI-706/707/709/710 段）",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    },
+    "eClassTiers": {
+      "value": {
+        "verified": 11,
+        "cancelled": 2,
+        "inProgress": 9,
+        "worthReviewing": 3,
+        "total": 22,
+        "triageBlockedCurrent": 23,
+        "triageLiveMissingCurrent": 15,
+        "driftDisclosed": true,
+        "layersConsistent": true
+      },
+      "source": "docs/e-class-human-eye-guide-2026-11-16.md + acceptance/block-332/ui-ledger-triage.json",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    },
+    "signatureSlots": {
+      "value": {
+        "slots": {
+          "E-01": {
+            "present": true,
+            "blank": true
+          },
+          "E-02": {
+            "present": true,
+            "blank": true
+          },
+          "E-03": {
+            "present": true,
+            "blank": true
+          },
+          "H-01": {
+            "present": true,
+            "blank": true
+          },
+          "H-02": {
+            "present": true,
+            "blank": true
+          },
+          "H-03": {
+            "present": true,
+            "blank": true
+          },
+          "H-04": {
+            "present": true,
+            "blank": true
+          },
+          "H-05": {
+            "present": true,
+            "blank": true
+          },
+          "H-06": {
+            "present": true,
+            "blank": true
+          },
+          "H-07": {
+            "present": true,
+            "blank": true
+          },
+          "H-08": {
+            "present": true,
+            "blank": true
+          }
+        },
+        "total": 11,
+        "filled": 0,
+        "allBlank": true
+      },
+      "source": "docs/ui-design-human-eye-route.md §3 签字槽",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    },
+    "batchNewUiFaces": {
+      "value": {
+        "p4": {
+          "humanEyeCells": 12,
+          "complete": true
+        },
+        "p5": {
+          "humanEyeSigned": false,
+          "status": "in_progress",
+          "readOnly": true,
+          "slotCount": 2
+        },
+        "p6": {
+          "humanEyeSigned": false,
+          "status": "in_progress",
+          "readOnly": true,
+          "slotCount": 2
+        },
+        "p2NoFace": true,
+        "p3NoFace": true,
+        "allUnsigned": true
+      },
+      "source": "acceptance/block47{1..5}-*/ evidence + 快照 humanEyeSlots",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    },
+    "evidenceIndex": {
+      "value": {
+        "entries": [
+          {
+            "path": "docs/ui-productization-audit.md",
+            "exists": true
+          },
+          {
+            "path": "docs/e-class-human-eye-guide-2026-11-16.md",
+            "exists": true
+          },
+          {
+            "path": "docs/ui-design-human-eye-route.md",
+            "exists": true
+          },
+          {
+            "path": "docs/ui-design-ia-decision-material.md",
+            "exists": true
+          },
+          {
+            "path": "docs/ui-design-acceptance-checklist-v1.md",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block-332/ui-ledger-triage.json",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block471-c53-p2-ia/evidence.md",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block472-c53-p3-visual-consistency/evidence.md",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block473-c53-p4-responsive-a11y/responsive-a11y-snapshot.json",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block474-c53-p5-performance-trust/performance-trust-snapshot.json",
+            "exists": true
+          },
+          {
+            "path": "acceptance/block475-c53-p6-skill-contract/skill-contract-snapshot.json",
+            "exists": true
+          }
+        ],
+        "allPresent": true,
+        "count": 11
+      },
+      "source": "acceptance/ + docs/ 真源路径在场",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    },
+    "humanEyeSlots": {
+      "value": {
+        "humanEyeSigned": false,
+        "status": "in_progress",
+        "slots": [
+          "C-53 P7 人眼收口（pending_human_eye，待用户实机过目）",
+          "UI-706/707/709/710 + E 类 22 条观感签字（pending_human_eye，待用户实机过目）"
+        ],
+        "readOnly": true,
+        "note": "Agent 不代签观感；本包只整理人眼收口清单与证据索引，签字槽留用户。"
+      },
+      "source": "UI 台账 pending_human_eye（观感零代签）",
+      "command": "node scripts/c53-human-eye-closeout.mjs",
+      "capturedAt": "2026-11-18T09:01:54.582Z"
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "id": "petri-human-eye-closeout",
+  "kind": "model-readable-human-eye-closeout",
+  "generatedBy": "node scripts/c53-human-eye-closeout.mjs",
+  "sourceCommit": "901587d4b6bf868e8c4bf1e238f71327544621f7",
+  "generatedAt": "2026-11-18T09:01:54.608Z",
+  "derivedFrom": [
+    "docs/ui-productization-audit.md（UI-706/707/709/710 in_progress + pending_human_eye）",
+    "docs/e-class-human-eye-guide-2026-11-16.md + acceptance/block-332/ui-ledger-triage.json（22 条分层）",
+    "docs/ui-design-human-eye-route.md §3（集中签字槽全空）",
+    "acceptance/block47{1..5}-*/ evidence + 快照（本批新 UI 面观感槽）"
+  ],
+  "uiLedgerSlots": {
+    "slots": {
+      "UI-706": {
+        "inProgress": true,
+        "pendingHumanEye": true,
+        "verified": false
+      },
+      "UI-707": {
+        "inProgress": true,
+        "pendingHumanEye": true,
+        "verified": false
+      },
+      "UI-709": {
+        "inProgress": true,
+        "pendingHumanEye": true,
+        "verified": false
+      },
+      "UI-710": {
+        "inProgress": true,
+        "pendingHumanEye": true,
+        "verified": false
+      }
+    },
+    "allInProgress": true,
+    "allPendingHumanEye": true,
+    "noneVerified": true
+  },
+  "eClassTiers": {
+    "verified": 11,
+    "cancelled": 2,
+    "inProgress": 9,
+    "worthReviewing": 3,
+    "total": 22,
+    "triageBlockedCurrent": 23,
+    "triageLiveMissingCurrent": 15,
+    "driftDisclosed": true,
+    "layersConsistent": true
+  },
+  "signatureSlots": {
+    "slots": {
+      "E-01": {
+        "present": true,
+        "blank": true
+      },
+      "E-02": {
+        "present": true,
+        "blank": true
+      },
+      "E-03": {
+        "present": true,
+        "blank": true
+      },
+      "H-01": {
+        "present": true,
+        "blank": true
+      },
+      "H-02": {
+        "present": true,
+        "blank": true
+      },
+      "H-03": {
+        "present": true,
+        "blank": true
+      },
+      "H-04": {
+        "present": true,
+        "blank": true
+      },
+      "H-05": {
+        "present": true,
+        "blank": true
+      },
+      "H-06": {
+        "present": true,
+        "blank": true
+      },
+      "H-07": {
+        "present": true,
+        "blank": true
+      },
+      "H-08": {
+        "present": true,
+        "blank": true
+      }
+    },
+    "total": 11,
+    "filled": 0,
+    "allBlank": true
+  },
+  "batchNewUiFaces": {
+    "p4": {
+      "humanEyeCells": 12,
+      "complete": true
+    },
+    "p5": {
+      "humanEyeSigned": false,
+      "status": "in_progress",
+      "readOnly": true,
+      "slotCount": 2
+    },
+    "p6": {
+      "humanEyeSigned": false,
+      "status": "in_progress",
+      "readOnly": true,
+      "slotCount": 2
+    },
+    "p2NoFace": true,
+    "p3NoFace": true,
+    "allUnsigned": true
+  },
+  "evidenceIndex": {
+    "entries": [
+      {
+        "path": "docs/ui-productization-audit.md",
+        "exists": true
+      },
+      {
+        "path": "docs/e-class-human-eye-guide-2026-11-16.md",
+        "exists": true
+      },
+      {
+        "path": "docs/ui-design-human-eye-route.md",
+        "exists": true
+      },
+      {
+        "path": "docs/ui-design-ia-decision-material.md",
+        "exists": true
+      },
+      {
+        "path": "docs/ui-design-acceptance-checklist-v1.md",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block-332/ui-ledger-triage.json",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block471-c53-p2-ia/evidence.md",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block472-c53-p3-visual-consistency/evidence.md",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block473-c53-p4-responsive-a11y/responsive-a11y-snapshot.json",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block474-c53-p5-performance-trust/performance-trust-snapshot.json",
+        "exists": true
+      },
+      {
+        "path": "acceptance/block475-c53-p6-skill-contract/skill-contract-snapshot.json",
+        "exists": true
+      }
+    ],
+    "allPresent": true,
+    "count": 11
+  },
+  "humanEyeSlots": {
+    "humanEyeSigned": false,
+    "status": "in_progress",
+    "slots": [
+      "C-53 P7 人眼收口（pending_human_eye，待用户实机过目）",
+      "UI-706/707/709/710 + E 类 22 条观感签字（pending_human_eye，待用户实机过目）"
+    ],
+    "readOnly": true,
+    "note": "Agent 不代签观感；本包只整理人眼收口清单与证据索引，签字槽留用户。"
+  },
+  "boundaries": {
+    "humanEyeSigned": false,
+    "readOnly": true,
+    "note": "观感项（UI-706/707/709/710、E 类 22 条、P5/P6 本批新 UI 面、C-53 P7 人眼收口）pending_human_eye 保持 in_progress，Agent 不代签；本契约为只读机械扫描，不改任何 UI 运行时代码或观感状态。"
+  }
+}

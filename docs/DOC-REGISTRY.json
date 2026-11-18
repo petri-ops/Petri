@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 629,
+    "documentCount": 630,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 612
+    "managedMarkdown": 613
   },
   "documents": [
     {
@@ -12725,6 +12725,36 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
+    },
+    {
+      "id": "BLOCK-476",
+      "path": "docs/block476-c53-p7-human-eye-closeout-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block476-c53-p7-human-eye-closeout",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block476-c53-p7-human-eye-closeout-plan.md",
+        "scripts/c53-human-eye-closeout.mjs",
+        "resources/design-context/human-eye-closeout.json",
+        "resources/design-context/manifest.json",
+        "test/c53-human-eye-closeout.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block476-c53-p7-human-eye-closeout/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c53",
+        "human-eye",
+        "closeout",
+        "design-context",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「开始 C-53 P7」；批2提示词 S6/R8）。范围=人眼收口非观感准备——沿 P1–P6 先例新增独立静态扫描器 scripts/c53-human-eye-closeout.mjs（纯函数 collectHumanEyeCloseout 六组读数：UI 台账四槽 / E 类 22 条分层 / 集中签字槽 / 本批新 UI 面 / 证据索引 / 观感留槽）+ 模型可读 human-eye-closeout.json（生成器维护 manifest sha）+ 消费测试（篡改负测 fail-closed）。零新增产品依赖/零 UI 运行时写面/零观感代签。非范围=任何观感状态翻 verified/签字槽填写/P0–P6 真源语义/user 资产/G1+。【收口 2026-11-18】HK-01 红→绿 11/11（模块缺席 → 11/11）；--check PASS（readingIds=6/uiLedgerAllInProgress/eClassTotal=22/signaturesBlank/evidencePresent）；六组读数（UI-706/707/709/710 各 in_progress 零 verified / E 类 11+2+9=22 且 triage 现读 23 漂移如实登记 / 签字槽 11 行全空 / P4 人眼格 12+P5/P6 观感槽未签+P2/P3 无面 / 证据索引 11 条全在场 / 观感留槽 in_progress 零代签）；P0–P6 Node 57/57 零回归、manifest sha 一致、docs:check/ui:audit/hygiene 绿；零 UI 写面/观感状态改动/新依赖。证据=acceptance/block476-c53-p7-human-eye-closeout/。plan=docs/block476-c53-p7-human-eye-closeout-plan.md。观感签字留用户，P7 完成仅指非观感准备就绪。"
     },
     {
       "id": "BLOCK-475",
