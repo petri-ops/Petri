@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | exit 3「cloud 供给不可用：读不到 jev.env.bak-by-user-request」 | key 文件缺失或目录名漂移 | §1 |
 | degraded=timeout（reason=timeout） | 直连被网络墙（连接层超时） | §2 |
-| degraded=http_error，服务端 451「not available in your region」 | 代理出口区域被封（Typesafe 封 CN/HK） | §2 |
+| degraded=http_error，服务端 451「not available in your region」；**但 curl 带 HTTPS_PROXY 同请求 403/400 正常** | Node fetch 默认不读 HTTPS_PROXY → 直连出口被封（curl 通/Node 不通的指纹） | §2；修法=`NODE_USE_ENV_PROXY=1` 前缀（Node 24+ 内置 fetch 读代理 env；已持久化进 package.json 四个 cloud 脚本，无 HTTPS_PROXY 环境零影响跨端安全） |
 | 台账空 / `decision:session` 报找不到 DB | PETRI_DB_PATH 未锚定或数据面目录改名漂移 | §4 |
 
 快速探针（无 key 也能测，一步定位是哪层）：
