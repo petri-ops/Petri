@@ -10,27 +10,27 @@ Backend Gateway 是 Petri Desktop 后端架构的统一入口层，协调 R Serv
 ┌─────────────────────────────────────────────────────────────┐
 │                     Frontend (React)                        │
 │                                                             │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │         BackendStatusProvider (Gateway Health)       │   │
-│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │         BackendStatusProvider (Gateway Health)      │    │
+│  └─────────────────────────────────────────────────────┘    │
 └─────────────────────────┬───────────────────────────────────┘
                           │ IPC Bridge
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              Backend Gateway (Port 3002)                     │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                  Tool Registry                      │   │
-│  │   - R Tools    - Python Tools   - Built-in Tools   │   │
-│  └─────────────────────────────────────────────────────┘   │
+│              Backend Gateway (Port 3002)                    │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                  Tool Registry                      │    │
+│  │    - R Tools    - Python Tools   - Built-in Tools   │    │
+│  └─────────────────────────────────────────────────────┘    │
 │                                                             │
 │  Routes:                                                    │
-│  - GET  /health          → 聚合健康检查                     │
-│  - GET  /api/tools       → 列出所有工具                     │
-│  - GET  /api/tools/:id   → 工具详情                         │
-│  - POST /api/execute     → 执行工具（自动路由）             │
-│  - GET  /api/services    → 服务状态列表                     │
-│  - /r-server/*           → 代理到 R Server                  │
-│  - /py-server/*         → 代理到 Python Server             │
+│  - GET  /health          → 聚合健康检查                      │
+│  - GET  /api/tools       → 列出所有工具                      │
+│  - GET  /api/tools/:id   → 工具详情                          │
+│  - POST /api/execute     → 执行工具（自动路由）               │
+│  - GET  /api/services    → 服务状态列表                      │
+│  - /r-server/*           → 代理到 R Server                   │
+│  - /py-server/*         → 代理到 Python Server               │
 └────────────────┬──────────────────────┬─────────────────────┘
                  │                      │
                  ▼                      ▼
