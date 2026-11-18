@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 622,
+    "documentCount": 623,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 605
+    "managedMarkdown": 606
   },
   "documents": [
     {
@@ -12695,6 +12695,23 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
+    },
+    {
+      "id": "NEXT-PHASE-E2E-PROMPT-2026-11-18-B2",
+      "path": "docs/next-phase-e2e-prompt-2026-11-18-b2.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "next-phase-e2e-prompt-20261118-b2",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "touchSurface": [
+        "docs/next-phase-e2e-prompt-2026-11-18-b2.md"
+      ],
+      "sharedBaselines": [],
+      "tags": ["e2e-prompt", "staged-autonomy", "c53-p2-p7", "polyfork-readonly", "G0"],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项登记（用户发令「为下一阶段的工作设计无人值守全自动执行提示词」）：上一批 S1-S5 全收口后的后继批。承接 Jev 单一建议 C-53-P2（0.58），按单工作包串行推进 C-53 P2 IA/高频路径→P3 视觉一致性→P4 响应式/a11y→P5 性能/可信态→P6 产品 Skill v1.1→P7 非观感准备（人眼签字留用户）+ Polyfork 授权材料只读收集附线（材料齐即停、接入决策归用户）。预置裁决 R8-R15；红线=观感不代签+C 类保护停止；§2 自包含正文复制整块给新 Agent 即可无人值守。覆盖用户要求七要素（目标/任务清单/触发依赖/完成标准/降级/输出汇报/边界）。用户动作清单=C-53 P7 人眼签字+UI-706/707/709/710+E 类 22 条+Polyfork 授权结论+D5。"
     },
     {
       "id": "NEXT-PHASE-E2E-PROMPT-2026-11-18",
