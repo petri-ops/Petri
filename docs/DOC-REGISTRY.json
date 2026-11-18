@@ -13375,12 +13375,12 @@
       "id": "BLOCK-494",
       "path": "docs/block494-w2-implementation-tickets-readiness-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block494-w2-tickets-readiness",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block494-w2-implementation-tickets-readiness-plan.md",
         "test/block322-p3-03-v2b-d2-contract.test.mjs",
@@ -13395,7 +13395,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S2 / BLOCK-492 plan §3 W2 波次）。W2 实现票准备：三票实况核对（P4-05b 第一刀+v2a 已于 BLOCK-322 时代 2026-10-30/31 实现且测试/实机证据齐——本包复跑 23/23 绿；v2b 半实现：特征表纯函数库+前端同源移植+几何签名探针定案在场，D2 白名单键/D1 求值器消费/导入链接线/sidecar sha 锚定缺位）+ v2b D2/D1 契约测骨架（skip 形态承载，环境开关复跑捕真实红，断言严格从 D1/D2/D3/D5 已裁决形态导出）+ 登记漂移如实登记（BLOCK-491 契约重算待其 reopen 条款=用户发令）。零产品实现落地/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S2 / BLOCK-492 plan §3 W2 波次）。W2 实现票准备：三票实况核对（P4-05b 第一刀+v2a 已于 BLOCK-322 时代 2026-10-30/31 实现且测试/实机证据齐——本包复跑 23/23 绿；v2b 半实现：特征表纯函数库+前端同源移植+几何签名探针定案在场，D2 白名单键/D1 求值器消费/导入链接线/sidecar sha 锚定缺位）+ v2b D2/D1 契约测骨架（skip 形态承载，环境开关复跑捕真实红，断言严格从 D1/D2/D3/D5 已裁决形态导出）+ 登记漂移如实登记（BLOCK-491 契约重算待其 reopen 条款=用户发令）。零产品实现落地/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】closeout 定向链 exit=0；骨架落档（skip 2绿+6skip/激活 3真红+5绿锚）；登记漂移列用户动作；串行槽位回空。"
     }
   ],
   "lastUpdated": "2026-11-18"

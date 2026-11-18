@@ -1,7 +1,7 @@
 ---
 capability: block494-w2-tickets-readiness
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: W2 已裁决实现票准备（BLOCK-492 plan §3 W2 · 无人值守提示词 §5 S2）——逐票核对 P4-05b / P3-03 v2a / v2b 的登记状态与仓库实况，补齐真正缺位的 HK-01 契约测骨架（skip 形态承载、启动时去 skip 即红），登记「登记 vs 实况」漂移；零产品实现落地（实现票保持逐票待用户发令）。
 acceptance:
   - 三票实况核对完成：P4-05b 第一刀 / v2a 已实现且有测试与实机证据（本包实测 23/23 绿）；v2b 半实现（特征表纯函数库+同源移植+探针定案在场；D2/D1 契约与接线缺位）——逐票登记证据指针
@@ -64,3 +64,13 @@ W2 预设「三票全 deferred、只备骨架」，实况核对发现 **P4-05b �
 - 零产品代码 diff（`git diff --stat` 仅 test/docs/acceptance/impact-map/registry）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- 判据达成：三票实况测试复跑 23/23 绿；骨架 skip 模式 2 绿+6 skip（不挂门禁）、激活模式 3 真红恰对三缺位+5 绿锚（红证据 acceptance/block494-w2-ticket-readiness/v2b-d2-skeleton-red.txt）；closeout 定向链 exit=0。
+- 夹具校准注记：红必须是契约缺席红——两轮校准（version='scene3d/v1'、parameters:{} 必填、成功形态无 errors 字段改用 ok===true 判）后，激活态红=D2①/D1①/D1③ 三条恰好对应三缺位实现面；D2② 零迁移锚与 D1② 几何签名锚为绿（已实现面）。
+- 提交：4d36b1e0（立项+交付批）+ 904fdbf1（coverage 随批）+ 本批（台账批）。
+- 骨架激活路径：实现票获发令 → `BLOCK322_V2B_SKELETON_ACTIVE=1 node --test test/block322-p3-03-v2b-d2-contract.test.mjs` 复跑确认红 → 最小实现转绿 → 去 skip 纳入常规定向集。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
