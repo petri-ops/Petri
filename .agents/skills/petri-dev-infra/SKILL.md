@@ -163,6 +163,7 @@ Jev 单一建议：<候选>（confidence=<数值>）——<一句话具体范围
 ```
 
 红线：只给一个建议，禁止「或」式多选；confidence 与计数从脚本/ canonical 现读；Jev 不可用或零建议时按候选队列首个兜底并标注；纯问答至少给一行「队列未变」；不列 G1+（Provider/公证/GA/packaged）。
+阶段收口后自动落档下一阶段提示词的作业规范见 `$petri-project-governance/references/NEXT-PHASE-PROMPT-HANDOFF.md`（自动落档草案、不自动发令、预置裁决只继承）。
 
 **透明标签附 Jev 计数（2026-09-25 用户裁决，与 AGENTS.md「Skill 使用透明度」同源）**：交付/答复收尾的〔skills: …〕标签须附 `· jev×N`——N=本工作阶段 Jev 调用次数，取 `npm run decision:session` **分段口径**（marker 记 startedAt+lastReadAt；每次收尾重跑得「本轮增量+累计」双数字；复用上一轮数字即违规——两次用户抓真在案；零次如实标 jev×0）。
 

@@ -12,6 +12,7 @@ Reference files in this folder (operational detail; this file stays the entry po
 - `references/WORK-PACKAGE-LAUNCH-CHECKLIST.md` — run at launch; any unchecked box means not ready (or an explicit, recorded user waiver).
 - `references/STAGE-CLOSEOUT-CHECKLIST.md` — run at every stage/Goal close, in order.
 - `references/NEXT-STEP-BRIEF.md` — mandatory delivery format after every task: one Jev recommendation with confidence and concrete scope, master-plan wave order, and blueprint/global-plan progress (母纲 Q-MATRIX / 竞争力纲 / Result Studio / UI 台账 / active package).
+- `references/NEXT-PHASE-PROMPT-HANDOFF.md` — after each staged work-package closeout, derive and file the next-phase unattended prompt from current blueprint truth; auto-file the draft, never auto-authorize the next stage (inherited rulings only).
 - `references/AUDIT-LOG-ENTRY-TEMPLATE.md` — required shape of launch/closeout/audit ledger entries.
 - `references/POSTMORTEM-TEMPLATE.md` — run after any incident; every postmortem must land its lesson somewhere.
 - `references/DEPENDENCY-CHANGE-CHECKLIST.md` — run before proposing any new dependency; default answer is "no".
@@ -73,6 +74,7 @@ Run `references/STAGE-CLOSEOUT-CHECKLIST.md` in order and write ledger entries p
 4. Run `npm run docs:reconcile` and review every candidate.
 5. Run `npm run docs:check`; do not claim completion while it fails.
 6. Report evidence, remaining exceptions, deferred archival, and preserved WIP.
+7. Derive and file the next-phase unattended prompt per `references/NEXT-PHASE-PROMPT-HANDOFF.md` (after the NEXT-STEP-BRIEF). Auto-file the draft from current blueprint truth + `npm run next:suggest -- --supply=cloud`; auto-authorize nothing — inherited rulings only, new ruling points go to the user action list, `pending_human_eye` stays `in_progress`. Register prompt + registry + README + AUDIT-LOG in the same commit.
 
 ### Archive or supersede documentation
 

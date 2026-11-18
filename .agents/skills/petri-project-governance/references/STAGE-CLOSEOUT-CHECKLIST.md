@@ -37,3 +37,11 @@
 - [ ] `completed` / `qualified` / `verified` 每一个字都有对应契约证据支撑
 - [ ] "当前无 active 工作包"或下一顺位建议，与 DOC-REGISTRY 一致
 - [ ] 已按 `references/NEXT-STEP-BRIEF.md` 输出下一步提示：单条 Jev 建议（含 confidence 与具体范围）+ 母纲波次顺序 + 蓝图/全局计划进展（母纲 Q-MATRIX / §6.5、竞争力纲/成熟度蓝图、Result Studio、UI 台账、active 包）
+
+## 6. 下一阶段提示词自动落档（阶段收口后，同提交）
+
+- [ ] 按 `references/NEXT-PHASE-PROMPT-HANDOFF.md` 派生并落档下一阶段无人值守提示词（与 NEXT-STEP-BRIEF 同层、在其之后）
+- [ ] 输入现读（state / AUDIT-LOG / 上一批提示词 / `npm run next:suggest -- --supply=cloud`），非聊天回忆；§2 正文七要素齐 + 两条红线 + G0 用语一次
+- [ ] 预置裁决只继承上一批已授权范围或引用用户发令，无 agent 自造新阶段范围；观感项零代签、既有红归属如实
+- [ ] 三件套登记齐（DOC-REGISTRY + README + AUDIT-LOG）+ `npm run docs:check` 绿 + `npm run hygiene:check` 绿
+- [ ] 队列确已清空且无下一阶段候选时，如实写「队列未变」，不臆造提示词
