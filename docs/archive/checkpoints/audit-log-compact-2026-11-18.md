@@ -11,3 +11,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-18T13:08:17.919Z -->
 | ✅ **BLOCK-458 实施完成（模型思考能力一键探测）**：新增 `POST /api/ai/agent/probe-model-capability`，按 profile/model 发极小 chat 请求（高思考、256 tokens、禁 fallback、15s），从 reasoning_content/reasoning_tokens 判 supported/unsupported/unknown；无证据不写 false，同时保留 requestedModel/responseModel。设置页渠道详情增加默认模型与逐模型「探测」按钮，点击即付费确认；supported 写开、unsupported 写关、unknown 不改。HK-01 3/3 + 7/7；真实 Key 探测 glm-4.6 supported（request_id 与 reasoning 证据在案，上游响应别名 glm-5.3-flash）；实机 block458-capability-probe 5/5 allPass（9223 离屏跑完即 kill）。证据=acceptance/block-458/。观感 pending_human_eye 不代签，按 UI-706 加映同段登记。 | 2026-11-17 | BLOCK-458 / IMPLEMENTED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-18T14:04:33.817Z -->
+| ✅ **C-52 第一包（Petri UI Design Context Pack）实施完成（轻量包/制度化）**：用户裁决「都做 都做 这俩都做」；先做内部设计上下文，第二包串行排队。新增 `.codebuddy/skills/petri-ui-design`：双模式、治理源顺序、四步工作流、七硬规则 + 设计说明/八态矩阵/参考分析/工具采纳/评审清单五份参考。零产品依赖/UI 写面/默认行为变化；他方 4 文档 WIP 零触碰。HK-01 5/5、quick_validate PASS（CRLF 首轮已修）。证据=acceptance/ui-design-context-pack/。观感 pending_human_eye 不代签。 | 2026-11-17 | C-52 P1 / IMPLEMENTED |

@@ -9,11 +9,36 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 640,
+    "documentCount": 641,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 622
+    "managedMarkdown": 623
   },
   "documents": [
+    {
+      "id": "BLOCK-487",
+      "path": "docs/block487-c55-video-p3-advanced-shot-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block487-c55-video-p3",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block487-c55-video-p3-advanced-shot-plan.md",
+        "core/petri-server/helpers/video-advanced-shot.js",
+        "test/block487-video-advanced-shot.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block487-c55-video-p3/"
+      ],
+      "tags": [
+        "C-55",
+        "VIDEO",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 C-55-P3」→停下报用户→用户裁决口令收窄为本地 SceneSpec v1 3D 镜头替换）。P3 收窄工作项：video-advanced-shot.js 纯函数（镜头登记三要素/SceneSpec v1 specRef 引用不建第二真值/替换普通镜头不破坏四字段+timeline/换producer·renderer·加领域三判据/证据链/完整性 fail-closed），零新依赖、只读消费 P0 工程与 BLOCK-459 真源。HK-01 26/26（缺席红+篡改负测）；真实腿 P0 video-project.json sc2 替换 machine_pass（四字段+timeline unchanged、三判据 true、三出口 exitChecks 全 true）。文生/图生视频/角色/物理/粒子/高成本缓存=deferred_user_ruling 只登记不实现；云/付费/外发字段 fail-closed；观感 pending_human_eye 零代签；不碰资格线/G1+。BLOCK-459 mapping-verdicts 全 gap 与 PROBE-REPORT 4direct/2convert 形态差异如实登记不伪造。零触碰他方 WIP。证据=acceptance/block487-c55-video-p3/。G0 开发期常态 · 不外推 packaged/Provider/GA."
+    },
     {
       "id": "BLOCK-490",
       "path": "docs/block490-capability-intake-review-plan.md",

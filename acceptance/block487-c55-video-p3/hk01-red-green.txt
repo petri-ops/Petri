@@ -1,0 +1,17 @@
+BLOCK-487 / C-55 VIDEO-P3 高级镜头 — HK-01 红绿先行证据
+日期：2026-11-18
+
+== 缺席红（实现前）==
+命令：node --test test/block487-video-advanced-shot.test.mjs
+结果：Error: Cannot find module '../core/petri-server/helpers/video-advanced-shot.js'
+      code: 'MODULE_NOT_FOUND'
+      ✖ test/block487-video-advanced-shot.test.mjs（fail）
+
+== 实现绿（video-advanced-shot.js 落地后）==
+命令：node --test test/block487-video-advanced-shot.test.mjs
+结果：tests 26 / pass 26 / fail 0 / skipped 0（duration ~103ms）
+
+== 红→绿修复留痕（判据校准，非放水）==
+- C0：SCENESPEC fixture 缺 id → specRef 无法与镜头 source.specRef 对齐。fixture 补 id='hinge'，实现改用 id 生成 specRef。
+- C4：自由关节程序层别名 free→导出层 floating 属信息性登记而非 fail-closed 拒绝；实现 ok 判定改为「无非信息性 flag 即 ok」，仅 alias_free_to_floating 不阻断。
+- 以上两处均为契约判据校准：deferred producer / 付费 / 外发 / posed(value≠0) / 第二套 IR / 非 scene3d/v1 / 观感翻态等阻断项全部保持 fail-closed，未放宽。

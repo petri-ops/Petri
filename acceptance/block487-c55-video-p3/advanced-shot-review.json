@@ -1,0 +1,108 @@
+{
+  "ok": true,
+  "schemaVersion": 1,
+  "shotKind": "scene3d_v1",
+  "sceneId": "sc2",
+  "scenes": [
+    {
+      "id": "sc1",
+      "visual": {
+        "kind": "card",
+        "title": "为什么天空是蓝色的？",
+        "text": "阳光 + 大气 = 颜色之谜"
+      },
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    },
+    {
+      "id": "sc2",
+      "visual": {
+        "kind": "scene3d_v1",
+        "specRef": "scene3d/v1:sc-2e803be3",
+        "source": {
+          "specRef": "scene3d/v1:sc-2e803be3",
+          "producer": "local_scene3d",
+          "producerVersion": "1.6.3"
+        },
+        "params": {
+          "camera": "static-16x9",
+          "jointsRef": "scene3d/v1:sc-2e803be3#joints"
+        },
+        "verification": {
+          "tool": "block459-probe",
+          "verdict": "mapping_feasible",
+          "digest": "sha256:2e803be355e92866d276357311fba73d60f7092b5533764771b6e4d3bbf4434e"
+        }
+      },
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    },
+    {
+      "id": "sc3",
+      "visual": {
+        "kind": "card",
+        "title": "我们看见蓝天",
+        "text": "散射蓝光进入眼睛"
+      },
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    }
+  ],
+  "exitChecks": {
+    "advanced_shot_replaces_normal_shot_without_touching_project_trunk": true,
+    "producer_renderer_domain_replaceability_criteria_hold": true,
+    "every_generated_shot_has_source_params_and_verification": true
+  },
+  "evidence": {
+    "source": true,
+    "params": true,
+    "verification": true
+  },
+  "sceneSpecMapping": {
+    "ok": true,
+    "specRef": "scene3d/v1:sc-2e803be3",
+    "jointCount": 1,
+    "flags": []
+  },
+  "constraints": {
+    "zeroNewDependency": true,
+    "cloudGeneration": "deferred_user_ruling",
+    "zeroBudget": true,
+    "localOnly": true,
+    "noEgress": true,
+    "noSecondSceneTruth": true,
+    "qualificationLineUntouched": true,
+    "humanReview": "pending_human_eye"
+  },
+  "deferredState": {
+    "text_to_video": "deferred_user_ruling",
+    "image_to_video": "deferred_user_ruling",
+    "character_animation": "deferred_user_ruling",
+    "physics": "deferred_user_ruling",
+    "particles": "deferred_user_ruling",
+    "high_cost_cache_retry_version_compare": "deferred_user_ruling"
+  },
+  "deferred": [
+    "text_to_video",
+    "image_to_video",
+    "character_animation",
+    "physics",
+    "particles",
+    "high_cost_cache_retry_version_compare"
+  ],
+  "humanReview": {
+    "status": "pending_human_eye"
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "constraints": {
+      "pendingHumanEye": true,
+      "zeroNewDependency": true,
+      "cloudGenerationDeferred": true
+    }
+  }
+}

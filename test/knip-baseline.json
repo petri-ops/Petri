@@ -216,6 +216,7 @@
     "files::acceptance/block482-c55-video-p0/probe-live.mjs",
     "files::acceptance/block483-c55-video-p1/probe-evidence.mjs",
     "files::acceptance/block486-c55-video-p2/probe-storyboard.mjs",
+    "files::acceptance/block487-c55-video-p3/probe-advanced-shot.mjs",
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",
     "files::resources/gen-ui/vendor/d3-7.9.0.min.js",

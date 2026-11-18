@@ -1,0 +1,72 @@
+{
+  "block": "BLOCK-487",
+  "package": "C-55 VIDEO-P3 高级镜头（本地 SceneSpec v1 3D 镜头替换）",
+  "at": "2026-11-18T13:59:57.967Z",
+  "verdict": "machine_pass",
+  "p0Source": {
+    "path": "acceptance/block482-c55-video-p0/video-project.json",
+    "sha256": "0b51ded7bdb70a3e7b1346100f3dbd8056f96ed2085df98708a7c3ad7ab2622d"
+  },
+  "sceneSpecSource": {
+    "probeReport": "acceptance/block-459/PROBE-REPORT.md",
+    "sha256SumFile": "acceptance/block-459/SHA256SUMS.txt",
+    "probeRestGlbSha256": "2e803be355e92866d276357311fba73d60f7092b5533764771b6e4d3bbf4434e",
+    "formDiscrepancy": {
+      "mechanicalVerdictAllGap": true,
+      "gapCount": 6,
+      "reportVerdict": "4 direct / 2 convert (PROBE-REPORT §3)",
+      "handling": "如实登记两形态差异，不伪造 direct verdict；本包只做 specRef 引用替换契约"
+    }
+  },
+  "unchanged": {
+    "durationSec": true,
+    "captions": true,
+    "evidenceRefs": true,
+    "narration": true,
+    "timeline": true
+  },
+  "replaceability": {
+    "ok": true,
+    "criteria": {
+      "changeProducer": true,
+      "changeRenderer": true,
+      "addDomain": true
+    },
+    "advancedShotCount": 1,
+    "flags": []
+  },
+  "evidence": {
+    "ok": true,
+    "evidence": {
+      "source": true,
+      "params": true,
+      "verification": true
+    },
+    "flags": []
+  },
+  "exitChecks": {
+    "E1_advanced_shot_replaces_normal_shot_without_touching_project_trunk": true,
+    "E2_producer_renderer_domain_replaceability_criteria_hold": true,
+    "E3_every_generated_shot_has_source_params_and_verification": true
+  },
+  "constraints": {
+    "zeroNewDependency": true,
+    "cloudGeneration": "deferred_user_ruling",
+    "zeroBudget": true,
+    "localOnly": true,
+    "noEgress": true,
+    "noSecondSceneTruth": true,
+    "qualificationLineUntouched": true,
+    "humanReview": "pending_human_eye"
+  },
+  "deferredState": {
+    "text_to_video": "deferred_user_ruling",
+    "image_to_video": "deferred_user_ruling",
+    "character_animation": "deferred_user_ruling",
+    "physics": "deferred_user_ruling",
+    "particles": "deferred_user_ruling",
+    "high_cost_cache_retry_version_compare": "deferred_user_ruling"
+  },
+  "humanReview": "pending_human_eye（观感/成片终审零代签）",
+  "allPass": true
+}
