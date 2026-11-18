@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 615,
+    "documentCount": 616,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 598
+    "managedMarkdown": 599
   },
   "documents": [
     {
@@ -12560,6 +12560,33 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「好 接下来 干啥子呢」= Jev 单一建议 3D P3 呈现层首包）。存量对账：蓝图 P3 ①③ 大半已被 RW-01 覆盖（viewerRegistry model3d adapter + 选择总线 + UI-654 工作面跳转）——只做真实增量：A=SceneSpec 证据面板（joints/provenance/verifierResults 呈现进 Model3DResultViewer，配对 scene snapshot 沿 sceneSnapshotFromUrl）；B=双形态互达（::compose mesh-reference 卡 → Result Studio 跳转 + selectComposePresentation 契约）；C=零内核改动证明（diff 分析）。实机腿=9223 离屏尽力跑，不可行如实判档。plan=docs/block463-3d-p3-presentation-plan.md。【收口 2026-11-18】P3 全交付：SceneSpec 证据面板（Model3DResultViewer 配对 scene.json 呈现 joints/provenance/verifierResults——BLOCK-460/462 证据链上屏，取数失败诚实降级）+ ::compose mesh-reference kind（沿 SceneSpec NODE_TYPES）+ Result Studio 跳转（selectComposePresentation 三面判定契约 + projectId 链路）+ 内核面零 diff 证明（bd0d5357..HEAD src/routes/agent-runner/viewerRegistry=0 行）+ 实机腿 block463-workbench-live 8/8 allPass（9223 离屏，真实管线产物经项目工作区装载——scene_not_found/mesh_reference_load_failed 两处实测根因留痕于 flow 注释；截图=工作台 viewport+场景节点 4+无装载失败）。台账 UI-710 in_progress（观感 pending_human_eye 不代签；ceiling 38/15/23 沿先例）。C-54 第 3 档 3D 域 P0/P1/P2/P3 全完成；P4 收口层=随包走已毕，catalog 扩展点深化（gen-ui 评估 P4）留候选。证据=acceptance/block463/。"
+    },
+    {
+      "id": "BLOCK-464",
+      "path": "docs/block464-gen-ui-catalog-extensions-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block464-gen-ui-catalog-extensions",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P4-LAUNCH",
+      "touchSurface": [
+        "docs/block464-gen-ui-catalog-extensions-plan.md",
+        "resources/gen-ui/compose-templates/",
+        "resources/skills/visualize/prompts/system.md",
+        "core/petri-server/helpers/pack-contributions.js"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "gen-ui",
+        "w11-p4",
+        "compose-templates",
+        "pack-contributions",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。"
     }
   ],
   "lastUpdated": "2026-11-18"
