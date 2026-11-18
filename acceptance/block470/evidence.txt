@@ -1,0 +1,24 @@
+BLOCK-470 — 方案B机械档 + Handoff 结构优化（2026-11-18）
+
+## T1 · 下一阶段提示词自动落档机械档
+- 纯函数 scripts/lib/next-phase-prompt-core.mjs：deriveNextPhaseDraft / classifyRulings / shouldWriteDraft。
+- CLI scripts/next-phase-prompt.mjs：读现读输入（npm run state / AUDIT-LOG 头部 / 最近提示词 §2 / next:suggest --json），派生草案骨架，幂等落档，仅 advice 不发令。
+- package.json：next:prompt（落档）+ next:prompt:report（--dry-run 只读）+ closeout --report next:prompt:report（报告级非阻塞、不落盘，守「自动任务禁写 git 追踪文件」纪律）。
+- HK-01 红绿：test/block470-next-phase-prompt.test.mjs 6/6——缺输入 external-blocked / 继承未消耗 R 项 / 观感零代签 / 新裁决标 pending_user_ruling / 幂等 / classifyRulings 不自造阶段。
+- 报告级实跑：建议锚=C-53-P2（confidence 0.53）· inherit_advice · 继承 7 条 R 项 · 仅 advice 未发令；无草案落盘（证明 --report 不写文件）。
+- 修复一次工具缺陷：初版未给 next:suggest 传 --context/--candidates 导致假 external-blocked，已修（env 可覆盖候选集）。
+
+## T2 · Handoff 结构优化
+- 纯函数 scripts/lib/handoff-compact-core.mjs：isChainLine / splitHandoffChain / collectChainRegion / compactHandoffLines。
+- 关键发现（干跑抓真）：头部链不是单行而是 6 行链区（lines[0..5]，第 5 行 9025 字符）；初始实现只看首行会漏裁，已修正为扫描连续链区，测试 fixture 同步从「单行」改为「多行链区」重跑红→绿。
+- CLI scripts/handoff-compact.mjs：import audit-log-compact.mjs 的 chooseArchiveTarget（不改该文件本体，保 AUDIT-LOG 契约测试），淘汰条目原文搬移 docs/archive/checkpoints/project-workspace-handoff-through-2026-11-18.md，幂等（复跑 already compact）。
+- 实测收敛：链 35 条 → 保留 1 条、34 条归档；活跃 handoff 27,135B → 9,943B；归档 19,715B（链 34 条 + 旧快照段原文）。
+- 正文快照段刷新到 2026-11-18 现读（旧段原文搬移归档）；g0-start-audit G0-START-09 正则文本（HLE-C0/G0-START/LF0）在活跃文件 count=0，核实非本批破坏。
+- HK-01 红绿：test/block470-handoff-compact.test.mjs 7/7——拆分含裸条目 / 全链区扫描 / 保留最近 N / 锚点保留 / 幂等 / fail-closed / throughDate。
+
+## 门禁与边界
+- 两测试合计 13/13；docs:check PASS(624)；hygiene:check PASS；normalize-eol 零漂移。
+- 零产品代码 / UI / 观感 / 新依赖 / 自动发令；不改 audit-log-compact.mjs 本体；registry lastUpdated 未手改。
+- 既有红如实：perf packaged_start 抖动（SKIPPED 不算 PASS）、test-affected block464 evidence gap、g0 正则文本历史残留。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

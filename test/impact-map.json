@@ -1669,6 +1669,10 @@
         "scripts/lib/gate-report-schema.mjs",
         "scripts/docs-governance.mjs",
         "scripts/audit-log-compact.mjs",
+        "scripts/handoff-compact.mjs",
+        "scripts/next-phase-prompt.mjs",
+        "scripts/lib/handoff-compact-core.mjs",
+        "scripts/lib/next-phase-prompt-core.mjs",
         "scripts/check-*.mjs",
         "scripts/test-affected.mjs",
         "scripts/verify-schema.js",
@@ -1676,6 +1680,8 @@
       ],
       "tests": [
         "test/docs-governance.test.mjs",
+        "test/block470-handoff-compact.test.mjs",
+        "test/block470-next-phase-prompt.test.mjs",
         "test/test-affected.test.mjs",
         "test/docs-roll-index.test.mjs",
         "test/nso-w7-governance-tooling.test.mjs"
