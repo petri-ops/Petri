@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "generator": "node scripts/c53-ia-map.mjs",
+  "sourceCommit": "1d13915d43910d736c9343d53947145bfafdd587",
+  "generatedAt": "2026-11-18T07:39:24.096Z",
+  "note": "模型可读 IA 映射；由 collector 从 App.tsx 现读路由派生，被 test/c53-ia-map.test.mjs 锚定。",
+  "routes": [
+    {
+      "path": "/",
+      "component": "WelcomePage",
+      "surface": "main",
+      "sourceLine": 216
+    },
+    {
+      "path": "/projects",
+      "component": "HomePage",
+      "surface": "main",
+      "sourceLine": 217
+    },
+    {
+      "path": "/extensions",
+      "component": "ExtensionsPage",
+      "surface": "main",
+      "sourceLine": 220
+    },
+    {
+      "path": "/settings",
+      "component": "SettingsPage",
+      "surface": "main",
+      "sourceLine": 224
+    },
+    {
+      "path": "/knowledge",
+      "component": "KnowledgePage",
+      "surface": "main",
+      "sourceLine": 227
+    },
+    {
+      "path": "/review",
+      "component": "ReviewModePage",
+      "surface": "main",
+      "sourceLine": 229
+    },
+    {
+      "path": "/project/:projectId/results",
+      "component": "LegacyResultsRedirect",
+      "surface": "main",
+      "sourceLine": 233
+    },
+    {
+      "path": "/project/:projectId/*",
+      "component": "ProjectWorkspace",
+      "surface": "main",
+      "sourceLine": 236
+    },
+    {
+      "path": "/window/terminal/:sessionId",
+      "component": "TerminalWindowPage",
+      "surface": "window",
+      "sourceLine": 287
+    },
+    {
+      "path": "/window/command-center",
+      "component": "CommandCenterPage",
+      "surface": "window",
+      "sourceLine": 288
+    },
+    {
+      "path": "/window/side-chat",
+      "component": "SideChatWindowPage",
+      "surface": "window",
+      "sourceLine": 289
+    },
+    {
+      "path": "/window/rail",
+      "component": "RailPage",
+      "surface": "window",
+      "sourceLine": 290
+    }
+  ],
+  "redirects": [
+    {
+      "from": "/skills",
+      "to": "/extensions?tab=domain-skills",
+      "surface": "main",
+      "sourceLine": 221
+    },
+    {
+      "from": "/plugins",
+      "to": "/extensions?tab=domain-plugins",
+      "surface": "main",
+      "sourceLine": 222
+    },
+    {
+      "from": "*",
+      "to": "/",
+      "surface": "main",
+      "sourceLine": 238
+    },
+    {
+      "from": "*",
+      "to": "/",
+      "surface": "window",
+      "sourceLine": 291
+    }
+  ],
+  "highFrequencyPaths": [
+    {
+      "id": "HFP-1",
+      "name": "首问直达工作区",
+      "steps": [
+        "/",
+        "/project/:projectId/*"
+      ]
+    },
+    {
+      "id": "HFP-2",
+      "name": "项目管理进入工作区",
+      "steps": [
+        "/projects",
+        "/project/:projectId/*"
+      ]
+    },
+    {
+      "id": "HFP-3",
+      "name": "工作区到代码评审",
+      "steps": [
+        "/project/:projectId/*",
+        "/review"
+      ]
+    },
+    {
+      "id": "HFP-4",
+      "name": "扩展中心技能/插件",
+      "steps": [
+        "/extensions",
+        "/skills",
+        "/plugins"
+      ]
+    },
+    {
+      "id": "HFP-5",
+      "name": "知识空间回到工作区",
+      "steps": [
+        "/knowledge",
+        "/project/:projectId/*"
+      ]
+    }
+  ]
+}

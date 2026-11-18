@@ -1,3 +1,4 @@
+最后更新：2026-11-18（**BLOCK-471 收口（C-53 P2 IA 与高频路径 · 全绿）**：ia-map.json（12 路由+4 重定向+5 高频路径）+ 消费测试 7/7、--check PASS、P1 包 8/8 零回归、单源重生成 625 文档；零 UI 写面/观感。串行 active 槽位回空；C-53 P3-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-470 收口（方案B机械档 + handoff 结构优化 · 全绿）**：next:prompt 生成器+closeout --report 报告级（仅 advice 不发令）、handoff 头部链 35→1 条归档收敛 27KB→9.9KB、快照刷新现读；测试 13/13 + docs:check(624) + hygiene 绿。零产品代码/观感。串行 active 槽位回空；C-53 P2-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-469 收口（S5 img2threejs 借形封装首片 · 门禁全绿）**：纯 JS 门禁范式骨架 + 契约测试 7/7，零整包安装/外部服务默认关/零新增依赖；S1-S5 五步串行全部收口，active 槽位回空。后续待用户发令=C-53 P2-P7/Polyfork/观感签字/D5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-468 收口（S4 基础设施清偿批 · 门禁全绿）**：lint-ledger --update 死代码修复+工具负测 4/4、Q-MATRIX §5 收拢 74/21/0/7（BLOCK-263 口径）、knip 346 键定性报告；零产品代码/观感/基线放宽。串行 active 槽位回空；S5 img2threejs 借形封装待续。G0 开发期常态 · 不外推 packaged/Provider/GA。）

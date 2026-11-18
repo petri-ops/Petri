@@ -8678,13 +8678,18 @@
       "note": "BLOCK-465 / C-53 S1：P0 设计基线冻结（collector 机械复算 design-charter/theme token 契约/UI 债 38/组件规则，快照可复算）+ P1 模型可读上下文包（resources/design-context/ 沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿+篡改负测；classifiesScripts=true 确保新脚本命中本规则，acceptance 目录不触发全量升级。证据 acceptance/block465-c53-p0p1/**。",
       "patterns": [
         "scripts/c53-design-baseline.mjs",
+        "scripts/c53-ia-map.mjs",
         "test/c53-design-context-pack.test.mjs",
+        "test/c53-ia-map.test.mjs",
         "resources/design-context/**",
         "docs/block465-c53-design-baseline-context-pack-plan.md",
-        "acceptance/block465-c53-p0p1/**"
+        "docs/block471-c53-p2-ia-highfreq-plan.md",
+        "acceptance/block465-c53-p0p1/**",
+        "acceptance/block471-c53-p2-ia/**"
       ],
       "tests": [
-        "test/c53-design-context-pack.test.mjs"
+        "test/c53-design-context-pack.test.mjs",
+        "test/c53-ia-map.test.mjs"
       ],
       "commands": [
         "docs-check",
