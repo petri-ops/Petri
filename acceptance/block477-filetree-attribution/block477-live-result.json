@@ -1,0 +1,42 @@
+{
+  "package": "BLOCK-477",
+  "at": "2026-11-18",
+  "probe": "block477-filetree-live",
+  "triState": "reproduced_and_attributed",
+  "samples": [
+    {
+      "phase": "baseline_first_page",
+      "rows": 200,
+      "hidden": false,
+      "t": 1794997430671
+    },
+    {
+      "phase": "after_click_300ms",
+      "rows": 400,
+      "hidden": false,
+      "t": 1794997430993
+    },
+    {
+      "phase": "after_click_1200ms",
+      "rows": 400,
+      "hidden": false,
+      "t": 1794997431896
+    },
+    {
+      "phase": "after_click_2600ms",
+      "rows": 200,
+      "hidden": false,
+      "t": 1794997433299
+    }
+  ],
+  "observations": {
+    "baseline": 200,
+    "peak": 400,
+    "troughAfterPoll": 200,
+    "grewAfterClick": true,
+    "reboundAfter2s": true,
+    "hiddenEver": false
+  },
+  "fatal": null,
+  "screenshot": "acceptance/block477-filetree-attribution/block477-filetree-repro.png"
+}

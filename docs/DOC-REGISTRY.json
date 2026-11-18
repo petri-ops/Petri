@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 630,
+    "documentCount": 632,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 613
+    "managedMarkdown": 615
   },
   "documents": [
     {
@@ -12725,6 +12725,57 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
+    },
+    {
+      "id": "BLOCK-477",
+      "path": "docs/block477-filetree-repro-attribution-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block477-filetree-repro-attribution",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block477-filetree-repro-attribution-plan.md",
+        "scripts/block477-filetree-repro.mjs",
+        "scripts/block477-filetree-live.cjs",
+        "test/block477-filetree-repro.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block477-filetree-attribution/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c47",
+        "filetree",
+        "pagination",
+        "repro",
+        "attribution",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「开始 C-47」）。范围=复现+归因专项（沿 BLOCK-358 未竟路径）：源码锚定（loadMoreRoot append / refreshFiles offset=0 覆盖 / 2s 轮询）+ 分页时序状态机确定性复现 + CDP 9223 离屏实机连续点击（环境允许时）+ 三态结论；HK-01 红绿先行（缺席红→5/5 绿含负测）；归因成立只立修复票不修产品代码、不销票。非范围=猜测性修复/RightFileTree.tsx 与 files.js 写面/观感代签/新依赖/用户资产/G1+。plan=docs/block477-filetree-repro-attribution-plan.md。"
+    },
+    {
+      "id": "BLOCK-477-REPORT",
+      "path": "docs/block477-filetree-attribution-report.md",
+      "kind": "work-package",
+      "status": "reference",
+      "canonical": false,
+      "truthDomain": "block477-filetree-repro-attribution",
+      "entrypoint": "docs/block477-filetree-repro-attribution-plan.md",
+      "archivePolicy": "retain_stable_path",
+      "touchSurface": [
+        "docs/block477-filetree-attribution-report.md"
+      ],
+      "tags": [
+        "c47",
+        "attribution",
+        "report",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "BLOCK-477 归因报告（reference）：三态结论 reproduced_and_attributed；根因=本地 2s 轮询 refreshFiles() 以 offset=0 覆盖 loadMoreRoot 续拉的第 2 页；三重证据（源码锚定+状态机+CDP 实机 400→200）；修复票候选方向 A/B 供用户裁决，未实施、未销票。"
     },
     {
       "id": "BLOCK-476",

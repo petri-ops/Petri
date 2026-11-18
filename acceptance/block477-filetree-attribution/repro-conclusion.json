@@ -1,0 +1,47 @@
+{
+  "package": "BLOCK-477",
+  "source": "frontend/src/pages/project-workspace/RightFileTree.tsx",
+  "triState": "reproduced_and_attributed",
+  "statement": "源码三处因果模式在场，状态机确定性复现「加载第 2 页后 2s 轮询拉回第一页」→ B3 惰性/回弹根因可归因。",
+  "sourceAnchors": {
+    "loadMoreAppend": true,
+    "refreshResetsToOffsetZero": true,
+    "pollEvery2s": true,
+    "allPresent": true,
+    "source": "frontend/src/pages/project-workspace/RightFileTree.tsx"
+  },
+  "replay": {
+    "input": {
+      "total": 520,
+      "pageSize": 200,
+      "clicks": 2,
+      "pollAfterEachClickMs": 2000,
+      "pollResets": true
+    },
+    "initialPage": {
+      "rows": 200,
+      "cursorDone": 200
+    },
+    "afterFirstClick": {
+      "rows": 400,
+      "cursorDone": 400
+    },
+    "afterPoll": {
+      "rows": 200,
+      "cursorDone": 200
+    },
+    "reboundObserved": true,
+    "inertObserved": true,
+    "rootCauseChain": "loadMoreRoot append → 2s poll refreshFiles → fetchDirPage('',0) 覆盖 setTree + 重置 rootMore.done"
+  },
+  "rootCauseAttributed": true,
+  "fixApplied": false,
+  "ticketStatus": "kept-open",
+  "ticketStatusNote": "C-47 归因成立仅立修复票，不销票；修复实施属独立票，需用户显式发令。",
+  "evidenceLevel": "source-anchored deterministic state machine（GUI 实机证据见 acceptance/block477-filetree-attribution/ 若在场）",
+  "nextStep": "立 C-47 修复票（轮询不重置已加载分页 / 或只增量对账），用户发令后实施；GUI 实机腿佐证。",
+  "honestBoundary": "状态机为源码语义抽象，非 GUI 真值；triState 不表述为「已修复」。",
+  "at": "2026-11-18",
+  "priorPackage": "BLOCK-358",
+  "priorConclusion": "observed_but_not_reproduced (no state-machine model)"
+}

@@ -7979,6 +7979,24 @@
       "scriptRole": "acceptance-probe"
     },
     {
+      "id": "block477-filetree-repro-attribution",
+      "note": "BLOCK-477 C-47 复现与归因：源码锚定 + 分页时序状态机 + CDP 实机腿 + 三态结论；脚本只读不写产品代码。新测试必须挂规则（nso-w5-impact-coverage 契约）。",
+      "patterns": [
+        "scripts/block477-*.mjs",
+        "scripts/block477-*.cjs",
+        "test/block477-*.test.mjs",
+        "docs/block477-*.md"
+      ],
+      "tests": [
+        "test/block477-filetree-repro.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "acceptance-probe"
+    },
+    {
       "id": "ui-modelcfg-collapse",
       "note": "UI-MODELCFG-1 / UI-COLLAPSE-2：模型菜单内快捷配置（上下文窗口 + 思考强度）与折叠时机改为 run 内统一展开。",
       "patterns": [
