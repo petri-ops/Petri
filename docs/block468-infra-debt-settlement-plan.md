@@ -43,3 +43,9 @@ G1–G3 全绿或明确 external-blocked + 六件套 + 证据落 `acceptance/blo
 G1 红→绿 4/4（工具负测，HK-01 判据侧）+ lint 负测 34/34；G2 Q-MATRIX 两处一致（74/21/0/7=102）+ knip 346 键定性报告 + knip/ratchet 绿；G3 docs/ui-audit/closeout 见 AUDIT-LOG。单源 JSON 重生成 406 规则/621 文档。证据=acceptance/block468-infra-debt/。零产品代码/观感/基线放宽。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口门禁归属（2026-11-18）
+
+closeout 全绿（perf SKIPPED）：quality:perf packaged_start 采样 487–495ms vs 阈值 485ms（median 373ms x1.3）——本批零 perf 面改动（治理文档+lint 工具+单源 JSON），该红为打包后端启动存量边界抖动（300ms 轮询粒度，noiseSources 在册），归属既有 perf 基线，不属本包，不重打基线掩盖。与 BLOCK-467 同一继承红。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
