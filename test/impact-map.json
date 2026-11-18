@@ -9000,6 +9000,26 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block478-c52-p2-assistant-ui",
+      "note": "BLOCK-478 / C-52 余项 P2：assistant-ui 五种交互形态（流式消息/工具确认/附件/结构化数据/选项列表）只做模式借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数 + assistant-ui-pattern.json 模型可读契约 + 消费测试（篡改负测）；零 UI 写面/观感代签/新依赖/不替换 SimpleChat。证据 acceptance/block478-c52-p2-assistant-ui/**。",
+      "patterns": [
+        "scripts/c52-assistant-ui-pattern.mjs",
+        "test/c52-assistant-ui-pattern.test.mjs",
+        "resources/design-context/assistant-ui-pattern.json",
+        "docs/block478-c52-p2-assistant-ui-pattern-plan.md",
+        "acceptance/block478-c52-p2-assistant-ui/**"
+      ],
+      "tests": [
+        "test/c52-assistant-ui-pattern.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "pattern-contract-collector"
     }
   ]
 }

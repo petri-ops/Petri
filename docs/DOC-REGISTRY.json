@@ -9,11 +9,40 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 632,
+    "documentCount": 633,
     "lastUpdated": "2026-11-18",
     "managedMarkdown": 615
   },
   "documents": [
+    {
+      "id": "BLOCK-478",
+      "path": "docs/block478-c52-p2-assistant-ui-pattern-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block478-c52-p2-assistant-ui-pattern",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block478-c52-p2-assistant-ui-pattern-plan.md",
+        "scripts/c52-assistant-ui-pattern.mjs",
+        "test/c52-assistant-ui-pattern.test.mjs",
+        "resources/design-context/assistant-ui-pattern.json",
+        "resources/design-context/manifest.json",
+        "acceptance/block478-c52-p2-assistant-ui/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c52",
+        "assistant-ui",
+        "pattern-borrowing",
+        "contract-freeze",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 C-52 余项」并授权定形 P2–P5 先做项）。定形=P2 assistant-ui 模式研究：发令边界逐字对应 C-52 P2，五形态有本地主权锚点可纯静态冻结。范围=静态扫描器 + assistant-ui-pattern.json 模型可读契约（六组读数：流式消息/工具确认/附件/结构化数据/选项列表/边界）+ 消费测试 + manifest 同步。HK-01 红→绿 11/11（缺席红+篡改负测）、--check PASS、C-53 P0–P7 Node 79/79 零回归、manifest sha 一致；零 UI 写面/观感代签/新依赖/不替换 SimpleChat。观感 UI-706/707/709/710 保持 in_progress 零代签；C-52 P3–P5 候选未启动。证据=acceptance/block478-c52-p2-assistant-ui/。"
+    },
     {
       "id": "BLOCK-457",
       "path": "docs/block-457-dev-single-backend-ownership-plan.md",
