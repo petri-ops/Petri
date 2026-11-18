@@ -1,3 +1,4 @@
+最后更新：2026-11-18（**BLOCK-469 收口（S5 img2threejs 借形封装首片 · 门禁全绿）**：纯 JS 门禁范式骨架 + 契约测试 7/7，零整包安装/外部服务默认关/零新增依赖；S1-S5 五步串行全部收口，active 槽位回空。后续待用户发令=C-53 P2-P7/Polyfork/观感签字/D5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-468 收口（S4 基础设施清偿批 · 门禁全绿）**：lint-ledger --update 死代码修复+工具负测 4/4、Q-MATRIX §5 收拢 74/21/0/7（BLOCK-263 口径）、knip 346 键定性报告；零产品代码/观感/基线放宽。串行 active 槽位回空；S5 img2threejs 借形封装待续。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-467 收口（3D P4 对账 + Gym 编排首片 · 门禁全绿）**：§9 对账表落 acceptance（M0/M1/M3 闭环、M2 部分、M4 本次）+ gym.mjs reset→step→finalize 真跑 verdict pass、digest/sha256 在册；HK-01 6/6 + digest 双跑；零新增依赖/零训练框架/零观感面。串行 active 槽位回空；C-53 P2-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 最后更新：2026-11-18（**BLOCK-466 收口（W11 P3 流式首切片 · 门禁全绿）**：::compose 流式稳定占位+完成后渲染；HK-01 8/8+组件 4/4+邻域 115/115+memo 3/3+断线续传兼容；实机腿 external-blocked 归因；零新增依赖/观感不代签。串行 active 槽位回空；C-53 P2-P7 待下批授权。G0 开发期常态 · 不外推 packaged/Provider/GA。）

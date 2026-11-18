@@ -8856,6 +8856,22 @@
       ]
     },
     {
+      "id": "block469-img2threejs-shim",
+      "note": "BLOCK-469 S5 img2threejs 借形封装首片：纯 JS 门禁范式骨架（spec-gate.mjs）+ 契约测试；零整包安装/外部服务默认关。改这些面必跑借形门禁契约测试。证据 acceptance/block469-img2threejs-shim/**。",
+      "patterns": [
+        "sidecars/img2threejs-shim/**",
+        "test/block469-img2threejs-shim.test.mjs",
+        "docs/block469-img2threejs-shim-plan.md",
+        "acceptance/block469-img2threejs-shim/**"
+      ],
+      "tests": [
+        "test/block469-img2threejs-shim.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "block468-infra-debt",
       "note": "BLOCK-468 S4 基础设施清偿批（治理批无产品代码）：lint-ledger --update 死代码修复（planWarnBaselineUpdate 纯函数+工具负测红绿）+ Q-MATRIX §5 收拢 + knip 346 键定性报告。改这些面必跑工具负测 + lint/m0 判据邻域 + knip ratchet。证据 acceptance/block468-infra-debt/**。",
       "patterns": [
