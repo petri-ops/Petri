@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "petri-performance-trust-contract",
+  "kind": "model-readable-performance-trust",
+  "generatedBy": "node scripts/c53-performance-trust.mjs",
+  "sourceCommit": "51e8fa7829d8c0f99aae24775bded8db70940143",
+  "generatedAt": "2026-11-18T08:38:01.265Z",
+  "derivedFrom": [
+    "frontend/src/components/copilot/gen-ui/referencesStreaming.ts + references.ts（BLOCK-466 流式投影）",
+    "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx + .test.tsx（BLOCK-154 memo）",
+    "test/m4-sse-real-endpoint.test.mjs + scripts/lib-sse-frames.mjs（M55 SSE 续传）",
+    "scripts/ui-design-a11y.mjs STATE_MATRIX + frontend/src TSX 全源（加载/空/错误态）",
+    "frontend/src/components/copilot/gen-ui/GenUiMessageContent.tsx + .streaming.test.tsx（首屏占位）"
+  ],
+  "streamingProjection": {
+    "streamingForcesPending": true,
+    "composeToPending": true,
+    "completedUpgrade": true,
+    "pureContentProjection": true,
+    "jsonPrefixGuard": true,
+    "pendingPart": true,
+    "contractItCount": 8
+  },
+  "memoBoundary": {
+    "reactMemo": true,
+    "bailOutIt": true,
+    "identityBreakIt": true,
+    "callbackIdentityIt": true,
+    "contractItCount": 3
+  },
+  "sseResume": {
+    "afterSeqResume": true,
+    "doneSentinel": true,
+    "crossChunkMerge": true,
+    "pingTransparent": true,
+    "terminalOrder": true,
+    "missingSentinelNegative": true,
+    "contractTestCount": 7,
+    "parserInPlace": true
+  },
+  "trustStateMachine": {
+    "trustCells": 12,
+    "complete": true,
+    "evidence": {
+      "roleAlert": 94,
+      "roleStatus": 57,
+      "ariaBusy": 3,
+      "ariaLive": 12
+    },
+    "cells": 32
+  },
+  "renderSkeleton": {
+    "pendingTestId": true,
+    "streamingBranch": true,
+    "partialPlaceholderIt": true,
+    "fullStillPlaceholderIt": true,
+    "plainTextFastPathIt": true,
+    "fenceExemptIt": true,
+    "contractItCount": 4
+  },
+  "humanEyeSlots": {
+    "humanEyeSigned": false,
+    "status": "in_progress",
+    "slots": [
+      "C-53 P5 流式占位/骨架动画观感（pending_human_eye，待用户实机过目）",
+      "C-53 P5 加载/空/错误态视觉观感（pending_human_eye，待用户实机过目）"
+    ],
+    "readOnly": true,
+    "note": "Agent 不代签观感；仅机械复算可信态/性能契约，动画与视觉观感签字槽留用户。"
+  },
+  "boundaries": {
+    "humanEyeSigned": false,
+    "readOnly": true,
+    "note": "观感项（流式占位/骨架动画/加载空错误视觉）pending_human_eye 保持 in_progress，Agent 不代签；本契约为只读机械扫描，不改任何 UI 运行时代码。"
+  }
+}

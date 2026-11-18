@@ -19,7 +19,7 @@
 
 > 本节是交接快照，不是第二真相源；终态以 Git / registry / evidence 原档为准。历史快照原文已搬移 `docs/archive/checkpoints/project-workspace-handoff-through-2026-11-18.md`（链 34 条 + 旧快照段）。
 
-- `main` @ 本批 HEAD（见下方提交）；串行 active 工作包=无（BLOCK-473 / C-53 P4 收口后槽位回空；P0 465 / P1 465 / P2 471 / P3 472 / P4 473 全 completed）；下游 C-53 P5-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- `main` @ 本批 HEAD（见下方提交）；串行 active 工作包=无（BLOCK-474 / C-53 P5 收口后槽位回空；P0 465 / P1 465 / P2 471 / P3 472 / P4 473 / P5 474 全 completed）；下游 C-53 P6–P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。
 - **S1–S5 五步串行全部收口**（2026-11-18）：BLOCK-465（C-53 P0/P1 设计基线+上下文包）→466（W11 P3 流式首切片）→467（3D P4 对账+Gym 编排）→468（基础设施清偿）→469（img2threejs 借形封装）。每步 HK-01 红绿 + 六件套回写 + 定向 closeout PASS；证据落各自 acceptance/。
 - **自动化机制落地**：方案 A——`petri-project-governance/references/NEXT-PHASE-PROMPT-HANDOFF.md`（阶段收口自动落档下一阶段提示词纪律，自动落档草案/不自动发令）；下一阶段提示词=`docs/next-phase-e2e-prompt-2026-11-18-b2.md`（C-53 P2–P7 + Polyfork 只读收集，§2 自包含正文）。
 - **下游待发令**：C-53-P2（Jev 现读 confidence 0.58~0.95，advice-only，需用户发令）；Polyfork 授权结论；post-h9 D5 原件处置。观感 pending_human_eye 零代签：UI-706/707/709/710 + E 类人眼 22 条 + C-53 P7 人眼收口。

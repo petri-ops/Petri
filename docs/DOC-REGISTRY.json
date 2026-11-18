@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 627,
+    "documentCount": 628,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 610
+    "managedMarkdown": 611
   },
   "documents": [
     {
@@ -12725,6 +12725,35 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
+    },
+    {
+      "id": "BLOCK-474",
+      "path": "docs/block474-c53-p5-performance-trust-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block474-c53-p5-performance-trust",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block474-c53-p5-performance-trust-plan.md",
+        "scripts/c53-performance-trust.mjs",
+        "resources/design-context/performance-trust.json",
+        "test/c53-performance-trust.test.mjs",
+        "acceptance/block474-c53-p5-performance-trust/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c53",
+        "performance",
+        "trust-state",
+        "streaming",
+        "design-context",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「开始 C-53 P5」；批2提示词 S4/R12）。范围=沿 P1–P4 先例新增独立静态扫描器 scripts/c53-performance-trust.mjs（纯函数 collectPerformanceTrust 从四真源机械复算六组读数：流式投影可信态/memo 渲染边界/SSE 断线续传/加载空错误状态机/首屏占位/观感留槽）+ 模型可读 performance-trust.json（生成器自身维护 manifest sha）+ 消费测试锚定（篡改负测 fail-closed）。零 UI 运行时写面/观感代签/新依赖。非范围=改四真源（referencesStreaming/references/SimpleChatMessageRow/m4-sse-real-endpoint/ui-design-a11y 零回归基线）/theme-token-contract.test.ts（P0 锚定）/design-charter 冻结项/C-53 P6-P7/用户资产/G1+。plan=docs/block474-c53-p5-performance-trust-plan.md。【收口 2026-11-18】HK-01 红→绿 11/11（模块缺席 ERR_MODULE_NOT_FOUND → 11/11）；--check PASS（readingIds=6/streamingIts=8/memoIts=3/sseTests=7/trustCells=12/skeletonIts=4）；performance-trust.json 六组读数（流式投影 pending 强制+compose→pending 替换+completed 升级+纯 content 投影 / memo 边界+3 it / SSE 六契约+parseSseStream / 加载空错误 12 格+证据>0 / 首屏占位+4 it / 观感留槽 in_progress 零代签）；P0–P4+M55 Node 42/42 + B466(8)/首屏(4)/B154(3) 前端 15/15 零回归；docs:check/ui:audit/hygiene 绿；manifest sha 一致。零 UI 运行时写面/观感代签/新依赖。closeout perf SKIPPED（G0 噪声）；block464/470 gap 既有红。证据=acceptance/block474-c53-p5-performance-trust/。C-53 P6-P7 待后续发令。"
     },
     {
       "id": "BLOCK-473",

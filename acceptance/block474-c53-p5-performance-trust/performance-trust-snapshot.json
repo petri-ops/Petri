@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-performance-trust",
+  "capability": "block474-c53-p5-performance-trust",
+  "sourceCommit": "51e8fa7829d8c0f99aae24775bded8db70940143",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-performance-trust.mjs",
+  "generatedAt": "2026-11-18T08:38:01.265Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；观感项 pending_human_eye 不代签，本包只读不改任何 UI 运行时代码。",
+  "readings": {
+    "streamingProjection": {
+      "value": {
+        "streamingForcesPending": true,
+        "composeToPending": true,
+        "completedUpgrade": true,
+        "pureContentProjection": true,
+        "jsonPrefixGuard": true,
+        "pendingPart": true,
+        "contractItCount": 8
+      },
+      "source": "referencesStreaming.ts + references.ts + references-streaming.test.ts",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    },
+    "memoBoundary": {
+      "value": {
+        "reactMemo": true,
+        "bailOutIt": true,
+        "identityBreakIt": true,
+        "callbackIdentityIt": true,
+        "contractItCount": 3
+      },
+      "source": "SimpleChatMessageRow.tsx + .test.tsx（BLOCK-154）",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    },
+    "sseResume": {
+      "value": {
+        "afterSeqResume": true,
+        "doneSentinel": true,
+        "crossChunkMerge": true,
+        "pingTransparent": true,
+        "terminalOrder": true,
+        "missingSentinelNegative": true,
+        "contractTestCount": 7,
+        "parserInPlace": true
+      },
+      "source": "m4-sse-real-endpoint.test.mjs + lib-sse-frames.mjs（M55）",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    },
+    "trustStateMachine": {
+      "value": {
+        "trustCells": 12,
+        "complete": true,
+        "evidence": {
+          "roleAlert": 94,
+          "roleStatus": 57,
+          "ariaBusy": 3,
+          "ariaLive": 12
+        },
+        "cells": 32
+      },
+      "source": "ui-design-a11y.mjs STATE_MATRIX + frontend/src TSX 全源",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    },
+    "renderSkeleton": {
+      "value": {
+        "pendingTestId": true,
+        "streamingBranch": true,
+        "partialPlaceholderIt": true,
+        "fullStillPlaceholderIt": true,
+        "plainTextFastPathIt": true,
+        "fenceExemptIt": true,
+        "contractItCount": 4
+      },
+      "source": "GenUiMessageContent.tsx + .streaming.test.tsx（BLOCK-466）",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    },
+    "humanEyeSlots": {
+      "value": {
+        "humanEyeSigned": false,
+        "status": "in_progress",
+        "slots": [
+          "C-53 P5 流式占位/骨架动画观感（pending_human_eye，待用户实机过目）",
+          "C-53 P5 加载/空/错误态视觉观感（pending_human_eye，待用户实机过目）"
+        ],
+        "readOnly": true,
+        "note": "Agent 不代签观感；仅机械复算可信态/性能契约，动画与视觉观感签字槽留用户。"
+      },
+      "source": "UI 台账 pending_human_eye（观感零代签）",
+      "command": "node scripts/c53-performance-trust.mjs",
+      "capturedAt": "2026-11-18T08:38:01.146Z"
+    }
+  }
+}
