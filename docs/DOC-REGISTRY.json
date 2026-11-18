@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 646,
+    "documentCount": 647,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 629
+    "managedMarkdown": 630
   },
   "documents": [
     {
@@ -13396,6 +13396,28 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S2 / BLOCK-492 plan §3 W2 波次）。W2 实现票准备：三票实况核对（P4-05b 第一刀+v2a 已于 BLOCK-322 时代 2026-10-30/31 实现且测试/实机证据齐——本包复跑 23/23 绿；v2b 半实现：特征表纯函数库+前端同源移植+几何签名探针定案在场，D2 白名单键/D1 求值器消费/导入链接线/sidecar sha 锚定缺位）+ v2b D2/D1 契约测骨架（skip 形态承载，环境开关复跑捕真实红，断言严格从 D1/D2/D3/D5 已裁决形态导出）+ 登记漂移如实登记（BLOCK-491 契约重算待其 reopen 条款=用户发令）。零产品实现落地/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】closeout 定向链 exit=0；骨架落档（skip 2绿+6skip/激活 3真红+5绿锚）；登记漂移列用户动作；串行槽位回空。"
+    },
+    {
+      "id": "BLOCK-495",
+      "path": "docs/block495-candidate-pool-review-2026-11-19.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block495-candidate-pool-review",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block495-candidate-pool-review-2026-11-19.md"
+      ],
+      "tags": [
+        "BLOCK-492",
+        "W3",
+        "candidate-pool",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S3 / BLOCK-492 plan §3 W3 波次）。W3 候选池转正评审：六组候选逐条六段材料（现状/候选/风险/推荐/影响面/退出成本），状态 pending_user_ruling 不启动实现。核对结论：C-45 已由 BLOCK-355 完成（trimmer 单元化+防御层+6/6 测试）、C-35~C-44 已由 BLOCK-264 完成（登记滞后第 3 次抓到）——两组候选消亡如实钉死；真候选四项=MIGRATION-IDEMPOTENT（推荐自愈补列收窄版记账）/BLOCK-490（推荐 D2/D8 先裁+最小垂直切片）/C-50（推荐维持登记等场景）/C-56（推荐手册内容稿先行）。他方 WIP（backlog 原件/block490 原件/gateway-design.md）零触碰；零实现/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-18"
