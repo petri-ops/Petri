@@ -1,0 +1,57 @@
+{
+  "capability": "block494-w2-tickets-readiness",
+  "block": "BLOCK-494",
+  "wave": "W2 已裁决实现票准备（BLOCK-492 plan §3 W2 · 零产品实现落地）",
+  "capturedAt": "2026-11-19",
+  "platform": "darwin arm64 / Node v24.16.0",
+  "ticketRealityCheck": {
+    "summary": "W2 预设三票全 deferred，仓库实况两票已实现（BLOCK-322 时代 2026-11-30/31 前落地，提交信息即引用 RULING-04 v2 §5 开工序）——登记漂移如实登记，改判归用户（BLOCK-491 reopen 条款）",
+    "p405b": {
+      "registered": "deferred_user_ruling（BLOCK-491 §4）",
+      "reality": "已实现+已接线：resolveToleranceFeatures + buildGdtAnnotationLayer 于 model3d-cad-drawing.js 主链；实机证据 acceptance/block-322-ruling04/p405b-live-macos.json（2026-10-30，occt-wasm 真实 STEP 腿 + D5 数值对账 height 30✓/width 120.4✗ 诚实 mismatch）",
+      "tests": "test/rw06-p405b-dimension-lines.test.mjs + rw06-p405b-dimension-annotations.test.mjs（本包复跑全绿）",
+      "residual": "完整尺寸链/GD&T（P4-05 主纲余量）另案；manifest capabilities.dimensions/gdt 保持诚实 false"
+    },
+    "v2a": {
+      "registered": "deferred_user_ruling（BLOCK-491 §4）",
+      "reality": "全实现：c88f2fd9（2026-10-31）applyMateConstraintV2a + 旋转合成 scene3d.js:660 区；实机证据 acceptance/block-322-p3/p3-03-v2a-live-macos.json（Blender 面心对账 gap=0 + rotation 读回一致）",
+      "probe": "欧拉序探针已实测在场：默认 rotation_mode='XYZ'、Rz·Ry·Rx 列向量右乘（Blender 5.2.3 实测定案）；本机 /Applications/Blender.app=5.2.3 LTS 与探针一致；材料写 4.5=版本号登记漂移",
+      "tests": "test/block322-p3-03-v2a-mate-rotation.test.mjs（5/5 + v1 兼容锚 90° 可解/45° fail-closed）"
+    },
+    "v2b": {
+      "registered": "deferred_user_ruling（BLOCK-491 §4）",
+      "reality": "半实现：特征表纯函数库 model3d-features.js（111 行）+ 前端同源移植 sceneFeatures.ts（R4 合规）+ SceneConstraintEditor 消费（aFeature→aFace 是 UI 命名映射非 D2 键）+ 稳定性探针定案 acceptance/block-322-p3/v2b-stability-probe.json（内核哈希同进程漂移不可用→几何签名 sha256(kind|量化体积|量化 bbox) 跨进程全匹配）",
+      "gaps": ["D2 白名单键 aFeature/bFeature（scene3d.js 零命中）", "D1 求值器消费 features[]（派生缓存+fail-closed）", "导入链抽特征接线（deriveImportFeatures core 内零调用者）", "sidecar sha 锚定"]
+    }
+  },
+  "registrationDrift": {
+    "content": "RULING-04 材料 §5 开工序 + BLOCK-491 契约 implementationTickets 登记 P4-05b/v2a/v2b 全 deferred；实况 P4-05b 第一刀+v2a 已实现",
+    "nature": "登记漂移（同 3D 蓝图 §10 类），非新越权实现，非本包引入",
+    "disposition": "BLOCK-491 契约重算按其 reopen 条款须用户发令——本包不改契约，列入用户动作清单",
+    "alsoNoted": "RULING-04 §1 行号系 2026-10-31 快照已漂移（mate 校验现约 :421-474/tolerances 现 :474-482/v2a 合成现 :660+）"
+  },
+  "skeletonEvidence": {
+    "file": "test/block322-p3-03-v2b-d2-contract.test.mjs",
+    "design": "skip 形态承载（deferred_user_ruling）；BLOCK322_V2B_SKELETON_ACTIVE=1 激活复跑捕真实红；断言严格从 D1/D2/D3/D5 已裁决形态导出",
+    "skipMode": "tests 8 / pass 2（自检+D3 静态）/ skipped 6 —— 常态入库不挂门禁",
+    "activeMode": "tests 8 / pass 5 / fail 3 —— 真红恰对应三缺位：D2① 白名单缺 aFeature/bFeature（constraints[0].aFeature 不在 mate 白名单）、D1① fail-closed 错误码 features_stale_version_mismatch 缺席、D1③ 导入链零接线；绿锚=自检/D3 静态/D2② 旧约束零迁移/D2③ nodeId#featureId 拒绝/D1② 几何签名可复现",
+    "redCapture": "acceptance/block494-w2-ticket-readiness/v2b-d2-skeleton-red.txt",
+    "fixtureCalibration": "夹具经两轮校准（version='scene3d/v1' + parameters:{} 必填 + 成功形态无 errors 字段用 ok===true 判），红全部为契约缺席红而非夹具瑕疵红"
+  },
+  "testsRerun": {
+    "threeExistingTestFiles": "node --test [v2a-mate-rotation + v2b-features + v2b-constraint-ops + rw06-p405b-dimension-lines + rw06-p405b-dimension-annotations] → 23/23 全绿",
+    "impactMap": "新骨架测试挂 next04a-3d-foundation tests 清单（其已携带 v2b 姊妹测试）；规则数 419 不变；单源重生成 tests node=799"
+  },
+  "exclusions": [
+    "零产品代码写面（scene3d/model3d-features/model3d-cad-drawing/前端组件零 diff）",
+    "不改 BLOCK-491 契约（登记对齐待用户发令）",
+    "零新依赖",
+    "观感 UI-706/707/709/710 + E 类 22 条零代签",
+    "不碰 G1+",
+    "用户资产与在他方 WIP 零触碰"
+  ],
+  "humanReview": {
+    "status": "pending_human_eye",
+    "note": "本包无观感面；观感签字槽保持 in_progress 零代签"
+  }
+}

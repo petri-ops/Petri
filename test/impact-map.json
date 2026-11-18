@@ -514,7 +514,8 @@
         "frontend/src/lib/workspaceFileUpload.test.ts",
         "frontend/src/lib/model3dAssetImport.test.ts",
         "test/block344-edit-governance.test.mjs",
-        "test/block322-p3-03-v2b-constraint-ops.test.mjs"
+        "test/block322-p3-03-v2b-constraint-ops.test.mjs",
+        "test/block322-p3-03-v2b-d2-contract.test.mjs"
       ],
       "classifiesScripts": false
     },

@@ -1,0 +1,80 @@
+✔ v2b D2/D1 骨架自检：断言集在场且激活开关语义未被改写 (0.706542ms)
+✔ v2b D3：特征派生链禁 OCCT 建模 API（静态负测，已实现面受检） (0.629917ms)
+✖ v2b D2①：mate 白名单收 aFeature/bFeature 可选键（当前树红：不在白名单） (7.483917ms)
+✔ v2b D2②：无新键的旧 mate 约束零迁移可解（兼容锚，激活后绿） (0.1265ms)
+✔ v2b D2③：禁 nodeId#featureId 字符串改法（D2 负向裁决锚） (0.078292ms)
+✖ v2b D1①：features[] 派生缓存与源不一致 fail-closed（版本键=sha/dimensions） (0.197125ms)
+✔ v2b D1②：特征 id=几何签名（禁内核哈希作跨会话 id） (1.53675ms)
+✖ v2b D1③：导入链抽特征接线（deriveImportFeatures 被导入链消费） (0.12ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 5
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 87.0635
+
+✖ failing tests:
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:67:1
+✖ v2b D2①：mate 白名单收 aFeature/bFeature 可选键（当前树红：不在白名单） (7.483917ms)
+  AssertionError [ERR_ASSERTION]: aFeature/bFeature 应在 mate 白名单：constraints[0].aFeature 不在 mate 白名单 / constraints[0].bFeature 不在 mate 白名单
+  + actual - expected
+  
+  + [
+  +   'constraints[0].aFeature 不在 mate 白名单',
+  +   'constraints[0].bFeature 不在 mate 白名单'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:84:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'constraints[0].aFeature 不在 mate 白名单', 'constraints[0].bFeature 不在 mate 白名单' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:122:1
+✖ v2b D1①：features[] 派生缓存与源不一致 fail-closed（版本键=sha/dimensions） (0.197125ms)
+  AssertionError [ERR_ASSERTION]: features 与源版本键不一致必须以 features_stale_version_mismatch fail-closed，实际：["mesh_source_hash_required"]
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:141:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:155:1
+✖ v2b D1③：导入链抽特征接线（deriveImportFeatures 被导入链消费） (0.12ms)
+  AssertionError [ERR_ASSERTION]: 导入链必须接线 deriveImportFeatures（当前树红：零调用者）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:162:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
