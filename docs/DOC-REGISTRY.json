@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 617,
+    "documentCount": 618,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 600
+    "managedMarkdown": 601
   },
   "documents": [
     {
@@ -12293,6 +12293,28 @@
       ],
       "notes": "2026-11-17 立项（用户裁决「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」）：modelPreferences 模型级覆写（contextWindow/thinkingLevel）单源+渠道级零迁移 fallback；syncPresetContextWindow choice-id 静默丢写修复；发送档=会话显式覆写>模型级默认；ModelMenu 左 quick 块退役改模型行悬停/focus 内联滑杆；设置页上下文列退役（8→7）。UI-707。P1 契约→P2 消费面→P3 UI→P4 收口。【2026-11-17 completed】P1-P4 全收口：HK-01 红 11/15→绿 15/15 + 后端邻域 57/57 + 前端契约 72/72 + UI 117/117 + theme-token 19/19 + types 0；P4 block456-live 19/19（隔离 :3399/:3398，悬停抽屉/模型级写盘回环/发送档四连证/设置页退役）+ block455-live 复跑 18/18；证据 acceptance/block-456/。UI-707 in_progress 观感 pending_human_eye 不代签。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-11-17"
+    },
+    {
+      "id": "BLOCK-465",
+      "path": "docs/block465-c53-design-baseline-context-pack-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block465-c53-design-baseline-context-pack",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block465-c53-design-baseline-context-pack-plan.md",
+        "scripts/c53-design-baseline.mjs",
+        "test/c53-design-context-pack.test.mjs",
+        "resources/design-context/",
+        "acceptance/block465-c53-p0p1/"
+      ],
+      "sharedBaselines": [],
+      "tags": ["c-53", "ui-design-quality", "design-baseline", "context-pack", "G0"],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户预授权 2026-11-18「梳理剩余工作+不用人参与的提示词」R1=C-53 仅 P0+P1；五步串行 S1）。C-53 母规划=AUDIT-LOG 条目/候选池；本包为独立可收口验收边界（快照+包+测试）立 BLOCK-465。范围=P0 设计基线冻结（collectDesignBaseline 纯函数机械复算 design-charter/theme token 契约/UI 债 38/组件规则/registry+AUDIT-LOG 状态面，快照可复算）+ P1 设计上下文包硬化（同真源派生 resources/design-context/ 模型可读输入，沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿先行+篡改负测；零新增产品依赖/零 UI 写面/零观感代签。非范围=C-53 P2-P7（停下等下批授权）/新产品 Skill（C-52 design-brief 已在）/档位预算变更/G1+。plan=docs/block465-c53-design-baseline-context-pack-plan.md。【收口 2026-11-18】P0=collector 9 冻结读数快照可复算（--check exit 0，readings 9 + captureContext 2）；P1=resources/design-context/ 模型可读输入（design-context.json+manifest.json，sha256 一致）被消费测试 8/8 锚定（含篡改负测）；HK-01 红 1→绿 8/8；theme-token 19/19 + docs/ui-audit 绿；零新增依赖/零 UI 写面/零观感代签。证据=acceptance/block465-c53-p0p1/。C-53 P2-P7 按 R1 停下等下批授权。"
     },
     {
       "id": "GEN-UI-DATA-PLANE-EVALUATION-2026-11-17",

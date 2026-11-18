@@ -1,0 +1,39 @@
+BLOCK-465 / C-53 S1 — HK-01 红绿先行证据（P0 基线冻结 + P1 上下文包硬化）
+
+发令：用户预授权 2026-11-18「梳理剩余工作 + 不用人参与的提示词」R1 = C-53 仅 P0+P1（五步串行 S1）。
+
+## RED（实现前，collector 模块缺席）
+命令：node --test test/c53-design-context-pack.test.mjs
+结果：pass 0 / fail 1（ERR_MODULE_NOT_FOUND: scripts/c53-design-baseline.mjs 缺席）
+时点：先落失败测试再写实现；HK-01 红证据在册。
+
+## GREEN（实现后）
+命令：node --test test/c53-design-context-pack.test.mjs
+结果：tests 8 / suites 2 / pass 8 / fail 0
+覆盖：
+  P0-1 快照结构完整（9 冻结读数带 value/source/command/capturedAt + captureContext 干净态留痕）
+  P0-2 逐读数现读一致（collectDesignBaseline 重算与落盘深等）
+  P0-3 结构坏源负测（null 子字段/缺字段被完整性校验拒；数值漂移由深等兜底）
+  P1-1 上下文包+manifest 在场、schema/生成器声明正确
+  P1-2 manifest sha256 与实际字节一致
+  P1-3 包正文派生自现真源读数（font/color/border/motion/controls/ratchet/uiDebt 逐项深等）
+  P1-4 人眼边界如实声明（humanEyeSigned=false / readOnly=true / pending_human_eye）
+  P1-5 篡改负测（改 uiDebt.debt 后与真源不等，消费测试锚有效）
+
+## 可复算判据
+命令：node scripts/c53-design-baseline.mjs --check
+结果：exit 0，{ok:true, readingIds:[9 项]}（冻结读数逐项与真源一致）
+快照：acceptance/block465-c53-p0p1/design-baseline.json
+  readings（9，冻结）：fontTiers/colorBudget/borderSemantics/motion/controls/ratchets/tokenGate/uiDebt/componentRules
+  captureContext（2，捕获态不参与冻结比对）：registry/auditUnresolved
+  关键读数：字号 6 档(28/20/16/14/12/11) · 色彩 ≥10:1/≤130/≤8 · 棘轮 40/130/0 ·
+            UI 债 38=live15+blocked23（sections503/unique494/verified453/closed12，与 DEBT_CEILING 交叉一致）·
+            token 契约 19 断言全在 · AUDIT-LOG 🔴/🟢=0
+
+## 形态先例与边界
+- 上下文包沿 resources/gen-ui/compose-templates 先例：resources/design-context/{design-context.json,manifest.json} 纯资源 JSON + 测试锚，非产品 Skill、非运行时代码。
+- C-52 已交付 design-brief 产品 Skill 与 petri-ui-design 内部 Skill，本包不并造第三套（skills:check 保持报告级）。
+- 零新增产品依赖、零 UI 运行时写面、零观感签字（本包无 pending_human_eye 面）。
+- 所有 untracked 用户资产（post-h9 原件/petri-logo*/tmp-*/assets/model3d 原件等）零触碰。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

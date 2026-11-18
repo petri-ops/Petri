@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-design-baseline",
+  "capability": "block465-c53-design-baseline-context-pack",
+  "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-design-baseline.mjs",
+  "generatedAt": "2026-11-18T03:34:24.610Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "policy": "readings=设计不变量（冻结，消费测试逐读数深等）；captureContext=捕获时状态（随包开合变化，仅证快照取自干净态，不参与冻结比对）",
+  "readings": {
+    "fontTiers": {
+      "value": {
+        "tiers": [
+          {
+            "token": "--petri-font-size-2xl",
+            "px": 28
+          },
+          {
+            "token": "--petri-font-size-xl",
+            "px": 20
+          },
+          {
+            "token": "--petri-font-size-lg",
+            "px": 16
+          },
+          {
+            "token": "--petri-font-size-body",
+            "px": 14
+          },
+          {
+            "token": "--petri-font-size-sm",
+            "px": 12
+          },
+          {
+            "token": "--petri-font-size-xs",
+            "px": 11
+          }
+        ],
+        "count": 6
+      },
+      "source": "docs/design-charter.md §1",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "colorBudget": {
+      "value": {
+        "neutralToAccentRatio": 10,
+        "accentRefCeiling": 130,
+        "accentsPerView": 8
+      },
+      "source": "docs/design-charter.md §2",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "borderSemantics": {
+      "value": {
+        "tokens": [
+          "--petri-border-input",
+          "--petri-border-card",
+          "--petri-divider"
+        ],
+        "count": 3,
+        "noSemanticHairlineTarget": 0
+      },
+      "source": "docs/design-charter.md §3",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "motion": {
+      "value": {
+        "durations": {
+          "fast": 150,
+          "base": 200,
+          "slow": 300
+        },
+        "easeTokens": [
+          "--petri-ease-standard",
+          "--petri-ease-emphasized"
+        ],
+        "easeCount": 2,
+        "durationCount": 3
+      },
+      "source": "docs/design-charter.md §4",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "controls": {
+      "value": {
+        "pieces": [
+          "Button",
+          "Input",
+          "Select",
+          "Chip",
+          "Empty"
+        ],
+        "count": 5,
+        "sourceDirFiles": [
+          "Status.tsx",
+          "StatusBadge.test.tsx",
+          "button.module.css",
+          "status.module.css"
+        ]
+      },
+      "source": "docs/design-charter.md §6 + controls/ 现读",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "ratchets": {
+      "value": {
+        "smallFont": 40,
+        "accent": 130,
+        "noSemanticBorder": 0
+      },
+      "source": "docs/design-charter.md §7",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "tokenGate": {
+      "value": {
+        "assertions": 19,
+        "keyTitlesPresent": true,
+        "keyTitles": [
+          "defines every Petri token referenced in frontend source",
+          "small font usage holds the frozen ratchet",
+          "accent usage holds the frozen ratchet",
+          "non-semantic 1px borders hold zero tolerance",
+          "charter counters catch synthetic violations"
+        ]
+      },
+      "source": "frontend/src/styles/theme-token-contract.test.ts",
+      "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "uiDebt": {
+      "value": {
+        "sections": 503,
+        "uniqueIds": 494,
+        "debt": 38,
+        "liveMissing": 15,
+        "blocked": 23,
+        "verified": 453,
+        "closed": 12,
+        "ceilingCrossCheck": {
+          "liveMissing": 15,
+          "blocked": 23,
+          "total": 38
+        },
+        "consistent": true
+      },
+      "source": "acceptance/block-332/ui-ledger-triage.json + post-h9-k3-experience.mjs",
+      "command": "npm run ui:audit:triage",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "componentRules": {
+      "value": {
+        "singleSourceDir": "frontend/src/components/ui/controls/",
+        "newButtonClassIsRed": true,
+        "weightDiscipline": {
+          "primary": 500,
+          "title": 600,
+          "heroOnly": 700
+        },
+        "charterSection": "§6"
+      },
+      "source": "docs/design-charter.md §6",
+      "command": "node scripts/c53-design-baseline.mjs",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    }
+  },
+  "captureContext": {
+    "registry": {
+      "value": {
+        "documentCount": 618,
+        "managedMarkdown": 601,
+        "activeWorkPackages": [
+          "BLOCK-465"
+        ]
+      },
+      "source": "docs/DOC-REGISTRY.json",
+      "command": "npm run state",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    },
+    "auditUnresolved": {
+      "value": {
+        "blocking": 0,
+        "readyToMerge": 0,
+        "total": 0
+      },
+      "source": "docs/AUDIT-LOG.md §当前待处理项",
+      "command": "npm run state",
+      "capturedAt": "2026-11-18T03:34:24.593Z"
+    }
+  }
+}

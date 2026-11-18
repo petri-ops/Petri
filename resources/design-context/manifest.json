@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "generator": "node scripts/c53-design-baseline.mjs",
+  "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
+  "generatedAt": "2026-11-18T03:34:24.610Z",
+  "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。",
+  "files": [
+    {
+      "path": "design-context.json",
+      "sha256": "ea23cd4b687f891fe38fcc2397baeb25f12bbb636913c3d87fc62287d2417793"
+    }
+  ]
+}

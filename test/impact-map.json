@@ -8668,6 +8668,26 @@
       ]
     },
     {
+      "id": "block465-c53-design-baseline",
+      "note": "BLOCK-465 / C-53 S1：P0 设计基线冻结（collector 机械复算 design-charter/theme token 契约/UI 债 38/组件规则，快照可复算）+ P1 模型可读上下文包（resources/design-context/ 沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿+篡改负测；classifiesScripts=true 确保新脚本命中本规则，acceptance 目录不触发全量升级。证据 acceptance/block465-c53-p0p1/**。",
+      "patterns": [
+        "scripts/c53-design-baseline.mjs",
+        "test/c53-design-context-pack.test.mjs",
+        "resources/design-context/**",
+        "docs/block465-c53-design-baseline-context-pack-plan.md",
+        "acceptance/block465-c53-p0p1/**"
+      ],
+      "tests": [
+        "test/c53-design-context-pack.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "baseline-collector"
+    },
+    {
       "id": "design-brief-product-skill",
       "note": "C-52 第二包：产品内置 design-brief Skill，经 skill_discover/skill_get 提供十节设计说明手册；零依赖、零 UI 写面变化。证据 acceptance/design-brief-skill/**。",
       "patterns": [

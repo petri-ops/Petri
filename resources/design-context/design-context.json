@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "petri-design-context-pack",
+  "kind": "model-readable-design-input",
+  "derivedFrom": [
+    "docs/design-charter.md",
+    "frontend/src/styles/theme-token-contract.test.ts",
+    "acceptance/block-332/ui-ledger-triage.json",
+    "frontend/src/components/ui/controls/"
+  ],
+  "font": {
+    "tiers": [
+      {
+        "token": "--petri-font-size-2xl",
+        "px": 28
+      },
+      {
+        "token": "--petri-font-size-xl",
+        "px": 20
+      },
+      {
+        "token": "--petri-font-size-lg",
+        "px": 16
+      },
+      {
+        "token": "--petri-font-size-body",
+        "px": 14
+      },
+      {
+        "token": "--petri-font-size-sm",
+        "px": 12
+      },
+      {
+        "token": "--petri-font-size-xs",
+        "px": 11
+      }
+    ],
+    "count": 6
+  },
+  "color": {
+    "neutralToAccentRatio": 10,
+    "accentRefCeiling": 130,
+    "accentsPerView": 8
+  },
+  "border": {
+    "tokens": [
+      "--petri-border-input",
+      "--petri-border-card",
+      "--petri-divider"
+    ],
+    "count": 3,
+    "noSemanticHairlineTarget": 0
+  },
+  "motion": {
+    "durations": {
+      "fast": 150,
+      "base": 200,
+      "slow": 300
+    },
+    "easeTokens": [
+      "--petri-ease-standard",
+      "--petri-ease-emphasized"
+    ],
+    "easeCount": 2,
+    "durationCount": 3
+  },
+  "controls": {
+    "pieces": [
+      "Button",
+      "Input",
+      "Select",
+      "Chip",
+      "Empty"
+    ],
+    "count": 5,
+    "sourceDirFiles": [
+      "Status.tsx",
+      "StatusBadge.test.tsx",
+      "button.module.css",
+      "status.module.css"
+    ]
+  },
+  "ratchets": {
+    "smallFont": 40,
+    "accent": 130,
+    "noSemanticBorder": 0
+  },
+  "tokenGate": {
+    "assertions": 19,
+    "keyTitlesPresent": true,
+    "keyTitles": [
+      "defines every Petri token referenced in frontend source",
+      "small font usage holds the frozen ratchet",
+      "accent usage holds the frozen ratchet",
+      "non-semantic 1px borders hold zero tolerance",
+      "charter counters catch synthetic violations"
+    ]
+  },
+  "uiDebt": {
+    "sections": 503,
+    "uniqueIds": 494,
+    "debt": 38,
+    "liveMissing": 15,
+    "blocked": 23,
+    "verified": 453,
+    "closed": 12,
+    "ceilingCrossCheck": {
+      "liveMissing": 15,
+      "blocked": 23,
+      "total": 38
+    },
+    "consistent": true
+  },
+  "componentRules": {
+    "singleSourceDir": "frontend/src/components/ui/controls/",
+    "newButtonClassIsRed": true,
+    "weightDiscipline": {
+      "primary": 500,
+      "title": 600,
+      "heroOnly": 700
+    },
+    "charterSection": "§6"
+  },
+  "boundaries": {
+    "humanEyeSigned": false,
+    "readOnly": true,
+    "note": "观感项 pending_human_eye 保持 in_progress，Agent 不代签；本包为只读资源输入，不改任何运行时行为或 token 定义。"
+  }
+}
