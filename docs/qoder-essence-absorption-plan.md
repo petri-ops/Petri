@@ -315,7 +315,7 @@ status: planned
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-10-25 BLOCK-260 回写，机械计数）**：✅ 69 · 🟡 25 · 🔴 1 · ⛔ 7 = **102 点**（BLOCK-260 交付 K3 逐项查看、K2 本地 minidump 摘要、C14 上下文追问；K2 上传=G1+、K3 逐项停止未做，均保持 🟡）。基线取 BLOCK-259 收口口径。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
+**矩阵统计（2026-11-18 BLOCK-468 收拢，机械计数）**：✅ 74 · 🟡 21 · 🔴 0 · ⛔ 7 = **102 点**。口径来源=BLOCK-263 changelog（§12 更新记录 2026-10-25 P4-REM 行：E13 🟡→✅、§6.5 串行队列清零）；本行与 §12 口径一致（两处收拢）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
 
 ## 6. 多波次计划（Q0–Q9）
 

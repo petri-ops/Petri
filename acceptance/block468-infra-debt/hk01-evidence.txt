@@ -1,0 +1,35 @@
+BLOCK-468 / S4 基础设施清偿批 — HK-01（判据侧工具负测红绿）+ 三项证据
+
+发令：用户预授权 R5（五步串行 S4，治理批无产品代码）。HK-01 先例=BLOCK-404/426「治理批豁免、门禁负测本身即红绿证据」。
+
+## ① lint-ledger --update 死代码路径修复
+
+旧实现：scripts/lint-ledger-verify.mjs:143 `if (!baseline && UPDATE)` —— 基线已在场永远走 else，--update 无法下调（死代码）。
+修复：抽纯函数 planWarnBaselineUpdate(current, baseline)——缺席 create / 任一域上涨 reject（issues 逐域红）/ 全域 ≤ 写 min 下调；main 的 --update 分支改调该函数。compareWarnDomains 只减判据一字未改。
+
+HK-01 红→绿（工具负测，test/lint-ledger-update.test.mjs）：
+  RED（实现前，纯函数缺席）：tests 4 / pass 0 / fail 4（子进程导入 planWarnBaselineUpdate 失败）。
+  GREEN（实现后）：tests 4 / pass 4 / fail 0 —— ①下降允许下调 ②持平幂等 ③三域各+1 必 reject（不放宽棘轮）④缺席首打 create。
+既有负测零回归：test/m0-criteria-boundaries.test.mjs + test/block404-l0-criteria-gates.test.mjs = 34/34。
+门禁语义不变：npm run quality:lint:ledger PASS（warnings 2441 = P1484/T418/S539 基线，零上调）。
+根因修：新函数内 own-enumerable 查找（BLOCK-456 先例），零新增 object-injection 告警。
+
+## ② Q-MATRIX §5 统计行收拢
+
+旧（:318）：✅69/🟡25/🔴1/⛔7=102（BLOCK-260 回写）。
+新（:318）：✅74/🟡21/🔴0/⛔7=102，来源=BLOCK-263 changelog（§12 :769 P4-REM 行）。
+两处口径现一致：§5 统计行与 §12 更新记录同为 74/21/0/7=102；只改统计行，矩阵行/§6.5 队列零触碰。
+
+## ③ knip 346 键定性批
+
+报告：acceptance/block468-infra-debt/knip-qualification-report.md —— exports 71 / files 146 / types 129 = 346 逐类定性（CK-11 六批 exports / 动态 CLI files / 上界 types）。
+守卫不变：test/knip-baseline.json 键集零改；quality:knip:check PASS（346 键冻结）+ test/knip-ratchet.test.mjs 1/1。
+
+## 附带（活源一致，非基线放宽）
+
+docs/post-k7-readings-single-source.json 经 scripts/post-k7-readings-generate.mjs 重生成——impact-map 规则数 402→405、registry documentCount 616→621（本批 + 前三包的登记），L0-8 单源测试 15/15。这是"文档引用一律指向单源 JSON"的既有再生成机制，非放宽基线。
+
+## 边界
+
+零产品代码 / UI / 观感签字；零基线语义放宽（warnings 棘轮、knip 守卫、perf 基线均不动）；untracked 用户资产零触碰。
+G0 开发期常态 · 不外推 packaged/Provider/GA。

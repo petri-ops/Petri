@@ -8856,6 +8856,25 @@
       ]
     },
     {
+      "id": "block468-infra-debt",
+      "note": "BLOCK-468 S4 基础设施清偿批（治理批无产品代码）：lint-ledger --update 死代码修复（planWarnBaselineUpdate 纯函数+工具负测红绿）+ Q-MATRIX §5 收拢 + knip 346 键定性报告。改这些面必跑工具负测 + lint/m0 判据邻域 + knip ratchet。证据 acceptance/block468-infra-debt/**。",
+      "patterns": [
+        "test/lint-ledger-update.test.mjs",
+        "test/lint-warnings-baseline.json",
+        "docs/qoder-essence-absorption-plan.md",
+        "docs/block468-infra-debt-settlement-plan.md",
+        "acceptance/block468-infra-debt/**"
+      ],
+      "tests": [
+        "test/lint-ledger-update.test.mjs",
+        "test/m0-criteria-boundaries.test.mjs",
+        "test/block404-l0-criteria-gates.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "block467-3d-p4-gym",
       "note": "BLOCK-467 3D P4 对账 + Agent Gym 编排首片：gym.mjs 编排（reset→step×N→finalize）+ §9 里程碑对账 + JSON 证据 sha256；改这些面必跑 gym 编排契约测试（需 three-live 隔离安装，缺席 skip）+ block462 verify 邻域。只编排不引训练框架（R3）。证据 acceptance/block467-3d-p4/**。",
       "patterns": [

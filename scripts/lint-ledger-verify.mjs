@@ -80,6 +80,36 @@ export function compareWarnDomains(current, baseline) {
   return { issues, improvements };
 }
 
+/**
+ * BLOCK-468 / S4：--update 的纯函数决策（修旧 `if (!baseline && UPDATE)` 死代码路径）。
+ *
+ * 三场景（棘轮语义不放宽，与 compareWarnDomains 只减判据同源）：
+ *   - baseline 缺席 → action='create'，写当前全域（首打，旧能力保留）；
+ *   - 任一域 current > baseline → action='reject'、ok=false、issues 逐域列红（拒绝上调，不放宽）；
+ *   - 全域 current ≤ baseline → action='update'、domains=min(current,baseline)（真正下调；持平幂等）。
+ * 不写盘、不依赖时间；main 的 --update 分支据此决策，基线语义一字未放宽。
+ */
+export function planWarnBaselineUpdate(current, baseline) {
+  // own-enumerable 查找（BLOCK-456 先例）：键来自冻结三域常量，零 object-injection 告警。
+  const ownGet = (obj, key) => Object.entries(obj).find(([k]) => k === key)?.[1];
+  if (!baseline) {
+    return { action: 'create', ok: true, domains: { ...current }, total: Object.values(current).reduce((a, b) => a + b, 0), issues: [] };
+  }
+  const issues = [];
+  for (const d of ['production', 'test', 'scripts']) {
+    const base = Number(ownGet(baseline.domains ?? {}, d));
+    if (!Number.isFinite(base)) { issues.push(`warnings 基线缺域 ${d}`); continue; }
+    const cur = Number(ownGet(current, d));
+    if (cur > base) issues.push(`warnings ${d} 域 ${cur} > 基线 ${base}（--update 拒绝上调——L-88 分域只减不放宽）`);
+  }
+  if (issues.length) return { action: 'reject', ok: false, domains: null, total: null, issues };
+  const domains = Object.fromEntries(['production', 'test', 'scripts'].map((d) => [
+    d, Math.min(Number(ownGet(current, d)), Number(ownGet(baseline.domains, d))),
+  ]));
+  const total = Object.values(domains).reduce((a, b) => a + b, 0);
+  return { action: 'update', ok: true, domains, total, issues: [] };
+}
+
 function runEslintUnsuppressed() {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'block404-lint-'));
   const emptySuppressions = path.join(tmpDir, 'empty-suppressions.json');
@@ -140,10 +170,24 @@ function main() {
   try {
     baseline = JSON.parse(fs.readFileSync(WARN_BASELINE, 'utf8'));
   } catch { /* 首次运行缺基线 */ }
-  if (!baseline && UPDATE) {
-    const fresh = { schemaVersion: 1, kind: 'lint-warnings-domain-baseline', domains: warnByDomain, total: warnTotal, generatedAt: new Date().toISOString(), note: 'L0-6（L-88）warnings 分域只减棘轮基线；只许 --update 下调，任一域上涨即红' };
-    fs.writeFileSync(WARN_BASELINE, JSON.stringify(fresh, null, 2) + '\n');
-    console.log(`[lint:ledger] warnings 基线已写（production=${warnByDomain.production} test=${warnByDomain.test} scripts=${warnByDomain.scripts} total=${warnTotal}）`);
+  if (UPDATE) {
+    // BLOCK-468 / S4：基线在场也可 --update 下调（旧 `!baseline && UPDATE` 是死代码）；
+    // 纯函数拒上调，棘轮语义与 compareWarnDomains 同源、一字未放宽。
+    const plan = planWarnBaselineUpdate(warnByDomain, baseline);
+    if (plan.ok) {
+      const fresh = {
+        schemaVersion: 1,
+        kind: 'lint-warnings-domain-baseline',
+        domains: plan.domains,
+        total: plan.total,
+        generatedAt: new Date().toISOString(),
+        note: 'L0-6（L-88）warnings 分域只减棘轮基线；只许 --update 下调，任一域上涨即红',
+      };
+      fs.writeFileSync(WARN_BASELINE, JSON.stringify(fresh, null, 2) + '\n');
+      console.log(`[lint:ledger] warnings 基线已 ${plan.action}（production=${plan.domains.production} test=${plan.domains.test} scripts=${plan.domains.scripts} total=${plan.total}）`);
+    } else {
+      issues.push(...plan.issues);
+    }
   } else {
     const warnCheck = compareWarnDomains(warnByDomain, baseline);
     issues.push(...warnCheck.issues);

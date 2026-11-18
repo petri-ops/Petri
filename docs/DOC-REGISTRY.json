@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 620,
+    "documentCount": 621,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 603
+    "managedMarkdown": 604
   },
   "documents": [
     {
@@ -12293,6 +12293,28 @@
       ],
       "notes": "2026-11-17 立项（用户裁决「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」）：modelPreferences 模型级覆写（contextWindow/thinkingLevel）单源+渠道级零迁移 fallback；syncPresetContextWindow choice-id 静默丢写修复；发送档=会话显式覆写>模型级默认；ModelMenu 左 quick 块退役改模型行悬停/focus 内联滑杆；设置页上下文列退役（8→7）。UI-707。P1 契约→P2 消费面→P3 UI→P4 收口。【2026-11-17 completed】P1-P4 全收口：HK-01 红 11/15→绿 15/15 + 后端邻域 57/57 + 前端契约 72/72 + UI 117/117 + theme-token 19/19 + types 0；P4 block456-live 19/19（隔离 :3399/:3398，悬停抽屉/模型级写盘回环/发送档四连证/设置页退役）+ block455-live 复跑 18/18；证据 acceptance/block-456/。UI-707 in_progress 观感 pending_human_eye 不代签。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-11-17"
+    },
+    {
+      "id": "BLOCK-468",
+      "path": "docs/block468-infra-debt-settlement-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block468-infra-debt-settlement",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block468-infra-debt-settlement-plan.md",
+        "scripts/lint-ledger-verify.mjs",
+        "test/lint-ledger-update.test.mjs",
+        "docs/qoder-essence-absorption-plan.md",
+        "acceptance/block468-infra-debt/"
+      ],
+      "sharedBaselines": [],
+      "tags": ["infra-debt", "lint-ledger", "q-matrix", "knip", "G0"],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户预授权 R5=基础设施清偿批；五步串行 S4，治理批无产品代码）。范围=① 修 lint-ledger --update 死代码路径（抽 planWarnBaselineUpdate 纯函数：基线在场可下调、任一域上涨拒绝、缺席首打；棘轮语义不放宽）+ 工具负测红绿（BLOCK-426 判据侧证据先例）；② Q-MATRIX §5 统计行（qoder-essence-absorption-plan.md:318）收拢到 BLOCK-263 changelog 口径 74/21/0/7=102（来源 §12 :769）；③ knip 346 键逐类定性旁挂报告落 acceptance（不放宽守卫）。非范围=产品代码/UI/观感/任何基线放宽/C-53 P2-P7/G1+。plan=docs/block468-infra-debt-settlement-plan.md。【收口 2026-11-18】① lint-ledger --update 死代码修复（planWarnBaselineUpdate 纯函数：缺席 create / 上涨 reject / 下降下调，棘轮不放宽）+ 工具负测红 4→绿 4/4，既有 lint 负测 34/34、quality:lint:ledger PASS（2441 基线不动）；② Q-MATRIX §5 统计行（qoder-essence-absorption-plan.md:318）收拢到 BLOCK-263 口径 ✅74/🟡21/🔴0/⛔7=102（与 §12 :769 两处一致）；③ knip 346 键逐类定性报告 acceptance/block468-infra-debt/knip-qualification-report.md（exports71/files146/types129，守卫不放宽）；单源 JSON 重生成 406 规则/621 文档（L0-8 15/15）。零产品代码/UI/观感/基线放宽。证据=acceptance/block468-infra-debt/。"
     },
     {
       "id": "BLOCK-467",
