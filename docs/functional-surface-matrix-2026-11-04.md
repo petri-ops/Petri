@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 6 个不计入判定）。生成时间：2026-11-18T12:53:14.747Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-18T15:55:11.663Z
 
 ## 0. 覆盖汇总
 
@@ -160,9 +160,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M core/petri-server/agent-tools/registry.js`
-- `M core/petri-server/agent-tools/tool-defs/browser.js`
-- `M core/petri-server/agent-tools/tool-events.js`
-- `M core/petri-server/agent-tools/tool-metadata.js`
-- `?? core/petri-server/agent-tools/video-tools.js`
-- `?? core/petri-server/helpers/video-compose.js`
+（无）

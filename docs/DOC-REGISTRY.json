@@ -13342,12 +13342,12 @@
       "id": "BLOCK-493",
       "path": "docs/block493-infra-debt-clearance-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block493-infra-debt-clearance",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block493-infra-debt-clearance-plan.md",
         "test/impact-map.json",
@@ -13357,7 +13357,10 @@
         "test/c52-assistant-ui-pattern.test.mjs",
         "docs/post-k7-readings-single-source.json",
         "docs/3d-authoring-domain-blueprint-2026-11-17.md",
-        "acceptance/block493-infra-debt-clearance/"
+        "acceptance/block493-infra-debt-clearance/",
+        "scripts/lib/post-h9-k4-architecture.mjs",
+        "test/post-h9-k4-architecture.test.mjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs"
       ],
       "tags": [
         "BLOCK-492",
@@ -13366,7 +13369,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户预授权无人值守提示词 §5 S1 / BLOCK-492 plan §3 W1 波次发令）。W1 基础设施清偿（治理批零产品代码）：①acceptance/block464|block470|block477-filetree-attribution 三处 evidence.json 虚拟探针挂 impact-map rule（两条既有 rule 扩 pattern + 一条新机械认领 rule，读者测试如实登记）；②lint:ledger 既有 warning production(+11)/test(+2) 溯源三分类=全部误报豁免（security/detect-object-injection 于内部白名单校验数据/测试夹具），处置沿 BLOCK-482 video-compose.js 文件级 disable 头同族先例 + 测试行级 disable+reason（block407/409/412 先例），warnings 不走 --suppress-all（会污染 errors 抑制台账致 verify 双向对平红），基线文件不动棘轮零放宽；③docs:check COVERAGE_COUNT_DRIFT 机械重算写回（post-h9 蓝图 DOCUMENT_MISSING 保持用户资产归属 W5 不代处置）；④3D 蓝图 §13 裁决表+§14 结论对齐已裁决态（U-3D-D1/D2/D3 2026-11-18 批量裁决 ruled，真源=3d-authoring-dependency-ruling-2026-11-17.md）；⑤post-k7 单源读数重生成；⑥定向测试+closeout 定向+证据落 acceptance/block493-infra-debt-clearance/+六件套+commit/push。红线=零产品代码/零基线放宽/用户资产 10 项零触碰/观感零代签/不碰 G1+/他方 WIP 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-18 立项（用户预授权无人值守提示词 §5 S1 / BLOCK-492 plan §3 W1 波次发令）。W1 基础设施清偿（治理批零产品代码）：①acceptance/block464|block470|block477-filetree-attribution 三处 evidence.json 虚拟探针挂 impact-map rule（两条既有 rule 扩 pattern + 一条新机械认领 rule，读者测试如实登记）；②lint:ledger 既有 warning production(+11)/test(+2) 溯源三分类=全部误报豁免（security/detect-object-injection 于内部白名单校验数据/测试夹具），处置沿 BLOCK-482 video-compose.js 文件级 disable 头同族先例 + 测试行级 disable+reason（block407/409/412 先例），warnings 不走 --suppress-all（会污染 errors 抑制台账致 verify 双向对平红），基线文件不动棘轮零放宽；③docs:check COVERAGE_COUNT_DRIFT 机械重算写回（post-h9 蓝图 DOCUMENT_MISSING 保持用户资产归属 W5 不代处置）；④3D 蓝图 §13 裁决表+§14 结论对齐已裁决态（U-3D-D1/D2/D3 2026-11-18 批量裁决 ruled，真源=3d-authoring-dependency-ruling-2026-11-17.md）；⑤post-k7 单源读数重生成；⑥定向测试+closeout 定向+证据落 acceptance/block493-infra-debt-clearance/+六件套+commit/push。红线=零产品代码/零基线放宽/用户资产 10 项零触碰/观感零代签/不碰 G1+/他方 WIP 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-18 收口】五项清偿全绿（evidence rule 417→419/lint 13 条误报豁免/K-22 346→350 对齐/flow env 函数化/3D 蓝图 ruled 对齐）；closeout 定向链 exit=0；P6 写门=两段提交处置；串行槽位回空。"
     }
   ],
   "lastUpdated": "2026-11-18"

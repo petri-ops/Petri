@@ -1,7 +1,7 @@
 ---
 capability: block493-infra-debt-clearance
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: W1 基础设施清偿（BLOCK-492 全量工作执行计划自动波次第一波）——清零非资产类既有红，使 closeout 链恢复可全绿；零产品代码、零基线放宽、零观感代签、零新依赖。
 acceptance:
   - test:changed 转绿：acceptance/block464|block470|block477-filetree-attribution 三处 evidence.json（虚拟探针）挂 impact-map rule，读取者测试如实登记（修工具映射，不改基线语义）
@@ -62,4 +62,14 @@ supersedes: 无（执行 BLOCK-492 plan §3 W1 波次；与既有 canonical 并�
 - `npm run docs:check` 除 DOCUMENT_MISSING post-h9（用户资产既有红）外零 issue；
 - `node scripts/post-k7-readings-generate.mjs` 后 `test/block404-l0-criteria-gates.test.mjs` 单源断言绿；
 - `npm run closeout` 定向链除用户资产既有红外全绿；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-18 · 一次会话完成）
+
+- **判据达成**：test:changed 定向 exit=0（含 test-affected 21/21、block267 3/3、post-h9-contracts 186/186）；lint:ledger PASS（P1484/T418/S539 与基线逐字持平）；docs:check PASS（645 registered）；closeout 定向链 exit=0 全绿。
+- **执行顺序注记（P6 写门）**：test/impact-map.json 是 P6 产品验收证据的绑定源，写门（`p6_current_source_tree_not_exact`）要求工作区与 HEAD 逐字节一致——收口采用两段提交（修复批先提交 → 干净树跑 closeout → 台账批后提交），属结构性约束非产品缺陷。
+- **实际处置清单**（比 plan §2 多两项，均为计划目标「清零非资产类既有红」的自然延伸）：K-22 knip 上限对齐（BLOCK-483/486/487 三包逐包 +1 漏同步既有红）；block463 flow env 固化函数化（BLOCK-267/375 棘轮债，定向集扩大后首次暴露）。
+- **真实变更**：commit 47e73173（修复批）+ 40a5c251（清偿批）+ 本批（台账批）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

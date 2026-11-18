@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T12:53:14.747Z",
+  "generatedAt": "2026-11-18T15:55:11.663Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 118,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 6,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5981,13 +5981,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M core/petri-server/agent-tools/registry.js",
-    "M core/petri-server/agent-tools/tool-defs/browser.js",
-    "M core/petri-server/agent-tools/tool-events.js",
-    "M core/petri-server/agent-tools/tool-metadata.js",
-    "?? core/petri-server/agent-tools/video-tools.js",
-    "?? core/petri-server/helpers/video-compose.js"
-  ],
+  "dirty": [],
   "defNotes": []
 }

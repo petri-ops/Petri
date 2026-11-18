@@ -1,8 +1,8 @@
 {
   "_about": "第五轮 L0-8 数字口径单源（蓝图 L-45/L-76/L-81/L-84）：文档引用读数一律以本 JSON 为准；由 scripts/post-k7-readings-generate.mjs 当场实测生成，禁止手抄/手改。",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-18T15:51:30.636Z",
-  "sourceCommit": "47e73173186ad13f5e5ae7bb7f8333cd92cfbf8d",
+  "generatedAt": "2026-11-18T15:57:18.639Z",
+  "sourceCommit": "40a5c251dc3f17b617f1365d1348ab2e023d4d5b",
   "generator": "node scripts/post-k7-readings-generate.mjs",
   "impactMap": {
     "rules": 419,
