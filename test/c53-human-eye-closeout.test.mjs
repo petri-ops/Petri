@@ -8,10 +8,7 @@ import {
   collectHumanEyeCloseout,
   validateCloseoutIntegrity,
   scanUiLedgerSlots,
-  scanEClassTiers,
   scanSignatureSlots,
-  scanBatchNewUiFaces,
-  scanEvidenceIndex,
   READING_IDS,
   CLOSEOUT_FLOOR,
 } from '../scripts/c53-human-eye-closeout.mjs';

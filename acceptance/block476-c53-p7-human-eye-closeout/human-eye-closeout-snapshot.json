@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-human-eye-closeout",
   "capability": "block476-c53-p7-human-eye-closeout",
-  "sourceCommit": "901587d4b6bf868e8c4bf1e238f71327544621f7",
+  "sourceCommit": "c37e082fb0d22ab8cb0f2f31eb40a66ae4749dbb",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-human-eye-closeout.mjs",
-  "generatedAt": "2026-11-18T09:01:54.608Z",
+  "generatedAt": "2026-11-18T09:08:21.334Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -41,7 +41,7 @@
       },
       "source": "docs/ui-productization-audit.md（UI-706/707/709/710 段）",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     },
     "eClassTiers": {
       "value": {
@@ -57,7 +57,7 @@
       },
       "source": "docs/e-class-human-eye-guide-2026-11-16.md + acceptance/block-332/ui-ledger-triage.json",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     },
     "signatureSlots": {
       "value": {
@@ -113,7 +113,7 @@
       },
       "source": "docs/ui-design-human-eye-route.md §3 签字槽",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     },
     "batchNewUiFaces": {
       "value": {
@@ -139,7 +139,7 @@
       },
       "source": "acceptance/block47{1..5}-*/ evidence + 快照 humanEyeSlots",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     },
     "evidenceIndex": {
       "value": {
@@ -194,7 +194,7 @@
       },
       "source": "acceptance/ + docs/ 真源路径在场",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     },
     "humanEyeSlots": {
       "value": {
@@ -209,7 +209,7 @@
       },
       "source": "UI 台账 pending_human_eye（观感零代签）",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:01:54.582Z"
+      "capturedAt": "2026-11-18T09:08:21.287Z"
     }
   }
 }

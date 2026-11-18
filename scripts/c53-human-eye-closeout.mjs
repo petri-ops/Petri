@@ -57,7 +57,6 @@ export const CLOSEOUT_FLOOR = Object.freeze({
 
 const ownGet = (obj, key) => Object.entries(obj ?? {}).find(([k]) => k === key)?.[1];
 const readText = (rel, root = ROOT) => fs.readFileSync(path.join(root, rel), 'utf8');
-const readJson = (rel, root = ROOT) => JSON.parse(readText(rel, root));
 const has = (text, re) => re.test(String(text ?? ''));
 
 /** UI-706/707/709/710 台账四槽：从段标题与相邻正文现读 in_progress + pending_human_eye、零 verified。 */
@@ -68,16 +67,16 @@ export function scanUiLedgerSlots(root = ROOT, sourcesOverride = null) {
   const sections = new Map();
   const re = /^## (UI-\d+):[^\n]*(?:\n(?!(?:## |# ))[^\n]*)*/gm;
   for (const m of text.matchAll(re)) sections.set(m[1], m[0]);
-  const slots = {};
-  for (const id of CLOSEOUT_FLOOR.uiLedgerIds) {
+  // fromEntries 一次性构建，避免动态键赋值触发 object-injection 告警。
+  const slots = Object.fromEntries(CLOSEOUT_FLOOR.uiLedgerIds.map((id) => {
     const sec = sections.get(id) ?? '';
     const inProgress = has(sec, /in_progress/i);
     const pendingHumanEye = has(sec, /pending_human_eye/i);
     // verified 只认状态词性（**verified** 或 "→ verified" / "in_progress → **verified**"），
     // 台账正文里的 "零 verified 代签" / "不冒充 verified" 等否定句不算翻态。
     const verified = has(sec, /\*\*verified\*\*|→\s*\*\*verified\*\*|状态.{0,12}verified/i);
-    slots[id] = { inProgress, pendingHumanEye, verified };
-  }
+    return [id, { inProgress, pendingHumanEye, verified }];
+  }));
   return {
     slots,
     allInProgress: CLOSEOUT_FLOOR.uiLedgerIds.every((id) => ownGet(slots, id).inProgress),
@@ -127,8 +126,7 @@ export function scanSignatureSlots(root = ROOT, sourcesOverride = null) {
   const route = read('docs/ui-design-human-eye-route.md');
   const sectionStart = route.search(/## 3\. 签字槽/);
   const table = sectionStart < 0 ? '' : route.slice(sectionStart);
-  const slots = {};
-  for (const id of CLOSEOUT_FLOOR.signatureIds) {
+  const slots = Object.fromEntries(CLOSEOUT_FLOOR.signatureIds.map((id) => {
     // 行形如 "| E-01 树测试 | 寻路 ≥80% ... | ______ | ______ | ______ |"
     const row = table.split('\n').find((l) => new RegExp(`^\\|\\s*${id}\\b`).test(l)) ?? '';
     const cells = row.split('|').map((c) => c.trim()).filter((c, i, a) => !(i === 0 && c === '') && !(i === a.length - 1 && c === ''));
@@ -136,8 +134,8 @@ export function scanSignatureSlots(root = ROOT, sourcesOverride = null) {
     const date = cells[3] ?? '';
     const verdict = cells[4] ?? '';
     const blank = [signer, date, verdict].every((c) => /^_{3,}$/.test(c));
-    slots[id] = { present: row.length > 0, blank };
-  }
+    return [id, { present: row.length > 0, blank }];
+  }));
   const filled = Object.values(slots).filter((s) => s.present && !s.blank).length;
   const total = Object.values(slots).filter((s) => s.present).length;
   return {
