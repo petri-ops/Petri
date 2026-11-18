@@ -126,7 +126,7 @@ test('K-22/K-18：债读数在场（读数型+活源一致；入册/收窄/拆�
 
 test('负测 K-22：存量环 / knip 保留键 / 动态 require 现状增长或被改写 → 判红（只增即红棘轮）', () => {
   mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 13 } }), 'K-22');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 343 } }), 'K-22'); // 随上限 342 演进（2026-11-18）
+  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 344 } }), 'K-22'); // 随上限 342 演进（2026-11-18）
   mustRed(tamper({ archDebt: { ...truth.archDebt, dynamicRequirePoints: [true, true, false] } }), 'K-22');
 });
 

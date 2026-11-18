@@ -12513,12 +12513,12 @@
       "id": "BLOCK-462",
       "path": "docs/block462-3d-p2-verification-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block462-3d-p2-verification",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P2-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block462-3d-p2-verification-plan.md",
         "sidecars/three-live-runner/",
@@ -12533,7 +12533,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户发令「按照你的建议来进行」= Jev 单一建议 3D P2 验证闭环；B-2 three-live 裁决在册：引入但仅外部 MCP+adapter 隔离、capability 默认关）。npm VERIFIED：three-live@1.4.0 Apache-2.0 deps:none bin=three-live/three-live-cli/three-live-mcp。范围=隔离 sidecar 安装（沿 sand3d-runner 模式零产品依赖）+ 工具面只读实测对账 + MCP 货架接入（逐工具策略默认关，形态不符则 CLI 直调如实降级）+ verification adapter（validate/render/sim 编排消费 BLOCK-459/460 产物，失败诚实）+ truth 链 verifierResults + sha256 复现用例。非范围=viewer 包/P3、Agent Gym（外部条件不足则降级）、capability UI 面、渲染进程内引擎。plan=docs/block462-3d-p2-verification-plan.md。"
+      "notes": "2026-11-18 立项（用户发令「按照你的建议来进行」= Jev 单一建议 3D P2 验证闭环；B-2 three-live 裁决在册：引入但仅外部 MCP+adapter 隔离、capability 默认关）。npm VERIFIED：three-live@1.4.0 Apache-2.0 deps:none bin=three-live/three-live-cli/three-live-mcp。范围=隔离 sidecar 安装（沿 sand3d-runner 模式零产品依赖）+ 工具面只读实测对账 + MCP 货架接入（逐工具策略默认关，形态不符则 CLI 直调如实降级）+ verification adapter（validate/render/sim 编排消费 BLOCK-459/460 产物，失败诚实）+ truth 链 verifierResults + sha256 复现用例。非范围=viewer 包/P3、Agent Gym（外部条件不足则降级）、capability UI 面、渲染进程内引擎。plan=docs/block462-3d-p2-verification-plan.md。【收口 2026-11-18】L4 全交付：three-live@1.4.0 隔离 sidecar（npm --prefix --no-save 零产品依赖）+ 工具面只读实测对账（CLI 10 子命令 / MCP 10 工具枚举；裁决记九如实登记差异；validate 仅 .js/.html 对 GLB 路径不适用如实登记）+ verification adapter verify.mjs（info/render/sim 编排，HK-01 红→绿 6/6：pass/fail/双跑 digest 复现/truth 追加幂等/越界拒绝）+ 渲染证据双跑 sha256 一致（headless 确定性实测）+ truth 链 verifierResults 以 digest 去重追加进 SceneSpec metadata.provenance（单一真相）+ MCP 接入材料（capability 默认关，用户显式开启；建议首批只开四只读验证工具）。knip 上限 343（+verify.mjs 动态入口定性）。Agent Gym 工具面已核、编排留后续按需；textures/from-image 外部 AI 默认关（本地主权）。证据=acceptance/block462/。"
     }
   ],
   "lastUpdated": "2026-11-17"

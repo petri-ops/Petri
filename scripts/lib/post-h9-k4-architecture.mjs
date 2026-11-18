@@ -188,7 +188,7 @@ export function adjudicateArchitecture(input) {
   n = issues.length;
   const a = t.archDebt;
   if (!(typeof a.cycles === 'number' && a.cycles <= 12)) issues.push('K-22: 存量环只增不退被破坏（新增环即红；消亡走 arch-cycles-gate --write 下调）');
-  if (!(typeof a.knipKeys === 'number' && a.knipKeys <= 342)) issues.push('K-22: knip 保留面只增不退被破坏（新增保留键即红；收窄走 knip-ratchet --update 下调）'); // 上限 330→342：2026-11-18 定性批（上游 7 flow + 2 types + BLOCK-460 2 scripts + e2e 编排 = 11+1 键，全数动态入口/契约保留）
+  if (!(typeof a.knipKeys === 'number' && a.knipKeys <= 343)) issues.push('K-22: knip 保留面只增不退被破坏（新增保留键即红；收窄走 knip-ratchet --update 下调）'); // 上限 330→343：2026-11-18 定性批（上游 7 flow + 2 types + BLOCK-460 2 scripts + e2e 编排 = 11+1 键，全数动态入口/契约保留；+BLOCK-462 verify.mjs 动态入口）
   if (!(Array.isArray(a.dynamicRequirePoints) && a.dynamicRequirePoints.every(Boolean))) issues.push('K-22: 三处动态 require 现状被改写');
   conclusions['K-22/K-18'] = issues.length === n ? 'debt-readings-recorded-improvement-allowed' : 'drift';
 

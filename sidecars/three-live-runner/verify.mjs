@@ -23,6 +23,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { URL } from 'node:url';
 
 const TOOL_VERSION = 'three-live@1.4.0';
 const INSTALL_ROOT = path.join('.petri-dev-user-data', 'three-live', 'node_modules', 'three-live', 'dist', 'three-live-cli.js');

@@ -221,6 +221,7 @@
     "files::resources/model3d/workflows/recipe-build.js",
     "files::resources/workflows/self-optimize.mjs",
     "files::sidecars/sand3d-runner/sand3d-runner.mjs",
+    "files::sidecars/three-live-runner/verify.mjs",
     "files::src/main/computer-use-pip-preload.js",
     "types::core/packages/shared-copilot/actions.ts::ExternalLinkAction",
     "types::core/packages/shared-copilot/actions.ts::NavigateAction",
