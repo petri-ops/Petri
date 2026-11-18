@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "verdict": "pass",
+  "tool": "three-live@1.4.0",
+  "glb": "test/fixtures/sand3d-probe-rest.glb",
+  "glbSha256": "2e803be355e92866d276357311fba73d60f7092b5533764771b6e4d3bbf4434e",
+  "digest": "4015235a73832a6c5ed8f730b06aed018fa5361195fe24a807bb1676cc91741c",
+  "steps": {
+    "reset": {
+      "ok": true,
+      "observation": {
+        "step": 0,
+        "tick": 0,
+        "timeSec": 0,
+        "bodyCount": 9,
+        "reward": 0,
+        "score": 0,
+        "done": false,
+        "eventCount": 0
+      }
+    },
+    "iterations": 3,
+    "stepExits": [
+      0,
+      0,
+      0
+    ],
+    "observations": [
+      {
+        "step": 0,
+        "tick": 0,
+        "timeSec": 0,
+        "bodyCount": 9,
+        "reward": 0,
+        "score": 0,
+        "done": false,
+        "eventCount": 0
+      },
+      {
+        "step": 1,
+        "tick": 30,
+        "timeSec": 0.5,
+        "bodyCount": 9,
+        "reward": 0,
+        "score": 0,
+        "done": false,
+        "eventCount": 0
+      },
+      {
+        "step": 2,
+        "tick": 60,
+        "timeSec": 1,
+        "bodyCount": 9,
+        "reward": 0,
+        "score": 0,
+        "done": false,
+        "eventCount": 0
+      },
+      {
+        "step": 3,
+        "tick": 90,
+        "timeSec": 1.5,
+        "bodyCount": 9,
+        "reward": 0,
+        "score": 0,
+        "done": false,
+        "eventCount": 0
+      }
+    ],
+    "finalize": {
+      "ok": true,
+      "recordedSteps": 3
+    }
+  },
+  "sessionNote": "three-live CLI 仅 reset/step/play；MCP 侧有 three_live_gym_close。本编排以 session 文件读回+封存表征 episode close，不引 MCP transport（R3 只编排与证据）。",
+  "at": "2026-11-18T04:12:12.165Z"
+}

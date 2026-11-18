@@ -1,0 +1,37 @@
+BLOCK-467 / 3D P4 对账 + Agent Gym 编排首片 — HK-01 红绿 + 证据 sha256 在册
+
+发令：用户预授权 R3 = 3D Agent Gym 编排首片（五步串行 S3；只编排与证据，不引训练框架）。
+
+## RED（实现前，gym.mjs 缺席）
+命令：node --test test/block467-gym-orchestrator.test.mjs
+结果：tests 6 / pass 0 / fail 6（gym.mjs 必须在场 → 失败）。红证据在册。
+
+## GREEN（实现后）
+命令：node --test test/block467-gym-orchestrator.test.mjs
+结果：tests 6 / pass 6 / fail 0
+  P1 实现物在册（gym.mjs + README gym 节）
+  P2 真实探针 GLB reset→step×2：verdict pass + glbSha/digest 64hex + observation 形状 + finalize ok
+  P3 digest 双跑一致（确定性字段集；时间戳/临时会话路径不入）
+  P4 损坏 GLB → verdict fail + exit≠0（诚实失败）
+  P5 越界路径 → path_outside_workspace
+  P6 零训练框架依赖面（gym.mjs 仅 spawnSync three-live + node 内建，无 torch/tfjs/训练字样）
+
+## Canonical 真跑证据（3 步 episode，消费 BLOCK-459 探针 GLB）
+输入：test/fixtures/sand3d-probe-rest.glb（sha256 2e803be355e92866d276357311fba73d60f7092b5533764771b6e4d3bbf4434e，与 BLOCK-459 probe-rest.glb 同）
+命令：node sidecars/three-live-runner/gym.mjs --glb test/fixtures/sand3d-probe-rest.glb --out acceptance/block467-3d-p4/run --steps 3 --actions '[{"type":"moveCharacter","direction":[1,0,0]}]'
+结果：verdict=pass, digest=4015235a73832a6c5ed8f730b06aed018fa5361195fe24a807bb1676cc91741c, observations=4（t0+3 步）, finalize=true
+observation 逐摘要：step 0/1/2/3 → tick 0/30/60/90, bodyCount 9, reward/score 0, done false（无目标场景，诚实呈现）
+证据落盘：acceptance/block467-3d-p4/run/gym-evidence.json
+  sha256=b7e4fbbb383ac246c6bf8a94c9ad2c3285aa72df9798adabb8e2b4836bacb8c8
+CLI 形态留痕：acceptance/block467-3d-p4/gym-cli-help.txt（gym/reset/step/close --help）
+  sha256=3d8aaa8a13c96eaaa3681310aefdfe8eeff494f80cab412da15c17a7c721d07a
+  实测事实：three-live CLI gym 子命令 = reset/step/play/help（无 close）；three_live_gym_close 仅 MCP tools/list；
+  本编排以 session 文件读回+封存表征 episode close（payload.sessionNote 如实登记，不引 MCP transport）。
+
+## 对账表
+acceptance/block467-3d-p4/MILESTONES-RECONCILIATION.md：M0=459 闭环 / M1=460 闭环 / M2=462 部分闭环（gym 编排本次补）/ M3=463 闭环 / M4=本次；BLOCK-461 属 W11 非 3D 明确排除。
+
+## 边界
+零新增产品依赖（three-live 隔离 sidecar 已装，capability 默认关不触碰）；不引训练框架（R3）；
+零 agent 内核改动 / 零 three-live 包改动；零观感面（sidecar+契约+证据均非用户 UI 写面）；
+untracked 用户资产零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。

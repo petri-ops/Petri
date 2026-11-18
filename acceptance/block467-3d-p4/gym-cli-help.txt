@@ -1,0 +1,49 @@
+Play a scene closed-loop, step by step, like a reinforcement-learning environment (the CLI form of the three_live_gym_* MCP tools)
+
+Usage: three-live-cli-macos-arm64 gym [OPTIONS] <COMMAND>
+
+Commands:
+  reset  Start an episode, save it to a session file, and print the t = 0 observation as JSON
+  step   Apply actions, advance the simulation, print the observation as JSON, and record the step in the session file
+  play   Interactive mode: print the t = 0 observation, then read one JSON step per stdin line ({"actions": [...], "ticks": 30, "watch": [...], "frame": "out.png"}) and print one observation (or {"error": ...}) per line
+  help   Print this message or the help of the given subcommand(s)
+
+Options:
+      --texture-pack <PACK>  AI texture pack (`scene.textures.json`) used by every compile in this command, so `userData.xr.material.prompt` textures match the Web viewer
+  -h, --help                 Print help
+Start an episode, save it to a session file, and print the t = 0 observation as JSON
+
+Usage: three-live-cli-macos-arm64 gym reset [OPTIONS] --session <SESSION> <INPUT>
+
+Arguments:
+  <INPUT>  Input file path (.js, .html, or .glb)
+
+Options:
+      --session <SESSION>    Session file to create (holds the scene and every step, so each call can resume)
+      --texture-pack <PACK>  AI texture pack (`scene.textures.json`) used by every compile in this command, so `userData.xr.material.prompt` textures match the Web viewer
+      --watch <WATCH>        Only report these node names (comma-separated; default all, at most 64)
+      --frame <FRAME>        Also render the observation to this PNG file
+      --view <VIEW>          Viewport for --frame [default: camera] [possible values: camera, front, top, right, iso, quad]
+      --width <WIDTH>        Frame width in pixels [default: 384]
+      --height <HEIGHT>      Frame height in pixels [default: 288]
+  -h, --help                 Print help
+Apply actions, advance the simulation, print the observation as JSON, and record the step in the session file
+
+Usage: three-live-cli-macos-arm64 gym step [OPTIONS] --session <SESSION>
+
+Options:
+      --session <SESSION>    Session file from `gym reset`
+      --texture-pack <PACK>  AI texture pack (`scene.textures.json`) used by every compile in this command, so `userData.xr.material.prompt` textures match the Web viewer
+      --actions <ACTIONS>    JSON array of actions; `at` is a delay in seconds from the start of this step (e.g. '[{"type":"moveCharacter","direction":[1,0,0],"jump":true}]') [default: []]
+      --ticks <TICKS>        60 Hz ticks to advance (1..600) [default: 30]
+      --watch <WATCH>        Override the session's watch list for this observation (comma-separated)
+      --frame <FRAME>        Also render the observation to this PNG file
+      --view <VIEW>          Viewport for --frame [default: camera] [possible values: camera, front, top, right, iso, quad]
+      --width <WIDTH>        Frame width in pixels [default: 384]
+      --height <HEIGHT>      Frame height in pixels [default: 288]
+  -h, --help                 Print help
+error: unrecognized subcommand 'close'
+
+Usage: three-live-cli-macos-arm64 gym [OPTIONS] <COMMAND>
+
+For more information, try '--help'.

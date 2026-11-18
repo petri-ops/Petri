@@ -52,8 +52,26 @@ three-live-mcp 为标准 stdio MCP server。**接入是用户动作**（capabili
    endpoint，保持 deny——本地主权边界）；
 3. `capabilities` 面不变（capability 声明默认关的既有治理不因本包改变）。
 
+## Agent Gym 编排（gym.mjs · BLOCK-467 / 3D P4）
+
+`gym.mjs` 编排一次 episode（reset → step×N → finalize），消费工作区内 GLB（含 BLOCK-459 探针），
+stdout 单行 JSON 为唯一机器出口，失败诚实 exit 1；digest 为确定性字段集 sha256（双跑一致）。
+**只编排与证据，不引训练框架**（R3）：
+
+```text
+node gym.mjs --glb <ws-relative .glb> --out <ws-relative dir> [--steps N] [--actions <json>] [--ticks 30]
+```
+
+- `reset` = CLI `gym reset --session <tmp> <GLB>` 起 episode + t0 observation；
+- `step` = CLI `gym step --session <tmp> --actions <json> --ticks N` ×N，逐次 observation 摘要
+  （step/tick/reward/score/done/bodies 计数）；
+- **"close" 语义**：three-live CLI 只有 `reset/step/play` 子命令（现场 `gym --help` 实测），
+  `three_live_gym_close` 仅存在于 MCP tools/list；本编排层不引 MCP transport，改以 session 文件
+  读回+封存表征 episode close（payload.sessionNote 如实登记该缺口）；
+- 证据落 `<out>/gym-evidence.json`（与 stdout 同内容）。
+
 ## 非范围
 
 - viewer 包入驻 viewer registry / 双形态呈现 / 选择总线（=P3 另包）；
-- Agent Gym 编排闭环（工具面已核，编排留后续按需）；
+- 训练框架 / RL 策略网络 / 策略学习（R3 边界：只编排与证据）；
 - textures/from-image 的外部 AI 服务（默认关，charter 本地主权）。

@@ -8856,6 +8856,25 @@
       ]
     },
     {
+      "id": "block467-3d-p4-gym",
+      "note": "BLOCK-467 3D P4 对账 + Agent Gym 编排首片：gym.mjs 编排（reset→step×N→finalize）+ §9 里程碑对账 + JSON 证据 sha256；改这些面必跑 gym 编排契约测试（需 three-live 隔离安装，缺席 skip）+ block462 verify 邻域。只编排不引训练框架（R3）。证据 acceptance/block467-3d-p4/**。",
+      "patterns": [
+        "sidecars/three-live-runner/gym.mjs",
+        "test/block467-gym-orchestrator.test.mjs",
+        "docs/block467-3d-p4-reconciliation-gym-plan.md",
+        "acceptance/block467-3d-p4/**"
+      ],
+      "tests": [
+        "test/block467-gym-orchestrator.test.mjs",
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "gym-orchestrator",
+      "commands": [
+        "docs-check"
+      ]
+    },
+    {
       "id": "block463-3d-p3-presentation",
       "note": "BLOCK-463 3D P3 呈现层：SceneSpec 证据面板 + ::compose 跳转 + scenePolicy + workbench-live flow。证据目录同规则认领。",
       "patterns": [
