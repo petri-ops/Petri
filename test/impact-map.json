@@ -9041,6 +9041,25 @@
       "classifiesScripts": true
     },
     {
+      "id": "block481-c52-p5-reference-board-review",
+      "note": "BLOCK-481 / C-52 余项 P5 参考板与评审法：Pinterest 灵感画板/Refero DESIGN.md 结构化/CTA-Footer 模块级观察/仅评审素材不进产品，只做评审方法借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数（inspirationBoard/structuredDesignMd/moduleObservation/reviewMaterialOnly/licenseProvenance/boundaries）+ reference-board-review.json 模型可读契约 + 消费测试（篡改负测 fail-closed）；零 UI 写面/观感代签/新依赖/不抄品牌资产/不照搬营销 CTA-Footer/不做全局换皮。C-52 余项收官包。证据 acceptance/block481-c52-p5-reference-board-review/**。",
+      "patterns": [
+        "scripts/c52-reference-board-review.mjs",
+        "test/c52-reference-board-review.test.mjs",
+        "resources/design-context/reference-board-review.json",
+        "docs/block481-c52-p5-reference-board-review-plan.md",
+        "acceptance/block481-c52-p5-reference-board-review/**"
+      ],
+      "tests": [
+        "test/c52-reference-board-review.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block479-c52-p3-react-bits-motion",
       "note": "BLOCK-479 / C-52 余项 P3：React Bits 四类反馈型微动效（hover/press/展开/成功反馈）只做模式借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数 + react-bits-motion.json 模型可读契约 + 消费测试（篡改负测）；复用 --petri-duration/ease token、零 UI 写面/观感代签/新依赖/禁整页动效。证据 acceptance/block479-c52-p3-react-bits-motion/**。",
       "patterns": [

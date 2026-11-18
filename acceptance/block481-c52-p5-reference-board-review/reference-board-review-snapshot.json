@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "c52-reference-board-review",
+  "capability": "block481-c52-p5-reference-board-review",
+  "sourceCommit": "281b087251e6c13d06544c6a89a85997adece16c",
+  "platform": "win32-x64",
+  "command": "node scripts/c52-reference-board-review.mjs",
+  "generatedAt": "2026-11-18T11:57:17.305Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；仅 Pinterest/Refero/CTA/Footer 参考板与评审法模式借鉴+契约冻结，仅评审素材不进产品，观感 pending_human_eye 不代签，零 UI 运行时写面。",
+  "readings": {
+    "inspirationBoard": {
+      "value": {
+        "analysisSteps": 5,
+        "observationBorrowSplit": true,
+        "designAtomsOnly": true,
+        "pinterestBoardMethod": true
+      },
+      "source": "petri-ui-design/references/reference-analysis.md + tool-adoption-matrix.md",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "structuredDesignMd": {
+      "value": {
+        "briefSections": 10,
+        "briefSkillV110": true,
+        "designContextPack": true,
+        "iaMapPresent": true,
+        "referoStructuredMethod": true
+      },
+      "source": "design-brief-template.md + design-brief skill.json v1.1.0 + design-context.json + ia-map.json",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "moduleObservation": {
+      "value": {
+        "stateMatrixStates": 8,
+        "preDeliveryChecklist": true,
+        "ctaActionHierarchy": true,
+        "footerGrouping": true
+      },
+      "source": "module-state-matrix.md + review-checklist.md + tool-adoption-matrix.md",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "reviewMaterialOnly": {
+      "value": {
+        "noBrandFingerprint": true,
+        "zeroNewDependencies": true,
+        "internalReferenceOnly": true,
+        "productVsInternalDecided": true
+      },
+      "source": "frontend/src 全源 + tool-adoption-matrix.md 默认决策 + reference-analysis.md Step5",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "licenseProvenance": {
+      "value": {
+        "licenseSources": 4,
+        "p5Entry": true,
+        "recordProvenance": true,
+        "licenseUnknownGuard": true,
+        "briefLicenseSection": true,
+        "licenseRegister": {
+          "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
+          "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",
+          "21st.dev": "逐组件查许可 · 仅组件/模板片段灵感（P4 候选），防风格漂移与依赖膨胀",
+          "Pinterest/Refero/CTA/Footer": "灵感画板与结构化评审法（P5 候选），仅评审素材不进产品"
+        }
+      },
+      "source": "LICENSE_REGISTER + reference-analysis.md Step4 + design-brief-template.md §9",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "boundaries": {
+      "value": {
+        "humanEyeZeroSign": true,
+        "noNewDependency": true,
+        "noSimpleChatReplace": true,
+        "noWholePageCopy": true,
+        "noGlobalReskin": true,
+        "licenseRegisterSources": 4
+      },
+      "source": "根/前端 package.json + UI 台账 + SimpleChat.tsx + design-charter.md + backlog",
+      "command": "node scripts/c52-reference-board-review.mjs",
+      "capturedAt": "freeze-invariant"
+    }
+  }
+}

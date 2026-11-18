@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "petri-reference-board-review-contract",
+  "kind": "model-readable-reference-board-review",
+  "generatedBy": "node scripts/c52-reference-board-review.mjs",
+  "sourceCommit": "281b087251e6c13d06544c6a89a85997adece16c",
+  "generatedAt": "2026-11-18T11:57:17.306Z",
+  "derivedFrom": [
+    ".agents/skills/petri-ui-design/references/reference-analysis.md（Pinterest 灵感画板五步法 + 观察/借鉴分离 + 只取设计原子）",
+    ".agents/skills/petri-ui-design/references/design-brief-template.md + resources/skills/design-brief（Refero DESIGN.md 结构化十节 + Skill v1.1.0）",
+    ".agents/skills/petri-ui-design/references/module-state-matrix.md + review-checklist.md（CTA/Footer 模块级八态观察 + 交付前评审）",
+    "resources/design-context/design-context.json + ia-map.json（模型可读设计输入与 IA 映射）",
+    "LICENSE_REGISTER 四来源登记 + docs/design-charter.md（不抄皮肤立场）+ docs/ui-productization-audit.md（观感零签）"
+  ],
+  "patterns": {
+    "inspirationBoard": {
+      "analysisSteps": 5,
+      "observationBorrowSplit": true,
+      "designAtomsOnly": true,
+      "pinterestBoardMethod": true
+    },
+    "structuredDesignMd": {
+      "briefSections": 10,
+      "briefSkillV110": true,
+      "designContextPack": true,
+      "iaMapPresent": true,
+      "referoStructuredMethod": true
+    },
+    "moduleObservation": {
+      "stateMatrixStates": 8,
+      "preDeliveryChecklist": true,
+      "ctaActionHierarchy": true,
+      "footerGrouping": true
+    },
+    "reviewMaterialOnly": {
+      "noBrandFingerprint": true,
+      "zeroNewDependencies": true,
+      "internalReferenceOnly": true,
+      "productVsInternalDecided": true
+    },
+    "licenseProvenance": {
+      "licenseSources": 4,
+      "p5Entry": true,
+      "recordProvenance": true,
+      "licenseUnknownGuard": true,
+      "briefLicenseSection": true,
+      "licenseRegister": {
+        "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
+        "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",
+        "21st.dev": "逐组件查许可 · 仅组件/模板片段灵感（P4 候选），防风格漂移与依赖膨胀",
+        "Pinterest/Refero/CTA/Footer": "灵感画板与结构化评审法（P5 候选），仅评审素材不进产品"
+      }
+    },
+    "boundaries": {
+      "humanEyeZeroSign": true,
+      "noNewDependency": true,
+      "noSimpleChatReplace": true,
+      "noWholePageCopy": true,
+      "noGlobalReskin": true,
+      "licenseRegisterSources": 4
+    }
+  },
+  "boundaries": {
+    "humanEyeSigned": false,
+    "readOnly": true,
+    "noBrandCopy": true,
+    "reviewMaterialOnly": true,
+    "fullPageCopy": false,
+    "noGlobalReskin": true,
+    "newProductDependency": false,
+    "note": "参考板与评审法只做评审方法借鉴与契约冻结：仅评审素材不进产品，不复制品牌标志/文案/插画/整页布局，不照搬营销 CTA-Footer 模式、不做全局换皮；观感项 pending_human_eye 保持 in_progress，Agent 不代签。"
+  }
+}
