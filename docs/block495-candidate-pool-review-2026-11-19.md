@@ -1,7 +1,7 @@
 ---
 capability: block495-candidate-pool-review
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: W3 候选池转正评审（BLOCK-492 plan §3 W3 · 无人值守提示词 §5 S3）——候选池各条产出一页可裁决评审材料（现状/候选/风险/推荐/影响面/退出成本），状态一律 pending_user_ruling，不启动任何实现；启动与否归用户发令。
 acceptance:
   - 六组候选逐条六段材料：C-45 / MIGRATION-IDEMPOTENT / BLOCK-490 / 母纲 C-35~C-40 / C-50 / C-56
@@ -85,3 +85,12 @@ supersedes: 无（评审材料=决策辅助，不改任何候选的 canonical �
 - **不启动承诺**：本波零实现、零依赖、零注册面变更；所有「推荐」均为 advice，启动与否归用户发令。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- 六组候选材料齐、六段全、状态全 pending_user_ruling；两组消亡判定附实况证据指针（BLOCK-355 测试 6/6 复跑/BLOCK-264 registry notes+backlog ✅ 行）。
+- docs:check PASS（647 registered）+ ui:audit:check 绿；本波零测试面变更（docs-only，无需定向测试）。
+- 提交：8541aeae（立项+交付批）+ 本批（台账批）。
+- G0 开发期常态 · 不外推 packaged/Provider/GA。

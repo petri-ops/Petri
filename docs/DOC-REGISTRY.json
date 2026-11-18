@@ -13401,12 +13401,12 @@
       "id": "BLOCK-495",
       "path": "docs/block495-candidate-pool-review-2026-11-19.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block495-candidate-pool-review",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block495-candidate-pool-review-2026-11-19.md"
       ],
@@ -13417,7 +13417,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S3 / BLOCK-492 plan §3 W3 波次）。W3 候选池转正评审：六组候选逐条六段材料（现状/候选/风险/推荐/影响面/退出成本），状态 pending_user_ruling 不启动实现。核对结论：C-45 已由 BLOCK-355 完成（trimmer 单元化+防御层+6/6 测试）、C-35~C-44 已由 BLOCK-264 完成（登记滞后第 3 次抓到）——两组候选消亡如实钉死；真候选四项=MIGRATION-IDEMPOTENT（推荐自愈补列收窄版记账）/BLOCK-490（推荐 D2/D8 先裁+最小垂直切片）/C-50（推荐维持登记等场景）/C-56（推荐手册内容稿先行）。他方 WIP（backlog 原件/block490 原件/gateway-design.md）零触碰；零实现/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S3 / BLOCK-492 plan §3 W3 波次）。W3 候选池转正评审：六组候选逐条六段材料（现状/候选/风险/推荐/影响面/退出成本），状态 pending_user_ruling 不启动实现。核对结论：C-45 已由 BLOCK-355 完成（trimmer 单元化+防御层+6/6 测试）、C-35~C-44 已由 BLOCK-264 完成（登记滞后第 3 次抓到）——两组候选消亡如实钉死；真候选四项=MIGRATION-IDEMPOTENT（推荐自愈补列收窄版记账）/BLOCK-490（推荐 D2/D8 先裁+最小垂直切片）/C-50（推荐维持登记等场景）/C-56（推荐手册内容稿先行）。他方 WIP（backlog 原件/block490 原件/gateway-design.md）零触碰；零实现/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】docs 门禁全绿；两组候选消亡钉死/真候选四项材料齐；串行槽位回空，无人值守三波次全收口。"
     }
   ],
   "lastUpdated": "2026-11-18"
