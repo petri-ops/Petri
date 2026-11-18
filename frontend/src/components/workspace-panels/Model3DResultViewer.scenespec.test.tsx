@@ -24,7 +24,6 @@ vi.mock('@/components/work-surface/Model3DScene', () => ({
 import Model3DResultViewer from './Model3DResultViewer';
 
 const RUN_URL = 'http://local.test/artifact?path=model3d/runs/r1/model.glb';
-const SCENE_PATH = 'model3d/runs/r1/scene.json';
 
 function sceneSpec(overrides: Record<string, unknown> = {}) {
   return {
