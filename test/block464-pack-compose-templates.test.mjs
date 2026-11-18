@@ -6,8 +6,6 @@ import test from 'node:test';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-
 // BLOCK-464 P4-C — pack.json provides.composeTemplates 投影契约（HK-01 红绿先行）。
 // 领域包经 manifest 段贡献 compose spec 模板；投影 fail-closed：
 //   白名单字段 {id,title,description?,spec}、上限 8 条、spec 4KB、id 唯一、
