@@ -111,6 +111,13 @@
 
 - **UI-704 加映五（2026-11-17，用户裁决「好 按照你的建议来」）——诊断归位维护，导航去项但功能零删**：从高级导航移除独立「运行时与诊断」；`TerminalPanel` 原样收进「数据与维护 → 诊断」`DiagnosticsFold`（默认折叠），全仓唯一的服务状态/打开日志/系统终端入口不删。旧深链 `?section=diagnostics` 经 `normalizeInitialSection` 归一到 `maintenance` 并自动展开折叠块；设置搜索的「诊断/日志/运行时/服务/后端/进程/backend/runtime」关键词并入 maintenance，搜索可达不回退。分区数 12→11，`SETTINGS_SEARCH_INDEX` 与 `SETTINGS_SECTIONS` 漂移门仍逐项相等。HK-01 红（suite 导入失败）→ 绿 4/4，加 SettingsNav 6/6 + settingsSearch 8/8 + global-pages 1/1 + block201 基线 4/4；Jev test:suggest 建议文件漂移改跑在册 block59 window-manager 43/43；doc:suggest 建议 uiAudit（deterministic，本行即回写）。实机 `ui704-diagnostics` **6/6 allPass**（9223 离屏、跑完即 kill、未设 `PETRI_TEST_ONSCREEN`；证据 `acceptance/ui-704-diagnostics/ui704-diagnostics-live-win32.json`）。零新依赖/零功能删除；其他 agent 在制文档零触碰。观感 `pending_human_eye` 不代签。
 
+## UI-710: SceneSpec 证据面板 + ::compose ↔ Result Studio 双形态互达（3D P3 呈现层 BLOCK-463；2026-11-18 **in_progress（契约绿 + 实机腿 8/8 allPass；观感 pending_human_eye 不代签）**）
+
+- **变化面**：① Model3DResultViewer 配对 scene.json（沿 UI-654 sceneSnapshotFromUrl）时呈现 SceneSpec 证据面板（joints 清单/kind、provenance producer+programDigest、three-live verifierResults verdict——BLOCK-460/462 证据链上屏）；取数失败/无配对零行为变化；② ::compose spec 新增 mesh-reference kind（沿 SceneSpec NODE_TYPES，source sha256 锚定）；③ ComposeCard mesh-reference .glb 卡「在 Result Studio 打开」跳转（dispatch model3dOpen，projectId 链路补传）+ selectComposePresentation 三面判定契约；④ flow=block463-workbench-live（9223 离屏）。
+- **契约证据**：HK-01 红→绿（面板 3/3 + jump 5/5 + 全邻域 200/200）；quality:types 0 error；内核面零 diff（bd0d5357..HEAD src/routes/agent-runner/viewerRegistry=0 行）。
+- **实机腿**：block463-workbench-live 8/8 allPass（真实管线产物经项目工作区装载：scene_not_found/mesh_reference_load_failed 两处实测根因修复留痕于 flow 注释；截图=工作台 viewport+场景节点 4+验证 verdict 上屏）。
+- **pending_human_eye**：证据面板视觉观感与 ::compose 卡跳转体感（签字槽留空，Agent 不代签）。
+
 ## UI-709: Gen UI ::compose 受控渲染插座（W11 数据面首包 BLOCK-461；2026-11-18 **in_progress（代码完成+契约绿；实机观感 pending_human_eye 不代签）**）
 
 - **变化面**：① `::compose` JSON 指令投影（references.ts 双指令管线，compose 片段独立 kind）；② 扁平树 spec 手写校验器 fail-closed（compose/spec.ts：未知 kind/悬空引用/环/深度/props 白名单/$state 格式全拒）；③ catalog 最小集（Card/Metric/Table/Chart）叶子经既有 ResultCardRenderer 渲染=ResultNode 插座通电零第二渲染真相；④ ComposeCard 降级占位（spec 无效→compose-invalid 占位+console 留痕）；⑤ $state 绑定复用 gen-ui:get-data 通道 + visible 条件 + widgetState 复用既有 REST（≤16KiB）；⑥ parser findClosingBrace 嵌套花括号深度跟踪（::visualize 平 JSON 行为不变，既有 60/60 零回归）。

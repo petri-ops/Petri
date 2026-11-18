@@ -79,6 +79,7 @@ export function GenUiMessageContent({
               key={`compose-${index}`}
               spec={part.spec}
               conversationId={conversationId}
+              projectId={projectId}
             />
           );
         }

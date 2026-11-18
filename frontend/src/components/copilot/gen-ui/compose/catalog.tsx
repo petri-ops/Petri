@@ -12,6 +12,8 @@ import { ResultCardRenderer } from '../../ResultCardRenderer';
 import type { ResultNode } from '../../types';
 import type { ComposeNode, ComposeSpec } from './spec';
 import { stateRefPath } from './spec';
+import { dispatchPetriEvent, petriEvents } from '@/lib/events';
+import { selectComposePresentation, sceneJsonSiblingFor } from './scenePolicy';
 
 /** unknown → 展示文本守卫（禁 Object 默认字符串化；对象/空值归 '—'，字符串原样）。 */
 function safeText(value: unknown, empty = '—'): string {
@@ -94,9 +96,10 @@ interface ComposeTreeNodeProps {
   nodeId: string;
   state: StateData;
   depth: number;
+  projectId?: string | null;
 }
 
-function ComposeTreeNode({ spec, nodeId, state, depth }: ComposeTreeNodeProps): React.ReactElement | null {
+function ComposeTreeNode({ spec, nodeId, state, depth, projectId }: ComposeTreeNodeProps): React.ReactElement | null {
   const node = Object.entries(spec.nodes).find(([k]) => k === nodeId)?.[1];
   if (!node || !isNodeVisible(node, state)) return null;
   const children = Object.entries(spec.nodes)
@@ -108,10 +111,47 @@ function ComposeTreeNode({ spec, nodeId, state, depth }: ComposeTreeNodeProps): 
       <div data-compose-node={nodeId} style={{ border: '1px solid var(--petri-border)', borderRadius: 10, padding: '10px 12px', margin: '8px 0' }}>
         {node.title ? <div style={{ fontWeight: 600, fontSize: 'var(--petri-font-size-sm, 12px)', marginBottom: 6 }}>{node.title}</div> : null}
         {children.map((child) => (
-          <ComposeTreeNode key={child} spec={spec} nodeId={child} state={state} depth={depth + 1} />
+          <ComposeTreeNode key={child} spec={spec} nodeId={child} state={state} depth={depth + 1} projectId={projectId} />
         ))}
       </div>
     );
+  }
+  // BLOCK-463（双形态互达）：mesh-reference .glb 节点 → Result Studio 工作面
+  //（selectComposePresentation 判定矩阵；scenePath 沿 model3d/runs 的 scene.json 配对惯例）。
+  if (node.kind === 'mesh-reference') {
+    const presentation = selectComposePresentation(node);
+    if (presentation === 'open-workbench') {
+      const glbPath = node.source?.path ?? '';
+      const handleOpen = () => {
+        dispatchPetriEvent(petriEvents.model3dOpen, {
+          projectId: projectId ?? undefined,
+          scenePath: sceneJsonSiblingFor(glbPath),
+          meshPath: glbPath,
+          label: node.title ?? glbPath,
+        } as never);
+      };
+      return (
+        <div data-compose-node={nodeId} style={{ margin: '8px 0' }}>
+          <button
+            type="button"
+            data-testid="compose-open-workbench"
+            onClick={handleOpen}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid var(--petri-border)',
+              borderRadius: 8,
+              background: 'transparent',
+              color: 'var(--petri-text)',
+              fontSize: 'var(--petri-font-size-sm, 12px)',
+              cursor: 'pointer',
+            }}
+          >
+            在 Result Studio 打开 · {node.title ?? glbPath}
+          </button>
+        </div>
+      );
+    }
+    return null;
   }
   const resultNode = toResultNode(nodeId, node, state);
   if (resultNode === null) return null;
@@ -122,6 +162,6 @@ function ComposeTreeNode({ spec, nodeId, state, depth }: ComposeTreeNodeProps): 
   );
 }
 
-export function ComposeTree({ spec, state = null }: { spec: ComposeSpec; state?: StateData }): React.ReactElement {
-  return <ComposeTreeNode spec={spec} nodeId={spec.root} state={state} depth={0} />;
+export function ComposeTree({ spec, state = null, projectId = null }: { spec: ComposeSpec; state?: StateData; projectId?: string | null }): React.ReactElement {
+  return <ComposeTreeNode spec={spec} nodeId={spec.root} state={state} depth={0} projectId={projectId} />;
 }

@@ -8,7 +8,7 @@
  */
 
 const COMPOSE_SPEC_VERSION = 1;
-const COMPOSE_KINDS = ['card', 'metric', 'table', 'chart'] as const;
+const COMPOSE_KINDS = ['card', 'metric', 'table', 'chart', 'mesh-reference'] as const;
 type ComposeKind = (typeof COMPOSE_KINDS)[number];
 
 const MAX_NODES = 32;
@@ -70,7 +70,16 @@ interface ComposeCardNode {
   visible?: string;
 }
 
-export type ComposeNode = ComposeCardNode | ComposeMetricNode | ComposeTableNode | ComposeChartNode;
+export type ComposeNode = ComposeCardNode | ComposeMetricNode | ComposeTableNode | ComposeChartNode | ComposeMeshReferenceNode;
+
+export interface ComposeMeshReferenceNode {
+  kind: 'mesh-reference';
+  parent?: string;
+  title?: string;
+  /** GLB 产物（工作区相对路径 + sha256 锚定，沿 mesh-assets 资产单源）。 */
+  source?: { path?: string; sourceSha256?: string };
+  visible?: string;
+}
 
 export interface ComposeSpec {
   version: typeof COMPOSE_SPEC_VERSION;
@@ -140,6 +149,16 @@ function validateNodeProps(id: string, node: Record<string, unknown>): string[] 
           if (!valuesOk) issues.push(`${id}: chart.series.values 非法`);
         }
       }
+    }
+  } else if (kind === 'mesh-reference') {
+    const allowed = [...common, 'source'];
+    if (keys.some((key) => !allowed.includes(key))) issues.push(`${id}: 未知字段（mesh-reference 白名单）`);
+    const source = node.source;
+    if (!isPlainObject(source) || typeof source.path !== 'string' || !source.path.toLowerCase().endsWith('.glb')) {
+      issues.push(`${id}: mesh-reference.source.path 必须是 .glb`);
+    }
+    if (!isPlainObject(source) || !/^[a-f0-9]{64}$/i.test(String(source.sourceSha256 || ''))) {
+      issues.push('mesh_source_hash_required');
     }
   } else if (kind === 'card') {
     if (keys.some((key) => !common.includes(key))) issues.push(`${id}: 未知字段（card 白名单）`);

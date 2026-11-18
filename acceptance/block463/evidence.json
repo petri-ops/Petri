@@ -1,0 +1,19 @@
+{
+  "package": "BLOCK-463-3D-P3-PRESENTATION",
+  "recordedAt": "2026-11-18",
+  "environment": "dev 无窗口栈（后端 :3001 + vite :3000 + 9223 离屏测试实例，跑完即 kill）· 契约层 vitest + testing-library · 零产品依赖",
+  "summary": "3D P3 呈现层首包：A=SceneSpec 证据面板（Model3DResultViewer 配对 scene.json 呈现 joints 清单/provenance digest/verifierResults verdict——BLOCK-460/462 证据链上屏，取数失败诚实降级无面板）；B=双形态互达（::compose mesh-reference .glb 卡「在 Result Studio 打开」跳转 dispatch model3dOpen + selectComposePresentation 判定矩阵 + spec 新增 mesh-reference kind 沿 SceneSpec NODE_TYPES）；C=零内核改动证明（bd0d5357..HEAD 内核面 src/+routes/agent-runner/viewerRegistry 零 diff，28 文件全落领域面）。实机腿 9223 离屏 8/8 allPass：真实管线产物（e2e cabinet GLB + scene.json 含 truth 链）在项目工作区经 model3dOpen 装载成功（节点 4 计数正确、mesh_reference_load_failed 修复后消失）。",
+  "files": [
+    "evidence.json",
+    "green-run.txt",
+    "block463-workbench-live-darwin.json",
+    "block463-workbench.png"
+  ],
+  "keyEvidence": {
+    "redGreen": "面板/jump/policy 红测（模块缺失）→ 绿（viewer 3/3 + jump 5/5 + 全邻域 200/200）",
+    "liveLeg": "block463-workbench-live-darwin.json 8/8 allPass（真实 model3dOpen 契约驱动工作面，产物经项目工作区解析——scene_not_found/mesh_reference_load_failed 两处实测根因修复留痕于 flow 注释）",
+    "kernelZeroDiff": "git diff bd0d5357..HEAD -- src/ core/petri-server/routes/ agent-runner viewerRegistry = 0 行",
+    "planSection": "docs/block463-3d-p3-presentation-plan.md"
+  },
+  "result": "PASS"
+}

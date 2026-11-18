@@ -89,3 +89,43 @@
   flex-shrink: 0;
   opacity: 0.75;
 }
+
+/* BLOCK-463 — SceneSpec 证据面板（joints/provenance/verifierResults 上屏；
+   theme token 阶梯口径，禁零定义字面量）。 */
+.sceneSpecPanel {
+  border: 1px solid var(--petri-border-card);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: var(--petri-font-size-sm, 12px);
+  color: var(--petri-text-muted);
+}
+
+.sceneSpecPanel summary {
+  cursor: pointer;
+  color: var(--petri-text);
+}
+
+.sceneSpecBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 4px;
+}
+
+.sceneSpecRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sceneSpecJoint {
+  color: var(--petri-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sceneSpecKind {
+  color: var(--petri-text-muted);
+  flex-shrink: 0;
+}

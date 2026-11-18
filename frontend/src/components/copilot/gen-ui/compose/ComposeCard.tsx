@@ -15,13 +15,14 @@ import type { StateData } from './catalog';
 export interface ComposeCardProps {
   spec: ComposeSpec | null;
   conversationId: string | null;
+  projectId?: string | null;
 }
 
 function readBridge(): Window['petri'] | null {
   return (typeof window !== 'undefined' && window.petri) || null;
 }
 
-export function ComposeCard({ spec, conversationId }: ComposeCardProps): React.ReactElement {
+export function ComposeCard({ spec, conversationId, projectId = null }: ComposeCardProps): React.ReactElement {
   const [stateData, setStateData] = React.useState<StateData>(null);
 
   // spec 无数据源时直接走派生（effect 内不再同步 setState——react-hooks/set-state-in-effect）
@@ -65,5 +66,5 @@ export function ComposeCard({ spec, conversationId }: ComposeCardProps): React.R
       </div>
     );
   }
-  return <ComposeTree spec={spec} state={needsFetch ? stateData : null} />;
+  return <ComposeTree spec={spec} state={needsFetch ? stateData : null} projectId={projectId} />;
 }

@@ -30,6 +30,29 @@ function sceneSnapshotFromUrl(url: string): string | null {
   }
 }
 
+/** BLOCK-463 — scene.json 的取数 URL：与产物 URL 同源同路径，仅换 path 参数。 */
+function sceneSnapshotFetchUrl(url: string, scenePath: string): string | null {
+  try {
+    const parsed = new URL(url, window.location.origin);
+    parsed.searchParams.set('path', scenePath);
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+interface SceneSpecPanelData {
+  joints?: Array<{ id: string; kind?: string }>;
+  metadata?: {
+    provenance?: {
+      producer?: string;
+      programDigest?: string;
+      glbSha256?: string;
+      verifierResults?: Array<{ tool?: string; verdict?: string; digest?: string }>;
+    };
+  };
+}
+
 export function Model3DResultViewer({
   url,
   name,
@@ -63,6 +86,33 @@ export function Model3DResultViewer({
   React.useEffect(() => {
     setSelectionBusArtifact({ artifactId, revisionId });
   }, [artifactId, revisionId]);
+
+  // BLOCK-463 — SceneSpec 证据面板取数（仅 runs 配对产物；异步 effect 无同步 setState；
+  // 失败诚实降级为无面板，不炸穿 viewer）。
+  const scenePath = sceneSnapshotFromUrl(url);
+  const sceneFetchUrl = scenePath ? sceneSnapshotFetchUrl(url, scenePath) : null;
+  const [sceneSpec, setSceneSpec] = React.useState<{ artifactId: string; data: SceneSpecPanelData | null }>({ artifactId, data: null });
+  React.useEffect(() => {
+    if (!sceneFetchUrl) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const response = await fetch(sceneFetchUrl);
+        if (!response.ok) return;
+        const body = (await response.json()) as SceneSpecPanelData;
+        if (!cancelled && body && typeof body === 'object') {
+          setSceneSpec({ artifactId, data: body });
+        }
+      } catch {
+        /* 取数失败 = 无面板（诚实降级），不冒充 */
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [sceneFetchUrl, artifactId]);
+  const panelData = viewState.artifactId === artifactId && sceneSpec.artifactId === artifactId ? sceneSpec.data : null;
 
   const handleSurfaceClick = React.useCallback(() => {
     setSelectionBusSelection({
@@ -136,6 +186,34 @@ export function Model3DResultViewer({
           >
             在 3D 工作台打开
           </button>
+        ) : null}
+        {panelData && (panelData.joints?.length || panelData.metadata?.provenance) ? (
+          <details className={styles.sceneSpecPanel} data-testid="scenespec-panel">
+            <summary>
+              SceneSpec 证据{panelData.joints?.length ? ` · ${panelData.joints.length} 个关节` : ''}
+              {panelData.metadata?.provenance?.verifierResults?.length ? ` · ${panelData.metadata.provenance.verifierResults.length} 条验证` : ''}
+            </summary>
+            <div className={styles.sceneSpecBody}>
+              {panelData.joints?.map((joint) => (
+                <div key={joint.id} className={styles.sceneSpecRow}>
+                  <span className={styles.sceneSpecJoint}>{joint.id}</span>
+                  <span className={styles.sceneSpecKind}>{joint.kind ?? '?'}</span>
+                </div>
+              ))}
+              {panelData.metadata?.provenance ? (
+                <div className={styles.sceneSpecRow}>
+                  <span className={styles.sceneSpecJoint}>{panelData.metadata.provenance.producer ?? 'unknown'}</span>
+                  <span className={styles.sceneSpecKind}>{panelData.metadata.provenance.programDigest ?? ''}</span>
+                </div>
+              ) : null}
+              {panelData.metadata?.provenance?.verifierResults?.map((row: { tool?: string; verdict?: string; digest?: string }, index: number) => (
+                <div key={`v-${index}`} className={styles.sceneSpecRow}>
+                  <span className={styles.sceneSpecJoint}>{row.tool}</span>
+                  <span className={styles.sceneSpecKind}>{row.verdict}</span>
+                </div>
+              ))}
+            </div>
+          </details>
         ) : null}
         <span className={styles.hint}>点击模型面可将该产物加入上下文引用</span>
       </div>
