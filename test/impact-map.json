@@ -9123,6 +9123,26 @@
       "classifiesScripts": true
     },
     {
+      "id": "block491-ruling-codification",
+      "note": "BLOCK-491 / BLOCK-322-RULING D1–D5 裁决固化：把用户对 RULING-04 特征级引用 v2 的五项裁决（D1 派生缓存/D2 新增 aFeature·bFeature/D3 禁 OCCT 建几何/D4 v2a 先行/D5 数值一致性判据）固化为机器可读契约 + 中性扫描器，从本地主权真源机械复算六组读数（rulings/featureIdentity/referenceSyntax/implementationTickets/gdtAcceptance/boundaries）+ 消费测试（HK-01 缺席红 + 篡改负测 fail-closed）；零产品代码写面/不改 SceneSpec 契约/观感代签/新依赖/不碰 G1+，实现票逐票 deferred 待发令。证据 acceptance/block491-ruling-codification/**。",
+      "patterns": [
+        "scripts/block491-ruling-codification.mjs",
+        "test/block491-ruling-codification.test.mjs",
+        "resources/ruling-codification/block322-ruling-codification.json",
+        "docs/block491-ruling-codification-plan.md",
+        "docs/block-322-ruling-04-feature-reference-v2.md",
+        "acceptance/block491-ruling-codification/**"
+      ],
+      "tests": [
+        "test/block491-ruling-codification.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block481-c52-p5-reference-board-review",
       "note": "BLOCK-481 / C-52 余项 P5 参考板与评审法：Pinterest 灵感画板/Refero DESIGN.md 结构化/CTA-Footer 模块级观察/仅评审素材不进产品，只做评审方法借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数（inspirationBoard/structuredDesignMd/moduleObservation/reviewMaterialOnly/licenseProvenance/boundaries）+ reference-board-review.json 模型可读契约 + 消费测试（篡改负测 fail-closed）；零 UI 写面/观感代签/新依赖/不抄品牌资产/不照搬营销 CTA-Footer/不做全局换皮。C-52 余项收官包。证据 acceptance/block481-c52-p5-reference-board-review/**。",
       "patterns": [

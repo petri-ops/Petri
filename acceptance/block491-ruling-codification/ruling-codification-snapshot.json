@@ -1,0 +1,128 @@
+{
+  "kind": "block491-ruling-codification",
+  "sourceCommit": "056f3685f2c9948ef605cb5db884ec147bdcce3b",
+  "platform": "win32",
+  "capturedAt": "2026-11-18T14:54:38.043Z",
+  "readings": {
+    "rulings": {
+      "value": {
+        "rulings": {
+          "D1": {
+            "object": "feature table truth status",
+            "form": "derived_cache",
+            "status": "ruled",
+            "hasUserQuote": true,
+            "ruledAt": "2026-11-18"
+          },
+          "D2": {
+            "object": "reference syntax",
+            "form": "additive_aFeature_bFeature",
+            "status": "ruled",
+            "hasUserQuote": true,
+            "ruledAt": "2026-11-18"
+          },
+          "D3": {
+            "object": "forbid OCCT geometry building",
+            "form": "occt_readonly_no_build_geometry",
+            "status": "ruled",
+            "hasUserQuote": true,
+            "ruledAt": "2026-11-18"
+          },
+          "D4": {
+            "object": "v2 coverage scope",
+            "form": "v2a_first",
+            "status": "ruled",
+            "hasUserQuote": true,
+            "ruledAt": "2026-11-18"
+          },
+          "D5": {
+            "object": "GD&T acceptance level",
+            "form": "numeric_consistency",
+            "status": "ruled",
+            "hasUserQuote": true,
+            "ruledAt": "2026-11-18"
+          }
+        },
+        "rulingCount": 5
+      },
+      "source": "RULING-04 材料 §4 + BLOCK-491 plan §1 用户原话",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "featureIdentity": {
+      "value": {
+        "derivedCache": true,
+        "versionKeyShaDimensions": true,
+        "mismatchFailClosed": true,
+        "noSecondSourceOfTruth": true,
+        "occtReadOnly": true,
+        "noOcctBuildGeometry": true
+      },
+      "source": "RULING-04 材料 §2/§4 + AGENTS.md 红线",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "referenceSyntax": {
+      "value": {
+        "additiveWhiteListKeys": true,
+        "aFeatureBFeature": true,
+        "zeroLegacyMigration": true,
+        "notNodeIdFeatureString": true,
+        "contractChangeDeferred": true
+      },
+      "source": "RULING-04 材料 §4 D2",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "implementationTickets": {
+      "value": {
+        "tickets": {
+          "P4-05b": {
+            "status": "deferred_user_ruling",
+            "needsUserOrder": true
+          },
+          "P3-03-v2a": {
+            "status": "deferred_user_ruling",
+            "needsUserOrder": true
+          },
+          "P3-03-v2b": {
+            "status": "deferred_user_ruling",
+            "needsUserOrder": true
+          },
+          "P3-03-v2c": {
+            "status": "deferred_user_ruling",
+            "needsUserOrder": true
+          }
+        },
+        "v2cSeparated": true,
+        "noImplementationStarted": true
+      },
+      "source": "RULING-04 材料 §5 + BLOCK-491 plan §4",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "gdtAcceptance": {
+      "value": {
+        "annotationText": true,
+        "viewProjectionCoords": true,
+        "numericConsistency": true,
+        "noSubjectiveLooksRight": true
+      },
+      "source": "RULING-04 材料 §4 D5",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "boundaries": {
+      "value": {
+        "humanEyeZeroSign": true,
+        "noNewDependency": true,
+        "noSceneSpecContractChange": true,
+        "noProductCodeWrite": true,
+        "noG1Plus": true
+      },
+      "source": "BLOCK-491 plan §3 + AGENTS.md + UI 台账 + package.json",
+      "command": "node scripts/block491-ruling-codification.mjs",
+      "capturedAt": "freeze-invariant"
+    }
+  }
+}

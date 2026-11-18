@@ -1,0 +1,111 @@
+{
+  "kind": "model-readable-ruling-codification",
+  "id": "BLOCK-491 / BLOCK-322-RULING D1–D5",
+  "capability": "block491-ruling-codification",
+  "rulingStatus": "ruled",
+  "ruledAt": "2026-11-18",
+  "sourcePackage": "docs/block-322-ruling-04-feature-reference-v2.md",
+  "codificationPlan": "docs/block491-ruling-codification-plan.md",
+  "sourceCommit": "056f3685f2c9948ef605cb5db884ec147bdcce3b",
+  "readings": {
+    "rulings": {
+      "rulings": {
+        "D1": {
+          "object": "feature table truth status",
+          "form": "derived_cache",
+          "status": "ruled",
+          "hasUserQuote": true,
+          "ruledAt": "2026-11-18"
+        },
+        "D2": {
+          "object": "reference syntax",
+          "form": "additive_aFeature_bFeature",
+          "status": "ruled",
+          "hasUserQuote": true,
+          "ruledAt": "2026-11-18"
+        },
+        "D3": {
+          "object": "forbid OCCT geometry building",
+          "form": "occt_readonly_no_build_geometry",
+          "status": "ruled",
+          "hasUserQuote": true,
+          "ruledAt": "2026-11-18"
+        },
+        "D4": {
+          "object": "v2 coverage scope",
+          "form": "v2a_first",
+          "status": "ruled",
+          "hasUserQuote": true,
+          "ruledAt": "2026-11-18"
+        },
+        "D5": {
+          "object": "GD&T acceptance level",
+          "form": "numeric_consistency",
+          "status": "ruled",
+          "hasUserQuote": true,
+          "ruledAt": "2026-11-18"
+        }
+      },
+      "rulingCount": 5
+    },
+    "featureIdentity": {
+      "derivedCache": true,
+      "versionKeyShaDimensions": true,
+      "mismatchFailClosed": true,
+      "noSecondSourceOfTruth": true,
+      "occtReadOnly": true,
+      "noOcctBuildGeometry": true
+    },
+    "referenceSyntax": {
+      "additiveWhiteListKeys": true,
+      "aFeatureBFeature": true,
+      "zeroLegacyMigration": true,
+      "notNodeIdFeatureString": true,
+      "contractChangeDeferred": true
+    },
+    "implementationTickets": {
+      "tickets": {
+        "P4-05b": {
+          "status": "deferred_user_ruling",
+          "needsUserOrder": true
+        },
+        "P3-03-v2a": {
+          "status": "deferred_user_ruling",
+          "needsUserOrder": true
+        },
+        "P3-03-v2b": {
+          "status": "deferred_user_ruling",
+          "needsUserOrder": true
+        },
+        "P3-03-v2c": {
+          "status": "deferred_user_ruling",
+          "needsUserOrder": true
+        }
+      },
+      "v2cSeparated": true,
+      "noImplementationStarted": true
+    },
+    "gdtAcceptance": {
+      "annotationText": true,
+      "viewProjectionCoords": true,
+      "numericConsistency": true,
+      "noSubjectiveLooksRight": true
+    },
+    "boundaries": {
+      "humanEyeZeroSign": true,
+      "noNewDependency": true,
+      "noSceneSpecContractChange": true,
+      "noProductCodeWrite": true,
+      "noG1Plus": true
+    }
+  },
+  "boundaries": {
+    "readOnly": true,
+    "noImplementation": true,
+    "noSceneSpecContractChange": true,
+    "noNewDependency": true,
+    "humanEyeSigned": false,
+    "noG1Plus": true
+  },
+  "generatedAt": "2026-11-18T14:54:38.042Z"
+}

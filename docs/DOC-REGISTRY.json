@@ -9,11 +9,38 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 641,
+    "documentCount": 642,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 623
+    "managedMarkdown": 624
   },
   "documents": [
+    {
+      "id": "BLOCK-491",
+      "path": "docs/block491-ruling-codification-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block491-ruling-codification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block491-ruling-codification-plan.md",
+        "docs/block-322-ruling-04-feature-reference-v2.md",
+        "scripts/block491-ruling-codification.mjs",
+        "test/block491-ruling-codification.test.mjs",
+        "resources/ruling-codification/block322-ruling-codification.json",
+        "test/impact-map.json",
+        "acceptance/block491-ruling-codification/"
+      ],
+      "tags": [
+        "BLOCK-322",
+        "RULING",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 BLOCK-322-RULING」→停下核实→用户裁决采纳推荐形态 D1–D5 + 以 RULING-04 另立新包）。把用户对 BLOCK-322 RULING-04 特征级引用 v2 的五项裁决（D1 派生缓存/D2 新增 aFeature·bFeature/D3 禁 OCCT 建几何/D4 v2a 先行/D5 数值一致性判据）固化为机器可读契约 + 中性扫描器，从本地主权真源机械复算六组读数（rulings/featureIdentity/referenceSyntax/implementationTickets/gdtAcceptance/boundaries）。HK-01 11/11（缺席红 ERR_MODULE_NOT_FOUND + 篡改负测 fail-closed：翻 D1 形态/翻观感/放行 OCCT 建几何/deferred 改 active/加依赖/篡改材料）；--check PASS + manifest sha256 一致。零产品代码写面/不改 SceneSpec 契约/观感 pending_human_eye 零代签/零新依赖/不碰 G1+。实现票 P4-05b/P3-03 v2a/v2b 逐票 deferred_user_ruling、v2c deferred，未获用户发令不启动。零触碰他方 WIP。证据=acceptance/block491-ruling-codification/。G0 开发期常态 · 不外推 packaged/Provider/GA."
+    },
     {
       "id": "BLOCK-487",
       "path": "docs/block487-c55-video-p3-advanced-shot-plan.md",
