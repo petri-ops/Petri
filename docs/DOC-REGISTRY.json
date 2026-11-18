@@ -9,11 +9,37 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 634,
+    "documentCount": 635,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 616
+    "managedMarkdown": 617
   },
   "documents": [
+    {
+      "id": "BLOCK-480",
+      "path": "docs/block480-c52-p4-21st-snippet-library-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block480-c52-p4-21st-snippet-library",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block480-c52-p4-21st-snippet-library-plan.md",
+        "scripts/c52-21st-snippet-library.mjs",
+        "test/c52-21st-snippet-library.test.mjs",
+        "resources/design-context/21st-snippet-library.json",
+        "resources/design-context/manifest.json",
+        "acceptance/block480-c52-p4-21st-snippet-library/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "C-52",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 C-52-P4」；发令边界逐字=P4）。范围=静态扫描器 + 21st-snippet-library.json 模型可读契约（六组读数：snippetInventory/licenseAudit/referenceOnly/styleDriftGuard/dependencyBloatGuard/boundaries）+ 消费测试 + manifest 同步；逐组件查许可、仅参考不搬、防风格漂移、防依赖膨胀。HK-01 红→绿 11/11（缺席红+篡改负测）、--check PASS、C-52 P2/P3/P4+C-53 P0–P7 Node 101/101 零回归、theme-token 19/19、manifest sha 一致、output:judge fit 3.36 PASS；零 UI 写面/观感代签/新依赖/不抄品牌资产。closeout 本包自身门全绿、既有红 docs:check（post-h9 未跟踪蓝图）如实归属。观感 UI-706/707/709/710 保持 in_progress 零代签；C-52 P5 候选未启动。证据=acceptance/block480-c52-p4-21st-snippet-library/。"
+    },
     {
       "id": "BLOCK-479",
       "path": "docs/block479-c52-p3-react-bits-motion-plan.md",

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "c52-21st-snippet-library",
+  "capability": "block480-c52-p4-21st-snippet-library",
+  "sourceCommit": "9a41525dba000aaab23754951f39563817ee6fbe",
+  "platform": "win32-x64",
+  "command": "node scripts/c52-21st-snippet-library.mjs",
+  "generatedAt": "2026-11-18T11:49:26.199Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；仅 21st.dev 片段灵感库模式借鉴+契约冻结，逐组件查许可/仅参考不搬/防风格漂移/防依赖膨胀，观感 pending_human_eye 不代签，零 UI 运行时写面。",
+  "readings": {
+    "snippetInventory": {
+      "value": {
+        "controlVariantClasses": 7,
+        "composesSingleSource": true,
+        "statusTriad": true,
+        "charterFiveKinds": true,
+        "buttonRatchetGuard": true
+      },
+      "source": "controls/button.module.css + status.module.css + design-charter.md §6 + theme-token-contract.test.ts",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "licenseAudit": {
+      "value": {
+        "licenseSources": 4,
+        "perComponentLicense": true,
+        "referenceOnlyClause": true,
+        "licenseRegister": {
+          "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
+          "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",
+          "21st.dev": "逐组件查许可 · 仅组件/模板片段灵感（P4 候选），防风格漂移与依赖膨胀",
+          "Pinterest/Refero/CTA/Footer": "灵感画板与结构化评审法（P5 候选），仅评审素材不进产品"
+        }
+      },
+      "source": "LICENSE_REGISTER（四来源许可证登记）",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "referenceOnly": {
+      "value": {
+        "noExternalSnippetImport": true,
+        "noCdnImport": true,
+        "charterNoSkinCopy": true
+      },
+      "source": "frontend/src 全源 + design-charter.md 立场",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "styleDriftGuard": {
+      "value": {
+        "navySpecAligned": true,
+        "charterSections": 7,
+        "colorRatchetGuard": true,
+        "buttonRatchetGuard": true
+      },
+      "source": "custom.css dark 块 + design-charter.md + theme-token-contract.test.ts",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "dependencyBloatGuard": {
+      "value": {
+        "noUiKitDependency": true,
+        "frontendDependencyCount": 39,
+        "noCliDependency": true
+      },
+      "source": "根/前端 package.json 依赖块",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "boundaries": {
+      "value": {
+        "humanEyeZeroSign": true,
+        "noNewDependency": true,
+        "noSimpleChatReplace": true,
+        "licenseRegister": {
+          "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
+          "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",
+          "21st.dev": "逐组件查许可 · 仅组件/模板片段灵感（P4 候选），防风格漂移与依赖膨胀",
+          "Pinterest/Refero/CTA/Footer": "灵感画板与结构化评审法（P5 候选），仅评审素材不进产品"
+        },
+        "noFullPageCopy": true
+      },
+      "source": "根/前端 package.json + UI 台账 + SimpleChat.tsx + LICENSE_REGISTER",
+      "command": "node scripts/c52-21st-snippet-library.mjs",
+      "capturedAt": "freeze-invariant"
+    }
+  }
+}

@@ -9022,6 +9022,25 @@
       "scriptRole": "pattern-contract-collector"
     },
     {
+      "id": "block480-c52-p4-21st-snippet-library",
+      "note": "BLOCK-480 / C-52 余项 P4：21st.dev 组件/模板片段灵感库只做模式借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数（snippetInventory/licenseAudit/referenceOnly/styleDriftGuard/dependencyBloatGuard/boundaries）+ 21st-snippet-library.json 模型可读契约 + 消费测试（篡改负测 fail-closed）；逐组件查许可/仅参考不搬/防风格漂移/防依赖膨胀、零 UI 写面/观感代签/新依赖/不抄品牌资产。证据 acceptance/block480-c52-p4-21st-snippet-library/**。",
+      "patterns": [
+        "scripts/c52-21st-snippet-library.mjs",
+        "test/c52-21st-snippet-library.test.mjs",
+        "resources/design-context/21st-snippet-library.json",
+        "docs/block480-c52-p4-21st-snippet-library-plan.md",
+        "acceptance/block480-c52-p4-21st-snippet-library/**"
+      ],
+      "tests": [
+        "test/c52-21st-snippet-library.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block479-c52-p3-react-bits-motion",
       "note": "BLOCK-479 / C-52 余项 P3：React Bits 四类反馈型微动效（hover/press/展开/成功反馈）只做模式借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数 + react-bits-motion.json 模型可读契约 + 消费测试（篡改负测）；复用 --petri-duration/ease token、零 UI 写面/观感代签/新依赖/禁整页动效。证据 acceptance/block479-c52-p3-react-bits-motion/**。",
       "patterns": [

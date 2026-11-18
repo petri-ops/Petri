@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> BLOCK-480 六件套同批登记（2026-11-18）：C-52 余项 P4 21st.dev 片段灵感库借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未引入 21st.dev/shadcn/magicui/radix 等 UI kit 依赖、未复制品牌标志/文案/插画/整页布局，四类边界（逐组件查许可/仅参考不搬/防风格漂移/防依赖膨胀）仅从本地主权控件单源静态冻结；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block480-c52-p4-21st-snippet-library/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 > BLOCK-479 六件套同批登记（2026-11-18）：C-52 余项 P3 React Bits 反馈型微动效模式借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未引入 react-bits/framer-motion 等新依赖、未加整页动效，四类反馈型微动效仅从本地主权锚点静态冻结并复用 --petri-duration/ease token；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block479-c52-p3-react-bits-motion/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > BLOCK-478 六件套同批登记（2026-11-18）：C-52 余项 P2 assistant-ui 模式借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未替换 SimpleChat，未新增产品依赖；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block478-c52-p2-assistant-ui/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
