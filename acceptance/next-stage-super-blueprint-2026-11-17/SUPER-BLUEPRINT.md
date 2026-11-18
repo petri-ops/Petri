@@ -482,4 +482,17 @@ C-53 UI 设计质量 P0-P1（第5档，可用户裁决提前）
 
 来源事实：three-live / sand3d / Polyfork / img2threejs 调研 + `docs/3d-authoring-domain-charter.md` + `docs/3d-authoring-domain-blueprint-2026-11-17.md` + `docs/3d-authoring-dependency-ruling-2026-11-17.md` + `docs/gen-ui-data-plane-evaluation-2026-11-17.md`。核验：`node --test test/next-stage-super-blueprint.test.mjs`（4 契约）+ `test:changed:list` unknown=[]。
 
+
+## 附：五步串行执行投影（2026-11-18，状态以 registry 为准）
+
+本投影不登记状态（沿 §0/§维护规则）；此处仅记录用户 2026-11-18 预授权 S1-S5 的执行结果，权威状态一律以 `docs/DOC-REGISTRY.json` 为准：
+
+- S1 C-53 P0/P1 → BLOCK-465 completed/CLOSED（设计基线快照可复算 + 上下文包硬化）；
+- S2 W11 P3 流式首切片 → BLOCK-466 completed/CLOSED（::compose 流式稳定占位，实机腿 external-blocked 如实判档）；
+- S3 3D P4 对账 + Agent Gym 编排首片 → BLOCK-467 completed/CLOSED（§9 对账 M2 部分闭环如实登记 + gym.mjs 真跑 digest 在册）；
+- S4 基础设施清偿批 → BLOCK-468 completed/CLOSED（lint-ledger --update 修复 + Q-MATRIX 74/21/0/7 + knip 定性）；
+- S5 img2threejs 借形封装首片 → BLOCK-469 completed/CLOSED（纯 JS 门禁范式骨架，零整包安装 + 外部服务默认关）。
+
+五步全收口、串行 active 槽位回空。仍需用户发令/签字：C-53 P2-P7、Polyfork 授权结论、观感 UI-706/707/709/710 + E 类 22 条、post-h9 D5。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。
