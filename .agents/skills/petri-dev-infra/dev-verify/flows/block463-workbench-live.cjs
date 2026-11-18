@@ -17,7 +17,6 @@ const lib = require('../lib.cjs');
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
 const API = process.env.BLOCK463_API || 'http://127.0.0.1:3001';
-const SCENE_PATH = 'model3d/runs/block463-live/scene.json';
 const MESH_PATH = 'model3d/runs/block463-live/model.glb';
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block463');
 

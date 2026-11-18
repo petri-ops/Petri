@@ -157,7 +157,7 @@ function validateNodeProps(id: string, node: Record<string, unknown>): string[] 
     if (!isPlainObject(source) || typeof source.path !== 'string' || !source.path.toLowerCase().endsWith('.glb')) {
       issues.push(`${id}: mesh-reference.source.path 必须是 .glb`);
     }
-    if (!isPlainObject(source) || !/^[a-f0-9]{64}$/i.test(String(source.sourceSha256 || ''))) {
+    if (!isPlainObject(source) || typeof source.sourceSha256 !== 'string' || !/^[a-f0-9]{64}$/i.test(source.sourceSha256)) {
       issues.push('mesh_source_hash_required');
     }
   } else if (kind === 'card') {
