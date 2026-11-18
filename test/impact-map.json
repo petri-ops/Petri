@@ -8830,6 +8830,24 @@
       "commands": [
         "docs-check"
       ]
+    },
+    {
+      "id": "block464-gen-ui-catalog-extensions",
+      "note": "BLOCK-464 W11 P4：compose spec 模板库（resources/gen-ui/compose-templates）+ pack.json provides.composeTemplates 投影段 + visualize skill 双形态补章。改这些面必跑 compose 模板命中契约与投影契约测试 + skills:check。",
+      "patterns": [
+        "resources/gen-ui/compose-templates/**",
+        "core/petri-server/helpers/pack-contributions.js",
+        "resources/skills/visualize/**",
+        "frontend/src/components/copilot/gen-ui/compose/templates.test.tsx",
+        "test/block464-pack-compose-templates.test.mjs"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/gen-ui/compose/templates.test.tsx",
+        "test/block464-pack-compose-templates.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ]
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "id": "trend-chart",
+  "title": "趋势图表卡",
+  "description": "Card + 图表：趋势/对比型结构化展示模板。chartType=bar（对比）或 line（趋势）；labels 换成横轴标签；series.values 换成数值数组或 $state.<path> 引用。",
+  "spec": {
+    "version": 1,
+    "root": "card1",
+    "nodes": {
+      "card1": { "kind": "card", "title": "趋势" },
+      "c1": { "kind": "chart", "parent": "card1", "title": "序列", "chartType": "line", "labels": ["T1", "T2", "T3"], "series": [{ "name": "主序列", "values": [0, 0, 0] }] }
+    }
+  }
+}

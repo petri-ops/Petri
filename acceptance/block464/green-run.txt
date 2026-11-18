@@ -1,0 +1,13 @@
+✔ BLOCK-464 前置：loadPackContributions 支持 testRoot 注入（投影可测形态） (94.673375ms)
+✔ BLOCK-464: 合法 composeTemplates 投影透出（含 spec 形状轻校验） (1.513334ms)
+✔ BLOCK-464: 非法条目 fail-closed 丢弃 + diagnostic（缺 spec/坏形状/坏 id/重复 id） (1.320209ms)
+✔ BLOCK-464: 上限 8 条 + spec 4KB 截断/拒绝（LIMITS 模式） (0.892958ms)
+✔ BLOCK-464: provides 非 composeTemplates 数组 → invalid_shape diagnostic（不炸穿其它段） (0.6175ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 188.513083

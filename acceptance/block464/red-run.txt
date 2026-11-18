@@ -1,0 +1,96 @@
+✔ BLOCK-464 前置：loadPackContributions 支持 testRoot 注入（投影可测形态） (3.716625ms)
+✖ BLOCK-464: 合法 composeTemplates 投影透出（含 spec 形状轻校验） (2.537ms)
+✖ BLOCK-464: 非法条目 fail-closed 丢弃 + diagnostic（缺 spec/坏形状/坏 id/重复 id） (5.85375ms)
+✖ BLOCK-464: 上限 8 条 + spec 4KB 截断/拒绝（LIMITS 模式） (0.829375ms)
+✖ BLOCK-464: provides 非 composeTemplates 数组 → invalid_shape diagnostic（不炸穿其它段） (0.705209ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 1
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 103.422292
+
+✖ failing tests:
+
+test at test/block464-pack-compose-templates.test.mjs:41:1
+✖ BLOCK-464: 合法 composeTemplates 投影透出（含 spec 形状轻校验） (2.537ms)
+  AssertionError [ERR_ASSERTION]: 投影应含 demo-pack: {"packs":[],"diagnostics":[]}
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block464-pack-compose-templates.test.mjs:50:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block464-pack-compose-templates.test.mjs:57:1
+✖ BLOCK-464: 非法条目 fail-closed 丢弃 + diagnostic（缺 spec/坏形状/坏 id/重复 id） (5.85375ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(pack)
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block464-pack-compose-templates.test.mjs:71:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block464-pack-compose-templates.test.mjs:76:1
+✖ BLOCK-464: 上限 8 条 + spec 4KB 截断/拒绝（LIMITS 模式） (0.829375ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(pack)
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block464-pack-compose-templates.test.mjs:85:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block464-pack-compose-templates.test.mjs:90:1
+✖ BLOCK-464: provides 非 composeTemplates 数组 → invalid_shape diagnostic（不炸穿其它段） (0.705209ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(result.diagnostics.some((d) => d.contribution === 'composeTemplates' && d.code === 'invalid_shape'))
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block464-pack-compose-templates.test.mjs:94:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

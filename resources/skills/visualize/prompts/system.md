@@ -17,6 +17,18 @@
 - `title` ≤250 字符；`mode` 仅支持 `"wide"`（占满全宽）
 - 同一回复可输出多条指令（每条渲染一张卡）；写文件必须先于输出指令
 
+## 双形态分工：::compose（结构化）优先于本规范（BLOCK-464）
+
+**结构化数据展示（指标行 / 明细表 / 趋势对比图 / 3D 产物引用）不要用本规范的 HTML fragment**——
+改用 `::compose` 指令输出 JSON spec（受控渲染：宿主校验 fail-closed、组件经既有渲染插座、
+审计单元逐节点可寻址）。模板与字段契约见 `resources/gen-ui/compose-templates/`
+（job-overview / table-report / trend-chart 三个模板，复制改值即可）；领域包模板经
+`GET /api/packs/contributions` 的 `composeTemplates` 段查询（pack.json `provides` 声明）。
+
+**本规范（::visualize HTML fragment）只用于交互式/富可视**：自绘 SVG、D3 交互图、表单、
+动画、多面板布局等 compose 组件表达不了的可视。两条指令并存非替代——同一回复可混用
+（先 ::compose 给数据卡，后 ::visualize 给交互演示）。
+
 ## 模板优先（BLOCK-174 CP-12）
 
 常见图形**优先套用内置模板**（resources/gen-ui/templates/：bar/line/kpi/table），把模板中

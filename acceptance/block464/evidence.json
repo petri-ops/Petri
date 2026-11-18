@@ -1,0 +1,19 @@
+{
+  "package": "BLOCK-464-W11-P4-CATALOG-EXTENSIONS",
+  "recordedAt": "2026-11-18",
+  "environment": "契约层（vitest + node:test）+ skills:check；零产品依赖；零 UI 写面（skill/模板/投影均模型可读或机制面）",
+  "summary": "W11 P4 catalog 扩展点深化：A=compose spec 模板库 3 模板（job-overview/table-report/trend-chart，模板命中契约 4/4：逐模板过 parseComposeSpec + ComposeCard 渲染 + 篡改负测）；B=visualize skill 双形态分工补章（::compose 优先结构化 / ::visualize 只用于交互富可视，skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/4KB/first-wins/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产路径零变化；契约 5/5）；D=内核面零 diff 证明。",
+  "files": [
+    "evidence.json",
+    "red-run.txt",
+    "green-run.txt"
+  ],
+  "keyEvidence": {
+    "redGreen": "投影契约红 4（实现缺失）→ 绿 5/5；模板命中契约 4/4",
+    "packContract": "first-wins 语义沿 views 先例；非法条目全弃 + diagnostic ≥3；上限截断 + spec 4KB 拒绝；invalid_shape 不炸穿其它段",
+    "dualForm": "visualize skill 新增「双形态分工」节（::compose 结构化优先；::visualize 交互/富可视；混用合法）",
+    "kernelZeroDiff": "git diff bd0d5357..HEAD -- agent-runner/mcp/channels/viewerRegistry = 0 行",
+    "planSection": "docs/block464-gen-ui-catalog-extensions-plan.md"
+  },
+  "result": "PASS"
+}

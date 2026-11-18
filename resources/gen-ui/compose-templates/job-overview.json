@@ -1,0 +1,15 @@
+{
+  "id": "job-overview",
+  "title": "任务概览卡",
+  "description": "Card + 指标行：概览型结构化展示的最小模板。把 3 个 metric 的 title/value/unit 换成真实数据；value 可用 $state.<path> 引用 gen-ui:get-data 取回的 job 数据。根 card 的 title 是卡片标题。",
+  "spec": {
+    "version": 1,
+    "root": "card1",
+    "nodes": {
+      "card1": { "kind": "card", "title": "任务概览" },
+      "m1": { "kind": "metric", "parent": "card1", "title": "总数", "value": "—" },
+      "m2": { "kind": "metric", "parent": "card1", "title": "成功率", "value": "—" },
+      "m3": { "kind": "metric", "parent": "card1", "title": "耗时", "value": "—", "unit": "秒" }
+    }
+  }
+}

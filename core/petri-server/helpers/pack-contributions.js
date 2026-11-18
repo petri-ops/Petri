@@ -34,6 +34,10 @@ const LIMITS = Object.freeze({
   uiActions: 200,
   // BLOCK-339 P1 — 领域快捷意图（cue）：让核心零域词，领域语汇由包声明
   quickIntents: 20,
+  // BLOCK-464 P4-C — 领域包 compose spec 模板贡献（catalog 扩展点 v1：消费面=模型可读，
+  // 经 /api/packs/contributions 透出；前端 UI/组件 kind 扩展=v2 候选）。
+  composeTemplates: 8,
+  composeTemplateSpecBytes: 4096,
   quickIntentCues: 12,
   idLength: 64,
   titleLength: 120,
@@ -80,6 +84,56 @@ function normalizePackModalities(packId, provides, diagnostics) {
     return [];
   }
   return normalizeModalities(provides.modalities, LIMITS.modalities);
+}
+
+/**
+ * BLOCK-464 P4-C — compose spec 模板贡献投影（catalog 扩展点 v1）。
+ * 白名单字段 {id,title,description?,spec}；spec 做投影侧轻校验（version=1/root 字符串/
+ * nodes 对象同构 compose spec），完整校验归消费侧 parseComposeSpec（双闸）；
+ * 非法条目丢弃 + diagnostic；上限 8 条、spec 4KB（LIMITS）。
+ */
+function normalizeComposeTemplates(packId, provides, diagnostics) {
+  if (provides.composeTemplates === undefined) return [];
+  if (!Array.isArray(provides.composeTemplates)) {
+    diagnostics.push(diagnostic(packId, 'composeTemplates', 'invalid_shape'));
+    return [];
+  }
+  const raw = provides.composeTemplates.slice(0, LIMITS.composeTemplates);
+  const templates = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const id = normalizeId(item && item.id);
+    const title = asSmallString(item && item.title, LIMITS.titleLength);
+    const description = asSmallString(item && item.description, LIMITS.emptyStateLength);
+    if (!id || !title) {
+      diagnostics.push(diagnostic(packId, 'composeTemplates', 'missing_id_or_title'));
+      continue;
+    }
+    if (seen.has(id)) {
+      diagnostics.push(diagnostic(packId, 'composeTemplates', 'duplicate_id'));
+      continue;
+    }
+    const spec = item && item.spec;
+    if (!spec || typeof spec !== 'object' || Array.isArray(spec)) {
+      diagnostics.push(diagnostic(packId, 'composeTemplates', 'missing_spec'));
+      continue;
+    }
+    const specText = JSON.stringify(spec);
+    if (specText.length > LIMITS.composeTemplateSpecBytes) {
+      diagnostics.push(diagnostic(packId, 'composeTemplates', 'spec_too_large'));
+      continue;
+    }
+    const shapeOk = spec.version === 1
+      && typeof spec.root === 'string' && spec.root.trim()
+      && spec.nodes && typeof spec.nodes === 'object' && !Array.isArray(spec.nodes);
+    if (!shapeOk) {
+      diagnostics.push(diagnostic(packId, 'composeTemplates', 'invalid_spec_shape'));
+      continue;
+    }
+    seen.add(id);
+    templates.push({ id, title, ...(description ? { description } : {}), spec });
+  }
+  return templates;
 }
 
 function normalizeViews(packId, packRoot, provides, diagnostics) {  const raw = Array.isArray(provides.views) ? provides.views.slice(0, LIMITS.views) : [];
@@ -288,7 +342,16 @@ function loadPackContributions(options = {}) {
   const diagnostics = [];
   let installed = [];
   try {
-    installed = packRegistry.readInstalledPacks(dataDir);
+    if (options.testRoot) {
+      // 测试 seam（BLOCK-464）：扫目录下含 pack.json 的子目录伪造 installed 记录——
+      // 生产路径零变化（不传 testRoot 即走既有 pack-registry 读数）。
+      installed = fs.readdirSync(options.testRoot, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => ({ packId: entry.name, packRoot: path.join(options.testRoot, entry.name), enabled: true }))
+        .filter((record) => readPackManifest(record.packRoot) !== null);
+    } else {
+      installed = packRegistry.readInstalledPacks(dataDir);
+    }
   } catch (error) {
     return {
       packs: [],
@@ -315,7 +378,8 @@ function loadPackContributions(options = {}) {
     const uiActions = normalizeUiActions(packId, provides, diagnostics);
     const modalities = normalizePackModalities(packId, provides, diagnostics);
     const quickIntents = normalizeQuickIntents(packId, provides, diagnostics);
-    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0 && modalities.length === 0 && quickIntents.length === 0) continue;
+    const composeTemplates = normalizeComposeTemplates(packId, provides, diagnostics);
+    if (views.length === 0 && resultSurfaces.length === 0 && uiActions.length === 0 && modalities.length === 0 && quickIntents.length === 0 && composeTemplates.length === 0) continue;
     packs.push({
       packId,
       name: asSmallString(manifest.name, LIMITS.titleLength) || packId,
@@ -325,6 +389,7 @@ function loadPackContributions(options = {}) {
       uiActions,
       modalities,
       quickIntents,
+      composeTemplates,
     });
   }
   return { packs, diagnostics };

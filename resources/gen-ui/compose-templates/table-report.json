@@ -1,0 +1,13 @@
+{
+  "id": "table-report",
+  "title": "表格报告卡",
+  "description": "Card + 表格：明细型结构化展示模板。columns 换成真实列名；rows 换成二维数组或 $state.<path> 引用（整表取数，≤200 行）。",
+  "spec": {
+    "version": 1,
+    "root": "card1",
+    "nodes": {
+      "card1": { "kind": "card", "title": "数据报告" },
+      "t1": { "kind": "table", "parent": "card1", "title": "明细", "columns": ["列 A", "列 B"], "rows": [["—", "—"]] }
+    }
+  }
+}
