@@ -1,6 +1,6 @@
 ---
 capability: block477-filetree-repro-attribution
-status: active
+status: completed
 goal: C-47「文件树连翻页第二次点击惰性/回弹」的可复算复现与根因归因——沿 BLOCK-358 未竟路径，用纯函数状态机 + CDP 实机连续点击 + 2s 轮询收敛观测，把"观察未归因"推进到可判定的三态结论；归因成立才立修复票，不猜测性修复。
 acceptance:
   - HK-01 红绿先行：状态机归因模块缺席时测试红，实现后契约绿（含负测/篡改锚定 fail-closed）。
@@ -14,7 +14,7 @@ reopen: 修复实施（归因成立后的独立票，需用户发令）；G1+ �
 
 # BLOCK-477 — 文件树连翻页复现与归因（C-47）
 
-> 状态：**active（2026-11-18 立项，用户发令「开始 C-47」）**
+> 状态：**completed（2026-11-18 收口；归因成立 reproduced_and_attributed；修复未实施、C-47 票保持 open）**
 
 - 依据任务：`docs/pending-work-backlog.md` C-47 条目（「观察，未归因」，启动条件=人工复现归因后立票）
 - 既有归因：`docs/block-358-filetree-pagination-plan.md` / `docs/block-358-report.md`（结论 `observed_but_not_reproduced`，票 kept-open）

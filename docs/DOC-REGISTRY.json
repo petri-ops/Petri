@@ -12730,12 +12730,12 @@
       "id": "BLOCK-477",
       "path": "docs/block477-filetree-repro-attribution-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block477-filetree-repro-attribution",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block477-filetree-repro-attribution-plan.md",
         "scripts/block477-filetree-repro.mjs",
@@ -12754,7 +12754,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户发令「开始 C-47」）。范围=复现+归因专项（沿 BLOCK-358 未竟路径）：源码锚定（loadMoreRoot append / refreshFiles offset=0 覆盖 / 2s 轮询）+ 分页时序状态机确定性复现 + CDP 9223 离屏实机连续点击（环境允许时）+ 三态结论；HK-01 红绿先行（缺席红→5/5 绿含负测）；归因成立只立修复票不修产品代码、不销票。非范围=猜测性修复/RightFileTree.tsx 与 files.js 写面/观感代签/新依赖/用户资产/G1+。plan=docs/block477-filetree-repro-attribution-plan.md。"
+      "notes": "2026-11-18 立项（用户发令「开始 C-47」）。范围=复现+归因专项（沿 BLOCK-358 未竟路径）：源码锚定（loadMoreRoot append / refreshFiles offset=0 覆盖 / 2s 轮询）+ 分页时序状态机确定性复现 + CDP 9223 离屏实机连续点击（环境允许时）+ 三态结论；HK-01 红绿先行（缺席红→5/5 绿含负测）；归因成立只立修复票不修产品代码、不销票。非范围=猜测性修复/RightFileTree.tsx 与 files.js 写面/观感代签/新依赖/用户资产/G1+。plan=docs/block477-filetree-repro-attribution-plan.md。【收口 2026-11-18】三态结论 reproduced_and_attributed：源码三处模式在场 + 状态机复现 200→400→(2s)→200 + CDP 9223 离屏实机分相位采样实测同一轨迹（hidden=false 轮询真触发）；HK-01 红→绿 5/5（含负测/篡改锚定）；closeout 全链 PASS（test:changed 44/44、quality:perf 110.7s 实跑、arch 两门零改动 SKIP）；C-47 票保持 open，修复票候选方向 A/B 待用户发令，未改一行产品代码。证据=acceptance/block477-filetree-attribution/；报告=docs/block477-filetree-attribution-report.md。"
     },
     {
       "id": "BLOCK-477-REPORT",
