@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-18T11:48:11.627Z",
+  "generatedAt": "2026-11-18T12:53:14.747Z",
   "summary": {
     "baseline": "HEAD",
-    "tools": 117,
+    "tools": 118,
     "toolDomains": 16,
-    "contracts": 117,
-    "metadata": 118,
+    "contracts": 118,
+    "metadata": 119,
     "ipcChannels": 172,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 169,
@@ -18,7 +18,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 6,
     "defsFallbacks": 0
   },
   "findings": [
@@ -413,6 +413,27 @@
       },
       "undeclaredArgs": [],
       "schemaProps": 3
+    },
+    {
+      "name": "compose_video",
+      "domain": "browser",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": false,
+      "reachable": true,
+      "reach": {
+        "name": "compose_video",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
     },
     {
       "name": "browser_connect",
@@ -5960,6 +5981,13 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/agent-tools/registry.js",
+    "M core/petri-server/agent-tools/tool-defs/browser.js",
+    "M core/petri-server/agent-tools/tool-events.js",
+    "M core/petri-server/agent-tools/tool-metadata.js",
+    "?? core/petri-server/agent-tools/video-tools.js",
+    "?? core/petri-server/helpers/video-compose.js"
+  ],
   "defNotes": []
 }

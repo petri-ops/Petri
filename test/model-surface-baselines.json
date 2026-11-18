@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-17T18:10:07.941Z",
+  "updatedAt": "2026-11-18T12:32:03.923Z",
   "systemPromptChars": 1083,
-  "toolDefsCount": 117,
-  "toolDefsChars": 64872,
+  "toolDefsCount": 118,
+  "toolDefsChars": 65990,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -22,6 +22,7 @@
     "read_video": 685,
     "transcribe_audio": 392,
     "speak_text": 530,
+    "compose_video": 1118,
     "browser_connect": 357,
     "browser_act": 758,
     "browser_status": 186,

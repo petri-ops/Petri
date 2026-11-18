@@ -9,11 +9,46 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 636,
+    "documentCount": 637,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 618
+    "managedMarkdown": 619
   },
   "documents": [
+    {
+      "id": "BLOCK-482",
+      "path": "docs/block482-c55-video-p0-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block482-c55-video-p0",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block482-c55-video-p0-plan.md",
+        "core/petri-server/helpers/video-compose.js",
+        "core/petri-server/agent-tools/video-tools.js",
+        "core/petri-server/agent-tools/tool-defs/browser.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "test/fixtures/tool-activity-labels.json",
+        "test/model-surface-baselines.json",
+        "test/block482-video-compose.test.mjs",
+        "acceptance/block482-c55-video-p0/"
+      ],
+      "sharedBaselines": [
+        "test/model-surface-baselines.json",
+        "test/fixtures/tool-activity-labels.json"
+      ],
+      "tags": [
+        "C-55",
+        "VIDEO",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 C-55-VIDEO-P0」+ 裁决「TTS 默认开/外部素材允许/尽可能做好」）。VideoProjectSpec + compose_video 通用合成窄口（复用 ffmpeg 6.1.1/TTS，零新依赖）+ 真实 3 镜头短视频成片（旁白/烧录字幕/讲稿/来源/QA/manifest 全链 sha256+血缘）+ ffprobe 独立解码验证（h264/1280x720/24fps/aac/21.9s exit=0）。HK-01 14/14（缺席红+6类篡改负测）、注册契约 39/39、QA machine_pass、subtitles_burned=true、CJK 无豆腐块。TTS 仅视频窄口授权开启不翻转全局 speech-config；外部素材须 provenance。观感成片终审 pending_human_eye 零代签。有意增长=TOOL_DEFS 117→118（compose_video）+ model-surface/code-size/surface-matrix/K-24 truth 同步对账；probe-live.mjs 定性动态入口入 knip 保留面。既有红 docs:check/test:changed 3 缺口/lint:ledger test 域既有漂移(本包贡献0)/EAR/perf/post-h9 6 红如实归属非本包文件面。证据=acceptance/block482-c55-video-p0/。"
+    },
     {
       "id": "BLOCK-481",
       "path": "docs/block481-c52-p5-reference-board-review-plan.md",

@@ -131,7 +131,7 @@ test('K-24：三矩阵非同源现状如实登记（capability 下游派生、sh
   assert.equal(truth.matrices.shelfWired, false);
   assert.equal(truth.matrices.capabilityDerivedFromMatrix, true);
   assert.equal(truth.matrices.shelfIndependent, true);
-  assert.equal(truth.matrices.summary.tools, 117); // BLOCK-454-P6 transcribe_audio+speak_text（2026-11-18 同步对账）
+  assert.equal(truth.matrices.summary.tools, 118); // BLOCK-454-P6 transcribe_audio+speak_text=117；BLOCK-482 compose_video +1=118（2026-11-18 同步对账，surface-matrix 现读一致）
 });
 
 test('负测 K-24：把 shelf 冒充已接入同源生成器 → 判红', () => {

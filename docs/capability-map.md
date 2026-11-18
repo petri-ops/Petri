@@ -2,7 +2,7 @@
 
 > **自动生成，勿手改**。生成器 `scripts/block357-capability-map.mjs`；
 > 数据源 `acceptance/functional-audit-2026-11-04/surface-matrix.json`（`scripts/functional-surface-audit.mjs` 产出）。
-> 矩阵生成时间：2026-11-18T11:48:11.627Z；覆盖 117 个工具、172 个 IPC 通道、289 个路由端点。
+> 矩阵生成时间：2026-11-18T12:53:14.747Z；覆盖 118 个工具、172 个 IPC 通道、289 个路由端点。
 
 ## 边界（先读这一段）
 
@@ -16,7 +16,7 @@
 | 域 | 能做什么 | 工具数 | 可达 |
 | --- | --- | ---: | ---: |
 | `agent-orchestration` | 任务编排与子智能体 | 10 | 10/10 |
-| `browser` | 浏览器操作 | 12 | 12/12 |
+| `browser` | 浏览器操作 | 13 | 13/13 |
 | `computer` | 电脑使用（桌面控制） | 9 | 9/9 |
 | `godot` | 游戏引擎桥 | 2 | 2/2 |
 | `knowledge` | 知识空间与检索 | 15 | 15/15 |

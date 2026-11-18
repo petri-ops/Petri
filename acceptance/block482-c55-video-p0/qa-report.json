@@ -1,0 +1,88 @@
+{
+  "ok": true,
+  "status": "machine_pass",
+  "checks": [
+    {
+      "name": "scene_count",
+      "passed": true,
+      "detail": "3/3"
+    },
+    {
+      "name": "timeline_monotonic",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "srt_caption_bounds",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "video_nonempty",
+      "passed": true,
+      "detail": "301155B"
+    },
+    {
+      "name": "subtitles_burned",
+      "passed": true,
+      "detail": "burned into video.mp4"
+    },
+    {
+      "name": "all_claims_traced",
+      "passed": true,
+      "detail": "2 claims"
+    }
+  ],
+  "humanReview": {
+    "status": "pending_human_eye",
+    "note": "成片观感/科学专业性终审由用户签字，Agent 不代签"
+  },
+  "timeline": {
+    "ok": true,
+    "scenes": [
+      {
+        "id": "sc1",
+        "index": 0,
+        "startMs": 0,
+        "endMs": 6400,
+        "durationMs": 6400,
+        "captions": [
+          {
+            "text": "晴朗的天空为什么是蓝色的？",
+            "startMs": 0,
+            "endMs": 4000
+          }
+        ]
+      },
+      {
+        "id": "sc2",
+        "index": 1,
+        "startMs": 6400,
+        "endMs": 15040,
+        "durationMs": 8640,
+        "captions": [
+          {
+            "text": "蓝光波长短，更容易被散射",
+            "startMs": 6400,
+            "endMs": 11400
+          }
+        ]
+      },
+      {
+        "id": "sc3",
+        "index": 2,
+        "startMs": 15040,
+        "endMs": 22120,
+        "durationMs": 7080,
+        "captions": [
+          {
+            "text": "散射的蓝光进入眼睛 → 蓝天",
+            "startMs": 15040,
+            "endMs": 20040
+          }
+        ]
+      }
+    ],
+    "totalMs": 22120
+  }
+}

@@ -160,6 +160,7 @@ const TOOL_METADATA = {
   read_image: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   transcribe_audio: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   speak_text: { readOnly: false, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
+  compose_video: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: false, riskLevel: 'medium', timeoutMs: 600000 },
   read_video: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: null },
   godot_run: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 120000 },
   model3d_blend_ops: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 120000 },

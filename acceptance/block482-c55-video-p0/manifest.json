@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "topic": "为什么天空是蓝色的？",
+  "aspectRatio": "16:9",
+  "totalMs": 22120,
+  "artifacts": [
+    {
+      "name": "video.mp4",
+      "sha256": "e95cadc876b7ea26dc78104f6db0f931cc9542524d1777ec24421a9ddb56fe29",
+      "bytes": 301155
+    },
+    {
+      "name": "narration.wav",
+      "sha256": "6806e95d18a27699fa8d1fd7339bc7afa3fc0fd0260e7d4707aeb62f61dd2065",
+      "bytes": 1061838
+    },
+    {
+      "name": "subtitles.srt",
+      "sha256": "6181a44d015b7595d9627bf9de120939339b3d0ea85649fe7989b22d3da2360f",
+      "bytes": 215
+    },
+    {
+      "name": "script.md",
+      "sha256": "05355e15fcae52391fb44e22e80e991936b7b98808d31567efb3e6337d53a25d",
+      "bytes": 1016
+    },
+    {
+      "name": "sources.md",
+      "sha256": "309c9f4618e0a1ba10e3e363dc719b41d85041ee41812cd2e6208f6fdec930d4",
+      "bytes": 402
+    },
+    {
+      "name": "video-project.json",
+      "sha256": "0b51ded7bdb70a3e7b1346100f3dbd8056f96ed2085df98708a7c3ad7ab2622d",
+      "bytes": 3937
+    },
+    {
+      "name": "qa-report.json",
+      "sha256": "38028c1cf49bd30f0ff2d217dd6c2ea43a2245a9bd04121b0aa9fec52e174a5a",
+      "bytes": 1772
+    }
+  ],
+  "bundleSha256": "93ec774c3eecca3406def6601fb888cc244f167cee4e8ae5b4d8f32e2af4df75",
+  "selfReference": {
+    "name": "manifest.json",
+    "note": "manifest 不自身哈希；以 bundleSha256 锚定全部产物"
+  },
+  "lineage": {
+    "sceneCount": 3,
+    "audioDurationsMs": [
+      6400,
+      8640,
+      7080
+    ],
+    "ttsVoice": "stella",
+    "ffmpegBin": "C:\\Users\\Admin\\AppData\\Local\\com.minimax.hub\\current\\resources\\ffmpeg\\ffmpeg.exe",
+    "narrationFallback": null,
+    "renderedAt": "2026-11-18T12:44:41.491Z"
+  }
+}

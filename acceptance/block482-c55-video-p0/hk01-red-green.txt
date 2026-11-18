@@ -1,0 +1,16 @@
+BLOCK-482 / C-55 VIDEO-P0 — HK-01 红绿先行证据
+日期：2026-11-18
+
+[RED] 缺席红（实现前）
+命令：node --test test/block482-video-compose.test.mjs
+结果：Cannot find module '../core/petri-server/helpers/video-compose.js' (ERR_MODULE_NOT_FOUND)
+       tests 1 / pass 0 / fail 1 / exit=1
+判据：契约测试先于实现落盘，缺席即红。
+
+[GREEN] 实现绿（helper 落地后）
+命令：node --test test/block482-video-compose.test.mjs
+结果：tests 14 / pass 14 / fail 0 / exit=0
+覆盖：A0-A5 spec 校验（含画幅翻态/unknown_source/素材 provenance 三类篡改负测）
+      B0-B2 timeline 真实音频时长+单调+caption 钳制
+      C0 SRT 时基
+      D0-D3 编排失败诚实（capability_unavailable/tts_failed/ffmpeg_failed 零产物 + 成功路径 manifest/bundleSha256）

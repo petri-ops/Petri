@@ -501,9 +501,9 @@
       "path": "core/petri-server/agent-tools/tool-events.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 800,
-      "bytes": 35697,
-      "sha256": "3267dce34d4bba919ff294e9d4099c2deaf64af15e70e159bcaa93a92e169d0d"
+      "lines": 801,
+      "bytes": 35735,
+      "sha256": "85e2ff7d8c0c3507477be8cb78be73e938697dc3b85468e44d976c019c57bd52"
     },
     {
       "path": "core/petri-server/helpers/svg-ops.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86301
+  "total": 86302
 }

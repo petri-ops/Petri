@@ -254,6 +254,27 @@ module.exports = [
   {
     "type": "function",
     "function": {
+      "name": "compose_video",
+      "description": "把一个 VideoProjectSpec 合成为真实科普短视频（BLOCK-482 / C-55 P0）。输入 spec 含 goal（主题/受众/时长/16:9）、sources、claims、scenes（每镜头旁白 narration + 画面 visual.card 或 visual.image 带 sourceId/license）、audio、render。系统用云 TTS 合成逐镜头旁白、ffprobe 取真实时长排程画面与字幕、ffmpeg 合成 H.264 MP4，产出 video.mp4/narration.wav/subtitles.srt/script.md/sources.md/video-project.json/qa-report.json/manifest.json（全部 sha256+血缘）落 .petri/video/<runId>/。失败（无 ffmpeg/TTS 失败/素材缺失）返回结构化原因，不产出不可用成片。字幕与观感终审仍需用户过目。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "spec": {
+            "type": "object",
+            "description": "VideoProjectSpec：{schemaVersion, goal:{topic,audience,language,durationSec,aspectRatio:'16:9',style}, sources:[{id,kind,urlOrPath,title,accessedAt,license}], claims:[{id,text,sourceIds,confidence}], scenes:[{id,narration,visual:{kind:'card',title,text}|{kind:'image',filePath,sourceId,license},evidenceRefs,captions?}], audio:{voice,format}, render:{width,height,fps,codec}}。画幅固定 16:9；image 素材必须带 sourceId+license。"
+          },
+          "runId": {
+            "type": "string",
+            "description": "可选：本次成片运行标识（限定 [a-zA-Z0-9_-]，默认时间戳）"
+          }
+        },
+        "required": ["spec"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "browser_connect",
       "description": "连接浏览器操作会话（BLOCK-264 C-40 垂直切片；opt-in；TTL 30 分钟）。连接后才能执行 browser_act。可选限定 allowedOrigins。私网/环回/云元数据地址一律拒绝。",
       "parameters": {

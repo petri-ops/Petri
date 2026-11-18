@@ -424,6 +424,7 @@ function emitReadOnlyResultOutput({ name, result, callId, traceId, iteration, em
 const TOOL_ACTIVITY_VERBS = Object.freeze({
   "transcribe_audio": "已转录",
   "speak_text": "已朗读",
+  "compose_video": "已合成视频",
   "act": "已变更",
   "decision_summary": "已统计",
   "decision_recent": "已回放",

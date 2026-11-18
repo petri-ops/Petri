@@ -1,15 +1,15 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-18T11:48:11.627Z
+> 基线：`HEAD`（工作区在制文件 6 个不计入判定）。生成时间：2026-11-18T12:53:14.747Z
 
 ## 0. 覆盖汇总
 
 | 面 | 数量 |
 | --- | --- |
-| 工具定义 | 117（16 域；文本降级 0 域） |
-| 工具契约 | 117 |
-| 调度元数据 | 118 |
+| 工具定义 | 118（16 域；文本降级 0 域） |
+| 工具契约 | 118 |
+| 调度元数据 | 119 |
 | IPC 通道 | 172（preload 缺包装 2；前端零消费 169） |
 | 路由端点 | 289（47 模块；未挂载 0） |
 | 设置存储键 | 20 |
@@ -52,6 +52,7 @@
 | `read_video` | browser | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
 | `transcribe_audio` | browser | ✓ | ✓ | ✓ | R1 | external-request | no | yes | - |
 | `speak_text` | browser | ✓ | ✓ | ✓ | R2 | workspace-write | no | yes | - |
+| `compose_video` | browser | ✓ | ✓ | ✓ | R2 | workspace-write | no | yes | - |
 | `browser_connect` | browser | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
 | `browser_act` | browser | ✓ | ✓ | ✓ | R2 | external-request | yes | yes | - |
 | `browser_status` | browser | ✓ | ✓ | ✓ | R0 | none | no | yes | - |
@@ -159,4 +160,9 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-（无）
+- `M core/petri-server/agent-tools/registry.js`
+- `M core/petri-server/agent-tools/tool-defs/browser.js`
+- `M core/petri-server/agent-tools/tool-events.js`
+- `M core/petri-server/agent-tools/tool-metadata.js`
+- `?? core/petri-server/agent-tools/video-tools.js`
+- `?? core/petri-server/helpers/video-compose.js`

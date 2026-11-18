@@ -1,0 +1,166 @@
+{
+  "schemaVersion": 1,
+  "goal": {
+    "topic": "为什么天空是蓝色的？",
+    "audience": "小学高年级",
+    "language": "zh",
+    "durationSec": 30,
+    "aspectRatio": "16:9",
+    "style": "科普图形"
+  },
+  "sources": [
+    {
+      "id": "s1",
+      "kind": "web",
+      "urlOrPath": "https://en.wikipedia.org/wiki/Rayleigh_scattering",
+      "title": "Rayleigh scattering（维基百科）",
+      "accessedAt": "2026-11-18",
+      "license": "CC-BY-SA-4.0"
+    },
+    {
+      "id": "s2",
+      "kind": "web",
+      "urlOrPath": "https://science.nasa.gov/earth/earth-observatory/why-is-the-sky-blue/",
+      "title": "Why is the sky blue?（NASA）",
+      "accessedAt": "2026-11-18",
+      "license": "public-domain"
+    }
+  ],
+  "claims": [
+    {
+      "id": "c1",
+      "text": "阳光进入大气后，波长较短的蓝光比红光更容易被空气分子散射。",
+      "sourceIds": [
+        "s1",
+        "s2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "c2",
+      "text": "散射的蓝光从各个方向进入眼睛，因此晴天天空呈蓝色。",
+      "sourceIds": [
+        "s2"
+      ],
+      "confidence": "high"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "sc1",
+      "narration": "你有没有想过，晴朗的天空为什么是蓝色的？答案藏在阳光和空气里。",
+      "visual": {
+        "kind": "card",
+        "title": "为什么天空是蓝色的？",
+        "text": "阳光 + 大气 = 颜色之谜"
+      },
+      "evidenceRefs": [],
+      "captions": [
+        {
+          "text": "晴朗的天空为什么是蓝色的？",
+          "startMs": 0,
+          "endMs": 4000
+        }
+      ]
+    },
+    {
+      "id": "sc2",
+      "narration": "阳光看起来是白色的，其实由很多颜色组成。蓝光波长短，更容易被空气分子向四面八方散射。",
+      "visual": {
+        "kind": "card",
+        "title": "瑞利散射",
+        "text": "蓝光波长短 → 更易被散射"
+      },
+      "evidenceRefs": [
+        "c1"
+      ],
+      "captions": [
+        {
+          "text": "蓝光波长短，更容易被散射",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ]
+    },
+    {
+      "id": "sc3",
+      "narration": "这些被散射的蓝光从各个方向进入我们的眼睛，于是我们抬头看到的，就是一片蓝天。",
+      "visual": {
+        "kind": "card",
+        "title": "我们看见蓝天",
+        "text": "散射蓝光进入眼睛"
+      },
+      "evidenceRefs": [
+        "c2"
+      ],
+      "captions": [
+        {
+          "text": "散射的蓝光进入眼睛 → 蓝天",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ]
+    }
+  ],
+  "audio": {
+    "voice": "stella",
+    "format": "wav"
+  },
+  "render": {
+    "width": 1280,
+    "height": 720,
+    "aspectRatio": "16:9",
+    "fps": 24,
+    "codec": "libx264",
+    "container": "mp4",
+    "transitions": "none"
+  },
+  "timeline": {
+    "ok": true,
+    "scenes": [
+      {
+        "id": "sc1",
+        "index": 0,
+        "startMs": 0,
+        "endMs": 6400,
+        "durationMs": 6400,
+        "captions": [
+          {
+            "text": "晴朗的天空为什么是蓝色的？",
+            "startMs": 0,
+            "endMs": 4000
+          }
+        ]
+      },
+      {
+        "id": "sc2",
+        "index": 1,
+        "startMs": 6400,
+        "endMs": 15040,
+        "durationMs": 8640,
+        "captions": [
+          {
+            "text": "蓝光波长短，更容易被散射",
+            "startMs": 6400,
+            "endMs": 11400
+          }
+        ]
+      },
+      {
+        "id": "sc3",
+        "index": 2,
+        "startMs": 15040,
+        "endMs": 22120,
+        "durationMs": 7080,
+        "captions": [
+          {
+            "text": "散射的蓝光进入眼睛 → 蓝天",
+            "startMs": 15040,
+            "endMs": 20040
+          }
+        ]
+      }
+    ],
+    "totalMs": 22120
+  }
+}

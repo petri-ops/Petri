@@ -9041,6 +9041,34 @@
       "classifiesScripts": true
     },
     {
+      "id": "block482-c55-video-p0",
+      "note": "BLOCK-482 / C-55 VIDEO-P0 科普视频最小成片闭环：VideoProjectSpec 数据模型 + compose_video 通用合成窄口（复用 ffmpeg 6.1.1/DeepSeek TTS，零新依赖）+ 真实 3 镜头短视频（旁白/烧录字幕/讲稿/来源/QA/manifest 全链 sha256+血缘）。改 helper/tool/工具注册面或证据即跑本包 HK-01 契约 + 注册契约测试。证据 acceptance/block482-c55-video-p0/**。",
+      "patterns": [
+        "core/petri-server/helpers/video-compose.js",
+        "core/petri-server/agent-tools/video-tools.js",
+        "core/petri-server/agent-tools/tool-defs/browser.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/tool-metadata.js",
+        "core/petri-server/agent-tools/tool-events.js",
+        "test/fixtures/tool-activity-labels.json",
+        "test/model-surface-baselines.json",
+        "test/agent-tool-registry.test.mjs",
+        "docs/block482-c55-video-p0-plan.md",
+        "acceptance/block482-c55-video-p0/**"
+      ],
+      "tests": [
+        "test/block482-video-compose.test.mjs",
+        "test/agent-tool-registry.test.mjs",
+        "test/tool-activity-labels.test.mjs",
+        "test/block346-tool-defs-assembly.test.mjs",
+        "test/block325-model-surface-budget.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block481-c52-p5-reference-board-review",
       "note": "BLOCK-481 / C-52 余项 P5 参考板与评审法：Pinterest 灵感画板/Refero DESIGN.md 结构化/CTA-Footer 模块级观察/仅评审素材不进产品，只做评审方法借鉴+契约冻结，静态扫描器从本地主权真源机械复算六组读数（inspirationBoard/structuredDesignMd/moduleObservation/reviewMaterialOnly/licenseProvenance/boundaries）+ reference-board-review.json 模型可读契约 + 消费测试（篡改负测 fail-closed）；零 UI 写面/观感代签/新依赖/不抄品牌资产/不照搬营销 CTA-Footer/不做全局换皮。C-52 余项收官包。证据 acceptance/block481-c52-p5-reference-board-review/**。",
       "patterns": [

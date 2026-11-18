@@ -1,0 +1,14 @@
+{
+  "runAt": "2026-11-18T12:44:32.483Z",
+  "specPresetCompliant": true,
+  "ttsAuthorization": "用户 2026-11-18 裁决「TTS 默认开」，仅视频窄口授权（不翻转全局 speech-config）",
+  "externalMaterials": "允许但须 provenance；本次仅 card 画面，外部来源记于 sources.md",
+  "ffmpegBin": "C:\\Users\\Admin\\AppData\\Local\\com.minimax.hub\\current\\resources\\ffmpeg\\ffmpeg.exe",
+  "result": {
+    "ok": true,
+    "qaStatus": "machine_pass",
+    "bundleSha256": "93ec774c3eecca3406def6601fb888cc244f167cee4e8ae5b4d8f32e2af4df75",
+    "totalMs": 22120
+  },
+  "status": "machine_pass"
+}

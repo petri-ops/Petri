@@ -36,6 +36,8 @@ const { tool_verify_state } = require('./verify-dispatch');
 const { tool_read_image, tool_read_video } = require('./vision-tools');
 // BLOCK-454 P6 — 语音窄口消费面（ASR 转写 / TTS 朗读，用户裁决 2026-11-17 启动）
 const { tool_transcribe_audio, tool_speak_text } = require('./speech-tools');
+// BLOCK-482 / C-55 P0 — 视频成片消费面（compose_video）
+const { tool_compose_video } = require('./video-tools');
 const { tool_godot_run, tool_godot_scene_apply } = require('./godot-tools');
 const { tool_svg_inspect, tool_svg_edit } = require('./svg-tools');
 const { tool_model3d_blend_ops } = require('./model3d-tools');
@@ -235,6 +237,7 @@ const HANDLERS = {
   read_video: tool_read_video,
   transcribe_audio: tool_transcribe_audio,
   speak_text: tool_speak_text,
+  compose_video: tool_compose_video,
   godot_run: tool_godot_run,
   godot_scene_apply: tool_godot_scene_apply,
   model3d_blend_ops: tool_model3d_blend_ops,
@@ -407,6 +410,9 @@ const CONTRACTS = {
   // BLOCK-454 P6 — 语音：transcribe 只读出网；speak 写 .petri/audio（影子目录）+出网
   transcribe_audio: contract('vision', 'external-request', 'R1', ['project.files', 'llm.provider'], 60000),
   speak_text: contract('vision', 'workspace-write', 'R2', ['project.files', 'llm.provider'], 120000),
+  // BLOCK-482 / C-55 P0 — 视频合成：写 .petri/video 影子目录 + 云 TTS + 本地 ffmpeg（长任务）。
+  // cancellable=false：handler 尚未接 toolCancelSignal（不得虚标可取消）。
+  compose_video: contract('vision', 'workspace-write', 'R2', ['project.files', 'llm.provider', 'local.process'], 600000),
   godot_run: contract('workspace', 'workspace-write', 'R2', ['project.files', 'local.process'], 120000),
   godot_scene_apply: contract('workspace', 'workspace-write', 'R2', ['project.files'], 5000),
   model3d_blend_ops: contract('workspace', 'workspace-write', 'R2', ['project.files', 'local.process'], 120000),

@@ -15,6 +15,10 @@
     "label": "已提问",
     "icon": "message-circle"
   },
+  "compose_video": {
+    "label": "已合成视频",
+    "icon": "video"
+  },
   "codegraph_classify_edges": {
     "label": "已盘点依赖",
     "icon": "git-branch"
