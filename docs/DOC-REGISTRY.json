@@ -9,11 +9,36 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 637,
+    "documentCount": 638,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 619
+    "managedMarkdown": 620
   },
   "documents": [
+    {
+      "id": "BLOCK-483",
+      "path": "docs/block483-c55-video-p1-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block483-c55-video-p1",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block483-c55-video-p1-plan.md",
+        "core/petri-server/helpers/video-evidence.js",
+        "test/block483-video-evidence.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block483-c55-video-p1/"
+      ],
+      "tags": [
+        "C-55",
+        "VIDEO",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 VIDEO-P1」）。P1 科学证据与质量闭环：video-evidence.js 纯函数（来源五档分级/Claim–Evidence 表/数字单位换算检查/冲突并列不静默择一/低置信标记/科学语义对照/AV 六项质检/完整性 fail-closed），零新依赖、不碰 VideoProjectSpec 主链。HK-01 22/22（缺席红+8 类篡改负测）；真实腿对 P0 成片跑 ffprobe/ffmpeg：h264/1280×720/24fps、skew 0.023s、黑帧 0、静音 1.132s、peak -2.2dB、字幕溢出 0，evidence-report machine_pass + integrity=true。四条出口逐条对账（B3 五论断 traced=5/C1 单位错误捕获/D0 冲突并列/G1+G2 缺音轨坏字幕拦截）。如实登记 2 项 P0 存量数据缺口（sources 无 excerptRef→traced=0/2；sc1 无 evidenceRef），未伪造片段未篡改 P0 产物。观感/科学专业性终审 pending_human_eye 零代签。证据=acceptance/block483-c55-video-p1/。既有红如实归属非本包文件面。G0 开发期常态 · 不外推 packaged/Provider/GA."
+    },
     {
       "id": "BLOCK-482",
       "path": "docs/block482-c55-video-p0-plan.md",

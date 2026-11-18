@@ -214,6 +214,7 @@
     "files::acceptance/block-65/block65-verify.cjs",
     "files::acceptance/block460/e2e-run.mjs",
     "files::acceptance/block482-c55-video-p0/probe-live.mjs",
+    "files::acceptance/block483-c55-video-p1/probe-evidence.mjs",
     "files::acceptance/ui-276/resume-verify-script.mjs",
     "files::acceptance/ui-ledger-closeout/ui156-uiattch-verify.cjs",
     "files::resources/gen-ui/vendor/d3-7.9.0.min.js",

@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-18T12:39:51.924Z -->
 | ✅ **UI-707 加映四（配置小页按模型行动态定位）实施完成（UI 轨）**：用户要求面板贴在悬停/选中模型正右侧，靠下模型自动避让视口。修复=定位函数支持按实际内容高度，保存行 anchor 后 useLayoutEffect 测量小页高度并重算；先贴行顶，仅在必要时最小上移，右侧优先/左侧回退不变。实机 ui707-positioning 红 5/6（上提 148px）→ 绿 6/6（flyout.top=row.top=455.9、右贴、完整可见）；ui707-add1 7/7、ui707-config-interaction 6/6 回归绿。证据=acceptance/ui-707-positioning/。观感 pending_human_eye 不代签。 | 2026-11-17 | UI-707 加映四 / IMPLEMENTED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-18T13:08:17.919Z -->
+| ✅ **BLOCK-458 实施完成（模型思考能力一键探测）**：新增 `POST /api/ai/agent/probe-model-capability`，按 profile/model 发极小 chat 请求（高思考、256 tokens、禁 fallback、15s），从 reasoning_content/reasoning_tokens 判 supported/unsupported/unknown；无证据不写 false，同时保留 requestedModel/responseModel。设置页渠道详情增加默认模型与逐模型「探测」按钮，点击即付费确认；supported 写开、unsupported 写关、unknown 不改。HK-01 3/3 + 7/7；真实 Key 探测 glm-4.6 supported（request_id 与 reasoning 证据在案，上游响应别名 glm-5.3-flash）；实机 block458-capability-probe 5/5 allPass（9223 离屏跑完即 kill）。证据=acceptance/block-458/。观感 pending_human_eye 不代签，按 UI-706 加映同段登记。 | 2026-11-17 | BLOCK-458 / IMPLEMENTED |

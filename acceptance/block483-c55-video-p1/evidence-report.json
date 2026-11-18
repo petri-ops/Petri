@@ -1,0 +1,169 @@
+{
+  "ok": true,
+  "schemaVersion": 1,
+  "status": "machine_pass",
+  "sections": {
+    "claimEvidence": {
+      "ok": true,
+      "rows": [
+        {
+          "claimId": "c1",
+          "text": "阳光进入大气后，波长较短的蓝光比红光更容易被空气分子散射。",
+          "confidence": "high",
+          "sources": [
+            {
+              "id": "s1",
+              "kind": "web",
+              "kindInferred": false,
+              "title": "Rayleigh scattering（维基百科）",
+              "urlOrDoi": "https://en.wikipedia.org/wiki/Rayleigh_scattering",
+              "accessedAt": "2026-11-18",
+              "publishedAt": "",
+              "excerptRef": "",
+              "license": "CC-BY-SA-4.0",
+              "traceStatus": "incomplete"
+            },
+            {
+              "id": "s2",
+              "kind": "web",
+              "kindInferred": false,
+              "title": "Why is the sky blue?（NASA）",
+              "urlOrDoi": "https://science.nasa.gov/earth/earth-observatory/why-is-the-sky-blue/",
+              "accessedAt": "2026-11-18",
+              "publishedAt": "",
+              "excerptRef": "",
+              "license": "public-domain",
+              "traceStatus": "incomplete"
+            }
+          ],
+          "traced": false,
+          "flags": [
+            "missing_excerpt"
+          ]
+        },
+        {
+          "claimId": "c2",
+          "text": "散射的蓝光从各个方向进入眼睛，因此晴天天空呈蓝色。",
+          "confidence": "high",
+          "sources": [
+            {
+              "id": "s2",
+              "kind": "web",
+              "kindInferred": false,
+              "title": "Why is the sky blue?（NASA）",
+              "urlOrDoi": "https://science.nasa.gov/earth/earth-observatory/why-is-the-sky-blue/",
+              "accessedAt": "2026-11-18",
+              "publishedAt": "",
+              "excerptRef": "",
+              "license": "public-domain",
+              "traceStatus": "incomplete"
+            }
+          ],
+          "traced": false,
+          "flags": [
+            "missing_excerpt"
+          ]
+        }
+      ],
+      "stats": {
+        "claims": 2,
+        "traced": 0,
+        "untraced": 2,
+        "conflicts": 0,
+        "lowConfidence": 0
+      }
+    },
+    "numeric": {
+      "ok": true,
+      "checked": 0,
+      "issues": []
+    },
+    "conflicts": {
+      "ok": true,
+      "conflicts": []
+    },
+    "lowConfidence": {
+      "ok": true,
+      "flagged": [],
+      "count": 0
+    },
+    "alignment": {
+      "ok": true,
+      "rows": [
+        {
+          "sceneId": "sc1",
+          "narration": "你有没有想过，晴朗的天空为什么是蓝色的？答案藏在阳光和空气里。",
+          "visualText": "为什么天空是蓝色的？ 阳光 + 大气 = 颜色之谜",
+          "evidenceRefs": []
+        },
+        {
+          "sceneId": "sc2",
+          "narration": "阳光看起来是白色的，其实由很多颜色组成。蓝光波长短，更容易被空气分子向四面八方散射。",
+          "visualText": "瑞利散射 蓝光波长短 → 更易被散射",
+          "evidenceRefs": [
+            "c1"
+          ]
+        },
+        {
+          "sceneId": "sc3",
+          "narration": "这些被散射的蓝光从各个方向进入我们的眼睛，于是我们抬头看到的，就是一片蓝天。",
+          "visualText": "我们看见蓝天 散射蓝光进入眼睛",
+          "evidenceRefs": [
+            "c2"
+          ]
+        }
+      ],
+      "flags": [
+        {
+          "type": "missing_evidence_ref",
+          "sceneId": "sc1",
+          "detail": "镜头未绑定任何论断"
+        }
+      ]
+    },
+    "av": {
+      "ok": true,
+      "status": "machine_pass",
+      "checks": [
+        {
+          "name": "black_frame",
+          "passed": true,
+          "detail": "blackFrames=0"
+        },
+        {
+          "name": "silence",
+          "passed": true,
+          "detail": "present=true silentSec=1.132"
+        },
+        {
+          "name": "loudness",
+          "passed": true,
+          "detail": "peakDbfs=-2.2"
+        },
+        {
+          "name": "av_duration_skew",
+          "passed": true,
+          "detail": "video=22.125 audio=22.147667"
+        },
+        {
+          "name": "subtitle_overflow",
+          "passed": true,
+          "detail": "overflowCount=0"
+        },
+        {
+          "name": "codec_error",
+          "passed": true,
+          "detail": "codec=h264"
+        }
+      ],
+      "humanReview": {
+        "status": "pending_human_eye",
+        "note": "成片观感/科学专业性终审由用户签字，Agent 不代签"
+      }
+    }
+  },
+  "humanReview": {
+    "status": "pending_human_eye",
+    "note": "观感与科学专业性终审由用户签字，Agent 不代签"
+  }
+}

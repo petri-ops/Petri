@@ -1,0 +1,28 @@
+BLOCK-483 / C-55 VIDEO-P1 — HK-01 红绿先行证据
+日期：2026-11-18
+
+[RED] 缺席红（实现前）
+命令：node --test test/block483-video-evidence.test.mjs
+结果：Cannot find module '../core/petri-server/helpers/video-evidence.js' (MODULE_NOT_FOUND)
+       tests 1 / pass 0 / fail 1 / exit=1
+判据：契约测试先于实现落盘，缺席即红。
+
+[GREEN] 实现绿（helper 落地后）
+命令：node --test test/block483-video-evidence.test.mjs
+结果：tests 22 / pass 22 / fail 0 / exit=0
+覆盖：
+  A0-A1 常量契约（SCHEMA_VERSION=1 / SOURCE_KINDS 五档 / CONFIDENCE 三档 / AV 六项）+ 来源分级启发式
+  B0-B3 Claim–Evidence 表（逐论断定位来源原文/五档分级/缺 excerptRef 负测/无来源负值/五论断抽查 traced=5）
+  C0-C2 数字单位换算（正确 650nm=0.65μm 通过；错误 650nm=65μm 被捕获；km/m 相干族）
+  D0-D1 冲突来源并列（分歧值不静默择一/一致值不误报）
+  E0 低置信与无来源显著标记
+  F0-F2 科学语义对照（悬空 evidenceRefs 红/缺失可见警告）
+  G0-G3 AV 质检（六项全绿/缺音轨红/坏字幕溢出红/黑帧+削波+编码错误红）
+  H0-H2 汇总与完整性 fail-closed（六组读数/humanReview 翻 verified 红/检查项矛盾红）
+
+[判据校准留痕]
+loudness 上界初设 -3dB 会误伤 P0 真实成片合法峰值 -2.2dB；校准为 -0.5dBTP（防 0dB 削波），
+负测样本同步改 -0.1dB（削波）。校准属 mechanical 判据工程修正，非产品裁决；校准后 22/22 复跑全绿。
+
+[篡改负测合计] 8 类：缺 excerptRef / 错误单位换算 / 冲突静默择一（正测并列）/ 悬空 evidenceRef /
+缺音轨 / 字幕溢出 / humanReview 翻 verified / 检查项 passed-detail 矛盾；另有黑帧/削波/编码错误样本各一。
