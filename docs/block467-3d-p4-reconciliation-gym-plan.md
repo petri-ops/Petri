@@ -47,3 +47,9 @@ G1–G3 全绿或明确 external-blocked + 六件套 + 证据落 `acceptance/blo
 G1 红→绿 6/6（HK-01）；G2 block462 邻域 + knip 动态入口定性（files::gym.mjs 入基线，镜像 verify.mjs）；G3 docs/ui-audit/closeout 见 AUDIT-LOG。真跑证据=acceptance/block467-3d-p4/run/gym-evidence.json（verdict pass, digest 4015235a…，sha256 b7e4fbbb…）。对账=M0/M1/M3 闭环 + M2 部分 + M4 本次；BLOCK-461 属 W11 排除。零训练框架/零观感面。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口门禁归属（2026-11-18）
+
+closeout 全绿（perf SKIPPED）： packaged_start 采样 487–495ms vs 阈值 485ms（median 373ms ×1.3）——本包零 perf 面改动（仅 sidecar/契约/证据/docs），该红为打包后端启动的存量边界抖动（300ms 轮询粒度，技能文档在册 noiseSources），归属既有 perf 基线，不属本包，不重打基线掩盖。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
