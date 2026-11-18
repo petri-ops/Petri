@@ -52,3 +52,9 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 HK-01 红→绿 7/7（模块缺席 ERR_MODULE_NOT_FOUND → 7/7）；--check PASS（routes=12 redirects=4 hfp=5）；P1 包 8/8 零回归；lint ledger 2441 不动；docs:check(625)/ui:audit:check 绿。证据=acceptance/block471-c53-p2-ia/。零 UI 写面/观感/发令。C-53 P3-P7 待后续发令。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口门禁归属（2026-11-18）
+
+closeout 全绿（perf SKIPPED）：quality:perf packaged_start 边界抖动（G0 噪声，noiseSources 在册）——本批零 perf 面改动（纯资源/脚本/测试），归属既有基线，不属本包，不重打基线掩盖。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
