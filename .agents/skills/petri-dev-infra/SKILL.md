@@ -149,16 +149,13 @@ description: Use Petri development infrastructure when starting or resuming a se
 
 ### 下一步提示（Next-Step Brief · 每次任务完成强制）
 
-用户裁决 2026-10-25（2026-11-18 精简）：**每次任务完成后都必须给出固定下一步提示**，不能只在阶段收口时给。调用 `next:suggest` 后，按 [`$petri-project-governance/references/NEXT-STEP-BRIEF.md`](../petri-project-governance/references/NEXT-STEP-BRIEF.md) 输出短精准 3 行 + 1 启动行：
+用户裁决 2026-10-25（2026-11-18 精简 + 可复制口令）：**每次任务完成后都必须给出固定下一步提示**，不能只在阶段收口时给。调用 `next:suggest` 后，按 [`$petri-project-governance/references/NEXT-STEP-BRIEF.md`](../petri-project-governance/references/NEXT-STEP-BRIEF.md) 输出——3 行定位 + **1 个可整块复制的启动代码块**（模板与口令全文以该 canonical 文件为单一真相源，本处不复刻）：
 
-```text
-下一步：<候选>（Jev <confidence>）——<一句话范围/体量>；未开工，等你发令。
-位置：Q-MATRIX <✅x/🟡y/🔴z/⛔w=N> · 波次 <A→B→C>（P4-REM 最后、Q4b 单列）· active <无/BLOCK-xxx> · UI 观感 <in_progress 计数零代签>。
-无人值守启动：发「开始 <候选>」，按 <docs/next-phase-e2e-prompt-<date>.md> §2 正文推进；<观感/发令边界一句>。
-（必要时第 4 行）补充：<竞争力纲/成熟度蓝图/Result Studio 本轮有变项>。
-```
+- 第 1 行「下一步：<候选>（Jev <confidence>）——<范围/体量>；未开工，等你发令。」
+- 第 2 行「位置：Q-MATRIX … · 波次 … · active … · UI 观感 …」（紧凑，竞争力纲/成熟度/Result Studio 本轮有变才补一行）
+- 代码块：整块发给新 Agent 即可启动的口令，含发令+先读 AUDIT-LOG/提示词 §2+纪律+红线，`<候选>`/`<date>` 现读替换不留占位符。
 
-红线：只给一个建议，禁止「或」式多选；confidence 与计数从脚本/ canonical 现读；Jev 不可用或零建议时按候选队列首个兜底并标注；纯问答至少给一行「队列未变」；不列 G1+（Provider/公证/GA/packaged）。无人值守启动行是可复制口令，但仍是 advice、未获发令不得开工。
+红线：只给一个建议，禁止「或」式多选；confidence 与计数从脚本/ canonical 现读；Jev 不可用或零建议时按候选队列首个兜底并标注；纯问答至少给一行「队列未变」；不列 G1+（Provider/公证/GA/packaged）。启动口令是 advice 的载体，是否发出由用户决定，未获发令不得开工。
 阶段收口后自动落档下一阶段提示词的作业规范见 `$petri-project-governance/references/NEXT-PHASE-PROMPT-HANDOFF.md`（自动落档草案、不自动发令、预置裁决只继承）。
 
 **透明标签附 Jev 计数（2026-09-25 用户裁决，与 AGENTS.md「Skill 使用透明度」同源）**：交付/答复收尾的〔skills: …〕标签须附 `· jev×N`——N=本工作阶段 Jev 调用次数，取 `npm run decision:session` **分段口径**（marker 记 startedAt+lastReadAt；每次收尾重跑得「本轮增量+累计」双数字；复用上一轮数字即违规——两次用户抓真在案；零次如实标 jev×0）。
