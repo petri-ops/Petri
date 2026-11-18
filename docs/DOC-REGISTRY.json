@@ -12539,12 +12539,12 @@
       "id": "BLOCK-463",
       "path": "docs/block463-3d-p3-presentation-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block463-3d-p3-presentation",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P3-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block463-3d-p3-presentation-plan.md",
         "frontend/src/components/workspace-panels/Model3DResultViewer.tsx",
@@ -12559,7 +12559,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项（用户发令「好 接下来 干啥子呢」= Jev 单一建议 3D P3 呈现层首包）。存量对账：蓝图 P3 ①③ 大半已被 RW-01 覆盖（viewerRegistry model3d adapter + 选择总线 + UI-654 工作面跳转）——只做真实增量：A=SceneSpec 证据面板（joints/provenance/verifierResults 呈现进 Model3DResultViewer，配对 scene snapshot 沿 sceneSnapshotFromUrl）；B=双形态互达（::compose mesh-reference 卡 → Result Studio 跳转 + selectComposePresentation 契约）；C=零内核改动证明（diff 分析）。实机腿=9223 离屏尽力跑，不可行如实判档。plan=docs/block463-3d-p3-presentation-plan.md。"
+      "notes": "2026-11-18 立项（用户发令「好 接下来 干啥子呢」= Jev 单一建议 3D P3 呈现层首包）。存量对账：蓝图 P3 ①③ 大半已被 RW-01 覆盖（viewerRegistry model3d adapter + 选择总线 + UI-654 工作面跳转）——只做真实增量：A=SceneSpec 证据面板（joints/provenance/verifierResults 呈现进 Model3DResultViewer，配对 scene snapshot 沿 sceneSnapshotFromUrl）；B=双形态互达（::compose mesh-reference 卡 → Result Studio 跳转 + selectComposePresentation 契约）；C=零内核改动证明（diff 分析）。实机腿=9223 离屏尽力跑，不可行如实判档。plan=docs/block463-3d-p3-presentation-plan.md。【收口 2026-11-18】P3 全交付：SceneSpec 证据面板（Model3DResultViewer 配对 scene.json 呈现 joints/provenance/verifierResults——BLOCK-460/462 证据链上屏，取数失败诚实降级）+ ::compose mesh-reference kind（沿 SceneSpec NODE_TYPES）+ Result Studio 跳转（selectComposePresentation 三面判定契约 + projectId 链路）+ 内核面零 diff 证明（bd0d5357..HEAD src/routes/agent-runner/viewerRegistry=0 行）+ 实机腿 block463-workbench-live 8/8 allPass（9223 离屏，真实管线产物经项目工作区装载——scene_not_found/mesh_reference_load_failed 两处实测根因留痕于 flow 注释；截图=工作台 viewport+场景节点 4+无装载失败）。台账 UI-710 in_progress（观感 pending_human_eye 不代签；ceiling 38/15/23 沿先例）。C-54 第 3 档 3D 域 P0/P1/P2/P3 全完成；P4 收口层=随包走已毕，catalog 扩展点深化（gen-ui 评估 P4）留候选。证据=acceptance/block463/。"
     }
   ],
   "lastUpdated": "2026-11-18"
