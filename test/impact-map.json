@@ -9193,6 +9193,20 @@
         "test/block470-handoff-compact.test.mjs",
         "test/block470-next-phase-prompt.test.mjs"
       ]
+    },
+    {
+      "id": "block493-infra-debt-clearance",
+      "note": "BLOCK-493 W1 基础设施清偿包的证据目录与工具面：本包改动面=impact-map 规则认领/lint warning 豁免/K-22 上限对齐/flow env 函数化/3D 蓝图表头对齐；证据变更选本包各清偿门的读者测试重跑（HK-01 契约面）。（2026-11-18 补挂——本包自己的 evidence.json 也必须被认领，否则 L0-4 fail-closed 升级全量，先行教训自我抓真）",
+      "patterns": [
+        "acceptance/block493-infra-debt-clearance/**"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs",
+        "test/lint-ledger-update.test.mjs",
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/block267-flow-env-trap.test.mjs",
+        "test/post-h9-k4-architecture.test.mjs"
+      ]
     }
   ]
 }

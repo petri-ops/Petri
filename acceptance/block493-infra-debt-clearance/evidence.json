@@ -30,6 +30,20 @@
       "before": "docs/3d-authoring-domain-blueprint-2026-11-17.md §13 表 U-3D-D1/D2/D3 状态 pending_user_ruling；§14 结论 3 写「待用户裁决」",
       "after": "两处对齐 ruled（2026-11-18 批量裁决=B-1/B-2/B-3，真源指针=3d-authoring-dependency-ruling-2026-11-17.md）；零产品代码、零新裁决点（登记同步非改判）",
       "fix": "登记同步（BLOCK-492 plan §6 已预置该漂移的对齐处置）。"
+    },
+    {
+      "gate": "gate:post-h9-contracts（closeout 链内专项门）",
+      "before": "FAIL：184 通过 / 2 红——K-22「knip 保留面只增不退被破坏」（scripts/lib/post-h9-k4-architecture.mjs:191 硬编码上限 346 < 实际 350；L0-1 解除负测同根）",
+      "attribution": "既有红，非本包引入：C-55 视频三包逐包 +1 经 knip-ratchet --update 批准入册（BLOCK-483 video-evidence→348 / BLOCK-486 video-storyboard→349 / BLOCK-487 video-advanced-shot→350，git show 逐提交核对），但 K-22 硬编码上限与负测篡改值（347）均漏同步",
+      "after": "PASS：186/186 全绿（上限 346→350 对齐 + 负测篡改值改 351=超限值；棘轮语义零放宽——knip-ratchet 自身基线 350 未动）",
+      "fix": "上限对齐（非放宽：数字锚跟随已批准的棘轮演进，负测仍以超限值判红）"
+    },
+    {
+      "gate": "test:changed → test/block267-flow-env-trap.test.mjs:59（本包定向集扩大后新暴露）",
+      "before": "FAIL：新增 flow 顶层 env 固化 .agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs:19（process.env.BLOCK463_API 顶层 const 固化；BLOCK-463 会话带入时漏过此门——当时未被定向集选中）",
+      "attribution": "既有债，非本包引入（b4474824 2026-11-18 08:44 block-463）；本包 dirty 文件经 platform-branch-freeze 规则首次把该门拉进定向集而暴露",
+      "after": "PASS：block267 3/3（函数化清偿根因：apiBase() 调用时读取，fetch 点同步改；零行为变化、基线零改动——入基线=合法化新增债，禁止）",
+      "fix": "函数化调用时读取（沿 BLOCK-375 棘轮判语首选修法）"
     }
   ],
   "mechanicalRegeneration": {

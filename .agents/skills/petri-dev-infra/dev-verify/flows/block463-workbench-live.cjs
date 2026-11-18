@@ -16,7 +16,8 @@ const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
-const API = process.env.BLOCK463_API || 'http://127.0.0.1:3001';
+// BLOCK-493 清偿：env 调用时读取（BLOCK-267/BLOCK-375 顶层固化棘轮；原顶层 const 固化在导入期取值）
+const apiBase = () => process.env.BLOCK463_API || 'http://127.0.0.1:3001';
 const SCENE_PATH = 'model3d/runs/block463-live/scene.json';
 const MESH_PATH = 'model3d/runs/block463-live/model.glb';
 const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block463');
@@ -24,7 +25,7 @@ const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'block463');
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 async function rest(method, endpoint, body) {
-  const resp = await fetch(`${API}/api${endpoint}`, {
+  const resp = await fetch(`${apiBase()}/api${endpoint}`, {
     method,
     headers: { Authorization: 'Bearer desktop-local', ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,
