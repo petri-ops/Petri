@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "kind": "c52-react-bits-motion",
+  "capability": "block479-c52-p3-react-bits-motion",
+  "sourceCommit": "a39711655cdf4e8865e6d2b4c264d83fcf55a602",
+  "platform": "win32-x64",
+  "command": "node scripts/c52-react-bits-motion.mjs",
+  "generatedAt": "2026-11-18T11:30:42.929Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；仅反馈型微动效模式借鉴+契约冻结，观感 pending_human_eye 不代签，零 UI 运行时写面。",
+  "readings": {
+    "hoverFeedback": {
+      "value": {
+        "tokenDrivenHover": true,
+        "hoverStateBaseline": true,
+        "hoverAnchors": 21
+      },
+      "source": "button.module.css + TitleBar.module.css + ToastProvider.module.css + FloatCardResizer.module.css",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "pressFeedback": {
+      "value": {
+        "activeScale": true,
+        "tokenDrivenPress": true,
+        "activeAnchors": 5
+      },
+      "source": "TitleBar.module.css + simple-chat.css + FloatCardResizer.module.css",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "expandFeedback": {
+      "value": {
+        "functionalOwners": 3,
+        "reducedMotionExemption": true,
+        "tokenDrivenExpand": true
+      },
+      "source": "LeftPanel/RightPanel/BottomTerminal + global.css（reduced-motion 豁免）",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "successFeedback": {
+      "value": {
+        "toastSuccessVariant": true,
+        "spinnerToken": true,
+        "reducedMotionFallback": true
+      },
+      "source": "ToastProvider.module.css + status.module.css + global.css",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "motionTokens": {
+      "value": {
+        "durationTiers": 3,
+        "easeTiers": 2,
+        "charterAligned": true,
+        "monotonicGuard": true,
+        "literalMsGuard": true,
+        "tokenUses": 281
+      },
+      "source": "custom.css + design-charter.md §4 + theme-token-contract.test.ts",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    },
+    "boundaries": {
+      "value": {
+        "noNewDependency": true,
+        "noFullPageMotion": true,
+        "humanEyeZeroSign": true,
+        "licenseRegister": {
+          "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
+          "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",
+          "21st.dev": "逐组件查许可 · 仅组件/模板片段灵感（P4 候选），防风格漂移与依赖膨胀",
+          "Pinterest/Refero/CTA/Footer": "灵感画板与结构化评审法（P5 候选），仅评审素材不进产品"
+        }
+      },
+      "source": "根/前端 package.json + global.css + UI 台账 + LICENSE_REGISTER",
+      "command": "node scripts/c52-react-bits-motion.mjs",
+      "capturedAt": "freeze-invariant"
+    }
+  }
+}

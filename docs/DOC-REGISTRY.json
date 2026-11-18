@@ -9,11 +9,41 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 633,
+    "documentCount": 634,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 615
+    "managedMarkdown": 616
   },
   "documents": [
+    {
+      "id": "BLOCK-479",
+      "path": "docs/block479-c52-p3-react-bits-motion-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block479-c52-p3-react-bits-motion",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block479-c52-p3-react-bits-motion-plan.md",
+        "scripts/c52-react-bits-motion.mjs",
+        "test/c52-react-bits-motion.test.mjs",
+        "resources/design-context/react-bits-motion.json",
+        "resources/design-context/manifest.json",
+        "acceptance/block479-c52-p3-react-bits-motion/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c52",
+        "react-bits",
+        "motion",
+        "pattern-borrowing",
+        "contract-freeze",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项+收口（用户发令「开始 C-52 P3」；发令边界逐字=P3）。范围=静态扫描器 + react-bits-motion.json 模型可读契约（六组读数：hover/press/expand/success/motionTokens/boundaries）+ 消费测试 + manifest 同步；复用 --petri-duration/ease token、禁整页动效。HK-01 红→绿 11/11（缺席红+篡改负测）、--check PASS、C-52 P2+C-53 P0–P7 Node 90/90 零回归、theme-token 19/19、manifest sha 一致；零 UI 写面/观感代签/新依赖/整页动效。观感 UI-706/707/709/710 保持 in_progress 零代签；C-52 P4/P5 候选未启动。证据=acceptance/block479-c52-p3-react-bits-motion/。"
+    },
     {
       "id": "BLOCK-478",
       "path": "docs/block478-c52-p2-assistant-ui-pattern-plan.md",
