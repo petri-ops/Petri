@@ -24,7 +24,6 @@ import { createHash } from 'node:crypto';
 import { deepStrictEqual } from 'node:assert/strict';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SRC = path.join(ROOT, 'frontend', 'src');
 
 /** 冻结读数 = 设计不变量（跨工作包生命周期稳定），被消费测试逐读数深等。 */
 export const READING_IDS = Object.freeze([
@@ -117,7 +116,7 @@ export function scanNavyLadder(customCss) {
       token: `--petri-bg-${key}`,
       hex,
       luminance: hex ? relativeLuminance(hex) : null,
-      expected: NAVY_LADDER_SPEC[i],
+      expected: NAVY_LADDER_SPEC.at(i),
     };
   });
   const specAligned = tiers.every((t) => t.hex && t.hex.toLowerCase() === String(t.expected).toLowerCase());
@@ -132,27 +131,28 @@ export function scanNavyLadder(customCss) {
  * 返回 { hits, overRatchet, patterns }：overRatchet 非空即表示新增违规。
  */
 export function scanSlateFamily(root, injected = null) {
-  const sources = {};
+  const sources = new Map();
   if (root && typeof root === 'string' && fs.existsSync(path.join(root, 'frontend', 'src'))) {
     for (const file of walk(path.join(root, 'frontend', 'src'))) {
-      sources[path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/')] =
-        stripComments(fs.readFileSync(file, 'utf8'));
+      sources.set(path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/'),
+        stripComments(fs.readFileSync(file, 'utf8')));
     }
   } else if (root && typeof root === 'object' && !injected) {
     // 允许直接传 sources 映射（纯函数形态）
-    for (const [rel, text] of Object.entries(root)) sources[rel] = stripComments(String(text));
+    for (const [rel, text] of Object.entries(root)) sources.set(rel, stripComments(String(text)));
   }
-  for (const [rel, text] of Object.entries(injected ?? {})) sources[rel] = stripComments(String(text));
+  for (const [rel, text] of Object.entries(injected ?? {})) sources.set(rel, stripComments(String(text)));
 
-  const hits = {};
-  for (const [rel, text] of Object.entries(sources)) {
-    const families = {};
+  const hitEntries = [];
+  for (const [rel, text] of sources) {
+    const familyEntries = [];
     for (const [name, re] of SLATE_PATTERNS) {
       const n = (text.match(new RegExp(re.source, re.flags)) || []).length;
-      if (n > 0) families[name] = n;
+      if (n > 0) familyEntries.push([name, n]);
     }
-    if (Object.keys(families).length) hits[rel] = families;
+    if (familyEntries.length) hitEntries.push([rel, Object.fromEntries(familyEntries)]);
   }
+  const hits = Object.fromEntries(hitEntries);
 
   // 与冻结基线对账：任一文件新增家族或计数上涨 → 红（只许收缩）。
   const overRatchet = [];
@@ -179,22 +179,23 @@ export function scanSlateFamily(root, injected = null) {
  * 纯函数：accent 引用现读计数（CSS 面，口径同 theme-token-contract）。
  */
 export function scanColorBudget(root, cssSources = null) {
-  const sources = {};
+  const sources = new Map();
   if (cssSources) {
-    for (const [rel, text] of Object.entries(cssSources)) sources[rel] = stripComments(String(text));
+    for (const [rel, text] of Object.entries(cssSources)) sources.set(rel, stripComments(String(text)));
   } else {
     for (const file of walk(path.join(root, 'frontend', 'src'))) {
       if (!file.endsWith('.css')) continue;
-      sources[path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/')] =
-        stripComments(fs.readFileSync(file, 'utf8'));
+      sources.set(path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/'),
+        stripComments(fs.readFileSync(file, 'utf8')));
     }
   }
-  const perFile = {};
+  const perFileEntries = [];
   let total = 0;
-  for (const [rel, text] of Object.entries(sources)) {
+  for (const [rel, text] of sources) {
     const n = (text.match(/var\(--petri-accent\)/g) || []).length;
-    if (n) { perFile[rel] = n; total += n; }
+    if (n) { perFileEntries.push([rel, n]); total += n; }
   }
+  const perFile = Object.fromEntries(perFileEntries);
   // 终态目标从 design-charter §2 现读（声明值，不改）
   let declaredCeiling = null;
   try {
@@ -218,19 +219,19 @@ const JS_INJECTED_TOKENS = new Set([
 
 /** 纯函数：token 完整性——零 var(--color-*) 残留 + var(--petri-*) 引用 ⊆ 定义。 */
 export function scanTokenIntegrity(root, sourcesOverride = null) {
-  const sources = {};
+  const sources = new Map();
   if (sourcesOverride) {
-    for (const [rel, text] of Object.entries(sourcesOverride)) sources[rel] = stripComments(String(text));
+    for (const [rel, text] of Object.entries(sourcesOverride)) sources.set(rel, stripComments(String(text)));
   } else {
     for (const file of walk(path.join(root, 'frontend', 'src'))) {
-      sources[path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/')] =
-        stripComments(fs.readFileSync(file, 'utf8'));
+      sources.set(path.relative(path.join(root, 'frontend', 'src'), file).replaceAll('\\', '/'),
+        stripComments(fs.readFileSync(file, 'utf8')));
     }
   }
   const definitions = new Set();
   const petriRefs = new Set();
   const undefinedColorRefs = [];
-  for (const [rel, text] of Object.entries(sources)) {
+  for (const [rel, text] of sources) {
     if (/var\(--color-/.test(text)) undefinedColorRefs.push(rel);
     for (const m of text.matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) definitions.add(m[0]);
     for (const m of text.matchAll(/var\(--(petri-[A-Za-z0-9-]+)/g)) petriRefs.add(`--${m[1]}`);

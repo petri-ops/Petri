@@ -63,7 +63,7 @@ describe('C-53 P3 视觉一致性契约可复算（HK-01）', () => {
     assert.equal(ladder.tiers.length, 4);
     assert.deepEqual(ladder.tiers.map((t) => t.hex), [...NAVY_LADDER_SPEC]);
     for (let i = 1; i < ladder.tiers.length; i++) {
-      assert.ok(ladder.tiers[i].luminance > ladder.tiers[i - 1].luminance, '明度必须逐档递增');
+      assert.ok(ladder.tiers.at(i).luminance > ladder.tiers.at(i - 1).luminance, '明度必须逐档递增');
     }
   });
 
