@@ -36,6 +36,44 @@ const jsonParameterPrefix = new RegExp(
   String.raw`^\s*(?:${jsonString}\s*:\s*${jsonString}\s*,\s*)*(?:${jsonString}(?:\s*:\s*(?:${jsonString})?)?)?\s*$`,
 );
 
+/**
+ * BLOCK-466（W11 P3）：compose spec 是嵌套 JSON（含 number/bool/null/对象/数组，如
+ * `"version":1,"nodes":{...}`），上面的 jsonParameterPrefix 只认 string:value 前缀，
+ * 会把流式半截 compose spec 误判为普通正文 → 原始 JSON 泄漏/闪烁。
+ * 本判据仅用于"未闭合 compose 指令"的流式前缀识别：只要内容可被补全为合法 JSON
+ * （按未闭合引号/括号补尾后尝试 JSON.parse），即视为合法前缀 → 出 pending 占位。
+ * 语义保守：连补全也失败的前缀不隐藏（保留原文，沿既有"不能把普通正文一起隐藏"纪律）。
+ */
+function isComposeJsonPrefix(source: string): boolean {
+  let quote: '"' | null = null;
+  let escaped = false;
+  const closers: string[] = [];
+  for (const character of source) {
+    if (quote !== null) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === '"') quote = null;
+      continue;
+    }
+    if (character === '"') quote = '"';
+    else if (character === '{' || character === '[') closers.push(character === '{' ? '}' : ']');
+    else if (character === '}' || character === ']') closers.pop();
+  }
+  let body = `${source}${quote !== null ? '"' : ''}`;
+  // 流式可停在结构边界：冒号后（待 value）/逗号后（待下一 key）——补占位使前缀可解析。
+  const trimmed = body.replace(/\s+$/, '');
+  if (trimmed.endsWith(':')) body = `${trimmed}null`;
+  else if (trimmed.endsWith(',')) body = trimmed.slice(0, -1);
+  // source 是指令 `{` 之后的对象体（不含外层花括号），补尾后须包一层 `{}` 再解析。
+  const completed = `{${body}${closers.reverse().join('')}}`;
+  try {
+    const parsed: unknown = JSON.parse(completed);
+    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
+
 export function projectGenUiReferences(text: string, completed: boolean): GenUiPart[] {
   const ranges = findMarkdownCodeRanges(text);
   const parts: GenUiPart[] = [];
@@ -68,7 +106,9 @@ export function projectGenUiReferences(text: string, completed: boolean): GenUiP
 
   const unclosedCandidates = (['visualize', 'compose'] as const)
     .map((name) => findUnclosedAssistantDirectiveStart(text, name, ranges, {
-      isParameterPrefix: (source) => jsonParameterPrefix.test(source),
+      // compose 是嵌套 JSON（number/对象值），补 json 前缀判据；visualize 仍走原 string:value 口径。
+      isParameterPrefix: (source) => jsonParameterPrefix.test(source)
+        || (name === 'compose' && isComposeJsonPrefix(source)),
     }))
     .filter((start): start is number => start !== null);
   const unclosed = unclosedCandidates.length > 0 ? Math.min(...unclosedCandidates) : null;

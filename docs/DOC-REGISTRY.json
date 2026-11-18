@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 618,
+    "documentCount": 619,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 601
+    "managedMarkdown": 602
   },
   "documents": [
     {
@@ -12293,6 +12293,28 @@
       ],
       "notes": "2026-11-17 立项（用户裁决「上下文和思考强度应该跟着具体的模型走吧？当鼠标悬停在具体的模型名上的时候再出现才合适。与此同时API Endpoint的上下文设置也就没有意义了。你看着怎么优化一下？」）：modelPreferences 模型级覆写（contextWindow/thinkingLevel）单源+渠道级零迁移 fallback；syncPresetContextWindow choice-id 静默丢写修复；发送档=会话显式覆写>模型级默认；ModelMenu 左 quick 块退役改模型行悬停/focus 内联滑杆；设置页上下文列退役（8→7）。UI-707。P1 契约→P2 消费面→P3 UI→P4 收口。【2026-11-17 completed】P1-P4 全收口：HK-01 红 11/15→绿 15/15 + 后端邻域 57/57 + 前端契约 72/72 + UI 117/117 + theme-token 19/19 + types 0；P4 block456-live 19/19（隔离 :3399/:3398，悬停抽屉/模型级写盘回环/发送档四连证/设置页退役）+ block455-live 复跑 18/18；证据 acceptance/block-456/。UI-707 in_progress 观感 pending_human_eye 不代签。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "registeredAt": "2026-11-17"
+    },
+    {
+      "id": "BLOCK-466",
+      "path": "docs/block466-w11-p3-streaming-first-slice-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block466-w11-p3-streaming-first-slice",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block466-w11-p3-streaming-first-slice-plan.md",
+        "frontend/src/components/copilot/gen-ui/references.ts",
+        "frontend/src/components/copilot/gen-ui/references-streaming.test.ts",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "acceptance/block466-w11-p3-streaming/"
+      ],
+      "sharedBaselines": [],
+      "tags": ["w11-p3", "gen-ui", "streaming", "compose", "G0"],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户预授权 R2=W11 P3 流式首切片；五步串行 S2）。范围=::compose 流式投影：partial spec 出稳定占位（不泄漏原始 JSON/不闪烁），完整合法后升级受控渲染；复用 agentTaskStream 事件契约（seq/afterSeq/reconnect 完整不改）与 projectGenUiReferences pending 语义。HK-01 红绿+断线续传兼容断言（投影为 content 纯函数）+ BLOCK-154 行 memo 边界守约；零新增依赖；观感 pending_human_eye 不代签（UI-709 保持 in_progress）。非范围=SSE 契约改动/半截 spec 局部卡渲染/::visualize 沙箱/后端产出/G1+。plan=docs/block466-w11-p3-streaming-first-slice-plan.md。【收口 2026-11-18】::compose 流式投影（referencesStreaming + isComposeJsonPrefix 嵌套 JSON 半截前缀识别，visualize 口径零改）+ GenUiMessageContent.streaming + 消息行流式接线；复用 agentTaskStream 事件契约零改动。HK-01 红 1→绿 8/8 + 组件 4/4 + 邻域 115/115 + BLOCK-154 memo 3/3 + 断线续传兼容断言；零新增依赖/观感 pending_human_eye 不代签（UI-709 in_progress）。实机腿 external-blocked（无确定性 ::compose 流发生器 + backend 未运行），按 R2 如实判档。证据=acceptance/block466-w11-p3-streaming/。"
     },
     {
       "id": "BLOCK-465",

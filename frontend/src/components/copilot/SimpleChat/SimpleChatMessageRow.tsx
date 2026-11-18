@@ -142,6 +142,11 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
   // BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：图片附件行抽成 <img>
   //（经 /file 端点按路径取图），不再停留为「[附件: 路径]」文本行。
   const inlineImages = m.role === 'user' ? parseInlineAttachments(m.content || '') : { text: '', images: [] };
+  // BLOCK-466（W11 P3）：流式 assistant 消息含 ::compose 时启用 Gen UI 流式投影。
+  // 派生自 props（m.content/streaming/pending），身份稳定——不破坏 BLOCK-154 行 memo。
+  // 纯字符串预筛仅决定是否进入投影；投影本身负责围栏豁免/防注入，误入也零行为变化。
+  const streamingCompose = m.role === 'assistant' && (streaming || Boolean(m.pending))
+    && Boolean(m.content) && m.content.includes('::compose');
   // UI-477 加映 — 点击放大（复用 ImagePreviewModal）；悬挂式小图不占正文主区。
   const [zoomedImage, setZoomedImage] = useState<InlineAttachmentImage | null>(null);
   // BLOCK-255 C4 — 本条统计面板开合（行内状态；不污染父级 memo props）。
@@ -265,7 +270,9 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
             </div>
           )}
           {/* BLOCK-166：assistant 已完结且非流式消息走 Gen UI 投影（无指令时快路径
-              等价原 CopilotMarkdown，零行为变化）；其余（user/流式/pending）原样。 */}
+              等价原 CopilotMarkdown，零行为变化）；BLOCK-466（W11 P3）：流式 assistant
+              且含 ::compose 时走流式投影（spec 完整前稳定占位、不泄漏原始 JSON）；
+              其余（user/普通流式/pending）原样。 */}
           {m.role === 'assistant' && !m.pending && !streaming && m.content ? (
             <GenUiMessageContent
               content={m.content}
@@ -279,6 +286,18 @@ export const SimpleChatMessageRow = React.memo(function SimpleChatMessageRow({
               highlightCode={m.role === 'assistant' ? ((code, language) => (
                 <HighlightedCode code={code} language={language} />
               )) : undefined}
+            />
+          ) : streamingCompose && m.content ? (
+            <GenUiMessageContent
+              content={m.content}
+              projectId={projectId}
+              conversationId={conversationId}
+              rowKey={messageKey}
+              onFileReferenceClick={onFileReferenceClick}
+              resolveContext={null}
+              resolveNonce={resolveNonce}
+              highlightCode={undefined}
+              streaming
             />
           ) : (
           <CopilotMarkdown

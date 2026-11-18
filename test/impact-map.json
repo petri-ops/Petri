@@ -8820,6 +8820,27 @@
       ]
     },
     {
+      "id": "block466-w11-p3-streaming",
+      "note": "BLOCK-466 W11 P3 流式首切片：::compose 流式投影（referencesStreaming + isComposeJsonPrefix）+ 消息行流式接线（SimpleChatMessageRow）；改这些面必跑流式投影/渲染契约 + compose 邻域 + BLOCK-154 行 memo + 前端类型门。实机腿 external-blocked（无确定性 ::compose 流发生器）。证据 acceptance/block466-w11-p3-streaming/**。",
+      "patterns": [
+        "frontend/src/components/copilot/gen-ui/referencesStreaming.ts",
+        "frontend/src/components/copilot/gen-ui/references-streaming.test.ts",
+        "frontend/src/components/copilot/gen-ui/GenUiMessageContent.streaming.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
+        "docs/block466-w11-p3-streaming-first-slice-plan.md",
+        "acceptance/block466-w11-p3-streaming/**"
+      ],
+      "tests": [
+        "frontend/src/components/copilot/gen-ui/references-streaming.test.ts",
+        "frontend/src/components/copilot/gen-ui/GenUiMessageContent.streaming.test.tsx"
+      ],
+      "frontendRelated": true,
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ]
+    },
+    {
       "id": "block462-3d-p2-verification",
       "note": "BLOCK-462 3D P2 验证闭环（L4）：three-live-runner sidecar verify.mjs + 契约测试；改这些面必跑 block462 契约测试（需 three-live 隔离安装，缺席 skip）。证据目录同规则认领。",
       "patterns": [

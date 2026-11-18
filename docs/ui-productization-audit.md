@@ -119,6 +119,7 @@
 - **pending_human_eye**：证据面板视觉观感与 ::compose 卡跳转体感（签字槽留空，Agent 不代签）。
 
 ## UI-709: Gen UI ::compose 受控渲染插座（W11 数据面首包 BLOCK-461；2026-11-18 **in_progress（代码完成+契约绿；实机观感 pending_human_eye 不代签）**）
+- **P3 流式切片加映（BLOCK-466，2026-11-18）**：::compose 流式期 spec 完整前出稳定占位（compose-stream-pending），不泄漏原始 JSON/不闪烁，completed 后升级 ComposeCard；投影为 content 纯函数（断线续传兼容）。HK-01 8/8 + 组件 DOM 4/4 + 邻域 115/115 + memo 3/3；实机腿 external-blocked（无确定性流发生器）。观感（占位/卡片视觉）pending_human_eye 不代签，条目保持 in_progress。证据=acceptance/block466-w11-p3-streaming/。
 
 - **变化面**：① `::compose` JSON 指令投影（references.ts 双指令管线，compose 片段独立 kind）；② 扁平树 spec 手写校验器 fail-closed（compose/spec.ts：未知 kind/悬空引用/环/深度/props 白名单/$state 格式全拒）；③ catalog 最小集（Card/Metric/Table/Chart）叶子经既有 ResultCardRenderer 渲染=ResultNode 插座通电零第二渲染真相；④ ComposeCard 降级占位（spec 无效→compose-invalid 占位+console 留痕）；⑤ $state 绑定复用 gen-ui:get-data 通道 + visible 条件 + widgetState 复用既有 REST（≤16KiB）；⑥ parser findClosingBrace 嵌套花括号深度跟踪（::visualize 平 JSON 行为不变，既有 60/60 零回归）。
 - **契约证据**：compose 四测 30/30（spec 12/catalog 3/projection 6/state 9，HK-01 红→绿）；copilot 全邻域 813/813；quality:types 0 error；lint 根因修（own-enumerable 查找沿 BLOCK-456 先例）0 error 0 warning。

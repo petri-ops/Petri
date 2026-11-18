@@ -1,0 +1,48 @@
+BLOCK-466 / W11 P3 流式首切片 — HK-01 红绿 + 邻域 + 实机腿归因证据
+
+发令：用户预授权 R2 = W11 P3 流式首切片（五步串行 S2）。
+
+## 增量定位（存量对账）
+- agentTaskStream 事件契约（seq/afterSeq/done/reconnect，BLOCK-151/457）已完整——本包零改动传输层。
+- 真实缺口：SimpleChatMessageRow.tsx:269 仅在 !streaming && !pending 时走 GenUiMessageContent；
+  流式期原始 ::compose{...} JSON 逐 delta 泄漏（闪烁/裸 JSON）。
+- projectGenUiReferences(text,false) 已有 pending 语义但只认 string:value 前缀——compose spec 是嵌套 JSON
+  （"version":1 数字值 / 嵌套 nodes 对象），半截 spec 漏检 → 新增 isComposeJsonPrefix 判据（可补全为合法 JSON
+  即视为前缀，保守不隐藏普通正文），沿既有防注入纪律。
+
+## RED（实现前，referencesStreaming 模块缺席）
+命令：npm run test:files -- references-streaming.test.ts
+结果：1 failed / no tests（ERR: 模块 ./referencesStreaming 不存在）。红证据在册。
+
+## GREEN（实现后）
+命令：npm run test:files -- references-streaming.test.ts references.test.ts references-compose.test.ts
+结果：7 files / 74 tests 全绿（其中 streaming 8/8、references 21/21、compose 6/6）。
+命令：npm run test:files -- GenUiMessageContent.streaming.test.tsx
+结果：1 file / 4 tests 全绿（jsdom 真实 DOM 断言：流式 partial 出 compose-stream-pending 占位、
+  原始 JSON/::compose 不进入 DOM、完成后渲染 ComposeCard、纯文本快路径、代码围栏防注入）。
+命令：邻域 15 files / 115 tests 全绿（含 SimpleChatMessageRow memo 3/3 + followups/stats + compose 全套）。
+
+## 契约点（逐条锚定）
+1. partial spec（3 种截断前缀）：pending 占位，原始 JSON 不泄漏 text 段 —— PASS
+2. 防闪烁：逐 delta 增长前缀占位态稳定（pending 恒在、compose 恒不在）—— PASS
+3. 流式完整 spec 不抢渲染（completed 才升级 compose）—— PASS
+4. invalid spec 完成后降级 invalid，不炸穿 —— PASS
+5. 代码围栏 ::compose 不命中（防注入）—— PASS
+6. 断线续传兼容：投影为 content 纯函数，afterSeq 重放同累积 content 投影逐等、零隐藏状态 —— PASS
+7. BLOCK-154 行 memo：SimpleChatMessageRow.test 3/3（相同 props bail-out / m 身份变化重渲染）—— PASS
+
+## 实机腿（9223 离屏）——external-blocked 归因（诚实判档）
+现状：backend :3001 未运行（curl /api/health 无响应）、:9223 空闲；仓库无任何 dev-verify flow
+  支持合成 assistant 消息或注入流式 ::compose delta（grep onDelta/inject-message/mock-stream 零命中）。
+判据：真实 ::compose 渐进渲染需模型流式吐出受控 spec，当前无确定性发生器、无合成注入路径——
+  按 dev-infra「无人化验收阶梯」Level 2（CDP 够不着 + 失败影响低 → 诚实分级，不凑形式证据）+
+  任务 R2「实机腿 allPass 或 external-blocked 归因」，本步实机腿判 external-blocked，不伪造 allPass。
+  契约级证据（jsdom 真实 DOM + 投影纯函数 + 邻域）已完整，观感 pending_human_eye 不代签。
+  栈就绪后补腿路线：9223 离屏起栈 → 让模型输出 ::compose（或合成注入）→ CDP 断 delta 抓占位 DOM →
+  完成后抓 ComposeCard DOM；跑完即 kill，禁 PETRI_TEST_ONSCREEN。
+
+## 边界
+零新增产品依赖；零 SSE 契约改动；::visualize 沙箱零改动（双形态并存）；观感 UI-709 保持 in_progress
+（pending_human_eye 不代签）；untracked 用户资产零触碰。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
