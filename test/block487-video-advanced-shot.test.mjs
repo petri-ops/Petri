@@ -81,6 +81,7 @@ test('A1 — 三出口契约字符串在场', () => {
 test('A2 — deferred 清单：文生/图生视频/角色/物理/粒子/高成本缓存只登记不实现', () => {
   for (const d of ['text_to_video', 'image_to_video', 'character_animation', 'physics', 'particles', 'high_cost_cache_retry_version_compare']) {
     assert.ok(H.DEFERRED.includes(d), `${d} 应在 deferred 清单`);
+    // eslint-disable-next-line security/detect-object-injection -- d 为上方固定字面量清单枚举（deferred 白名单键），无外部输入面
     assert.equal(H.DEFERRED_STATE[d], 'deferred_user_ruling');
   }
 });

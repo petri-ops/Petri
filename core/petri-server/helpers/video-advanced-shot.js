@@ -10,6 +10,8 @@
  *      → 换 producer/换 renderer/加领域三判据 → 生成证据链 → 完整性 fail-closed。
  * 不写盘、不新造 Job/Artifact/执行器；deferred 项只登记不实现；云/付费/外发字段一律 fail-closed。
  */
+
+/* eslint-disable security/detect-object-injection -- 键全部来自白名单常量/ownGet 有 hasOwnProperty 守卫，无外部输入面（BLOCK-493 误报豁免留痕，沿 BLOCK-482 video-compose.js 同族先例） */
 'use strict';
 
 const SCHEMA_VERSION = 1;

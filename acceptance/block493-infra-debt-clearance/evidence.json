@@ -1,0 +1,55 @@
+{
+  "capability": "block493-infra-debt-clearance",
+  "block": "BLOCK-493",
+  "wave": "W1 基础设施清偿（BLOCK-492 plan §3 W1 · 治理批零产品代码）",
+  "capturedAt": "2026-11-18",
+  "platform": "darwin arm64 / Node v24.16.0",
+  "redGreenEvidence": [
+    {
+      "gate": "test:changed → test/test-affected.test.mjs:90",
+      "before": "FAIL：resolveImpact(acceptance/<dir>/evidence.json 枚举) unknown=['acceptance/block464/evidence.json','acceptance/block470/evidence.json','acceptance/block477-filetree-attribution/evidence.json']（expected []）",
+      "after": "PASS：node --test test/test-affected.test.mjs → tests 21 / pass 21 / fail 0",
+      "fix": "impact-map.json：block464-gen-ui-catalog-extensions 与 block477-filetree-repro-attribution 各追加 acceptance/<dir>/** pattern（读者测试已在其 tests）；新增 rule block470-evidence-claim（acceptance/block470/** → block470-handoff-compact + block470-next-phase-prompt，机械认领沿 block454/8881 先例）。规则数 417→418。"
+    },
+    {
+      "gate": "lint:ledger（scripts/lint-ledger-verify.mjs）",
+      "before": "FAIL（2 项）：warnings production 1495 > 基线 1484（+11）、test 420 > 418（+2）；errors 抑制台账 193/121 逐条相等（对平）",
+      "after": "PASS：warnings P1484/T418/S539（与基线逐字持平，基线文件零改动、棘轮零放宽）",
+      "attribution": "13 条全部 security/detect-object-injection，全部为基线提交 71f74b40（2026-11-18 02:41 BLOCK-460 收口）之后入库文件所引入：video-storyboard.js 6 + video-advanced-shot.js 5（production），test/block487-video-advanced-shot.test.mjs 1 + test/c52-assistant-ui-pattern.test.mjs 1（test）。post-h9-k3/k4/k5 测试文件的 warning 经基线存在性核对（git cat-file -e 71f74b40:<file>）确认基线前既有，不属本次增量。",
+      "classification": "三分类=全部误报豁免：被标记面均为内部白名单校验数据/测试夹具（ownGet 带 Object.prototype.hasOwnProperty 守卫、键来自冻结白名单常量/固定字面量清单），无外部输入面。",
+      "fix": "production 两文件：文件级 disable 头（逐字沿 BLOCK-482 同族先例 video-compose.js:3）；test 两处：行级 disable + reason（沿 block407/409/412 测试先例）。机制注记：warnings 不能走 --suppress-all（抑制表只服务 errors 机械投影，warning 入账会令 verify 双向对平判'债务已收缩'而恒红——scripts/lib/eslint-counts-formatter.cjs 仅计 severity 2），行/文件级 disable+reason 是本仓 warnings 豁免的唯一既有机制。"
+    },
+    {
+      "gate": "docs:check",
+      "before": "FAIL (1)：COVERAGE_COUNT_DRIFT registry coverage.managedMarkdown=626 与实际 627 不一致",
+      "after": "PASS (645 registered documents)；注：启动时即无 DOCUMENT_MISSING post-h9（该 untracked 用户资产文件在场，早前会话的红已随文件落盘消解）——本包未触碰该资产",
+      "fix": "npm run docs:coverage 机械重算写回（managedMarkdown=628 含本包新增 plan；documentCount=645 含 BLOCK-493 登记）。"
+    },
+    {
+      "gate": "3D 蓝图裁决漂移",
+      "before": "docs/3d-authoring-domain-blueprint-2026-11-17.md §13 表 U-3D-D1/D2/D3 状态 pending_user_ruling；§14 结论 3 写「待用户裁决」",
+      "after": "两处对齐 ruled（2026-11-18 批量裁决=B-1/B-2/B-3，真源指针=3d-authoring-dependency-ruling-2026-11-17.md）；零产品代码、零新裁决点（登记同步非改判）",
+      "fix": "登记同步（BLOCK-492 plan §6 已预置该漂移的对齐处置）。"
+    }
+  ],
+  "mechanicalRegeneration": {
+    "docsCoverage": "managedMarkdown 626→628、documentCount 645",
+    "postK7SingleSource": "impact-map 418 规则 / 89 未映射（unmappedTests 为另一基线指标，与 evidence.json unknown 无关，不变属正确）；registry 645/628",
+    "lintWarningsBaseline": "未改动（1484/418/539 保持；--update 未调用）"
+  },
+  "exclusions": [
+    "post-h9 等 10 项用户资产零触碰（user-asset-guard 绿）",
+    "eslint-suppressions.json 零改动（errors 台账本已对平）",
+    "test/lint-warnings-baseline.json 零改动",
+    "观感 UI-706/707/709/710 + E 类 22 条零代签",
+    "G1+ 不外推",
+    "他方 WIP（gateway-design.md / pending-backlog C-56 行 / block490 评审稿）零触碰"
+  ],
+  "notes": [
+    "P6 写入门交互（如实登记）：test:changed 定向集因 impact-map.json（P6 绑定源）变更而拉入 test/g0-rs-p6-product-acceptance.test.mjs；其中'P6 stored verification and write gate target an injected evidence path'子测在树未提交时红（p6_current_source_tree_not_exact detail=[test/impact-map.json]）——该写入门要求工作区与 HEAD 逐字节一致（readFileSync vs git show HEAD），属 P6 证据重打静默纪律的写面表现，非产品缺陷。处置=先提交修复批再于干净树跑门禁（两段提交），提交后该子测绿。stored 证据本体断言（source-bound and recomputable）全程绿。"
+  ],
+  "humanReview": {
+    "status": "pending_human_eye",
+    "note": "本包无观感面；观感签字槽（UI-706/707/709/710 + E 类 22 条）保持 in_progress 零代签"
+  }
+}

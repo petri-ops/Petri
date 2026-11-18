@@ -234,9 +234,9 @@ SceneIR {
 
 | 裁决点 | 内容 | 状态 |
 |---|---|---|
-| U-3D-D1 | 是否引入 sand3d（`bpy` 重依赖） | pending_user_ruling |
-| U-3D-D2 | 是否引入 three-live 外部 MCP 工具 | pending_user_ruling |
-| U-3D-D3 | 蓝图是否立项、首包范围（建议 P0–P1）、波次归属 | pending_user_ruling |
+| U-3D-D1 | 是否引入 sand3d（`bpy` 重依赖） | ruled（2026-11-18 批量裁决=B-1 隔离探针；真源见[依赖裁决材料](./3d-authoring-dependency-ruling-2026-11-17.md)） |
+| U-3D-D2 | 是否引入 three-live 外部 MCP 工具 | ruled（2026-11-18 批量裁决=B-2 外部 MCP+adapter 隔离；真源见[依赖裁决材料](./3d-authoring-dependency-ruling-2026-11-17.md)） |
+| U-3D-D3 | 蓝图是否立项、首包范围（建议 P0–P1）、波次归属 | ruled（2026-11-18 批量裁决=B-3 仅 P0 探针包；真源见[依赖裁决材料](./3d-authoring-dependency-ruling-2026-11-17.md)） |
 
 - 本文件 = reference + planned 决策/蓝图材料，不启动工作包、不改运行时、默认行为不变。
 - 立项后按 artifact-plane-direction「渲染层」语义登记新切片，不重写该文档；不新建第二 canonical 真相。
@@ -247,4 +247,4 @@ SceneIR {
 
 1. 方向成立：3D 能力的差距是结构性（无骨架/无 IR/无闭环/未用配方/治理缺位），非功能数量，故需系统性方案而非技巧堆砌。
 2. 方案以领域入驻配方为骨架、Scene IR 为枢纽、证据闭环为魂，四阶段（P0→P3）从可行到可扩展。
-3. 三裁决点（U-3D-D1/D2/D3）待用户裁决；本文件不启动任何工作包，默认行为不变。
+3. 三裁决点（U-3D-D1/D2/D3）已于 2026-11-18 由用户批量裁决（B-1~B-5 同批，含 D4 Polyfork/D5 img2threejs）——状态以[依赖裁决材料](./3d-authoring-dependency-ruling-2026-11-17.md)为准（本表 2026-11-18 BLOCK-493 对齐，属登记同步非新裁决）；本文件不启动任何工作包，默认行为不变。

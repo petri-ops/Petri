@@ -131,6 +131,7 @@ describe('C-52 P2 assistant-ui 模式借鉴契约可复算（HK-01）', () => {
     const fresh = collectAssistantUiPattern(ROOT);
     const override = (id, value) => {
       const clone = Object.fromEntries(READING_IDS.map((rid) => [rid, { ...ownGet(fresh, rid) }]));
+      // eslint-disable-next-line security/detect-object-injection -- id 来自 READING_IDS 在册键集合（白名单），无外部输入面
       clone[id] = { ...ownGet(clone, id), value };
       return clone;
     };

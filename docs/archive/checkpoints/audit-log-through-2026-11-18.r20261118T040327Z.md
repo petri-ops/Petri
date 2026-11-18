@@ -1,0 +1,8 @@
+# 审计广播台历史归档 · through 2026-11-18
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（BLOCK-170 自稳设计；
+> 活跃台只留「最后更新」链最近 8 条，本档=被淘汰链行原文追加，搬移不改写）。
+> 状态与完成语义以 canonical 文档（roadmap/plan/DOC-REGISTRY）为准，本档仅作广播历史追溯。
+
+最后更新：2026-11-18（🚀 **BLOCK-463 立项启动（3D P3 呈现层首包 L3/L5 · active / P3-LAUNCH，占串行槽位）**：用户发令（Jev 单一建议获批）。**存量对账**：蓝图 P3 ①③ 大半已被 RW-01 既有面覆盖（viewerRegistry model3d adapter 解析 .glb/.scene3d.json + canSelect + 选择总线 + UI-654 工作面跳转）——只做真实增量：A=SceneSpec 证据面板（BLOCK-460 joints + BLOCK-462 verifierResults/provenance 呈现进 Model3DResultViewer——证据自证=魂，配对 snapshot 沿 sceneSnapshotFromUrl）；B=双形态互达（::compose mesh-reference 卡 .glb → Result Studio 跳转沿 UI-654 先例 + selectComposePresentation 判定契约）；C=零内核改动证明（diff 分析入 acceptance）。实机腿=9223 离屏尽力跑（无窗口栈），不可行 external-blocked 如实判档。HK-01 红绿先行。plan=docs/block463-3d-p3-presentation-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-18（🏁 **BLOCK-462 收口（3D P2 验证闭环 L4 · 一次会话完成 · closeout 21 门全绿）**：three-live@1.4.0 npm VERIFIED + 隔离 sidecar 安装（零产品依赖，B-2 边界）→ 工具面只读实测对账（CLI 10 子命令 / MCP 10 工具枚举 vs 裁决记九——差异如实登记；validate 仅 .js/.html 对 GLB 不适用如实登记）→ verification adapter verify.mjs（info/render/sim 编排，HK-01 红→绿 6/6：真实探针 GLB verdict=pass、损坏 GLB verdict=fail 诚实退出、越界拒绝）→ **渲染证据双跑 sha256 一致**（headless 确定性实测：同 GLB → 同 PNG 67c9b6b3…）→ digest=确定性字段集 sha256（8a7500d4… 可复现）→ truth 链 verifierResults 以 digest 去重追加进 SceneSpec metadata.provenance（单一真相）→ sim 实测全 9 节点状态 exit=0。MCP 接入材料在册（capability 默认关=本包不改用户 mcp-servers 配置；建议首批只开 validate/render/sim/info 四只读工具，from_image/bake_textures 保持 deny——本地主权）。knip 上限 343（+verify.mjs 动态入口定性）。Agent Gym 工具面已核、编排留后续按需。plan=docs/block462-3d-p2-verification-plan.md；registry completed。G0 开发期常态 · 不外推 packaged/Provider/GA.）

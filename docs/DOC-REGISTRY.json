@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 644,
+    "documentCount": 645,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 626
+    "managedMarkdown": 628
   },
   "documents": [
     {
@@ -13337,6 +13337,36 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项登记（用户发令「梳理剩余工作 + 不用人参与的提示词，阶段性推进」）：C-54 六档收束后的下一阶段无人值守提示词入口——S1 C-53 P0/P1（R1 仅 P0+P1，P2 起停下等批）→S2 W11 P3 流式首切片（R2）→S3 3D P4 对账+Agent Gym 首片（R3）→S4 基础设施清偿（R5：lint-ledger 工具修复/Q-MATRIX 统计行收拢/knip 定性批）→S5 img2threejs 借形封装首片（R4）；R6 Polyfork 只做授权材料只读收集（接入决策归用户=红线 2）；红线=观感不代签+C 类停止+他方 WIP 零触碰；§10 自包含提示词正文，复制整块给新 Agent 即可。用户动作清单=观感签字 UI-706/707/709/710+E 类 22 条+post-h9 D5+Polyfork 授权确认+C-53 P2 起发令。"
+    },
+    {
+      "id": "BLOCK-493",
+      "path": "docs/block493-infra-debt-clearance-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block493-infra-debt-clearance",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block493-infra-debt-clearance-plan.md",
+        "test/impact-map.json",
+        "core/petri-server/helpers/video-storyboard.js",
+        "core/petri-server/helpers/video-advanced-shot.js",
+        "test/block487-video-advanced-shot.test.mjs",
+        "test/c52-assistant-ui-pattern.test.mjs",
+        "docs/post-k7-readings-single-source.json",
+        "docs/3d-authoring-domain-blueprint-2026-11-17.md",
+        "acceptance/block493-infra-debt-clearance/"
+      ],
+      "tags": [
+        "BLOCK-492",
+        "W1",
+        "infra-debt",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户预授权无人值守提示词 §5 S1 / BLOCK-492 plan §3 W1 波次发令）。W1 基础设施清偿（治理批零产品代码）：①acceptance/block464|block470|block477-filetree-attribution 三处 evidence.json 虚拟探针挂 impact-map rule（两条既有 rule 扩 pattern + 一条新机械认领 rule，读者测试如实登记）；②lint:ledger 既有 warning production(+11)/test(+2) 溯源三分类=全部误报豁免（security/detect-object-injection 于内部白名单校验数据/测试夹具），处置沿 BLOCK-482 video-compose.js 文件级 disable 头同族先例 + 测试行级 disable+reason（block407/409/412 先例），warnings 不走 --suppress-all（会污染 errors 抑制台账致 verify 双向对平红），基线文件不动棘轮零放宽；③docs:check COVERAGE_COUNT_DRIFT 机械重算写回（post-h9 蓝图 DOCUMENT_MISSING 保持用户资产归属 W5 不代处置）；④3D 蓝图 §13 裁决表+§14 结论对齐已裁决态（U-3D-D1/D2/D3 2026-11-18 批量裁决 ruled，真源=3d-authoring-dependency-ruling-2026-11-17.md）；⑤post-k7 单源读数重生成；⑥定向测试+closeout 定向+证据落 acceptance/block493-infra-debt-clearance/+六件套+commit/push。红线=零产品代码/零基线放宽/用户资产 10 项零触碰/观感零代签/不碰 G1+/他方 WIP 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-18"

@@ -8034,12 +8034,13 @@
     },
     {
       "id": "block477-filetree-repro-attribution",
-      "note": "BLOCK-477 C-47 复现与归因：源码锚定 + 分页时序状态机 + CDP 实机腿 + 三态结论；脚本只读不写产品代码。新测试必须挂规则（nso-w5-impact-coverage 契约）。",
+      "note": "BLOCK-477 C-47 复现与归因：源码锚定 + 分页时序状态机 + CDP 实机腿 + 三态结论；脚本只读不写产品代码。新测试必须挂规则（nso-w5-impact-coverage 契约）。（2026-11-18 BLOCK-493 补挂 acceptance/block477-filetree-attribution/** 证据目录认领——收口带入时漏登，对标 block139/140/142 先例）",
       "patterns": [
         "scripts/block477-*.mjs",
         "scripts/block477-*.cjs",
         "test/block477-*.test.mjs",
-        "docs/block477-*.md"
+        "docs/block477-*.md",
+        "acceptance/block477-filetree-attribution/**"
       ],
       "tests": [
         "test/block477-filetree-repro.test.mjs"
@@ -9039,13 +9040,14 @@
     },
     {
       "id": "block464-gen-ui-catalog-extensions",
-      "note": "BLOCK-464 W11 P4：compose spec 模板库（resources/gen-ui/compose-templates）+ pack.json provides.composeTemplates 投影段 + visualize skill 双形态补章。改这些面必跑 compose 模板命中契约与投影契约测试 + skills:check。",
+      "note": "BLOCK-464 W11 P4：compose spec 模板库（resources/gen-ui/compose-templates）+ pack.json provides.composeTemplates 投影段 + visualize skill 双形态补章。改这些面必跑 compose 模板命中契约与投影契约测试 + skills:check。（2026-11-18 BLOCK-493 补挂 acceptance/block464/** 证据目录认领——收口带入时漏登，对标 block139/140/142 先例）",
       "patterns": [
         "resources/gen-ui/compose-templates/**",
         "core/petri-server/helpers/pack-contributions.js",
         "resources/skills/visualize/**",
         "frontend/src/components/copilot/gen-ui/compose/templates.test.tsx",
-        "test/block464-pack-compose-templates.test.mjs"
+        "test/block464-pack-compose-templates.test.mjs",
+        "acceptance/block464/**"
       ],
       "tests": [
         "frontend/src/components/copilot/gen-ui/compose/templates.test.tsx",
@@ -9180,6 +9182,17 @@
       ],
       "classifiesScripts": true,
       "scriptRole": "pattern-contract-collector"
+    },
+    {
+      "id": "block470-evidence-claim",
+      "note": "BLOCK-470 handoff-compact/next-phase-prompt 工具批的存储证据目录机械认领（acceptance/block470/ 实存 evidence.txt，无独立 evidence.json；test-affected 对每目录按 evidence.json 虚拟路径扫描，未登记即判 unknown fail-closed——2026-11-18 BLOCK-493 补挂，对标 block454/上游遗留目录机械覆盖先例，不代写证据内容）。",
+      "patterns": [
+        "acceptance/block470/**"
+      ],
+      "tests": [
+        "test/block470-handoff-compact.test.mjs",
+        "test/block470-next-phase-prompt.test.mjs"
+      ]
     }
   ]
 }

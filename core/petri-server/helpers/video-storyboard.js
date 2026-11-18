@@ -9,6 +9,8 @@
  * 红线：默认零新依赖（出口④）；图像生成新服务/真实外部搜索属产品级新依赖+外发，
  *       归 pending_user_ruling 留白，本模块不擅自接入；观感 pending_human_eye 零代签。
  */
+
+/* eslint-disable security/detect-object-injection -- 键全部来自白名单常量/ownGet 有 hasOwnProperty 守卫，无外部输入面（BLOCK-493 误报豁免留痕，沿 BLOCK-482 video-compose.js 同族先例） */
 'use strict';
 
 const SCHEMA_VERSION = 1;
