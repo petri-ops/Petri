@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 626,
+    "documentCount": 627,
     "lastUpdated": "2026-11-18",
-    "managedMarkdown": 609
+    "managedMarkdown": 610
   },
   "documents": [
     {
@@ -12725,6 +12725,35 @@
       ],
       "registeredAt": "2026-11-18",
       "notes": "2026-11-18 立项（用户发令「按照你的建议 继续推进」= Jev 单一建议 gen-ui P4 catalog 扩展点深化获批）。存量对账：CP-12 HTML fragment 模板库已由 BLOCK-174 交付、pack 投影机制已由 BLOCK-216 立好（provides 白名单 + LIMITS + /api/packs/contributions）——本包只做真实增量：A=compose spec 模板库 3 模板（overview/table-report/trend-chart，模板命中契约）；B=visualize skill 双形态分工补章（::compose 优先结构化、::visualize 交互/富可视，skills:check）；C=pack.json provides.composeTemplates 投影段 additive（白名单/上限/fail-closed 沿 LIMITS 模式，demo fixture 契约测试，REST 零改动自动透出；消费面 v1=模型可读，前端 UI/组件 kind 扩展=v2 候选如实登记）；D=零内核改动判据复验。plan=docs/block464-gen-ui-catalog-extensions-plan.md。【收口 2026-11-18】P4 全交付：A=compose spec 模板库 3 模板（resources/gen-ui/compose-templates/：job-overview/table-report/trend-chart；模板命中契约 4/4——逐模板过 parseComposeSpec+ComposeCard 渲染+篡改负测）；B=visualize skill 双形态分工补章（::compose 结构化优先 / ::visualize 交互富可视；skills:check PASS 13 内置 + integrity --write）；C=pack.json provides.composeTemplates 投影段 additive（白名单 {id,title,description,spec}/上限 8 条/spec 4KB/first-wins 沿 views 语义/投影侧轻校验 fail-closed 沿 LIMITS 模式 + testRoot 测试 seam 生产零变化；契约 5/5；REST /api/packs/contributions 零改动自动透出；消费面 v1=模型可读〔skill 补章指引〕，前端 UI 消费与组件 kind 扩展=v2 候选如实登记）；D=内核面零 diff 证明（agent-runner/mcp/channels/viewerRegistry=0 行）。零观感面（skill/模板/投影均非用户 UI 写面）。W11 五阶段（P0-P2 首包+P4 扩展点）全完成；P3 流式=可选拆包留候选。证据=acceptance/block464/。"
+    },
+    {
+      "id": "BLOCK-473",
+      "path": "docs/block473-c53-p4-responsive-a11y-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block473-c53-p4-responsive-a11y",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block473-c53-p4-responsive-a11y-plan.md",
+        "scripts/c53-responsive-a11y.mjs",
+        "resources/design-context/responsive-a11y.json",
+        "test/c53-responsive-a11y.test.mjs",
+        "acceptance/block473-c53-p4-responsive-a11y/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "c53",
+        "responsive",
+        "accessibility",
+        "wcag",
+        "design-context",
+        "G0"
+      ],
+      "registeredAt": "2026-11-18",
+      "notes": "2026-11-18 立项（用户发令「开始 C-53 P4」；批2提示词 S3/R11）。范围=沿 P1/P2/P3 先例新增独立静态扫描器 scripts/c53-responsive-a11y.mjs（纯函数 collectResponsiveA11y 从双真源 + TSX/CSS 全源机械复算六组读数：键盘焦点/ARIA 状态机/WCAG 对比度/断点/触摸目标/八态矩阵）+ 模型可读 responsive-a11y.json（生成器自身维护 manifest sha）+ 消费测试锚定（篡改负测 fail-closed）。零 CSS/组件写面/观感代签/新依赖。非范围=改双真源（nso-w3-a11y.test.tsx/ui-design-a11y.test.mjs/ui-design-a11y.mjs 是零回归基线）/theme-token-contract.test.ts（P0 快照锚定）/design-charter 冻结项/C-53 P5-P7/用户资产/G1+。plan=docs/block473-c53-p4-responsive-a11y-plan.md。【收口 2026-11-18】HK-01 红→绿 11/11（契约缺席 ENOENT → 11/11）；--check PASS（readingIds=6/focusGapFiles=12/breakpointTotal=36/stateMachine=3-94-57-12）；responsive-a11y.json 六组读数（键盘焦点 12/16 只减棘轮+inert 隔离/状态机四类逐项>0/WCAG 32 对阈值不放宽 belowBody=0/断点 26+10+20 档位窄屏覆盖/触摸目标 24/30px 达标/八态矩阵 32 格人眼格标注）；P0 8/8+P2 7/7+P3 9/9+双真源 7/7(4/4) 零回归；docs:check/ui:audit/hygiene 绿；单源重生成。零 UI 写面/观感代签/新依赖。closeout perf SKIPPED（G0 噪声）；block464/470 gap + g0-rs-p6 源绑定=既有红。证据=acceptance/block473-c53-p4-responsive-a11y/。C-53 P5-P7 待后续发令。"
     },
     {
       "id": "BLOCK-472",

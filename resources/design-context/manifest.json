@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
   "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
-  "generatedAt": "2026-11-18T08:01:37.722Z",
+  "generatedAt": "2026-11-18T08:21:52.297Z",
   "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。",
   "files": [
     {
@@ -16,6 +16,10 @@
     {
       "path": "visual-consistency.json",
       "sha256": "a22e144d1fe823ea8a8246286eede3da24368782a37b220cc37fa46f1aadb2bc"
+    },
+    {
+      "path": "responsive-a11y.json",
+      "sha256": "509c7324c15f3d2e4c4a1154a27aaf9ca97238cc2e726b2554643aee13d00410"
     }
   ]
 }

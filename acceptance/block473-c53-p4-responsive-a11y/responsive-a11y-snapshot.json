@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-responsive-a11y",
+  "capability": "block473-c53-p4-responsive-a11y",
+  "sourceCommit": "35e19314ab9d08b65d1a39da330017708442c37f",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-responsive-a11y.mjs",
+  "generatedAt": "2026-11-18T08:21:52.296Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；观感项 pending_human_eye 不代签，本包只读不改任何 CSS/组件/token 定义。",
+  "readings": {
+    "keyboardFocus": {
+      "value": {
+        "focusGapFiles": 12,
+        "focusGapDeclarations": 16,
+        "frozenFiles": 12,
+        "frozenDeclarations": 16,
+        "overRatchet": false,
+        "focusGaps": {
+          "components/annotations/AnnotationBar.module.css": 1,
+          "components/desktop/desktop.css": 2,
+          "components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css": 2,
+          "components/desktop/WorkingTreeReview/ReviewMode.css": 1,
+          "components/editor/CodeMirror/CodeMirrorEditor.module.css": 1,
+          "components/knowledge/KnowledgeConsoleChat.module.css": 1,
+          "components/workspace-panels/KnowledgeSpacePanel.module.css": 1,
+          "pages/extensions/McpPolicyEditor.module.css": 1,
+          "pages/extensions/styles.module.css": 2,
+          "pages/home.module.css": 1,
+          "pages/welcome.module.css": 2,
+          "pages/window/command-center.module.css": 1
+        },
+        "inertOccurrences": 3,
+        "focusVisibleRules": 85,
+        "keyboardIsolationPresent": true
+      },
+      "source": "frontend/src CSS 全源 + ui-design-a11y.mjs FOCUS_GAP_BASELINE + nso-w3-a11y inert 语义",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    },
+    "ariaStateMachine": {
+      "value": {
+        "ariaBusy": 3,
+        "roleAlert": 94,
+        "roleStatus": 57,
+        "ariaLive": 12
+      },
+      "source": "frontend/src TSX 全源（aria-busy/role=alert/role=status/aria-live）",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    },
+    "contrast": {
+      "value": {
+        "pairCount": 32,
+        "bodyThreshold": 4.5,
+        "largeThreshold": 3,
+        "belowBodyCount": 0,
+        "belowBody": [],
+        "thresholdsNotRelaxed": true
+      },
+      "source": "scripts/ui-design-a11y.mjs computeContrastPairs + custom.css token 对账表",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    },
+    "breakpoints": {
+      "value": {
+        "media": 26,
+        "container": 10,
+        "total": 36,
+        "widthSteps": [
+          96,
+          420,
+          520,
+          560,
+          640,
+          679,
+          680,
+          700,
+          720,
+          760,
+          768,
+          820,
+          860,
+          960,
+          996,
+          997,
+          1120,
+          1146,
+          1200,
+          1380
+        ],
+        "widthStepCount": 20,
+        "narrowCoverage": true,
+        "perFile": {
+          "components/copilot/RunStatsBar.module.css": 1,
+          "components/copilot/simple-chat.css": 4,
+          "components/copilot/SimpleChat/PromptEnhanceDialog.module.css": 1,
+          "components/desktop/desktop.css": 2,
+          "components/desktop/settings-redesign.module.css": 2,
+          "components/desktop/TitleBar.module.css": 3,
+          "components/result-studio/CompactResultNavigator.module.css": 1,
+          "components/result-studio/ResultAgentComposer.module.css": 1,
+          "components/result-studio/ResultStudioChangeSetPanel.module.css": 1,
+          "components/result-studio/ResultStudioSurface.module.css": 1,
+          "components/result-studio/ScientificInteractionViewer.module.css": 1,
+          "components/settings/ExperimentalFeaturesSection.module.css": 1,
+          "components/work-surface/Model3DEditPanel.module.css": 1,
+          "components/work-surface/Model3DReviewPanel.module.css": 1,
+          "components/work-surface/Model3DSurface.module.css": 1,
+          "components/work-surface/WorkflowRunsPanel.module.css": 1,
+          "pages/extensions/styles.module.css": 1,
+          "pages/project-workspace.module.css": 5,
+          "styles/custom.css": 7
+        }
+      },
+      "source": "frontend/src CSS 全源（@media/@container 宽度断点）",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    },
+    "touchTargets": {
+      "value": {
+        "iconBasePx": 24,
+        "standardBaseHeightPx": 30,
+        "wcagTargetMinPx": 24,
+        "iconMeetsMinimum": true,
+        "standardMeetsMinimum": true,
+        "desktopFormFactor": true,
+        "note": "桌面 Electron 形态；图标按钮 24px 达标、标准按钮 30px 达标；<24px 项（如 status min-height 20px）为信息行非点击目标，如实登记不改 CSS（观感归 E）。"
+      },
+      "source": "frontend/src/components/ui/controls/button.module.css",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    },
+    "eightStateMatrix": {
+      "value": {
+        "cells": 32,
+        "complete": true,
+        "humanEyeCells": 12
+      },
+      "source": "scripts/ui-design-a11y.mjs STATE_MATRIX",
+      "command": "node scripts/c53-responsive-a11y.mjs",
+      "capturedAt": "2026-11-18T08:21:52.092Z"
+    }
+  }
+}
