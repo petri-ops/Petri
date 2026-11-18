@@ -59,7 +59,7 @@ describe('::compose → Result Studio 跳转（双形态互达）', () => {
     expect(button).toBeTruthy();
     fireEvent.click(button);
     expect(dispatchSpy).toHaveBeenCalledTimes(1);
-    const call = dispatchSpy.mock.calls[0];
+    const call = dispatchSpy.mock.calls[0] as [string, { scenePath?: string; meshPath?: string; projectId?: string; label?: string }];
     expect(call[0]).toBe('petri:model3d-open');
     expect(call[1].scenePath).toBe('model3d/runs/r1/scene.json');
     expect(call[1].meshPath).toBe('model3d/runs/r1/model.glb');
