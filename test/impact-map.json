@@ -8675,36 +8675,41 @@
     },
     {
       "id": "block465-c53-design-baseline",
-      "note": "BLOCK-465 / C-53 S1：P0 设计基线冻结（collector 机械复算 design-charter/theme token 契约/UI 债 38/组件规则，快照可复算）+ P1 模型可读上下文包（resources/design-context/ 沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿+篡改负测；classifiesScripts=true 确保新脚本命中本规则，acceptance 目录不触发全量升级。证据 acceptance/block465-c53-p0p1/**。BLOCK-472 / C-53 P3 视觉一致性延续本规则：静态扫描器（海军蓝阶梯/广谱 slate ratchet/颜色预算/token 完整性）+ visual-consistency.json + 消费测试。证据 acceptance/block472-c53-p3-visual-consistency/**。BLOCK-473 / C-53 P4 响应式与可访问性延续本规则：静态扫描器（键盘焦点 12/16 棘轮+inert/ARIA 状态机/WCAG 对比度/断点/触摸目标/八态矩阵，复用 ui-design-a11y 纯函数）+ responsive-a11y.json + 消费测试。证据 acceptance/block473-c53-p4-responsive-a11y/**。BLOCK-474 / C-53 P5 性能与可信状态延续本规则：静态扫描器（流式投影可信态/memo 渲染边界/SSE 断线续传/加载空错误状态机/首屏占位/观感留槽，从 BLOCK-154/466/M55/STATE_MATRIX 真源机械复算）+ performance-trust.json + 消费测试。证据 acceptance/block474-c53-p5-performance-trust/**。",
+      "note": "BLOCK-465 / C-53 S1：P0 设计基线冻结（collector 机械复算 design-charter/theme token 契约/UI 债 38/组件规则，快照可复算）+ P1 模型可读上下文包（resources/design-context/ 沿 compose-templates 先例，被最小消费测试锚定）。HK-01 红绿+篡改负测；classifiesScripts=true 确保新脚本命中本规则，acceptance 目录不触发全量升级。证据 acceptance/block465-c53-p0p1/**。BLOCK-472 / C-53 P3 视觉一致性延续本规则：静态扫描器（海军蓝阶梯/广谱 slate ratchet/颜色预算/token 完整性）+ visual-consistency.json + 消费测试。证据 acceptance/block472-c53-p3-visual-consistency/**。BLOCK-473 / C-53 P4 响应式与可访问性延续本规则：静态扫描器（键盘焦点 12/16 棘轮+inert/ARIA 状态机/WCAG 对比度/断点/触摸目标/八态矩阵，复用 ui-design-a11y 纯函数）+ responsive-a11y.json + 消费测试。证据 acceptance/block473-c53-p4-responsive-a11y/**。BLOCK-474 / C-53 P5 性能与可信状态延续本规则：静态扫描器（流式投影可信态/memo 渲染边界/SSE 断线续传/加载空错误状态机/首屏占位/观感留槽，从 BLOCK-154/466/M55/STATE_MATRIX 真源机械复算）+ performance-trust.json + 消费测试。证据 acceptance/block474-c53-p5-performance-trust/**。BLOCK-475 / C-53 P6 产品 Skill v1.1 延续本规则：静态扫描器（design-context 五件套消费/IA 消费/a11y 约束/Skill 版本契约/发现桥对齐/观感留槽）+ skill-contract.json + 消费测试（篡改负测 fail-closed）；design-brief skill.json/README/system.md 升级 v1.1.0 + 对齐 Agent skill 发现桥。证据 acceptance/block475-c53-p6-skill-contract/**。",
       "patterns": [
         "scripts/c53-design-baseline.mjs",
         "scripts/c53-ia-map.mjs",
         "scripts/c53-visual-consistency.mjs",
         "scripts/c53-responsive-a11y.mjs",
         "scripts/c53-performance-trust.mjs",
+        "scripts/c53-skill-contract.mjs",
         "test/c53-design-context-pack.test.mjs",
         "test/c53-ia-map.test.mjs",
         "test/c53-visual-consistency.test.mjs",
         "test/c53-responsive-a11y.test.mjs",
         "test/c53-performance-trust.test.mjs",
+        "test/c53-skill-contract.test.mjs",
         "resources/design-context/**",
         "docs/block465-c53-design-baseline-context-pack-plan.md",
         "docs/block471-c53-p2-ia-highfreq-plan.md",
         "docs/block472-c53-p3-visual-consistency-plan.md",
         "docs/block473-c53-p4-responsive-a11y-plan.md",
         "docs/block474-c53-p5-performance-trust-plan.md",
+        "docs/block475-c53-p6-skill-contract-plan.md",
         "acceptance/block465-c53-p0p1/**",
         "acceptance/block471-c53-p2-ia/**",
         "acceptance/block472-c53-p3-visual-consistency/**",
         "acceptance/block473-c53-p4-responsive-a11y/**",
-        "acceptance/block474-c53-p5-performance-trust/**"
+        "acceptance/block474-c53-p5-performance-trust/**",
+        "acceptance/block475-c53-p6-skill-contract/**"
       ],
       "tests": [
         "test/c53-design-context-pack.test.mjs",
         "test/c53-ia-map.test.mjs",
         "test/c53-visual-consistency.test.mjs",
         "test/c53-responsive-a11y.test.mjs",
-        "test/c53-performance-trust.test.mjs"
+        "test/c53-performance-trust.test.mjs",
+        "test/c53-skill-contract.test.mjs"
       ],
       "commands": [
         "docs-check",
@@ -8715,16 +8720,19 @@
     },
     {
       "id": "design-brief-product-skill",
-      "note": "C-52 第二包：产品内置 design-brief Skill，经 skill_discover/skill_get 提供十节设计说明手册；零依赖、零 UI 写面变化。证据 acceptance/design-brief-skill/**。",
+      "note": "C-52 第二包：产品内置 design-brief Skill，经 skill_discover/skill_get 提供十节设计说明手册；零依赖、零 UI 写面变化。证据 acceptance/design-brief-skill/**。BLOCK-475 / C-53 P6 把 design-brief 升 v1.1.0（README/system 消费 design-context 五件套 + ia-map + a11y；skill.json/manifest version + capabilities 同步；builtinSha256 重算），对齐 .agents/skills/petri-ui-design/SKILL.md 走发现桥；证据 acceptance/block475-c53-p6-skill-contract/**。",
       "patterns": [
         "resources/skills/design-brief/**",
         "resources/skills/manifest.json",
+        ".agents/skills/petri-ui-design/SKILL.md",
         "test/design-brief-skill.test.mjs",
         "test/post-s7-h9-skill-integrity.test.mjs",
-        "acceptance/design-brief-skill/**"
+        "acceptance/design-brief-skill/**",
+        "acceptance/block475-c53-p6-skill-contract/**"
       ],
       "tests": [
         "test/design-brief-skill.test.mjs",
+        "test/c53-skill-contract.test.mjs",
         "test/post-s7-h9-skill-integrity.test.mjs",
         "test/block176-w7-contracts.test.mjs"
       ],

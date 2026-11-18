@@ -7,7 +7,7 @@
 按以下十节输出 Markdown；不适用的节写 `n/a` 并说明原因。
 
 1. **目标与非目标**：用户要完成什么；明确不做什么。
-2. **规范锚点**：引用 `docs/design-charter.md`、`docs/ui-design-acceptance-checklist-v1.md`、现有 UI 问题/模块；不创建第二套视觉规范。
+2. **规范锚点**：引用 `docs/design-charter.md`、`docs/ui-design-acceptance-checklist-v1.md`、现有 UI 问题/模块；不创建第二套视觉规范。产出前先按序读取 `resources/design-context/` 模型可读真源（清单见 `manifest.json`，由静态扫描器从 canonical 真源机械派生）：`design-context.json`（token/字号/颜色预算基线）、`ia-map.json`（路由/重定向/高频路径，入口与导航设计据此判断可达性）、`visual-consistency.json`（暗色阶梯/ratchet/颜色预算现读）、`responsive-a11y.json`（键盘/焦点/ARIA 状态/对比度/断点/触摸目标契约）、`performance-trust.json`（流式投影/memo/SSE 续传/加载空错误状态机/首屏占位）。真源缺席或漂移即 fail-closed，不以记忆或截图代替。
 3. **信息层级**：主操作、次操作、支持信息、延后/高级信息。
 4. **模块状态矩阵**：按钮/图标钮、输入/编辑器、列表项/卡片、导航/tab × 八态（default/hover/active/disabled/loading/empty/error/focus-visible）。
 5. **布局与响应式契约**：容器边界、窄视口、长内容三态、portal/z-index 边界。

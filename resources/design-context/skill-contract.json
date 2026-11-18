@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "petri-skill-contract",
+  "kind": "model-readable-skill-contract",
+  "generatedBy": "node scripts/c53-skill-contract.mjs",
+  "sourceCommit": "78800278e790893389da370f52becd7e8b752678",
+  "generatedAt": "2026-11-18T08:50:01.709Z",
+  "derivedFrom": [
+    "resources/skills/design-brief/README.md + prompts/system.md（设计上下文真源消费）",
+    "resources/design-context/ 五件套（design-context / ia-map / visual-consistency / responsive-a11y / performance-trust）",
+    "resources/skills/design-brief/skill.json + resources/skills/manifest.json（版本契约）",
+    ".agents/skills/petri-ui-design/SKILL.md + .codebuddy 发现桥 symlink（对齐）"
+  ],
+  "designContextConsumption": {
+    "fileRefs": {
+      "design-context.json": true,
+      "ia-map.json": true,
+      "visual-consistency.json": true,
+      "responsive-a11y.json": true,
+      "performance-trust.json": true
+    },
+    "manifestRef": true,
+    "dirRef": true,
+    "referenceCount": 5
+  },
+  "iaConsumption": {
+    "keywords": {
+      "iaMap": true,
+      "route": true,
+      "highFreqPath": true,
+      "redirect": true
+    },
+    "iaMapRef": true
+  },
+  "a11yConstraints": {
+    "keywords": {
+      "keyboard": true,
+      "focus": true,
+      "aria": true,
+      "contrast": true,
+      "touchTarget": true,
+      "breakpoint": true
+    },
+    "a11yContractRef": true
+  },
+  "skillVersionContract": {
+    "skillJsonVersion": "1.1.0",
+    "manifestVersion": "1.1.0",
+    "versionAligned": true,
+    "capabilities": {
+      "design-context-consumption": true,
+      "ia-map-consumption": true,
+      "a11y-constraints": true
+    },
+    "integrityCurrent": true
+  },
+  "bridgeAlignment": {
+    "agentSkillGoverningSources": true,
+    "agentSkillIaRef": true,
+    "agentSkillA11yRef": true,
+    "codebuddyBridgeReal": true,
+    "bridgeTargetCorrect": true
+  },
+  "humanEyeSlots": {
+    "humanEyeSigned": false,
+    "status": "in_progress",
+    "slots": [
+      "C-53 P7 人眼收口（pending_human_eye，待用户实机过目）",
+      "UI-706/707/709/710 + E 类观感签字（pending_human_eye，待用户实机过目）"
+    ],
+    "readOnly": true,
+    "note": "Agent 不代签观感；本包只升级产品 Skill 契约并机械复算，观感签字槽留用户。"
+  },
+  "boundaries": {
+    "humanEyeSigned": false,
+    "readOnly": true,
+    "note": "观感项（P7 人眼收口 / UI-706/707/709/710 + E 类）pending_human_eye 保持 in_progress，Agent 不代签；本契约为只读机械扫描，不改任何 UI 运行时代码。"
+  }
+}

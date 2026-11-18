@@ -2,12 +2,12 @@
   "skillManifestVersion": 1,
   "id": "design-brief",
   "name": "设计说明生成器",
-  "version": "1.0.0",
-  "description": "把用户的界面/产品设计请求转成结构化设计说明：目标与非目标、信息层级、八态矩阵、布局与响应式、token/组件映射、键盘与交互、反例、参考来源许可、验证计划；可选再用 Gen UI 出原型。",
+  "version": "1.1.0",
+  "description": "把用户的界面/产品设计请求转成结构化设计说明：目标与非目标、信息层级、八态矩阵、布局与响应式、token/组件映射、键盘与交互、反例、参考来源许可、验证计划；产出前消费 design-context 真源（含 IA 映射与响应式 a11y 约束），可选再用 Gen UI 出原型。",
   "category": "design/brief",
   "tags": ["design", "ux", "brief", "design-md", "gen-ui"],
   "source": "built-in",
-  "capabilities": ["design-brief", "ui-design", "state-matrix", "visual-reference-analysis"],
+  "capabilities": ["design-brief", "ui-design", "state-matrix", "visual-reference-analysis", "design-context-consumption", "ia-map-consumption", "a11y-constraints"],
   "plugins": {
     "required": [],
     "optional": []

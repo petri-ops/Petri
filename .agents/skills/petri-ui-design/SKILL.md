@@ -23,6 +23,7 @@ Read in this order; later sources never override earlier ones:
 3. `docs/ui-productization-audit.md` — UI debt and per-issue evidence; do not mark `verified` without live evidence.
 4. `frontend/src/styles/theme-token-contract.test.ts` — mechanical token ratchets.
 5. `$petri-css-theme` — implementation-level CSS pitfalls and hard rules.
+6. `resources/design-context/` — machine-readable design inputs derived mechanically from the canonical sources above; read in this order before proposing changes: `design-context.json` (font/color/border/motion baseline), `ia-map.json` (routes/redirects/high-frequency paths for information hierarchy), `visual-consistency.json` (dark ramp/slate ratchet/color budget), `responsive-a11y.json` (keyboard/focus/ARIA/contrast/breakpoint/touch-target contracts), `performance-trust.json` (streaming/memo/SSE/trust states/skeleton). Manifest and sha256 in `resources/design-context/manifest.json`; a missing or drifted source is fail-closed, never substitute memory or screenshots. These are also consumed by the `design-brief` product Skill (v1.1).
 
 ## Workflow
 

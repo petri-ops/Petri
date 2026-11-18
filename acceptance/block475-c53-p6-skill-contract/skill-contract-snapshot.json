@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "kind": "c53-skill-contract",
+  "capability": "block475-c53-p6-skill-contract",
+  "sourceCommit": "78800278e790893389da370f52becd7e8b752678",
+  "platform": "darwin-arm64",
+  "command": "node scripts/c53-skill-contract.mjs",
+  "generatedAt": "2026-11-18T08:50:01.709Z",
+  "evidenceClass": "mechanical-gate",
+  "verdict": "measured",
+  "humanEyeEquivalent": false,
+  "note": "读数=机械不变量（冻结，消费测试逐读数深等）；观感项 pending_human_eye 不代签，本包只升级产品 Skill 契约，不改任何 UI 运行时代码。",
+  "readings": {
+    "designContextConsumption": {
+      "value": {
+        "fileRefs": {
+          "design-context.json": true,
+          "ia-map.json": true,
+          "visual-consistency.json": true,
+          "responsive-a11y.json": true,
+          "performance-trust.json": true
+        },
+        "manifestRef": true,
+        "dirRef": true,
+        "referenceCount": 5
+      },
+      "source": "design-brief README.md + prompts/system.md",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    },
+    "iaConsumption": {
+      "value": {
+        "keywords": {
+          "iaMap": true,
+          "route": true,
+          "highFreqPath": true,
+          "redirect": true
+        },
+        "iaMapRef": true
+      },
+      "source": "design-brief README.md + prompts/system.md + ia-map.json",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    },
+    "a11yConstraints": {
+      "value": {
+        "keywords": {
+          "keyboard": true,
+          "focus": true,
+          "aria": true,
+          "contrast": true,
+          "touchTarget": true,
+          "breakpoint": true
+        },
+        "a11yContractRef": true
+      },
+      "source": "design-brief README.md + prompts/system.md + responsive-a11y.json",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    },
+    "skillVersionContract": {
+      "value": {
+        "skillJsonVersion": "1.1.0",
+        "manifestVersion": "1.1.0",
+        "versionAligned": true,
+        "capabilities": {
+          "design-context-consumption": true,
+          "ia-map-consumption": true,
+          "a11y-constraints": true
+        },
+        "integrityCurrent": true
+      },
+      "source": "design-brief skill.json + skills/manifest.json + post-s7-skill-integrity",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    },
+    "bridgeAlignment": {
+      "value": {
+        "agentSkillGoverningSources": true,
+        "agentSkillIaRef": true,
+        "agentSkillA11yRef": true,
+        "codebuddyBridgeReal": true,
+        "bridgeTargetCorrect": true
+      },
+      "source": ".agents/skills/petri-ui-design/SKILL.md + .codebuddy 发现桥 symlink",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    },
+    "humanEyeSlots": {
+      "value": {
+        "humanEyeSigned": false,
+        "status": "in_progress",
+        "slots": [
+          "C-53 P7 人眼收口（pending_human_eye，待用户实机过目）",
+          "UI-706/707/709/710 + E 类观感签字（pending_human_eye，待用户实机过目）"
+        ],
+        "readOnly": true,
+        "note": "Agent 不代签观感；本包只升级产品 Skill 契约并机械复算，观感签字槽留用户。"
+      },
+      "source": "UI 台账 pending_human_eye（观感零代签）",
+      "command": "node scripts/c53-skill-contract.mjs",
+      "capturedAt": "2026-11-18T08:50:01.686Z"
+    }
+  }
+}
