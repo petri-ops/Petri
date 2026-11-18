@@ -1,0 +1,21 @@
+BLOCK-486 / C-55 VIDEO-P2 — HK-01 红绿先行记录
+================================================
+
+[RED] 2026-11-18 — 缺席红（helper 未实现）
+命令: node --test test/block486-video-storyboard.test.mjs
+结果: Error: Cannot find module '../core/petri-server/helpers/video-storyboard.js'
+      code: 'MODULE_NOT_FOUND'
+      pass 0 / fail 1
+判据: 契约测试先于实现落盘；模块缺席即红，验证测试确有依赖对象、非空跑。
+
+[GREEN] 2026-11-18 — 实现后转绿
+命令: node --test test/block486-video-storyboard.test.mjs
+结果: tests 22 / pass 22 / fail 0 / skip 0 / duration_ms 99.6
+实现: core/petri-server/helpers/video-storyboard.js（纯函数、零新依赖、只读消费 VideoProjectSpec）。
+八组契约: A 登记/A2-A3 篡改 / B 统一来源+B1 未知 kind / C 替换不破坏结构+C1-C2 篡改 /
+          D 授权来源+D1-D2 篡改 / E 分镜可看可改 / F 音频替换+F1 篡改 /
+          G 完整性 fail-closed+G1-G3 篡改 / H 出口④零新依赖+待裁决留白。
+篡改负测 11 类（缺 provenance / 非法授权值 / 未知来源 kind / 替换夹带结构覆盖 /
+                 目标镜头不存在 / 缺 provenance 审计 / license_unknown / 夹带 narration 覆盖 /
+                 顶层观感翻 verified / 镜头级观感翻 verified / 授权抬级但 provenance 缺）一律 fail-closed。
+观感: buildStoryboardReview humanReview.status=pending_human_eye 全程零代签；G1/G2 专钉此红线。

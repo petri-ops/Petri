@@ -3,6 +3,24 @@
   "description": "Fail-closed mapping from changed workspace paths to the smallest sufficient test and governance scope.",
   "rules": [
     {
+      "id": "block486-c55-video-p2",
+      "note": "BLOCK-486 / C-55 VIDEO-P2 素材供给与分镜审阅：video-storyboard.js 纯函数（素材登记/统一来源五类 kind/镜头替换不破坏时长字幕证据/分镜可看可改/音频替换契约/完整性 fail-closed），零新依赖、只读消费 P0 工程。HK-01 22/22（缺席红+11 类篡改负测）+ 真实腿 P0 video-project.json sc2 替换+3 镜头审阅 machine_pass + P0 sources 数据形态差异如实登记（acceptance/block486-c55-video-p2/**）。图像生成新服务/真实外部搜索=pending_user_ruling 留白。改 helper/测试/证据即跑本包 HK-01 契约 + P1 邻域回归。",
+      "patterns": [
+        "core/petri-server/helpers/video-storyboard.js",
+        "test/block486-video-storyboard.test.mjs",
+        "docs/block486-c55-video-p2-storyboard-plan.md",
+        "acceptance/block486-c55-video-p2/**"
+      ],
+      "tests": [
+        "test/block486-video-storyboard.test.mjs",
+        "test/block483-video-evidence.test.mjs"
+      ],
+      "commands": [
+        "docs-check"
+      ],
+      "classifiesScripts": true
+    },
+    {
       "id": "block483-c55-video-p1",
       "note": "BLOCK-483 / C-55 VIDEO-P1 科学证据与质量闭环：video-evidence.js 纯函数（来源五档分级/Claim–Evidence 表/数字单位换算/冲突并列/低置信标记/科学语义对照/AV 六项质检/完整性 fail-closed），零新依赖、只读消费 P0 产物。HK-01 22/22 + 真实 ffprobe/ffmpeg AV 证据（acceptance/block483-c55-video-p1/**）。改 helper/测试/证据即跑本包 HK-01 契约。",
       "patterns": [

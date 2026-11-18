@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-18T13:22:00.601Z",
+  "sourceSpecSha256": "0b51ded7bdb70a3e7b1346100f3dbd8056f96ed2085df98708a7c3ad7ab2622d",
+  "dataShapeNotes": {
+    "p0SourcesFieldCount": 2,
+    "p0SourcesFields": [
+      "id",
+      "kind",
+      "urlOrPath",
+      "title",
+      "accessedAt",
+      "license"
+    ],
+    "note": "P0 video-project.json 用 sources 字段记录外部资料（license/urlOrPath/accessedAt 在场，attribution/licenseStatus 字段缺席）；P2 provenance 审计面向 assets 字段。本腿只审计 P2 结构层注入的本地生成占位素材，未把 sources 的 title 伪装成作者署名、未强行映射——属 P0 数据形态差异，如实登记不伪造。",
+    "injectedAssetIsStructuralPlaceholder": true
+  },
+  "provenance": {
+    "ok": true,
+    "stats": {
+      "total": 1,
+      "authorized": 1,
+      "unknown": 0,
+      "unauthorized": 0,
+      "missingProvenance": 0
+    },
+    "flags": [],
+    "rows": [
+      {
+        "id": "p2-generated-svg-sc2",
+        "kind": "svg",
+        "licenseStatus": "authorized",
+        "provenance": {
+          "license": "user-generated",
+          "attribution": "Petri 本地生成",
+          "urlOrPath": "gen://storyboard/sc2",
+          "accessedAt": "2026-11-18"
+        },
+        "needsUserRuling": false,
+        "flags": []
+      }
+    ]
+  },
+  "audioReplacement": {
+    "ok": true,
+    "flags": [],
+    "preserved": {
+      "narrationRefs": true,
+      "captions": true
+    }
+  },
+  "integrity": {
+    "ok": true,
+    "issues": [],
+    "constraints": {
+      "pendingHumanEye": true,
+      "zeroNewDependency": true
+    }
+  },
+  "exitChecks": {
+    "E1_scene_replace_preserves_structure": true,
+    "E2_every_external_asset_licensed_and_sourced": true,
+    "E3_storyboard_visible_and_editable": true,
+    "E4_zero_new_dependency": true
+  },
+  "status": "machine_pass",
+  "humanReview": {
+    "status": "pending_human_eye"
+  }
+}

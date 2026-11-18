@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-18T13:22:00.601Z",
+  "sourceSpec": "acceptance/block482-c55-video-p0/video-project.json",
+  "sourceSpecSha256": "0b51ded7bdb70a3e7b1346100f3dbd8056f96ed2085df98708a7c3ad7ab2622d",
+  "constraints": {
+    "zeroNewDependency": true,
+    "imageGenerationAdapter": "pending_user_ruling",
+    "externalAssetSearch": "pending_user_ruling",
+    "externalAssetFetch": "delegated_existing_web_fetch"
+  },
+  "exitCriteria": [
+    "scene_asset_replace_preserves_duration_captions_evidence",
+    "every_external_asset_has_license_status_and_provenance",
+    "storyboard_review_visible_and_editable_before_render",
+    "zero_new_dependency_new_service_requires_user_ruling"
+  ],
+  "sceneReplace": {
+    "target": "sc2",
+    "before": {
+      "captions": [
+        {
+          "text": "蓝光波长短，更容易被散射",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ],
+      "evidenceRefs": [
+        "c1"
+      ],
+      "narration": "阳光看起来是白色的，其实由很多颜色组成。蓝光波长短，更容易被空气分子向四面八方散射。",
+      "visual": {
+        "kind": "card",
+        "title": "瑞利散射",
+        "text": "蓝光波长短 → 更易被散射"
+      }
+    },
+    "after": {
+      "captions": [
+        {
+          "text": "蓝光波长短，更容易被散射",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ],
+      "evidenceRefs": [
+        "c1"
+      ],
+      "narration": "阳光看起来是白色的，其实由很多颜色组成。蓝光波长短，更容易被空气分子向四面八方散射。",
+      "visual": {
+        "kind": "svg",
+        "assetRefs": [
+          "p2-generated-svg-sc2"
+        ],
+        "specRef": "gen://storyboard/sc2",
+        "note": "P2 单点替换：图表/SVG 统一为镜头来源（结构层，未触发重编码）"
+      }
+    },
+    "unchanged": {
+      "durationSec": true,
+      "captions": true,
+      "evidenceRefs": true,
+      "narration": true
+    },
+    "preservesAll": true,
+    "flags": []
+  },
+  "visualSources": {
+    "rows": [
+      {
+        "sceneId": "sc1",
+        "rawKind": "card",
+        "normalizedKind": "card",
+        "assetRefs": [],
+        "hasProvenance": true
+      },
+      {
+        "sceneId": "sc2",
+        "rawKind": "svg",
+        "normalizedKind": "svg",
+        "assetRefs": [
+          "p2-generated-svg-sc2"
+        ],
+        "specRef": "gen://storyboard/sc2",
+        "hasProvenance": true
+      },
+      {
+        "sceneId": "sc3",
+        "rawKind": "card",
+        "normalizedKind": "card",
+        "assetRefs": [],
+        "hasProvenance": true
+      }
+    ],
+    "flags": [],
+    "count": 3
+  },
+  "scenes": [
+    {
+      "id": "sc1",
+      "index": 0,
+      "narration": "你有没有想过，晴朗的天空为什么是蓝色的？答案藏在阳光和空气里。",
+      "captions": [
+        {
+          "text": "晴朗的天空为什么是蓝色的？",
+          "startMs": 0,
+          "endMs": 4000
+        }
+      ],
+      "visual": {
+        "kind": "card",
+        "title": "为什么天空是蓝色的？",
+        "text": "阳光 + 大气 = 颜色之谜"
+      },
+      "visualAssetRefs": [],
+      "evidenceRefs": [],
+      "editable": true,
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    },
+    {
+      "id": "sc2",
+      "index": 1,
+      "narration": "阳光看起来是白色的，其实由很多颜色组成。蓝光波长短，更容易被空气分子向四面八方散射。",
+      "captions": [
+        {
+          "text": "蓝光波长短，更容易被散射",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ],
+      "visual": {
+        "kind": "svg",
+        "assetRefs": [
+          "p2-generated-svg-sc2"
+        ],
+        "specRef": "gen://storyboard/sc2",
+        "note": "P2 单点替换：图表/SVG 统一为镜头来源（结构层，未触发重编码）"
+      },
+      "visualAssetRefs": [
+        "p2-generated-svg-sc2"
+      ],
+      "evidenceRefs": [
+        "c1"
+      ],
+      "editable": true,
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    },
+    {
+      "id": "sc3",
+      "index": 2,
+      "narration": "这些被散射的蓝光从各个方向进入我们的眼睛，于是我们抬头看到的，就是一片蓝天。",
+      "captions": [
+        {
+          "text": "散射的蓝光进入眼睛 → 蓝天",
+          "startMs": 0,
+          "endMs": 5000
+        }
+      ],
+      "visual": {
+        "kind": "card",
+        "title": "我们看见蓝天",
+        "text": "散射蓝光进入眼睛"
+      },
+      "visualAssetRefs": [],
+      "evidenceRefs": [
+        "c2"
+      ],
+      "editable": true,
+      "humanReview": {
+        "status": "pending_human_eye"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "p2-generated-svg-sc2",
+      "kind": "svg",
+      "licenseStatus": "authorized",
+      "provenance": {
+        "license": "user-generated",
+        "attribution": "Petri 本地生成",
+        "urlOrPath": "gen://storyboard/sc2",
+        "accessedAt": "2026-11-18"
+      },
+      "needsUserRuling": false
+    }
+  ],
+  "humanReview": {
+    "status": "pending_human_eye"
+  }
+}
