@@ -55,3 +55,9 @@ G1–G4 全绿 + 六件套 + 证据落盘。零产品代码/观感/基线放宽�
 T1 红→绿 6/6 + 报告级实跑（继承 7 条 R 项、仅 advice、零落盘）；T2 红→绿 7/7 + 头部链 35→1 条（34 条归档）、活跃 27KB→9.9KB、快照刷新 11-18；干跑抓真链区多行 bug 已修。docs:check(624)/hygiene 绿。证据=acceptance/block470/。零产品代码/观感/发令。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口门禁归属（2026-11-18）
+
+closeout 全绿（perf SKIPPED）：quality:perf packaged_start 采样边界抖动（G0 噪声，noiseSources 在册）——本批零 perf 面改动（治理脚本+文档），归属既有基线，不属本包，不重打基线掩盖。新挂 --report next:prompt:report 实测 OK（报告级不落盘、不改退出码）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。

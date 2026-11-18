@@ -2,7 +2,7 @@
 
 > **自动生成，勿手改**。生成器 `scripts/block357-capability-map.mjs`；
 > 数据源 `acceptance/functional-audit-2026-11-04/surface-matrix.json`（`scripts/functional-surface-audit.mjs` 产出）。
-> 矩阵生成时间：2026-11-18T06:00:27.416Z；覆盖 117 个工具、172 个 IPC 通道、289 个路由端点。
+> 矩阵生成时间：2026-11-18T07:17:07.343Z；覆盖 117 个工具、172 个 IPC 通道、289 个路由端点。
 
 ## 边界（先读这一段）
 
