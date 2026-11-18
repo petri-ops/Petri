@@ -49,3 +49,9 @@ G1–G3 全绿 + 六件套 + 证据落 `acceptance/block469-img2threejs-shim/`�
 G1 红→绿 7/7（HK-01，含零整包安装证明 + 外部服务默认关 + 零依赖面）；G2 零安装 find/grep 取证 + 纯 JS 无 product 依赖；G3 knip 346 键冻结无新增 + lint ledger 2441 + docs/ui-audit/closeout 见 AUDIT-LOG。证据=acceptance/block469-img2threejs-shim/。零观感面。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口门禁归属（2026-11-18）
+
+closeout 全绿（perf SKIPPED）：quality:perf packaged_start 采样 487–495ms vs 阈值 485ms（median 373ms x1.3）——本批零 perf 面改动（sidecar+测试+文档），该红为打包后端启动存量边界抖动（300ms 轮询粒度），归属既有 perf 基线，不属本包，不重打基线掩盖。与 BLOCK-467/468 同一继承红。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
