@@ -149,20 +149,16 @@ description: Use Petri development infrastructure when starting or resuming a se
 
 ### 下一步提示（Next-Step Brief · 每次任务完成强制）
 
-用户裁决 2026-10-25：**每次任务完成后都必须给出固定下一步提示**，不能只在阶段收口时给。调用 `next:suggest` 后，按 [`$petri-project-governance/references/NEXT-STEP-BRIEF.md`](../petri-project-governance/references/NEXT-STEP-BRIEF.md) 输出：
+用户裁决 2026-10-25（2026-11-18 精简）：**每次任务完成后都必须给出固定下一步提示**，不能只在阶段收口时给。调用 `next:suggest` 后，按 [`$petri-project-governance/references/NEXT-STEP-BRIEF.md`](../petri-project-governance/references/NEXT-STEP-BRIEF.md) 输出短精准 3 行 + 1 启动行：
 
 ```text
-Jev 单一建议：<候选>（confidence=<数值>）——<一句话具体范围>，<体量/类型>。未启动任何新工作包，等你发令。
-母纲波次顺序：<A → B → C …>（P4-REM 最后；Q4b 单列）。
-蓝图 / 全局计划进展：
-- 母纲 Q-MATRIX：<✅x / 🟡y / 🔴z / ⛔w = N>；§6.5 剩余：<队列>
-- 竞争力纲 / 成熟度蓝图：<当前波次/状态；不适用则写明>
-- Result Studio：<状态 / RS-P 阶段>
-- UI 台账：<verified / in_progress 计数>
-- 当前 active 工作包：<无 / BLOCK-xxx 阶段>
+下一步：<候选>（Jev <confidence>）——<一句话范围/体量>；未开工，等你发令。
+位置：Q-MATRIX <✅x/🟡y/🔴z/⛔w=N> · 波次 <A→B→C>（P4-REM 最后、Q4b 单列）· active <无/BLOCK-xxx> · UI 观感 <in_progress 计数零代签>。
+无人值守启动：发「开始 <候选>」，按 <docs/next-phase-e2e-prompt-<date>.md> §2 正文推进；<观感/发令边界一句>。
+（必要时第 4 行）补充：<竞争力纲/成熟度蓝图/Result Studio 本轮有变项>。
 ```
 
-红线：只给一个建议，禁止「或」式多选；confidence 与计数从脚本/ canonical 现读；Jev 不可用或零建议时按候选队列首个兜底并标注；纯问答至少给一行「队列未变」；不列 G1+（Provider/公证/GA/packaged）。
+红线：只给一个建议，禁止「或」式多选；confidence 与计数从脚本/ canonical 现读；Jev 不可用或零建议时按候选队列首个兜底并标注；纯问答至少给一行「队列未变」；不列 G1+（Provider/公证/GA/packaged）。无人值守启动行是可复制口令，但仍是 advice、未获发令不得开工。
 阶段收口后自动落档下一阶段提示词的作业规范见 `$petri-project-governance/references/NEXT-PHASE-PROMPT-HANDOFF.md`（自动落档草案、不自动发令、预置裁决只继承）。
 
 **透明标签附 Jev 计数（2026-09-25 用户裁决，与 AGENTS.md「Skill 使用透明度」同源）**：交付/答复收尾的〔skills: …〕标签须附 `· jev×N`——N=本工作阶段 Jev 调用次数，取 `npm run decision:session` **分段口径**（marker 记 startedAt+lastReadAt；每次收尾重跑得「本轮增量+累计」双数字；复用上一轮数字即违规——两次用户抓真在案；零次如实标 jev×0）。
