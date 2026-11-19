@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 653,
+    "documentCount": 654,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 636
+    "managedMarkdown": 637
   },
   "documents": [
     {
@@ -13575,6 +13575,28 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 交付（用户裁决「方向 A（推荐）」；处置 BLOCK-477 open 票）。C-47 修复：轮询路径收窄为 reconcileActiveFile 签名对账（readActiveSignature 读数核拆分），不重建树/不重置 rootMore 续拉游标；整树重拉限定结构变更事件（初始加载/换项目/agent 写档/手动刷新）。HK-01 红（两 tick 根拉取增长=症状复现）→绿 2/2（fake timers：零根拉取+签名对账 ≥2+广播事件重建保留）；tsc 零红；既有 UI-399 测试零回归。方向 B 不实施（用户选 A）。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红→绿 2/2+tsc 零红+UI-399 零回归；closeout exit=0；C-47 票关闭。"
+    },
+    {
+      "id": "BLOCK-503",
+      "path": "docs/block503-human-eye-review-checklist-2026-11-19.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block503-human-eye-review-checklist",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "MATERIAL",
+      "touchSurface": [
+        "docs/block503-human-eye-review-checklist-2026-11-19.md"
+      ],
+      "tags": [
+        "W4",
+        "human-eye",
+        "checklist",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户发令「立一个包 把需要肉眼核对的内容 梳理出来，我一个个判断」）。肉眼核对总清单：甲组=读材料即可裁决 3 项（甲1 C-56 手册稿 4 评审要点/甲2 capability-intake 两源 license_unknown 裁决/甲3 E-03 SUS 评分方式）+ 乙组=实机观感签字 9 组（乙1-4 UI-710/709/707/706 各给入口与判据/乙5 P4 八态矩阵/乙6 P5+P6 四槽/乙7 H-01~H-08 路线表/乙8 E-01 树测试+E-02 22 条 debt/乙9 C-55 成片终审 video.mp4）。全部条目现读真源（human-eye-closeout.json 契约+UI 台账+人眼路线），逐项给判什么/怎么看/裁决口令格式；签字槽零代签、观感状态零写面（本包=汇总投影，状态真源仍是台账/契约）；回写方式=用户给口令→Agent 按台账纪律回写。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
