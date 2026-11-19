@@ -9261,6 +9261,19 @@
         "test/block499-p405-full-chain.test.mjs",
         "test/block322-p4-cad-exchange.test.mjs"
       ]
+    },
+    {
+      "id": "block501-capability-intake",
+      "note": "BLOCK-501 capability-intake 最小垂直切片（D1–D8 ruled 骨架落地）：skill/桥/provenance 台账；证据变更选消费测试重跑+hygiene（真 symlink）。",
+      "patterns": [
+        ".agents/skills/capability-intake/**",
+        "test/block501-capability-intake.test.mjs",
+        "acceptance/capability-intake/**",
+        "acceptance/block501-capability-intake/**"
+      ],
+      "tests": [
+        "test/block501-capability-intake.test.mjs"
+      ]
     }
   ]
 }

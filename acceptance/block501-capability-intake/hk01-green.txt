@@ -1,0 +1,12 @@
+✔ D1：SKILL.md 在场且三步闭环+红线锚齐备（缺席红） (0.745583ms)
+✔ D7：两发现桥为真 symlink 且解析到 canonical（退化=宿主静默 not found） (0.291125ms)
+✔ D4：provenance 台账 append-only 契约——逐行 JSON、必填字段齐、sha256 可复算锚 (0.127417ms)
+✔ D5：seed 行 license_unknown=true 在册（C-56 humanizer 来源停等用户裁决，不代答） (0.086458ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 76.670166
