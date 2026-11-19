@@ -277,9 +277,9 @@
       "path": "core/petri-server/helpers/scene3d.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1287,
-      "bytes": 64837,
-      "sha256": "969225bd75dfa4f1a048c762a578a4b3d035575687d7a4ca9b8167f4a1212ecd"
+      "lines": 1288,
+      "bytes": 64912,
+      "sha256": "90b137048ddf9e82b6f944f89abce890bffaacb6cffcf033b9d13858b05653e6"
     },
     {
       "path": "core/petri-server/agent-tools/learning.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86424
+  "total": 86425
 }
