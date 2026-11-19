@@ -1,7 +1,7 @@
 ---
 capability: block502-c47-filetree-poll-fix
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: C-47 文件树翻页/回弹修复票·方向 A（用户 2026-11-19 裁决「方向 A（推荐）」）——轮询路径只做活动文件签名对账（不重建树、不重置 rootMore 续拉游标），整树重拉限定在结构变更事件（初始加载/换项目/agent 写档广播/手动刷新）；消除「本地 2s 轮询以 offset=0 覆盖续拉页」缺陷（BLOCK-477 三重证据复现归因：reproduced_and_attributed）。
 acceptance:
   - HK-01：红=本地项目 2s tick 根拉取数增长（症状复现）→ 实现方向 A → 绿=两 tick 零根拉取+签名对账仍在跑+结构事件保留全量重建语义（既有 UI-399 测试零回归）
@@ -33,4 +33,14 @@ supersedes: 无（处置 BLOCK-477 C-47 open 票，方向 A=报告内标注「�
 
 - HK-01 红（hk01-red.txt：两 tick 根拉取增长）→ 绿（hk01-green.txt：2/2，根拉取零增长+事件重建保留）；
 - tsc 零红；closeout 定向绿；证据=acceptance/block502-c47-fix/；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- HK-01：红（hk01-red.txt：本地项目两 tick 根拉取增长=C-47 症状复现）→ 方向 A 实现 → 绿 2/2（hk01-green.txt：零根拉取+签名对账 ≥2+广播事件重建保留）。
+- 执行修正（如实登记）：①vitest toBe 消息参数移 expect 首参（tsc 2554）；②根拉取过滤词勘误（所有 /tree 调用均带 prefix=，根=空值 /prefix=(&|$)/）；③impact-map rule tests 引用勘误（真实文件名 workspace-file-ops.test.mjs，规则引用缺席测试=exit 2）；④RightFileTree 尺寸指纹重打（1061→1079 拆分净增留因）。
+- 提交：f8f41fe7（主批）+ bf5b0828（勘误）+ 8be587a8（指纹）+ 本批（翻面批）。
+- C-47 open 票就此关闭；方向 B 不实施（用户选 A）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
