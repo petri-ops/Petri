@@ -1,0 +1,35 @@
+✅ [2026-11-19T09:20:05.405Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: dashscope-vision (vision)
+✔ BLOCK-507 ②①：连续两次零可见输出 stall → 第 3 次尝试恢复（calls=3，两次 provider_retry，退避可注入） (124.732667ms)
+✔ BLOCK-507 ②②：三次全 stall → 如实返回最后一次错误（不无限重试不假成功） (3.707417ms)
+✔ BLOCK-507 ②③：已交付可见输出的 stall 不重试（防重复交付，既有语义保留） (0.380416ms)
+✅ [2026-11-19T09:20:05.405Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-19T09:20:05.407Z] [llm-providers] registered: dashscope-vision (vision)
+✔ W1 llm-client 首 token stall 重试前发 provider_retry 事件（不静默） (2121.74675ms)
+✔ STALL-ROOT idle 段但无可见输出（只吐 reasoning 后卡死）→ 安全重试一次 (2001.791167ms)
+✔ STALL-ROOT idle 段且已有可见输出 → 不重试（防重复交付内容） (0.236875ms)
+✔ W1 orchestrator 把 provider_retry 投影为 agent_status(phase=provider_retry, reasonCode) (0.39475ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4213.402833

@@ -1,0 +1,33 @@
+✔ BLOCK-338 续命集合封闭：只有四类 delta 续命（心跳/空 chunk/ping 一律不续命） (1.707334ms)
+✔ BLOCK-338 首 token 到达后转 idle 计时；真实 delta 续命 (0.138583ms)
+✔ BLOCK-338 reasoning_delta 必须续命：慢推理模型不得在首 token 阈值被误杀 (0.076875ms)
+✔ BLOCK-338 触发幂等 + stop() 后不再回调 (0.079334ms)
+✔ BLOCK-338 阈值解析：保守默认 + env 覆盖 + 下限与非法值回落 (0.107875ms)
+✔ BLOCK-338 接入：心跳上游在阈值内判死为 stream_stalled(first_token) (2205.420958ms)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-19T08:53:38.428Z] [llm-providers] registered: dashscope-vision (vision)
+✔ BLOCK-338 接入：中途静默判死为 stream_stalled(idle)，已出 token 不删 (2200.383292ms)
+✔ BLOCK-338 P2：首 token stall 自动重试一次（idle 不重试，二次仍 stall 不无限重试） (61.826375ms)
+✔ BLOCK-338 P2：首 token stall 不发 error 事件（留给重试），idle stall 照发 (0.445792ms)
+✔ BLOCK-338 接入：正常流零误杀（阈值内持续出 token 时不得判死） (751.9935ms)
+✔ BLOCK-507 ① token 估算：CJK≈1/字符、其它≈1/4、tools 计入、空体=0 (0.8525ms)
+✔ BLOCK-507 ② 小请求不缩放：base 预算原样（90s 默认） (0.104083ms)
+✔ BLOCK-507 ③ 大请求缩放：1M 量级预填不再被固定 90s 误杀（封顶 600s） (1.545833ms)
+✔ BLOCK-507 ④ env base 语义不变：PETRI_STREAM_STALL_FIRST_MS 是 base 预算而非硬上限 (0.568834ms)
+✔ BLOCK-507 ⑤ 既有 resolveStallThresholds 零回归（无体量入参时行为不变） (0.059375ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5322.524333

@@ -31,6 +31,11 @@ const RENEWAL_EVENT_TYPES = Object.freeze([
 const DEFAULT_FIRST_TOKEN_MS = 90_000;
 const DEFAULT_IDLE_TOKEN_MS = 60_000;
 const MIN_THRESHOLD_MS = 1_000;
+// BLOCK-507（大上下文韧性 · 用户 2026-11-19 发令「彻底解决」，1M 量级在途）——
+// 上下文感知首包预算：固定 90s 首包预算对超大 prefill 必然误杀（同 BLOCK-338
+// 「45s 稳定误杀 45002ms」事故形态，量级更大）。常数保守下限，待真实 1M 数据再校准。
+const REQUEST_SCALE_TOKENS_PER_SECOND = 3_000; // 每预估 3000 token 加 1s 首包预算
+const REQUEST_FIRST_TOKEN_CAP_MS = 600_000;    // 首包预算封顶 10 分钟
 
 function readThreshold(raw, fallback) {
   const value = Number(raw);
@@ -43,6 +48,48 @@ function resolveStallThresholds(env = process.env) {
   return {
     firstTokenMs: readThreshold(env && env.PETRI_STREAM_STALL_FIRST_MS, DEFAULT_FIRST_TOKEN_MS),
     idleTokenMs: readThreshold(env && env.PETRI_STREAM_STALL_IDLE_MS, DEFAULT_IDLE_TOKEN_MS),
+  };
+}
+
+/**
+ * BLOCK-507 — 请求体预估 token 数（粗粒度，仅用于看门狗阈值缩放，非计费口径）。
+ * CJK≈1 token/字符、其它≈1/4 token/字符；messages 与 tools 全量计入
+ * （16k 工具定义实测显著拉长 prefill——BLOCK-338 注释在案）。
+ */
+function estimateRequestTokens(requestBody) {
+  if (!requestBody || typeof requestBody !== 'object') return 0;
+  let chars = 0;
+  let cjkChars = 0;
+  const walk = (value) => {
+    if (typeof value === 'string') {
+      chars += value.length;
+      const cjk = value.match(/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/g);
+      if (cjk) cjkChars += cjk.length;
+      return;
+    }
+    if (Array.isArray(value)) { value.forEach(walk); return; }
+    if (value && typeof value === 'object') { Object.values(value).forEach(walk); }
+  };
+  walk({ messages: requestBody.messages, tools: requestBody.tools });
+  if (chars === 0) return 0;
+  return Math.ceil(cjkChars + (chars - cjkChars) / 4);
+}
+
+/**
+ * BLOCK-507 — 上下文感知阈值：首包预算 = base + floor(预估 token/3000)×1s（每满 3000 token 加 1s，小请求不缩放），封顶 600s；
+ * idle 段不随体量缩放（token 流一旦开始，中途 60s 静默仍是死亡信号）。
+ * env 的 PETRI_STREAM_STALL_FIRST_MS 语义为 base 预算（非硬上限），封顶恒生效。
+ */
+function resolveRequestStallThresholds(requestBody, env = process.env) {
+  const base = resolveStallThresholds(env);
+  const estimatedTokens = estimateRequestTokens(requestBody);
+  const scaled = base.firstTokenMs + Math.floor(estimatedTokens / REQUEST_SCALE_TOKENS_PER_SECOND) * 1000;
+  const firstTokenMs = Math.min(scaled, REQUEST_FIRST_TOKEN_CAP_MS);
+  return {
+    firstTokenMs,
+    idleTokenMs: base.idleTokenMs,
+    estimatedTokens,
+    firstTokenScaled: scaled > base.firstTokenMs,
   };
 }
 
@@ -125,5 +172,7 @@ module.exports = {
   MIN_THRESHOLD_MS,
   isRenewalEvent,
   resolveStallThresholds,
+  estimateRequestTokens,
+  resolveRequestStallThresholds,
   createStreamStallWatchdog,
 };

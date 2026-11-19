@@ -246,9 +246,11 @@ test('BLOCK-338 P2：首 token stall 自动重试一次（idle 不重试，二�
       calls.push(1);
       return { error: 'stream_stalled', phase: 'first_token', elapsedMs: 1200 };
     };
-    const twice = await callChatProvider('deepseek', 'sk', { messages: [] }, {}, () => {});
+    // BLOCK-507 ② 把零可见输出 stall 从「重试 1 次（总 2）」强化为「重试 2 次（总 3）+退避」；
+    // 旧断言 calls===2 随语义同步为 3，退避注入 [1,1] 避免测试真等 7s。仍封顶不无限重试。
+    const twice = await callChatProvider('deepseek', 'sk', { messages: [] }, {}, () => {}, { stallRetryDelaysMs: [1, 1] });
     assert.equal(twice.error, 'stream_stalled');
-    assert.equal(calls.length, 2, '第二次仍 stall 直接返回，不无限重试');
+    assert.equal(calls.length, 3, 'BLOCK-507：总尝试 3 次（初始+2 重试），三次仍 stall 封顶不无限重试');
   } finally {
     modelGateway.chat = originalChat;
     modelGateway.getConfig = originalConfig;

@@ -1,0 +1,57 @@
+✅ [2026-11-19T09:19:38.513Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-19T09:19:38.514Z] [llm-providers] registered: dashscope-vision (vision)
+✖ BLOCK-507 ②①：连续两次零可见输出 stall → 第 3 次尝试恢复（calls=3，两次 provider_retry，退避可注入） (92.48725ms)
+✖ BLOCK-507 ②②：三次全 stall → 如实返回最后一次错误（不无限重试不假成功） (0.239208ms)
+✔ BLOCK-507 ②③：已交付可见输出的 stall 不重试（防重复交付，既有语义保留） (0.132625ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 191.5975
+
+✖ failing tests:
+
+test at test/block507-stall-recovery.test.mjs:22:1
+✖ BLOCK-507 ②①：连续两次零可见输出 stall → 第 3 次尝试恢复（calls=3，两次 provider_retry，退避可注入） (92.48725ms)
+  AssertionError [ERR_ASSERTION]: 总尝试 3 次（初始+2 重试），实际 2
+  
+  2 !== 3
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-stall-recovery.test.mjs:36:12)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 3,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block507-stall-recovery.test.mjs:47:1
+✖ BLOCK-507 ②②：三次全 stall → 如实返回最后一次错误（不无限重试不假成功） (0.239208ms)
+  AssertionError [ERR_ASSERTION]: 总尝试封顶 3 次
+  
+  2 !== 3
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-stall-recovery.test.mjs:60:12)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 3,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

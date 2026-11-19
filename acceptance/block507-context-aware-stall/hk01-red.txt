@@ -1,0 +1,57 @@
+✖ BLOCK-507 ① token 估算：CJK≈1/字符、其它≈1/4、tools 计入、空体=0 (0.7315ms)
+✖ BLOCK-507 ② 小请求不缩放：base 预算原样（90s 默认） (0.062083ms)
+✖ BLOCK-507 ③ 大请求缩放：1M 量级预填不再被固定 90s 误杀（封顶 600s） (0.065458ms)
+✖ BLOCK-507 ④ env base 语义不变：PETRI_STREAM_STALL_FIRST_MS 是 base 预算而非硬上限 (0.080667ms)
+✔ BLOCK-507 ⑤ 既有 resolveStallThresholds 零回归（无体量入参时行为不变） (0.107ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 1
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82.455042
+
+✖ failing tests:
+
+test at test/block507-context-aware-stall.test.mjs:29:1
+✖ BLOCK-507 ① token 估算：CJK≈1/字符、其它≈1/4、tools 计入、空体=0 (0.7315ms)
+  TypeError: estimateRequestTokens is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-context-aware-stall.test.mjs:30:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at test/block507-context-aware-stall.test.mjs:45:1
+✖ BLOCK-507 ② 小请求不缩放：base 预算原样（90s 默认） (0.062083ms)
+  TypeError: resolveRequestStallThresholds is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-context-aware-stall.test.mjs:47:13)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at test/block507-context-aware-stall.test.mjs:53:1
+✖ BLOCK-507 ③ 大请求缩放：1M 量级预填不再被固定 90s 误杀（封顶 600s） (0.065458ms)
+  TypeError: resolveRequestStallThresholds is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-context-aware-stall.test.mjs:56:13)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block507-context-aware-stall.test.mjs:67:1
+✖ BLOCK-507 ④ env base 语义不变：PETRI_STREAM_STALL_FIRST_MS 是 base 预算而非硬上限 (0.080667ms)
+  TypeError: resolveRequestStallThresholds is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block507-context-aware-stall.test.mjs:70:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)

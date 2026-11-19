@@ -11,7 +11,7 @@ const { normalizeModelConfig, resolveModelProfile, resolveModelCapabilities } = 
 // BLOCK-81 P1 — 思考档位：中性档位→上游参数的单一映射点 + 去参重试判据
 const { thinkingParamsFor, isUnknownParameterError } = require('./thinking-level');
 // BLOCK-338 — 流式 stall 看门狗（心跳/空 chunk 不续命，只认有效 token）
-const { createStreamStallWatchdog, resolveStallThresholds } = require('./stream-stall-watchdog');
+const { createStreamStallWatchdog, resolveStallThresholds, resolveRequestStallThresholds } = require('./stream-stall-watchdog');
 
 /** 组合外部 signal 与看门狗 signal（Node 20+ 用 AbortSignal.any，否则手动转发）。 */
 function combineSignals(external, internal) {
@@ -293,8 +293,11 @@ class ModelGateway {
         // 这里按「多久没收到有效 token」判死并 abort 本次 attempt。
         const stallController = new AbortController();
         let stallInfo = null;
+        // BLOCK-507 — 上下文感知首包预算：base(env) + 每满 3000 预估 token 加 1s（封顶 600s）；
+        // 1M 量级 prefill 不再被固定 90s 误杀。idle 段保持 60s 不缩放。
+        const stallThresholds = resolveRequestStallThresholds(requestBody, process.env);
         const watchdog = createStreamStallWatchdog({
-          ...resolveStallThresholds(process.env),
+          ...stallThresholds,
           onStall: (info) => {
             stallInfo = info;
             try { stallController.abort(); } catch { /* already aborted */ }
@@ -335,6 +338,8 @@ class ModelGateway {
             {
               phase: stallInfo.phase,
               elapsedMs: stallInfo.elapsedMs,
+              estimatedTokens: stallThresholds.estimatedTokens,
+              firstTokenScaled: stallThresholds.firstTokenScaled,
               profileId: profile.id,
               // STALL-ROOT：是否已有可见交付输出（content/tool_call）。reasoning_delta
               // 会把看门狗 phase 推到 idle，但不算交付内容——上层据此判「重放是否重复」，

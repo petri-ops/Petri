@@ -78,28 +78,38 @@ function callChatProvider(providerName, apiKey, body, telemetry, onEvent, option
     // BLOCK-365（F-01）流中断穿透到上层整轮重试（此前在此丢参，生产链路零重试）
     errorsAsRejections: !!(options && options.errorsAsRejections),
   });
-  return invoke().then((result) => {
-    // BLOCK-338 P2 / STALL-ROOT — stall 可重试判据是「本轮零可见交付输出」而非 phase。
-    // reasoning_delta 会把看门狗 phase 推到 idle，但 reasoning 不是交付内容：模型只吐
-    // reasoning 后卡死（idle + emittedOutput=false）同样是零输出瞬态，重放安全，应重试。
-    // 真正吐了 content/tool_call（emittedOutput=true）才不重试，防重复交付。
-    // emittedOutput 未显式为 true（兼容旧 mock/调用方）时按零输出处理。第二次仍 stall 直接返回。
-    if (result && result.error === 'stream_stalled' && result.emittedOutput !== true) {
-      // BLOCK-365（W1）重试可观测：不把重试当错误，也不把重试藏起来。
-      if (typeof onEvent === 'function') {
-        try {
-          onEvent({
-            type: 'provider_retry',
-            reason: result.phase === 'first_token' ? 'stream_stalled_first_token' : 'stream_stalled_no_output',
-            elapsedMs: result.elapsedMs || null,
-            attempt: 2,
-          });
-        } catch { /* 观测回调失败不影响重试 */ }
-      }
-      return invoke();
+  // BLOCK-507 ②（用户 2026-11-19 发令「彻底解决」）——停滞恢复强化：零可见交付输出的
+  // stream_stalled 最多重试 2 次（总尝试 3 次），退避 2s/5s（options.stallRetryDelaysMs 可注入）。
+  // 依据：deepseek 前缀缓存使重试大 prefill 命中缓存（重试成本最小化），瞬时停摆大概率
+  // 在后继尝试恢复；重放安全判据不变（emittedOutput!==true 才重试，防重复交付）。
+  // 全部重试仍 stall → 如实返回最后一次错误（不无限重试、不假成功）。
+  const stallRetryDelaysMs = (options && Array.isArray(options.stallRetryDelaysMs))
+    ? options.stallRetryDelaysMs
+    : [2000, 5000];
+  const attemptLoop = (result, attemptIndex) => {
+    const retryable = result
+      && result.error === 'stream_stalled'
+      && result.emittedOutput !== true
+      && attemptIndex <= stallRetryDelaysMs.length;
+    if (!retryable) return result;
+    const delayMs = stallRetryDelaysMs[attemptIndex - 1];
+    // BLOCK-365（W1）重试可观测：不把重试当错误，也不把重试藏起来。
+    if (typeof onEvent === 'function') {
+      try {
+        onEvent({
+          type: 'provider_retry',
+          reason: result.phase === 'first_token' ? 'stream_stalled_first_token' : 'stream_stalled_no_output',
+          elapsedMs: result.elapsedMs || null,
+          attempt: attemptIndex + 1,
+          delayMs,
+        });
+      } catch { /* 观测回调失败不影响重试 */ }
     }
-    return result;
-  });
+    return new Promise((resolve) => setTimeout(resolve, delayMs))
+      .then(invoke)
+      .then((next) => attemptLoop(next, attemptIndex + 1));
+  };
+  return invoke().then((result) => attemptLoop(result, 1));
 }
 
 /**
