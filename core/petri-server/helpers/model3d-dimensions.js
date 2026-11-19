@@ -17,6 +17,8 @@
  * 叠加 <g data-gdt-annotations>（尺寸文字 + 公差带），不改内核、不改既有图形。
  */
 
+/* eslint-disable security/detect-object-injection -- 对象键全部来自内部派生特征行（derivePrimitiveFeatures 标记键）/白名单维度表，无外部输入面（BLOCK-499 误报豁免留痕，沿 BLOCK-482 video-compose 同族先例） */
+
 const model3dFeatures = require('./model3d-features');
 
 const DIMENSION_FEATURES_BY_TYPE = {
