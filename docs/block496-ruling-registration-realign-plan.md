@@ -1,7 +1,7 @@
 ---
 capability: block496-ruling-registration-realign
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: 登记漂移对齐（用户 2026-11-19 裁决「B 组按推荐的来」→ B7 对齐授权）——按 BLOCK-491 自带 reopen 条款「显式发令启动某个实现票时，本契约须同步重算并重开对应实现包」，把 block322-ruling-codification 契约的 implementationTickets 读数组从「收口时点快照（四票全 deferred）」重算为「当前真值（两票已实现/v2b 已授权/v2c 维持）」，登记与实况一致；治理批零产品代码。
 acceptance:
   - 对齐真源落档：本文件 §3 实现状态表（机器可读，扫描器读数组的新读数源）+ §2 用户授权原话（2026-11-19 AskUserQuestion 答复原文）
@@ -76,4 +76,14 @@ BLOCK-494 钉死的登记漂移（契约登记四票全 deferred vs 实况两票
 - `node scripts/block491-ruling-codification.mjs --check` PASS；
 - 骨架与邻域零回归（block322 邻域测试不受影响——本包零产品代码）；
 - docs:check / ui:audit:check / closeout 定向绿；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- HK-01：红 5（旧快照 vs 新锚，hk01-red-before-realign.txt）→ 重算 → 绿 11/11（hk01-green-after-realign.txt）+ --check PASS（契约 sha256 2ecee4a4…）。
+- 执行修正 2 处（如实登记）：①授权段锚正则放宽为前缀匹配（标题含副题「· 原话留痕」）；②新代码 2 处 detect-object-injection 白名单键误报豁免（行级 disable+reason，warnings 基线零改动 P1484/T418/S539）。
+- 提交：66083cf3（主批）+ 3db40c31（误报豁免随批）+ 本批（台账批）。
+- 契约后续维护：包3（v2b）收口时按 reopen 条款更新 v2b 状态为 implemented（含证据）；包4 收口时更新 p4_05_full_chain。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
