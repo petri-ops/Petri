@@ -1,0 +1,32 @@
+✖ 自愈补列后桌面迁移重放 021 不再拒启（缺口感复现→收窄版记账转绿） (11.948417ms)
+✔ 跳版守卫：v15 库自愈补列但记账保持 v15（防误记 16~20） (4.836375ms)
+✔ projects 表缺席（全新库）自愈静默交给迁移 (1.31175ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.067042
+
+✖ failing tests:
+
+test at test/block497-migration-idempotent-selfheal.test.mjs:74:1
+✖ 自愈补列后桌面迁移重放 021 不再拒启（缺口感复现→收窄版记账转绿） (11.948417ms)
+  AssertionError [ERR_ASSERTION]: 收窄版记账：恰差一版（v20）时补列必须补记 v21
+  
+  20 !== 21
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block497-migration-idempotent-selfheal.test.mjs:80:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 20,
+    expected: 21,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

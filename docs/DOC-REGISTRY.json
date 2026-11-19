@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 648,
+    "documentCount": 649,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 631
+    "managedMarkdown": 632
   },
   "documents": [
     {
@@ -13446,6 +13446,31 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户裁决 B 组按推荐=B7 对齐授权）。登记漂移对齐：按 BLOCK-491 自带 reopen 条款把 block322-ruling-codification 契约 implementationTickets 从收口时点快照（四票全 deferred）重算为当前真值（P4-05b/v2a implemented 含证据指针 / v2b authorized_pending_start 2026-11-19 / v2c deferred_maintained；P4-05 完整链附属读数 authorized_pending_start）；D1–D5 五裁决形态一字不动；消费测试 fail-closed 锚迁移=钉住当前真值+篡改即红（越权推进/抹证据/抹授权段均红）；对齐真源=本包 plan §3 机器可读状态表（扫描器读数组新源）。零产品代码/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红5→绿11/11+--check PASS；契约重算完成（reopen 条款）；串行槽位回空，包2 接续。"
+    },
+    {
+      "id": "BLOCK-497",
+      "path": "docs/block497-migration-idempotent-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block497-migration-idempotent",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block497-migration-idempotent-plan.md",
+        "core/petri-server/helpers/project-worktree.js",
+        "test/block497-migration-idempotent-selfheal.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block497-migration-idempotent/"
+      ],
+      "tags": [
+        "MIGRATION-IDEMPOTENT",
+        "A1",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户 A 组 #1 发令；Jev 0.18 唯一建议）。MIGRATION-IDEMPOTENT 修复票：ensureProjectWorktreeColumn 自愈补列收窄版记账——补列 ALTER 与条件记账（仅 MAX(version)===20 补记 v21）同事务；消除「无头栈补列→桌面壳重放 021 撞 duplicate column 拒启」缺口（2026-11-17 实机案底）；跳版守卫（v15 库不记账）+缺席不记+事务原子。HK-01 红绿（红=缺口复现）+邻域 block336 22/22 零回归。迁移内核与 021 SQL 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"

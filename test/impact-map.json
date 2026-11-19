@@ -9221,6 +9221,20 @@
       "tests": [
         "test/block491-ruling-codification.test.mjs"
       ]
+    },
+    {
+      "id": "block497-migration-idempotent",
+      "note": "BLOCK-497 MIGRATION-IDEMPOTENT：自愈补列收窄版记账（ensureProjectWorktreeColumn 补列+仅 MAX(version)===20 记账 v21 同事务）；证据变更选本包契约测试重跑（HK-01）+block336 worktree 邻域。",
+      "patterns": [
+        "test/block497-migration-idempotent-selfheal.test.mjs",
+        "core/petri-server/helpers/project-worktree.js",
+        "docs/block497-migration-idempotent-plan.md",
+        "acceptance/block497-migration-idempotent/**"
+      ],
+      "tests": [
+        "test/block497-migration-idempotent-selfheal.test.mjs",
+        "test/block336-worktree-project-layer.test.mjs"
+      ]
     }
   ]
 }

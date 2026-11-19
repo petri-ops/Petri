@@ -219,7 +219,25 @@ function detach({ dataDir, project, confirmDirty = false, userId = null, databas
 function ensureProjectWorktreeColumn(database) {
   try {
     const columns = database.prepare('PRAGMA table_info(projects)').all().map((column) => column.name);
-    if (!columns.includes('worktree_of')) database.exec('ALTER TABLE projects ADD COLUMN worktree_of TEXT');
+    if (columns.includes('worktree_of')) return;
+    // BLOCK-497 MIGRATION-IDEMPOTENT（用户 2026-11-19 发令 A1）——自愈补列 + 收窄版记账：
+    // 此前补列不记 schema_migrations，无头栈（node server.js）先开 v20 库补列后，桌面壳
+    // boot 重放 021_project_worktree_of.sql 撞 duplicate column 拒启（2026-11-17 实机案底）。
+    // 收窄守卫=仅当 MAX(version)===20（恰差 021 一版）才补记 v21；其余版本态不记（防 v15
+    // 库被跳版误记 16~20）；schema_migrations 缺席不记（全新库由迁移建表自会补齐）。
+    // 补列+记账同事务：记账失败回滚补列，不留「列在账外」半态。
+    database.transaction(() => {
+      database.exec('ALTER TABLE projects ADD COLUMN worktree_of TEXT');
+      let versionRow = null;
+      try {
+        versionRow = database.prepare('SELECT MAX(version) AS v FROM schema_migrations').get();
+      } catch {
+        versionRow = null;
+      }
+      if (Number(versionRow?.v) === 20) {
+        database.prepare('INSERT INTO schema_migrations(version) VALUES(?)').run(21);
+      }
+    })();
   } catch {
     // projects 表尚不存在（全新库由迁移建表）→ 交给迁移
   }
