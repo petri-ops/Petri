@@ -6,7 +6,7 @@
   "ruledAt": "2026-11-18",
   "sourcePackage": "docs/block-322-ruling-04-feature-reference-v2.md",
   "codificationPlan": "docs/block491-ruling-codification-plan.md",
-  "sourceCommit": "ef0baf7812f9ba49418038f39caf5f767159276b",
+  "sourceCommit": "801b37aba7dd5dd9be67070e48c5e2455adce207",
   "readings": {
     "rulings": {
       "rulings": {
@@ -93,8 +93,9 @@
       "ticketCount": 4,
       "v2cSeparated": true,
       "p4_05_full_chain": {
-        "status": "authorized_pending_start",
-        "authorizedAt": "2026-11-19",
+        "status": "implemented",
+        "implementedAt": "2026-11-19",
+        "evidence": "acceptance/block499-p405-full-chain/",
         "dependsOn": "P3-03-v2b"
       },
       "alignmentAuthorized": true
@@ -121,5 +122,5 @@
     "humanEyeSigned": false,
     "noG1Plus": true
   },
-  "generatedAt": "2026-11-19T05:52:52.938Z"
+  "generatedAt": "2026-11-19T06:44:16.152Z"
 }

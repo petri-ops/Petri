@@ -34,7 +34,7 @@ function drawingViews(input) {
   return normalized || null;
 }
 
-async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240, height = 240, showHidden = true, tolerances = null, scene = null } = {}) {
+async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240, height = 240, showHidden = true, tolerances = null, scene = null, chains = null } = {}) {
   if (!workspaceRoot) return { ok: false, error: 'project_required' };
   const inspected = await inspectCadAsset({ workspaceRoot, relativePath: sourcePath });
   if (!inspected.ok) return inspected;
@@ -61,6 +61,14 @@ async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240,
     gdtRows = resolveToleranceFeatures(scene, tolerances);
     annotatedSvg = buildGdtAnnotationLayer(converted.svg, gdtRows);
   }
+  // P4-05 完整尺寸链（BLOCK-499）——链代数（D5 数值一致性）→ SVG 链层 → manifest 诚实翻转
+  let chainRows = null;
+  if (Array.isArray(chains) && chains.length > 0) {
+    if (!scene || typeof scene !== 'object') return { ok: false, error: 'chain_scene_required' };
+    const { buildDimensionChain, buildChainAnnotationLayer } = require('./model3d-dimensions');
+    chainRows = buildDimensionChain(scene, chains);
+    annotatedSvg = buildChainAnnotationLayer(annotatedSvg, chainRows);
+  }
   const outDir = path.join(workspaceRoot, ...DRAWING_DIR.split('/'));
   fs.mkdirSync(outDir, { recursive: true });
   const id = `${safeStem(inspected.path)}-${Date.now().toString(36)}`;
@@ -85,10 +93,18 @@ async function createCadDrawing({ workspaceRoot, sourcePath, views, width = 240,
     svg: { path: svgRel, sha256: svgSha, bytes: svgBytes },
     capabilities: {
       hiddenLineRemoval: true,
-      dimensions: false,
+      // BLOCK-499 诚实翻转：dimensions=true 仅当链齐且全部 D5 数值一致；无链/不一致维持 false。
+      // gdt（形位符号）不在本票，恒 false。
+      dimensions: Array.isArray(chainRows) && chainRows.length > 0 && chainRows.every((row) => row.resolved && row.consistent),
+      dimensionChains: Array.isArray(chainRows) && chainRows.length > 0 && chainRows.every((row) => row.resolved),
       gdt: false,
-      note: 'HLR multiview line drawing only; dimension chains and GD&T require feature-level references (RULING-04).',
+      note: 'HLR multiview + feature-anchored dimension chains (numeric consistency per RULING-04 D5); GD&T symbols require form/position scope.',
     },
+    dimensionChainSummary: Array.isArray(chainRows) ? {
+      count: chainRows.length,
+      consistentCount: chainRows.filter((row) => row.resolved && row.consistent).length,
+      rows: chainRows,
+    } : null,
     summary: converted.summary || {},
   };
   fs.writeFileSync(path.join(workspaceRoot, ...manifestRel.split('/')), `${JSON.stringify(manifest, null, 2)}\n`);

@@ -47,7 +47,7 @@ BLOCK-494 钉死的登记漂移（契约登记四票全 deferred vs 实况两票
 | P3-03-v2a | implemented | 2026-10-31 | acceptance/block-322-p3/p3-03-v2a-live-macos.json（Blender 5.2.3 欧拉探针定案 + 面心对账 gap=0）+ commit c88f2fd9；测试 test/block322-p3-03-v2a-mate-rotation.test.mjs |
 | P3-03-v2b | partially_implemented | 2026-11-19 | 后端契约票（BLOCK-498）收口：D2 白名单键+D1 派生缓存落地（契约测 9/9 常驻+邻域 43/43）；证据=acceptance/block498-v2b-d2-contract/ + docs/block498-v2b-d2-d1-backend-contract-plan.md；第二票（CAD 导入链抽特征+前端编辑器切特征键）在 A 组 #2 发令范围内待续 |
 | P3-03-v2c | deferred_maintained | 2026-11-19 | 用户裁决「C 组说『维持』」；重开需新发令 |
-| P4-05（完整尺寸链） | authorized_pending_start | 2026-11-19 | 用户发令「#3 P4-05 完整尺寸链」开工；依赖 v2b 特征引用落地；属主纲余量附属读数，不占四票槽位 |
+| P4-05（完整尺寸链） | implemented | 2026-11-19 | BLOCK-499 落地：特征引用解析+尺寸链代数（D5 数值一致性）+SVG 链层+manifest 诚实翻转；实机腿=真实 STEP（occt-wasm）全链 9/9；证据=acceptance/block499-p405-full-chain/ + docs/block499-p405-full-chain-plan.md |
 
 - **状态语义（封闭枚举）**：`implemented`（已实现且有证据指针）/ `partially_implemented`（部分实现）/ `authorized_pending_start`（用户已发令待开工）/ `deferred_maintained`（用户裁决维持不做）/ `deferred_user_ruling`（待发令）。
 - **重开纪律**：任何票越过当前状态推进（含 v2b 后续票、P4-05 完整链、v2c 重开）一律需用户新发令；本表更新随对应包收口走。

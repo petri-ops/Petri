@@ -118,8 +118,8 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     }
     assert.equal(s.v2cSeparated, true, 'v2c 必须单列');
     assert.equal(s.alignmentAuthorized, true, '2026-11-19 对齐授权段（BLOCK-496 §2）必须在场');
-    assert.equal(s.p4_05_full_chain.status, 'authorized_pending_start', 'P4-05 完整尺寸链=已授权待开工');
-    assert.equal(s.p4_05_full_chain.authorizedAt, '2026-11-19');
+    assert.equal(s.p4_05_full_chain.status, 'implemented', 'P4-05 完整尺寸链=已实现（BLOCK-499）');
+    assert.equal(s.p4_05_full_chain.implementedAt, '2026-11-19');
     assert.equal(s.p4_05_full_chain.dependsOn, 'P3-03-v2b');
   });
 

@@ -193,7 +193,7 @@ const TICKET_ROW_ANCHORS = Object.freeze({
     re: /\|\s*P3-03-v2c\s*\|\s*deferred_maintained\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?维持/,
   },
 });
-const P4_05_FULL_CHAIN_ANCHOR = /\|\s*P4-05（完整尺寸链）\s*\|\s*authorized_pending_start\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?开工/;
+const P4_05_FULL_CHAIN_ANCHOR = /\|\s*P4-05（完整尺寸链）\s*\|\s*implemented\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?block499/;
 
 /** 纯函数：实现票生命周期状态（读 RULING-04 §5 范围 + BLOCK-496 §3 对齐状态表）。 */
 export function scanImplementationTickets(root = ROOT, sourcesOverride = null) {
@@ -223,8 +223,8 @@ export function scanImplementationTickets(root = ROOT, sourcesOverride = null) {
     ticketCount: Object.keys(tickets).length,
     v2cSeparated: has(material, /v2c\s*单列|v2c\s*单列\s*deferred|v2c（曲面\/边）单列/),
     p4_05_full_chain: P4_05_FULL_CHAIN_ANCHOR.test(align)
-      ? { status: TICKET_STATUS.AUTHORIZED_PENDING_START, authorizedAt: '2026-11-19', dependsOn: 'P3-03-v2b' }
-      : { status: 'undetermined', authorizedAt: null, dependsOn: null },
+      ? { status: TICKET_STATUS.IMPLEMENTED, implementedAt: '2026-11-19', evidence: 'acceptance/block499-p405-full-chain/', dependsOn: 'P3-03-v2b' }
+      : { status: 'undetermined', implementedAt: null, evidence: null, dependsOn: null },
     alignmentAuthorized: has(align, /## 2\. 用户授权（2026-11-19/),
   };
 }
@@ -310,7 +310,7 @@ export function validateRulingCodificationIntegrity(readings) {
           || (typeof row.evidence === 'string' && row.evidence.startsWith('acceptance/')));
     })
     || !t.v2cSeparated || !t.alignmentAuthorized
-    || t.p4_05_full_chain?.status !== TICKET_STATUS.AUTHORIZED_PENDING_START) issues.push('implementationTickets 违约');
+    || t.p4_05_full_chain?.status !== TICKET_STATUS.IMPLEMENTED) issues.push('implementationTickets 违约');
   const g = get('gdtAcceptance');
   if (!g || !g.annotationText || !g.viewProjectionCoords || !g.numericConsistency || !g.noSubjectiveLooksRight) issues.push('gdtAcceptance 违约');
   const b = get('boundaries');

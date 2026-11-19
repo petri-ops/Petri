@@ -1,7 +1,11 @@
 'use strict';
 
 /**
- * helpers/model3d-dimensions.js — BLOCK-322 P4-05b 第一刀：特征锚定的尺寸标注（纯逻辑层）。
+ * helpers/model3d-dimensions.js — BLOCK-322 P4-05b 第一刀 + P4-05 完整尺寸链（BLOCK-499）：特征锚定的尺寸标注（纯逻辑层）。
+ *
+ * BLOCK-499（2026-11-19 用户 A 组 #3 发令）新增：特征引用解析（feat: id/特征名，缓存优先+基元派生回落）、
+ * 尺寸链代数（Σlinks vs total，D5 数值一致性 |偏差|≤1e-6）、SVG 链层（data-gdt-chains）、
+ * manifest capabilities.dimensions/dimensionChains 诚实翻转（链齐且全一致才 true）。
  *
  * RULING-04 v2 §5 开工序第 1 票。第一刀范围（v2a 语义）：
  *   - 基元节点 dimensions 键引用（feature='height'|'width'|'depth'|'radius' 等）→
@@ -12,6 +16,8 @@
  * SVG 标注层：内核无文字 API → 内核外后处理——解析成功的条目在 HLR SVG 尾部
  * 叠加 <g data-gdt-annotations>（尺寸文字 + 公差带），不改内核、不改既有图形。
  */
+
+const model3dFeatures = require('./model3d-features');
 
 const DIMENSION_FEATURES_BY_TYPE = {
   box: ['width', 'depth', 'height'],
@@ -47,7 +53,34 @@ function resolveToleranceFeatures(scene, tolerances) {
     const dims = node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : null;
     const allowed = DIMENSION_FEATURES_BY_TYPE[node.type] || [];
     if (!dims || !allowed.includes(row.feature)) {
-      return { ...base, resolved: { source: 'unresolved', value: null, matched: false, deviation: null, reason: 'feature_not_a_primitive_dimension' } };
+      // BLOCK-499 — 特征引用路径（D2 引用语法 + D1 派生缓存）：feat: id / 特征名，
+      // 节点 features[] 缓存优先，基元无缓存自动派生回落；非代数量如实 unresolved。
+      const featureRow = resolveFeatureRow(node, row.feature);
+      if (!featureRow) {
+        return { ...base, resolved: { source: 'unresolved', value: null, matched: false, deviation: null, reason: 'feature_not_a_primitive_dimension' } };
+      }
+      const scalar = featureScalarFromRow(featureRow);
+      if (scalar.value === null) {
+        return { ...base, resolved: { source: 'unresolved', value: null, matched: false, deviation: null, reason: 'feature_value_not_algebraic' } };
+      }
+      const nominalF = isFiniteNumber(row.nominal) ? row.nominal : null;
+      const deviationF = nominalF === null ? null : Number((scalar.value - nominalF).toFixed(4));
+      const lowerF = isFiniteNumber(row.lower) ? row.lower : 0;
+      const upperF = isFiniteNumber(row.upper) ? row.upper : 0;
+      const matchedF = deviationF !== null && deviationF >= lowerF && deviationF <= upperF;
+      return {
+        ...base,
+        resolved: {
+          source: 'feature',
+          featureId: featureRow.id || null,
+          featureKind: featureRow.kind || null,
+          dimKey: scalar.dimKey,
+          value: scalar.value,
+          matched: matchedF,
+          deviation: deviationF,
+          band: [lowerF, upperF],
+        },
+      };
     }
     const value = isFiniteNumber(dims[row.feature]) ? dims[row.feature] : null;
     if (value === null) {
@@ -226,4 +259,117 @@ function buildGdtDimensionLines(svg, endpointRows, { view = 'front', panel = { x
   return layer;
 }
 
-module.exports = { resolveToleranceFeatures, buildGdtAnnotationLayer, DIMENSION_FEATURES_BY_TYPE, resolveToleranceEndpoints, buildGdtDimensionLines, FEATURE_AXIS };
+// ===== P4-05 完整尺寸链（BLOCK-499）：特征引用解析 + 链代数 + SVG 链层 =====
+
+const CHAIN_AXIS_DIMS = Object.freeze({
+  box: { x: 'width', y: 'depth', z: 'height' },
+  cylinder: { z: 'height' },
+});
+const CHAIN_EPSILON = 1e-6;
+
+/** 特征行解析（feat: id 或特征名）：节点 features[] 缓存优先，基元无缓存派生回落（D1 同源）。 */
+function resolveFeatureRow(node, ref) {
+  const refStr = String(ref ?? '');
+  let rows = Array.isArray(node.features) ? node.features : null;
+  if (!rows && (node.type === 'box' || node.type === 'cylinder' || node.type === 'sphere')) {
+    rows = model3dFeatures.derivePrimitiveFeatures(node);
+  }
+  if (!Array.isArray(rows)) return null;
+  return rows.find((f) => f && typeof f === 'object' && (f.id === refStr || f.feature === refStr)) || null;
+}
+
+/** 特征行的可代数量：解析行内数值键字符串（size/radius/height，derivePrimitiveFeatures 展开形态）。 */
+function featureScalarFromRow(row) {
+  if (!row || typeof row !== 'object') return { value: null, dimKey: null };
+  const kv = {};
+  for (const [key, raw] of Object.entries(row)) {
+    if (!/^\d+$/.test(key)) continue;
+    const text = String(raw);
+    const idx = text.indexOf(':');
+    if (idx > 0) kv[text.slice(0, idx)] = text.slice(idx + 1);
+  }
+  for (const [name, dimKey] of [['size', kv.dimsKey || null], ['height', 'height'], ['radius', 'radius']]) {
+    const value = Number(kv[name]);
+    if (kv[name] !== undefined && Number.isFinite(value)) return { value, dimKey: name === 'size' ? (kv.dimsKey || null) : dimKey };
+  }
+  return { value: null, dimKey: null };
+}
+
+/** 链 link 解析：特征引用优先，dimensions 键回落（两路径同一代数事实）。 */
+function resolveChainLinkScalar(node, ref) {
+  const featureRow = resolveFeatureRow(node, ref);
+  if (featureRow) {
+    const scalar = featureScalarFromRow(featureRow);
+    if (scalar.value !== null) return { source: 'feature', value: scalar.value };
+  }
+  const dims = node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : null;
+  const allowed = DIMENSION_FEATURES_BY_TYPE[node.type] || [];
+  if (dims && allowed.includes(ref) && isFiniteNumber(dims[ref])) return { source: 'dimension', value: Number(dims[ref]) };
+  return null;
+}
+
+/**
+ * 尺寸链代数（D5 数值一致性）：links 逐项解析 → Σ 与 total 比对（|Σ−total|≤1e-6 → consistent）。
+ * total 缺省=该节点沿 axis 的 dimension 总量（box x/y/z、cylinder z；无法派生 → total_unavailable）。
+ * @returns rows: [{ id, nodeId, links, linkValues, sum, total, deviation, consistent, resolved, reason? }]
+ */
+function buildDimensionChain(scene, chainSpecs) {
+  const nodes = new Map();
+  for (const node of (scene && Array.isArray(scene.nodes) ? scene.nodes : [])) {
+    if (node && typeof node.id === 'string') nodes.set(node.id, node);
+  }
+  const list = Array.isArray(chainSpecs) ? chainSpecs : [];
+  return list.map((spec) => {
+    const base = { ...spec };
+    const node = nodes.get(spec.nodeId);
+    if (!node) return { ...base, resolved: false, reason: 'node_not_found', consistent: false, sum: null, total: null, deviation: null, linkValues: [] };
+    const links = Array.isArray(spec.links) ? spec.links : [];
+    const linkValues = [];
+    for (const link of links) {
+      // link 形态：'ref'（本节点）| { nodeId, ref }（跨节点装配链——尺寸链的工程本义）。
+      const isObjectLink = link && typeof link === 'object' && !Array.isArray(link);
+      const linkNode = isObjectLink ? nodes.get(link.nodeId) : node;
+      const ref = isObjectLink ? link.ref : link;
+      const label = isObjectLink ? `${link.nodeId}.${ref}` : String(ref);
+      if (!linkNode) return { ...base, resolved: false, reason: 'link_node_not_found', link: label, consistent: false, sum: null, total: null, deviation: null, linkValues };
+      const scalar = resolveChainLinkScalar(linkNode, ref);
+      if (!scalar) return { ...base, resolved: false, reason: 'link_unresolved', link: label, consistent: false, sum: null, total: null, deviation: null, linkValues };
+      linkValues.push({ ref: label, value: scalar.value, source: scalar.source });
+    }
+    const sum = linkValues.reduce((acc, item) => acc + item.value, 0);
+    let total = null;
+    if (isFiniteNumber(spec.total)) total = Number(spec.total);
+    else {
+      const axis = spec.axis === undefined ? 'z' : spec.axis;
+      const dimKey = (CHAIN_AXIS_DIMS[node.type] || {})[axis];
+      const dims = node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : null;
+      if (dimKey && dims && isFiniteNumber(dims[dimKey])) total = Number(dims[dimKey]);
+    }
+    if (!isFiniteNumber(total)) return { ...base, resolved: false, reason: 'total_unavailable', linkValues, sum: Number(sum.toFixed(4)), total: null, deviation: null, consistent: false };
+    const deviation = Number((sum - total).toFixed(4));
+    const consistent = Math.abs(sum - total) <= CHAIN_EPSILON;
+    return { ...base, resolved: true, linkValues, sum: Number(sum.toFixed(4)), total, deviation, consistent };
+  });
+}
+
+/** SVG 链层：数字进文本（标注文本可复核，D5）；有链才叠层；返回以 </svg> 收尾。 */
+function buildChainAnnotationLayer(svg, chainRows) {
+  const drawable = (Array.isArray(chainRows) ? chainRows : []).filter((row) => row.resolved);
+  if (drawable.length === 0 || typeof svg !== 'string' || !svg.endsWith('</svg>')) return svg;
+  const lines = [];
+  let y = 18;
+  for (const row of drawable) {
+    const mark = row.consistent ? '✓' : '✗';
+    const color = row.consistent ? '#2e7d32' : '#c62828';
+    const linksText = (row.linkValues || []).map((item) => `${item.ref}=${item.value}`).join(' + ');
+    lines.push(
+      `<text x="8" y="${y}" font-family="monospace" font-size="11" fill="${color}" data-gdt-chain="${row.id || row.nodeId}">` +
+        `${mark} ${row.id || row.nodeId}: ${linksText} → Σ=${row.sum} vs total=${row.total}（偏差 ${row.deviation}）</text>`,
+    );
+    y += 16;
+  }
+  const layer = `<g data-gdt-chains role="list" aria-label="尺寸链">${lines.join('')}</g></svg>`;
+  return svg.slice(0, svg.length - '</svg>'.length) + layer;
+}
+
+module.exports = { resolveToleranceFeatures, buildGdtAnnotationLayer, DIMENSION_FEATURES_BY_TYPE, resolveToleranceEndpoints, buildGdtDimensionLines, FEATURE_AXIS, buildDimensionChain, buildChainAnnotationLayer };

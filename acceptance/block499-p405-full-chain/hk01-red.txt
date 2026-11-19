@@ -1,0 +1,165 @@
+✖ ① 特征引用解析：features[] 缓存行 feat: id → 代数量（source=feature） (1.580584ms)
+✖ ② 基元无缓存时自动派生回落（D1 派生缓存同源） (0.124334ms)
+✖ ③ 交叉对账：特征路径与 dimensions 键路径同值（D5） (0.099459ms)
+✖ ④ 诚实 unresolved：mesh 无表 → 未解析；other 行 → 非代数量不静默近似 (0.094083ms)
+✖ ⑤ 尺寸链一致：Σlinks==total（30+20=50）→ consistent；SVG 链层带数字 (0.068458ms)
+✖ ⑥ 尺寸链不一致：total=49 → deviation=1 → consistent=false 显式 ✗（不静默） (0.09375ms)
+✖ ⑦ 缺省 total=沿轴 dimension 总量；cylinder 轴映射；无法派生 → total_unavailable (0.073875ms)
+✖ ⑧ 标注层与链层共存（同 SVG 两组 data-gdt-*） (0.114583ms)
+✖ ⑨ 实机腿：真实 STEP（occt-wasm makeBox 10×20×30）→ createCadDrawing 带 chains → manifest 诚实翻转 (4.850041ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 0
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.016958
+
+✖ failing tests:
+
+test at test/block499-p405-full-chain.test.mjs:44:1
+✖ ① 特征引用解析：features[] 缓存行 feat: id → 代数量（source=feature） (1.580584ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'unresolved'
+  - 'feature'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:53:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'unresolved',
+    expected: 'feature',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block499-p405-full-chain.test.mjs:59:1
+✖ ② 基元无缓存时自动派生回落（D1 派生缓存同源） (0.124334ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'unresolved'
+  - 'feature'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:63:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'unresolved',
+    expected: 'feature',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block499-p405-full-chain.test.mjs:68:1
+✖ ③ 交叉对账：特征路径与 dimensions 键路径同值（D5） (0.099459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'unresolved'
+  - 'feature'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:74:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'unresolved',
+    expected: 'feature',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block499-p405-full-chain.test.mjs:78:1
+✖ ④ 诚实 unresolved：mesh 无表 → 未解析；other 行 → 非代数量不静默近似 (0.094083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'feature_not_a_primitive_dimension'
+  - 'feature_value_not_algebraic'
+             ^
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:89:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'feature_not_a_primitive_dimension',
+    expected: 'feature_value_not_algebraic',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block499-p405-full-chain.test.mjs:92:1
+✖ ⑤ 尺寸链一致：Σlinks==total（30+20=50）→ consistent；SVG 链层带数字 (0.068458ms)
+  TypeError: buildDimensionChain is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:93:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block499-p405-full-chain.test.mjs:105:1
+✖ ⑥ 尺寸链不一致：total=49 → deviation=1 → consistent=false 显式 ✗（不静默） (0.09375ms)
+  TypeError: buildDimensionChain is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:106:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block499-p405-full-chain.test.mjs:115:1
+✖ ⑦ 缺省 total=沿轴 dimension 总量；cylinder 轴映射；无法派生 → total_unavailable (0.073875ms)
+  TypeError: buildDimensionChain is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:116:24)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block499-p405-full-chain.test.mjs:128:1
+✖ ⑧ 标注层与链层共存（同 SVG 两组 data-gdt-*） (0.114583ms)
+  TypeError: buildDimensionChain is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:131:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)
+
+test at test/block499-p405-full-chain.test.mjs:138:1
+✖ ⑨ 实机腿：真实 STEP（occt-wasm makeBox 10×20×30）→ createCadDrawing 带 chains → manifest 诚实翻转 (4.850041ms)
+  TypeError: OcctKernelMod.default is not a function
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block499-p405-full-chain.test.mjs:140:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7)

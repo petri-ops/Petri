@@ -1,11 +1,11 @@
 {
   "_about": "第五轮 L0-8 数字口径单源（蓝图 L-45/L-76/L-81/L-84）：文档引用读数一律以本 JSON 为准；由 scripts/post-k7-readings-generate.mjs 当场实测生成，禁止手抄/手改。",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-19T05:43:34.654Z",
-  "sourceCommit": "df5b30b4ec343a830e9660cf3620788a47eaea8b",
+  "generatedAt": "2026-11-19T06:45:50.920Z",
+  "sourceCommit": "801b37aba7dd5dd9be67070e48c5e2455adce207",
   "generator": "node scripts/post-k7-readings-generate.mjs",
   "impactMap": {
-    "rules": 422,
+    "rules": 423,
     "unmappedTests": 89,
     "coverageBaselineUpdatedAt": "2026-11-10",
     "source": [
@@ -14,13 +14,13 @@
     ]
   },
   "docRegistry": {
-    "documentCount": 650,
-    "managedMarkdown": 633,
+    "documentCount": 651,
+    "managedMarkdown": 634,
     "registryLastUpdated": "2026-11-19",
     "source": "docs/DOC-REGISTRY.json"
   },
   "tests": {
-    "nodePhysicalTestFiles": 800,
+    "nodePhysicalTestFiles": 801,
     "frontendTestFiles": 389,
     "unmappedTests": 89,
     "denominatorNote": "628 是三段分片清单读数（test:all:sharded 的清单长度口径），700 是物理 test/*.test.mjs 文件数——两个分母不得混用（L-84）。",

@@ -9248,6 +9248,19 @@
         "test/block322-p3-constraints.test.mjs",
         "test/next04a-scene3d.test.mjs"
       ]
+    },
+    {
+      "id": "block499-p405-full-chain",
+      "note": "BLOCK-499 P4-05 完整尺寸链：特征引用解析+链代数+SVG 链层+manifest 诚实翻转（D5）；证据变更选本包契约测+p4-cad-exchange 邻域重跑。",
+      "patterns": [
+        "docs/block499-p405-full-chain-plan.md",
+        "test/block499-p405-full-chain.test.mjs",
+        "acceptance/block499-p405-full-chain/**"
+      ],
+      "tests": [
+        "test/block499-p405-full-chain.test.mjs",
+        "test/block322-p4-cad-exchange.test.mjs"
+      ]
     }
   ]
 }

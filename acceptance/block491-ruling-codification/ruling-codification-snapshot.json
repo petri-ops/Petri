@@ -1,8 +1,8 @@
 {
   "kind": "block491-ruling-codification",
-  "sourceCommit": "ef0baf7812f9ba49418038f39caf5f767159276b",
+  "sourceCommit": "801b37aba7dd5dd9be67070e48c5e2455adce207",
   "platform": "darwin",
-  "capturedAt": "2026-11-19T05:52:52.939Z",
+  "capturedAt": "2026-11-19T06:44:16.153Z",
   "readings": {
     "rulings": {
       "value": {
@@ -105,8 +105,9 @@
         "ticketCount": 4,
         "v2cSeparated": true,
         "p4_05_full_chain": {
-          "status": "authorized_pending_start",
-          "authorizedAt": "2026-11-19",
+          "status": "implemented",
+          "implementedAt": "2026-11-19",
+          "evidence": "acceptance/block499-p405-full-chain/",
           "dependsOn": "P3-03-v2b"
         },
         "alignmentAuthorized": true
