@@ -9351,6 +9351,18 @@
         "test/block338-stream-stall-watchdog.test.mjs",
         "test/post-h9-evidence-and-ledger.test.mjs"
       ]
+    },
+    {
+      "id": "ui-error-classification-stall",
+      "note": "2026-11-19 UI 错误分类修复：流式停滞(stream_stalled)曾误判为 Python 模块缺失，诱导用户装无关运行时；另修 ENOTFOUND 正则无边界吞 ModuleNotFoundError。轻量包（HK-01 红绿+邻域 10/10+tsc 0），非观感状态写面。证据 acceptance/ui-error-classification-stall/。",
+      "patterns": [
+        "frontend/src/components/copilot/errorMessages.ts",
+        "frontend/src/components/copilot/errorMessages.test.ts",
+        "acceptance/ui-error-classification-stall/**"
+      ],
+      "tests": [
+        "errorMessages.test.ts"
+      ]
     }
   ]
 }

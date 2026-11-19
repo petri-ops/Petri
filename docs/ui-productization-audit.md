@@ -6757,3 +6757,10 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证（代码）**：RunStatsBar 7/7（title 承载/「—」语义/记忆保留/可访问性 span）+ 实机 V2（text 只剩隐藏 0%，h=26px）。
 - **实机证据**：`acceptance/block-266/`（亮/暗各 4/4）。**2026-10-27 用户推翻**：实际渲染图标偏大不美观（上下文环被裁切），恢复 UI-523 文字形态（见 UI-592）。
 - **边界（reopen）**：hover 弹出数字明细浮层（进阶形态）不做。
+
+## UI-711: 流式停滞错误分类纠正（2026-11-19 **in_progress**；轻量包，HK-01 4/4 + 邻域 10/10 + tsc 0）
+
+- **变化面**：`frontend/src/components/copilot/errorMessages.ts` 加 `STREAM_STALLED` 分类（文案「模型响应暂时停滞，正在自动恢复；若持续不动请稍后重试或切换渠道」）+ 规则置于通用 network/python 规则前；顺手修 `ENOTFOUND` 正则加 `\b` 边界（此前 `ModuleNotFoundError` 含 `enotfound` 子串被误吞）。
+- **为什么这样设计**：真实事故——用户看到「Python 依赖模块缺失——请装 Python 运行时」，实际错误是「模型流式响应停滞（连续无 token 60001ms）」，分类误导用户装无关运行时；且真 Python 缺失反被 `ENOTFOUND` 抢先匹配。只改分类文案与正则，不动观感与数据流。
+- **验证（代码）**：`errorMessages.test.ts` 4/4（停滞→STREAM_STALLED 不误判 Python / 首 token 停滞同类 / 真 Python 缺失仍归 PYTHON_MODULE_MISSING / 文案无 Python 误导词）+ 邻域 10/10 + `quality:types` 零红；HK-01 红证据 `acceptance/ui-error-classification-stall/hk01-red.txt`（红=3 失败，含 ENOTFOUND 误吞抓真）、绿证据 `hk01-green.txt`。
+- **状态边界**：in_progress（代码级验证完成，未跑实机）；观感零代签、不碰 G1+。实机腿=重启 dev 栈后发超长请求确认前端显示 STALL 文案而非 Python 提示，留给用户验证。

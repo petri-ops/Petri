@@ -200,6 +200,12 @@ export const ERROR_MESSAGES: Record<string, ErrorMessageConfig> = {
     severity: 'warning',
     showDetails: true,
   },
+  // 2026-11-19：流式停滞曾误判为 Python 模块缺失（诱导用户去装无关运行时）。
+  STREAM_STALLED: {
+    userMessage: '模型响应暂时停滞，正在自动恢复；若持续不动请稍后重试或切换渠道',
+    severity: 'warning',
+    showDetails: true,
+  },
   WORKFLOW_ERROR: {
     userMessage: '工作流程执行失败，请稍后重试',
     severity: 'error',
@@ -284,11 +290,15 @@ export const ERROR_MESSAGES: Record<string, ErrorMessageConfig> = {
  * and the error code to map to.
  */
 const ERROR_PATTERNS: Array<{ pattern: RegExp; code: string }> = [
+  // 流式停滞优先判定（2026-11-19）：必须先于通用 network/python 规则，
+  // 否则「连续无 token 60001ms」被旧构建误判成 Python 模块缺失，诱导装无关运行时。
+  { pattern: /流式响应停滞|stream[_\s-]*stall|连续无\s*token/i, code: 'STREAM_STALLED' },
   // Network errors
   { pattern: /network.*error|fetch.*fail|网络.*错误/i, code: 'NETWORK_ERROR' },
   { pattern: /timeout|timed?\s*out|超时/i, code: 'TIMEOUT' },
   { pattern: /econnrefused|connection\s*refused/i, code: 'ECONNREFUSED' },
-  { pattern: /enotfound|dns|找不到.*服务器/i, code: 'ENOTFOUND' },
+  // \b 边界：ModuleNotFoundError 含 enotfound 子串，无边界会吞掉真实 Python 模块缺失
+  { pattern: /\benotfound\b|dns|找不到.*服务器/i, code: 'ENOTFOUND' },
   { pattern: /etimedout|socket\s*timeout/i, code: 'ETIMEDOUT' },
 
   // Authentication errors
