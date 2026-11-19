@@ -67,4 +67,5 @@ supersedes: 无（承接 BLOCK-498 第一票 reopen 条款；执行 BLOCK-496 �
 - **观感纪律**：Jev doc:suggest uiAudit deterministic 建议命中（SceneConstraintEditor.tsx 改动）→ UI-639a 增数据面增量小节，明示 additive 特征锚键+缓存消费为代码契约级、未跑实机腿、不升级 verified 态、观感零代签。
 - **Jev 建议器**：test:suggest 零建议（area_none：立项时仅新建 plan 无生产面）；doc:suggest 仅 uiAudit deterministic 命中（已处置）。
 - **范围守住**：零新依赖（occt-wasm=RULING-01 已批只读）/ D3 禁建模 API（只读分析）/ 观感零代签（仅数据面）/ 求值几何不变（aFace/bFace 求值主键 additive 保留）/ 不碰 G1+ / D1–D5 形态不变。既有 5 项跟踪改动 + 10 项 untracked 保护资产零触碰，提交逐批显式 add。
-- **提交与快照**：见 AUDIT-LOG 收口行（commit hash + snapshot 标签）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **closeout 门禁总账**：定向链 15 门绿；`quality:perf` 环境性红如实登记（非本包文件面、非本包失败）——packaged_start 495/529ms vs 485ms 阈值、long_conversation 52ms/big_project_tree 19ms 偶发越阈，中位值与基线文件零改动，本机 load avg 3.5~4.7 + CodeBuddy 76% CPU + Electron 16.6% 并发负载=采样抖动；不放宽阈值/不改基线，待负载回落 CI 复验。
+- **提交与快照**：主批 b3edd956 + 收口补记（perf 归属登记）批；snapshot 标签见 AUDIT-LOG 收口行。G0 开发期常态 · 不外推 packaged/Provider/GA。
