@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 651,
+    "documentCount": 652,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 634
+    "managedMarkdown": 635
   },
   "documents": [
     {
@@ -13528,6 +13528,28 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户 A 组 #3 发令；BLOCK-496 对齐表 P4-05 完整链落地）。P4-05 完整尺寸链：特征引用解析（feat: id/特征名，features[] 缓存优先+基元派生回落，source='feature'）+ 尺寸链代数（Σlinks vs total，跨节点 {nodeId,ref} 装配链，缺省 total=沿轴维度总量，|偏差|≤1e-6 consistent）+ SVG data-gdt-chains 文本层 + manifest capabilities.dimensions/dimensionChains 诚实翻转（链齐且全一致才 true；gdt 恒 false=形位另案）。HK-01 红 9→绿 9（含真实 occt-wasm STEP 实机腿）；邻域 17/17；契约 reopen 同步（P4-05=implemented，sha 3abe9fd5）。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红9→绿9 含实机腿；邻域 17/17；契约 P4-05=implemented；串行槽位回空，包 5 接续。"
+    },
+    {
+      "id": "BLOCK-500",
+      "path": "docs/c56-paper-writing-manual-draft-2026-11-19.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "c56-paper-writing-manual-draft",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "DRAFT-FOR-REVIEW",
+      "touchSurface": [
+        "docs/c56-paper-writing-manual-draft-2026-11-19.md"
+      ],
+      "tags": [
+        "C-56",
+        "A4",
+        "manual-draft",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户 A 组 #4 发令；BLOCK-495 评审材料 §6 推荐候选②=手册内容先行）。C-56 论文写作/修改保真 Skill 的十节手册内容稿 v0.1：事实保真内核四保护（确定程度/归因/完成状态/数字锁定）+不编造红线+方法结果段锁定（只校验不改）+中文 F 类 6 检查（每项形态→改写示例）+claim 保真三栏对照（无默认最终稿）+provenance/未覆盖说明+人机边界+执行流程+反模式。零注册面（skill 目录/manifest/桥待用户对手册认可后另批）；评审要点 4 项列文末。零运行时改动/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
