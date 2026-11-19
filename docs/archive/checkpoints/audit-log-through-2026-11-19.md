@@ -1,0 +1,8 @@
+# 审计广播台历史归档 · through 2026-11-19
+
+> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成（BLOCK-170 自稳设计；
+> 活跃台只留「最后更新」链最近 8 条，本档=被淘汰链行原文追加，搬移不改写）。
+> 状态与完成语义以 canonical 文档（roadmap/plan/DOC-REGISTRY）为准，本档仅作广播历史追溯。
+
+最后更新：2026-11-19（🚀 **BLOCK-494 立项启动（W2 实现票准备 · active / P0-LAUNCH，占唯一串行槽位）**：用户预授权无人值守提示词 §5 S2 发令，执行 BLOCK-492 plan §3 W2 波次。三票实况核对启动即发现**登记漂移**：RULING-04 §5/BLOCK-491 implementationTickets 登记三票全 deferred，但仓库实况 P4-05b 第一刀与 v2a 已于 BLOCK-322 时代（2026-10-30/31）实现（测试 23/23 绿+实机证据齐）。本包=实况钉死 + v2b D2/D1 契约测骨架（skip 形态承载）+ 漂移如实登记（BLOCK-491 契约重算待其 reopen 条款=用户发令）；零产品实现落地。plan=docs/block494-w2-implementation-tickets-readiness-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-18（🏁 **BLOCK-493 收口（W1 基础设施清偿 · closeout 定向链 exit=0 全绿 · 一次会话完成）**：用户预授权无人值守提示词 §5 S1 发令执行 BLOCK-492 plan §3 W1 波次。五项非资产类既有红清偿：①test:changed evidence.json 三处虚拟探针挂 impact-map rule（block464/block477 既有 rule 扩 pattern + block470/block493 自映射机械认领，规则 417→419，test-affected 21/21）；②lint:ledger 13 条既有 warning 全误报豁免（detect-object-injection 于白名单校验数据/测试夹具；video-storyboard/advanced-shot 文件级 disable 沿 BLOCK-482 video-compose 先例+两测试行级 disable+reason；P1484/T418/S539 与基线持平，基线与 errors 台账零改动）；③K-22 knip 硬编码上限 346→350 对齐（既有红：BLOCK-483/486/487 逐包 +1 经棘轮批准但本行漏同步；负测篡改值 351 超限，语义零放宽；post-h9-contracts 186/186）；④block463-workbench-live.cjs 顶层 env 固化函数化（BLOCK-267/375 棘轮，函数化首选修法零行为变化）；⑤3D 蓝图 §13/§14 对齐 ruled + docs:coverage 机械重算 + 单源重生成。closeout 定向链 exit=0（surface-matrix 干净树收敛 dirty 6→0 随批）。P6 写门交互如实登记：impact-map=P6 绑定源，两段提交使写门绿。用户资产 10 项零触碰/观感零代签/零新依赖/不碰 G1+/他方 WIP 零触碰。串行槽位回空，W2 实现票准备为下一波次。证据=acceptance/block493-infra-debt-clearance/。G0 开发期常态 · 不外推 packaged/Provider/GA.）

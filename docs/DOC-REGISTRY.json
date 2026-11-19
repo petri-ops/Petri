@@ -13476,12 +13476,12 @@
       "id": "BLOCK-498",
       "path": "docs/block498-v2b-d2-d1-backend-contract-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block498-v2b-d2-d1-backend-contract",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block498-v2b-d2-d1-backend-contract-plan.md",
         "core/petri-server/helpers/scene3d.js",
@@ -13498,7 +13498,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 立项（用户 A 组 #2 发令；BLOCK-496 对齐表 v2b=authorized_pending_start 的第一票）。P3-03 v2b 后端契约票：D2 mate 白名单收 aFeature/bFeature additive 可选键（旧键零迁移/aFace 仍求值主键/禁 nodeId#featureId 语法/constraint_feature_unresolved/mate_feature_not_planar 显式拒绝曲面）+ D1 features[]/featuresVersionKey 派生缓存（版本键=sourceSha256/dimensions 规范指纹，不一致 features_stale_version_mismatch 与 mesh_source_hash_required 同聚合口径）+ 基元派生接线（deriveNodeFeatureTable/buildImportFeatureTable 导出=第二票接缝）+ 特征库 ESM→CJS + 前端镜像白名单同步（跨语言对账门逐值一致）。HK-01 骨架激活红 4→绿 9/9；邻域 43/43；前端 vitest 15/15+tsc 零红。第二票（导入链抽特征+前端编辑器）另案待发令；曲面=v2c 维持。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 立项（用户 A 组 #2 发令；BLOCK-496 对齐表 v2b=authorized_pending_start 的第一票）。P3-03 v2b 后端契约票：D2 mate 白名单收 aFeature/bFeature additive 可选键（旧键零迁移/aFace 仍求值主键/禁 nodeId#featureId 语法/constraint_feature_unresolved/mate_feature_not_planar 显式拒绝曲面）+ D1 features[]/featuresVersionKey 派生缓存（版本键=sourceSha256/dimensions 规范指纹，不一致 features_stale_version_mismatch 与 mesh_source_hash_required 同聚合口径）+ 基元派生接线（deriveNodeFeatureTable/buildImportFeatureTable 导出=第二票接缝）+ 特征库 ESM→CJS + 前端镜像白名单同步（跨语言对账门逐值一致）。HK-01 骨架激活红 4→绿 9/9；邻域 43/43；前端 vitest 15/15+tsc 零红。第二票（导入链抽特征+前端编辑器）另案待发令；曲面=v2c 维持。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红4→绿9/9 常驻；邻域 43/43+前端 15/15+tsc 零红；BLOCK-496 契约 v2b=partially_implemented；事故（包2 裸 add 卷资产）已处置登记；第二票待续。"
     }
   ],
   "lastUpdated": "2026-11-19"

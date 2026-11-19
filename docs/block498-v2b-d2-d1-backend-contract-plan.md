@@ -1,7 +1,7 @@
 ---
 capability: block498-v2b-d2-d1-backend-contract
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: P3-03 v2b 后端契约票（用户 2026-11-19 A 组 #2 发令；D2/D1 已裁决形态落地）——aFeature/bFeature additive 白名单键 + features[] 派生缓存（版本键=sourceSha256/dimensions 指纹，不一致 fail-closed）+ 基元派生接线 + 特征库 CJS 收口；第二票（CAD 导入链抽特征+前端编辑器切特征键）另案待发令。
 acceptance:
   - D2：mate 白名单收 aFeature/bFeature 可选键（旧键零迁移、aFace/bFace 仍是求值主键）；禁 nodeId#featureId 字符串语法（显式报错）；节点带 features 表时引用必须可解析（constraint_feature_unresolved）+ 非平面特征显式拒绝（mate_feature_not_planar，曲面/边=v2c）
@@ -41,4 +41,17 @@ supersedes: 无（执行 BLOCK-496 对齐表 v2b=authorized_pending_start 的第
 - 骨架激活：红 4（D2①/D2④/D1①/D1③，hk01-red.txt）→ 绿 9/9；
 - 邻域：scene3d+v2a+v2b+constraints 43/43；前端 scene3d vitest 15/15 + tsc 零红；
 - closeout 定向绿；证据=acceptance/block498-v2b-d2-contract/；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- HK-01：骨架激活红 4（D2① 白名单缺键/D2④ 引用未解析/D1① 版本键错误码缺席/D1③ 接线缺席，hk01-red.txt）→ 实现 → 绿 9/9（常驻，无 skip）。
+- 邻域：scene3d/v2a/v2b/constraints/geometry 43/43；前端 scene3d vitest 15/15 + tsc 零红；跨语言对账门（block322-p3-constraints）驱动前端镜像同步=契约变更两面同批。
+- 契约联动：BLOCK-496 对齐表 v2b → partially_implemented（reopen 条款），block322-ruling-codification 重算 --check PASS（sha d428d6ce）。
+- 门禁交互：scene3d 尺寸基线重打（1165→1287 有意增长留因，棘轮语义不变）；新代码 1 处 object-injection warning 经 Object.entries 解构消除（P 域回归基线 1484）；1 处 no-useless-escape error 修根因。
+- 事故登记（跨包）：包2 收口批裸 `git add acceptance/` 卷入 untracked 保护资产 nso wave-0 summary（df5b30b4 已推送）→ gate:user-assets 抓真 → `git rm --cached` 处置（盘上文件原样保留；先例 548eab51 同形；历史不改写）。教训=显式 add 纪律适用任何目录级 add，逐批核对 staged 清单（AGENTS 教训 a 的具体化，guard 门在册兜底）。
+- 提交：b5804d14（主批）+ 5952ee76（资产处置）+ c57d78fb/ef0baf78（尺寸基线随批）+ 203c19e0（warning 修根因）+ 本批（台账批）。
+- 第二票（CAD 导入链抽特征 occt-wasm faces→deriveImportFeatures 消费 + 前端编辑器发送面切 aFeature/bFeature）在 A 组 #2 发令范围内，待续另批。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

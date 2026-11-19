@@ -45,7 +45,7 @@ BLOCK-494 钉死的登记漂移（契约登记四票全 deferred vs 实况两票
 | --- | --- | --- | --- |
 | P4-05b | implemented | 2026-10-30 | acceptance/block-322-ruling04/p405b-live-macos.json（D5 数值对账：height 30 ✓ / width 120.4 ✗ 诚实 mismatch）；测试 test/rw06-p405b-dimension-lines.test.mjs + rw06-p405b-dimension-annotations.test.mjs |
 | P3-03-v2a | implemented | 2026-10-31 | acceptance/block-322-p3/p3-03-v2a-live-macos.json（Blender 5.2.3 欧拉探针定案 + 面心对账 gap=0）+ commit c88f2fd9；测试 test/block322-p3-03-v2a-mate-rotation.test.mjs |
-| P3-03-v2b | authorized_pending_start | 2026-11-19 | 用户发令「#2 v2b D2/D1 落地（推荐）」开工；后端契约票先行（骨架=test/block322-p3-03-v2b-d2-contract.test.mjs 已备）；导入链抽特征+前端接线=后续票 |
+| P3-03-v2b | partially_implemented | 2026-11-19 | 后端契约票（BLOCK-498）收口：D2 白名单键+D1 派生缓存落地（契约测 9/9 常驻+邻域 43/43）；证据=acceptance/block498-v2b-d2-contract/ + docs/block498-v2b-d2-d1-backend-contract-plan.md；第二票（CAD 导入链抽特征+前端编辑器切特征键）在 A 组 #2 发令范围内待续 |
 | P3-03-v2c | deferred_maintained | 2026-11-19 | 用户裁决「C 组说『维持』」；重开需新发令 |
 | P4-05（完整尺寸链） | authorized_pending_start | 2026-11-19 | 用户发令「#3 P4-05 完整尺寸链」开工；依赖 v2b 特征引用落地；属主纲余量附属读数，不占四票槽位 |
 

@@ -101,7 +101,7 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     const expected = {
       'P4-05b': 'implemented',
       'P3-03-v2a': 'implemented',
-      'P3-03-v2b': 'authorized_pending_start',
+      'P3-03-v2b': 'partially_implemented',
       'P3-03-v2c': 'deferred_maintained',
     };
     for (const id of DEFERRED_TICKETS) {

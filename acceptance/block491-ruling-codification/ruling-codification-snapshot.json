@@ -1,8 +1,8 @@
 {
   "kind": "block491-ruling-codification",
-  "sourceCommit": "18c63c85cac29ab2fd6db2fe870d6cf01e4d5e95",
+  "sourceCommit": "ef0baf7812f9ba49418038f39caf5f767159276b",
   "platform": "darwin",
-  "capturedAt": "2026-11-19T05:24:34.206Z",
+  "capturedAt": "2026-11-19T05:52:52.939Z",
   "readings": {
     "rulings": {
       "value": {
@@ -90,9 +90,9 @@
             "reopenRequiresUserOrder": true
           },
           "P3-03-v2b": {
-            "status": "authorized_pending_start",
+            "status": "partially_implemented",
             "at": "2026-11-19",
-            "evidence": null,
+            "evidence": "acceptance/block498-v2b-d2-contract/",
             "reopenRequiresUserOrder": true
           },
           "P3-03-v2c": {
