@@ -1,7 +1,7 @@
 ---
 capability: block499-p405-full-chain
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: P4-05 完整尺寸链（用户 2026-11-19 A 组 #3 发令）——在第一刀（dimensions 键解析+公差带+SVG 标注+端点投影）之上，把引用升级到 v2b 特征级（BLOCK-498 落地的 feat: id/特征名+派生缓存），补尺寸链代数（D5 数值一致性：Σlinks vs total，|偏差|≤1e-6）与 SVG 链层，manifest capabilities.dimensions/dimensionChains 诚实翻转（链齐且全一致才 true，gdt 恒 false=形位符号不在本票）。
 acceptance:
   - 特征引用解析：节点 features[] 缓存优先 / 基元无缓存派生回落（D1 同源）；值=行内代数量；kind=other 非代数量如实 unresolved（feature_value_not_algebraic）
@@ -40,4 +40,14 @@ supersedes: 无（执行 BLOCK-496 对齐表 P4-05 完整链=authorized_pending_
 - 邻域 p4-cad-exchange + rw06×2 = 17/17 零回归；
 - BLOCK-496 契约 reopen 同步（P4-05 完整链=implemented，--check PASS）；
 - closeout 定向绿；证据=acceptance/block499-p405-full-chain/；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- HK-01：红 9（函数缺席全红，hk01-red.txt）→ 实现 → 绿 9/9（hk01-green.txt，⑨=真实 occt-wasm STEP 实机腿：链齐 manifest dimensions=true+SVG 链层在盘；无链对照 false 既有 pin 不破）。
+- 执行修正（如实登记）：①链 link 扩跨节点 {nodeId,ref}（测试夹具初版代数错：同节点 +z/-z/height=90≠80——链的工程本义=跨零件装配链，API 与夹具同步修正）；②total_unavailable 夹具改 cone（plane 不在第一刀维度白名单）；③model3d-dimensions 文件级误报豁免（内部派生行标记键，沿 video-compose 家族先例，P 回归基线 1484）。
+- 契约联动：BLOCK-496 对齐表 P4-05 完整链 → implemented（reopen 条款），block322-ruling-codification 重算 --check PASS（sha 3abe9fd5）。
+- 提交：cfff3c6e（主批）+ 82dacf83（误报豁免随批）+ 本批（台账批）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

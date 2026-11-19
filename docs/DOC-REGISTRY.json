@@ -13504,12 +13504,12 @@
       "id": "BLOCK-499",
       "path": "docs/block499-p405-full-chain-plan.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block499-p405-full-chain",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "P0-LAUNCH",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block499-p405-full-chain-plan.md",
         "core/petri-server/helpers/model3d-dimensions.js",
@@ -13527,7 +13527,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 立项（用户 A 组 #3 发令；BLOCK-496 对齐表 P4-05 完整链落地）。P4-05 完整尺寸链：特征引用解析（feat: id/特征名，features[] 缓存优先+基元派生回落，source='feature'）+ 尺寸链代数（Σlinks vs total，跨节点 {nodeId,ref} 装配链，缺省 total=沿轴维度总量，|偏差|≤1e-6 consistent）+ SVG data-gdt-chains 文本层 + manifest capabilities.dimensions/dimensionChains 诚实翻转（链齐且全一致才 true；gdt 恒 false=形位另案）。HK-01 红 9→绿 9（含真实 occt-wasm STEP 实机腿）；邻域 17/17；契约 reopen 同步（P4-05=implemented，sha 3abe9fd5）。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 立项（用户 A 组 #3 发令；BLOCK-496 对齐表 P4-05 完整链落地）。P4-05 完整尺寸链：特征引用解析（feat: id/特征名，features[] 缓存优先+基元派生回落，source='feature'）+ 尺寸链代数（Σlinks vs total，跨节点 {nodeId,ref} 装配链，缺省 total=沿轴维度总量，|偏差|≤1e-6 consistent）+ SVG data-gdt-chains 文本层 + manifest capabilities.dimensions/dimensionChains 诚实翻转（链齐且全一致才 true；gdt 恒 false=形位另案）。HK-01 红 9→绿 9（含真实 occt-wasm STEP 实机腿）；邻域 17/17；契约 reopen 同步（P4-05=implemented，sha 3abe9fd5）。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红9→绿9 含实机腿；邻域 17/17；契约 P4-05=implemented；串行槽位回空，包 5 接续。"
     }
   ],
   "lastUpdated": "2026-11-19"
