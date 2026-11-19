@@ -1,7 +1,7 @@
 ---
 capability: block497-migration-idempotent
-status: active
-phase: P0-LAUNCH
+status: completed
+phase: CLOSED
 goal: MIGRATION-IDEMPOTENT 修复票（用户 2026-11-19 A 组 #1 发令）——自愈补列收窄版记账：ensureProjectWorktreeColumn 补列成功后仅当 MAX(schema_migrations.version)===20 补记 v21，消除「无头栈补列→桌面壳 boot 重放 021 撞 duplicate column 拒启」缺口（AUDIT-LOG 🟡 2026-11-17 实机案底）；小体量单票。
 acceptance:
   - HK-01 红绿：红=补列后台账仍 v20→runMigrations 重放 021 复现拒启；绿=补列+记账 v21→重放跳过（真实 021 SQL 副本走真实 runMigrations）
@@ -37,4 +37,14 @@ supersedes: 无（处置 AUDIT-LOG 🟡 MIGRATION-IDEMPOTENT 行 + BLOCK-495 评
 - `node --test test/block497-migration-idempotent-selfheal.test.mjs` 3/3（红证据 hk01-red.txt：主测红复现缺口、守卫测前-后均绿）；
 - 邻域 `block336-worktree-*` 22/22 零回归；
 - `npm run closeout` 定向绿；证据落 `acceptance/block497-migration-idempotent/`；
+- G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 收口笔录（2026-11-19 · 一次会话完成）
+
+- HK-01：红=主测复现缺口（补列后台账仍 v20→重放 021 duplicate column，hk01-red.txt）→ 实现（事务化补列+收窄记账）→ 绿 3/3（hk01-green.txt）；守卫两测（v15 不记账/全新库静默）红绿两相均绿=守卫语义文档化。
+- 邻域零回归：block336 worktree 三测 22/22。
+- closeout 定向链 exit=0（干净树一次过）；AUDIT-LOG 🟡 MIGRATION-IDEMPOTENT 行就地清偿注记。
+- 提交：5bee2626（主批）+ 本批（台账批）。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。
