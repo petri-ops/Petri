@@ -9,6 +9,9 @@
 
 const crypto = require('node:crypto');
 const { meshFormatForPath, textureFormatForPath } = require('./mesh-assets');
+// BLOCK-498（P3-03 v2b 后端契约票）——特征库单源（D1 基元自动派生 + D2 引用解析）；
+// 内核哈希不作特征 id（探针定案），禁 OCCT 建模 API（D3，静态负测守护）。
+const model3dFeatures = require('./model3d-features');
 
 const SCENE_VERSION = 'scene3d/v1';
 const UNITS = new Set(['mm']);
@@ -55,7 +58,9 @@ const CONSTRAINT_FIELDS = {
   align: ['id', 'kind', 'a', 'b', 'axis'],
   distance: ['id', 'kind', 'a', 'b', 'axis', 'value'],
   angle: ['id', 'kind', 'a', 'b', 'axis', 'value'],
-  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
+  // BLOCK-498（P3-03 v2b 后端契约票，D2 ruled additive 白名单加键）——aFeature/bFeature 可选
+  // 特征锚；旧键零迁移，aFace/bFace 仍是求值主键。
+  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset', 'aFeature', 'bFeature'],
 };
 /** 每条约束只改写 b 的指定分量：align/distance/mate 定位置，angle 定姿态。 */
 const CONSTRAINT_TARGET_FIELD = { align: 'position', distance: 'position', angle: 'rotation', mate: 'position' };
@@ -70,6 +75,7 @@ const LIMITS = Object.freeze({
   maxResolutionPx: 4096,
   maxLights: 16,
   maxModifiers: 8,
+  maxFeatures: 64,
 });
 
 function isPlainObject(value) {
@@ -200,6 +206,72 @@ function validateParameterRef(value, parameters, errors, where) {
  * 引用合法性（boolean 目标必须是更早的已存在节点）在 validateSceneSpec 的二次遍历里查，
  * 与 constraints 同一手法：此处还不知道全量节点 id。
  */
+// BLOCK-498（P3-03 v2b D1/D2 后端契约）——特征引用与派生缓存。
+const FEATURE_ID_RE = /^feat:[0-9a-f]{24}$/;
+const FEATURE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_:+\-]{0,63}$/;
+const FEATURE_KIND_SET = new Set(model3dFeatures.FEATURE_KINDS);
+
+/**
+ * 节点特征表的源版本键（D1 派生缓存）：导入件=sourceSha256；基元=dimensions 规范指纹。
+ * 无法派生（group 等）返回 null。
+ */
+function featureVersionKeyOf(node) {
+  if (node.type === 'mesh-reference') {
+    const sha = String(node.source?.sourceSha256 || '');
+    return /^[a-f0-9]{64}$/i.test(sha) ? sha.toLowerCase() : null;
+  }
+  if (isPlainObject(node.dimensions) && Object.keys(node.dimensions).length > 0) {
+    const canonical = Object.keys(node.dimensions).sort()
+      .map((key) => `${key}:${JSON.stringify(node.dimensions[key])}`).join('|');
+    return crypto.createHash('sha256').update(`features/v1|${node.type}|${canonical}`).digest('hex');
+  }
+  return null;
+}
+
+/** 节点 features[] 形状与版本键校验（D1：与源不一致 fail-closed）。 */
+function validateNodeFeatures(node, where, errors) {
+  if (node.features === undefined && node.featuresVersionKey === undefined) return;
+  if (node.features !== undefined && !Array.isArray(node.features)) {
+    errors.push(`${where}.features 必须是数组`);
+    return;
+  }
+  if (!Array.isArray(node.features) || node.features.length === 0) {
+    errors.push(`${where}.featuresVersionKey 需与非空 features 同时提供`);
+    return;
+  }
+  if (node.features.length > LIMITS.maxFeatures) errors.push(`${where}.features 数量超限`);
+  for (const [fi, row] of node.features.entries()) {
+    const fw = `${where}.features[${fi}]`;
+    if (!isPlainObject(row)) { errors.push(`${fw} 必须是对象`); continue; }
+    if (!FEATURE_ID_RE.test(String(row.id || ''))) errors.push(`${fw}.id 非法（须为几何签名 feat:+24hex）`);
+    if (!FEATURE_KIND_SET.has(row.kind)) errors.push(`${fw}.kind 非法（${model3dFeatures.FEATURE_KINDS.join('/')})`);
+    if (row.feature !== undefined && (typeof row.feature !== 'string' || !FEATURE_NAME_RE.test(row.feature))) errors.push(`${fw}.feature 非法`);
+  }
+  if (typeof node.featuresVersionKey !== 'string' || !/^[a-f0-9]{64}$/i.test(node.featuresVersionKey)) {
+    errors.push(`${where}.featuresVersionKey 非法（64hex 源版本键）`);
+    return;
+  }
+  const currentKey = featureVersionKeyOf(node);
+  if (currentKey === null) {
+    errors.push(`${where}.features 无法派生源版本键（节点缺 sourceSha256/dimensions）`);
+    return;
+  }
+  if (currentKey !== String(node.featuresVersionKey).toLowerCase()) {
+    errors.push('features_stale_version_mismatch');
+  }
+}
+
+/**
+ * D2 引用解析：aFeature/bFeature 须在该节点特征表（在册 id 或 feature 名）可解析；
+ * 节点无特征表（旧场景）跳过解析（零迁移，求值回落 aFace 语义）。返回 null=可放行/无表。
+ */
+function resolveConstraintFeature(node, ref) {
+  if (!Array.isArray(node.features)) return { ok: true, row: null };
+  const row = node.features.find((f) => isPlainObject(f) && (f.id === ref || f.feature === ref));
+  if (!row) return { ok: false, row: null };
+  return { ok: true, row };
+}
+
 function validateModifiers(node, index, errors) {
   const where = `nodes[${index}]`;
   if (node.modifiers === undefined) return;
@@ -324,6 +396,7 @@ function validateNode(node, index, parameters, ids, errors) {
       errors.push('mesh_source_hash_required');
     }
   }
+  validateNodeFeatures(node, where, errors);
   validateModifiers(node, index, errors);
 }
 
@@ -447,6 +520,25 @@ function validateConstraints(constraints, nodesById, errors) {
       }
       if (constraint.offset !== undefined && !finiteNumber(constraint.offset)) {
         errors.push(`${where}.offset 必须是有限数值（mm）`);
+      }
+      // BLOCK-498（D2 additive 白名单键）——aFeature/bFeature 可选特征锚：格式（禁 nodeId#featureId
+      // 字符串语法）+ 节点特征表可解析 + 平面性（曲面/边=v2c 不在本票，显式拒绝不静默）。
+      for (const [sideKey, ref] of [['aFeature', constraint.aFeature], ['bFeature', constraint.bFeature]]) {
+        if (ref === undefined) continue;
+        const refStr = String(ref);
+        const nodeRef = sideKey === 'aFeature' ? constraint.a : constraint.b;
+        if (refStr.includes('#') || (!FEATURE_ID_RE.test(refStr) && !FEATURE_NAME_RE.test(refStr))) {
+          errors.push(`${where}.${sideKey} 非法（须为几何签名 feat:+24hex 或特征名；禁 nodeId#featureId 字符串语法）`);
+          continue;
+        }
+        const refNode = nodesById.get(nodeRef);
+        if (!refNode) continue;
+        const resolved = resolveConstraintFeature(refNode, refStr);
+        if (!resolved.ok) {
+          errors.push(`constraint_feature_unresolved: ${where}.${sideKey} ${refStr} 不在 ${nodeRef} 特征表`);
+        } else if (resolved.row && resolved.row.kind !== 'plane') {
+          errors.push(`mate_feature_not_planar: ${where}.${sideKey} ${refStr} kind=${resolved.row.kind}（本票只解平面贴合；曲面/边=v2c）`);
+        }
       }
       for (const [side, node, face] of [['a', aNode, constraint.aFace], ['b', bNode, constraint.bFace]]) {
         if (!node) continue;
@@ -598,6 +690,7 @@ function validateSceneSpec(input) {
   if (input.environment !== undefined) validateEnvironment(input.environment, errors);
   const uniqueErrors = [...new Set(errors)];
   if (uniqueErrors.includes('mesh_source_hash_required')) return { ok: false, error: 'mesh_source_hash_required', errors: uniqueErrors };
+  if (uniqueErrors.includes('features_stale_version_mismatch')) return { ok: false, error: 'features_stale_version_mismatch', errors: uniqueErrors };
   if (uniqueErrors.includes('mesh_format_unsupported')) return { ok: false, error: 'mesh_format_unsupported', errors: uniqueErrors };
   if (uniqueErrors.includes('texture_source_hash_required')) return { ok: false, error: 'texture_source_hash_required', errors: uniqueErrors };
   if (uniqueErrors.includes('texture_format_unsupported')) return { ok: false, error: 'texture_format_unsupported', errors: uniqueErrors };
@@ -715,6 +808,16 @@ function applyMateConstraint({ constraint, index, anchor, target, decided, fail,
   if (!aFace || !bFace) {
     fail('mate_face_incompatible', `constraint ${index}（mate）面标识非法（${constraint.aFace}/${constraint.bFace}）`);
     return;
+  }
+  // BLOCK-498（D2/D1）——特征锚非平面显式拒绝（曲面/边=v2c；aFace/bFace 仍是求值主键）。
+  for (const ref of [constraint.aFeature, constraint.bFeature]) {
+    if (ref === undefined) continue;
+    const featureNode = ref === constraint.aFeature ? anchor : target;
+    const resolved = resolveConstraintFeature(featureNode, String(ref));
+    if (resolved.row && resolved.row.kind !== 'plane') {
+      fail('mate_feature_not_planar', `constraint ${index}（mate）特征 ${ref} kind=${resolved.row.kind} 非平面（曲面/边=v2c）`);
+      return;
+    }
   }
   // P3-03 v2a — 任一节点带旋转 → 局→世合成路径（世界法向校验 + 面点旋转求值 + 姿态写入）
   const aRotated = !rotationIsZero(anchor);
@@ -1151,8 +1254,27 @@ function buildExportManifest(input = {}) {
   };
 }
 
+/**
+ * BLOCK-498（D1 基元自动派生导出）——节点特征表 + 源版本键一条龙（派生缓存写入侧）。
+ * 基元走 derivePrimitiveFeatures；导入件特征须由 CAD 导入链（第二票）以 deriveImportFeatures
+ * 枚举后写入 features[]，本函数对非基元返回 null（不猜、不建第二真值）。
+ */
+function deriveNodeFeatureTable(node) {
+  if (node.type !== 'box' && node.type !== 'cylinder' && node.type !== 'sphere') return null;
+  const versionKey = featureVersionKeyOf(node);
+  if (versionKey === null) return null;
+  return { features: model3dFeatures.derivePrimitiveFeatures(node), versionKey };
+}
+
+/** CAD 导入件特征表接缝（第二票导入链的消费点；本票保证接口单源在册、不悬空）。 */
+function buildImportFeatureTable(faces) {
+  return model3dFeatures.deriveImportFeatures(faces);
+}
+
 module.exports = {
   SCENE_VERSION,
+  deriveNodeFeatureTable,
+  buildImportFeatureTable,
   LIMITS,
   JOINT_KINDS,
   stableStringify,

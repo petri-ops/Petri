@@ -1,0 +1,94 @@
+✔ v2b D2/D1 骨架自检：断言集与契约锚在场 (0.812875ms)
+✔ v2b D3：特征派生链禁 OCCT 建模 API（静态负测，已实现面受检） (0.655125ms)
+✖ v2b D2①：mate 白名单收 aFeature/bFeature 可选键 (1.22525ms)
+✔ v2b D2②：无新键的旧 mate 约束零迁移可解（兼容锚） (0.121834ms)
+✔ v2b D2③：禁 nodeId#featureId 字符串改法（D2 负向裁决锚） (0.079ms)
+✖ v2b D2④：引用特征未解析（节点带 features 表但引用不在册）fail-closed (0.123625ms)
+✖ v2b D1①：features[] 派生缓存与源不一致 fail-closed（版本键=sha/dimensions 指纹） (0.303917ms)
+✔ v2b D1②：特征 id=几何签名（禁内核哈希作跨会话 id） (0.611417ms)
+✖ v2b D1③：派生消费接线——derivePrimitiveFeatures 进 scene3d（基元自动派生）；deriveImportFeatures 接口在册（导入链抽取=第二票） (0.086334ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 5
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 104.905167
+
+✖ failing tests:
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:59:1
+✖ v2b D2①：mate 白名单收 aFeature/bFeature 可选键 (1.22525ms)
+  AssertionError [ERR_ASSERTION]: aFeature/bFeature 应在 mate 白名单且可解析：["constraints[0].aFeature 不在 mate 白名单","constraints[0].bFeature 不在 mate 白名单"]
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:75:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:110:1
+✖ v2b D2④：引用特征未解析（节点带 features 表但引用不在册）fail-closed (0.123625ms)
+  AssertionError [ERR_ASSERTION]: 节点带特征表时引用必须可解析：["constraints[0].aFeature 不在 mate 白名单"]
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:129:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:133:1
+✖ v2b D1①：features[] 派生缓存与源不一致 fail-closed（版本键=sha/dimensions 指纹） (0.303917ms)
+  AssertionError [ERR_ASSERTION]: features 与源版本键不一致必须以 features_stale_version_mismatch fail-closed，实际：{"ok":true,"scene":{"version":"scene3d/v1","parameters":{},"units":"mm","coordinateSystem":"z-up-right-handed","nodes":[{"id":"imported","type":"mesh-reference","position":[0,0,0],"source":{"path":"model3d/runs/x/model.glb","sourceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"featuresVersionKey":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","features":[{"id":"feat:0123456789abcdef01234567","kind":"plane"}]}],"constraints":[]},"stats":{"nodes":1,"parameters":0,"constraints":0,"joints":0,"primitiveEstimate":0},"appliedConstraints":[]}
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:149:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/block322-p3-03-v2b-d2-contract.test.mjs:162:1
+✖ v2b D1③：派生消费接线——derivePrimitiveFeatures 进 scene3d（基元自动派生）；deriveImportFeatures 接口在册（导入链抽取=第二票） (0.086334ms)
+  AssertionError [ERR_ASSERTION]: scene3d 必须接线特征库单源
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block322-p3-03-v2b-d2-contract.test.mjs:165:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

@@ -1,5 +1,6 @@
 /**
- * helpers/model3d-features.js — BLOCK-322 P3-03 v2b 第一票：特征表生成与几何签名（纯逻辑层）。
+ * helpers/model3d-features.js — BLOCK-322 P3-03 v2b 第一票：特征表生成与几何签名（纯逻辑层 · CJS）。
+ * （BLOCK-498 转换 ESM→CJS：消除对 Node 模块语法探测的运行时依赖，产品化收口；唯一消费面=scene3d.js + 契约测试 createRequire。）
  *
  * 稳定性探针定案（acceptance/block-322-p3/v2b-stability-probe.json）：
  *   内核 subShapeHashes 同进程两次 import 即漂移 → 特征 id 一律用**几何签名**
@@ -12,7 +13,7 @@
  *   - 特征 id = sha256('feature/v1|' + kind + '|' + 量化几何参数)，跨会话可复现。
  */
 
-import { createHash } from 'node:crypto';
+const { createHash } = require('node:crypto');
 
 const FEATURE_KINDS = Object.freeze(['plane', 'cylinder', 'cone', 'sphere', 'other']);
 const AXIS_INDEX = { x: 0, y: 1, z: 2 };
@@ -102,7 +103,8 @@ function deriveImportFeatures(faces) {
   });
 }
 
-export {
+
+module.exports = {
   FEATURE_KINDS,
   derivePrimitiveFeatures,
   deriveImportFeatures,

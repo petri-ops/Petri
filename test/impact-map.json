@@ -9235,6 +9235,19 @@
         "test/block497-migration-idempotent-selfheal.test.mjs",
         "test/block336-worktree-project-layer.test.mjs"
       ]
+    },
+    {
+      "id": "block498-v2b-d2-contract",
+      "note": "BLOCK-498 P3-03 v2b 后端契约票（D2/D1 落地）：契约测=block322-p3-03-v2b-d2-contract（骨架激活常驻）；证据变更选契约测+scene3d 邻域；next04a-3d-foundation 保留 scene3d 主域映射。",
+      "patterns": [
+        "docs/block498-v2b-d2-d1-backend-contract-plan.md",
+        "acceptance/block498-v2b-d2-contract/**"
+      ],
+      "tests": [
+        "test/block322-p3-03-v2b-d2-contract.test.mjs",
+        "test/block322-p3-constraints.test.mjs",
+        "test/next04a-scene3d.test.mjs"
+      ]
     }
   ]
 }

@@ -27,6 +27,9 @@ export interface Scene3DConstraint {
   bFace?: string;
   /** mate：沿 a 面法向的间距 mm。 */
   offset?: number;
+  /** mate：特征锚（BLOCK-498 D2 additive；feat:+24hex 几何签名或特征名；旧场景零迁移）。 */
+  aFeature?: string;
+  bFeature?: string;
 }
 
 export type Scene3DModifier =
@@ -352,7 +355,7 @@ const CONSTRAINT_FIELDS: Record<string, readonly string[]> = {
   align: ['id', 'kind', 'a', 'b', 'axis'],
   distance: ['id', 'kind', 'a', 'b', 'axis', 'value'],
   angle: ['id', 'kind', 'a', 'b', 'axis', 'value'],
-  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset'],
+  mate: ['id', 'kind', 'a', 'b', 'aFace', 'bFace', 'offset', 'aFeature', 'bFeature'],
 };
 const MAX_CONSTRAINTS = 200;
 

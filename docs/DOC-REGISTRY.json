@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 649,
+    "documentCount": 650,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 632
+    "managedMarkdown": 633
   },
   "documents": [
     {
@@ -13471,6 +13471,34 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户 A 组 #1 发令；Jev 0.18 唯一建议）。MIGRATION-IDEMPOTENT 修复票：ensureProjectWorktreeColumn 自愈补列收窄版记账——补列 ALTER 与条件记账（仅 MAX(version)===20 补记 v21）同事务；消除「无头栈补列→桌面壳重放 021 撞 duplicate column 拒启」缺口（2026-11-17 实机案底）；跳版守卫（v15 库不记账）+缺席不记+事务原子。HK-01 红绿（红=缺口复现）+邻域 block336 22/22 零回归。迁移内核与 021 SQL 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】HK-01 红→绿 3/3+邻域 22/22；closeout exit=0；🟡 行清偿；包 3 v2b 接续。"
+    },
+    {
+      "id": "BLOCK-498",
+      "path": "docs/block498-v2b-d2-d1-backend-contract-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block498-v2b-d2-d1-backend-contract",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block498-v2b-d2-d1-backend-contract-plan.md",
+        "core/petri-server/helpers/scene3d.js",
+        "core/petri-server/helpers/model3d-features.js",
+        "frontend/src/lib/scene3d.ts",
+        "test/block322-p3-03-v2b-d2-contract.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block498-v2b-d2-contract/"
+      ],
+      "tags": [
+        "BLOCK-322",
+        "v2b",
+        "A2",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户 A 组 #2 发令；BLOCK-496 对齐表 v2b=authorized_pending_start 的第一票）。P3-03 v2b 后端契约票：D2 mate 白名单收 aFeature/bFeature additive 可选键（旧键零迁移/aFace 仍求值主键/禁 nodeId#featureId 语法/constraint_feature_unresolved/mate_feature_not_planar 显式拒绝曲面）+ D1 features[]/featuresVersionKey 派生缓存（版本键=sourceSha256/dimensions 规范指纹，不一致 features_stale_version_mismatch 与 mesh_source_hash_required 同聚合口径）+ 基元派生接线（deriveNodeFeatureTable/buildImportFeatureTable 导出=第二票接缝）+ 特征库 ESM→CJS + 前端镜像白名单同步（跨语言对账门逐值一致）。HK-01 骨架激活红 4→绿 9/9；邻域 43/43；前端 vitest 15/15+tsc 零红。第二票（导入链抽特征+前端编辑器）另案待发令；曲面=v2c 维持。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
