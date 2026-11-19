@@ -1,0 +1,21 @@
+▶ BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）
+  ✔ 缺席红：扫描器 / 契约 / 快照三件必须全部在场 (1.485209ms)
+  ✔ 逐读数现读一致（collect 重算与落盘 value 深等） (9.803959ms)
+  ✔ 五裁决逐项：D1–D5 全部在场、形态值与用户裁决一致、状态 ruled (0.183375ms)
+  ✔ D1 派生缓存 + sha/dimensions 版本键 + 不一致 fail-closed + D3 禁 OCCT 建几何 (0.096917ms)
+  ✔ D2 新增 aFeature/bFeature 白名单键 + 旧场景零迁移 + 非 nodeId#featureId 字符串 (0.094875ms)
+  ✔ 实现票生命周期对齐（BLOCK-496）：两票 implemented / v2b 授权待开工 / v2c 维持；证据在盘 (0.157916ms)
+  ✔ D5 GD&T 数值一致性判据：标注文本 + 视图投影坐标 + 解析尺寸一致，禁主观像不像 (0.076042ms)
+  ✔ 边界：观感零代签 + 零新依赖 + 不改 SceneSpec 契约 + 零产品写面 + 不碰 G1+ (0.092166ms)
+  ✔ manifest sha256 一致 + 契约模型可读标识在场 (0.912084ms)
+  ✔ 篡改负测：翻形态值 / 翻观感 / 加依赖 / 放行 OCCT 建几何 / 越权改票状态 / 抹授权段 一律 fail-closed (16.2195ms)
+  ✔ 零回归基线：RULING-04 材料 / BLOCK-322 主纲 / 观感台账真源文件在场 (6.311417ms)
+✔ BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01） (36.3705ms)
+ℹ tests 11
+ℹ suites 1
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.502167

@@ -1,8 +1,8 @@
 {
   "kind": "block491-ruling-codification",
-  "sourceCommit": "056f3685f2c9948ef605cb5db884ec147bdcce3b",
-  "platform": "win32",
-  "capturedAt": "2026-11-18T14:54:38.043Z",
+  "sourceCommit": "18c63c85cac29ab2fd6db2fe870d6cf01e4d5e95",
+  "platform": "darwin",
+  "capturedAt": "2026-11-19T05:24:34.206Z",
   "readings": {
     "rulings": {
       "value": {
@@ -78,24 +78,38 @@
       "value": {
         "tickets": {
           "P4-05b": {
-            "status": "deferred_user_ruling",
-            "needsUserOrder": true
+            "status": "implemented",
+            "at": "2026-10-30",
+            "evidence": "acceptance/block-322-ruling04/p405b-live-macos.json",
+            "reopenRequiresUserOrder": true
           },
           "P3-03-v2a": {
-            "status": "deferred_user_ruling",
-            "needsUserOrder": true
+            "status": "implemented",
+            "at": "2026-10-31",
+            "evidence": "acceptance/block-322-p3/p3-03-v2a-live-macos.json",
+            "reopenRequiresUserOrder": true
           },
           "P3-03-v2b": {
-            "status": "deferred_user_ruling",
-            "needsUserOrder": true
+            "status": "authorized_pending_start",
+            "at": "2026-11-19",
+            "evidence": null,
+            "reopenRequiresUserOrder": true
           },
           "P3-03-v2c": {
-            "status": "deferred_user_ruling",
-            "needsUserOrder": true
+            "status": "deferred_maintained",
+            "at": "2026-11-19",
+            "evidence": null,
+            "reopenRequiresUserOrder": true
           }
         },
+        "ticketCount": 4,
         "v2cSeparated": true,
-        "noImplementationStarted": true
+        "p4_05_full_chain": {
+          "status": "authorized_pending_start",
+          "authorizedAt": "2026-11-19",
+          "dependsOn": "P3-03-v2b"
+        },
+        "alignmentAuthorized": true
       },
       "source": "RULING-04 材料 §5 + BLOCK-491 plan §4",
       "command": "node scripts/block491-ruling-codification.mjs",

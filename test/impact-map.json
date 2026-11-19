@@ -9208,6 +9208,19 @@
         "test/block267-flow-env-trap.test.mjs",
         "test/post-h9-k4-architecture.test.mjs"
       ]
+    },
+    {
+      "id": "block496-ruling-registration-realign",
+      "note": "BLOCK-496 登记漂移对齐包：block322-ruling-codification 契约 implementationTickets 重算（reopen 条款，2026-11-19 用户授权）；证据变更选契约消费测试重跑（HK-01 契约面）。",
+      "patterns": [
+        "acceptance/block496-ruling-registration-realign/**",
+        "docs/block496-ruling-registration-realign-plan.md",
+        "scripts/block491-ruling-codification.mjs",
+        "test/block491-ruling-codification.test.mjs"
+      ],
+      "tests": [
+        "test/block491-ruling-codification.test.mjs"
+      ]
     }
   ]
 }

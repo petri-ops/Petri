@@ -87,10 +87,15 @@ status: reference
 ## 5. 批准后的开工序（每票独立可停）
 
 1. **P4-05b（= 候选 D）特征锚定的尺寸标注第一刀**：`tolerances[].feature` 变可解析引用 + HLR SVG 上出尺寸线与文字。判据=契约测 + 实机 SVG 数值对账 + UI 腿。体量=1 票。
+   *状态*：**implemented（2026-10-30）**——第一刀已实现并接线（实机证据 `acceptance/block-322-ruling04/p405b-live-macos.json`，D5 数值对账在册）；现行状态以 [BLOCK-496 对齐表](./block496-ruling-registration-realign-plan.md) §3 为准。
 2. **P3-03 v2a**：求值器加局部系→世界系合成，`mate` 支持带旋转的平面贴合；前置探针=Blender 4.5 欧拉序实测（`resources/model3d/blender_scene.py:106-111` 直接设 `rotation_euler`、未设 `rotation_mode`，默认序必须**实测**确认，不能按文档猜——本纲已四次栽在 API/枚举漂移上，见纲 §5）。体量=1 票。
+   *状态*：**implemented（2026-10-31，commit c88f2fd9）**——欧拉序已按实测探针定案（本机 Blender 5.2.3 LTS：默认 `rotation_mode='XYZ'`、Rz·Ry·Rx 列向量右乘；材料原文 4.5 为版本号登记漂移）；实机证据 `acceptance/block-322-p3/p3-03-v2a-live-macos.json`（面心对账 gap=0）。现行状态以 [BLOCK-496 对齐表](./block496-ruling-registration-realign-plan.md) §3 为准。
 3. **P3-03 v2b**：`features[]` 数据模型 + 基元自动派生 + CAD 导入件入链时抽特征（平面/圆柱/锥/球；`bspline` 等一律如实标 `other` 并拒绝贴合）+ sidecar sha 锚定 + 前端约束编辑器。体量=2 票（后端/前端）。
+   *状态*：**authorized_pending_start（2026-11-19 用户发令开工）**——特征表纯函数库/前端同源移植/几何签名探针定案已在场；后端契约票（D2/D1）先行（契约测骨架 `test/block322-p3-03-v2b-d2-contract.test.mjs` 已备）；现行状态以 [BLOCK-496 对齐表](./block496-ruling-registration-realign-plan.md) §3 为准。
 4. **P3-03 v2c**：曲面/边贴合与相切约束（须 D4 明确承诺才排期）。
+   *状态*：**deferred_maintained（2026-11-19 用户裁决维持）**——重开需新发令。
 5. **不随本裁决**：P4-04b（IGES 导出 / 解析 B-rep STEP）仍是 RULING-01 的原生内核议题；P5-02（真实 Tripo key）你已裁决暂停；RULING-03（切片 CLI）本机实装的是 Orca agent CLI，不是 OrcaSlicer，条件不成立。
+   *补充（2026-11-19）*：**P4-05 完整尺寸链（主纲余量，非本 §5 四票槽位）** 已获用户发令开工（authorized_pending_start），依赖 v2b 特征引用落地；登记见 [BLOCK-496 对齐表](./block496-ruling-registration-realign-plan.md) §3。
 
 ## 6. 实测记录（探针只用于选型，跑完即删，不入库）
 

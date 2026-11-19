@@ -9,11 +9,19 @@ import {
   validateRulingCodificationIntegrity,
   scanRulings,
   scanBoundaries,
+  scanImplementationTickets,
   RULING_IDS,
   RULING_FORM,
   DEFERRED_TICKETS,
   READING_IDS,
 } from '../scripts/block491-ruling-codification.mjs';
+
+/** 篡改注入：把 BLOCK-496 对齐表整体换成无关文本（状态必须回退 undetermined，不得沿用旧值）。 */
+function scanImplementationTicketsSourcesOverridden(root) {
+  return scanImplementationTickets(root, {
+    'docs/block496-ruling-registration-realign-plan.md': 'alignment plan with no machine readable status table at all',
+  });
+}
 
 // BLOCK-491 · BLOCK-322-RULING D1–D5 裁决固化（HK-01 红绿先行 + 篡改负测）。
 // 只固化裁决材料 + 冻结边界，不实现任何几何/SceneSpec 契约变更。
@@ -86,16 +94,32 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     assert.equal(s.contractChangeDeferred, true, 'SceneSpec 契约变更属后续实现票，本包不落地');
   });
 
-  it('实现票 deferred 逐票：P4-05b / v2a / v2b 待发令，v2c deferred，不随裁决项登记', () => {
+  it('实现票生命周期对齐（BLOCK-496）：两票 implemented / v2b 授权待开工 / v2c 维持；证据在盘', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const s = ownGet(snap.readings, 'implementationTickets').value;
     assert.deepEqual(Object.keys(s.tickets).sort(), [...DEFERRED_TICKETS].sort());
+    const expected = {
+      'P4-05b': 'implemented',
+      'P3-03-v2a': 'implemented',
+      'P3-03-v2b': 'authorized_pending_start',
+      'P3-03-v2c': 'deferred_maintained',
+    };
     for (const id of DEFERRED_TICKETS) {
-      assert.equal(ownGet(s.tickets, id).status, 'deferred_user_ruling', `${id} 必须 deferred_user_ruling`);
-      assert.equal(ownGet(s.tickets, id).needsUserOrder, true, `${id} 需用户逐票发令`);
+      const row = ownGet(s.tickets, id);
+      assert.equal(row.status, expected[id], `${id} 状态须与 2026-11-19 对齐表（BLOCK-496 §3）一致`);
+      assert.equal(row.reopenRequiresUserOrder, true, `${id} 越过当前状态推进须用户新发令`);
     }
-    assert.equal(s.v2cSeparated, true, 'v2c 必须单列 deferred');
-    assert.equal(s.noImplementationStarted, true, '本包未启动任何实现票');
+    assert.equal(ownGet(s.tickets, 'P4-05b').evidence, 'acceptance/block-322-ruling04/p405b-live-macos.json');
+    assert.equal(ownGet(s.tickets, 'P3-03-v2a').evidence, 'acceptance/block-322-p3/p3-03-v2a-live-macos.json');
+    // 登记≠存在：已实现票的证据文件必须在盘（实况锚，BLOCK-494 教训）。
+    for (const ev of ['acceptance/block-322-ruling04/p405b-live-macos.json', 'acceptance/block-322-p3/p3-03-v2a-live-macos.json']) {
+      assert.equal(fs.existsSync(path.join(ROOT, ev)), true, `已实现票证据必须在盘：${ev}`);
+    }
+    assert.equal(s.v2cSeparated, true, 'v2c 必须单列');
+    assert.equal(s.alignmentAuthorized, true, '2026-11-19 对齐授权段（BLOCK-496 §2）必须在场');
+    assert.equal(s.p4_05_full_chain.status, 'authorized_pending_start', 'P4-05 完整尺寸链=已授权待开工');
+    assert.equal(s.p4_05_full_chain.authorizedAt, '2026-11-19');
+    assert.equal(s.p4_05_full_chain.dependsOn, 'P3-03-v2b');
   });
 
   it('D5 GD&T 数值一致性判据：标注文本 + 视图投影坐标 + 解析尺寸一致，禁主观像不像', () => {
@@ -127,11 +151,11 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     assert.equal(contract.kind, 'model-readable-ruling-codification');
     assert.equal(contract.rulingStatus, 'ruled');
     assert.equal(contract.boundaries.readOnly, true);
-    assert.equal(contract.boundaries.noImplementation, true);
+    assert.equal(contract.boundaries.codificationIsNotImplementation, true, '契约工具自身零实现写面');
     assert.equal(contract.boundaries.humanEyeSigned, false);
   });
 
-  it('篡改负测：翻形态值 / 翻观感 / 加依赖 / 放行 OCCT 建几何 / 改 deferred 为 active 一律 fail-closed', () => {
+  it('篡改负测：翻形态值 / 翻观感 / 加依赖 / 放行 OCCT 建几何 / 越权改票状态 / 抹授权段 一律 fail-closed', () => {
     const fresh = collectRulingCodification(ROOT);
     const override = (id, value) => Object.fromEntries(
       READING_IDS.map((rid) => [rid, rid === id ? { ...ownGet(fresh, rid), value } : { ...ownGet(fresh, rid) }]),
@@ -146,10 +170,22 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     // 放行 OCCT 建几何必须红。
     const tamperedOcct = { ...ownGet(fresh, 'featureIdentity').value, noOcctBuildGeometry: false };
     assert.equal(validateRulingCodificationIntegrity(override('featureIdentity', tamperedOcct)).ok, false, '放行 OCCT 建几何必须 fail-closed');
-    // 把 deferred 改成 active 必须红。
+    // 越权改票状态：非法枚举值（active）必须红。
     const t = ownGet(fresh, 'implementationTickets').value;
-    const tamperedTickets = { ...t, tickets: { ...t.tickets, 'P3-03-v2a': { ...ownGet(t.tickets, 'P3-03-v2a'), status: 'active' } } };
-    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedTickets)).ok, false, 'deferred 改 active 必须 fail-closed');
+    const tamperedActive = { ...t, tickets: { ...t.tickets, 'P3-03-v2a': { ...ownGet(t.tickets, 'P3-03-v2a'), status: 'active' } } };
+    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedActive)).ok, false, '非法票状态必须 fail-closed');
+    // 越权推进：v2b 未经收口直接标 implemented（无证据）必须红。
+    const tamperedSkip = { ...t, tickets: { ...t.tickets, 'P3-03-v2b': { ...ownGet(t.tickets, 'P3-03-v2b'), status: 'implemented', evidence: null } } };
+    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedSkip)).ok, false, '越权推进 implemented（无证据）必须 fail-closed');
+    // 已实现票证据指针被抹必须红。
+    const tamperedEvidence = { ...t, tickets: { ...t.tickets, 'P4-05b': { ...ownGet(t.tickets, 'P4-05b'), evidence: null } } };
+    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedEvidence)).ok, false, 'implemented 票缺证据指针必须 fail-closed');
+    // 对齐授权段被抹必须红。
+    const tamperedAuth = { ...t, alignmentAuthorized: false };
+    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedAuth)).ok, false, '对齐授权缺席必须 fail-closed');
+    // 直接注入篡改对齐表：状态表整体被换 → 票状态回退 undetermined（不得沿用旧值）。
+    const alignTampered = scanImplementationTicketsSourcesOverridden(ROOT);
+    assert.equal(alignTampered.tickets['P3-03-v2a'].status, 'undetermined', '篡改对齐表后不得仍报 implemented');
     // 直接注入篡改真源：RULING-04 材料删掉禁 OCCT 建几何句 → noOcctBuildGeometry 翻红。
     const rulingTampered = scanRulings(ROOT, {
       'docs/block-322-ruling-04-feature-reference-v2.md': 'feature reference material with no red lines at all',

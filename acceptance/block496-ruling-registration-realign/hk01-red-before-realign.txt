@@ -1,0 +1,119 @@
+▶ BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）
+  ✖ 缺席红：扫描器 / 契约 / 快照三件必须全部在场 (3.004917ms)
+  ✖ 逐读数现读一致（collect 重算与落盘 value 深等） (11.518834ms)
+  ✔ 五裁决逐项：D1–D5 全部在场、形态值与用户裁决一致、状态 ruled (0.255167ms)
+  ✔ D1 派生缓存 + sha/dimensions 版本键 + 不一致 fail-closed + D3 禁 OCCT 建几何 (0.112125ms)
+  ✔ D2 新增 aFeature/bFeature 白名单键 + 旧场景零迁移 + 非 nodeId#featureId 字符串 (0.14125ms)
+  ✖ 实现票生命周期对齐（BLOCK-496）：两票 implemented / v2b 授权待开工 / v2c 维持；证据在盘 (0.375791ms)
+  ✔ D5 GD&T 数值一致性判据：标注文本 + 视图投影坐标 + 解析尺寸一致，禁主观像不像 (0.09475ms)
+  ✔ 边界：观感零代签 + 零新依赖 + 不改 SceneSpec 契约 + 零产品写面 + 不碰 G1+ (0.079459ms)
+  ✖ manifest sha256 一致 + 契约模型可读标识在场 (0.743709ms)
+  ✖ 篡改负测：翻形态值 / 翻观感 / 加依赖 / 放行 OCCT 建几何 / 越权改票状态 / 抹授权段 一律 fail-closed (8.480916ms)
+  ✔ 零回归基线：RULING-04 材料 / BLOCK-322 主纲 / 观感台账真源文件在场 (6.450709ms)
+✖ BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01） (32.159042ms)
+ℹ tests 11
+ℹ suites 1
+ℹ pass 6
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.236416
+
+✖ failing tests:
+
+test at test/block491-ruling-codification.test.mjs:41:3
+✖ 缺席红：扫描器 / 契约 / 快照三件必须全部在场 (3.004917ms)
+  AssertionError [ERR_ASSERTION]: 完整性: implementationTickets 违约
+  
+  false !== true
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block491-ruling-codification.test.mjs:48:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block491-ruling-codification.test.mjs:51:3
+✖ 逐读数现读一致（collect 重算与落盘 value 深等） (11.518834ms)
+  Error: [block491:ruling] 读数不合格: implementationTickets 违约
+      at collectRulingCodification (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/scripts/block491-ruling-codification.mjs:334:24)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block491-ruling-codification.test.mjs:53:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at test/block491-ruling-codification.test.mjs:97:3
+✖ 实现票生命周期对齐（BLOCK-496）：两票 implemented / v2b 授权待开工 / v2c 维持；证据在盘 (0.375791ms)
+  AssertionError [ERR_ASSERTION]: P4-05b 状态须与 2026-11-19 对齐表（BLOCK-496 §3）一致
+  + actual - expected
+  
+  + 'deferred_user_ruling'
+  - 'implemented'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block491-ruling-codification.test.mjs:109:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'deferred_user_ruling',
+    expected: 'implemented',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block491-ruling-codification.test.mjs:144:3
+✖ manifest sha256 一致 + 契约模型可读标识在场 (0.743709ms)
+  AssertionError [ERR_ASSERTION]: 契约工具自身零实现写面
+  + actual - expected
+  
+  + undefined
+  - true
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block491-ruling-codification.test.mjs:154:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/block491-ruling-codification.test.mjs:158:3
+✖ 篡改负测：翻形态值 / 翻观感 / 加依赖 / 放行 OCCT 建几何 / 越权改票状态 / 抹授权段 一律 fail-closed (8.480916ms)
+  Error: [block491:ruling] 读数不合格: implementationTickets 违约
+      at collectRulingCodification (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/scripts/block491-ruling-codification.mjs:334:24)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/block491-ruling-codification.test.mjs:159:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7)

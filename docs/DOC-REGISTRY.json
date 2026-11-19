@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 647,
-    "lastUpdated": "2026-11-18",
-    "managedMarkdown": 630
+    "documentCount": 648,
+    "lastUpdated": "2026-11-19",
+    "managedMarkdown": 631
   },
   "documents": [
     {
@@ -13418,7 +13418,35 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户预授权无人值守提示词 §5 S3 / BLOCK-492 plan §3 W3 波次）。W3 候选池转正评审：六组候选逐条六段材料（现状/候选/风险/推荐/影响面/退出成本），状态 pending_user_ruling 不启动实现。核对结论：C-45 已由 BLOCK-355 完成（trimmer 单元化+防御层+6/6 测试）、C-35~C-44 已由 BLOCK-264 完成（登记滞后第 3 次抓到）——两组候选消亡如实钉死；真候选四项=MIGRATION-IDEMPOTENT（推荐自愈补列收窄版记账）/BLOCK-490（推荐 D2/D8 先裁+最小垂直切片）/C-50（推荐维持登记等场景）/C-56（推荐手册内容稿先行）。他方 WIP（backlog 原件/block490 原件/gateway-design.md）零触碰；零实现/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。【2026-11-19 收口】docs 门禁全绿；两组候选消亡钉死/真候选四项材料齐；串行槽位回空，无人值守三波次全收口。"
+    },
+    {
+      "id": "BLOCK-496",
+      "path": "docs/block496-ruling-registration-realign-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block496-ruling-registration-realign",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block496-ruling-registration-realign-plan.md",
+        "scripts/block491-ruling-codification.mjs",
+        "test/block491-ruling-codification.test.mjs",
+        "resources/ruling-codification/block322-ruling-codification.json",
+        "docs/block-322-ruling-04-feature-reference-v2.md",
+        "test/impact-map.json",
+        "acceptance/block496-ruling-registration-realign/"
+      ],
+      "tags": [
+        "BLOCK-491",
+        "BLOCK-322",
+        "registration-realign",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户裁决 B 组按推荐=B7 对齐授权）。登记漂移对齐：按 BLOCK-491 自带 reopen 条款把 block322-ruling-codification 契约 implementationTickets 从收口时点快照（四票全 deferred）重算为当前真值（P4-05b/v2a implemented 含证据指针 / v2b authorized_pending_start 2026-11-19 / v2c deferred_maintained；P4-05 完整链附属读数 authorized_pending_start）；D1–D5 五裁决形态一字不动；消费测试 fail-closed 锚迁移=钉住当前真值+篡改即红（越权推进/抹证据/抹授权段均红）；对齐真源=本包 plan §3 机器可读状态表（扫描器读数组新源）。零产品代码/零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-18"
+  "lastUpdated": "2026-11-19"
 }

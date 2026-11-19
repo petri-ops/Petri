@@ -1,11 +1,11 @@
 {
   "kind": "block491-ruling-codification-manifest",
-  "sourceCommit": "056f3685f2c9948ef605cb5db884ec147bdcce3b",
+  "sourceCommit": "18c63c85cac29ab2fd6db2fe870d6cf01e4d5e95",
   "files": [
     {
       "path": "block322-ruling-codification.json",
-      "sha256": "e565d062fa4cc0db7ea0dfa0b5d31f08f4d097be0bdff993c10caffe76d102c4",
-      "bytes": 3150
+      "sha256": "2ecee4a41bf0ca4a265da301f9fa595a9299868394f316a15335e1820678d70b",
+      "bytes": 3688
     }
   ]
 }

@@ -5,12 +5,13 @@
  * collectRulingCodification(root) 是纯函数：从本地主权真源机械复算六组读数，不写产品代码。
  * 本包只固化「用户对 RULING-04 的 D1–D5 裁决已采纳」这一事实 + 冻结边界；
  * 零产品代码写面 / 零新依赖 / 不改 SceneSpec 契约 / 观感 pending_human_eye 零代签 / 不碰 G1+。
- * 几何实现票（P4-05b / P3-03 v2a / v2b / v2c）一律 deferred_user_ruling，逐票待发令。
+ * 几何实现票（P4-05b / P3-03 v2a / v2b / v2c）生命周期状态以 BLOCK-496 对齐表为准
+ * （BLOCK-491 收口时点全 deferred；2026-11-19 用户发令后按 reopen 条款重算：两票 implemented / v2b 授权待开工 / v2c 维持）。
  *
  *   - rulings              D1–D5 五项：对象/形态值/状态 ruled/用户原话在场
  *   - featureIdentity      D1 派生缓存 + sha/dimensions 版本键 + fail-closed + D3 禁 OCCT 建几何
  *   - referenceSyntax      D2 白名单加键 aFeature/bFeature + 旧场景零迁移 + 非 nodeId#featureId
- *   - implementationTickets 实现票分期与 deferred（P4-05b / v2a / v2b / v2c）
+ *   - implementationTickets 实现票生命周期（P4-05b / v2a / v2b / v2c · BLOCK-496 对齐）
  *   - gdtAcceptance        D5 数值一致性判据 + 禁主观像不像
  *   - boundaries           观感零代签 / 零新依赖 / 不改契约 / 零产品写面 / 不碰 G1+
  *
@@ -53,16 +54,25 @@ export const RULING_OBJECT = Object.freeze({
   D5: 'GD&T acceptance level',
 });
 
-/** 实现票（逐票 deferred_user_ruling，需用户发令）。 */
+/** 实现票（四票槽位；生命周期状态见 TICKET_STATUS，对齐真源=BLOCK-496 §3 状态表）。 */
 export const DEFERRED_TICKETS = Object.freeze([
   'P4-05b', 'P3-03-v2a', 'P3-03-v2b', 'P3-03-v2c',
 ]);
 
+/** 实现票生命周期状态（封闭枚举 · BLOCK-496 对齐引入；越过当前状态推进一律需用户新发令）。 */
+export const TICKET_STATUS = Object.freeze({
+  IMPLEMENTED: 'implemented',
+  PARTIALLY_IMPLEMENTED: 'partially_implemented',
+  AUTHORIZED_PENDING_START: 'authorized_pending_start',
+  DEFERRED_MAINTAINED: 'deferred_maintained',
+  DEFERRED_USER_RULING: 'deferred_user_ruling',
+});
+
 /** 冻结下限（只减必红）。 */
 export const PATTERN_FLOOR = Object.freeze({
   rulingCount: 5,
-  deferredTicketCount: 4,
-  owner: 'BLOCK-491：立项现读 2026-11-18；RULING-04 D1–D5 裁决固化 + 契约冻结；零产品写面/观感零代签',
+  ticketCount: 4,
+  owner: 'BLOCK-491 立项现读 2026-11-18（D1–D5 固化）+ BLOCK-496 对齐现读 2026-11-19（reopen 条款：实现票发令→契约同步重算）；D1–D5 形态一字不动；零产品写面/观感零代签',
 });
 
 // own-enumerable 查找（BLOCK-456 先例），避免 object-injection 告警。
@@ -153,30 +163,69 @@ export function scanReferenceSyntax(root = ROOT, sourcesOverride = null) {
   };
 }
 
-/** 纯函数：实现票分期与 deferred。 */
+/** 对齐真源（BLOCK-496 plan §3 状态表；BLOCK-491 plan §4 为收口时点历史快照，不作现行状态源）。 */
+const ALIGN_DOC = 'docs/block496-ruling-registration-realign-plan.md';
+
+/** 对齐表行锚（BLOCK-496 §3 · 机器可读状态表；行被篡改即回退 undetermined）。 */
+const TICKET_ROW_ANCHORS = Object.freeze({
+  'P4-05b': {
+    status: TICKET_STATUS.IMPLEMENTED,
+    at: '2026-10-30',
+    evidence: 'acceptance/block-322-ruling04/p405b-live-macos.json',
+    re: /\|\s*P4-05b\s*\|\s*implemented\s*\|\s*2026-10-30\s*\|[\s\S]{0,240}?p405b-live-macos/,
+  },
+  'P3-03-v2a': {
+    status: TICKET_STATUS.IMPLEMENTED,
+    at: '2026-10-31',
+    evidence: 'acceptance/block-322-p3/p3-03-v2a-live-macos.json',
+    re: /\|\s*P3-03-v2a\s*\|\s*implemented\s*\|\s*2026-10-31\s*\|[\s\S]{0,240}?p3-03-v2a-live/,
+  },
+  'P3-03-v2b': {
+    status: TICKET_STATUS.AUTHORIZED_PENDING_START,
+    at: '2026-11-19',
+    evidence: null,
+    re: /\|\s*P3-03-v2b\s*\|\s*authorized_pending_start\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?开工/,
+  },
+  'P3-03-v2c': {
+    status: TICKET_STATUS.DEFERRED_MAINTAINED,
+    at: '2026-11-19',
+    evidence: null,
+    re: /\|\s*P3-03-v2c\s*\|\s*deferred_maintained\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?维持/,
+  },
+});
+const P4_05_FULL_CHAIN_ANCHOR = /\|\s*P4-05（完整尺寸链）\s*\|\s*authorized_pending_start\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?开工/;
+
+/** 纯函数：实现票生命周期状态（读 RULING-04 §5 范围 + BLOCK-496 §3 对齐状态表）。 */
 export function scanImplementationTickets(root = ROOT, sourcesOverride = null) {
   const material = read(root, sourcesOverride, RULING_DOC);
-  const plan = read(root, sourcesOverride, PLAN_DOC);
+  const align = read(root, sourcesOverride, ALIGN_DOC);
   const tickets = {};
-  const ticketSignals = Object.freeze({
+  const ticketScope = Object.freeze({
     'P4-05b': /P4-05b/,
     'P3-03-v2a': /P3-03\s*v2a|v2a/,
     'P3-03-v2b': /P3-03\s*v2b|v2b/,
     'P3-03-v2c': /P3-03\s*v2c|v2c/,
   });
   for (const id of DEFERRED_TICKETS) {
-    const signal = ownGet(ticketSignals, id);
-    const inScope = has(material, signal) && has(plan, signal);
-    const markedActive = new RegExp(`${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]{0,120}(active|in_progress|已开工)`).test(plan);
+    const inScope = has(material, ownGet(ticketScope, id));
+    const anchor = ownGet(TICKET_ROW_ANCHORS, id);
+    const matched = Boolean(inScope && anchor && anchor.re.test(align));
     Object.assign(tickets, { [id]: {
-      status: inScope && !markedActive ? 'deferred_user_ruling' : 'undetermined',
-      needsUserOrder: true,
+      status: matched ? anchor.status : 'undetermined',
+      at: matched ? anchor.at : null,
+      evidence: matched ? (anchor.evidence ?? null) : null,
+      // 越过当前状态推进（含重开/下一票/翻案）一律需用户新发令——普适 fail-closed。
+      reopenRequiresUserOrder: true,
     } });
   }
   return {
     tickets,
+    ticketCount: Object.keys(tickets).length,
     v2cSeparated: has(material, /v2c\s*单列|v2c\s*单列\s*deferred|v2c（曲面\/边）单列/),
-    noImplementationStarted: has(plan, /不启动任何\s*SceneSpec|不启动任何几何|零产品代码写面/),
+    p4_05_full_chain: P4_05_FULL_CHAIN_ANCHOR.test(align)
+      ? { status: TICKET_STATUS.AUTHORIZED_PENDING_START, authorizedAt: '2026-11-19', dependsOn: 'P3-03-v2b' }
+      : { status: 'undetermined', authorizedAt: null, dependsOn: null },
+    alignmentAuthorized: has(align, /## 2\. 用户授权（2026-11-19/),
   };
 }
 
@@ -243,9 +292,24 @@ export function validateRulingCodificationIntegrity(readings) {
   if (!s || !s.additiveWhiteListKeys || !s.aFeatureBFeature || !s.zeroLegacyMigration
     || !s.notNodeIdFeatureString || !s.contractChangeDeferred) issues.push('referenceSyntax 违约');
   const t = get('implementationTickets');
-  if (!t || Object.keys(t.tickets ?? {}).length !== PATTERN_FLOOR.deferredTicketCount
-    || !DEFERRED_TICKETS.every((id) => ownGet(t.tickets, id)?.status === 'deferred_user_ruling' && ownGet(t.tickets, id)?.needsUserOrder === true)
-    || !t.v2cSeparated || !t.noImplementationStarted) issues.push('implementationTickets 违约');
+  const VALID_TICKET_STATUS = new Set(Object.values(TICKET_STATUS));
+  // 钉住当前真值（BLOCK-496 对齐表）：任一票状态被篡改/越权推进 → 红。对应包收口时按 reopen 条款同步更新此处。
+  const EXPECTED_TICKET_STATUS = Object.freeze({
+    'P4-05b': TICKET_STATUS.IMPLEMENTED,
+    'P3-03-v2a': TICKET_STATUS.IMPLEMENTED,
+    'P3-03-v2b': TICKET_STATUS.AUTHORIZED_PENDING_START,
+    'P3-03-v2c': TICKET_STATUS.DEFERRED_MAINTAINED,
+  });
+  if (!t || Object.keys(t.tickets ?? {}).length !== PATTERN_FLOOR.ticketCount
+    || !DEFERRED_TICKETS.every((id) => {
+      const row = ownGet(t.tickets, id);
+      return row && VALID_TICKET_STATUS.has(row.status) && row.status === EXPECTED_TICKET_STATUS[id]
+        && row.reopenRequiresUserOrder === true
+        && (row.status !== TICKET_STATUS.IMPLEMENTED
+          || (typeof row.evidence === 'string' && row.evidence.startsWith('acceptance/')));
+    })
+    || !t.v2cSeparated || !t.alignmentAuthorized
+    || t.p4_05_full_chain?.status !== TICKET_STATUS.AUTHORIZED_PENDING_START) issues.push('implementationTickets 违约');
   const g = get('gdtAcceptance');
   if (!g || !g.annotationText || !g.viewProjectionCoords || !g.numericConsistency || !g.noSubjectiveLooksRight) issues.push('gdtAcceptance 违约');
   const b = get('boundaries');
@@ -287,7 +351,8 @@ function buildContract(readings, sourceCommit) {
     readings: Object.fromEntries(READING_IDS.map((id) => [id, val(id)])),
     boundaries: {
       readOnly: true,
-      noImplementation: true,
+      // 契约工具自身零实现写面（实现发生在各实现票包，本契约随其 reopen 条款同步重算）。
+      codificationIsNotImplementation: true,
       noSceneSpecContractChange: true,
       noNewDependency: true,
       humanEyeSigned: false,
