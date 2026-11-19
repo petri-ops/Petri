@@ -1,0 +1,35 @@
+
+> petri-desktop-frontend@0.0.4 test:files
+> node scripts/test-files.mjs src/pages/project-workspace/RightFileTree.refresh.test.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/pages/project-workspace/RightFileTree.refresh.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 206[2mms[22m[39m
+   [31m❯[39m RightFileTree 刷新触发面 (UI-399) [2m(2)[22m
+     [32m✓[39m 切换活动文件不触发树请求；projectWorkspaceChanged 才触发[32m 198[2mms[22m[39m
+[31m     [31m×[31m C-47 方向 A — 本地 2s 轮询只做签名对账，不重建树（根拉取数不增长）[39m[32m 7[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/project-workspace/RightFileTree.refresh.test.tsx[2m > [22mRightFileTree 刷新触发面 (UI-399)[2m > [22mC-47 方向 A — 本地 2s 轮询只做签名对账，不重建树（根拉取数不增长）
+[31m[1mAssertionError[22m: expected 0 to be greater than 0[39m
+[36m [2m❯[22m src/pages/project-workspace/RightFileTree.refresh.test.tsx:[2m152:30[22m[39m
+    [90m150|[39m       const rootFetches = () => treeCalls.filter((u) => !u.includes('p…
+    [90m151|[39m       const rootAfterMount = rootFetches();
+    [90m152|[39m       expect(rootAfterMount).toBeGreaterThan(0);
+    [90m   |[39m                              [31m^[39m
+    [90m153|[39m
+    [90m154|[39m       // 两个轮询 tick（C-47 症状=每个 tick 一次 offset=0 根拉取重建树+重置续拉游标）
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 15:03:11
+[2m   Duration [22m 850ms[2m (environment 35%, tests 29%, transform 19%, import 16%)[22m
+

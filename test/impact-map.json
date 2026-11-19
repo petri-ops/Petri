@@ -9274,6 +9274,17 @@
       "tests": [
         "test/block501-capability-intake.test.mjs"
       ]
+    },
+    {
+      "id": "block502-c47-fix",
+      "note": "BLOCK-502 C-47 修复票（方向 A）：轮询只签名对账不重建树；证据变更选 C-47 回归测重跑+既有 UI-399 刷新触发面测试。",
+      "patterns": [
+        "docs/block502-c47-filetree-poll-fix-plan.md",
+        "acceptance/block502-c47-fix/**"
+      ],
+      "tests": [
+        "test/block89-workspace-file-ops.test.mjs"
+      ]
     }
   ]
 }

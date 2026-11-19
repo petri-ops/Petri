@@ -177,17 +177,11 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     }
   }, [rootMore, rootLoadingMore, fetchDirPage]);
 
-  const refreshFiles = useCallback(async (forcePreview = false) => {
-    const rootPage = await fetchDirPage('', 0);
-    setTree(rootPage.entries);
-    setRootMore(rootPage.truncated ? { total: rootPage.total, done: rootPage.entries.length } : null);
-    setLoading(false);
-    setRefreshVersion((value) => value + 1);
-
-    // UI-399 — 活动文件签名对账读 ref（闭包版依赖 activeFile 使本函数身份
-    // 随切换文件变化，曾导致每次点开文件整树重拉，见上方 activeFileRef 注释）。
+  // C-47 方向 A（BLOCK-502，用户 2026-11-19 发令）——活动文件签名读取核（读 ref 保身份稳定，
+  // UI-399 教训）；返回「签名是否变化」。轮询路径与全量刷新共用。
+  const readActiveSignature = useCallback(async (): Promise<boolean> => {
     const currentFile = activeFileRef.current;
-    if (!currentFile?.path) return;
+    if (!currentFile?.path) return false;
     const segments = currentFile.path.split('/').filter(Boolean);
     const fileName = segments.pop() || currentFile.name;
     const parent = segments.join('/');
@@ -199,7 +193,29 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       : 'missing';
     const previous = activeFileSignatureRef.current;
     activeFileSignatureRef.current = signature;
-    if (forcePreview || (previous !== null && previous !== signature)) {
+    return previous !== null && previous !== signature;
+  }, [fetchDir]);
+
+  /** C-47 方向 A — 轮询路径：只做活动文件签名对账与活动 tab bump，不重建树、不动 rootMore。 */
+  const reconcileActiveFile = useCallback(async () => {
+    const changed = await readActiveSignature();
+    if (changed) {
+      const activePath = activeFileRef.current?.path;
+      if (activePath) {
+        setPreviewVersions((prev) => ({ ...prev, [activePath]: (prev[activePath] ?? 0) + 1 }));
+      }
+    }
+  }, [readActiveSignature]);
+
+  const refreshFiles = useCallback(async (forcePreview = false) => {
+    const rootPage = await fetchDirPage('', 0);
+    setTree(rootPage.entries);
+    setRootMore(rootPage.truncated ? { total: rootPage.total, done: rootPage.entries.length } : null);
+    setLoading(false);
+    setRefreshVersion((value) => value + 1);
+
+    const signatureChanged = await readActiveSignature();
+    if (forcePreview || signatureChanged) {
       // UI-451 加映 v2 (P2-1) — forcePreview（手动刷新/agent 写档）除活动 tab 外连带刷新
       // 全部**非脏**后台 tab（无草稿可丢，消除切回时的陈旧内容）；本地 2s 轮询的签名
       // 变化只验证活动文件 → 维持只 bump 活动 tab（语义不变）。
@@ -266,7 +282,9 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
     let timer: number | undefined;
     if (!isSsh) {
       timer = window.setInterval(() => {
-        if (!document.hidden) void refreshFiles();
+        // C-47 方向 A — 轮询只做签名对账（此前走 refreshFiles 全量重建+offset=0
+        // 根拉取，每 2s 收回用户已续拉的页；BLOCK-477 三重证据复现归因）。
+        if (!document.hidden) void reconcileActiveFile();
       }, 2000);
     }
     const unsubscribe = subscribePetriEvent(petriEvents.projectWorkspaceChanged, (detail) => {
@@ -278,7 +296,7 @@ async function walkOsEntry(entry: FileSystemEntry, prefix: string): Promise<OsWa
       if (timer) window.clearInterval(timer);
       unsubscribe();
     };
-  }, [active, project.id, project.workspaceKind, refreshFiles]);
+  }, [active, project.id, project.workspaceKind, refreshFiles, reconcileActiveFile]);
 
   const toggleDir = useCallback((dirPath: string) => {
     setExpandedDirs((prev) => {

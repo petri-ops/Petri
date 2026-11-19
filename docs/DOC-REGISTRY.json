@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 652,
+    "documentCount": 653,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 635
+    "managedMarkdown": 636
   },
   "documents": [
     {
@@ -13550,6 +13550,31 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 交付（用户 A 组 #4 发令；BLOCK-495 评审材料 §6 推荐候选②=手册内容先行）。C-56 论文写作/修改保真 Skill 的十节手册内容稿 v0.1：事实保真内核四保护（确定程度/归因/完成状态/数字锁定）+不编造红线+方法结果段锁定（只校验不改）+中文 F 类 6 检查（每项形态→改写示例）+claim 保真三栏对照（无默认最终稿）+provenance/未覆盖说明+人机边界+执行流程+反模式。零注册面（skill 目录/manifest/桥待用户对手册认可后另批）；评审要点 4 项列文末。零运行时改动/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-502",
+      "path": "docs/block502-c47-filetree-poll-fix-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block502-c47-filetree-poll-fix",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/block502-c47-filetree-poll-fix-plan.md",
+        "frontend/src/pages/project-workspace/RightFileTree.tsx",
+        "frontend/src/pages/project-workspace/RightFileTree.refresh.test.tsx",
+        "test/impact-map.json",
+        "acceptance/block502-c47-fix/"
+      ],
+      "tags": [
+        "C-47",
+        "B6",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户裁决「方向 A（推荐）」；处置 BLOCK-477 open 票）。C-47 修复：轮询路径收窄为 reconcileActiveFile 签名对账（readActiveSignature 读数核拆分），不重建树/不重置 rootMore 续拉游标；整树重拉限定结构变更事件（初始加载/换项目/agent 写档/手动刷新）。HK-01 红（两 tick 根拉取增长=症状复现）→绿 2/2（fake timers：零根拉取+签名对账 ≥2+广播事件重建保留）；tsc 零红；既有 UI-399 测试零回归。方向 B 不实施（用户选 A）。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"

@@ -127,4 +127,46 @@ describe('RightFileTree 刷新触发面 (UI-399)', () => {
     expect(treeCalls[2]).toContain('prefix=');
     expect(treeCalls[3]).toContain('prefix=src');
   });
+
+  it('C-47 方向 A — 本地 2s 轮询只做签名对账，不重建树（根拉取数不增长）', async () => {
+    vi.useFakeTimers();
+    try {
+      const localProject: Project = { ...makeProject(), id: 'p_local1', workspaceKind: 'local' };
+      const view = render(
+        <RightFileTree
+          project={localProject}
+          active
+          openFiles={[makeFile('a.txt')]}
+          activeFile={makeFile('a.txt')}
+          onOpenFile={() => {}}
+          onActivateFile={() => {}}
+          onCloseFiles={() => {}}
+          onReorderFiles={() => {}}
+          onRenameFile={() => {}}
+          onReopenFile={() => {}}
+        />
+      );
+      await vi.advanceTimersByTimeAsync(1);
+      const rootFetches = () => treeCalls.filter((u) => /prefix=(&|$)/.test(u)).length;
+      const rootAfterMount = rootFetches();
+      expect(rootAfterMount).toBeGreaterThan(0);
+
+      // 两个轮询 tick（C-47 症状=每个 tick 一次 offset=0 根拉取重建树+重置续拉游标）
+      await vi.advanceTimersByTimeAsync(2000);
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(rootFetches(), '方向 A：轮询零根拉取（树不重建、游标不重置）').toBe(rootAfterMount);
+      // 签名对账仍在跑（每 tick 一次活动文件目录请求）
+      const sigFetches = treeCalls.filter((u) => u.includes('prefix=src')).length;
+      expect(sigFetches).toBeGreaterThanOrEqual(2);
+
+      // 结构事件仍全量重建（agent 写档）
+      dispatchPetriEvent(petriEvents.projectWorkspaceChanged, { projectId: 'p_local1', source: 'agent' });
+      await vi.advanceTimersByTimeAsync(1);
+      expect(rootFetches(), '结构变更事件保留整树重拉语义').toBe(rootAfterMount + 1);
+      void view;
+    } finally {
+      vi.useRealTimers();
+      cleanup();
+    }
+  });
 });

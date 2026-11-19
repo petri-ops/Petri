@@ -1,0 +1,17 @@
+
+> petri-desktop-frontend@0.0.4 test:files
+> node scripts/test-files.mjs src/pages/project-workspace/RightFileTree.refresh.test.tsx
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [32m✓[39m src/pages/project-workspace/RightFileTree.refresh.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 207[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m   Start at [22m 15:04:54
+[2m   Duration [22m 654ms[2m (tests 38%, environment 29%, transform 21%, import 12%)[22m
+
