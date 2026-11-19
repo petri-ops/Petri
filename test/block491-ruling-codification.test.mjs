@@ -94,14 +94,14 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     assert.equal(s.contractChangeDeferred, true, 'SceneSpec 契约变更属后续实现票，本包不落地');
   });
 
-  it('实现票生命周期对齐（BLOCK-496）：两票 implemented / v2b 授权待开工 / v2c 维持；证据在盘', () => {
+  it('实现票生命周期对齐（BLOCK-496）：三票 implemented / v2c 维持；证据在盘', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const s = ownGet(snap.readings, 'implementationTickets').value;
     assert.deepEqual(Object.keys(s.tickets).sort(), [...DEFERRED_TICKETS].sort());
     const expected = {
       'P4-05b': 'implemented',
       'P3-03-v2a': 'implemented',
-      'P3-03-v2b': 'partially_implemented',
+      'P3-03-v2b': 'implemented',
       'P3-03-v2c': 'deferred_maintained',
     };
     for (const id of DEFERRED_TICKETS) {
@@ -112,8 +112,9 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     }
     assert.equal(ownGet(s.tickets, 'P4-05b').evidence, 'acceptance/block-322-ruling04/p405b-live-macos.json');
     assert.equal(ownGet(s.tickets, 'P3-03-v2a').evidence, 'acceptance/block-322-p3/p3-03-v2a-live-macos.json');
+    assert.equal(ownGet(s.tickets, 'P3-03-v2b').evidence, 'acceptance/block504-v2b-import-features/');
     // 登记≠存在：已实现票的证据文件必须在盘（实况锚，BLOCK-494 教训）。
-    for (const ev of ['acceptance/block-322-ruling04/p405b-live-macos.json', 'acceptance/block-322-p3/p3-03-v2a-live-macos.json']) {
+    for (const ev of ['acceptance/block-322-ruling04/p405b-live-macos.json', 'acceptance/block-322-p3/p3-03-v2a-live-macos.json', 'acceptance/block504-v2b-import-features/hk01-green.txt']) {
       assert.equal(fs.existsSync(path.join(ROOT, ev)), true, `已实现票证据必须在盘：${ev}`);
     }
     assert.equal(s.v2cSeparated, true, 'v2c 必须单列');
@@ -175,9 +176,9 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     const t = ownGet(fresh, 'implementationTickets').value;
     const tamperedActive = { ...t, tickets: { ...t.tickets, 'P3-03-v2a': { ...ownGet(t.tickets, 'P3-03-v2a'), status: 'active' } } };
     assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedActive)).ok, false, '非法票状态必须 fail-closed');
-    // 越权推进：v2b 未经收口直接标 implemented（无证据）必须红。
-    const tamperedSkip = { ...t, tickets: { ...t.tickets, 'P3-03-v2b': { ...ownGet(t.tickets, 'P3-03-v2b'), status: 'implemented', evidence: null } } };
-    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedSkip)).ok, false, '越权推进 implemented（无证据）必须 fail-closed');
+    // 越权推进：implemented 票证据指针被抹（无证据）必须红（v2a 为已实现票锚）。
+    const tamperedSkip = { ...t, tickets: { ...t.tickets, 'P3-03-v2a': { ...ownGet(t.tickets, 'P3-03-v2a'), evidence: null } } };
+    assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedSkip)).ok, false, 'implemented 无证据必须 fail-closed');
     // 已实现票证据指针被抹必须红。
     const tamperedEvidence = { ...t, tickets: { ...t.tickets, 'P4-05b': { ...ownGet(t.tickets, 'P4-05b'), evidence: null } } };
     assert.equal(validateRulingCodificationIntegrity(override('implementationTickets', tamperedEvidence)).ok, false, 'implemented 票缺证据指针必须 fail-closed');

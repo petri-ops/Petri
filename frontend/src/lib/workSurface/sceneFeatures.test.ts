@@ -37,4 +37,27 @@ describe('P3-03 v2b sceneFeatures（前端移植）', () => {
     expect(table.a.length).toBe(6);
     expect(table.boss.length).toBe(3);
   });
+
+  // BLOCK-504（v2b 第二票）——导入件派生缓存优先消费 + D1 版本键守门。
+  it('导入件 node.features 派生缓存优先（带合法版本键）', () => {
+    const cached = [
+      { id: 'feat:0123456789abcdef01234567', feature: 'face-0', kind: 'plane', parts: [], index: 0, mateAllowed: true, bboxMm: [0, 0, 0, 10, 20, 0] },
+      { id: 'feat:89abcdef0123456789abcdef', feature: 'face-1', kind: 'cylinder', parts: [], index: 1, mateAllowed: true, bboxMm: [0, 0, 0, 5, 5, 25] },
+    ];
+    const features = deriveSceneFeatures({
+      id: 'imported', type: 'mesh-reference', features: cached, featuresVersionKey: 'a'.repeat(64),
+    });
+    expect(features).toEqual(cached);
+  });
+
+  it('缓存版本键非法/缺席时回落（不采信陈旧表）', () => {
+    const stale = [{ id: 'feat:0123456789abcdef01234567', feature: 'face-0', kind: 'plane', parts: [] }];
+    // 导入件无 dimensions → 回落得到空表（陈旧缓存不被当成真值）。
+    expect(deriveSceneFeatures({ id: 'imported', type: 'mesh-reference', features: stale, featuresVersionKey: 'bad' })).toEqual([]);
+    expect(deriveSceneFeatures({ id: 'imported', type: 'mesh-reference', features: stale })).toEqual([]);
+    // 基元带非法缓存 → 回落同源派生（仍得 6 面），零迁移。
+    expect(deriveSceneFeatures({
+      id: 'a', type: 'box', dimensions: { width: 120, depth: 80, height: 30 }, features: stale, featuresVersionKey: 'bad',
+    }).length).toBe(6);
+  });
 });

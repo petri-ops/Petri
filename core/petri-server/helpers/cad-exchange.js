@@ -121,6 +121,45 @@ async function stepToGlb({ bytes } = {}) {
   }
 }
 
+/**
+ * BLOCK-504（P3-03 v2b 第二票）——CAD 导入件**只读** face 枚举。
+ *
+ * D3 红线：只用 occt-wasm 的只读分析 API（importStep/getSubShapes/surfaceType/
+ * getBoundingBox/getVolume），绝不调用建模族（makeBox/sew/makeSolid/...）；
+ * 本函数不建几何、不改 SceneSpec，仅把 face 摘要交给 deriveImportFeatures 消费。
+ * IGES 走 occt-import-js 网格、无 B-rep face 概念，调用方应跳过（不编造）。
+ */
+async function extractImportFaces({ bytes } = {}) {
+  const input = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes || []);
+  if (input.length === 0) return { ok: false, error: 'cad_source_empty' };
+  const { OcctKernel } = await loadOcct();
+  const kernel = await OcctKernel.init();
+  let shape;
+  try {
+    shape = kernel.importStep(input.toString('utf8'));
+    const rawFaces = kernel.getSubShapes(shape, 'face');
+    if (!Array.isArray(rawFaces) || rawFaces.length === 0) return { ok: false, error: 'step_no_faces' };
+    const faces = rawFaces.map((face) => {
+      const bb = normalizeBoundingBox(kernel.getBoundingBox(face));
+      return {
+        type: String(kernel.surfaceType(face) || 'other'),
+        bboxMm: bb ? [bb.xmin, bb.ymin, bb.zmin, bb.xmax, bb.ymax, bb.zmax] : null,
+        volumeMm3: Math.abs(Number(kernel.getVolume(face)) || 0),
+      };
+    });
+    return {
+      ok: true,
+      faces,
+      summary: { kernel: 'occt-wasm', kernelVersion: packageVersion('occt-wasm'), faceCount: faces.length },
+    };
+  } catch (error) {
+    return { ok: false, error: 'face_extract_failed', message: String(error && error.message ? error.message : error) };
+  } finally {
+    try { shape?.close?.(); } catch { /* imported shape may not expose close */ }
+    disposeKernel(kernel);
+  }
+}
+
 async function stepToSvg({ bytes, views = ['front', 'top', 'right', 'iso'], width = 240, height = 240, showHidden = true } = {}) {
   const input = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes || []);
   if (input.length === 0) return { ok: false, error: 'cad_source_empty' };
@@ -375,6 +414,7 @@ module.exports = {
   cadFormatForPath,
   probeCadExchange,
   stepToGlb,
+  extractImportFaces,
   stepToSvg,
   igesToStl,
   stlToStep,

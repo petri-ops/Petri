@@ -60,6 +60,10 @@ export function SceneConstraintEditor({ projectId, scene, scenePath, expectedHas
     setNotice(null);
     try {
       const offset = form.offset.trim() === '' ? undefined : Number(form.offset);
+      // BLOCK-504（v2b 第二票）——发送面切 aFeature/bFeature 契约键（取选中特征的几何签名 id）；
+      // aFace/bFace 求值主键 additive 保留（D2 ruled：旧键零迁移、求值主键不变）。
+      const aFeatureId = faceOptions(form.a).find((f) => f.feature === form.aFeature)?.id;
+      const bFeatureId = faceOptions(form.b).find((f) => f.feature === form.bFeature)?.id;
       const result = await applySceneOperations({
         projectId,
         path: scenePath,
@@ -71,6 +75,8 @@ export function SceneConstraintEditor({ projectId, scene, scenePath, expectedHas
             b: form.b,
             aFace: form.aFeature,
             bFace: form.bFeature,
+            ...(aFeatureId ? { aFeature: aFeatureId } : {}),
+            ...(bFeatureId ? { bFeature: bFeatureId } : {}),
             ...(offset !== undefined && Number.isFinite(offset) ? { offset } : {}),
           },
         }],

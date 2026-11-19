@@ -12,6 +12,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { inspectMeshAsset, inspectCadAsset } = require('./mesh-assets');
 const cadExchange = require('./cad-exchange');
+const scene3d = require('./scene3d');
 const generation = require('./model3d-generation-provider');
 const { resolveWorkspaceTarget } = require('../agent-tools/workspace-tools/internals');
 
@@ -46,6 +47,8 @@ function cleanProvenance(input) {
     'model', 'promptHash', 'parameters', 'source', 'generator', 'license',
     'sourceSha256', 'sourceFormat', 'derivedFormat', 'derivedSha256',
     'kernel', 'kernelVersion', 'faceted', 'notes',
+    // BLOCK-504（v2b 第二票）——特征表 sha 锚定字段（写入 sidecar provenance）。
+    'featuresVersionKey', 'featureCount', 'featureKinds',
   ]) {
     if (source[key] === undefined) continue;
     const text = typeof source[key] === 'string' ? source[key] : JSON.stringify(source[key]);
@@ -152,6 +155,27 @@ async function importCadAsset({ workspaceRoot, sourcePath, name, provenance } = 
   if (!derivedBytes || derivedBytes.length === 0) return { ok: false, error: 'cad_conversion_empty' };
   const derivedFormat = converted.glb ? 'glb' : 'stl';
   const derivedSha = sha256Buffer(derivedBytes);
+
+  // BLOCK-504（P3-03 v2b 第二票）——STEP 导入件只读抽特征（D3：禁建模 API）。
+  // 经接缝 buildImportFeatureTable 消费 deriveImportFeatures；版本键=节点 source.sourceSha256
+  // =派生资产 sha（D1：featureVersionKeyOf 对 mesh-reference 读的就是该字段，不一致即 fail-closed）。
+  // IGES 走 occt-import-js 网格，无 B-rep face 概念：如实跳过，不编造 features。
+  let importFeatures = null;
+  if (format === 'step') {
+    const extracted = await cadExchange.extractImportFaces({ bytes: sourceBytes });
+    if (extracted.ok && Array.isArray(extracted.faces) && extracted.faces.length > 0) {
+      const features = scene3d.buildImportFeatureTable(extracted.faces);
+      if (Array.isArray(features) && features.length > 0) {
+        importFeatures = {
+          features,
+          featuresVersionKey: derivedSha,
+          featureCount: features.length,
+          featureKinds: JSON.stringify([...new Set(features.map((f) => f.kind))].sort()),
+        };
+      }
+    }
+  }
+
   const tempRel = `${ASSET_ROOT}/.cad-${derivedSha}.${derivedFormat}`;
   let tempTarget;
   try {
@@ -176,6 +200,11 @@ async function importCadAsset({ workspaceRoot, sourcePath, name, provenance } = 
         derivedSha256: derivedSha,
         kernel: converted.summary?.kernel,
         kernelVersion: converted.summary?.kernelVersion,
+        ...(importFeatures ? {
+          featuresVersionKey: importFeatures.featuresVersionKey,
+          featureCount: importFeatures.featureCount,
+          featureKinds: importFeatures.featureKinds,
+        } : {}),
         notes: format === 'iges'
           ? 'IGES import is mesh-based; assembly hierarchy/colors are not guaranteed.'
           : 'STEP imported through occt-wasm XCAF; derived GLB preserves names/colors where present.',
@@ -184,6 +213,13 @@ async function importCadAsset({ workspaceRoot, sourcePath, name, provenance } = 
     if (!imported.ok) return imported;
     return {
       ...imported,
+      ...(importFeatures ? {
+        node: {
+          ...imported.node,
+          features: importFeatures.features,
+          featuresVersionKey: importFeatures.featuresVersionKey,
+        },
+      } : {}),
       cad: {
         sourceFormat: format,
         derivedFormat,

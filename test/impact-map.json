@@ -9250,6 +9250,37 @@
       ]
     },
     {
+      "id": "block504-v2b-import-features",
+      "note": "BLOCK-504 P3-03 v2b 第二票：CAD 导入链 occt-wasm 只读 faces 枚举→buildImportFeatureTable 接缝消费→features[]+featuresVersionKey 源 sha 锚定+sidecar provenance；前端 SceneConstraintEditor 切 aFeature/bFeature 契约键+sceneFeatures 优先消费 node.features 缓存。HK-01 契约测 8/8+真 STEP 只读腿+D3 静态负测；邻域 scene3d/cad-exchange/assets/glb-import+前端 vitest/tsc；契约联动 block496 v2b=implemented。零新依赖/D3 禁建模/观感零代签/不碰 G1+。",
+      "patterns": [
+        "docs/block504-v2b-import-features-plan.md",
+        "test/block504-v2b-import-features.test.mjs",
+        "acceptance/block504-v2b-import-features/**",
+        "frontend/src/lib/workSurface/sceneFeatures.ts",
+        "frontend/src/lib/workSurface/sceneFeatures.test.ts",
+        "frontend/src/components/work-surface/SceneConstraintEditor.tsx"
+      ],
+      "tests": [
+        "test/block504-v2b-import-features.test.mjs",
+        "test/block322-p4-cad-exchange.test.mjs",
+        "test/block322-p5-assets.test.mjs",
+        "test/block322-p3-03-v2b-d2-contract.test.mjs",
+        "test/block322-p3-constraints.test.mjs",
+        "test/block460-glb-import.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
+      ]
+    },
+    {
+      "id": "block494-w2-ticket-readiness-evidence",
+      "note": "BLOCK-494 W2 实现票准备的存储证据目录分类占位（acceptance/block494-w2-ticket-readiness/evidence.json，tracked 在 HEAD）。test-affected 契约要求每个 acceptance/<dir>/evidence.json 恰被一条规则覆盖；该 evidence 自 BLOCK-494 收口起漏登记，BLOCK-504 收口跑 test:changed 时抓真（由 impact-map 改动拉入门范围）——对标 BLOCK-493「三处虚拟探针挂 rule」/UI-696 先例顺手清存量债。本规则只做映射不冒充验证，证据内容原样保留。",
+      "patterns": [
+        "acceptance/block494-w2-ticket-readiness/**"
+      ],
+      "tests": [],
+      "commands": [],
+      "classifiesScripts": false
+    },
+    {
       "id": "block499-p405-full-chain",
       "note": "BLOCK-499 P4-05 完整尺寸链：特征引用解析+链代数+SVG 链层+manifest 诚实翻转（D5）；证据变更选本包契约测+p4-cad-exchange 邻域重跑。",
       "patterns": [

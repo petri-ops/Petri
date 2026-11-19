@@ -45,7 +45,7 @@ BLOCK-494 钉死的登记漂移（契约登记四票全 deferred vs 实况两票
 | --- | --- | --- | --- |
 | P4-05b | implemented | 2026-10-30 | acceptance/block-322-ruling04/p405b-live-macos.json（D5 数值对账：height 30 ✓ / width 120.4 ✗ 诚实 mismatch）；测试 test/rw06-p405b-dimension-lines.test.mjs + rw06-p405b-dimension-annotations.test.mjs |
 | P3-03-v2a | implemented | 2026-10-31 | acceptance/block-322-p3/p3-03-v2a-live-macos.json（Blender 5.2.3 欧拉探针定案 + 面心对账 gap=0）+ commit c88f2fd9；测试 test/block322-p3-03-v2a-mate-rotation.test.mjs |
-| P3-03-v2b | partially_implemented | 2026-11-19 | 后端契约票（BLOCK-498）收口：D2 白名单键+D1 派生缓存落地（契约测 9/9 常驻+邻域 43/43）；证据=acceptance/block498-v2b-d2-contract/ + docs/block498-v2b-d2-d1-backend-contract-plan.md；第二票（CAD 导入链抽特征+前端编辑器切特征键）在 A 组 #2 发令范围内待续 |
+| P3-03-v2b | implemented | 2026-11-19 | 两票齐：后端契约票（BLOCK-498）D2 白名单键+D1 派生缓存（契约测 9/9+邻域 43/43）+ 第二票（BLOCK-504）CAD 导入链 occt-wasm 只读 faces→deriveImportFeatures 消费+featuresVersionKey 源 sha 锚定+前端编辑器切 aFeature/bFeature（契约测 8/8+前端 21/21+邻域 32/32）；证据=acceptance/block504-v2b-import-features/ + docs/block504-v2b-import-features-plan.md（第一票证据=acceptance/block498-v2b-d2-contract/） |
 | P3-03-v2c | deferred_maintained | 2026-11-19 | 用户裁决「C 组说『维持』」；重开需新发令 |
 | P4-05（完整尺寸链） | implemented | 2026-11-19 | BLOCK-499 落地：特征引用解析+尺寸链代数（D5 数值一致性）+SVG 链层+manifest 诚实翻转；实机腿=真实 STEP（occt-wasm）全链 9/9；证据=acceptance/block499-p405-full-chain/ + docs/block499-p405-full-chain-plan.md |
 

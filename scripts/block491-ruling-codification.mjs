@@ -181,10 +181,10 @@ const TICKET_ROW_ANCHORS = Object.freeze({
     re: /\|\s*P3-03-v2a\s*\|\s*implemented\s*\|\s*2026-10-31\s*\|[\s\S]{0,240}?p3-03-v2a-live/,
   },
   'P3-03-v2b': {
-    status: TICKET_STATUS.PARTIALLY_IMPLEMENTED,
+    status: TICKET_STATUS.IMPLEMENTED,
     at: '2026-11-19',
-    evidence: 'acceptance/block498-v2b-d2-contract/',
-    re: /\|\s*P3-03-v2b\s*\|\s*partially_implemented\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?block498/,
+    evidence: 'acceptance/block504-v2b-import-features/',
+    re: /\|\s*P3-03-v2b\s*\|\s*implemented\s*\|\s*2026-11-19\s*\|[\s\S]{0,240}?block504/,
   },
   'P3-03-v2c': {
     status: TICKET_STATUS.DEFERRED_MAINTAINED,
@@ -297,7 +297,7 @@ export function validateRulingCodificationIntegrity(readings) {
   const EXPECTED_TICKET_STATUS = Object.freeze({
     'P4-05b': TICKET_STATUS.IMPLEMENTED,
     'P3-03-v2a': TICKET_STATUS.IMPLEMENTED,
-    'P3-03-v2b': TICKET_STATUS.PARTIALLY_IMPLEMENTED,
+    'P3-03-v2b': TICKET_STATUS.IMPLEMENTED,
     'P3-03-v2c': TICKET_STATUS.DEFERRED_MAINTAINED,
   });
   if (!t || Object.keys(t.tickets ?? {}).length !== PATTERN_FLOOR.ticketCount

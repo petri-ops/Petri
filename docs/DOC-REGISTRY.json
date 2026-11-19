@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 654,
+    "documentCount": 656,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 637
+    "managedMarkdown": 639
   },
   "documents": [
     {
@@ -13589,6 +13589,7 @@
       "touchSurface": [
         "docs/block503-human-eye-review-checklist-2026-11-19.md"
       ],
+      "sharedBaselines": [],
       "tags": [
         "W4",
         "human-eye",
@@ -13597,6 +13598,58 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 交付（用户发令「立一个包 把需要肉眼核对的内容 梳理出来，我一个个判断」）。肉眼核对总清单：甲组=读材料即可裁决 3 项（甲1 C-56 手册稿 4 评审要点/甲2 capability-intake 两源 license_unknown 裁决/甲3 E-03 SUS 评分方式）+ 乙组=实机观感签字 9 组（乙1-4 UI-710/709/707/706 各给入口与判据/乙5 P4 八态矩阵/乙6 P5+P6 四槽/乙7 H-01~H-08 路线表/乙8 E-01 树测试+E-02 22 条 debt/乙9 C-55 成片终审 video.mp4）。全部条目现读真源（human-eye-closeout.json 契约+UI 台账+人眼路线），逐项给判什么/怎么看/裁决口令格式；签字槽零代签、观感状态零写面（本包=汇总投影，状态真源仍是台账/契约）；回写方式=用户给口令→Agent 按台账纪律回写。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-504",
+      "path": "docs/block504-v2b-import-features-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block504-v2b-import-features",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "touchSurface": [
+        "docs/block504-v2b-import-features-plan.md",
+        "core/petri-server/helpers/cad-exchange.js",
+        "core/petri-server/helpers/model3d-assets.js",
+        "frontend/src/lib/workSurface/sceneFeatures.ts",
+        "frontend/src/components/work-surface/SceneConstraintEditor.tsx",
+        "test/block504-v2b-import-features.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block504-v2b-import-features/"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "BLOCK-322",
+        "v2b",
+        "A2",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户发令「开始 v2b 第二票」；编号避让 BLOCK-503 人眼包）。P3-03 v2b 第二票，承接 BLOCK-498 第一票 reopen 接缝=buildImportFeatureTable：CAD 导入链 occt-wasm 只读 faces 枚举→deriveImportFeatures 消费→features[]+featuresVersionKey=sourceSha256 写入节点+sidecar provenance 锚定；前端 SceneConstraintEditor 发送面切 aFeature/bFeature 契约键（additive，aFace/bFace 求值主键保留）；sceneFeatures 优先消费 node.features 缓存。HK-01 红绿先行；零新依赖/D3 禁建模 API（只读分析）/观感零代签/求值几何不变/不碰 G1+。曲面=v2c 维持 deferred。【2026-11-19 收口】HK-01 红 6→绿 8/8（真 STEP 只读腿 6 面+D3 静态负测）；前端 21/21+tsc 零红+邻域 32/32+契约联动 11/11（block496 v2b=implemented，sha cb37813f69a5）；版本键根因修正（派生资产 sha，非原始 STEP sha）；Jev doc:suggest uiAudit 命中已按数据面增量登记零代签；closeout 定向绿；证据=acceptance/block504-v2b-import-features/。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-505",
+      "path": "docs/block505-review-prompts-2026-11-19.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block505-review-prompts",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "MATERIAL",
+      "touchSurface": [
+        "docs/block505-review-prompts-2026-11-19.md"
+      ],
+      "tags": [
+        "W4",
+        "review-prompts",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户发令「针对每一个核对的点给提示词——输入后工作产出我再来核对」；BLOCK-503 清单执行层配套）。15 段自包含提示词：P-甲1 C-56 手册真实改写演练（三栏对照+F类报告+数字锁定校验）/P-甲2 两源 license 补抓（append-only 更正行）/P-甲3 SUS 问卷草案/P-乙0 环境准备（三面齐+9223 离屏）/P-乙1-4 UI-710/709/707/706 截图+DOM 读数/P-乙5 八态矩阵逐格/P-乙6 P5 流式态+P6 skill 链/P-乙7-A/B/C H-01~H-06 截图组（读屏主观部分如实留给真人）/P-乙8 E-01 树测试机械读数+E-02 22 条扫描/P-乙9 C-55 帧提取+ffprobe。统一纪律=9223 离屏跑完 kill/截图不可得如实标注/产出落 acceptance/block503-outputs/<item>//不写 verified 不代签（判定归用户）。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "sharedBaselines": []
     }
   ],
   "lastUpdated": "2026-11-19"

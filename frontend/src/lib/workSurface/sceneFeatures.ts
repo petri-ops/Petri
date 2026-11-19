@@ -14,6 +14,11 @@ export interface SceneFeatureRow {
   dimsKey?: string;
   size?: number;
   radius?: number;
+  // BLOCK-504（v2b 第二票）——导入件特征字段（后端 deriveImportFeatures 输出）。
+  index?: number;
+  mateAllowed?: boolean;
+  bboxMm?: number[];
+  volumeMm3?: number;
 }
 
 const AXIS_INDEX: Record<string, number> = { x: 0, y: 1, z: 2 };
@@ -85,10 +90,28 @@ interface SceneNodeLite {
   id: string;
   type: string;
   dimensions?: Record<string, unknown>;
+  // BLOCK-504（v2b 第二票）——导入链写入的派生缓存 + D1 版本键（与后端 node.features 同形）。
+  features?: SceneFeatureRow[];
+  featuresVersionKey?: string;
 }
 
-/** 基元节点特征表（与后端 derivePrimitiveFeatures 同源：同输入同 id）。 */
+/**
+ * BLOCK-504（v2b 第二票）——导入件派生缓存优先消费。
+ * 版本键（featuresVersionKey=64hex）必须与 node.source.sourceSha256 一致，后端 validateNodeFeatures
+ * 已 fail-closed（features_stale_version_mismatch）；前端只做形态守门，不自行重算真值。
+ * 缓存缺席/非法（非数组或空）时返回 null，回落基元派生（零迁移）。
+ */
+function deriveSceneFeaturesFromCache(node: SceneNodeLite): SceneFeatureRow[] | null {
+  const rows = node.features;
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  if (typeof node.featuresVersionKey !== 'string' || !/^[a-f0-9]{64}$/i.test(node.featuresVersionKey)) return null;
+  return rows.filter((row) => typeof row?.id === 'string' && typeof row?.kind === 'string');
+}
+
+/** 节点特征表（导入件派生缓存优先；基元缓存缺席回落同源派生：同输入同 id）。 */
 export function deriveSceneFeatures(node: SceneNodeLite): SceneFeatureRow[] {
+  const cached = deriveSceneFeaturesFromCache(node);
+  if (cached) return cached;
   const dims = node.dimensions && typeof node.dimensions === 'object' ? node.dimensions : {};
   const features: SceneFeatureRow[] = [];
   const half = {

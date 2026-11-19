@@ -18,3 +18,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-19T07:06:40.506Z -->
 最后更新：2026-11-19（🚀 **BLOCK-497 立项启动（MIGRATION-IDEMPOTENT 修复票 · active / P0-LAUNCH，占唯一串行槽位）**：用户 A 组 #1 发令（Jev 0.18 唯一建议）。自愈补列收窄版记账：ensureProjectWorktreeColumn 补列 ALTER 与条件记账（仅 MAX(version)===20 补记 v21）同事务；消除「无头栈补列→桌面壳重放 021 撞 duplicate column 拒启」缺口。HK-01 红绿先行；迁移内核与 021 SQL 零触碰。plan=docs/block497-migration-idempotent-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-19T07:45:31.331Z -->
+最后更新：2026-11-19（🚀 **BLOCK-498 立项启动（P3-03 v2b 后端契约票 · active / P0-LAUNCH，占唯一串行槽位）**：用户 A 组 #2 发令（BLOCK-496 对齐表 v2b=authorized_pending_start 的第一票）。D2/D1 已裁决形态落地：mate 白名单收 aFeature/bFeature additive 可选键（旧键零迁移）+ features[] 派生缓存（版本键=sha/dimensions 指纹，不一致 fail-closed）+ 基元派生接线 + 特征库 CJS + 前端镜像同步；骨架激活捕红。第二票（导入链抽特征+前端编辑器）另案待发令。plan=docs/block498-v2b-d2-d1-backend-contract-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-19（🏁 **BLOCK-497 收口（MIGRATION-IDEMPOTENT · closeout 定向链 exit=0 全绿 · 一次会话完成）**：自愈补列收窄版记账落地——ensureProjectWorktreeColumn 补列 ALTER 与条件记账（仅 MAX(version)===20 补记 v21）同事务原子；HK-01 红（补列后台账仍 v20→重放 021 复现拒启）→绿 3/3（真实 021 SQL 走真实 runMigrations 重放跳过）；跳版守卫（v15 不记账）+缺席不记；邻域 block336 worktree 22/22 零回归；迁移内核与 021 SQL 零触碰；迁移数据零删除。AUDIT-LOG 🟡 MIGRATION-IDEMPOTENT 行就此清偿。零新依赖/观感零代签/不碰 G1+。串行槽位回空→包 3 v2b D2/D1 接续（用户已发令）。证据=acceptance/block497-migration-idempotent/。G0 开发期常态 · 不外推 packaged/Provider/GA.）

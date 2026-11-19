@@ -6,7 +6,7 @@
   "ruledAt": "2026-11-18",
   "sourcePackage": "docs/block-322-ruling-04-feature-reference-v2.md",
   "codificationPlan": "docs/block491-ruling-codification-plan.md",
-  "sourceCommit": "801b37aba7dd5dd9be67070e48c5e2455adce207",
+  "sourceCommit": "7c2efe16645f5514a0aee4bcae9b3dceed20951b",
   "readings": {
     "rulings": {
       "rulings": {
@@ -78,9 +78,9 @@
           "reopenRequiresUserOrder": true
         },
         "P3-03-v2b": {
-          "status": "partially_implemented",
+          "status": "implemented",
           "at": "2026-11-19",
-          "evidence": "acceptance/block498-v2b-d2-contract/",
+          "evidence": "acceptance/block504-v2b-import-features/",
           "reopenRequiresUserOrder": true
         },
         "P3-03-v2c": {
@@ -122,5 +122,5 @@
     "humanEyeSigned": false,
     "noG1Plus": true
   },
-  "generatedAt": "2026-11-19T06:44:16.152Z"
+  "generatedAt": "2026-11-19T07:42:42.565Z"
 }

@@ -701,6 +701,8 @@ D 类逐条裁决；E 类归治理台账。
 - **验证（代码）**：后端操作契约 4/4（合法 mate 写入求值生效/非法 fail-closed/移除幂等/旋转不可解拒收）+ 前端组件 4/4（提交/失败透传/移除/少节点诚实）+ sceneFeatures 移植 4/4（跨端对账锚）+ tsc 0 + lint 0。
 - **边界（reopen）**：①工作区实机腿（真实项目页操作流程）未跑；②face 下拉目前只含基元 dimensions 引用（face:cylinder 等导入件引用属 v2b 特征表 SceneSpec 契约后续）。
 
+- **数据面增量（BLOCK-504 · 2026-11-19，仅数据面、观感零代签）**：`SceneConstraintEditor` 提交 mate 时 additive 新增 `aFeature`/`bFeature` 特征锚键（取选中特征行的几何签名 id），`aFace`/`bFace` 求值主键 additive 保留（D2 ruled 旧键零迁移）；`sceneFeatures` 改为优先消费导入件 `node.features` 派生缓存（带 64hex 版本键守门，非法回落基元派生），边界②的导入件特征引用在数据面接通。**验证等级=代码契约**（HK-01 8/8 含前端断言 + 前端 vitest 21/21 + tsc 零红）；BLOCK-333 实机 13/13 证据仍对应旧数据面（无特征锚键），本增量**未跑实机腿**，不升级 UI-639a 的 verified 态、观感维持人眼签字槽。feature 下拉视觉/文案未改。
+
 ## UI-638: Result Studio 内嵌 3D viewer + 3D 产物入成果面真值（RW-01；2026-10-31 **verified（用户确认「确认」·发现腿+点开腿全通：任务墙列出→下钻→viewer 挂载；artifacts 投影缺陷修复）**）
 
 - **变化面**：`ResultArtifactKind` 增 `model3d`（SECTION_LABELS「3D 模型」）；viewerRegistry 新增 model3d adapter（kind 恒胜 + `.glb/.gltf/.stl/.obj/.scene3d.json` 先于 json/binary 兜底，canSelect=true artifact 级选择）；`Model3DResultViewer` 薄壳（复用 work-surface Model3DScene 零复制，挂载即绑定 selectionBus、点击面写 artifact 级选择、WebGL 缺席如实降级）；ResultArtifactShell 渲染分支。
