@@ -29,6 +29,13 @@ const {
   mapDecisionToIterationStatus,
 } = require('../shared-backend/loop-controller');
 const { decideIterationOutcome } = require('./helpers/loop-decision');
+// BLOCK-508 — agent 循环层 stall-resume：纯函数决策/去重/checkpoint，不碰 provider 层
+const {
+  shouldResumeOnStall: shouldResumeStall508,
+  createResumeEventFilter: createResumeFilter508,
+  buildGenerationCheckpoint: buildGenCheckpoint508,
+  STALL_RESUME_LIMITS: STALL_LIMITS_508,
+} = require('../shared-backend/loop-stall-resume');
 // BLOCK-171 CP-1 — 运行内工具协作取消注册表（cancellable 族 AbortSignal 原语）
 const {
   createToolCancellation,
@@ -816,6 +823,11 @@ async function runLoop({
 
       let streamedText = '';
       let upJson;
+      // BLOCK-508 — 循环层 stall-resume 现场：已发文本/工具游标 + 重放过滤器（仅非 finalizing）
+      let srReplayFilter = null;
+      let srEmittedTextLength = 0;
+      let srEmittedToolIds = [];
+      const srStartedAt = Date.now();
       const attemptLimit = finalizing ? MAX_FINALIZATION_ATTEMPTS : 1;
       for (let attempt = 1; attempt <= attemptLimit && !aborted(); attempt++) {
         streamedText = '';
@@ -829,6 +841,28 @@ async function runLoop({
           ? buildFinalizationRetryRequest(reqBody)
           : reqBody;
         // BLOCK-109 P1 — 网络瞬断重试包裹（finalizing 走既有 attempt 循环不叠加）
+        // BLOCK-508 — 外层 stall-resume：已出字后 idle stall 不再直接失败，自动续跑+去重。
+        let srAttempt = 0;
+        for (;;) {
+        if (srAttempt > 0) {
+          // 续跑前建立本次重放过滤器（按已发文本长度剥离前缀，工具 id 集合去重）
+          const cp508 = buildGenCheckpoint508({
+            messages: requestMessages,
+            emittedTextLength: srEmittedTextLength,
+            emittedToolCallIds: srEmittedToolIds,
+            attempt: srAttempt,
+          });
+          srReplayFilter = createResumeFilter508(cp508);
+          const backoff = STALL_LIMITS_508.backoffMsByAttempt[Math.min(srAttempt, STALL_LIMITS_508.backoffMsByAttempt.length - 1)] || 0;
+          if (backoff > 0) await new Promise((r) => setTimeout(r, backoff));
+          _emit({
+            event: 'agent_status',
+            phase: 'stall_resume',
+            reasonCode: 'stream_stalled_no_output',
+            attempt: srAttempt + 1,
+            message: '模型流式响应停滞，正在从已生成内容后自动续跑（无需重试整轮）',
+          });
+        }
         upJson = await callProviderWithNetworkRetry(
           () => callChatProvider(
             providerName,
@@ -839,7 +873,13 @@ async function runLoop({
             conversationId: _activeConv && _activeConv.id,
             kind: attempt > 1 ? 'agent_finalization_retry' : 'agent_iter',
           },
-          protocolRecoveryAttempt ? undefined : (event) => {
+          protocolRecoveryAttempt ? undefined : (rawEvent) => {
+            // BLOCK-508 — 续跑重放去重：已交付的重复帧在入口吞掉，用户侧零重复。
+            let event = rawEvent;
+            if (srReplayFilter && event) {
+              event = srReplayFilter(event);
+              if (event && event.suppressed === true) return;
+            }
             // BLOCK-56 P1 — 请求级降级事件透传：gateway 内 primary→备用切换时
             // 发出 model_fallback；此前该事件被吞掉用户不可见。_emit 落
             // task_events + SSE，前端任务条显示「已降级到 X 模型」。
@@ -869,6 +909,7 @@ async function runLoop({
             }
             if (event.type === 'content_delta' && event.content && !aborted()) {
               streamedText += event.content;
+              srEmittedTextLength += event.content.length;
               if (!resultEditCompletionGuard.required) {
                 _emit({ choices: [{ delta: { content: event.content } }] });
               }
@@ -912,6 +953,33 @@ async function runLoop({
             isAborted: aborted,
           }
         );
+        // BLOCK-508 — stall 且可续跑则重发（已出字也覆盖）；耗尽/非 stall/abort 则退出循环走既有终态。
+        if (!finalizing && upJson && upJson.error === 'stream_stalled' && !aborted()) {
+          const verdict508 = shouldResumeStall508({
+            error: upJson.error,
+            emittedOutput: upJson.emittedOutput,
+            emittedTextLength: srEmittedTextLength,
+            emittedToolCallIds: srEmittedToolIds,
+            attempt: srAttempt,
+            elapsedMs: Date.now() - srStartedAt,
+            budgetMs: STALL_LIMITS_508.maxTotalBudgetMs,
+            limits: STALL_LIMITS_508,
+          });
+          if (verdict508.action === 'resume') {
+            srAttempt = verdict508.nextAttempt;
+            continue;
+          }
+          _emit({
+            event: 'agent_status',
+            phase: 'stall_resume_exhausted',
+            reasonCode: verdict508.reason,
+            attempt: srAttempt + 1,
+            message: '模型连续停滞，自动续跑已达上限，本次调用如实结束',
+          });
+        }
+        srReplayFilter = null; // 本轮调用链结束，清除重放过滤
+        break; // BLOCK-508 stall-resume while 唯一正常出口
+        }
         // BLOCK-56 P1 — finalization 档不传 onEvent，modelRouting 兜底追踪
         if (upJson && upJson.modelRouting && upJson.modelRouting.fallbackFrom) {
           modelFallbackOccurred = true;

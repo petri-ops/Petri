@@ -202,8 +202,10 @@ test('K-07 治理对账：README 第三轮蓝图 status 与 registry 一致（�
   assert.equal(r.blueprintStatusParity.value.postS7Registry, 'completed');
   assert.equal(r.blueprintStatusParity.value.postS7ReadmeActive, false);
   assert.equal(r.blueprintStatusParity.value.conflict, false);
-  assert.equal(r.blueprintStatusParity.value.postH9Registry, 'planned', '第四轮蓝图 planned living-plan 不占串行槽位');
-  assert.equal(r.blueprintStatusParity.value.postH9ReadmePlanned, true);
+  // 2026-11-19 用户裁决「POST-H9 蓝图状态归位」：registry/frontmatter/README 已由 planned 翻 completed
+  // （living-plan 完成态，八阶段 K0–K7 全由 BLOCK-396~403 收口）；本断言随裁决同步，非回弹。
+  assert.equal(r.blueprintStatusParity.value.postH9Registry, 'completed', '第四轮蓝图已归位 completed（2026-11-19 用户裁决）');
+  assert.equal(r.blueprintStatusParity.value.postH9ReadmePlanned, false, 'README 蓝图条目已同步为 completed');
 });
 
 // ---------- ④ 治理工具 selftest ----------

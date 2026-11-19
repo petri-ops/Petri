@@ -1,0 +1,23 @@
+▶ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点）
+  ✔ ① 已吐 content/tool_call 后 idle stall 仍决定 resume（507 覆盖不到的痛点） (0.503167ms)
+  ✔ ② 零可见输出 stall 同样 resume（既有场景不回退） (0.070916ms)
+  ✔ ③ 有界：attempt 超上限/预算耗尽 → terminal，不无限重试 (0.057083ms)
+  ✔ ④ 非 stall 错误（含已出字）永不 resume (0.044625ms)
+✔ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点） (1.352666ms)
+▶ BLOCK-508 · HK-01 重放去重（已交付内容零重复）
+  ✔ ① 已发文本累计长度内的 delta 被吞，超出部分透传 (0.832875ms)
+  ✔ ② 已交付 tool_call id 整条丢弃，新 id 透传 (0.071917ms)
+  ✔ ③ 非 delta 事件（done/usage/error/stall/provider_retry）一律透传不外挂 suppressed (0.079125ms)
+  ✔ ④ reasoning_delta 不算可见交付，不去重（续跑后仍可见） (0.069709ms)
+✔ BLOCK-508 · HK-01 重放去重（已交付内容零重复） (1.173291ms)
+▶ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场）
+  ✔ ① 记录 messages 摘要/已发帧游标/tool_call id/attempt，不复制 messages 正文 (1.032834ms)
+✔ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场） (1.091792ms)
+ℹ tests 9
+ℹ suites 3
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 148.915625

@@ -137,7 +137,11 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
       // 现值 1143 与锚点 1140 长期不一致（存量红）。按本测试自述「增长需显式重锚留因」校正到 1143，
       // 语义仍是只减不增；后续收缩走蓝图 S4.1 拆分回收。
       { file: 'core/petri-server/agent-runner.js', anchor: 1143 },
-      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1579 },
+      // BLOCK-508 重锚 1579→1647（+68）：循环层 stall-resume 接线（import/重放过滤入口/
+      // 有界续跑 for(;;)/stall 决策与去重），修复「已出字后停摆→break→手动重试」痛点。
+      // 纯逻辑在独立模块 loop-stall-resume.js（本文件只薄接线）；按本测试纪律显式重锚留因，
+      // 只减不增继续生效，真正拆分回收仍走蓝图 S4.1。
+      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1647 },
       { file: 'core/petri-server/conversation-adapter.js', anchor: 465 },
     ];
     // 行数口径与 `wc -l` 一致（末行换行不额外计 1）。此前 readLines 用 split('\n').length，
