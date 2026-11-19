@@ -208,7 +208,7 @@ function validateParameterRef(value, parameters, errors, where) {
  */
 // BLOCK-498（P3-03 v2b D1/D2 后端契约）——特征引用与派生缓存。
 const FEATURE_ID_RE = /^feat:[0-9a-f]{24}$/;
-const FEATURE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_:+\-]{0,63}$/;
+const FEATURE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_:+-]{0,63}$/;
 const FEATURE_KIND_SET = new Set(model3dFeatures.FEATURE_KINDS);
 
 /**
@@ -221,8 +221,9 @@ function featureVersionKeyOf(node) {
     return /^[a-f0-9]{64}$/i.test(sha) ? sha.toLowerCase() : null;
   }
   if (isPlainObject(node.dimensions) && Object.keys(node.dimensions).length > 0) {
-    const canonical = Object.keys(node.dimensions).sort()
-      .map((key) => `${key}:${JSON.stringify(node.dimensions[key])}`).join('|');
+    const canonical = Object.entries(node.dimensions)
+      .sort(([keyA], [keyB]) => (keyA < keyB ? -1 : keyA > keyB ? 1 : 0))
+      .map(([dimKey, dimValue]) => `${dimKey}:${JSON.stringify(dimValue)}`).join('|');
     return crypto.createHash('sha256').update(`features/v1|${node.type}|${canonical}`).digest('hex');
   }
   return null;
