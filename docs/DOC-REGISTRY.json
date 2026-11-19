@@ -114,17 +114,17 @@
       "id": "BLOCK-490",
       "path": "docs/block490-capability-intake-review-plan.md",
       "kind": "reference",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block490-capability-intake-review",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "PLANNED",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block490-capability-intake-review-plan.md"
       ],
       "registeredAt": "2026-11-18",
-      "notes": "2026-11-18 立项评审稿（用户发令「先出一份独立立项评审稿（plan）」；Jev 落地形态=CAPABILITY-INTAKE-SKILL 0.60 advice-only）。capability-intake 能力扩展承接 Agent skill 的 planned 前置评审材料——把用户随时提出的外部能力扩展需求（一句话/文档链接/资料库引用）标准化为接收→解析→理解拆解→内化→候选登记→排队工作流，全程记录来源与版权 provenance。TASK-FORM 归类=能力沉淀制度化 + 立项评审稿；D1–D8 逐项 pending_user_ruling 不代答（关键边界 D2=自动登记候选+评审稿、启动仍发令，不合 G0 串行纪律）。本稿不启动工作包、不建 skill 目录/发现桥、零运行时/依赖/观感写面；三件套登记同提交。G0 开发期常态 · 不外推 packaged/Provider/GA."
+      "notes": "2026-11-18 立项评审稿（用户发令「先出一份独立立项评审稿（plan）」；Jev 落地形态=CAPABILITY-INTAKE-SKILL 0.60 advice-only）。capability-intake 能力扩展承接 Agent skill 的 planned 前置评审材料——把用户随时提出的外部能力扩展需求（一句话/文档链接/资料库引用）标准化为接收→解析→理解拆解→内化→候选登记→排队工作流，全程记录来源与版权 provenance。TASK-FORM 归类=能力沉淀制度化 + 立项评审稿；D1–D8 逐项 pending_user_ruling 不代答（关键边界 D2=自动登记候选+评审稿、启动仍发令，不合 G0 串行纪律）。本稿不启动工作包、不建 skill 目录/发现桥、零运行时/依赖/观感写面；三件套登记同提交。【2026-11-19 状态归位·对账收口】用户发令「开始 BLOCK-490」→执行前核对发现评审（D1-D8 已 ruled）+实施（BLOCK-501 已交付：SKILL.md+两桥真 symlink+provenance.jsonl+HK-01 4/4）均完成，停下报用户→裁决「状态归位批」。status planned→completed（评审稿完成态非实施态），零新实现/只动账；登记漂移清偿（BLOCK-495 已抓登记滞后第 3 次同族）；Jev doc:suggest 命中 planDoc 已落 plan 笔录。零新依赖/零运行时/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA."
     },
     {
       "id": "BLOCK-486",

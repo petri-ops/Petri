@@ -25,3 +25,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-19T07:53:20.017Z -->
 最后更新：2026-11-19（🏁 **BLOCK-498 收口（P3-03 v2b 后端契约票 · closeout 定向链 exit=0 全绿 · 一次会话完成）**：D2/D1 已裁决形态落地——mate 白名单收 aFeature/bFeature（旧键零迁移/禁 nodeId#featureId/constraint_feature_unresolved/mate_feature_not_planar 显式拒绝曲面）；features[]/featuresVersionKey 派生缓存 fail-closed（features_stale_version_mismatch）；基元派生接线导出+特征库 ESM→CJS+前端镜像同步（跨语言对账门逐值一致）。骨架激活红 4→绿 9/9 常驻；邻域 43/43+前端 vitest 15/15+tsc 零红；BLOCK-496 契约按 reopen 同步 v2b=partially_implemented（sha d428d6ce）。事故如实登记：包2 收口批裸 git add acceptance/ 卷入保护资产（df5b30b4 已推送）→guard 抓真→rm --cached 处置（先例 548eab51 同形）；scene3d 尺寸基线重打（+122 行契约面留因）。第二票（导入链抽特征+前端编辑器）在 A 组 #2 范围内待续；曲面=v2c 维持。串行槽位回空→包 4 P4-05 完整尺寸链接续（用户已发令，v2b 特征引用已解锁）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-19T08:34:37.727Z -->
+最后更新：2026-11-19（🚀 **BLOCK-499 立项启动（P4-05 完整尺寸链 · active / P0-LAUNCH，占唯一串行槽位）**：用户 A 组 #3 发令（BLOCK-496 对齐表 P4-05=authorized_pending_start 的落地，前置 v2b 特征引用已由 BLOCK-498 解锁）。第一刀之上升级特征级引用+链代数+manifest 诚实翻转；实机腿=真实 occt-wasm STEP。plan=docs/block499-p405-full-chain-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）

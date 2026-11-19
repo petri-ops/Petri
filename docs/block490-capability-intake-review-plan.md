@@ -1,6 +1,6 @@
 ---
 capability: block490-capability-intake-review
-status: planned
+status: completed
 kind: reference
 truthDomain: block490-capability-intake-review
 entrypoint: docs/README.md
@@ -84,3 +84,18 @@ acceptance:
 在此之前本模块处于 planned / 已裁决待槽位，不存在可用 skill，不会自动承接任何需求。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## 状态归位笔录（2026-11-19 · 对账收口，零新实现）
+
+> 形态：TASK-FORM-TAXONOMY §3「对账收口 / superseded」——零产品代码、零新实现、只动账，目标是账实一致。
+
+- **触发**：用户发令「开始 BLOCK-490」，执行前 evidence reconciliation 核对出发令目标**实质已完成**，构成新裁决点，停下报用户；用户裁决「状态归位批（registry planned→completed，同步三件套，不重复实施）」。
+- **账实对账证据**：
+  - 评审稿层面：§4 D1–D8 已于 2026-11-18 全部 ruled（用户「全按评审稿推荐选项」）——本稿"评审"已完成。
+  - 实施切片层面：BLOCK-501（2026-11-19 交付，AUDIT-LOG/registry COMPLETED）已把 §2 五项实施预期全部落地——①canonical `.agents/skills/capability-intake/SKILL.md`（三步闭环+四红线）②D7 两发现桥真 symlink（`.claude`/`.codebuddy`，在盘可查）③D4 `acceptance/capability-intake/provenance.jsonl` append-only（2 行 seed，C-56 两源 `license_unknown=true` 停等在册）④HK-01 消费测试 `test/block501-capability-intake.test.mjs` 4/4。
+- **归位动作**：本稿 status `planned`→`completed`（**评审稿完成态，非实施态**）；DOC-REGISTRY/README/AUDIT-LOG/roadmap/handoff 同步；不新建 skill、不改运行时、不重复 BLOCK-501 实施、不造第二真相。
+- **登记漂移根因**：BLOCK-495 W3 收口已抓到"登记滞后第 3 次"，BLOCK-490 的 registry 状态未随 BLOCK-501 交付回写，本次为同族清偿；Jev doc:suggest 命中 planDoc（model，adopted）已落本笔录。
+- **门禁总账**：docs:check PASS（656 注册文档）+ui:audit:check 绿+test:changed（docs-check 命令、unknown 空）+docs:reconcile 零归档候选（retained 351/manual 0/validation 0）；closeout 定向链 15 门绿、arch 两门按定向语义 SKIP（纯文档批改动域不相交）；**quality:perf 环境性红如实登记（非本包文件面、非本包失败）**——packaged_start 489~505ms vs 阈值 485ms + long_conversation 47ms，本批零 perf/生产路径改动、基线文件零触碰，本机 load avg 5.5 高负载，与 BLOCK-504 收口同根因；不放宽阈值/不反复重跑，待负载回落 CI 复验。
+- **边界守住**：零新依赖/零运行时写面/观感零代签/不碰 G1+；并行人眼包（BLOCK-503/505）与全部 untracked 保护资产零触碰，提交逐批显式 add。G0 开发期常态 · 不外推 packaged/Provider/GA。
