@@ -303,6 +303,7 @@ export function validateRulingCodificationIntegrity(readings) {
   if (!t || Object.keys(t.tickets ?? {}).length !== PATTERN_FLOOR.ticketCount
     || !DEFERRED_TICKETS.every((id) => {
       const row = ownGet(t.tickets, id);
+      // eslint-disable-next-line security/detect-object-injection -- id 来自 DEFERRED_TICKETS 冻结白名单，EXPECTED_TICKET_STATUS 为同源冻结表
       return row && VALID_TICKET_STATUS.has(row.status) && row.status === EXPECTED_TICKET_STATUS[id]
         && row.reopenRequiresUserOrder === true
         && (row.status !== TICKET_STATUS.IMPLEMENTED

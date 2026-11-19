@@ -106,6 +106,7 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     };
     for (const id of DEFERRED_TICKETS) {
       const row = ownGet(s.tickets, id);
+      // eslint-disable-next-line security/detect-object-injection -- id 来自 DEFERRED_TICKETS 冻结白名单，expected 为同源字面量表
       assert.equal(row.status, expected[id], `${id} 状态须与 2026-11-19 对齐表（BLOCK-496 §3）一致`);
       assert.equal(row.reopenRequiresUserOrder, true, `${id} 越过当前状态推进须用户新发令`);
     }
