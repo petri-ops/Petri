@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 657,
+    "documentCount": 659,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 640
+    "managedMarkdown": 642
   },
   "documents": [
     {
@@ -13672,6 +13672,59 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 交付（用户三问「Petri 需要做什么吗/拆两步喂能安排吗/ZCode 或 deepseek harness 是这么做的吗？理清楚并学习」）。大上下文处理对标研究：Petri 四件套现读锚（分页读取 240/1000 workspace-tools.js/microcompact BLOCK-98/auto-compact D3 公式化阈值注释自证对标 ZCode/流式看门狗 90/60 两段+封闭续命集 BLOCK-338 含误杀校准案底）——四件套齐且经实测校准，修复层面不需要动。对标分层：ZCode harness 一手观察 Z1-Z4（分页/Explore 子 agent 读摘要委托/auto-compact/停滞中止保护——唯一缺的形态=Z2 子 agent 读摘要委托，sideTask 零检索命中 A7 存续待查）；deepseek 二手 D1 prefix caching（与零可见输出自动重试配合重试已最小成本）/D2 reasoning_delta 已续命/D3 服务端停摆=核实根因。候选分级：P0 提示词纪律已落/P1 读摘要委托子 agent 化 pending_user_ruling（建议先观察直连后停滞频率）/P1' 渠道 fallback pending/P2 已存在无需动。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-507",
+      "path": "docs/block507-context-aware-stall-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block507-context-aware-stall",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "sharedBaselines": [],
+      "touchSurface": [
+        "docs/block507-context-aware-stall-plan.md",
+        "core/shared-backend/llm-providers/stream-stall-watchdog.js",
+        "core/shared-backend/llm-providers/model-gateway.js",
+        "test/block507-context-aware-stall.test.mjs",
+        "test/impact-map.json",
+        "acceptance/block507-context-aware-stall/"
+      ],
+      "tags": [
+        "large-context",
+        "A-彻底解决",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户发令「彻底解决，能开整吗；长下文免不了，后面可能还会有 1m 上下文的量」；BLOCK-506 研究的落地票 1）。上下文感知看门狗首包预算：首包预算=base(env 默认 90s)+floor(预估 token/3000)×1s 封顶 600s——1M 量级 prefill 获数分钟级预算不再被固定 90s 误杀；idle 60s 不缩放（生成开始后中途静默仍是死亡信号）；预估 CJK≈1/字符其它≈1/4、messages+tools 计入；stall 错误 details 增 estimatedTokens/firstTokenScaled 可观测；env FIRST 变 base 预算语义（非硬上限）封顶恒生效。HK-01 红 4→绿 15/15（含 BLOCK-338 全量零回归）+model-gateway 19/19。常数保守下限待真实 1M 数据校准（reopen 在案）；票 2=读摘要委托子 agent 化另票。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-508",
+      "path": "docs/block508-loop-stall-resume-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block508-loop-stall-resume",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "sharedBaselines": [],
+      "touchSurface": [
+        "docs/block508-loop-stall-resume-plan.md",
+        "core/petri-server/loop-orchestrator.js",
+        "core/shared-backend/loop-checkpoint.js",
+        "test/loop-stall-resume.test.mjs",
+        "acceptance/block508-loop-stall-resume/"
+      ],
+      "tags": [
+        "large-context",
+        "stall-resume",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 立项（用户裁决「立新包做循环层续跑……真正消除手动重试」；BLOCK-506 研究 + BLOCK-507 首包预算的循环层接续票 2）。大上下文韧性票 2：agent 循环层 stall-resume——消除「流式 LLM 中途停摆→整轮任务失败→用户手动重试」。核心：请求前 generation checkpoint（messages 快照+已发帧游标+tool_call id+attempt 预算，落 task_events）；stall 时 orchestrator 不再 break，走有界续跑状态机自动重发（依赖服务端 prefix caching 降成本），按已发 delta 游标去重（已出字不重复交付）。用户原话「不是修修补补打补丁，要彻底解决；服务端能通就永不中断；手动重试不合理」。现读证据：已出字 idle stall 时 emittedOutput=true→不重试→error→orchestrator break→任务失败；DeepSeek 无 stream resume/cursor 协议故只能循环层重发+去重。文件面隔离：零触碰 BLOCK-507 在制文件（llm-client.js/model-gateway.js/stream-stall-watchdog.js/block507-*），本包只动 loop-orchestrator.js+loop-checkpoint.js+新模块。HK-01 红绿先行；为消除与 507 的并行契约冲突，本包不改 test/impact-map.json（测试用通用名 test/loop-stall-resume.test.mjs 走既有覆盖），零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
