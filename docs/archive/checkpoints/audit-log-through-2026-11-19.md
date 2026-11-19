@@ -28,3 +28,7 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-19T08:34:37.727Z -->
 最后更新：2026-11-19（🚀 **BLOCK-499 立项启动（P4-05 完整尺寸链 · active / P0-LAUNCH，占唯一串行槽位）**：用户 A 组 #3 发令（BLOCK-496 对齐表 P4-05=authorized_pending_start 的落地，前置 v2b 特征引用已由 BLOCK-498 解锁）。第一刀之上升级特征级引用+链代数+manifest 诚实翻转；实机腿=真实 occt-wasm STEP。plan=docs/block499-p405-full-chain-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-19T08:47:41.742Z -->
+最后更新：2026-11-19（🗃 **BLOCK-500 交付（C-56 论文写作/修改保真 Skill 手册先行稿 v0.1 · DRAFT-FOR-REVIEW，零注册面）**：用户 A 组 #4 发令（BLOCK-495 评审材料 §6 推荐候选②=手册内容先行）。十节手册正文落档：事实保真内核四保护+不编造红线+方法/结果段锁定（只校验不改失败即回滚）+中文 F 类 6 检查（每项形态→改写示例）+claim 保真三栏对照（无默认最终稿）+provenance/未覆盖清单+人机边界+执行流程+反模式；评审要点 4 项文末（结构深度/F 类增删/数字锁定粒度/认可后启动注册面）。零注册面（skill 目录/manifest/桥待认可后另批）；零运行时改动。docs/c56-paper-writing-manual-draft-2026-11-19.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+最后更新：2026-11-19（🏁 **BLOCK-499 收口（P4-05 完整尺寸链 · closeout 定向链 exit=0 全绿 · 一次会话完成）**：特征引用解析（feat: id/特征名，缓存优先+派生回落，source='feature'，非代数量如实拒绝）+ 尺寸链代数（跨节点 {nodeId,ref} 装配链，缺省 total=沿轴维度总量，|Σ−total|≤1e-6）+ SVG data-gdt-chains 文本层 + manifest 诚实翻转（链齐且全一致才 dimensions=true，gdt 恒 false=形位另案）。HK-01 红 9→绿 9 含真实 occt-wasm STEP 实机腿；邻域 17/17；BLOCK-496 契约 reopen 同步 P4-05=implemented（sha 3abe9fd5）；model3d-dimensions 文件级误报豁免（P 回归基线 1484）。零新依赖/观感零代签/不碰 G1+。串行槽位回空→包 5 C-56 手册稿接续（用户已发令）。证据=acceptance/block499-p405-full-chain/。G0 开发期常态 · 不外推 packaged/Provider/GA.）

@@ -1384,7 +1384,7 @@
       "capability": "post-h9-optimization-blueprint-2026-11-10",
       "path": "docs/post-h9-optimization-blueprint-2026-11-10.md",
       "kind": "living-plan",
-      "status": "planned",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "post-h9-optimization-program",
       "entrypoint": "docs/README.md",
@@ -1394,7 +1394,7 @@
         "ui-ux",
         "workflow"
       ],
-      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。planned 不占单包串行槽位，正式 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。 【程序状态同步】K0–K7 八阶段已由 BLOCK-396～403 全部收口，总报告见 docs/post-h9-2026-11-10-final-report.md；本条目 status 保持 planned（living-plan 不占串行槽位），蓝图原件为受保护未跟踪文件、全程零触碰。"
+      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。不占单包串行槽位，各 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。 【程序状态同步】K0–K7 八阶段已由 BLOCK-396～403 全部收口，总报告见 docs/post-h9-2026-11-10-final-report.md。【2026-11-19 状态归位·对账收口】用户发令「开始 POST-H9 优化蓝图」→执行前核对八阶段 K0–K7 全部 completed、证据目录 k0/..k7/ 与脚本/测试在盘、抽查 K0/K2/K7 契约测 32/32 当前绿（非 registry 虚标），构成新裁决点停下报用户→裁决「状态归位批」。registry status planned→completed（living-plan 完成态，非重做/非新阶段），零新实现/只动账；历史「保持 planned 不占槽位」决策按本次裁决翻为完成态；蓝图原件为受保护未跟踪文件——正文/32 条缺口/证据数字零改写，仅 frontmatter `status: planned→completed` 随归位同步（docs:check FRONTMATTER_STATUS_MISMATCH 硬约束 registry/frontmatter 一致，与 BLOCK-490 同形）；Jev doc:suggest 命中 planDoc 已落 AUDIT-LOG 归位笔录。零新依赖/零运行时/观感零代签/不碰 G1+。"
     },
     {
       "id": "POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06",
