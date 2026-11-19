@@ -9,9 +9,9 @@
       "docs/archive/"
     ],
     "requireRegistration": true,
-    "documentCount": 656,
+    "documentCount": 657,
     "lastUpdated": "2026-11-19",
-    "managedMarkdown": 639
+    "managedMarkdown": 640
   },
   "documents": [
     {
@@ -13650,6 +13650,28 @@
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 交付（用户发令「针对每一个核对的点给提示词——输入后工作产出我再来核对」；BLOCK-503 清单执行层配套）。15 段自包含提示词：P-甲1 C-56 手册真实改写演练（三栏对照+F类报告+数字锁定校验）/P-甲2 两源 license 补抓（append-only 更正行）/P-甲3 SUS 问卷草案/P-乙0 环境准备（三面齐+9223 离屏）/P-乙1-4 UI-710/709/707/706 截图+DOM 读数/P-乙5 八态矩阵逐格/P-乙6 P5 流式态+P6 skill 链/P-乙7-A/B/C H-01~H-06 截图组（读屏主观部分如实留给真人）/P-乙8 E-01 树测试机械读数+E-02 22 条扫描/P-乙9 C-55 帧提取+ffprobe。统一纪律=9223 离屏跑完 kill/截图不可得如实标注/产出落 acceptance/block503-outputs/<item>//不写 verified 不代签（判定归用户）。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。",
       "sharedBaselines": []
+    },
+    {
+      "id": "BLOCK-506",
+      "path": "docs/block506-large-context-benchmark-research-2026-11-19.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block506-large-context-benchmark-research",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "MATERIAL",
+      "sharedBaselines": [],
+      "touchSurface": [
+        "docs/block506-large-context-benchmark-research-2026-11-19.md"
+      ],
+      "tags": [
+        "benchmark",
+        "large-context",
+        "G0"
+      ],
+      "registeredAt": "2026-11-19",
+      "notes": "2026-11-19 交付（用户三问「Petri 需要做什么吗/拆两步喂能安排吗/ZCode 或 deepseek harness 是这么做的吗？理清楚并学习」）。大上下文处理对标研究：Petri 四件套现读锚（分页读取 240/1000 workspace-tools.js/microcompact BLOCK-98/auto-compact D3 公式化阈值注释自证对标 ZCode/流式看门狗 90/60 两段+封闭续命集 BLOCK-338 含误杀校准案底）——四件套齐且经实测校准，修复层面不需要动。对标分层：ZCode harness 一手观察 Z1-Z4（分页/Explore 子 agent 读摘要委托/auto-compact/停滞中止保护——唯一缺的形态=Z2 子 agent 读摘要委托，sideTask 零检索命中 A7 存续待查）；deepseek 二手 D1 prefix caching（与零可见输出自动重试配合重试已最小成本）/D2 reasoning_delta 已续命/D3 服务端停摆=核实根因。候选分级：P0 提示词纪律已落/P1 读摘要委托子 agent 化 pending_user_ruling（建议先观察直连后停滞频率）/P1' 渠道 fallback pending/P2 已存在无需动。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
