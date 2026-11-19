@@ -330,20 +330,20 @@
       "sha256": "2997e80561a366baca8fc2f3990f9d43854c9550c4d36cd5ebd83c74f29205c7"
     },
     {
+      "path": "frontend/src/pages/project-workspace/RightFileTree.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1079,
+      "bytes": 49261,
+      "sha256": "fc05ccd5a7727248e9514bc7c9e85a685ff7922c118e405a4f16e886d84507dd"
+    },
+    {
       "path": "core/shared-backend/result-compare-service.js",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1072,
       "bytes": 49068,
       "sha256": "42362ac4c1ab53d25a7856608f9479d93b6eca9189f0e902d6b43bbba3cc42df"
-    },
-    {
-      "path": "frontend/src/pages/project-workspace/RightFileTree.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1061,
-      "bytes": 48369,
-      "sha256": "b40bd6bbef270ceb7c493ad66f165fa98ccfc70dbf2e2297eba219fa5c23f9e2"
     },
     {
       "path": "frontend/src/lib/electron.d.ts",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86425
+  "total": 86443
 }
