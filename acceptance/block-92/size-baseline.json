@@ -274,20 +274,20 @@
       "sha256": "6c9007ae21afca0970faf965c40c5e820e20ef1e637f7aa8a2b3bc568b798ec2"
     },
     {
+      "path": "core/petri-server/helpers/scene3d.js",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1287,
+      "bytes": 64837,
+      "sha256": "969225bd75dfa4f1a048c762a578a4b3d035575687d7a4ca9b8167f4a1212ecd"
+    },
+    {
       "path": "core/petri-server/agent-tools/learning.js",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 1256,
       "bytes": 50636,
       "sha256": "1eca3b47669afacc89acd4a46b572682f522f81fbc42a410c8f7cf25ef22b5e9"
-    },
-    {
-      "path": "core/petri-server/helpers/scene3d.js",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1165,
-      "bytes": 58091,
-      "sha256": "281bb2bdcb1325c77afbdcea64922743d8a24e888f33478d6effbbaa67736a99"
     },
     {
       "path": "core/packages/shared-config/config-schema.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86302
+  "total": 86424
 }
