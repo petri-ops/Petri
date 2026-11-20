@@ -32,6 +32,7 @@ vi.mock('@/components/workspace-panels/ResultView', () => ({
   }) => (
     <div data-testid="core-result-view" data-mode={mode} data-active={active ? 'true' : 'false'} data-has-back={onBack ? 'true' : 'false'}>
       result body
+      {onBack ? <button type="button" onClick={onBack}>返回对话</button> : null}
       <button type="button" onClick={onAskCurrentResult}>询问 Agent</button>
       <button type="button" onClick={() => onModeChange?.('compare')}>审查</button>
       <button type="button" onClick={() => onModeChange?.('code')}>代码</button>
@@ -97,13 +98,16 @@ function context(overrides: Partial<ResultsSurfaceContext> = {}): ResultsSurface
 }
 
 describe('BLOCK-334 ResultsSurface (right-rail result host)', () => {
-  it('renders the core result body in result sub-mode and threads active down for WebGL gating', () => {
-    render(<ResultsSurface ctx={context()} active />);
+  it('result sub-mode gives a back-to-chat path and keeps active result context', () => {
+    const onBackToChat = vi.fn();
+    render(<ResultsSurface ctx={context()} active onBackToChat={onBackToChat} />);
     const body = screen.getByTestId('core-result-view');
     expect(body.getAttribute('data-mode')).toBe('result');
     expect(body.getAttribute('data-active')).toBe('true');
-    // 中央不再是宿主：结果子态没有「返回对话」可回
-    expect(body.getAttribute('data-has-back')).toBe('false');
+    expect(body.getAttribute('data-has-back')).toBe('true');
+    const back = screen.getByRole('button', { name: '返回对话' });
+    fireEvent.click(back);
+    expect(onBackToChat).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('button', { name: '返回结果' })).toBeNull();
   });
 

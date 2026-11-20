@@ -71,10 +71,13 @@ export interface ResultsSurfaceContext {
 export function ResultsSurface({
   ctx,
   active,
+  onBackToChat,
 }: {
   ctx: ResultsSurfaceContext;
   /** 右栏当前 tab 是否为 results：非激活时 3D 预览不持有 WebGL 上下文（block-322 P3 门控）。 */
   active: boolean;
+  /** UI-713 — Studio/结果深度面返回中央聊天（保留会话与 activeJob）。 */
+  onBackToChat?: () => void;
 }): React.ReactElement {
   const [mode, setMode] = React.useState<ResultSurfaceMode>('result');
   // job 切换时子态回到 result：render 期 adjust-state（与 ResultArtifactShell 同模式），
@@ -187,8 +190,9 @@ export function ResultsSurface({
             conclusion={contextConclusion}
             revisionLabel={shortRevisionLabel(ctx.activeArtifact?.revisionId, ctx.activeArtifact?.revisionOrdinal)}
             selectionLabel={describeSelection(ctx.activeArtifact?.selection)}
-            // 中央不再是结果宿主：「返回」只回到结果子态，不切会话。
-            onBack={mode === 'result' ? undefined : () => setMode('result')}
+            // UI-713 — 结果子态返回中央聊天；其它子态仍先返回结果主态。
+            onBack={mode === 'result' ? onBackToChat : () => setMode('result')}
+            backLabel={mode === 'result' ? '返回对话' : '返回结果'}
             onAskAgent={askAboutCurrentResult}
             activeMode={mode}
             canReviewVersions={!!ctx.activeArtifact?.artifactFamilyId}
@@ -232,6 +236,7 @@ export function ResultsSurface({
                 workflow={ctx.activeWorkflow}
                 activeArtifact={ctx.activeArtifact}
                 onActiveArtifactChange={ctx.setActiveArtifact}
+                onBack={onBackToChat}
                 onAskAgent={ctx.handleAskAgent}
                 onWorkflowChanged={ctx.onWorkflowChanged}
                 onAgentCodeRequest={onRevisionAgentRequest}

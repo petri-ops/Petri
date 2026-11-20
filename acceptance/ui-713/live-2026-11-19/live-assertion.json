@@ -1,0 +1,40 @@
+{
+  "item": "UI-713-LIVE",
+  "capturedAt": "2026-11-19T14:58:12.303Z",
+  "target": "http://localhost:3000/ui713-live.html",
+  "mode": "dev Electron visible window + real components + controlled fixture",
+  "boundary": "真实 ChatArtifactCard/ResultsSurface 组件；fixture 与 ctx 为受控桩，产品回调接线由 HK-01/邻域测试覆盖；观感签字仍归用户。",
+  "results": [
+    {
+      "id": "C1_default_summary",
+      "pass": true,
+      "detail": "已生成 2 个产物 · summary.png\n查看结果详情"
+    },
+    {
+      "id": "C2_expand_detail",
+      "pass": true,
+      "detail": {
+        "detail": true,
+        "detail3d": true,
+        "has3d": false
+      }
+    },
+    {
+      "id": "C3_collapse",
+      "pass": true,
+      "detail": "已生成 2 个产物 · summary.png\n查看结果详情"
+    },
+    {
+      "id": "C4_back_to_chat",
+      "pass": true,
+      "detail": {
+        "rightOpen": false,
+        "backCalls": 1,
+        "activeJobId": "job_ui713",
+        "conversationId": "conv_ui713",
+        "inputFocused": true
+      }
+    }
+  ],
+  "ok": true
+}

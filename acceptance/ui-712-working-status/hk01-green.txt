@@ -1,0 +1,6 @@
+UI-712 HK-01 绿证据（2026-11-19）
+
+命令：npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/ChatWorkingStatus.test.tsx
+
+结果：Test Files 1 passed (1) · Tests 4 passed (4)
+覆盖：未运行不渲染；运行时显示「工作中」并按 startedAt 起算秒表（首 tick 6 秒→7 秒，锚点为 5 秒前）；缺省 startedAt 按挂载时刻起算（2 秒）；运行结束后状态条移除、计时停止。

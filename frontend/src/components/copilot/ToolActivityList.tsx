@@ -771,7 +771,7 @@ export function ToolActivityList({
   // 此前只在 legacy 分支渲染，聊天时间线走 collapseWhenSettled 提前 return，
   // 卡永远不可达（BLOCK-322 P3-03 v2b 接线断裂）。
   const artifactCards = artifactWorthyJobs.map((job) => (
-    <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded projectId={projectId} />
+    <ChatArtifactCard key={job.toolJobId} toolJobId={job.toolJobId} expanded projectId={projectId} lightweight />
   ));
   const awaiting = activities.filter((activity) => activity.status === 'awaiting_confirmation').length;
   const attention = activities.filter(

@@ -1,0 +1,53 @@
+{
+  "item": "UI-707-LIVE",
+  "capturedAt": "2026-11-19T15:36:22.748Z",
+  "targets": [
+    "/ui707-live.html",
+    "/settings"
+  ],
+  "mode": "dev Electron visible window + real ModelMenu + real settings DOM",
+  "boundary": "ModelMenu 为真实组件 + 受控 presets；patch 只记录不落盘；设置页读真实 DOM。观感口令归用户，不写 verified。",
+  "results": [
+    {
+      "id": "H1_model_row_config",
+      "pass": true,
+      "detail": {
+        "focused": true,
+        "flyout": true,
+        "rowConfig": true,
+        "ctx": true,
+        "think": true,
+        "quickGone": true
+      }
+    },
+    {
+      "id": "H2_context_change_callback",
+      "pass": true,
+      "detail": {
+        "patch": {
+          "presetId": "p1::model-a",
+          "contextWindow": 200000
+        },
+        "patchText": "{\n  \"presetId\": \"p1::model-a\",\n  \"contextWindow\": 200000\n}"
+      }
+    },
+    {
+      "id": "H3_settings_context_retired",
+      "pass": true,
+      "detail": {
+        "found": true,
+        "cols": [
+          "",
+          "协议",
+          "供应商",
+          "Base URL",
+          "Key",
+          "默认模型",
+          "连通性",
+          ""
+        ]
+      }
+    }
+  ],
+  "ok": true
+}

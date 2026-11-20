@@ -5448,3 +5448,22 @@
 }
 
 /* BLOCK-266 并钮组合菜单——供应商分组标题行（非输入语义，弱化样式） */
+
+/* UI-712 — 聊天底部工作反馈：运行中常驻，正文/过程折叠不由本类接管 */
+.sc-working-status {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: var(--petri-space-2) 0;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-base);
+}
+
+.sc-working-status-label {
+  color: var(--petri-text);
+}
+
+.sc-working-status-elapsed {
+  color: var(--petri-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}

@@ -262,7 +262,7 @@ export function ConversationTimeline({
           </button>
         </div>
         {artifactJobs.map((toolJobId) => (
-          <ChatArtifactCard key={toolJobId} toolJobId={toolJobId} expanded projectId={projectId} />
+          <ChatArtifactCard key={toolJobId} toolJobId={toolJobId} expanded projectId={projectId} lightweight />
         ))}
       </div>
     );

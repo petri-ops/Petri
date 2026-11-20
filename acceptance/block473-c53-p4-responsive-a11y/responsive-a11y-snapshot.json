@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-responsive-a11y",
   "capability": "block473-c53-p4-responsive-a11y",
-  "sourceCommit": "35e19314ab9d08b65d1a39da330017708442c37f",
+  "sourceCommit": "92f54660f3c4f8d784069a51f0eefa3a3c79cf62",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-responsive-a11y.mjs",
-  "generatedAt": "2026-11-18T08:21:52.296Z",
+  "generatedAt": "2026-11-20T00:51:26.670Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -38,18 +38,18 @@
       },
       "source": "frontend/src CSS 全源 + ui-design-a11y.mjs FOCUS_GAP_BASELINE + nso-w3-a11y inert 语义",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     },
     "ariaStateMachine": {
       "value": {
         "ariaBusy": 3,
         "roleAlert": 94,
-        "roleStatus": 57,
-        "ariaLive": 12
+        "roleStatus": 58,
+        "ariaLive": 13
       },
       "source": "frontend/src TSX 全源（aria-busy/role=alert/role=status/aria-live）",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     },
     "contrast": {
       "value": {
@@ -62,7 +62,7 @@
       },
       "source": "scripts/ui-design-a11y.mjs computeContrastPairs + custom.css token 对账表",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     },
     "breakpoints": {
       "value": {
@@ -117,7 +117,7 @@
       },
       "source": "frontend/src CSS 全源（@media/@container 宽度断点）",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     },
     "touchTargets": {
       "value": {
@@ -131,7 +131,7 @@
       },
       "source": "frontend/src/components/ui/controls/button.module.css",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     },
     "eightStateMatrix": {
       "value": {
@@ -141,7 +141,7 @@
       },
       "source": "scripts/ui-design-a11y.mjs STATE_MATRIX",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-18T08:21:52.092Z"
+      "capturedAt": "2026-11-20T00:51:26.461Z"
     }
   }
 }

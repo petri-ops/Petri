@@ -67,6 +67,7 @@ export function ResultStudioContextBar({
   revisionLabel,
   selectionLabel,
   onBack,
+  backLabel = '返回结果',
   onAskAgent,
   activeMode = 'result',
   onModeChange,
@@ -81,6 +82,8 @@ export function ResultStudioContextBar({
   selectionLabel: string;
   /** BLOCK-334 — 右栏宿主下「返回」只回结果子态；result 子态本身无处可回，不传即不渲染。 */
   onBack?: () => void;
+  /** UI-713 — 返回目标由宿主决定：结果返回聊天，子态返回结果。 */
+  backLabel?: string;
   onAskAgent: () => void;
   activeMode?: Extract<ResultMode, 'result' | 'code' | 'compare' | 'history'>;
   onModeChange?: (mode: Extract<ResultMode, 'result' | 'code' | 'compare' | 'history'>) => void;
@@ -90,7 +93,7 @@ export function ResultStudioContextBar({
   return (
     <header className={styles.contextBar}>
       {onBack && (
-        <button type="button" className={styles.backButton} onClick={onBack} aria-label="返回结果">
+        <button type="button" className={styles.backButton} onClick={onBack} aria-label={backLabel} title={backLabel}>
           <Icon name="arrow-left" size={14} />
         </button>
       )}

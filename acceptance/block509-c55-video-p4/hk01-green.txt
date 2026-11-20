@@ -1,0 +1,4 @@
+BLOCK-509 HK-01 绿证据（2026-11-20）
+
+Node：node --test test/block509-video-p4.test.mjs → 6/6（valid P0-compatible spec、付费确认文案、三类 fail-closed、两类篡改负测、确定性）。
+前端：npm run test:files --prefix frontend -- src/components/copilot/ChatArtifactCard.video.test.tsx → 1/1（轻量摘要、mp4 内联 controls/preload=metadata、下载链、收起回摘要）。

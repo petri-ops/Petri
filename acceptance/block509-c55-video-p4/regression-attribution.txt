@@ -1,0 +1,6 @@
+BLOCK-509 回归归属（2026-11-20）
+
+命令：node --test test/block482-video-compose.test.mjs
+结果：D2「ffmpeg 超时/失败 → ffmpeg_failed」在 macOS 本机得到 `out_dir_failed`（真实 fs 对 `/ws` 无写权限），不是 `ffmpeg_failed`；P0 历史在 Windows 环境全绿。
+
+归属：BLOCK-482 存量环境性红，非 BLOCK-509 文件面。BLOCK-509 未改 `core/petri-server/helpers/video-compose.js` 或该测试；本包自己的 HK-01（Node 6/6 + 前端 1/1）与邻域 52/52 全绿，实机 L1-L3 3/3。

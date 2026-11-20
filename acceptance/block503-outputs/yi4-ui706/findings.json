@@ -1,0 +1,48 @@
+{
+  "item": "UI-706-LIVE",
+  "capturedAt": "2026-11-19T15:49:27.359Z",
+  "target": "http://localhost:3000/settings",
+  "mode": "dev Electron visible window + real settings DOM",
+  "boundary": "只读观察真实设置页；未改任何 Endpoint 持久配置；用户口令已给，Agent 不代签观感。",
+  "results": [
+    {
+      "id": "U1_8_columns_no_context",
+      "pass": true,
+      "detail": {
+        "found": true,
+        "cols": [
+          "",
+          "协议",
+          "供应商",
+          "Base URL",
+          "Key",
+          "默认模型",
+          "连通性",
+          ""
+        ],
+        "rowCount": 0
+      }
+    },
+    {
+      "id": "U2_row_detail_expand",
+      "pass": true,
+      "detail": {
+        "clicked": true,
+        "aria": "DeepSeek 能力与选择器详情",
+        "detail": true,
+        "models": true,
+        "modelsText": "模型\n视觉\n思考\n向量\n探测\n渠道默认（兜底）\ndeepseek-v4-pro\n探测",
+        "expanded": "true"
+      }
+    },
+    {
+      "id": "U3_row_detail_collapse",
+      "pass": true,
+      "detail": {
+        "detail": false,
+        "expanded": "false"
+      }
+    }
+  ],
+  "ok": true
+}

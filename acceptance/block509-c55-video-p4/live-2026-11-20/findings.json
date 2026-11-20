@@ -1,0 +1,46 @@
+{
+  "item": "BLOCK-509-LIVE",
+  "capturedAt": "2026-11-19T16:16:22.393Z",
+  "target": "http://localhost:3000/block509-live.html",
+  "mode": "dev Electron visible window + real ChatArtifactCard + real BLOCK-482 MP4 via Vite @fs",
+  "boundary": "fetch /tools/status 为受控桩；MP4 与讲稿/字幕/来源/QA 为 P0 真实产物；付费确认由 Node HK-01 覆盖，本页不代用户确认；观感零代签。",
+  "results": [
+    {
+      "id": "L1_lightweight_default",
+      "pass": true,
+      "detail": {
+        "summary": true,
+        "summaryText": "已生成 5 个产物 · video.mp4\n查看结果详情",
+        "video": false
+      }
+    },
+    {
+      "id": "L2_video_inline_and_loaded",
+      "pass": true,
+      "detail": {
+        "video": true,
+        "controls": true,
+        "preload": "metadata",
+        "readyState": 4,
+        "duration": 22.147667,
+        "src": "http://localhost:3000/@fs/Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/block482-c55-video-p0/video.mp4",
+        "downloads": [
+          "video.mp4",
+          "script.md",
+          "subtitles.srt",
+          "sources.md",
+          "qa-report.json"
+        ]
+      }
+    },
+    {
+      "id": "L3_collapse",
+      "pass": true,
+      "detail": {
+        "summary": true,
+        "video": false
+      }
+    }
+  ],
+  "ok": true
+}

@@ -33,15 +33,21 @@ npm run dev        # 打开可见窗口（你看的是真窗口；dev 栈 http:/
 - **判什么**：文末 4 个评审要点——①十节结构够不够手册级 ②中文 F 类六项增删（英文论文是否同批覆盖）③数字锁定粒度（逐字符 vs 数值等价）④是否认可→启动注册面（resources/skills+manifest+发现桥）
 - **怎么看**：读该文档（约 120 行）
 - **格式**：`甲1：①认可 ②F 类维持/增删X ③粒度=逐字符/数值 ④注册面开工/再等`
+- **用户裁决（2026-11-19，原话逐字）**：`甲1：①认可 ②维持六项，英文另批 ③逐字符 ④注册面开工`
+- **回写**：手册十节结构与深度认可；F 类维持六项、英文论文另批（不为本次加面）；数字锁定=逐字符；注册面已授权开工（`resources/skills/paper-writing` + 顶层 manifest + `skills:check`），证据落 `acceptance/c56-skill-registration/`。Agent 只按口令回写，不代改判；英文论文与观感项保持未裁决。
 
 ### 甲2 · capability-intake 两来源 license 裁决（D5 停等在册）
 - **判什么**：provenance 台账两行 `license_unknown=true`（github.com/blader/humanizer + op7418/Humanizer-zh）——C-56 内核的出处。license 未知时接入类动作（装包/引依赖/复制内容）全部禁止；手册层内化已按「取内核弃外壳、零复制」完成
 - **选项**：`补抓 license（我去 fetch 仓库 LICENSE 再回填）` / `维持 unknown（仅手册层，永不接入，可接受）` / `放弃该来源`
 - **格式**：`甲2：维持 unknown / 补抓 / 放弃`
+- **用户裁决（2026-11-19，原话逐字）**：`甲2：补抓`
+- **回写**：两来源均补抓为 **MIT**；原 `ci-2026-11-18-001/002`（unknown）逐字保留，追加更正行 `ci-2026-11-19-001/002`（MIT、license_unknown=false、URL sha256 可复算）；报告 `acceptance/block503-outputs/jia2-license-report.md`。本裁决只授权证据补抓，不等于接入授权；零依赖/零复制/不写 verified。
 
 ### 甲3 · E-03 SUS/UMUX-Lite 观感评分方式
 - **判什么**：需要真人样本 + 外部量表平台的评分（V 类）；裁决=做/不做/何时做（G0 内可推迟）
 - **格式**：`甲3：做（时间）/推迟/取消`
+- **用户裁决（2026-11-19，原话逐字）**：`甲3：做`
+- **回写**：问卷草案已产出——中文 SUS 十题（标准 5 点，总分×2.5）+ UMUX-Lite 三题（7 点，主分只取前两题、第三题作持续意愿补充读数）+ 采样建议（首轮 12 人/最低 8、新老用户分层、本地渠道、任务后 5 分钟内）+ 计分口径；产物 `acceptance/block503-outputs/jia3-sus-questionnaire.md`。真人样本与外部平台仍 `external-blocked`，E-03 签字槽由人填，Agent 零代签、不写 verified。
 
 ---
 

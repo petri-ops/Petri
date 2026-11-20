@@ -29,10 +29,13 @@ interface ChatArtifactCardProps {
   /** 惰性：仅在展开时才拉取 /tools/status */
   expanded: boolean;
   projectId?: string | null;
+  /** UI-713 — 聊天主链默认轻量摘要；详情点击后才展开产物明细。 */
+  lightweight?: boolean;
 }
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp']);
 const MODEL_3D_EXTENSIONS = new Set(['.glb', '.gltf']);
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.mov']);
 
 const ACTION_BUTTON_STYLE: React.CSSProperties = {
   fontSize: 'var(--petri-font-size-xs, 11px)',
@@ -86,11 +89,12 @@ function sceneSnapshotPath(outDir: string, artifact: ChatArtifact): string {
   return slash >= 0 ? `${artifactPath.slice(0, slash)}/scene.json` : '';
 }
 
-export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifactCardProps): React.ReactElement | null {
+export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight = false }: ChatArtifactCardProps): React.ReactElement | null {
   const [artifacts, setArtifacts] = React.useState<ChatArtifact[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [zoomedImage, setZoomedImage] = React.useState<string | null>(null);
   const [show3D, setShow3D] = React.useState(false);
+  const [detailOpen, setDetailOpen] = React.useState(false);
   const [outDir, setOutDir] = React.useState('');
 
   React.useEffect(() => {
@@ -128,10 +132,34 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
   const visibleArtifacts = artifacts.filter((artifact) => Boolean(fileUrl(artifact)));
   if (visibleArtifacts.length === 0) return null;
 
+  if (lightweight && !detailOpen) {
+    return (
+      <div
+        data-testid="chat-artifact-summary"
+        style={{ margin: '4px 0', padding: '6px 8px', border: `1px solid var(--petri-border-card, var(--petri-border))`, borderRadius: 8, background: 'var(--petri-bg-subtle)', display: 'flex', alignItems: 'center', gap: 10 }}
+      >
+        <span style={{ fontSize: 'var(--petri-font-size-sm)', color: 'var(--petri-text-secondary)' }}>
+          {`已生成 ${visibleArtifacts.length} 个产物 · ${visibleArtifacts[0]?.name || '结果'}`}
+        </span>
+        <button
+          type="button"
+          data-testid="chat-artifact-open-detail"
+          style={ACTION_BUTTON_STYLE}
+          onClick={() => setDetailOpen(true)}
+        >
+          查看结果详情
+        </button>
+      </div>
+    );
+  }
+
   const model3dArtifacts = visibleArtifacts.filter((a) => MODEL_3D_EXTENSIONS.has(ext(a.name || a.filename || '')));
   const imageArtifacts = visibleArtifacts.filter((a) => IMAGE_EXTENSIONS.has(ext(a.name || a.filename || '')));
+  const videoArtifacts = visibleArtifacts.filter((a) => VIDEO_EXTENSIONS.has(ext(a.name || a.filename || '')));
   const otherArtifacts = visibleArtifacts.filter(
-    (a) => !MODEL_3D_EXTENSIONS.has(ext(a.name || a.filename || '')) && !IMAGE_EXTENSIONS.has(ext(a.name || a.filename || '')),
+    (a) => !MODEL_3D_EXTENSIONS.has(ext(a.name || a.filename || ''))
+      && !IMAGE_EXTENSIONS.has(ext(a.name || a.filename || ''))
+      && !VIDEO_EXTENSIONS.has(ext(a.name || a.filename || '')),
   );
 
   return (
@@ -139,6 +167,11 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
       data-testid="chat-artifact-card"
       style={{ margin: '4px 0', padding: 8, border: '1px solid rgba(128,152,177,0.25)', borderRadius: 8, background: 'rgba(128,152,177,0.06)' }}
     >
+      {lightweight ? (
+        <button type="button" data-testid="chat-artifact-close-detail" style={ACTION_BUTTON_STYLE} onClick={() => setDetailOpen(false)}>
+          收起结果详情
+        </button>
+      ) : null}
       {/* 3D 预览 */}
       {model3dArtifacts.length > 0 && (
         <div style={{ marginBottom: 8 }}>
@@ -210,6 +243,31 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId }: ChatArtifac
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* BLOCK-509 视频结果：轻量摘要后点击展开才内联播放，避免聊天主链被媒体撑满 */}
+      {videoArtifacts.length > 0 && (
+        <div style={{ marginBottom: 8 }}>
+          {videoArtifacts.map((artifact) => (
+            <div key={`video:${artifact.name || artifact.path || artifact.url}`} style={{ marginBottom: 6 }}>
+              <video
+                data-testid="chat-artifact-video"
+                controls
+                preload="metadata"
+                src={fileUrl(artifact)}
+                style={{ display: 'block', width: '100%', maxWidth: 640, maxHeight: 360, borderRadius: 6, background: 'var(--petri-bg-subtle)' }}
+              />
+              <a
+                data-testid="chat-artifact-video-download"
+                href={fileUrl(artifact)}
+                download={artifact.name}
+                style={ACTION_BUTTON_STYLE}
+              >
+                下载视频 · {artifact.name}
+              </a>
+            </div>
+          ))}
         </div>
       )}
 

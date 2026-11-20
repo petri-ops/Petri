@@ -1,0 +1,7 @@
+UI-713 HK-01 红证据（2026-11-19）
+
+命令：npm run test:files --prefix frontend -- src/components/copilot/ChatArtifactCard.lightweight.test.tsx src/components/work-surface/ResultsSurface.test.tsx
+
+结果：2 failed / 8 passed（共 10）。
+- ChatArtifactCard.lightweight：chat-artifact-summary 不存在（轻量态未实现）。
+- ResultsSurface：结果子态 data-has-back=false（返回聊天回调未接线）。

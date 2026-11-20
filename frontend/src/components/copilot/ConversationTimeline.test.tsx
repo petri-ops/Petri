@@ -282,8 +282,11 @@ describe('BLOCK-322 产物卡：落定折叠后仍在时间线可见', () => {
       <ConversationTimeline segments={[exportSegment]} projectId="p_demo" />
     );
 
-    // 折叠态=只一行运行摘要；产物卡必须仍在时间线内
+    // UI-713 折叠态=只一行运行摘要 + 轻量产物摘要；详情点击后才展开 3D 预览
     expect(container.querySelector('.sc-run-fold-line')).toBeTruthy();
+    const summary = await findByTestId('chat-artifact-summary');
+    expect(summary.textContent).toContain('已生成');
+    fireEvent.click(within(summary).getByTestId('chat-artifact-open-detail'));
     const card = await findByTestId('chat-artifact-card');
     expect(card.textContent).toContain('3D 预览');
   });

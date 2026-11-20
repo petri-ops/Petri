@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BLOCK-509 · 视频结果卡实机核对</title>
+  <style>
+    html,body,#root{min-height:100%;margin:0;background:#0b1220;color:#e6edf3;font-family:system-ui,sans-serif}
+    #root{padding:20px 28px;box-sizing:border-box}
+    h1{font-size:20px;margin:0 0 6px}.lead{font-size:13px;color:#9aa7b8;margin-bottom:14px;line-height:1.6}
+    a{color:#5ac8d8;font-size:13px;margin-right:16px}.card{border:1px solid #324466;border-radius:12px;background:#111a2e;padding:16px;max-width:720px}
+    pre{font-size:12px;color:#b1bac4;white-space:pre-wrap;line-height:1.6}
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>BLOCK-509 · 视频结果卡（dev Electron 实机）</h1>
+    <div>
+      <a href="/">← 返回 Petri 主界面</a>
+      <a href="/project/p_mwle5yje_wf3c">← 返回项目</a>
+    </div>
+    <div class="lead">真实 ChatArtifactCard + BLOCK-482 的真实 P0 成片。默认只看轻量摘要；点「查看结果详情」才展开内联视频与讲稿/字幕/来源/QA 下载。付费 TTS 确认文案由 Node HK-01 钉住，页面不代用户确认。</div>
+    <div class="card" id="cardHost"></div>
+  </div>
+  <script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { ThemeProvider } from '/src/themes/ThemeProvider.tsx';
+    import { ChatArtifactCard } from '/src/components/copilot/ChatArtifactCard.tsx';
+
+    const mp4 = 'http://localhost:3000/@fs/Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/block482-c55-video-p0/video.mp4';
+    const base = '/@fs/Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/block482-c55-video-p0/';
+    const payload = {
+      ok: true,
+      result: {
+        outDir: 'acceptance/block482-c55-video-p0',
+        artifacts: [
+          { name: 'video.mp4', path: 'video.mp4', url: mp4 },
+          { name: 'script.md', path: 'script.md', url: base + 'script.md' },
+          { name: 'subtitles.srt', path: 'subtitles.srt', url: base + 'subtitles.srt' },
+          { name: 'sources.md', path: 'sources.md', url: base + 'sources.md' },
+          { name: 'qa-report.json', path: 'qa-report.json', url: base + 'qa-report.json' },
+        ],
+      },
+    };
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = typeof input === 'string' ? input : String(input?.url || '');
+      if (url.includes('/tools/status/')) {
+        return Promise.resolve(new Response(JSON.stringify(payload), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      return nativeFetch(input, init);
+    };
+    createRoot(document.getElementById('cardHost')).render(
+      React.createElement(ThemeProvider, null,
+        React.createElement(ChatArtifactCard, { toolJobId: 'block509_live', expanded: true, lightweight: true })
+      )
+    );
+  </script>
+</body>
+</html>

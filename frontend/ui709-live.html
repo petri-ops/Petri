@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI-709 · compose 受控渲染核对</title>
+  <style>
+    html,body,#root{min-height:100%;margin:0;background:#0b1220;color:#e6edf3;font-family:system-ui,sans-serif}
+    #root{padding:20px 28px;box-sizing:border-box}
+    h1{font-size:20px;margin:0 0 6px}.lead{font-size:13px;color:#9aa7b8;margin-bottom:14px;line-height:1.6}
+    a{color:#5ac8d8;font-size:13px}.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start}
+    .card{border:1px solid #324466;border-radius:12px;background:#111a2e;padding:16px;box-sizing:border-box}
+    .card h2{font-size:15px;margin:0 0 12px}.stack{display:grid;gap:12px;max-width:520px}
+    .stack svg{width:100%!important;height:auto!important;max-height:180px}
+    .note{font-size:12px;color:#8b98ad;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>UI-709 · ::compose 受控渲染（人眼核对）</h1>
+    <div class="lead">真实 ComposeCard / GenUiMessageContent 组件 + 受控 spec。看三件事：① 合法 spec 是否渲染为结构化卡片；② 流式半截 spec 是否只给稳定占位、不泄漏 JSON；③ 非法 spec / .glb 引用是否诚实降级或给出跳转按钮。</div>
+    <div><a href="/project/p_mwle5yje_wf3c">← 返回项目</a></div>
+    <div class="grid">
+      <div class="card">
+        <h2>① 合法 spec（Card / Metric / Table / Chart / mesh-reference）</h2>
+        <div id="valid" class="stack"></div>
+        <div class="note">数据来自受控 fixture，不写项目数据。</div>
+      </div>
+      <div class="card">
+        <h2>② 流式占位 + 非法降级</h2>
+        <div id="pending"></div>
+        <div id="invalid" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { ThemeProvider } from '/src/themes/ThemeProvider.tsx';
+    import { ComposeCard } from '/src/components/copilot/gen-ui/compose/ComposeCard.tsx';
+    import { parseComposeSpec } from '/src/components/copilot/gen-ui/compose/spec.ts';
+    import { GenUiMessageContent } from '/src/components/copilot/gen-ui/GenUiMessageContent.tsx';
+    import { registerDefaultRenderers } from '/src/components/copilot/renderers/index.ts';
+    registerDefaultRenderers();
+
+    const fullSpec = parseComposeSpec({
+      version: 1,
+      root: 'root',
+      nodes: {
+        root: { kind: 'card', title: '项目健康概览' },
+        m1: { kind: 'metric', parent: 'root', title: '缓存命中', value: '92', unit: '%' },
+        t1: { kind: 'table', parent: 'root', title: '近三次耗时', columns: ['阶段', '耗时'], rows: [['prefill', '1.2s'], ['decode', '0.8s']] },
+        c1: { kind: 'chart', parent: 'root', title: '吞吐趋势', chartType: 'bar', labels: ['A', 'B', 'C'], series: [{ name: 'tok/s', values: [120, 145, 132] }] },
+        g1: { kind: 'mesh-reference', parent: 'root', title: '3D 装配', source: { path: 'model3d/runs/ui709/model.glb', sourceSha256: 'b'.repeat(64) } },
+      },
+    });
+
+    const App = () => React.createElement('div', null,
+      React.createElement('div', { id: 'valid' },
+        React.createElement(ComposeCard, { spec: fullSpec, conversationId: 'conv_ui709', projectId: 'p_demo' })
+      ),
+      React.createElement('div', { id: 'pending' },
+        React.createElement(GenUiMessageContent, {
+          content: '::compose{"version":1,"root":"root","nodes":{"root":{"kind":"metric"',
+          streaming: true,
+          rowKey: 'ui709-pending',
+          conversationId: 'conv_ui709',
+          projectId: 'p_demo',
+        })
+      ),
+      React.createElement('div', { id: 'invalid' },
+        React.createElement(ComposeCard, { spec: null, conversationId: 'conv_ui709', projectId: 'p_demo' })
+      )
+    );
+
+    createRoot(document.getElementById('root')).render(React.createElement(ThemeProvider, null, React.createElement(App)));
+  </script>
+</body>
+</html>

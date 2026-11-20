@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "source": "built-in",
-  "updated": "2026-11-18",
+  "updated": "2026-11-19",
   "skills": {
     "design-brief": {
       "id": "design-brief",
@@ -282,6 +282,33 @@
             "description": "digest 双锚 + 校验结论证据"
           }
         ]
+      }
+    },
+    "paper-writing": {
+      "id": "paper-writing",
+      "version": "0.1.0",
+      "source": "built-in",
+      "kind": "skill",
+      "category": "writing/paper",
+      "capabilities": [
+        "paper-writing",
+        "academic-revision",
+        "claim-faithfulness",
+        "number-locking",
+        "chinese-f-class-checks"
+      ],
+      "plugins": {
+        "required": [],
+        "optional": []
+      },
+      "artifacts": {
+        "macos-arm64": {
+          "url": "built-in://skills/paper-writing",
+          "sha256": null
+        }
+      },
+      "integrity": {
+        "builtinSha256": "cab9bb6b980915bb118877595323b0958d386943a881b5e96be8e89c8deb71ee"
       }
     }
   },

@@ -73,6 +73,7 @@ import { ApprovalCard } from './SimpleChat/ApprovalCard';
 import { ResultEditProgressList } from './SimpleChat/ResultEditProgressList';
 // BLOCK-154 波次 3 — 消息行组件（memo 渲染边界，契约见该文件头与 SimpleChatMessageRow.test.tsx）。
 import { SimpleChatMessageRow } from './SimpleChat/SimpleChatMessageRow';
+import { ChatWorkingStatus } from './SimpleChat/ChatWorkingStatus';
 import { CompactionNotice } from './SimpleChat/CompactionNotice';
 import { TurnBoundary } from './TimelineBoundaries';
 import { StreamReconnectBanner, deriveReconnectPhase } from './StreamReconnectBanner';
@@ -1458,6 +1459,9 @@ export function SimpleChat({
               </TurnBoundary>
             );
           })}
+          {/* UI-712 — ZCode 形态底部运行反馈：运行期常驻「工作中 · 已运行 N 秒」，
+              正文与过程折叠仍由既有行组件负责，卸载即停表。 */}
+          <ChatWorkingStatus running={streaming} startedAt={activeRun?.startedAt} />
           {standaloneDurableLoop && (
             <div className="sc-msg sc-msg-assistant" aria-label="历史任务循环">
               <div className="sc-msg-avatar">

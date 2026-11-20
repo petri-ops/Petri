@@ -1,0 +1,6 @@
+BLOCK-509 HK-01 红证据（2026-11-20）
+
+Node：node --test test/block509-video-p4.test.mjs → 1 failed / 0 passed（video-brief-spec.js 不存在）。
+前端：npm run test:files --prefix frontend -- src/components/copilot/ChatArtifactCard.video.test.tsx → 1 failed / 0 passed（chat-artifact-video 节点不存在）。
+
+契约：主题→P0兼容 30s spec、fail-closed、付费确认文案；轻量摘要默认折叠、展开后 mp4 内联播放与下载链不回归。当前均未满足。

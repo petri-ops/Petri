@@ -507,6 +507,14 @@ export function ProjectWorkspace(): React.ReactElement {
   const handleOpenRightChat = useCallback(() => {
     void openSideChatWindow({ projectId: projectId ?? '', sourceConversationId: activeConvId });
   }, [projectId, activeConvId]);
+  // UI-713 — 从结果/Studio 深度面回中央聊天：只收起右栏，不清理 activeJob/conv/结果上下文。
+  const handleBackToChat = useCallback(() => {
+    setRightOpen(false);
+    updateWorkspaceMode('chat');
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLTextAreaElement>('textarea.sc-input')?.focus();
+    });
+  }, [setRightOpen, updateWorkspaceMode]);
   // BLOCK-334 — 标题不再按中央模式拼「· 结果」：右栏结果 tab 激活且有产物时才前置产物名。
   const titleBarTitle = useMemo(
     () => buildResultTitleBarTitle(resultsFocus, project?.name, activeArtifact?.label || activeArtifact?.name),
@@ -1048,6 +1056,7 @@ export function ProjectWorkspace(): React.ReactElement {
     handleOpenRightBrowser,
     handleOpenRightFiles,
     handleOpenRightChat,
+    handleBackToChat,
     setBrowserUrl,
     setBrowserCanGoBack,
     setBrowserCanGoForward,

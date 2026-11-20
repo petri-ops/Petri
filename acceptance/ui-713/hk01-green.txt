@@ -1,0 +1,6 @@
+UI-713 HK-01 绿证据（2026-11-19）
+
+命令：npm run test:files --prefix frontend -- src/components/copilot/ChatArtifactCard.lightweight.test.tsx src/components/work-surface/ResultsSurface.test.tsx
+结果：2 files / 10 tests passed。
+
+覆盖：轻量结果卡默认只显示「已生成 N 个产物」摘要与打开详情按钮，3D/下载明细点击后才出现；结果子态提供「返回对话」按钮且回调触发一次。

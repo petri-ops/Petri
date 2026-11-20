@@ -1,0 +1,6 @@
+UI-712 HK-01 红证据（2026-11-19）
+
+测试：frontend/src/components/copilot/SimpleChat/ChatWorkingStatus.test.tsx
+命令：npm run test:files --prefix frontend -- src/components/copilot/SimpleChat/ChatWorkingStatus.test.tsx
+
+失败摘要：Failed to resolve import "./ChatWorkingStatus" from ChatWorkingStatus.test.tsx（组件不存在，3 项契约无法执行，0 tests）。

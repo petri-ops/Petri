@@ -130,6 +130,8 @@ export interface RightPanelContext {
   handleOpenRightBrowser: () => void;
   handleOpenRightFiles: () => void;
   handleOpenRightChat: () => void;
+  /** UI-713 — 从结果/Studio 深度面返回中央聊天。 */
+  handleBackToChat: () => void;
   setBrowserUrl: (url: string) => void;
   setBrowserCanGoBack: (value: boolean) => void;
   setBrowserCanGoForward: (value: boolean) => void;
@@ -245,6 +247,7 @@ export function RightPanel({
                 {tab === 'results' && (
                   <ResultsSurface
                     active={ctx.rightTab === tab}
+                    onBackToChat={ctx.handleBackToChat}
                     ctx={{
                       project: ctx.project,
                       projectId: ctx.projectId,

@@ -1,0 +1,31 @@
+{
+  "item": "UI-711-LIVE",
+  "date": "2026-11-19",
+  "leg": "dev Electron 主窗 + CDP Fetch 改道本地 mock SSE（真实前端收帧/分类/渲染链）",
+  "boundary": "真实 deepseek 停摆偶发不可按需触发；上游错误帧由 mock 注入，文案取 model-gateway 原句。非产品代码改动。",
+  "observedExtra": {
+    "genericUnknownBanner": true,
+    "note": "mock 终态叠加的通用 UNKNOWN 横幅，非 UI-711 范围；本腿只断言 STALL 文案在场且无误导 Python 文案。"
+  },
+  "target": "http://localhost:3000/project/p_mwngaftt_eec2",
+  "upstreamError": "模型流式响应停滞（连续无 token 60001ms），已中止本次调用",
+  "screenshot": "acceptance/ui-711-live/stall-classification.png",
+  "results": [
+    {
+      "id": "L0_upstream_message",
+      "pass": true,
+      "detail": "模型流式响应停滞（连续无 token 60001ms），已中止本次调用"
+    },
+    {
+      "id": "L1_stall_ui",
+      "pass": true,
+      "detail": "模型响应暂时停滞，正在自动恢复；若持续不动请稍后重试或切换渠道\n\n发生未知错误，请重试或联系支持\n查看详情\n刚刚"
+    },
+    {
+      "id": "L2_no_python_mislead",
+      "pass": true,
+      "detail": "pythonMisleading=false"
+    }
+  ],
+  "ok": true
+}

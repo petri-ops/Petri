@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-performance-trust",
   "capability": "block474-c53-p5-performance-trust",
-  "sourceCommit": "51e8fa7829d8c0f99aae24775bded8db70940143",
+  "sourceCommit": "92f54660f3c4f8d784069a51f0eefa3a3c79cf62",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-performance-trust.mjs",
-  "generatedAt": "2026-11-18T08:38:01.265Z",
+  "generatedAt": "2026-11-20T00:51:26.792Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -23,7 +23,7 @@
       },
       "source": "referencesStreaming.ts + references.ts + references-streaming.test.ts",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     },
     "memoBoundary": {
       "value": {
@@ -35,7 +35,7 @@
       },
       "source": "SimpleChatMessageRow.tsx + .test.tsx（BLOCK-154）",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     },
     "sseResume": {
       "value": {
@@ -50,7 +50,7 @@
       },
       "source": "m4-sse-real-endpoint.test.mjs + lib-sse-frames.mjs（M55）",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     },
     "trustStateMachine": {
       "value": {
@@ -58,15 +58,15 @@
         "complete": true,
         "evidence": {
           "roleAlert": 94,
-          "roleStatus": 57,
+          "roleStatus": 58,
           "ariaBusy": 3,
-          "ariaLive": 12
+          "ariaLive": 13
         },
         "cells": 32
       },
       "source": "ui-design-a11y.mjs STATE_MATRIX + frontend/src TSX 全源",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     },
     "renderSkeleton": {
       "value": {
@@ -80,7 +80,7 @@
       },
       "source": "GenUiMessageContent.tsx + .streaming.test.tsx（BLOCK-466）",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     },
     "humanEyeSlots": {
       "value": {
@@ -95,7 +95,7 @@
       },
       "source": "UI 台账 pending_human_eye（观感零代签）",
       "command": "node scripts/c53-performance-trust.mjs",
-      "capturedAt": "2026-11-18T08:38:01.146Z"
+      "capturedAt": "2026-11-20T00:51:26.748Z"
     }
   }
 }

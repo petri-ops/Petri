@@ -3,8 +3,8 @@
   "id": "petri-performance-trust-contract",
   "kind": "model-readable-performance-trust",
   "generatedBy": "node scripts/c53-performance-trust.mjs",
-  "sourceCommit": "51e8fa7829d8c0f99aae24775bded8db70940143",
-  "generatedAt": "2026-11-18T08:38:01.265Z",
+  "sourceCommit": "92f54660f3c4f8d784069a51f0eefa3a3c79cf62",
+  "generatedAt": "2026-11-20T00:51:26.792Z",
   "derivedFrom": [
     "frontend/src/components/copilot/gen-ui/referencesStreaming.ts + references.ts（BLOCK-466 流式投影）",
     "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx + .test.tsx（BLOCK-154 memo）",
@@ -43,9 +43,9 @@
     "complete": true,
     "evidence": {
       "roleAlert": 94,
-      "roleStatus": 57,
+      "roleStatus": 58,
       "ariaBusy": 3,
-      "ariaLive": 12
+      "ariaLive": 13
     },
     "cells": 32
   },

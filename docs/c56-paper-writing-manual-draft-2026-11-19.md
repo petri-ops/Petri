@@ -1,7 +1,7 @@
 ---
 capability: c56-paper-writing-manual-draft
 status: active
-phase: DRAFT-FOR-REVIEW
+phase: APPROVED-FOR-REGISTRATION
 goal: C-56 论文写作/修改保真 Skill 的手册内容先行稿（评审候选②：纯文档零注册面风险，人眼评审认可后再裁注册面=候选①）——取外部 humanizer/Humanizer-zh 的实事保真内核，内化为 Petri 形态：确定程度/归因/完成状态保护、不编造、claim 保真对照、中文 F 类 6 项检查、provenance 与未覆盖说明；反转「默认只交最终稿」为「改写始终在可见会话内」。
 acceptance:
   - 十节手册形态对标 design-brief 先例（未来经 skill_get 消费的手册正文）
@@ -91,5 +91,14 @@ supersedes: 无（执行 BLOCK-495 评审材料 §6 推荐候选②；C-56 backl
 2. F 类六项的检测特征与示例是否需要增删（如英文论文是否同批覆盖）？
 3. §4 数字锁定的粒度（逐字符 vs 数值等价）取哪档？
 4. 认可后启动注册面包（resources/skills/writing/paper-writing + manifest + skills:check 链 + 发现桥）。
+
+## 用户评审裁决（2026-11-19 · 原文逐字）
+
+`甲1：①认可 ②维持六项，英文另批 ③逐字符 ④注册面开工`
+
+- ① 十节结构与深度：认可，保持本稿十节。
+- ② 中文 F 类六项：维持；英文论文覆盖另批，不并入本包。
+- ③ 数字锁定粒度：逐字符（与 §4 一致）。
+- ④ 注册面：已授权开工，落 `resources/skills/paper-writing` + 顶层 manifest + `skills:check`；证据 `acceptance/c56-skill-registration/`。Agent 不代改判，英文论文面保持未裁决。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

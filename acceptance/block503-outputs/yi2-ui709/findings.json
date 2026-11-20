@@ -1,0 +1,40 @@
+{
+  "item": "UI-709-LIVE",
+  "capturedAt": "2026-11-19T15:26:54.790Z",
+  "target": "http://localhost:3000/ui709-live.html?v=1",
+  "mode": "dev Electron visible window + real ComposeCard/GenUiMessageContent + controlled specs",
+  "boundary": "真实组件 + 受控 spec；观感签字归用户；不写 verified。",
+  "results": [
+    {
+      "id": "U1_valid_spec",
+      "pass": true,
+      "detail": [
+        "root",
+        "m1",
+        "t1",
+        "c1",
+        "g1"
+      ]
+    },
+    {
+      "id": "U2_mesh_jump",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "id": "U3_pending_placeholder",
+      "pass": true,
+      "detail": {
+        "pending": "正在生成组合视图…",
+        "rawLeak": false
+      }
+    },
+    {
+      "id": "U4_invalid_fallback",
+      "pass": true,
+      "detail": "组合视图 spec 无效，已跳过渲染"
+    }
+  ],
+  "exceptions": [],
+  "ok": true
+}

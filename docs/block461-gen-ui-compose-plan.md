@@ -1,6 +1,6 @@
 ---
 capability: block461-gen-ui-compose
-status: active
+status: completed
 goal: W11 Gen UI 数据面形态演进首包（BLOCK-461）——`::compose` JSON spec 受控渲染 MVP（P0 探针→P1 内核→P2 数据面）：catalog 最小集经既有 ResultNode 插座渲染、手写校验器 fail-closed、directive parser 接线、$state 绑定复用 get-data 通道、widgetState 持久化复用既有通道；零新依赖、HTML 沙箱形态并存不退役
 acceptance:
   - HK-01 红绿先行：spec 校验器 + catalog 分派 + parser 接线契约测试先红后绿
@@ -10,7 +10,7 @@ acceptance:
   - 既有 ::visualize 链零回归（双形态并存非替代）；closeout 定向门全绿
 ---
 
-# BLOCK-461 · W11 Gen UI 数据面首包 `::compose`（active / P0-LAUNCH）
+# BLOCK-461 · W11 Gen UI 数据面首包 `::compose`（completed / CLOSED；2026-11-19 状态归位）
 
 > **发令**：用户 2026-11-18 端到端预授权批量裁决——B-8「W11 发令 = 发令开工」+ B-6「W11 路径 = A（零依赖自实现）」+ B-7「W11 首包 = P0-P2」。
 > **从属**：`docs/gen-ui-data-plane-evaluation-2026-11-17.md` §9（P0-P2 任务卡）+ `docs/next-work-blueprint-2026-11-16.md` W11 行 + master charter。评估 §8 边界继承：双形态并存非替代、不重写 artifact-plane-direction、不动 RS 资格线。

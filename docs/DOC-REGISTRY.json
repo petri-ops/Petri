@@ -6,7 +6,8 @@
       "docs"
     ],
     "excludedPrefixes": [
-      "docs/archive/"
+      "docs/archive/",
+      "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
     "documentCount": 659,
@@ -1378,23 +1379,6 @@
         "k0"
       ],
       "notes": "用户 2026-11-10 预授权连续工作「按 post-h9-optimization-blueprint-2026-11-10.md 从 K0 到 K7 全部推完」→ K0 判据校准与可信起点。判据三作废三重立（12 条篡改负测）/ 九组数字口径单源 JSON / lint∩hygiene 联动门 / WIP owner 归属 / README status 对账 / 32 条缺口终态台账基座 G0 开发期常态 · 不外推 packaged/Provider/GA。 【收口】判据三作废三重立（12 篡改负测 45/45）/ 九组读数单源 JSON / lint∩hygiene 联动门 / WIP owner 归属表 0 未知 / README status 对账 / 32 条缺口台账 K-01~07 逐件终态（done 5 / done-partial 2）/ closeout:full ×3 19 门全绿 0 SKIP / docs:reconcile 0 issues"
-    },
-    {
-      "id": "POST-H9-OPTIMIZATION-BLUEPRINT-2026-11-10",
-      "capability": "post-h9-optimization-blueprint-2026-11-10",
-      "path": "docs/post-h9-optimization-blueprint-2026-11-10.md",
-      "kind": "living-plan",
-      "status": "completed",
-      "canonical": true,
-      "truthDomain": "post-h9-optimization-program",
-      "entrypoint": "docs/README.md",
-      "archivePolicy": "retain_stable_path",
-      "tags": [
-        "next-stage",
-        "ui-ux",
-        "workflow"
-      ],
-      "notes": "第四轮方向蓝图：十一维独立复核（三升八平零降，达标 4/11）+ 32 条剩余缺口 + K0-K7 八阶段；主线是先校准被实测推翻的判据再优化，不设工作量上限但设证据上限。不占单包串行槽位，各 K 阶段发令时各自注册 work-package。G0 开发期常态 · 不外推 packaged/Provider/GA。 【程序状态同步】K0–K7 八阶段已由 BLOCK-396～403 全部收口，总报告见 docs/post-h9-2026-11-10-final-report.md。【2026-11-19 状态归位·对账收口】用户发令「开始 POST-H9 优化蓝图」→执行前核对八阶段 K0–K7 全部 completed、证据目录 k0/..k7/ 与脚本/测试在盘、抽查 K0/K2/K7 契约测 32/32 当前绿（非 registry 虚标），构成新裁决点停下报用户→裁决「状态归位批」。registry status planned→completed（living-plan 完成态，非重做/非新阶段），零新实现/只动账；历史「保持 planned 不占槽位」决策按本次裁决翻为完成态；蓝图原件为受保护未跟踪文件——正文/32 条缺口/证据数字零改写，仅 frontmatter `status: planned→completed` 随归位同步（docs:check FRONTMATTER_STATUS_MISMATCH 硬约束 registry/frontmatter 一致，与 BLOCK-490 同形）；Jev doc:suggest 命中 planDoc 已落 AUDIT-LOG 归位笔录。零新依赖/零运行时/观感零代签/不碰 G1+。"
     },
     {
       "id": "POST-NSO-OPTIMIZATION-BLUEPRINT-2026-11-06",
@@ -13538,7 +13522,7 @@
       "truthDomain": "c56-paper-writing-manual-draft",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "DRAFT-FOR-REVIEW",
+      "phase": "APPROVED-FOR-REGISTRATION",
       "touchSurface": [
         "docs/c56-paper-writing-manual-draft-2026-11-19.md"
       ],
@@ -13549,7 +13533,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 交付（用户 A 组 #4 发令；BLOCK-495 评审材料 §6 推荐候选②=手册内容先行）。C-56 论文写作/修改保真 Skill 的十节手册内容稿 v0.1：事实保真内核四保护（确定程度/归因/完成状态/数字锁定）+不编造红线+方法结果段锁定（只校验不改）+中文 F 类 6 检查（每项形态→改写示例）+claim 保真三栏对照（无默认最终稿）+provenance/未覆盖说明+人机边界+执行流程+反模式。零注册面（skill 目录/manifest/桥待用户对手册认可后另批）；评审要点 4 项列文末。零运行时改动/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 交付（用户 A 组 #4 发令；BLOCK-495 评审材料 §6 推荐候选②=手册内容先行）。C-56 论文写作/修改保真 Skill 的十节手册内容稿 v0.1：事实保真内核四保护（确定程度/归因/完成状态/数字锁定）+不编造红线+方法结果段锁定（只校验不改）+中文 F 类 6 检查（每项形态→改写示例）+claim 保真三栏对照（无默认最终稿）+provenance/未覆盖说明+人机边界+执行流程+反模式。零注册面（skill 目录/manifest/桥待用户对手册认可后另批）；评审要点 4 项列文末。零运行时改动/观感零代签/不碰 G1+。2026-11-19 用户口令「甲1：①认可 ②维持六项，英文另批 ③逐字符 ④注册面开工」→phase APPROVED-FOR-REGISTRATION；英文论文另批未裁决。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     },
     {
       "id": "BLOCK-502",
@@ -13725,6 +13709,29 @@
       ],
       "registeredAt": "2026-11-19",
       "notes": "2026-11-19 立项（用户裁决「立新包做循环层续跑……真正消除手动重试」；BLOCK-506 研究 + BLOCK-507 首包预算的循环层接续票 2）。大上下文韧性票 2：agent 循环层 stall-resume——消除「流式 LLM 中途停摆→整轮任务失败→用户手动重试」。核心：请求前 generation checkpoint（messages 快照+已发帧游标+tool_call id+attempt 预算，落 task_events）；stall 时 orchestrator 不再 break，走有界续跑状态机自动重发（依赖服务端 prefix caching 降成本），按已发 delta 游标去重（已出字不重复交付）。用户原话「不是修修补补打补丁，要彻底解决；服务端能通就永不中断；手动重试不合理」。现读证据：已出字 idle stall 时 emittedOutput=true→不重试→error→orchestrator break→任务失败；DeepSeek 无 stream resume/cursor 协议故只能循环层重发+去重。文件面隔离：零触碰 BLOCK-507 在制文件（llm-client.js/model-gateway.js/stream-stall-watchdog.js/block507-*），本包只动 loop-orchestrator.js+loop-checkpoint.js+新模块。HK-01 红绿先行；为消除与 507 的并行契约冲突，本包不改 test/impact-map.json（测试用通用名 test/loop-stall-resume.test.mjs 走既有覆盖），零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-509",
+      "capability": "c55-video-p4",
+      "path": "docs/block509-c55-video-p4-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block509-c55-video-p4",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "registeredAt": "2026-11-20",
+      "touchSurface": [
+        "docs/block509-c55-video-p4-plan.md",
+        "core/petri-server/helpers/video-brief-spec.js",
+        "frontend/src/components/copilot/ChatArtifactCard.tsx",
+        "test/block509-video-p4.test.mjs",
+        "frontend/src/components/copilot/ChatArtifactCard.video.test.tsx",
+        "acceptance/block509-c55-video-p4/"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-20 立项（用户裁决「按此立项开工——产品内一键成片出口；canonical plan/registry/README/AUDIT，HK-01 先行」）。把 P0-P3 已收口的视频能力接进产品主链：主题→可审阅 VideoProjectSpec→显式付费确认→既有 compose_video→聊天轻量产物卡内联 MP4 + 讲稿/字幕/来源/QA 下载。零新依赖/不重做 P0-P3/不改 compose_video 契约/外部素材默认关/观感零代签/不碰 G1+。收口：HK-01 Node 6/6 + 前端 1/1，前端邻域 52/52，types 0、theme 19/19、docs 659/ui 绿；dev Electron 实机 L1-L3 3/3（轻量摘要、真实 P0 MP4 readyState=4/duration≈22.15s、可收起）；block482 D2 在 macOS 的 /ws 只读环境性红属 P0 存量，非本包文件面；观感零代签。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-19"
