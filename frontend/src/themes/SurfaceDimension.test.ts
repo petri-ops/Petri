@@ -74,6 +74,41 @@ describe('B: data-surface dimension', () => {
     expect(fn).toMatch(/hits\[hits\.length - 1\]/);
   });
 
+  it('derived muted text keeps WCAG AA (>=4.5:1) on every surface (亮+暗)', () => {
+    const hex2rgb = (h: string) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+    const lum = (h: string) => {
+      const [r, g, b] = hex2rgb(h).map((c) => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const cr = (a: string, b: string) => {
+      const x = lum(a), y = lum(b);
+      return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+    };
+    const mixHex = (bgHex: string, fgHex: string, p: number) => {
+      const a = hex2rgb(bgHex), b = hex2rgb(fgHex);
+      return '#' + a.map((v, i) => Math.round(v * (1 - p) + b[i] * p).toString(16).padStart(2, '0')).join('');
+    };
+    const pairs: Array<[string, string, string]> = [
+      ['paper', '#f2efe6', '#1c1b19'],
+      ['celadon', '#f4f1e8', '#173a38'],
+      ['ultramarine', '#edf0f6', '#1e2e52'],
+      ['mist', '#eaeef2', '#1b2b40'],
+    ];
+    for (const [name, inkPaper, inkBase] of pairs) {
+      for (const [bg, fg, ratios] of [
+        [inkPaper, inkBase, [0.82, 0.74, 0.70]],
+        [inkBase, inkPaper, [0.84, 0.76, 0.72]],
+      ] as Array<[string, string, number[]]>) {
+        for (const p of ratios) {
+          expect(cr(mixHex(bg, fg, p), bg), `${name} text ratio ${p} must be >=4.5:1`).toBeGreaterThanOrEqual(4.5);
+        }
+      }
+    }
+  });
+
   it('no visual sign-off claimed from static evidence', () => {
     const self = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8');
     expect(self).not.toMatch(/expect\([^)]*verified[^)]*\)\.toBe\(true\)/);

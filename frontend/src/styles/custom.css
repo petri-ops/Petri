@@ -1364,12 +1364,13 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
 [data-surface] {
   --petri-text: var(--petri-ink-base);
   --petri-text-primary: var(--petri-ink-base);
-  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 68%, var(--petri-ink-paper));
-  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 52%, var(--petri-ink-paper));
-  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 48%, var(--petri-ink-paper));
-  --petri-border: color-mix(in srgb, var(--petri-ink-base) 16%, transparent);
-  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 28%, transparent);
-  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 10%, transparent);
+  /* A4 预审轮1：原 .68/.52/.48 派生出 2.6–3.4:1 灰字（"模糊"根因），提到正文 ≥4.5:1。 */
+  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 82%, var(--petri-ink-paper));
+  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 74%, var(--petri-ink-paper));
+  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 70%, var(--petri-ink-paper));
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 22%, transparent);
+  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 36%, transparent);
+  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 14%, transparent);
   --petri-border-color: var(--petri-border);
   --petri-bg-canvas: var(--petri-ink-paper);
   --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 90%, white);
@@ -1377,12 +1378,13 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   --petri-bg-elevated: color-mix(in srgb, var(--petri-ink-paper) 62%, white);
 }
 [data-surface][data-theme='dark'] {
-  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 72%, var(--petri-ink-paper));
-  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 56%, var(--petri-ink-paper));
-  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 52%, var(--petri-ink-paper));
-  --petri-border: color-mix(in srgb, var(--petri-ink-base) 14%, transparent);
-  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 26%, transparent);
-  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 9%, transparent);
+  /* 暗底为微光：弱化字色同样守 ≥4.5:1（原 72/56/52 在墨底上仍偏虚）。 */
+  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 84%, var(--petri-ink-paper));
+  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 76%, var(--petri-ink-paper));
+  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 72%, var(--petri-ink-paper));
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 20%, transparent);
+  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 34%, transparent);
+  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 12%, transparent);
   --petri-bg-canvas: var(--petri-ink-paper);
   --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 92%, var(--petri-ink-base));
   --petri-bg-subtle: color-mix(in srgb, var(--petri-ink-paper) 86%, var(--petri-ink-base));
