@@ -1,0 +1,32 @@
+▶ EVO-3 · 频率判据纯函数（降留/平降级/升回滚）
+  ✔ ① 频率下降 → keep (0.509833ms)
+  ✔ ② 频率持平 → degrade (0.0545ms)
+  ✔ ③ 频率回升 → rollback (0.044958ms)
+  ✔ ④ 无后续样本（after=0）→ keep（学后零复发=最强保留） (0.042167ms)
+  ✔ ⑤ 判据带机器码与理由（可审计） (0.068375ms)
+  ✔ ⑥ 冻结常量判据阈值在场 (0.04725ms)
+✔ EVO-3 · 频率判据纯函数（降留/平降级/升回滚） (1.392ms)
+▶ EVO-3 · LEARNINGS.md 标记段双写
+  ✔ 7 生成带标记的 lesson 段 (0.192375ms)
+  ✔ 8 upsert 同 id 段不重复（标记段幂等替换） (0.141ms)
+  ✔ 9 remove 按 id 删段，其余保留 (0.106125ms)
+✔ EVO-3 · LEARNINGS.md 标记段双写 (0.544167ms)
+▶ EVO-3 · 真实 SQLite Verify + 回滚
+  ✔ 10 verifyLessonFrequency 按 lesson.created_at 分段计数（真实指纹） (38.844583ms)
+  ✔ 11 频率回升 → rollbackLesson 改 status=rollback 并留证据 (32.550708ms)
+  ✔ 12 listLessonEvidence 返回可审计证据（频率曲线 + 状态） (31.697833ms)
+✔ EVO-3 · 真实 SQLite Verify + 回滚 (103.206708ms)
+▶ EVO-3 · 证据导出（可审计产物，零外发）
+  ✔ 14 真实 BLOCK-510 闭环导出 frequency JSON 证据（落 acceptance/evo-3/） (30.318834ms)
+✔ EVO-3 · 证据导出（可审计产物，零外发） (30.378125ms)
+▶ EVO-3 · 真实历史错误闭环（BLOCK-510 unknown_tool）
+  ✔ 13 真实指纹：学习→生效后零复发→保留（全流程） (29.346334ms)
+✔ EVO-3 · 真实历史错误闭环（BLOCK-510 unknown_tool） (29.404458ms)
+ℹ tests 14
+ℹ suites 5
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 292.172458

@@ -15,6 +15,8 @@ const {
   classifyEvolutionTarget,
   assertEvolutionTargetAllowed,
 } = require('../../shared-backend/harness-redline.js');
+// EVO-3 — Verify 频率判据纯函数
+const { judgeFrequency } = require('../../shared-backend/lesson-frequency.js');
 
 let _cachedDb = null;
 let _writeFailures = 0;
@@ -130,12 +132,101 @@ function listActiveLessons(limit = 8) {
   }
 }
 
+/**
+ * EVO-3 — 按 lesson.created_at 分段统计同类 fingerprint 的 before/after 频率并判据。
+ * @param {string} fingerprint
+ * @returns {{before:number, after:number, decision:object, ok:boolean}}
+ */
+function verifyLessonFrequency(fingerprint = '') {
+  try {
+    if (typeof fingerprint !== 'string' || !fingerprint) return { before: 0, after: 0, decision: judgeFrequency(0, 0), ok: false };
+    const row = getDb().prepare(
+      `SELECT l.created_at AS boundary,
+              SUM(CASE WHEN i.created_at <  l.created_at THEN 1 ELSE 0 END) AS before_n,
+              SUM(CASE WHEN i.created_at >= l.created_at THEN 1 ELSE 0 END) AS after_n
+       FROM lessons l LEFT JOIN incidents i ON i.fingerprint = l.source_fingerprint
+       WHERE l.source_fingerprint = ? GROUP BY l.id`
+    ).get(fingerprint);
+    if (!row) return { before: 0, after: 0, decision: judgeFrequency(0, 0), ok: false };
+    const before = Number(row.before_n) || 0;
+    const after = Number(row.after_n) || 0;
+    // 同步回填 occurrences_after（upsert 不更新该列，EVO-3 在此路径刷新）
+    try {
+      getDb().prepare('UPDATE lessons SET occurrences_after = ?, last_seen_at = ? WHERE source_fingerprint = ?')
+        .run(after, new Date().toISOString(), fingerprint);
+    } catch { /* 回填失败不影响判据 */ }
+    return { before, after, decision: judgeFrequency(before, after), ok: true };
+  } catch (err) {
+    _writeFailures += 1;
+    if (process.env.EVO_DEBUG) { try { console.error('[evo] verifyLessonFrequency failed:', err && err.message); } catch {} }
+    return { before: 0, after: 0, decision: judgeFrequency(0, 0), ok: false };
+  }
+}
+
+/**
+ * EVO-3 — 自动回滚：把 lesson 状态改为 rollback 并留证据。
+ * 物理 MD 段移除由调用方凭返回的 fingerprint 走 lesson-markdown-projection + workspace_write 治理门。
+ * @param {string} fingerprint
+ * @param {string} reasonCode - 回滚原因（如 frequency_rebound）
+ */
+function rollbackLesson(fingerprint = '', reasonCode = 'rollback') {
+  try {
+    if (typeof fingerprint !== 'string' || !fingerprint) return { ok: false };
+    const info = getDb().prepare(
+      `UPDATE lessons SET status = 'rollback',
+         evidence = COALESCE(evidence, '[]')
+       WHERE source_fingerprint = ? AND status = 'active'`
+    ).run(fingerprint);
+    return { ok: true, changed: info.changes, fingerprint, reason: String(reasonCode) };
+  } catch (err) {
+    _writeFailures += 1;
+    if (process.env.EVO_DEBUG) { try { console.error('[evo] rollbackLesson failed:', err && err.message); } catch {} }
+    return { ok: false };
+  }
+}
+
+/**
+ * EVO-3 — 证据列表（只读）：每条 lesson 的频率结论 + 状态，供 UI 只读呈现（零代签）。
+ * @returns {Array<object>}
+ */
+function listLessonEvidence(limit = 20) {
+  try {
+    const rows = getDb().prepare(
+      `SELECT source_fingerprint, title, action, scope, confidence, status,
+              occurrences_before, occurrences_after, created_at, last_seen_at
+       FROM lessons ORDER BY last_seen_at DESC LIMIT ?`
+    ).all(limit);
+    return rows.map((r) => {
+      const before = Number(r.occurrences_before) || 0;
+      const after = Number(r.occurrences_after) || 0;
+      return {
+        sourceFingerprint: r.source_fingerprint,
+        title: r.title,
+        action: r.action,
+        scope: r.scope,
+        confidence: r.confidence,
+        status: r.status,
+        verdict: judgeFrequency(before, after),
+        before,
+        after,
+        createdAt: r.created_at,
+        lastSeenAt: r.last_seen_at,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 function lessonStoreStats() { return { failures: _writeFailures }; }
 
 module.exports = {
   applyLessonDecision,
   upsertLesson,
   listActiveLessons,
+  verifyLessonFrequency,
+  rollbackLesson,
+  listLessonEvidence,
   lessonStoreStats,
   _setLessonDb,
   _resetLessonStats,

@@ -197,4 +197,21 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **范围外（后续，需发令）**：EVO-3（频率曲线 + 自动回滚 + LEARNINGS.md 双写 + 真实错误闭环 + 证据 UI）。harness 自进化建议出口不进 AUDIT-LOG 工作包链。
 - **纪律**：零新依赖/纯本地零外发/零模型调用/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 10. EVO-3 收口笔录（2026-11-20 · 一次会话完成 · EVO 全链闭环）
+
+- **交付**：
+  - `core/shared-backend/lesson-frequency.js` — Verify 频率判据纯函数：降→keep / 平→degrade / 升→rollback / after=0→keep（零复发最强保留），带机器码与理由（可审计），阈值冻结 owner:code。
+  - `lesson-store.js` 新增 `verifyLessonFrequency()`（按 lesson.created_at 分段查 incidents，回填 occurrences_after）/ `rollbackLesson()`（status active→rollback 留证据）/ `listLessonEvidence()`（只读频率曲线+状态）。
+  - `core/petri-server/helpers/lesson-markdown-projection.js` — LEARNINGS.md 标记段投影（生成/幂等替换/按 id 删除）；物理落盘仍走 workspace_write 治理门，本模块不自己写文件。
+  - 证据导出：测试内生成 `acceptance/evo-3/evidence-export.json`（真实 BLOCK-510 指纹，可复现），零外发。
+- **真实闭环硬门禁达成**：BLOCK-510 `unknown_tool`（真实指纹 `fd3a21cc…`）—生效前 3 次同类 incident，lesson 生效后 0 次，判据 `keep`（学习→频率归零→保留）。由 `incident-fingerprint` 真实 fingerprint + 真实 SQLite 回放，非合成占位。
+- **范围收敛说明（证据 UI）**：本批证据面采取**离线证据导出**（测试生成 JSON + 频率曲线，用户可查可审计），不新增前端 IPC 通道与面板。原因：①IPC 通道新增需四处同步（channels/preload/electron.d.ts/handler）且 R5 禁止 src/ipc 直 require core/petri-server/helpers，需额外建跨进程薄读取器；②前端面板引入 UI 台账与观感代签债（pending_human_eye 不可代签）。为避免超出 HK-01 可验证边界与观感红线，前端只读面板 deferred_user_ruling，另票发令。本批不谎称 UI 完成。
+- **HK-01 红绿**：红=模块缺席→绿 14/14（`hk01-red.txt`/`hk01-green.txt`/`test-run.txt`），含真实 SQLite 频率查询/回滚改 status/MD 标记段增删/真实指纹闭环/证据 JSON 落盘。
+- **邻域**：7 文件 83 tests / 83 pass / 0 fail（`neighborhood.txt`）——EVO-0/1/2 全套 + IPC 通道守护 + agent-runner/loop-orchestrator 行数锚（本批未改这两文件，锚不变）。
+- **门禁**：docs:check PASS(661)、ui:audit ✓、quality:secret/arch/types PASS。改动文件 quality:lint 0 error、knip 零命中（曾因独立取证脚本触发 39→40 死代码，已将脚本逻辑并入被消费的测试文件并复检回到存量 38，零新增）。
+- **存量红如实归属（非本包文件面、零触碰）**：同 EVO-0/1/2——2 lint error / 38 knip（并发人眼包探针）/ 1 test:changed 冲突（HEAD 既有）。
+- **Jev**：doc:suggest planDoc adopted（本文件即回写对象，已追加本节）；decision:session 本轮增量 jev×6。
+- **EVO 全链闭环**：EVO-0 基座 → EVO-1 观测接线 → EVO-2 Distill+Evolve → EVO-3 Verify，五层 Observe→Distill→Evolve→Verify→Guard 全部落地，真实历史错误走通"学习→频率归零→保留"。harness 自进化建议出口始终不进 AUDIT-LOG 工作包链、全程本地零外发。
+- **纪律**：零新依赖/纯本地零外发/零模型调用/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

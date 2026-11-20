@@ -9417,6 +9417,31 @@
       ]
     },
     {
+      "id": "evo3-verify-frequency",
+      "note": "EVO-3 Verify：lesson 前后频率曲线纯函数(降留/平降级/升回滚)+lesson-store verifyLessonFrequency/rollbackLesson+LEARNINGS.md 标记段投影+真实 BLOCK-510 错误闭环回放+证据 UI 只读 IPC+面板(零代签)。证据=acceptance/evo-3/**。纯本地零外发/红线 fail-closed/观感零代签。",
+      "patterns": [
+        "core/shared-backend/lesson-frequency.js",
+        "core/petri-server/helpers/lesson-store.js",
+        "core/petri-server/helpers/lesson-markdown-projection.js",
+        "src/ipc/channels.js",
+        "src/ipc/lesson-evidence.js",
+        "src/preload.js",
+        "frontend/src/lib/electron.d.ts",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.module.css",
+        "frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx",
+        "test/evo3-verify-frequency.test.mjs",
+        "acceptance/evo-3/**"
+      ],
+      "tests": [
+        "test/evo3-verify-frequency.test.mjs",
+        "test/evo2-distill-evolve.test.mjs",
+        "test/evo1-observe-wiring.test.mjs",
+        "test/evo0-incident-ledger.test.mjs",
+        "test/ipc-channels-registry.test.mjs"
+      ]
+    },
+    {
       "id": "ui-error-classification-stall",
       "note": "2026-11-19 UI 错误分类修复：流式停滞(stream_stalled)曾误判为 Python 模块缺失，诱导用户装无关运行时；另修 ENOTFOUND 正则无边界吞 ModuleNotFoundError。轻量包（HK-01 红绿+邻域 10/10+tsc 0），非观感状态写面。证据 acceptance/ui-error-classification-stall/。",
       "patterns": [

@@ -1,0 +1,2 @@
+[docs:check] PASS (661 registered documents)
+[audit-ledger] 119KB > 50KB 保留阈——npm run audit:compact 幂等自稳（closeout 首步已自动执行）。

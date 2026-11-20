@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "source": "BLOCK-510 unknown_tool harness 自进化闭环（本机真实台账只读导出）",
+  "fingerprint": "fd3a21cc25dc2b8a6c65490a9bfd8f80cc2acd43d4a5ab4df6237fde3bb44f32",
+  "frequency": {
+    "before": 3,
+    "after": 0,
+    "verdict": "keep"
+  },
+  "curveByDay": {
+    "2026-11-17": {
+      "before": 1,
+      "after": 0
+    },
+    "2026-11-18": {
+      "before": 1,
+      "after": 0
+    },
+    "2026-11-19": {
+      "before": 1,
+      "after": 0
+    }
+  },
+  "note": "before=lesson 生效前同类 incident 数；after=生效后；after=0 即「学习后零复发」。零外发。"
+}
