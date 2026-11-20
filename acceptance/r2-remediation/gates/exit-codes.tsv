@@ -1,0 +1,8 @@
+docs:check	0	acceptance/r2-remediation/gates/baseline-docs-check.log
+ui:audit:check	1	acceptance/r2-remediation/gates/baseline-ui-audit-check.log
+hygiene:check	0	acceptance/r2-remediation/gates/baseline-hygiene-check.log
+test:changed:list	2	acceptance/r2-remediation/gates/baseline-test-changed-list.log
+quality:types	0	acceptance/r2-remediation/gates/baseline-quality-types.log
+gate:code-size	1	acceptance/r2-remediation/gates/baseline-gate-code-size.log
+gate:user-assets	1	acceptance/r2-remediation/gates/baseline-gate-user-assets.log
+gate:silent-catch	1	acceptance/r2-remediation/gates/baseline-gate-silent-catch.log

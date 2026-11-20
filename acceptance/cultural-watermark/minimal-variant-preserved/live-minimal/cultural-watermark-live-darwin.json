@@ -1,0 +1,19 @@
+{
+  "name": "cultural-watermark",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T13:05:42.016Z",
+  "finishedAt": "2026-11-20T13:05:50.561Z",
+  "assertions": [
+    {
+      "name": "vite_bundle_ready",
+      "pass": false,
+      "detail": "极简单线 CSS 未在强制 reload 后 12 轮内生效"
+    },
+    {
+      "name": "flow_completed_without_exception",
+      "pass": false,
+      "detail": "cdp_socket_not_open"
+    }
+  ],
+  "allPass": false
+}

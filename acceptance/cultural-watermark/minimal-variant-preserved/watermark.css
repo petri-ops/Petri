@@ -1,0 +1,73 @@
+/* ============================================================
+   国风背景水印 — 极简几何单线（计白当黑 · 候选 1 判据）
+   四原型：月洞门弧 / 卵石 / 空心方印 / 开环。
+   mask data-URI SVG 均匀 stroke 单线（stroke-width 3），无楔形 fill、
+   无反相滤镜；color-mix(--petri-ink-base, --petri-bg-canvas) 主题自适应，
+   亮暗与四档和声均随 token 走，URI 零字面色。
+   ============================================================ */
+
+.petri-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* 12% 墨：细锋清晰但不抢内容；ink-base 随主题/档位派生，无需反相。 */
+  background: color-mix(in srgb, var(--petri-ink-base) 12%, var(--petri-bg-canvas));
+}
+
+.petri-watermark-global {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.petri-watermark-global .petri-watermark {
+  position: absolute;
+}
+
+/* ── 月洞门：半圆拱单线 ── */
+.petri-watermark--moon-gate {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M118 580 C120 400 200 320 300 320 C400 320 480 400 482 580'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M118 580 C120 400 200 320 300 320 C400 320 480 400 482 580'/%3E%3C/svg%3E");
+  -webkit-mask-size: 620px 620px;
+  mask-size: 620px 620px;
+  -webkit-mask-position: 78% 82%;
+  mask-position: 78% 82%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* ── 卵石：三枚留白椭单线 ── */
+.petri-watermark--pebble {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M64 262 C70 210 130 196 190 214 C232 227 244 258 214 284 C178 314 96 308 68 282 C60 275 60 268 64 262 Z M130 292 C144 272 194 264 220 280 C236 290 228 308 204 314 C170 322 132 312 130 292 Z M198 296 C214 268 274 260 300 282 C316 296 306 318 280 324 C246 332 202 322 198 296 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M64 262 C70 210 130 196 190 214 C232 227 244 258 214 284 C178 314 96 308 68 282 C60 275 60 268 64 262 Z M130 292 C144 272 194 264 220 280 C236 290 228 308 204 314 C170 322 132 312 130 292 Z M198 296 C214 268 274 260 300 282 C316 296 306 318 280 324 C246 332 202 322 198 296 Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 420px;
+  mask-size: 420px 420px;
+  -webkit-mask-position: 6% 86%;
+  mask-position: 6% 86%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* ── 落印：空心方印（非实心块） ── */
+.petri-watermark--seal {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M96 150 H144 V198 H96 Z M102 166 H120 M126 182 H140'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M96 150 H144 V198 H96 Z M102 166 H120 M126 182 H140'/%3E%3C/svg%3E");
+  -webkit-mask-size: 260px 260px;
+  mask-size: 260px 260px;
+  -webkit-mask-position: 92% 12%;
+  mask-position: 92% 12%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* ── 开环：缺口单线环 ── */
+.petri-watermark--open-ring {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M122 262 C104 162 162 102 224 102 C288 102 344 162 326 266 C316 314 278 332 224 332 C182 332 144 314 124 282'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='none' stroke='black' stroke-width='3' d='M122 262 C104 162 162 102 224 102 C288 102 344 162 326 266 C316 314 278 332 224 332 C182 332 144 314 124 282'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 420px;
+  mask-size: 420px 420px;
+  -webkit-mask-position: 88% 60%;
+  mask-position: 88% 60%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}

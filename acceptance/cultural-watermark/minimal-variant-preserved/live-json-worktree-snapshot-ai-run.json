@@ -1,0 +1,89 @@
+{
+  "name": "cultural-watermark",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T13:00:03.888Z",
+  "finishedAt": "2026-11-20T13:00:10.830Z",
+  "assertions": [
+    {
+      "name": "welcome_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"bg\":\"url(\\\"http://localhost:3000/src/assets/cultural-watermark.png\\\")\",\"op\":\"0.1\",\"filter\":\"sepia(0.3)\"}"
+    },
+    {
+      "name": "welcome_image_loaded",
+      "pass": true,
+      "detail": "bg=url(\"http://localhost:3000/src/assets/cultural-watermark.png\")"
+    },
+    {
+      "name": "welcome_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"bg\":\"none\",\"op\":\"1\",\"filter\":\"none\"}"
+    },
+    {
+      "name": "home_image_loaded",
+      "pass": false,
+      "detail": "bg=none"
+    },
+    {
+      "name": "home_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_home",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "extensions_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"bg\":\"none\",\"op\":\"1\",\"filter\":\"none\"}"
+    },
+    {
+      "name": "extensions_image_loaded",
+      "pass": false,
+      "detail": "bg=none"
+    },
+    {
+      "name": "extensions_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"bg\":\"none\",\"op\":\"1\",\"filter\":\"none\"}"
+    },
+    {
+      "name": "settings_image_loaded",
+      "pass": false,
+      "detail": "bg=none"
+    },
+    {
+      "name": "settings_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_settings",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": false
+}
