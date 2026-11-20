@@ -66,4 +66,4 @@
   outline-offset: 2px;
 }
 .scatter circle:focus-visible { outline: none; stroke: var(--petri-accent); stroke-width: 3; fill-opacity: 1; }
-@media (max-width: 820px) { .tableToolbar > span { width: 100%; margin-left: 0; } .viewer { min-height: 300px; } }
+@media (max-width: 960px) { .tableToolbar > span { width: 100%; margin-left: 0; } .viewer { min-height: 300px; } }

@@ -45,7 +45,7 @@
   color: var(--petri-text-secondary);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .strip {
     gap: 6px;
   }

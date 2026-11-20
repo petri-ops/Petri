@@ -23,10 +23,17 @@ export const BREAKPOINTS_TS = 'frontend/src/lib/uiBreakpoints.ts';
 export const MOBILE_ALIGNED_PX = 768;
 export const COMPACT_ALIGNED_PX = 960;
 
-/** 冻结登记表：@media/@container 条件里的阈值当次读数（21 档，含 WIP 面）。只减棘轮。 */
+/**
+ * 冻结登记表：@media/@container 条件里的阈值当次读数（12 档，含 WIP 面）。只减棘轮。
+ * U-04 档位收敛（R2 清偿批 S6b，2026-11-21）：视口档位收敛至 4 档单源
+ * 520（窄）/768（手机，JS 单源 MOBILE）/960（紧凑，JS 单源 COMPACT）/1200（宽），
+ * 由 2026-11-21 现读聚类推导（簇={520,560,577}/{640..760,768}/{820,996,997,960}/{1120,1146,1380,1200}，
+ * 锚点=簇内众数与既有 JS 单源常量）；560/577/680/760/820/996/997/1120/1380 九档移除。
+ * 96/420/679/720/1146 为 @container 元素级查询（非视口档位，不参与 4 档收敛）；
+ * 640/700/860 属 WIP 文件（BLOCK-395 B-11，owner 收口）。
+ */
 export const REGISTERED_THRESHOLDS = [
-  96, 420, 520, 560, 577, 640, 679, 680, 700, 720, 760,
-  768, 820, 860, 960, 996, 997, 1120, 1146, 1200, 1380,
+  96, 420, 520, 640, 679, 700, 720, 768, 860, 960, 1146, 1200,
 ];
 export const WIP_THRESHOLDS = [520, 640, 700, 860, 960];
 export const WIP_OWNER = '他方在制 WIP（BLOCK-395 B-11）；UI 程序零触碰，档位收敛待 owner 收口 + U-04 裁决';

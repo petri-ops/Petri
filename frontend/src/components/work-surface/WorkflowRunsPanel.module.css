@@ -182,7 +182,7 @@
   color: var(--petri-danger);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .body {
     grid-template-columns: minmax(0, 1fr);
   }

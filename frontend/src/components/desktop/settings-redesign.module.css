@@ -385,7 +385,7 @@
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   [role='dialog'][aria-label='设置'] :global(.petri-settings-sidebar) {
     flex-basis: 56px;
     width: 56px;

@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-719: 断点档位收敛 17→4 档单源（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S6b/P0-2 · U-04 预授权执行，行为基线同套绿，观感零代签）
+
+- **范围**：视口媒体查询档位收敛至 4 档单源——520（窄）/768（手机=JS 单源 MOBILE）/960（紧凑=JS 单源 COMPACT）/1200（宽）；簇锚点由 2026-11-21 现读 census 推导（20 档非 WIP 值聚类，簇内众数+既有 JS 单源优先）；`gate:ui-breakpoints` 登记表 21→12 档（只减）；96/420/679/720/1146 为 @container 元素级查询不参与收敛；project-workspace.module.css 5 档=BLOCK-395 B-11 他方 WIP 零触碰（owner 收口后并入）。
+- **机械证据**：改前改后同套 635 tests（styles+work-surface+result-studio+desktop+welcome/home）改前 632+3 自匹配假红（S6a 契约测提交后 git grep 自见，已修）→ 改后 **635/635**；tsc 0；a11y PASS；`gate:ui-breakpoints` PASS（非 WIP 9 档在册/JS 裸阈值 0）。
+- **诚实边界**：收敛=authorized breaking（簇内 520–768 等边缘区间塌缩点平移，如 640/700/720/760→768 后这些区间下才塌缩）；@container 元素级自适应不受影响；观感 in_progress 零代签。
+
 ## UI-718: 默认身份面可见性（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S5/P1-3 · A0 裁决「开干」的默认态落地，机械断言 dev Electron/9223 边界内 10/10，观感零代签）
 
 - **范围**：默认 accent `teal → celadon-ink`（A0 裁决 B 青瓷·墨，ruling.json 现读落档名）；默认态 `data-accent`+`data-surface` 双属性在场（宣纸/墨骨架 + 青瓷工作态 accent 默认可见）；welcome 问候区身份 token 组件面消费（问候字 `--petri-ink-base` 宣纸墨字 + `::after` 朱砂落印点 `--petri-accent-vermilion`/`--petri-radius-seal`，点睛 <5%）；旧配置迁移=显式保存过偏好的用户保留（存 teal 得 teal，非法值才回落默认）。

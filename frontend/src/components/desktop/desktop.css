@@ -943,7 +943,7 @@
   justify-content: flex-end;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .petri-settings-layout {
     flex-direction: column;
   }

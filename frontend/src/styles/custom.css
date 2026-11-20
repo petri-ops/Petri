@@ -469,7 +469,7 @@ html[data-theme='dark'],
 }
 
 /* 文档页桌面大屏：左栏贴左、TOC 贴右、正文在主区域内居中 */
-@media (min-width: 997px) {
+@media (min-width: 960px) {
   [class*='docMainContainer'] > .container {
     max-width: none;
     padding-inline: 0;
@@ -1048,16 +1048,16 @@ html[data-theme='dark'],
   }
 }
 
-@media (max-width: 996px) and (min-width: 577px) {
-  /* ≤996px 左侧导航折叠成汉堡菜单；搜索框继续靠右、更紧凑。
-     ≤576px 不覆盖，交给搜索插件自带的"失焦收成图标"逻辑。 */
+@media (max-width: 960px) and (min-width: 520px) {
+  /* ≤960px 左侧导航折叠成汉堡菜单；搜索框继续靠右、更紧凑。
+     ≤520px 不覆盖，交给搜索插件自带的"失焦收成图标"逻辑。 */
   .navbar .navbar__search-input {
     width: 140px;
     max-width: 40vw;
   }
 }
 
-@media (max-width: 996px) {
+@media (max-width: 960px) {
   /* 限制左侧 brand 宽度，避免标题过长挤压右侧（全部移动宽度生效）。 */
   .navbar__brand {
     max-width: 45%;
@@ -1070,9 +1070,9 @@ html[data-theme='dark'],
   }
 }
 
-@media (max-width: 768px) and (min-width: 577px) {
+@media (max-width: 768px) and (min-width: 520px) {
   /* 中小屏：搜索框收到较小宽度，仍保持可输入。
-     ≤576px 交给搜索插件自带逻辑（失焦收成放大镜图标），这里不覆盖。 */
+     ≤520px 交给搜索插件自带逻辑（失焦收成放大镜图标），这里不覆盖。 */
   .navbar .navbar__search-input {
     width: 110px;
     max-width: 44vw;
@@ -1100,7 +1100,7 @@ button.DocSearch-Button .DocSearch-Button-Keys,
   opacity: 0.6;
 }
 
-@media (max-width: 996px) {
+@media (max-width: 960px) {
   .navbar-separator {
     display: none;
   }

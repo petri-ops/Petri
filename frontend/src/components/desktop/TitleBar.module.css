@@ -961,7 +961,7 @@
   --titlebar-pill-bg: color-mix(in srgb, var(--petri-bg-elevated) 70%, transparent 30%);
 }
 
-@media (max-width: 1380px) {
+@media (max-width: 1200px) {
   .titleBar {
     grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
   }
@@ -975,7 +975,7 @@
   }
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 1200px) {
   .titleBar {
     grid-template-columns: var(--titlebar-left-span) minmax(0, 1fr) var(--titlebar-right-span);
   }

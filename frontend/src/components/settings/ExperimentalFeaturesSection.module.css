@@ -77,7 +77,7 @@
   text-align: right;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 520px) {
   .featureRow {
     align-items: flex-start;
     flex-direction: column;

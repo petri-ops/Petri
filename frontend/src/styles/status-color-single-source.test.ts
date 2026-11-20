@@ -22,7 +22,11 @@ function grepFrontend(args: string[]): string[] {
       cwd: ROOT,
       encoding: 'utf8',
     });
-    return out.split('\n').filter(Boolean);
+    // 排除本文件：本契约测源码必然提及旧名（提交后 git grep 可见自身），不算消费
+    return out
+      .split('\n')
+      .filter(Boolean)
+      .filter((l) => !l.includes('status-color-single-source.test.ts'));
   } catch {
     return []; // git grep 退出码 1 = 无命中（对「零定义/零消费」断言即通过条件）
   }

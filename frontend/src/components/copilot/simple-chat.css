@@ -3713,7 +3713,7 @@
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .cp-overlay {
     padding-top: 8vh;
     align-items: flex-end;
@@ -4202,7 +4202,7 @@
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .sc-preview-container {
     width: 95vw;
     max-height: 95vh;

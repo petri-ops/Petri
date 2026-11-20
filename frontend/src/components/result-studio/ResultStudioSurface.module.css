@@ -265,7 +265,7 @@
 .technicalDetails dt { color: var(--petri-text-tertiary); }
 .technicalDetails dd { margin: 0; overflow-wrap: anywhere; }
 
-@media (max-width: 820px) {
+@media (max-width: 960px) {
   .contextBar {
     grid-template-columns: 30px minmax(0, 1fr);
     padding: var(--petri-space-3) 10px;

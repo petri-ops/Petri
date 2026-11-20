@@ -170,7 +170,7 @@
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   .overlay {
     padding: var(--petri-space-2);
   }
