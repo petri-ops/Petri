@@ -2017,7 +2017,7 @@
 .sc-approval-action-chip-primary {
   border-color: var(--petri-accent-border);
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 .sc-approval-action-chip:disabled {
@@ -3552,7 +3552,7 @@
 
 .cp-item-selected .cp-item-icon {
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 .cp-item-content {

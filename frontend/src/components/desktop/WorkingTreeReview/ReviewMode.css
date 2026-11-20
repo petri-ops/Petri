@@ -959,7 +959,7 @@
 /* UI-237 — 展开行不再铺灰底：左侧 accent 竖线 + 标题变色标记选中 */
 .rvw-history-row[aria-expanded='true'] {
   background: transparent;
-  box-shadow: inset 2px 0 0 var(--petri-accent);
+  box-shadow: inset 2px 0 0 var(--petri-text);
 }
 
 .rvw-history-row[aria-expanded='true'] .rvw-history-subject {

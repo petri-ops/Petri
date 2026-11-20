@@ -26,7 +26,7 @@
   width: 24px;
   height: 28px;
   flex: 0 0 24px;
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
 }
 
 .currentCopy {

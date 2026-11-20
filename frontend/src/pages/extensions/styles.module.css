@@ -164,9 +164,9 @@
 }
 
 .filterChipActive {
-  border-color: var(--petri-accent);
+  border-color: var(--petri-text);
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 .filterCount {
@@ -219,9 +219,9 @@
 }
 
 .categoryChipActive {
-  border-color: var(--petri-accent);
+  border-color: var(--petri-text);
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 /* ============================================================
@@ -580,7 +580,7 @@
   padding: var(--petri-space-1) 10px;
   border-radius: var(--petri-radius-md);
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
   font-size: var(--petri-font-size-sm);
   font-weight: 500;
 }

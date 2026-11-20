@@ -31,8 +31,8 @@
 .sheetTabActive,
 .sheetTabActive:hover {
   background: var(--petri-accent-bg);
-  border-color: var(--petri-accent);
-  color: var(--petri-accent);
+  border-color: var(--petri-text);
+  color: var(--petri-text);
 }
 
 /* 有界截断如实标注：次级文字，不抢网格视觉 */

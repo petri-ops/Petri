@@ -466,7 +466,7 @@
 }
 
 [role='dialog'][aria-label='设置'] [data-external-import-panel] label:has(input[type='radio']:checked) {
-  border-color: var(--petri-accent);
+  border-color: var(--petri-text);
   background: var(--petri-accent-bg);
 }
 

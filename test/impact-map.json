@@ -8798,6 +8798,32 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "v1-accent-scarcity",
+      "note": "V1 配色稀缺化：谨慎白名单 codemod 收敛装饰性 accent（双重强调/装饰glow/通用图标色），356→316，棘轮按文件下调，c53 快照 targetMet=false 诚实未达130；HK-01 红绿 + 五契约39tests + c53 --check + tsc0，观感零代签。剩余~186合法语义需U类裁决。证据 acceptance/v1-accent-scarcity/**。",
+      "patterns": [
+        "scripts/v1-accent-scarcity.mjs",
+        "frontend/src/styles/AccentScarcity.test.ts",
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "resources/design-context/visual-consistency.json",
+        "resources/design-context/manifest.json",
+        "acceptance/v1-accent-scarcity/**",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/components/copilot/simple-chat.css",
+        "frontend/src/components/desktop/desktop.css",
+        "frontend/src/pages/extensions/styles.module.css",
+        "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css"
+      ],
+      "tests": [
+        "frontend/src/styles/AccentScarcity.test.ts",
+        "frontend/src/styles/theme-token-contract.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "codemod"
+    },
+    {
       "id": "a3-editorial-rhythm",
       "note": "A3 排版留白：欢迎页标题宽字距0.04em/注脚0.02em、设置页标题0.01→0.03em + 中性落印位3px方点（petri-settings-seal::after），零 accent 增量/零新 token；HK-01 红绿 + 邻域39 tests + 主契约19/19 + tsc0。观感零代签 UI-717。证据 acceptance/a3-editorial-rhythm/**。",
       "patterns": [

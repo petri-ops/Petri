@@ -33,7 +33,7 @@
 }
 
 .switchBtnActive {
-  border-color: var(--petri-accent);
+  border-color: var(--petri-text);
   background: var(--petri-accent-bg);
   color: var(--petri-text);
   font-weight: 650;

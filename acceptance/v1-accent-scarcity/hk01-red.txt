@@ -1,0 +1,235 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/styles/AccentScarcity.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 81[2mms[22m[39m
+   [31m❯[39m V1 accent scarcity [2m(5)[22m
+[31m     [31m×[31m no double-emphasis: accent-bg background must not pair with accent text color[39m[32m 40[2mms[22m[39m
+[31m     [31m×[31m no decorative accent glow (box-shadow on non-focus selectors)[39m[32m 17[2mms[22m[39m
+[31m     [31m×[31m generic icon surfaces use neutral text, not accent[39m[32m 17[2mms[22m[39m
+[31m     [31m×[31m total accent strictly decreases from the 356 baseline[39m[32m 7[2mms[22m[39m
+[31m     [31m×[31m charter ceiling is still 130 and targetMet is NOT faked[39m[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/styles/AccentScarcity.test.ts[2m > [22mV1 accent scarcity[2m > [22mno double-emphasis: accent-bg background must not pair with accent text color
+[31m[1mAssertionError[22m: expected [ …(21) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/branch/BranchTabs.module.css :: .branchTabActive",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-approval-action-chip-primary",[39m
+[31m+   "components/copilot/simple-chat.css :: .cp-item-selected .cp-item-icon",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-composer-dragging",[39m
+[31m+   "components/desktop/desktop.css :: [data-theme='dark'] .petri-plugin-card__meta .tag-data",[39m
+[31m+   "components/desktop/settings-redesign.module.css :: [role='dialog'][aria-label='设置'] [data-external-import-panel] label:has(input[type='radio']:checked)",[39m
+[31m+   "components/result-studio/LineageViewSwitch.module.css :: .switchBtnActive",[39m
+[31m+   "components/viewers/SpreadsheetViewer.module.css :: .sheetTabActive:hover",[39m
+[31m+   "pages/extensions/styles.module.css :: .filterChipActive",[39m
+[31m+   "pages/extensions/styles.module.css :: .categoryChipActive",[39m
+[31m+   "pages/extensions/styles.module.css :: .categoryBadge",[39m
+[31m+   "pages/project-workspace.module.css :: .headerRailBtn.breathing",[39m
+[31m+   "pages/project-workspace.module.css :: .modalityBadge",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceSummaryBadge",[39m
+[31m+   "pages/project-workspace.module.css :: .switcherItemBadge",[39m
+[31m+   "pages/project-workspace.module.css :: .leftQuickActionActive",[39m
+[31m+   "pages/project-workspace.module.css :: .projectTreeRowActive",[39m
+[31m+   "pages/project-workspace.module.css :: .convItemActive",[39m
+[31m+   "pages/project-workspace.module.css :: .bottomRailHandle.breathing",[39m
+[31m+   "pages/project-workspace.module.css :: .iconBtnActive",[39m
+[31m+   "pages/project-workspace.module.css :: .resultFocusActionHint",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/styles/AccentScarcity.test.ts:[2m54:53[22m[39m
+    [90m 52|[39m       /color:\s*var\(--petri-accent\)(?!-)/.test(r.body),
+    [90m 53|[39m     );
+    [90m 54|[39m     expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+    [90m   |[39m                                                     [31m^[39m
+    [90m 55|[39m   });
+    [90m 56|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/AccentScarcity.test.ts[2m > [22mV1 accent scarcity[2m > [22mno decorative accent glow (box-shadow on non-focus selectors)
+[31m[1mAssertionError[22m: expected [ …(13) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-history-row[aria-expanded='true']",[39m
+[31m+   "components/desktop/desktop.css :: 100%",[39m
+[31m+   "pages/project-workspace.module.css :: 0%, 100%",[39m
+[31m+   "pages/project-workspace.module.css :: .convRunningDot",[39m
+[31m+   "pages/project-workspace.module.css :: .treeRenameInput",[39m
+[31m+   "pages/project-workspace.module.css :: 0%, 100%",[39m
+[31m+   "pages/project-workspace.module.css :: .plotCardActive",[39m
+[31m+   "pages/project-workspace.module.css :: .fileCardActive",[39m
+[31m+   "pages/project-workspace.module.css :: .fileTreeRowActive",[39m
+[31m+   "pages/project-workspace.module.css :: .fileTreeRowDropTarget",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceFileTabStripDropTail",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceFileTabDropLeft",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceFileTabDropRight",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/styles/AccentScarcity.test.ts:[2m61:53[22m[39m
+    [90m 59|[39m       /box-shadow[^;]*var\(--petri-accent\)/.test(r.body) && !/focus/i…
+    [90m 60|[39m     );
+    [90m 61|[39m     expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+    [90m   |[39m                                                     [31m^[39m
+    [90m 62|[39m   });
+    [90m 63|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/AccentScarcity.test.ts[2m > [22mV1 accent scarcity[2m > [22mgeneric icon surfaces use neutral text, not accent
+[31m[1mAssertionError[22m: expected [ …(4) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/desktop/desktop.css :: .petri-desktop-panel__icon",[39m
+[31m+   "components/desktop/desktop.css :: .petri-plugin-store__icon",[39m
+[31m+   "components/desktop/desktop.css :: .petri-plugin-card__icon",[39m
+[31m+   "components/result-studio/CompactResultNavigator.module.css :: .currentIcon",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/styles/AccentScarcity.test.ts:[2m70:53[22m[39m
+    [90m 68|[39m       !/Active|active|:hover|focus|\[data-status|\[aria-(?:pressed|sel…
+    [90m 69|[39m     );
+    [90m 70|[39m     expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+    [90m   |[39m                                                     [31m^[39m
+    [90m 71|[39m   });
+    [90m 72|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/AccentScarcity.test.ts[2m > [22mV1 accent scarcity[2m > [22mtotal accent strictly decreases from the 356 baseline
+[31m[1mAssertionError[22m: current=356, baseline=356: expected 356 to be less than 356[39m
+[36m [2m❯[22m src/styles/AccentScarcity.test.ts:[2m75:53[22m[39m
+    [90m 73|[39m   it('total accent strictly decreases from the 356 baseline', () => {
+    [90m 74|[39m     const total = countAccent();
+    [90m 75|[39m     expect(total, `current=${total}, baseline=356`).toBeLessThan(356);
+    [90m   |[39m                                                     [31m^[39m
+    [90m 76|[39m   });
+    [90m 77|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/AccentScarcity.test.ts[2m > [22mV1 accent scarcity[2m > [22mcharter ceiling is still 130 and targetMet is NOT faked
+[31m[1mAssertionError[22m: expected '// V1 配色稀缺化 — HK-01 红绿先行消费测试。\n// 目标：…' not to match /targetMet\s*[:=]\s*true/[39m
+
+[32m- Expected:[39m
+/targetMet\s*[:=]\s*true/
+
+[31m+ Received:[39m
+"// V1 配色稀缺化 — HK-01 红绿先行消费测试。
+// 目标：装饰性 accent 归零（双击强调的冗余 color / 装饰 glow / 通用图标色），
+// 保留五类合法语义（主按钮 / 激活选中 / 链接 / 焦点环 / 状态语义）。
+// targetMet(≤130) 是终态目标：本测试要求总量严格下降且 ratchet 同步下调，
+// 不伪造 targetMet=true（剩余为合法语义，需 U 类裁决才能进一步收敛）。
+// 观感零代签：静态结构只证明收敛，不声明视觉通过。
+
+import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const CSS_ROOT = path.join(ROOT);
+const CHARTER = path.join(ROOT, '..', '..', 'docs', 'design-charter.md');
+
+const strip = (s: string) => s.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');
+const cssFiles = (): string[] => {
+  const out: string[] = [];
+  const walk = (d: string) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (p.endsWith('.css')) out.push(p);
+    }
+  };
+  walk(CSS_ROOT);
+  return out;
+};
+
+type Rule = { file: string; sel: string; body: string };
+const rules = (): Rule[] => {
+  const out: Rule[] = [];
+  for (const f of cssFiles()) {
+    const t = strip(fs.readFileSync(f, 'utf8'));
+    const re = /([^{}]+)\\{([^{}]*)\\}/g;
+    let m;
+    while ((m = re.exec(t))) {
+      out.push({ file: path.relative(CSS_ROOT, f), sel: m[1].trim().split('\\n').pop()!.trim(), body: m[2] });
+    }
+  }
+  return out;
+};
+
+const countAccent = () =>
+  cssFiles().reduce((n, f) => n + (strip(fs.readFileSync(f, 'utf8')).match(/var\\(--petri-accent\\)/g) || []).length, 0);
+
+describe('V1 accent scarcity', () => {
+  it('no double-emphasis: accent-bg background must not pair with accent text color', () => {
+    const bad = rules().filter((r) =>
+      /background[^;]*var\\(--petri-accent-bg\\)/.test(r.body) &&
+      /color:\\s*var\\(--petri-accent\\)(?!-)/.test(r.body),
+    );
+    expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+  });
+
+  it('no decorative accent glow (box-shadow on non-focus selectors)', () => {
+    const bad = rules().filter((r) =>
+      /box-shadow[^;]*var\\(--petri-accent\\)/.test(r.body) && !/focus/i.test(r.sel),
+    );
+    expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+  });
+
+  it('generic icon surfaces use neutral text, not accent', () => {
+    const bad = rules().filter((r) =>
+      /(?:__icon|\\.icon\\b|Icon)/.test(r.sel) &&
+      /color:\\s*var\\(--petri-accent\\)(?!-)/.test(r.body) &&
+      !/Active|active|:hover|focus|\\[data-status|\\[aria-(?:pressed|selected)/.test(r.sel),
+    );
+    expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+  });
+
+  it('total accent strictly decreases from the 356 baseline', () => {
+    const total = countAccent();
+    expect(total, `current=${total}, baseline=356`).toBeLessThan(356);
+  });
+
+  it('charter ceiling is still 130 and targetMet is NOT faked', () => {
+    const charter = fs.readFileSync(CHARTER, 'utf8');
+    expect(charter).toMatch(/引用总量终态\\s*≤130/);
+    // 本测试不声明 targetMet=true；真值由 c53 生成器现读，剩余合法语义需 U 类裁决。
+    expect(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')).not.toMatch(/targetMet\\s*[:=]\\s*true/);
+  });
+});
+"
+
+[36m [2m❯[22m src/styles/AccentScarcity.test.ts:[2m82:73[22m[39m
+    [90m 80|[39m     expect(charter).toMatch(/引用总量终态\s*≤130/);
+    [90m 81|[39m     // 本测试不声明 targetMet=true；真值由 c53 生成器现读，剩余合法语义需 U 类裁决。
+    [90m 82|[39m     expect(fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')).no…
+    [90m   |[39m                                                                         [31m^[39m
+    [90m 83|[39m   });
+    [90m 84|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[90m (5)[39m
+[2m   Start at [22m 16:34:35
+[2m   Duration [22m 402ms[2m (environment 60%, tests 32%, transform 5%, import 2%, worker 1%)[22m
+

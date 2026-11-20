@@ -41,7 +41,7 @@
 .branchTabActive {
   background: color-mix(in srgb, var(--petri-accent-bg) 72%, var(--petri-bg-surface) 28%);
   border-color: color-mix(in srgb, var(--petri-accent) 28%, var(--petri-border) 72%);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 .branchTabActive:hover {

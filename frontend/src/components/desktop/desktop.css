@@ -222,7 +222,7 @@
   height: 32px;
   border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 
@@ -1365,7 +1365,7 @@
   height: 34px;
   border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 
@@ -1730,7 +1730,7 @@
   height: 34px;
   border-radius: var(--petri-radius-lg);
   background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  color: var(--petri-text-secondary);
   flex-shrink: 0;
 }
 
@@ -1797,7 +1797,7 @@
 @keyframes petriUpdatePulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--petri-accent) 40%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--petri-text) 40%, transparent);
   }
   50% {
     box-shadow: 0 0 0 4px transparent;
@@ -1895,7 +1895,7 @@
 
 [data-theme='dark'] .petri-plugin-card__meta .tag-data {
   background: var(--petri-accent-bg);
-  color: var(--petri-accent);
+  color: var(--petri-text);
 }
 
 [data-theme='dark'] .petri-plugin-card__meta .tag-optional {

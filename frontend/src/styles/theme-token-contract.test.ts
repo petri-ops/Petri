@@ -434,28 +434,28 @@ describe('theme token contract', () => {
       // 用户裁决「有光晕后同色竖带冗余」：hover accent 线与 :has 分隔线转色退场（-2）
       // UI-593 空态重排：+7 = 工作区标题章底色/入口卡图标章（默认+hover）/卡片 hover accent 描边与底色——宪章五类「交互态入口卡」合法语义（同 ArtifactPinPane/拖拽把手先例）
       // UI-596 最近使用徽章：+2 = pill 底色+文字色（交互态入口卡语义延续）
-      'pages/project-workspace.module.css': 103,
-      'components/copilot/simple-chat.css': 31,
+      'pages/project-workspace.module.css': 81,
+      'components/copilot/simple-chat.css': 29,
       // BLOCK-423 设置页视觉改版：+4 = checkbox / 搜索框 focus 描边 / 导入来源选中卡片描边 / 输入 focus 描边
       // （宪章五类「交互态」合法语义，对标 button.module.css .primary 与 AnnotationOverlay 选中态先例）。
-      'components/desktop/settings-redesign.module.css': 4,
-      'components/desktop/desktop.css': 24,
-      'pages/extensions/styles.module.css': 20,
+      'components/desktop/settings-redesign.module.css': 3,
+      'components/desktop/desktop.css': 19,
+      'pages/extensions/styles.module.css': 13,
       'components/workspace-panels/KnowledgeSpacePanel.module.css': 18,
-      'components/desktop/WorkingTreeReview/ReviewMode.css': 17,
+      'components/desktop/WorkingTreeReview/ReviewMode.css': 16,
       'pages/home.module.css': 14,
       'components/desktop/TitleBar.module.css': 10,
       'styles/custom.css': 9,
       'components/result-studio/ResultStudioChangeSetPanel.module.css': 8,
       'components/copilot/ToolActivityDock.module.css': 7,
       'components/result-studio/ScientificInteractionViewer.module.css': 7,
-      'components/branch/BranchTabs.module.css': 6,
+      'components/branch/BranchTabs.module.css': 5,
       'pages/extensions/extensions.module.css': 6,
       'components/result-studio/LineageStrip.module.css': 5,
       'pages/welcome.module.css': 5,
       'components/copilot/integration/integration.module.css': 4,
       'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 4,
-      'components/result-studio/CompactResultNavigator.module.css': 4,
+      'components/result-studio/CompactResultNavigator.module.css': 3,
       'components/result-studio/ResultEditPanel.module.css': 4,
       'components/result-studio/ResultStudioSurface.module.css': 4,
       'components/knowledge/KnowledgeConsoleChat.module.css': 3,
@@ -465,14 +465,14 @@ describe('theme token contract', () => {
       'components/workspace-panels/WorkspaceTodoSection.module.css': 3,
       'components/copilot/MessageRail.module.css': 2,
       'components/knowledge/KnowledgeConsoleDock.module.css': 2,
-      'components/result-studio/LineageViewSwitch.module.css': 2,
+      'components/result-studio/LineageViewSwitch.module.css': 1,
       'components/RouteErrorBoundary.module.css': 2,
       'components/workspace-panels/FloatCardResizer.module.css': 2, // 拖拽把手态：UI-591 跟手渐晕（同色 hover 线按用户裁决退场，常驻线本就中性）
       // BLOCK-342 切片2 — 路径节点编辑/钢笔 overlay：锚点/手柄/预览线 = 选中态编辑把手（五类合法语义，
       // 同 AnnotationOverlay「选中批注 accent 外环」先例）
       'components/svg-editor/SvgEditorViewer.module.css': 6, // BLOCK-343 P1 +1 = 选区浮动工具条边框（选中态语义延续）
       'components/viewers/MarkdownViewer.module.css': 2, // BLOCK-334 P2 — 自 workspace-panels/MarkdownResultViewer.module.css 平移（accent 用法不变）
-      'components/viewers/SpreadsheetViewer.module.css': 2, // BLOCK-334 P2 Slice D — 自 workspace-panels/SpreadsheetResultViewer.module.css 平移
+      'components/viewers/SpreadsheetViewer.module.css': 0, // BLOCK-334 P2 Slice D — V1 装饰 glow 收敛归零
       'components/copilot/LlmTranscriptViewer.css': 1,
       'components/copilot/renderers/TableRenderer.module.css': 1,
       'components/copilot/ResultCard.module.css': 1,

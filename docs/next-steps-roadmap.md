@@ -1,3 +1,4 @@
+最后更新：2026-11-20（🗃 **V1 配色稀缺化收口（部分·U）**：装饰性 accent 收敛 356→316，棘轮下调、c53 targetMet=false 诚实未达 130（剩余合法语义待 U 裁决）；HK-01 绿5/5 + 契约39tests + tsc0。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **A3 排版留白收口**：欢迎页标题0.04em/注脚0.02em、设置页标题0.03em+中性落印位，HK-01绿5/5+邻域39tests+契约19/19+tsc0，零accent增量/观感零代签；evidence=acceptance/a3-editorial-rhythm/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **A2 造型图标原子收口**：自绘 Icon 单源新增开环/错落格/发丝线三原子落空态+tab active，HK-01 绿6/6 + 邻域71 tests + 契约19/19 + tsc0，零图标依赖/观感零代签；evidence=acceptance/a2-identity-atoms/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **A1 色板 token 化收口**：A0 裁决行后落地身份色板四 token 亮暗双套，HK-01 红→绿 4/4 + 主契约 19/19 + 对比度 32 对 0 违规；零组件消费改动/观感零代签/零依赖；evidence=acceptance/a1-identity-palette/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
