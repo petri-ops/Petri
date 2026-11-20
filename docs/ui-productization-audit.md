@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-## UI-717: 身份色板 token 化（2026-11-20 **verified**；UI 轨，A0 裁决「行」后 A1–A3+V1+V1-U 落地，A4 round2 静态面 + round3 交互面偏好预审闭环签字·dev Electron/9223 离屏边界内）
+## UI-717: 身份色板 token 化（2026-11-20 **verified**；UI 轨，A0 裁决「行」后 A1–A3+V1+V1-U+V5+B 落地，A4 round2 静态面 + round3 交互面 + **A4 四档整体观感**偏好预审闭环签字·dev Electron/9223 离屏边界内）
 
 - **用户裁决原话**：「开干」（=A0 单一建议「行」：B 青瓷·墨工作态主 accent + A 宣纸·朱砂品牌落印点睛 <5%）。
 - **范围**：`frontend/src/styles/custom.css` 亮暗双套新增四个身份 token（`--petri-ink-paper/-base`、`--petri-accent-celadon`、`--petri-accent-vermilion`），vermilion 注释锁定为品牌点睛语义；identity-palette-contract 测试 + impact-map 登记。
@@ -16,7 +16,8 @@
 
 - **V5 四档和声接入（2026-11-20，用户「行」）**：四套东方和声（宣纸朱砂/青瓷墨/群青铜/靛雾）注册为 `[data-accent]` 新档，复用现成 AccentControl/ThemeProvider 管道；HK-01 绿 6/6 + 邻域 41 tests + 契约 19/19 + 9223 离屏实机 17/17（四档色各异、亮暗双套、四截图）。**观感未签**：点睛色随档变已证，但骨架仍海军蓝（覆盖骨架属新 U 类）；四档审美保持 in_progress。证据 `acceptance/v5-harmony-accents/`。
 
-- **B 方案骨架随档切换（2026-11-20，用户裁决「B」）**：正交 `data-surface` 由四和声档联切（`applyAccent` 同设/删），骨架 token 全由 `--petri-ink-*` 派生、surface 位零 hex（c53 navyLadder 未放宽）；HK-01 绿 6/6 + 六契约 48/48 + 实机 14/14（四档亮色骨架各异、移除回默认、四截图），两处预审抓真（暗 elevated 中灰→微光、群青 ink-paper→冷白）仅呈现面修复。paper 档截图=宣纸暖白底+米栏+朱砂点睛，**视觉世界真随档变**。**观感未签**（四档审美保持 in_progress）；证据 `acceptance/b-surface-dimension/`。
+- **B 方案骨架随档切换（2026-11-20，用户裁决「B」）**：正交 `data-surface` 由四和声档联切（`applyAccent` 同设/删），骨架 token 全由 `--petri-ink-*` 派生、surface 位零 hex（c53 navyLadder 未放宽）；HK-01 绿 6/6 + 六契约 48/48 + 实机 14/14（四档亮色骨架各异、移除回默认、四截图），两处预审抓真（暗 elevated 中灰→微光、群青 ink-paper→冷白）仅呈现面修复。paper 档截图=宣纸暖白底+米栏+朱砂点睛，**视觉世界真随档变**；证据 `acceptance/b-surface-dimension/`。
+- **A4 四档整体观感预审（2026-11-20，用户「可以的 冲」授权）**：9223 离屏逐档切色截三面 12 张 PNG，断言 **46/46 allPass**（四档 accent/骨架各八值 distinct）+ 人工复核 P1–P5 全过（文字 42 字、三面 0 溢出、点睛 ≤1、弱化字 4.64/6.50:1、四档皆和谐）。按 11-20 裁决「预审通过即签字」翻**四档观感 verified**（dev Electron/9223 边界内）。边界：`.sc-access-btn` 固定橙红=安全状态语义不随主题（U 类未改）、顶部黄条=dev 调试提示非产品 UI；不外推其它 UI-###/E 类/packaged。证据 `acceptance/a4-harmony-preview/`。
 
 - **B 观感预审轮 1（2026-11-20，用户实机反馈「有点模糊」）**：算得 B 方案弱化字派生仅 2.63–3.39:1（低于 AA 4.5:1，原仓库 muted 曾修到 5.3:1 被覆盖退化）。仅呈现面优化：亮 `.82/.74/.70`、暗 `.84/.76/.72`、border `16%→22%`；复验四档亮暗八组最弱 4.64（亮）/6.50（暗）全达标，契约 41/41 + c53 + ui-a11y 0 违规；同类第二次转机械门禁（SurfaceDimension 新增每档弱化字 ≥4.5:1 断言）。Vite HMR 已生效待用户实机确认；此只清「清晰度」一条，四档整体审美仍 in_progress。证据 `acceptance/b-surface-dimension/PREFERENCE-REVIEW.md`。
 

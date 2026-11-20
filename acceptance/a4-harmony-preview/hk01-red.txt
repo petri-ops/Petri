@@ -1,0 +1,141 @@
+▶ A4 harmony preview criteria
+  ✖ criteria material exists and lists all four harmony accents (0.864792ms)
+  ✖ carries the five per-acceptance criteria from user preference (0.102042ms)
+  ✖ declares ≤3 rounds and presentation-only boundary (0.597583ms)
+  ✖ requires per-accent screenshots as evidence (0.094084ms)
+  ✖ verification flow exists and asserts four accents distinct (0.076792ms)
+  ✖ flow never opens visible window / never touches main window (0.067708ms)
+  ✔ tamper negative: dropping a criterion fails closed (0.064542ms)
+✖ A4 harmony preview criteria (2.557959ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 1
+ℹ fail 6
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122.351375
+
+✖ failing tests:
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:17:3
+✖ criteria material exists and lists all four harmony accents (0.864792ms)
+  AssertionError [ERR_ASSERTION]: criteria material missing
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:19:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:25:3
+✖ carries the five per-acceptance criteria from user preference (0.102042ms)
+  AssertionError [ERR_ASSERTION]: missing P1
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:27:62)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:32:3
+✖ declares ≤3 rounds and presentation-only boundary (0.597583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /≤\s*3\s*轮|最多\s*3\s*轮/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:34:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /≤\s*3\s*轮|最多\s*3\s*轮/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:38:3
+✖ requires per-accent screenshots as evidence (0.094084ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /round1/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:40:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /round1/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:44:3
+✖ verification flow exists and asserts four accents distinct (0.076792ms)
+  AssertionError [ERR_ASSERTION]: flow missing
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:46:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:53:3
+✖ flow never opens visible window / never touches main window (0.067708ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /connectTestTarget/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs:55:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /connectTestTarget/,
+    operator: 'match',
+    diff: 'simple'
+  }

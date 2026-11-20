@@ -1,0 +1,239 @@
+{
+  "name": "a4-harmony-preview",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T11:38:11.270Z",
+  "finishedAt": "2026-11-20T11:38:36.545Z",
+  "assertions": [
+    {
+      "name": "P3_paper-vermilion_surface_applied",
+      "pass": true,
+      "detail": "paper-vermilion canvas=#f2efe6"
+    },
+    {
+      "name": "P3_paper-vermilion_accent_applied",
+      "pass": true,
+      "detail": "paper-vermilion accent=#b5482f"
+    },
+    {
+      "name": "P2_paper-vermilion_welcome_no_overflow",
+      "pass": true,
+      "detail": "paper-vermilion/welcome 横向溢出"
+    },
+    {
+      "name": "P1_paper-vermilion_welcome_short",
+      "pass": true,
+      "detail": "paper-vermilion 副标题=42"
+    },
+    {
+      "name": "shot_paper-vermilion_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_paper-vermilion_settings_no_overflow",
+      "pass": true,
+      "detail": "paper-vermilion/settings 横向溢出"
+    },
+    {
+      "name": "shot_paper-vermilion_settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_paper-vermilion_extensions_no_overflow",
+      "pass": true,
+      "detail": "paper-vermilion/extensions 横向溢出"
+    },
+    {
+      "name": "P4_paper-vermilion_one_focal",
+      "pass": true,
+      "detail": "paper-vermilion active atom=1"
+    },
+    {
+      "name": "P4_paper-vermilion_text_neutral",
+      "pass": true,
+      "detail": "paper-vermilion active text=rgb(28, 27, 25)"
+    },
+    {
+      "name": "shot_paper-vermilion_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P3_celadon-ink_surface_applied",
+      "pass": true,
+      "detail": "celadon-ink canvas=#f4f1e8"
+    },
+    {
+      "name": "P3_celadon-ink_accent_applied",
+      "pass": true,
+      "detail": "celadon-ink accent=#0f766e"
+    },
+    {
+      "name": "P2_celadon-ink_welcome_no_overflow",
+      "pass": true,
+      "detail": "celadon-ink/welcome 横向溢出"
+    },
+    {
+      "name": "P1_celadon-ink_welcome_short",
+      "pass": true,
+      "detail": "celadon-ink 副标题=42"
+    },
+    {
+      "name": "shot_celadon-ink_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_celadon-ink_settings_no_overflow",
+      "pass": true,
+      "detail": "celadon-ink/settings 横向溢出"
+    },
+    {
+      "name": "shot_celadon-ink_settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_celadon-ink_extensions_no_overflow",
+      "pass": true,
+      "detail": "celadon-ink/extensions 横向溢出"
+    },
+    {
+      "name": "P4_celadon-ink_one_focal",
+      "pass": true,
+      "detail": "celadon-ink active atom=1"
+    },
+    {
+      "name": "P4_celadon-ink_text_neutral",
+      "pass": true,
+      "detail": "celadon-ink active text=rgb(23, 58, 56)"
+    },
+    {
+      "name": "shot_celadon-ink_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P3_ultramarine-brass_surface_applied",
+      "pass": true,
+      "detail": "ultramarine-brass canvas=#edf0f6"
+    },
+    {
+      "name": "P3_ultramarine-brass_accent_applied",
+      "pass": true,
+      "detail": "ultramarine-brass accent=#a87c42"
+    },
+    {
+      "name": "P2_ultramarine-brass_welcome_no_overflow",
+      "pass": true,
+      "detail": "ultramarine-brass/welcome 横向溢出"
+    },
+    {
+      "name": "P1_ultramarine-brass_welcome_short",
+      "pass": true,
+      "detail": "ultramarine-brass 副标题=42"
+    },
+    {
+      "name": "shot_ultramarine-brass_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_ultramarine-brass_settings_no_overflow",
+      "pass": true,
+      "detail": "ultramarine-brass/settings 横向溢出"
+    },
+    {
+      "name": "shot_ultramarine-brass_settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_ultramarine-brass_extensions_no_overflow",
+      "pass": true,
+      "detail": "ultramarine-brass/extensions 横向溢出"
+    },
+    {
+      "name": "P4_ultramarine-brass_one_focal",
+      "pass": true,
+      "detail": "ultramarine-brass active atom=1"
+    },
+    {
+      "name": "P4_ultramarine-brass_text_neutral",
+      "pass": true,
+      "detail": "ultramarine-brass active text=rgb(30, 46, 82)"
+    },
+    {
+      "name": "shot_ultramarine-brass_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P3_indigo-mist_surface_applied",
+      "pass": true,
+      "detail": "indigo-mist canvas=#eaeef2"
+    },
+    {
+      "name": "P3_indigo-mist_accent_applied",
+      "pass": true,
+      "detail": "indigo-mist accent=#6e9ca0"
+    },
+    {
+      "name": "P2_indigo-mist_welcome_no_overflow",
+      "pass": true,
+      "detail": "indigo-mist/welcome 横向溢出"
+    },
+    {
+      "name": "P1_indigo-mist_welcome_short",
+      "pass": true,
+      "detail": "indigo-mist 副标题=42"
+    },
+    {
+      "name": "shot_indigo-mist_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_indigo-mist_settings_no_overflow",
+      "pass": true,
+      "detail": "indigo-mist/settings 横向溢出"
+    },
+    {
+      "name": "shot_indigo-mist_settings",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P2_indigo-mist_extensions_no_overflow",
+      "pass": true,
+      "detail": "indigo-mist/extensions 横向溢出"
+    },
+    {
+      "name": "P4_indigo-mist_one_focal",
+      "pass": true,
+      "detail": "indigo-mist active atom=1"
+    },
+    {
+      "name": "P4_indigo-mist_text_neutral",
+      "pass": true,
+      "detail": "indigo-mist active text=rgb(27, 43, 64)"
+    },
+    {
+      "name": "shot_indigo-mist_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "four_accents_distinct",
+      "pass": true,
+      "detail": "accents=[\"#b5482f\",\"#0f766e\",\"#a87c42\",\"#6e9ca0\"]"
+    },
+    {
+      "name": "four_surfaces_distinct",
+      "pass": true,
+      "detail": "canvases=[\"#f2efe6\",\"#f4f1e8\",\"#edf0f6\",\"#eaeef2\"]"
+    }
+  ],
+  "allPass": true
+}

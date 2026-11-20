@@ -8798,6 +8798,22 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a4-harmony-preview",
+      "note": "A4 四档整体观感预审闭环：9223 离屏逐档切 data-accent+data-surface 截三面，46/46 断言 + 人工复核 P1–P5 全过，首轮即过按偏好预审裁决翻四档观感 verified（边界 sc-access-btn 状态色未改/顶部黄条 dev 提示）；HK-01 7/7、9223 已 kill。证据 acceptance/a4-harmony-preview/**。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/a4-harmony-preview.cjs",
+        "acceptance/a4-harmony-preview/**"
+      ],
+      "tests": [
+        "acceptance/a4-harmony-preview/PREVIEW-CRITERIA.test.mjs"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "verification"
+    },
+    {
       "id": "b-surface-dimension",
       "note": "B 方案：正交 data-surface 维度由四和声档联切，骨架 token 由 --petri-ink-* 派生零 hex 不放宽 c53 navyLadder；HK-01 6/6+六契约48/48+实机14/14(四档骨架各异+回默认+四截图)，观感未签，9223已kill。证据 acceptance/b-surface-dimension/**。",
       "patterns": [

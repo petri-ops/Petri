@@ -1,0 +1,17 @@
+▶ A4 harmony preview criteria
+  ✔ criteria material exists and lists all four harmony accents (0.625458ms)
+  ✔ carries the five per-acceptance criteria from user preference (0.193417ms)
+  ✔ declares ≤3 rounds and presentation-only boundary (0.168417ms)
+  ✔ requires per-accent screenshots as evidence (0.075416ms)
+  ✔ verification flow exists and asserts four accents distinct (0.131042ms)
+  ✔ flow never opens visible window / never touches main window (0.153583ms)
+  ✔ tamper negative: dropping a criterion fails closed (0.072041ms)
+✔ A4 harmony preview criteria (2.163ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.624042
