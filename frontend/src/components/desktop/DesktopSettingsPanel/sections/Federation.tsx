@@ -414,7 +414,7 @@ export function FederationPanel(): React.ReactElement {
       </div>
 
       <div className={styles.addCard}>
-        <h4 className={styles.addTitle}>添加协作节点</h4>
+        <h4 className={styles.addTitle}>协作节点</h4>
         <input
           type="text"
           className={styles.addInput}

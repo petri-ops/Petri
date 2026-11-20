@@ -1,0 +1,32 @@
+{
+  "kind": "petri.ui-design.v234-scorecard.v1",
+  "method": "现读机械判据派生的保守下限估计（非人工审美打分）",
+  "before": {
+    "A": 3,
+    "B": 3.5,
+    "C": 3.5,
+    "D": 4.5,
+    "composite": 3.6
+  },
+  "after": {
+    "A": 3.5,
+    "B": 4,
+    "C": 4,
+    "D": 4.7,
+    "composite": 4.1
+  },
+  "readings": {
+    "identityTokensPaired": true,
+    "ratchetGatePresent": true,
+    "harmonyAccents": true,
+    "surfaceDimension": true,
+    "singlePanelWrap": true,
+    "shadowTiers": true,
+    "selectionSingle": true,
+    "noDoubleSemicolon": true,
+    "tabularNums": true,
+    "contrastGate": true,
+    "nounHeadings": true
+  },
+  "note": "机械判据全过只支撑每维 ≤+0.5 的保守增量，不等于审美满分；D 维封顶 4.7。D 维 4.4 目标分为 U 类未采纳门槛；观感由 A4 预审单独签字，本分数不外推 E 类人眼槽/packaged/Provider/GA。"
+}

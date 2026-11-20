@@ -8798,6 +8798,25 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "v234-layer-detail",
+      "note": "V2/V3/V4 视觉升级收尾（用户预授权连续一次做完）：leftPanelWrap 双定义合并+128处;;清理+动词标题名词化；裸z-index/阴影/selection/扫描面盘点确认已是现状不妄动；V4现读评分卡3.6→4.1保守下限；HK01绿8/8+全契约60tests+c53/a11y绿；breaking U类(断点/状态色/focus单源)deferred。证据 acceptance/v234-layer-detail/**。",
+      "patterns": [
+        "frontend/src/styles/VisualLayerDiscipline.test.ts",
+        "frontend/src/pages/project-workspace.module.css",
+        "frontend/src/components/desktop/DesktopSettingsPanel/sections/Federation.tsx",
+        "scripts/lib/v234-scorecard.mjs",
+        "acceptance/v234-layer-detail/**"
+      ],
+      "tests": [
+        "frontend/src/styles/VisualLayerDiscipline.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "baseline-collector"
+    },
+    {
       "id": "a4-harmony-preview",
       "note": "A4 四档整体观感预审闭环：9223 离屏逐档切 data-accent+data-surface 截三面，46/46 断言 + 人工复核 P1–P5 全过，首轮即过按偏好预审裁决翻四档观感 verified（边界 sc-access-btn 状态色未改/顶部黄条 dev 提示）；HK-01 7/7、9223 已 kill。证据 acceptance/a4-harmony-preview/**。",
       "patterns": [

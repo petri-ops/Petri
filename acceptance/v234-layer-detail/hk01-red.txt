@@ -1,0 +1,9 @@
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[41m[1m FAIL [22m[49m src/styles/VisualLayerDiscipline.test.ts[2m > [22mV2 层级单源[2m > [22m.leftPanelWrap has a single definition carrying position:relative
+[31m[1mAssertionError[22m: leftPanelWrap blocks=2, must merge to 1: expected 2 to be 1 // Object.is equality[39m
+[41m[1m FAIL [22m[49m src/styles/VisualLayerDiscipline.test.ts[2m > [22mV3 浏览器表面细节[2m > [22mno double-semicolon in non-WIP CSS
+[31m[1mAssertionError[22m: ;; in project-workspace must be cleaned: expected '/* ==================================…' not to match /;\s*;/[39m
+[41m[1m FAIL [22m[49m src/styles/VisualLayerDiscipline.test.ts[2m > [22mV3 浏览器表面细节[2m > [22msection headings use noun phrases, not verb phrases
+[31m[1mAssertionError[22m: frontend/src/pages/home.tsx still has verb-phrase heading: expected [ '<h1>创建', '创建', …(3) ] to deeply equal [][39m
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (8)[39m
