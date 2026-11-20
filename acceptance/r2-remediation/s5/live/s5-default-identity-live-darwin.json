@@ -1,0 +1,59 @@
+{
+  "name": "s5-default-identity",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T23:36:27.890Z",
+  "finishedAt": "2026-11-20T23:36:29.016Z",
+  "assertions": [
+    {
+      "name": "welcome_reached",
+      "pass": true,
+      "detail": "h1.greeting 轮询"
+    },
+    {
+      "name": "server_pref_preserved_refill",
+      "pass": true,
+      "detail": "stored=celadon-ink"
+    },
+    {
+      "name": "default_accent_celadon_ink",
+      "pass": true,
+      "detail": "{\"accent\":\"celadon-ink\",\"surface\":\"celadon\",\"theme\":\"light\",\"storedAccent\":\"celadon-ink\"}"
+    },
+    {
+      "name": "default_surface_celadon",
+      "pass": true,
+      "detail": "{\"accent\":\"celadon-ink\",\"surface\":\"celadon\",\"theme\":\"light\",\"storedAccent\":\"celadon-ink\"}"
+    },
+    {
+      "name": "greeting_ink_token_consumed",
+      "pass": true,
+      "detail": "{\"found\":true,\"color\":\"rgb(23, 58, 56)\",\"seal\":{\"bg\":\"rgb(181, 72, 47)\",\"w\":\"6.99219px\",\"r\":\"3px\"}}"
+    },
+    {
+      "name": "greeting_color_celadon_ink",
+      "pass": true,
+      "detail": "color=rgb(23, 58, 56)"
+    },
+    {
+      "name": "seal_dot_vermilion",
+      "pass": true,
+      "detail": "{\"bg\":\"rgb(181, 72, 47)\",\"w\":\"6.99219px\",\"r\":\"3px\"}"
+    },
+    {
+      "name": "seal_dot_radius_seal_token",
+      "pass": true,
+      "detail": "radius=3px"
+    },
+    {
+      "name": "accent_var_celadon",
+      "pass": true,
+      "detail": "accent=#0f766e"
+    },
+    {
+      "name": "shot_welcome_default_identity",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

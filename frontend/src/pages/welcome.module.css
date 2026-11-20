@@ -23,8 +23,21 @@
   font-weight: 700;
   /* A3 东方排版：标题宽字距承载竖排标题的重量（横排转译，不引新字族/依赖）。 */
   letter-spacing: 0.04em;
-  color: var(--petri-text);
+  /* S5/P1-3 身份 token 组件面消费：问候字 = 宣纸上的墨字（骨架 token 随档联切，
+     celadon 档为青瓷墨）。落印点 = A0 朱砂点睛 <5%（品牌落印位，不随 accent）。 */
+  color: var(--petri-ink-base);
   text-align: center;
+}
+
+.greeting::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 0.35em;
+  vertical-align: 0.12em;
+  border-radius: var(--petri-radius-seal);
+  background: var(--petri-accent-vermilion);
 }
 
 .welcomeSub {

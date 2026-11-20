@@ -19,14 +19,16 @@ export interface AccentOption {
 }
 
 export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
-  { id: 'teal', label: '青碧（默认）', swatch: '#0d9488' },
+  // S5/P1-3 默认档迁至 A0 裁决的 celadon-ink（青瓷·墨）；teal 退为遗留基础档
+  // （token 在 :root，applyAccent 对 teal 移除属性即回落基础身份）。
+  { id: 'teal', label: '青碧', swatch: '#0d9488' },
   { id: 'blue', label: '远蓝', swatch: '#2563eb' },
   { id: 'violet', label: '紫罗兰', swatch: '#7c3aed' },
   { id: 'rose', label: '玫红', swatch: '#e11d48' },
   { id: 'amber', label: '琥珀', swatch: '#d97706' },
   // V5 身份面上线 — 四套和声（东方视觉语境；复用同一 [data-accent] 管道）。
   { id: 'paper-vermilion', label: '宣纸·朱砂', swatch: '#b5482f' },
-  { id: 'celadon-ink', label: '青瓷·墨', swatch: '#0f766e' },
+  { id: 'celadon-ink', label: '青瓷·墨（默认）', swatch: '#0f766e' },
   { id: 'ultramarine-brass', label: '群青·铜', swatch: '#a87c42' },
   { id: 'indigo-mist', label: '靛·雾', swatch: '#6e9ca0' },
 ];

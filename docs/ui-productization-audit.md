@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-718: 默认身份面可见性（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S5/P1-3 · A0 裁决「开干」的默认态落地，机械断言 dev Electron/9223 边界内 10/10，观感零代签）
+
+- **范围**：默认 accent `teal → celadon-ink`（A0 裁决 B 青瓷·墨，ruling.json 现读落档名）；默认态 `data-accent`+`data-surface` 双属性在场（宣纸/墨骨架 + 青瓷工作态 accent 默认可见）；welcome 问候区身份 token 组件面消费（问候字 `--petri-ink-base` 宣纸墨字 + `::after` 朱砂落印点 `--petri-accent-vermilion`/`--petri-radius-seal`，点睛 <5%）；旧配置迁移=显式保存过偏好的用户保留（存 teal 得 teal，非法值才回落默认）。
+- **机械证据**：HK-01 红 4/2→绿（defaultIdentity.test.ts 6 tests + 邻域 26/26）；token 契约 36/36；tsc 0；ui-a11y 0 违规；css-modules 重锚（watermark 两 plain CSS 漏登记债，13 白名单）；实机 flow `s5-default-identity` **10/10 allPass**（celadon-ink 默认档/问候字 rgb(23,58,56)/落印点 rgb(181,72,47)/--petri-accent=#0f766e/server 已存偏好保留 refill 活证）+ 截图 `acceptance/r2-remediation/s5/live/welcome-default-identity.png`。
+- **诚实边界**：纯默认路径（无任何存储）由单测承担（jsdom）；实机实例后端持有用户真实 user-prefs（celadon-ink），零触碰不写服务端，迁移保留语义由 refill 活证+单测双证。**观感 in_progress 零代签**（审美维度无 codified 偏好覆盖）；顶部黄条=dev 调试提示非产品 UI。
+
 ## UI-717: 身份色板 token 化（2026-11-20 **verified**；UI 轨，A0 裁决「行」后 A1–A3+V1+V1-U+V5+B 落地，A4 round2 静态面 + round3 交互面 + **A4 四档整体观感**偏好预审闭环签字·dev Electron/9223 离屏边界内）
 
 - **用户裁决原话**：「开干」（=A0 单一建议「行」：B 青瓷·墨工作态主 accent + A 宣纸·朱砂品牌落印点睛 <5%）。

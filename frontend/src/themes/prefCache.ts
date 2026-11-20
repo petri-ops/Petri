@@ -91,7 +91,12 @@ export function readCachedFontScale(): number {
   return 1;
 }
 
-/** 读取强调色缓存（非法值回落 teal）。 */
+/**
+ * 读取强调色缓存（非法/无存储值回落 A0 裁决默认档）。
+ * S5/P1-3（R2 清偿批）：默认档 teal → celadon-ink（A0 裁决「B 青瓷·墨」工作态主 accent，
+ * 裁决真源 = acceptance/a0-identity-translation/ruling.json）——身份面默认可见；
+ * 显式保存过偏好的用户不受影响（存什么读什么，非法值才回落）。
+ */
 export function readCachedAccent(): AccentId {
   try {
     const saved = localStorage.getItem(ACCENT_STORAGE_KEY);
@@ -99,7 +104,7 @@ export function readCachedAccent(): AccentId {
   } catch {
     /* storage unavailable */
   }
-  return 'teal';
+  return 'celadon-ink';
 }
 
 /** 读取动效模式缓存（非法/不可用 ⇒ system，零行为变化）。 */

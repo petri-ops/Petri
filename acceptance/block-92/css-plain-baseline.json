@@ -11,6 +11,8 @@
     "frontend/src/components/ui/Lightbox.css",
     "frontend/src/components/ui/code-highlight.css",
     "frontend/src/styles/custom.css",
-    "frontend/src/styles/global.css"
+    "frontend/src/styles/global.css",
+    "frontend/src/styles/watermark-ai.css",
+    "frontend/src/styles/watermark.css"
   ]
 }
