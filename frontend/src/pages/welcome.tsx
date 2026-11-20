@@ -378,6 +378,9 @@ export default function Welcome(): React.ReactElement {
 
   return (
     <div className={styles.welcome} aria-label="欢迎页">
+      {/* 国风背景水印：月洞门弧 + 落印方，计白当黑，极淡且不参与交互/无障碍树。 */}
+      <div className="petri-watermark petri-watermark--moon-gate" aria-hidden="true" />
+      <div className="petri-watermark petri-watermark--seal" aria-hidden="true" />
       {/* UI-424 — 顶部「← 返回」按钮退役（用户裁决「左上角的返回不需要了」）：
           落地页语义下「返回」概念别扭，且标题栏 bare 化后页面干净优先；
           历史后退（Alt+←/鼠标侧键）仍可用，选项目/打开文件夹即离开本页。 */}

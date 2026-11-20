@@ -1,0 +1,471 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/styles/CulturalWatermark.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 6[2mms[22m[39m
+   [31m❯[39m 国风背景水印（计白当黑） [2m(6)[22m
+[31m     [31m×[31m watermark stylesheet exists with four archetype patterns[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m patterns are mask-image data-URI SVG (no hardcoded color in URI)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m tint derives from ink tokens at ≤4% (计白当黑, theme-adaptive)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m watermark is non-interactive and never writes a raw z-index[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m bound to root containers (welcome / workspace) without DOM change[39m[32m 1[2mms[22m[39m
+     [32m✓[39m no new dependency / no static-to-visual sign-off[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/styles/CulturalWatermark.test.ts[2m > [22m国风背景水印（计白当黑）[2m > [22mwatermark stylesheet exists with four archetype patterns
+[31m[1mAssertionError[22m: watermark.css missing: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m src/styles/CulturalWatermark.test.ts:[2m16:80[22m[39m
+    [90m 14|[39m describe('国风背景水印（计白当黑）', () => {
+    [90m 15|[39m   it('watermark stylesheet exists with four archetype patterns', () =>…
+    [90m 16|[39m     expect(fs.existsSync(path.join(ROOT, WATERMARK)), 'watermark.css m…
+    [90m   |[39m                                                                                [31m^[39m
+    [90m 17|[39m     const css = read(WATERMARK);
+    [90m 18|[39m     for (const [name, re] of [
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/CulturalWatermark.test.ts[2m > [22m国风背景水印（计白当黑）[2m > [22mpatterns are mask-image data-URI SVG (no hardcoded color in URI)
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/styles/watermark.css'[39m
+[36m [2m❯[22m read src/styles/CulturalWatermark.test.ts:[2m10:34[22m[39m
+    [90m  8|[39m
+    [90m  9|[39m const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url))…
+    [90m 10|[39m const read = (rel: string) => fs.readFileSync(path.join(ROOT, rel), 'u…
+    [90m   |[39m                                  [31m^[39m
+    [90m 11|[39m const WATERMARK = 'frontend/src/styles/watermark.css';
+    [90m 12|[39m const GLOBAL = 'frontend/src/styles/global.css';
+[90m [2m❯[22m src/styles/CulturalWatermark.test.ts:[2m29:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/CulturalWatermark.test.ts[2m > [22m国风背景水印（计白当黑）[2m > [22mtint derives from ink tokens at ≤4% (计白当黑, theme-adaptive)
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/styles/watermark.css'[39m
+[36m [2m❯[22m read src/styles/CulturalWatermark.test.ts:[2m10:34[22m[39m
+    [90m  8|[39m
+    [90m  9|[39m const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url))…
+    [90m 10|[39m const read = (rel: string) => fs.readFileSync(path.join(ROOT, rel), 'u…
+    [90m   |[39m                                  [31m^[39m
+    [90m 11|[39m const WATERMARK = 'frontend/src/styles/watermark.css';
+    [90m 12|[39m const GLOBAL = 'frontend/src/styles/global.css';
+[90m [2m❯[22m src/styles/CulturalWatermark.test.ts:[2m40:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/CulturalWatermark.test.ts[2m > [22m国风背景水印（计白当黑）[2m > [22mwatermark is non-interactive and never writes a raw z-index
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/styles/watermark.css'[39m
+[36m [2m❯[22m read src/styles/CulturalWatermark.test.ts:[2m10:34[22m[39m
+    [90m  8|[39m
+    [90m  9|[39m const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url))…
+    [90m 10|[39m const read = (rel: string) => fs.readFileSync(path.join(ROOT, rel), 'u…
+    [90m   |[39m                                  [31m^[39m
+    [90m 11|[39m const WATERMARK = 'frontend/src/styles/watermark.css';
+    [90m 12|[39m const GLOBAL = 'frontend/src/styles/global.css';
+[90m [2m❯[22m src/styles/CulturalWatermark.test.ts:[2m46:17[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/CulturalWatermark.test.ts[2m > [22m国风背景水印（计白当黑）[2m > [22mbound to root containers (welcome / workspace) without DOM change
+[31m[1mAssertionError[22m: expected '/* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */\…' to match /\.welcome::before/[39m
+
+[32m- Expected:[39m
+/\.welcome::before/
+
+[31m+ Received:[39m
+"/* BLOCK-80 — 欢迎页（ZCode 形态、本项目内容） */
+
+.welcome {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: var(--petri-space-8) var(--petri-space-6);
+  overflow-y: auto;
+}
+
+.welcomeInner {
+  width: min(720px, 94%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.greeting {
+  margin: 0;
+  font-size: var(--petri-font-size-2xl);
+  font-weight: 700;
+  /* A3 东方排版：标题宽字距承载竖排标题的重量（横排转译，不引新字族/依赖）。 */
+  letter-spacing: 0.04em;
+  color: var(--petri-text);
+  text-align: center;
+}
+
+.welcomeSub {
+  margin: -10px 0 6px;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  /* A3：英文/技术标签作横排小字注脚，微量字距与标题同族。 */
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.composerCard {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* UI-341 加映 — 用户裁决继续弱化包裹感：外壳全去（背景/投影/圆角/内边距），
+     composer 自身卡片成为唯一视觉框，项目切换浮在页面上 */
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.pickerRow,
+.composerTopRow {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-4);
+  flex-wrap: wrap;
+}
+
+.pickerLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  color: var(--petri-text-secondary);
+}
+
+.projectSelect {
+  max-width: 260px;
+  padding: var(--petri-space-1) var(--petri-space-2);
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+}
+
+.pickerEmpty {
+  color: var(--petri-text-secondary);
+}
+
+.branchChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-1);
+  padding: 3px var(--petri-space-3);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
+}
+
+.manageLink {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.manageLink:hover { background: var(--petri-hover);
+    color: var(--petri-text);
+}
+
+.errorText {
+  color: var(--petri-danger, #c0392b);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.chip {
+  padding: var(--petri-space-2) 14px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-pill);
+  background: var(--petri-bg-surface);
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-sm);
+  cursor: pointer;
+  transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);
+}
+
+.chip:hover { color: var(--petri-text);
+  border-color: var(--petri-accent);
+}
+
+/* UI-337 — ZCode 式项目下拉面板（搜索 + 清单✓ + 打开文件夹 + 远程连接） */
+
+.pickerWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.pickerTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  padding: 5px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-hover);
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pickerTrigger:hover {
+  border-color: var(--petri-border-color, var(--petri-text-secondary));
+}
+
+.pickerOverlay {
+  position: fixed;
+  inset: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+  z-index: 30;
+}
+
+.projectPanel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 340px;
+  max-width: 80vw;
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg-surface);
+  border: 1px solid var(--petri-border-card);
+  box-shadow: var(--petri-shadow-float);
+  z-index: 31;
+  overflow: hidden;
+}
+
+.projectSearch {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px var(--petri-space-4);
+  border: none;
+  border-bottom: 1px solid var(--petri-divider);
+  background: transparent;
+  color: var(--petri-text);
+  font: inherit;
+  font-size: var(--petri-font-size-body);
+  outline: none;
+}
+
+.projectList {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: var(--petri-space-1);
+}
+
+.projectRow {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+  width: 100%;
+  padding: var(--petri-space-3) 10px;
+  border: none;
+  border-radius: var(--petri-radius-lg);
+  background: transparent;
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.projectRow:hover {
+  background: var(--petri-hover);
+}
+
+.projectRowActive {
+  background: var(--petri-accent-bg, var(--petri-hover));
+}
+
+.projectRowName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectRowTag {
+  font-size: var(--petri-font-size-xs);
+  padding: 1px 5px;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-hover);
+  color: var(--petri-text-secondary);
+}
+
+.projectRowEmpty {
+  padding: 10px var(--petri-space-4);
+  color: var(--petri-text-secondary);
+}
+
+.panelActions {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--petri-divider);
+  padding: var(--petri-space-1);
+}
+
+.panelAction {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--petri-radius-lg);
+  background: transparent;
+  color: var(--petri-text);
+  font-size: var(--petri-font-size-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.panelAction:hover {
+  background: var(--petri-hover);
+}
+
+.actionForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--petri-space-3);
+  padding: var(--petri-space-2) var(--petri-space-1);
+}
+
+.actionInput {
+  padding: 7px 9px;
+  border: 1px solid var(--petri-border-card);
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-bg);
+  color: var(--petri-text);
+  font: inherit;
+  font-size: var(--petri-font-size-body);
+  outline: none;
+}
+
+.actionPath {
+  color: var(--petri-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionBtnRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--petri-space-3);
+}
+
+.actionBack {
+  border: none;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  cursor: pointer;
+}
+
+.actionPrimary {
+  padding: var(--petri-space-2) 14px;
+  border: none;
+  border-radius: var(--petri-radius-lg);
+  background: var(--petri-accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionPrimary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.actionHint {
+  font-size: var(--petri-font-size-sm);
+  color: var(--petri-text-secondary);
+}
+
+/* UI-424 — 顶部「← 返回」按钮退役（用户裁决），exitRow/exitBtn 样式随组件删除
+（普通 CSS 死类无门禁抓，删组件必同步删样式——a4663652 家法） */
+
+/* UI-338 加映 — SSH「先连接再补全」 */
+.sshAliasRow {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-3);
+}
+
+.sshAliasRow .actionInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.dirSuggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.dirSuggestion {
+  border: none;
+  background: transparent;
+  color: var(--petri-text-secondary);
+  text-align: left;
+  padding: 5px var(--petri-space-3);
+  border-radius: var(--petri-radius-md);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dirSuggestion:hover {
+  background: var(--petri-hover); color: var(--petri-text);
+}
+
+/* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框
+   容器提供，挂载层自身无壳、高度随 composer 自适应 */
+.chatMount {
+  width: 100%;
+}
+"
+
+[36m [2m❯[22m src/styles/CulturalWatermark.test.ts:[2m55:21[22m[39m
+    [90m 53|[39m     const welcome = read('frontend/src/pages/welcome.module.css');
+    [90m 54|[39m     const workspace = read('frontend/src/pages/project-workspace.modul…
+    [90m 55|[39m     expect(welcome).toMatch(/\.welcome::before/);
+    [90m   |[39m                     [31m^[39m
+    [90m 56|[39m     expect(workspace).toMatch(/\.workspaceRoot::before/);
+    [90m 57|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 20:11:21
+[2m   Duration [22m 325ms[2m (environment 85%, transform 7%, tests 3%, import 3%, worker 1%)[22m
+

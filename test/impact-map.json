@@ -8798,6 +8798,27 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "cultural-watermark",
+      "note": "国风简约背景水印：月洞门/卵石/落印/开环四原型 mask data-URI + color-mix(ink 3%,bg) 主题自适应，pointer-events:none+aria-hidden+零裸z；HK01绿6/6+邻域42tests+tsc0+a11y绿+实机6/6(welcome四纹样截图；工作区测试userData无项目如实标不可达)，审美不代签。证据 acceptance/cultural-watermark/**。",
+      "patterns": [
+        "frontend/src/styles/CulturalWatermark.test.ts",
+        "frontend/src/styles/watermark.css",
+        "frontend/src/main.tsx",
+        "frontend/src/pages/welcome.tsx",
+        "frontend/src/pages/project-workspace.tsx",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark.cjs",
+        "acceptance/cultural-watermark/**"
+      ],
+      "tests": [
+        "frontend/src/styles/CulturalWatermark.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "constraint"
+    },
+    {
       "id": "form-grammar",
       "note": "艺术性造型升级：形态语义层级 seal3/icon10/card14 三档 token + 契约白名单，图标座/hero/徽章/mcpCard 换形，空徽章圆印记，SVG 加 seal-square 方印原子；HK01绿7/7+邻域65tests+tsc0+c53+实机7/7；审美不代签(in_progress)。证据 acceptance/form-grammar/**。",
       "patterns": [

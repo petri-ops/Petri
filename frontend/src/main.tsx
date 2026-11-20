@@ -8,6 +8,7 @@ import App from './App';
 import { ThemeProvider } from './themes/ThemeProvider';
 import { ToastProvider } from './components/common/ToastProvider';
 import './styles/global.css';
+import './styles/watermark.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

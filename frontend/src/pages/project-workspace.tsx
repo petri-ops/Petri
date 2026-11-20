@@ -1063,6 +1063,9 @@ export function ProjectWorkspace(): React.ReactElement {
   };
   return (
     <div className={`${styles.workspaceRoot} ${compactLayout ? styles.workspaceRootCompact : ''}`}>
+      {/* 国风背景水印：卵石柔 + 开环缺，计白当黑，极淡且不参与交互/无障碍树。 */}
+      <div className="petri-watermark petri-watermark--pebble" aria-hidden="true" />
+      <div className="petri-watermark petri-watermark--open-ring" aria-hidden="true" />
       <ProjectionStreamBanner phase={invalidationPhase} />
       {/* BLOCK-62 P1b — compact（≤960px）列变浮层、无「列宽」语义 → fixed 整条
           回归（ctx 注入的列内 header 已同步禁用）；regular 顶栏由三个列内

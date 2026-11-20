@@ -1,0 +1,62 @@
+/* ============================================================
+   国风简约背景水印 — 计白当黑（2026-11-20）
+   四原型：月洞门弧 / 卵石柔 / 落印方 / 开环缺。
+   纪律：mask-image(data-URI SVG) + color-mix(ink-base 3%, bg-canvas) 主题自适应；
+   URI 内零字面色；pointer-events:none；不写裸 z-index；铺根容器伪元素、DOM 零改动。
+   ============================================================ */
+
+.petri-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--petri-ink-base) 3%, var(--petri-bg-canvas));
+  opacity: 0.9;
+}
+
+/* 月洞门：建筑取形——一道开放的圆拱，留白处见天光。 */
+.petri-watermark--moon-gate {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath d='M120 600 A180 180 0 0 1 480 600' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M160 600 A140 140 0 0 1 440 600' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath d='M120 600 A180 180 0 0 1 480 600' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M160 600 A140 140 0 0 1 440 600' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-size: 620px 620px;
+  mask-size: 620px 620px;
+  -webkit-mask-position: 78% 82%;
+  mask-position: 78% 82%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 卵石：雕塑取形——两三枚错落的柔椭，水边静物。 */
+.petri-watermark--pebble {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='150' cy='260' rx='86' ry='58' fill='none' stroke='black' stroke-width='2' transform='rotate(-18 150 260)'/%3E%3Cellipse cx='248' cy='300' rx='58' ry='40' fill='none' stroke='black' stroke-width='1.5' transform='rotate(12 248 300)'/%3E%3Cellipse cx='96' cy='330' rx='34' ry='22' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='150' cy='260' rx='86' ry='58' fill='none' stroke='black' stroke-width='2' transform='rotate(-18 150 260)'/%3E%3Cellipse cx='248' cy='300' rx='58' ry='40' fill='none' stroke='black' stroke-width='1.5' transform='rotate(12 248 300)'/%3E%3Cellipse cx='96' cy='330' rx='34' ry='22' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 420px;
+  mask-size: 420px 420px;
+  -webkit-mask-position: 6% 86%;
+  mask-position: 6% 86%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 落印：绘画取形——一枚近方小印，点睛处方有郑重语义。 */
+.petri-watermark--seal {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect x='96' y='150' width='48' height='48' rx='3' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='96' y1='166' x2='110' y2='166' stroke='black' stroke-width='2'/%3E%3Cline x1='130' y1='182' x2='144' y2='182' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect x='96' y='150' width='48' height='48' rx='3' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='96' y1='166' x2='110' y2='166' stroke='black' stroke-width='2'/%3E%3Cline x1='130' y1='182' x2='144' y2='182' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  -webkit-mask-size: 260px 260px;
+  mask-size: 260px 260px;
+  -webkit-mask-position: 92% 12%;
+  mask-position: 92% 12%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 开环：格物 mark——缺口朝下，不圆满、留余地。 */
+.petri-watermark--open-ring {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath d='M120 300 A110 110 0 1 1 280 300' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='120' y1='300' x2='150' y2='300' stroke='black' stroke-width='2'/%3E%3Cline x1='250' y1='300' x2='280' y2='300' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath d='M120 300 A110 110 0 1 1 280 300' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='120' y1='300' x2='150' y2='300' stroke='black' stroke-width='2'/%3E%3Cline x1='250' y1='300' x2='280' y2='300' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  -webkit-mask-size: 420px 420px;
+  mask-size: 420px 420px;
+  -webkit-mask-position: 88% 60%;
+  mask-position: 88% 60%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
