@@ -13,6 +13,18 @@
   opacity: 0.9;
 }
 
+/* 全局固定层：一处挂载覆盖所有路由，fixed 铺视口、永远在最底、不挡交互。
+   不写 z-index（避免裸 z 棘轮）；DOM 置于各页内容之后，页面根有背景时水印在留白处仍可见。 */
+.petri-watermark-global {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.petri-watermark-global .petri-watermark {
+  position: absolute;
+}
+
 /* 月洞门：建筑取形——一道开放的圆拱，留白处见天光。 */
 .petri-watermark--moon-gate {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath d='M120 600 A180 180 0 0 1 480 600' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M160 600 A140 140 0 0 1 440 600' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");

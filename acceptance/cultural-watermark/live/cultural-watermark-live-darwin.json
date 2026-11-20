@@ -1,28 +1,23 @@
 {
   "name": "cultural-watermark",
   "platform": "darwin",
-  "startedAt": "2026-11-20T12:17:14.561Z",
-  "finishedAt": "2026-11-20T12:17:18.255Z",
+  "startedAt": "2026-11-20T12:38:40.338Z",
+  "finishedAt": "2026-11-20T12:38:47.120Z",
   "assertions": [
     {
-      "name": "welcome_watermarks_present",
+      "name": "welcome_global_mounted",
       "pass": true,
-      "detail": "[{\"cls\":\"petri-watermark petri-watermark--moon-gate\",\"pe\":\"none\",\"mask\":\"url(\\\"data:image/svg+xml,%3Csvg\",\"bg\":\"color(srgb 0.893294 0.910392 0.928078)\",\"op\":\"0.9\"},{\"cls\":\"petri-watermark petri-watermark--seal\",\"pe\":\"none\",\"mask\":\"url(\\\"data:image/svg+xml,%3Csvg\",\"bg\":\"color(srgb 0.893294 0.910392 0.928078)\",\"op\":\"0.9\"}]"
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"count\":4,\"cls\":[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"],\"masks\":[\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\"]}"
     },
     {
-      "name": "welcome_expected_archetype",
+      "name": "welcome_four_archetypes",
       "pass": true,
-      "detail": "[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\"]"
+      "detail": "[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"]"
     },
     {
-      "name": "welcome_non_interactive",
+      "name": "welcome_fixed_noninteractive",
       "pass": true,
-      "detail": "[\"none\",\"none\"]"
-    },
-    {
-      "name": "welcome_has_mask",
-      "pass": true,
-      "detail": "[\"url(\\\"data:image/svg+xml,%3Csvg\",\"url(\\\"data:image/svg+xml,%3Csvg\"]"
+      "detail": "pos=fixed pe=none"
     },
     {
       "name": "shot_welcome",
@@ -30,9 +25,64 @@
       "detail": ""
     },
     {
-      "name": "workspace_live_unavailable",
+      "name": "home_global_mounted",
       "pass": true,
-      "detail": "测试 userData 无项目：工作区实机面不可达，静态接线由 HK-01 覆盖，未伪造截图"
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"count\":4,\"cls\":[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"],\"masks\":[\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\"]}"
+    },
+    {
+      "name": "home_four_archetypes",
+      "pass": true,
+      "detail": "[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"]"
+    },
+    {
+      "name": "home_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_home",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "extensions_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"count\":4,\"cls\":[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"],\"masks\":[\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\"]}"
+    },
+    {
+      "name": "extensions_four_archetypes",
+      "pass": true,
+      "detail": "[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"]"
+    },
+    {
+      "name": "extensions_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "settings_global_mounted",
+      "pass": true,
+      "detail": "{\"global\":true,\"pos\":\"fixed\",\"pe\":\"none\",\"count\":4,\"cls\":[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"],\"masks\":[\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\",\"url(\\\"data:image/sv\"]}"
+    },
+    {
+      "name": "settings_four_archetypes",
+      "pass": true,
+      "detail": "[\"petri-watermark petri-watermark--moon-gate\",\"petri-watermark petri-watermark--seal\",\"petri-watermark petri-watermark--pebble\",\"petri-watermark petri-watermark--open-ring\"]"
+    },
+    {
+      "name": "settings_fixed_noninteractive",
+      "pass": true,
+      "detail": "pos=fixed pe=none"
+    },
+    {
+      "name": "shot_settings",
+      "pass": true,
+      "detail": ""
     }
   ],
   "allPass": true

@@ -9,6 +9,7 @@ import { ThemeProvider } from './themes/ThemeProvider';
 import { ToastProvider } from './components/common/ToastProvider';
 import './styles/global.css';
 import './styles/watermark.css';
+import { GlobalWatermark } from './components/common/GlobalWatermark';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ToastProvider>
         <BrowserRouter>
           <App />
+          <GlobalWatermark />
         </BrowserRouter>
       </ToastProvider>
     </ThemeProvider>

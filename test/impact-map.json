@@ -8799,13 +8799,12 @@
     },
     {
       "id": "cultural-watermark",
-      "note": "国风简约背景水印：月洞门/卵石/落印/开环四原型 mask data-URI + color-mix(ink 3%,bg) 主题自适应，pointer-events:none+aria-hidden+零裸z；HK01绿6/6+邻域42tests+tsc0+a11y绿+实机6/6(welcome四纹样截图；工作区测试userData无项目如实标不可达)，审美不代签。证据 acceptance/cultural-watermark/**。",
+      "note": "国风水印全局层（用户反馈'只在欢迎页看到'后重构）：GlobalWatermark main.tsx 挂一次、fixed四角覆盖所有路由，移除逐页div；四原型mask+ink3%主题自适应+pointer-events:none+aria-hidden+零裸z；HK01绿6/6+邻域PASS+tsc0+a11y绿+实机16/16(四路由四纹样全可见截图)；审美不代签。证据 acceptance/cultural-watermark/**。",
       "patterns": [
         "frontend/src/styles/CulturalWatermark.test.ts",
         "frontend/src/styles/watermark.css",
         "frontend/src/main.tsx",
-        "frontend/src/pages/welcome.tsx",
-        "frontend/src/pages/project-workspace.tsx",
+        "frontend/src/components/common/GlobalWatermark.tsx",
         ".agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark.cjs",
         "acceptance/cultural-watermark/**"
       ],

@@ -49,13 +49,17 @@ describe('国风背景水印（计白当黑）', () => {
     expect(local).not.toMatch(/z-index:\s*\d/);
   });
 
-  it('bound to root containers via aria-hidden watermark element (zero interaction)', () => {
-    const welcome = read('frontend/src/pages/welcome.tsx');
-    const workspace = read('frontend/src/pages/project-workspace.tsx');
-    expect(welcome).toMatch(/petri-watermark--moon-gate/);
-    expect(welcome).toMatch(/aria-hidden/);
-    expect(workspace).toMatch(/petri-watermark--pebble|petri-watermark--open-ring/);
-    expect(workspace).toMatch(/aria-hidden/);
+  it('mounted once globally (all routes) with all four archetypes, aria-hidden', () => {
+    const comp = read('frontend/src/components/common/GlobalWatermark.tsx');
+    for (const cls of ['moon-gate', 'seal', 'pebble', 'open-ring']) {
+      expect(comp, `${cls} missing in global watermark`).toContain(`petri-watermark--${cls}`);
+    }
+    expect(comp).toMatch(/aria-hidden/);
+    const main = read('frontend/src/main.tsx');
+    expect(main).toMatch(/<GlobalWatermark\s*\/>/);
+    // 逐页重复挂载已移除（单源）。
+    expect(read('frontend/src/pages/welcome.tsx')).not.toMatch(/petri-watermark--/);
+    expect(read('frontend/src/pages/project-workspace.tsx')).not.toMatch(/petri-watermark--/);
   });
 
   it('no new dependency / no static-to-visual sign-off', () => {
