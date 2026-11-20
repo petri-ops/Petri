@@ -92,7 +92,7 @@
 }
 
 .statusBadge[data-tone='success'] {
-  color: var(--petri-success);
+  color: var(--petri-status-success-fg);
 }
 
 .statusBadge[data-tone='warning'] {

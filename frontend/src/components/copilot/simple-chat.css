@@ -4584,7 +4584,7 @@
 }
 
 .sc-tool-qoder-glyph-success {
-  color: var(--petri-success);
+  color: var(--petri-status-success-fg);
 }
 
 .sc-tool-qoder-glyph-error,
@@ -4649,7 +4649,7 @@
 }
 
 .sc-tool-qoder-diffstat-add {
-  color: var(--petri-success);
+  color: var(--petri-status-success-fg);
 }
 
 .sc-tool-qoder-diffstat-del {
@@ -4703,7 +4703,7 @@
 }
 
 .sc-tool-qoder-row .sc-tool-row-copy.is-copied {
-  color: var(--petri-success);
+  color: var(--petri-status-success-fg);
 }
 
 /* UI-437 v5.12 — 溢出逃逸根治：min-width:0 必须贯穿整条 grid/flex 祖先链。
@@ -4814,8 +4814,8 @@
 }
 
 .sc-tool-resultdata-copy.is-copied {
-  color: var(--petri-success);
-  border-color: var(--petri-success);
+  color: var(--petri-status-success-fg);
+  border-color: var(--petri-status-success);
 }
 
 /* BLOCK-150 加映（UI-477）— 用户消息图片附件内联渲染：悬挂式小图不占正文主区 */

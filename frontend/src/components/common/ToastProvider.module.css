@@ -27,7 +27,7 @@
 }
 
 .toast[data-variant='success'] {
-  border-left-color: var(--petri-success);
+  border-left-color: var(--petri-status-success);
 }
 .toast[data-variant='info'] {
   border-left-color: var(--petri-info);
@@ -133,7 +133,7 @@
 }
 
 .historyItem[data-variant='success'] {
-  border-left-color: var(--petri-success);
+  border-left-color: var(--petri-status-success);
 }
 .historyItem[data-variant='warning'] {
   border-left-color: var(--petri-warning-text);

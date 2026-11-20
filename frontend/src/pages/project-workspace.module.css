@@ -1298,7 +1298,7 @@
   border: 1px solid transparent;
 }
 .resultsLibraryBadge[data-status='done'] {
-  color: var(--petri-success, #2e7d32);
+  color: var(--petri-status-success-fg);
   background: rgba(46, 125, 50, 0.12);
 }
 .resultsLibraryBadge[data-status='running'] {

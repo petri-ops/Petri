@@ -147,7 +147,6 @@
      导致 theme-token-contract 测试失败、且引用处回退为无效值。
      取值优先复用既有语义令牌（surface 类用 var() 引用，明暗双主题自动适配），
      颜色类对齐组件原 fallback，保证零视觉回归。 */
-  --petri-success: #2e7d32;
   --petri-info: #1565c0;
   --petri-bg-hover: var(--petri-hover);
   --petri-surface-raised: var(--petri-bg-elevated);
@@ -232,7 +231,6 @@ html[data-theme='dark'],
   --petri-mint: rgba(67, 209, 174, 0.14);
   --petri-mint-bright: #8ff0d6;
   /* BLOCK-103 — 状态徽章成功色暗色对（亮色 #2e7d32 定义于 :root 补齐令牌组） */
-  --petri-success: #7fd8a4;
 
   /* ===== Petri semantic surface tokens (dark mode) =====
      暗色下：canvas 最深、surface 抬高一档、subtle 更亮一档；

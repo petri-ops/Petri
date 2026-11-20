@@ -92,7 +92,7 @@
   font-size: var(--petri-font-size-body);
 }
 
-.badge[data-tone='valid'] { color: var(--petri-success, var(--petri-text)); }
+.badge[data-tone='valid'] { color: var(--petri-status-success-fg); }
 .badge[data-tone='blocked'] { color: var(--petri-danger, var(--petri-text)); }
 .badge[data-tone='degraded'] { color: var(--petri-warning, var(--petri-text)); }
 

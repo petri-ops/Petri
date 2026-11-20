@@ -40,8 +40,8 @@
 }
 
 .badgeOk {
-  border-color: var(--petri-success);
-  color: var(--petri-success);
+  border-color: var(--petri-status-success);
+  color: var(--petri-status-success-fg);
 }
 
 .badgeWarn {

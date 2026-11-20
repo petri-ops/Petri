@@ -6,3 +6,4 @@ quality:types	0	acceptance/r2-remediation/gates/baseline-quality-types.log
 gate:code-size	1	acceptance/r2-remediation/gates/baseline-gate-code-size.log
 gate:user-assets	1	acceptance/r2-remediation/gates/baseline-gate-user-assets.log
 gate:silent-catch	1	acceptance/r2-remediation/gates/baseline-gate-silent-catch.log
+s6a-status-color	status-color-single-source+styles62+roster/knowledge14+block109-6+tsc0+a11y PASS	0	gates/s6a-tests.log(local)
