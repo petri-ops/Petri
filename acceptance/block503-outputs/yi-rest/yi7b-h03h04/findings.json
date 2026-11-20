@@ -1,0 +1,195 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "legs": [
+    {
+      "id": "h03_dark_hover_convergence",
+      "pass": true,
+      "detail": {
+        "states": [
+          {
+            "kind": "iconButton",
+            "sel": "[aria-label=\"搜索会话标题\"]",
+            "before": {
+              "bg": "rgba(0, 0, 0, 0)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "after": {
+              "bgHover": "rgba(230, 237, 243, 0.07)",
+              "borderHover": "rgb(230, 237, 243)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "hoverChanged": true,
+            "file": "h03-dark-hover-iconButton.png"
+          },
+          {
+            "kind": "textButton",
+            "sel": ".sc-model-btn",
+            "before": {
+              "bg": "rgba(0, 0, 0, 0)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "after": {
+              "bgHover": "rgba(230, 237, 243, 0.06)",
+              "borderHover": "rgba(0, 0, 0, 0)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "hoverChanged": true,
+            "file": "h03-dark-hover-textButton.png"
+          },
+          {
+            "kind": "input",
+            "sel": "textarea",
+            "before": {
+              "bg": "rgba(0, 0, 0, 0)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "after": {
+              "bgHover": "rgba(0, 0, 0, 0)",
+              "borderHover": "rgb(230, 237, 243)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "hoverChanged": false,
+            "file": "h03-dark-hover-input.png"
+          },
+          {
+            "kind": "listItem",
+            "sel": "[class*=\"_convItem_\"]",
+            "before": {
+              "bg": "rgba(96, 165, 250, 0.14)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "after": {
+              "bgHover": "rgba(230, 237, 243, 0.07)",
+              "borderHover": "rgb(96, 165, 250)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "hoverChanged": true,
+            "file": "h03-dark-hover-listItem.png"
+          },
+          {
+            "kind": "navItem",
+            "sel": "[class*=\"_leftQuickAction_\"]",
+            "before": {
+              "bg": "rgba(0, 0, 0, 0)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "after": {
+              "bgHover": "rgba(230, 237, 243, 0.07)",
+              "borderHover": "rgb(230, 237, 243)",
+              "hoverVar": "rgba(230, 237, 243, 0.07)"
+            },
+            "hoverChanged": true,
+            "file": "h03-dark-hover-navItem.png"
+          }
+        ],
+        "hoverVarsInPlay": [
+          "rgba(230, 237, 243, 0.07)"
+        ],
+        "distinctHoverBgs": [
+          "rgba(230, 237, 243, 0.07)",
+          "rgba(230, 237, 243, 0.06)"
+        ],
+        "criterion": "5 类悬停同一提亮档（--petri-hover 单一档位）；无灰 hover/层级倒挂观感归用户",
+        "theme": "dark（live 属性切换，已复原）"
+      }
+    },
+    {
+      "id": "h04_selected_token_matrix",
+      "pass": true,
+      "detail": {
+        "matrix": [
+          {
+            "accent": "teal",
+            "theme": "light",
+            "outlineColor": "rgba(13, 148, 136, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-teal-light.png"
+          },
+          {
+            "accent": "blue",
+            "theme": "light",
+            "outlineColor": "rgba(37, 99, 235, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-blue-light.png"
+          },
+          {
+            "accent": "violet",
+            "theme": "light",
+            "outlineColor": "rgba(124, 58, 237, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-violet-light.png"
+          },
+          {
+            "accent": "rose",
+            "theme": "light",
+            "outlineColor": "rgba(225, 29, 72, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-rose-light.png"
+          },
+          {
+            "accent": "amber",
+            "theme": "light",
+            "outlineColor": "rgba(217, 119, 6, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-amber-light.png"
+          },
+          {
+            "accent": "teal",
+            "theme": "dark",
+            "outlineColor": "rgba(45, 212, 191, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-teal-dark.png"
+          },
+          {
+            "accent": "blue",
+            "theme": "dark",
+            "outlineColor": "rgba(96, 165, 250, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-blue-dark.png"
+          },
+          {
+            "accent": "violet",
+            "theme": "dark",
+            "outlineColor": "rgba(167, 139, 250, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-violet-dark.png"
+          },
+          {
+            "accent": "rose",
+            "theme": "dark",
+            "outlineColor": "rgba(251, 113, 133, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-rose-dark.png"
+          },
+          {
+            "accent": "amber",
+            "theme": "dark",
+            "outlineColor": "rgba(251, 191, 36, 0.4)",
+            "outlineWidth": "1.50084px",
+            "file": "h04-selected-amber-dark.png"
+          }
+        ],
+        "distinctOutlineColors": [
+          "rgba(13, 148, 136, 0.4)",
+          "rgba(37, 99, 235, 0.4)",
+          "rgba(124, 58, 237, 0.4)",
+          "rgba(225, 29, 72, 0.4)",
+          "rgba(217, 119, 6, 0.4)",
+          "rgba(45, 212, 191, 0.4)",
+          "rgba(96, 165, 250, 0.4)",
+          "rgba(167, 139, 250, 0.4)",
+          "rgba(251, 113, 133, 0.4)",
+          "rgba(251, 191, 36, 0.4)"
+        ],
+        "criterion": "选中态描边随 accent 且可辨识（专用 token --petri-selected-border；明暗成对派生）；无「选中=hover」混淆观感归用户",
+        "note": "路线写 4 主题色 × 明暗 8 态；现选面板 5 档 → 全量 10 态取材（漂移如实登记）",
+        "restore": "accent=blue / theme=light 已复原"
+      }
+    }
+  ],
+  "original": {
+    "dataTheme": "light",
+    "dataAccent": "blue",
+    "vw": 1937
+  }
+}

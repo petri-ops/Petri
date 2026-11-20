@@ -1,0 +1,5 @@
+[c53:closeout] UI 台账四槽状态漂移: {"slots":{"UI-706":{"inProgress":false,"pendingHumanEye":true,"verified":false},"UI-707":{"inProgress":true,"pendingHumanEye":true,"verified":false},"UI-709":{"inProgress":true,"pendingHumanEye":true,"verified":false},"UI-710":{"inProgress":false,"pendingHumanEye":false,"verified":false}},"allInProgress":false,"allPendingHumanEye":false,"noneVerified":true}
+exit=1
+--- check mode ---
+[c53:closeout] UI 台账四槽状态漂移: {"slots":{"UI-706":{"inProgress":false,"pendingHumanEye":true,"verified":false},"UI-707":{"inProgress":true,"pendingHumanEye":true,"verified":false},"UI-709":{"inProgress":true,"pendingHumanEye":true,"verified":false},"UI-710":{"inProgress":false,"pendingHumanEye":false,"verified":false}},"allInProgress":false,"allPendingHumanEye":false,"noneVerified":true}
+exit=1

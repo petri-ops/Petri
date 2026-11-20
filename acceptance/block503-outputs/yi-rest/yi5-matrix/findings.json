@@ -1,0 +1,250 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "cells": [
+    {
+      "id": "button:hover",
+      "pass": true,
+      "rect": {
+        "x": 175.04745483398438,
+        "y": 186.1278839111328,
+        "w": 23.99002456665039,
+        "h": 23.99002456665039
+      },
+      "def": {
+        "background-color": "rgba(0, 0, 0, 0)",
+        "border-color": "rgb(24, 24, 27)",
+        "color": "rgb(24, 24, 27)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_iconBase_10kpp_6 _iconBtn_jcrxc_141 "
+      },
+      "hover": {
+        "background-color": "rgb(244, 244, 245)",
+        "border-color": "rgb(24, 24, 27)",
+        "color": "rgb(24, 24, 27)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_iconBase_10kpp_6 _iconBtn_jcrxc_141 "
+      },
+      "sel": "[aria-label=\"搜索会话标题\"]",
+      "criterion": "§1 hover：单一 --petri-hover 档"
+    },
+    {
+      "id": "button:active",
+      "pass": true,
+      "pressedStyle": {
+        "background-color": "rgb(244, 244, 245)",
+        "border-color": "rgb(24, 24, 27)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_iconBase_10kpp_6 _iconBtn_jcrxc_141 "
+      },
+      "ariaPressedEvidence": {
+        "cls": "_projectTreeAddBtn_jcrxc_1000",
+        "ariaPressed": "false"
+      },
+      "sel": "[aria-label=\"搜索会话标题\"]",
+      "criterion": "§1 active/pressed：aria-pressed 或 data-state；按下态视觉",
+      "clickNote": "mouseDown+Up 会真实点击「会话搜索」钮——已补 Escape 关浮层"
+    },
+    {
+      "id": "button:focus-visible",
+      "pass": true,
+      "tabs": 67,
+      "focusVisible": true,
+      "style": {
+        "outline-width": "2.25126px",
+        "outline-style": "none",
+        "outline-color": "rgb(24, 24, 27)",
+        "box-shadow": "color(srgb 0.145098 0.388235 0.921569 / 0.1) 0px 0px 0px 2px",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "INPUT",
+        "__cls": "_treeRenameInput_jcrxc_1173"
+      },
+      "sel": "[aria-label=\"搜索会话标题\"]",
+      "criterion": "§1 focus-visible：键盘可见焦点（非 outline:none 裸删）"
+    },
+    {
+      "id": "input:hover",
+      "pass": false,
+      "def": {
+        "border-color": "rgb(24, 24, 27)",
+        "box-shadow": "none",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "TEXTAREA",
+        "__cls": "sc-input"
+      },
+      "hover": {
+        "border-color": "rgb(24, 24, 27)",
+        "box-shadow": "none",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "TEXTAREA",
+        "__cls": "sc-input"
+      },
+      "cssNote": "simple-chat.css 无 .sc-input:hover 规则（仅 :focus §2107）——元素级 hover 零差异为真实读数",
+      "sel": "textarea",
+      "criterion": "§1 hover：边框强调"
+    },
+    {
+      "id": "input:active",
+      "pass": true,
+      "focusBool": true,
+      "style": {
+        "outline-width": "2.25126px",
+        "outline-style": "none",
+        "outline-color": "rgb(24, 24, 27)",
+        "box-shadow": "none",
+        "border-color": "rgb(24, 24, 27)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "TEXTAREA",
+        "__cls": "sc-input"
+      },
+      "sel": "textarea",
+      "criterion": "§1 active/pressed（输入）：聚焦环"
+    },
+    {
+      "id": "input:focus-visible",
+      "pass": true,
+      "tabs": 60,
+      "focusVisible": true,
+      "style": {
+        "outline-width": "2.25126px",
+        "outline-style": "none",
+        "outline-color": "rgb(24, 24, 27)",
+        "box-shadow": "none",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "TEXTAREA",
+        "__cls": "sc-input"
+      },
+      "sel": "textarea",
+      "criterion": "§1 focus-visible：键盘可见焦点"
+    },
+    {
+      "id": "listItem:hover",
+      "pass": true,
+      "def": {
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(63, 63, 70)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "DIV",
+        "__cls": "_projectTreeRow_jcrxc_963 "
+      },
+      "hover": {
+        "background-color": "rgb(244, 244, 245)",
+        "color": "rgb(63, 63, 70)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "DIV",
+        "__cls": "_projectTreeRow_jcrxc_963 "
+      },
+      "rowInfo": {
+        "cls": "_projectTreeRow_jcrxc_963 ",
+        "role": null,
+        "tabindex": "-1"
+      },
+      "sel": "[class*=\"_projectTreeRow_\"]:not([class*=\"Act\"])",
+      "criterion": "§1 hover：提亮不跳布局"
+    },
+    {
+      "id": "listItem:active",
+      "pass": true,
+      "activeVariant": {
+        "cls": "_convItem_jcrxc_1045 _convItemActive_jcrxc_1063 ",
+        "role": null,
+        "ariaCurrent": null,
+        "dataState": null
+      },
+      "pressedStyle": {
+        "background-color": "rgb(244, 244, 245)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "LI",
+        "__cls": "_convItem_jcrxc_1045 _convItemActive_jcrxc_1063 "
+      },
+      "sel": "[class*=\"_convItemActive_\"]",
+      "criterion": "§1 active/pressed：按下态 / aria-current"
+    },
+    {
+      "id": "listItem:focus-visible",
+      "pass": true,
+      "tabs": 60,
+      "focusVisible": true,
+      "style": {
+        "outline-width": "0.750421px",
+        "outline-style": "auto",
+        "outline-color": "rgb(229, 151, 0)",
+        "box-shadow": "none",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "DIV",
+        "__cls": "_projectTreeRow_jcrxc_963 _projectTreeRowActive_jcrxc_978"
+      },
+      "sel": "[class*=\"_projectTreeRow_\"]",
+      "criterion": "§1 focus-visible：键盘可见焦点"
+    },
+    {
+      "id": "navItem:hover",
+      "pass": true,
+      "def": {
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(63, 63, 70)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_leftQuickAction_jcrxc_786 "
+      },
+      "hover": {
+        "background-color": "rgb(244, 244, 245)",
+        "color": "rgb(24, 24, 27)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_leftQuickAction_jcrxc_786 "
+      },
+      "sel": "[class*=\"_leftQuickAction_\"]",
+      "criterion": "§1 hover：提亮不跳布局"
+    },
+    {
+      "id": "navItem:active",
+      "pass": true,
+      "tabActive": {
+        "active": {
+          "cls": "_shelfTab_zk4gq_14 _shelfTabActive_zk4gq_36",
+          "text": "领域插件",
+          "ariaSelected": "true"
+        },
+        "inactive": {
+          "cls": "_shelfTab_zk4gq_14 ",
+          "text": "领域技能"
+        },
+        "leftQuickAriaCurrent": 0
+      },
+      "style": {
+        "background-color": "rgba(0, 0, 0, 0)",
+        "color": "rgb(37, 99, 235)",
+        "border-color": "rgb(37, 99, 235)",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_shelfTab_zk4gq_14 _shelfTabActive_zk4gq_36"
+      },
+      "sel": "[role=\"tab\"][aria-selected=\"true\"]",
+      "criterion": "§1 active/pressed：aria-current / 当前项可辨识",
+      "cssNote": "左栏 QuickActions isActive 恒 false（LeftPanel.tsx items mode:null）→ 导航项无 aria-current；active 判据由 /extensions 四货架真 tabs 承载"
+    },
+    {
+      "id": "navItem:focus-visible",
+      "pass": true,
+      "tabs": 13,
+      "focusVisible": true,
+      "style": {
+        "outline-width": "1.50084px",
+        "outline-style": "solid",
+        "outline-color": "rgb(228, 228, 231)",
+        "box-shadow": "rgba(239, 246, 255, 0.77) 0px 0px 0px 2.30378px",
+        "__hoverVar": "#f4f4f5",
+        "__tag": "BUTTON",
+        "__cls": "_leftQuickAction_jcrxc_786 "
+      },
+      "sel": "[class*=\"_leftQuickAction_\"]",
+      "criterion": "§1 focus-visible：键盘可见焦点"
+    }
+  ],
+  "boundary": "只读观察+状态触发（hover/按压/键盘 Tab）；未改 CSS/配置/持久数据；观感判定归用户，Agent 不代签。"
+}

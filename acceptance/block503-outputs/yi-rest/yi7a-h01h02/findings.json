@@ -1,0 +1,59 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "legs": [
+    {
+      "id": "h01_bare_topbar",
+      "pass": true,
+      "detail": {
+        "extensions": {
+          "bareEl": true,
+          "brandChipEl": false,
+          "brandText": null,
+          "path": "/extensions"
+        },
+        "project": {
+          "bareEl": false,
+          "brandChipEl": true,
+          "brandText": "UI-710 FIXTURE 20261119",
+          "path": "/project/p_mwnkhuj2_okzh"
+        },
+        "criterion": "独立页 bare（无品牌 chip/分区分隔线，TitleBarCenterZone isStandalonePagePath 分支）；工作区恢复 chip+标题"
+      }
+    },
+    {
+      "id": "h02_breakpoint_768",
+      "pass": true,
+      "detail": {
+        "states": [
+          {
+            "dataProjection": "1",
+            "matchMedia768": false,
+            "leftPanelWidth": 240,
+            "vw": 769,
+            "path": "/project/p_mwnkhuj2_okzh",
+            "zoomApplied": "2.7946"
+          },
+          {
+            "dataProjection": "1",
+            "matchMedia768": true,
+            "leftPanelWidth": -1,
+            "vw": 768,
+            "path": "/project/p_mwnkhuj2_okzh",
+            "zoomApplied": "2.8018"
+          }
+        ],
+        "base": 1280,
+        "criterion": "769 未触发 / 768 恰好触发（matchMedia max-width:768 与 JS MOBILE_BREAKPOINT_PX=768 单源；zoom 等效布局视口读数，media query 真实响应）",
+        "note": "9223 测试实例取材（跑完 kill/zoomReset）；CDP 在 Electron 无真实窗口 resize（Emulation 恒回弹，实测沉淀），zoom 路线为 CSS 布局视口等效",
+        "instance": "9223 test instance"
+      }
+    }
+  ],
+  "theme0": {
+    "dataTheme": "light",
+    "accent": "blue",
+    "vw": 1937,
+    "vh": 1328,
+    "dpr": 1.332585096359253
+  }
+}

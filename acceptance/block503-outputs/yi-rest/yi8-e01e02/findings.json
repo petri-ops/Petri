@@ -1,0 +1,203 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "e01": [
+    {
+      "step": 1,
+      "task": "冷启动首屏可见入口清单",
+      "entries": {
+        "quickActions": [
+          "新建任务",
+          "扩展",
+          "知识空间",
+          "",
+          ""
+        ],
+        "headerBtns": [
+          "关闭窗口",
+          "最小化窗口",
+          "全屏",
+          "收起左侧栏",
+          "搜索会话标题",
+          "新建 SSH 远程项目",
+          "联邦",
+          "设置",
+          "展开摘要概览",
+          "解释项目结构",
+          "快速开始",
+          "规划一个任务"
+        ],
+        "url": "/project/p_mwnkhuj2_okzh"
+      },
+      "file": "e01-step1-first-screen.png",
+      "note": "reload 等价冷启动（dev 会话已在跑，如实标注）"
+    },
+    {
+      "step": 2,
+      "task": "找到全部分析项目库（/projects）",
+      "clicks": 1,
+      "sequence": [
+        "左栏:新建任务"
+      ],
+      "arrival": {
+        "path": "/project/p_mwnkhuj2_okzh",
+        "h1": ""
+      },
+      "pass": false,
+      "file": "e01-step2-projects.png",
+      "criterion": "≤3 点击"
+    },
+    {
+      "step": 3,
+      "task": "审阅当前工作树变更",
+      "clicks": 1,
+      "sequence": [
+        "右栏:展开更多工具→审阅"
+      ],
+      "arrival": {
+        "path": "/project/p_mwnkhuj2_okzh",
+        "reviewSurface": 1,
+        "bodySample": "工作台|新建任务|扩展|知识空间|项目|UI-710 FIXTURE 20261119|新对话|刚刚|新对话|1分|新对话|2分|新对话|3分|新对话|2小时|stall-508-live|BLOCK463-LIVE|agent-live-"
+      },
+      "surfaceKind": "右栏 tab（非路由页）如实记录",
+      "file": "e01-step3-review.png",
+      "criterion": "≤3 点击且能说明是路由页还是右栏 tab"
+    },
+    {
+      "step": 4,
+      "task": "打开扩展中心的 MCP 服务货架",
+      "clicks": 2,
+      "sequence": [
+        "左栏:扩展",
+        "货架tab:MCP服务"
+      ],
+      "arrival": {
+        "path": "/extensions",
+        "activeTab": "MCP 服务"
+      },
+      "pass": true,
+      "file": "e01-step4-mcp-shelf.png",
+      "criterion": "≤3 点击"
+    },
+    {
+      "step": 5,
+      "task": "改一个键盘快捷键",
+      "clicks": 3,
+      "sequence": [
+        "左栏:设置",
+        "搜索:快捷键→高级组已展开",
+        "设置节:快捷键 命令键位与冲突"
+      ],
+      "arrival": {
+        "path": "/settings",
+        "hasKbd": true,
+        "bodySample": "50|返回|恢复「快捷键」默认|▾ 高级|1|快捷键|命令键位与冲突||当前：快捷键 · 命令键位与冲突||快捷键||应用级命令的键位、冲突提示与恢复默认；就近"
+      },
+      "pass": true,
+      "file": "e01-step5-shortcuts.png",
+      "criterion": "≤3 点击可达设置节（快捷键节经搜索直达；编辑态交互留给真人）"
+    },
+    {
+      "step": 6,
+      "task": "汇总",
+      "note": "寻路成功率 ≥80% / 首击正确率 ≥70% = 真人样本判据，Agent 不可测（IA 材料 §6 原文）；本批只产机械点击序列与到达读数"
+    }
+  ],
+  "e02": {
+    "verified": [
+      {
+        "id": "UI-458/459",
+        "item": "双轨结果 UI 收敛 + result 卫生批",
+        "presenceCheck": {
+          "resultPanelText": false,
+          "dualTrackGone": true
+        },
+        "note": "当前 fixture 项目 0 分析任务——空态在场即收敛面；任务态复核需真实结果（如实标注）"
+      },
+      {
+        "id": "UI-390/387/386/384/383/382",
+        "item": "子智能体族 6 条（角色展示/职能图标/聚合条退役/工具行详情/时间线折叠/内联时间线）",
+        "note": "已 verified（探针 A/B/D 证据在册）；当前 fixture 会话无子智能体运行数据——复跑需真实多轮任务，本批零臆造"
+      },
+      {
+        "id": "UI-389",
+        "item": "文件树大目录截断「加载更多」",
+        "note": "已 verified（520 夹具 200 行截断+游标证据在册）；当前目录规模未触发"
+      },
+      {
+        "id": "UI-456",
+        "item": "结果血缘条",
+        "note": "已 verified（UI-460 走查核销+真跨 Job 链）；需真实结果数据"
+      },
+      {
+        "id": "UI-535",
+        "item": "段落级错误兜底",
+        "note": "已 verified（探针 D 受控注入）；需错误注入场景"
+      }
+    ],
+    "cancelled": [
+      {
+        "id": "UI-471",
+        "item": "隧道徽标端到端自探活",
+        "reason": "已裁决取消（真隧道/公网门环境不可得；徽标三态由 UI-468 verified）",
+        "absenceCheck": {
+          "visibleTunnelEls": 0
+        }
+      },
+      {
+        "id": "UI-532",
+        "item": "生信主结果面 pack resultSurface",
+        "reason": "已裁决取消（pack 无 views.resultSurfaces 声明；host 侧诚实降级已实机证）"
+      }
+    ],
+    "inProgress": [
+      {
+        "id": "UI-695",
+        "item": "模型快捷配置 + run 级折叠",
+        "evidence": "模型菜单在开，就地项读数=deepseek-flash|当前使用 · 1M 上下文",
+        "file": "e02-ui695-model-menu.png",
+        "note": "run 级折叠腿需多轮工具 run（留待真实任务，如实标注）"
+      },
+      {
+        "id": "UI-331",
+        "item": "左栏会话行短式相对时间",
+        "evidence": "时间读数=\"刚刚\"（机械读数；相对时间正确性归用户）",
+        "file": "e02-ui331-conv-time.png"
+      },
+      {
+        "id": "UI-200",
+        "error": "\"undefined\" is not valid JSON"
+      },
+      {
+        "id": "UI-656",
+        "item": "消息行 DOM 成本棘轮",
+        "note": "零渲染变更、测试面守卫——无实机面可验（e-class 指南分层原文）"
+      },
+      {
+        "id": "UI-391",
+        "item": "copilot 族巨型文件模块化",
+        "note": "纯重构非可见 UI 面——code-size 棘轮即证据载体"
+      },
+      {
+        "id": "UI-639",
+        "item": "pack iframe 写桥四写面",
+        "note": "iframe 端到端腿需 pack 环境（UI-532 同前提，环境不可得）"
+      },
+      {
+        "id": "UI-326",
+        "item": "创建面板「IP+密码连接」模式",
+        "note": "需造连接场景数据（P0 判定证据链断裂在案）"
+      },
+      {
+        "id": "UI-304",
+        "item": "左栏「+」dialog-first",
+        "note": "需造项目创建场景"
+      },
+      {
+        "id": "UI-388",
+        "item": "远程目标 IPv6 黑洞握手提示",
+        "note": "触发条件=IPv6 黑洞/WSL 网络故障环境，本机不满足"
+      }
+    ]
+  },
+  "boundary": "E-01 判据（成功率/首击率）=真人样本，Agent 只产机械读数；E-02 的 verified 项复核以「面可达性+当前数据可见性」为限，不冒充观感签字；判定归用户，Agent 零代签。"
+}

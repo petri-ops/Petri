@@ -1,0 +1,66 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "legs": [
+    {
+      "id": "p5_empty_state",
+      "pass": true,
+      "sel": ".sc-root",
+      "detail": {
+        "hasEmpty": true,
+        "examples": 3
+      }
+    },
+    {
+      "id": "p5_streaming_pending",
+      "pass": true,
+      "sel": ".sc-root",
+      "detail": {
+        "barText": "本次 1 轮 · 0 步 · — 0%",
+        "streamingMsg": 1
+      }
+    },
+    {
+      "id": "p5_compose_pending_then_completed",
+      "pass": true,
+      "detail": {
+        "pendingRead": {
+          "text": "正在生成组合视图…",
+          "leak": false
+        },
+        "doneRead": {
+          "metric": true,
+          "chart": true,
+          "rawLeak": false,
+          "pending": false,
+          "invalid": false,
+          "svgCount": 10,
+          "lastMsgText": "这是乙6 受控长回复第一段：用于观察流式渲染 pending 态与运行统计条。||第二段：流式过程中消息逐段上屏，不阻塞输入区。||第三段：随后进入结构化产物流式段，观察首屏占位。||第四段：占位期间不得泄漏原始 JSON。||流式命中|9"
+        },
+        "completedShot": true,
+        "imgEvidence": "见 p5-compose-completed.png（合成持久化消息经真实 hydrate 链渲染的完成态）"
+      }
+    },
+    {
+      "id": "p5_error_state",
+      "pass": true,
+      "detail": {
+        "banner": true,
+        "bannerText": "发生未知错误，请重试或联系支持\n查看详情",
+        "roleAlert": 1
+      }
+    },
+    {
+      "id": "p6_skill_chain",
+      "pass": true,
+      "detail": {
+        "rows": 2,
+        "labels": [
+          "✓ 已列技能 技能台 → 匹配 design-brief（语义分 0.91）",
+          "✓ 已读技能 技能手册 → design-brief v1.1.0 已加载（五件套契约）"
+        ],
+        "note": "工具行标签为产品本地化形态（已列技能=skill_discover / 已读技能=skill_get）"
+      }
+    }
+  ],
+  "boundary": "上游 /api/ai/agent* 由本地 mock SSE 受控注入（真实 deepseek 流式偶发不可按需触发）；前端 conversationRunStore/渲染链全真实。消息落当前 fixture 会话（UI-711 同款先例，如实登记）。观感判定归用户，Agent 零代签。"
+}

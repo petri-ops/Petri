@@ -1,0 +1,222 @@
+{
+  "startUrl": "http://localhost:3000/project/p_mwnkhuj2_okzh",
+  "legs": [
+    {
+      "id": "h05_tertiary_contrast",
+      "pass": true,
+      "detail": {
+        "rows": [
+          {
+            "id": "convItemTime",
+            "color": "rgb(37, 99, 235)",
+            "bg": "rgb(239, 246, 255)",
+            "ratio": 4.749275280080391,
+            "fontSize": "10.5px",
+            "rect": {
+              "x": 172.90171813964844,
+              "y": 264.1599426269531,
+              "w": 26.135759353637695,
+              "h": 10.494170188903809
+            },
+            "text": "1小时",
+            "file": "h05-tertiary-convItemTime.png",
+            "belowAA": false
+          },
+          {
+            "id": "composerPlaceholder",
+            "color": "rgb(107, 107, 115)",
+            "bg": "rgb(255, 255, 255)",
+            "ratio": 5.281957285416207,
+            "fontSize": "14px",
+            "rect": {
+              "x": 535.554443359375,
+              "y": 1184.5396728515625,
+              "w": 718.4930419921875,
+              "h": 51.9901123046875
+            },
+            "text": "输入消息… (Enter 发送, Shift+Enter 换行, ↑/↓ 回溯历史)",
+            "file": "h05-tertiary-composerPlaceholder.png",
+            "belowAA": false
+          },
+          {
+            "id": "exampleCardSub",
+            "color": "rgb(107, 107, 115)",
+            "bg": "rgb(255, 255, 255)",
+            "ratio": 5.281957285416207,
+            "fontSize": "12.25px",
+            "rect": {
+              "x": 623.5178833007812,
+              "y": 668.8128051757812,
+              "w": 140.53981018066406,
+              "h": 34.30831527709961
+            },
+            "text": "了解项目的文件组织与数据构成",
+            "file": "h05-tertiary-exampleCardSub.png",
+            "belowAA": false
+          },
+          {
+            "id": "leftFooter",
+            "color": "rgb(63, 63, 70)",
+            "bg": "rgb(255, 255, 255)",
+            "ratio": 10.443633928552316,
+            "fontSize": "12.25px",
+            "rect": {
+              "x": 185.0257110595703,
+              "y": 1280.2652587890625,
+              "w": 29.993392944335938,
+              "h": 29.993392944335938
+            },
+            "text": "",
+            "file": "h05-tertiary-leftFooter.png",
+            "belowAA": false
+          },
+          {
+            "id": "emptyStateHint",
+            "color": "rgb(0, 0, 0)",
+            "bg": "rgb(255, 255, 255)",
+            "ratio": 21,
+            "fontSize": "12.25px",
+            "rect": {
+              "x": 623.5178833007812,
+              "y": 649.8998413085938,
+              "w": 140.53981018066406,
+              "h": 53.22127151489258
+            },
+            "text": "解释项目结构\n了解项目的文件组织与数据构成",
+            "file": "h05-tertiary-emptyStateHint.png",
+            "belowAA": false
+          }
+        ],
+        "criterion": "路线判据：4.40:1（<4.5，大字 3:1 适用）处是否影响阅读/是否需调色=人判定；机械部分=逐样本 ratio 读数",
+        "theme": "light"
+      }
+    },
+    {
+      "id": "h06_focus_visible_12files",
+      "pass": false,
+      "detail": {
+        "results": [
+          {
+            "file": "components/annotations/AnnotationBar.module.css",
+            "page": "project",
+            "missing": "无该文件样式的可聚焦元素（倒排反查 0 命中；页面 styleFiles=1645）"
+          },
+          {
+            "file": "h06-desktop.png",
+            "page": "project",
+            "gapDeclarations": 2,
+            "method": "tab-modality+focus-fallback",
+            "tabs": 60,
+            "focusVisible": false,
+            "outline": "2.25126px none rgb(63, 63, 70)",
+            "boxShadow": "none",
+            "tag": "BUTTON",
+            "cls": "petri-btn petri-btn--ghost petri-btn--sm",
+            "rect": {
+              "x": 1331.9036865234375,
+              "y": 1317.751220703125,
+              "w": 67.97173309326172,
+              "h": 30.74381446838379
+            },
+            "ariaLabel": null
+          },
+          {
+            "file": "components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css",
+            "page": "review",
+            "missing": "审阅面未打开（flow=menu-opened，drawer 探测 {\"drawer\":false,\"any\":1}；如实标注）"
+          },
+          {
+            "file": "components/desktop/WorkingTreeReview/ReviewMode.css",
+            "page": "review",
+            "missing": "审阅面未打开（flow=direct，drawer 探测 {\"drawer\":false,\"any\":1}；如实标注）"
+          },
+          {
+            "file": "components/editor/CodeMirror/CodeMirrorEditor.module.css",
+            "page": "review",
+            "missing": "审阅面未打开（flow=direct，drawer 探测 {\"drawer\":false,\"any\":1}；如实标注）"
+          },
+          {
+            "file": "components/knowledge/KnowledgeConsoleChat.module.css",
+            "page": "knowledge",
+            "missing": "无该文件样式的可聚焦元素（倒排反查 0 命中；页面 styleFiles=1238）"
+          },
+          {
+            "file": "h06-KnowledgeSpacePanel.module.png",
+            "page": "knowledge",
+            "gapDeclarations": 1,
+            "method": "real-tab-traversal",
+            "tabs": 53,
+            "focusVisible": true,
+            "outline": "0.750421px auto rgb(229, 151, 0)",
+            "boxShadow": "none",
+            "tag": "BUTTON",
+            "cls": "_switchBtn_182kq_70 ",
+            "rect": {
+              "x": 1848.146484375,
+              "y": 127.81781768798828,
+              "w": 75.45249938964844,
+              "h": 28.258045196533203
+            },
+            "ariaLabel": null
+          },
+          {
+            "file": "pages/extensions/McpPolicyEditor.module.css",
+            "page": "extensions",
+            "missing": "无该文件样式的可聚焦元素（倒排反查 0 命中；页面 styleFiles=1238）"
+          },
+          {
+            "file": "pages/extensions/styles.module.css",
+            "page": "extensions",
+            "missing": "无该文件样式的可聚焦元素（倒排反查 0 命中；页面 styleFiles=1238）"
+          },
+          {
+            "file": "pages/home.module.css",
+            "page": "projects",
+            "missing": "无该文件样式的可聚焦元素（倒排反查 0 命中；页面 styleFiles=1238）"
+          },
+          {
+            "file": "h06-welcome.module.png",
+            "page": "home",
+            "gapDeclarations": 2,
+            "method": "real-tab-traversal",
+            "tabs": 58,
+            "focusVisible": true,
+            "outline": "0.750421px auto rgb(229, 151, 0)",
+            "boxShadow": "none",
+            "tag": "BUTTON",
+            "cls": "_pickerTrigger_c6s9e_137",
+            "rect": {
+              "x": 742.7879028320312,
+              "y": 605.0504760742188,
+              "w": 108.43585205078125,
+              "h": 28.75050926208496
+            },
+            "ariaLabel": "选择项目"
+          },
+          {
+            "file": "h06-command-center.module.png",
+            "page": "command-center",
+            "gapDeclarations": 1,
+            "method": "real-tab-traversal",
+            "tabs": 2,
+            "focusVisible": true,
+            "outline": "0.750421px auto rgb(229, 151, 0)",
+            "boxShadow": "none",
+            "tag": "BUTTON",
+            "cls": "_govBtn_x9za6_395",
+            "rect": {
+              "x": 1665.887939453125,
+              "y": 94.92826843261719,
+              "w": 88.12757873535156,
+              "h": 26.241287231445312
+            },
+            "ariaLabel": null
+          }
+        ],
+        "reachedCount": 4,
+        "criterion": "焦点环可见（:focus-visible + outline 非裸删）；DOM 顺序与朗读标签机械读数在案；VoiceOver 朗读=留真人（路线原文）",
+        "note": "review 页=右栏审阅 tab best-effort；AnnotationBar 在 artifact 视图，无 artifact 时如实标注"
+      }
+    }
+  ]
+}
