@@ -63,10 +63,12 @@ export function resolveInitialFlag(): boolean {
     return bridgeFlags.getExtraRenderers() === true;
   }
 
+  // UI-714 加映三 — 缺省翻转（用户裁决「ResultCard 渲染 改为默认开启」）：
+  // 无显式记录（null/空串）→ 默认开启；仅显式 'false' 视为用户主动关闭。
   try {
-    return window.localStorage.getItem(LS_KEY) === 'true';
+    return window.localStorage.getItem(LS_KEY) !== 'false';
   } catch {
-    return false;
+    return true;
   }
 }
 

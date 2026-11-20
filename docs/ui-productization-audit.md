@@ -6811,6 +6811,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 3. **model-btn hover 收敛**（乙7 H-03 留因闭环）：`.sc-model-btn:hover` 原借 `--petri-user-bubble-bg`（气泡底，暗 0.06）→ 改 `--petri-hover` 真源（暗 0.07 单一档）。ui-visual PASS（hover 单源）；实机探针暗色 hover computed=rgba(230,237,243,0.07)。
 
 **边界**：零新依赖；`code-size` 重打（LeftPanel.tsx 842→851 +9 行=本批派生块，留因；loop-orchestrator 指纹随前批残留在案）；loop-orchestrator/其余他方面零触碰；renderers/index 与 ResultCardRenderer 头注释同步现状。**观感零代签**——chart 在真实会话中的视觉质量与 hover 色差感知留用户过目后翻 verified。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**加映三（2026-11-20，用户裁决「Agent 工作台：ResultCard 渲染 改为默认开启」）**：SimpleChat ResultCard 渲染实验开关缺省翻转 false→true——三处默认源同步：main.js 进程内缺省、workbench-flags parseAgentWorkbenchFlags（无 CLI/env 显式配置时默认开启，显式提供保持列表语义含空串=关）、renderer resolveInitialFlag（仅显式 'false' 视为关闭，null/空串/其它→开；bridge 优先语义不动）。测试同步：extraRenderers+ExperimentalFeaturesSection+SimpleChat.extraRenderers 三文件 39/39（含显式 false 尊重/bridge 优先/storage 翻转方向修正）。主进程面改动需重启 Electron 生效（本批已重启）。零新依赖/观感零代签。
 
 ## UI-713: 结果卡轻量化 + Studio 深度面返回路径（2026-11-19 **verified**；UI 轨，用户裁决 Chat-first / Studio-on-demand，dev Electron 边界内）
 

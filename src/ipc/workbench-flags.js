@@ -20,6 +20,12 @@ function parseAgentWorkbenchFlags(argv = process.argv, env = process.env) {
   const raw = cliValue
     ? cliValue.slice("--agent-workbench-flags=".length)
     : String(env.PETRI_AGENT_WORKBENCH_FLAGS || "");
+  // UI-714 加映三 — 缺省翻转：未提供 CLI/env 时默认开启（用户裁决 2026-11-20）；
+  // 显式提供时按列表语义（不列 extraRenderers 即关闭，含空串=显式关）。
+  const explicitlyProvided = Boolean(cliValue || String(env.PETRI_AGENT_WORKBENCH_FLAGS || ""));
+  if (!explicitlyProvided) {
+    return { extraRenderers: true };
+  }
   const enabled = raw
     .split(",")
     .map((value) => value.trim())

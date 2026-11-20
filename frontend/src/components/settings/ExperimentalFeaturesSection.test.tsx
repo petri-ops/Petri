@@ -10,7 +10,7 @@
 //   6. a11y label / role switch
 //   7. hover 状态
 //   8. focus 状态
-//   9. 默认 false（无 bridge 无 localStorage）
+//   9. 默认 true（UI-714 加映三 缺省开启；无 bridge 无 localStorage）
 //  10. localStorage fallback 当 bridge 不可用
 // ============================================================
 
@@ -84,7 +84,8 @@ describe('ExperimentalFeaturesSection', () => {
   it('defaults the toggle to off when no bridge and no localStorage exist', () => {
     render(<ExperimentalFeaturesSection />);
     const toggle = screen.getByRole<HTMLInputElement>('switch', { name: EXTRA_RENDERERS_LABEL });
-    expect(toggle.checked).toBe(false);
+    // UI-714 加映三 — 缺省开启
+    expect(toggle.checked).toBe(true);
   });
 
   it('falls back to localStorage when the bridge is absent', () => {

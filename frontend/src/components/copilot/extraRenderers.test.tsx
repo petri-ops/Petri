@@ -84,22 +84,26 @@ describe('parseAssistantResultNodes', () => {
 });
 
 describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
-  it('defaults to false when no localStorage key is set', () => {
-    expect(readExtraRenderersFlag()).toBe(false);
+  it('defaults to true when no localStorage key is set（UI-714 加映三 缺省开启）', () => {
+    expect(readExtraRenderersFlag()).toBe(true);
   });
 
-  it('returns true only when the localStorage key is exactly "true"', () => {
+  it('explicit "false" turns off; any other value defaults on（UI-714 加映三）', () => {
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
     expect(readExtraRenderersFlag()).toBe(true);
 
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'TRUE');
+    expect(readExtraRenderersFlag()).toBe(true);
+
+    window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'false');
     expect(readExtraRenderersFlag()).toBe(false);
 
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '1');
-    expect(readExtraRenderersFlag()).toBe(false);
+    expect(readExtraRenderersFlag()).toBe(true);
 
     window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, '');
-    expect(readExtraRenderersFlag()).toBe(false);
+    // UI-714 加映三 — 空串非显式 false → 缺省开启
+    expect(readExtraRenderersFlag()).toBe(true);
   });
 
   // ── UI-AGENTWB-007 — 分层读取优先级 ─────────────────────────
@@ -122,8 +126,8 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
     expect(resolveInitialFlag()).toBe(true);
   });
 
-  it('resolveInitialFlag defaults to false when no bridge and no localStorage exist', () => {
-    expect(resolveInitialFlag()).toBe(false);
+  it('resolveInitialFlag defaults to true when no bridge and no localStorage exist（UI-714 加映三 缺省开启）', () => {
+    expect(resolveInitialFlag()).toBe(true);
   });
 
   it('resolveInitialFlag treats bridge=true as the source of truth even when localStorage=false', () => {
@@ -160,6 +164,7 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
       return <div data-testid="probe">{flag ? 'on' : 'off'}</div>;
     }
     render(<Probe />);
+    // bridge 显式 false 优先于缺省开启（UI-714 加映三 只翻缺省，不动 bridge 优先语义）
     expect(screen.getByTestId('probe').textContent).toBe('off');
 
     // Bridge flips to on; hook should re-read via the onChange callback.
@@ -170,13 +175,13 @@ describe('readExtraRenderersFlag / useExtraRenderersFlag', () => {
     expect(screen.getByTestId('probe').textContent).toBe('on');
   });
 
-  it('the React hook reports off when no key is set', () => {
+  it('the React hook reports on when no key is set（UI-714 加映三 缺省开启）', () => {
     function Probe() {
       const flag = useExtraRenderersFlag();
       return <div data-testid="probe">{flag ? 'on' : 'off'}</div>;
     }
     render(<Probe />);
-    expect(screen.getByTestId('probe').textContent).toBe('off');
+    expect(screen.getByTestId('probe').textContent).toBe('on');
   });
 });
 

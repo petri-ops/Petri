@@ -93,8 +93,9 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
   });
 
   it('flag off + resultNodes present → falls through to markdown, no ResultCard', () => {
-    // The flag defaults to off when the localStorage key is absent.
-    expect(window.localStorage.getItem(EXTRA_RENDERERS_STORAGE_KEY)).toBeNull();
+    // UI-714 加映三 缺省开启后，flag off 场景需显式 'false'。
+    window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'false');
+    expect(window.localStorage.getItem(EXTRA_RENDERERS_STORAGE_KEY)).toBe('false');
 
     const nodes = [makeNode({ id: 'a', title: 'Result A' })];
     render(<SimpleChatMessageBody message={{ content: 'wrapper', resultNodes: nodes }} />);
@@ -235,19 +236,21 @@ describe('SimpleChat A4 bridge — restoreSimpleMessage + render branch', () => 
     }
 
     render(<FlagProbe />);
-    expect(screen.getByTestId('flag-probe').textContent).toBe('off');
+    // UI-714 加映三 — 缺省开启；Settings 面翻转（写 'false'）无需 remount 即生效。
+    expect(screen.getByTestId('flag-probe').textContent).toBe('on');
 
     // Simulate the Settings panel flipping the toggle: write localStorage
     // and dispatch the same StorageEvent the panel emits via notifyStorage.
     act(() => {
-      window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'true');
+      window.localStorage.setItem(EXTRA_RENDERERS_STORAGE_KEY, 'false');
       window.dispatchEvent(
         new StorageEvent('storage', {
           key: EXTRA_RENDERERS_STORAGE_KEY,
-          newValue: 'true',
+          newValue: 'false',
         }),
       );
     });
-    expect(screen.getByTestId('flag-probe').textContent).toBe('on');
+    // storage handler 重读 localStorage：'false' → 缺省开翻为关
+    expect(screen.getByTestId('flag-probe').textContent).toBe('off');
   });
 });

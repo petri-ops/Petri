@@ -78,7 +78,7 @@ const {
 } = require("./main/security-hardening.js");
 
 // Guard: core-utils.js requires Electron app; skip if not in Electron env
-let agentWorkbenchFlags = { extraRenderers: false };
+let agentWorkbenchFlags = { extraRenderers: true }; // UI-714 加映三 — 缺省开启（用户裁决 2026-11-20「ResultCard 渲染 改为默认开启」）
 try {
   agentWorkbenchFlags = parseAgentWorkbenchFlags();
 } catch { /* ignore during --check */ }
