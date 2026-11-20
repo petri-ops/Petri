@@ -1,0 +1,1120 @@
+▶ EVO-4 · IPC 通道四处同步（只读）
+  ✖ ① channels.js 登记 data.lessonEvidence (2.647875ms)
+  ✖ ② preload.js 有真实 ipcRenderer.invoke 调用点（非注释） (1.142167ms)
+  ✖ ③ data-management.js handler 用 CHANNELS 常量（无手写字面量） (0.499792ms)
+  ✖ ④ electron.d.ts 声明只读方法（无写入签名） (0.878458ms)
+✖ EVO-4 · IPC 通道四处同步（只读） (5.886208ms)
+▶ EVO-4 · 前端面板只读数据面
+  ✖ ⑤ 面板文件在场且只读（无 button / 无写入方法） (0.132042ms)
+  ✖ ⑥ 面板无「已验证/已签名/通过」观感代签徽标 (0.054667ms)
+  ✖ ⑦ 面板如实呈现失败/空态（不伪造曲线） (0.050125ms)
+  ✖ ⑧ CSS 全 var(--petri-*) token，零字面量颜色/字号 (0.078792ms)
+  ✖ ⑨ 面板挂载在 maintenance（不新增导航项/台账债） (0.374291ms)
+✖ EVO-4 · 前端面板只读数据面 (0.825166ms)
+ℹ tests 9
+ℹ suites 2
+ℹ pass 0
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 127.772833
+
+✖ failing tests:
+
+test at test/evo4-evidence-panel.test.mjs:17:3
+✖ ① channels.js 登记 data.lessonEvidence (2.647875ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /lessonEvidence:\s*'data:lesson-evidence'/. Input:
+  
+  "'use strict';\n" +
+    '\n' +
+    '// IPC 通道唯一注册表（BLOCK-92 Wave D2，旧 BLOCK-9.6 候选兑现）。\n' +
+    '// 纪律：\n' +
+    '//  1. 值逐字节等于历史字面量；主进程 handler 一律引用本表，不再手写字符串。\n' +
+    '//  2. src/preload.js 保持自包含字面量——sandbox 渲染进程 preload 不能 require 本地模块；\n' +
+    '//     两侧漂移由 test/ipc-channels-registry.test.mjs 双向守护（注册表⊆preload、消费方零残留）。\n' +
+    '//  3. 新增通道：先在本表登记，再在 preload 增同名包装。\n' +
+    '\n' +
+    '/** @type {Record<string, Record<string, string>>} */\n' +
+    'const CHANNELS = {\n' +
+    '  agent: {\n' +
+    "    taskDone: 'agent:task-done',\n" +
+    '  },\n' +
+    '  // BLOCK-264（C-38）— 电脑使用画中画（主进程侧窗口/截帧；preload 不暴露——\n' +
+    '  // PiP 页自带独立 preload，主窗渲染侧不消费）\n' +
+    '  computerUsePip: {\n' +
+    "    open: 'computer-use:pip-open',\n" +
+    "    close: 'computer-use:pip-close',\n" +
+    "    frame: 'computer-use:pip-frame',\n" +
+    "    status: 'computer-use:pip-status',\n" +
+    '  },\n' +
+    '  aiSettings: {\n' +
+    "    get: 'ai-settings:get',\n" +
+    "    getCredential: 'ai-settings:get-credential',\n" +
+    "    listModels: 'ai-settings:list-models',\n" +
+    "    save: 'ai-settings:save',\n" +
+    "    test: 'ai-settings:test',\n" +
+    '  },\n' +
+    '  app: {\n' +
+    "    getActivitySummary: 'app:get-activity-summary',\n" +
+    "    getShellStatus: 'app:get-shell-status',\n" +
+    "    hideToTray: 'app:hide-to-tray',\n" +
+    "    notificationClicked: 'app:notification-clicked',\n" +
+    "    notify: 'app:notify',\n" +
+    "    previewQuitSummary: 'app:preview-quit-summary',\n" +
+    "    quitDecision: 'app:quit-decision',\n" +
+    "    quitRequested: 'app:quit-requested',\n" +
+    "    relaunch: 'app:relaunch',\n" +
+    "    setShellPrefs: 'app:set-shell-prefs',\n" +
+    "    showMain: 'app:show-main',\n" +
+    "    softRefresh: 'app:soft-refresh',\n" +
+    '  },\n' +
+    '  backend: {\n' +
+    "    status: 'backend:status',\n" +
+    '  },\n' +
+    '  branch: {\n' +
+    "    active: 'branch:active',\n" +
+    "    create: 'branch:create',\n" +
+    "    delete: 'branch:delete',\n" +
+    "    list: 'branch:list',\n" +
+    "    rename: 'branch:rename',\n" +
+    "    switch: 'branch:switch',\n" +
+    '  },\n' +
+    '  contentPlugin: {\n' +
+    "    list: 'content-plugin:list',\n" +
+    "    listDocs: 'content-plugin:list-docs',\n" +
+    "    read: 'content-plugin:read',\n" +
+    '  },\n' +
+    '  data: {\n' +
+    "    info: 'data:info',\n" +
+    "    openDir: 'data:open-dir',\n" +
+    '  },\n' +
+    '  diagnostic: {\n' +
+    "    export: 'diagnostic:export',\n" +
+    "    crashStatus: 'diagnostic:crash-status',\n" +
+    "    crashDumpSummary: 'diagnostic:crash-dump-summary',\n" +
+    "    crashOpenDumps: 'diagnostic:crash-open-dumps',\n" +
+    "    crashSimulate: 'diagnostic:crash-simulate',\n" +
+    '  },\n' +
+    '  file: {\n' +
+    "    listDirectory: 'file:list-directory',\n" +
+    "    openDialog: 'file:open-dialog',\n" +
+    "    openPath: 'file:open-path',\n" +
+    "    openWorkspaceFile: 'file:open-workspace-file',\n" +
+    "    showInFolder: 'file:show-in-folder',\n" +
+    "    downloadFromUrl: 'file:download-from-url',\n" +
+    '    // UI-453 加映二 — OS 拖出导出：webContents.startDrag（真文件拖拽）\n' +
+    "    startFileDrag: 'file:start-drag',\n" +
+    "    saveDialog: 'file:save-dialog',\n" +
+    "    saveTextFile: 'file:save-text-file',\n" +
+    "    validateDirectory: 'file:validate-directory',\n" +
+    '  },\n' +
+    '  petri: {\n' +
+    "    agentWorkbenchFlags: 'petri:agent-workbench-flags',\n" +
+    '  },\n' +
+    '  startup: {\n' +
+    '    // BLOCK-101 P0 — 启动 timeline 度量：渲染层把四段 marks 汇总上报（send），\n' +
+    '    // flow/诊断经 marks 拉取（invoke）读主进程存档。纯观测通道，无业务消费方。\n' +
+    "    report: 'startup:report',\n" +
+    "    marks: 'startup:marks',\n" +
+    '  },\n' +
+    '  git: {\n' +
+    "    applyInverseHunk: 'git:apply-inverse-hunk',\n" +
+    "    blame: 'git:blame',\n" +
+    "    branchList: 'git:branch-list',\n" +
+    "    checkoutBranch: 'git:checkout-branch',\n" +
+    '    // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（创建=plumbing 无副作用快照；回滚=恢复快照树）\n' +
+    "    checkpointCreate: 'git:checkpoint-create',\n" +
+    "    checkpointRollback: 'git:checkpoint-rollback',\n" +
+    "    commitDiff: 'git:commit-diff',\n" +
+    "    commitFileContent: 'git:commit-file-content',\n" +
+    "    commitIndex: 'git:commit-index',\n" +
+    "    commitLog: 'git:commit-log',\n" +
+    "    commitReview: 'git:commit-review',\n" +
+    "    discardFile: 'git:discard-file',\n" +
+    "    fileHeadContent: 'git:file-head-content',\n" +
+    "    hunkApply: 'git:hunk-apply',\n" +
+    "    hunkRejectInverse: 'git:hunk-reject-inverse',\n" +
+    "    initRepository: 'git:init-repository',\n" +
+    "    listModified: 'git:list-modified',\n" +
+    "    pull: 'git:pull',\n" +
+    "    push: 'git:push',\n" +
+    "    remoteList: 'git:remote-list',\n" +
+    "    remoteStatus: 'git:remote-status',\n" +
+    "    revertFile: 'git:revert-file',\n" +
+    "    shortstat: 'git:working-tree-shortstat',\n" +
+    "    splitSideDiff: 'git:split-side-diff',\n" +
+    "    stagePaths: 'git:stage-paths',\n" +
+    "    stashList: 'git:stash-list',\n" +
+    "    tagList: 'git:tag-list',\n" +
+    "    undoLastCommit: 'git:undo-last-commit',\n" +
+    "    unstagePaths: 'git:unstage-paths',\n" +
+    "    workingTreeDiff: 'git:working-tree-diff',\n" +
+    "    workingTreeFileContent: 'git:working-tree-file-content',\n" +
+    "    workingTreeRevert: 'git:working-tree-revert',\n" +
+    "    workingTreeStatus: 'git:working-tree-status',\n" +
+    '  },\n' +
+    '  harnessCapabilities: {\n' +
+    "    list: 'harness-capabilities:list',\n" +
+    '  },\n' +
+    '  pack: {\n' +
+    "    installFromDialog: 'pack:install-from-dialog',\n" +
+    "    installPath: 'pack:install-path',\n" +
+    "    installProgress: 'pack:install-progress',\n" +
+    "    installRuntime: 'pack:install-runtime',\n" +
+    "    listAvailable: 'pack:list-available',\n" +
+    "    listInstalled: 'pack:list-installed',\n" +
+    "    setEnabled: 'pack:set-enabled',\n" +
+    "    uninstall: 'pack:uninstall',\n" +
+    "    uninstallPlan: 'pack:uninstall-plan',\n" +
+    '  },\n' +
+    '  // BLOCK-242 — petri-install:// 深链安装（预览只读 / 确认安装 / main→renderer 推送）\n' +
+    '  installDeepLink: {\n' +
+    "    deepLink: 'install:deep-link',\n" +
+    "    preview: 'install:preview-deep-link',\n" +
+    "    confirm: 'install:confirm-deep-link',\n" +
+    "    pending: 'install:pending-deep-link',\n" +
+    '  },\n' +
+    '  plugin: {\n' +
+    '    // BLOCK-158 商店面退役：仅存目录读面（listInstalled/listRemote=运行时目录投影，\n' +
+    '    // 供包卡片运行时标题/体积）；install/uninstall/checkUpdates 随商店面移除，\n' +
+    '    // 插件分发 = 领域包通道（pack:*），运行时安装 = 包一键内链 installPlugin。\n' +
+    "    listInstalled: 'plugin:list-installed',\n" +
+    "    listRemote: 'plugin:list-remote',\n" +
+    '  },\n' +
+    '  runtime: {\n' +
+    "    status: 'runtime:status',\n" +
+    '  },\n' +
+    '  skills: {\n' +
+    "    cancel: 'skills:cancel',\n" +
+    "    discover: 'skills:discover',\n" +
+    "    execute: 'skills:execute',\n" +
+    "    getExecution: 'skills:getExecution',\n" +
+    "    progress: 'skills:progress',\n" +
+    '    // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙/直路径，复刻 pack 先例）\n' +
+    '    // BLOCK-177 — 技能治理（停用/卸载/安装信息/重装；动作落 skill-prefs 审计）\n' +
+    "    setDisabled: 'skills:set-disabled',\n" +
+    "    uninstall: 'skills:uninstall',\n" +
+    "    getInstallInfo: 'skills:get-install-info',\n" +
+    "    reinstall: 'skills:reinstall',\n" +
+    "    importDirectory: 'skills:import-directory',\n" +
+    "    importPath: 'skills:import-path',\n" +
+    '  },\n' +
+    '  // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径；写面走 core\n' +
+    '  // mcp-settings helper 经 CAP-2 加密落盘，读面 HTTP /api/mcp/servers 不变）\n' +
+    '  mcpConfig: {\n' +
+    "    importDialog: 'mcp-config:import-dialog',\n" +
+    "    importPath: 'mcp-config:import-path',\n" +
+    '  },\n' +
+    '  ssh: {\n' +
+    "    registerHost: 'ssh:register-host',\n" +
+    '  },\n' +
+    '  telemetry: {\n' +
+    "    report: 'telemetry:report',\n" +
+    '  },\n' +
+    '  terminal: {\n' +
+    "    data: 'terminal:data',\n" +
+    "    exit: 'terminal:exit',\n" +
+    "    openLogDir: 'terminal:open-log-dir',\n" +
+    "    openShell: 'terminal:open-shell',\n" +
+    "    sessionList: 'terminal:session-list',\n" +
+    "    sessionResize: 'terminal:session-resize',\n" +
+    "    sessionStart: 'terminal:session-start',\n" +
+    "    sessionStop: 'terminal:session-stop',\n" +
+    "    sessionWrite: 'terminal:session-write',\n" +
+    "    snapshot: 'terminal:snapshot',\n" +
+    '  },\n' +
+    '  updater: {\n' +
+    "    check: 'updater:check',\n" +
+    "    download: 'updater:download',\n" +
+    "    downloadProgress: 'updater:download-progress',\n" +
+    "    error: 'updater:error',\n" +
+    "    install: 'updater:install',\n" +
+    "    updateAvailable: 'updater:update-available',\n" +
+    "    updateDownloaded: 'updater:update-downloaded',\n" +
+    "    updateNotAvailable: 'updater:update-not-available',\n" +
+    '  },\n' +
+    '  window: {\n' +
+    "    close: 'window:close',\n" +
+    "    fullscreenChanged: 'window:fullscreen-changed',\n" +
+    "    getZoom: 'window:get-zoom',\n" +
+    "    isFullScreen: 'window:isFullScreen',\n" +
+    "    isMaximized: 'window:isMaximized',\n" +
+    "    maximize: 'window:maximize',\n" +
+    "    maximizeChanged: 'window:maximize-changed',\n" +
+    "    minimize: 'window:minimize',\n" +
+    "    openResultInMain: 'window:open-result-in-main',\n" +
+    "    popOut: 'window:pop-out',\n" +
+    "    railMouse: 'window:rail-mouse',\n" +
+    "    relayToMain: 'window:relay-to-main',\n" +
+    "    remove: 'window:remove',\n" +
+    "    restore: 'window:restore',\n" +
+    "    return: 'window:return',\n" +
+    "    self: 'window:self',\n" +
+    '    // BLOCK-100/UI-411 — 测试实例窗口管理（handler 有 PETRI_TEST_INSTANCE 守卫，\n' +
+    '    // 用户实例调用恒拒绝）：置顶切换 + 鼠标穿透开关（forward:true）。\n' +
+    "    setAlwaysOnTop: 'window:set-always-on-top',\n" +
+    "    setIgnoreMouseEvents: 'window:set-ignore-mouse-events',\n" +
+    "    testManageModeChanged: 'window:test-manage-mode-changed',\n" +
+    '    // UI-421 加映（用户裁决 2026-11-17「组合键太麻烦，换成可解锁按钮」）：\n' +
+    '    // 徽标条「解锁」按钮点击切换管理模式；锁定态徽标条 hover 窥视（见 _window-ipc）。\n' +
+    "    testManageToggle: 'window:test-manage-toggle',\n" +
+    "    testManageHover: 'window:test-manage-hover',\n" +
+    "    snapshot: 'window:snapshot',\n" +
+    "    stateChanged: 'window:state-changed',\n" +
+    "    thumbnail: 'window:thumbnail',\n" +
+    "    toggleFullScreen: 'window:toggleFullScreen',\n" +
+    "    zoomBy: 'window:zoom-by',\n" +
+    "    zoomReset: 'window:zoom-reset',\n" +
+    '  },\n' +
+    '  workspace: {\n' +
+    "    writeTextFile: 'workspace:write-text-file',\n" +
+    '  },\n' +
+    '  genUi: {\n' +
+    "    prepare: 'gen-ui:prepare',\n" +
+    '    // BLOCK-445 — MCP App 页面准备（外部 MCP server 的 ui 资源 → gen-ui 沙箱）\n' +
+    "    prepareMcpApp: 'gen-ui:prepare-mcp-app',\n" +
+    "    callMcpAppTool: 'gen-ui:mcp-app-call',\n" +
+    '    // BLOCK-166 P1 — guest 桥 RPC 中继（GenUiCard 经 desktopBridge 转发）：\n' +
+    '    // set-state = widgetState 内存落主进程；open-external = 绝对 http(s) 白名单裁决。\n' +
+    "    setState: 'gen-ui:set-state',\n" +
+    "    openExternal: 'gen-ui:open-external',\n" +
+    '    // BLOCK-166 P2 — 复制图片（sender/会话/几何三重校验后 capturePage→剪贴板）。\n' +
+    "    copyImage: 'gen-ui:copy-image',\n" +
+    '    // BLOCK-174 CP-13b — fragment 导出（主进程读会话 filePath 原文交渲染层另存）。\n' +
+    "    export: 'gen-ui:export',\n" +
+    '    // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。\n' +
+    "    getData: 'gen-ui:get-data',\n" +
+    '    // BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测推送（main→renderer）：OOPIF 子框导航\n' +
+    '    // 不可取消（BLOCK-168 实证），主进程侦测到 petri-genui 帧外导航即推此通道，\n' +
+    '    // GenUiCard 按帧 URL 精确匹配即时重置（心跳宽限 9s → 亚秒）。\n' +
+    "    sandboxHijacked: 'gen-ui:sandbox-hijacked',\n" +
+    '  },\n' +
+    '};\n' +
+    '\n' +
+    'module.exports = CHANNELS;\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:19:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "'use strict';\n\n// IPC 通道唯一注册表（BLOCK-92 Wave D2，旧 BLOCK-9.6 候选兑现）。\n// 纪律：\n//  1. 值逐字节等于历史字面量；主进程 handler 一律引用本表，不再手写字符串。\n//  2. src/preload.js 保持自包含字面量——sandbox 渲染进程 preload 不能 require 本地模块；\n//     两侧漂移由 test/ipc-channels-registry.test.mjs 双向守护（注册表⊆preload、消费方零残留）。\n//  3. 新增通道：先在本表登记，再在 preload 增同名包装。\n\n/** @type {Record<string, Record<string, string>>} */\nconst CHANNELS = {\n  agent: {\n    taskDone: 'agent:task-done',\n  },\n  // BLOCK-264（C-38）— 电脑使用画中画（主进程侧窗口/截帧；preload 不暴露——\n  // PiP 页自带独立 preload，主窗渲染侧不消费）\n  computerUsePip: {\n    open: 'computer-use:pip-open',\n    close: 'computer-use:pip-close',\n    frame: 'computer-use:pip-frame',\n    status: 'computer-use:pip-status',\n  },\n  aiSettings: {\n    get: 'ai-settings:get',\n    getCredential: 'ai-settings:get-credential',\n    listModels: 'ai-settings:list-models',\n    save: 'ai-settings:save',\n    test: 'ai-settings:test',\n  },\n  app: {\n    getActivitySummary: 'app:get-activity-summary',\n    getShellStatus: 'app:get-shell-status',\n    hideToTray: 'app:hide-to-tray',\n    notificationClicked: 'app:notification-clicked',\n    notify: 'app:notify',\n    previewQuitSummary: 'app:preview-quit-summary',\n    quitDecision: 'app:quit-decision',\n    quitRequested: 'app:quit-requested',\n    relaunch: 'app:relaunch',\n    setShellPrefs: 'app:set-shell-prefs',\n    showMain: 'app:show-main',\n    softRefresh: 'app:soft-refresh',\n  },\n  backend: {\n    status: 'backend:status',\n  },\n  branch: {\n    active: 'branch:active',\n    create: 'branch:create',\n    delete: 'branch:delete',\n    list: 'branch:list',\n    rename: 'branch:rename',\n    switch: 'branch:switch',\n  },\n  contentPlugin: {\n    list: 'content-plugin:list',\n    listDocs: 'content-plugin:list-docs',\n    read: 'content-plugin:read',\n  },\n  data: {\n    info: 'data:info',\n    openDir: 'data:open-dir',\n  },\n  diagnostic: {\n    export: 'diagnostic:export',\n    crashStatus: 'diagnostic:crash-status',\n    crashDumpSummary: 'diagnostic:crash-dump-summary',\n    crashOpenDumps: 'diagnostic:crash-open-dumps',\n    crashSimulate: 'diagnostic:crash-simulate',\n  },\n  file: {\n    listDirectory: 'file:list-directory',\n    openDialog: 'file:open-dialog',\n    openPath: 'file:open-path',\n    openWorkspaceFile: 'file:open-workspace-file',\n    showInFolder: 'file:show-in-folder',\n    downloadFromUrl: 'file:download-from-url',\n    // UI-453 加映二 — OS 拖出导出：webContents.startDrag（真文件拖拽）\n    startFileDrag: 'file:start-drag',\n    saveDialog: 'file:save-dialog',\n    saveTextFile: 'file:save-text-file',\n    validateDirectory: 'file:validate-directory',\n  },\n  petri: {\n    agentWorkbenchFlags: 'petri:agent-workbench-flags',\n  },\n  startup: {\n    // BLOCK-101 P0 — 启动 timeline 度量：渲染层把四段 marks 汇总上报（send），\n    // flow/诊断经 marks 拉取（invoke）读主进程存档。纯观测通道，无业务消费方。\n    report: 'startup:report',\n    marks: 'startup:marks',\n  },\n  git: {\n    applyInverseHunk: 'git:apply-inverse-hunk',\n    blame: 'git:blame',\n    branchList: 'git:branch-list',\n    checkoutBranch: 'git:checkout-branch',\n    // BLOCK-176 CP-17 — 工作树 checkpoint 安全网（创建=plumbing 无副作用快照；回滚=恢复快照树）\n    checkpointCreate: 'git:checkpoint-create',\n    checkpointRollback: 'git:checkpoint-rollback',\n    commitDiff: 'git:commit-diff',\n    commitFileContent: 'git:commit-file-content',\n    commitIndex: 'git:commit-index',\n    commitLog: 'git:commit-log',\n    commitReview: 'git:commit-review',\n    discardFile: 'git:discard-file',\n    fileHeadContent: 'git:file-head-content',\n    hunkApply: 'git:hunk-apply',\n    hunkRejectInverse: 'git:hunk-reject-inverse',\n    initRepository: 'git:init-repository',\n    listModified: 'git:list-modified',\n    pull: 'git:pull',\n    push: 'git:push',\n    remoteList: 'git:remote-list',\n    remoteStatus: 'git:remote-status',\n    revertFile: 'git:revert-file',\n    shortstat: 'git:working-tree-shortstat',\n    splitSideDiff: 'git:split-side-diff',\n    stagePaths: 'git:stage-paths',\n    stashList: 'git:stash-list',\n    tagList: 'git:tag-list',\n    undoLastCommit: 'git:undo-last-commit',\n    unstagePaths: 'git:unstage-paths',\n    workingTreeDiff: 'git:working-tree-diff',\n    workingTreeFileContent: 'git:working-tree-file-content',\n    workingTreeRevert: 'git:working-tree-revert',\n    workingTreeStatus: 'git:working-tree-status',\n  },\n  harnessCapabilities: {\n    list: 'harness-capabilities:list',\n  },\n  pack: {\n    installFromDialog: 'pack:install-from-dialog',\n    installPath: 'pack:install-path',\n    installProgress: 'pack:install-progress',\n    installRuntime: 'pack:install-runtime',\n    listAvailable: 'pack:list-available',\n    listInstalled: 'pack:list-installed',\n    setEnabled: 'pack:set-enabled',\n    uninstall: 'pack:uninstall',\n    uninstallPlan: 'pack:uninstall-plan',\n  },\n  // BLOCK-242 — petri-install:// 深链安装（预览只读 / 确认安装 / main→renderer 推送）\n  installDeepLink: {\n    deepLink: 'install:deep-link',\n    preview: 'install:preview-deep-link',\n    confirm: 'install:confirm-deep-link',\n    pending: 'install:pending-deep-link',\n  },\n  plugin: {\n    // BLOCK-158 商店面退役：仅存目录读面（listInstalled/listRemote=运行时目录投影，\n    // 供包卡片运行时标题/体积）；install/uninstall/checkUpdates 随商店面移除，\n    // 插件分发 = 领域包通道（pack:*），运行时安装 = 包一键内链 installPlugin。\n    listInstalled: 'plugin:list-installed',\n    listRemote: 'plugin:list-remote',\n  },\n  runtime: {\n    status: 'runtime:status',\n  },\n  skills: {\n    cancel: 'skills:cancel',\n    discover: 'skills:discover',\n    execute: 'skills:execute',\n    getExecution: 'skills:getExecution',\n    progress: 'skills:progress',\n    // BLOCK-156 D7 — 第三方技能本地目录导入（对话框一条龙/直路径，复刻 pack 先例）\n    // BLOCK-177 — 技能治理（停用/卸载/安装信息/重装；动作落 skill-prefs 审计）\n    setDisabled: 'skills:set-disabled',\n    uninstall: 'skills:uninstall',\n    getInstallInfo: 'skills:get-install-info',\n    reinstall: 'skills:reinstall',\n    importDirectory: 'skills:import-directory',\n    importPath: 'skills:import-path',\n  },\n  // BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框/直路径；写面走 core\n  // mcp-settings helper 经 CAP-2 加密落盘，读面 HTTP /api/mcp/servers 不变）\n  mcpConfig: {\n    importDialog: 'mcp-config:import-dialog',\n    importPath: 'mcp-config:import-path',\n  },\n  ssh: {\n    registerHost: 'ssh:register-host',\n  },\n  telemetry: {\n    report: 'telemetry:report',\n  },\n  terminal: {\n    data: 'terminal:data',\n    exit: 'terminal:exit',\n    openLogDir: 'terminal:open-log-dir',\n    openShell: 'terminal:open-shell',\n    sessionList: 'terminal:session-list',\n    sessionResize: 'terminal:session-resize',\n    sessionStart: 'terminal:session-start',\n    sessionStop: 'terminal:session-stop',\n    sessionWrite: 'terminal:session-write',\n    snapshot: 'terminal:snapshot',\n  },\n  updater: {\n    check: 'updater:check',\n    download: 'updater:download',\n    downloadProgress: 'updater:download-progress',\n    error: 'updater:error',\n    install: 'updater:install',\n    updateAvailable: 'updater:update-available',\n    updateDownloaded: 'updater:update-downloaded',\n    updateNotAvailable: 'updater:update-not-available',\n  },\n  window: {\n    close: 'window:close',\n    fullscreenChanged: 'window:fullscreen-changed',\n    getZoom: 'window:get-zoom',\n    isFullScreen: 'window:isFullScreen',\n    isMaximized: 'window:isMaximized',\n    maximize: 'window:maximize',\n    maximizeChanged: 'window:maximize-changed',\n    minimize: 'window:minimize',\n    openResultInMain: 'window:open-result-in-main',\n    popOut: 'window:pop-out',\n    railMouse: 'window:rail-mouse',\n    relayToMain: 'window:relay-to-main',\n    remove: 'window:remove',\n    restore: 'window:restore',\n    return: 'window:return',\n    self: 'window:self',\n    // BLOCK-100/UI-411 — 测试实例窗口管理（handler 有 PETRI_TEST_INSTANCE 守卫，\n    // 用户实例调用恒拒绝）：置顶切换 + 鼠标穿透开关（forward:true）。\n    setAlwaysOnTop: 'window:set-always-on-top',\n    setIgnoreMouseEvents: 'window:set-ignore-mouse-events',\n    testManageModeChanged: 'window:test-manage-mode-changed',\n    // UI-421 加映（用户裁决 2026-11-17「组合键太麻烦，换成可解锁按钮」）：\n    // 徽标条「解锁」按钮点击切换管理模式；锁定态徽标条 hover 窥视（见 _window-ipc）。\n    testManageToggle: 'window:test-manage-toggle',\n    testManageHover: 'window:test-manage-hover',\n    snapshot: 'window:snapshot',\n    stateChanged: 'window:state-changed',\n    thumbnail: 'window:thumbnail',\n    toggleFullScreen: 'window:toggleFullScreen',\n    zoomBy: 'window:zoom-by',\n    zoomReset: 'window:zoom-reset',\n  },\n  workspace: {\n    writeTextFile: 'workspace:write-text-file',\n  },\n  genUi: {\n    prepare: 'gen-ui:prepare',\n    // BLOCK-445 — MCP App 页面准备（外部 MCP server 的 ui 资源 → gen-ui 沙箱）\n    prepareMcpApp: 'gen-ui:prepare-mcp-app',\n    callMcpAppTool: 'gen-ui:mcp-app-call',\n    // BLOCK-166 P1 — guest 桥 RPC 中继（GenUiCard 经 desktopBridge 转发）：\n    // set-state = widgetState 内存落主进程；open-external = 绝对 http(s) 白名单裁决。\n    setState: 'gen-ui:set-state',\n    openExternal: 'gen-ui:open-external',\n    // BLOCK-166 P2 — 复制图片（sender/会话/几何三重校验后 capturePage→剪贴板）。\n    copyImage: 'gen-ui:copy-image',\n    // BLOCK-174 CP-13b — fragment 导出（主进程读会话 filePath 原文交渲染层另存）。\n    export: 'gen-ui:export',\n    // BLOCK-174 CP-11 — artifact/job 数据面只读绑定（guest getData 中继落点）。\n    getData: 'gen-ui:get-data',\n    // BLOCK-166-NAV-GUARD — 沙箱帧劫持侦测推送（main→renderer）：OOPIF 子框导航\n    // 不可取消（BLOCK-168 实证），主进程侦测到 petri-genui 帧外导航即推此通道，\n    // GenUiCard 按帧 URL 精确匹配即时重置（心跳宽限 9s → 亚秒）。\n    sandboxHijacked: 'gen-ui:sandbox-hijacked',\n  },\n};\n\nmodule.exports = CHANNELS;\n",
+    expected: /lessonEvidence:\s*'data:lesson-evidence'/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:22:3
+✖ ② preload.js 有真实 ipcRenderer.invoke 调用点（非注释） (1.142167ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /lessonEvidence:\s*\(\)\s*=>\s*ipcRenderer\.invoke\('data:lesson-evidence'\)/. Input:
+  
+  '/**\n' +
+    ' * Electron Preload — 桌面版前端 ↔ 主进程 IPC 桥\n' +
+    ' *\n' +
+    ' * 通过 contextBridge 暴露安全的 API 给 webview 前端调用。\n' +
+    ' * 前端通过 window.petriDesktop 访问这些 API。\n' +
+    ' *\n' +
+    ' * 阶段 3（desktop-spa）：主窗口加载 Vite SPA，不再需要隐藏 Docusaurus\n' +
+    ' * navbar（SPA 没有 navbar）。body padding 由 DesktopToolbar 组件自己管理。\n' +
+    ' */\n' +
+    '\n' +
+    "const { contextBridge, ipcRenderer, webUtils } = require('electron');\n" +
+    '\n' +
+    '// A-009: pull the petri-server port fallback from env-coordinator\n' +
+    '// instead of duplicating the per-port fallback defaults here. The\n' +
+    '// Electron main process sets R_SERVER_PORT on\n' +
+    '// process.env before preload.js runs, so the helper default\n' +
+    '// (3001) is only consulted in the rare standalone-render\n' +
+    '// fallback path.\n' +
+    '// A-009: getBackendPort() default was 3001 (r).\n' +
+    "// Electron main process's setupDesktopEnv() injects the resolved port\n" +
+    '// into process.env.R_SERVER_PORT *before* preload.js\n' +
+    '// runs (env-coordinator.js writes it in setupDesktopEnv). Reading from\n' +
+    '// process.env directly is therefore equivalent to calling the helper,\n' +
+    '// and avoids the cross-file require which is forbidden when\n' +
+    '// BrowserWindow is launched with sandbox: true (the require here\n' +
+    '// otherwise throws "module not found" and aborts the entire preload,\n' +
+    '// which silently strips window.petriDesktop and disables the custom\n' +
+    '// traffic-light buttons in the title bar).\n' +
+    'function _readPort(envName, defaultPort) {\n' +
+    '  const raw = process.env[envName];\n' +
+    "  if (raw == null || raw === '') return defaultPort;\n" +
+    '  const parsed = parseInt(raw, 10);\n' +
+    '  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultPort;\n' +
+    '}\n' +
+    "const _rPort = _readPort('R_SERVER_PORT', 3001);\n" +
+    '\n' +
+    "const AGENT_WORKBENCH_FLAG_CHANNEL = 'petri:agent-workbench-flags';\n" +
+    'const AGENT_WORKBENCH_FLAGS = { extraRenderers: false };\n' +
+    '\n' +
+    'ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {\n' +
+    "  if (!payload || typeof payload.extraRenderers !== 'boolean') return;\n" +
+    '  AGENT_WORKBENCH_FLAGS.extraRenderers = payload.extraRenderers;\n' +
+    '});\n' +
+    '\n' +
+    "contextBridge.exposeInMainWorld('petriAgentFlags', {\n" +
+    '  agentWorkbenchFlags: {\n' +
+    '    // contextBridge freezes getters on the renderer side and rebinds them\n' +
+    '    // to a frozen snapshot of the snapshot taken at first access — using a\n' +
+    '    // plain getter causes `window.petriAgentFlags.agentWorkbenchFlags.extraRenderers`\n' +
+    '    // to permanently read `false` even after the user flips the toggle in\n' +
+    '    // packaged Electron. Expose a synchronous method instead so each call\n' +
+    '    // returns the live value from the closure.\n' +
+    '    getExtraRenderers: () => AGENT_WORKBENCH_FLAGS.extraRenderers,\n' +
+    '    set: (value) => ipcRenderer.invoke(AGENT_WORKBENCH_FLAG_CHANNEL, value === true),\n' +
+    '    onChange: (callback) => {\n' +
+    "      if (typeof callback !== 'function') return () => {};\n" +
+    '      const listener = (_event, payload) => {\n' +
+    "        if (payload && typeof payload.extraRenderers === 'boolean') callback(payload.extraRenderers);\n" +
+    '      };\n' +
+    '      ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, listener);\n' +
+    '      return () => ipcRenderer.removeListener(AGENT_WORKBENCH_FLAG_CHANNEL, listener);\n' +
+    '    },\n' +
+    '  },\n' +
+    '});\n' +
+    '\n' +
+    "ipcRenderer.on('app:soft-refresh', () => {\n" +
+    '  try {\n' +
+    "    window.dispatchEvent(new CustomEvent('petri:soft-refresh'));\n" +
+    '  } catch {}\n' +
+    '});\n' +
+    '\n' +
+    '// ============================================================\n' +
+    "// 注入 process.env.PETRI_DESKTOP = '1' 到渲染进程\n" +
+    '// ============================================================\n' +
+    '// 前端代码通过 typeof process && process.env && process.env.PETRI_DESKTOP\n' +
+    '// 检测桌面版，但 contextIsolation:true + nodeIntegration:false 下\n' +
+    '// 渲染进程没有 process 对象。通过 contextBridge 暴露让其检测通过。\n' +
+    "contextBridge.exposeInMainWorld('process', {\n" +
+    '  env: {\n' +
+    "    PETRI_DESKTOP: '1',\n" +
+    "    NODE_ENV: 'production',\n" +
+    '  },\n' +
+    '});\n' +
+    '\n' +
+    '// BLOCK-61 品牌桥：主全局名 petri；petriDesktop 为兼容别名（同一 surface\n' +
+    '// 双暴露，desktopBridge 双读），过渡期后评估移除。\n' +
+    'const desktopBridgeSurface = {\n' +
+    '  // 平台标识\n' +
+    '  isDesktop: true,\n' +
+    '  platform: process.platform,\n' +
+    '  arch: process.arch,\n' +
+    '  // BLOCK-101 P0 — 启动 timeline 桥（纯观测）：渲染层四段 marks 汇总上报 +\n' +
+    '  // 主进程 marks 拉取（flow 用）。沙箱 preload 禁跨文件 require，通道按本文件\n' +
+    '  // 既有家法用字面量（与 src/ipc/channels.js startup 域保持一致）。\n' +
+    '  // preload 执行时刻改由主进程 did-start-loading 打点（timeOrigin 跨进程语义\n' +
+    '  // 不一致曾致负天文数字——渲染层自算不可靠）。\n' +
+    '  startup: {\n' +
+    "    report: (payload) => ipcRenderer.send('startup:report', payload),\n" +
+    "    marks: () => ipcRenderer.invoke('startup:marks'),\n" +
+    '  },\n' +
+    '  // BLOCK-100 — 测试实例标记（主进程经 webPreferences.additionalArguments 注入\n' +
+    '  // --petri-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问\n' +
+    '  // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。\n' +
+    "  __testInstance: process.argv.includes('--petri-test-instance=1'),\n" +
+    '  // UI-421 — 测试实例管理模式快捷键透传（主进程 _window-create.js 注入实际生效\n' +
+    '  // 的组合键；默认 Ctrl+Alt+Shift+M，PETRI_TEST_MANAGE_SHORTCUT 可覆盖）。\n' +
+    '  __testManageShortcut:\n' +
+    "    (process.argv.find((a) => a.startsWith('--petri-test-manage-shortcut=')) || '').split('=')[1] || null,\n" +
+    '  backendConfig: Object.freeze({\n' +
+    '    rApiBase: `http://localhost:${_rPort}/api`,\n' +
+    '  }),\n' +
+    '\n' +
+    '  // 窗口控制（配合 frame:false 自定义标题栏）\n' +
+    '  window: {\n' +
+    "    minimize: () => ipcRenderer.send('window:minimize'),\n" +
+    "    maximize: () => ipcRenderer.send('window:maximize'),\n" +
+    "    close: () => ipcRenderer.send('window:close'),\n" +
+    '    isMaximized: () => {\n' +
+    '      try {\n' +
+    "        return Promise.resolve(ipcRenderer.invoke('window:isMaximized')).then(\n" +
+    '          (value) => value === true,\n' +
+    '        );\n' +
+    '      } catch (error) {\n' +
+    '        return Promise.reject(error);\n' +
+    '      }\n' +
+    '    },\n' +
+    '    onMaximizeChanged: (callback) => {\n' +
+    "      if (typeof callback !== 'function') return () => {};\n" +
+    '      const listener = (_event, isMaximized) => callback(isMaximized === true);\n' +
+    "      ipcRenderer.on('window:maximize-changed', listener);\n" +
+    "      return () => ipcRenderer.removeListener('window:maximize-changed', listener);\n" +
+    '    },\n' +
+    '    // Mac fullscreen support\n' +
+    '    isFullScreen: () => {\n' +
+    '      try {\n' +
+    "        return Promise.resolve(ipcRenderer.invoke('window:isFullScreen')).then(\n" +
+    '          (value) => value === true,\n' +
+    '        );\n' +
+    '      } catch (error) {\n' +
+    '        return Promise.reject(error);\n' +
+    '      }\n' +
+    '    },\n' +
+    "    toggleFullScreen: () => ipcRenderer.send('window:toggleFullScreen'),\n" +
+    '    onFullScreenChanged: (callback) => {\n' +
+    "      if (typeof callback !== 'function') return () => {};\n" +
+    '      const listener = (_event, isFullScreen) => callback(isFullScreen === true);\n' +
+    "      ipcRenderer.on('window:fullscreen-changed', listener);\n" +
+    "      return () => ipcRenderer.removeListener('window:fullscreen-changed', listener);\n" +
+    '    },\n' +
+    '    // BLOCK-100/UI-411 — 测试实例窗口管理（仅测试实例前端会调用）\n' +
+    "    setAlwaysOnTop: (flag) => ipcRenderer.invoke('window:set-always-on-top', flag),\n" +
+    "    setIgnoreMouseEvents: (flag) => ipcRenderer.invoke('window:set-ignore-mouse-events', flag),\n" +
+    '    onTestManageModeChanged: (callback) => {\n' +
+    '      const listener = (_event, manageMode) => callback(manageMode);\n' +
+    "      ipcRenderer.on('window:test-manage-mode-changed', listener);\n" +
+    "      return () => ipcRenderer.removeListener('window:test-manage-mode-changed', listener);\n" +
+    '    },\n' +
+    '    // UI-421 加映 — 一键解锁按钮：点击切换管理模式；锁定态徽标条 hover 窥视\n' +
+    '    // （点击穿透窗口里按钮要能被点到，hover 时主进程临时转交互，离开回锁）。\n' +
+    "    testManageToggle: () => ipcRenderer.send('window:test-manage-toggle'),\n" +
+    "    testManageHover: (active) => ipcRenderer.send('window:test-manage-hover', active === true),\n" +
+    '\n' +
+    '    // 页面缩放（无边框窗口：菜单 Zoom 角色不可达，故显式暴露）。\n' +
+    '    // delta 为 zoomLevel 步长，可为小数（滚轮平滑缩放用），正数放大。\n' +
+    "    zoomBy: (delta) => ipcRenderer.send('window:zoom-by', Number(delta) || 0),\n" +
+    "    zoomReset: () => ipcRenderer.send('window:zoom-reset'),\n" +
+    '    getZoomLevel: () => {\n' +
+    '      try {\n' +
+    "        return Promise.resolve(ipcRenderer.invoke('window:get-zoom')).then((value) =>\n" +
+    "          typeof value === 'number' ? value : 0,\n" +
+    '        );\n' +
+    '      } catch (error) {\n' +
+    '        return Promise.reject(error);\n' +
+    '      }\n' +
+    '    },\n' +
+    '  },\n' +
+    '\n' +
+    '  // BLOCK-59 窗口系统 — 弹出窗 / 边缘轨道 / 指挥中心。\n' +
+    '  // × 永远是降格（minimizeToRail），销毁只有轨道显式 remove（plan §3 契约）。\n' +
+    '  windowManager: {\n' +
+    '    // UI-627 — query: 白名单键由主进程 sanitizePopOutQuery 过滤（跨窗初始状态走 URL）\n' +
+    "    popOut: (type, key, query) => ipcRenderer.invoke('window:pop-out', { type, key, query }),\n" +
+    "    returnToDock: (id) => ipcRenderer.invoke('window:return', { id }),\n" +
+    "    minimizeToRail: (id) => ipcRenderer.invoke('window:minimize', { id }),\n" +
+    "    restore: (id) => ipcRenderer.invoke('window:restore', { id }),\n" +
+    "    remove: (id) => ipcRenderer.invoke('window:remove', { id }),\n" +
+    "    snapshot: () => ipcRenderer.invoke('window:snapshot'),\n" +
+    "    /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */\n" +
+    "    self: () => ipcRenderer.invoke('window:self'),\n" +
+    '    /** 轨道 hover 卡内容预览：降格瞬间快照（无快照返回 ok:false）。 */\n' +
+    "    thumbnail: (id) => ipcRenderer.invoke('window:thumbnail', { id }),\n" +
+    '    /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */\n' +
+    "    setRailMouseIgnore: (ignore) => ipcRenderer.send('window:rail-mouse', { ignore }),\n" +
+    '    onStateChanged: (callback) => {\n' +
+    "      if (typeof callback !== 'function') return () => {};\n" +
+    '      const listener = (_event, payload) => callback(payload);\n' +
+    "      ipcRenderer.on('window:state-changed', listener);\n" +
+    "      return () => ipcRenderer.removeListener('window:state-changed', listener);\n" +
+    '    },\n' +
+    '    /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */\n' +
+    "    openResultInMainWindow: (payload) => ipcRenderer.invoke('window:open-result-in-main', payload),\n" +
+    '    /** UI-385 — 主窗接收 relay（白名单类型 → DOM CustomEvent，与 lib/events 同名）。 */\n' +
+    '    onRelayToMain: (callback) => {\n' +
+    "      if (typeof callback !== 'function') return () => {};\n" +
+    '      const listener = (_event, payload) => callback(payload);\n' +
+    "      ipcRenderer.on('window:relay-to-main', listener);\n" +
+    "      return () => ipcRenderer.removeListener('window:relay-to-main', listener);\n" +
+    '    },\n' +
+    '  },\n' +
+    '\n' +
+    '  // 应用级控制 — 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化，\n' +
+    '  // 只重启 petri-server 不够，必须重新解析 runtime 路径）\n' +
+    '  app: {\n' +
+    "    relaunch: () => ipcRenderer.invoke('app:relaunch'),\n" +
+    '    // BLOCK-264（C-38）— 电脑使用画中画（转投主进程 computer-use-pip 通道）\n' +
+    "    openComputerUsePip: () => ipcRenderer.invoke('computer-use:pip-open'),\n" +
+    "    closeComputerUsePip: () => ipcRenderer.invoke('computer-use:pip-close'),\n" +
+    '    // BLOCK-223 — 桌面外壳（通知 / 托盘 / 退出摘要）\n' +
+    "    getActivitySummary: () => ipcRenderer.invoke('app:get-activity-summary'),\n" +
+    "    getShellStatus: () => ipcRenderer.invoke('app:get-shell-status'),\n" +
+    "    setShellPrefs: (prefs) => ipcRenderer.invoke('app:set-shell-prefs', prefs),\n" +
+    "    notify: (payload) => ipcRenderer.invoke('app:notify"... 20252 more characters
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:24:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/**\n * Electron Preload — 桌面版前端 ↔ 主进程 IPC 桥\n *\n * 通过 contextBridge 暴露安全的 API 给 webview 前端调用。\n * 前端通过 window.petriDesktop 访问这些 API。\n *\n * 阶段 3（desktop-spa）：主窗口加载 Vite SPA，不再需要隐藏 Docusaurus\n * navbar（SPA 没有 navbar）。body padding 由 DesktopToolbar 组件自己管理。\n */\n\nconst { contextBridge, ipcRenderer, webUtils } = require(\'electron\');\n\n// A-009: pull the petri-server port fallback from env-coordinator\n// instead of duplicating the per-port fallback defaults here. The\n// Electron main process sets R_SERVER_PORT on\n// process.env before preload.js runs, so the helper default\n// (3001) is only consulted in the rare standalone-render\n// fallback path.\n// A-009: getBackendPort() default was 3001 (r).\n// Electron main process\'s setupDesktopEnv() injects the resolved port\n// into process.env.R_SERVER_PORT *before* preload.js\n// runs (env-coordinator.js writes it in setupDesktopEnv). Reading from\n// process.env directly is therefore equivalent to calling the helper,\n// and avoids the cross-file require which is forbidden when\n// BrowserWindow is launched with sandbox: true (the require here\n// otherwise throws "module not found" and aborts the entire preload,\n// which silently strips window.petriDesktop and disables the custom\n// traffic-light buttons in the title bar).\nfunction _readPort(envName, defaultPort) {\n  const raw = process.env[envName];\n  if (raw == null || raw === \'\') return defaultPort;\n  const parsed = parseInt(raw, 10);\n  return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultPort;\n}\nconst _rPort = _readPort(\'R_SERVER_PORT\', 3001);\n\nconst AGENT_WORKBENCH_FLAG_CHANNEL = \'petri:agent-workbench-flags\';\nconst AGENT_WORKBENCH_FLAGS = { extraRenderers: false };\n\nipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, (_event, payload) => {\n  if (!payload || typeof payload.extraRenderers !== \'boolean\') return;\n  AGENT_WORKBENCH_FLAGS.extraRenderers = payload.extraRenderers;\n});\n\ncontextBridge.exposeInMainWorld(\'petriAgentFlags\', {\n  agentWorkbenchFlags: {\n    // contextBridge freezes getters on the renderer side and rebinds them\n    // to a frozen snapshot of the snapshot taken at first access — using a\n    // plain getter causes `window.petriAgentFlags.agentWorkbenchFlags.extraRenderers`\n    // to permanently read `false` even after the user flips the toggle in\n    // packaged Electron. Expose a synchronous method instead so each call\n    // returns the live value from the closure.\n    getExtraRenderers: () => AGENT_WORKBENCH_FLAGS.extraRenderers,\n    set: (value) => ipcRenderer.invoke(AGENT_WORKBENCH_FLAG_CHANNEL, value === true),\n    onChange: (callback) => {\n      if (typeof callback !== \'function\') return () => {};\n      const listener = (_event, payload) => {\n        if (payload && typeof payload.extraRenderers === \'boolean\') callback(payload.extraRenderers);\n      };\n      ipcRenderer.on(AGENT_WORKBENCH_FLAG_CHANNEL, listener);\n      return () => ipcRenderer.removeListener(AGENT_WORKBENCH_FLAG_CHANNEL, listener);\n    },\n  },\n});\n\nipcRenderer.on(\'app:soft-refresh\', () => {\n  try {\n    window.dispatchEvent(new CustomEvent(\'petri:soft-refresh\'));\n  } catch {}\n});\n\n// ============================================================\n// 注入 process.env.PETRI_DESKTOP = \'1\' 到渲染进程\n// ============================================================\n// 前端代码通过 typeof process && process.env && process.env.PETRI_DESKTOP\n// 检测桌面版，但 contextIsolation:true + nodeIntegration:false 下\n// 渲染进程没有 process 对象。通过 contextBridge 暴露让其检测通过。\ncontextBridge.exposeInMainWorld(\'process\', {\n  env: {\n    PETRI_DESKTOP: \'1\',\n    NODE_ENV: \'production\',\n  },\n});\n\n// BLOCK-61 品牌桥：主全局名 petri；petriDesktop 为兼容别名（同一 surface\n// 双暴露，desktopBridge 双读），过渡期后评估移除。\nconst desktopBridgeSurface = {\n  // 平台标识\n  isDesktop: true,\n  platform: process.platform,\n  arch: process.arch,\n  // BLOCK-101 P0 — 启动 timeline 桥（纯观测）：渲染层四段 marks 汇总上报 +\n  // 主进程 marks 拉取（flow 用）。沙箱 preload 禁跨文件 require，通道按本文件\n  // 既有家法用字面量（与 src/ipc/channels.js startup 域保持一致）。\n  // preload 执行时刻改由主进程 did-start-loading 打点（timeOrigin 跨进程语义\n  // 不一致曾致负天文数字——渲染层自算不可靠）。\n  startup: {\n    report: (payload) => ipcRenderer.send(\'startup:report\', payload),\n    marks: () => ipcRenderer.invoke(\'startup:marks\'),\n  },\n  // BLOCK-100 — 测试实例标记（主进程经 webPreferences.additionalArguments 注入\n  // --petri-test-instance=1）。严格 === true 判定：投影 shim 的 Proxy 属性访问\n  // 返回 callable proxy（truthy 但非 true），不会误亮测试徽标。\n  __testInstance: process.argv.includes(\'--petri-test-instance=1\'),\n  // UI-421 — 测试实例管理模式快捷键透传（主进程 _window-create.js 注入实际生效\n  // 的组合键；默认 Ctrl+Alt+Shift+M，PETRI_TEST_MANAGE_SHORTCUT 可覆盖）。\n  __testManageShortcut:\n    (process.argv.find((a) => a.startsWith(\'--petri-test-manage-shortcut=\')) || \'\').split(\'=\')[1] || null,\n  backendConfig: Object.freeze({\n    rApiBase: `http://localhost:${_rPort}/api`,\n  }),\n\n  // 窗口控制（配合 frame:false 自定义标题栏）\n  window: {\n    minimize: () => ipcRenderer.send(\'window:minimize\'),\n    maximize: () => ipcRenderer.send(\'window:maximize\'),\n    close: () => ipcRenderer.send(\'window:close\'),\n    isMaximized: () => {\n      try {\n        return Promise.resolve(ipcRenderer.invoke(\'window:isMaximized\')).then(\n          (value) => value === true,\n        );\n      } catch (error) {\n        return Promise.reject(error);\n      }\n    },\n    onMaximizeChanged: (callback) => {\n      if (typeof callback !== \'function\') return () => {};\n      const listener = (_event, isMaximized) => callback(isMaximized === true);\n      ipcRenderer.on(\'window:maximize-changed\', listener);\n      return () => ipcRenderer.removeListener(\'window:maximize-changed\', listener);\n    },\n    // Mac fullscreen support\n    isFullScreen: () => {\n      try {\n        return Promise.resolve(ipcRenderer.invoke(\'window:isFullScreen\')).then(\n          (value) => value === true,\n        );\n      } catch (error) {\n        return Promise.reject(error);\n      }\n    },\n    toggleFullScreen: () => ipcRenderer.send(\'window:toggleFullScreen\'),\n    onFullScreenChanged: (callback) => {\n      if (typeof callback !== \'function\') return () => {};\n      const listener = (_event, isFullScreen) => callback(isFullScreen === true);\n      ipcRenderer.on(\'window:fullscreen-changed\', listener);\n      return () => ipcRenderer.removeListener(\'window:fullscreen-changed\', listener);\n    },\n    // BLOCK-100/UI-411 — 测试实例窗口管理（仅测试实例前端会调用）\n    setAlwaysOnTop: (flag) => ipcRenderer.invoke(\'window:set-always-on-top\', flag),\n    setIgnoreMouseEvents: (flag) => ipcRenderer.invoke(\'window:set-ignore-mouse-events\', flag),\n    onTestManageModeChanged: (callback) => {\n      const listener = (_event, manageMode) => callback(manageMode);\n      ipcRenderer.on(\'window:test-manage-mode-changed\', listener);\n      return () => ipcRenderer.removeListener(\'window:test-manage-mode-changed\', listener);\n    },\n    // UI-421 加映 — 一键解锁按钮：点击切换管理模式；锁定态徽标条 hover 窥视\n    // （点击穿透窗口里按钮要能被点到，hover 时主进程临时转交互，离开回锁）。\n    testManageToggle: () => ipcRenderer.send(\'window:test-manage-toggle\'),\n    testManageHover: (active) => ipcRenderer.send(\'window:test-manage-hover\', active === true),\n\n    // 页面缩放（无边框窗口：菜单 Zoom 角色不可达，故显式暴露）。\n    // delta 为 zoomLevel 步长，可为小数（滚轮平滑缩放用），正数放大。\n    zoomBy: (delta) => ipcRenderer.send(\'window:zoom-by\', Number(delta) || 0),\n    zoomReset: () => ipcRenderer.send(\'window:zoom-reset\'),\n    getZoomLevel: () => {\n      try {\n        return Promise.resolve(ipcRenderer.invoke(\'window:get-zoom\')).then((value) =>\n          typeof value === \'number\' ? value : 0,\n        );\n      } catch (error) {\n        return Promise.reject(error);\n      }\n    },\n  },\n\n  // BLOCK-59 窗口系统 — 弹出窗 / 边缘轨道 / 指挥中心。\n  // × 永远是降格（minimizeToRail），销毁只有轨道显式 remove（plan §3 契约）。\n  windowManager: {\n    // UI-627 — query: 白名单键由主进程 sanitizePopOutQuery 过滤（跨窗初始状态走 URL）\n    popOut: (type, key, query) => ipcRenderer.invoke(\'window:pop-out\', { type, key, query }),\n    returnToDock: (id) => ipcRenderer.invoke(\'window:return\', { id }),\n    minimizeToRail: (id) => ipcRenderer.invoke(\'window:minimize\', { id }),\n    restore: (id) => ipcRenderer.invoke(\'window:restore\', { id }),\n    remove: (id) => ipcRenderer.invoke(\'window:remove\', { id }),\n    snapshot: () => ipcRenderer.invoke(\'window:snapshot\'),\n    /** 当前窗口的内容身份：主窗为 null，弹出窗为 \'type:key\'。 */\n    self: () => ipcRenderer.invoke(\'window:self\'),\n    /** 轨道 hover 卡内容预览：降格瞬间快照（无快照返回 ok:false）。 */\n    thumbnail: (id) => ipcRenderer.invoke(\'window:thumbnail\', { id }),\n    /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */\n    setRailMouseIgnore: (ignore) => ipcRenderer.send(\'window:rail-mouse\', { ignore }),\n    onStateChanged: (callback) => {\n      if (typeof callback !== \'function\') return () => {};\n      const listener = (_event, payload) => callback(payload);\n      ipcRenderer.on(\'window:state-changed\', listener);\n      return () => ipcRenderer.removeListener(\'window:state-changed\', listener);\n    },\n    /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */\n    openResultInMainWindow: (payload) => ipcRenderer.invoke(\'window:open-result-in-main\', payload),\n    /** UI-385 — 主窗接收 relay（白名单类型 → DOM CustomEvent，与 lib/events 同名）。 */\n    onRelayToMain: (callback) => {\n      if (typeof callback !== \'function\') return () => {};\n      const listener = (_event, payload) => callback(payload);\n      ipcRenderer.on(\'window:relay-to-main\', listener);\n      return () => ipcRenderer.removeListener(\'window:relay-to-main\', listener);\n    },\n  },\n\n  // 应用级控制 — 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化，\n  // 只重启 petri-server 不够，必须重新解析 runtime 路径）\n  app: {\n    relaunch: () => ipcRenderer.invoke(\'app:relaunch\'),\n    // BLOCK-264（C-38）— 电脑使用画中画（转投主进程 computer-use-pip 通道）\n    openComputerUsePip: () => ipcRenderer.invoke(\'computer-use:pip-open\'),\n    closeComputerUsePip: () => ipcRenderer.invoke(\'computer-use:pip-close\'),\n    // BLOCK-223 — 桌面外壳（通知 / 托盘 / 退出摘要）\n    getActivitySummary: () => ipcRenderer.invoke(\'app:get-activity-summary\'),\n    getShellStatus: () => ipcRenderer.invoke(\'app:get-shell-status\'),\n    setShellPrefs: (prefs) => ipcRenderer.invoke(\'app:set-shell-prefs\', prefs),\n    notify: (payload) => ipcRenderer.invoke(\'app:notify'... 20252 more characters,
+    expected: /lessonEvidence:\s*\(\)\s*=>\s*ipcRenderer\.invoke\('data:lesson-evidence'\)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:27:3
+✖ ③ data-management.js handler 用 CHANNELS 常量（无手写字面量） (0.499792ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ipcMain\.handle\(CHANNELS\.data\.lessonEvidence/. Input:
+  
+  "const CHANNELS = require('./channels');\n" +
+    '// ============================================================\n' +
+    '// IPC handlers: data:info, data:open-dir\n' +
+    '//\n' +
+    '// Extracted from src/main.js by BLOCK-9.1 PHASE 1.\n' +
+    '// Original location: src/main.js ~line 1822 (setupDataManagementIpc).\n' +
+    '//\n' +
+    '// Self-contained: only depends on process.env, fs, path, shell.\n' +
+    '// No mainWindow injection needed.\n' +
+    '// ============================================================\n' +
+    '\n' +
+    'const fs = require("fs");\n' +
+    'const path = require("path");\n' +
+    'const { ipcMain, shell } = require("electron");\n' +
+    '\n' +
+    '// BLOCK-150 ⑨：空间占用明细的中文名（可操作文案）。\n' +
+    '// breakdown 的键必须是磁盘上的真实目录/文件名（path.join 直接用），不能中文化；\n' +
+    '// 用户可读名称经 labels 字段随 payload 下发，前端按 labels[key] ?? key 渲染。\n' +
+    'const BREAKDOWN_LABELS = {\n' +
+    '  runtimes: "运行时（R / Python）",\n' +
+    '  plugins: "插件",\n' +
+    '  results: "分析结果",\n' +
+    '  uploads: "上传文件",\n' +
+    '  logs: "日志",\n' +
+    '  tmp: "临时文件",\n' +
+    '  "petri.db": "本地数据库",\n' +
+    '  "ai-settings.json": "AI 配置",\n' +
+    '};\n' +
+    '\n' +
+    'function setupDataManagementIpc() {\n' +
+    '  // 递归计算目录大小（字节）\n' +
+    '  function getDirSize(dir) {\n' +
+    '    if (!fs.existsSync(dir)) return 0;\n' +
+    '    let total = 0;\n' +
+    '    const walk = (d) => {\n' +
+    '      try {\n' +
+    '        for (const entry of fs.readdirSync(d, { withFileTypes: true })) {\n' +
+    '          const full = path.join(d, entry.name);\n' +
+    '          if (entry.isSymbolicLink()) continue; // 跳过符号链接避免循环\n' +
+    '          if (entry.isDirectory()) walk(full);\n' +
+    '          else if (entry.isFile()) {\n' +
+    '            try {\n' +
+    '              total += fs.statSync(full).size;\n' +
+    '            } catch {}\n' +
+    '          }\n' +
+    '        }\n' +
+    '      } catch {}\n' +
+    '    };\n' +
+    '    walk(dir);\n' +
+    '    return total;\n' +
+    '  }\n' +
+    '\n' +
+    '  // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）\n' +
+    '  ipcMain.handle(CHANNELS.data.info, async () => {\n' +
+    '    try {\n' +
+    '      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n' +
+    '      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n' +
+    '      const breakdown = {};\n' +
+    '      const subdirs = [\n' +
+    '        "runtimes",\n' +
+    '        "plugins",\n' +
+    '        "results",\n' +
+    '        "uploads",\n' +
+    '        "logs",\n' +
+    '        "tmp",\n' +
+    '      ];\n' +
+    '      for (const sub of subdirs) {\n' +
+    '        const subPath = path.join(dataDir, sub);\n' +
+    '        if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);\n' +
+    '      }\n' +
+    '      // petri.db 单独算\n' +
+    '      const dbPath = path.join(dataDir, "petri.db");\n' +
+    '      if (fs.existsSync(dbPath)) {\n' +
+    '        try {\n' +
+    '          breakdown["petri.db"] = fs.statSync(dbPath).size;\n' +
+    '        } catch {}\n' +
+    '      }\n' +
+    '      // ai-settings.json 等\n' +
+    '      const aiPath = path.join(dataDir, "ai-settings.json");\n' +
+    '      if (fs.existsSync(aiPath)) {\n' +
+    '        try {\n' +
+    '          breakdown["ai-settings.json"] = fs.statSync(aiPath).size;\n' +
+    '        } catch {}\n' +
+    '      }\n' +
+    '      const total = Object.values(breakdown).reduce((a, b) => a + b, 0);\n' +
+    '      const labels = {};\n' +
+    '      for (const key of Object.keys(breakdown)) {\n' +
+    '        if (BREAKDOWN_LABELS[key]) labels[key] = BREAKDOWN_LABELS[key];\n' +
+    '      }\n' +
+    '      return { ok: true, dataDir, total, breakdown, labels };\n' +
+    '    } catch (e) {\n' +
+    '      return { ok: false, error: e.message };\n' +
+    '    }\n' +
+    '  });\n' +
+    '\n' +
+    '  // 在系统文件管理器中打开数据目录\n' +
+    '  ipcMain.handle(CHANNELS.data.openDir, async () => {\n' +
+    '    try {\n' +
+    '      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n' +
+    '      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n' +
+    '      if (!fs.existsSync(dataDir)) {\n' +
+    '        fs.mkdirSync(dataDir, { recursive: true });\n' +
+    '      }\n' +
+    '      await shell.openPath(dataDir);\n' +
+    '      return { ok: true };\n' +
+    '    } catch (e) {\n' +
+    '      return { ok: false, error: e.message };\n' +
+    '    }\n' +
+    '  });\n' +
+    '}\n' +
+    '\n' +
+    'module.exports = { setupDataManagementIpc };\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:29:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: `const CHANNELS = require('./channels');\n// ============================================================\n// IPC handlers: data:info, data:open-dir\n//\n// Extracted from src/main.js by BLOCK-9.1 PHASE 1.\n// Original location: src/main.js ~line 1822 (setupDataManagementIpc).\n//\n// Self-contained: only depends on process.env, fs, path, shell.\n// No mainWindow injection needed.\n// ============================================================\n\nconst fs = require("fs");\nconst path = require("path");\nconst { ipcMain, shell } = require("electron");\n\n// BLOCK-150 ⑨：空间占用明细的中文名（可操作文案）。\n// breakdown 的键必须是磁盘上的真实目录/文件名（path.join 直接用），不能中文化；\n// 用户可读名称经 labels 字段随 payload 下发，前端按 labels[key] ?? key 渲染。\nconst BREAKDOWN_LABELS = {\n  runtimes: "运行时（R / Python）",\n  plugins: "插件",\n  results: "分析结果",\n  uploads: "上传文件",\n  logs: "日志",\n  tmp: "临时文件",\n  "petri.db": "本地数据库",\n  "ai-settings.json": "AI 配置",\n};\n\nfunction setupDataManagementIpc() {\n  // 递归计算目录大小（字节）\n  function getDirSize(dir) {\n    if (!fs.existsSync(dir)) return 0;\n    let total = 0;\n    const walk = (d) => {\n      try {\n        for (const entry of fs.readdirSync(d, { withFileTypes: true })) {\n          const full = path.join(d, entry.name);\n          if (entry.isSymbolicLink()) continue; // 跳过符号链接避免循环\n          if (entry.isDirectory()) walk(full);\n          else if (entry.isFile()) {\n            try {\n              total += fs.statSync(full).size;\n            } catch {}\n          }\n        }\n      } catch {}\n    };\n    walk(dir);\n    return total;\n  }\n\n  // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）\n  ipcMain.handle(CHANNELS.data.info, async () => {\n    try {\n      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n      const breakdown = {};\n      const subdirs = [\n        "runtimes",\n        "plugins",\n        "results",\n        "uploads",\n        "logs",\n        "tmp",\n      ];\n      for (const sub of subdirs) {\n        const subPath = path.join(dataDir, sub);\n        if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);\n      }\n      // petri.db 单独算\n      const dbPath = path.join(dataDir, "petri.db");\n      if (fs.existsSync(dbPath)) {\n        try {\n          breakdown["petri.db"] = fs.statSync(dbPath).size;\n        } catch {}\n      }\n      // ai-settings.json 等\n      const aiPath = path.join(dataDir, "ai-settings.json");\n      if (fs.existsSync(aiPath)) {\n        try {\n          breakdown["ai-settings.json"] = fs.statSync(aiPath).size;\n        } catch {}\n      }\n      const total = Object.values(breakdown).reduce((a, b) => a + b, 0);\n      const labels = {};\n      for (const key of Object.keys(breakdown)) {\n        if (BREAKDOWN_LABELS[key]) labels[key] = BREAKDOWN_LABELS[key];\n      }\n      return { ok: true, dataDir, total, breakdown, labels };\n    } catch (e) {\n      return { ok: false, error: e.message };\n    }\n  });\n\n  // 在系统文件管理器中打开数据目录\n  ipcMain.handle(CHANNELS.data.openDir, async () => {\n    try {\n      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n      if (!fs.existsSync(dataDir)) {\n        fs.mkdirSync(dataDir, { recursive: true });\n      }\n      await shell.openPath(dataDir);\n      return { ok: true };\n    } catch (e) {\n      return { ok: false, error: e.message };\n    }\n  });\n}\n\nmodule.exports = { setupDataManagementIpc };\n`,
+    expected: /ipcMain\.handle\(CHANNELS\.data\.lessonEvidence/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:34:3
+✖ ④ electron.d.ts 声明只读方法（无写入签名） (0.878458ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /lessonEvidence:\s*\(\)\s*=>\s*Promise</. Input:
+  
+  '// Petri 桌面版原生 shell — Electron preload 桥\n' +
+    '// 桌面版前端通过 window.petriDesktop 访问 Electron IPC\n' +
+    '// （从 desktop-app/src/preload.js 暴露的 API）\n' +
+    '\n' +
+    '// M1-1：后端就绪感知层返回结构\n' +
+    'export interface BackendStatus {\n' +
+    '  /** `true` 已安装 / `false` 确认缺失 / `null` 状态未知（backend:status 查询\n' +
+    '   *  失败时的兜底）。消费端判断"缺失"必须用 `=== false`，用 `!rRuntime` 会把\n' +
+    '   *  "未知"误判成"缺失"，导致偶发 IPC 异常时错弹首次配置引导页。 */\n' +
+    '  rRuntime: boolean | null;\n' +
+    '  pyRuntime: boolean | null;\n' +
+    '  /** BLOCK-66 P1：历史名，语义 = petri-server up（与 serverUp 同值，保留兼容）。 */\n' +
+    '  rServerUp: boolean;\n' +
+    '  /** BLOCK-66 P1 additive：petri-server 就绪（与 R 运行时安装状态解绑——\n' +
+    '   *  R 缺失时应用全功能可用，isReady 不再因 rRuntime=false 而为 false）。\n' +
+    '   *  optional：历史 fixture 无需逐个补字段。 */\n' +
+    '  serverUp?: boolean;\n' +
+    '  isReady: boolean;\n' +
+    '  downReason: string | null;\n' +
+    '  /** true once the first backend status read has resolved — lets the UI\n' +
+    '   *  avoid flashing runtime-missing banners before detection has run. */\n' +
+    '  loaded: boolean;\n' +
+    '}\n' +
+    '\n' +
+    '// M2-3：可选错误遥测 payload（最小化，隐私优先）\n' +
+    '// 仅含 category + errorSummary；appVersion/timestamp 由主进程补全\n' +
+    'export interface TelemetryPayload {\n' +
+    '  category?: string;\n' +
+    '  errorSummary?: string;\n' +
+    '}\n' +
+    '\n' +
+    '/** Stage 3 M1: one entry from the Harness provisioning ledger. */\n' +
+    'export interface HarnessCapabilityEntry {\n' +
+    '  capabilityId: string;\n' +
+    "  kind: string; // 后端值域：'bundle' | 'runtime'\n" +
+    '  version: string;\n' +
+    '  sha256: string | null;\n' +
+    '  url: string;\n' +
+    '  size: number | null;\n' +
+    '  installDir: string;\n' +
+    '  installedAt: number;\n' +
+    '  attempts: number;\n' +
+    '}\n' +
+    '\n' +
+    '// UI-311 — result:* IPC handler 统一 fail-closed 信封（preload 1:1 镜像如实声明）。\n' +
+    '// 拆包单点在 lib/resultBridge.ts，前端消费方仍见裸值契约。\n' +
+    'type ResultIpcEnvelope<T> = { ok: boolean; data?: T; error?: string };\n' +
+    '\n' +
+    '// UI-P2-001 — branch:* IPC handler 返回的落库行（snake_case SQLite 列，\n' +
+    '// src/database/branch-db.js 原样返回）。camelCase 映射在 lib/branchBridge.ts。\n' +
+    'type BranchRowRecord = {\n' +
+    '  id: string;\n' +
+    '  project_id: string;\n' +
+    '  name: string;\n' +
+    '  parent_branch_id: string | null;\n' +
+    '  created_at: number;\n' +
+    '  updated_at: number;\n' +
+    '  is_active: number | boolean;\n' +
+    '};\n' +
+    '\n' +
+    '/** BLOCK-242 — 深链安装预览（见 src/main/install-deep-link-core.js）。 */\n' +
+    'export interface InstallDeepLinkMcpServer {\n' +
+    '  id: string;\n' +
+    '  name: string;\n' +
+    "  transport: 'stdio' | 'http';\n" +
+    '  command?: string;\n' +
+    '  args?: string[];\n' +
+    '  url?: string;\n' +
+    '}\n' +
+    'export interface InstallDeepLinkPackArchive {\n' +
+    '  url: string;\n' +
+    '  sizeBytes: number | null;\n' +
+    '  sha256: string;\n' +
+    '}\n' +
+    'export interface InstallDeepLinkPreview {\n' +
+    "  kind: 'pack' | 'mcp';\n" +
+    '  link: string;\n' +
+    '  source: { host: string | null; url: string | null };\n' +
+    '  pack?: {\n' +
+    '    packId: string;\n' +
+    '    name: string;\n' +
+    '    version: string | null;\n' +
+    '    description: string | null;\n' +
+    '    source: string | null;\n' +
+    '    archive: InstallDeepLinkPackArchive;\n' +
+    '    mcpServers: InstallDeepLinkMcpServer[];\n' +
+    '  };\n' +
+    '  server?: InstallDeepLinkMcpServer;\n' +
+    "  risk: { level: 'caution'; reasons: string[] };\n" +
+    '  requiresReplace: { pack: boolean; mcp: string[] };\n' +
+    '}\n' +
+    'export interface InstallDeepLinkExpected {\n' +
+    '  archive?: { url: string; sha256: string; sizeBytes?: number | null };\n' +
+    '  /** L1-2（蓝图 L-51）：mcp 安装确认的预览快照（TOCTOU 对账；缺省即拒装）。 */\n' +
+    "  mcp?: { id: string; transport: 'stdio' | 'http'; command?: string; args?: string[]; url?: string };\n" +
+    '}\n' +
+    '\n' +
+    'declare global {\n' +
+    '  interface Window {\n' +
+    '    /** BLOCK-61 品牌桥主全局名。 */\n' +
+    '    petri?: {\n' +
+    '      isDesktop: true;\n' +
+    '      platform: string;\n' +
+    '      arch: string;\n' +
+    '      backendConfig: {\n' +
+    '        rApiBase: string;\n' +
+    '      };\n' +
+    '      window: {\n' +
+    '        minimize: () => void;\n' +
+    '        maximize: () => void;\n' +
+    '        close: () => void;\n' +
+    '        isMaximized: () => Promise<boolean>;\n' +
+    '        onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void;\n' +
+    '        /** Mac fullscreen support */\n' +
+    '        isFullScreen: () => Promise<boolean>;\n' +
+    '        toggleFullScreen: () => void;\n' +
+    '        onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;\n' +
+    '        /** BLOCK-100/UI-411 — 测试实例窗口管理（handler 仅测试实例放行） */\n' +
+    "        setAlwaysOnTop: (flag: boolean, level?: 'floating' | 'modal-panel' | 'main-menu' | 'status' | 'pop-up-menu' | 'screen-saver') => Promise<{ ok: boolean; alwaysOnTop?: boolean }>;\n" +
+    '        setIgnoreMouseEvents: (flag: boolean) => Promise<{ ok: boolean }>;\n' +
+    '        /** UI-413 — 管理模式（Ctrl+Alt+M）切换事件；manageMode=true=已解锁 */\n' +
+    '        onTestManageModeChanged: (callback: (manageMode: boolean) => void) => () => void;\n' +
+    '        /** UI-421 加映 — 一键解锁按钮：点击切换管理模式（与快捷键并存） */\n' +
+    '        testManageToggle: () => void;\n' +
+    '        /** UI-421 加映 — 锁定态徽标条 hover 窥视：active=true 临时转交互（点击可落），false 回锁 */\n' +
+    '        testManageHover: (active: boolean) => void;\n' +
+    '      };\n' +
+    '      /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */\n' +
+    '      windowManager: {\n' +
+    '        /** 把内容弹出为独立窗口；同内容已弹出 = 聚焦既有窗（禁双开）。 */\n' +
+    '        /** UI-627 — query 键值经主进程白名单（POP_OUT_QUERY_KEYS）过滤后拼入弹窗 URL。 */\n' +
+    '        popOut: (type: string, key?: string, query?: Record<string, string>) => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          id?: string;\n' +
+    "          action?: 'created' | 'focused' | 'restored' | 'singleton';\n" +
+    '          autoDemoted?: string | null;\n' +
+    '          code?: string;\n' +
+    '          error?: string;\n' +
+    '        }>;\n' +
+    '        /** popped → docked：弹出窗收回主窗（BrowserWindow 销毁，状态零丢失）。 */\n' +
+    '        returnToDock: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n' +
+    '        /** popped → railed：× = 降格进边缘轨道（永不销毁，plan §3 不可变契约）。 */\n' +
+    '        minimizeToRail: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n' +
+    '        /** railed → popped：从轨道恢复（回记忆位置）。 */\n' +
+    '        restore: (id: string) => Promise<{ ok: boolean; state?: string; autoDemoted?: string | null; code?: string; error?: string }>;\n' +
+    '        /** railed → closed：唯一的销毁路径（仅轨道内显式移除）。 */\n' +
+    '        remove: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n' +
+    '        /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */\n' +
+    '        openResultInMainWindow: (payload: { type: string; detail?: unknown }) => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          code?: string;\n' +
+    '          error?: string;\n' +
+    '        }>;\n' +
+    '        /** UI-385 — 主窗接收 relay（仅白名单类型会被主进程转发）。 */\n' +
+    '        onRelayToMain: (callback: (payload: { type: string; detail?: unknown }) => void) => () => void;\n' +
+    '        snapshot: () => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          snapshot?: {\n' +
+    '            maxPopped: number;\n' +
+    '            entries: Array<{\n' +
+    '              id: string;\n' +
+    '              type: string;\n' +
+    '              key: string;\n' +
+    "              state: 'docked' | 'popped' | 'railed';\n" +
+    "              railClass: 'static' | 'persistent';\n" +
+    '              fadeAfter: number | null;\n' +
+    '              createdAt: number;\n' +
+    '              poppedAt: number | null;\n' +
+    '              railedAt: number | null;\n' +
+    '            }>;\n' +
+    '            singletons: Record<string, { type: string; route: string }>;\n' +
+    '          };\n' +
+    '          code?: string;\n' +
+    '        }>;\n' +
+    "        /** 当前窗口的内容身份：主窗为 null，弹出窗为 'type:key'。 */\n" +
+    '        self: () => Promise<{ ok: boolean; contentId: string | null; code?: string }>;\n' +
+    '        /** 轨道 hover 卡内容预览：降格瞬间快照 dataURL（无快照 ok:false）。 */\n' +
+    '        thumbnail: (id: string) => Promise<{ ok: boolean; dataUrl?: string | null; code?: string }>;\n' +
+    '        /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */\n' +
+    '        setRailMouseIgnore: (ignore: boolean) => void;\n' +
+    "        /** 注册表增量多播（所有存活窗）：{ kind: 'upsert', entry } / { kind: 'remove', id }。 */\n" +
+    '        onStateChanged: (\n' +
+    '          callback: (\n' +
+    '            payload:\n' +
+    "              | { kind: 'upsert'; entry: { id: string; type: string; key: string; state: 'docked' | 'popped' | 'railed'; railClass: 'static' | 'persistent'; fadeAfter: number | null; createdAt: number; poppedAt: number | null; railedAt: number | null } }\n" +
+    "              | { kind: 'remove'; id: string }\n" +
+    '          ) => void\n' +
+    '        ) => () => void;\n' +
+    '      };\n' +
+    '      /** 应用级控制 —— 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化）。 */\n' +
+    '      app: {\n' +
+    '        relaunch: () => Promise<{ ok: boolean; error?: string }>;\n' +
+    '        /** BLOCK-264（C-38）— 电脑使用画中画：开/关置顶小窗（会话级隐藏）。 */\n' +
+    '        openComputerUsePip: () => Promise<{ ok: boolean }>;\n' +
+    '        closeComputerUsePip: () => Promise<{ ok: boolean }>;\n' +
+    '        /** BLOCK-223 — 退出摘要只读计数（主进程把终端会话数合并进来）。 */\n' +
+    '        getActivitySummary: () => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          counts: Record<string, number>;\n' +
+    '          total: number;\n' +
+    '          fetchedAt: string | null;\n' +
+    '          degraded: boolean;\n' +
+    '        }>;\n' +
+    '        getShellStatus: () => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          closeToTray: boolean;\n' +
+    '          notifyOnTurnEnd: boolean;\n' +
+    '          notifyOnUpdates?: boolean;\n' +
+    '          trayActive: boolean;\n' +
+    '          notificationsSupported: boolean;\n' +
+    '          testInstance: boolean;\n' +
+    '        }>;\n' +
+    '        setShellPrefs: (prefs: {\n' +
+    '          closeToTray?: boolean;\n' +
+    '          notifyOnTurnEnd?: boolean;\n' +
+    '          notifyOnUpdates?: boolean;\n' +
+    '        }) => Promise<{\n' +
+    '          ok: boolean;\n' +
+    '          changed?: boolean;\n' +
+    '          prefs?: { closeToTray: boolean; notifyOnTurnEnd: boolean; notifyOnUpdates?: boolean };\n' +
+    '        }>;\n' +
+    '        notify: (payload: {\n' +
+    "          kind: 'turn_completed' | 'turn_failed' | 'approval_required' | 'update_available';\n" +
+    '          conversationId?: string;\n' +
+    '          label?: string;\n' +
+    '          toolName?: string;\n' +
+    '          dedupeKey?: string;\n' +
+    '        }) => Promise<{ shown: boolean; reason?: string; wouldShow?: boolean }>;\n' +
+    '        respondQuitDecision: (\n' +
+    "          action: 'cancel' | 'tray' | 'quit'\n" +
+    '        ) => Promise<{ ok: boolean; action?: string; reason?: string; preview?: boolean }>;\n' +
+    '        onQuitRequested: (\n' +
+    '          callback: (payload: {\n' +
+    '            counts: Record<string, number>;\n' +
+    '            total: number;\n' +
+    '            rows: Array<{ key: string; label: string; value: number }>;\n' +
+    '            /** BLOCK-260/261 K3 — 主进程归一后的有界逐项定位（无参数正文）。 */\n' +
+    '            items?: Array<{\n' +
+    "              kind: 'toolJob' | 'task' | 'subagentTask' | 'approval';\n" +
+    '              id: string;\n' +
+    '              label: string;\n' +
+    '              status?: string;\n' +
+    '              projectId?: string | null;\n' +
+    '              conversationId?: string | null;\n' +
+    '              taskId?: string | null;\n' +
+    '            }>;\n' +
+    '            fetchedAt?: string | null;\n' +
+    '            reason?: string;\n' +
+    '            preview?: boolean;\n' +
+    '            trayAvailable?: boolean;\n' +
+    '          }) => void\n' +
+    '        ) => () => void;\n' +
+    '        onNotificationClicked: (\n' +
+    '          callback: '... 34530 more characters
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:36:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '// Petri 桌面版原生 shell — Electron preload 桥\n// 桌面版前端通过 window.petriDesktop 访问 Electron IPC\n// （从 desktop-app/src/preload.js 暴露的 API）\n\n// M1-1：后端就绪感知层返回结构\nexport interface BackendStatus {\n  /** `true` 已安装 / `false` 确认缺失 / `null` 状态未知（backend:status 查询\n   *  失败时的兜底）。消费端判断"缺失"必须用 `=== false`，用 `!rRuntime` 会把\n   *  "未知"误判成"缺失"，导致偶发 IPC 异常时错弹首次配置引导页。 */\n  rRuntime: boolean | null;\n  pyRuntime: boolean | null;\n  /** BLOCK-66 P1：历史名，语义 = petri-server up（与 serverUp 同值，保留兼容）。 */\n  rServerUp: boolean;\n  /** BLOCK-66 P1 additive：petri-server 就绪（与 R 运行时安装状态解绑——\n   *  R 缺失时应用全功能可用，isReady 不再因 rRuntime=false 而为 false）。\n   *  optional：历史 fixture 无需逐个补字段。 */\n  serverUp?: boolean;\n  isReady: boolean;\n  downReason: string | null;\n  /** true once the first backend status read has resolved — lets the UI\n   *  avoid flashing runtime-missing banners before detection has run. */\n  loaded: boolean;\n}\n\n// M2-3：可选错误遥测 payload（最小化，隐私优先）\n// 仅含 category + errorSummary；appVersion/timestamp 由主进程补全\nexport interface TelemetryPayload {\n  category?: string;\n  errorSummary?: string;\n}\n\n/** Stage 3 M1: one entry from the Harness provisioning ledger. */\nexport interface HarnessCapabilityEntry {\n  capabilityId: string;\n  kind: string; // 后端值域：\'bundle\' | \'runtime\'\n  version: string;\n  sha256: string | null;\n  url: string;\n  size: number | null;\n  installDir: string;\n  installedAt: number;\n  attempts: number;\n}\n\n// UI-311 — result:* IPC handler 统一 fail-closed 信封（preload 1:1 镜像如实声明）。\n// 拆包单点在 lib/resultBridge.ts，前端消费方仍见裸值契约。\ntype ResultIpcEnvelope<T> = { ok: boolean; data?: T; error?: string };\n\n// UI-P2-001 — branch:* IPC handler 返回的落库行（snake_case SQLite 列，\n// src/database/branch-db.js 原样返回）。camelCase 映射在 lib/branchBridge.ts。\ntype BranchRowRecord = {\n  id: string;\n  project_id: string;\n  name: string;\n  parent_branch_id: string | null;\n  created_at: number;\n  updated_at: number;\n  is_active: number | boolean;\n};\n\n/** BLOCK-242 — 深链安装预览（见 src/main/install-deep-link-core.js）。 */\nexport interface InstallDeepLinkMcpServer {\n  id: string;\n  name: string;\n  transport: \'stdio\' | \'http\';\n  command?: string;\n  args?: string[];\n  url?: string;\n}\nexport interface InstallDeepLinkPackArchive {\n  url: string;\n  sizeBytes: number | null;\n  sha256: string;\n}\nexport interface InstallDeepLinkPreview {\n  kind: \'pack\' | \'mcp\';\n  link: string;\n  source: { host: string | null; url: string | null };\n  pack?: {\n    packId: string;\n    name: string;\n    version: string | null;\n    description: string | null;\n    source: string | null;\n    archive: InstallDeepLinkPackArchive;\n    mcpServers: InstallDeepLinkMcpServer[];\n  };\n  server?: InstallDeepLinkMcpServer;\n  risk: { level: \'caution\'; reasons: string[] };\n  requiresReplace: { pack: boolean; mcp: string[] };\n}\nexport interface InstallDeepLinkExpected {\n  archive?: { url: string; sha256: string; sizeBytes?: number | null };\n  /** L1-2（蓝图 L-51）：mcp 安装确认的预览快照（TOCTOU 对账；缺省即拒装）。 */\n  mcp?: { id: string; transport: \'stdio\' | \'http\'; command?: string; args?: string[]; url?: string };\n}\n\ndeclare global {\n  interface Window {\n    /** BLOCK-61 品牌桥主全局名。 */\n    petri?: {\n      isDesktop: true;\n      platform: string;\n      arch: string;\n      backendConfig: {\n        rApiBase: string;\n      };\n      window: {\n        minimize: () => void;\n        maximize: () => void;\n        close: () => void;\n        isMaximized: () => Promise<boolean>;\n        onMaximizeChanged: (callback: (isMaximized: boolean) => void) => () => void;\n        /** Mac fullscreen support */\n        isFullScreen: () => Promise<boolean>;\n        toggleFullScreen: () => void;\n        onFullScreenChanged: (callback: (isFullScreen: boolean) => void) => () => void;\n        /** BLOCK-100/UI-411 — 测试实例窗口管理（handler 仅测试实例放行） */\n        setAlwaysOnTop: (flag: boolean, level?: \'floating\' | \'modal-panel\' | \'main-menu\' | \'status\' | \'pop-up-menu\' | \'screen-saver\') => Promise<{ ok: boolean; alwaysOnTop?: boolean }>;\n        setIgnoreMouseEvents: (flag: boolean) => Promise<{ ok: boolean }>;\n        /** UI-413 — 管理模式（Ctrl+Alt+M）切换事件；manageMode=true=已解锁 */\n        onTestManageModeChanged: (callback: (manageMode: boolean) => void) => () => void;\n        /** UI-421 加映 — 一键解锁按钮：点击切换管理模式（与快捷键并存） */\n        testManageToggle: () => void;\n        /** UI-421 加映 — 锁定态徽标条 hover 窥视：active=true 临时转交互（点击可落），false 回锁 */\n        testManageHover: (active: boolean) => void;\n      };\n      /** BLOCK-59 窗口系统 — 窗口状态机（docked/popped/railed/closed）IPC 面。 */\n      windowManager: {\n        /** 把内容弹出为独立窗口；同内容已弹出 = 聚焦既有窗（禁双开）。 */\n        /** UI-627 — query 键值经主进程白名单（POP_OUT_QUERY_KEYS）过滤后拼入弹窗 URL。 */\n        popOut: (type: string, key?: string, query?: Record<string, string>) => Promise<{\n          ok: boolean;\n          id?: string;\n          action?: \'created\' | \'focused\' | \'restored\' | \'singleton\';\n          autoDemoted?: string | null;\n          code?: string;\n          error?: string;\n        }>;\n        /** popped → docked：弹出窗收回主窗（BrowserWindow 销毁，状态零丢失）。 */\n        returnToDock: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n        /** popped → railed：× = 降格进边缘轨道（永不销毁，plan §3 不可变契约）。 */\n        minimizeToRail: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n        /** railed → popped：从轨道恢复（回记忆位置）。 */\n        restore: (id: string) => Promise<{ ok: boolean; state?: string; autoDemoted?: string | null; code?: string; error?: string }>;\n        /** railed → closed：唯一的销毁路径（仅轨道内显式移除）。 */\n        remove: (id: string) => Promise<{ ok: boolean; state?: string; code?: string; error?: string }>;\n        /** UI-385 — 独立窗下钻通道：把载荷转发到主窗（右栏打开结果/智能体）。 */\n        openResultInMainWindow: (payload: { type: string; detail?: unknown }) => Promise<{\n          ok: boolean;\n          code?: string;\n          error?: string;\n        }>;\n        /** UI-385 — 主窗接收 relay（仅白名单类型会被主进程转发）。 */\n        onRelayToMain: (callback: (payload: { type: string; detail?: unknown }) => void) => () => void;\n        snapshot: () => Promise<{\n          ok: boolean;\n          snapshot?: {\n            maxPopped: number;\n            entries: Array<{\n              id: string;\n              type: string;\n              key: string;\n              state: \'docked\' | \'popped\' | \'railed\';\n              railClass: \'static\' | \'persistent\';\n              fadeAfter: number | null;\n              createdAt: number;\n              poppedAt: number | null;\n              railedAt: number | null;\n            }>;\n            singletons: Record<string, { type: string; route: string }>;\n          };\n          code?: string;\n        }>;\n        /** 当前窗口的内容身份：主窗为 null，弹出窗为 \'type:key\'。 */\n        self: () => Promise<{ ok: boolean; contentId: string | null; code?: string }>;\n        /** 轨道 hover 卡内容预览：降格瞬间快照 dataURL（无快照 ok:false）。 */\n        thumbnail: (id: string) => Promise<{ ok: boolean; dataUrl?: string | null; code?: string }>;\n        /** 轨道容器窗专用：hover 条带/卡时切换点击穿透（仅轨道窗 sender 生效）。 */\n        setRailMouseIgnore: (ignore: boolean) => void;\n        /** 注册表增量多播（所有存活窗）：{ kind: \'upsert\', entry } / { kind: \'remove\', id }。 */\n        onStateChanged: (\n          callback: (\n            payload:\n              | { kind: \'upsert\'; entry: { id: string; type: string; key: string; state: \'docked\' | \'popped\' | \'railed\'; railClass: \'static\' | \'persistent\'; fadeAfter: number | null; createdAt: number; poppedAt: number | null; railedAt: number | null } }\n              | { kind: \'remove\'; id: string }\n          ) => void\n        ) => () => void;\n      };\n      /** 应用级控制 —— 装完运行时后需整体重启（PETRI_R_HOME 在 main 启动时固化）。 */\n      app: {\n        relaunch: () => Promise<{ ok: boolean; error?: string }>;\n        /** BLOCK-264（C-38）— 电脑使用画中画：开/关置顶小窗（会话级隐藏）。 */\n        openComputerUsePip: () => Promise<{ ok: boolean }>;\n        closeComputerUsePip: () => Promise<{ ok: boolean }>;\n        /** BLOCK-223 — 退出摘要只读计数（主进程把终端会话数合并进来）。 */\n        getActivitySummary: () => Promise<{\n          ok: boolean;\n          counts: Record<string, number>;\n          total: number;\n          fetchedAt: string | null;\n          degraded: boolean;\n        }>;\n        getShellStatus: () => Promise<{\n          ok: boolean;\n          closeToTray: boolean;\n          notifyOnTurnEnd: boolean;\n          notifyOnUpdates?: boolean;\n          trayActive: boolean;\n          notificationsSupported: boolean;\n          testInstance: boolean;\n        }>;\n        setShellPrefs: (prefs: {\n          closeToTray?: boolean;\n          notifyOnTurnEnd?: boolean;\n          notifyOnUpdates?: boolean;\n        }) => Promise<{\n          ok: boolean;\n          changed?: boolean;\n          prefs?: { closeToTray: boolean; notifyOnTurnEnd: boolean; notifyOnUpdates?: boolean };\n        }>;\n        notify: (payload: {\n          kind: \'turn_completed\' | \'turn_failed\' | \'approval_required\' | \'update_available\';\n          conversationId?: string;\n          label?: string;\n          toolName?: string;\n          dedupeKey?: string;\n        }) => Promise<{ shown: boolean; reason?: string; wouldShow?: boolean }>;\n        respondQuitDecision: (\n          action: \'cancel\' | \'tray\' | \'quit\'\n        ) => Promise<{ ok: boolean; action?: string; reason?: string; preview?: boolean }>;\n        onQuitRequested: (\n          callback: (payload: {\n            counts: Record<string, number>;\n            total: number;\n            rows: Array<{ key: string; label: string; value: number }>;\n            /** BLOCK-260/261 K3 — 主进程归一后的有界逐项定位（无参数正文）。 */\n            items?: Array<{\n              kind: \'toolJob\' | \'task\' | \'subagentTask\' | \'approval\';\n              id: string;\n              label: string;\n              status?: string;\n              projectId?: string | null;\n              conversationId?: string | null;\n              taskId?: string | null;\n            }>;\n            fetchedAt?: string | null;\n            reason?: string;\n            preview?: boolean;\n            trayAvailable?: boolean;\n          }) => void\n        ) => () => void;\n        onNotificationClicked: (\n          callback: '... 34530 more characters,
+    expected: /lessonEvidence:\s*\(\)\s*=>\s*Promise</,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:47:3
+✖ ⑤ 面板文件在场且只读（无 button / 无写入方法） (0.132042ms)
+  Error: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+      at Object.readFileSync (node:fs:441:20)
+      at read (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:14:26)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:48:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:54:3
+✖ ⑥ 面板无「已验证/已签名/通过」观感代签徽标 (0.054667ms)
+  Error: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+      at Object.readFileSync (node:fs:441:20)
+      at read (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:14:26)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:55:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:59:3
+✖ ⑦ 面板如实呈现失败/空态（不伪造曲线） (0.050125ms)
+  Error: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+      at Object.readFileSync (node:fs:441:20)
+      at read (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:14:26)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:60:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:65:3
+✖ ⑧ CSS 全 var(--petri-*) token，零字面量颜色/字号 (0.078792ms)
+  Error: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.module.css'
+      at Object.readFileSync (node:fs:441:20)
+      at read (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:14:26)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:66:15)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.module.css'
+  }
+
+test at test/evo4-evidence-panel.test.mjs:75:3
+✖ ⑨ 面板挂载在 maintenance（不新增导航项/台账债） (0.374291ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /LessonEvidencePanel/. Input:
+  
+  "import { SettingsField } from './SettingsField';\n" +
+    "import { UpdateChecker } from './sections/UpdateChecker';\n" +
+    "import { ExportDiagnostic } from './sections/ExportDiagnostic';\n" +
+    "import { ConfigTransferPanel } from './sections/ConfigTransferPanel';\n" +
+    '\n' +
+    '/**\n' +
+    ' * MaintenanceSection — 「隐私与维护」分区（BLOCK-201 W2 从 696→750 行面板抽出）。\n' +
+    ' *\n' +
+    ' * 抽出的唯一触发是 code-size 门禁（面板基线 696 / 预算 700）：本包新增搜索与备份面后\n' +
+    ' * 顶爆预算，按「已超健康体量的文件先拆再加」纪律把这一整节（反馈/更新/诊断/配置备份）\n' +
+    ' * 搬成独立组件，而不是申请例外或抬基线。\n' +
+    ' */\n' +
+    'interface Props {\n' +
+    '  telemetryEnabled: boolean;\n' +
+    '  onToggleTelemetry: (next: boolean) => void;\n' +
+    '  /** 配置导入成功后通知父层重挂载分区面板。 */\n' +
+    '  onConfigChanged: () => void;\n' +
+    '}\n' +
+    '\n' +
+    'export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConfigChanged }: Props): React.ReactElement {\n' +
+    '  return (\n' +
+    '    <section className="petri-settings-section">\n' +
+    '      <div className="petri-settings-section__heading">\n' +
+    '        <h3>数据与维护</h3>\n' +
+    '        <p>数据目录、备份、诊断与反馈；更新会在界面上主动提示，不用进这里找。</p>\n' +
+    '      </div>\n' +
+    '      {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}\n' +
+    '      <SettingsField\n' +
+    '        icon="shield"\n' +
+    '        label="错误反馈"\n' +
+    '        htmlFor="petri-telemetry-toggle"\n' +
+    '        trailing\n' +
+    "        meta={telemetryEnabled ? '已开启' : '已关闭'}\n" +
+    '        hint="仅上报错误分类与应用版本，不含用户数据、文件路径或文件名"\n' +
+    '      >\n' +
+    '        <input\n' +
+    '          type="checkbox"\n' +
+    '          id="petri-telemetry-toggle"\n' +
+    '          className="petri-toggle"\n' +
+    '          checked={telemetryEnabled}\n' +
+    '          onChange={(event) => onToggleTelemetry(event.target.checked)}\n' +
+    '        />\n' +
+    '      </SettingsField>\n' +
+    '      {/* L6-6（蓝图 L-72/BLOCK-410）：本地主权说明——产品人设「跑在你机器上」的设置面可见形态 */}\n' +
+    '      <p className="petri-field__hint" role="note" data-testid="local-sovereignty-note">\n' +
+    '        本机优先：数据、模型凭据与产物均保存在本机，核心链路本地运行、全程可审计。\n' +
+    '      </p>\n' +
+    '      <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">\n' +
+    '        <ExportDiagnostic />\n' +
+    '      </SettingsField>\n' +
+    '      {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}\n' +
+    '      <ConfigTransferPanel onChanged={onConfigChanged} />\n' +
+    '      {/* UI-704 — 更新检查移出主位（用户裁决「设置内部不实用」）：页面内 UpdateCard\n' +
+    '          主动呈现；此处保留折叠的手动检查入口（功能不删，搜索可达）。 */}\n' +
+    '      <details className="petri-settings-advanced-details">\n' +
+    '        <summary>手动检查更新（通常不需要——新版本会自动在页面上出现）</summary>\n' +
+    '        <SettingsField icon="refresh" label="应用更新" trailing hint="检查并下载当前系统的安装包">\n' +
+    '          <UpdateChecker />\n' +
+    '        </SettingsField>\n' +
+    '      </details>\n' +
+    '    </section>\n' +
+    '  );\n' +
+    '}\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-panel.test.mjs:77:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: `import { SettingsField } from './SettingsField';\nimport { UpdateChecker } from './sections/UpdateChecker';\nimport { ExportDiagnostic } from './sections/ExportDiagnostic';\nimport { ConfigTransferPanel } from './sections/ConfigTransferPanel';\n\n/**\n * MaintenanceSection — 「隐私与维护」分区（BLOCK-201 W2 从 696→750 行面板抽出）。\n *\n * 抽出的唯一触发是 code-size 门禁（面板基线 696 / 预算 700）：本包新增搜索与备份面后\n * 顶爆预算，按「已超健康体量的文件先拆再加」纪律把这一整节（反馈/更新/诊断/配置备份）\n * 搬成独立组件，而不是申请例外或抬基线。\n */\ninterface Props {\n  telemetryEnabled: boolean;\n  onToggleTelemetry: (next: boolean) => void;\n  /** 配置导入成功后通知父层重挂载分区面板。 */\n  onConfigChanged: () => void;\n}\n\nexport function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConfigChanged }: Props): React.ReactElement {\n  return (\n    <section className="petri-settings-section">\n      <div className="petri-settings-section__heading">\n        <h3>数据与维护</h3>\n        <p>数据目录、备份、诊断与反馈；更新会在界面上主动提示，不用进这里找。</p>\n      </div>\n      {/* M2-3：可选错误遥测开关（默认关闭，用户主动开启） */}\n      <SettingsField\n        icon="shield"\n        label="错误反馈"\n        htmlFor="petri-telemetry-toggle"\n        trailing\n        meta={telemetryEnabled ? '已开启' : '已关闭'}\n        hint="仅上报错误分类与应用版本，不含用户数据、文件路径或文件名"\n      >\n        <input\n          type="checkbox"\n          id="petri-telemetry-toggle"\n          className="petri-toggle"\n          checked={telemetryEnabled}\n          onChange={(event) => onToggleTelemetry(event.target.checked)}\n        />\n      </SettingsField>\n      {/* L6-6（蓝图 L-72/BLOCK-410）：本地主权说明——产品人设「跑在你机器上」的设置面可见形态 */}\n      <p className="petri-field__hint" role="note" data-testid="local-sovereignty-note">\n        本机优先：数据、模型凭据与产物均保存在本机，核心链路本地运行、全程可审计。\n      </p>\n      <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">\n        <ExportDiagnostic />\n      </SettingsField>\n      {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}\n      <ConfigTransferPanel onChanged={onConfigChanged} />\n      {/* UI-704 — 更新检查移出主位（用户裁决「设置内部不实用」）：页面内 UpdateCard\n          主动呈现；此处保留折叠的手动检查入口（功能不删，搜索可达）。 */}\n      <details className="petri-settings-advanced-details">\n        <summary>手动检查更新（通常不需要——新版本会自动在页面上出现）</summary>\n        <SettingsField icon="refresh" label="应用更新" trailing hint="检查并下载当前系统的安装包">\n          <UpdateChecker />\n        </SettingsField>\n      </details>\n    </section>\n  );\n}\n`,
+    expected: /LessonEvidencePanel/,
+    operator: 'match',
+    diff: 'simple'
+  }

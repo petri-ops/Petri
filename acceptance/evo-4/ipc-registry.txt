@@ -1,0 +1,17 @@
+✔ registry values are unique and channel-shaped (0.928667ms)
+✔ every registry channel is wrapped in preload or explicitly main-only (main/preload drift guard) (1.535708ms)
+✔ MAIN_ONLY allowlist stays tight (every entry is still registered, none wrapped) (0.258625ms)
+✔ consumers hold no hand-written channel literals (literal reflux guard) (5.290333ms)
+✔ every consumer can resolve its channels require (path guard — src/ vs src/main/ 深度差异) (1.186875ms)
+✔ W2-2 preload 调用点 ∪ MAIN_ONLY 与注册表集合相等（双向） (0.566125ms)
+✔ W2-2 负测：通道名只出现在注释里不计入调用点（堵 includes 假绿） (0.198375ms)
+✔ W2-2 全量 glob：src 下任何主进程模块不得手写已登记通道字面量，也不得手写未登记 IPC 通道 (13.734166ms)
+✔ L2-6（BLOCK-406）：通道分类注记键 ⊆ 注册表字面量（testOnly/platformScoped 单源一致） (0.519333ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 147.102375

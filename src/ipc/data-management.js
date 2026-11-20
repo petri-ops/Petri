@@ -1,4 +1,7 @@
 const CHANNELS = require('./channels');
+// EVO-4 — 只读证据通道：R5 合法层（core/shared-backend）+ 路径/构造器单源
+const { resolveCore } = require('../main/core-utils');
+const { resolveDbPath } = require(resolveCore('shared-backend', 'db-connection-policy.js'));
 // ============================================================
 // IPC handlers: data:info, data:open-dir
 //
@@ -103,6 +106,36 @@ function setupDataManagementIpc() {
       }
       await shell.openPath(dataDir);
       return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  // EVO-4 — 只读：harness 自进化证据（lessons 频率/状态 + incidents 日频）。
+  // 零写入、零外发；路径与构造器单源均来自 core/shared-backend 与 migration-runner（R5 合规）。
+  ipcMain.handle(CHANNELS.data.lessonEvidence, async () => {
+    try {
+      const dbPath = resolveDbPath(process.env);
+      if (!dbPath || !fs.existsSync(dbPath)) {
+        return { ok: true, lessons: [], incidentTrend: [], reason: 'db-not-found' };
+      }
+      const { loadDatabaseConstructor } = require('../migration-runner');
+      const Database = loadDatabaseConstructor();
+      const db = new Database(dbPath, { readonly: true, fileMustExist: true });
+      try {
+        const lessons = db.prepare(
+          `SELECT id, source_fingerprint, title, scope, status, confidence,
+                  occurrences_before, occurrences_after, created_at, last_seen_at
+           FROM lessons ORDER BY last_seen_at DESC LIMIT 200`
+        ).all();
+        const incidentTrend = db.prepare(
+          `SELECT date(created_at) AS day, COUNT(*) AS count
+           FROM incidents GROUP BY day ORDER BY day ASC`
+        ).all();
+        return { ok: true, lessons, incidentTrend };
+      } finally {
+        db.close();
+      }
     } catch (e) {
       return { ok: false, error: e.message };
     }

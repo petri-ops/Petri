@@ -214,4 +214,15 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **EVO 全链闭环**：EVO-0 基座 → EVO-1 观测接线 → EVO-2 Distill+Evolve → EVO-3 Verify，五层 Observe→Distill→Evolve→Verify→Guard 全部落地，真实历史错误走通"学习→频率归零→保留"。harness 自进化建议出口始终不进 AUDIT-LOG 工作包链、全程本地零外发。
 - **纪律**：零新依赖/纯本地零外发/零模型调用/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 11. EVO-4 收口笔录（2026-11-20 · 用户发令「冲」=EVO-3 deferred 面板转正）
+
+- **交付**：`data.lessonEvidence` 只读 IPC 通道四处同步（channels.js / preload.js / electron.d.ts / data-management.js handler）——handler 用 core/shared-backend 的 db-connection-policy（路径单源）+ migration-runner 的 ABI 构造器单源直读 petri.db（R5 合规、零写入、零外发）；设置页 maintenance 内嵌 `LessonEvidencePanel`（只读频率柱状曲线 + lesson 状态行 + 失败/空态如实呈现，零写入控件、无「已验证/已签名」徽标），CSS 全 var(--petri-*) token 零字面量；挂载在既有 maintenance 分区不新增导航项。
+- **观感零代签**：UI-716 台账保持 `in_progress + pending_human_eye`，面板只呈原始状态字符串/时间戳/计数，不写任何结论性徽标；布局/配色/可读性留用户实机过目。
+- **HK-01 红绿**：红=通道/面板文件缺席（9/9 失败）→ 绿 Node 源级 9/9（通道四处同步 + 面板只读零代签 + CSS token）+ IPC 注册表守护 9/9（双向集合相等 + 全量 glob 无字面量回流 + R5）+ 前端组件 4 测 + theme-token 契约 23/23（`frontend-tests.txt`）。
+- **门禁**：quality:types(tsc) 0、ui:audit ✓、quality:secret/arch PASS、docs:check PASS(661)（AUDIT-LOG 超 120KB 阈经 audit:compact 归档 27 行历史后复检绿，搬移不改写）、改动文件 lint 0 error（前端 `react-hooks/set-state-in-effect` 用订阅式异步回调规避，零新增豁免）、knip 零命中（存量 38）。
+- **存量红如实归属**：同 EVO-0/1/2/3——2 lint error / 38 knip / 1 test:changed 冲突（HEAD/并发 WIP，零触碰）。
+- **Jev**：doc:suggest uiAudit+planDoc adopted（UI 台账本批已登记、本文件即回写对象）；decision:session 本轮增量 jev×1。
+- **EVO 全链最终态**：EVO-0 基座 → EVO-1 观测 → EVO-2 蒸馏+改进 → EVO-3 验证 → EVO-4 证据可见，五层 Observe→Distill→Evolve→Verify→Guard 连同用户可见证据面全部落地；harness 自进化建议出口始终不进开发治理链、全程本地零外发。
+- **纪律**：零新依赖/纯本地零外发/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

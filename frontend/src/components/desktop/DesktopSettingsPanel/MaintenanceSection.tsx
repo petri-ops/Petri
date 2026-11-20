@@ -2,6 +2,7 @@ import { SettingsField } from './SettingsField';
 import { UpdateChecker } from './sections/UpdateChecker';
 import { ExportDiagnostic } from './sections/ExportDiagnostic';
 import { ConfigTransferPanel } from './sections/ConfigTransferPanel';
+import { LessonEvidencePanel } from './sections/LessonEvidencePanel';
 
 /**
  * MaintenanceSection — 「隐私与维护」分区（BLOCK-201 W2 从 696→750 行面板抽出）。
@@ -47,6 +48,15 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
       </p>
       <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">
         <ExportDiagnostic />
+      </SettingsField>
+      {/* EVO-4 UI-716 — harness 自进化证据（只读快照，零写入控件，观感零代签） */}
+      <SettingsField
+        icon="bar-chart"
+        label="Harness 自进化证据"
+        trailing
+        hint="本机 lesson 频率与状态快照；只读，无写入"
+      >
+        <LessonEvidencePanel />
       </SettingsField>
       {/* BLOCK-201 W2 — 设置全景导出/导入（注册表 6 族；凭据与未注册落点显式排除） */}
       <ConfigTransferPanel onChanged={onConfigChanged} />

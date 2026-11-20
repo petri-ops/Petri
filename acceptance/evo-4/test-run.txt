@@ -1,0 +1,21 @@
+▶ EVO-4 · IPC 通道四处同步（只读）
+  ✔ ① channels.js 登记 data.lessonEvidence (0.844083ms)
+  ✔ ② preload.js 有真实 ipcRenderer.invoke 调用点（非注释） (0.792ms)
+  ✔ ③ data-management.js handler 用 CHANNELS 常量（无手写字面量） (0.247708ms)
+  ✔ ④ electron.d.ts 声明只读方法（无写入签名） (0.635416ms)
+✔ EVO-4 · IPC 通道四处同步（只读） (3.192833ms)
+▶ EVO-4 · 前端面板只读数据面
+  ✔ ⑤ 面板文件在场且只读（无 button / 无写入方法） (0.364541ms)
+  ✔ ⑥ 面板无「已验证/已签名/通过」观感代签徽标 (0.144792ms)
+  ✔ ⑦ 面板如实呈现失败/空态（不伪造曲线） (0.146167ms)
+  ✔ ⑧ CSS 全 var(--petri-*) token，零字面量颜色/字号 (1.107584ms)
+  ✔ ⑨ 面板挂载在 maintenance（不新增导航项/台账债） (0.238583ms)
+✔ EVO-4 · 前端面板只读数据面 (2.141125ms)
+ℹ tests 9
+ℹ suites 2
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.902333

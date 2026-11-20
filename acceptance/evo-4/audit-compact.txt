@@ -1,0 +1,2 @@
+[audit-compact] 链淘汰 27 行 + 记录表淘汰 0 行 → docs/archive/checkpoints/
+[audit-compact] 活跃台现在 101173 字节。请跑 npm run docs:check 验证直链完整性。

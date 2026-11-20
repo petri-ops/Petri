@@ -60,6 +60,8 @@ const CHANNELS = {
   data: {
     info: 'data:info',
     openDir: 'data:open-dir',
+    // 只读：harness 自进化 lesson 频率/状态证据面（零外发、无写入）
+    lessonEvidence: 'data:lesson-evidence',
   },
   diagnostic: {
     export: 'diagnostic:export',

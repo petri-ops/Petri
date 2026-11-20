@@ -373,6 +373,7 @@ const desktopBridgeSurface = {
   data: {
     info: () => ipcRenderer.invoke('data:info'),
     openDir: () => ipcRenderer.invoke('data:open-dir'),
+    lessonEvidence: () => ipcRenderer.invoke('data:lesson-evidence'),
   },
 
   // 右侧工具栏。BLOCK-54 P2 多 Tab：session 形通道全量 additive——

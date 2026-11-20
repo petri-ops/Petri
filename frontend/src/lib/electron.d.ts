@@ -573,6 +573,25 @@ declare global {
           labels?: Record<string, string>;
         }>;
         openDir: () => Promise<{ ok: boolean; error?: string }>;
+        /** 只读：harness 自进化证据（lesson 频率/状态 + incident 日频），无写入、无外发 */
+        lessonEvidence: () => Promise<{
+          ok: boolean;
+          lessons?: Array<{
+            id: number;
+            source_fingerprint: string;
+            title: string;
+            scope: string;
+            status: string;
+            confidence: number;
+            occurrences_before: number;
+            occurrences_after: number;
+            created_at: string;
+            last_seen_at: string;
+          }>;
+          incidentTrend?: Array<{ day: string; count: number }>;
+          reason?: 'db-not-found';
+          error?: string;
+        }>;
       };
       terminal: {
         snapshot: () => Promise<{

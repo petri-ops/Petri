@@ -6786,6 +6786,14 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **观感确认**：用户原话「好多了 看起来不错」（2026-11-19）——确认来自用户，Agent 零代签；据此由 in_progress 升 verified。
 - **状态边界**：dev Electron 边界内 verified；不外推 packaged/Provider/GA。
 
+## UI-716: Harness 自进化证据面板——设置页只读 lesson 频率曲线与状态（2026-11-20 **in_progress（代码+契约；观感零代签 pending_human_eye）**）
+
+EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）。此前证据面=离线 JSON 导出（`acceptance/evo-3/evidence-export.json`），用户不可从 UI 直接看；本增量把它做成设置页只读快照，服务「越用越好用」的可审计证据可见面。
+
+**实现**：新增 `data.lessonEvidence` 只读 IPC（channels.js/preload.js/electron.d.ts/data-management.js 四处同步；R5 用 core/shared-backend 的 db-connection-policy + ABI 构造器单源直读 petri.db，零写入）；设置页 maintenance 内嵌 `LessonEvidencePanel`（只读柱状频率曲线 + lesson 状态行 + 失败/空态如实呈现，零写入控件、无「已验证/已签名」徽标）。CSS 全 var(--petri-*) token 零字面量。
+
+**验证**：HK-01 红绿（IPC 通道门 + 面板契约）；IPC 注册表双向集合相等门；前端定向测试（只读渲染/失败不伪造/缺桥静默）；theme-token 契约；tsc 0。**观感零代签**（面板布局/配色/可读性留用户实机过目，状态保持 in_progress + pending_human_eye）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-715: 会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代签）**）
 
 用户指出「会话列表只能看到名字、没法拿会话 id，定位不合适」——乙组取证（乙6/UI-711/UI-712 多次需要 conv_xxx id）同证此痛点；「全链可审计」卖点的定位面。对标：ZCode 左侧会话右键菜单为既有形态（reference/ZCode/docs/v4-session-workbench-groups.md Context-menu split parity）；信息获取类（复制 id）ZCode 无明文，按常规菜单形态落地。
