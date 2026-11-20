@@ -1,0 +1,6 @@
+# E-03 回收模板（本两行 # 注释行录入时删除）
+# veteran: old=老用户(≥2周) new=新用户(≤3次)　tasks: coding|review|settings（三类任务各≥3人）
+# sus1..sus10: 1-5　umux1..umux3: 1-7　date: 填写日期
+pid,veteran,tasks,sus1,sus2,sus3,sus4,sus5,sus6,sus7,sus8,sus9,sus10,umux1,umux2,umux3,date
+P01,old,coding,4,2,4,2,4,2,4,2,4,2,6,5,4,2026-11-20
+P02,new,review,3,3,3,3,3,3,3,3,3,3,4,4,4,2026-11-20
