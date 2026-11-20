@@ -1,3 +1,4 @@
+最后更新：2026-11-20（🖊 **国风水印·钢笔笔锋二轮**：uniform stroke→楔形fill，8%墨+3px细锋+空心方印；HK01绿7/7+33tests+实机16/16；细锋达成但柳叶笔锋未完全到位如实标注、审美in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🖌 **国风水印修复：全局层覆盖所有页面**（用户反馈"只在欢迎页看到"）：重构 GlobalWatermark 全局单源 fixed 四角，移除逐页 div；实机 16/16 四路由四纹样全可见、内容不干扰；审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🖌 **国风简约背景水印（计白当黑）**：四原型 mask+ink3%主题自适应+零交互干扰；HK01绿6/6+42tests+实机6/6(welcome月洞弧+方印截图)；工作区测试面不可达如实标、审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🎨 **艺术性造型升级（形态语义层级）**：seal3/icon10/card14 三档 token + 图标座/hero/徽章/mcpCard 换形 + seal-square 方印原子；HK01绿7/7+65tests+c53+实机7/7；审美不代签 in_progress、UI-717 不外推。G0 开发期常态 · 不外推 packaged/Provider/GA.）

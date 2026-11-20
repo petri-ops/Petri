@@ -1,6 +1,7 @@
-// 国风简约背景水印 — HK-01 红绿先行消费测试。
-// 用户诉求：月洞门弧/卵石柔/落印方/开环缺做成若有若无的页面底纹（计白当黑）。
-// 判据：四原型纹样在场、极淡(≤4%)、主题自适应、零交互干扰、不触 z-index/raw-color ratchet。
+// 国风背景水印 — HK-01 红绿先行消费测试（第二轮·钢笔笔锋）。
+// 用户反馈首版「模糊」→ 改钢笔白描：细而硬、有笔锋提按、清晰不抢内容。
+// 判据：四原型在场、楔形笔锋(path fill 变宽)、墨浓度 10–16%、无全局 opacity 模糊、
+// 主题自适应、零交互干扰、不触 z-index/raw-color ratchet。
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -36,9 +37,21 @@ describe('国风背景水印（计白当黑）', () => {
     }
   });
 
-  it('tint derives from ink tokens at ≤4% (计白当黑, theme-adaptive)', () => {
+  it('pen-stroke: tapered path fills (笔锋提按), thin, no round-cap blur', () => {
     const css = read(WATERMARK);
-    expect(css).toMatch(/color-mix\(\s*in srgb,\s*var\(--petri-ink-base\)\s+(\d|1\d|2\d|3\d|40)\%/);
+    const uriBlocks = css.match(/data:image\/svg\+xml[^;)]*/g) || [];
+    const tapered = uriBlocks.filter((u) => {
+      const paths = [...u.matchAll(/%3Cpath\s[^%]*?(?=%3E|>)/gi)].map((m) => m[0]);
+      return paths.some((p) => /fill='black'/i.test(p) && /d='M[^']*[CLQ]/i.test(p));
+    });
+    expect(tapered.length, 'each archetype needs at least one filled taper path (笔锋)').toBeGreaterThanOrEqual(2);
+    expect(css, 'no round stroke caps (钢笔硬锋)').not.toMatch(/stroke-linecap='round'/);
+    expect(css, 'no global opacity blur').not.toMatch(/opacity:\s*0?\.\d/);
+  });
+
+  it('ink concentration 6–16% (清晰但不抢内容), theme-adaptive', () => {
+    const css = read(WATERMARK);
+    expect(css).toMatch(/color-mix\(\s*in srgb,\s*var\(--petri-ink-base\)\s+([6-9]|1[0-6])\%/);
     expect(css).toMatch(/var\(--petri-bg-canvas\)/);
   });
 

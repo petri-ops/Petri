@@ -1,20 +1,20 @@
 /* ============================================================
-   国风简约背景水印 — 计白当黑（2026-11-20）
+   国风背景水印 — 钢笔白描（细锋·用户反馈二轮收敛）
    四原型：月洞门弧 / 卵石柔 / 落印方 / 开环缺。
-   纪律：mask-image(data-URI SVG) + color-mix(ink-base 3%, bg-canvas) 主题自适应；
-   URI 内零字面色；pointer-events:none；不写裸 z-index；铺根容器伪元素、DOM 零改动。
+   技法：mask data-URI SVG 楔形 fill 笔锋（提按），笔画**细**（3px 级）；
+   墨浓度 8%（比首版 3% 清晰、比上轮 12% 克制）；无 opacity 模糊、无 round-cap；
+   color-mix(ink-base, bg-canvas) 主题自适应，URI 零字面色。
    ============================================================ */
 
 .petri-watermark {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: color-mix(in srgb, var(--petri-ink-base) 3%, var(--petri-bg-canvas));
-  opacity: 0.9;
+  /* 8% 墨：细锋清晰但不抢内容。 */
+  background: color-mix(in srgb, var(--petri-ink-base) 8%, var(--petri-bg-canvas));
 }
 
-/* 全局固定层：一处挂载覆盖所有路由，fixed 铺视口、永远在最底、不挡交互。
-   不写 z-index（避免裸 z 棘轮）；DOM 置于各页内容之后，页面根有背景时水印在留白处仍可见。 */
+/* 全局固定层：一处挂载覆盖所有路由，fixed 铺视口、不挡交互。 */
 .petri-watermark-global {
   position: fixed;
   inset: 0;
@@ -25,10 +25,10 @@
   position: absolute;
 }
 
-/* 月洞门：建筑取形——一道开放的圆拱，留白处见天光。 */
+/* ── 月洞门：细楔形弧笔，起笔重收笔轻（3px 级锋） ── */
 .petri-watermark--moon-gate {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath d='M120 600 A180 180 0 0 1 480 600' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M160 600 A140 140 0 0 1 440 600' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath d='M120 600 A180 180 0 0 1 480 600' fill='none' stroke='black' stroke-width='2'/%3E%3Cpath d='M160 600 A140 140 0 0 1 440 600' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath fill='black' d='M118 600 C120 400 200 320 300 320 C400 320 480 400 482 600 L478 600 C476 404 398 324 300 324 C202 324 124 404 122 600 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cpath fill='black' d='M118 600 C120 400 200 320 300 320 C400 320 480 400 482 600 L478 600 C476 404 398 324 300 324 C202 324 124 404 122 600 Z'/%3E%3C/svg%3E");
   -webkit-mask-size: 620px 620px;
   mask-size: 620px 620px;
   -webkit-mask-position: 78% 82%;
@@ -37,10 +37,10 @@
   mask-repeat: no-repeat;
 }
 
-/* 卵石：雕塑取形——两三枚错落的柔椭，水边静物。 */
+/* ── 卵石：细锋留白椭（3px 级） ── */
 .petri-watermark--pebble {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='150' cy='260' rx='86' ry='58' fill='none' stroke='black' stroke-width='2' transform='rotate(-18 150 260)'/%3E%3Cellipse cx='248' cy='300' rx='58' ry='40' fill='none' stroke='black' stroke-width='1.5' transform='rotate(12 248 300)'/%3E%3Cellipse cx='96' cy='330' rx='34' ry='22' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='150' cy='260' rx='86' ry='58' fill='none' stroke='black' stroke-width='2' transform='rotate(-18 150 260)'/%3E%3Cellipse cx='248' cy='300' rx='58' ry='40' fill='none' stroke='black' stroke-width='1.5' transform='rotate(12 248 300)'/%3E%3Cellipse cx='96' cy='330' rx='34' ry='22' fill='none' stroke='black' stroke-width='1'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='black' fill-rule='evenodd' d='M64 262 C70 210 130 196 190 214 C232 227 244 258 214 284 C178 314 96 308 68 282 C60 275 60 268 64 262 Z M70 276 C87 298 168 304 204 279 C223 266 212 238 183 228 C131 212 78 227 70 276 Z'/%3E%3Cpath fill='black' fill-rule='evenodd' d='M198 296 C214 268 274 260 300 282 C316 296 306 318 280 324 C246 332 202 322 198 296 Z M203 297 C218 275 271 268 294 286 C307 297 299 313 278 318 C249 325 207 316 203 297 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='black' fill-rule='evenodd' d='M64 262 C70 210 130 196 190 214 C232 227 244 258 214 284 C178 314 96 308 68 282 C60 275 60 268 64 262 Z M70 276 C87 298 168 304 204 279 C223 266 212 238 183 228 C131 212 78 227 70 276 Z'/%3E%3Cpath fill='black' fill-rule='evenodd' d='M198 296 C214 268 274 260 300 282 C316 296 306 318 280 324 C246 332 202 322 198 296 Z M203 297 C218 275 271 268 294 286 C307 297 299 313 278 318 C249 325 207 316 203 297 Z'/%3E%3C/svg%3E");
   -webkit-mask-size: 420px 420px;
   mask-size: 420px 420px;
   -webkit-mask-position: 6% 86%;
@@ -49,10 +49,10 @@
   mask-repeat: no-repeat;
 }
 
-/* 落印：绘画取形——一枚近方小印，点睛处方有郑重语义。 */
+/* ── 落印：空心方印带刀刻缺口（非实心块） ── */
 .petri-watermark--seal {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect x='96' y='150' width='48' height='48' rx='3' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='96' y1='166' x2='110' y2='166' stroke='black' stroke-width='2'/%3E%3Cline x1='130' y1='182' x2='144' y2='182' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Crect x='96' y='150' width='48' height='48' rx='3' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='96' y1='166' x2='110' y2='166' stroke='black' stroke-width='2'/%3E%3Cline x1='130' y1='182' x2='144' y2='182' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='black' fill-rule='evenodd' d='M96 150 H144 V198 H96 Z M99 153 H141 V195 H99 Z M99 166 H112 V168 H99 Z M128 182 H141 V184 H128 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cpath fill='black' fill-rule='evenodd' d='M96 150 H144 V198 H96 Z M99 153 H141 V195 H99 Z M99 166 H112 V168 H99 Z M128 182 H141 V184 H128 Z'/%3E%3C/svg%3E");
   -webkit-mask-size: 260px 260px;
   mask-size: 260px 260px;
   -webkit-mask-position: 92% 12%;
@@ -61,10 +61,10 @@
   mask-repeat: no-repeat;
 }
 
-/* 开环：格物 mark——缺口朝下，不圆满、留余地。 */
+/* ── 开环：细锋缺口环 ── */
 .petri-watermark--open-ring {
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath d='M120 300 A110 110 0 1 1 280 300' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='120' y1='300' x2='150' y2='300' stroke='black' stroke-width='2'/%3E%3Cline x1='250' y1='300' x2='280' y2='300' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath d='M120 300 A110 110 0 1 1 280 300' fill='none' stroke='black' stroke-width='2'/%3E%3Cline x1='120' y1='300' x2='150' y2='300' stroke='black' stroke-width='2'/%3E%3Cline x1='250' y1='300' x2='280' y2='300' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='black' d='M112 300 C112 220 168 180 224 180 C280 180 336 220 336 300 L332 300 C332 224 278 184 224 184 C170 184 116 224 116 300 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cpath fill='black' d='M112 300 C112 220 168 180 224 180 C280 180 336 220 336 300 L332 300 C332 224 278 184 224 184 C170 184 116 224 116 300 Z'/%3E%3C/svg%3E");
   -webkit-mask-size: 420px 420px;
   mask-size: 420px 420px;
   -webkit-mask-position: 88% 60%;
