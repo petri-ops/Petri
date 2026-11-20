@@ -9456,6 +9456,7 @@
         "test/evo4-evidence-panel.test.mjs",
         "acceptance/evo-4/**",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui716-evidence-live.cjs",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/mainwindow-handler-contract.cjs",
         "acceptance/ui-716/**"
       ],
       "tests": [

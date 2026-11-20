@@ -206,6 +206,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-config-interaction.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-positioning.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui708-wave2.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/mainwindow-handler-contract.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui716-evidence-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",

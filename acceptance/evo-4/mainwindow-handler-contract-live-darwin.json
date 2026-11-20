@@ -1,0 +1,29 @@
+{
+  "name": "mainwindow-handler-contract",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T06:27:04.826Z",
+  "finishedAt": "2026-11-20T06:27:04.846Z",
+  "assertions": [
+    {
+      "name": "M1_main_window_target_found",
+      "pass": true,
+      "detail": "9222 主窗 page target"
+    },
+    {
+      "name": "M2_handler_bridge_present",
+      "pass": true,
+      "detail": "preload 桥在场"
+    },
+    {
+      "name": "M3_handler_no_abi_error",
+      "pass": true,
+      "detail": "{\"ok\":true,\"error\":null,\"lessons\":0,\"trend\":0,\"reason\":null}"
+    },
+    {
+      "name": "M4_handler_payload_shape",
+      "pass": true,
+      "detail": "ok=true lessons=0 trend=0"
+    }
+  ],
+  "allPass": true
+}

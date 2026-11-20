@@ -1,0 +1,6 @@
+[dev-verify] PASS M1_main_window_target_found :: 9222 主窗 page target
+[dev-verify] PASS M2_handler_bridge_present :: preload 桥在场
+[dev-verify] PASS M3_handler_no_abi_error :: {"ok":true,"error":null,"lessons":0,"trend":0,"reason":null}
+[dev-verify] PASS M4_handler_payload_shape :: ok=true lessons=0 trend=0
+[dev-verify] evidence: /Users/zhangdiandian/Documents/1.WorkDir/Petri/acceptance/evo-4/mainwindow-handler-contract-live-darwin.json
+[dev-verify] run "mainwindow-handler-contract": 4/4 assertions, allPass=true

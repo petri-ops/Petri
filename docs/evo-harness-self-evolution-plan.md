@@ -238,4 +238,13 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **观感零代签**：UI-716 保持 in_progress + pending_human_eye，等用户口令；本批只修 bug、不代签。
 - **纪律**：零新依赖/纯本地零外发/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 13. 主窗重启 + 验证盲区防复发（2026-11-20 · bugfix 收尾）
+
+- **用户反馈**：bugfix 后主窗仍报同一 ABI 错。根因=主窗 Electron 主进程（PID 31171，14:02 启动）比 bugfix（14:13）早 11 分钟，驻留旧 handler；上批只重启后端漏了 Electron 主窗本身。
+- **处置**：用户授权后定点杀进程链（31030 编排器 + 31171 Electron），`npm run dev` 起完整栈（49524 编排器 / 49673 Vite / 49730 Electron / 49969 后端），三面齐；主窗恢复到 `/settings`（默认外观分区）。
+- **只读验证**：CDP `Runtime.evaluate` 在主窗 invoke `data.lessonEvidence()` → `{ok:true, lessons:0, trend:0}`，**无 ABI 错误**（新 handler 生效）。不导航、不点击、不改状态，遵守「探针禁导航用户窗口」红线。
+- **防复发（用户问「怎么优化」）**：新增 dev-verify flow `mainwindow-handler-contract.cjs`——只读 invoke 主窗 handler 并断言无 ABI 错误，作为**主进程代码改动的收口必跑门禁**（主进程改动须先重启 Electron，光重启后端不够）。flow 4/4 PASS（M1 主窗 target / M2 桥在场 / M3 无 ABI / M4 载荷形态）。impact-map + knip 基线已登记（动态入口定性，回存量 38）。
+- **观感零代签**：UI-716 保持 in_progress + pending_human_eye；用户切到「数据与维护」分区看过面板后给口令才翻 verified。
+- **纪律**：零新依赖/纯本地零外发/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。
