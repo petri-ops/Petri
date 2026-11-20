@@ -136,7 +136,11 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
       // BLOCK-437 锚点修正：BLOCK-398（89568433）已有 additive 增长但当时未重锚，
       // 现值 1143 与锚点 1140 长期不一致（存量红）。按本测试自述「增长需显式重锚留因」校正到 1143，
       // 语义仍是只减不增；后续收缩走蓝图 S4.1 拆分回收。
-      { file: 'core/petri-server/agent-runner.js', anchor: 1143 },
+      // EVO-2 重锚 1143→1153（+10）：自进化经验注入 ctxForPrompt.selfEvolutionLessons
+      // （从 lesson-store 读活跃 lesson，fail-soft，动态段不进 staticPrefix 保护前缀缓存）。
+      // 纯逻辑在独立模块 lesson-store.js / lesson-render.js / lesson-distiller.js，本文件仅薄接线；
+      // 按本测试纪律显式重锚留因，只减不增继续生效，真正拆分回收仍走蓝图 S4.1。
+      { file: 'core/petri-server/agent-runner.js', anchor: 1153 },
       // BLOCK-508 重锚 1579→1647（+68）：循环层 stall-resume 接线（import/重放过滤入口/
       // 有界续跑 for(;;)/stall 决策与去重），修复「已出字后停摆→break→手动重试」痛点。
       // 纯逻辑在独立模块 loop-stall-resume.js（本文件只薄接线）；按本测试纪律显式重锚留因，

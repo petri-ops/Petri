@@ -314,6 +314,16 @@ async function runAgentLoop({
       ? { ...context, audience: isGuest ? 'guest' : 'user' }
       : { audience: isGuest ? 'guest' : 'user' };
 
+  // EVO-2 — 自进化经验注入（fail-soft：lesson 读取失败=零注入，不影响 agent 主链；
+  // lessons 走系统提示词动态段，不进 staticPrefix，保护历史 prompt 前缀缓存）。
+  if (!isGuest) {
+    try {
+      const { listActiveLessons } = require('./helpers/lesson-store');
+      const lessons = listActiveLessons(8);
+      if (Array.isArray(lessons) && lessons.length > 0) ctxForPrompt.selfEvolutionLessons = lessons;
+    } catch { /* 自进化经验读取失败不影响本轮运行 */ }
+  }
+
   // BLOCK-337 P2 — 会话侧治理装载：workspacePath 只从 projects 表派生（覆盖/剥除客户端
   // 传值）；主链、resume、子代理三路都经 runAgentLoop，在此单点接线。失败=零治理注入。
   try {

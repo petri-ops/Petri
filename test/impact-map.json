@@ -9391,6 +9391,32 @@
       ]
     },
     {
+      "id": "evo2-distill-evolve",
+      "note": "EVO-2 Distill+Evolve：lessons 表(migration 024)+lesson-distiller 纯函数(聚类→lesson)+lesson-store(upsert)+selfEvolution prompt 注入段+harness_apply_lesson 红线门工具。证据=acceptance/evo-2/**。零模型调用/纯本地零外发/分级写入先过 harness-redline。",
+      "patterns": [
+        "src/migrations/024_lessons.sql",
+        "core/shared-backend/lesson-distiller.js",
+        "core/petri-server/helpers/lesson-store.js",
+        "core/petri-server/helpers/lesson-render.js",
+        "core/petri-server/agent-tools/tool-defs/evolution.js",
+        "core/petri-server/agent-tools/evolution-tools.js",
+        "core/petri-server/agent-tools/tool-defs.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/helpers/system-prompt.js",
+        "core/petri-server/agent-runner.js",
+        "test/evo2-distill-evolve.test.mjs",
+        "acceptance/evo-2/**"
+      ],
+      "tests": [
+        "test/evo2-distill-evolve.test.mjs",
+        "test/evo1-observe-wiring.test.mjs",
+        "test/evo0-incident-ledger.test.mjs",
+        "test/system-prompt-identity.test.mjs",
+        "test/system-prompt-rejects.test.mjs",
+        "test/block346-tool-defs-assembly.test.mjs"
+      ]
+    },
+    {
       "id": "ui-error-classification-stall",
       "note": "2026-11-19 UI 错误分类修复：流式停滞(stream_stalled)曾误判为 Python 模块缺失，诱导用户装无关运行时；另修 ENOTFOUND 正则无边界吞 ModuleNotFoundError。轻量包（HK-01 红绿+邻域 10/10+tsc 0），非观感状态写面。证据 acceptance/ui-error-classification-stall/。",
       "patterns": [

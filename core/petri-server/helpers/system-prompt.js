@@ -14,6 +14,9 @@
 // ============================================================================
 // CACHE METRICS (exported for monitoring)
 // ============================================================================
+// EVO-2 — 自进化经验 prompt 段渲染器（纯函数，动态段注入）
+const { renderSelfEvolutionForPrompt } = require('./lesson-render');
+
 const cacheMetrics = {
   staticBuilds: 0,
   dynamicBuilds: 0,
@@ -445,6 +448,8 @@ const SECTION_CHAR_BUDGETS = {
   harnessProjectSummary: 2500,
   harnessActiveSummary: 2500,
   workingTreeRejects: 4000,
+  // EVO-2 — 自进化经验段预算（与 workingTreeRejects 同级；lesson 数据来自 lesson-store）
+  selfEvolution: 4000,
 };
 
 // MAIN EXPORT: buildSystemPrompt
@@ -529,6 +534,12 @@ function buildSystemPromptSections(context, runtimeIdentity = {}) {
     if (entries.length > 0) rejectsSeg = renderWorkingTreeRejectsForPrompt(entries);
   }
   add(clipSection(rejectsSeg, 'workingTreeRejects'));
+
+  // EVO-2 — 自进化经验段（动态段，落 body 不进 staticPrefix，保护历史 prompt 前缀缓存）。
+  // lessons 由 agent-runner 从 lesson-store 读出后经 context.selfEvolutionLessons 传入；缺席零注入。
+  if (context && Array.isArray(context.selfEvolutionLessons)) {
+    add(clipSection(renderSelfEvolutionForPrompt(context.selfEvolutionLessons), 'selfEvolution'));
+  }
 
   if (typeof context.pageContent === 'string' && context.pageContent.length > 0) {
     add(clipSection('\n\n【当前界面正文】\n' + context.pageContent, 'pageContent'));

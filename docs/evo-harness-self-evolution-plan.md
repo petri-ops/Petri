@@ -180,4 +180,21 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **范围外（后续阶段，需各自发令）**：EVO-2（聚类+lesson 分级写入+prompt 注入段）、EVO-3（频率曲线+自动回滚+真实错误闭环）。harness 自进化建议出口不进 AUDIT-LOG 工作包链。
 - **纪律**：零新依赖/纯本地零外发/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 9. EVO-2 收口笔录（2026-11-20 · 一次会话完成）
+
+- **交付**：
+  - `src/migrations/024_lessons.sql` — lessons 结构化真源（UNIQUE source_fingerprint + status/scope 索引；不用 AUTOINCREMENT）。
+  - `core/shared-backend/lesson-distiller.js` — Distill 纯函数：按 fingerprint 聚类 incidents（频次/趋势/影响会话数）→ L1/L2 规则（复用 loop-failure-diagnoser fault type 语义）产出 lesson（title/action/scope/confidence/evidence/status），**零模型调用**、证据指针回指 ≥1 条样本、低置信标 `needs_human`。
+  - `core/petri-server/helpers/lesson-store.js` — 分级写入决策核 `applyLessonDecision()`（**先过 harness-redline fail-closed 门**，红线 tier 优先于 lesson.scope，拒绝优先）+ `upsertLesson()`（ON CONFLICT 去重累加，仿 policy-observation-store）+ `listActiveLessons()`（best-effort）。
+  - `core/petri-server/helpers/lesson-render.js` — selfEvolution prompt 段渲染（照 rejects 模板：空零注入、条数上限、逐条预算、超长截断）。
+  - 接线：`system-prompt.js` 加 `selfEvolution:4000` 预算 + `add(clipSection(renderSelfEvolutionForPrompt(...)))`（落 body 动态段，不进 staticPrefix 保护前缀缓存）；`agent-runner.js` 从 lesson-store 读活跃 lesson 注入 `ctxForPrompt.selfEvolutionLessons`（fail-soft）。
+- **范围收敛说明**：物理文件写入不新建 `harness_apply_lesson` 工具——继续走既有 `workspace_write` 治理门（路径沙箱/审批/sha256 乐观锁），本批只产出"写到哪个 tier、是否放行"的决策核；避免扩大工具注册面（registry.js 为 EVO-0 红线禁改资产）。真实自写入工具待 EVO-3 与频率验证闭环一并裁决。
+- **HK-01 红绿**：红=模块缺席→绿 18/18（`hk01-red.txt`/`hk01-green.txt`/`test-run.txt`）。含真实 SQLite 跑全部 migration：合成 4 次同类失败→1 条 active lesson→upsert→读出→注入 prompt 段（端到端闭环 16-18）；同 fingerprint upsert 两次一行（不重复插）；写入失败 fail-soft + 计数。
+- **邻域**：12 文件 125 tests / 124 pass / 0 fail / 1 skipped（`neighborhood.txt`）——含 agent-runner-loop-orchestrator / system-prompt-* / block346-tool-defs-assembly / block510 / loop-sse-contract。唯一曾红=agent-runner 行数锚 1143→1153（+10=EVO-2 注入块），按该测试纪律显式重锚留因后转绿。
+- **门禁**：docs:check PASS(661)、ui:audit ✓、quality:secret/arch/types PASS。改动文件 quality:lint 0 error（1 warning 属存量同类）、knip 零命中。
+- **存量红如实归属（非本包文件面、零触碰）**：同 EVO-0/1——2 lint error（model-gateway/video.test=BLOCK-338/507/509）、38 knip（并发人眼包探针）、1 test:changed 冲突（HEAD 既有）。
+- **Jev**：doc:suggest planDoc adopted（本文件即回写对象，已追加本节）；decision:session 本轮增量 jev×7。
+- **范围外（后续，需发令）**：EVO-3（频率曲线 + 自动回滚 + LEARNINGS.md 双写 + 真实错误闭环 + 证据 UI）。harness 自进化建议出口不进 AUDIT-LOG 工作包链。
+- **纪律**：零新依赖/纯本地零外发/零模型调用/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。
