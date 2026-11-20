@@ -1,0 +1,8 @@
+C-56 注册面 HK-01 绿证据（2026-11-19）
+
+命令：node --test test/c56-paper-writing-skill.test.mjs
+结果：tests 3 / pass 3 / fail 0。
+
+覆盖：tool_skill_discover 可发现 paper-writing 且 tool_skill_get 可读；system prompt 保留十节、四保护、F1-F6、逐字符、三栏对照、〈未覆盖：…〉与「英文论文覆盖另批」；零运行时依赖且顶层 manifest 版本双向一致。
+
+门禁：node scripts/post-s7-skill-integrity.mjs --check PASS（14 条内置 skill 摘要一致）；npm run skills:check PASS（14 内置 + 3 领域包）。

@@ -1,0 +1,5 @@
+C-56 注册面 HK-01 红证据（2026-11-19）
+
+命令：node --test test/c56-paper-writing-skill.test.mjs
+
+结果：3 failed / 0 passed。失败原因=resources/skills/paper-writing/ 不存在（system.md 与 skill.json ENOENT），且 tool_skill_discover 未发现 paper-writing。契约=可发现可读取、十节+四保护+F1-F6+逐字符+三栏对照+未覆盖+英文另批、零依赖与 manifest 双向一致，当前均未满足。
