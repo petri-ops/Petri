@@ -8798,6 +8798,23 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a1-identity-palette",
+      "note": "A1 色板 token 化（A0 裁决行之后）：身份色板四 token（ink-paper/ink-base/accent-celadon/accent-vermilion）亮暗双套，点睛仅品牌语义；HK-01 红绿 + 主契约 19/19 + 对比度 32 对 0 违规。零组件消费改动/观感零代签/不碰 G1+。证据 acceptance/a1-identity-palette/**。",
+      "patterns": [
+        "frontend/src/styles/custom.css",
+        "frontend/src/styles/identity-palette-contract.test.ts",
+        "acceptance/a1-identity-palette/**"
+      ],
+      "tests": [
+        "frontend/src/styles/identity-palette-contract.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "constraint"
+    },
+    {
       "id": "a0-identity-translation",
       "note": "A0 身份转译决策（专项·结论型）：纯函数 collectIdentityTranslation 从品牌真源（petri-logo-concepts_assets 按后缀发现）机械派生六组读数（真源资产/艺术门类/和声试样/单一推荐/不采纳清单/边界），decision-material.json 快照可复算 + schema 契约 + 消费测试（7 类篡改负测 fail-closed）。零产品代码/零依赖/观感零代签/不碰 G1+；只产结论停在 pending_user_ruling。证据 acceptance/a0-identity-translation/**。",
       "patterns": [

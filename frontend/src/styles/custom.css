@@ -101,6 +101,14 @@
   --petri-hover: #f4f4f5;
   --petri-surface-dim: #f4f4f5;
   --petri-accent-hover: #0f766e;
+  /* A1 身份色板（A0 裁决「行」）：格物东方视觉语境，骨架/点睛二段和声。
+     --petri-ink-* = 骨架（宣纸暖白 / 墨色结构）；light 为宣纸受光，dark 为墨底微光。
+     --petri-accent-celadon = B 青瓷·墨，工作态主 accent（延续既有 teal 认知，不铺满）。
+     --petri-accent-vermilion = A 朱砂，品牌落印/点睛专用，面积 <5%，不做工作态主色。 */
+  --petri-ink-paper: #f2efe6;
+  --petri-ink-base: #1c1b19;
+  --petri-accent-celadon: #0f766e;
+  --petri-accent-vermilion: #b5482f;
   --petri-danger: #ef4444;
   --petri-bg-terminal: #ffffff;
   --petri-text-terminal: #3f3f46;
@@ -258,6 +266,11 @@ html[data-theme='dark'],
   --petri-hover: rgba(230, 237, 243, 0.07);
   --petri-surface-dim: #111a2e;
   --petri-accent-hover: #14b8a6;
+  /* A1 身份色板 dark（墨底微光，非亮色反色）：骨架=墨底+纸字；工作态 accent 提亮青瓷；朱砂仅品牌点睛。 */
+  --petri-ink-paper: #1c1b19;
+  --petri-ink-base: #f2efe6;
+  --petri-accent-celadon: #2fd7d2;
+  --petri-accent-vermilion: #d97055;
   --petri-danger: #f87171;
   --petri-bg-terminal: var(--petri-bg-surface);
   --petri-text-terminal: #cbd5e1;

@@ -1,4 +1,6 @@
-# A0 身份转译决策材料（待用户裁决 · pending_user_ruling）
+# A0 身份转译决策材料（已裁决：行 · 2026-11-20）
+
+> **裁决**：用户「开干」= **行**，采纳单一建议（B 青瓷·墨主 accent + A 宣纸·朱砂点睛<5%），授权 A1 开工。裁决记录 `ruling.json`（append-only）；下方材料快照保留 `pending_user_ruling` 作为消费测试现读锚，不改写。
 
 > **形态**：专项（结论型）；plan = `docs/AUDIT-LOG.md` A0 条目。零产品代码 / 零新依赖 / 观感零代签 / 不碰 G1+。
 > **证据机读真源**：`decision-material.json`（由 `scripts/lib/a0-identity-translation.mjs::collectIdentityTranslation` 从品牌真源机械派生，逐读数现读可复算）；契约 `schema.json`；HK-01 `hk01-red.txt` / `hk01-green.txt`。

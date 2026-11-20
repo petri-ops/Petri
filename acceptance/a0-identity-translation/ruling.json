@@ -1,0 +1,10 @@
+{
+  "kind": "a0-identity-decision-ruling",
+  "ruledAt": "2026-11-20",
+  "userUtterance": "开干",
+  "ruling": "行",
+  "resolves": "A0 单一建议（B 青瓷·墨 工作态主 accent；A 宣纸·朱砂 品牌落印位点睛 <5%）",
+  "scope": "方向裁决：授权 A1 色板 token 化开工；不自动授权 A2/A3，不改观感状态，不引入产品级依赖",
+  "materialStatus": "ruled",
+  "note": "用户以「开干」发令 A1，等价于对本 A0 单一建议的「行」；裁决以本 append-only 记录为准，decision-material.json 快照保持 pending_user_ruling 不动（消费测试的现读一致锚）。"
+}

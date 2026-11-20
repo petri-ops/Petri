@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-717: 身份色板 token 化（2026-11-20 **in_progress**；UI 轨，A0 裁决「行」后 A1 落地，观感零代签）
+
+- **用户裁决原话**：「开干」（=A0 单一建议「行」：B 青瓷·墨工作态主 accent + A 宣纸·朱砂品牌落印点睛 <5%）。
+- **范围**：`frontend/src/styles/custom.css` 亮暗双套新增四个身份 token（`--petri-ink-paper/-base`、`--petri-accent-celadon`、`--petri-accent-vermilion`），vermilion 注释锁定为品牌点睛语义；identity-palette-contract 测试 + impact-map 登记。
+- **非范围**：不改组件消费、不改 `--petri-accent` 工作态引用（356 处收敛属 V1）、不翻观感状态、零新依赖。
+- **验收**：HK-01 红 3fail→绿 4/4、主契约 19/19、对比度 32 对 0 违规（ink/paper 14.97:1、celadon 4.76/9.65、vermilion/paper 4.64），ui-a11y PASS、docs/hygiene PASS；证据 `acceptance/a1-identity-palette/`。
+- **状态边界**：token 代码级完成；观感（点睛面积 <5%、色板在真实页面的观感）走偏好预审闭环或用户口令，保持 `in_progress` 不代签；dev Electron 边界内，不外推 packaged/Provider/GA。
+
 > BLOCK-503 · YI-REST-WB 人眼签字回写批（2026-11-20）：乙组剩余（乙5–乙8）证据采集+用户批量口令签署——**乙5 P4 八态矩阵 12 人眼格 verified**（input:hover 格留因=无 :hover 规则仅 focus 强调属设计取舍；navItem:active 格留因=由 /extensions 四货架真 tabs 承载、左栏 QuickActions 无 aria-current）、**乙6 P5 两槽 verified / P6 两槽 verified+留因**（消费面真实；语义匹配真实触发腿受控注入留观察）、**H-01/H-02/H-03/H-04/H-05/H-07 verified**（H-02 留因 zoom 等效布局视口、H-03 留因 0.06 vs 0.07、H-05 留注样本 4.75–21.0 全达标且 4.40:1 已由 BLOCK-422 提至 4.81 未复现）、**H-06/H-08/E-02 分批**（H-06 三文件 verified+desktop.css pending 在册+8 文件 pending 补腿；E-02：11 verified/2 cancelled 维持终态、UI-695/UI-331 verified+留因、UI-200 与其余 6 条 in_progress 维持）、**E-01/E-03 保持 pending_human_eye 零代填**。签字记录=`docs/ui-design-human-eye-route.md` §3 + `acceptance/block503-outputs/yi-rest/signature-record.md`（证据=`acceptance/block503-outputs/yi-rest/`）。**零 CSS/组件/token 写面、零新依赖、debt 棘轮零改动**；台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写，e-class 指南分层陈旧如实披露）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > BLOCK-480 六件套同批登记（2026-11-18）：C-52 余项 P4 21st.dev 片段灵感库借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未引入 21st.dev/shadcn/magicui/radix 等 UI kit 依赖、未复制品牌标志/文案/插画/整页布局，四类边界（逐组件查许可/仅参考不搬/防风格漂移/防依赖膨胀）仅从本地主权控件单源静态冻结；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block480-c52-p4-21st-snippet-library/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
