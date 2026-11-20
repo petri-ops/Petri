@@ -8798,6 +8798,24 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a4-editorial-preference",
+      "note": "A4 观感预审闭环：9223 离屏两轮截图+DOM 判据（文字少/布局和谐/点睛图标）；run-a4.cjs 绕开 BLOCK-463 顶层副作用；轮1 抓真假绿→仅呈现面优化→轮2 16/16 PASS，按偏好预审裁决翻 UI-717 verified；onscreen 纪律 PASS、9223 跑完即 kill。证据 acceptance/a4-editorial-preference/**。",
+      "patterns": [
+        ".agents/skills/petri-dev-infra/dev-verify/flows/a4-editorial-preference.cjs",
+        "acceptance/a4-editorial-preference/**",
+        "frontend/src/styles/EditorialRhythm.test.ts",
+        "frontend/src/components/desktop/settings-redesign.module.css"
+      ],
+      "tests": [
+        "frontend/src/styles/EditorialRhythm.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "verification"
+    },
+    {
       "id": "v1-accent-scarcity",
       "note": "V1 配色稀缺化：谨慎白名单 codemod 收敛装饰性 accent（双重强调/装饰glow/通用图标色），356→316，棘轮按文件下调，c53 快照 targetMet=false 诚实未达130；HK-01 红绿 + 五契约39tests + c53 --check + tsc0，观感零代签。剩余~186合法语义需U类裁决。证据 acceptance/v1-accent-scarcity/**。",
       "patterns": [

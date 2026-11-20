@@ -1,6 +1,6 @@
 # Petri Desktop UI 产品化审计台账
 
-## UI-717: 身份色板 token 化（2026-11-20 **in_progress**；UI 轨，A0 裁决「行」后 A1 落地，观感零代签）
+## UI-717: 身份色板 token 化（2026-11-20 **verified**；UI 轨，A0 裁决「行」后 A1–A3+V1 落地，A4 偏好预审闭环签字·dev Electron/9223 离屏边界内）
 
 - **用户裁决原话**：「开干」（=A0 单一建议「行」：B 青瓷·墨工作态主 accent + A 宣纸·朱砂品牌落印点睛 <5%）。
 - **范围**：`frontend/src/styles/custom.css` 亮暗双套新增四个身份 token（`--petri-ink-paper/-base`、`--petri-accent-celadon`、`--petri-accent-vermilion`），vermilion 注释锁定为品牌点睛语义；identity-palette-contract 测试 + impact-map 登记。
@@ -9,7 +9,8 @@
 - **状态边界**：token 代码级完成；观感（点睛面积 <5%、色板在真实页面的观感）走偏好预审闭环或用户口令，保持 `in_progress` 不代签；dev Electron 边界内，不外推 packaged/Provider/GA。
 - **A2 加映（2026-11-20，用户「你直接推就好了」授权）**：三原子落位——`Icon.tsx` 单源新增 `open-ring`（MCP 空态替 zap）/ `offset-grid`（extensions active tab 一格点睛，每视图 ≤1）/ `hairline`（单源登记）；HK-01 红 5fail→绿 6/6 + 邻域 6 files/71 tests + 主契约 19/19 + tsc 0；零图标依赖。观感仍 `in_progress` 零代签；证据 `acceptance/a2-identity-atoms/`。
 - **A3 加映（2026-11-20，用户「开干 按你的建议下一步」授权）**：排版留白——欢迎页 `.greeting` 0.04em / `.welcomeSub` 0.02em 字距，设置页标题 0.01→0.03em + `:global(.petri-settings-seal)::after` 3×3px 中性落印位（`--petri-text-tertiary`，非 accent）；HK-01 红 4fail→绿 5/5 + 邻域 4 files/39 tests + 主契约 19/19 + tsc 0，零 accent 增量/零新 token。观感仍 `in_progress` 零代签；证据 `acceptance/a3-editorial-rhythm/`。
-- **V1 加映（2026-11-20，用户发令开干）**：配色稀缺化——谨慎白名单收敛装饰性 accent（双重强调/装饰 glow/通用图标色）三类，accent 总量 356→316（−40），`theme-token-contract` 逐文件棘轮下调、`visual-consistency.json` 快照重生成（`targetMet=false` 如实未达 ≤130，剩余为宪章合法五类语义需 U 裁决）；HK-01 绿 5/5 + 五契约 39 tests + c53 --check + tsc 0。改的是 accent 密度呈现面，观感（收敛后是否更克制）保持 `in_progress` 零代签；证据 `acceptance/v1-accent-scarcity/`。
+- **V1 加映（2026-11-20，用户发令开干）**：配色稀缺化——谨慎白名单收敛装饰性 accent（双重强调/装饰 glow/通用图标色）三类，accent 总量 356→316（−40），`theme-token-contract` 逐文件棘轮下调、`visual-consistency.json` 快照重生成（`targetMet=false` 如实未达 ≤130，剩余为宪章合法五类语义需 U 裁决）；HK-01 绿 5/5 + 五契约 39 tests + c53 --check + tsc 0。改的是 accent 密度呈现面；证据 `acceptance/v1-accent-scarcity/`。
+- **A4 观感预审签字（2026-11-20，偏好预审闭环）**：标准=用户原话「简单文字少，布局和谐」。第 1 轮 16/16 断言过但人工复核抓真——设置页判据命中隐藏模板标题（宽 0），截图实际可见标题仍 0.01em 无落印位 → 假绿；仅呈现面优化（字距/落印改挂真实可见的分区标题 h3、测试改锚可见元素、3px±0.1 容差）→ 第 2 轮 16/16 逐条 PASS（文字 42/2 字、三面 0 溢出、字距 0.040/0.030em、落印 2.99805px 中性、图标 1.75 同笔宽、点睛 1/视图）。按 2026-11-20 裁决「预审通过即视为签字」，`in_progress` → **verified**（dev Electron / 9223 离屏边界内，不外推）。证据 `acceptance/a4-editorial-preference/{PREFERENCE-REVIEW.md,round1,round2}/`。
 
 > BLOCK-503 · YI-REST-WB 人眼签字回写批（2026-11-20）：乙组剩余（乙5–乙8）证据采集+用户批量口令签署——**乙5 P4 八态矩阵 12 人眼格 verified**（input:hover 格留因=无 :hover 规则仅 focus 强调属设计取舍；navItem:active 格留因=由 /extensions 四货架真 tabs 承载、左栏 QuickActions 无 aria-current）、**乙6 P5 两槽 verified / P6 两槽 verified+留因**（消费面真实；语义匹配真实触发腿受控注入留观察）、**H-01/H-02/H-03/H-04/H-05/H-07 verified**（H-02 留因 zoom 等效布局视口、H-03 留因 0.06 vs 0.07、H-05 留注样本 4.75–21.0 全达标且 4.40:1 已由 BLOCK-422 提至 4.81 未复现）、**H-06/H-08/E-02 分批**（H-06 三文件 verified+desktop.css pending 在册+8 文件 pending 补腿；E-02：11 verified/2 cancelled 维持终态、UI-695/UI-331 verified+留因、UI-200 与其余 6 条 in_progress 维持）、**E-01/E-03 保持 pending_human_eye 零代填**。签字记录=`docs/ui-design-human-eye-route.md` §3 + `acceptance/block503-outputs/yi-rest/signature-record.md`（证据=`acceptance/block503-outputs/yi-rest/`）。**零 CSS/组件/token 写面、零新依赖、debt 棘轮零改动**；台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写，e-class 指南分层陈旧如实披露）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

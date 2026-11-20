@@ -1,0 +1,89 @@
+{
+  "name": "a4-editorial-preference",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T08:50:46.739Z",
+  "finishedAt": "2026-11-20T08:50:58.373Z",
+  "assertions": [
+    {
+      "name": "surface_welcome_ready",
+      "pass": true,
+      "detail": "welcome 未就绪"
+    },
+    {
+      "name": "surface_welcome_no_h_overflow",
+      "pass": true,
+      "detail": "welcome 横向溢出"
+    },
+    {
+      "name": "surface_welcome_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_settings_ready",
+      "pass": true,
+      "detail": "settings 未就绪"
+    },
+    {
+      "name": "surface_settings_no_h_overflow",
+      "pass": true,
+      "detail": "settings 横向溢出"
+    },
+    {
+      "name": "surface_settings_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_extensions_ready",
+      "pass": true,
+      "detail": "extensions 未就绪"
+    },
+    {
+      "name": "surface_extensions_no_h_overflow",
+      "pass": true,
+      "detail": "extensions 横向溢出"
+    },
+    {
+      "name": "surface_extensions_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P1_welcome_subtitle_short",
+      "pass": true,
+      "detail": "副标题字数=42"
+    },
+    {
+      "name": "P2_welcome_tracking",
+      "pass": true,
+      "detail": "字距=0.040em"
+    },
+    {
+      "name": "P1_settings_title_short",
+      "pass": true,
+      "detail": "标题=设置"
+    },
+    {
+      "name": "P2_settings_tracking",
+      "pass": true,
+      "detail": "字距=0.030em"
+    },
+    {
+      "name": "P2_seal_3px_neutral",
+      "pass": true,
+      "detail": "落印位宽=3px"
+    },
+    {
+      "name": "P3_active_tab_atom",
+      "pass": true,
+      "detail": "{\"active\":1,\"withAtom\":1,\"stroke\":[\"1.75\"]}"
+    },
+    {
+      "name": "P3_one_focal_per_view",
+      "pass": true,
+      "detail": "点睛数=1"
+    }
+  ],
+  "allPass": true
+}

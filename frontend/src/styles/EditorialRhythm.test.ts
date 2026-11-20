@@ -31,21 +31,22 @@ describe('A3 editorial rhythm (欢迎页 + 设置页)', () => {
     expect(s).toMatch(/--petri-text-secondary|--petri-text-tertiary/);
   });
 
-  it('settings panel title tracking widened (>=0.03em), neutral seal mark present', () => {
+  it('settings visible section heading tracking widened (>=0.03em), neutral seal present', () => {
     const css = read(SETTINGS_CSS);
-    const title = css.match(/\.petri-desktop-panel__title\)\s*\{([^}]*)\}/)?.[1] ?? '';
+    const title = css.match(/\.petri-settings-section__heading\)\s*h3\s*\{([^}]*)\}/)?.[1] ?? '';
+    expect(title, 'visible section heading rule must exist').not.toBe('');
     expect(title).toMatch(/font-weight:\s*600/);
     const ls = Number(title.match(/letter-spacing:\s*([\d.]+)em/)?.[1] ?? 0);
-    expect(ls, 'settings title tracking must widen (was 0.01em)').toBeGreaterThanOrEqual(0.03);
-    // 落印位：极小几何（2-4px）+ 中性 token，不增 accent。
-    expect(css, 'a neutral 落印位 mark must exist').toMatch(
-      /petri-settings-seal\)\s*::after\s*\{[\s\S]{0,200}(--petri-text-tertiary|--petri-border)/,
+    expect(ls, 'visible heading tracking must widen (was 0.01em)').toBeGreaterThanOrEqual(0.03);
+    // 落印位挂在真实可见的分区标题上（A4 轮1抓真）。
+    expect(css, 'neutral seal on visible heading').toMatch(
+      /\.petri-settings-section__heading\)\s*::after\s*\{[\s\S]{0,200}(--petri-text-tertiary|--petri-border)/,
     );
   });
 
   it('seal mark introduces no accent token (ratchet only-tighten)', () => {
     const css = read(SETTINGS_CSS);
-    const seal = css.match(/:global\(\.petri-settings-seal\)\s*::after\s*\{([^}]*)\}/)?.[1] ?? '';
+    const seal = css.match(/\.petri-settings-section__heading\)\s*::after\s*\{([^}]*)\}/)?.[1] ?? '';
     expect(seal, 'seal block must exist').not.toBe('');
     expect(seal).not.toMatch(/--petri-accent/);
   });

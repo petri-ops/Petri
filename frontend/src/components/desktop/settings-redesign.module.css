@@ -300,8 +300,19 @@
   margin: 0;
   font-size: var(--petri-font-size-lg);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  /* A4 轮1复审：可见分区标题才是用户实际看到的字距面（原 0.01em 在隐藏 panel title 上）。 */
+  letter-spacing: 0.03em;
   color: var(--petri-text);
+}
+
+/* A4 轮1复审：落印位挂到真实可见的分区标题下方（非隐藏 panel title）。 */
+[role='dialog'][aria-label='设置'] :global(.petri-settings-section__heading)::after {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 3px;
+  margin-top: var(--petri-space-1);
+  background: var(--petri-text-tertiary);
 }
 
 [role='dialog'][aria-label='设置'] :global(.petri-settings-section__heading) p {
