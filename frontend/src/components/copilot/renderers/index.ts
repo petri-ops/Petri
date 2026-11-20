@@ -4,10 +4,11 @@
 // ResultCardRenderer itself only pre-registers `text` (the safe
 // fallback) at module load; everything else (table / chart /
 // image) is registered through registerDefaultRenderers() so a
-// consumer can opt in by importing this module once. Today this
-// module is imported only by tests — SimpleChat extraRenderers
-// injection is intentionally deferred to a later phase so the
-// renderer registry stays a pure contract layer.
+// consumer can opt in by importing this module once. Consumers
+// today: tests + the compose surface (ComposeCard mounts it,
+// UI-714 — compose chart/table 叶子此前一直走 raw-payload 兜底).
+// SimpleChat result-card injection remains intentionally deferred
+// so the renderer registry stays a pure contract layer there.
 // ============================================================
 
 import { registerRenderer } from '../ResultCardRenderer';

@@ -11,6 +11,7 @@ import React from 'react';
 import type { ComposeSpec } from './spec';
 import { ComposeTree } from './catalog';
 import type { StateData } from './catalog';
+import { registerDefaultRenderers } from '../../renderers';
 
 export interface ComposeCardProps {
   spec: ComposeSpec | null;
@@ -24,6 +25,13 @@ function readBridge(): Window['petri'] | null {
 
 export function ComposeCard({ spec, conversationId, projectId = null }: ComposeCardProps): React.ReactElement {
   const [stateData, setStateData] = React.useState<StateData>(null);
+
+  // UI-714 — compose 渲染面注册 table/chart/image 渲染器（幂等 Map.set）。此前
+  // registerDefaultRenderers 仅测试注入，compose 的 chart/table 叶子一直走 TextRenderer
+  // raw-payload 兜底（乙6/P7 实证：chart 以结构化 JSON 形态显示）。
+  React.useEffect(() => {
+    registerDefaultRenderers();
+  }, []);
 
   // spec 无数据源时直接走派生（effect 内不再同步 setState——react-hooks/set-state-in-effect）
   const targetJobId = spec?.source?.jobId ?? null;

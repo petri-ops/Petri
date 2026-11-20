@@ -43,4 +43,10 @@ describe('ComposeCard（P0 catalog 渲染）', () => {
     expect(screen.getByTestId('compose-invalid')).toBeTruthy();
     expect(errorSpy).toHaveBeenCalled();
   });
+
+  it('UI-714 — chart 叶子走 ChartRenderer（svg 在场，不再 raw-payload 兜底）', () => {
+    const { container } = render(<ComposeCard spec={spec} conversationId={null} />);
+    expect(container.querySelector('svg')).toBeTruthy();
+    expect(container.textContent).not.toContain('"series"');
+  });
 });

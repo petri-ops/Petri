@@ -4,9 +4,9 @@
 //
 // The registry is a module-level singleton Map so tests can
 // inspect / reset it deterministically. Only TextRenderer is
-// pre-registered; table / chart / image renderers will be added
-// by P1.2 / P1.3 via registerRenderer() (typically through
-// ./renderers/index.ts → registerDefaultRenderers()).
+// pre-registered; table / chart / image renderers register via
+// ./renderers/index.ts → registerDefaultRenderers(), which the
+// compose surface (ComposeCard, UI-714) invokes on mount.
 //
 // Lookups fallback to TextRenderer when type is unknown so the
 // container always renders something meaningful.
