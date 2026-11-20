@@ -6792,7 +6792,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 
 **实现**：新增 `data.lessonEvidence` 只读 IPC（channels.js/preload.js/electron.d.ts/data-management.js 四处同步；R5 用 core/shared-backend 的 db-connection-policy + ABI 构造器单源直读 petri.db，零写入）；设置页 maintenance 内嵌 `LessonEvidencePanel`（只读柱状频率曲线 + lesson 状态行 + 失败/空态如实呈现，零写入控件、无「已验证/已签名」徽标）。CSS 全 var(--petri-*) token 零字面量。
 
-**验证**：HK-01 红绿（IPC 通道门 + 面板契约）；IPC 注册表双向集合相等门；前端定向测试（只读渲染/失败不伪造/缺桥静默）；theme-token 契约；tsc 0。**观感零代签**（面板布局/配色/可读性留用户实机过目，状态保持 in_progress + pending_human_eye）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+**验证**：HK-01 红绿（IPC 通道门 + 面板契约）；IPC 注册表双向集合相等门；前端定向测试（只读渲染/失败不伪造/缺桥静默）；theme-token 契约；tsc 0。**实机腿（dev-verify ui716-evidence-live，9223 离屏实例，跑完即 kill）**：6/6 PASS——面板在 maintenance 在场 / 零写入控件 / 无代签徽标 / 只读标注在场 / 空态诚实无伪造曲线 / 截图捕获；证据=`acceptance/ui-716/ui716-evidence-live-darwin.json` + `ui716-evidence-panel.png`。**观感零代签**（面板布局/配色/可读性留用户实机过目，状态保持 in_progress + pending_human_eye，等口令 `UI-716：verified` 才翻）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## UI-715: 会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代签）**）
 

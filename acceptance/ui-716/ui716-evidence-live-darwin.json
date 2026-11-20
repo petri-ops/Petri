@@ -1,0 +1,39 @@
+{
+  "name": "ui716-evidence-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T06:04:51.529Z",
+  "finishedAt": "2026-11-20T06:04:52.261Z",
+  "assertions": [
+    {
+      "name": "D1_panel_present_in_maintenance",
+      "pass": true,
+      "detail": "nav settings?section=maintenance → lesson-evidence-panel"
+    },
+    {
+      "name": "D2_panel_has_no_write_control",
+      "pass": true,
+      "detail": "{\"buttons\":0,\"badge\":false,\"readonlyHint\":true,\"textLen\":409}"
+    },
+    {
+      "name": "D3_panel_no_verified_badge",
+      "pass": true,
+      "detail": "观感零代签：无 verified/已验证徽标"
+    },
+    {
+      "name": "D4_panel_readonly_hint",
+      "pass": true,
+      "detail": "只读标注在场"
+    },
+    {
+      "name": "D5_data_state_honest",
+      "pass": true,
+      "detail": "{\"curve\":false,\"statusRows\":0,\"honestEmpty\":true}"
+    },
+    {
+      "name": "D6_screenshot_captured",
+      "pass": true,
+      "detail": "ui716-evidence-panel.png"
+    }
+  ],
+  "allPass": true
+}

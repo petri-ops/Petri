@@ -9454,12 +9454,15 @@
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.test.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/MaintenanceSection.tsx",
         "test/evo4-evidence-panel.test.mjs",
-        "acceptance/evo-4/**"
+        "acceptance/evo-4/**",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/ui716-evidence-live.cjs",
+        "acceptance/ui-716/**"
       ],
       "tests": [
         "test/evo4-evidence-panel.test.mjs",
         "test/ipc-channels-registry.test.mjs",
-        "test/evo3-verify-frequency.test.mjs"
+        "test/evo3-verify-frequency.test.mjs",
+        "test/live-window-policy.test.mjs"
       ]
     },
     {
