@@ -1,0 +1,132 @@
+{
+  "kind": "a0-identity-decision-material",
+  "generatedBy": "scripts/lib/a0-identity-translation.mjs",
+  "truthDomain": "ui-visual-art-direction-2026-11-20",
+  "capturedAt": "2026-11-20T07:58:50.442Z",
+  "readings": {
+    "sourceAssets": {
+      "value": [
+        {
+          "suffix": "01-system-board.png",
+          "file": "petri-logo-concepts_assets/8d517163-01-system-board.png",
+          "present": true
+        },
+        {
+          "suffix": "00-palette.png",
+          "file": "petri-logo-concepts_assets/66879bfb-00-palette.png",
+          "present": true
+        },
+        {
+          "suffix": "FINAL-grid-contact.png",
+          "file": "petri-logo-concepts_assets/05f2e930-FINAL-grid-contact.png",
+          "present": true
+        },
+        {
+          "suffix": "FINAL-main.png",
+          "file": "petri-logo-concepts_assets/e14210ee-FINAL-main.png",
+          "present": true
+        },
+        {
+          "suffix": "v2-colour-directions.png",
+          "file": "petri-logo-concepts_assets/fd3f1f6e-v2-colour-directions.png",
+          "present": true
+        }
+      ],
+      "source": "petri-logo-concepts_assets/（只读用户资产）"
+    },
+    "artDisciplines": {
+      "value": {
+        "core": [
+          "architecture",
+          "film",
+          "painting",
+          "art-history"
+        ],
+        "extended": [
+          "music",
+          "sculpture",
+          "theatre",
+          "literature",
+          "photography",
+          "typography",
+          "industrial-design"
+        ],
+        "source": "acceptance/ui-visual-upgrade-2026-11-20/CROSS-DISCIPLINARY-MASTER.md"
+      },
+      "source": "acceptance/ui-visual-upgrade-2026-11-20/CROSS-DISCIPLINARY-MASTER.md"
+    },
+    "harmonicSchemes": {
+      "value": [
+        {
+          "id": "A",
+          "name": "宣纸·朱砂",
+          "skeleton": "#F2EFE6",
+          "ink": "#1C1B19",
+          "accent": "#B5482F",
+          "role": "品牌面落印"
+        },
+        {
+          "id": "B",
+          "name": "青瓷·墨",
+          "skeleton": "#F4F1E8",
+          "ink": "#173A38",
+          "accent": "#2FD7D2",
+          "role": "工作态主 accent 候选"
+        },
+        {
+          "id": "C",
+          "name": "群青·铜",
+          "skeleton": "#F2EFE6",
+          "ink": "#1E2E52",
+          "accent": "#A87C42",
+          "role": "证据/归档面"
+        },
+        {
+          "id": "D",
+          "name": "靛·雾",
+          "skeleton": "#EAEFF2",
+          "ink": "#1B2B40",
+          "accent": "#6E9CA0",
+          "role": "数据密集面"
+        }
+      ],
+      "source": "petri-logo-concepts_assets/00-palette.png / v2-colour-directions.png"
+    },
+    "recommendation": {
+      "value": {
+        "options": [
+          "B 青瓷·墨 为工作态主 accent；A 宣纸·朱砂 仅在品牌落印位点睛（<5% 面积）"
+        ],
+        "reasons": [
+          "延续既有 teal 认知与「主题色一致」偏好，先用和声关系收敛 accent 预算，身份点睛留在品牌面而不铺满工具面。"
+        ],
+        "status": "pending_user_ruling"
+      },
+      "source": "acceptance/ui-visual-upgrade-2026-11-20/ART-DIRECTION.md §2.1"
+    },
+    "refusals": {
+      "value": {
+        "refused": [
+          "glassmorphism",
+          "parallax",
+          "film-grain",
+          "neon-glow",
+          "gradient-text",
+          "emoji-as-icon"
+        ],
+        "rationale": "与品牌 v2-colour-directions「Flat colour only - no gradients, no glow, no transparency」及 G0 工程纪律冲突"
+      },
+      "source": "acceptance/ui-visual-upgrade-2026-11-20/CROSS-DISCIPLINARY-MASTER.md §0/§5"
+    },
+    "boundaries": {
+      "value": {
+        "humanEyeStatus": "in_progress",
+        "productCodeChanges": 0,
+        "newDependencies": 0,
+        "g1Touched": false,
+        "serialSlot": "专项（结论型），不占 BLOCK 串行槽"
+      },
+      "source": "AGENTS.md G0 纪律 + 2026-11-20 观感签字裁决"
+    }
+  }
+}

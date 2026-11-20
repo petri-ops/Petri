@@ -8798,6 +8798,24 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a0-identity-translation",
+      "note": "A0 身份转译决策（专项·结论型）：纯函数 collectIdentityTranslation 从品牌真源（petri-logo-concepts_assets 按后缀发现）机械派生六组读数（真源资产/艺术门类/和声试样/单一推荐/不采纳清单/边界），decision-material.json 快照可复算 + schema 契约 + 消费测试（7 类篡改负测 fail-closed）。零产品代码/零依赖/观感零代签/不碰 G1+；只产结论停在 pending_user_ruling。证据 acceptance/a0-identity-translation/**。",
+      "patterns": [
+        "scripts/lib/a0-identity-translation.mjs",
+        "acceptance/a0-identity-translation/**",
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "tests": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "commands": [
+        "docs-check",
+        "ui-audit"
+      ],
+      "classifiesScripts": true,
+      "scriptRole": "baseline-collector"
+    },
+    {
       "id": "design-brief-product-skill",
       "note": "C-52 第二包：产品内置 design-brief Skill，经 skill_discover/skill_get 提供十节设计说明手册；零依赖、零 UI 写面变化。证据 acceptance/design-brief-skill/**。BLOCK-475 / C-53 P6 把 design-brief 升 v1.1.0（README/system 消费 design-context 五件套 + ia-map + a11y；skill.json/manifest version + capabilities 同步；builtinSha256 重算），对齐 .agents/skills/petri-ui-design/SKILL.md 走发现桥；证据 acceptance/block475-c53-p6-skill-contract/**。",
       "patterns": [
