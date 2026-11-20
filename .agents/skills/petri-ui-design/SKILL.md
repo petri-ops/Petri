@@ -60,7 +60,7 @@ Use `references/design-brief-template.md` for product mode. Include:
 - Run the mechanical gates relevant to the touched surface: `theme-token-contract`, UI audit, targeted tests, and `dev-verify` flows when UI behavior changes.
 - Use `references/review-checklist.md` for a pre-delivery review.
 - Write static scores only from current command output; never call them human-eye scores.
-- Mark aesthetic/visual judgement as `pending_human_eye`; agents do not sign it.
+- Aesthetic/visual judgement: with a user preference ruling, run the preference-review loop (review → optimization suggestions → auto-optimize the presentation layer → re-verify → sign verified with per-criterion evidence); without a preference ruling, mark `pending_human_eye` and do not sign. See AGENTS.md §UI 进度自动对账 for boundaries (≤3 iterations, presentation-only changes).
 
 ## Hard rules
 

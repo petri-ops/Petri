@@ -247,4 +247,12 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **观感零代签**：UI-716 保持 in_progress + pending_human_eye；用户切到「数据与维护」分区看过面板后给口令才翻 verified。
 - **纪律**：零新依赖/纯本地零外发/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 14. 观感签字纪律变更 + UI-716 首次适用（2026-11-20 · 用户裁决）
+
+- **裁决原话**：「按你的建议来 同时优化一下，skills 改为 偏好预审通过即视为签字」+「偏好预审给出优化建议并自动优化，优化后即通过」。
+- **新纪律**：观感项从「零代签/仅用户口令」改为「用户口令 OR 偏好预审闭环」；闭环=用户给明确偏好标准 → Agent 实机预审 → 优化建议 → 自动优化呈现面 → 复验通过即翻 verified。边界=仅呈现面（文案/布局/space/token）不改功能与交互契约、≤3 轮、逐条判据+证据留痕、按项/按类授权不外推、无偏好裁决项仍 in_progress。canonical 改全：AGENTS.md §UI 进度自动对账 + petri-project-governance 3 refs + petri-ui-design 2 refs（符号链接发现桥自动同步）。
+- **UI-716 首次适用**：偏好原话「简单文字少，布局和谐」。轮 1 预审：布局 pass、文字少 fail（字段 hint + 面板 hint + 空态三行同义反复）；优化建议=删字段 hint、面板 hint 收敛一行；自动优化后轮 2 复验：文字少 pass（面板 2 行，textLen 63→46）、布局 pass、只读/无红字 pass（实机 7/7）→ 翻 verified，台账留逐轮判据 + 证据路径。
+- **验证**：Node 契约 23/23、前端 23/23、实机 7/7、ui:audit ✓、UI 台账契约 5/5（triage 重算）、docs:check PASS(661)。
+- **纪律**：零新依赖/纯本地零外发/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

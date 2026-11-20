@@ -51,7 +51,7 @@ agent 不得自行新造下一阶段范围、不得自动启动 work-package。�
 | 已授权且**未消耗完**（如 P2–P7 只做完 P2） | **原样继承**剩余阶段，只更新现读数字与已完成项，不重造 R 编号语义 |
 | 已**全部消耗**（范围内 work-package 全 completed） | 不再继承；新阶段若需推进 → 标 `advice_only / pending_user_ruling`，列用户动作清单，不写进 R 项 |
 | 下一阶段**超出**上一批预置范围（新依赖 / design-charter 冻结项 / 授权结论 / G1+） | **红线 2 停**：只出材料，不落 R 项，最终报告列「待用户发令」 |
-| 观感项（pending_human_eye：UI-###、E 类人眼、人眼收口） | 永远 `in_progress` 留槽，正文只写非观感部分，不代签 |
+| 观感项（pending_human_eye：UI-###、E 类人眼、人眼收口） | 有用户偏好裁决的走「偏好预审闭环」（预审→优化建议→自动优化→复验通过即翻 verified，见 AGENTS.md UI 纪律）；无偏好裁决的永远 `in_progress` 留槽 |
 | 既有红（perf 抖动 / evidence gap 等） | 如实登记归属，归属既有基线，不重打掩盖 |
 
 ## 6. 降级策略（失败诚实）
@@ -66,7 +66,7 @@ agent 不得自行新造下一阶段范围、不得自动启动 work-package。�
 - [ ] 输入来自现读 canonical（state / AUDIT-LOG / 上一批提示词 / next:suggest），非聊天回忆
 - [ ] §2 正文七要素齐 + 两条红线 + G0 用语一次
 - [ ] 预置裁决只继承或引用用户发令，无 agent 自造新阶段范围
-- [ ] 观感项零代签、既有红归属如实
+- [ ] 观感项：有偏好裁决的走预审闭环并留逐条判据、无偏好裁决的不代签；既有红归属如实
 - [ ] 三件套登记齐 + docs:check 绿 + hygiene:check 绿
 - [ ] commit + push 成功（失败标 external-blocked 如实报告）
 

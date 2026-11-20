@@ -47,7 +47,7 @@ export function LessonEvidencePanel(): React.ReactElement | null {
 
   return (
     <div className={styles.panel} data-testid="lesson-evidence-panel" role="note">
-      <p className={styles.hint}>只读证据快照：本机 lessons/incidents 汇总，无写入、无外发。</p>
+      <p className={styles.hint}>本机 lesson 证据快照 · 只读无外发</p>
 
       {!data && <p className={styles.hint}>读取中…</p>}
       {data && !data.ok && <p className={styles.error}>读取失败：{data.error ?? '未知错误'}</p>}

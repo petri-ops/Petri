@@ -1,30 +1,20 @@
 {
-  "generatedAt": "2026-11-18T00:42:53.092Z",
+  "generatedAt": "2026-11-20T07:03:41.083Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 503,
-  "uniqueIds": 494,
+  "sections": 509,
+  "uniqueIds": 500,
   "counts": {
-    "live-missing": 15,
-    "verified": 453,
+    "live-missing": 13,
+    "verified": 461,
     "blocked": 23,
     "closed": 12
   },
-  "debt": 38,
+  "debt": 36,
   "liveMissing": [
     {
       "id": "UI-702",
       "deps": [],
       "title": "通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）"
-    },
-    {
-      "id": "UI-710",
-      "deps": [],
-      "title": "SceneSpec 证据面板 + ::compose ↔ Result Studio 双形态互达（3D P3 呈现层 BLOCK-463；2026-11-18 **in_progr"
-    },
-    {
-      "id": "UI-709",
-      "deps": [],
-      "title": "Gen UI ::compose 受控渲染插座（W11 数据面首包 BLOCK-461；2026-11-18 **in_progress（代码完成+契约绿；实机观感 pending"
     },
     {
       "id": "UI-699",
@@ -93,18 +83,6 @@
       "deps": [],
       "external": true,
       "title": "设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 *"
-    },
-    {
-      "id": "UI-707",
-      "deps": [],
-      "external": true,
-      "title": "上下文窗口与思考默认档模型级化——模型行悬停配置 + 设置页上下文退役（BLOCK-456；2026-11-17 **in_progress（P1-P4 收口，实机腿 19/19；"
-    },
-    {
-      "id": "UI-706",
-      "deps": [],
-      "external": true,
-      "title": "API Endpoint 能力面简化——主表 11→8 列 + 行详情折叠 + 能力声明模型级化 + 角色绑定模型对（BLOCK-455 P4/P5；2026-11-17 **in"
     },
     {
       "id": "UI-656",
@@ -227,6 +205,18 @@
       "deps": [],
       "external": true,
       "title": "段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入：段卡 workspace-preview data-segment-crash"
+    },
+    {
+      "id": "UI-715",
+      "deps": [],
+      "external": true,
+      "title": "会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代"
+    },
+    {
+      "id": "UI-714",
+      "deps": [],
+      "external": true,
+      "title": "乙组观察点落地小批——compose chart/table 渲染接线 + 左栏导航 aria-current + model-btn hover 收敛单一档（2026-11-20"
     }
   ],
   "unknown": [],

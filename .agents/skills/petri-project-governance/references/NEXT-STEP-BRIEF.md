@@ -16,11 +16,11 @@
 
 ````text
 下一步：<候选>（Jev <confidence>）——<一句话范围/体量>；未开工，等你发令。
-位置：Q-MATRIX <✅x/🟡y/🔴z/⛔w=N> · 波次 <A→B→C>（P4-REM 最后、Q4b 单列）· active <无/BLOCK-xxx> · UI 观感 <in_progress 零代签>。
+位置：Q-MATRIX <✅x/🟡y/🔴z/⛔w=N> · 波次 <A→B→C>（P4-REM 最后、Q4b 单列）· active <无/BLOCK-xxx> · UI 观感 <有偏好裁决走预审闭环 / 无则 in_progress 不代签>。
 
 可直接复制的启动提示词（整块发给新 Agent）：
 ```
-你是 Petri Desktop 全自动执行 Agent。用户发令「开始 <候选>」。先读 docs/AUDIT-LOG.md 头部与 docs/next-phase-e2e-prompt-<date>.md §2 自包含正文，按其执行序列推进 <候选>。纪律：单工作包串行、HK-01 红绿先行、每步定向测试+closeout 门禁+证据落 acceptance/+六件套回写+commit/push。红线：观感项（pending_human_eye）保持 in_progress 零代签；新裁决点/产品级新依赖/G1+ 停下报用户；未获用户发令不启动后续阶段。
+你是 Petri Desktop 全自动执行 Agent。用户发令「开始 <候选>」。先读 docs/AUDIT-LOG.md 头部与 docs/next-phase-e2e-prompt-<date>.md §2 自包含正文，按其执行序列推进 <候选>。纪律：单工作包串行、HK-01 红绿先行、每步定向测试+closeout 门禁+证据落 acceptance/+六件套回写+commit/push。红线：观感项有用户偏好裁决的走预审闭环（预审→优化建议→自动优化→复验通过即翻 verified）、无偏好裁决的保持 in_progress 不代签；新裁决点/产品级新依赖/G1+ 停下报用户；未获用户发令不启动后续阶段。
 ```
 ````
 
@@ -30,11 +30,11 @@
 
 ````text
 下一步：C-53-P2（Jev 0.95）——IA 与高频路径首片，1 个小包；未开工，等你发令。
-位置：Q-MATRIX 74/21/0/7=102 · 波次 C-53（P2-P7 待发令）→候选池（P4-REM 最后、Q4b 单列）· active 无 · UI 观感 in_progress 零代签。
+位置：Q-MATRIX 74/21/0/7=102 · 波次 C-53（P2-P7 待发令）→候选池（P4-REM 最后、Q4b 单列）· active 无 · UI 观感 有偏好裁决走预审闭环/无则 in_progress。
 
 可直接复制的启动提示词（整块发给新 Agent）：
 ```
-你是 Petri Desktop 全自动执行 Agent。用户发令「开始 C-53 P2」。先读 docs/AUDIT-LOG.md 头部与 docs/next-phase-e2e-prompt-2026-11-18-b2.md §2 自包含正文，按其执行序列推进 C-53 P2。纪律：单工作包串行、HK-01 红绿先行、每步定向测试+closeout 门禁+证据落 acceptance/+六件套回写+commit/push。红线：观感项（pending_human_eye）保持 in_progress 零代签；新裁决点/产品级新依赖/G1+ 停下报用户；未获用户发令不启动后续阶段。
+你是 Petri Desktop 全自动执行 Agent。用户发令「开始 C-53 P2」。先读 docs/AUDIT-LOG.md 头部与 docs/next-phase-e2e-prompt-2026-11-18-b2.md §2 自包含正文，按其执行序列推进 C-53 P2。纪律：单工作包串行、HK-01 红绿先行、每步定向测试+closeout 门禁+证据落 acceptance/+六件套回写+commit/push。红线：观感项有用户偏好裁决的走预审闭环（预审→优化建议→自动优化→复验通过即翻 verified）、无偏好裁决的保持 in_progress 不代签；新裁决点/产品级新依赖/G1+ 停下报用户；未获用户发令不启动后续阶段。
 ```
 ````
 
@@ -55,7 +55,7 @@
 5. **「未启动任何新工作包，等你发令」**：除非用户在本轮已预授权连续工作，否则这句必须保留；建议是 advice，不是开工。
 6. **母纲波次顺序**：从 `docs/qoder-essence-absorption-plan.md` §6.5 现读，已完成项不列；P4-REM 必须最后，Q4b 单列；压进「位置」行，不另占一行。
 7. **蓝图/全局计划进展**：母纲 Q-MATRIX + active + UI 观感进「位置」行（紧凑）；竞争力纲/成熟度蓝图/Result Studio 仅本轮有变才补「补充」行，未触及不写。数字/状态一律从 canonical 现读，禁止凭记忆或沿用上一轮。
-7b. **可复制启动提示词**（必带、独立代码块）：`<候选>` / `<date>` 现读替换、**不留占位符**；口令含四要素——①发令「开始 <候选>」②先读 AUDIT-LOG + 提示词 §2 ③纪律（串行/HK-01/测试+closeout+证据+六件套+commit）④红线（观感零代签/新裁决与依赖与 G1+ 停/未发令不续）。目的=用户整块复制即可启动，无需阅读辨别；但口令本身是 advice 的载体，是否发出由用户决定。
+7b. **可复制启动提示词**（必带、独立代码块）：`<候选>` / `<date>` 现读替换、**不留占位符**；口令含四要素——①发令「开始 <候选>」②先读 AUDIT-LOG + 提示词 §2 ③纪律（串行/HK-01/测试+closeout+证据+六件套+commit）④红线（观感项有偏好裁决走预审闭环、无则零代签/新裁决与依赖与 G1+ 停/未发令不续）。目的=用户整块复制即可启动，无需阅读辨别；但口令本身是 advice 的载体，是否发出由用户决定。
 8. **active 工作包**：以 `docs/project-workspace-handoff.md` 的「恢复要点」与 `docs/DOC-REGISTRY.json` 为准；没有就写「无」。
 9. **不列 G1+**：Provider 矩阵、packaged 公证/签名、GA、远程发布、dist staleness 等不作为下一步建议；G0 阶段纪律不变。
 10. **不把「未做」写成「阻塞」**：阻塞只用于真正的契约/安全/外部条件前置；可做但未排期的写「未开工/排队」。

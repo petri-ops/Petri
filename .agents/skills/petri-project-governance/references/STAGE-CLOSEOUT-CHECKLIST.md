@@ -42,6 +42,6 @@
 
 - [ ] 按 `references/NEXT-PHASE-PROMPT-HANDOFF.md` 派生并落档下一阶段无人值守提示词（与 NEXT-STEP-BRIEF 同层、在其之后）
 - [ ] 输入现读（state / AUDIT-LOG / 上一批提示词 / `npm run next:suggest -- --supply=cloud`），非聊天回忆；§2 正文七要素齐 + 两条红线 + G0 用语一次
-- [ ] 预置裁决只继承上一批已授权范围或引用用户发令，无 agent 自造新阶段范围；观感项零代签、既有红归属如实
+- [ ] 预置裁决只继承上一批已授权范围或引用用户发令，无 agent 自造新阶段范围；观感项有偏好裁决的走预审闭环（逐条判据留痕）、无偏好裁决的不代签；既有红归属如实
 - [ ] 三件套登记齐（DOC-REGISTRY + README + AUDIT-LOG）+ `npm run docs:check` 绿 + `npm run hygiene:check` 绿
 - [ ] 队列确已清空且无下一阶段候选时，如实写「队列未变」，不臆造提示词

@@ -36,7 +36,7 @@ Run before declaring any Petri UI or design artifact complete.
 - [ ] Static, mechanical, and human-eye evidence separated.
 - [ ] Targeted tests and dev-verify flows run where applicable.
 - [ ] Screenshots unavailable are recorded as unavailable, not passed.
-- [ ] Aesthetic judgement marked `pending_human_eye`.
+- [ ] Aesthetic judgement: with user preference ruling, preference-review loop completed (per-criterion verdict + optimization + re-verify evidence); otherwise marked `pending_human_eye`.
 - [ ] External references and licenses recorded; nothing copied from brands.
 
 ## Product capability mode
