@@ -23,6 +23,33 @@
 set -u
 cd "$(dirname "$0")/.." || exit 2
 
+# ── S7/P2-2 TTL 看门狗（R2 清偿批，2026-11-21）──
+# 同类遗留第二次出现（9223 测试实例跑完忘 kill，源码门禁对进程遗留是盲区）
+# → 机械防线：实例就绪后布防 detached 看门狗，超时自动 kill 9223 监听者。
+# 代币防误杀：重启实例会刷新 .petri-test-instance.ttl 标记，旧看门狗触发时
+# 发现代币已换代即静默退出（绝不杀后启的新实例）。触发时按端口现查监听者
+# （不锚启动期 pid，重启漂移安全）。默认 4h，PETRI_TEST_TTL_S 可覆盖。
+arm_ttl_watchdog() {
+  ttl_s="${PETRI_TEST_TTL_S:-14400}"
+  token="$(date +%s)-${RANDOM}"
+  printf '%s\n' "$token" > .petri-test-instance.ttl
+  nohup bash -c "
+    sleep ${ttl_s}
+    cur=\$(cat .petri-test-instance.ttl 2>/dev/null || true)
+    [ \"\$cur\" = \"${token}\" ] || exit 0
+    if [ \"\$(uname -s)\" = \"Darwin\" ]; then
+      pid=\$(lsof -tnP -iTCP:9223 -sTCP:LISTEN 2>/dev/null | head -1)
+      [ -n \"\$pid\" ] && kill \"\$pid\" 2>/dev/null
+    else
+      pid=\$(netstat -ano | grep ':9223' | grep LISTENING | awk '{print \$5}' | head -1)
+      [ -n \"\$pid\" ] && MSYS_NO_PATHCONV=1 taskkill /PID \"\$pid\" /F 2>/dev/null
+    fi
+    [ -n \"\$pid\" ] && echo \"[ttl-watchdog] TTL ${ttl_s}s reached — killed leftover test instance (pid \$pid)\" >> .petri-test-instance.ttl.log
+    exit 0
+  " >/dev/null 2>&1 &
+  echo "ttl-watchdog armed (${ttl_s}s, token ${token})"
+}
+
 # ── 参数解析 ──
 for arg in "$@"; do
   case "$arg" in
@@ -106,6 +133,7 @@ for i in $(seq 1 40); do
   pages=$(curl -s -m 3 http://127.0.0.1:9223/json/list 2>/dev/null | grep -c 'test=1' || true)
   echo "t+$((i*3))s test=1 targets: ${pages}"
   if [ "${pages:-0}" -ge 1 ]; then
+    arm_ttl_watchdog
     echo "TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)"
     exit 0
   fi

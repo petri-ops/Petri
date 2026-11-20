@@ -125,3 +125,5 @@ model3d/runs/
 
 # 运行时代理临时目录（agent 工具产生的中间截图/探针，不入库）
 .petri-agent-tmp/
+.petri-test-instance.ttl
+.petri-test-instance.ttl.log

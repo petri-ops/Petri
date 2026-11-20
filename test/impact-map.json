@@ -2654,14 +2654,15 @@
     },
     {
       "id": "script-dev-stack",
-      "note": "dev 栈/实机验收编排脚本（BLOCK-77 沉淀的 restart-dev-stack.sh + 窗口尺寸辅助）。非产品代码，改动只需跑脚本冒烟（--check/语法），故 tests 挂 dev-verify 契约测试。 BLOCK-100 增补 start-test-instance.sh（测试实例启动器，同型非产品脚本）。",
+      "note": "dev 栈/实机验收编排脚本（BLOCK-77 沉淀的 restart-dev-stack.sh + 窗口尺寸辅助）。非产品代码，改动只需跑脚本冒烟（--check/语法），故 tests 挂 dev-verify 契约测试。 BLOCK-100 增补 start-test-instance.sh（测试实例启动器，同型非产品脚本）。 2026-11-21 R2 清偿批 S7：追加测试实例 TTL 看门狗契约测（P2-2 机械门禁）。",
       "patterns": [
         "scripts/restart-dev-stack.sh",
         "scripts/resize-electron-window.ps1",
         "scripts/start-test-instance.sh"
       ],
       "tests": [
-        "test/dev-debug-scripts.test.mjs"
+        "test/dev-debug-scripts.test.mjs",
+        "test/test-instance-ttl.test.mjs"
       ],
       "classifiesScripts": true
     },
