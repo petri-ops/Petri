@@ -872,8 +872,7 @@
 
 .retryBtn:hover {
   background: var(--petri-hover);
-  border-color: var(--petri-accent);
-  color: var(--petri-accent);
+  border-color: var(--petri-accent); color: var(--petri-text);
 }
 
 /* ============================================================

@@ -180,15 +180,13 @@
   background: var(--petri-hover);
 }
 
-.tabBtnActive {
-  color: var(--petri-accent);
+.tabBtnActive { color: var(--petri-text);
   border-bottom-color: var(--petri-accent);
   background: transparent;
 }
 
 .tabBtnActive:hover {
-  background: transparent;
-  color: var(--petri-accent);
+  background: transparent; color: var(--petri-text);
 }
 
 /* ===== BLOCK-103 文档库容器（拖拽 dropzone 根） ===== */
@@ -504,8 +502,7 @@
   max-width: 100%;
 }
 
-.docNameBtn:hover {
-  color: var(--petri-accent);
+.docNameBtn:hover { color: var(--petri-text);
   text-decoration: underline;
 }
 
@@ -540,8 +537,8 @@
   cursor: pointer;
 }
 
-.previewOpenRaw:hover {
-  color: var(--petri-accent);
+.previewOpenRaw:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .previewChunk {

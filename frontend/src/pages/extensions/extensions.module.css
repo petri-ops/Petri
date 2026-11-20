@@ -33,8 +33,7 @@
   color: var(--petri-text);
 }
 
-.shelfTabActive {
-  color: var(--petri-accent);
+.shelfTabActive { color: var(--petri-text);
   border-bottom-color: var(--petri-accent);
 }
 

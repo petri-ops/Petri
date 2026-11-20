@@ -221,8 +221,7 @@ button.iconAction {
 
 .secondaryActions a:hover,
 .secondaryActions button:hover {
-  border-color: var(--petri-accent-border);
-  color: var(--petri-accent);
+  border-color: var(--petri-accent-border); color: var(--petri-text);
 }
 
 .menuLabel {

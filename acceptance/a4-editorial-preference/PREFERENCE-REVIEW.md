@@ -38,3 +38,4 @@
 
 - 本签字仅覆盖 UI-717 的 V0–V1 视觉呈现面（色板 token / 图标原子 / 排版落印 / accent 密度），不外推到其它 UI-### 或 E 类人眼槽。
 - 第 1 轮 runner/BLOCK-463 顶层副作用、accent targetMet 未达 130（V1 已如实登记 U 类）均不属本轮签字范围，原样保留。
+- **第 3 轮（V1-U 之后，2026-11-20）未通过**：`round3/a4-editorial-preference-live-darwin.json` 0/1 FAIL，根因 backend :3001 死、`restart-dev-stack.sh` TIMEOUT（api=000/vite=200），`cdp_not_ready_on_port_9223`。未伪造截图、未开窗。处置：round2 已验证的静态面维持 verified；V1-U 新增的 hover/active 交互呈现**未获实机复审**，待栈恢复补跑 round3 后方可对该面声称通过。证据见 `acceptance/v1u-accent-semantics/GATE-LEDGER.md`。

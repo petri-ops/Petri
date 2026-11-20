@@ -1,0 +1,140 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/styles/V1UAccentSemantics.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 76[2mms[22m[39m
+   [31m❯[39m V1-U semantic accent convergence [2m(5)[22m
+[31m     [31m×[31m no accent text color remains in hover/active rules[39m[32m 28[2mms[22m[39m
+[31m     [31m×[31m converted text-color rules keep a feedback channel (bg/border/underline/shadow)[39m[32m 17[2mms[22m[39m
+     [32m✓[39m focus ring accent is preserved (WCAG)[32m 17[2mms[22m[39m
+[31m     [31m×[31m total accent strictly decreases from 316[39m[32m 13[2mms[22m[39m
+     [32m✓[39m targetMet is not faked by aliases[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/styles/V1UAccentSemantics.test.ts[2m > [22mV1-U semantic accent convergence[2m > [22mno accent text color remains in hover/active rules
+[31m[1mAssertionError[22m: expected [ …(47) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/copilot/ToolActivityDock.module.css :: .tabActive",[39m
+[31m+   "components/copilot/ToolActivityDock.module.css :: .footerBtnActive",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-tool-term-copy:hover",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-knowledge-toggle:hover:not(:disabled)",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-knowledge-toggle-on:hover:not(:disabled)",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-tool-qoder-row .sc-tool-row-copy:hover",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-tool-resultdata-copy:hover",[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-view-switch-btn.active",[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-acc-action-edit:hover",[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-commit-tree-row.active",[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-acc-action-stage:hover",[39m
+[31m+   "components/desktop/desktop.css :: .petri-settings-nav__item.active",[39m
+[31m+   "components/desktop/desktop.css :: .petri-plugin-store__nav-item.active",[39m
+[31m+   "components/desktop/desktop.css :: [data-theme='dark'] .petri-plugin-store__nav-item.active",[39m
+[31m+   "components/desktop/desktop.css :: .petri-plugin-store__nav-item.active .petri-plugin-store__nav-count",[39m
+[31m+   "components/desktop/desktop.css :: [data-theme='dark'] .petri-plugin-store__nav-item.active .petri-plugin-store__nav-count",[39m
+[31m+   "components/desktop/desktop.css :: .petri-nav-item:hover .petri-nav-item__arrow",[39m
+[31m+   "components/knowledge/KnowledgeConsoleDock.module.css :: .handleActive",[39m
+[31m+   "components/result-studio/CompactResultNavigator.module.css :: .secondaryActions button:hover",[39m
+[31m+   "components/viewers/MarkdownViewer.module.css :: .markdownBody a:hover",[39m
+[31m+   "components/workspace-panels/KnowledgeSpacePanel.module.css :: .tabBtnActive",[39m
+[31m+   "components/workspace-panels/KnowledgeSpacePanel.module.css :: .tabBtnActive:hover",[39m
+[31m+   "components/workspace-panels/KnowledgeSpacePanel.module.css :: .docNameBtn:hover",[39m
+[31m+   "components/workspace-panels/KnowledgeSpacePanel.module.css :: .previewOpenRaw:hover",[39m
+[31m+   "pages/extensions/extensions.module.css :: .shelfTabActive",[39m
+[31m+   "pages/extensions/styles.module.css :: .retryBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePathText:not(:disabled):hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePathAction:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceSummaryChipBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .leftWorkspaceText:not(:disabled):hover",[39m
+[31m+   "pages/project-workspace.module.css :: .leftWorkspaceAction:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .leftSidebarPathText:not(:disabled):hover",[39m
+[31m+   "pages/project-workspace.module.css :: .projectTreeAddBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .convItemForkBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: button.workspacePinnedSummaryPrimaryCard:hover",[39m
+[31m+   "pages/project-workspace.module.css :: button.workspacePinnedSummaryMetricCard:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePinnedSummaryTaskRow:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePinnedSummaryHistoryItem:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .resultTabActive",[39m
+[31m+   "pages/project-workspace.module.css :: .emptyResultLaunchCard:hover .emptyResultLaunchIcon",[39m
+[31m+   "pages/project-workspace.module.css :: .tabBtnActive",[39m
+[31m+   "pages/project-workspace.module.css :: .toolboxTabActive",[39m
+[31m+   "pages/project-workspace.module.css :: .convItemActive .convItemTime",[39m
+[31m+   "pages/project-workspace.module.css :: .workspaceFileTabActive",[39m
+[31m+   "pages/welcome.module.css :: .manageLink:hover",[39m
+[31m+   "pages/welcome.module.css :: .chip:hover",[39m
+[31m+   "pages/welcome.module.css :: .dirSuggestion:hover",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/styles/V1UAccentSemantics.test.ts:[2m44:53[22m[39m
+    [90m 42|[39m   it('no accent text color remains in hover/active rules', () => {
+    [90m 43|[39m     const bad = rules().filter((r) => hoverOrActive(r.sel) && accentCo…
+    [90m 44|[39m     expect(bad.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+    [90m   |[39m                                                     [31m^[39m
+    [90m 45|[39m   });
+    [90m 46|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/V1UAccentSemantics.test.ts[2m > [22mV1-U semantic accent convergence[2m > [22mconverted text-color rules keep a feedback channel (bg/border/underline/shadow)
+[31m[1mAssertionError[22m: expected [ …(19) ] to deeply equal [][39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [][39m
+[31m+ [[39m
+[31m+   "components/common/ToastProvider.module.css :: .dismiss:hover",[39m
+[31m+   "components/common/ToastProvider.module.css :: .historyToggle:hover",[39m
+[31m+   "components/copilot/ToolActivityDock.module.css :: .iconBtn:hover",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-tool-activity-summary:hover",[39m
+[31m+   "components/copilot/simple-chat.css :: .sc-changes-scope-btn:hover",[39m
+[31m+   "components/desktop/WorkingTreeReview/ReviewMode.css :: .rvw-history-filter-clear:hover",[39m
+[31m+   "components/desktop/desktop.css :: .petri-settings-advanced-details > summary:hover",[39m
+[31m+   "components/desktop/desktop.css :: .petri-nav-item:hover",[39m
+[31m+   "components/desktop/desktop.css :: .petri-nav-panel .petri-desktop-panel__close:hover",[39m
+[31m+   "components/desktop/settings-redesign.module.css :: [role='dialog'][aria-label='设置'] :global(.petri-settings-nav__item.active) svg",[39m
+[31m+   "components/result-studio/ResultStudioSurface.module.css :: .modeSwitcher button:hover",[39m
+[31m+   "components/work-surface/TraceSurface.module.css :: .chip:hover",[39m
+[31m+   "pages/extensions/extensions.module.css :: .mcpRefresh:hover",[39m
+[31m+   "pages/extensions/styles.module.css :: .closeButton:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePinnedSummaryActionBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .workspacePinnedSummarySectionHeading > button:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .resultTab:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .tabBtn:hover",[39m
+[31m+   "pages/project-workspace.module.css :: .toolboxTab:hover",[39m
+[31m+ ][39m
+
+[36m [2m❯[22m src/styles/V1UAccentSemantics.test.ts:[2m55:60[22m[39m
+    [90m 53|[39m       return !feedback.test(r.body) && !/\[aria-selected|aria-pressed|…
+    [90m 54|[39m     });
+    [90m 55|[39m     expect(suspicious.map((r) => `${r.file} :: ${r.sel}`)).toEqual([]);
+    [90m   |[39m                                                            [31m^[39m
+    [90m 56|[39m   });
+    [90m 57|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/V1UAccentSemantics.test.ts[2m > [22mV1-U semantic accent convergence[2m > [22mtotal accent strictly decreases from 316
+[31m[1mAssertionError[22m: current=316, previous=316: expected 316 to be less than 316[39m
+[36m [2m❯[22m src/styles/V1UAccentSemantics.test.ts:[2m65:69[22m[39m
+    [90m 63|[39m
+    [90m 64|[39m   it('total accent strictly decreases from 316', () => {
+    [90m 65|[39m     expect(totalAccent(), `current=${totalAccent()}, previous=316`).to…
+    [90m   |[39m                                                                     [31m^[39m
+    [90m 66|[39m   });
+    [90m 67|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 17:03:04
+[2m   Duration [22m 473ms[2m (environment 66%, tests 25%, transform 5%, import 2%, worker 1%)[22m
+

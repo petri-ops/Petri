@@ -63,8 +63,7 @@
 }
 
 .tabActive {
-  border-color: var(--petri-accent);
-  color: var(--petri-accent);
+  border-color: var(--petri-accent); color: var(--petri-text);
 }
 
 .tabDot {
@@ -170,8 +169,7 @@
 }
 
 .footerBtnActive {
-  border-color: var(--petri-accent);
-  color: var(--petri-accent);
+  border-color: var(--petri-accent); color: var(--petri-text);
 }
 
 .truncated,

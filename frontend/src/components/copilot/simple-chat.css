@@ -1643,8 +1643,8 @@
 }
 
 
-.sc-tool-term-copy:hover {
-  color: var(--petri-accent);
+.sc-tool-term-copy:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .sc-tool-term-jump {
@@ -2254,8 +2254,7 @@
 }
 
 .sc-knowledge-toggle:hover:not(:disabled) {
-  background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  background: var(--petri-accent-surface); color: var(--petri-text);
 }
 
 .sc-knowledge-toggle:disabled {
@@ -2265,8 +2264,7 @@
 
 .sc-knowledge-toggle-on,
 .sc-knowledge-toggle-on:hover:not(:disabled) {
-  background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  background: var(--petri-accent-surface); color: var(--petri-text);
 }
 
 .sc-access-overlay {
@@ -4700,8 +4698,8 @@
   opacity: 1;
 }
 
-.sc-tool-qoder-row .sc-tool-row-copy:hover {
-  color: var(--petri-accent);
+.sc-tool-qoder-row .sc-tool-row-copy:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .sc-tool-qoder-row .sc-tool-row-copy.is-copied {
@@ -4811,8 +4809,7 @@
   cursor: pointer;
 }
 
-.sc-tool-resultdata-copy:hover {
-  color: var(--petri-accent);
+.sc-tool-resultdata-copy:hover { color: var(--petri-text);
   border-color: var(--petri-accent);
 }
 

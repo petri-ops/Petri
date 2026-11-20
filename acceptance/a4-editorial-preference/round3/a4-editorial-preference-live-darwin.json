@@ -1,0 +1,14 @@
+{
+  "name": "a4-editorial-preference",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T09:08:34.303Z",
+  "finishedAt": "2026-11-20T09:09:34.565Z",
+  "assertions": [
+    {
+      "name": "flow_completed_without_exception",
+      "pass": false,
+      "detail": "cdp_not_ready_on_port_9223: connect ECONNREFUSED 127.0.0.1:9223 — 先启动 dev 栈：PETRI_DEV_ELECTRON_ARGS=\"--remote-debugging-port=9223\" npm run dev"
+    }
+  ],
+  "allPass": false
+}

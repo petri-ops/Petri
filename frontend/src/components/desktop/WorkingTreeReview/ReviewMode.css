@@ -612,8 +612,7 @@
 }
 
 .rvw-view-switch-btn.active {
-  background: var(--petri-accent-soft);
-  color: var(--petri-accent);
+  background: var(--petri-accent-soft); color: var(--petri-text);
   font-weight: 600;
 }
 
@@ -843,8 +842,7 @@
 }
 
 /* BLOCK-29.6 UI-243 — 行内编辑操作 hover 用 accent（区别于 danger 放弃） */
-.rvw-acc-action-edit:hover {
-  color: var(--petri-accent);
+.rvw-acc-action-edit:hover { color: var(--petri-text);
   background: var(--petri-accent-soft);
 }
 
@@ -1045,8 +1043,7 @@
 }
 
 .rvw-commit-tree-row.active {
-  background: var(--petri-accent-soft);
-  color: var(--petri-accent);
+  background: var(--petri-accent-soft); color: var(--petri-text);
   font-weight: 600;
 }
 
@@ -1252,8 +1249,7 @@
 }
 
 /* 行内 stage/unstage：hover 用 accent（staged 行 minus / unstaged 行 plus） */
-.rvw-acc-action-stage:hover {
-  color: var(--petri-accent);
+.rvw-acc-action-stage:hover { color: var(--petri-text);
   background: var(--petri-accent-soft);
 }
 

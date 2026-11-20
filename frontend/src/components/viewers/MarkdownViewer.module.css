@@ -53,8 +53,8 @@
   text-decoration: underline;
 }
 
-.markdownBody a:hover {
-  color: var(--petri-accent);
+.markdownBody a:hover { background: var(--petri-hover);
+    color: var(--petri-text);
   opacity: 0.85;
 }
 

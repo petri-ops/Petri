@@ -1,0 +1,240 @@
+{
+  "kind": "v1u-converted-rules",
+  "rules": [
+    {
+      "file": "components/copilot/ToolActivityDock.module.css",
+      "sel": ".tabActive",
+      "addedBg": false
+    },
+    {
+      "file": "components/copilot/ToolActivityDock.module.css",
+      "sel": ".footerBtnActive",
+      "addedBg": false
+    },
+    {
+      "file": "components/copilot/simple-chat.css",
+      "sel": ".sc-tool-term-copy:hover",
+      "addedBg": true
+    },
+    {
+      "file": "components/copilot/simple-chat.css",
+      "sel": ".sc-knowledge-toggle:hover:not(:disabled)",
+      "addedBg": false
+    },
+    {
+      "file": "components/copilot/simple-chat.css",
+      "sel": ".sc-knowledge-toggle-on:hover:not(:disabled)",
+      "addedBg": false
+    },
+    {
+      "file": "components/copilot/simple-chat.css",
+      "sel": ".sc-tool-qoder-row .sc-tool-row-copy:hover",
+      "addedBg": true
+    },
+    {
+      "file": "components/copilot/simple-chat.css",
+      "sel": ".sc-tool-resultdata-copy:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/WorkingTreeReview/ReviewMode.css",
+      "sel": ".rvw-view-switch-btn.active",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/WorkingTreeReview/ReviewMode.css",
+      "sel": ".rvw-acc-action-edit:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/WorkingTreeReview/ReviewMode.css",
+      "sel": ".rvw-commit-tree-row.active",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/WorkingTreeReview/ReviewMode.css",
+      "sel": ".rvw-acc-action-stage:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": ".petri-settings-nav__item.active",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": ".petri-plugin-store__nav-item.active",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": "[data-theme='dark'] .petri-plugin-store__nav-item.active",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": ".petri-plugin-store__nav-item.active .petri-plugin-store__nav-count",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": "[data-theme='dark'] .petri-plugin-store__nav-item.active .petri-plugin-store__nav-count",
+      "addedBg": false
+    },
+    {
+      "file": "components/desktop/desktop.css",
+      "sel": ".petri-nav-item:hover .petri-nav-item__arrow",
+      "addedBg": true
+    },
+    {
+      "file": "components/knowledge/KnowledgeConsoleDock.module.css",
+      "sel": ".handleActive",
+      "addedBg": false
+    },
+    {
+      "file": "components/result-studio/CompactResultNavigator.module.css",
+      "sel": ".secondaryActions button:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/viewers/MarkdownViewer.module.css",
+      "sel": ".markdownBody a:hover",
+      "addedBg": true
+    },
+    {
+      "file": "components/workspace-panels/KnowledgeSpacePanel.module.css",
+      "sel": ".tabBtnActive",
+      "addedBg": false
+    },
+    {
+      "file": "components/workspace-panels/KnowledgeSpacePanel.module.css",
+      "sel": ".tabBtnActive:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/workspace-panels/KnowledgeSpacePanel.module.css",
+      "sel": ".docNameBtn:hover",
+      "addedBg": false
+    },
+    {
+      "file": "components/workspace-panels/KnowledgeSpacePanel.module.css",
+      "sel": ".previewOpenRaw:hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/extensions/extensions.module.css",
+      "sel": ".shelfTabActive",
+      "addedBg": false
+    },
+    {
+      "file": "pages/extensions/styles.module.css",
+      "sel": ".retryBtn:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspacePathText:not(:disabled):hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspacePathAction:hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspaceSummaryChipBtn:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".leftWorkspaceText:not(:disabled):hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".leftWorkspaceAction:hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".leftSidebarPathText:not(:disabled):hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".projectTreeAddBtn:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".convItemForkBtn:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": "button.workspacePinnedSummaryPrimaryCard:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": "button.workspacePinnedSummaryMetricCard:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspacePinnedSummaryTaskRow:hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspacePinnedSummaryHistoryItem:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".resultTabActive",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".emptyResultLaunchCard:hover .emptyResultLaunchIcon",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".tabBtnActive",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".toolboxTabActive",
+      "addedBg": false
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".convItemActive .convItemTime",
+      "addedBg": true
+    },
+    {
+      "file": "pages/project-workspace.module.css",
+      "sel": ".workspaceFileTabActive",
+      "addedBg": false
+    },
+    {
+      "file": "pages/welcome.module.css",
+      "sel": ".manageLink:hover",
+      "addedBg": true
+    },
+    {
+      "file": "pages/welcome.module.css",
+      "sel": ".chip:hover",
+      "addedBg": false
+    },
+    {
+      "file": "pages/welcome.module.css",
+      "sel": ".dirSuggestion:hover",
+      "addedBg": false
+    }
+  ]
+}

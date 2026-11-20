@@ -32,8 +32,7 @@
 
 .handleActive {
   border-color: var(--petri-accent);
-  background: var(--petri-accent-surface);
-  color: var(--petri-accent);
+  background: var(--petri-accent-surface); color: var(--petri-text);
 }
 
 .handleText {

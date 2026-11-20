@@ -100,8 +100,8 @@
   text-underline-offset: 3px;
 }
 
-.manageLink:hover {
-  color: var(--petri-accent);
+.manageLink:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .errorText {
@@ -126,8 +126,7 @@
   transition: color var(--petri-duration-fast), border-color var(--petri-duration-fast);
 }
 
-.chip:hover {
-  color: var(--petri-accent);
+.chip:hover { color: var(--petri-text);
   border-color: var(--petri-accent);
 }
 
@@ -362,8 +361,7 @@
 }
 
 .dirSuggestion:hover {
-  background: var(--petri-hover);
-  color: var(--petri-accent);
+  background: var(--petri-hover); color: var(--petri-text);
 }
 
 /* UI-341 加映 — 内嵌聊天（composer-only 变体）：壳由 composerCard 对话框

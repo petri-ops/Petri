@@ -192,8 +192,8 @@
   color: var(--petri-text-tertiary);
 }
 
-.workspacePathText:not(:disabled):hover {
-  color: var(--petri-accent);
+.workspacePathText:not(:disabled):hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .workspacePathAction {
@@ -206,8 +206,8 @@
   cursor: pointer;
 }
 
-.workspacePathAction:hover {
-  color: var(--petri-accent);
+.workspacePathAction:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .workspacePathNotice {
@@ -329,8 +329,7 @@
 }
 
 .workspaceSummaryChipBtn:hover {
-  border-color: var(--petri-accent-border);
-  color: var(--petri-accent);
+  border-color: var(--petri-accent-border); color: var(--petri-text);
 }
 
 .workspaceSummaryChipBtn strong {
@@ -655,8 +654,8 @@
   color: var(--petri-text-tertiary);
 }
 
-.leftWorkspaceText:not(:disabled):hover {
-  color: var(--petri-accent);
+.leftWorkspaceText:not(:disabled):hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .leftWorkspaceAction {
@@ -669,8 +668,8 @@
   cursor: pointer;
 }
 
-.leftWorkspaceAction:hover {
-  color: var(--petri-accent);
+.leftWorkspaceAction:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .leftWorkspaceNotice {
@@ -743,8 +742,8 @@
   color: var(--petri-text-tertiary);
 }
 
-.leftSidebarPathText:not(:disabled):hover {
-  color: var(--petri-accent);
+.leftSidebarPathText:not(:disabled):hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .leftSidebarPathAction {
@@ -1019,8 +1018,7 @@
 }
 
 .projectTreeAddBtn:hover {
-  background: var(--petri-hover);
-  color: var(--petri-accent);
+  background: var(--petri-hover); color: var(--petri-text);
 }
 
 /* BLOCK-161 W1 键盘可达性：focus 环显形（原 opacity:0 仅 hover 显形，
@@ -1166,8 +1164,7 @@
 }
 
 .convItemForkBtn:hover {
-  background: var(--petri-hover);
-  color: var(--petri-accent);
+  background: var(--petri-hover); color: var(--petri-text);
 }
 
 .treeRenameInput {
@@ -2025,8 +2022,7 @@ button.workspacePinnedSummaryPrimaryCard {
 }
 
 button.workspacePinnedSummaryPrimaryCard:hover {
-  background: transparent;
-  color: var(--petri-accent);
+  background: transparent; color: var(--petri-text);
 }
 
 .workspacePinnedSummaryPrimaryCard > svg {
@@ -2067,8 +2063,7 @@ button.workspacePinnedSummaryMetricCard {
 }
 
 button.workspacePinnedSummaryMetricCard:hover {
-  background: transparent;
-  color: var(--petri-accent);
+  background: transparent; color: var(--petri-text);
 }
 
 .workspacePinnedSummaryMetricCard > span {
@@ -2108,8 +2103,8 @@ button.workspacePinnedSummaryMetricCard:hover {
   cursor: pointer;
 }
 
-.workspacePinnedSummaryTaskRow:hover {
-  color: var(--petri-accent);
+.workspacePinnedSummaryTaskRow:hover { background: var(--petri-hover);
+    color: var(--petri-text);
 }
 
 .workspacePinnedSummaryTaskRow > svg {
@@ -2451,8 +2446,7 @@ button.workspacePinnedSummaryMetricCard:hover {
 }
 
 .workspacePinnedSummaryHistoryItem:hover {
-  background: transparent;
-  color: var(--petri-accent);
+  background: transparent; color: var(--petri-text);
 }
 
 .workspacePinnedSummaryHistoryItem + .workspacePinnedSummaryHistoryItem {
@@ -5229,8 +5223,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text);
 }
 
-.resultTabActive {
-  color: var(--petri-accent);
+.resultTabActive { color: var(--petri-text);
   border-bottom-color: var(--petri-accent);
 }
 
@@ -5675,8 +5668,7 @@ body:global(.petri-resizing-columns) * {
 }
 
 .emptyResultLaunchCard:hover .emptyResultLaunchIcon {
-  background: color-mix(in srgb, var(--petri-accent) 18%, transparent);
-  color: var(--petri-accent);
+  background: color-mix(in srgb, var(--petri-accent) 18%, transparent); color: var(--petri-text);
 }
 
 .emptyResultLaunchText {
@@ -5732,8 +5724,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text);
 }
 
-.tabBtnActive {
-  color: var(--petri-accent);
+.tabBtnActive { color: var(--petri-text);
   border-bottom-color: var(--petri-accent);
 }
 
@@ -7007,8 +6998,7 @@ body:global(.petri-resizing-columns) * {
   color: var(--petri-text);
 }
 
-.toolboxTabActive {
-  color: var(--petri-accent);
+.toolboxTabActive { color: var(--petri-text);
   border-bottom-color: var(--petri-accent);
 }
 
@@ -7210,8 +7200,8 @@ body:global(.petri-resizing-columns) * {
   opacity: 0.85;
 }
 
-.convItemActive .convItemTime {
-  color: var(--petri-accent);
+.convItemActive .convItemTime { background: var(--petri-hover);
+    color: var(--petri-text);
   opacity: 1;
 }
 
@@ -7565,8 +7555,7 @@ body:global(.petri-resizing-columns) * {
 
 .workspaceFileTabActive {
   background: var(--petri-bg-surface);
-  border-color: var(--petri-border);
-  color: var(--petri-accent);
+  border-color: var(--petri-border); color: var(--petri-text);
 }
 
 .workspaceFileTabDropLeft {

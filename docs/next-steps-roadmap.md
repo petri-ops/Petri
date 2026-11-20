@@ -1,3 +1,4 @@
+最后更新：2026-11-20（🗃 **V1-U 语义收敛（交互面待复审）**：hover/active 文字 accent 47 处收敛 316→269，13 条补中性底，focus/按钮/链接/状态保留；契约44/44+c53 269+tsc0；A4 round3 因 dev 栈 down 0/1 FAIL，交互面待栈恢复复审。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（✅ **A4 观感预审闭环 · UI-717 verified**：偏好预审两轮（抓真假绿→呈现面优化→16/16 PASS），按裁决翻 verified（9223 边界内）；三契约29/29+门禁绿+9223已kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🗃 **V1 配色稀缺化收口（部分·U）**：装饰性 accent 收敛 356→316，棘轮下调、c53 targetMet=false 诚实未达 130（剩余合法语义待 U 裁决）；HK-01 绿5/5 + 契约39tests + tsc0。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **A3 排版留白收口**：欢迎页标题0.04em/注脚0.02em、设置页标题0.03em+中性落印位，HK-01绿5/5+邻域39tests+契约19/19+tsc0，零accent增量/观感零代签；evidence=acceptance/a3-editorial-rhythm/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
