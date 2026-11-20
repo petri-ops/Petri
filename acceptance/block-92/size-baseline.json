@@ -70,8 +70,8 @@
       "wave": "B",
       "module": "W-01",
       "lines": 625,
-      "bytes": 32310,
-      "sha256": "028b8e294122a212f93bf66c2cfbd03b21dcb1434fe231e5713c6606e5c6e5f1"
+      "bytes": 32330,
+      "sha256": "1793e9197772adcd9c3ddf87dba8644afc1de7bac6b3283742d7dc1743f16a76"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -149,9 +149,9 @@
       "path": "core/petri-server/agent-tools/workspace-tools.js",
       "wave": "C",
       "module": "P-03",
-      "lines": 1605,
-      "bytes": 67044,
-      "sha256": "9dcd8304c6b1178d667d7579fa57290f40dcb89b93141557bbe90a80f200b9cb"
+      "lines": 1619,
+      "bytes": 68041,
+      "sha256": "da533c31c6d60bdb472fab9e303773bcc63778213865976a08b81ea13d2496b2"
     },
     {
       "path": "core/petri-server/mcp/registry.js",
@@ -197,25 +197,25 @@
       "path": "frontend/src/pages/project-workspace.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 7761,
-      "bytes": 176885,
-      "sha256": "d021a9a6f907aa2c5d64cd48ff2bcf7544c902f721969c070ce47fb197cfa6ce"
+      "lines": 7751,
+      "bytes": 177240,
+      "sha256": "225dcc49d9e7076a9c7cfccf59743b8f96926f023a25ec96a579db6e548f6f81"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5472,
-      "bytes": 132675,
-      "sha256": "1eac1c038ecee3366c42a1cc6e16e685ecb84f71dd5394d6aa717642105e2947"
+      "lines": 5469,
+      "bytes": 132723,
+      "sha256": "7dfb01f4c5431d63ff6fc72eb75c5362d294c0d166b121069daf7b9524f342bf"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 2212,
-      "bytes": 53862,
-      "sha256": "a6d73aefc6c49158e953113ad8c0afc05613cc1c784bb69942ace4aeb0abbecf"
+      "lines": 2207,
+      "bytes": 53894,
+      "sha256": "d214ae4f7278ff91d28315f3dfcd88f3a060a9130e0d55f233432b05c0dcb965"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
@@ -229,9 +229,9 @@
       "path": "core/petri-server/loop-orchestrator.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1647,
-      "bytes": 75331,
-      "sha256": "47ae9384a51f18724b0cb5815dd27340e37a5be4b4f2cabf173ba13adeb9720d"
+      "lines": 1674,
+      "bytes": 76991,
+      "sha256": "272e2a2a936a872e2516baf2fc3381d796db75d20e9ef0ab0896bbd13ef8c5c8"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
@@ -242,6 +242,14 @@
       "sha256": "78717662596787d07e9ddcf9775f1e054bb88104e1f0f0a4a809459bf6af3c61"
     },
     {
+      "path": "frontend/src/styles/custom.css",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 1485,
+      "bytes": 49517,
+      "sha256": "a1d542f586d21e425c7d343abccca0aa538b848dd180a662fc498d80218e8187"
+    },
+    {
       "path": "core/shared-backend/skill-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -250,20 +258,12 @@
       "sha256": "f5bf446554629a50c5f3fdf162483b46b2264bb20fdec12b447d98690cc2b4df"
     },
     {
-      "path": "frontend/src/styles/custom.css",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 1301,
-      "bytes": 39709,
-      "sha256": "3e96c41ce875fdb471b57cafc9cc4f63c2c860ebbaf0eec11aa38bee32fce447"
-    },
-    {
       "path": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1299,
-      "bytes": 30480,
-      "sha256": "d4d5a0475a72e033343cf43f3323e8a11d3b9ac0765ac6df91ecb4498ac3f9fa"
+      "lines": 1295,
+      "bytes": 30462,
+      "sha256": "28379dc8fd5d8a0e5420f0d4fbf7bec6bf68fb9ce8bfc947804b9b5c001a59fb"
     },
     {
       "path": "core/petri-server/agent-task-store.js",
@@ -293,17 +293,17 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1153,
-      "bytes": 60605,
-      "sha256": "ff112dd6b374f990b2b48009f632a9d35a6d5be66aab0a95c4945dbf8757adfc"
+      "lines": 1156,
+      "bytes": 60694,
+      "sha256": "455151796f02d5ceec6cedf1ba4c9b1db4552268b0fee3d3095c3012be149574"
     },
     {
       "path": "core/petri-server/agent-runner.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1143,
-      "bytes": 59682,
-      "sha256": "b155c866eabba76ff75107bbe47404c0a344a67efa0c770d2b47d7d728f4ff98"
+      "lines": 1153,
+      "bytes": 60215,
+      "sha256": "0175f250b323de0c622fe6ecf75e2232522433ed54aadc262aaacb0adb9e02ad"
     },
     {
       "path": "core/shared-backend/skill-runtime.js",
@@ -349,9 +349,9 @@
       "path": "frontend/src/lib/electron.d.ts",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1032,
-      "bytes": 48094,
-      "sha256": "06adb9e4d50798102eab312c1e6cc0e16d8e8324c1c6ec6e1c5fab0aef6c7adb"
+      "lines": 1051,
+      "bytes": 48776,
+      "sha256": "feb595a7d8d64928d6911336fe75d03e9be37c161d88e96e0a491d0596119761"
     },
     {
       "path": "frontend/src/components/workspace-panels/WorkspaceSummaryCard.tsx",
@@ -381,9 +381,9 @@
       "path": "frontend/src/components/desktop/TitleBar.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 995,
-      "bytes": 22596,
-      "sha256": "40501b60c2fa17e56d60316d084038911093103335523bc9cf3e6183811545fb"
+      "lines": 996,
+      "bytes": 22698,
+      "sha256": "63ff226f5cc71ac61fe16418129d733d7132769ad040a3f88d230d694412ab32"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -392,6 +392,14 @@
       "lines": 972,
       "bytes": 36708,
       "sha256": "c81a0a06b01eaa87ac1dcc9fbee98db946783738c1ab6f36edb1a6cd175cc000"
+    },
+    {
+      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 972,
+      "bytes": 38789,
+      "sha256": "4777887a5e2149be11942949660602d261c501513a625d372cd00bf6495d6494"
     },
     {
       "path": "core/shared-backend/scientific-replay-package.js",
@@ -422,16 +430,16 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 920,
-      "bytes": 46638,
-      "sha256": "89251eb595275195b7c72e1451b25bdeb20bf365c7e67c42e1e63d320192bc9e"
+      "bytes": 46745,
+      "sha256": "1d2c6e8e5256963abdc79576f948d8c123f7ecad88200555963f4af233f7c9ef"
     },
     {
       "path": "frontend/src/pages/extensions/styles.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 915,
-      "bytes": 19089,
-      "sha256": "e3a028e29747714680ef58d910c18ae46a9d5937c0ac3d2f745ba3afb7e4bc0b"
+      "lines": 914,
+      "bytes": 19075,
+      "sha256": "151fe8ee3dd002d22b41386d663aa748f3a3bf0b3f20a66d4f8aa2220aaf7f9f"
     },
     {
       "path": "core/petri-server/mcp/registry/run-plugin-script.js",
@@ -490,14 +498,6 @@
       "sha256": "53024a0bbd1ef37a08159905f14b118510926570b2c0d9491c8345623906a46a"
     },
     {
-      "path": "frontend/src/components/workspace-panels/LeftPanel.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 851,
-      "bytes": 34465,
-      "sha256": "a581b8d0d19e096b27bbb797eae508a334364013d0b58479c7bed826a17985a5"
-    },
-    {
       "path": "core/petri-server/agent-tools/tool-events.js",
       "wave": "L0",
       "module": "auto-discovered",
@@ -530,20 +530,20 @@
       "sha256": "1282d1ce146060b24f87bf63ad8a4356981359d6b799eebd2d07bac73de4de58"
     },
     {
+      "path": "frontend/src/components/icons/Icon.tsx",
+      "wave": "L0",
+      "module": "auto-discovered",
+      "lines": 783,
+      "bytes": 23139,
+      "sha256": "e6ae89e12d6f6d55f4d15c96ef484d2e7c3769b9b1703be1c178c01486b96170"
+    },
+    {
       "path": "frontend/src/components/svg-editor/SvgEditorCanvas.tsx",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 747,
       "bytes": 31682,
       "sha256": "8b4f78e5eedbd0448eba86316cdc5822ecf75d2a8c33f1e7875e981208197fae"
-    },
-    {
-      "path": "frontend/src/components/icons/Icon.tsx",
-      "wave": "L0",
-      "module": "auto-discovered",
-      "lines": 744,
-      "bytes": 21683,
-      "sha256": "57292cbf16049d9b8c3d1d002fc96f3c8ae634c879f6e76b175b10b0a14e4af6"
     },
     {
       "path": "frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86555
+  "total": 86950
 }

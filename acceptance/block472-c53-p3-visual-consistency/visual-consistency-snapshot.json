@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-visual-consistency",
   "capability": "block472-c53-p3-visual-consistency",
-  "sourceCommit": "2a212ee02cd8baa8e31eba318c7724a21a199b89",
+  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-visual-consistency.mjs",
-  "generatedAt": "2026-11-18T08:01:37.721Z",
+  "generatedAt": "2026-11-20T23:29:38.666Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -44,7 +44,7 @@
       },
       "source": "frontend/src/styles/custom.css dark 块",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-18T08:01:37.530Z"
+      "capturedAt": "2026-11-20T23:29:38.570Z"
     },
     "slateFamily": {
       "value": {
@@ -88,33 +88,33 @@
       },
       "source": "frontend/src 全源（广谱 slate ratchet）",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-18T08:01:37.530Z"
+      "capturedAt": "2026-11-20T23:29:38.570Z"
     },
     "colorBudget": {
       "value": {
-        "total": 356,
+        "total": 269,
         "perFile": {
           "components/annotations/AnnotationOverlay.module.css": 2,
-          "components/branch/BranchTabs.module.css": 6,
+          "components/branch/BranchTabs.module.css": 5,
           "components/copilot/LlmTranscriptViewer.css": 1,
           "components/copilot/MessageRail.module.css": 2,
           "components/copilot/ResultCard.module.css": 1,
-          "components/copilot/ToolActivityDock.module.css": 7,
+          "components/copilot/ToolActivityDock.module.css": 5,
           "components/copilot/integration/integration.module.css": 4,
           "components/copilot/renderers/TableRenderer.module.css": 1,
-          "components/copilot/simple-chat.css": 31,
+          "components/copilot/simple-chat.css": 24,
           "components/desktop/TitleBar.module.css": 10,
-          "components/desktop/WorkingTreeReview/ReviewMode.css": 17,
+          "components/desktop/WorkingTreeReview/ReviewMode.css": 12,
           "components/desktop/WorkingTreeReview/WorkingTreeReview.css": 4,
-          "components/desktop/desktop.css": 24,
-          "components/desktop/settings-redesign.module.css": 4,
+          "components/desktop/desktop.css": 13,
+          "components/desktop/settings-redesign.module.css": 3,
           "components/desktop/titlebar/UpdatePill.module.css": 3,
           "components/knowledge/KnowledgeConsoleChat.module.css": 3,
-          "components/knowledge/KnowledgeConsoleDock.module.css": 2,
-          "components/result-studio/CompactResultNavigator.module.css": 4,
+          "components/knowledge/KnowledgeConsoleDock.module.css": 1,
+          "components/result-studio/CompactResultNavigator.module.css": 2,
           "components/result-studio/LineageGraph.module.css": 3,
           "components/result-studio/LineageStrip.module.css": 5,
-          "components/result-studio/LineageViewSwitch.module.css": 2,
+          "components/result-studio/LineageViewSwitch.module.css": 1,
           "components/result-studio/ResultAgentComposer.module.css": 3,
           "components/result-studio/ResultEditPanel.module.css": 4,
           "components/result-studio/ResultStudioChangeSetPanel.module.css": 8,
@@ -123,18 +123,17 @@
           "components/result-studio/ScientificInteractionViewer.module.css": 7,
           "components/svg-editor/SvgEditorViewer.module.css": 6,
           "components/ui/controls/button.module.css": 1,
-          "components/viewers/MarkdownViewer.module.css": 2,
-          "components/viewers/SpreadsheetViewer.module.css": 2,
+          "components/viewers/MarkdownViewer.module.css": 1,
           "components/window/rail-page.module.css": 3,
           "components/workspace-panels/ArtifactPinPane.module.css": 2,
           "components/workspace-panels/FloatCardResizer.module.css": 1,
-          "components/workspace-panels/KnowledgeSpacePanel.module.css": 18,
+          "components/workspace-panels/KnowledgeSpacePanel.module.css": 14,
           "components/workspace-panels/WorkspaceTodoSection.module.css": 3,
-          "pages/extensions/extensions.module.css": 6,
-          "pages/extensions/styles.module.css": 18,
+          "pages/extensions/extensions.module.css": 5,
+          "pages/extensions/styles.module.css": 12,
           "pages/home.module.css": 14,
-          "pages/project-workspace.module.css": 102,
-          "pages/welcome.module.css": 5,
+          "pages/project-workspace.module.css": 63,
+          "pages/welcome.module.css": 2,
           "styles/custom.css": 9,
           "styles/global.css": 1
         },
@@ -143,18 +142,18 @@
       },
       "source": "frontend/src CSS 全源 + docs/design-charter.md §2",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-18T08:01:37.530Z"
+      "capturedAt": "2026-11-20T23:29:38.570Z"
     },
     "undefinedTokens": {
       "value": {
         "undefinedColorRefs": [],
         "missingPetriRefs": [],
-        "definitionCount": 144,
-        "referenceCount": 133
+        "definitionCount": 151,
+        "referenceCount": 138
       },
       "source": "frontend/src 全源（token 定义/引用扫描）",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-18T08:01:37.530Z"
+      "capturedAt": "2026-11-20T23:29:38.570Z"
     }
   }
 }

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-design-baseline",
   "capability": "block465-c53-design-baseline-context-pack",
-  "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
+  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-design-baseline.mjs",
-  "generatedAt": "2026-11-18T03:34:24.610Z",
+  "generatedAt": "2026-11-20T23:29:24.667Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -43,7 +43,7 @@
       },
       "source": "docs/design-charter.md §1",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "colorBudget": {
       "value": {
@@ -53,7 +53,7 @@
       },
       "source": "docs/design-charter.md §2",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "borderSemantics": {
       "value": {
@@ -67,7 +67,7 @@
       },
       "source": "docs/design-charter.md §3",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "motion": {
       "value": {
@@ -85,7 +85,7 @@
       },
       "source": "docs/design-charter.md §4",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "controls": {
       "value": {
@@ -106,7 +106,7 @@
       },
       "source": "docs/design-charter.md §6 + controls/ 现读",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "ratchets": {
       "value": {
@@ -116,7 +116,7 @@
       },
       "source": "docs/design-charter.md §7",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "tokenGate": {
       "value": {
@@ -132,27 +132,27 @@
       },
       "source": "frontend/src/styles/theme-token-contract.test.ts",
       "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "uiDebt": {
       "value": {
-        "sections": 503,
-        "uniqueIds": 494,
-        "debt": 38,
-        "liveMissing": 15,
+        "sections": 509,
+        "uniqueIds": 500,
+        "debt": 36,
+        "liveMissing": 13,
         "blocked": 23,
-        "verified": 453,
+        "verified": 461,
         "closed": 12,
         "ceilingCrossCheck": {
           "liveMissing": 15,
           "blocked": 23,
           "total": 38
         },
-        "consistent": true
+        "consistent": false
       },
       "source": "acceptance/block-332/ui-ledger-triage.json + post-h9-k3-experience.mjs",
       "command": "npm run ui:audit:triage",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "componentRules": {
       "value": {
@@ -167,21 +167,23 @@
       },
       "source": "docs/design-charter.md §6",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     }
   },
   "captureContext": {
     "registry": {
       "value": {
-        "documentCount": 618,
-        "managedMarkdown": 601,
+        "documentCount": 663,
+        "managedMarkdown": 646,
         "activeWorkPackages": [
-          "BLOCK-465"
+          "BLOCK-503",
+          "BLOCK-505",
+          "BLOCK-506"
         ]
       },
       "source": "docs/DOC-REGISTRY.json",
       "command": "npm run state",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     },
     "auditUnresolved": {
       "value": {
@@ -191,7 +193,7 @@
       },
       "source": "docs/AUDIT-LOG.md §当前待处理项",
       "command": "npm run state",
-      "capturedAt": "2026-11-18T03:34:24.593Z"
+      "capturedAt": "2026-11-20T23:29:24.654Z"
     }
   }
 }

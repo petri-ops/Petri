@@ -35,7 +35,14 @@ describe('C-53 S1 设计基线快照可复算（P0）', () => {
     assert.equal(check.ok, true, `完整性: ${check.issues.join('; ')}`);
     // 捕获时状态留痕：快照取自干净态（无 🔴/🟢），不参与冻结比对。
     assert.equal(snap.captureContext.auditUnresolved.value.total, 0);
-    assert.equal(snap.captureContext.registry.value.activeWorkPackages.includes('BLOCK-465'), true);
+    // active 槽位走中性结构判据（不锚具体包 ID）：包会推进 completed，锚 ID 会让快照契约
+    // 跟着治理状态漂移（契约漂移第④类先例=BLOCK-465 写死 active，R2 清偿批 S3/P1-2 演进）。
+    const activePackages = snap.captureContext.registry.value.activeWorkPackages;
+    assert.equal(Array.isArray(activePackages), true, 'activeWorkPackages 必须是数组');
+    assert.ok(
+      activePackages.every((id) => typeof id === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(id)),
+      `active 槽位含非法包 ID: ${JSON.stringify(activePackages)}`,
+    );
   });
 
   it('逐读数现读一致（collectDesignBaseline 重算与落盘 value 深等）', () => {

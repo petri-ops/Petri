@@ -97,19 +97,19 @@
     ]
   },
   "uiDebt": {
-    "sections": 503,
-    "uniqueIds": 494,
-    "debt": 38,
-    "liveMissing": 15,
+    "sections": 509,
+    "uniqueIds": 500,
+    "debt": 36,
+    "liveMissing": 13,
     "blocked": 23,
-    "verified": 453,
+    "verified": 461,
     "closed": 12,
     "ceilingCrossCheck": {
       "liveMissing": 15,
       "blocked": 23,
       "total": 38
     },
-    "consistent": true
+    "consistent": false
   },
   "componentRules": {
     "singleSourceDir": "frontend/src/components/ui/controls/",

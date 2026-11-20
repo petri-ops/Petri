@@ -1,53 +1,17 @@
 {
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
-  "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
-  "generatedAt": "2026-11-20T12:05:23.210Z",
+  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
+  "generatedAt": "2026-11-20T23:29:38.667Z",
   "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。",
   "files": [
     {
       "path": "design-context.json",
-      "sha256": "ea23cd4b687f891fe38fcc2397baeb25f12bbb636913c3d87fc62287d2417793"
-    },
-    {
-      "path": "ia-map.json",
-      "sha256": "2be5736062de9532fdccc8aa661d3fd2eeff7faa37372ae44881295bc92e10e2"
+      "sha256": "9a12ce221319211c0591d09fd2deba3f49c51aa7897e3ee3b4740f18bae6a38d"
     },
     {
       "path": "visual-consistency.json",
-      "sha256": "e15135b1027d87d3b056cfa4f52d87205a4f9ce124b1bacd5249e09c9c5a1730"
-    },
-    {
-      "path": "responsive-a11y.json",
-      "sha256": "d3415d35b873858eaff7e30b4e0e5be8e2d10ab44952829d56d5d48672281d1f"
-    },
-    {
-      "path": "performance-trust.json",
-      "sha256": "531bb829b31ed309686e14628b1022f17e8e35b35ff8dfa607b6de6451ecaa15"
-    },
-    {
-      "path": "skill-contract.json",
-      "sha256": "006fbccfedb16622c79fbf30cae60050bd776f019a8530459f24b51c920ad478"
-    },
-    {
-      "path": "human-eye-closeout.json",
-      "sha256": "3b0e900836014fc7464fc3db1b70d48c4b96129af1073ccce2d4d47fa5e63268"
-    },
-    {
-      "path": "assistant-ui-pattern.json",
-      "sha256": "c6614308407b2f1ff53f55344bcc7ddf2b1f3c24f638b813acb92e7c118c174a"
-    },
-    {
-      "path": "react-bits-motion.json",
-      "sha256": "aa3a5accb97b633dc28d778cb9e96680c182085c63f896e15d16809ffefc7793"
-    },
-    {
-      "path": "21st-snippet-library.json",
-      "sha256": "6d0224487bcf3645bafc6fac9b45245b4579f013846633966661ecac407aa774"
-    },
-    {
-      "path": "reference-board-review.json",
-      "sha256": "d98dbc78f4d09d4c6b26e38adca889f4a5df18d9d5a7ae9cc32e9fdb4a69a25e"
+      "sha256": "5e8870d39f800536153354faf79ab8602f9d2a89d4453ccd409bee13c4f84daf"
     }
   ]
 }

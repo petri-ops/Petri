@@ -3,8 +3,8 @@
   "id": "petri-visual-consistency-contract",
   "kind": "model-readable-visual-consistency",
   "generatedBy": "node scripts/c53-visual-consistency.mjs",
-  "sourceCommit": "d75444cbde46397b843dcb47019658b6778e724c",
-  "generatedAt": "2026-11-20T12:05:23.209Z",
+  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
+  "generatedAt": "2026-11-20T23:29:38.666Z",
   "derivedFrom": [
     "frontend/src/styles/custom.css",
     "frontend/src（广谱 slate / accent / token 扫描）",

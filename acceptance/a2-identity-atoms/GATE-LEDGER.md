@@ -29,4 +29,9 @@
 
 ## HEAD 存量红（零触碰）
 
-同 A0/A1 `GATE-LEDGER.md`：test:changed 裸文件名 / user-assets / silent-catch / lint / knip / code-size 六项均非 A2 文件面。
+同 A0/A1 `GATE-LEDGER.md`：test:changed 裸文件名 / user-assets / silent-catch / lint / knip 五项均非 A2 文件面。
+
+> **归属更正（2026-11-21 · R2 清偿批 S3/P1-1）**：原行把 code-size 一并归为「非 A2 文件面」系误判——
+> `frontend/src/components/icons/Icon.tsx` 正是 A2 改的文件（`908e561c` 744→774 行，后经造型批 `c3fcfe20` 783 行），
+> 其行数+指纹超标属**本轮视觉链引入且已提交**（A2 未随提交重打基线）。该超标已由 R2 清偿批 S3 按台账
+> `--write` 程序重打（783 行/23139 字节），造型批增量归属见 `acceptance/r2-remediation/s3/RULINGS.md`。
