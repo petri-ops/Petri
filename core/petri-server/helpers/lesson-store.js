@@ -158,7 +158,7 @@ function verifyLessonFrequency(fingerprint = '') {
     return { before, after, decision: judgeFrequency(before, after), ok: true };
   } catch (err) {
     _writeFailures += 1;
-    if (process.env.EVO_DEBUG) { try { console.error('[evo] verifyLessonFrequency failed:', err && err.message); } catch {} }
+    if (process.env.EVO_DEBUG) { try { console.error('[evo] verifyLessonFrequency failed:', err && err.message); } catch { /* 调试日志自身失败不追加抛错：外层 catch 已计 _writeFailures，失败可见 */ } }
     return { before: 0, after: 0, decision: judgeFrequency(0, 0), ok: false };
   }
 }
@@ -180,7 +180,7 @@ function rollbackLesson(fingerprint = '', reasonCode = 'rollback') {
     return { ok: true, changed: info.changes, fingerprint, reason: String(reasonCode) };
   } catch (err) {
     _writeFailures += 1;
-    if (process.env.EVO_DEBUG) { try { console.error('[evo] rollbackLesson failed:', err && err.message); } catch {} }
+    if (process.env.EVO_DEBUG) { try { console.error('[evo] rollbackLesson failed:', err && err.message); } catch { /* 调试日志自身失败不追加抛错：外层 catch 已计 _writeFailures，失败可见 */ } }
     return { ok: false };
   }
 }

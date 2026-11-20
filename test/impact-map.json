@@ -9630,11 +9630,13 @@
     },
     {
       "id": "block508-loop-stall-resume",
-      "note": "BLOCK-508 大上下文韧性票 2：agent 循环层 stall-resume——已出字后 idle stall 不再 break→有界续跑+delta 游标去重（已出字零重复）。证据变更选本包契约测+orchestrator/loop-checkpoint 邻域+BLOCK-338/507 基线重跑。文件面隔离：零触碰 BLOCK-507 在制文件（llm-client/gateway/watchdog），本规则为纯追加在 507 规则之后。",
+      "note": "BLOCK-508 大上下文韧性票 2：agent 循环层 stall-resume——已出字后 idle stall 不再 break→有界续跑+delta 游标去重（已出字零重复）。证据变更选本包契约测+orchestrator/loop-checkpoint 邻域+BLOCK-338/507 基线重跑。文件面隔离：零触碰 BLOCK-507 在制文件（llm-client/gateway/watchdog），本规则为纯追加在 507 规则之后。2026-11-21 R2 清偿批 S2 追加登记 stall-live/stall-verify 两实机验证证据目录（原批漏登记）。",
       "patterns": [
         "docs/block508-loop-stall-resume-plan.md",
         "test/loop-stall-resume.test.mjs",
         "acceptance/block508-loop-stall-resume/**",
+        "acceptance/stall-live-2026-11-19/**",
+        "acceptance/stall-verify-2026-11-19/**",
         "core/shared-backend/loop-stall-resume.js"
       ],
       "tests": [
@@ -9769,7 +9771,36 @@
         "acceptance/ui-error-classification-stall/**"
       ],
       "tests": [
-        "errorMessages.test.ts"
+        "frontend/src/components/copilot/errorMessages.test.ts"
+      ]
+    },
+    {
+      "id": "e03-score-calculator",
+      "note": "2026-11-21 补登记（R2 清偿批 S2/P1-6）：BLOCK-503 甲3 E-03 SUS/UMUX-Lite 机械核算器，该批漏登记 impact-map 致 test:changed 分类冲突（script must match exactly one rule）。E-03 真人样本评分已 cancelled，评分器+模板留档 G1+ 可复用（AUDIT-LOG 2026-11-20 行）。",
+      "classifiesScripts": true,
+      "patterns": [
+        "scripts/e03-score.mjs",
+        "acceptance/block503-outputs/e03-kit/**"
+      ],
+      "tests": [
+        "test/e03-score.test.mjs"
+      ]
+    },
+    {
+      "id": "block503-human-eye-review",
+      "note": "2026-11-21 补登记（R2 清偿批 S2/P1-6）：BLOCK-503 人眼评审清单批（甲/乙组）产出物目录，原批未登记致其未跟踪证据触发 FAIL_CLOSED 覆盖缺口。批状态见 DOC-REGISTRY（S4 归位 completed）。",
+      "patterns": [
+        "docs/block503-human-eye-review-checklist-2026-11-19.md",
+        "acceptance/block503-outputs/**"
+      ]
+    },
+    {
+      "id": "r2-remediation-batch",
+      "note": "2026-11-21 登记（R2 清偿批）：R2 项目评估（前批）+ R2 清偿批（本批）的证据与提示词面。",
+      "patterns": [
+        "acceptance/project-status-assessment-r2-2026-11-20/**",
+        "acceptance/r2-remediation/**",
+        "docs/next-phase-e2e-prompt-2026-11-20.md"
       ]
     }
   ]

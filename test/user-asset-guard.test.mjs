@@ -46,8 +46,12 @@ test('现场：当前仓库索引里没有任何受保护路径', () => {
   assert.equal(result.ok, true);
 });
 
-test('清单自洽：无重复、无绝对路径、两次事故均在册', () => {
+test('清单自洽：无重复、无绝对路径、事故台账在册且无重复 commit', () => {
   assert.equal(new Set(baseline.paths).size, baseline.paths.length);
   assert.ok(baseline.paths.every((p) => !p.startsWith('/')));
-  assert.equal(baseline.incidents.length, 2);
+  // 原始两起误提交事故必须永远在册（BLOCK-393 立门依据）；台账只增不改，允许后续追加（如 58053d77 清单陈旧案）。
+  const incidentCommits = baseline.incidents.map((i) => i.commit);
+  assert.ok(incidentCommits.includes('34076352'));
+  assert.ok(incidentCommits.includes('932b9136'));
+  assert.equal(new Set(incidentCommits).size, incidentCommits.length);
 });

@@ -73,6 +73,7 @@ if (isMain) {
       console.error(`  - [${hit.source}] ${hit.file}  ← 清单 ${hit.protectedPath}`);
     }
     console.error('处置：git rm --cached <path>（磁盘文件保留），禁止覆盖/暂存/删除未知 WIP。');
+    console.error('若该路径已被有意入库（如已完成批次的归档欠账提交），则属保护清单陈旧：同批更新 test/user-asset-guard-baseline.json 并在 reconcileNote 留痕（先例 58053d77 / R2 清偿批 S2），不得为过门禁改判定逻辑。');
   }
   process.exitCode = result.ok ? 0 : 1;
 }
