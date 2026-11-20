@@ -8798,6 +8798,27 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a2-identity-atoms",
+      "note": "A2 造型图标原子：复用自绘 Icon.tsx 单源新增开环/错落四格/发丝线三原子，落 MCP 空态与 extensions active tab（一格点睛≤1/视图）；HK-01 红绿 + 邻域 71 tests + 主契约 19/19 + tsc 0，零图标依赖/观感零代签。证据 acceptance/a2-identity-atoms/**。",
+      "patterns": [
+        "frontend/src/components/icons/Icon.tsx",
+        "frontend/src/components/icons/IdentityAtoms.test.tsx",
+        "frontend/src/pages/extensions/index.tsx",
+        "frontend/src/pages/extensions/McpShelfPane.tsx",
+        "acceptance/a2-identity-atoms/**"
+      ],
+      "tests": [
+        "frontend/src/components/icons/IdentityAtoms.test.tsx",
+        "frontend/src/pages/extensions/index.test.tsx",
+        "frontend/src/pages/extensions/McpShelfPane.test.tsx"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "constraint"
+    },
+    {
       "id": "a1-identity-palette",
       "note": "A1 色板 token 化（A0 裁决行之后）：身份色板四 token（ink-paper/ink-base/accent-celadon/accent-vermilion）亮暗双套，点睛仅品牌语义；HK-01 红绿 + 主契约 19/19 + 对比度 32 对 0 违规。零组件消费改动/观感零代签/不碰 G1+。证据 acceptance/a1-identity-palette/**。",
       "patterns": [

@@ -96,6 +96,9 @@ export default function ExtensionsPage(): React.ReactElement {
             title={shelf.description}
             data-testid={`extensions-tab-${shelf.id}`}
           >
+            {shelf.id === activeShelf ? (
+              <Icon name="offset-grid" size={14} className="petri-identity-atom" />
+            ) : null}
             {shelf.label}
           </button>
         ))}

@@ -246,7 +246,7 @@ export function McpShelfPane(): React.ReactElement {
       ) : servers.length === 0 ? (
         <div data-testid="mcp-empty">
           <EmptyState
-            icon={<Icon name="zap" size={24} />}
+            icon={<Icon name="open-ring" size={24} />}
             title="还没有配置 MCP 服务"
             description="点右上「添加 server」接入第一个第三方 MCP server"
           />

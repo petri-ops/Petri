@@ -1,0 +1,1632 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/components/icons/IdentityAtoms.test.tsx [2m([22m[2m6 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+   [31m❯[39m A2 identity icon atoms (single source) [2m(6)[22m
+[31m     [31m×[31m defines all three atoms in IconName + paths (single source)[39m[32m 4[2mms[22m[39m
+[31m     [31m×[31m keeps one stroke family: 24×24 viewBox, stroke=currentColor, no fill[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m wires open-ring into the empty state (replaces generic zap)[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m marks tab active with offset-grid, one highlighted cell only[39m[32m 0[2mms[22m[39m
+     [32m✓[39m introduces no icon dependency and no emoji-as-icon[32m 0[2mms[22m[39m
+[31m     [31m×[31m keeps human-eye slot open (no verified claim from static evidence)[39m[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/components/icons/IdentityAtoms.test.tsx[2m > [22mA2 identity icon atoms (single source)[2m > [22mdefines all three atoms in IconName + paths (single source)
+[31m[1mAssertionError[22m: IconName missing open-ring: expected '// ==================================…' to match /'open-ring'/[39m
+
+[32m- Expected:[39m
+/'open-ring'/
+
+[31m+ Received:[39m
+"// ============================================================
+// Icon — minimal inline-SVG icon component
+//
+// Self-contained. Pulls only what we need. Lucide-style outline
+// (24x24, stroke 1.75, round caps + joins, currentColor).
+//
+// Add a new icon by extending the `paths` map below — only declare
+// what's actually rendered in UI chrome (NOT in chat content / FigCode
+// slogans, those stay as authored).
+//
+// Usage:
+//   <Icon name=\"book\" />
+//   <Icon name=\"graduation-cap\" size={18} />
+//   <Icon name=\"dna\" className=\"petri-icon--accent\" />
+// ============================================================
+
+import React from 'react';
+
+export type IconName =
+  | 'search'
+  | 'user'
+  | 'book'
+  | 'book-marked'
+  | 'graduation-cap'
+  | 'dna'
+  | 'shield'
+  | 'log-out'
+  | 'bar-chart'
+  | 'calendar'
+  | 'repeat'
+  | 'printer'
+  | 'brain'
+  | 'study'
+  | 'sparkles'
+  | 'arrow-right'
+  | 'arrow-up'
+  | 'check'
+  | 'copy'
+  | 'eye'
+  | 'eye-off'
+  | 'pencil'
+  | 'refresh'
+  | 'flag'
+  | 'pin'
+  | 'archive'
+  | 'sidebar'
+  | 'image'
+  | 'settings'
+  | 'smartphone'
+  | 'puzzle'
+  | 'x'
+  | 'download'
+  | 'trash'
+  | 'key'
+  | 'cpu'
+  | 'bot'
+  | 'sun'
+  | 'moon'
+  | 'zap'
+  | 'clock'
+  | 'bell'
+  | 'folder'
+  | 'file'
+  | 'svg'
+  | 'database'
+  | 'globe'
+  | 'terminal'
+  | 'arrow-left'
+  | 'panel-left'
+  | 'panel-right'
+  | 'panel-bottom'
+  | 'chevron-down'
+  | 'chevron-up'
+  | 'chevron-right'
+  | 'wrench'
+  | 'layout-grid'
+  | 'list-details'
+  | 'plus'
+  | 'message-circle'
+  | 'send'
+  | 'square'
+  | 'square-stack'
+  | 'minus'
+  | 'restore'
+  | 'expand'
+  | 'more-horizontal'
+  | 'help-circle'
+  | 'alert-circle'
+  | 'alert-triangle'
+  | 'git-branch'
+  | 'command'
+  | 'layers'
+  | 'play'
+  | 'info'
+  | 'table'
+  | 'home'
+  | 'circle'
+  | 'arrow-up-right'
+  | 'type'
+  | 'highlighter'
+  | 'pen-tool'
+  | 'undo-2'
+  | 'mouse-pointer';
+
+interface IconProps {
+  name: IconName;
+  size?: number;
+  className?: string;
+  /** Optional aria-label. If omitted, the icon is decorative (aria-hidden). */
+  label?: string;
+  strokeWidth?: number;
+}
+
+// All paths share: 24×24 viewBox, fill=none, stroke=currentColor.
+// Each entry returns the inner SVG (without the <svg> wrapper).
+const paths: Record<IconName, React.ReactNode> = {
+  // Search — magnifying glass
+  search: (
+    <>
+      <circle cx=\"11\" cy=\"11\" r=\"8\" />
+      <line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\" />
+    </>
+  ),
+  // User — person avatar
+  user: (
+    <>
+      <path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" />
+      <circle cx=\"12\" cy=\"7\" r=\"4\" />
+    </>
+  ),
+  // BookOpen — learning records
+  book: (
+    <>
+      <path d=\"M2 4h7a3 3 0 0 1 3 3v13\" />
+      <path d=\"M22 4h-7a3 3 0 0 0-3 3v13\" />
+      <path d=\"M2 4v15h7a3 3 0 0 1 3 3\" />
+      <path d=\"M22 4v15h-7a3 3 0 0 0-3 3\" />
+    </>
+  ),
+  // BookMarked — \"这张图属于哪节课\"
+  'book-marked': (
+    <>
+      <path d=\"M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16l4-3 4 3 4-3 2 1Z\" />
+      <path d=\"M10 3v8l2-1.5L14 11V3\" />
+    </>
+  ),
+  // GraduationCap — 组学实践
+  'graduation-cap': (
+    <>
+      <path d=\"M22 10v6\" />
+      <path d=\"m2 10 10-5 10 5-10 5-10-5Z\" />
+      <path d=\"M6 12v5c3 2 9 2 12 0v-5\" />
+    </>
+  ),
+  // DNA — single-cell platform
+  dna: (
+    <>
+      <path d=\"M4 3v1a8 8 0 0 0 16 0V3\" />
+      <path d=\"M4 21v-1a8 8 0 0 1 16 0v1\" />
+      <path d=\"M7 6h10\" />
+      <path d=\"M7 18h10\" />
+      <path d=\"M9 9h6\" />
+      <path d=\"M9 15h6\" />
+    </>
+  ),
+  // Shield — admin / governance
+  shield: (
+    <>
+      <path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z\" />
+    </>
+  ),
+  // LogOut
+  'log-out': (
+    <>
+      <path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\" />
+      <polyline points=\"16 17 21 12 16 7\" />
+      <line x1=\"21\" y1=\"12\" x2=\"9\" y2=\"12\" />
+    </>
+  ),
+  // BarChart3 — 各领域分布
+  'bar-chart': (
+    <>
+      <path d=\"M3 3v18h18\" />
+      <path d=\"M7 16v-5\" />
+      <path d=\"M12 16V7\" />
+      <path d=\"M17 16v-3\" />
+    </>
+  ),
+  // Calendar — 时间线
+  calendar: (
+    <>
+      <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\" />
+      <line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\" />
+      <line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\" />
+    </>
+  ),
+  // Repeat / RefreshCw — 复习
+  repeat: (
+    <>
+      <path d=\"m17 2 4 4-4 4\" />
+      <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" />
+      <path d=\"m7 22-4-4 4-4\" />
+      <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />
+    </>
+  ),
+  // Printer
+  printer: (
+    <>
+      <polyline points=\"6 9 6 2 18 2 18 9\" />
+      <path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" />
+      <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" />
+    </>
+  ),
+  // Brain
+  brain: (
+    <>
+      <path d=\"M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z\" />
+      <path d=\"M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z\" />
+    </>
+  ),
+  // Study (a generic notebook + pen)
+  study: (
+    <>
+      <path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\" />
+      <path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z\" />
+      <path d=\"M9 6h6\" />
+      <path d=\"M9 10h6\" />
+    </>
+  ),
+  // Sparkles — AI vibe
+  sparkles: (
+    <>
+      <path d=\"m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.1L5.5 9l4.6-1.4L12 3Z\" />
+      <path d=\"M5 19l.7 1.6L7.5 21l-1.8.4L5 23l-.7-1.6L2.5 21l1.8-.4L5 19Z\" />
+      <path d=\"M19 14l.7 1.6L21.5 16l-1.8.4L19 18l-.7-1.6L16.5 16l1.8-.4L19 14Z\" />
+    </>
+  ),
+  // ArrowRight
+  'arrow-right': (
+    <>
+      <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />
+      <polyline points=\"12 5 19 12 12 19\" />
+    </>
+  ),
+  // ArrowUp — submit / send
+  'arrow-up': (
+    <>
+      <line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"5\" />
+      <polyline points=\"5 12 12 5 19 12\" />
+    </>
+  ),
+  check: <polyline points=\"20 6 9 17 4 12\" />,
+  copy: (
+    <>
+      <rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\" />
+      <path d=\"M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1\" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d=\"M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z\" />
+      <circle cx=\"12\" cy=\"12\" r=\"2.5\" />
+    </>
+  ),
+  'eye-off': (
+    <>
+      <path d=\"m3 3 18 18\" />
+      <path d=\"M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a18.7 18.7 0 0 1-3.1 3.7\" />
+      <path d=\"M6.3 6.4C3.6 8.2 2 12 2 12s3.5 6 10 6a10.8 10.8 0 0 0 2.1-.2\" />
+    </>
+  ),
+  pencil: (
+    <>
+      <path d=\"M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\" />
+      <path d=\"m15 5 4 4\" />
+    </>
+  ),
+  refresh: (
+    <>
+      <path d=\"M3 12a9 9 0 0 1 15-6.7L21 8\" />
+      <polyline points=\"21 3 21 8 16 8\" />
+      <path d=\"M21 12a9 9 0 0 1-15 6.7L3 16\" />
+      <polyline points=\"3 21 3 16 8 16\" />
+    </>
+  ),
+  // Flag — milestone / start
+  flag: (
+    <>
+      <path d=\"M4 22V4\" />
+      <path d=\"M4 4h13l-2 4 2 4H4\" />
+    </>
+  ),
+  pin: (
+    <>
+      <line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"22\" />
+      <path d=\"M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1V4H8v2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z\" />
+    </>
+  ),
+  // Archive — 长期记忆 / 事实档案（Lucide archive）
+  archive: (
+    <>
+      <rect x=\"3\" y=\"4\" width=\"18\" height=\"4\" rx=\"1\" />
+      <path d=\"M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8\" />
+      <path d=\"M10 12h4\" />
+    </>
+  ),
+  // Sidebar (right) — dock the copilot panel as a side column
+  sidebar: (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\" />
+    </>
+  ),
+  // Image — attach picture (Lucide image)
+  image: (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <circle cx=\"9\" cy=\"9\" r=\"2\" />
+      <path d=\"m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21\" />
+    </>
+  ),
+  // Settings — gear (Lucide settings, mechanical look)
+  settings: (
+    <>
+      <path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" />
+      <circle cx=\"12\" cy=\"12\" r=\"3\" />
+    </>
+  ),
+  // Smartphone — phone / mobile remote (Lucide smartphone)
+  smartphone: (
+    <>
+      <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" />
+      <path d=\"M12 18h.01\" />
+    </>
+  ),
+  // Puzzle — plugin / extension (Lucide puzzle)
+  puzzle: (
+    <>
+      <path d=\"M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.878.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z\" />
+    </>
+  ),
+  // X — close (Lucide x)
+  x: (
+    <>
+      <line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\" />
+      <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\" />
+    </>
+  ),
+  // Download (Lucide download)
+  download: (
+    <>
+      <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />
+      <polyline points=\"7 10 12 15 17 10\" />
+      <line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" />
+    </>
+  ),
+  // Trash (Lucide trash-2)
+  trash: (
+    <>
+      <path d=\"M3 6h18\" />
+      <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />
+      <line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\" />
+      <line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" />
+    </>
+  ),
+  // Key (Lucide key)
+  key: (
+    <>
+      <circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\" />
+      <path d=\"m21 2-9.6 9.6\" />
+      <path d=\"m15.5 7.5 3 3L22 7l-3-3\" />
+    </>
+  ),
+  // CPU — runtime / engine (Lucide cpu)
+  cpu: (
+    <>
+      <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" />
+      <rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" />
+      <line x1=\"9\" y1=\"1\" x2=\"9\" y2=\"4\" />
+      <line x1=\"15\" y1=\"1\" x2=\"15\" y2=\"4\" />
+      <line x1=\"9\" y1=\"20\" x2=\"9\" y2=\"23\" />
+      <line x1=\"15\" y1=\"20\" x2=\"15\" y2=\"23\" />
+      <line x1=\"20\" y1=\"9\" x2=\"23\" y2=\"9\" />
+      <line x1=\"20\" y1=\"14\" x2=\"23\" y2=\"14\" />
+      <line x1=\"1\" y1=\"9\" x2=\"4\" y2=\"9\" />
+      <line x1=\"1\" y1=\"14\" x2=\"4\" y2=\"14\" />
+    </>
+  ),
+  // Sun — light mode (Lucide sun)
+  sun: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"4\" />
+      <line x1=\"12\" y1=\"2\" x2=\"12\" y2=\"4\" />
+      <line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"22\" />
+      <line x1=\"4.93\" y1=\"4.93\" x2=\"6.34\" y2=\"6.34\" />
+      <line x1=\"17.66\" y1=\"17.66\" x2=\"19.07\" y2=\"19.07\" />
+      <line x1=\"2\" y1=\"12\" x2=\"4\" y2=\"12\" />
+      <line x1=\"20\" y1=\"12\" x2=\"22\" y2=\"12\" />
+      <line x1=\"4.93\" y1=\"19.07\" x2=\"6.34\" y2=\"17.66\" />
+      <line x1=\"17.66\" y1=\"6.34\" x2=\"19.07\" y2=\"4.93\" />
+    </>
+  ),
+  // Moon — dark mode (Lucide moon)
+  moon: <path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z\" />,
+  // Zap — quick start / lightning (Lucide zap)
+  zap: <polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\" />,
+  // Clock — recent runs (Lucide clock)
+  clock: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <polyline points=\"12 6 12 12 16 14\" />
+    </>
+  ),
+  // Bell — notification center (Lucide bell)
+  bell: (
+    <>
+      <path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" />
+      <path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />
+    </>
+  ),
+  // Folder — project / resource (Lucide folder)
+  folder: <path d=\"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z\" />,
+  // File — generic file (Lucide file)
+  file: (
+    <>
+      <path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" />
+      <polyline points=\"14 2 14 8 20 8\" />
+    </>
+  ),
+  // SVG — vector file / chart artifact
+  svg: (
+    <>
+      <path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" />
+      <polyline points=\"14 2 14 8 20 8\" />
+      <path d=\"M8.5 13.5 10.5 11l2 2.5 2-3 1.5 2\" />
+      <circle cx=\"8.5\" cy=\"13.5\" r=\"0.75\" />
+      <circle cx=\"10.5\" cy=\"11\" r=\"0.75\" />
+      <circle cx=\"12.5\" cy=\"13.5\" r=\"0.75\" />
+      <circle cx=\"14.5\" cy=\"10.5\" r=\"0.75\" />
+      <circle cx=\"16\" cy=\"12.5\" r=\"0.75\" />
+    </>
+  ),
+  // Database — dataset / storage (Lucide database)
+  database: (
+    <>
+      <ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\" />
+      <path d=\"M3 5v14a9 3 0 0 0 18 0V5\" />
+      <path d=\"M3 12a9 3 0 0 0 18 0\" />
+    </>
+  ),
+  // Globe — browser / web surface
+  globe: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <path d=\"M2 12h20\" />
+      <path d=\"M12 2c3.5 3.5 3.5 16.5 0 20\" />
+      <path d=\"M12 2c-3.5 3.5-3.5 16.5 0 20\" />
+    </>
+  ),
+  // Terminal — agent / console (Lucide terminal)
+  terminal: (
+    <>
+      <polyline points=\"4 17 10 11 4 5\" />
+      <line x1=\"12\" y1=\"19\" x2=\"20\" y2=\"19\" />
+    </>
+  ),
+  // Bot — sub-agent independence marker (Lucide bot)
+  bot: (
+    <>
+      <path d='M12 8V4H8' />
+      <rect width='16' height='12' x='4' y='8' rx='2' />
+      <path d='M2 14h2' />
+      <path d='M20 14h2' />
+      <path d='M15 13v2' />
+      <path d='M9 13v2' />
+    </>
+  ),
+  // Arrow left — back navigation (Lucide arrow-left)
+  'arrow-left': (
+    <>
+      <line x1=\"19\" y1=\"12\" x2=\"5\" y2=\"12\" />
+      <polyline points=\"12 19 5 12 12 5\" />
+    </>
+  ),
+  // Panel left — toggle left sidebar (Lucide panel-left)
+  'panel-left': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"9\" y1=\"3\" x2=\"9\" y2=\"21\" />
+    </>
+  ),
+  // Panel right — toggle right sidebar (Lucide panel-right)
+  'panel-right': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\" />
+    </>
+  ),
+  // Panel bottom — toggle embedded terminal
+  'panel-bottom': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\" />
+    </>
+  ),
+  // Chevron down — collapse (Lucide chevron-down)
+  'chevron-down': <polyline points=\"6 9 12 15 18 9\" />,
+  'chevron-up': <polyline points=\"18 15 12 9 6 15\" />,
+  // Chevron right — expand (Lucide chevron-right)
+  'chevron-right': <polyline points=\"9 18 15 12 9 6\" />,
+  // Wrench — tool / toolbox (Lucide wrench)
+  wrench: (
+    <path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\" />
+  ),
+  // Layout grid — toolbox grid (Lucide layout-grid)
+  'layout-grid': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" />
+      <rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" />
+      <rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" />
+      <rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" />
+    </>
+  ),
+  // List details — Codex-style session summary
+  'list-details': (
+    <>
+      <circle cx=\"6\" cy=\"6\" r=\"2.25\" />
+      <circle cx=\"6\" cy=\"12\" r=\"2.25\" />
+      <circle cx=\"6\" cy=\"18\" r=\"2.25\" />
+      <line x1=\"11\" y1=\"6\" x2=\"20\" y2=\"6\" />
+      <line x1=\"11\" y1=\"12\" x2=\"20\" y2=\"12\" />
+      <line x1=\"11\" y1=\"18\" x2=\"20\" y2=\"18\" />
+    </>
+  ),
+  // Plus — new item (Lucide plus)
+  plus: (
+    <>
+      <line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\" />
+      <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />
+    </>
+  ),
+  // Message circle — conversation (Lucide message-circle)
+  'message-circle': (
+    <>
+      <path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z\" />
+    </>
+  ),
+  // Send — send message (Lucide send)
+  send: (
+    <>
+      <line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\" />
+      <polygon points=\"22 2 15 22 11 13 2 9 22 2\" />
+    </>
+  ),
+  // Square — stop (Lucide square)
+  square: (
+    <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+  ),
+  // Square-stack — restore from maximize (Lucide square-stack icon)
+  'square-stack': (
+    <>
+      <rect x=\"7\" y=\"7\" width=\"13\" height=\"13\" rx=\"1.5\" />
+      <path d=\"M4 17V5a1 1 0 0 1 1-1h12\" />
+    </>
+  ),
+  minus: <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />,
+  // Restore — window behind window (Lucide \"copy\"-style two rectangles)
+  restore: (
+    <>
+      <rect x=\"3\" y=\"8\" width=\"13\" height=\"13\" rx=\"2\" />
+      <path d=\"M8 3h13a2 2 0 0 1 2 2v13\" />
+    </>
+  ),
+  // Expand — fullscreen icon (arrows pointing to corners)
+  expand: (
+    <>
+      <polyline points=\"15 3 21 3 21 9\" />
+      <polyline points=\"9 21 3 21 3 15\" />
+      <line x1=\"21\" y1=\"3\" x2=\"14\" y2=\"10\" />
+      <line x1=\"3\" y1=\"21\" x2=\"10\" y2=\"14\" />
+    </>
+  ),
+  'more-horizontal': (
+    <>
+      <circle cx=\"6\" cy=\"12\" r=\"1.75\" />
+      <circle cx=\"12\" cy=\"12\" r=\"1.75\" />
+      <circle cx=\"18\" cy=\"12\" r=\"1.75\" />
+    </>
+  ),
+  // Help circle — help/question
+  'help-circle': (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" />
+      <line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\" />
+    </>
+  ),
+  // Alert circle — error/info
+  'alert-circle': (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\" />
+      <line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\" />
+    </>
+  ),
+  // Alert triangle — warning
+  'alert-triangle': (
+    <>
+      <path d=\"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\" />
+      <line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\" />
+      <line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\" />
+    </>
+  ),
+  // Git branch — fork conversation (Lucide git-branch)
+  'git-branch': (
+    <>
+      <line x1=\"6\" y1=\"3\" x2=\"6\" y2=\"15\" />
+      <circle cx=\"18\" cy=\"6\" r=\"3\" />
+      <circle cx=\"6\" cy=\"18\" r=\"3\" />
+      <path d=\"M18 9a9 9 0 0 1-9 9\" />
+    </>
+  ),
+  // Command — keyboard command icon
+  command: (
+    <>
+      <path d=\"M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z\" />
+    </>
+  ),
+  // Layers — stacked layers for skills count
+  layers: (
+    <>
+      <polygon points=\"12 2 2 7 12 12 22 7 12 2\" />
+      <polyline points=\"2 17 12 22 22 17\" />
+      <polyline points=\"2 12 12 17 22 12\" />
+    </>
+  ),
+  // Play — execute/start action
+  play: (
+    <>
+      <polygon points=\"5 3 19 12 5 21 5 3\" />
+    </>
+  ),
+  // Info — information icon
+  info: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\" />
+      <line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\" />
+    </>
+  ),
+  // Table — table icon for tabular output
+  table: (
+    <>
+      <path d=\"M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4\" />
+      <line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\" />
+      <line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\" />
+    </>
+  ),
+  // Home — workbench (Lucide home)
+  home: (
+    <>
+      <path d=\"m3 10.5 9-7.5 9 7.5\" />
+      <path d=\"M5 9.5V21h14V9.5\" />
+      <path d=\"M9.5 21v-6.5h5V21\" />
+    </>
+  ),
+  // Circle — ellipse annotation tool (Lucide circle)
+  circle: (
+    <circle cx=\"12\" cy=\"12\" r=\"9\" />
+  ),
+  // Arrow up-right — arrow annotation tool (Lucide arrow-up-right)
+  'arrow-up-right': (
+    <>
+      <path d=\"M7 7h10v10\" />
+      <path d=\"M7 17 17 7\" />
+    </>
+  ),
+  // Type — text annotation tool (Lucide type)
+  type: (
+    <>
+      <polyline points=\"4 7 4 4 20 4 20 7\" />
+      <line x1=\"9\" y1=\"20\" x2=\"15\" y2=\"20\" />
+      <line x1=\"12\" y1=\"4\" x2=\"12\" y2=\"20\" />
+    </>
+  ),
+  // Highlighter — text-selection annotation tool (Lucide highlighter)
+  highlighter: (
+    <>
+      <path d=\"m9 11-6 6v3h9l3-3\" />
+      <path d=\"m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4Z\" />
+    </>
+  ),
+  // Pen tool — freehand annotation tool (Lucide pen-tool)
+  'pen-tool': (
+    <>
+      <path d=\"m12 19 7-7 3 3-7 7-3-3z\" />
+      <path d=\"m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z\" />
+      <path d=\"m2 2 7.586 7.586\" />
+      <circle cx=\"11\" cy=\"11\" r=\"2\" />
+    </>
+  ),
+  // Undo 2 — undo last annotation action (Lucide undo-2)
+  'undo-2': (
+    <>
+      <path d=\"M9 14 4 9l5-5\" />
+      <path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\" />
+    </>
+  ),
+  // Mouse pointer — select/移动批注（Lucide mouse-pointer-2）
+  'mouse-pointer': (
+    <path d=\"m4 4 7.07 17 2.51-7.39L21 11.07z\" />
+  ),
+};
+
+export function Icon({
+  name,
+  size = 16,
+  className,
+  label,
+  strokeWidth = 1.75,
+}: IconProps): React.ReactElement {
+  const isDecorative = !label;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox=\"0 0 24 24\"
+      fill=\"none\"
+      stroke=\"currentColor\"
+      strokeWidth={strokeWidth}
+      strokeLinecap=\"round\"
+      strokeLinejoin=\"round\"
+      className={className}
+      role={isDecorative ? undefined : 'img'}
+      aria-hidden={isDecorative ? true : undefined}
+      aria-label={label}
+      focusable=\"false\"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+"
+
+[36m [2m❯[22m src/components/icons/IdentityAtoms.test.tsx:[2m25:48[22m[39m
+    [90m 23|[39m     const icon = read(ICON);
+    [90m 24|[39m     for (const name of ATOMS) {
+    [90m 25|[39m       expect(icon, `IconName missing ${name}`).toMatch(new RegExp(`'${…
+    [90m   |[39m                                                [31m^[39m
+    [90m 26|[39m       expect(icon, `paths missing ${name}`).toMatch(new RegExp(`^\\s{2…
+    [90m 27|[39m     }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/icons/IdentityAtoms.test.tsx[2m > [22mA2 identity icon atoms (single source)[2m > [22mkeeps one stroke family: 24×24 viewBox, stroke=currentColor, no fill
+[31m[1mAssertionError[22m: open-ring path missing: expected '' not to be '' // Object.is equality[39m
+[36m [2m❯[22m src/components/icons/IdentityAtoms.test.tsx:[2m38:49[22m[39m
+    [90m 36|[39m     for (const name of ATOMS) {
+    [90m 37|[39m       const block = icon.match(new RegExp(`^\\s{2}${name}:\\s*\\(([\\s…
+    [90m 38|[39m       expect(block, `${name} path missing`).not.toBe('');
+    [90m   |[39m                                                 [31m^[39m
+    [90m 39|[39m       expect(block, `${name} must not set fill/color`).not.toMatch(/fi…
+    [90m 40|[39m     }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/icons/IdentityAtoms.test.tsx[2m > [22mA2 identity icon atoms (single source)[2m > [22mwires open-ring into the empty state (replaces generic zap)
+[31m[1mAssertionError[22m: expected '/**\n * McpShelfPane — 扩展中心「MCP 服务」货架…' to match /<Icon\s+name="open-ring"/[39m
+
+[32m- Expected:[39m
+/<Icon\s+name="open-ring"/
+
+[31m+ Received:[39m
+"/**
+ * McpShelfPane — 扩展中心「MCP 服务」货架（BLOCK-156 P2）。
+ *
+ * 配置/连接第三方 MCP server（stdio 子进程）：清单卡片（状态徽标/工具计数/
+ * 连接·断开·移除）+ 添加表单（id / 命令 / 参数）。数据面走 useMcpServers
+ * （后端 HTTP）。第三方工具经 P3 投影进 agent 可用集（此处只见连接事实）。
+ */
+
+import React, { useState } from 'react';
+import { Icon } from '@/components/icons/Icon';
+import { useMcpServers, type McpServerStatus } from '@/hooks/useMcpServers';
+import { McpPolicyEditor } from './McpPolicyEditor';
+import styles from './extensions.module.css';
+import { EmptyState, LoadingBlock } from '../../components/ui/controls/Status';
+
+const STATUS_LABELS: Record<McpServerStatus, string> = {
+  connected: '已连接',
+  connecting: '连接中…',
+  disconnected: '未连接',
+  error: '错误',
+  auth_required: '需要授权',
+  authorizing: '等待授权…',
+};
+
+function parseArgs(raw: string): string[] {
+  // 简单空格分参（带引号的复杂场景留给未来；v1 如实按空白切分）
+  return raw.trim().length ? raw.trim().split(/\\s+/) : [];
+}
+
+/** BLOCK-258 — 每行 `Name: value`；空行忽略；非法行直接拒绝（不静默丢弃）。 */
+function parseHeaders(raw: string): Record<string, string> | undefined {
+  const lines = raw.split('\\n').map((line) => line.trim()).filter(Boolean);
+  if (lines.length === 0) return undefined;
+  const headers: Record<string, string> = {};
+  for (const line of lines) {
+    const idx = line.indexOf(':');
+    if (idx <= 0) throw new Error(`Header 行缺少冒号：${line}`);
+    const name = line.slice(0, idx).trim();
+    const value = line.slice(idx + 1).trim();
+    if (!name) throw new Error('Header 名为空');
+    headers[name] = value;
+  }
+  return headers;
+}
+
+export function McpShelfPane(): React.ReactElement {
+  const {
+    servers, loading, error, notice, busyId,
+    refresh, addServer, removeServer, connect, disconnect, updatePolicy, authenticate, revokeAuthorization,
+  } = useMcpServers();
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [draftId, setDraftId] = useState('');
+  const [draftTransport, setDraftTransport] = useState<'stdio' | 'http' | 'sse'>('stdio');
+  const [draftCommand, setDraftCommand] = useState('');
+  const [draftArgs, setDraftArgs] = useState('');
+  const [draftUrl, setDraftUrl] = useState('');
+  const [draftHeaders, setDraftHeaders] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
+  const [authUrl, setAuthUrl] = useState<string | null>(null);
+
+  const handleAuthenticate = async (row: { id: string }) => {
+    const result = await authenticate(row.id);
+    if (result.authorizationUrl) {
+      setAuthUrl(result.authorizationUrl);
+      try {
+        window.open(result.authorizationUrl, '_blank', 'noopener');
+      } catch { /* 浏览器未打开时下方链接兜底 */ }
+    } else {
+      setAuthUrl(null);
+    }
+  };
+
+  const handleAdd = async () => {
+    const id = draftId.trim();
+    const isRemote = draftTransport !== 'stdio';
+    const command = draftCommand.trim();
+    const url = draftUrl.trim();
+    if (!id || /[\\s/\\\\]/.test(id)) {
+      setFormError('ID 不能为空，且不含空格/斜杠');
+      return;
+    }
+    if (isRemote && !/^https?:\\/\\//.test(url)) {
+      setFormError('URL 必须以 http:// 或 https:// 开头');
+      return;
+    }
+    if (!isRemote && !command) {
+      setFormError('命令不能为空（如 node / npx / uvx）');
+      return;
+    }
+    let headers: Record<string, string> | undefined;
+    try {
+      headers = isRemote ? parseHeaders(draftHeaders) : undefined;
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Header 格式错误');
+      return;
+    }
+    setFormError(null);
+    const ok = await addServer({
+      id,
+      command: isRemote ? draftTransport : command,
+      args: isRemote ? [] : parseArgs(draftArgs),
+      transport: draftTransport,
+      ...(isRemote ? { url } : {}),
+      ...(headers ? { headers } : {}),
+    });
+    if (ok) {
+      setDraftId('');
+      setDraftCommand('');
+      setDraftArgs('');
+      setDraftUrl('');
+      setDraftHeaders('');
+      setDraftTransport('stdio');
+      setFormOpen(false);
+    } else {
+      setFormError('添加失败（检查 ID 是否重复、URL 或 headers 是否合法）');
+    }
+  };
+
+  return (
+    <div className={styles.shelfPane} data-testid=\"mcp-shelf\">
+      <div className={styles.mcpHeaderRow}>
+        <div className={styles.mcpIntro}>
+          <Icon name=\"zap\" size={16} />
+          <span>连接第三方 MCP server（本地 stdio / HTTP / SSE；远程可带自定义 Headers 或 OAuth）；已连接 server 的工具自动进入 agent 可用集</span>
+        </div>
+        <button
+          type=\"button\"
+          className={styles.mcpAddBtn}
+          onClick={() => setFormOpen((v) => !v)}
+          data-testid=\"mcp-add-toggle\"
+        >
+          <Icon name=\"plus\" size={14} />
+          <span>{formOpen ? '收起表单' : '添加 server'}</span>
+        </button>
+      </div>
+
+      {formOpen && (
+        <div className={styles.mcpForm} data-testid=\"mcp-add-form\">
+          <div className={styles.mcpFormRow}>
+            <label className={styles.mcpField}>
+              <span>传输</span>
+              <select
+                value={draftTransport}
+                onChange={(e) => setDraftTransport(e.target.value === 'http' ? 'http' : e.target.value === 'sse' ? 'sse' : 'stdio')}
+                aria-label=\"传输类型\"
+                data-testid=\"mcp-form-transport\"
+              >
+                <option value=\"stdio\">本地 stdio</option>
+                <option value=\"http\">HTTP（OAuth）</option>
+                <option value=\"sse\">SSE（旧版远程）</option>
+              </select>
+            </label>
+            <label className={styles.mcpField}>
+              <span>ID</span>
+              <input
+                value={draftId}
+                onChange={(e) => setDraftId(e.target.value)}
+                placeholder=\"如 filesystem（唯一标识）\"
+                aria-label=\"server ID\"
+                data-testid=\"mcp-form-id\"
+              />
+            </label>
+            {draftTransport !== 'stdio' ? (
+              <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
+                <span>URL</span>
+                <input
+                  value={draftUrl}
+                  onChange={(e) => setDraftUrl(e.target.value)}
+                  placeholder=\"https://example.com/mcp\"
+                  aria-label=\"MCP URL\"
+                  data-testid=\"mcp-form-url\"
+                />
+              </label>
+            ) : (
+              <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
+                <span>命令</span>
+                <input
+                  value={draftCommand}
+                  onChange={(e) => setDraftCommand(e.target.value)}
+                  placeholder=\"如 npx -y @modelcontextprotocol/server-filesystem\"
+                  aria-label=\"启动命令\"
+                  data-testid=\"mcp-form-command\"
+                />
+              </label>
+            )}
+          </div>
+          {draftTransport !== 'stdio' && (
+            <div className={styles.mcpFormRow}>
+              <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
+                <span>自定义 Headers（每行 Name: value，可留空；值不会回显）</span>
+                <textarea
+                  value={draftHeaders}
+                  onChange={(e) => setDraftHeaders(e.target.value)}
+                  placeholder=\"x-api-key: sk-…\"
+                  rows={2}
+                  aria-label=\"自定义请求头\"
+                  data-testid=\"mcp-form-headers\"
+                />
+              </label>
+            </div>
+          )}
+          <div className={styles.mcpFormRow}>
+            {draftTransport !== 'stdio' ? (
+              <span className={`${styles.mcpAuthHint} ${styles.mcpFieldGrow}`}>
+                保存后点卡片上的「授权」完成 OAuth；授权前工具不会投影。
+              </span>
+            ) : (
+              <label className={`${styles.mcpField} ${styles.mcpFieldGrow}`}>
+                <span>参数（空格分隔，可留空——命令含参数时也可全填这里）</span>
+                <input
+                  value={draftArgs}
+                  onChange={(e) => setDraftArgs(e.target.value)}
+                  placeholder=\"如 /path/to/dir\"
+                  aria-label=\"参数\"
+                  data-testid=\"mcp-form-args\"
+                />
+              </label>
+            )}
+            <button
+              type=\"button\"
+              className={styles.mcpAddBtn}
+              onClick={() => void handleAdd()}
+              data-testid=\"mcp-form-submit\"
+            >
+              保存
+            </button>
+          </div>
+          {formError && <p className={styles.mcpFormError} role=\"alert\">{formError}</p>}
+        </div>
+      )}
+
+      {notice && (
+        <p className={styles.mcpNotice} role=\"status\" data-testid=\"mcp-notice\">{notice}</p>
+      )}
+      {error && <p className={styles.mcpFormError} role=\"alert\">后端不可达：{error}</p>}
+      {authUrl && (
+        <p className={styles.mcpNotice} data-testid=\"mcp-auth-url\">
+          若浏览器未打开，请手动访问：
+          <a href={authUrl} target=\"_blank\" rel=\"noreferrer\">{authUrl}</a>
+        </p>
+      )}
+
+      {loading ? (
+        <LoadingBlock label=\"加载 MCP 服务清单…\" />
+      ) : servers.length === 0 ? (
+        <div data-testid=\"mcp-empty\">
+          <EmptyState
+            icon={<Icon name=\"zap\" size={24} />}
+            title=\"还没有配置 MCP 服务\"
+            description=\"点右上「添加 server」接入第一个第三方 MCP server\"
+          />
+        </div>
+      ) : (
+        <div className={styles.mcpList}>
+          {servers.map((row) => (
+            <div
+              key={row.id}
+              className={styles.mcpCard}
+              data-testid={`mcp-card-${row.id}`}
+              data-status={row.status}
+            >
+              <div className={styles.mcpCardHead}>
+                <span className={styles.mcpCardId}>{row.id}</span>
+                <span
+                  className={`${styles.mcpStatusBadge} ${styles[`mcpStatus_${row.status}`] ?? ''}`}
+                >
+                  {STATUS_LABELS[row.status]}
+                </span>
+              </div>
+              <div
+                className={styles.mcpCardCmd}
+                title={row.transport === 'http' || row.transport === 'sse' ? row.url : [row.command, ...row.args].join(' ')}
+              >
+                {row.transport === 'http' || row.transport === 'sse' ? row.url : `${row.command} ${row.args.join(' ')}`}
+              </div>
+              <div className={styles.mcpCardMeta}>
+                {row.transport === 'sse' && <span>SSE</span>}
+                {row.status === 'connected' && (
+                  <span>{row.toolCount} 个工具</span>
+                )}
+                {row.headerCount > 0 && (
+                  <span data-testid={`mcp-header-count-${row.id}`} title={row.headerKeys.join(', ')}>
+                    {row.headerCount} 个自定义 Header
+                  </span>
+                )}
+                {row.auth === 'authorized' && (
+                  <span data-testid={`mcp-auth-badge-${row.id}`}>已授权</span>
+                )}
+                {row.status === 'error' && row.error && (
+                  <span className={styles.mcpErrorText} title={row.error}>{row.error}</span>
+                )}
+                {row.status === 'auth_required' && (
+                  <span className={styles.mcpAuthHint}>授权后才能发现并调用该 server 的工具</span>
+                )}
+                {row.autoConnect && row.status === 'disconnected' && <span>启动时自动连接</span>}
+              </div>
+              <McpPolicyEditor
+                server={row}
+                onSave={(patch) => updatePolicy(row.id, patch)}
+              />
+              <div className={styles.mcpCardActions}>
+                {row.auth === 'authorized' && (
+                  <>
+                    <button
+                      type=\"button\"
+                      disabled={busyId === row.id}
+                      onClick={() => void revokeAuthorization(row.id)}
+                      data-testid={`mcp-revoke-${row.id}`}
+                    >
+                      断开授权
+                    </button>
+                    <button
+                      type=\"button\"
+                      disabled={busyId === row.id}
+                      onClick={() => void handleAuthenticate(row)}
+                      data-testid={`mcp-reauth-${row.id}`}
+                    >
+                      重新授权
+                    </button>
+                  </>
+                )}
+                {row.status === 'auth_required' ? (
+                  <button
+                    type=\"button\"
+                    disabled={busyId === row.id}
+                    onClick={() => void handleAuthenticate(row)}
+                    data-testid={`mcp-authenticate-${row.id}`}
+                  >
+                    授权
+                  </button>
+                ) : row.status === 'authorizing' ? (
+                  <button type=\"button\" disabled data-testid={`mcp-authorizing-${row.id}`}>
+                    等待授权…
+                  </button>
+                ) : row.status === 'connected' || row.status === 'error' ? (
+                  <button
+                    type=\"button\"
+                    disabled={busyId === row.id}
+                    onClick={() => void disconnect(row.id)}
+                    data-testid={`mcp-disconnect-${row.id}`}
+                  >
+                    断开
+                  </button>
+                ) : (
+                  <button
+                    type=\"button\"
+                    disabled={busyId === row.id || row.status === 'connecting'}
+                    onClick={() => void connect(row.id)}
+                    data-testid={`mcp-connect-${row.id}`}
+                  >
+                    {row.status === 'connecting' ? '连接中…' : '连接'}
+                  </button>
+                )}
+                <button
+                  type=\"button\"
+                  disabled={busyId === row.id}
+                  onClick={() => void removeServer(row.id)}
+                  data-testid={`mcp-remove-${row.id}`}
+                >
+                  移除
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        {/* BLOCK-160 W2 P5（DIST-2）— MCP 配置文件导入（对话框一条龙，skills 导入先例） */}
+        <button
+          type=\"button\"
+          className={styles.mcpRefresh}
+          title=\"从 JSON 文件导入 MCP server 配置（{servers:[…]} 或数组；坏条目跳过并提示）\"
+          onClick={() => {
+            void (async () => {
+            const bridge = (window as unknown as { petriDesktop?: { mcpConfigImportDialog?: () => Promise<{ ok: boolean; canceled?: boolean; imported?: number; skipped?: Array<{ id: string; error: string }>; error?: string }> } }).petriDesktop;
+            if (!bridge?.mcpConfigImportDialog) return;
+            const result = await bridge.mcpConfigImportDialog();
+            if (result?.canceled) return;
+            if (result?.ok) {
+              const skippedNote = result.skipped?.length ? `，跳过 ${result.skipped.length} 条（${result.skipped.map((x) => `${x.id}:${x.error}`).join('；')}）` : '';
+              setFormError(`导入完成：${result.imported} 条${skippedNote}`);
+              void refresh();
+            } else if (result?.error) {
+              setFormError(`导入失败：${result.error}`);
+            }
+            })();
+          }}
+        >
+          <Icon name=\"file\" size={12} />
+          <span>导入配置</span>
+        </button>
+        <button
+          type=\"button\"
+          className={styles.mcpRefresh}
+          onClick={() => void refresh()}
+          title=\"刷新状态\"
+        >
+          <Icon name=\"refresh\" size={12} />
+          <span>刷新</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+"
+
+[36m [2m❯[22m src/components/icons/IdentityAtoms.test.tsx:[2m45:19[22m[39m
+    [90m 43|[39m   it('wires open-ring into the empty state (replaces generic zap)', ()…
+    [90m 44|[39m     const empty = read(EMPTY);
+    [90m 45|[39m     expect(empty).toMatch(/<Icon\s+name="open-ring"/);
+    [90m   |[39m                   [31m^[39m
+    [90m 46|[39m     expect(empty).not.toMatch(/<Icon\s+name="zap"[^>]*size=\{24\}/);
+    [90m 47|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/icons/IdentityAtoms.test.tsx[2m > [22mA2 identity icon atoms (single source)[2m > [22mmarks tab active with offset-grid, one highlighted cell only
+[31m[1mAssertionError[22m: active tab must render offset-grid atom: expected '/**\n * Extensions 页 — BLOCK-156 扩展中心…' to match /shelfTabActive[\s\S]{0,120}offset-gri…/[39m
+
+[32m- Expected:[39m
+/shelfTabActive[\s\S]{0,120}offset-grid|<Icon\s+name="offset-grid"/
+
+[31m+ Received:[39m
+"/**
+ * Extensions 页 — BLOCK-156 扩展中心（四货架单入口）。
+ *
+ * D1 裁决：/extensions 单页四货签（领域插件 / 领域技能 / 通用技能 / MCP 服务），
+ * 旧 /plugins、/skills 路由 fail-closed 重定向到对应货签（App.tsx 层 Navigate）。
+ * D2 裁决：领域/通用界定 = category 前缀规则（extensionShelves 单源，零 manifest 迁移）。
+ * 红线：货架合并是入口层合并——插件与技能的运行时（plugin-loader / skill-registry）不动。
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Icon } from '@/components/icons/Icon';
+import { PluginStorePanel } from '@/components/desktop/PluginStorePanel';
+import { useSkillStore, type Skill } from '@/hooks/useSkillStore';
+import { getBridge } from '@/lib/desktopBridge';
+import { getPlatformApiPrefix, getToken } from '@/lib/authClient';
+import {
+  EXTENSION_SHELVES,
+  classifySkillShelf,
+  isExtensionShelfId,
+  type ExtensionShelfId,
+} from '@/lib/extensionShelves';
+import { SkillCard } from './SkillCard';
+import { SkillDetail } from './SkillDetail';
+import { McpShelfPane } from './McpShelfPane';
+import globalStyles from '../global-page.module.css';
+import styles from './extensions.module.css';
+import skillStyles from './styles.module.css';
+
+export default function ExtensionsPage(): React.ReactElement {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') ?? '';
+  const activeShelf: ExtensionShelfId = isExtensionShelfId(tabParam)
+    ? tabParam
+    : 'domain-plugins';
+
+  const navigate = useNavigate();
+  const handleReturn = useCallback(() => {
+    // 与既有独立页同语义：回上一页，无历史则回欢迎页
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      void navigate('/');
+    }
+  }, [navigate]);
+
+  const handleSelectShelf = useCallback(
+    (id: ExtensionShelfId) => {
+      setSearchParams(id === 'domain-plugins' ? {} : { tab: id }, { replace: true });
+    },
+    [setSearchParams]
+  );
+
+  return (
+    <div className={globalStyles.page} data-testid=\"extensions-page\">
+      <header className={globalStyles.header}>
+        <button
+          type=\"button\"
+          className={globalStyles.backBtn}
+          onClick={handleReturn}
+          title=\"返回\"
+          aria-label=\"返回\"
+        >
+          <Icon name=\"arrow-left\" size={16} />
+          <span>返回</span>
+        </button>
+        <div className={globalStyles.pageIcon}>
+          <Icon name=\"puzzle\" size={22} />
+        </div>
+        <div className={globalStyles.titleWrap}>
+          <span className={globalStyles.title}>扩展中心</span>
+          <span className={globalStyles.subtitle}>领域扩展 · 通用技能 · MCP 服务</span>
+        </div>
+        {/* BLOCK-242 — 深链安装粘贴入口（与 petri-install:// OS 推送共用预览/确认弹层） */}
+        <button
+          type=\"button\"
+          className={globalStyles.backBtn}
+          onClick={() => window.dispatchEvent(new CustomEvent('petri:open-install-deep-link'))}
+          title=\"从链接安装（petri-install:// 预览后确认）\"
+          data-testid=\"extensions-install-from-link\"
+        >
+          <Icon name=\"plus\" size={16} />
+          <span>从链接安装</span>
+        </button>
+      </header>
+
+      <nav className={styles.shelfBar} role=\"tablist\" aria-label=\"扩展货架\">
+        {EXTENSION_SHELVES.map((shelf) => (
+          <button
+            key={shelf.id}
+            type=\"button\"
+            role=\"tab\"
+            aria-selected={shelf.id === activeShelf}
+            className={`${styles.shelfTab} ${shelf.id === activeShelf ? styles.shelfTabActive : ''}`}
+            onClick={() => handleSelectShelf(shelf.id)}
+            title={shelf.description}
+            data-testid={`extensions-tab-${shelf.id}`}
+          >
+            {shelf.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className={globalStyles.body}>
+        {activeShelf === 'domain-plugins' && (
+          <PluginStorePanel embedded onClose={handleReturn} backLabel=\"返回\" />
+        )}
+        {activeShelf === 'domain-skills' && <SkillShelfPane shelfId=\"domain-skills\" />}
+        {activeShelf === 'general-skills' && <SkillShelfPane shelfId=\"general-skills\" />}
+        {activeShelf === 'mcp' && <McpShelfPane />}
+      </div>
+    </div>
+  );
+}
+
+/** 技能货架：按 D2 分类学过滤 + 搜索 + 卡片网格 + 执行详情弹层。 */
+function SkillShelfPane({ shelfId }: { shelfId: 'domain-skills' | 'general-skills' }): React.ReactElement {
+  const { skills, loading, error, execute, discover, setSkillDisabled, uninstallSkill, getInstallInfo, reinstallSkill } = useSkillStore({ autoLoad: true });
+  const [query, setQuery] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [executingSkillId, setExecutingSkillId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importNotice, setImportNotice] = useState<string | null>(null);
+
+  // BLOCK-156 D7 — 本地技能目录导入（主进程对话框一条龙；成功后重发现）
+  const handleImport = useCallback(async () => {
+    setImporting(true);
+    setImportNotice(null);
+    try {
+      const skillsBridge = getBridge('skills');
+      if (!skillsBridge) {
+        setImportNotice('导入失败：桌面桥不可用');
+        return;
+      }
+      const result = await skillsBridge.importDirectory();
+      if (result.ok) {
+        setImportNotice(`已导入技能 ${result.skillId ?? ''}`);
+        await discover();
+      } else if (!result.canceled) {
+        setImportNotice(`导入失败：${result.message ?? result.error ?? '未知错误'}`);
+      }
+    } catch (e) {
+      setImportNotice(`导入失败：${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setImporting(false);
+    }
+  }, [discover]);
+
+  const shelfSkills = useMemo(
+    () => skills.filter((s) => classifySkillShelf(s.category) === shelfId),
+    [skills, shelfId]
+  );
+  // BLOCK-176 W7 CP-21 — 依赖三态徽章数据面（后端 which/where 只读探测；
+  // 探测失败静默=卡片如实不显示状态，与「不可用即不虚报」一致）
+  const [depsMap, setDepsMap] = useState<Record<string, { status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform'; missingBins: string[]; install?: string | null }>>({});
+  useEffect(() => {
+    let cancelled = false;
+    const token = getToken();
+    void fetch(`${getPlatformApiPrefix()}/skills/preflight`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+      .then(async (response) => {
+        const json = (await response.json().catch(() => null)) as { ok?: boolean; results?: Record<string, { status: 'available' | 'installable' | 'missing_deps' | 'blocked_platform'; missingBins: string[]; install?: string | null }> } | null;
+        if (!cancelled && response.ok && json?.ok && json.results) setDepsMap(json.results);
+      })
+      .catch(() => { /* 探测面不可达=徽章缺省，不阻塞货架 */ });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleSkills = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return shelfSkills;
+    return shelfSkills.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q)
+    );
+  }, [shelfSkills, query]);
+
+  const handleExecute = useCallback(
+    async (skill: Skill, params: Record<string, unknown>) => {
+      setExecutingSkillId(skill.id);
+      try {
+        const result = await execute(skill.id, params);
+        if (result.ok) {
+          // 与原 Skills 页同节奏：短暂成功反馈后收起详情弹层
+          setTimeout(() => {
+            setExecutingSkillId(null);
+            setSelectedSkill(null);
+          }, 800);
+        } else {
+          setExecutingSkillId(null);
+        }
+      } catch {
+        setExecutingSkillId(null);
+      }
+    },
+    [execute]
+  );
+
+  const shelfLabel =
+    shelfId === 'domain-skills' ? '领域技能' : '通用技能';
+
+  return (
+    <div className={styles.shelfPane} data-testid={`skill-shelf-${shelfId}`}>
+      {shelfId === 'general-skills' && (
+        <div className={styles.mcpHeaderRow}>
+          <span className={styles.mcpIntro}>
+            <Icon name=\"download\" size={14} />
+            <span>{importNotice ?? '通用技能不绑领域；从本地目录导入含 skill.json 的技能'}</span>
+          </span>
+          <button
+            type=\"button\"
+            className={styles.mcpAddBtn}
+            disabled={importing}
+            onClick={() => void handleImport()}
+            data-testid=\"skill-import-directory\"
+          >
+            <Icon name=\"plus\" size={14} />
+            <span>{importing ? '导入中…' : '导入本地技能目录'}</span>
+          </button>
+        </div>
+      )}
+      <div className={skillStyles.searchRow}>
+        <div className={skillStyles.searchInputWrapper}>
+          <Icon name=\"search\" size={16} className={skillStyles.searchIcon} />
+          <input
+            type=\"text\"
+            className={skillStyles.searchInput}
+            placeholder={`搜索${shelfLabel}…`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label={`搜索${shelfLabel}`}
+          />
+        </div>
+        <span className={styles.shelfCount}>{shelfSkills.length} 项</span>
+      </div>
+
+      {loading ? (
+        <div className={skillStyles.skillsEmpty}>
+          <h3 className={skillStyles.emptyTitle}>加载中…</h3>
+        </div>
+      ) : error ? (
+        <div className={skillStyles.skillsEmpty}>
+          <h3 className={skillStyles.emptyTitle}>{error}</h3>
+        </div>
+      ) : visibleSkills.length === 0 ? (
+        <div className={skillStyles.skillsEmpty}>
+          <div className={skillStyles.emptyIcon}>
+            <Icon name=\"search\" size={24} />
+          </div>
+          <h3 className={skillStyles.emptyTitle} data-testid=\"empty-guide\">暂无匹配的{shelfLabel}</h3>
+          <p className={skillStyles.emptyText}>
+            {shelfId === 'general-skills'
+              ? '还没有通用技能——点上方「导入本地技能目录」接入第一个（含 skill.json 的目录）'
+              : '尝试调整搜索条件，或从领域包安装分析能力'}
+          </p>
+        </div>
+      ) : (
+        <div className={skillStyles.skillsGrid}>
+          {visibleSkills.map((skill) => (
+            <SkillCard
+              key={skill.id}
+              skill={skill}
+              onViewDetail={setSelectedSkill}
+              onExecute={(s) => setSelectedSkill(s)}
+              canExecute={executingSkillId === null}
+              deps={depsMap[skill.id] ?? null}
+            />
+          ))}
+        </div>
+      )}
+
+      {selectedSkill && (
+        <SkillDetail
+          // BLOCK-181 代行评估抓真——详情持开卡时快照会导致停用后按钮不翻转
+          // （再次点击重复提交同一操作）；按 id 从刷新后列表派生活引用。
+          skill={skills.find((s) => s.id === selectedSkill.id) ?? selectedSkill}
+          onClose={() => setSelectedSkill(null)}
+          onExecute={(skill, params) => void handleExecute(skill, params)}
+          canExecute={executingSkillId === null}
+          isExecuting={executingSkillId === selectedSkill.id}
+          governance={{
+            setDisabled: setSkillDisabled,
+            uninstall: uninstallSkill,
+            getInstallInfo,
+            reinstall: reinstallSkill,
+            onChanged: () => void discover(),
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+"
+
+[36m [2m❯[22m src/components/icons/IdentityAtoms.test.tsx:[2m51:60[22m[39m
+    [90m 49|[39m   it('marks tab active with offset-grid, one highlighted cell only', (…
+    [90m 50|[39m     const ext = read(EXT);
+    [90m 51|[39m     expect(ext, 'active tab must render offset-grid atom').toMatch(
+    [90m   |[39m                                                            [31m^[39m
+    [90m 52|[39m       /shelfTabActive[\s\S]{0,120}offset-grid|<Icon\s+name="offset-gri…
+    [90m 53|[39m     );
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/icons/IdentityAtoms.test.tsx[2m > [22mA2 identity icon atoms (single source)[2m > [22mkeeps human-eye slot open (no verified claim from static evidence)
+[31m[1mAssertionError[22m: expected '// A2 造型图标原子 — HK-01 红绿先行消费测试。\n// 三原…' not to match /verified/[39m
+
+[32m- Expected:[39m
+/verified/
+
+[31m+ Received:[39m
+"// A2 造型图标原子 — HK-01 红绿先行消费测试。
+// 三原子=开环(open-ring)/错落四格(offset-grid)/发丝线(hairline)；
+// 落点=空态（McpShelfPane）与 tab active（extensions shelfTab）。
+// 断言：Icon 单源含三原子、笔画同族（24×24/stroke/currentColor）、
+// 点睛每视图 ≤1 格、零 emoji 当图标、零新依赖。观感留槽不代签。
+
+import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ICON = path.join(HERE, 'Icon.tsx');
+const EXT = path.join(HERE, '..', '..', 'pages', 'extensions', 'index.tsx');
+const EMPTY = path.join(HERE, '..', '..', 'pages', 'extensions', 'McpShelfPane.tsx');
+const PKG = path.join(HERE, '..', '..', '..', 'package.json');
+const read = (p: string) => fs.readFileSync(p, 'utf8');
+
+const ATOMS = ['open-ring', 'offset-grid', 'hairline'] as const;
+
+describe('A2 identity icon atoms (single source)', () => {
+  it('defines all three atoms in IconName + paths (single source)', () => {
+    const icon = read(ICON);
+    for (const name of ATOMS) {
+      expect(icon, `IconName missing ${name}`).toMatch(new RegExp(`'${name}'`));
+      expect(icon, `paths missing ${name}`).toMatch(new RegExp(`^\\\\s{2}${name}:`, 'm'));
+    }
+  });
+
+  it('keeps one stroke family: 24×24 viewBox, stroke=currentColor, no fill', () => {
+    const icon = read(ICON);
+    expect(icon).toMatch(/viewBox=\"0 0 24 24\"/);
+    expect(icon).toMatch(/stroke=\"currentColor\"/);
+    expect(icon).toMatch(/fill=\"none\"/);
+    // 三原子 path 本身不得引入 fill 或硬编码颜色（继承 currentColor）。
+    for (const name of ATOMS) {
+      const block = icon.match(new RegExp(`^\\\\s{2}${name}:\\\\s*\\\\(([\\\\s\\\\S]*?)^\\\\s{2}\\\\),`, 'm'))?.[1] ?? '';
+      expect(block, `${name} path missing`).not.toBe('');
+      expect(block, `${name} must not set fill/color`).not.toMatch(/fill=|#[0-9a-fA-F]{3,8}|currentColor/);
+    }
+  });
+
+  it('wires open-ring into the empty state (replaces generic zap)', () => {
+    const empty = read(EMPTY);
+    expect(empty).toMatch(/<Icon\\s+name=\"open-ring\"/);
+    expect(empty).not.toMatch(/<Icon\\s+name=\"zap\"[^>]*size=\\{24\\}/);
+  });
+
+  it('marks tab active with offset-grid, one highlighted cell only', () => {
+    const ext = read(EXT);
+    expect(ext, 'active tab must render offset-grid atom').toMatch(
+      /shelfTabActive[\\s\\S]{0,120}offset-grid|<Icon\\s+name=\"offset-grid\"/,
+    );
+    // 每视图点睛 ≤1：offset-grid 渲染实例只出现在 active 分支。
+    const instances = (ext.match(/name=\"offset-grid\"/g) ?? []).length;
+    expect(instances).toBeLessThanOrEqual(1);
+  });
+
+  it('introduces no icon dependency and no emoji-as-icon', () => {
+    const pkg = JSON.parse(read(PKG));
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    for (const d of ['lucide-react', '@phosphor-icons/react', 'react-icons', 'heroicons']) {
+      expect(deps[d], `unexpected icon dependency ${d}`).toBeUndefined();
+    }
+  });
+
+  it('keeps human-eye slot open (no verified claim from static evidence)', () => {
+    // A2 是视觉呈现改动；静态测试只证明结构，不写 verified。
+    const self = read(fileURLToPath(import.meta.url));
+    expect(self).not.toMatch(/verified/);
+  });
+});
+"
+
+[36m [2m❯[22m src/components/icons/IdentityAtoms.test.tsx:[2m70:22[22m[39m
+    [90m 68|[39m     // A2 是视觉呈现改动；静态测试只证明结构，不写 verified。
+    [90m 69|[39m     const self = read(fileURLToPath(import.meta.url));
+    [90m 70|[39m     expect(self).not.toMatch(/verified/);
+    [90m   |[39m                      [31m^[39m
+    [90m 71|[39m   });
+    [90m 72|[39m });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 16:16:48
+[2m   Duration [22m 415ms[2m (environment 89%, transform 5%, tests 3%, import 2%, worker 1%)[22m
+

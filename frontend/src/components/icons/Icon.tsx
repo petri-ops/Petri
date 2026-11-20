@@ -57,6 +57,10 @@ export type IconName =
   | 'sun'
   | 'moon'
   | 'zap'
+  // A2 身份原子（格物视觉语境；与 Lucide 风格同笔画族，非通用图标）
+  | 'open-ring'
+  | 'offset-grid'
+  | 'hairline'
   | 'clock'
   | 'bell'
   | 'folder'
@@ -405,6 +409,32 @@ const paths: Record<IconName, React.ReactNode> = {
   moon: <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />,
   // Zap — quick start / lightning (Lucide zap)
   zap: <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />,
+  // A2 身份原子 —— 开环：缺口朝下，不闭合、留余地（本地主权形态隐喻）。
+  'open-ring': (
+    <>
+      <path d="M5.6 17.2A8 8 0 1 1 18.4 17.2" />
+      <line x1="5.6" y1="17.2" x2="8" y2="17.2" />
+      <line x1="16" y1="17.2" x2="18.4" y2="17.2" />
+    </>
+  ),
+  // A2 身份原子 —— 错落四格：一格点睛（小点标记），其余同族中性。
+  'offset-grid': (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="13.5" y="13.5" width="8" height="8" rx="1" />
+      <circle cx="17.5" cy="17.5" r="1" />
+    </>
+  ),
+  // A2 身份原子 —— 发丝线：分隔用细线，端点有界（不是卡片描边）。
+  hairline: (
+    <>
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="9.5" x2="3" y2="14.5" />
+      <line x1="21" y1="9.5" x2="21" y2="14.5" />
+    </>
+  ),
   // Clock — recent runs (Lucide clock)
   clock: (
     <>
