@@ -102,7 +102,10 @@
 
 .sc-model-btn:hover {
   color: var(--petri-text);
-  background: var(--petri-user-bubble-bg);
+  /* UI-714 加映一 — hover 收敛单一档：改用 --petri-hover 真源。原借
+     --petri-user-bubble-bg（用户气泡底，暗色 0.06）与其余元件 hover 档
+     （--petri-hover，暗色 0.07）差 1pp——乙7 H-03 读数留因就此闭环。 */
+  background: var(--petri-hover);
 }
 
 .sc-model-btn span {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { treeRovingIntent, rovingTabIndex } from './treeRoving';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/icons/Icon';
@@ -328,6 +329,14 @@ function LeftSidebarFooter({ ctx }: { ctx: LeftPanelContext }): React.ReactEleme
 }
 
 function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
+  // UI-714 加映二 — 导航项 aria-current 随路由派生（乙5 读数：isActive 恒 false、无 aria-current）。
+  // 全局页（/extensions、/knowledge）标 page；「新建任务」是动作钮（切工作台视图）不标。
+  const { pathname } = useLocation();
+  const routeActiveKey: string | null = pathname.startsWith('/extensions')
+    ? 'extensions'
+    : pathname.startsWith('/knowledge')
+      ? 'knowledge'
+      : null;
   const items: Array<{
     // BLOCK-156 — 'plugins'/'skills' 收敛为 'extensions'（扩展中心四货架）
     key: WorkspaceMode | 'skills' | 'knowledge' | 'backend' | 'newtask' | 'extensions';
@@ -371,7 +380,7 @@ function QuickActions({ ctx }: { ctx: LeftPanelContext }): React.ReactElement {
     <div className={styles.leftQuickActions}>
       <div className={styles.leftQuickSectionLabel}>工作台</div>
       {items.map((item) => {
-        const isActive = Boolean(item.mode) && ctx.workspaceMode === item.mode;
+        const isActive = (Boolean(item.mode) && ctx.workspaceMode === item.mode) || item.key === routeActiveKey;
         return (
           <button
             key={item.key}

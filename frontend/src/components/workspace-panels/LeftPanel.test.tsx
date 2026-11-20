@@ -76,6 +76,37 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
 }
 
 describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
+  it('UI-714 加映二 — /extensions 路由下「扩展」标 aria-current=page，其余项不标', () => {
+    const ctx = buildCtx('chat');
+    render(
+      <MemoryRouter initialEntries={['/extensions']}>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('button', { name: '扩展' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('button', { name: '知识空间' }).getAttribute('aria-current')).toBeNull();
+    expect(screen.getByRole('button', { name: '新建任务' }).getAttribute('aria-current')).toBeNull();
+  });
+
+  it('UI-714 加映二 — /knowledge 下「知识空间」标 page；项目路由下全部不标（动作钮语义）', () => {
+    const ctx = buildCtx('chat');
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/knowledge']}>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('button', { name: '知识空间' }).getAttribute('aria-current')).toBe('page');
+    unmount();
+    render(
+      <MemoryRouter initialEntries={['/project/p1']}>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    for (const label of ['新建任务', '扩展', '知识空间']) {
+      expect(screen.getByRole('button', { name: label }).getAttribute('aria-current')).toBeNull();
+    }
+  });
+
   it('renders workbench quick-actions without the retired search entry (UI-347)', () => {
     const ctx = buildCtx('chat');
     render(
