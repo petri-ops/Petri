@@ -8798,6 +8798,26 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "b-surface-dimension",
+      "note": "B 方案：正交 data-surface 维度由四和声档联切，骨架 token 由 --petri-ink-* 派生零 hex 不放宽 c53 navyLadder；HK-01 6/6+六契约48/48+实机14/14(四档骨架各异+回默认+四截图)，观感未签，9223已kill。证据 acceptance/b-surface-dimension/**。",
+      "patterns": [
+        "frontend/src/themes/SurfaceDimension.test.ts",
+        "frontend/src/themes/accents.ts",
+        "frontend/src/styles/custom.css",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/b-surface-dimension.cjs",
+        "acceptance/b-surface-dimension/**",
+        "acceptance/u-skeleton-per-accent/RULING.md"
+      ],
+      "tests": [
+        "frontend/src/themes/SurfaceDimension.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "verification"
+    },
+    {
       "id": "u-skeleton-per-accent",
       "note": "U 类裁决材料：骨架是否随 data-accent 档切换。三方案 A保持/B新建正交 data-surface(唯一推荐)/C直接写accent块，记录 c53 navyLadder 全文末次定义硬红与 accent/theme 正交契约；消费测试 6/6（三方案/单一推荐/篡改负测），零产品代码，pending_user_ruling。证据 acceptance/u-skeleton-per-accent/**。",
       "patterns": [

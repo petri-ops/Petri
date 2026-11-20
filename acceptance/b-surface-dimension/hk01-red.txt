@@ -1,0 +1,130 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/themes/SurfaceDimension.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 7[2mms[22m[39m
+   [31m❯[39m B: data-surface dimension [2m(6)[22m
+[31m     [31m×[31m four harmony accents map to distinct surfaces; legacy accents keep default[39m[32m 2[2mms[22m[39m
+[31m     [31m×[31m applyAccent drives data-surface (联动而不新增持久化偏好)[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m each surface has light + dark CSS blocks overriding skeleton tiers[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m surface skeleton derives from ink tokens, never raw hex (navyLadder gate stays strict)[39m[32m 0[2mms[22m[39m
+     [32m✓[39m c53 navyLadder scanner is NOT weakened (no exemption for data-surface)[32m 1[2mms[22m[39m
+     [32m✓[39m no visual sign-off claimed from static evidence[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/themes/SurfaceDimension.test.ts[2m > [22mB: data-surface dimension[2m > [22mfour harmony accents map to distinct surfaces; legacy accents keep default
+[31m[1mTypeError[22m: surfaceForAccent is not a function[39m
+[36m [2m❯[22m src/themes/SurfaceDimension.test.ts:[2m19:12[22m[39m
+    [90m 17|[39m describe('B: data-surface dimension', () => {
+    [90m 18|[39m   it('four harmony accents map to distinct surfaces; legacy accents ke…
+    [90m 19|[39m     expect(surfaceForAccent('paper-vermilion' as AccentId)).toBe('pape…
+    [90m   |[39m            [31m^[39m
+    [90m 20|[39m     expect(surfaceForAccent('celadon-ink' as AccentId)).toBe('celadon'…
+    [90m 21|[39m     expect(surfaceForAccent('ultramarine-brass' as AccentId)).toBe('ul…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/SurfaceDimension.test.ts[2m > [22mB: data-surface dimension[2m > [22mapplyAccent drives data-surface (联动而不新增持久化偏好)
+[31m[1mAssertionError[22m: expected '// ==================================…' to match /setAttribute\(\s*'data-surface'/[39m
+
+[32m- Expected:[39m
+/setAttribute\(\s*'data-surface'/
+
+[31m+ Received:[39m
+"// ============================================================
+// BLOCK-49 加映三 — 主题色（强调色）系统。
+//
+// 在 light/dark（明暗维度）之上增加独立的「主题色」维度：
+// 用户选择强调色（teal 默认 / 蓝 / 紫 / 玫红 / 琥珀），ThemeProvider 将
+// data-accent 注入 html；custom.css 里每档 [data-accent='…'] 覆盖
+// accent token（light/dark 双套），其余 token 不动。
+// ============================================================
+
+import { readCachedAccent, type AccentId } from './prefCache';
+
+export type { AccentId };
+
+export interface AccentOption {
+  id: AccentId;
+  label: string;
+  /** 面板色板圆点用的 hex（light 基准）。 */
+  swatch: string;
+}
+
+export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
+  { id: 'teal', label: '青碧（默认）', swatch: '#0d9488' },
+  { id: 'blue', label: '远蓝', swatch: '#2563eb' },
+  { id: 'violet', label: '紫罗兰', swatch: '#7c3aed' },
+  { id: 'rose', label: '玫红', swatch: '#e11d48' },
+  { id: 'amber', label: '琥珀', swatch: '#d97706' },
+  // V5 身份面上线 — 四套和声（东方视觉语境；复用同一 [data-accent] 管道）。
+  { id: 'paper-vermilion', label: '宣纸·朱砂', swatch: '#b5482f' },
+  { id: 'celadon-ink', label: '青瓷·墨', swatch: '#0f766e' },
+  { id: 'ultramarine-brass', label: '群青·铜', swatch: '#a87c42' },
+  { id: 'indigo-mist', label: '靛·雾', swatch: '#6e9ca0' },
+];
+
+// BLOCK-203 W4a P7 — 缓存键、枚举与读取全部迁到 `prefCache`（真值在服务端 user-prefs.json）；
+// 本文件只保留\"当前实现认哪个 id\"的选项表与 DOM 应用逻辑。
+export function readAccent(): AccentId {
+  return readCachedAccent();
+}
+
+export function applyAccent(accent: AccentId): void {
+  const html = document.documentElement;
+  if (accent === 'teal') html.removeAttribute('data-accent');
+  else html.setAttribute('data-accent', accent);
+}
+
+"
+
+[36m [2m❯[22m src/themes/SurfaceDimension.test.ts:[2m30:17[22m[39m
+    [90m 28|[39m   it('applyAccent drives data-surface (联动而不新增持久化偏好)', () => {
+    [90m 29|[39m     const src = fs.readFileSync(ACCENTS, 'utf8');
+    [90m 30|[39m     expect(src).toMatch(/setAttribute\(\s*'data-surface'/);
+    [90m   |[39m                 [31m^[39m
+    [90m 31|[39m     expect(src).toMatch(/removeAttribute\(\s*'data-surface'/);
+    [90m 32|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/SurfaceDimension.test.ts[2m > [22mB: data-surface dimension[2m > [22meach surface has light + dark CSS blocks overriding skeleton tiers
+[31m[1mAssertionError[22m: paper light block missing: expected '' not to be '' // Object.is equality[39m
+[36m [2m❯[22m src/themes/SurfaceDimension.test.ts:[2m39:53[22m[39m
+    [90m 37|[39m       const light = css.match(new RegExp(`\\[data-surface='${s}'\\]\\s…
+    [90m 38|[39m       const dark = css.match(new RegExp(`\\[data-surface='${s}'\\]\\[d…
+    [90m 39|[39m       expect(light, `${s} light block missing`).not.toBe('');
+    [90m   |[39m                                                     [31m^[39m
+    [90m 40|[39m       expect(dark, `${s} dark block missing`).not.toBe('');
+    [90m 41|[39m       for (const block of [light, dark]) {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/SurfaceDimension.test.ts[2m > [22mB: data-surface dimension[2m > [22msurface skeleton derives from ink tokens, never raw hex (navyLadder gate stays strict)
+[31m[1mAssertionError[22m: paper bg-canvas must derive from ink token: expected '' to match /var\(--petri-ink-/[39m
+
+[32m- Expected:[39m
+/var\(--petri-ink-/
+
+[31m+ Received:[39m
+""
+
+[36m [2m❯[22m src/themes/SurfaceDimension.test.ts:[2m58:70[22m[39m
+    [90m 56|[39m         for (const tier of ['canvas', 'surface', 'subtle', 'elevated']…
+    [90m 57|[39m           const decl = block.match(new RegExp(`--petri-bg-${tier}:\\s*…
+    [90m 58|[39m           expect(decl, `${s} bg-${tier} must derive from ink token`).t…
+    [90m   |[39m                                                                      [31m^[39m
+    [90m 59|[39m           expect(decl, `${s} bg-${tier} must not contain hex`).not.toM…
+    [90m 60|[39m           if (/--petri-bg-[a-z]+:\s*#[0-9a-f]/.test(block)) hijacks++;
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 19:16:38
+[2m   Duration [22m 381ms[2m (environment 84%, transform 10%, tests 3%, import 3%, worker 1%)[22m
+

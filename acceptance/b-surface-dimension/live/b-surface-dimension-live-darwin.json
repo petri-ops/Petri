@@ -1,0 +1,79 @@
+{
+  "name": "b-surface-dimension",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T11:22:04.990Z",
+  "finishedAt": "2026-11-20T11:22:11.161Z",
+  "assertions": [
+    {
+      "name": "surface_paper_attr",
+      "pass": true,
+      "detail": "paper attr=paper"
+    },
+    {
+      "name": "surface_paper_skeleton_changed",
+      "pass": true,
+      "detail": "paper bg=#f2efe6 base=#ffffff"
+    },
+    {
+      "name": "surface_paper_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_celadon_attr",
+      "pass": true,
+      "detail": "celadon attr=celadon"
+    },
+    {
+      "name": "surface_celadon_skeleton_changed",
+      "pass": true,
+      "detail": "celadon bg=#f4f1e8 base=#ffffff"
+    },
+    {
+      "name": "surface_celadon_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_ultramarine_attr",
+      "pass": true,
+      "detail": "ultramarine attr=ultramarine"
+    },
+    {
+      "name": "surface_ultramarine_skeleton_changed",
+      "pass": true,
+      "detail": "ultramarine bg=#edf0f6 base=#ffffff"
+    },
+    {
+      "name": "surface_ultramarine_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_mist_attr",
+      "pass": true,
+      "detail": "mist attr=mist"
+    },
+    {
+      "name": "surface_mist_skeleton_changed",
+      "pass": true,
+      "detail": "mist bg=#eaeef2 base=#ffffff"
+    },
+    {
+      "name": "surface_mist_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "four_surfaces_distinct",
+      "pass": true,
+      "detail": "bgs=[\"#f2efe6\",\"#f4f1e8\",\"#edf0f6\",\"#eaeef2\"]"
+    },
+    {
+      "name": "surface_removed_restores_default",
+      "pass": true,
+      "detail": "restored=#ffffff base=#ffffff"
+    }
+  ],
+  "allPass": true
+}

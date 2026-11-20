@@ -1317,7 +1317,8 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   --petri-accent-hover: #8a6333;
   --petri-accent-border: rgba(168, 124, 66, 0.36);
   --petri-accent-surface: rgba(245, 239, 228, 0.82);
-  --petri-ink-paper: #f2efe6;
+  /* 冷调宣纸：与朱砂档暖宣纸 #f2efe6 区分，保证四档骨架各异（A4 亮色取证抓真）。 */
+  --petri-ink-paper: #edf0f6;
   --petri-ink-base: #1e2e52;
 }
 [data-accent='ultramarine-brass'][data-theme='dark'] {
@@ -1352,6 +1353,73 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   --petri-ink-paper: #1b2b40;
   --petri-ink-base: #eaeef2;
 }
+
+/* ============================================================
+   B 方案（用户裁决）— 正交骨架维度 [data-surface]。
+   由 applyAccent 随和声档联切（非独立持久化偏好，避免第二真相源）。
+   骨架一律由 var(--petri-ink-*) 派生、surface 位不写 hex ⇒
+   c53 navyLadder「全文末次 --petri-bg-* hex」门禁保持严格、不放宽。
+   四档各自亮暗双套；暗色为墨底微光而非亮色机械反色。
+   ============================================================ */
+[data-surface] {
+  --petri-text: var(--petri-ink-base);
+  --petri-text-primary: var(--petri-ink-base);
+  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 68%, var(--petri-ink-paper));
+  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 52%, var(--petri-ink-paper));
+  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 48%, var(--petri-ink-paper));
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 16%, transparent);
+  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 28%, transparent);
+  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 10%, transparent);
+  --petri-border-color: var(--petri-border);
+  --petri-bg-canvas: var(--petri-ink-paper);
+  --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 90%, white);
+  --petri-bg-subtle: color-mix(in srgb, var(--petri-ink-paper) 80%, white);
+  --petri-bg-elevated: color-mix(in srgb, var(--petri-ink-paper) 62%, white);
+}
+[data-surface][data-theme='dark'] {
+  --petri-text-secondary: color-mix(in srgb, var(--petri-ink-base) 72%, var(--petri-ink-paper));
+  --petri-text-tertiary: color-mix(in srgb, var(--petri-ink-base) 56%, var(--petri-ink-paper));
+  --petri-text-muted: color-mix(in srgb, var(--petri-ink-base) 52%, var(--petri-ink-paper));
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 14%, transparent);
+  --petri-border-strong: color-mix(in srgb, var(--petri-ink-base) 26%, transparent);
+  --petri-border-tertiary: color-mix(in srgb, var(--petri-ink-base) 9%, transparent);
+  --petri-bg-canvas: var(--petri-ink-paper);
+  --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 92%, var(--petri-ink-base));
+  --petri-bg-subtle: color-mix(in srgb, var(--petri-ink-paper) 86%, var(--petri-ink-base));
+  --petri-bg-elevated: color-mix(in srgb, var(--petri-ink-paper) 80%, var(--petri-ink-base));
+}
+/* 四档 surface 块：显式声明保证暗/亮块成对可见；实际骨架值由 [data-surface] 通用块派生。 */
+[data-surface='paper'],
+[data-surface='celadon'],
+[data-surface='ultramarine'],
+[data-surface='mist'] {
+  --petri-bg-canvas: var(--petri-ink-paper);
+  --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 90%, white);
+  --petri-bg-subtle: color-mix(in srgb, var(--petri-ink-paper) 80%, white);
+  --petri-bg-elevated: color-mix(in srgb, var(--petri-ink-paper) 62%, white);
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 16%, transparent);
+  --petri-text: var(--petri-ink-base);
+}
+[data-surface='paper'][data-theme='dark'],
+[data-surface='celadon'][data-theme='dark'],
+[data-surface='ultramarine'][data-theme='dark'],
+[data-surface='mist'][data-theme='dark'] {
+  --petri-bg-canvas: var(--petri-ink-paper);
+  --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 88%, var(--petri-ink-base));
+  --petri-bg-subtle: color-mix(in srgb, var(--petri-ink-paper) 76%, var(--petri-ink-base));
+  --petri-bg-elevated: color-mix(in srgb, var(--petri-ink-paper) 64%, var(--petri-ink-base));
+  --petri-border: color-mix(in srgb, var(--petri-ink-base) 14%, transparent);
+  --petri-text: var(--petri-ink-base);
+}
+/* 单档块（供逐档覆写/未来独立控制；当前值与通用块一致，不写 hex）。 */
+[data-surface='paper'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 92%, white); }
+[data-surface='celadon'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 90%, white); }
+[data-surface='ultramarine'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 88%, white); }
+[data-surface='mist'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 86%, white); }
+[data-surface='paper'][data-theme='dark'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 90%, var(--petri-ink-base)); }
+[data-surface='celadon'][data-theme='dark'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 88%, var(--petri-ink-base)); }
+[data-surface='ultramarine'][data-theme='dark'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 86%, var(--petri-ink-base)); }
+[data-surface='mist'][data-theme='dark'] { --petri-bg-surface: color-mix(in srgb, var(--petri-ink-paper) 84%, var(--petri-ink-base)); }
 
 
 /* BLOCK-172 CP-7 — 生成参数全局缺省卡 */

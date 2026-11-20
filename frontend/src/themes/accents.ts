@@ -37,9 +37,26 @@ export function readAccent(): AccentId {
   return readCachedAccent();
 }
 
+/** B 方案（用户裁决）：and声档联切骨架维度；前 5 档维持默认海军蓝骨架（返回 null）。 */
+export type SurfaceId = 'paper' | 'celadon' | 'ultramarine' | 'mist';
+
+export function surfaceForAccent(accent: AccentId): SurfaceId | null {
+  switch (accent) {
+    case 'paper-vermilion': return 'paper';
+    case 'celadon-ink': return 'celadon';
+    case 'ultramarine-brass': return 'ultramarine';
+    case 'indigo-mist': return 'mist';
+    default: return null;
+  }
+}
+
 export function applyAccent(accent: AccentId): void {
   const html = document.documentElement;
   if (accent === 'teal') html.removeAttribute('data-accent');
   else html.setAttribute('data-accent', accent);
+  // 骨架随档联切（正交 CSS 维度；不新增持久化偏好，避免第二真相源）。
+  const surface = surfaceForAccent(accent);
+  if (surface) html.setAttribute('data-surface', surface);
+  else html.removeAttribute('data-surface');
 }
 
