@@ -10,9 +10,9 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 661,
+    "documentCount": 662,
     "lastUpdated": "2026-11-20",
-    "managedMarkdown": 644
+    "managedMarkdown": 645
   },
   "documents": [
     {
@@ -13782,6 +13782,25 @@
       ],
       "registeredAt": "2026-11-20",
       "notes": "2026-11-20 立项（用户发令「给一个了不起的规划，设计好就可以直接按计划开搞」；三轮澄清锁定=让 Petri 自带 harness 运行时自进化，非开发治理链）。五层架构 Observe→Distill→Evolve→Verify→Guard：失败本地落库→聚类成 lesson→分级改进（低自动注入 prompt/中改进卡片待裁决/高只出草案）→频率曲线验证→不可修改红线横切。EVO-0 首包=Guard 红线纯函数+incident 表(migration 023)+fingerprint 归一化/脱敏纯函数+HK-01 红绿。零新依赖/纯本地零外发/不进 AUDIT-LOG 工作包链（harness 自身建议出口）/红线 fail-closed/不碰 G1+。与三个 MATERIAL active 包(BLOCK-503/505/506) docs-only 文件面零相交，按用户显式并行裁决开工、零触碰未知 WIP。【2026-11-20 EVO-0 收口】incident 表(migration 023)+fingerprint 脱敏归一化纯函数+不可修改红线守卫；HK-01 红→绿 10/10（真实 SQLite 端到端建表）+邻域 27/27+docs 661/ui/secret/arch/types 全绿+新增文件 lint 0 error/knip 零命中；存量红（2 lint error=BLOCK-338/507/509、38 knip=并发人眼包探针、1 test:changed 冲突=HEAD 既有）如实归属零触碰。后续 EVO-1/2/3 需各自发令。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "USER-PREFERENCES-CODIFICATION",
+      "path": "docs/user-preferences-codification.md",
+      "capability": "user-preferences",
+      "kind": "reference",
+      "status": "reference",
+      "canonical": true,
+      "truthDomain": "user-preferences-codification",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "registeredAt": "2026-11-20",
+      "tags": [
+        "preferences",
+        "material",
+        "ui-design",
+        "G0"
+      ],
+      "notes": "用户偏好定稿候选清单（用户「系统性从不同角度列出，我来定稿」）：7 维度（身份差异化/本地主权/视觉布局/文案/交互形状/agent 行为/实机验收）逐条标现状+定稿建议+裁决状态（已固化/建议采纳/需裁决），附精确证据路径与 5 项待裁决空白。不改纪律本体，定稿后才升格 canonical。三路取证：视觉 token/机械门、人设与原话、AUDIT-LOG 历史裁决。"
     }
   ],
   "lastUpdated": "2026-11-20"
