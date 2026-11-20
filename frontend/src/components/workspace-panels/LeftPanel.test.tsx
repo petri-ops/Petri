@@ -75,6 +75,50 @@ function buildCtx(workspaceMode: WorkspaceMode): LeftPanelContext & { project: P
   };
 }
 
+describe('UI-715 会话行右键信息菜单', () => {
+  const conv715 = { id: 'conv-715', title: '会话甲', status: 'active' as const, last_page: null, message_count: 3, created_at: '2026-11-20T00:00:00.000Z', updated_at: '2026-11-20T00:00:00.000Z', project_id: 'project-1' };
+
+  function renderWithConv() {
+    const ctx = buildCtx('chat');
+    ctx.conversations = [conv715];
+    ctx.expandedProjects = new Set<string>(['project-1']);
+    ctx.visibleProjects = [ctx.project];
+    const utils = render(
+      <MemoryRouter initialEntries={['/project/project-1']}>
+        <LeftPanel ctx={ctx} />
+      </MemoryRouter>,
+    );
+    const row = screen.getByText('会话甲').closest('li');
+    if (!row) throw new Error('会话行未渲染');
+    return { ctx, utils, row };
+  }
+
+  it('右键弹菜单：只读会话 ID 在场；复制 ID/复制信息写剪贴板；Escape 关闭', async () => {
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    const { row } = renderWithConv();
+    expect(row.getAttribute('data-conversation-id')).toBe('conv-715');
+    fireEvent.contextMenu(row);
+    const menu = screen.getByRole('menu');
+    expect(menu).toBeTruthy();
+    expect(screen.getByText('conv-715')).toBeTruthy();
+    fireEvent.click(screen.getByRole('menuitem', { name: '复制会话 ID' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('conv-715'));
+    fireEvent.contextMenu(row);
+    fireEvent.click(screen.getByRole('menuitem', { name: '复制会话信息（JSON）' }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(expect.stringContaining('"id": "conv-715"')));
+    fireEvent.contextMenu(row);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('menu')).toBeNull();
+  });
+
+  it('普通左键点击不弹菜单（仅右键触发）', () => {
+    renderWithConv();
+    fireEvent.click(screen.getByText('会话甲').closest('li')!);
+    expect(screen.queryByRole('menu')).toBeNull();
+  });
+});
+
 describe('BLOCK-14 LeftPanel QuickActions a11y', () => {
   it('UI-714 加映二 — /extensions 路由下「扩展」标 aria-current=page，其余项不标', () => {
     const ctx = buildCtx('chat');

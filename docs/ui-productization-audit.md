@@ -6786,6 +6786,14 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **观感确认**：用户原话「好多了 看起来不错」（2026-11-19）——确认来自用户，Agent 零代签；据此由 in_progress 升 verified。
 - **状态边界**：dev Electron 边界内 verified；不外推 packaged/Provider/GA。
 
+## UI-715: 会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代签）**）
+
+用户指出「会话列表只能看到名字、没法拿会话 id，定位不合适」——乙组取证（乙6/UI-711/UI-712 多次需要 conv_xxx id）同证此痛点；「全链可审计」卖点的定位面。对标：ZCode 左侧会话右键菜单为既有形态（reference/ZCode/docs/v4-session-workbench-groups.md Context-menu split parity）；信息获取类（复制 id）ZCode 无明文，按常规菜单形态落地。
+
+**实现**：ConversationItem 右键（onContextMenu preventDefault）→ portal 菜单（fixed 定位、--petri-z-dropdown/overlay、--petri-shadow-menu，全 token 零字面量）：①只读等宽展示会话 id（当场可看）②复制会话 ID（navigator.clipboard）③复制会话信息（JSON：id/title/projectId/status/parentId/messageCount/createdAt/updatedAt）；outside-click + Escape 关闭；普通左键不触发。样式全 var() token（inline-baseline 棘轮零新增字面量）。
+
+**验证**：LeftPanel.test 两测（右键菜单在场+只读 id+复制 ID/JSON writeText 断言+Escape 关闭；左键不弹）；HK-01 红绿回放=临时禁 onContextMenu 即红（1 failed）→恢复 21/21 绿；tsc 0。**实机腿（9223 牺牲实例，跑完 kill；主窗已被用户使用零触碰）**：展开项目树→右键会话行→菜单只读 id 与 data-conversation-id 一致（idMatches=true）+两菜单项在场+点击复制项后菜单关闭——证据=acceptance/ui-715/context-menu-live.png+live-assertion.json。**观感零代签**（菜单位置/配色/交互手感留用户过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-714: 乙组观察点落地小批——compose chart/table 渲染接线 + 左栏导航 aria-current + model-btn hover 收敛单一档（2026-11-20 **in_progress（代码+契约+实机腿 3/3 allPass；观感零代签）**）
 
 **判据与实现**（三处均为 2026-11-20 YI-REST 系列登记的观察点落地，用户发令「开整」）：

@@ -1,0 +1,39 @@
+{
+  "legs": [
+    {
+      "id": "context_menu_live",
+      "pass": true,
+      "detail": {
+        "target": {
+          "id": "conv_b4975ef5-104",
+          "title": "新对话",
+          "x": null,
+          "y": null
+        },
+        "menu": {
+          "items": [
+            "复制会话 ID",
+            "复制会话信息（JSON）"
+          ],
+          "idText": "conv_b4975ef5-104",
+          "idMatches": true,
+          "rect": {
+            "x": 120,
+            "y": 263.994140625,
+            "w": 231.9921875,
+            "h": 94.541015625
+          }
+        }
+      },
+      "file": "context-menu-live.png"
+    },
+    {
+      "id": "copy_item_closes_menu",
+      "pass": true,
+      "detail": {
+        "closed": true
+      }
+    }
+  ],
+  "boundary": "右键交互真实输入管线；剪贴板内容契约由 LeftPanel.test（writeText 断言）守护，实机不读系统剪贴板。"
+}

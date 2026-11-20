@@ -737,6 +737,41 @@ function ConversationItem({
   const conversationRun = useConversationRun(conversation.id);
   const [editing, setEditing] = React.useState(false);
   const [title, setTitle] = React.useState(conversation.title);
+  // UI-715 — 会话行右键信息菜单（对标 ZCode 左侧会话右键形态）：只读展示会话 ID +
+  // 复制 ID / 复制会话信息（JSON），服务「全链可审计」的定位取证场景（乙组取证多次需要会话 id）。
+  const [infoMenu, setInfoMenu] = React.useState<{ x: number; y: number } | null>(null);
+  const infoMenuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!infoMenu) return;
+    const onDown = (e: MouseEvent) => {
+      if (infoMenuRef.current && !infoMenuRef.current.contains(e.target as Node)) setInfoMenu(null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setInfoMenu(null);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [infoMenu]);
+
+  const copyConversationInfo = async () => {
+    const payload = JSON.stringify({
+      id: conversation.id,
+      title: conversation.title,
+      projectId,
+      status: conversation.status,
+      parentId: conversation.parent_id ?? null,
+      messageCount: conversation.message_count,
+      createdAt: conversation.created_at,
+      updatedAt: conversation.updated_at,
+    }, null, 2);
+    try { await navigator.clipboard.writeText(payload); } catch { /* 剪贴板不可用则静默，菜单仍关闭 */ }
+    setInfoMenu(null);
+  };
 
   const isRunning = conversationRun?.status === 'running';
   const hasBranch = Boolean(conversation.parent_id);
@@ -764,6 +799,10 @@ function ConversationItem({
       onDragStart={(event) => {
         event.stopPropagation();
         setConversationDragData(event.dataTransfer, conversation);
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        setInfoMenu({ x: event.clientX, y: event.clientY });
       }}
       onClick={() => {
         if (!isCurrent) ctx.switchToProject(projectId);
@@ -839,6 +878,88 @@ function ConversationItem({
             <Icon name="trash" size={11} />
           </button>
         </>
+      )}
+      {infoMenu && createPortal(
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 'var(--petri-z-overlay)' }}
+            onClick={() => setInfoMenu(null)}
+            aria-label="关闭会话菜单"
+          />
+          <div
+            ref={infoMenuRef}
+            role="menu"
+            aria-label={`会话菜单 ${conversation.title}`}
+            style={{
+              position: 'fixed',
+              left: infoMenu.x,
+              top: infoMenu.y,
+              zIndex: 'var(--petri-z-dropdown)',
+              minWidth: 232,
+              maxWidth: 320,
+              background: 'var(--petri-surface)',
+              border: '1px solid var(--petri-border)',
+              borderRadius: 10,
+              padding: 6,
+              boxShadow: 'var(--petri-shadow-menu)',
+            }}
+          >
+            <div
+              style={{
+                padding: '5px 8px',
+                fontSize: 'var(--petri-font-size-sm, 11px)',
+                color: 'var(--petri-text-muted)',
+                fontFamily: 'var(--petri-font-mono, monospace)',
+                wordBreak: 'break-all',
+                userSelect: 'text',
+              }}
+            >
+              {conversation.id}
+            </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                void navigator.clipboard.writeText(conversation.id).catch(() => {});
+                setInfoMenu(null);
+              }}
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'left',
+                padding: '6px 8px',
+                border: 'none',
+                borderRadius: 6,
+                background: 'transparent',
+                color: 'var(--petri-text)',
+                cursor: 'pointer',
+                fontSize: 'var(--petri-font-size-sm, 12px)',
+              }}
+            >
+              复制会话 ID
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => void copyConversationInfo()}
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'left',
+                padding: '6px 8px',
+                border: 'none',
+                borderRadius: 6,
+                background: 'transparent',
+                color: 'var(--petri-text)',
+                cursor: 'pointer',
+                fontSize: 'var(--petri-font-size-sm, 12px)',
+              }}
+            >
+              复制会话信息（JSON）
+            </button>
+          </div>
+        </>,
+        document.body,
       )}
     </li>
   );
