@@ -1,3 +1,4 @@
+最后更新：2026-11-20（🗃 **V5 四档和声接入可切（点睛层）**：四档注册 data-accent 复用现成管道，实机 17/17、契约绿；骨架仍海军蓝属新 U 类。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（✅ **A4 round3 复审通过 · UI-717 全量 verified**：backend 单独起+9223 离屏，交互面断言 18/18 PASS、截图复核通过；静态面 round2+交互面 round3 均 verified，9223 已 kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🗃 **V1-U 语义收敛（交互面待复审）**：hover/active 文字 accent 47 处收敛 316→269，13 条补中性底，focus/按钮/链接/状态保留；契约44/44+c53 269+tsc0；A4 round3 因 dev 栈 down 0/1 FAIL，交互面待栈恢复复审。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（✅ **A4 观感预审闭环 · UI-717 verified**：偏好预审两轮（抓真假绿→呈现面优化→16/16 PASS），按裁决翻 verified（9223 边界内）；三契约29/29+门禁绿+9223已kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）

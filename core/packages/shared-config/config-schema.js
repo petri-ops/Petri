@@ -496,7 +496,10 @@ const CONFIG_KEYS = Object.freeze([
   },
   {
     key: 'userPrefs.accent', family: 'user-prefs', path: 'accent',
-    type: 'string', domain: { oneOf: ['teal', 'blue', 'violet', 'rose', 'amber'] }, envKeys: [], aliases: [],
+    type: 'string', domain: {
+      oneOf: ['teal', 'blue', 'violet', 'rose', 'amber',
+        'paper-vermilion', 'celadon-ink', 'ultramarine-brass', 'indigo-mist'],
+    }, envKeys: [], aliases: [],
     mutable: true, ui: 'settings',
   },
   {

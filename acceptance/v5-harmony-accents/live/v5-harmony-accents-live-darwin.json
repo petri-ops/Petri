@@ -1,0 +1,94 @@
+{
+  "name": "v5-harmony-accents",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T11:03:29.743Z",
+  "finishedAt": "2026-11-20T11:03:36.527Z",
+  "assertions": [
+    {
+      "name": "accent_paper-vermilion_token",
+      "pass": true,
+      "detail": "paper-vermilion theme=dark token=#d97055 expect=#d97055"
+    },
+    {
+      "name": "accent_paper-vermilion_computed",
+      "pass": true,
+      "detail": "paper-vermilion theme=dark computed=rgb(217, 112, 85) expect=rgb(217, 112, 85)"
+    },
+    {
+      "name": "accent_paper-vermilion_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accent_celadon-ink_token",
+      "pass": true,
+      "detail": "celadon-ink theme=dark token=#2fd7d2 expect=#2fd7d2"
+    },
+    {
+      "name": "accent_celadon-ink_computed",
+      "pass": true,
+      "detail": "celadon-ink theme=dark computed=rgb(47, 215, 210) expect=rgb(47, 215, 210)"
+    },
+    {
+      "name": "accent_celadon-ink_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accent_ultramarine-brass_token",
+      "pass": true,
+      "detail": "ultramarine-brass theme=dark token=#c9a063 expect=#c9a063"
+    },
+    {
+      "name": "accent_ultramarine-brass_computed",
+      "pass": true,
+      "detail": "ultramarine-brass theme=dark computed=rgb(201, 160, 99) expect=rgb(201, 160, 99)"
+    },
+    {
+      "name": "accent_ultramarine-brass_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "accent_indigo-mist_token",
+      "pass": true,
+      "detail": "indigo-mist theme=dark token=#8fb8bb expect=#8fb8bb"
+    },
+    {
+      "name": "accent_indigo-mist_computed",
+      "pass": true,
+      "detail": "indigo-mist theme=dark computed=rgb(143, 184, 187) expect=rgb(143, 184, 187)"
+    },
+    {
+      "name": "accent_indigo-mist_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "four_harmony_colors_distinct",
+      "pass": true,
+      "detail": "colors=[\"rgb(217, 112, 85)\",\"rgb(47, 215, 210)\",\"rgb(201, 160, 99)\",\"rgb(143, 184, 187)\"]"
+    },
+    {
+      "name": "accent_paper-vermilion_pair_light",
+      "pass": true,
+      "detail": "paper-vermilion light=#b5482f expect=#b5482f"
+    },
+    {
+      "name": "accent_celadon-ink_pair_light",
+      "pass": true,
+      "detail": "celadon-ink light=#0f766e expect=#0f766e"
+    },
+    {
+      "name": "accent_ultramarine-brass_pair_light",
+      "pass": true,
+      "detail": "ultramarine-brass light=#a87c42 expect=#a87c42"
+    },
+    {
+      "name": "accent_indigo-mist_pair_light",
+      "pass": true,
+      "detail": "indigo-mist light=#6e9ca0 expect=#6e9ca0"
+    }
+  ],
+  "allPass": true
+}

@@ -1,0 +1,90 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/themes/HarmonyAccents.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 6[2mms[22m[39m
+   [31m❯[39m V5 harmony accents (可见品牌面) [2m(6)[22m
+[31m     [31m×[31m four harmony ids are in frontend whitelist and predicate[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m frontend whitelist matches server schema (drift contract)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m ACCENT_OPTIONS exposes all four with distinct labels/swatches[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m each harmony has light + dark CSS blocks with non-identical accent[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m no new icon/theme dependency introduced[39m[32m 0[2mms[22m[39m
+     [32m✓[39m no visual sign-off from static evidence[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/themes/HarmonyAccents.test.ts[2m > [22mV5 harmony accents (可见品牌面)[2m > [22mfour harmony ids are in frontend whitelist and predicate
+[31m[1mAssertionError[22m: paper-vermilion missing in whitelist: expected [ 'teal', 'blue', 'violet', …(2) ] to include 'paper-vermilion'[39m
+[36m [2m❯[22m src/themes/HarmonyAccents.test.ts:[2m30:61[22m[39m
+    [90m 28|[39m   it('four harmony ids are in frontend whitelist and predicate', () =>…
+    [90m 29|[39m     for (const h of HARMONY) {
+    [90m 30|[39m       expect(ACCENT_VALUES, `${h.id} missing in whitelist`).toContain(…
+    [90m   |[39m                                                             [31m^[39m
+    [90m 31|[39m       expect(isAccentId(h.id), `${h.id} rejected by predicate`).toBe(t…
+    [90m 32|[39m     }
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/HarmonyAccents.test.ts[2m > [22mV5 harmony accents (可见品牌面)[2m > [22mfrontend whitelist matches server schema (drift contract)
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/core/packages/shared-config/config-schema.js'[39m
+[36m [2m❯[22m src/themes/HarmonyAccents.test.ts:[2m36:23[22m[39m
+    [90m 34|[39m
+    [90m 35|[39m   it('frontend whitelist matches server schema (drift contract)', () =…
+    [90m 36|[39m     const schema = fs.readFileSync(SCHEMA, 'utf8');
+    [90m   |[39m                       [31m^[39m
+    [90m 37|[39m     const m = schema.match(/key:\s*'userPrefs\.accent'[\s\S]{0,200}?on…
+    [90m 38|[39m     expect(m, 'server accent domain not found').toBeTruthy();
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/HarmonyAccents.test.ts[2m > [22mV5 harmony accents (可见品牌面)[2m > [22mACCENT_OPTIONS exposes all four with distinct labels/swatches
+[31m[1mAssertionError[22m: paper-vermilion missing option: expected undefined to be truthy[39m
+
+[32m- Expected:[39m
+true
+
+[31m+ Received:[39m
+undefined
+
+[36m [2m❯[22m src/themes/HarmonyAccents.test.ts:[2m48:45[22m[39m
+    [90m 46|[39m     for (const h of HARMONY) {
+    [90m 47|[39m       const opt = ACCENT_OPTIONS.find((o) => o.id === (h.id as AccentI…
+    [90m 48|[39m       expect(opt, `${h.id} missing option`).toBeTruthy();
+    [90m   |[39m                                             [31m^[39m
+    [90m 49|[39m       expect(opt!.label.length).toBeGreaterThan(1);
+    [90m 50|[39m       labels.add(opt!.label);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/HarmonyAccents.test.ts[2m > [22mV5 harmony accents (可见品牌面)[2m > [22meach harmony has light + dark CSS blocks with non-identical accent
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/frontend/src/styles/custom.css'[39m
+[36m [2m❯[22m src/themes/HarmonyAccents.test.ts:[2m58:20[22m[39m
+    [90m 56|[39m
+    [90m 57|[39m   it('each harmony has light + dark CSS blocks with non-identical acce…
+    [90m 58|[39m     const css = fs.readFileSync(CSS, 'utf8').replace(/\/\*[\s\S]*?\*\/…
+    [90m   |[39m                    [31m^[39m
+    [90m 59|[39m     for (const h of HARMONY) {
+    [90m 60|[39m       const light = css.match(new RegExp(`\\[data-accent='${h.id}'\\]\…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/themes/HarmonyAccents.test.ts[2m > [22mV5 harmony accents (可见品牌面)[2m > [22mno new icon/theme dependency introduced
+[31m[1mError[22m: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend/frontend/package.json'[39m
+[36m [2m❯[22m src/themes/HarmonyAccents.test.ts:[2m74:31[22m[39m
+    [90m 72|[39m
+    [90m 73|[39m   it('no new icon/theme dependency introduced', () => {
+    [90m 74|[39m     const pkg = JSON.parse(fs.readFileSync(PKG, 'utf8')) as {
+    [90m   |[39m                               [31m^[39m
+    [90m 75|[39m       dependencies?: Record<string, string>;
+    [90m 76|[39m       devDependencies?: Record<string, string>;
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 19:00:12
+[2m   Duration [22m 384ms[2m (environment 85%, transform 9%, tests 2%, import 2%, worker 1%)[22m
+

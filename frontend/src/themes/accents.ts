@@ -24,6 +24,11 @@ export const ACCENT_OPTIONS: ReadonlyArray<AccentOption & { id: AccentId }> = [
   { id: 'violet', label: '紫罗兰', swatch: '#7c3aed' },
   { id: 'rose', label: '玫红', swatch: '#e11d48' },
   { id: 'amber', label: '琥珀', swatch: '#d97706' },
+  // V5 身份面上线 — 四套和声（东方视觉语境；复用同一 [data-accent] 管道）。
+  { id: 'paper-vermilion', label: '宣纸·朱砂', swatch: '#b5482f' },
+  { id: 'celadon-ink', label: '青瓷·墨', swatch: '#0f766e' },
+  { id: 'ultramarine-brass', label: '群青·铜', swatch: '#a87c42' },
+  { id: 'indigo-mist', label: '靛·雾', swatch: '#6e9ca0' },
 ];
 
 // BLOCK-203 W4a P7 — 缓存键、枚举与读取全部迁到 `prefCache`（真值在服务端 user-prefs.json）；

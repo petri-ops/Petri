@@ -16,7 +16,9 @@
  * 这里是"允许哪些值"。放在渲染侧会造出 `accents ↔ prefCache` 的循环依赖
  * （`gate:arch-cycles` 当场拦下）。
  */
-export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber';
+export type AccentId = 'teal' | 'blue' | 'violet' | 'rose' | 'amber'
+  // V5 身份面上线：四套和声档（用户裁决「行」，可见品牌面）。
+  | 'paper-vermilion' | 'celadon-ink' | 'ultramarine-brass' | 'indigo-mist';
 
 export const THEME_STORAGE_KEY = 'petri-theme';
 export const FONT_SCALE_STORAGE_KEY = 'petri-font-scale';
@@ -29,7 +31,10 @@ export const LEGACY_THEME_KEYS = ['petri-theme', 'theme'] as const;
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export const THEME_VALUES: ReadonlyArray<ThemePreference> = ['system', 'light', 'dark'];
-export const ACCENT_VALUES: ReadonlyArray<AccentId> = ['teal', 'blue', 'violet', 'rose', 'amber'];
+export const ACCENT_VALUES: ReadonlyArray<AccentId> = [
+  'teal', 'blue', 'violet', 'rose', 'amber',
+  'paper-vermilion', 'celadon-ink', 'ultramarine-brass', 'indigo-mist',
+];
 
 /** 动效模式：system=跟随系统 prefers-reduced-motion（默认）。 */
 export type MotionMode = 'system' | 'full' | 'reduced';

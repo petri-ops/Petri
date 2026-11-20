@@ -1259,6 +1259,100 @@ html.petri-desktop .theme-doc-sidebar-container .menu__link {
   --petri-accent-surface: rgba(251, 191, 36, 0.12);
 }
 
+/* ============================================================
+   V5 身份面上线 — 四套和声档（用户裁决「行」）。
+   复用 [data-accent] 管道；每档亮暗双套，骨架(宣纸/墨)由 --petri-ink-* 承载，
+   点睛色只在被格出的一格出现（面积 <5%）。非机械反色：暗底为微光而非亮色反转。
+   ============================================================ */
+
+/* ── 宣纸·朱砂 A ── */
+[data-accent='paper-vermilion'] {
+  --petri-accent: #b5482f;
+  --petri-accent-soft: rgba(181, 72, 47, 0.14);
+  --petri-accent-bg: #f7ece8;
+  --petri-accent-hover: #963724;
+  --petri-accent-border: rgba(181, 72, 47, 0.36);
+  --petri-accent-surface: rgba(247, 236, 232, 0.82);
+  --petri-ink-paper: #f2efe6;
+  --petri-ink-base: #1c1b19;
+}
+[data-accent='paper-vermilion'][data-theme='dark'] {
+  --petri-accent: #d97055;
+  --petri-accent-soft: rgba(217, 112, 85, 0.18);
+  --petri-accent-bg: rgba(217, 112, 85, 0.12);
+  --petri-accent-hover: #e88a70;
+  --petri-accent-border: rgba(217, 112, 85, 0.4);
+  --petri-accent-surface: rgba(217, 112, 85, 0.1);
+  --petri-ink-paper: #1c1b19;
+  --petri-ink-base: #f2efe6;
+}
+
+/* ── 青瓷·墨 B（工作态，延续 teal 认知） ── */
+[data-accent='celadon-ink'] {
+  --petri-accent: #0f766e;
+  --petri-accent-soft: rgba(15, 118, 110, 0.14);
+  --petri-accent-bg: #eaf4f2;
+  --petri-accent-hover: #0b5f58;
+  --petri-accent-border: rgba(15, 118, 110, 0.36);
+  --petri-accent-surface: rgba(234, 244, 242, 0.82);
+  --petri-ink-paper: #f4f1e8;
+  --petri-ink-base: #173a38;
+}
+[data-accent='celadon-ink'][data-theme='dark'] {
+  --petri-accent: #2fd7d2;
+  --petri-accent-soft: rgba(47, 215, 210, 0.18);
+  --petri-accent-bg: rgba(47, 215, 210, 0.12);
+  --petri-accent-hover: #58e4df;
+  --petri-accent-border: rgba(47, 215, 210, 0.4);
+  --petri-accent-surface: rgba(47, 215, 210, 0.1);
+  --petri-ink-paper: #173a38;
+  --petri-ink-base: #f4f1e8;
+}
+
+/* ── 群青·铜 C（证据/归档贵重） ── */
+[data-accent='ultramarine-brass'] {
+  --petri-accent: #a87c42;
+  --petri-accent-soft: rgba(168, 124, 66, 0.14);
+  --petri-accent-bg: #f5efe4;
+  --petri-accent-hover: #8a6333;
+  --petri-accent-border: rgba(168, 124, 66, 0.36);
+  --petri-accent-surface: rgba(245, 239, 228, 0.82);
+  --petri-ink-paper: #f2efe6;
+  --petri-ink-base: #1e2e52;
+}
+[data-accent='ultramarine-brass'][data-theme='dark'] {
+  --petri-accent: #c9a063;
+  --petri-accent-soft: rgba(201, 160, 99, 0.18);
+  --petri-accent-bg: rgba(201, 160, 99, 0.12);
+  --petri-accent-hover: #dcb681;
+  --petri-accent-border: rgba(201, 160, 99, 0.4);
+  --petri-accent-surface: rgba(201, 160, 99, 0.1);
+  --petri-ink-paper: #1e2e52;
+  --petri-ink-base: #f2efe6;
+}
+
+/* ── 靛·雾 D（数据密集/克制） ── */
+[data-accent='indigo-mist'] {
+  --petri-accent: #6e9ca0;
+  --petri-accent-soft: rgba(110, 156, 160, 0.14);
+  --petri-accent-bg: #edf2f3;
+  --petri-accent-hover: #567f83;
+  --petri-accent-border: rgba(110, 156, 160, 0.36);
+  --petri-accent-surface: rgba(237, 242, 243, 0.82);
+  --petri-ink-paper: #eaeef2;
+  --petri-ink-base: #1b2b40;
+}
+[data-accent='indigo-mist'][data-theme='dark'] {
+  --petri-accent: #8fb8bb;
+  --petri-accent-soft: rgba(143, 184, 187, 0.18);
+  --petri-accent-bg: rgba(143, 184, 187, 0.12);
+  --petri-accent-hover: #a9cccf;
+  --petri-accent-border: rgba(143, 184, 187, 0.4);
+  --petri-accent-surface: rgba(143, 184, 187, 0.1);
+  --petri-ink-paper: #1b2b40;
+  --petri-ink-base: #eaeef2;
+}
+
 
 /* BLOCK-172 CP-7 — 生成参数全局缺省卡 */
 .petri-generation-defaults {

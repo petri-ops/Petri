@@ -8798,6 +8798,28 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "v5-harmony-accents",
+      "note": "V5 四档和声接入 [data-accent]：宣纸朱砂/青瓷墨/群青铜/靛雾注册为 accent 新档，复用 ThemeProvider 现成管道，前后端白名单同步；HK-01 6/6+邻域41tests+实机17/17(四档色各异亮暗双套)；骨架仍海军蓝属新 U 类未擅动。证据 acceptance/v5-harmony-accents/**。",
+      "patterns": [
+        "frontend/src/themes/HarmonyAccents.test.ts",
+        "frontend/src/themes/prefCache.ts",
+        "frontend/src/themes/accents.ts",
+        "core/packages/shared-config/config-schema.js",
+        "frontend/src/styles/custom.css",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/v5-harmony-accents.cjs",
+        "acceptance/v5-harmony-accents/**"
+      ],
+      "tests": [
+        "frontend/src/themes/HarmonyAccents.test.ts",
+        "frontend/src/themes/prefCache.drift.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "verification"
+    },
+    {
       "id": "v1u-accent-semantics",
       "note": "V1-U 语义收敛：hover/active 文字 accent 47 处中性化（13 条补中性 hover 底保反馈），316→269，focus/按钮/链接/状态保留；转换清单从 Git HEAD 重建，棘轮仅 accent 块内下调；HK-01 绿5/5+六契约44/44+c53 269+tsc0；A4 round3 因 dev 栈 down 未过，交互面待复审。证据 acceptance/v1u-accent-semantics/**。",
       "patterns": [
