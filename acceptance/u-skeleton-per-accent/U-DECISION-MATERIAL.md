@@ -1,7 +1,8 @@
 ---
 kind: u-class-decision-material
 truthDomain: ui-visual-art-direction-2026-11-20
-status: pending_user_ruling
+status: ruled
+rulingPointer: "acceptance/u-skeleton-per-accent/RULING.md（2026-11-20 用户裁决 B，append-only；实现=acceptance/b-surface-dimension/）"
 generatedAt: 2026-11-20
 trigger: "用户发令「行」= 做 U 类裁决包；问题：骨架是否随 data-accent 档位切换（让宣纸真的变纸底）"
 ---
@@ -50,7 +51,7 @@ V5 已让四套和声（`paper-vermilion` / `celadon-ink` / `ultramarine-brass` 
 
 ## 5. 裁决边界
 
-- 本材料**不改代码**；status=`pending_user_ruling`。
+- 本材料**不改代码**；status 已于 2026-11-21 由 `pending_user_ruling` flip 为 `ruled`（R2 清偿批 S4/P1-5：方案 B 已裁决并执行，待裁清单不再虚挂；裁决真值=RULING.md append-only，见 frontmatter rulingPointer）。
 - 用户回「行」= 采纳 B，下一包按 B 做 HK-01 红绿（surface 维度 + c53 口径调整 + 逐档对比度）。
 - 用户回「不行」= 维持 A 或给新方向；不追问、不开菜单。
 - 与 V2 的断点 U 类、状态色合并 U 类彼此独立，可分别裁决。

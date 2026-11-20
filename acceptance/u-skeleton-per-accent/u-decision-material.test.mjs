@@ -1,6 +1,8 @@
 // U 类裁决材料消费测试（HK-01 红绿先行）。
-// 材料必须：声明 pending、含三方案对照与单一推荐、列出 navyLadder 硬红约束、
-// 不擅自改代码、不改 status 为 decided。篡改负测 fail-closed。
+// 材料必须：含三方案对照与单一推荐、列出 navyLadder 硬红约束、不擅自改代码、
+// 状态与裁决真值一致（2026-11-21 R2 清偿批 S4/P1-5 契约演进：方案 B 已裁决并执行，
+// status 从 pending_user_ruling 演进为 ruled + rulingPointer，测试追上契约——
+// 原「永久 pending 锚」让待裁清单虚挂真实已裁项）。篡改负测 fail-closed。
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,13 +10,19 @@ import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
 
 const FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'U-DECISION-MATERIAL.md');
+const RULING = path.join(path.dirname(fileURLToPath(import.meta.url)), 'RULING.md');
 const read = () => fs.readFileSync(FILE, 'utf8');
 const setStatus = (text, value) => text.replace(/status:\s*[a-z_]+/, `status: ${value}`);
 
 describe('U-skeleton-per-accent decision material', () => {
-  it('material exists and is pending_user_ruling', () => {
+  it('material exists and status matches ruling truth (ruled + pointer)', () => {
     const m = read();
-    assert.match(m, /status:\s*pending_user_ruling/);
+    assert.match(m, /status:\s*ruled/);
+    assert.match(m, /rulingPointer:.*RULING\.md/);
+    // 裁决真源在场且为 append-only 记录
+    const r = fs.readFileSync(RULING, 'utf8');
+    assert.match(r, /"kind":\s*"u-class-ruling"/);
+    assert.match(r, /采纳方案 B/);
   });
 
   it('contains three options and exactly one recommendation', () => {
@@ -43,8 +51,10 @@ describe('U-skeleton-per-accent decision material', () => {
     assert.doesNotMatch(m, /status:\s*decided/);
   });
 
-  it('tamper: status flipped to decided → red', () => {
-    assert.equal(setStatus(read(), 'decided').includes('status: decided'), true);
-    assert.doesNotMatch(setStatus(read(), 'decided'), /status:\s*pending_user_ruling/);
+  it('tamper: status flipped to decided → red（裁决状态只能 ruled，不得自裁 decided）', () => {
+    const m = setStatus(read(), 'decided');
+    assert.match(m, /status:\s*decided/);
+    // decided 不是合法状态：裁决必须出自用户（RULING.md），材料只能 ruled 指向它
+    assert.doesNotMatch(m, /status:\s*ruled/);
   });
 });

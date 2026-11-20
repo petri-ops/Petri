@@ -10,11 +10,34 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 662,
+    "documentCount": 663,
     "lastUpdated": "2026-11-20",
-    "managedMarkdown": 645
+    "managedMarkdown": 646
   },
   "documents": [
+    {
+      "id": "NEXT-PHASE-E2E-PROMPT-2026-11-20",
+      "path": "docs/next-phase-e2e-prompt-2026-11-20.md",
+      "kind": "roadmap",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "next-phase-e2e-prompt-20261120",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "touchSurface": [
+        "docs/next-phase-e2e-prompt-2026-11-20.md"
+      ],
+      "sharedBaselines": [],
+      "tags": [
+        "e2e-prompt",
+        "staged-autonomy",
+        "r2-remediation",
+        "gate-recovery",
+        "G0"
+      ],
+      "registeredAt": "2026-11-20",
+      "notes": "2026-11-20 立项登记（用户发令「给一个可以把接下来工作都搞完的提示词，不需要人参与，agent 自动推进校验复核判断」）：R2 评估（acceptance/project-status-assessment-r2-2026-11-20/，四维 9/20）后的清偿批。S1 水印终版与并发清场（P0-1，Jev 单一建议 0.56）→S2 存量红清偿（P1-6/7/8/9：impact-map 裸文件名/user-assets tracked 误判/silent-catch/失败任务账）→S3 视觉链带红清偿（P1-1/P1-2：code-size 自身 2 处+design-context 契约演进+A2 GATE-LEDGER 归属更正）→S4 治理归位（P1-4/P1-5/P2-1/P2-3）→S5 默认身份面可见性（P1-3，A0 裁决落地+旧配置迁移）→S6 三项 breaking U 类（P0-2/3/4，行为基线前后同套绿+独立 commit）→S7 测试实例 TTL 机械门禁（P2-2）→S8 closeout:full+R3 自评。预置裁决 R1–R12 全部引用用户本批发令与 R2 现读证据，无 agent 自造范围；不继承 11-18-b2 的 R8–R15。红线=观感无偏好覆盖不代签+保护性停止（不可逆破坏/新依赖/G1+/安全敏感，登记后跳过不阻塞）+反假绿（SKIP≠PASS/定向≠全量/离屏禁 onscreen）+commit 自动 push 留发令。out=候选池 C-35~C-44/竞争力纲 CP-1~CP-19/母纲新波次/G1+/他包 WIP/用户资产。"
+    },
     {
       "id": "BLOCK-492-FULL-WORK-EXECUTION-PROMPT",
       "path": "docs/block492-full-work-execution-prompt.md",
@@ -13564,12 +13587,12 @@
       "id": "BLOCK-503",
       "path": "docs/block503-human-eye-review-checklist-2026-11-19.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block503-human-eye-review-checklist",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "MATERIAL",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block503-human-eye-review-checklist-2026-11-19.md"
       ],
@@ -13581,7 +13604,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 交付（用户发令「立一个包 把需要肉眼核对的内容 梳理出来，我一个个判断」）。肉眼核对总清单：甲组=读材料即可裁决 3 项（甲1 C-56 手册稿 4 评审要点/甲2 capability-intake 两源 license_unknown 裁决/甲3 E-03 SUS 评分方式）+ 乙组=实机观感签字 9 组（乙1-4 UI-710/709/707/706 各给入口与判据/乙5 P4 八态矩阵/乙6 P5+P6 四槽/乙7 H-01~H-08 路线表/乙8 E-01 树测试+E-02 22 条 debt/乙9 C-55 成片终审 video.mp4）。全部条目现读真源（human-eye-closeout.json 契约+UI 台账+人眼路线），逐项给判什么/怎么看/裁决口令格式；签字槽零代签、观感状态零写面（本包=汇总投影，状态真源仍是台账/契约）；回写方式=用户给口令→Agent 按台账纪律回写。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 交付（用户发令「立一个包 把需要肉眼核对的内容 梳理出来，我一个个判断」）。肉眼核对总清单：甲组=读材料即可裁决 3 项（甲1 C-56 手册稿 4 评审要点/甲2 capability-intake 两源 license_unknown 裁决/甲3 E-03 SUS 评分方式）+ 乙组=实机观感签字 9 组（乙1-4 UI-710/709/707/706 各给入口与判据/乙5 P4 八态矩阵/乙6 P5+P6 四槽/乙7 H-01~H-08 路线表/乙8 E-01 树测试+E-02 22 条 debt/乙9 C-55 成片终审 video.mp4）。全部条目现读真源（human-eye-closeout.json 契约+UI 台账+人眼路线），逐项给判什么/怎么看/裁决口令格式；签字槽零代签、观感状态零写面（本包=汇总投影，状态真源仍是台账/契约）；回写方式=用户给口令→Agent 按台账纪律回写。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。 2026-11-21 R2 清偿批 S4/P1-4 状态归位：MATERIAL 交付完成态翻 completed/CLOSED（对账收口先例 W11-GENUI/POST-H9/BLOCK-490；材料在盘 acceptance/block503-outputs/ 等 + 提示词/研究文档 canonical 在盘；R2 评估判定「3 个 active 槽位登记漂移」清偿）。"
     },
     {
       "id": "BLOCK-504",
@@ -13617,12 +13640,12 @@
       "id": "BLOCK-505",
       "path": "docs/block505-review-prompts-2026-11-19.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block505-review-prompts",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "MATERIAL",
+      "phase": "CLOSED",
       "touchSurface": [
         "docs/block505-review-prompts-2026-11-19.md"
       ],
@@ -13632,19 +13655,19 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 交付（用户发令「针对每一个核对的点给提示词——输入后工作产出我再来核对」；BLOCK-503 清单执行层配套）。15 段自包含提示词：P-甲1 C-56 手册真实改写演练（三栏对照+F类报告+数字锁定校验）/P-甲2 两源 license 补抓（append-only 更正行）/P-甲3 SUS 问卷草案/P-乙0 环境准备（三面齐+9223 离屏）/P-乙1-4 UI-710/709/707/706 截图+DOM 读数/P-乙5 八态矩阵逐格/P-乙6 P5 流式态+P6 skill 链/P-乙7-A/B/C H-01~H-06 截图组（读屏主观部分如实留给真人）/P-乙8 E-01 树测试机械读数+E-02 22 条扫描/P-乙9 C-55 帧提取+ffprobe。统一纪律=9223 离屏跑完 kill/截图不可得如实标注/产出落 acceptance/block503-outputs/<item>//不写 verified 不代签（判定归用户）。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。",
+      "notes": "2026-11-19 交付（用户发令「针对每一个核对的点给提示词——输入后工作产出我再来核对」；BLOCK-503 清单执行层配套）。15 段自包含提示词：P-甲1 C-56 手册真实改写演练（三栏对照+F类报告+数字锁定校验）/P-甲2 两源 license 补抓（append-only 更正行）/P-甲3 SUS 问卷草案/P-乙0 环境准备（三面齐+9223 离屏）/P-乙1-4 UI-710/709/707/706 截图+DOM 读数/P-乙5 八态矩阵逐格/P-乙6 P5 流式态+P6 skill 链/P-乙7-A/B/C H-01~H-06 截图组（读屏主观部分如实留给真人）/P-乙8 E-01 树测试机械读数+E-02 22 条扫描/P-乙9 C-55 帧提取+ffprobe。统一纪律=9223 离屏跑完 kill/截图不可得如实标注/产出落 acceptance/block503-outputs/<item>//不写 verified 不代签（判定归用户）。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。 2026-11-21 R2 清偿批 S4/P1-4 状态归位：MATERIAL 交付完成态翻 completed/CLOSED（对账收口先例 W11-GENUI/POST-H9/BLOCK-490；材料在盘 acceptance/block503-outputs/ 等 + 提示词/研究文档 canonical 在盘；R2 评估判定「3 个 active 槽位登记漂移」清偿）。",
       "sharedBaselines": []
     },
     {
       "id": "BLOCK-506",
       "path": "docs/block506-large-context-benchmark-research-2026-11-19.md",
       "kind": "work-package",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "block506-large-context-benchmark-research",
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
-      "phase": "MATERIAL",
+      "phase": "CLOSED",
       "sharedBaselines": [],
       "touchSurface": [
         "docs/block506-large-context-benchmark-research-2026-11-19.md"
@@ -13655,7 +13678,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-19",
-      "notes": "2026-11-19 交付（用户三问「Petri 需要做什么吗/拆两步喂能安排吗/ZCode 或 deepseek harness 是这么做的吗？理清楚并学习」）。大上下文处理对标研究：Petri 四件套现读锚（分页读取 240/1000 workspace-tools.js/microcompact BLOCK-98/auto-compact D3 公式化阈值注释自证对标 ZCode/流式看门狗 90/60 两段+封闭续命集 BLOCK-338 含误杀校准案底）——四件套齐且经实测校准，修复层面不需要动。对标分层：ZCode harness 一手观察 Z1-Z4（分页/Explore 子 agent 读摘要委托/auto-compact/停滞中止保护——唯一缺的形态=Z2 子 agent 读摘要委托，sideTask 零检索命中 A7 存续待查）；deepseek 二手 D1 prefix caching（与零可见输出自动重试配合重试已最小成本）/D2 reasoning_delta 已续命/D3 服务端停摆=核实根因。候选分级：P0 提示词纪律已落/P1 读摘要委托子 agent 化 pending_user_ruling（建议先观察直连后停滞频率）/P1' 渠道 fallback pending/P2 已存在无需动。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+      "notes": "2026-11-19 交付（用户三问「Petri 需要做什么吗/拆两步喂能安排吗/ZCode 或 deepseek harness 是这么做的吗？理清楚并学习」）。大上下文处理对标研究：Petri 四件套现读锚（分页读取 240/1000 workspace-tools.js/microcompact BLOCK-98/auto-compact D3 公式化阈值注释自证对标 ZCode/流式看门狗 90/60 两段+封闭续命集 BLOCK-338 含误杀校准案底）——四件套齐且经实测校准，修复层面不需要动。对标分层：ZCode harness 一手观察 Z1-Z4（分页/Explore 子 agent 读摘要委托/auto-compact/停滞中止保护——唯一缺的形态=Z2 子 agent 读摘要委托，sideTask 零检索命中 A7 存续待查）；deepseek 二手 D1 prefix caching（与零可见输出自动重试配合重试已最小成本）/D2 reasoning_delta 已续命/D3 服务端停摆=核实根因。候选分级：P0 提示词纪律已落/P1 读摘要委托子 agent 化 pending_user_ruling（建议先观察直连后停滞频率）/P1' 渠道 fallback pending/P2 已存在无需动。docs-only 零运行时。G0 开发期常态 · 不外推 packaged/Provider/GA。 2026-11-21 R2 清偿批 S4/P1-4 状态归位：MATERIAL 交付完成态翻 completed/CLOSED（对账收口先例 W11-GENUI/POST-H9/BLOCK-490；材料在盘 acceptance/block503-outputs/ 等 + 提示词/研究文档 canonical 在盘；R2 评估判定「3 个 active 槽位登记漂移」清偿）。"
     },
     {
       "id": "BLOCK-507",

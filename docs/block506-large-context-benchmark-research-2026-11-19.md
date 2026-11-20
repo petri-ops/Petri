@@ -1,7 +1,7 @@
 ---
 capability: block506-large-context-benchmark-research
-status: active
-phase: MATERIAL
+status: completed
+phase: CLOSED
 goal: 大上下文处理对标研究（用户发令「ZCode 或 deepseek harness 是这么做的吗？理清楚并学习」）——回答三问：①Petri 需要做什么吗 ②「大上下文拆两步喂」能安排吗 ③ZCode/deepseek harness 怎么做的。结论：Petri 四件套已在册且经实测校准（分页读取/microcompact/auto-compact/流式看门狗），停滞根因=provider 直连中途停摆（BLOCK-505 已核实）非缺机制；唯一值得列的产品增强候选=「读→摘要委托子 agent 化」（对标 ZCode Explore 模式），pending_user_ruling，建议先观察频率再裁决。
 acceptance:
   - 对标事实分层标注：ZCode harness 一手观察（本会话即运行于该 harness，可观察其工具行为）/ deepseek 侧公开机制（prefix caching）/ Petri 代码现读（行号在案）——不冒充、不臆断

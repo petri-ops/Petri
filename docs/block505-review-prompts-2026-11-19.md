@@ -1,7 +1,7 @@
 ---
 capability: block505-review-prompts
-status: active
-phase: MATERIAL
+status: completed
+phase: CLOSED
 goal: 核对点执行提示词集（用户发令「针对每一个核对的点给提示词——输入提示词后工作产出，我再来核对」）——BLOCK-503 清单的每个核对点配一段可整块复制的自包含提示词，喂给执行 agent 后产出可核对的产物（真实演练/截图/DOM 读数/报告，落 acceptance/block503-outputs/），用户核对产物后再回裁决口令；全部提示词自带环境纪律与诚实边界（不代签 verified）。
 acceptance:
   - BLOCK-503 清单每个核对点（甲1-3/乙1-9，H 系列合理并批）各有自包含提示词：先读指针+操作步骤+证据落盘路径+诚实边界（截图不可得如实标注、不写 verified）

@@ -1,0 +1,10 @@
+docs-check	0
+ui-audit-check	1
+hygiene-check	0
+gate-ui-a11y	0
+c53-check	0
+test-changed-list	2
+quality-types	0
+gate-code-size	1
+gate-user-assets	1
+gate-silent-catch	1

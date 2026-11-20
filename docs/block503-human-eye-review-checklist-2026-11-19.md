@@ -1,7 +1,7 @@
 ---
 capability: block503-human-eye-review-checklist
-status: active
-phase: MATERIAL
+status: completed
+phase: CLOSED
 goal: 肉眼核对总清单（用户发令「立一个包 把需要肉眼核对的内容 梳理出来，我一个个判断」）——把当前全部待人眼判断事项收敛为一张可逐项裁决的清单：甲组=读材料即可裁决（3 项）、乙组=实机观感签字（9 组，含怎么看/判什么/签字格式）；全部条目现读 canonical 真源（human-eye-closeout.json 契约+UI 台账+人眼路线文档），零代签、零状态改写。
 acceptance:
   - 清单条目全部来自现读真源（resources/design-context/human-eye-closeout.json 六组读数 + docs/ui-productization-audit.md 四槽 + docs/ui-design-human-eye-route.md 路线 + BLOCK-500/501 待评审项 + C-55 成片证据），逐项给「判什么/怎么看/裁决格式」
