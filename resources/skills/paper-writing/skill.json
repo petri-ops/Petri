@@ -1,0 +1,43 @@
+{
+  "skillManifestVersion": 1,
+  "id": "paper-writing",
+  "name": "论文写作保真",
+  "version": "0.1.0",
+  "description": "论文/学术文本写作与修改的保真手册：确定程度/归因/完成状态/数字四保护，不编造，方法结果段数字逐字符锁定，中文 F 类六项检查，三栏对照与未覆盖清单。英文论文覆盖另批。",
+  "category": "writing/paper",
+  "tags": ["paper", "academic-writing", "faithfulness", "revision", "Chinese"],
+  "source": "built-in",
+  "capabilities": [
+    "paper-writing",
+    "academic-revision",
+    "claim-faithfulness",
+    "number-locking",
+    "chinese-f-class-checks"
+  ],
+  "plugins": {
+    "required": [],
+    "optional": []
+  },
+  "workflows": {
+    "default": "default",
+    "variants": []
+  },
+  "prompts": {
+    "system": "prompts/system.md"
+  },
+  "parameters": {
+    "required": [],
+    "optional": {}
+  },
+  "outputs": {
+    "primary": [],
+    "secondary": []
+  },
+  "metadata": {
+    "author": "Petri Team",
+    "license": "MIT",
+    "source": "built-in",
+    "created": "2026-11-19",
+    "updated": "2026-11-19"
+  }
+}

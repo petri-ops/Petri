@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI-713 实机核对</title>
+  <style>
+    html,body,#root{min-height:100%;margin:0;background:#0b1220;color:#e6edf3;font-family:system-ui,sans-serif}
+    #root{padding:20px 28px;box-sizing:border-box}
+    h1{font-size:20px;margin:0 0 6px}.lead{font-size:13px;color:#9aa7b8;margin-bottom:14px;line-height:1.6}
+    a{color:#5ac8d8;font-size:13px}.grid{display:grid;grid-template-columns:1fr 1.2fr;gap:20px;align-items:start}
+    .card{border:1px solid #324466;border-radius:12px;background:#111a2e;padding:16px;box-sizing:border-box}
+    .card h2{font-size:15px;margin:0 0 12px}.frame{min-height:360px}
+    #chatBox{border:1px solid #243149;border-radius:8px;background:#0b1220;padding:12px;max-height:520px;overflow:auto}
+    textarea.sc-input{width:100%;height:44px;margin-top:12px;background:#182339;color:#e6edf3;border:1px solid #324466;border-radius:8px;padding:10px;box-sizing:border-box}
+    pre{font-size:12px;color:#9aa7b8;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>UI-713 · 结果卡轻量化 + Studio 返回聊天（实机核对）</h1>
+    <div class="lead">真实 ChatArtifactCard / ResultsSurface 组件 + 受控 fixture。左：默认摘要→点击展开→收起。右：结果深度面点「返回对话」应收起右面并聚焦输入框，且不清理 job/conversation。</div>
+    <div><a href="/project/p_mwle5yje_wf3c">← 返回项目</a></div>
+    <div class="grid">
+      <div class="card"><h2>① 聊天结果卡</h2><div id="chatBox" class="frame"></div><textarea class="sc-input" placeholder="聊天输入框（用于验证返回后聚焦）"></textarea></div>
+      <div class="card"><h2>② Studio / 结果深度面</h2><div id="studioBox" class="frame"></div></div>
+    </div>
+  </div>
+  <script type="module">
+    import React, { useState, useRef } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { ChatArtifactCard } from '/src/components/copilot/ChatArtifactCard.tsx';
+    import { ResultsSurface } from '/src/components/work-surface/ResultsSurface.tsx';
+    import { ThemeProvider } from '/src/themes/ThemeProvider.tsx';
+
+    const statusPayload = {
+      ok: true,
+      result: {
+        outDir: 'model3d/runs/ui713-live',
+        artifacts: [
+          { name: 'summary.png', path: 'model3d/runs/ui713-live/summary.png', url: 'http://localhost:3001/api/workspaces/p_demo/file?path=model3d%2Fruns%2Fui713-live%2Fsummary.png' },
+          { name: 'model.glb', path: 'model3d/runs/ui713-live/model.glb', url: 'http://localhost:3001/api/workspaces/p_demo/file?path=model3d%2Fruns%2Fui713-live%2Fmodel.glb' },
+        ],
+      },
+    };
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      const url = typeof input === 'string' ? input : String(input?.url || '');
+      if (url.includes('/tools/status/')) {
+        return Promise.resolve(new Response(JSON.stringify(statusPayload), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+      }
+      if (url.includes('/api/result-studio/')) {
+        return Promise.resolve(new Response(JSON.stringify({ ok: false }), { status: 599 }));
+      }
+      return nativeFetch(input, init);
+    };
+
+    const ctx = {
+      project: { id: 'p_demo', name: 'UI-713 Fixture' },
+      projectId: 'p_demo',
+      conversationId: 'conv_ui713',
+      activeJob: { id: 'job_ui713', tool_id: 'paper-writing', status: 'done', created_at: 1 },
+      activeWorkflow: { jobStatus: 'done', artifactTruth: { status: 'valid' } },
+      activeArtifact: { jobId: 'job_ui713', toolId: 'paper-writing', name: 'result.md', type: 'text', label: '写作保真结果', truthStatus: 'valid', conclusion: '聊天主链只给摘要，详情在 Studio 深看。' },
+      setActiveArtifact: () => {}, jobs: [], packResultSurfaces: [], resultContext: null,
+      resultEditControls: null, resultEditSubmitting: false, resultAgentDraft: '', setResultAgentDraft: () => {},
+      onResultEditSubmit: () => {}, pendingArtifactName: null, onPendingArtifactConsumed: () => {},
+      onWorkflowChanged: () => {}, handleAskAgent: () => {}, handleOpenResult: () => {},
+      openRevisionWorkspaceFile: () => {}, openResultBrowser: () => {},
+    };
+
+    function App() {
+      const [rightOpen, setRightOpen] = useState(true);
+      const [backCalls, setBackCalls] = useState(0);
+      const [focused, setFocused] = useState(false);
+      const inputRef = useRef(null);
+      const backToChat = () => {
+        setBackCalls((n) => n + 1);
+        setRightOpen(false);
+        requestAnimationFrame(() => {
+          inputRef.current?.focus();
+          setFocused(document.activeElement === inputRef.current);
+        });
+      };
+      const state = {
+        rightOpen, backCalls,
+        activeJobId: ctx.activeJob.id,
+        conversationId: ctx.conversationId,
+        inputFocused: focused,
+      };
+      window.__ui713 = state;
+      return React.createElement('div', null,
+        React.createElement('div', { id: 'chatBox' },
+          React.createElement(ChatArtifactCard, { toolJobId: 'job_ui713', expanded: true, projectId: 'p_demo', lightweight: true })
+        ),
+        React.createElement('textarea', { className: 'sc-input', ref: inputRef, placeholder: '聊天输入框（用于验证返回后聚焦）' }),
+        React.createElement('div', { id: 'studioBox', style: { display: rightOpen ? 'block' : 'none', marginTop: 12 } },
+          React.createElement(ResultsSurface, { ctx, active: rightOpen, onBackToChat: backToChat })
+        ),
+        React.createElement('pre', { id: 'stateLog' }, JSON.stringify(state, null, 2))
+      );
+    }
+    createRoot(document.getElementById('root')).render(React.createElement(ThemeProvider, null, React.createElement(App)));
+  </script>
+</body>
+</html>

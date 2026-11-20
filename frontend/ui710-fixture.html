@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UI-710 人眼核对卡</title>
+  <style>
+    html, body, #root { min-height:100%; margin:0; background:#0b1220; color:#e6edf3; font-family:system-ui,sans-serif; }
+    #root { padding:24px 32px; box-sizing:border-box; }
+    h1 { font-size:22px; margin:0 0 8px; }
+    a { color:#5ac8d8; font-size:14px; margin-right:16px; }
+    .lead { font-size:14px; color:#9aa7b8; margin:12px 0 20px; max-width:960px; line-height:1.7; }
+    .flow { display:flex; gap:10px; align-items:center; font-size:13px; color:#b1bac4; margin-bottom:20px; }
+    .flow span { padding:6px 12px; border:1px solid #324466; border-radius:999px; background:#111a2e; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .card { border:1px solid #324466; border-radius:12px; background:#111a2e; padding:20px; box-sizing:border-box; }
+    .card h2 { font-size:16px; margin:0 0 14px; }
+    .card .sub { font-size:12px; color:#8b98ad; margin-bottom:12px; }
+    .frame { height:480px; overflow:hidden; }
+    .frame canvas { display:block !important; }
+    #viewer details, #viewer summary { font-size:17px; }
+    #viewer details > div > div { font-size:15px; padding:5px 0; }
+    #viewer button { font-size:14px; }
+    #compose button { font-size:15px; padding:10px 14px; }
+    pre { font-size:14px; color:#9aa7b8; white-space:pre-wrap; line-height:1.6; }
+    .ok { color:#7fd1a8; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <h1>UI-710 · 人眼核对卡</h1>
+    <div>
+      <a href="/project/p_mwle5yje_wf3c">← 返回项目</a>
+      <a href="javascript:history.back()">← 返回上一页</a>
+    </div>
+    <div class="lead">
+      这不是产品页面，是我用<strong>真实组件</strong>和隔离 fixture 拼的核对卡。你只需要看两件事：
+      <strong>①</strong> 左边是否把 SceneSpec 的关节、来源摘要、验证结论列出来；
+      <strong>②</strong> 右边 compose 卡的「在 Result Studio 打开」点击后，是否给出正确跳转参数。
+      看完点上方链接返回。
+    </div>
+    <div class="flow"><span>模型输出 compose spec</span>→<span>compose 卡</span>→<span>点击跳转</span>→<span>3D viewer</span>→<span class="ok">证据面板</span></div>
+    <div class="grid">
+      <div class="card">
+        <h2>① SceneSpec 证据面板</h2>
+        <div class="sub">真实 Model3DResultViewer 组件 · 数据来自隔离 fixture 的 scene.json</div>
+        <div id="viewer" class="frame"></div>
+      </div>
+      <div class="card">
+        <h2>② compose 卡 → Result Studio 跳转</h2>
+        <div class="sub">真实 ComposeCard 组件 · 点击按钮后读取事件参数</div>
+        <div id="compose"></div>
+        <h2>点击后的事件读数</h2>
+        <pre id="event-log">（未点击）</pre>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+    import React from 'react';
+    import { createRoot } from 'react-dom/client';
+    import Model3DResultViewer from '/src/components/workspace-panels/Model3DResultViewer.tsx';
+    import { ComposeCard } from '/src/components/copilot/gen-ui/compose/ComposeCard.tsx';
+    import { parseComposeSpec } from '/src/components/copilot/gen-ui/compose/spec.ts';
+
+    window.addEventListener('petri:model3d-open', (e) => {
+      document.getElementById('event-log').textContent = JSON.stringify(e.detail, null, 2);
+    });
+
+    const url = 'http://localhost:3001/api/workspaces/p_mwnkhuj2_okzh/file?path=' + encodeURIComponent('model3d/runs/block463-live/model.glb');
+    createRoot(document.getElementById('viewer')).render(
+      React.createElement(Model3DResultViewer, { url, name:'model.glb', artifactId:'ui710-fixture', revisionId:null, projectId:'p_mwnkhuj2_okzh' })
+    );
+
+    const spec = parseComposeSpec({
+      version:1, root:'asm',
+      nodes:{ asm:{ kind:'mesh-reference', source:{ path:'model3d/runs/block463-live/model.glb', sourceSha256:'b'.repeat(64) } } }
+    });
+    createRoot(document.getElementById('compose')).render(
+      React.createElement(ComposeCard, { spec, conversationId:'ui710-fixture', projectId:'p_mwnkhuj2_okzh' })
+    );
+  </script>
+</body>
+</html>
