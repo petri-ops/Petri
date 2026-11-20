@@ -8,8 +8,8 @@ import App from './App';
 import { ThemeProvider } from './themes/ThemeProvider';
 import { ToastProvider } from './components/common/ToastProvider';
 import './styles/global.css';
-import './styles/watermark.css';
-import { GlobalWatermark } from './components/common/GlobalWatermark';
+import './styles/watermark-ai.css';
+import { GlobalWatermarkAI } from './components/common/GlobalWatermarkAI';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -17,7 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ToastProvider>
         <BrowserRouter>
           <App />
-          <GlobalWatermark />
+          <GlobalWatermarkAI />
         </BrowserRouter>
       </ToastProvider>
     </ThemeProvider>

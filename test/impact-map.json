@@ -8798,6 +8798,27 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "cultural-watermark-ai",
+      "note": "国风水印·AI专业出图原封不动落地：image_gen 钢笔白描四原型+白底抠alpha(笔锋不动,原图留证)，GlobalWatermarkAI+watermark-ai.css 全局单图；HK01 6/6+实机12/12质感优于手绘；并发冲突用独立新文件不碰对方。证据 acceptance/cultural-watermark/ai-image/**。",
+      "patterns": [
+        "frontend/src/styles/watermark-ai.css",
+        "frontend/src/components/common/GlobalWatermarkAI.tsx",
+        "frontend/src/assets/cultural-watermark.png",
+        "frontend/src/styles/CulturalWatermark.test.ts",
+        "frontend/src/main.tsx",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark-ai.cjs",
+        "acceptance/cultural-watermark/ai-image/**"
+      ],
+      "tests": [
+        "frontend/src/styles/CulturalWatermark.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "verification"
+    },
+    {
       "id": "cultural-watermark",
       "note": "国风水印全局层（用户反馈'只在欢迎页看到'后重构）：GlobalWatermark main.tsx 挂一次、fixed四角覆盖所有路由，移除逐页div；四原型mask+ink3%主题自适应+pointer-events:none+aria-hidden+零裸z；HK01绿6/6+邻域PASS+tsc0+a11y绿+实机16/16(四路由四纹样全可见截图)；审美不代签。证据 acceptance/cultural-watermark/**。",
       "patterns": [
