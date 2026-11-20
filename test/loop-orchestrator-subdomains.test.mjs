@@ -141,7 +141,13 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
       // 有界续跑 for(;;)/stall 决策与去重），修复「已出字后停摆→break→手动重试」痛点。
       // 纯逻辑在独立模块 loop-stall-resume.js（本文件只薄接线）；按本测试纪律显式重锚留因，
       // 只减不增继续生效，真正拆分回收仍走蓝图 S4.1。
-      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1647 },
+      // EVO-1 重锚 1647→1674（+27）：Observe 自观测 3 处 additive 接线——
+      // ① incident-log require（+2）② _emit 旁路捕获 provider_retry/stream_stall/stall_resume_exhausted
+      // 三类 stall 事件（+13）③ 顶层 fatal 在 catch 后记录（覆盖 providerFailure/catch 两路径，
+      // +12）。纯写入在独立模块 incident-log.js + shared-backend/incident-fingerprint.js
+      //（本文件只薄接线一行调用）；fail-soft 不阻断主链、零外发。按本测试纪律显式重锚留因，
+      // 只减不增继续生效，真正拆分回收仍走蓝图 S4.1。
+      { file: 'core/petri-server/loop-orchestrator.js', anchor: 1674 },
       { file: 'core/petri-server/conversation-adapter.js', anchor: 465 },
     ];
     // 行数口径与 `wc -l` 一致（末行换行不额外计 1）。此前 readLines 用 split('\n').length，

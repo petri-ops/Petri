@@ -20,6 +20,8 @@
  */
 
 const agentTaskStore = require('../../agent-task-store');
+// EVO-1 — Observe SSE 具名失败自观测（fail-soft；sseSend reasonCode 窄守卫，零外发）
+const { recordIncident } = require('../../helpers/incident-log');
 
 module.exports = {
     register(app) {
@@ -55,6 +57,17 @@ module.exports = {
       res.flushHeaders && res.flushHeaders();
 
       const sseSend = (obj) => {
+        // EVO-1 Observe — 只对具名失败帧（reasonCode）记一条 incident，正常事件零开销；
+        // fire-and-forget（不 await），写失败由 incident-log 全吞，绝不拖慢 SSE。
+        if (obj && typeof obj === 'object' && obj.reasonCode) {
+          recordIncident({
+            source: 'sse_reason',
+            errorCode: String(obj.reasonCode),
+            phase: String(obj.event || 'sse_frame'),
+            message: typeof obj.error === 'string' ? obj.error : String(obj.reasonCode),
+            context: { taskId },
+          });
+        }
         try {
           res.write('data: ' + JSON.stringify(obj) + '\n\n');
         } catch { /* 客户端已断开——写失败忽略（L-14 具名：sse_write_after_close） */ }

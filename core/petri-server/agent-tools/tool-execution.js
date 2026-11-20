@@ -5,6 +5,8 @@ const { redactSensitiveValue } = require('../../shared-backend/redaction');
 const { interceptAgentToolCall } = require('./agent-tool-interceptor');
 const { getToolContract } = require('./registry');
 const { toolTraceStore } = require('./tool-trace-store');
+// EVO-1 — Observe 工具失败自观测（fail-soft；appendTrace 旁路，零外发）
+const { recordIncident } = require('../helpers/incident-log');
 
 const { TOOL_CONTRACT_VERSION: TOOL_RESULT_CONTRACT_VERSION } = require('../../shared-backend/schema-versions');
 const MODEL_RESULT_LIMIT = 6000;
@@ -87,6 +89,18 @@ function appendTrace(envelope, args, result, ctx) {
     args,
     result,
   });
+  // EVO-1 Observe — 工具失败旁路（envelope.status=error|denied 即失败；ctx 可选上下文，
+  // message 取 terminationReason 交 incident-log 脱敏；fail-soft 不阻断工具结果回灌）。
+  if (envelope && (envelope.status === 'error' || envelope.status === 'denied')) {
+    recordIncident({
+      source: 'tool_failure',
+      errorCode: envelope.terminationReason || envelope.status,
+      tool: envelope.tool,
+      phase: `iteration:${ctx && ctx.iteration != null ? ctx.iteration : 'unknown'}`,
+      message: envelope.terminationReason || envelope.status,
+      context: { conversationId: ctx && ctx.conversationId, taskId: ctx && ctx.taskId },
+    });
+  }
 }
 
 function buildEnvelope(name, args, data, ctx, options, durationMs) {

@@ -53,6 +53,11 @@ const STATIC_CACHE = {
   builtAt: null,
 };
 
+// EVO-1 — reject 自观测去重集（每次 buildSystemPrompt 都会读 rejects，按 rejectedAt|file 去重，
+// 有界：超过上限即清空重来，避免长期会话内存增长）。
+const _EVO_SEEN_REJECTS = new Set();
+const _EVO_SEEN_REJECTS_MAX = 500;
+
 function invalidateStaticCache() {
   STATIC_CACHE.templates = null;
   STATIC_CACHE.builtAt = null;
@@ -309,6 +314,21 @@ function loadWorkingTreeRejectEntries(userDataDir, options = {}) {
     if (Number.isFinite(ts) && now - ts > ttlMs) {
       try { fs.unlinkSync(full); } catch { /* prune best-effort */ }
       continue;
+    }
+    // EVO-1 Observe — working-tree 否决自观测（每次 build prompt 都会读，按 rejectedAt|file 去重；
+    // fail-soft、纯本地、不碰 src/ipc（R5）；message 取 feedback 交 incident-log 脱敏）。
+    const rejectKey = `${obj.rejectedAt || ''}|${obj.file || name}`;
+    if (!_EVO_SEEN_REJECTS.has(rejectKey)) {
+      if (_EVO_SEEN_REJECTS.size >= _EVO_SEEN_REJECTS_MAX) _EVO_SEEN_REJECTS.clear();
+      _EVO_SEEN_REJECTS.add(rejectKey);
+      require('./incident-log').recordIncident({
+        source: 'reject',
+        errorCode: 'working_tree_reject',
+        tool: obj.file || null,
+        phase: 'working_tree_review',
+        message: typeof obj.feedback === 'string' ? obj.feedback : 'working_tree_reject',
+        context: { taskId: obj.taskId },
+      });
     }
     out.push(obj);
   }

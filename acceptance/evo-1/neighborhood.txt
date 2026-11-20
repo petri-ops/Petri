@@ -1,0 +1,378 @@
+[migration] applied 001_result_studio.sql → v1
+[migration] applied 002_result_workflow_graph.sql → v2
+[migration] applied 003_result_ref_transactions.sql → v3
+[migration] applied 004_git_repository_consent.sql → v4
+[migration] applied 005_branch_conversation.sql → v5
+[migration] applied 006_result_studio.sql → v6
+[migration] applied 007_result_conversation_export_type.sql → v7
+[migration] applied 008_add_projects_description.sql → v8
+[migration] applied 009_knowledge_space.sql → v9
+[migration] applied 010_knowledge_space_bindings.sql → v10
+[migration] applied 011_decision_log.sql → v11
+[migration] applied 012_decision_log_tokens.sql → v12
+[migration] applied 013_memory_lifecycle.sql → v13
+[migration] applied 014_funnel_events.sql → v14
+[migration] applied 015_result_annotations.sql → v15
+[migration] applied 016_scratchpad.sql → v16
+[migration] applied 017_message_ratings.sql → v17
+[migration] applied 018_annotation_text_anchor.sql → v18
+[migration] applied 019_annotation_entry_owner.sql → v19
+[migration] applied 020_annotation_path.sql → v20
+[migration] applied 021_project_worktree_of.sql → v21
+[migration] applied 022_artifact_chain_hash.sql → v22
+[migration] applied 023_incidents.sql → v23
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:16.077Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T05:18:16.180Z] [executors] registered: r
+✅ [2026-11-20T05:18:16.180Z] [executors] registered: python
+✅ [2026-11-20T05:18:16.182Z] [storage] registered: local
+✅ [2026-11-20T05:18:16.183Z] [storage] capabilities declared: local
+✅ [2026-11-20T05:18:16.184Z] [storage] active: local
+⚠️ [2026-11-20T05:18:16.258Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T05:18:16.258Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T05:18:16.258Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T05:18:16.258Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T05:18:16.259Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T05:18:16.259Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+▶ agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state machine)
+  ✔ exports runLoop as the sole public API and preserves PHASE 3.1 contract (617.268292ms)
+  ✔ runLoop input contract requires the 9 callbacks + config + conversationState (0.67075ms)
+  ✔ agent-runner facade correctly wires runLoop with 4 emit callbacks and config (1.209584ms)
+✔ agent-runner-loop-orchestrator.test.mjs (BLOCK-14 PHASE 3.1 state machine) (619.878125ms)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:16.068Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T05:18:16.245Z] [executors] registered: r
+✅ [2026-11-20T05:18:16.246Z] [executors] registered: python
+✅ [2026-11-20T05:18:16.246Z] [storage] registered: local
+✅ [2026-11-20T05:18:16.246Z] [storage] capabilities declared: local
+✅ [2026-11-20T05:18:16.246Z] [storage] active: local
+⚠️ [2026-11-20T05:18:16.291Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T05:18:16.291Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T05:18:16.291Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T05:18:16.292Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T05:18:16.292Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T05:18:16.292Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ executeToolCall wraps a denied unknown tool while dispatchTool stays raw (7.137917ms)
+✔ initial ToolResult truncation is measured from raw data before redaction (3.710167ms)
+✔ successful large results expose neutral truncation metadata (0.447708ms)
+✔ large run_tool results keep promoted tool_job lineage outside bounded preview (0.491375ms)
+✔ tool activity recorder keeps safe summaries for conversation restore (0.397ms)
+✔ successful read-only operations report no observed side effects (20.177292ms)
+✔ workspace dry-run reports no side effects while a real write remains R2 (23.685458ms)
+﹣ executeToolCall keeps pending run_tool approval truthful and records only the created job (0.196042ms) # run_tool 需已装 deseq2 领域插件（BLOCK-83/86 包生态迁移）；装包后本测试自动恢复
+✔ tool SSE events expose structured results and retain legacy approval fields (0.756042ms)
+✔ model serialization recursively redacts credential variants and preserves shared aliases (0.961333ms)
+✔ model serialization redacts Result Studio context tokens in every supported key form (0.245667ms)
+✔ trace store keeps only redacted summaries within capacity and TTL (0.169125ms)
+✔ model projection compacts workspace result types without changing the source envelope (6.485709ms)
+✔ workspace_read deduplicates only within one project, trace, and path scope (0.92275ms)
+✔ trace store isolates identical trace ids by project including global scope (0.1125ms)
+✔ hard-capped workspace_read does not mark omitted lines as already read (2.008334ms)
+✔ BLOCK-345 P1 — 控制类工具审批事件上抬工具无关（computer_click 首调带 needApproval/ackToken） (0.151917ms)
+✔ BLOCK-507 ① token 估算：CJK≈1/字符、其它≈1/4、tools 计入、空体=0 (0.868292ms)
+✔ BLOCK-507 ② 小请求不缩放：base 预算原样（90s 默认） (0.219042ms)
+✔ BLOCK-507 ③ 大请求缩放：1M 量级预填不再被固定 90s 误杀（封顶 600s） (2.569084ms)
+✔ BLOCK-507 ④ env base 语义不变：PETRI_STREAM_STALL_FIRST_MS 是 base 预算而非硬上限 (0.989333ms)
+✔ BLOCK-507 ⑤ 既有 resolveStallThresholds 零回归（无体量入参时行为不变） (0.317792ms)
+✅ [2026-11-20T05:18:15.651Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:15.652Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:15.652Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:15.652Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:15.652Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:15.652Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:15.653Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:15.653Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:15.653Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:15.653Z] [llm-providers] registered: dashscope-vision (vision)
+✔ BLOCK-507 ②①：连续两次零可见输出 stall → 第 3 次尝试恢复（calls=3，两次 provider_retry，退避可注入） (184.14325ms)
+✔ BLOCK-507 ②②：三次全 stall → 如实返回最后一次错误（不无限重试不假成功） (3.171958ms)
+✔ BLOCK-507 ②③：已交付可见输出的 stall 不重试（防重复交付，既有语义保留） (0.542958ms)
+✅ [2026-11-20T05:18:15.971Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:15.972Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T05:18:16.177Z] [executors] registered: r
+✅ [2026-11-20T05:18:16.177Z] [executors] registered: python
+✅ [2026-11-20T05:18:16.178Z] [storage] registered: local
+✅ [2026-11-20T05:18:16.178Z] [storage] capabilities declared: local
+✅ [2026-11-20T05:18:16.178Z] [storage] active: local
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T05:18:16.237Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ P1a — unknown_tool 附相近已注册工具建议（exec → workspace_exec） (3.989167ms)
+✔ P1a — 前缀/编辑距离兜底：workspace_exe 仍命中建议；正常工具不受影响 (0.735875ms)
+✔ P1b — workspace_exec description 平台/shell 语义补强（provider-visible） (0.213333ms)
+✔ P1c — 失败反馈 set -e pitfall hint（源级断言：两处失败路径均挂 hint） (0.245291ms)
+▶ EVO-0 · incident fingerprint 归一化/脱敏
+  ✔ ① 同义输入（不同会话 id / 时间戳 / 临时路径）得到同一 fingerprint (3.401375ms)
+  ✔ ② 不同错误得到不同 fingerprint (0.699792ms)
+  ✔ ③ 敏感 token / 邮箱 / 会话 id 脱敏零残留 (0.468459ms)
+  ✔ ④ fingerprint 为 64 位 sha256 十六进制 (0.281208ms)
+  ✔ ⑤ 超长输入按有界上限截断（不 OOM） (20.063666ms)
+✔ EVO-0 · incident fingerprint 归一化/脱敏 (27.82475ms)
+▶ EVO-0 · 不可修改红线守卫
+  ✔ ⑥ harness 自身源码 / 工具注册表 / approval 链一律拒绝 (2.331542ms)
+  ✔ ⑦ 允许的进化写入面放行（LEARNINGS / 可写策略 / installed skill） (0.35575ms)
+  ✔ ⑧ 红线表自身 owner=code（agent 不可改） (0.281541ms)
+✔ EVO-0 · 不可修改红线守卫 (3.305084ms)
+▶ EVO-0 · migration 023 建表
+  ✔ ⑨ migration 023 创建 incidents 表且含 fingerprint 索引（源级断言） (0.429833ms)
+  ✔ ⑩ 真实 SQLite 执行全部 migration 后 incidents 表可写可读（端到端建表） (61.617333ms)
+✔ EVO-0 · migration 023 建表 (62.179167ms)
+▶ EVO-1 · incident-log 写入咽喉
+  ✔ ① 5 类 source 逐类落库可查 (4.721ms)
+  ✔ ② 非白名单 source 静默跳过 (0.078125ms)
+  ✔ ③ raw message 脱敏零残留（密钥/会话 id 不落库） (0.122833ms)
+  ✔ ④ fail-soft：DB 写入抛错时不 throw，失败计数 +1 (1.148375ms)
+  ✔ ⑤ 写入失败计数可观测（多次累加） (0.138834ms)
+  ✔ ⑥ context.conversationId 落到 conversation_id 列 (0.421833ms)
+  ✔ ⑦ 空 source / 无参调用不抛不写 (0.204167ms)
+✔ EVO-1 · incident-log 写入咽喉 (8.663292ms)
+▶ EVO-1 · 5 类 catch 点旁路接线（源级断言）
+  ✔ 8 fatal：loop-orchestrator 在 catch 后接线，覆盖两条赋值路径且排除取消 (1.177791ms)
+  ✔ 9 tool_failure：tool-execution.js appendTrace 内接线 (0.984333ms)
+  ✔ 10 sse_reason：events.js sseSend 内 reasonCode 窄守卫 (4.000875ms)
+  ✔ 11 stall：loop-orchestrator _emit 旁路捕获三类 stall 事件 (0.893084ms)
+  ✔ 12 reject：system-prompt loadRejectEntries 接线（R5 避 src/ipc） (1.240458ms)
+  ✔ 13 红线不被触碰：src/ipc 未新增 incident require（R5） (10.986708ms)
+✔ EVO-1 · 5 类 catch 点旁路接线（源级断言） (20.089083ms)
+[migration] applied 001_result_studio.sql → v1
+[migration] applied 002_result_workflow_graph.sql → v2
+[migration] applied 003_result_ref_transactions.sql → v3
+[migration] applied 004_git_repository_consent.sql → v4
+[migration] applied 005_branch_conversation.sql → v5
+[migration] applied 006_result_studio.sql → v6
+[migration] applied 007_result_conversation_export_type.sql → v7
+[migration] applied 008_add_projects_description.sql → v8
+[migration] applied 009_knowledge_space.sql → v9
+[migration] applied 010_knowledge_space_bindings.sql → v10
+[migration] applied 011_decision_log.sql → v11
+[migration] applied 012_decision_log_tokens.sql → v12
+[migration] applied 013_memory_lifecycle.sql → v13
+[migration] applied 014_funnel_events.sql → v14
+[migration] applied 015_result_annotations.sql → v15
+[migration] applied 016_scratchpad.sql → v16
+[migration] applied 017_message_ratings.sql → v17
+[migration] applied 018_annotation_text_anchor.sql → v18
+[migration] applied 019_annotation_entry_owner.sql → v19
+[migration] applied 020_annotation_path.sql → v20
+[migration] applied 021_project_worktree_of.sql → v21
+[migration] applied 022_artifact_chain_hash.sql → v22
+[migration] applied 023_incidents.sql → v23
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:16.264Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T05:18:16.340Z] [executors] registered: r
+✅ [2026-11-20T05:18:16.340Z] [executors] registered: python
+✅ [2026-11-20T05:18:16.340Z] [storage] registered: local
+✅ [2026-11-20T05:18:16.340Z] [storage] capabilities declared: local
+✅ [2026-11-20T05:18:16.340Z] [storage] active: local
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T05:18:16.379Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+▶ loop-orchestrator-subdomains.test.mjs
+  ▶ loop-orchestrator.js
+    ✔ should require without error (480.765ms)
+    ✔ should export runLoop function (0.160417ms)
+    ✔ runLoop should be async function (0.099791ms)
+    ✔ should NOT reference harness-workflow-state (0.417166ms)
+  ✔ loop-orchestrator.js (481.878042ms)
+  ▶ conversation-adapter.js
+    ✔ should require without error (3.179083ms)
+    ✔ should export required functions (0.128792ms)
+    ✔ should re-export conversation helpers (0.087083ms)
+  ✔ conversation-adapter.js (3.5365ms)
+  ▶ agent-runner.js facade
+    ✔ should require without error (3.982084ms)
+    ✔ should export runAgentLoop function (0.087375ms)
+    ✔ runAgentLoop should be async function (0.149083ms)
+    ✔ should export 5 named functions (signature unchanged) (0.719583ms)
+    ✔ runAgentLoop should be callable with documented parameters (0.067917ms)
+  ✔ agent-runner.js facade (5.122916ms)
+  ▶ line count targets
+    ✔ core/petri-server/agent-runner.js <= 1143 lines (BLOCK-375 shrink-only ratchet) (0.328333ms)
+    ✔ core/petri-server/loop-orchestrator.js <= 1674 lines (BLOCK-375 shrink-only ratchet) (0.272542ms)
+    ✔ core/petri-server/conversation-adapter.js <= 465 lines (BLOCK-375 shrink-only ratchet) (0.097875ms)
+    ✔ line anchors reflect current reality (anchor-update guard) (0.579375ms)
+  ✔ line count targets (1.354084ms)
+✔ loop-orchestrator-subdomains.test.mjs (492.368834ms)
+▶ HLE-C4: Loop SSE Event Contract
+  ▶ loop_phase:started
+    ✔ has required fields for onLoopPhase callback (0.492917ms)
+    ✔ handles null loopRunId gracefully (0.061625ms)
+    ✔ handles string loopRunId (0.045916ms)
+  ✔ loop_phase:started (0.956708ms)
+  ▶ loop_phase:cancelled
+    ✔ has required fields for onLoopPhase callback (0.077959ms)
+  ✔ loop_phase:cancelled (0.124916ms)
+  ▶ loop_iteration
+    ✔ has all required fields for onLoopIteration callback (0.121375ms)
+    ✔ handles missing optional fields (0.055292ms)
+    ✔ handles non-number sequence (0.056166ms)
+  ✔ loop_iteration (0.325166ms)
+  ▶ Event non-interference
+    ✔ loop_phase ignores non-loop_phase events (0.060084ms)
+    ✔ loop_iteration ignores non-loop_iteration events (0.04475ms)
+  ✔ Event non-interference (0.172792ms)
+  ▶ Cancellation overrides all decisions (SSE)
+    ✔ cancelled loop_phase fires before final iteration (0.097583ms)
+  ✔ Cancellation overrides all decisions (SSE) (0.127084ms)
+  ▶ Decision types match expected status mapping
+    ✔ complete → status=succeeded (0.091334ms)
+    ✔ continue → status=succeeded (0.028584ms)
+    ✔ retry → status=failed (0.026542ms)
+    ✔ block → status=blocked (0.0275ms)
+    ✔ wait → status=pending (1.568375ms)
+    ✔ cancel → status=skipped (0.122208ms)
+  ✔ Decision types match expected status mapping (2.548166ms)
+✔ HLE-C4: Loop SSE Event Contract (9.954375ms)
+▶ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点）
+  ✔ ① 已吐 content/tool_call 后 idle stall 仍决定 resume（507 覆盖不到的痛点） (0.491416ms)
+  ✔ ② 零可见输出 stall 同样 resume（既有场景不回退） (0.716125ms)
+  ✔ ③ 有界：attempt 超上限/预算耗尽 → terminal，不无限重试 (0.2195ms)
+  ✔ ④ 非 stall 错误（含已出字）永不 resume (0.073125ms)
+✔ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点） (2.7385ms)
+▶ BLOCK-508 · HK-01 重放去重（已交付内容零重复）
+  ✔ ① 已发文本累计长度内的 delta 被吞，超出部分透传 (3.728792ms)
+  ✔ ② 已交付 tool_call id 整条丢弃，新 id 透传 (0.254083ms)
+  ✔ ③ 非 delta 事件（done/usage/error/stall/provider_retry）一律透传不外挂 suppressed (0.100833ms)
+  ✔ ④ reasoning_delta 不算可见交付，不去重（续跑后仍可见） (0.064667ms)
+✔ BLOCK-508 · HK-01 重放去重（已交付内容零重复） (4.397541ms)
+▶ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场）
+  ✔ ① 记录 messages 摘要/已发帧游标/tool_call id/attempt，不复制 messages 正文 (1.865208ms)
+✔ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场） (2.112791ms)
+▶ BLOCK-508 · orchestrator 接线合同（结构断言）
+  ✔ ① 引入 508 纯函数模块并用于决策 (0.503834ms)
+  ✔ ② stall-resume while 循环存在且 resume 时 continue（不是 break） (0.211667ms)
+  ✔ ③ onEvent 入口吞掉重放抑制帧，用户侧零重复 (0.11625ms)
+  ✔ ④ 既有终态判定保留（非 stall 仍按原逻辑 break） (0.07775ms)
+✔ BLOCK-508 · orchestrator 接线合同（结构断言） (1.119166ms)
+✔ M55-1 data 帧切分：裸 [DONE] 不被 JSON.parse 吞掉 (2.429083ms)
+✔ M55-2 跨 chunk 半帧归并：逐字节喂入与整段喂入结果一致 (1.451042ms)
+✔ M55-3 ping 心跳对解析器透明（不产出 data 帧） (0.084958ms)
+✔ M55-4 afterSeq 续传：回放帧 seq 严格递增且从 N+1 起 (0.087334ms)
+✔ M55-5 终态顺序契约：run_terminal → done 摘要 → [DONE] (0.121666ms)
+✔ M55-6 负测：缺 [DONE] 哨兵必须判红（模拟历史「完成前中断」bug） (0.067916ms)
+✔ M55-7 负测：failed 终态不得伪装成 completed (0.073791ms)
+[migration] applied 001_result_studio.sql → v1
+[migration] applied 002_result_workflow_graph.sql → v2
+[migration] applied 003_result_ref_transactions.sql → v3
+[migration] applied 004_git_repository_consent.sql → v4
+[migration] applied 005_branch_conversation.sql → v5
+[migration] applied 006_result_studio.sql → v6
+[migration] applied 007_result_conversation_export_type.sql → v7
+[migration] applied 008_add_projects_description.sql → v8
+[migration] applied 009_knowledge_space.sql → v9
+[migration] applied 010_knowledge_space_bindings.sql → v10
+[migration] applied 011_decision_log.sql → v11
+[migration] applied 012_decision_log_tokens.sql → v12
+[migration] applied 013_memory_lifecycle.sql → v13
+[migration] applied 014_funnel_events.sql → v14
+[migration] applied 015_result_annotations.sql → v15
+[migration] applied 016_scratchpad.sql → v16
+[migration] applied 017_message_ratings.sql → v17
+[migration] applied 018_annotation_text_anchor.sql → v18
+[migration] applied 019_annotation_entry_owner.sql → v19
+[migration] applied 020_annotation_path.sql → v20
+[migration] applied 021_project_worktree_of.sql → v21
+[migration] applied 022_artifact_chain_hash.sql → v22
+[migration] applied 023_incidents.sql → v23
+⚠️ [2026-11-20T05:18:16.356Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T05:18:16.357Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T05:18:16.357Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T05:18:16.357Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T05:18:16.357Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T05:18:16.357Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T05:18:16.498Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T05:18:16.499Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T05:18:16.499Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T05:18:16.543Z] [executors] registered: r
+✅ [2026-11-20T05:18:16.543Z] [executors] registered: python
+✅ [2026-11-20T05:18:16.543Z] [storage] registered: local
+✅ [2026-11-20T05:18:16.543Z] [storage] capabilities declared: local
+✅ [2026-11-20T05:18:16.543Z] [storage] active: local
+▶ routes/ai-agent subdomains
+  ✔ chat.js loads and has register function (197.862333ms)
+  ✔ context.js loads and has register function (12.80725ms)
+  ✔ events.js loads and has register function (0.5625ms)
+  ✔ tools.js loads and has register function (0.335542ms)
+  ✔ index.js loads and has register + _submodules (217.087625ms)
+  ✔ main routes/ai-agent.js facade loads without error (0.34325ms)
+  ✔ chat.js register() attaches POST /api/ai/agent (0.364792ms)
+  ✔ context.js register() attaches POST /api/ai/agent/task/:taskId/cancel (0.107042ms)
+  ✔ events.js register() attaches GET /api/ai/agent/task/:taskId (SSE subscribe) (0.158917ms)
+  ✔ index.js register() attaches all 3 endpoints (0.805041ms)
+  ✔ facade (ai-agent.js) is significantly smaller than original 1222 lines (0.1175ms)
+✔ routes/ai-agent subdomains (431.63475ms)
+✔ system prompt keeps the assistant role brand-neutral and discloses the real provider and model (1.322125ms)
+✔ custom supplier labels remain visible alongside the adapter provider id (0.100042ms)
+✔ renderWorkingTreeRejectsForPrompt returns empty for non-array (0.83925ms)
+✔ renderWorkingTreeRejectsForPrompt renders entries with feedback and code snippets (0.17625ms)
+✔ renderWorkingTreeRejectsForPrompt skips entries with non-string file (0.070875ms)
+✔ renderWorkingTreeRejectsForPrompt truncates by char budget (0.630667ms)
+✔ renderWorkingTreeRejectsForPrompt treats missing feedback as (无反馈) (0.074666ms)
+✔ loadWorkingTreeRejectEntries returns [] when dir absent (2.414ms)
+✔ loadWorkingTreeRejectEntries reads + sorts by rejectedAt desc + unlinks expired (31.720583ms)
+✔ loadWorkingTreeRejectEntries returns [] for non-directory path (1.062958ms)
+✔ loadWorkingTreeRejectEntries returns [] for invalid userDataDir (0.133209ms)
+✔ buildSystemPrompt injects reject block when ctxForPrompt carries entries (0.528417ms)
+✔ buildSystemPrompt does not break when workingTreeRejects absent (0.099041ms)
+✔ RS-P3 prompt describes the open result without leaking any internal id (1.398458ms)
+✔ RS-P3 prompt directs the model to the context tool instead of asking the user for ids (0.110833ms)
+✔ P4R-3 bound Composer context reads the trusted schema without exposing the token (0.11125ms)
+✔ P4R-3 keeps structured manual patches in the hidden orchestration block (0.10475ms)
+✔ RS-P3 prompt fixes the five public phases and forbids hidden reasoning (0.110584ms)
+✔ RS-P3 prompt reports a compatible selection as usable by the agent (0.063583ms)
+✔ RS-P3 prompt refuses to let a stale or invalid selection be reused (0.160417ms)
+✔ RS-P3 prompt states honestly when no revision exists yet (0.109208ms)
+✔ RS-P3 prompt adds no result context block when nothing is open (0.097458ms)
+ℹ tests 140
+ℹ suites 23
+ℹ pass 139
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 1170.217458

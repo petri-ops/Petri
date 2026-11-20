@@ -61,6 +61,8 @@ const { summarizeAiUsage } = require('./helpers/ai-usage');
 const { buildRunUsageEvent, createRunUsageTotals, accumulateRunUsage } = require('./helpers/run-usage');
 // BLOCK-179 — 正文工具块修复提升（扫描+fail-closed 决策；keep 零行为变化）
 const { scanPlainTextToolCalls } = require('./helpers/tool-call-repair');
+// EVO-1 — Observe 自观测写入咽喉（fail-soft；5 类 catch 点旁路落本地 incidents 表，零外发）
+const { recordIncident } = require('./helpers/incident-log');
 const {
   persistLoopRun,
   updateLoopRunStatus,
@@ -264,6 +266,19 @@ async function runLoop({
   // ---------- Event emitter proxy ----------
   const _emit = (obj) => {
     emitAssistant(obj);
+    // EVO-1 Observe — stall 类事件旁路（additive 观测，不改控制流；只认具名事件，零外发）：
+    // provider_retry（llm-client 零输出重试）/ stream_stall（gateway 看门狗）/ stall_resume_exhausted（循环层耗尽）。
+    if (obj && (obj.type === 'provider_retry' || obj.type === 'stream_stall' || obj.phase === 'stall_resume_exhausted')) {
+      const stallCode = obj.reasonCode || obj.type || obj.phase;
+      const stallMessage = typeof obj.reason === 'string' ? obj.reason : (typeof obj.error === 'string' ? obj.error : stallCode);
+      recordIncident({
+        source: 'stall',
+        errorCode: stallCode,
+        phase: obj.phase || (obj.type === 'provider_retry' ? 'retry' : 'stream'),
+        message: stallMessage,
+        context: { conversationId: _activeConv && _activeConv.id, taskId: toolCtx.taskId },
+      });
+    }
   };
 
   // UI-523 — 单次调用用量外发（additive：旧客户端不认识 `usage` 事件，天然 no-op）。
@@ -1602,6 +1617,18 @@ async function runLoop({
     if (loopRunId && !cancellationObserved) {
       _loopPersistPhase('failed', 'Harness Loop 收口失败，执行记录与已有产物已保留。');
     }
+  }
+
+  // EVO-1 Observe — 顶层 fatal 自观测（fail-soft；覆盖 providerFailure 与 catch 两条赋值路径，
+  // 排除用户主动取消；message 交 incident-log 脱敏，raw 不落库，零外发）。
+  if (fatalAgentError && !cancellationObserved) {
+    recordIncident({
+      source: 'fatal',
+      errorCode: 'agent_run_failed',
+      phase: providerFailureReason ? 'provider_failure' : 'harness_catch',
+      message: fatalAgentError && fatalAgentError.message,
+      context: { conversationId: _activeConv && _activeConv.id, taskId: toolCtx.taskId, cancellationObserved },
+    });
   }
 
   // BLOCK-171 CP-1 — 运行收口释放取消注册表（防 task 键泄漏）。

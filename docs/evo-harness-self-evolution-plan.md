@@ -163,4 +163,21 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **范围外（后续阶段，需各自发令）**：EVO-1（5 类 catch 点接线+fail-soft）；EVO-2（聚类+lesson 分级写入+prompt 注入段）；EVO-3（频率曲线+自动回滚+真实错误闭环）。harness 自进化建议出口不进 AUDIT-LOG 工作包链。
 - **纪律**：零新依赖/纯本地零外发/红线 fail-closed/用户可 wipe/不碰 G1+；与三个 MATERIAL active 包文件面零相交、零触碰未知 WIP。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 8. EVO-1 收口笔录（2026-11-20 · 一次会话完成）
+
+- **前置**：EVO-0 改动补提交（806e5187）并推送 origin/main（快进 +13，含历史未推提交），满足单工作包串行。
+- **交付**：incident-log 写入咽喉（`core/petri-server/helpers/incident-log.js`：白名单 5 源 + 脱敏 + fail-soft 全吞 + 内存失败计数 + EVO_DEBUG 门 error-log append + 测试注入）＋ 5 类 catch 点旁路接线：
+  - fatal → `loop-orchestrator.js` catch 后（覆盖 providerFailure/catch 两条赋值路径，排除用户取消）
+  - tool_failure → `tool-execution.js` appendTrace（envelope.status=error|denied）
+  - sse_reason → `events.js` sseSend（reasonCode 窄守卫，fire-and-forget）
+  - stall → `loop-orchestrator.js` _emit（provider_retry / stream_stall / stall_resume_exhausted 三类）
+  - reject → `system-prompt.js` loadWorkingTreeRejectEntries（R5 避 src/ipc，模块级 seen 去重）
+- **HK-01 红绿**：红=模块缺席+接线缺席（行为 7/7 绿、接线 5 红；`acceptance/evo-1/hk01-red.txt`）→ 绿 13/13（`hk01-green.txt` / `test-run.txt`）。测试正则三处跨度校准（源码接线本身正确，属测试断言精度）。
+- **邻域**：15 文件 140 tests / 139 pass / 0 fail（`acceptance/evo-1/neighborhood.txt`）——含 agent-runner-loop-orchestrator / loop-sse-contract / agent-tool-result / system-prompt-rejects / routes-ai-agent-subdomains / m4-sse-real-endpoint / block507 / block510。唯一曾红=loop-orchestrator 行数锚 1647→1674（+27=EVO-1 三处接线），按该测试纪律显式重锚留因后转绿。
+- **门禁**：docs:check PASS(661)（撤销误建的第二 registry 条目后恢复单值；EVO-1 与 EVO-0 共享 plan 文档，仅 AUDIT-LOG/README/impact-map 登记，禁止第二真相源）、ui:audit ✓、quality:secret/arch/types PASS。改动文件 quality:lint 0 error（12 warning 均存量同类 detect-object-injection）、knip 零命中。
+- **存量红如实归属（非本包文件面、零触碰）**：同 EVO-0——2 lint error（model-gateway/video.test=BLOCK-338/507/509）、38 knip（并发人眼包探针）、1 test:changed 冲突（HEAD 既有）。
+- **Jev**：doc:suggest planDoc adopted（本文件即回写对象，已追加本节）；decision:session 本轮增量 jev×5。
+- **范围外（后续阶段，需各自发令）**：EVO-2（聚类+lesson 分级写入+prompt 注入段）、EVO-3（频率曲线+自动回滚+真实错误闭环）。harness 自进化建议出口不进 AUDIT-LOG 工作包链。
+- **纪律**：零新依赖/纯本地零外发/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

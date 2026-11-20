@@ -9370,6 +9370,27 @@
       ]
     },
     {
+      "id": "evo1-observe-wiring",
+      "note": "EVO-1 Observe 接线：incident-log 写入咽喉（fail-soft + 内存失败计数 + error-log append）+ 5 类 catch 点旁路（fatal/tool_failure/sse_reason/stall/reject）。证据=acceptance/evo-1/**。零新依赖/纯本地零外发。",
+      "patterns": [
+        "core/petri-server/helpers/incident-log.js",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/agent-tools/tool-execution.js",
+        "core/petri-server/routes/ai-agent/events.js",
+        "core/petri-server/helpers/system-prompt.js",
+        "test/evo1-observe-wiring.test.mjs",
+        "test/loop-orchestrator-subdomains.test.mjs",
+        "acceptance/evo-1/**"
+      ],
+      "tests": [
+        "test/evo1-observe-wiring.test.mjs",
+        "test/evo0-incident-ledger.test.mjs",
+        "test/loop-orchestrator-subdomains.test.mjs",
+        "test/block510-tool-call-reliability.test.mjs",
+        "test/loop-stall-resume.test.mjs"
+      ]
+    },
+    {
       "id": "ui-error-classification-stall",
       "note": "2026-11-19 UI 错误分类修复：流式停滞(stream_stalled)曾误判为 Python 模块缺失，诱导用户装无关运行时；另修 ENOTFOUND 正则无边界吞 ModuleNotFoundError。轻量包（HK-01 红绿+邻域 10/10+tsc 0），非观感状态写面。证据 acceptance/ui-error-classification-stall/。",
       "patterns": [

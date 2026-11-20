@@ -1,0 +1,25 @@
+▶ EVO-1 · incident-log 写入咽喉
+  ✔ ① 5 类 source 逐类落库可查 (2.936459ms)
+  ✔ ② 非白名单 source 静默跳过 (0.083375ms)
+  ✔ ③ raw message 脱敏零残留（密钥/会话 id 不落库） (0.109125ms)
+  ✔ ④ fail-soft：DB 写入抛错时不 throw，失败计数 +1 (0.129958ms)
+  ✔ ⑤ 写入失败计数可观测（多次累加） (0.114125ms)
+  ✔ ⑥ context.conversationId 落到 conversation_id 列 (0.074541ms)
+  ✔ ⑦ 空 source / 无参调用不抛不写 (0.057084ms)
+✔ EVO-1 · incident-log 写入咽喉 (4.221041ms)
+▶ EVO-1 · 5 类 catch 点旁路接线（源级断言）
+  ✔ 8 fatal：loop-orchestrator 在 catch 后接线，覆盖两条赋值路径且排除取消 (1.145791ms)
+  ✔ 9 tool_failure：tool-execution.js appendTrace 内接线 (0.265208ms)
+  ✔ 10 sse_reason：events.js sseSend 内 reasonCode 窄守卫 (0.389541ms)
+  ✔ 11 stall：loop-orchestrator _emit 旁路捕获三类 stall 事件 (0.277375ms)
+  ✔ 12 reject：system-prompt loadRejectEntries 接线（R5 避 src/ipc） (0.371709ms)
+  ✔ 13 红线不被触碰：src/ipc 未新增 incident require（R5） (5.259459ms)
+✔ EVO-1 · 5 类 catch 点旁路接线（源级断言） (7.877584ms)
+ℹ tests 13
+ℹ suites 2
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 144.102208
