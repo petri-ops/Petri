@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
   "sourceCommit": "5f13e85b4701b81d85e6546c72bcab3c6e7e39f7",
-  "generatedAt": "2026-11-20T00:51:26.794Z",
+  "generatedAt": "2026-11-20T01:33:10.287Z",
   "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。",
   "files": [
     {
@@ -31,7 +31,7 @@
     },
     {
       "path": "human-eye-closeout.json",
-      "sha256": "f93d6b3cd1f7ce437d91afe2718f52690da37d19071b8095ec16fc6e9ff736b0"
+      "sha256": "3b0e900836014fc7464fc3db1b70d48c4b96129af1073ccce2d4d47fa5e63268"
     },
     {
       "path": "assistant-ui-pattern.json",

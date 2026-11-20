@@ -5,12 +5,12 @@ goal: 界面设计优化程序的 E 类人眼验收路线与集中签字槽（Ag
 acceptance:
   - 22 条 pending_human_eye 逐条有步骤/输入/每步预期/证据留存点
   - 暗色观感、读屏、SUS/树测试真人样本路线在册
-  - 签字槽以 §3 实况为准（2026-11-20 用户批量口令部分签署：H-01~H-05/H-07/H-08/E-02 分批 verified；E-01/E-03 与 H-06 部分文件保持 pending_human_eye，绝不代填）
+  - 签字槽以 §3 实况为准（2026-11-20 用户批量口令部分签署：H-01~H-05/H-07/H-08/E-02 分批 verified；E-01 保持 pending_human_eye（代理走查 n=1 留因已签）与 H-06 部分文件保持 pending；E-03 已 cancelled（用户 G0 裁决））
 ---
 
 # UI 人眼验收路线与签字槽（canonical · 2026-11-11）
 
-> **状态**：2026-11-20 用户批量口令部分签署（YI-REST-WB 批，证据=`acceptance/block503-outputs/yi-rest/`）——H-01~H-05/H-07 verified、H-06/H-08 分批（部分 verified+部分 pending 补腿）、E-02 分批；E-01/E-03 与 H-06 未实测文件保持 `pending_human_eye`，签字槽留空不代填。本文件是**路线与签字槽的唯一集中处**；U 类裁决材料在 `docs/ui-design-ia-decision-material.md`，V 类补腿条件同文件 §7。
+> **状态**：2026-11-20 用户批量口令部分签署（YI-REST-WB 批，证据=`acceptance/block503-outputs/yi-rest/`）——H-01~H-05/H-07 verified、H-06/H-08 分批（部分 verified+部分 pending 补腿）、E-02 分批；E-01 与 H-06 未实测文件保持 `pending_human_eye`；E-03 已按用户 G0 裁决 cancelled（2026-11-20）。本文件是**路线与签字槽的唯一集中处**；U 类裁决材料在 `docs/ui-design-ia-decision-material.md`，V 类补腿条件同文件 §7。
 > **既有路线复用**：`docs/post-s7-h7-human-eye-route.md` 已含 32 条 debt 人眼子集 / 长内容三态 / 分屏键盘读屏的逐步路线，本文件**不另立第二份逐条路线**，只做索引、增量与集中签字槽。
 > **证据规则**：人眼验收证据 = 本路线原文 + 人的明确签字记录（日期、覆盖断言、结论）。DOM/CDP 读数、组件测试、机械门禁、静态评分**均不冒充**人眼观感。Agent 不代答、不替签、不写 `verified`。
 > G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -44,7 +44,7 @@ acceptance:
 | --- | --- | --- | --- | --- |
 | E-01 树测试 | 寻路 ≥80% / 首击 ≥70% | ______ | ______ | ______（保持 pending_human_eye；判据=真人寻路样本，用户亲走五步后按 n=1 留因另批签） |
 | E-02 22 条 debt | 逐条 verified / cancelled | 用户（批量口令） | 2026-11-20 | 分批：11 条 verified 维持、2 条 cancelled 维持（终态已封）；UI-695 verified+留因（生效腿留观察）、UI-331 verified+留因（n=1）、UI-200 与其余 6 条 in_progress 维持。注：台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写） |
-| E-03 SUS / UMUX-Lite | 样本量 + 分值 | ______ | ______ | ______（external-blocked 维持） |
+| E-03 SUS / UMUX-Lite | 样本量 + 分值 | 用户（裁决口令） | 2026-11-20 | **cancelled（G0 阶段裁决）**——用户原话「过去了 长期处于G0开发阶段 不需要用户反馈」：真人样本观感评分在 G0 开发期不做、不外推；评分器与回收模板留档（scripts/e03-score.mjs + acceptance/block503-outputs/e03-kit/），G1+ 若需可复用 |
 | H-01 页头 bare | 亮/暗两态无跳动 | 用户（批量口令） | 2026-11-20 | verified（/extensions bare 无品牌 chip vs 工作区 chip+标题，DOM+截图双证） |
 | H-02 768px 对齐 | 769/768 边界精确 | 用户（批量口令） | 2026-11-20 | verified+留因（取证形态=zoom 等效 CSS 布局视口，CDP 在 Electron 无真实窗口 resize 实测沉淀；769 未触发/768 恰好触发读数真实，768 态左栏按 @media 真实收起） |
 | H-03 暗色 hover | 5 类同一档 | 用户（批量口令） | 2026-11-20 | verified+留因（4 类 0.07 同档、文本钮 0.06 差 1 个百分点肉眼不可分辨；input 无 :hover 规则属设计取舍） |

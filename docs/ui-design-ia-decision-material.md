@@ -118,7 +118,7 @@ acceptance:
 | --- | --- | --- | --- | --- |
 | E-01 树测试 | 寻路 ≥80% / 首击 ≥70% | ______ | ______ | ______ |
 | E-02 22 条人眼 | 逐条 verified / cancelled | ______ | ______ | ______ |
-| E-03 SUS / UMUX-Lite | 样本量 + 分值 | ______ | ______ | ______ |
+| E-03 SUS / UMUX-Lite | 样本量 + 分值 | 用户（裁决口令） | 2026-11-20 | cancelled（G0 阶段裁决，原话「过去了 长期处于G0开发阶段 不需要用户反馈」；评分器/模板留档 scripts/e03-score.mjs + acceptance/block503-outputs/e03-kit/，G1+ 若需可复用） |
 | U-01～U-06 裁决 | 逐项裁决原文 | ______ | ______ | ______ |
 
 > 无签字时，本文件所有 U/E 项保持 `pending_user_ruling` / `pending_human_eye`，D5 逐件终态化时不得写成 `done` 或 `verified`。

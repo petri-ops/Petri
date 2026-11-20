@@ -205,7 +205,7 @@ function collectHumanEyeSlotReading() {
     status: 'signed-partial',
     slots: [
       '已签：乙5 八态矩阵 12 格 / 乙6 P5·P6 四槽 / H-01~H-05、H-07 / H-06 分批（3 文件）/ E-02 分批（UI-695、UI-331）——用户批量口令+Agent 审定·委托',
-      'pending：E-01（真人寻路判据）/ E-03（external-blocked）/ H-06 九文件补腿与 desktop.css 在册 gap / UI-200 diff 腿等场景',
+      'pending：E-01（真人寻路判据）/ H-06 九文件补腿与 desktop.css 在册 gap / UI-200 diff 腿等场景；E-03 已 cancelled（2026-11-20 用户 G0 裁决：不需要用户反馈评分）',
     ],
     readOnly: true,
     note: '签署层=用户批量口令（内容出自用户）+Agent 审定·委托（用户授权 2026-11-20，推翻权在用户）；Agent 零代签。',

@@ -77,9 +77,9 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const c = ownGet(snap.readings, 'signatureSlots').value;
     assert.equal(c.total, 11, '签字槽应为 11 行（E-01/02/03 + H-01~H-08）');
-    assert.equal(c.filled, 9, '已签=9（H-01~H-08 + E-02；H-06/H-08/E-02 为分批签署）');
+    assert.equal(c.filled, 10, '已签=10（H-01~H-08 + E-02 + E-03 cancelled；H-06/H-08/E-02 为分批签署）');
     assert.equal(c.blankIds.includes('E-01'), true, 'E-01 保持 pending_human_eye 零代填');
-    assert.equal(c.blankIds.includes('E-03'), true, 'E-03 保持 external-blocked 零代填');
+    assert.equal(c.blankIds.includes('E-03'), false, 'E-03 已 cancelled（2026-11-20 用户 G0 裁决，转录在案）');
     for (const id of ['H-01', 'H-02', 'H-03', 'H-04', 'H-05', 'H-06', 'H-07', 'H-08', 'E-02']) {
       assert.equal(c.blankIds.includes(id), false, `${id} 已签署（分批口径见 route §3）`);
     }
