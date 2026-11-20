@@ -1,0 +1,17 @@
+▶ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST
+  ✔ ① IPC handler 不再 require migration-runner / better-sqlite3 构造器 (0.776375ms)
+  ✔ ② IPC handler 通过 fetch 调后端只读端点 (0.169916ms)
+  ✔ ③ 后端新增 lesson-evidence 只读路由并挂载 (0.55525ms)
+✔ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST (2.146584ms)
+▶ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排
+  ✔ ④ 挂载去掉 trailing（panel 独占整行，不挤压文本列） (0.328791ms)
+  ✔ ⑤ panel CSS 有 width/min-width 约束 + 长文案断行 (0.310541ms)
+✔ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排 (0.719584ms)
+ℹ tests 5
+ℹ suites 2
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.886542

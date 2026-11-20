@@ -4,6 +4,9 @@
   flex-direction: column;
   gap: var(--petri-space-3);
   color: var(--petri-text);
+  /* EVO-4 bugfix：约束宽度，防长文案把设置字段文本列挤成竖排 */
+  width: 100%;
+  min-width: 0;
 }
 
 .hint {
@@ -16,6 +19,9 @@
   margin: 0;
   color: var(--petri-danger);
   line-height: 1.5;
+  /* 长路径/技术错误文案在窄列内断行，不撑破父布局 */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .curve {

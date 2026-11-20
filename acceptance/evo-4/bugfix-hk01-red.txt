@@ -1,0 +1,311 @@
+▶ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST
+  ✖ ① IPC handler 不再 require migration-runner / better-sqlite3 构造器 (1.164ms)
+  ✖ ② IPC handler 通过 fetch 调后端只读端点 (1.100458ms)
+  ✖ ③ 后端新增 lesson-evidence 只读路由并挂载 (0.09675ms)
+✖ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST (3.127959ms)
+▶ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排
+  ✖ ④ 挂载去掉 trailing（panel 独占整行，不挤压文本列） (0.312667ms)
+  ✖ ⑤ panel CSS 有 width/min-width 约束 + 长文案断行 (0.258375ms)
+✖ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排 (0.64325ms)
+ℹ tests 5
+ℹ suites 2
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.928917
+
+✖ failing tests:
+
+test at test/evo4-evidence-bugfix.test.mjs:20:3
+✖ ① IPC handler 不再 require migration-runner / better-sqlite3 构造器 (1.164ms)
+  AssertionError [ERR_ASSERTION]: 不得在主进程取 DB 构造器（ABI 爆点）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:22:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-bugfix.test.mjs:26:3
+✖ ② IPC handler 通过 fetch 调后端只读端点 (1.100458ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /fetch\(/. Input:
+  
+  "const CHANNELS = require('./channels');\n" +
+    '// EVO-4 — 只读证据通道：R5 合法层（core/shared-backend）+ 路径/构造器单源\n' +
+    "const { resolveCore } = require('../main/core-utils');\n" +
+    "const { resolveDbPath } = require(resolveCore('shared-backend', 'db-connection-policy.js'));\n" +
+    '// ============================================================\n' +
+    '// IPC handlers: data:info, data:open-dir\n' +
+    '//\n' +
+    '// Extracted from src/main.js by BLOCK-9.1 PHASE 1.\n' +
+    '// Original location: src/main.js ~line 1822 (setupDataManagementIpc).\n' +
+    '//\n' +
+    '// Self-contained: only depends on process.env, fs, path, shell.\n' +
+    '// No mainWindow injection needed.\n' +
+    '// ============================================================\n' +
+    '\n' +
+    'const fs = require("fs");\n' +
+    'const path = require("path");\n' +
+    'const { ipcMain, shell } = require("electron");\n' +
+    '\n' +
+    '// BLOCK-150 ⑨：空间占用明细的中文名（可操作文案）。\n' +
+    '// breakdown 的键必须是磁盘上的真实目录/文件名（path.join 直接用），不能中文化；\n' +
+    '// 用户可读名称经 labels 字段随 payload 下发，前端按 labels[key] ?? key 渲染。\n' +
+    'const BREAKDOWN_LABELS = {\n' +
+    '  runtimes: "运行时（R / Python）",\n' +
+    '  plugins: "插件",\n' +
+    '  results: "分析结果",\n' +
+    '  uploads: "上传文件",\n' +
+    '  logs: "日志",\n' +
+    '  tmp: "临时文件",\n' +
+    '  "petri.db": "本地数据库",\n' +
+    '  "ai-settings.json": "AI 配置",\n' +
+    '};\n' +
+    '\n' +
+    'function setupDataManagementIpc() {\n' +
+    '  // 递归计算目录大小（字节）\n' +
+    '  function getDirSize(dir) {\n' +
+    '    if (!fs.existsSync(dir)) return 0;\n' +
+    '    let total = 0;\n' +
+    '    const walk = (d) => {\n' +
+    '      try {\n' +
+    '        for (const entry of fs.readdirSync(d, { withFileTypes: true })) {\n' +
+    '          const full = path.join(d, entry.name);\n' +
+    '          if (entry.isSymbolicLink()) continue; // 跳过符号链接避免循环\n' +
+    '          if (entry.isDirectory()) walk(full);\n' +
+    '          else if (entry.isFile()) {\n' +
+    '            try {\n' +
+    '              total += fs.statSync(full).size;\n' +
+    '            } catch {}\n' +
+    '          }\n' +
+    '        }\n' +
+    '      } catch {}\n' +
+    '    };\n' +
+    '    walk(dir);\n' +
+    '    return total;\n' +
+    '  }\n' +
+    '\n' +
+    '  // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）\n' +
+    '  ipcMain.handle(CHANNELS.data.info, async () => {\n' +
+    '    try {\n' +
+    '      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n' +
+    '      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n' +
+    '      const breakdown = {};\n' +
+    '      const subdirs = [\n' +
+    '        "runtimes",\n' +
+    '        "plugins",\n' +
+    '        "results",\n' +
+    '        "uploads",\n' +
+    '        "logs",\n' +
+    '        "tmp",\n' +
+    '      ];\n' +
+    '      for (const sub of subdirs) {\n' +
+    '        const subPath = path.join(dataDir, sub);\n' +
+    '        if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);\n' +
+    '      }\n' +
+    '      // petri.db 单独算\n' +
+    '      const dbPath = path.join(dataDir, "petri.db");\n' +
+    '      if (fs.existsSync(dbPath)) {\n' +
+    '        try {\n' +
+    '          breakdown["petri.db"] = fs.statSync(dbPath).size;\n' +
+    '        } catch {}\n' +
+    '      }\n' +
+    '      // ai-settings.json 等\n' +
+    '      const aiPath = path.join(dataDir, "ai-settings.json");\n' +
+    '      if (fs.existsSync(aiPath)) {\n' +
+    '        try {\n' +
+    '          breakdown["ai-settings.json"] = fs.statSync(aiPath).size;\n' +
+    '        } catch {}\n' +
+    '      }\n' +
+    '      const total = Object.values(breakdown).reduce((a, b) => a + b, 0);\n' +
+    '      const labels = {};\n' +
+    '      for (const key of Object.keys(breakdown)) {\n' +
+    '        if (BREAKDOWN_LABELS[key]) labels[key] = BREAKDOWN_LABELS[key];\n' +
+    '      }\n' +
+    '      return { ok: true, dataDir, total, breakdown, labels };\n' +
+    '    } catch (e) {\n' +
+    '      return { ok: false, error: e.message };\n' +
+    '    }\n' +
+    '  });\n' +
+    '\n' +
+    '  // 在系统文件管理器中打开数据目录\n' +
+    '  ipcMain.handle(CHANNELS.data.openDir, async () => {\n' +
+    '    try {\n' +
+    '      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n' +
+    '      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n' +
+    '      if (!fs.existsSync(dataDir)) {\n' +
+    '        fs.mkdirSync(dataDir, { recursive: true });\n' +
+    '      }\n' +
+    '      await shell.openPath(dataDir);\n' +
+    '      return { ok: true };\n' +
+    '    } catch (e) {\n' +
+    '      return { ok: false, error: e.message };\n' +
+    '    }\n' +
+    '  });\n' +
+    '\n' +
+    '  // EVO-4 — 只读：harness 自进化证据（lessons 频率/状态 + incidents 日频）。\n' +
+    '  // 零写入、零外发；路径与构造器单源均来自 core/shared-backend 与 migration-runner（R5 合规）。\n' +
+    '  ipcMain.handle(CHANNELS.data.lessonEvidence, async () => {\n' +
+    '    try {\n' +
+    '      const dbPath = resolveDbPath(process.env);\n' +
+    '      if (!dbPath || !fs.existsSync(dbPath)) {\n' +
+    "        return { ok: true, lessons: [], incidentTrend: [], reason: 'db-not-found' };\n" +
+    '      }\n' +
+    "      const { loadDatabaseConstructor } = require('../migration-runner');\n" +
+    '      const Database = loadDatabaseConstructor();\n' +
+    '      const db = new Database(dbPath, { readonly: true, fileMustExist: true });\n' +
+    '      try {\n' +
+    '        const lessons = db.prepare(\n' +
+    '          `SELECT id, source_fingerprint, title, scope, status, confidence,\n' +
+    '                  occurrences_before, occurrences_after, created_at, last_seen_at\n' +
+    '           FROM lessons ORDER BY last_seen_at DESC LIMIT 200`\n' +
+    '        ).all();\n' +
+    '        const incidentTrend = db.prepare(\n' +
+    '          `SELECT date(created_at) AS day, COUNT(*) AS count\n' +
+    '           FROM incidents GROUP BY day ORDER BY day ASC`\n' +
+    '        ).all();\n' +
+    '        return { ok: true, lessons, incidentTrend };\n' +
+    '      } finally {\n' +
+    '        db.close();\n' +
+    '      }\n' +
+    '    } catch (e) {\n' +
+    '      return { ok: false, error: e.message };\n' +
+    '    }\n' +
+    '  });\n' +
+    '}\n' +
+    '\n' +
+    'module.exports = { setupDataManagementIpc };\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:28:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'const CHANNELS = require(\'./channels\');\n// EVO-4 — 只读证据通道：R5 合法层（core/shared-backend）+ 路径/构造器单源\nconst { resolveCore } = require(\'../main/core-utils\');\nconst { resolveDbPath } = require(resolveCore(\'shared-backend\', \'db-connection-policy.js\'));\n// ============================================================\n// IPC handlers: data:info, data:open-dir\n//\n// Extracted from src/main.js by BLOCK-9.1 PHASE 1.\n// Original location: src/main.js ~line 1822 (setupDataManagementIpc).\n//\n// Self-contained: only depends on process.env, fs, path, shell.\n// No mainWindow injection needed.\n// ============================================================\n\nconst fs = require("fs");\nconst path = require("path");\nconst { ipcMain, shell } = require("electron");\n\n// BLOCK-150 ⑨：空间占用明细的中文名（可操作文案）。\n// breakdown 的键必须是磁盘上的真实目录/文件名（path.join 直接用），不能中文化；\n// 用户可读名称经 labels 字段随 payload 下发，前端按 labels[key] ?? key 渲染。\nconst BREAKDOWN_LABELS = {\n  runtimes: "运行时（R / Python）",\n  plugins: "插件",\n  results: "分析结果",\n  uploads: "上传文件",\n  logs: "日志",\n  tmp: "临时文件",\n  "petri.db": "本地数据库",\n  "ai-settings.json": "AI 配置",\n};\n\nfunction setupDataManagementIpc() {\n  // 递归计算目录大小（字节）\n  function getDirSize(dir) {\n    if (!fs.existsSync(dir)) return 0;\n    let total = 0;\n    const walk = (d) => {\n      try {\n        for (const entry of fs.readdirSync(d, { withFileTypes: true })) {\n          const full = path.join(d, entry.name);\n          if (entry.isSymbolicLink()) continue; // 跳过符号链接避免循环\n          if (entry.isDirectory()) walk(full);\n          else if (entry.isFile()) {\n            try {\n              total += fs.statSync(full).size;\n            } catch {}\n          }\n        }\n      } catch {}\n    };\n    walk(dir);\n    return total;\n  }\n\n  // 返回数据目录路径 + 各子目录大小（runtimes / plugins / results / uploads / logs / db）\n  ipcMain.handle(CHANNELS.data.info, async () => {\n    try {\n      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n      const breakdown = {};\n      const subdirs = [\n        "runtimes",\n        "plugins",\n        "results",\n        "uploads",\n        "logs",\n        "tmp",\n      ];\n      for (const sub of subdirs) {\n        const subPath = path.join(dataDir, sub);\n        if (fs.existsSync(subPath)) breakdown[sub] = getDirSize(subPath);\n      }\n      // petri.db 单独算\n      const dbPath = path.join(dataDir, "petri.db");\n      if (fs.existsSync(dbPath)) {\n        try {\n          breakdown["petri.db"] = fs.statSync(dbPath).size;\n        } catch {}\n      }\n      // ai-settings.json 等\n      const aiPath = path.join(dataDir, "ai-settings.json");\n      if (fs.existsSync(aiPath)) {\n        try {\n          breakdown["ai-settings.json"] = fs.statSync(aiPath).size;\n        } catch {}\n      }\n      const total = Object.values(breakdown).reduce((a, b) => a + b, 0);\n      const labels = {};\n      for (const key of Object.keys(breakdown)) {\n        if (BREAKDOWN_LABELS[key]) labels[key] = BREAKDOWN_LABELS[key];\n      }\n      return { ok: true, dataDir, total, breakdown, labels };\n    } catch (e) {\n      return { ok: false, error: e.message };\n    }\n  });\n\n  // 在系统文件管理器中打开数据目录\n  ipcMain.handle(CHANNELS.data.openDir, async () => {\n    try {\n      const dataDir = process.env.PETRI_LOCAL_DATA_DIR;\n      if (!dataDir) return { ok: false, error: "数据目录未配置" };\n      if (!fs.existsSync(dataDir)) {\n        fs.mkdirSync(dataDir, { recursive: true });\n      }\n      await shell.openPath(dataDir);\n      return { ok: true };\n    } catch (e) {\n      return { ok: false, error: e.message };\n    }\n  });\n\n  // EVO-4 — 只读：harness 自进化证据（lessons 频率/状态 + incidents 日频）。\n  // 零写入、零外发；路径与构造器单源均来自 core/shared-backend 与 migration-runner（R5 合规）。\n  ipcMain.handle(CHANNELS.data.lessonEvidence, async () => {\n    try {\n      const dbPath = resolveDbPath(process.env);\n      if (!dbPath || !fs.existsSync(dbPath)) {\n        return { ok: true, lessons: [], incidentTrend: [], reason: \'db-not-found\' };\n      }\n      const { loadDatabaseConstructor } = require(\'../migration-runner\');\n      const Database = loadDatabaseConstructor();\n      const db = new Database(dbPath, { readonly: true, fileMustExist: true });\n      try {\n        const lessons = db.prepare(\n          `SELECT id, source_fingerprint, title, scope, status, confidence,\n                  occurrences_before, occurrences_after, created_at, last_seen_at\n           FROM lessons ORDER BY last_seen_at DESC LIMIT 200`\n        ).all();\n        const incidentTrend = db.prepare(\n          `SELECT date(created_at) AS day, COUNT(*) AS count\n           FROM incidents GROUP BY day ORDER BY day ASC`\n        ).all();\n        return { ok: true, lessons, incidentTrend };\n      } finally {\n        db.close();\n      }\n    } catch (e) {\n      return { ok: false, error: e.message };\n    }\n  });\n}\n\nmodule.exports = { setupDataManagementIpc };\n',
+    expected: /fetch\(/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-bugfix.test.mjs:33:3
+✖ ③ 后端新增 lesson-evidence 只读路由并挂载 (0.09675ms)
+  Error: ENOENT: no such file or directory, open '/Users/zhangdiandian/Documents/1.WorkDir/Petri/core/petri-server/routes/lesson-evidence.js'
+      at Object.readFileSync (node:fs:441:20)
+      at read (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:15:26)
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:34:19)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/Users/zhangdiandian/Documents/1.WorkDir/Petri/core/petri-server/routes/lesson-evidence.js'
+  }
+
+test at test/evo4-evidence-bugfix.test.mjs:48:3
+✖ ④ 挂载去掉 trailing（panel 独占整行，不挤压文本列） (0.312667ms)
+  AssertionError [ERR_ASSERTION]: panel 挂载不得用 trailing
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:51:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at node:internal/test_runner/test:1769:71
+      at node:internal/per_context/primordials:466:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:435:3)
+      at node:internal/per_context/primordials:466:9
+      at Array.map (<anonymous>) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/evo4-evidence-bugfix.test.mjs:54:3
+✖ ⑤ panel CSS 有 width/min-width 约束 + 长文案断行 (0.258375ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /width:\s*100%/. Input:
+  
+  '/* 只读证据面板：全 token，零字面量颜色/字号；不引入 accent（ratchet 默认 0） */\n' +
+    '.panel {\n' +
+    '  display: flex;\n' +
+    '  flex-direction: column;\n' +
+    '  gap: var(--petri-space-3);\n' +
+    '  color: var(--petri-text);\n' +
+    '}\n' +
+    '\n' +
+    '.hint {\n' +
+    '  margin: 0;\n' +
+    '  color: var(--petri-text-tertiary);\n' +
+    '  line-height: 1.5;\n' +
+    '}\n' +
+    '\n' +
+    '.error {\n' +
+    '  margin: 0;\n' +
+    '  color: var(--petri-danger);\n' +
+    '  line-height: 1.5;\n' +
+    '}\n' +
+    '\n' +
+    '.curve {\n' +
+    '  display: flex;\n' +
+    '  align-items: flex-end;\n' +
+    '  gap: var(--petri-space-1);\n' +
+    '  height: calc(var(--petri-space-8) * 2);\n' +
+    '}\n' +
+    '\n' +
+    '.bar {\n' +
+    '  flex: 1 1 0;\n' +
+    '  min-width: var(--petri-space-1);\n' +
+    '  background: var(--petri-bg-hover);\n' +
+    '  border-radius: var(--petri-radius-sm);\n' +
+    '}\n' +
+    '\n' +
+    '.row {\n' +
+    '  display: flex;\n' +
+    '  justify-content: space-between;\n' +
+    '  gap: var(--petri-space-2);\n' +
+    '}\n' +
+    '\n' +
+    '.title { color: var(--petri-text); }\n' +
+    '\n' +
+    '.status { color: var(--petri-text-muted); }\n'
+  
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/evo4-evidence-bugfix.test.mjs:56:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1771:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/* 只读证据面板：全 token，零字面量颜色/字号；不引入 accent（ratchet 默认 0） */\n.panel {\n  display: flex;\n  flex-direction: column;\n  gap: var(--petri-space-3);\n  color: var(--petri-text);\n}\n\n.hint {\n  margin: 0;\n  color: var(--petri-text-tertiary);\n  line-height: 1.5;\n}\n\n.error {\n  margin: 0;\n  color: var(--petri-danger);\n  line-height: 1.5;\n}\n\n.curve {\n  display: flex;\n  align-items: flex-end;\n  gap: var(--petri-space-1);\n  height: calc(var(--petri-space-8) * 2);\n}\n\n.bar {\n  flex: 1 1 0;\n  min-width: var(--petri-space-1);\n  background: var(--petri-bg-hover);\n  border-radius: var(--petri-radius-sm);\n}\n\n.row {\n  display: flex;\n  justify-content: space-between;\n  gap: var(--petri-space-2);\n}\n\n.title { color: var(--petri-text); }\n\n.status { color: var(--petri-text-muted); }\n',
+    expected: /width:\s*100%/,
+    operator: 'match',
+    diff: 'simple'
+  }

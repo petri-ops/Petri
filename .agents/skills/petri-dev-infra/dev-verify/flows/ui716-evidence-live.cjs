@@ -70,6 +70,16 @@ module.exports = {
     assert('D5_data_state_honest', dataState && (dataState.curve || dataState.statusRows > 0 || dataState.honestEmpty),
       JSON.stringify(dataState));
 
+    // EVO-4 bugfix 回归：主进程 ABI 不匹配曾产生红字「读取失败：...better_sqlite3.node was compiled
+    // against a different Node.js version」。改走后端 REST 后不得再出现该错误文案。
+    const noAbiError = await lib.evalJs(client, `(function(){
+      const p = document.querySelector('[data-testid="lesson-evidence-panel"]');
+      const t = p ? (p.textContent || '') : '';
+      return { hasReadFailure: /读取失败/.test(t), hasAbi: /better_sqlite3|NODE_MODULE_VERSION|compiled against/i.test(t) };
+    })()`);
+    assert('D7_no_abi_read_failure', noAbiError && !noAbiError.hasReadFailure && !noAbiError.hasAbi,
+      JSON.stringify(noAbiError));
+
     // 截图（离屏可能合成帧超时，失败如实标注，不开窗换证据）
     try {
       await lib.screenshotPng(client, path.join(process.cwd(), 'acceptance', 'ui-716'), 'ui716-evidence-panel.png', { timeoutMs: 20_000 });

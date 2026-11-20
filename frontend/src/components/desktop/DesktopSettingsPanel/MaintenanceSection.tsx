@@ -49,11 +49,11 @@ export function MaintenanceSection({ telemetryEnabled, onToggleTelemetry, onConf
       <SettingsField icon="download" label="诊断日志" trailing hint="导出本地诊断信息用于排查问题">
         <ExportDiagnostic />
       </SettingsField>
-      {/* EVO-4 UI-716 — harness 自进化证据（只读快照，零写入控件，观感零代签） */}
+      {/* EVO-4 UI-716 — harness 自进化证据（只读快照，零写入控件，观感零代签）。
+          不用 trailing：panel 内容宽度可变，trailing 会把 label/hint 列挤成竖排。 */}
       <SettingsField
         icon="bar-chart"
         label="Harness 自进化证据"
-        trailing
         hint="本机 lesson 频率与状态快照；只读，无写入"
       >
         <LessonEvidencePanel />

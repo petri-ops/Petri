@@ -1,8 +1,8 @@
 {
   "name": "ui716-evidence-live",
   "platform": "darwin",
-  "startedAt": "2026-11-20T06:04:51.529Z",
-  "finishedAt": "2026-11-20T06:04:52.261Z",
+  "startedAt": "2026-11-20T06:13:40.129Z",
+  "finishedAt": "2026-11-20T06:13:40.727Z",
   "assertions": [
     {
       "name": "D1_panel_present_in_maintenance",
@@ -12,7 +12,7 @@
     {
       "name": "D2_panel_has_no_write_control",
       "pass": true,
-      "detail": "{\"buttons\":0,\"badge\":false,\"readonlyHint\":true,\"textLen\":409}"
+      "detail": "{\"buttons\":0,\"badge\":false,\"readonlyHint\":true,\"textLen\":63}"
     },
     {
       "name": "D3_panel_no_verified_badge",
@@ -28,6 +28,11 @@
       "name": "D5_data_state_honest",
       "pass": true,
       "detail": "{\"curve\":false,\"statusRows\":0,\"honestEmpty\":true}"
+    },
+    {
+      "name": "D7_no_abi_read_failure",
+      "pass": true,
+      "detail": "{\"hasReadFailure\":false,\"hasAbi\":false}"
     },
     {
       "name": "D6_screenshot_captured",

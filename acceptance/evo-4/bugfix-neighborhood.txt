@@ -1,0 +1,64 @@
+▶ EVO-3 · 频率判据纯函数（降留/平降级/升回滚）
+  ✔ ① 频率下降 → keep (0.6975ms)
+  ✔ ② 频率持平 → degrade (0.065625ms)
+  ✔ ③ 频率回升 → rollback (0.055334ms)
+  ✔ ④ 无后续样本（after=0）→ keep（学后零复发=最强保留） (0.0465ms)
+  ✔ ⑤ 判据带机器码与理由（可审计） (0.07475ms)
+  ✔ ⑥ 冻结常量判据阈值在场 (0.049041ms)
+✔ EVO-3 · 频率判据纯函数（降留/平降级/升回滚） (2.12825ms)
+▶ EVO-3 · LEARNINGS.md 标记段双写
+  ✔ 7 生成带标记的 lesson 段 (0.195209ms)
+  ✔ 8 upsert 同 id 段不重复（标记段幂等替换） (0.145375ms)
+  ✔ 9 remove 按 id 删段，其余保留 (0.109625ms)
+✔ EVO-3 · LEARNINGS.md 标记段双写 (0.562083ms)
+▶ EVO-3 · 真实 SQLite Verify + 回滚
+  ✔ 10 verifyLessonFrequency 按 lesson.created_at 分段计数（真实指纹） (43.108375ms)
+  ✔ 11 频率回升 → rollbackLesson 改 status=rollback 并留证据 (30.446167ms)
+  ✔ 12 listLessonEvidence 返回可审计证据（频率曲线 + 状态） (29.290083ms)
+✔ EVO-3 · 真实 SQLite Verify + 回滚 (102.978375ms)
+▶ EVO-3 · 证据导出（可审计产物，零外发）
+  ✔ 14 真实 BLOCK-510 闭环导出 frequency JSON 证据（落 acceptance/evo-3/） (30.043875ms)
+✔ EVO-3 · 证据导出（可审计产物，零外发） (30.114542ms)
+▶ EVO-3 · 真实历史错误闭环（BLOCK-510 unknown_tool）
+  ✔ 13 真实指纹：学习→生效后零复发→保留（全流程） (31.476125ms)
+✔ EVO-3 · 真实历史错误闭环（BLOCK-510 unknown_tool） (31.542875ms)
+▶ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST
+  ✔ ① IPC handler 不再 require migration-runner / better-sqlite3 构造器 (0.530667ms)
+  ✔ ② IPC handler 通过 fetch 调后端只读端点 (0.169792ms)
+  ✔ ③ 后端新增 lesson-evidence 只读路由并挂载 (0.203875ms)
+✔ EVO-4 bugfix ① — 主进程不直开 better-sqlite3，改走后端 REST (1.591458ms)
+▶ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排
+  ✔ ④ 挂载去掉 trailing（panel 独占整行，不挤压文本列） (0.167292ms)
+  ✔ ⑤ panel CSS 有 width/min-width 约束 + 长文案断行 (0.151584ms)
+✔ EVO-4 bugfix ② — 设置面板 label/hint 不再竖排 (0.395708ms)
+▶ EVO-4 · IPC 通道四处同步（只读）
+  ✔ ① channels.js 登记 data.lessonEvidence (1.446291ms)
+  ✔ ② preload.js 有真实 ipcRenderer.invoke 调用点（非注释） (0.611ms)
+  ✔ ③ data-management.js handler 用 CHANNELS 常量（无手写字面量） (0.49ms)
+  ✔ ④ electron.d.ts 声明只读方法（无写入签名） (0.754125ms)
+✔ EVO-4 · IPC 通道四处同步（只读） (4.994167ms)
+▶ EVO-4 · 前端面板只读数据面
+  ✔ ⑤ 面板文件在场且只读（无 button / 无写入方法） (0.276958ms)
+  ✔ ⑥ 面板无「已验证/已签名/通过」观感代签徽标 (0.130917ms)
+  ✔ ⑦ 面板如实呈现失败/空态（不伪造曲线） (0.1215ms)
+  ✔ ⑧ CSS 全 var(--petri-*) token，零字面量颜色/字号 (1.178208ms)
+  ✔ ⑨ 面板挂载在 maintenance（不新增导航项/台账债） (0.287333ms)
+✔ EVO-4 · 前端面板只读数据面 (2.195ms)
+✔ registry values are unique and channel-shaped (1.551084ms)
+✔ every registry channel is wrapped in preload or explicitly main-only (main/preload drift guard) (1.58025ms)
+✔ MAIN_ONLY allowlist stays tight (every entry is still registered, none wrapped) (0.276ms)
+✔ consumers hold no hand-written channel literals (literal reflux guard) (1.329417ms)
+✔ every consumer can resolve its channels require (path guard — src/ vs src/main/ 深度差异) (1.047209ms)
+✔ W2-2 preload 调用点 ∪ MAIN_ONLY 与注册表集合相等（双向） (0.594625ms)
+✔ W2-2 负测：通道名只出现在注释里不计入调用点（堵 includes 假绿） (0.232ms)
+✔ W2-2 全量 glob：src 下任何主进程模块不得手写已登记通道字面量，也不得手写未登记 IPC 通道 (8.551666ms)
+✔ L2-6（BLOCK-406）：通道分类注记键 ⊆ 注册表字面量（testOnly/platformScoped 单源一致） (0.51475ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (35.121125ms)
+ℹ tests 38
+ℹ suites 9
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 311.79525

@@ -225,4 +225,17 @@ CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint, c
 - **EVO 全链最终态**：EVO-0 基座 → EVO-1 观测 → EVO-2 蒸馏+改进 → EVO-3 验证 → EVO-4 证据可见，五层 Observe→Distill→Evolve→Verify→Guard 连同用户可见证据面全部落地；harness 自进化建议出口始终不进开发治理链、全程本地零外发。
 - **纪律**：零新依赖/纯本地零外发/红线 fail-closed/不进治理链/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
+## 12. EVO-4 用户实测 bug 修复（2026-11-20 · 同日热修）
+
+- **触发**：用户主窗截图暴露两真 bug——①红色报错 `better_sqlite3.node was compiled against a different Node.js version`（主进程 ABI 不匹配）；②设置页 label/hint 竖排。此前 9223 实机腿未暴露①，因测试实例 Electron ABI 恰能加载该二进制；用户主窗 ABI 不同即爆。
+- **根因与修法**：
+  - ① IPC handler 在 Electron 主进程 `loadDatabaseConstructor()` 直开 petri.db → 改走后端只读 REST `GET /api/harness/lesson-evidence`（新 `core/petri-server/routes/lesson-evidence.js` + routes/index.js mount；后端进程 ABI 正确），主进程只 `fetch` + `getBackendPort('r')`，零直开库。
+  - ② `SettingsField trailing` + 长路径错误文案不可断行 → label 列被挤成 0 宽竖排；去掉 trailing + panel `.panel{width:100%;min-width:0}` + `.error{overflow-wrap:anywhere}`，不动通用 SettingsField。
+- **HK-01 红→绿**：红 5/5（两 bug 未修）→ 绿 5/5（源级回归门禁：`test/evo4-evidence-bugfix.test.mjs`）——主进程无 DB 构造器 / 走 REST / 后端路由在场只读 / 挂载无 trailing / panel 宽度+断行约束。
+- **邻域**：38/38（bugfix + EVO-4 契约 + IPC 守护 + EVO-3 + live-window-policy）；前端 23/23（含 theme-token）；tsc 0；docs 661/ui:audit/secret/arch 全绿；lint 0 error；knip 回存量 38（ui716 flow 动态入口精确追加基线一条，不动他方 WIP）。
+- **实机复验**：后端重启（PID 31303→41004，REST 端点 `{ok:true}`），9223 离屏 flow 7/7 PASS（新增 D7「无 ABI 读取失败红字」），跑完 kill 9223。证据 `acceptance/evo-4/bugfix-*` + `acceptance/ui-716/`（截图与 JSON 已更新）。
+- **Jev**：doc:suggest uiAudit adopted（UI-716 台账已回写本次 bugfix）；decision:session 本轮增量 jev×1。
+- **观感零代签**：UI-716 保持 in_progress + pending_human_eye，等用户口令；本批只修 bug、不代签。
+- **纪律**：零新依赖/纯本地零外发/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 G0 开发期常态 · 不外推 packaged/Provider/GA。

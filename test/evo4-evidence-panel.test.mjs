@@ -46,7 +46,7 @@ describe('EVO-4 · 前端面板只读数据面', () => {
 
   it('⑤ 面板文件在场且只读（无 button / 无写入方法）', () => {
     const s = read(PANEL);
-    assert.match(s, /lessonEvidence\(\)/);
+    assert.match(s, /data\?\.lessonEvidence/, '通过只读通道取数（含订阅式 read() 形态）');
     assert.ok(!/<button|role=['"]button/.test(s), '零写入控件');
     assert.ok(!/lessonEvidence\.(write|upsert|apply|rollback)/.test(s), '零写入调用');
   });

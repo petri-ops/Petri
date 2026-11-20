@@ -1,0 +1,4 @@
+backend :3001 healthy
+start dispatched (darwin nohup pid 30434)
+t+3s test=1 targets: 1
+TEST INSTANCE READY (cdp 9223, userData .petri-test-user-data)
