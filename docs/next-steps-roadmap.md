@@ -1,3 +1,4 @@
+最后更新：2026-11-20（🎨 **艺术性造型升级（形态语义层级）**：seal3/icon10/card14 三档 token + 图标座/hero/徽章/mcpCard 换形 + seal-square 方印原子；HK01绿7/7+65tests+c53+实机7/7；审美不代签 in_progress、UI-717 不外推。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **V2/V3/V4 收尾 · 视觉升级全链闭环**（用户预授权一次做完）：leftPanelWrap 双定义合并 + ;;128处清零 + 标题名词化；V4 评分卡 3.6→4.1（保守下限）；HK-01 绿8/8+60tests+tsc0+c53+a11y绿；breaking U 类 deferred。观感 UI-717 已由 A4 签，本包零视觉变化。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（✅ **A4 四档整体观感预审闭环 · 四档观感 verified**：9223 离屏逐档截图 46/46 + 人工复核 P1–P5 全过，首轮即过按裁决签字；边界 sc-access-btn 状态色未改；HK-01 7/7、9223 已 kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
 最后更新：2026-11-20（🏁 **B 方案落地：骨架随档切换**：正交 data-surface 联切、c53 门禁不放宽、实机 14/14 四档骨架各异+回默认；观感未签、9223已kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）

@@ -127,7 +127,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  /* form grammar: 主入口大图标座用纸面 squircle（原硬编码 15px 收编为 token）。 */
+  border-radius: var(--petri-radius-card);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
   border: 1px solid var(--petri-border-card);
@@ -195,7 +196,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--petri-radius-lg);
+  border-radius: var(--petri-radius-icon);
   background: var(--petri-accent-bg);
   color: var(--petri-text-secondary);
 }

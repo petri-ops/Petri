@@ -1,0 +1,1640 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/styles/FormGrammar.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 10[2mms[22m[39m
+   [31m❯[39m 形态语义层级（form grammar） [2m(7)[22m
+[31m     [31m×[31m defines three semantic radius tiers with ascending squircle values[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m contract whitelist includes new tiers (tier set + dark exemption)[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m high-frequency icon seats consume the icon-seat tier (not the generic square)[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m workbench hero icon uses card squircle, empty badge is a circular seal[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m Icon single-source has a seal-square atom (方印点睛) reusing round stroke family[39m[32m 1[2mms[22m[39m
+     [32m✓[39m no new icon dependency and no radius ratchet regression[32m 0[2mms[22m[39m
+     [32m✓[39m no static-to-visual sign-off claim[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/styles/FormGrammar.test.ts[2m > [22m形态语义层级（form grammar）[2m > [22mdefines three semantic radius tiers with ascending squircle values
+[31m[1mAssertionError[22m: seal must exist (近方印记): expected 0 to be greater than or equal to 2[39m
+[36m [2m❯[22m src/styles/FormGrammar.test.ts:[2m23:44[22m[39m
+    [90m 21|[39m     const icon = val('--petri-radius-icon');
+    [90m 22|[39m     const card = val('--petri-radius-card');
+    [90m 23|[39m     expect(seal, 'seal must exist (近方印记)').toBeGreaterThanOrEqual(2);
+    [90m   |[39m                                            [31m^[39m
+    [90m 24|[39m     expect(icon, 'icon seat must exist (squircle)').toBeGreaterThanOrE…
+    [90m 25|[39m     expect(card, 'card must exist (纸面柔边)').toBeGreaterThanOrEqual(12);
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/FormGrammar.test.ts[2m > [22m形态语义层级（form grammar）[2m > [22mcontract whitelist includes new tiers (tier set + dark exemption)
+[31m[1mAssertionError[22m: --petri-radius-seal missing in contract tier list: expected 'import fs from \'node:fs\';\nimport p…' to contain '--petri-radius-seal'[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- --petri-radius-seal[39m
+[31m+ import fs from 'node:fs';[39m
+[31m+ import path from 'node:path';[39m
+[31m+ import { fileURLToPath } from 'node:url';[39m
+[31m+ import { describe, expect, it } from 'vitest';[39m
+[31m+[39m
+[31m+ const srcRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');[39m
+[31m+[39m
+[31m+ function walk(dir: string): string[] {[39m
+[31m+   const entries = fs.readdirSync(dir, { withFileTypes: true });[39m
+[31m+   const files: string[] = [];[39m
+[31m+   for (const entry of entries) {[39m
+[31m+     const fullPath = path.join(dir, entry.name);[39m
+[31m+     if (entry.isDirectory()) {[39m
+[31m+       files.push(...walk(fullPath));[39m
+[31m+       continue;[39m
+[31m+     }[39m
+[31m+     if (!/\.(css|ts|tsx|js|jsx)$/.test(entry.name)) continue;[39m
+[31m+     if (/\.test\.(ts|tsx|js|jsx)$/.test(entry.name) || /\.spec\.(ts|tsx|js|jsx)$/.test(entry.name)) continue;[39m
+[31m+     files.push(fullPath);[39m
+[31m+   }[39m
+[31m+   return files;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ function stripComments(text: string): string {[39m
+[31m+   return text[39m
+[31m+     .replace(/\/\*[\s\S]*?\*\//g, '')[39m
+[31m+     .replace(/(^|[^\S\r\n])\/\/.*$/gm, '$1');[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ describe('theme token contract', () => {[39m
+[31m+   it('defines every Petri token referenced in frontend source', () => {[39m
+[31m+     const definitions = new Set<string>();[39m
+[31m+     const references = new Set<string>();[39m
+[31m+[39m
+[31m+     for (const file of walk(srcRoot)) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       for (const match of text.matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) {[39m
+[31m+         definitions.add(match[0]);[39m
+[31m+       }[39m
+[31m+       for (const match of text.matchAll(/var\(--(petri-[A-Za-z0-9-]+)/g)) {[39m
+[31m+         references.add(`--${match[1]}`);[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+[39m
+[31m+     // JS 运行时 setProperty 注入的拖拽期 live token（useResizableColumns），[39m
+[31m+     // 无静态定义属预期——白名单见 BLOCK-76 会话 🟢 清债登记（AUDIT-LOG 2026-09-08）。[39m
+[31m+     const JS_INJECTED_TOKENS = new Set([[39m
+[31m+       '--petri-live-left-width',[39m
+[31m+       '--petri-live-left-span',[39m
+[31m+       '--petri-live-right-width',[39m
+[31m+       '--petri-live-right-span',[39m
+[31m+       '--petri-live-result-right-width',[39m
+[31m+     ]);[39m
+[31m+     const missing = [...references][39m
+[31m+       .filter((token) => !definitions.has(token) && !JS_INJECTED_TOKENS.has(token))[39m
+[31m+       .sort();[39m
+[31m+     expect(missing).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   // UI-392 — 海军蓝家族统一后的防回潮门禁（规范见 .agents/skills/petri-css-theme）。[39m
+[31m+[39m
+[31m+   it('holds no legacy undefined --color-* token references (零定义家族禁回潮)', () => {[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of walk(srcRoot)) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       if (/var\(--color-/.test(text)) offenders.push(path.relative(srcRoot, file));[39m
+[31m+     }[39m
+[31m+     expect(offenders).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('holds no slate-family color literals (navy 家族外禁回潮)', () => {[39m
+[31m+     const FORBIDDEN = [/rgba\(148,\s*163,\s*184/i, /#0f172a\b/i, /#1b1b1d\b/i, /#334155\b/i];[39m
+[31m+     // 豁免清单（带理由）：light 终端主题在白底上用近黑文字/ANSI 色，属浅色面[39m
+[31m+     // 正当用色，非暗色 navy 家族管辖范围。[39m
+[31m+     const ALLOWED_FILES = new Map([['themes/terminal-themes.ts', new Set(['#0f172a\\b'])]]);[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of walk(srcRoot)) {[39m
+[31m+       const rel = path.relative(srcRoot, file);[39m
+[31m+       const allowed = ALLOWED_FILES.get(rel.replaceAll('\\', '/')) || new Set<string>();[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       for (const pattern of FORBIDDEN) {[39m
+[31m+         if (pattern.test(text) && !allowed.has(pattern.source)) {[39m
+[31m+           offenders.push(`${rel} :: ${pattern}`);[39m
+[31m+         }[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+     expect(offenders).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('dark token-definition blocks in styles/ out-rank infima (html 前缀特异性)', () => {[39m
+[31m+     // infima 暗色默认用 html[data-theme='dark']（0,1,1）；本仓 styles/ 下的[39m
+[31m+     // 暗色定义块若只写 [data-theme='dark']（0,1,0）即为死字（UI-392 根因二：[39m
+[31m+     // --ifm-background-color/emphasis 系曾整块失效）。多行 selector 组[39m
+[31m+     // （逗号续行）需整组包含 html 前缀。[39m
+[31m+     const stylesDir = path.join(srcRoot, 'styles');[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of walk(stylesDir)) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       for (const match of text.matchAll([39m
+[31m+         /(?:^|\n)((?:[^\n{}]*,\n)*[^\n{}]*\[data-theme='dark'\][^\n{}]*)\s*\{([^{}]*)\}/g,[39m
+[31m+       )) {[39m
+[31m+         const selectorGroup = match[1];[39m
+[31m+         const body = match[2];[39m
+[31m+         if (body.includes('--ifm-') && !selectorGroup.includes("html[data-theme='dark']")) {[39m
+[31m+           offenders.push(`${path.relative(srcRoot, file)} :: ${selectorGroup.trim().slice(0, 60)}`);[39m
+[31m+         }[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+     expect(offenders).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   // ============================================================[39m
+[31m+   // BLOCK-161 W2 — 档位体系 + 门禁棘轮（plan §3-W2；出口判据 §8）[39m
+[31m+   // ============================================================[39m
+[31m+[39m
+[31m+   const CSS_FILES = (): string[] => walk(srcRoot).filter((f) => f.endsWith('.css'));[39m
+[31m+[39m
+[31m+   it('defines the tier token sets (间距 8 档 / 圆角 4 档 / z-index 8 档)', () => {[39m
+[31m+     const text = stripComments([39m
+[31m+       fs.readFileSync(path.join(srcRoot, 'styles', 'global.css'), 'utf8')[39m
+[31m+       + fs.readFileSync(path.join(srcRoot, 'styles', 'custom.css'), 'utf8'),[39m
+[31m+     );[39m
+[31m+     for (const token of [[39m
+[31m+       '--petri-space-1', '--petri-space-2', '--petri-space-3', '--petri-space-4',[39m
+[31m+       '--petri-space-5', '--petri-space-6', '--petri-space-7', '--petri-space-8',[39m
+[31m+       '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg', '--petri-radius-pill',[39m
+[31m+       '--petri-z-base', '--petri-z-raised', '--petri-z-sticky', '--petri-z-dropdown',[39m
+[31m+       '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox', '--petri-z-toast',[39m
+[31m+     ]) {[39m
+[31m+       expect(text).toMatch(new RegExp(`${token.replace(/-/g, '\\-')}\\s*:`));[39m
+[31m+     }[39m
+[31m+     // 语义倒挂守卫（审计 P0）：Toast 必须是最高档（原 9999 < TitleBar 10001）。[39m
+[31m+     const zValue = (name: string) => {[39m
+[31m+       const m = text.match(new RegExp(`${name.replace(/-/g, '\\-')}\\s*:\\s*(\\d+)`));[39m
+[31m+       return m ? Number(m[1]) : -1;[39m
+[31m+     };[39m
+[31m+     const toast = zValue('--petri-z-toast');[39m
+[31m+     expect(toast).toBeGreaterThan(zValue('--petri-z-lightbox'));[39m
+[31m+     expect(toast).toBeGreaterThan(zValue('--petri-z-modal'));[39m
+[31m+     expect(toast).toBeGreaterThan(zValue('--petri-z-overlay'));[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('holds no duplicate token definitions in the same :root/dark block (重复定义禁)', () => {[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       for (const block of text.matchAll(/:root\s*\{([^{}]*)\}|html\[data-theme='dark'\][^{]*\{([^{}]*)\}/g)) {[39m
+[31m+         const body = block[1] ?? block[2] ?? '';[39m
+[31m+         const seen = new Set<string>();[39m
+[31m+         for (const m of body.matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) {[39m
+[31m+           if (seen.has(m[0])) offenders.push(`${path.relative(srcRoot, file)} :: ${m[0]}`);[39m
+[31m+           seen.add(m[0]);[39m
+[31m+         }[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+     expect(offenders).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('dark blocks pair with :root for color tokens (明暗成对棘轮 — 24 个存量冻结)', () => {[39m
+[31m+     // W3 将把存量清零；本断言冻结现状：新 token 只许成对定义，未配对名单只许收缩。[39m
+[31m+     const PAIRED_EXEMPT = new Set([[39m
+[31m+       // 功能性/派生 token：仅亮色语义或由暗色块整体继承（BLOCK-161 W2 核实）[39m
+[31m+       '--petri-font-scale', '--petri-font-size-xs', '--petri-font-size-sm',[39m
+[31m+       '--petri-font-size-body', '--petri-font-size-lg',[39m
+[31m+       '--petri-font-size-xl', '--petri-font-size-2xl', '--petri-font-size-base',[39m
+[31m+       '--petri-space-1', '--petri-space-2', '--petri-space-3', '--petri-space-4', '--petri-space-5',[39m
+[31m+       '--petri-space-6', '--petri-space-7', '--petri-space-8', '--petri-live-result-right-width',[39m
+[31m+       '--petri-titlebar-height', '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg',[39m
+[31m+       '--petri-radius-pill', '--petri-z-base', '--petri-z-raised', '--petri-z-sticky',[39m
+[31m+       '--petri-z-dropdown', '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox',[39m
+[31m+       '--petri-z-toast', '--petri-font-sans', '--petri-font-mono', '--petri-mono',[39m
+[31m+       '--petri-shadow-sm',[39m
+[31m+       // BLOCK-178 — 功能性尺寸 token（焦点环宽度，非颜色；主题无关）[39m
+[31m+       '--petri-ring-width',[39m
+[31m+       // UI-591 — 功能性几何 token（拖拽边界渐晕中心 Y，px；主题无关，同 ring-width 理由）[39m
+[31m+       '--petri-resize-glow-y',[39m
+[31m+       // 派生层（color-mix(var(--petri-*)) 自动适配主题）非缺失[39m
+[31m+       '--petri-accent-weak',[39m
+[31m+       // BLOCK-167 W0 — 宪章派生 token：border 三语义引用主题变量按元素解析；[39m
+[31m+       // duration/ease 为非色功能 token（同 space/z 豁免理由）。[39m
+[31m+       '--petri-border-input', '--petri-border-card', '--petri-divider',[39m
+[31m+       '--petri-duration-fast', '--petri-duration-base', '--petri-duration-slow',[39m
+[31m+       '--petri-ease-standard', '--petri-ease-emphasized',[39m
+[31m+       '--petri-bg-base', '--petri-fg', '--petri-fg-muted', '--petri-bg-elev',[39m
+[31m+       '--petri-bg-button', '--petri-bg-button-hover', '--petri-bg-hover',[39m
+[31m+       '--petri-surface-raised', '--petri-bg-surface-raised', '--petri-surface-strong',[39m
+[31m+       '--petri-border-color', '--petri-text-primary', '--petri-warning-bg', '--petri-warning-text',[39m
+[31m+       '--petri-warning', '--petri-danger-bg', '--petri-bg-terminal', '--petri-text-terminal',[39m
+[31m+       '--petri-text-terminal-strong', '--petri-text-terminal-muted', '--petri-text-terminal-prompt',[39m
+[31m+     ]);[39m
+[31m+     const rootTokens = new Set<string>();[39m
+[31m+     const darkTokens = new Set<string>();[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       for (const block of text.matchAll(/:root\s*\{([^{}]*)\}/g)) {[39m
+[31m+         for (const m of block[1].matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) rootTokens.add(m[0]);[39m
+[31m+       }[39m
+[31m+       for (const block of text.matchAll(/\[data-theme='dark'\][^{]*\{([^{}]*)\}/g)) {[39m
+[31m+         for (const m of block[1].matchAll(/--petri-[A-Za-z0-9-]+(?=\s*:)/g)) darkTokens.add(m[0]);[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+     const unpaired = [...rootTokens][39m
+[31m+       .filter((t) => !darkTokens.has(t) && !PAIRED_EXEMPT.has(t))[39m
+[31m+       .sort();[39m
+[31m+     expect(unpaired).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('holds no bare px font-size beyond the frozen ratchet (裸 font-size 棘轮 — W3 清零)', () => {[39m
+[31m+     // W3 出口=0；本断言冻结现状计数（BLOCK-161 W2 盘点：>1000 处裸 font-size 于[39m
+[31m+     // css/tsx 内联样式——棘轮按文件粒度登记存量，新增文件或存量文件加行即红）。[39m
+[31m+     const FORBIDDEN = /font-size:\s*\d+(?:\.\d+)?px/;[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       const count = (text.match(new RegExp(FORBIDDEN.source, 'g')) || []).length;[39m
+[31m+       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);[39m
+[31m+     }[39m
+[31m+     // 棘轮快照（W2 盘点时点）。收缩后更新此表（只许减不许增）；W3 清零后整表删除。[39m
+[31m+     const RATCHET: Record<string, number> = {}; // W3 已清零（2026-10-11）：121 处全部归档 --petri-font-size-* 档[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const entry of offenders) {[39m
+[31m+       const [rel, count] = entry.split(':');[39m
+[31m+       const key = rel.replaceAll('\\', '/');[39m
+[31m+       actual[key] = (actual[key] || 0) + Number(count);[39m
+[31m+     }[39m
+[31m+     // 白名单外的任何文件出现裸 font-size 即红；白名单内只许 ≤ 快照值。[39m
+[31m+     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);[39m
+[31m+     const problems: string[] = [];[39m
+[31m+     for (const key of allKeys) {[39m
+[31m+       // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const allowed = RATCHET[key] || 0;[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const found = actual[key] || 0;[39m
+[31m+       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);[39m
+[31m+     }[39m
+[31m+     expect(problems).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('holds no raw-color var() fallbacks beyond the frozen ratchet (禁颜色 fallback 棘轮)', () => {[39m
+[31m+     // var(--petri-*, #hex|rgba) 的字面色 fallback 绕过主题系统——存量冻结、新增即红。[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       const count = (text.match(/var\(--petri-[A-Za-z0-9-]+\s*,\s*(?:#[0-9a-fA-F]{3,8}|rgba?\()/g) || []).length;[39m
+[31m+       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);[39m
+[31m+     }[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       // W2 盘点快照（2026-10-11 实测 235 处/19 文件；逐批归并后收缩）。[39m
+[31m+       // UI-D3 / BLOCK-418 — 按当次现值重打：17 文件 / 190 处（原 19/235），[39m
+[31m+       // 归零的 MobileSync.module.css 与 styles/custom.css 两键删除（更严，非放宽），[39m
+[31m+       // 其余逐键下调到现值；新增 fallback 即红。WIP 文件 39 处零触碰、保持现值。[39m
+[31m+       'components/copilot/integration/integration.module.css': 2,[39m
+[31m+       'components/copilot/renderers/ChartRenderer.module.css': 1,[39m
+[31m+       'components/copilot/ResultCard.module.css': 16,[39m
+[31m+       'components/copilot/simple-chat.css': 45,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 1,[39m
+[31m+       'components/desktop/FolderPicker.module.css': 1,[39m
+[31m+       'components/desktop/TestInstanceBadge.module.css': 1,[39m
+[31m+       'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 14,[39m
+[31m+       'components/result-studio/ResultStudioChangeSetPanel.module.css': 1,[39m
+[31m+       'components/settings/ExperimentalFeaturesSection.module.css': 6,[39m
+[31m+       'components/ui/code-highlight.css': 6,[39m
+[31m+       'components/window/window-shell.module.css': 15,[39m
+[31m+       'components/workspace-panels/SshStatusDot.module.css': 3,[39m
+[31m+       'pages/home.module.css': 1,[39m
+[31m+       'pages/project-workspace.module.css': 39,[39m
+[31m+       'pages/welcome.module.css': 1,[39m
+[31m+       'pages/window/command-center.module.css': 37,[39m
+[31m+     };[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const entry of offenders) {[39m
+[31m+       const [rel, count] = entry.split(':');[39m
+[31m+       const key = rel.replaceAll('\\', '/');[39m
+[31m+       actual[key] = (actual[key] || 0) + Number(count);[39m
+[31m+     }[39m
+[31m+     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);[39m
+[31m+     const problems: string[] = [];[39m
+[31m+     for (const key of allKeys) {[39m
+[31m+       // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const allowed = RATCHET[key] || 0;[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const found = actual[key] || 0;[39m
+[31m+       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);[39m
+[31m+     }[39m
+[31m+     expect(problems).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   // ============================================================[39m
+[31m+   // BLOCK-167 — 产品质感提升（设计宪章用法门禁；docs/design-charter.md §7）[39m
+[31m+   // 棘轮形态与 BLOCK-161 一致：冻结基线快照，波次收缩时只许下调快照值。[39m
+[31m+   // 口径=全 CSS 面（module.css + 普通 css），为 plan §3 数字的 canonical 计数器。[39m
+[31m+   // ============================================================[39m
+[31m+[39m
+[31m+   const stripCss = (file: string): string => stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+[39m
+[31m+   /** 每文件计数快照（相对 frontend/src 的 posix 路径 → 次数）。 */[39m
+[31m+   function countPerFile(re: RegExp, transform: (css: string) => string = (css) => css): Record<string, number> {[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const count = (transform(stripCss(file)).match(new RegExp(re.source, 'g')) || []).length;[39m
+[31m+       if (count > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = count;[39m
+[31m+     }[39m
+[31m+     return actual;[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   /** 棘轮对账：actual 超出快照即红；收缩后下调快照（只许减不许增）。 */[39m
+[31m+   function expectRatchet(ratchet: Record<string, number>, actual: Record<string, number>) {[39m
+[31m+     const allKeys = new Set([...Object.keys(ratchet), ...Object.keys(actual)]);[39m
+[31m+     const problems: string[] = [];[39m
+[31m+     for (const key of allKeys) {[39m
+[31m+       // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const allowed = ratchet[key] || 0;[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const found = actual[key] || 0;[39m
+[31m+       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);[39m
+[31m+     }[39m
+[31m+     expect(problems).toEqual([]);[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   it('defines charter motion tiers and border semantics (宪章 token 存在性)', () => {[39m
+[31m+     const text =[39m
+[31m+       stripCss(path.join(srcRoot, 'styles', 'custom.css'))[39m
+[31m+       + stripCss(path.join(srcRoot, 'styles', 'global.css'));[39m
+[31m+     for (const token of [[39m
+[31m+       '--petri-duration-fast', '--petri-duration-base', '--petri-duration-slow',[39m
+[31m+       '--petri-ease-standard', '--petri-ease-emphasized',[39m
+[31m+       '--petri-border-input', '--petri-border-card', '--petri-divider',[39m
+[31m+     ]) {[39m
+[31m+       expect(text).toMatch(new RegExp(`${token.replace(/-/g, '\\-')}\\s*:`));[39m
+[31m+     }[39m
+[31m+     // duration 档值守卫（宪章 §4：150/200/300ms）[39m
+[31m+     const duration = (name: string) => {[39m
+[31m+       const m = text.match(new RegExp(`${name.replace(/-/g, '\\-')}\\s*:\\s*([\\d.]+)ms`));[39m
+[31m+       return m ? Number(m[1]) : -1;[39m
+[31m+     };[39m
+[31m+     expect(duration('--petri-duration-fast')).toBeLessThan(duration('--petri-duration-base'));[39m
+[31m+     expect(duration('--petri-duration-base')).toBeLessThan(duration('--petri-duration-slow'));[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('defines ::selection exactly once (选中色全局唯一·accent 派生)', () => {[39m
+[31m+     const hits: string[] = [];[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const count = (stripCss(file).match(/::selection/g) || []).length;[39m
+[31m+       if (count > 0) hits.push(`${path.relative(srcRoot, file).replaceAll('\\', '/')}:${count}`);[39m
+[31m+     }[39m
+[31m+     expect(hits).toEqual(['styles/global.css:1']);[39m
+[31m+     expect(stripCss(path.join(srcRoot, 'styles', 'global.css'))).toMatch([39m
+[31m+       /::selection\s*\{[^}]*var\(--petri-accent\)/,[39m
+[31m+     );[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('small font usage holds the frozen ratchet (小字号棘轮 W1=227；终态≤40 仅徽标域)', () => {[39m
+[31m+     // xs(11px)+sm(12px) 引用——W1 已重分类 519 处正文性小字→inherit(14)；[39m
+[31m+     // 剩余应为徽标/元信息语境（宪章 §1）。W2/W4 逐域审计后继续收缩并下调快照。[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       'components/common/ToastProvider.module.css': 5,[39m
+[31m+       // L3-7 断线相位横幅（BLOCK-412 期接入）：元信息读数 sm 域（对标 UI-523 RunStatsBar 先例）[39m
+[31m+       'components/projection-stream-banner.module.css': 1,[39m
+[31m+       'components/annotations/AnnotationOverlay.module.css': 1, // BLOCK-254 文字批注正文（图内注释；框内需小于页面正文，非正文性小字）[39m
+[31m+       'components/ui/controls/status.module.css': 3, // W4 三件套元信息（ErrorNotice/LoadingLabel）合法 sm 域[39m
+[31m+       // UI-593 空态重排：+2 = 工作区描述文案 + 入口卡说明行（次级元信息合法 sm 域，对标 status.module.css 先例）[39m
+[31m+       // UI-596 最近使用徽章：+1 = 「上次使用」pill（合法徽标域，对标 OrchestrationGraph 先例）[39m
+[31m+       'pages/project-workspace.module.css': 55,[39m
+[31m+       'components/copilot/simple-chat.css': 24,[39m
+[31m+       'components/workspace-panels/OrchestrationGraph.module.css': 1, // BLOCK-178 定性：节点状态徽标 pill（合法徽标域）[39m
+[31m+       // BLOCK-423/424/425 设置页：+11 = 导航描述 / 分组标签 / 字段提示 / 导入面板元信息 / 高级折叠标签与计数 / 字段右侧读数[39m
+[31m+       // （次级元信息合法 sm 域，对标 status.module.css 与 UI-593 空态描述先例；正文性文字一律 body）。[39m
+[31m+       'components/desktop/settings-redesign.module.css': 11,[39m
+[31m+       // UI-704 — 维护分区「手动检查更新」折叠摘要行：+1（次级元信息合法 sm 域，对标 BLOCK-424 高级折叠标签先例）[39m
+[31m+       'components/desktop/desktop.css': 17,[39m
+[31m+       // UI-704 — models「能力渠道」折叠开关元信息：+1（次级元信息合法 sm 域）[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/SettingsQuickwins.module.css': 1,[39m
+[31m+       // UI-705 — 标题栏 UpdatePill：pill 文本/面板说明/错误行三处次级元信息[39m
+[31m+       // （合法 sm 域，对标 status.module.css 先例；UI-704 UpdateCard 形态迭代退役，[39m
+[31m+       // 其旧键 2 随文件删除出籍=更严）。[39m
+[31m+       'components/desktop/titlebar/UpdatePill.module.css': 3,[39m
+[31m+       'components/result-studio/ScientificInteractionViewer.module.css': 15,[39m
+[31m+       'components/result-studio/ResultStudioChangeSetPanel.module.css': 13,[39m
+[31m+       'pages/extensions/styles.module.css': 12,[39m
+[31m+       'components/desktop/WorkingTreeReview/ReviewMode.css': 11,[39m
+[31m+       'components/workspace-panels/WorkspaceFileIcon.module.css': 9,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/MobileSync.module.css': 6,[39m
+[31m+       'components/result-studio/ResultStudioSurface.module.css': 5,[39m
+[31m+       'components/workspace-panels/KnowledgeSpacePanel.module.css': 5,[39m
+[31m+       'pages/home.module.css': 5,[39m
+[31m+       'pages/window/command-center.module.css': 5,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/Federation.module.css': 4,[39m
+[31m+       'components/desktop/TitleBar.module.css': 4,[39m
+[31m+       'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 4,[39m
+[31m+       'components/result-studio/RevisionCodeView.module.css': 4,[39m
+[31m+       'pages/welcome.module.css': 4,[39m
+[31m+       'components/copilot/LlmTranscriptViewer.css': 3,[39m
+[31m+       'components/copilot/RunStatsBar.module.css': 1, // UI-523 计量条元信息读数（本次/会话/上下文=合法徽标域）[39m
+[31m+       'components/window/rail-page.module.css': 3,[39m
+[31m+       'components/copilot/gen-ui/GenUiCard.module.css': 2,[39m
+[31m+       'components/copilot/ResultCard.module.css': 2,[39m
+[31m+       'components/desktop/TestInstanceBadge.module.css': 2,[39m
+[31m+       'components/result-studio/ResultAgentComposer.module.css': 2,[39m
+[31m+       'components/window/window-shell.module.css': 2,[39m
+[31m+       'pages/extensions/extensions.module.css': 2,[39m
+[31m+       'styles/custom.css': 2,[39m
+[31m+       'components/desktop/FolderPicker.module.css': 1,[39m
+[31m+       'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 1,[39m
+[31m+       'components/knowledge/KnowledgeConsoleChat.module.css': 1,[39m
+[31m+       'components/result-studio/CompactResultNavigator.module.css': 1,[39m
+[31m+       'components/result-studio/ResultEditPanel.module.css': 1,[39m
+[31m+       'components/ui/Lightbox.css': 1,[39m
+[31m+       'components/ui/WorkbenchEmpty.module.css': 1,[39m
+[31m+       'components/workspace-panels/WorkspaceCitationsSection.module.css': 1,[39m
+[31m+       'components/workspace-panels/WorkspaceTodoSection.module.css': 1,[39m
+[31m+     };[39m
+[31m+     expectRatchet(RATCHET, countPerFile(/var\(--petri-font-size-(?:xs|sm)\)/));[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('accent usage holds the frozen ratchet (accent 棘轮 W1=335；预算可执行形态=五类语义)', () => {[39m
+[31m+     // 宪章 §2：W1 装饰性清除 37 处（图标族/标签文本/notice 文本），其余为交互态/[39m
+[31m+     // 链接/状态点/badge=合法五类语义。预算的机械守护随 W2 控件收敛加 grep 守卫[39m
+[31m+     // （装饰性新增即红）；W2 后继续收缩并下调快照。[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       // UI-705 — 标题栏 UpdatePill pill 主按钮底+hover 深化+就绪态 fallback 三处（发现新版本=需要行动的主按钮语义，五类合法；同 .primary 先例）：[39m
+[31m+       'components/desktop/titlebar/UpdatePill.module.css': 3,'components/ui/controls/button.module.css': 1, // W2 共享 .primary 主按钮（五类合法语义）[39m
+[31m+       // UI-612 选择态：+2 = 选中批注 accent 外环（box）+ SVG 光晕（箭头/画笔）——「选中态」合法语义[39m
+[31m+       'components/annotations/AnnotationOverlay.module.css': 2,[39m
+[31m+       // BLOCK-178 存量清偿定性：W3/W5 两件的交互态焦点环/拖拽把手态（宪章五类合法；[39m
+[31m+       // LineageViewSwitch 既有条目 2 已覆盖其选中态计数，不重复登记）[39m
+[31m+       'components/workspace-panels/ArtifactPinPane.module.css': 2, // 拖拽把手态+键盘可达 focus ring[39m
+[31m+       'components/workspace-panels/OrchestrationGraph.module.css': 1, // 节点选中态[39m
+[31m+       // BLOCK-273 拖拽边界统一规范：+2 = 文件树把手悬停渐隐 glow（accent 16% 渐变）+[39m
+[31m+       // 分隔线 hover 转 accent（:has）——宪章五类「交互态拖拽把手」合法语义（同 ArtifactPinPane 先例）[39m
+[31m+       // UI-591 指针跟随渐晕：+1 = resizeHandleV::before 跟手 radial glow；[39m
+[31m+       // 用户裁决「有光晕后同色竖带冗余」：hover accent 线与 :has 分隔线转色退场（-2）[39m
+[31m+       // UI-593 空态重排：+7 = 工作区标题章底色/入口卡图标章（默认+hover）/卡片 hover accent 描边与底色——宪章五类「交互态入口卡」合法语义（同 ArtifactPinPane/拖拽把手先例）[39m
+[31m+       // UI-596 最近使用徽章：+2 = pill 底色+文字色（交互态入口卡语义延续）[39m
+[31m+       'pages/project-workspace.module.css': 63,[39m
+[31m+       'components/copilot/simple-chat.css': 24,[39m
+[31m+       // BLOCK-423 设置页视觉改版：+4 = checkbox / 搜索框 focus 描边 / 导入来源选中卡片描边 / 输入 focus 描边[39m
+[31m+       // （宪章五类「交互态」合法语义，对标 button.module.css .primary 与 AnnotationOverlay 选中态先例）。[39m
+[31m+       'components/desktop/settings-redesign.module.css': 3,[39m
+[31m+       'components/desktop/desktop.css': 13,[39m
+[31m+       'pages/extensions/styles.module.css': 12,[39m
+[31m+       'components/workspace-panels/KnowledgeSpacePanel.module.css': 14,[39m
+[31m+       'components/desktop/WorkingTreeReview/ReviewMode.css': 12,[39m
+[31m+       'pages/home.module.css': 14,[39m
+[31m+       'components/desktop/TitleBar.module.css': 10,[39m
+[31m+       'styles/custom.css': 9,[39m
+[31m+       'components/result-studio/ResultStudioChangeSetPanel.module.css': 8,[39m
+[31m+       'components/copilot/ToolActivityDock.module.css': 5,[39m
+[31m+       'components/result-studio/ScientificInteractionViewer.module.css': 7,[39m
+[31m+       'components/branch/BranchTabs.module.css': 5,[39m
+[31m+       'pages/extensions/extensions.module.css': 5,[39m
+[31m+       'components/result-studio/LineageStrip.module.css': 5,[39m
+[31m+       'pages/welcome.module.css': 2,[39m
+[31m+       'components/copilot/integration/integration.module.css': 4,[39m
+[31m+       'components/desktop/WorkingTreeReview/WorkingTreeReview.css': 4,[39m
+[31m+       'components/result-studio/CompactResultNavigator.module.css': 2,[39m
+[31m+       'components/result-studio/ResultEditPanel.module.css': 4,[39m
+[31m+       'components/result-studio/ResultStudioSurface.module.css': 4,[39m
+[31m+       'components/knowledge/KnowledgeConsoleChat.module.css': 3,[39m
+[31m+       'components/result-studio/LineageGraph.module.css': 3,[39m
+[31m+       'components/result-studio/ResultAgentComposer.module.css': 3,[39m
+[31m+       'components/window/rail-page.module.css': 3,[39m
+[31m+       'components/workspace-panels/WorkspaceTodoSection.module.css': 3,[39m
+[31m+       'components/copilot/MessageRail.module.css': 2,[39m
+[31m+       'components/knowledge/KnowledgeConsoleDock.module.css': 1,[39m
+[31m+       'components/result-studio/LineageViewSwitch.module.css': 1,[39m
+[31m+       'components/RouteErrorBoundary.module.css': 2,[39m
+[31m+       'components/workspace-panels/FloatCardResizer.module.css': 1, // 拖拽把手态：UI-591 跟手渐晕（同色 hover 线按用户裁决退场，常驻线本就中性）[39m
+[31m+       // BLOCK-342 切片2 — 路径节点编辑/钢笔 overlay：锚点/手柄/预览线 = 选中态编辑把手（五类合法语义，[39m
+[31m+       // 同 AnnotationOverlay「选中批注 accent 外环」先例）[39m
+[31m+       'components/svg-editor/SvgEditorViewer.module.css': 6, // BLOCK-343 P1 +1 = 选区浮动工具条边框（选中态语义延续）[39m
+[31m+       'components/viewers/MarkdownViewer.module.css': 1, // BLOCK-334 P2 — 自 workspace-panels/MarkdownResultViewer.module.css 平移（accent 用法不变）[39m
+[31m+       'components/viewers/SpreadsheetViewer.module.css': 0, // BLOCK-334 P2 Slice D — V1 装饰 glow 收敛归零[39m
+[31m+       'components/copilot/LlmTranscriptViewer.css': 1,[39m
+[31m+       'components/copilot/renderers/TableRenderer.module.css': 1,[39m
+[31m+       'components/copilot/ResultCard.module.css': 1,[39m
+[31m+       'components/result-studio/RevisionCodeView.module.css': 1,[39m
+[31m+       'pages/window/command-center.module.css': 1,[39m
+[31m+       'styles/global.css': 1,[39m
+[31m+     };[39m
+[31m+     expectRatchet(RATCHET, countPerFile(/var\(--petri-accent\)/));[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('non-semantic 1px borders hold zero tolerance (结构无语义细线=0·宪章 §3 终态)', () => {[39m
+[31m+     // W1 迁移 447 处后达成 0。计数器排除四类非治理对象（宪章豁免族）：[39m
+[31m+     // ①三语义 token 本体 ②transparent 占位（非视觉线）③状态/信号色边[39m
+[31m+     // （danger/warning/accent/status/titlebar/sc-border 沙箱族=彩色信号线）[39m
+[31m+     // ④currentControl 语义线。新增任何结构性 1px solid 即红。[39m
+[31m+     const BORDER_SEMANTIC = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*var\(--petri-(?:border-input|border-card|divider)\)/;[39m
+[31m+     const ALL_1PX = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*(:?;|\}|$)/;[39m
+[31m+     const EXEMPT = /transparent|status|danger|warning|accent|titlebar|sc-border|currentcolor/i;[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const css = stripCss(file);[39m
+[31m+       const all = (css.match(new RegExp(ALL_1PX.source, 'g')) || []).filter([39m
+[31m+         (decl) => !BORDER_SEMANTIC.test(decl) && !EXEMPT.test(decl),[39m
+[31m+       ).length;[39m
+[31m+       if (all > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = all;[39m
+[31m+     }[39m
+[31m+     expect(Object.entries(actual)).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('button class definitions hold the frozen inventory (按钮清单棘轮 W2=31 文件/125 定义)', () => {[39m
+[31m+     // 宪章 §6：新按钮一律用 ui/controls/button.module.css 变体（base/primary/ghost/[39m
+[31m+     // ghostCard/danger/iconBase）；组件文件不再新增按钮类定义——既有清单冻结，[39m
+[31m+     // 新文件出现定义或存量文件加定义即红。W2 起逐域迁移后下调快照。[39m
+[31m+     const RE = /\.([a-zA-Z]*[bB]tn[a-zA-Z]*|[a-zA-Z]*utton[a-zA-Z]*)\s*[,{]/g;[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const count = (stripCss(file).match(new RegExp(RE.source, 'g')) || []).length;[39m
+[31m+       if (count > 0) actual[path.relative(srcRoot, file).replaceAll('\\', '/')] = count;[39m
+[31m+     }[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       'components/ui/controls/status.module.css': 1, // W4 三件套 retryBtn（controls 家族豁免同 button.module.css）[39m
+[31m+       'pages/project-workspace.module.css': 40,[39m
+[31m+       'components/workspace-panels/KnowledgeSpacePanel.module.css': 10,[39m
+[31m+       'components/desktop/TitleBar.module.css': 10,[39m
+[31m+       'pages/extensions/styles.module.css': 8,[39m
+[31m+       'pages/window/command-center.module.css': 8,[39m
+[31m+       'components/result-studio/ResultStudioSurface.module.css': 7,[39m
+[31m+       'components/RouteErrorBoundary.module.css': 1,[39m
+[31m+       'components/copilot/ToolActivityDock.module.css': 3,[39m
+[31m+       'components/knowledge/KnowledgeConsoleChat.module.css': 3,[39m
+[31m+       'components/branch/BranchTabs.module.css': 2,[39m
+[31m+       'components/copilot/renderers/ChartRenderer.module.css': 2,[39m
+[31m+       'components/desktop/FolderPicker.module.css': 2,[39m
+[31m+       'components/desktop/TestInstanceBadge.module.css': 2,[39m
+[31m+       'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 2,[39m
+[31m+       'components/result-studio/LineageViewSwitch.module.css': 2,[39m
+[31m+       'components/window/rail-page.module.css': 2,[39m
+[31m+       'components/window/window-shell.module.css': 2,[39m
+[31m+       'components/workspace-panels/KnowledgeSpaceSwitcher.module.css': 2,[39m
+[31m+       'components/copilot/gen-ui/GenUiCard.module.css': 1,[39m
+[31m+       'components/copilot/MessageRail.module.css': 1,[39m
+[31m+       'components/copilot/renderers/TableRenderer.module.css': 1,[39m
+[31m+       'components/desktop/desktop.css': 1,[39m
+[31m+       'components/knowledge/KnowledgeConsoleDock.module.css': 1,[39m
+[31m+       'components/result-studio/ResultStudioChangeSetPanel.module.css': 1,[39m
+[31m+       'components/ui/controls/button.module.css': 6,[39m
+[31m+       // UI-627（BLOCK-321）— 侧聊独立窗 ✕ 按钮（同 SideChatDock closeBtn 先例：窗口级关闭钮）[39m
+[31m+       'pages/window/SideChatWindowPage.module.css': 1,[39m
+[31m+       'components/workspace-panels/SshStatusDot.module.css': 1,[39m
+[31m+       'pages/extensions/extensions.module.css': 1,[39m
+[31m+       'pages/global-page.module.css': 1,[39m
+[31m+       'pages/welcome.module.css': 1,[39m
+[31m+       'styles/custom.css': 1,[39m
+[31m+     };[39m
+[31m+     expectRatchet(RATCHET, actual);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('transition durations use motion tokens (motion 棘轮：字面量时长仅存功能保留)', () => {[39m
+[31m+     // 宪章 §4：W3 起全站 transition 时长走 duration 三档 token；唯一豁免=[39m
+[31m+     // global.css reduced-motion 功能块的 transition-delay: 0ms（0 值非档位语义）。[39m
+[31m+     const LITERAL_TIME = /transition[a-z-]*:\s*[^;]*\d*\.?\d+m?s/;[39m
+[31m+     const offenders: { file: string; decl: string }[] = [];[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       const css = stripCss(file);[39m
+[31m+       for (const m of css.matchAll(new RegExp(LITERAL_TIME.source, 'g'))) {[39m
+[31m+         offenders.push({ file: path.relative(srcRoot, file), decl: m[0].trim().slice(0, 70) });[39m
+[31m+       }[39m
+[31m+     }[39m
+[31m+     const ALLOWED = offenders.filter([39m
+[31m+       (o) => o.file.replaceAll('\\', '/') === 'styles/global.css' && /transition-delay:\s*0/.test(o.decl),[39m
+[31m+     );[39m
+[31m+     expect(offenders.filter((o) => !ALLOWED.includes(o))).toEqual([]);[39m
+[31m+     // token 化存量守卫：duration token 引用必须存在（防整段退化）[39m
+[31m+     let tokenUses = 0;[39m
+[31m+     for (const file of CSS_FILES()) {[39m
+[31m+       tokenUses += ([39m
+[31m+         stripCss(file).match(/var\(--petri-duration-(?:fast|base|slow)\)/g) || [][39m
+[31m+       ).length;[39m
+[31m+     }[39m
+[31m+     expect(tokenUses).toBeGreaterThan(150);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('charter counters catch synthetic violations (红证据自检)', () => {[39m
+[31m+     // 合成违例必须被计数器抓住——棘轮「新增即红」的机制证明（HK-04 精确红先例）。[39m
+[31m+     const count = (css: string, re: RegExp) => (css.match(new RegExp(re.source, 'g')) || []).length;[39m
+[31m+     const smallHit = count([39m
+[31m+       '.x { font-size: var(--petri-font-size-xs); }',[39m
+[31m+       /var\(--petri-font-size-(?:xs|sm)\)/,[39m
+[31m+     );[39m
+[31m+     const accentHit = count('.x { color: var(--petri-accent); }', /var\(--petri-accent\)/);[39m
+[31m+     const bare = '.x { border: 1px solid var(--petri-border); }';[39m
+[31m+     const semantic = '.x { border: 1px solid var(--petri-border-input); }';[39m
+[31m+     const ALL_1PX = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*(:?;|\}|$)/;[39m
+[31m+     const BORDER_SEMANTIC = /border[^:{}]*:\s*[^;{}]*\b1px\s+solid[^;}]*var\(--petri-(?:border-input|border-card|divider)\)/;[39m
+[31m+     const bareHit = (bare.match(new RegExp(ALL_1PX.source, 'g')) || []).filter([39m
+[31m+       (d) => !BORDER_SEMANTIC.test(d),[39m
+[31m+     ).length;[39m
+[31m+     const semanticHit = (semantic.match(new RegExp(ALL_1PX.source, 'g')) || []).filter([39m
+[31m+       (d) => !BORDER_SEMANTIC.test(d),[39m
+[31m+     ).length;[39m
+[31m+     expect(smallHit).toBe(1);[39m
+[31m+     expect(accentHit).toBe(1);[39m
+[31m+     expect(bareHit).toBe(1);[39m
+[31m+     expect(semanticHit).toBe(0);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   // ============================================================[39m
+[31m+   // BLOCK-413（L-66/L-67 补腿）——全源 .tsx/.css 数字 z-index 棘轮[39m
+[31m+   // 与内联颜色字面量全量 .tsx 只减棘轮（蓝图 §4-L6；存量冻结、新增即红）。[39m
+[31m+   // 计数器口径自检见 'charter counters catch synthetic violations'。[39m
+[31m+   // ============================================================[39m
+[31m+[39m
+[31m+   it('holds no digital z-index beyond the frozen ratchet across tsx/ts/css (BLOCK-413 L-66/L-71 棘轮)', () => {[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of walk(srcRoot)) {[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       const count = (text.match(/z-?[Ii]ndex\s*:\s*(?!["'`]?\s*var\()\d/g) || []).length;[39m
+[31m+       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);[39m
+[31m+     }[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       // BLOCK-413 冻结 38 文件 / 111 处。[39m
+[31m+       // UI-D3 / BLOCK-418 — 7 处精确等价裸值（100/1000/10000）迁移到[39m
+[31m+       // var(--petri-z-*)，按当次现值下调为 34 文件 / 104 处（只减不放宽）：[39m
+[31m+       // 归零 4 键删除（更严），3 个文件数值下调；不等价档位（9998/10001/100000 等）[39m
+[31m+       // 不硬映射、保留现值。WIP 文件 26 处零触碰、保持现值。[39m
+[31m+       // 注：SvgEditorViewer ×2 与 TitleBar ×1 的 10/10000 因 code-size 入册文件[39m
+[31m+       // 字节棘轮「只减不增」不能替换为更长字符串，保留裸值并登记在[39m
+[31m+       // gate:ui-visual 的 Z_TIER_FROZEN 冻结清单（新增即红、只减不增）。[39m
+[31m+       'App.tsx': 2,[39m
+[31m+       'components/annotations/AnnotationBar.module.css': 1,[39m
+[31m+       'components/annotations/AnnotationOverlay.module.css': 2,[39m
+[31m+       'components/copilot/ChatArtifactCard.tsx': 1,[39m
+[31m+       'components/copilot/ChatScrollbar.module.css': 1,[39m
+[31m+       'components/copilot/ContextBudgetBar.tsx': 1,[39m
+[31m+       'components/copilot/MessageRail.module.css': 2,[39m
+[31m+       'components/copilot/SimpleChat/PromptEnhanceDialog.module.css': 1,[39m
+[31m+       'components/copilot/SimpleChat/ScheduleDialog.module.css': 1,[39m
+[31m+       'components/copilot/ToolActivityDock.module.css': 1,[39m
+[31m+       'components/copilot/simple-chat.css': 17,[39m
+[31m+       'components/desktop/CrashNoticeBanner.tsx': 1,[39m
+[31m+       'components/desktop/InstallDeepLinkDialog.tsx': 1,[39m
+[31m+       'components/desktop/PluginStorePanel.tsx': 1,[39m
+[31m+       'components/desktop/TitleBar.module.css': 3,[39m
+[31m+       'components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css': 1,[39m
+[31m+       'components/desktop/WorkingTreeReview/ReviewMode.css': 5,[39m
+[31m+       'components/desktop/desktop.css': 3,[39m
+[31m+       'components/desktop/theme-control.css': 1,[39m
+[31m+       'components/desktop/titlebar/ColumnizedTitleBar.module.css': 1,[39m
+[31m+       'components/desktop/titlebar/TitleBarRightZone.tsx': 1,[39m
+[31m+       'components/knowledge/KnowledgeConsoleDock.module.css': 2,[39m
+[31m+       'components/result-studio/CompactResultNavigator.module.css': 2,[39m
+[31m+       'components/result-studio/ContinueAnalysisMenu.module.css': 1,[39m
+[31m+       'components/result-studio/RevisionCodeView.module.css': 1,[39m
+[31m+       'components/shell/QuitSummaryDialog.module.css': 1,[39m
+[31m+       'components/svg-editor/SvgEditorViewer.module.css': 16,[39m
+[31m+       'components/ui/Lightbox.css': 1,[39m
+[31m+       'components/workspace-panels/FloatCardResizer.module.css': 1,[39m
+[31m+       'pages/project-workspace.module.css': 26,[39m
+[31m+       'pages/welcome.module.css': 2,[39m
+[31m+       'pages/window/CommandCenterJobsWall.tsx': 1,[39m
+[31m+       'pages/window/SideChatWindowPage.module.css': 1,[39m
+[31m+       'themes/ThemeProvider.tsx': 1,[39m
+[31m+     }[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const entry of offenders) {[39m
+[31m+       const [rel, count] = entry.split(':');[39m
+[31m+       const key = rel.replaceAll('\\', '/');[39m
+[31m+       // 误报豁免：key 来自 offenders 自建清单与冻结基线（同 306-309 先例），非外部输入。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       actual[key] = (actual[key] || 0) + Number(count);[39m
+[31m+     }[39m
+[31m+     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);[39m
+[31m+     const problems: string[] = [];[39m
+[31m+     for (const key of allKeys) {[39m
+[31m+       // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const allowed = RATCHET[key] || 0;[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const found = actual[key] || 0;[39m
+[31m+       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);[39m
+[31m+     }[39m
+[31m+     expect(problems).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   it('holds inline color literals across all tsx to the frozen ratchet (BLOCK-413 L-67 全量扫描)', () => {[39m
+[31m+     const offenders: string[] = [];[39m
+[31m+     for (const file of walk(srcRoot)) {[39m
+[31m+       if (!file.endsWith('.tsx')) continue;[39m
+[31m+       const text = stripComments(fs.readFileSync(file, 'utf8'));[39m
+[31m+       const count = (text.match(/#[0-9a-fA-F]{6}\b|rgba?\(\s*\d{1,3}/g) || []).length;[39m
+[31m+       if (count > 0) offenders.push(`${path.relative(srcRoot, file)}:${count}`);[39m
+[31m+     }[39m
+[31m+     const RATCHET: Record<string, number> = {[39m
+[31m+       'App.tsx': 1,[39m
+[31m+       'components/copilot/ChatArtifactCard.tsx': 9,[39m
+[31m+       'components/copilot/ContextBudgetBar.tsx': 18,[39m
+[31m+       'components/copilot/SimpleChat/SlashCommandPanel.tsx': 1,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/AgentRulesPanel.tsx': 2,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/MemoryPanel.tsx': 1,[39m
+[31m+       'components/desktop/DesktopSettingsPanel/sections/ToolApprovalPanel.tsx': 1,[39m
+[31m+       'components/desktop/InstallDeepLinkDialog.tsx': 1,[39m
+[31m+       'components/desktop/PluginStorePanel.tsx': 8,[39m
+[31m+       'components/result-studio/ResultEditPanel.tsx': 1,[39m
+[31m+       'components/svg-editor/SvgEditorViewer.tsx': 5,[39m
+[31m+       'components/work-surface/Model3DScene.tsx': 1,[39m
+[31m+       'components/workspace-panels/AnalysisLaunchPanel.tsx': 1,[39m
+[31m+       'components/workspace-panels/LeftSshCreatePanel.tsx': 3,[39m
+[31m+       'components/workspace-panels/OrchestrationGraph.tsx': 8,[39m
+[31m+       'pages/project-workspace/WorkspaceFilePreview.tsx': 1,[39m
+[31m+     }[39m
+[31m+     const actual: Record<string, number> = {};[39m
+[31m+     for (const entry of offenders) {[39m
+[31m+       const [rel, count] = entry.split(':');[39m
+[31m+       const key = rel.replaceAll('\\', '/');[39m
+[31m+       // 误报豁免：key 来自 offenders 自建清单与冻结基线（同 306-309 先例），非外部输入。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       actual[key] = (actual[key] || 0) + Number(count);[39m
+[31m+     }[39m
+[31m+     const allKeys = new Set([...Object.keys(RATCHET), ...Object.keys(actual)]);[39m
+[31m+     const problems: string[] = [];[39m
+[31m+     for (const key of allKeys) {[39m
+[31m+       // 误报豁免：key 来自同两对象的 Object.keys 并集，非外部输入（security/detect-object-injection）。[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const allowed = RATCHET[key] || 0;[39m
+[31m+       // eslint-disable-next-line security/detect-object-injection[39m
+[31m+       const found = actual[key] || 0;[39m
+[31m+       if (found > allowed) problems.push(`${key}: ${found} > ratchet ${allowed}`);[39m
+[31m+     }[39m
+[31m+     expect(problems).toEqual([]);[39m
+[31m+   });[39m
+[31m+[39m
+[31m+ });[39m
+[31m+[39m
+
+[36m [2m❯[22m src/styles/FormGrammar.test.ts:[2m33:62[22m[39m
+    [90m 31|[39m     const contract = read(CONTRACT);
+    [90m 32|[39m     for (const t of ['--petri-radius-seal', '--petri-radius-icon', '--…
+    [90m 33|[39m       expect(contract, `${t} missing in contract tier list`).toContain…
+    [90m   |[39m                                                              [31m^[39m
+    [90m 34|[39m     }
+    [90m 35|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/FormGrammar.test.ts[2m > [22m形态语义层级（form grammar）[2m > [22mhigh-frequency icon seats consume the icon-seat tier (not the generic square)
+[31m[1mAssertionError[22m: frontend/src/components/desktop/TitleBar.module.css .iconBtn still square: expected '\n  position: relative;\n  display: f…' to match /border-radius:\s*var\(--petri-radius-…/[39m
+
+[32m- Expected:[39m
+/border-radius:\s*var\(--petri-radius-icon\)/
+
+[31m+ Received:[39m
+"
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--petri-radius-md);
+  background: transparent;
+  color: var(--titlebar-ink-muted);
+  cursor: pointer;
+  transition: background var(--petri-duration-fast) ease, color var(--petri-duration-fast) ease, opacity var(--petri-duration-fast) ease;
+  padding: 0;
+  flex-shrink: 0;
+  /* UI-215 补充：纯图标按钮收敛 UA 默认字号（13.3333px）到 token */
+  font-size: var(--petri-font-size-sm);
+"
+
+[36m [2m❯[22m src/styles/FormGrammar.test.ts:[2m47:52[22m[39m
+    [90m 45|[39m       const block = css.match(new RegExp(`${cls.replace('.', '\\.')}\\…
+    [90m 46|[39m       expect(block, `${file} ${cls} missing`).not.toBe('');
+    [90m 47|[39m       expect(block, `${file} ${cls} still square`).toMatch(/border-rad…
+    [90m   |[39m                                                    [31m^[39m
+    [90m 48|[39m     }
+    [90m 49|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/FormGrammar.test.ts[2m > [22m形态语义层级（form grammar）[2m > [22mworkbench hero icon uses card squircle, empty badge is a circular seal
+[31m[1mAssertionError[22m: expected '\n  width: 50px;\n  height: 50px;\n  …' to match /border-radius:\s*var\(--petri-radius-…/[39m
+
+[32m- Expected:[39m
+/border-radius:\s*var\(--petri-radius-card\)/
+
+[31m+ Received:[39m
+"
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background: var(--petri-accent-bg);
+  color: var(--petri-text-secondary);
+  border: 1px solid var(--petri-border-card);
+"
+
+[36m [2m❯[22m src/styles/FormGrammar.test.ts:[2m54:18[22m[39m
+    [90m 52|[39m     const home = read('frontend/src/pages/home.module.css');
+    [90m 53|[39m     const hero = home.match(/\.workbenchIcon\s*\{([^}]*)\}/)?.[1] ?? '…
+    [90m 54|[39m     expect(hero).toMatch(/border-radius:\s*var\(--petri-radius-card\)/…
+    [90m   |[39m                  [31m^[39m
+    [90m 55|[39m     const pw = read('frontend/src/pages/project-workspace.module.css');
+    [90m 56|[39m     const badge = pw.match(/\.emptyResultBadge\s*\{([^}]*)\}/)?.[1] ??…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/FormGrammar.test.ts[2m > [22m形态语义层级（form grammar）[2m > [22mIcon single-source has a seal-square atom (方印点睛) reusing round stroke family
+[31m[1mAssertionError[22m: expected '// ==================================…' to match /'seal-square'/[39m
+
+[32m- Expected:[39m
+/'seal-square'/
+
+[31m+ Received:[39m
+"// ============================================================
+// Icon — minimal inline-SVG icon component
+//
+// Self-contained. Pulls only what we need. Lucide-style outline
+// (24x24, stroke 1.75, round caps + joins, currentColor).
+//
+// Add a new icon by extending the `paths` map below — only declare
+// what's actually rendered in UI chrome (NOT in chat content / FigCode
+// slogans, those stay as authored).
+//
+// Usage:
+//   <Icon name=\"book\" />
+//   <Icon name=\"graduation-cap\" size={18} />
+//   <Icon name=\"dna\" className=\"petri-icon--accent\" />
+// ============================================================
+
+import React from 'react';
+
+export type IconName =
+  | 'search'
+  | 'user'
+  | 'book'
+  | 'book-marked'
+  | 'graduation-cap'
+  | 'dna'
+  | 'shield'
+  | 'log-out'
+  | 'bar-chart'
+  | 'calendar'
+  | 'repeat'
+  | 'printer'
+  | 'brain'
+  | 'study'
+  | 'sparkles'
+  | 'arrow-right'
+  | 'arrow-up'
+  | 'check'
+  | 'copy'
+  | 'eye'
+  | 'eye-off'
+  | 'pencil'
+  | 'refresh'
+  | 'flag'
+  | 'pin'
+  | 'archive'
+  | 'sidebar'
+  | 'image'
+  | 'settings'
+  | 'smartphone'
+  | 'puzzle'
+  | 'x'
+  | 'download'
+  | 'trash'
+  | 'key'
+  | 'cpu'
+  | 'bot'
+  | 'sun'
+  | 'moon'
+  | 'zap'
+  // A2 身份原子（格物视觉语境；与 Lucide 风格同笔画族，非通用图标）
+  | 'open-ring'
+  | 'offset-grid'
+  | 'hairline'
+  | 'clock'
+  | 'bell'
+  | 'folder'
+  | 'file'
+  | 'svg'
+  | 'database'
+  | 'globe'
+  | 'terminal'
+  | 'arrow-left'
+  | 'panel-left'
+  | 'panel-right'
+  | 'panel-bottom'
+  | 'chevron-down'
+  | 'chevron-up'
+  | 'chevron-right'
+  | 'wrench'
+  | 'layout-grid'
+  | 'list-details'
+  | 'plus'
+  | 'message-circle'
+  | 'send'
+  | 'square'
+  | 'square-stack'
+  | 'minus'
+  | 'restore'
+  | 'expand'
+  | 'more-horizontal'
+  | 'help-circle'
+  | 'alert-circle'
+  | 'alert-triangle'
+  | 'git-branch'
+  | 'command'
+  | 'layers'
+  | 'play'
+  | 'info'
+  | 'table'
+  | 'home'
+  | 'circle'
+  | 'arrow-up-right'
+  | 'type'
+  | 'highlighter'
+  | 'pen-tool'
+  | 'undo-2'
+  | 'mouse-pointer';
+
+interface IconProps {
+  name: IconName;
+  size?: number;
+  className?: string;
+  /** Optional aria-label. If omitted, the icon is decorative (aria-hidden). */
+  label?: string;
+  strokeWidth?: number;
+}
+
+// All paths share: 24×24 viewBox, fill=none, stroke=currentColor.
+// Each entry returns the inner SVG (without the <svg> wrapper).
+const paths: Record<IconName, React.ReactNode> = {
+  // Search — magnifying glass
+  search: (
+    <>
+      <circle cx=\"11\" cy=\"11\" r=\"8\" />
+      <line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\" />
+    </>
+  ),
+  // User — person avatar
+  user: (
+    <>
+      <path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\" />
+      <circle cx=\"12\" cy=\"7\" r=\"4\" />
+    </>
+  ),
+  // BookOpen — learning records
+  book: (
+    <>
+      <path d=\"M2 4h7a3 3 0 0 1 3 3v13\" />
+      <path d=\"M22 4h-7a3 3 0 0 0-3 3v13\" />
+      <path d=\"M2 4v15h7a3 3 0 0 1 3 3\" />
+      <path d=\"M22 4v15h-7a3 3 0 0 0-3 3\" />
+    </>
+  ),
+  // BookMarked — \"这张图属于哪节课\"
+  'book-marked': (
+    <>
+      <path d=\"M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16l4-3 4 3 4-3 2 1Z\" />
+      <path d=\"M10 3v8l2-1.5L14 11V3\" />
+    </>
+  ),
+  // GraduationCap — 组学实践
+  'graduation-cap': (
+    <>
+      <path d=\"M22 10v6\" />
+      <path d=\"m2 10 10-5 10 5-10 5-10-5Z\" />
+      <path d=\"M6 12v5c3 2 9 2 12 0v-5\" />
+    </>
+  ),
+  // DNA — single-cell platform
+  dna: (
+    <>
+      <path d=\"M4 3v1a8 8 0 0 0 16 0V3\" />
+      <path d=\"M4 21v-1a8 8 0 0 1 16 0v1\" />
+      <path d=\"M7 6h10\" />
+      <path d=\"M7 18h10\" />
+      <path d=\"M9 9h6\" />
+      <path d=\"M9 15h6\" />
+    </>
+  ),
+  // Shield — admin / governance
+  shield: (
+    <>
+      <path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z\" />
+    </>
+  ),
+  // LogOut
+  'log-out': (
+    <>
+      <path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\" />
+      <polyline points=\"16 17 21 12 16 7\" />
+      <line x1=\"21\" y1=\"12\" x2=\"9\" y2=\"12\" />
+    </>
+  ),
+  // BarChart3 — 各领域分布
+  'bar-chart': (
+    <>
+      <path d=\"M3 3v18h18\" />
+      <path d=\"M7 16v-5\" />
+      <path d=\"M12 16V7\" />
+      <path d=\"M17 16v-3\" />
+    </>
+  ),
+  // Calendar — 时间线
+  calendar: (
+    <>
+      <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\" />
+      <line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\" />
+      <line x1=\"3\" y1=\"10\" x2=\"21\" y2=\"10\" />
+    </>
+  ),
+  // Repeat / RefreshCw — 复习
+  repeat: (
+    <>
+      <path d=\"m17 2 4 4-4 4\" />
+      <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" />
+      <path d=\"m7 22-4-4 4-4\" />
+      <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />
+    </>
+  ),
+  // Printer
+  printer: (
+    <>
+      <polyline points=\"6 9 6 2 18 2 18 9\" />
+      <path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\" />
+      <rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" />
+    </>
+  ),
+  // Brain
+  brain: (
+    <>
+      <path d=\"M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z\" />
+      <path d=\"M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z\" />
+    </>
+  ),
+  // Study (a generic notebook + pen)
+  study: (
+    <>
+      <path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\" />
+      <path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z\" />
+      <path d=\"M9 6h6\" />
+      <path d=\"M9 10h6\" />
+    </>
+  ),
+  // Sparkles — AI vibe
+  sparkles: (
+    <>
+      <path d=\"m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15l-1.9-4.1L5.5 9l4.6-1.4L12 3Z\" />
+      <path d=\"M5 19l.7 1.6L7.5 21l-1.8.4L5 23l-.7-1.6L2.5 21l1.8-.4L5 19Z\" />
+      <path d=\"M19 14l.7 1.6L21.5 16l-1.8.4L19 18l-.7-1.6L16.5 16l1.8-.4L19 14Z\" />
+    </>
+  ),
+  // ArrowRight
+  'arrow-right': (
+    <>
+      <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />
+      <polyline points=\"12 5 19 12 12 19\" />
+    </>
+  ),
+  // ArrowUp — submit / send
+  'arrow-up': (
+    <>
+      <line x1=\"12\" y1=\"19\" x2=\"12\" y2=\"5\" />
+      <polyline points=\"5 12 12 5 19 12\" />
+    </>
+  ),
+  check: <polyline points=\"20 6 9 17 4 12\" />,
+  copy: (
+    <>
+      <rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\" />
+      <path d=\"M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1\" />
+    </>
+  ),
+  eye: (
+    <>
+      <path d=\"M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z\" />
+      <circle cx=\"12\" cy=\"12\" r=\"2.5\" />
+    </>
+  ),
+  'eye-off': (
+    <>
+      <path d=\"m3 3 18 18\" />
+      <path d=\"M10.6 6.2A10.8 10.8 0 0 1 12 6c6.5 0 10 6 10 6a18.7 18.7 0 0 1-3.1 3.7\" />
+      <path d=\"M6.3 6.4C3.6 8.2 2 12 2 12s3.5 6 10 6a10.8 10.8 0 0 0 2.1-.2\" />
+    </>
+  ),
+  pencil: (
+    <>
+      <path d=\"M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\" />
+      <path d=\"m15 5 4 4\" />
+    </>
+  ),
+  refresh: (
+    <>
+      <path d=\"M3 12a9 9 0 0 1 15-6.7L21 8\" />
+      <polyline points=\"21 3 21 8 16 8\" />
+      <path d=\"M21 12a9 9 0 0 1-15 6.7L3 16\" />
+      <polyline points=\"3 21 3 16 8 16\" />
+    </>
+  ),
+  // Flag — milestone / start
+  flag: (
+    <>
+      <path d=\"M4 22V4\" />
+      <path d=\"M4 4h13l-2 4 2 4H4\" />
+    </>
+  ),
+  pin: (
+    <>
+      <line x1=\"12\" y1=\"17\" x2=\"12\" y2=\"22\" />
+      <path d=\"M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1V4H8v2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z\" />
+    </>
+  ),
+  // Archive — 长期记忆 / 事实档案（Lucide archive）
+  archive: (
+    <>
+      <rect x=\"3\" y=\"4\" width=\"18\" height=\"4\" rx=\"1\" />
+      <path d=\"M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8\" />
+      <path d=\"M10 12h4\" />
+    </>
+  ),
+  // Sidebar (right) — dock the copilot panel as a side column
+  sidebar: (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\" />
+    </>
+  ),
+  // Image — attach picture (Lucide image)
+  image: (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <circle cx=\"9\" cy=\"9\" r=\"2\" />
+      <path d=\"m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21\" />
+    </>
+  ),
+  // Settings — gear (Lucide settings, mechanical look)
+  settings: (
+    <>
+      <path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" />
+      <circle cx=\"12\" cy=\"12\" r=\"3\" />
+    </>
+  ),
+  // Smartphone — phone / mobile remote (Lucide smartphone)
+  smartphone: (
+    <>
+      <rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\" />
+      <path d=\"M12 18h.01\" />
+    </>
+  ),
+  // Puzzle — plugin / extension (Lucide puzzle)
+  puzzle: (
+    <>
+      <path d=\"M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.878.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02z\" />
+    </>
+  ),
+  // X — close (Lucide x)
+  x: (
+    <>
+      <line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\" />
+      <line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\" />
+    </>
+  ),
+  // Download (Lucide download)
+  download: (
+    <>
+      <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" />
+      <polyline points=\"7 10 12 15 17 10\" />
+      <line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" />
+    </>
+  ),
+  // Trash (Lucide trash-2)
+  trash: (
+    <>
+      <path d=\"M3 6h18\" />
+      <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\" />
+      <line x1=\"10\" y1=\"11\" x2=\"10\" y2=\"17\" />
+      <line x1=\"14\" y1=\"11\" x2=\"14\" y2=\"17\" />
+    </>
+  ),
+  // Key (Lucide key)
+  key: (
+    <>
+      <circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\" />
+      <path d=\"m21 2-9.6 9.6\" />
+      <path d=\"m15.5 7.5 3 3L22 7l-3-3\" />
+    </>
+  ),
+  // CPU — runtime / engine (Lucide cpu)
+  cpu: (
+    <>
+      <rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\" />
+      <rect x=\"9\" y=\"9\" width=\"6\" height=\"6\" />
+      <line x1=\"9\" y1=\"1\" x2=\"9\" y2=\"4\" />
+      <line x1=\"15\" y1=\"1\" x2=\"15\" y2=\"4\" />
+      <line x1=\"9\" y1=\"20\" x2=\"9\" y2=\"23\" />
+      <line x1=\"15\" y1=\"20\" x2=\"15\" y2=\"23\" />
+      <line x1=\"20\" y1=\"9\" x2=\"23\" y2=\"9\" />
+      <line x1=\"20\" y1=\"14\" x2=\"23\" y2=\"14\" />
+      <line x1=\"1\" y1=\"9\" x2=\"4\" y2=\"9\" />
+      <line x1=\"1\" y1=\"14\" x2=\"4\" y2=\"14\" />
+    </>
+  ),
+  // Sun — light mode (Lucide sun)
+  sun: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"4\" />
+      <line x1=\"12\" y1=\"2\" x2=\"12\" y2=\"4\" />
+      <line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"22\" />
+      <line x1=\"4.93\" y1=\"4.93\" x2=\"6.34\" y2=\"6.34\" />
+      <line x1=\"17.66\" y1=\"17.66\" x2=\"19.07\" y2=\"19.07\" />
+      <line x1=\"2\" y1=\"12\" x2=\"4\" y2=\"12\" />
+      <line x1=\"20\" y1=\"12\" x2=\"22\" y2=\"12\" />
+      <line x1=\"4.93\" y1=\"19.07\" x2=\"6.34\" y2=\"17.66\" />
+      <line x1=\"17.66\" y1=\"6.34\" x2=\"19.07\" y2=\"4.93\" />
+    </>
+  ),
+  // Moon — dark mode (Lucide moon)
+  moon: <path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z\" />,
+  // Zap — quick start / lightning (Lucide zap)
+  zap: <polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\" />,
+  // A2 身份原子 —— 开环：缺口朝下，不闭合、留余地（本地主权形态隐喻）。
+  'open-ring': (
+    <>
+      <path d=\"M5.6 17.2A8 8 0 1 1 18.4 17.2\" />
+      <line x1=\"5.6\" y1=\"17.2\" x2=\"8\" y2=\"17.2\" />
+      <line x1=\"16\" y1=\"17.2\" x2=\"18.4\" y2=\"17.2\" />
+    </>
+  ),
+  // A2 身份原子 —— 错落四格：一格点睛（小点标记），其余同族中性。
+  'offset-grid': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\" />
+      <rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\" />
+      <rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\" />
+      <rect x=\"13.5\" y=\"13.5\" width=\"8\" height=\"8\" rx=\"1\" />
+      <circle cx=\"17.5\" cy=\"17.5\" r=\"1\" />
+    </>
+  ),
+  // A2 身份原子 —— 发丝线：分隔用细线，端点有界（不是卡片描边）。
+  hairline: (
+    <>
+      <line x1=\"3\" y1=\"12\" x2=\"21\" y2=\"12\" />
+      <line x1=\"3\" y1=\"9.5\" x2=\"3\" y2=\"14.5\" />
+      <line x1=\"21\" y1=\"9.5\" x2=\"21\" y2=\"14.5\" />
+    </>
+  ),
+  // Clock — recent runs (Lucide clock)
+  clock: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <polyline points=\"12 6 12 12 16 14\" />
+    </>
+  ),
+  // Bell — notification center (Lucide bell)
+  bell: (
+    <>
+      <path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\" />
+      <path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\" />
+    </>
+  ),
+  // Folder — project / resource (Lucide folder)
+  folder: <path d=\"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z\" />,
+  // File — generic file (Lucide file)
+  file: (
+    <>
+      <path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" />
+      <polyline points=\"14 2 14 8 20 8\" />
+    </>
+  ),
+  // SVG — vector file / chart artifact
+  svg: (
+    <>
+      <path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" />
+      <polyline points=\"14 2 14 8 20 8\" />
+      <path d=\"M8.5 13.5 10.5 11l2 2.5 2-3 1.5 2\" />
+      <circle cx=\"8.5\" cy=\"13.5\" r=\"0.75\" />
+      <circle cx=\"10.5\" cy=\"11\" r=\"0.75\" />
+      <circle cx=\"12.5\" cy=\"13.5\" r=\"0.75\" />
+      <circle cx=\"14.5\" cy=\"10.5\" r=\"0.75\" />
+      <circle cx=\"16\" cy=\"12.5\" r=\"0.75\" />
+    </>
+  ),
+  // Database — dataset / storage (Lucide database)
+  database: (
+    <>
+      <ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\" />
+      <path d=\"M3 5v14a9 3 0 0 0 18 0V5\" />
+      <path d=\"M3 12a9 3 0 0 0 18 0\" />
+    </>
+  ),
+  // Globe — browser / web surface
+  globe: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <path d=\"M2 12h20\" />
+      <path d=\"M12 2c3.5 3.5 3.5 16.5 0 20\" />
+      <path d=\"M12 2c-3.5 3.5-3.5 16.5 0 20\" />
+    </>
+  ),
+  // Terminal — agent / console (Lucide terminal)
+  terminal: (
+    <>
+      <polyline points=\"4 17 10 11 4 5\" />
+      <line x1=\"12\" y1=\"19\" x2=\"20\" y2=\"19\" />
+    </>
+  ),
+  // Bot — sub-agent independence marker (Lucide bot)
+  bot: (
+    <>
+      <path d='M12 8V4H8' />
+      <rect width='16' height='12' x='4' y='8' rx='2' />
+      <path d='M2 14h2' />
+      <path d='M20 14h2' />
+      <path d='M15 13v2' />
+      <path d='M9 13v2' />
+    </>
+  ),
+  // Arrow left — back navigation (Lucide arrow-left)
+  'arrow-left': (
+    <>
+      <line x1=\"19\" y1=\"12\" x2=\"5\" y2=\"12\" />
+      <polyline points=\"12 19 5 12 12 5\" />
+    </>
+  ),
+  // Panel left — toggle left sidebar (Lucide panel-left)
+  'panel-left': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"9\" y1=\"3\" x2=\"9\" y2=\"21\" />
+    </>
+  ),
+  // Panel right — toggle right sidebar (Lucide panel-right)
+  'panel-right': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"15\" y1=\"3\" x2=\"15\" y2=\"21\" />
+    </>
+  ),
+  // Panel bottom — toggle embedded terminal
+  'panel-bottom': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+      <line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\" />
+    </>
+  ),
+  // Chevron down — collapse (Lucide chevron-down)
+  'chevron-down': <polyline points=\"6 9 12 15 18 9\" />,
+  'chevron-up': <polyline points=\"18 15 12 9 6 15\" />,
+  // Chevron right — expand (Lucide chevron-right)
+  'chevron-right': <polyline points=\"9 18 15 12 9 6\" />,
+  // Wrench — tool / toolbox (Lucide wrench)
+  wrench: (
+    <path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\" />
+  ),
+  // Layout grid — toolbox grid (Lucide layout-grid)
+  'layout-grid': (
+    <>
+      <rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" />
+      <rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" />
+      <rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" />
+      <rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" />
+    </>
+  ),
+  // List details — Codex-style session summary
+  'list-details': (
+    <>
+      <circle cx=\"6\" cy=\"6\" r=\"2.25\" />
+      <circle cx=\"6\" cy=\"12\" r=\"2.25\" />
+      <circle cx=\"6\" cy=\"18\" r=\"2.25\" />
+      <line x1=\"11\" y1=\"6\" x2=\"20\" y2=\"6\" />
+      <line x1=\"11\" y1=\"12\" x2=\"20\" y2=\"12\" />
+      <line x1=\"11\" y1=\"18\" x2=\"20\" y2=\"18\" />
+    </>
+  ),
+  // Plus — new item (Lucide plus)
+  plus: (
+    <>
+      <line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\" />
+      <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />
+    </>
+  ),
+  // Message circle — conversation (Lucide message-circle)
+  'message-circle': (
+    <>
+      <path d=\"M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z\" />
+    </>
+  ),
+  // Send — send message (Lucide send)
+  send: (
+    <>
+      <line x1=\"22\" y1=\"2\" x2=\"11\" y2=\"13\" />
+      <polygon points=\"22 2 15 22 11 13 2 9 22 2\" />
+    </>
+  ),
+  // Square — stop (Lucide square)
+  square: (
+    <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" />
+  ),
+  // Square-stack — restore from maximize (Lucide square-stack icon)
+  'square-stack': (
+    <>
+      <rect x=\"7\" y=\"7\" width=\"13\" height=\"13\" rx=\"1.5\" />
+      <path d=\"M4 17V5a1 1 0 0 1 1-1h12\" />
+    </>
+  ),
+  minus: <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\" />,
+  // Restore — window behind window (Lucide \"copy\"-style two rectangles)
+  restore: (
+    <>
+      <rect x=\"3\" y=\"8\" width=\"13\" height=\"13\" rx=\"2\" />
+      <path d=\"M8 3h13a2 2 0 0 1 2 2v13\" />
+    </>
+  ),
+  // Expand — fullscreen icon (arrows pointing to corners)
+  expand: (
+    <>
+      <polyline points=\"15 3 21 3 21 9\" />
+      <polyline points=\"9 21 3 21 3 15\" />
+      <line x1=\"21\" y1=\"3\" x2=\"14\" y2=\"10\" />
+      <line x1=\"3\" y1=\"21\" x2=\"10\" y2=\"14\" />
+    </>
+  ),
+  'more-horizontal': (
+    <>
+      <circle cx=\"6\" cy=\"12\" r=\"1.75\" />
+      <circle cx=\"12\" cy=\"12\" r=\"1.75\" />
+      <circle cx=\"18\" cy=\"12\" r=\"1.75\" />
+    </>
+  ),
+  // Help circle — help/question
+  'help-circle': (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\" />
+      <line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\" />
+    </>
+  ),
+  // Alert circle — error/info
+  'alert-circle': (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"12\" />
+      <line x1=\"12\" y1=\"16\" x2=\"12.01\" y2=\"16\" />
+    </>
+  ),
+  // Alert triangle — warning
+  'alert-triangle': (
+    <>
+      <path d=\"M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\" />
+      <line x1=\"12\" y1=\"9\" x2=\"12\" y2=\"13\" />
+      <line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\" />
+    </>
+  ),
+  // Git branch — fork conversation (Lucide git-branch)
+  'git-branch': (
+    <>
+      <line x1=\"6\" y1=\"3\" x2=\"6\" y2=\"15\" />
+      <circle cx=\"18\" cy=\"6\" r=\"3\" />
+      <circle cx=\"6\" cy=\"18\" r=\"3\" />
+      <path d=\"M18 9a9 9 0 0 1-9 9\" />
+    </>
+  ),
+  // Command — keyboard command icon
+  command: (
+    <>
+      <path d=\"M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z\" />
+    </>
+  ),
+  // Layers — stacked layers for skills count
+  layers: (
+    <>
+      <polygon points=\"12 2 2 7 12 12 22 7 12 2\" />
+      <polyline points=\"2 17 12 22 22 17\" />
+      <polyline points=\"2 12 12 17 22 12\" />
+    </>
+  ),
+  // Play — execute/start action
+  play: (
+    <>
+      <polygon points=\"5 3 19 12 5 21 5 3\" />
+    </>
+  ),
+  // Info — information icon
+  info: (
+    <>
+      <circle cx=\"12\" cy=\"12\" r=\"10\" />
+      <line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\" />
+      <line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\" />
+    </>
+  ),
+  // Table — table icon for tabular output
+  table: (
+    <>
+      <path d=\"M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4\" />
+      <line x1=\"3\" y1=\"9\" x2=\"21\" y2=\"9\" />
+      <line x1=\"3\" y1=\"15\" x2=\"21\" y2=\"15\" />
+    </>
+  ),
+  // Home — workbench (Lucide home)
+  home: (
+    <>
+      <path d=\"m3 10.5 9-7.5 9 7.5\" />
+      <path d=\"M5 9.5V21h14V9.5\" />
+      <path d=\"M9.5 21v-6.5h5V21\" />
+    </>
+  ),
+  // Circle — ellipse annotation tool (Lucide circle)
+  circle: (
+    <circle cx=\"12\" cy=\"12\" r=\"9\" />
+  ),
+  // Arrow up-right — arrow annotation tool (Lucide arrow-up-right)
+  'arrow-up-right': (
+    <>
+      <path d=\"M7 7h10v10\" />
+      <path d=\"M7 17 17 7\" />
+    </>
+  ),
+  // Type — text annotation tool (Lucide type)
+  type: (
+    <>
+      <polyline points=\"4 7 4 4 20 4 20 7\" />
+      <line x1=\"9\" y1=\"20\" x2=\"15\" y2=\"20\" />
+      <line x1=\"12\" y1=\"4\" x2=\"12\" y2=\"20\" />
+    </>
+  ),
+  // Highlighter — text-selection annotation tool (Lucide highlighter)
+  highlighter: (
+    <>
+      <path d=\"m9 11-6 6v3h9l3-3\" />
+      <path d=\"m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4Z\" />
+    </>
+  ),
+  // Pen tool — freehand annotation tool (Lucide pen-tool)
+  'pen-tool': (
+    <>
+      <path d=\"m12 19 7-7 3 3-7 7-3-3z\" />
+      <path d=\"m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z\" />
+      <path d=\"m2 2 7.586 7.586\" />
+      <circle cx=\"11\" cy=\"11\" r=\"2\" />
+    </>
+  ),
+  // Undo 2 — undo last annotation action (Lucide undo-2)
+  'undo-2': (
+    <>
+      <path d=\"M9 14 4 9l5-5\" />
+      <path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\" />
+    </>
+  ),
+  // Mouse pointer — select/移动批注（Lucide mouse-pointer-2）
+  'mouse-pointer': (
+    <path d=\"m4 4 7.07 17 2.51-7.39L21 11.07z\" />
+  ),
+};
+
+export function Icon({
+  name,
+  size = 16,
+  className,
+  label,
+  strokeWidth = 1.75,
+}: IconProps): React.ReactElement {
+  const isDecorative = !label;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox=\"0 0 24 24\"
+      fill=\"none\"
+      stroke=\"currentColor\"
+      strokeWidth={strokeWidth}
+      strokeLinecap=\"round\"
+      strokeLinejoin=\"round\"
+      className={className}
+      role={isDecorative ? undefined : 'img'}
+      aria-hidden={isDecorative ? true : undefined}
+      aria-label={label}
+      focusable=\"false\"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+"
+
+[36m [2m❯[22m src/styles/FormGrammar.test.ts:[2m62:18[22m[39m
+    [90m 60|[39m   it('Icon single-source has a seal-square atom (方印点睛) reusing round s…
+    [90m 61|[39m     const icon = read(ICON);
+    [90m 62|[39m     expect(icon).toMatch(/'seal-square'/);
+    [90m   |[39m                  [31m^[39m
+    [90m 63|[39m     const block = icon.match(/'seal-square':\s*\(([\s\S]*?)^\s{2}\),/m…
+    [90m 64|[39m     expect(block).not.toBe('');
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 20:02:12
+[2m   Duration [22m 396ms[2m (environment 86%, transform 6%, tests 5%, import 2%, worker 1%)[22m
+

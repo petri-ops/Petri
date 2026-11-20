@@ -8798,6 +8798,26 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "form-grammar",
+      "note": "艺术性造型升级：形态语义层级 seal3/icon10/card14 三档 token + 契约白名单，图标座/hero/徽章/mcpCard 换形，空徽章圆印记，SVG 加 seal-square 方印原子；HK01绿7/7+邻域65tests+tsc0+c53+实机7/7；审美不代签(in_progress)。证据 acceptance/form-grammar/**。",
+      "patterns": [
+        "frontend/src/styles/FormGrammar.test.ts",
+        "frontend/src/styles/custom.css",
+        "frontend/src/styles/theme-token-contract.test.ts",
+        "frontend/src/components/icons/Icon.tsx",
+        ".agents/skills/petri-dev-infra/dev-verify/flows/form-grammar.cjs",
+        "acceptance/form-grammar/**"
+      ],
+      "tests": [
+        "frontend/src/styles/FormGrammar.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "constraint"
+    },
+    {
       "id": "v234-layer-detail",
       "note": "V2/V3/V4 视觉升级收尾（用户预授权连续一次做完）：leftPanelWrap 双定义合并+128处;;清理+动词标题名词化；裸z-index/阴影/selection/扫描面盘点确认已是现状不妄动；V4现读评分卡3.6→4.1保守下限；HK01绿8/8+全契约60tests+c53/a11y绿；breaking U类(断点/状态色/focus单源)deferred。证据 acceptance/v234-layer-detail/**。",
       "patterns": [

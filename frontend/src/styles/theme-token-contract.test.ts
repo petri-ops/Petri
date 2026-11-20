@@ -124,6 +124,7 @@ describe('theme token contract', () => {
       '--petri-space-1', '--petri-space-2', '--petri-space-3', '--petri-space-4',
       '--petri-space-5', '--petri-space-6', '--petri-space-7', '--petri-space-8',
       '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg', '--petri-radius-pill',
+      '--petri-radius-seal', '--petri-radius-icon', '--petri-radius-card',
       '--petri-z-base', '--petri-z-raised', '--petri-z-sticky', '--petri-z-dropdown',
       '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox', '--petri-z-toast',
     ]) {
@@ -166,7 +167,8 @@ describe('theme token contract', () => {
       '--petri-space-1', '--petri-space-2', '--petri-space-3', '--petri-space-4', '--petri-space-5',
       '--petri-space-6', '--petri-space-7', '--petri-space-8', '--petri-live-result-right-width',
       '--petri-titlebar-height', '--petri-radius-sm', '--petri-radius-md', '--petri-radius-lg',
-      '--petri-radius-pill', '--petri-z-base', '--petri-z-raised', '--petri-z-sticky',
+      '--petri-radius-pill', '--petri-radius-seal', '--petri-radius-icon', '--petri-radius-card',
+      '--petri-z-base', '--petri-z-raised', '--petri-z-sticky',
       '--petri-z-dropdown', '--petri-z-overlay', '--petri-z-modal', '--petri-z-lightbox',
       '--petri-z-toast', '--petri-font-sans', '--petri-font-mono', '--petri-mono',
       '--petri-shadow-sm',

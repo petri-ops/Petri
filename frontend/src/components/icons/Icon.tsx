@@ -61,6 +61,7 @@ export type IconName =
   | 'open-ring'
   | 'offset-grid'
   | 'hairline'
+  | 'seal-square'
   | 'clock'
   | 'bell'
   | 'folder'
@@ -433,6 +434,14 @@ const paths: Record<IconName, React.ReactNode> = {
       <line x1="3" y1="12" x2="21" y2="12" />
       <line x1="3" y1="9.5" x2="3" y2="14.5" />
       <line x1="21" y1="9.5" x2="21" y2="14.5" />
+    </>
+  ),
+  // 艺术性造型 —— 方印：近方（seal 档）带缺口，与 open-ring 同语；点睛处"方"有郑重语义。
+  'seal-square': (
+    <>
+      <rect x="4" y="4" width="16" height="16" rx="1.5" />
+      <line x1="4" y1="9" x2="9" y2="9" />
+      <line x1="15" y1="15" x2="20" y2="15" />
     </>
   ),
   // Clock — recent runs (Lucide clock)

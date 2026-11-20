@@ -750,7 +750,8 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: var(--petri-radius-md);
+  /* form grammar: 图标座 squircle（器物之润），与卡片柔边同族但更收敛。 */
+  border-radius: var(--petri-radius-icon);
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;
@@ -935,7 +936,7 @@
   width: 30px;
   height: 28px;
   border: none;
-  border-radius: var(--petri-radius-md);
+  border-radius: var(--petri-radius-icon);
   background: transparent;
   color: var(--titlebar-ink-muted);
   cursor: pointer;

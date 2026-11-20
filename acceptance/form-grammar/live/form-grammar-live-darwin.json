@@ -1,0 +1,44 @@
+{
+  "name": "form-grammar",
+  "platform": "darwin",
+  "startedAt": "2026-11-20T12:05:47.905Z",
+  "finishedAt": "2026-11-20T12:05:53.537Z",
+  "assertions": [
+    {
+      "name": "shot_home",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "radii_present_home",
+      "pass": true,
+      "detail": "{\"icon\":\"10px\"}"
+    },
+    {
+      "name": "shot_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "radii_present_extensions",
+      "pass": true,
+      "detail": "{\"icon\":\"10px\"}"
+    },
+    {
+      "name": "shot_project",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "radii_present_project",
+      "pass": true,
+      "detail": "{\"icon\":\"10px\"}"
+    },
+    {
+      "name": "three_form_tiers_live",
+      "pass": true,
+      "detail": "{\"seal\":\"3px\",\"icon\":\"10px\",\"card\":\"14px\"}"
+    }
+  ],
+  "allPass": true
+}

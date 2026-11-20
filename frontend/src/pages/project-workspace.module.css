@@ -806,7 +806,8 @@
   width: 100%;
   height: 30px;
   border: none;
-  border-radius: var(--petri-radius-md);
+  /* form grammar: 整行工具座用图标档 squircle（比小方块更柔，仍克制）。 */
+  border-radius: var(--petri-radius-icon);
   padding: 0 10px;
   background: transparent;
   color: var(--petri-text-secondary);
@@ -5594,7 +5595,8 @@ body:global(.petri-resizing-columns) * {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  /* form grammar: 圆形印记（月洞/落印）——点睛处用圆满而非方卡，与开环呼应。 */
+  border-radius: 50%;
   background: color-mix(in srgb, var(--petri-accent) 12%, transparent);
   color: var(--petri-accent);
 }
@@ -5659,7 +5661,7 @@ body:global(.petri-resizing-columns) * {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  border-radius: var(--petri-radius-md);
+  border-radius: var(--petri-radius-icon);
   background: color-mix(in srgb, var(--petri-accent) 10%, transparent);
   color: var(--petri-text-secondary);
   transition: background-color var(--petri-duration-fast) ease-in-out,

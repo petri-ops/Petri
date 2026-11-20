@@ -191,7 +191,8 @@
   gap: var(--petri-space-2);
   padding: var(--petri-space-4) 14px;
   border: 1px solid var(--petri-border-card);
-  border-radius: var(--petri-radius-lg);
+  /* form grammar: 纸面区块用更柔的 squircle 收边（宣纸铺展）。 */
+  border-radius: var(--petri-radius-card);
   background: var(--petri-bg-subtle);
 }
 

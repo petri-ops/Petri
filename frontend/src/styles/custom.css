@@ -180,6 +180,13 @@
   --petri-radius-md: 6px;
   --petri-radius-lg: 8px;
   --petri-radius-pill: 999px;
+  /* 艺术性造型层级（form grammar）— 方/圆/环各有身份，不再同一模子：
+     seal=3px 近方（朱砂落印，方在点睛处有郑重语义，非缺陷）；
+     icon=10px squircle 图标座（器物之润，取雕塑卵石/建筑拱券的柔）；
+     card=14px 纸面区块柔边（宣纸铺展，取月洞门的开放）。 */
+  --petri-radius-seal: 3px;
+  --petri-radius-icon: 10px;
+  --petri-radius-card: 14px;
   /* z-index 8 档：全局层级唯一来源；语义守卫=Toast 最高（审计 P0 倒挂：原 Toast 9999 < TitleBar 10001）。
      组件内部相对层叠（≤base 档数值）不在本表管辖，见契约棘轮白名单。 */
   --petri-z-base: 10;
