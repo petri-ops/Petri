@@ -8798,6 +8798,19 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "u-skeleton-per-accent",
+      "note": "U 类裁决材料：骨架是否随 data-accent 档切换。三方案 A保持/B新建正交 data-surface(唯一推荐)/C直接写accent块，记录 c53 navyLadder 全文末次定义硬红与 accent/theme 正交契约；消费测试 6/6（三方案/单一推荐/篡改负测），零产品代码，pending_user_ruling。证据 acceptance/u-skeleton-per-accent/**。",
+      "patterns": [
+        "acceptance/u-skeleton-per-accent/**"
+      ],
+      "tests": [
+        "acceptance/u-skeleton-per-accent/u-decision-material.test.mjs"
+      ],
+      "commands": [],
+      "classifiesScripts": false,
+      "scriptRole": "decision-material"
+    },
+    {
       "id": "v5-harmony-accents",
       "note": "V5 四档和声接入 [data-accent]：宣纸朱砂/青瓷墨/群青铜/靛雾注册为 accent 新档，复用 ThemeProvider 现成管道，前后端白名单同步；HK-01 6/6+邻域41tests+实机17/17(四档色各异亮暗双套)；骨架仍海军蓝属新 U 类未擅动。证据 acceptance/v5-harmony-accents/**。",
       "patterns": [
