@@ -1,0 +1,70 @@
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T03:41:53.902Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T03:41:54.033Z] [executors] registered: r
+✅ [2026-11-20T03:41:54.033Z] [executors] registered: python
+✅ [2026-11-20T03:41:54.034Z] [storage] registered: local
+✅ [2026-11-20T03:41:54.034Z] [storage] capabilities declared: local
+✅ [2026-11-20T03:41:54.034Z] [storage] active: local
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T03:41:54.074Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ P1a — unknown_tool 附相近已注册工具建议（exec → workspace_exec） (1.841125ms)
+✔ P1a — 前缀/编辑距离兜底：workspace_exe 仍命中建议；正常工具不受影响 (0.649458ms)
+✔ P1b — workspace_exec description 平台/shell 语义补强（provider-visible） (0.194333ms)
+✔ P1c — 失败反馈 set -e pitfall hint（源级断言：两处失败路径均挂 hint） (0.24575ms)
+▶ EVO-0 · incident fingerprint 归一化/脱敏
+  ✔ ① 同义输入（不同会话 id / 时间戳 / 临时路径）得到同一 fingerprint (1.40075ms)
+  ✔ ② 不同错误得到不同 fingerprint (0.226ms)
+  ✔ ③ 敏感 token / 邮箱 / 会话 id 脱敏零残留 (0.14225ms)
+  ✔ ④ fingerprint 为 64 位 sha256 十六进制 (0.161042ms)
+  ✔ ⑤ 超长输入按有界上限截断（不 OOM） (14.489541ms)
+✔ EVO-0 · incident fingerprint 归一化/脱敏 (17.319584ms)
+▶ EVO-0 · 不可修改红线守卫
+  ✔ ⑥ harness 自身源码 / 工具注册表 / approval 链一律拒绝 (0.378334ms)
+  ✔ ⑦ 允许的进化写入面放行（LEARNINGS / 可写策略 / installed skill） (0.197208ms)
+  ✔ ⑧ 红线表自身 owner=code（agent 不可改） (0.066041ms)
+✔ EVO-0 · 不可修改红线守卫 (0.790125ms)
+▶ EVO-0 · migration 023 建表
+  ✔ ⑨ migration 023 创建 incidents 表且含 fingerprint 索引（源级断言） (0.200625ms)
+  ✔ ⑩ 真实 SQLite 执行全部 migration 后 incidents 表可写可读（端到端建表） (37.291125ms)
+✔ EVO-0 · migration 023 建表 (37.6065ms)
+▶ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点）
+  ✔ ① 已吐 content/tool_call 后 idle stall 仍决定 resume（507 覆盖不到的痛点） (0.465083ms)
+  ✔ ② 零可见输出 stall 同样 resume（既有场景不回退） (0.059708ms)
+  ✔ ③ 有界：attempt 超上限/预算耗尽 → terminal，不无限重试 (0.058625ms)
+  ✔ ④ 非 stall 错误（含已出字）永不 resume (0.048ms)
+✔ BLOCK-508 · HK-01 stall-resume 判据（含已出字痛点） (1.238583ms)
+▶ BLOCK-508 · HK-01 重放去重（已交付内容零重复）
+  ✔ ① 已发文本累计长度内的 delta 被吞，超出部分透传 (1.466083ms)
+  ✔ ② 已交付 tool_call id 整条丢弃，新 id 透传 (0.075542ms)
+  ✔ ③ 非 delta 事件（done/usage/error/stall/provider_retry）一律透传不外挂 suppressed (0.078875ms)
+  ✔ ④ reasoning_delta 不算可见交付，不去重（续跑后仍可见） (0.062459ms)
+✔ BLOCK-508 · HK-01 重放去重（已交付内容零重复） (1.825ms)
+▶ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场）
+  ✔ ① 记录 messages 摘要/已发帧游标/tool_call id/attempt，不复制 messages 正文 (1.377541ms)
+✔ BLOCK-508 · HK-01 请求前 checkpoint（续跑现场） (1.445791ms)
+▶ BLOCK-508 · orchestrator 接线合同（结构断言）
+  ✔ ① 引入 508 纯函数模块并用于决策 (0.492709ms)
+  ✔ ② stall-resume while 循环存在且 resume 时 continue（不是 break） (0.180125ms)
+  ✔ ③ onEvent 入口吞掉重放抑制帧，用户侧零重复 (0.128959ms)
+  ✔ ④ 既有终态判定保留（非 stall 仍按原逻辑 break） (0.112208ms)
+✔ BLOCK-508 · orchestrator 接线合同（结构断言） (1.0735ms)
+ℹ tests 27
+ℹ suites 7
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 535.399458

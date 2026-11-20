@@ -9353,6 +9353,23 @@
       ]
     },
     {
+      "id": "evo0-incident-ledger",
+      "note": "EVO-0 Harness 自进化基座：incident 本地表(migration 023)+fingerprint 归一化/脱敏纯函数+不可修改红线守卫。证据变更选本包契约测+工具调用可靠性邻域+migration 相关基线。零新依赖/纯本地零外发；与三个 MATERIAL 包文件面零相交。",
+      "patterns": [
+        "docs/evo-harness-self-evolution-plan.md",
+        "src/migrations/023_incidents.sql",
+        "core/shared-backend/incident-fingerprint.js",
+        "core/shared-backend/harness-redline.js",
+        "test/evo0-incident-ledger.test.mjs",
+        "acceptance/evo-0/**"
+      ],
+      "tests": [
+        "test/evo0-incident-ledger.test.mjs",
+        "test/block510-tool-call-reliability.test.mjs",
+        "test/loop-stall-resume.test.mjs"
+      ]
+    },
+    {
       "id": "ui-error-classification-stall",
       "note": "2026-11-19 UI 错误分类修复：流式停滞(stream_stalled)曾误判为 Python 模块缺失，诱导用户装无关运行时；另修 ENOTFOUND 正则无边界吞 ModuleNotFoundError。轻量包（HK-01 红绿+邻域 10/10+tsc 0），非观感状态写面。证据 acceptance/ui-error-classification-stall/。",
       "patterns": [

@@ -10,9 +10,9 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 660,
+    "documentCount": 661,
     "lastUpdated": "2026-11-20",
-    "managedMarkdown": 643
+    "managedMarkdown": 644
   },
   "documents": [
     {
@@ -13754,6 +13754,34 @@
         "acceptance/block510/"
       ],
       "notes": "工具调用可靠性：unknown_tool 相近名建议（P1a）+exec description 平台/shell 语义补强（P1b）+set -e pitfall hint（P1c）；P2 跨平台 shell 矩阵实机回归另票"
+    },
+    {
+      "id": "EVO-HARNESS-SELF-EVOLUTION",
+      "path": "docs/evo-harness-self-evolution-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "evo-harness-self-evolution",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "EVO-0-CLOSED",
+      "sharedBaselines": [],
+      "touchSurface": [
+        "docs/evo-harness-self-evolution-plan.md",
+        "src/migrations/023_incidents.sql",
+        "core/shared-backend/incident-fingerprint.js",
+        "core/shared-backend/harness-redline.js",
+        "test/evo0-incident-ledger.test.mjs",
+        "acceptance/evo-0/"
+      ],
+      "tags": [
+        "EVO",
+        "self-evolution",
+        "harness",
+        "G0"
+      ],
+      "registeredAt": "2026-11-20",
+      "notes": "2026-11-20 立项（用户发令「给一个了不起的规划，设计好就可以直接按计划开搞」；三轮澄清锁定=让 Petri 自带 harness 运行时自进化，非开发治理链）。五层架构 Observe→Distill→Evolve→Verify→Guard：失败本地落库→聚类成 lesson→分级改进（低自动注入 prompt/中改进卡片待裁决/高只出草案）→频率曲线验证→不可修改红线横切。EVO-0 首包=Guard 红线纯函数+incident 表(migration 023)+fingerprint 归一化/脱敏纯函数+HK-01 红绿。零新依赖/纯本地零外发/不进 AUDIT-LOG 工作包链（harness 自身建议出口）/红线 fail-closed/不碰 G1+。与三个 MATERIAL active 包(BLOCK-503/505/506) docs-only 文件面零相交，按用户显式并行裁决开工、零触碰未知 WIP。【2026-11-20 EVO-0 收口】incident 表(migration 023)+fingerprint 脱敏归一化纯函数+不可修改红线守卫；HK-01 红→绿 10/10（真实 SQLite 端到端建表）+邻域 27/27+docs 661/ui/secret/arch/types 全绿+新增文件 lint 0 error/knip 零命中；存量红（2 lint error=BLOCK-338/507/509、38 knip=并发人眼包探针、1 test:changed 冲突=HEAD 既有）如实归属零触碰。后续 EVO-1/2/3 需各自发令。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
   "lastUpdated": "2026-11-20"

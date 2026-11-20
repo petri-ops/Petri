@@ -1,0 +1,24 @@
+▶ EVO-0 · incident fingerprint 归一化/脱敏
+  ✔ ① 同义输入（不同会话 id / 时间戳 / 临时路径）得到同一 fingerprint (0.968625ms)
+  ✔ ② 不同错误得到不同 fingerprint (0.092916ms)
+  ✔ ③ 敏感 token / 邮箱 / 会话 id 脱敏零残留 (0.094375ms)
+  ✔ ④ fingerprint 为 64 位 sha256 十六进制 (0.095958ms)
+  ✔ ⑤ 超长输入按有界上限截断（不 OOM） (10.812417ms)
+✔ EVO-0 · incident fingerprint 归一化/脱敏 (12.670917ms)
+▶ EVO-0 · 不可修改红线守卫
+  ✔ ⑥ harness 自身源码 / 工具注册表 / approval 链一律拒绝 (0.327292ms)
+  ✔ ⑦ 允许的进化写入面放行（LEARNINGS / 可写策略 / installed skill） (0.146125ms)
+  ✔ ⑧ 红线表自身 owner=code（agent 不可改） (0.049542ms)
+✔ EVO-0 · 不可修改红线守卫 (0.606417ms)
+▶ EVO-0 · migration 023 建表
+  ✔ ⑨ migration 023 创建 incidents 表且含 fingerprint 索引（源级断言） (0.158208ms)
+  ✔ ⑩ 真实 SQLite 执行全部 migration 后 incidents 表可写可读（端到端建表） (38.938458ms)
+✔ EVO-0 · migration 023 建表 (39.183958ms)
+ℹ tests 10
+ℹ suites 3
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 160.491542
