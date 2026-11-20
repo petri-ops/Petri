@@ -1,14 +1,99 @@
 {
   "name": "a4-editorial-preference",
   "platform": "darwin",
-  "startedAt": "2026-11-20T09:08:34.303Z",
-  "finishedAt": "2026-11-20T09:09:34.565Z",
+  "startedAt": "2026-11-20T09:42:12.923Z",
+  "finishedAt": "2026-11-20T09:42:24.553Z",
   "assertions": [
     {
-      "name": "flow_completed_without_exception",
-      "pass": false,
-      "detail": "cdp_not_ready_on_port_9223: connect ECONNREFUSED 127.0.0.1:9223 — 先启动 dev 栈：PETRI_DEV_ELECTRON_ARGS=\"--remote-debugging-port=9223\" npm run dev"
+      "name": "surface_welcome_ready",
+      "pass": true,
+      "detail": "welcome 未就绪"
+    },
+    {
+      "name": "surface_welcome_no_h_overflow",
+      "pass": true,
+      "detail": "welcome 横向溢出"
+    },
+    {
+      "name": "surface_welcome_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_settings_ready",
+      "pass": true,
+      "detail": "settings 未就绪"
+    },
+    {
+      "name": "surface_settings_no_h_overflow",
+      "pass": true,
+      "detail": "settings 横向溢出"
+    },
+    {
+      "name": "surface_settings_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "surface_extensions_ready",
+      "pass": true,
+      "detail": "extensions 未就绪"
+    },
+    {
+      "name": "surface_extensions_no_h_overflow",
+      "pass": true,
+      "detail": "extensions 横向溢出"
+    },
+    {
+      "name": "surface_extensions_screenshot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "P1_welcome_subtitle_short",
+      "pass": true,
+      "detail": "副标题字数=42"
+    },
+    {
+      "name": "P2_welcome_tracking",
+      "pass": true,
+      "detail": "字距=0.040em"
+    },
+    {
+      "name": "P1_settings_title_short",
+      "pass": true,
+      "detail": "可见标题=外观"
+    },
+    {
+      "name": "P2_settings_tracking",
+      "pass": true,
+      "detail": "可见字距=0.030em"
+    },
+    {
+      "name": "P2_seal_3px_neutral",
+      "pass": true,
+      "detail": "可见落印位宽=2.99805px"
+    },
+    {
+      "name": "P3_active_tab_atom",
+      "pass": true,
+      "detail": "{\"active\":1,\"withAtom\":1,\"stroke\":[\"1.75\"]}"
+    },
+    {
+      "name": "P3_one_focal_per_view",
+      "pass": true,
+      "detail": "点睛数=1"
+    },
+    {
+      "name": "P4_active_text_neutral",
+      "pass": true,
+      "detail": "active 文字色=rgb(24, 24, 27)"
+    },
+    {
+      "name": "P4_active_feedback_kept",
+      "pass": true,
+      "detail": "active 反馈 bg=rgba(0, 0, 0, 0) border=rgb(225, 29, 72)"
     }
   ],
-  "allPass": false
+  "allPass": true
 }

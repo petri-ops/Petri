@@ -38,4 +38,4 @@
 
 - 本签字仅覆盖 UI-717 的 V0–V1 视觉呈现面（色板 token / 图标原子 / 排版落印 / accent 密度），不外推到其它 UI-### 或 E 类人眼槽。
 - 第 1 轮 runner/BLOCK-463 顶层副作用、accent targetMet 未达 130（V1 已如实登记 U 类）均不属本轮签字范围，原样保留。
-- **第 3 轮（V1-U 之后，2026-11-20）未通过**：`round3/a4-editorial-preference-live-darwin.json` 0/1 FAIL，根因 backend :3001 死、`restart-dev-stack.sh` TIMEOUT（api=000/vite=200），`cdp_not_ready_on_port_9223`。未伪造截图、未开窗。处置：round2 已验证的静态面维持 verified；V1-U 新增的 hover/active 交互呈现**未获实机复审**，待栈恢复补跑 round3 后方可对该面声称通过。证据见 `acceptance/v1u-accent-semantics/GATE-LEDGER.md`。
+- **第 3 轮（V1-U 之后，2026-11-20）——首跑因环境失败、复跑全过**：首次 `round3/...json` 0/1 FAIL（backend :3001 死、`restart-dev-stack.sh` 是 Windows 专用脚本在 Mac TIMEOUT，`cdp_not_ready`）。用户发令「你来吧 直接搞定 不要我参与」→ 单独后台起 backend（既有 DB、不开窗、health `db_ok:true`）+ 9223 离屏，flow 加 P4 交互面断言（active 文字中性 + 反馈通道在场），**复跑 18/18 逐条 PASS**（P4: active 文字 `rgb(24,24,27)`、反馈 `border=rgb(225,29,72)`）。实机截图复核扩展页：active tab 错落格、左侧 active 底、错误 pill/一键安装均合法语义、文字中性、留白和谐。**结论：静态面（round2）+ 交互面（round3）均通过，UI-717 全量 verified**。9223 跑完即 kill。证据 `round3/a4-editorial-preference-live-darwin.json` + `round3/{welcome,settings,extensions}.png`。

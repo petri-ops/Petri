@@ -85,6 +85,18 @@ module.exports = {
     assert('P3_active_tab_atom', atomInfo && atomInfo.active === 1 && atomInfo.withAtom === 1, JSON.stringify(atomInfo));
     assert('P3_one_focal_per_view', atomInfo && atomInfo.withAtom <= 1, `点睛数=${atomInfo && atomInfo.withAtom}`);
 
+    // V1-U 交互面：active 态文字 accent 已收敛（computed style 现读），反馈由底/边框承载。
+    const interaction = await lib.evalJs(client, `(()=>{
+      const tab=[...document.querySelectorAll('[role="tab"]')].find(t=>t.getAttribute('aria-selected')==='true');
+      if(!tab)return null;
+      const cs=getComputedStyle(tab);
+      const accentish=(s)=>/rgba?\\((?:13,\\s*148,\\s*136|45,\\s*212,\\s*191|181,\\s*72,\\s*47|47,\\s*215,\\s*210)\\)/.test(s);
+      return {textColor:cs.color, bg:cs.backgroundColor, border:cs.borderBottomColor, textAccent:accentish(cs.color),
+        hasFeedback:cs.backgroundColor!=='rgba(0, 0, 0, 0)' || cs.borderBottomColor!=='rgba(0, 0, 0, 0)'};
+    })()`, 10_000).catch(() => null);
+    assert('P4_active_text_neutral', interaction && interaction.textAccent === false, `active 文字色=${interaction && interaction.textColor}`);
+    assert('P4_active_feedback_kept', interaction && interaction.hasFeedback === true, `active 反馈 bg=${interaction && interaction.bg} border=${interaction && interaction.border}`);
+
     return results;
   },
 };

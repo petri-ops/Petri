@@ -25,11 +25,12 @@
 | c53 --check | 快照 269 一致 |
 | TSC | 0 error |
 
-## 观感复审：未通过（诚实，环境原因）
+## 观感复审：已通过（round3，18/18）
 
-- A4 第 3 轮（`acceptance/a4-editorial-preference/round3/...json`）**0/1 FAIL**：`cdp_not_ready_on_port_9223`（backend :3001 dead）。
-- `bash scripts/restart-dev-stack.sh` TIMEOUT（180s，api=000 / vite=200），dev 栈未能恢复；未伪造截图、未开窗取证，9223 保持已清理。
-- 处置：UI-717 的 A4 round2 已验证面（欢迎/设置静态态、atom、落印位）维持 verified；**本包新增的 hover/active 交互呈现未获实机复审，该面保持未验证**，待 dev 栈恢复后补 run-a4 round3。静态契约只证明反馈通道存在，不证明视觉通过。
+- 首跑 round3 0/1 FAIL 因 backend :3001 死 + `restart-dev-stack.sh`（Windows 专用）在 Mac TIMEOUT；未伪造、未开窗。
+- 用户发令「你来吧 直接搞定 不要我参与」→ 单独后台起 backend（既有 DB，`db_ok:true`，不开窗）+ 9223 离屏；flow 加 P4 交互面断言（active 文字中性 + 反馈通道）。
+- **复跑 18/18 PASS**：P4 active 文字 `rgb(24,24,27)` 中性、边框 `rgb(225,29,72)` 承载反馈；实机截图复核通过。UI-717 静态面（round2）+ 交互面（round3）均 verified。9223 跑完即 kill。
+- 证据 `acceptance/a4-editorial-preference/round3/`。
 
 ## HEAD 存量红（零触碰）
 
