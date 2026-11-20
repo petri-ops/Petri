@@ -71,7 +71,7 @@ async function connect({ port = 9222 } = {}) {
     return m.result?.result?.value;
   };
 
-  const evalJson = async (expression) => JSON.parse(await evaluate(`JSON.stringify((${expression}))`));
+  const evalJson = async (expression) => JSON.parse(await evaluate(`JSON.stringify((${expression}) ?? null)`));
 
   const shot = async (file, { clip = null } = {}) => {
     const params = { format: 'png', captureBeyondViewport: false };

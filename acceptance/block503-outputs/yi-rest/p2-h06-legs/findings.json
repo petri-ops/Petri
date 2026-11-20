@@ -1,0 +1,72 @@
+{
+  "legs": [
+    {
+      "file": "KnowledgeConsoleChat.module.css",
+      "missing": "knowledge 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "McpPolicyEditor.module.css",
+      "missing": "knowledge 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "styles.module.css",
+      "missing": "knowledge 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "home.module.css",
+      "missing": "knowledge 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "AnnotationBar.module.css",
+      "missing": "knowledge 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "KnowledgeConsoleChat.module.css",
+      "missing": "extensions 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "McpPolicyEditor.module.css",
+      "missing": "extensions 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "styles.module.css",
+      "missing": "extensions 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "home.module.css",
+      "missing": "extensions 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "AnnotationBar.module.css",
+      "missing": "extensions 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "KnowledgeConsoleChat.module.css",
+      "missing": "projects 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "McpPolicyEditor.module.css",
+      "missing": "projects 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "styles.module.css",
+      "missing": "projects 页面倒排 0 命中（组件未挂载或样式未注入）"
+    },
+    {
+      "file": "h06-home.png",
+      "method": "tab-modality+focus-fallback",
+      "fv": true,
+      "outline": "0.750421px/auto/rgb(229, 151, 0)",
+      "rect": {
+        "x": 792.7964477539062,
+        "y": 261.7210998535156,
+        "w": 619.988525390625,
+        "h": 55.49598693847656
+      }
+    },
+    {
+      "file": "AnnotationBar.module.css",
+      "missing": "projects 页面倒排 0 命中（组件未挂载或样式未注入）"
+    }
+  ]
+}

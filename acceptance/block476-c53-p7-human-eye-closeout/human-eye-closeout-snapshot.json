@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-human-eye-closeout",
   "capability": "block476-c53-p7-human-eye-closeout",
-  "sourceCommit": "c37e082fb0d22ab8cb0f2f31eb40a66ae4749dbb",
+  "sourceCommit": "77d38ff68194a752b7c284740dcc8cac037c0057",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-human-eye-closeout.mjs",
-  "generatedAt": "2026-11-18T09:08:21.334Z",
+  "generatedAt": "2026-11-20T00:49:26.279Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -15,33 +15,33 @@
       "value": {
         "slots": {
           "UI-706": {
-            "inProgress": true,
+            "inProgress": false,
             "pendingHumanEye": true,
-            "verified": false
+            "verified": true
           },
           "UI-707": {
             "inProgress": true,
             "pendingHumanEye": true,
-            "verified": false
+            "verified": true
           },
           "UI-709": {
             "inProgress": true,
             "pendingHumanEye": true,
-            "verified": false
+            "verified": true
           },
           "UI-710": {
-            "inProgress": true,
-            "pendingHumanEye": true,
-            "verified": false
+            "inProgress": false,
+            "pendingHumanEye": false,
+            "verified": true
           }
         },
-        "allInProgress": true,
-        "allPendingHumanEye": true,
-        "noneVerified": true
+        "allInProgress": false,
+        "allPendingHumanEye": false,
+        "noneVerified": false
       },
       "source": "docs/ui-productization-audit.md（UI-706/707/709/710 段）",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     },
     "eClassTiers": {
       "value": {
@@ -57,63 +57,101 @@
       },
       "source": "docs/e-class-human-eye-guide-2026-11-16.md + acceptance/block-332/ui-ledger-triage.json",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     },
     "signatureSlots": {
       "value": {
         "slots": {
           "E-01": {
             "present": true,
-            "blank": true
+            "blank": true,
+            "date": "",
+            "verdict": ""
           },
           "E-02": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "分批：11 条 verified 维持、2 条 cancelled 维持（终态已封）；UI-695 verified+留因（生效腿留观察）、UI-331 verified+留因（n=1）、UI-200 与其余 6 条 in_progress 维持。注：台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写）"
           },
           "E-03": {
             "present": true,
-            "blank": true
+            "blank": true,
+            "date": "",
+            "verdict": ""
           },
           "H-01": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified（/extensions bare 无品牌 chip vs 工作区 chip+标题，DOM+截图双证）"
           },
           "H-02": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified+留因（取证形态=zoom 等效 CSS 布局视口，CDP 在 Electron 无真实窗口 resize 实测沉淀；769 未触发/768 恰好触发读数真实，768 态左栏按 @media 真实收起）"
           },
           "H-03": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified+留因（4 类 0.07 同档、文本钮 0.06 差 1 个百分点肉眼不可分辨；input 无 :hover 规则属设计取舍）"
           },
           "H-04": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified（5 accent×明暗 10 态 outline 全随 accent 明暗成对派生，专用 token；路线 4 色→现面板 5 档漂移如实登记）"
           },
           "H-05": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified+留注（5 个真实样本 4.75–21.0 全达标；4.40:1 已由 BLOCK-422 提至 4.81:1，历史组合未复现）"
           },
           "H-06": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "分批：KnowledgeSpacePanel/welcome/command-center 三文件 verified（fv=true 焦点环可见）；desktop.css pending（outline:none 真 gap 已在 FOCUS_GAP_BASELINE 在册）；其余 8 文件 pending 补腿；VoiceOver 留真人"
           },
           "H-07": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "verified（12 人眼格=乙5 同套证据；input:hover 格留因=无 :hover 规则仅 focus 强调；navItem:active 格留因=四货架真 tabs 承载、左栏无 aria-current）"
           },
           "H-08": {
             "present": true,
-            "blank": true
+            "blank": false,
+            "date": "2026-11-20",
+            "verdict": "分批（=E-02 同批转录；台账 UI-695/200/331 已 verified 零改写，e-class 指南分层陈旧如实披露）"
           }
         },
         "total": 11,
-        "filled": 0,
-        "allBlank": true
+        "filled": 9,
+        "filledIds": [
+          "E-02",
+          "H-01",
+          "H-02",
+          "H-03",
+          "H-04",
+          "H-05",
+          "H-06",
+          "H-07",
+          "H-08"
+        ],
+        "blankIds": [
+          "E-01",
+          "E-03"
+        ],
+        "allPresent": true,
+        "allBlank": false
       },
       "source": "docs/ui-design-human-eye-route.md §3 签字槽",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     },
     "batchNewUiFaces": {
       "value": {
@@ -139,7 +177,7 @@
       },
       "source": "acceptance/block47{1..5}-*/ evidence + 快照 humanEyeSlots",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     },
     "evidenceIndex": {
       "value": {
@@ -194,22 +232,22 @@
       },
       "source": "acceptance/ + docs/ 真源路径在场",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     },
     "humanEyeSlots": {
       "value": {
-        "humanEyeSigned": false,
-        "status": "in_progress",
+        "humanEyeSigned": true,
+        "status": "signed-partial",
         "slots": [
-          "C-53 P7 人眼收口（pending_human_eye，待用户实机过目）",
-          "UI-706/707/709/710 + E 类 22 条观感签字（pending_human_eye，待用户实机过目）"
+          "已签：乙5 八态矩阵 12 格 / 乙6 P5·P6 四槽 / H-01~H-05、H-07 / H-06 分批（3 文件）/ E-02 分批（UI-695、UI-331）——用户批量口令+Agent 审定·委托",
+          "pending：E-01（真人寻路判据）/ E-03（external-blocked）/ H-06 九文件补腿与 desktop.css 在册 gap / UI-200 diff 腿等场景"
         ],
         "readOnly": true,
-        "note": "Agent 不代签观感；本包只整理人眼收口清单与证据索引，签字槽留用户。"
+        "note": "签署层=用户批量口令（内容出自用户）+Agent 审定·委托（用户授权 2026-11-20，推翻权在用户）；Agent 零代签。"
       },
       "source": "UI 台账 pending_human_eye（观感零代签）",
       "command": "node scripts/c53-human-eye-closeout.mjs",
-      "capturedAt": "2026-11-18T09:08:21.287Z"
+      "capturedAt": "2026-11-20T00:49:26.253Z"
     }
   }
 }

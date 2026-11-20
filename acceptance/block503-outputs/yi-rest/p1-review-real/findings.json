@@ -1,0 +1,52 @@
+{
+  "legs": [
+    {
+      "id": "p1_review_real_diff",
+      "pass": false,
+      "detail": {
+        "codeMirror": true,
+        "cmChangedLines": 0,
+        "reviewFileEls": 0,
+        "bodySample": "工作台|新建任务|扩展|知识空间|项目|Petri|暂无对话|stall-508-live|agent-live-check|verify-toolJobId|RW06-501-1793427599555|Petri||开始新的对话||在下方输入框中提问|解释项目结构|了解项目的文件组织与数据构成|快速开始|查看 AI 能帮你做什么|规划一个任务|说出目标，我来拆解成可执行的步骤|完全访问|deepseek-flash|0%|审阅|×|50|审阅|改动|历史|+293|−71"
+      },
+      "expectation": "P1-1/P1-2"
+    },
+    {
+      "id": "p1_light_dark",
+      "pass": true,
+      "files": [
+        "ui200-codemirror-diff-light.png",
+        "ui200-codemirror-diff-dark.png"
+      ],
+      "expectation": "P1-3"
+    },
+    {
+      "id": "h06_review_three",
+      "results": [
+        {
+          "file": "CodeReviewDrawer.module.css",
+          "missing": "审阅面内无可聚焦归属元素"
+        },
+        {
+          "file": "h06-ReviewMode.png",
+          "method": "tab-modality+focus-fallback",
+          "fv": true,
+          "outline": "0.750421px/auto/rgb(229, 151, 0)",
+          "rect": {
+            "x": 1560.3248291015625,
+            "y": 45.59980773925781,
+            "w": 46.64336013793945,
+            "h": 24.740446090698242
+          },
+          "cls": "rvw-view-switch-btn active"
+        },
+        {
+          "file": "CodeMirrorEditor.module.css",
+          "missing": "审阅面内无可聚焦归属元素"
+        }
+      ],
+      "expectation": "P2"
+    }
+  ],
+  "projectUrl": "http://localhost:3000/project/p_mwo92wsv_x90e"
+}

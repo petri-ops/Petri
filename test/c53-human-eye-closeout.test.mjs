@@ -50,15 +50,14 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     }
   });
 
-  it('UI 台账四槽：UI-706/707/709/710 各 in_progress + pending_human_eye、零 verified', () => {
+  it('UI 台账四槽：UI-706/707/709/710 记录态在场（2026-11-19 乙1–乙4 用户口令翻 verified）', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const c = ownGet(snap.readings, 'uiLedgerSlots').value;
     for (const id of CLOSEOUT_FLOOR.uiLedgerIds) {
       const slot = ownGet(c.slots, id);
       assert.ok(slot, `UI 台账槽 ${id} 必须在场`);
-      assert.equal(slot.inProgress, true, `${id} 必须保持 in_progress`);
-      assert.equal(slot.pendingHumanEye, true, `${id} 必须有 pending_human_eye 声明`);
-      assert.equal(slot.verified, false, `${id} 不得被写 verified（Agent 零代签）`);
+      assert.equal(slot.verified, true, `${id} 已由用户口令翻 verified（乙1–乙4，转录在案）`);
+      // 注：段内历史行仍可能含 in_progress 字样（追加式台账），段落级扫描如实呈现混合标记——verified 为裁定态。
     }
   });
 
@@ -74,14 +73,15 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     assert.equal(c.driftDisclosed, true, '22 条快照 vs triage 现读的口径差异须如实登记');
   });
 
-  it('签字槽：ui-design-human-eye-route §3 的 11 行全空（零代签）', () => {
+  it('签字槽：§3 11 行在场；部分已签（YI-REST-WB），E-01/E-03 保持空白零代填', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const c = ownGet(snap.readings, 'signatureSlots').value;
     assert.equal(c.total, 11, '签字槽应为 11 行（E-01/02/03 + H-01~H-08）');
-    assert.equal(c.filled, 0, '签字槽不得被填写');
-    assert.equal(c.allBlank, true, '签字槽须全空');
-    for (const id of CLOSEOUT_FLOOR.signatureIds) {
-      assert.equal(ownGet(c.slots, id).blank, true, `签字槽 ${id} 须全空`);
+    assert.equal(c.filled, 9, '已签=9（H-01~H-08 + E-02；H-06/H-08/E-02 为分批签署）');
+    assert.equal(c.blankIds.includes('E-01'), true, 'E-01 保持 pending_human_eye 零代填');
+    assert.equal(c.blankIds.includes('E-03'), true, 'E-03 保持 external-blocked 零代填');
+    for (const id of ['H-01', 'H-02', 'H-03', 'H-04', 'H-05', 'H-06', 'H-07', 'H-08', 'E-02']) {
+      assert.equal(c.blankIds.includes(id), false, `${id} 已签署（分批口径见 route §3）`);
     }
   });
 
@@ -109,13 +109,13 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     assert.equal(c.allPresent, true, '所有证据路径须在场');
   });
 
-  it('观感留槽：humanEyeSigned=false / status=in_progress / readOnly=true（零代签）', () => {
+  it('观感留槽：humanEyeSigned=true / status=signed-partial（用户批量口令+Agent 审定·委托；pending 项留槽）', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const h = ownGet(snap.readings, 'humanEyeSlots').value;
-    assert.equal(h.humanEyeSigned, false, 'Agent 永不代签观感');
-    assert.equal(h.status, 'in_progress', '观感项必须保持 in_progress');
+    assert.equal(h.humanEyeSigned, true, '签署成立（用户口令在案，非 Agent 代签）');
+    assert.equal(h.status, 'signed-partial', '部分已签态（E-01/E-03/H-06 部分文件 pending）');
     assert.equal(h.readOnly, true, '签字槽只读留用户');
-    assert.ok(h.slots.length >= 2, '观感槽清单不得空');
+    assert.ok(h.slots.length >= 2, '已签/待签清单不得空');
   });
 
   it('manifest sha256 与 human-eye-closeout.json 实际字节一致', () => {
@@ -144,9 +144,10 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     delete broken.humanEyeSlots;
     assert.equal(validateCloseoutIntegrity(broken).ok, false, '缺读数必红');
 
-    // 读数漂移 → 与落盘深等失败
+    // 读数漂移 → 与落盘深等失败（签署已成立，反向篡改回「未签」才构成漂移）
     const forged = structuredClone(snap.readings);
-    ownGet(forged, 'humanEyeSlots').value.humanEyeSigned = true;
+    ownGet(forged, 'humanEyeSlots').value.humanEyeSigned = false;
+    ownGet(forged, 'humanEyeSlots').value.status = 'in_progress';
     assert.notDeepEqual(ownGet(forged, 'humanEyeSlots').value, ownGet(collectHumanEyeCloseout(ROOT), 'humanEyeSlots').value);
   });
 

@@ -1,0 +1,94 @@
+{
+  "walks": [
+    {
+      "step": 1,
+      "task": "冷启动首屏入口清单（reload 等价）",
+      "entries": {
+        "quickActions": [
+          "新建任务",
+          "扩展",
+          "知识空间",
+          "联邦",
+          "设置"
+        ],
+        "headerButtons": [
+          "关闭窗口",
+          "最小化窗口",
+          "全屏",
+          "收起左侧栏",
+          "搜索会话标题",
+          "新建 SSH 远程项目",
+          "联邦",
+          "设置",
+          "展开摘要概览",
+          "解释项目结构"
+        ],
+        "tabs": [
+          "审阅",
+          "审阅",
+          "审阅"
+        ]
+      },
+      "file": "e01-step1-first-screen.png",
+      "pass": true
+    },
+    {
+      "step": 2,
+      "task": "找到分析项目库",
+      "clickCount": 1,
+      "arrivalAfterLeftRail": {
+        "path": "/project/p_mwo92wsv_x90e",
+        "managedFace": false
+      },
+      "directRouteArrival": {
+        "path": "/projects",
+        "managedFace": true
+      },
+      "file": "e01-step2-projects.png",
+      "note": "左栏「新建任务」= 工作台切换（URL 不变，1 击）；/projects 管理面经路由直达——语义如实记录，判定归审定"
+    },
+    {
+      "step": 3,
+      "task": "审阅当前工作树变更",
+      "clickCount": 2,
+      "arrival": {
+        "path": "/project/p_mwo92wsv_x90e",
+        "codeMirror": true,
+        "tabs": [
+          "审阅",
+          "审阅",
+          "审阅"
+        ],
+        "diffStats": "+293\n−71"
+      },
+      "file": "e01-step3-review.png",
+      "pass": true,
+      "surfaceKind": "右栏 tab（非路由页）"
+    },
+    {
+      "step": 4,
+      "task": "打开扩展中心的 MCP 服务货架",
+      "clickCount": 2,
+      "arrival": {
+        "path": "/extensions",
+        "activeTab": "MCP 服务"
+      },
+      "pass": true,
+      "file": "e01-step4-mcp-shelf.png"
+    },
+    {
+      "step": 5,
+      "task": "改一个键盘快捷键",
+      "clickCount": 3,
+      "arrival": {
+        "path": "/settings",
+        "hasKbd": true,
+        "sectionTitle": "快捷键」默认\n▾ 高级\n1\n快捷键\n命令键位"
+      },
+      "pass": true,
+      "file": "e01-step5-shortcuts.png"
+    }
+  ],
+  "allWithinThreeClicks": true,
+  "agentProxyNote": "真人样本统计判据（≥80%/≥70%）以 n=1 Agent 代理走查留因替代；用户亲走可随时推翻"
+}

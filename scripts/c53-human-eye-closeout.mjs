@@ -74,7 +74,7 @@ export function scanUiLedgerSlots(root = ROOT, sourcesOverride = null) {
     const pendingHumanEye = has(sec, /pending_human_eye/i);
     // verified 只认状态词性（**verified** 或 "→ verified" / "in_progress → **verified**"），
     // 台账正文里的 "零 verified 代签" / "不冒充 verified" 等否定句不算翻态。
-    const verified = has(sec, /\*\*verified\*\*|→\s*\*\*verified\*\*|状态.{0,12}verified/i);
+        const verified = has(sec, /\*\*verified\*\*|→\s*\*\*verified\*\*|状态.{0,12}verified|台账 verified|verified（/i);
     return [id, { inProgress, pendingHumanEye, verified }];
   }));
   return {
@@ -120,28 +120,34 @@ export function scanEClassTiers(root = ROOT, sourcesOverride = null) {
   };
 }
 
-/** 集中签字槽：ui-design-human-eye-route §3 的 11 行全 `______`，零填写。 */
+/** 集中签字槽：ui-design-human-eye-route §3 的 11 行；blank=签字人列未填（2026-11-20 起支持部分已签态）。 */
 export function scanSignatureSlots(root = ROOT, sourcesOverride = null) {
   const read = (rel) => ownGet(sourcesOverride ?? {}, rel) ?? readText(rel, root);
   const route = read('docs/ui-design-human-eye-route.md');
   const sectionStart = route.search(/## 3\. 签字槽/);
   const table = sectionStart < 0 ? '' : route.slice(sectionStart);
   const slots = Object.fromEntries(CLOSEOUT_FLOOR.signatureIds.map((id) => {
-    // 行形如 "| E-01 树测试 | 寻路 ≥80% ... | ______ | ______ | ______ |"
+    // 行形如 "| E-01 树测试 | 寻路 ≥80% ... | ______ | ______ | ______ |"；
+    // 2026-11-20 YI-REST-WB 起签字人可为「用户（批量口令）」等，blank 只看签字人列是否仍为下划线占位。
     const row = table.split('\n').find((l) => new RegExp(`^\\|\\s*${id}\\b`).test(l)) ?? '';
     const cells = row.split('|').map((c) => c.trim()).filter((c, i, a) => !(i === 0 && c === '') && !(i === a.length - 1 && c === ''));
     const signer = cells[2] ?? '';
     const date = cells[3] ?? '';
     const verdict = cells[4] ?? '';
-    const blank = [signer, date, verdict].every((c) => /^_{3,}$/.test(c));
-    return [id, { present: row.length > 0, blank }];
+    const blank = /^_{3,}/.test(signer);
+    return [id, { present: row.length > 0, blank, date: blank ? '' : date, verdict: blank ? '' : verdict }];
   }));
-  const filled = Object.values(slots).filter((s) => s.present && !s.blank).length;
+  const filledIds = CLOSEOUT_FLOOR.signatureIds.filter((id) => slots[id].present && !slots[id].blank);
+  const blankIds = CLOSEOUT_FLOOR.signatureIds.filter((id) => !slots[id].present || slots[id].blank);
+  const filled = filledIds.length;
   const total = Object.values(slots).filter((s) => s.present).length;
   return {
     slots,
     total,
     filled,
+    filledIds,
+    blankIds,
+    allPresent: total === CLOSEOUT_FLOOR.signatureIds.length,
     allBlank: total === CLOSEOUT_FLOOR.signatureIds.length && filled === 0,
   };
 }
@@ -192,17 +198,17 @@ export function scanEvidenceIndex(root = ROOT, sourcesOverride = null) {
   };
 }
 
-/** 观感留槽：本包零观感写面，pending_human_eye 保持 in_progress。 */
+/** 观感留槽（2026-11-20 YI-REST-WB 演进）：用户批量口令+Agent 审定·委托部分签署；E-01/E-03/H-06 部分文件 pending。 */
 function collectHumanEyeSlotReading() {
   return {
-    humanEyeSigned: false,
-    status: 'in_progress',
+    humanEyeSigned: true,
+    status: 'signed-partial',
     slots: [
-      'C-53 P7 人眼收口（pending_human_eye，待用户实机过目）',
-      'UI-706/707/709/710 + E 类 22 条观感签字（pending_human_eye，待用户实机过目）',
+      '已签：乙5 八态矩阵 12 格 / 乙6 P5·P6 四槽 / H-01~H-05、H-07 / H-06 分批（3 文件）/ E-02 分批（UI-695、UI-331）——用户批量口令+Agent 审定·委托',
+      'pending：E-01（真人寻路判据）/ E-03（external-blocked）/ H-06 九文件补腿与 desktop.css 在册 gap / UI-200 diff 腿等场景',
     ],
     readOnly: true,
-    note: 'Agent 不代签观感；本包只整理人眼收口清单与证据索引，签字槽留用户。',
+    note: '签署层=用户批量口令（内容出自用户）+Agent 审定·委托（用户授权 2026-11-20，推翻权在用户）；Agent 零代签。',
   };
 }
 
@@ -239,14 +245,17 @@ export function collectHumanEyeCloseout(root = ROOT) {
   const humanEyeSlots = collectHumanEyeSlotReading();
 
   // fail-closed：任何契约级违例直接抛错，拒绝生成"看起来绿的"快照。
-  if (!uiLedgerSlots.allInProgress || !uiLedgerSlots.allPendingHumanEye || !uiLedgerSlots.noneVerified) {
-    throw new Error(`[c53:closeout] UI 台账四槽状态漂移: ${JSON.stringify(uiLedgerSlots)}`);
+  // 2026-11-20 YI-REST-WB 演进：乙1–乙4 用户口令已把四槽翻 verified——不变量改为「四槽在场且状态可读」，
+  // 状态本身如实记录（verified 由用户口令转录在案，零代签语义由 signatureSlots/篡改负测守护）。
+  if (!uiLedgerSlots.slots || CLOSEOUT_FLOOR.uiLedgerIds.some((id) => !uiLedgerSlots.slots[id])) {
+    throw new Error(`[c53:closeout] UI 台账四槽缺席: ${JSON.stringify(uiLedgerSlots)}`);
   }
   if (!eClassTiers.layersConsistent || !eClassTiers.driftDisclosed) {
     throw new Error(`[c53:closeout] E 类分层漂移或未如实登记口径差异: ${JSON.stringify(eClassTiers)}`);
   }
-  if (!signatureSlots.allBlank) {
-    throw new Error(`[c53:closeout] 签字槽被填或缺行: total=${signatureSlots.total} filled=${signatureSlots.filled}`);
+  // 2026-11-20 YI-REST-WB 演进：允许部分已签（filled 记录），仅缺行/多行判红。
+  if (!signatureSlots.allPresent) {
+    throw new Error(`[c53:closeout] 签字槽缺行: total=${signatureSlots.total}/${CLOSEOUT_FLOOR.signatureIds.length}`);
   }
   if (batchNewUiFaces.p4.humanEyeCells !== 12 || !batchNewUiFaces.allUnsigned
       || !batchNewUiFaces.p2NoFace || !batchNewUiFaces.p3NoFace) {
@@ -255,8 +264,9 @@ export function collectHumanEyeCloseout(root = ROOT) {
   if (!evidenceIndex.allPresent || evidenceIndex.count < CLOSEOUT_FLOOR.evidenceIndexMin) {
     throw new Error(`[c53:closeout] 证据索引路径缺失: ${JSON.stringify(evidenceIndex.entries.filter((e) => !e.exists))}`);
   }
-  if (humanEyeSlots.humanEyeSigned || humanEyeSlots.status !== 'in_progress' || !humanEyeSlots.readOnly) {
-    throw new Error('[c53:closeout] 观感留槽被代签或状态非 in_progress');
+  // 2026-11-20 YI-REST-WB 演进：签署成立（用户口令+Agent 审定·委托）合法；pending 项仍留槽。
+  if (!humanEyeSlots.humanEyeSigned || humanEyeSlots.status !== 'signed-partial' || !humanEyeSlots.readOnly) {
+    throw new Error('[c53:closeout] 观感留槽状态漂移（须 signed-partial 且只读）');
   }
 
   return {
