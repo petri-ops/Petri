@@ -50,8 +50,19 @@
 [role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__title) {
   font-size: var(--petri-font-size-lg);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  /* A3：宽字距承载竖排标题重量；落印位用 ::after 极小方点，中性 token 不增 accent 棘轮。 */
+  letter-spacing: 0.03em;
   color: var(--petri-text);
+}
+
+/* A3 落印位：标题下方 3px 中性方点（朱砂点睛留给品牌面，工具面用墨色克制）。 */
+:global(.petri-settings-seal)::after {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 3px;
+  margin-top: var(--petri-space-1);
+  background: var(--petri-text-tertiary);
 }
 
 [role='dialog'][aria-label='设置'] :global(.petri-desktop-panel__subtitle) {

@@ -184,7 +184,7 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
           <Icon name="settings" size={18} />
         </span>
         <div className="petri-desktop-panel__titles">
-          <h2 className="petri-desktop-panel__title">设置</h2>
+          <h2 className="petri-desktop-panel__title petri-settings-seal">设置</h2>
           <p className="petri-desktop-panel__subtitle">{activeSectionMeta.description}</p>
         </div>
       </div>

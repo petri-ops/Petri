@@ -21,6 +21,8 @@
   margin: 0;
   font-size: var(--petri-font-size-2xl);
   font-weight: 700;
+  /* A3 东方排版：标题宽字距承载竖排标题的重量（横排转译，不引新字族/依赖）。 */
+  letter-spacing: 0.04em;
   color: var(--petri-text);
   text-align: center;
 }
@@ -29,6 +31,8 @@
   margin: -10px 0 6px;
   color: var(--petri-text-secondary);
   font-size: var(--petri-font-size-body);
+  /* A3：英文/技术标签作横排小字注脚，微量字距与标题同族。 */
+  letter-spacing: 0.02em;
   text-align: center;
 }
 

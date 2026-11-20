@@ -8798,6 +8798,27 @@
       "scriptRole": "baseline-collector"
     },
     {
+      "id": "a3-editorial-rhythm",
+      "note": "A3 排版留白：欢迎页标题宽字距0.04em/注脚0.02em、设置页标题0.01→0.03em + 中性落印位3px方点（petri-settings-seal::after），零 accent 增量/零新 token；HK-01 红绿 + 邻域39 tests + 主契约19/19 + tsc0。观感零代签 UI-717。证据 acceptance/a3-editorial-rhythm/**。",
+      "patterns": [
+        "frontend/src/pages/welcome.module.css",
+        "frontend/src/components/desktop/settings-redesign.module.css",
+        "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+        "frontend/src/styles/EditorialRhythm.test.ts",
+        "acceptance/a3-editorial-rhythm/**"
+      ],
+      "tests": [
+        "frontend/src/styles/EditorialRhythm.test.ts",
+        "frontend/src/pages/welcome.test.tsx",
+        "frontend/src/components/desktop/settings-redesign.models-exemption.test.ts"
+      ],
+      "commands": [
+        "ui-audit"
+      ],
+      "classifiesScripts": false,
+      "scriptRole": "constraint"
+    },
+    {
       "id": "a2-identity-atoms",
       "note": "A2 造型图标原子：复用自绘 Icon.tsx 单源新增开环/错落四格/发丝线三原子，落 MCP 空态与 extensions active tab（一格点睛≤1/视图）；HK-01 红绿 + 邻域 71 tests + 主契约 19/19 + tsc 0，零图标依赖/观感零代签。证据 acceptance/a2-identity-atoms/**。",
       "patterns": [

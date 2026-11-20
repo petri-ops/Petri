@@ -1,0 +1,95 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vitest.config.ts:12:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.0.1 [39m[90m/Users/zhangdiandian/Documents/1.WorkDir/Petri/frontend[39m
+
+ [31m❯[39m src/styles/EditorialRhythm.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 6[2mms[22m[39m
+   [31m❯[39m A3 editorial rhythm (欢迎页 + 设置页) [2m(5)[22m
+[31m     [31m×[31m welcome greeting uses wider tracking with heavy weight (竖排标题重量转译)[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m welcome subtitle is the horizontal footnote role (英/技术标签位)[39m[32m 0[2mms[22m[39m
+[31m     [31m×[31m settings panel title tracking widened (>=0.03em), neutral seal mark present[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m seal mark introduces no accent token (ratchet only-tighten)[39m[32m 0[2mms[22m[39m
+     [32m✓[39m no new bare-color literals in the touched CSS blocks[32m 0[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/styles/EditorialRhythm.test.ts[2m > [22mA3 editorial rhythm (欢迎页 + 设置页)[2m > [22mwelcome greeting uses wider tracking with heavy weight (竖排标题重量转译)
+[31m[1mAssertionError[22m: greeting must have letter-spacing: expected '\n  margin: 0;\n  font-size: var(--pe…' to match /letter-spacing:\s*[\d.]+em/[39m
+
+[32m- Expected:[39m
+/letter-spacing:\s*[\d.]+em/
+
+[31m+ Received:[39m
+"
+  margin: 0;
+  font-size: var(--petri-font-size-2xl);
+  font-weight: 700;
+  color: var(--petri-text);
+  text-align: center;
+"
+
+[36m [2m❯[22m src/styles/EditorialRhythm.test.ts:[2m23:52[22m[39m
+    [90m 21|[39m     const g = block(read(WELCOME_CSS), '.greeting');
+    [90m 22|[39m     expect(g).toMatch(/font-weight:\s*700/);
+    [90m 23|[39m     expect(g, 'greeting must have letter-spacing').toMatch(/letter-spa…
+    [90m   |[39m                                                    [31m^[39m
+    [90m 24|[39m     const ls = Number(g.match(/letter-spacing:\s*([\d.]+)em/)?.[1] ?? …
+    [90m 25|[39m     expect(ls, 'tracking must be wider than body (>=0.03em)').toBeGrea…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/EditorialRhythm.test.ts[2m > [22mA3 editorial rhythm (欢迎页 + 设置页)[2m > [22mwelcome subtitle is the horizontal footnote role (英/技术标签位)
+[31m[1mAssertionError[22m: expected '\n  margin: -10px 0 6px;\n  color: va…' to match /letter-spacing:\s*[\d.]+em/[39m
+
+[32m- Expected:[39m
+/letter-spacing:\s*[\d.]+em/
+
+[31m+ Received:[39m
+"
+  margin: -10px 0 6px;
+  color: var(--petri-text-secondary);
+  font-size: var(--petri-font-size-body);
+  text-align: center;
+"
+
+[36m [2m❯[22m src/styles/EditorialRhythm.test.ts:[2m30:15[22m[39m
+    [90m 28|[39m   it('welcome subtitle is the horizontal footnote role (英/技术标签位)', () …
+    [90m 29|[39m     const s = block(read(WELCOME_CSS), '.welcomeSub');
+    [90m 30|[39m     expect(s).toMatch(/letter-spacing:\s*[\d.]+em/);
+    [90m   |[39m               [31m^[39m
+    [90m 31|[39m     expect(s).toMatch(/--petri-text-secondary|--petri-text-tertiary/);
+    [90m 32|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/EditorialRhythm.test.ts[2m > [22mA3 editorial rhythm (欢迎页 + 设置页)[2m > [22msettings panel title tracking widened (>=0.03em), neutral seal mark present
+[31m[1mAssertionError[22m: settings title tracking must widen (was 0.01em): expected 0.01 to be greater than or equal to 0.03[39m
+[36m [2m❯[22m src/styles/EditorialRhythm.test.ts:[2m39:67[22m[39m
+    [90m 37|[39m     expect(title).toMatch(/font-weight:\s*600/);
+    [90m 38|[39m     const ls = Number(title.match(/letter-spacing:\s*([\d.]+)em/)?.[1]…
+    [90m 39|[39m     expect(ls, 'settings title tracking must widen (was 0.01em)').toBe…
+    [90m   |[39m                                                                   [31m^[39m
+    [90m 40|[39m     // 落印位：极小几何（2-4px）+ 中性 token，不增 accent。
+    [90m 41|[39m     expect(css, 'a neutral 落印位 mark must exist').toMatch(/petri-settin…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/styles/EditorialRhythm.test.ts[2m > [22mA3 editorial rhythm (欢迎页 + 设置页)[2m > [22mseal mark introduces no accent token (ratchet only-tighten)
+[31m[1mAssertionError[22m: seal block must exist: expected '' not to be '' // Object.is equality[39m
+[36m [2m❯[22m src/styles/EditorialRhythm.test.ts:[2m47:47[22m[39m
+    [90m 45|[39m     const css = read(SETTINGS_CSS);
+    [90m 46|[39m     const seal = css.match(/\.petri-settings-seal\s*\{([^}]*)\}/)?.[1]…
+    [90m 47|[39m     expect(seal, 'seal block must exist').not.toBe('');
+    [90m   |[39m                                               [31m^[39m
+    [90m 48|[39m     expect(seal).not.toMatch(/--petri-accent/);
+    [90m 49|[39m   });
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 16:25:48
+[2m   Duration [22m 323ms[2m (environment 86%, transform 7%, tests 3%, import 3%, worker 1%)[22m
+
