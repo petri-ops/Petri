@@ -207,7 +207,7 @@ module.exports = [
     "type": "function",
     "function": {
       "name": "workspace_exec",
-      "description": "在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；交互式提权、不可恢复删除、静默远端推送和远程脚本管道仍由安全边界拒绝。只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。长命令建议传 yield_ms：等到产出或超时即交还控制权，未完成时自动转入后台进程表（返回 yielded:true + processId，用 process_status 轮询收尾），避免傻等阻塞。",
+      "description": "在当前项目工作区打开通用命令行。完全访问模式允许使用 shell 执行用户机器上可用的命令、脚本、管道和重定向；交互式提权、不可恢复删除、静默远端推送和远程脚本管道仍由安全边界拒绝。只读模式或用户明确要求仅检查/规划时禁止调用。科学分析正式结果仍应通过 run_tool 进入 tool_job 与 artifact truth。长命令建议传 yield_ms：等到产出或超时即交还控制权，未完成时自动转入后台进程表（返回 yielded:true + processId，用 process_status 轮询收尾），避免傻等阻塞。Shell 语义与平台：命令经系统 shell 执行（Windows 默认 cmd，可用 shell 参数选 powershell；macOS/Linux 为 $SHELL，通常 zsh/bash），平台相关命令（brew/apt/launchctl/reg 等）先用 system_info 确认平台再调用；多命令用 && 或换行分隔，注意 `set -e <命令>` 不会执行命令（set 把后续词当作位置参数），需要错误即停请单独一句 set -e。自建封装脚本（如 .petri-agent-tmp/ 下的 cdp 助手）崩溃时 stderr 会原样返回，建议先单独跑通脚本再串长链。",
       "parameters": {
         "type": "object",
         "properties": {

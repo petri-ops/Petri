@@ -618,6 +618,11 @@ function getProviderToolDefs() {
   return defs;
 }
 
+// BLOCK-510 P1a — 内建工具名清单（unknown_tool 相近名建议数据源；不含 mcp_ 投影）。
+function listBuiltinToolNames() {
+  return [...TOOL_BY_NAME.keys()];
+}
+
 function getToolEntry(name) {
   // 静态优先（内建永不被 MCP 投影遮蔽）；mcp_* 前缀走投影兜底
   const entry = TOOL_BY_NAME.get(name);
@@ -651,6 +656,7 @@ module.exports = {
   RISK_TIERS,
   buildToolRegistry,
   getProviderToolDefs,
+  listBuiltinToolNames,
   getToolEntry,
   getToolHandler,
   getToolContract,

@@ -886,6 +886,18 @@ function createWorkspaceTools(options = {}) {
     return hint;
   }
 
+  // BLOCK-510 P1c — shell 语义误区 hint：`set -e <命令>` 把命令名当作 set 的位置参数，
+  // 命令根本不会执行（实证：agent 取证链 cdp.mjs 首段静默跳过、后续链语义错位）。
+  // 失败反馈带此 hint 让模型一次自我纠正（对标 attachCommandNotFoundHint 同形）。
+  function attachShellSemanticsHint(result) {
+    if (!result || result.ok) return result;
+    if (typeof result.command === 'string' && /^\s*set\s+-e\s+\S/.test(result.command)) {
+      result.shellSemanticsHint = 'set -e 后跟命令名不会执行该命令（set 把后续词当作位置参数）。需要「错误即停」请单独使用一句 set -e（或 set -o errexit），与命令用 && 或分号分隔，例如 `set -e && <命令>`；本命令的前半段因此没有执行。';
+      if (!result.note) result.note = result.shellSemanticsHint;
+    }
+    return result;
+  }
+
   async function attachCommandNotFoundHint(result, notFoundEvidence, cwdRoot) {
     const exitCode = Number.isInteger(result.exitCode) ? result.exitCode : 1;
     const looksNotFound = isCommandNotFoundText(notFoundEvidence)
@@ -1007,6 +1019,7 @@ function createWorkspaceTools(options = {}) {
       };
       if (spawnResult.errorMessage) failed.errorMessage = spawnResult.errorMessage;
       failed = await attachCommandNotFoundHint(failed, `${spawnResult.errorMessage || ''}\n${spawnResult.stderr || ''}`, cwdRoot);
+      attachShellSemanticsHint(failed);
       return failed;
     }, { requireCompatible: true }), verdict);
   }
@@ -1145,6 +1158,7 @@ function createWorkspaceTools(options = {}) {
         }
         if (!result.ok) {
           await attachCommandNotFoundHint(result, `${outcome.spawnError || ''}\n${stderrRaw || ''}`, cwdRoot);
+          attachShellSemanticsHint(result);
         }
         return result;
       }

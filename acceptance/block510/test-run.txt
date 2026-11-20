@@ -1,0 +1,33 @@
+✅ [2026-11-20T03:12:49.928Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-20T03:12:49.929Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-20T03:12:50.044Z] [executors] registered: r
+✅ [2026-11-20T03:12:50.045Z] [executors] registered: python
+✅ [2026-11-20T03:12:50.045Z] [storage] registered: local
+✅ [2026-11-20T03:12:50.045Z] [storage] capabilities declared: local
+✅ [2026-11-20T03:12:50.045Z] [storage] active: local
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-20T03:12:50.099Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ P1a — unknown_tool 附相近已注册工具建议（exec → workspace_exec） (2.518417ms)
+✔ P1a — 前缀/编辑距离兜底：workspace_exe 仍命中建议；正常工具不受影响 (1.029ms)
+✔ P1b — workspace_exec description 平台/shell 语义补强（provider-visible） (0.474333ms)
+✔ P1c — 失败反馈 set -e pitfall hint（源级断言：两处失败路径均挂 hint） (0.344084ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 504.451875

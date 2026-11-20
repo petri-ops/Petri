@@ -2,7 +2,7 @@
 const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('../helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
 
 const { decideAgentToolCall } = require('./agent-tool-policy');
-const { getToolEntry } = require('./registry');
+const { getToolEntry, listBuiltinToolNames } = require('./registry');
 const { preflightWorkspaceTool } = require('./workspace-tools');
 const { bindResultStudioContextToken } = require('./result-context-binding');
 // BLOCK-243 — 编辑参数批准后的原始指纹→生效参数替换（一次性，执行前再校验）。
@@ -262,6 +262,36 @@ function withOverrideAcks(ctx, guardKey) {
   return { ...ctx, dynamicGuardAcks: { has }, approvedFingerprints: new Set() };
 }
 
+// BLOCK-510 P1a — 相近名建议：编辑距离≤2 或 前缀/包含匹配，按距离升序取 top3。
+function editDistanceLE2(a, b) {
+  if (Math.abs(a.length - b.length) > 2) return false;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i += 1) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length] <= 2;
+}
+
+function suggestBuiltinToolNames(name) {
+  const q = String(name || '').toLowerCase();
+  if (!q) return [];
+  const names = listBuiltinToolNames();
+  const scored = [];
+  for (const n of names) {
+    const ln = String(n).toLowerCase();
+    let d = Infinity;
+    if (ln.startsWith(q) || q.startsWith(ln) || ln.includes(q) || (q.length >= 4 && ln.includes(q.slice(0, 4)))) d = 0;
+    else if (editDistanceLE2(q, ln)) d = 1;
+    if (d !== Infinity) scored.push({ n, d });
+  }
+  scored.sort((a, b) => a.d - b.d || a.n.localeCompare(b.n));
+  return scored.slice(0, 3).map((x) => x.n);
+}
+
 function createAgentToolInterceptor(options = {}) {
   const resolveEntry = options.getToolEntry || getToolEntry;
   const workspacePreflight = options.preflightWorkspaceTool || preflightWorkspaceTool;
@@ -270,12 +300,20 @@ function createAgentToolInterceptor(options = {}) {
   return async function interceptAgentToolCall(name, argsObj, ctx = {}, handlerOptions = {}) {
     const entry = resolveEntry(name);
     if (!entry) {
+      // BLOCK-510 P1a — unknown_tool 相近名建议：模型幻觉/简写工具名（实证 exec≠workspace_exec）
+      // 时只回「未知工具」会让模型多轮试错；附注册表相近名（编辑距离≤2 或 前缀/包含匹配，top3）
+      // 让模型一次自我纠正（对标 ZCode relaxed-execution-policy「错误反馈要能支撑自我纠正」）。
+      const suggestions = (typeof options.suggestToolNames === 'function'
+        ? options.suggestToolNames(name)
+        : suggestBuiltinToolNames(name));
+      const hint = suggestions.length ? `。相近已注册工具: ${suggestions.join(', ')} — 请改用确切名称重试` : '';
       return {
         ok: false,
         error: 'unknown_tool',
         reason: 'unknown_tool',
-        message: `未知工具: ${name}`,
+        message: `未知工具: ${name}${hint}`,
         messageKey: 'agent_tool.unknown_tool',
+        ...(suggestions.length ? { suggestions } : {}),
       };
     }
 

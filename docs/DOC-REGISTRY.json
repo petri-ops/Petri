@@ -10,9 +10,9 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 659,
-    "lastUpdated": "2026-11-19",
-    "managedMarkdown": 642
+    "documentCount": 660,
+    "lastUpdated": "2026-11-20",
+    "managedMarkdown": 643
   },
   "documents": [
     {
@@ -13732,7 +13732,29 @@
       ],
       "sharedBaselines": [],
       "notes": "2026-11-20 立项（用户裁决「按此立项开工——产品内一键成片出口；canonical plan/registry/README/AUDIT，HK-01 先行」）。把 P0-P3 已收口的视频能力接进产品主链：主题→可审阅 VideoProjectSpec→显式付费确认→既有 compose_video→聊天轻量产物卡内联 MP4 + 讲稿/字幕/来源/QA 下载。零新依赖/不重做 P0-P3/不改 compose_video 契约/外部素材默认关/观感零代签/不碰 G1+。收口：HK-01 Node 6/6 + 前端 1/1，前端邻域 52/52，types 0、theme 19/19、docs 659/ui 绿；dev Electron 实机 L1-L3 3/3（轻量摘要、真实 P0 MP4 readyState=4/duration≈22.15s、可收起）；block482 D2 在 macOS 的 /ws 只读环境性红属 P0 存量，非本包文件面；观感零代签。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+    },
+    {
+      "id": "BLOCK-510",
+      "path": "docs/block510-tool-call-reliability-plan.md",
+      "kind": "work-package",
+      "status": "completed",
+      "canonical": true,
+      "truthDomain": "block510-tool-call-reliability",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "CLOSED",
+      "sharedBaselines": [],
+      "touchSurface": [
+        "docs/block510-tool-call-reliability-plan.md",
+        "core/petri-server/agent-tools/agent-tool-interceptor.js",
+        "core/petri-server/agent-tools/registry.js",
+        "core/petri-server/agent-tools/workspace-tools.js",
+        "core/petri-server/agent-tools/tool-defs/workspace.js",
+        "test/block510-tool-call-reliability.test.mjs",
+        "acceptance/block510/"
+      ],
+      "notes": "工具调用可靠性：unknown_tool 相近名建议（P1a）+exec description 平台/shell 语义补强（P1b）+set -e pitfall hint（P1c）；P2 跨平台 shell 矩阵实机回归另票"
     }
   ],
-  "lastUpdated": "2026-11-19"
+  "lastUpdated": "2026-11-20"
 }
