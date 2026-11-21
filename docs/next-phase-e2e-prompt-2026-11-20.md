@@ -1,6 +1,7 @@
 ---
 capability: next-phase-e2e-prompt-20261120
-status: active
+status: completed
+closeoutNote: "2026-11-21 S1–S8 全部执行完毕（八波八 commit d3780338..S8 终点，证据=acceptance/r2-remediation/，R3 自评=acceptance/project-status-assessment-r3-2026-11-21/）；判据类自主裁决逐波 RULINGS 留痕。"
 goal: R2 评估后的清偿批无人值守提示词（2026-11-20）——把 R2 问题清单 P0/P1/P2 全部清完并让收口链恢复全绿：S1 水印终版与并发清场 → S2 存量红清偿 → S3 视觉链带红清偿 → S4 治理归位 → S5 默认身份面可见性 → S6 三项 breaking U 类 → S7 测试实例 TTL 门禁 → S8 全量收口 + R3 自评。用户本批发令「不需要人参与，agent 自动推进校验复核判断」= 预授权连续推进 + 判据类自主裁决；观感无偏好覆盖不代签、不可逆破坏/新依赖/G1+ 一律不做。
 acceptance:
   - 自包含：新 Agent 复制 §2 代码块整块即可无人值守推进，无需外部上下文

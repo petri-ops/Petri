@@ -1,17 +1,53 @@
 {
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
-  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
-  "generatedAt": "2026-11-20T23:29:38.667Z",
-  "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。",
+  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
+  "generatedAt": "2026-11-21T00:03:39.142Z",
+  "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。files=自有 design-context.json + 各外部条目（合并保留，不整写）。",
   "files": [
     {
       "path": "design-context.json",
-      "sha256": "9a12ce221319211c0591d09fd2deba3f49c51aa7897e3ee3b4740f18bae6a38d"
+      "sha256": "fa2cd9612ef8c26995e8e442f2c155f856d47a89032aa764747a7920a06cfb58"
+    },
+    {
+      "path": "ia-map.json",
+      "sha256": "45cd582ba2357e61a1fca7653ce15524cb6d49e5f9a1fba9f7d1d707dec25d3e"
     },
     {
       "path": "visual-consistency.json",
-      "sha256": "5e8870d39f800536153354faf79ab8602f9d2a89d4453ccd409bee13c4f84daf"
+      "sha256": "93b9927876d6ad0d572750cdc563d9b0ddfc7949139c1f0e3f76c5aaec77966c"
+    },
+    {
+      "path": "responsive-a11y.json",
+      "sha256": "6fcee6553cd13b371d03da83af826f007f7c0a0402adc9a173204450b2485d22"
+    },
+    {
+      "path": "performance-trust.json",
+      "sha256": "4c064c85e2fc7a6be2e47db6085603e7a25f2a7a2cf6ed916e0421ffd5bdf50f"
+    },
+    {
+      "path": "skill-contract.json",
+      "sha256": "006fbccfedb16622c79fbf30cae60050bd776f019a8530459f24b51c920ad478"
+    },
+    {
+      "path": "human-eye-closeout.json",
+      "sha256": "282ff3cd2f74f938730fcd4a4125174da898d5cc710c86f51f76687343c3f45a"
+    },
+    {
+      "path": "assistant-ui-pattern.json",
+      "sha256": "c6614308407b2f1ff53f55344bcc7ddf2b1f3c24f638b813acb92e7c118c174a"
+    },
+    {
+      "path": "react-bits-motion.json",
+      "sha256": "aa3a5accb97b633dc28d778cb9e96680c182085c63f896e15d16809ffefc7793"
+    },
+    {
+      "path": "21st-snippet-library.json",
+      "sha256": "6d0224487bcf3645bafc6fac9b45245b4579f013846633966661ecac407aa774"
+    },
+    {
+      "path": "reference-board-review.json",
+      "sha256": "d98dbc78f4d09d4c6b26e38adca889f4a5df18d9d5a7ae9cc32e9fdb4a69a25e"
     }
   ]
 }

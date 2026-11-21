@@ -7,3 +7,4 @@ gate:code-size	1	acceptance/r2-remediation/gates/baseline-gate-code-size.log
 gate:user-assets	1	acceptance/r2-remediation/gates/baseline-gate-user-assets.log
 gate:silent-catch	1	acceptance/r2-remediation/gates/baseline-gate-silent-catch.log
 s6a-status-color	status-color-single-source+styles62+roster/knowledge14+block109-6+tsc0+a11y PASS	0	gates/s6a-tests.log(local)
+s8a-closeout-contracts	post-h9契约演进(186/186)+c53 manifest根修(28/28)+断点下限演进(40/40)	0	gates/s8-*.log(local)

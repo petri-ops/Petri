@@ -19,7 +19,7 @@
       "id": "NEXT-PHASE-E2E-PROMPT-2026-11-20",
       "path": "docs/next-phase-e2e-prompt-2026-11-20.md",
       "kind": "roadmap",
-      "status": "active",
+      "status": "completed",
       "canonical": true,
       "truthDomain": "next-phase-e2e-prompt-20261120",
       "entrypoint": "docs/README.md",
@@ -36,7 +36,7 @@
         "G0"
       ],
       "registeredAt": "2026-11-20",
-      "notes": "2026-11-20 立项登记（用户发令「给一个可以把接下来工作都搞完的提示词，不需要人参与，agent 自动推进校验复核判断」）：R2 评估（acceptance/project-status-assessment-r2-2026-11-20/，四维 9/20）后的清偿批。S1 水印终版与并发清场（P0-1，Jev 单一建议 0.56）→S2 存量红清偿（P1-6/7/8/9：impact-map 裸文件名/user-assets tracked 误判/silent-catch/失败任务账）→S3 视觉链带红清偿（P1-1/P1-2：code-size 自身 2 处+design-context 契约演进+A2 GATE-LEDGER 归属更正）→S4 治理归位（P1-4/P1-5/P2-1/P2-3）→S5 默认身份面可见性（P1-3，A0 裁决落地+旧配置迁移）→S6 三项 breaking U 类（P0-2/3/4，行为基线前后同套绿+独立 commit）→S7 测试实例 TTL 机械门禁（P2-2）→S8 closeout:full+R3 自评。预置裁决 R1–R12 全部引用用户本批发令与 R2 现读证据，无 agent 自造范围；不继承 11-18-b2 的 R8–R15。红线=观感无偏好覆盖不代签+保护性停止（不可逆破坏/新依赖/G1+/安全敏感，登记后跳过不阻塞）+反假绿（SKIP≠PASS/定向≠全量/离屏禁 onscreen）+commit 自动 push 留发令。out=候选池 C-35~C-44/竞争力纲 CP-1~CP-19/母纲新波次/G1+/他包 WIP/用户资产。"
+      "notes": "2026-11-20 立项登记（用户发令「给一个可以把接下来工作都搞完的提示词，不需要人参与，agent 自动推进校验复核判断」）：R2 评估（acceptance/project-status-assessment-r2-2026-11-20/，四维 9/20）后的清偿批。S1 水印终版与并发清场（P0-1，Jev 单一建议 0.56）→S2 存量红清偿（P1-6/7/8/9：impact-map 裸文件名/user-assets tracked 误判/silent-catch/失败任务账）→S3 视觉链带红清偿（P1-1/P1-2：code-size 自身 2 处+design-context 契约演进+A2 GATE-LEDGER 归属更正）→S4 治理归位（P1-4/P1-5/P2-1/P2-3）→S5 默认身份面可见性（P1-3，A0 裁决落地+旧配置迁移）→S6 三项 breaking U 类（P0-2/3/4，行为基线前后同套绿+独立 commit）→S7 测试实例 TTL 机械门禁（P2-2）→S8 closeout:full+R3 自评。预置裁决 R1–R12 全部引用用户本批发令与 R2 现读证据，无 agent 自造范围；不继承 11-18-b2 的 R8–R15。红线=观感无偏好覆盖不代签+保护性停止（不可逆破坏/新依赖/G1+/安全敏感，登记后跳过不阻塞）+反假绿（SKIP≠PASS/定向≠全量/离屏禁 onscreen）+commit 自动 push 留发令。out=候选池 C-35~C-44/竞争力纲 CP-1~CP-19/母纲新波次/G1+/他包 WIP/用户资产。 2026-11-21 S1–S8 执行完毕翻 completed（八波 commit d3780338 起，证据=acceptance/r2-remediation/；R3=acceptance/project-status-assessment-r3-2026-11-21/）。"
     },
     {
       "id": "BLOCK-492-FULL-WORK-EXECUTION-PROMPT",

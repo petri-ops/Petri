@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "generator": "node scripts/c53-ia-map.mjs",
-  "sourceCommit": "1d13915d43910d736c9343d53947145bfafdd587",
-  "generatedAt": "2026-11-18T07:39:24.096Z",
+  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
+  "generatedAt": "2026-11-21T00:02:59.196Z",
   "note": "模型可读 IA 映射；由 collector 从 App.tsx 现读路由派生，被 test/c53-ia-map.test.mjs 锚定。",
   "routes": [
     {

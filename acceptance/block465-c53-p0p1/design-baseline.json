@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-design-baseline",
   "capability": "block465-c53-design-baseline-context-pack",
-  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
+  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-design-baseline.mjs",
-  "generatedAt": "2026-11-20T23:29:24.667Z",
+  "generatedAt": "2026-11-21T00:01:14.259Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -43,7 +43,7 @@
       },
       "source": "docs/design-charter.md §1",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "colorBudget": {
       "value": {
@@ -53,7 +53,7 @@
       },
       "source": "docs/design-charter.md §2",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "borderSemantics": {
       "value": {
@@ -67,7 +67,7 @@
       },
       "source": "docs/design-charter.md §3",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "motion": {
       "value": {
@@ -85,7 +85,7 @@
       },
       "source": "docs/design-charter.md §4",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "controls": {
       "value": {
@@ -106,7 +106,7 @@
       },
       "source": "docs/design-charter.md §6 + controls/ 现读",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "ratchets": {
       "value": {
@@ -116,7 +116,7 @@
       },
       "source": "docs/design-charter.md §7",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "tokenGate": {
       "value": {
@@ -132,7 +132,7 @@
       },
       "source": "frontend/src/styles/theme-token-contract.test.ts",
       "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "uiDebt": {
       "value": {
@@ -144,15 +144,15 @@
         "verified": 461,
         "closed": 12,
         "ceilingCrossCheck": {
-          "liveMissing": 15,
+          "liveMissing": 13,
           "blocked": 23,
-          "total": 38
+          "total": 36
         },
-        "consistent": false
+        "consistent": true
       },
       "source": "acceptance/block-332/ui-ledger-triage.json + post-h9-k3-experience.mjs",
       "command": "npm run ui:audit:triage",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "componentRules": {
       "value": {
@@ -167,7 +167,7 @@
       },
       "source": "docs/design-charter.md §6",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     }
   },
   "captureContext": {
@@ -175,15 +175,11 @@
       "value": {
         "documentCount": 663,
         "managedMarkdown": 646,
-        "activeWorkPackages": [
-          "BLOCK-503",
-          "BLOCK-505",
-          "BLOCK-506"
-        ]
+        "activeWorkPackages": []
       },
       "source": "docs/DOC-REGISTRY.json",
       "command": "npm run state",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     },
     "auditUnresolved": {
       "value": {
@@ -193,7 +189,7 @@
       },
       "source": "docs/AUDIT-LOG.md §当前待处理项",
       "command": "npm run state",
-      "capturedAt": "2026-11-20T23:29:24.654Z"
+      "capturedAt": "2026-11-21T00:01:14.246Z"
     }
   }
 }

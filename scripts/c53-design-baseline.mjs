@@ -259,13 +259,29 @@ function main(argv) {
   };
   const pack = buildPack(readings);
   const packBuf = Buffer.from(`${JSON.stringify(pack, null, 2)}\n`, 'utf8');
+  // manifest 合并语义（2026-11-21 R2 清偿批 S8 根修）：本生成器只拥有 design-context.json
+  // 条目；manifest 里的其它条目（skill-contract/ia-map/responsive-a11y/performance-trust/
+  // human-eye-closeout/assistant-ui-pattern/react-bits-motion/21st-snippet-library/
+  // reference-board-review/visual-consistency）归各自生成器/契约所有——整写会把它们静默清掉
+  // （S3 曾因此丢 9 条致 c53-skill-contract 契约红，closeout:full 揭出）。故：读旧 manifest，
+  // 保留非自有条目原样（sha 由各自所有者维护），仅更新自有条目与元数据。
+  const previous = (() => {
+    try {
+      const m = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      return Array.isArray(m.files) ? m.files : [];
+    } catch {
+      return [];
+    }
+  })();
+  const ownSha = createHash('sha256').update(packBuf).digest('hex');
+  const foreign = previous.filter((f) => ownGet(f, 'path') !== 'design-context.json');
   const manifest = {
     schemaVersion: 1,
     generator: 'node scripts/c53-design-baseline.mjs',
     sourceCommit,
     generatedAt: new Date().toISOString(),
-    note: '模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。',
-    files: [{ path: 'design-context.json', sha256: createHash('sha256').update(packBuf).digest('hex') }],
+    note: '模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。files=自有 design-context.json + 各外部条目（合并保留，不整写）。',
+    files: [{ path: 'design-context.json', sha256: ownSha }, ...foreign],
   };
 
   for (const p of [snapPath, packPath, manifestPath]) fs.mkdirSync(path.dirname(p), { recursive: true });

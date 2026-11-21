@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-responsive-a11y",
   "capability": "block473-c53-p4-responsive-a11y",
-  "sourceCommit": "92f54660f3c4f8d784069a51f0eefa3a3c79cf62",
+  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-responsive-a11y.mjs",
-  "generatedAt": "2026-11-20T00:51:26.670Z",
+  "generatedAt": "2026-11-21T00:03:39.141Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -38,7 +38,7 @@
       },
       "source": "frontend/src CSS 全源 + ui-design-a11y.mjs FOCUS_GAP_BASELINE + nso-w3-a11y inert 语义",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     },
     "ariaStateMachine": {
       "value": {
@@ -49,7 +49,7 @@
       },
       "source": "frontend/src TSX 全源（aria-busy/role=alert/role=status/aria-live）",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     },
     "contrast": {
       "value": {
@@ -62,7 +62,7 @@
       },
       "source": "scripts/ui-design-a11y.mjs computeContrastPairs + custom.css token 对账表",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     },
     "breakpoints": {
       "value": {
@@ -73,25 +73,17 @@
           96,
           420,
           520,
-          560,
           640,
           679,
-          680,
           700,
           720,
-          760,
           768,
-          820,
           860,
           960,
-          996,
-          997,
-          1120,
           1146,
-          1200,
-          1380
+          1200
         ],
-        "widthStepCount": 20,
+        "widthStepCount": 12,
         "narrowCoverage": true,
         "perFile": {
           "components/copilot/RunStatsBar.module.css": 1,
@@ -117,7 +109,7 @@
       },
       "source": "frontend/src CSS 全源（@media/@container 宽度断点）",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     },
     "touchTargets": {
       "value": {
@@ -131,7 +123,7 @@
       },
       "source": "frontend/src/components/ui/controls/button.module.css",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     },
     "eightStateMatrix": {
       "value": {
@@ -141,7 +133,7 @@
       },
       "source": "scripts/ui-design-a11y.mjs STATE_MATRIX",
       "command": "node scripts/c53-responsive-a11y.mjs",
-      "capturedAt": "2026-11-20T00:51:26.461Z"
+      "capturedAt": "2026-11-21T00:03:38.943Z"
     }
   }
 }

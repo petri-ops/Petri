@@ -97,11 +97,17 @@ export function scanBreakpoints(sourcesOverride = null) {
   };
 }
 
-/** 冻结断点 ratchet 下限（只减必红，新增合法）：立项现读 26 media / 10 container / 20 档位。 */
+/**
+ * 冻结断点 ratchet 下限（只减必红，新增合法）：立项现读 26 media / 10 container / 20 档位。
+ * widthStepCount 20→12（2026-11-21 R2 清偿批 S6b/U-04 契约演进）：视口档位收敛 17→4（520/768/960/1200，
+ * 用户预授权 breaking；@container 元素级 5 档 + WIP 面 5 档仍在 = 12 实测）——覆盖意图由
+ * narrowCoverage + media/container 下限继续守护，distinct 档位数下限随收敛下调；
+ * B-11 owner 收口后并档可再降（trail 本行）。
+ */
 export const BREAKPOINT_FLOOR = Object.freeze({
   media: 26,
   container: 10,
-  widthStepCount: 20,
+  widthStepCount: 12,
   narrowCoverageRequired: true,
   owner: 'BLOCK-473 / C-53 P4：立项现读 2026-11-18；新增断点合法，删除至低于下限或丢失窄屏覆盖必红；观感归 E',
 });

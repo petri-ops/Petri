@@ -3,8 +3,8 @@
   "id": "petri-visual-consistency-contract",
   "kind": "model-readable-visual-consistency",
   "generatedBy": "node scripts/c53-visual-consistency.mjs",
-  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
-  "generatedAt": "2026-11-20T23:29:38.666Z",
+  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
+  "generatedAt": "2026-11-21T00:01:14.435Z",
   "derivedFrom": [
     "frontend/src/styles/custom.css",
     "frontend/src（广谱 slate / accent / token 扫描）",
@@ -132,8 +132,8 @@
   "undefinedTokens": {
     "undefinedColorRefs": [],
     "missingPetriRefs": [],
-    "definitionCount": 151,
-    "referenceCount": 138
+    "definitionCount": 150,
+    "referenceCount": 139
   },
   "boundaries": {
     "humanEyeSigned": false,

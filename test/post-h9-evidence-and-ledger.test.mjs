@@ -202,10 +202,11 @@ test('K-07 治理对账：README 第三轮蓝图 status 与 registry 一致（�
   assert.equal(r.blueprintStatusParity.value.postS7Registry, 'completed');
   assert.equal(r.blueprintStatusParity.value.postS7ReadmeActive, false);
   assert.equal(r.blueprintStatusParity.value.conflict, false);
-  // 2026-11-19 用户裁决「POST-H9 蓝图状态归位」：registry/frontmatter/README 已由 planned 翻 completed
-  // （living-plan 完成态，八阶段 K0–K7 全由 BLOCK-396~403 收口）；本断言随裁决同步，非回弹。
-  assert.equal(r.blueprintStatusParity.value.postH9Registry, 'completed', '第四轮蓝图已归位 completed（2026-11-19 用户裁决）');
-  assert.equal(r.blueprintStatusParity.value.postH9ReadmePlanned, false, 'README 蓝图条目已同步为 completed');
+  // 2026-11-19 两段用户裁决：先「蓝图状态归位 completed」，同日 POST-H9-D5「摘除」——registry/README
+  // 条目移除、蓝图原件转为受保护用户资产（零登记面）。本断言随 D5 终态演进（R2 清偿批 S8，
+  // 该红此前被 test:changed exit-2 工具错掩盖）：'deregistered'=摘除态，非回弹、非缺陷。
+  assert.equal(r.blueprintStatusParity.value.postH9Registry, 'deregistered', '蓝图条目已按 D5 摘除（缺席=deregistered）');
+  assert.equal(r.blueprintStatusParity.value.postH9ReadmePlanned, false, 'README 无 planned 蓝图条目（摘除态）');
 });
 
 // ---------- ④ 治理工具 selftest ----------
@@ -217,9 +218,16 @@ test('治理回写工具 selftest 12 项全绿', () => {
 });
 
 // ---------- ⑤ lint∩hygiene 联动门 ----------
-test('联动门在干净树无 overlap；受保护资产精确豁免（L0-8/L-83：9→10 项对账补第四轮蓝图原件）', () => {
+// 2026-11-21 R2 清偿批 S2/P1-7 契约演进：scripts/backfill-artifact-chain.mjs 经 58053d77
+// 有意入库（已完成批次归档欠账）→ 保护清单移除该条目（10→9），本测从「冻结计数 10」
+// 演进为「关键成员在册 + 上界约束」，计数不再锚死（追加/移除走 incidents+reconcileNote 留痕）。
+test('联动门在干净树无 overlap；受保护资产精确豁免（关键成员在册；清单只含未跟踪资产）', () => {
   const protectedList = JSON.parse(fs.readFileSync(path.join(ROOT, 'test/user-asset-guard-baseline.json'), 'utf8')).paths;
-  assert.equal(protectedList.length, 10);
+  assert.ok(protectedList.length >= 9 && protectedList.length <= 12, `保护清单 ${protectedList.length} 项（L-83 十项时代 2026-11-21 演进为 9 项，见 baseline incidents）`);
+  for (const member of ['assets/', 'docs/pelican-bicycle.html', 'docs/post-h9-optimization-blueprint-2026-11-10.md', 'tmp-review/']) {
+    assert.ok(protectedList.includes(member), `关键成员在册: ${member}`);
+  }
+  assert.ok(!protectedList.includes('scripts/backfill-artifact-chain.mjs'), '已入库脚本不在清单（58053d77）');
   assert.ok(protectedList.includes('docs/post-h9-optimization-blueprint-2026-11-10.md'), '第四轮蓝图原件已在保护清单');
   assert.equal(evaluateOverlap({ untracked: ['assets/logo.png', 'tmp-review/demo.svg'], protectedList }).ok, true);
   assert.equal(isProtected('assets/logo.png', protectedList), true);

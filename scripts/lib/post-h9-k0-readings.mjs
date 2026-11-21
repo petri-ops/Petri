@@ -112,7 +112,9 @@ export function collectReadings(root = ROOT) {
     blueprintStatusParity: mk(
       {
         postS7Registry: postS7?.status ?? null, postS7ReadmeActive: /\*\*active/.test(readmeS7Line),
-        postH9Registry: h9?.status ?? null, postH9ReadmePlanned: /\*\*planned/.test(readmeH9Line),
+        // POST-H9-D5（2026-11-19 用户裁决「摘除」）：蓝图条目已从 registry/README 摘除（受保护用户资产原件，
+        // 零登记面）。缺席=摘除态语义 'deregistered'（非 null 缺陷）；本行 2026-11-21 R2 清偿批 S8 契约演进。
+        postH9Registry: h9?.status ?? 'deregistered', postH9ReadmePlanned: /\*\*planned/.test(readmeH9Line),
         conflict: postS7?.status === 'completed' && /\*\*active/.test(readmeS7Line),
       },
       'docs/DOC-REGISTRY.json + docs/README.md:1-2',

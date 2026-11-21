@@ -105,11 +105,11 @@
     "verified": 461,
     "closed": 12,
     "ceilingCrossCheck": {
-      "liveMissing": 15,
+      "liveMissing": 13,
       "blocked": 23,
-      "total": 38
+      "total": 36
     },
-    "consistent": false
+    "consistent": true
   },
   "componentRules": {
     "singleSourceDir": "frontend/src/components/ui/controls/",
