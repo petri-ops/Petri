@@ -1,13 +1,13 @@
 {
   "name": "block463-workbench-live",
   "platform": "darwin",
-  "startedAt": "2026-11-18T00:41:46.458Z",
-  "finishedAt": "2026-11-18T00:41:56.623Z",
+  "startedAt": "2026-11-20T23:23:33.506Z",
+  "finishedAt": "2026-11-20T23:23:43.851Z",
   "assertions": [
     {
       "name": "project_created",
       "pass": true,
-      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwleby0z_ehi6\",\"name\":\"BLOCK463-LIVE-1794962506459\",\"created_at\":\"2026-11-18T00:41:46.499Z\",\"updated_at\":\"2026-11-18T00:41:46."
+      "detail": "{\"status\":\"ok\",\"project\":{\"id\":\"p_mwpluwx7_dz3i\",\"name\":\"BLOCK463-LIVE-1795217013507\",\"created_at\":\"2026-11-20T23:23:33.547Z\",\"updated_at\":\"2026-11-20T23:23:33."
     },
     {
       "name": "workspace_path_resolved",
