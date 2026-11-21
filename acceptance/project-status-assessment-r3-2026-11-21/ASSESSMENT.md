@@ -4,6 +4,9 @@
 > 待 closeout:full 终轮绿灯后定格；R2→R3 之间 = R2 清偿批 S1–S8 共 8+ commit，区间 `d3780338..HEAD`）。
 > 性质：R2 清偿批的批内自评（无人值守预授权），R4 复评仍按周期由评估 Agent 出具。
 > 门禁原始输出：`gates/`（本轮现采；*.log 落盘不入库为仓库 *.gitignore 惯例，退出码经 exit-codes.tsv 可追溯）。
+> **closeout:full 终轮=CLOSEOUT: PASS（21 阻塞门全绿+2 report 门 OK，零 SKIP）**；此前 10 轮逐门揭出并清偿的
+> 被掩盖存量红与契约演进全记录于 `../r2-remediation/s8/RULINGS-closeout-contracts.md`（test:changed exit-2
+> 与 lint 增量缓存长期遮蔽 post-h9/EAR/lint:ledger 四族存量红，S8 一并清偿——链路恢复真实）。
 
 ---
 
@@ -64,9 +67,9 @@
 
 | 门 | S0 基线（2026-11-21 07:19） | R3 现读 | 变化 |
 |---|---|---|---|
-| docs:check | 0 PASS(663) | 见 closeout 终轮 | — |
+| docs:check | 0 PASS(663) | 0 PASS(663) | 维持 |
 | ui:audit:check | 1 FAIL | 0 PASS | ✅（S1+UI-718/719 回写） |
-| hygiene:check | 0 PASS | 见 closeout 终轮 | — |
+| hygiene:check | 0 PASS | 0 PASS | 维持 |
 | test:changed:list | 2 FAIL（工具错） | 0 PASS | ✅（S2） |
 | quality:types | 0 PASS | 0 PASS | 维持 |
 | gate:code-size | 1 FAIL（30 条） | 0 PASS | ✅（S3 --write） |
@@ -76,7 +79,7 @@
 | gate:ui-breakpoints | （未在基线） | 0 PASS（非 WIP 9 档在册） | ✅（S6b） |
 | quality:knip:check | （未在基线） | 0 PASS（402 键定性在册） | ✅（S8 --update） |
 | c53 契约三套 | 15/17 | **28/28** | ✅（S3 演进+S8 根修） |
-| closeout:full | （未跑过全链绿） | 终轮结果见 §6 | — |
+| closeout:full | （未跑过全链绿；R2 时点必然 fail-fast） | **PASS 全绿 21 门+2 report 零跳过**（第 11 轮，gates/s8-closeout-full-11.log） | ✅ |
 
 ---
 
