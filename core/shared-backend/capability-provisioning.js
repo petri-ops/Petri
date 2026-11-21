@@ -103,6 +103,12 @@ function checkUrlAllowed(url, options = {}) {
 }
 
 function defaultRuntimesDir() {
+  // PETRI_CAPABILITY_RUNTIMES_DIR（2026-11-21 R2 清偿批清退票随批）：capability 缓存显式覆盖——
+  // 隔离后端（evals/P6 压测，PETRI_LOCAL_DATA_DIR=mkdtemp）每个实例 runtimes 全新空目录，
+  // 会把「已就绪 bundle」判定打穿被迫重新下载；bundle 体积大（数百 MB）且跨实例可共享，
+  // 与 PETRI_CAPABILITY_ALLOWED_HOSTS 同族=env 覆盖约定。未设时行为逐字节不变。
+  const override = process.env.PETRI_CAPABILITY_RUNTIMES_DIR;
+  if (override) return override;
   const localDataDir = process.env.PETRI_LOCAL_DATA_DIR || path.join(os.homedir(), 'Documents', 'Petri-Local');
   return path.join(localDataDir, 'runtimes');
 }

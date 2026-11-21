@@ -178,6 +178,9 @@ export async function spawnIsolatedBackend({ root, tmpDir, mode = 'mock' }) {
       ...process.env,
       PETRI_DB_PATH: path.join(tmpDir, 'petri.db'),
       PETRI_LOCAL_DATA_DIR: tmpDir,
+      // capability bundle 缓存跨实例共享（数百 MB 不随 mkdtemp 丢弃）：指向仓库共享 runtimes
+      //（R2 清偿批清退票 2026-11-21；r-enrichment 本机自愈重建后 P6 压测不再触发 OSS 重下载）
+      ...(process.env.PETRI_CAPABILITY_RUNTIMES_DIR ? { PETRI_CAPABILITY_RUNTIMES_DIR: process.env.PETRI_CAPABILITY_RUNTIMES_DIR } : {}),
       // BLOCK-439：凭据迁移同样隔离到临时文件，避免 mock/real 种子写进用户 login Keychain
       //（此前 evals-mock-key 会覆盖 openai-compatible 账号）。
       PETRI_CREDENTIAL_BACKEND: 'file',
