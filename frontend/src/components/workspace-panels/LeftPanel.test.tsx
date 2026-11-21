@@ -424,8 +424,8 @@ describe('UI-445 会话标题搜索', () => {
   function buildCtxWithProjects() {
     const ctx = buildCtx('chat');
     ctx.visibleProjects = [
-      { id: 'project-1', name: 'Project One', createdAt: '', updatedAt: '' } as Project,
-      { id: 'project-2', name: 'Project Two', createdAt: '', updatedAt: '' } as Project,
+      { id: 'project-1', name: 'Project One', createdAt: '', updatedAt: '' },
+      { id: 'project-2', name: 'Project Two', createdAt: '', updatedAt: '' },
     ];
     return ctx;
   }

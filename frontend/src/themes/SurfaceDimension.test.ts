@@ -16,10 +16,10 @@ const SURFACES = ['paper', 'celadon', 'ultramarine', 'mist'] as const;
 
 describe('B: data-surface dimension', () => {
   it('four harmony accents map to distinct surfaces; legacy accents keep default', () => {
-    expect(surfaceForAccent('paper-vermilion' as AccentId)).toBe('paper');
-    expect(surfaceForAccent('celadon-ink' as AccentId)).toBe('celadon');
-    expect(surfaceForAccent('ultramarine-brass' as AccentId)).toBe('ultramarine');
-    expect(surfaceForAccent('indigo-mist' as AccentId)).toBe('mist');
+    expect(surfaceForAccent('paper-vermilion')).toBe('paper');
+    expect(surfaceForAccent('celadon-ink')).toBe('celadon');
+    expect(surfaceForAccent('ultramarine-brass')).toBe('ultramarine');
+    expect(surfaceForAccent('indigo-mist')).toBe('mist');
     for (const legacy of ['teal', 'blue', 'violet', 'rose', 'amber'] as AccentId[]) {
       expect(surfaceForAccent(legacy), `${legacy} must keep default skeleton`).toBeNull();
     }

@@ -73,12 +73,6 @@ describe('A0 身份转译决策材料完整性（HK-01）', () => {
     }
   });
 
-  // ---- 篡改负测：植入违规必红 ----
-  const tamper = (mutate) => {
-    const m = JSON.parse(fs.readFileSync(MATERIAL, 'utf8'));
-    mutate(m.readings);
-    return validateMaterialIntegrity(m.readings);
-  };
   const setVal = (readings, id, value) => {
     const clone = structuredClone(readings);
     ownGet(clone, id).value = value;

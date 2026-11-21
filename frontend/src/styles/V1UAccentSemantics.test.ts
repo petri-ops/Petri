@@ -46,7 +46,8 @@ describe('V1-U semantic accent convergence', () => {
 
   it('every converted rule keeps a feedback channel (bg/border/underline/shadow)', () => {
     const manifestPath = path.join(ROOT, '..', '..', 'acceptance', 'v1u-accent-semantics', 'converted.json');
-    const converted = JSON.parse(fs.readFileSync(manifestPath, 'utf8')).rules as Array<{ file: string; sel: string; addedBg: boolean }>;
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as { rules?: Array<{ file: string; sel: string; addedBg: boolean }> };
+    const converted = parsed.rules ?? [];
     expect(converted.length, 'conversion manifest must exist and be non-empty').toBeGreaterThan(0);
     const feedback = /(?:^|;)\s*background\s*:|border[^:]*:[^;]*var\(|text-decoration:|box-shadow:/;
     const byFile = new Map<string, Rule[]>();

@@ -61,7 +61,7 @@ describe('A1 identity palette token contract', () => {
     const occurrences = [...raw.matchAll(/--petri-accent-vermilion\s*:/g)];
     expect(occurrences.length, 'vermilion must be defined in both themes').toBeGreaterThanOrEqual(2);
     for (const m of occurrences) {
-      const before = raw.slice(Math.max(0, m.index! - 160), m.index!);
+      const before = raw.slice(Math.max(0, m.index - 160), m.index);
       expect(before, 'vermilion must be annotated as brand-point/落印').toMatch(/点睛|落印|品牌/);
     }
   });

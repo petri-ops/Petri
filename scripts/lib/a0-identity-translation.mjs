@@ -32,9 +32,7 @@ const defaultRead = (root, rel) => {
  * reader(relPath) -> string | null, 由调用方注入（Node: fs.readFileSync('utf8')）。
  * 纯函数：不写文件、不改状态；读数来自真源 presence + canonical 方案正文锚。
  */
-export function collectIdentityTranslation(root, reader = defaultRead) {
-  const read = (rel) => reader(root, rel);
-  const exists = (rel) => read(rel) !== null && read(rel) !== undefined;
+export function collectIdentityTranslation(root, _reader = defaultRead) { // _reader=扩展点（当前无自定义调用方；no-unused-vars 豁免前缀）
 
   // 用户资产带 hash 前缀且未跟踪；按后缀发现真源，避免硬编码文件名漂移。
   const suffixes = ['01-system-board.png', '00-palette.png', 'FINAL-grid-contact.png', 'FINAL-main.png', 'v2-colour-directions.png'];

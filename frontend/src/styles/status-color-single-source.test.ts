@@ -14,7 +14,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-const CUSTOM = path.join(ROOT, 'frontend', 'src', 'styles', 'custom.css');
 
 function grepFrontend(args: string[]): string[] {
   try {

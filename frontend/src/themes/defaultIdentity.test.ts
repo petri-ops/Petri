@@ -33,7 +33,8 @@ describe('默认身份面（A0 裁决落地 · S5/P1-3）', () => {
   });
 
   it('裁决真源在场且判 celadon-ink 为工作态主 accent（不凭记忆写档名）', () => {
-    const ruling = JSON.parse(readFileSync(RULING, 'utf8'));
+    interface A0Ruling { kind?: string; ruling?: string; resolves?: string; materialStatus?: string }
+    const ruling = JSON.parse(readFileSync(RULING, 'utf8')) as A0Ruling;
     expect(ruling.ruling).toBe('行');
     expect(String(ruling.resolves)).toMatch(/青瓷·墨/);
     expect(String(ruling.resolves)).toMatch(/celadon|B 青瓷/);

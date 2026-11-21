@@ -11,7 +11,7 @@ const { normalizeModelConfig, resolveModelProfile, resolveModelCapabilities } = 
 // BLOCK-81 P1 — 思考档位：中性档位→上游参数的单一映射点 + 去参重试判据
 const { thinkingParamsFor, isUnknownParameterError } = require('./thinking-level');
 // BLOCK-338 — 流式 stall 看门狗（心跳/空 chunk 不续命，只认有效 token）
-const { createStreamStallWatchdog, resolveStallThresholds, resolveRequestStallThresholds } = require('./stream-stall-watchdog');
+const { createStreamStallWatchdog, resolveRequestStallThresholds } = require('./stream-stall-watchdog');
 
 /** 组合外部 signal 与看门狗 signal（Node 20+ 用 AbortSignal.any，否则手动转发）。 */
 function combineSignals(external, internal) {
