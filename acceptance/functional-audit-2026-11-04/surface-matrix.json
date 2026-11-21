@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T04:01:32.995Z",
+  "generatedAt": "2026-11-21T09:05:22.094Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 118,
@@ -19,7 +19,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 3,
+    "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
@@ -5992,10 +5992,6 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [
-    "M core/petri-server/routes/ai-legacy.js",
-    "D  frontend/src/components/common/GlobalWatermark.tsx",
-    "D  frontend/src/styles/watermark.css"
-  ],
+  "dirty": [],
   "defNotes": []
 }

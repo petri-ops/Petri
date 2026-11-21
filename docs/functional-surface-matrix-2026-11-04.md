@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 3 个不计入判定）。生成时间：2026-11-21T04:01:32.995Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-21T09:05:22.094Z
 
 ## 0. 覆盖汇总
 
@@ -160,6 +160,4 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-- `M core/petri-server/routes/ai-legacy.js`
-- `D  frontend/src/components/common/GlobalWatermark.tsx`
-- `D  frontend/src/styles/watermark.css`
+（无）

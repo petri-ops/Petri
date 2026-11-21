@@ -88,8 +88,11 @@ const BUNDLE_REGISTRY = Object.freeze({
     bundleId: 'r-enrichment',
     version: DEFAULT_VERSION,
     url: bundleUrl('r-enrichment', DEFAULT_VERSION, DEFAULT_PLATFORM),
-    sha256: 'a857831d0d548cc6f9d856684ccec32c0241af018521c5d0641349ade0be1820',
-    sizeBytes: 422094687,
+    // 2026-11-21 回填（R2 清偿批尾票）：OSS 旧对象 404 后按 build-r-bundle NEXT 指引本机重建
+    // （R 4.5.2/Bioc 3.22，闭包 128 包；解压+隔离 R 加载 VERIFY PASS，manifest 三元组一致），
+    // 新哈希/尺寸回填；OSS 上传仍 human-gated（本机 runtimes 已就位，P6 压测不再依赖下载）。
+    sha256: '12b919b6ca81e4e524007e04a2effaefba9759dd2113e9e83faa49274a0e79bd',
+    sizeBytes: 422014460,
     platforms: Object.freeze([DEFAULT_PLATFORM]),
   }),
   'r-wgcna': Object.freeze({

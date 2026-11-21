@@ -197,9 +197,9 @@
       "path": "frontend/src/pages/project-workspace.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 7751,
-      "bytes": 177241,
-      "sha256": "f8ba511e38807e35c8e8b0b7a17e0b218b8427352881d019aa3d5b9c069be5bf"
+      "lines": 7735,
+      "bytes": 176970,
+      "sha256": "35164d2968566b9d137290a8584dc34fc68287bf0310af4a3613366b03c0576a"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -381,9 +381,9 @@
       "path": "frontend/src/components/desktop/TitleBar.module.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 996,
-      "bytes": 22698,
-      "sha256": "ed663a6a4a3fd134eb4582cdfa9dee98a0f508df9bc76c9f5d1ca483c78a774e"
+      "lines": 994,
+      "bytes": 22667,
+      "sha256": "0c48dd057447a519d40dd3de4d65f278925a22a84246be575820fccc7484af12"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86734
+  "total": 86716
 }
