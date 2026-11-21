@@ -5,10 +5,12 @@ acceptance:
   - 方向级验收 = 各波以独立工作包立项后按其 plan 验收为准（本文件不承载运行时证据）
   - 总纲达成判据 = §4 六波出口判据逐项被收口包证据覆盖，或经用户显式裁决出籍
 reopen: 波次启动逐波用户发令（单工作包串行不变；波内零停顿沿用 blueprint §3.4 先例）；总纲重估 = 用户对标尺改判 / 对标产品形态代际变化 / G1+ 阶段启动（届时相关包整体出籍重估）
-status: planned
+status: completed
 ---
 
 # Agent 竞争力总纲（AGENT-COMPETITIVENESS-PROGRAM）
+
+> **对账归位（2026-11-21，R2 清偿批治理归位包）**：六波 19 包（CP-1~CP-19）全波次闭环——W1~W5 各包收口在案、W6=`block-176-competitiveness-wave6-plan.md`（十三门 PASS+w6-live 8/8）、CP-19=`BLOCK-183-DATA-BRIDGE-WS`（2026-10-14）；2026-10-29 码上抽验「W6 无剩余工作，竞争力纲全波次闭环」（`federation-tools.js` 委托期 SSE / `git:checkpoint-*` 通道 / `loop-orchestrator.js` costCapCny 硬熔断）。frontmatter `planned` 系登记滞后（第 4 例同族），本批翻 completed。
 
 > 立项溯源（用户裁决三连，2026-10-12）：①「避免成为另一个 Zcode 或者 codex 呀 保留自己的特色 借鉴他们的优点」②「我觉得不够 好像你把要优化升级的部分大幅度的缩减了 agent的通用能力 仍旧是最核心的开发重点 它也应该突出自己的优势 不仅仅是增加数据资产」③「做更详细和全面的方案 目前好像太简单了 我们的petri开发进度远远不够」。
 > 溯源证据：2026-10-12 双路只读探查（后端 agent 核心 8 域 / 前端产品面 9 节，60+ 文件锚点落 §1-§2）；对标知识=ZCode 宿主形态直接经验 + Codex 先例（BLOCK-55 已吸收 plan 模式）。

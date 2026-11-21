@@ -50,7 +50,7 @@ function entryDate(line) {
  * 纯函数核心：给定台账行数组，返回保留/剪切划分。不触碰文件系统，便于契约直测。
  * 结构不变量（fail-closed）：三段标题必须存在且按 链→待处理项→记录表→规则 排列。
  */
-export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = ROWS_KEEP } = {}) {
+export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = ROWS_KEEP, pendingKeepDays = null, today = null } = {}) {
   const idxPending = lines.findIndex((l) => l.trim() === PENDING_HEAD);
   const idxRecords = lines.findIndex((l) => l.trim() === RECORDS_HEAD);
   const idxRules = lines.findIndex((l) => l.trim() === RULES_HEAD);
@@ -87,11 +87,28 @@ export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = R
     }
   }
 
-  const outLines = lines.filter((_, i) => !chainCutIdx.has(i) && !rowsCutIdx.has(i));
+  // 「当前待处理项」✅ 行分诊（治理归位包 2026-11-21）：BLOCK-170 全量保留语义针对活跃广播
+  // （🔴/🟡/🟢/📋 等）；✅/COMPLETED 完成行不是活跃广播，堆积致台账压不回阈值。演进：开启
+  // pendingKeepDays 时，日期早于 keepDays 天的 ✅ 行整行剪切归档（搬移不改写）；🔴/🟡/🟢/📋
+  // 未决行与无日期行保守保留（fail-closed），新鲜 ✅ 行保留。默认 null=关闭（行为兼容）。
+  const pendingCutIdx = new Set();
+  if (Number.isFinite(Number(pendingKeepDays)) && pendingKeepDays !== null && Number(pendingKeepDays) >= 0) {
+    const nowMs = Date.parse(`${today || new Date().toISOString().slice(0, 10)}T00:00:00Z`);
+    const cutoffMs = nowMs - Number(pendingKeepDays) * 86_400_000;
+    for (let i = idxPending + 1; i < idxRecords; i += 1) {
+      if (!/^\| ✅ \|/.test(lines[i])) continue; // 只分诊 ✅ 完成行，未决行永不剪
+      const d = entryDate(lines[i]);
+      if (!d) continue; // 无日期保守保留
+      if (Date.parse(`${d}T00:00:00Z`) < cutoffMs) pendingCutIdx.add(i);
+    }
+  }
+
+  const outLines = lines.filter((_, i) => !chainCutIdx.has(i) && !rowsCutIdx.has(i) && !pendingCutIdx.has(i));
   const chainCutLines = [...chainCutIdx].map((i) => lines[i]);
   const rowsCutLines = [...rowsCutIdx].map((i) => lines[i]);
+  const pendingCutLines = [...pendingCutIdx].map((i) => lines[i]);
   const dates = chainCutLines.map(entryDate).filter(Boolean).sort();
-  return { outLines, chainCutLines, rowsCutLines, throughDate: dates[dates.length - 1] ?? null };
+  return { outLines, chainCutLines, rowsCutLines, pendingCutLines, throughDate: dates[dates.length - 1] ?? null };
 }
 
 /**
@@ -135,8 +152,9 @@ function resolveArchiveTarget(baseName) {
 
 function main() {
   const lines = fs.readFileSync(LEDGER, 'utf8').split('\n');
-  const result = compactLedgerLines(lines);
-  if (result.chainCutLines.length === 0 && result.rowsCutLines.length === 0) {
+  const pendingKeepDays = Number(process.env.AUDIT_LOG_PENDING_KEEP_DAYS ?? 1);
+  const result = compactLedgerLines(lines, { pendingKeepDays, today: new Date().toISOString().slice(0, 10) });
+  if (result.chainCutLines.length === 0 && result.rowsCutLines.length === 0 && result.pendingCutLines.length === 0) {
     console.log('[audit-compact] already compact——无淘汰行，文件未改动。');
     return;
   }
@@ -185,9 +203,29 @@ function main() {
     fs.appendFileSync(compactPath, `${note}${result.rowsCutLines.join('\n')}\n`, 'utf8');
   }
 
+  if (result.pendingCutLines.length > 0) {
+    const pendingTarget = resolveArchiveTarget(`audit-log-compact-${stamp}.md`);
+    const pendingPath = pendingTarget.path;
+    if (pendingTarget.redirected) {
+      console.log(`[audit-compact] 标准归档 audit-log-compact-${stamp}.md 带未提交改动（或 git 不可读）→ 改写 ${path.basename(pendingPath)}`);
+    }
+    const note = fs.existsSync(pendingPath)
+      ? `\n<!-- audit-log-compact.mjs 追加 @ ${new Date().toISOString()} -->\n`
+      : [
+          `# AUDIT-LOG 自动精简归档 · ${stamp}（audit-log-compact.mjs）`,
+          '',
+          `> 来源声明：本档由 scripts/audit-log-compact.mjs 自动剪切生成。内容=「当前待处理项」过期`,
+          `> ✅ 完成行（分诊阈值 AUDIT_LOG_PENDING_KEEP_DAYS=1 天）原文整行搬移，搬移不改写；`,
+          `> 未决行（🔴/🟡/🟢/📋）与无日期行保守保留。canonical 状态以 roadmap/plan/DOC-REGISTRY 为准。`,
+          '',
+          '',
+        ].join('\n');
+    fs.appendFileSync(pendingPath, `${note}${result.pendingCutLines.join('\n')}\n`, 'utf8');
+  }
+
   fs.writeFileSync(LEDGER, `${result.outLines.join('\n')}`, 'utf8');
   console.log(
-    `[audit-compact] 链淘汰 ${result.chainCutLines.length} 行 + 记录表淘汰 ${result.rowsCutLines.length} 行 → ${path.relative(ROOT, ARCHIVE_DIR)}/`,
+    `[audit-compact] 链淘汰 ${result.chainCutLines.length} 行 + 记录表淘汰 ${result.rowsCutLines.length} 行 + 待处理项 ✅ 分诊 ${result.pendingCutLines.length} 行 → ${path.relative(ROOT, ARCHIVE_DIR)}/`,
   );
   console.log(`[audit-compact] 活跃台现在 ${fs.statSync(LEDGER).size} 字节。请跑 npm run docs:check 验证直链完整性。`);
 }
