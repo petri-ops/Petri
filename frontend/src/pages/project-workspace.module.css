@@ -276,7 +276,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 0;
   flex-wrap: wrap;
   font-size: var(--petri-font-size-sm);
   color: var(--petri-text-muted);
@@ -1813,7 +1812,6 @@
   /* UI-370 — 钉住列同样贴齐会话区右缘（原 padding-right:var(--petri-space-1) + 卡片靠左，
      使卡片右缘距会话区右缘 28px，与标题栏右区/输入区不在同一条线上）。
      flex + flex-end 让卡片右对齐到内容右缘；去掉 var(--petri-space-1) 内缩消除多余缝。 */
-  padding-right: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1833,8 +1831,6 @@
 }
 
 .workspaceModeSurface :global(.petri-plugin-store-panel) {
-  width: 100%;
-  height: 100%;
 }
 
 .workspaceModeSurface :global(.petri-desktop-panel),
@@ -2041,8 +2037,6 @@ button.workspacePinnedSummaryPrimaryCard:hover {
 .workspacePinnedSummaryMetricCard {
   display: flex;
   align-items: center;
-  gap: var(--petri-space-2);
-  min-width: 0;
   min-height: 34px;
   padding: var(--petri-space-2) var(--petri-space-1);
   border: 0;
@@ -3332,7 +3326,6 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
 
 /* Compact terminal card header, shared by light and dark application themes. */
 .embeddedTerminalHeader {
-  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--petri-space-3);
@@ -3817,8 +3810,6 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   display: flex;
   align-items: center;
   gap: var(--petri-space-2);
-  flex: 1;
-  min-width: 0;
 }
 
 .browserUrlBar input {
@@ -3867,7 +3858,6 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   flex: 1;
   width: 100%;
   height: 100%;
-  min-height: 0;
   margin: 0;
   border-top: none;
   border-radius: 0;
@@ -4213,7 +4203,6 @@ body:global(.petri-resizing-columns) .rightPanelTabContent iframe {
   align-items: center;
   justify-content: space-between;
   gap: var(--petri-space-3);
-  min-width: 0;
   color: var(--petri-text-secondary);
 }
 
@@ -4798,7 +4787,6 @@ body:global(.petri-resizing-columns) * {
   border: none;
   border-radius: 0;
   background: transparent;
-  min-width: 0;
 }
 
 .resultReportCanvas {
@@ -5508,7 +5496,6 @@ body:global(.petri-resizing-columns) * {
 }
 
 .jobDetailSection dl {
-  display: grid;
   gap: var(--petri-space-2);
   margin: 0;
 }
@@ -6220,7 +6207,6 @@ body:global(.petri-resizing-columns) * {
 .workspaceFilePreviewPane {
   display: flex;
   flex: 1;
-  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -7618,8 +7604,6 @@ body:global(.petri-resizing-columns) * {
   position: absolute;
   inset: 0;
   display: flex;
-  min-width: 0;
-  min-height: 0;
   visibility: hidden;
 }
 

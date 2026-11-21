@@ -80,7 +80,6 @@
 .layers,
 .revisionCard {
   min-width: 0;
-  min-height: 0;
   padding: 8px 10px;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);

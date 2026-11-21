@@ -45,7 +45,11 @@ export const WIP_OWNER_NOTE = '零触碰：不代改、不 stage、不提交；u
  * 口径 = 剥离 CSS 注释后的**单一类选择器**定义，容器级属性合计 >3 的类名组数。
  * 初版 804 是含组合选择器/注释的不同口径，已按同口径重算为 708（不缩分母、不放宽）。
  */
-export const CONTAINER_HOTSPOT_BASELINE = 708;
+/**
+ * 热点基线演进（只减）：708（冻结）→703（2026-11-21 LAYOUT-HOTSPOT 子票：SvgEditorViewer 跨值去重 109 行
+ * + 四文件同值去重 19 行，容器热点棘轮随实际收敛下调；改进方向合规）。
+ */
+export const CONTAINER_HOTSPOT_BASELINE = 703;
 const CONTAINER_PROPS = /^\s*(display|grid-template-\w+|flex(?:-\w+)?|position|width|height|min-width|min-height|max-width|max-height|inset|gap|padding(?:-\w+)?)\s*:/;
 
 function walk(dir, out = []) {

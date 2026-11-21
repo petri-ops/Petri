@@ -9798,7 +9798,7 @@
     },
     {
       "id": "r2-remediation-batch",
-      "note": "2026-11-21 登记（R2 清偿批）：R2 项目评估（前批）+ R2 清偿批（本批）的证据与提示词面。",
+      "note": "2026-11-21 登记（R2 清偿批）：R2 项目评估（前批）+ R2 清偿批（本批）的证据与提示词面。 E-02 delegated-walk 证据目录随批登记。",
       "patterns": [
         "acceptance/project-status-assessment-r2-2026-11-20/**",
         "acceptance/r2-remediation/**",
@@ -9806,7 +9806,8 @@
         "acceptance/project-status-assessment-r3-2026-11-21/**",
         "acceptance/aesthetic-signoff-trio/**",
         "acceptance/project-status-assessment-r4-2026-11-21/**",
-        "acceptance/u-materials-2026-11-21/**"
+        "acceptance/u-materials-2026-11-21/**",
+        "acceptance/e02-delegated-walk/**"
       ],
       "tests": [
         "test/r2-remediation-evidence.test.mjs"

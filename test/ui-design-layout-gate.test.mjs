@@ -60,7 +60,7 @@ test('全仓容器热点新增即红（只减棘轮）', () => {
   const many = Array.from({ length: 5 }, (_, i) => def('a.css', `hot${i}`, i, 4));
   assert.equal(countContainerHotspots(many), 5);
   assert.ok(verifyLayoutDefinitions({ definitions: many, hotspotBaseline: 0 }).some((x) => x.includes('热点由 0 增至')));
-  assert.equal(CONTAINER_HOTSPOT_BASELINE, 708);
+  assert.equal(CONTAINER_HOTSPOT_BASELINE, 703); // 2026-11-21 LAYOUT-HOTSPOT 子票随实际收敛下调（只减）
 });
 
 test('WIP 例外不可被滥用于非 WIP 文件（越界必红）', () => {

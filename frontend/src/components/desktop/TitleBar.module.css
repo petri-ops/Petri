@@ -155,7 +155,6 @@
   justify-content: center;
   width: var(--win-btn-size);
   height: var(--win-btn-size);
-  padding: 0;
   border: none;
   border-radius: 50%;
   background: var(--win-btn-bg);
@@ -858,7 +857,6 @@
 }
 
 .tabsRailCompact .tabPillText {
-  display: none;
 }
 
 .tabsRailCompact .tabClose {
