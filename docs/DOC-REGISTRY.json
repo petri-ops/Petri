@@ -12771,7 +12771,7 @@
       "capability": "3d-authoring-domain",
       "path": "docs/3d-authoring-domain-blueprint-2026-11-17.md",
       "kind": "reference",
-      "status": "planned",
+      "status": "completed",
       "canonical": false,
       "entrypoint": "docs/README.md",
       "archivePolicy": "retain_stable_path",
@@ -12783,7 +12783,7 @@
         "pending-user-ruling"
       ],
       "registeredAt": "2026-11-17",
-      "notes": "2026-11-17 3D 造物域开发蓝图与详细开发计划（用户裁决「基于此前讨论，将现有想法整合为可直接执行的开发蓝图与详细开发计划」）：基于 three-live（Three.js 多端 JIT + capability 沙箱 + MCP 验证闭环 + Agent Gym）与 sand3d（LLM 友好的确定性 Python/bpy 建模 DSL，导出带 joints extras 的 GLB）调研，结合两者在 GLB extras 关节层的咬合。诊断现有方案停留浅层五根因（定位错/无 IR/无闭环/未用入驻配方/治理缺位）；方案以 artifact-plane 领域入驻配方（工具包+Skill包+viewer包，内核零改动）为骨架，设计五层架构（L0 意图编排/L1 几何生产/L2 Scene IR 枢纽/L3 呈现/L4 验证证据 + L5 治理扩展横切）+ 证据自证闭环；含开发蓝图六要素（架构/模块/数据模型/流程/选型依据/目标）+ 详细计划六要素（阶段/交付物/里程碑/依赖风险/分工/验收测试）+ 可扩展性/安全性/性能/运维/成本/用户体验/合规性七方面处理。kind=reference status=planned，不启动工作包、不改运行时、默认行为不变；三裁决点 U-3D-D1/D2/D3 pending_user_ruling 不代答；零新依赖优先、不碰 Result Studio 资格线、不外推 packaged/Provider/GA。【2026-11-17 加从属声明：本文件为可演进分阶段实施层，从属于稳定顶层设计 3D-AUTHORING-DOMAIN-CHARTER，冲突以 charter 为准】"
+      "notes": "2026-11-17 3D 造物域开发蓝图与详细开发计划（用户裁决「基于此前讨论，将现有想法整合为可直接执行的开发蓝图与详细开发计划」）：基于 three-live（Three.js 多端 JIT + capability 沙箱 + MCP 验证闭环 + Agent Gym）与 sand3d（LLM 友好的确定性 Python/bpy 建模 DSL，导出带 joints extras 的 GLB）调研，结合两者在 GLB extras 关节层的咬合。诊断现有方案停留浅层五根因（定位错/无 IR/无闭环/未用入驻配方/治理缺位）；方案以 artifact-plane 领域入驻配方（工具包+Skill包+viewer包，内核零改动）为骨架，设计五层架构（L0 意图编排/L1 几何生产/L2 Scene IR 枢纽/L3 呈现/L4 验证证据 + L5 治理扩展横切）+ 证据自证闭环；含开发蓝图六要素（架构/模块/数据模型/流程/选型依据/目标）+ 详细计划六要素（阶段/交付物/里程碑/依赖风险/分工/验收测试）+ 可扩展性/安全性/性能/运维/成本/用户体验/合规性七方面处理。kind=reference status=planned，不启动工作包、不改运行时、默认行为不变；三裁决点 U-3D-D1/D2/D3 pending_user_ruling 不代答；零新依赖优先、不碰 Result Studio 资格线、不外推 packaged/Provider/GA。【2026-11-17 加从属声明：本文件为可演进分阶段实施层，从属于稳定顶层设计 3D-AUTHORING-DOMAIN-CHARTER，冲突以 charter 为准】 2026-11-21 状态归位（R2 清偿批尾票）：全蓝图 P0→P4 已由 BLOCK-459/460/462+467/463/467 全链交付（执行前核对发现，登记滞后第 5 例同族；BLOCK-467 MILESTONES-RECONCILIATION.md 为对账真源）；不重建。"
     },
     {
       "id": "3D-AUTHORING-DOMAIN-CHARTER",

@@ -1,6 +1,6 @@
 ---
 capability: 3d-authoring-domain
-status: planned
+status: completed
 goal: 把 3D 创造从散落的 Skill/工具点状堆砌，升级为按领域入驻配方（工具包 + Skill 包 + viewer 包，内核零改动）组织的「3D 造物域」——五层架构（意图编排/几何生产/中间表示/呈现/验证证据）+ 统一 Scene IR + 证据自证闭环，大幅提升 Petri 在物理/工程对象上的创造、可信与扩展能力
 acceptance:
   - 蓝图含系统架构概览/核心模块划分/数据模型/关键流程/技术选型依据/整体目标六要素
@@ -15,7 +15,7 @@ acceptance:
 > **从属声明**：本文件是可演进的**分阶段实施层**，从属于稳定顶层设计 `docs/3d-authoring-domain-charter.md`；在核心目标/范围/原则/约束上以 charter 为准，冲突时以 charter 为最终依据。本文件负责在 charter §1–§4 约束内展开具体阶段任务，不镜像 charter 的冻结项。
 > 触发：2026-11-17 用户裁决原话「需要的 基于此前讨论，将现有想法整合为可直接执行的开发蓝图与详细开发计划」。
 > 溯源：三轮调研（three-live 架构与 agent 设计、sand3d 确定性建模 DSL、两者 GLB extras 关节咬合）+ 仓库 canonical 探查（artifact-plane-direction.md 领域入驻配方、gen-ui-data-plane-evaluation-2026-11-17.md 演进方法论、agent-competitiveness-program.md 八维、MCP 客户端货架、Gen UI 沙箱、12 内置 Skill）。
-> 定位：本文件 = 决策/蓝图材料（kind=reference，status=planned），供团队执行与后续裁决引用；**不启动工作包、不改运行时、不新建第二 canonical 真相**。任何阶段开工需用户发令 + 走 WORK-PACKAGE-LAUNCH-CHECKLIST。
+> 定位：本文件 = 决策/蓝图材料（kind=reference）。**【状态归位 2026-11-21，R2 清偿批尾票】全蓝图 P0→P4 已交付并对账**——执行前核对发现本蓝图阶段已由独立包全链落地（登记滞后第 5 例同族）：P0 探针=BLOCK-459（extras 实测 schema+六行映射 4 direct+2 convert，S3 判据=可行）、P1 首包=BLOCK-460（SceneSpec v1 joints+归一器+sand3d-runner sidecar+model3d-authoring Skill+端到端 11/11）、P2 验证闭环=BLOCK-462（validate/render/sim）+BLOCK-467（gym 编排补齐 M2）、P3 呈现层=BLOCK-463（UI-710 verified）、P4 收口对账=BLOCK-467（MILESTONES-RECONCILIATION.md 逐条对账+诚实缺口登记）。**不重建**；本文件降为蓝图归档参照（phase→package 映射如上）。
 
 ## §0 一句话结论
 
