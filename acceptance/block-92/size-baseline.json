@@ -198,16 +198,16 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 7751,
-      "bytes": 177240,
-      "sha256": "225dcc49d9e7076a9c7cfccf59743b8f96926f023a25ec96a579db6e548f6f81"
+      "bytes": 177241,
+      "sha256": "477666d1c7734832ad2110291da816d5859f7035c28b6e8c1aa8bb56ebd540c6"
     },
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 5469,
-      "bytes": 132723,
-      "sha256": "7dfb01f4c5431d63ff6fc72eb75c5362d294c0d166b121069daf7b9524f342bf"
+      "bytes": 132770,
+      "sha256": "49c98f2db8d614f8bbb439bacc6f1fa357cf6cb703c126b3a4a61922d0fbaa0f"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
@@ -215,7 +215,7 @@
       "module": "auto-discovered",
       "lines": 2207,
       "bytes": 53894,
-      "sha256": "d214ae4f7278ff91d28315f3dfcd88f3a060a9130e0d55f233432b05c0dcb965"
+      "sha256": "cfdcea41f6432d78e63f90bf678db29913fc12daaea3debef5002cf34ccbf7e1"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.module.css",
@@ -245,9 +245,9 @@
       "path": "frontend/src/styles/custom.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1485,
-      "bytes": 49517,
-      "sha256": "a1d542f586d21e425c7d343abccca0aa538b848dd180a662fc498d80218e8187"
+      "lines": 1483,
+      "bytes": 49461,
+      "sha256": "5c6549594776bcdb098992db73e4ca187174a0825d2104557fe69edcbb0bc419"
     },
     {
       "path": "core/shared-backend/skill-schema.js",
@@ -383,7 +383,7 @@
       "module": "auto-discovered",
       "lines": 996,
       "bytes": 22698,
-      "sha256": "63ff226f5cc71ac61fe16418129d733d7132769ad040a3f88d230d694412ab32"
+      "sha256": "ed663a6a4a3fd134eb4582cdfa9dee98a0f508df9bc76c9f5d1ca483c78a774e"
     },
     {
       "path": "core/shared-backend/loop-repair-strategy.js",
@@ -594,5 +594,5 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86950
+  "total": 86948
 }
