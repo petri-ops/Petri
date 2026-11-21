@@ -3,11 +3,7 @@
    按钮一律复用 ui/controls/button.module.css；viewer 随面板高度、不自定高。 */
 
 .viewer {
-  display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  gap: 8px;
   color: var(--petri-text-primary);
   font-size: var(--petri-font-size-body);
 }
@@ -58,8 +54,6 @@
 
 .body {
   display: grid;
-  grid-template-columns: 200px minmax(0, 1fr) 240px;
-  gap: 8px;
   min-height: 0;
   flex: 1;
 }
@@ -68,10 +62,8 @@
 .inspector {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   min-height: 0;
   overflow: auto;
-  padding: 8px;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
   background: var(--petri-bg-elevated);
@@ -87,9 +79,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .layerRow,
@@ -98,7 +88,6 @@
   align-items: center;
   gap: 6px;
   width: 100%;
-  padding: 3px 4px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
@@ -132,7 +121,6 @@
 }
 
 .stage {
-  min-height: 0;
   min-width: 0;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
@@ -156,9 +144,6 @@
 }
 
 .canvasInner {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .canvasInner svg {
@@ -228,15 +213,10 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
 .propRow {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--petri-divider);
 }
@@ -279,7 +259,6 @@
 
 .paletteItem {
   width: 100%;
-  padding: 4px 6px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
@@ -295,16 +274,11 @@
 
 /* BLOCK-342 W2/W3/W4 — 工具栏 / 属性面板 / 色板 / 文字编辑覆盖层 */
 .toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 6px 8px;
   border-bottom: 1px solid var(--petri-border-card);
   background: var(--petri-bg-surface);
 }
 
 .tool {
-  padding: 3px 9px;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
   background: transparent;
@@ -329,7 +303,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 10px;
   border-bottom: 1px solid var(--petri-border-card);
   background: var(--petri-bg-elevated);
 }
@@ -346,18 +319,11 @@
 }
 
 .props {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px 10px 4px;
   border-top: 1px solid var(--petri-border-card);
 }
 
 .field {
-  display: grid;
-  grid-template-columns: 64px 1fr;
   align-items: center;
-  gap: 8px;
   font-size: var(--petri-font-size-body);
 }
 
@@ -366,16 +332,11 @@
 }
 
 .fieldRow {
-  display: flex;
   align-items: center;
-  gap: 6px;
 }
 
 .field input:not([type='color']),
 .field select {
-  width: 100%;
-  min-width: 0;
-  padding: 3px 6px;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
   background: var(--petri-bg-surface);
@@ -384,19 +345,12 @@
 }
 
 .field input[type='color'] {
-  width: 26px;
-  height: 24px;
-  padding: 0;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
   background: transparent;
 }
 
 .rowActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 6px 0;
 }
 
 .paletteBlock {
@@ -407,13 +361,10 @@
 .swatches {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
   margin-top: 6px;
 }
 
 .swatch {
-  width: 18px;
-  height: 18px;
   border: 1px solid var(--petri-border-card);
   border-radius: 4px;
   cursor: pointer;
@@ -421,26 +372,20 @@
 
 /* BLOCK-342 W4 — 未保存改动的逐元素取舍 */
 .changeBlock {
-  padding: 8px 10px;
   border-top: 1px solid var(--petri-divider);
 }
 
 .changeList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   margin: 6px 0 0;
   padding: 0;
   list-style: none;
-  max-height: 220px;
   overflow: auto;
 }
 
 .changeRow {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 2px;
-  padding: 4px 6px;
   border: 1px solid var(--petri-border-card);
   border-radius: 6px;
   font-size: var(--petri-font-size-body);
@@ -495,9 +440,6 @@
 }
 
 .toolGroup {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 4px;
 }
 
 .toolGroup[data-open='0'] {
@@ -536,8 +478,6 @@
 }
 
 .layersHead {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 6px;
 }
@@ -585,26 +525,20 @@
 /* 面板节奏：标题与内容同一左基线，块间距 8px，区内 10px */
 .layers,
 .inspector {
-  gap: 8px;
-  padding: 10px;
   border-radius: var(--petri-radius-md);
 }
 
 .layersHead,
 .inspectorHead {
-  padding-bottom: 6px;
   border-bottom: 1px solid var(--petri-divider);
 }
 
 .props,
 .paletteBlock,
 .changeBlock {
-  gap: 8px;
-  padding: 10px 2px 2px;
 }
 
 .layerList {
-  gap: 2px;
 }
 
 .layerRow,
@@ -622,8 +556,6 @@
 
 /* 工具条：按钮等高、间距 6，激活态用强调底色而非仅描边 */
 .toolbar {
-  gap: 6px;
-  padding: 8px 10px;
   border-bottom: 1px solid var(--petri-divider);
 }
 
@@ -646,9 +578,6 @@
 
 /* 属性行：标签列定宽对齐，控件同高 */
 .field {
-  grid-template-columns: 68px minmax(0, 1fr);
-  gap: 10px;
-  padding: 2px 0;
 }
 
 .fieldLabel {
@@ -659,8 +588,6 @@
 .field input:not([type='color']),
 .field select {
   border-radius: var(--petri-radius-sm);
-  padding: 4px 8px;
-  min-height: 28px;
   transition: border-color var(--petri-duration-fast) var(--petri-ease-standard), background-color var(--petri-duration-fast) var(--petri-ease-standard);
 }
 
@@ -673,7 +600,6 @@
 
 .field input[type='color'] {
   border-radius: var(--petri-radius-sm);
-  width: 28px;
   height: 26px;
 }
 
@@ -702,7 +628,6 @@
 }
 
 .changeRow {
-  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 4px 8px;
   padding: 6px 8px;
@@ -748,11 +673,9 @@
 .field select,
 .field input[type='number'],
 .fieldRow {
-  width: 100%;
 }
 
 .stage {
-  padding: 12px;
 }
 
 .body[data-layers='0'] {
@@ -775,8 +698,6 @@
 /* 精修补充二：下拉在 grid 第二列必须拉伸（截图过目：字体/字重/对齐曾偏窄） */
 .field > select,
 .field select {
-  width: 100%;
-  min-width: 120px;
   justify-self: stretch;
 }
 
@@ -786,17 +707,12 @@
       触发/收起用画布角落的小胶囊按钮，无学习成本：点「图层/属性」就有，再点就收。
    ============================================================ */
 .body {
-  position: relative;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
 }
 
 .layers,
 .inspector {
-  position: absolute;
   top: 8px;
   bottom: 8px;
-  width: 236px;
   z-index: 5;
   background: var(--petri-bg-surface);
   border-radius: var(--petri-radius-md);
@@ -841,7 +757,6 @@
 
 /* 工具条改为画布内浮条：默认只露「工具 ▾」，点开就地展开一排（不再常驻一行高度） */
 .toolbar {
-  position: absolute;
   top: 8px;
   left: 50%;
   transform: translateX(-50%);
@@ -849,14 +764,10 @@
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);
   background: var(--petri-bg-surface);
-  padding: 4px 6px;
-  gap: 4px;
   box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
 }
 
 .stage {
-  position: relative;
-  padding: 44px 12px 12px;
 }
 
 /* 定位修正（截图过目）：工具条不换行、贴左上；图层胶囊贴左下，属性胶囊贴右上 */
@@ -864,14 +775,10 @@
   left: 10px;
   top: 8px;
   transform: none;
-  width: max-content;
-  max-width: calc(100% - 20px);
   white-space: nowrap;
-  flex-wrap: nowrap;
 }
 
 .stage {
-  padding: 56px 12px 12px;
 }
 
 .railToggle[data-action='expand-layers'] {
@@ -886,8 +793,6 @@
 /* 修正（用户抓真：抽屉改绝对定位后画布高度塌陷、打开无内容）：
    面板回到 grid 流内（高度由 grid 拉伸保证），收起时列宽 0 + display:none = 仍然零占位。 */
 .body {
-  position: relative;
-  grid-template-columns: 200px minmax(0, 1fr) 240px;
 }
 
 .body[data-layers='0'] {
@@ -904,8 +809,6 @@
 
 .layers,
 .inspector {
-  position: static;
-  width: auto;
   box-shadow: none;
 }
 
@@ -915,14 +818,10 @@
 }
 
 .stage {
-  padding: 56px 12px 12px;
-  min-height: 0;
 }
 
 /* 回滚布局（用户抓真：抽屉/浮条改造后画布内容不可见）——先恢复到稳定三列，布局美化另起一批 */
 .body {
-  position: static;
-  grid-template-columns: 200px minmax(0, 1fr) 240px;
 }
 
 .body[data-layers='0'] {
@@ -946,26 +845,18 @@
 }
 
 .stage {
-  position: static;
-  padding: 0;
-  min-height: 0;
 }
 
 .toolbar {
-  position: static;
   transform: none;
   left: auto;
   top: auto;
-  width: auto;
-  max-width: none;
   box-shadow: none;
   border: none;
   border-bottom: 1px solid var(--petri-divider);
   border-radius: 0;
   background: transparent;
-  padding: 6px 8px;
   white-space: normal;
-  flex-wrap: wrap;
 }
 
 .railToggle {
@@ -977,8 +868,6 @@
 .toolbar {
   border: none;
   border-bottom: 1px solid var(--petri-divider);
-  gap: 2px;
-  padding: 6px 8px;
 }
 
 .tool {
@@ -1042,29 +931,21 @@
 /* 顶层图标（与工具并列）+ 面板悬浮覆盖（用户裁决：图标上顶栏、属性和图层都是浮层） */
 .body {
   position: relative;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
 }
 
 .stage {
   position: relative;
-  height: 100%;
-  min-height: 320px;
-  padding: 48px 12px 12px;
 }
 
 .layers,
 .inspector {
-  position: absolute;
   top: 48px;
   bottom: 12px;
-  width: 244px;
   z-index: 8;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
   box-shadow: 0 8px 28px rgb(0 0 0 / 20%);
-  padding: 10px;
   overflow: auto;
 }
 
@@ -1099,14 +980,11 @@
   z-index: 9;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-pill);
   background: var(--petri-bg-surface);
   box-shadow: 0 2px 10px rgb(0 0 0 / 10%);
   flex-wrap: nowrap;
-  width: auto;
   max-width: none;
   white-space: nowrap;
 }
@@ -1137,7 +1015,6 @@
   border: none;
   background: transparent;
   box-shadow: none;
-  gap: 2px;
 }
 
 .toolbar:hover {
@@ -1147,8 +1024,6 @@
 
 .layers,
 .inspector {
-  width: 220px;
-  padding: 8px;
   gap: 6px;
   top: 40px;
 }
@@ -1161,9 +1036,6 @@
 }
 
 .field {
-  grid-template-columns: 60px minmax(0, 1fr);
-  gap: 8px;
-  padding: 1px 0;
 }
 
 .field input:not([type='color']),
@@ -1173,8 +1045,6 @@
 }
 
 .rowActions {
-  padding: 4px 0;
-  gap: 4px;
 }
 
 .hint {
@@ -1182,21 +1052,17 @@
 }
 
 .stage {
-  padding: 44px 12px 12px;
 }
 
 /* 底部属性坞（用户裁决：图片不占满窗口，属性/图层放图片下方）
    画布占上方，图层与属性改为底部横条；字段横向流式排列，不再挤占左右两侧。 */
 .stage {
-  padding: 44px 12px 214px;
 }
 
 .layers {
   top: auto;
   bottom: 12px;
   left: 12px;
-  width: 196px;
-  height: 194px;
 }
 
 .inspector {
@@ -1204,8 +1070,6 @@
   bottom: 12px;
   left: 216px;
   right: 12px;
-  width: auto;
-  height: 194px;
   overflow: auto;
 }
 
@@ -1218,25 +1082,19 @@
 }
 
 .layersHead {
-  position: sticky;
   top: 0;
   background: var(--petri-bg-surface);
-  padding-bottom: 4px;
   z-index: 1;
 }
 
 /* 属性字段横向流式：一行多个，窄屏自动换行 */
 .props {
-  display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  gap: 6px 18px;
   padding: 4px 2px;
 }
 
 .field {
-  grid-template-columns: 56px 132px;
-  gap: 6px;
 }
 
 .propList {
@@ -1247,7 +1105,6 @@
 
 .propRow {
   flex-direction: row;
-  gap: 6px;
 }
 
 .rowActions {
@@ -1276,23 +1133,15 @@
 
 /* 布局定稿（用户裁决）：图层贴画布下方（绑定感，不贴窗口底）；图形属性回右侧悬浮原样 */
 .body {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .stage {
   grid-row: 1;
-  padding: 44px 12px 8px;
 }
 
 .layers {
-  position: static;
   grid-row: 2;
-  width: auto;
-  height: auto;
-  max-height: 132px;
   margin: 0 12px 8px;
-  padding: 6px 10px;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
@@ -1306,7 +1155,6 @@
 
 .layersHead {
   position: static;
-  padding-bottom: 2px;
 }
 
 .layerList {
@@ -1320,8 +1168,6 @@
   right: 12px;
   bottom: 12px;
   left: auto;
-  width: 220px;
-  height: auto;
   box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
 }
 
@@ -1336,7 +1182,6 @@
 }
 
 .field {
-  grid-template-columns: 58px minmax(0, 1fr);
 }
 
 .body:has(.layers[data-open='0']) .inspector {
@@ -1346,30 +1191,21 @@
 /* 图层坞移入画布流内（紧跟图片下方，用户裁决「还是太远」）：stage 改纵向 flex，
    画布按内容高度、图层紧随其后一起滚动；工具栏默认展开。 */
 .body {
-  grid-template-rows: minmax(0, 1fr);
 }
 
 .stage {
-  display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 44px 12px 12px;
   overflow: auto;
 }
 
 .stage > [data-testid='svg-editor-canvas'] {
-  flex: 0 0 auto;
-  height: auto;
-  min-height: 0;
 }
 
 .layers {
-  position: static;
   grid-row: auto;
   flex: 0 0 auto;
   margin: 0;
-  max-height: 132px;
-  padding: 6px 10px;
   border: 1px solid var(--petri-border-card);
   border-radius: var(--petri-radius-md);
   background: var(--petri-bg-surface);
@@ -1381,8 +1217,6 @@
 
 /* 布局定稿 v2（用户裁决）：属性占用右侧区域（不悬浮）；图层坞矮化、不触底 */
 .body {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
 }
 
 .body[data-inspector='1'] {
@@ -1395,43 +1229,32 @@
 }
 
 .inspector {
-  position: static;
   top: auto;
   right: auto;
   bottom: auto;
   left: auto;
-  width: auto;
-  height: auto;
-  max-height: none;
   border: none;
   border-left: 1px solid var(--petri-divider);
   border-radius: 0;
   box-shadow: none;
-  padding: 10px 10px 10px 12px;
 }
 
 .layers {
-  max-height: 88px;
   margin: 0 0 8px;
-  padding: 6px 8px;
 }
 
 .layers .layerList {
-  max-height: 52px;
   overflow: auto;
 }
 
 .stage {
-  padding: 44px 12px 10px;
 }
 
 /* 图层坞容纳更多条目但不遮挡内容（流内布局，天然不覆盖画布） */
 .layers {
-  max-height: 152px;
 }
 
 .layers .layerList {
-  max-height: 116px;
   overflow: auto;
 }
 
@@ -1445,8 +1268,6 @@
 
 /* 布局定稿 v3（用户裁决：图层放主绘图区域下方，不覆盖、不悬浮） */
 .body {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .body[data-inspector='1'] {
@@ -1459,17 +1280,13 @@
   grid-column: 1;
   display: block;
   overflow: auto;
-  padding: 44px 12px 10px;
 }
 
 .layers {
   grid-row: 2;
   grid-column: 1 / -1;
   position: static;
-  display: flex;
   flex-direction: column;
-  height: auto;
-  max-height: 148px;
   margin: 0 12px 10px;
   padding: 8px 10px;
   border: 1px solid var(--petri-border-card);
@@ -1489,8 +1306,6 @@
 .layers .layerList {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 10px;
-  max-height: 104px;
   overflow: auto;
   align-content: flex-start;
 }
@@ -1516,16 +1331,12 @@
 .stage {
   grid-row: 1;
   grid-column: 1;
-  min-height: 0;
   overflow: auto;
 }
 
 .layers {
   grid-row: 2;
   grid-column: 1;
-  height: auto;
-  max-height: none;
-  min-height: 0;
   margin: 0 12px 10px;
   overflow: hidden;
 }
@@ -1533,8 +1344,6 @@
 .inspector {
   grid-row: 1 / -1;
   grid-column: 2;
-  height: auto;
-  max-height: none;
   overflow: auto;
 }
 
@@ -1575,12 +1384,10 @@
 .changeRow,
 .propList,
 .propRow {
-  min-width: 0;
 }
 
 .field {
   grid-template-columns: 56px minmax(0, 1fr);
-  gap: 8px;
 }
 
 .field input:not([type='color']),
@@ -1649,7 +1456,6 @@
 .layers {
   grid-row: 2;
   grid-column: 1;
-  min-height: 0;
   height: auto;
   margin: 0 12px 10px;
   overflow: hidden;
@@ -1669,8 +1475,6 @@
 /* 属性区块式布局（根治横向溢出：标签独占一行、控件占满整行，物理上不可能超宽） */
 .inspector {
   align-self: stretch;
-  height: 100%;
-  max-height: none;
   grid-row: 1 / -1;
   grid-column: 2;
 }
@@ -1690,7 +1494,6 @@
 .field input:not([type='color']),
 .field select,
 .fieldRow {
-  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -1732,8 +1535,6 @@
 
 /* 横向溢出根治：色块固定 + 输入框 flex 占满（此前 28px + 100% 叠加超宽） */
 .fieldRow > input[type='color'] {
-  flex: 0 0 auto;
-  width: 28px;
 }
 
 .fieldRow > input:not([type='color']) {
@@ -1802,11 +1603,9 @@
 
 /* 修订历史浮层（左侧覆盖，展示完整列表；用户裁决：点历史开新窗） */
 .revisionPanel {
-  position: absolute;
   left: 12px;
   top: 48px;
   bottom: 12px;
-  width: 320px;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -1820,13 +1619,11 @@
 }
 
 .revisionPanel .changeList {
-  max-height: none;
   overflow: visible;
 }
 
 /* 修订历史浮层：紧邻按钮左侧（联动感），相对属性栏定位 */
 .inspector {
-  position: relative;
   overflow: visible;
 }
 
@@ -1897,9 +1694,7 @@
 }
 
 .leftCol {
-  display: flex;
   flex-direction: column;
-  gap: 8px;
   min-width: 0;
   min-height: 0;
 }
@@ -1977,11 +1772,6 @@
 
 /* 布局收口（量测发现：leftCol 被压成 222 → 历史卡与属性栏重叠）。高特异性定死两列。 */
 .viewer .body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 272px;
-  grid-template-rows: minmax(0, 1fr);
-  gap: 8px;
-  min-height: 0;
 }
 
 .viewer .body > .leftCol {
@@ -1992,30 +1782,22 @@
   grid-template-rows: minmax(0, 1fr) 196px;
   gap: 8px;
   min-width: 0;
-  min-height: 0;
 }
 
 .viewer .body > .leftCol > .stage {
   grid-column: 1 / -1;
   grid-row: 1;
-  min-height: 0;
 }
 
 .viewer .body > .leftCol > .layers {
   grid-column: 1;
   grid-row: 2;
-  width: auto;
-  max-width: none;
-  height: auto;
   margin: 0;
 }
 
 .viewer .body > .leftCol > .revisionCard {
   grid-column: 2;
   grid-row: 2;
-  width: auto;
-  max-width: none;
-  height: auto;
   margin: 0;
 }
 
