@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m6a-surface-schema",
-  "capturedAt": "2026-11-14T00:33:41.802Z",
+  "capturedAt": "2026-11-21T03:18:31.393Z",
   "policy": "三面身份 schema 单一形状；漂移按「只减不增」棘轮冻结；本文件只读生成，不改矩阵数据",
   "shape": {
     "entry": [
@@ -16,12 +16,12 @@
     ]
   },
   "counts": {
-    "entries": 569,
-    "ipc": 170,
-    "tool": 115,
-    "route": 284,
-    "truthChannels": 170,
-    "truthTools": 115
+    "entries": 581,
+    "ipc": 173,
+    "tool": 118,
+    "route": 290,
+    "truthChannels": 173,
+    "truthTools": 118
   },
   "drift": {
     "ipcMissingInRegistry": 0,
@@ -38,11 +38,11 @@
     }
   },
   "summaryMismatches": [
-    "metadata: matrix=116 actual=115"
+    "metadata: matrix=119 actual=118"
   ],
   "defects": [
     "DUPLICATE_ENTRY: route::POST /api/ai/interpret",
-    "SUMMARY_DRIFT: metadata: matrix=116 actual=115"
+    "SUMMARY_DRIFT: metadata: matrix=119 actual=118"
   ],
   "entries": [
     {
@@ -279,6 +279,13 @@
     {
       "kind": "ipc",
       "id": "data:open-dir",
+      "scope": "data",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "data:lesson-evidence",
       "scope": "data",
       "exposed": true,
       "consumed": false
@@ -1125,6 +1132,20 @@
     },
     {
       "kind": "ipc",
+      "id": "window:test-manage-toggle",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
+      "id": "window:test-manage-hover",
+      "scope": "window",
+      "exposed": true,
+      "consumed": false
+    },
+    {
+      "kind": "ipc",
       "id": "window:snapshot",
       "scope": "window",
       "exposed": true,
@@ -1190,7 +1211,7 @@
       "kind": "ipc",
       "id": "gen-ui:mcp-app-call",
       "scope": "gen-ui",
-      "exposed": false,
+      "exposed": true,
       "consumed": false
     },
     {
@@ -1362,6 +1383,30 @@
       "exposed": true,
       "consumed": true,
       "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "transcribe_audio",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R1"
+    },
+    {
+      "kind": "tool",
+      "id": "speak_text",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
+    },
+    {
+      "kind": "tool",
+      "id": "compose_video",
+      "scope": "browser",
+      "exposed": true,
+      "consumed": true,
+      "riskTier": "R2"
     },
     {
       "kind": "tool",
@@ -3270,6 +3315,13 @@
     },
     {
       "kind": "route",
+      "id": "GET /api/harness/lesson-evidence",
+      "scope": "lesson-evidence",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
       "id": "GET /api/mcp/servers",
       "scope": "mcp-client",
       "exposed": true,
@@ -3313,6 +3365,13 @@
     {
       "kind": "route",
       "id": "POST /api/mcp/servers/:id/resource",
+      "scope": "mcp-client",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "POST /api/mcp/servers/:id/tools/call",
       "scope": "mcp-client",
       "exposed": true,
       "consumed": true
@@ -3691,6 +3750,34 @@
     {
       "kind": "route",
       "id": "PUT /api/web-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/ocr-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/ocr-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "GET /api/speech-access",
+      "scope": "runtime-config",
+      "exposed": true,
+      "consumed": true
+    },
+    {
+      "kind": "route",
+      "id": "PUT /api/speech-access",
       "scope": "runtime-config",
       "exposed": true,
       "consumed": true

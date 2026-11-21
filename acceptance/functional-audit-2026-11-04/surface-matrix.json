@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-11-19T07:10:16.807Z",
+  "generatedAt": "2026-11-21T01:09:09.688Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 118,
     "toolDomains": 16,
     "contracts": 118,
     "metadata": 119,
-    "ipcChannels": 172,
+    "ipcChannels": 173,
     "ipcMissingPreload": 2,
-    "ipcUnusedInRenderer": 169,
-    "routes": 289,
-    "routeModules": 47,
+    "ipcUnusedInRenderer": 170,
+    "routes": 290,
+    "routeModules": 48,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
     "findingsBySeverity": {
@@ -2687,6 +2687,11 @@
       "usedInRenderer": false
     },
     {
+      "channel": "data:lesson-evidence",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
       "channel": "diagnostic:export",
       "inPreload": true,
       "usedInRenderer": false
@@ -3545,6 +3550,11 @@
     },
     {
       "channel": "data:open-dir",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "data:lesson-evidence",
       "inPreload": true,
       "usedInRenderer": false
     },
@@ -5177,6 +5187,12 @@
       "module": "knowledge",
       "method": "POST",
       "route": "/api/knowledge/binding",
+      "mounted": true
+    },
+    {
+      "module": "lesson-evidence",
+      "method": "GET",
+      "route": "/api/harness/lesson-evidence",
       "mounted": true
     },
     {
