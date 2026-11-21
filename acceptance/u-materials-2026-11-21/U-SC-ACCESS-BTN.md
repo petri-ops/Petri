@@ -1,0 +1,21 @@
+# U 材料 · sc-access-btn 橙红是否随和声（2026-11-21 · pending_user_ruling 零代答）
+
+> 现状现读：`frontend/src/components/copilot/simple-chat.css:2217` `.sc-access-btn` 用
+> `--petri-accent-orange`（固定橙红）+ hover `--petri-accent-orange-bg`——**不随 data-accent 切档**
+> （A4 预审时登记为边界：安全状态语义不随主题）。
+
+## 可选方向
+
+| 方向 | 说明 | 代价 |
+|---|---|---|
+| A 保持橙红固定（现状） | 无障碍入口=常量安全色，跨主题/跨和声恒定可识别 | 与 celadon 和声并排时色相独立（A4 已验和谐） |
+| B 随 data-accent | 换 `--petri-accent`（随九档变） | 失去「安全入口=固定色」的跨档恒定识别；橙红语义（紧急/求助）弱化 |
+
+## 单一推荐：**A 保持固定**（一句理由）
+
+无障碍/求助入口的**跨主题恒定可识别**是 a11y 惯例（紧急语义不随装饰主题漂移），且 A4 四档预审
+已实证橙红在各和声下和谐不冲突——改动只有语义损失无观感收益。
+
+## 裁决格式
+
+`U-SC-ACCESS：A` 或 `U-SC-ACCESS：B`；裁决后回写 A4 边界注记。
