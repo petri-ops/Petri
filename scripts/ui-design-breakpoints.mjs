@@ -18,7 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const WIP_CSS = 'frontend/src/pages/project-workspace.module.css';
+export const WIP_CSS = 'frontend/src/pages/project-workspace.module.css'; // 历史常量保留（B-11 并档后无 WIP 阈值）
 export const BREAKPOINTS_TS = 'frontend/src/lib/uiBreakpoints.ts';
 export const MOBILE_ALIGNED_PX = 768;
 export const COMPACT_ALIGNED_PX = 960;
@@ -32,11 +32,14 @@ export const COMPACT_ALIGNED_PX = 960;
  * 96/420/679/720/1146 为 @container 元素级查询（非视口档位，不参与 4 档收敛）；
  * 640/700/860 属 WIP 文件（BLOCK-395 B-11，owner 收口）。
  */
+/**
+ * U-04 收敛完成（2026-11-21 B-11 并档票）：BLOCK-395 已 completed（registry 在案），其 WIP 面
+ * 三阈值并档（700→768 / 860→960；520/960 为锚）——WIP 例外退役，全部阈值并入常规只减表。
+ * 登记表现读 8 档：96/420/520/679/720（@container 元素级）+ 768/960/1200（视口四档锚）。
+ */
 export const REGISTERED_THRESHOLDS = [
-  96, 420, 520, 640, 679, 700, 720, 768, 860, 960, 1146, 1200,
+  96, 420, 520, 679, 720, 768, 960, 1146, 1200,
 ];
-export const WIP_THRESHOLDS = [520, 640, 700, 860, 960];
-export const WIP_OWNER = '他方在制 WIP（BLOCK-395 B-11）；UI 程序零触碰，档位收敛待 owner 收口 + U-04 裁决';
 
 export const JS_SCAN_ROOTS = ['frontend/src/hooks', 'frontend/src/components', 'frontend/src/pages', 'frontend/src/lib'];
 export const JS_SCAN_EXEMPT = new Set([BREAKPOINTS_TS]);

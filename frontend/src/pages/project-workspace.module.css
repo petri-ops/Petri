@@ -2923,7 +2923,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .workspacePathBar {
     display: none;
   }
@@ -3094,7 +3094,7 @@ body:global(.petri-resizing-columns) .embeddedTerminal {
   cursor: pointer;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .resultScientificDeliveryGrid {
     grid-template-columns: 1fr;
   }
