@@ -9,7 +9,6 @@
  * 语义=证据链防静默丢失（消费面即资产化面，EAR 口径 testRef ∧ impactRule）。
  */
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +20,6 @@ const R2_ASSESS = path.join(ROOT, 'acceptance', 'project-status-assessment-r2-20
 const R3_ASSESS = path.join(ROOT, 'acceptance', 'project-status-assessment-r3-2026-11-21');
 const PRESERVED = path.join(ROOT, 'acceptance', 'cultural-watermark', 'minimal-variant-preserved');
 
-const sha256 = (p) => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 
 test('每波 RULINGS 在场且非空（S1–S7 + s8 契约演进）', () => {
   const rulings = [

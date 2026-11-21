@@ -66,9 +66,11 @@ test('block351 负测：EAR 跌破 40% → 棘轮下限判红（缩分母不行�
   assert.ok(issues.some((i) => i.includes('棘轮下限')));
 });
 
-test('block351 负测 L0-3：EAR 降至 41%（低于 manifest 记录 43.3）→ 真棘轮判红', () => {
+test('block351 负测 L0-3：EAR 降至 ~41%（低于 manifest 记录）→ 真棘轮判红', () => {
   const current = baseCurrent();
-  current.entries = current.entries.slice(0, 825); // 825/2013 = 41.0%
+  // 场景算术随 manifest 重锚机械演进（R2 清偿批 S8）：切片数=分母×41%，使结果 EAR≈41%
+  // 恒低于记录值（重建后记录=42.8），场景语义「低于记录即红」不锚具体基数。
+  current.entries = current.entries.slice(0, Math.floor(manifest.totals.acceptanceFiles * 0.41));
   const { ok, issues } = validateManifest(manifest, current);
   assert.equal(ok, false);
   assert.ok(issues.some((i) => i.includes('棘轮只进不退') && i.includes('41') ), issues.join(' / '));
