@@ -97,17 +97,17 @@
     ]
   },
   "uiDebt": {
-    "sections": 509,
-    "uniqueIds": 500,
-    "debt": 36,
-    "liveMissing": 13,
-    "blocked": 23,
-    "verified": 461,
-    "closed": 12,
+    "sections": 512,
+    "uniqueIds": 503,
+    "debt": 28,
+    "liveMissing": 14,
+    "blocked": 14,
+    "verified": 471,
+    "closed": 13,
     "ceilingCrossCheck": {
-      "liveMissing": 13,
-      "blocked": 23,
-      "total": 36
+      "liveMissing": 14,
+      "blocked": 14,
+      "total": 28
     },
     "consistent": true
   },

@@ -26,7 +26,7 @@ export const INLINE_DEBT_FILES = Object.freeze([
   'frontend/src/components/desktop/PluginStorePanel.tsx',
   'frontend/src/App.tsx',
 ]);
-export const DEBT_CEILING = Object.freeze({ liveMissing: 13, blocked: 23, total: 36 }); // 随 canonical triage JSON 机械演进：35/13/22→36/13/23→38/15/23（11-18 UI-709/710 入债）→36/13/23（11-20 yi-rest 签字批+UI-714 加映，R2 清偿批 S8 对账）
+export const DEBT_CEILING = Object.freeze({ liveMissing: 14, blocked: 14, total: 28 }); // 随 canonical triage JSON 机械演进：…→38/15/23→36/13/23（11-20 yi-rest 签字批）→28/14/14（11-21 E-02 delegated-walk：9 条 Agent 审定 verified/cancelled 回写，debt -8）
 
 const HEX = /#[0-9a-fA-F]{3,8}\b/g;
 const RGBA = /rgba?\([^)]*\)/g;

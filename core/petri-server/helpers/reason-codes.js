@@ -17,6 +17,7 @@
 
 /** category 封闭集（新增类别需先扩此表并在测试对账）。 */
 const REASON_CATEGORIES = Object.freeze([
+  'evolution',  // 自进化：lesson 回滚原因域（EVO-3，R2 清偿批清退票随批注册）
   'governance', // 治理面：用户规则/动态防护/MCP 信任/工具策略/循环防护
   'mode',       // 档位与模式：plan/read/workspace-write/只读请求
   'workspace',  // 项目工作区：前置校验/授权
@@ -106,6 +107,9 @@ const REASONS = Object.freeze({
   zip_total_bytes_exceeded: { category: 'input', template: '压缩包累计解压体积超上限（>{maxTotalBytes} 字节）。' },
   zip_symlink_entry_rejected: { category: 'input', template: '压缩包含符号链接条目，已拒绝（{entry}）。' },
   zip_entry_path_invalid: { category: 'input', template: '压缩包条目路径非法（{problem}：{entry}）。' },
+  // —— EVO-3（BLOCK-462 期注册 · R2 清偿批清退票补登）：lesson 回滚原因域 ——
+  rollback: { category: 'evolution', template: '该 lesson 已回滚（{reason}）。' },
+  frequency_rebound: { category: 'evolution', template: '生效后频率回升（{before}→{after}）：自动回滚该 lesson。' },
 });
 
 /** 渲染原因文本：{placeholder} 按 values 替换；未注册 code 走诚实的回退文本。 */

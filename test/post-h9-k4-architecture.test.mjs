@@ -119,14 +119,14 @@ test('K-22/K-18：债读数在场（读数型+活源一致；入册/收窄/拆�
   assert.equal(truth.archDebt.knipKeys, knipBaseline.keys.length);
   assert.equal(typeof truth.archDebt.sizeFiles, 'number');
   assert.equal(typeof truth.archDebt.loopOrchestratorInManifest, 'boolean');
-  assert.equal(truth.archDebt.loopOrchestratorLines, 1579);
+assert.equal(truth.archDebt.loopOrchestratorLines, 1674); // BLOCK-508 接线 +27 后行数（与 big-file-anchor/code-size 台账同源演进）
   assert.equal(typeof truth.archDebt.knipFullEntryInWorkspace, 'boolean');
   assert.deepEqual(truth.archDebt.dynamicRequirePoints, [true, true, true]);
 });
 
 test('负测 K-22：存量环 / knip 保留键 / 动态 require 现状增长或被改写 → 判红（只增即红棘轮）', () => {
   mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 13 } }), 'K-22');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 403 } }), 'K-22'); // 随上限演进取超限值：>402（R2 清偿批 S8 2026-11-21 演进，50 键定性入册见 lib 注释 trail）
+  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 407 } }), 'K-22'); // 随上限演进取超限值：>406（清退票 2026-11-21 笔锋版原键收缩+新 flow 入册，现读 406）
   mustRed(tamper({ archDebt: { ...truth.archDebt, dynamicRequirePoints: [true, true, false] } }), 'K-22');
 });
 

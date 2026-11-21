@@ -87,7 +87,7 @@ test('K-17：内联债冻结读数与 CSS 面 354/30 基线分离，不重打 de
   assert.equal(truth.cssBaselineTotal, 354);
   assert.equal(truth.cssBaselineFiles, 30);
   assert.ok(truth.debtTotal > 0, '内联债真实存在，不得冻结成 0 形成假绿');
-  assert.deepEqual(DEBT_CEILING, { liveMissing: 13, blocked: 23, total: 36 }); // 随 canonical triage JSON 机械演进：35/13/22→36/13/23（11-18）→38/15/23（11-18 UI-709/710 入债）→36/13/23（11-20 yi-rest 批量签字+UI-714 加映，R2 清偿批 S8 对账）
+  assert.deepEqual(DEBT_CEILING, { liveMissing: 14, blocked: 14, total: 28 }); // 随 canonical triage JSON 机械演进：…→36/13/23→28/14/14（11-21 E-02 delegated-walk 9 条回写，debt -8）
 });
 
 test('K-17：门禁在干净树判绿且逐文件与基线一致', () => {
@@ -127,10 +127,10 @@ test('负测 K-17：CSS 面基线被改写 → 判红', () => {
 });
 
 // ---- K-15 debt / 人眼边界（钉值随 canonical triage JSON 机械演进：…→38/15/23 → 36/13/23，2026-11-20 yi-rest 签字批 + R2 清偿批 S8 对账）----
-test('K-15：debt 36 = live-missing 13 + blocked 23，人眼路线未签字', () => {
-  assert.equal(truth.triage.debt, 36);
-  assert.equal(truth.triage.counts['live-missing'], 13);
-  assert.equal(truth.triage.counts.blocked, 23);
+test('K-15：debt 28 = live-missing 14 + blocked 14，人眼路线未签字', () => {
+  assert.equal(truth.triage.debt, 28);
+  assert.equal(truth.triage.counts['live-missing'], 14);
+  assert.equal(truth.triage.counts.blocked, 14);
   assert.equal(truth.humanEyeRouteSigned, false);
   assert.equal(truth.ledgerMechanicallyClassified, true);
 });

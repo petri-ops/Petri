@@ -30,11 +30,14 @@ test('canonical 原文里的「实机走查待人工 / 待实机观感」必须�
     const line = canonical.split(/\r?\n/).find((l) => l.startsWith(`## ${id}:`));
     return line ? line.slice(line.indexOf(': ') + 2) : '';
   };
-  for (const id of ['UI-699', 'UI-698', 'UI-697', 'UI-695']) {
+  // 演进（R2 清偿批尾票）：UI-695 已于 2026-11-16 verified（用户口令）→ adjudicator 现判
+  // 'agent-adjudicable'（verified 标题触达既判域）——从「必须人眼」名单移除，其余三个保持。
+  for (const id of ['UI-699', 'UI-698', 'UI-697']) {
     const title = titleOf(id);
     assert.ok(title.length > 0, `${id} 台账原文必须存在`);
     assert.equal(adjudicateRow({ id, reason: title }), 'pending_human_eye', `${id} 完整标题应归人眼`);
   }
+  assert.equal(adjudicateRow({ id: 'UI-695', reason: titleOf('UI-695') }), 'agent-adjudicable', 'UI-695 verified 后归 agent-adjudicable（2026-11-16 用户口令）');
   const e = JSON.parse(fs.readFileSync(path.join(ROOT, 'acceptance/post-s7-2026-11-10/h10/debt-adjudication.json'), 'utf8'));
   assert.ok(e.buckets.pending_human_eye >= 20, '人眼桶不得被截断数据洗小');
   assert.equal(e.totalDebt, 35);

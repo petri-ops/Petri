@@ -158,6 +158,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block99-knowledge-multispace.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark-ai.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/form-grammar.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/mainwindow-handler-contract.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/next01-workflow-live.cjs",

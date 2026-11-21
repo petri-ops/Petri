@@ -3,8 +3,8 @@
   "id": "petri-human-eye-closeout",
   "kind": "model-readable-human-eye-closeout",
   "generatedBy": "node scripts/c53-human-eye-closeout.mjs",
-  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
-  "generatedAt": "2026-11-21T00:02:58.861Z",
+  "sourceCommit": "14a9583fd6d435c071657bde692d625fe92264e1",
+  "generatedAt": "2026-11-21T06:54:30.564Z",
   "derivedFrom": [
     "docs/ui-productization-audit.md（UI-706/707/709/710 in_progress + pending_human_eye）",
     "docs/e-class-human-eye-guide-2026-11-16.md + acceptance/block-332/ui-ledger-triage.json（22 条分层）",
@@ -44,8 +44,8 @@
     "inProgress": 9,
     "worthReviewing": 3,
     "total": 22,
-    "triageBlockedCurrent": 23,
-    "triageLiveMissingCurrent": 13,
+    "triageBlockedCurrent": 14,
+    "triageLiveMissingCurrent": 14,
     "driftDisclosed": true,
     "layersConsistent": true
   },

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
-  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
-  "generatedAt": "2026-11-21T04:23:15.652Z",
+  "sourceCommit": "14a9583fd6d435c071657bde692d625fe92264e1",
+  "generatedAt": "2026-11-21T06:54:30.564Z",
   "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。files=自有 design-context.json + 各外部条目（合并保留，不整写）。",
   "files": [
     {
       "path": "design-context.json",
-      "sha256": "fa2cd9612ef8c26995e8e442f2c155f856d47a89032aa764747a7920a06cfb58"
+      "sha256": "5fdd19416d92c717b0f1478b7e1f596b048712ab52ecdb215e3a4b6776b390fa"
     },
     {
       "path": "ia-map.json",
@@ -15,7 +15,7 @@
     },
     {
       "path": "visual-consistency.json",
-      "sha256": "913327d1a2aa73f39d0cdf466bf3841adcb04eb2d2b33a34a0d5d5f7356c4b53"
+      "sha256": "0f73d0f8aabcc217c37a72467c87e92c8d2982e52ebf27c784444365d93144f4"
     },
     {
       "path": "responsive-a11y.json",
@@ -31,7 +31,7 @@
     },
     {
       "path": "human-eye-closeout.json",
-      "sha256": "282ff3cd2f74f938730fcd4a4125174da898d5cc710c86f51f76687343c3f45a"
+      "sha256": "003a8ab7e425c30f08a4ace0424b21aca78b84b0fd0a155f0ef1ab70ea5a6861"
     },
     {
       "path": "assistant-ui-pattern.json",

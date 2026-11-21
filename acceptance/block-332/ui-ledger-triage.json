@@ -1,16 +1,21 @@
 {
-  "generatedAt": "2026-11-20T07:03:41.083Z",
+  "generatedAt": "2026-11-21T06:51:21.188Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 509,
-  "uniqueIds": 500,
+  "sections": 512,
+  "uniqueIds": 503,
   "counts": {
-    "live-missing": 13,
-    "verified": 461,
-    "blocked": 23,
-    "closed": 12
+    "live-missing": 14,
+    "verified": 471,
+    "closed": 13,
+    "blocked": 14
   },
-  "debt": 36,
+  "debt": 28,
   "liveMissing": [
+    {
+      "id": "UI-719",
+      "deps": [],
+      "title": "断点档位收敛 17→4 档单源（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S6b/P0-2 · U-04 预授权执行，行为基线同套绿，观感零代签"
+    },
     {
       "id": "UI-702",
       "deps": [],
@@ -79,60 +84,16 @@
   ],
   "blocked": [
     {
-      "id": "UI-704",
-      "deps": [],
-      "external": true,
-      "title": "设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 *"
-    },
-    {
-      "id": "UI-656",
-      "deps": [],
-      "external": true,
-      "title": "长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **in_progress（测试面守卫，零渲染变更，无实机面可验）**）"
-    },
-    {
-      "id": "UI-639",
-      "deps": [
-        "UI-532"
-      ],
-      "external": false,
-      "title": "pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；ifra"
-    },
-    {
-      "id": "UI-304",
-      "deps": [],
-      "external": true,
-      "title": "增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress；**RW-02 d 档对账"
-    },
-    {
-      "id": "UI-326",
-      "deps": [],
-      "external": true,
-      "title": "创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补"
-    },
-    {
       "id": "UI-331",
       "deps": [],
       "external": true,
       "title": "左栏会话行短式相对时间（用户参考图裁决）(**verified**：10-30 RW-02 实机 + 2026-11-16 当次 flow 复核，标题 in_progress 漂移"
     },
     {
-      "id": "UI-391",
-      "deps": [],
-      "external": true,
-      "title": "BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内；**RW-"
-    },
-    {
       "id": "UI-390",
       "deps": [],
       "external": true,
       "title": "子智能体显式角色展示——spawn role 贯通三处图标（BLOCK-93 P2）(2026-09-16 **verified（2026-11-05 探针 A：内联卡+摘要卡 c"
-    },
-    {
-      "id": "UI-388",
-      "deps": [],
-      "external": true,
-      "title": "远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev"
     },
     {
       "id": "UI-389",
@@ -205,18 +166,6 @@
       "deps": [],
       "external": true,
       "title": "段落级错误兜底（2026-10-20 **verified（2026-11-05 探针 D 受控注入：段卡 workspace-preview data-segment-crash"
-    },
-    {
-      "id": "UI-715",
-      "deps": [],
-      "external": true,
-      "title": "会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代"
-    },
-    {
-      "id": "UI-714",
-      "deps": [],
-      "external": true,
-      "title": "乙组观察点落地小批——compose chart/table 渲染接线 + 左栏导航 aria-current + model-btn hover 收敛单一档（2026-11-20"
     }
   ],
   "unknown": [],

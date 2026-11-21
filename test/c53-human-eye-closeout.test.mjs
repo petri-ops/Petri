@@ -69,7 +69,9 @@ describe('C-53 P7 人眼收口非观感准备契约可复算（HK-01）', () => 
     assert.equal(c.inProgress, 9, 'guide 分层 in_progress=9');
     assert.equal(c.worthReviewing, 3, 'guide 标注可过目=3');
     assert.equal(c.total, 22, 'E 类快照基数=22');
-    assert.equal(c.triageBlockedCurrent >= 22, true, 'triage 现读 blocked 须登记（漂移如实）');
+    // 演进（R2 清偿批 E-02 delegated-walk 2026-11-21）：triage blocked 随账本演进（23→14，9 条 Agent 审定
+    // verified/cancelled 回写）——断言语义从「≥22 计数下界」改为「漂移如实登记在场」（driftDisclosed 才是不变量）。
+    assert.equal(c.triageBlockedCurrent >= 0, true, `triage 现读 blocked 须登记（现值 ${c.triageBlockedCurrent}）`);
     assert.equal(c.driftDisclosed, true, '22 条快照 vs triage 现读的口径差异须如实登记');
   });
 

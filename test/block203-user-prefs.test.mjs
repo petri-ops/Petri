@@ -157,10 +157,13 @@ test('BLOCK-203 P2 — resetPrefs 只清覆盖层（回落默认），不删目�
 
 test('BLOCK-203 P2 — 域值单源：注册表枚举 == 前端 accents.ts 的 AccentId 集合', () => {
   const entry = schema.findKeyEntry('userPrefs.accent');
-  assert.deepEqual([...entry.domain.oneOf], ['teal', 'blue', 'violet', 'rose', 'amber']);
+  // 演进（R2 清偿批尾票 2026-11-21）：V5 四和声（paper-vermilion/celadon-ink/ultramarine-brass/indigo-mist）
+  // 入册后枚举 5→9；硬编码清单随活源演进退役，改为「schema 枚举 == accents.ts 选项表 == AccentId 联合类型」
+  // 三方互证（单源语义不变，不再逐批同步常数）。
   const accentsSrc = read('frontend/src/themes/accents.ts');
-  const ids = [...accentsSrc.matchAll(/\{ id: '([a-z]+)', label:/g)].map((m) => m[1]);
-  assert.deepEqual(ids, [...entry.domain.oneOf], `accents.ts 与注册表的强调色集合不一致：${ids.join(',')}`);
+  const ids = [...accentsSrc.matchAll(/\{ id: '([a-z0-9-]+)', label:/g)].map((m) => m[1]);
+  assert.deepEqual([...entry.domain.oneOf], ids, `accents.ts 与注册表的强调色集合不一致：${ids.join(',')}`);
+  assert.ok(ids.includes('celadon-ink'), '默认档（A0 裁决）必须在枚举内');
   // 词汇表所在处：BLOCK-203 P7 收口时把 `AccentId` 从 accents 下沉到 prefCache（拆 accents↔prefCache 环），
   // accents 只保留选项表与 DOM 应用；联合类型断言因此改读 prefCache。
   const prefCacheSrc = read('frontend/src/themes/prefCache.ts');

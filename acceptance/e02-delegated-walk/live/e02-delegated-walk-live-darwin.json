@@ -1,0 +1,99 @@
+{
+  "name": "e02-delegated-walk",
+  "platform": "darwin",
+  "startedAt": "2026-11-21T06:46:45.665Z",
+  "finishedAt": "2026-11-21T06:47:00.203Z",
+  "assertions": [
+    {
+      "name": "ui304_plus_found",
+      "pass": true,
+      "detail": "{\"found\":true,\"clicked\":true}"
+    },
+    {
+      "name": "ui304_dialog_first_panel",
+      "pass": true,
+      "detail": "{\"panel\":false,\"input\":false,\"pickBtn\":true}"
+    },
+    {
+      "name": "ui304_shot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ui326_ssh_panel",
+      "pass": true,
+      "detail": "{\"panel\":true,\"aliasMode\":true,\"ipMode\":true,\"pwd\":true}"
+    },
+    {
+      "name": "ui326_dual_mode",
+      "pass": true,
+      "detail": "{\"panel\":true,\"aliasMode\":true,\"ipMode\":true,\"pwd\":true}"
+    },
+    {
+      "name": "ui326_shot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ui388_compute_section",
+      "pass": true,
+      "detail": "{\"computeSection\":true,\"sshRegister\":true,\"federation\":true,\"badgeRetired\":true}"
+    },
+    {
+      "name": "ui388_f6_badge_retired",
+      "pass": true,
+      "detail": "{\"computeSection\":true,\"sshRegister\":true,\"federation\":true,\"badgeRetired\":true}"
+    },
+    {
+      "name": "ui388_shot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ui704_ia_v2_core",
+      "pass": true,
+      "detail": "{\"core\":true,\"advancedFold\":true,\"update\":true,\"channel\":true}"
+    },
+    {
+      "name": "ui704_advanced_fold_or_update",
+      "pass": true,
+      "detail": "{\"core\":true,\"advancedFold\":true,\"update\":true,\"channel\":true}"
+    },
+    {
+      "name": "ui704_shot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ui714_nav_aria_current",
+      "pass": true,
+      "detail": "{\"extFound\":true,\"ariaCurrent\":\"page\",\"othersClean\":true}"
+    },
+    {
+      "name": "ui714_no_chart_error_placeholder",
+      "pass": true,
+      "detail": "{\"noChartErrorPlaceholder\":true}"
+    },
+    {
+      "name": "ui714_shot",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "ui715_context_menu_open",
+      "pass": true,
+      "detail": "{\"open\":true,\"idItem\":true,\"jsonItem\":true}"
+    },
+    {
+      "name": "ui715_menu_items",
+      "pass": true,
+      "detail": "{\"open\":true,\"idItem\":true,\"jsonItem\":true}"
+    },
+    {
+      "name": "ui715_shot",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

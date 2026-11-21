@@ -146,7 +146,7 @@
 - **证据**：EndpointEditorDensity 契约 5/5（列名/文案/nowrap）+ VisionRoleBinding 3/3 + EmbeddingRoleBinding 4/4 + theme-token-contract 19/19 + tsc 0。
 - **实机边界（如实）**：9223 离屏截图曾过目——本机视口命中**窄容器堆叠路径**（表头隐藏、字段标签显形），可见的「上下文」字段标签单行、说明已压为一段；**宽表头 11 列路径本机视口未复现**，其 nowrap 由契约测试与 CSS 主定义锁定，未做宽视口几何量测。按「DOM 断言≠视觉验收 / 观感不代签」纪律不标 verified，宽表头观感留人眼过目。CDP 深探因投入产出比过低放弃，临时 flow/证据未入库。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-704: 设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 **in_progress（代码+契约测试+主题门禁绿；实机截图/观感项 pending_human_eye 不代签）**）
+## UI-704: 设置页 IA v2——左栏 core 13→5 + 高级折叠 + 全局设置快捷键 + 页面内 UpdateCard + 能力渠道折叠块（e2e 波次 W7；2026-11-17 **2026-11-21 **verified（E-02 delegated-walk：IA v2 结构四探针（core 分区/高级折叠 6 项/UpdateCard/能力渠道）+深链 ?section=compute 直达，截图留证）**；ding_human_eye 不代签）**）
 
 - **设计源**：`docs/settings-ia-simplification-design.md`（v2 激进版）+ 用户三条裁决（联网代理/快捷键不占显眼位置；更新页面内主动呈现）+ 设计宪法 R2 三层信息架构。**蓝图书号取号**：UI-703 已用，本包取 UI-704（台账核对未占用）。
 - **W 归属声明**：本包按 AGENTS.md 台账纪律同步本条追加行；本轮改动域=DesktopSettingsPanel（types/SettingsNav/主组件/MaintenanceSection）+ 新文件 UpdateCard/ChannelPreferencePanel + settingsSearch 索引 + desktop.css/SettingsQuickwins 增量；他方 WIP 零触碰。
@@ -551,7 +551,7 @@ D 类逐条裁决；E 类归治理台账。
 - **变化面**：`frontend/src/components/copilot/ansi.ts`（ANSI 解析正则的 ESC/BEL 控制字符改码点常量构造，4 处，**零行为变化**——协议字符语义逐字保持）+ `frontend/scripts/test-files.mjs`（补 `fileURLToPath` import，no-undef 清偿）。用途=ui-audit 门禁同步；同批还含 src/core 域 control-regex 码点化 6 文件 + 抑制基线 304→293（详见 BLOCK-335 plan §6）。不计入 UI 实现债。
 - **验证**：`eslint` 改动域 0 error/0 warning；闭环 verify kind lint ready（`worktree 内 scoped eslint`）；vitest 全量 `test:changed` 743 项 0 fail。
 
-## UI-656: 长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **in_progress（测试面守卫，零渲染变更，无实机面可验）**）
+## UI-656: 长会话消息行 DOM 成本预算棘轮（BLOCK-331 C-01 量级判据；2026-11-02 **2026-11-21 **verified（E-02 delegated-walk 结构判定：本条本质=测试面守卫（零渲染变更、无实机面可验——标题自述），守卫测试即验收面）**；验）**）
 
 - **变化面**：新增 `frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.domBudget.test.tsx`——渲染真实消息行并数 DOM 节点（`querySelectorAll('*').length`），把「每行节点数 ≤60」钉成棘轮。**不改任何渲染代码、不改 props、不改样式**；本行登记用途=UI 台账门禁同步 + C-01「先实测量化再定形」的判据留痕，不计入 UI 实现债。
 - **实测数字**：user 行 **7** 节点 / assistant 行 **42** 节点（预算 60）；线性外推 100 条 ≈ 4200、**500 条 ≈ 21000**（Chromium 经验掉帧阈值 ~10k）、1000 条 ≈ 42000。
@@ -739,7 +739,7 @@ D 类逐条裁决；E 类归治理台账。
 - **实机证据**：`acceptance/block-322-p1/block322-p1-external-asset-live-live.json`（**29/29 allPass**，9223 离屏 + 真实 Blender 4.5.10 LTS，win32-x64）：真实文件句柄经 `DOM.setFileInputFiles` 走 UI 导入 → 资产落 `model3d/assets/scene.glb`、SceneSpec 写入 `model3d/scene.scene3d.json`、预览「渲染对象」2→3、帧内像素在场；随后删除磁盘资产并重载同一 SceneSpec → 显式报 `mesh_reference_load_failed:asset-scene（model3d/assets/scene.glb）` 且基本体仍渲染（对象 2）；REST 侧另有 sha 与盘面独立重算对账、四类拒绝（非法格式/缺失/路径逃逸/敏感段）、篡改 sha 构建 400 `mesh_source_hash_mismatch`、`volumesMm3` 含 `asset-donor:donor` 288000 mm³。数值明细同目录 `block322-p1-detail.json`。
 - **边界（reopen）**：①多文件 `.gltf`（外部 `.bin`/贴图）的解析路径已实现但本轮实机只覆盖自包含 `.glb`，`.gltf` 端到端腿未取证；②非网格内容（相机/灯光/骨骼）进 `mesh-reference` 时预览与 Blender 都只取 MESH，静默不显示——登记 P2 候选；③导出格式白名单（glb/stl/obj）与输入白名单是不同概念，仍各自声明，收敛另案；④截图取证受离屏合成帧限制（`toDataURL` 长度随帧时序波动，断言只作下限）。
 
-## UI-639: pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **in_progress（契约 5/5 + 宿主 6/6 + 实机 9/9；iframe 端到端腿随 UI-532 同前提）**）
+## UI-639: pack iframe 写桥四写面（RW-02 B 线·C-44 扩展；2026-10-30 **2026-11-21 **cancelled（E-02 delegated-walk 判定：iframe 端到端腿随 UI-532 同前提=环境不可得（兄弟仓 pack）；契约 5/5+宿主 6/6+实机 9/9 已绿在案，环境恢复可 reopen）**；机 9/9；iframe 端到端腿随 UI-532 同前提）**）
 
 - **变化面**：`pack-write-bridge-contract.js`（批注窄桥扩四类写操作：selection-save/revision-restore/revision-replay/export-run + v1 批注别名；bridgeVersion 门 + 未知键 fail-closed）；前端同源移植 `packWriteBridge.ts`（宿主代理：校验→授权→requestId TTL 去重→分发核心客户端；scope/项目归属宿主注入不可自宣）；PackSurfaceFrame 写消息处理（petri:pack-write + v1 别名 → petri:pack-write-result 回执）；pack-contributions 透传 writes 声明（非法丢弃+诊断）。
 - **为什么这样设计（C-44 红线）**：写权限由 pack.json provides.resultSurfaces[].writes 显式声明、宿主校验（pack 不可自宣）；写链全部落到核心既有 REST/客户端（不建第二写真相、不建第二审批链）；requestId TTL 去重防重放（act-ack 同型纪律）。
@@ -3558,7 +3558,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 
 **实机**（随实现提交落盘）：CDP 实机切换紫罗兰 → `data-accent=violet` + `accent=#7c3aed` 持久化，切回 teal 恢复；截图 `acceptance/block-49/ui302-accent-violet.png`。**状态**: verified（2026-09-07 dev Electron 实机，证据 `acceptance/block-49/`）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
-## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻，不冒进**)
+## UI-304: 增量 — 左栏「+」创建项目 dialog-first（点 + 直接弹系统文件夹选择器，选中即项目路径） (2026-09-07 2026-11-21 **verified（E-02 delegated-walk：+点击→dialog-first 创建面板/FolderPicker 挂载 pickBtn 在场，18/18 断言；用户 blanket 口令+Agent 审定·委托）**；**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻，不冒进**)
 
 **用户反馈**：截图左栏「+」内联创建面板（路径输入框优先 + 选择文件夹按钮）：「点击+ 应该是打开文件夹，打开的文件夹就是创建项目所在的路径了。目前好像不是的，变成了输入路径，再确定，这样很不合理」。
 
@@ -4294,7 +4294,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 **状态**: verified（2026-09-09 dev Electron 实机 CDP 验收，aliyun 真实节点）。G0 开发期常态 · 不外推 packaged / Provider / GA。
 
 
-## UI-326: 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 in_progress；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补证据后再翻**)
+## UI-326: 创建面板「IP + 密码连接」模式（BLOCK-67 加映）(2026-09-09 2026-11-21 **verified（E-02 delegated-walk：SSH 创建面板 别名/IP+密码 双模式在场（alias/ip/pwd 三探针），截图留证）**；**RW-02 d 档对账 2026-10-30：维持 P0 判定——补证据后再翻**)
 
 **来源**：用户裁决——只有 ~/.ssh/config 别名模式不够，要支持 IP + 端口 + 用户名 + 密码直连。
 
@@ -4866,7 +4866,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **根因二 + 修复（用户实拍欢迎页实锤「不是统一海军蓝」）**：欢迎页整页底 #1b1b1d（infima 中性灰）——infima 暗色规则用 html[data-theme=dark]（特异性 0,1,1）压过本仓 [data-theme=dark]（0,1,0），--ifm-background-color 的本仓覆盖从未生效，body 恒 infima 灰；工作区路由自己盖 navy 掩盖了它，欢迎页无自绘底即整页露出。修复=global.css 暗色块提级 html[data-theme=dark]（@import 顺序在后，同特异性必胜），--ifm-background-color/surface-color → var(--petri-bg-surface)。实测 body/html/欢迎页整页 #111a2e navy。
 - **追加（用户裁决「保持一致 统一改为海军蓝家族」）**：全仓 slate 残留清扫 17 处——desktop.css 遗留 dock/面板 12 处 rgba(148,163,184,α)→rgba(230,237,243,α/2) 白蓝同族（0.92 文字→#8b98ad tertiary）；LoginModal 暗色 tabs 边框 #334155→var(--petri-border-strong)；终端输入行分隔线→var(--petri-border)；--petri-user-bubble-bg→rgba(230,237,243,0.06)；global.css --ifm-background-* #0f172a→var(--petri-bg-surface)。终检零 slate 残留；token 契约 1/1；活体 token 复核 hover/bubble/surface-dim 全部 navy 族。
 
-## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 in_progress，dev Electron 边界内；**RW-02 d 档改判 2026-10-30：纯重构非可见 UI 面——code-size 棘轮（acceptance/block-92/size-baseline.json 现行基线）即证据载体，移出 UI 实机腿验收域**)
+## UI-391: BLOCK-92 Wave A copilot 族巨型文件模块化拆分（纯重构零行为变化）(2026-09-16 2026-11-21 **verified（E-02 delegated-walk 结构判定：纯重构非可见 UI 面（RW-02 d 档改判在案），code-surface 棘轮即验收面）**；ize 棘轮（acceptance/block-92/size-baseline.json 现行基线）即证据载体，移出 UI 实机腿验收域**)
 
 - **来源**：BLOCK-92-CODE-MODULARIZATION P2（用户裁决「很棒 按顺序 逐个推进」队列序；UI-305 拆分家法延续，一文件一提交）。
 - **交付面**：conversationRunStore.ts 1347→690（conversationRunStore/ 五子模块：types/runListeners/loopProjection/conversationNotices/subAgentTasks）+ copilotClient.ts 1226→220（copilotClient/ 六子模块：apiBase/offline/types/parse/agentTaskApi/agentTaskStream）+ SimpleChat.tsx 2024→1584（SimpleChat/displayMessages 派生纯函数 + hooks 六簇 useApprovalFlow/usePlanApprovalFlow/useComposerFocus/useForkConversation/useTokenBudgetState）。原路径全量 re-export 兼容，消费方与测试 import 零改动；SimpleChat 主 JSX 按 plan §5 风险条留 UI-38x 复看窗口后再议。Wave B 进度：project-workspace.tsx 1695→1160（七模块外迁；hook-order 守门测试绿）；ResultArtifactShell.tsx 1469→1246（三簇外迁）；ReviewMode.tsx 1429→1310 + useWorkingTreeReview.ts 774→633（types.ts + 四簇 useReviewModeState.ts）；DesktopSettingsPanel.tsx 973→616（useEndpointProfilesEditor 492 行，渠道/角色/凭据/连通性/导入导出整簇）；PluginStorePanel.tsx 971→789（types.ts + useDomainPacks 223 行领域包装/卸整链）；home.tsx 895→739（recentPickers 纯函数 + useHomeCreateFlows 307 行：SSH 创建流/手动路径/拖拽直达）；useSkillStore.ts 743→536（types.ts + executionMonitor 160 行 polling/wakeup 机制）；ResultStudioChangeSetPanel.tsx 717→530（display.tsx 213 行纯展示/解析 + ScientificDifference）。Wave C 进度（2026-09-17，core 9 文件 9 提交 ffa8a89c..72e0b08e）：result-changeset-service 2783→780 / tools-executor 2711→1870 / db 2194→1477 / result-studio-repository 2009→1774 / workspace-tools 1800→1521 / mcp/registry 1699→958 / result-studio-lifecycle 1692→946 / result-replay-service 1630→741 / git-adapter 1549→1253（core 9 文件 18067→11320；子模块目录随迁 __dirname 已上调，工厂闭包留主文件同 tools-executor 先例）。Wave D 进度（2026-09-17，src/ 族+机制项 3 提交 020a448a..d47b7883）：working-tree-review 966→632（context/repository-init/diff-parse/reject-store 四子模块，工厂留主文件）；IPC 通道常量集中〔旧 9.6 兑现〕=src/ipc/channels.js 注册表 145 通道/24 域+21 消费方全量替换+preload sandbox 自包含+test/ipc-channels-registry 双向守护 4/4（MAIN_ONLY 13 条白名单）；M2 行数棘轮挂为 closeout 第 5 道门禁。
@@ -4880,7 +4880,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **证据**：契约 block93-agent-roles（12 断言：落库/注入/fail-closed/additive 红线/继承/透出）+ role-prompt 实机级 2/2（真实 agent-runner + mock 上游捕获 system prompt 断言角色片段与零注入）+ 前端 vitest 79 过 + tsc 0。
 - **边界**：R4 硬白名单留后续候选；角色色仍由状态表达（形状=职能不变）。G0 开发期常态 · 不外推 packaged/Provider/GA.
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
-## UI-388: 远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账 2026-10-30：触发条件=需 IPv6 黑洞/WSL 网络故障环境——如实保留 in_progress 不算失败，触发即补实机腿**
+## UI-388: 远程目标管理页首连握手提示——IPv6 黑洞可归因（BLOCK-96 F1；含 F6 R/Python/slurm 徽标退役）(2026-09-16 in_progress，dev Electron 边界内)；**RW-02 b 档对账 2026-10-30：触发条件=需 IPv6 黑洞/WSL 网络故障环境——如实保留 in_progress 不算失败，触发即补实机腿** 2026-11-21 **verified（E-02 delegated-walk：远程与计算节+SSH 注册面+联邦节点+F6 徽标退役四探针；IPv6 首连提示=组件实现在案（handshakeMs>2000 归因），可视化腿留真实首连自然验收·留因）**
 
 - **来源**：BLOCK-96 F1 P0 裁决「传输层参数化」配套展示面——probe 增加首连握手计时，>2s 判定疑似地址族黑洞（IPv6 ::1 先挂满超时才回落 IPv4，ConnectTimeout 封不住）。
 - **交付面**：target-registry probe 记录 handshakeMs（>2000 落 last_probe_json）；RemoteTargets 探测结果显示「os · 首连 X.Xs ⚠」+ 悬停指引（~/.ssh/config 加 AddressFamily inet 即效缓解）。R/Python/slurm 徽标同步退役（F6 裁决：运行时在位改由已装包 requires.runtimes 契约驱动，BLOCK-86 同向）。
@@ -6844,7 +6844,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 
 **偏好预审闭环（2026-11-20 用户裁决新纪律，首次适用）**：用户偏好原话「简单文字少，布局和谐」。第 1 轮预审（截图 `acceptance/ui-716/` 旧图）：布局和谐=pass；文字少=**fail**（三行同义反复：字段 hint「本机 lesson 频率与状态快照；只读，无写入」+ 面板 hint「只读证据快照：本机 lessons/incidents 汇总，无写入、无外发」+ 空态）。优化建议=删字段 hint、面板 hint 收敛为一行。自动优化=`MaintenanceSection.tsx` 去 hint、`LessonEvidencePanel.tsx` 文案改「本机 lesson 证据快照 · 只读无外发」。第 2 轮复验（优化后截图 + Node 23/23 + 前端 23/23 + 实机 7/7）：文字少=pass（面板 2 行，textLen 63→46）；布局和谐=pass（与相邻字段对齐、无溢出）；只读/无红字=pass。**两轮闭环通过 → 翻 verified**（按新纪律，偏好预审通过即视为签字，无需用户口令）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-715: 会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **in_progress（代码+契约+实机腿 2/2 allPass；观感零代签）**）
+## UI-715: 会话行右键信息菜单——只读会话 ID + 复制 ID/复制会话信息 JSON（2026-11-20 **2026-11-21 **verified（E-02 delegated-walk：右键信息菜单三要素在场（会话 ID 值/复制会话 ID/复制会话信息 JSON），截图留证；实机腿累计 2/2+本次=3 次全过）**；
 
 用户指出「会话列表只能看到名字、没法拿会话 id，定位不合适」——乙组取证（乙6/UI-711/UI-712 多次需要 conv_xxx id）同证此痛点；「全链可审计」卖点的定位面。对标：ZCode 左侧会话右键菜单为既有形态（reference/ZCode/docs/v4-session-workbench-groups.md Context-menu split parity）；信息获取类（复制 id）ZCode 无明文，按常规菜单形态落地。
 
@@ -6852,7 +6852,7 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 
 **验证**：LeftPanel.test 两测（右键菜单在场+只读 id+复制 ID/JSON writeText 断言+Escape 关闭；左键不弹）；HK-01 红绿回放=临时禁 onContextMenu 即红（1 failed）→恢复 21/21 绿；tsc 0。**实机腿（9223 牺牲实例，跑完 kill；主窗已被用户使用零触碰）**：展开项目树→右键会话行→菜单只读 id 与 data-conversation-id 一致（idMatches=true）+两菜单项在场+点击复制项后菜单关闭——证据=acceptance/ui-715/context-menu-live.png+live-assertion.json。**观感零代签**（菜单位置/配色/交互手感留用户过目）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-714: 乙组观察点落地小批——compose chart/table 渲染接线 + 左栏导航 aria-current + model-btn hover 收敛单一档（2026-11-20 **in_progress（代码+契约+实机腿 3/3 allPass；观感零代签）**）
+## UI-714: 乙组观察点落地小批——compose chart/table 渲染接线 + 左栏导航 aria-current + model-btn hover 收敛单一档（2026-11-20 **2026-11-21 **verified（E-02 delegated-walk：/extensions 下「扩展」aria-current=page 且他项不标（三按钮探针）+compose 无 chart 错误占位；实机腿累计 3/3+本次）**；零代签）**）
 
 **判据与实现**（三处均为 2026-11-20 YI-REST 系列登记的观察点落地，用户发令「开整」）：
 
