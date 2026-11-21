@@ -8,3 +8,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-21T05:30:46.997Z -->
 最后更新：2026-11-21（🧹 **R2 清偿批 S5–S7 完成、S8 收口中（无人值守续推）**：S5 默认身份面可见性=默认 accent teal→celadon-ink（A0 裁决 ruling.json 现读）+welcome 问候区身份 token 组件面消费 0→3（墨字+朱砂落印点）+旧配置迁移保留+实机 10/10 allPass 截图（UI-718 in_progress 零代签，commit 6bcd86f4）；S6 三项 breaking U 类三票三 commit=状态色三套合并单源（删 --petri-success 零别名，56e8d5e6）+断点 17→4 档单源 520/768/960/1200（c13d453f）+目标分 4.4 采纳为方向性门槛（现读 4.0 缺口 0.4 明示，60a1e426）；S7 测试实例 TTL 机械门禁=TTL 看门狗+代币防误杀+行为实测（3f4e6344）。八波全绿收口链见 acceptance/r2-remediation/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-21T07:37:52.820Z -->
+最后更新：2026-11-21（🏁 **R2 清偿批 S8 收口完成 · closeout:full 全绿（21 门+2 report 零跳过）**：S8 十一轮收口逐门揭出被 exit-2/增量缓存长期掩盖的存量红并全部契约演进清偿——post-h9 契约族（保护清单计数锚/K-07 摘除态/K-15 triage 36·13·23/K-22 knip 402/K-26 分母只增语义）/c53 manifest 整写丢 9 条根修（S3 自伤回归）/断点下限 20→12/EAR sanctioned 重锚 42.8%（证据链契约 test/r2-remediation-evidence 资产化 77 文件）/lint 16 errors→0/EAR 负测算术相对化；中途修正 S4 误入库保护资产（nso summary，guard 提示行当场抓获，史上第三例同文件）。R3 自评=acceptance/project-status-assessment-r3-2026-11-21/（16/20，R2 9/20 → +7 四维全升）。commit 区间 d3780338..S8 终点待 push。G0 开发期常态 · 不外推 packaged/Provider/GA.）
