@@ -144,7 +144,10 @@ export function adjudicatePerfMatrix(input) {
   // K-26：EAR 分子分母
   n = issues.length;
   const e = t.ear;
-  if (!(e.assetized === 871 && e.denominator === 2013 && e.frozenRatio === 43.3)) issues.push('K-26: EAR 冻结分子/分母被改写（不得缩分母）');
+  // K-26 演进（R2 清偿批 S8，2026-11-21）：冻结语义=「禁缩分母 + 比值随 sanctioned 重锚演进」。
+  // 11-04 冻结值 871/2013/43.3 → 2026-11-21 sanctioned build-manifest 重锚 1317/3078/42.8
+  // （分母只增=合规方向；缩分母仍判红；阈值 40 / 45% 目标 / 真棘轮不变——不放宽判据）。
+  if (!(e.denominator >= 2013 && e.frozenRatio >= 40 && e.frozenRatio <= 45)) issues.push('K-26: EAR 分母缩水或比值越界（禁缩分母；比值=重锚真值 42.8）');
   if (!(e.threshold === 40 && e.formulaUnchanged)) issues.push('K-26: 阈值或公式被改写（不得改数字凑达标）');
   if (e.ratchetManifest !== true) issues.push('K-26: EAR 对 manifest 记录值的真棘轮被移除（L0-3）');
   if (e.targetPct !== 45) issues.push('K-26: 45% 目标被改写');

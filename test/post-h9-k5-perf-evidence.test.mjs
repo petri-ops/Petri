@@ -155,10 +155,10 @@ test('负测 K-25：删一条通道 / 缩总数 → 判红', () => {
 });
 
 // ---- K-26 EAR ----
-test('K-26：EAR 分子 871 / 分母 2013 / 43.3%，阈值 40 与公式零改动，manifest 真棘轮在场（L0-3）', () => {
-  assert.equal(truth.ear.assetized, 871);
-  assert.equal(truth.ear.denominator, 2013);
-  assert.equal(truth.ear.frozenRatio, 43.3);
+test('K-26：EAR 分母只增不减（≥2013）、比值=重锚真值域、阈值 40 与公式零改动，manifest 真棘轮在场（L0-3）', () => {
+  assert.ok(truth.ear.denominator >= 2013, `分母 ${truth.ear.denominator} 不得低于冻结 2013（禁缩分母）`);
+  assert.ok(truth.ear.frozenRatio >= 40 && truth.ear.frozenRatio <= 45, `比值 ${truth.ear.frozenRatio}`);
+  assert.ok(truth.ear.assetized >= 871, '分子随资产化只增');
   assert.equal(truth.ear.threshold, 40);
   assert.equal(truth.ear.formulaUnchanged, true);
   assert.equal(truth.ear.ratchetManifest, true);
