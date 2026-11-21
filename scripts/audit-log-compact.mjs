@@ -96,7 +96,9 @@ export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = R
     const nowMs = Date.parse(`${today || new Date().toISOString().slice(0, 10)}T00:00:00Z`);
     const cutoffMs = nowMs - Number(pendingKeepDays) * 86_400_000;
     for (let i = idxPending + 1; i < idxRecords; i += 1) {
+ // eslint-disable-next-line security/detect-object-injection -- 键来自 DRIFT_KEYS 封闭词表/本地常量 Map，可信读数面；R2 清偿批清退票依 BLOCK-493 先例行级豁免
       if (!/^\| ✅ \|/.test(lines[i])) continue; // 只分诊 ✅ 完成行，未决行永不剪
+ // eslint-disable-next-line security/detect-object-injection -- 键来自 DRIFT_KEYS 封闭词表/本地常量 Map，可信读数面；R2 清偿批清退票依 BLOCK-493 先例行级豁免
       const d = entryDate(lines[i]);
       if (!d) continue; // 无日期保守保留
       if (Date.parse(`${d}T00:00:00Z`) < cutoffMs) pendingCutIdx.add(i);
@@ -104,8 +106,11 @@ export function compactLedgerLines(lines, { chainKeep = CHAIN_KEEP, rowsKeep = R
   }
 
   const outLines = lines.filter((_, i) => !chainCutIdx.has(i) && !rowsCutIdx.has(i) && !pendingCutIdx.has(i));
+ // eslint-disable-next-line security/detect-object-injection -- 键来自 DRIFT_KEYS 封闭词表/本地常量 Map，可信读数面；R2 清偿批清退票依 BLOCK-493 先例行级豁免
   const chainCutLines = [...chainCutIdx].map((i) => lines[i]);
+ // eslint-disable-next-line security/detect-object-injection -- 键来自 DRIFT_KEYS 封闭词表/本地常量 Map，可信读数面；R2 清偿批清退票依 BLOCK-493 先例行级豁免
   const rowsCutLines = [...rowsCutIdx].map((i) => lines[i]);
+ // eslint-disable-next-line security/detect-object-injection -- 键来自 DRIFT_KEYS 封闭词表/本地常量 Map，可信读数面；R2 清偿批清退票依 BLOCK-493 先例行级豁免
   const pendingCutLines = [...pendingCutIdx].map((i) => lines[i]);
   const dates = chainCutLines.map(entryDate).filter(Boolean).sort();
   return { outLines, chainCutLines, rowsCutLines, pendingCutLines, throughDate: dates[dates.length - 1] ?? null };

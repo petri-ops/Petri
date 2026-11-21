@@ -6,14 +6,6 @@
  */
 const express = require('express');
 
-const {
-  lookupCellType,
-  lookupCellTypeWithConfidence,
-  isMarkerGuardEnabled,
-  isStandardAnalysisType,
-  callDeepSeekSimple,
-  buildInterpretPrompt,
-} = require('../helpers/interpret');
 const {ackActToken} = require('../agent-tools');
 const dbMod = require('../db');
 
@@ -30,75 +22,6 @@ module.exports = function mountAiLegacy(app) {
     });
   });
 
-  // —— 以下为退役前的实现（不可达，保留待 pack 迁移时删除）——
-  app.post('/api/ai/interpret', express.json({limit: '128kb'}), async (req, res) => {
-    const {analysisType, summary, topMarkers} = req.body || {};
-    if (!analysisType || !summary) {
-      return res.status(400).json({status: 'error', error: '缺少参数'});
-    }
-
-    // BLOCK-111 W1-1：marker 判别二跳（默认关=零行为变化；开=cellTypeHints 照旧 + additive 明细）。
-    const markerGuardEnabled = isMarkerGuardEnabled();
-    const localResults = {};
-    let cellTypeHintsDetailed = null;
-    if (topMarkers) {
-      if (markerGuardEnabled) {
-        cellTypeHintsDetailed = [];
-        const clusterEntries = Object.entries(topMarkers);
-        const decided = await Promise.all(
-          clusterEntries.map(([, markers]) => lookupCellTypeWithConfidence(markers))
-        );
-        decided.forEach((d, i) => {
-          const [cluster, markers] = clusterEntries[i];
-          const cellType = lookupCellType(markers);
-          if (cellType) localResults[cluster] = cellType;
-          cellTypeHintsDetailed.push({
-            cluster,
-            type: d.type,
-            confidence: d.confidence,
-            adopted: d.adopted,
-            ...(d.probabilities ? {probabilities: d.probabilities} : {}),
-          });
-        });
-      } else {
-        for (const [cluster, markers] of Object.entries(topMarkers)) {
-          const cellType = lookupCellType(markers);
-          if (cellType) localResults[cluster] = cellType;
-        }
-      }
-    }
-
-    const prompt = buildInterpretPrompt(analysisType, summary, {topMarkers});
-    let aiText = null;
-    if (prompt) {
-      aiText = await callDeepSeekSimple(prompt);
-    }
-
-    if (!aiText) {
-      if (isStandardAnalysisType(analysisType)) {
-        const {nCells, nGenes, nClusters} = summary;
-        let fallback = '✓ 分析完成：' + (nCells || 0).toLocaleString() + ' 个细胞，' + (nGenes || 0).toLocaleString() + ' 个基因，识别出 ' + (nClusters || 0) + ' 个 cluster。';
-        if (Object.keys(localResults).length > 0) {
-          fallback += '\n\n初步细胞类型推断（基于 marker 查表）：';
-          for (const [c, t] of Object.entries(localResults)) {
-            fallback += '\n- Cluster ' + c + '：' + t;
-          }
-        }
-        fallback += '\n\n建议：使用 SingleR 做正式细胞注释，或对感兴趣的 cluster 做 DEG 分析。';
-        aiText = fallback;
-      } else {
-        aiText = '分析已完成。请查看下方图表和数据文件了解详情。';
-      }
-    }
-
-    res.json({
-      status: 'ok',
-      interpretation: aiText,
-      cellTypeHints: localResults,
-      ...(cellTypeHintsDetailed ? {cellTypeHintsDetailed} : {}),
-      source: aiText && !aiText.startsWith('✓') ? 'model_gateway' : 'fallback',
-    });
-  });
 
   app.post('/api/ai/act-ack/:token', express.json({limit:'8kb'}), (req, res) => {
     const userId = req.user && req.user.id;

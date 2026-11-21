@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c52-reference-board-review",
   "capability": "block481-c52-p5-reference-board-review",
-  "sourceCommit": "281b087251e6c13d06544c6a89a85997adece16c",
-  "platform": "win32-x64",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "platform": "darwin-arm64",
   "command": "node scripts/c52-reference-board-review.mjs",
-  "generatedAt": "2026-11-18T11:57:17.305Z",
+  "generatedAt": "2026-11-21T04:17:19.687Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -76,7 +76,7 @@
     },
     "boundaries": {
       "value": {
-        "humanEyeZeroSign": true,
+        "humanEyeZeroSign": false,
         "noNewDependency": true,
         "noSimpleChatReplace": true,
         "noWholePageCopy": true,

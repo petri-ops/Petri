@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "m6a-surface-schema",
-  "capturedAt": "2026-11-21T03:18:31.393Z",
+  "capturedAt": "2026-11-21T04:01:33.158Z",
   "policy": "三面身份 schema 单一形状；漂移按「只减不增」棘轮冻结；本文件只读生成，不改矩阵数据",
   "shape": {
     "entry": [
@@ -16,10 +16,10 @@
     ]
   },
   "counts": {
-    "entries": 581,
+    "entries": 580,
     "ipc": 173,
     "tool": 118,
-    "route": 290,
+    "route": 289,
     "truthChannels": 173,
     "truthTools": 118
   },
@@ -37,13 +37,8 @@
       "routeModuleMissing": []
     }
   },
-  "summaryMismatches": [
-    "metadata: matrix=119 actual=118"
-  ],
-  "defects": [
-    "DUPLICATE_ENTRY: route::POST /api/ai/interpret",
-    "SUMMARY_DRIFT: metadata: matrix=119 actual=118"
-  ],
+  "summaryMismatches": [],
+  "defects": [],
   "entries": [
     {
       "kind": "ipc",
@@ -2337,13 +2332,6 @@
       "kind": "route",
       "id": "POST /api/ai/conversations/:id/fork",
       "scope": "ai-conversations",
-      "exposed": true,
-      "consumed": true
-    },
-    {
-      "kind": "route",
-      "id": "POST /api/ai/interpret",
-      "scope": "ai-legacy",
       "exposed": true,
       "consumed": true
     },

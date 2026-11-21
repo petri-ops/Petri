@@ -3,8 +3,8 @@
   "id": "petri-21st-snippet-library-contract",
   "kind": "model-readable-21st-snippet-library",
   "generatedBy": "node scripts/c52-21st-snippet-library.mjs",
-  "sourceCommit": "9a41525dba000aaab23754951f39563817ee6fbe",
-  "generatedAt": "2026-11-18T11:49:26.200Z",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "generatedAt": "2026-11-21T04:17:19.136Z",
   "derivedFrom": [
     "components/ui/controls/button.module.css + status.module.css（本地主权控件片段单源）",
     "docs/design-charter.md §1–§6（字号/色彩/线条/动效/渲染/控件 + 不抄皮肤立场）",
@@ -48,7 +48,7 @@
       "noCliDependency": true
     },
     "boundaries": {
-      "humanEyeZeroSign": true,
+      "humanEyeZeroSign": false,
       "noNewDependency": true,
       "noSimpleChatReplace": true,
       "licenseRegister": {

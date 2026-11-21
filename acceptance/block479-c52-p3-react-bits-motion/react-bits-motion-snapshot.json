@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c52-react-bits-motion",
   "capability": "block479-c52-p3-react-bits-motion",
-  "sourceCommit": "a39711655cdf4e8865e6d2b4c264d83fcf55a602",
-  "platform": "win32-x64",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "platform": "darwin-arm64",
   "command": "node scripts/c52-react-bits-motion.mjs",
-  "generatedAt": "2026-11-18T11:30:42.929Z",
+  "generatedAt": "2026-11-21T04:18:51.733Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -68,7 +68,7 @@
       "value": {
         "noNewDependency": true,
         "noFullPageMotion": true,
-        "humanEyeZeroSign": true,
+        "humanEyeZeroSign": false,
         "licenseRegister": {
           "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
           "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",

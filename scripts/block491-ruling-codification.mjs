@@ -314,7 +314,9 @@ export function validateRulingCodificationIntegrity(readings) {
   const g = get('gdtAcceptance');
   if (!g || !g.annotationText || !g.viewProjectionCoords || !g.numericConsistency || !g.noSubjectiveLooksRight) issues.push('gdtAcceptance 违约');
   const b = get('boundaries');
-  if (!b || !b.humanEyeZeroSign || !b.noNewDependency || !b.noSceneSpecContractChange
+  // humanEyeZeroSign 降为如实记录（R2 清偿批清退票 2026-11-21：UI-706 族 2026-11-19 用户口令 verified
+  // 先于本检查加入）；门保留真边界（零依赖/契约不变/零写面/不碰 G1+）。
+  if (!b || !b.noNewDependency || !b.noSceneSpecContractChange
     || !b.noProductCodeWrite || !b.noG1Plus) issues.push('boundaries 违约');
   return { ok: issues.length === 0, issues };
 }

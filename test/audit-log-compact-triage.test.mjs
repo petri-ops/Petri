@@ -20,7 +20,6 @@ test('红基线：旧行为=待处理项 ✅ 行全量保留（分诊前永不�
     '| ✅ | 2026-11-01 | **旧完成行 A** | x |',
     '| 🔴 | 2026-11-21 | **阻塞行** | x |',
   ];
-  const r = compactLedgerLines(ledger(...rows), { pendingKeepDays: 0 });
   // 分诊关闭（无 pendingKeepDays 语义前）→ 本断言钉住「默认关闭时零剪切」的兼容面
   const rDefault = compactLedgerLines(ledger(...rows));
   assert.equal(rDefault.outLines.length, ledger(...rows).length);

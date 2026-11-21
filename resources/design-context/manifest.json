@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "generator": "node scripts/c53-design-baseline.mjs",
-  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
-  "generatedAt": "2026-11-21T00:03:39.142Z",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "generatedAt": "2026-11-21T04:23:15.652Z",
   "note": "模型可读设计上下文包；由 collector 从 canonical 真源派生，被 test/c53-design-context-pack.test.mjs 锚定。files=自有 design-context.json + 各外部条目（合并保留，不整写）。",
   "files": [
     {
@@ -15,7 +15,7 @@
     },
     {
       "path": "visual-consistency.json",
-      "sha256": "93b9927876d6ad0d572750cdc563d9b0ddfc7949139c1f0e3f76c5aaec77966c"
+      "sha256": "913327d1a2aa73f39d0cdf466bf3841adcb04eb2d2b33a34a0d5d5f7356c4b53"
     },
     {
       "path": "responsive-a11y.json",
@@ -35,19 +35,19 @@
     },
     {
       "path": "assistant-ui-pattern.json",
-      "sha256": "c6614308407b2f1ff53f55344bcc7ddf2b1f3c24f638b813acb92e7c118c174a"
+      "sha256": "5c3d12a02912f85d71d1365e74c78629f1c3ba98e6bc40369f754a12c599c83c"
     },
     {
       "path": "react-bits-motion.json",
-      "sha256": "aa3a5accb97b633dc28d778cb9e96680c182085c63f896e15d16809ffefc7793"
+      "sha256": "1501c1f3a7e676c6ceb548291ebcff19fa5249320c3479b5aae1fa7fd504d9df"
     },
     {
       "path": "21st-snippet-library.json",
-      "sha256": "6d0224487bcf3645bafc6fac9b45245b4579f013846633966661ecac407aa774"
+      "sha256": "71bb87e9daee28b6ae4b2a8c57051213411722ac193c4e07e54411cd60ee0fde"
     },
     {
       "path": "reference-board-review.json",
-      "sha256": "d98dbc78f4d09d4c6b26e38adca889f4a5df18d9d5a7ae9cc32e9fdb4a69a25e"
+      "sha256": "a2165e35f2946a10dff5087c0471b9fadae184a2e93c3a1bb24d4a8e0c088d1e"
     }
   ]
 }

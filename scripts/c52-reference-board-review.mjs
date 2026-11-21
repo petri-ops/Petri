@@ -230,7 +230,7 @@ export function validateReferenceBoardReviewIntegrity(readings) {
     || !l.licenseUnknownGuard || !l.briefLicenseSection
     || Object.keys(l.licenseRegister ?? {}).length !== PATTERN_FLOOR.licenseSources) issues.push('licenseProvenance 违约');
   const b = get('boundaries');
-  if (!b || !b.humanEyeZeroSign || !b.noNewDependency || !b.noSimpleChatReplace || !b.noWholePageCopy
+  if (!b || !b.noNewDependency || !b.noSimpleChatReplace || !b.noWholePageCopy
     || !b.noGlobalReskin || b.licenseRegisterSources !== PATTERN_FLOOR.licenseSources) issues.push('boundaries 违约');
   return { ok: issues.length === 0, issues };
 }

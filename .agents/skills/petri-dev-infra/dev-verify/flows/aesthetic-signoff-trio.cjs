@@ -11,8 +11,9 @@ const path = require('node:path');
 const fs = require('node:fs');
 const lib = require('../lib.cjs');
 const ROOT = lib.findRepoRoot(__dirname);
-const ROUND = process.env.TRIO_ROUND || '1';
-const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'aesthetic-signoff-trio', 'round' + ROUND);
+// env 调用时读取（BLOCK-375 顶层固化棘轮；R2 清偿批清退票同形）
+const round = () => process.env.TRIO_ROUND || '1';
+const EVIDENCE_DIR = () => path.join(ROOT, 'acceptance', 'aesthetic-signoff-trio', 'round' + round());
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const ROUTES = [['/', 'welcome'], ['/extensions', 'extensions'], ['/settings', 'settings']];
@@ -20,10 +21,10 @@ const ROUTES = [['/', 'welcome'], ['/extensions', 'extensions'], ['/settings', '
 module.exports = {
   id: 'aesthetic-signoff-trio',
   description: '审美签字三件套：身份面+造型+水印 四路由机械判据+截图',
-  evidenceDir: EVIDENCE_DIR,
+  evidenceDir: EVIDENCE_DIR(),
   async run(ctx) {
     const { assert } = ctx;
-    fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+    fs.mkdirSync(EVIDENCE_DIR(), { recursive: true });
     const client = await lib.connectTestTarget({ timeoutMs: 60_000 });
 
     for (const [p, name] of ROUTES) {
@@ -69,7 +70,7 @@ module.exports = {
       assert(`C1_${name}_watermark_layer`, probe.watermark && probe.watermark.pos === 'fixed' && probe.watermark.pe === 'none', JSON.stringify(probe.watermark));
       const expectedOpacity = probe.theme === 'dark' ? '0.08' : '0.1';
       assert(`C2_${name}_opacity`, probe.watermark && probe.watermark.opacity === expectedOpacity, `op=${probe.watermark && probe.watermark.opacity} theme=${probe.theme}`);
-      const shot = await lib.screenshotPng(client, EVIDENCE_DIR, `${name}.png`).catch((e) => ({ error: String(e) }));
+      const shot = await lib.screenshotPng(client, EVIDENCE_DIR(), `${name}.png`).catch((e) => ({ error: String(e) }));
       assert(`shot_${name}`, !shot.error, shot.error ? `screenshot_unavailable: ${shot.error}` : '');
     }
     return { ok: true };

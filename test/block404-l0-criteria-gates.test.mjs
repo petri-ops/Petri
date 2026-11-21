@@ -207,14 +207,17 @@ test('L0-8 单源 JSON：字段齐备且与活源一致（文档引用一律以�
   assert.ok(s.tests.denominatorNote.includes('628'), '628=分片清单注记在场（L-84）');
   assert.ok(Array.isArray(s.staleReadings) && s.staleReadings.length >= 3, '历史读数作废记录在场（L-45）');
   assert.ok(s.staleReadings.some((r) => String(r.claim).includes('365')), '365/120 旧读数已登记作废');
-  assert.equal(s.userAssets.protectedPaths, 10, '用户资产 10 项对账（L-83）');
+  // 演进（R2 清偿批清退票）：10→9（scripts/backfill-artifact-chain.mjs 经 58053d77 有意入库移出清单，
+  // incidents 第 3 案在册）；计数以 generator 现读 guard 基线为准。
+  assert.equal(s.userAssets.protectedPaths, 9, '用户资产 9 项对账（L-83→S2 演进）');
 });
 
-test('L0-8 用户资产守卫：真实树 exit 0（10 项保护路径零 tracked/staged 命中）', () => {
+test('L0-8 用户资产守卫：真实树 exit 0（保护路径零 tracked/staged 命中，台账只增）', () => {
   const r = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'user-asset-guard.mjs')], { encoding: 'utf8' });
   assert.equal(r.status, 0, `guard 应绿：${r.stdout}\n${r.stderr}`);
   const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'test', 'user-asset-guard-baseline.json'), 'utf8'));
-  assert.equal(baseline.paths.length, 10);
+  // 演进（R2 清偿批清退票）：计数 10→9（58053d77 有意入库移出清单）不再锚死；关键成员+台账只增保留。
+  assert.equal(baseline.paths.length, 9);
   assert.equal(new Set(baseline.paths).size, baseline.paths.length, '无重复条目');
-  assert.equal(baseline.incidents.length, 2, '两次历史误入库事故记录保留');
+  assert.ok(baseline.incidents.length >= 2, '历史误入库事故记录只增保留（34076352/932b9136/58053d77）');
 });

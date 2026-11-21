@@ -603,7 +603,11 @@ function build() {
     tools: toolRows.length,
     toolDomains: domains.length,
     contracts: contracts.size,
-    metadata: metadata.size,
+    // 口径统一（R2 清偿批清退票 2026-11-21）：metadata 按 toolRows 宇宙（TOOL_DEFS）计，
+    // 不再混入 MCP-only 条目（skill_execute 设计上不进 TOOL_DEFS，另有计数注记）——
+    // 否则 summary.metadata(119) 与 toolRows.hasMetadata(118) 恒差一，M6-A SUMMARY_DRIFT 假漂移。
+    metadata: toolRows.filter((x) => x.hasMetadata).length,
+    metadataMcpOnly: metadata.size - toolRows.filter((x) => x.hasMetadata).length,
     ipcChannels: ipcRows.length,
     ipcMissingPreload: ipcRows.filter((x) => !x.inPreload).length,
     ipcUnusedInRenderer: ipcUnused.length,
@@ -639,7 +643,7 @@ function toMarkdown(result) {
   L.push('| --- | --- |');
   L.push(`| 工具定义 | ${s.tools}（${s.toolDomains} 域；文本降级 ${s.defsFallbacks} 域） |`);
   L.push(`| 工具契约 | ${s.contracts} |`);
-  L.push(`| 调度元数据 | ${s.metadata} |`);
+  L.push(`| 调度元数据 | ${s.metadata}（另有 MCP-only 条目 ${s.metadataMcpOnly} 条不在 TOOL_DEFS 宇宙，如 skill_execute） |`);
   L.push(`| IPC 通道 | ${s.ipcChannels}（preload 缺包装 ${s.ipcMissingPreload}；前端零消费 ${s.ipcUnusedInRenderer}） |`);
   L.push(`| 路由端点 | ${s.routes}（${s.routeModules} 模块；未挂载 ${s.routeModulesUnmounted}） |`);
   L.push(`| 设置存储键 | ${s.storageKeys} |`);

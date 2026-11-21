@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-17T17:56:29.671Z",
+  "at": "2026-11-21T04:38:56.804Z",
   "shelves": {
     "skills": [
       {
@@ -88,6 +88,13 @@
       },
       {
         "shelf": "skills",
+        "name": "paper-writing",
+        "source": "built-in",
+        "verdict": "available",
+        "basis": "skill.json 契约合规（id=paper-writing，name/description/version 在场）；契约校验=npm run skills:check（14/14 在案）；触发=skill_discover/skill_get 工具面"
+      },
+      {
+        "shelf": "skills",
         "name": "visualize",
         "source": "built-in",
         "verdict": "available",
@@ -120,8 +127,8 @@
         "shelf": "plugins",
         "name": "expression-qc",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_1934c41fa0884082（demo 输入 → 10 产物）；catalog 在架",
-        "jobId": "job_1934c41fa0884082"
+        "basis": "真实动作=真跑完成 job=job_a786be3585784c53（demo 输入 → 10 产物）；catalog 在架",
+        "jobId": "job_a786be3585784c53"
       },
       {
         "shelf": "plugins",
@@ -134,8 +141,8 @@
         "shelf": "plugins",
         "name": "deg-standardizer",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_5cdfc15e62d44dff（demo 输入 → 7 产物）；catalog 在架",
-        "jobId": "job_5cdfc15e62d44dff"
+        "basis": "真实动作=真跑完成 job=job_4cdc042f9f414d97（demo 输入 → 7 产物）；catalog 在架",
+        "jobId": "job_4cdc042f9f414d97"
       },
       {
         "shelf": "plugins",
@@ -155,8 +162,8 @@
         "shelf": "plugins",
         "name": "volcano-plot",
         "verdict": "available",
-        "basis": "真实动作=真跑完成 job=job_603eadef78b04daf（demo 输入 → 5 产物）；catalog 在架",
-        "jobId": "job_603eadef78b04daf"
+        "basis": "真实动作=真跑完成 job=job_f9c7a93e7ad14750（demo 输入 → 5 产物）；catalog 在架",
+        "jobId": "job_f9c7a93e7ad14750"
       },
       {
         "shelf": "plugins",
@@ -179,10 +186,10 @@
     }
   },
   "totals": {
-    "skills": 16,
+    "skills": 17,
     "plugins": 7,
     "verdicts": {
-      "available": 19,
+      "available": 20,
       "detour": 4
     },
     "allJudged": true

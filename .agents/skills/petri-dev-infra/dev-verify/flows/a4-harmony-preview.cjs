@@ -11,8 +11,9 @@ const fs = require('node:fs');
 const lib = require('../lib.cjs');
 
 const ROOT = lib.findRepoRoot(__dirname);
-const ROUND = process.env.A4_ROUND || 'round1';
-const EVIDENCE_DIR = path.join(ROOT, 'acceptance', 'a4-harmony-preview', ROUND);
+// env 调用时读取（BLOCK-375 顶层固化棘轮）
+const round = () => process.env.A4_ROUND || 'round1';
+const EVIDENCE_DIR = () => path.join(ROOT, 'acceptance', 'a4-harmony-preview', round());
 const ACCENTS = [
   { id: 'paper-vermilion', surface: 'paper' },
   { id: 'celadon-ink', surface: 'celadon' },
@@ -29,10 +30,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 module.exports = {
   id: 'a4-harmony-preview',
   description: 'A4 四档整体观感预审：逐档切色截图三面 + P1–P4 逐条判据 + 四档各异',
-  evidenceDir: EVIDENCE_DIR,
+  evidenceDir: EVIDENCE_DIR(),
   async run(ctx) {
     const { assert } = ctx;
-    fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+    fs.mkdirSync(EVIDENCE_DIR(), { recursive: true });
     const client = await lib.connectTestTarget({ timeoutMs: 60_000 });
     await lib.evalJs(client, `location.href='http://localhost:3000/?test=1'`, 10_000);
     await sleep(2000);
@@ -74,7 +75,7 @@ module.exports = {
           assert(`P4_${acc.id}_text_neutral`, txt !== '', `${acc.id} active text=${txt}`);
         }
 
-        const shot = await lib.screenshotPng(client, EVIDENCE_DIR, `${acc.id}-${s.id}.png`).catch((e) => ({ error: String(e) }));
+        const shot = await lib.screenshotPng(client, EVIDENCE_DIR(), `${acc.id}-${s.id}.png`).catch((e) => ({ error: String(e) }));
         assert(`shot_${acc.id}_${s.id}`, !shot.error, shot.error ? `screenshot_unavailable: ${shot.error}` : '');
       }
     }

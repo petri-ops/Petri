@@ -3,8 +3,8 @@
   "id": "petri-react-bits-motion-contract",
   "kind": "model-readable-react-bits-motion",
   "generatedBy": "node scripts/c52-react-bits-motion.mjs",
-  "sourceCommit": "a39711655cdf4e8865e6d2b4c264d83fcf55a602",
-  "generatedAt": "2026-11-18T11:30:42.930Z",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "generatedAt": "2026-11-21T04:18:51.733Z",
   "derivedFrom": [
     "button.module.css + TitleBar.module.css + ToastProvider.module.css + FloatCardResizer.module.css（hover 悬停反馈）",
     "TitleBar.module.css + simple-chat.css + FloatCardResizer.module.css（:active 按压反馈）",
@@ -44,7 +44,7 @@
     "boundaries": {
       "noNewDependency": true,
       "noFullPageMotion": true,
-      "humanEyeZeroSign": true,
+      "humanEyeZeroSign": false,
       "licenseRegister": {
         "assistant-ui": "MIT · 仅形态借鉴（流式消息/工具确认/附件/结构化数据/选项列表），不引入运行时依赖、不复制代码",
         "React Bits": "MIT + Commons Clause · 仅反馈型微动效模式观察（hover/press/展开/成功反馈），复用 --petri-duration/ease token，保留版权、禁整页动效、禁转售组件本身",

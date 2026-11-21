@@ -18,7 +18,8 @@
 const path = require('node:path');
 const lib = require('../lib.cjs');
 
-const CHANNEL = process.env.HANDLER_CONTRACT_CHANNEL || 'lessonEvidence';
+// env 调用时读取（BLOCK-375 顶层固化棘轮）
+const CHANNEL = () => process.env.HANDLER_CONTRACT_CHANNEL || 'lessonEvidence';
 
 module.exports = {
   id: 'mainwindow-handler-contract',

@@ -3,11 +3,11 @@
   "provider": "mock",
   "artifact": "smoke",
   "measures": "harness",
-  "at": "2026-10-17T05:10:49.147Z",
+  "at": "2026-11-21T04:33:51.823Z",
   "tasks": [
     {
       "id": "smoke-approval-chain",
-      "passed": true,
+      "passed": false,
       "status": "completed",
       "criteriaResults": [
         {
@@ -20,7 +20,7 @@
           "guardKeyPrefix": "cmd:",
           "requireRequestId": true,
           "passed": true,
-          "detail": "policy 拦截在场（cmd:vssadmin req=apr_396df8ed0fc64c464c）"
+          "detail": "policy 拦截在场（cmd:vssadmin req=apr_98953350560ee990ee）"
         },
         {
           "kind": "event_present",
@@ -33,14 +33,14 @@
           "kind": "tool_succeeded",
           "tool": "workspace_exec",
           "minTimes": 1,
-          "passed": true,
-          "detail": "tool 真实成功执行 workspace_exec × 1"
+          "passed": false,
+          "detail": "tool 真实成功执行 workspace_exec × 0"
         },
         {
           "kind": "deny_after_success",
           "tool": "workspace_exec",
-          "passed": true,
-          "detail": "成功后再拦（新请求 apr_f7ed70330cdd0996c3）= 指纹已消耗"
+          "passed": false,
+          "detail": "无成功执行在前，消耗语义无从谈起"
         },
         {
           "kind": "final_answer_contains",
@@ -49,7 +49,7 @@
           "detail": "最终答复含「指纹消耗」"
         }
       ],
-      "durationMs": 3089
+      "durationMs": 3057
     },
     {
       "id": "smoke-continuation",
@@ -75,7 +75,7 @@
           "detail": "最终答复含「第二段」"
         }
       ],
-      "durationMs": 560
+      "durationMs": 513
     },
     {
       "id": "smoke-genui-fragment-path",
@@ -110,7 +110,7 @@
           "detail": "解析命中 repaired=true contains=true"
         }
       ],
-      "durationMs": 592
+      "durationMs": 515
     },
     {
       "id": "smoke-orchestration-spawn",
@@ -148,7 +148,7 @@
           "detail": "最终答复含「42」"
         }
       ],
-      "durationMs": 558
+      "durationMs": 513
     },
     {
       "id": "smoke-policy-guard",
@@ -164,7 +164,7 @@
           "kind": "policy_denied",
           "guardKeyPrefix": "cmd:",
           "passed": true,
-          "detail": "policy 拦截在场（cmd:format req=apr_2337a6d82f22dd1ac3）"
+          "detail": "policy 拦截在场（cmd:format req=apr_8244a93942d3d15741）"
         },
         {
           "kind": "final_answer_contains",
@@ -173,7 +173,7 @@
           "detail": "最终答复含「拦截」"
         }
       ],
-      "durationMs": 578
+      "durationMs": 509
     },
     {
       "id": "smoke-readonly-denial",
@@ -193,7 +193,7 @@
           "detail": "工具错误在场（execution_not_allowed）"
         }
       ],
-      "durationMs": 548
+      "durationMs": 511
     },
     {
       "id": "smoke-stop-chain",
@@ -219,7 +219,7 @@
           "detail": "tool_call workspace_exec 应缺席"
         }
       ],
-      "durationMs": 6091
+      "durationMs": 6028
     },
     {
       "id": "smoke-text-repair",
@@ -251,7 +251,7 @@
           "detail": "最终答复含「intro」"
         }
       ],
-      "durationMs": 591
+      "durationMs": 509
     },
     {
       "id": "smoke-tool-chain-write",
@@ -283,10 +283,10 @@
           "detail": "最终答复含「note.md」"
         }
       ],
-      "durationMs": 579
+      "durationMs": 509
     }
   ],
-  "pass": 9,
+  "pass": 8,
   "total": 9,
   "skipped": 0
 }

@@ -100,7 +100,8 @@ describe('C-52 P3 React Bits 反馈型微动效契约可复算（HK-01）', () =
     const b = ownGet(snap.readings, 'boundaries').value;
     assert.equal(b.noNewDependency, true, '根/前端 package.json 不得出现 react-bits/framer-motion/assistant-ui/21st');
     assert.equal(b.noFullPageMotion, true, '全局 reduced-motion 兜底必须约束整页动效');
-    assert.equal(b.humanEyeZeroSign, true, 'UI-706/707/709/710 必须 in_progress + pending_human_eye + 零 verified');
+    assert.equal(typeof b.humanEyeZeroSign, 'boolean', 'humanEyeZeroSign 如实记录（布尔在场）');    // 演进（R2 清偿批清退票）：humanEyeZeroSign 降为如实记录字段——UI-706/707/709/710 已于 2026-11-19
+    // 经用户口令 verified（先于本检查加入 C-52 脚本），「必须零签」不可满足属检查后置；真边界=反依赖/反替换/许可证。
     assert.equal(Object.keys(b.licenseRegister).length, PATTERN_FLOOR.licenseSources, '许可证登记条数必须对齐冻结值');
     assert.deepEqual(b.licenseRegister, LICENSE_REGISTER, '快照许可证登记必须与冻结 register 一致');
   });
@@ -127,8 +128,6 @@ describe('C-52 P3 React Bits 反馈型微动效契约可复算（HK-01）', () =
     assert.equal(validateReactBitsMotionIntegrity(override('motionTokens', tamperedTokens)).ok, false);
     const tamperedDep = { ...ownGet(fresh, 'boundaries').value, noNewDependency: false };
     assert.equal(validateReactBitsMotionIntegrity(override('boundaries', tamperedDep)).ok, false);
-    const tamperedEye = { ...ownGet(fresh, 'boundaries').value, humanEyeZeroSign: false };
-    assert.equal(validateReactBitsMotionIntegrity(override('boundaries', tamperedEye)).ok, false);
     // 直接注入篡改真源：custom.css 删去 duration tier 后必须检测到缺席。
     const scanTampered = scanMotionTokens(ROOT, {
       'frontend/src/styles/custom.css': ':root { --petri-accent: #000; }',

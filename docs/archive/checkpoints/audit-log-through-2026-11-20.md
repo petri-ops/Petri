@@ -57,3 +57,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-21T03:46:31.796Z -->
 最后更新：2026-11-20（📋 **R2 项目系统评估（专项结论型 · 零产品代码/零台账状态翻转）**：HEAD=`c3242e8c`，四维 D1=3/D2=2/D3=2/D4=2 → **9/20（45%）**；R1 未打分，本轮为首个量化基线。三个关键发现：①A0 裁决的身份面**默认态不可见**（`prefCache.ts:102` 默认 `teal` + `accents.ts:55-60` 对 teal 移除 `data-accent`/`data-surface`，身份 token 组件面消费 0 处）＝COMPLETION-PLAN「素材加了界面没变」的残留根因；②视觉链**自身引入且已提交** 2 处 code-size 超标（Icon.tsx 744→783、custom.css 字节 49517>39709）+ design-context 契约 2 fail，而 `acceptance/a2-identity-atoms/GATE-LEDGER.md:32` 误归「非 A2 文件面」；③R1 的 P0 水印并发**未闭环且证据恶化**（极简版自身 live `allPass:false`、4 张已提交 PNG 被删、5 tests 绿的契约锚的是未接线死代码、9223 遗留）。扩展 10 门现读 5 PASS/5 FAIL；1 P0 + 9 P1 + 3 P2 + 1 P3，R1 未闭环卡按纪律升一级。P1 一律「一句话建议+一句理由」未擅动；`audit:compact` 因归档文件带他方未提交 WIP **故意跳过**并如实登记。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-21T04:44:42.147Z -->
+最后更新：2026-11-20（🗃 **R2 清偿批无人值守提示词落档**（用户发令「给一个可以把接下来工作都搞完的提示词，不需要人参与，agent 自动推进校验复核判断」）：`docs/next-phase-e2e-prompt-2026-11-20.md` §2 自包含正文，S1 水印终版与并发清场→S2 存量红清偿→S3 视觉链带红清偿→S4 治理归位→S5 默认身份面可见性→S6 三项 breaking U 类→S7 测试实例 TTL 门禁→S8 closeout:full+R3 自评；预置裁决 R1–R12 全部引用本批发令 + R2 现读证据（不继承 11-18-b2 的 R8–R15、无自造范围）。红线=观感无偏好覆盖不代签 + 保护性停止（不可逆破坏/新依赖/G1+/安全敏感，登记后跳过不阻塞）+ 反假绿 + commit 自动 **push 留发令**。三件套登记齐（registry 663 / README 512h / 本台），`docs:check` PASS(663)。**advice 性质：未发令不开工**。G0 开发期常态 · 不外推 packaged/Provider/GA.）

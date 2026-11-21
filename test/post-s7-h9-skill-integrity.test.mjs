@@ -29,7 +29,8 @@ test('现场：内置 skill 摘要在册且无漂移（BLOCK-460 起 13 条）',
   }
   const r = evaluateSkillIntegrity(manifest, digests);
   assert.equal(r.ok, true, JSON.stringify(r.issues));
-  assert.equal(r.checked.length, 13); // BLOCK-460 新增 model3d-authoring（机械计数随内置 Skill 演进）
+  // 演进（R2 清偿批清退票）：13→14（C-56 注册 paper-writing Skill，2026-11-19；机械计数随内置 Skill 演进）
+  assert.equal(r.checked.length, 14);
 });
 
 test('摘要确定性：同目录两次计算结果一致', () => {

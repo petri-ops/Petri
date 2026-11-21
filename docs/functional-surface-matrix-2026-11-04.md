@@ -1,7 +1,7 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-21T01:09:09.688Z
+> 基线：`HEAD`（工作区在制文件 3 个不计入判定）。生成时间：2026-11-21T04:01:32.995Z
 
 ## 0. 覆盖汇总
 
@@ -9,9 +9,9 @@
 | --- | --- |
 | 工具定义 | 118（16 域；文本降级 0 域） |
 | 工具契约 | 118 |
-| 调度元数据 | 119 |
+| 调度元数据 | 118（另有 MCP-only 条目 1 条不在 TOOL_DEFS 宇宙，如 skill_execute） |
 | IPC 通道 | 173（preload 缺包装 2；前端零消费 170） |
-| 路由端点 | 290（48 模块；未挂载 0） |
+| 路由端点 | 289（48 模块；未挂载 0） |
 | 设置存储键 | 20 |
 | 判定 P1 / P2 / P3 | **0 / 0 / 2** |
 
@@ -160,4 +160,6 @@
 
 ## 6. 在制文件（本轮不计入判定）
 
-（无）
+- `M core/petri-server/routes/ai-legacy.js`
+- `D  frontend/src/components/common/GlobalWatermark.tsx`
+- `D  frontend/src/styles/watermark.css`

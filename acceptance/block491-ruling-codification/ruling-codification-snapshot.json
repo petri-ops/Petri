@@ -1,8 +1,8 @@
 {
   "kind": "block491-ruling-codification",
-  "sourceCommit": "7c2efe16645f5514a0aee4bcae9b3dceed20951b",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
   "platform": "darwin",
-  "capturedAt": "2026-11-19T07:42:42.566Z",
+  "capturedAt": "2026-11-21T04:23:01.264Z",
   "readings": {
     "rulings": {
       "value": {
@@ -129,7 +129,7 @@
     },
     "boundaries": {
       "value": {
-        "humanEyeZeroSign": true,
+        "humanEyeZeroSign": false,
         "noNewDependency": true,
         "noSceneSpecContractChange": true,
         "noProductCodeWrite": true,

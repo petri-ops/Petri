@@ -1,4 +1,5 @@
 #!/bin/bash
+# platform: darwin（BLOCK-440 mac-arm64 打包隔离脚本；产物 dist/mac-arm64，BLOCK-104 P4 标注契约）
 # BLOCK-440 — 隔离式打包：强制重建 Electron ABI → 打包 → 必恢复开发 Node ABI。
 #
 # 为什么需要这个脚本（全部来自实测）：

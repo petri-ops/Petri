@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-design-baseline",
   "capability": "block465-c53-design-baseline-context-pack",
-  "sourceCommit": "3f4e63440fb3a62636aad800e36aaa01ca879071",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-design-baseline.mjs",
-  "generatedAt": "2026-11-21T00:01:14.259Z",
+  "generatedAt": "2026-11-21T04:23:15.444Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -43,7 +43,7 @@
       },
       "source": "docs/design-charter.md §1",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "colorBudget": {
       "value": {
@@ -53,7 +53,7 @@
       },
       "source": "docs/design-charter.md §2",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "borderSemantics": {
       "value": {
@@ -67,7 +67,7 @@
       },
       "source": "docs/design-charter.md §3",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "motion": {
       "value": {
@@ -85,7 +85,7 @@
       },
       "source": "docs/design-charter.md §4",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "controls": {
       "value": {
@@ -106,7 +106,7 @@
       },
       "source": "docs/design-charter.md §6 + controls/ 现读",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "ratchets": {
       "value": {
@@ -116,7 +116,7 @@
       },
       "source": "docs/design-charter.md §7",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "tokenGate": {
       "value": {
@@ -132,7 +132,7 @@
       },
       "source": "frontend/src/styles/theme-token-contract.test.ts",
       "command": "cd frontend && npx vitest run src/styles/theme-token-contract.test.ts",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "uiDebt": {
       "value": {
@@ -152,7 +152,7 @@
       },
       "source": "acceptance/block-332/ui-ledger-triage.json + post-h9-k3-experience.mjs",
       "command": "npm run ui:audit:triage",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "componentRules": {
       "value": {
@@ -167,7 +167,7 @@
       },
       "source": "docs/design-charter.md §6",
       "command": "node scripts/c53-design-baseline.mjs",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     }
   },
   "captureContext": {
@@ -179,7 +179,7 @@
       },
       "source": "docs/DOC-REGISTRY.json",
       "command": "npm run state",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     },
     "auditUnresolved": {
       "value": {
@@ -189,7 +189,7 @@
       },
       "source": "docs/AUDIT-LOG.md §当前待处理项",
       "command": "npm run state",
-      "capturedAt": "2026-11-21T00:01:14.246Z"
+      "capturedAt": "2026-11-21T04:23:15.424Z"
     }
   }
 }

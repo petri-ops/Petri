@@ -25,26 +25,30 @@
     "note": "静默缺失即红：新增入口必须显式判 consumed/deferred 并留因。"
   },
   "bigFiles": {
-    "ok": true,
-    "issues": [],
+    "ok": false,
+    "issues": [
+      "core/petri-server/loop-orchestrator.js: 独立行数锚缺失或漂移（需 --write 重打）",
+      "frontend/src/components/copilot/SimpleChat.tsx: 独立行数锚缺失或漂移（需 --write 重打）",
+      "frontend/src/pages/project-workspace.tsx: 独立行数锚缺失或漂移（需 --write 重打）"
+    ],
     "rows": [
       {
         "file": "core/petri-server/loop-orchestrator.js",
-        "lines": 1579,
-        "anchored": true,
+        "lines": 1674,
+        "anchored": false,
         "anchorLines": 1579
       },
       {
         "file": "frontend/src/components/copilot/SimpleChat.tsx",
-        "lines": 2079,
-        "anchored": true,
-        "anchorLines": 2079
+        "lines": 1944,
+        "anchored": false,
+        "anchorLines": 1940
       },
       {
         "file": "frontend/src/pages/project-workspace.tsx",
-        "lines": 1221,
-        "anchored": true,
-        "anchorLines": 1221
+        "lines": 1233,
+        "anchored": false,
+        "anchorLines": 1224
       },
       {
         "file": "frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx",

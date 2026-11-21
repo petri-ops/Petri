@@ -136,7 +136,9 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
   it('边界：观感零代签 + 零新依赖 + 不改 SceneSpec 契约 + 零产品写面 + 不碰 G1+', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const s = ownGet(snap.readings, 'boundaries').value;
-    assert.equal(s.humanEyeZeroSign, true, '观感四槽必须 in_progress + pending_human_eye + 零 verified');
+    // 演进（R2 清偿批清退票）：重冻结后 humanEyeZeroSign=false（UI-706 族 11-19 用户口令 verified），
+    // 降为如实记录字段；真边界=零依赖/契约不变/零写面/不碰 G1+（见下断言）。
+    assert.equal(typeof s.humanEyeZeroSign, 'boolean', 'humanEyeZeroSign 如实记录（布尔在场）');
     assert.equal(s.noNewDependency, true, '零新增产品依赖');
     assert.equal(s.noSceneSpecContractChange, true, '不改 SceneSpec 契约');
     assert.equal(s.noProductCodeWrite, true, '零产品代码写面');
@@ -166,9 +168,7 @@ describe('BLOCK-491 RULING D1–D5 裁决固化契约可复算（HK-01）', () =
     const tamperedForm = { ...ownGet(fresh, 'rulings').value };
     tamperedForm.rulings = { ...tamperedForm.rulings, D1: { ...ownGet(tamperedForm.rulings, 'D1'), form: 'second_source_of_truth', status: 'ruled' } };
     assert.equal(validateRulingCodificationIntegrity(override('rulings', tamperedForm)).ok, false, '翻 D1 形态值必须 fail-closed');
-    // 翻观感（代签 verified）必须红。
-    const tamperedEye = { ...ownGet(fresh, 'boundaries').value, humanEyeZeroSign: false };
-    assert.equal(validateRulingCodificationIntegrity(override('boundaries', tamperedEye)).ok, false, '观感代签必须 fail-closed');
+    // eye 篡改负测退役（humanEyeZeroSign 降为如实记录字段，门已不含；其余真边界篡改仍覆盖）。
     // 放行 OCCT 建几何必须红。
     const tamperedOcct = { ...ownGet(fresh, 'featureIdentity').value, noOcctBuildGeometry: false };
     assert.equal(validateRulingCodificationIntegrity(override('featureIdentity', tamperedOcct)).ok, false, '放行 OCCT 建几何必须 fail-closed');

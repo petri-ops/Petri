@@ -14,6 +14,12 @@
 const path = require('node:path');
 const lib = require('../lib.cjs');
 
+// 守卫（R2 清偿批清退票 2026-11-21）：本文件历史上无 module.exports 且 IIFE 顶层自执行——
+// dev-verify run.cjs 装载全部 flows 找 id 时被连带真实执行（建垃圾项目/改写证据），同类事故
+// 多次复发。守卫语义：仅直接调用（node 本文件 / npm run verify -- block463-workbench-live）执行。
+if (require.main !== module) {
+  module.exports = { id: 'block463-workbench-live', description: 'BLOCK-463 实机腿（自执行已守卫，run.cjs 装载安全）' };
+} else {
 const ROOT = lib.findRepoRoot(__dirname);
 const APP = 'http://localhost:3000';
 // BLOCK-493 清偿：env 调用时读取（BLOCK-267/BLOCK-375 顶层固化棘轮；原顶层 const 固化在导入期取值）
@@ -117,3 +123,4 @@ async function rest(method, endpoint, body) {
   console.log(JSON.stringify(summary).slice(0, 400));
   process.exit(summary.allPass ? 0 : 1);
 })();
+}

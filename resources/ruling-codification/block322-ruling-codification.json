@@ -6,7 +6,7 @@
   "ruledAt": "2026-11-18",
   "sourcePackage": "docs/block-322-ruling-04-feature-reference-v2.md",
   "codificationPlan": "docs/block491-ruling-codification-plan.md",
-  "sourceCommit": "7c2efe16645f5514a0aee4bcae9b3dceed20951b",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
   "readings": {
     "rulings": {
       "rulings": {
@@ -107,7 +107,7 @@
       "noSubjectiveLooksRight": true
     },
     "boundaries": {
-      "humanEyeZeroSign": true,
+      "humanEyeZeroSign": false,
       "noNewDependency": true,
       "noSceneSpecContractChange": true,
       "noProductCodeWrite": true,
@@ -122,5 +122,5 @@
     "humanEyeSigned": false,
     "noG1Plus": true
   },
-  "generatedAt": "2026-11-19T07:42:42.565Z"
+  "generatedAt": "2026-11-21T04:23:01.263Z"
 }

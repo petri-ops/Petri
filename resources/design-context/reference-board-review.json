@@ -3,8 +3,8 @@
   "id": "petri-reference-board-review-contract",
   "kind": "model-readable-reference-board-review",
   "generatedBy": "node scripts/c52-reference-board-review.mjs",
-  "sourceCommit": "281b087251e6c13d06544c6a89a85997adece16c",
-  "generatedAt": "2026-11-18T11:57:17.306Z",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "generatedAt": "2026-11-21T04:17:19.687Z",
   "derivedFrom": [
     ".agents/skills/petri-ui-design/references/reference-analysis.md（Pinterest 灵感画板五步法 + 观察/借鉴分离 + 只取设计原子）",
     ".agents/skills/petri-ui-design/references/design-brief-template.md + resources/skills/design-brief（Refero DESIGN.md 结构化十节 + Skill v1.1.0）",
@@ -52,7 +52,7 @@
       }
     },
     "boundaries": {
-      "humanEyeZeroSign": true,
+      "humanEyeZeroSign": false,
       "noNewDependency": true,
       "noSimpleChatReplace": true,
       "noWholePageCopy": true,

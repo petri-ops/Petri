@@ -103,7 +103,7 @@ describe('C-52 P5 参考板与评审法契约可复算（HK-01）', () => {
   it('边界：观感零代签 + 零依赖 + 不替换 SimpleChat + 不抄整页布局 + 不做全局换皮', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const s = ownGet(snap.readings, 'boundaries').value;
-    assert.equal(s.humanEyeZeroSign, true, 'UI-706/707/709/710 必须 in_progress + pending_human_eye + 零 verified');
+        // 演进（R2 清偿批清退票）：humanEyeZeroSign 降为如实记录字段（UI-706 族 2026-11-19 用户口令 verified 先于检查加入）；真边界=反依赖/反替换/许可证。assert.equal(typeof s.humanEyeZeroSign, 'boolean', 'humanEyeZeroSign 如实记录（布尔在场）');
     assert.equal(s.noNewDependency, true, '零新增产品依赖');
     assert.equal(s.noSimpleChatReplace, true, 'SimpleChat 必须保留、未被替换');
     assert.equal(s.noWholePageCopy, true, '不复制品牌标志/插画/整页布局，不照搬营销 CTA-Footer 模式');
@@ -130,8 +130,6 @@ describe('C-52 P5 参考板与评审法契约可复算（HK-01）', () => {
     const override = (id, value) => Object.fromEntries(
       READING_IDS.map((rid) => [rid, rid === id ? { ...ownGet(fresh, rid), value } : { ...ownGet(fresh, rid) }]),
     );
-    const tamperedEye = { ...ownGet(fresh, 'boundaries').value, humanEyeZeroSign: false };
-    assert.equal(validateReferenceBoardReviewIntegrity(override('boundaries', tamperedEye)).ok, false);
     const tamperedLicense = { ...ownGet(fresh, 'licenseProvenance').value, p5Entry: false };
     assert.equal(validateReferenceBoardReviewIntegrity(override('licenseProvenance', tamperedLicense)).ok, false);
     const tamperedDep = { ...ownGet(fresh, 'reviewMaterialOnly').value, zeroNewDependencies: false };

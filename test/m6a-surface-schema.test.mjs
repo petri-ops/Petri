@@ -28,8 +28,11 @@ test('M6-A 三面 schema：矩阵与真相源/基线一致，身份唯一性缺�
   assert.equal(schema.counts.entries, baseline.counts.entries);
   assert.equal(schema.counts.entries, schema.counts.ipc + schema.counts.tool + schema.counts.route);
   assert.ok(Array.isArray(schema.defects));
-  assert.ok(schema.defects.length >= 1, '至少冻结重复注册缺陷');
-  assert.ok(schema.defects.every((d) => /^(DUPLICATE_ENTRY|SUMMARY_DRIFT):/.test(d)));
+  // 演进（R2 清偿批清退票 2026-11-21）：两项冻结缺陷已根修清零——
+  // DUPLICATE_ENTRY route::POST /api/ai/interpret = ai-legacy 旧实现不可达双注册（退役注释本就
+  // 约定「pack 迁移后删除」，P4-REM 已收口故删除）；SUMMARY_DRIFT metadata = 生成器 summary 口径
+  // 混源（TOOL_METADATA 119 全量 vs toolRows 118 宇宙），统一到行宇宙后归零。
+  assert.deepEqual(schema.defects, [], `冻结缺陷应已清零: ${JSON.stringify(schema.defects)}`);
 });
 
 test('M6-A 门基线：当前实现 + 基线 → PASS 0 issues', () => {

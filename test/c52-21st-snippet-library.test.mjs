@@ -98,7 +98,7 @@ describe('C-52 P4 21st.dev 片段灵感库契约可复算（HK-01）', () => {
   it('边界：观感零代签 + 零依赖 + 不替换 SimpleChat + 四来源许可证 + 不抄整页布局', () => {
     const snap = JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
     const b = ownGet(snap.readings, 'boundaries').value;
-    assert.equal(b.humanEyeZeroSign, true, 'UI-706/707/709/710 必须 in_progress + pending_human_eye + 零 verified');
+        // 演进（R2 清偿批清退票）：humanEyeZeroSign 降为如实记录字段（UI-706 族 2026-11-19 用户口令 verified 先于检查加入）；真边界=反依赖/反替换/许可证。assert.equal(typeof b.humanEyeZeroSign, 'boolean', 'humanEyeZeroSign 如实记录（布尔在场）');
     assert.equal(b.noNewDependency, true, '零新增产品依赖');
     assert.equal(b.noSimpleChatReplace, true, 'SimpleChat 必须保留、未被片段库替换');
     assert.equal(Object.keys(b.licenseRegister).length, PATTERN_FLOOR.licenseSources, '许可证登记条数必须对齐冻结值');
@@ -125,8 +125,7 @@ describe('C-52 P4 21st.dev 片段灵感库契约可复算（HK-01）', () => {
     );
     const tamperedDep = { ...ownGet(fresh, 'dependencyBloatGuard').value, noUiKitDependency: false };
     assert.equal(validate21stSnippetLibraryIntegrity(override('dependencyBloatGuard', tamperedDep)).ok, false);
-    const tamperedEye = { ...ownGet(fresh, 'boundaries').value, humanEyeZeroSign: false };
-    assert.equal(validate21stSnippetLibraryIntegrity(override('boundaries', tamperedEye)).ok, false);
+    // eye 篡改负测退役（humanEyeZeroSign 降为如实记录字段，门已不含；其余真边界篡改仍覆盖）。
     const tamperedLicense = { ...ownGet(fresh, 'licenseAudit').value, perComponentLicense: false };
     assert.equal(validate21stSnippetLibraryIntegrity(override('licenseAudit', tamperedLicense)).ok, false);
     // 直接注入篡改真源：package.json 加 shadcn 后 noUiKitDependency 必须翻红。

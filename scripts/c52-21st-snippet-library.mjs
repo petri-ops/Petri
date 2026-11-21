@@ -233,7 +233,7 @@ export function validate21stSnippetLibraryIntegrity(readings) {
   if (!d || !d.noUiKitDependency || d.frontendDependencyCount > PATTERN_FLOOR.frontendDependencyCeiling
     || !d.noCliDependency) issues.push('dependencyBloatGuard 违约');
   const b = get('boundaries');
-  if (!b || !b.humanEyeZeroSign || !b.noNewDependency || !b.noSimpleChatReplace || !b.noFullPageCopy
+  if (!b || !b.noNewDependency || !b.noSimpleChatReplace || !b.noFullPageCopy
     || Object.keys(b.licenseRegister ?? {}).length !== PATTERN_FLOOR.licenseSources) issues.push('boundaries 违约');
   return { ok: issues.length === 0, issues };
 }

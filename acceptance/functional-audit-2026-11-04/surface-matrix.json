@@ -1,15 +1,16 @@
 {
-  "generatedAt": "2026-11-21T01:09:09.688Z",
+  "generatedAt": "2026-11-21T04:01:32.995Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 118,
     "toolDomains": 16,
     "contracts": 118,
-    "metadata": 119,
+    "metadata": 118,
+    "metadataMcpOnly": 1,
     "ipcChannels": 173,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 170,
-    "routes": 290,
+    "routes": 289,
     "routeModules": 48,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
@@ -18,7 +19,7 @@
       "P2": 0,
       "P3": 2
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 3,
     "defsFallbacks": 0
   },
   "findings": [
@@ -4364,12 +4365,6 @@
     {
       "module": "ai-legacy",
       "method": "POST",
-      "route": "/api/ai/interpret",
-      "mounted": true
-    },
-    {
-      "module": "ai-legacy",
-      "method": "POST",
       "route": "/api/ai/act-ack/:token",
       "mounted": true
     },
@@ -5997,6 +5992,10 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/routes/ai-legacy.js",
+    "D  frontend/src/components/common/GlobalWatermark.tsx",
+    "D  frontend/src/styles/watermark.css"
+  ],
   "defNotes": []
 }

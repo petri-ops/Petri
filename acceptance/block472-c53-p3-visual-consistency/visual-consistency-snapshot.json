@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c53-visual-consistency",
   "capability": "block472-c53-p3-visual-consistency",
-  "sourceCommit": "1d8bc5a7bb00e51eaaeddf1e823f1491886b1ced",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
   "platform": "darwin-arm64",
   "command": "node scripts/c53-visual-consistency.mjs",
-  "generatedAt": "2026-11-20T23:29:38.666Z",
+  "generatedAt": "2026-11-21T04:23:15.650Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -44,7 +44,7 @@
       },
       "source": "frontend/src/styles/custom.css dark 块",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-20T23:29:38.570Z"
+      "capturedAt": "2026-11-21T04:23:15.530Z"
     },
     "slateFamily": {
       "value": {
@@ -88,7 +88,7 @@
       },
       "source": "frontend/src 全源（广谱 slate ratchet）",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-20T23:29:38.570Z"
+      "capturedAt": "2026-11-21T04:23:15.530Z"
     },
     "colorBudget": {
       "value": {
@@ -142,18 +142,18 @@
       },
       "source": "frontend/src CSS 全源 + docs/design-charter.md §2",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-20T23:29:38.570Z"
+      "capturedAt": "2026-11-21T04:23:15.530Z"
     },
     "undefinedTokens": {
       "value": {
         "undefinedColorRefs": [],
         "missingPetriRefs": [],
-        "definitionCount": 151,
-        "referenceCount": 138
+        "definitionCount": 150,
+        "referenceCount": 139
       },
       "source": "frontend/src 全源（token 定义/引用扫描）",
       "command": "node scripts/c53-visual-consistency.mjs",
-      "capturedAt": "2026-11-20T23:29:38.570Z"
+      "capturedAt": "2026-11-21T04:23:15.530Z"
     }
   }
 }

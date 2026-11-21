@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "kind": "c52-21st-snippet-library",
   "capability": "block480-c52-p4-21st-snippet-library",
-  "sourceCommit": "9a41525dba000aaab23754951f39563817ee6fbe",
-  "platform": "win32-x64",
+  "sourceCommit": "01f89aaea5363443664823bcccfd13cb828937b8",
+  "platform": "darwin-arm64",
   "command": "node scripts/c52-21st-snippet-library.mjs",
-  "generatedAt": "2026-11-18T11:49:26.199Z",
+  "generatedAt": "2026-11-21T04:17:19.136Z",
   "evidenceClass": "mechanical-gate",
   "verdict": "measured",
   "humanEyeEquivalent": false,
@@ -72,7 +72,7 @@
     },
     "boundaries": {
       "value": {
-        "humanEyeZeroSign": true,
+        "humanEyeZeroSign": false,
         "noNewDependency": true,
         "noSimpleChatReplace": true,
         "licenseRegister": {

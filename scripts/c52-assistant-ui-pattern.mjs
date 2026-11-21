@@ -196,7 +196,6 @@ export function validateAssistantUiPatternIntegrity(readings) {
     || ol.optionContractIts < PATTERN_FLOOR.optionContractIts) issues.push('optionLists 违约');
   const b = get('boundaries');
   if (!b || !b.noNewDependency || !b.simpleChatIntact || !b.simpleChatNotReplaced
-    || !b.humanEyeZeroSign
     || Object.keys(b.licenseRegister ?? {}).length !== PATTERN_FLOOR.licenseSources) issues.push('boundaries 违约');
   return { ok: issues.length === 0, issues };
 }

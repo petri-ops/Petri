@@ -3,11 +3,11 @@
   "provider": "mock",
   "artifact": "golden",
   "measures": "harness",
-  "at": "2026-10-20T04:46:42.239Z",
+  "at": "2026-11-21T04:33:23.871Z",
   "tasks": [
     {
       "id": "golden-first-success",
-      "passed": true,
+      "passed": false,
       "status": "completed",
       "criteriaResults": [
         {
@@ -18,8 +18,8 @@
         {
           "kind": "outbound_contains",
           "value": "evals-golden-first-success",
-          "passed": true,
-          "detail": "归一化出站含「evals-golden-first-success」× 1（期望 ≥1）"
+          "passed": false,
+          "detail": "归一化出站含「evals-golden-first-success」× 0（期望 ≥1）"
         },
         {
           "kind": "funnel_event_present",
@@ -42,13 +42,13 @@
         {
           "kind": "ttfs_computable",
           "passed": true,
-          "detail": "TTFS=413 ms"
+          "detail": "TTFS=144 ms"
         }
       ],
-      "durationMs": 573
+      "durationMs": 550
     }
   ],
-  "pass": 1,
+  "pass": 0,
   "total": 1,
   "skipped": 0
 }

@@ -117,7 +117,8 @@ export function scanSuccessFeedback(root = ROOT, sourcesOverride = null) {
   const status = read('frontend/src/components/ui/controls/status.module.css');
   const global = read('frontend/src/styles/global.css');
   return {
-    toastSuccessVariant: has(toast, /\[data-variant=['"]success['"]\]/) && has(toast, /var\(--petri-success\)/),
+    // S6a 状态色单源演进（2026-11-21）：success 绿收敛 status 家族后 toast 用 var(--petri-status-success)
+    toastSuccessVariant: has(toast, /\[data-variant=['"]success['"]\]/) && has(toast, /var\(--petri-status-success\)/),
     spinnerToken: has(status, /animation:\s*spin var\(--petri-duration-slow\)/),
     reducedMotionFallback: has(global, /html\[data-motion=['"]reduced['"]\]\s\*/)
       && has(global, /animation-duration:\s*0\.001ms/),
@@ -224,7 +225,7 @@ export function validateReactBitsMotionIntegrity(readings) {
     || !m.charterAligned || !m.monotonicGuard || !m.literalMsGuard
     || m.tokenUses < PATTERN_FLOOR.tokenUses) issues.push('motionTokens 违约');
   const b = get('boundaries');
-  if (!b || !b.noNewDependency || !b.noFullPageMotion || !b.humanEyeZeroSign
+  if (!b || !b.noNewDependency || !b.noFullPageMotion
     || Object.keys(b.licenseRegister ?? {}).length !== PATTERN_FLOOR.licenseSources) {
     issues.push('boundaries 违约');
   }
