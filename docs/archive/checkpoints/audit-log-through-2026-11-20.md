@@ -51,3 +51,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-21T02:13:26.487Z -->
 最后更新：2026-11-20（🖊 **国风水印·钢笔笔锋二轮**（用户反馈「模糊→钢笔笔锋硬一点、细、不要太透明、不干扰内容」）：四原型从均匀 stroke 重写为楔形 fill 笔锋；轮1 12%墨+宽带实机过粗如粉笔 → 轮2 收敛 8%墨+3px级细锋+空心方印。HK-01 红2fail→绿7/7 + 33tests + tsc0 + c53 + 实机16/16。实机截图：细锋达成、方印空心、内容不干扰；**柳叶笔锋(两端尖)未完全到位**如实标注、审美 in_progress，≤3轮内未再震荡。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-21T03:20:18.743Z -->
+最后更新：2026-11-20（🖼 **国风水印·AI 专业出图原封不动落地**（用户「手绘 SVG 没质感，专业工具设计好原封不动拿来」）：工具盘点=Figma/Penpot MCP 未连接、image_gen 可用→用它生成钢笔白描四原型（1536×1024），仅白底抠 alpha、笔锋像素不动，原图留 provenance。`GlobalWatermarkAI`+`watermark-ai.css` 全局单图 background，opacity 0.10/dark 反相 0.08；HK-01 6/6 + 实机 12/12（三路由背景图加载/非交互/截图），settings 截图目测质感明显优于手绘版。**并发冲突如实记录**：另一进程持续把 watermark.css/GlobalWatermark.tsx/flow 覆盖为「极简几何单线候选1」，本包改用独立新文件不碰对方，main.tsx 现指向 AI 版；需用户知悉。观感由实机截图认定、UI-717 不外推。G0 开发期常态 · 不外推 packaged/Provider/GA.）
