@@ -894,6 +894,81 @@ async function inspectPublicProjection(webContents) {
   `, true);
 }
 
+/**
+ * P6-TABLE-LOAD 前置票（R2 清偿批 2026-11-21）：pack iframe 探针入口。
+ * 枚举 petri-pack:// frame（frameTree + 跨进程 target），isolated world 读 iframe 内
+ * ready/console 标记，经 evaluatePackSurfaceProbe 归因；probe 异常不打断失败诊断主流程。
+ * （与 inspectReport 同构：frameTree 主 frame 树 + Target.getTargets 捕 OOP iframe。）
+ */
+async function inspectPackSurface(webContents) {
+  if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');
+  await webContents.debugger.sendCommand('Page.enable');
+  await webContents.debugger.sendCommand('Runtime.enable');
+  const { frameTree } = await webContents.debugger.sendCommand('Page.getFrameTree');
+  const pending = frameTree ? [frameTree] : [];
+  const frameRows = [];
+  const { targetInfos = [] } = await webContents.debugger.sendCommand('Target.getTargets');
+  while (pending.length > 0) {
+    const current = pending.shift();
+    const frameUrl = String(current?.frame?.url || '');
+    let frameProbe = { url: frameUrl, readySignal: false, consoleTail: [], loadState: 'unknown' };
+    if (frameUrl.startsWith('petri-pack:')) {
+      try {
+        const world = await webContents.debugger.sendCommand('Page.createIsolatedWorld', {
+          frameId: current.frame.id,
+          worldName: 'petri-p6-pack-observer',
+          grantUniveralAccess: false,
+        });
+        const inner = await webContents.debugger.sendCommand('Runtime.evaluate', {
+          expression: '(() => ({ readySignal: window.__petriSurfaceReady === true, consoleTail: (window.__petriConsoleTail || []).slice(-6) }))()',
+          contextId: world.executionContextId,
+          returnByValue: true,
+        });
+        const value = inner?.result?.value;
+        frameProbe = value
+          ? Object.assign({ url: frameUrl }, value, { loadState: 'loaded' })
+          : { url: frameUrl, readySignal: false, consoleTail: [], loadState: 'loaded_no_value' };
+      } catch (e) {
+        frameProbe = { url: frameUrl, readySignal: false, consoleTail: ['probe_error: ' + String(e.message).slice(0, 120)], loadState: 'probe_failed' };
+      }
+    }
+    frameRows.push(frameProbe);
+    pending.push(...(current?.childFrames || []));
+  }
+  for (const ti of targetInfos) {
+    if (String(ti.url || '').startsWith('petri-pack:')) {
+      frameRows.push({ url: ti.url, readySignal: false, consoleTail: ['oop-iframe-target（跨进程，需 Target.attachToTarget 深探）'], loadState: 'oop' });
+    }
+  }
+  return evaluatePackSurfaceProbe(frameRows);
+}
+
+/**
+ * 纯评估：iframe 枚举行 → 归因 verdict（no_pack_frame / pack_frame_not_loaded /
+ * loaded_but_ready_not_sent / ready_sent_host_side_issue）。
+ */
+function evaluatePackSurfaceProbe(frames) {
+  const rows = Array.isArray(frames) ? frames : [];
+  const packFrames = rows.filter((r) => String(r.url || '').startsWith('petri-pack:'));
+  const readySignal = rows.some((r) => r.readySignal === true);
+  const consoleTail = rows.flatMap((r) => r.consoleTail || []).slice(-6);
+  let verdict = 'no_pack_frame';
+  if (packFrames.length > 0) {
+    const loaded = packFrames.some((r) => r.loadState === 'loaded' || r.loadState === 'complete');
+    if (!loaded) verdict = 'pack_frame_not_loaded';
+    else if (!readySignal) verdict = 'loaded_but_ready_not_sent';
+    else verdict = 'ready_sent_host_side_issue';
+  }
+  return {
+    frames: rows,
+    packUrl: packFrames.map((r) => r.url).slice(0, 4),
+    frameUrl: packFrames[0]?.url ?? null,
+    readySignal,
+    consoleTail,
+    verdict,
+  };
+}
+
 async function failureDiagnostic(webContents) {
   try {
     return await webContents.executeJavaScript(`
@@ -1189,11 +1264,22 @@ async function run() {
     window.destroy();
   } catch (error) {
     const page = await failureDiagnostic(window.webContents);
+    // P6-TABLE-LOAD 前置票：table_load 阶段失败接入 pack iframe 探针
+    //（petri-pack:// frame 枚举 + iframe 内 ready/console → evaluatePackSurfaceProbe 归因）。
+    let packSurfaceProbe = null;
+    if (stage === 'table_load') {
+      try {
+        packSurfaceProbe = await inspectPackSurface(window.webContents);
+      } catch (probeError) {
+        packSurfaceProbe = { verdict: 'probe_error', probeError: String(probeError.message).slice(0, 200) };
+      }
+    }
     writeFileSync(config.resultPath, `${JSON.stringify({
       schemaVersion: 1,
       passed: false,
       failedStage: stage,
       page,
+      packSurfaceProbe,
       artifactNetwork: artifactNetworkObservation(),
       rendererConsole,
     }, null, 2)}\n`, { mode: 0o600 });
