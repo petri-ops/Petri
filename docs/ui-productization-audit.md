@@ -5506,6 +5506,7 @@ BLOCK-22 PHASE 4 落地：acceptHunk / rejectHunk IPC 成功后派发 typed even
 - **来源**：BLOCK-124 第一批 C-13 符号图产品化（plan=docs/block-124-harness-productization-plan.md）。agent 新增 `codegraph_who_imports` / `codegraph_classify_edges` 两个只读工具（HK-03 内核单源迁 core/petri-server/helpers/code-graph.js），聊天工具行需同步可读呈现。
 - **改动（本条仅 UI 面）**：`frontend/src/components/copilot/toolActivity.ts` VERBS +2（已查引用/已盘点依赖）+ ICONS +2（git-branch）；`test/fixtures/tool-activity-labels.json` 同步两行（三面同源钉死，UI-437 v5.18 注册表机制零新增面）。
 - **证据（契约）**：test/tool-activity-labels.test.mjs 宇宙 76 双向覆盖绿 + toolActivity.test.ts fixture 行为级断言绿 + tsc 0。
+- **加映（2026-11-21，R2 清偿批尾票 · 漂移维护非新面）**：compose_video（BLOCK-482 `a1f906d8` 上游加工具）fixture+后端 tool-events.js 已登记而前端动词/图标表漏挂（同类第 3 例）→ 前端 VERBS +1（已合成视频）+ ICONS +1（play——fixture 意愿值 'video' 不在 IconName 88 原子集，按视频家族语义对齐既有 play，fixture 同步）；双端同构契约 toolActivity 26/26 + labels 5/5 绿（本测试即红绿先行：修复前红）。同批 McpAppCard postToFrame 防御化 try/catch+warn（happy-dom origin 限制 unhandled rejection 根因归因，生产=跨源导航失败可见不打断）→ gen-ui 91/91 零 unhandled。界=纯映射/数据面维护，UI-437 v5.18 verified 语义不变。
 - **实机走查（2026-09-26，BLOCK-124 P1）**：探针 block124-p1-codegraph-walkthrough.mjs allPass——真实模型任务中 codegraph_who_imports 被自主调用×2，工具行事件正常产出（SSE 取证 tool_result：available true · symbol legacyRound · totalHits 1）；证据 acceptance/block-124/p1-walkthrough.json。用户实机过目后翻 verified。
 - **verified 翻转（2026-09-27，用户实机过目「符合预期」）**：联测路线（真实编码任务）中「已查引用」工具行（git-branch 图标）确认呈现。
 - G0 开发期常态 · 不外推 packaged/Provider/GA。

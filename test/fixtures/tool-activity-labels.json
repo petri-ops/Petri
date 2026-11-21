@@ -17,7 +17,7 @@
   },
   "compose_video": {
     "label": "已合成视频",
-    "icon": "video"
+    "icon": "play"
   },
   "codegraph_classify_edges": {
     "label": "已盘点依赖",

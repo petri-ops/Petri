@@ -48,3 +48,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-21T01:49:35.024Z -->
 最后更新：2026-11-20（🖌 **国风水印修复：全局层覆盖所有页面**（用户实机反馈「只在欢迎页看到，其它都没看到」）：只读 CDP 诊断根因=首版仅挂 welcome/workspace 两处、且工作区水印被内容盖住。重构为全局单源——`GlobalWatermark.tsx` 在 main.tsx 挂一次，`.petri-watermark-global` fixed 四角，移除逐页 div；不变：四原型 mask/3% ink 派生/URI 零字面色/pointer-events:none/aria-hidden/零裸 z。实机 16/16：welcome/home/extensions/settings 四路由四纹样全在场且可见（settings/extensions 截图过目：月洞弧/方印/卵石/开环四角到位、内容不受干扰）。HK-01 绿6/6+邻域 PASS+tsc0+a11y绿；审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-21T02:13:26.487Z -->
+最后更新：2026-11-20（🖊 **国风水印·钢笔笔锋二轮**（用户反馈「模糊→钢笔笔锋硬一点、细、不要太透明、不干扰内容」）：四原型从均匀 stroke 重写为楔形 fill 笔锋；轮1 12%墨+宽带实机过粗如粉笔 → 轮2 收敛 8%墨+3px级细锋+空心方印。HK-01 红2fail→绿7/7 + 33tests + tsc0 + c53 + 实机16/16。实机截图：细锋达成、方印空心、内容不干扰；**柳叶笔锋(两端尖)未完全到位**如实标注、审美 in_progress，≤3轮内未再震荡。G0 开发期常态 · 不外推 packaged/Provider/GA.）

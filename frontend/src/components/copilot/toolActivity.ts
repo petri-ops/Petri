@@ -334,6 +334,9 @@ const TOOL_ACTIVITY_VERBS: Readonly<Record<string, string>> = {
   "model3d_share": "已生成 3D 分享包",
   // BLOCK-340/341/342 补齐：fixture 已登记但前端表漏项（双端同构契约由 toolActivity.test 钉住）
   "read_video": "已读取",
+  // 2026-11-21 同步补登记（R2 清偿批尾票）：BLOCK-482 a1f906d8 上游加 compose_video 时 fixture+后端
+  // tool-events.js 已登记而前端动词表漏挂（第 3 例同类：上游加工具→双端同构测抓漏）
+  "compose_video": "已合成视频",
   "godot_run": "已运行",
   "godot_scene_apply": "已应用",
   "model3d_blend_ops": "已操作",
@@ -455,6 +458,7 @@ export const TOOL_ACTIVITY_ICONS: Readonly<Record<string, IconName>> = {
   "model3d_asset": "layers",
   "model3d_share": "download",
   "read_video": "play",
+  "compose_video": "play",
   "transcribe_audio": "list-details",
   "speak_text": "play",
   "godot_run": "play",

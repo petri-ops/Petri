@@ -9802,10 +9802,33 @@
         "acceptance/project-status-assessment-r2-2026-11-20/**",
         "acceptance/r2-remediation/**",
         "docs/next-phase-e2e-prompt-2026-11-20.md",
-        "acceptance/project-status-assessment-r3-2026-11-21/**"
+        "acceptance/project-status-assessment-r3-2026-11-21/**",
+        "acceptance/aesthetic-signoff-trio/**"
       ],
       "tests": [
         "test/r2-remediation-evidence.test.mjs"
+      ]
+    },
+    {
+      "id": "closed-batch-evidence-dirs",
+      "note": "2026-11-21 补登记（R2 清偿批尾票）：已收口批次 acceptance 目录的 evidence.json 假设路径未映射致 test-affected 元测试红——各目录 owner：ui-711-live/ui-712-working-status/ui-713/ui-714/ui-715=各 UI-### 批；block509-c55-video-p4=BLOCK-509；block510=BLOCK-510；c56-skill-registration=C-56；project-evaluation-prompt-2026-11-20 与 project-status-assessment-2026-11-20=评估提示词/评估批（前批未跟踪遗留）；ui-visual-upgrade-2026-11-20=视觉升级总纲批。纯 patterns 登记，零内容触碰。 W5a 补登记（同批）：test/block509-video-p4.test.mjs=BLOCK-509、test/c56-paper-writing-skill.test.mjs=C-56、test/evo4-evidence-bugfix.test.mjs=EVO-4 漏挂规则（各批登记债）。",
+      "patterns": [
+        "acceptance/ui-711-live/**",
+        "acceptance/ui-712-working-status/**",
+        "acceptance/ui-713/**",
+        "acceptance/ui-714/**",
+        "acceptance/ui-715/**",
+        "acceptance/block509-c55-video-p4/**",
+        "acceptance/block510/**",
+        "acceptance/c56-skill-registration/**",
+        "acceptance/project-evaluation-prompt-2026-11-20/**",
+        "acceptance/project-status-assessment-2026-11-20/**",
+        "acceptance/ui-visual-upgrade-2026-11-20/**"
+      ],
+      "tests": [
+        "test/block509-video-p4.test.mjs",
+        "test/c56-paper-writing-skill.test.mjs",
+        "test/evo4-evidence-bugfix.test.mjs"
       ]
     }
   ]

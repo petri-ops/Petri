@@ -83,7 +83,14 @@ export const McpAppCard = React.memo(function McpAppCard({
 
   const postToFrame = React.useCallback((message: Record<string, unknown>) => {
     if (!sandbox) return;
-    frameRef.current?.contentWindow?.postMessage(message, sandbox.origin);
+    // postMessage 可能因目标 origin 不匹配抛 SecurityError（真实浏览器中 iframe 被意外导航/
+    // 跨源时；测试环境 happy-dom 沙箱 iframe origin='null' 亦触发）——失败要可见但不打断调用方
+    // （RPC 回复通道的失败由沙箱侧超时兜底），2026-11-21 R2 清偿批尾票留痕。
+    try {
+      frameRef.current?.contentWindow?.postMessage(message, sandbox.origin);
+    } catch (err) {
+      console.warn('[McpAppCard] postMessage 到沙箱 iframe 失败:', err instanceof Error ? err.message : err);
+    }
   }, [sandbox]);
 
   const relayRpc = React.useCallback(async (rpc: RpcMessage) => {

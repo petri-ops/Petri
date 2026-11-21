@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-11-18T12:32:03.923Z",
+  "updatedAt": "2026-11-21T02:04:44.230Z",
   "systemPromptChars": 1083,
   "toolDefsCount": 118,
-  "toolDefsChars": 65990,
+  "toolDefsChars": 66286,
   "perToolChars": {
     "interrupt_agent": 319,
     "send_message": 381,
@@ -116,7 +116,7 @@
     "workspace_read": 393,
     "workspace_write": 627,
     "workspace_replace": 596,
-    "workspace_exec": 1261,
+    "workspace_exec": 1557,
     "workspace_exec_background": 694,
     "workspace_worktree_create": 540,
     "workspace_worktree_list": 225,
