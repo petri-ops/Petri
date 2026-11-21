@@ -47,6 +47,7 @@ export function collectV234Scorecard(root) {
   const after = {};
   for (const [k, checks] of Object.entries(dims)) {
     const ratio = checks.filter(Boolean).length / checks.length;
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     after[k] = Math.round((before[k] + ratio * cap[k]) * 10) / 10;
   }
   after.composite = Math.round((Object.values(after).reduce((a, b) => a + b, 0) / 4) * 10) / 10;

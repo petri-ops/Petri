@@ -137,7 +137,9 @@ export function scanSignatureSlots(root = ROOT, sourcesOverride = null) {
     const blank = /^_{3,}/.test(signer);
     return [id, { present: row.length > 0, blank, date: blank ? '' : date, verdict: blank ? '' : verdict }];
   }));
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
   const filledIds = CLOSEOUT_FLOOR.signatureIds.filter((id) => slots[id].present && !slots[id].blank);
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
   const blankIds = CLOSEOUT_FLOOR.signatureIds.filter((id) => !slots[id].present || slots[id].blank);
   const filled = filledIds.length;
   const total = Object.values(slots).filter((s) => s.present).length;
@@ -247,6 +249,7 @@ export function collectHumanEyeCloseout(root = ROOT) {
   // fail-closed：任何契约级违例直接抛错，拒绝生成"看起来绿的"快照。
   // 2026-11-20 YI-REST-WB 演进：乙1–乙4 用户口令已把四槽翻 verified——不变量改为「四槽在场且状态可读」，
   // 状态本身如实记录（verified 由用户口令转录在案，零代签语义由 signatureSlots/篡改负测守护）。
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
   if (!uiLedgerSlots.slots || CLOSEOUT_FLOOR.uiLedgerIds.some((id) => !uiLedgerSlots.slots[id])) {
     throw new Error(`[c53:closeout] UI 台账四槽缺席: ${JSON.stringify(uiLedgerSlots)}`);
   }

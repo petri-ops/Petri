@@ -184,7 +184,9 @@ describe('EVO-3 · 证据导出（可审计产物，零外发）', () => {
       for (const r of rows) {
         const day = String(r.created_at).slice(0, 10);
         const phase = r.created_at >= '2026-11-20T00:00:00Z' ? 'after' : 'before';
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
         byDay[day] = byDay[day] || { before: 0, after: 0 };
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
         byDay[day][phase] += 1;
       }
       const evidence = {

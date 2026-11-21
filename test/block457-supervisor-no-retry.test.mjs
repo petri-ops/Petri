@@ -15,7 +15,9 @@ function fakeChild(pid) {
   return {
     pid,
     killed: false,
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     once(event, fn) { (listeners[event] ||= []).push(fn); },
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     emit(event, ...args) { (listeners[event] || []).forEach((fn) => fn(...args)); },
     kill() { this.killed = true; },
   };

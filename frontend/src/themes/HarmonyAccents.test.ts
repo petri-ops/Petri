@@ -78,6 +78,7 @@ describe('V5 harmony accents (可见品牌面)', () => {
     };
     const deps: Record<string, string | undefined> = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
     for (const d of ['lucide-react', '@phosphor-icons/react', 'react-icons', 'heroicons']) {
+  // eslint-disable-next-line security/detect-object-injection -- 可信契约读数面（canonical 快照封闭词表键），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
       expect(deps[d], `unexpected dependency ${d}`).toBeUndefined();
     }
   });

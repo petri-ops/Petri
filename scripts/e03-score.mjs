@@ -29,7 +29,9 @@ export function scoreSus(answers) {
   }
   let sum = 0;
   for (let i = 0; i < SUS_ITEMS; i += 1) {
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     const v = Number(answers[i]);
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     if (!Number.isInteger(v) || v < 1 || v > 5) throw new Error(`SUS 第 ${i + 1} 题选项非法: ${answers[i]}`);
     sum += (i % 2 === 0) ? v - 1 : 5 - v;
   }
@@ -40,6 +42,7 @@ export function scoreSus(answers) {
 export function scoreUmuxLite(q1, q2, q3) {
   const vals = [q1, q2, q3].map((x) => Number(x));
   for (let i = 0; i < 3; i += 1) {
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     if (!Number.isInteger(vals[i]) || vals[i] < 1 || vals[i] > 7) throw new Error(`UMUX 第 ${i + 1} 题选项非法: ${[q1, q2, q3][i]}`);
   }
   return {
@@ -63,6 +66,7 @@ export function parseParticipants(csvText) {
   return lines.slice(1).map((line, idx) => {
     const cells = line.split(',').map((c) => c.trim());
     if (cells.length !== header.length) throw new Error(`第 ${idx + 2} 行列数 ${cells.length} ≠ 表头 ${header.length}`);
+// eslint-disable-next-line security/detect-object-injection -- 可信内部 JSON 读数面（canonical 契约/测试夹具，键为封闭词表或本地常量），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
     const row = Object.fromEntries(header.map((h, i) => [h, cells[i]]));
     return {
       pid: row.pid || `P${idx + 1}`,

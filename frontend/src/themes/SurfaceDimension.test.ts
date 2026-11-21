@@ -89,6 +89,7 @@ describe('B: data-surface dimension', () => {
     };
     const mixHex = (bgHex: string, fgHex: string, p: number) => {
       const a = hex2rgb(bgHex), b = hex2rgb(fgHex);
+  // eslint-disable-next-line security/detect-object-injection -- 可信契约读数面（canonical 快照封闭词表键），启发式误报；R2 清偿批 S8 依 BLOCK-493 先例行级豁免留痕
       return '#' + a.map((v, i) => Math.round(v * (1 - p) + b[i] * p).toString(16).padStart(2, '0')).join('');
     };
     const pairs: Array<[string, string, string]> = [
