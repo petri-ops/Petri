@@ -1,0 +1,54 @@
+{
+  "running": {
+    "rows": [
+      {
+        "cls": "sc-tool-activity sc-tool-qoder-row sc-timeline-reasoning",
+        "dataExpanded": null,
+        "ariaExpanded": null,
+        "text": "✓|思考|The user wants a ::compose output. No tool calls. I need to out…"
+      },
+      {
+        "cls": "sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-running",
+        "dataExpanded": null,
+        "ariaExpanded": null,
+        "text": "已读取|文件"
+      },
+      {
+        "cls": "sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-running",
+        "dataExpanded": null,
+        "ariaExpanded": null,
+        "text": "已调用|workspace_grep"
+      },
+      {
+        "cls": "sc-tool-activity sc-tool-qoder-row sc-tool-qoder-row-running",
+        "dataExpanded": null,
+        "ariaExpanded": null,
+        "text": "终端命令 运行中|命令"
+      }
+    ],
+    "workingStatus": true,
+    "assistantMsgs": 2
+  },
+  "done": {
+    "rows": [
+      {
+        "dataExpanded": null,
+        "ariaExpanded": null
+      },
+      {
+        "dataExpanded": null,
+        "ariaExpanded": null
+      },
+      {
+        "dataExpanded": null,
+        "ariaExpanded": null
+      },
+      {
+        "dataExpanded": null,
+        "ariaExpanded": null
+      }
+    ],
+    "workingStatus": true
+  },
+  "note": "运行中第三工具 running 态时取第一组读数；结束后取第二组。"
+}

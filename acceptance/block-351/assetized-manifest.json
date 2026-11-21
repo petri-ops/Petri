@@ -1,10 +1,10 @@
 {
-  "frozenAt": "2026-11-21T01:00:50.344Z",
+  "frozenAt": "2026-11-21T09:02:43.634Z",
   "definition": "docs/block-351-ear-definition.md",
   "totals": {
-    "acceptanceFiles": 3078,
-    "assetized": 1317,
-    "earPct": 42.8
+    "acceptanceFiles": 3111,
+    "assetized": 1323,
+    "earPct": 42.5
   },
   "entries": [
     {
@@ -5314,6 +5314,15 @@
       ]
     },
     {
+      "file": "acceptance/evals/golden-2026-11-21T04-33-23-871Z.json",
+      "assertedBy": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "impactRule": [
+        "block181-evals-harness"
+      ]
+    },
+    {
       "file": "acceptance/evals/golden-latest.json",
       "assertedBy": [
         "test/block192-real-provider-credentials.test.mjs"
@@ -5656,6 +5665,15 @@
       ]
     },
     {
+      "file": "acceptance/evals/real-replay-2026-11-21T04-34-18-535Z.json",
+      "assertedBy": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "impactRule": [
+        "block181-evals-harness"
+      ]
+    },
+    {
       "file": "acceptance/evals/real-replay-latest.json",
       "assertedBy": [
         "test/block192-real-provider-credentials.test.mjs"
@@ -5945,6 +5963,15 @@
     },
     {
       "file": "acceptance/evals/smoke-2026-11-12T13-53-09-768Z.json",
+      "assertedBy": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "impactRule": [
+        "block181-evals-harness"
+      ]
+    },
+    {
+      "file": "acceptance/evals/smoke-2026-11-21T04-33-51-823Z.json",
       "assertedBy": [
         "test/block192-real-provider-credentials.test.mjs"
       ],
@@ -10959,6 +10986,24 @@
       ]
     },
     {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-10.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-11.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
       "file": "acceptance/r2-remediation/gates/s8-closeout-full-2.log",
       "assertedBy": [
         "test/r2-remediation-evidence.test.mjs"
@@ -11014,6 +11059,15 @@
     },
     {
       "file": "acceptance/r2-remediation/gates/s8-closeout-full-8.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-9.log",
       "assertedBy": [
         "test/r2-remediation-evidence.test.mjs"
       ],
