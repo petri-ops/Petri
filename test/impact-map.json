@@ -9801,7 +9801,11 @@
       "patterns": [
         "acceptance/project-status-assessment-r2-2026-11-20/**",
         "acceptance/r2-remediation/**",
-        "docs/next-phase-e2e-prompt-2026-11-20.md"
+        "docs/next-phase-e2e-prompt-2026-11-20.md",
+        "acceptance/project-status-assessment-r3-2026-11-21/**"
+      ],
+      "tests": [
+        "test/r2-remediation-evidence.test.mjs"
       ]
     }
   ]

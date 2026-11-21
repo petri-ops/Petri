@@ -1,12 +1,75 @@
 {
-  "frozenAt": "2026-11-04T21:52:27.767Z",
+  "frozenAt": "2026-11-21T01:00:50.344Z",
   "definition": "docs/block-351-ear-definition.md",
   "totals": {
-    "acceptanceFiles": 2013,
-    "assetized": 871,
-    "earPct": 43.3
+    "acceptanceFiles": 3078,
+    "assetized": 1317,
+    "earPct": 42.8
   },
   "entries": [
+    {
+      "file": "acceptance/a0-identity-translation/DECISION-BRIEF.md",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/GATE-LEDGER.md",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/decision-material.json",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/hk01-green.txt",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/hk01-red.txt",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/ruling.json",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
+    {
+      "file": "acceptance/a0-identity-translation/schema.json",
+      "assertedBy": [
+        "test/a0-identity-translation.test.mjs"
+      ],
+      "impactRule": [
+        "a0-identity-translation"
+      ]
+    },
     {
       "file": "acceptance/block-105/baseline-20260920/audit-frontend.json",
       "assertedBy": [
@@ -365,6 +428,126 @@
       ],
       "impactRule": [
         "block107-conversation-stream-ux"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/agent-panel-running.png",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/agent-panel-samples.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/agent-panel-terminal.png",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/arch-cycles-baseline.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/block109-agent-panel-live.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/block109-reporting-live-live.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/block109-single-truth-live-live.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/reporting-live-samples.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/single-truth-final.png",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/single-truth-recovered-running.png",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/single-truth-samples.json",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
+      ]
+    },
+    {
+      "file": "acceptance/block-109/spawn-live.png",
+      "assertedBy": [
+        "test/post-s7-h9-cycle-decay.test.mjs"
+      ],
+      "impactRule": [
+        "block109-agent-orchestration-ux",
+        "block109-core-arch-convergence"
       ]
     },
     {
@@ -1710,7 +1893,8 @@
       "file": "acceptance/block-322-p3/block322-chat-artifact-actions-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1722,7 +1906,8 @@
       "file": "acceptance/block-322-p3/block322-chat-artifact-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1734,7 +1919,8 @@
       "file": "acceptance/block-322-p3/block322-chat-artifact-realturn-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1746,7 +1932,8 @@
       "file": "acceptance/block-322-p3/block322-model3d-entrypoints-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1758,7 +1945,8 @@
       "file": "acceptance/block-322-p3/block322-model3d-webgl-context-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1770,7 +1958,8 @@
       "file": "acceptance/block-322-p3/block322-p3-02b-preview-eval-detail-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1781,7 +1970,8 @@
       "file": "acceptance/block-322-p3/block322-p3-02b-preview-eval-detail.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1792,7 +1982,8 @@
       "file": "acceptance/block-322-p3/block322-p3-02b-preview-eval-live-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1803,7 +1994,8 @@
       "file": "acceptance/block-322-p3/block322-p3-02b-preview-eval-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1814,7 +2006,8 @@
       "file": "acceptance/block-322-p3/block322-p3-03-mate-ui-live-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1825,7 +2018,8 @@
       "file": "acceptance/block-322-p3/block322-p3-03-mate-ui-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1836,7 +2030,8 @@
       "file": "acceptance/block-322-p3/block322-p3-constraints-detail-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1847,7 +2042,8 @@
       "file": "acceptance/block-322-p3/block322-p3-constraints-detail.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1858,7 +2054,8 @@
       "file": "acceptance/block-322-p3/block322-p3-constraints-live-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1869,7 +2066,8 @@
       "file": "acceptance/block-322-p3/block322-p3-constraints-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1880,7 +2078,8 @@
       "file": "acceptance/block-322-p3/block322-p3-geometry-detail-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1891,7 +2090,8 @@
       "file": "acceptance/block-322-p3/block322-p3-geometry-detail.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1902,7 +2102,8 @@
       "file": "acceptance/block-322-p3/block322-p3-geometry-live-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1913,7 +2114,8 @@
       "file": "acceptance/block-322-p3/block322-p3-geometry-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1924,7 +2126,8 @@
       "file": "acceptance/block-322-p3/block322-p3-mate-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1935,7 +2138,8 @@
       "file": "acceptance/block-322-p3/block322-p3-mate-live.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1946,7 +2150,8 @@
       "file": "acceptance/block-322-p3/block322-p3-mate-ui-detail-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1957,7 +2162,8 @@
       "file": "acceptance/block-322-p3/block322-p3-mate-ui-detail.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1968,7 +2174,8 @@
       "file": "acceptance/block-322-p3/p3-03-v2a-live-macos.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
@@ -1979,10 +2186,20 @@
       "file": "acceptance/block-322-p3/v2b-stability-probe.json",
       "assertedBy": [
         "test/block322-p3-03-v2b-features.test.mjs",
-        "test/block351-assetization.test.mjs"
+        "test/block351-assetization.test.mjs",
+        "test/block491-ruling-codification.test.mjs"
       ],
       "impactRule": [
         "next04a-3d-foundation",
+        "block322-p4-p6"
+      ]
+    },
+    {
+      "file": "acceptance/block-322-ruling04/p405b-live-macos.json",
+      "assertedBy": [
+        "test/block491-ruling-codification.test.mjs"
+      ],
+      "impactRule": [
         "block322-p4-p6"
       ]
     },
@@ -2103,6 +2320,28 @@
     },
     {
       "file": "acceptance/block-348/artifacts/t2-data-cleaning/workspace/out/chart.html",
+      "assertedBy": [
+        "test/block348-task-suite.test.mjs",
+        "test/block351-assetization.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block348-universal-agent-eval"
+      ]
+    },
+    {
+      "file": "acceptance/block-348/artifacts/t2-data-cleaning/workspace/out/monthly.json",
+      "assertedBy": [
+        "test/block348-task-suite.test.mjs",
+        "test/block351-assetization.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block348-universal-agent-eval"
+      ]
+    },
+    {
+      "file": "acceptance/block-348/artifacts/t2-data-cleaning/workspace/out/stats.json",
       "assertedBy": [
         "test/block348-task-suite.test.mjs",
         "test/block351-assetization.test.mjs"
@@ -2973,7 +3212,8 @@
     {
       "file": "acceptance/block-349/block349-bigdir-error.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -2983,7 +3223,8 @@
     {
       "file": "acceptance/block-349/block349-bigdir-live-darwin.json",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -2993,7 +3234,8 @@
     {
       "file": "acceptance/block-349/block349-bigdir-tree.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3003,7 +3245,8 @@
     {
       "file": "acceptance/block-349/block349-result-error.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3013,7 +3256,8 @@
     {
       "file": "acceptance/block-349/block349-result-live-darwin.json",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3023,7 +3267,8 @@
     {
       "file": "acceptance/block-349/block349-result-page.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3033,7 +3278,8 @@
     {
       "file": "acceptance/block-349/block349-segment-crash.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3043,7 +3289,8 @@
     {
       "file": "acceptance/block-349/block349-segment-error.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3053,7 +3300,8 @@
     {
       "file": "acceptance/block-349/block349-segment-live-darwin.json",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3063,7 +3311,8 @@
     {
       "file": "acceptance/block-349/block349-segment-recovered.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3073,7 +3322,8 @@
     {
       "file": "acceptance/block-349/block349-subagent-live-darwin.json",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3083,7 +3333,8 @@
     {
       "file": "acceptance/block-349/block349-subagent-summary.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3093,7 +3344,8 @@
     {
       "file": "acceptance/block-349/block349-subagent-timeline.png",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
@@ -3103,11 +3355,568 @@
     {
       "file": "acceptance/block-349/retention-live.json",
       "assertedBy": [
-        "test/block349-clearance.test.mjs"
+        "test/block349-clearance.test.mjs",
+        "test/block358-filetree-repro.test.mjs"
       ],
       "impactRule": [
         "program-348-354-artifacts",
         "block349-evidence-clearance"
+      ]
+    },
+    {
+      "file": "acceptance/block-351/assetized-manifest.json",
+      "assertedBy": [
+        "test/block354-readiness.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block351-evidence-assetization"
+      ]
+    },
+    {
+      "file": "acceptance/block-351/ear-snapshot.json",
+      "assertedBy": [
+        "test/block354-readiness.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block351-evidence-assetization"
+      ]
+    },
+    {
+      "file": "acceptance/block-352/shelf-matrix.json",
+      "assertedBy": [
+        "test/block357-shelf-and-map.test.mjs",
+        "test/post-s7-h9-matrix-parity.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block352-extension-shelf-audit"
+      ]
+    },
+    {
+      "file": "acceptance/block-353/packaged-regression.json",
+      "assertedBy": [
+        "test/block354-readiness.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block353-packaged-regression"
+      ]
+    },
+    {
+      "file": "acceptance/block-353/packaged-t2-trace.jsonl",
+      "assertedBy": [
+        "test/block354-readiness.test.mjs"
+      ],
+      "impactRule": [
+        "program-348-354-artifacts",
+        "block353-packaged-regression"
+      ]
+    },
+    {
+      "file": "acceptance/block-356/results-v2.json",
+      "assertedBy": [
+        "test/post-s7-gap-blocker-classification.test.mjs"
+      ],
+      "impactRule": [
+        "batch-355-358-artifacts"
+      ]
+    },
+    {
+      "file": "acceptance/block-356/results-v2final.json",
+      "assertedBy": [
+        "test/post-s7-gap-blocker-classification.test.mjs"
+      ],
+      "impactRule": [
+        "batch-355-358-artifacts"
+      ]
+    },
+    {
+      "file": "acceptance/block-356/tasks-v2.json",
+      "assertedBy": [
+        "test/post-s7-gap-blocker-classification.test.mjs"
+      ],
+      "impactRule": [
+        "batch-355-358-artifacts"
+      ]
+    },
+    {
+      "file": "acceptance/block-357/detour-rulings.json",
+      "assertedBy": [
+        "test/block357-shelf-and-map.test.mjs"
+      ],
+      "impactRule": [
+        "batch-355-358-artifacts"
+      ]
+    },
+    {
+      "file": "acceptance/block-358/repro-result.json",
+      "assertedBy": [
+        "test/block358-filetree-repro.test.mjs"
+      ],
+      "impactRule": [
+        "batch-355-358-artifacts"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/CLOSEOUT.md",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/DELIVERABLES.md",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live-darwin.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/dev-verify/m7-longtask-resume-live.png",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t1-red-clearing.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t1-test-changed.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run1.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run2.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run3.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run4.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run5.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-flow-run6.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t2-live-resume.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t3-closeout-full-run1.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t3-closeout-full-run2.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t3-closeout-full-run3.log",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/t3-closeout-readings.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/verify-deliverables-output.txt",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/evidence/verify-deliverables.mjs",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s0-fact-baseline.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s1-requirement-matrix.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s2-plan.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s3/task-T1.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s3/task-T2.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s3/task-T3.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s3/task-T4.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s4-verification-report.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-449/s5-decision-log.json",
+      "assertedBy": [
+        "test/agent-task-resume-route-disambiguation.test.mjs",
+        "test/m7-longtask-resume-live-flow.test.mjs"
+      ],
+      "impactRule": [
+        "block-449-evidence"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/PROBE-REPORT.md",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/SHA256SUMS.txt",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/evidence.json",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/mapping-verdicts.json",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/parse_glb.py",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/pip-freeze.txt",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe-kinds.glb",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe-posed45.glb",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe-rest-run1.glb",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe-rest.glb",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe-rest.urdf",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe_assembly.py",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/probe_kinds.py",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/rest-nodes-dump.json",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/run2.log",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/sand3d-api-official.md",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/scene-ir-v0-draft.md",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
+      ]
+    },
+    {
+      "file": "acceptance/block-459/verify_mapping.py",
+      "assertedBy": [
+        "test/block460-glb-import.test.mjs",
+        "test/block460-scene-joints.test.mjs"
+      ],
+      "impactRule": [
+        "block459-3d-p0-probe"
       ]
     },
     {
@@ -3516,12 +4325,731 @@
       ]
     },
     {
+      "file": "acceptance/block-92/css-plain-baseline.json",
+      "assertedBy": [
+        "test/block409-l5-structure.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs"
+      ],
+      "impactRule": [
+        "block92-code-modularization"
+      ]
+    },
+    {
+      "file": "acceptance/block-92/size-baseline.json",
+      "assertedBy": [
+        "test/block409-l5-structure.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs"
+      ],
+      "impactRule": [
+        "block92-code-modularization",
+        "block259-q9-rem-slice"
+      ]
+    },
+    {
+      "file": "acceptance/block-92/size-exceptions.json",
+      "assertedBy": [
+        "test/block409-l5-structure.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs"
+      ],
+      "impactRule": [
+        "block92-code-modularization"
+      ]
+    },
+    {
+      "file": "acceptance/block-92/size-final.json",
+      "assertedBy": [
+        "test/block409-l5-structure.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs"
+      ],
+      "impactRule": [
+        "block92-code-modularization"
+      ]
+    },
+    {
+      "file": "acceptance/block462/adapter-out/diagnostics.json",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/adapter-out/sand3d-probe-rest-render.png",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/evidence.json",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/green-run.txt",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/probe-render.png",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/red-run.txt",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/repro-a/diagnostics.json",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/repro-a/sand3d-probe-rest-render.png",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/repro-b/diagnostics.json",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block462/repro-b/sand3d-probe-rest-render.png",
+      "assertedBy": [
+        "test/block462-verify-adapter.test.mjs"
+      ],
+      "impactRule": [
+        "block462-3d-p2-verification"
+      ]
+    },
+    {
+      "file": "acceptance/block465-c53-p0p1/design-baseline.json",
+      "assertedBy": [
+        "test/c53-design-context-pack.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block465-c53-p0p1/hk01-evidence.txt",
+      "assertedBy": [
+        "test/c53-design-context-pack.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block467-3d-p4/MILESTONES-RECONCILIATION.md",
+      "assertedBy": [
+        "test/block467-gym-orchestrator.test.mjs"
+      ],
+      "impactRule": [
+        "block467-3d-p4-gym"
+      ]
+    },
+    {
+      "file": "acceptance/block467-3d-p4/gym-cli-help.txt",
+      "assertedBy": [
+        "test/block467-gym-orchestrator.test.mjs"
+      ],
+      "impactRule": [
+        "block467-3d-p4-gym"
+      ]
+    },
+    {
+      "file": "acceptance/block467-3d-p4/hk01-evidence.txt",
+      "assertedBy": [
+        "test/block467-gym-orchestrator.test.mjs"
+      ],
+      "impactRule": [
+        "block467-3d-p4-gym"
+      ]
+    },
+    {
+      "file": "acceptance/block467-3d-p4/run/gym-evidence.json",
+      "assertedBy": [
+        "test/block467-gym-orchestrator.test.mjs"
+      ],
+      "impactRule": [
+        "block467-3d-p4-gym"
+      ]
+    },
+    {
+      "file": "acceptance/block472-c53-p3-visual-consistency/evidence.md",
+      "assertedBy": [
+        "test/c53-visual-consistency.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block472-c53-p3-visual-consistency/visual-consistency-snapshot.json",
+      "assertedBy": [
+        "test/c53-visual-consistency.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block473-c53-p4-responsive-a11y/evidence.md",
+      "assertedBy": [
+        "test/c53-responsive-a11y.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block473-c53-p4-responsive-a11y/responsive-a11y-snapshot.json",
+      "assertedBy": [
+        "test/c53-responsive-a11y.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block474-c53-p5-performance-trust/evidence.md",
+      "assertedBy": [
+        "test/c53-performance-trust.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block474-c53-p5-performance-trust/performance-trust-snapshot.json",
+      "assertedBy": [
+        "test/c53-performance-trust.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block475-c53-p6-skill-contract/evidence.md",
+      "assertedBy": [
+        "test/c53-skill-contract.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline",
+        "design-brief-product-skill"
+      ]
+    },
+    {
+      "file": "acceptance/block475-c53-p6-skill-contract/skill-contract-snapshot.json",
+      "assertedBy": [
+        "test/c53-skill-contract.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline",
+        "design-brief-product-skill"
+      ]
+    },
+    {
+      "file": "acceptance/block476-c53-p7-human-eye-closeout/evidence.md",
+      "assertedBy": [
+        "test/c53-human-eye-closeout.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block476-c53-p7-human-eye-closeout/human-eye-closeout-snapshot.json",
+      "assertedBy": [
+        "test/c53-human-eye-closeout.test.mjs"
+      ],
+      "impactRule": [
+        "block465-c53-design-baseline"
+      ]
+    },
+    {
+      "file": "acceptance/block478-c52-p2-assistant-ui/assistant-ui-pattern-snapshot.json",
+      "assertedBy": [
+        "test/c52-assistant-ui-pattern.test.mjs"
+      ],
+      "impactRule": [
+        "block478-c52-p2-assistant-ui"
+      ]
+    },
+    {
+      "file": "acceptance/block478-c52-p2-assistant-ui/evidence.md",
+      "assertedBy": [
+        "test/c52-assistant-ui-pattern.test.mjs"
+      ],
+      "impactRule": [
+        "block478-c52-p2-assistant-ui"
+      ]
+    },
+    {
+      "file": "acceptance/block479-c52-p3-react-bits-motion/evidence.md",
+      "assertedBy": [
+        "test/c52-react-bits-motion.test.mjs"
+      ],
+      "impactRule": [
+        "block479-c52-p3-react-bits-motion"
+      ]
+    },
+    {
+      "file": "acceptance/block479-c52-p3-react-bits-motion/react-bits-motion-snapshot.json",
+      "assertedBy": [
+        "test/c52-react-bits-motion.test.mjs"
+      ],
+      "impactRule": [
+        "block479-c52-p3-react-bits-motion"
+      ]
+    },
+    {
+      "file": "acceptance/block480-c52-p4-21st-snippet-library/21st-snippet-library-snapshot.json",
+      "assertedBy": [
+        "test/c52-21st-snippet-library.test.mjs"
+      ],
+      "impactRule": [
+        "block480-c52-p4-21st-snippet-library"
+      ]
+    },
+    {
+      "file": "acceptance/block480-c52-p4-21st-snippet-library/evidence.md",
+      "assertedBy": [
+        "test/c52-21st-snippet-library.test.mjs"
+      ],
+      "impactRule": [
+        "block480-c52-p4-21st-snippet-library"
+      ]
+    },
+    {
+      "file": "acceptance/block481-c52-p5-reference-board-review/evidence.md",
+      "assertedBy": [
+        "test/c52-reference-board-review.test.mjs"
+      ],
+      "impactRule": [
+        "block481-c52-p5-reference-board-review"
+      ]
+    },
+    {
+      "file": "acceptance/block481-c52-p5-reference-board-review/reference-board-review-snapshot.json",
+      "assertedBy": [
+        "test/c52-reference-board-review.test.mjs"
+      ],
+      "impactRule": [
+        "block481-c52-p5-reference-board-review"
+      ]
+    },
+    {
+      "file": "acceptance/block491-ruling-codification/manifest.json",
+      "assertedBy": [
+        "test/block491-ruling-codification.test.mjs"
+      ],
+      "impactRule": [
+        "block491-ruling-codification"
+      ]
+    },
+    {
+      "file": "acceptance/block491-ruling-codification/ruling-codification-snapshot.json",
+      "assertedBy": [
+        "test/block491-ruling-codification.test.mjs"
+      ],
+      "impactRule": [
+        "block491-ruling-codification"
+      ]
+    },
+    {
+      "file": "acceptance/block498-v2b-d2-contract/hk01-red.txt",
+      "assertedBy": [
+        "test/block322-p3-03-v2b-d2-contract.test.mjs"
+      ],
+      "impactRule": [
+        "block498-v2b-d2-contract"
+      ]
+    },
+    {
+      "file": "acceptance/block504-v2b-import-features/hk01-green.txt",
+      "assertedBy": [
+        "test/block491-ruling-codification.test.mjs",
+        "test/block504-v2b-import-features.test.mjs"
+      ],
+      "impactRule": [
+        "block504-v2b-import-features"
+      ]
+    },
+    {
+      "file": "acceptance/block504-v2b-import-features/hk01-red.txt",
+      "assertedBy": [
+        "test/block491-ruling-codification.test.mjs",
+        "test/block504-v2b-import-features.test.mjs"
+      ],
+      "impactRule": [
+        "block504-v2b-import-features"
+      ]
+    },
+    {
       "file": "acceptance/bundle-size-baseline.json",
       "assertedBy": [
         "test/block141-bundle-baseline.test.mjs"
       ],
       "impactRule": [
         "block141-riders-clearing"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/GATE-LEDGER.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/GATE-LEDGER.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/hk01-green.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/hk01-red.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/live/cultural-watermark-ai-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/live/cultural-watermark-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/live/extensions.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/live/settings.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/ai-image/live/welcome.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark-ai",
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/design-concepts/A_single_minimalist_Chinese_in_2026-11-20T12-57-16.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/hk01-green.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/hk01-red.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live-minimal/cultural-watermark-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live-minimal/extensions.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live-minimal/home.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live-minimal/settings.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live-minimal/welcome.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live/cultural-watermark-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live/extensions.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live/home.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live/settings.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/live/welcome.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/GlobalWatermark.tsx",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/cultural-watermark.cjs",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-json-worktree-snapshot-ai-run.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-minimal/cultural-watermark-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-minimal/extensions.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-minimal/home.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-minimal/settings.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/live-minimal/welcome.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/watermark-contract.test.ts",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/minimal-variant-preserved/watermark.css",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/pen-stroke/GATE-LEDGER.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/pen-stroke/hk01-green.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
+      ]
+    },
+    {
+      "file": "acceptance/cultural-watermark/pen-stroke/hk01-red.txt",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "cultural-watermark"
       ]
     },
     {
@@ -4407,12 +5935,104 @@
       ]
     },
     {
+      "file": "acceptance/evals/smoke-2026-11-12T13-41-48-255Z.json",
+      "assertedBy": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "impactRule": [
+        "block181-evals-harness"
+      ]
+    },
+    {
+      "file": "acceptance/evals/smoke-2026-11-12T13-53-09-768Z.json",
+      "assertedBy": [
+        "test/block192-real-provider-credentials.test.mjs"
+      ],
+      "impactRule": [
+        "block181-evals-harness"
+      ]
+    },
+    {
       "file": "acceptance/evals/smoke-latest.json",
       "assertedBy": [
         "test/block192-real-provider-credentials.test.mjs"
       ],
       "impactRule": [
         "block181-evals-harness"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/docs-check.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/evidence-export.json",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/hk01-green.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/hk01-red.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/neighborhood.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/test-run.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/evo-3/ui-audit.txt",
+      "assertedBy": [
+        "test/evo3-verify-frequency.test.mjs"
+      ],
+      "impactRule": [
+        "evo3-verify-frequency"
+      ]
+    },
+    {
+      "file": "acceptance/functional-audit-2026-11-04/surface-matrix.json",
+      "assertedBy": [
+        "test/block357-shelf-and-map.test.mjs",
+        "test/post-s7-h9-hygiene-gates.test.mjs",
+        "test/post-s7-h9-matrix-parity.test.mjs"
+      ],
+      "impactRule": [
+        "block346-surface-audit"
       ]
     },
     {
@@ -5570,6 +7190,528 @@
       ],
       "impactRule": [
         "acceptance-script-owned"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/EXECUTION-PROMPT.md",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/FULL-AUDIT-AND-BLUEPRINT.md",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-canonical-readings.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-closeout-gates.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-delivery-brief.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-gap-ledger-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-historical-readings.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-perf-adjudication.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-six-dimension-review.md",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m0/m0-wip-owner-table.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m1/m1-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m1/m1-six-dimension-review.md",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m2-run-1.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m2-run-2.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m2-run-3.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m2/m2-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m2/m2-six-dimension-review.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m3/gate-report.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m3/m3-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/evals-readout.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/evals-smoke-run-reading.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/fixture/fixture.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/fixture/manifest.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/gate-report.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m4/m4-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m5/gate-report.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m5/m5-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m5a/m5a-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/A/m6-a-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/B/m6-b-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/C/m6-c-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/D/m6-d-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/E/m6-e-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/F/m6-f-view.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/m6-all-views.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6/m6-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/full-test-sweep.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/genui-frame-live.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/launch-verification.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/m6a-block437-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/m6a-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/mcp-app-auto-render.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/mechanical-gap-closeout.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/model-agent-verification.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/p1-p4-verification.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/packaged-start-attribution.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/packaged-start-diagnosis.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/real-stack-smoke.txt",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/surface-schema.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/universal-plugin-compat.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m6a/verification-matrix.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/closeout-runs.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/eleven-dimension-col8.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/gap-ledger.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/long-task-self-proof.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/m7-delivery-brief.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/m7-evidence.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
+      ]
+    },
+    {
+      "file": "acceptance/m-blueprint-2026-11-11/m7/red-line-verification.json",
+      "assertedBy": [
+        "test/m6a-surface-schema.test.mjs"
+      ],
+      "impactRule": [
+        "m-blueprint-program"
       ]
     },
     {
@@ -7229,6 +9371,1801 @@
       ]
     },
     {
+      "file": "acceptance/next-stage-super-blueprint-2026-11-17/IMG2THREEJS-EVALUATION.md",
+      "assertedBy": [
+        "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "impactRule": [
+        "next-stage-super-blueprint"
+      ]
+    },
+    {
+      "file": "acceptance/next-stage-super-blueprint-2026-11-17/SUPER-BLUEPRINT.md",
+      "assertedBy": [
+        "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "impactRule": [
+        "next-stage-super-blueprint"
+      ]
+    },
+    {
+      "file": "acceptance/next-stage-super-blueprint-2026-11-17/hk01.txt",
+      "assertedBy": [
+        "test/next-stage-super-blueprint.test.mjs"
+      ],
+      "impactRule": [
+        "next-stage-super-blueprint"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/gap-terminal-ledger.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-canonical-readings.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-criteria-verdict.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-governance-selftest.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-lint-hygiene-overlap.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-start-baseline.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k0/k0-wip-owner-table.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-definition-wiring.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-ipc-first-batch.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-mcp-metering-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k1/k1-permission-tier-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k2/k2-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k2/k2-envelope-and-index.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k2/k2-named-limit-refactor.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k2/k2-red-green.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k2/k2-w5b-deferred-slices.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-debt-triage.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-e-l-boundaries.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-experience-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-inline-style-baseline.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k3/k3-inline-style-gate.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-architecture-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-source-scan-baseline.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-source-scan-ratchet.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-version-parity-report.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k4/k4-w5b-slices.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-evidence-metadata-gate.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-perf-evidence-explicit.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-perf-matrix-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k5/k5-v-l-boundaries.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k6/k6-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k6/k6-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k6/k6-red-green.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k6/k6-security-truth.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k6/k6-u-boundaries.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-closeout-gates.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-contract-tests.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-docs-reconcile-review.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-eleven-dim-review.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-evidence-disclosure.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-final-review-p1-fixes.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-final-verdict.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/k7-gap-terminal-states.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-h9-2026-11-10/k7/task-suite-attempt.json",
+      "assertedBy": [
+        "test/block404-l0-criteria-gates.test.mjs",
+        "test/post-h9-k5-perf-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l0/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l0/perf-evidence.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l1/dependency-static-inventory.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l1/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l1/u-materials-pointer.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l2/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l3/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l4/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l4/perf-evidence.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l5/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l6/gate-sweep.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l6/historic-evidence-index.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l7/closeout-runs.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l7/gap-ledger.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-k7-2026-11-10/l7/perf-evidence.json",
+      "assertedBy": [
+        "test/block351-ear.test.mjs",
+        "test/block410-l6-experience.test.mjs"
+      ],
+      "impactRule": [
+        "post-h9-program"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h0/gate-baseline.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h0/shard-attribution.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h0/shard-summary-baseline.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h0/shard-summary.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h0/wip-inventory.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h1/legacy-unhashed-inventory.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h5/perf-evidence.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-09/h7/gap-ledger.json",
+      "assertedBy": [
+        "test/block385-h0-evidence.test.mjs",
+        "test/post-s7-gap-blocker-classification.test.mjs",
+        "test/post-s7-h10-round2-ledger.test.mjs",
+        "test/post-s7-h9-agent-side-ledger.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/cascade-scan.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/cdp-event-projection.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/cold-start-x5.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/color-baseline.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/cycle-clusters.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/debt-adjudication.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/deferred-triage.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h10/unmapped-decay-batch2.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block395-self-contained-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h8/closeout.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h8/dom-budget-live.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h8/startup-five-stage.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-startup-marks"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h8/ui-live.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/big-file-anchor.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/cv-ab.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/ipc-unused-triage.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/layout-ab.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/lint-domain-baseline.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/prompt-injection-inventory.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/structural-triage.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/post-s7-2026-11-10/h9/unmapped-decay-batch.json",
+      "assertedBy": [
+        "test/post-h9-k5-perf-evidence.test.mjs",
+        "test/post-s7-h10-b05-cascade.test.mjs",
+        "test/post-s7-h10-cold-start.test.mjs",
+        "test/post-s7-h10-color-ratchet.test.mjs",
+        "test/post-s7-h10-cycle-cluster.test.mjs",
+        "test/post-s7-h10-debt-adjudicate.test.mjs",
+        "test/post-s7-h10-deferred-triage.test.mjs",
+        "test/post-s7-h8-evidence-contract.test.mjs",
+        "test/post-s7-h9-ab-evidence.test.mjs",
+        "test/post-s7-h9-size-ledger-trace.test.mjs",
+        "test/post-s7-h9-structural-gates.test.mjs"
+      ],
+      "impactRule": [
+        "post-s7-acceptance",
+        "block394-mechanical-gates"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/ASSESSMENT.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/c53-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/docs-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/exit-codes.tsv",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/gate-code-size.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/gate-silent-catch.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/gate-ui-a11y.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/gate-user-assets.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/hygiene-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/quality-types.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/test-changed-list.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/ui-audit-check-post-writeback.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/ui-audit-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/v0-baseline-contracts.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/project-status-assessment-r2-2026-11-20/gates/visual-chain-contracts.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-all.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-docs-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-gate-code-size.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-gate-silent-catch.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-gate-user-assets.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-hygiene-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-quality-types.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-test-changed-list.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/baseline-ui-audit-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/exit-codes.tsv",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s1-flow-run.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s1-test-instance-boot.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s1-ui-audit-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s2-silent-catch.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s2-test-changed-list.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s2-user-assets.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s3-code-size.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s3-design-baseline-regen.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s3-design-context-tests.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s3-visual-consistency-regen.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s4-docs-check.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-css-modules.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-flow-run.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-test-instance-boot.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-ui-a11y.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-ui-audit.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s5-vitest-green.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s6a-tests.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-2.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-3.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-4.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-5.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-6.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-7.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full-8.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/gates/s8-closeout-full.log",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s1/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s2/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s3/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s4/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s4/gates-registry-check.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s5/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s5/live/s5-default-identity-live-darwin.json",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s5/live/welcome-default-identity.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s5/live/welcome-migrated-teal.png",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s6/RULINGS-breakpoints.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s6/RULINGS-status-color.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s6/RULINGS-target-score.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s7/RULINGS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s8/PROGRESS.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
+      "file": "acceptance/r2-remediation/s8/RULINGS-closeout-contracts.md",
+      "assertedBy": [
+        "test/r2-remediation-evidence.test.mjs"
+      ],
+      "impactRule": [
+        "r2-remediation-batch"
+      ]
+    },
+    {
       "file": "acceptance/ui-315/ui315-encoding-shell.png",
       "assertedBy": [
         "test/block351-assetization.test.mjs"
@@ -8120,6 +12057,510 @@
       ]
     },
     {
+      "file": "acceptance/ui-design-assessment-2026-11-11/ASSESSMENT-AND-PLAN.md",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/baseline.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d0/failure-triage.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d0/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d0/gate-readout.txt",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d1/failure-triage.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d1/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2-refactor/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2-refactor/workspace-after-readable.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2-refactor/workspace-after.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2-refactor/workspace-before.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2/ui-d2-geometry-element.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d2/ui-d2-geometry-live-darwin.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d3/convergence.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d3/dryrun.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d3/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d4/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d4/ui-d4-a11y-live-darwin.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d4/ui-d4-a11y-live.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d5/before-after-scorecard.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d5/closeout-runs.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d5/gap-ledger-summary.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/d5/gap-ledger.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/gate-readout.json",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-after.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-after2.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-after3.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-after4.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-before.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-desktop.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-ia-expanded.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-ia1.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-ia2.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-import.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-maintenance.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v10.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v11.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v12.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v13.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v14.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v15.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v16.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v17.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v18.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v2.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v20.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v21.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v22.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v3.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v4.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v5.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v6.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v7.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v8.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
+      "file": "acceptance/ui-design-assessment-2026-11-11/settings-redesign/settings-v9.png",
+      "assertedBy": [
+        "test/ui-design-program.test.mjs"
+      ],
+      "impactRule": [
+        "ui-design-program"
+      ]
+    },
+    {
       "file": "acceptance/ui-proxy-review/1/ui499-gen-defaults.png",
       "assertedBy": [
         "test/block351-assetization.test.mjs"
@@ -8378,6 +12819,18 @@
       ],
       "impactRule": [
         "ui-proxy-review-probe"
+      ]
+    },
+    {
+      "file": "acceptance/video-north-star-2026-11-18/VIDEO-NORTH-STAR-PLAN.md",
+      "assertedBy": [
+        "test/block482-video-compose.test.mjs",
+        "test/block483-video-evidence.test.mjs",
+        "test/block486-video-storyboard.test.mjs",
+        "test/block487-video-advanced-shot.test.mjs"
+      ],
+      "impactRule": [
+        "upstream-sync-acceptance-coverage"
       ]
     }
   ]
