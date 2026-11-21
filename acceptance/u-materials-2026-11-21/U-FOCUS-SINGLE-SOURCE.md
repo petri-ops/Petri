@@ -1,4 +1,4 @@
-# U 材料 · 全局 focus-visible 单源（2026-11-21 · pending_user_ruling 零代答）
+# U 材料 · 全局 focus-visible 单源（2026-11-21 · **ruled（2026-11-21 用户口令「裁决了 没有问题 冲」=采纳推荐）**）
 
 > 现状现读：focus-visible 声明 **85 处**分散于组件 CSS（V234 时代盘点 88，S6a 状态色收敛后现读 85）；
 > 色值已统一走 `--petri-accent`（焦点环颜色一致），分散的是**声明位置**（各组件自带 :focus-visible 规则）。
@@ -18,3 +18,12 @@
 ## 裁决格式
 
 `U-FOCUS：B` 或 `U-FOCUS：A`；裁决后回写 V234 GATE-LEDGER deferred 行。
+
+
+---
+
+## 裁决（2026-11-21）
+
+- 用户口令原话：「裁决了 没有问题 冲」
+- **verdict = B（维持+增量纪律）**（采纳本文推荐）
+- 回写落点见各 GATE-LEDGER/边界注记。

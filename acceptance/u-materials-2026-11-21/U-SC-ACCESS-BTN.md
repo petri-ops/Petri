@@ -1,4 +1,4 @@
-# U 材料 · sc-access-btn 橙红是否随和声（2026-11-21 · pending_user_ruling 零代答）
+# U 材料 · sc-access-btn 橙红是否随和声（2026-11-21 · **ruled（2026-11-21 用户口令「裁决了 没有问题 冲」=采纳推荐）**）
 
 > 现状现读：`frontend/src/components/copilot/simple-chat.css:2217` `.sc-access-btn` 用
 > `--petri-accent-orange`（固定橙红）+ hover `--petri-accent-orange-bg`——**不随 data-accent 切档**
@@ -19,3 +19,12 @@
 ## 裁决格式
 
 `U-SC-ACCESS：A` 或 `U-SC-ACCESS：B`；裁决后回写 A4 边界注记。
+
+
+---
+
+## 裁决（2026-11-21）
+
+- 用户口令原话：「裁决了 没有问题 冲」
+- **verdict = A（保持橙红固定）**（采纳本文推荐）
+- 回写落点见各 GATE-LEDGER/边界注记。

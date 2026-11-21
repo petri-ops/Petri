@@ -16,7 +16,7 @@
   - `project-workspace.module.css` 128 处 `;;` 双分号（2026-10-11 语法噪声，无契约冻结）机械清零；
   - `Federation.tsx` 标题「添加协作节点」→「协作节点」（标题名词短语纪律；按钮仍动词）。
 - **CTA 例外登记**：home「创建第一个项目」是空态主行动标题（3 测试依赖），动词短语在此合规，不改。
-- **deferred**：全局 focus-visible 单源（88 处分散，强行收敛属大重构、易触 ratchet）——盘点记录，本次不合并。
+- **deferred → ruled（2026-11-21 U-FOCUS：B 维持+增量纪律）**：focus-visible 色值已统一 accent（现读 85 处声明分散为声明位置非观感漂移）；新增组件一律单源写法（theme-token 契约锚随批）；85 处存量重构不做（无观感增益回归面大）。材料=acceptance/u-materials-2026-11-21/U-FOCUS-SINGLE-SOURCE.md。
 
 ### V4 复测回写
 - `scripts/lib/v234-scorecard.mjs` 从现读 11 项判据机械派生评分卡，**保守口径**（每维 ≤+0.5、D 封顶 4.7，不宣称审美满分）：before **3.6 → after 4.1**（A3.5/B4.0/C4.0/D4.7）。证据 `scorecard.json`。
