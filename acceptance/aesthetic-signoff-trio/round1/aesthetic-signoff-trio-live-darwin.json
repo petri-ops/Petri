@@ -1,0 +1,59 @@
+{
+  "name": "aesthetic-signoff-trio",
+  "platform": "darwin",
+  "startedAt": "2026-11-21T01:44:39.454Z",
+  "finishedAt": "2026-11-21T01:44:42.819Z",
+  "assertions": [
+    {
+      "name": "A1_default_accent_attrs",
+      "pass": true,
+      "detail": "{\"accent\":\"celadon-ink\",\"surface\":\"celadon\"}"
+    },
+    {
+      "name": "C1_welcome_watermark_layer",
+      "pass": true,
+      "detail": "{\"bg\":\"url(\\\"http://localhost:3000/src/assets/cultural-watermark.png\",\"opacity\":\"0.1\",\"filter\":\"none\",\"pe\":\"none\",\"pos\":\"fixed\"}"
+    },
+    {
+      "name": "C2_welcome_opacity",
+      "pass": true,
+      "detail": "op=0.1 theme=light"
+    },
+    {
+      "name": "shot_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C1_extensions_watermark_layer",
+      "pass": true,
+      "detail": "{\"bg\":\"url(\\\"http://localhost:3000/src/assets/cultural-watermark.png\",\"opacity\":\"0.1\",\"filter\":\"none\",\"pe\":\"none\",\"pos\":\"fixed\"}"
+    },
+    {
+      "name": "C2_extensions_opacity",
+      "pass": true,
+      "detail": "op=0.1 theme=light"
+    },
+    {
+      "name": "shot_extensions",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "C1_settings_watermark_layer",
+      "pass": true,
+      "detail": "{\"bg\":\"url(\\\"http://localhost:3000/src/assets/cultural-watermark.png\",\"opacity\":\"0.1\",\"filter\":\"none\",\"pe\":\"none\",\"pos\":\"fixed\"}"
+    },
+    {
+      "name": "C2_settings_opacity",
+      "pass": true,
+      "detail": "op=0.1 theme=light"
+    },
+    {
+      "name": "shot_settings",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

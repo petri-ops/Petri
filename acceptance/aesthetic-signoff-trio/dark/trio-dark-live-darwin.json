@@ -1,0 +1,49 @@
+{
+  "name": "trio-dark",
+  "platform": "darwin",
+  "startedAt": "2026-11-21T01:47:57.301Z",
+  "finishedAt": "2026-11-21T01:48:05.922Z",
+  "assertions": [
+    {
+      "name": "dark_welcome_theme",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\"}"
+    },
+    {
+      "name": "dark_welcome_watermark_008",
+      "pass": true,
+      "detail": "{\"opacity\":\"0.08\",\"filter\":\"invert(1)\",\"pe\":\"none\"}"
+    },
+    {
+      "name": "dark_welcome_identity_attrs",
+      "pass": true,
+      "detail": "{\"accent\":\"celadon-ink\",\"surface\":\"celadon\"}"
+    },
+    {
+      "name": "dark_shot_welcome",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "dark_settings_theme",
+      "pass": true,
+      "detail": "{\"theme\":\"dark\"}"
+    },
+    {
+      "name": "dark_settings_watermark_008",
+      "pass": true,
+      "detail": "{\"opacity\":\"0.08\",\"filter\":\"invert(1)\",\"pe\":\"none\"}"
+    },
+    {
+      "name": "dark_settings_identity_attrs",
+      "pass": true,
+      "detail": "{\"accent\":\"celadon-ink\",\"surface\":\"celadon\"}"
+    },
+    {
+      "name": "dark_shot_settings",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}

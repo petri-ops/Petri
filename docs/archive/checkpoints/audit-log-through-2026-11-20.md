@@ -45,3 +45,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-20T23:50:20.041Z -->
 最后更新：2026-11-20（🎨 **艺术性造型升级（形态语义层级）**：用户「图标小卡片方方正正不够高级/个性」→ 跨门类取形（建筑月洞门柔边/雕塑卵石之润/绘画落印方有郑重/开环呼应），让方/圆/环各有身份。新 token seal3/icon10/card14px 同步契约白名单；图标座/hero/mcpCard 换 squircle、空徽章 50% 圆印记、SVG 加 seal-square 方印原子；KPI 发丝线表格 radius0 保留（框架语法）。HK-01 红5fail→绿7/7 + 邻域65tests + tsc0 + c53重生成 + 实机7/7(三档live+三面截图)。实机变化真实但克制，审美**不代签**保持 in_progress（需偏好标准或口令走预审），UI-717 四档 verified 不外推。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-21T01:49:35.024Z -->
+最后更新：2026-11-20（🖌 **国风水印修复：全局层覆盖所有页面**（用户实机反馈「只在欢迎页看到，其它都没看到」）：只读 CDP 诊断根因=首版仅挂 welcome/workspace 两处、且工作区水印被内容盖住。重构为全局单源——`GlobalWatermark.tsx` 在 main.tsx 挂一次，`.petri-watermark-global` fixed 四角，移除逐页 div；不变：四原型 mask/3% ink 派生/URI 零字面色/pointer-events:none/aria-hidden/零裸 z。实机 16/16：welcome/home/extensions/settings 四路由四纹样全在场且可见（settings/extensions 截图过目：月洞弧/方印/卵石/开环四角到位、内容不受干扰）。HK-01 绿6/6+邻域 PASS+tsc0+a11y绿；审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）

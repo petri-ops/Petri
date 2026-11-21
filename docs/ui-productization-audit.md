@@ -6,11 +6,11 @@
 - **机械证据**：改前改后同套 635 tests（styles+work-surface+result-studio+desktop+welcome/home）改前 632+3 自匹配假红（S6a 契约测提交后 git grep 自见，已修）→ 改后 **635/635**；tsc 0；a11y PASS；`gate:ui-breakpoints` PASS（非 WIP 9 档在册/JS 裸阈值 0）。
 - **诚实边界**：收敛=authorized breaking（簇内 520–768 等边缘区间塌缩点平移，如 640/700/720/760→768 后这些区间下才塌缩）；@container 元素级自适应不受影响；观感 in_progress 零代签。
 
-## UI-718: 默认身份面可见性（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S5/P1-3 · A0 裁决「开干」的默认态落地，机械断言 dev Electron/9223 边界内 10/10，观感零代签）
+## UI-718: 默认身份面可见性（2026-11-21 **verified**；UI 轨，R2 清偿批 S5/P1-3 · A0 裁决「开干」的默认态落地；机械 10/10 + **审美偏好预审闭环签字**（2026-11-21 用户发令三件套预审，首轮 14/14 判据全过即翻，dev Electron/9223 离屏边界内））
 
 - **范围**：默认 accent `teal → celadon-ink`（A0 裁决 B 青瓷·墨，ruling.json 现读落档名）；默认态 `data-accent`+`data-surface` 双属性在场（宣纸/墨骨架 + 青瓷工作态 accent 默认可见）；welcome 问候区身份 token 组件面消费（问候字 `--petri-ink-base` 宣纸墨字 + `::after` 朱砂落印点 `--petri-accent-vermilion`/`--petri-radius-seal`，点睛 <5%）；旧配置迁移=显式保存过偏好的用户保留（存 teal 得 teal，非法值才回落默认）。
 - **机械证据**：HK-01 红 4/2→绿（defaultIdentity.test.ts 6 tests + 邻域 26/26）；token 契约 36/36；tsc 0；ui-a11y 0 违规；css-modules 重锚（watermark 两 plain CSS 漏登记债，13 白名单）；实机 flow `s5-default-identity` **10/10 allPass**（celadon-ink 默认档/问候字 rgb(23,58,56)/落印点 rgb(181,72,47)/--petri-accent=#0f766e/server 已存偏好保留 refill 活证）+ 截图 `acceptance/r2-remediation/s5/live/welcome-default-identity.png`。
-- **诚实边界**：纯默认路径（无任何存储）由单测承担（jsdom）；实机实例后端持有用户真实 user-prefs（celadon-ink），零触碰不写服务端，迁移保留语义由 refill 活证+单测双证。**观感 in_progress 零代签**（审美维度无 codified 偏好覆盖）；顶部黄条=dev 调试提示非产品 UI。
+- **诚实边界**：纯默认路径（无任何存储）由单测承担（jsdom）；实机实例后端持有用户真实 user-prefs（celadon-ink），零触碰不写服务端，迁移保留语义由 refill 活证+单测双证。**观感签字（2026-11-21）**：用户发令三件套偏好预审闭环 → 判据=审美通则（文字少/布局和谐/默认收敛）+A0 裁决，welcome 首屏 14/14 判据首轮全过（截图逐条）→ 翻 verified；证据 `acceptance/aesthetic-signoff-trio/`。顶部黄条=dev 调试提示非产品 UI。
 
 ## UI-717: 身份色板 token 化（2026-11-20 **verified**；UI 轨，A0 裁决「行」后 A1–A3+V1+V1-U+V5+B 落地，A4 round2 静态面 + round3 交互面 + **A4 四档整体观感**偏好预审闭环签字·dev Electron/9223 离屏边界内）
 
@@ -35,7 +35,7 @@
 
 - **V2/V3/V4 收尾加映（2026-11-20，用户预授权一次做完）**：零视觉变化的三类结构/语法修复——`leftPanelWrap` 双定义合并（UI-262 锚点保持）、`;;` 128 处清零、「添加协作节点」→「协作节点」名词化；裸 z-index(104 冻结)/扫描面(已 rows)/阴影三档/caret/selection 盘点已是现状不妄动；V4 现读评分卡 3.6→4.1（机械下限、D 封顶 4.7，不宣称审美满分）。HK-01 绿 8/8 + 全契约 60 tests + tsc0 + c53/a11y 绿；breaking U 类（断点/状态色/focus 单源）deferred。不触发观感签字（零视觉变化），UI-717 四档 verified 维持；证据 `acceptance/v234-layer-detail/`。
 
-- **艺术性造型升级（2026-11-20，用户"方卡不够高级/个性"反馈）**：形态语义层级——seal3/icon10/card14 三档 token（同步契约白名单），图标座(TitleBar/home/leftQuickAction/emptyLaunch)、`.workbenchIcon`、`.mcpCard` 换 squircle，`.emptyResultBadge` 12px 方卡→50% 圆印记，SVG 单源加 `seal-square` 方印原子；KPI 发丝线表格 radius0 保留（框架语法）。取形：建筑月洞门柔边/雕塑卵石之润/绘画落印方有郑重/开环呼应——让方/圆/环各有身份而非同一模子。HK-01 绿 7/7 + 邻域 65 tests + tsc0 + c53 重生成 + 实机 7/7（三档 live+三面截图）。**审美不代签**：实机变化真实但克制，保持 in_progress（需偏好标准或口令走 ≤3 轮预审），UI-717 四档 verified 不外推；证据 `acceptance/form-grammar/`。
+- **艺术性造型升级（2026-11-20，用户"方卡不够高级/个性"反馈）**：形态语义层级——seal3/icon10/card14 三档 token（同步契约白名单），图标座(TitleBar/home/leftQuickAction/emptyLaunch)、`.workbenchIcon`、`.mcpCard` 换 squircle，`.emptyResultBadge` 12px 方卡→50% 圆印记，SVG 单源加 `seal-square` 方印原子；KPI 发丝线表格 radius0 保留（框架语法）。取形：建筑月洞门柔边/雕塑卵石之润/绘画落印方有郑重/开环呼应——让方/圆/环各有身份而非同一模子。HK-01 绿 7/7 + 邻域 65 tests + tsc0 + c53 重生成 + 实机 7/7（三档 live+三面截图）。**审美签字（2026-11-21 偏好预审闭环 verified）**：用户发令三件套预审 → 判据=用户原话「方方正正不够高级/个性」+审美通则；extensions/settings/welcome 三面逐条 B1–B5 全过（柔边/圆印记/白名单/点睛合规/布局和谐，首轮即过零优化项）→ 翻 verified；证据 `acceptance/aesthetic-signoff-trio/form-grammar/`（round1 三面截图）+`acceptance/form-grammar/`。
 
 - **国风简约背景水印（2026-11-20，用户"月洞门/卵石/落印/开环做国风背景水印"诉求）**：四原型 mask data-URI（月洞弧/卵石椭/方印/开环）+ `color-mix(ink-base 3%, bg-canvas)` 主题自适应，URI 零字面色、`pointer-events:none`、`aria-hidden`、零裸 z-index；挂 welcome/workspace 根容器。HK-01 绿 6/6 + 邻域 42 tests + tsc0 + a11y 绿 + 实机 6/6。welcome 截图：右下两道月洞弧、右上淡方印，主区留白、正文不干扰——计白当黑。**审美不代签** in_progress（工作区测试 userData 无项目如实标不可达未伪造），UI-717 不外推；证据 `acceptance/cultural-watermark/`。
 
@@ -43,7 +43,7 @@
 
 - **国风水印·钢笔笔锋二轮（2026-11-20，用户反馈「模糊→要钢笔笔锋、硬、细、不要太透明、不干扰内容」）**：四原型 mask 从均匀 stroke 重写为**楔形 fill 笔锋**；轮1（12%墨+宽带）实机截图过粗如粉笔 → 轮2 收敛为 8% 墨 + 3px 级细锋 + 空心方印（非实心）。HK-01 红2fail→绿7/7（笔锋 fill/无 round-cap/无 opacity 模糊/6–16% 墨），33 tests + tsc0 + c53 + 实机 16/16。实机 settings 截图：细锋已达成、空心方印对、内容不干扰；**柳叶笔锋（两端尖中间粗）未完全到位**（当前为等宽细带），如实标注、审美保持 in_progress，≤3 轮上限内未再震荡。证据 `acceptance/cultural-watermark/pen-stroke/`。
 
-- **国风水印·AI 专业出图原封不动（2026-11-20，用户"手绘没质感，专业工具设计好原封不动拿来"）**：Figma/Penpot MCP 未连接→image_gen 生成钢笔白描四原型（1536×1024，原图留 provenance），仅白底抠 alpha、笔锋像素不动；`GlobalWatermarkAI`+`watermark-ai.css` 全局单图 background（opacity 0.10/dark 反相 0.08），main.tsx 挂载。HK-01 6/6 + 实机 12/12（三路由背景图加载/非交互/截图）；settings 截图目测：月洞门提按笔锋/开环/方印/卵石四角到位、质感明显优于手绘 SVG 版。**并发冲突如实记录**：另一进程覆盖 watermark.css/GlobalWatermark.tsx/flow 为"极简几何单线候选1"，本包用独立新文件不碰对方，需用户决定最终版本；观感由实机截图认定、UI-717 不外推。证据 `acceptance/cultural-watermark/ai-image/`。
+- **国风水印·AI 专业出图原封不动（2026-11-20，用户"手绘没质感，专业工具设计好原封不动拿来"）**：Figma/Penpot MCP 未连接→image_gen 生成钢笔白描四原型（1536×1024，原图留 provenance），仅白底抠 alpha、笔锋像素不动；`GlobalWatermarkAI`+`watermark-ai.css` 全局单图 background（opacity 0.10/dark 反相 0.08），main.tsx 挂载。HK-01 6/6 + 实机 12/12（三路由背景图加载/非交互/截图）；settings 截图目测：月洞门提按笔锋/开环/方印/卵石四角到位、质感明显优于手绘 SVG 版。**并发冲突收口（S1 已裁）**：终版=AI 版（极简变体留证 minimal-variant-preserved/，对方产物零删）；**审美签字（2026-11-21 偏好预审闭环 verified）**：用户发令三件套预审 → 判据=用户原话「国风简约朴素美/不干扰内容/专业工具质感」；welcome/extensions/settings 三面逐条 C1–C4 全过（纹样边缘化不扰文/单图简约/白描质感，首轮即过零优化项）+暗色 0.08 机械过 → 翻 verified；证据 `acceptance/aesthetic-signoff-trio/`（round1+dark）。
 
 > BLOCK-503 · YI-REST-WB 人眼签字回写批（2026-11-20）：乙组剩余（乙5–乙8）证据采集+用户批量口令签署——**乙5 P4 八态矩阵 12 人眼格 verified**（input:hover 格留因=无 :hover 规则仅 focus 强调属设计取舍；navItem:active 格留因=由 /extensions 四货架真 tabs 承载、左栏 QuickActions 无 aria-current）、**乙6 P5 两槽 verified / P6 两槽 verified+留因**（消费面真实；语义匹配真实触发腿受控注入留观察）、**H-01/H-02/H-03/H-04/H-05/H-07 verified**（H-02 留因 zoom 等效布局视口、H-03 留因 0.06 vs 0.07、H-05 留注样本 4.75–21.0 全达标且 4.40:1 已由 BLOCK-422 提至 4.81 未复现）、**H-06/H-08/E-02 分批**（H-06 三文件 verified+desktop.css pending 在册+8 文件 pending 补腿；E-02：11 verified/2 cancelled 维持终态、UI-695/UI-331 verified+留因、UI-200 与其余 6 条 in_progress 维持）、**E-01/E-03 保持 pending_human_eye 零代填**。签字记录=`docs/ui-design-human-eye-route.md` §3 + `acceptance/block503-outputs/yi-rest/signature-record.md`（证据=`acceptance/block503-outputs/yi-rest/`）。**零 CSS/组件/token 写面、零新依赖、debt 棘轮零改动**；台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写，e-class 指南分层陈旧如实披露）。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

@@ -1,0 +1,19 @@
+{
+  "name": "trio-dark-diag",
+  "platform": "darwin",
+  "startedAt": "2026-11-21T01:47:25.432Z",
+  "finishedAt": "2026-11-21T01:47:29.727Z",
+  "assertions": [
+    {
+      "name": "diag_theme_dark",
+      "pass": true,
+      "detail": "dark"
+    },
+    {
+      "name": "diag_shot",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "allPass": true
+}
