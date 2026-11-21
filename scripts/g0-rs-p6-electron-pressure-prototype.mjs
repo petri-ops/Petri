@@ -1169,8 +1169,12 @@ export async function observeP6ElectronPressure({
   let vite = null;
   let electron = null;
   let cleaning = false;
+  // 调试开关（R2 清偿批清退票 2026-11-21）：PETRI_P6_KEEP_ROOT=1 保留现场（table_load 类
+  // 深水调试需要 driver-result.json/stderr 现场；正常跑保持既有清理纪律）。
+  const keepRoot = process.env.PETRI_P6_KEEP_ROOT === '1';
   const cleanup = async () => {
     if (cleaning) return;
+    if (keepRoot) { console.log('[p6-pressure] PETRI_P6_KEEP_ROOT=1 — 保留现场 ' + root); return; }
     cleaning = true;
     await stopChild(electron);
     await stopChild(vite);
