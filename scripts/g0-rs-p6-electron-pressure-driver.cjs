@@ -975,6 +975,13 @@ async function failureDiagnostic(webContents) {
       (() => {
         const canvas = document.querySelector('[aria-label="结果主画布"]');
         const tableViewport = document.querySelector('[aria-label="科学结果表格"]');
+        // P6-TABLE-LOAD 轮2：DOM 级 iframe 元素读数（pack iframe 是否真的挂进 DOM）
+        const packIframes = [...document.querySelectorAll('iframe')].map((el) => ({
+          title: el.getAttribute('title') || '',
+          src: (el.getAttribute('src') || '').slice(0, 100),
+          visible: Boolean(el.offsetParent || el.getClientRects().length),
+          width: Math.round(el.getBoundingClientRect().width),
+        }));
         const visibleText = (document.body?.innerText || '').replace(/\\s+/g, ' ').trim();
         const images = [...(canvas?.querySelectorAll('img') || [])].slice(0, 10).map((image) => {
           let sourceKind = 'unknown';
@@ -1022,6 +1029,7 @@ async function failureDiagnostic(webContents) {
         return {
           canvasPresent: Boolean(canvas),
           tableViewportPresent: Boolean(tableViewport),
+          packIframes,
           images,
           resourceTimings,
           viewerModes: [...(canvas?.querySelectorAll('[data-mode]') || [])]

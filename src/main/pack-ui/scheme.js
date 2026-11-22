@@ -30,7 +30,10 @@ function registerPackSchemePrivileges() {
   protocol.registerSchemesAsPrivileged([
     {
       scheme: SCHEME,
-      privileges: { standard: true, secure: true, supportFetchAPI: false, corsEnabled: false },
+      // U-P6-SANDBOX 裁决 A（2026-11-22）：沙箱 iframe 判 petri-pack:// 为 external protocol
+      // 的成因=缺 supportFetchAPI/corsEnabled——补 true 后沙箱 iframe 可正常加载 pack 视图
+      //（P6 压测 table_load 断点修复；standard/secure 保持；契约 test/p6-pack-scheme-privileges.test.mjs）。
+      privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true },
     },
   ]);
 }
