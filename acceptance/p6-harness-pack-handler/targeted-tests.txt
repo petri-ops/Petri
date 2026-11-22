@@ -1,0 +1,30 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (5.550041ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (1.580291ms)
+✔ BLOCK-216 contributions: disabled pack disappears (1.511084ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (2.498125ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (1.428625ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (1.652291ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (1.212542ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (1.286125ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (53.153916ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (0.926542ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (0.453667ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.333541ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.299417ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.316959ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.302417ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (0.411583ms)
+✔ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (1.362792ms)
+✔ registerPackSchemePrivileges 在 app ready 前调用 (0.295917ms)
+✔ setupPackProtocol 在 run() 内 app ready 后调用 (0.323875ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.133292ms)
+✔ U-P6-SANDBOX：pack scheme privileges 含 supportFetchAPI + corsEnabled（裁决 A） (0.856334ms)
+✔ U-P6-SANDBOX：privileges 注册仍先于 app ready（registerPackSchemePrivileges 时序契约） (0.209875ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 192.145833

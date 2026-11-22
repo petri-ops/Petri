@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "passed": false,
+  "failedStage": "table_load",
+  "timeoutReason": "oop_watchdog_forced",
+  "page": {
+    "canvasPresent": true,
+    "tableViewportPresent": false,
+    "packIframes": [
+      {
+        "title": "bio-result",
+        "src": "petri-pack://petri-pack-bio/ui/result.html",
+        "visible": true,
+        "width": 720
+      }
+    ],
+    "images": [],
+    "resourceTimings": [],
+    "viewerModes": [],
+    "canvasText": "分类结果表 已核验（未篡改） 结果已经过产物校验，可继续查看、比较或交给 Agent 解释。 v1 未选择对象 结果 代码 审查修改 版本历史 询问 Agent",
+    "bodyText": "工作台 新建任务 扩展 知识空间 项目 P5 disposable scientific editing P5 live scientific editing 1分 分类结果表 · P5 disposable scientific editing 结果 2 开始新的对话 在下方输入框中提问 解释项目结构 了解项目的文件组织与数据构成 快速开始 查看 AI 能帮你做什么 规划一个任务 说出目标，我来拆解成可执行的步骤 完全访问 0% 结果 × 分类结果表 已核验（未篡改） 结果已经过产物校验，可继续查看、比较或交给 Agent 解释。 v1 未选择对象 结果 代码 审查修改 版本历史 询问 Agent 高级精细调整 按插件参数逐项控制"
+  },
+  "packSurfaceProbe": {
+    "frames": [
+      {
+        "url": "http://127.0.0.1:63557/project/p_mwrz51ka_jvi0?job=job_128bad97aade4012&artifact=classified_table.csv",
+        "readySignal": false,
+        "consoleTail": [],
+        "loadState": "unknown"
+      }
+    ],
+    "packUrl": [],
+    "frameUrl": null,
+    "readySignal": false,
+    "consoleTail": [],
+    "verdict": "no_pack_frame",
+    "oop": {
+      "verdict": "oop_document_present_ready_missing",
+      "iframeTargetCount": 1,
+      "attachedCount": 1,
+      "contextReadableCount": 1,
+      "readySignal": false,
+      "frames": [
+        {
+          "url": "petri-pack://petri-pack-bio/ui/result.html",
+          "attached": true,
+          "contextAvailable": true,
+          "bioTableRows": 0,
+          "bodyText": "classified_table.csv table rev rev_572a8f7d gene log2FoldChange sig significance significance_column pvalue padj GENE000001 -3 Down 4e-06 padj 1e-06 4e-06 GENE000002 -2.63 Down 7.2e-05 padj 1.8e-05 7.",
+          "documentTitle": "生信主结果",
+          "documentUrl": "petri-pack://petri-pack-bio/ui/result.html",
+          "hasBioTable": true,
+          "hasStateLoading": true,
+          "htmlLength": 30466,
+          "readyState": "complete",
+          "stateLoadingHidden": true,
+          "surfaceReady": false,
+          "surfaceReadyRaw": "undefined",
+          "consoleTail": [],
+          "loadState": "oop_loaded"
+        }
+      ],
+      "iframeTargets": [
+        {
+          "type": "iframe",
+          "url": "petri-pack://petri-pack-bio/ui/result.html"
+        }
+      ],
+      "hostMessages": [],
+      "consoleTail": []
+    }
+  },
+  "artifactNetwork": {
+    "completedCount": 2,
+    "errorCount": 0,
+    "events": [
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      }
+    ]
+  },
+  "rendererConsole": [
+    "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security\n  Policy set or a policy with \"unsafe-eval\" enabled. This exposes users of\n  this app to unnecessary security risks.\n\nFor more information and help, consult\nhttps://electronjs.org/docs/tutorial/security.\nThis warning will not show up\nonce the app is packaged.",
+    "Uncaught (in promise) Error: Error invoking remote method 'app:set-shell-prefs': Error: No handler registered for 'app:set-shell-prefs'"
+  ]
+}

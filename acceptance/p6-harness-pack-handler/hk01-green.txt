@@ -1,0 +1,12 @@
+✔ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (0.9675ms)
+✔ registerPackSchemePrivileges 在 app ready 前调用 (0.291041ms)
+✔ setupPackProtocol 在 run() 内 app ready 后调用 (0.304667ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.140958ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.072542

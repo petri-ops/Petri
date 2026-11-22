@@ -1,0 +1,66 @@
+✖ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (1.297542ms)
+✖ registerPackSchemePrivileges 在 app ready 前调用 (0.34225ms)
+✖ setupPackProtocol 在 run() 内 app ready 后调用 (0.310708ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.225625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.725042
+
+✖ failing tests:
+
+test at test/p6-driver-pack-handler.test.mjs:22:1
+✖ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (1.297542ms)
+  AssertionError [ERR_ASSERTION]: driver 须 require 产品 scheme.js（petri-pack 协议 handler 单源）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-pack-handler.test.mjs:24:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: '#!/usr/bin/env node\n\'use strict\';\n\n/**\n * Disposable Electron-side observer for the bounded P6 pressure prototype.\n * Runtime coordinates stay in the private config file. The result contains\n * only counts, timings, dimensions and digests suitable for later evidence.\n */\n\nconst { app, BrowserWindow, ipcMain } = require(\'electron\');\nconst { createHash } = require(\'node:crypto\');\nconst { mkdirSync, readFileSync, writeFileSync } = require(\'node:fs\');\nconst path = require(\'node:path\');\nconst { probeUrl } = require(\'../src/backend-health.js\');\n\nconst CONFIG_ENV = \'PETRI_P6_PRESSURE_DRIVER_CONFIG\';\nconst PRELOAD_PATH = path.resolve(__dirname, \'..\', \'src\', \'preload.js\');\nconst requestedWaitMs = Number(process.env.PETRI_P6_PRESSURE_WAIT_MS);\nconst WAIT_MS = Number.isFinite(requestedWaitMs) && requestedWaitMs >= 5_000\n  ? requestedWaitMs\n  : 120_000;\nconst POLL_MS = 100;\nconst BACKEND_STATUS_TIMEOUT_MS = 1_500;\n\napp.commandLine.appendSwitch(\'js-flags\', \'--expose-gc\');\n\nconst disposableConfigPath = process.env[CONFIG_ENV];\nif (!disposableConfigPath || !path.isAbsolute(disposableConfigPath)) {\n  throw new Error(`${CONFIG_ENV} must be an absolute disposable path`);\n}\nconst disposableUserData = path.join(path.dirname(disposableConfigPath), \'electron-user-data\');\nmkdirSync(disposableUserData, { recursive: true, mode: 0o700 });\napp.setPath(\'userData\', disposableUserData);\n\nfunction sha256(value) {\n  return createHash(\'sha256\').update(value).digest(\'hex\');\n}\n\nfunction pause(ms) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\nfunction readConfig() {\n  const configPath = process.env[CONFIG_ENV];\n  if (!configPath || !path.isAbsolute(configPath)) {\n    throw new Error(`${CONFIG_ENV} must be an absolute disposable path`);\n  }\n  const config = JSON.parse(readFileSync(configPath, \'utf8\'));\n  for (const key of [\'uiBaseUrl\', \'backendBaseUrl\', \'projectId\', \'conversationId\', \'resultPath\']) {\n    if (typeof config[key] !== \'string\' || !config[key]) throw new Error(`missing config field: ${key}`);\n  }\n  const loopback = (value, label) => {\n    const parsed = new URL(value);\n    if (parsed.protocol !== \'http:\' || parsed.hostname !== \'127.0.0.1\' || !parsed.port || parsed.pathname !== \'/\') {\n      throw new Error(`${label} must be an isolated loopback origin`);\n    }\n    return parsed;\n  };\n  const ui = loopback(config.uiBaseUrl, \'uiBaseUrl\');\n  const backend = loopback(config.backendBaseUrl, \'backendBaseUrl\');\n  if (ui.port === backend.port) throw new Error(\'UI and backend ports must differ\');\n  if (String(process.env.R_SERVER_PORT || \'\') !== backend.port) {\n    throw new Error(\'backendBaseUrl must match the Electron preload backend port\');\n  }\n  if (!path.isAbsolute(config.resultPath)\n      || path.dirname(config.resultPath) !== path.dirname(disposableConfigPath)) {\n    throw new Error(\'resultPath must stay beside the disposable driver config\');\n  }\n  for (const name of [\'table\', \'png\', \'svg\', \'report\']) {\n    const target = config.targets?.[name];\n    if (!target || typeof target.jobId !== \'string\' || typeof target.artifact !== \'string\'\n        || typeof target.label !== \'string\' || !target.label) {\n      throw new Error(`missing target: ${name}`);\n    }\n  }\n  return config;\n}\n\nfunction targetUrl(config, target, mode = \'result\') {\n  return `${config.uiBaseUrl}/project/${encodeURIComponent(config.projectId)}`\n    + `/${encodeURIComponent(mode)}?job=${encodeURIComponent(target.jobId)}`\n    + `&artifact=${encodeURIComponent(target.artifact)}`;\n}\n\nfunction parseToolFileIdentity(value) {\n  try {\n    const parsed = new URL(value);\n    const match = parsed.pathname.match(/\\/tools\\/file\\/([^/]+)\\/([^/]+)$/);\n    if (!match) return null;\n    return {\n      parsed,\n      jobId: decodeURIComponent(match[1]),\n      artifact: decodeURIComponent(match[2]),\n    };\n  } catch {\n    return null;\n  }\n}\n\nfunction matchesToolFileTarget(value, target) {\n  const identity = parseToolFileIdentity(value);\n  return Boolean(identity\n    && identity.jobId === target.jobId\n    && identity.artifact === target.artifact);\n}\n\nfunction registerBackendStatusHandler(config) {\n  const healthUrl = new URL(\'/api/health\', config.backendBaseUrl).toString();\n  const observations = [];\n  ipcMain.handle(\'backend:status\', async () => {\n    const started = performance.now();\n    const rServerUp = await probeUrl(healthUrl, BACKEND_STATUS_TIMEOUT_MS);\n    observations.push({\n      ready: rServerUp,\n      durationMs: performance.now() - started,\n    });\n    return {\n      rRuntime: rServerUp,\n      pyRuntime: false,\n      rServerUp,\n      isReady: rServerUp,\n      downReason: rServerUp ? null : \'本地分析服务尚未就绪\',\n    };\n  });\n  return () => ({\n    checkCount: observations.length,\n    everyCheckReady: observations.length > 0\n      && observations.every((observation) => observation.ready === true),\n    maxDurationMs: observations.length > 0\n      ? Math.max(...observations.map((observation) => observation.durationMs))\n      : null,\n  });\n}\n\nfunction registerIsolatedCompatibilityHandlers() {\n  const observations = {\n    aiSettingsReadCount: 0,\n    terminalResizeCount: 0,\n    terminalStopCount: 0,\n  };\n  ipcMain.handle(\'ai-settings:get\', async () => {\n    observations.aiSettingsReadCount += 1;\n    return {};\n  });\n  ipcMain.handle(\'terminal:session-resize\', async () => {\n    observations.terminalResizeCount += 1;\n    return { ok: false, error: \'terminal_not_exercised_by_pressure_trace\' };\n  });\n  ipcMain.handle(\'terminal:session-stop\', async () => {\n    observations.terminalStopCount += 1;\n    return { ok: true, wasRunning: false };\n  });\n  return () => ({ ...observations });\n}\n\nfunction registerArtifactNetworkObservation(webContents, config) {\n  const backend = new URL(config.backendBaseUrl);\n  const targets = Object.entries(config.targets);\n  const events = [];\n  const classify = (details, outcome) => {\n    const identity = parseToolFileIdentity(details.url);\n    if (!identity) return;\n    const isBackendLoopback = identity.parsed.protocol === \'http:\'\n      && [\'127.0.0.1\', \'localhost\', \'[::1]\'].includes(identity.parsed.hostname)\n      && identity.parsed.port === backend.port;\n    if (!isBackendLoopback) return;\n    const matchedTargets = targets\n      .filter(([, target]) => identity.jobId === target.jobId && identity.artifact === target.artifact)\n      .map(([name]) => name);\n    if (matchedTargets.length === 0) return;\n    events.push({\n      artifactName: identity.artifact,\n      matchedTargets,\n      outcome,\n      resourceType: details.resourceType || \'unknown\',\n      statusCode: Number.isFinite(details.statusCode) ? details.statusCode : null,\n      fromCache: details.fromCache === true,\n      error: outcome === \'error\' ? String(details.error || \'unknown\').slice(0, 160) : null,\n    });\n    if (events.length > 40) events.shift();\n  };\n  // The preload API origin is intentionally loopback-only, but the renderer\n  // may spell the same host as either localhost or 127.0.0.1. Observe all\n  // requests in this disposable session, then retain only exact configured\n  // Job/artifact coordinates without persisting raw URLs or Job IDs.\n  const filter = { urls: [\'<all_urls>\'] };\n  webContents.session.webRequest.onCompleted(filter, (details) => classify(details, \'completed\'));\n  webContents.session.webRequest.onErrorOccurred(filter, (details) => classify(details, \'error\'));\n  return () => ({\n    completedCount: events.filter((event) => event.outcome === \'completed\').length,\n    errorCount: events.filter((event) => event.outcome === \'error\').length,\n    events: events.slice(),\n  });\n}\n\nasync function waitFor(webContents, expression, label, timeoutMs = WAIT_MS) {\n  const deadline = Date.now() + timeoutMs;\n  while (Date.now() < deadline) {\n    try {\n      const value = await webContents.executeJavaScript(expression, true);\n      if (value) return value;\n    } catch {}\n    await pause(POLL_MS);\n  }\n  throw new Error(`timeout:${label}`);\n}\n\nasync function dismissOnboarding(webContents) {\n  await waitFor(webContents, `\n    (() => {\n      const dialog = document.querySelector(\'[role="dialog"][aria-label="首次启动引导"]\');\n      if (!dialog) return true;\n      const button = [...dialog.querySelectorAll(\'button\')]\n        .find((item) => (item.textContent || \'\').trim() === \'跳过引导\' && !item.disabled);\n      if (!button) return false;\n      button.click();\n      return true;\n    })()\n  `, \'onboarding\');\n}\n\nasync function navigate(window, config, target, mode = \'result\') {\n  const started = performance.now();\n  await window.loadURL(targetUrl(config, target, mode));\n  await waitFor(window.webContents,\n    `Boolean(document.querySelector(\'[aria-label="结果主画布"]\'))`,\n    `${mode}_canvas`,\n  );\n  await dismissOnboarding(window.webContents);\n  return performance.now() - started;\n}\n\nasync function attachDebugger(webContents) {\n  if (!webContents.debugger.isAttached()) webContents.debugger.attach(\'1.3\');\n  await webContents.debugger.sendCommand(\'Page.enable\');\n  await webContents.debugger.sendCommand(\'Runtime.enable\');\n  await webContents.debugger.sendCommand(\'HeapProfiler.enable\');\n}\n\n/**\n * P6 OOP 深探（小票 2026-11-22）：在导航前给每个 frame 注入宿主 message tap，\n * 记录 petri:* postMessage（pack iframe 的 petri:ready 发给宿主 window）。\n * 失败不打断主流程；tap 只观测不改 sandbox/CSP/凭据。\n */\nasync function _installHostMessageTap(webContents) {\n  if (!webContents.debugger.isAttached()) webContents.debugger.attach(\'1.3\');\n  await webContents.debugger.sendCommand(\'Page.enable\');\n  await webContents.debugger.sendCommand(\'Runtime.enable\');\n  await webContents.debugger.sendCommand(\'Page.addScriptToEvaluateOnNewDocument\', {\n    source: `(() => {\n      if (window.__petriP6TapInstalled) return;\n      window.__petriP6TapInstalled = true;\n      window.__petriP6Messages = [];\n      window.addEventListener(\'message\', (e) => {\n        const d = e.data;\n        if (d && typeof d === \'object\' && typeof d.type === \'string\'\n            && d.type.indexOf(\'petri:\') === 0) {\n          try {\n            window.__petriP6Messages.push({\n              type: d.type,\n     '... 59362 more characters,
+    expected: /require\([^)]*pack-ui[\\/]scheme\)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/p6-driver-pack-handler.test.mjs:33:1
+✖ registerPackSchemePrivileges 在 app ready 前调用 (0.34225ms)
+  AssertionError [ERR_ASSERTION]: 须调用 registerPackSchemePrivileges()
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-pack-handler.test.mjs:37:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/p6-driver-pack-handler.test.mjs:45:1
+✖ setupPackProtocol 在 run() 内 app ready 后调用 (0.310708ms)
+  AssertionError [ERR_ASSERTION]: 须调用 setupPackProtocol()
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-pack-handler.test.mjs:50:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

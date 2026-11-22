@@ -12,6 +12,10 @@ const { createHash } = require('node:crypto');
 const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
 const path = require('node:path');
 const { probeUrl } = require('../src/backend-health.js');
+// P6 harness 补 pack handler（2026-11-22）：复用产品主进程 scheme.js 单源，
+// 让隔离压测 driver 也能服务 iframe 的 petri-pack:// URL（只读 handler，
+// 仅 harness 协议能力；不改产品 sandbox/CSP/凭据/B1 token）。
+const { registerPackSchemePrivileges, setupPackProtocol } = require('../src/main/pack-ui/scheme');
 
 const CONFIG_ENV = 'PETRI_P6_PRESSURE_DRIVER_CONFIG';
 const PRELOAD_PATH = path.resolve(__dirname, '..', 'src', 'preload.js');
@@ -31,6 +35,9 @@ if (!disposableConfigPath || !path.isAbsolute(disposableConfigPath)) {
 const disposableUserData = path.join(path.dirname(disposableConfigPath), 'electron-user-data');
 mkdirSync(disposableUserData, { recursive: true, mode: 0o700 });
 app.setPath('userData', disposableUserData);
+// 必须在 app ready 前注册 scheme privileges（Electron 硬约束）；复用产品单源，
+// Privileges 含裁决 A（supportFetchAPI/corsEnabled），与产品主窗完全同形。
+registerPackSchemePrivileges();
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -1266,6 +1273,8 @@ async function failureDiagnostic(webContents) {
 }
 
 async function run() {
+  // app ready 后注册 protocol.handle（ready 前不可用）；与 privileges 同为产品单源。
+  setupPackProtocol();
   const config = readConfig();
   const backendStatusObservation = registerBackendStatusHandler(config);
   const compatibilityObservation = registerIsolatedCompatibilityHandlers();

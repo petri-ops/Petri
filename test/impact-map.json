@@ -1956,17 +1956,20 @@
     },
     {
       "id": "p6-electron-pressure-prototype",
-      "note": "The development Electron 100k-row, media, long-report and multi-Revision pressure producer, driver and non-closeout checkpoint select their direct source-binding, budget and renderer regression. P6-OOP-PROBE 小票（2026-11-22）：driver OOP 深探读数/契约测与 acceptance/p6-oop-probe/ 证据目录由本规则认领（CDP attachToTarget 定位 sandbox 导航拦截断点）。",
+      "note": "The development Electron 100k-row, media, long-report and multi-Revision pressure producer, driver and non-closeout checkpoint select their direct source-binding, budget and renderer regression. P6-OOP-PROBE 小票（2026-11-22）：driver OOP 深探读数/契约测与 acceptance/p6-oop-probe/ 证据目录由本规则认领（CDP attachToTarget 定位 sandbox 导航拦截断点）。P6-HARNESS-HANDLER：driver 补 petri-pack protocol handler 契约测与 acceptance/p6-harness-pack-handler/ 证据目录由本规则认领。",
       "patterns": [
         "scripts/g0-rs-p6-electron-pressure-prototype.mjs",
         "scripts/g0-rs-p6-electron-pressure-driver.cjs",
         "test/p6-driver-iframe-probe.test.mjs",
+        "test/p6-driver-pack-handler.test.mjs",
         "acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json",
         "acceptance/p6-oop-probe/**",
-        "acceptance/p6-b1-sandbox-token/**"
+        "acceptance/p6-b1-sandbox-token/**",
+        "acceptance/p6-harness-pack-handler/**"
       ],
       "tests": [
-        "test/g0-rs-p6-electron-pressure-prototype.test.mjs"
+        "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
+        "test/p6-driver-pack-handler.test.mjs"
       ],
       "classifiesScripts": false
     },
