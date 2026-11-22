@@ -1,0 +1,5 @@
+
+> petri-desktop@0.0.4 ui:audit:check
+> node scripts/check-ui-productization-audit.mjs
+
+[ui-audit] 同步检查通过；Git 历史已有 651 个带实现证据的 UI 问题编号

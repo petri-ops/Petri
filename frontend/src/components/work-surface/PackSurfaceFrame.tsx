@@ -17,6 +17,14 @@ function packOrigin(packId: string): string {
   return `petri-pack://${packId}`;
 }
 
+/**
+ * P6-TABLE-LOAD B1（2026-11-22 用户裁决）：sandbox iframe 加载 petri-pack:// 自定义
+ * 协议时，Chromium 要求 allow-top-navigation-to-custom-protocols，否则导航在 iframe
+ * target 创建前被拒（DOM iframe 在场但 frame 树无对应项 → 结果永挂「正在加载」）。
+ * 仅加该点名 token；不放开 allow-top-navigation / allow-popups 等更宽边界。
+ */
+export const PACK_SURFACE_SANDBOX = 'allow-scripts allow-same-origin allow-top-navigation-to-custom-protocols';
+
 export function packSurfaceUrl(descriptor: WorkSurfaceDescriptor): string | null {
   // BLOCK-252 实机抓真：pack-result surface 与 pack-view 共用同一 entry/协议，
   // 旧实现只认 pack-view，导致结果包永远显示“没有可挂载的视图入口”。
@@ -241,7 +249,7 @@ export function PackSurfaceFrame({
         className={styles.frame}
         src={url}
         title={descriptor.title}
-        sandbox="allow-scripts allow-same-origin"
+        sandbox={PACK_SURFACE_SANDBOX}
         referrerPolicy="no-referrer"
         data-hidden={state === 'error' ? 'true' : undefined}
         onLoad={() => {

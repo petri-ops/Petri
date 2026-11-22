@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-720: pack iframe sandbox B1 token（2026-11-22 **in_progress**；P6-TABLE-LOAD；sandbox 导航层修复，无独立 GUI 观感面）
+
+- **范围**：`PackSurfaceFrame.tsx` 导出 `PACK_SURFACE_SANDBOX`，iframe sandbox 增 B1 点名 token `allow-top-navigation-to-custom-protocols`（仅此一个，不动 allow-top-navigation/allow-popups 等宽边界、不动 CSP/凭据）。用户裁决「按 B1 在 sandbox 增 token」放行。
+- **证据**：HK-01 红3→绿（`PackSurfaceFrame.test.ts` 4/4，断言 B1 token 在场且更宽 token 不在场）；邻域 Node 18/18；tsc 0 / lint 0 error。压测 A/B（同一 driver/frontend）sandbox 导航拦截报错 B1前1条→B1后两轮均0条=修复生效。
+- **状态边界**：sandbox 属性为导航权限修复，非用户可见呈现面；观感无独立改动、不代签 verified。压测 table_load 全链受 driver harness 缺 pack protocol handler 限制未过（新裁决点）；实机 GUI 验收未做——保持 in_progress。证据 `acceptance/p6-b1-sandbox-token/`。
+
 ## UI-719: 断点档位收敛 17→4 档单源（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S6b/P0-2 · U-04 预授权执行，行为基线同套绿，观感零代签）
 
 - **范围**：视口媒体查询档位收敛至 4 档单源——520（窄）/768（手机=JS 单源 MOBILE）/960（紧凑=JS 单源 COMPACT）/1200（宽）；簇锚点由 2026-11-21 现读 census 推导（20 档非 WIP 值聚类，簇内众数+既有 JS 单源优先）；`gate:ui-breakpoints` 登记表 21→12 档（只减）；96/420/679/720/1146 为 @container 元素级查询不参与收敛；project-workspace.module.css 5 档=BLOCK-395 B-11 他方 WIP 零触碰（owner 收口后并入）。

@@ -242,7 +242,7 @@ async function attachDebugger(webContents) {
  * 记录 petri:* postMessage（pack iframe 的 petri:ready 发给宿主 window）。
  * 失败不打断主流程；tap 只观测不改 sandbox/CSP/凭据。
  */
-async function installHostMessageTap(webContents) {
+async function _installHostMessageTap(webContents) {
   if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');
   await webContents.debugger.sendCommand('Page.enable');
   await webContents.debugger.sendCommand('Runtime.enable');
@@ -1290,7 +1290,7 @@ async function run() {
   // await 在 pack iframe 导航被拦时会挂起，导致其后的 watchdog 永远设不上（实测）。
   // 深探改为纯 CDP 读 iframe document 加载态/执行上下文/console，petri:ready 以
   // iframe 侧 postMessage 已执行（document 在场即脚本跑完）为判据，不依赖宿主 tap。
-  // installHostMessageTap 保留为可选工具函数，默认不调用。
+  // _installHostMessageTap 保留为可选工具函数，默认不调用。
   window.webContents.on('render-process-gone', (_event, details) => {
     gone.push({ reason: details?.reason || 'unknown', exitCode: details?.exitCode ?? null });
   });
@@ -1317,13 +1317,23 @@ async function run() {
     } catch (error) {
       oopProbe = { verdict: 'oop_probe_error', error: String(error?.message || error).slice(0, 200) };
     }
+    // B1 验证（2026-11-22）：watchdog 落证带 DOM 诊断，判断 sandbox 放行后 iframe 的真实加载态。
+    let diagnosticPage = { watchdog: true };
+    try {
+      diagnosticPage = await Promise.race([
+        failureDiagnostic(window.webContents),
+        new Promise((resolve) => setTimeout(() => resolve({ watchdog: true, diagnosticTimeout: true }), 8_000)),
+      ]);
+    } catch (diagnosticError) {
+      diagnosticPage = { watchdog: true, diagnosticError: String(diagnosticError?.message || diagnosticError).slice(0, 200) };
+    }
     try {
       writeFileSync(config.resultPath, `${JSON.stringify({
         schemaVersion: 1,
         passed: false,
         failedStage: stage,
         timeoutReason: 'oop_watchdog_forced',
-        page: { watchdog: true },
+        page: diagnosticPage,
         packSurfaceProbe: oopProbe,
         artifactNetwork: artifactNetworkObservation(),
         rendererConsole,

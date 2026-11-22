@@ -1962,7 +1962,8 @@
         "scripts/g0-rs-p6-electron-pressure-driver.cjs",
         "test/p6-driver-iframe-probe.test.mjs",
         "acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json",
-        "acceptance/p6-oop-probe/**"
+        "acceptance/p6-oop-probe/**",
+        "acceptance/p6-b1-sandbox-token/**"
       ],
       "tests": [
         "test/g0-rs-p6-electron-pressure-prototype.test.mjs"
