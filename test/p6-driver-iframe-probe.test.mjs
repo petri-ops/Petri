@@ -45,3 +45,79 @@ test('table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊�
     'table_load 失败诊断须调用 inspectPackSurface',
   );
 });
+
+// ── P6 OOP iframe 深探（小票 2026-11-22）────────────────────────────────────
+// 裁决 A（supportFetchAPI+corsEnabled）已试无效；本票用 CDP
+// Target.attachToTarget({targetId, flatten:true}) 挂进跨进程 petri-pack iframe target，
+// 读 document 加载态/执行上下文/console/ready 握手，坐实真断点在导航层还是脚本层。
+
+test('OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target', () => {
+  const s = src();
+  assert.match(s, /async function attachOopPackFrame\(/, '须有独立 OOP attach 深探函数');
+  assert.match(s, /Target\.attachToTarget/, '须用 Target.attachToTarget 挂跨进程 iframe');
+  assert.match(s, /flatten:\s*true/, 'attachToTarget 须 flatten:true 拿独立 sessionId');
+  assert.match(s, /sessionId/, 'Runtime.evaluate 须带 attached sessionId');
+});
+
+test('OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手', () => {
+  const s = src();
+  for (const token of [
+    'document.readyState', 'location.href', 'document.title',
+    'hasBioTable', 'contextAvailable', 'Log.enable', 'consoleAPICalled',
+    'exceptionThrown', '__petriSurfaceReady', 'petri:ready',
+  ]) {
+    assert.ok(s.includes(token), `OOP 深探读数缺 ${token}`);
+  }
+});
+
+test('OOP 深探纯函数归因 + verdict 分支 + driver-result 落证', () => {
+  const s = src();
+  assert.match(s, /function evaluateOopProbe\(/, '须有可测纯函数 evaluateOopProbe');
+  for (const v of [
+    'oop_no_iframe_target', 'oop_pack_target_absent', 'oop_attach_failed', 'oop_context_unavailable',
+    'oop_document_replaced', 'oop_document_loading',
+    'oop_document_present_ready_missing', 'oop_document_present_ready_sent',
+  ]) {
+    assert.ok(s.includes(v), `OOP verdict 缺 ${v}`);
+  }
+  assert.ok(
+    /oopProbe/.test(s) && /packSurfaceProbe/.test(s),
+    '深探读数须并入 packSurfaceProbe 段落落证',
+  );
+});
+
+test('OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支', () => {
+  const s = src();
+  const start = s.indexOf('function evaluateOopProbe(input) {');
+  assert.ok(start >= 0, '须能定位 evaluateOopProbe 定义');
+  // 自包含纯函数：从定义起按大括号配平截取函数体。
+  let depth = 0;
+  let end = -1;
+  for (let i = s.indexOf('{', start); i < s.length; i += 1) {
+    if (s[i] === '{') depth += 1;
+    else if (s[i] === '}') { depth -= 1; if (depth === 0) { end = i + 1; break; } }
+  }
+  assert.ok(end > start, '函数体须可完整截取');
+  const evaluateOopProbe = new Function(`return (${s.slice(start, end)})`)();
+  assert.equal(evaluateOopProbe({ frames: [], iframeTargets: [] }).verdict, 'oop_no_iframe_target');
+  assert.equal(
+    evaluateOopProbe({ frames: [], iframeTargets: [{ type: 'iframe', url: 'about:blank' }] }).verdict,
+    'oop_pack_target_absent',
+  );
+  assert.equal(
+    evaluateOopProbe({
+      frames: [{ attached: true, contextAvailable: true, documentTitle: '生信主结果', readyState: 'complete', hasBioTable: true }],
+      iframeTargets: [{ type: 'iframe', url: 'petri-pack://petri-pack-bio/ui/result.html' }],
+      hostMessages: [{ type: 'petri:ready' }],
+    }).verdict,
+    'oop_document_present_ready_sent',
+  );
+  assert.equal(
+    evaluateOopProbe({
+      frames: [{ attached: true, contextAvailable: true, documentTitle: '生信主结果', readyState: 'complete', hasBioTable: true }],
+      iframeTargets: [{ type: 'iframe', url: 'petri-pack://petri-pack-bio/ui/result.html' }],
+      hostMessages: [],
+    }).verdict,
+    'oop_document_present_ready_missing',
+  );
+});

@@ -237,6 +237,37 @@ async function attachDebugger(webContents) {
   await webContents.debugger.sendCommand('HeapProfiler.enable');
 }
 
+/**
+ * P6 OOP 深探（小票 2026-11-22）：在导航前给每个 frame 注入宿主 message tap，
+ * 记录 petri:* postMessage（pack iframe 的 petri:ready 发给宿主 window）。
+ * 失败不打断主流程；tap 只观测不改 sandbox/CSP/凭据。
+ */
+async function installHostMessageTap(webContents) {
+  if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');
+  await webContents.debugger.sendCommand('Page.enable');
+  await webContents.debugger.sendCommand('Runtime.enable');
+  await webContents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
+    source: `(() => {
+      if (window.__petriP6TapInstalled) return;
+      window.__petriP6TapInstalled = true;
+      window.__petriP6Messages = [];
+      window.addEventListener('message', (e) => {
+        const d = e.data;
+        if (d && typeof d === 'object' && typeof d.type === 'string'
+            && d.type.indexOf('petri:') === 0) {
+          try {
+            window.__petriP6Messages.push({
+              type: d.type,
+              surfaceId: d.surfaceId || null,
+              at: Date.now(),
+            });
+          } catch (err) {}
+        }
+      });
+    })();`,
+  });
+}
+
 function rendererWorkingSetBytes(webContents) {
   const pid = webContents.getOSProcessId();
   const metric = app.getAppMetrics().find((entry) => entry.pid === pid);
@@ -895,6 +926,184 @@ async function inspectPublicProjection(webContents) {
 }
 
 /**
+ * P6 OOP iframe 深探（小票 2026-11-22）：
+ * 对 Target.getTargets 枚举到的跨进程 iframe target，用
+ * Target.attachToTarget({ targetId, flatten: true }) 挂进独立 session，读四项真值：
+ *   ① document 加载态（readyState / title / #bioTable / #stateLoading）
+ *   ② iframe 内执行上下文可用性（Runtime.evaluate 是否可达、contextAvailable）
+ *   ③ console/message 报文（Log.enable + Runtime.exceptionThrown，区分导航前拒绝 vs 加载后脚本错）
+ *   ④ window.__petriSurfaceReady / petri:ready 握手（iframe 侧标记 + 宿主 message tap）
+ * 全部为只读观测，不改 sandbox token/CSP/凭据（安全边界不擅改）。
+ */
+async function attachOopPackFrame(webContents, targetInfos) {
+  const allIframeTargets = (Array.isArray(targetInfos) ? targetInfos : [])
+    .filter((targetInfo) => targetInfo && targetInfo.type === 'iframe');
+  const targets = allIframeTargets
+    .filter((targetInfo) => String(targetInfo.url || '').startsWith('petri-pack:'));
+  const sessions = [];
+  const rows = [];
+  const consoleEvents = [];
+  const onMessage = (_event, method, params, sessionId) => {
+    if (!sessionId || !sessions.includes(sessionId)) return;
+    if (method === 'Runtime.consoleAPICalled') {
+      const text = (params.args || []).map((arg) => String(arg.value ?? arg.description ?? '')).join(' ');
+      consoleEvents.push(`console:${params.type || 'log'}: ${text}`.slice(0, 300));
+    } else if (method === 'Runtime.exceptionThrown') {
+      const detail = params.exceptionDetails || {};
+      consoleEvents.push(`exception: ${detail.text || detail.exception?.description || 'unknown'}`.slice(0, 300));
+    } else if (method === 'Log.entryAdded') {
+      const entry = params.entry || {};
+      consoleEvents.push(`log:${entry.level || 'log'}: ${entry.text || ''}`.slice(0, 300));
+    }
+    if (consoleEvents.length > 30) consoleEvents.shift();
+  };
+  webContents.debugger.on('message', onMessage);
+  try {
+    for (const target of targets.slice(0, 4)) {
+      let sessionId = null;
+      let row;
+      try {
+        const attached = await webContents.debugger.sendCommand('Target.attachToTarget', {
+          targetId: target.targetId,
+          flatten: true,
+        });
+        sessionId = attached?.sessionId || null;
+        if (!sessionId) {
+          row = { url: target.url, attached: false, error: 'attach_no_session' };
+        } else {
+          sessions.push(sessionId);
+          await webContents.debugger.sendCommand('Runtime.enable', {}, sessionId);
+          await webContents.debugger.sendCommand('Log.enable', {}, sessionId);
+          const evaluated = await webContents.debugger.sendCommand('Runtime.evaluate', {
+            expression: `(() => {
+              const stateLoading = document.querySelector('#stateLoading');
+              const bioTable = document.querySelector('#bioTable');
+              return {
+                readyState: document.readyState,
+                documentUrl: location.href,
+                documentTitle: document.title,
+                htmlLength: (document.documentElement?.outerHTML || '').length,
+                bodyText: (document.body?.innerText || '').replace(/\\s+/g, ' ').trim().slice(0, 200),
+                hasBioTable: Boolean(bioTable),
+                bioTableRows: bioTable ? bioTable.querySelectorAll('tbody tr').length : 0,
+                hasStateLoading: Boolean(stateLoading),
+                stateLoadingHidden: stateLoading ? stateLoading.hidden : null,
+                surfaceReady: window.__petriSurfaceReady === true,
+                surfaceReadyRaw: typeof window.__petriSurfaceReady,
+              };
+            })()`,
+            returnByValue: true,
+          }, sessionId);
+          if (evaluated?.exceptionDetails) {
+            row = {
+              url: target.url, attached: true, contextAvailable: false,
+              error: `evaluate_exception:${(evaluated.exceptionDetails.text || '').slice(0, 160)}`,
+            };
+          } else {
+            row = Object.assign(
+              { url: target.url, attached: true, contextAvailable: true },
+              evaluated?.result?.value || {},
+            );
+          }
+        }
+      } catch (error) {
+        row = { url: target.url, attached: Boolean(sessionId), error: String(error?.message || error).slice(0, 200) };
+      }
+      row.consoleTail = consoleEvents.slice(-6);
+      if (row.attached && row.contextAvailable) {
+        row.loadState = row.readyState === 'complete' ? 'oop_loaded'
+          : row.readyState === 'loading' ? 'oop_loading' : 'oop_other';
+      } else {
+        row.loadState = row.attached ? 'oop_context_unavailable' : 'oop_attach_failed';
+      }
+      rows.push(row);
+    }
+  } finally {
+    webContents.debugger.removeListener('message', onMessage);
+  }
+  // 宿主 message tap 读数：pack iframe 的 petri:ready 是否抵达宿主 window。
+  // 用 CDP Runtime.evaluate（独立协议通道）而非 executeJavaScript——后者在主上下文被
+  // pack iframe 导航阻塞时会永不 resolve（实测挂起 >7min），CDP 命令不受影响。
+  let hostMessages = [];
+  try {
+    if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');
+    const evaluated = await Promise.race([
+      webContents.debugger.sendCommand('Runtime.evaluate', {
+        expression: 'window.__petriP6Messages || []',
+        returnByValue: true,
+      }),
+      new Promise((resolve) => setTimeout(() => resolve({ cdpTimeout: true }), 8_000)),
+    ]);
+    if (evaluated?.exceptionDetails || evaluated?.cdpTimeout) {
+      hostMessages = [{ captureError: evaluated?.cdpTimeout ? 'cdp_timeout' : String(evaluated.exceptionDetails.text).slice(0, 120) }];
+    } else {
+      hostMessages = evaluated?.result?.value || [];
+    }
+  } catch (error) {
+    hostMessages = [{ captureError: String(error?.message || error).slice(0, 120) }];
+  }
+  return evaluateOopProbe({
+    frames: rows,
+    iframeTargets: allIframeTargets.map((target) => ({ type: target.type, url: String(target.url || '').slice(0, 200) })),
+    hostMessages: Array.isArray(hostMessages) ? hostMessages.slice(-12) : [],
+    consoleTail: consoleEvents.slice(-8),
+  });
+}
+
+/**
+ * 纯函数：OOP 深探读数 → verdict（不触网、可独立测试）。
+ * verdict 判据树：
+ *   oop_no_iframe_target           —— Target.getTargets 无 iframe target（导航层拦截在 target 创建前）
+ *   oop_attach_failed              —— 有 target 但 attachToTarget 失败
+ *   oop_context_unavailable        —— attach 成功但 Runtime.evaluate 不可达（document 未建立）
+ *   oop_document_loading           —— document readyState=loading（导航挂起/被拒表现）
+ *   oop_document_replaced          —— document 存在但非 result.html（title/DOM 不匹配，被替换/拒绝）
+ *   oop_document_present_ready_missing —— result.html DOM 在场但 petri:ready 未达宿主（脚本层）
+ *   oop_document_present_ready_sent    —— result.html DOM 在场且 petri:ready 已发（宿主侧问题）
+ */
+function evaluateOopProbe(input) {
+  const payload = input && typeof input === 'object' ? input : {};
+  const rows = Array.isArray(payload.frames) ? payload.frames : [];
+  const iframeTargets = Array.isArray(payload.iframeTargets) ? payload.iframeTargets : [];
+  const hostMessages = Array.isArray(payload.hostMessages) ? payload.hostMessages : [];
+  const consoleTail = Array.isArray(payload.consoleTail) ? payload.consoleTail : [];
+  const readySent = hostMessages.some((message) => message && message.type === 'petri:ready');
+  const contextRows = rows.filter((row) => row && row.contextAvailable === true);
+  const doc = contextRows.find((row) => row.documentTitle === '生信主结果') || contextRows[0] || null;
+  let verdict = 'oop_no_iframe_target';
+  if (iframeTargets.length > 0) {
+    const packTargets = iframeTargets.filter((target) => String(target.url || '').startsWith('petri-pack:'));
+    if (packTargets.length === 0) {
+      // iframe target 存在但 URL 非 petri-pack：导航在 URL 提交前被拦（DOM 元素在场、frame 未建立）。
+      verdict = 'oop_pack_target_absent';
+    } else if (rows.length === 0 || rows.every((row) => row.attached === false)) {
+      verdict = 'oop_attach_failed';
+    } else if (contextRows.length === 0) {
+      verdict = 'oop_context_unavailable';
+    } else if (doc.readyState === 'loading' || doc.readyState === 'uninitialized') {
+      verdict = 'oop_document_loading';
+    } else if (doc.documentTitle !== '生信主结果' && !doc.hasBioTable) {
+      verdict = 'oop_document_replaced';
+    } else if (readySent) {
+      verdict = 'oop_document_present_ready_sent';
+    } else {
+      verdict = 'oop_document_present_ready_missing';
+    }
+  }
+  return {
+    verdict,
+    iframeTargetCount: iframeTargets.length,
+    attachedCount: rows.filter((row) => row.attached === true).length,
+    contextReadableCount: contextRows.length,
+    readySignal: readySent || contextRows.some((row) => row.surfaceReady === true),
+    frames: rows,
+    iframeTargets,
+    hostMessages,
+    consoleTail,
+  };
+}
+
+/**
  * P6-TABLE-LOAD 前置票（R2 清偿批 2026-11-21）：pack iframe 探针入口。
  * 枚举 petri-pack:// frame（frameTree + 跨进程 target），isolated world 读 iframe 内
  * ready/console 标记，经 evaluatePackSurfaceProbe 归因；probe 异常不打断失败诊断主流程。
@@ -935,12 +1144,24 @@ async function inspectPackSurface(webContents) {
     frameRows.push(frameProbe);
     pending.push(...(current?.childFrames || []));
   }
-  for (const ti of targetInfos) {
-    if (String(ti.url || '').startsWith('petri-pack:')) {
-      frameRows.push({ url: ti.url, readySignal: false, consoleTail: ['oop-iframe-target（跨进程，需 Target.attachToTarget 深探）'], loadState: 'oop' });
-    }
+  // 所有 iframe 类型 target 都记录（含导航被拒后 URL 变为 about:blank 的），
+  // 避免只在 petri-pack URL 在场时才落证——「无 target」本身就是关键判据。
+  const allIframeTargets = targetInfos.filter((ti) => ti && ti.type === 'iframe');
+  const probe = evaluatePackSurfaceProbe(frameRows);
+  let oopProbe;
+  try {
+    oopProbe = await attachOopPackFrame(webContents, targetInfos);
+  } catch (oopError) {
+    oopProbe = {
+      verdict: 'oop_probe_error',
+      iframeTargets: allIframeTargets.map((ti) => ({ type: ti.type, url: String(ti.url || '').slice(0, 200) })),
+      error: String(oopError?.message || oopError).slice(0, 200),
+    };
   }
-  return evaluatePackSurfaceProbe(frameRows);
+  // 落证：OOP 深探读数并入 packSurfaceProbe.oop（driver-result.json 失败段）。
+  // 无 iframe target 时 evaluateOopProbe 判 oop_no_iframe_target（导航层拦截在 target 创建前）。
+  probe.oop = oopProbe;
+  return probe;
 }
 
 /**
@@ -1065,6 +1286,11 @@ async function run() {
     },
   });
   const artifactNetworkObservation = registerArtifactNetworkObservation(window.webContents, config);
+  // P6 OOP 深探小票（2026-11-22）：宿主 message tap 的 Page.addScriptToEvaluateOnNewDocument
+  // await 在 pack iframe 导航被拦时会挂起，导致其后的 watchdog 永远设不上（实测）。
+  // 深探改为纯 CDP 读 iframe document 加载态/执行上下文/console，petri:ready 以
+  // iframe 侧 postMessage 已执行（document 在场即脚本跑完）为判据，不依赖宿主 tap。
+  // installHostMessageTap 保留为可选工具函数，默认不调用。
   window.webContents.on('render-process-gone', (_event, details) => {
     gone.push({ reason: details?.reason || 'unknown', exitCode: details?.exitCode ?? null });
   });
@@ -1073,6 +1299,40 @@ async function run() {
     rendererConsole.push(String(message || '').slice(0, 1_000));
     if (rendererConsole.length > 20) rendererConsole.shift();
   });
+
+  // P6 OOP 深探小票（2026-11-22）看门狗：pack iframe 导航被拦时，宿主某个
+  // executeJavaScript 可能永不 resolve（实测挂起 >7min），主流程既不成功也不进 catch。
+  // 超时后强制跑一次纯 CDP OOP 深探并落证，保证 table_load 断点读数不丢。
+  let oopSettled = false;
+  const watchdogMs = Math.max(WAIT_MS, 90_000);
+  const watchdog = setTimeout(async () => {
+    if (oopSettled) return;
+    oopSettled = true;
+    let oopProbe = { verdict: 'oop_watchdog_probe_error' };
+    try {
+      oopProbe = await Promise.race([
+        inspectPackSurface(window.webContents),
+        new Promise((resolve) => setTimeout(() => resolve({ verdict: 'oop_probe_timeout', note: 'CDP probe exceeded 25s during watchdog' }), 25_000)),
+      ]);
+    } catch (error) {
+      oopProbe = { verdict: 'oop_probe_error', error: String(error?.message || error).slice(0, 200) };
+    }
+    try {
+      writeFileSync(config.resultPath, `${JSON.stringify({
+        schemaVersion: 1,
+        passed: false,
+        failedStage: stage,
+        timeoutReason: 'oop_watchdog_forced',
+        page: { watchdog: true },
+        packSurfaceProbe: oopProbe,
+        artifactNetwork: artifactNetworkObservation(),
+        rendererConsole,
+      }, null, 2)}\n`, { mode: 0o600 });
+    } catch (writeError) {
+      console.error('[p6-oop] watchdog write failed: ' + String(writeError?.message || writeError).slice(0, 200));
+    }
+    app.exit(3);
+  }, watchdogMs);
 
   try {
     const memorySamples = [];
@@ -1268,12 +1528,17 @@ async function run() {
         && event.statusCode === 200
       ))
       && result.backendStatus.everyCheckReady === true;
+    oopSettled = true;
+    clearTimeout(watchdog);
     writeFileSync(config.resultPath, `${JSON.stringify(result, null, 2)}\n`, { mode: 0o600 });
     window.destroy();
   } catch (error) {
-    const page = await failureDiagnostic(window.webContents);
+    oopSettled = true;
+    clearTimeout(watchdog);
     // P6-TABLE-LOAD 前置票：table_load 阶段失败接入 pack iframe 探针
     //（petri-pack:// frame 枚举 + iframe 内 ready/console → evaluatePackSurfaceProbe 归因）。
+    // OOP 探针先跑（纯 CDP），failureDiagnostic 的 executeJavaScript 在 pack iframe
+    // 导航被拦时可能永不 resolve，故放在探针之后且不阻塞落证。
     let packSurfaceProbe = null;
     if (stage === 'table_load') {
       try {
@@ -1281,6 +1546,15 @@ async function run() {
       } catch (probeError) {
         packSurfaceProbe = { verdict: 'probe_error', probeError: String(probeError.message).slice(0, 200) };
       }
+    }
+    let page = { diagnosticSkipped: 'pack_iframe_navigation_blocked' };
+    try {
+      page = await Promise.race([
+        failureDiagnostic(window.webContents),
+        new Promise((resolve) => setTimeout(() => resolve({ diagnosticTimeout: true }), 10_000)),
+      ]);
+    } catch (diagnosticError) {
+      page = { diagnosticError: String(diagnosticError?.message || diagnosticError).slice(0, 200) };
     }
     writeFileSync(config.resultPath, `${JSON.stringify({
       schemaVersion: 1,

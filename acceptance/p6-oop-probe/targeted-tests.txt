@@ -1,0 +1,24 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (5.321334ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (1.991083ms)
+✔ BLOCK-216 contributions: disabled pack disappears (1.498583ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (1.993625ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (1.39175ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (1.899792ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (1.576292ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (1.761542ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (114.146333ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (1.072208ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (0.497042ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.291292ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.286375ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.503917ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.4145ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (0.454334ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 256.7365
