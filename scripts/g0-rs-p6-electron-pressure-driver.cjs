@@ -435,14 +435,21 @@ async function measureFilterFeedback(webContents) {
   return webContents.executeJavaScript(`
     new Promise((resolve, reject) => {
       const viewer = document.querySelector('[aria-label="科学结果表格"]')?.closest('[data-mode="table"]');
-      const field = document.querySelector('select[aria-label="筛选字段"]');
-      const input = document.querySelector('input[aria-label="筛选内容"]');
-      if (!viewer || !(field instanceof HTMLSelectElement) || !(input instanceof HTMLInputElement)) {
+      // P6 table_scroll selector 对齐（2026-11-23）：产品筛选 UI 是
+      // role=group[aria-label=表格筛选] 内带序号的 aria-label（筛选字段 1 / 筛选条件 1），
+      // 旧 selector 用 筛选字段 / 筛选内容（无序号、名字错）→ filter_controls_missing。
+      const filterGroup = viewer?.querySelector('[role="group"][aria-label="表格筛选"]');
+      const field = filterGroup?.querySelector('select[aria-label^="筛选字段"]');
+      const input = filterGroup?.querySelector('input[aria-label^="筛选条件"]');
+      if (!viewer || !(filterGroup instanceof HTMLElement)
+          || !(field instanceof HTMLSelectElement) || !(input instanceof HTMLInputElement)) {
         return reject(new Error('filter_controls_missing'));
       }
       const option = [...field.options].find((item) => item.value === 'gene');
       if (!option) return reject(new Error('filter_field_missing'));
-      field.value = option.value;
+      // React 受控 select：用 native value setter + change 事件可靠触发 onChange。
+      const selectSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+      if (selectSetter) { selectSetter.call(field, option.value); } else { field.value = option.value; }
       field.dispatchEvent(new Event('change', { bubbles: true }));
       requestAnimationFrame(() => {
         const readSummary = () => [...viewer.querySelectorAll('span')]

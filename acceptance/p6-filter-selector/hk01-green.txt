@@ -1,0 +1,11 @@
+✔ filter selector 用产品真实 aria-label（筛选字段 1 / 筛选条件 1 带序号） (1.014583ms)
+✔ filter selector 限定表格筛选 group 容器（避免误捕其他控件） (0.221667ms)
+✔ 产品筛选 UI 契约未改（红线：不改产品筛选 DOM/逻辑） (0.157542ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 120.726

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "passed": false,
+  "failedStage": "png_load",
+  "subStage": "table_interactions",
+  "readyHandshake": {
+    "hostTapReady": true,
+    "attempts": 1
+  },
+  "page": {
+    "canvasPresent": true,
+    "tableViewportPresent": false,
+    "packIframes": [
+      {
+        "title": "bio-result",
+        "src": "petri-pack://petri-pack-bio/ui/result.html",
+        "visible": true,
+        "width": 720
+      }
+    ],
+    "images": [],
+    "resourceTimings": [],
+    "viewerModes": [],
+    "canvasText": "火山图 已核验（未篡改） 结果已经过产物校验，可继续查看、比较或交给 Agent 解释。 v1 已选择 1 个对象 · 可恢复 结果 代码 审查修改 版本历史 询问 Agent",
+    "bodyText": "工作台 新建任务 扩展 知识空间 项目 P5 disposable scientific editing P5 live scientific editing 刚刚 火山图 · P5 disposable scientific editing 结果 2 开始新的对话 在下方输入框中提问 解释项目结构 了解项目的文件组织与数据构成 快速开始 查看 AI 能帮你做什么 规划一个任务 说出目标，我来拆解成可执行的步骤 完全访问 0% 结果 × 火山图 已核验（未篡改） 结果已经过产物校验，可继续查看、比较或交给 Agent 解释。 v1 已选择 1 个对象 · 可恢复 结果 代码 审查修改 版本历史 询问 Agent 高级精细调整 按插件参数逐项控制"
+  },
+  "packSurfaceProbe": null,
+  "artifactNetwork": {
+    "completedCount": 4,
+    "errorCount": 0,
+    "events": [
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "volcano.png",
+        "matchedTargets": [
+          "png"
+        ],
+        "outcome": "completed",
+        "resourceType": "image",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "volcano.png",
+        "matchedTargets": [
+          "png"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      }
+    ]
+  },
+  "rendererConsole": [
+    "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security\n  Policy set or a policy with \"unsafe-eval\" enabled. This exposes users of\n  this app to unnecessary security risks.\n\nFor more information and help, consult\nhttps://electronjs.org/docs/tutorial/security.\nThis warning will not show up\nonce the app is packaged.",
+    "Uncaught (in promise) Error: Error invoking remote method 'app:set-shell-prefs': Error: No handler registered for 'app:set-shell-prefs'"
+  ]
+}

@@ -1,0 +1,47 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (5.838ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (2.26225ms)
+✔ BLOCK-216 contributions: disabled pack disappears (1.405375ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (2.923875ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (2.445ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (4.969709ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (1.601208ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (1.405958ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (69.354084ms)
+✔ filter selector 用产品真实 aria-label（筛选字段 1 / 筛选条件 1 带序号） (1.731458ms)
+✔ filter selector 限定表格筛选 group 容器（避免误捕其他控件） (0.268375ms)
+✔ 产品筛选 UI 契约未改（红线：不改产品筛选 DOM/逻辑） (0.265792ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (4.082166ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (1.697042ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.571584ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.420667ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.514417ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.488709ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (0.657334ms)
+✔ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (2.342875ms)
+✔ registerPackSchemePrivileges 在 app ready 前调用 (0.620541ms)
+✔ setupPackProtocol 在 run() 内 app ready 后调用 (0.739417ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.174625ms)
+✔ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (1.096583ms)
+✔ 探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例） (0.329334ms)
+✔ waitFor 的求值有超时防护（防主上下文挂起永久阻塞） (0.615375ms)
+✔ table_load 各步有 subStage 打点（挂起源精确落证） (1.208666ms)
+✔ navigate 的 loadURL 用 domcontentloaded（pack iframe 子资源不阻塞主文档导航） (0.304333ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler） (0.169667ms)
+✔ 裁决材料在案：方向 B（原生 viewer）+ 保住 10万行语义理由 + pack #bioTable 200行证据 (2.5225ms)
+✔ tap 用 Runtime.evaluate 注入（替代挂起的 addScriptToEvaluateOnNewDocument） (0.760792ms)
+✔ tap 注入时机在 navigate 的 loadURL 之后（Runtime.evaluate 只在已提交文档上下文存活） (0.400625ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler/注册表） (0.44025ms)
+✔ U-P6-SANDBOX：pack scheme privileges 含 supportFetchAPI + corsEnabled（裁决 A） (0.993625ms)
+✔ U-P6-SANDBOX：privileges 注册仍先于 app ready（registerPackSchemePrivileges 时序契约） (0.226917ms)
+✔ resultSurfaces[0].artifactTypes 不含 table（table 族回退原生 viewer） (0.765291ms)
+✔ provides.artifactTypes 保留 table（包能力声明不动） (0.09125ms)
+✔ 回退链路在案：resolveResultSurface 未命中→core-transitional 原生 viewer (0.195583ms)
+✔ 产品安全边界未动（红线：不改 sandbox/CSP/凭据/B1 token/handler） (0.16275ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 313.255667

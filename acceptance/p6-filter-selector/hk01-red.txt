@@ -1,0 +1,47 @@
+✖ filter selector 用产品真实 aria-label（筛选字段 1 / 筛选条件 1 带序号） (2.932709ms)
+✖ filter selector 限定表格筛选 group 容器（避免误捕其他控件） (0.335166ms)
+✔ 产品筛选 UI 契约未改（红线：不改产品筛选 DOM/逻辑） (0.549375ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 1
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.658375
+
+✖ failing tests:
+
+test at test/p6-driver-filter-selector.test.mjs:22:1
+✖ filter selector 用产品真实 aria-label（筛选字段 1 / 筛选条件 1 带序号） (2.932709ms)
+  AssertionError [ERR_ASSERTION]: field select 须用前缀匹配 筛选字段 N
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-filter-selector.test.mjs:27:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'async function measureFilterFeedback(webContents) {\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const viewer = document.querySelector(\'[aria-label="科学结果表格"]\')?.closest(\'[data-mode="table"]\');\n      const field = document.querySelector(\'select[aria-label="筛选字段"]\');\n      const input = document.querySelector(\'input[aria-label="筛选内容"]\');\n      if (!viewer || !(field instanceof HTMLSelectElement) || !(input instanceof HTMLInputElement)) {\n        return reject(new Error(\'filter_controls_missing\'));\n      }\n      const option = [...field.options].find((item) => item.value === \'gene\');\n      if (!option) return reject(new Error(\'filter_field_missing\'));\n      field.value = option.value;\n      field.dispatchEvent(new Event(\'change\', { bubbles: true }));\n      requestAnimationFrame(() => {\n        const readSummary = () => [...viewer.querySelectorAll(\'span\')]\n          .map((item) => (item.textContent || \'\').trim())\n          .find((value) => /^\\\\d[\\\\d,]* \\\\/ \\\\d[\\\\d,]* 行$/.test(value)) || \'\';\n        const readFirstRow = () => viewer.querySelector(\'',
+    expected: /aria-label\^="筛选字段"/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/p6-driver-filter-selector.test.mjs:32:1
+✖ filter selector 限定表格筛选 group 容器（避免误捕其他控件） (0.335166ms)
+  AssertionError [ERR_ASSERTION]: 须限定 role=group[aria-label=表格筛选] 容器
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-filter-selector.test.mjs:36:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'async function measureFilterFeedback(webContents) {\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const viewer = document.querySelector(\'[aria-label="科学结果表格"]\')?.closest(\'[data-mode="table"]\');\n      const field = document.querySelector(\'select[aria-label="筛选字段"]\');\n      const input = document.querySelector(\'input[aria-label="筛选内容"]\');\n      if (!viewer || !(field instanceof HTMLSelectElement) || !(input instanceof HTMLInputElement)) {\n        return reject(new Error(\'filter_controls_missing\'));\n      }\n      const option = [...field.options].find((item) => item.value === \'gene\');\n      if (!option) return reject(new Error(\'filter_field_missing\'));\n      field.value = option.value;\n      field.dispatchEvent(new Event(\'change\', { bubbles: true }));\n      requestAnimationFrame(() => {\n        const readSummary = () => [...viewer.querySelectorAll(\'span\')]\n          .map((item) => (item.textContent || \'\').trim())\n          .find((value) => /^\\\\d[\\\\d,]* \\\\/ \\\\d[\\\\d,]* 行$/.test(value)) || \'\';\n        const readFirstRow = () => viewer.querySelector(\'',
+    expected: /aria-label="表格筛选"/,
+    operator: 'match',
+    diff: 'simple'
+  }
