@@ -5067,6 +5067,31 @@
   line-height: 1.5;
 }
 
+/* QODER-A2 P3 — 按需解释：按钮/骨架/提示，全部走既有 token，零新颜色字面量。 */
+.sc-guard-card__explain {
+  display: flex;
+  align-items: center;
+  gap: var(--petri-space-2);
+  margin: 0 0 var(--petri-space-2);
+  flex-wrap: wrap;
+}
+.sc-guard-card__explain-skeleton {
+  display: inline-block;
+  width: 8rem;
+  height: 0.7em;
+  border-radius: var(--petri-radius-sm);
+  background: var(--petri-surface-hover);
+  animation: scGuardExplainPulse 1.2s ease-in-out infinite;
+}
+.sc-guard-card__explain-notice {
+  color: var(--petri-text-tertiary);
+  font-size: inherit;
+}
+@keyframes scGuardExplainPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
 .sc-guard-card__meta {
   margin: var(--petri-space-1) 0;
   color: var(--petri-text-tertiary);

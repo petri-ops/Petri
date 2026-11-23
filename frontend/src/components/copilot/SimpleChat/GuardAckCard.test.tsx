@@ -206,4 +206,79 @@ describe('GuardAckCard（BLOCK-243 Q1 v2）', () => {
     expect(screen.getByTestId('guard-ack-intent').textContent).toContain('可能不可逆');
     expect(screen.getByTestId('guard-ack-source').textContent).toContain('侧边任务');
   });
+
+  // QODER-A2 P3 — 按需模型解释：按钮/骨架/失败降级，审批按钮全程可用。
+  it('按需解释：模型解释覆盖文案，解释中显示骨架但审批按钮不禁用，失败保留确定性解释', () => {
+    const onExplain = vi.fn();
+    const onAck = vi.fn();
+    const { rerender } = render(
+      <GuardAckCard
+        {...base}
+        requestId="apr_test123"
+        explanation="确定性说明：仅放行本次调用。"
+        onAck={onAck}
+        onDismiss={vi.fn()}
+        onExplain={onExplain}
+        guardExplainBusy={false}
+        modelExplanation={null}
+        explainNotice={null}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('guard-ack-explain-button'));
+    expect(onExplain).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('guard-ack-explanation').textContent).toContain('确定性说明');
+
+    rerender(
+      <GuardAckCard
+        {...base}
+        requestId="apr_test123"
+        explanation="确定性说明：仅放行本次调用。"
+        onAck={onAck}
+        onDismiss={vi.fn()}
+        onExplain={onExplain}
+        guardExplainBusy={true}
+        modelExplanation={null}
+        explainNotice={null}
+      />,
+    );
+    expect(screen.getByTestId('guard-ack-explain-button').textContent).toContain('分析中');
+    expect(screen.queryByLabelText('分析中')).not.toBeNull();
+    // 审批按钮不因解释中禁用：找出含「放行一次」「拒绝」的按钮逐个断言。
+    const actionButtons = Array.from(screen.getByTestId('guard-ack-card').querySelectorAll('button'))
+      .filter((button) => /放行一次|拒绝/.test(button.textContent || ''));
+    expect(actionButtons.length).toBeGreaterThanOrEqual(2);
+    for (const button of actionButtons) expect(button.hasAttribute('disabled')).toBe(false);
+
+    rerender(
+      <GuardAckCard
+        {...base}
+        requestId="apr_test123"
+        explanation="确定性说明：仅放行本次调用。"
+        onAck={onAck}
+        onDismiss={vi.fn()}
+        onExplain={onExplain}
+        guardExplainBusy={false}
+        modelExplanation={null}
+        explainNotice="模型解释暂不可用"
+      />,
+    );
+    expect(screen.getByTestId('guard-ack-explanation').textContent).toContain('确定性说明');
+    expect(screen.getByTestId('guard-ack-card').textContent).toContain('模型解释暂不可用');
+
+    rerender(
+      <GuardAckCard
+        {...base}
+        requestId="apr_test123"
+        explanation="确定性说明：仅放行本次调用。"
+        onAck={onAck}
+        onDismiss={vi.fn()}
+        onExplain={onExplain}
+        guardExplainBusy={false}
+        modelExplanation="模型说明：该操作仅写入本项目文件，可撤销。"
+        explainNotice={null}
+      />,
+    );
+    expect(screen.getByTestId('guard-ack-explanation').textContent).toContain('模型说明');
+    expect(screen.getByTestId('guard-ack-explanation').textContent).not.toContain('确定性说明');
+  });
 });

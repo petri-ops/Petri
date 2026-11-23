@@ -9867,14 +9867,25 @@
       "note": "2026-11-23 三类并档：QODER-YELLOW9-REOPEN 立项评审稿 + A2 P1 审批意图解释模型辅助。HK-01/邻域契约与 acceptance 证据由本规则认领；零新依赖（复用 callModelTask role=explanation）。",
       "patterns": [
         "core/petri-server/helpers/approval-explanation.js",
+        "core/petri-server/routes/ai-agent/task-actions.js",
+        "frontend/src/components/copilot/SimpleChat/GuardAckCard.tsx",
+        "frontend/src/components/copilot/SimpleChat/GuardAckCard.test.tsx",
+        "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.ts",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "frontend/src/components/copilot/simple-chat.css",
         "scripts/c56-paper-writing-drill.mjs",
         "test/qoder-a2-approval-explanation.test.mjs",
+        "test/qoder-a2-explain-ui.test.mjs",
+        "test/qoder-a2-explain-route.test.mjs",
         "docs/qoder-yellow9-reopen-review.md",
         "acceptance/qoder-yellow9-review/**",
-        "acceptance/three-batch-launch/**"
+        "acceptance/three-batch-launch/**",
+        "acceptance/a2-approval-explanation/**"
       ],
       "tests": [
-        "test/qoder-a2-approval-explanation.test.mjs"
+        "test/qoder-a2-approval-explanation.test.mjs",
+        "test/qoder-a2-explain-ui.test.mjs",
+        "test/qoder-a2-explain-route.test.mjs"
       ],
       "classifiesScripts": true
     }

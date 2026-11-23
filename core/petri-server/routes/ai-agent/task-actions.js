@@ -29,6 +29,8 @@ const {
   buildPermissionResolvedEvent,
 } = require('../../helpers/approval-request-store');
 const { revalidateUpdatedInput } = require('../../helpers/approval-input-revalidation');
+// QODER-A2 P2 — 按需模型解释（零新依赖，fail-soft 不阻断审批）。
+const { resolveModelExplanation } = require('../../helpers/approval-explanation');
 const mcpServerPolicy = require('../../helpers/mcp-server-policy');
 // BLOCK-244 Q1-REM — 结构化提问回答（暂停资源的用户裁定落点）
 const { answerUserQuestion } = require('../../helpers/user-question-store');
@@ -269,6 +271,26 @@ module.exports = {
       at: new Date().toISOString(),
     });
     return res.json({ ok: true, questionId, answer: outcome.answer });
+  });
+
+  // QODER-A2 P2 — 按需模型解释：从 approval request 的确定性 intent 生成易读解释。
+  // 失败一律 fail-soft（explanation:null + explainUnavailable），不写回 deny/allow 语义、
+  // 不改变 approval 请求状态——审批按钮全程可用（A2 验收：失败降级不阻断审批）。
+  app.post('/api/ai/agent/task/:taskId/approval/:requestId/explain', async (req, res) => {
+    const userId = req.user && req.user.id;
+    if (!userId) return res.status(401).json({ ok: false, error: 'unauthorized', message: '未登录' });
+    const task = agentTaskStore.getAgentTask(req.params.taskId);
+    if (!task) return res.status(404).json({ ok: false, error: 'not_found', message: '任务不存在' });
+    if (task.user_id && task.user_id !== userId) return res.status(403).json({ ok: false, error: 'forbidden', message: '无权访问该任务' });
+    const taskKey = task.taskId || req.params.taskId;
+    const requestId = String(req.params.requestId || '').trim();
+    const pending = getApprovalRequest(taskKey, requestId);
+    if (!pending) return res.status(404).json({ ok: false, error: 'approval_request_not_found', message: '审批请求不存在或已过期' });
+    const explanation = await resolveModelExplanation({ intent: pending.intent || {} });
+    if (!explanation) {
+      return res.json({ ok: true, explanation: null, explainUnavailable: true });
+    }
+    return res.json({ ok: true, explanation, explainUnavailable: false });
   });
 
   // BLOCK-171 CP-2 — 审批记录复查（guard_ack 事件 × 本人任务，最新 50）。

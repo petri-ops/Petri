@@ -1,0 +1,50 @@
+✅ [2026-11-23T05:15:55.496Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T05:15:55.497Z] [llm-providers] registered: dashscope-vision (vision)
+✔ A2 P1 模块存在且零新依赖（仅复用 callModelTask） (1.383666ms)
+✔ prompt 从确定性 intent 派生，明确不编造/不覆盖审批判断 (49.494167ms)
+✔ 文本规范化：空/超长/-whitespace 失败-soft (0.10675ms)
+✔ resolveModelExplanation 失败返回 null（不阻断审批） (0.099208ms)
+✔ 产品审批硬边界未被本票改写（零新 provider/不改 deny 语义） (0.238ms)
+⚠️ [2026-11-23T05:15:55.618Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-23T05:15:55.619Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-23T05:15:55.619Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-23T05:15:55.619Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-23T05:15:55.619Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-23T05:15:55.619Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T05:15:55.832Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-23T05:15:55.913Z] [executors] registered: r
+✅ [2026-11-23T05:15:55.913Z] [executors] registered: python
+✅ [2026-11-23T05:15:55.914Z] [storage] registered: local
+✅ [2026-11-23T05:15:55.914Z] [storage] capabilities declared: local
+✅ [2026-11-23T05:15:55.914Z] [storage] active: local
+✔ explain 路由：pending 请求返回 fail-soft（不伪造解释、不改审批状态） (1196.201875ms)
+✔ explain 路由：不存在的 requestId 返回 404，不泄漏其他请求 (2.145209ms)
+✔ P2 后端：按需解释路由注册 + 从 store 取 intent + fail-soft (1.213ms)
+✔ P3 前端 hook：解释 handler 调路由 + 失败保留确定性解释 (0.573875ms)
+✔ P3 UI：「解释」按钮 + 骨架 + 审批按钮未被禁用/包裹在 loading 内 (1.313125ms)
+✔ 红线：产品安全边界与既有审批决策测试未改 (1.393916ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1849.538166

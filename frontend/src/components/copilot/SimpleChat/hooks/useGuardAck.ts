@@ -120,12 +120,20 @@ export function useGuardAck(
   guardAckBusy: boolean;
   guardAckNotice: string | null;
   ackedGuardKeys: string[];
+  guardExplainBusy: boolean;
+  modelExplanation: string | null;
+  explainNotice: string | null;
   handleGuardAck: (mode: 'once' | 'task' | 'always', updatedInput?: unknown) => void;
   handleGuardDismiss: () => void;
+  handleGuardExplain: () => void;
 } {
   const [ackedGuardKeys, setAckedGuardKeys] = useState<string[]>([]);
   const [guardAckBusy, setGuardAckBusy] = useState(false);
   const [guardAckNotice, setGuardAckNotice] = useState<string | null>(null);
+  // QODER-A2 P3 — 按需解释本地态：成功覆盖卡片文案，失败保留确定性解释（notice 提示）。
+  const [guardExplainBusy, setGuardExplainBusy] = useState(false);
+  const [modelExplanation, setModelExplanation] = useState<string | null>(null);
+  const [explainNotice, setExplainNotice] = useState<string | null>(null);
   useEffect(() => {
     if (!guardAckNotice) return undefined;
     const timer = window.setTimeout(() => setGuardAckNotice(null), 5000);
@@ -135,7 +143,17 @@ export function useGuardAck(
     () => findPendingGuardAck((activeRun?.toolActivities as GuardAckActivity[]) || [], ackedGuardKeys),
     [activeRun, ackedGuardKeys],
   );
-
+  // 换卡（requestId/guardKey 变化）时清空上一张卡的模型解释态，避免跨卡残留。
+  const pendingKey = pendingGuardAck ? `${pendingGuardAck.requestId || ''}:${pendingGuardAck.guardKey}` : '';
+  useEffect(() => {
+    // 异步清空：避免 effect 内同步 setState 触发 cascading render（react-hooks lint）；
+    // 换卡后旧解释在下一 tick 清除，不跨卡残留。
+    const timer = window.setTimeout(() => {
+      setModelExplanation(null);
+      setExplainNotice(null);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [pendingKey]);
 
   const handleGuardAck = useCallback((mode: 'once' | 'task' | 'always', updatedInput?: unknown) => {
     if (!pendingGuardAck || !conversationId) return;
@@ -195,12 +213,52 @@ export function useGuardAck(
     }).catch(() => { /* deny 上送失败不阻塞本地关卡 */ });
   }, [conversationId, pendingGuardAck]);
 
+  // QODER-A2 P3 — 按需解释：成功覆盖卡片解释文案；失败只提示、保留确定性解释，
+  // 审批按钮全程可用（不 disable、不改 busy 态）。
+  const handleGuardExplain = useCallback(() => {
+    if (!pendingGuardAck || !conversationId || guardExplainBusy) return;
+    const runTaskId = getConversationRunSnapshot(conversationId)?.taskId;
+    const requestId = pendingGuardAck.requestId;
+    if (!runTaskId || !requestId) {
+      setExplainNotice('该审批无可解释请求（保留原说明）。');
+      return;
+    }
+    setGuardExplainBusy(true);
+    setExplainNotice(null);
+    void fetch(getPlatformApiPrefix() + '/ai/agent/task/' + encodeURIComponent(runTaskId)
+      + '/approval/' + encodeURIComponent(requestId) + '/explain', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(getToken() ? { Authorization: 'Bearer ' + getToken() } : {}),
+      },
+    })
+      .then(async (response) => {
+        const data = (await response.json().catch(() => ({}))) as {
+          ok?: unknown; explanation?: unknown; explainUnavailable?: unknown;
+        };
+        if (data && data.ok === true && typeof data.explanation === 'string' && data.explanation) {
+          setModelExplanation(data.explanation);
+        } else {
+          setExplainNotice('模型解释暂不可用，已保留原说明（不影响允许/拒绝）。');
+        }
+      })
+      .catch(() => {
+        setExplainNotice('模型解释网络失败，已保留原说明（不影响允许/拒绝）。');
+      })
+      .finally(() => setGuardExplainBusy(false));
+  }, [conversationId, pendingGuardAck, guardExplainBusy]);
+
   return {
     pendingGuardAck,
     guardAckBusy,
     guardAckNotice,
     ackedGuardKeys,
+    guardExplainBusy,
+    modelExplanation,
+    explainNotice,
     handleGuardAck,
     handleGuardDismiss,
+    handleGuardExplain,
   };
 }

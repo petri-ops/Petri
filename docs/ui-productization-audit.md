@@ -1,5 +1,11 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-721: 审批卡按需模型解释入口（2026-11-23 **in_progress**；QODER-A2 P3；解释按钮/分析中骨架/失败降级，行为面非观感面）
+
+- **范围**：`GuardAckCard.tsx` 增「解释」按钮 + 分析中骨架 + 失败提示；`useGuardAck.ts` 增 `handleGuardExplain` 调 P2 explain 路由；`SimpleChat.tsx` 透传；`simple-chat.css` 用既有 token 加骨架样式。模型解释成功覆盖确定性文案、失败保留原说明；审批「允许/拒绝」按钮全程可用（不禁用、不受 busy 影响）。零新依赖（复用 `callModelTask({role:'explanation'})`）。
+- **证据**：HK-01 `test/qoder-a2-explain-ui.test.mjs` 4/4；组件 `GuardAckCard.test.tsx` 15/15（含新增按需解释用例）；P2 路由端到端 `test/qoder-a2-explain-route.test.mjs` 2/2；tsc/lint/docs/changed 全绿。
+- **状态边界**：此为行为/可访问性面（按钮、骨架 aria-label），非用户观感签字项；无偏好裁决保持 in_progress 不代签 verified。红线：不改产品 sandbox/CSP/凭据/B1 token/handler/pack 声明。证据=`acceptance/a2-approval-explanation/`。
+
 ## UI-720: pack iframe sandbox B1 token（2026-11-22 **in_progress**；P6-TABLE-LOAD；sandbox 导航层修复，无独立 GUI 观感面）
 
 - **范围**：`PackSurfaceFrame.tsx` 导出 `PACK_SURFACE_SANDBOX`，iframe sandbox 增 B1 点名 token `allow-top-navigation-to-custom-protocols`（仅此一个，不动 allow-top-navigation/allow-popups 等宽边界、不动 CSP/凭据）。用户裁决「按 B1 在 sandbox 增 token」放行。

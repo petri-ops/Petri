@@ -955,8 +955,12 @@ export function SimpleChat({
     guardAckBusy,
     guardAckNotice,
     ackedGuardKeys,
+    guardExplainBusy,
+    modelExplanation,
+    explainNotice,
     handleGuardAck,
     handleGuardDismiss,
+    handleGuardExplain,
   } = useGuardAck(conversationId, activeRun);
 
   // BLOCK-244 Q1-REM — 审批控制面收尾簇（完全访问确认/结构化提问/编辑重发 checkpoint）。
@@ -1590,6 +1594,10 @@ export function SimpleChat({
                 duplicatePending={pendingGuardAck.duplicatePending}
                 mcpServerId={pendingGuardAck.mcpServerId}
                 canAlways={pendingGuardAck.canAlways}
+                guardExplainBusy={guardExplainBusy}
+                modelExplanation={modelExplanation}
+                explainNotice={explainNotice}
+                onExplain={pendingGuardAck.requestId ? handleGuardExplain : undefined}
                 onAck={handleGuardAck}
                 onDismiss={handleGuardDismiss}
               />

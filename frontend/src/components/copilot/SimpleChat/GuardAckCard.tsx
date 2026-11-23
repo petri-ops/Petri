@@ -41,6 +41,11 @@ export interface GuardAckCardProps {
   duplicatePending?: boolean;
   mcpServerId?: string | null;
   canAlways?: boolean;
+  // QODER-A2 P3 — 按需模型解释（可选）：成功覆盖解释文案，失败保留确定性解释。
+  guardExplainBusy?: boolean;
+  modelExplanation?: string | null;
+  explainNotice?: string | null;
+  onExplain?: () => void;
   onAck: (mode: 'once' | 'task' | 'always', updatedInput?: unknown) => void;
   onDismiss: () => void;
 }
@@ -100,6 +105,10 @@ export function GuardAckCard({
   duplicatePending = false,
   mcpServerId,
   canAlways = false,
+  guardExplainBusy = false,
+  modelExplanation = null,
+  explainNotice = null,
+  onExplain,
   onAck,
   onDismiss,
 }: GuardAckCardProps): React.ReactElement {
@@ -166,7 +175,8 @@ export function GuardAckCard({
     onAck(scope);
   }, [armScope, onAck]);
 
-  const explanationText = explanation || message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`;
+  // QODER-A2：模型解释成功时覆盖确定性文案；失败/未触发时保留原解释（不编造）。
+  const explanationText = modelExplanation || explanation || message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`;
 
   return (
     <div
@@ -186,6 +196,21 @@ export function GuardAckCard({
       </div>
       <p className="sc-guard-card__message">{message || `工具 ${toolName} 命中审批维度，需要你确认后放行。`}</p>
       <p className="sc-guard-card__explanation" data-testid="guard-ack-explanation">{explanationText}</p>
+      {onExplain ? (
+        <div className="sc-guard-card__explain" data-testid="guard-ack-explain">
+          <button
+            type="button"
+            className="petri-btn petri-btn--ghost petri-btn--sm"
+            onClick={onExplain}
+            disabled={guardExplainBusy}
+            data-testid="guard-ack-explain-button"
+          >
+            {guardExplainBusy ? '分析中…' : '解释'}
+          </button>
+          {guardExplainBusy ? <span className="sc-guard-card__explain-skeleton" aria-label="分析中" /> : null}
+          {explainNotice ? <span className="sc-guard-card__explain-notice">{explainNotice}</span> : null}
+        </div>
+      ) : null}
       {intent && (intent.action || intent.impact) ? (
         <div className="sc-guard-card__intent" data-testid="guard-ack-intent">
           {intent.action ? <span><b>意图</b> {intent.action}</span> : null}
