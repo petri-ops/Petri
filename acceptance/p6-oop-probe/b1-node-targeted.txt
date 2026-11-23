@@ -1,0 +1,26 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (9.448416ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (2.488083ms)
+✔ BLOCK-216 contributions: disabled pack disappears (3.262291ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (3.818375ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (1.578792ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (1.745625ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (2.497833ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (2.486083ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (147.4605ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (2.6905ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (0.916292ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.31025ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.236084ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.315917ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.428334ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (0.547166ms)
+✔ U-P6-SANDBOX：pack scheme privileges 含 supportFetchAPI + corsEnabled（裁决 A） (1.410792ms)
+✔ U-P6-SANDBOX：privileges 注册仍先于 app ready（registerPackSchemePrivileges 时序契约） (1.320291ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 353.589333
