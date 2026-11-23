@@ -1,0 +1,523 @@
+
+> petri-desktop@0.0.4 test:changed:list
+> node scripts/test-affected.mjs --json
+
+{
+  "changedFiles": [
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
+    "acceptance/c56-web-sourced-manuscript/changed-list.txt",
+    "acceptance/c56-web-sourced-manuscript/docs-check.txt",
+    "acceptance/c56-web-sourced-manuscript/lint.txt",
+    "acceptance/c56-web-sourced-manuscript/manuscript-draft.md",
+    "acceptance/c56-web-sourced-manuscript/node-tests.txt",
+    "acceptance/c56-web-sourced-manuscript/rewrite-report.md",
+    "acceptance/c56-web-sourced-manuscript/source-provenance.md",
+    "acceptance/c56-web-sourced-manuscript/tsc.txt",
+    "acceptance/c56-web-sourced-manuscript/ui-audit.txt",
+    "acceptance/cleanup-retirement/block463-junk/projects-snapshot.json",
+    "acceptance/cleanup-retirement/pen-stroke/GlobalWatermark.tsx",
+    "acceptance/cleanup-retirement/pen-stroke/sha256-before.txt",
+    "acceptance/cleanup-retirement/pen-stroke/watermark.css",
+    "acceptance/cultural-watermark/live-minimal/cultural-watermark-live-darwin.json",
+    "acceptance/cultural-watermark/live-minimal/extensions.png",
+    "acceptance/cultural-watermark/live-minimal/home.png",
+    "acceptance/cultural-watermark/live-minimal/settings.png",
+    "acceptance/cultural-watermark/live-minimal/welcome.png",
+    "acceptance/evals/golden-2026-11-21T04-33-23-871Z.json",
+    "acceptance/evals/real-replay-2026-11-21T04-34-18-535Z.json",
+    "acceptance/evals/smoke-2026-11-21T04-33-51-823Z.json",
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+    "acceptance/p6-oop-probe/b1-node-targeted.txt",
+    "acceptance/stall-live-2026-11-19/live-leg-events.ndjson",
+    "acceptance/stall-live-2026-11-19/live-leg-result.json",
+    "acceptance/stall-live-2026-11-19/live-leg-sse.ndjson",
+    "acceptance/stall-live-2026-11-19/mock-leg-events.ndjson",
+    "acceptance/stall-live-2026-11-19/mock-leg-result.json",
+    "acceptance/stall-live-2026-11-19/mock-leg-sse.ndjson",
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs",
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs",
+    "acceptance/stall-verify-2026-11-19/block338-stream-stall-watchdog.txt",
+    "acceptance/stall-verify-2026-11-19/block507-context-aware-stall.txt",
+    "acceptance/stall-verify-2026-11-19/block507-stall-recovery.txt",
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs",
+    "acceptance/stall-verify-2026-11-19/live-darwin.json",
+    "acceptance/stall-verify-2026-11-19/loop-stall-resume.txt",
+    "acceptance/stall-verify-2026-11-19/model-gateway.txt",
+    "acceptance/stall-verify-2026-11-19/negtest-restored.txt",
+    "acceptance/stall-verify-2026-11-19/negtest-tampered.txt",
+    "assets/logo.png",
+    "assets/pelican-from-petri.html",
+    "docs/pelican-bicycle.html",
+    "docs/post-h9-optimization-blueprint-2026-11-10.md",
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+    "petri-logo-concepts.miora",
+    "petri-logo-concepts_assets/056f605d-v4-size-check.png",
+    "petri-logo-concepts_assets/05f2e930-FINAL-grid-contact.png",
+    "petri-logo-concepts_assets/09d5385b-water-static-final.png",
+    "petri-logo-concepts_assets/0a976a1f-petri-logo-F.png",
+    "petri-logo-concepts_assets/0c4cd02f-v4-compact.png",
+    "petri-logo-concepts_assets/1375ef22-FINAL-compact.png",
+    "petri-logo-concepts_assets/14f4bf37-final-brand.png",
+    "petri-logo-concepts_assets/15756fb3-v3-size-check.png",
+    "petri-logo-concepts_assets/15a2d8a4-v8-size.png",
+    "petri-logo-concepts_assets/15f636c7-petri-logo-lockups.png",
+    "petri-logo-concepts_assets/1daf9dfa-petri-v2.png",
+    "petri-logo-concepts_assets/2a19c197-FINAL-ink-contact.png",
+    "petri-logo-concepts_assets/3050450d-final-brand.png",
+    "petri-logo-concepts_assets/30da81f6-FINAL-A-contact.png",
+    "petri-logo-concepts_assets/34e7ef66-petri-logo-E.png",
+    "petri-logo-concepts_assets/36a055d0-00-fixed-sheet.png",
+    "petri-logo-concepts_assets/3921e9ab-v4-compare.png",
+    "petri-logo-concepts_assets/39bb5e29-v2-line-3.png",
+    "petri-logo-concepts_assets/3d329ec1-v8-lockup.png",
+    "petri-logo-concepts_assets/3eb15117-FINAL-A-compact.png",
+    "petri-logo-concepts_assets/448c7df5-petri-logo-B.png",
+    "petri-logo-concepts_assets/4930b7b9-water-final-frame.png",
+    "petri-logo-concepts_assets/49940c8c-v2-size-check.png",
+    "petri-logo-concepts_assets/4b97180e-v3-lockups.png",
+    "petri-logo-concepts_assets/4e4177cf-miora_text_to_image-1793867593907-0-fac88be96a54.png",
+    "petri-logo-concepts_assets/4e488326-petri-logo-D.png",
+    "petri-logo-concepts_assets/5329e1b8-v2-line-4.png",
+    "petri-logo-concepts_assets/539f8bbf-00-sheet.png",
+    "petri-logo-concepts_assets/54db6ac2-v2-line-1.png",
+    "petri-logo-concepts_assets/561653b4-miora_text_to_image-1793867605666-0-dc7f3ee55fed.png",
+    "petri-logo-concepts_assets/56c453e4-v2-line-2.png",
+    "petri-logo-concepts_assets/59a68e0a-fixed-inv.png",
+    "petri-logo-concepts_assets/5df17a34-fixed-ink.png",
+    "petri-logo-concepts_assets/66879bfb-00-palette.png",
+    "petri-logo-concepts_assets/6793f42b-mark-a300.png",
+    "petri-logo-concepts_assets/6c4c9e58-miora_text_to_image-1793867574962-0-5da0c1d58e3e.png",
+    "petri-logo-concepts_assets/6ebbc86f-miora_text_to_image-1793867615410-0-80767894ca00.png",
+    "petri-logo-concepts_assets/71dd34e6-petri-logo-A.png",
+    "petri-logo-concepts_assets/744448e7-fixed-brand.png",
+    "petri-logo-concepts_assets/7747cf87-00-sheet.png",
+    "petri-logo-concepts_assets/7bb0f534-FINAL-ultra-contact.png",
+    "petri-logo-concepts_assets/84aa741e-v4-final.png",
+    "petri-logo-concepts_assets/89651c1d-v3-compare.png",
+    "petri-logo-concepts_assets/8d517163-01-system-board.png",
+    "petri-logo-concepts_assets/8f9f76fb-petri-v2-compact.png",
+    "petri-logo-concepts_assets/92e6ee9e-miora_text_to_image-1793867629271-0-27bd64782d15.png",
+    "petri-logo-concepts_assets/94750754-FINAL-contact.png",
+    "petri-logo-concepts_assets/9631028e-FINAL-A-main.png",
+    "petri-logo-concepts_assets/995c064b-03-web-hero.png",
+    "petri-logo-concepts_assets/9a1da4db-FINAL-A-lockup.png",
+    "petri-logo-concepts_assets/9a60f72b-miora_text_to_image-1793867583660-0-d3afaf25ff72.png",
+    "petri-logo-concepts_assets/a20fbc15-water-wave-v2.gif",
+    "petri-logo-concepts_assets/a6929426-v4-lockups.png",
+    "petri-logo-concepts_assets/b3937e5e-02-splash.png",
+    "petri-logo-concepts_assets/b3ca3dac-FINAL-lockup.png",
+    "petri-logo-concepts_assets/c179bb03-petri-logo-size-check.png",
+    "petri-logo-concepts_assets/c6763031-petri-logo-C.png",
+    "petri-logo-concepts_assets/c6bac584-04-report-cover.png",
+    "petri-logo-concepts_assets/c71c3cc7-05-poster.png",
+    "petri-logo-concepts_assets/d5fbfa31-v3-final.png",
+    "petri-logo-concepts_assets/d72e0dd0-water-wave-final.gif",
+    "petri-logo-concepts_assets/e14210ee-FINAL-main.png",
+    "petri-logo-concepts_assets/f45e7289-FINAL-ultra.png",
+    "petri-logo-concepts_assets/fd3f1f6e-v2-colour-directions.png",
+    "test/c56-web-sourced-fidelity.test.mjs",
+    "test/impact-map.json",
+    "tmp-block342-live/scene.svg",
+    "tmp-review/demo.svg"
+  ],
+  "tests": [
+    "test/agent-runner-loop-orchestrator.test.mjs",
+    "test/block322-p3-constraints.test.mjs",
+    "test/block322-p4-bom.test.mjs",
+    "test/block338-stream-stall-watchdog.test.mjs",
+    "test/block509-video-p4.test.mjs",
+    "test/block93-role-prompt.test.mjs",
+    "test/c56-manuscript-rewrite-fidelity.test.mjs",
+    "test/c56-paper-writing-skill.test.mjs",
+    "test/c56-skill-drill.test.mjs",
+    "test/c56-web-sourced-fidelity.test.mjs",
+    "test/dev-verify.test.mjs",
+    "test/evals-harness.test.mjs",
+    "test/evo4-evidence-bugfix.test.mjs",
+    "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
+    "test/g0-rs-p6-product-acceptance.test.mjs",
+    "test/loop-checkpoint.test.cjs",
+    "test/loop-orchestrator-subdomains.test.mjs",
+    "test/loop-stall-resume.test.mjs",
+    "test/next04a-scene3d.test.mjs",
+    "test/next05-scene-store.test.mjs",
+    "test/nso-w5-impact-coverage.test.mjs",
+    "test/p6-artifact-switch-pack.test.mjs",
+    "test/p6-driver-filter-selector.test.mjs",
+    "test/p6-driver-pack-handler.test.mjs",
+    "test/p6-driver-ready-handshake.test.mjs",
+    "test/p6-inspect-decider.test.mjs",
+    "test/p6-pack-table-surface-disable.test.mjs",
+    "test/p6-result-surfaces-retire.test.mjs",
+    "test/platform-branch-freeze.test.mjs",
+    "test/post-h9-evidence-and-ledger.test.mjs",
+    "test/test-affected.test.mjs"
+  ],
+  "commands": [
+    "docs-check",
+    "ui-audit"
+  ],
+  "frontendRelated": [
+    "src/styles/CulturalWatermark.test.ts"
+  ],
+  "syntax": [
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs",
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs",
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs"
+  ],
+  "unknown": [],
+  "reasons": {
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs": [
+      "governance-docs",
+      "script-dev-infra"
+    ],
+    "acceptance/c56-web-sourced-manuscript/changed-list.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/docs-check.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/lint.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/manuscript-draft.md": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/node-tests.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/rewrite-report.md": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/source-provenance.md": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/tsc.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/c56-web-sourced-manuscript/ui-audit.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/block463-junk/projects-snapshot.json": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/GlobalWatermark.tsx": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/sha256-before.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/watermark.css": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cultural-watermark/live-minimal/cultural-watermark-live-darwin.json": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/extensions.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/home.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/settings.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/welcome.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/evals/golden-2026-11-21T04-33-23-871Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/evals/real-replay-2026-11-21T04-34-18-535Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/evals/smoke-2026-11-21T04-33-51-823Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json": [
+      "nso-evaluation-artifacts"
+    ],
+    "acceptance/p6-oop-probe/b1-node-targeted.txt": [
+      "p6-electron-pressure-prototype"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-events.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-result.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-sse.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-events.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-result.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-sse.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block338-stream-stall-watchdog.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block507-context-aware-stall.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block507-stall-recovery.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/live-darwin.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/loop-stall-resume.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/model-gateway.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/negtest-restored.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/negtest-tampered.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "assets/logo.png": [
+      "static-assets"
+    ],
+    "assets/pelican-from-petri.html": [
+      "static-assets"
+    ],
+    "docs/pelican-bicycle.html": [
+      "governance-docs"
+    ],
+    "docs/post-h9-optimization-blueprint-2026-11-10.md": [
+      "governance-docs"
+    ],
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json": [
+      "model3d-sample-scenes"
+    ],
+    "petri-logo-concepts.miora": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/056f605d-v4-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/05f2e930-FINAL-grid-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/09d5385b-water-static-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/0a976a1f-petri-logo-F.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/0c4cd02f-v4-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/1375ef22-FINAL-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/14f4bf37-final-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15756fb3-v3-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15a2d8a4-v8-size.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15f636c7-petri-logo-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/1daf9dfa-petri-v2.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/2a19c197-FINAL-ink-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3050450d-final-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/30da81f6-FINAL-A-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/34e7ef66-petri-logo-E.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/36a055d0-00-fixed-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3921e9ab-v4-compare.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/39bb5e29-v2-line-3.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3d329ec1-v8-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3eb15117-FINAL-A-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/448c7df5-petri-logo-B.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4930b7b9-water-final-frame.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/49940c8c-v2-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4b97180e-v3-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4e4177cf-miora_text_to_image-1793867593907-0-fac88be96a54.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4e488326-petri-logo-D.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/5329e1b8-v2-line-4.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/539f8bbf-00-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/54db6ac2-v2-line-1.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/561653b4-miora_text_to_image-1793867605666-0-dc7f3ee55fed.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/56c453e4-v2-line-2.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/59a68e0a-fixed-inv.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/5df17a34-fixed-ink.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/66879bfb-00-palette.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6793f42b-mark-a300.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6c4c9e58-miora_text_to_image-1793867574962-0-5da0c1d58e3e.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6ebbc86f-miora_text_to_image-1793867615410-0-80767894ca00.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/71dd34e6-petri-logo-A.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/744448e7-fixed-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/7747cf87-00-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/7bb0f534-FINAL-ultra-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/84aa741e-v4-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/89651c1d-v3-compare.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/8d517163-01-system-board.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/8f9f76fb-petri-v2-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/92e6ee9e-miora_text_to_image-1793867629271-0-27bd64782d15.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/94750754-FINAL-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9631028e-FINAL-A-main.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/995c064b-03-web-hero.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9a1da4db-FINAL-A-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9a60f72b-miora_text_to_image-1793867583660-0-d3afaf25ff72.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/a20fbc15-water-wave-v2.gif": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/a6929426-v4-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/b3937e5e-02-splash.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/b3ca3dac-FINAL-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c179bb03-petri-logo-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c6763031-petri-logo-C.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c6bac584-04-report-cover.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c71c3cc7-05-poster.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/d5fbfa31-v3-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/d72e0dd0-water-wave-final.gif": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/e14210ee-FINAL-main.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/f45e7289-FINAL-ultra.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/fd3f1f6e-v2-colour-directions.png": [
+      "user-miora-artifacts"
+    ],
+    "test/c56-web-sourced-fidelity.test.mjs": [
+      "platform-branch-freeze",
+      "p6-canonical-source-binding",
+      "test-infrastructure"
+    ],
+    "test/impact-map.json": [
+      "platform-branch-freeze",
+      "p6-canonical-source-binding",
+      "test-infrastructure",
+      "nso-w5-impact-coverage"
+    ],
+    "tmp-block342-live/scene.svg": [
+      "tmp-block342-live"
+    ],
+    "tmp-review/demo.svg": [
+      "tmp-review-scratch"
+    ]
+  }
+}
