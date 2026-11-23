@@ -9850,6 +9850,8 @@
         "acceptance/block510/**",
         "acceptance/c56-skill-registration/**",
         "acceptance/c56-synthetic-drill/**",
+        "acceptance/c56-synthetic-manuscript-rewrite/**",
+        "acceptance/c56-real-manuscript/**",
         "acceptance/project-evaluation-prompt-2026-11-20/**",
         "acceptance/project-status-assessment-2026-11-20/**",
         "acceptance/ui-visual-upgrade-2026-11-20/**",
@@ -9859,6 +9861,7 @@
         "test/block509-video-p4.test.mjs",
         "test/c56-paper-writing-skill.test.mjs",
         "test/c56-skill-drill.test.mjs",
+        "test/c56-manuscript-rewrite-fidelity.test.mjs",
         "test/evo4-evidence-bugfix.test.mjs"
       ]
     },
