@@ -108,6 +108,8 @@ module.exports = async function registerRoutes(app) {
     ['Data retention', () => require('./data-retention').registerDataRetentionRoutes(app)],
     // EVO-4 bugfix：harness 自进化证据只读端点（后端 ABI 正确读 DB，主进程经 REST 转发）
     ['Lesson evidence', () => require('./lesson-evidence')(app)],
+    // QODER-J2：技能自进化建议（本地 lessons 审计→建议草案；忽略走独立账本；不自动建任务）
+    ['Skill suggestions', () => require('./skill-suggestions')(app)],
   ];
 
   for (const [name, fn] of routes) {

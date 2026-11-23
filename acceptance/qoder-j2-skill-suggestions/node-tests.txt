@@ -1,0 +1,15 @@
+✔ J2 P1 模块存在且零新依赖（仅 Node 内置） (1.407208ms)
+✔ projectSkillSuggestions：lessons→建议，draft tier 标注 + skillId 归因 (0.765834ms)
+✔ 忽略账本：ignored fingerprint 被过滤，可跨蒸馏存活（独立账本） (0.078167ms)
+✔ 空输入/无匹配 skill 不伪造建议，不泄漏内部字段 (0.061542ms)
+✔ 红线：不改内置 skill 资产与既有 harness 红线 (0.443ms)
+✔ GET 建议可读：draft tier、不自动建任务、prompt 草案可读 (22.709833ms)
+✔ 忽略写独立账本 + 忽略后 GET 过滤 + unignore 恢复 (16.564625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 334.485417

@@ -13839,7 +13839,7 @@
         "docs/qoder-yellow9-reopen-review.md"
       ],
       "registeredAt": "2026-11-23",
-      "notes": "2026-11-23 用户发令「🟡9 开始吧 可以立项了」+裁决「立9项评审稿+立刻开工A2」。母纲9个保留🟡 reopen 项(A2/E12/J2/J4/J6/L1/L2/L5/L6)统一立项评审稿：逐项范围/形态/待裁决/验收边界在案。TASK-FORM=立项评审稿(taxonomy §3)；单工作包串行——A2 唯一 active 实施包，其余8项 queued 待逐项发令。L1/L2 只借行为合同不接 Qoder 端点；零新依赖默认；不改产品安全边界/观感不代签；不碰 G1+。G0 开发期常态·不外推 packaged/Provider/GA. 【2026-11-23 实施进度】A2 审批意图解释 completed（P1纯函数+P2 explain路由+P3按钮/骨架，acceptance/a2-approval-explanation/）；E12 Notebook 单元格编辑 completed（notebook_edit 工具工具数119，acceptance/qoder-e12-notebook-edit/）；其余7项 queued。"
+      "notes": "2026-11-23 用户发令「🟡9 开始吧 可以立项了」+裁决「立9项评审稿+立刻开工A2」。母纲9个保留🟡 reopen 项(A2/E12/J2/J4/J6/L1/L2/L5/L6)统一立项评审稿：逐项范围/形态/待裁决/验收边界在案。TASK-FORM=立项评审稿(taxonomy §3)；单工作包串行——A2 唯一 active 实施包，其余8项 queued 待逐项发令。L1/L2 只借行为合同不接 Qoder 端点；零新依赖默认；不改产品安全边界/观感不代签；不碰 G1+。G0 开发期常态·不外推 packaged/Provider/GA. 【2026-11-23 实施进度】A2 审批意图解释 completed（P1纯函数+P2 explain路由+P3按钮/骨架，acceptance/a2-approval-explanation/）；E12 Notebook 单元格编辑 completed（notebook_edit 工具工具数119，acceptance/qoder-e12-notebook-edit/）；其余7项 queued。 【J2 completed】技能自进化建议（投影器+只读/忽略路由+独立忽略账本，acceptance/qoder-j2-suggestions/）；其余6项queued。"
     }
   ],
   "lastUpdated": "2026-11-23"
