@@ -1,0 +1,40 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (6.973ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (1.848666ms)
+✔ BLOCK-216 contributions: disabled pack disappears (3.990792ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (3.217166ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (2.018708ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (3.327292ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (1.644ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (3.980625ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (56.952ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (1.856084ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (1.117208ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.402167ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.29175ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.574167ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.84725ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (1.104042ms)
+✔ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (1.086083ms)
+✔ registerPackSchemePrivileges 在 app ready 前调用 (0.66175ms)
+✔ setupPackProtocol 在 run() 内 app ready 后调用 (0.380125ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.149208ms)
+✔ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (1.143875ms)
+✔ 探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例） (0.309834ms)
+✔ waitFor 的求值有超时防护（防主上下文挂起永久阻塞） (0.238458ms)
+✔ table_load 各步有 subStage 打点（挂起源精确落证） (0.401208ms)
+✔ navigate 的 loadURL 用 domcontentloaded（pack iframe 子资源不阻塞主文档导航） (0.242959ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler） (0.135583ms)
+✔ 裁决材料在案：方向 B（原生 viewer）+ 保住 10万行语义理由 + pack #bioTable 200行证据 (2.204208ms)
+✔ tap 用 Runtime.evaluate 注入（替代挂起的 addScriptToEvaluateOnNewDocument） (0.412417ms)
+✔ tap 注入时机在 navigate 的 loadURL 之后（Runtime.evaluate 只在已提交文档上下文存活） (0.260708ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler/注册表） (0.56525ms)
+✔ U-P6-SANDBOX：pack scheme privileges 含 supportFetchAPI + corsEnabled（裁决 A） (1.081083ms)
+✔ U-P6-SANDBOX：privileges 注册仍先于 app ready（registerPackSchemePrivileges 时序契约） (0.2255ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 243.951833

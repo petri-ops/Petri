@@ -1,0 +1,66 @@
+✖ 裁决材料在案：方向 B（原生 viewer）+ 保住 10万行语义理由 + pack #bioTable 200行证据 (1.131375ms)
+✖ tap 用 Runtime.evaluate 注入（替代挂起的 addScriptToEvaluateOnNewDocument） (1.039708ms)
+✖ tap 注入时机在 navigate 的 loadURL 之后（Runtime.evaluate 只在已提交文档上下文存活） (0.24675ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler/注册表） (0.660459ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 125.775125
+
+✖ failing tests:
+
+test at test/p6-inspect-decider.test.mjs:20:1
+✖ 裁决材料在案：方向 B（原生 viewer）+ 保住 10万行语义理由 + pack #bioTable 200行证据 (1.131375ms)
+  AssertionError [ERR_ASSERTION]: 须落裁决材料 acceptance/p6-inspect-decider/DECISION.md
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-inspect-decider.test.mjs:21:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/p6-inspect-decider.test.mjs:29:1
+✖ tap 用 Runtime.evaluate 注入（替代挂起的 addScriptToEvaluateOnNewDocument） (1.039708ms)
+  AssertionError [ERR_ASSERTION]: tap 须用 Runtime.evaluate 注入
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-inspect-decider.test.mjs:34:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "function _installHostMessageTap(webContents) {\n  if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');\n  await webContents.debugger.sendCommand('Page.enable');\n  await webContents.debugger.sendCommand('Runtime.enable');\n  await webContents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {\n    source: `(() => {\n      if (window.__petriP6TapInstalled) return;\n      window.__petriP6TapInstalled = true;\n      window.__petriP6Messages = [];\n      window.addEventListener('message', (e) => {\n        const d = e.data;\n        if (d && typeof d === 'object' && typeof d.type === 'string'\n            && d.type.indexOf('petri:') === 0) {\n          try {\n            window.__petriP6Messages.push({\n              type: d.type,\n              surfaceId: d.surfaceId || null,\n              at: Date.now(),\n            });\n          } catch (err) {}\n        }\n      });\n    })();`,\n  });\n}\n\nfunction rendererWorkingSetBytes(webContents) {\n  const pid = webContents.getOSProcessId();\n  const metric = app.getAppMetrics().find((entry) => entry.pid === pid);\n  const kib = Number(metric?.memory?.workingSetSize);\n  return Number.isFinite(kib) && kib >= 0 ? Math.round(kib * 10",
+    expected: /Runtime\.evaluate/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/p6-inspect-decider.test.mjs:39:1
+✖ tap 注入时机在 navigate 的 loadURL 之后（Runtime.evaluate 只在已提交文档上下文存活） (0.24675ms)
+  AssertionError [ERR_ASSERTION]: navigate 内须调用 tap（loadURL 后注入，页面重载后 listener 存活）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-inspect-decider.test.mjs:47:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

@@ -1963,16 +1963,19 @@
         "test/p6-driver-iframe-probe.test.mjs",
         "test/p6-driver-pack-handler.test.mjs",
         "test/p6-driver-ready-handshake.test.mjs",
+        "test/p6-inspect-decider.test.mjs",
         "acceptance/g0-result-studio/rs-p6-electron-pressure-multirevision.json",
         "acceptance/p6-oop-probe/**",
         "acceptance/p6-b1-sandbox-token/**",
         "acceptance/p6-harness-pack-handler/**",
-        "acceptance/p6-ready-handshake/**"
+        "acceptance/p6-ready-handshake/**",
+        "acceptance/p6-inspect-decider/**"
       ],
       "tests": [
         "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
         "test/p6-driver-pack-handler.test.mjs",
-        "test/p6-driver-ready-handshake.test.mjs"
+        "test/p6-driver-ready-handshake.test.mjs",
+        "test/p6-inspect-decider.test.mjs"
       ],
       "classifiesScripts": false
     },

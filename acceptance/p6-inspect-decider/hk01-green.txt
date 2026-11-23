@@ -1,0 +1,12 @@
+✔ 裁决材料在案：方向 B（原生 viewer）+ 保住 10万行语义理由 + pack #bioTable 200行证据 (1.329667ms)
+✔ tap 用 Runtime.evaluate 注入（替代挂起的 addScriptToEvaluateOnNewDocument） (0.322333ms)
+✔ tap 注入时机在 navigate 的 loadURL 之后（Runtime.evaluate 只在已提交文档上下文存活） (0.255375ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler/注册表） (0.574417ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.132458

@@ -22,15 +22,14 @@ const src = () => fs.readFileSync(DRIVER, 'utf8');
 test('宿主 message tap 已启用：捕产品实发的 petri:ready postMessage', () => {
   const s = src();
   assert.match(s, /function _installHostMessageTap\s*\(/, '须保留宿主 message tap 函数');
-  // 关键：真正调用了 tap（上票禁用导致 hostMessages 恒空）。须有 race 超时保护避免导航挂起。
   assert.match(s, /_installHostMessageTap\s*\(/, '须调用宿主 message tap');
-  const tapCall = s.search(/_installHostMessageTap\s*\(\s*window\.webContents/);
-  assert.ok(tapCall >= 0, 'tap 须作用于 window.webContents（宿主）');
+  // 2026-11-23 裁决配套修法：addScriptToEvaluateOnNewDocument 在此场景挂起，
+  // 改用 Runtime.evaluate 在 navigate 的 loadURL 后注入（见 p6-inspect-decider.test.mjs）。
   const tapDef = s.search(/function _installHostMessageTap\s*\(/);
-  assert.ok(tapCall > tapDef, '调用须在定义之后');
-  // 启用点须带超时防护（上票该 await 无保护导致挂起）。
-  const around = s.slice(tapCall, tapCall + 500);
-  assert.match(around, /Promise\.race|timeout|Timeout/, 'tap 调用须带 race/timeout 防护');
+  assert.ok(tapDef >= 0, '须有 tap 定义');
+  const around = s.slice(tapDef, tapDef + 900);
+  assert.match(around, /Runtime\.evaluate/, 'tap 注入须用 Runtime.evaluate（替代挂起的 addScriptToEvaluateOnNewDocument）');
+  assert.match(s, /hostTapReady/, 'tap 启用状态须落证');
 });
 
 test('探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例）', () => {

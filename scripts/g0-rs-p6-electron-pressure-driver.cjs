@@ -25,6 +25,8 @@ const WAIT_MS = Number.isFinite(requestedWaitMs) && requestedWaitMs >= 5_000
   : 120_000;
 const POLL_MS = 100;
 const BACKEND_STATUS_TIMEOUT_MS = 1_500;
+// P6 ready 握手层（2026-11-23）：宿主 message tap 注入状态（navigate 内写、落证读）。
+const hostTapState = { ready: false, attempts: 0 };
 
 app.commandLine.appendSwitch('js-flags', '--expose-gc');
 
@@ -244,6 +246,19 @@ async function navigate(window, config, target, mode = 'result') {
   // 主流程卡在此 await → 被 watchdog 强杀。改 domcontentloaded：主文档就绪即返回，
   // 子 iframe 由后续 waitFor/探针独立观测，不阻塞主文档导航。
   await window.loadURL(targetUrl(config, target, mode), { waitUntil: 'domcontentloaded' });
+  // P6 ready 握手层（2026-11-23 裁决配套修法）：Runtime.evaluate 只在已提交文档上下文
+  // 存活——loadURL 之后注入 message tap，每次导航重注（幂等标记绑 location.href）。
+  // 带 race 超时防护，失败不打断主流程；状态落 hostTapState 供 result 落证。
+  hostTapState.attempts += 1;
+  try {
+    const outcome = await Promise.race([
+      _installHostMessageTap(window.webContents),
+      new Promise((resolve) => setTimeout(() => resolve('tap_timeout'), 10_000)),
+    ]);
+    if (outcome !== 'tap_timeout') hostTapState.ready = true;
+  } catch (tapError) {
+    console.error('[p6-ready] host message tap failed: ' + String(tapError?.message || tapError).slice(0, 200));
+  }
   await waitFor(window.webContents,
     `Boolean(document.querySelector('[aria-label="结果主画布"]'))`,
     `${mode}_canvas`,
@@ -260,18 +275,20 @@ async function attachDebugger(webContents) {
 }
 
 /**
- * P6 OOP 深探（小票 2026-11-22）：在导航前给每个 frame 注入宿主 message tap，
- * 记录 petri:* postMessage（pack iframe 的 petri:ready 发给宿主 window）。
- * 失败不打断主流程；tap 只观测不改 sandbox/CSP/凭据。
+ * P6 ready 握手层（2026-11-23 裁决配套修法）：给宿主 window 注入 message tap，
+ * 记录产品实发的 petri:* postMessage（pack iframe 的 petri:ready）。
+ * 2026-11-23 从 Page.addScriptToEvaluateOnNewDocument 改 Runtime.evaluate——
+ * 前者在此 Electron 场景的 CDP await 挂起（实测 10s 超时、hostTapReady=false）；
+ * Runtime.evaluate 只作用于已提交文档，故须在 navigate() 的 loadURL 之后调用，
+ * 每次导航重新注入。失败不打断主流程；tap 只观测不改 sandbox/CSP/凭据。
  */
 async function _installHostMessageTap(webContents) {
   if (!webContents.debugger.isAttached()) webContents.debugger.attach('1.3');
-  await webContents.debugger.sendCommand('Page.enable');
   await webContents.debugger.sendCommand('Runtime.enable');
-  await webContents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument', {
-    source: `(() => {
-      if (window.__petriP6TapInstalled) return;
-      window.__petriP6TapInstalled = true;
+  return webContents.debugger.sendCommand('Runtime.evaluate', {
+    expression: `(() => {
+      if (window.__petriP6TapInstalled === location.href) return true;
+      window.__petriP6TapInstalled = location.href;
       window.__petriP6Messages = [];
       window.addEventListener('message', (e) => {
         const d = e.data;
@@ -286,7 +303,9 @@ async function _installHostMessageTap(webContents) {
           } catch (err) {}
         }
       });
-    })();`,
+      return true;
+    })()`,
+    returnByValue: true,
   });
 }
 
@@ -1323,19 +1342,8 @@ async function run() {
     if (rendererConsole.length > 20) rendererConsole.shift();
   });
 
-  // P6 ready 握手层专项（2026-11-23）：补 handler 后 result.html 已能真实加载，
-  // 重新启用宿主 message tap 捕产品实发的 petri:ready postMessage（对齐信号名，
-  // 替代探针读产品不设的 __petriSurfaceReady）。须在首次 loadURL 前注入（对新 document
-  // 生效）；整体带 race 超时防护——上票该 await 无保护导致挂起、watchdog 都设不上。
-  let hostTapReady = false;
-  try {
-    await Promise.race([
-      _installHostMessageTap(window.webContents),
-      new Promise((resolve) => setTimeout(() => resolve('tap_timeout'), 10_000)),
-    ]).then((outcome) => { hostTapReady = outcome !== 'tap_timeout'; });
-  } catch (tapError) {
-    console.error('[p6-ready] host message tap failed: ' + String(tapError?.message || tapError).slice(0, 200));
-  }
+  // P6 ready 握手层（2026-11-23 裁决配套修法）：宿主 tap 移至 navigate() 内
+  // loadURL 之后注入（Runtime.evaluate 只在已提交文档上下文存活），落证读 hostTapState。
 
   // P6 OOP 深探小票（2026-11-22）看门狗：pack iframe 导航被拦时，宿主某个
   // executeJavaScript 可能永不 resolve（实测挂起 >7min），主流程既不成功也不进 catch。
@@ -1371,7 +1379,7 @@ async function run() {
         failedStage: stage,
         subStage,
         timeoutReason: 'oop_watchdog_forced',
-        readyHandshake: { hostTapReady },
+        readyHandshake: { hostTapReady: hostTapState.ready, attempts: hostTapState.attempts },
         page: diagnosticPage,
         packSurfaceProbe: oopProbe,
         artifactNetwork: artifactNetworkObservation(),
@@ -1494,7 +1502,7 @@ async function run() {
     const result = {
       schemaVersion: 1,
       renderer: `Electron ${process.versions.electron}; Chromium ${process.versions.chrome}`,
-      readyHandshake: { hostTapReady },
+      readyHandshake: { hostTapReady: hostTapState.ready, attempts: hostTapState.attempts },
       table: {
         totalRows: table.totalRows,
         visibleRows: table.visibleRows,
@@ -1617,7 +1625,7 @@ async function run() {
       passed: false,
       failedStage: stage,
       subStage,
-      readyHandshake: { hostTapReady },
+      readyHandshake: { hostTapReady: hostTapState.ready, attempts: hostTapState.attempts },
       page,
       packSurfaceProbe,
       artifactNetwork: artifactNetworkObservation(),
