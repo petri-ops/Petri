@@ -33,7 +33,7 @@ goal: 母纲 Q-MATRIX 9 个保留 🟡 reopen 项的统一立项评审稿——�
 | **J6 ✅ P1 core（2026-11-23）** | Agent builder（:284） | 自定义 Agent/角色（当前仅内置 roles） | BLOCK | 内置 roles 在案 | D1 自定义角色 schema / D2 是否持久化位置 | 角色 CRUD + 使用契约；zero-G1+ |
 | **L1 ✅ P1 core（2026-11-23）** | 联网搜索方言（:307） | `web_search` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SearXNG + 显式授权 + 来源主机名在案 | D1 只借行为合同不接 Qoder 端点（已定）/ D2 权威度口径 | 方言映射契约；不改出网硬边界 |
 | **L2 ✅ P1 core（2026-11-23）** | 网页抓取方言（:308） | `web_fetch` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SSRF 硬边界 + 逐跳复检在案 | 同 L1 | 同 L1；不得放宽 SSRF/协议白名单 |
-| **L5 ✅ 契约层（2026-11-23；运行态需裁决）** | 插件宿主契约（:311） | 通用 utility-process host/sandbox（Q5 surface/pack host API 已交 BLOCK-216） | BLOCK | surface/pack host 在案 | D1 utility-process 是否新依赖 / D2 sandbox 边界 | host API + manifest 契约；默认拒绝 |
+| **L5 ✅ 契约层 + 运行态（2026-11-23 用户裁决放行）** | 插件宿主契约（:311） | 通用 utility-process host/sandbox（Q5 surface/pack host API 已交 BLOCK-216） | BLOCK | surface/pack host 在案 | D1 utility-process 是否新依赖 / D2 sandbox 边界 | host API + manifest 契约；默认拒绝 |
 | **L6 ✅ P1 core（2026-11-23）** | 插件权限/生命周期/审计（:312） | 生命周期/审计统一（深链安装 BLOCK-242 + trust BLOCK-243 已交） | 轻量包 / BLOCK | 深链 + trust 在案 | D1 审计落点（本地 SQLite）/ D2 生命周期事件集 | 审计事件可查 + 权限变更留痕 |
 
 ## 非范围（全项）
@@ -56,3 +56,7 @@ G0 开发期常态 · 不外推 packaged/Provider/GA。
 ## 2026-11-23 一次性推进补记
 
 剩余 6 项按「最小切片+默认口径」全部推完 P1 核心（HK-01 25/25），详见 。J4/J6/L1/L2/L6 工具注册/前端/写路由集成层留后续票；L5 仅契约层（运行态 utility-process 必碰 sandbox 红线，需用户裁决）。六项不谎称完整 BLOCK 交付。
+
+## 2026-11-23 L5 运行态裁决落地补记
+
+用户「没问题 冲」放行 L5-RUNTIME-RULING。实现 （默认不装载、启用包门、白名单入口、固定 argv、不传 MessagePort、30s 超时、before-quit 清理、审计脱敏）+ IPC 三通道（channels/preload 双向守护 9/9）+ 决策层 6/6。零现有 sandbox/CSP 文件改动；诚实边界=utilityProcess 是 Node 进程不能套 nodeIntegration:false 语义，靠 sender 门+无 MessagePort+白名单兜住。安全评审见 。

@@ -1,0 +1,48 @@
+✔ registry values are unique and channel-shaped (1.610625ms)
+✔ every registry channel is wrapped in preload or explicitly main-only (main/preload drift guard) (4.63375ms)
+✔ MAIN_ONLY allowlist stays tight (every entry is still registered, none wrapped) (0.754417ms)
+✔ consumers hold no hand-written channel literals (literal reflux guard) (6.891125ms)
+✔ every consumer can resolve its channels require (path guard — src/ vs src/main/ 深度差异) (2.36375ms)
+✔ W2-2 preload 调用点 ∪ MAIN_ONLY 与注册表集合相等（双向） (0.571542ms)
+✔ W2-2 负测：通道名只出现在注释里不计入调用点（堵 includes 假绿） (0.217875ms)
+✔ W2-2 全量 glob：src 下任何主进程模块不得手写已登记通道字面量，也不得手写未登记 IPC 通道 (20.339708ms)
+✔ L2-6（BLOCK-406）：通道分类注记键 ⊆ 注册表字面量（testOnly/platformScoped 单源一致） (0.615416ms)
+✔ J4 P1 模块存在且零新依赖 (1.505584ms)
+✔ authenticate 请求校验：仅 http/sse 远程服务可发起，不碰 token (1.229584ms)
+✔ URL 不落日志：投影只含状态与 serverId，不含 authorizationUrl/token (0.208708ms)
+✔ 项目级默认策略：缺省=ask 零变化，非法值回落 ask (0.087083ms)
+✔ 红线：既有凭据存储与 handler 未改 (0.324125ms)
+✔ J6 模块存在且零新依赖 (1.124125ms)
+✔ normalizeCustomRoles：合法角色入场，非法形状丢弃不整份失败 (0.431166ms)
+✔ 禁止覆盖内置角色 key 与 baseRole 人设 (0.0755ms)
+✔ mergeAgentRoles：内置∪自定义，unknown fail-closed 路径仍有效 (0.086833ms)
+✔ 红线：baseRole 人设真源未改 (0.44425ms)
+✔ L1/L2 模块存在且零新依赖 (1.298958ms)
+✔ L1 projectSearchResults：summary 有界 + authority 透传/诚实 null (0.468042ms)
+✔ L2 projectFetchMetadata：只补 source/authority 元数据，不改正文 (0.157791ms)
+✔ 恶意/缺失输入不伪造结果 (0.100666ms)
+✔ 红线：出网硬边界与配置白名单未改 (1.482208ms)
+✔ L5 契约模块存在且零新依赖 (1.634834ms)
+✔ 默认拒绝：无 host 声明即不装载，不启动进程 (0.901291ms)
+✔ 合法声明须含入口/权限/消息白名单，且入口路径安全 (0.575167ms)
+✔ 未知权限/消息类型 fail-closed，不隐式放行 (0.116291ms)
+✔ 红线：不改 pack handler/CSP/scheme (1.036458ms)
+✔ L6 模块存在且零新依赖 (1.414125ms)
+✔ parseAuditLines：JSONL 逐行宽容，坏行不整份失败 (1.328416ms)
+✔ formatAuditEvent：统一事件形状，脱敏（不含 token/凭据字段） (0.1235ms)
+✔ projectUnifiedAudit：多源合并按时间排序，只读投影不改写源 (8.844625ms)
+✔ 红线：信任判断与凭据不进投影 (0.512792ms)
+✔ L5 决策模块存在且零新依赖 (2.87475ms)
+✔ 默认不装载：无显式声明/未启用包/未知入口一律拒绝 (0.540792ms)
+✔ 合法声明：固定 argv、不传 MessagePort、远程 URL 拒绝 (2.203667ms)
+✔ 生命周期状态机：start→running→exit/stop，非法跃迁拒绝 (0.217708ms)
+✔ 审计事件：只记状态/入口/包 id，不记路径真值/凭据 (0.214375ms)
+✔ 红线：现有 pack sandbox/CSP handler 未改 (0.435416ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 219.729834

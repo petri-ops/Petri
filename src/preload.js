@@ -280,6 +280,13 @@ const desktopBridgeSurface = {
     },
   },
 
+  // QODER-L5 — utility-process host（默认不装载；start 须白名单准入）。
+  utilityHost: {
+    start: (packId) => ipcRenderer.invoke('utility-host:start', packId),
+    stop: (packId) => ipcRenderer.invoke('utility-host:stop', packId),
+    status: () => ipcRenderer.invoke('utility-host:status'),
+  },
+
   // BLOCK-242 — petri-install:// 深链安装：预览只读 / 确认安装 / main→renderer 推送
   installDeepLink: {
     preview: (url) => ipcRenderer.invoke('install:preview-deep-link', url),

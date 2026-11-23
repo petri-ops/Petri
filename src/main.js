@@ -738,6 +738,9 @@ async function main() {
   const { setupDataManagementIpc } = require("./ipc/data-management");
   const { setupBranchIpc } = require("./ipc/branch-handlers");
   const { setupWorkingTreeReviewIpc } = require("./ipc/working-tree-review");
+  // QODER-L5 — utility-process host（默认不装载；IPC start 须白名单准入）
+  const { registerUtilityHostIpc } = require("./ipc/utility-host");
+  registerUtilityHostIpc();
   setupAiSettingsIpc({ mainWindow: () => mainWindow });
   setupTelemetryIpc();
   setupHarnessCapabilitiesIpc();
@@ -894,6 +897,8 @@ app.on("before-quit", () => {
   // before-quit shutdown sequence.
   const { rServerSupervisor } = require("./main/backend-proc-manager");
   rServerSupervisor.shutdown("app-quit");
+  // QODER-L5 — utility host 子进程退出收敛（不残留 fork）
+  try { require("./ipc/utility-host").shutdownUtilityHosts(); } catch { /* 退出清理 best-effort */ }
 });
 
 // BLOCK-360（NSO-W2-4）桌面侧 SQLite 连接退出收敛：此前 closeAll 零生产调用点，WAL 不收敛。

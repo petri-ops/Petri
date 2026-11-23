@@ -1,0 +1,714 @@
+
+> petri-desktop@0.0.4 test:changed:list
+> node scripts/test-affected.mjs --json
+
+{
+  "changedFiles": [
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
+    "acceptance/cleanup-retirement/block463-junk/projects-snapshot.json",
+    "acceptance/cleanup-retirement/pen-stroke/GlobalWatermark.tsx",
+    "acceptance/cleanup-retirement/pen-stroke/sha256-before.txt",
+    "acceptance/cleanup-retirement/pen-stroke/watermark.css",
+    "acceptance/cultural-watermark/live-minimal/cultural-watermark-live-darwin.json",
+    "acceptance/cultural-watermark/live-minimal/extensions.png",
+    "acceptance/cultural-watermark/live-minimal/home.png",
+    "acceptance/cultural-watermark/live-minimal/settings.png",
+    "acceptance/cultural-watermark/live-minimal/welcome.png",
+    "acceptance/evals/golden-2026-11-21T04-33-23-871Z.json",
+    "acceptance/evals/real-replay-2026-11-21T04-34-18-535Z.json",
+    "acceptance/evals/smoke-2026-11-21T04-33-51-823Z.json",
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json",
+    "acceptance/p6-oop-probe/b1-node-targeted.txt",
+    "acceptance/qoder-yellow9-rest6/L5-RUNTIME-SECURITY.md",
+    "acceptance/qoder-yellow9-rest6/changed-list-runtime.txt",
+    "acceptance/qoder-yellow9-rest6/docs-check-runtime.txt",
+    "acceptance/qoder-yellow9-rest6/lint-runtime.txt",
+    "acceptance/qoder-yellow9-rest6/node-tests-runtime.txt",
+    "acceptance/qoder-yellow9-rest6/tsc-runtime.txt",
+    "acceptance/qoder-yellow9-rest6/ui-audit-runtime.txt",
+    "acceptance/stall-live-2026-11-19/live-leg-events.ndjson",
+    "acceptance/stall-live-2026-11-19/live-leg-result.json",
+    "acceptance/stall-live-2026-11-19/live-leg-sse.ndjson",
+    "acceptance/stall-live-2026-11-19/mock-leg-events.ndjson",
+    "acceptance/stall-live-2026-11-19/mock-leg-result.json",
+    "acceptance/stall-live-2026-11-19/mock-leg-sse.ndjson",
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs",
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs",
+    "acceptance/stall-verify-2026-11-19/block338-stream-stall-watchdog.txt",
+    "acceptance/stall-verify-2026-11-19/block507-context-aware-stall.txt",
+    "acceptance/stall-verify-2026-11-19/block507-stall-recovery.txt",
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs",
+    "acceptance/stall-verify-2026-11-19/live-darwin.json",
+    "acceptance/stall-verify-2026-11-19/loop-stall-resume.txt",
+    "acceptance/stall-verify-2026-11-19/model-gateway.txt",
+    "acceptance/stall-verify-2026-11-19/negtest-restored.txt",
+    "acceptance/stall-verify-2026-11-19/negtest-tampered.txt",
+    "assets/logo.png",
+    "assets/pelican-from-petri.html",
+    "core/shared-backend/utility-host-decision.js",
+    "docs/pelican-bicycle.html",
+    "docs/post-h9-optimization-blueprint-2026-11-10.md",
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json",
+    "petri-logo-concepts.miora",
+    "petri-logo-concepts_assets/056f605d-v4-size-check.png",
+    "petri-logo-concepts_assets/05f2e930-FINAL-grid-contact.png",
+    "petri-logo-concepts_assets/09d5385b-water-static-final.png",
+    "petri-logo-concepts_assets/0a976a1f-petri-logo-F.png",
+    "petri-logo-concepts_assets/0c4cd02f-v4-compact.png",
+    "petri-logo-concepts_assets/1375ef22-FINAL-compact.png",
+    "petri-logo-concepts_assets/14f4bf37-final-brand.png",
+    "petri-logo-concepts_assets/15756fb3-v3-size-check.png",
+    "petri-logo-concepts_assets/15a2d8a4-v8-size.png",
+    "petri-logo-concepts_assets/15f636c7-petri-logo-lockups.png",
+    "petri-logo-concepts_assets/1daf9dfa-petri-v2.png",
+    "petri-logo-concepts_assets/2a19c197-FINAL-ink-contact.png",
+    "petri-logo-concepts_assets/3050450d-final-brand.png",
+    "petri-logo-concepts_assets/30da81f6-FINAL-A-contact.png",
+    "petri-logo-concepts_assets/34e7ef66-petri-logo-E.png",
+    "petri-logo-concepts_assets/36a055d0-00-fixed-sheet.png",
+    "petri-logo-concepts_assets/3921e9ab-v4-compare.png",
+    "petri-logo-concepts_assets/39bb5e29-v2-line-3.png",
+    "petri-logo-concepts_assets/3d329ec1-v8-lockup.png",
+    "petri-logo-concepts_assets/3eb15117-FINAL-A-compact.png",
+    "petri-logo-concepts_assets/448c7df5-petri-logo-B.png",
+    "petri-logo-concepts_assets/4930b7b9-water-final-frame.png",
+    "petri-logo-concepts_assets/49940c8c-v2-size-check.png",
+    "petri-logo-concepts_assets/4b97180e-v3-lockups.png",
+    "petri-logo-concepts_assets/4e4177cf-miora_text_to_image-1793867593907-0-fac88be96a54.png",
+    "petri-logo-concepts_assets/4e488326-petri-logo-D.png",
+    "petri-logo-concepts_assets/5329e1b8-v2-line-4.png",
+    "petri-logo-concepts_assets/539f8bbf-00-sheet.png",
+    "petri-logo-concepts_assets/54db6ac2-v2-line-1.png",
+    "petri-logo-concepts_assets/561653b4-miora_text_to_image-1793867605666-0-dc7f3ee55fed.png",
+    "petri-logo-concepts_assets/56c453e4-v2-line-2.png",
+    "petri-logo-concepts_assets/59a68e0a-fixed-inv.png",
+    "petri-logo-concepts_assets/5df17a34-fixed-ink.png",
+    "petri-logo-concepts_assets/66879bfb-00-palette.png",
+    "petri-logo-concepts_assets/6793f42b-mark-a300.png",
+    "petri-logo-concepts_assets/6c4c9e58-miora_text_to_image-1793867574962-0-5da0c1d58e3e.png",
+    "petri-logo-concepts_assets/6ebbc86f-miora_text_to_image-1793867615410-0-80767894ca00.png",
+    "petri-logo-concepts_assets/71dd34e6-petri-logo-A.png",
+    "petri-logo-concepts_assets/744448e7-fixed-brand.png",
+    "petri-logo-concepts_assets/7747cf87-00-sheet.png",
+    "petri-logo-concepts_assets/7bb0f534-FINAL-ultra-contact.png",
+    "petri-logo-concepts_assets/84aa741e-v4-final.png",
+    "petri-logo-concepts_assets/89651c1d-v3-compare.png",
+    "petri-logo-concepts_assets/8d517163-01-system-board.png",
+    "petri-logo-concepts_assets/8f9f76fb-petri-v2-compact.png",
+    "petri-logo-concepts_assets/92e6ee9e-miora_text_to_image-1793867629271-0-27bd64782d15.png",
+    "petri-logo-concepts_assets/94750754-FINAL-contact.png",
+    "petri-logo-concepts_assets/9631028e-FINAL-A-main.png",
+    "petri-logo-concepts_assets/995c064b-03-web-hero.png",
+    "petri-logo-concepts_assets/9a1da4db-FINAL-A-lockup.png",
+    "petri-logo-concepts_assets/9a60f72b-miora_text_to_image-1793867583660-0-d3afaf25ff72.png",
+    "petri-logo-concepts_assets/a20fbc15-water-wave-v2.gif",
+    "petri-logo-concepts_assets/a6929426-v4-lockups.png",
+    "petri-logo-concepts_assets/b3937e5e-02-splash.png",
+    "petri-logo-concepts_assets/b3ca3dac-FINAL-lockup.png",
+    "petri-logo-concepts_assets/c179bb03-petri-logo-size-check.png",
+    "petri-logo-concepts_assets/c6763031-petri-logo-C.png",
+    "petri-logo-concepts_assets/c6bac584-04-report-cover.png",
+    "petri-logo-concepts_assets/c71c3cc7-05-poster.png",
+    "petri-logo-concepts_assets/d5fbfa31-v3-final.png",
+    "petri-logo-concepts_assets/d72e0dd0-water-wave-final.gif",
+    "petri-logo-concepts_assets/e14210ee-FINAL-main.png",
+    "petri-logo-concepts_assets/f45e7289-FINAL-ultra.png",
+    "petri-logo-concepts_assets/fd3f1f6e-v2-colour-directions.png",
+    "src/ipc/channels.js",
+    "src/ipc/utility-host.js",
+    "src/main.js",
+    "src/preload.js",
+    "test/utility-host-decision.test.mjs",
+    "tmp-block342-live/scene.svg",
+    "tmp-review/demo.svg"
+  ],
+  "tests": [
+    "test/agent-approval.test.mjs",
+    "test/agent-provider-boundary.test.mjs",
+    "test/agent-runner-loop-orchestrator.test.mjs",
+    "test/agent-task-store-busy-timeout.test.mjs",
+    "test/agent-tool-registry.test.mjs",
+    "test/agent-workflow-phase6.test.mjs",
+    "test/agent-workflow.test.mjs",
+    "test/backend-health.test.mjs",
+    "test/block113-tool-prerouting.test.mjs",
+    "test/block116-decision-platform.test.mjs",
+    "test/block135-retry-policy.test.mjs",
+    "test/block138-f1-chain-pending-registration.test.mjs",
+    "test/block145-tunnel-async.test.mjs",
+    "test/block154-css-modules-ratchet.test.mjs",
+    "test/block157-pack-enabled.test.mjs",
+    "test/block157-plugin-enabled.test.mjs",
+    "test/block157-skill-index.test.mjs",
+    "test/block157-skill-visibility.test.mjs",
+    "test/block163-pack-permissions.test.mjs",
+    "test/block201-settings-baseline.test.mjs",
+    "test/block203-landing-registry.test.mjs",
+    "test/block216-pack-contributions.test.mjs",
+    "test/block219-result-annotations.test.mjs",
+    "test/block220-pack-methods.test.mjs",
+    "test/block223-activity-summary.test.mjs",
+    "test/block223-desktop-shell-model.test.mjs",
+    "test/block228-crash-guard.test.mjs",
+    "test/block234-demo-assets.test.mjs",
+    "test/block234-methods-templates.test.mjs",
+    "test/block234-pack-example-prompts.test.mjs",
+    "test/block234-pack-workflow-templates.test.mjs",
+    "test/block234-profile-actors.test.mjs",
+    "test/block234-scientific-profiles.test.mjs",
+    "test/block260-minidump.test.mjs",
+    "test/block260-q9-rem.test.mjs",
+    "test/block264-assistant-suggestions.test.mjs",
+    "test/block264-browser-connector.test.mjs",
+    "test/block264-computer-use-pip.test.mjs",
+    "test/block264-external-import-apply.test.mjs",
+    "test/block264-model-access.test.mjs",
+    "test/block264-pack-annotation-bridge.test.mjs",
+    "test/block322-p3-constraints.test.mjs",
+    "test/block322-p4-bom.test.mjs",
+    "test/block328-early-loop-guard.test.mjs",
+    "test/block338-stream-stall-watchdog.test.mjs",
+    "test/block353-artifact-check.test.mjs",
+    "test/block405-l1-security.test.mjs",
+    "test/block414-backend-port-reuse.test.mjs",
+    "test/block446-credential-file-encryption.test.mjs",
+    "test/block457-bind-first.test.mjs",
+    "test/block457-ownership.test.mjs",
+    "test/block457-supervisor-no-retry.test.mjs",
+    "test/block509-video-p4.test.mjs",
+    "test/block84-pack-oneclick.test.mjs",
+    "test/block93-role-prompt.test.mjs",
+    "test/c56-paper-writing-skill.test.mjs",
+    "test/c56-skill-drill.test.mjs",
+    "test/credential-store.test.mjs",
+    "test/db-singleton-shared-file.test.mjs",
+    "test/db-singleton.test.mjs",
+    "test/dev-electron-profile.test.mjs",
+    "test/dev-verify.test.mjs",
+    "test/domain-neutrality.test.mjs",
+    "test/electron-security-assertions.test.mjs",
+    "test/env-coordinator-port.test.mjs",
+    "test/env-coordinator-trusted-origins.test.mjs",
+    "test/evals-harness.test.mjs",
+    "test/evo0-incident-ledger.test.mjs",
+    "test/evo1-observe-wiring.test.mjs",
+    "test/evo2-distill-evolve.test.mjs",
+    "test/evo3-verify-frequency.test.mjs",
+    "test/evo4-evidence-bugfix.test.mjs",
+    "test/evo4-evidence-panel.test.mjs",
+    "test/g0-chf0-http.test.mjs",
+    "test/g0-chf0-lifecycle.test.mjs",
+    "test/g0-rs-p6-electron-pressure-prototype.test.mjs",
+    "test/g0-rs-p6-product-acceptance.test.mjs",
+    "test/g0-rs-p7-acceptance.test.mjs",
+    "test/g0-sdc0-profile-registry.test.mjs",
+    "test/g0-third-wave.test.mjs",
+    "test/ipc-channels-registry.test.mjs",
+    "test/knip-ratchet.test.mjs",
+    "test/live-window-policy.test.mjs",
+    "test/loop-checkpoint.test.cjs",
+    "test/loop-orchestrator-subdomains.test.mjs",
+    "test/loop-stall-resume.test.mjs",
+    "test/mcp-bin-e2e.test.mjs",
+    "test/mcp-projection.test.mjs",
+    "test/mcp-server-autoload.test.mjs",
+    "test/mcp-server.test.mjs",
+    "test/mcp-tool-registry.test.mjs",
+    "test/migration-007-conversation-export.test.mjs",
+    "test/migration-runner.test.mjs",
+    "test/next04a-scene3d.test.mjs",
+    "test/next05-csp.test.mjs",
+    "test/next05-scene-store.test.mjs",
+    "test/nso-w2-db-single-source.test.mjs",
+    "test/p6-artifact-switch-pack.test.mjs",
+    "test/p6-driver-filter-selector.test.mjs",
+    "test/p6-driver-pack-handler.test.mjs",
+    "test/p6-driver-ready-handshake.test.mjs",
+    "test/p6-inspect-decider.test.mjs",
+    "test/p6-pack-table-surface-disable.test.mjs",
+    "test/p6-result-surfaces-retire.test.mjs",
+    "test/pack-registry.test.mjs",
+    "test/pl4a-tool-jobs-retention.test.mjs",
+    "test/pl4b-job-governance.test.mjs",
+    "test/platform-branch-freeze.test.mjs",
+    "test/platform-compat.test.mjs",
+    "test/plugin-checksum-fail-closed.test.mjs",
+    "test/plugin-manifest-schema.test.mjs",
+    "test/plugin-schema-strict.test.mjs",
+    "test/plugin-sdk.test.mjs",
+    "test/post-h9-evidence-and-ledger.test.mjs",
+    "test/post-s7-h8-startup-five-stage.test.mjs",
+    "test/post-s7-h9-structural-gates.test.mjs",
+    "test/preload-branch-result-namespaces.test.mjs",
+    "test/qoder-a2-approval-explanation.test.mjs",
+    "test/qoder-a2-explain-route.test.mjs",
+    "test/qoder-a2-explain-ui.test.mjs",
+    "test/qoder-e12-notebook-edit.test.mjs",
+    "test/qoder-e12-notebook-handler.test.mjs",
+    "test/qoder-j2-skill-suggestions.test.mjs",
+    "test/qoder-j2-suggestions-route.test.mjs",
+    "test/qoder-j4-mcp-trust.test.mjs",
+    "test/qoder-j6-custom-roles.test.mjs",
+    "test/qoder-l1l2-web-projection.test.mjs",
+    "test/qoder-l5-host-contract.test.mjs",
+    "test/qoder-l6-plugin-audit.test.mjs",
+    "test/result-changeset-service.test.mjs",
+    "test/result-compare-service.test.mjs",
+    "test/result-edit-agent-tool.test.mjs",
+    "test/result-replay-service.test.mjs",
+    "test/result-scientific-compare.test.mjs",
+    "test/result-scientific-rerun.test.mjs",
+    "test/result-selection-tools.test.mjs",
+    "test/result-studio-evidence-bundle.test.mjs",
+    "test/result-studio-qualification.test.mjs",
+    "test/scientific-task-planner.test.mjs",
+    "test/startup-perf-budget.test.mjs",
+    "test/terminal-multisession-ipc.test.mjs",
+    "test/test-affected.test.mjs",
+    "test/tool-activity-labels.test.mjs",
+    "test/utility-host-decision.test.mjs",
+    "test/window-controls.test.mjs"
+  ],
+  "commands": [
+    "docs-check",
+    "ui-audit"
+  ],
+  "frontendRelated": [
+    "src/components/copilot/RunStatsBar.test.tsx",
+    "src/components/copilot/SimpleChat/SimpleChatMessageRow.followups.test.tsx",
+    "src/components/copilot/SimpleChat/examplePrompts.test.ts",
+    "src/components/copilot/SimpleChat/messageActions.test.ts",
+    "src/components/desktop/AppRailContext.test.tsx",
+    "src/components/desktop/CrashNoticeBanner.test.tsx",
+    "src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.test.tsx",
+    "src/components/desktop/TitleBar.test.tsx",
+    "src/components/result-studio/resultSurfaceHost.test.ts",
+    "src/components/shell/QuitSummaryDialog.test.tsx",
+    "src/components/work-surface/EvidenceSurface.test.tsx",
+    "src/components/work-surface/GeneratedFilesSurface.test.tsx",
+    "src/components/work-surface/PackSurfaceFrame.test.ts",
+    "src/components/work-surface/PlanSurface.test.tsx",
+    "src/components/workspace-panels/CenterPanel.test.tsx",
+    "src/components/workspace-panels/RightPanel.test.tsx",
+    "src/components/workspace-panels/WorkspaceFileIcon.test.ts",
+    "src/hooks/useWorkSurfaceTabs.test.tsx",
+    "src/ipc/channels.js",
+    "src/lib/copilotContextProvider.test.tsx",
+    "src/lib/office-file-preview.test.ts",
+    "src/lib/result-manifest.test.ts",
+    "src/lib/workSurface/generatedFileSource.test.ts",
+    "src/lib/workSurface/model.test.ts",
+    "src/lib/workSurface/registry.test.ts",
+    "src/pages/project-workspace/RightFileTree.shortcuts.test.tsx",
+    "src/pages/project-workspace/WorkspaceFileTabStrip.test.tsx",
+    "src/pages/project-workspace/fileOps.test.tsx",
+    "src/preload.js",
+    "src/styles/CulturalWatermark.test.ts"
+  ],
+  "syntax": [
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs",
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs",
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs",
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs",
+    "core/shared-backend/utility-host-decision.js",
+    "src/ipc/channels.js",
+    "src/ipc/utility-host.js",
+    "src/main.js",
+    "src/preload.js"
+  ],
+  "unknown": [],
+  "reasons": {
+    ".agents/skills/petri-dev-infra/dev-verify/flows/e02-delegated-walk.cjs": [
+      "governance-docs",
+      "script-dev-infra"
+    ],
+    "acceptance/cleanup-retirement/block463-junk/projects-snapshot.json": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/GlobalWatermark.tsx": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/sha256-before.txt": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cleanup-retirement/pen-stroke/watermark.css": [
+      "closed-batch-evidence-dirs"
+    ],
+    "acceptance/cultural-watermark/live-minimal/cultural-watermark-live-darwin.json": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/extensions.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/home.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/settings.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/cultural-watermark/live-minimal/welcome.png": [
+      "cultural-watermark"
+    ],
+    "acceptance/evals/golden-2026-11-21T04-33-23-871Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/evals/real-replay-2026-11-21T04-34-18-535Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/evals/smoke-2026-11-21T04-33-51-823Z.json": [
+      "block181-evals-harness"
+    ],
+    "acceptance/nso-2026-11-06/wave-0/full-test-shards/summary-1793978091259.json": [
+      "nso-evaluation-artifacts"
+    ],
+    "acceptance/p6-oop-probe/b1-node-targeted.txt": [
+      "p6-electron-pressure-prototype"
+    ],
+    "acceptance/qoder-yellow9-rest6/L5-RUNTIME-SECURITY.md": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/changed-list-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/docs-check-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/lint-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/node-tests-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/tsc-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/qoder-yellow9-rest6/ui-audit-runtime.txt": [
+      "qoder-yellow9-a2-explanation"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-events.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-result.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/live-leg-sse.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-events.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-result.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/mock-leg-sse.ndjson": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/run-live-leg.mjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-live-2026-11-19/run-mock-leg.mjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block338-stream-stall-watchdog.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block507-context-aware-stall.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/block507-stall-recovery.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/flow-507-508-stall-live.cjs": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/live-darwin.json": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/loop-stall-resume.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/model-gateway.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/negtest-restored.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "acceptance/stall-verify-2026-11-19/negtest-tampered.txt": [
+      "block508-loop-stall-resume"
+    ],
+    "assets/logo.png": [
+      "static-assets"
+    ],
+    "assets/pelican-from-petri.html": [
+      "static-assets"
+    ],
+    "core/shared-backend/utility-host-decision.js": [
+      "platform-branch-freeze",
+      "p6-canonical-source-binding"
+    ],
+    "docs/pelican-bicycle.html": [
+      "governance-docs"
+    ],
+    "docs/post-h9-optimization-blueprint-2026-11-10.md": [
+      "governance-docs"
+    ],
+    "model3d/enclosure-120x80x30-wall3p0.scene3d.json": [
+      "model3d-sample-scenes"
+    ],
+    "petri-logo-concepts.miora": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/056f605d-v4-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/05f2e930-FINAL-grid-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/09d5385b-water-static-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/0a976a1f-petri-logo-F.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/0c4cd02f-v4-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/1375ef22-FINAL-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/14f4bf37-final-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15756fb3-v3-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15a2d8a4-v8-size.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/15f636c7-petri-logo-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/1daf9dfa-petri-v2.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/2a19c197-FINAL-ink-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3050450d-final-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/30da81f6-FINAL-A-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/34e7ef66-petri-logo-E.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/36a055d0-00-fixed-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3921e9ab-v4-compare.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/39bb5e29-v2-line-3.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3d329ec1-v8-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/3eb15117-FINAL-A-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/448c7df5-petri-logo-B.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4930b7b9-water-final-frame.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/49940c8c-v2-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4b97180e-v3-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4e4177cf-miora_text_to_image-1793867593907-0-fac88be96a54.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/4e488326-petri-logo-D.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/5329e1b8-v2-line-4.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/539f8bbf-00-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/54db6ac2-v2-line-1.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/561653b4-miora_text_to_image-1793867605666-0-dc7f3ee55fed.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/56c453e4-v2-line-2.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/59a68e0a-fixed-inv.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/5df17a34-fixed-ink.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/66879bfb-00-palette.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6793f42b-mark-a300.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6c4c9e58-miora_text_to_image-1793867574962-0-5da0c1d58e3e.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/6ebbc86f-miora_text_to_image-1793867615410-0-80767894ca00.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/71dd34e6-petri-logo-A.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/744448e7-fixed-brand.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/7747cf87-00-sheet.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/7bb0f534-FINAL-ultra-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/84aa741e-v4-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/89651c1d-v3-compare.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/8d517163-01-system-board.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/8f9f76fb-petri-v2-compact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/92e6ee9e-miora_text_to_image-1793867629271-0-27bd64782d15.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/94750754-FINAL-contact.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9631028e-FINAL-A-main.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/995c064b-03-web-hero.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9a1da4db-FINAL-A-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/9a60f72b-miora_text_to_image-1793867583660-0-d3afaf25ff72.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/a20fbc15-water-wave-v2.gif": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/a6929426-v4-lockups.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/b3937e5e-02-splash.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/b3ca3dac-FINAL-lockup.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c179bb03-petri-logo-size-check.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c6763031-petri-logo-C.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c6bac584-04-report-cover.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/c71c3cc7-05-poster.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/d5fbfa31-v3-final.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/d72e0dd0-water-wave-final.gif": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/e14210ee-FINAL-main.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/f45e7289-FINAL-ultra.png": [
+      "user-miora-artifacts"
+    ],
+    "petri-logo-concepts_assets/fd3f1f6e-v2-colour-directions.png": [
+      "user-miora-artifacts"
+    ],
+    "src/ipc/channels.js": [
+      "block228-crash-notice",
+      "block223-desktop-shell",
+      "platform-branch-freeze",
+      "electron-runtime",
+      "block92-code-modularization",
+      "block101-startup-performance",
+      "block157-maturity-wave1",
+      "block158-store-retirement",
+      "block216-q5-work-surface-host",
+      "block260-q9-rem-tail",
+      "block264-candidate-batch",
+      "evo3-verify-frequency",
+      "evo4-evidence-panel"
+    ],
+    "src/ipc/utility-host.js": [
+      "platform-branch-freeze",
+      "electron-runtime"
+    ],
+    "src/main.js": [
+      "block228-crash-notice",
+      "block223-desktop-shell",
+      "platform-branch-freeze",
+      "chf0-critical",
+      "electron-runtime",
+      "block216-q5-work-surface-host",
+      "block234-qdomain-p4c-tail",
+      "block264-candidate-batch",
+      "block405-l1-security-hardening",
+      "block394-startup-marks",
+      "block457-single-backend-ownership"
+    ],
+    "src/preload.js": [
+      "block228-crash-notice",
+      "block223-desktop-shell",
+      "platform-branch-freeze",
+      "electron-runtime",
+      "p6-canonical-source-binding",
+      "block84-domain-pack-oneclick",
+      "block101-startup-performance",
+      "block105-code-quality",
+      "block157-maturity-wave1",
+      "block158-store-retirement",
+      "block216-q5-work-surface-host",
+      "block260-q9-rem-tail",
+      "block264-candidate-batch",
+      "evo3-verify-frequency",
+      "evo4-evidence-panel"
+    ],
+    "test/utility-host-decision.test.mjs": [
+      "platform-branch-freeze",
+      "p6-canonical-source-binding",
+      "test-infrastructure"
+    ],
+    "tmp-block342-live/scene.svg": [
+      "tmp-block342-live"
+    ],
+    "tmp-review/demo.svg": [
+      "tmp-review-scratch"
+    ]
+  }
+}

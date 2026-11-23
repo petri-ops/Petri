@@ -142,6 +142,12 @@ const CHANNELS = {
     uninstall: 'pack:uninstall',
     uninstallPlan: 'pack:uninstall-plan',
   },
+  // QODER-L5 — utility-process host（默认不装载；显式 start + 白名单准入才 fork）。
+  utilityHost: {
+    start: 'utility-host:start',
+    stop: 'utility-host:stop',
+    status: 'utility-host:status',
+  },
   // BLOCK-242 — petri-install:// 深链安装（预览只读 / 确认安装 / main→renderer 推送）
   installDeepLink: {
     deepLink: 'install:deep-link',
