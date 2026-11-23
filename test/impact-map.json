@@ -9907,7 +9907,10 @@
         "core/petri-server/agent-tools/mcp-auth-tools.js",
         "core/petri-server/agent-tools/tool-defs/mcp.js",
         "test/qoder-j4-tool-registration.test.mjs",
-        "acceptance/qoder-j4-tool-reg/**"
+        "acceptance/qoder-j4-tool-reg/**",
+        "core/petri-server/agent-tools/agent-roles.js",
+        "test/qoder-j6-role-wiring.test.mjs",
+        "acceptance/qoder-j6-role-wiring/**"
       ],
       "tests": [
         "test/qoder-a2-approval-explanation.test.mjs",
@@ -9922,7 +9925,8 @@
         "test/qoder-l1l2-web-projection.test.mjs",
         "test/qoder-l5-host-contract.test.mjs",
         "test/qoder-l6-plugin-audit.test.mjs",
-        "test/qoder-j4-tool-registration.test.mjs"
+        "test/qoder-j4-tool-registration.test.mjs",
+        "test/qoder-j6-role-wiring.test.mjs"
       ],
       "classifiesScripts": true
     }

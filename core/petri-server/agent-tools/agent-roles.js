@@ -108,9 +108,31 @@ const AGENT_ROLES = [
   },
 ];
 
-const AGENT_ROLE_KEYS = AGENT_ROLES.map((r) => r.key);
-const AGENT_ROLE_KEY_SET = new Set(AGENT_ROLE_KEYS);
-const AGENT_ROLE_MAP = new Map(AGENT_ROLES.map((r) => [r.key, r]));
+// QODER-J6 — 内置 ∪ 用户自定义角色（P1 核心 custom-agent-roles.js 纯函数合并）。
+// 用户账本 <dataDir>/agent-roles.json：模块加载时读一次（进程内角色固定，避免每次 spawn 读盘）。
+// 内置优先、baseRole/内置 key 不可覆盖、未知仍 fail-closed；消费端函数签名零变化。
+const fs = require('node:fs');
+const path = require('node:path');
+const { resolveDataDir } = require('../../shared-backend/data-paths');
+const { normalizeCustomRoles, mergeAgentRoles } = require('../../shared-backend/custom-agent-roles');
+
+function loadCustomRoles(filePath) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    return normalizeCustomRoles({
+      roles: parsed && parsed.roles,
+      builtinKeys: AGENT_ROLES.map((r) => r.key),
+    }).roles;
+  } catch {
+    return []; // 账本缺失/损坏 → 无自定义角色（fail-soft，内置不受影响）
+  }
+}
+
+const CUSTOM_ROLES = loadCustomRoles(path.join(resolveDataDir(), 'agent-roles.json'));
+const REGISTRY = mergeAgentRoles(AGENT_ROLES, CUSTOM_ROLES);
+const AGENT_ROLE_KEYS = [...REGISTRY.keys];
+const AGENT_ROLE_KEY_SET = REGISTRY.keys;
+const AGENT_ROLE_MAP = REGISTRY.map;
 
 function getAgentRole(key) {
   return AGENT_ROLE_MAP.get(String(key || '').trim()) || null;
@@ -158,5 +180,5 @@ module.exports = {
   isValidAgentRole,
   renderRoleDirective,
   resolveRoleOrError,
-  __test: { failInvalidRole },
+  __test: { failInvalidRole, loadCustomRoles },
 };
