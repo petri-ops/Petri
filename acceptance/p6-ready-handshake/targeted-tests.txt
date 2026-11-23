@@ -1,0 +1,36 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (5.612458ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (3.201417ms)
+✔ BLOCK-216 contributions: disabled pack disappears (2.725458ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (1.738166ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (1.427334ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (1.924ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (1.443458ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (2.326875ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (57.20425ms)
+✔ 探针函数 inspectPackSurface 存在且可独立评估（纯结构，不触网） (1.153291ms)
+✔ 读数形状：iframe 枚举含 url/ready/console 尾与归因字段 (0.645208ms)
+✔ table_load 失败路径自动落证（inspectPackSurface 接入 fail 诊断） (0.224875ms)
+✔ OOP 深探：attachToTarget({flatten:true}) 挂跨进程 iframe target (0.599084ms)
+✔ OOP 深探读 4 项：document 加载态 / 执行上下文可达 / console / ready 握手 (0.53525ms)
+✔ OOP 深探纯函数归因 + verdict 分支 + driver-result 落证 (0.673167ms)
+✔ OOP 判据树纯函数行为：无 target / 无 pack target / ready 握手三分支 (0.856416ms)
+✔ driver 复用产品主进程 scheme.js 单源（不自造第二份 handler） (1.019958ms)
+✔ registerPackSchemePrivileges 在 app ready 前调用 (0.34425ms)
+✔ setupPackProtocol 在 run() 内 app ready 后调用 (0.349458ms)
+✔ 产品 scheme.js 保持 handler 单源（红线：不改产品 handler/CSP/凭据/privileges） (0.138541ms)
+✔ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (1.097667ms)
+✔ 探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例） (1.030333ms)
+✔ waitFor 的求值有超时防护（防主上下文挂起永久阻塞） (0.288083ms)
+✔ table_load 各步有 subStage 打点（挂起源精确落证） (0.399708ms)
+✔ navigate 的 loadURL 用 domcontentloaded（pack iframe 子资源不阻塞主文档导航） (0.251792ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler） (0.140709ms)
+✔ U-P6-SANDBOX：pack scheme privileges 含 supportFetchAPI + corsEnabled（裁决 A） (0.8685ms)
+✔ U-P6-SANDBOX：privileges 注册仍先于 app ready（registerPackSchemePrivileges 时序契约） (0.214292ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 201.687041

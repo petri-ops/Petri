@@ -200,11 +200,22 @@ function registerArtifactNetworkObservation(webContents, config) {
   });
 }
 
+// P6 ready 握手层专项（2026-11-23）：executeJavaScript 在 pack iframe 导航/渲染期
+// 主上下文可能短暂挂起（永不 resolve）——用 Promise.race 给单次求值加超时防护，
+// 超时则丢弃该次结果重试，直到 deadline；避免主流程被永久阻塞后靠 watchdog 强杀。
+const EVAL_CALL_TIMEOUT_MS = 8_000;
+async function evaluateGuarded(webContents, expression, withUserGesture = true) {
+  return Promise.race([
+    webContents.executeJavaScript(expression, withUserGesture),
+    new Promise((resolve) => setTimeout(() => resolve(undefined), EVAL_CALL_TIMEOUT_MS)),
+  ]);
+}
+
 async function waitFor(webContents, expression, label, timeoutMs = WAIT_MS) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
-      const value = await webContents.executeJavaScript(expression, true);
+      const value = await evaluateGuarded(webContents, expression, true);
       if (value) return value;
     } catch {}
     await pause(POLL_MS);
@@ -228,7 +239,11 @@ async function dismissOnboarding(webContents) {
 
 async function navigate(window, config, target, mode = 'result') {
   const started = performance.now();
-  await window.loadURL(targetUrl(config, target, mode));
+  // P6 ready 握手层专项（2026-11-23）：默认 waitUntil:'load' 会等所有子资源，
+  // pack iframe（petri-pack:// 子文档）加载/渲染期会让 load 事件延迟甚至不触发，
+  // 主流程卡在此 await → 被 watchdog 强杀。改 domcontentloaded：主文档就绪即返回，
+  // 子 iframe 由后续 waitFor/探针独立观测，不阻塞主文档导航。
+  await window.loadURL(targetUrl(config, target, mode), { waitUntil: 'domcontentloaded' });
   await waitFor(window.webContents,
     `Boolean(document.querySelector('[aria-label="结果主画布"]'))`,
     `${mode}_canvas`,
@@ -1279,6 +1294,7 @@ async function run() {
   const backendStatusObservation = registerBackendStatusHandler(config);
   const compatibilityObservation = registerIsolatedCompatibilityHandlers();
   let stage = 'window_create';
+  let subStage = 'init';
   const gone = [];
   const rendererConsole = [];
   const window = new BrowserWindow({
@@ -1295,11 +1311,9 @@ async function run() {
     },
   });
   const artifactNetworkObservation = registerArtifactNetworkObservation(window.webContents, config);
-  // P6 OOP 深探小票（2026-11-22）：宿主 message tap 的 Page.addScriptToEvaluateOnNewDocument
-  // await 在 pack iframe 导航被拦时会挂起，导致其后的 watchdog 永远设不上（实测）。
-  // 深探改为纯 CDP 读 iframe document 加载态/执行上下文/console，petri:ready 以
-  // iframe 侧 postMessage 已执行（document 在场即脚本跑完）为判据，不依赖宿主 tap。
-  // _installHostMessageTap 保留为可选工具函数，默认不调用。
+  // P6 OOP 深探（2026-11-22）+ ready 握手层（2026-11-23）：pack iframe 导航被拦时
+  // 宿主 tap 的 addScriptToEvaluateOnNewDocument await 曾挂起（已加 race 防护）；
+  // 现补 handler 后导航成功，tap 重新启用以捕产品实发的 petri:ready。见下方启用点。
   window.webContents.on('render-process-gone', (_event, details) => {
     gone.push({ reason: details?.reason || 'unknown', exitCode: details?.exitCode ?? null });
   });
@@ -1308,6 +1322,20 @@ async function run() {
     rendererConsole.push(String(message || '').slice(0, 1_000));
     if (rendererConsole.length > 20) rendererConsole.shift();
   });
+
+  // P6 ready 握手层专项（2026-11-23）：补 handler 后 result.html 已能真实加载，
+  // 重新启用宿主 message tap 捕产品实发的 petri:ready postMessage（对齐信号名，
+  // 替代探针读产品不设的 __petriSurfaceReady）。须在首次 loadURL 前注入（对新 document
+  // 生效）；整体带 race 超时防护——上票该 await 无保护导致挂起、watchdog 都设不上。
+  let hostTapReady = false;
+  try {
+    await Promise.race([
+      _installHostMessageTap(window.webContents),
+      new Promise((resolve) => setTimeout(() => resolve('tap_timeout'), 10_000)),
+    ]).then((outcome) => { hostTapReady = outcome !== 'tap_timeout'; });
+  } catch (tapError) {
+    console.error('[p6-ready] host message tap failed: ' + String(tapError?.message || tapError).slice(0, 200));
+  }
 
   // P6 OOP 深探小票（2026-11-22）看门狗：pack iframe 导航被拦时，宿主某个
   // executeJavaScript 可能永不 resolve（实测挂起 >7min），主流程既不成功也不进 catch。
@@ -1341,7 +1369,9 @@ async function run() {
         schemaVersion: 1,
         passed: false,
         failedStage: stage,
+        subStage,
         timeoutReason: 'oop_watchdog_forced',
+        readyHandshake: { hostTapReady },
         page: diagnosticPage,
         packSurfaceProbe: oopProbe,
         artifactNetwork: artifactNetworkObservation(),
@@ -1358,13 +1388,19 @@ async function run() {
     const publicProjectionSamples = [];
 
     stage = 'table_load';
+    subStage = 'navigate';
     const tableNavigationMs = await navigate(window, config, config.targets.table, 'result');
+    subStage = 'inspectTable';
     const table = await inspectTable(window.webContents);
+    subStage = 'attachDebugger';
     await attachDebugger(window.webContents);
+    subStage = 'visualDigest';
     const tableCapture = await visualDigest(window);
+    subStage = 'sampleMemory';
     memorySamples.push(await sampleMemory(window.webContents, 'table_baseline'));
 
     stage = 'table_scroll';
+    subStage = 'table_interactions';
     const scroll = await measureTableScroll(window.webContents);
     const selection = await measureSelectionFeedback(window.webContents);
     const virtualPage = await measureVirtualPageLoad(window.webContents);
@@ -1458,6 +1494,7 @@ async function run() {
     const result = {
       schemaVersion: 1,
       renderer: `Electron ${process.versions.electron}; Chromium ${process.versions.chrome}`,
+      readyHandshake: { hostTapReady },
       table: {
         totalRows: table.totalRows,
         visibleRows: table.visibleRows,
@@ -1579,6 +1616,8 @@ async function run() {
       schemaVersion: 1,
       passed: false,
       failedStage: stage,
+      subStage,
+      readyHandshake: { hostTapReady },
       page,
       packSurfaceProbe,
       artifactNetwork: artifactNetworkObservation(),

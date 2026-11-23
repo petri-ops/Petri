@@ -1,0 +1,12 @@
+✔ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (1.099666ms)
+✔ 探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例） (0.29275ms)
+✔ waitFor 的求值有超时防护（防主上下文挂起永久阻塞） (0.238166ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler） (0.160625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 117.197375

@@ -1,0 +1,48 @@
+✖ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (2.048334ms)
+✔ 探针 readySignal 判据以 petri:ready postMessage 为准（非 __petriSurfaceReady 单例） (0.327708ms)
+✖ waitFor 的 executeJavaScript 有超时防护（防主上下文挂起永久阻塞） (0.221375ms)
+✔ 产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/handler） (0.554709ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 2
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.030291
+
+✖ failing tests:
+
+test at test/p6-driver-ready-handshake.test.mjs:22:1
+✖ 宿主 message tap 已启用：捕产品实发的 petri:ready postMessage (2.048334ms)
+  AssertionError [ERR_ASSERTION]: tap 须作用于 window.webContents（宿主）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-ready-handshake.test.mjs:28:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at test/p6-driver-ready-handshake.test.mjs:46:1
+✖ waitFor 的 executeJavaScript 有超时防护（防主上下文挂起永久阻塞） (0.221375ms)
+  AssertionError [ERR_ASSERTION]: executeJavaScript 须包 Promise.race 超时防护（挂起时重试而非永久阻塞）
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-driver-ready-handshake.test.mjs:52:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'async function waitFor(webContents, expression, label, timeoutMs = WAIT_MS) {\n  const deadline = Date.now() + timeoutMs;\n  while (Date.now() < deadline) {\n    try {\n      const value = await webContents.executeJavaScript(expression, true);\n      if (value) return value;\n    } catch {}\n    await pause(POLL_MS);\n  }\n  throw new Error(`timeout:${label}`);\n}\n\nasync function dismissOnboarding(webContents) {\n  await waitFor(webContents, `\n    (() => {\n      const dialog = document.querySelector(\'[role="dialog"][aria-label="首次启动引导"]\');\n      if (!dialog) return true;\n      const button = [...dialog.querySelectorAll(\'button\')]\n        .find((item) => (item.textContent || \'\').trim() === \'跳过引导\' && !item.disabled);\n      if (!button) return false;\n      button.click();\n      return true;\n    })()\n  `, \'onboarding\');\n}\n\nasync function navigate(window, config, target, mode = \'result\') {\n  const start',
+    expected: /Promise\.race/,
+    operator: 'match',
+    diff: 'simple'
+  }
