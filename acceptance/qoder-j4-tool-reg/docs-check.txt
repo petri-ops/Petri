@@ -1,0 +1,6 @@
+
+> petri-desktop@0.0.4 docs:check
+> node scripts/docs-governance.mjs --check
+
+[docs:check] PASS (664 registered documents)
+[audit-ledger] 109KB > 50KB 保留阈——npm run audit:compact 幂等自稳（closeout 首步已自动执行）。

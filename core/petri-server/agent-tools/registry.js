@@ -100,6 +100,8 @@ const {
 // QODER-E12 — Notebook cell 级编辑（handler 复用 workspace withWorkspace 单源）
 const { createNotebookTools } = require('./notebook-tools');
 const tool_notebook_edit = createNotebookTools().notebookEdit;
+// QODER-J4 — MCP authenticate（委托既有 OAuth 发起链，不碰 token）
+const { tool_mcp_authenticate } = require('./mcp-auth-tools');
 const { tool_system_info } = require('./system-info-tools');
 // BLOCK-247（Q2b）— 联网检索与抓取：唯一出网入口（策略层见 helpers/web-fetch-policy）
 const { tool_web_search, tool_web_fetch } = require('./web-tools');
@@ -171,6 +173,8 @@ const HANDLERS = {
   workspace_exec: tool_workspace_exec,
   // QODER-E12 — cell CRUD 写盘=R2 workspace-write；execute 只返计划、实际执行走 workspace_exec 鉴权。
   notebook_edit: tool_notebook_edit,
+  // QODER-J4 — OAuth 发起（外部可见动作，审批在 metadata 声明）
+  mcp_authenticate: tool_mcp_authenticate,
   workspace_worktree_create: tool_workspace_worktree_create,
   workspace_worktree_list: tool_workspace_worktree_list,
   workspace_worktree_remove: tool_workspace_worktree_remove,
@@ -333,6 +337,8 @@ const CONTRACTS = {
   workspace_exec: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 30000),
   // QODER-E12 — Notebook cell CRUD：写盘类 workspace-write/R2；只读 op 由策略层按 mode 放行。
   notebook_edit: contract('workspace', 'workspace-write', 'R2', ['project.files'], 500),
+  // QODER-J4 — OAuth 发起：外部可见动作，state-write/R2（不读写 token，不碰凭据）
+  mcp_authenticate: contract('action', 'state-write', 'R2', ['local.process'], 30000),
   // BLOCK-33 P4 — 后台进程：启动即返回（估时短），实际进程时长不占用工具执行预算
   workspace_exec_background: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 5000),
   process_status: contract('workspace', 'none', 'R0', ['local.process'], 500),

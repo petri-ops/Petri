@@ -33,6 +33,8 @@ const TOOL_METADATA = {
   workspace_exec_background: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'high', timeoutMs: null },
   // QODER-E12 — Notebook cell CRUD：保守按写类（含只读 op 统一走审批，族级声明）
   notebook_edit: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: null },
+  // QODER-J4 — OAuth 发起：外部可见动作，事前声明审批；不读写 token
+  mcp_authenticate: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 30000 },
   // ---- worktree 域（BLOCK-336 P1）：create/remove 走审批（目录级副作用）；list 纯读并发；merge_request 只写登记表不动工作区 ----
   workspace_worktree_create: { readOnly: false, destructive: false, concurrentSafe: false, needsApproval: true, riskLevel: 'medium', timeoutMs: 60000 },
   workspace_worktree_list: { readOnly: true, destructive: false, concurrentSafe: true, needsApproval: false, riskLevel: 'low', timeoutMs: 20000 },

@@ -16,6 +16,8 @@ const domainModules = {
   'godot': require('./tool-defs/godot'),
   'computer': require('./tool-defs/computer'),
   'knowledge': require('./tool-defs/knowledge'),
+  // QODER-J4 — MCP agent 侧 authenticate（OAuth 发起，不碰 token）
+  'mcp': require('./tool-defs/mcp'),
   // QODER-E12 — Notebook cell 级编辑（零新依赖，ipynb=JSON）
   'notebook': require('./tool-defs/notebook'),
   'model3d': require('./tool-defs/model3d'),
@@ -37,6 +39,7 @@ const TOOL_DEFS = [
   ...domainModules['godot'],
   ...domainModules['computer'],
   ...domainModules['knowledge'],
+  ...domainModules['mcp'],
   ...domainModules['notebook'],
   ...domainModules['model3d'],
   ...domainModules['remote'],
