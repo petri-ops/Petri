@@ -97,6 +97,9 @@ const {
   tool_resident_task_list,
   tool_resident_task_read,
 } = require('./workspace-tools');
+// QODER-E12 — Notebook cell 级编辑（handler 复用 workspace withWorkspace 单源）
+const { createNotebookTools } = require('./notebook-tools');
+const tool_notebook_edit = createNotebookTools().notebookEdit;
 const { tool_system_info } = require('./system-info-tools');
 // BLOCK-247（Q2b）— 联网检索与抓取：唯一出网入口（策略层见 helpers/web-fetch-policy）
 const { tool_web_search, tool_web_fetch } = require('./web-tools');
@@ -166,6 +169,8 @@ const HANDLERS = {
   workspace_write: tool_workspace_write,
   workspace_replace: tool_workspace_replace,
   workspace_exec: tool_workspace_exec,
+  // QODER-E12 — cell CRUD 写盘=R2 workspace-write；execute 只返计划、实际执行走 workspace_exec 鉴权。
+  notebook_edit: tool_notebook_edit,
   workspace_worktree_create: tool_workspace_worktree_create,
   workspace_worktree_list: tool_workspace_worktree_list,
   workspace_worktree_remove: tool_workspace_worktree_remove,
@@ -326,6 +331,8 @@ const CONTRACTS = {
   workspace_write: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_replace: contract('workspace', 'workspace-write', 'R2', ['project.files'], 200),
   workspace_exec: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 30000),
+  // QODER-E12 — Notebook cell CRUD：写盘类 workspace-write/R2；只读 op 由策略层按 mode 放行。
+  notebook_edit: contract('workspace', 'workspace-write', 'R2', ['project.files'], 500),
   // BLOCK-33 P4 — 后台进程：启动即返回（估时短），实际进程时长不占用工具执行预算
   workspace_exec_background: contract('workspace', 'execution', 'R2', ['project.files', 'local.process'], 5000),
   process_status: contract('workspace', 'none', 'R0', ['local.process'], 500),

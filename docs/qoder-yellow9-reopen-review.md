@@ -27,7 +27,7 @@ goal: 母纲 Q-MATRIX 9 个保留 🟡 reopen 项的统一立项评审稿——�
 | 项 | 对照点（母纲行） | 范围（本次 reopen 可做部分） | 形态预估 | 现状证据 | 待裁决 D | 验收边界 |
 |---|---|---|---|---|---|---|
 | **A2 ✅ completed（2026-11-23）** | 审批意图解释（:159） | 模型/本地模型解释层（确定性解释已交付 BLOCK-243）；「解释」按钮 + 分析中骨架 + 失败仍可允许/拒绝 | 轻量包 / BLOCK（取决于模型接入面） | `BLOCK-243` 确定性解释在案 | D1 默认否新 provider（已遵守，复用 callModelTask）/ D2 复用现有本地绑定（已遵守） | **已达成**：P1 纯函数 5/5 + P2 路由端到端 2/2 + P3 组件 15/15 + HK-01 9/9；证据 `acceptance/a2-approval-explanation/` |
-| E12 | Notebook cell 级编辑（:228） | NotebookEdit（cell 读写/执行） | BLOCK | 无 cell 级工具 | D1 cell 执行沙箱边界 / D2 是否复用现有编辑器 | cell CRUD + 执行契约；零新依赖优先 |
+| **E12 ✅ completed（2026-11-23）** | Notebook cell 级编辑（:228） | NotebookEdit（cell 读写/执行） | BLOCK | 无 cell 级工具 | D1=复用 workspace_exec 既有审批门（已遵守）/ D2=先工具层最小切片（已遵守） | **已达成**：`notebook_edit` 工具（schema+handler+contract+metadata，工具数 119），P1 纯函数 5/5+handler 端到端 3/3+registry 15/15+邻域累计 38/38；execute 只返借道计划不绕过审批。证据 `acceptance/qoder-e12-notebook-edit/` |
 | J2 | 技能自进化建议（:280） | 建议列表 / 一键建任务 / 忽略 | 轻量包 | 无 | D1 建议来源（本地审计 vs 模型）/ D2 是否自动建任务（默认否） | 建议可读 + 忽略/建任务动作；HK-01 |
 | J4 | MCP 信任/OAuth 余项（:282） | agent 侧 `authenticate` 工具 + 项目级默认策略 | 轻量包 | BLOCK-239/240/241/243/258 已交大头 | D1 项目级默认拒绝取值 / D2 authenticate 工具签名 | 契约测 + 与既有 trust 门一致性 |
 | J6 | Agent builder（:284） | 自定义 Agent/角色（当前仅内置 roles） | BLOCK | 内置 roles 在案 | D1 自定义角色 schema / D2 是否持久化位置 | 角色 CRUD + 使用契约；zero-G1+ |

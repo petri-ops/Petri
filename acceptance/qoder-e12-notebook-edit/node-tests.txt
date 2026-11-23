@@ -1,0 +1,110 @@
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: r
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: python
+✅ [2026-11-23T05:38:59.554Z] [storage] registered: local
+✅ [2026-11-23T05:38:59.554Z] [storage] capabilities declared: local
+✅ [2026-11-23T05:38:59.554Z] [storage] active: local
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ agent registry pairs every model-visible definition with one handler and contract (1.957375ms)
+✔ registry validation rejects duplicate definitions and definition-handler drift (0.308917ms)
+✔ registry validation rejects invalid internal contract metadata (0.073083ms)
+✔ risk tier allowlist cannot be extended by registry consumers (0.088541ms)
+✔ schema-first loading does not capture partial act helper exports (432.254416ms)
+✔ Provider definitions are fresh OpenAI function projections without internal metadata (4.138791ms)
+✔ retired learning handlers remain outside the Agent registry and dispatcher (1.811916ms)
+✔ BLOCK-99 G4 knowledge-console subset filters to the knowledge whitelist and leaves other contexts untouched (0.852709ms)
+✔ Anthropic schema conversion explicitly strips internal contract metadata (0.282666ms)
+✔ OpenAI-compatible outbound JSON contains Provider schema only (15.364708ms)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: r
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: python
+✅ [2026-11-23T05:38:59.554Z] [storage] registered: local
+✅ [2026-11-23T05:38:59.554Z] [storage] capabilities declared: local
+✅ [2026-11-23T05:38:59.554Z] [storage] active: local
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-23T05:38:59.652Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ P2 完备性门禁 — 每个已定义工具都有六字段元数据（新工具缺元数据即红） (3.451625ms)
+✔ P2 完备性门禁 — 元数据表无未知工具名（改名/删工具不同步即红） (0.938459ms)
+✔ P2 一致性 — destructive ⇒ 串行；readOnly ⇒ 非破坏；spawn 族永不并行（P2-5 组合语义） (0.137458ms)
+✔ BLOCK-150 ④ — metadata.readOnly ⇒ 契约 sideEffect 无写面（跨表一致性） (0.146708ms)
+✔ P2 调度行为 — 并行组真并发、串行组保序、结果按原序重组 (164.260083ms)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T05:38:59.420Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: r
+✅ [2026-11-23T05:38:59.553Z] [executors] registered: python
+✅ [2026-11-23T05:38:59.554Z] [storage] registered: local
+✅ [2026-11-23T05:38:59.554Z] [storage] capabilities declared: local
+✅ [2026-11-23T05:38:59.554Z] [storage] active: local
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-23T05:38:59.643Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ foundation tool definitions are exposed to the model (6.447292ms)
+✔ write dry-run validates and summarizes a create without touching disk (4.872875ms)
+✔ dry-run preserves workspace authorization and edit preconditions (4.33025ms)
+✔ central dispatcher enforces explicit read-only access mode (1.363792ms)
+✔ lists, finds, searches, and reads project-scoped files (3.06625ms)
+✔ creates files and requires explicit overwrite plus matching sha256 (4.581792ms)
+✔ write/replace results carry per-line changeDiff for UI execution records (UI-273) (5.327083ms)
+✔ precise replace requires sha at the handler and supports optimistic concurrency (3.6035ms)
+✔ same-process writes serialize so one stale sha loses for overwrite and replace (5.788ms)
+✔ blocks path traversal, absolute paths, sensitive files, and symlink escape (2.014917ms)
+✔ enforces project ownership (0.100541ms)
+✔ full access executes general shell commands from the project root (277.164125ms)
+[workspace-exec] 风险提示（已放行；严格模式可一键恢复硬拦：设环境变量 PETRI_EXEC_STRICT_DENYLIST=1）：禁止通过命令行执行不可恢复删除；请使用受控文件操作
+✔ command handler requires full access even when called without the central interceptor (0.562667ms)
+✔ 默认不拦删除/提权类命令（用户裁决：不设黑名单），仅回传风险提示 (38.372917ms)
+✔ strict denylist mode still rejects privilege, deletion, remote push, and pipe execution risks (1.218875ms)
+✔ E12 P1 模块存在且零新依赖（仅 Node 内置） (1.257584ms)
+✔ parseNotebook：source string|string[] 归一为 string，保留 metadata/outputs (1.614667ms)
+✔ cell CRUD：insert/update/delete 有界且幂等，不改其他 cell (2.049667ms)
+✔ 执行参数构造：借道 workspace_exec，语言驱动映射 + 既有审批门字段 (0.759833ms)
+✔ 红线：不碰产品安全边界与既有工具注册 (1.40775ms)
+✔ read/list：读回 cell 结构与 sha256 (9.788792ms)
+✔ insert 落盘 + expectedSha256 并发冲突防护 (6.373167ms)
+✔ dryRun 不落盘；execute 只返计划、不执行、继承审批门标记 (2.636667ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1149.886542

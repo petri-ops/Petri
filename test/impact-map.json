@@ -9880,12 +9880,20 @@
         "docs/qoder-yellow9-reopen-review.md",
         "acceptance/qoder-yellow9-review/**",
         "acceptance/three-batch-launch/**",
-        "acceptance/a2-approval-explanation/**"
+        "acceptance/a2-approval-explanation/**",
+        "core/petri-server/helpers/notebook-edit.js",
+        "core/petri-server/agent-tools/notebook-tools.js",
+        "core/petri-server/agent-tools/tool-defs/notebook.js",
+        "test/qoder-e12-notebook-edit.test.mjs",
+        "test/qoder-e12-notebook-handler.test.mjs",
+        "acceptance/qoder-e12-notebook-edit/**"
       ],
       "tests": [
         "test/qoder-a2-approval-explanation.test.mjs",
         "test/qoder-a2-explain-ui.test.mjs",
-        "test/qoder-a2-explain-route.test.mjs"
+        "test/qoder-a2-explain-route.test.mjs",
+        "test/qoder-e12-notebook-edit.test.mjs",
+        "test/qoder-e12-notebook-handler.test.mjs"
       ],
       "classifiesScripts": true
     }

@@ -16,6 +16,8 @@ const domainModules = {
   'godot': require('./tool-defs/godot'),
   'computer': require('./tool-defs/computer'),
   'knowledge': require('./tool-defs/knowledge'),
+  // QODER-E12 — Notebook cell 级编辑（零新依赖，ipynb=JSON）
+  'notebook': require('./tool-defs/notebook'),
   'model3d': require('./tool-defs/model3d'),
   'remote': require('./tool-defs/remote'),
   'resident': require('./tool-defs/resident'),
@@ -35,6 +37,7 @@ const TOOL_DEFS = [
   ...domainModules['godot'],
   ...domainModules['computer'],
   ...domainModules['knowledge'],
+  ...domainModules['notebook'],
   ...domainModules['model3d'],
   ...domainModules['remote'],
   ...domainModules['resident'],
