@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "renderer": "Electron 44.7.0; Chromium 152.0.7977.130",
+  "readyHandshake": {
+    "hostTapReady": true,
+    "attempts": 3
+  },
+  "table": {
+    "totalRows": 100000,
+    "visibleRows": 18,
+    "navigationMs": 1302.357666,
+    "canvasFirstVisibleMs": 1302.357666,
+    "productCanvasFirstVisibleMs": 18.9,
+    "scrollFeedbackMs": 3.800000011920929,
+    "scrollChanged": true,
+    "selectionFeedbackMs": 14.699999988079071,
+    "selectionChanged": true,
+    "sortFeedbackMs": 4.5,
+    "sortChanged": true,
+    "filterFeedbackMs": 6,
+    "filterQueryCompleteMs": 741.3000000119209,
+    "filterChanged": true,
+    "filterQueryChanged": true,
+    "filterMatchedSummaryChanged": true,
+    "filterFirstVisibleRowChanged": true,
+    "virtualPageLoadMs": 55.799999952316284,
+    "virtualPageChanged": true,
+    "screenshotSha256": "493c780848af0ea2da1aba3e8bfdf4b94082b697cc74239b95b15b8c0b68de28",
+    "screenshotBytes": 983559,
+    "width": 2880,
+    "height": 1706
+  },
+  "media": {
+    "png": {
+      "loadMs": 123.71962500000018,
+      "switch": {
+        "feedbackMs": 15.699999988079071,
+        "productMetricMs": 3.1,
+        "wallFeedbackMs": 15.699999988079071,
+        "changed": true,
+        "surface": "core"
+      },
+      "rendered": true,
+      "renderMode": "source_image",
+      "naturalWidth": 2100,
+      "naturalHeight": 1500,
+      "pointCount": 0,
+      "sourceKind": "tool_file",
+      "sourceTargetMatched": true,
+      "artifactTargetMatched": true,
+      "screenshotSha256": "3ba3909e205ee1b932271be2ec8735a0f5def1c4096b307276804aa512f153d0",
+      "screenshotBytes": 1478020,
+      "width": 2880,
+      "height": 1706
+    },
+    "svg": {
+      "loadMs": 220.7611670000001,
+      "exportLinkPresent": true,
+      "exportHrefMatched": true,
+      "bytes": 42686780,
+      "validSvgRoot": true,
+      "fetchMs": 220.19999998807907,
+      "switch": {
+        "changed": true,
+        "feedbackMs": 220.19999998807907,
+        "productMetricMs": null,
+        "wallFeedbackMs": 220.19999998807907
+      },
+      "sourceKind": "tool_file",
+      "sourceTargetMatched": true,
+      "artifactTargetMatched": true,
+      "screenshotSha256": "b9e31396b3343ca84c316371f9d19a13c1e44aa02e0729ee0047bf904e5781e4",
+      "screenshotBytes": 1478202,
+      "width": 2880,
+      "height": 1706
+    },
+    "report": {
+      "loadMs": 946.4141250000002,
+      "iframeVisible": true,
+      "iframeWidth": 720,
+      "iframeHeight": 627,
+      "iframeSourceKind": "tool_file",
+      "sourceTargetMatched": true,
+      "artifactTargetMatched": true,
+      "embeddedImageCount": 7,
+      "firstEmbeddedImageWidth": 258,
+      "headingCount": 22,
+      "publicProjectionAudit": {
+        "absolutePath": false,
+        "providerMaterial": false,
+        "rawInternalId": false
+      },
+      "textCharacters": 4246,
+      "screenshotSha256": "6c6be1d82f2ed9eb2cdad34ca8a1e548f832f8e10c029b84a1896a25e0e1863d",
+      "screenshotBytes": 1053531,
+      "width": 2880,
+      "height": 1706
+    }
+  },
+  "compare": {
+    "openMs": 722.9328750000004,
+    "progressiveRows": 204,
+    "progressivePages": [
+      {
+        "rows": 54,
+        "loadMs": null
+      },
+      {
+        "rows": 104,
+        "loadMs": 700.5566669999998
+      },
+      {
+        "rows": 154,
+        "loadMs": 677.8247920000013
+      },
+      {
+        "rows": 204,
+        "loadMs": 106.31608400000005
+      }
+    ],
+    "screenshotSha256": "6e0dd52e602209560c45885ed82923c0495cf0ca3a9bf123523f84b34423d9c2",
+    "screenshotBytes": 1322521,
+    "width": 2880,
+    "height": 1706
+  },
+  "history": {
+    "firstPageVersions": 100,
+    "firstPageMs": 15.465915999999197,
+    "afterPaginationVersions": 123,
+    "paginationMs": 105.49499999999898,
+    "screenshotSha256": "6a1411585b7152c465dec725488dc594e39b80575daf97dff0c61a00395ca932",
+    "screenshotBytes": 1130921,
+    "width": 2880,
+    "height": 1706
+  },
+  "memory": {
+    "baselinePostGcBytes": 37732840,
+    "peakRawUsedBytes": 52689048,
+    "peakRawGrowthBytes": 14956208,
+    "peakPostGcUsedBytes": 40767880,
+    "peakPostGcGrowthBytes": 3035040,
+    "peakWorkingSetBytes": 1058766848,
+    "samples": [
+      {
+        "stage": "table_baseline",
+        "rawUsedBytes": 41797556,
+        "postGcUsedBytes": 37732840,
+        "heapTotalBytes": 38862848,
+        "workingSetBytes": 361054208
+      },
+      {
+        "stage": "table_interactions",
+        "rawUsedBytes": 40840484,
+        "postGcUsedBytes": 37638520,
+        "heapTotalBytes": 38600704,
+        "workingSetBytes": 341540864
+      },
+      {
+        "stage": "png",
+        "rawUsedBytes": 39637428,
+        "postGcUsedBytes": 37787140,
+        "heapTotalBytes": 39124992,
+        "workingSetBytes": 365658112
+      },
+      {
+        "stage": "svg",
+        "rawUsedBytes": 37809224,
+        "postGcUsedBytes": 37787280,
+        "heapTotalBytes": 38862848,
+        "workingSetBytes": 400932864
+      },
+      {
+        "stage": "report",
+        "rawUsedBytes": 45083028,
+        "postGcUsedBytes": 37193456,
+        "heapTotalBytes": 39124992,
+        "workingSetBytes": 318275584
+      },
+      {
+        "stage": "compare",
+        "rawUsedBytes": 52689048,
+        "postGcUsedBytes": 40767880,
+        "heapTotalBytes": 42532864,
+        "workingSetBytes": 1058766848
+      },
+      {
+        "stage": "history",
+        "rawUsedBytes": 43475112,
+        "postGcUsedBytes": 39454660,
+        "heapTotalBytes": 40960000,
+        "workingSetBytes": 1033502720
+      }
+    ]
+  },
+  "publicProjectionAudit": {
+    "absolutePath": false,
+    "providerMaterial": false,
+    "rawInternalId": false
+  },
+  "publicProjectionSampleCount": 7,
+  "renderProcessGoneCount": 0,
+  "artifactNetwork": {
+    "completedCount": 7,
+    "errorCount": 0,
+    "events": [
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "volcano.png",
+        "matchedTargets": [
+          "png"
+        ],
+        "outcome": "completed",
+        "resourceType": "image",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "volcano.svg",
+        "matchedTargets": [
+          "svg"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "report.html",
+        "matchedTargets": [
+          "report"
+        ],
+        "outcome": "completed",
+        "resourceType": "subFrame",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      }
+    ]
+  },
+  "backendStatus": {
+    "checkCount": 6,
+    "everyCheckReady": true,
+    "maxDurationMs": 60.18783399999984
+  },
+  "isolatedCompatibility": {
+    "aiSettingsReadCount": 3,
+    "terminalResizeCount": 0,
+    "terminalStopCount": 0
+  },
+  "passed": true
+}

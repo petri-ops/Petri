@@ -55,5 +55,12 @@ test('产品判据 DOM 未被本票改写（红线：不改产品 debug 属性/p
   assert.match(shell, /data-debug-selected-name/, '产品 debug 属性未改');
   assert.match(resultsSurface, /data-result-surface-source/, '产品 pack 接管标志未改');
   const pack = JSON.parse(packJson);
-  assert.ok(pack.provides.resultSurfaces[0].artifactTypes.includes('plot'), 'pack plot surface 保留（不改 pack 声明）');
+  // 2026-11-23 全链收口：resultSurfaces 已整体停用（方向 B 完成，见 p6-result-surfaces-retire）；
+  // 本票当时只改了 table，plot 保留。两种状态都是合法进展——断言「未擅自操纵 pack 声明」的
+  // 实质=product 代码未改 + pack.json 变更均经裁决（table 停→plot/report 停）。
+  const surfaces = pack.provides.resultSurfaces || [];
+  assert.ok(
+    surfaces.length === 0 || (surfaces[0].artifactTypes || []).includes('plot'),
+    'pack result surface 状态须为已整体停用或 plot 保留（均为裁决内状态）',
+  );
 });

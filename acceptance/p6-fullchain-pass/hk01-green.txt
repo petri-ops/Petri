@@ -1,0 +1,11 @@
+✔ bio resultSurfaces 已停用（无接管 result 的 surface） (0.800167ms)
+✔ pack 其他能力保留（只停 result surface，不停包） (0.1265ms)
+✔ 产品安全边界未动（红线） (0.380208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 127.284584

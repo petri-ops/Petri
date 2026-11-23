@@ -15,17 +15,16 @@ import { test } from 'node:test';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PACK_JSON = '/Users/zhangdiandian/Documents/1.WorkDir/petri-pack-bio/pack.json';
 
-test('resultSurfaces[0].artifactTypes 不含 table（table 族回退原生 viewer）', () => {
+test('table 族不被任何 result surface 接管（table 族回退原生 viewer）', () => {
   const pack = JSON.parse(fs.readFileSync(PACK_JSON, 'utf8'));
-  const surface = pack.provides.resultSurfaces.find((item) => item.id === 'bio-result');
-  assert.ok(surface, '须存在 bio-result result surface');
-  assert.ok(Array.isArray(surface.artifactTypes), 'result surface 须有 artifactTypes 数组');
-  assert.ok(
-    !surface.artifactTypes.includes('table'),
-    'result surface 不得接管 table 族——否则 classified_table.csv 走 pack iframe 200 行预览，inspectTable 判据永远不成立',
+  const surfaces = pack.provides.resultSurfaces || [];
+  const claimingTable = surfaces.filter((item) => (item.artifactTypes || []).includes('table'));
+  assert.equal(
+    claimingTable.length, 0,
+    '不得有 result surface 接管 table 族——否则 classified_table.csv 走 pack iframe 200 行预览，inspectTable 判据不成立',
   );
-  assert.ok(surface.artifactTypes.includes('plot') && surface.artifactTypes.includes('report'),
-    'plot/report result surface 不受影响');
+  // 2026-11-23 全链收口后 resultSurfaces 已整体停用（方向 B 完成）；本票当时的
+  // 「plot/report 保留」是中间态，两种状态都合法，只断言 table 未被接管这一不变量。
 });
 
 test('provides.artifactTypes 保留 table（包能力声明不动）', () => {
