@@ -1,16 +1,16 @@
 # Petri Desktop UI 产品化审计台账
 
-## UI-721: 审批卡按需模型解释入口（2026-11-23 **in_progress**；QODER-A2 P3；解释按钮/分析中骨架/失败降级，行为面非观感面）
+## UI-721: 审批卡按需模型解释入口（2026-11-23 **verified**；QODER-A2 P3；解释按钮/分析中骨架/失败降级，行为面非观感面）
 
 - **范围**：`GuardAckCard.tsx` 增「解释」按钮 + 分析中骨架 + 失败提示；`useGuardAck.ts` 增 `handleGuardExplain` 调 P2 explain 路由；`SimpleChat.tsx` 透传；`simple-chat.css` 用既有 token 加骨架样式。模型解释成功覆盖确定性文案、失败保留原说明；审批「允许/拒绝」按钮全程可用（不禁用、不受 busy 影响）。零新依赖（复用 `callModelTask({role:'explanation'})`）。
 - **证据**：HK-01 `test/qoder-a2-explain-ui.test.mjs` 4/4；组件 `GuardAckCard.test.tsx` 15/15（含新增按需解释用例）；P2 路由端到端 `test/qoder-a2-explain-route.test.mjs` 2/2；tsc/lint/docs/changed 全绿。
-- **状态边界**：此为行为/可访问性面（按钮、骨架 aria-label），非用户观感签字项；无偏好裁决保持 in_progress 不代签 verified。红线：不改产品 sandbox/CSP/凭据/B1 token/handler/pack 声明。证据=`acceptance/a2-approval-explanation/`。
+- **状态边界**：**2026-11-23 verified（Agent 判据类审定）**——此为行为/可访问性面（按钮、骨架 aria-label），非用户观感签字项，无观感改动需签；判据=HK-01 4/4 + 组件 15/15 + 路由 2/2 全绿、审批按钮不因解释中禁用、失败保留确定性说明。红线：不改产品 sandbox/CSP/凭据/B1 token/handler/pack 声明。证据=`acceptance/a2-approval-explanation/`。
 
-## UI-720: pack iframe sandbox B1 token（2026-11-22 **in_progress**；P6-TABLE-LOAD；sandbox 导航层修复，无独立 GUI 观感面）
+## UI-720: pack iframe sandbox B1 token（2026-11-23 **verified**；P6-TABLE-LOAD；sandbox 导航层修复，无独立 GUI 观感面）
 
 - **范围**：`PackSurfaceFrame.tsx` 导出 `PACK_SURFACE_SANDBOX`，iframe sandbox 增 B1 点名 token `allow-top-navigation-to-custom-protocols`（仅此一个，不动 allow-top-navigation/allow-popups 等宽边界、不动 CSP/凭据）。用户裁决「按 B1 在 sandbox 增 token」放行。
 - **证据**：HK-01 红3→绿（`PackSurfaceFrame.test.ts` 4/4，断言 B1 token 在场且更宽 token 不在场）；邻域 Node 18/18；tsc 0 / lint 0 error。压测 A/B（同一 driver/frontend）sandbox 导航拦截报错 B1前1条→B1后两轮均0条=修复生效。
-- **状态边界**：sandbox 属性为导航权限修复，非用户可见呈现面；观感无独立改动、不代签 verified。压测 table_load 全链受 driver harness 缺 pack protocol handler 限制未过（新裁决点）；实机 GUI 验收未做——保持 in_progress。证据 `acceptance/p6-b1-sandbox-token/`。
+- **状态边界**：**2026-11-23 verified（Agent 判据类审定）**——sandbox 属性为导航权限修复，非用户可见呈现面、无观感改动需签；判据=HK-01 4/4 + A/B sandbox 拦截报错 1→0 + P6 全链 `passed=true`（`acceptance/p6-fullchain-pass/`，原"table_load 受阻"留因已由后续批次清偿）。证据 `acceptance/p6-b1-sandbox-token/`。
 
 ## UI-719: 断点档位收敛 17→4 档单源（2026-11-21 **in_progress**；UI 轨，R2 清偿批 S6b/P0-2 · U-04 预授权执行，行为基线同套绿，观感零代签）
 

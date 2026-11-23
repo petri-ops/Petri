@@ -1,0 +1,19 @@
+✔ GET 空账本返回 ok:true 空事件（fail-soft） (17.364958ms)
+✔ POST 追加经脱敏；GET 可见；非法事件 400 (12.591417ms)
+✔ L6 模块存在且零新依赖 (0.917666ms)
+✔ parseAuditLines：JSONL 逐行宽容，坏行不整份失败 (0.43875ms)
+✔ formatAuditEvent：统一事件形状，脱敏（不含 token/凭据字段） (0.100333ms)
+✔ projectUnifiedAudit：多源合并按时间排序，只读投影不改写源 (7.042708ms)
+✔ 红线：信任判断与凭据不进投影 (0.208084ms)
+✔ L6 写路由文件存在且消费 P1 核心 (0.939875ms)
+✔ 路由注册：GET 只读投影 + POST 追加，注册到 routes/index (0.1755ms)
+✔ 只读投影不泄漏凭据/信任真源 (0.111042ms)
+✔ 红线：信任策略/凭据 handler 未改 (0.5225ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 257.235

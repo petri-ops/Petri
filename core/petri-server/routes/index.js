@@ -110,6 +110,8 @@ module.exports = async function registerRoutes(app) {
     ['Lesson evidence', () => require('./lesson-evidence')(app)],
     // QODER-J2：技能自进化建议（本地 lessons 审计→建议草案；忽略走独立账本；不自动建任务）
     ['Skill suggestions', () => require('./skill-suggestions')(app)],
+    // QODER-L6：插件生命周期/权限审计统一（只读投影 + 追加 JSONL；不碰凭据）
+    ['Plugin lifecycle audit', () => require('./plugin-lifecycle-audit')(app)],
   ];
 
   for (const [name, fn] of routes) {

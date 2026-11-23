@@ -1,11 +1,11 @@
 ---
 id: QODER-YELLOW9-REOPEN
 kind: reference
-status: active
+status: completed
 canonical: true
 truthDomain: qoder-yellow9-reopen
 entrypoint: docs/README.md
-phase: P0-LAUNCH
+phase: CLOSED
 registeredAt: 2026-11-23
 owner: main-agent
 goal: 母纲 Q-MATRIX 9 个保留 🟡 reopen 项的统一立项评审稿——逐项登记范围/形态/待裁决/验收边界，受单工作包串行纪律约束，一项 active（A2）其余 queued。

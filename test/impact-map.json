@@ -9913,7 +9913,11 @@
         "acceptance/qoder-j6-role-wiring/**",
         "core/petri-server/agent-tools/web-tools.js",
         "test/qoder-l1l2-wiring.test.mjs",
-        "acceptance/qoder-l1l2-wiring/**"
+        "acceptance/qoder-l1l2-wiring/**",
+        "core/petri-server/routes/plugin-lifecycle-audit.js",
+        "test/qoder-l6-write-route.test.mjs",
+        "test/qoder-l6-audit-route.e2e.test.mjs",
+        "acceptance/qoder-final-sweep/**"
       ],
       "tests": [
         "test/qoder-a2-approval-explanation.test.mjs",
@@ -9930,7 +9934,9 @@
         "test/qoder-l6-plugin-audit.test.mjs",
         "test/qoder-j4-tool-registration.test.mjs",
         "test/qoder-j6-role-wiring.test.mjs",
-        "test/qoder-l1l2-wiring.test.mjs"
+        "test/qoder-l1l2-wiring.test.mjs",
+        "test/qoder-l6-write-route.test.mjs",
+        "test/qoder-l6-audit-route.e2e.test.mjs"
       ],
       "classifiesScripts": true
     }

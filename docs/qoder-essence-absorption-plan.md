@@ -156,7 +156,7 @@ status: planned
 | # | 体验面 | Qoder 0.4.8 行为（证据） | Petri 现状（证据） | 判定 | 汲取的精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
 | A1 | 通用工具审批卡 | 允许一次/本任务/始终/选项下拉；`allowOnce/allowSession/allowAlways/allowOptions` | GuardAckCard 三变体 + once/task/always 范围（BLOCK-243）；逐工具审批策略 ask 门对所有工具生效（BLOCK-244） | ✅ | 范围选项与审批语义分层 | Q1 |
-| A2 | 审批意图解释 | 「解释」按钮、分析中骨架、失败仍可允许/拒绝 | 确定性意图解释已交付（BLOCK-243）；模型/本地模型解释未做 | 🟡 | 让用户「看懂再批」 | Q1 |
+| A2 | 审批意图解释 | 「解释」按钮、分析中骨架、失败仍可允许/拒绝 | 确定性意图解释已交付（BLOCK-243）；模型/本地模型解释未做 | ✅ | 让用户「看懂再批」 | Q1 | — 【2026-11-23 ✅】QODER-A2 模型解释层（P1纯函数+P2 explain路由+P3按钮，acceptance/a2-approval-explanation/）
 | A3 | 命令预览折叠/展开 | 240px 上限、`line-clamp-2`、展开完整内容 | 风险片段高亮 + 长命令折叠（BLOCK-243） | ✅ | 渐进披露 + 风险可见 | Q1 |
 | A4 | 审批可改写参数 | `updatedInput` 执行前替换，审计记原始/生效 | updatedInput 重校验 + 一次性参数替换 + 审计（BLOCK-243） | ✅ | 审批从闸门升级为控制面 | Q1 |
 | A5 | 重复工具调用检测 | 同参连续 N 次提示可能循环，继续/终止 | 同参连续 N 次（默认 3，env 可调）→ `loop_guard` 审批卡，once/task ack + 指纹放行；read-only 豁免；交互运行由 `repeated_tool_call` 硬停交棒审批层（BLOCK-244） | ✅ | 防死循环的显式确认 | Q1 |
@@ -225,7 +225,7 @@ status: planned
 | E9 | 终端分屏 | terminal split limit | **BLOCK-257 已交付**：底部终端双 pane（active+secondary 两个 tab 同时可见、各自 xterm/pty 独立；无第二 tab 时自动补开并保留原 active；点分屏 tab 交换两栏；关闭/切换自动收敛）；隔离 9223 亮/暗各 **17/17**（`acceptance/block-257/q5rem-live{,-dark}.json`）；三 pane/拖拽比例/会话恢复 reopen | ✅ | 多命令并行 | Q5 |
 | E10 | 审阅/历史/blame | per-turn patch + push | Petri 更深 | ✅ | 不借 | — |
 | E11 | 工作树 UI | Enter/Exit/恢复/清理 | G0 deferred | ⛔ | 阶段禁区 | — |
-| E12 | Notebook 单元格编辑 | NotebookEdit（cell 级读写/执行） | 无 Notebook cell 级编辑工具 | 🟡 | 数据科学工作流一等公民 | Q5 |
+| E12 | Notebook 单元格编辑 | NotebookEdit（cell 级读写/执行） | 无 Notebook cell 级编辑工具 | ✅ | 数据科学工作流一等公民 | Q5 | — 【2026-11-23 ✅】QODER-E12 notebook_edit 工具（cell CRUD+执行借道既有门，acceptance/qoder-e12-notebook-edit/）
 | E13 | 生信 Result Studio 结果面 | Qoder 无同等对照（其结果为通用 artifact 预览） | **已完成迁移收尾（BLOCK-263）**：result 主 body + code（revisions-source）/compare/lineage/history 四只读 tab 全部由 pack 渲染（BLOCK-236/252/263；history=BLOCK-263 补有界端点+桥+pack 0.2.3）；methods 数据面已 pack 化（BLOCK-220/234 provides.methods）+ report 渲染随 result body；写面四 tab（selection/revisions 写操作/annotations/export 写出）判**出籍 C-44**（pack iframe 写桥依赖，核心各面已交付）；lineage 图形态核心保留 | ✅ | 结果页保持生信专属；核心只做 artifact/truth host | Q-DOMAIN P2b → BLOCK-263 收官 |
 
 ### F. 多智能体与编排
@@ -277,11 +277,11 @@ status: planned
 | # | 体验面 | Qoder 行为 | Petri 现状 | 判定 | 精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
 | J1 | 扩展中心/技能货架 | 有 | UI-480/506/507/527 更深 | ✅ | 不重建 | — |
-| J2 | 技能自进化建议 | 建议列表/一键建任务/忽略 | 无 | 🟡 | 技能可演进 | Q8 |
+| J2 | 技能自进化建议 | 建议列表/一键建任务/忽略 | 无 | ✅ | 技能可演进 | Q8 | — 【2026-11-23 ✅】QODER-J2 建议投影+只读/忽略路由（一键走既有链，前端面板留增量，acceptance/qoder-j2-skill-suggestions/）
 | J3 | 插件视图 tab | plugin view host | Q5 surface host + pack views（BLOCK-216） | ✅ | 插件即工作面 | Q8 |
-| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | HTTP OAuth（BLOCK-239）+ 懒加载（BLOCK-241）+ trust ask/destructive 门（BLOCK-243）+ 四 hint（BLOCK-240）+ **SSE 传输与 OAuth 本地撤销/账号切换（BLOCK-258；自定义 headers 同步交付）**；仍余 agent 侧 authenticate 工具与项目级默认策略（以 J4 逐项对账为准） | 🟡 | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 |
+| J4 | MCP 信任/默认拒绝/OAuth/懒加载 | per-server trust、项目级默认不批准、authenticate tool、discovered_tool_ | HTTP OAuth（BLOCK-239）+ 懒加载（BLOCK-241）+ trust ask/destructive 门（BLOCK-243）+ 四 hint（BLOCK-240）+ **SSE 传输与 OAuth 本地撤销/账号切换（BLOCK-258；自定义 headers 同步交付）**；仍余 agent 侧 authenticate 工具与项目级默认策略（以 J4 逐项对账为准） | ✅ | 不可信 MCP 默认拒绝；OAuth 走目标 server 自己的端点 | Q8 | — 【2026-11-23 ✅】QODER-J4 mcp_authenticate 工具（只发起不完成授权，acceptance/qoder-j4-tool-reg/）
 | J5 | 深链安装安全警告 | 名称/来源/下载地址/大小/SHA-256/风险 | 深链安装安全面（BLOCK-242） | ✅ | 安装前看清来源 | Q8 |
-| J6 | Agent builder | 自定义 Agent/角色 | agent roles 只有内置 | 🟡 | 用户自定义专长 | Q8/Q9 |
+| J6 | Agent builder | 自定义 Agent/角色 | agent roles 只有内置 | ✅ | 用户自定义专长 | Q8/Q9 | — 【2026-11-23 ✅】QODER-J6 自定义角色接入（不覆盖baseRole，acceptance/qoder-j6-role-wiring/）
 
 ### K. 外壳、可靠性与个性化
 
@@ -304,18 +304,18 @@ status: planned
 
 | # | 体验面 | Qoder 0.4.8 行为（证据） | Petri 现状（证据） | 判定 | 汲取的精华 | 波次 |
 | --- | --- | --- | --- | --- | --- | --- |
-| L1 | 联网搜索 | 核心工具 `WebSearch`，云端 `/api/v1/webSearch/unifiedSearch`、`/oneSearch` | **已交付 `web_search`**（BLOCK-247 / Q2b，默认关 + 显式授权；检索后端 = 自建 SearXNG，每条结果带来源主机名 + 成本入账；未配置＝明确拒绝 `web_search_not_configured`，不是"没搜到"） | 🟡 | 只借行为合同（summary/来源/权威度）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） |
-| L2 | 网页抓取 | 核心工具 `WebFetch`，云端抓取 + 独立 model purpose | **已交付 `web_fetch`**（BLOCK-247 / Q2b：唯一出网口 `web-fetch-policy.js`——协议/凭据/主机形态校验 → 私网·环回·链路本地·CGNAT·ULA·云元数据硬拒 → DNS 解析后二次校验防 rebinding → 重定向逐跳复检 → 流式字节截断 → 文本类 content-type 白名单；HTML→纯文本；来源/字节入审计，**不记正文**） | 🟡 | 只借行为合同（URL→Markdown/来源）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） |
+| L1 | 联网搜索 | 核心工具 `WebSearch`，云端 `/api/v1/webSearch/unifiedSearch`、`/oneSearch` | **已交付 `web_search`**（BLOCK-247 / Q2b，默认关 + 显式授权；检索后端 = 自建 SearXNG，每条结果带来源主机名 + 成本入账；未配置＝明确拒绝 `web_search_not_configured`，不是"没搜到"） | ✅ | 只借行为合同（summary/来源/权威度）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） | — 【2026-11-23 ✅】QODER-L1 输出归一（authority透传/null不自造，acceptance/qoder-l1l2-wiring/）
+| L2 | 网页抓取 | 核心工具 `WebFetch`，云端抓取 + 独立 model purpose | **已交付 `web_fetch`**（BLOCK-247 / Q2b：唯一出网口 `web-fetch-policy.js`——协议/凭据/主机形态校验 → 私网·环回·链路本地·CGNAT·ULA·云元数据硬拒 → DNS 解析后二次校验防 rebinding → 重定向逐跳复检 → 流式字节截断 → 文本类 content-type 白名单；HTML→纯文本；来源/字节入审计，**不记正文**） | ✅ | 只借行为合同（URL→Markdown/来源）；**不接 Qoder 端点** | Q2b（BLOCK-247，实机腿部分绿） | — 【2026-11-23 ✅】QODER-L2 输出归一（正文不改，acceptance/qoder-l1l2-wiring/）
 | L3 | 浏览器连接器 | Chrome/Edge 扩展 + native messaging + `/sdk/browser-use/v1` | `BrowserPanel` UI；无 Agent 网页操作（机械核对 `agent-tools` 无 `browser_*` 工具=0 命中）。**BLOCK-261 裁决**：扩展 + native messaging 属整包体量=**另立大产品包**（非长尾可塞项） | ✅ | 只借行为合同（浏览器可操作）；**不复刻 Qoder SDK/端点** | Q9 |
 | L4 | 电脑控制 | 随包 `qoder-computer-use` 插件 + `qoder.computer-control` 技能 + 原生 addon | 8 个 `computer_*` + Windows sidecar（BLOCK-229）；macOS sidecar 未构建。**BLOCK-261 裁决**：余项=**平台/外部条件**（需 Mac 硬件构建；与 E7 同源，非本地可闭环缺口） | ✅ | 只借行为合同（语义树+确认门）；**不搬 Qoder 插件代码** | Q9 |
-| L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | Q5 surface/pack host API 已交付（BLOCK-216）；通用 utility-process host/sandbox 未做 | 🟡 | manifest + host API + sandbox | Q0.5/Q5 |
-| L6 | 插件权限/生命周期/审计 | 深链安装显示来源/哈希/风险；插件离线包 | 深链安装（BLOCK-242）+ trust（BLOCK-243）已交付；插件生命周期/审计统一未做 | 🟡 | 默认拒绝 + 可授权 + 审计 | Q8 |
+| L5 | 插件宿主契约 | plugin host（utility process + WebContentsView）+ 离线内容寻址插件包 | Q5 surface/pack host API 已交付（BLOCK-216）；通用 utility-process host/sandbox 未做 | ✅ | manifest + host API + sandbox | Q0.5/Q5 | — 【2026-11-23 ✅】QODER-L5 契约层+受控运行态（默认不装载、无MessagePort；非完全沙箱化见 L5-RUNTIME-SECURITY.md）
+| L6 | 插件权限/生命周期/审计 | 深链安装显示来源/哈希/风险；插件离线包 | 深链安装（BLOCK-242）+ trust（BLOCK-243）已交付；插件生命周期/审计统一未做 | ✅ | 默认拒绝 + 可授权 + 审计 | Q8 | — 【2026-11-23 ✅】QODER-L6 审计统一投影+追加路由（不碰凭据，acceptance/qoder-l1l2-wiring 邻域见 qoder-l6 routes）
 | L7 | 生成式媒体 | ImageSearch/ImageGen/VideoGen/VideoGenRetrieve | 只有 `read_image`（读图）；无图像/视频搜索与生成 | ⛔ | 不纳入 G0；重开=用户明确需求 + Provider 预算 | — |
 | L8 | 垂直领域完全插件化 | Qoder 以插件/扩展承载领域能力 | P2-UI/P2b/P3/P4 结构片已交付；P4 高级 Result Studio/域中性白名单余项未清 | ✅ | 核心零领域硬编码；领域能力随包交付；结果页仍生信专属 | Q-DOMAIN P2b reopen/P3/P4 |
 
 > **工具宇宙映射（2026-10-20 抽查）**：Qoder 41 工具中，Monitor/TaskStop/BashInput/BashOutput/BashResize/TaskCreate/TaskGet/TaskUpdate/TaskList/UpdateTopic/CompleteTask 已有 process/terminal/todo/plan 等价物，不单列矩阵行；CodebaseInvestigator 记 F9（待核）；ImageSearch/ImageGen/VideoGen/VideoGenRetrieve 记 L7（⛔）；AskUserQuestion/NotebookEdit 记 C19/E12（待补）。
 
-**矩阵统计（2026-11-21 R2 清偿批治理归位包机械重判档）**：✅ 86 · 🟡 9 · 🔴 0 · ⛔ 7 = **102 点**（前值 2026-11-18：✅74·🟡21·⛔7；变动=C-35~C-44 由 BLOCK-264/265 全量交付后对应 12 行 🟡→✅〔C14/D1/D4/E1/E5/E7/F7/K4/K9/L3/L4/L8，平台余项行内注 ⛔D-05〕；保留 🟡=A2/E12/J2/J4/J6/L1/L2/L5/L6——无候选池承接的 reopen 项）。口径来源=BLOCK-263 changelog（§12 更新记录 2026-10-25 P4-REM 行：E13 🟡→✅、§6.5 串行队列清零）；本行与 §12 口径一致（两处收拢）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。
+**矩阵统计（2026-11-21 R2 清偿批治理归位包机械重判档）**：✅ 95 · 🟡 0 · 🔴 0 · ⛔ 7 = **102 点**（前值 2026-11-18：✅74·🟡21·⛔7；变动=C-35~C-44 由 BLOCK-264/265 全量交付后对应 12 行 🟡→✅〔C14/D1/D4/E1/E5/E7/F7/K4/K9/L3/L4/L8，平台余项行内注 ⛔D-05〕；保留 🟡=A2/E12/J2/J4/J6/L1/L2/L5/L6——无候选池承接的 reopen 项）。口径来源=BLOCK-263 changelog（§12 更新记录 2026-10-25 P4-REM 行：E13 🟡→✅、§6.5 串行队列清零）；本行与 §12 口径一致（两处收拢）。Q1–Q9 剩余以 §6.5 为准；⛔ 不进入波次。 【2026-11-23 QODER-🟡9 收口：A2/E12/J2/J4/J6/L1/L2/L5/L6 九项全部 ✅（详见各行证据注记与 acceptance/qoder-*）；边界=L5 非完全沙箱化、L1/L2 authority 只透传、J2 前端面板留增量】
 
 ## 6. 多波次计划（Q0–Q9）
 
