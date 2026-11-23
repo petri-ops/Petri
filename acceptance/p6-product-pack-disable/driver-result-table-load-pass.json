@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "passed": false,
+  "failedStage": "table_scroll",
+  "subStage": "table_interactions",
+  "readyHandshake": {
+    "hostTapReady": true,
+    "attempts": 1
+  },
+  "page": {
+    "canvasPresent": true,
+    "tableViewportPresent": true,
+    "packIframes": [],
+    "images": [],
+    "resourceTimings": [],
+    "viewerModes": [
+      "table"
+    ],
+    "canvasText": "预览报告 火山图 分类结果表 已核验（未篡改） 结果 代码 审查 历史 继续分析 暂无可视血缘链（单节点任务无可展示的上下游） 筛选字段 gene log2FoldChange sig significance significance_column pvalue padj 包含 = ≠ > ≥ < ≤ 添加筛选条件 选择全部筛选结果 100,000 / 100,000 行 已选择 1 个 gene 清除 选择结果列 gene ↑ log2FoldChange sig significance significance_column pvalue padj GENE000201 -1.12 Down 0.0136 padj 0.003401 0.0136 GENE000202 -0.75 NS 0.01367 padj 0.003418 0.01367 GENE000203 -0.38 NS 0.01374 padj 0.003435 0.01374 GENE000204 -0.01 NS 0.01381 padj 0.003452 0.01381 GENE000205 0.36 NS 0.01388 padj 0.003469 0.01388 GENE000206 0.73 NS 0.01394 padj 0.003486 0.01394 GENE000207 1.1 Up 0.01401 padj 0.003503 0.01401 GENE000208 1.47 Up 0.01408 padj 0.00352 0.01408 GENE000209 1.84 Up 0.01415 padj 0.003537 0.01415 GENE000210 2.21 Up 0.01422 padj 0.003554 0.01422 GENE000211 2.58 Up 0.01428 padj 0.003571 0.01428 GENE000212 2.95 Up 0.01435 padj 0.003588 0.01435 GENE000213 -2.69 Down 0.01442 padj 0.003605 0.01442 GENE000214 -2.32 Down 0.01449 padj 0.003622 0.01449 GENE000215 -1.95 Down 0.01456 padj 0.003639 0.01456 GENE000216 -1.58 Down 0.01462 padj 0.003656 0.01462 GENE000217 -1.21 Down 0.01469 padj 0.003673 0.01469 GENE000218 -0.84 NS 0.01476 padj 0.00369 0.01476 读取完整表查询…",
+    "bodyText": "工作台 新建任务 扩展 知识空间 项目 P5 disposable scientific editing P5 live scientific editing 刚刚 分类结果表 · P5 disposable scientific editing 结果 2 开始新的对话 在下方输入框中提问 解释项目结构 了解项目的文件组织与数据构成 快速开始 查看 AI 能帮你做什么 规划一个任务 说出目标，我来拆解成可执行的步骤 完全访问 0% 结果 × 预览报告 火山图 分类结果表 已核验（未篡改） 结果 代码 审查 历史 继续分析 暂无可视血缘链（单节点任务无可展示的上下游） 筛选字段 gene log2FoldChange sig significance significance_column pvalue padj 包含 = ≠ > ≥ < ≤ 添加筛选条件 选择全部筛选结果 100,000 / 100,000 行 已选择 1 个 gene 清除 选择结果列 gene ↑ log2FoldChange sig significance significance_column pvalue padj GENE000201 -1.12 Down 0.0136 padj 0.003401 0.0136 GENE000202 -0.75 NS 0.01367 padj 0.003418 0.01367 GENE000203 -0.38 NS 0.01374 padj 0.003435 0.01374 GENE000204 -0.01 NS 0.01381 padj 0.003452 0.01381 GENE000205 0.36 NS 0.01388 padj 0.003469 0.01388 GENE000206 0.73 NS 0.01394 padj 0.003486 0.01394 GENE000207 1.1 Up 0.01401 padj 0.003503 0.01401 GENE000208 1.47 Up 0.01408 padj 0.00352 0.01408 GENE000209 1.84 Up 0.01415 padj 0.003537 0.01415 GENE000210 2.21 Up 0.01422 padj 0.003554 0.01422 GENE000211 2.58 Up 0.01428 padj 0.003571 0.01428 GENE000212 2.95 Up 0.01435 padj 0.003588 0.01435 GENE000213 -2.69 Down 0.01442 padj 0.003605 0.01442 GENE000214 -2.32 Down 0.01449 padj 0.003622 0.01449 GENE000215 -1.95 Down 0.01456 padj 0.003639 0.01456 GENE000216 -1.58 Down 0.01462 padj 0.003656 0.01462 GENE000217 -1.21 Down 0.01469 padj 0.003673 0.01469 GENE000218 -0.84 NS 0.01476 padj 0.00369 0.01476 读取完整表查询… 高级精细调整 按插件参数逐项控制"
+  },
+  "packSurfaceProbe": null,
+  "artifactNetwork": {
+    "completedCount": 2,
+    "errorCount": 0,
+    "events": [
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      },
+      {
+        "artifactName": "classified_table.csv",
+        "matchedTargets": [
+          "table"
+        ],
+        "outcome": "completed",
+        "resourceType": "xhr",
+        "statusCode": 200,
+        "fromCache": false,
+        "error": null
+      }
+    ]
+  },
+  "rendererConsole": [
+    "%cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security\n  Policy set or a policy with \"unsafe-eval\" enabled. This exposes users of\n  this app to unnecessary security risks.\n\nFor more information and help, consult\nhttps://electronjs.org/docs/tutorial/security.\nThis warning will not show up\nonce the app is packaged.",
+    "Uncaught (in promise) Error: Error invoking remote method 'app:set-shell-prefs': Error: No handler registered for 'app:set-shell-prefs'"
+  ]
+}

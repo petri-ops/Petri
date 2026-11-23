@@ -1,0 +1,12 @@
+✔ resultSurfaces[0].artifactTypes 不含 table（table 族回退原生 viewer） (0.894042ms)
+✔ provides.artifactTypes 保留 table（包能力声明不动） (0.122375ms)
+✔ 回退链路在案：resolveResultSurface 未命中→core-transitional 原生 viewer (0.266708ms)
+✔ 产品安全边界未动（红线：不改 sandbox/CSP/凭据/B1 token/handler） (0.20125ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.680125
