@@ -10,9 +10,9 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 663,
-    "lastUpdated": "2026-11-20",
-    "managedMarkdown": 646
+    "documentCount": 664,
+    "lastUpdated": "2026-11-23",
+    "managedMarkdown": 647
   },
   "documents": [
     {
@@ -13824,7 +13824,23 @@
         "G0"
       ],
       "notes": "用户偏好定稿候选清单（用户「系统性从不同角度列出，我来定稿」）：7 维度（身份差异化/本地主权/视觉布局/文案/交互形状/agent 行为/实机验收）逐条标现状+定稿建议+裁决状态（已固化/建议采纳/需裁决），附精确证据路径与 5 项待裁决空白。不改纪律本体，定稿后才升格 canonical。三路取证：视觉 token/机械门、人设与原话、AUDIT-LOG 历史裁决。"
+    },
+    {
+      "id": "QODER-YELLOW9-REOPEN",
+      "path": "docs/qoder-yellow9-reopen-review.md",
+      "kind": "reference",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "qoder-yellow9-reopen",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "P0-LAUNCH",
+      "touchSurface": [
+        "docs/qoder-yellow9-reopen-review.md"
+      ],
+      "registeredAt": "2026-11-23",
+      "notes": "2026-11-23 用户发令「🟡9 开始吧 可以立项了」+裁决「立9项评审稿+立刻开工A2」。母纲9个保留🟡 reopen 项(A2/E12/J2/J4/J6/L1/L2/L5/L6)统一立项评审稿：逐项范围/形态/待裁决/验收边界在案。TASK-FORM=立项评审稿(taxonomy §3)；单工作包串行——A2 唯一 active 实施包，其余8项 queued 待逐项发令。L1/L2 只借行为合同不接 Qoder 端点；零新依赖默认；不改产品安全边界/观感不代签；不碰 G1+。G0 开发期常态·不外推 packaged/Provider/GA."
     }
   ],
-  "lastUpdated": "2026-11-20"
+  "lastUpdated": "2026-11-23"
 }

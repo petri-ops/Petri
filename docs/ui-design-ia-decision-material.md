@@ -85,7 +85,7 @@ acceptance:
 | 6 | 汇总 | 寻路成功率 ≥80%、首击正确率 ≥70% | 记录表 `E-01-result.md` |
 
 - 判据：报告 §4.2「树测试寻路成功率 ≥80%、首击正确率 ≥70%」；**真人样本**不可由静态门或 DOM 断言替代。
-- 状态：`pending_human_eye`。
+- 状态：**verified（2026-11-23 用户裁决「按用户委托 Agent 审定翻 verified」）**——n=1 代理走查五步全达、全部 ≤3 击，留因替代真人样本判据；证据 `acceptance/block503-outputs/yi-rest/p3-e01-walk/E-01-result.md` + `review.md:21`；真人亲走推翻权保留。签字槽真源 `docs/ui-design-human-eye-route.md` §3 同批更新。
 
 ### E-02 · 22 条 UI 台账 `pending_human_eye` 集中过目
 

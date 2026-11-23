@@ -20,6 +20,7 @@
 > 标记图例：▶ 可执行排队项 · 👁 观察型（随使用累计）· 👤 用户事项（Agent 不代行）· 🗃 候选池（未排期，启动需裁决+立项）· ⛔ 阻塞/延期（外部条件）· ✅ 已核实销号（防重复入册）。
 
 最后更新：2026-11-18（🗃 **C-56 论文写作/修改保真 Skill 规划落档**：用户发令「登记进 backlog」；外部 humanizer/Humanizer-zh 取「事实保真内核 + 中文 F 类检查」内化为 built-in `writing/paper-writing` 产品 Skill，复用现成 Skill 发现→加载→门控→治理链、零新依赖；属长期愿景 §2 论文链路，G0 当前不建设，不进母纲 Q-MATRIX、不进 active roadmap。仅登记候选不开工，启动须发令 + canonical plan + 三件套；他方 WIP `docs/architecture/gateway-design.md` 零触碰。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-23（🗂️ **三类并档（用户发令安排 + 三项裁决）**：E-01 按用户委托 Agent 审定翻 verified（补 `E-01-result.md`，5/5 代理走查+n=1 留因，真人口令覆盖、推翻权保留）；C-56 合成夹具端到端演练（`scripts/c56-paper-writing-drill.mjs` 真 Skill 链路 11/11、HK-01 4/4、非真实稿件标注、手册 §9 真实稿件判据未改——真实改写仍等用户给稿件路径）；🟡9 立 `docs/qoder-yellow9-reopen-review.md` 评审稿（9 项范围/形态/D 待裁决，A2 唯一 active 其余 queued），Jev 首推 A2 开工，A2 P1 后端纯函数 `approval-explanation.js`（HK-01 5/5、零新依赖、fail-soft），**A2 未 completed**（P2 路由/P3 前端待续，active 保持）。门禁：33/33+docs664/ui/lint/tsc/changed 全绿。证据=`acceptance/three-batch-launch/`。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 最后更新：2026-11-18（🗃 **C-55 科普视频生成北极星规划落档**：用户裁决「这些可以落档吗 写到plan中 后面推进？」；`acceptance/video-north-star-2026-11-18/VIDEO-NORTH-STAR-PLAN.md` 为非 canonical 规划/评估材料，不启动工作包、不改 C-54/W11/3D charter。路线=P0 30–60 秒最小成片闭环→P1 科学证据→P2 素材与分镜→P3 高级镜头。Jev 单一建议=VIDEO-MVP-P0 confidence=0.79 advice-only。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 

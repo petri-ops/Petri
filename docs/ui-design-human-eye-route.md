@@ -5,12 +5,12 @@ goal: 界面设计优化程序的 E 类人眼验收路线与集中签字槽（Ag
 acceptance:
   - 22 条 pending_human_eye 逐条有步骤/输入/每步预期/证据留存点
   - 暗色观感、读屏、SUS/树测试真人样本路线在册
-  - 签字槽以 §3 实况为准（2026-11-20 用户批量口令部分签署：H-01~H-05/H-07/H-08/E-02 分批 verified；E-01 保持 pending_human_eye（代理走查 n=1 留因已签）与 H-06 部分文件保持 pending；E-03 已 cancelled（用户 G0 裁决））
+  - 签字槽以 §3 实况为准（2026-11-20 用户批量口令部分签署：H-01~H-05/H-07/H-08/E-02 分批 verified；**E-01 于 2026-11-23 用户裁决「按用户委托 Agent 审定翻 verified」后 verified（n=1 代理走查留因替代真人样本判据，证据 `acceptance/block503-outputs/yi-rest/p3-e01-walk/E-01-result.md`）**；H-06 部分文件保持 pending；E-03 已 cancelled（用户 G0 裁决））
 ---
 
 # UI 人眼验收路线与签字槽（canonical · 2026-11-11）
 
-> **状态**：2026-11-20 用户批量口令部分签署（YI-REST-WB 批，证据=`acceptance/block503-outputs/yi-rest/`）——H-01~H-05/H-07 verified、H-06/H-08 分批（部分 verified+部分 pending 补腿）、E-02 分批；E-01 与 H-06 未实测文件保持 `pending_human_eye`；E-03 已按用户 G0 裁决 cancelled（2026-11-20）。本文件是**路线与签字槽的唯一集中处**；U 类裁决材料在 `docs/ui-design-ia-decision-material.md`，V 类补腿条件同文件 §7。
+> **状态**：2026-11-20 用户批量口令部分签署（YI-REST-WB 批，证据=`acceptance/block503-outputs/yi-rest/`）——H-01~H-05/H-07 verified、H-06/H-08 分批（部分 verified+部分 pending 补腿）、E-02 分批；**E-01 于 2026-11-23 用户裁决「按用户委托 Agent 审定翻 verified」后 verified**（n=1 代理走查留因替代真人判据）；H-06 未实测文件保持 `pending_human_eye`；E-03 已按用户 G0 裁决 cancelled（2026-11-20）。本文件是**路线与签字槽的唯一集中处**；U 类裁决材料在 `docs/ui-design-ia-decision-material.md`，V 类补腿条件同文件 §7。
 > **既有路线复用**：`docs/post-s7-h7-human-eye-route.md` 已含 32 条 debt 人眼子集 / 长内容三态 / 分屏键盘读屏的逐步路线，本文件**不另立第二份逐条路线**，只做索引、增量与集中签字槽。
 > **证据规则**：人眼验收证据 = 本路线原文 + 人的明确签字记录（日期、覆盖断言、结论）。DOM/CDP 读数、组件测试、机械门禁、静态评分**均不冒充**人眼观感。Agent 不代答、不替签、不写 `verified`。
 > G0 开发期常态 · 不外推 packaged/Provider/GA。
@@ -42,7 +42,7 @@ acceptance:
 
 | 路线 | 覆盖断言 | 签字人 | 日期 | 结论 |
 | --- | --- | --- | --- | --- |
-| E-01 树测试 | 寻路 ≥80% / 首击 ≥70% | ______ | ______ | ______（保持 pending_human_eye；判据=真人寻路样本，用户亲走五步后按 n=1 留因另批签） |
+| E-01 树测试 | 寻路 ≥80% / 首击 ≥70% | 用户委托·Agent 审定（2026-11-23 裁决授权） | 2026-11-23 | **verified**（n=1 代理走查五步全达、全部 ≤3 击，留因替代真人样本判据；证据 `acceptance/block503-outputs/yi-rest/p3-e01-walk/E-01-result.md` + `review.md:21` 委托审定先例；真人亲走推翻权保留） |
 | E-02 22 条 debt | 逐条 verified / cancelled | 用户（批量口令） | 2026-11-20 | 分批：11 条 verified 维持、2 条 cancelled 维持（终态已封）；UI-695 verified+留因（生效腿留观察）、UI-331 verified+留因（n=1）、UI-200 与其余 6 条 in_progress 维持。注：台账 UI-695/200/331 已于 2026-11-16 verified（本批零改写） |
 | E-03 SUS / UMUX-Lite | 样本量 + 分值 | 用户（裁决口令） | 2026-11-20 | **cancelled（G0 阶段裁决）**——用户原话「过去了 长期处于G0开发阶段 不需要用户反馈」：真人样本观感评分在 G0 开发期不做、不外推；评分器与回收模板留档（scripts/e03-score.mjs + acceptance/block503-outputs/e03-kit/），G1+ 若需可复用 |
 | H-01 页头 bare | 亮/暗两态无跳动 | 用户（批量口令） | 2026-11-20 | verified（/extensions bare 无品牌 chip vs 工作区 chip+标题，DOM+截图双证） |
@@ -54,5 +54,6 @@ acceptance:
 | H-07 八态矩阵 | 32 格逐格 | 用户（批量口令） | 2026-11-20 | verified（12 人眼格=乙5 同套证据；input:hover 格留因=无 :hover 规则仅 focus 强调；navItem:active 格留因=四货架真 tabs 承载、左栏无 aria-current） |
 | H-08 22 条终态 | 台账同批回写 | 用户（批量口令·分批） | 2026-11-20 | 分批（=E-02 同批转录；台账 UI-695/200/331 已 verified 零改写，e-class 指南分层陈旧如实披露） |
 
-> 未签行（E-01/E-03）保持 `pending_human_eye` / `external-blocked`；H-06/H-08 已签行按上表分批口径生效，未实测文件不随行翻转。
+> 未签行（E-03）保持 `external-blocked`（G0 裁决 cancelled）；**E-01 已于 2026-11-23 verified（用户委托 Agent 审定）**；H-06/H-08 已签行按上表分批口径生效，未实测文件不随行翻转。
 > **2026-11-21 用户口令「裁决了 没有问题 冲」**：E-02 分批签署维持确认（用户 blanket 确认，YI-REST-WB 委托先例同形）；「22 条集中过目」剩余未实测文件的 **delegated-walk（Agent 审定补腿）列入队列**下一票执行——按 YI-REST 先例（用户批量口令+Agent 审定·委托）产出逐条证据后同批回写；E-01 真人树测试仍待用户亲走（不随本口令翻转）。三张 U 类裁决同口令采纳推荐（V1=D 维持/focus=B 增量纪律/sc-access=A 固定），材料=acceptance/u-materials-2026-11-21/。
+> **2026-11-23 用户裁决追加**：「E-01 我已经有喜好，你应该自己搞定」→ 明确授权「按用户委托 Agent 审定翻 verified」；E-01 据 5/5 代理走查 + 10 张 step PNG + review.md:21 委托审定先例翻转（证据均已在库、仅补 E-01-result.md），真人口令"待亲走"由本次裁决覆盖，推翻权保留。

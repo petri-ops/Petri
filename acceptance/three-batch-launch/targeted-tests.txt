@@ -1,0 +1,72 @@
+✔ BLOCK-216 contributions: installed pack projects views/result surfaces/actions (9.116167ms)
+✔ BLOCK-252 contributions: result surface tabs are passed through with whitelist (3.893333ms)
+✔ BLOCK-216 contributions: disabled pack disappears (4.723083ms)
+✔ BLOCK-216 contributions: unsafe, missing, duplicate entries are dropped with diagnostics (2.907833ms)
+✔ BLOCK-216 contributions: malformed provides arrays are diagnosed, not thrown (2.665541ms)
+✔ BLOCK-216 pack protocol: only installed + enabled packs resolve to a root (2.166292ms)
+✔ BLOCK-216 asset path: traversal, absolute and missing files are rejected (3.057917ms)
+✔ BLOCK-216 asset path: symlink escape is rejected when the platform allows symlinks (2.50075ms)
+✅ [2026-11-23T03:31:29.591Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T03:31:29.592Z] [llm-providers] registered: dashscope-vision (vision)
+✅ [2026-11-23T03:31:29.725Z] [executors] registered: r
+✅ [2026-11-23T03:31:29.725Z] [executors] registered: python
+✅ [2026-11-23T03:31:29.726Z] [storage] registered: local
+✅ [2026-11-23T03:31:29.726Z] [storage] capabilities declared: local
+✅ [2026-11-23T03:31:29.726Z] [storage] active: local
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN user_id TEXT (duplicate column name: user_id)
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN agent_status TEXT (duplicate column name: agent_status)
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_count INTEGER DEFAULT 0 (duplicate column name: retry_count)
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN retry_error_type TEXT (duplicate column name: retry_error_type)
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)
+⚠️ [2026-11-23T03:31:29.772Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)
+✔ BLOCK-243 注册：参数预览/可编辑性/待审批计数/重复 pending 幂等 (3.514291ms)
+✔ BLOCK-243 参数预览：敏感键脱敏后不可编辑；超大有界截断 (0.550083ms)
+✔ BLOCK-243 once + updatedInput：登记一次性参数替换，不批原指纹 (0.438375ms)
+✔ BLOCK-243 编辑参数只允许 once 范围（task/always 先按原参数建立范围） (0.118792ms)
+✔ BLOCK-243 编辑参数执行替换：模型重试原调用 → 处理器收到生效参数、替换一次性消费 (1.623167ms)
+✔ BLOCK-243 task：写维度级 ack；legacy mode=always 映射为 task (0.196084ms)
+✔ BLOCK-243 always：仅 MCP 请求可用；applyAlways 失败时保持 pending (0.152375ms)
+✔ BLOCK-243 审计：permission.resolved 含原始/生效哈希、范围、耗时、脱敏输入 (0.176209ms)
+✔ BLOCK-243 重校验：schema 失败拒绝，工具不可用/快照缺失 fail-closed (0.2005ms)
+✔ BLOCK-243 重校验：同一 guardKey 放行、新风险维度拒绝、preflight 失败拒绝 (0.316709ms)
+✔ BLOCK-243 MCP trust：ask+destructive 需审批；allow/非 destructive/ack/指纹放行 (0.1805ms)
+✔ BLOCK-243 MCP trust：构造器从合同元数据 + 当前策略解析 trust（缺策略 fail-closed ask） (0.151833ms)
+✔ C-56 注册面 — paper-writing 可被发现并读取手册 (19.089458ms)
+✔ C-56 注册面 — system prompt 保留十节与四条保真纪律 (0.184583ms)
+✔ C-56 注册面 — 零运行时依赖且 manifest 双向一致 (1.542834ms)
+✔ 演练驱动存在且真实调用 Skill 发现/读取链路 (1.770958ms)
+✔ 演练标注非真实稿件、不改判据语义 (0.59475ms)
+✔ 保真不变量可机械复核（数字锁定/四保护/F六项/provenance） (0.153292ms)
+✔ 手册 §9 真实稿件判据未被改写 (0.668333ms)
+✔ agent 实机脚本不得设置 PETRI_TEST_ONSCREEN（屏幕不留测试窗） (132.932042ms)
+✅ [2026-11-23T03:31:29.342Z] [llm-providers] registered: deepseek (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: openai (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: openai-compatible (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: ollama (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: lmstudio (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: vllm (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: anthropic (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: deepseek-responses (chat)
+✅ [2026-11-23T03:31:29.343Z] [llm-providers] registered: dashscope (embedding)
+✅ [2026-11-23T03:31:29.344Z] [llm-providers] registered: dashscope-vision (vision)
+✔ A2 P1 模块存在且零新依赖（仅复用 callModelTask） (1.588167ms)
+✔ prompt 从确定性 intent 派生，明确不编造/不覆盖审批判断 (62.912417ms)
+✔ 文本规范化：空/超长/-whitespace 失败-soft (0.14025ms)
+✔ resolveModelExplanation 失败返回 null（不阻断审批） (0.107667ms)
+✔ 产品审批硬边界未被本票改写（零新 provider/不改 deny 语义） (1.043084ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 620.52025

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "capability": "c56-synthetic-drill",
+  "inputOrigin": "synthetic-fixture",
+  "nonRealManuscript": true,
+  "criterionSemanticsUnchanged": true,
+  "note": "合成夹具端到端演练；非真实论文稿件，不替代手册 §9 真实稿件路径判据",
+  "checks": [
+    {
+      "name": "skill_discover",
+      "pass": true,
+      "detail": "paper-writing found"
+    },
+    {
+      "name": "skill_get",
+      "pass": true,
+      "detail": "system.md resolved"
+    },
+    {
+      "name": "four_protections",
+      "pass": true,
+      "detail": "determination/attribution/completion/number-lock sections in system.md"
+    },
+    {
+      "name": "F1_F6",
+      "pass": true,
+      "detail": "F1..F6 present"
+    },
+    {
+      "name": "逐字符对照",
+      "pass": true,
+      "detail": "three-column fidelity contract present"
+    },
+    {
+      "name": "provenance",
+      "pass": true,
+      "detail": "provenance/uncovered markers present"
+    },
+    {
+      "name": "英文论文另批",
+      "pass": true,
+      "detail": "English scope deferred"
+    },
+    {
+      "name": "input_has_number",
+      "pass": true,
+      "detail": "fixture carries 98.7%"
+    },
+    {
+      "name": "number_locked_in_drill",
+      "pass": true,
+      "detail": "98.7% present in drill, no conflicting uplift"
+    },
+    {
+      "name": "non_real_label",
+      "pass": true,
+      "detail": "drill draft marks fixture as synthetic"
+    },
+    {
+      "name": "manual_criterion_unchanged",
+      "pass": true,
+      "detail": "§9 real-manuscript path criterion intact"
+    }
+  ],
+  "passed": true,
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": []
+  }
+}

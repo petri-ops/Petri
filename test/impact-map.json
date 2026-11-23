@@ -9849,6 +9849,7 @@
         "acceptance/block509-c55-video-p4/**",
         "acceptance/block510/**",
         "acceptance/c56-skill-registration/**",
+        "acceptance/c56-synthetic-drill/**",
         "acceptance/project-evaluation-prompt-2026-11-20/**",
         "acceptance/project-status-assessment-2026-11-20/**",
         "acceptance/ui-visual-upgrade-2026-11-20/**",
@@ -9857,8 +9858,25 @@
       "tests": [
         "test/block509-video-p4.test.mjs",
         "test/c56-paper-writing-skill.test.mjs",
+        "test/c56-skill-drill.test.mjs",
         "test/evo4-evidence-bugfix.test.mjs"
       ]
+    },
+    {
+      "id": "qoder-yellow9-a2-explanation",
+      "note": "2026-11-23 三类并档：QODER-YELLOW9-REOPEN 立项评审稿 + A2 P1 审批意图解释模型辅助。HK-01/邻域契约与 acceptance 证据由本规则认领；零新依赖（复用 callModelTask role=explanation）。",
+      "patterns": [
+        "core/petri-server/helpers/approval-explanation.js",
+        "scripts/c56-paper-writing-drill.mjs",
+        "test/qoder-a2-approval-explanation.test.mjs",
+        "docs/qoder-yellow9-reopen-review.md",
+        "acceptance/qoder-yellow9-review/**",
+        "acceptance/three-batch-launch/**"
+      ],
+      "tests": [
+        "test/qoder-a2-approval-explanation.test.mjs"
+      ],
+      "classifiesScripts": true
     }
   ]
 }
