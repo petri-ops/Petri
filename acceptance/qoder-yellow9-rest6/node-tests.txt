@@ -1,0 +1,33 @@
+✔ J4 P1 模块存在且零新依赖 (1.378541ms)
+✔ authenticate 请求校验：仅 http/sse 远程服务可发起，不碰 token (0.626708ms)
+✔ URL 不落日志：投影只含状态与 serverId，不含 authorizationUrl/token (0.110333ms)
+✔ 项目级默认策略：缺省=ask 零变化，非法值回落 ask (0.072ms)
+✔ 红线：既有凭据存储与 handler 未改 (0.882083ms)
+✔ J6 模块存在且零新依赖 (1.174958ms)
+✔ normalizeCustomRoles：合法角色入场，非法形状丢弃不整份失败 (0.725334ms)
+✔ 禁止覆盖内置角色 key 与 baseRole 人设 (0.154209ms)
+✔ mergeAgentRoles：内置∪自定义，unknown fail-closed 路径仍有效 (0.185042ms)
+✔ 红线：baseRole 人设真源未改 (1.001333ms)
+✔ L1/L2 模块存在且零新依赖 (1.698833ms)
+✔ L1 projectSearchResults：summary 有界 + authority 透传/诚实 null (0.6965ms)
+✔ L2 projectFetchMetadata：只补 source/authority 元数据，不改正文 (0.108041ms)
+✔ 恶意/缺失输入不伪造结果 (0.07775ms)
+✔ 红线：出网硬边界与配置白名单未改 (1.244875ms)
+✔ L5 契约模块存在且零新依赖 (1.158584ms)
+✔ 默认拒绝：无 host 声明即不装载，不启动进程 (0.429209ms)
+✔ 合法声明须含入口/权限/消息白名单，且入口路径安全 (0.168167ms)
+✔ 未知权限/消息类型 fail-closed，不隐式放行 (0.069541ms)
+✔ 红线：不改 pack handler/CSP/scheme (0.48875ms)
+✔ L6 模块存在且零新依赖 (1.839083ms)
+✔ parseAuditLines：JSONL 逐行宽容，坏行不整份失败 (0.574083ms)
+✔ formatAuditEvent：统一事件形状，脱敏（不含 token/凭据字段） (0.124875ms)
+✔ projectUnifiedAudit：多源合并按时间排序，只读投影不改写源 (9.896583ms)
+✔ 红线：信任判断与凭据不进投影 (0.639125ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 165.029
