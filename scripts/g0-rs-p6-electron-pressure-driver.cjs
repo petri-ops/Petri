@@ -526,7 +526,9 @@ async function measureArtifactSwitch(webContents, target) {
         return reject(new Error('artifact_switch_option_missing:' + artifactName));
       }
       const started = performance.now();
-      select.value = artifactName;
+      // P6 PNG artifact 切换（2026-11-23）：受控 select 用 native setter 可靠触发 onChange。
+      const selectSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
+      selectSetter.call(select, artifactName);
       select.dispatchEvent(new Event('change', { bubbles: true }));
       const deadline = started + 5000;
       const inspect = () => {
@@ -536,13 +538,21 @@ async function measureArtifactSwitch(webContents, target) {
         const selectedName = document.querySelector('[data-debug-selected-name]')
           ?.getAttribute('data-debug-selected-name');
         const wallFeedbackMs = performance.now() - started;
-        if (selectedName === artifactName && Number.isFinite(productMetricMs)
-            && productMetricMs >= 0) {
+        // P6 PNG artifact 切换（2026-11-23）：volcano.png 属 plot 族，bio pack 仍提供 plot
+        // result surface → 切换后 packTakesOver，ResultArtifactShell 连同 debug 属性被卸载，
+        // 全局 selectedName 永远拿不到。切换是否成功改看 pack 接管标志 + surface ready。
+        // core 路径保留原 selectedName 判据（未命中 pack 的结果）。
+        const packSurface = canvas.querySelector('[data-result-surface-source="pack"]');
+        const packReady = Boolean(packSurface
+          && packSurface.querySelector('[data-testid="pack-surface-frame"][data-surface-state="ready"]'));
+        const coreSwitched = selectedName === artifactName;
+        if (coreSwitched || packReady) {
           return resolve({
-            feedbackMs: Math.max(productMetricMs, wallFeedbackMs),
-            productMetricMs,
+            feedbackMs: Math.max(Number.isFinite(productMetricMs) ? productMetricMs : 0, wallFeedbackMs),
+            productMetricMs: Number.isFinite(productMetricMs) ? productMetricMs : null,
             wallFeedbackMs,
             changed: true,
+            surface: packReady ? 'pack' : 'core',
           });
         }
         if (performance.now() > deadline) {
@@ -551,6 +561,8 @@ async function measureArtifactSwitch(webContents, target) {
             productMetricMs: Number.isFinite(productMetricMs) ? productMetricMs : null,
             wallFeedbackMs,
             changed: false,
+            observedSelectedName: selectedName || null,
+            observedPackSource: Boolean(packSurface),
           });
         }
         requestAnimationFrame(inspect);
@@ -1426,16 +1438,17 @@ async function run() {
 
     stage = 'png_load';
     const pngStarted = performance.now();
-    const pngSwitch = await measureArtifactSwitch(
-      window.webContents,
-      config.targets.png,
-      { useSection: true },
-    );
+    subStage = 'png_switch';
+    const pngSwitch = await measureArtifactSwitch(window.webContents, config.targets.png);
     if (!pngSwitch.changed) throw new Error('png_artifact_switch_failed');
+    subStage = 'png_inspectProjection';
     const png = await inspectPlotProjection(window.webContents, config.targets.png);
     const pngLoadMs = performance.now() - pngStarted;
+    subStage = 'png_visualDigest';
     const pngCapture = await visualDigest(window);
+    subStage = 'png_sampleMemory';
     memorySamples.push(await sampleMemory(window.webContents, 'png'));
+    subStage = 'png_publicProjection';
     publicProjectionSamples.push(await inspectPublicProjection(window.webContents));
 
     stage = 'svg_load';

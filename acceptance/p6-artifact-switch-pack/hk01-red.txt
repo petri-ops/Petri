@@ -1,0 +1,66 @@
+✖ measureArtifactSwitch 判据含 pack 分支（packTakesOver 后 debug 属性被卸载） (1.704917ms)
+✖ 受控 select 用 native setter（与 measureFilterFeedback 同构） (0.357416ms)
+✖ 调用点无死参（函数签名与调用一致） (0.283916ms)
+✔ 产品判据 DOM 未被本票改写（红线：不改产品 debug 属性/pack 声明/handler） (1.062083ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 1
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.379708
+
+✖ failing tests:
+
+test at test/p6-artifact-switch-pack.test.mjs:21:1
+✖ measureArtifactSwitch 判据含 pack 分支（packTakesOver 后 debug 属性被卸载） (1.704917ms)
+  AssertionError [ERR_ASSERTION]: 判据须含 data-result-surface-source="pack" 分支
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-artifact-switch-pack.test.mjs:27:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.start (node:internal/test_runner/test:1177:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'async function measureArtifactSwitch(webContents, target) {\n  // UX1A-era compact navigator contract: artifact switching is a\n  // `select[aria-label="切换当前结果"]` whose option values are artifact file\n  // names. Switch success is observed through the shell\'s\n  // `data-debug-selected-name` projection plus the product\n  // `data-artifact-switch-ms` metric.\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const canvas = document.querySelector(\'[aria-label="结果主画布"]\');\n      const artifactName = ${JSON.stringify(target.artifact)};\n      if (!canvas) return reject(new Error(\'result_canvas_missing\'));\n      const select = canvas.querySelector(\'select[aria-label="切换当前结果"]\');\n      if (!(select instanceof HTMLSelectElement)) {\n        return reject(new Error(\'artifact_switch_control_missing\'));\n      }\n      const option = [...select.options].find((item) => item.value === artifactName);\n      if (!option) {\n        return reject(new Error(\'artifact_switch_option_missing:\' + artifactName));\n      }\n      const started = performance.now();\n      select.value = artifactName;\n      select.dispatchEvent(new Event(\'change\', { bubbles: true }));\n      const deadline = started + 5000;\n      const inspect = () => {\n        const surface = canvas.closest(\'[data-artifact-switch-ms]\')\n          || document.querySelector(\'[data-artifact-switch-ms]\');\n        const productMetricMs = Number(surface?.getAttribute(\'data-artifact-switch-ms\'));\n        const selectedName = document.querySelector(\'[data-debug-selected-name]\')\n          ?.getAttribute(\'data-debug-selected-name\');\n        const wallFeedbackMs = performance.now() - started;\n        if (selectedName === artifactName && Number.isFinite(productMetricMs)\n            && productMetricMs >= 0) {\n          return resolve({\n            feedbackMs: Math.max(productMetricMs, wallFeedbackMs),\n            productMetricMs,\n            wallFeedbackMs,\n            changed: true,\n          });\n        }\n        if (performance.now() > deadline) {\n          return resolve({\n            feedbackMs: wallFeedbackMs,\n            productMetricMs: Number.isFinite(productMetricMs) ? productMetricMs : null,\n            wallFeedbackMs,\n            changed: false,\n          });\n        }\n        requestAnimationFrame(inspect);\n      };\n      requestAnimationFrame(inspect);\n    })\n  `, true);\n}\n\nasync function measureVirtualPageLoad(webContents) {\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const viewport = document.querySelector(\'[aria-label="科学结果表格"]\');\n      if (!(vi',
+    expected: /data-result-surface-source/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/p6-artifact-switch-pack.test.mjs:31:1
+✖ 受控 select 用 native setter（与 measureFilterFeedback 同构） (0.357416ms)
+  AssertionError [ERR_ASSERTION]: select 须用 native value setter
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-artifact-switch-pack.test.mjs:35:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'async function measureArtifactSwitch(webContents, target) {\n  // UX1A-era compact navigator contract: artifact switching is a\n  // `select[aria-label="切换当前结果"]` whose option values are artifact file\n  // names. Switch success is observed through the shell\'s\n  // `data-debug-selected-name` projection plus the product\n  // `data-artifact-switch-ms` metric.\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const canvas = document.querySelector(\'[aria-label="结果主画布"]\');\n      const artifactName = ${JSON.stringify(target.artifact)};\n      if (!canvas) return reject(new Error(\'result_canvas_missing\'));\n      const select = canvas.querySelector(\'select[aria-label="切换当前结果"]\');\n      if (!(select instanceof HTMLSelectElement)) {\n        return reject(new Error(\'artifact_switch_control_missing\'));\n      }\n      const option = [...select.options].find((item) => item.value === artifactName);\n      if (!option) {\n        return reject(new Error(\'artifact_switch_option_missing:\' + artifactName));\n      }\n      const started = performance.now();\n      select.value = artifactName;\n      select.dispatchEvent(new Event(\'change\', { bubbles: true }));\n      const deadline = started + 5000;\n      const inspect = () => {\n        const surface = canvas.closest(\'[data-artifact-switch-ms]\')\n          || document.querySelector(\'[data-artifact-switch-ms]\');\n        const productMetricMs = Number(surface?.getAttribute(\'data-artifact-switch-ms\'));\n        const selectedName = document.querySelector(\'[data-debug-selected-name]\')\n          ?.getAttribute(\'data-debug-selected-name\');\n        const wallFeedbackMs = performance.now() - started;\n        if (selectedName === artifactName && Number.isFinite(productMetricMs)\n            && productMetricMs >= 0) {\n          return resolve({\n            feedbackMs: Math.max(productMetricMs, wallFeedbackMs),\n            productMetricMs,\n            wallFeedbackMs,\n            changed: true,\n          });\n        }\n        if (performance.now() > deadline) {\n          return resolve({\n            feedbackMs: wallFeedbackMs,\n            productMetricMs: Number.isFinite(productMetricMs) ? productMetricMs : null,\n            wallFeedbackMs,\n            changed: false,\n          });\n        }\n        requestAnimationFrame(inspect);\n      };\n      requestAnimationFrame(inspect);\n    })\n  `, true);\n}\n\nasync function measureVirtualPageLoad(webContents) {\n  return webContents.executeJavaScript(`\n    new Promise((resolve, reject) => {\n      const viewport = document.querySelector(\'[aria-label="科学结果表格"]\');\n      if (!(vi',
+    expected: /HTMLSelectElement\.prototype['"]?,\s*['"]value/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at test/p6-artifact-switch-pack.test.mjs:39:1
+✖ 调用点无死参（函数签名与调用一致） (0.283916ms)
+  AssertionError [ERR_ASSERTION]: 调用点须清除不存在的 useSection 死参
+      at TestContext.<anonymous> (file:///Users/zhangdiandian/Documents/1.WorkDir/Petri/test/p6-artifact-switch-pack.test.mjs:44:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1306:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:897:18)
+      at Test.postRun (node:internal/test_runner/test:1447:19)
+      at Test.run (node:internal/test_runner/test:1372:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: "measureArtifactSwitch(\n      window.webContents,\n      config.targets.png,\n      { useSection: true },\n    );\n    if (!pngSwitch.changed) throw new Error('png_artifact_switch_failed');\n    const png = await inspectPlotProjection(window.webContents, c",
+    expected: /useSection/,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
