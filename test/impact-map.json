@@ -9910,7 +9910,10 @@
         "acceptance/qoder-j4-tool-reg/**",
         "core/petri-server/agent-tools/agent-roles.js",
         "test/qoder-j6-role-wiring.test.mjs",
-        "acceptance/qoder-j6-role-wiring/**"
+        "acceptance/qoder-j6-role-wiring/**",
+        "core/petri-server/agent-tools/web-tools.js",
+        "test/qoder-l1l2-wiring.test.mjs",
+        "acceptance/qoder-l1l2-wiring/**"
       ],
       "tests": [
         "test/qoder-a2-approval-explanation.test.mjs",
@@ -9926,7 +9929,8 @@
         "test/qoder-l5-host-contract.test.mjs",
         "test/qoder-l6-plugin-audit.test.mjs",
         "test/qoder-j4-tool-registration.test.mjs",
-        "test/qoder-j6-role-wiring.test.mjs"
+        "test/qoder-j6-role-wiring.test.mjs",
+        "test/qoder-l1l2-wiring.test.mjs"
       ],
       "classifiesScripts": true
     }

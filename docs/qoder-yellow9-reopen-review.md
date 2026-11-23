@@ -31,8 +31,8 @@ goal: 母纲 Q-MATRIX 9 个保留 🟡 reopen 项的统一立项评审稿——�
 | **J2 ✅ completed（2026-11-23）** | 技能自进化建议（:280） | 建议列表 / 一键建任务 / 忽略 | 轻量包 | 无 | D1=本地 lessons 审计为源（已遵守）/ D2=自动建任务默认否（已遵守，仅出 prompt 草案） | **已达成**：投影器 `skill-suggestion-projector.js` + 只读/忽略路由 `skill-suggestions.js` + 独立忽略账本（不写 lessons.status）；P1 5/5 + 路由 2/2 = 7/7，全门禁绿。一键建任务走既有 createAgentTask 链（不新建执行器）；前端面板留可选增量。证据 `acceptance/qoder-j2-skill-suggestions/` |
 | **J4 ✅ completed（2026-11-23，工具注册）** | MCP 信任/OAuth 余项（:282） | agent 侧 `authenticate` 工具 + 项目级默认策略 | 轻量包 | BLOCK-239/240/241/243/258 已交大头 | D1 项目级默认拒绝取值 / D2 authenticate 工具签名 | 契约测 + 与既有 trust 门一致性 |
 | **J6 ✅ completed（2026-11-23，角色接入）** | Agent builder（:284） | 自定义 Agent/角色（当前仅内置 roles） | BLOCK | 内置 roles 在案 | D1 自定义角色 schema / D2 是否持久化位置 | 角色 CRUD + 使用契约；zero-G1+ |
-| **L1 ✅ P1 core（2026-11-23）** | 联网搜索方言（:307） | `web_search` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SearXNG + 显式授权 + 来源主机名在案 | D1 只借行为合同不接 Qoder 端点（已定）/ D2 权威度口径 | 方言映射契约；不改出网硬边界 |
-| **L2 ✅ P1 core（2026-11-23）** | 网页抓取方言（:308） | `web_fetch` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SSRF 硬边界 + 逐跳复检在案 | 同 L1 | 同 L1；不得放宽 SSRF/协议白名单 |
+| **L1 ✅ completed（2026-11-23，输出接线）** | 联网搜索方言（:307） | `web_search` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SearXNG + 显式授权 + 来源主机名在案 | D1 只借行为合同不接 Qoder 端点（已定）/ D2 权威度口径 | 方言映射契约；不改出网硬边界 |
+| **L2 ✅ completed（2026-11-23，输出接线）** | 网页抓取方言（:308） | `web_fetch` provider 方言/权威度（核心已交 BLOCK-247） | 轻量包 | SSRF 硬边界 + 逐跳复检在案 | 同 L1 | 同 L1；不得放宽 SSRF/协议白名单 |
 | **L5 ✅ 契约层 + 运行态（2026-11-23 用户裁决放行）** | 插件宿主契约（:311） | 通用 utility-process host/sandbox（Q5 surface/pack host API 已交 BLOCK-216） | BLOCK | surface/pack host 在案 | D1 utility-process 是否新依赖 / D2 sandbox 边界 | host API + manifest 契约；默认拒绝 |
 | **L6 ✅ P1 core（2026-11-23）** | 插件权限/生命周期/审计（:312） | 生命周期/审计统一（深链安装 BLOCK-242 + trust BLOCK-243 已交） | 轻量包 / BLOCK | 深链 + trust 在案 | D1 审计落点（本地 SQLite）/ D2 生命周期事件集 | 审计事件可查 + 权限变更留痕 |
 

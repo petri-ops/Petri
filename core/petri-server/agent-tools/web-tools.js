@@ -25,6 +25,8 @@ const path = require('path');
 const config = require('../helpers/web-search-config');
 const policy = require('../helpers/web-fetch-policy');
 const { searchWeb } = require('../helpers/web-search-provider');
+// QODER-L1/L2 — 行为合同输出投影（additive：只补 summary/authority，不改出网/正文/审计）
+const { projectSearchResults, projectFetchMetadata } = require('../../shared-backend/web-result-projection');
 
 /** 抓取正文进模型上下文的上限（字符）。超限截断并如实标注。 */
 const FETCH_TEXT_LIMIT = 20000;
@@ -99,7 +101,19 @@ async function tool_web_search(args = {}, _ctx = {}, deps = {}) {
     config: { ...effective, allowedHosts, blockedHosts },
     ...(deps && typeof deps.fetchImpl === 'function' ? { fetchImpl: deps.fetchImpl } : {}),
   });
-  return withAudit(result, {
+  // QODER-L1 — additive 行为合同投影：保留原 snippet/source，补 summary/authority。
+  const projected = projectSearchResults({ results: result.results, truncated: result.truncated, filtered: result.filtered });
+  const augmented = Array.isArray(result.results) && Array.isArray(projected.results)
+    ? {
+      ...result,
+      results: result.results.map((row, index) => ({
+        ...row,
+        summary: projected.results[index] ? projected.results[index].summary : String(row.snippet || ''),
+        authority: projected.results[index] ? projected.results[index].authority : null,
+      })),
+    }
+    : result;
+  return withAudit(augmented, {
     tool: 'web_search',
     query: String(args.query || '').slice(0, 200),
     provider: effective.provider,
@@ -145,11 +159,14 @@ async function tool_web_fetch(args = {}, _ctx = {}, deps = {}) {
     ? `${extracted.slice(0, FETCH_TEXT_LIMIT)}\n…（正文超出 ${FETCH_TEXT_LIMIT} 字符上限，已截断；完整内容未落盘）`
     : extracted;
 
+  // QODER-L2 — additive 行为合同投影：只补 authority，正文 text 一字不改。
+  const metadata = projectFetchMetadata({ ok: true, url: rawUrl, source: fetched.host });
   return withAudit({
     ok: true,
     url: rawUrl,
     finalUrl: fetched.finalUrl,
     source: fetched.host,
+    authority: metadata.authority,
     ...(title ? { title } : {}),
     contentType: fetched.contentType,
     status: fetched.status,

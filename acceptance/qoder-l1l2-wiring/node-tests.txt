@@ -1,0 +1,41 @@
+✔ classifyAddress：私网与保留地址分类正确 (6.222209ms)
+✔ parseTargetUrl：只收 http(s)、不收凭据、拒本机主机名 (0.330459ms)
+✔ isHostAllowed：黑名单优先、白名单含子域 (0.116875ms)
+✔ resolveHostAddresses：解析到私网地址一律拒绝 (0.193125ms)
+✔ isTextContentType：只收文本类 (0.074958ms)
+✔ stripHtml：去脚本样式、留正文、抽标题 (1.080583ms)
+✔ guardedFetch：本机/解析到私网一律拒（DNS rebinding 防线） (2.967542ms)
+✔ guardedFetch：公网主机名放行后 HTML 落成纯文本 (15.497333ms)
+✔ guardedFetch：重定向到内网地址必须被拒（逐跳复检） (4.59425ms)
+✔ guardedFetch：内容类型与字节上限都按约束生效 (2.868875ms)
+✔ searchWeb：默认关 → 明确拒绝；未配后端 → not_configured (0.304792ms)
+✔ searchWeb：正常检索返回来源主机名与成本 (2.983708ms)
+✔ normalizeSearxngResults：按域名白/黑名单过滤并保留条数上限 (0.20425ms)
+✔ 默认关：检索与抓取都返回结构化拒绝（不静默、不出网） (3.902166ms)
+✔ 开启但未配置检索后端：报「未配置」而不是空结果 (0.330083ms)
+✔ 检索成功：结果带来源主机名与成本，审计落一行 (1.010709ms)
+✔ 来源标签随工具活动快照落库（历史重载后来源不丢） (2.414667ms)
+✔ 抓取成功：正文转纯文本、返回来源与重定向链 (6.541625ms)
+✔ 抓取：重定向到内网被拒（逐跳复检，不是信任上游） (0.462916ms)
+✔ 抓取：二进制内容类型被拒（不返回乱码） (0.281875ms)
+✔ 抓取：超过字节上限即截断并如实标注 (0.596417ms)
+✔ 抓取：黑名单域名被拒 (0.414375ms)
+✔ 配置写侧：未知键被拒（结构化 diagnostics），合法键落盘 (0.579416ms)
+✔ 配置写侧：非法形状被拒（不静默改写） (0.304042ms)
+✔ 配置读侧：选了 SearXNG 却没填地址 → 诊断（不是静默失效） (0.200417ms)
+✔ L1/L2 模块存在且零新依赖 (0.934125ms)
+✔ L1 projectSearchResults：summary 有界 + authority 透传/诚实 null (0.399583ms)
+✔ L2 projectFetchMetadata：只补 source/authority 元数据，不改正文 (0.09075ms)
+✔ 恶意/缺失输入不伪造结果 (0.069917ms)
+✔ 红线：出网硬边界与配置白名单未改 (0.518458ms)
+✔ L1/L2 接线：web-tools.js 消费 P1 投影器 (1.724542ms)
+✔ 接线 additive：保留原 snippet/source/text，不替换字段 (0.2235ms)
+✔ 红线：出网硬边界与配置族未改 (0.334541ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 198.908375
