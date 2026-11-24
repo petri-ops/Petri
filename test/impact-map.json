@@ -6280,7 +6280,9 @@
         "frontend/src/components/copilot/SimpleChat/slashExecute.ts",
         "frontend/src/components/copilot/SimpleChat/types.ts",
         "frontend/src/components/copilot/SimpleChat.tsx",
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "acceptance/block515-wakeup-trusted/**",
+        "test/block515-wakeup-trusted.test.mjs"
       ],
       "tests": [
         "test/block256-automation.test.mjs",
