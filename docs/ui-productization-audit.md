@@ -259,6 +259,8 @@
 - **后端对偶**：`loop-orchestrator.js` 失败分支发显式 `task.failed{reason, reasonCode}`（additive；error/run_terminal 不变）。
 - **实机腿（2026-11-08）**：契约级断言由 nso-s1-stream-rejection 族守护；结构化终态字段与消费路径经组件流+类型面验证（task.failed 仅在 error 兼容载荷未命中时结算）；真实 provider 失败注入腿=行为面由后端事件契约测试（loop 失败分支发 task.failed）+前端消费单测双面钉住，AgentRunPanel 终态呈现随 run_terminal 复用链。**注意**：横幅/三态的字段级视觉呈现随 BLOCK-383 实机腿 flow（block383-live-legs 8/8）覆盖其 prefs 邻接面。
 
+- **实机机械腿（2026-11-24 补，BLOCK-517 W2）**：`ui699-cv-live` 5/5 allPass（acceptance/block517-walk-batch/）——会话列表行 .convItem computed **content-visibility=auto**（5 行在场）确认；结果库行 .resultsLibraryItem 在当前 UI 态不可达 → **如实 skip**（台账原注=结果面板 UI 态依赖，欠账腿维持 pending 状态，不伪造）。字号 token 12 处收敛为静态契约面（theme 契约测试持续守护）。
+
 ## UI-699: 字号 token 收敛 12 处 + 结果库/会话行 content-visibility DOM 预算起步（BLOCK-370 NSO-W3b；2026-11-06 **in_progress（会话行 cv live 在 p_mvtu0b52_9cbr 上过；结果库行 cv 在 p_mvtwf22y_9byo 上也未出现——结果面板 UI 态依赖，实机走查待人工）**）
 
 - **字号 token 收敛**：fontSize:11 → var(--petri-font-size-xs, 11px) 共 12 处 5 文件（ChatArtifactCard×8 / LeftSshCreatePanel×2 / LeftPanel / CrashNoticeBanner / TerminalWindowPage）；TerminalWindowPage XTerm 例豁免留痕（fontSize 为数值 canvas API，CSS token 不适用）。
