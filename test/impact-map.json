@@ -9853,6 +9853,8 @@
         "acceptance/c56-synthetic-manuscript-rewrite/**",
         "acceptance/c56-real-manuscript/**",
         "acceptance/c56-web-sourced-manuscript/**",
+        "acceptance/c56-user-manuscript/**",
+        "petri-informal-paper.md",
         "acceptance/project-evaluation-prompt-2026-11-20/**",
         "acceptance/project-status-assessment-2026-11-20/**",
         "acceptance/ui-visual-upgrade-2026-11-20/**",
@@ -9864,6 +9866,7 @@
         "test/c56-skill-drill.test.mjs",
         "test/c56-manuscript-rewrite-fidelity.test.mjs",
         "test/c56-web-sourced-fidelity.test.mjs",
+        "test/c56-user-manuscript-fidelity.test.mjs",
         "test/evo4-evidence-bugfix.test.mjs"
       ]
     },
