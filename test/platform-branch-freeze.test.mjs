@@ -187,6 +187,10 @@ const BASELINE = new Set([
   // BLOCK-457 — keychain 事故门（BLOCK-414 沿袭）的平台护栏：process.platform 仅用于
   // macOS 专用探针（/usr/bin/security）缺席时的显式 skip 理由，非产品面平台分支。
   'test/block414-backend-port-reuse.test.mjs',
+  // BLOCK-512 P2 — bash 测试显式解析 helper：process.platform 仅用于 win32 WSL launcher
+  // 形态识别（本 helper 的功能本体=平台检测，检测器可注入单测钉住）；test-only，
+  // 收敛到 platform-compat 无收益，登记即留痕。
+  'test/helpers/bash-resolver.cjs',
 ]);
 
 function scan() {
