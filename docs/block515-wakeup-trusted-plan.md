@@ -1,12 +1,13 @@
 ---
 capability: block515-wakeup-trusted
-status: active
+status: completed
 kind: work-package
 canonical: true
 truthDomain: block515-wakeup-trusted
 entrypoint: docs/README.md
 registeredAt: 2026-11-24
 owner: main-agent
+phase: CLOSED
 ---
 
 # BLOCK-515 · agent 唤醒 B 档：per-schedule 预授权白名单（plan）
@@ -31,5 +32,15 @@ owner: main-agent
 
 - block515 红绿证据 + block256/next01/interceptor 邻域回归 + 定向集全绿；收口 `npm run closeout`（存量红如实归属）。
 - 证据=acceptance/block515-wakeup-trusted/；完成语义=plan/registry/AUDIT-LOG 同批翻 completed。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口笔录（2026-11-24 · completed）
+
+提交链：立项 `6b0bed3d7` → 实现 `2f0122efe` → 证据+映射 `f4a68ee7f` → 本批回写。
+
+- HK-01 红（4/4 fail 实录）→ 绿 **4/4**；邻域 block256+next01+block514 **22/22**；test:changed **309/0**；post-h9 契约 **186/186**；code-size/tracked-consistency/secret/arch/lint/types/knip 全绿（触碰文件 eslint 0 新增 warning，存量 5 条 stash 对照实测）。
+- §1 对账：六项全交付（三列 additive/校验矩阵/setScheduleAuto 撤回口/runner 带档/interceptor 硬边界/routes 透传）；owner 四约束逐条对照见 EVIDENCE.md 治理对照节。
+- 已知边界：store→agent-tools/registry 顶层 require 与 goal-tools 成环改惰性 require（留痕）；UI 勾选面另点。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
