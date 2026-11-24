@@ -10,9 +10,9 @@
    "docs/post-h9-optimization-blueprint-2026-11-10.md"
   ],
   "requireRegistration": true,
-  "documentCount": 666,
+  "documentCount": 667,
   "lastUpdated": "2026-11-24",
-  "managedMarkdown": 649
+  "managedMarkdown": 650
  },
  "documents": [
   {
@@ -13890,12 +13890,12 @@
    "id": "BLOCK-512",
    "path": "docs/block512-local-closeable-sweep-plan.md",
    "kind": "work-package",
-   "status": "active",
+   "status": "completed",
    "canonical": true,
    "truthDomain": "block512-local-closeable-sweep",
    "entrypoint": "docs/README.md",
    "archivePolicy": "retain_stable_path",
-   "phase": "P0-LAUNCH",
+   "phase": "CLOSED",
    "registeredAt": "2026-11-24",
    "touchSurface": [
     "docs/block512-local-closeable-sweep-plan.md",
@@ -13909,7 +13909,7 @@
     "docs/AUDIT-LOG.md"
    ],
    "sharedBaselines": [],
-   "notes": "2026-11-24 owner 经 Orca 转达主人「那你系统性梳理一下吧 能干的都干完」。本地可闭环清扫包，三项串行独立提交：P1 web_fetch pin-IP（BLOCK-511 唯一遗留，默认通道 node http/https pinned lookup+servername，fetchImpl 注入契约保留为测试通道，HK-01 红绿先行）→P2 bash/tar 测试显式路径健壮化（WSL launcher/bsdtar 假红→诚实 skip）→P3 台账残留机械归位（backlog C-53/C-55、remaining-work-plan B 类两行、AUDIT-LOG UI-713 行）。非范围=等裁决项/等外部真值项/19 项未跟踪 WIP/frogfish/G1+。零新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
+   "notes": "2026-11-24 owner 经 Orca 转达主人「那你系统性梳理一下吧 能干的都干完」。本地可闭环清扫包，已收口（2026-11-24 completed）。三项串行独立提交（P1 d048a0da8/P2 200357642/P3 5147c764a+收口红双修 397a68601）：P1 web_fetch pin-IP（BLOCK-511 唯一遗留，默认通道 node http/https pinned lookup+servername，fetchImpl 注入契约保留为测试通道，HK-01 红绿先行）→P2 bash/tar 测试显式路径健壮化（WSL launcher/bsdtar 假红→诚实 skip）→P3 台账残留机械归位（backlog C-53/C-55、remaining-work-plan B 类两行、AUDIT-LOG UI-713 行）。非范围=等裁决项/等外部真值项/19 项未跟踪 WIP/frogfish/G1+。零新依赖。G0 开发期常态 · 不外推 packaged/Provider/GA。"
   }
  ],
  "lastUpdated": "2026-11-24"

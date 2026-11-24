@@ -1,12 +1,13 @@
 ---
 capability: block512-local-closeable-sweep
-status: active
+status: completed
 kind: work-package
 canonical: true
 truthDomain: block512-local-closeable-sweep
 entrypoint: docs/README.md
 registeredAt: 2026-11-24
 owner: main-agent
+phase: CLOSED
 ---
 
 # BLOCK-512 · 本地可闭环清扫包（plan）
@@ -60,3 +61,17 @@ AUDIT-LOG 🟡（2026-10-20）：Windows 机 `bash`→WSL launcher、`tar`→bsd
 ## 5. 完成语义
 
 三项各有独立提交；本 plan + registry + AUDIT-LOG 同批收口翻 completed；证据=acceptance/block512-local-sweep-2026-11-24/。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口笔录（2026-11-24 · completed）
+
+提交链：立项 `56d3e258d`+`cf11b1372` → P1 `d048a0da8`+`0a817c33f` → P2 `200357642` → P3 `5147c764a` → 收口红双修 `397a68601` → 本批收口回写。
+
+门禁逐项对账（当日实跑）：
+- ✅ audit:compact / hygiene / docs:check(667) / ui:audit:check / gate:user-assets / gate:version-parity / gate:silent-catch / gate:code-size / gate:arch-cycles / gate:css-modules / gate:tracked-consistency / quality:secret / quality:arch / quality:lint
+- ✅ test:changed 313 pass / 0 fail（首轮两条红已修：本包证据目录挂 `closed-batch-evidence-dirs`〔BLOCK-511 立项同型先例〕、bash-resolver 平台基线登记〔BLOCK-104 P4 登记即留痕〕，见 `397a68601`）
+- ✅ quality:types / quality:knip:check（409 键冻结）/ gate:post-h9-contracts（186 项）/ quality:surface
+- ❌→存量红如实归属：`quality:lint:ledger`（S0 基点即红 1499>1480/418>416，S6-EVIDENCE:23 已实证归属「11-21 基线打点后多批提交累积」；本批复跑 1500/418，本批全部触碰文件 eslint 实测 0 warning，production +1 非 本包文件面）、`quality:ear`（S0 基点即红 38.9%<42.5%；S6 曾改善至 41.0%，本包 web-fetch-policy 增行致分母略增 40.9%——棘轮只进不退语义如实登记，不凑绿）
+
+验收对账（§4）：P1 block512 10/10 + block247×2/qoder-l1l2×2 33/33；P2 resolver 5/5 + block67 13 pass/1 既有平台 skip；P3 docs:check/ui 绿。三项全达。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
