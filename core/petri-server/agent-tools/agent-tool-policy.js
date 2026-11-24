@@ -12,7 +12,7 @@ const READ_ONLY_PLAN_OPS = new Set(['list', 'get']);
 // 动态防护判定与 span 分析共用，拦截与高亮不漂移）。
 const {
   DANGEROUS_FIRST_TOKENS,
-  firstToken,
+  firstTokens,
   normalizePathLike,
   matchesSensitivePath,
 } = require('../helpers/command-risk-rules');
@@ -46,11 +46,12 @@ const PATH_ARG_FIELDS = {
 function evaluateDynamicGuards(name, args = {}) {
   if (name === 'workspace_exec' || name === 'workspace_exec_background') {
     const command = String(args.command || '');
-    const token = firstToken(command);
-    if (token && DANGEROUS_FIRST_TOKENS.has(token)) {
+    // BLOCK-511 S3.3 — 逐命令段取首 token（换行/;/&&/||/| 分段，剥 sudo 与前置 env 赋值）。
+    const hitToken = firstTokens(command).find((t) => DANGEROUS_FIRST_TOKENS.has(t));
+    if (hitToken) {
       return {
-        flagged: true, dimension: 'command', guardKey: `cmd:${token}`,
-        detail: `命令「${token}」命中系统级破坏命令维度`,
+        flagged: true, dimension: 'command', guardKey: `cmd:${hitToken}`,
+        detail: `命令「${hitToken}」命中系统级破坏命令维度`,
       };
     }
     if (matchesSensitivePath(command)) {

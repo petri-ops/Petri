@@ -22,11 +22,31 @@ const SENSITIVE_PATH_PATTERNS = [
   '/sys/kernel', '.ssh', '.gnupg', '.aws', '$recycle.bin',
 ];
 
-function firstToken(command) {
-  const raw = String(command || '').trim().split(/\s+/)[0]?.toLowerCase() || '';
+function normalizeFirstToken(raw) {
+  const token = String(raw || '').trim().toLowerCase();
   // 归一化：剥可执行后缀与派生名（format.com→format / mkfs.ext4→mkfs）
-  const base = raw.replace(/\.(exe|com|cmd|bat)$/, '');
+  const base = token.replace(/^(sudo|doas)\s+/i, '').replace(/\.(exe|com|cmd|bat)$/, '');
   return base.includes('.') ? base.split('.')[0] : base;
+}
+
+function firstToken(command) {
+  return normalizeFirstToken(String(command || '').trim().split(/\s+/)[0]);
+}
+
+/**
+ * BLOCK-511 S3.3 — 逐命令段取首 token：按换行/; /&&/||/| 分段，剥掉 sudo/doas
+ * 与前置环境变量赋值（FOO=1 cmd → cmd）。命中处置不变（调用方决定是否拦截）。
+ */
+function firstTokens(command) {
+  return String(command || '')
+    .split(/[\n;]|\|\||&&|\|/)
+    .map((segment) => segment.trim().split(/\s+/).filter(Boolean))
+    .map((parts) => {
+      while (parts.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(parts[0])) parts.shift();
+      while (parts.length && /^(sudo|doas)$/i.test(parts[0])) parts.shift();
+      return normalizeFirstToken(parts[0]);
+    })
+    .filter(Boolean);
 }
 
 function normalizePathLike(value) {
@@ -42,6 +62,7 @@ module.exports = {
   DANGEROUS_FIRST_TOKENS,
   SENSITIVE_PATH_PATTERNS,
   firstToken,
+  firstTokens,
   normalizePathLike,
   matchesSensitivePath,
 };

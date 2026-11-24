@@ -1724,7 +1724,8 @@
         "scripts/check-*.mjs",
         "scripts/test-affected.mjs",
         "scripts/verify-schema.js",
-        "scripts/docs-roll-index.mjs"
+        "scripts/docs-roll-index.mjs",
+        "scripts/gate-tracked-consistency.mjs"
       ],
       "tests": [
         "test/docs-governance.test.mjs",
@@ -8087,7 +8088,8 @@
       "classifiesScripts": true,
       "patterns": [
         "scripts/test-all-shards.mjs",
-        "test/block359-test-shards.test.mjs"
+        "test/block359-test-shards.test.mjs",
+        "scripts/test-all.mjs"
       ],
       "tests": [
         "test/block359-test-shards.test.mjs"
@@ -9850,7 +9852,13 @@
         "test/scripts/check-ui-productization-audit-exit-2.test.mjs",
         "test/scripts/dev-launch-state.test.mjs",
         "test/code-size-allow-grow.test.mjs",
-        "test/gate-tracked-consistency.test.mjs"
+        "test/gate-tracked-consistency.test.mjs",
+        "test/block511-origin-null-boundary.test.mjs",
+        "test/block511-mcp-route-origin-guard.test.mjs",
+        "test/block511-child-env-sanitizer.test.mjs",
+        "test/block511-open-path-exec-guard.test.mjs",
+        "test/block511-command-risk-visibility.test.mjs",
+        "test/block511-async-handler.test.mjs"
       ]
     },
     {

@@ -48,9 +48,25 @@ function rejectUntrustedOrigin(req, res, next) {
   const origin = req && req.headers ? req.headers.origin : undefined;
   const absent = origin === undefined || origin === null || origin === '';
   if (absent) return next();
-  // 只拦真实 http(s) 页面来源：'null' / file:// 等不透明来源由各路由的 token 门
-  // 自行裁决（既有 BLOCK-67 拖出下载语义：Origin:null + 正确 token → 放行）。
-  if (!isBrowserHttpOrigin(origin)) return next();
+  // BLOCK-511 S3.1a — 非 http(s) 来源（含 'null'/file://）的变更请求必须携带正确的
+  // 本机 token；未配置 token 直接 403（fail-closed）。GET/无 Origin/可信 Origin 语义不变；
+  // 其它 http(s) 来源维持既有 untrusted_origin 403。BLOCK-67 拖出下载（Origin:null +
+  // 路由级 token）由路由自己裁决，本门只校验本机头，两者不冲突。
+  if (!isBrowserHttpOrigin(origin)) {
+    const method = String((req && req.method) || 'GET').toUpperCase();
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      const expected = process.env.PETRI_LOCAL_REQUEST_TOKEN;
+      const provided = req && req.headers ? req.headers['x-petri-local-request-token'] : undefined;
+      if (!expected || provided !== expected) {
+        return res.status(403).json({
+          status: 'error',
+          error: 'local_request_token_required',
+          message: '该来源的本地变更请求必须携带正确的 x-petri-local-request-token。',
+        });
+      }
+    }
+    return next();
+  }
   if (isTrustedDesktopOrigin(origin)) return next();
   return res.status(403).json({
     status: 'error',

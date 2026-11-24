@@ -63,6 +63,10 @@ supersedes: 无（PANORAMIC-ASSESSMENT 的修复执行包）
 - **删除 `test/pipeline.test.js`**：该文件 365 行，全部依赖 `../core/gateway/pipeline`（`executePipeline` / `PipelineError`）。现读 `core/gateway/` 目录已不存在（OSS 解耦/架构迁移后生产代码删除，见 `docs/dependency-decoupling-checkpoint.md`），测试无对应生产代码、无法修好，按提示词「已无对应生产代码的删除并在 plan 留因，不得用 skip 掩盖」删除，非 skip 掩盖。
 - **保留并挂规则**：`test/block67-node-agent-fs.test.js`（依赖 node-agent/workspace-gateway 均在，37 有效断言 + 1 darwin BSD find 显式 skip 属既有平台分支）、`test/scripts/check-ui-productization-audit-exit-2.test.mjs`、`test/scripts/dev-launch-state.test.mjs`（依赖脚本均存在）三件验证有效，挂入对应 impact-map 规则。
 
+## 3.2 S3.5 web_fetch 重绑定遗留登记（2026-11-24）
+
+- `core/petri-server/helpers/web-fetch-policy.js:303-317` 逐跳 `resolveHostAddresses` 校验通过后才 `fetchImpl(parsed.url)`；因 `fetchImpl` 为可注入参数（block247 / qoder-l1l2-wiring 契约），把连接钉在校验 IP 上要么改用 `node:https`+`lookup` 重写入口（破坏注入契约与 TLS SNI/证书校验），要么引入新依赖（违反零新依赖）。按提示词「做不到零新依赖又不破坏这些测试，就保持现状并登记为遗留，不得削弱现有防护」——**保持现状**：逐跳重校验/私网拒绝/重定向记账全部保留，DNS 重绑定间隙登记为遗留。不做半吊子 pin-IP，不削弱现有防护。
+
 ## 4. 验证节奏与决策工具
 
 - 每修复点 HK-01 红绿先行；定向测试优先（`test:changed` / `node --test` / `test:files --prefix frontend`），全量门留 S6。

@@ -29,7 +29,9 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
   ".txt", ".md", ".json", ".jsonc", ".csv", ".tsv", ".xml", ".html", ".htm",
   ".css", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs",
   ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".env",
-  ".log", ".sh", ".bash", ".zsh", ".fish", ".ps1", ".bat", ".cmd",
+  ".log",
+  // BLOCK-511 S3.2 — .sh/.bash/.zsh/.fish/.ps1/.bat/.cmd 等脚本/可执行关联扩展名
+  // 移出白名单（见 DENIED_OPEN_EXTENSIONS），不再用系统默认程序打开。
   ".py", ".r", ".R", ".sql", ".graphql", ".vue", ".svelte",
   // Images (commonly previewed)
   ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".bmp",
@@ -44,6 +46,14 @@ const ALLOWED_OPEN_EXTENSIONS = Object.freeze([
 // HDF5-family data containers share the same prefix (e.g. .h5ad); allow the
 // family without enumerating every domain-specific suffix.
 const ALLOWED_OPEN_EXTENSION_PREFIXES = Object.freeze([".h5"]);
+
+// BLOCK-511 S3.2 — shell 脚本与 Windows 可执行关联类扩展名：一律不用系统默认程序打开。
+const DENIED_OPEN_EXTENSIONS = Object.freeze([
+  ".sh", ".bash", ".zsh", ".fish", ".ksh", ".ps1", ".psm1", ".bat", ".cmd",
+  ".command", ".scpt", ".workflow", ".vbs", ".vbe", ".wsf", ".ws", ".msi", ".msp",
+  ".exe", ".com", ".scr", ".pif", ".cpl", ".hta", ".jar", ".run", ".app", ".dll",
+  ".so", ".dylib",
+]);
 
 function isAllowedOpenExtension(ext) {
   return ALLOWED_OPEN_EXTENSIONS.includes(ext)
@@ -199,6 +209,17 @@ function setupFileDialogIpc({ mainWindow, listWorkspaceRoots = listRegisteredWor
         return { ok: false, error: "path does not exist" };
       }
       const ext = path.extname(targetPath).toLowerCase();
+      // BLOCK-511 S3.2 — 显式拒绝脚本/可执行关联扩展名（即便将来误入白名单也不放行）。
+      if (DENIED_OPEN_EXTENSIONS.includes(ext)) {
+        return { ok: false, error: `file type '${ext}' is not allowed to be opened (script/executable)` };
+      }
+      // BLOCK-511 S3.2 — 无扩展名且带可执行位的文件不作为文档打开（防无后缀 shell 脚本）。
+      if (!ext) {
+        const st = fs.statSync(targetPath);
+        if (st.isFile() && (st.mode & 0o111) !== 0) {
+          return { ok: false, error: "executable file without extension is not allowed to be opened" };
+        }
+      }
       if (ext && !isAllowedOpenExtension(ext)) {
         return {
           ok: false,

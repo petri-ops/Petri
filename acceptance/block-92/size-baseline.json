@@ -189,9 +189,9 @@
       "path": "src/ipc/working-tree-review.js",
       "wave": "D",
       "module": "P-01",
-      "lines": 777,
-      "bytes": 37807,
-      "sha256": "dc7989ad5fa25ffc1dcd32488760f820ea99b5c0dd34e061cee7df17c26c5acf"
+      "lines": 776,
+      "bytes": 37957,
+      "sha256": "63bb383679f53e8ef4eec23d05d8b4a3b94fea545f8d78e38389884353dd82b8"
     },
     {
       "path": "frontend/src/pages/project-workspace.module.css",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86724,
+  "total": 86723,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",

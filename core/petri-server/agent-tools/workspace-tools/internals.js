@@ -7,6 +7,8 @@
 const crypto = require('crypto');
 const fsp = require('fs/promises');
 const path = require('path');
+// BLOCK-511 S3.1c — 子进程 env 凭据剥离共用单源
+const { sanitizeChildEnv } = require('../../../shared-backend/child-env-sanitizer');
 const { spawn } = require('child_process');
 const { StringDecoder } = require('string_decoder');
 
@@ -49,11 +51,15 @@ function errorResult(error, message, extra = {}) {
 const MAX_COMMAND_BYTES = 64 * 1024;
 const EXEC_TOKEN_ENV = 'PETRI_WORKSPACE_EXEC_TOKEN'; // 已停用（检测到即告警，恒忽略）
 const STRICT_MODE_HINT = '严格模式可一键恢复硬拦：设环境变量 PETRI_EXEC_STRICT_DENYLIST=1';
+// BLOCK-511 S3.3 — 锚点扩到换行/命令替换（m 标志）；命中处置不变（默认放行+可见）。
+const CMD_ANCHOR = '(^|[\\n;&|]\\s*|\\$\\(\\s*)';
 const NON_NEGOTIABLE_RISKS = Object.freeze([
-  { pattern: /(^|[;&|]\s*)(sudo|doas)(\s|$)/i, reason: '禁止通过命令行发起交互式提权' },
-  { pattern: /(^|[;&|]\s*)rm(\s|$)/i, reason: '禁止通过命令行执行不可恢复删除；请使用受控文件操作' },
-  { pattern: /(^|[;&|]\s*)git(?:\s+-C\s+\S+)?\s+push(\s|$)/i, reason: '禁止由工作区命令静默推送远端' },
-  { pattern: /\b(curl|wget)\b[^|]*\|\s*(sh|bash|zsh|fish|python(?:3)?|perl|ruby)\b/i, reason: '禁止下载远程内容后直接管道执行' },
+  { pattern: new RegExp(`${CMD_ANCHOR}(sudo|doas)(\\s|$)`, 'im'), reason: '禁止通过命令行发起交互式提权' },
+  { pattern: new RegExp(`${CMD_ANCHOR}rm(\\s|$)`, 'im'), reason: '禁止通过命令行执行不可恢复删除；请使用受控文件操作' },
+  { pattern: new RegExp(`${CMD_ANCHOR}git(?:\\s+-C\\s+\\S+)?\\s+push(\\s|$)`, 'im'), reason: '禁止由工作区命令静默推送远端' },
+  { pattern: /\b(curl|wget)\b[^|]*\|\s*(sh|bash|zsh|fish|python(?:3)?|perl|ruby)\b/im, reason: '禁止下载远程内容后直接管道执行' },
+  { pattern: /\bfind\b[\s\S]*?\s-delete\b/im, reason: 'find -delete 属于不可恢复批量删除，需受控文件操作' },
+  { pattern: /\bxargs\b[\s\S]*?\brm\b/im, reason: 'xargs … rm 属于不可恢复批量删除，需受控文件操作' },
 ]);
 let envTokenDeprecationWarned = false;
 
@@ -91,9 +97,9 @@ function withRiskVisibility(result, verdict) {
   return Object.keys(extra).length ? { ...result, ...extra } : result;
 }
 
-/** 子进程 env：剥除特权令牌（防 printenv 读回复用）。 */
+/** 子进程 env：BLOCK-511 S3.1c 统一走共用凭据剥离（含 EXEC_TOKEN_ENV 旧语义）。 */
 function childProcessEnv(base = process.env) {
-  const env = { ...base };
+  const { env } = sanitizeChildEnv(base);
   delete env[EXEC_TOKEN_ENV];
   return env;
 }

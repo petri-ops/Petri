@@ -19,6 +19,10 @@
 
 const express = require('express');
 const settings = require('../helpers/mcp-settings');
+// BLOCK-511 S3.1b — MCP 变更路由统一挂本机桌面 Origin 门
+const { requireTrustedDesktopOrigin } = require('../helpers/local-request-boundary');
+// BLOCK-511 S3.4 — async 路由抛错兜底
+const { asyncHandler } = require('../helpers/async-handler');
 const manager = require('../mcp/client-manager');
 const toolPolicy = require('../helpers/mcp-tool-policy');
 const serverPolicy = require('../helpers/mcp-server-policy');
@@ -76,7 +80,7 @@ function registerMcpClientRoutes(app) {
     res.json({ status: 'ok', serverId: id, policy: serverPolicy.policyForServer(id) });
   });
 
-  app.put('/api/mcp/servers/:id/policy', express.json(), (req, res) => {
+  app.put('/api/mcp/servers/:id/policy', requireTrustedDesktopOrigin, express.json(), (req, res) => {
     const id = String(req.params.id || '');
     const knownIds = new Set(settings.listMcpServers().map((s) => s.id));
     const tools = manager.listServerTools(id);
@@ -103,7 +107,7 @@ function registerMcpClientRoutes(app) {
   });
 
   // BLOCK-239 — OAuth 授权入口（UI 发起；不在 connect 时自动造 pending）
-  app.post('/api/mcp/servers/:id/authenticate', async (req, res) => {
+  app.post('/api/mcp/servers/:id/authenticate', requireTrustedDesktopOrigin, async (req, res) => {
     const id = String(req.params.id || '');
     const cfg = settings.getMcpServer(id);
     if (!cfg) {
@@ -151,7 +155,7 @@ function registerMcpClientRoutes(app) {
   });
 
   // BLOCK-258 — 本地撤销授权（账号切换=撤销后重新授权）；不动 server 配置本身。
-  app.post('/api/mcp/servers/:id/oauth/revoke', express.json(), async (req, res) => {
+  app.post('/api/mcp/servers/:id/oauth/revoke', requireTrustedDesktopOrigin, express.json(), async (req, res) => {
     const id = String(req.params.id || '');
     const body = req.body || {};
     const result = await manager.revokeAuthorization(id, { forgetClient: body.forgetClient === true });
@@ -172,7 +176,7 @@ function registerMcpClientRoutes(app) {
   });
 
   // BLOCK-445 — MCP App 页面资源（只读）：{ uri } → HTML 文本（供 gen-ui 沙箱渲染）
-  app.post('/api/mcp/servers/:id/resource', express.json({ limit: '8kb' }), async (req, res) => {
+  app.post('/api/mcp/servers/:id/resource', requireTrustedDesktopOrigin, express.json({ limit: '8kb' }), async (req, res) => {
     const id = String(req.params.id || '');
     const uri = String((req.body && req.body.uri) || '');
     const result = await manager.readResource(id, uri);
@@ -186,7 +190,7 @@ function registerMcpClientRoutes(app) {
 
   // BLOCK-447 — MCP App 页面内工具调用（双向 RPC 落点）：session 归属校验在主进程侧，
   // 这里只做同进程 MCP 客户端调用；逐工具策略仍由 mcp-projection 的既有判据约束。
-  app.post('/api/mcp/servers/:id/tools/call', express.json({ limit: '64kb' }), async (req, res) => {
+  app.post('/api/mcp/servers/:id/tools/call', requireTrustedDesktopOrigin, express.json({ limit: '64kb' }), async (req, res) => {
     const id = String(req.params.id || '');
     const toolName = String((req.body && req.body.toolName) || '');
     const args = req.body && req.body.args && typeof req.body.args === 'object' ? req.body.args : {};
@@ -199,7 +203,7 @@ function registerMcpClientRoutes(app) {
     return res.json({ status: 'ok', result: result.result });
   });
 
-  app.post('/api/mcp/servers', express.json(), (req, res) => {
+  app.post('/api/mcp/servers', requireTrustedDesktopOrigin, express.json(), (req, res) => {
     const body = req.body || {};
     // BLOCK-258 — 三传输：stdio / http(StreamableHTTP) / sse；远程可带自定义 headers
     const transport = body.transport === 'http' ? 'http' : body.transport === 'sse' ? 'sse' : 'stdio';
@@ -222,7 +226,7 @@ function registerMcpClientRoutes(app) {
     res.json({ status: 'ok', server });
   });
 
-  app.delete('/api/mcp/servers/:id', async (req, res) => {
+  app.delete('/api/mcp/servers/:id', requireTrustedDesktopOrigin, async (req, res) => {
     const id = String(req.params.id || '');
     await manager.disconnectServer(id).catch(() => { /* 未连接时静默 */ });
     const { removed, error } = settings.removeMcpServer(id);
@@ -234,7 +238,7 @@ function registerMcpClientRoutes(app) {
     res.json({ status: 'ok', removed });
   });
 
-  app.post('/api/mcp/servers/:id/connect', async (req, res) => {
+  app.post('/api/mcp/servers/:id/connect', requireTrustedDesktopOrigin, asyncHandler(async (req, res) => {
     const id = String(req.params.id || '');
     const result = await manager.connectServer(id);
     if (!result.ok) {
@@ -242,9 +246,9 @@ function registerMcpClientRoutes(app) {
       return;
     }
     res.json({ status: 'ok', id, toolCount: result.toolCount ?? 0 });
-  });
+  }));
 
-  app.post('/api/mcp/servers/:id/disconnect', async (req, res) => {
+  app.post('/api/mcp/servers/:id/disconnect', requireTrustedDesktopOrigin, asyncHandler(async (req, res) => {
     const id = String(req.params.id || '');
     const result = await manager.disconnectServer(id);
     if (!result.ok) {
@@ -252,7 +256,7 @@ function registerMcpClientRoutes(app) {
       return;
     }
     res.json({ status: 'ok', id });
-  });
+  }));
 
   // BLOCK-204（W5）— 逐工具策略面（v1 无设置页，API 为唯一写面；漂移门按 NO_UI_FAMILIES 登记）
   app.get('/api/mcp/tool-policy', (_req, res) => {
@@ -267,7 +271,7 @@ function registerMcpClientRoutes(app) {
     });
   });
 
-  app.put('/api/mcp/tool-policy', express.json(), (req, res) => {
+  app.put('/api/mcp/tool-policy', requireTrustedDesktopOrigin, express.json(), (req, res) => {
     const patch = req.body || {};
     // unknown-tool 判定需要"当前投影"作为已知集合；已有策略条目也算已知（离线仍可改/删）
     const known = projection.projectedToolNames();

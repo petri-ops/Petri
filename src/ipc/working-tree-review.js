@@ -28,6 +28,7 @@ const { createSenderGuard } = require('./_sender-guard');
 // diff-parse（diff 解析与反向 patch）/ reject-store（reject 清单落盘）。
 // 本文件保留 setupWorkingTreeReviewIpc 工厂编排与通道装配（同 tools-executor 先例）。
 const { safeInvoke, resolveGitAdapter, getProjectWorkspacePath } = require('./working-tree-review/context');
+const { resolveReviewFilePath } = require('./working-tree-review/path-guard'); // BLOCK-511 S3.2 realpath 包含校验
 const { initRepositoryAt } = require('./working-tree-review/repository-init');
 const { diffForReview, parseDiffFiles, buildReversePatchForReject } = require('./working-tree-review/diff-parse');
 const { _writeRejectEntry } = require('./working-tree-review/reject-store');
@@ -138,14 +139,12 @@ function setupWorkingTreeReviewIpc(options = {}) {
       if (!args || !args.path || typeof args.path !== 'string') {
         throw new GitAdapterError('path_required', 'path is required.');
       }
-      if (args.ref && args.ref !== 'HEAD' && args.ref !== 'WORKTREE') {
-        throw new GitAdapterError('invalid_ref', `ref must be 'HEAD' or 'WORKTREE'.`);
-      }
+      if (args.ref && args.ref !== 'HEAD' && args.ref !== 'WORKTREE') throw new GitAdapterError('invalid_ref', `ref must be 'HEAD' or 'WORKTREE'.`);
       if (args.ref === 'HEAD') {
         const content = adapter.showFile({ ref: 'HEAD', filePath: args.path });
         return { content, encoding: 'utf-8', size: Buffer.byteLength(content, 'utf-8') };
       }
-      const abs = path.resolve(adapter.workTree || process.cwd(), args.path);
+      const abs = resolveReviewFilePath(adapter.workTree || process.cwd(), args.path); // BLOCK-511 S3.2 realpath 包含校验
       if (!fs.existsSync(abs)) {
         // BLOCK-50 — 已删除（D）/已消失文件是审阅合法条目，不再抛 file_missing：
         // HEAD 有（showFile 返回非 null）→ deleted:true（空内容呈现删除 diff）；

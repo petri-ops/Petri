@@ -340,6 +340,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), permissionGateDegraded: process.env.PETRI_PERMISSION_GATE_DEGRADED === '1' });
 });
 
+// BLOCK-511 S3.4 — Express 4 全局错误中间件（async handler 经 asyncHandler 转交 next(err)
+// 后统一返回 JSON 5xx，消除 await 异常导致的请求悬挂）。必须挂在所有业务路由之后。
+require('./helpers/async-handler').installErrorMiddleware(app);
+
 // Start cache cleanup scheduler (runs daily at 03:00)
 try {
   cacheManager.startScheduler();

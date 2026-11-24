@@ -108,3 +108,29 @@ test('BLOCK-50: ref=HEAD 请求已删除文件 → 仍返回 HEAD 内容（回�
   assert.equal(res.ok, true);
   assert.equal(res.data.content, 'head a line\n');
 });
+
+// BLOCK-511 S3.2 HK-01 — 工作区文件读取 realpath 包含校验
+test('BLOCK-511: 绝对路径读取工作区外文件 → 拒绝', async () => {
+  const secretPath = path.join(tmpRoot, 'outside-secret.txt');
+  fs.writeFileSync(secretPath, 'SHOULD NOT LEAK\n');
+  const res = await callFileContent({ path: secretPath });
+  assert.equal(res.ok, false);
+  assert.ok(!JSON.stringify(res).includes('SHOULD NOT LEAK'));
+});
+
+test('BLOCK-511: .. 逃逸读取工作区外文件 → 拒绝', async () => {
+  fs.writeFileSync(path.join(tmpRoot, 'escape.txt'), 'ESCAPE SECRET\n');
+  const res = await callFileContent({ path: '../escape.txt' });
+  assert.equal(res.ok, false);
+  assert.ok(!JSON.stringify(res).includes('ESCAPE SECRET'));
+});
+
+test('BLOCK-511: 指向工作区外的符号链接 → 拒绝', async () => {
+  const secretPath = path.join(tmpRoot, 'linked-secret.txt');
+  fs.writeFileSync(secretPath, 'LINKED SECRET\n');
+  const linkPath = path.join(repoDir, 'inside-link.txt');
+  try { fs.symlinkSync(secretPath, linkPath); } catch { /* 已存在 */ }
+  const res = await callFileContent({ path: 'inside-link.txt' });
+  assert.equal(res.ok, false);
+  assert.ok(!JSON.stringify(res).includes('LINKED SECRET'));
+});

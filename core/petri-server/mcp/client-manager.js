@@ -15,6 +15,8 @@
 'use strict';
 
 const crypto = require('node:crypto');
+// BLOCK-511 S3.1c — 子进程环境凭据剥离单源
+const { sanitizeChildEnv } = require('../../shared-backend/child-env-sanitizer');
 const settings = require('../helpers/mcp-settings');
 const oauthProvider = require('./oauth-provider');
 const oauthStore = require('../helpers/mcp-oauth-store');
@@ -127,10 +129,14 @@ async function connectServer(id) {
         error.status = verdict.status;
         throw error;
       }
+      // BLOCK-511 S3.1c — stdio 子进程环境过共用凭据剥离（服务器自身 env 合并后同剥）；
+      // 连接日志只写被剥除的变量名，不写值。
+      const { env: childEnv, stripped } = sanitizeChildEnv({ ...process.env, ...(cfg.env || {}) });
+      if (stripped.length) console.warn(`[mcp-client] stripped env keys for ${cfg.id || cfg.command}: ${stripped.join(', ')}`);
       transport = new StdioClientTransport({
         command: cfg.command,
         args: cfg.args || [],
-        env: { ...process.env, ...(cfg.env || {}) },
+        env: childEnv,
       });
     }
     await _withTimeout(client.connect(transport), CONNECT_TIMEOUT_MS, 'connect');

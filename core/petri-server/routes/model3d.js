@@ -16,6 +16,8 @@ const { buildWorkspaceArtifactUrl } = require('../helpers/model3d-artifact-proje
 const { normalizeRenderViews } = require('../helpers/model3d-views');
 const { tool_model3d_export } = require('../agent-tools/model3d-tools');
 const { authorizeProject } = require('../agent-tools/workspace-tools/internals');
+// BLOCK-511 S3.4 — async 路由抛错兜底
+const { asyncHandler } = require('../helpers/async-handler');
 
 // resolveWorkspaceTarget 的路径拒绝码 → 403（与 400「请求本身不合法」区分）。
 const PATH_REJECT_ERRORS = ['sensitive_path', 'path_escape', 'symlink_escape', 'symlink_not_allowed', 'workspace_unavailable'];
@@ -72,7 +74,8 @@ function loadLocalProject(req, res, projectId) {
 }
 
 module.exports = function registerModel3DRoutes(app) {
-  app.get('/api/model3d/capability', async (_req, res) => {
+  // BLOCK-511 S3.4 — async 抛错转 next(err) → 全局错误中间件返回 JSON 5xx（不再悬挂）
+  app.get('/api/model3d/capability', asyncHandler(async (_req, res) => {
     const capability = await blender.probeBlender();
     const cad = await cadExchange.probeCadExchange();
     res.json({
@@ -83,7 +86,7 @@ module.exports = function registerModel3DRoutes(app) {
       cad,
       generation: generation.probeGenerationProvider(),
     });
-  });
+  }));
 
   // NEXT-05 P1-1 — SceneSpec 编辑/修订/语义 diff（本地项目，白名单 operations）。
   app.post('/api/model3d/scene/read', async (req, res) => {
