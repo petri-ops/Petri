@@ -10,9 +10,9 @@
       "docs/post-h9-optimization-blueprint-2026-11-10.md"
     ],
     "requireRegistration": true,
-    "documentCount": 665,
-    "lastUpdated": "2026-11-23",
-    "managedMarkdown": 648
+    "documentCount": 666,
+    "lastUpdated": "2026-11-24",
+    "managedMarkdown": 649
   },
   "documents": [
     {
@@ -13856,7 +13856,36 @@
       ],
       "registeredAt": "2026-11-23",
       "notes": "2026-11-23 用户「没做的可以规划一下 / 这个计划也 push」——现读 canonical 后一次列全剩余项的四类规划入口（A可自推空/B等用户裁决8项/C等外部条件/D已done未翻状态）。living-plan 不占串行工作包槽位、不自动开工；任何项开工仍需发令。证据源 AUDIT-LOG/pending-work-backlog/ui-productization-audit/DOC-REGISTRY/manual draft。G0 开发期常态·不外推 packaged/Provider/GA."
+    },
+    {
+      "id": "BLOCK-511",
+      "path": "docs/block511-panoramic-remediation-plan.md",
+      "kind": "work-package",
+      "status": "active",
+      "canonical": true,
+      "truthDomain": "block511-panoramic-remediation",
+      "entrypoint": "docs/README.md",
+      "archivePolicy": "retain_stable_path",
+      "phase": "S0-LAUNCH",
+      "registeredAt": "2026-11-24",
+      "touchSurface": [
+        "docs/block511-panoramic-remediation-plan.md",
+        "acceptance/panoramic-remediation-2026-11-24/",
+        "core/petri-server/loop-orchestrator.js",
+        "core/petri-server/cache-manager.js",
+        "core/petri-server/bootstrap.js",
+        "core/petri-server/routes/mcp-client.js",
+        "core/petri-server/mcp/client-manager.js",
+        "src/main.js",
+        "src/main/desktop-shell.js",
+        "src/main/csp-config.js",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "test/impact-map.json",
+        ".github/workflows/ci.yml"
+      ],
+      "sharedBaselines": [],
+      "notes": "2026-11-24 用户发令「开始 PANORAMIC-REMEDIATION-2026-11-24」=「一次性搞定，要没问题的搞定」。全景评估一次性修复包：S1 正确性（流重试正文重复/cache fail-open/Cmd+Q 守卫/排队消息挂载/require 路径与漂移门）→S2 门禁自洽（W5a/测试递归/去绝对路径/tracked-consistency/棘轮留因/CI）→S3 本机边界加固（请求边界/MCP 路由/env 剥离/文件读取/命令风险/Express 错误/web_fetch）→S4 端口与首屏（CSP 端口/3D 与 graph 懒加载）→S5 入口归位（纯文档）→S6 总验证收口。HK-01 红绿先行、零新依赖、主文件净减行、六阶段串行独立提交。基线：code-size FAIL(7)、knip FAIL(2)、W5a FAIL(3)、其余全绿。G0 开发期常态 · 不外推 packaged/Provider/GA。"
     }
   ],
-  "lastUpdated": "2026-11-23"
+  "lastUpdated": "2026-11-24"
 }
