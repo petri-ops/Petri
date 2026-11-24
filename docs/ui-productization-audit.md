@@ -300,6 +300,8 @@
 - **实机腿（13/13 allPass）**：`dev-verify/flows/ui696-model-preferences.cjs`，证据 `acceptance/ui-696/ui696-model-preferences-live-darwin.json` + `ui696-model-preferences.png`。隔离后端（临时端口 + SQLite backup 快照，跑完 kill + 删临时目录，未触碰用户库与 :3001 长活后端）验 R1–R6：快捷写回只送兼容快照时 `model_profiles.contextWindow` 64000→200000、`visible=false` / `defaultThinkingLevel=high` / `capabilities` 不丢、兼容快照同值；9223 离屏只读 DOM（记录并恢复原 URL）验 D1–D7：默认/自定义页签、设置页与模型菜单两个 `input[type=range]` 刻度条、生效边界文案、切页、无横向溢出、截图成功。**实机抓真**：R6 首轮读到兼容快照仍是旧窗口，按红绿先行补失败断言（`undefined !== 200000`）→ 修 `syncPresetContextWindow` 双侧同步 → 契约 4/4 转绿、实机复跑 13/13。
 - **边界**：未跑真实 Provider 长任务与用户主窗 9222；:3001 长活旧后端未重启（隔离后端已加载当前代码并验证）；思考档位出站参数由 `test/block200-reasoning-config.test.mjs` 既有出站腿承索。本包未提交（工作树含并行会话在制 WIP，不批量提交）。
 
+- **实机机械腿（2026-11-24 补，BLOCK-517 W5）**：`ui694-settings-live` 7/7 allPass（acceptance/block517-walk-batch/）——治理与决策分区真连后端：模型允许清单/原因码词表/Agent 操作审计区块在场 ✓；**如实 skip 两腿**：①运行环境包重新检测钮不在当前 RuntimePolicyPanel 形态（面板演进，探测口在 pack/skills:check 面）②pdf 真渲染需 pdf pinned 快照产物（当前无）——均不伪造。**欠账腿**：侧聊档位锁定说明条（需 trusted/accessModeLocked 态）与钉住多格式预览（markdown previewText 由组件测试覆盖）——维持 in_progress 不翻 verified。
+
 ## UI-694: 功能面接线批——设置面板五段 + 档位锁定提示 + 钉住多格式预览（BLOCK-346 T1/T3/T4；2026-11-04 **in_progress（代码+组件测试完成，待实机腿；按纪律不标 verified）**；2026-11-06 BLOCK-359 W0 维护注记）
 
 - **设置「决策与调度」新增五段**（后端能力早已存在、此前前端零调用）：①模型允许清单（读写 `allowedModels` + 理由账本逐行 `模型=理由`，开放/白名单两态如实标注）②原因码词表（折叠展示 `/api/ai/reason-codes`，点开才拉）③运行环境包「重新检测」（复用既有 list IPC，不新增通道）④Agent 操作审计与撤销（`agent-audit` 列表 + `agent-undo/:token` + `agent-settings` 暂停开关）⑤记忆压缩策略（`memory-policy` 读写 + 生效来源标注 + `memory-wipe` 二次确认）。
