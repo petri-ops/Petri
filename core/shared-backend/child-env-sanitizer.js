@@ -21,7 +21,7 @@ function sanitizeChildEnv(base = process.env) {
       stripped.push(key);
       continue;
     }
-    env[key] = value;
+    Object.defineProperty(env, key, { value, enumerable: true, configurable: true, writable: true });
   }
   return { env, stripped };
 }

@@ -87,7 +87,7 @@ test('K-17：内联债冻结读数与 CSS 面 354/30 基线分离，不重打 de
   assert.equal(truth.cssBaselineTotal, 354);
   assert.equal(truth.cssBaselineFiles, 30);
   assert.ok(truth.debtTotal > 0, '内联债真实存在，不得冻结成 0 形成假绿');
-  assert.deepEqual(DEBT_CEILING, { liveMissing: 14, blocked: 14, total: 28 }); // 随 canonical triage JSON 机械演进：…→36/13/23→28/14/14（11-21 E-02 delegated-walk 9 条回写，debt -8）
+  assert.deepEqual(DEBT_CEILING, { liveMissing: 15, blocked: 14, total: 29 }); // 随 canonical triage JSON 机械演进：…→28/14/14（11-21 E-02 debt -8）→29/15/14（BLOCK-511 S5 UI-723 未实机项 +1，UI-722 已实机翻 verified）
 });
 
 test('K-17：门禁在干净树判绿且逐文件与基线一致', () => {

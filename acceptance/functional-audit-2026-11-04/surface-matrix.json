@@ -1,28 +1,34 @@
 {
-  "generatedAt": "2026-11-21T09:05:22.094Z",
+  "generatedAt": "2026-11-24T05:34:00.993Z",
   "summary": {
     "baseline": "HEAD",
-    "tools": 118,
-    "toolDomains": 16,
-    "contracts": 118,
-    "metadata": 118,
+    "tools": 120,
+    "toolDomains": 18,
+    "contracts": 120,
+    "metadata": 120,
     "metadataMcpOnly": 1,
-    "ipcChannels": 173,
+    "ipcChannels": 176,
     "ipcMissingPreload": 2,
-    "ipcUnusedInRenderer": 170,
-    "routes": 289,
-    "routeModules": 48,
+    "ipcUnusedInRenderer": 173,
+    "routes": 293,
+    "routeModules": 50,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
     "findingsBySeverity": {
       "P1": 0,
       "P2": 0,
-      "P3": 2
+      "P3": 3
     },
     "dirtyFiles": 0,
     "defsFallbacks": 0
   },
   "findings": [
+    {
+      "sev": "P3",
+      "kind": "route_endpoint_no_frontend_consumer",
+      "subject": "4 个端点",
+      "detail": "业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：GET /api/harness/plugin-audit, POST /api/harness/plugin-audit/append, GET /api/harness/skill-suggestions, POST /api/harness/skill-suggestions/ignore"
+    },
     {
       "sev": "P3",
       "kind": "storage_read_never_written",
@@ -1065,6 +1071,48 @@
       },
       "undeclaredArgs": [],
       "schemaProps": 1
+    },
+    {
+      "name": "mcp_authenticate",
+      "domain": "mcp",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "state-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "mcp_authenticate",
+        "read": "deny",
+        "workspace-write": "deny",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 2
+    },
+    {
+      "name": "notebook_edit",
+      "domain": "notebook",
+      "hasContract": true,
+      "hasHandler": true,
+      "handlerStatic": "yes",
+      "hasMetadata": true,
+      "riskTier": "R2",
+      "sideEffect": "workspace-write",
+      "needsApprovalMeta": true,
+      "reachable": true,
+      "reach": {
+        "name": "notebook_edit",
+        "read": "deny",
+        "workspace-write": "allow",
+        "full": "allow",
+        "planMode": "deny"
+      },
+      "undeclaredArgs": [],
+      "schemaProps": 9
     },
     {
       "name": "model3d_inspect",
@@ -2998,6 +3046,21 @@
       "usedInRenderer": false
     },
     {
+      "channel": "utility-host:start",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "utility-host:stop",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "utility-host:status",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
       "channel": "install:deep-link",
       "inPreload": true,
       "usedInRenderer": false
@@ -3861,6 +3924,21 @@
     },
     {
       "channel": "pack:uninstall-plan",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "utility-host:start",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "utility-host:stop",
+      "inPreload": true,
+      "usedInRenderer": false
+    },
+    {
+      "channel": "utility-host:status",
       "inPreload": true,
       "usedInRenderer": false
     },
@@ -5455,6 +5533,18 @@
       "mounted": true
     },
     {
+      "module": "plugin-lifecycle-audit",
+      "method": "GET",
+      "route": "/api/harness/plugin-audit",
+      "mounted": true
+    },
+    {
+      "module": "plugin-lifecycle-audit",
+      "method": "POST",
+      "route": "/api/harness/plugin-audit/append",
+      "mounted": true
+    },
+    {
       "module": "projection-data",
       "method": "GET",
       "route": "/api/skills/registry",
@@ -5602,6 +5692,18 @@
       "module": "scratchpad",
       "method": "DELETE",
       "route": "/api/scratchpad/:entryId",
+      "mounted": true
+    },
+    {
+      "module": "skill-suggestions",
+      "method": "GET",
+      "route": "/api/harness/skill-suggestions",
+      "mounted": true
+    },
+    {
+      "module": "skill-suggestions",
+      "method": "POST",
+      "route": "/api/harness/skill-suggestions/ignore",
       "mounted": true
     },
     {

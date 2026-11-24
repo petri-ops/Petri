@@ -1,4 +1,4 @@
-最后更新：2026-11-21（**R2 清偿批交接要点 · S1–S7 完成待收口**：R2 评估 P0/P1/P2 全部清偿——水印终版=AI 版已落地、默认身份面 celadon-ink 默认可见（UI-718）、断点 4 档（UI-719）、状态色单源、目标分 4.4 方向性门槛、TTL 看门狗、存量红与视觉链带红全归绿、三槽位归位 completed。**接手先读**=acceptance/r2-remediation/s{1..7}/RULINGS*.md + 本台 S1–S7 行；**观感未签**=造型/水印/默认身份面审美 in_progress（无偏好覆盖不代签）；commit 区间 d3780338..HEAD 待 push。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+最后更新：2026-11-24（**BLOCK-511 全景修复包收口（completed）**：S0–S6 六阶段串行独立提交；§2 十二缺陷 11 已修 + 1 遗留（web_fetch pin-IP 按授权登记）；门禁 W5a/code-size/tracked-consistency/棘轮留因/CI 11 门全清；HK-01 逐项红→绿；实机 S4 10/10 + S6 4/4（零 CSP 违规/SSE/排队刷新保留），9223 离屏跑完即 kill。**接手先读**=acceptance/panoramic-remediation-2026-11-24/REMEDIATION.md + S1–S6-EVIDENCE.md；**观感零代签**（UI-723 因 3D 卡未实机保留 in_progress）。**存量红两门**=lint:ledger / EAR（S0 基点已红、本包零触碰基线，不凑绿）。串行槽位空。G0 开发期常态 · 不外推 packaged/Provider/GA。）
 
 ---
 

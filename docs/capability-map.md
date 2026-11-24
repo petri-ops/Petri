@@ -2,7 +2,7 @@
 
 > **自动生成，勿手改**。生成器 `scripts/block357-capability-map.mjs`；
 > 数据源 `acceptance/functional-audit-2026-11-04/surface-matrix.json`（`scripts/functional-surface-audit.mjs` 产出）。
-> 矩阵生成时间：2026-11-21T09:05:22.094Z；覆盖 118 个工具、173 个 IPC 通道、289 个路由端点。
+> 矩阵生成时间：2026-11-24T05:34:00.993Z；覆盖 120 个工具、176 个 IPC 通道、293 个路由端点。
 
 ## 边界（先读这一段）
 
@@ -20,7 +20,9 @@
 | `computer` | 电脑使用（桌面控制） | 9 | 9/9 |
 | `godot` | 游戏引擎桥 | 2 | 2/2 |
 | `knowledge` | 知识空间与检索 | 15 | 15/15 |
+| `mcp` | mcp | 1 | 1/1 |
 | `model3d` | 3D 模型与编辑 | 12 | 12/12 |
+| `notebook` | notebook | 1 | 1/1 |
 | `remote` | 远程执行目标 | 2 | 2/2 |
 | `resident` | 常驻任务 | 3 | 3/3 |
 | `result-studio` | 结果面与批注 | 18 | 18/18 |
@@ -43,7 +45,8 @@
 
 ## 当前已知限制（来自矩阵）
 
-- 功能面矩阵判定：**P1=0 / P2=0 / P3=2**（P1/P2 为阻断级，归零后才可宣称能力面自洽）。
+- 功能面矩阵判定：**P1=0 / P2=0 / P3=3**（P1/P2 为阻断级，归零后才可宣称能力面自洽）。
+- P3 `route_endpoint_no_frontend_consumer` · 4 个端点：业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：GET /api/harness/plugin-audit, POST /api/harness/plugin-audit/append, GET /api/harness/
 - P3 `storage_read_never_written` · petri_token：3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotCo
 - P3 `storage_read_never_written` · petri.simplechat.extraRenderers：1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx
 

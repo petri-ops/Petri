@@ -1,19 +1,19 @@
 # 功能面全量核对矩阵（generated）
 
 > 本文件由 `scripts/functional-surface-audit.mjs` 生成，勿手改；复跑即刷新。
-> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-21T09:05:22.094Z
+> 基线：`HEAD`（工作区在制文件 0 个不计入判定）。生成时间：2026-11-24T05:34:00.993Z
 
 ## 0. 覆盖汇总
 
 | 面 | 数量 |
 | --- | --- |
-| 工具定义 | 118（16 域；文本降级 0 域） |
-| 工具契约 | 118 |
-| 调度元数据 | 118（另有 MCP-only 条目 1 条不在 TOOL_DEFS 宇宙，如 skill_execute） |
-| IPC 通道 | 173（preload 缺包装 2；前端零消费 170） |
-| 路由端点 | 289（48 模块；未挂载 0） |
+| 工具定义 | 120（18 域；文本降级 0 域） |
+| 工具契约 | 120 |
+| 调度元数据 | 120（另有 MCP-only 条目 1 条不在 TOOL_DEFS 宇宙，如 skill_execute） |
+| IPC 通道 | 176（preload 缺包装 2；前端零消费 173） |
+| 路由端点 | 293（50 模块；未挂载 0） |
 | 设置存储键 | 20 |
-| 判定 P1 / P2 / P3 | **0 / 0 / 2** |
+| 判定 P1 / P2 / P3 | **0 / 0 / 3** |
 
 ## 1. P1 明细（能力在、用户用不到）
 
@@ -27,6 +27,7 @@
 
 | 类别 | 对象 | 说明 |
 | --- | --- | --- |
+| route_endpoint_no_frontend_consumer | `4 个端点` | 业务面前缀下后端已挂载、前端零引用（需分诊：待接线 or 退役）：GET /api/harness/plugin-audit, POST /api/harness/plugin-audit/append, GET /api/harness/skill-suggestions, POST /api/harness/skill-suggestions/ignore |
 | storage_read_never_written | `petri_token` | 3 处：getItem@frontend/src/components/copilot/copilotClient/apiBase.ts , getItem@frontend/src/components/copilot/copilotConversationsClient.ts , getItem@frontend/src/hooks/useSshHeartbeat.ts |
 | storage_read_never_written | `petri.simplechat.extraRenderers` | 1 处：getItem@frontend/src/components/copilot/extraRenderers.tsx |
 
@@ -83,6 +84,8 @@
 | `knowledge_doc_move` | knowledge | ✓ | ✓ | ✓ | R1 | state-write | yes | yes | - |
 | `knowledge_doc_delete` | knowledge | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
 | `knowledge_doc_reindex` | knowledge | ✓ | ✓ | ✓ | R1 | state-write | yes | yes | - |
+| `mcp_authenticate` | mcp | ✓ | ✓ | ✓ | R2 | state-write | yes | yes | - |
+| `notebook_edit` | notebook | ✓ | ✓ | ✓ | R2 | workspace-write | yes | yes | - |
 | `model3d_inspect` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
 | `model3d_validate` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |
 | `model3d_propose` | model3d | ✓ | ✓ | ✓ | R1 | none | no | yes | - |

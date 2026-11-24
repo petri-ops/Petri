@@ -27,7 +27,7 @@ test('①凭据类变量全部剥除（精确 + 名称含关键字，大小写�
   const { env, stripped } = sanitizeChildEnv(input);
   assert.deepEqual(Object.keys(env), []);
   for (const k of Object.keys(input)) assert.ok(stripped.includes(k), `${k} 应被剥除`);
-  for (const k of stripped) assert.ok(!JSON.stringify(env).includes(input[k]), '值不得出现在透传环境');
+  for (const secret of Object.values(input)) assert.ok(!JSON.stringify(env).includes(secret), '值不得出现在透传环境');
 });
 
 test('②其余环境原样透传（无白名单，避免打断用户 MCP 服务器依赖）', () => {

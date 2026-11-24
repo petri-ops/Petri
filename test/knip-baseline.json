@@ -154,6 +154,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block458-capability-probe.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s4-firstpaint-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s6-queued-reload-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
@@ -426,6 +427,11 @@
     {
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s4-firstpaint-live.cjs",
       "reason": "BLOCK-511 S4 dev-verify 实机 flow（run.cjs 按 id 动态发现，knip 静态盲区）；HK-01 10/10 实机证据",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s6-queued-reload-live.cjs",
+      "reason": "BLOCK-511 S6 dev-verify 实机 flow（run.cjs 按 id 动态发现，knip 静态盲区）；HK-01 4/4 排队持久化实证",
       "date": "2026-11-24"
     }
   ]

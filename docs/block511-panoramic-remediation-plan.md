@@ -1,7 +1,7 @@
 ---
 capability: block511-panoramic-remediation
-status: active
-phase: S0-LAUNCH
+status: completed
+phase: CLOSED
 goal: 全景评估一次性修复包（用户发令「开始 PANORAMIC-REMEDIATION-2026-11-24」／「一次性搞定，要没问题的搞定」）——按 acceptance/project-panoramic-assessment-2026-11-24/ASSESSMENT.md §2/§3/§4/§8 的已核证缺陷与门禁/入口漂移，六阶段严格串行修复，HK-01 红绿先行、零新依赖、主文件只做薄接线并净减行；「没问题」高于「做完」，任一项 3 轮不过即停在阶段边界、保持已提交部分全绿并报卡点。
 acceptance:
   - S1 正确性修复 1.1-1.5 全部 HK-01 红→绿，test:changed 除已登记存量红外零新增红，独立提交
@@ -74,3 +74,7 @@ supersedes: 无（PANORAMIC-ASSESSMENT 的修复执行包）
 - Jev 计数取 `npm run decision:session` 分段口径，每次收尾重跑取双数字。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 收口（2026-11-24）
+
+六阶段全部提交；HK-01 红→绿逐项留痕；HK-02 最小改动+零新依赖；closeout 全门除两门存量红（lint:ledger / EAR，S0 基点已红、本包零触碰基线）外全绿。遗留=web_fetch pin-IP（按授权登记）+ 3D 卡实机可展开（本会话无 artifact，构建 chunk+单测背书）。G0 开发期常态 · 不外推 packaged/Provider/GA。

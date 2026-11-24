@@ -4,7 +4,12 @@
  */
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { analyze } from '../scripts/gate-tracked-consistency.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const baseMap = { rules: [{ id: 'r1', tests: ['test/keep.test.mjs'], patterns: ['src/keep.js', 'src/**'] }] };
 const basePkg = { scripts: { 'test:one': 'node scripts/runner.mjs --flag', 'build': 'tsc -p frontend/tsconfig.json' } };
@@ -40,4 +45,13 @@ test('带 owner/date/reason 的豁免项不报红', () => {
   const exemptions = { items: [{ path: 'test/ghost.test.mjs', owner: 'block511', date: '2026-11-24', reason: '在制未入库' }] };
   const r = analyze({ tracked: new Set(tracked), map, pkg: {}, exemptions });
   assert.deepEqual(r.violations, []);
+});
+
+test('真实豁免基线在册且每条带 owner/date/reason（证据链不靠叙述）', () => {
+  const file = 'acceptance/panoramic-remediation-2026-11-24/tracked-consistency-exemptions.json';
+  const real = JSON.parse(fs.readFileSync(path.resolve(root, file), 'utf8'));
+  assert.ok(Array.isArray(real.items));
+  for (const item of real.items) {
+    assert.ok(item.path && item.owner && item.date && item.reason, `${item.path} 缺 owner/date/reason`);
+  }
 });
