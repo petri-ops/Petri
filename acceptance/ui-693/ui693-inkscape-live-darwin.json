@@ -1,0 +1,49 @@
+{
+  "name": "ui693-inkscape-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T09:35:28.283Z",
+  "finishedAt": "2026-11-24T09:35:30.792Z",
+  "assertions": [
+    {
+      "name": "P0_repo_root_project_present",
+      "pass": true,
+      "detail": "p_mwo92wsv_x90e Petri"
+    },
+    {
+      "name": "A0_probe_available",
+      "pass": true,
+      "detail": "bin=/Applications/Inkscape.app/Contents/MacOS/inkscape source=path"
+    },
+    {
+      "name": "A1_union_single_path",
+      "pass": true,
+      "detail": "ok=true paths=1 rects=0 changed=true"
+    },
+    {
+      "name": "A2_text_to_path",
+      "pass": true,
+      "detail": "ok=true texts=0 paths=1"
+    },
+    {
+      "name": "A3_difference_real",
+      "pass": true,
+      "detail": "ok=true rects=0 paths=1 changed=true"
+    },
+    {
+      "name": "A4_export_pdf",
+      "pass": true,
+      "detail": "ok=true bytes=1111 magic=%PDF"
+    },
+    {
+      "name": "A5_audit_revision_recorded",
+      "pass": true,
+      "detail": "ok=true revisions=1"
+    },
+    {
+      "name": "P9_tmp_dir_cleaned",
+      "pass": true,
+      "detail": "rm ok"
+    }
+  ],
+  "allPass": true
+}
