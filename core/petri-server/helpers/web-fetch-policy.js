@@ -15,10 +15,19 @@
  *
  * 纯函数（`parseTargetUrl` / `classifyAddress` / `isHostAllowed` / `stripHtml`）与
  * 网络副作用（`guardedFetch`）分离：前者可零网络单测，后者在测试里指向本地 HTTP 服务。
+ *
+ * BLOCK-512 P1 — pin-IP（清 BLOCK-511 §2 第 8 项遗留）：此前「先解析校验、再交 fetch
+ * 建连」存在 DNS rebinding TOCTOU 窗口（undici 建连时自行重解析）。现默认通道改
+ * Node 内建 http/https + `pinnedLookupFor`（建连层只连**已校验地址**，不再查 DNS）+
+ * https `servername=host`（SNI 与证书身份仍按目标主机名校验）。`fetchImpl` 注入契约
+ * 保留为测试/兜底通道（不 pin-IP，生产路径零注入不会走到）；`transportImpl` 为新
+ * 注入点（测试可用流式 shim 直驱）。
  */
 
 const dns = require('dns');
 const net = require('net');
+const http = require('http');
+const https = require('https');
 
 const MAX_REDIRECTS = 5;
 const TEXT_CONTENT_TYPES = [
@@ -271,8 +280,132 @@ async function readBodyBounded(response, maxBytes) {
   return { text: Buffer.concat(chunks).toString('utf8'), bytes, seenBytes, truncated };
 }
 
+/** 诚实 UA 与接受面（两条通道共用，不伪装浏览器）。 */
+const REQUEST_HEADERS = {
+  'user-agent': 'Petri-Desktop/0.0.1 (+local-first agent; web_fetch)',
+  accept: 'text/html,application/xhtml+xml,text/plain,application/json;q=0.9,*/*;q=0.1',
+};
+
+/**
+ * BLOCK-512 P1 — pin 住已校验地址的 lookup：对**任何** hostname 都只回 records，
+ * 建连层不再信 DNS（rebind-proof 的核心属性——DNS 再怎么重绑定都影响不到连接目标）。
+ * 兼容 `all: true`（回数组）与普通形态（回 address, family）两种回调契约。
+ */
+function pinnedLookupFor(records) {
+  const list = (Array.isArray(records) ? records : [])
+    .map((row) => {
+      const address = typeof row === 'string' ? row : row && row.address;
+      return { address, family: net.isIP(address) === 6 ? 6 : 4 };
+    })
+    .filter((row) => row.address && net.isIP(row.address));
+  return function pinnedLookup(_hostname, options, callback) {
+    const cb = typeof options === 'function' ? options : callback;
+    if (list.length === 0) {
+      const err = new Error('no pinned address');
+      err.code = 'ECONNREFUSED';
+      return cb(err);
+    }
+    if (options && typeof options === 'object' && options.all) return cb(null, list);
+    return cb(null, list[0].address, list[0].family);
+  };
+}
+
+/**
+ * BLOCK-512 P1 — 默认传输通道：Node 内建 http/https + pinned lookup。
+ * https 时 `servername=host`：SNI 与证书身份仍按目标主机名校验（连接目标是 pin 住的
+ * IP，但 TLS 语义不变）。超时覆盖建连与读体全程（ destroy 携 TimeoutError 名，
+ * guardedFetch 映射为 web_fetch_timeout）。
+ */
+function defaultTransport({ url, host, addresses, timeoutMs = 10000, headers = {} }) {
+  return new Promise((resolve, reject) => {
+    const isHttps = url.protocol === 'https:';
+    const mod = isHttps ? https : http;
+    const req = mod.request(url, {
+      method: 'GET',
+      headers: { ...REQUEST_HEADERS, ...headers },
+      servername: isHttps ? host : undefined,
+      lookup: pinnedLookupFor(addresses),
+    }, (res) => {
+      resolve({
+        status: res.statusCode,
+        headers: {
+          get(name) {
+            const v = res.headers[String(name).toLowerCase()];
+            if (v == null) return null;
+            return Array.isArray(v) ? v.join(', ') : String(v);
+          },
+        },
+        stream: res,
+      });
+    });
+    req.on('error', reject);
+    const timer = setTimeout(() => {
+      const err = new Error(`request timed out after ${timeoutMs}ms`);
+      err.name = 'TimeoutError';
+      req.destroy(err);
+    }, Math.max(1000, Number(timeoutMs) || 10000));
+    req.on('close', () => clearTimeout(timer));
+    req.end();
+  });
+}
+
+/** 流式有界读（Node 可读流）：超限即断流截断，语义与 readBodyBounded 一致。 */
+function readStreamBounded(stream, maxBytes) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let bytes = 0;
+    let seenBytes = 0;
+    let truncated = false;
+    let settled = false;
+    const cleanup = () => {
+      stream.off('data', onData);
+      stream.off('end', onEnd);
+      stream.off('error', onError);
+    };
+    const settle = (result) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
+    const onData = (chunk) => {
+      seenBytes += chunk.length;
+      if (bytes + chunk.length > maxBytes) {
+        truncated = true;
+        const keep = Math.max(0, maxBytes - bytes);
+        if (keep > 0) chunks.push(chunk.subarray(0, keep));
+        bytes += keep;
+        settle({ text: Buffer.concat(chunks).toString('utf8'), bytes, seenBytes, truncated });
+        try { stream.destroy(); } catch { /* 已结束 */ }
+      } else {
+        chunks.push(Buffer.from(chunk));
+        bytes += chunk.length;
+      }
+    };
+    const onEnd = () => settle({ text: Buffer.concat(chunks).toString('utf8'), bytes, seenBytes, truncated });
+    const onError = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+    stream.on('data', onData);
+    stream.on('end', onEnd);
+    stream.on('error', onError);
+  });
+}
+
+/** 早退路径关闭底层流（node IncomingMessage；fetch Response 无 destroy 时为空操作）。 */
+function discardStream(response) {
+  try {
+    if (response && response.body && typeof response.body.destroy === 'function') response.body.destroy();
+  } catch { /* 已结束 */ }
+}
+
 /**
  * 受控抓取：逐跳校验 → 解析校验 → 抓取 → 有界读体。
+ * 通道选择（BLOCK-512 P1）：显式 `fetchImpl`（兼容契约，不 pin）> `transportImpl`（新
+ * 注入点）> `defaultTransport`（生产默认，pinned）。
  * @returns {Promise<object>} 成功 { ok:true, status, finalUrl, host, contentType, text, bytes,
  *   truncated, redirects }；失败 { ok:false, code, message, retryable? }
  */
@@ -283,13 +416,14 @@ async function guardedFetch(rawUrl, options = {}) {
     allowedHosts = [],
     blockedHosts = [],
     maxRedirects = MAX_REDIRECTS,
-    fetchImpl = globalThis.fetch,
+    fetchImpl = undefined,
+    transportImpl = undefined,
     lookup = dns.promises.lookup,
   } = options;
 
   const first = parseTargetUrl(rawUrl);
   if (!first.ok) return first;
-  if (typeof fetchImpl !== 'function') {
+  if (fetchImpl !== undefined && typeof fetchImpl !== 'function') {
     return { ok: false, code: 'web_fetch_unavailable', message: '当前运行时没有 fetch，无法抓取。' };
   }
 
@@ -305,16 +439,35 @@ async function guardedFetch(rawUrl, options = {}) {
 
     let response;
     try {
-      response = await fetchImpl(parsed.url.toString(), {
-        method: 'GET',
-        redirect: 'manual',
-        signal: AbortSignal.timeout(Math.max(1000, Number(timeoutMs) || 10000)),
-        headers: {
-          // 诚实 UA：不伪装成浏览器；给对端一个可识别的身份
-          'user-agent': 'Petri-Desktop/0.0.1 (+local-first agent; web_fetch)',
-          accept: 'text/html,application/xhtml+xml,text/plain,application/json;q=0.9,*/*;q=0.1',
-        },
-      });
+      if (typeof fetchImpl === 'function') {
+        // 兼容通道：测试注入的 fetchImpl（undici 自行建连，不 pin-IP——见文件头注记）
+        response = await fetchImpl(parsed.url.toString(), {
+          method: 'GET',
+          redirect: 'manual',
+          signal: AbortSignal.timeout(Math.max(1000, Number(timeoutMs) || 10000)),
+          headers: { ...REQUEST_HEADERS },
+        });
+      } else {
+        // BLOCK-512 P1 — 校验与建连合一：addresses 已全公网，传输层 pin 住不再查 DNS
+        const transport = typeof transportImpl === 'function'
+          ? transportImpl
+          : defaultTransport;
+        const shim = await transport({
+          url: parsed.url,
+          host: parsed.host,
+          addresses: resolved.addresses,
+          timeoutMs,
+          maxBytes,
+          headers: { ...REQUEST_HEADERS },
+        });
+        response = {
+          status: shim.status,
+          ok: shim.status >= 200 && shim.status < 300,
+          headers: shim.headers,
+          body: shim.stream,
+          transportStream: true,
+        };
+      }
     } catch (error) {
       const name = error && error.name;
       if (name === 'TimeoutError' || name === 'AbortError') {
@@ -330,6 +483,7 @@ async function guardedFetch(rawUrl, options = {}) {
     }
 
     if (response.status >= 300 && response.status < 400) {
+      discardStream(response);
       const location = response.headers.get('location');
       if (!location) {
         return { ok: false, code: 'web_fetch_redirect_invalid', message: `HTTP ${response.status} 缺 Location，无法跟随。`, redirects };
@@ -350,6 +504,7 @@ async function guardedFetch(rawUrl, options = {}) {
 
     const contentType = response.headers.get('content-type') || '';
     if (!isTextContentType(contentType)) {
+      discardStream(response);
       return {
         ok: false,
         code: 'web_content_type_unsupported',
@@ -360,6 +515,7 @@ async function guardedFetch(rawUrl, options = {}) {
       };
     }
     if (!response.ok) {
+      discardStream(response);
       return {
         ok: false,
         code: 'web_fetch_http_error',
@@ -373,7 +529,10 @@ async function guardedFetch(rawUrl, options = {}) {
 
     let body;
     try {
-      body = await readBodyBounded(response, Math.max(1024, Number(maxBytes) || 1048576));
+      const cap = Math.max(1024, Number(maxBytes) || 1048576);
+      body = response.transportStream
+        ? await readStreamBounded(response.body, cap)
+        : await readBodyBounded(response, cap);
     } catch (error) {
       const name = error && error.name;
       const code = name === 'TimeoutError' || name === 'AbortError' ? 'web_fetch_timeout' : 'web_fetch_body_failed';
@@ -389,6 +548,7 @@ async function guardedFetch(rawUrl, options = {}) {
       text: body.text,
       bytes: body.bytes,
       truncated: body.truncated,
+      ...(body.seenBytes != null ? { seenBytes: body.seenBytes } : {}),
       redirects,
     };
   }
@@ -409,5 +569,8 @@ module.exports = {
   extractTitle,
   stripHtml,
   readBodyBounded,
+  readStreamBounded,
+  pinnedLookupFor,
+  defaultTransport,
   guardedFetch,
 };

@@ -5937,6 +5937,7 @@
       "tests": [
         "test/block247-web-policy.test.mjs",
         "test/block247-web-tools.test.mjs",
+        "test/block512-web-fetch-pin-ip.test.mjs",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/WebAccessPanel.test.tsx",
         "test/agent-tool-registry.test.mjs",
         "test/tool-activity-labels.test.mjs"
