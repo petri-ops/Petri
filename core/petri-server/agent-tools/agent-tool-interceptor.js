@@ -337,6 +337,20 @@ function createAgentToolInterceptor(options = {}) {
       try { ctx = { ...ctx, toolApprovalMode: toolApprovalPolicy.modeFor(name) }; } catch { /* fail-soft allow */ }
     }
 
+    // BLOCK-515 — 唤醒 trusted 档执行面收窄（fail-closed 硬边界）：任务带
+    // autoToolAllowlist（per-schedule 显式预授权）时，白名单外工具直接拒绝并审计，
+    // 不进审批队列（trusted 授权范围外=硬边界，比 guided 更严而非更松）。
+    // 无 autoToolAllowlist 的任务零变化（guided 默认逐字不变）。
+    if (Array.isArray(ctx.autoToolAllowlist) && !ctx.autoToolAllowlist.includes(name)) {
+      return {
+        ok: false,
+        error: 'auto_allowlist_denied',
+        reason: 'auto_allowlist_denied',
+        message: `该任务由定时唤醒以预授权白名单运行，工具 ${name} 不在授权清单内（BLOCK-515 治理边界）。`,
+        messageKey: 'agent_tool.auto_allowlist_denied',
+      };
+    }
+
     // BLOCK-243 — 编辑参数批准：模型重试原调用时替换为生效参数；原始指纹用于
     // 审计与替换消费，策略按生效参数重新判定（只代理本次 guardKey）。
     const originalFingerprint = callFingerprint(name, boundOriginalArgs);

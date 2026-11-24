@@ -89,6 +89,9 @@ function ensureSchema() {
   try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN tz_offset_minutes INTEGER'); } catch { /* exists */ }
   try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN retry_backoff TEXT'); } catch { /* exists */ }
   try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN overlap_policy TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN auto_mode TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN auto_tool_allowlist TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN auto_budget_checked INTEGER'); } catch { /* exists */ }
   try { sqlite.exec('ALTER TABLE agent_schedule_runs ADD COLUMN workflow_run_id TEXT'); } catch { /* exists */ }
 }
 
@@ -265,6 +268,8 @@ function createSchedule({
   tzOffsetMinutes = 0,
   retryBackoff = 'none',
   overlapPolicy = 'skip',
+  autoMode: autoModeParam = 'guided',
+  autoToolAllowlist = null,
 } = {}) {
   const pid = clampString(projectId, 120);
   if (!pid) return { ok: false, error: 'missing_projectId', message: '定时任务必须绑定项目（projectId）。' };
@@ -284,6 +289,28 @@ function createSchedule({
   } else if (intervalMinutes === undefined || intervalMinutes === null) {
     // 无 cron 且未显式给 interval → 拒绝（二选一），不再静默回默认 60
     return { ok: false, error: 'missing_schedule', message: 'intervalMinutes 与 cronExpr 至少提供一个。' };
+  }
+  // BLOCK-515 — 唤醒 trusted 档校验（fail-closed）：①非空白名单 ②每个工具名都在
+  // registry 内置声明面（未知拒绝）③绑定带预算的 active goal（预算硬顶=既有 goalGate，
+  // 保守值复用已验证机制）；撤回=清空白名单/auto_mode 回 guided（显式可审计可撤回）。
+  const autoMode = autoModeParam === 'trusted' ? 'trusted' : 'guided';
+  let cleanAutoAllowlist = null;
+  let autoBudgetChecked = 0;
+  if (autoMode === 'trusted') {
+    const allowlist = Array.isArray(autoToolAllowlist) ? autoToolAllowlist : null;
+    if (!allowlist || allowlist.length === 0) {
+      return { ok: false, error: 'auto_allowlist_missing', message: 'trusted 档必须提供非空 autoToolAllowlist（白名单外一律硬拒绝）。' };
+    }
+    const known = builtinToolNameSet();
+    const unknown = allowlist.filter((n) => !known.has(String(n)));
+    if (unknown.length > 0) {
+      return { ok: false, error: 'unknown_tool_allowlist', message: '白名单含未注册工具名：' + unknown.join(', ') + '。' };
+    }
+    if (!goalId) {
+      return { ok: false, error: 'auto_budget_missing', message: 'trusted 档必须绑定 goal（带预算）——预算硬顶由既有 goalGate 机制执行。' };
+    }
+    cleanAutoAllowlist = JSON.stringify(allowlist.map((n) => String(n)));
+    autoBudgetChecked = 1;
   }
   const backoff = retryBackoff === 'exponential' ? 'exponential' : 'none';
   const overlap = overlapPolicy === 'queue' ? 'queue' : 'skip';
@@ -320,12 +347,13 @@ function createSchedule({
     || (scheduleKind === 'reminder' ? cleanReminder : scheduleKind === 'workflow' ? '工作流' : cleanPrompt).slice(0, 80)
     || '定时任务';
   db().prepare(`INSERT INTO agent_schedules
-    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,workflow_script,workflow_args_json,enabled,next_run_at,last_run_at,created_at,updated_at,cron_expr,tz_offset_minutes,retry_backoff,overlap_policy)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,?,?,?,?)`)
+    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,workflow_script,workflow_args_json,enabled,next_run_at,last_run_at,created_at,updated_at,cron_expr,tz_offset_minutes,retry_backoff,overlap_policy,auto_mode,auto_tool_allowlist,auto_budget_checked)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,?,?,?,?,?,?,?)`)
     .run(id, userId || null, pid, goal ? goal.id : null, titleClean, cleanPrompt, scheduleKind,
       Math.round(minutes), cleanReminder || null, cleanWorkflowScript || null, workflowArgsJson,
       enabled ? 1 : 0, enabled ? next : next, now.toISOString(), now.toISOString(),
-      cleanCronExpr, cleanCronExpr ? tzMinutes : null, backoff, overlap);
+      cleanCronExpr, cleanCronExpr ? tzMinutes : null, backoff, overlap,
+      autoMode, cleanAutoAllowlist, autoBudgetChecked);
   return { ok: true, schedule: scheduleView(getScheduleRow(id)) };
 }
 
@@ -366,6 +394,38 @@ function runScheduleNow({ id, userId = null } = {}) {
   db().prepare('UPDATE agent_schedules SET next_run_at=?, updated_at=? WHERE id=?')
     .run(nowIso(), nowIso(), row.id);
   return { ok: true, queued: true, schedule: scheduleView(getScheduleRow(row.id)) };
+}
+
+/**
+ * BLOCK-515 — 唤醒 trusted 授予/撤回的显式变更口（可审计：每次变更走本函数留 updated_at）。
+ * guided=撤回（清空白名单）；trusted=按 createSchedule 同一 fail-closed 矩阵校验。
+ */
+function setScheduleAuto({ id, autoMode, autoToolAllowlist = null, userId = null } = {}) {
+  const row = getScheduleRow(id);
+  if (!row) return { ok: false, error: 'schedule_not_found', message: '定时计划不存在。' };
+  if (userId && row.user_id && row.user_id !== userId) return { ok: false, error: 'schedule_not_found', message: '定时计划不存在。' };
+  const mode = autoMode === 'trusted' ? 'trusted' : 'guided';
+  if (mode === 'guided') {
+    db().prepare('UPDATE agent_schedules SET auto_mode=?, auto_tool_allowlist=NULL, auto_budget_checked=0, updated_at=? WHERE id=?')
+      .run('guided', nowIso(), row.id);
+    return { ok: true, schedule: scheduleView(getScheduleRow(row.id)) };
+  }
+  const allowlist = Array.isArray(autoToolAllowlist) ? autoToolAllowlist : null;
+  if (!allowlist || allowlist.length === 0) {
+    return { ok: false, error: 'auto_allowlist_missing', message: 'trusted 档必须提供非空 autoToolAllowlist。' };
+  }
+  const known = builtinToolNameSet();
+  const unknown = allowlist.filter((n) => !known.has(String(n)));
+  if (unknown.length > 0) {
+    return { ok: false, error: 'unknown_tool_allowlist', message: '白名单含未注册工具名：' + unknown.join(', ') + '。' };
+  }
+  const goal = row.goal_id ? getGoalRow(row.goal_id) : null;
+  if (!goal || goal.status !== 'active' || !(Number(goal.budget_tokens) > 0)) {
+    return { ok: false, error: 'auto_budget_missing', message: 'trusted 档必须绑定带预算的 active goal（预算硬顶）。' };
+  }
+  db().prepare('UPDATE agent_schedules SET auto_mode=?, auto_tool_allowlist=?, auto_budget_checked=1, updated_at=? WHERE id=?')
+    .run('trusted', JSON.stringify(allowlist.map((n) => String(n))), nowIso(), row.id);
+  return { ok: true, schedule: scheduleView(getScheduleRow(row.id)) };
 }
 
 function deleteSchedule({ id, userId = null } = {}) {
@@ -413,6 +473,13 @@ function advanceSchedule(id, runAt = Date.now()) {
 const MAX_BACKOFF_MS = 24 * 60 * 60_000;
 
 /** 连续失败次数（最近 runs 的前导 failed 段长度）。 */
+// BLOCK-515 — registry 内置名单惰性读取（顶层 require 会与 goal-tools 形成环：
+// store→agent-tools/registry→goal-tools→store，循环内 store.createGoal 尚未导出）。
+function builtinToolNameSet() {
+  const { listBuiltinToolNames } = require('../agent-tools/registry');
+  return new Set(listBuiltinToolNames());
+}
+
 function consecutiveFailures(scheduleId) {
   const runs = db().prepare('SELECT status FROM agent_schedule_runs WHERE schedule_id=? ORDER BY started_at DESC, rowid DESC LIMIT 20')
     .all(scheduleId);
@@ -553,6 +620,7 @@ module.exports = {
   listSchedules,
   getSchedule,
   setScheduleEnabled,
+  setScheduleAuto,
   runScheduleNow,
   deleteSchedule,
   listDueSchedules,

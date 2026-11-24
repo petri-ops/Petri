@@ -310,6 +310,12 @@ module.exports = {
               // 留痕/审计用：resume 续跑链不回读（同 thinkingLevel 形态），
               // 续跑任务 visionInline=false fail-closed 回旧 read_image 路径。
               visionInline: visionInline || undefined,
+              // BLOCK-515 — 唤醒 trusted 档预授权白名单随任务参数落库（truthy 才存）：
+              // interceptor 执行面按此硬拒绝白名单外工具（无人值守治理边界）。
+              autoToolAllowlist: Array.isArray(req.body && req.body.autoToolAllowlist)
+                && (req.body.autoToolAllowlist).length > 0
+                ? req.body.autoToolAllowlist.map((n) => String(n))
+                : undefined,
             },
           }).taskId;
         } catch (e) {

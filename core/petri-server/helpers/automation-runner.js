@@ -50,12 +50,25 @@ async function createRunConversation({ schedule, fetchImpl, baseUrl }) {
 }
 
 async function submitAgentTask({ schedule, conversationId, fetchImpl, baseUrl }) {
+  // BLOCK-515 — 唤醒 trusted 档：显式授予（auto_mode=trusted + 非空白名单）的 schedule
+  // 提交时带档与白名单（loop 三档契约消费；白名单由 interceptor 执行面硬拒绝）。
+  // guided（默认）提交逐字不变。
+  const trusted = schedule.auto_mode === 'trusted' && schedule.auto_tool_allowlist;
+  let allowlist = null;
+  if (trusted) {
+    try { allowlist = JSON.parse(schedule.auto_tool_allowlist); } catch { allowlist = null; }
+  }
   const data = await fetchJson(fetchImpl, `${baseUrl}/api/ai/agent`, {
     method: 'POST',
     body: JSON.stringify({
       messages: [{ role: 'user', content: schedule.prompt }],
-      context: { page: 'desktop-project', projectId: schedule.project_id },
+      context: {
+        page: 'desktop-project',
+        projectId: schedule.project_id,
+        ...(trusted ? { automationMode: 'trusted' } : {}),
+      },
       conversationId,
+      ...(trusted && Array.isArray(allowlist) && allowlist.length ? { autoToolAllowlist: allowlist } : {}),
     }),
   });
   if (!data || typeof data.taskId !== 'string' || !data.taskId) throw new Error('task_submit_failed');
