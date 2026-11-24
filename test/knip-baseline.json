@@ -196,6 +196,8 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui303-add1.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui341-welcome-chat.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui342-endpoint-grid.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui475-vision-paste-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui522-export-mask-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui523-run-stats.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui526-527-badges.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui538-add1.cjs",
@@ -213,8 +215,11 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui558-trace-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui559-team-ui.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui593-empty-state-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui595-freehand-smooth-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui633-add1.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui693-inkscape-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui704-diagnostics.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-add1.cjs",
@@ -432,6 +437,31 @@
     {
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s6-queued-reload-live.cjs",
       "reason": "BLOCK-511 S6 dev-verify 实机 flow（run.cjs 按 id 动态发现，knip 静态盲区）；HK-01 4/4 排队持久化实证",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui593-empty-state-live.cjs",
+      "reason": "BLOCK-513 L1 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区；同 shutdownUtilityHosts 先例）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui475-vision-paste-live.cjs",
+      "reason": "BLOCK-513 L3 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui522-export-mask-live.cjs",
+      "reason": "BLOCK-513 L2 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui693-inkscape-live.cjs",
+      "reason": "BLOCK-513 L4 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui595-freehand-smooth-live.cjs",
+      "reason": "BLOCK-513 L6 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区）",
       "date": "2026-11-24"
     }
   ]

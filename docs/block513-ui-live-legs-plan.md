@@ -1,12 +1,13 @@
 ---
 capability: block513-ui-live-legs
-status: active
+status: completed
 kind: work-package
 canonical: true
 truthDomain: block513-ui-live-legs
 entrypoint: docs/README.md
 registeredAt: 2026-11-24
 owner: main-agent
+phase: CLOSED
 ---
 
 # BLOCK-513 · UI 实机补腿包（plan）
@@ -43,5 +44,22 @@ owner: main-agent
 
 - 每项：新 flow 断言数 + 台账行更新（verified 仅限机械判据腿；UI-475 停在「实机腿已补、观感腿待签」）。
 - 收口：`npm run closeout` 全门（存量红 lint:ledger/EAR 如实归属）。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口笔录（2026-11-24 · completed）
+
+提交链：立项+文档批 `86306ddb9` → L1 `af453314e` → L2 `ca759aaae` → L3 `22bc4871b` → L4 `2915ca288` → L6 `8aec00999` → 收口目录映射 `1dddbce9e` → 本批收口回写。
+
+对账（§1 计划 vs 实际）：
+- L1 UI-593 ✅ verified（8/8）；L2 UI-522 ✅ verified（13/13）；L3 UI-475 ✅ verified 实机腿兑现、人测腿保留零代签（6/6）；L4 UI-693 ✅ verified（8/8）；L6 UI-595 ✅ verified（10/10）。
+- **L5 改判**：UI-663 已由 UI-670（BLOCK-342）交付并 verified（owner 独立核码同结论），纯文档归位不造实现工作。
+- UI-482 维持挂外部（真机过隧道腿，本机模拟不等价不翻 verified）。
+
+门禁对账（收口日实跑）：
+- ✅ test:changed **327 pass / 0 fail**（首轮元测试红=新验收目录未映射，按 charter 挂 closed-batch-evidence-dirs 修，`1dddbce9e`）
+- ✅ closeout 前列（audit:compact/hygiene/docs:check/ui:audit:check）+ 单独跑绿：user-assets/version-parity/silent-catch/code-size/arch-cycles/css-modules/tracked-consistency/secret/arch/lint/types/post-h9-contracts（186）/surface
+- ✅ quality:knip:check：5 个新 flow 入口经 `--allow-grow` 留因（run.cjs readdir 动态加载=静态盲区，shutdownUtilityHosts 先例），保留面 414 键冻结
+- ❌→存量红如实归属：`quality:lint:ledger`（S0 基点即红 1499>1480/418>416，S6-EVIDENCE:23 已实证归属；本批触碰文件全部 eslint 0 warning——flows 目录在 ignore 名单，与既有 flows 同口径）、`quality:ear`（S0 基点即红 38.9%<42.5%；S6 曾改善至 41.0%，本批分母微增 40.9%，棘轮只进不退如实登记）
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
