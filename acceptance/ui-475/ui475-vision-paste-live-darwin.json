@@ -1,0 +1,39 @@
+{
+  "name": "ui475-vision-paste-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T09:32:26.694Z",
+  "finishedAt": "2026-11-24T09:32:30.013Z",
+  "assertions": [
+    {
+      "name": "A1_backend_vision_true",
+      "pass": true,
+      "detail": "vision_configured=true"
+    },
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "id=p_mwuhxi59_2fha"
+    },
+    {
+      "name": "A2_paste_image_allowed",
+      "pass": true,
+      "detail": "attachment chip rendered after paste"
+    },
+    {
+      "name": "A3_no_blocked_notice",
+      "pass": true,
+      "detail": "no blocked notice"
+    },
+    {
+      "name": "A4_remove_attachment",
+      "pass": true,
+      "detail": "attachment removed"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}
