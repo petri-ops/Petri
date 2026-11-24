@@ -1,0 +1,12 @@
+{
+  "schema": "petri/tracked-consistency-exemptions.v1",
+  "policy": "在制未入库项走带 owner 与 date 的豁免；只减不增（新增豁免须明确 owner/date/reason 并留痕），不得由门禁自动添加",
+  "items": [
+    {
+      "path": "test/c56-user-manuscript-fidelity.test.mjs",
+      "owner": "C-56",
+      "date": "2026-11-24",
+      "reason": "S0 基线已登记的未跟踪 WIP（用户资产/他包在制），BLOCK-511 零触碰；impact-map closed-batch-evidence-dirs.tests 引用。待 owner 入库后移出本豁免（只减不增）。"
+    }
+  ]
+}
