@@ -25,3 +25,6 @@
 
 <!-- audit-log-compact.mjs 追加 @ 2026-11-24T04:59:30.490Z -->
 | ✅ **E-01 树测试翻 verified（用户委托审定）**：用户裁决「按用户委托 Agent 审定翻 verified」，补 E-01-result.md，据 5/5 代理走查+10 张 PNG+review.md:21 先例翻转；留痕 n=1 代理替代真人判据、真人口令覆盖、推翻权保留。 | 2026-11-23 | E-01 / VERIFIED |
+
+<!-- audit-log-compact.mjs 追加 @ 2026-11-24T08:13:31.162Z -->
+| 🔵 **启动登记（active QODER-A2 · QODER-YELLOW9-REOPEN 评审稿同批）**：用户发令「🟡9 开始吧 可以立项了」+裁决立 9 项评审稿、Jev 首推 A2（0.49）→A2 为唯一 active 实施包（审批意图解释的模型/本地模型解释层；确定性解释已交 BLOCK-243）。范围/非范围/依赖/验收边界见 `docs/qoder-yellow9-reopen-review.md`，其余 8 项 queued 待逐项发令。红线：零新依赖默认、不改产品安全边界、观感零代签、不碰 G1+。三件套（plan+registry+README）同批。 | 2026-11-23 | QODER-A2 / P0-LAUNCH |
