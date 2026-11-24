@@ -5,10 +5,16 @@ on:
     branches: [main]
   pull_request:
 
+# BLOCK-511 S2.6 — 同分支新推送取消旧运行（省 CI 额度）；有界等待防挂起
+concurrency:
+  group: desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   stability:
     # Petri Desktop releases are macOS-only from v0.0.1-rc.2 onward.
     runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +30,22 @@ jobs:
 
       - name: Install frontend dependencies
         run: npm --prefix frontend ci
+
+      # BLOCK-511 S2.6 — 静态门禁入 CI（原仅约 19/843 Node 测试 + tsc/build:spa；
+      # closeout 门禁此前全不在 CI）。每项失败即红，逐个定位修复，不带红门。
+      - name: Run static gates
+        run: |
+          npm run docs:check
+          npm run ui:audit:check
+          npm run quality:secret
+          npm run quality:arch
+          npm run quality:lint
+          npm run quality:types
+          npm run gate:code-size
+          npm run gate:css-modules
+          npm run gate:arch-cycles
+          npm run quality:knip:check
+          npm run gate:tracked-consistency
 
       - name: Run platform regressions
         run: >-

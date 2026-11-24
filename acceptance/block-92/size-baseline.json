@@ -21,9 +21,9 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1944,
-      "bytes": 96172,
-      "sha256": "02fbc22e22357ce6d01b85621d18692dd6697afdf671cac9ca80f228d6faecd4"
+      "lines": 1943,
+      "bytes": 96115,
+      "sha256": "b0f5ea7277b5206d40cff60b4da92750ef3c4359e90c7fbd8800e404b6060606"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -205,9 +205,9 @@
       "path": "frontend/src/components/copilot/simple-chat.css",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 5469,
-      "bytes": 132770,
-      "sha256": "49c98f2db8d614f8bbb439bacc6f1fa357cf6cb703c126b3a4a61922d0fbaa0f"
+      "lines": 5494,
+      "bytes": 133453,
+      "sha256": "d9980492c2c90f7a6e0bf05af17f868edfca9098c846c65ab64c5659525b912c"
     },
     {
       "path": "frontend/src/components/desktop/desktop.css",
@@ -229,9 +229,9 @@
       "path": "core/petri-server/loop-orchestrator.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1674,
-      "bytes": 76991,
-      "sha256": "272e2a2a936a872e2516baf2fc3381d796db75d20e9ef0ab0896bbd13ef8c5c8"
+      "lines": 1658,
+      "bytes": 76555,
+      "sha256": "1770f5a8bbf953d97c732bf5f1916cd7915d86c4ae895b068c251530d61b9a42"
     },
     {
       "path": "frontend/src/components/svg-editor/SvgEditorViewer.tsx",
@@ -430,8 +430,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 920,
-      "bytes": 46745,
-      "sha256": "1d2c6e8e5256963abdc79576f948d8c123f7ecad88200555963f4af233f7c9ef"
+      "bytes": 46988,
+      "sha256": "4f0add2cb592b2523833e62122560c78dbd730da8356c77ea2a07ca17349ce7c"
     },
     {
       "path": "frontend/src/pages/extensions/styles.module.css",
@@ -594,5 +594,20 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86716
+  "total": 86724,
+  "growAllowances": [
+    {
+      "path": "frontend/src/components/copilot/simple-chat.css",
+      "reason": "QODER-A2 P3 骨架样式（commit 16c48c6d，UI-721 审批意图解释按钮/分析中骨架/失败降级，全部走既有 token 零新颜色字面量）；BLOCK-511 S2.5 核实来源提交后留因上调 25 行/683 字节",
+      "date": "2026-11-24",
+      "from": {
+        "lines": 5469,
+        "bytes": 132770
+      },
+      "to": {
+        "lines": 5494,
+        "bytes": 133453
+      }
+    }
+  ]
 }

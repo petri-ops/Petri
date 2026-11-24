@@ -138,7 +138,7 @@ function buildLedger(manifest = MANIFEST, extra = []) {
  * 门禁核心（纯函数，供 CLI 与自测共用）。
  * @returns {{ ok: boolean, violations: string[], warnings: string[] }}
  */
-export function evaluateGate({ current, baseline, exceptions, today }) {
+export function evaluateGate({ current, baseline, exceptions, today, growAllowances = [] }) {
   const violations = [];
   const warnings = [];
   const baseMap = new Map(baseline.files.map((f) => [f.path, f]));
@@ -164,6 +164,9 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
     if (!currentMap.has(p)) violations.push(`${p}: 例外登记的文件不在台账清单——请移除该例外`);
   }
 
+  // BLOCK-511 S2.5 — 上调留因：有 growAllowances 记录（path+reason+date）的文件允许行数/字节增长；
+  // 无记录的增长仍红。sha 指纹必须同批 --write 重打（不放宽「静默换内容」防线）。
+  const growSet = new Set((Array.isArray(growAllowances) ? growAllowances : []).map((g) => g.path));
   for (const file of current.files) {
     const base = baseMap.get(file.path);
     if (base === undefined) {
@@ -175,8 +178,8 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
       }
       continue;
     }
-    // 1) 行数棘轮（v1 语义保留）
-    if (file.lines > base.lines) {
+    // 1) 行数棘轮（v1 语义保留；BLOCK-511 S2.5 有留因的上调放行）
+    if (file.lines > base.lines && !growSet.has(file.path)) {
       violations.push(`${file.path}: ${file.lines} > 基线 ${base.lines}（棘轮只减不增）`);
     }
     // 2) sha256 指纹（P3-1）：改动必须随提交显式重打基线
@@ -184,7 +187,7 @@ export function evaluateGate({ current, baseline, exceptions, today }) {
       violations.push(`${file.path}: 内容指纹漂移（sha256 变更未随提交重打基线）——node scripts/code-size-ledger.mjs --write`);
     }
     // 4) CSS 字节棘轮（L0-7/L-36：css 入册后字节只减不增——防行数不变而体积膨胀）
-    if (Number.isFinite(base.bytes) && Number.isFinite(file.bytes) && /\.css$/.test(file.path) && file.bytes > base.bytes) {
+    if (Number.isFinite(base.bytes) && Number.isFinite(file.bytes) && /\.css$/.test(file.path) && file.bytes > base.bytes && !growSet.has(file.path)) {
       violations.push(`${file.path}: CSS 字节 ${file.bytes} > 基线 ${base.bytes}（字节棘轮只减不增）`);
     }
     // 3) 预算 + 例外 expires（P3-1）：超预算必须有未过期例外。
@@ -262,7 +265,7 @@ async function main() {
       console.error('[code-size-ledger] WARN 例外文件不可读（视为无例外）');
     }
     const today = argValue('--today') || new Date().toISOString().slice(0, 10);
-    const result = evaluateGate({ current: ledger, baseline, exceptions, today });
+    const result = evaluateGate({ current: ledger, baseline, exceptions, today, growAllowances: baseline.growAllowances || [] });
     for (const w of result.warnings) console.warn(`[code-size-ledger] WARN ${w}`);
     if (!result.ok) {
       console.error('[code-size-ledger] FAIL 门禁违规：');
@@ -275,13 +278,54 @@ async function main() {
     process.exit(0);
   }
 
-  const json = JSON.stringify(ledger, null, 2);
   if (args.includes('--write')) {
+    // BLOCK-511 S2.5 — --write 默认只允许下调（行数/CSS 字节/sha 重打）。上调必须显式
+    // --allow-grow <path>=<reason>（可重复），理由写入 baseline.growAllowances 随 diff 审计。
+    const allowPairs = args.flatMap((a, i) => a === '--allow-grow' ? [args[i + 1]] : [])
+      .filter(Boolean);
+    const allowMap = new Map();
+    for (const pair of allowPairs) {
+      const eq = pair.indexOf('=');
+      if (eq <= 0 || eq === pair.length - 1) {
+        console.error(`[code-size-ledger] --allow-grow 格式错误：${pair}（应为 <path>=<reason>）`);
+        process.exit(1);
+      }
+      allowMap.set(pair.slice(0, eq), pair.slice(eq + 1));
+    }
+    let oldBaseline = null;
+    if (fs.existsSync(baselinePath)) {
+      try { oldBaseline = JSON.parse(fs.readFileSync(baselinePath, 'utf8')); } catch { /* 首次写入 */ }
+    }
+    const oldMap = new Map((oldBaseline?.files || []).map((f) => [f.path, f]));
+    const grew = [];
+    for (const file of ledger.files) {
+      const old = oldMap.get(file.path);
+      if (!old) continue;
+      const lineGrow = Number.isFinite(old.lines) && file.lines > old.lines;
+      const byteGrow = /\.css$/.test(file.path) && Number.isFinite(old.bytes) && Number.isFinite(file.bytes) && file.bytes > old.bytes;
+      if ((lineGrow || byteGrow) && !allowMap.has(file.path)) {
+        grew.push(`${file.path}: ${lineGrow ? `${old.lines}→${file.lines} 行` : ''}${byteGrow ? ` ${old.bytes}→${file.bytes} 字节` : ''}`);
+      }
+    }
+    if (grew.length) {
+      console.error('[code-size-ledger] --write 拒绝未留因的上调（棘轮只减不增）：');
+      for (const g of grew) console.error(`  - ${g}`);
+      console.error('  如确属正当上调，请用 --allow-grow <path>=<reason> 显式登记理由。');
+      process.exit(1);
+    }
+    const today = argValue('--today') || new Date().toISOString().slice(0, 10);
+    const allowances = [...(oldBaseline?.growAllowances || [])];
+    for (const [p, reason] of allowMap) {
+      const old = oldMap.get(p);
+      const cur = ledger.files.find((f) => f.path === p);
+      allowances.push({ path: p, reason, date: today, from: old ? { lines: old.lines, bytes: old.bytes ?? null } : null, to: cur ? { lines: cur.lines, bytes: cur.bytes ?? null } : null });
+    }
+    const out = { ...ledger, ...(allowances.length ? { growAllowances: allowances } : {}) };
     fs.mkdirSync(path.dirname(baselinePath), { recursive: true });
-    fs.writeFileSync(baselinePath, `${json}\n`);
-    console.log(`[code-size-ledger] v2 基线已写入 ${path.relative(ROOT, baselinePath) || baselinePath}`);
+    fs.writeFileSync(baselinePath, `${JSON.stringify(out, null, 2)}\n`);
+    console.log(`[code-size-ledger] v2 基线已写入 ${path.relative(ROOT, baselinePath) || baselinePath}（growAllowances=${allowances.length}）`);
   } else {
-    console.log(json);
+    console.log(JSON.stringify(ledger, null, 2));
   }
 }
 

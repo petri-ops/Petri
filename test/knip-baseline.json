@@ -6,7 +6,7 @@
     "types",
     "files"
   ],
-  "updatedAt": "2026-11-21",
+  "updatedAt": "2026-11-24",
   "keys": [
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::DEFAULT_PORT",
     "exports::.agents/skills/petri-dev-infra/dev-verify/lib.cjs::TEST_INSTANCE_PORT",
@@ -26,6 +26,7 @@
     "exports::frontend/src/components/result-studio/viewerRegistry.ts::viewerProfileCanCompare",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::PACK_WRITE_BRIDGE_VERSION",
     "exports::frontend/src/lib/workSurface/packWriteBridge.ts::validateSurfaceWritesDecl",
+    "exports::src/ipc/utility-host.js::shutdownUtilityHosts",
     "exports::src/main/core-utils.js::IS_DEV",
     "exports::src/main/core-utils.js::resolveCoreRoot",
     "exports::src/main/core-utils.js::resolveNodeBin",
@@ -414,5 +415,12 @@
     "types::frontend/src/themes/ThemeProvider.tsx::AccentId",
     "types::frontend/src/themes/ThemeProvider.tsx::ResolvedTheme",
     "types::frontend/src/types/branch.types.ts::Message"
+  ],
+  "growAllowances": [
+    {
+      "key": "exports::src/ipc/utility-host.js::shutdownUtilityHosts",
+      "reason": "src/main.js:897 before-quit 动态 require 调用（knip 静态分析盲区）；BLOCK-511 S1.3 退出守卫清理链，属动态入口定性保留",
+      "date": "2026-11-24"
+    }
   ]
 }

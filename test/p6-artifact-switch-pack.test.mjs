@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { readPackBioJson, PACK_BIO_SKIP_REASON } from './helpers/petri-pack-bio.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DRIVER = path.join(ROOT, 'scripts', 'g0-rs-p6-electron-pressure-driver.cjs');
@@ -51,13 +52,17 @@ test('产品判据 DOM 未被本票改写（红线：不改产品 debug 属性/p
   const resultsSurface = fs.readFileSync(
     path.join(ROOT, 'frontend', 'src', 'components', 'work-surface', 'ResultsSurface.tsx'), 'utf8',
   );
-  const packJson = fs.readFileSync('/Users/zhangdiandian/Documents/1.WorkDir/petri-pack-bio/pack.json', 'utf8');
   assert.match(shell, /data-debug-selected-name/, '产品 debug 属性未改');
   assert.match(resultsSurface, /data-result-surface-source/, '产品 pack 接管标志未改');
+});
+
+test('pack 声明未擅改（需 petri-pack-bio 兄弟仓）', (t) => {
+  const packJson = readPackBioJson();
+  if (packJson === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
   const pack = JSON.parse(packJson);
   // 2026-11-23 全链收口：resultSurfaces 已整体停用（方向 B 完成，见 p6-result-surfaces-retire）；
   // 本票当时只改了 table，plot 保留。两种状态都是合法进展——断言「未擅自操纵 pack 声明」的
-  // 实质=product 代码未改 + pack.json 变更均经裁决（table 停→plot/report 停）。
+  // 实质=pack.json 变更均经裁决（table 停→plot/report 停）。
   const surfaces = pack.provides.resultSurfaces || [];
   assert.ok(
     surfaces.length === 0 || (surfaces[0].artifactTypes || []).includes('plot'),

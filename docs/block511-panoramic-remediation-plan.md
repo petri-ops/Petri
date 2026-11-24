@@ -58,6 +58,11 @@ supersedes: 无（PANORAMIC-ASSESSMENT 的修复执行包）
 
 原始输出：`/tmp/panoramic-baseline/*.log`（S6 前归档入证据目录）。
 
+## 3.1 S2 测试入口补全留因（2026-11-24）
+
+- **删除 `test/pipeline.test.js`**：该文件 365 行，全部依赖 `../core/gateway/pipeline`（`executePipeline` / `PipelineError`）。现读 `core/gateway/` 目录已不存在（OSS 解耦/架构迁移后生产代码删除，见 `docs/dependency-decoupling-checkpoint.md`），测试无对应生产代码、无法修好，按提示词「已无对应生产代码的删除并在 plan 留因，不得用 skip 掩盖」删除，非 skip 掩盖。
+- **保留并挂规则**：`test/block67-node-agent-fs.test.js`（依赖 node-agent/workspace-gateway 均在，37 有效断言 + 1 darwin BSD find 显式 skip 属既有平台分支）、`test/scripts/check-ui-productization-audit-exit-2.test.mjs`、`test/scripts/dev-launch-state.test.mjs`（依赖脚本均存在）三件验证有效，挂入对应 impact-map 规则。
+
 ## 4. 验证节奏与决策工具
 
 - 每修复点 HK-01 红绿先行；定向测试优先（`test:changed` / `node --test` / `test:files --prefix frontend`），全量门留 S6。

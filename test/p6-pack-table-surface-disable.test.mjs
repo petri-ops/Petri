@@ -11,12 +11,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { readPackBioJson, PACK_BIO_SKIP_REASON } from './helpers/petri-pack-bio.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PACK_JSON = '/Users/zhangdiandian/Documents/1.WorkDir/petri-pack-bio/pack.json';
 
-test('table 族不被任何 result surface 接管（table 族回退原生 viewer）', () => {
-  const pack = JSON.parse(fs.readFileSync(PACK_JSON, 'utf8'));
+test('table 族不被任何 result surface 接管（table 族回退原生 viewer）', (t) => {
+  const raw = readPackBioJson();
+  if (raw === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
+  const pack = JSON.parse(raw);
   const surfaces = pack.provides.resultSurfaces || [];
   const claimingTable = surfaces.filter((item) => (item.artifactTypes || []).includes('table'));
   assert.equal(
@@ -27,8 +29,10 @@ test('table 族不被任何 result surface 接管（table 族回退原生 viewer
   // 「plot/report 保留」是中间态，两种状态都合法，只断言 table 未被接管这一不变量。
 });
 
-test('provides.artifactTypes 保留 table（包能力声明不动）', () => {
-  const pack = JSON.parse(fs.readFileSync(PACK_JSON, 'utf8'));
+test('provides.artifactTypes 保留 table（包能力声明不动）', (t) => {
+  const raw = readPackBioJson();
+  if (raw === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
+  const pack = JSON.parse(raw);
   assert.ok(
     pack.provides.artifactTypes.includes('table'),
     'provides.artifactTypes 是包能力声明（工具目录投影），不得随 result surface 一起删',

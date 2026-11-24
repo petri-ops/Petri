@@ -13,12 +13,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { readPackBioJson, PACK_BIO_SKIP_REASON } from './helpers/petri-pack-bio.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const PACK_JSON = '/Users/zhangdiandian/Documents/1.WorkDir/petri-pack-bio/pack.json';
-const load = () => JSON.parse(fs.readFileSync(PACK_JSON, 'utf8'));
+const load = () => JSON.parse(readPackBioJson());
 
-test('bio resultSurfaces 已停用（无接管 result 的 surface）', () => {
+test('bio resultSurfaces 已停用（无接管 result 的 surface）', (t) => {
+  if (readPackBioJson() === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
   const pack = load();
   const surfaces = pack.provides.resultSurfaces || [];
   const claiming = surfaces.filter((item) => (item.artifactTypes || []).length > 0);
@@ -28,7 +29,8 @@ test('bio resultSurfaces 已停用（无接管 result 的 surface）', () => {
   );
 });
 
-test('pack 其他能力保留（只停 result surface，不停包）', () => {
+test('pack 其他能力保留（只停 result surface，不停包）', (t) => {
+  if (readPackBioJson() === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
   const pack = load();
   assert.equal(pack.packId, 'petri-pack-bio');
   assert.ok(pack.provides.plugins, 'plugins 保留');

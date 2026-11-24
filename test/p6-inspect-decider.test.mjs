@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { readPackBioJson, PACK_BIO_SKIP_REASON } from './helpers/petri-pack-bio.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DRIVER = path.join(ROOT, 'scripts', 'g0-rs-p6-electron-pressure-driver.cjs');
@@ -54,9 +55,13 @@ test('产品协议未被本票改写（红线：不改产品 sandbox/CSP/凭据/
     path.join(ROOT, 'frontend', 'src', 'components', 'work-surface', 'PackSurfaceFrame.tsx'), 'utf8',
   );
   const scheme = fs.readFileSync(path.join(ROOT, 'src', 'main', 'pack-ui', 'scheme.js'), 'utf8');
-  const packJson = fs.readFileSync('/Users/zhangdiandian/Documents/1.WorkDir/petri-pack-bio/pack.json', 'utf8');
   assert.match(packFrame, /allow-top-navigation-to-custom-protocols/, '产品 B1 token 仍在');
   assert.match(scheme, /protocol\.handle\(SCHEME/, '产品 handler 仍在');
   assert.match(scheme, /Content-Security-Policy/, '产品 CSP 仍在');
+});
+
+test('pack.json 的 table 声明未被擅删（需 petri-pack-bio 兄弟仓）', (t) => {
+  const packJson = readPackBioJson();
+  if (packJson === null) { t.skip(PACK_BIO_SKIP_REASON); return; }
   assert.match(packJson, /"table"/, 'pack.json 的 table 声明未被删（产品侧改动未擅做）');
 });

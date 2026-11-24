@@ -34,10 +34,18 @@ const LONG_RE = /(^|[-.])(live|e2e|soak)([-.])|perf-probe|startup-perf/;
 
 const SHARDS = ['node-core', 'frontend', 'node-long'];
 
-function listNodeTests() {
-  return fs.readdirSync(TEST_DIR)
-    .filter((f) => f.endsWith('.test.mjs') || f.endsWith('.test.cjs'))
-    .sort();
+function listNodeTests(dir = TEST_DIR) {
+  // BLOCK-511 S2.2 — 递归覆盖 test/ 下 *.test.mjs/.test.cjs/.test.js（此前仅顶层 mjs/cjs，
+  // test/scripts/ 子目录与 .test.js 永不执行）。返回相对 test/ 的 POSIX 路径。
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listNodeTests(full));
+    else if (entry.isFile() && /\.test\.(mjs|cjs|js)$/.test(entry.name)) {
+      out.push(path.relative(TEST_DIR, full).split(path.sep).join('/'));
+    }
+  }
+  return out.sort();
 }
 
 export function buildShardPlan() {

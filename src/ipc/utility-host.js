@@ -116,4 +116,4 @@ function shutdownUtilityHosts() {
   for (const packId of [...ACTIVE.keys()]) stopChild(packId);
 }
 
-module.exports = { registerUtilityHostIpc, shutdownUtilityHosts, ACTIVE };
+module.exports = { registerUtilityHostIpc, shutdownUtilityHosts }; // BLOCK-511 S2.5 — ACTIVE 内部 Map 无需导出（死导出清理）

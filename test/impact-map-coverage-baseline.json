@@ -72,7 +72,6 @@
     "test/nso-w2-mcp-health.test.mjs",
     "test/nso-w4-extension-single-source.test.mjs",
     "test/owned-backend-supervisor.test.mjs",
-    "test/pipeline.test.js",
     "test/pl6a-stale-running-reconciler.test.mjs",
     "test/project-memory-isolation.test.mjs",
     "test/project-memory-migration.test.mjs",

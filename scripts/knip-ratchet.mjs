@@ -86,10 +86,37 @@ function loadBaseline() {
 const update = process.argv.includes('--update');
 const current = collectKeys(runKnipJson());
 
+// BLOCK-511 S2.5 — 上调留因：--update 默认只允许下调（移除键）；新增键必须
+// --allow-grow <key>=<reason>（可重复）显式登记，理由写入 baseline.growAllowances。
+const allowPairs = process.argv.flatMap((a, i) => a === '--allow-grow' ? [process.argv[i + 1]] : []).filter(Boolean);
+const allowMap = new Map();
+for (const pair of allowPairs) {
+  const eq = pair.indexOf('=');
+  if (eq <= 0 || eq === pair.length - 1) {
+    console.error(`[knip-ratchet] --allow-grow 格式错误：${pair}（应为 <key>=<reason>）`);
+    process.exit(1);
+  }
+  allowMap.set(pair.slice(0, eq), pair.slice(eq + 1));
+}
+
 if (update) {
-  const previous = fs.existsSync(BASELINE_PATH) ? new Set(JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8')).keys) : new Set();
+  const prevDoc = fs.existsSync(BASELINE_PATH) ? JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf8')) : { keys: [] };
+  const previous = new Set(prevDoc.keys);
   const added = [...current].filter((k) => !previous.has(k));
   const removed = [...previous].filter((k) => !current.has(k));
+  const unapproved = added.filter((k) => !allowMap.has(k));
+  if (unapproved.length) {
+    console.error('[knip-ratchet] --update 拒绝未留因的保留面上调（新增即红）：');
+    for (const k of unapproved) console.error(`  - ${k}`);
+    console.error('  确属保留（动态入口/测试契约/盲区误报）请用 --allow-grow <key>=<reason> 登记。');
+    process.exit(1);
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const allowances = [...(prevDoc.growAllowances || [])];
+  for (const [k, reason] of allowMap) {
+    if (allowances.some((a) => a.key === k)) continue;
+    allowances.push({ key: k, reason, date: today });
+  }
   fs.writeFileSync(
     BASELINE_PATH,
     JSON.stringify(
@@ -103,6 +130,7 @@ if (update) {
         categories: CATEGORIES,
         updatedAt: new Date().toISOString().slice(0, 10),
         keys: [...current].sort(),
+        growAllowances: allowances,
       },
       null,
       2,

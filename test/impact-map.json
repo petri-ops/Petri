@@ -136,7 +136,6 @@
       "note": "W5b 第一刀（BLOCK-414）SimpleChat guard-ack 簇抽取：useGuardAck hook + 行数只减锚。改 SimpleChat/hooks 或主文件即跑本契约。",
       "patterns": [
         "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.ts",
-        "frontend/src/components/copilot/SimpleChat/hooks/useGuardAck.test.ts",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "src/main/_backend-ports.js"
       ],
@@ -844,7 +843,6 @@
         "src/preload.js",
         "core/packages/shared-config/config-schema.js",
         "frontend/src/components/shell/**",
-        "frontend/src/hooks/useDesktopShell.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/DesktopBehaviorPanel.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx",
@@ -1056,7 +1054,6 @@
         "acceptance/block-78/**",
         "core/petri-server/helpers/ai-usage.js",
         "core/petri-server/routes/ai-misc.js",
-        "core/petri-server/routes/harness/harness.js",
         "core/petri-server/agent-tools/workspace-ssh-surface.js",
         "core/petri-server/agent-tools/workspace-tools.js",
         "core/petri-server/routes/ai-agent/background-processes.js",
@@ -1129,7 +1126,6 @@
         "core/shared-backend/git-adapter.js",
         "src/ipc/working-tree-review/review-stage.js",
         "core/shared-backend/git-repository-binding.js",
-        "core/shared-backend/git-repository-consent-schema.js",
         "src/migrations/004_git_repository_consent.sql"
       ],
       "tests": [
@@ -1235,8 +1231,7 @@
       "patterns": [
         "core/shared-backend/loop-*.js",
         "core/petri-server/agent-runner.js",
-        "core/petri-server/routes/ai-loop.js",
-        "core/petri-server/routes/loop.js"
+        "core/petri-server/routes/ai-loop.js"
       ],
       "tests": [
         "test/loop-contract.test.mjs",
@@ -1347,8 +1342,6 @@
         "frontend/src/components/desktop/titlebar/shared.tsx",
         "frontend/src/components/workspace-panels/LeftPanel.tsx",
         "frontend/src/pages/window/CommandCenterJobsWall.tsx",
-        "frontend/src/pages/plugins/index.tsx",
-        "frontend/src/pages/plugins/plugins.module.css",
         "frontend/src/pages/settings/index.tsx",
         "frontend/src/pages/settings/settings.module.css",
         "frontend/src/lib/project-store.ts",
@@ -1468,7 +1461,6 @@
         "core/petri-server/helpers/process-lifecycle.js",
         "core/petri-server/helpers/tools-executor.js",
         "core/petri-server/routes/files.js",
-        "core/petri-server/routes/r-compute.js",
         "core/petri-server/routes/tools-platform.js",
         "core/shared-backend/local-request-boundary.js",
         "plugins/pca-explorer/**",
@@ -1988,7 +1980,8 @@
         "test/p6-pack-table-surface-disable.test.mjs",
         "test/p6-driver-filter-selector.test.mjs",
         "test/p6-artifact-switch-pack.test.mjs",
-        "test/p6-result-surfaces-retire.test.mjs"
+        "test/p6-result-surfaces-retire.test.mjs",
+        "test/p6-driver-iframe-probe.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -2646,7 +2639,6 @@
         "core/petri-server/helpers/ai-usage.js",
         "core/petri-server/routes/ai-misc.js",
         "core/petri-server/helpers/project-storage.js",
-        "core/petri-server/shared-backend/llm-providers/model-gateway.js",
         "core/shared-backend/llm-providers/model-gateway.js",
         "core/shared-backend/llm-providers/deepseek.js",
         "core/shared-backend/llm-providers/anthropic.js",
@@ -2785,7 +2777,6 @@
         "frontend/src/components/workspace-panels/AnalysisLaunchPanel.tsx",
         "frontend/src/components/workspace-panels/RightPanel.tsx",
         "frontend/src/components/workspace-panels/ResultArtifactShell.tsx",
-        "frontend/src/pages/window/WindowResultPage.tsx",
         "frontend/src/lib/project-types.ts",
         "test/block83-tool-catalog.test.mjs",
         "core/shared-backend/script-host-languages.js",
@@ -3375,7 +3366,6 @@
         "src/ipc/window-manager.js",
         "src/preload.js",
         "eslint-suppressions.json",
-        "frontend/eslint-suppressions.json",
         "scripts/quality-baseline.sh",
         "scripts/knip-ratchet.mjs",
         "test/knip-baseline.json",
@@ -3411,7 +3401,6 @@
       "patterns": [
         "core/petri-server/helpers/decision-api.js",
         "scripts/block110-calibrate.mjs",
-        "scripts/block110-merge-corpus.cjs",
         "acceptance/block-110/**",
         "test/block110-*.test.mjs",
         "scripts/block110-p1-ab.mjs",
@@ -4133,7 +4122,6 @@
       "id": "ui448-side-chat-dock-alignment",
       "note": "UI-448 侧边聊天悬浮面体验对齐项目摘要：hooks/sideChatDockStore.ts 共享开态 + SimpleChat/ComposerYield.tsx 让位提示条 + SimpleChat compact 占位符 + CenterPanel agentMainSideChatYield 让位类 + SideChatDock 视觉对齐（--petri-shadow-float）+ custom.css token + 摘要浮层阴影收编单源；证据目录 acceptance/ui-448/ 归 exactly-one 规则防 fail-closed 拦截。",
       "patterns": [
-        "frontend/src/hooks/sideChatDockStore.ts",
         "frontend/src/components/copilot/SimpleChat/ComposerYield.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/components/copilot/SimpleChat/types.ts",
@@ -4835,8 +4823,6 @@
       "patterns": [
         "frontend/src/styles/custom.css",
         "frontend/src/components/copilot/CommandPalette.tsx",
-        "frontend/src/components/auth/LoginModal.css",
-        "frontend/src/components/ui/PageHeader.css",
         "frontend/src/pages/project-workspace.module.css",
         "frontend/src/components/desktop/WorkingTreeReview/CodeReviewDrawer.module.css",
         "frontend/src/pages/extensions/extensions.module.css",
@@ -5486,7 +5472,8 @@
         "frontend/src/pages/project-workspace/fileOps.test.tsx",
         "frontend/src/pages/project-workspace/WorkspaceFileTabStrip.test.tsx",
         "frontend/src/pages/project-workspace/RightFileTree.shortcuts.test.tsx",
-        "test/next05-csp.test.mjs"
+        "test/next05-csp.test.mjs",
+        "test/p6-pack-scheme-privileges.test.mjs"
       ],
       "classifiesScripts": false
     },
@@ -5603,7 +5590,6 @@
         "core/petri-server/helpers/tools-assets.js",
         "core/petri-server/helpers/pack-demo-assets.js",
         "core/petri-server/helpers/methods-export.js",
-        "core/shared-backend/pack-methods.js",
         "core/shared-backend/pack-scientific-profiles.js",
         "core/shared-backend/result-scientific-compare.js",
         "core/shared-backend/result-scientific-rerun.js",
@@ -5851,7 +5837,6 @@
         "frontend/src/components/copilot/SimpleChat/SelectionActionBar.tsx",
         "frontend/src/components/copilot/SimpleChat/selectionActions*.ts",
         "frontend/src/components/copilot/SimpleChat/messageActions.ts",
-        "frontend/src/components/copilot/SimpleChat/sessionDigest.ts",
         "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
         "frontend/src/components/copilot/SimpleChat/ImagePreviewModal.tsx",
         "frontend/src/components/copilot/SimpleChat/PlanApprovalCard.tsx",
@@ -6540,7 +6525,6 @@
         "frontend/src/components/copilot/SimpleChat.tsx",
         "frontend/src/lib/events.ts",
         "frontend/src/lib/auto-model.ts",
-        "frontend/src/lib/packTabData.ts",
         "frontend/src/lib/workSurface/usePackTabData.ts",
         "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
         "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
@@ -7844,7 +7828,6 @@
         "scripts/post-k7-source-scan-ratchet.mjs",
         "test/block404-*.test.mjs",
         "test/lint-warnings-baseline.json",
-        "test/knip-asserts-baseline.json",
         "docs/post-k7-readings-single-source.json"
       ],
       "tests": [
@@ -8085,7 +8068,6 @@
       "patterns": [
         "frontend/src/components/copilot/SimpleChat/ModelMenu.tsx",
         "frontend/src/components/copilot/SimpleChat/activeRunWindow.ts",
-        "frontend/src/components/copilot/SimpleChat/hooks/useContextWindowQuickPick.ts",
         "frontend/src/components/copilot/SimpleChat/modelConfigAndCollapse.test.tsx",
         "frontend/src/components/copilot/SimpleChat/SimpleChatMessageRow.tsx",
         "frontend/src/components/copilot/SimpleChat.tsx"
@@ -8166,8 +8148,7 @@
       "note": "NSO Batch-1（BLOCK-373 链哈希）/Batch-4（BLOCK-374 MCP 两轴分离）守护测试登记。BLOCK-375 S0 全量分片归因时补挂规则（W5a 棘轮『新测试必须挂规则』抓真）。",
       "patterns": [
         "src/migrations/022_artifact_chain_hash.sql",
-        "scripts/verify-artifact-chain.mjs",
-        "core/petri-server/helpers/agent-tool-interceptor.js"
+        "scripts/verify-artifact-chain.mjs"
       ],
       "tests": [
         "test/nso-b1-chain-hash.test.mjs",
@@ -8399,8 +8380,6 @@
         "core/petri-server/agent-tools/security-boundaries.js",
         "core/petri-server/helpers/ddl-migrate.js",
         "core/petri-server/bootstrap.js",
-        "core/petri-server/agent-tools/transcript.js",
-        "core/petri-server/agent-tools/task-graph.js",
         "core/petri-server/agent-tools/tool-capability.js",
         "test/m6a-*",
         "docs/block-434-*",
@@ -8850,9 +8829,7 @@
       "note": "国风水印全局层（用户反馈'只在欢迎页看到'后重构）：GlobalWatermark main.tsx 挂一次、fixed四角覆盖所有路由，移除逐页div；四原型mask+ink3%主题自适应+pointer-events:none+aria-hidden+零裸z；HK01绿6/6+邻域PASS+tsc0+a11y绿+实机16/16(四路由四纹样全可见截图)；审美不代签。证据 acceptance/cultural-watermark/**。",
       "patterns": [
         "frontend/src/styles/CulturalWatermark.test.ts",
-        "frontend/src/styles/watermark.css",
         "frontend/src/main.tsx",
-        "frontend/src/components/common/GlobalWatermark.tsx",
         ".agents/skills/petri-dev-infra/dev-verify/flows/cultural-watermark.cjs",
         "acceptance/cultural-watermark/**"
       ],
@@ -9217,7 +9194,6 @@
       "id": "upstream-sync-test-registration",
       "note": "上游同步（2026-11-17/18）带入的测试文件机械补挂（W5a 契约：每个测试文件必须被 impact-map 引用）：agent-task-resume 路由消歧 / BLOCK-450 M2 task_events 唯一约束 / UI-421 一键解锁 / UI-705 UpdatePill。",
       "patterns": [
-        "src/ipc/agent-tasks.js",
         "core/petri-server/db/migrations/*task_events*",
         "frontend/src/components/desktop/titlebar/UpdatePill*",
         "frontend/src/components/desktop/WorkingTreeReview/**"
@@ -9721,8 +9697,6 @@
         "core/shared-backend/lesson-distiller.js",
         "core/petri-server/helpers/lesson-store.js",
         "core/petri-server/helpers/lesson-render.js",
-        "core/petri-server/agent-tools/tool-defs/evolution.js",
-        "core/petri-server/agent-tools/evolution-tools.js",
         "core/petri-server/agent-tools/tool-defs.js",
         "core/petri-server/agent-tools/registry.js",
         "core/petri-server/helpers/system-prompt.js",
@@ -9747,7 +9721,6 @@
         "core/petri-server/helpers/lesson-store.js",
         "core/petri-server/helpers/lesson-markdown-projection.js",
         "src/ipc/channels.js",
-        "src/ipc/lesson-evidence.js",
         "src/preload.js",
         "frontend/src/lib/electron.d.ts",
         "frontend/src/components/desktop/DesktopSettingsPanel/sections/LessonEvidencePanel.tsx",
@@ -9870,7 +9843,14 @@
         "test/c56-manuscript-rewrite-fidelity.test.mjs",
         "test/c56-web-sourced-fidelity.test.mjs",
         "test/c56-user-manuscript-fidelity.test.mjs",
-        "test/evo4-evidence-bugfix.test.mjs"
+        "test/evo4-evidence-bugfix.test.mjs",
+        "test/cache-manager-cleanup.test.mjs",
+        "test/quit-guard-default-prevented.test.mjs",
+        "test/block67-node-agent-fs.test.js",
+        "test/scripts/check-ui-productization-audit-exit-2.test.mjs",
+        "test/scripts/dev-launch-state.test.mjs",
+        "test/code-size-allow-grow.test.mjs",
+        "test/gate-tracked-consistency.test.mjs"
       ]
     },
     {
@@ -9947,7 +9927,8 @@
         "test/qoder-j6-role-wiring.test.mjs",
         "test/qoder-l1l2-wiring.test.mjs",
         "test/qoder-l6-write-route.test.mjs",
-        "test/qoder-l6-audit-route.e2e.test.mjs"
+        "test/qoder-l6-audit-route.e2e.test.mjs",
+        "test/utility-host-decision.test.mjs"
       ],
       "classifiesScripts": true
     }
