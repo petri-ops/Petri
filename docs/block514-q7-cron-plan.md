@@ -1,12 +1,13 @@
 ---
 capability: block514-q7-cron
-status: active
+status: completed
 kind: work-package
 canonical: true
 truthDomain: block514-q7-cron
 entrypoint: docs/README.md
 registeredAt: 2026-11-24
 owner: main-agent
+phase: CLOSED
 ---
 
 # BLOCK-514 · Q7 cron+时区+失败退避+overlap 可配置（plan）
@@ -38,5 +39,15 @@ owner: main-agent
 
 - block514 红绿证据 + block256/next01 邻域回归 + 定向集全绿；收口 `npm run closeout`（存量红如实归属）。
 - 完成语义：plan/registry/AUDIT-LOG 同批翻 completed；证据=acceptance/block514-q7-cron/。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口笔录（2026-11-24 · completed）
+
+提交链：立项 `0c3a23cd5` → 实现 `d7c29d5e0` → 收口对账双修 `e19e05d2f` → 本批回写。
+
+- HK-01 红（模块缺失实录）→ 绿 **9/9**；邻域 block256+next01 9/9；test:changed **309/0**；post-h9 契约 **186/186**（knip 上限 409→414 同步=BLOCK-493 同根先例，正测+负测探针同批留痕）。
+- 其余门：code-size/tracked-consistency（4345+）/secret/arch/lint/types/knip（414 键含 5 flow 留因）全绿；lint:ledger/EAR 存量红维持如实归属（S0 基点，S6 同款纪律）。
+- §1 对账：五项全交付（纯函数/四列 additive/退避/overlap/routes）；非范围四项（跨设备/唤醒/DST/UI 编辑器）未触碰。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
