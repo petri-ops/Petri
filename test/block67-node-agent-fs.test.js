@@ -15,6 +15,12 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 
 const { PETRI_AGENT_SH, remoteAgentCommand } = require('../core/petri-server/helpers/remote-execution/node-agent');
+// BLOCK-512 P2 — bash 显式解析：PATH 命中 WSL launcher 时自动改用 Git Bash 显式路径，
+// 找不到则诚实 skip（假红→可见原因），检测逻辑单测见 test/block512-bash-resolver.test.mjs。
+const { checkBash } = require('./helpers/bash-resolver.cjs');
+
+const BASH = checkBash();
+const skipIfNoBash = (t) => { if (!BASH.ok) t.skip(BASH.reason); };
 
 const execFileP = promisify(execFile);
 
@@ -24,7 +30,7 @@ async function runAgent(args, { env } = {}) {
   const tmpScript = path.join(os.tmpdir(), `block67-agent-${process.pid}-${Date.now()}.sh`);
   fs.writeFileSync(tmpScript, PETRI_AGENT_SH, 'utf-8');
   try {
-    const { stdout } = await execFileP('bash', [tmpScript, ...args], { env: { ...process.env, ...(env || {}) } });
+    const { stdout } = await execFileP(BASH.ok ? BASH.bashPath : 'bash', [tmpScript, ...args], { env: { ...process.env, ...(env || {}) } });
     return stdout;
   } finally {
     fs.rmSync(tmpScript, { force: true });
@@ -34,6 +40,7 @@ async function runAgent(args, { env } = {}) {
 const b64 = (s) => Buffer.from(String(s), 'utf-8').toString('base64');
 
 test('block67 fs verbs: write → stat → read 往返（UTF-8 中文）', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const file = path.join(dir, 'sub', '笔记.md').replace(/\\/g, '/');
@@ -56,6 +63,7 @@ test('block67 fs verbs: write → stat → read 往返（UTF-8 中文）', async
 test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（BLOCK-96 F2 NUL 记录协议）', {
   skip: process.platform === 'darwin' && 'macOS BSD find 无 -printf（fs_list 单进程批量化依赖 GNU find；语义面由 Linux 节点 / Windows Git Bash 覆盖）',
 }, async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, 'a.txt'), 'aaa');
@@ -78,6 +86,7 @@ test('block67 fs verbs: list 含目录排序语义条目与隐藏文件过滤（
 });
 
 test('block67 fs verbs: die 显式错误码经 stderr（already_exists；BLOCK-96 F3 错误契约）', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, 'a.txt'), 'x');
@@ -92,6 +101,7 @@ test('block67 fs verbs: die 显式错误码经 stderr（already_exists；BLOCK-9
 });
 
 test('block67 fs verbs: fs_read 偏移+长度窗口', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const file = path.join(dir, 'w.txt').replace(/\\/g, '/');
@@ -103,6 +113,7 @@ test('block67 fs verbs: fs_read 偏移+长度窗口', async (t) => {
 });
 
 test('block67 fs verbs: mkdir / mv / rm 链路', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const posix = (p) => p.replace(/\\/g, '/');
@@ -124,6 +135,7 @@ test('block67 fs verbs: mkdir / mv / rm 链路', async (t) => {
 });
 
 test('block89 fs_cp: 文件复制 + 目录递归复制 + 目标父目录自动建', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block89-cp-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const posix = (p) => p.replace(/\\/g, '/');
@@ -148,6 +160,7 @@ test('block89 fs_cp: 文件复制 + 目录递归复制 + 目标父目录自动�
 });
 
 test('block89 fs_cp: already_exists 显式报错 + not_found 诚实语义', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block89-cp-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const posix = (p) => p.replace(/\\/g, '/');
@@ -172,6 +185,7 @@ test('block89 fs_cp: already_exists 显式报错 + not_found 诚实语义', asyn
 });
 
 test('block67 fs verbs: not_found 诚实语义（stat/list/read/rm）', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-fs-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const missing = path.join(dir, 'nope').replace(/\\/g, '/');
@@ -192,6 +206,7 @@ test('block67 remoteAgentCommand: fs verb 参数经 base64 落在白名单（无
 
 // ── BLOCK-67 P2：find / grep / exec / 进程面 verbs ──
 test('block67 P2 verbs: fs_find 相对路径 + 隐藏目录剪枝', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.mkdirSync(path.join(dir, 'sub'));
@@ -207,6 +222,7 @@ test('block67 P2 verbs: fs_find 相对路径 + 隐藏目录剪枝', async (t) =>
 });
 
 test('block67 P2 verbs: fs_grep 文本命中 + 二进制跳过', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, 'one.txt'), 'hello MARKER_42 world\nsecond line\n');
@@ -220,6 +236,7 @@ test('block67 P2 verbs: fs_grep 文本命中 + 二进制跳过', async (t) => {
 });
 
 test('block67 P2 verbs: exec 同步命令（cwd + code + stdout/stderr base64）', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const out = await runAgent(['exec', b64('echo out-中文; echo err-1 >&2; exit 3'), b64(dir.replace(/\\/g, '/')), '20']);
@@ -231,6 +248,7 @@ test('block67 P2 verbs: exec 同步命令（cwd + code + stdout/stderr base64）
 });
 
 test('block67 P2 verbs: exec 超时被杀（timeout KILL → 非零 code）', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const out = await runAgent(['exec', b64('sleep 30'), b64(dir.replace(/\\/g, '/')), '2']);
@@ -239,6 +257,7 @@ test('block67 P2 verbs: exec 超时被杀（timeout KILL → 非零 code）', as
 });
 
 test('block67 P2 verbs: exec_bg + ps_pid + kill_pid 生命周期', async (t) => {
+  skipIfNoBash(t);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'block67-p2-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const log = path.join(dir, 'bg.log').replace(/\\/g, '/');

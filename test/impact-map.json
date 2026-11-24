@@ -2910,7 +2910,8 @@
         "test/block67-node-agent-fs.test.js",
         "test/block67-routes.test.mjs",
         "test/block73-hidden-files.test.mjs",
-        "test/block148-tree-reachability.test.mjs"
+        "test/block148-tree-reachability.test.mjs",
+        "test/block512-bash-resolver.test.mjs"
       ],
       "frontendRelated": true,
       "classifiesScripts": true,
