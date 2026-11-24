@@ -6324,10 +6324,11 @@ AgentRulesPanel（规则列表式增删改：路径 glob/命令首 token × 拒�
 - **验证**：`prefCache.drift.test.ts` 6/6（键名冻结·枚举与注册表逐项相等·钳位边界一致·ThemeProvider 无 localStorage 直连·prefCache 无 core 引用）+ `ThemeProvider` 5/5 + `ThemeProvider.sync` 4/4（既有行为零变化）+ `quality:types` 0。
 - **P0 台账核查（2026-10-21）→ RW-02 清偿（2026-10-30）**：9223 离屏实机腿已补（`acceptance/rw-02-ui-evidence/`）：欢迎页文案零生信垂直词 + 无领域包时示例卡 count=0（动态提供语义在场）。
 
-## UI-522: 模型渠道导出默认脱敏（**RW-02 d 档对账 2026-10-30：维持 P0 判定——证据链断裂，补实机产物后再翻**（2026-10-18 in_progress，BLOCK-203 W4a P8 / D-2 rider）
+## UI-522: 模型渠道导出默认脱敏（**2026-11-24 verified（BLOCK-513 L2 实机补腿：台账自设条件「补实机产物后再翻」兑现——ui522-export-mask-live 13/13 allPass，dev Electron 边界内；RW-02 d 档 P0 判定以实机产物闭环**）
 
 - **变化面**：设置页「模型接口」的渠道导出从"确认一次即写明文 Key"改为**默认脱敏**（只留后四位）+ 二次确认才出明文；打码在导出构建器内部完成，调用方不传 `masked:false` 就是脱敏。文件名、JSON 信封与 CSV 列顺序/其余列零改动。
-- **诚实边界**：**无实机腿**（导出只走浏览器下载/原生另存，未在 9223 上点导出）→ 记 `in_progress`；该路径不经 `config-transfer` 排除清单，故脱敏必须由构建器保证而不是靠调用方纪律。
+- **实机证据（2026-11-24 补腿）**：acceptance/ui-522/ui522-export-mask-live-darwin.json 13/13 allPass——真实 UI 路径（加渠道→本地 mock provider 发现模型→假 Key→保存→点导出）：导出 JSON（二次确认=取消）明文零出现+`***<后四位>`+信封 note=masked；CSV 列序 id,supplier,baseUrl,defaultModel,provider,hasApiKey,apiKey 不变+值脱敏（BOM 经 blob.text() 剥离观察不到，文件本体带 BOM，断言按表头行=下游解析器列序口径）；二次确认=确定明文对照在场（证明默认脱敏是显式选择而非 Key 缺席假象）；清理只删本包造卡、既有渠道计数 2→2 不动。
+- **诚实边界（2026-11-24）**：①二次确认取向经 in-page confirm 桩预设应答——本环境（9223 离屏测试实例）原生 window.confirm 自动按「确定」应答经首轮实证，桩为等价应答、导出按钮点击为真实路径；②被删测试渠道的假 Key（sk-ui522-…，非真实凭据）或残留 keychain 孤儿条目无害，如实注记。
 - **验证**：`model-endpoint-transfer` 8/8（默认脱敏·显式明文·CSV 列形状不变·`maskApiKey` 边界）；`quality:secret` PASS（fail-closed 复跑）；`quality:knip:check` PASS。
 - **P0 台账核查（2026-10-21）**：正文声称实机/live 通过，但仓内无对应证据产物：按纪律不得标 `verified`，保持 `in_progress`，补证据后再翻。
 

@@ -1,0 +1,74 @@
+{
+  "name": "ui522-export-mask-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T09:29:46.382Z",
+  "finishedAt": "2026-11-24T09:29:50.713Z",
+  "assertions": [
+    {
+      "name": "P0_settings_open",
+      "pass": true,
+      "detail": "settings panel + model endpoints section expanded"
+    },
+    {
+      "name": "A1_profile_added",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A1b_fields_filled",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "name": "A2_model_discovered",
+      "pass": true,
+      "detail": "model=block513-mock-model"
+    },
+    {
+      "name": "A3_save_clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A3_saved",
+      "pass": true,
+      "detail": "已保存 toast"
+    },
+    {
+      "name": "A4_export_json_clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A4_export_json_masked",
+      "pass": true,
+      "detail": "plaintext_absent=true masked_present=true note=true"
+    },
+    {
+      "name": "A5_export_csv_clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A5_export_csv_shape",
+      "pass": true,
+      "detail": "header_ok=true masked_present=true plaintext_absent=true"
+    },
+    {
+      "name": "A6_export_json2_clicked",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A6_export_plaintext_contrast",
+      "pass": true,
+      "detail": "plaintext_present=true"
+    },
+    {
+      "name": "P9_cleanup_profile_removed",
+      "pass": true,
+      "detail": "mockCardsLeft=0 others 2->2 removed=1"
+    }
+  ],
+  "allPass": true
+}
