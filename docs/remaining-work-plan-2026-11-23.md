@@ -27,7 +27,7 @@ phase: G0
 |---|---|---|---|
 | C-50 跨机 7×24 中心调度 | 场景裁决（共享工作区/常驻节点/Web 入口）+ 先答「中心权限边界到哪、本地主权从哪开始」，才立项 BLOCK | L | backlog:303 |
 | ~~C-56 真实稿件改写~~ **已执行 2026-11-24** | 用户给 `petri-informal-paper.md`（自有英文稿），按 §9 通用保内核跑完三栏对照/四保护/未覆盖、不落盘；证据 `acceptance/c56-user-manuscript/` | S | manual:76-78 / registry:13559 |
-| C-56 英文论文另批 | **裁决材料已备 2026-11-24（pending_user_ruling）**：`acceptance/c56-english-surface/U-DECISION-MATERIAL.md`（三方案单一推荐 B=内核+英文 E 六项），等主人一次口令；不开工不改稿 | M | manual:91/100/102 |
+| ~~C-56 英文论文另批~~ **已执行 2026-11-24（B 方案）**：E 类六项并入手册 §11（裁决原话留痕）；对用户英文稿跑 §9 全链 E 类扫描 0/6 命中（零改写建议、原文一字未动，记录见 `acceptance/c56-english-surface/B-EXECUTION.md`） | M | manual §11 / B-EXECUTION |
 | D-04 i18n 资源抽离 | 是否国际化/哪些语言/react-i18next 还是自研 | L | AUDIT-LOG:190 / backlog:351 |
 | ~~G0 qualified 视觉证据~~ **已执行 2026-11-24** | `distinctStates` 唯一性断言已实现（HK-01 3/3 绿）；`g0:qualification:visual` 实机**诚实红**（5 PNG 4 唯一态）维持「不补拍不伪造」裁决，等用户对实机红处置 | M | AUDIT-LOG 2026-11-24 B-CLASS 行 / backlog:349 |
 | ~~C-32 `env='1'` 语义~~ **已清偿（BLOCK-211，2026-11-24 核码归位）** | 实现已按注释语义修正（`8a0731672`，2026-10-18），真相表 12/12 绿；登记滞后不开新包 | M | backlog:371 |

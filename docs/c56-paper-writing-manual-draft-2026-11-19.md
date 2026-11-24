@@ -102,3 +102,23 @@ supersedes: 无（执行 BLOCK-495 评审材料 §6 推荐候选②；C-56 backl
 - ④ 注册面：已授权开工，落 `resources/skills/paper-writing` + 顶层 manifest + `skills:check`；证据 `acceptance/c56-skill-registration/`。Agent 不代改判，英文论文面保持未裁决。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+---
+
+## §11 英文面 E 类六项检查（用户裁决 2026-11-24 附录）
+
+> **裁决留痕**：owner 经 Orca 转达主人 2026-11-24「行呀 还有啥没干的 继续呀」=三按钮全批，其中 C-56 英文面「按推荐 B（保真内核 + 英文 E1–E6 stylistic 检查）开工改写」。材料=`acceptance/c56-english-surface/U-DECISION-MATERIAL.md`（三方案单一推荐 B，2026-11-24 备）。执行中 E1–E6 可如实记录增删建议，不擅自扩范围。
+> 通用保内核（四保护/不编造/三栏对照/数字锁定/限制段零弱化/provenance）**语言无关，英文稿照用**——本节只加英文 stylistic 检查层，与中文 F 类（§5）并行不互斥。
+
+| # | 形态 | 检测特征 | 改写原则（示例） |
+|---|---|---|---|
+| E1 | 名词化堆叠（nominalization chains） | 名词化链 ≥2 层（「the utilization of the implementation of X」/「for the validation of the assessment of」） | 动词化：「we used X to validate Y」 |
+| E2 | 弱动词 + 名词化搭配 | conduct/perform/undertake/carry out + analysis/investigation/study/experiment | 实义动词直出：「analyzed」「measured」「simulated」 |
+| E3 | 被动语态连用 | 连续 ≥2 句被动且施事缺失（方法段标准被动除外） | 主动化或学术惯用 we：「We measured three variables」 |
+| E4 | 万能背景开头 | 「In recent years, … has attracted increasing attention」/「… plays an important/critical role in」开篇 | 直接给具体事实或研究缺口 |
+| E5 | 套话收尾 | 「In conclusion, our findings demonstrate the great significance of…」/「paves the way for future research」收束 | 具体结论 + 具体边界（什么成立、什么未验证）——与中文 F6 同旨 |
+| E6 | 冗余连接词/套话插入语 | Moreover/Furthermore/Additionally 连开 ≥3 句；「It is worth noting that / It should be noted that」高频（≥2） | 删或合并；强调改由句序与具体内容承担 |
+
+- 六项只作用于**作者自己的论述性 prose**；Methods 段惯用被动与术语不在打击面（与 §5 边界注记同形）。
+- 输出形态与中文一致：每项命中位置 + 改写前后对照 + 作者逐条采纳/拒绝（建议不覆盖）。
+- 判据来源=英文科技写作共识（主动语态优先、去名词化、具体开头收尾——各刊 author guidelines 通用要求），非某刊专属规则，不引具体页码不编造出处。
