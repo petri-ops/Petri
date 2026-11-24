@@ -9859,7 +9859,8 @@
         "acceptance/project-evaluation-prompt-2026-11-20/**",
         "acceptance/project-status-assessment-2026-11-20/**",
         "acceptance/ui-visual-upgrade-2026-11-20/**",
-        "acceptance/cleanup-retirement/**"
+        "acceptance/cleanup-retirement/**",
+        "acceptance/project-panoramic-assessment-2026-11-24/**"
       ],
       "tests": [
         "test/block509-video-p4.test.mjs",
