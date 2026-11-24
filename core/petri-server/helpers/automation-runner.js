@@ -93,7 +93,10 @@ async function executeSchedule(schedule, deps = {}) {
   const now = deps.now ? new Date(deps.now) : new Date();
   if (activeSchedules.has(schedule.id)) return { scheduleId: schedule.id, status: 'skipped_active' };
   const open = store.listOpenRunsForSchedule(schedule.id);
-  if (open.length > 0) {
+  // BLOCK-514 — overlap 可配置：默认 skip（现行为逐字不变）；queue=已提交排入、仍放行新提交。
+  // 进程内 activeSchedules 去重不受策略影响（同 tick 防重入）。
+  const overlapQueue = schedule.overlap_policy === 'queue';
+  if (open.length > 0 && !overlapQueue) {
     store.advanceSchedule(schedule.id, now.getTime());
     return { scheduleId: schedule.id, status: 'skipped_running' };
   }
@@ -136,14 +139,15 @@ async function executeSchedule(schedule, deps = {}) {
           workflowRunId: workflow.runId,
         };
       } catch (error) {
+        const message = error && error.message ? error.message : String(error);
         store.createRun({
           scheduleId: schedule.id,
           status: 'failed',
-          error: error && error.message ? error.message : String(error),
+          error: message,
           startedAt: now.toISOString(),
         });
         store.advanceSchedule(schedule.id, now.getTime());
-        return { scheduleId: schedule.id, status: 'failed', error: error && error.message ? error.message : String(error) };
+        return { scheduleId: schedule.id, status: 'failed', error: message };
       }
     }
 
@@ -161,15 +165,16 @@ async function executeSchedule(schedule, deps = {}) {
       store.advanceSchedule(schedule.id, now.getTime());
       return { scheduleId: schedule.id, status: 'running', taskId, conversationId };
     } catch (error) {
+      const message = error && error.message ? error.message : String(error);
       store.createRun({
         scheduleId: schedule.id,
         conversationId,
         status: 'failed',
-        error: error && error.message ? error.message : String(error),
+        error: message,
         startedAt: now.toISOString(),
       });
       store.advanceSchedule(schedule.id, now.getTime());
-      return { scheduleId: schedule.id, status: 'failed', error: error && error.message ? error.message : String(error) };
+      return { scheduleId: schedule.id, status: 'failed', error: message };
     }
   } finally {
     activeSchedules.delete(schedule.id);
@@ -268,5 +273,6 @@ module.exports = {
   runScheduleById,
   reconcileOpenRuns,
   startScheduleRunner,
+  executeSchedule,
   DEFAULT_INTERVAL_MS,
 };

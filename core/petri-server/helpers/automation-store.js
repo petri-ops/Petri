@@ -13,6 +13,7 @@
 
 const crypto = require('node:crypto');
 const dbMod = require('../db');
+const cronSchedule = require('./cron-schedule');
 
 let _sqlite = null;
 function db() {
@@ -83,6 +84,11 @@ function ensureSchema() {
   // NEXT-01 — workflow schedule 持久脚本/args；运行行关联 workflowRunId
   try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN workflow_script TEXT'); } catch { /* exists */ }
   try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN workflow_args_json TEXT'); } catch { /* exists */ }
+  // BLOCK-514 — Q7 cron+时区+失败退避+overlap 可配置（additive；旧数据零迁移零行为变化）
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN cron_expr TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN tz_offset_minutes INTEGER'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN retry_backoff TEXT'); } catch { /* exists */ }
+  try { sqlite.exec('ALTER TABLE agent_schedules ADD COLUMN overlap_policy TEXT'); } catch { /* exists */ }
   try { sqlite.exec('ALTER TABLE agent_schedule_runs ADD COLUMN workflow_run_id TEXT'); } catch { /* exists */ }
 }
 
@@ -250,17 +256,38 @@ function createSchedule({
   title,
   prompt = '',
   kind = 'task',
-  intervalMinutes = 60,
+  intervalMinutes = null,
   reminderText = '',
   workflowScript = '',
   workflowArgs = null,
   enabled = true,
+  cronExpr = null,
+  tzOffsetMinutes = 0,
+  retryBackoff = 'none',
+  overlapPolicy = 'skip',
 } = {}) {
   const pid = clampString(projectId, 120);
   if (!pid) return { ok: false, error: 'missing_projectId', message: '定时任务必须绑定项目（projectId）。' };
   const scheduleKind = String(kind || 'task');
   if (!SCHEDULE_KINDS.has(scheduleKind)) return { ok: false, error: 'invalid_kind', message: 'kind 必须是 task、reminder 或 workflow。' };
-  const minutes = Number(intervalMinutes);
+  // BLOCK-514 — cron 表达式（提供时二选一优先生效；interval 仍保留作退避基值）
+  let cleanCronExpr = null;
+  let tzMinutes = 0;
+  if (cronExpr !== null && cronExpr !== undefined && String(cronExpr).trim() !== '') {
+    const parsed = cronSchedule.parseCron(String(cronExpr));
+    if (!parsed.ok) return { ok: false, error: parsed.code, message: parsed.message };
+    cleanCronExpr = String(cronExpr).trim().replace(/\s+/g, ' ');
+    tzMinutes = Number(tzOffsetMinutes) || 0;
+    if (!Number.isInteger(tzMinutes) || tzMinutes < -840 || tzMinutes > 840) {
+      return { ok: false, error: 'invalid_timezone', message: 'tzOffsetMinutes 必须是 -840–840 的整数分钟。' };
+    }
+  } else if (intervalMinutes === undefined || intervalMinutes === null) {
+    // 无 cron 且未显式给 interval → 拒绝（二选一），不再静默回默认 60
+    return { ok: false, error: 'missing_schedule', message: 'intervalMinutes 与 cronExpr 至少提供一个。' };
+  }
+  const backoff = retryBackoff === 'exponential' ? 'exponential' : 'none';
+  const overlap = overlapPolicy === 'queue' ? 'queue' : 'skip';
+  const minutes = Number(intervalMinutes === undefined || intervalMinutes === null ? 60 : intervalMinutes);
   if (!Number.isFinite(minutes) || minutes < MIN_INTERVAL_MINUTES || minutes > MAX_INTERVAL_MINUTES) {
     return { ok: false, error: 'invalid_interval', message: `间隔必须在 ${MIN_INTERVAL_MINUTES}–${MAX_INTERVAL_MINUTES} 分钟。` };
   }
@@ -293,11 +320,12 @@ function createSchedule({
     || (scheduleKind === 'reminder' ? cleanReminder : scheduleKind === 'workflow' ? '工作流' : cleanPrompt).slice(0, 80)
     || '定时任务';
   db().prepare(`INSERT INTO agent_schedules
-    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,workflow_script,workflow_args_json,enabled,next_run_at,last_run_at,created_at,updated_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?)`)
+    (id,user_id,project_id,goal_id,title,prompt,kind,interval_minutes,reminder_text,workflow_script,workflow_args_json,enabled,next_run_at,last_run_at,created_at,updated_at,cron_expr,tz_offset_minutes,retry_backoff,overlap_policy)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,?,?,?,?)`)
     .run(id, userId || null, pid, goal ? goal.id : null, titleClean, cleanPrompt, scheduleKind,
       Math.round(minutes), cleanReminder || null, cleanWorkflowScript || null, workflowArgsJson,
-      enabled ? 1 : 0, enabled ? next : next, now.toISOString(), now.toISOString());
+      enabled ? 1 : 0, enabled ? next : next, now.toISOString(), now.toISOString(),
+      cleanCronExpr, cleanCronExpr ? tzMinutes : null, backoff, overlap);
   return { ok: true, schedule: scheduleView(getScheduleRow(id)) };
 }
 
@@ -357,10 +385,51 @@ function listDueSchedules(now = nowIso()) {
 function advanceSchedule(id, runAt = Date.now()) {
   const row = getScheduleRow(id);
   if (!row) return null;
-  const next = new Date(runAt + row.interval_minutes * 60_000).toISOString();
+  // BLOCK-514 — 失败退避自 runs 推导（最近 runs 前导 failed 段 >0 即视为失败推进），
+  // 无需调用方传旗标；成功 run 落库后 streak 清零自然回 interval。
+  const inferredFailed = consecutiveFailures(row.id) > 0;
+  const backoffActive = inferredFailed && row.retry_backoff === 'exponential';
+  let nextMs;
+  if (row.cron_expr) {
+    // BLOCK-514 — cron 调度：按固定偏移钟面求下一次触发
+    nextMs = cronSchedule.nextFireMs({
+      cron: row.cron_expr,
+      fromMs: runAt,
+      tzOffsetMinutes: row.tz_offset_minutes || 0,
+    });
+    if (backoffActive) nextMs = Math.min(runAt + backoffMs(row), nextMs);
+  } else if (backoffActive) {
+    // 失败指数退避：interval × 2^连续失败次数，封顶 24h
+    nextMs = runAt + backoffMs(row);
+  } else {
+    nextMs = runAt + row.interval_minutes * 60_000;
+  }
+  const next = new Date(nextMs).toISOString();
   db().prepare('UPDATE agent_schedules SET next_run_at=?, last_run_at=?, updated_at=? WHERE id=?')
     .run(next, new Date(runAt).toISOString(), nowIso(), row.id);
   return getScheduleRow(id);
+}
+
+const MAX_BACKOFF_MS = 24 * 60 * 60_000;
+
+/** 连续失败次数（最近 runs 的前导 failed 段长度）。 */
+function consecutiveFailures(scheduleId) {
+  const runs = db().prepare('SELECT status FROM agent_schedule_runs WHERE schedule_id=? ORDER BY started_at DESC, rowid DESC LIMIT 20')
+    .all(scheduleId);
+  let streak = 0;
+  for (const run of runs) {
+    if (run.status === 'failed') streak += 1;
+    else break;
+  }
+  return streak;
+}
+
+/** 指数退避毫数：interval × 2^连续失败，封顶 24h。 */
+function backoffMs(row) {
+  const streak = consecutiveFailures(row.id);
+  const base = Math.max(1, Number(row.interval_minutes) || 60) * 60_000;
+  const raw = base * (2 ** Math.min(streak, 10));
+  return Math.min(raw, MAX_BACKOFF_MS);
 }
 
 function createRun({

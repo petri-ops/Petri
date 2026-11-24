@@ -40,6 +40,10 @@ module.exports = function registerAutomationRoutes(app) {
       workflowScript: req.body && req.body.workflowScript,
       workflowArgs: req.body && req.body.workflowArgs,
       enabled: req.body ? req.body.enabled !== false : true,
+      cronExpr: req.body && req.body.cronExpr,
+      tzOffsetMinutes: req.body && req.body.tzOffsetMinutes,
+      retryBackoff: req.body && req.body.retryBackoff,
+      overlapPolicy: req.body && req.body.overlapPolicy,
     });
     if (!result.ok) return fail(res, result, 400);
     res.json(result);
