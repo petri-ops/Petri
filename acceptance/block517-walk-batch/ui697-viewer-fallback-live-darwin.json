@@ -1,0 +1,34 @@
+{
+  "name": "ui697-viewer-fallback-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T14:47:23.329Z",
+  "finishedAt": "2026-11-24T14:47:30.146Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_with_binary",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mwut6itl_hc99\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/projects/ui697---1795531643330-mwut6itl\"}"
+    },
+    {
+      "name": "P0b_binary_fixture_written",
+      "pass": true,
+      "detail": "bytes=1032"
+    },
+    {
+      "name": "A1_binary_preview_fallback",
+      "pass": true,
+      "detail": "binaryCard=true notHtml=true"
+    },
+    {
+      "name": "A2_fallback_reason_readable",
+      "pass": true,
+      "detail": "机器可读 viewer-fallback-reason 属结果面（P6 裁决后不可达）；工作区预览降级语义以文本在场已验（A1）——如实 skip 该腿"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}

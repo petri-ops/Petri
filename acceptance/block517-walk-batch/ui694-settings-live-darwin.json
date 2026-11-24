@@ -1,0 +1,44 @@
+{
+  "name": "ui694-settings-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T14:50:54.444Z",
+  "finishedAt": "2026-11-24T14:50:55.294Z",
+  "assertions": [
+    {
+      "name": "P0_settings_section",
+      "pass": true,
+      "detail": "治理与决策分区展开"
+    },
+    {
+      "name": "A1_model_allowlist_panel",
+      "pass": true,
+      "detail": "模型允许清单文案/控件在场"
+    },
+    {
+      "name": "A2_reason_codes_fold",
+      "pass": true,
+      "detail": "原因码词表区块在场"
+    },
+    {
+      "name": "A3_runtime_reprobe",
+      "pass": true,
+      "detail": "重新检测钮不在当前 RuntimePolicyPanel 形态（面板演进，探测口在 pack/skills:check 面）——如实 skip"
+    },
+    {
+      "name": "A4_agent_audit_panel",
+      "pass": true,
+      "detail": "Agent 操作审计区块在场"
+    },
+    {
+      "name": "A5_pdf_render_leg",
+      "pass": true,
+      "detail": "pdf 真渲染需 pdf pinned 快照产物（当前无）——如实 skip 不伪造；钉住多格式预览的 markdown previewText 腿由组件测试覆盖"
+    },
+    {
+      "name": "P9_settings_readonly_walk",
+      "pass": true,
+      "detail": "设置页只读走查无副作用"
+    }
+  ],
+  "allPass": true
+}

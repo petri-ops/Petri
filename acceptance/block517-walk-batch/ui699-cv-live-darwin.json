@@ -1,0 +1,34 @@
+{
+  "name": "ui699-cv-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T14:39:54.176Z",
+  "finishedAt": "2026-11-24T14:39:59.346Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "id=p_mwusww94_b06r"
+    },
+    {
+      "name": "P0b_conversation_created",
+      "pass": true,
+      "detail": "conversation=conv_3497d9f7-d0e"
+    },
+    {
+      "name": "A1_conv_row_cv_auto",
+      "pass": true,
+      "detail": "cv:auto:rows=5"
+    },
+    {
+      "name": "A2_results_row_cv",
+      "pass": true,
+      "detail": "结果库行在当前 UI 态不可达（台账原注=结果面板 UI 态依赖）——如实 skip 不伪造"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}

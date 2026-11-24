@@ -9972,7 +9972,11 @@
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui698-a11y-live.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui697-viewer-fallback-live.cjs",
         ".agents/skills/petri-dev-infra/dev-verify/flows/ui694-settings-live.cjs",
-        "acceptance/block517-walk-batch/**"
+        "acceptance/block517-walk-batch/**",
+        "acceptance/completeness-inventory/**",
+        "acceptance/g1-execution-plan-2026-11-24/**",
+        "acceptance/g1-readiness/**",
+        "acceptance/sus-rollout/**"
       ],
       "tests": [
         "test/ui-ledger-status-contract.test.mjs"

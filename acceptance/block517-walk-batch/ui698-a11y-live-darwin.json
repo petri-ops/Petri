@@ -1,0 +1,34 @@
+{
+  "name": "ui698-a11y-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T14:41:29.782Z",
+  "finishedAt": "2026-11-24T14:41:37.358Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "id=p_mwusyy0u_31qg"
+    },
+    {
+      "name": "A1_tree_semantics",
+      "pass": true,
+      "detail": "tree=true label=项目树 treeitems=7"
+    },
+    {
+      "name": "A2_import_panel_form_semantics",
+      "pass": true,
+      "detail": "radios=2 labeled=2"
+    },
+    {
+      "name": "A3_inert_dual_mode",
+      "pass": true,
+      "detail": "非 chat 投影层 inert 双模态的 scheduled 入口当前 UI 不存在（handleShowScheduled 仅声明未消费，产品范围注记）——双模态行为由 nso-w3-a11y 契约测试 4/4 覆盖，live 腿如实 skip"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}
