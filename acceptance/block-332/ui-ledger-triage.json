@@ -1,16 +1,21 @@
 {
-  "generatedAt": "2026-11-21T06:51:21.188Z",
+  "generatedAt": "2026-11-24T05:14:30.622Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 512,
-  "uniqueIds": 503,
+  "sections": 516,
+  "uniqueIds": 507,
   "counts": {
-    "live-missing": 14,
-    "verified": 471,
+    "live-missing": 15,
+    "verified": 474,
     "closed": 13,
     "blocked": 14
   },
-  "debt": 28,
+  "debt": 29,
   "liveMissing": [
+    {
+      "id": "UI-723",
+      "deps": [],
+      "title": "全景修复 S4 首屏重依赖懒加载与 CSP 端口（2026-11-24 **in_progress**；BLOCK-511 S4；行为/性能面，零可见观感变化）"
+    },
     {
       "id": "UI-719",
       "deps": [],

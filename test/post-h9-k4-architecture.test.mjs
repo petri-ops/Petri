@@ -119,14 +119,18 @@ test('K-22/K-18：债读数在场（读数型+活源一致；入册/收窄/拆�
   assert.equal(truth.archDebt.knipKeys, knipBaseline.keys.length);
   assert.equal(typeof truth.archDebt.sizeFiles, 'number');
   assert.equal(typeof truth.archDebt.loopOrchestratorInManifest, 'boolean');
-assert.equal(truth.archDebt.loopOrchestratorLines, 1674); // BLOCK-508 接线 +27 后行数（与 big-file-anchor/code-size 台账同源演进）
+{
+  // BLOCK-511 S1：重试逻辑抽到 helpers/network-retry.js 后净减行；与 big-file-anchor/code-size 台账同源活源
+  const anchor = JSON.parse(fs.readFileSync(path.join(ROOT, 'acceptance/post-s7-2026-11-10/h9/big-file-anchor.json'), 'utf8'));
+  assert.equal(truth.archDebt.loopOrchestratorLines, anchor.files.find((f) => f.path === 'core/petri-server/loop-orchestrator.js').lines);
+}
   assert.equal(typeof truth.archDebt.knipFullEntryInWorkspace, 'boolean');
   assert.deepEqual(truth.archDebt.dynamicRequirePoints, [true, true, true]);
 });
 
 test('负测 K-22：存量环 / knip 保留键 / 动态 require 现状增长或被改写 → 判红（只增即红棘轮）', () => {
   mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 13 } }), 'K-22');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 407 } }), 'K-22'); // 随上限演进取超限值：>406（清退票 2026-11-21 笔锋版原键收缩+新 flow 入册，现读 406）
+  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 409 } }), 'K-22'); // 随上限演进取超限值：>408（BLOCK-511 S2/S4 --allow-grow 留因上调后上限）
   mustRed(tamper({ archDebt: { ...truth.archDebt, dynamicRequirePoints: [true, true, false] } }), 'K-22');
 });
 

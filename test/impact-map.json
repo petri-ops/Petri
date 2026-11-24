@@ -1725,7 +1725,8 @@
         "scripts/test-affected.mjs",
         "scripts/verify-schema.js",
         "scripts/docs-roll-index.mjs",
-        "scripts/gate-tracked-consistency.mjs"
+        "scripts/gate-tracked-consistency.mjs",
+        "scripts/roadmap-compact.mjs"
       ],
       "tests": [
         "test/docs-governance.test.mjs",

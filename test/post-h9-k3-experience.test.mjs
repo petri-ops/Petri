@@ -126,10 +126,10 @@ test('负测 K-17：CSS 面基线被改写 → 判红', () => {
   mustRed(tamper({ cssBaselineTotal: 353 }), 'K-17');
 });
 
-// ---- K-15 debt / 人眼边界（钉值随 canonical triage JSON 机械演进：…→38/15/23 → 36/13/23，2026-11-20 yi-rest 签字批 + R2 清偿批 S8 对账）----
-test('K-15：debt 28 = live-missing 14 + blocked 14，人眼路线未签字', () => {
-  assert.equal(truth.triage.debt, 28);
-  assert.equal(truth.triage.counts['live-missing'], 14);
+// ---- K-15 debt / 人眼边界（钉值随 canonical triage JSON 机械演进：…→36/13/23 → 29/15/14，2026-11-20 yi-rest 签字批 + R2 S8 对账 + BLOCK-511 S5 UI-723 未实机项 +1 债）----
+test('K-15：debt 29 = live-missing 15 + blocked 14，人眼路线未签字', () => {
+  assert.equal(truth.triage.debt, 29);
+  assert.equal(truth.triage.counts['live-missing'], 15);
   assert.equal(truth.triage.counts.blocked, 14);
   assert.equal(truth.humanEyeRouteSigned, false);
   assert.equal(truth.ledgerMechanicallyClassified, true);

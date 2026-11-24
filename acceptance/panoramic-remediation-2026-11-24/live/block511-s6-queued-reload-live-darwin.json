@@ -1,0 +1,29 @@
+{
+  "name": "block511-s6-queued-reload-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T05:13:39.595Z",
+  "finishedAt": "2026-11-24T05:13:40.551Z",
+  "assertions": [
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "queue_persisted_after_reload",
+      "pass": true,
+      "detail": "{\"ready\":\"complete\",\"persisted\":true,\"visible\":false}"
+    },
+    {
+      "name": "shell_surfaces_present",
+      "pass": true,
+      "detail": "{\"hasComposer\":true,\"bodyLen\":150,\"origin\":\"http://localhost:3000\"}"
+    },
+    {
+      "name": "approval_surface_checked",
+      "pass": true,
+      "detail": "{\"hasApprovalCard\":false}"
+    }
+  ],
+  "allPass": true
+}
