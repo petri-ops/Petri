@@ -692,7 +692,7 @@ status: planned
 | 12 | P4-REM **（completed · BLOCK-263 · 2026-10-25）** | 已交付：history tab 全链（有界端点 6/6 + 桥 17/17 + pack 0.2.3 声明渲染器 + 实机 contributions 透出）；裁决落档=写面四 tab（selection/revisions 写/annotations/export）出籍 C-44、域中性 11 处/6 键**保留**（schema 回填/legacy 别名/安全边界/制品契约——清零即破坏存量，基线=显式兼容终态）、methods 数据面已达成；真实结果页实机腿 R 未装如实顺延（UI-526 重开条件不变，r.installed=false 实测登记）。证据=Node 6/6 + 前端 17/17 + 隔离后端实机 6/6（acceptance/block-263/p4rem-live.json）+ closeout 十三门。**§6.5 串行队列就此清零** | 母纲硬约束=最后 ✓（串行队列最后一项收口） | 已完成 |
 | V | V-REM **（completed · BLOCK-252 · 2026-10-24）** | 已交付：UI-544/545/546 实机腿（pack tabs、结果面 compare、图形批注亮暗各 23/23） | 代码+单测已绿；纯验证债已清 | 已完成 |
 
-> 推荐执行序（Q1-REM/Q2/Q2b/Q3/Q4a/Q5-REM/Q6-REM/Q7/Q8-REM 已收口）：**Q4b → Q9-REM → P4-REM**；Q4b 单列，Q4b 之后按 §6.5 队列。Q5/Q6 余项与 Q9 可在主序中互换；Q2-REM/V-REM 已收口。P4-REM 最后。
+> 推荐执行序（2026-11-24 纠错：本行写于收口前未随收口更新，系过期推荐——**Q4b（BLOCK-262）/Q9-REM（BLOCK-259/260/261）/P4-REM（BLOCK-263）均已收口，§6.5 串行队列清零**，见 §6.5 表与 §12；后续候选走 backlog/候选池逐项裁决，不再按本行排队。
 
 ## 7. 波次依赖与排序
 
@@ -760,7 +760,7 @@ Q-DOMAIN（垂直去核化，跨波次）
 - **母纲**：`AGENT-COMPETITIVENESS-PROGRAM`（方向）；本文件是 Qoder 样本的增量，不重开 CP-1–CP-22。
 - **建议首波**：**Q0.5（插件 ADR，0.5–1 天）+ Q-DOMAIN P1（skills 去核，1–2 周）**——先把 host 契约和生信 skills 落进 pack，再按 Q1（信任与审批）→ Q2b（联网检索）→ Q5（工作面 host）→ Q-DOMAIN P2b（生信 Result Surface）→ Q6 推进；Q-DOMAIN P2/P3 可穿插，P4 最后。
 - **发令方式**：Q-DOMAIN P1 可独立立项为 BLOCK（P0 ADR / P1 实现）；Q1/Q2b 各自独立发令；**结果页 P2b 不得早于 Q5 host，Q6 不得早于 P2b**。
-- **当前状态**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）、模型选择器 D1+D2（BLOCK-224）、D4 Auto（BLOCK-225）、通知中心/免打扰（BLOCK-226）、首启角色揭示（BLOCK-227）、崩溃同意/本地提示（BLOCK-228）、E7 电脑控制 Windows 切片（BLOCK-229）、P4 数据模型第一片（BLOCK-230）均已收口（completed）**。P4 剩余结构项（权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions）仍 open，需独立阶段发令。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）、P2b 全量高级 tab 迁移、E7 的 macOS/PiP/端到端控制为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
+- **当前状态（2026-11-24 对齐注记：本行「P4 剩余结构项仍 open」系滞后文本，§6.5/§12/矩阵 ✅95 与 BLOCK-263 收口为准——P4-REM 已 completed、§6.5 串行队列清零）**：本文件为 planned（方向母纲）；**Q5（BLOCK-216）、P2-UI（BLOCK-217）、P2b 垂直切片（BLOCK-218）、Q6 批注垂直切片（BLOCK-219）、P3 垂直切片（BLOCK-220）、Q8 治理垂直切片（BLOCK-221）、Q9 边界垂直切片（BLOCK-222）、Q9 续项垂直切片（BLOCK-223）、模型选择器 D1+D2（BLOCK-224）、D4 Auto（BLOCK-225）、通知中心/免打扰（BLOCK-226）、首启角色揭示（BLOCK-227）、崩溃同意/本地提示（BLOCK-228）、E7 电脑控制 Windows 切片（BLOCK-229）、P4 数据模型第一片（BLOCK-230）均已收口（completed）**。P4 剩余结构项（权限通用化/域中性归零/RS 保真/导出联邦基线/dataModelExtensions）仍 open，需独立阶段发令。P3 余项（`_pythonEquivalent` 脚本模板/`artifact-profiles`/`agent-workflow`/`learning`/`result-*-tools`）、Q6 余项（六种图形工具/文本批注与速记板/Office/pack 面批注）、P2b 全量高级 tab 迁移、E7 的 macOS/PiP/端到端控制为 reopen。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 ## 12. 附：Q-MATRIX 更新记录
 

@@ -13,6 +13,7 @@ status: completed
 ---
 
 # BLOCK-262 · Q4b 工作流脚本（确定性多代理编排执行面）
+> **2026-11-24 核码对齐（登记滞后反向例=代码领先台账）**：reopen 前三项已被后续批次交付——run_workflow agent 工具=core/petri-server/agent-tools/workflow-tools.js（NEXT-01 批，registry.js:218，R2/needsApproval/riskLevel high）；schedule 定时触发=automation-store agent_schedules workflow_script 列 + automation-runner.js:121 kind=workflow；前端运行查看面=WorkflowRunsPanel.tsx（超原计划）。**仍未做需裁决**：DAG 可视化编辑面（M）、Qoder 全量语法（M~L）、worker_threads 隔离（L）、跨设备（G1+）。
 
 用户发令：「行 按照建议 推完这一波」（2026-10-25）——按 Jev 单一建议（confidence=0.85 主会话 / 0.08 本轮复核，方向一致）立项 Q4b，推完本波。
 
