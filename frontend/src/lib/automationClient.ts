@@ -61,6 +61,10 @@ export interface AutomationSchedule {
   last_run_at: string | null;
   goal: { id: string; title: string; status: GoalStatus; budgetLimited: boolean; usageLimited: boolean } | null;
   lastRun: AutomationRun | null;
+  /** BLOCK-515/516 — 唤醒 trusted 档（预授权白名单；guided 默认不携带白名单） */
+  auto_mode?: 'guided' | 'trusted';
+  auto_tool_allowlist?: string | null;
+  auto_budget_checked?: number;
 }
 
 export interface AutomationReminder {
@@ -110,6 +114,8 @@ export function createSchedule(input: {
   workflowArgs?: Record<string, unknown> | null;
   goalId?: string | null;
   enabled?: boolean;
+  autoMode?: 'guided' | 'trusted';
+  autoToolAllowlist?: string[];
 }): Promise<{ ok: true; schedule: AutomationSchedule }> {
   return request(`/schedules`, {
     method: 'POST',
@@ -124,8 +130,24 @@ export function createSchedule(input: {
       workflowArgs: input.workflowArgs ?? null,
       goalId: input.goalId || null,
       enabled: input.enabled !== false,
+      // BLOCK-516 — 唤醒 trusted 档预授权（服务端 fail-closed 校验：非空白名单∧声明面∧带预算 goal）
+      autoMode: input.autoMode,
+      autoToolAllowlist: input.autoToolAllowlist,
     }),
   });
+}
+
+/** BLOCK-516 — 唤醒预授权显式授予/撤回口（撤回=guided，清空白名单；服务端 setScheduleAuto）。 */
+export function setScheduleAuto(id: string, autoMode: 'guided' | 'trusted', autoToolAllowlist: string[]): Promise<{ ok: true; schedule: AutomationSchedule }> {
+  return request(`/schedules/${encodeURIComponent(id)}/auto`, {
+    method: 'POST',
+    body: JSON.stringify({ autoMode, autoToolAllowlist }),
+  });
+}
+
+/** BLOCK-516 — registry 内置工具名单（白名单勾选数据源；此前内置名单无 REST 面）。 */
+export function fetchAutoToolNames(): Promise<{ ok: true; names: string[] }> {
+  return request(`/schedules/auto-tool-names`);
 }
 
 export function toggleSchedule(id: string, enabled: boolean): Promise<{ ok: true; schedule: AutomationSchedule }> {

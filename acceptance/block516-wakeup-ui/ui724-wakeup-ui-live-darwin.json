@@ -1,0 +1,54 @@
+{
+  "name": "ui724-wakeup-ui-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T12:17:44.850Z",
+  "finishedAt": "2026-11-24T12:17:51.721Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "id=p_mwunu2zg_5gb6"
+    },
+    {
+      "name": "P0_fixture_goal_seeded",
+      "pass": true,
+      "detail": "goal=goal_b516_a32257b8 budget=5000 conversation=conv_b516_d89bdf60"
+    },
+    {
+      "name": "A1_dialog_opens",
+      "pass": true,
+      "detail": "/schedule menu → ScheduleDialog opened"
+    },
+    {
+      "name": "A2_trusted_fold_expands",
+      "pass": true,
+      "detail": "selected:goal_b516_a32257b8"
+    },
+    {
+      "name": "A3_allowlist_data_source",
+      "pass": true,
+      "detail": "first=interrupt_agent"
+    },
+    {
+      "name": "A3_allowlist_checked",
+      "pass": true,
+      "detail": "checked checked=1"
+    },
+    {
+      "name": "A4_submitted_trusted_persisted",
+      "pass": true,
+      "detail": "{\"found\":true,\"allowlistOk\":true,\"goalId\":\"goal_b516_a32257b8\"}"
+    },
+    {
+      "name": "P9_fixture_rows_cleaned",
+      "pass": true,
+      "detail": "goal=goal_b516_a32257b8"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}

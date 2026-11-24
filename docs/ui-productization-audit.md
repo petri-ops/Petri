@@ -1,5 +1,13 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-724: 唤醒预授权 UI 勾选面（BLOCK-516；2026-11-24 **verified（dev Electron 边界内；ui724-wakeup-ui-live 9/9 allPass + 组件测试 9/9；观感待主人过目不代签）**）
+
+- **变化面**：①ScheduleDialog（composer `/schedule` 确认框）新增「无人值守预授权（可选，默认关）」折起区——trusted 勾选 → ①预算 Goal 下拉（只列带预算 active goal，过滤无预算/暂停/预算用尽）②白名单勾选列表（数据源=新增 GET /api/schedules/auto-tool-names，registry 内置名单此前无 REST 面）；提交携 autoMode/autoToolAllowlist/goalId，服务端 BLOCK-515 fail-closed 校验错误原样透出。②ScheduledWorkspacePanel：trusted 行「唤醒 trusted · 白名单 N 项」徽章 + 「撤回预授权」按钮（setScheduleAuto guided 撤回即清白名单回 guided）。③routes additive：GET auto-tool-names + POST :id/auto + 创建透传。BLOCK-515 治理语义（最小只读起步/默认 guided/预算硬顶 goalGate/显式可审计可撤回）由此获得设置面。
+- **为什么这样设计**：BLOCK-515 owner 裁决 B 档「UI 勾选面另点」的自然收尾件；无人值守≠免审——预授权必须显式勾选且范围可见（白名单数在徽章上），撤回一键可达。
+- **验证（代码）**：ScheduleDialog.test 5/5（trusted 勾选提交携档/goal 下拉过滤无预算与暂停/不勾选不携字段）+ ScheduledWorkspacePanel.test 4/4（徽章+撤回调用 setScheduleAuto guided 并刷新）+ tsc 0 + eslint 触碰文件 0 新增。
+- **实机证据**：`acceptance/block516-wakeup-ui/ui724-wakeup-ui-live-darwin.json` **9/9 allPass**——9223 离屏：composer `/schedule` 菜单点「定时任务」→ 对话框打开 → 折起区展开 → trusted 勾选 → goal 下拉只列 seed 的带预算 goal → 白名单勾选（auto-tool-names 数据源）→ 提交 → REST 复核 auto_mode=trusted/白名单含所勾工具/goal 绑定正确 → fixture 清理。
+- **诚实边界**：观感（布局/文案质感）待主人过目，零代签；ScheduledWorkspacePanel 的新建内联表单不带预授权字段（trusted 经对话框创建，管理面只读+撤回——刻意的最小面）。
+
 ## UI-723: 全景修复 S4 首屏重依赖懒加载与 CSP 端口（2026-11-24 **in_progress**；BLOCK-511 S4；行为/性能面，零可见观感变化）
 
 - **范围**：`ChatArtifactCard.tsx` 的 3D 场景改 React.lazy（同 `Model3DSurface:46` 的 lazy 模式）+ Suspense 空占位；`ToolActivityDock.tsx` 的 `OrchestrationGraph` 改 lazy + Suspense 空占位。首屏静态 import 链不再触达 three / @xyflow/react。CSP 按实际后端端口与渲染 Origin 生成，打包态恒用生产 CSP。

@@ -7,6 +7,7 @@ import {
   fetchAutomation,
   runSchedule,
   setGoalStatus,
+  setScheduleAuto,
   toggleSchedule,
   type AutomationGoal,
   type AutomationReminder,
@@ -322,13 +323,21 @@ export function ScheduledWorkspacePanel({
               <div className={styles.empty}>还没有定时计划。新建一个，或在对话里用 `/schedule`。</div>
             ) : (
               <div className={styles.cards}>
-                {schedules.map((schedule) => (
+                {schedules.map((schedule) => {
+                  const allowlistNames = schedule.auto_mode === 'trusted' && schedule.auto_tool_allowlist
+                    ? (JSON.parse(schedule.auto_tool_allowlist) as string[]) : [];
+                  return (
                   <div key={schedule.id} className={styles.card} data-testid={`automation-schedule-${schedule.id}`}>
                     <div className={styles.cardHead}>
                       <span className={styles.cardTitle}>{schedule.title}</span>
                       <span className={`${styles.badge} ${schedule.enabled ? styles.statusOk : ''}`}>
                         {schedule.kind === 'reminder' ? '提醒' : schedule.kind === 'workflow' ? '工作流' : '分析'} · {schedule.enabled ? '启用' : '暂停'}
                       </span>
+                      {schedule.auto_mode === 'trusted' && (
+                        <span className={styles.badge} data-testid={`automation-schedule-trusted-${schedule.id}`}>
+                          唤醒 trusted · 白名单 {allowlistNames.length} 项
+                        </span>
+                      )}
                     </div>
                     <div className={styles.metaRow}>
                       <span>每 {schedule.interval_minutes} 分钟</span>
@@ -373,9 +382,21 @@ export function ScheduledWorkspacePanel({
                         <Icon name="trash" size={12} />
                         删除
                       </button>
+                      {schedule.auto_mode === 'trusted' && (
+                        <button
+                          type="button"
+                          className={button.ghost}
+                          data-testid={`automation-schedule-revoke-${schedule.id}`}
+                          disabled={busy}
+                          onClick={() => void act('已撤回预授权（回 guided）', () => setScheduleAuto(schedule.id, 'guided', []))}
+                        >
+                          撤回预授权
+                        </button>
+                      )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>

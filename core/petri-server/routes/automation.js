@@ -44,6 +44,25 @@ module.exports = function registerAutomationRoutes(app) {
       tzOffsetMinutes: req.body && req.body.tzOffsetMinutes,
       retryBackoff: req.body && req.body.retryBackoff,
       overlapPolicy: req.body && req.body.overlapPolicy,
+      autoMode: req.body && req.body.autoMode,
+      autoToolAllowlist: req.body && req.body.autoToolAllowlist,
+    });
+    if (!result.ok) return fail(res, result, 400);
+    res.json(result);
+  });
+
+  // BLOCK-516 — 唤醒预授权：内置工具名单数据源（白名单勾选；此前内置名单无 REST 面）
+  app.get('/api/schedules/auto-tool-names', async (req, res) => {
+    res.json({ ok: true, names: store.builtinToolNames() });
+  });
+
+  // BLOCK-516 — 唤醒预授权授予/撤回口（显式可审计可撤回；校验在 store.setScheduleAuto）
+  app.post('/api/schedules/:id/auto', express.json({ limit: '64kb' }), async (req, res) => {
+    const result = store.setScheduleAuto({
+      id: req.params.id,
+      userId: userIdOf(req),
+      autoMode: req.body && req.body.autoMode,
+      autoToolAllowlist: req.body && req.body.autoToolAllowlist,
     });
     if (!result.ok) return fail(res, result, 400);
     res.json(result);

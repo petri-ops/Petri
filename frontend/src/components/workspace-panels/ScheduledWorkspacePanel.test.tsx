@@ -10,6 +10,8 @@ const client = vi.hoisted(() => ({
   runSchedule: vi.fn(),
   deleteSchedule: vi.fn(),
   setGoalStatus: vi.fn(),
+  setScheduleAuto: vi.fn(),
+  fetchAutoToolNames: vi.fn(),
   ackReminder: vi.fn(),
 }));
 
@@ -29,6 +31,9 @@ const snapshot = {
     interval_minutes: 60,
     reminder_text: null,
     enabled: true,
+    auto_mode: 'trusted',
+    auto_tool_allowlist: JSON.stringify(['read_file', 'web_fetch']),
+    auto_budget_checked: 1,
     next_run_at: '2026-10-25T10:00:00.000Z',
     last_run_at: null,
     goal: { id: 'goal_1', title: '稳定交付', status: 'active' as const, budgetLimited: false, usageLimited: false },
@@ -135,5 +140,17 @@ describe('ScheduledWorkspacePanel', () => {
     const { getByText } = render(<ScheduledWorkspacePanel onBackToChat={vi.fn()} />);
     expect(getByText('请先选择项目：定时任务与目标按项目隔离。')).toBeTruthy();
     expect(client.fetchAutomation).not.toHaveBeenCalled();
+  });
+
+  // BLOCK-516 — 唤醒 trusted 徽章 + 撤回预授权（回 guided，清白名单）
+  it('trusted 徽章在场，撤回预授权调用 setScheduleAuto guided 并刷新', async () => {
+    client.setScheduleAuto.mockResolvedValue({ ok: true, schedule: { id: 'sch_1' } });
+    const { getByTestId, getByText } = render(<ScheduledWorkspacePanel projectId="proj_1" onBackToChat={vi.fn()} />);
+    // fetchAutomation 异步解析后再断言徽章
+    await waitFor(() => expect(getByTestId('automation-schedule-trusted-sch_1')).toBeTruthy());
+    expect(getByText('唤醒 trusted · 白名单 2 项')).toBeTruthy();
+    fireEvent.click(getByTestId('automation-schedule-revoke-sch_1'));
+    await waitFor(() => expect(client.setScheduleAuto).toHaveBeenCalledWith('sch_1', 'guided', []));
+    await waitFor(() => expect(client.fetchAutomation).toHaveBeenCalledTimes(2));
   });
 });
