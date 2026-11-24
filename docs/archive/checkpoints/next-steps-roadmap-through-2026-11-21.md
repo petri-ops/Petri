@@ -1,0 +1,173 @@
+# next-steps-roadmap 历史链归档（2026-11-21）
+
+> 来源：docs/next-steps-roadmap.md 头部「最后更新」链；搬移不改写、零删除、追溯专用。
+
+最后更新：2026-11-21（**R2 清偿批 S1–S4 无人值守推进**：S1 水印终版=AI 版+并发清场（P0-1 闭环）/S2 存量红四门归绿/S3 视觉链带红清偿（code-size+design-context 17/17）/S4 三槽位 BLOCK-503/505/506 completed/CLOSED+U 材料 flip ruled+AUDIT-LOG compact。后续=S5 默认身份面可见性→S6 三项 breaking U 类→S7 TTL 门禁→S8 closeout:full+R3 自评。证据=acceptance/r2-remediation/。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-20（📋 **R2 项目系统评估（专项结论型）**：四维 9/20（45%）首个量化基线；三关键发现=默认 accent teal 致 A0 身份面默认不可见（token 组件面消费 0 处）/ 视觉链自身 code-size+design-context 红被 A2 台账误归存量 / 水印并发未闭环且极简版实机 allPass:false 却覆盖已验证文件。10 门 5P/5F；P0=水印终版裁决与并发清场（需用户回「行/不行」），P1 三项 breaking U 类仍未裁。零产品代码/零台账状态翻转。证据=acceptance/project-status-assessment-r2-2026-11-20/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🖼 **国风水印·AI 专业出图原封不动落地**：image_gen 钢笔白描四原型+白底抠alpha，GlobalWatermarkAI+watermark-ai.css 全局单图；HK01 6/6+实机12/12、质感优于手绘；并发冲突如实记录用独立新文件不碰对方。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🖊 **国风水印·钢笔笔锋二轮**：uniform stroke→楔形fill，8%墨+3px细锋+空心方印；HK01绿7/7+33tests+实机16/16；细锋达成但柳叶笔锋未完全到位如实标注、审美in_progress。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🖌 **国风水印修复：全局层覆盖所有页面**（用户反馈"只在欢迎页看到"）：重构 GlobalWatermark 全局单源 fixed 四角，移除逐页 div；实机 16/16 四路由四纹样全可见、内容不干扰；审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🖌 **国风简约背景水印（计白当黑）**：四原型 mask+ink3%主题自适应+零交互干扰；HK01绿6/6+42tests+实机6/6(welcome月洞弧+方印截图)；工作区测试面不可达如实标、审美不代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🎨 **艺术性造型升级（形态语义层级）**：seal3/icon10/card14 三档 token + 图标座/hero/徽章/mcpCard 换形 + seal-square 方印原子；HK01绿7/7+65tests+c53+实机7/7；审美不代签 in_progress、UI-717 不外推。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **V2/V3/V4 收尾 · 视觉升级全链闭环**（用户预授权一次做完）：leftPanelWrap 双定义合并 + ;;128处清零 + 标题名词化；V4 评分卡 3.6→4.1（保守下限）；HK-01 绿8/8+60tests+tsc0+c53+a11y绿；breaking U 类 deferred。观感 UI-717 已由 A4 签，本包零视觉变化。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（✅ **A4 四档整体观感预审闭环 · 四档观感 verified**：9223 离屏逐档截图 46/46 + 人工复核 P1–P5 全过，首轮即过按裁决签字；边界 sc-access-btn 状态色未改；HK-01 7/7、9223 已 kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **B 方案落地：骨架随档切换**：正交 data-surface 联切、c53 门禁不放宽、实机 14/14 四档骨架各异+回默认；观感未签、9223已kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🗃 **U 类裁决材料：骨架随档切换落档**：三方案 + 单一推荐 B（正交 data-surface 维度），消费测试 6/6，零代码、待用户裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🗃 **V5 四档和声接入可切（点睛层）**：四档注册 data-accent 复用现成管道，实机 17/17、契约绿；骨架仍海军蓝属新 U 类。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（✅ **A4 round3 复审通过 · UI-717 全量 verified**：backend 单独起+9223 离屏，交互面断言 18/18 PASS、截图复核通过；静态面 round2+交互面 round3 均 verified，9223 已 kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🗃 **V1-U 语义收敛（交互面待复审）**：hover/active 文字 accent 47 处收敛 316→269，13 条补中性底，focus/按钮/链接/状态保留；契约44/44+c53 269+tsc0；A4 round3 因 dev 栈 down 0/1 FAIL，交互面待栈恢复复审。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（✅ **A4 观感预审闭环 · UI-717 verified**：偏好预审两轮（抓真假绿→呈现面优化→16/16 PASS），按裁决翻 verified（9223 边界内）；三契约29/29+门禁绿+9223已kill。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🗃 **V1 配色稀缺化收口（部分·U）**：装饰性 accent 收敛 356→316，棘轮下调、c53 targetMet=false 诚实未达 130（剩余合法语义待 U 裁决）；HK-01 绿5/5 + 契约39tests + tsc0。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **A3 排版留白收口**：欢迎页标题0.04em/注脚0.02em、设置页标题0.03em+中性落印位，HK-01绿5/5+邻域39tests+契约19/19+tsc0，零accent增量/观感零代签；evidence=acceptance/a3-editorial-rhythm/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **A2 造型图标原子收口**：自绘 Icon 单源新增开环/错落格/发丝线三原子落空态+tab active，HK-01 绿6/6 + 邻域71 tests + 契约19/19 + tsc0，零图标依赖/观感零代签；evidence=acceptance/a2-identity-atoms/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **A1 色板 token 化收口**：A0 裁决行后落地身份色板四 token 亮暗双套，HK-01 红→绿 4/4 + 主契约 19/19 + 对比度 32 对 0 违规；零组件消费改动/观感零代签/零依赖；evidence=acceptance/a1-identity-palette/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🗃 **A0 身份转译决策落材料待裁决**：专项结论型，纯函数从品牌真源派生六组读数 + 消费测试 12/12（HK-01 红→绿 + 7 负测）；单一建议 B 青瓷·墨主 accent + A 宣纸·朱砂点睛<5%，status=pending_user_ruling，停在裁决点不进 A1；零产品代码/零依赖/观感零代签。证据=acceptance/a0-identity-translation/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-20（🏁 **BLOCK-509 / C-55 VIDEO-P4 收口（产品内一键成片出口）**：主题→VideoProjectSpec→付费 TTS 窄口确认文案→既有 compose_video→轻量产物卡内联真实 MP4；HK-01 7/7、邻域 52/52、实机 3/3；零新依赖/不重做 P0–P3/观感零代签。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（✅ **W11-GENUI 状态归位（对账收口·零新实现）**：用户发令「开始 W11-GENUI-P0」→执行前核对目标已由 BLOCK-461（P0-P2）+BLOCK-464（P4）+BLOCK-466（P3）全部交付、registry completed/CLOSED、acceptance 在盘→停下报用户→裁决「做状态归位批」；plan frontmatter active→completed、蓝图 W11 行与 D8 同步 completed、本 roadmap/handoff/AUDIT-LOG 对齐，零产品代码/零新依赖/观感零代签。Jev 的 W11-P0 建议属陈旧候选，未重做。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（🏁 **BLOCK-508 收口（大上下文韧性票 2：循环层 stall-resume）**：已吐字后 idle stall 不再 break→有界续跑（≤3 次/10 分钟）+delta 游标去重（已出字零重复），消除手动重试；纯函数模块 loop-stall-resume.js+orchestrator 薄接线。HK-01 9/9+邻域 54/54+行数锚 16/16；test:changed 19 红经隔离确认非本包面（并发 WIP）如实登记。零新依赖/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（**BLOCK-507 交付（上下文感知看门狗首包预算 · 全绿）**：首包预算=base+floor(预估 token/3000)×1s 封顶 600s——1M 量级 prefill 不再被固定 90s 误杀；idle 60s 不缩放；stall details 增 estimatedTokens/firstTokenScaled 可观测。HK-01 红 4→绿 15/15+model-gateway 19/19。常数待真实 1M 数据校准（reopen）；票 2=读摘要委托子 agent 化另票待设计。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（✅ **POST-H9 蓝图状态归位（对账收口·零新实现）**：发令「开始 POST-H9」→核对 K0–K7 八阶段已由 BLOCK-396～403 全部收口（32/32 测试当前绿）→停下报用户→裁决状态归位批；registry `POST-H9-OPTIMIZATION-BLUEPRINT` planned→completed（living-plan 完成态）+README/AUDIT-LOG/handoff 同步，零新实现/只动账/登记漂移清偿；蓝图原件正文/证据零改写，仅 frontmatter status 随门禁同步。零新依赖/零运行时/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（**BLOCK-506 交付（大上下文对标研究 · MATERIAL）**：Petri 四件套已在册对标过（分页读取/microcompact/auto-compact/流式看门狗）修复层面不需要动；唯一实质缺口=Z2 Explore 子 agent 读摘要委托（候选 P1 pending_user_ruling，建议先观察直连后停滞频率）；「拆两步喂」已落 BLOCK-505 P0 纪律层。停滞根因=deepseek 直连对超大上下文的中途停摆（服务端侧不可治，重试/拆分/换渠道绕）。docs=docs/block506-large-context-benchmark-research-2026-11-19.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（✅ **BLOCK-490 状态归位（对账收口·零新实现）**：发令「开始 BLOCK-490」→核对评审 D1-D8 已 ruled+实施已由 BLOCK-501 交付在盘→停下报用户→裁决状态归位批；registry planned→completed（评审稿完成态非实施态）+plan/README/AUDIT-LOG 同步，零新实现/只动账/登记漂移清偿；Jev doc:suggest 命中 planDoc 已落笔录。零新依赖/零运行时/观感零代签/不碰 G1+。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（🏁 **BLOCK-504 收口（P3-03 v2b 第二票 · closeout 定向 · 一次会话完成）**：CAD 导入链 occt-wasm 只读 faces 抽特征→buildImportFeatureTable 接缝消费→features[]+featuresVersionKey=派生资产 sha+sidecar provenance 锚定；前端约束编辑器切 aFeature/bFeature additive 契约键+sceneFeatures 缓存优先。HK-01 红 6→绿 8/8（真 STEP 只读腿+D3 静态负测）+前端 21/21+tsc 零红+邻域 32/32+契约联动 11/11（v2b=implemented）；版本键根因修正；观感零代签/求值几何不变/零新依赖/不碰 G1+；曲面=v2c 维持 deferred。证据=acceptance/block504-v2b-import-features/；串行槽位回空。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-19（**BLOCK-503 交付（肉眼核对总清单 · MATERIAL）**：全部待人眼事项收敛为逐项裁决清单——甲组 3 项（读材料即可）+乙组 9 组（实机签字，每项给判什么/怎么看/口令格式）；现读真源零代签零状态写面；用户回口令即由 Agent 按台账纪律回写。用户裁决批自动化线已移交另一 agent；人工区 W4 以本清单为准逐项推进。清单=docs/block503-human-eye-review-checklist-2026-11-19.md。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-502 交付（C-47 方向 A 修复 · 全绿）**：轮询收窄为签名对账（不重建树/不重置续拉游标），整树重拉限定结构事件；HK-01 红→绿 2/2+tsc 零红+UI-399 零回归；C-47 open 票关闭。用户裁决包（A1-A4/B5-B7/C 维持）全落地；**剩余=v2b 第二票（导入链抽特征+前端编辑器，A 组 #2 范围内已授权待续）**。串行槽位回空。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-501 交付（capability-intake 最小垂直切片 · 全绿）**：D1–D8 ruled 骨架落地——canonical SKILL.md 三步闭环+四红线+两桥真 symlink+provenance append-only（C-56 两源 license_unknown 停等在册）+HK-01 4/4。串行槽位回空→包 7 C-47 方向 A 修复票接续（用户已发令）；v2b 第二票（导入链+前端编辑器）在 A 组 #2 范围内待续。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-500 交付（C-56 手册先行稿 v0.1 · 零注册面）**：十节手册内容稿落档待人眼评审（保真四保护/F 类 6 检查/claim 三栏对照/不编造红线）；认可后另批注册面。串行槽位回空→包 6 BLOCK-490 最小垂直切片接续（用户已发令 B5）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-499 收口（P4-05 完整尺寸链 · 全绿）**：特征引用解析+尺寸链代数（跨节点装配链+D5 数值一致性 1e-6）+SVG 链层+manifest 诚实翻转；HK-01 红 9→绿 9 含真实 occt-wasm STEP 实机腿；邻域 17/17；契约 reopen 同步 P4-05=implemented。A 组 #1/#2/#3 三票全落地；串行槽位回空→包 5 C-56 手册稿接续（用户已发令；后续队列=包6 BLOCK-490 切片→包7 C-47 方向 A→v2b 第二票导入链+前端编辑器）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-498 收口（v2b 后端契约票 · 全绿）**：D2/D1 落地（aFeature/bFeature 白名单+features[] 派生缓存 fail-closed+引用解析+非平面显式拒绝+基元派生接线+特征库 CJS+前端镜像同步）；骨架激活红 4→绿 9/9 常驻；邻域 43/43+前端 15/15+tsc 零红；BLOCK-496 契约 reopen 同步 v2b=partially_implemented。事故登记：包2 裸 git add 卷入保护资产已处置（guard 抓真）。第二票（导入链抽特征+前端编辑器）在 A 组 #2 范围内待续；串行槽位回空→包 4 P4-05 完整尺寸链接续（用户已发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-497 收口（MIGRATION-IDEMPOTENT · 全绿）**：自愈补列收窄版记账（补列+仅 MAX(version)===20 记账 v21 同事务；跳版守卫；缺席不记）——消除「无头栈补列→桌面壳重放 021 拒启」缺口；HK-01 红→绿 3/3+邻域 block336 22/22 零回归；closeout exit=0；🟡 行清偿。串行槽位回空→包 3 v2b D2/D1 接续（用户已发令）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-496 收口（登记漂移对齐 · 全绿）**：block322-ruling-codification 契约 implementationTickets 按 reopen 条款重算到当前真值（P4-05b/v2a implemented/v2b authorized_pending_start/v2c deferred_maintained，2026-11-19 用户授权）；D1–D5 一字不动；对齐真源=BLOCK-496 plan §3 状态表；消费测试 HK-01 红 5→绿 11/11+--check PASS。用户同批发令串行队列：包2 MIGRATION-IDEMPOTENT→包3 v2b D2/D1→包4 P4-05 完整链→包5 C-56 手册稿→包6 BLOCK-490 切片→包7 C-47 方向 A（各包独立立项收口）。零产品代码。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-495 收口（W3 候选池转正评审 · 全绿）**：六组候选六段材料落档全部 pending_user_ruling 零实现——C-45/C-35~C-44 两组消亡钉死（BLOCK-355/BLOCK-264 已完成，登记滞后第 3 次抓到）；真候选四项推荐=MIGRATION-IDEMPOTENT 自愈收窄版记账/BLOCK-490 D2·D8 先裁+垂直切片/C-50 维持登记/C-56 手册稿先行。启动与否归用户发令。**无人值守三波次（W1 基础设施清偿=W2 实现票准备=W3 候选评审）全收口**，串行槽位回空；剩余=人工区（W4 观感签字/W5 裁决与资产处置，见 BLOCK-492 plan §4）。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-19（**BLOCK-494 收口（W2 实现票准备 · 全绿）**：三票实况核对——P4-05b 第一刀+v2a 已于 BLOCK-322 时代实现（23/23 绿+实机证据齐），v2b 半实现（特征表库+同源移植+几何签名探针定案在场；D2 白名单键/D1 求值器消费/导入链接线/sidecar sha 锚定缺位）；登记漂移如实登记（BLOCK-491 契约重算待其 reopen 条款=用户发令）；v2b D2/D1 契约测骨架 skip 形态落档（激活态 3 真红恰对三缺位）；欧拉序探针=Blender 5.2.3 实测定案在场。closeout 定向链 exit=0；零产品实现落地。串行槽位回空；W3 候选池评审（pending_user_ruling 材料不启动实现）为下一波次。证据=acceptance/block494-w2-ticket-readiness/。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-493 收口（W1 基础设施清偿 · closeout 定向链全绿）**：用户预授权无人值守提示词 §5 S1 发令执行 BLOCK-492 plan §3 W1。五项非资产类既有红清偿：①evidence.json 三处虚拟探针挂 impact-map rule（417→419）；②lint:ledger 13 条 warning 全误报豁免（沿 video-compose disable 先例，P1484/T418/S539 基线持平零放宽）；③K-22 knip 上限 346→350 对齐（BLOCK-483/486/487 漏同步既有红）；④block463 flow env 固化函数化（BLOCK-267/375）；⑤3D 蓝图 §13/§14 ruled 对齐+docs:coverage+单源重生成。closeout 定向链 exit=0；P6 写门=两段提交处置如实登记。串行槽位回空；W2 实现票准备（P4-05b→v2a→v2b，逐票发令、只备 HK-01 骨架不落地实现）为下一波次。证据=acceptance/block493-infra-debt-clearance/。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-492 落档（全量工作执行计划 + 无人值守提示词 · 规划治理批零产品代码）**：用户发令「全面核对与审查…提取全部可执行任务…生成提示词交由其他 agent 全量执行」。盘点所有欠缺与待完善并按波次分组：W1 基础设施清偿（零产品代码）→W2 已裁决实现票（P4-05b/v2a/v2b 逐票发令）→W3 候选池转正评审（不启动实现）→人工区 W4 观感签字/W5 裁决与资产处置（统一殿后）。明确排除 G1+ 与观感代签；3D 蓝图 §10 裁决漂移如实登记。计划=docs/block492-full-work-execution-plan.md，提示词=docs/block492-full-work-execution-prompt.md（§2 自包含）。串行槽位空，逐波发令执行。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-491 收口（BLOCK-322-RULING D1–D5 裁决固化 · 全绿）**：用户「开始 BLOCK-322-RULING」→停下核实→裁决采纳推荐形态 D1–D5 + 以 RULING-04 另立新包。五项裁决固化到 RULING-04 材料 §4 状态行 + 模型可读契约 block322-ruling-codification.json + 中性扫描器六组读数（rulings/featureIdentity/referenceSyntax/implementationTickets/gdtAcceptance/boundaries）+ 消费测试 HK-01 红→绿 11/11（缺席红+篡改负测）+ --check PASS + manifest sha 一致。零产品代码写面/不改 SceneSpec 契约/观感代签/新依赖/不碰 G1+；实现票 P4-05b/v2a/v2b 逐票 deferred_user_ruling、v2c deferred，未获发令不启动。串行 active 槽位回空；零触碰他方 WIP。证据=acceptance/block491-ruling-codification/。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-487 收口（C-55 VIDEO-P3 高级镜头 · 全绿）**：用户「开始 C-55-P3」→裁决口令收窄为本地 SceneSpec v1 3D 镜头替换。video-advanced-shot.js 纯函数零新依赖，HK-01 26/26，真实腿 P0 sc2 替换 machine_pass（四字段+timeline 不变、三判据 true、三出口 exitChecks 全 true）。文生/图生视频/角色/物理/粒子/高成本缓存=deferred_user_ruling 只登记不实现；云/付费/外发 fail-closed；观感 pending_human_eye 零代签；零触碰他方 WIP。证据=acceptance/block487-c55-video-p3/。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-486 收口（C-55 VIDEO-P2 素材供给与分镜审阅 · 全绿）**：用户发令「开始 C-55-P2」。video-storyboard.js 纯函数（素材登记/统一来源五类 kind/镜头替换不破坏时长字幕证据/分镜可看可改/音频替换契约/完整性 fail-closed），零新依赖、只读消费 P0/P1 产物。HK-01 22/22（缺席红+11 类篡改负测）+ 真实腿 P0 工程 sc2 替换+3 镜头审阅 machine_pass（四项结构 unchanged、integrity=true、四出口 exitChecks 全 true）。P0 sources 数据形态差异如实登记；图像生成新服务/真实外部搜索=pending_user_ruling 留白；观感 pending_human_eye 零代签。编号冲突避让 484→485→486，零触碰他方 WIP；P3 未启动。既有红如实归属。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-483 收口（C-55 VIDEO-P1 科学证据与质量闭环 · 全绿）**：用户发令「开始 VIDEO-P1」。video-evidence.js 纯函数（五档来源分级/Claim–Evidence 表/数字单位换算/冲突并列/低置信标记/科学语义对照/AV 六项质检/完整性 fail-closed），零新依赖、只读消费 P0 产物。HK-01 22/22（缺席红+8 类篡改负测+判据校准）+ 真实 ffprobe/ffmpeg 对 P0 成片质检 machine_pass（h264/1280×720/24fps/skew 0.023s/黑帧 0/静音 1.132s/peak -2.2dB/字幕溢出 0）+ 四条出口逐条对账。如实登记 2 项 P0 存量数据缺口（无 excerptRef→traced=0/2；sc1 无 evidenceRef），未伪造。观感 pending_human_eye 零代签；串行 active 槽位回空，C-55 P2/P3 候选未启动。既有红如实归属。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-482 收口（C-55 VIDEO-P0 科普视频最小成片闭环 · 全绿）**：用户发令「开始 C-55-VIDEO-P0」+ 裁决「TTS 默认开/外部素材允许/尽可能做好」。VideoProjectSpec + compose_video 通用合成窄口（零新依赖，复用 ffmpeg 6.1.1/TTS）+ 真实 3 镜头成片（旁白/烧录字幕/讲稿/来源/QA/manifest）+ ffprobe 独立解码 h264/1280x720/24fps/aac/21.9s。HK-01 14/14、注册契约 39/39、QA machine_pass；compose_video 工具注册 TOOL_DEFS 117→118 有意增长同步对账。观感 pending_human_eye 零代签；串行 active 槽位回空，C-55 P1–P3 候选未启动。既有红 docs:check/test:changed 3 缺口/lint:ledger/EAR/perf/post-h9 如实归属。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-481 收口（C-52 余项 P5 参考板与评审法借鉴与契约冻结 · 全绿）**：用户发令「开始 C-52-P5」；静态扫描器 + reference-board-review.json 六组读数（inspirationBoard 五步法+观察/借鉴分离/只取设计原子+ Pinterest 行/structuredDesignMd brief 十节+Skill v1.1.0+design-context+ia-map+ Refero 行/moduleObservation 八态+checklist+CTA/Footer 行/reviewMaterialOnly 零品牌指纹+零新依赖+内部参考+产品内部决策分离/licenseProvenance 四来源+P5 条目+provenance+license_unknown+brief §9/boundaries 观感零签+零依赖+不替换 SimpleChat+不抄整页+不全局换皮）+ 消费测试 11/11（HK-01 红绿+四类篡改负测）；--check PASS、C-52 P2–P5+C-53 P0–P7 Node 112/112 零回归、theme-token 19/19、manifest sha 一致；零 UI 写面/观感代签/新依赖/不抄品牌资产/不照搬营销 CTA-Footer。串行 active 槽位回空；**C-52 余项 P2–P5 全阶段收官（本包为收官包）**。既有红 docs:check（post-h9 未跟踪蓝图）/ test:changed（block464/470/477 evidence.json 未映射）如实归属。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-480 收口（C-52 余项 P4 21st.dev 片段灵感库借鉴与契约冻结 · 全绿）**：静态扫描器 + 21st-snippet-library.json 六组读数（snippetInventory 7 变体+三态+五件套+棘轮/licenseAudit 四来源+逐组件查许可/referenceOnly 零片段指纹+零 CDN+不抄皮肤/styleDriftGuard 海军蓝四档+七节+双棘轮/dependencyBloatGuard 零 UI kit+39≤45/boundaries 观感零签+不替换 SimpleChat）+ 消费测试 11/11；--check PASS、C-52 P2/P3/P4+C-53 P0–P7 Node 101/101 零回归、theme-token 19/19、manifest sha 一致；零 UI 写面/观感代签/新依赖。串行 active 槽位回空；C-52 P5 保持候选待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-479 收口（C-52 余项 P3 React Bits 反馈型微动效模式借鉴与契约冻结 · 全绿）**：静态扫描器 + react-bits-motion.json 六组读数（hover 21/press :active scale 5/expand 三宿主+豁免/success 语义色+spinner/motionTokens 三档 duration+两档 ease+281 引用/boundaries 零依赖+禁整页+观感零签）+ 消费测试 11/11；--check PASS、C-52 P2+C-53 P0–P7 Node 90/90 零回归、theme-token 19/19、manifest sha 一致；零 UI 写面/观感代签/新依赖。串行 active 槽位回空；C-52 P4/P5 保持候选待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-478 收口（C-52 余项 P2 assistant-ui 模式借鉴与契约冻结 · 全绿）**：定形 P2–P5 先做 P2——静态扫描器 + assistant-ui-pattern.json 六组读数（流式 8 it+7 SSE test / 工具确认 / 附件 / 结构化数据五 kind+12 it / 选项 3 it / 边界零依赖+观感零签）+ 消费测试 11/11；--check PASS、C-53 P0–P7 Node 79/79 零回归、manifest sha 一致；零 UI 写面/观感代签/新依赖。串行 active 槽位回空；C-52 P3–P5 保持候选待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-477 收口（C-47 连翻页惰性/回弹复现与归因 · 全绿）**：源码三处模式锚定 + 状态机 + CDP 9223 离屏实机分相位采样，三重证据闭环复现 200→400→(2s)→200（hidden=false），根因=本地 2s 轮询 refreshFiles() 以 offset=0 覆盖 loadMoreRoot 续拉页；三态结论 reproduced_and_attributed，HK-01 红→绿 5/5（含负测）；closeout 全链 PASS（test:changed 44/44、perf 110.7s 实跑）；零产品代码写面/观感代签/新依赖。C-47 票保持 open，修复票候选方向 A/B 待用户发令、未实施；串行 active 槽位回空。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-476 收口（C-53 P7 人眼收口非观感准备 · 全绿）**：静态扫描器 + human-eye-closeout.json 六组读数（UI 台账四槽 in_progress 零 verified / E 类 22 条分层且 triage 现读 23 漂移如实登记 / 集中签字槽 11 行全空 / 本批新 UI 面观感槽 / 证据索引 11 条 / 观感留槽零代签）+ 消费测试 11/11；--check PASS、P0–P6 Node 57/57 零回归、manifest sha 一致；零 UI 写面/观感状态改动/新依赖。串行 active 槽位回空；C-53 P2–P7 全阶段收口，观感签字留用户零代签；Polyfork S7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-475 收口（C-53 P6 产品 Skill v1.1 · 全绿）**：静态扫描器 + skill-contract.json 六组读数（design-context 五件套消费 / IA 消费 / a11y 约束 / Skill 1.1.0 版本契约 / 发现桥对齐 / 观感留槽零代签）+ 消费测试 11/11；--check PASS、P0–P5+design-brief+integrity Node 65/65 + skills:check 13 + integrity 13 零回归；design-brief 升 v1.1.0 + petri-ui-design 发现桥对齐；零 UI 写面/观感/新依赖。串行 active 槽位回空；C-53 P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-474 收口（C-53 P5 性能与可信状态 · 全绿）**：静态扫描器 + performance-trust.json 六组读数（流式投影 pending 强制+compose→pending+completed 升级 8 it / memo 边界 React.memo+3 it / SSE 六契约+parseSseStream 7 test / 加载空错误 12 格+证据>0 / 首屏占位 compose-stream-pending+4 it / 观感留槽 in_progress 零代签）+ 消费测试 11/11；--check PASS、Node 42/42+前端 15/15 零回归；零 UI 写面/观感。串行 active 槽位回空；C-53 P6–P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-473 收口（C-53 P4 响应式与可访问性 · 全绿）**：静态扫描器 + responsive-a11y.json 六组读数（键盘焦点 12/16 棘轮+inert 隔离/状态机 3/94/57/12/WCAG 32 对/断点 26+10+20 档位窄屏覆盖/触摸目标 24/30/八态 32 格）+ 消费测试 11/11；--check PASS、P0 8/8+P2 7/7+P3 9/9+双真源 7/7(4/4) 零回归；零 UI 写面/观感。串行 active 槽位回空；C-53 P5-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-472 收口（C-53 P3 视觉一致性 · 全绿）**：静态扫描器 + visual-consistency.json 四组读数（海军蓝阶梯单调/广谱 slate ratchet/颜色预算现读 356/token 完整性）+ 消费测试 9/9；--check PASS、P1 8/8+P2 7/7+theme-token 19/19 零回归、单源重生成 626 文档；零 UI 写面/观感。串行 active 槽位回空；C-53 P4-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-471 收口（C-53 P2 IA 与高频路径 · 全绿）**：ia-map.json（12 路由+4 重定向+5 高频路径）+ 消费测试 7/7、--check PASS、P1 包 8/8 零回归、单源重生成 625 文档；零 UI 写面/观感。串行 active 槽位回空；C-53 P3-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-470 收口（方案B机械档 + handoff 结构优化 · 全绿）**：next:prompt 生成器+closeout --report 报告级（仅 advice 不发令）、handoff 头部链 35→1 条归档收敛 27KB→9.9KB、快照刷新现读；测试 13/13 + docs:check(624) + hygiene 绿。零产品代码/观感。串行 active 槽位回空；C-53 P2-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-469 收口（S5 img2threejs 借形封装首片 · 门禁全绿）**：纯 JS 门禁范式骨架 + 契约测试 7/7，零整包安装/外部服务默认关/零新增依赖；S1-S5 五步串行全部收口，active 槽位回空。后续待用户发令=C-53 P2-P7/Polyfork/观感签字/D5。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-468 收口（S4 基础设施清偿批 · 门禁全绿）**：lint-ledger --update 死代码修复+工具负测 4/4、Q-MATRIX §5 收拢 74/21/0/7（BLOCK-263 口径）、knip 346 键定性报告；零产品代码/观感/基线放宽。串行 active 槽位回空；S5 img2threejs 借形封装待续。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-467 收口（3D P4 对账 + Gym 编排首片 · 门禁全绿）**：§9 对账表落 acceptance（M0/M1/M3 闭环、M2 部分、M4 本次）+ gym.mjs reset→step→finalize 真跑 verdict pass、digest/sha256 在册；HK-01 6/6 + digest 双跑；零新增依赖/零训练框架/零观感面。串行 active 槽位回空；C-53 P2-P7 待发令。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-466 收口（W11 P3 流式首切片 · 门禁全绿）**：::compose 流式稳定占位+完成后渲染；HK-01 8/8+组件 4/4+邻域 115/115+memo 3/3+断线续传兼容；实机腿 external-blocked 归因；零新增依赖/观感不代签。串行 active 槽位回空；C-53 P2-P7 待下批授权。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-465 收口（C-53 S1 设计基线冻结 + 上下文包硬化 · 门禁全绿）**：P0 快照可复算（--check exit 0）+ P1 resources/design-context/ 消费测试 8/8 锚定；HK-01 红→绿、theme-token 19/19；零新增依赖/零 UI 写面/零观感代签。C-53 P2-P7 按 R1 待下批授权；串行 active 槽位回空。G0 开发期常态 · 不外推 packaged/Provider/GA。）
+
+最后更新：2026-11-18（**BLOCK-464 收口（W11 P4 catalog 扩展点深化 · 门禁全绿）**：W11 五阶段 P0/P1/P2+P4 全完成（P3 流式=可选拆包留候选）；C-54 第 2 档 W11 全链收束；gen-ui 数据面=沙箱+compose 双形态并存 + 模板库 + pack 扩展点契约。串行槽位空出。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-464 立项启动（W11 P4 catalog 扩展点深化）**：串行槽位=BLOCK-464；compose 模板库+skill 补章+pack 投影段 additive。plan=docs/block464-gen-ui-catalog-extensions-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-463 收口（3D P3 呈现层首包 · 21 门全绿）**：C-54 第 3 档 3D 造物域 P0→P3 全完成（L0 意图编排/L1 几何生产/L2 Scene IR/L4 验证闭环/L3 呈现接线）；catalog 扩展点深化（gen-ui 评估 P4）留候选；P4 收口层已随包走。串行槽位空出。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-463 立项启动（3D P3 呈现层首包）**：串行槽位=BLOCK-463；SceneSpec 证据面板 + 双形态互达 + 零内核证明；实机腿 9223 尽力跑。plan=docs/block463-3d-p3-presentation-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-462 收口（3D P2 验证闭环 L4 · 21 门全绿）**：three-live 隔离接入+adapter+truth 链全交付；capability 默认关；C-54 第 3 档 3D 域 P0/P1/P2 全完成，下游=P3 呈现层（viewer 包+双形态+选择总线）另包待发令。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-462 立项启动（3D P2 验证闭环）**：串行槽位=BLOCK-462；three-live@1.4.0 npm VERIFIED；隔离 sidecar + adapter + truth 链，capability 默认关。plan=docs/block462-3d-p2-verification-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-461 收口（W11 ::compose 首包 P0-P2 · 21 门全绿）**：C-54 六档执行序列至此=清账✓→3D 裁决✓→W11 首包✓→3D P0/P1✓（BLOCK-459/460）→W10 对账✓（本次会话登记）→候选池登记✓；观感项（UI-706/707/709）如实留待签字。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-461 立项启动（W11 ::compose 首包 P0-P2）**：串行槽位=BLOCK-461；路径 A 零依赖；HK-01 红绿先行。plan=docs/block461-gen-ui-compose-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-460 立项启动（3D P1 首包）**：串行槽位=BLOCK-460；IR 落点修正=SceneSpec v1 additive joints（charter §3.2，蓝图 §4.1 同批修正）；红绿先行→sidecar→Skill→端到端。plan=docs/block460-scene-joints-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-459 收口（3D P0 探针=可行）**：extras schema 实测+六行映射 4 direct/2 convert 零不可行项+双进程确定性一致；Scene IR v0 草案在册；S3=BLOCK-460 按预授权启动（红绿先行）。plan=docs/block-459-3d-p0-probe-plan.md §6。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-18（**BLOCK-459 立项启动（3D 造物域 P0 可行性探针）**：用户端到端预授权批量裁决 B-1..B-9 按推荐执行——串行槽位=BLOCK-459（隔离 venv→带关节 GLB→extras schema 实测→Scene IR v0 映射验证→探针报告+IR 契约草案）；S1 清账完成（5 条失败任务复核=过程产物、docs:check 计数器机械修复、他方 WIP 零触碰）；W11 已发令（B-8）但次序在 3D P0/P1 后。plan=docs/block-459-3d-p0-probe-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**BLOCK-455 收口（模型级能力声明 + Endpoint 能力面简化）**：P1-P5 全门有当前证据——Node 契约 21/21 + 前端 59/59 + 拆前邻域 77 pass/2 既有 skip + 实机腿 18/18 allPass + UI-703 回归 7/7；UI-706 in_progress 待观感 pending_human_eye；串行槽位空出。plan=docs/block-455-model-level-capabilities-plan.md §7。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**BLOCK-455 立项启动（模型级能力声明 + Endpoint 能力面简化）**：用户裁决「按照你的建议安排……要彻底修 工作量大也修」——串行槽位=BLOCK-455（P1 内核契约→P2 后端消费面→P3 前端数据面→P4 UI/UI-706→P5 收口）；e2e 蓝图 W1-W10 已闭环不占槽位。plan=docs/block-455-model-level-capabilities-plan.md。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**W6 ASR/TTS 补充实施完成（用户裁决启动）**：BLOCK-454 六阶段 P1-P6 全部交付；当前执行 W8 宽表头材料 + W10 大纲核对。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e 序列终局：W1-W5+W7+W9 全部收口，closeout 21 门全绿**——BLOCK-454 completed、UI-704 实机腿过观感待签、串行槽位空闲；未执行 W6/W8/W10 见 AUDIT-LOG 终局行；快照 snapshot-20261117。下一步建议见 NEXT-STEP-BRIEF。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W7 已收口（UI-704 设置页 IA v2）**：core 13→5+高级折叠+深链归一+Cmd/Ctrl+,+UpdateCard+能力渠道折叠块；实机腿 11/11；观感需用户裁决不代签。当前执行到 W9 遗留治理清账。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W5 已收口 + BLOCK-454 整包 completed（P1-P5 五波连推）**：串行槽位空出，下一步候选=W7 设置页 IA v2（UI-704）；W6 ASR/TTS 暂缓、W8 UI-703 待用户过目、W10 需另立包裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W4 已收口（BLOCK-454 P4 Files API+协议归一+归属校验）**：当前执行到 W5 Responses 协议；W4 证据=acceptance/block-454/p4/（真实问答腿 external-blocked 同 D2 原则）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W3 已收口（BLOCK-454 P3 OCR 窄口+adapter+knowledge 接入）**：当前执行到 W4 文件输入链；W3 证据=acceptance/block-454/p3/（真端点腿 external-blocked 同 D2 原则）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W2 已收口（BLOCK-454 P2 deepseek-search adapter）**：当前执行到 W3 OCR 窄口；W2 证据=acceptance/block-454/p2/（D2 external-blocked 真端点腿）。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**e2e W1 已收口（BLOCK-454 P1 vision 修通）**：当前执行到 W2 搜索 adapter；W1 证据=acceptance/block-454/p1/。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+最后更新：2026-11-17（**端到端执行方案已就绪**：要自动推完全部工作，直接复制 [`docs/E2E-PROMPT.md`](./E2E-PROMPT.md) 代码块给新 Agent；逐项任务卡见 [`docs/e2e-execution-plan-2026-11-17.md`](./e2e-execution-plan-2026-11-17.md)。蓝图 W1-W10 仍是战略层，执行方案是其任务级拆解，D1-D8 已预置裁决。G0 开发期常态 · 不外推 packaged/Provider/GA.）
+
+（**统一工作蓝图已立**：`docs/next-work-blueprint-2026-11-16.md` 为当前唯一 active 执行蓝图（living-plan），把接下来所有事串成 W1-W10 串行波次——W1 BLOCK-454 P1 vision（可开工）→W2 搜索 adapter→W3 OCR→W4 文件链→W5 Responses(可选)→W6 ASR/TTS(暂缓)；W7 设置页 IA v2 实施（待裁决插队）；W8 UI-703 信息密度收口（待用户过目宽表头）；W9 遗留治理清账；W10 排队规划大纲。7 个用户决策点见蓝图 §3。串行 active 工作包仍=BLOCK-454（P0 完成，下一步 P1）。G0 开发期常态 · 不外推 packaged/Provider/GA.）

@@ -255,6 +255,7 @@
     "quality:baseline": "bash scripts/quality-baseline.sh",
     "audit:compact": "node scripts/audit-log-compact.mjs",
     "handoff:compact": "node scripts/handoff-compact.mjs",
+    "roadmap:compact": "node scripts/roadmap-compact.mjs",
     "config:doctor": "node scripts/block199-config-doctor.mjs",
     "evals:run": "node scripts/evals-run.mjs",
     "evals:gate": "node scripts/evals-gate.mjs",

@@ -91,7 +91,7 @@ npm run quality:baseline # P0 四项体检基线重扫（Knip/jscpd/audit/密钥
 npm run state        # 会话状态一键恢复：分支/WIP/AUDIT-LOG 未决项/active 工作包
 npm run audit:compact  # AUDIT-LOG 自稳（BLOCK-170）：「最后更新」链/处理记录表超窗行自动剪切归档（搬移不改写，幂等）；closeout 首步自动执行
 npm run hygiene:check   # 工作区卫生：死符号链接 + 临时残留 + 换行漂移 + 符号链接检出退化 + 文本源码控制字节（只报告不代删）
-npm run closeout     # 收口门禁聚合（fail-fast，定向语义 BLOCK-272）：audit:compact(自稳先行) → hygiene → docs → ui-audit → test:changed → gate:code-size → gate:arch-cycles → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check（十一门）；arch/knip 三门带域跳过（改动域不相交才 SKIP，fail-open），lint/tsc 走增量缓存，cruise 同轮共享；--force-full 全量转义
+npm run closeout     # 收口门禁聚合（fail-fast，定向语义 BLOCK-272）：audit:compact(自稳先行) → hygiene → docs → ui-audit → test:changed → gate:code-size → gate:arch-cycles → quality:secret → quality:arch → quality:lint → quality:types → quality:knip:check（门数现读 `npm run closeout` 输出）；arch/knip 三门带域跳过（改动域不相交才 SKIP，fail-open），lint/tsc 走增量缓存，cruise 同轮共享；--force-full 全量转义
 npm run closeout:full # 冷启动全量收口（closeout --force-full）：发布前/CI/锚点存疑时用
 npm run verify -- <flow> # dev-verify 实机校验 flow（--list 查清单；前置 dev 栈在跑）
 npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
@@ -103,25 +103,25 @@ npm run skills:check    # 产品 Skill 契约校验（resources/skills/）
 
 ```
 desktop/
-├── src/                    # Electron 主进程（72 个 .js）
-│   ├── main.js            # 装配入口（686 行；历史巨型文件已拆分，勿按 61KB 旧账理解）
-│   ├── main/              # 主进程职责模块（窗口/后端进程/插件加载/品牌/CSP…17 文件）
-│   ├── ipc/               # IPC handler 按域拆分（20 文件）+ channels.js = 通道唯一注册表
+├── src/                    # Electron 主进程（现读 `find src -name "*.js" | wc -l`）
+│   ├── main.js            # 装配入口（行数现读 `wc -l src/main.js`；历史巨型文件已拆分）
+│   ├── main/              # 主进程职责模块（窗口/后端进程/插件加载/品牌/CSP，现读目录）
+│   ├── ipc/               # IPC handler 按域拆分 + channels.js = 通道唯一注册表
 │   ├── preload.js         # 预加载脚本（自包含字面量，不 require 本地模块）
 │   ├── migrations/        # 桌面侧 SQLite 迁移（NNN_*.sql，由 migration-runner.js 应用）
 │   ├── database/          # 桌面侧库访问（如 result-db.js）
-│   ├── plugin-manager.js  # 插件管理器（562 行，生命周期见 src/main/_plugin-loader.js）
+│   ├── plugin-manager.js  # 插件管理器（生命周期见 src/main/_plugin-loader.js）
 │   └── mcp-server.js      # MCP stdio 壳（协议层，工具实体在 core 侧 registry）
-├── frontend/src/           # 渲染进程（84k 行 TS/TSX）
+├── frontend/src/           # 渲染进程（规模现读 `find frontend/src -name "*.ts" -o -name "*.tsx" | wc -l`）
 │   ├── pages/            # 路由页面：home / knowledge / plugins / project-workspace /
 │   │                     #   result-studio / settings / skills / window（+ review.tsx 等顶层页）
-│   ├── components/       # React 组件（162 个 .tsx）：copilot / desktop / workspace-panels /
+│   ├── components/       # React 组件：copilot / desktop / workspace-panels /
 │   │                     #   knowledge / result-studio / window / ui / editor / settings / …
 │   ├── hooks/             # React Hooks
 │   ├── lib/               # 工具函数
 │   │   └── desktopBridge.ts  # IPC 桥接
 │   └── themes/            # 主题系统
-├── test/                   # Node 侧测试（317 个 .test.mjs，前端测试住在 frontend/src 同目录）
+├── test/                   # Node 侧测试（现读 `ls test/*.test.mjs | wc -l`，前端测试住 frontend/src 同目录）
 └── core/                   # 核心后端（仓库内，已内联）：petri-server / shared-backend / packages
 ```
 
@@ -209,7 +209,7 @@ desktop/
 
 ### 测试范围纪律（定向优先）
 
-- 默认**只跑与本次改动相关的测试**，不跑全量 `npm run test:all:workspace`（1300+ 项，耗时数分钟）。
+- 默认**只跑与本次改动相关的测试**，不跑全量 `npm run test:all:workspace`（规模现读 `node scripts/test-all-shards.mjs --plan`，耗时数分钟）。
 
 - 影响范围由 `test/impact-map.json` 维护，`npm run test:changed:list` 必须可复现；未知生产路径 fail-closed，直接升级为全量 Node/前端检查，不得静默漏测。
 
@@ -252,13 +252,13 @@ desktop/
 
 ### 修改大型文件前
 
-- `frontend/src/components/copilot/SimpleChat.tsx`（1664 行）— 聊天主链，改前先读 `conversationRunStore` 语义
+- `frontend/src/components/copilot/SimpleChat.tsx`（行数现读 `wc -l`）— 聊天主链，改前先读 `conversationRunStore` 语义
 
-- `frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx`（1310 行）与 `pages/project-workspace.tsx`（1170 行）— 工作区/评审投影
+- `frontend/src/components/desktop/WorkingTreeReview/ReviewMode.tsx` 与 `pages/project-workspace.tsx`（行数现读 `wc -l`）— 工作区/评审投影
 
-- `src/main.js`（686 行，装配入口）— 进程模型与 window 管理已拆到 `src/main/`（窗口/后端进程/插件加载）与 `src/ipc/`（按域 handler），改行为通常落在子模块而非入口
+- `src/main.js`（行数现读 `wc -l`，装配入口）— 进程模型与 window 管理已拆到 `src/main/`（窗口/后端进程/插件加载）与 `src/ipc/`（按域 handler），改行为通常落在子模块而非入口
 
-- `src/ipc/working-tree-review.js`（633 行）/ `src/ipc/window-manager.js`（623 行）/ `src/plugin-manager.js`（562 行，生命周期见 `src/main/_plugin-loader.js`）
+- `src/ipc/working-tree-review.js` / `src/ipc/window-manager.js` / `src/plugin-manager.js`（行数现读 `wc -l`，生命周期见 `src/main/_plugin-loader.js`）
 
 - 体积由 `npm run gate:code-size`（`scripts/code-size-ledger.mjs`）机械守护，超标走台账登记而非临时放宽
 

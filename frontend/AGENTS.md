@@ -6,21 +6,20 @@
 
 ```
 frontend/src/
-├── pages/                    # 路由页面（每个 .tsx 是路由）
-│   ├── single-cell/         # 单细胞分析模块
-│   ├── spatial/             # 空间转录组模块
-│   ├── figcode/             # 可交互图表模块
-│   ├── admin/               # 管理面板
-│   └── home.tsx            # 首页
+├── pages/                    # 路由页面（每个 .tsx 是路由；现读目录为准）
+│   ├── home.tsx            # 首页
+│   ├── knowledge / plugins / project-workspace /
+│   ├── result-studio / settings / skills / window
+│   └── review.tsx          # 审阅顶层页
 ├── components/              # React 组件
 │   ├── copilot/            # AI Copilot 组件
 │   ├── desktop/             # 桌面特有组件
 │   ├── ui/                  # 通用 UI 组件
-│   └── mdx/                 # MDX 组件
+│   └── knowledge / result-studio / window / editor / settings / …
 ├── hooks/                   # 自定义 Hooks
 ├── lib/                     # 工具函数
 │   ├── desktopBridge.ts    # IPC 通信桥接
-│   ├── copilotContext.tsx  # Copilot Context
+│   ├── copilotContext.ts   # Copilot Context（另有 copilotContextProvider.tsx）
 │   └── *.ts
 ├── styles/                  # 全局样式
 └── themes/                  # 主题系统
@@ -37,8 +36,8 @@ frontend/src/
 ### 允许的方式
 
 - React `useState` + `useCallback`
-- React Context（参考 `lib/copilotContext.tsx`）
-- 自定义 store（如 `pages/single-cell/_store.ts`）
+- React Context（参考 `lib/copilotContextProvider.tsx`）
+- 自定义 store（参考 `components/copilot/conversationRunStore.ts`）
 
 ### 禁止的方式
 

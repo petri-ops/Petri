@@ -1,10 +1,10 @@
 # 🧫 Petri · 格物
 
-> 🧫 Petri — a desktop AI agent that is general by design and vertical by content: ships with multi-omics learning & practice packs, extends via MCP, runs local-first. A petri dish where your skills grow.
+> 🧫 Petri — a general-purpose agent that runs on your machine: local sovereignty, fully auditable, evidence by construction.
 
-**Petri · 格物** 是一个通用 AI Agent 桌面应用：**通用内核 + 垂直领域内容**。首个内置垂直领域为**全组学（multi-omics）学习与实战**——AI 陪伴式导师在你的机器上规划任务、调用工具、执行分析、产出报告，数据不出本机。
+**格物（Petri）是跑在你机器上的通用 agent——本地主权、全链可审计、证据自证；以目标为输入、工具为手足、真实产物为交付；领域能力（生信等）由已安装领域包按需放大，不是与生俱来的身份。** 通用能力（编排 / 知识 / 工具 / 模型计量 / 可靠性）是开发主线；领域内容包是优势放大器。
 
-Petri is a general-purpose AI agent desktop app, seeded with vertical-domain content — starting with multi-omics learning and hands-on practice. Local-first and MCP-native: it plans, runs tools and analyses right on your machine.
+Petri is a general-purpose agent running entirely on your machine — local sovereignty, end-to-end auditability, evidence by construction. Domain capabilities (e.g. multi-omics) come from installed domain packs, not from the agent's identity.
 
 ## Highlights / 特性
 
@@ -23,16 +23,15 @@ Petri is a general-purpose AI agent desktop app, seeded with vertical-domain con
 npm install
 cd frontend && npm install && cd ..
 
-# 2. 启动前端 dev server（:3000）
-cd frontend && npm run dev   # 保持运行
-
-# 3. 启动桌面应用（另开终端；自动拉起 :3001 本地后端）
+# 2. 一条命令启动完整 dev 栈（BLOCK-457 唯一入口）
+#    Electron main 先绑端口 → 自起 :3001 后端（含迁移）→ 拉起 :3000 Vite → 载窗。
+#    不要再手动 `npm --prefix core/petri-server start`：双 spawner 会 EADDRINUSE。
 npm run dev
 ```
 
 生产构建（SPA + 站点）：`npm run build:all`；桌面打包：`npm run build:win` / `npm run build:mac`。
 
-> 当前版本处于 G0 开发期（`v0.0.1-rc.7` 工程候选），Result Studio 为 `implemented_unverified / experimental`；签名/公证/远程分发属后续阶段，尚不可用。
+> 当前处于 G0 开发期，版本以 `package.json` 为准；Result Studio 为 `implemented_unverified / experimental`；签名/公证/远程分发属后续阶段，尚不可用。
 
 ## Architecture / 架构一览
 
@@ -52,7 +51,7 @@ npm run dev
 ```bash
 npm run state          # 会话状态一键恢复
 npm run test:changed   # 影响范围定向测试（默认方式）
-npm run closeout       # 收口门禁聚合（hygiene/docs/ui-audit/test/quality 十二门）
+npm run closeout       # 收口门禁聚合（门数现读 `npm run closeout` 输出）
 npm run docs:check     # 文档治理门禁
 ```
 

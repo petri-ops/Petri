@@ -3,6 +3,10 @@
 All notable changes to the Petri desktop app are documented in this
 file. The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## Unreleased
+
+- G0 开发期进行中的工作以文档入口为准：当前可恢复状态与文档索引见 [`docs/README.md`](./docs/README.md)，受治理文档的登记/分类真相见 [`docs/DOC-REGISTRY.json`](./docs/DOC-REGISTRY.json)。版本以 `package.json` 为准。
+
 ## Week 4 (2026-07-14) -- RC Gate 1 close-out + Gate 4 macOS DMG + release CI
 
 ### Added

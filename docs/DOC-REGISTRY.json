@@ -13844,7 +13844,7 @@
     {
       "id": "REMAINING-WORK-PLAN-2026-11-23",
       "path": "docs/remaining-work-plan-2026-11-23.md",
-      "kind": "reference",
+      "kind": "living-plan",
       "status": "active",
       "canonical": true,
       "truthDomain": "remaining-work-queue",
