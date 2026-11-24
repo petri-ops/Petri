@@ -279,6 +279,8 @@
 - **证据**：nso-w3-a11y 4/4（inert 双模式/树语义在 LeftPanel 契约/全链回滚 live region）；CenterPanel 21/21；settings 14/14；theme-token-contract 绿；tsc 0。
 - **待补**：实机读屏/键盘走查（Tab 不入不可见层），通过后转 verified。
 
+- **实机机械腿（2026-11-24 补，BLOCK-517 W4）**：`ui697-viewer-fallback-live` 5/5 allPass（acceptance/block517-walk-batch/）——工作区文件预览路径：binary 伪 mp4 → 预览降级卡文本在场（二进制文件/系统默认应用/下载副本）且 **不再被塞进 HTML 预览**（UI-697 修复行为实证）；binary 腿原「结果库行不可靠复现」路径已被 P6 裁决停用 resultSurfaces 取代——工作区文件预览即现存 binary 预览面（如实分级）。**如实 skip**：prefsSync/实验开关失败告警条腿=网络失败注入，契约 nso-w3-failure-visibility 3/3 覆盖，live 注入不破坏运行栈不做；机器可读 viewer-fallback-reason testid 属结果面不可达。
+
 ## UI-697: viewer 分派三段式 + 降级原因上抛 + prefs/实验开关失败可见（BLOCK-369 NSO-W3 F-09/F-10；2026-11-06 **in_progress（live 腿 6/6 过含 prefs 告警条+截图；binary 降级原因腿需特定 UI 态+binary 产物——结果库行在 9223 上不可靠复现，实机走查待人工）**）
 
 - **viewer 分派三段式（F-09 有意翻转旧错分派）**：扩展名优先 → kind 兜底 → binary+机器可读降级原因（preview_disabled / no_matching_viewer）。修复 kind=report 的 .pdf/.mp4/.svg 被塞进 HTML 预览；Shell binary 卡显示降级原因（data-testid=viewer-fallback-reason）；plot .svg 让位语义保持（unlessKind）。旧「现状平迁」期望逐条有意翻转留理由（viewerRegistry.test / viewerRegistry.block142.test）。
