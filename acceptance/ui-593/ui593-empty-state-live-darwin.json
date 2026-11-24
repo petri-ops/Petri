@@ -1,0 +1,49 @@
+{
+  "name": "ui593-empty-state-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T09:15:27.489Z",
+  "finishedAt": "2026-11-24T09:15:32.391Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "id=p_mwuhbnoc_rzxp"
+    },
+    {
+      "name": "A1_header_block",
+      "pass": true,
+      "detail": "{\"title\":\"工作区\",\"desc\":\"Agent 会在这里看文件、改文件、跑命令，也会读取 Git 状态——选择一个面\",\"badgeSvg\":true}"
+    },
+    {
+      "name": "A2_six_rich_cards_two_col",
+      "pass": true,
+      "detail": "{\"cards\":8,\"withDesc\":8,\"rowCount\":4,\"twoCol\":true}"
+    },
+    {
+      "name": "A3_vertically_centered",
+      "pass": true,
+      "detail": "{\"cTop\":38,\"cH\":962,\"iTop\":270,\"iH\":497,\"expectTop\":271}"
+    },
+    {
+      "name": "A4_no_review_badge_on_fresh",
+      "pass": true,
+      "detail": "fresh project has no unread changes"
+    },
+    {
+      "name": "A5_hover_accent_state",
+      "pass": true,
+      "detail": "{\"baseline\":{\"border\":\"color(srgb 0.105882 0.168627 0.25098 / 0.1024)\",\"bg\":\"color(srgb 0.929176 0.942667 0.956157)\"},\"hover\":{\"hovered\":true,\"border\":\"color(srgb 0.431373 0.611765 0.627451 / 0.45)\",\"bg\":\"color(srgb 0.899308 0.922813 0.936435)\"}}"
+    },
+    {
+      "name": "A6_dark_layout_intact",
+      "pass": true,
+      "detail": "{\"cards\":8,\"withDesc\":8,\"title\":\"工作区\"}"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}

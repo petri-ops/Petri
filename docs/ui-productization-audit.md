@@ -1112,12 +1112,12 @@ D 类逐条裁决；E 类归治理台账。
 - **实机证据**：9223 dev Electron 工作区图像面实断（acceptance/block-298/live-pending.json + pending-preview.png，10/10 PASS）：D0 不点 toggle 自动打开；D1 箭头工具；D2b 松手后 `annotation-pending-rect` 立即可见（left=15.02%/width=40%）；D3 composer 激活；D4 保存转正 annotation-box kind=arrow；D5 REST rect 归一化；D6 取消退场且条目数不增。探针揭示并修复真 bug：begin* 残留旧语义 `setDrawing(false)`（画完即退出绘制模式，第二笔被拒识）——已删除，连续批注动线由组件级测试+实机 D6 双证。
 - **边界（reopen）**：toggle 语义反转（画笔常开时 toggle=退出）如体感不佳随时回退；anchor（文本选区）待填无 overlay 预览（选区本身即预览）。
 
-## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 **in_progress（L6-3/BLOCK-410 降级：verified 冒认——组件级 21/21 但 9223 实机走查未做；实机补腿后升回）**）
+## UI-593: 右栏空态重排·Qoder 式工作区引导（2026-10-27 in_progress → **2026-11-24 verified（BLOCK-513 L1 实机补腿：台账自设 reopen 条件「实机补腿后升回」兑现——ui593-empty-state-live 8/8 allPass，dev Electron 边界内）**）
 
 - **变化面**：EmptyResult 从「底部 6 枚图标+文字小卡 + 上方全空」重排为 Qoder 式空态——顶部「工作区」标题章/标题/描述块（内容合同=Qoder 0.4.8 ui-i18n #3788255/#3788272「工作区就是 Agent 动手的地方…」）+ 六入口升级富卡片（图标章 30px + 标题 + 一句说明，2 列网格，margin:auto 垂直居中）；审阅徽章/±行数保留；卡片悬停 accent 描边+底色（BLOCK-273 悬停规范同源）。
 - **为什么这样设计**：用户裁决「过于简约老土，看 Qoder CN 布局，大幅提升布局合理性与美观」——Qoder 范式=空态有内容合同（标题+描述引导）+ 入口带说明；旧态六枚小字按钮沉底、大片空白无引导。
 - **验证（代码）**：EmptyResult.unread 3/3（徽章契约不变）+ RightPanel + theme 门 21/21（小字棘轮 52→54 描述文案域 / accent 94→101 入口卡交互态，均留痕）+ tsc 0。
-- **实机证据**：9223 welcome+项目页实断（acceptance/block-277/，探针同 block-275 配方）。
+- **实机证据（2026-11-24 补腿后重写）**：acceptance/ui-593/ui593-empty-state-live-darwin.json 8/8 allPass（现行 HEAD 新鲜取证，取代与降级判定矛盾的 block-277 旧证据）——A1 头部块内容合同/A2 入口富卡全带图标章+说明且两列等宽行（卡数已由 6 演进到 8：后续批次加入口，布局契约=富卡+两列不变，断言按现真值不钉死六）/A3 垂直居中 ±1px/A4 新项目无审阅徽章/A5 真实 CDP 指针悬停 accent 描边+底色变化（BLOCK-273 规范）/A6 暗色布局不塌/P9 临时项目清理。截图 -32000 离屏边界=已入册先例（BLOCK-273/UI-590），unavailable 如实记明细不作 fail。
 - **边界（reopen）**：最近使用面板记忆（未做）；空态插画（Qoder 有插画层，未做）。
 
 ## UI-592: 运行计量条恢复文字形态（2026-10-27 **verified（BLOCK-276 轻量包；用户推翻 UI-584 图标态；组件级 8/8 + 恢复即 UI-523 已验证形态原样回退）**）
