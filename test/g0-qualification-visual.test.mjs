@@ -12,8 +12,10 @@ function evidence(overrides = {}) {
     ['restart-restored-light-wide', 'light', 'wide'],
   ];
   return {
-    states: specs.map(([id, theme, viewport]) => ({
-      id, theme, viewport, width: 1200, height: 800, bytes: 20000, imageSha256: 'a'.repeat(64),
+    states: specs.map(([id, theme, viewport], index) => ({
+      // 2026-11-24：五态须逐态唯一 sha（理想夹具），重复 sha 由负测单独覆盖。
+      id, theme, viewport, width: 1200, height: 800, bytes: 20000,
+      imageSha256: String(index + 1).repeat(64),
     })),
     inspection: {
       method: 'computer-use-accessibility-and-screenshot-review',
@@ -35,6 +37,15 @@ function evidence(overrides = {}) {
 test('visual evidence requires packaged theme, viewport, surface and restart convergence matrices', () => {
   const verdict = evaluateVisualEvidence(evidence());
   assert.equal(verdict.passed, true, JSON.stringify(verdict.checks));
+});
+
+test('visual evidence rejects duplicated screenshots (5 states must be distinct)', () => {
+  const value = evidence();
+  // 把第 5 张改成与第 1 张同 sha（复刻真实证据缺口：5 张 PNG / 4 唯一态）。
+  value.states[4].imageSha256 = value.states[0].imageSha256;
+  const verdict = evaluateVisualEvidence(value);
+  assert.equal(verdict.checks.distinctStates, false);
+  assert.equal(verdict.passed, false);
 });
 
 test('visual evidence rejects hidden reasoning or missing restart result projection', () => {

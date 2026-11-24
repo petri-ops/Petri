@@ -66,6 +66,7 @@
 > BLOCK-479 六件套同批登记（2026-11-18）：C-52 余项 P3 React Bits 反馈型微动效模式借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未引入 react-bits/framer-motion 等新依赖、未加整页动效，四类反馈型微动效仅从本地主权锚点静态冻结并复用 --petri-duration/ease token；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block479-c52-p3-react-bits-motion/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 > BLOCK-478 六件套同批登记（2026-11-18）：C-52 余项 P2 assistant-ui 模式借鉴与契约冻结为脚本+模型可读契约+台账批，**零 UI 增量**；未改任何 .tsx/CSS/token，未替换 SimpleChat，未新增产品依赖；UI-706/707/709/710 与 E 类观感槽保持 in_progress + pending_human_eye 零代签；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/block478-c52-p2-assistant-ui/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+> **2026-11-24 归位注记（用户裁决「以台账 verified 为准翻登记行」）**：上三行「UI-706/707/709/710 保持 in_progress」为 2026-11-18 历史叙述；四项目前按台账标题行（UI-710/709/707/706）均为 **verified（2026-11-19 用户口令 verified + 人眼核对卡，dev Electron 边界内）**，BLOCK-478/479/480 registry status 亦为 completed。**仅同步这四项的编号状态口径，E 类观感槽与所有 `pending_human_eye` 签字位一律不动、零代签**。
 
 > BLOCK-437 拖入源范围门 + 真实栈实测（2026-11-11）：本包为后端路由/判据与体积抽模块，**零 UI 增量**；未改任何 .tsx/CSS/token；台账不新增 UI-### 编号、不改状态词、不重打 debt 棘轮。证据=`acceptance/m-blueprint-2026-11-11/m6a/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 

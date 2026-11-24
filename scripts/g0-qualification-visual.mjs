@@ -60,6 +60,10 @@ export function evaluateVisualEvidence(report) {
     screenshotsValid: (report.states || []).length === REQUIRED_STATES.length
       && report.states.every((state) => /^[a-f0-9]{64}$/.test(state.imageSha256)
         && state.width >= 720 && state.height >= 520 && state.bytes > 10000),
+    // 2026-11-24 用户裁决批准：视觉证据须逐态唯一，复制同一 PNG 冒充不同状态判失败。
+    // 接受 g0:qualification 因此先红——真实 evidence 仍是 5 张 PNG / 4 唯一 sha，不补拍不伪造。
+    distinctStates: new Set((report.states || []).map((state) => state.imageSha256)).size
+      === REQUIRED_STATES.length,
     themeMatrix: new Set((report.states || []).map((state) => state.theme)).size >= 2,
     viewportMatrix: new Set((report.states || []).map((state) => state.viewport)).size >= 2,
     productionSurfaces: ['chat', 'summary', 'task', 'files', 'result'].every((surface) =>

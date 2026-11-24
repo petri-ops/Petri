@@ -1385,7 +1385,8 @@
         "core/shared-backend/g0-*.js",
         "core/shared-backend/g0/**",
         "test/g0-*.test.mjs",
-        "test/fixtures/g0-**/**"
+        "test/fixtures/g0-**/**",
+        "acceptance/g0-distinct-states-ruling/**"
       ],
       "tests": [
         "test/g0-baseline.test.mjs",

@@ -1,0 +1,11 @@
+✔ visual evidence requires packaged theme, viewport, surface and restart convergence matrices (4.162541ms)
+✔ visual evidence rejects duplicated screenshots (5 states must be distinct) (0.402625ms)
+✔ visual evidence rejects hidden reasoning or missing restart result projection (0.412708ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 263.275541

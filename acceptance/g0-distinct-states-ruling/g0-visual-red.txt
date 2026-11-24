@@ -1,0 +1,5 @@
+
+> petri-desktop@0.0.4 g0:qualification:visual
+> node scripts/g0-qualification-visual.mjs
+
+[G0-LF12 visual] FAIL — visual_qualification_failed
