@@ -1,12 +1,13 @@
 ---
 capability: block517-walk-batch
-status: active
+status: completed
 kind: work-package
 canonical: true
 truthDomain: block517-walk-batch
 entrypoint: docs/README.md
 registeredAt: 2026-11-24
 owner: main-agent
+phase: CLOSED
 ---
 
 # BLOCK-517 · 筐② 五项 9223 实机走查批（plan）
@@ -32,5 +33,16 @@ owner: main-agent
 
 - 每项：走查 flow allPass（含如实 skip 项）+ 台账行更新（verified 仅限走查判据全过且无不可达欠账；有欠账的如实标注欠账腿）。
 - 收口：closeout 全门（存量红如实归属）；证据=acceptance/block517-walk-batch/。
+
+G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## 6. 收口笔录（2026-11-24 · completed）
+
+提交链：立项 `d1e988585` → W1 `b5b88821b` → W2 `f933f08ea` → W3 `1b40dc4ee` → W4 `f96212639` → W5 `741dde8e8` → 对账 `0806a5abf`/`5a75dec6c`/`88b56f8eb` → 本批回写。
+
+- **五腿全走查**：W1 UI-702 7/7（通知历史回看全链真实路径）→ W2 UI-699 5/5（会话行 cv=auto 确认；结果库行不可达如实 skip）→ W3 UI-698 5/5（树语义+导入面板语义；inert 双模态腿 skip=入口不存在，契约覆盖）→ W4 UI-697 5/5（binary 降级卡+无 HTML 错分派实证；工作区预览=现存 binary 预览面）→ W5 UI-694 7/7（五段真连后端；重新检测钮/pdf 渲染腿如实 skip）。
+- **台账口径（观感零代签）**：五项状态均维持 in_progress 不翻 verified——欠账腿=观感/读屏/特定产物场景（归人归后续）；机械判据腿已全部补齐并留证。
+- 门禁：walk flows 全部 allPass（7/7+5/5+5/5+5/5+7/7）；test:changed **313/2**（2 红=BLOCK-462 three-live 环境漂移族，S0/COMPLETENESS 筐⑤已归属，模型3d域零触碰 git 实证）；post-h9 **186/186**（knip 上限 414→420 同步留痕 `88b56f8eb`）；knip 420 键（五 W flow 留因）；lint 0 errors；types 0。
+- 台账滞后两处随批纠正（living-plan C 类源文件未动留归位令——兴奋抓真后如实分级）。
 
 G0 开发期常态 · 不外推 packaged/Provider/GA。

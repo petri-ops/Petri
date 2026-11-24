@@ -1,4 +1,4 @@
-512q. [`block517-walk-batch-plan.md`](./block517-walk-batch-plan.md) — 2026-11-24 **active（BLOCK-517 · 筐②五项 9223 实机走查批 / owner「逐个进行走起来」第一项）**：UI-702 通知历史→UI-699 字号+行 cv→UI-698 inert 语义→UI-697 viewer 三段式（binary 腿 skip 如实）→UI-694 设置五段，逐项独立提交走查；观感零代签、binary/结果库 cv 不可达腿如实 skip 不伪造；栈跑完即 kill。G0 开发期常态 · 不外推 packaged/Provider/GA。
+512q. [`block517-walk-batch-plan.md`](./block517-walk-batch-plan.md) — 2026-11-24 **completed（BLOCK-517 · CLOSED； · 筐②五项 9223 实机走查批 / owner「逐个进行走起来」第一项）**：UI-702 通知历史→UI-699 字号+行 cv→UI-698 inert 语义→UI-697 viewer 三段式（binary 腿 skip 如实）→UI-694 设置五段，逐项独立提交走查；观感零代签、binary/结果库 cv 不可达腿如实 skip 不伪造；栈跑完即 kill。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
 512p. [`block516-wakeup-ui-plan.md`](./block516-wakeup-ui-plan.md) — 2026-11-24 **completed（BLOCK-516 · CLOSED； · 唤醒 B 档 UI 勾选面收尾 / owner 经 Orca 转达「下一波两件」第一项）**：routes additive（auto-tool-names 数据源+:id/auto 口+创建透传）、automationClient additive、ScheduleDialog 预授权折起区（trusted+goal 下拉+白名单勾选）、ScheduledWorkspacePanel 徽章+撤回钮；UI-724 登记（实机 flow 翻 verified，观感待签）；HK-01 红绿先行。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
