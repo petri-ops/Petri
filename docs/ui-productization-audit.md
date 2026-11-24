@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-722: 全景修复 S1 排队消息挂载保真与退出守卫（2026-11-24 **in_progress**；BLOCK-511 S1；行为修复，零可见观感变化）
+
+- **范围**：`SimpleChat.tsx` 队列状态/水合/回写/清空抽为 `SimpleChat/hooks/usePromptQueue.ts`，清空仅在 conversationId/projectId 真正变化时执行（挂载不清空，保住刷新后的排队追问）；`newConversation` 显式清空不变。主进程 `before-quit` 三处消费者（main.js/terminal.js/window-manager.js）先判 `event.defaultPrevented`，`app.once→on`，Cmd+Q 取消不再误杀后端/终端/窗口。`src/main.js` 回到 920 行、`SimpleChat.tsx` 1943 行（棘轮只减）。
+- **证据**：HK-01 前端 `usePromptQueue.test.ts` 4/4（预置 localStorage 挂载保留 / 切会话清空 / 切项目清空 / 显式更新回写）；Node `quit-guard-default-prevented` 3/3 + `terminal-multisession-ipc` 6/6 + `ipc-relative-requires`（扩 src 全域）1/1；tsc 0 / lint 0 error / docs / secret 绿。
+- **状态边界**：**in_progress（修复包零观感变化）**——本条为行为/可靠性修复，不改变任何用户可见呈现，无观感签字项；dev Electron 实机腿在 S4/S6 汇总验证后统一对账。观感槽零代签。证据=`acceptance/panoramic-remediation-2026-11-24/`。
+
+
 ## UI-721: 审批卡按需模型解释入口（2026-11-23 **verified**；QODER-A2 P3；解释按钮/分析中骨架/失败降级，行为面非观感面）
 
 - **范围**：`GuardAckCard.tsx` 增「解释」按钮 + 分析中骨架 + 失败提示；`useGuardAck.ts` 增 `handleGuardExplain` 调 P2 explain 路由；`SimpleChat.tsx` 透传；`simple-chat.css` 用既有 token 加骨架样式。模型解释成功覆盖确定性文案、失败保留原说明；审批「允许/拒绝」按钮全程可用（不禁用、不受 busy 影响）。零新依赖（复用 `callModelTask({role:'explanation'})`）。

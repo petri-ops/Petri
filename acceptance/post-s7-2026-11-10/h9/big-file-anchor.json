@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
   "kind": "post-s7-big-file-anchor",
-  "generatedAt": "2026-11-21",
+  "generatedAt": "2026-11-24",
   "policy": "行数只减不增 + 内容指纹必须同批重打；与 code-size-ledger 集合互斥",
   "files": [
     {
       "path": "core/petri-server/loop-orchestrator.js",
-      "lines": 1674,
-      "sha256": "272e2a2a936a872e2516baf2fc3381d796db75d20e9ef0ab0896bbd13ef8c5c8",
+      "lines": 1658,
+      "sha256": "1770f5a8bbf953d97c732bf5f1916cd7915d86c4ae895b068c251530d61b9a42",
       "missing": false
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
-      "lines": 1944,
-      "sha256": "02fbc22e22357ce6d01b85621d18692dd6697afdf671cac9ca80f228d6faecd4",
+      "lines": 1943,
+      "sha256": "b0f5ea7277b5206d40cff60b4da92750ef3c4359e90c7fbd8800e404b6060606",
       "missing": false
     },
     {

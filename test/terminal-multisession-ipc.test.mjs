@@ -94,6 +94,10 @@ function loadFreshTerminal() {
       once(event, fn) {
         if (event === 'before-quit') beforeQuitFns.push(fn);
       },
+      // BLOCK-511 S1.3 — terminal 退出监听由 app.once 改 app.on（取消后真退出仍清理）
+      on(event, fn) {
+        if (event === 'before-quit') beforeQuitFns.push(fn);
+      },
     },
     shell: { openPath: async () => null },
   };

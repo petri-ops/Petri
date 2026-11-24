@@ -134,7 +134,7 @@ function resolveNodeBin() {
   }
   try {
     const { execFileSync } = require("child_process");
-    const { getNodeLocator } = require("./platform-compat");
+    const { getNodeLocator } = require("../platform-compat");
     const locator = getNodeLocator(process.platform);
     const bin = execFileSync(locator, ["node"], {
       encoding: "utf-8",

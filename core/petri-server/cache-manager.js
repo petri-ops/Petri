@@ -31,6 +31,9 @@ const CACHE_DIR = path.join(TEMP_DIR, '_cache');
 
 const DEFAULT_TEMP_MAX_AGE_HOURS = 24;
 const DEFAULT_CACHE_MAX_IDLE_DAYS = 7;
+// BLOCK-511 S1.2 — analyses 未终态词表（与 db.js:1320 的 active 查询同口径）；
+// 只有这些状态的任务视为「运行中」，其缓存/临时目录必须保留。
+const ACTIVE_ANALYSIS_STATUSES = ['running', 'pending', 'queued'];
 
 // ============================================================
 // Stats
@@ -332,12 +335,14 @@ function rmrf(p) {
  * @param {boolean} opts.dryRun - if true, list candidates without deleting
  * @param {number} opts.tempMaxAgeHours
  * @param {number} opts.cacheMaxIdleDays
+ * @param {function} opts.getDatabase - injectable DB accessor (tests)
  */
 function cleanup(opts = {}) {
   const {
     dryRun = false,
     tempMaxAgeHours = DEFAULT_TEMP_MAX_AGE_HOURS,
     cacheMaxIdleDays = DEFAULT_CACHE_MAX_IDLE_DAYS,
+    getDatabase = null,
   } = opts;
 
   const report = {
@@ -353,16 +358,24 @@ function cleanup(opts = {}) {
   const tempCutoff = now - tempMaxAgeHours * 3600 * 1000;
   const cacheCutoff = now - cacheMaxIdleDays * 24 * 3600 * 1000;
 
-  // Get active analysis taskIds from DB (preserve corresponding caches).
+  // BLOCK-511 S1.2 — 查库失败即中止本轮清理（fail-closed）：此前只记 errors 继续，
+  // dbTaskIds 为空会把所有缓存判 orphan 删除，运行中任务产物被误删。
+  // runningTaskIds 用 analyses.status 的未终态任务填充；dbTaskIds 保留全部引用。
   const runningTaskIds = new Set();
   const dbTaskIds = new Set();
   try {
-    const dbMod = require('./db');
-    const sqlDb = dbMod.getDatabase();
-    const rows = sqlDb.prepare('SELECT task_id FROM analyses WHERE task_id IS NOT NULL').all();
-    for (const r of rows) if (r.task_id) dbTaskIds.add(r.task_id);
+    const sqlDb = (typeof getDatabase === 'function' ? getDatabase() : require('./db').getDatabase());
+    const allRows = sqlDb.prepare('SELECT task_id, status FROM analyses WHERE task_id IS NOT NULL').all();
+    for (const r of allRows) {
+      if (!r.task_id) continue;
+      dbTaskIds.add(r.task_id);
+      if (ACTIVE_ANALYSIS_STATUSES.includes(r.status)) runningTaskIds.add(r.task_id);
+    }
   } catch (e) {
+    report.aborted = true;
+    report.abortReason = 'db_query_failed';
     report.errors.push(`Failed to query DB for active taskIds: ${e.message}`);
+    return report;
   }
 
   // ---------- Clean TEMP_DIR ----------

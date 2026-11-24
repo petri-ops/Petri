@@ -635,7 +635,9 @@ function setupWindowManagerIpc({
     return { ok: !!dataUrl, dataUrl: dataUrl || null };
   });
 
-  app.once("before-quit", () => {
+  // BLOCK-511 S1.3 — 退出守卫已拦截（取消）时不销毁窗口/写状态；app.on 保证真退出仍清理。
+  app.on("before-quit", (event) => {
+    if (event && event.defaultPrevented) return;
     exiting = true;
     for (const rec of windows.values()) {
       try {

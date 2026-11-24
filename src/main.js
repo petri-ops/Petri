@@ -12,6 +12,7 @@
  * 6. 外部链接走系统浏览器
  */
 const CHANNELS = require('./ipc/channels');
+const { _mapSkillRuntimeStatus } = require('./_mapSkillRuntimeStatus'); // BLOCK-511 S1.5 模块级一次加载（原 handler 内 ../ 路径错误）
 // BLOCK-264（C-38）— 电脑使用画中画 IPC（窗口/截帧；主窗 preload 不暴露）
 const computerUsePip = require('./main/computer-use-pip');
 // BLOCK-101 P0 — 启动 timeline：进程起点锚点必须在主进程模块加载期冻结（main()
@@ -410,7 +411,6 @@ function setupSkillsIpc() {
       // 让 poller 能通过 getExecutionStatus 拉快照
       const executionId = `sre_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const paramsObj = (params && typeof params === "object") ? params : {};
-      const { _mapSkillRuntimeStatus } = require("../_mapSkillRuntimeStatus");
       const _publish = (execId, payload) =>
         _publishSkillProgress({ getMainWindow: () => mainWindow }, execId, payload);
       const promise = runtime.execute(paramsObj, { executionId })
@@ -466,7 +466,6 @@ function setupSkillsIpc() {
       if (!runtime) {
         return { ok: false, error: `Unknown execution: ${executionId}` };
       }
-      const { _mapSkillRuntimeStatus } = require("../_mapSkillRuntimeStatus");
       const execCtx = runtime.getExecutionStatus(executionId);
       if (!execCtx) {
         return { ok: false, error: `Execution not found: ${executionId}` };
@@ -506,8 +505,6 @@ function setupSkillsIpc() {
     }
   });
 }
-
-// _mapSkillRuntimeStatus already extracted to src/_mapSkillRuntimeStatus.js
 
 // ── IPC：Harness Capability Provisioning — Stage 3 M1 ─────────
 // 只读：让设置页"计算与数据"分类展示 Harness 自备了哪些运行时/包。
@@ -891,18 +888,16 @@ app.on("activate", () => {
   }
 });
 
-app.on("before-quit", () => {
-  // BLOCK-9.1 PHASE 4: backend proc handles moved to
-  // src/main/backend-proc-manager.js. Import them here for the
-  // before-quit shutdown sequence.
+app.on("before-quit", (event) => {
+  if (event && event.defaultPrevented) return; // BLOCK-511 S1.3 取消退出时不拆后端（健康检查保持 200）
+  // BLOCK-9.1 PHASE 4: backend proc handles moved to src/main/backend-proc-manager.js.
   const { rServerSupervisor } = require("./main/backend-proc-manager");
   rServerSupervisor.shutdown("app-quit");
   // QODER-L5 — utility host 子进程退出收敛（不残留 fork）
   try { require("./ipc/utility-host").shutdownUtilityHosts(); } catch { /* 退出清理 best-effort */ }
 });
 
-// BLOCK-360（NSO-W2-4）桌面侧 SQLite 连接退出收敛：此前 closeAll 零生产调用点，WAL 不收敛。
-// will-quit 晚于 before-quit 的后端关停；checkpoint 失败不阻断退出。
+// BLOCK-360（NSO-W2-4）SQLite 退出收敛（晚于后端关停；checkpoint 失败不阻断退出）。
 app.on("will-quit", () => {
   try {
     require("./database/_db-singleton").closeAll({ checkpoint: true });

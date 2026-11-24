@@ -130,6 +130,13 @@ const { createFreshnessTracker, applyFreshnessMark } = require('./helpers/contex
 //（纯变换，messages 本体不突变）；读图与 read_image 工具同源（vision-image-io）。
 const { inlineVisionImagesForRequest, lastUserAttachmentImagePaths } = require('./agent-tools/vision-inline');
 const { readWorkspaceImageDataUrl } = require('./agent-tools/vision-image-io');
+// BLOCK-511 S1.1 — 瞬断重试纯逻辑抽到 helpers/network-retry.js（主文件净减行），
+// 新增 onBeforeRetry 钩子供重发前装载 BLOCK-508 重放过滤器（防已下发正文重复）。
+// BLOCK-109 P1 语义不变：退避重试至多 retries 次、耗尽上抛、abort 即停。
+const {
+  callProviderWithNetworkRetry,
+  TRANSIENT_NETWORK_ERROR,
+} = require('./helpers/network-retry');
 
 /**
  * Run the agent loop state machine.
@@ -137,39 +144,6 @@ const { readWorkspaceImageDataUrl } = require('./agent-tools/vision-image-io');
  * @param {object} opts
  * @param {Array} opts.messages - Full messages array (with system prompt at index 0)
  * @param {object} opts.toolCtx - Tool context
-/**
- * BLOCK-109 P1 — 每轮模型调用的网络瞬断重试。
- *
- * ECONNRESET 等传输层瞬断（2026-09-21 用户实测：全景梳理主任务 read ECONNRESET
- * 直接挂除，9 项清单只完成 3 项，而 5 个子任务结果都已就绪）不该一击致命。
- * 退避重试至多 retries 次；重试耗尽原样上抛，走既有 fatal/fallback 路径。
- * abort 一旦置位立即停止重试。
- */
-const TRANSIENT_NETWORK_ERROR = /ECONNRESET|ECONNREFUSED|ETIMEDOUT|EPIPE|socket hang up|network/i;
-
-async function callProviderWithNetworkRetry(fn, { retries = 2, baseDelayMs = 3000, log = () => {}, isAborted = () => false } = {}) {
-  let lastErr;
-  for (let retry = 0; retry <= retries; retry++) {
-    if (retry > 0) {
-      if (isAborted()) throw lastErr;
-      const delay = baseDelayMs * retry;
-      log(`模型连接瞬断，${Math.round(delay / 1000)}s 后自动重试（${retry}/${retries}）`);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      if (isAborted()) throw lastErr;
-    }
-    try {
-      return await fn();
-    } catch (error) {
-      lastErr = error;
-      const msg = String((error && error.message) || error);
-      if (retry === retries || !TRANSIENT_NETWORK_ERROR.test(msg)) throw error;
-      log(`[network-retry] transient model call failure (${msg.slice(0, 140)}), retry ${retry + 1}/${retries}`);
-    }
-  }
-  throw lastErr;
-}
-
-/**
  * @param {function} opts.shouldAbort - Abort check function
  * @param {function} opts.emitToolResult - Callback for tool result events
  * @param {function} opts.emitAssistant - Callback for assistant events
@@ -966,6 +940,16 @@ async function runLoop({
             baseDelayMs: 3000,
             log: (message) => _emit({ event: 'agent_status', phase: 'network_retry', message }),
             isAborted: aborted,
+            // BLOCK-511 S1.1 — 重发前若已有下发（文本或工具增量），装载 BLOCK-508
+            // 同款重放过滤器，按已发游标剥离前缀；无任何下发时不装载（行为不变）。
+            onBeforeRetry: () => {
+              if (srEmittedTextLength > 0 || srEmittedToolIds.length > 0) {
+                srReplayFilter = createResumeFilter508({
+                  emittedTextLength: srEmittedTextLength,
+                  emittedToolCallIds: srEmittedToolIds,
+                });
+              }
+            },
           }
         );
         // BLOCK-508 — stall 且可续跑则重发（已出字也覆盖）；耗尽/非 stall/abort 则退出循环走既有终态。

@@ -47,6 +47,7 @@ const require = createRequire(import.meta.url);
 
 const { DeepSeekProvider } = require(path.join(root, 'core', 'shared-backend', 'llm-providers', 'deepseek.js'));
 const { callProviderWithNetworkRetry } = require(path.join(root, 'core', 'petri-server', 'loop-orchestrator.js'));
+const { createResumeEventFilter } = require(path.join(root, 'core', 'shared-backend', 'loop-stall-resume.js'));
 
 const sseFrame = (obj) => `data: ${JSON.stringify(obj)}\n\n`;
 
@@ -125,6 +126,50 @@ test('③ 整轮重试集成 — 第 1 连接流中重置、第 2 连接成功 �
     );
     assert.equal(server.hits(), 2, '两次连接（1 失败 + 1 重试成功）');
     assert.equal(result.choices[0].message.content, '部分输出然后连接被掐断收尾');
+    assert.ok(!result.error, '重试成功后无错误形状');
+  } finally {
+    server.close();
+  }
+});
+
+test('⑥ 网络重试不重复下发正文：首连半截断开、重连完整重发（HK-01 BLOCK-511 S1.1）', async () => {
+  // 模拟 loop 层：onEvent 前挂重放过滤器；重试前若已有下发则装载 BLOCK-508 同款 filter。
+  // 修复前 callProviderWithNetworkRetry 无 onBeforeRetry 钩子 → filter 始终 null →
+  // 重连完整正文从头追加到已下发半截之后 → 拼接重复 → 本测试红。
+  const server = await startSseServer('reset-then-die');
+  try {
+    const delivered = [];
+    let replayFilter = null;
+    let emittedTextLength = 0;
+    const onEvent = (rawEvent) => {
+      let event = rawEvent;
+      if (replayFilter) {
+        event = replayFilter(event);
+        if (!event || event.suppressed === true) return;
+      }
+      if (event.type === 'content_delta' && event.content) {
+        delivered.push(event.content);
+        emittedTextLength += event.content.length;
+      }
+    };
+    const result = await callProviderWithNetworkRetry(
+      () => provider.chatStream('k', BODY, {}, onEvent, {
+        baseUrl: server.url, errorsAsRejections: true,
+      }),
+      {
+        retries: 2,
+        baseDelayMs: 1,
+        onBeforeRetry: () => {
+          if (emittedTextLength > 0) {
+            replayFilter = createResumeEventFilter({ emittedTextLength });
+          }
+        },
+      }
+    );
+    assert.equal(server.hits(), 2, '两次连接（1 失败 + 1 重试成功）');
+    const joined = delivered.join('');
+    assert.equal(joined, '部分输出然后连接被掐断收尾', '下发 content_delta 拼接恰好一次完整正文');
+    assert.equal(joined, result.choices[0].message.content, '下发正文与 provider 结果正文一致');
     assert.ok(!result.error, '重试成功后无错误形状');
   } finally {
     server.close();

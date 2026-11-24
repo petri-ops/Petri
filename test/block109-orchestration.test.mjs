@@ -77,6 +77,15 @@ test('callProviderWithNetworkRetry：瞬断重试后成功、耗尽上抛、非�
   assert.equal(calls4, 1);
 });
 
+test('循环层网络重试挂重放过滤器契约（BLOCK-511 S1.1）', () => {
+  const src = readFileSync(resolve(root, 'core', 'petri-server', 'loop-orchestrator.js'), 'utf8');
+  assert.ok(src.includes('onBeforeRetry: () =>'), 'callProviderWithNetworkRetry 调用处必须挂 onBeforeRetry 钩子');
+  assert.ok(src.includes('srEmittedTextLength > 0 || srEmittedToolIds.length > 0'), '仅当已有下发（文本/工具增量）时才装载过滤器');
+  assert.ok(src.includes('srReplayFilter = createResumeFilter508'), '钩子必须用 BLOCK-508 同款重放过滤器');
+  const mod = readFileSync(resolve(root, 'core', 'petri-server', 'helpers', 'network-retry.js'), 'utf8');
+  assert.ok(mod.includes('onBeforeRetry(retry)'), '重试包装必须在每次真实重发前调用钩子');
+});
+
 test('spawn 派发并行度软上限源码契约（BLOCK-109 P2）', () => {
   const src = readFileSync(resolve(root, 'core', 'petri-server', 'agent-tools', 'spawn-agent-tools.js'), 'utf8');
   // 软上限守卫三要素：守卫调用 + 常量 + 软指引返回（wait_agent 引导）

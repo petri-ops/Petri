@@ -172,7 +172,8 @@ import {
 // The hook owns send/stop/regenerate/queue/runInBackground plus the
 // `starting` state, messagesRef/sendRef indirection, the copilotAsk
 // event subscription, and the queue drain effect.
-import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP, type QueuedPrompt } from './SimpleChat/hooks/useChatStream';
+import { useChatStream, enqueueQueuedPrompt, QUEUE_CAP } from './SimpleChat/hooks/useChatStream';
+import { usePromptQueue } from './SimpleChat/hooks/usePromptQueue';
 import { useGuardAck } from './SimpleChat/hooks/useGuardAck';
 // BLOCK-52 P1/P2 → BLOCK-245 P2：上下文引用从三条平行通道收敛为单列表
 // （状态簇 hooks/useComposerContext + 渲染簇 ComposerContextChips）。
@@ -237,14 +238,8 @@ export function SimpleChat({
   const [messages, setMessages] = useState<SimpleMessage[]>([]);
   const [copiedMessageKey, setCopiedMessageKey] = useState<string | null>(null);
   const [input, setInput] = useState('');
-  // BLOCK-102 P2 — 队列条目带会话归属（修复排队追问跨会话注入竞态）。
-  // BLOCK-178 P2 — 懒初始化从 localStorage 水合（刷新不丢；避免 mount effect 同步 setState）。
-  const [queuedPrompts, setQueuedPrompts] = useState<QueuedPrompt[]>(() => {
-    try {
-      const raw = localStorage.getItem('petri:chat-queue:v1');
-      return raw ? (JSON.parse(raw) as QueuedPrompt[]) : [];
-    } catch { return []; }
-  });
+  // BLOCK-511 S1.4 — 队列状态/水合/回写/清空统一由 usePromptQueue 管理（挂载不清空）。
+  const { queuedPrompts, setQueuedPrompts } = usePromptQueue(conversationId, projectId);
   // BLOCK-178 — 暂停排水 + 溢出提示（UI-620：投递模式不再全局切换——
   // 运行中发送默认进消息排队，逐条在队列行内「插话」/「立即执行」）。
   const [autoDrain, setAutoDrain] = useState(true);
@@ -255,10 +250,6 @@ export function SimpleChat({
     if (queueOverflowTimerRef.current) window.clearTimeout(queueOverflowTimerRef.current);
     queueOverflowTimerRef.current = window.setTimeout(() => setQueueOverflow(false), 4000);
   }, []);
-  // BLOCK-178 P2 — 队列随会话持久化（写面；归属标记 BLOCK-102 语义不变）
-  useEffect(() => {
-    try { localStorage.setItem('petri:chat-queue:v1', JSON.stringify(queuedPrompts)); } catch { /* 忽略 */ }
-  }, [queuedPrompts]);
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   // BLOCK-91 — 附件发送失败/守卫提示（诚实可见，不再静默丢弃）。
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
@@ -799,8 +790,8 @@ export function SimpleChat({
 
   useEffect(() => {
     setInput(loadConversationDraft(projectId, conversationId) || '');
-    setQueuedPrompts([]);
     historyNavRef.current = INITIAL_NAV_STATE;
+    // BLOCK-511 S1.4 — 队列清空移入 usePromptQueue 的「仅会话/项目变化时」守卫。
   }, [conversationId, projectId]);
 
   const onInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

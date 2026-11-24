@@ -361,7 +361,10 @@ function setupTerminalIpc({ mainWindow, getProcs, getLogDir, readLogTail } = {})
     return { ok: true, sessions: list, maxTabs: MAX_TERMINAL_TABS };
   });
 
-  app.once("before-quit", () => {
+  // BLOCK-511 S1.3 — 若退出守卫已 preventDefault（用户点取消），不得拆除终端会话；
+  // app.on 保证「取消后再次确认退出」时清理仍会执行（once 会被取消那次消耗掉）。
+  app.on("before-quit", (event) => {
+    if (event && event.defaultPrevented) return;
     try {
       killAllSessions();
     } catch {}
