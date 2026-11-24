@@ -268,6 +268,8 @@
 - **证据**：theme-token-contract 17/17；ResultsLibrary/LeftPanel/ChatArtifactCard/CrashNoticeBanner 回归全绿；css-modules 门 PASS；tsc 0。
 - **待补**：实机长列表滚动实测（CDP 节点数/滚动帧率）与观感确认，通过后转 verified。
 
+- **实机机械腿（2026-11-24 补，BLOCK-517 W3）**：`ui698-a11y-live` 5/5 allPass（acceptance/block517-walk-batch/）——项目树 role=tree+aria-label「项目树」+ role=treeitem aria-expanded（7 节点）✓；导入面板 fieldset/legend「选择配置来源」+ radio×2 + label[for] 关联 ✓；**inert 双模态 live 腿如实 skip**（非 chat 投影层 scheduled 入口当前 UI 不存在——handleShowScheduled 仅声明未消费，产品范围注记；双模态行为由 nso-w3-a11y 契约 4/4 覆盖）。
+
 ## UI-698: 隐藏层 inert + 项目树语义 + 导入面板表单语义/live region + 字号 token 首例（BLOCK-369 NSO-W3 F-18；2026-11-06 **in_progress（代码+契约测试完成，待实机观感）**）
 
 - **CenterPanel 非 chat 投影层 inert**：此前仅 aria-hidden（输入框/按钮仍可 Tab 进入不可见层）；现投影层带 inert（React 18 类型缺属性→展开旁路）。chat 模式不带。
