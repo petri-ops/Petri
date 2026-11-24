@@ -115,7 +115,7 @@
 > 相关门禁读数（docs:check 571 / ui:audit:check PASS / M0 专项门 0 issues / closeout exit 1 两红 W 归属）
 > 见 `acceptance/m-blueprint-2026-11-11/m0/`。G0 开发期常态 · 不外推 packaged/Provider/GA。
 
-## UI-702: 通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 **in_progress**）
+## UI-702: 通知历史回看 + viewer 降级 status 语义（BLOCK-387 / post-S7 H2；2026-11-09 in_progress → **2026-11-24 机械实机腿补齐（BLOCK-517 W1：ui702-toast-history-live 7/7 allPass，dev Electron 边界内）——状态维持 in_progress：观感腿（层级/遮挡/长消息换行/暗色对比）pending_human_eye 归人，零代签**）
 
 - **变化面**：ToastProvider 增加有界通知历史（播报即入历史、同 (variant,message) 去重、上限 50、可展开/清空、面板 role=log）；viewport 内新增「通知历史（N）」入口，不新建第二套通知中心。ResultArtifactShell 的 viewer 降级原因由 role=note 升为 role=status + aria-live=polite（非错误不抢话，但进播报队列）。
 - **为什么这样设计**：4 秒提示对 error/warning 是「一闪而过的不可回看事实」；历史复用已播报内容，零新增投递通道。降级原因是用户当下必须知道的状态变化，role=note 不进读屏播报队列。
@@ -123,6 +123,7 @@
 - **未做实机腿**：DOM 断言与组件测试不冒充视觉绿——历史面板的层级/遮挡、长消息换行、暗色态对比需在 H3 实机腿一并取证。
 - **BLOCK-394 C 批追加（同一 in_progress 条目，不新增债）**：①`copilotClient/runHealthEvents.ts` 把四事件码（compaction_failed/trim_skipped/provider_retry/stream_stall）映射为可见文案 + 严重度，SSE 分派走既有 `onAgentStatus` 通道（零新建 UI truth/通知中心）；②`settings/ExternalImportPanel.tsx` 操作回执单条 message → 组件内局部有界 20 条可回看列表（去重、可清空、`role=log`，原 live region 保留）；③`copilot/StreamReconnectBanner.tsx` 从既有 `statusMessage` 派生断线/重放/耗尽三态独立横幅（`role=status` + `aria-live=polite`），零新状态源。
 - **证据等级（行为测试/机械门禁，不冒充视觉绿）**：`runHealthEvents.test.ts` 4/4、`ExternalImportPanel.test.tsx` 5/5、`StreamReconnectBanner.test.tsx` 3/3、`tsc --noEmit` 0 error、`conversationRunStore` 邻域 59/59；B-09/B-11 另有 CDP DOM/几何 A/B 证据在 `acceptance/post-s7-2026-11-10/h9/`。
+- **实机机械腿（2026-11-24 补）**：`ui702-toast-history-live` 7/7 allPass（acceptance/block517-walk-batch/）——真实 UI 路径：seed SSH 项目（远端不可达）→ 树行「远程连接」钮 → sshConnectProject 校验失败 → error toast 播报 → 「通知历史（1）」入口在场 → 展开面板 role=log + 错误消息回看（toast 已消失仍可回看）→ 清空后入口退场 → SSH 项目清理。观感腿维持 pending_human_eye（下条）。
 - **仍 pending_human_eye**：四事件真实 SSE 到轨迹面的观感、断线注入三态截图过目、VoiceOver 朗读、暗色对比度——Agent 不代答，路线见 `docs/post-s7-h7-human-eye-route.md`。B-09 cv A/B 无收益（布局耗时 A=B=0.7ms）按判据回滚不改 CSS；B-11 几何 A/B 显示改类名会让消息区窄 74px/移 40px → 不改产品 CSS，收敛需独立切片 + 人眼过目。
 - **BLOCK-395 二轮追加（同一 in_progress 条目，不新增债）**：①`workspace-panels/treeRoving.ts` 纯映射 + `LeftPanel.tsx` 真挂载 roving tabindex（树只保留一个 tab stop，方向键/Home/End 移动、左右键展开折叠）；tsc 0 error、LeftPanel 邻域 21/21、契约 5/5。**VoiceOver 朗读确认仍 pending_human_eye**。②`CenterPanel.tsx` + `project-workspace.module.css` 零几何收敛：内层独立语义类名 `workspaceSessionInner` composes 同一规则，消除双层同名 layout；面板邻域 157/157、3/3 契约。③`styles/theme-token-contract` 侧新增颜色字面量机械门，按文件冻结 30 文件 / 354 处债（token 定义与注释不计、新增即红）；**颜色值替换与暗色截图 diff 仍待人眼**。
 - **二轮核实口径**：以上三项此前被整体归入「人眼验收」属过度归类——代码实现与机械门不需人，只有观感/读屏末步需人。35 条 debt 已按 canonical 完整标题机械分诊为 22 人眼 / 1 外部条件 / 12 可机械判档（首版误用截断派生数据把人眼洗成 1 条，已根修）；DOM 断言不冒充视觉绿，条目仍 `in_progress`。

@@ -1,0 +1,44 @@
+{
+  "name": "ui702-toast-history-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T14:38:28.704Z",
+  "finishedAt": "2026-11-24T14:38:36.408Z",
+  "assertions": [
+    {
+      "name": "P0_ssh_project_seeded",
+      "pass": true,
+      "detail": "id=p_mwusv2aw_n8y9 status=200"
+    },
+    {
+      "name": "A0_connect_clicked",
+      "pass": true,
+      "detail": "clicked"
+    },
+    {
+      "name": "A1_history_entry_present",
+      "pass": true,
+      "detail": "通知历史入口在场（toast 已播报）"
+    },
+    {
+      "name": "A2_history_panel_role_log",
+      "pass": true,
+      "detail": "role=log"
+    },
+    {
+      "name": "A3_history_message_replay",
+      "pass": true,
+      "detail": "错误消息在历史面板可回看（toast 已消失）"
+    },
+    {
+      "name": "A4_history_clear",
+      "pass": true,
+      "detail": "清空后入口退场"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}
