@@ -130,7 +130,7 @@ test('K-22/K-18：债读数在场（读数型+活源一致；入册/收窄/拆�
 
 test('负测 K-22：存量环 / knip 保留键 / 动态 require 现状增长或被改写 → 判红（只增即红棘轮）', () => {
   mustRed(tamper({ archDebt: { ...truth.archDebt, cycles: 13 } }), 'K-22');
-  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 415 } }), 'K-22'); // 随上限演进取超限值：>414（BLOCK-513 五 flow --allow-grow 留因上调后上限，2026-11-24）
+  mustRed(tamper({ archDebt: { ...truth.archDebt, knipKeys: 421 } }), 'K-22'); // 随上限演进取超限值：>420（BLOCK-517 五 W flow --allow-grow 留因上调后上限，2026-11-24）
   mustRed(tamper({ archDebt: { ...truth.archDebt, dynamicRequirePoints: [true, true, false] } }), 'K-22');
 });
 

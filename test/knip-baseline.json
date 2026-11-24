@@ -220,7 +220,12 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui633-add1.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui638-viewer-clip.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui693-inkscape-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui694-settings-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui696-model-preferences.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui697-viewer-fallback-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui698-a11y-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui699-cv-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui702-toast-history-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui704-diagnostics.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-add1.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-config-interaction.cjs",
@@ -468,6 +473,31 @@
     {
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui724-wakeup-ui-live.cjs",
       "reason": "BLOCK-516 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区；同 ui593/ui475/ui522/ui595/ui693 五先例）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui702-toast-history-live.cjs",
+      "reason": "BLOCK-517 W1 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区；同五先例）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui699-cv-live.cjs",
+      "reason": "BLOCK-517 W2 dev-verify flow 入口（同上）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui698-a11y-live.cjs",
+      "reason": "BLOCK-517 W3 dev-verify flow 入口（同上）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui697-viewer-fallback-live.cjs",
+      "reason": "BLOCK-517 W4 dev-verify flow 入口（同上）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui694-settings-live.cjs",
+      "reason": "BLOCK-517 W5 dev-verify flow 入口（同上）",
       "date": "2026-11-24"
     }
   ]
