@@ -473,6 +473,10 @@ function advanceSchedule(id, runAt = Date.now()) {
 const MAX_BACKOFF_MS = 24 * 60 * 60_000;
 
 /** 连续失败次数（最近 runs 的前导 failed 段长度）。 */
+function builtinToolNames() {
+  return [...builtinToolNameSet()];
+}
+
 // BLOCK-515 — registry 内置名单惰性读取（顶层 require 会与 goal-tools 形成环：
 // store→agent-tools/registry→goal-tools→store，循环内 store.createGoal 尚未导出）。
 function builtinToolNameSet() {
@@ -621,6 +625,7 @@ module.exports = {
   getSchedule,
   setScheduleEnabled,
   setScheduleAuto,
+  builtinToolNames,
   runScheduleNow,
   deleteSchedule,
   listDueSchedules,

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-24T09:59:29.526Z",
+  "generatedAt": "2026-11-24T12:40:12.224Z",
   "summary": {
     "baseline": "HEAD",
     "tools": 120,
@@ -10,7 +10,7 @@
     "ipcChannels": 176,
     "ipcMissingPreload": 2,
     "ipcUnusedInRenderer": 173,
-    "routes": 293,
+    "routes": 295,
     "routeModules": 50,
     "routeModulesUnmounted": 0,
     "storageKeys": 20,
@@ -19,7 +19,7 @@
       "P2": 0,
       "P3": 3
     },
-    "dirtyFiles": 0,
+    "dirtyFiles": 1,
     "defsFallbacks": 0
   },
   "findings": [
@@ -4802,6 +4802,18 @@
     },
     {
       "module": "automation",
+      "method": "GET",
+      "route": "/api/schedules/auto-tool-names",
+      "mounted": true
+    },
+    {
+      "module": "automation",
+      "method": "POST",
+      "route": "/api/schedules/:id/auto",
+      "mounted": true
+    },
+    {
+      "module": "automation",
       "method": "POST",
       "route": "/api/schedules/:id/toggle",
       "mounted": true
@@ -6094,6 +6106,8 @@
     ],
     "brandMismatch": []
   },
-  "dirty": [],
+  "dirty": [
+    "M core/petri-server/helpers/automation-store.js"
+  ],
   "defNotes": []
 }
