@@ -29,9 +29,9 @@ phase: G0
 | ~~C-56 真实稿件改写~~ **已执行 2026-11-24** | 用户给 `petri-informal-paper.md`（自有英文稿），按 §9 通用保内核跑完三栏对照/四保护/未覆盖、不落盘；证据 `acceptance/c56-user-manuscript/` | S | manual:76-78 / registry:13559 |
 | C-56 英文论文另批 | 是否覆盖英文面（上轮"维持六项、英文另批"） | M | manual:91/100/102 |
 | D-04 i18n 资源抽离 | 是否国际化/哪些语言/react-i18next 还是自研 | L | AUDIT-LOG:190 / backlog:351 |
-| G0 qualified 视觉证据 | 是否批准补 `distinctStates` 唯一性断言（会让 G0 门先红） | M | AUDIT-LOG:187 / backlog:349 |
+| ~~G0 qualified 视觉证据~~ **已执行 2026-11-24** | `distinctStates` 唯一性断言已实现（HK-01 3/3 绿）；`g0:qualification:visual` 实机**诚实红**（5 PNG 4 唯一态）维持「不补拍不伪造」裁决，等用户对实机红处置 | M | AUDIT-LOG 2026-11-24 B-CLASS 行 / backlog:349 |
 | ~~C-32 `env='1'` 语义~~ **已清偿（BLOCK-211，2026-11-24 核码归位）** | 实现已按注释语义修正（`8a0731672`，2026-10-18），真相表 12/12 绿；登记滞后不开新包 | M | backlog:371 |
-| UI-706/707/709/710 | 口径冲突：台账标题已 verified vs BLOCK 登记 in_progress+pending_human_eye，以哪为准 | S | audit:63-67 vs 181/189/198/218 |
+| ~~UI-706/707/709/710~~ **已执行 2026-11-24** | 口径已按台账 verified 翻正 BLOCK 登记行（pending_human_eye 零代签不动），冲突解除 | S | AUDIT-LOG 2026-11-24 B-CLASS 行 / audit:63-67 |
 | C-26/C-27 judge 读数 | 是否批一次真实 Provider 预算做成对实验 | M | backlog:364-365 |
 
 ### B 类裁决材料（用户「其它也都安排上」→ 每项单一最合理建议 + 一句理由）
