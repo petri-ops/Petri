@@ -83,7 +83,7 @@ describe('ScheduleDialog', () => {
     fireEvent.click(getByText('read_file'));
     fireEvent.click(getByTestId('schedule-dialog-submit'));
     await waitFor(() => expect(createSchedule).toHaveBeenCalled());
-    const arg = createSchedule.mock.calls[0][0];
+    const arg = createSchedule.mock.calls[0][0] as { autoMode?: string; autoToolAllowlist?: string[]; goalId?: string };
     expect(arg.autoMode).toBe('trusted');
     expect(arg.autoToolAllowlist).toEqual(['read_file']);
     expect(arg.goalId).toBe('goal_budget');
@@ -97,7 +97,7 @@ describe('ScheduleDialog', () => {
     );
     fireEvent.click(getByTestId('schedule-dialog-submit'));
     await waitFor(() => expect(createSchedule).toHaveBeenCalled());
-    const arg = createSchedule.mock.calls[0][0];
+    const arg = createSchedule.mock.calls[0][0] as { autoMode?: string; autoToolAllowlist?: string[] };
     expect(arg.autoMode).toBeUndefined();
     expect(arg.autoToolAllowlist).toBeUndefined();
   });

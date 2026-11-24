@@ -227,6 +227,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui707-positioning.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui708-wave2.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui716-evidence-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui724-wakeup-ui-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/v5-harmony-accents.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-file-ops.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/workspace-panel-motion.cjs",
@@ -462,6 +463,11 @@
     {
       "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui595-freehand-smooth-live.cjs",
       "reason": "BLOCK-513 L6 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区）",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/ui724-wakeup-ui-live.cjs",
+      "reason": "BLOCK-516 dev-verify flow 入口（run.cjs readdir 动态加载，静态盲区；同 ui593/ui475/ui522/ui595/ui693 五先例）",
       "date": "2026-11-24"
     }
   ]
