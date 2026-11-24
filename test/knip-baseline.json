@@ -153,6 +153,7 @@
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block383-live-legs.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block458-capability-probe.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block463-workbench-live.cjs",
+    "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s4-firstpaint-live.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block83-tool-catalog.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block94-knowledge.cjs",
     "files::.agents/skills/petri-dev-infra/dev-verify/flows/block96-ssh-channel.cjs",
@@ -420,6 +421,11 @@
     {
       "key": "exports::src/ipc/utility-host.js::shutdownUtilityHosts",
       "reason": "src/main.js:897 before-quit 动态 require 调用（knip 静态分析盲区）；BLOCK-511 S1.3 退出守卫清理链，属动态入口定性保留",
+      "date": "2026-11-24"
+    },
+    {
+      "key": "files::.agents/skills/petri-dev-infra/dev-verify/flows/block511-s4-firstpaint-live.cjs",
+      "reason": "BLOCK-511 S4 dev-verify 实机 flow（run.cjs 按 id 动态发现，knip 静态盲区）；HK-01 10/10 实机证据",
       "date": "2026-11-24"
     }
   ]

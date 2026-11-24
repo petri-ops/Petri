@@ -1,5 +1,8 @@
 import React from 'react';
-import { Model3DScene } from '@/components/work-surface/Model3DScene';
+// BLOCK-511 S4.2 — 3D 场景改走懒加载（同 Model3DSurface:46 的 lazy 包装），首屏不静态引入 three
+const Model3DScene = React.lazy(() =>
+  import('@/components/work-surface/Model3DScene').then((m) => ({ default: m.Model3DScene }))
+);
 import { getApiPrefix } from '@/lib/env';
 import { getToken } from '@/lib/authClient';
 import { workspaceFileUrlFor } from '@/lib/previewFileUtils';
@@ -317,12 +320,14 @@ export function ChatArtifactCard({ toolJobId, expanded, projectId, lightweight =
 function Model3DSceneWrapper({ url }: { url: string }) {
   return (
     <div style={{ height: 220 }}>
-      <Model3DScene
-        view={null}
-        viewAngle="iso"
-        modelUrl={url}
-        modelFormat="glb"
-      />
+      <React.Suspense fallback={<div />}>
+        <Model3DScene
+          view={null}
+          viewAngle="iso"
+          modelUrl={url}
+          modelFormat="glb"
+        />
+      </React.Suspense>
     </div>
   );
 }

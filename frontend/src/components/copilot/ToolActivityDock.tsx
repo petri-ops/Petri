@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 // BLOCK-173 CP-9 — 编排 DAG 可视化（spawn 树只读投影；数据源=既有 run 快照）
 import { useSubAgentTasksForConversation } from './conversationRunStore/subAgentTasks';
 import { getConversationRunSnapshot } from './conversationRunStore';
-import { OrchestrationGraph } from '@/components/workspace-panels/OrchestrationGraph';
+// BLOCK-511 S4.2 — dock 内 lazy 加载 @xyflow 图，首屏静态链不引入重依赖
+const OrchestrationGraph = lazy(() =>
+  import('@/components/workspace-panels/OrchestrationGraph').then((m) => ({ default: m.OrchestrationGraph }))
+);
 import {
   fetchProcessLogTail,
   listBackgroundProcesses,
@@ -261,15 +264,17 @@ export function ToolActivityDock({ conversationId, projectId }: ToolActivityDock
             </div>
           )}
           {(subAgentTasks.length > 0 && (showGraph || !activeProcess)) ? (
-            <OrchestrationGraph
-              tasks={subAgentTasks.map((t) => ({
-                taskId: t.taskId,
-                parentTaskId: t.parentTaskId,
-                status: t.status,
-                userContent: t.userContent,
-              }))}
-              rootTaskId={conversationId ? getConversationRunSnapshot(conversationId)?.taskId ?? null : null}
-            />
+            <Suspense fallback={<div />}>
+              <OrchestrationGraph
+                tasks={subAgentTasks.map((t) => ({
+                  taskId: t.taskId,
+                  parentTaskId: t.parentTaskId,
+                  status: t.status,
+                  userContent: t.userContent,
+                }))}
+                rootTaskId={conversationId ? getConversationRunSnapshot(conversationId)?.taskId ?? null : null}
+              />
+            </Suspense>
           ) : activeProcess ? (
             <pre
               ref={logRef}

@@ -9858,7 +9858,9 @@
         "test/block511-child-env-sanitizer.test.mjs",
         "test/block511-open-path-exec-guard.test.mjs",
         "test/block511-command-risk-visibility.test.mjs",
-        "test/block511-async-handler.test.mjs"
+        "test/block511-async-handler.test.mjs",
+        "test/block511-csp-port.test.mjs",
+        "test/block511-first-paint-lazy.test.mjs"
       ]
     },
     {

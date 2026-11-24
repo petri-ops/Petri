@@ -793,7 +793,7 @@ async function main() {
   setupPackProtocol();
 
   // 6. CSP 加固——禁用 unsafe-eval，限制资源来源到 self + localhost（后端/SSE/dev server）
-  setupCsp({ isDevMode });
+  setupCsp({ isDevMode, backendPort: backendPorts.r, rendererOrigin: rendererDevUrl, isPackaged: app.isPackaged }); // BLOCK-511 S4.1
 
   // 6.5 BLOCK-223 — 桌面外壳 IPC 必须在建窗前注册：渲染进程首帧就会推偏好镜像。
   const { setupDesktopShellIpc } = require("./ipc/desktop-shell");

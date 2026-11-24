@@ -430,8 +430,8 @@
       "wave": "L0",
       "module": "auto-discovered",
       "lines": 920,
-      "bytes": 46988,
-      "sha256": "4f0add2cb592b2523833e62122560c78dbd730da8356c77ea2a07ca17349ce7c"
+      "bytes": 47095,
+      "sha256": "c4348feaa8033c3aa1757865463100e85133671afa7a667aee824fa04ab9fa71"
     },
     {
       "path": "frontend/src/pages/extensions/styles.module.css",

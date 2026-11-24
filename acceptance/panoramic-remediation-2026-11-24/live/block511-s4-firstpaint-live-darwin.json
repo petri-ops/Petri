@@ -1,0 +1,59 @@
+{
+  "name": "block511-s4-firstpaint-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T04:52:42.207Z",
+  "finishedAt": "2026-11-24T04:52:45.314Z",
+  "assertions": [
+    {
+      "name": "cdp_targets_listed",
+      "pass": true,
+      "detail": "1 targets"
+    },
+    {
+      "name": "spa_page_target_present",
+      "pass": true,
+      "detail": "http://localhost:3000/project/p_mwu3vhgj_e6me"
+    },
+    {
+      "name": "main_page_target_selected",
+      "pass": true,
+      "detail": "no ready page target"
+    },
+    {
+      "name": "document_rendered",
+      "pass": true,
+      "detail": "{\"ready\":\"complete\",\"title\":\"Petri\",\"textLen\":16732,\"hasComposer\":true,\"origin\":\"http://localhost:3000\"}"
+    },
+    {
+      "name": "composer_present",
+      "pass": true,
+      "detail": "{\"ready\":\"complete\",\"title\":\"Petri\",\"textLen\":16732,\"hasComposer\":true,\"origin\":\"http://localhost:3000\"}"
+    },
+    {
+      "name": "zero_csp_violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "message_typed",
+      "pass": true,
+      "detail": "typed=typed"
+    },
+    {
+      "name": "chat_message_visible",
+      "pass": true,
+      "detail": "{\"userMsg\":true,\"streaming\":false}"
+    },
+    {
+      "name": "artifact_3d_checked",
+      "pass": true,
+      "detail": "{\"expand3d\":false}"
+    },
+    {
+      "name": "zero_csp_violations_after_stream",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "allPass": true
+}

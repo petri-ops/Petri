@@ -16,18 +16,27 @@ const { SCHEME: PACK_UI_SCHEME } = require("./pack-ui/scheme");
 // {3000 vite, 3001 后端}——「任意本机端口可连/可嵌」的放大面移除。dev script-src 仍需
 // 'unsafe-inline'（vite react-refresh 前导是内联 module script，无 nonce 注入点；
 // nonce 化需动 vite 构建链，retain-with-reason 随 L5/L6 构建面批次处理）。
-const CSP_DEV_PORTS = ["http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "ws://localhost:3000", "ws://127.0.0.1:3000"];
-const CSP_PROD_PORTS = ["http://localhost:3001", "ws://localhost:3001"];
-
-function buildCspHeader(isDevMode) {
-  const scriptSrc = isDevMode
+function buildCspHeader(isDevMode, opts = {}) {
+  // BLOCK-511 S4.1 — 端口按实际后端/渲染 Origin 生成；dev CSP 只在「未打包 + isDevMode」时
+  // 生效（打包态即使 NODE_ENV=development 也走生产 CSP）。
+  const dev = isDevMode && opts.isPackaged !== true;
+  const scriptSrc = dev
     ? "script-src 'self' 'unsafe-inline'; "
     : "script-src 'self'; ";
-  const localNet = (isDevMode ? CSP_DEV_PORTS : CSP_PROD_PORTS).join(" ") + " ";
+  const backendPort = Number(opts.backendPort) > 0 ? Number(opts.backendPort) : 3001;
+  const rendererOrigin = typeof opts.rendererOrigin === 'string' && opts.rendererOrigin
+    ? opts.rendererOrigin.replace(/\/$/, '')
+    : 'http://localhost:3000';
+  const parsedRenderer = (() => { try { return new URL(rendererOrigin); } catch { return null; } })();
+  const rendererHost = parsedRenderer ? parsedRenderer.hostname : 'localhost';
+  const backendHost = 'localhost';
+  const localNet = dev
+    ? `${rendererOrigin} http://127.0.0.1:${new URL(rendererOrigin).port || 3000} http://${backendHost}:${backendPort} http://127.0.0.1:${backendPort} ws://${rendererHost}:${new URL(rendererOrigin).port || 3000} ws://${backendHost}:${backendPort} ws://127.0.0.1:${backendPort} `
+    : `http://${backendHost}:${backendPort} ws://${backendHost}:${backendPort} `;
   return "default-src 'self'; " +
     scriptSrc +
     "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: blob: http://localhost:3001 ; " +
+    `img-src 'self' data: blob: http://${backendHost}:${backendPort} ; ` +
     // NEXT-05 — Three.js 文件加载器（GLB/STL/OBJ）经 fetch(blob:) 读本地文件预览；
     // blob: 仅由渲染进程自建，connect-src 放行不回扩网络面。
     "connect-src 'self' blob: " + localNet + "; " +
@@ -42,7 +51,7 @@ function buildCspHeader(isDevMode) {
     "object-src 'none';";
 }
 
-function setupCsp({ isDevMode }) {
+function setupCsp({ isDevMode, backendPort, rendererOrigin, isPackaged }) {
   // BLOCK-166 P3（实机渗透实证，勿回退）：gen-ui 沙箱页自身导航在网络栈层阻断。
   // CSP frame-src 只约束「嵌入子框架的 src」，frame 自身 location 赋值不受它管；
   // will-navigate / will-frame-navigate 对 OOPIF 均不派发（Electron 实测）——
@@ -101,7 +110,7 @@ function setupCsp({ isDevMode }) {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        "Content-Security-Policy": [buildCspHeader(isDevMode)],
+        "Content-Security-Policy": [buildCspHeader(isDevMode, { backendPort, rendererOrigin, isPackaged })],
       },
     });
   });

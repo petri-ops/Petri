@@ -1,5 +1,12 @@
 # Petri Desktop UI 产品化审计台账
 
+## UI-723: 全景修复 S4 首屏重依赖懒加载与 CSP 端口（2026-11-24 **in_progress**；BLOCK-511 S4；行为/性能面，零可见观感变化）
+
+- **范围**：`ChatArtifactCard.tsx` 的 3D 场景改 React.lazy（同 `Model3DSurface:46` 的 lazy 模式）+ Suspense 空占位；`ToolActivityDock.tsx` 的 `OrchestrationGraph` 改 lazy + Suspense 空占位。首屏静态 import 链不再触达 three / @xyflow/react。CSP 按实际后端端口与渲染 Origin 生成，打包态恒用生产 CSP。
+- **证据**：HK-01 `block511-first-paint-lazy` 2/2（静态链扫描 + lazy/Suspense 契约）+ `block511-csp-port` 4/4；前端邻域 28/28（theme-token 19/19 + ChatArtifactCard 3 + ToolActivityDock 6）；tsc 0。构建产物 `Model3DScene-*.js`（907KB，含 three）与 `OrchestrationGraph-*.js` 为独立 chunk，首屏 index chunk 无 three。dev Electron 实机 flow `block511-s4-firstpaint-live` 10/10（零 CSP 违规、首屏渲染、聊天 SSE 消息可见；3D 产物卡本会话未出现，如实标 not_present）。9223 离屏实例跑完即 kill。
+- **状态边界**：**in_progress（行为/性能面，观感零代签）**——Suspense fallback 为空占位，用户可见呈现零变化；3D 卡可展开仅在有 3D artifact 的会话可证，本会话未产出 artifact 不伪造。证据=`acceptance/panoramic-remediation-2026-11-24/live/`。
+
+
 ## UI-722: 全景修复 S1 排队消息挂载保真与退出守卫（2026-11-24 **in_progress**；BLOCK-511 S1；行为修复，零可见观感变化）
 
 - **范围**：`SimpleChat.tsx` 队列状态/水合/回写/清空抽为 `SimpleChat/hooks/usePromptQueue.ts`，清空仅在 conversationId/projectId 真正变化时执行（挂载不清空，保住刷新后的排队追问）；`newConversation` 显式清空不变。主进程 `before-quit` 三处消费者（main.js/terminal.js/window-manager.js）先判 `event.defaultPrevented`，`app.once→on`，Cmd+Q 取消不再误杀后端/终端/窗口。`src/main.js` 回到 920 行、`SimpleChat.tsx` 1943 行（棘轮只减）。
