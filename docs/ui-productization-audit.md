@@ -917,12 +917,12 @@ D 类逐条裁决；E 类归治理台账。
 - **实机证据**：未跑（右栏实机批补）。
 - **边界（reopen）**：最近使用栈（仅记最后一个）；跨设备同步。
 
-## UI-595: 批注画笔渲染平滑与触屏防误触 **in_progress（降档 b：组件级 62/62 已锚，待图像 artifact 在结果面打开的实机腿）**（2026-10-30 **RW-02 A 线处置：降档 b——批注面需图像 artifact 在结果面打开（UI-638 点开腿同前提），组件级 62/62 已锚**；BLOCK-288；UI-587 reopen 两项清偿；
+## UI-595: 批注画笔渲染平滑与触屏防误触 **2026-11-24 verified（BLOCK-513 L6 实机补腿：ui595-freehand-smooth-live 10/10 allPass，dev Electron 边界内；「结果面打开」前提经核码改判——AnnotationOverlay 现唯一消费面=WorkspaceFilePreview，2026-11-23 P6 裁决已停用 resultSurfaces、产物回退 core 原生 viewer，图像批注的现存打开面即工作区文件预览；原 2026-10-30 RW-02 A 线降档 b 注记随实机腿闭环**）
 
 - **变化面**：①freehand 渲染层贝塞尔平滑——smoothFreehandPathD（二次中点：原始点作 Q 控制点、中点作锚）持久笔画与草稿预览统一 polyline→path，**存储 path 契约不变**（原始采点原样入库，平滑纯渲染面）；②触屏防误触——活动笔触期间只认同一 pointerId（第二指/手掌落屏不篡改笔画），pointerCapture 兜底 try/catch（happy-dom 无 capture 实现），pointerLeave 守卫同口径。
 - **为什么这样设计**：UI-587 reopen（压感/贝塞尔/触屏）三项中贝塞尔与触屏可代码化（压感需硬件感知，维持 reopen）；渲染层平滑不改存储契约=已入库批注零迁移。
 - **验证（代码）**：annotations.test 平滑 3 例（直线/多点 Q 段/空路径）+Overlay 采点/防误触+pane 回归 62/62+tsc 0。
-- **实机证据**：未跑（批注实机批补）。
+- **实机证据（2026-11-24 补腿）**：acceptance/ui-595/ui595-freehand-smooth-live-darwin.json **10/10 allPass**——真实 UI 路径（临时项目→文件面板→figure.png 预览→批注条 annotatable=true→kind=freehand）：①5 点采点笔触渲染 d 含 Q 段（贝塞尔平滑：`M 20,30 Q 35,50 42.5,42.5 Q …`，草稿/持久/待填三态统一）②笔触期间第二 pointerId=7 down+move → 草稿 d 零变化且草稿数=1（防误触）③落库 REST path=原始采点数组长度 5（第二指点不在内；存储契约不变，渲染平滑纯呈现面）④撤销清空+REST 同步为空⑤临时项目清理。诚实边界：触屏双指缩放手势互斥与压感线宽维持 reopen（需硬件感知）。
 - **边界（reopen）**：压感线宽（需 pointer pressure 硬件）；触屏双指缩放手势与画笔的互斥细节。
 
 ## UI-594: 斜杠 skill 条目结构化 chip（2026-10-30 **verified（RW-02 A 线 a 档批量取证；9223 实机）**）

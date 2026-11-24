@@ -1,0 +1,59 @@
+{
+  "name": "ui595-freehand-smooth-live",
+  "platform": "darwin",
+  "startedAt": "2026-11-24T09:56:28.961Z",
+  "finishedAt": "2026-11-24T09:56:36.823Z",
+  "assertions": [
+    {
+      "name": "P0_temp_project_created",
+      "pass": true,
+      "detail": "{\"projectId\":\"p_mwuisey1_knwj\",\"workspacePath\":\"/Users/zhangdiandian/Documents/1.WorkDir/Petri/.petri-dev-user-data/projects/ui595---1795514188961-mwuisey1\"}"
+    },
+    {
+      "name": "A1_fixtures_written",
+      "pass": true,
+      "detail": "svg=563B"
+    },
+    {
+      "name": "A2_image_bar_mounted",
+      "pass": true,
+      "detail": "data-annotatable=true"
+    },
+    {
+      "name": "A3_freehand_tool_selected",
+      "pass": true,
+      "detail": "kind=freehand"
+    },
+    {
+      "name": "A5_stroke_started",
+      "pass": true,
+      "detail": "started"
+    },
+    {
+      "name": "A5_second_pointer_ignored",
+      "pass": true,
+      "detail": "dSame=true draftCount=1 dBeforeLen=33"
+    },
+    {
+      "name": "A4_stroke_smoothed_render",
+      "pass": true,
+      "detail": "hasQ=true dHead=M 20,30 Q 35,50 42.5,42.5 Q 50,35 57.5,45 Q 65,55 72.5,57.5  draftGone=true"
+    },
+    {
+      "name": "A6_storage_raw_points",
+      "pass": true,
+      "detail": "kind=freehand pathLen=5（原始采点 5，第二指点不在内）"
+    },
+    {
+      "name": "A7_undo_removes_and_rest_syncs",
+      "pass": true,
+      "detail": "strokes=0 restRows=0"
+    },
+    {
+      "name": "P9_cleanup_project_deleted",
+      "pass": true,
+      "detail": "status=200"
+    }
+  ],
+  "allPass": true
+}
