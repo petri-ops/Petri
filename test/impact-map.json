@@ -9851,7 +9851,9 @@
         "acceptance/ui-595/**",
         "acceptance/ui-693/**",
         "acceptance/c56-english-surface/**",
-        "acceptance/q7-reopen-candidates/**"
+        "acceptance/q7-reopen-candidates/**",
+        "acceptance/next-wave-rulings/**",
+        "acceptance/block514-q7-cron/**"
       ],
       "tests": [
         "test/block509-video-p4.test.mjs",
