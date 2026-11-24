@@ -29,13 +29,14 @@ const policy = await import('../core/petri-server/helpers/web-fetch-policy.js');
 const PUBLIC_IP = '93.184.216.34'; // example.com 网段，测试中代表「公网解析结果」
 
 function fakeLookup(map) {
+  const records = new Map(Object.entries(map));
   return async (host) => {
-    if (!(host in map)) {
+    if (!records.has(host)) {
       const err = new Error(`lookup: no fake record for ${host}`);
       err.code = 'ENOTFOUND';
       throw err;
     }
-    return map[host].map((address) => ({ address, family: address.includes(':') ? 6 : 4 }));
+    return records.get(host).map((address) => ({ address, family: address.includes(':') ? 6 : 4 }));
   };
 }
 
