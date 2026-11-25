@@ -1,10 +1,10 @@
 # Petri Scientific Intelligence OS — 核心愿景与阶段成长宪章
 
-最后更新：2026-07-23
+最后更新：2026-11-25（item 39：§10 G1–G6 按通用 agent 内核 + 领域包重写；G0 与北极星不动、旧阶梯留痕见 acceptance/item39-phase-alignment/LEGACY-G1-G6-VISION.md）
 
 文档性质：`long-term core direction`
 
-当前产品阶段：`Research Preview / G0 Living Foundation establishing`
+当前产品阶段：`G0 永久 maintained / G1 进行中（六序按令推进）`
 
 长期北极星：`Local-first Scientific Intelligence OS`
 
@@ -397,12 +397,12 @@ ResearchProject
 G0～G6 不是完成一个就丢弃一个的线性项目阶段，而是永久叠加的能力层：
 
 ```text
-G6  Continuous Research
-G5  Scientific Capability Ecosystem
-G4  Federated Scientific Intelligence
-G3  Lab Scientific OS
-G2  Evidence-centered Research
-G1  Agent-native Scientific Analysis
+G6  Continuous Agent Improvement
+G5  Agent Ecosystem & Distribution
+G4  Federated & Extensible Agent
+G3  Trusted Local Autonomy
+G2  Agent × Domain Pack Composition
+G1  General Agent Core Qualification
 G0  Living Scientific Foundation
 ```
 
@@ -465,111 +465,152 @@ G0 首个基线的资格出口：
 - 实施完整 Evidence Graph。
 - 用上层功能优先级覆盖 G0 回归。
 
-### G1：Agent-native Scientific Analysis Platform
+### G1：General Agent Core Qualification
 
-状态：`next`
+状态：`NOW`
 
 目标：
 
-- 从一个旗舰任务扩展到至少 3 个稳定科学任务包。
-- 建立科学任务级输入、验证、异常、交付和复现标准。
-- 补齐长任务资源、取消、恢复和环境治理。
-- 让分析小白可以在最少必要提问下完成端到端任务。
-
-建议旗舰任务：
-
-1. Bulk RNA-seq 差异分析与功能解释。
-2. 单细胞基础发现流程。
-3. 富集、网络或空间分析中的一个完整任务。
+- 把已落地的通用 agent 内核（任务 / 工具 / 记忆 / 编排 / 模型计量 / 可靠性五维）推到可审计的资格证据等级。
+- 完成内核资格与发布就绪六序：功能面维持 → 裁决表拍板 → SUS 真人样本投放 → RS 重资格本机范围 → 外部采购 → 打包发布流水。
+- 维持 G0 永久 maintained，G0 回归始终具有最高阻断优先级；历史证据不冒充 G1 资格。
 
 阶段出口：
 
-- 3 个任务包均覆盖正常、可修复和科学阻断。
-- 任务包使用可组合 Plugin，不在 Harness Core 硬编码算法。
-- 不同模型/Profile 不改变确定性科学验收。
-- 真实数据规模下资源、恢复和交付可接受。
-- 用户能够从结果追溯到脚本、参数、输入和限制。
-
-### G2：Evidence-centered Research Workbench
-
-状态：`later`
-
-目标：
-
-- 实现 Scientific Evidence Graph v1。
-- 把 Question、Hypothesis、Evidence、Claim 和 Limitation 变成持久对象。
-- 让图表、报告和科学主张引用同一证据图。
-- 加入科学反证、替代解释和结论边界。
-
-阶段出口：
-
-- 至少 3 个真实项目使用 Evidence Graph 管理结果。
-- Claim 能反向追溯到 Artifact、方法和数据。
-- 新分析可以支持、削弱或修正旧 Claim。
-- 报告和论文内容不复制出第二套科学状态。
-
-### G3：Lab Scientific OS
-
-状态：`future`
-
-目标：
-
-- 从个人项目扩展到课题组和实验室。
-- 加入成员、角色、审阅、批准、版本和项目交接。
-- 支持共享运行资源、数据范围和实验室知识。
-
-阶段出口：
-
-- 多成员协作不破坏项目事实和权限。
-- 科学决策、图表和结论具有审阅记录。
-- 项目可以在成员变动和设备迁移后继续。
-- 实验室知识来自可追溯项目对象，不是无来源的共享摘要。
-
-### G4：Federated Scientific Intelligence OS
-
-状态：`future`
-
-目标：
-
-- 在 local-first 前提下接入 NAS、实验室服务器、HPC 和云计算。
-- 支持更完整的转录组、单细胞、空间、代谢组、蛋白组和临床数据。
-- 按数据隐私、资源、模型能力和成本选择执行位置。
-
-阶段出口：
-
-- 本地和远程 adapter 使用同一 Task/Job/Artifact/Evidence 契约。
-- 远程运行不要求把所有数据上传第三方。
-- 跨设备任务可恢复、审计和复现。
-- 计算成本、数据范围和访问权清晰可见。
-
-### G5：Scientific Capability Ecosystem
-
-状态：`future`
-
-目标：
-
-- 冻结公共 Plugin、Task Pack、Evidence Pack 和 Validator 标准。
-- 建立开发者工具、兼容矩阵、benchmark 和分发治理。
-- 支持第三方能力而不牺牲科学质量、隐私和复现。
+- RS 重资格本机三契约（selection→enrichment candidate cohort / affected-subgraph lifecycle / historical alternative compare）与 P7 资格契约对齐已落证据。
+- 对外动作（真人样本投放、发布、远程分发）与外部采购（签名证书）逐项获主人发令后完成。
+- `qualificationEligible` 仅在 G1 资格链证据完备后按裁决翻转，不由 Agent 自行加速。
 
 进入条件：
 
-- 内置插件和任务包已经通过真实产品长期验证。
-- 外部开发者需求真实存在。
-- 版本、Runtime、权限和签名治理可以承担第三方风险。
+- 主人「进 G1」口令（已裁决，见 `acceptance/g1-execution-plan-2026-11-24/EXECUTION-PLAN.md`）。
+- 六序内本地工作按序推进；外部真值项不催不动。
 
-### G6：Continuous Research System
+科研能力不因本层重写而缩减：科研任务作为领域能力由 `petri-pack-bio` 自己的规划承载（一句指针，不碰兄弟仓）。
+
+### G2：Agent × Domain Pack Composition
+
+状态：`NEXT`
+
+目标：
+
+- 让通用 agent 内核成为唯一执行主线，领域包（bio / 3D / 其他垂直包）按需安装、可审计放大。
+- 领域能力声明与内核契约解耦：领域包只提供工具 / 数据契约 / 验证器 / Task Pack，不复制内核的执行、记忆或治理。
+- 内核对任意领域包使用同一套 Job / Artifact / ChangeSet / Revision / 证据链。
+
+阶段出口：
+
+- 至少一个领域包以纯插件形态完成端到端任务，内核零领域特化分支。
+- 领域包升级 / 卸载不影响内核历史证据与回放。
+- 领域能力是放大器不是身份——内核五维成熟度不因某个领域包而定义。
+
+进入条件：
+
+- G1 内核资格本机范围证据落地。
+- 领域包接口契约（Plugin / Task Pack / Validator）冻结且可审计。
+
+### G3：Trusted Local Autonomy
+
+状态：`LATER`
+
+目标：
+
+- 在 local-first 前提下提升长任务自治：多 Agent 协作、外部监督、异常升级与可恢复中断。
+- 把「能完成任务但体感不稳」的结构性缺位（进程死 / 会话断 / 停滞）变为可观测、可告警、可恢复的事件面。
+- 治理透明继续是能力：动态审批、用户规则、ack 审计随自治能力提升同步加强。
+
+阶段出口：
+
+- 进程死 / 会话断 / 长任务停滞有外部可观测告警与恢复路径（只观测不动作先行，控制面扩张需另裁）。
+- 多 Agent 协作不破坏本地主权、证据链与用户 WIP 零触碰。
+- 自治失败不静默：诚实报错、可追溯、可重放。
+
+进入条件：
+
+- G2 领域包组合在真实任务长期验证。
+- 外部监督器形态经 owner 裁决（U 类材料 pending）。
+
+### G4：Federated & Extensible Agent
+
+状态：`RESEARCH`
+
+目标：
+
+- 在 local-first 前提下按数据隐私 / 资源 / 模型能力 / 成本选择执行位置（本机 / NAS / 实验室服务器 / 云端）。
+- 第三方能力包与本地包使用同一权限、版本与签名治理，不牺牲隐私与复现。
+- 跨设备任务可恢复、审计、回放。
+
+阶段出口：
+
+- 本地与远程 adapter 使用同一 Task / Job / Artifact / Evidence 契约。
+- 远程运行不要求把所有数据上传第三方。
+- 第三方包风险由权限声明、兼容矩阵与签名链承担。
+
+进入条件：
+
+- G3 自治与恢复证据稳定。
+- 远程执行环境与信任链治理就位。
+
+### G5：Agent Ecosystem & Distribution
+
+状态：`RESEARCH`
+
+目标：
+
+- 冻结公共插件 / Task Pack / 技能 / MCP 配置 / 领域包标准与兼容矩阵。
+- 建立开发者工具、benchmark 与分发治理；安装前权限知情。
+- 打包、签名、公证与发布流水按 owner 裁决与 G1 六序外部项推进，不提前外推。
+
+阶段出口：
+
+- 第三方能力可装 / 启 / 停 / 卸，更新半自动，权限声明装前可见。
+- 市场与信任链不牺牲本地主权与全链可审计。
+
+进入条件：
+
+- G4 联邦与扩展契约稳定。
+- 签名 / 公证外部真值到位（G1 序列 5 连带）。
+
+### G6：Continuous Agent Improvement
 
 状态：`north-star`
 
 目标：
 
-- 持续维护项目假设、证据、矛盾、限制和未解决问题。
-- 从新数据和新结果中更新研究图谱。
-- 生成可审阅的下一实验、下一分析和新问题建议。
-- 长期陪伴一个研究项目，而不是只响应一次请求。
+- 从真实任务、事故与回放中持续把候选策略经 fixture / shadow / 兼容门 / 回滚后进入新基线。
+- 维持项目假设、证据、矛盾、限制与未解决问题的可审阅图谱；生成下一步任务 / 分析 / 问题建议。
+- 长期陪伴用户工作，而不是只响应一次请求。
 
-这仍然是需要科学家主导和审阅的研究系统，不是替代科学责任主体的自动研究机器。
+阶段出口：
+
+- 改进由可审计证据驱动，不靠人工布尔断言或合成指标冒充。
+- Agent 自进化不改人设一句话（BLOCK-339）、不越本地主权与治理边界。
+
+进入条件：
+
+- G5 生态与分发长期验证。
+- 仍是需用户主导和审阅的 agent 系统，不是替代责任主体的自动机器。
+
+### 旧到新阶梯映射（三套 G1 定义收敛为一套）
+
+> 旧三套口径：①本文件旧 §10 科研阶梯 G1–G6；②`docs/g0-agent-maturity-blueprint.md` §6/§7.1 的「G1+ 出籍项」；③`acceptance/g1-execution-plan-2026-11-24/EXECUTION-PLAN.md` 六序（实际在用）。本表把它们映射到唯一新阶梯；旧文按留痕纪律保留（`acceptance/item39-phase-alignment/LEGACY-G1-G6-VISION.md`）。
+
+| 旧口径 | 旧位置 | 新阶梯归属 | 说明 |
+|---|---|---|---|
+| 愿景 G1 Agent-native Scientific Analysis Platform | 旧 §10 | **G1** 内核资格 + **G2** 领域包组合 | 内核资格归 G1；「3 个科学任务包」归 G2 领域包（科研归 bio 包） |
+| 愿景 G2 Evidence-centered Research Workbench | 旧 §10 | **G2** + **G3** | 证据 / Claim 对象属内核能力（G2 承载），多项目审阅协作归 G3 |
+| 愿景 G3 Lab Scientific OS | 旧 §10 | **G3** 本地自治 + **G4** 联邦 | 成员/角色/交接属 G3，跨机构共享资源归 G4 |
+| 愿景 G4 Federated Scientific Intelligence | 旧 §10 | **G4** | 执行位置选择直接对应 |
+| 愿景 G5 Scientific Capability Ecosystem | 旧 §10 | **G5** | 能力包生态直接对应（去科研专属化） |
+| 愿景 G6 Continuous Research System | 旧 §10 | **G6** | 持续自进化直接对应（去科研专属化） |
+| 成熟度蓝图 §6 出籍：真实 Provider 矩阵实机验证 | maturity-blueprint §6 | **G1** 序列4 W4 | 外部真值项，挂账不催 |
+| 成熟度蓝图 §6 出籍：插件签名公证 / packaged 分发验证 | maturity-blueprint §6 | **G1** 序列5/6 + **G5** | 发布就绪前置归 G1，生态分发治理归 G5 |
+| 成熟度蓝图 §6 出籍：远程市场生态 | maturity-blueprint §6 | **G5** | 生态与分发 |
+| 成熟度蓝图 §7.1 出籍：确认 UI 弹卡 / KNW-3 chip 注入 v2 / ORC-4 编排 DAG 化 | maturity-blueprint §7.1 | **G3** 本地自治 | 控制面 / 知识注入 / 编排统一归自治层 |
+| EXECUTION-PLAN 序列 1 功能面 / 2 裁决表 / 3 SUS 投放 | 执行规划 | **G1** | 六序前三项 |
+| EXECUTION-PLAN 序列 4 RS 重资格（W1–W3 本机 / W4–W5 外部） | 执行规划 | **G1** | 本机已落，外部挂账 |
+| EXECUTION-PLAN 序列 5 签名公证 / 6 发布流水 | 执行规划 | **G1**（前置）+ **G5**（生态） | 外部采购与发布就绪 |
+
 
 ## 11. 上层能力跃迁规则
 
@@ -584,10 +625,12 @@ G0 首个基线的资格出口：
 | `LATER` | 中期方向 | 记录需求和进入条件 |
 | `RESEARCH` | 长期探索 | 只做研究，不成为当前产品承诺 |
 
+当前阶梯归属（2026-11-25 口径）：`NOW`=G1 内核资格（六序按令推进）；`NEXT`=G2 内核×领域包组合；`LATER`=G3 本地自治；`RESEARCH`=G4 联邦扩展 / G5 生态分发；`north-star`=G6 持续自进化。归属随真实证据推进调整，不因名称改变。
+
 ### 11.2 进入下一能力层必须同时满足
 
 - 当前阶段核心用户旅程真实跑通。
-- 自动检查、真实 Provider、实机 UI 和科学验收分别有证据。
+- 自动检查、真实 Provider、实机 UI 和领域验收（若该层涉及领域包）分别有证据。
 - 关键失败模式有稳定处理。
 - 现有对象和契约能够支撑迁移。
 - 下一阶段问题在真实项目中重复出现，而不是假设出来。
@@ -600,7 +643,7 @@ G0 首个基线的资格出口：
 - 远期名称不能改变当前产品成熟度。
 - Roadmap 不能把 planned 写成 complete。
 - fixture 不能冒充真实项目。
-- 模型自评不能冒充科学审阅。
+- 模型自评不能冒充独立审阅或真实证据。
 - 新 UI 不能发明后端不存在的状态。
 
 ## 12. 新需求决策框架
