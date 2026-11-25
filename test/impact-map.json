@@ -1038,8 +1038,7 @@
       ],
       "tests": [
         "test/platform-branch-freeze.test.mjs"
-      ],
-      "classifiesScripts": false
+      ]
     },
     {
       "id": "block78-runtime-projection",
@@ -10238,6 +10237,17 @@
       ],
       "tests": [
         "test/g1-rs-p7-ui462-alignment.test.mjs"
+      ]
+    },
+    {
+      "id": "block520-a-supervisor-l2",
+      "note": "BLOCK-520 A-会话级外部监督器直达 L2（owner 口令 msg_7cf0a3957a41）：身份+豁免+fail-safe、L2 resume 续跑、风暴熔断、L3 挂账。",
+      "patterns": [
+        "core/petri-server/helpers/external-supervisor-controller.js",
+        "test/block520-a-supervisor-l2.test.mjs"
+      ],
+      "tests": [
+        "test/block520-a-supervisor-l2.test.mjs"
       ]
     }
   ]
