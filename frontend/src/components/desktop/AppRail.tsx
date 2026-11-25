@@ -24,6 +24,18 @@ function modeFromPath(pathname: string): LeftPanelContext['workspaceMode'] {
   return segmentToMode(m[1]);
 }
 
+/**
+ * 试用反馈①（owner msg_771e9c3e974b）：「新建任务」=去 welcome 任务创建页——
+ * 页内显式定项目上下文（选已有项目 / 新建项目），输入发送请求后才建该项目会话；
+ * 不再静默把会话塞进 allProjects[0]（least-surprise）。pure + facade 零行为外溢。
+ */
+export function resolveNewTaskNavigation(_input: {
+  currentProjectId?: string | null;
+  allProjects?: ReadonlyArray<{ id: string }>;
+}): { target: string; silentProjectId: null } {
+  return { target: '/', silentProjectId: null };
+}
+
 export function AppRail(): React.ReactElement {
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,17 +77,12 @@ export function AppRail(): React.ReactElement {
 
   const workspaceMode = modeFromPath(location.pathname);
 
-  /** item26 —「新建任务」＝新建会话，点即出（不跳项目流创建项目）。
-   *  有当前项目直接用；无当前项目但有既有项目取第一个建会话；
-   *  冷启动零项目才回工作台——此时没有可承载会话的项目，属诚实边界。 */
+  /** 试用反馈①（owner msg_771e9c3e974b）—「新建任务」进 welcome 任务创建页：
+   *  页内显式选/新建项目并输入请求，发送后才建该项目会话（least-surprise）。
+   *  不再静默取 allProjects[0] 建会话。 */
   const handleNewTask = React.useCallback(() => {
-    const pid = currentProjectId || allProjects[0]?.id;
-    if (pid) {
-      void createConversationForProject(pid);
-      return;
-    }
-    void navigate('/');
-  }, [allProjects, createConversationForProject, currentProjectId, navigate]);
+    void navigate(resolveNewTaskNavigation({ currentProjectId, allProjects }).target);
+  }, [allProjects, currentProjectId, navigate]);
 
   const ctx: LeftPanelContext = {
     width: leftWidth,

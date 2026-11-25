@@ -1,6 +1,6 @@
 /**
  * item 26 创建入口重构 — HK-01 红绿先行契约
- * 新建任务=新建会话不跳项目流 / 项目区➕撤销 / 🌐并入 home 统一面板 /
+ * 新建任务→welcome 任务创建页（试用反馈①修正；原 item26 为点即建会话）/ 项目区➕撤销 / 🌐并入 home 统一面板 /
  * 拖拽建项目链保留 / home 明确「新建项目」唯一入口。
  */
 import React from 'react';
@@ -72,7 +72,7 @@ function LocationProbe(): React.ReactElement {
 }
 
 describe('item26 创建入口重构', () => {
-  it('「新建任务」按钮走 ctx.handleNavigateToHome（壳层已映射新建会话，不渲染项目流）', () => {
+  it('「新建任务」按钮走 ctx.handleNavigateToHome（壳层现映射去 welcome 任务创建页，显式定项目上下文）', () => {
     const ctx = ctxWith();
     render(<MemoryRouter><LeftPanel ctx={ctx} /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: '新建任务' }));

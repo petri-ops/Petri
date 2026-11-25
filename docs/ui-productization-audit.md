@@ -6967,3 +6967,11 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **为什么这样设计**：审批确认按钮点了没反应、无提示无留痕，是 A1 静默吞错分级治理首批的用户可感知路径；只加诊断留痕，不改返回 false 的 fail-soft 契约与调用方语义。
 - **验证**：A1 HK-01 5/5 绿（含前端 reasonCode 断言）；无呈现面/交互契约改动，观感零代签；未跑实机腿，状态保持 in_progress，待实机证据后翻 verified。
 - **边界**：G0 开发期常态 · 不外推 packaged/Provider/GA。
+
+## UI-729: 新建任务语义修正——进 welcome 任务创建页（2026-11-26 **in_progress**；代码完成，实机待 owner 重试）
+
+- **来源**：owner 实机试用反馈原话（2026-11-25，msg_771e9c3e974b）：「新建任务 为什么没有出来新建项目的页面呢 目前出来的是新建会话 你理解一下 感觉不对呀 再试试」。item26（6bc5112ac）追认的是入口简化（➕撤销/🌐并入），本条修「新建任务」语义本身。
+- **变化面**：`frontend/src/components/desktop/AppRail.tsx` 新增纯函数 `resolveNewTaskNavigation`（target='/'，silentProjectId=null）+ `handleNewTask` 改为导航 welcome 任务创建页，不再静默取 `allProjects[0]` 建会话（least-surprise）；`frontend/src/components/workspace-panels/CreateEntryRefactor.test.tsx` 注释同步新语义。
+- **为什么这样设计**：welcome 页现成「项目选择（选已有/打开文件夹/SSH 新建）+ 输入框常驻 + sendGuard 未选拦截 + 发送后才建该项目会话」——正是 owner 要的「带项目上下文的新建任务页」；复用而非新造向导，诚实边界（零项目走新建引导）保留。
+- **验证**：HK-01 `AppRailNewTask.test.ts` 红 3/3→绿 3/3（多项目/有当前/零项目均去 welcome、silentProjectId=null）；邻域 `CreateEntryRefactor 5/5 + AppRailContext 4/4`；types/lint/arch/frontend-deps/ts-syntax/arch-cycles/code-size/docs 全绿。
+- **状态边界**：代码完成、**观感零代签 pending_human_eye**，owner 实机重试给第二轮反馈后才可翻；dev Electron 边界内，不外推 packaged/Provider/GA。G0 永久 maintained · G1 进行中。
