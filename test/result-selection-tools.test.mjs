@@ -436,3 +436,30 @@ test('BLOCK-143: go_kegg 既有行为零变化（注册表化回归锚）', asyn
   assert.equal(call.args.params.analysis_type, 'all');
   assert.equal(call.args.params.species, 'human');
 });
+
+test('G1 W1 enrichment 回执带 derived-result candidate cohort（默认 pending，不自动 adopt）', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.runTool = async () => ({ ok: true, toolJobId: 'job_enrichment', artifactTruth: { status: 'valid' } });
+  const result = await tool_result_enrichment_from_revision({
+    revisionId: 'rev_1', species: 'human', geneIdType: 'auto', analysisType: 'GO-BP',
+  }, { userId: 'user_1', projectId: 'project_1', accessMode: 'full' }, fx.dependencies);
+  assert.equal(result.ok, true);
+  const cohort = result.candidateCohort;
+  assert.ok(cohort, 'enrichment 回执须带 candidateCohort');
+  assert.equal(cohort.mode, 'pending_candidate');
+  assert.equal(cohort.autoAdopt, false);
+  assert.deepEqual(cohort.requiredStages, ['candidate', 'compare', 'adopt_or_revert', 'replay']);
+  assert.ok(cohort.chainPreview, '须附既有 ChangeSet Truth 的 chainPreview');
+});
+
+test('G1 W1 legacyAutoAdopt=true 显式回溯旧 dev 行为（默认关，回执标 legacy）', async (context) => {
+  const fx = fixture(context);
+  fx.dependencies.runTool = async () => ({ ok: true, toolJobId: 'job_enrichment', artifactTruth: { status: 'valid' } });
+  const result = await tool_result_enrichment_from_revision({
+    revisionId: 'rev_1', species: 'human', legacyAutoAdopt: true,
+  }, { userId: 'user_1', projectId: 'project_1', accessMode: 'full' }, fx.dependencies);
+  assert.equal(result.ok, true);
+  assert.equal(result.candidateCohort.mode, 'legacy_auto_current');
+  assert.equal(result.candidateCohort.autoAdopt, true);
+  assert.equal(result.candidateCohort.legacy, true);
+});

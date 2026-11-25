@@ -581,9 +581,9 @@
       "path": "core/petri-server/agent-tools/result-selection-tools.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 706,
-      "bytes": 32876,
-      "sha256": "af38950f5e8338f0f7825bf7b0bf1e6b74d7bccf7219b44dd88bb8e4b2760807"
+      "lines": 742,
+      "bytes": 34462,
+      "sha256": "e6ce19c9bdfd040f137f434a6b08f20540dbd681a2801e20191e5c40d54b9edc"
     },
     {
       "path": "core/petri-server/helpers/methods-export.js",
@@ -706,6 +706,16 @@
       "to": {
         "lines": 1921,
         "bytes": 94379
+      }
+    },
+    {
+      "path": "core/petri-server/agent-tools/result-selection-tools.js",
+      "reason": "G1 首包 W1 candidate cohort：enrichment 回执接既有 ensureChainRevisions + cohort 语义（+36 行，带 owner 裁决 msg_ac7093fe2a26）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 742,
+        "bytes": 34462
       }
     }
   ]

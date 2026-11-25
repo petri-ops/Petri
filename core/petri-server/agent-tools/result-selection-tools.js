@@ -408,6 +408,35 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
   });
   const workflowFailure = failClosedWorkflowAction(executed, workflowGraph);
   if (workflowFailure) return workflowFailure;
+
+  // G1 首包 W1 — derived-result candidate cohort：默认登记为 pending candidate
+  //（需 compare → adopt/revert → replay），legacyAutoAdopt=true 才回溯旧 dev 行为。
+  // 实际写仍走既有 ensureChainRevisions / ChangeSet Truth（不新增第二套工具/不放宽门）。
+  const { planEnrichmentCohort } = require('../../shared-backend/result-enrichment-cohort');
+  const cohortPlan = planEnrichmentCohort({ executed, legacyAutoAdopt: args?.legacyAutoAdopt === true });
+  let chainPreview = null;
+  try {
+    const { ensureChainRevisions } = require('../../shared-backend/result-changeset-service');
+    const chain = ensureChainRevisions({
+      projectId,
+      toolJobId: String(executed.toolJobId || ''),
+      artifactId: revision.artifactId,
+      workspaceRoot,
+    }, {
+      repository,
+      getToolJob: dependencies.getToolJob || dbMod.getToolJob,
+      listProjectToolJobs: (id) => dbMod.listProjectToolJobsForWorkflow(id),
+    });
+    chainPreview = {
+      ok: chain.ok === true,
+      registered: chain.registered === true,
+      idempotent: chain.idempotent === true,
+      ...(chain.reason ? { reason: chain.reason } : {}),
+      ...(chain.changeSetId ? { changeSetId: chain.changeSetId } : {}),
+    };
+  } catch (error) {
+    chainPreview = { ok: false, registered: false, reason: (error && error.code) || 'chain_preview_failed' };
+  }
   return {
     ...executed,
     enrichmentAction: {
@@ -420,6 +449,13 @@ async function tool_result_enrichment_from_revision(args, ctx, dependencies = {}
         ? { graphId: workflowGraph.graph.graphId, sourceDigest: workflowGraph.graph.sourceDigest, validationStatus: workflowGraph.graph.validationStatus }
         : null,
       workflowDiagnostics: workflowGraph.ok ? [] : workflowGraph.diagnostics,
+    },
+    candidateCohort: {
+      mode: cohortPlan.mode,
+      autoAdopt: cohortPlan.autoAdopt,
+      legacy: cohortPlan.legacy,
+      requiredStages: cohortPlan.requiredStages,
+      chainPreview,
     },
   };
 }
