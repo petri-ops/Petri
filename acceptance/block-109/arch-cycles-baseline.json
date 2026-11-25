@@ -13,6 +13,7 @@
     "core/petri-server/helpers/guest-permissions.js -> core/petri-server/helpers/permissions.js",
     "frontend/src/components/editor/integration/PetriOpenFileDevBridge.tsx",
     "frontend/src/components/workspace-panels/LeftPanel.tsx -> frontend/src/components/workspace-panels/LeftSshCreatePanel.tsx",
-    "frontend/src/pages/project-workspace/FileTreeItem.tsx -> frontend/src/pages/project-workspace/FileTreeList.tsx"
+    "frontend/src/pages/project-workspace/FileTreeItem.tsx -> frontend/src/pages/project-workspace/FileTreeList.tsx",
+    "core/petri-server/agent-tools/goal-tools.js -> core/petri-server/helpers/automation-store.js -> core/petri-server/agent-tools/registry.js"
   ]
 }

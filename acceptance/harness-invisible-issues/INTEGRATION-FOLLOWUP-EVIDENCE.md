@@ -100,3 +100,19 @@ worker 交付后按兴奋 msg_602bf9f8ef61 / msg_32555ffe46d7 裁决补齐：该
 - `acceptance/block-92/size-baseline.json` 中 `frontend/src/pages/project-workspace/WorkspaceFilePreview.tsx` 条目：lines 727→731、bytes 34624→35060、sha256 → `def0075fb1874adfab9d3c4c11058d65a0f376e639ebd64e3f86cae2b748d444`（当前文件真值）。
 - 仅改这一条，`total` 字段保持原值 86730（非 files 求和语义，不擅改）；其余 7 个集成文件重打不变。
 - 复验：`node scripts/code-size-ledger.mjs --check` → **PASS v2**（台账 74 文件，基线 86730，生效例外 16，预算 700），exit 0。gate:code-size 红消除。
+
+## 第六部分：coordinator 补记 — arch-cycles 存量环入册（2026-11-25 · 兴奋裁决 A）
+
+CI run 45581829708 静态门红在 `gate:arch-cycles`：`goal-tools.js → automation-store.js → registry.js`。核真结论=**存量、非本次回归、且运行时已被打断**：
+
+- 三文件 `goal-tools.js` / `automation-store.js` / `registry.js` 在本次集成 `86efb04ca..e8d3a32f8` 全部未改（`git diff` 实证）。
+- 依赖链由 **BLOCK-515 提交 `2f0122efe`（2026-11-24 18:58）** 引入：`goal-tools.js:10` 顶层 require automation-store；`automation-store.js:483` 在 `builtinToolNameSet()` **函数内惰性 require** registry（源码注释明写「顶层 require 会与 goal-tools 形成环，循环内 store.createGoal 尚未导出」）；`registry.js:24` 顶层 require goal-tools。惰性 require 已在运行时打断环；gate 静态分析把 lazy require 也算作边才报新环。
+- 基线 `acceptance/block-109/arch-cycles-baseline.json` 原有 12 环无此条（BLOCK-515 引入时漏登记）。这道门自 11-24 晚起一直红，之后收口都在更早门禁（lint/code-size）exit，没跑到它，故真因一直被掩盖。
+
+**处置（裁决 A）**：基线精确 12→13，**只加这一条，其余签名逐字不变**。注意 `node scripts/arch-cycles-gate.mjs --write` 会全量重写、把 2 条存量环判「已消亡」删掉（diff 实测 12→11 且删2加1），不符合要求，故改为**手动精确插入**该签名。复验 `node scripts/arch-cycles-gate.mjs --check` → PASS（`11 存量环在册；2 个已消亡` —— 那 2 个按裁决保留原样不动）。
+
+**为什么入册而非改代码**：这道门的设计里存量环的处置就是入册并登记理由；环在运行时已被惰性 require 打断，不是回归；回归 / Harness 确定性门 / 前端构建三步自 11-24 起一次都没真跑过，优先把 CI 推到那一步比现在动依赖结构更值。
+
+**后续债（独立开项，不混入本次收尾）**：让 `automation-store` 不在函数内 require registry——由调用方注入 `listBuiltinToolNames`，消除这条静态环。归 **A2 架构债队列，待 owner 发令**；请主席位收进「下一阶段统一清单」。
+
+**方法论修正（兴奋提示，本笔已采用）**：集成类交付的「门禁全绿」此前多是子集（HK-01/docs/secret/arch/diff-check），不含 arch-cycles/code-size/types/lint；今后以 `npm run closeout`（现含新增的 frontend-deps、ts-syntax 两门，排在 lint 前）为准。本笔已真实复跑 code-size 与 arch-cycles 两道此前被掩盖的门。
