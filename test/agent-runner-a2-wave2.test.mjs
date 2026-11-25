@@ -214,21 +214,27 @@ describe('A2 WAVE2 — agent-runner.js 纯函数拆解 HK-01', () => {
     });
   });
 
-  describe('注入点区域零改断言（D1 分支将来合回）', () => {
-    it('自进化 lesson 注入块逐字在场且带原始注释', () => {
+  describe('注入点语义完整断言（D1 已合回 · wave2 拆解未破坏注入点）', () => {
+    it('自进化注入块语义完整：D1 guard 已接线 + wave2 facade 重导出在场', () => {
       const src = fs.readFileSync(runnerPath, 'utf8');
+      // D1 guard：真源判据（listActiveLessons + verifyLessonFrequency）必须先过 guard 再写注入
+      const guardCall = "require('./helpers/lesson-injection-guard').guardLessonInjection(listActiveLessons(8), verifyLessonFrequency)";
+      const guardIdx = src.indexOf(guardCall);
+      const writeIdx = src.indexOf('ctxForPrompt.selfEvolutionLessons = lessons;');
+      assert.ok(guardIdx >= 0, 'D1 guardLessonInjection 必须在注入点接线（真源判据入场）');
+      assert.ok(writeIdx > guardIdx, 'guard 必须先于 lesson 注入赋值（冻结判定不绕过）');
       assert.ok(
-        src.includes("const { listActiveLessons } = require('./helpers/lesson-store');"),
-        'lesson-store require 必须逐字保留'
+        src.includes('if (lessons.length > 0) ctxForPrompt.selfEvolutionLessons = lessons;'),
+        'D1 改写后的注入赋值行必须逐字在场'
       );
-      assert.ok(src.includes('const lessons = listActiveLessons(8);'), 'listActiveLessons(8) 必须逐字保留');
       assert.ok(
-        src.includes('if (Array.isArray(lessons) && lessons.length > 0) ctxForPrompt.selfEvolutionLessons = lessons;'),
-        '注入赋值行必须逐字保留'
+        src.includes('} catch { /* 自进化经验读取 / 冻结失败不影响本轮运行 */ }'),
+        'fail-soft catch 注释必须逐字在场'
       );
+      // wave2 门禁力保留：拆解后主文件仍从 helper 重导出，注入点未被内联改写
       assert.ok(
-        src.includes('} catch { /* 自进化经验读取失败不影响本轮运行 */ }'),
-        'fail-soft catch 注释必须逐字保留'
+        src.includes("require('./helpers/agent-loop-helpers')"),
+        'wave2 facade 重导出必须仍在场（注入点未被拆解内联破坏）'
       );
     });
 

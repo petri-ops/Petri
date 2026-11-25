@@ -1,8 +1,9 @@
 {
   "_about": "A2 console 债务按文件冻结的存量棘轮（只减不增）：新增 console 即红，治理收敛后 --write 下调基线。口径=core/+src/ 自有代码 console.<method> 调用字面量（含子进程源码字符串），排除 node_modules/dist/build/.git/frontend。",
+  "_integrationNote": "item39 七支集成重基：登记 D1 新增文件 helpers/lesson-injection-guard.js 的 1 处 console.warn（位于 if(process.env.EVO_DEBUG) 门控 + try/catch 内，属合法调试留痕非生产 console 债务）；基线建于 D1 之前故原未登记。只减不增棘轮仍有效——该文件今后再加 console 照样红。",
   "schemaVersion": 1,
   "updatedAt": "2026-11-25",
-  "total": 287,
+  "total": 288,
   "files": {
     "core/petri-server/agent-runner.js": 15,
     "core/petri-server/agent-tools/act-tools.js": 1,
@@ -36,6 +37,7 @@
     "core/petri-server/helpers/ip-geo.js": 1,
     "core/petri-server/helpers/knowledge-ingest.js": 4,
     "core/petri-server/helpers/knowledge-space.js": 4,
+    "core/petri-server/helpers/lesson-injection-guard.js": 1,
     "core/petri-server/helpers/lesson-store.js": 3,
     "core/petri-server/helpers/mcp-env-crypto.js": 1,
     "core/petri-server/helpers/memory-vectors.js": 1,

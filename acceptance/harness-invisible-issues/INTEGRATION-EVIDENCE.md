@@ -47,31 +47,33 @@
 - 根因：wave2 单独合入时把 shrink-only 锚从 1153 重锚到 1024（=1153−129）；A1 静默吞错留痕先合入 +15 行（1153→1168），叠加后 1038 = 1023 + 15，超锚 14 行。两分支各自 HK-01 全绿，纯为合并叠加触发元约束；对原始 1153 净减 115 行，wave2 的 −129 收缩成果完整保留。
 - 裁决（协调方 msg_24d66c183fed，选 A）：**授权重锚 1024→1038 并留因**。已在 `test/loop-orchestrator-subdomains.test.mjs` 注释写明「1024→1038（+14，非压门禁）：wave2 单独合入锚 1024=1153−129；A1 +15 叠加后 1038=1023+15；净减 115、棘轮仍只减不增卡在 1038、再超即红、拆分回收走 S4.1」。重锚后该测试 16/16 绿。D1 对该文件 4+/4− 行数中性，合后复核仍 1038 行、棘轮 16/16 绿。
 
-## 整合 HK-01 全量复跑（7 支全合后，最终 HEAD）
+## 整合 HK-01 全量复跑（7 支全合后）
 
-对 8 个契约测试文件逐支复跑（`node --test`），结果如下：
+首次复跑 8 个契约测试文件发现 2 处红（D1 最后合入使早先测试的前置假设失效，非代码回归），如实报协调方；协调方 `msg_ddf18bc3f64f` 裁决 A——按「把门禁基准校准到集成后真实状态，非压门禁」处置。校准后最终复跑结果：
 
-| 分支 | 测试文件 | 结果 |
-|------|----------|------|
-| A1 | `test/a1-silent-error-grading.test.mjs` | ✅ 5/5 |
-| B4 | `test/harness-b4b5-contract.test.mjs` | ✅ 6/6 |
-| B1 | `test/harness-b1-zindex-contract.test.mjs` | ✅ 6/6 |
-| A5 | `test/harness-a5-external-supervisor.test.mjs` | ✅ 10/10 |
-| console-governance (wave1) | `test/a2-console-wave1.test.mjs` | ❌ 3/4（1 fail，见下） |
-| q7-a2 (wave2) | `test/agent-runner-a2-wave2.test.mjs` | ❌ 9/10（1 fail，见下） |
-| q7-a2 (棘轮) | `test/loop-orchestrator-subdomains.test.mjs` | ✅ 16/16 |
-| D1 | `test/a3-d1-lesson-injection-guard.test.mjs` | ✅ 14/14 |
+| 分支 | 测试文件 | 首次 | 校准后 |
+|------|----------|------|--------|
+| A1 | `test/a1-silent-error-grading.test.mjs` | ✅ 5/5 | ✅ 5/5 |
+| B4 | `test/harness-b4b5-contract.test.mjs` | ✅ 6/6 | ✅ 6/6 |
+| B1 | `test/harness-b1-zindex-contract.test.mjs` | ✅ 6/6 | ✅ 6/6 |
+| A5 | `test/harness-a5-external-supervisor.test.mjs` | ✅ 10/10 | ✅ 10/10 |
+| console-governance (wave1) | `test/a2-console-wave1.test.mjs` | ❌ 3/4 | ✅ 4/4 |
+| q7-a2 (wave2) | `test/agent-runner-a2-wave2.test.mjs` | ❌ 9/10 | ✅ 10/10 |
+| q7-a2 (棘轮) | `test/loop-orchestrator-subdomains.test.mjs` | ✅ 16/16 | ✅ 16/16 |
+| D1 | `test/a3-d1-lesson-injection-guard.test.mjs` | ✅ 14/14 | ✅ 14/14 |
 
-**两处整合红（均系 D1 最后合入使早先测试的前置假设失效，非代码回归；已停下如实报协调方待裁决）：**
+**8 文件全部绿；测试数不减（WAVE1 4、WAVE2 10 与校准前一致）；其余门禁 `docs:check` / `ui:audit:check` / `quality:secret` / `quality:arch` / `git diff --check` 校准后复跑仍全绿。**
 
-- **WAVE1 `A2-WAVE1 console ratchet 只减不增` fail**：`AssertionError: console 棘轮违规：core/petri-server/helpers/lesson-injection-guard.js: 1 处 > 基线 0（新增 console）`。D1 新增的 `lesson-injection-guard.js` 第 36 行有 1 处 `console.warn`，且受 `process.env.EVO_DEBUG` 门控（非正常路径）；`test/console-baseline.json` 由 console-governance wave1 建基线，当时该文件尚不存在故未登记。wave1 本波目标文件仍全清（其余 3 项绿）。
-- **WAVE2 `自进化 lesson 注入块逐字在场且带原始注释` fail**：`AssertionError: lesson-store require 必须逐字保留`。该断言所属 describe 组名为「注入点区域零改断言（**D1 分支将来合回**）」——其设计目的仅是证明 wave2 拆解未触碰注入点，以便 D1 后合。D1 已按裁决合入并正当地改写该注入块（原 `const { listActiveLessons } = require('./helpers/lesson-store');` 改为 `require('./helpers/lesson-injection-guard').guardLessonInjection(...)`），故该 verbatim 前置断言已过期；D1 自身的注入边界语义由 D1 HK-01 第 14 项覆盖且已绿。
+### 两处校准处置（裁决 msg_ddf18bc3f64f）
+
+1. **WAVE1 console 基线重基**：首次红为 `console 棘轮违规：core/petri-server/helpers/lesson-injection-guard.js: 1 处 > 基线 0（新增 console）`。核真：该 `console.warn` 位于 `lesson-injection-guard.js:36` 的 `if (process.env.EVO_DEBUG)` 门控 + `try/catch` 内，属 D1 合法调试留痕、非生产 console 债务；基线建于 D1 之前故未登记。处置：`test/console-baseline.json` 登记该文件计 1、`total` 287→288，`_integrationNote` 写明 EVO_DEBUG 门控性质。**只减不增棘轮仍有效**——该文件今后再加 console 照样红。校准后 WAVE1 4/4 绿。
+2. **WAVE2 断言组校准（未删旧门禁力）**：首次红为 `lesson-store require 必须逐字保留`；该断言组原名「注入点区域零改断言（**D1 分支将来合回**）」，仅用于证明 wave2 拆解未触碰注入点，D1 合入后 verbatim 前置假设过期。处置：组名更新为「注入点语义完整断言（D1 已合回 · wave2 拆解未破坏注入点）」，原 `it` 改写为验证 **D1 guard 已接线（`guardLessonInjection(listActiveLessons(8), verifyLessonFrequency)` 且先于注入赋值）+ wave2 facade 重导出仍在场 + 注入块语义完整（D1 改写后的赋值行与 fail-soft catch 逐字在场）**，测试数不减、门禁力保留。校准后 WAVE2 10/10 绿。
 
 `frontend/node_modules` 本机未安装，B1 的 `frontend/src/styles/theme-token-contract.test.ts`（vitest）无法执行，B1 evidence 已如实记录；本次未将其计为绿。
 
 ## 收尾状态
 
 - 7 支全部合入独立 worktree 的 `petri-ops/item39-harness7`，工作树干净。
-- 当前 HEAD：`1bcfa205fb75244f4e6581c9dc83f1545e4c25b5`。
+- 校准提交 = 本文件所在提交（与两处校准同批 commit），为本次交付最后一次提交；精确 HEAD SHA 见交付回报（协调方 fetch 时以实际值为准）。
 - **未 push**；由协调方 fetch 核实后亲自 push。
-- 整合 HK-01：6 项绿、2 项红（均为 D1 后置使前置断言过期的静态契约，根因与处置建议已上报协调方，等待裁决）。
+- 整合 HK-01：**8/8 全绿**（首次 6 绿 2 红经上述校准转绿）；未合分支：无（7 支全合）。
