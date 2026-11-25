@@ -34,10 +34,10 @@ phase: G0
 - **OB-004** ✅ error-log 静默 catch 修复（`getLastWriteError`+stderr 留痕）+ 全局 `console.error`→`logError` 桥接 + dedupe（不重做默认路径）；server.js 端口守卫路径刻意不装桥接以守 block457 零副作用契约。
 - **OB-007** ✅ 抽 `installProcessErrorHandlers` 统一注册（复用 server-main.js 原注册点），unhandledRejection/uncaughtException 必触 error-log（E-019），保留 exit(1) 受控重启语义。
 
-### 波次 P1 — 链路可追、状态可量（中风险，P0 收口后另点）
-- **OB-002** IPC trace 贯穿（preload/main handler/backend spawn env，rid 可选参数向后兼容）：验单条 IPC 全链 rid 时间轴可重建。
-- **OB-003** `core/shared-backend/metrics.js` + `/api/_internal/metrics`（零新依赖、不引 prom-client）：IPC 计数 / SQLite 写延迟 / 后端重启次数 / breaker 状态。
-- **OB-005** `core/shared-backend/health.js` 四端点同 shape，区分 readiness/liveness。
+### 波次 P1 — 链路可追、状态可量（✅ 已落地 2026-11-25，待 wave 回执；证据 `acceptance/harness-observability/P1-EVIDENCE.md`）
+- **OB-002** ✅ IPC trace 贯穿：`core/shared-backend/ipc-trace.js` rid+时间轴、全局 `_ipc-trace.js` 包装 `ipcMain.handle`（rid 可选尾参向后兼容）、preload 自包含 rid 透传、spawn env `PETRI_TRACE_RID`；单条 IPC 全链可按 rid 重建时间轴。
+- **OB-003** ✅ `core/shared-backend/metrics.js` + `/api/_internal/metrics`（零新依赖）：IPC 计数/SQLite 写延迟（DB 单点 run 计时）/后端重启次数/breaker 状态 add 接口。
+- **OB-005** ✅ `core/shared-backend/health.js` 四端点 additive 同 shape，区分 readiness/liveness（保留 attach 判据原字段）。
 
 ### 波次 P2 — 控制闭环（需评估/可能裁决）
 - **OB-008** goal-verifier 接线进主循环终止判定（闭合「目标输入、证据交付」）；`decisionVerifier` 默认值明确化——默认改非 null 属行为裁决，单列与主人确认。
