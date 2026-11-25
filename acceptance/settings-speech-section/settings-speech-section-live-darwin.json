@@ -1,0 +1,44 @@
+{
+  "name": "settings-speech-section",
+  "platform": "darwin",
+  "startedAt": "2026-11-25T08:31:51.191Z",
+  "finishedAt": "2026-11-25T08:31:53.709Z",
+  "assertions": [
+    {
+      "name": "S1_speech_deeplink_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=speech"
+    },
+    {
+      "name": "S2_nav_has_speech_active",
+      "pass": true,
+      "detail": "{\"active\":\"语音\\n本地模型 / 转写与朗读\",\"nav\":[\"模型接口\\n模型、API Key 与能力声明\",\"语音\\n本地模型 / 转写与朗读\",\"外观\\n主题、字号与强调色\",\"通知与桌面\\n提醒、托盘与免打扰\",\"用量与资源\\n成本、缓存与本机状态\",\"数据与维护\\n数据、备份与反馈\"]}"
+    },
+    {
+      "name": "S3_four_speech_blocks_present",
+      "pass": true,
+      "detail": "missing="
+    },
+    {
+      "name": "S4_search_ocr_ui_removed",
+      "pass": true,
+      "detail": "forbidden="
+    },
+    {
+      "name": "S5_no_outer_fold",
+      "pass": true,
+      "detail": "true"
+    },
+    {
+      "name": "S6_models_page_reachable",
+      "pass": true,
+      "detail": "nav /settings?section=models"
+    },
+    {
+      "name": "S7_models_page_has_no_speech_panel",
+      "pass": true,
+      "detail": "true"
+    }
+  ],
+  "allPass": true
+}

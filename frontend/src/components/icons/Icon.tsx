@@ -17,6 +17,7 @@
 import React from 'react';
 
 export type IconName =
+  | 'mic'
   | 'search'
   | 'user'
   | 'book'
@@ -119,6 +120,15 @@ interface IconProps {
 // All paths share: 24×24 viewBox, fill=none, stroke=currentColor.
 // Each entry returns the inner SVG (without the <svg> wrapper).
 const paths: Record<IconName, React.ReactNode> = {
+  // Mic — 语音输入（item 40 语音分区）
+  mic: (
+    <>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0 0 14 0" />
+      <line x1="12" y1="17" x2="12" y2="22" />
+      <line x1="8" y1="22" x2="16" y2="22" />
+    </>
+  ),
   // Search — magnifying glass
   search: (
     <>

@@ -14,6 +14,7 @@ export type SettingsSectionId =
   | 'appearance'
   | 'desktop'
   | 'models'
+  | 'speech'
   | 'network'
   | 'compute'
   | 'usage'
@@ -36,8 +37,13 @@ export const SETTINGS_SEARCH_INDEX: readonly SettingsSearchEntry[] = Object.free
   {
     id: 'models',
     label: '模型接口',
-    description: '模型、API Key 与能力渠道',
-    keywords: ['模型', '接口', '渠道', 'api', 'key', 'endpoint', 'provider', 'vision', '视觉', 'ocr', '搜索', '检索后端', '能力渠道'],
+    description: '模型、API Key 与能力声明',
+    keywords: ['模型', '接口', 'api', 'key', 'endpoint', 'provider', 'vision', '视觉', '向量', 'embedding', '默认模型'],
+  },  {
+    id: 'speech',
+    label: '语音',
+    description: '本地模型 / 转写与朗读',
+    keywords: ['语音', '本地模型', 'ASR', 'TTS', 'SenseVoice', 'Whisper', '转写', '朗读', '麦克风', 'speech', 'voice'],
   },  {
     id: 'appearance',
     label: '外观',

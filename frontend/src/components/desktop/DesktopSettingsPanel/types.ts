@@ -24,6 +24,7 @@ export type SettingsSection =
   | 'desktop'
   | 'general'
   | 'models'
+  | 'speech'
   | 'network'
   | 'compute'
   | 'usage'
@@ -56,7 +57,8 @@ export const SETTINGS_SECTIONS: Array<{
   icon: IconName;
   tier: SettingsTier;
 }> = [
-  { id: 'models', label: '模型接口', description: '模型、API Key 与能力渠道', icon: 'bot', tier: 'core' },
+  { id: 'models', label: '模型接口', description: '模型、API Key 与能力声明', icon: 'bot', tier: 'core' },
+  { id: 'speech', label: '语音', description: '本地模型 / 转写与朗读', icon: 'mic', tier: 'core' },
   { id: 'appearance', label: '外观', description: '主题、字号与强调色', icon: 'sun', tier: 'core' },
   { id: 'desktop', label: '通知与桌面', description: '提醒、托盘与免打扰', icon: 'bell', tier: 'core' },
   { id: 'usage', label: '用量与资源', description: '成本、缓存与本机状态', icon: 'bar-chart', tier: 'core' },

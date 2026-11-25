@@ -22,7 +22,7 @@ interface Props {
 
 /** 常驻分区（core 5 组）的展示分组：只影响阅读顺序，不改 id 与深链语义。 */
 const NAV_GROUPS: Array<{ label: string; ids: SettingsSection[] }> = [
-  { label: '能力', ids: ['models'] },
+  { label: '能力', ids: ['models', 'speech'] },
   { label: '应用', ids: ['appearance', 'desktop'] },
   { label: '系统', ids: ['usage', 'maintenance'] },
 ];

@@ -808,6 +808,26 @@
         "lines": 994,
         "bytes": 22721
       }
+    },
+    {
+      "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
+      "reason": "item40 语音独立成区：ChannelPreferencePanel 挂载迁出到 speech 分支（净减行，指纹随改）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 622,
+        "bytes": 32069
+      }
+    },
+    {
+      "path": "frontend/src/components/icons/Icon.tsx",
+      "reason": "item40 语音分区新增 mic 语义图标（+10 行）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 793,
+        "bytes": 23419
+      }
     }
   ]
 }

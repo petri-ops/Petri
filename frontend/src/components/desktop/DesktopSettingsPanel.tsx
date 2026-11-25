@@ -211,6 +211,7 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
         {activeSection === 'appearance' && <AppearanceSection />}
         {activeSection === 'desktop' && <DesktopSection />}
         {activeSection === 'network' && <NetworkSection />}
+        {activeSection === 'speech' && <ChannelPreferencePanel />}
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
@@ -251,10 +252,6 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
               value={roleBindings.embedding}
               onChange={(binding) => setRoleBindings((prev) => ({ ...prev, embedding: binding }))}
             />
-            {/* UI-704 — 能力渠道折叠块（BLOCK-454 槽位显化）：识图/向量绑定在上方主位，
-                检索后端与 OCR 渠道按设计（settings-ia-simplification-design.md §六）
-                统一收进本折叠块，不新增左栏分组。 */}
-            <ChannelPreferencePanel />
             <div className="petri-model-list">
               {userModelProfiles.length > 0 && (
                 <div className="petri-endpoint-list-header" aria-hidden="true">

@@ -20,17 +20,17 @@ function renderNav(activeSection: SettingsSection = 'appearance') {
   return { onSelect };
 }
 
-describe('UI-704 设置页 IA v2 — 左栏 core 5 组 + 高级折叠', () => {
-  it('core 5 组：模型接口/外观/通知与桌面/用量与资源/数据与维护 常驻左栏', () => {
+describe('UI-704 + item 40 设置页 IA — 左栏 core 6 组 + 高级折叠', () => {
+  it('core 6 组：模型接口/语音/外观/通知与桌面/用量与资源/数据与维护 常驻左栏', () => {
     const coreIds = SETTINGS_SECTIONS.filter((item) => item.tier === 'core').map((item) => item.id);
-    expect(coreIds).toEqual(['models', 'appearance', 'desktop', 'usage', 'maintenance']);
+    expect(coreIds).toEqual(['models', 'speech', 'appearance', 'desktop', 'usage', 'maintenance']);
   });
 
   it('快捷键与联网与代理不在 core（高级折叠组内，搜索可达）', () => {
     renderNav('appearance');
-    // 左栏直接可见的项数 = core 5 + 1 个高级折叠开关
+    // 左栏直接可见的项数 = core 6 + 1 个高级折叠开关
     const navButtons = screen.getAllByRole('button').filter((b) => b.className.includes('petri-settings-nav__item'));
-    expect(navButtons.length).toBe(5);
+    expect(navButtons.length).toBe(6);
     expect(screen.queryByText('快捷键')).toBeNull();
     expect(screen.queryByText('联网与代理')).toBeNull();
     // 搜索可达：visibleSectionIds 含全部分区时，展开高级即可见
