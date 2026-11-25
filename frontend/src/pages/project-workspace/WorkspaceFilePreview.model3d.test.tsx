@@ -103,3 +103,19 @@ describe('UI-654 文件预览一键转 3D 模型', () => {
     });
   });
 });
+
+/**
+ * 3D HTML（three.js + WebGL，如 3d-demo.html / pelican.html）必须执行脚本才能渲染，
+ * 空 sandbox="" 会禁掉全部脚本导致黑屏 + 转圈；本测试钉死「放行脚本 + opaque origin 隔离」
+ * 的安全边界：allow-scripts 必在、allow-same-origin 必不在（脚本碰不到主应用 DOM/凭据）。
+ */
+describe('工作区 3D HTML 预览沙箱（黑屏修复 · 安全边界）', () => {
+  it('3D html iframe 含 allow-scripts 且不含 allow-same-origin', async () => {
+    renderPreview(workspaceFile('3d-demo.html', 'demos/3d-demo.html'));
+
+    const frame = await screen.findByTitle('3d-demo.html');
+    const sandbox = frame.getAttribute('sandbox') ?? '';
+    expect(sandbox).toContain('allow-scripts');
+    expect(sandbox).not.toContain('allow-same-origin');
+  });
+});

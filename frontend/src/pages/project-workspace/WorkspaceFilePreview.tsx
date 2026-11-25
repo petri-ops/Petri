@@ -528,12 +528,16 @@ export function WorkspaceFilePreview({
           />
         )}
         {status === 'ready' && fallbackKind === 'html' && (
-          /* BLOCK-334 P2 — HtmlViewer；主题参数由宿主算好传 src */
+          /* BLOCK-334 P2 — HtmlViewer；主题参数由宿主算好传 src。
+             静态 html 与交互式 html（three.js/WebGL 3D，如 3d-demo.html/pelican.html）共用此 viewer：
+             空 sandbox="" 禁掉全部脚本 → 3D 黑屏 + 转圈，故放行 allow-scripts。
+             刻意不加 allow-same-origin：保持 opaque origin，iframe 内脚本碰不到主应用 DOM/凭据，
+             也拿不到同源 fetch/XHR 能力（本地主权 · 隔离边界）。 */
           <HtmlViewer
             src={withReportTheme(previewUrl, resolvedTheme)}
             title={file.name}
             className={styles.workspaceHtmlIframe}
-            sandbox=""
+            sandbox="allow-scripts"
           />
         )}
         {status === 'ready' && isSpreadsheet && (
