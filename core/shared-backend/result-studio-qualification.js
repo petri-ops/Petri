@@ -14,6 +14,8 @@ const REQUIRED_TASKS = Object.freeze([
   'historical_alternative_compare',
 ]);
 
+// 历史完整枚举（含退役项）——保留以防历史证据的 environmentTags 绑定漂移。
+// 退役项不得从本数组删除；新资格判定改用 ACTIVE_ENVIRONMENTS。
 const REQUIRED_ENVIRONMENTS = Object.freeze([
   'managed_non_git',
   'existing_clean_git',
@@ -29,6 +31,13 @@ const REQUIRED_ENVIRONMENTS = Object.freeze([
   'imported_user_data',
   'provider_and_execution_failure',
 ]);
+// G1 P7 对齐 UI-462（2026-10-03 owner 裁决、10-30 verified）：
+// 「接入用户自有 Git 仓库」能力已整体退役，existing_clean_git / existing_dirty_git
+// 不再是可获取的新资格环境。标退役而非删除（历史证据仍可引用），新判定按 ACTIVE 集。
+const RETIRED_ENVIRONMENTS = Object.freeze(['existing_clean_git', 'existing_dirty_git']);
+const ACTIVE_ENVIRONMENTS = Object.freeze(
+  REQUIRED_ENVIRONMENTS.filter((id) => !RETIRED_ENVIRONMENTS.includes(id)),
+);
 
 const REQUIRED_TRACE_STEPS = Object.freeze([
   'conversation',
@@ -300,7 +309,8 @@ function evaluateResultStudioQualification(report = {}, { evidenceRoot = null, m
   }
   const providerClasses = new Set(independentEvidence.providerClasses || []);
   const environments = new Set(independentEvidence.environmentTags || []);
-  const missingEnvironments = REQUIRED_ENVIRONMENTS.filter((id) => !environments.has(id));
+  // 新资格判定只要求 ACTIVE 集；退役项（UI-462）不作为新证据缺口。
+  const missingEnvironments = ACTIVE_ENVIRONMENTS.filter((id) => !environments.has(id));
   const checks = {
     schema: report.schemaVersion === RESULT_STUDIO_QUALIFICATION_VERSION,
     allTracesValid: traces.length > 0 && validTraces.length === traces.length,
@@ -347,6 +357,8 @@ module.exports = {
   RESULT_STUDIO_PRODUCT_TRACE_VERSION,
   REQUIRED_TASKS,
   REQUIRED_ENVIRONMENTS,
+  RETIRED_ENVIRONMENTS,
+  ACTIVE_ENVIRONMENTS,
   REQUIRED_TRACE_STEPS,
   REQUIRED_INVARIANTS,
   QUALIFYING_EVIDENCE_KINDS,

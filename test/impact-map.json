@@ -10191,6 +10191,18 @@
       "tests": [
         "test/g1-rs-w3-historical-alternative.test.mjs"
       ]
+    },
+    {
+      "id": "g1-rs-p7-ui462-alignment",
+      "note": "P7 资格契约与 UI-462 对齐（owner 裁决 msg_5bc541c8c0eb）：RETIRED/ACTIVE 环境集、历史枚举不删、新判定不要求退役项、qualificationEligible 零翻转。",
+      "patterns": [
+        "core/shared-backend/result-studio-qualification.js",
+        "core/shared-backend/result-studio-evidence-bundle.js",
+        "acceptance/g1-rs-requalification/**"
+      ],
+      "tests": [
+        "test/g1-rs-p7-ui462-alignment.test.mjs"
+      ]
     }
   ]
 }

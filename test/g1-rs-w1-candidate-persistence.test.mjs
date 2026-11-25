@@ -60,7 +60,6 @@ test('W1 子步2 HK-01：可证明 enrichment 产物经 ensureChainRevisions 真
       repository,
       getToolJob: () => sourceJob,
       listProjectToolJobs: () => [],
-      adapter: { /* 注入 adapter 避开 git binding：下面用真实 binding 兜底更稳 */ } || undefined,
     });
     // 假 repository 未具备完整 Truth 写 API（startChangeSetWithCheckpoint 等）→
     // 必须 fail-closed 诚实报 repository_unavailable，绝不伪造 registered/落库成功。

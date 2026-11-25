@@ -444,6 +444,10 @@ function verifyQualificationEvidence(root, report, manifest) {
     else if (typeof provider.providerClass === 'string') providerClasses.add(provider.providerClass);
     const repository = verdict.roles.get('environment.repository')?.payload || {};
     if (repository.mode === 'managed' && repository.initialState === 'non_git') environmentTags.add('managed_non_git');
+    // UI-462（2026-10-03 owner 裁决、10-30 verified）退役「接入用户自有 Git 仓库」
+    // 能力：existing_* 环境不再是可获取的新资格环境。以下分支仅为**历史证据读取**保留
+    // （退役前 legacy 证据的 environmentTags 仍可解析、不冒充现行产品）；新证据不得
+    // 依赖这些标签——新资格判定走 result-studio-qualification 的 ACTIVE_ENVIRONMENTS。
     if (repository.mode === 'existing' && repository.initialState === 'clean' && repository.consentObserved === true) {
       environmentTags.add('existing_clean_git');
     }
