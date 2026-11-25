@@ -4,7 +4,7 @@
 
 ## §1 现状
 
-- `docs/scientific-intelligence-os-vision.md` 文件名、`# Petri Scientific Intelligence OS — 核心愿景与阶段成长宪章` 标题、头部 `长期北极星：Local-first Scientific Intelligence OS` 仍是科研 OS 口径。
+- （裁决前现状）`docs/scientific-intelligence-os-vision.md` 文件名、`# Petri Scientific Intelligence OS — 核心愿景与阶段成长宪章` 标题、头部 `长期北极星：Local-first Scientific Intelligence OS` 为科研 OS 口径；文件名不改，标题/北极星按本裁决于第三步改写（见文末裁决留痕）。
 - 第二步已把 §10 的 G1–G6 重写为「通用 agent 内核 + 领域包」阶梯（G0 与北极星按令不动）。
 - 产品人设一句话（BLOCK-339）「格物是跑在你机器上的通用 agent——本地主权、全链可审计、证据自证；以目标为输入、工具为手足、真实产物为交付；领域能力由已安装领域包按需放大，不是与生俱来的身份」已是通用 agent 口径——**不动**（动它需主人裁决，本次不在范围）。
 
@@ -21,3 +21,10 @@
 ## §4 请主人只回
 
 **「行」（按建议不改，本项收口）** 或 **「不行，改」（触发另立裁决项，本包不动）**。
+
+---
+
+## 裁决留痕（2026-11-25 · e358）
+
+- 问题：「愿景的标题、北极星句和 G0 名称要不要对齐成通用 agent 口径？」→ **主人所选答案原话：「改」**（选项说明：对齐人设一句话，文件名不动；科研 OS 表述留给 bio 包）。
+- 执行：标题→「Petri 通用 Agent — 核心愿景与阶段成长宪章」；北极星→人设一句话口径；G0 名→`Living Agent Foundation`；旧值逐字留痕于 `LEGACY-G1-G6-VISION.md` §旧命名留痕；`petri-pack-bio` 零触碰。

@@ -1,12 +1,12 @@
-# Petri Scientific Intelligence OS — 核心愿景与阶段成长宪章
+# Petri 通用 Agent — 核心愿景与阶段成长宪章
 
-最后更新：2026-11-25（item 39：§10 G1–G6 按通用 agent 内核 + 领域包重写；G0 与北极星不动、旧阶梯留痕见 acceptance/item39-phase-alignment/LEGACY-G1-G6-VISION.md）
+最后更新：2026-11-25（item 39 第三步：标题/北极星/G0 名对齐通用 agent 口径——按主人裁决「改」；旧标题/北极星/G0 名留痕见 acceptance/item39-phase-alignment/LEGACY-G1-G6-VISION.md，科研 OS 路线归 petri-pack-bio 自己的规划；文件名不变）
 
 文档性质：`long-term core direction`
 
 当前产品阶段：`G0 永久 maintained / G1 进行中（六序按令推进）`
 
-长期北极星：`Local-first Scientific Intelligence OS`
+长期北极星：本地主权、全链可审计、证据自证的通用 agent；领域能力由已安装领域包按需放大（对齐 BLOCK-339 人设一句话，原文一字不动）
 
 ## 1. 文档作用
 
@@ -403,14 +403,16 @@ G4  Federated & Extensible Agent
 G3  Trusted Local Autonomy
 G2  Agent × Domain Pack Composition
 G1  General Agent Core Qualification
-G0  Living Scientific Foundation
+G0  Living Agent Foundation
 ```
+
+原「Scientific Intelligence OS」科研路线表述归 `petri-pack-bio` 自己的规划（本文件只保留通用 agent 内核方向，不碰兄弟仓）。
 
 上层能力以真实出口推进，不以日期和宣传目标推进。进入任何上层后，G0 仍然持续运行、验证、维护和进化；G0 回归始终具有最高发布阻断优先级。
 
-### G0：Living Scientific Foundation
+### G0：Living Agent Foundation
 
-状态：`establishing`；首个基线通过后转为 `qualified + maintained`，永不归档。
+状态：`qualified + maintained`（2026-11-25 口径对齐：与 `g0-living-foundation-plan.md` 头部一致，G0 永久 maintained、永不归档）。
 
 G0 是 Petri 永久存在的可信基础层，同时承担：
 
@@ -497,12 +499,14 @@ G0 首个基线的资格出口：
 - 让通用 agent 内核成为唯一执行主线，领域包（bio / 3D / 其他垂直包）按需安装、可审计放大。
 - 领域能力声明与内核契约解耦：领域包只提供工具 / 数据契约 / 验证器 / Task Pack，不复制内核的执行、记忆或治理。
 - 内核对任意领域包使用同一套 Job / Artifact / ChangeSet / Revision / 证据链。
+- **证据自证（内核能力）**：建立 Evidence Graph v1——把 Question / Claim / Evidence / Limitation 变成内核可引用对象，图表与结论引用同一证据链（人设一句话「证据自证」的内核落点，不归领域包）。
 
 阶段出口：
 
 - 至少一个领域包以纯插件形态完成端到端任务，内核零领域特化分支。
 - 领域包升级 / 卸载不影响内核历史证据与回放。
 - 领域能力是放大器不是身份——内核五维成熟度不因某个领域包而定义。
+- Evidence Graph v1 在至少三个真实任务里被图表 / 报告 / 结论反向引用，不产生第二套科学或执行状态。
 
 进入条件：
 
@@ -511,12 +515,13 @@ G0 首个基线的资格出口：
 
 ### G3：Trusted Local Autonomy
 
-状态：`LATER`
+状态：`LATER`（**稳定性 / 可观测性本身不在此层，属 G1 期并行轨**——见下方说明）
+
+> **G1 期并行轨（主人 2026-11-25 item39 第三步裁决）**：「能完成任务但体感不稳」的可观测、可告警、可恢复（BLOCK-520 harness 可观测性、harness 隐形问题队列、外部监督器 U 类）**今天正在还**，是 G1 期间与 RS 重资格并行的内核可靠性轨道，不排到 `LATER`。G3 保留的是在此之上的**自治**：多 Agent 协作与控制面扩张（需另裁），两者不混为一谈。
 
 目标：
 
-- 在 local-first 前提下提升长任务自治：多 Agent 协作、外部监督、异常升级与可恢复中断。
-- 把「能完成任务但体感不稳」的结构性缺位（进程死 / 会话断 / 停滞）变为可观测、可告警、可恢复的事件面。
+- 在 local-first 前提下提升长任务自治：多 Agent 协作、控制面扩张、异常升级（在 G1 并行轨已铺好的可观测事件面之上）。
 - 治理透明继续是能力：动态审批、用户规则、ack 审计随自治能力提升同步加强。
 
 阶段出口：
@@ -598,7 +603,7 @@ G0 首个基线的资格出口：
 | 旧口径 | 旧位置 | 新阶梯归属 | 说明 |
 |---|---|---|---|
 | 愿景 G1 Agent-native Scientific Analysis Platform | 旧 §10 | **G1** 内核资格 + **G2** 领域包组合 | 内核资格归 G1；「3 个科学任务包」归 G2 领域包（科研归 bio 包） |
-| 愿景 G2 Evidence-centered Research Workbench | 旧 §10 | **G2** + **G3** | 证据 / Claim 对象属内核能力（G2 承载），多项目审阅协作归 G3 |
+| 愿景 G2 Evidence-centered Research Workbench | 旧 §10 | **G2**（Evidence Graph v1 已补入 G2 目标与出口）+ **G3**（多项目审阅协作） | 证据 / Claim 对象属内核能力（人设一句话「证据自证」），不归 bio 包；G2 正文已落点 |
 | 愿景 G3 Lab Scientific OS | 旧 §10 | **G3** 本地自治 + **G4** 联邦 | 成员/角色/交接属 G3，跨机构共享资源归 G4 |
 | 愿景 G4 Federated Scientific Intelligence | 旧 §10 | **G4** | 执行位置选择直接对应 |
 | 愿景 G5 Scientific Capability Ecosystem | 旧 §10 | **G5** | 能力包生态直接对应（去科研专属化） |
@@ -606,7 +611,7 @@ G0 首个基线的资格出口：
 | 成熟度蓝图 §6 出籍：真实 Provider 矩阵实机验证 | maturity-blueprint §6 | **G1** 序列4 W4 | 外部真值项，挂账不催 |
 | 成熟度蓝图 §6 出籍：插件签名公证 / packaged 分发验证 | maturity-blueprint §6 | **G1** 序列5/6 + **G5** | 发布就绪前置归 G1，生态分发治理归 G5 |
 | 成熟度蓝图 §6 出籍：远程市场生态 | maturity-blueprint §6 | **G5** | 生态与分发 |
-| 成熟度蓝图 §7.1 出籍：确认 UI 弹卡 / KNW-3 chip 注入 v2 / ORC-4 编排 DAG 化 | maturity-blueprint §7.1 | **G3** 本地自治 | 控制面 / 知识注入 / 编排统一归自治层 |
+| 成熟度蓝图 §7.1 出籍：确认 UI 弹卡 / KNW-3 chip 注入 v2 / ORC-4 编排 DAG 化 | maturity-blueprint §7.1 | **G1 期并行轨**（内核五维纵深，与 G2 领域包组合并行） | 不排在领域包组合之后——控制面 / 知识注入 / 编排统一属内核可靠性纵深，与 RS 重资格同轨推进 |
 | EXECUTION-PLAN 序列 1 功能面 / 2 裁决表 / 3 SUS 投放 | 执行规划 | **G1** | 六序前三项 |
 | EXECUTION-PLAN 序列 4 RS 重资格（W1–W3 本机 / W4–W5 外部） | 执行规划 | **G1** | 本机已落，外部挂账 |
 | EXECUTION-PLAN 序列 5 签名公证 / 6 发布流水 | 执行规划 | **G1**（前置）+ **G5**（生态） | 外部采购与发布就绪 |
@@ -625,7 +630,7 @@ G0 首个基线的资格出口：
 | `LATER` | 中期方向 | 记录需求和进入条件 |
 | `RESEARCH` | 长期探索 | 只做研究，不成为当前产品承诺 |
 
-当前阶梯归属（2026-11-25 口径）：`NOW`=G1 内核资格（六序按令推进）；`NEXT`=G2 内核×领域包组合；`LATER`=G3 本地自治；`RESEARCH`=G4 联邦扩展 / G5 生态分发；`north-star`=G6 持续自进化。归属随真实证据推进调整，不因名称改变。
+当前阶梯归属（2026-11-25 口径）：`NOW`=G1 内核资格（六序按令推进）+ **G1 期并行轨**（稳定性 / 可观测 / 五维残余纵深，不排到 `LATER` 也不排在领域包之后）；`NEXT`=G2 内核×领域包组合（含 Evidence Graph v1 内核落点）；`LATER`=G3 本地自治（多 Agent / 控制面扩张）；`RESEARCH`=G4 联邦扩展 / G5 生态分发；`north-star`=G6 持续自进化。归属随真实证据推进调整，不因名称改变。
 
 ### 11.2 进入下一能力层必须同时满足
 

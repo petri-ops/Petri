@@ -108,3 +108,16 @@
 
 这仍然是需要科学家主导和审阅的研究系统，不是替代科学责任主体的自动研究机器。
 
+
+---
+
+## 旧命名留痕（item 39 第三步 · 2026-11-25 · 主人裁决「改」）
+
+按留痕纪律逐字保留（文件名 `scientific-intelligence-os-vision.md` 不变，有 600+ 路径引用）：
+
+- 旧标题：`# Petri Scientific Intelligence OS — 核心愿景与阶段成长宪章`
+- 旧北极星：`长期北极星：Local-first Scientific Intelligence OS`
+- 旧 G0 名称：`G0  Living Scientific Foundation` / `### G0：Living Scientific Foundation`
+- 旧 G0 状态行：`状态：establishing；首个基线通过后转为 qualified + maintained，永不归档。`
+
+新口径对齐 BLOCK-339 人设一句话（原文一字不动）；科研 OS 路线归 `petri-pack-bio` 自己的规划，不碰兄弟仓。G0 段本次仅名称与状态行对齐，定义/不变量/禁止项不动；G0 正文其余「科学」字样（科学宪法、科学准确性）涉及含义取舍，按令不改、列清单随回报。

@@ -19,8 +19,8 @@
 | **W1（本包首个可开工）** | selection→enrichment **derived-result candidate cohort**：enrichment 真跑后登记为**非 current 候选**（candidate），提供 compare → adopt/revert → replay 产品链（单一 ChangeSet/Revision Truth，不新增第二套 enrichment 工具、不放宽 cohort 安全门） | **产品语义 refactor** | ✅ HK-01 纯函数/状态机 + fixture 集成 + dev Electron 边界内 trace | 无（不跑真实 Provider） |
 | W2 | affected-subgraph lifecycle 同构为真实契约（**heatmap 按 owner 裁决「跟包走」已从内核 G1 移除**——证据归 bio 领域包 `petri-pack-bio` 激活验收，非内核 G1 要求） | 产品语义 refactor | ✅（affected-subgraph） | 无（heatmap 归 bio 包计划，不在本包） |
 | W3 | Git consent UI（五条独立 task trace）+ historical alternative 产品契约 | 前端 + trace | ✅ 前端可测 | 真实 Git 仓库样本（本机可造） |
-| W4 | 双 Provider 矩阵真实 tool calling（≥1 OpenAI-compatible） | 资格证据 | 部分 | **真实 Provider Key/模型（外部）** |
-| W5 | packaged macOS arm64 六格 + literal OS reboot + 发布流水 | 资格证据 | 否 | **签名/公证/证书/真机（外部）** |
+| W4 | 双 Provider 矩阵真实 tool calling（≥1 OpenAI-compatible） | 资格证据 | 部分 | **真实 Provider Key/模型（外部，先挂账）**——主人日常使用的真实模型仅供参考，不构成双 Provider 矩阵资格证据（2026-11-25 裁决「先挂账」） |
+| W5 | packaged macOS arm64 六格 + literal OS reboot + 发布流水 | 资格证据 | 否 | **真机与 OS 重启窗口（外部）**——签名/公证非硬门（主人 2026-11-25 裁决），证书到位即做、不到位不阻塞；未签名路径先走通，签名相关格如实标等证书 |
 | 纪律 | 历史 RS9/P4R/P6 证据继续作 G0 开发态证据，**不冒充 G1 资格证据** | 纪律 | ✅ | 无 |
 
 - **heatmap 归属裁决（owner 原话「b heatmap 跟包走」）**：heatmap 子项**从 G1 内核资格矩阵移除**，不再写「等兄弟仓激活另立子包」（那把决定权留在错误的地方）。新归属=**heatmap 证据归 bio 领域包 `petri-pack-bio` 自己激活时的验收**，非内核 G1 要求；依据=领域包架构原则（领域能力是放大器不是身份）+ 历史 P4R-5 已 4/4 验过该链（不冒充资格、不阻塞内核 G1）。本包**不激活兄弟仓、不动 petri-pack-bio**，那边何时做 heatmap 验收归包自己的计划。

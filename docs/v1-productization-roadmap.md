@@ -190,7 +190,7 @@ UI 不得制造第二套状态真相，模型层不得绕过确认/审计边界�
 
 ## 6. Stage 4：首个稳定产品版本
 
-状态：✅ macOS arm64 RC 工程出口完成；`rc.7` 已完成公开分发链路，但仍属于工程候选版，不等于正式产品上线。签名/公证不作为本项目必需条件；x64 分析 Runtime 是否建设另行决策。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
+状态：✅ macOS arm64 RC 工程出口完成；`rc.7` 已完成公开分发链路，但仍属于工程候选版，不等于正式产品上线。签名/公证不作为本项目必需条件（主人 2026-11-25 item39 第三步裁决：签名/公证不是 G1 硬门，证书到位即做、不到位不阻塞 G1）；x64 分析 Runtime 是否建设另行决策。执行台账见 [`stage4-stable-release-checklist.md`](./stage4-stable-release-checklist.md)。
 
 主模块：`P-06 桌面集成与交付`；覆盖全部质量关注点。
 

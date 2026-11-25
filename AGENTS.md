@@ -14,7 +14,7 @@ Petri Desktop（格物，原名 Petri）= Electron 桌面应用 + Vite SPA 前�
 1. **G0 是永久 `maintained` 的 Living Foundation**——可信基础层长期维护、回归最高阻断优先，不因进入上层而归档或冻结演进。
 2. **G1 进行中**——主人 2026-11-24 显式裁决「进 G1」（六序推荐项），当前按 `acceptance/g1-execution-plan-2026-11-24/EXECUTION-PLAN.md` 逐项发令；G1 之后按「通用 agent 内核 + 领域包」方向重写（主人 2026-11-25 裁决，科研路线归 `petri-pack-bio` 自己的规划）。
 
-**六序现状（2026-11-25 现读）**：①功能面收口 ✅（持续维护）②裁决表批量拍板 ✅（agent 唤醒 B 已落地、C-43 已清偿）③SUS 真人样本投放**待主人定渠道**④RS 重资格 W1–W3 本机范围已落 main（三契约 + P7 UI-462 对齐 + heatmap 归 bio 包），W4 双 Provider / W5 packaged 六格 + literal OS reboot **挂账待外部真值**⑤Win 签名证书 / macOS 公证**等外部采购**⑥打包六格 + 真机重启 + 发布流水**未启动**。
+**六序现状（2026-11-25 现读）**：①功能面收口 ✅（持续维护）②裁决表批量拍板 ✅（agent 唤醒 B 已落地、C-43 已清偿）③SUS 真人样本投放**待主人定渠道**④RS 重资格 W1–W3 本机范围已落 main（三契约 + P7 UI-462 对齐 + heatmap 归 bio 包），W4 双 Provider / W5 packaged 六格 + literal OS reboot **挂账待外部真值**⑤Win 签名证书 / macOS 公证**等外部采购（可选项：证书到位即做，不阻塞 G1——主人 11-25 item39 裁决「不是硬门」）**⑥打包六格 + 真机重启 + 发布流水**未启动**。
 
 **不许松的事实（照留）**：`qualificationEligible:false` 仍是 G0 常态事实、不因进 G1 自动翻转；诚实红不伪造不补拍（G0 视觉 distinctStates 5PNG/4唯一已裁接受，证据 `acceptance/g0-distinct-states-ruling/`）；观感零代签；`v0.0.1-rc.7` 不是 GA；RS 维持 `implemented_unverified / experimental`；历史证据（RS9/P4R/P6 等）不冒充 G1 资格证据。
 
@@ -31,7 +31,7 @@ Petri Desktop（格物，原名 Petri）= Electron 桌面应用 + Vite SPA 前�
 **Agent 纪律（新边界）**：
 
 1. 六序内的**本地文档与证据工作**按序推进（含 RS 本机契约、P7 契约对齐、阶段口径对齐），不需重复申请「是否进 G1」口令——主人 11-24 口令已覆盖方向。
-2. **对外动作**（真人样本投放、发布、远程分发）和**外部采购**（代码签名证书、公证）仍逐项等主人发令；不催外部、不擅自启动 W4/W5 的外部真值子项。
+2. **对外动作**（真人样本投放、发布、远程分发）和**外部采购**（代码签名证书、公证）仍逐项等主人发令；不催外部、不擅自启动 W4/W5 的外部真值子项。**签名/公证是 G1 可选项、非硬门**（证书到位即做、不到位不阻塞），但证书到位前不翻 `supported` 字段、不伪造签名证据、未签名限制写进发布说明。
 3. **不得**把 `qualificationEligible` / Provider / GA 写成"待办缺口"——G0 常态事实不外推为待办；进 G1 后按 EXECUTION-PLAN 逐包发令，不由 Agent 自行加速。
 4. **不得**把"`dev Electron / packaged Electron 三轴对齐`"描述为"待完成"——G0 已收口的开发态 + packaged 实机核对是当前合理证据等级，`qualificationEligible` 升 `true` 按 G1 资格链取证。
 5. 收口笔录用语：统一写 **"G0 永久 maintained · G1 进行中（六序按令推进）"**；**不**写旧句"G0 开发期常态 · 不外推 packaged/Provider/GA"，**不**列举未做项。
