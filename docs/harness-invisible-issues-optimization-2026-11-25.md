@@ -22,7 +22,7 @@ phase: G0
 | # | 问题 | 口径 | 现读真值（2026-11-25） | 判定 |
 |---|---|---|---|---|
 | A1 | 静默吞错 | 用户点了没反应、无提示无留痕 | core+src 全量 **493 处**空 catch；`error-log.js`2、`config-schema.js`11、`capability-provisioning.js`7、`judge-core.js`7 等 | **仍在·真问题** |
-| A2 | 架构债「能用但难改」 | 改动成本/风险持续抬高 | 架构审计 5.3/10；`console` 319:59 → **1104:51**（在放大）；`agent-runner.js` 聚宝盆、大文件 1366 行 | **仍在·且在恶化** |
+| A2 | 架构债「能用但难改」 | 改动成本/风险持续抬高 | 架构审计 5.3/10；`console` 319:59 → **288**（自有代码 ratchet 口径 core/+src/，A2 两波治理后：wave1 48 处 console→logger 收敛、wave2 拆 5 纯函数）；`agent-runner.js` 聚宝盆 1366→**1038** 行（−129，facade 兼容） | **两波已治理**（queue7 Done；残余见 A2 后续债） |
 | A3 | 自进化 lesson 投毒 | agent 被自己的失败反馈带坏 | 红线是**路径白名单**（`harness-redline.js`），挡源码不挡语义注入；`.petri/LEARNINGS.md` 在白名单且注入 prompt；EVO 的 reopen 只有「事后停环审计」 | **仍在·无事前机械门** |
 | A4 | 终止判定只观测不改写 | 「做完了」由 agent 自说自话 | P2 `goal-verifier` 已接线但只发 verdict 事件、`decisionVerifier=null` 未动（裁决2待 owner） | **仍在·待裁决** |
 | A5 | 外部监督器缺位 | 进程死/会话断无人接管 | `U-EXTERNAL-SUPERVISOR.md` status=pending_user_ruling，推荐 C 先行（只告警不动作） | **待 owner 拍板** |
@@ -84,7 +84,7 @@ phase: G0
 - [x] 队列 4 — A5 外部监督器 C 先行 ✅ Done（item 32；提交 450483bc3 落独立分支 petri-ops/codex-harness-invisible-a5，未 push；HK-01 10/10、红线扫描零命中、隔离栈 3911 实机双路径验证；只观测不动作、零外发；U 材料 status 保持 pending_user_ruling 未擅翻）
 - [x] 队列 5 — A3 机械门方案 ✅ Done（item 33；仅方案零代码改动，落 A3-LESSON-GUARD-DESIGN.md；真注入入口 agent-runner.js:321-323→system-prompt.js:540-542；推荐候选②注入边界 frequency_rebound 冻结）
 - [ ] 队列 5.5 — A3 D1 落地（注入边界 frequency_rebound 冻结）——待发令
-- [ ] 队列 7 — A2 架构债专项（与 D1 同改 agent-runner.js，串行在其后）
+- [x] 队列 7 — A2 架构债专项 ✅ Done（两波已落地 origin/main：wave1 console→logger 7 文件 48 处 ratchet 335→287；wave2 agent-runner 1038 行 5 纯函数迁 helper+facade；HK-01 现基实测绿；后续债 automation-store 注入消 arch 环待发令）
 - [x] 队列 6 — A4 decisionVerifier 裁决 ✅ 留档（按 §4 裁决维持 `null` 不改；goal-verifier 继续只发 verdict 事件观测；改终止语义属行为面大改，G0 无新证据不动。无 worker，无代码改动）
 
 #### 队列 6 A4 裁决留档 · BLOCK-520 P2 观测钩子对齐补记（2026-11-25）
@@ -95,6 +95,6 @@ phase: G0
   - `agent-runner.js` 的 `decisionVerifier = null` 不变（P2 HK-01 机械守护断言在场）；`spawn-agent-tools.js` 仅在有 goals/todoRefs 时构造钩子，无目标=null 零变化。默认全程未传 → 零行为变化。
   - 因此 A4「维持 null」与 P2「goal-verifier 仅观测」**同一边界**：终止判定不被 verdict 改写，只在事件面多一路可审计观测。后续若要让 verdict 进入 decision，属新行为裁决（推翻本裁决），须 owner 亲裁，不在本轮范围。
 - **范围**：纯文档留档，零产品代码改动；与 D1 worker（独立 worktree `codex-a3-d1-lesson`，改 agent-runner/lesson-frequency 面）文件面零冲突，本轮不触碰其文件。G0 开发期常态 · 不外推 packaged/Provider/GA。
-- [ ] 队列 7 — A2 架构债专项（待资源）
+- [x] 队列 7 — A2 架构债专项（已完成两波：console 治理 + agent-runner 聚宝盆拆解，见执行进度）
 
 status: active-queued — 4 项裁决已按「主人裁决：按建议来」落定，按 §3 序逐项发令开工；单工作包串行。
