@@ -10162,6 +10162,21 @@
         "test/g1-rs-w1-candidate-cohort.test.mjs",
         "test/g1-rs-w1-candidate-persistence.test.mjs"
       ]
+    },
+    {
+      "id": "g1-rs-w2-affected-subgraph",
+      "note": "G1 首包 W2 affected-subgraph lifecycle 产品契约核验（owner 裁决 msg_77f1c1fe2cbe）：既有设施齐备只补 HK-01，heatmap 挂账兄弟仓。",
+      "patterns": [
+        "core/shared-backend/result-edit-intent.js",
+        "core/shared-backend/result-edit-controls.js",
+        "core/shared-backend/result-replay-service.js",
+        "core/shared-backend/result-changeset-service.js",
+        "frontend/src/components/result-studio/ResultStudioChangeSetPanel.tsx",
+        "acceptance/g1-rs-requalification/**"
+      ],
+      "tests": [
+        "test/g1-rs-w2-affected-subgraph.test.mjs"
+      ]
     }
   ]
 }
