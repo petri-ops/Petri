@@ -1,0 +1,31 @@
+{
+  "startedAt": "2026-11-25T09:51:40.947Z",
+  "artifacts": {
+    "dist/Petri-0.0.4-arm64.dmg": {
+      "bytes": 246011573,
+      "sha256": "36180e489d3724411d23b9e8a582bd4f84fc444c516db32cf63f02784d8dc329"
+    },
+    "dist/Petri-0.0.4.dmg": {
+      "bytes": 251277658,
+      "sha256": "93756cb7f57bc795564eddb9b0e5c9d9b49ca64cab2fe8aade0a8ce5b4fa2b24"
+    }
+  },
+  "checks": {
+    "serverPresent": true,
+    "packagedAddon": {
+      "ok": true,
+      "detail": "OK 149 function"
+    },
+    "migration": "MIGRATED 24 files, tables=33",
+    "health": {
+      "status": 200,
+      "text": "{\"status\":\"ok\",\"service\":\"petri-r\",\"timestamp\":\"2026-11-25T09:51:41.838Z\",\"readiness\":true,\"liveness\":true,\"details\":{\"db_ok\":true},\"supervisorSnapshot\":{\"observations\":0,\"byReason\":{},\"lastReasonCode\":null,\"lastFingerprint\":null},\"version\":\"1.0.0\",\"db_ok\":true,\"instanceId\":\"9899bf1f-6dbe-4d69-b7e7-a8d668fedf48\",\"pid\":83313,\"dataDir\":\"/var/folders/21/qbc03mcn1zd2kgnj7vkqgsnh0000gn/T/petri-g1-smoke"
+    },
+    "spa": {
+      "status": 404,
+      "text": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>Cannot GET /</pre>\n</body>\n</html>\n"
+    },
+    "serverLogTail": "] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN next_retry_at TEXT (duplicate column name: next_retry_at)\n⚠️ [2026-11-25T09:51:41.467Z] [agent-task-store] schema step skipped: ALTER TABLE tasks ADD COLUMN max_retries INTEGER DEFAULT 0 (duplicate column name: max_retries)\n✅ [2026-11-25T09:51:41.727Z] 🧬 Petri R Server running on port 3105\n✅ [2026-11-25T09:51:41.727Z]    POST http://localhost:3105/api/run\n✅ [2026-11-25T09:51:41.727Z]    GET  http://localhost:3105/api/health\n"
+  },
+  "finishedAt": "2026-11-25T09:51:41.846Z"
+}

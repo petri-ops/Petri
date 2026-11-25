@@ -10248,6 +10248,38 @@
       "tests": [
         "test/block520-a-supervisor-l2.test.mjs"
       ]
+    },
+    {
+      "id": "harness-integration-scripts",
+      "note": "harness 集成新增 script（console-ratchet/quality-frontend-deps-gate）+ 7 个集成测试分类登记——补集成线遗漏，让 test:changed 门可跑；非产品改动。",
+      "patterns": [
+        "scripts/console-ratchet.mjs",
+        "scripts/quality-frontend-deps-gate.mjs",
+        "scripts/g1-release-smoke.mjs"
+      ],
+      "tests": [
+        "test/test-affected.test.mjs",
+        "test/a2-console-wave1.test.mjs",
+        "test/agent-runner-a2-wave2.test.mjs",
+        "test/b1-inline-var-quoting.test.mjs",
+        "test/b1-inline-var-syntax.test.mjs",
+        "test/harness-a5-external-supervisor.test.mjs",
+        "test/harness-b1-zindex-contract.test.mjs",
+        "test/harness-b4b5-contract.test.mjs"
+      ],
+      "classifiesScripts": true
+    },
+    {
+      "id": "item39-item40-evidence-dirs",
+      "note": "item39 文档证据 + item40 语音实机证据目录；test-affected 枚举 acceptance/<dir>/evidence.json 要求恰被一规则覆盖。",
+      "patterns": [
+        "acceptance/item39-phase-alignment/**",
+        "acceptance/settings-speech-section/**",
+        "acceptance/g1-release-pipeline/**"
+      ],
+      "tests": [
+        "test/block201-settings-baseline.test.mjs"
+      ]
     }
   ]
 }
