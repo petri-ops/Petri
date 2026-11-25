@@ -10147,6 +10147,21 @@
       "tests": [
         "test/block519-stage2-whisper.test.mjs"
       ]
+    },
+    {
+      "id": "g1-rs-w1-candidate-cohort",
+      "note": "G1 首包 W1 selection→enrichment candidate cohort（owner 裁决 msg_ac7093fe2a26）：语义契约+落库链验证+adopt 门零放宽。",
+      "patterns": [
+        "core/shared-backend/result-enrichment-cohort.js",
+        "core/petri-server/agent-tools/result-selection-tools.js",
+        "core/shared-backend/result-changeset-service/chain-preview.js",
+        "core/shared-backend/result-studio-repository.js",
+        "acceptance/g1-rs-requalification/**"
+      ],
+      "tests": [
+        "test/g1-rs-w1-candidate-cohort.test.mjs",
+        "test/g1-rs-w1-candidate-persistence.test.mjs"
+      ]
     }
   ]
 }
