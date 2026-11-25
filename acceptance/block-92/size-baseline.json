@@ -293,9 +293,9 @@
       "path": "core/packages/shared-config/config-schema.js",
       "wave": "L0",
       "module": "auto-discovered",
-      "lines": 1156,
-      "bytes": 60694,
-      "sha256": "455151796f02d5ceec6cedf1ba4c9b1db4552268b0fee3d3095c3012be149574"
+      "lines": 1168,
+      "bytes": 61334,
+      "sha256": "d853c8a4e7ae74331fd91125b5a3bb65abab28851c85332fbfa1dd37ed45ff87"
     },
     {
       "path": "core/petri-server/agent-runner.js",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86695,
+  "total": 86707,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",
@@ -607,6 +607,19 @@
       "to": {
         "lines": 5494,
         "bytes": 133453
+      }
+    },
+    {
+      "path": "core/packages/shared-config/config-schema.js",
+      "reason": "BLOCK-519 speech.provider_chain/local_model additive schema 条目：provider 链与本地模型配置的唯一写入守卫",
+      "date": "2026-11-25",
+      "from": {
+        "lines": 1156,
+        "bytes": 60694
+      },
+      "to": {
+        "lines": 1168,
+        "bytes": 61334
       }
     }
   ]

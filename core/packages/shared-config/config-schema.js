@@ -413,10 +413,22 @@ const CONFIG_KEYS = Object.freeze([
     mutable: true, ui: 'none',
   },
   {
-    // 语音渠道：deepseek（云 adapter，key 与对话共用）| none 未选。WS 流式留接口不实现。
+    // 语音渠道：local（本地 SenseVoice）| deepseek（云 adapter）| chain（按 provider_chain 回退）| none 未选。
+    // WS 流式留接口不实现。
     key: 'speech.provider', family: 'speech', path: 'provider',
-    type: 'string', domain: { pattern: '^(?:deepseek|none)?$' }, envKeys: [], aliases: [],
+    type: 'string', domain: { pattern: '^(?:deepseek|local|chain|none)?$' }, envKeys: [], aliases: [],
     mutable: true, ui: 'none',
+  },
+  {
+    // BLOCK-519 — 回退链顺序（容器只做浅层守卫，内容由 speech-config 白名单收窄）。
+    key: 'speech.provider_chain', family: 'speech', path: 'provider_chain',
+    type: 'array', domain: { maxItems: 4 }, envKeys: [], aliases: [],
+    mutable: true, ui: 'none',
+  },
+  {
+    // BLOCK-519 — 本地 ASR 模型配置意图（modelId/language）；已落盘状态另由模型目录真值决定。
+    key: 'speech.local_model', family: 'speech', path: 'local_model',
+    type: 'object', envKeys: [], aliases: [], mutable: true, ui: 'none',
   },
   {
     // TTS 声音（findings §2 官方白名单）：stella 女 | tide 男。

@@ -14,6 +14,7 @@
  *  GET  /api/speech-access → 语音（ASR/TTS）授权快照（BLOCK-454 P6；默认关）
  *  PUT  /api/speech-access → 写语音授权（**即时生效**；key 走凭据族不在本面）
  *
+ *  GET/POST/DELETE /api/speech/local-models[:/id/download] → BLOCK-519 本地 ASR 模型管理
  * 拒绝形状与 keymap/generation/config-transfer 同构：400 + 结构化 diagnostics。
  * 代理与 CA 只在进程启动时被 Node 读取，因此 PUT 只做持久化与「需重启」标记，不谎称已生效。
  */
@@ -27,6 +28,7 @@ const webSearch = require('../helpers/web-search-config');
 const ocrConfig = require('../helpers/ocr-config');
 // BLOCK-454（P6）— 语音（ASR/TTS）授权面（默认关；即时生效；key 走凭据族）
 const speechConfig = require('../helpers/speech-config');
+const localAsrModel = require('../helpers/local-asr-model');
 
 function sendRejection(res, error) {
   if (error && error.message === 'config_value_rejected') {
@@ -125,6 +127,37 @@ module.exports = function mountRuntimeConfig(app) {
       return res.json({ status: 'ok', speechAccess: snapshot });
     } catch (error) {
       return sendRejection(res, error);
+    }
+  });
+
+  // —— BLOCK-519 本地 ASR 模型管理（不挂 capability ledger；落盘真值） ——
+  app.get('/api/speech/local-models', (_req, res) => {
+    try {
+      return res.json({ status: 'ok', models: localAsrModel.listLocalAsrModels() });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.post('/api/speech/local-models/:id/download', async (req, res) => {
+    try {
+      const result = await localAsrModel.downloadLocalAsrModel(req.params.id);
+      if (!result.ok) {
+        return res.status(400).json({ status: 'error', error: result.code, message: result.message });
+      }
+      return res.json({ status: 'ok', ...result });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
+
+  app.delete('/api/speech/local-models/:id', (req, res) => {
+    try {
+      const result = localAsrModel.deleteLocalAsrModel(req.params.id);
+      if (!result.ok) return res.status(400).json({ status: 'error', error: result.code });
+      return res.json({ status: 'ok', ...result });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
     }
   });
 };

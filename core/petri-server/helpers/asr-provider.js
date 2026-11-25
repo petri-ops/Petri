@@ -1,26 +1,28 @@
 'use strict';
 
 /**
- * asr-provider.js — 语音转写窄口（BLOCK-454 P6）。
+ * asr-provider.js — 语音转写窄口（BLOCK-454 P6；BLOCK-519 provider 链扩展）。
  *
- * 契约（findings §2，VERIFIED）：POST https://api.deepseek.com/v1/tools/asr，
+ * 云渠道契约（findings §2，VERIFIED）：POST https://api.deepseek.com/v1/tools/asr，
  * multipart/form-data + Bearer；file 限 16bit PCM WAV 或 Ogg Opus；≤8MiB/120 秒；
- * 19 种语言自动识别；响应 {text, duration_ms}；50 并发。
+ * 响应 {text, duration_ms}；key 走凭据族（'deepseek' 与对话共用）。
  *
- * 诚实边界（与 ocr-provider 同款纪律）：
- *  · 默认关（config.enabled=false → asr_access_disabled；云调用=付费副作用 P5-a）。
- *  · key 走凭据族（getApiKeyFn 注入，'deepseek' 与对话共用），本层不存取凭据。
- *  · 格式守卫按魔数判定（RIFF/WAVE、OggS）——其他格式诚实拒并指路，不猜不转码。
- *  · 成本计量 cost.requests/bytes。WS 流式契约在 findings 在册但本期不接（留接口）。
+ * BLOCK-519 — provider_chain 顺序即回退链：local（SenseVoice/sherpa-onnx）→
+ * deepseek 云 → 诚实报错；成功回执带 provider 来源与 fallbacks 轨迹。
+ * 单 provider（legacy none|deepseek）行为逐字保留，旧调用方零行为变化。
+ *
+ * 诚实边界：
+ *  · 默认关（config.enabled=false → asr_access_disabled）。
+ *  · 格式/体积/超时守卫按魔数与字节判定；WS 流式契约在册但本期不接。
+ *  · 本地模型未落盘不冒充可用（local_asr_unavailable，链继续回退云）。
  */
-
 const ASR_ENDPOINT = 'https://api.deepseek.com/v1/tools/asr';
 const ASR_MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+const PROVIDERS = ['local', 'deepseek'];
 
 /** 默认 key 查询：凭据族唯一来源（懒 require，避免轻量测试环境拖起 ai-settings）。 */
 function defaultDeepseekKeyLookup() {
   try {
-     
     const { getApiKey } = require('./ai-settings');
     return getApiKey('deepseek') || '';
   } catch {
@@ -36,33 +38,48 @@ function detectAudioFormat(buffer) {
   return null;
 }
 
-/**
- * 语音转写（ASR）。
- * @param {{buffer:Buffer, filename:string, config:{enabled:boolean, provider:string, timeoutMs?:number}, fetchImpl?:Function, getApiKeyFn?:Function, maxUploadBytes?:number}} input
- * @returns {Promise<{ok:true, provider, text, durationMs, cost}|{ok:false, code, message, retryable?, status?}>}
- */
-async function transcribeAudio(input = {}) {
+function resolveProviderChain(config) {
+  const provider = String((config && config.provider) || 'none');
+  if (provider === 'chain') {
+    const supplied = Array.isArray(config.provider_chain) ? config.provider_chain : [];
+    return [...new Set(supplied.map((p) => String(p).trim()).filter((p) => PROVIDERS.includes(p)))].slice(0, 4);
+  }
+  return PROVIDERS.includes(provider) ? [provider] : [];
+}
+
+async function invokeLocal(input) {
+  if (typeof input.localFn === 'function') {
+    return input.localFn({ buffer: input.buffer, filename: input.filename, config: input.config });
+  }
+  try {
+    const { resolveLocalAsrModel, DEFAULT_LOCAL_MODEL_ID } = require('./local-asr-model');
+    const configuredId = input.config && input.config.local_model && input.config.local_model.modelId;
+    const model = resolveLocalAsrModel(configuredId || DEFAULT_LOCAL_MODEL_ID);
+    if (!model) {
+      return {
+        ok: false,
+        provider: 'local',
+        code: 'local_asr_unavailable',
+        message: '本地 ASR 模型未落盘：请先在 设置 → 能力渠道 → 语音 下载 SenseVoice-small。',
+      };
+    }
+    const { transcribeWithLocalAsr } = require('./local-asr');
+    return transcribeWithLocalAsr({
+      buffer: input.buffer,
+      filename: input.filename,
+      model,
+      language: (input.config.local_model && input.config.local_model.language) || 'auto',
+    });
+  } catch (error) {
+    return { ok: false, provider: 'local', code: 'local_asr_unavailable', message: `本地 ASR 不可用：${error && error.message ? error.message : 'unknown'}` };
+  }
+}
+
+async function transcribeWithDeepseek(input) {
   const buffer = input.buffer;
   const filename = String(input.filename || 'audio');
   const config = input.config || {};
-  if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
-    return { ok: false, code: 'asr_file_missing', message: '缺少待转写音频内容（buffer 为空）。' };
-  }
-  if (config.enabled !== true) {
-    return {
-      ok: false,
-      code: 'asr_access_disabled',
-      message: '语音转写未开启（默认关，云调用=付费副作用）。请在 speech-config（speech-config.json）置 enabled=true 并选择 provider 后再试。',
-    };
-  }
-  const provider = String(config.provider || 'none');
-  if (provider !== 'deepseek') {
-    return {
-      ok: false,
-      code: 'asr_not_configured',
-      message: '未选择语音转写渠道（provider=none）。可选：deepseek（云渠道，key 与对话共用）。',
-    };
-  }
+  const provider = 'deepseek';
   const getApiKeyFn = typeof input.getApiKeyFn === 'function' ? input.getApiKeyFn : defaultDeepseekKeyLookup;
   const apiKey = String(getApiKeyFn('deepseek') || '').trim();
   if (!apiKey) {
@@ -94,7 +111,6 @@ async function transcribeAudio(input = {}) {
   }
   const timeoutMs = Math.max(1000, Number(config.timeoutMs) || 120000);
 
-  // multipart 组装（findings：file 字段；格式由文件内容判定）。
   const form = new FormData();
   const blob = new Blob([buffer], { type: audioFormat === 'wav' ? 'audio/wav' : 'audio/ogg' });
   form.set('file', blob, path_basename(filename));
@@ -150,6 +166,55 @@ async function transcribeAudio(input = {}) {
   };
 }
 
+/**
+ * 语音转写（ASR）。
+ * @param {{buffer:Buffer, filename:string, config:{enabled:boolean, provider:string, provider_chain?:string[], local_model?:object, timeoutMs?:number}, fetchImpl?:Function, getApiKeyFn?:Function, localFn?:Function, maxUploadBytes?:number}} input
+ * @returns {Promise<{ok:true, provider, text, durationMs, cost, fallbacks?}|{ok:false, code, message, attempts?}>}
+ */
+async function transcribeAudio(input = {}) {
+  const buffer = input.buffer;
+  const config = input.config || {};
+  if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+    return { ok: false, code: 'asr_file_missing', message: '缺少待转写音频内容（buffer 为空）。' };
+  }
+  if (config.enabled !== true) {
+    return {
+      ok: false,
+      code: 'asr_access_disabled',
+      message: '语音转写未开启（默认关，云调用=付费副作用）。请在 speech-config（speech-config.json）置 enabled=true 并选择 provider 后再试。',
+    };
+  }
+  const chain = resolveProviderChain(config);
+  if (chain.length === 0) {
+    return {
+      ok: false,
+      code: 'asr_not_configured',
+      message: '未选择语音转写渠道（provider=none）。可选：local（本地 SenseVoice，需先下载模型）/ deepseek（云渠道，key 与对话共用）/ chain（本地优先，失败回退云）。',
+    };
+  }
+
+  const fallbacks = [];
+  const attempts = [];
+  for (const provider of chain) {
+    const result = provider === 'local' ? await invokeLocal(input) : await transcribeWithDeepseek(input);
+    if (result && result.ok) {
+      return chain.length > 1 ? { ...result, provider, fallbacks } : { ...result, provider };
+    }
+    // 单 provider（legacy 口径）原样透出 provider 自己的错误信封（status/retryable 等不丢）。
+    if (chain.length === 1) return result && result.provider ? result : { ...result, provider };
+    attempts.push({ provider, code: result && result.code ? result.code : 'asr_failed', message: result && result.message ? result.message : '转写失败' });
+    fallbacks.push(provider);
+  }
+  const last = attempts[attempts.length - 1];
+  return {
+    ok: false,
+    code: last ? last.code : 'asr_all_providers_failed',
+    message: `转写失败（已尝试 ${attempts.map((a) => a.provider).join(' → ')}）：${last ? last.message : '无可用 provider'}`,
+    attempts,
+    fallbacks,
+  };
+}
+
 function path_basename(p) {
   const normalized = String(p || '').replace(/\\/g, '/');
   const idx = normalized.lastIndexOf('/');
@@ -159,6 +224,8 @@ function path_basename(p) {
 module.exports = {
   ASR_ENDPOINT,
   ASR_MAX_UPLOAD_BYTES,
+  PROVIDERS,
+  resolveProviderChain,
   transcribeAudio,
   detectAudioFormat,
 };

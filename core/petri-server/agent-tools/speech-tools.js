@@ -40,7 +40,9 @@ function resolveWorkspaceAudioPath(ctx, filePath) {
 async function tool_transcribe_audio(args, ctx, deps = {}) {
   const filePath = args && args.filePath;
   if (!filePath) return { ok: false, code: 'missing_filePath', message: '需要 filePath（工作区相对路径，wav/ogg）' };
-  const resolved = resolveWorkspaceAudioPath(ctx, filePath);
+  const resolved = deps.resolveWorkspaceFn
+    ? deps.resolveWorkspaceFn(ctx, filePath)
+    : resolveWorkspaceAudioPath(ctx, filePath);
   if (resolved.error) return resolved.error;
   const target = resolved.target;
   if (!fs.existsSync(target)) {

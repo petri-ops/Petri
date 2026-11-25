@@ -25,15 +25,39 @@ interface OcrEffective {
 interface SpeechEffective {
   enabled: boolean;
   provider: string;
+  provider_chain?: string[];
+  local_model?: { modelId: string; language: string };
   ttsVoice: string;
   ttsFormat: string;
   filterMarkdown: boolean;
   timeoutMs: number;
 }
 
+interface LocalAsrModel {
+  id: string;
+  label: string;
+  installed: boolean;
+  language: string;
+  sha256?: string | null;
+}
+
+const LOCAL_MODEL_ID = 'sensevoice-small-int8-2024-07-17';
+const LOCAL_LANGUAGES = [
+  { value: 'auto', label: '自动检测（SenseVoice 原生多语）' },
+  { value: 'zh', label: '中文' },
+  { value: 'en', label: '英语' },
+  { value: 'ja', label: '日语' },
+  { value: 'ko', label: '韩语' },
+  { value: 'yue', label: '粤语' },
+];
+
 const EMPTY_OCR: OcrEffective = { enabled: false, provider: 'none', purpose: 'rich_layout_recognition', timeoutMs: 60000 };
 
-const EMPTY_SPEECH: SpeechEffective = { enabled: false, provider: 'none', ttsVoice: 'stella', ttsFormat: 'wav', filterMarkdown: true, timeoutMs: 60000 };
+const EMPTY_SPEECH: SpeechEffective = {
+  enabled: false, provider: 'none', provider_chain: ['local', 'deepseek'],
+  local_model: { modelId: LOCAL_MODEL_ID, language: 'auto' },
+  ttsVoice: 'stella', ttsFormat: 'wav', filterMarkdown: true, timeoutMs: 60000,
+};
 
 function authHeader(): Record<string, string> {
   const token = getToken();
@@ -44,22 +68,33 @@ export function ChannelPreferencePanel(): React.ReactElement {
   const [searchProvider, setSearchProvider] = useState<string>('none');
   const [ocr, setOcr] = useState<OcrEffective>({ ...EMPTY_OCR });
   const [speech, setSpeech] = useState<SpeechEffective>({ ...EMPTY_SPEECH });
+  const [localModels, setLocalModels] = useState<LocalAsrModel[]>([]);
+  const [busyModel, setBusyModel] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const loadModels = useCallback(async () => {
+    const response = await fetch(`${getPlatformApiPrefix()}/speech/local-models`, { headers: authHeader() });
+    const data = await response.json().catch(() => ({})) as { status?: string; models?: LocalAsrModel[] };
+    if (response.ok && data.status === 'ok' && Array.isArray(data.models)) setLocalModels(data.models);
+  }, []);
+
   const load = useCallback(async () => {
     try {
-      const [webRes, ocrRes, speechRes] = await Promise.all([
+      const [webRes, ocrRes, speechRes, modelRes] = await Promise.all([
         fetch(`${getPlatformApiPrefix()}/web-access`, { headers: authHeader() }),
         fetch(`${getPlatformApiPrefix()}/ocr-access`, { headers: authHeader() }),
         fetch(`${getPlatformApiPrefix()}/speech-access`, { headers: authHeader() }),
+        fetch(`${getPlatformApiPrefix()}/speech/local-models`, { headers: authHeader() }),
       ]);
       const webData = await webRes.json().catch(() => ({})) as { webAccess?: { effective?: { provider?: string } } };
       const ocrData = await ocrRes.json().catch(() => ({})) as { ocrAccess?: { effective?: OcrEffective } };
       const speechData = await speechRes.json().catch(() => ({})) as { speechAccess?: { effective?: SpeechEffective } };
+      const modelData = await modelRes.json().catch(() => ({})) as { status?: string; models?: LocalAsrModel[] };
       if (webData.webAccess?.effective?.provider !== undefined) setSearchProvider(webData.webAccess.effective.provider);
       if (ocrData.ocrAccess?.effective) setOcr({ ...EMPTY_OCR, ...ocrData.ocrAccess.effective });
       if (speechData.speechAccess?.effective) setSpeech({ ...EMPTY_SPEECH, ...speechData.speechAccess.effective });
+      if (modelRes.ok && modelData.status === 'ok' && Array.isArray(modelData.models)) setLocalModels(modelData.models);
     } catch {
       setNotice('加载失败');
     }
@@ -109,18 +144,57 @@ export function ChannelPreferencePanel(): React.ReactElement {
     if (!ok) setOcr(prev);
   }
 
-  async function handleSpeechToggle(next: boolean) {
-    const prev = speech;
-    setSpeech({ ...speech, enabled: next });
-    const ok = await put('/speech-access', { enabled: next });
-    if (!ok) setSpeech(prev);
-  }
-
   async function handleSpeechVoice(next: string) {
     const prev = speech;
     setSpeech({ ...speech, ttsVoice: next });
     const ok = await put('/speech-access', { ttsVoice: next });
     if (!ok) setSpeech(prev);
+  }
+
+  async function handleSpeechProvider(next: string) {
+    const prev = speech;
+    const enabled = next !== 'none';
+    setSpeech({ ...speech, enabled, provider: next });
+    const ok = await put('/speech-access', enabled ? { enabled: true, provider: next } : { enabled: false });
+    if (!ok) setSpeech(prev);
+  }
+
+  async function handleLanguage(next: string) {
+    const prev = speech;
+    const localModel = { modelId: speech.local_model?.modelId || LOCAL_MODEL_ID, language: next };
+    setSpeech({ ...speech, local_model: localModel });
+    const ok = await put('/speech-access', { local_model: localModel });
+    if (!ok) setSpeech(prev);
+  }
+
+  async function handleModelUse(id: string) {
+    const localModel = { modelId: id, language: speech.local_model?.language || 'auto' };
+    const prev = speech;
+    setSpeech({ ...speech, local_model: localModel });
+    const ok = await put('/speech-access', { local_model: localModel });
+    if (!ok) setSpeech(prev);
+  }
+
+  async function handleModelAction(id: string, method: 'POST' | 'DELETE') {
+    setBusyModel(id);
+    setNotice(null);
+    try {
+      const response = await fetch(`${getPlatformApiPrefix()}/speech/local-models/${encodeURIComponent(id)}${method === 'POST' ? '/download' : ''}`, {
+        method,
+        headers: authHeader(),
+      });
+      const data = await response.json().catch(() => ({})) as { status?: string; message?: string };
+      if (!response.ok || data.status !== 'ok') {
+        setNotice(data.message || '本地模型操作失败');
+      } else {
+        setNotice(method === 'POST' ? '下载完成（以落盘状态为准）' : '已删除本地模型');
+        await loadModels();
+      }
+    } catch {
+      setNotice('本地模型操作失败');
+    } finally {
+      setBusyModel(null);
+    }
   }
 
   return (
@@ -178,13 +252,77 @@ export function ChannelPreferencePanel(): React.ReactElement {
               className="petri-select"
               data-testid="channel-speech-provider"
               value={speech.enabled ? speech.provider : 'none'}
-              onChange={(e) => void handleSpeechToggle(e.target.value !== 'none')}
+              onChange={(e) => void handleSpeechProvider(e.target.value)}
               aria-label="语音渠道"
             >
               <option value="none">未开启（默认）</option>
+              <option value="local">本地 SenseVoice（离线，需先下载模型）</option>
               <option value="deepseek">DeepSeek 语音（云渠道，Key 与对话共用）</option>
+              <option value="chain">本地优先 → 云端回退</option>
             </select>
           </label>
+          {speech.enabled && speech.provider !== 'deepseek' && (
+            <>
+              <label className={styles.field}>
+                <span>ASR 语言</span>
+                <select
+                  className="petri-select"
+                  data-testid="channel-speech-language"
+                  value={speech.local_model?.language || 'auto'}
+                  onChange={(e) => void handleLanguage(e.target.value)}
+                  aria-label="ASR 语言"
+                >
+                  {LOCAL_LANGUAGES.map((lang) => (
+                    <option key={lang.value} value={lang.value}>{lang.label}</option>
+                  ))}
+                </select>
+              </label>
+              <div className={styles.field} data-testid="channel-local-models">
+                <span>本地模型（下载 / 使用中 / 删除）</span>
+                {localModels.length === 0 && <p className="petri-field__hint">暂无可管理的本地模型。</p>}
+                {localModels.map((model) => (
+                  <div key={model.id} className={styles.field} data-testid={`local-model-row-${model.id}`}>
+                    <span>{model.label} · {model.installed ? '已下载（真实落盘）' : '未下载'}</span>
+                    {model.installed ? (
+                      <>
+                        <button
+                          type="button"
+                          className="petri-btn petri-btn--ghost petri-btn--sm"
+                          data-testid={`local-model-use-${model.id}`}
+                          disabled={speech.local_model?.modelId === model.id || busyModel === model.id}
+                          onClick={() => void handleModelUse(model.id)}
+                        >
+                          {speech.local_model?.modelId === model.id ? '使用中' : '设为使用中'}
+                        </button>
+                        <button
+                          type="button"
+                          className="petri-btn petri-btn--ghost petri-btn--sm"
+                          data-testid={`local-model-delete-${model.id}`}
+                          disabled={busyModel === model.id}
+                          onClick={() => void handleModelAction(model.id, 'DELETE')}
+                        >
+                          删除
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="petri-btn petri-btn--ghost petri-btn--sm"
+                        data-testid={`local-model-download-${model.id}`}
+                        disabled={busyModel === model.id}
+                        onClick={() => void handleModelAction(model.id, 'POST')}
+                      >
+                        {busyModel === model.id ? '下载中…' : '下载'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="petri-field__hint">
+                模型未落盘前不会标记为「使用中」；auto = SenseVoice 原生多语自动识别（配置透传，不写 native 参数）。
+              </p>
+            </>
+          )}
           {speech.enabled && (
             <label className={styles.field}>
               <span>TTS 声音</span>

@@ -9993,6 +9993,22 @@
       "tests": [
         "test/block518-capability-narrowing.test.mjs"
       ]
+    },
+    {
+      "id": "block519-local-asr",
+      "note": "BLOCK-519 SenseVoice 本地 ASR 阶段一：模型管理/native worker/provider 链/设置面与验收证据的机械认领（W5a 新增测试必须挂规则 + test-affected 对 acceptance/<dir>/evidence.json 全映射；只做映射不冒充验证）。",
+      "patterns": [
+        "core/petri-server/helpers/local-asr-model.js",
+        "core/petri-server/helpers/local-asr.js",
+        "core/petri-server/helpers/local-asr-worker.js",
+        "core/petri-server/helpers/asr-provider.js",
+        "core/petri-server/helpers/speech-config.js",
+        "core/petri-server/agent-tools/speech-tools.js",
+        "acceptance/voice-local-stage1/**"
+      ],
+      "tests": [
+        "test/block519-local-asr.test.mjs"
+      ]
     }
   ]
 }
