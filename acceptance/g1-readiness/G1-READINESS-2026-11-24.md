@@ -1,5 +1,7 @@
 # G1 就绪度评估材料（2026-11-24 · 只评估不开工）
 
+> **勘误注记（2026-11-25 · W3 核真，owner 裁决 msg_d8df1b1e636f）**：本材料 §一.1「既有 Git consent UI（五条独立 task trace）」所述「后端已有 opt-in、缺前端同意 UI」**已失效**——canonical **UI-462（2026-10-03 owner 裁决、10-30 verified）整体退役「接入用户自有 Git 仓库」能力**，consent UI/2 端点/存储/schema 全拆，`bindProjectRepository` 收敛 managed-only；UI-127 台账明确「P7 existing Git consent UI 项随之失效」。核真三证：`git-repository-binding.js:10` managed-only 声明、`result-studio-repository.js:222` consent 表保留但不再读写、`existing_repository_not_attached_without_consent` 在 core 生产代码零命中。本 G1-READINESS 旧表述仅为当时盘点快照，不描述现行产品；后续以 UI-462 为准，详见 `acceptance/g1-rs-requalification/W3-SCOPE-NOTE.md`。资格矩阵残留（REQUIRED_ENVIRONMENTS existing_* + evidence-bundle existing 分支）单列「P7 资格契约与 UI-462 对齐」子包待裁决，未批前不擅动。
+
 > 授权：owner 经 Orca 转达「下一波两件」第二项——功能面收干净后（Q-MATRIX ✅95·🟡0·🔴0·⛔7）的 G0→G1 门槛盘点与建议顺序。性质=方向性拍板材料，非排产、不启动任何 G1 工作。
 > 数据源全部现读：AGENTS.md 当前阶段纪律、`docs/g0-result-studio-plan.md` §14、AUDIT-LOG D-01/D-03/D-05/backlog 行、`docs/dependency-decoupling-checkpoint.md`、RULING-TABLE-2026-11-24。G0 长期开发期纪律不变——本材料不构成进入 G1 的决定。
 

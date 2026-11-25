@@ -10177,6 +10177,20 @@
       "tests": [
         "test/g1-rs-w2-affected-subgraph.test.mjs"
       ]
+    },
+    {
+      "id": "g1-rs-w3-historical-alternative",
+      "note": "G1 首包 W3 historical alternative compare 可观测契约 + Git consent 按 UI-462 失效挂账（owner 裁决 msg_d8df1b1e636f）。",
+      "patterns": [
+        "core/shared-backend/result-compare-service.js",
+        "core/shared-backend/result-studio-repository.js",
+        "core/shared-backend/git-repository-binding.js",
+        "acceptance/g1-rs-requalification/**",
+        "acceptance/g1-readiness/**"
+      ],
+      "tests": [
+        "test/g1-rs-w3-historical-alternative.test.mjs"
+      ]
     }
   ]
 }
