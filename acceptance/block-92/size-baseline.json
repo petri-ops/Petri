@@ -69,9 +69,9 @@
       "path": "frontend/src/components/desktop/DesktopSettingsPanel.tsx",
       "wave": "B",
       "module": "W-01",
-      "lines": 609,
-      "bytes": 31586,
-      "sha256": "6eb035e46917fa532c285c06c8f19d0dc62208c8d48d80c22bfd73cf03d30d23"
+      "lines": 588,
+      "bytes": 30356,
+      "sha256": "dd18a653def1a7b08fe58d2b0cdde80c7d0120d4355cbc6db421148ca6e49cdf"
     },
     {
       "path": "frontend/src/components/desktop/PluginStorePanel.tsx",
@@ -594,7 +594,7 @@
       "sha256": "6919f71b28f189c23816b1572e26d1f8c100dff3ad8b683e707a542c63a4cb5b"
     }
   ],
-  "total": 86645,
+  "total": 86624,
   "growAllowances": [
     {
       "path": "frontend/src/components/copilot/simple-chat.css",

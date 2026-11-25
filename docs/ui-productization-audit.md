@@ -6985,10 +6985,12 @@ EVO-3 收口时 deferred 的前端证据面板转正（用户发令「冲」）�
 - **验证**：HK-01 纯函数 3/3 + 容器 2/2（老配置读取不丢、保存只改两字段）+ auto-model 6/6 + 邻域 KnowledgeSpacePanel 9/9 + global-pages/EmbeddingRoleBinding 全绿；types/lint(0 error)/arch/frontend-deps/ts-syntax/arch-cycles/code-size/docs/ui 全绿。
 - **诚实边界**：只动配置 UI 归属——embedding provider/回退链/DB schema 零变化、BLOCK-518 语义不回退、老用户配置不丢（同一 `model_role_bindings` 键 + 原样透传其它字段）。观感零代签 pending_human_eye，待 owner 实机重试确认。G0 永久 maintained · G1 进行中。
 
-## UI-732: 生成参数意图化——意图预设 + 任务感知自动参数（2026-11-26 **in_progress**；代码完成，实机待 owner 重试）
+## UI-732: 生成参数意图化——意图预设 + 任务感知自动参数（2026-11-26 **完成·终形态=全自动**；设置 UI 已撤，owner 终裁 msg_4639d2fea3a9）
 
 - **来源**：owner 试用反馈③升级（msg_0604663bd2f3 / 裁决 msg_b9d146535752）：「大部分用户并不清楚这个有什么用处，我觉得这 agent 应该自动化处理」——行，按推荐 A 执行。
 - **变化面**：①新增 `core/petri-server/helpers/generation-intent.js`（策展四档常量 precise0.2/balanced0.4/creative0.8/longform 预算自适应；本地规则关键词判定，agent 不可自写参数/无写入口）；②`ai-settings.js getGenerationDefaults(context)` 增三层优先级链（env>intentPreset>旧 generation 裸值>自动档），无 context 走原路径零突变；③`agent-runner.js` 带 latestUserText/taskKind 上下文注入；④`GenerationDefaultsPanel` 裸滑杆→意图选择（写 generation.intentPreset，oneOf 注册于 config-schema + save 白名单）；⑤GET `/ai/generation-defaults` 回传 intentPreset。
 - **行为切换点（交付单列）**：默认档由固定 0.4 改为按任务意图选档；判定失败一律落平衡 0.4（今天行为零意外）；切换写脱敏 incident（档位，不含用户文本）。长文预设=预算信号，交 loop 既有 resolveOutputBudget 自适应。
 - **验证**：HK-01 纯函数 5/5 + 集成 5/5 + 前端面板 2/2 + 后端邻域 27/27（含 config 8/8）；types/lint(0 error)/arch/frontend-deps/ts-syntax/arch-cycles/code-size/docs/ui 全绿。
 - **边界**：env 后门最高不变、底层 provider/回退链/DB/思考档位 reasoning 键零改、零新依赖、旧 generation 键兼容读取、agent 不可自写生成参数。观感零代签 pending_human_eye，待 owner 实机重试。G0 永久 maintained · G1 进行中。
+
+- **终形态更新（owner 终裁 msg_4639d2fea3a9）**：owner 原话「自动化处理 但是这个内容在设置中就不要出现了 出现就需要了解是什么 耗费用户心力」——**设置页移除整个「默认偏好/意图」区**（删 ModelPreferenceTabs/GenerationDefaultsPanel 挂载，前者文件删除），自动档（本地规则按任务判定）成为唯一 UI 内形态、永远自动不可关；env 专家后门与 generation.intentPreset API 键保留但 UI 无入口（三层链在 UI 无意图层时降级为 env>自动）；旧 generation 键兼容读取不变、reasoning 思考档位分区保留。HK-01 面板移除断言 4/4 绿、knip 0 新增、全静态门绿；HMR 落 owner 窗口。本条不翻 verified（观感零代签，自动档行为待 owner 实机确认）。

@@ -28,7 +28,6 @@ import {
   type UserModelProvider,
   validateUserModelProfile,
 } from '@/lib/model-provider-options';
-import { ModelPreferenceTabs } from './DesktopSettingsPanel/ModelPreferenceTabs';
 import prefStyles from '@/components/copilot/SimpleChat/ModelPreferenceControls.module.css';
 import { getBridge } from '@/lib/desktopBridge';
 // UI-704 — models「能力渠道」折叠块（BLOCK-454 渠道槽位：检索后端/OCR 渠道）
@@ -51,7 +50,6 @@ import { DiagnosticsFold } from './DesktopSettingsPanel/sections/DiagnosticsFold
 import { AgentRulesPanel } from './DesktopSettingsPanel/sections/AgentRulesPanel';
 import { ToolApprovalPanel } from './DesktopSettingsPanel/sections/ToolApprovalPanel';
 import { DecisionConfigPanel } from './DesktopSettingsPanel/sections/DecisionConfigPanel';
-import { GenerationDefaultsPanel } from './DesktopSettingsPanel/sections/GenerationDefaultsPanel';
 import { KeymapPanel } from './DesktopSettingsPanel/sections/KeymapPanel';
 import { ReasoningDefaultsPanel } from './DesktopSettingsPanel/sections/ReasoningDefaultsPanel';
 import { GuardAckHistoryPanel } from '@/components/copilot/SimpleChat/GuardAckCard';
@@ -83,8 +81,6 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
     resetActiveSection,
   } = useSettingsTransferState({ activeSection, activeLabel: activeSectionMeta.label });
   const backendStatus = useBackendStatus();
-  // UI-696 — 图 2 形态：默认（全局）/ 自定义（逐模型）双页签
-  const [modelPrefTab, setModelPrefTab] = useState<'default' | 'custom'>('custom');
   // BLOCK-455 D6 — 渠道行详情展开态（能力位/选择器控件在详情里）
   const [expandedEndpoints, setExpandedEndpoints] = useState<Record<string, boolean>>({});
   // BLOCK-92 Wave B-4 — API Endpoint 编辑器状态簇外迁
@@ -212,21 +208,6 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
 
         {activeSection === 'models' && (
           <section className="petri-settings-section petri-settings-section--models">
-            <ModelPreferenceTabs value={modelPrefTab} onChange={setModelPrefTab} />
-            {modelPrefTab === 'default' ? (
-              <div className={prefStyles.defaultPane}>
-                <div className="petri-settings-section__heading">
-                  <h3>默认偏好</h3>
-                  <p>所有模型继承的全局生成参数与思考档位。</p>
-                </div>
-                <GenerationDefaultsPanel />
-                <p className="petri-field__hint">
-                  思考档位的默认值、高档预算与逐协议参数映射在「推理档位」分区；逐模型覆盖请切到「自定义」。
-                  这些偏好对所有任务生效，运行中的回复保持当前设置，下一轮开始使用新设置。
-                </p>
-              </div>
-            ) : (
-              <>
             <div className="petri-settings-section__heading">
               <h3>API Endpoint</h3>
               <p
@@ -480,8 +461,6 @@ export function DesktopSettingsPanel({ onClose, initialSection, initialDiagnosti
                 </div>
               )}
             </div>
-              </>
-            )}
 
           </section>
         )}
