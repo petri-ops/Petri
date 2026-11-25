@@ -35,4 +35,20 @@ describe('GenerationDefaultsPanel（意图覆盖档）', () => {
     expect(JSON.parse(put.body)).toEqual({ intentPreset: 'precise' });
     expect(screen.queryByTestId('generation-temperature')).toBeNull();
   });
+
+  it('自动档入口存在且为默认选中；选自动保存写 null 清 intentPreset 回全自动', async () => {
+    fetchMock
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ status: 'ok', generation: {} }) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ status: 'ok' }) });
+    render(<GenerationDefaultsPanel />);
+    const select = await screen.findByTestId<HTMLSelectElement>('generation-intent-preset');
+    const auto = Array.from(select.options).find((o) => o.textContent?.includes('自动'));
+    expect(auto).toBeDefined();
+    expect(select.value).toBe(auto?.value);
+    fireEvent.change(select, { target: { value: '' } });
+    fireEvent.click(screen.getByTestId('generation-save'));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const put = fetchMock.mock.calls[1][1] as { body: string };
+    expect(JSON.parse(put.body)).toEqual({ intentPreset: null });
+  });
 });
