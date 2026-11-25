@@ -145,7 +145,10 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
       // buildLoopObservationEvidence / _applyProjectTrustCeiling）逐字搬到
       // helpers/agent-loop-helpers.js，agent-runner 保留 facade 重导出（外部 require 零变化）。
       // runAgentLoop 主循环体 873 行逐字未动、自进化注入点零改；棘轮只减不增，显式重锚留因。
-      { file: 'core/petri-server/agent-runner.js', anchor: 1024 },
+      // item39 七支集成重锚 1024→1038（+14，非压门禁）：wave2 单独合入时锚 1024=1153−129；
+      // A1 静默吞错留痕先合入 +15 行，叠加后 1038=1023+15（对原始 1153 净减 115，wave2 收缩完整保留）。
+      // 棘轮仍只减不增、卡在 1038（比 1024 更贴近真实值），再超即红；真正拆分回收走蓝图 S4.1。
+      { file: 'core/petri-server/agent-runner.js', anchor: 1038 },
       // BLOCK-508 重锚 1579→1647（+68）：循环层 stall-resume 接线（import/重放过滤入口/
       // 有界续跑 for(;;)/stall 决策与去重），修复「已出字后停摆→break→手动重试」痛点。
       // 纯逻辑在独立模块 loop-stall-resume.js（本文件只薄接线）；按本测试纪律显式重锚留因，
