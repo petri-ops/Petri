@@ -1,5 +1,7 @@
 # Petri Desktop UI 产品化审计台账
 
+> **BLOCK-519 阶段二同批登记（2026-11-25 · owner 发令「按已批计划继续推进」）**：composer 输入栏新增麦克风入口（`ComposerMicButton` + `useComposerMic`）——点击录音→停止→转写文本**追加**进输入框（不自动发送，动作语义「加入上下文 ≠ 立即执行」）；不支持/禁用/失败可见态；后端 `POST /api/speech/transcribe` 复用现有 ASR provider 链（默认关不发请求、云回退如实报来源）。零新增 UI-###、不翻任何条目状态词、观感 `pending_human_eye` 零代签；判据=HK-01 红 4/4→绿 4/4 + 阶段一语音回归 18/18 + ChannelPreference 6/6 + types/lint 0 + Vite HMR 新源核对（owner 3000/3001/9222 PID 未变）。whisper 并列依赖形态待 owner 裁决（V 材料 CLI 假设与真值不符，四问建议 npm binding，见 `acceptance/voice-local-stage2/STAGE2-DEPENDENCY-FOUR-Q.md`）。证据=`acceptance/voice-local-stage2/EVIDENCE.md`。G0 开发期常态 · 不外推 packaged/Provider/GA。
+
 ## UI-725: 背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）
 
 - **变化面**：设置页「外观」新增「背景水印」项（三态 无/内置水墨/自定义图片 + 本地图片导入/路径 + 浅底转透明 + 透明度 0–30%）；`GlobalWatermarkAI` 改为读偏好动态注入背景图，暗色反相沿用既有 CSS 规则。

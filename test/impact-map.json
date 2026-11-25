@@ -10113,6 +10113,21 @@
       "tests": [
         "test/block520-p2-control.test.mjs"
       ]
+    },
+    {
+      "id": "block519-stage2-composer-mic",
+      "note": "BLOCK-519 阶段二 composer 麦克风入口（2026-11-25）：转写 helper/REST 口/前端 hook+按钮/接 SimpleChat。whisper 并列依赖真值偏差与四问见 acceptance/voice-local-stage2/。HK-01 红绿先行。",
+      "patterns": [
+        "core/petri-server/helpers/composer-mic-transcribe.js",
+        "core/petri-server/routes/runtime-config.js",
+        "frontend/src/components/copilot/SimpleChat/useComposerMic.ts",
+        "frontend/src/components/copilot/SimpleChat/ComposerMicButton.tsx",
+        "frontend/src/components/copilot/SimpleChat.tsx",
+        "acceptance/voice-local-stage2/**"
+      ],
+      "tests": [
+        "test/block519-stage2-composer-mic.test.mjs"
+      ]
     }
   ]
 }

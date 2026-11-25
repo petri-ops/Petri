@@ -21,9 +21,9 @@
       "path": "frontend/src/components/copilot/SimpleChat.tsx",
       "wave": "A",
       "module": "W-03",
-      "lines": 1915,
-      "bytes": 93934,
-      "sha256": "e4df1ec3df800f0fbe99935e5b394a12e4e24bdd96ac55b788d3e7736188d561"
+      "lines": 1921,
+      "bytes": 94379,
+      "sha256": "d3b45a63572e493752537e332e47ca4ca4a3c157b32f1a8d7878a8386b75259e"
     },
     {
       "path": "frontend/src/components/copilot/SimpleChat/hooks/useThinkingLevel.ts",
@@ -696,6 +696,16 @@
       "to": {
         "lines": 1033,
         "bytes": 48507
+      }
+    },
+    {
+      "path": "frontend/src/components/copilot/SimpleChat.tsx",
+      "reason": "BLOCK-519 阶段二 composer 麦克风入口接线（import+组件 6 行）",
+      "date": "2026-11-25",
+      "from": null,
+      "to": {
+        "lines": 1921,
+        "bytes": 94379
       }
     }
   ]

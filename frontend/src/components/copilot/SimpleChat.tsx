@@ -55,6 +55,8 @@ import { uploadAttachment, type UploadedAttachmentRef } from './SimpleChat/attac
 import { ImagePreviewModal } from './SimpleChat/ImagePreviewModal';
 import { ScheduleDialog } from './SimpleChat/ScheduleDialog';
 import { PromptEnhanceControls } from './SimpleChat/PromptEnhanceControls';
+// BLOCK-519 阶段二 — composer 麦克风入口（转写文本追加进输入框，不自动发送）
+import { ComposerMicButton } from './SimpleChat/ComposerMicButton';
 import { useScheduleComposer } from './SimpleChat/hooks/useScheduleComposer';
 import { runCompactSlash } from './SimpleChat/compactSlash';
 // BLOCK-92 三波拆分 — 思考档位/滚动守卫两簇外迁 hooks/（原样平移）
@@ -1713,6 +1715,10 @@ export function SimpleChat({
                   )}
                 </div>
                 {!slimComposer && <PromptEnhanceControls prompt={input} hasProject={Boolean(projectId)} contextItems={composerContext.items} onApplyText={handleInsertComposerText} />}
+                {/* BLOCK-519 阶段二 — 麦克风输入：转写文本追加进输入框，不自动发送 */}
+                <ComposerMicButton
+                  onTranscript={(text) => handleInsertComposerText(input ? `${input}${text}` : text)}
+                />
                 {/* BLOCK-69 / UI-318 — 知识空间大脑开关（独立 icon 开关，不挂已移除的 ⋯ 菜单） */}
                 <button
                   type="button"

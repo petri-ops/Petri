@@ -160,4 +160,27 @@ module.exports = function mountRuntimeConfig(app) {
       return res.status(500).json({ status: 'error', error: error.message });
     }
   });
+
+  // BLOCK-519 阶段二 — composer 麦克风：音频 → 文本（复用 asr-provider 链，零新识别逻辑）。
+  // 默认关不发请求（付费知情）；失败诚实 400 + 结构化 code，不伪造文本。
+  app.post('/api/speech/transcribe', express.raw({ type: 'audio/*', limit: '8mb' }), async (req, res) => {
+    try {
+      const buffer = Buffer.isBuffer(req.body) ? req.body : null;
+      if (!buffer || buffer.length === 0) {
+        return res.status(400).json({ status: 'error', error: 'mic_audio_empty', message: '麦克风音频为空' });
+      }
+      const { transcribeMicAudio } = require('../helpers/composer-mic-transcribe');
+      const result = await transcribeMicAudio({
+        buffer,
+        filename: String(req.query.filename || 'mic.wav'),
+        config: speechConfig.getEffectiveConfig(),
+      });
+      if (!result.ok) {
+        return res.status(400).json({ status: 'error', error: result.code, message: result.message });
+      }
+      return res.json({ status: 'ok', ...result });
+    } catch (error) {
+      return res.status(500).json({ status: 'error', error: error.message });
+    }
+  });
 };
