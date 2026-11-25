@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-25T01:50:07.997Z",
+  "generatedAt": "2026-11-25T02:49:42.310Z",
   "ledger": "docs/ui-productization-audit.md",
-  "sections": 517,
-  "uniqueIds": 508,
+  "sections": 518,
+  "uniqueIds": 509,
   "counts": {
+    "blocked": 15,
     "verified": 479,
     "live-missing": 11,
-    "closed": 13,
-    "blocked": 14
+    "closed": 13
   },
-  "debt": 25,
+  "debt": 26,
   "liveMissing": [
     {
       "id": "UI-723",
@@ -68,6 +68,12 @@
     }
   ],
   "blocked": [
+    {
+      "id": "UI-725",
+      "deps": [],
+      "external": true,
+      "title": "背景水印可替换设置（2026-11-25 **in_progress**；独立 worktree `petri-ops/watermark-swap`）"
+    },
     {
       "id": "UI-331",
       "deps": [],
