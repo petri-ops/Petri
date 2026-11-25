@@ -7,28 +7,37 @@
 Petri Desktop（格物，原名 Petri）= Electron 桌面应用 + Vite SPA 前端 + MCP Server
 跑在本机的通用 agent 内核 + 按需安装的垂直领域内容（本地主权 · 全链可审计 · 证据自证）
 
-## 当前阶段纪律（最高优先级 · G0 长期开发期）
+## 当前阶段纪律（最高优先级 · 两层事实）
 
-**项目当前长期处于 G0 开发期，不是发布期**。`docs/next-steps-roadmap.md` 已写明：
+**两层事实（2026-11-25 口径对齐，主人 item 39 裁决）**：
 
-- `v0.0.1-rc.7` 是当前 OSS 线上工程候选版，**不是 GA / 正式发布版**
+1. **G0 是永久 `maintained` 的 Living Foundation**——可信基础层长期维护、回归最高阻断优先，不因进入上层而归档或冻结演进。
+2. **G1 进行中**——主人 2026-11-24 显式裁决「进 G1」（六序推荐项），当前按 `acceptance/g1-execution-plan-2026-11-24/EXECUTION-PLAN.md` 逐项发令；G1 之后按「通用 agent 内核 + 领域包」方向重写（主人 2026-11-25 裁决，科研路线归 `petri-pack-bio` 自己的规划）。
 
-- `qualificationEligible: false` 是 G0 开发期的**常态事实**，不是缺陷、不是待办、不是下次校验需推动的事
+**六序现状（2026-11-25 现读）**：①功能面收口 ✅（持续维护）②裁决表批量拍板 ✅（agent 唤醒 B 已落地、C-43 已清偿）③SUS 真人样本投放**待主人定渠道**④RS 重资格 W1–W3 本机范围已落 main（三契约 + P7 UI-462 对齐 + heatmap 归 bio 包），W4 双 Provider / W5 packaged 六格 + literal OS reboot **挂账待外部真值**⑤Win 签名证书 / macOS 公证**等外部采购**⑥打包六格 + 真机重启 + 发布流水**未启动**。
 
-- `Result Studio` 长期保持 `implemented_unverified / experimental`，RS-P7 deferred
+**不许松的事实（照留）**：`qualificationEligible:false` 仍是 G0 常态事实、不因进 G1 自动翻转；诚实红不伪造不补拍（G0 视觉 distinctStates 5PNG/4唯一已裁接受，证据 `acceptance/g0-distinct-states-ruling/`）；观感零代签；`v0.0.1-rc.7` 不是 GA；RS 维持 `implemented_unverified / experimental`；历史证据（RS9/P4R/P6 等）不冒充 G1 资格证据。
 
-- 真实 `Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水均属 G1+ 阶段，**当前阶段不校验、不实现、不视为缺口**
+**阶段事实见上方两层口径**（G0 永久 maintained / G1 进行中）；旧表述「长期 G0、不是发布期」已被 2026-11-24 进 G1 裁决取代，保留下述历史事实边界：
 
-**Agent 纪律**：
+- `v0.0.1-rc.7` 是 OSS 线上工程候选版，**不是 GA / 正式发布版**（发布动作属对外动作，逐项等主人发令）
 
-1. **不得**主动建议或启动 `Provider / 公证 / GA / 远程发布 / dist staleness` 等 G1+ 工作 —— 这些是 G1+ 工作，不是当前 active 工作包候选
-2. **不得**在收口报告、closeout 笔录、AUDIT-LOG 或 ui-productization-audit.md 反复写 "`qualificationEligible` 维持 false" / "未做 Provider" / "未做 GA" —— 这些是 G1+ 阶段事项，按当前阶段纪律是**不外推**而不是"待办"
-3. **不得**把"`dev Electron / packaged Electron 三轴对齐"`描述为"待完成" —— 当前 G0 已收口的开发态 + packaged 实机核对是当前阶段的合理证据等级；`qualificationEligible` 升 `true` 需 G1+ 阶段
-4. 收口笔录用语：直接写"G0 开发期常态 · 不外推 packaged/Provider/GA" 一句即可，**不**列举未做项
-5. UI-AGENTWB-### 等前端工作包的状态标头：`dev Electron 边界内 verified` / `packaged 边界内 verified` 即为**当前阶段最高证据等级**，不需要补 G1+ 阶段才有的 Provider / GA
-6. 用户若未明确裁决启动 G1+ 阶段，**禁止**主 Agent 主动提出"是否要做 Provider / GA / release-pipeline"
+- `qualificationEligible: false` 是 G0 **常态事实**，不是缺陷、不是待办、不因进 G1 自动翻转
 
-**变更 G1+ 阶段纪律需用户显式裁决**：用户当前已裁决"长期处于 G0 开发期"（2026-08-15），任何提前进入 G1+ 的提议都视作越权，必须先回到此节确认。
+- `Result Studio` 维持 `implemented_unverified / experimental`（G0 常态），RS 重资格本机范围已落、外部项挂账
+
+- 真实 `Provider` 矩阵、`packaged Electron` 公证/签名、`OSS` 远程接手、`GA` 公证流水按 G1 EXECUTION-PLAN 六序推进，外部真值项**不催不动**
+
+**Agent 纪律（新边界）**：
+
+1. 六序内的**本地文档与证据工作**按序推进（含 RS 本机契约、P7 契约对齐、阶段口径对齐），不需重复申请「是否进 G1」口令——主人 11-24 口令已覆盖方向。
+2. **对外动作**（真人样本投放、发布、远程分发）和**外部采购**（代码签名证书、公证）仍逐项等主人发令；不催外部、不擅自启动 W4/W5 的外部真值子项。
+3. **不得**把 `qualificationEligible` / Provider / GA 写成"待办缺口"——G0 常态事实不外推为待办；进 G1 后按 EXECUTION-PLAN 逐包发令，不由 Agent 自行加速。
+4. **不得**把"`dev Electron / packaged Electron 三轴对齐`"描述为"待完成"——G0 已收口的开发态 + packaged 实机核对是当前合理证据等级，`qualificationEligible` 升 `true` 按 G1 资格链取证。
+5. 收口笔录用语：统一写 **"G0 永久 maintained · G1 进行中（六序按令推进）"**；**不**写旧句"G0 开发期常态 · 不外推 packaged/Provider/GA"，**不**列举未做项。
+6. UI-AGENTWB-### 等前端工作包的状态标头：`dev Electron 边界内 verified` / `packaged 边界内 verified` 即为当前阶段最高证据等级，不需补 G1+ 才有的 Provider / GA 才能标 verified。
+
+**阶段边界裁决**：方向层变更（进入 G1、G1 之后规划方向、推翻 UI-462 等已裁事项、北极星/人设改字）须主人显式裁决；本纪律 2026-11-25 由主人 item 39 裁决对齐（原「提前进 G1+ 一律视作越权」条款随进 G1 失效，替换为上述六序内/对外两条边界）。
 
 ## 产品个性纪律（对标不改魂 · 2026-10-12 用户裁决，需时刻警醒）
 

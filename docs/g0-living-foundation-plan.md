@@ -1,8 +1,8 @@
 # G0 Living Foundation Engineering — 永久可信基础层计划
 
-最后更新：2026-07-24
+最后更新：2026-11-25
 
-状态：`establishing`
+状态：`qualified + maintained`（2026-11-25 口径对齐：头部与 §28 正文一致；G0 永久 maintained、G1 进行中）
 
 计划编号：`G0-LF`
 

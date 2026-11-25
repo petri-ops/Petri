@@ -8,7 +8,7 @@ entrypoint: docs/README.md
 registeredAt: 2026-11-23
 owner: main-agent
 goal: 用户「没做的可以规划一下 / 这个计划也 push」——现读 canonical 后一次列全剩余未做项，按可自推/等用户裁决/等外部条件/已 done 未翻状态四类归档，作为后续逐项发令的单一入口。不占串行工作包槽位、不自动开工。
-phase: G0
+phase: G1-in-progress (G0 permanent maintained)
 ---
 
 # 剩余工作规划（2026-11-23 现读基线）
@@ -78,10 +78,37 @@ phase: G0
 
 E-01 树测试、E-02 IA v2 delegated-walk、UI-720 pack sandbox B1、UI-721 审批卡解释入口——均 verified（AUDIT-LOG:3/22/209，audit:3/9）。
 
+## 下一阶段统一清单（2026-11-25 · item 39 口径对齐，收进同一张表）
+
+> 性质：把 G1 余步、规划外在跑/待跑项、资格门收口收进一张表；每项写性质/等什么/体量/证据指针。不新增工作包、不改变发令纪律。G0 永久 maintained、G1 进行中（主人 2026-11-24 裁决），对外动作与外部采购逐项等主人发令。
+
+| 项 | 性质 | 等什么 | 体量 | 证据指针 |
+|---|---|---|---|---|
+| G1 序列3 SUS 真人样本投放 | 半外部 | 主人定投放渠道（问卷已备 BLOCK-503） | S | `acceptance/g1-execution-plan-2026-11-24/EXECUTION-PLAN.md` 序列3 |
+| G1 序列4 W4 双 Provider 矩阵 | 外部真值 | 第二家 Provider 账号/预算（主人日常已用真实模型，第二家待定）——见下方 H 裁决材料 | L | `acceptance/g1-rs-requalification/G1-RS-PLAN.md` W4 + EXECUTION-PLAN 序列4 |
+| G1 序列4 W5 packaged 六格 + literal OS reboot | 外部真值 | 签名/公证 + 真机重启窗口（序列5/6 连带） | L | EXECUTION-PLAN 序列5/6 + G1-RS-PLAN W5 |
+| G1 序列5 Win 签名证书 / macOS 公证 | 外部采购 | 证书到位（不催不动、不翻 supported 字段） | M | EXECUTION-PLAN 序列5 |
+| P7 资格契约 UI-462 对齐 | ✅ 已落 main | 无（已完成：`7d24bffea`） | S | `acceptance/g1-rs-requalification/P7-UI462-ALIGNMENT-EVIDENCE.md` |
+| heatmap 归属 | ✅ 已裁决 | 无（归 bio 包 `petri-pack-bio` 激活验收，非内核 G1） | — | `G1-RS-PLAN.md` W2 + msg_ef23501c425e |
+| A1 静默吞错扩面（harness 队列1） | 规划外·待发令 | 主人发令（A1 本体已 Done `721dc1edc`，扩面未开） | S | harness 文档 §5 队列1 |
+| A3 D1 落地 / 队列7 第一/二波 | ✅ 已 Done（独立分支未 push） | 各分支 push/集成发令（非本包阻塞） | — | harness 文档 §5 队列5.5/队列7（43983eef2 / 854c006b6 / 38513bc09） |
+| A5 外部监督器 U 类 | 待 owner 裁决 | 主人判 C 先行之外是否升级（U 材料 pending_user_ruling） | M | `acceptance/harness-observability/U-EXTERNAL-SUPERVISOR.md` |
+| B2 间距 token 收尾 | 观察·收尾项 | 触发条件/发令（大部分已修） | S | harness 文档 §1 B2（裸 px 1055、token 1645） |
+| B3 长列表虚拟化 | 观察态·未触发 | 会话≥400 或节点>10k（C-01 重开条件） | M | harness 文档 §1 B3 |
+| 视觉逐屏改版（Orca item 24） | 规划外·未开工 | 主人发令 | L | Orca item 24 |
+| G0 视觉资格门诚实红（J） | ✅ 已裁决收口 | 无——11-24 B 类裁决已批补 distinctStates + 接受 5PNG/4唯一诚实红、不补拍不伪造；本表纠正 B 段「等处置」滞后登记 | — | `acceptance/g0-distinct-states-ruling/` + AUDIT-LOG 2026-11-24 B-CLASS 行 |
+
+### H 条裁决材料（两项，单一建议 + 一句理由，随 item 39 回报递主人）
+
+| 项 | 单一最合理建议 | 一句理由 |
+|---|---|---|
+| 签名/公证口径：v1-productization-roadmap §6「不作为必需条件」 vs EXECUTION-PLAN 序列5 前置 | **统一为「G1 发布就绪前置、G0 非必需」两层口径**——在 v1-productization-roadmap §6 加一句 G1 衔接注（不改其 G0 结论），EXECUTION-PLAN 序列5 保持前置 | 两句各自在其阶段成立，矛盾源于阶段口径未分层；加衔接注消除歧义又不翻 G0 历史结论。 |
+| G1-RS-PLAN W4「双 Provider」挂外部依赖，而主人日常已用真实模型 | **保持 W4 外部依赖登记、不因日常单 Provider 使用而降级为可本机闭环**——在 W4 加一句「主人日常真实模型供参考，不构成双 Provider 矩阵资格证据」 | 资格矩阵要的是两家真实 Provider 的可审计对照证据，单家日常使用不能替代，登记不降级才不冒进。 |
+
 ## 执行建议（advice，未获发令不开工）
 
 1. **先做 D 类机械归位**（纯文档、零代码风险、S）——需用户一句发令；
 2. B 类按优先级：C-56 真实稿件路径最轻（给路径即跑）、C-50 场景裁决最重（需先答权限边界）；
 3. C 类按外部到位节奏，不主动催。
 
-G0 开发期常态 · 不外推 packaged/Provider/GA。
+G0 永久 maintained · G1 进行中（六序按令推进）。
