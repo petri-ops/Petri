@@ -140,7 +140,12 @@ describe('loop-orchestrator-subdomains.test.mjs', () => {
       // （从 lesson-store 读活跃 lesson，fail-soft，动态段不进 staticPrefix 保护前缀缓存）。
       // 纯逻辑在独立模块 lesson-store.js / lesson-render.js / lesson-distiller.js，本文件仅薄接线；
       // 按本测试纪律显式重锚留因，只减不增继续生效，真正拆分回收仍走蓝图 S4.1。
-      { file: 'core/petri-server/agent-runner.js', anchor: 1153 },
+      // A2 WAVE2 重锚 1153→1024（−129）：5 个顶层纯函数（resolveAgentTaskTerminal /
+      // resolveFailedJobReplacements / buildObservedReplacementAttempt /
+      // buildLoopObservationEvidence / _applyProjectTrustCeiling）逐字搬到
+      // helpers/agent-loop-helpers.js，agent-runner 保留 facade 重导出（外部 require 零变化）。
+      // runAgentLoop 主循环体 873 行逐字未动、自进化注入点零改；棘轮只减不增，显式重锚留因。
+      { file: 'core/petri-server/agent-runner.js', anchor: 1024 },
       // BLOCK-508 重锚 1579→1647（+68）：循环层 stall-resume 接线（import/重放过滤入口/
       // 有界续跑 for(;;)/stall 决策与去重），修复「已出字后停摆→break→手动重试」痛点。
       // 纯逻辑在独立模块 loop-stall-resume.js（本文件只薄接线）；按本测试纪律显式重锚留因，

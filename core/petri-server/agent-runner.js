@@ -1,5 +1,13 @@
 'use strict';
 const { AGENT_TASK_EVENTS_ALL_LIMIT } = require('./helpers/agent-task-event-limits'); // post-H9 K2/K-12: 全量回放上限具名单源
+// A2 WAVE2 — 顶层纯函数 facade 重导出（实现落 helpers/agent-loop-helpers.js）；外部 require 零变化。
+const {
+  resolveAgentTaskTerminal,
+  resolveFailedJobReplacements,
+  buildObservedReplacementAttempt,
+  buildLoopObservationEvidence,
+  _applyProjectTrustCeiling,
+} = require('./helpers/agent-loop-helpers');
 
 /**
  * agent-runner.js — agent loop 执行器（PHASE 3.1 thin facade）
@@ -83,9 +91,8 @@ const {
 } = require('./conversation-adapter');
 
 // HLE-C1: Loop Controller + Ledger imports
-const {
-  buildEvidence,
-} = require('../shared-backend/loop-contract');
+// A2 WAVE2 — buildEvidence 唯一消费者 buildLoopObservationEvidence 已迁 helper，
+// 该解构 import 随迁移除（loop-contract 仍由 helper 顶层 require，模块加载链零变化）。
 const {
   deriveObservedStateDigest,
   mapDecisionToIterationStatus,
@@ -120,125 +127,6 @@ const {
 const agentTaskStore = require('./agent-task-store');
 
 /**
- * Resolve terminal task status.
- * @param {object} opts
- * @returns {{status: string, error: string|null}}
- */
-function resolveAgentTaskTerminal({
-  cancelled = false,
-  fatalError = null,
-  assistantText = '',
-  pendingApproval = false,
-} = {}) {
-  if (cancelled) return { status: 'cancelled', error: null };
-  if (fatalError) {
-    return {
-      status: 'failed',
-      error: fatalError.message || String(fatalError) || 'agent loop failed',
-    };
-  }
-  // BLOCK-49 加映 —— 完成判定放宽为非空即完成：原 >20 字符启发式把短回答
-  // 子任务（如纯算式「17 * 23 = 391」14 字符）误判为 failed（实机两轮触发，
-  // 破坏 wait_agent/followup 对短任务可靠性）。空字符串仍判 failed（防御
-  // 「模型全程无输出」的真失败）。
-  if (String(assistantText || '').trim().length > 0 || pendingApproval) {
-    return { status: 'completed', error: null };
-  }
-  return { status: 'failed', error: 'agent loop 未生成有效回复' };
-}
-
-/**
- * Resolve failed job replacements from tool jobs array.
- * @param {Array} toolJobs
- * @returns {object}
- */
-function resolveFailedJobReplacements(toolJobs = []) {
-  const failedJobs = toolJobs.filter((job) => ['failed', 'blocked'].includes(job.status));
-  const replacementByFailureKey = new Map();
-  for (const failed of failedJobs) {
-    const failedToolId = failed.toolId || failed.jobTruth?.tool_id || null;
-    if (!failedToolId) continue;
-    const replacement = toolJobs.find((candidate) =>
-      candidate.status === 'completed' &&
-      candidate.toolJobId &&
-      candidate.iteration > failed.iteration &&
-      (candidate.toolId || candidate.jobTruth?.tool_id) === failedToolId
-    );
-    if (replacement) {
-      replacementByFailureKey.set(failed.toolJobId || failed.callId, replacement);
-    }
-  }
-  const unresolvedFailedJobs = failedJobs.filter(
-    (failed) => !replacementByFailureKey.has(failed.toolJobId || failed.callId)
-  );
-  const primaryFailed = failedJobs.find((failed) =>
-    failed.toolJobId && replacementByFailureKey.has(failed.toolJobId)
-  ) || failedJobs.find((failed) => failed.toolJobId) || failedJobs[0] || null;
-  return {
-    failedJobs,
-    unresolvedFailedJobs,
-    primaryFailed,
-    replacementByFailureKey,
-    repairedFailedJobIds: new Set(
-      failedJobs
-        .filter((failed) => failed.toolJobId && replacementByFailureKey.has(failed.toolJobId))
-        .map((failed) => failed.toolJobId)
-    ),
-  };
-}
-
-/**
- * Build observed replacement attempt evidence.
- * @param {object} diagnosis
- * @param {object} failedJob
- * @param {object} replacementJob
- * @returns {object|null}
- */
-function buildObservedReplacementAttempt(diagnosis, failedJob, replacementJob) {
-  if (!failedJob?.toolJobId || !replacementJob?.toolJobId) return null;
-  const toolId =
-    replacementJob.toolId ||
-    replacementJob.jobTruth?.tool_id ||
-    failedJob.toolId ||
-    failedJob.jobTruth?.tool_id ||
-    null;
-  return {
-    strategyId: 'observed_same_tool_replacement',
-    strategyVersion: '1.0.0',
-    newToolId: toolId,
-    newInputs: null,
-    newParams: null,
-    parentLineage: {
-      parentJobId: failedJob.toolJobId,
-      parentArtifactIds: [],
-      parentPlanHash: null,
-      repairReason: diagnosis?.faultType || 'unclassified_failure',
-    },
-    replacementJobId: replacementJob.toolJobId,
-    repaired: true,
-    invalidatedArtifactIds: [],
-    preservedArtifactIds: [],
-    isActionable: false,
-    requiresUserAuth: false,
-    publicMessage: '已验证同一工具的新 Job 成功替换失败 Job，并保留 parent/replacement lineage。',
-    costMultiplier: 1,
-    safetyLevel: 'safe',
-  };
-}
-
-/**
- * Build loop observation evidence.
- * @param {object} input
- * @returns {object}
- */
-function buildLoopObservationEvidence(input) {
-  return buildEvidence({
-    ...input,
-    kind: 'observation',
-  });
-}
-
-/**
  * Run agent loop (from HTTP handler decoupled).
  *
  * @param {object} opts
@@ -259,24 +147,6 @@ function buildLoopObservationEvidence(input) {
  *
  * PHASE 3.1: Function signature 100% unchanged.
  */
-
-/**
- * BLOCK-207（W7b）— 项目信任级天花板：请求档位 → 按项目信任级**只收紧**后的档位。
- * 边界：四档判定/审批/用户规则一字不动；这里只可能在进入判定前把写/执行降为 read。
- */
-function _applyProjectTrustCeiling(context) {
-  const explicit = context && (context.accessMode === 'read' || context.accessMode === 'workspace-write' || context.accessMode === 'plan' || context.accessMode === 'full')
-    ? context.accessMode
-    : require('./helpers/runtime-policy').getDefaultApprovalMode();
-  try {
-    const trust = require('./helpers/trust-policy');
-    const level = trust.levelForProject(context && context.projectId);
-    return trust.applyTrustCeiling(explicit, level);
-  } catch {
-    // 信任层故障不得改变既有行为（fail-open 到原档位）：它是收紧器，不是判定器
-    return explicit;
-  }
-}
 
 async function runAgentLoop({
   messages,
